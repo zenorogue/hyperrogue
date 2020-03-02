@@ -359,6 +359,10 @@ EX namespace elec {
     if(c->wall == waDeadTroll2 || isAlchAny(c) || c->wall == waVinePlant)
       drawParticles(c, winf[c->wall].color, 16),
       c->wall = waNone;
+    
+    /* destroy charged walls on the border */
+    if(c->wall == waCharged) forCellEx(c1, c) if(c1->wall == waGrounded)
+      c->wall = waNone;
     /* if(c->wall == waCharged)
       c->wall = waMetal; */
     }
