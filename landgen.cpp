@@ -1035,7 +1035,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           }
         if(!c->monst && !tactic::on && !racing::on && !yendor::on && !randomPatternsMode && !peace::on && !euclid && hrand(4000) < 10 && !safety) {
           c->item = itBabyTortoise;
-          tortoise::babymap[c] = getBits(c) ^ tortoise::getRandomBits();
+          tortoise::babymap[c] = tortoise::getb(c) ^ tortoise::getRandomBits();
           }
         }
       break;

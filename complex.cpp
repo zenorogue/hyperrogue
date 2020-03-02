@@ -2510,7 +2510,7 @@ EX namespace tortoise {
 
   EX int getb(cell *where) {
     if(emap.count(where)) return emap[where];
-    return getBits(where);
+    return getBits(where) & ((1<<numbits)-1);
     }
 
   EX int countBits(int c) {

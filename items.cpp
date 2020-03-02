@@ -153,12 +153,14 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
   else if(c2->item == itBabyTortoise) {
     using namespace tortoise;
     int bnew = babymap[c2];
+    changes.map_value(babymap, c2);
     babymap.erase(c2);
     int bold = seekbits;
     seekbits = bnew;
     changes.value_set(tortoise::last, seekbits);
     if(seek()) {
       cell *c = passable(cwt.at, NULL, 0) ? cwt.at : c2;
+      changes.ccell(c);
       c->item = itBabyTortoise;
       if(c == c2) dopickup = false;
       changes.map_value(babymap, c);
