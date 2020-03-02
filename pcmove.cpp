@@ -907,7 +907,7 @@ bool pcmove::attack() {
       changes.ccell(c2);
       // salamanders are stunned for longer time when pushed into a wall
       if(c2->monst == moSalamander && (mip.t == c2 || !mip.t)) c2->stuntime = 10;
-      if(!c2->monst) {
+      if(!c2->monst || isAnyIvy(m)) {
         spread_plague(cwt.at, c2, mi.d, moPlayer);
         produceGhost(c2, m, moPlayer);
         }
