@@ -1192,6 +1192,7 @@ EX void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill IS(0)) {
       explodeBarrel(c);
     
     if(stabthere && canAttack(mt,who,c,c->monst,AF_STAB)) {
+      changes.ccell(c);
       if(c->monst != moHedge) { 
         markOrb(itOrbThorns); if(who != moPlayer) markOrb(itOrbEmpathy);
         }
@@ -1205,6 +1206,7 @@ EX void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill IS(0)) {
       }
 
     if(away && c != mt && canAttack(mf,who,c,c->monst,AF_BACK)) {
+      changes.ccell(c);
       if(c->monst == moVizier && c->hitpoints > 1) {
         fightmessage(c->monst, who, true, AF_BACK);
         c->hitpoints--;
