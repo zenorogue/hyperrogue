@@ -219,7 +219,11 @@ EX void invoke() {
         int idx = 1;
         c->wall = p.first[0];
         c->wparam = p.first[0];
-        forCellEx(c1, c) c1->wparam = c1->wall = p.first[idx++];
+        forCellEx(c1, c) {
+          if(c1->wall != waBarrier) 
+            c1->wparam = c1->wall = p.first[idx];
+          idx++;
+          }
         break;
         }
       }
