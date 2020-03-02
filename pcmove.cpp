@@ -1358,8 +1358,10 @@ EX void sideAttack(cell *mf, int dir, eMonster who, int bonus, eItem orb) {
   if(!items[orb]) return;
   if(who != moPlayer && !items[itOrbEmpathy]) return;
   for(int k: {-1, 1}) {
-    cell *mt = mf->modmove(dir + k*bonus);
-    sideAttackAt(mf, dir, mt, who, orb, mf);
+    int dir1 = dir + k*bonus;
+    dir1 = mf->c.fix(dir1);
+    cell *mt = mf->move(dir1);
+    sideAttackAt(mf, dir1, mt, who, orb, mf);
     }
   }
 
