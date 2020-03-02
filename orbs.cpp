@@ -186,7 +186,9 @@ EX void flashCell(cell *c, eMonster killer, flagtype flags) {
   flashAlchemist(c);
   if((flags & AF_MSG) && c->monst && !isWorm(c) && c->monst != moShadow)
     addMessage(XLAT("%The1 is destroyed by the Flash.", c->monst));
-  if(c->monst || isPlayerOn(c)) attackMonster(c, flags, killer);
+  if(c->monst || isPlayerOn(c)) 
+    if(canAttack(nullptr, killer, c, c->monst, flags))
+      attackMonster(c, flags, killer);
   if(isIcyLand(c))
     HEAT(c) += 2;
   if(c->land == laDryForest)
@@ -384,7 +386,9 @@ EX void castLightningBolt(cellwalker lig) {
 
     flashAlchemist(c);
     if(c->monst == moMetalBeast2 && !c->item) c->item = itFulgurite;
-    if(c->monst) attackMonster(c, AF_MAGIC, moLightningBolt);
+    if(c->monst) 
+      if(canAttack(nullptr, moPlayer, c, c->monst, AF_MAGIC))
+        attackMonster(c, AF_MAGIC, moLightningBolt);
     if(isIcyLand(c)) HEAT(c) += 2;
     if(c->land == laDryForest) c->landparam += 2;
     bool first = !c->ligon;
