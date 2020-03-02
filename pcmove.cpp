@@ -568,6 +568,7 @@ bool pcmove::actual_move() {
 
   if(isPushable(c2->wall) && !c2->monst && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
     mip = determinePush(cwt, subdir, [c2] (cell *c) { return canPushThumperOn(c, c2, cwt.at); });
+    if(mip.t) changes.ccell(mip.t);
     if(mip.d == NO_SPACE) {
       addMessage(XLAT("No room to push %the1.", c2->wall));
       return false;
@@ -862,6 +863,7 @@ bool pcmove::attack() {
       mip = determinePush(cwt, subdir, [c2] (cell *c) { return passable(c, c2, P_BLOW); });
     else
       mip.t = c2;
+    if(mip.t) changes.ccell(mip.t);
     }
   
   if(havePushConflict(mip.t, checkonly)) return false;
