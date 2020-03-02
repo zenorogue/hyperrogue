@@ -372,7 +372,8 @@ EX eLand getNewLand(eLand old) {
     laMinefield, laPalace, laReptile, laSwitch, laBurial, laDungeon, laRuins, laZebra,
     laStorms, laWhirlwind, laOvergrown, laBlizzard, laDryForest, laWineyard, laVolcano,
     laDeadCaves, laRedRock, laVariant, laHell, laCocytus, laPower,
-    laBull, laTerracotta, laRose, laGraveyard, laHive, laDragon, laTrollheim,  
+    laBull, laTerracotta, laRose, laGraveyard, laHive, laDragon, laTrollheim,
+    laWet, laFrog, laEclectic,
     laCrossroads5,
     })
     if(landUnlocked(l)) tab[cnt++] = l;    
@@ -394,6 +395,8 @@ EX eLand getNewLand(eLand old) {
     {laWhirlwind, laBlizzard, 5, 5},
     {laAlchemist, laVolcano, 5, 5},
     {laDesert, laRedRock, 5, 5},
+    {laFrog, laReptile, 2, 2}, {laFrog, laSwitch, 2, 2}, {laFrog, laZebra, 2, 2},
+    {laEclectic, laStorms, 3, 3}, {laEclectic, laIce, 3, 3}, {laEclectic, laPalace, 3, 3}, {laEclectic, laDeadCaves, 3, 3},
     
     {laEFire, laDragon, 5, 5}, {laEWater, laLivefjord, 5, 5}, {laEEarth, laDeadCaves, 5, 5}, {laEAir, laWhirlwind, 5, 5},
     }) {
