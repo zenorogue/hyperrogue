@@ -258,6 +258,7 @@ EX void moveMonster(const movei& mi) {
   if(!cellEdgeUnstable(ct)) {
     if(isMetalBeast(m)) ct->stuntime += 2;
     if(m == moTortoise) ct->stuntime += 3;
+    if(m == moWorldTurtle) ct->stuntime += 3;
     if(m == moDraugr && ct->land != laBurial && ct->land != laHalloween) ct->stuntime += 2;
     if(m == moBrownBug && snakelevel(ct) < snakelevel(cf)) ct->stuntime += 2;
     if(m == moBrownBug && snakelevel(ct) < snakelevel(cf) - 1) ct->stuntime += 2;

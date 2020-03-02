@@ -2910,8 +2910,13 @@ EX void setdist(cell *c, int d, cell *from) {
         c->item = itNone;
         }
       }
-    if(d == 7 && c->land == laMemory && hrand(100) < 5) {
-      c->wall = waTrapdoor, c->item = itOrbSafety;
+    if(d == 7 && c->land == laMemory) {
+      if(hrand(100) < 5) {
+        c->wall = waTrapdoor, c->item = itOrbSafety;
+        }
+      else if(hrand(100) < 2) {
+        c->monst = moWorldTurtle, c->wall = waNone, c->hitpoints = 5;
+        }
       }
     }
 

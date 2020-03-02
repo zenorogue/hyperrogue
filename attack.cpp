@@ -336,6 +336,7 @@ EX void stunMonster(cell *c2, eMonster killer, flagtype flags) {
     c2->monst == moTerraWarrior ? min(int(c2->stuntime + 8 - c2->hitpoints), 7) :
     isMetalBeast(c2->monst) ? 7 :
     c2->monst == moTortoise ? 7 :
+    c2->monst == moWorldTurtle ? 7 :
     c2->monst == moReptile ? 7 :
     isPrincess(c2->monst) ? 6 :
     // spear stunning
@@ -350,7 +351,7 @@ EX void stunMonster(cell *c2, eMonster killer, flagtype flags) {
     c2->monst == moBrownBug ? 3 :
     3);
   if(killer == moArrowTrap) newtime = min(newtime + 3, 7);
-  if(!isMetalBeast(c2->monst) && !among(c2->monst, moSkeleton, moReptile, moSalamander, moTortoise, moBrownBug)) {
+  if(!isMetalBeast(c2->monst) && !among(c2->monst, moSkeleton, moReptile, moSalamander, moTortoise, moWorldTurtle, moBrownBug)) {
     c2->hitpoints--;
     if(c2->monst == moPrincess)
       playSound(c2, princessgender() ? "hit-princess" : "hit-prince");
@@ -1002,7 +1003,7 @@ EX void killFriendlyIvy() {
   }
 
 EX bool monsterPushable(cell *c2) {
-  return (c2->monst != moFatGuard && !(isMetalBeast(c2->monst) && c2->stuntime < 2) && c2->monst != moTortoise && c2->monst != moTerraWarrior && c2->monst != moVizier);
+  return (c2->monst != moFatGuard && !(isMetalBeast(c2->monst) && c2->stuntime < 2) && c2->monst != moTortoise && c2->monst != moTerraWarrior && c2->monst != moVizier && c2->monst != moWorldTurtle);
   }  
 
 EX bool should_switchplace(cell *c1, cell *c2) {

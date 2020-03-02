@@ -438,6 +438,13 @@ EX namespace tortoise {
     if(getBit(bits, tfShellDark)) shellcolor = gradient(shellcolor, 0, 0, .5, 1);
     if(getBit(bits, tfSkinDark)) skincolor = gradient(skincolor, 0, 0, .5, 1);
     
+    if(bits < 0) { 
+      skincolor = 0xC00060;
+      shellcolor = 0xFF00FF;
+      scutecolor = 0x6000C0;
+      eyecolor = 0xFFFFFF;
+      }
+    
     for(int i=0; i<12; i++) {
       color_t col = 
         i == 0 ? shellcolor:
@@ -1266,9 +1273,9 @@ EX bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t 
 
   // if(GDIM == 3) V = V * cspin(0, 2, M_PI/2);
 
-  if(m == moTortoise && where && where->stuntime >= 3)
+  if(among(m, moTortoise, moWorldTurtle) && where && where->stuntime >= 3)
     drawStunStars(V, where->stuntime-2);
-  else if (m == moTortoise || m == moPlayer || (where && !where->stuntime)) ;
+  else if (among(m, moTortoise, moWorldTurtle) || m == moPlayer || (where && !where->stuntime)) ;
   else if(where && !(isMetalBeast(m) && where->stuntime == 1))
     drawStunStars(V, where->stuntime);
   
@@ -1281,6 +1288,11 @@ EX bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t 
       tortoise::draw(V, bits, 0, where ? where->stuntime : 0);
       if(tortoise::seek() && !tortoise::diff(bits) && where)
         queuepoly(V, cgi.shRing, darkena(0xFFFFFF, 0, 0x80 + 0x70 * sintick(200)));
+      return false;
+      }
+    
+    case moWorldTurtle: {
+      tortoise::draw(V, -1, 0, where ? where->stuntime : 0);
       return false;
       }
     
@@ -1525,7 +1537,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t 
       return false;
       }
     
-    case moShark: case moGreaterShark: case moCShark: case moYellowSkipper:
+    case moShark: case moGreaterShark: case moCShark: 
       queuepoly(VFISH, cgi.shShark, darkena(col, 0, 0xFF));
       return false;
       

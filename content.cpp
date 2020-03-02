@@ -1565,7 +1565,13 @@ WALL( '=', 0x0000A0, "deep water", waDeepWater, WF_WATER, RESERVED, 0, sgWater,
 MONSTER( 'P', 0xC08080, "Pike", moPike, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, 
   "You remembler anglers from your hometown showing the impressive pikes they have caught. This one is much larger."
   )
-MONSTER( 'S', 0xC0C080, "Yellow Skipper", moYellowSkipper, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, "Just a nasty shark.") /* unused */
+MONSTER( 'T', 0xFF00FF, "World Turtle", moWorldTurtle, CF_FACE_SIDE | CF_STUNNABLE | CF_SLOWMOVER, RESERVED, moYeti, 
+  "Have you reached the edge of the Poincaré disk? No, it must just be the edge of this world. "
+  "Which happens to be floating on the backs of some turtles. Wondering how such not very big turtles could "
+  "support such a large world? Well, there are LOTS of them! "
+  "This one got so annoyed by the fact that you discovered this that it left its post. However, the world still "
+  "stands, because there are so many turtles."
+  )
 MONSTER( 'R', 0x4040C0, "Rusałka", moRusalka, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, GENDERSWITCH)
 ITEM( 'o', 0x808080, "Orb of Plague", itOrbPlague, IC_ORB, IF_EMPATHY, RESERVED, osOffensive, 
   "When you kill an enemy, adjacent enemies all also attacked, as long as they are further away from you than from the originally attacked enemy. "
