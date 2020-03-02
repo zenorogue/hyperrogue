@@ -81,6 +81,12 @@ static const int terracol[8] = {0xD000, 0xE25050, 0xD0D0D0, 0x606060, 0x303030, 
 void celldrawer::addaura() {
   hr::addaura(tC0(V), darkened(aura_color), fd);
   }
+
+/* Eclectic City's version of Red Rock is of slightly different color, */
+/* to make it different from hot cells */
+void eclectic_red(color_t& col) {
+  part(col, 0) = part(col, 2) * 3 / 4;
+  }
   
 void celldrawer::setcolors() {
 
@@ -423,6 +429,8 @@ void celldrawer::setcolors() {
         if(c->wall == waLake)
           fcol = wcol = (wcol & 0xFCFCFC) >> 2;
         }
+      if(realred(c)) 
+        eclectic_red(wcol);
       break;
     
     case laOcean:
@@ -633,8 +641,11 @@ int celldrawer::getSnakelevColor(int i, int last) {
   #endif
   else if(i == last-1)
     col = wcol;
-  else
+  else {
     col = winf[waRed1+i].color;
+    if(c->land == laEclectic)
+      eclectic_red(col);
+    }
   return darkena(col, fd, 0xFF);
   }
 
