@@ -178,6 +178,7 @@ EX void initgame() {
   if(firstland == laMercuryRiver) firstland = laTerracotta;
   if(firstland == laMountain && !tactic::on) firstland = laJungle;
   if(firstland == laPrincessQuest) firstland = laPalace;
+  if(firstland == laMemory) firstland = laIce;
   if((isGravityLand(firstland) && !isCyclic(firstland)) || (firstland == laOcean && !safety && !yendor::on)) 
     firstland = weirdhyperbolic ? laCrossroads4 : laCrossroads;
   
