@@ -1228,15 +1228,18 @@ EX namespace mirror {
   void unlist() {
     for(auto& m: mirrors)
       if(m.second.at->monst == moMimic)
+        changes.ccell(m.second.at),
         m.second.at->monst = moNone;
     }
   
   void list() {
     for(auto& m: mirrors)
+      changes.ccell(m.second.at),
       m.second.at->monst = moMimic;
     }
 
   EX void destroyAll() {
+    changes.value_keep(mirrors);
     unlist();
     mirrors.clear();
     }
@@ -1244,6 +1247,7 @@ EX namespace mirror {
   EX void createMirror(cellwalker cw, int cpid) {
     if(!shmup::on && inmirror(cw))
       cw = reflect(cw);
+    changes.ccell(cw.at);
     if(cpid == LIGHTNING)
       castLightningBolt(cw);
     else if(cellMirrorable(cw.at)) {
@@ -1400,6 +1404,7 @@ EX namespace mirror {
         dynamicval<int> d(multi::cpid, pid);
         gainShard(cw.at, c->wall == waMirror ? "The mirror shatters!" : "The cloud turns into a bunch of images!");
         }
+      changes.ccell(c);
       c->wall = waNone;
       }
     }
@@ -1415,6 +1420,7 @@ EX namespace mirror {
     }
    
   void go(bool fwd) {
+    changes.value_keep(mirrors);
     int tk = tkills();
     int nummirage = 0;    
     int j = 0;
