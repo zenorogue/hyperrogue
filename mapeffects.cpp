@@ -737,6 +737,12 @@ EX bool makeEmpty(cell *c) {
   if(c->item != itCompass)
     c->item = itNone;
   
+  if(c->land == laEclectic) {
+    c->wall = waNone;
+    forCellEx(c1, c)
+      c1->wall = waNone;
+    }
+  
   if(c->land == laWildWest) {
     forCellEx(c2, c)
     forCellEx(c3, c2)
