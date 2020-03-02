@@ -1612,7 +1612,7 @@ MONSTER('F', 0x8080FF, "Blue Frog", moVaulter, ZERO, RESERVED, moVaulter,
   
   NATIVE(among(m, moFrog, moPhaser, moVaulter) ? 2 : 0)  
   #define LST {itDodeca, itZebra, itSwitch}
-  REQ(ITEMS_TOTAL(LST, variant_unlock_value()))
+  REQ(ITEMS_TOTAL(LST, variant_unlock_value()*4/5))
   #undef LST
 
 LAND( 0xC0C0FF, "Eclectic City", laEclectic, LF_ICY | LF_ELECTRIC, itEclectic, RESERVED, NODESCYET)
