@@ -755,7 +755,7 @@ EX namespace yendor {
     items[itOrbShield] += 31;
     for(int i=0; i<isize(yendor::yi); i++)
       if(yendor::yi[i].path[0] == c2) 
-        yendor::yi[i].foundOrb = true;
+        changes.value_set(yendor::yi[i].foundOrb, true);
     // Shielding always, so that we know that it protects!
     for(int i=0; i<4; i++) switch(hrand(13)) {
       case 0: items[itOrbSpeed] += 31; break;
@@ -774,9 +774,9 @@ EX namespace yendor {
       }
     items[itOrbYendor]++; 
     items[itKey]--;
-    yendor::everwon = true;
+    changes.value_set(yendor::everwon, true);        
     if(yendor::on) {
-      yendor::won = true;
+      changes.value_set(yendor::won, true);
       if(!cheater) {
         dynamicval<int> c(chaosmode, 0);
         yendor::bestscore[modecode()][yendor::challenge] = 
