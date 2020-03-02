@@ -269,7 +269,7 @@ bool pcmove::movepcto() {
   bool b = (d >= 0) ? actual_move() : stay();
   if(checkonly || !b) {
     changes.rollback();
-    flipplayer = false;
+    if(!checkonly) flipplayer = false;
     }
   else if(changes.on) {
     println(hlog, "error: not commited!");
