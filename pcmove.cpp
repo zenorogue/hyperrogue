@@ -507,8 +507,10 @@ void apply_chaos() {
   if(switch_lhu_in(cb->land)) cb->LHU = cob.LHU;
   int sa = ca->mondir - ((cwt+1)+wstep).spin;
   int sb = cb->mondir - ((cwt-1)+wstep).spin;
-  ca->stuntime = min(ca->stuntime + 3, 15);
-  cb->stuntime = min(cb->stuntime + 3, 15);
+  if(!(isFriendly(ca) && markOrb(itOrbEmpathy)))
+    ca->stuntime = min(ca->stuntime + 3, 15);
+  if(!(isFriendly(cb) && markOrb(itOrbEmpathy)))
+    cb->stuntime = min(cb->stuntime + 3, 15);
   ca->monmirror = !ca->monmirror;
   cb->monmirror = !cb->monmirror;
   if(ca->mondir < ca->type)
