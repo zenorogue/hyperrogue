@@ -1555,7 +1555,7 @@ MONSTER('A', 0x606040, "Space Rock", moAsteroid, ZERO, RESERVED, moAsteroid, roc
 LAND( 0x00C0C0, "Wetland",    laWet, ZERO, itWet, RESERVED, 
   "Some people have definitely drowned in this treacherous area. Better be careful!"
   )
-ITEM( '%', 0xFFD500, "Water Lily", itWet, IC_TREASURE, ZERO, RESERVED, osNone, 
+ITEM( '%', 0xFF6EC7, "Water Lily", itWet, IC_TREASURE, ZERO, RESERVED, osNone, 
   "A beautiful plant from the Wetland.")
 WALL( '=', 0x00C0C0, "shallow water", waShallow, ZERO, RESERVED, 0, sgWater, 
   "Shallow water is passable both for land creatures and for water creatures."
