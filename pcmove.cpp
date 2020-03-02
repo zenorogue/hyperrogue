@@ -395,6 +395,7 @@ EX void copy_metadata(cell *x, const gcell *y) {
   x->stuntime = y->stuntime;
   x->hitpoints = y->hitpoints;
   x->monmirror = y->monmirror;
+  x->LHU = y->LHU;
   if(isIcyLand(x)) {
     x->landparam = y->landparam;
     }
@@ -485,6 +486,10 @@ struct changes_t {
 
 EX changes_t changes;
 
+bool switch_lhu_in(eLand l) {
+  return among(l, laBrownian, laMinefield);
+  }
+
 void apply_chaos() {
   cell *ca = (cwt+1).cpeek();
   cell *cb = (cwt-1).cpeek();
@@ -495,6 +500,8 @@ void apply_chaos() {
   gcell cob = *cb;
   copy_metadata(ca, &cob);
   copy_metadata(cb, &coa);
+  if(switch_lhu_in(ca->land)) ca->LHU = coa.LHU;
+  if(switch_lhu_in(cb->land)) cb->LHU = cob.LHU;
   int sa = ca->mondir - ((cwt+1)+wstep).spin;
   int sb = cb->mondir - ((cwt-1)+wstep).spin;
   ca->stuntime = min(ca->stuntime + 3, 15);
