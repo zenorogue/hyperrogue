@@ -190,6 +190,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     items[itOrbSpeed] += v;
     items[itHolyGrail]++;
     addMessage(XLAT("Congratulations! You have found the Holy Grail!"));
+    if(!eubinary) changes.value_keep(c2->master->alt->emeraldval);
     if(!eubinary) c2->master->alt->emeraldval |= GRAIL_FOUND;
     achievement_collection(c2->item);
     }
