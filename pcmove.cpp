@@ -494,6 +494,8 @@ bool switch_lhu_in(eLand l) {
 void apply_chaos() {
   cell *ca = (cwt+1).cpeek();
   cell *cb = (cwt-1).cpeek();
+  if(ca && is_paired(ca->monst)) killMonster(ca, moPlayer);
+  if(cb && is_paired(cb->monst)) killMonster(cb, moPlayer);
   if(!items[itOrbChaos] || chaos_forbidden(ca) || chaos_forbidden(cb)) return;
   changes.ccell(ca);
   changes.ccell(cb);
@@ -513,12 +515,6 @@ void apply_chaos() {
     ca->mondir = ((cwt+1)+wstep-sb).spin;
   if(cb->mondir < cb->type)
     cb->mondir = ((cwt+1)+wstep-sa).spin;
-  if(cb && cb->monst == moPair) {
-    killMonster(cb, moPlayer);
-    }
-  if(ca && ca->monst == moPair) {
-    killMonster(ca, moPlayer);
-    }
   }
   
 bool pcmove::actual_move() {

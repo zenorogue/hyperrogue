@@ -368,4 +368,8 @@ EX bool do_not_touch_this_wall(cell *c) {
   return among(c->wall, waMirrorWall, waBarrier, waRoundTable);
   }
 
+EX bool is_paired(eMonster m) {
+  return among(m, moPair, moNorthPole, moSouthPole);
+  }
+
 }
