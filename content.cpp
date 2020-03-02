@@ -1216,7 +1216,7 @@ LAND( 0x2020FF, "Ocean", laOcean, ZERO | LF_EQUI | LF_SEA | LF_COASTAL, itCoast,
     "You can also take one of the boats and venture into the Ocean, "
     "to find other coasts, dangerous whirlpools, and islands inhabited by Pirates."
     )
-  NATIVE((m == moBomberbird || m == moTameBomberbird) ? 1 : 0)
+  NATIVE(m == moAlbatross ? 2 : m == moPirate ? 1 : 0)
   REQ(GOLD(R30))
 
 LAND( 0x0000C0, "Whirlpool", laWhirlpool, ZERO | LF_CYCLIC | LF_SEA, itWhirlpool, RESERVED, 
