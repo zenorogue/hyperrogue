@@ -186,6 +186,7 @@ EX bool incompatible1(eLand l1, eLand l2) {
   if(l1 == laDeadCaves && l2 == laCaves) return true;
   if(l1 == laWarpSea && l2 == laKraken) return true;
   if(l1 == laPrairie && l2 == laCrossroads3) return true;
+  if(l1 == laWet && l2 == laDesert) return true;
   if(isElemental(l1) && isElemental(l2)) return true;
   return false;
   }
