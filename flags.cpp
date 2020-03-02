@@ -213,8 +213,8 @@ EX bool ignoresPlates(eMonster m) {
 
 EX bool isInactiveEnemy(cell *w, eMonster forwho) {
   if(forwho != moPlayer) {
-    if(w->monst == moGreaterM || w->monst == moLesserM) return true;
-    if(w->monst == moGreater || w->monst == moLesser) return false;
+    if(w->monst == moGreaterM || w->monst == moLesserM) return false;
+    if(w->monst == moGreater || w->monst == moLesser) return true;
     }
   if(isInactiveEnemyType(w->monst)) return true;
   if(w->monst && ((forwho == moPlayer) ? realstuntime(w) : realstuntime(w) > 1) && !isFriendly(w))
