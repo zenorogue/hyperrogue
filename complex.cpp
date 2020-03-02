@@ -2899,6 +2899,7 @@ EX namespace kraken {
     }
  
   EX void kill(cell *c, eMonster who) {
+    changes.ccell(c);
     drawParticles(c, minf[moKrakenH].color, 16);
     c->monst = moNone;
     if(checkOrb(who, itOrbUndeath)) c->monst = moFriendlyGhost;
