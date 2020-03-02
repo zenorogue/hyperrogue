@@ -152,6 +152,7 @@ EX bool monstersnear(stalemate1& sm) {
 EX bool monstersnear2();
 
 EX bool monstersnear2() {
+  changes.value_set(passive_switch, (gold() & 1) ? moSwitch1 : moSwitch2);
   multi::cpid++;
   bool b = false;
   bool recorduse[ittypes];
@@ -159,25 +160,6 @@ EX bool monstersnear2() {
   if(multi::cpid == multi::players || multi::players == 1 || multi::checkonly) {
   
     dynamicval<eMonster> sw(passive_switch, passive_switch);
-
-    // check for safe orbs and switching first
-    for(auto &sm: stalemate::moves) if(sm.who == moPlayer) {
-
-      if(hasSafeOrb(sm.moveto)) {
-        multi::cpid--; return 0;
-        }
-      if(sm.moveto->item && itemclass(sm.moveto->item) == IC_TREASURE)
-        passive_switch = active_switch();
-      if(items[itOrbMagnetism]) forCellEx(c2, sm.moveto)
-        if(canPickupItemWithMagnetism(c2, sm.comefrom)) {
-          if(itemclass(c2->item) == IC_TREASURE)
-            passive_switch = active_switch();
-          if(hasSafeOrb(c2)) {
-            multi::cpid--;
-            return 0;
-            }
-          }
-      }    
 
     for(int i=0; i<isize(stalemate::moves); i++)
     for(int j=0; j<isize(stalemate::moves); j++) if(i != j) {
