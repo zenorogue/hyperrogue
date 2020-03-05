@@ -716,8 +716,10 @@ bool pcmove::after_escape() {
   if(forcedmovetype == fmAttack) attackable = true;
   attackable = attackable && (!c2->monst || isFriendly(c2));
   attackable = attackable && !nonAdjacentPlayer(cwt.at,c2);
-    
-  if(attackable && fmsAttack) {
+  
+  bool dont_attack = items[itOrbFlash] || items[itOrbLightning];
+  
+  if(attackable && fmsAttack && !dont_attack) {
     if(checkNeedMove(checkonly, true)) return false;
     nextmovetype = nm ? lmAttack : lmSkip;
     if(c2->wall == waSmallTree) {
