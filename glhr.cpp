@@ -485,6 +485,7 @@ EX void full_enable(shared_ptr<GLprogram> p) {
   auto& cur = current_glprogram;
   flagtype oldflags = cur ? cur->shader_flags : 0;
   if(p == cur) return;
+  if(!vid.usingGL) return;
   cur = p;
   GLERR("pre_switch_mode");
   WITHSHADER({

@@ -286,7 +286,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   vsh += varying;
   vsh += vmain;
   
-  if(glhr::noshaders) fsh = vsh = "";
+  if(glhr::noshaders || !vid.usingGL) fsh = vsh = "";
   
   string both = fsh + "*" + vsh + "*" + its(shader_flags);
   if(compiled_programs.count(both)) 
