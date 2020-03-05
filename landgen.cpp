@@ -2035,6 +2035,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
                   cellwalker cw1 = ci + bonus + wstep + revstep;
                   if(cw0.at->mpdist > 7)
                   if(cw1.at->mpdist > 7)
+                  if(!next->monst || next->monst == moHunterGuard)
                     next.emplace_back(cw0.at, cw1.at);
                   }
                 if(isize(next)) {
@@ -2051,7 +2052,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
                   c->item = itHunting;
                   cell *c3 = next[hrand(isize(next))];
                   vector<cell*> dogcells;
-                  forCellEx(c4, c3) if(c4->mpdist > 7 && !isNeighbor(c4, c))
+                  forCellEx(c4, c3) if(c4->mpdist > 7 && !isNeighbor(c4, c) && (c4->monst ==moHunterGuard || !c4->monst))
                     dogcells.push_back(c4);
                   if(items[itHunting] < 10 && isize(dogcells) >= 2) {
                     for(int t=0;; t++) {
@@ -2078,7 +2079,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             else placeLocalSpecial(c, 10);
             }
           }
-        if(hrand_monster(5000) < items[itHunting]- 17 + yendor::hardness())
+        if(hrand_monster(5000) < items[itHunting]- 17 + yendor::hardness() && !c->monst)
           c->monst = moHunterDog;
         }
       break;
