@@ -1621,7 +1621,7 @@ LAND( 0xC0C0FF, "Eclectic City", laEclectic, LF_ICY | LF_ELECTRIC, itEclectic, R
 MONSTER( 'W', 0xA04060, "Mutant2", moVariantWarrior2, CF_FACE_UP, RESERVED, moYeti, 
     "These guys look a bit strange, but they have no special properties."
     )
-ITEM( '/', 0x303090, "Lazurite Figurine", itEclectic, IC_TREASURE, ZERO, RESERVED, osNone, 
+ITEM( '/', 0x26619c, "Lazurite Figurine", itEclectic, IC_TREASURE, ZERO, RESERVED, osNone, 
     "A beautiful blue figurine. Every figurine is different.")
 ITEM( 'o', 0x808080, "Orb of Chaos", itOrbChaos, IC_ORB, ZERO, RESERVED, osUtility, 
    "When you move, the contents of the two cells adjacent to your both locations are swapped. "
