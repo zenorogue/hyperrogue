@@ -832,7 +832,7 @@ EX namespace euc {
         if(g == gCubeTiling ||
           (g == gRhombic3 && T_edit[2][2] % 2 == 0) ||
           (g == gBitrunc3 && T_edit[0][0] % 2 == 0 && T_edit[1][1] % 2 == 0))
-          dialog::addBoolItem(XLAT("third turn space"), twisted_edit & 16, 'x');
+          dialog::addBoolItem(XLAT("third-turn space"), twisted_edit & 16, 'x');
         else
           dialog::addBoolItem(XLAT("make it even"), twisted_edit & 16, 'x');
         dialog::add_action([] { eu_edit.twisted ^= 16; });

@@ -7618,7 +7618,6 @@ S("\"Did you know that the Cultists are relatives of the Desert Men?\"",
 S("do not use special centering for racing", "wyścig bez specjalnego centrowania")
 
 S("F8 = settings", "F8 = ustawienia")
-#undef Orb
 
 // standarization of geometry names
 
@@ -7671,7 +7670,8 @@ Cell("{3,3,3} 5") Cell("{4,3,3} 8") Cell("{3,3,4} 16") Cell("{3,4,3} 24") Cell("
   S(x " hyperbolic honeycomb", x " siatka hiperboliczna") \
   S(x " field quotient space", x " przestrzeń ilorazowa ciała")
 
-Honeycomb("{5,3,4}") Honeycomb("{4,3,5}")
+Honeycomb("{5,3,4}") Honeycomb("{4,3,5}") Honeycomb("{3,3,6}") Honeycomb("{3,4,4}") Honeycomb("{5,3,5}") Honeycomb("{5,3,6}") Honeycomb("{4,3,6}") Honeycomb("{5,3,6}")
+
 #undef Honeycomb
 
 // new or previously untranslated options
@@ -8114,6 +8114,12 @@ S(
 
 S("rotation space", "przestrzeń obrotów")
 S("steps", "kroki")
+
+// 11.3
+//======
+
+// new geometries
+
 S("space of rotations in current geometry", "przestrzeń obrotów obecnej geometrii")
 S("~SL(2,R)~", "~SL(2,R)~")
 S("Only works with (semi-)regular tilings", "Działa jedynie w parkietażach (pół)regularnych")
@@ -8123,11 +8129,12 @@ S("Hint: this is more playable with pure {7,3} or pure {5,4}", "Wskazówka: lepi
 
 S("view the underlying geometry", "pokaż geometrię bazową")
 
-S("The space you are currently in the space of rotations of the underlying hyperbolic or spherical geometry. "
-  "This option lets you see the underlying space. Lands and some walls (e.g. in the Graveyard) are based on "
+S("The space you are currently in is the space of rotations of the underlying hyperbolic or spherical geometry. ",
+  "Jesteś obecnie w przestrzeni rotacji bazowej geometrii hiperbolicznej lub sferycznej. ")
+
+S("This option lets you see the underlying space. Lands and some walls (e.g. in the Graveyard) are based on "
   "the respective features in the underlying world, but details such as monsters or items are ignored.",
   
-  "Jesteś obecnie w przestrzeni rotacji bazowej geometrii hiperbolicznej lub sferycznej. "
   "Ta opcja pozwala obejrzeć przestrzeń bazową. Krainy i pewne ściany (np. na Cmentarzu) bazują na "
   "odpowiednich cechach świata bazowego, ale szczegóły takie jak potwory i przedmioty są ignorowane.")
 
@@ -8141,6 +8148,227 @@ S("parallels to draw", "ile równoleżników")
 S("meridians to draw", "ile południków")
 S("range of grid to draw", "zasięg siatki")
 
+S("current filter", "obecny filtr")
+S("Solv quotient spaces", "przestrzenie ilorazowe Solv")
+S("%1 period", "okres %1")
+S("Note: the value 0 functions effectively as the size of int (2^32).", "Uwaga: warto�� 0 dzia�a w rzeczywisto�ci jak rozmiar inta (2^32).")
+
+S("standard ternary tiling", "standardowy parkietaż ternarny")
+S("stretched hyperbolic", "rozciągnięta hiperboliczna")
+S("stretched Solv", "rozciągnięta geometria Solv")
+
+S("{3,∞} (infinite triangles)", "{3,∞} (nieskończone trójkąty)")
+S("{4,∞} (infinite triangles)", "{4,∞} (nieskończone kwadraty)")
+S("{3/4,∞} (infinite triangles and squares)", "nieskończone trójkąty i kwadraty")
+
+S("4D crystal in H3", "4D kryształ w H3")
+S("6D crystal in H3", "6D kryształ w H3")
+
+S("Arnold's cat mapping torus", "torus przekształcenia kota Arnolda")
+S("{5,3,5} quotient", "przestrzeń ilorazowa w {5,3,5}")
+S("Seifert-Weber space", "przestrzeń Seiferta-Webera")
+S("Poincaré homology sphere", "sfera homologii Poincaré")
+
+S("load from file", "ładuj z pliku")
+
+S("Crystal torus", "Kryształowy torus")
+S("Z_k^d instead of Z^d. Only works with k even.", "Z_k^d zamiast Z^d. Działa tylko z parzystym k.")
+
+S("Euclidean quotient spaces", "Euklidesowe przestrzenie ilorazowe")
+S("columns specify periods", "kolumny określają okresy")
+S("(vectors you need to take to get back to start)", "(wektory, które trzeba przejść, by wrócić do startu)")
+S("third-turn space", "przestrzeń obrotu o 1/3")
+S("make it even", "liczby muszą być parzyste")
+S("or for columns : (A,B,C), (B,C,A), (D,D,D) where A+B+C=0", "lub dla kolumn : (A,B,C), (B,C,A), (D,D,D) gdzie A+B+C=0")
+S("quarter-turn space", "przestrzeń ćwierćobrotu")
+
+S("change the second column for Möbius bands and Klein bottles", "zmień drugą kolumnę, by uzyskać wstęgi Möbiusa i butelki Kleina")
+S("second period is chiral -- cannot be mirrored", "drugi okres jest chiralny -- nie można odbić")
+S("periods must be orthogonal for mirroring", "by odbić, okresy muszą być prostopadłe")
+S("mirror flip in the second period", "odbicie drugiego okresu")
+S("single-cell torus", "torus jednego pola")
+S("Klein bottle", "butelka Kleina")
+S("large regular torus", "duży torus regularny")
+S("cylinder", "walec")
+S("Möbius band", "wstęga Möbiusa")
+S("seven-colorable torus", "siedmiokolorowalny torus")
+S("HyperRogue classical torus", "klasyczny torus HyperRogue")
+S("no quotient", "bez dzielenia")
+S("standard rotation", "obrót standardowy")
+
+S("field quotient", "przestrzeń ilorazowa ciała")
+S("order %1%2 (%3 %4s)", "rząd %1%2 (%3 %4ów)")
+S("order %1%2 (%3 %4-gons)", "rząd %1%2 (%3 %4-kątów)")
+
+S("non-isotropic", "geometrie nieizotropowe")
+S("regular 2D tesselations", "regularne parkietaże 2D")
+S("regular 3D honeycombs", "regularne parkietaże 3D")
+S("interesting quotient spaces", "interesujące przestrzenie ilorazowe")
+S("geometries", "geometrie")
+S("geometry", "geometria")
+
+S("start discovery", "zacznij poszukiwania")
+S("resume discovery", "przywróc poszukiwania")
+S("suspend discovery", "wstrzymaj poszukiwania")
+
+S("#%1, cells: %2", "#%1, komórek: %2")
+
+S("hyperbolic (3:2)", "hiperboliczna (3:2)")
+S("Sol (3:2)", "Sol (3:2)")
+
+S("quotient spaces in ", "przestrzenie ilorazowe w: ")
+S("No quotient spaces avialable in the current tiling.",
+  "Brak dostępnych przestrzeni ilorazowych zo becnym parkietażem.")
+
+S("You are currently in a product space.", "Jesteś w przestrzeni produktowej.")
+
+S("Nil quotient spaces", "Przestrzenie ilorazowe Nil")
+S("honeycomb", "siatka")
+S("Y period must be divisible by Z period", "okres Y musi być podzielny przez okres Z")
+S("quotient product spaces", "ilorazowe przestrzenie produktowe")
+S("Set to 0 to make it non-periodic.", "Ustaw 0, by było nieokresowe.")
+S("Works if the underlying space is symmetric.", "Działa dla symetrycznej przestrzeni bazowej.")
+S("reflect", "odbicie")
+S("the current rotation is invalid", "obecny obrót jest nieprawidłowy")
+
+S("Note: adjacency rule affects environmental effects, but not movement.",
+  "Uwaga: reguła sąsiedztwa definiuje efekty terenowe, ale nie ruchy.")
+
+S("\n\nOption -mineadj 1 can be added for Moore neighborhoods.", "\n\nOpcja -mineadj 1 może zostać dodana, by uzyskać sąsiedztwo Moore'a.")
+
+// WFC generation
+
+S("configure WFC", "konfiguracja WFC")
+
+S("Wave Function Collapse", "Wave Function Collapse")
+S("import the current map", "zaimportuj obecną mapę")
+S("generate a map using WFC", "wygeneruj mapę używając WFC")
+
+// racing in Thurston geometries
+
+S("Racing", "Wyścigi")
+S("how fast can you reach the end?", "jak szybko dobiegniesz do końca?")
+S("Racing in Thurston geometries", "Wyścigi w geometriach Thurstona")
+S("race through a maze in exotic 3D geometry!", "Wyścig przez egzotyczną trójwymiarową geometrię!")
+
+S("periodic Solv", "okresowa Solv")
+S("hyperbolic crystal", "hiperboliczny kryształ")
+S("hyperbolic regular", "hiperboliczna siatka regularna")
+S("S2xE regular", "regularna w S2xE")
+S("H2xE regular", "regularna w H2xE")
+S("periodic Nil", "okresowa w Nil")
+S("alternate versions", "wersje alternatywne")
+
+// extra option
+
+S("floors in 2D geometries", "podłogi w geometriach 2D")
+
+S("slides", "slajdy")
+
+// raycasting
+
+S("configure raycasting", "skonfiguruj raycasting")
+S("raycasting configuration", "konfiguracja raycastingu")
+S("available in current geometry", "dostępne w obecnej geometrii")
+S("use raycasting?", "czy używać raycastingu?")
+S("comparison mode", "tryb porównania")
+S("exponential range", "zasięg wykładniczy")
+S("brightness formula: max(1-d/sightrange, s*exp(-d/r))", "wzór na jasność: max(1-d/sightrange, s*exp(-d/r))")
+S("exponential start", "start wykładniczy")
+S("hard limit", "twarde ograniczenie")
+S("no limit", "bez ograniczeń")
+S("reflective walls", "odbijające ściany")
+S("max step", "maksymalny krok")
+S("affects the precision of solving the geodesic equation in Solv", "określa dokładność rozwiązywania równania geodezyjnych w Solv")
+S("min step", "minimalny krok")
+S("how precisely should we find out when do cross the cell boundary", "jak dokładnie sprawdzamy moment przecięcia granicy pola")
+S("iterations", "iteracje")
+S("in H3/H2xE/E3 this is the number of cell boundaries; in nonisotropic, the number of simulation steps",
+  "w H3/H2xE/E3 liczba przejść przez granicę komórki; w nieizotropowych geometriach liczba kroków symulacji")
+S("max cells", "maksymalna liczba komórek")
+S("generate", "generuj spoza zasięgu")
+S("out-of-range color", "kolor poza zasięgiem")
+
+// new graphical styles
+
+S("standard graphics", "standardowa grafika")
+S("neon mode", "tryb neonu")
+S("no boundary mode", "tryb bez obramowań")
+S("neon mode II", "tryb neonu II")
+S("illustration mode", "tryb ilustracji")
+S("hint: Press Alt while testing modes", "wskazówka: wciśnij Alt przy testowaniu trybów")
+S("disable shadows", "wyłącz cienie")
+S("bright mode", "tryb jasny")
+S("colorblind simulation", "symulacja daltonizmu")
+S("ASCII/3D", "ASCII/3D")
+
+// new configuration options
+
+S("particles on attack", "cząsteczki przy ataku")
+S("floating bubbles: special", "bąbelki: specjalne")
+S("floating bubbles: treasure  thresholds", "bąbelki: progi skarbów")
+S("floating bubbles: all treasures", "bąbelki: wszystkie skarby")
+
+S("variable width", "zmienna szerokość")
+S("lines longer than this value will be split into shorter lines, with width computed separately for each of them.",
+  "linie dłuższe niż ta wartość będą dzielone na krótsze, których szerokość jest obliczana osobno.")
+
+S("smoothen", "wygładzanie")
+S("large values help if the joystick is imprecise", "duże wartości pomagają, gdy joystick jest nieprecyzyjny")
+
+S("level lines", "poziomice")
+S("This feature superimposes level lines on the rendered screen. These lines depend on the Z coordinate. In 3D hyperbolic the Z coordinate is taken from the Klein model. "
+  "Level lines can be used to observe the curvature: circles correspond to positive curvature, while hyperbolas correspond to negative. See e.g. the Hypersian Rug mode.",
+  
+  "Ta funkcjonalność powoduje, że na wytworzonym obrazie są rysowane poziomice, zależne od współrzędnej Z. W przypadku trójwymiarowej przestrzeni hiperbolicznej, współrzędna "
+  "Z jest liczona według modelu Kleina. Poziomic można użyć do obserwacji krzywizny: koła to krzywizna dodatnia, hiperbole to krzywizna ujemna. Widać to np. w trybie "
+  "hiperskiego dywanu.")
+
+S("disable textures", "wyłącz tekstury")
+S("disable level lines", "wyłącz poziomice")
+
+S("Size of the fish eye.", "Rozmiar oka ryby.")
+S("product Z stretch", "rozciągnięcie współrzędnej Z")
+S("horocyclic coordinates", "współrzędne horocykliczne")
+
+// dual geometry puzzles
+
+S("You won!", "Wygra%łeś!")
+S("dual geometry puzzles", "zagadki w dwóch geometriach")
+S("move both characters to marked squares at once!", "ustaw obie postaci w zaznaczonych kwadratach jednocześnie!")
+S("enter seed", "wpisz ziarno")
+S("Euclidean size", "rozmiar Euklidesowy")
+S("hyperbolic size", "rozmiar hiperboliczny")
+
+// another new mode
+
+S("play this Strange Challenge unofficially", "gram nieoficjalnie")
+
+// new gameplay lines
+
+S("\n\nIn the Orb Strategy Mode, the effect is increased to +100%.",
+  "\n\nW Trybie Strategii Sfer efekt jest powiększony do +100%.")
+
+S("\n\nAdditionally, your allies are protected from your indirect attacks.", 
+  "\n\nDodatkowo, Twoi przyjaciele są chronieni przed Twoimi pośrednimi atakami.")
+
+S("\n\nLeaves cut directly: %1", "\n\nLiści ściętych bezpośrednio: %1")
+S("\n\nLeaves cut onscreen: %1", "\n\nLiści ściętych na ekranie: %1")
+S("\n\nLeaves cut offscreen (approximately): %1", "\n\nLiści ściętych poza ekranem (mniej więcej): %1")
+S("leaves cut: %1", "ściętych liści: %1")
+
+// explanations for the start screen
+
+S("(random option)", "(opcja losowa)")
+S("(seasonal option)", "(opcja sezonowa)")
+
+S("spinning in the band model", "obrót w modelu wstęgi")
+S("spinning around", "obrót dookoała")
+S("row of ghosts", "rząd duchów")
+S("army of ghosts", "armia duchów")
+S("ghost spiral", "spirala duchów")
+S("Fibonacci ghosts", "duchy Fibonacciego")
+
 // new welcome messages
 
 S("Welcome to Spherindrogue!", "Witaj w Sferyndrogue!")
@@ -8150,10 +8378,159 @@ S("Welcome to SolvRogue!", "Witaj w SolvRogue!")
 S("Welcome to NilRogue!", "Witaj w NilRogue!")
 S("Welcome to PSL(2,R)-ogue!", "Witaj w PSL(2,R)-ogue!")
 
-// extra option
+// new patterns and line patterns
 
-S("play this Strange Challenge unofficially", "gram nieoficjalnie")
+S("empty", "pusty")
+S("rainbow by distance", "tęcza w zal. od odległości")
+S("Cage", "Klatka")
+S("Hyperplanes", "Hiperpłaszczyzny")
+S("Honeycomb", "Siatka")
+S("Diagonal", "Przekątna")
+S("Penrose staircase", "schody Penrose'a")
+S("nearer end", "bliższy koniec")
+S("furthest from start", "najdalszy od startu")
+S("types", "typy")
+S("display the inner walls", "pokazuj ściany wewnętrzne")
+S("floor type", "typ podłogi")
+S("(no wall)", "(bez ściany)")
+S("Goldberg tree", "drzewo Goldberga")
+S("irregular master", "pola główne")
+S("sub-lines", "pod-linie")
+S("fat edges", "grube krawędzie")
+S("You chop down the shrub.", "Ścinasz krzak.")
 
-S("floors in 2D geometries", "podłogi w geometriach 2D")
+// new lands
 
-S("slides", "slajdy")
+N("Wetland", GEN_N, "Mokradła", "Mokradła", "Mokradła", "na Mokradłach")
+
+S("Some people have definitely drowned in this treacherous area. Better be careful!",
+  "Na pewno ktoś utonął w tym zdradliwym miejscu. Lepiej uważać!")
+
+N("Water Lily", GEN_N, "Lilia Wodna", "Lilie Wodne", "Lilię Wodną", "Lilią Wodną")
+S("A beautiful plant from the Wetland.", "Piękny kwiat z Mokradeł.")
+
+N("shallow water", GEN_F, "płytka woda", "płytkie wody", "płytką wodę", "płytką wodą")
+S("Shallow water is passable both for land creatures and for water creatures.",
+  "Przez płytką wodę mogą przejść i stworzenia lądowe, i wodne.")
+
+N("shallow water", GEN_F, "głęboka woda", "głębokie wody", "głęboką wodę", "głęboką wodą")
+
+S("This body of water is calm and beautiful, but too deep to pass.",
+  "Ta woda jest spokojna i piękna, ale zbyt głęboka, by przez nią przejść.")
+
+S("You remembler anglers from your hometown showing the impressive pikes they have caught. This one is much larger.",
+  "Pamiętasz, jak w Twoim rodzinnym mieście wędkarze chwalili się wielkością złowionych szczupaków. Ten szczupak "
+  "jest dużo większy.")
+
+S("World Turtle", "Żółw Świata")
+S("Have you reached the edge of the Poincaré disk? No, it must just be the edge of this world. "
+  "Which happens to be floating on the backs of some turtles. Wondering how such not very big turtles could "
+  "support such a large world? Well, there are LOTS of them! "
+  "This one got so annoyed by the fact that you discovered this that it left its post. However, the world still "
+  "stands, because there are so many turtles.",
+  
+  "Czy osiągn%ąłeś brzeg dysku Poincaré? Nie, to tylko koniec tego świata. "
+  "Jak się okazuje, ten świat jest niesiony na skorupiach żółwi. Zastanawiasz się, jak takie małe żółwie "
+  "mogą dźwigać taki wielki świat? Jest ich po prostu BARDZO DUŻO! Ten się trochę zdenerwował, że "
+  "tu jesteś, i porzucił swoje stanowisko. Ale żółwi jest na tyle dużo, że świat wciąż stoi.")
+
+// gender-switched
+N("Rusałka", GEN_F, "Rusałka", "Rusałki", "Rusałkę", "Rusałką")
+S("A malicious water being. When you kill her, she changes the tile you are standing on, from land to shallow water, or from shallow water to deep water.",
+  "Złowroga wodna istota. Gdy ją zabijesz, zmienia pole, na którym jesteś: z pola lądowego na płytką wodę lub z płytkiej wody na głęboką.")
+  
+N("Topielec", GEN_M, "Topielec", "Topielce", "Topielca", "Topielcem")
+S("A malicious water being. When you kill him, he changes the tile you are standing on, from land to shallow water, or from shallow water to deep water.",
+  "Złowroga wodna istota. Gdy go zabijesz, zmienia pole, na którym jesteś: z pola lądowego na płytką wodę lub z płytkiej wody na głęboką.")
+
+// przet
+
+Orb("Plague", "Zarazy")
+S(
+  "When you kill an enemy, adjacent enemies all also attacked, as long as they are further away from you than from the originally attacked enemy. "
+  "These enemies may in turn infect further enemies, up to distance of at most 4 from you.",
+  "Kiedy zabijesz przeciwnika, sąsiedni przeciwnicy również są atakowani, o ile są dalej od Ciebie niż przeciwnik zaatakowany oryginalnie. "
+  "Ci przeciwnicy mogą zarażać kolejnych, aż do odległości 4 od Ciebie.")
+
+//---
+
+N("Frog Park", GEN_O, "Żabi Park", "Żabie Parki", "Żabi Park", "w Żabim Parku")
+
+S("This park is a perfect place for frogs to hide from predators. "
+  "So perfect that the frogs have grown in size, gained magical abilities, "
+  "and become very dangerous themselves.",
+  "Ten park jest doskonałym miejscem, by żabki mogły się ukryć przed drapieżnikami. "
+  "Tak doskonałym, że żabki urosły, zdobyły zdolności magiczne, i same się "
+  "stały bardzo niebezpieczne."
+  )
+
+N("Gold Ball", GEN_F, "Złota Piłka", "Złote Piłki", "Złotą Piłkę", "Złotą Piłką")
+S("A toy lost in the Frog Park by a spoiled child.", "Zabawka zgubiona w Żabim Parku przez rozpuszczone dziecko.")
+
+Orb("Impact", "Uderzenia")
+S("Whenever you use a ranged Orb to achieve an affect, all the single-tile monsters adjacent to the target "
+  "location are stunned.",
+  "Za każdym razem, gdy używasz Sfery z efektem zdalnym, by uzyskać efekt, wszystkie jednopolowe stworzenia "
+  "sąsiedujące z celem są ogłuszane.")
+
+N("shrub", GEN_O, "krzak", "krzaki", "krzaka", "krzakiem")
+S("A strange small tree that cannot be attacked with mundane weapons nor phased though. "
+  "It can be vaulted over, though.",
+  "Małe, dziwne drzewko, które nie może być ścięte zwykłymi broniami, ani nie może być przefazowane. "
+  "Można użyć przeskoku.")
+
+N("Giant Frog", GEN_F, "Wielka Żaba", "Wielkie Żaby", "Wielką Żabę", "Wielką Żabą")
+
+S(
+  "At first, you are shocked by the agility of this frog. Such a large creature "
+  "should not be able to jump that quickly!\n\n"
+  "Then, you notice the green glow around its legs. This frog must be magical... "
+  "it has sacrificed its swimming abilities for superfrog jumping powers.",
+  
+  "Na początku zaskoczyła Cię zręczność tej żaby. Tak wielkie stworzenie "
+  "nie powinno być zdolne do tak szybkich skoków!\n\n"
+  "Potem zauważy%łeś zieloną poświatę wokół jej nóg. Ta żaba musi być magiczna... "
+  "poświęciła zdolność pływania dla nadżabich zdolności skakania.")
+
+N("Yellow Frog", GEN_F, "Żółta Żaba", "Żółte Żaby", "Żółtą Żabę", "Żółtą Żabą")
+
+S("A slightly transparent yellow frog. It has mastered the magical power of phasing through solid "
+  "obstacles such as rock.",
+  "Lekko przezroczysta żółta żaba. Opanowała ona magiczną moc Fazy, pozwaljąca na przechodzenie "
+  "przez lite przeszkody, takie jak skały.")
+
+N("Blue Frog", GEN_F, "Niebieska Żaba", "Niebieskie Żaby", "Niebieską Żabę", "Niebieską Żabą")
+
+S(
+  "This frog is able to vault over the shrubs in the Frog Park, destroying the shrub in the process. "
+  "While it can also vault over monsters, it will never hurt the other frogs!",
+
+  "Ta żaba umie przeskakiwać krzaki w Żabim Parku, przy okazji niszcząc te krzaki. "
+  "Potrafi ona też przeskakiwać inne stworzenia, ale nigdy nie skrzywdzi innych żab!")
+
+S("\n\nThis Frog uses the power of %the1. You get 5 charges yourself for killing it.", "\n\nTa Żaba używa mocy '%1'. Dostaniesz 5 ładunków tej Sfery, gdy ją zabijesz.")
+
+//---
+
+N("Eclectic City", GEN_N, "Eklektyczne Miasto", "Eklektyczne Miasta", "Eklektyczne Miasto", "w Eklektycznym Mieście")
+
+S("Many kinds of creatures are living here, each with its own architectural style.",
+  "Wiele rodzajów stworzeń tu mieszka, każde ze swoim własnym stylem architektury.")
+
+N("Lazurite Figurine", GEN_F, "Lazurytowa Figurka", "Lazurytowe Figurki", "Lazurytową Figurkę", "Lazurytową Figurką")
+
+S("A beautiful blue figurine. Every figurine is different.",
+  "Piękna niebieska figurka. Każda figurka jest inna.")
+  
+Orb("Chaos", "Chaosu")
+S(
+  "When you move, the contents of the two cells adjacent to your both locations are swapped. "
+  "If they contain creatures, these creatures will be stunned for some time, before they understand what happened.\n\n"
+  "Does not work if one of the cells contains a "
+  "multi-tile creature or a barrier-like wall.",
+  
+  "Kiedy się ruszasz, zawartość dwóch pól sąsiedujących z obiema Twoimi polami jest zamieniana. "
+  "Jeśli były tam stworzenia, zostają one ogłuszone przez pewien czas, aż zrozumieją, co się właściwie stało.\n\n"
+  "Nie działa, gdy któreś z pól zawiera istotę wielopolową lub bariero-podobną ścianę.")
+#undef Orb
+

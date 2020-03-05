@@ -7892,8 +7892,6 @@ S("do not use special centering for racing", "nepoužívat speciální centrová
 
 S("F8 = settings", "F8 = nastavení")
 
-#undef Orb
-
 // 11.0p
 
 // standarization of geometry names
@@ -7947,7 +7945,7 @@ Cell("{3,3,3} 5") Cell("{4,3,3} 8") Cell("{3,3,4} 16") Cell("{3,4,3} 24") Cell("
   S(x " hyperbolic honeycomb", x " hyperbolické dělení") \
   S(x " field quotient space", x " prostor s tělesovým kvocientem")
 
-Honeycomb("{5,3,4}") Honeycomb("{4,3,5}")
+Honeycomb("{5,3,4}") Honeycomb("{4,3,5}") Honeycomb("{3,3,6}") Honeycomb("{3,4,4}") Honeycomb("{5,3,5}") Honeycomb("{5,3,6}") Honeycomb("{4,3,6}") Honeycomb("{5,3,6}")
 #undef Honeycomb
 
 // new or previously untranslated options
@@ -8395,4 +8393,423 @@ S(
 
 S("rotation space", "prostor rotací")
 S("steps", "kroky")
+
+// 11.3
+//======
+
+// new geometries
+
+S("space of rotations in current geometry", "prostor rotací v současné geometrii")
+S("~SL(2,R)~", "~SL(2,R)~")
+S("Only works with (semi-)regular tilings", "Funguje pouze s (polo)pravidelnými dlážděními")
+S("That would have %1/%2 levels", "To by mělo %1/%2 úrovní")
+S("number of levels", "počet úrovní")
+S("Hint: this is more playable with pure {7,3} or pure {5,4}", "Nápověda: toto je hratelnější v čistém {7,3} nebo čistém {5,4}")
+
+S("view the underlying geometry", "zobraz základní geometrii")
+
+S("The space you are currently in the space of rotations of the underlying hyperbolic or spherical geometry. ",
+  "Prostor, ve kterém se právě nacházíš, je prostorem rotací základní hyperbolické nebo sférické geometrie. ")
+
+S("This option lets you see the underlying space. Lands and some walls (e.g. in the Graveyard) are based on "
+  "the respective features in the underlying world, but details such as monsters or items are ignored.",
+  
+  "Tato možnost ti umožňuje vidět tento základní prostor. Kraje a některé stěny (např. na Hřbitově) "
+  "jsou založeny na prvcích základního světa, ale detaily jako netvoři nebo předměty se ignorují.")
+
+// map editor in 3D nonisotropic
+
+S("place points on surfaces of const Z", "umísťuj body na povrchy s konstantním Z")
+S("place points on surfaces of const X", "umísťuj body na povrchy s konstantním X")
+S("place points on surfaces of const Y", "umísťuj body na povrchy s konstantním Y")
+
+S("parallels to draw", "rovnoběžky")
+S("meridians to draw", "poledníky")
+S("range of grid to draw", "rozsah mřížky")
+
+S("current filter", "aktuální filtr")
+S("Solv quotient spaces", "kvocientové prostory v Solv")
+S("%1 period", "perioda %1")
+S("Note: the value 0 functions effectively as the size of int (2^32).", "Poznámka: hodnota 0 funguje jako velikost int (2^32).")
+
+S("standard ternary tiling", "standardní ternární dláždění")
+S("stretched hyperbolic", "natažené hyperbolické")
+S("stretched Solv", "natažený Solv")
+
+S("{3,∞} (infinite triangles)", "{3,∞} (nekonečné trojúhelníky)")
+S("{4,∞} (infinite triangles)", "{4,∞} (nekonečné čtverce)")
+S("{3/4,∞} (infinite triangles and squares)", "nekonečné trojúhelníky a čtverce")
+
+S("4D crystal in H3", "4D krystal v H3")
+S("6D crystal in H3", "6D krystal v H3")
+
+S("Arnold's cat mapping torus", "torus v Arnoldově kočičím mapování")
+S("{5,3,5} quotient", "kvocient v {5,3,5}")
+S("Seifert-Weber space", "Seifert-Weberův prostor")
+S("Poincaré homology sphere", "Sféra Poincarého homologie")
+
+S("load from file", "nahraj ze souboru")
+
+S("Crystal torus", "Krystalický torus")
+S("Z_k^d instead of Z^d. Only works with k even.", "Z_k^d místo Z^d. Funguje pouze pro sudá k.")
+
+S("Euclidean quotient spaces", "Eukleidovské kvocientové prostory")
+S("columns specify periods", "sloupce specifikují periody")
+S("(vectors you need to take to get back to start)", "(vektory, kterými je třeba se dát, aby ses vrátil na začátek)")
+S("third-turn space", "prostor třetinové otáčky")
+S("make it even", "musejí to být sudá čísla")
+S("or for columns : (A,B,C), (B,C,A), (D,D,D) where A+B+C=0", "nebo pro sloupce : (A,B,C), (B,C,A), (D,D,D), kde A+B+C=0")
+S("quarter-turn space", "prostor čtvrtotáčky")
+
+S("change the second column for Möbius bands and Klein bottles", "pro Möbiovy pásky a Kleinovy lahve změň druhý sloupec")
+S("second period is chiral -- cannot be mirrored", "druhá perioda je chirální -- nelze ji zrcadlit")
+S("periods must be orthogonal for mirroring", "pro zrcadlení musejí být periody kolmé")
+S("mirror flip in the second period", "zrcadlové překlopení ve druhé periodě")
+S("single-cell torus", "jednopolíčkový torus")
+S("Klein bottle", "Kleinova lahev")
+S("large regular torus", "velký pravidelný torus")
+S("cylinder", "válec")
+S("Möbius band", "Möbiův pásek")
+S("seven-colorable torus", "torus obarvitelný sedmi barvami")
+S("HyperRogue classical torus", "klasický HyperRogue torus")
+S("no quotient", "bez kvocientu")
+S("standard rotation", "standardní rotace")
+
+S("field quotient", "tělesový kvocient")
+S("order %1%2 (%3 %4s)", "řád %1%2 (%3 %4ů)")
+S("order %1%2 (%3 %4-gons)", "řád %1%2 (%3 %4-úhelníků)")
+
+S("non-isotropic", "neizotropní geometrie")
+S("regular 2D tesselations", "pravidelná 2D dláždění")
+S("regular 3D honeycombs", "pravidelná 3D dláždění")
+S("interesting quotient spaces", "zajímavé kvocientové prostory")
+S("geometries", "geometrie")
+S("geometry", "geometrie")
+
+S("start discovery", "začni s objevováním")
+S("resume discovery", "pokračuj v objevování")
+S("suspend discovery", "přeruš objevování")
+
+S("#%1, cells: %2", "#%1, buněk: %2")
+
+S("hyperbolic (3:2)", "hyperbolická (3:2)")
+S("Sol (3:2)", "Solv (3:2)")
+
+S("quotient spaces in ", "kvocientové prostory v: ")
+S("No quotient spaces avialable in the current tiling.",
+  "V současném dláždění nejsou k dispozici žádné kvocientové prostory.")
+
+S("You are currently in a product space.", "Momentálně se nacházíš v produktovém prostoru.")
+
+S("Nil quotient spaces", "Kvocientové prostory v Nil")
+S("honeycomb", "mřížka")
+S("Y period must be divisible by Z period", "perioda Y musí být dělitelná periodou Z")
+S("quotient product spaces", "kvocientové produktové prostory")
+S("Set to 0 to make it non-periodic.", "Pro neperiodičnost nastav na 0.")
+S("Works if the underlying space is symmetric.", "Funguje, je-li základní prostor symetrický.")
+S("reflect", "zrcadlení")
+S("the current rotation is invalid", "současná rotace je neplatná")
+
+S("Note: adjacency rule affects environmental effects, but not movement.",
+  "Poznámka: pravidlo sousedění má vliv na efekty prostředí, ale nikoli na pohyb.")
+
+S("\n\nOption -mineadj 1 can be added for Moore neighborhoods.", "\n\npro Mooreova okolí můžeš přidat možnost -mineadj 1.")
+
+// WFC generation
+
+S("configure WFC", "konfigurace WFC")
+
+S("Wave Function Collapse", "Wave Function Collapse")
+S("import the current map", "importuj současnou mapu")
+S("generate a map using WFC", "vygeneruj mapu s použitím WFC")
+
+// racing in Thurston geometries
+
+S("Racing", "Závodění")
+S("how fast can you reach the end?", "jak rychle se dokážeš dostat na konec?")
+S("Racing in Thurston geometries", "Závodění v Thurstonových geometriích")
+S("race through a maze in exotic 3D geometry!", "závoď v bludišti v exotické 3D geometrii!")
+
+S("periodic Solv", "periodický Solv")
+S("hyperbolic crystal", "hyperbolický krystal")
+S("hyperbolic regular", "hyperbolická pravidelná mřížka")
+S("S2xE regular", "pravidelná v S2xE")
+S("H2xE regular", "pravidelná v H2xE")
+S("periodic Nil", "periodický Nil")
+S("alternate versions", "alternativní verze")
+
+// extra option
+
+S("floors in 2D geometries", "podlahy v 2D geometriích")
+
+S("slides", "snímky")
+
+// raycasting
+
+S("configure raycasting", "konfiguruj raycasting")
+S("raycasting configuration", "konfigurace raycastingu")
+S("available in current geometry", "dostupné v současné geometrii")
+S("use raycasting?", "používat raycasting?")
+S("comparison mode", "srovnávací mód")
+S("exponential range", "exponenciální dosah")
+S("brightness formula: max(1-d/sightrange, s*exp(-d/r))", "vzorec jasnosti: max(1-d/sightrange, s*exp(-d/r))")
+S("exponential start", "exponenciální start")
+S("hard limit", "tvrdý limit")
+S("no limit", "bez limitu")
+S("reflective walls", "odrazné stěny")
+S("max step", "maximální krok")
+S("affects the precision of solving the geodesic equation in Solv", "ovlivňuje přesnost řešení geodetické rovnice v Solv")
+S("min step", "minimální krok")
+S("how precisely should we find out when do cross the cell boundary", "jak přesně máme zjišťovat, kdy překračujeme hranici políčka")
+S("iterations", "iterace")
+S("in H3/H2xE/E3 this is the number of cell boundaries; in nonisotropic, the number of simulation steps",
+  "v H3/H2xE/E3 je toto počet hranic buněk; v neizotropních geometriích počet kroků simulace")
+S("max cells", "maximální počet buněk")
+S("generate", "generuj")
+S("out-of-range color", "barva mimo dosah")
+
+// new graphical styles
+
+S("standard graphics", "standardní grafika")
+S("neon mode", "neonový mód")
+S("no boundary mode", "mód bez hranice")
+S("neon mode II", "neonový mód II")
+S("illustration mode", "mód ilustrace")
+S("hint: Press Alt while testing modes", "nápověda: používej během testování módů klávesu Alt")
+S("disable shadows", "vypni stíny")
+S("bright mode", "jasný mód")
+S("colorblind simulation", "simulace daltonismu")
+S("ASCII/3D", "ASCII/3D")
+
+// new configuration options
+
+S("particles on attack", "částice při útoku")
+S("floating bubbles: special", "bubliny: speciální")
+S("floating bubbles: treasure  thresholds", "bubliny: hranice pokladů")
+S("floating bubbles: all treasures", "bubliny: všechny poklady")
+
+S("variable width", "proměnná šířka")
+S("lines longer than this value will be split into shorter lines, with width computed separately for each of them.",
+  "čáry delší než tato hodnota budou rozděleny na kratší, jejichž šířka bude vypočtena zvlášť.")
+
+S("smoothen", "vyhlazení")
+S("large values help if the joystick is imprecise", "vyšší hodnoty pomohou v případě nepřesného joysticku")
+
+S("level lines", "horizontály")
+S("This feature superimposes level lines on the rendered screen. These lines depend on the Z coordinate. In 3D hyperbolic the Z coordinate is taken from the Klein model. "
+  "Level lines can be used to observe the curvature: circles correspond to positive curvature, while hyperbolas correspond to negative. See e.g. the Hypersian Rug mode.",
+  
+  "Tato funkce přeloží přes vyrenderovanou obrazovku horizontály. Tyto čáry závisejí na souřadnici Z. Ve 3D hyperbolické geometrii je souřadnice Z převzata z Kleinova modelu. "
+  "Horizontály lze použít k pozorování zakřivení: kruhy odpovídají kladnému zakřivení, hyperboly zápornému. Viz např. model hyperského koberce.")
+
+S("disable textures", "vypni textury")
+S("disable level lines", "vypni horizontály")
+
+S("Size of the fish eye.", "Rozměr rybího oka.")
+S("product Z stretch", "Z-natažení produktu")
+S("horocyclic coordinates", "horocyklické souřadnice")
+
+// dual geometry puzzles
+
+S("You won!", "Vyhrál jsi!")
+S("dual geometry puzzles", "hádanky duální geometrie")
+S("move both characters to marked squares at once!", "přesuň obě postavy zároveň na označené čtverce!")
+S("enter seed", "zadej seed")
+S("Euclidean size", "eukleidovský rozměr")
+S("hyperbolic size", "hyperbolický rozměr")
+
+// another new mode
+
+S("play this Strange Challenge unofficially", "zahraj si tuto Podivnou výzvu neoficiálně")
+
+// new gameplay lines
+
+S("\n\nIn the Orb Strategy Mode, the effect is increased to +100%.",
+  "\n\nVe Sférostrategickém módu se tento efekt zvyšuje na +100%.")
+
+S("\n\nAdditionally, your allies are protected from your indirect attacks.", 
+  "\n\nMimo to jsou tví spojenci chráněni před tvými nepřímými útoky.")
+
+S("\n\nLeaves cut directly: %1", "\n\nPřímo useknuté listy: %1")
+S("\n\nLeaves cut onscreen: %1", "\n\nListy useknuté na obrazovce: %1")
+S("\n\nLeaves cut offscreen (approximately): %1", "\n\nListy useknuté mimo obraz (přibližně): %1")
+S("leaves cut: %1", "useknuté listy: %1")
+
+// explanations for the start screen
+
+S("(random option)", "(náhodná možnost)")
+S("(seasonal option)", "(sezónní možnost)")
+
+S("spinning in the band model", "rotace v pásovém modelu")
+S("spinning around", "rotace kolem dokola")
+S("row of ghosts", "řada duchů")
+S("army of ghosts", "armáda duchů")
+S("ghost spiral", "spirála duchů")
+S("Fibonacci ghosts", "Fibonnaciho duchové")
+
+// new welcome messages
+
+S("Welcome to Spherindrogue!", "Vítej ve Spherindrogue!")
+S("Welcome to Hyper-X-R-Rogue!", "Vítej v Hyper-X-R-Rogue!")
+S("Good luck in the elliptic space!", "Hodně štěstí v eliptickém prostoru!")
+S("Welcome to SolvRogue!", "Vítej v SolvRogue!")
+S("Welcome to NilRogue!", "Vítej v NilRogue!")
+S("Welcome to PSL(2,R)-ogue!", "Vítej v PSL(2,R)-ogue!")
+
+// new patterns and line patterns
+
+S("empty", "prázdná")
+S("rainbow by distance", "duha podle vzdálenosti")
+S("Cage", "Klec")
+S("Hyperplanes", "Hyperroviny")
+S("Honeycomb", "Mřížka")
+S("Diagonal", "Diagonála")
+S("Penrose staircase", "Penroseovo schodiště")
+S("nearer end", "bližší konec")
+S("furthest from start", "nejdále od startu")
+S("types", "typy")
+S("display the inner walls", "zobraz vnitřní stěny")
+S("floor type", "typ podlahy")
+S("(no wall)", "(bez stěny)")
+S("Goldberg tree", "Goldbergův strom")
+S("irregular master", "hlavní nepravidelné")
+S("sub-lines", "sub-linie")
+S("fat edges", "tlusté hrany")
+S("You chop down the shrub.", "Sekáš keřík.")
+
+// new lands
+
+N("Wetland", GEN_O, "Mokřad", "Mokřadu", "Mokřady", "v Mokřadu")
+
+S("Some people have definitely drowned in this treacherous area. Better be careful!",
+  "V této zrádné oblasti se už určitě někdo utopil. Dej si pozor!")
+
+N("Water Lily", GEN_O, "Leknín", "Lekníny", "Leknín", "Leknín")
+S("A beautiful plant from the Wetland.", "Krásná rostlina z Mokřadu.")
+
+N("shallow water", GEN_F, "mělká voda", "mělké vody", "mělkou vodu", "mělkou vodou")
+S("Shallow water is passable both for land creatures and for water creatures.",
+  "Mělkou vodou mohou procházet jak suchozemští, tak vodní tvorové.")
+
+N("shallow water", GEN_F, "hluboká voda", "hluboké vody", "hlubokou vodu", "hlubokou vodou")
+
+S("This body of water is calm and beautiful, but too deep to pass.",
+  "Tato voda je klidná a krásná, ale příliš hluboká, než abys skrz ni mohl projít.")
+
+S("You remembler anglers from your hometown showing the impressive pikes they have caught. This one is much larger.",
+  "Vzpomínáš si, jak rybáři ve tvém rodném městě ukazovali impresivní štiky, které chytili. Tahle je mnohem větší.")
+
+S("World Turtle", "Světoželva")
+S("Have you reached the edge of the Poincaré disk? No, it must just be the edge of this world. "
+  "Which happens to be floating on the backs of some turtles. Wondering how such not very big turtles could "
+  "support such a large world? Well, there are LOTS of them! "
+  "This one got so annoyed by the fact that you discovered this that it left its post. However, the world still "
+  "stands, because there are so many turtles.",
+  
+  "Že bys dorazil na okraj Poincarého disku? Ne, to musí být okraj tohoto světa. "
+  "Který, jak se ukazuje, pluje na zádech želv. Zajímá tě, jak takovéhle ne zrovna velké želvy dokážou "
+  "udržet tak velký svět? Inu, je jich SPOUSTA! "
+  "Tahle je tak otrávená skutečností, že jsi ji objevil, že opustila své místo. Ale svět stále "
+  "stojí, protože želv je tolik.")
+
+// gender-switched
+N("Rusałka", GEN_F, "Rusalka", "Rusalky", "Rusalku", "Rusalkou")
+S("A malicious water being. When you kill her, she changes the tile you are standing on, from land to shallow water, or from shallow water to deep water.",
+  "Zlovolná vodní bytost. Když ji zabiješ, změní políčko, na kterém stojíš, ze země na mělkou vodu nebo z mělké vody na hlubokou.")
+  
+N("Topielec", GEN_M, "Vodník", "Vodníci", "Vodníka", "Vodníkem")
+S("A malicious water being. When you kill him, he changes the tile you are standing on, from land to shallow water, or from shallow water to deep water.",
+  "Zlovolná vodní bytost. Když ho zabiješ, změní políčko, na kterém stojíš, ze země na mělkou vodu nebo z mělké vody na hlubokou.")
+
+// przet
+
+Orb("Plague", "Moru")
+S(
+  "When you kill an enemy, adjacent enemies all also attacked, as long as they are further away from you than from the originally attacked enemy. "
+  "These enemies may in turn infect further enemies, up to distance of at most 4 from you.",
+  "Kdykoli zabiješ nepřítele, útok zasáhne i nepřátele, kteří s ním sousedí, pokud jsou od tebe dál než nepřítel, na kterého jsi původně zaútočil. "
+  "Tito nepřátelé mohou nakazit další nepřátele, až do vzdálenosti maximálně 4 políčka od tebe.")
+
+//---
+
+N("Frog Park", GEN_O, "Žabí Park", "Žabí Parky", "Žabí Park", "v Žabím parku")
+
+S("This park is a perfect place for frogs to hide from predators. "
+  "So perfect that the frogs have grown in size, gained magical abilities, "
+  "and become very dangerous themselves.",
+  "Tento park je dokonalé místo, kde se mohou žáby ukrývat před predátory. "
+  "Tak dokonalé, že žáby vyrostly, získaly magické schopnosti "
+  "a samy se staly velice nebezpečnými."
+  )
+
+N("Gold Ball", GEN_O, "Zlatý míček", "Zlaté míčky", "Zlatý míček", "Zlatým míčkem")
+S("A toy lost in the Frog Park by a spoiled child.", "Hračka, kterou nějaké rozmazlené dítě ztratilo v Žabím parku.")
+
+Orb("Impact", "Úderu")
+S("Whenever you use a ranged Orb to achieve an affect, all the single-tile monsters adjacent to the target "
+  "location are stunned.",
+  "Kdykoli použiješ efekt nějaké dálkové Sféry, všichni jednopolíčkoví netvoři sousedící s cílovou "
+  "lokací budou omráčeni.")
+
+N("shrub", GEN_O, "krzak", "krzaki", "krzaka", "krzakiem")
+S("A strange small tree that cannot be attacked with mundane weapons nor phased though. "
+  "It can be vaulted over, though.",
+  "Podivná malá dřevina, na kterou nelze zaútočit běžnými zbraněmi, ani skrz ni profázovat. "
+  "Dá se však přeskočit.")
+
+N("Giant Frog", GEN_F, "Velká žába", "Velké žáby", "Velkou žábu", "Velkou žábou")
+
+S(
+  "At first, you are shocked by the agility of this frog. Such a large creature "
+  "should not be able to jump that quickly!\n\n"
+  "Then, you notice the green glow around its legs. This frog must be magical... "
+  "it has sacrificed its swimming abilities for superfrog jumping powers.",
+  
+  "Hbitost této žáby tě zpočátku ohromí. Tak velký tvor "
+  "by neměl být schopný tak rychle skákat!\n\n"
+  "Potom si všimneš zelené záře kolem jejích nohou Tahle žába musí být kouzelná... "
+  "obětovala svoji schopnost plavat, aby získala superžabí skokanské schopnosti.")
+
+N("Yellow Frog", GEN_F, "Žlutá žába", "Žluté žáby", "Žlutou žábu", "Žlutou žábou")
+
+S("A slightly transparent yellow frog. It has mastered the magical power of phasing through solid "
+  "obstacles such as rock.",
+  "Mírně průsvitná žlutá žába. Ovládla magickou schopnost fázování skrz pevné "
+  "překážky, jako jsou skály.")
+
+N("Blue Frog", GEN_F, "Modrá žába", "Modré žáby", "Modrou žábu", "Modrou žábou")
+
+S(
+  "This frog is able to vault over the shrubs in the Frog Park, destroying the shrub in the process. "
+  "While it can also vault over monsters, it will never hurt the other frogs!",
+
+  "Tato žába dokáže přeskočit keříky v Žabím parku, a tím je zničit. "
+  "Může přeskakovat i netvory, ale nikdy neublíží jiným žábám!")
+
+S("\n\nThis Frog uses the power of %the1. You get 5 charges yourself for killing it.", "\n\nTato žába využívá sílu '%1'. Když ji zabiješ, získáš 5 nábojů této Sféry.")
+
+//---
+
+N("Eclectic City", GEN_N, "Eklektické město", "Eklektická města", "Eklektické město", "v Eklektickém městě")
+
+S("Many kinds of creatures are living here, each with its own architectural style.",
+  "Žije zde mnoho druhů tvorů, každý se svým vlastním architektonickým stylem.")
+
+N("Lazurite Figurine", GEN_F, "Lazuritová figurka", "Lazuritové figurky", "Lazuritovou figurku", "Lazuritovou figurkou")
+
+S("A beautiful blue figurine. Every figurine is different.",
+  "Krásná modrá figurka. Každá je jiná.")
+  
+Orb("Chaos", "Chaosu")
+S(
+  "When you move, the contents of the two cells adjacent to your both locations are swapped. "
+  "If they contain creatures, these creatures will be stunned for some time, before they understand what happened.\n\n"
+  "Does not work if one of the cells contains a "
+  "multi-tile creature or a barrier-like wall.",
+  
+  "Kdykoli se pohneš, obsah dvou políček, které sousedí jak s počátečním, tak s cílovým políčkem, se vymění. "
+  "Pokud tam jsou nějací tvorové, budou na chvíli omráčeni, než si uvědomí, co se stalo.\n\n"
+  "Nefunguje, pokud je na jednom z políček vícepolíčkový tvor nebo bariéra jako zeď.")
+
+#undef Orb
 
