@@ -4471,7 +4471,7 @@ EX void precise_mouseover() {
     transmatrix cov = ggmatrix(mouseover2);
     forCellIdEx(c1, i, mouseover2) {
       hyperpoint h1 = tC0(cov * currentmap->adj(mouseover2, i));
-      ld dist = geo_dist(h1, h, iTable) - geo_dist(C0, h1, iTable);
+      ld dist = geo_dist(h, h1, iTable) - geo_dist(C0, h1, iTable);
       if(dist < best) mouseover = c1, best = dist;
       }
     return; 
