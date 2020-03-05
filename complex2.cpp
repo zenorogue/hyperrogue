@@ -703,8 +703,13 @@ EX int size(cell *c, eItem what) {
     case itOrbFreedom:
       return restricted ? 10 : 60;
     
+    case itOrbImpact:
+    case itOrbPlague:
+      return 10;
+    
     case itOrbThorns:
     case itOrb37:
+    case itOrbChaos:
       return 20;
     
     case itOrbLava:
