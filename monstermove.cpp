@@ -881,6 +881,7 @@ EX void moveWorm(cell *c) {
     c->monst = eMonster(moWormtail + id);
     goal->mondir = mi.rev_dir_or(NODIR);
     goal->monmirror = c->monmirror ^ c->c.mirror(dir);
+    setdist(goal, 6, nullptr);
   
     mountmove(mi, true);
     
@@ -1206,6 +1207,7 @@ EX void moveHexSnake(const movei& mi, bool mounted) {
   // note: move from 'c' to 'from'!
   auto& from = mi.t;
   auto& c = mi.s;
+  setdist(from, 6, nullptr);
   if(from->wall == waBoat) from->wall = waSea;
   moveEffect(mi, c->monst);
   from->monst = c->monst; from->mondir = mi.rev_dir_or(NODIR); from->hitpoints = c->hitpoints;
