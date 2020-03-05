@@ -768,7 +768,8 @@ EX int size(cell *c, eItem what) {
   
   }
 
-EX int ambush(cell *c, eItem what) {
+EX void ambush(cell *c, eItem what) {
+  LATE ( ambush(c, what); )
   int maxdist = gamerange();
   celllister cl(c, maxdist, 1000000, NULL);
   cell *c0 = c;
@@ -821,19 +822,24 @@ EX int ambush(cell *c, eItem what) {
   int dogs = size(c, what);
   
   int gaps = dogs;
-  if(!N) return dogs0;
-  ambushed = true;
-  int shift = hrand(N);
-  dogs = min(dogs, N);
-  gaps = min(gaps, N);
-  for(int i=0; i<dogs; i++) {
-    int pos = (shift + (N * i) / gaps) % N;
-    cell *nextdog = around[pos];
-    nextdog->monst = moHunterDog;
-    nextdog->stuntime = 1;
-    drawFlash(nextdog);
+  int result = dogs0;
+  if(N) {
+    ambushed = true;
+    int shift = hrand(N);
+    dogs = min(dogs, N);
+    gaps = min(gaps, N);
+    for(int i=0; i<dogs; i++) {
+      int pos = (shift + (N * i) / gaps) % N;
+      cell *nextdog = around[pos];
+      nextdog->monst = moHunterDog;
+      nextdog->stuntime = 1;
+      drawFlash(nextdog);
+      }
+    result += dogs;
     }
-  return dogs + dogs0;
+
+  if(result)
+    addMessage(XLAT("You are ambushed!"));
   }
 EX }
 
