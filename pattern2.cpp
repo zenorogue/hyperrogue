@@ -1994,7 +1994,7 @@ EX namespace patterns {
           "wallif(condition, color)\n"
           );
         
-        s += "see compute_map_function in pattern2.cpp for more\n";
+        s += XLAT("see compute_map_function in pattern2.cpp for more\n");
 
         s += "\n\n" + parser_help();
 
