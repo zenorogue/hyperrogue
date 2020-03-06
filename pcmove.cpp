@@ -513,6 +513,10 @@ void apply_chaos() {
     ca->mondir = ((cwt+1)+wstep-sb).spin;
   if(cb->mondir < cb->type)
     cb->mondir = ((cwt+1)+wstep-sa).spin;
+  if(isPrincess(ca) && !isPrincess(cb))
+    princess::move(movei{cb, ca, JUMP});
+  if(isPrincess(cb) && !isPrincess(ca))
+    princess::move(movei{ca, cb, JUMP});
   }
   
 bool pcmove::actual_move() {
