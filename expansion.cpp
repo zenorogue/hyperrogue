@@ -851,7 +851,15 @@ int sibling_distance(cell *a, cell *b, int limit) {
     }
   }
 
-EX int hyperbolic_celldistance(cell *c1, cell *c2) {  
+/** An algorithm for computing distance between two cells.
+    This algorithm runs correctly in O(d) assuming that:
+    - distances from the origin are known
+    - the set of cells in distance d from the origin forms a cycle
+    - the map is Gromov hyperbolic (with sibling_limit computed correctly) and planar
+    - all vertices have valence <= 4
+    - each vertex has at most two parents
+    */
+EX int hyperbolic_celldistance(cell *c1, cell *c2) {
   int found_distance = INF;
   
   int d = 0, d1 = celldist0(c1), d2 = celldist0(c2), sl_used = 0;
