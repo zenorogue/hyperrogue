@@ -334,6 +334,36 @@ EX int knighted = 0;
 /** this value is used when using Orb of Safety in the Camelot in Pure Tactics Mode */
 EX int anthraxBonus = 0;
 
+vector<string> knight_names = {
+  "DivisionByZero", "tricosahedron", "BillSYZ0317", "rjdimo", "Person", "Strange Yeah", "godamnsteemsux", "Allalinor", "Spuddnik", "QETC Crimson", 
+  "cannobeens", "Dylgear", "Patashu", "hotdogPi", "vincent", "Chimera245", "BreedPineapple", "TaeK", "Aliased", "Vipul", "english5040", "marvincast", 
+  "Lord Ignus", "Darth Calculus", "*****-mail", "Wheat Wizard", "xiqnyl", "zelda0x181e", "ad-jones", "mtomato", "Fififionek", "jkvw3", "J Pystynen", 
+  "krstefan11", "green orange", "ZombieGirl1616", "z.chlebicki", "Lokki", "zeno", "Fulgur14", "uqblf", "santagonewrong", "CtrlAltDestroy", "Vee Nought", 
+  "archmageomega", "Wroclaw", "lunaduskjr", "loper", "Sharklilly", "Dasypus Daimon", "Mateusz", "guysige", "MrSprucetree", "Atia", "nerdyjoe", "florrat", 
+  "psychopanda121", "Sprite Guard", "Fluffiest Princess", "no stop", "Kieroshark", "juhdanad", "lllllllllwith10ls", "NattieGilgamesh", "chocokels", "oren", 
+  "sir289", "pringle", "Spicy", "Cheetahs", "xy2", "Heavpoot", "2jjy", "Hirgon", "martradams", "TravelDemon", "The Big Extent", "fones4jenke13", "ekisacik", 
+  "j0eymcgrath", "EatChangmyeong", "craus", "akei_arkay", "__________", "Ichigo Jam", "supernewton", "Westville", "Huja (chat off)", "Just A Witch", "Particles",
+  "The Horrendous Space Kablooie", "ddtizm", "amagikuser", "vkozulya", "gassa", "Factitious", "wonderfullizardofoz", "woofmao", "CandorVelexion", "Toricon", 
+  "Vectis99", "RobotNerd277", "jerrypoons", "MagmaMcFry", "unczane", "glass", "Wegener", "JeLomun", "kip", "Fooruman", "Prezombie", "ashley89", "bjobae", 
+  "MFErtre", "Roaringdragon2", "howilovepi", "Yulgash", "coper", "Tirear", "qoala _", "Tiegon", "Metroid26", "Sklorg", "Fumblestealth", "Toph", "jruderman",
+  "ray", "Deathroll", "Sinquetica", "mootmoot", "Noobinator", "Gunblob", "Snakebird Priestess", "brisingre", "Khashishi", "Berenthas", "Misery", "Altripp", "Aldrenean",
+  };
+
+map<cell*, int> knight_id;
+
+EX string knight_name(cell *c) {
+  if(!knight_id.count(c)) knight_id[c] = rand() % isize(knight_names);
+  return knight_names[knight_id[c]];
+  }
+
+EX void move_knight(cell *c1, cell *c2) {
+  LATE ( move_knight(c1, c2); )
+  if(knight_id.count(c1)) {
+    knight_id[c2] = knight_id[c1];
+    knight_id.erase(c1);
+    }
+  }
+
 EX void roundTableMessage(cell *c2) {
   if(!euclid && !cwt.at->master->alt) return;
   if(!euclid && !c2->master->alt) return;

@@ -888,8 +888,11 @@ EX void describeMouseover() {
     
     if(isReptile(c->wall))
       out += " [" + turnstring((unsigned char) c->wparam) + "]";
+      
+    if(c->monst == moKnight)
+      out += XLAT(", %1 the Knight", camelot::knight_name(c));
   
-    if(c->monst) {
+    else if(c->monst) {
       out += ", "; out += XLAT1(minf[c->monst].name); 
       if(hasHitpoints(c->monst))
         out += " (" + its(c->hitpoints)+" HP)";

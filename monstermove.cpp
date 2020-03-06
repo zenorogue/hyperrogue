@@ -84,6 +84,8 @@ EX void moveEffect(const movei& mi, eMonster m) {
     
   if(cf && isPrincess(m)) princess::move(mi);
   
+  if(cf && m == moKnight) camelot::move_knight(cf, ct);
+  
   if(cf && m == moTortoise) {
     changes.map_value(tortoise::emap, ct);
     changes.map_value(tortoise::emap, cf);
