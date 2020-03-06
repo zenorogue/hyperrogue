@@ -128,6 +128,15 @@ EX bool wrongMode(char flags) {
   return false;
   }
 
+EX set<string> got_achievements;
+
+EX void achievement_gain_once(const string& s) {
+  LATE(achievement_gain_once(s));
+  if(got_achievements.count(s)) return;
+  got_achievements.insert(s);
+  achievement_gain(s.c_str());
+  }
+
 EX void achievement_log(const char* s, char flags) {
 
 #ifdef PRINT_ACHIEVEMENTS

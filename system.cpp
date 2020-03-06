@@ -360,7 +360,7 @@ EX void initgame() {
     #if CAP_CRYSTAL
     crystal::used_compass_inside = false;
     #endif
-    got_survivalist = false;
+    got_achievements = {};
 #if CAP_INV
     if(inv::on) inv::init();
 #endif

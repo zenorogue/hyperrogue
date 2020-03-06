@@ -17,7 +17,7 @@ EX bool seenSevenMines = false;
 EX bool hauntedWarning;
 
 /** is the Survivalist achievement still valid? have we received it? */
-EX bool survivalist, got_survivalist;
+EX bool survivalist;
 
 EX void fail_survivalist() {
   changes.value_set(survivalist, false);
@@ -336,21 +336,17 @@ bool pcmove::after_move() {
   
   check_total_victory();
 
-  if(items[itWhirlpool] && cwt.at->land != laWhirlpool && !whirlpool::escaped) {
-    changes.value_set(whirlpool::escaped, true);
-    achievement_gain("WHIRL1");
-    }
+  if(items[itWhirlpool] && cwt.at->land != laWhirlpool)
+    achievement_gain_once("WHIRL1");
 
-  if(items[itLotus] >= 25 && !isHaunted(cwt.at->land) && survivalist && !got_survivalist) {
-    changes.value_set(got_survivalist, true);
-    achievement_gain("SURVIVAL");
-    }
+  if(items[itLotus] >= 25 && !isHaunted(cwt.at->land) && survivalist)
+    achievement_gain_once("SURVIVAL");
 
   if(seenSevenMines && cwt.at->land != laMinefield) {
     changes.value_set(seenSevenMines, false);
     achievement_gain("SEVENMINE");
     }
-  
+
   DEBB(DF_TURN, ("done"));
   return true;
   }
