@@ -18,7 +18,7 @@ EX const char* leadernames[NUMLEADER] = {
   "Score", "Diamonds", "Gold", "Spice", "Rubies", "Elixirs",
   "Shards100", "Totems", "Daisies", "Statues", "Feathers", "Sapphires",
   "Hyperstones", "Time to Win-71", "Turns to Win-71",
-  "Time to 10 Hyperstones-110", "Turns to 10 Hyperstones-110", "Orbs of Yendor",
+  "Time to 10 Hyperstones-113", "Turns to 10 Hyperstones-113", "Orbs of Yendor",
   "Fern Flowers", 
   "Royal Jellies", "Powerstones", "Silver", "Wine", "Emeralds", "Grimoires",
   "Holy Grails", "Red Gems", "Pirate Treasures",
@@ -75,8 +75,8 @@ EX const char* leadernames[NUMLEADER] = {
   "Meteorites", // 80
   "Racing Official Track", // 81
   "Gold Balls", // 82
-  "Lapis Lazuli", // 83
-  "Water Lily", // 84
+  "Lazurite Figurines", // 83
+  "Water Lilies", // 84
   };
 
 #define LB_STATISTICS 62
