@@ -492,6 +492,8 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     s = ivy_total() - s;
     if(vid.bubbles_special && s > bignum(1))
       drawBubble(c, 0xFFFF00, s.get_str(100), .5);
+    if(isize(clearing::imputed.digits) > 11)
+      achievement_gain_once("KILLMUTANT");      
     }
   
   if(m == moPrincess) {
