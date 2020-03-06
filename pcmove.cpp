@@ -216,10 +216,14 @@ struct pcmove {
 
   movei mi, mip;
   pcmove() : mi(nullptr, nullptr, 0), mip(nullptr, nullptr, 0) {}
+
+  bool vmsg();
   };
 #endif
 
 EX cell *global_pushto;
+
+bool pcmove::vmsg() {  changes.rollback(); return errormsgs && !checkonly; }
 
 EX bool movepcto(int d, int subdir IS(1), bool checkonly IS(false)) {
   pcmove pcm;
@@ -543,7 +547,7 @@ bool pcmove::actual_move() {
     }
 
   if(againstRose(cwt.at, c2) && !scentResistant()) {
-    addMessage("Those roses smell too nicely. You have to come towards them.");
+    if(vmsg()) addMessage("Those roses smell too nicely. You have to come towards them.");
     return false;
     }
   
@@ -568,7 +572,7 @@ bool pcmove::actual_move() {
     mip = determinePush(cwt, subdir, [c2] (cell *c) { return canPushThumperOn(c, c2, cwt.at); });
     if(mip.t) changes.ccell(mip.t);
     if(mip.d == NO_SPACE) {
-      addMessage(XLAT("No room to push %the1.", c2->wall));
+      if(vmsg()) addMessage(XLAT("No room to push %the1.", c2->wall));
       return false;
       }
     nextmovetype = lmMove;
@@ -579,7 +583,7 @@ bool pcmove::actual_move() {
     }
 
   if(c2->item == itHolyGrail && roundTableRadius(c2) < newRoundTableRadius()) {
-    addMessage(XLAT("That was not a challenge. Find a larger castle!"));
+    if(vmsg()) addMessage(XLAT("That was not a challenge. Find a larger castle!"));
     return false;
     }
 
@@ -613,21 +617,21 @@ bool pcmove::boat_move() {
   if(havePushConflict(cwt.at, checkonly)) return false;
 
   if(againstWind(c2, cwt.at)) {
-    addMessage(XLAT(airdist(c2) < 3 ? "The Air Elemental blows you away!" : "You cannot go against the wind!"));
+    if(vmsg()) addMessage(XLAT(airdist(c2) < 3 ? "The Air Elemental blows you away!" : "You cannot go against the wind!"));
     return false;
     }
 
   if(againstCurrent(c2, cwt.at) && !markOrb(itOrbWater)) {
     if(markOrb(itOrbFish) || markOrb(itOrbAether) || gravity_state)
       return after_escape();
-    addMessage(XLAT("You cannot go against the current!"));
+    if(vmsg()) addMessage(XLAT("You cannot go against the current!"));
     return false;
     }
 
   if(cwt.at->item == itOrbYendor) {        
     if(markOrb(itOrbFish) || markOrb(itOrbAether) || gravity_state) 
       return after_escape();
-    addMessage(XLAT("The Orb of Yendor is locked in with powerful magic."));
+    if(vmsg()) addMessage(XLAT("The Orb of Yendor is locked in with powerful magic."));
     return false;
     }
 
@@ -682,10 +686,12 @@ bool pcmove::after_escape() {
 
   if(c2->wall == waBigStatue && !c2->monst && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
     if(!canPushStatueOn(cwt.at)) {
-      if(isFire(cwt.at))
-        addMessage(XLAT("You have to escape first!"));
-      else
-        addMessage(XLAT("There is not enough space!"));
+      if(vmsg()) { 
+        if(isFire(cwt.at))
+          addMessage(XLAT("You have to escape first!"));
+        else
+          addMessage(XLAT("There is not enough space!"));
+        }
       return false;
       }
     
@@ -760,14 +766,14 @@ bool pcmove::after_escape() {
     return false;
     }
   else if(c2->monst == moKnight) {
-    camelot::knightFlavorMessage(c2);
+    if(vmsg()) camelot::knightFlavorMessage(c2);
     return false;
     }
   else if(c2->monst && (!isFriendly(c2) || c2->monst == moTameBomberbird || isMountable(c2->monst))
     && !(peace::on && !isMultitile(c2->monst) && !good_tortoise)) 
     return attack();
   else if(!passable(c2, cwt.at, P_USEBOAT | P_ISPLAYER | P_MIRROR | P_MONSTER)) {
-    tell_why_impassable();
+    if(vmsg()) tell_why_impassable();
     return false;
     }
   else if(fmsMove) 
@@ -841,15 +847,14 @@ bool pcmove::attack() {
   if(!ca) {
     if(forcedmovetype == fmAttack) {
       if(monstersnear(cwt.at,moPlayer,NULL,cwt.at)) {
-        changes.rollback();
-        if(errormsgs && !checkonly) wouldkill("%The1 would get you!");
+        if(vmsg()) wouldkill("%The1 would get you!");
         return false;
         }
       nextmovetype = lmSkip;
       addMessage(XLAT("You swing your sword at %the1.", c2->monst));
       return swing();
       }
-    tell_why_cannot_attack();
+    if(vmsg()) tell_why_cannot_attack();
     return false;
     }
     
@@ -923,9 +928,7 @@ bool pcmove::attack() {
   swordAttackStatic();
 
   if(monstersnear(cwt.at, moPlayer, nullptr, cwt.at)) {
-    changes.rollback();
-    if(errormsgs && !checkonly)
-      wouldkill("You would be killed by %the1!");
+    if(vmsg()) wouldkill("You would be killed by %the1!");
     return false;
     }
   if(checkonly) return true;
@@ -1031,8 +1034,7 @@ bool pcmove::perform_move_or_jump() {
   if(mi.t->monst == moFriendlyIvy) changes.ccell(mi.t), mi.t->monst = moNone;
   
   if(monstersnear(cwt.at, moPlayer, nullptr, c1)) {
-    changes.rollback();
-    if(errormsgs && !checkonly) wouldkill("%The1 would kill you there!");
+    if(vmsg()) wouldkill("%The1 would kill you there!");
     return false;
     }
   
@@ -1066,9 +1068,7 @@ bool pcmove::stay() {
   swordAttackStatic();
   nextmovetype = lmSkip;
   if(monstersnear(cwt.at, moPlayer, nullptr, cwt.at)) {
-    changes.rollback();
-    if(errormsgs && !checkonly) 
-      wouldkill("%The1 would get you!");
+    if(vmsg()) wouldkill("%The1 would get you!");
     return false;
     }
   if(checkonly) return true;
