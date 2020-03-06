@@ -756,7 +756,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
       for(int i=0; i<c2->type; i++)
         if(c2->move(i)->monst == moIvyWait && c2->move(i)->mondir == c2->c.spin(i))
           qty++;
-      if(c->move(c->mondir)->monst == moIvyRoot || qty) {
+      if(c2->monst == moIvyRoot || qty) {
         c->monst = moIvyNext;
         /* c->monst = moIvyHead;
         ivynext(c);
@@ -764,7 +764,8 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
         else c->monst = moNone; */
         }
       else {
-        c->move(c->mondir)->monst = moIvyHead;
+        changes.ccell(c2);
+        c2->monst = moIvyHead;
         }
       }
     }
