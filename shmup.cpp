@@ -1069,7 +1069,7 @@ void movePlayer(monster *m, int delta) {
           }
         }
       else if(isPushable(c2->wall) && !nonAdjacent(c2, m->base)) {
-        int sd1 = neighborId(m->base, c2);
+        int sd1 = neighborId(c2, m->base);
         int sd = m->base->c.spin(sd1);
         int subdir = 1;
         double bestd = 9999;
@@ -1081,7 +1081,7 @@ void movePlayer(monster *m, int delta) {
           if(d<bestd) bestd=d, subdir = di;
           }
         pushmonsters();
-        auto mip = determinePush(cellwalker(c2, sd1), subdir, [m, c2] (cell *c) { return canPushThumperOn(c, c2, m->base); });
+        auto mip = determinePush(cellwalker(c2, sd1)+wstep, subdir, [m, c2] (cell *c) { return canPushThumperOn(c, c2, m->base); });
         visibleFor(300);
         if(!mip.proper()) go = false;
         else pushThumper(mip);
