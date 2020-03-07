@@ -636,6 +636,9 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laEclectic && !(geometry == gNormal && BITRUNCATED))
     return pattern_not_implemented_weird;
   
+  if(l == laFrog && shmup::on)
+    return not_in_shmup;
+
   if(walls_not_implemented() && isCrossroads(l))
     return no_walls;
   
