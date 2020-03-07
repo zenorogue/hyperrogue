@@ -259,7 +259,8 @@ bool pcmove::movepcto() {
     lastmountpos[0] = cwt.at;
   
   if(againstRose(cwt.at, NULL) && d<0 && !scentResistant()) {
-    addMessage("You just cannot stand in place, those roses smell too nicely.");
+    if(vmsg())
+      addMessage("You just cannot stand in place, those roses smell too nicely.");
     return false;
     }
 
@@ -361,8 +362,7 @@ bool pcmove::swing() {
   mirror::act(origd, mirror::SPINMULTI | mirror::ATTACK);
 
   if(monstersnear(cwt.at, moPlayer, nullptr, cwt.at)) {
-    changes.rollback();
-    if(errormsgs && !checkonly)
+    if(vmsg())
       wouldkill("You would be killed by %the1!");          
     return false;
     }
