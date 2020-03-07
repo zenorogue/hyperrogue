@@ -365,7 +365,7 @@ EX bool hornStuns(cell *c) {
 
 /** changing this wall for whatever reason may cause the game to crash */
 EX bool do_not_touch_this_wall(cell *c) {
-  return among(c->wall, waMirrorWall, waBarrier, waRoundTable);
+  return among(c->wall, waMirrorWall, waBarrier, waRoundTable, waWarpGate);
   }
 
 EX bool is_paired(eMonster m) {
