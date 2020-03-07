@@ -447,7 +447,8 @@ struct changes_t {
     }
   
   template<class T> void value_set(T& what, T value) {
-    if(what == value || !on) return;
+    if(!on) { what = value; return; }
+    if(what == value) return;
     T old = what;
     rollbacks.push_back([&what, old] { what = old; });
     what = value;
