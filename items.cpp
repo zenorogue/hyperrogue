@@ -80,7 +80,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     }
 
   if(c2->land == laHunting && c2->item && !inv::activating) {
-    ambush::ambush(c2, c2->item);
+    ambush::ambush(c2, ambush::size(c2, c2->item));
     }
   
   if(isRevivalOrb(c2->item) && multi::revive_queue.size()) {

@@ -798,8 +798,8 @@ EX int size(cell *c, eItem what) {
   
   }
 
-EX void ambush(cell *c, eItem what) {
-  LATE ( ambush(c, what); )
+EX void ambush(cell *c, int dogs) {
+  LATE ( ambush(c, dogs); )
   int maxdist = gamerange();
   celllister cl(c, maxdist, 1000000, NULL);
   cell *c0 = c;
@@ -812,7 +812,6 @@ EX void ambush(cell *c, eItem what) {
     if(dh > d) c0 = cx, d = dh;
     }
   if(sphere) {
-    int dogs = size(c, what);  
     for(int i = cl.lst.size()-1; i>0 && dogs; i--) 
       if(!isPlayerOn(cl.lst[i]) && !cl.lst[i]->monst)
         cl.lst[i]->monst = moHunterDog, dogs--;
@@ -849,7 +848,6 @@ EX void ambush(cell *c, eItem what) {
       }
     }
   int N = isize(around);
-  int dogs = size(c, what);
   
   int gaps = dogs;
   int result = dogs0;
