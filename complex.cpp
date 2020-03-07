@@ -2876,6 +2876,8 @@ EX namespace sword {
     }
 
   void shuffle(int i) {
+    changes.value_keep(dir[i].angle);
+    changes.value_keep(dir[i].T);
     dir[i].angle = hrand(sword_angles);
     if(SWORDDIM == 3) dir[i].T = initial_matrix();
     }
