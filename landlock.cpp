@@ -711,7 +711,7 @@ EX land_validity_t& land_validity(eLand l) {
   
   #if CAP_ARCM
   if(arcm::in()) {
-    if(among(l, laPower, laZebra, laWineyard) && arcm::current.have_line) return lv::pattern_defined;
+    if(among(l, laPower, laZebra, laFrog, laWineyard) && arcm::current.have_line) return lv::pattern_defined;
     // horocycles not implemented
     if(isCyclic(l)) return not_implemented;
     }
@@ -1043,10 +1043,10 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laCrossroads4 && quotient)
     return some0;
 
-  if(l == laZebra && quotient && geometry != gZebraQuotient && !randomPatternsMode)
+  if(among(l, laZebra, laFrog) && quotient && geometry != gZebraQuotient && !randomPatternsMode)
     return pattern_incompatibility;
   
-  if(l == laZebra && !(stdeucx || (a4 && !BITRUNCATED) || a46 || (geometry == gZebraQuotient && old_daily_id > 106)) && !randomPatternsMode)
+  if(among(l, laZebra, laFrog) && !(stdeucx || (a4 && !BITRUNCATED) || a46 || (geometry == gZebraQuotient && old_daily_id > 106)) && !randomPatternsMode)
     return pattern_not_implemented_weird;
   
   if(l == laCrossroads3 && euclid)
@@ -1079,7 +1079,7 @@ EX land_validity_t& land_validity(eLand l) {
     return full_game;
   
   // highlight Zebra-based lands on Zebra Quotient!
-  if((l == laZebra || l == laWhirlwind || l == laStorms || l == laWarpCoast || l == laWarpSea) && geometry == gZebraQuotient)
+  if((among(l, laZebra, laWhirlwind, laStorms, laWarpCoast, laWarpSea, laFrog) && geometry == gZebraQuotient)
     return pattern_compatibility;
   
   // highlight FP-based lands on Field Quotient!
