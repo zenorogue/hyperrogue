@@ -943,7 +943,9 @@ EX bool chaos_forbidden(cell *c) {
 
 bool pcmove::perform_actual_move() {
   cell*& c2 = mi.t;
-  flipplayer = true; if(multi::players > 1) multi::flipped[multi::cpid] = true;
+  changes.at_commit([&] {
+    flipplayer = true; if(multi::players > 1) multi::flipped[multi::cpid] = true;
+    });
   if(c2->item && isAlch(c2)) {
     if(cwt.at->wall == waBoat)
       c2->wall = waNone;
