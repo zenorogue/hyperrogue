@@ -433,7 +433,6 @@ bignum bignum::randomized_div(int x) const {
     }
   while(isize(res.digits) && res.digits.back() == 0) res.digits.pop_back();
   if(rand() % x < carry) res += 1;
-  // println(hlog, get_str(100), " / ", x, " = ", res.get_str(100));
   return res;
   }
 
