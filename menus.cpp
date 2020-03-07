@@ -207,6 +207,7 @@ EX void showOverview() {
 // -- main menu --
 
 EX void showMainMenu() {
+  cancel(); cancel = noaction;
   gamescreen(2);
 
   getcstat = ' ';

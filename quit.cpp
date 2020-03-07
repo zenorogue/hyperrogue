@@ -36,9 +36,9 @@ string timeline() {
       XLAT("%1 turns (%2)", its(turncount), getgametime_s());
   }
 
-void noaction() {}
+EX void noaction() {}
 
-function<void()> cancel = noaction;
+EX function<void()> cancel = noaction;
 
 #if HDR
 struct hint {
