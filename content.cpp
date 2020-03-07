@@ -1329,7 +1329,7 @@ LAND( 0xC0C0FF, "Windy Plains", laWhirlwind, ZERO, itWindstone, RESERVED, windde
 
 LAND( 0x764e7c*2, "Rose Garden", laRose, ZERO, itRose, RESERVED, roselanddesc)
   NATIVE((m == moFalsePrincess || m == moRoseBeauty || m == moRoseLady) ? 2 : 0)
-  REQ( GOLD(R60) )
+  REQ( GOLD(R90) )
 
 LAND( 0xFFD580, "Warped Coast", laWarpCoast, ZERO | LF_WARPED | LF_COASTAL, itCoral, RESERVED, warplanddesc)
   NATIVE(m == moRatling ? 2 : m == moRatlingAvenger ? 1 : 0)
