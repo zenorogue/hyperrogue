@@ -57,6 +57,7 @@ struct dqi_poly : drawqueueitem {
   int flags;
   struct basic_textureinfo *tinf;
   hyperpoint intester;
+  float cache;
   void draw();
   void gldraw();
   void draw_back();
@@ -1737,6 +1738,7 @@ EX void quickqueue() {
 
 ld xintval(const hyperpoint& h) {
   if(sphereflipped()) return -h[2];
+  if(hyperbolic) return -h[2];
   return -intval(h, C0);
   }
 
@@ -1938,15 +1940,21 @@ EX void drawqueue() {
   
   sort_drawqueue();
   
+  if(GDIM == 2) 
   for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,
-    PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM}) 
-  if(GDIM == 2) sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
-    [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
-      auto ap1 = (dqi_poly&) *p1;
-      auto ap2 = (dqi_poly&) *p2;
-      return xintval(ap1.V * xpush0(.1))
-        < xintval(ap2.V * xpush0(.1));
-      });
+    PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM, PPR::ASHALLOW, PPR::BSHALLOW}) {
+    int pp = int(p);
+    for(int i=qp0[pp]; i<qp[pp]; i++) {
+      auto ap = (dqi_poly&) *ptds[i];
+      ap.cache = xintval(ap.V * xpush0(.1));
+      }
+    sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
+      [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
+        auto ap1 = (dqi_poly&) *p1;
+        auto ap2 = (dqi_poly&) *p2;
+        return ap1.cache < ap2.cache;
+        });
+    }
 
   for(PPR p: {PPR::TRANSPARENT_WALL})
     sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
