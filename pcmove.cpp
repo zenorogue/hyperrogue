@@ -1303,7 +1303,7 @@ EX int plague_kills;
 EX void spread_plague(cell *mf, cell *mt, int dir, eMonster who) {
   if(!(who == moPlayer ? markOrb(itOrbPlague) : !markEmpathy(itOrbPlague))) return;
   int kk = tkills();
-  forCellEx(mx, mt) if(celldistance(mx, mf) > celldistance(mx, mf->move(dir)) && celldistance(mx, mf) <= 4) {
+  forCellEx(mx, mt) if(celldistance(mx, mf) > celldistance(mx, mf->modmove(dir)) && celldistance(mx, mf) <= 4) {
     sideAttackAt(mf, dir, mx, who, itOrbPlague, mt);
     }
   plague_kills += tkills() - kk;
