@@ -1,0 +1,10 @@
+## {4,4}, pentomino 3 (L), solution 18
+e2.
+angleunit(pi/2)
+# the line below lets us specify internal angles
+angleofs(pi)
+unittile(1,1,2,1,2,2,2,1,1,2,2,3)
+# the Conway notation
+conway("(0 8)(1 7)(2 3)(4 6)(5)(9 11)(10)")
+sublines(1)
+

@@ -1,0 +1,9 @@
+## {4,4}, tetromino 2 (L), solution 3
+e2.
+angleunit(pi/2)
+# the line below lets us specify internal angles
+angleofs(pi)
+unittile(1,1,2,1,2,2,1,1,2,3)
+# the Conway notation
+conway("(0 1)(2 9)(3 8)(4 5)(6 7)")
+sublines(1)
