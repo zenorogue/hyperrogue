@@ -72,7 +72,7 @@
 #endif
 
 #ifndef CAP_ZLIB
-#define CAP_ZLIB (MAXMDIM >= 4)
+#define CAP_ZLIB 1
 #endif
 
 #define CAP_FRAMELIMIT (!ISMOBWEB)
