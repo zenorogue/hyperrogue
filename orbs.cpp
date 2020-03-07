@@ -553,7 +553,7 @@ int teleportAction() {
   else return 2;
   }
 
-void teleportTo(cell *dest) {
+EX void teleportTo(cell *dest) {
   playSound(dest, "other-teleport");
   if(dest->monst) {
     cwt.at->monst = dest->monst;
