@@ -62,7 +62,7 @@ void autoplay(int num_moves = 1000000000) {
     if(false && sameland(lland, cwt.at->land)) lcount++;
     else {
       lcount = 0; lland2 = lland; lland = cwt.at->land;
-      printf("%10dcc %5dt %5de %5d$ %5dK %5dgc %-30s H%d\n", cellcount, turncount, celldist(cwt.at), gold(), tkills(), gcount, dnameof(cwt.at->land), hrand(1000000));
+      printf("%10dcc %5dt %5de %5d$ %5dK %5dgc %-30s H%d\n", cellcount, turncount, celldist(cwt.at), gold(), tkills(), gcount, dnameof(cwt.at->land).c_str(), hrand(1000000));
       fflush(stdout);
 #ifndef NOSDL
       if(int(SDL_GetTicks()) > lastdraw + 3000) {
@@ -94,8 +94,15 @@ void autoplay(int num_moves = 1000000000) {
           goto again;
           }
       }
-    killMonster(c2, moNone);
-    jumpTo(c2, itNone);
+    cwt.spin = 0;
+    int d = neighborId(cwt.at, c2);
+    if(d >= 0 && movepcto(d, 1, false))
+      println(hlog, "OK");
+    else {    
+      println(hlog, "NOK");
+      killMonster(c2, moNone);
+      jumpTo(roKeyboard, c2, itNone, 0, moNone);
+      }
     if(false) if(turncount % 5000 == 0) {
       printf("cells travelled: %d\n", celldist(cwt.at));
       
