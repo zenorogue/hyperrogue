@@ -1079,7 +1079,7 @@ EX land_validity_t& land_validity(eLand l) {
     return full_game;
   
   // highlight Zebra-based lands on Zebra Quotient!
-  if((among(l, laZebra, laWhirlwind, laStorms, laWarpCoast, laWarpSea, laFrog) && geometry == gZebraQuotient)
+  if(among(l, laZebra, laWhirlwind, laStorms, laWarpCoast, laWarpSea, laFrog) && geometry == gZebraQuotient)
     return pattern_compatibility;
   
   // highlight FP-based lands on Field Quotient!
