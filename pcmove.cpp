@@ -885,6 +885,7 @@ bool pcmove::attack() {
   mirror::act(origd, mirror::SPINMULTI | mirror::ATTACK);
   
   int tk = tkills();
+  plague_kills = 0;
 
   if(good_tortoise) {
     changes.at_commit([c2] {
@@ -925,7 +926,7 @@ bool pcmove::attack() {
       }
     }
   
-  sideAttack(cwt.at, d, moPlayer, tkills() - tk);
+  sideAttack(cwt.at, d, moPlayer, tkills() - tk - plague_kills);
   lastmovetype = lmAttack; lastmove = c2;
   swordAttackStatic();
 
@@ -1303,11 +1304,9 @@ EX int plague_kills;
 
 EX void spread_plague(cell *mf, cell *mt, int dir, eMonster who) {
   if(!(who == moPlayer ? markOrb(itOrbPlague) : !markEmpathy(itOrbPlague))) return;
-  int kk = tkills();
   forCellEx(mx, mt) if(celldistance(mx, mf) > celldistance(mx, mf->modmove(dir)) && celldistance(mx, mf) <= 4) {
     sideAttackAt(mf, dir, mx, who, itOrbPlague, mt);
     }
-  plague_kills += tkills() - kk;
   }
 
 EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb, cell *pf) {
@@ -1329,7 +1328,11 @@ EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb, cell 
     changes.ccell(mt);
     plague_particles();
     if(who != moPlayer) markOrb(itOrbEmpathy);
+    int kk = 0;
+    if(orb == itOrbPlague) kk = tkills();
     if(attackMonster(mt, AF_NORMAL | AF_SIDE | AF_MSG, who) || isAnyIvy(m)) {
+      if(orb == itOrbPlague && kk < tkills())
+        plague_kills++;
       if(mt->monst != m) spread_plague(mf, mt, dir, who);
       produceGhost(mt, m, who);
       }
@@ -1378,7 +1381,7 @@ EX void sideAttack(cell *mf, int dir, eMonster who, int bonuskill) {
   sideAttack(mf, dir, who, 1, itOrbSide1);
   sideAttack(mf, dir, who, 2, itOrbSide2);
   sideAttack(mf, dir, who, 3, itOrbSide3);  
-  k -= tkills() - plague_kills;
+  k += plague_kills;
 
   if(who == moPlayer) {
     int kills = tkills() - k + bonuskill;
