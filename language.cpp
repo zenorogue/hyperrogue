@@ -10,10 +10,10 @@
 #include "hyper.h"
 namespace hr {
 
-EX const char *dnameof(eMonster m) { return minf[m].name; }
-EX const char *dnameof(eLand l) { return linf[l].name; }
-EX const char *dnameof(eWall w) { return winf[w].name; }
-EX const char *dnameof(eItem i) { return iinf[i].name; }
+EX const string dnameof(eMonster m) { return m >= 0 && m < motypes ? minf[m].name : format("[MONSTER %d]", m); }
+EX const string dnameof(eLand l) { return l >= 0 && l < landtypes ? linf[l].name : format("[LAND %d]", l); }
+EX const string dnameof(eWall w) { return w >= 0 && w < walltypes ? winf[w].name : format("[WALL %d]", w); }
+EX const string dnameof(eItem i) { return i >= 0 && i < ittypes ? iinf[i].name : format("[ITEM %d]", i); }
 
 #if HDR
 #define NUMLAN 7

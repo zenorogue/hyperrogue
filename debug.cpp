@@ -677,7 +677,7 @@ int read_cheat_args() {
     PHASE(3) cheat(); start_game(); if(WDIM == 3) { drawthemap(); bfs(); }
     shift(); eMonster m = readMonster(args());
     shift(); int q = argi();
-    printf("m = %s q = %d\n", dnameof(m), q);
+    printf("m = %s q = %d\n", dnameof(m).c_str(), q);
     restoreGolems(q, m, 7);
     }
   else if(argis("-MK")) {
