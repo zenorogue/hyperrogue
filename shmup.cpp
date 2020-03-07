@@ -295,7 +295,7 @@ EX void popmonsters() {
 EX void degradeDemons() {
   for(monster* m: nonvirtual) {
     if(m->type == moGreater) m->type = moLesser;
-    if(m->stk == moGreater) m->type = moLesser;
+    if(m->stk == moGreater) m->stk = moLesser;
     }
   }
 
