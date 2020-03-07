@@ -8534,3 +8534,10 @@ S(
   "Nie działa, gdy któreś z pól zawiera istotę wielopolową lub bariero-podobną ścianę.")
 #undef Orb
 
+S("digon", "dwukąt")
+S("triangle", "trójkąt")
+S("square", "kwadrat")
+S("pentagon", "pięciokąt")
+S("hexagon", "sześciokąt")
+S("heptagon", "siedmiokąt")
+S("octagon", "ośmiokąt")

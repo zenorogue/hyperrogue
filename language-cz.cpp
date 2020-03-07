@@ -8813,3 +8813,10 @@ S(
 
 #undef Orb
 
+S("digon", "dvojúhelník")
+S("triangle", "trojúhelník")
+S("square", "čtverec")
+S("pentagon", "pětiúhelník")
+S("hexagon", "šestiúhelník")
+S("heptagon", "sedmiúhelník")
+S("octagon", "osmiúhelník")
