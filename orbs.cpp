@@ -1119,6 +1119,7 @@ EX void apply_impact(cell *c) {
       if(!c1->monst) continue;
       if(isMultitile(c1->monst)) continue;
       addMessage(XLAT("You stun %the1!", c1->monst));
+      changes.ccell(c1);
       c1->stuntime = min(c1->stuntime + 5, 7);
       checkStunKill(c1);
       }
