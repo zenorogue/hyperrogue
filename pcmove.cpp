@@ -505,8 +505,8 @@ void apply_chaos() {
   gcell cob = *cb;
   copy_metadata(ca, &cob);
   copy_metadata(cb, &coa);
-  if(switch_lhu_in(ca->land)) ca->LHU = coa.LHU;
-  if(switch_lhu_in(cb->land)) cb->LHU = cob.LHU;
+  if(!switch_lhu_in(ca->land)) ca->LHU = coa.LHU;
+  if(!switch_lhu_in(cb->land)) cb->LHU = cob.LHU;
   int sa = ca->mondir - ((cwt+1)+wstep).spin;
   int sb = cb->mondir - ((cwt-1)+wstep).spin;
   if(!(isFriendly(ca) && markOrb(itOrbEmpathy)))
