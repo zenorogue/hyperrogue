@@ -3786,7 +3786,7 @@ Geometries:
 - improved Temple of Cthulhu in 535 and 435
 - fixed dual geometry sync destroyed when pressing Space
 
-2020-20-08 10:46 Update 11.2x:
+2020-02-08 10:46 Update 11.2x:
 - ASCII/3D mode; neon settings better with border changed
 - no timer ghosts in dual geometry puzzle
 - in dual geometry mode, when one side is Euclidean, only the other one rotates
@@ -3795,3 +3795,18 @@ Geometries:
 - while in cheatmode, centering lets you center in cardinal directions
 - fixed a crash when displaying inventory with OpenGL off
 - nicer side plain walls in binary tiling
+
+2020-03-07 04:42 Update 11.3:
+- new lands: Frog Park, Eclectic City, Wetland
+- new implementation of the checkmate rule
+- beefed up Orb of Empathy: it now also protects your allies from your indirect attacks
+- fixed several bugs when going too far into the Clearing; an achievement for destroying lots of leaves
+- on-activation effect for Orb of Digging in OSM
+- all chaos modes can now be used for achievements
+- special map generation when going too many steps from the starting point
+- named Knights
+- bugfix: worms now generate land if they wander through not-yet-generated 
+- bugfix: fixed a crash when not using OpenGL (again)
+- bugfix: fixed pointing at cells in Solv
+- bugfix: fixed native monster information for Ocean
+- bugfix: fixed allies handling Demons incorrectly
