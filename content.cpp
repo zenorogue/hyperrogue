@@ -1574,7 +1574,7 @@ MONSTER( 'T', 0xFF00FF, "World Turtle", moWorldTurtle, CF_FACE_SIDE | CF_STUNNAB
   )
 MONSTER( 'R', 0x4040C0, "Rusałka", moRusalka, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, GENDERSWITCH)
 ITEM( 'o', 0x808080, "Orb of Plague", itOrbPlague, IC_ORB, IF_EMPATHY, RESERVED, osOffensive, 
-  "When you kill an enemy, adjacent enemies all also attacked, as long as they are further away from you than from the originally attacked enemy. "
+  "When you kill an enemy, adjacent enemies are also attacked, as long as they are further away from you than from the originally attacked enemy. "
   "These enemies may in turn infect further enemies, up to distance of at most 4 from you."
   )
   NATIVE(among(m, moPike, moRusalka) ? 2 : 0)
@@ -1588,7 +1588,7 @@ LAND( 0x6FA136, "Frog Park",     laFrog, ZERO, itFrog, RESERVED,
 ITEM( '$', 0xFFD520, "Gold Ball", itFrog, IC_TREASURE, ZERO, RESERVED, osNone, 
   "A toy lost in the Frog Park by a spoiled child.")
 ITEM( 'o', 0x808080, "Orb of Impact", itOrbImpact, IC_ORB, ZERO, RESERVED, osUtility, 
-  "Whenever you use a ranged Orb to achieve an affect, all the single-tile monsters adjacent to the target "
+  "Whenever you use a ranged Orb to achieve an effect, all the single-tile monsters adjacent to the target "
   "location are stunned."
   )
 WALL( '#', 0x00C000, "shrub",  waShrub, WF_WALL | WF_HIGHWALL | WF_STDTREE | WF_CONE, RESERVED, 0, sgNone, 

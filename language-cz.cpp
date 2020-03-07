@@ -8496,7 +8496,7 @@ S("hyperbolic (3:2)", "hyperbolická (3:2)")
 S("Sol (3:2)", "Solv (3:2)")
 
 S("quotient spaces in ", "kvocientové prostory v: ")
-S("No quotient spaces avialable in the current tiling.",
+S("No quotient spaces available in the current tiling.",
   "V současném dláždění nejsou k dispozici žádné kvocientové prostory.")
 
 S("You are currently in a product space.", "Momentálně se nacházíš v produktovém prostoru.")
@@ -8725,7 +8725,7 @@ S("A malicious water being. When you kill him, he changes the tile you are stand
 
 Orb("Plague", "Moru")
 S(
-  "When you kill an enemy, adjacent enemies all also attacked, as long as they are further away from you than from the originally attacked enemy. "
+  "When you kill an enemy, adjacent enemies are also attacked, as long as they are further away from you than from the originally attacked enemy. "
   "These enemies may in turn infect further enemies, up to distance of at most 4 from you.",
   "Kdykoli zabiješ nepřítele, útok zasáhne i nepřátele, kteří s ním sousedí, pokud jsou od tebe dál než nepřítel, na kterého jsi původně zaútočil. "
   "Tito nepřátelé mohou nakazit další nepřátele, až do vzdálenosti maximálně 4 políčka od tebe.")
@@ -8746,7 +8746,7 @@ N("Gold Ball", GEN_O, "Zlatý míček", "Zlaté míčky", "Zlatý míček", "Zla
 S("A toy lost in the Frog Park by a spoiled child.", "Hračka, kterou nějaké rozmazlené dítě ztratilo v Žabím parku.")
 
 Orb("Impact", "Úderu")
-S("Whenever you use a ranged Orb to achieve an affect, all the single-tile monsters adjacent to the target "
+S("Whenever you use a ranged Orb to achieve an effect, all the single-tile monsters adjacent to the target "
   "location are stunned.",
   "Kdykoli použiješ efekt nějaké dálkové Sféry, všichni jednopolíčkoví netvoři sousedící s cílovou "
   "lokací budou omráčeni.")

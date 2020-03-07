@@ -8217,7 +8217,7 @@ S("hyperbolic (3:2)", "hiperboliczna (3:2)")
 S("Sol (3:2)", "Sol (3:2)")
 
 S("quotient spaces in ", "przestrzenie ilorazowe w: ")
-S("No quotient spaces avialable in the current tiling.",
+S("No quotient spaces available in the current tiling.",
   "Brak dostępnych przestrzeni ilorazowych zo becnym parkietażem.")
 
 S("You are currently in a product space.", "Jesteś w przestrzeni produktowej.")
@@ -8447,7 +8447,7 @@ S("A malicious water being. When you kill him, he changes the tile you are stand
 
 Orb("Plague", "Zarazy")
 S(
-  "When you kill an enemy, adjacent enemies all also attacked, as long as they are further away from you than from the originally attacked enemy. "
+  "When you kill an enemy, adjacent enemies are also attacked, as long as they are further away from you than from the originally attacked enemy. "
   "These enemies may in turn infect further enemies, up to distance of at most 4 from you.",
   "Kiedy zabijesz przeciwnika, sąsiedni przeciwnicy również są atakowani, o ile są dalej od Ciebie niż przeciwnik zaatakowany oryginalnie. "
   "Ci przeciwnicy mogą zarażać kolejnych, aż do odległości 4 od Ciebie.")
@@ -8468,7 +8468,7 @@ N("Gold Ball", GEN_F, "Złota Piłka", "Złote Piłki", "Złotą Piłkę", "Zło
 S("A toy lost in the Frog Park by a spoiled child.", "Zabawka zgubiona w Żabim Parku przez rozpuszczone dziecko.")
 
 Orb("Impact", "Uderzenia")
-S("Whenever you use a ranged Orb to achieve an affect, all the single-tile monsters adjacent to the target "
+S("Whenever you use a ranged Orb to achieve an effect, all the single-tile monsters adjacent to the target "
   "location are stunned.",
   "Za każdym razem, gdy używasz Sfery z efektem zdalnym, by uzyskać efekt, wszystkie jednopolowe stworzenia "
   "sąsiedujące z celem są ogłuszane.")

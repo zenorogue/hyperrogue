@@ -575,7 +575,7 @@ EX void select_quotient() {
       start_game();
       } */
     else
-      addMessage("No quotient spaces avialable in the current tiling.");
+      addMessage("No quotient spaces available in the current tiling.");
     }
   }
 
