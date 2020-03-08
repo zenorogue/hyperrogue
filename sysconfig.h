@@ -433,7 +433,7 @@ extern "C" {
 #endif
 
 #if CAP_THREAD
-#if WINDOWS
+#if OLD_MINGW
 #include "mingw.thread.h"
 #include "mingw.mutex.h"
 #include "mingw.condition_variable.h"
