@@ -1373,6 +1373,10 @@ EX void centerpc(ld aspd) {
   
   else {
     aspd *= euclid ? (2+3*R*R) : (1+R+(shmup::on?1:0));
+
+    if(R < aspd && gmatrix.count(cwt.at) && eqmatrix(gmatrix[cwt.at], current_display->which_copy)) {
+      current_display->which_copy = gmatrix[cwt.at];
+      }
     
     if(R < aspd) 
       shift_view_to(H);
