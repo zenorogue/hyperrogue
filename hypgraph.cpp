@@ -1367,7 +1367,8 @@ EX void centerpc(ld aspd) {
       } */
     spinEdge(aspd);
     fixmatrix(View);
-    current_display->which_copy = gmatrix[cwt.at];
+    if(gmatrix.count(cwt.at))
+      current_display->which_copy = gmatrix[cwt.at];
     }
   
   else {
