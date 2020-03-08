@@ -3810,3 +3810,20 @@ Geometries:
 - bugfix: fixed pointing at cells in Solv
 - bugfix: fixed native monster information for Ocean
 - bugfix: fixed allies handling Demons incorrectly
+
+2020-03-08 01:29 Bugfix update 11.3a:
+
+- fixed counting kills (for the purpose of Master of Melee achievement etc.)
+- fixed some typos
+- fixed Red Raiders killed incorrectly
+- Frog Park is now disabled in shmup
+- fixed Swords moving randomly when having Orb of the Frog
+- moved Rose Garden back to being unlocked at R90
+- fixed Orb of Impact stunning things while using the mouse
+- Warp Gates are now untouchable by Orb of Chaos
+- fixed land parameter switching by Orb of Chaos (e.g. in the gravity lands)
+- fixed pushing in shmups
+- optimized drawing side walls
+- main menu cancels visualizations enabled from the quit screen
+- fixed centering lost after Eternal Motion in shmup
+- fixed centering disabled after Orb of Safety in shmup
