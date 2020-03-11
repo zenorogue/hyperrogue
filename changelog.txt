@@ -3827,3 +3827,16 @@ Geometries:
 - main menu cancels visualizations enabled from the quit screen
 - fixed centering lost after Eternal Motion in shmup
 - fixed centering disabled after Orb of Safety in shmup
+
+29020-03-11 11:34 Bugfix update 11.3b:
+
+- Thumpers are now still considered when one cell outside the game range
+- fixed Wild West
+- fixed Orb of Chaos in Terracotta Army
+- you can no longer try to change the adjacency rule in infinite-order tilings
+- fixed Dragon kills counting as double
+- fixed a crash in some tilings when drawing plain sidewalls
+- clear memory error in wfc
+- fixed typo
+- fixed music in Frog Park
+- fixed a problem in irregular tiling (?)
