@@ -438,6 +438,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     c->stuntime = 1;
     cell *head = dragon::findhead(c);
     if(dragon::totalhp(head) == 0) dragon::kill(head, who);
+    return;
     }
   if(isWorm(c) && m != moTentacleGhost) return;
   
