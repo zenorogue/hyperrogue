@@ -8418,7 +8418,7 @@ N("shallow water", GEN_F, "głęboka woda", "głębokie wody", "głęboką wodę
 S("This body of water is calm and beautiful, but too deep to pass.",
   "Ta woda jest spokojna i piękna, ale zbyt głęboka, by przez nią przejść.")
 
-S("You remembler anglers from your hometown showing the impressive pikes they have caught. This one is much larger.",
+S("You remember anglers from your hometown showing the impressive pikes they have caught. This one is much larger.",
   "Pamiętasz, jak w Twoim rodzinnym mieście wędkarze chwalili się wielkością złowionych szczupaków. Ten szczupak "
   "jest dużo większy.")
 

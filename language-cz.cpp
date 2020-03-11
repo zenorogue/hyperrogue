@@ -8696,7 +8696,7 @@ N("shallow water", GEN_F, "hluboká voda", "hluboké vody", "hlubokou vodu", "hl
 S("This body of water is calm and beautiful, but too deep to pass.",
   "Tato voda je klidná a krásná, ale příliš hluboká, než abys skrz ni mohl projít.")
 
-S("You remembler anglers from your hometown showing the impressive pikes they have caught. This one is much larger.",
+S("You remember anglers from your hometown showing the impressive pikes they have caught. This one is much larger.",
   "Vzpomínáš si, jak rybáři ve tvém rodném městě ukazovali impresivní štiky, které chytili. Tahle je mnohem větší.")
 
 S("World Turtle", "Světoželva")

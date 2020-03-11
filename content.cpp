@@ -1563,7 +1563,7 @@ WALL( '=', 0x00C0C0, "shallow water", waShallow, ZERO, RESERVED, 0, sgWater,
 WALL( '=', 0x0000A0, "deep water", waDeepWater, WF_WATER, RESERVED, 0, sgWater, 
   "This body of water is calm and beautiful, but too deep to pass.")
 MONSTER( 'P', 0xC08080, "Pike", moPike, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, 
-  "You remembler anglers from your hometown showing the impressive pikes they have caught. This one is much larger."
+  "You remember anglers from your hometown showing the impressive pikes they have caught. This one is much larger."
   )
 MONSTER( 'T', 0xFF00FF, "World Turtle", moWorldTurtle, CF_FACE_SIDE | CF_STUNNABLE | CF_SLOWMOVER, RESERVED, moYeti, 
   "Have you reached the edge of the Poincaré disk? No, it must just be the edge of this world. "
