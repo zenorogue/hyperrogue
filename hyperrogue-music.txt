@@ -152,6 +152,14 @@
 [85] */music/hr-savino-ivory.ogg
 # Irradiated Fields
 [86] */music/hr-savino-palace.ogg
+# Space Rocks
+[87] */music/hr3-crossroads.ogg
+# Wetland
+[88] */music/hr3-graveyard.ogg
+# Frog Park
+[89] */music/hr3-laboratory.ogg
+# Eclectic City
+[90] */music/hr-savino-palace.ogg
 
 # None [00] (used when the window is out of focus)
 
