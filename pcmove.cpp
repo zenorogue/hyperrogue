@@ -490,7 +490,7 @@ struct changes_t {
 EX changes_t changes;
 
 bool switch_lhu_in(eLand l) {
-  return among(l, laBrownian, laMinefield);
+  return among(l, laBrownian, laMinefield, laTerracotta);
   }
 
 void apply_chaos() {
