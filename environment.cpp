@@ -147,7 +147,7 @@ EX void computePathdist(eMonster param) {
       pathqm.push_back(c); 
       continue; 
       }
-    if(c->cpdist > limit && !(c->land == laTrollheim && turncount < c->landparam)) continue;
+    if(c->cpdist > limit && !(c->land == laTrollheim && turncount < c->landparam) && c->wall != waThumperOn) continue;
     int d = c->pathdist;
     if(d == PINFD - 1) continue;
     for(int j=0; j<c->type; j++) {
@@ -434,6 +434,12 @@ EX void bfs() {
         }
       }
     }
+
+  for(int i=first7; i<isize(dcal); i++)
+    forCellEx(c2, dcal[i])
+      if(c2->wall == waThumperOn) {
+        targets.push_back(c2);
+        }
 
   while(recalcTide) {
     recalcTide = false;
