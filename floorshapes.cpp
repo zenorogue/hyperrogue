@@ -286,7 +286,8 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, ld
       }
     
     for(int k=0; k<SIDEPARS; k++) {
-      fsh.gpside[k].resize(c->type);
+      if(isize(fsh.gpside[k]) < c->type)
+        fsh.gpside[k].resize(c->type);
       for(int i=0; i<c->type; i++) {
         sizeto(fsh.gpside[k][i], id);
         bshape(fsh.gpside[k][i][id], PPR::LAKEWALL); 
@@ -442,7 +443,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
       hpcpush(mid_at(hpxy(0,0), cornerlist[i%cor], SHADMUL));
     
     for(int k=0; k<SIDEPARS; k++) {
-      fsh.gpside[k].resize(cor);
+      if(isize(fsh.gpside[k]) < cor)
+        fsh.gpside[k].resize(cor);
       for(int cid=0; cid<cor; cid++) {
         sizeto(fsh.gpside[k][cid], id);
         bshape(fsh.gpside[k][cid][id], fsh.prio);
@@ -594,7 +596,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
       for(int l=0; l<SIDEPARS; l++) {
         for(auto& li: fsh.side[l]) 
           bind_floor_texture(li, fsh.id);
-        fsh.gpside[l].resize(c->type);
+        if(isize(fsh.gpside[l]) < c->type)
+          fsh.gpside[l].resize(c->type);
         for(auto& gs: fsh.gpside[l]) {
           for(auto& li: gs) 
             bind_floor_texture(li, fsh.id);
@@ -611,7 +614,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         for(auto& li: fsh.levels[l]) bind_floor_texture(li, fsh.id);
         fsh.side[l] = shFullFloor.side[l];
         for(auto& li: fsh.side[l]) bind_floor_texture(li, fsh.id);
-        fsh.gpside[l].resize(c->type);
+        if(isize(fsh.gpside[l]) < c->type)
+          fsh.gpside[l].resize(c->type);
         for(int e=0; e<c->type; e++) {
           fsh.gpside[l][e] = shFullFloor.gpside[l][e];
           for(auto& li: fsh.gpside[l][e]) 
