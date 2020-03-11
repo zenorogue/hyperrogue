@@ -1118,7 +1118,8 @@ EX void loadsave() {
         if(score != 0 
           && !(land == laOcean && verless(ver, "8.0f"))
           && !(land == laTerracotta && verless(ver, "10.3e"))
-        ) tactic::record(l2, score, xc);
+          && !(land == laWildWest && verless(ver, "11.3b") && !verless(ver, "11.3")))
+          tactic::record(l2, score, xc);
         anticheat::nextid(tactic::id, ver, cert);
         }
       }

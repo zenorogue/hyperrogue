@@ -928,15 +928,28 @@ void psi_attack(cell *dest) {
   checkmoveO();
   }
 
-void gun_attack(cell *dest) {
+bool gun_attack(orbAction a, cell *dest) {
   playSound(dest, "orb-ranged");
   addMessage(XLAT("You shoot %the1!", dest->monst));
+  changes.ccell(dest);
   attackMonster(dest, AF_GUN, moNone);
+  apply_impact(dest);
+
+  if(monstersnearO(a, cwt.at, moPlayer, NULL, cwt.at)) {
+    changes.rollback();
+    return false;
+    } 
+  if(isCheck(a)) {
+    changes.rollback();
+    return true;
+    }
+  changes.commit();
   items[itRevolver] --;
   bfs();
   checkmoveO();
   createNoise(5);
   monstersTurn();
+  return true;
   }
 
 EX void checkStunKill(cell *dest) {
@@ -1341,14 +1354,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     for(cell *c1: gun_targets(cwt.at)) if(c1 == c) inrange = true;
     if(inrange) {
       changes.init(isCheck(a));
-      gun_attack(c), apply_impact(c);
-      if(monstersnearO(a, cwt.at, moPlayer, NULL, cwt.at)) {
-        changes.rollback();
-        }
-      else {
-        if(isCheck(a)) changes.rollback();
-        return itRevolver;
-        }
+      if(gun_attack(a, c)) return itRevolver;
       }
     }
   

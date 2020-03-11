@@ -299,20 +299,14 @@ bool pcmove::movepcto() {
       checkmove();
       return true;
       }
-
-    if(false && who_kills_me == moOutlaw && items[itRevolver]) {
+          
+    if(who_kills_me == moOutlaw && items[itRevolver] && !checkonly) {
       cell *c2 = cwt.cpeek();
-      for(int i=0; i<c2->type; i++) {
-        cell *c3 = c2->move(i);
-        if(c3) for(int i=0; i<c3->type; i++) {
-          cell *c4 = c3->move(i);
-          if(c4 && c4->monst == moOutlaw) {
-            eItem i = targetRangedOrb(c4, roCheck);
-            if(i == itRevolver) { 
-              targetRangedOrb(c4, roKeyboard);
-              return false;
-              }
-            }
+      forCellEx(c3, c2) forCellEx(c4, c3) if(c4->monst == moOutlaw) {
+        eItem i = targetRangedOrb(c4, roCheck);
+        if(i == itRevolver) { 
+          targetRangedOrb(c4, roKeyboard);
+          return true;
           }
         }
       }
