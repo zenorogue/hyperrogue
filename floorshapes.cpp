@@ -640,6 +640,7 @@ void geometry_information::generate_floorshapes() {
   heptagon modelh;
   cell model;
   model.master = &modelh;
+  modelh.c7 = &model;
   model.type = modelh.type = S7;
   
   auto mmerge1 = [&] (int i, int j) { model.c.setspin(i, j, false); modelh.c.setspin(i, j, false); };  
