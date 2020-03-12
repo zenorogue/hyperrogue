@@ -517,6 +517,12 @@ void apply_chaos() {
     princess::move(movei{cb, ca, JUMP});
   if(isPrincess(cb) && !isPrincess(ca))
     princess::move(movei{ca, cb, JUMP});
+  if(ca->monst == moTortoise || cb->monst == moTortoise) {
+    tortoise::move_adult(ca, cb);
+    }
+  if(ca->item == itBabyTortoise || cb->item == itBabyTortoise) {
+    tortoise::move_baby(ca, cb);
+    }
   }
   
 bool pcmove::actual_move() {

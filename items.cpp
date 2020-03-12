@@ -347,9 +347,8 @@ EX void moveItem1(cell *from, cell *to, bool activateYendor) {
       yendor::yi[i].actualKey = to;
     }
   
-  if(from->item == itBabyTortoise) {
-    tortoise::babymap[to] = tortoise::babymap[from];
-    tortoise::babymap.erase(from);
+  if(from->item == itBabyTortoise || to->item == itBabyTortoise) {
+    tortoise::move_baby(from, to);
     }  
 
   eItem i = to->item;

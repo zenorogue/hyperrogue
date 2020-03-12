@@ -2569,6 +2569,25 @@ EX namespace tortoise {
   EX string measure(int bits) {
     return "(" + its(progress(bits)) + "/" + its(tortoise::numbits) + ")";
     }    
+
+  template<class T> void swap_data(T& data, cell *c1, cell *c2) {
+    changes.map_value(data, c1);
+    changes.map_value(data, c2);
+    if(data.count(c1) && data.count(c2))
+      swap(data[c1], data[c2]);
+    else if(data.count(c1))
+      data[c2] = data[c1], data.erase(c1);
+    else if(data.count(c2))
+      data[c1] = data[c2], data.erase(c2);
+    }
+  
+  EX void move_baby(cell *c1, cell *c2) {
+    swap_data(babymap, c1, c2);
+    }
+
+  EX void move_adult(cell *c1, cell *c2) {
+    swap_data(emap, c1, c2);
+    }
 EX }
 
 EX namespace dragon {

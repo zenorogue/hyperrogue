@@ -87,20 +87,14 @@ EX void moveEffect(const movei& mi, eMonster m) {
   if(cf && m == moKnight) camelot::move_knight(cf, ct);
   
   if(cf && m == moTortoise) {
-    changes.map_value(tortoise::emap, ct);
-    changes.map_value(tortoise::emap, cf);
-    tortoise::emap[ct] = tortoise::getb(cf);
-    tortoise::emap.erase(cf);
+    tortoise::move_adult(cf, ct);
     }
   
   if(cf && ct->item == itBabyTortoise && !cf->item) {
-    changes.map_value(tortoise::babymap, ct);
-    changes.map_value(tortoise::babymap, cf);
     cf->item = itBabyTortoise;
     ct->item = itNone;
     animateMovement(mi.rev(), LAYER_BOAT);
-    tortoise::babymap[cf] = tortoise::babymap[ct];
-    tortoise::babymap.erase(ct);
+    tortoise::move_baby(cf, ct);
     }
   }
 
