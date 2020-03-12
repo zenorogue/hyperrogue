@@ -299,7 +299,7 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
   if(it == itOrbSafety)
     if(l == laCaves || l == laLivefjord || l == laRedRock || l == laCocytus || l == laHell ||
       l == laDesert || l == laAlchemist || l == laDeadCaves || l == laMinefield || isHaunted(l) ||
-      l == laDragon) 
+      l == laDragon || l == laWet) 
       return olrDangerous;
     
   if(it == itOrbMatter)
