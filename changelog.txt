@@ -3828,7 +3828,7 @@ Geometries:
 - fixed centering lost after Eternal Motion in shmup
 - fixed centering disabled after Orb of Safety in shmup
 
-29020-03-11 11:34 Bugfix update 11.3b:
+2020-03-11 11:34 Bugfix update 11.3b:
 
 - Thumpers are now still considered when one cell outside the game range
 - fixed Wild West
@@ -3840,3 +3840,10 @@ Geometries:
 - fixed typo
 - fixed music in Frog Park
 - fixed a problem in irregular tiling (?)
+
+2020-03-12 10:32 Bugfix update 11.3c:
+
+- Frogs are not generated until you are in Frog Park or have treasure
+- Frog Park longer can be generated adjacent to Land of Motion
+- Orb of Safety is now marked dangerous in Wetland
+- Orb of Chaos no longer despecializes Tortoises
