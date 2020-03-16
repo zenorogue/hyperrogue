@@ -687,6 +687,18 @@ void draw_ncee() {
     #endif
       (fmap[y][x] == '1' && show_mgrid && show_mapping) ? 0x404040FF : typecols[fmap[y][x] - '0'], PPR::LINE);
     }
+  
+  if(inhighQual) for(int x=0; x<X; x++) for(int y=0; y<Y; y++) {
+    curvepoint(h(x,y));
+    curvepoint(h(x,y+1));
+    curvepoint(h(x+1,y+1));
+    curvepoint(h(x+1,y));
+    queuecurve(0, 
+      typecols[fmap[y][x] - '0'], PPR::LINE);
+    }
+
+  quickqueue();
+  initquickqueue();
 
   nctinf.texture_id = rug::glbuf->renderedTexture;
   nctinf.tvertices.clear();
