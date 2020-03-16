@@ -31,7 +31,9 @@ EX bool canPickupItemWithMagnetism(cell *c, cell *from) {
 EX bool doPickupItemsWithMagnetism(cell *c) {
   cell *csaf = NULL;
   if(items[itOrbMagnetism])
-    forCellEx(c3, c) if(canPickupItemWithMagnetism(c3, c)) {
+    forCellEx(c3, c) if(canPickupItemWithMagnetism(c3, c)) {      
+      changes.ccell(c3);
+      changes.ccell(c);
       if(c3->item == itCompass) {
         if(!c->item)
           moveItem(c3, c, false);
@@ -52,8 +54,11 @@ EX void pickupMovedItems(cell *c) {
   if(isPlayerOn(c)) collectItem(c, true);  
   if(items[itOrbMagnetism])
     forCellEx(c2, c)
-      if(isPlayerOn(c2) && canPickupItemWithMagnetism(c, c2))
+      if(isPlayerOn(c2) && canPickupItemWithMagnetism(c, c2)) {
+        changes.ccell(c2);
+        changes.ccell(c);
         collectItem(c, true);
+        }
   }
 
 EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
