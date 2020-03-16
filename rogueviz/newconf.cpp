@@ -478,6 +478,112 @@ void pick_algorithm() {
   }
 #endif
 
+void ncee_work();
+
+bool animated_pattern = false;
+
+int redraws;
+
+void redraw_texture() {
+  View = Id;
+  if(arcm::in()) View = View * spin(45 * degree);
+  dynamicval<int> cgl(vid.cells_generated_limit, 9999999);
+  dynamicval<int> cdl(vid.cells_drawn_limit, 9999999);
+  dynamicval<bool> r(mousing, false);
+  rug::rugged = true;
+  rug::prepareTexture();
+  rug::rugged = false;
+  }
+
+template<class T> void chg_pattern(const T& f) {
+  tactic::on = true;
+  autocheat = true;
+  reptilecheat = true;
+  stop_game();
+  set_geometry(gNormal);
+  set_variation(eVariation::bitruncated);
+  f();
+  start_game();
+  clearMessages();
+  redraws = 1;
+  }
+
+void pick_pattern() {
+  cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
+  ncee_work();
+  dialog::init(XLAT("patterns"));
+
+  dialog::addItem("green football", 'g');
+  dialog::add_action([] { 
+    chg_pattern([] {
+      firstland = specialland = laCanvas;
+      patterns::whichCanvas = 'B';
+      });
+    });
+
+  dialog::addItem("Goldberg football", 'G');
+  dialog::add_action([] { 
+    chg_pattern([] {
+      gp::param.first = 9;
+      gp::param.second = 0;
+      set_variation(eVariation::goldberg);
+      firstland = specialland = laCanvas;
+      patterns::whichCanvas = 'F';
+      });
+    });
+
+  dialog::addItem("octagons", 'o');
+  dialog::add_action([] { 
+    chg_pattern([] {
+      set_geometry(gOctagon);
+      firstland = specialland = laCanvas;
+      patterns::whichCanvas = 'T';
+      });
+    });
+
+  dialog::addItem("windy plains", 'w');
+  dialog::add_action([] { 
+    chg_pattern([] {
+      firstland = specialland = laWhirlwind;
+      });
+    vid.smart_range_detail = 2.5;
+    });
+  
+  dialog::addItem("reptiles", 'r');
+  dialog::add_action([] { 
+    chg_pattern([] {
+      firstland = specialland = laReptile;
+      });
+    });
+  
+  dialog::addItem("zebra", 'z');
+  dialog::add_action([] { 
+    chg_pattern([] {
+      firstland = specialland = laZebra;
+      });
+    });
+  
+  dialog::addItem("colored squares", 's');
+  dialog::add_action([] { 
+    chg_pattern([] {
+      set_variation(eVariation::pure);
+      arcm::current.parse("4^5");
+      set_geometry(gArchimedean);
+      firstland = specialland = laCanvas;
+      patterns::whichCanvas = 'A';
+      });
+    });
+    
+  if(specialland == laWhirlwind) {
+    dialog::addBoolItem_action("animated", animated_pattern, 'a');
+    }
+  else dialog::addBreak(100);
+
+  dialog::addBreak(50);
+  dialog::addBack();
+  dialog::display();
+  }
+
 namespace ncee_scr {
   int X, Y, xc, yc, x0, y0, siz;
   }
@@ -496,7 +602,31 @@ void draw_ncee() {
   x0 = - int(siz * X / 2);
   y0 = - int(siz * Y / 2);
   
-  const ld period = 2.898149445355172 / M_PI * 2;
+  ld period;
+  
+  if(geometry == gNormal) {
+
+    auto cw = heptspin(cwt.at->master, 0);
+    cw = cw + wstep + 3 + wstep + 5 + wstep;
+    period = hdist0(tC0(currentmap->relative_matrix(cwt.at, cw.at->c7, C0)));
+  
+    if(specialland == laWhirlwind)
+      period *= 9;
+    if(specialland == laZebra)
+      period *= 6;
+    if(specialland == laReptile)
+      period *= 3;
+    }
+
+  else if(geometry == gOctagon) {
+    period = 2 * hdist0(tC0(currentmap->adj(cwt.at->master, 0)));
+    }
+
+  else {
+    period = 2 * hdist0(tC0(currentmap->adj(cwt.at, 0)));
+    }
+
+  period *= 2 / M_PI;
   
   dynamicval<eModel> pm(pmodel, mdPixel);
   dynamicval<eGeometry> pg(geometry, gEuclid);
@@ -635,8 +765,21 @@ void prepare_ncee_map() {
   rug::rugged = false;
   }
   
-void ncee() {
-  cmode = showmenu ? (sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X) : 0;
+void ncee_work() {
+
+  if(specialland != laWhirlwind)
+    animated_pattern = false;
+
+  if(redraws > 0) { 
+    redraws--; 
+    vid.consider_shader_projection = false;
+    redraw_texture(); 
+    }
+  if(animated_pattern) {
+    vid.consider_shader_projection = true;
+    redraw_texture();
+    }
+
   calcparam();
   
   if(ncee_map_prepared < 5) { cmode = sm::NORMAL; ncee_map_prepared++; if(ncee_map_prepared == 5) prepare_ncee_map(); gamescreen(2); return; }
@@ -649,6 +792,11 @@ void ncee() {
     iterate();
   
   draw_ncee();
+  }
+
+void ncee() {
+  cmode = showmenu ? (sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X) : 0;
+  ncee_work();
   using namespace ncee_scr;
   auto cd = current_display;
 
@@ -683,6 +831,7 @@ void ncee() {
     dialog::addItem("solving method", 'l');
     #endif
     dialog::addItem("shapes", 't');
+    dialog::addItem("patterns", 'p');
     dialog::addItem("hide the menu", 'v');
     dialog::addItem("stop", 'x');
     dialog::display();
@@ -709,6 +858,7 @@ void ncee() {
     #if CAP_NCONF
     if(uni == 'l') pushScreen(pick_algorithm);
     #endif
+    if(uni == 'p') pushScreen(pick_pattern);
     // if(uni == 'w') edit_whatever('f', 0);
     if(uni == 'd') doublemap();
     if(uni == 'm') viewmap = !viewmap;
@@ -759,6 +909,8 @@ extern "C" {
       fmap = gensquare(19, 7), reset_vxy();
     else if(i == 14)
       fmap = snake, reset_vxy();
+    else if(i == 15)
+      pushScreen(pick_pattern);
     }
   }
   
