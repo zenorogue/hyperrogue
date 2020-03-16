@@ -44,6 +44,23 @@ vector<string> gensquare(int X, int Y) {
   return res;
   }
 
+vector<string> genellipse(int D, ld alpha) {
+  vector<string> res(D+4, string (D+4, '0'));
+  ld R = (D-1.) / 2;
+  for(int y=0; y<D; y++)
+  for(int x=0; x<D; x++) {
+    ld ax = (x-R);
+    ld ay = (y-R);
+    ld bx = ax * cos(alpha) - ay * sin(alpha);
+    ld by = ay * cos(alpha) + ax * sin(alpha);
+    bx /= R;
+    by /= R;
+    res[y+2][x+2] = bx*bx+by*by*2 < 1 ? '1' : '0';
+    }
+  add_border(res, 2+R);
+  return res;
+  }
+
 vector<string> gent(int X, int Y) {
   vector<string> res(Y+X+4, string (Y+X+X+4, '0'));
   for(int y=0; y<Y; y++)
@@ -394,6 +411,8 @@ void conf_shapes() {
   dialog::add_action([] { fmap = gent(19, 7); reset_vxy(); popScreen(); });
   dialog::addItem("snake", 'd');
   dialog::add_action([] { fmap = snake; reset_vxy(); popScreen(); });
+  dialog::addItem("ellipse 50", 'e');
+  dialog::add_action([] { fmap = genellipse(50, hrand(180)); reset_vxy(); popScreen(); });
   dialog::addBreak(100);
   dialog::addBack();
   dialog::display();
