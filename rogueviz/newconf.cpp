@@ -737,6 +737,8 @@ void draw_ncee() {
   hyperpoint vmap[256][256];
 
   pair<int, int> mpt = {(mousex - xc - cd->xcenter - x0) / siz, (mousey - yc - cd->ycenter - y0) / siz};
+
+  queueline(h(0,0), h(0,-1), 0x1010101);
   
   const color_t gridcol = 0xFFFFFFFF;
   if(inHighQual) ;
@@ -762,8 +764,11 @@ void draw_ncee() {
   
   for(int x=0; x<=X; x++) queueline(h(x,0), h(x,Y), 0x80808080);
   for(int y=0; y<=Y; y++) queueline(h(0,y), h(X,y), 0x80808080);
-  quickqueue();
+  
+  queueline(h(0,0), h(0,-1), 0x1010101);
 
+  quickqueue();
+  glflush();
   }
 
 int ncee_map_prepared;
