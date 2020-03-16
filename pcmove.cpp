@@ -600,7 +600,6 @@ bool pcmove::actual_move() {
 
     if(havePushConflict(cwt.at, checkonly)) return false;
 
-    if(checkonly) { nextmovetype = lmMove; return true; }
     if(c2->item && !cwt.at->item) moveItem(c2, cwt.at, false), boatmove = true;
     placeWater(c2, cwt.at);
     moveBoat(mi);
