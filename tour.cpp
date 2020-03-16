@@ -697,7 +697,7 @@ EX slide default_slides[] = {
       if(mode == 4) {
         cell *c = cwt.at->move(0);
         c->item = itBabyTortoise;
-        tortoise::babymap[c] = getBits(c) ^ tortoise::getRandomBits();
+        tortoise::babymap[c] = tortoise::getb(c) ^ tortoise::getRandomBits();
         }
       GETNEXT {
         if(old == laDragon) return pick(laTortoise, laTortoise, laCrossroads);

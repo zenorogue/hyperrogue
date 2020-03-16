@@ -1802,7 +1802,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         if(quickfind(laTortoise)) chance += 150;
         if((tactic::on || euclid || peace::on) && hrand(4000) < chance && !safety) {
           c->item = itBabyTortoise;
-          tortoise::babymap[c] = getBits(c) ^ tortoise::getRandomBits();
+          tortoise::babymap[c] = tortoise::getb(c) ^ tortoise::getRandomBits();
           }
         }
       break;
