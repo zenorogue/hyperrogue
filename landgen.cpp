@@ -1794,6 +1794,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         if(hrand_monster(4000) < (peace::on ? 750 : 50 + items[itBabyTortoise]*2 + yendor::hardness() * 6) && !safety) {
           c->monst = moTortoise;
           c->hitpoints = 3;
+          auto val = tortoise::getb(c);
+          tortoise::emap[c] = val;
           }
         
         int chance = 50 + items[itBabyTortoise]*2;
