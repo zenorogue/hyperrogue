@@ -2,6 +2,8 @@
 // example commandline: -noplayer -rugtsize 4096 -smart 1 -canvas B -ncee
 // set CAP_NCONF (and change the path) if you have access to newconformist
 
+#include "../hyper.h"
+
 #ifndef CAP_NCONF
 #define CAP_NCONF 0
 #endif
