@@ -3847,3 +3847,13 @@ Geometries:
 - Frog Park longer can be generated adjacent to Land of Motion
 - Orb of Safety is now marked dangerous in Wetland
 - Orb of Chaos no longer despecializes Tortoises
+
+2020-03-16 21:47 Bugfix update 11.3d:
+- fixed the missing messages (and click sound) when interacting with Orb of Yendor
+- you no longer immediately die in LoEM in the Hardcore mode
+- fixed items disappearing with Orb of Winter and Orb of Magnetism
+- fixed Baby Tortoise colors in tour/PTM
+- fixed Tortoises losing their colors
+- fixed Orb of Chaos losing Hive colors
+- added the new lands to PTM
+- fixed game over not being detected correctly when using magical boats
