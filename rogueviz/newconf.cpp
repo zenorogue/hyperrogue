@@ -761,6 +761,26 @@ void draw_ncee() {
         }
       }
     }
+  else {
+    auto [x,y] = mpt;
+    vid.linewidth *= 3;
+    color_t col = 0;
+    if(x >= 0 && y >= 0 && x < X && y < Y) {
+      if(pointmode != 0) 
+        col = 0x00FF00FF;
+      else if(mousepressed)
+        col = paintmode == '1' ? 0xFF0000FF : 0xFFFF00FF;
+      else if(fmap[y][x] == '1')
+        col = 0xFF0000FF;
+      else if(fmap[y][x] == '4' || fmap[y][x] == '5')
+        col = 0xFFFF00FF;
+      }
+    queueline(h(x,y), h(x,y+1), col);
+    queueline(h(x,y), h(x+1,y), col);
+    queueline(h(x+1,y), h(x+1,y+1), col);
+    queueline(h(x,y+1), h(x+1,y+1), col);
+    vid.linewidth /= 3;
+    }
   
   for(int x=0; x<=X; x++) queueline(h(x,0), h(x,Y), 0x80808080);
   for(int y=0; y<=Y; y++) queueline(h(0,y), h(X,y), 0x80808080);
