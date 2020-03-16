@@ -494,6 +494,7 @@ EX namespace yendor {
   
       yi.push_back(nyi);
       }
+    dynamicval<bool> b(changes.on, false);
     addMessage(XLAT("You need to find the right Key to unlock this Orb of Yendor!"));
     if(yi[byi].actualKey)
       addMessage(XLAT("You feel that these directions are %1 turns old.", yi[byi].age.get_str(100)));
