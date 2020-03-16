@@ -1346,7 +1346,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = waChasm;
         else if(c->type == 6 && buildPrizeMirror(c, 1000))
           {}
-        else
+        else if(!reptilecheat)
           whirlwind::switchTreasure(c);
         }
       ONEMPTY {
