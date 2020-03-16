@@ -17,7 +17,7 @@
 
 using namespace std;
 
-string opts = "-DFHS -DLINUX -DWHATEVER -I/usr/include/SDL";
+string opts = "-DFHS -DLINUX -DWHATEVER -DMYMAKE -I/usr/include/SDL";
 
 string standard = " -std=c++11";
 
@@ -80,11 +80,11 @@ int main(int argc, char **argv) {
     else if(s.substr(0, 2) == "-l")
       linker += " " + s;
     else if(s == "-I") {
-      linker += " " + s + " " + argv[i+1];
+      opts += " " + s + " " + argv[i+1];
       i++;
       }
     else if(s.substr(0, 2) == "-I")
-      linker += " " + s;
+      opts += " " + s;
     else {
       if(s.size() >= 5 && s.substr(s.size() - 4) == ".cpp")
         s = s.substr(0, s.size() - 4);
