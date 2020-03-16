@@ -702,6 +702,7 @@ EX vector<landtacinfo> land_tac = {
   {laBrownian, 10, 1},
   {laVariant, 10, 1},
   {laWestWall, 10, 1},
+  {laWet, 10, 1}, {laFrog, 10, 1}, {laEclectic, 10, 1},
   };
 
 EX vector<eLand> randlands = {
