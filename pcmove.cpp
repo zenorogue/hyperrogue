@@ -174,7 +174,7 @@ EX bool checkNeedMove(bool checkonly, bool attacking) {
     addMessage(XLAT("Your Aether power has expired! RUN!"));
     }
   else return false;
-  if(hardcore) 
+  if(hardcore && !checkonly) 
     killHardcorePlayer(multi::cpid, flags);
   return true;
   }
