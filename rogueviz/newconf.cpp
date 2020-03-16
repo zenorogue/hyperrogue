@@ -23,6 +23,8 @@ namespace hr {
 
 namespace nconf2 {
 
+string rfname;
+
 enum class ptype : char { outside, inside, inside_left_up, inside_left_down, top, bottom, left_inf, right_inf, marked };
 
 void add_border(vector<string>& v, int cy) {
@@ -725,7 +727,8 @@ void draw_ncee() {
   pair<int, int> mpt = {(mousex - xc - cd->xcenter - x0) / siz, (mousey - yc - cd->ycenter - y0) / siz};
   
   const color_t gridcol = 0xFFFFFFFF;
-  if(show_mapping && show_mgrid && !in_visualization) {
+  if(inHighQual) ;
+  else if(show_mapping && show_mgrid && !in_visualization) {
     for(int x=0; x<X-1; x++) for(int y=0; y<Y-1; y++) 
       if(fmap[y][x] > '0')
         vmap[y][x] = hpxy(vx[y][x]/cscale * sca2 / 2, vy[y][x] * sca2 / 2+ map_ypos);
@@ -874,6 +877,26 @@ void ncee() {
       changepoint(x, y, true);
       }
     if(uni == 'v') showmenu = !showmenu;
+    if(uni == 'X') {
+      int D = 100;
+  
+      fmap = genellipse(D, -10 * degree), reset_vxy();
+      nconf_solve(); 
+      iterate();
+      iterate();      
+      iterate();
+      
+      int slow = 2;
+  
+      for(int i=-100; i<180*slow; i++) {
+        ticks = anims::period * i / 180 / slow;
+        redraw_texture();
+        fmap = genellipse(D, i * degree / slow);
+        println(hlog, "i = ", i);
+        for(int a=0; a<10; a++) iterate();
+        if(i >= 0) shot::take(format(rfname.c_str(), i), draw_ncee);
+        }
+      }
     };
   }
 
@@ -929,6 +952,10 @@ int niceArgs() {
     shift();
     nconf_view(argi());
     }
+  else if(argis("-ncvid")) {
+    shift(); rfname = args();
+    }
+    
   else return 1;
   return 0;
   }
