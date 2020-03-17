@@ -688,7 +688,7 @@ void draw_ncee() {
       (fmap[y][x] == '1' && show_mgrid && show_mapping) ? 0x404040FF : typecols[fmap[y][x] - '0'], PPR::LINE);
     }
   
-  if(inhighQual) for(int x=0; x<X; x++) for(int y=0; y<Y; y++) {
+  if(inHighQual) for(int x=0; x<X; x++) for(int y=0; y<Y; y++) {
     curvepoint(h(x,y));
     curvepoint(h(x,y+1));
     curvepoint(h(x+1,y+1));
@@ -762,7 +762,8 @@ void draw_ncee() {
       }
     }
   else {
-    auto [x,y] = mpt;
+    int x = mpt.first;
+    int y = mpt.second;
     vid.linewidth *= 3;
     color_t col = 0;
     if(x >= 0 && y >= 0 && x < X && y < Y) {
@@ -918,7 +919,9 @@ void ncee() {
       int D = 100;
   
       fmap = genellipse(D, -10 * degree), reset_vxy();
+      #if CAP_NCONF
       nconf_solve(); 
+      #endif
       iterate();
       iterate();      
       iterate();
