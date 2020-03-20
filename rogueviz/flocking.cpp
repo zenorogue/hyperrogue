@@ -16,6 +16,8 @@
 
 // press 'o' when flocking active to change the parameters.
 
+// (does not yet work in product geometries)
+
 #ifdef USE_THREADS
 #include <thread>
 int threads = 1;
@@ -99,7 +101,7 @@ namespace flocking {
       for(int i=0; i<isize(cl.lst); i++) {
         cell *c2 = cl.lst[i];
         transmatrix T = calc_relative_matrix(c2, c1, C0);
-        if(hdist0(tC0(T)) <= check_range) {
+        if(hypot_d(WDIM, inverse_exp(tC0(T), iTable, false)) <= check_range) {
           relmatrices[c1][c2] = T;
           forCellEx(c3, c2) cl.add(c3);
           }
@@ -110,7 +112,7 @@ namespace flocking {
     for(int i=0; i<N; i++) {
       vertexdata& vd = vdata[i];
       // set initial base and at to random cell and random position there 
-      createViz(i, v[hrand(isize(v))], spin(hrand(100)) * xpush(hrand(100) / 200.));
+      createViz(i, v[hrand(isize(v))], random_spin() * xpush(hrand(100) / 200.));
       vd.name = its(i+1);
       vd.cp = dftcolor;
       vd.cp.color2 = ((hrand(0x1000000) << 8) + 0xFF) | 0x808080FF;
@@ -133,6 +135,7 @@ namespace flocking {
     ld d = delta / 1000.;
     int N = isize(vdata);
     vector<transmatrix> pats(N);
+    vector<transmatrix> oris(N);
     vector<ld> vels(N);
     using shmup::monster;
     
@@ -146,11 +149,20 @@ namespace flocking {
     
     lines.clear();
 
-    parallelize(N, [&monsat, &d, &vels, &pats] (int a, int b) { for(int i=a; i<b; i++) {
+    parallelize(N, [&monsat, &d, &vels, &pats, &oris] (int a, int b) { for(int i=a; i<b; i++) {
       vertexdata& vd = vdata[i];
       auto m = vd.m;
       
-      transmatrix I = inverse(m->at);
+      transmatrix I, Rot;
+      
+      if(nonisotropic) {
+        I = gpushxto0(tC0(m->at));
+        Rot = inverse(I * m->at);
+        }
+      else {
+        I = inverse(m->at);
+        Rot = Id;
+        }
       
       // we do all the computations here in the frame of reference
       // where m is at (0,0,1) and its velocity is (m->vel,0,0)
@@ -175,11 +187,11 @@ namespace flocking {
           // at2 is like m2->at but relative to m->at
           
           // m2's position relative to m (tC0 means *(0,0,1))
-          hyperpoint ac = tC0(at2);
+          hyperpoint ac = inverse_exp(tC0(at2), iTable, false);
+          if(nonisotropic) ac = Rot * ac;
           
           // distance and azimuth to m2
-          ld di = hdist0(ac);
-          transmatrix alphaspin = rspintox(ac); // spin(-atan2(ac));
+          ld di = hypot_d(WDIM, ac);
 
           color_t col = 0;
             
@@ -187,22 +199,22 @@ namespace flocking {
             // we need to transfer m2's velocity vector to m's position
             // this is done by applying an isometry which sends m2 to m1
             // and maps the straight line on which m1 and m2 are to itself
-            align += gpushxto0(ac) * at2 * hpxyz(vel2, 0, 0);
+            
+            // note: in nonisotropic it is not clear whether we should
+            // use gpushxto0, or parallel transport along the shortest geodesic
+            align += gpushxto0(tC0(at2)) * at2 * hpxyz(vel2, 0, 0);
             align_count++;
             col |= 0xFF0040;
             }
           
           if(di < coh_range) {
-            // azimuthal equidistant projection of ac
-            // (thus the cohesion force pushes us towards the
-            // average of azimuthal equidistant projections)
-            coh += alphaspin * hpxyz(di, 0, 0);
+            coh += tangent_length(ac, di);
             coh_count++;
             col |= 0xFF40;
             }
           
           if(di < sep_range && di > 0) {
-            sep -= alphaspin * hpxyz(1 / di, 0, 0);
+            sep -= tangent_length(ac, 1 / di);
             sep_count++;
             col |= 0xFF000040;
             }
@@ -228,8 +240,13 @@ namespace flocking {
         vels[i] = max_speed;
         }      
       
-      pats[i] = m->at * alphaspin * xpush(vels[i] * d);
+      pats[i] = m->at;
+      oris[i] = m->ori;
+      rotate_object(pats[i], oris[i], alphaspin);
+      
+      apply_parallel_transport(pats[i], oris[i], xtangent(vels[i] * d));
       fixmatrix(pats[i]);
+
       } return 0; });
       
     for(int i=0; i<N; i++) {
@@ -237,6 +254,7 @@ namespace flocking {
       auto m = vd.m;
       // these two functions compute new base and at, based on pats[i]
       m->at = pats[i];
+      m->ori = oris[i];
       virtualRebase(m);
       m->vel = vels[i];
       }
