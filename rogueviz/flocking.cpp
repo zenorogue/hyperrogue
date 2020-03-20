@@ -348,6 +348,10 @@ namespace flocking {
       for(int i=0; i<N; i++) 
         vdata[i].cp.shade = shape;
       }
+    else if(argis("-flockspd")) {
+      shift(); ini_speed = argf();
+      shift(); max_speed = argf();
+      }
     #ifdef USE_THREADS
     else if(argis("-threads")) {
       shift(); threads = argi();
