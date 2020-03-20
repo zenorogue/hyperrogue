@@ -283,12 +283,16 @@ namespace flocking {
         // are taken), and normalize the result to project it back to the hyperboloid
         // (the same method is commonly used on the sphere AFAIK)
         hyperpoint h = Hypc;
+        bool ok = false;
         for(int i=0; i<N; i++) if(gmatrix.count(vdata[i].m->base)) {
+          ok = true;
           vdata[i].m->pat = gmatrix[vdata[i].m->base] * vdata[i].m->at;
           h += tC0(vdata[i].m->pat);
           }
-        h = normalize(h);
-        View = gpushxto0(h) * View;
+        if(ok) {
+          h = normalize(h);
+          View = inverse(actual_view_transform) * gpushxto0(h) * actual_view_transform * View;
+          }
         }
 
       optimizeview();
