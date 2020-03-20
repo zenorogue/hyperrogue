@@ -9,7 +9,7 @@
 // example parameters: 
 
 // flocking on a torus:
-//    -tpar 21,4 -geo 6 -flocking 10 -rvshape 3
+//    -t2 3 0 0 3 0 -geo 1 -flocking 10 -rvshape 3
 
 // flocking on the Zebra quotient:
 //    -geo 4 -flocking 10 -rvshape 3 -zoom .9
