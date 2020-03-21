@@ -126,5 +126,7 @@ namespace rogueviz {
 
   void close();
   extern bool showlabels;
+
+  void createViz(int id, cell *c, transmatrix at);
   }
 
