@@ -1140,7 +1140,9 @@ void geometry_information::make_floor_textures_here() {
   gv.emplace_back(+1, +1, 1, 1, 1);
   gv.emplace_back(-1, +1, 1, 1, 1);
   
+  #if CAP_RAY
   dynamicval<bool> riu(ray::in_use, false);
+  #endif
   
   if(1) {
     current_display->next_shader_flags = GF_VARCOLOR;

@@ -4563,7 +4563,7 @@ EX void drawthemap() {
   for(int m=0; m<motypes; m++) if(isPrincess(eMonster(m))) 
     minf[m].name = princessgender() ? "Princess" : "Prince";
   
-  #if MAXMDIM >= 4
+  #if CAP_RAY
   ray::in_use = ray::requested();
   #endif
   no_wall_rendering = ray::in_use;
