@@ -53,22 +53,9 @@ struct hrmap {
   static constexpr ld SPIN_NOT_AVAILABLE = 1e5;
   virtual ld spin_angle(cell *c, int d) { return SPIN_NOT_AVAILABLE; }
   
-  virtual transmatrix spin_to(cell *c, int d, ld bonus=0) {
-    ld sa = spin_angle(c, d);
-    if(sa != SPIN_NOT_AVAILABLE) { return spin(bonus + sa); }
-    transmatrix T = rspintox(tC0(adj(c, d)));
-    if(WDIM == 3) return T * cspin(2, 0, bonus);
-    return T * spin(bonus);
-    }
-
-  virtual transmatrix spin_from(cell *c, int d, ld bonus=0) {
-    ld sa = spin_angle(c, d);
-    if(sa != SPIN_NOT_AVAILABLE) { return spin(bonus - sa); }
-    transmatrix T = spintox(tC0(adj(c, d)));
-    if(WDIM == 3) return T * cspin(2, 0, bonus);
-    return T * spin(bonus);
-    }
-
+  virtual transmatrix spin_to(cell *c, int d, ld bonus=0);
+  virtual transmatrix spin_from(cell *c, int d, ld bonus=0);
+  
   virtual double spacedist(cell *c, int i) { return hdist0(tC0(adj(c, i))); }
   };
 
@@ -105,6 +92,22 @@ struct hrmap_hyperbolic : hrmap_standard {
   void virtualRebase(heptagon*& base, transmatrix& at) override;
   };
 #endif
+
+transmatrix hrmap::spin_to(cell *c, int d, ld bonus) {
+  ld sa = spin_angle(c, d);
+  if(sa != SPIN_NOT_AVAILABLE) { return spin(bonus + sa); }
+  transmatrix T = rspintox(tC0(adj(c, d)));
+  if(WDIM == 3) return T * cspin(2, 0, bonus);
+  return T * spin(bonus);
+  }
+
+transmatrix hrmap::spin_from(cell *c, int d, ld bonus) {
+  ld sa = spin_angle(c, d);
+  if(sa != SPIN_NOT_AVAILABLE) { return spin(bonus - sa); }
+  transmatrix T = spintox(tC0(adj(c, d)));
+  if(WDIM == 3) return T * cspin(2, 0, bonus);
+  return T * spin(bonus);
+  }
 
 transmatrix hrmap::adj(heptagon *h, int i) { return relative_matrix(h->cmove(i), h, C0); }
 
