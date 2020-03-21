@@ -1313,6 +1313,15 @@ int hk =
 
 EX purehookset on_geometry_change;
 
+EX int field_celldistance(cell *c1, cell *c2) {
+  if(geometry != gFieldQuotient) return DISTANCE_UNKNOWN;
+  if(GOLDBERG) return DISTANCE_UNKNOWN;
+  auto v1 =fieldpattern::fieldval(c1);
+  auto v2 =fieldpattern::fieldval(c2);
+  int d = currfp.getdist(v1, v2);
+  return d;
+  }
+
 EX }
 
 #define currfp fieldpattern::getcurrfp()

@@ -366,7 +366,7 @@ EX int zebra3(cell *c) {
 EX namespace fieldpattern {
 
 EX pair<int, bool> fieldval(cell *c) {
-  if(WDIM == 3) return make_pair(int(c->master->fieldval) * currfp.local_group, false);
+  if(WDIM == 3) return make_pair(currfp.inverses[int(c->master->fieldval) * currfp.local_group], false);
   else if(ctof(c)) return make_pair(int(c->master->fieldval), false);
   else return make_pair(btspin(c->master->fieldval, c->c.spin(0)), true);
   }

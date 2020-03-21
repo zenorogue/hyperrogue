@@ -1064,8 +1064,10 @@ EX int celldistance(cell *c1, cell *c2) {
   if(hybri) return hybrid::celldistance(c1, c2);
   
   #if CAP_FIELD
-  if(geometry == gFieldQuotient && !GOLDBERG)
-    return currfp.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
+  if(geometry == gFieldQuotient) {
+    int d = fieldpattern::field_celldistance(c1, c2);
+    if(d != DISTANCE_UNKNOWN) return d;
+    }
   #endif
   
   if(bounded) return bounded_celldistance(c1, c2);
