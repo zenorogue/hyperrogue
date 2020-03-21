@@ -277,7 +277,7 @@ void analyze() {
   }
 
 bool coloring_3d(cell *c, const transmatrix& V) {
-  if(WDIM == 3 && on) 
+  if(WDIM == 3 && on && kind == kKohonen) 
     queuepoly(face_the_player(V), cgi.shRing, darkena(c->landparam_color, 0, 0xFF));
   return false;
   }
