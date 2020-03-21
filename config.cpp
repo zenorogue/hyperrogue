@@ -2522,6 +2522,10 @@ EX int read_config_args() {
     PHASEFROM(2);
     shift(); neon_mode = argi();
     }
+  else if(argis("-precw")) {
+    PHASEFROM(2);
+    shift_arg_formula(precise_width);
+    }
   else if(argis("-char")) {
     auto& cs = vid.cs;
     shift(); cs.charid = argi();
