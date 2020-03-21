@@ -352,13 +352,13 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
   if(it == itOrbSword && l == laBurial)
     return olrAlways;
     
-  if(it == itOrbFish && !among(l, laOcean, laLivefjord, laWhirlpool, laCamelot, laTortoise, laWarpCoast, laWarpSea, laCocytus, laBrownian, laVariant))
+  if(it == itOrbFish && !among(l, laOcean, laLivefjord, laWhirlpool, laCamelot, laTortoise, laWarpCoast, laWarpSea, laCocytus, laBrownian, laVariant, laWet, laFrog))
     return olrUseless;
 
   if(it == itOrbDomination && l != laOcean && l != laRedRock && l != laDesert &&
     l != laRlyeh && l != laDragon)
     return olrUseless;
-  
+
   if(it == itOrbIllusion) return olrPrize3;
   
   if(l == laTortoise)
