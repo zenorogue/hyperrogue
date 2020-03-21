@@ -379,6 +379,9 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
   if(l == laDryForest)
     if(it == itOrbFire || it == itOrbLightning || it == itOrbLava)
       return olrDangerous;
+
+  if(l == laWet && among(it, itOrbDragon, itOrbLava, itOrbFire))  
+    return olrUseless;
     
   if(l == laDungeon) {
     if(it == itOrbSafety || it == itOrbFrog || 
