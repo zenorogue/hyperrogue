@@ -16,8 +16,6 @@
 
 // press 'o' when flocking active to change the parameters.
 
-// (does not yet work in product geometries)
-
 #ifdef USE_THREADS
 #include <thread>
 int threads = 1;
@@ -112,7 +110,10 @@ namespace flocking {
     for(int i=0; i<N; i++) {
       vertexdata& vd = vdata[i];
       // set initial base and at to random cell and random position there 
-      createViz(i, v[hrand(isize(v))], random_spin() * xpush(hrand(100) / 200.));
+      createViz(i, v[hrand(isize(v))], Id);
+      rotate_object(vd.m->pat, vd.m->ori, random_spin());
+      apply_parallel_transport(vd.m->pat, vd.m->ori, xtangent(hrand(100) / 200.));
+      
       vd.name = its(i+1);
       vd.cp = dftcolor;
       vd.cp.color2 = ((hrand(0x1000000) << 8) + 0xFF) | 0x808080FF;
@@ -154,14 +155,20 @@ namespace flocking {
       auto m = vd.m;
       
       transmatrix I, Rot;
+      bool use_rot = true;
       
-      if(nonisotropic) {
+      if(prod) {
+        I = inverse(m->at);
+        Rot = inverse(m->ori);
+        }
+      else if(nonisotropic) {
         I = gpushxto0(tC0(m->at));
         Rot = inverse(I * m->at);
         }
       else {
         I = inverse(m->at);
         Rot = Id;
+        use_rot = false;
         }
       
       // we do all the computations here in the frame of reference
@@ -188,7 +195,7 @@ namespace flocking {
           
           // m2's position relative to m (tC0 means *(0,0,1))
           hyperpoint ac = inverse_exp(tC0(at2), iTable, false);
-          if(nonisotropic) ac = Rot * ac;
+          if(use_rot) ac = Rot * ac;
           
           // distance and azimuth to m2
           ld di = hypot_d(WDIM, ac);
@@ -246,7 +253,14 @@ namespace flocking {
       
       apply_parallel_transport(pats[i], oris[i], xtangent(vels[i] * d));
       fixmatrix(pats[i]);
-
+      
+      /* RogueViz does not correctly rotate them */
+      if(prod) {
+        hyperpoint h = oris[i] * xtangent(1);
+        pats[i] = pats[i] * spin(-atan2(h[1], h[0]));
+        oris[i] = spin(+atan2(h[1], h[0])) * oris[i];
+        }
+      
       } return 0; });
       
     for(int i=0; i<N; i++) {
@@ -271,10 +285,23 @@ namespace flocking {
       if(follow == 1) {
         gmatrix.clear();
         vdata[0].m->pat = View * calc_relative_matrix(vdata[0].m->base, centerover, C0) * vdata[0].m->at;
-        View = spin(90 * degree) * inverse(vdata[0].m->pat) * View;
-        if(GDIM == 3) {
-          View = hr::cspin(1, 2, 90 * degree) * View;
-          }
+        View = inverse(vdata[0].m->pat) * View;
+        if(prod) {
+          NLP = inverse(vdata[0].m->ori);
+          
+          NLP = hr::cspin(1, 2, 90 * degree) * spin(90 * degree) * NLP;
+
+          if(NLP[0][2]) {
+            auto downspin = -atan2(NLP[0][2], NLP[1][2]);
+            NLP = spin(downspin) * NLP;
+            }
+          }          
+        else {
+          View =spin(90 * degree) * View;
+          if(GDIM == 3) {
+            View = hr::cspin(1, 2, 90 * degree) * View;
+            }
+          }        
         }
 
       if(follow == 2) {
@@ -283,14 +310,23 @@ namespace flocking {
         // are taken), and normalize the result to project it back to the hyperboloid
         // (the same method is commonly used on the sphere AFAIK)
         hyperpoint h = Hypc;
-        bool ok = false;
+        int cnt = 0;
+        ld lev = 0;
         for(int i=0; i<N; i++) if(gmatrix.count(vdata[i].m->base)) {
-          ok = true;
           vdata[i].m->pat = gmatrix[vdata[i].m->base] * vdata[i].m->at;
-          h += tC0(vdata[i].m->pat);
+          auto h1 = tC0(vdata[i].m->pat);
+          cnt++;          
+          if(prod) {
+            auto d1 = product_decompose(h1);
+            lev += d1.first;
+            h += d1.second;
+            }
+          else
+            h += h1;
           }
-        if(ok) {
-          h = normalize(h);
+        if(cnt) {
+          h = normalize_flat(h);
+          if(prod) h = zshift(h, lev / cnt);
           View = inverse(actual_view_transform) * gpushxto0(h) * actual_view_transform * View;
           }
         }
