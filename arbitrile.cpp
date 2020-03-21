@@ -72,7 +72,7 @@ template<class T> void verify_index(int index, const T& v) { if(!correct_index(i
 
 string unnamed = "unnamed";
 
-void load(const string& fname) {
+EX void load(const string& fname) {
   fhstream f(fname, "rt");
   string s;
   while(true) {
