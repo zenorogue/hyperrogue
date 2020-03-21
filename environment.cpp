@@ -71,6 +71,9 @@ EX vector<cell*> pathq;
 /** the number of big statues -- they increase monster generation */
 EX int statuecount;
 
+/** the number of slimes in Wetland -- they create ghosts */
+EX int wetslime;
+
 /** list of monsters to move (pathq restriced to monsters) */
 EX vector<cell*> pathqm;
 
@@ -206,6 +209,7 @@ EX void bfs() {
   worms.clear(); ivies.clear(); ghosts.clear(); golems.clear(); 
   tempmonsters.clear(); targets.clear(); 
   statuecount = 0;
+  wetslime = 0;
   hexsnakes.clear(); 
 
   hadwhat = havewhat;
@@ -336,6 +340,9 @@ EX void bfs() {
                 
         if(c2->wall == waBigStatue && c2->land != laTemple) 
           statuecount++;
+        
+        if(isAlch(c2->wall) && c2->land == laWet)
+          wetslime++;
           
         if(cellHalfvine(c2) && isWarped(c2)) {
           addMessage(XLAT("%The1 is destroyed!", c2->wall));

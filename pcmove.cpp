@@ -911,7 +911,7 @@ bool pcmove::attack() {
       if(m == moRusalka) {
         changes.ccell(cwt.at);
         if(cwt.at->wall == waNone) cwt.at->wall = waShallow;
-        else if(cwt.at->wall == waShallow) cwt.at->wall = waDeepWater;
+        else if(cwt.at->wall == waShallow || isAlch(cwt.at->wall)) cwt.at->wall = waDeepWater;
         }
       changes.ccell(c2);
       // salamanders are stunned for longer time when pushed into a wall
