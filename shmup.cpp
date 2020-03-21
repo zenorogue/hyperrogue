@@ -2940,7 +2940,7 @@ bool celldrawer::draw_shmup_monster() {
           drawPlayerEffects(view, c, true);
           if(WDIM == 3) {
             if(prod) {
-              hyperpoint h = m->ori * C0;
+              hyperpoint h = m->ori * C0; // ztangent(1)
               view = view * spin(-atan2(h[1], h[0]));
               }
             else {
@@ -3031,6 +3031,12 @@ bool celldrawer::draw_shmup_monster() {
         }
 
       default:
+        if(WDIM == 3) {
+          if(prod) {
+            hyperpoint h = m->ori * xtangent(1);
+            view = view * spin(-atan2(h[1], h[0]));
+            }
+          }
         if(m->inBoat) m->footphase = 0;
         color_t col = minf[m->type].color;
         if(m->type == moMimic) 
