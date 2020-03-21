@@ -448,8 +448,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
       for(int cid=0; cid<cor; cid++) {
         sizeto(fsh.gpside[k][cid], id);
         bshape(fsh.gpside[k][cid][id], fsh.prio);
-        hpcpush(iddspin(c, cid) * cornerlist[cid]);
-        hpcpush(iddspin(c, cid) * cornerlist[(cid+1)%cor]);
+        hpcpush(iddspin_side(c, cid) * cornerlist[cid]);
+        hpcpush(iddspin_side(c, cid) * cornerlist[(cid+1)%cor]);
         chasmifyPoly(dlow_table[k], dhi_table[k], k);
         }
       }

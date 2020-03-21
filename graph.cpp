@@ -3337,8 +3337,8 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, color_t
   else prio = PPR::REDWALL-2+4*(sidepar-SIDE_SLEV);
   
   dynamicval<bool> ncor(approx_nearcorner, true);
-  transmatrix V2 = V * ddspin(c, i);
- 
+  transmatrix V2 = V * ddspin_side(c, i);
+  
   if(NONSTDVAR || !standard_tiling()) {
     #if CAP_ARCM
     if(arcm::in() && !PURE)

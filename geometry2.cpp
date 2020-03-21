@@ -378,6 +378,26 @@ ld hrmap_standard::spin_angle(cell *c, int d) {
 EX transmatrix ddspin(cell *c, int d, ld bonus IS(0)) { return currentmap->spin_to(c, d, bonus); }
 EX transmatrix iddspin(cell *c, int d, ld bonus IS(0)) { return currentmap->spin_from(c, d, bonus); }
 EX ld cellgfxdist(cell *c, int d) { return currentmap->spacedist(c, d); }
+
+EX transmatrix ddspin_side(cell *c, int d, ld bonus IS(0)) { 
+  if(kite::in()) {
+    hyperpoint h1 = get_corner_position(c, gmod(d, c->type), 3);
+    hyperpoint h2 = get_corner_position(c, gmod(d+1, c->type) , 3);
+    hyperpoint hm = mid(h1, h2);
+    return rspintox(hm) * spin(bonus);
+    }
+  return currentmap->spin_to(c, d, bonus); 
+  }
+
+EX transmatrix iddspin_side(cell *c, int d, ld bonus IS(0)) {
+  if(kite::in()) {
+    hyperpoint h1 = get_corner_position(c, gmod(d, c->type), 3);
+    hyperpoint h2 = get_corner_position(c, gmod(d+1, c->type) , 3);
+    hyperpoint hm = mid(h1, h2);
+    return spintox(hm) * spin(bonus);
+    }
+  return currentmap->spin_from(c, d, bonus);
+  }
     
 double hrmap_standard::spacedist(cell *c, int i) {
   if(NONSTDVAR || WDIM == 3) return hrmap::spacedist(c, i);
