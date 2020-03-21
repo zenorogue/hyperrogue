@@ -1696,10 +1696,12 @@ EX void show3D() {
       });
     }
   
+  #if CAP_RAY
   if(GDIM == 3) {
     dialog::addItem(XLAT("configure raycasting"), 'A');
     dialog::add_action_push(ray::configure);
     }
+  #endif
   
   edit_levellines('L');
   
