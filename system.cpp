@@ -339,7 +339,6 @@ EX void initgame() {
   if(!safety) {
     usedSafety = false;
     timerstart = time(NULL); turncount = 0; rosewave = 0; rosephase = 0;
-    patterns::whichShape = 0;
     noiseuntil = 0;
     sagephase = 0; hardcoreAt = 0;
     timerstopped = false;
@@ -347,6 +346,7 @@ EX void initgame() {
     cheater = 0;
     if(autocheat) cheater = 1;
     if(!wfc::use_eclectic) cheater = 1;
+    if(!autocheat && !cheater && geometry == gNormal) patterns::whichShape = 0;
     hauntedWarning = false;
     if(!autocheat) {
       timerghost = true;
