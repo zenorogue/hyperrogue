@@ -159,7 +159,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     changes.map_value(babymap, c2);
     babymap.erase(c2);
     int bold = seekbits;
-    seekbits = bnew;
+    changes.value_set(tortoise::seekbits, bnew);
     changes.value_set(tortoise::last, seekbits);
     if(seek()) {
       cell *c = passable(cwt.at, NULL, 0) ? cwt.at : c2;
