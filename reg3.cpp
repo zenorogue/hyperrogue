@@ -20,6 +20,7 @@ namespace binary {
   hyperpoint deparabolic3(hyperpoint h);
   }
 
+/** regular three-dimensional tessellations */
 EX namespace reg3 {
 
   #if HDR

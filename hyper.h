@@ -21,18 +21,21 @@
 #include <stdarg.h>
 #include "hyper_function.h"
 
+/** the main namespace of HyperRogue */
 namespace hr {
 
+/** A helper structure that acts as a boolean which is always false. Helpful when disabling stuff with compiler flags. */
 struct always_false {
   operator bool() const { return false; };
   bool operator = (bool b) const { return b; };
   };
 
+/** placate GCC's overzealous -Wunused-result */
 template<class T>
 void ignore(T&&) {
-  // placate GCC's overzealous -Wunused-result
   }
 
+/** Is the value of first parameter equal to one of the remaining parameters? */
 template<class T, class V, class... U> bool among(T x, V y) { return x == y; }
 template<class T, class V, class... U> bool among(T x, V y, U... u) { return x==y || among(x,u...); }
 
