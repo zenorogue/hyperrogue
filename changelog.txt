@@ -3857,3 +3857,14 @@ Geometries:
 - fixed Orb of Chaos losing Hive colors
 - added the new lands to PTM
 - fixed game over not being detected correctly when using magical boats
+
+2020-03-22 12:01 Update 11.3e:
+- arbitrary tessellations: new files, utility functions for making Archimedean tilings, fixed a bug in some spherical tilings
+- fixed a precedence bug in expression parser
+- fixed a bug in loading maps from old versions
+- Galapagos: moving over other tortoises no longer clones them, and shading now can be disabled
+- fixed the Slime cheese in the Wetland
+- fixed distance computation in 3D fieldquotient
+- fire-related orbs are now useless in Wetland
+- Orb of the Fish is no longer useless in Wetland and Frog Park
+- some 3D models were created incorrectly in S2xE geometry (they were asymmetrical)
