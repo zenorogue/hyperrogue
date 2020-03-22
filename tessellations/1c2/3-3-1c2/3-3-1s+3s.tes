@@ -1,0 +1,11 @@
+## {3,3}, triangle 1S + triamond 1S
+s2.
+angleunit(2*pi/3)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(3,3))
+unittile(1,1,1)
+unittile(2,2,2)
+# the Conway notation
+conway("(0 0')(1 1')(2 2')")
+sublines(1)

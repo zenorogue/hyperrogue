@@ -1,0 +1,11 @@
+## {4,4}, tromino 1F + tromino 2A, solution 1
+e2.
+angleunit(pi/2)
+# the line below lets us specify internal angles
+angleofs(pi)
+unittile(1,1,2,2,1,1,2,2)
+unittile(1,1,2,1,2,1,1,3)
+unittile(1,1,2,2,1,1,2,2)
+# the Conway notation
+conway("(0)(6'')(1)(5'')(2 7)(4'' 7'')(3 6)(3'' 0'')(4 1')(2'' 6')(5 2')(1'' 5')(0' 3')(7' 4')")
+sublines(1)

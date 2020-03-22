@@ -1,0 +1,12 @@
+## {3,8}, triangle 1R + diamond 1A2, solution 1
+h2.
+angleunit(pi/4)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(3,8))
+unittile(1,1,1)
+unittile(1,2,1,2)
+unittile(1,1,1)
+# the Conway notation
+conway("(0 0')(2')(1 0')(2 0')(1' 0'')(1' 1'')(1' 2'')(3')")
+sublines(1)

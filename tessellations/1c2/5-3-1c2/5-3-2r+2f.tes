@@ -1,0 +1,11 @@
+## {5,3}, dipent 1R + dipent 1F
+s2.
+angleunit(2*pi/3)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(5,3))
+unittile(1,1,1,2,1,1,1,2)
+unittile(1,1,1,2,1,1,1,2)
+# the Conway notation
+conway("(0 0')(1 7')(2 5')(3 1')(4 0')(5 7')(6 5')(7 1')(2' 4')(3')(6')")
+sublines(1)

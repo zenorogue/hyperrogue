@@ -1,0 +1,12 @@
+## {3,7}, diamond 1R + diamond 1F + diamond 1F, solution 6
+h2.
+angleunit(2*pi/7)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(3,7))
+unittile(1,2,1,2)
+unittile(1,2,1,2)
+unittile(1,2,1,2)
+# the Conway notation
+conway("(0 0')(1 1'')(2 0')(3 1'')(1')(2')(3' 0'')(2'' 3'')")
+sublines(1)

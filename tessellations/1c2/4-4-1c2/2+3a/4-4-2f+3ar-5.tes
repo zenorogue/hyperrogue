@@ -1,0 +1,10 @@
+## {4,4}, domino 1F + tromino 1R, solution 5
+e2.
+angleunit(pi/2)
+# the line below lets us specify internal angles
+angleofs(pi)
+unittile(1,1,2,1,1,2)
+unittile(1,1,2,2,1,1,2,2)
+# the Conway notation
+conway("(0 3)[1 2](4 0')(5 1')(2' 3')(4 4')(5 5')(6' 7')")
+sublines(1)

@@ -1,0 +1,12 @@
+## {3,7}, triangle 1F + triangle 1F + triamond 1F, solution 28
+h2.
+angleunit(2*pi/7)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(3,7))
+unittile(1,1,1)
+unittile(1,1,1)
+unittile(1,2,2,1,3)
+# the Conway notation
+conway("(0 0')[1 1'](2 2'')[2' 0''](1'')(3'' 4'')")
+sublines(1)

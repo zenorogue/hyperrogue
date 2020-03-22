@@ -1,0 +1,11 @@
+## {3,5}, triangle 1R + triamond 1F, solution 3
+s2.
+angleunit(2*pi/5)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(3,5))
+unittile(1,1,1)
+unittile(1,2,2,1,3)
+# the Conway notation
+conway("(0 1')(1 1')(2 1')[0' 3'][2' 4']")
+sublines(1)

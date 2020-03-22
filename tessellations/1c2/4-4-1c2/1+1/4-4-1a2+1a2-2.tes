@@ -1,0 +1,9 @@
+## {4,4}, square 1A2 + square 1A2, solution 2
+e2.
+angleunit(pi/2)
+# the line below lets us specify internal angles
+angleofs(pi)
+unittile(1,1,1,1)
+unittile(1,1,1,1)
+# the Conway notation
+conway("(0 1)(2 0')(3 3')(1' 2')")

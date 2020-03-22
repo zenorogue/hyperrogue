@@ -1,0 +1,10 @@
+## {4,4}, square 1F + tromino 1F, solution 8
+e2.
+angleunit(pi/2)
+# the line below lets us specify internal angles
+angleofs(pi)
+unittile(1,1,1,1)
+unittile(1,1,2,2,1,1,2,2)
+# the Conway notation
+conway("[0][1](2 0')(3 5')[1'][2'][3'][4'](6' 7')")
+sublines(1)

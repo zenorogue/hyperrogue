@@ -1,0 +1,12 @@
+## {4,6}, square 1R4 + domino 1A1
+h2.
+angleunit(pi/3)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(4,6))
+unittile(1,1,1,1)
+unittile(1,1,2,1,1,2)
+unittile(1,1,1,1)
+# the Conway notation
+conway("(0 0')(1 0')(2 0')(3 0')(0'' 5')(3'' 5')(2'' 5')(1'' 5')(1' 4')(2' 3')")
+sublines(1)

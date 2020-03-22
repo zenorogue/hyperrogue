@@ -1,0 +1,10 @@
+## {3,6}, triangle 1A + diamond 1A1, solution 1
+e2.
+angleunit(pi/3)
+# the line below lets us specify internal angles
+angleofs(pi)
+unittile(1,1,1)
+unittile(1,2,1,2)
+# the Conway notation
+conway("(0)(1 0')(2 3')(1')(2')")
+sublines(1)

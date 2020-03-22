@@ -1,0 +1,11 @@
+## {4,6}, square 1A2 + square 1A2, solution 2
+h2.
+angleunit(pi/3)
+# the line below lets us specify internal angles
+angleofs(pi)
+distunit(edge(4,6))
+unittile(1,1,1,1)
+unittile(1,1,1,1)
+# the Conway notation
+conway("(0 3)(1 1')(2 2')(0' 3')")
+sublines(1)
