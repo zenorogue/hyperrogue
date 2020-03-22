@@ -404,9 +404,9 @@ struct hrmap_arbi : hrmap {
       }
 
     for(auto& p2: altmap[alt]) if(id_of(p2.first) == xt && hdist(tC0(p2.second), tC0(T)) < 1e-2) {
-      for(int oth=0; oth < p2.first->type; oth++)
-        if(hdist(p2.second * xsh.vertices[oth], T * xsh.vertices[e]) < 1e-2) {
-          ld err = hdist(p2.second * xsh.vertices[oth], T * xsh.vertices[e]);
+      for(int oth=0; oth < p2.first->type; oth++) {
+        ld err = hdist(p2.second * xsh.vertices[oth], T * xsh.vertices[e]);
+        if(err < 1e-2) {
           static ld max_err = 0;
           if(err > max_err) {
             println(hlog, "err = ", err);
@@ -415,6 +415,7 @@ struct hrmap_arbi : hrmap {
           h->c.connect(d, p2.first, oth%p2.first->type, m);
           return p2.first;
           }
+        }
       }
 
     auto h1 = tailored_alloc<heptagon> (current.shapes[xt].size());
