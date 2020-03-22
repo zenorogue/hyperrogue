@@ -212,16 +212,16 @@ cld exp_parser::parse(int prio) {
   else if(eat("frac(")) { res = parsepar(); res = res - floor(real(res)); }
   else if(eat("to01(")) { res = parsepar(); return atan(res) / ld(M_PI) + ld(0.5); }
   else if(eat("edge(")) {
-    cld a = rparse(0);
+    ld a = rparse(0);
     force_eat(",");
-    cld b = rparse(0);
+    ld b = rparse(0);
     force_eat(")");
-    return edge_of_triangle_with_angles(2*M_PI/real(a), M_PI/real(b), M_PI/real(b));
+    res = edge_of_triangle_with_angles(2*M_PI/a, M_PI/b, M_PI/b);
     }
   else if(eat("regradius(")) {
-    cld a = rparse(0);
+    ld a = rparse(0);
     force_eat(",");
-    cld b = rparse(0);
+    ld b = rparse(0);
     force_eat(")");
     res = edge_of_triangle_with_angles(M_PI/2, M_PI/a, M_PI/b);
     }
@@ -279,14 +279,14 @@ cld exp_parser::parse(int prio) {
     cld yes = parse(0);
     force_eat(",");
     cld no = parsepar();
-    return real(cond) > 0 ? yes : no;
+    res = real(cond) > 0 ? yes : no;
     }  
   else if(eat("wallif(")) {
     cld val0 = parse(0);
     force_eat(",");
     cld val1 = parsepar();
-    if(real(extra_params["p"]) >= 3.5) return val0;
-    else return val1;
+    if(real(extra_params["p"]) >= 3.5) res = val0;
+    else res = val1;
     }
   else if(eat("rgb(")) {     
     cld val0 = parse(0);
@@ -295,10 +295,10 @@ cld exp_parser::parse(int prio) {
     force_eat(",");
     cld val2 = parsepar();
     switch(int(real(extra_params["p"]) + .5)) {
-      case 1: return val0;
-      case 2: return val1;
-      case 3: return val2;
-      default: return 0;
+      case 1: res = val0; break;
+      case 2: res = val1; break;
+      case 3: res = val2; break;
+      default: res = 0;
       }
     }
   else if(eat("let(")) {
@@ -307,12 +307,12 @@ cld exp_parser::parse(int prio) {
     cld val = parse(0);
     force_eat(",");
     dynamicval<cld> d(extra_params[name], val);
-    return parsepar();
+    res = parsepar();
     }
   #if CAP_TEXTURE
   else if(eat("txp(")) {
     cld val = parsepar();
-    return texture::get_txp(real(val), imag(val), int(real(extra_params["p"]) + .5)-1);
+    res = texture::get_txp(real(val), imag(val), int(real(extra_params["p"]) + .5)-1);
     }
   #endif
   else if(next() == '(') at++, res = parsepar(); 
