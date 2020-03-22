@@ -620,6 +620,8 @@ EX void initConfig() {
   addsaver(racing::standard_centering, "race_standard_centering");
 #endif
 
+  addsaver(tortoise::shading_enabled, "tortoise_shading", true);
+
   addsaver(bounded_mine_percentage, "bounded_mine_percentage");
 
   addsaver(nisot::geodesic_movement, "solv_geodesic_movement", true);
@@ -2090,6 +2092,10 @@ EX void show_color_dialog() {
     dialog::add_action([] () { crystal::view_coordinates = true; pushScreen([] () { edit_color_table(crystal::coordcolors); });});
     }
   #endif
+
+  if(cwt.at->land == laTortoise) {
+    dialog::addBoolItem_action(XLAT("Galápagos shading"), tortoise::shading_enabled, 'T');
+    }
 
   dialog::addInfo(XLAT("colors of some game objects can be edited by clicking them."));
   

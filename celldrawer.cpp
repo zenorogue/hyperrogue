@@ -617,7 +617,7 @@ void celldrawer::tune_colors() {
 
   aura_color = fcol;
 
-  if(peace::on && peace::hint && c->land != laTortoise) {
+  if(peace::on && peace::hint && (c->land != laTortoise || !tortoise::shading_on())) {
     int d =
       (c->land == laCamelot || (c->land == laCaribbean && celldistAlt(c) <= 0) || (c->land == laPalace && celldistAlt(c))) ? celldistAlt(c):
       celldist(c);

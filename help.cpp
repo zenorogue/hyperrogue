@@ -1083,5 +1083,10 @@ EX void gotoHelpFor(eLand l) {
     listbeasts();
      }});
   else listbeasts();  
+  
+  if(l == laTortoise)
+    help_extensions.push_back(help_extension{'t', XLAT("Galápagos shading"), [] () {
+      tortoise::shading_enabled = !tortoise::shading_enabled;
+      }});
   }
 }

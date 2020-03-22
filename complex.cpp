@@ -2536,10 +2536,16 @@ EX namespace tortoise {
     else val = target;
     }
   
+  EX bool shading_enabled = true;
+  
+  EX bool shading_on() {
+    return shading_enabled && seek();
+    }
+  
   EX void updateVals(int delta) {
     int currbits = getBits(cwt.at);
     for(int i=0; i<numbits; i++)
-      update(seekval[i], seek() && !(peace::on && !peace::hint) ? getBit(seekbits, i) : .5, delta);
+      update(seekval[i], shading_on() ? getBit(seekbits, i) : .5, delta);
     for(int i=0; i<numbits; i++)
       update(currval[i], getBit(currbits, i), delta);
     }
