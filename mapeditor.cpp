@@ -150,22 +150,22 @@ namespace mapstream {
     #if CAP_ARCM
     if(geometry == gArchimedean) f.write(arcm::current.symbol);
     #endif
-    if(geometry == gNil && VERNUM_HEX >= 0xA80C) {
+    if(geometry == gNil) {
       f.write(S7);
       f.write(nilv::nilperiod);
       }
-    if(geometry == gArnoldCat && VERNUM_HEX >= 0xA80C) {
+    if(geometry == gArnoldCat) {
       f.write(asonov::period_xy);
       f.write(asonov::period_z);
       }
-    if(geometry == gProduct && VERNUM_HEX >= 0xA80C) {
+    if(geometry == gProduct) {
       f.write(product::csteps);
       f.write(product::cspin);
       }
-    if(hybri && VERNUM_HEX >= 0xA80C) {
+    if(hybri) {
       hybrid::in_underlying_geometry([&] { save_geometry(f); });
       }
-    if(bt::in() && VERNUM_HEX >= 0xA80C) 
+    if(bt::in()) 
       f.write(vid.binary_width);
     if(euc::in()) {
       f.write(euc::eu_input.user_axes);
@@ -212,7 +212,7 @@ namespace mapstream {
         auto& ge = fgeomextras[current_extra];
         auto& id = ge.current_prime_id;
         f.read(id);
-        if(VERNUM_HEX < 0xA80C) switch(ge.base) {
+        if(f.vernum < 0xA80C) switch(ge.base) {
           case gNormal: id++; break;
           case g45: id++; break;
           case g46: id+=2; break;
@@ -233,32 +233,32 @@ namespace mapstream {
         }
       }
     #endif
-    if(geometry == gNil && VERNUM_HEX >= 0xA80C) {
+    if(geometry == gNil && f.vernum >= 0xA80C) {
       f.read(S7);
       f.read(nilv::nilperiod);
       nilv::set_flags();
       }
-    if(geometry == gArnoldCat && VERNUM_HEX >= 0xA80C) {
+    if(geometry == gArnoldCat && f.vernum >= 0xA80C) {
       f.read(asonov::period_xy);
       f.read(asonov::period_z);
       asonov::set_flags();
       }
-    if(geometry == gProduct && VERNUM_HEX >= 0xA80C) {
+    if(geometry == gProduct && f.vernum >= 0xA80C) {
       f.read(product::csteps);
-      if(VERNUM_HEX >= 0xA80D) f.read(product::cspin);
+      if(f.vernum >= 0xA80D) f.read(product::cspin);
       }
-    if(hybri && VERNUM_HEX >= 0xA80C) {
+    if(hybri && f.vernum >= 0xA80C) {
       auto g = geometry;
       load_geometry(f);
       set_geometry(g);
       }
-    if(bt::in() && VERNUM_HEX >= 0xA80C) 
+    if(bt::in() && f.vernum >= 0xA80C) 
       f.read(vid.binary_width);
-    if(euc::in() && VERNUM_HEX >= 0xA80D) {
+    if(euc::in() && f.vernum >= 0xA80D) {
       f.read(euc::eu_input.user_axes);
       f.read(euc::eu_input.twisted);
       }
-    if(VERNUM_HEX >= 0xA810)
+    if(f.vernum >= 0xA810)
       f.read(mine_adjacency_rule);
     }
   
@@ -405,7 +405,7 @@ namespace mapstream {
       f.read(patterns::subpattern_flags);
       f.read(patterns::whichCanvas);
       f.read(patterns::displaycodes);
-      if(VERNUM_HEX >= 0xA816)
+      if(f.vernum >= 0xA816)
         f.read(canvas_default_wall);
       f.read(mapeditor::drawplayer);
       if(patterns::whichCanvas == 'f') f.read(patterns::color_formula);
