@@ -61,6 +61,16 @@ void shape::build_from_angles_edges() {
     at = at * xpush(edges[i]) * spin(angles[i]);
     }
   if(!eqmatrix(at, Id)) throw hr_parse_exception("polygon error");
+  if(sqhypot_d(3, ctr) < 1e-2) {
+    // this may happen for some spherical tilings
+    // try to move towards the center
+    println(hlog, "special case encountered");
+    for(int i=0; i<n; i++) {
+      ctr += at * xpush(edges[i]) * spin((angles[i]+M_PI)/2) * xpush0(.01);
+      at = at * xpush(edges[i]) * spin(angles[i]);
+      }
+    println(hlog, "ctr = ", ctr);
+    }
   ctr = normalize(ctr);
   for(auto& v: vertices) v = gpushxto0(ctr) * v;
   }
