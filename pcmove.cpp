@@ -401,12 +401,23 @@ EX void copy_metadata(cell *x, const gcell *y) {
 
 extern void playSound(cell *c, const string& fname, int vol);
 
+/** A structure to keep track of changes made during the player movement.
+ *  This is a singleton object, \link hr::changes \endlink.
+ */
+
 struct changes_t {
   vector<reaction_t> rollbacks;
   vector<reaction_t> commits;
   bool on;
   bool checking;
   
+  /**
+   * Start keeping track of changes, perform changes.
+   * init(false) if you intend to commit the changes (if successful), or 
+   * init(true) if you just want to check whether the move would be successful, 
+   * without performing it if it is.
+   */
+   
   void init(bool ch) {
     on = true; 
     ccell(cwt.at);
@@ -417,12 +428,20 @@ struct changes_t {
     checking = ch;
     }
 
+  /**
+   * Commit the changes. Should only be called after init(false).
+   */
+
   void commit() { 
     on = false; 
     for(auto& p: commits) p();
     rollbacks.clear();
     commits.clear();
     }
+
+  /**
+   * Rollback the changes. Should only be called after init(true).
+   */
 
   void rollback(int pos = 0) { 
     on = false;
@@ -434,12 +453,18 @@ struct changes_t {
     commits.clear();
     }
   
+  /**
+   * The changes to cell c will be rolled back when rollback() is called.
+   */
   void ccell(cell *c) {
     if(!on) return;
     gcell a = *c;
     rollbacks.push_back([c, a] { copy_metadata(c, &a); });
     }
   
+  /**
+   * Set the value of what to value. This change will be rolled back if necessary.
+   */
   template<class T> void value_set(T& what, T value) {
     if(!on) { what = value; return; }
     if(what == value) return;
@@ -448,17 +473,29 @@ struct changes_t {
     what = value;
     }
 
+  /**
+   * Add step to the value of what. This change will be rolled back if necessary.
+   */
+
   template<class T> void value_add(T& what, T step) {
     value_keep(what); what += step;
     }
 
   template<class T> void value_inc(T& what) { value_add(what, 1); }
 
+  /**
+   * Any change to the value of what will be rolled back if necessary.
+   */
+
   template<class T> void value_keep(T& what) {
     if(!on) return;
     T old = what;
     rollbacks.push_back([&what, old] { what = old; });
     }
+  
+  /**
+   * Like value_keep but for maps.
+   */
 
   template<class T, class U, class V> void map_value(map<T, U>& vmap, V& key) {
     if(vmap.count(key)) {
@@ -470,10 +507,18 @@ struct changes_t {
       }
     }
   
+  /**
+   * Perform the given action on commit. @see LATE
+   */
+   
   void at_commit(reaction_t act) {
     if(!on) act();
     else commits.emplace_back(act);
     }
+
+  /**
+   * Perform the given action on rollback.
+   */
 
   void at_rollback(reaction_t act) {
     if(on) rollbacks.emplace_back(act);
@@ -481,12 +526,23 @@ struct changes_t {
   };
 #endif
 
+/**
+ * The only instance of hr::changes_t
+ */
 EX changes_t changes;
 
+/**
+ * Auxiliary function for hr::apply_chaos(). Returns whether the cell attribute LHU 
+ * should be switched.
+ */
 bool switch_lhu_in(eLand l) {
   return among(l, laBrownian, laMinefield, laTerracotta, laHive);
   }
 
+/**
+ * Apply the Orb of Chaos. We assume that the player moves from cwt.peek, in
+ * in the direction given by cwt.spin.
+ */
 void apply_chaos() {
   cell *ca = (cwt+1).cpeek();
   cell *cb = (cwt-1).cpeek();
