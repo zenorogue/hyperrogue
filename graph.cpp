@@ -4376,7 +4376,7 @@ EX bool allowIncreasedSight() {
 #endif
   if(randomPatternsMode) return true;
   if(racing::on) return true;
-  if(quotient || !hyperbolic || arcm::in()) return true;
+  if(quotient || !hyperbolic || arcm::in() || arb::in()) return true;
   if(WDIM == 3) return true;
   return false;
   }
@@ -4388,7 +4388,7 @@ EX bool allowChangeRange() {
 #endif
   if(racing::on) return true;
   if(sightrange_bonus >= 0) return true;
-  if(arcm::in()) return true;
+  if(arcm::in() || arb::in()) return true;
   if(WDIM == 3) return true;
   return false;
   }
