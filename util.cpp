@@ -223,7 +223,55 @@ cld exp_parser::parse(int prio) {
     force_eat(",");
     cld b = rparse(0);
     force_eat(")");
-    return edge_of_triangle_with_angles(M_PI/2, M_PI/real(a), M_PI/real(b));
+    res = edge_of_triangle_with_angles(M_PI/2, M_PI/a, M_PI/b);
+    }
+  else if(eat("arcmedge(")) {
+    vector<int> vals;
+    vals.push_back(iparse(0));
+    while(true) {
+      skip_white();
+      if(eat(",")) vals.push_back(iparse(0));
+      else break;
+      }
+    force_eat(")");
+    arcm::archimedean_tiling test;
+    test.faces = vals;
+    test.compute_sum();
+    test.compute_geometry();
+    res = test.edgelength;
+    if(extra_params.count("distunit"))
+      res /= extra_params["distunit"];
+    }
+  else if(eat("regangle(")) {
+    ld edgelen = rparse(0);
+    if(extra_params.count("distunit")) {
+      println(hlog, "got edgelen = ", edgelen);
+      println(hlog, "distunit = ", real(extra_params["distunit"]));
+      edgelen = real(edgelen * extra_params["distunit"]); 
+      println(hlog, "got edgelen = ", edgelen);
+      }
+    
+    force_eat(",");
+    int edges = iparse(0);
+    force_eat(")");
+    ld alpha = M_PI / edges;
+    ld c = asin_auto(sin_auto(edgelen/2) / sin(alpha));
+    hyperpoint h = xpush(c) * spin(M_PI - 2*alpha) * xpush0(c);
+    res = 2 * atan2(h);
+    if(real(res) < 0) res = -res;
+    while(real(res) > 2 * M_PI) res -= 2 * M_PI;
+    if(real(res) > M_PI) res = 2 * M_PI - res;
+    res = M_PI - res;
+
+    if(extra_params.count("angleofs"))
+      res -= extra_params["angleofs"];
+
+    if(extra_params.count("angleunit"))
+      res /= extra_params["angleunit"];    
+    }
+  else if(eat("test(")) {
+    res = parsepar();
+    println(hlog, "res = ", make_pair(real(res), imag(res)));
     }
   else if(eat("ifp(")) {
     cld cond = parse(0);

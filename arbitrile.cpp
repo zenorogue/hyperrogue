@@ -107,6 +107,11 @@ EX void load(const string& fname) {
     ep.force_eat(")");
     };
   while(true) {
+
+    ep.extra_params["distunit"] = distunit;
+    ep.extra_params["angleunit"] = angleunit;
+    ep.extra_params["angleofs"] = angleofs;
+
     ep.skip_white();
     if(ep.next() == 0) break;
     if(ep.eat("#")) {

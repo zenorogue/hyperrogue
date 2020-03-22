@@ -42,6 +42,7 @@ struct archimedean_tiling {
   
   void make_match(int a, int i, int b, int j);
   void prepare();
+  void compute_sum();
   void compute_geometry();
   
   void parse();
@@ -135,10 +136,19 @@ void archimedean_tiling::make_match(int a, int i, int b, int j) {
 /** mostly to protect the user from entering too large numbers */
 const int MAX_EDGE_ARCM = FULL_EDGE;
 
-void archimedean_tiling::prepare() {
-
+void archimedean_tiling::compute_sum() {
+  N = isize(faces);
   euclidean_angle_sum = 0;
   for(int f: faces) euclidean_angle_sum += (f-2.) / f;
+
+  real_faces = 0, real_face_type = 0;
+  for(int i=0; i<N; i++) if(faces[i] > 2) real_faces++, real_face_type += faces[i];
+  real_face_type /= 2;
+  }
+
+void archimedean_tiling::prepare() {
+
+  compute_sum();
 
   for(int i: faces) if(i > MAX_EDGE_ARCM) {
     errormsg = XLAT("currently no more than %1 edges", its(MAX_EDGE_ARCM));
@@ -160,10 +170,6 @@ void archimedean_tiling::prepare() {
     errors++;
     return;
     }
-
-  real_faces = 0, real_face_type = 0;
-  for(int i=0; i<N; i++) if(faces[i] > 2) real_faces++, real_face_type += faces[i];
-  real_face_type /= 2;
 
   if(real_faces) {
     for(int i=1; i<isize(faces); i++) if(faces[i] == 2 && faces[i-1] == 2) {
@@ -189,7 +195,6 @@ void archimedean_tiling::prepare() {
 
   /* build the 'adjacent' table */
 
-  N = isize(faces);
   int M = 2 * N + 2;
   adjacent.clear();
   adjacent.resize(M);
