@@ -877,7 +877,7 @@ EX void describeMouseover() {
           "Trees in this forest can be chopped down. Big trees take two turns to chop down.";
       else 
         if(c->wall != waSea && c->wall != waPalace && c->wall != waDeadfloor)
-        if(!((c->wall == waCavefloor || c->wall == waCavewall) && (c->land == laEmerald && c->land == laCaves)))
+        if(!((c->wall == waCavefloor || c->wall == waCavewall) && (c->land == laEmerald || c->land == laCaves)))
         if(!((isAlch(c->wall) && c->land == laAlchemist)))
           help = bygen([c] () { gotoHelpFor(c->wall); });
       }
