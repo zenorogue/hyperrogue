@@ -421,6 +421,7 @@ extern "C" {
 #include <string>
 #include <map>
 #include <queue>
+#include <sstream>
 #include <stdexcept>
 #include <array>
 #include <set>
