@@ -224,7 +224,7 @@ EX namespace sn {
   EX hyperpoint table_to_azeq(hyperpoint x) {
     // Poincare to azimuthal equidistant  
     ld hr = sqhypot_d(3, x);
-    if(hr == 0) return point3(0,0,0);    
+    if(hr < 1e-5) return x * 2;
     if(hr >= 1) return x * 60;
     ld hz = (1 + hr) / (1 - hr);
     ld d = (hz+1) * acosh(hz) / sinh(acosh(hz));    
