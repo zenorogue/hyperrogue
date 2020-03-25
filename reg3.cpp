@@ -1566,8 +1566,8 @@ EX void construct_relations() {
   int last_i = -1;
   for(hyperpoint h: reg3::cellshape) {
     int i = 0, j = 0;
-    for(hyperpoint u: reg3::cellshape) if(hdist(h, full_X*u) < 1e-4) i++;
-    for(hyperpoint u: reg3::cellshape) if(hdist(h, full_R*u) < 1e-4) j++;
+    for(hyperpoint u: reg3::cellshape) if(hdist(h, full_X*u) < 5e-2) i++;
+    for(hyperpoint u: reg3::cellshape) if(hdist(h, full_R*u) < 5e-2) j++;
     if(last_i == -1) last_i = i;
     if(i != j || i != last_i) ok = false;
     }
