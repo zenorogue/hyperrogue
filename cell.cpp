@@ -39,7 +39,9 @@ struct hrmap {
   virtual struct transmatrix adj(cell *c, int i) { return adj(c->master, i); }
   virtual struct transmatrix adj(heptagon *h, int i);
   struct transmatrix iadj(cell *c, int i) { cell *c1 = c->cmove(i); return adj(c1, c->c.spin(i)); }
-  transmatrix iadj(heptagon *h, int d) { return adj(h->cmove(d), h->c.spin(d)); }
+  transmatrix iadj(heptagon *h, int d) { 
+    heptagon *h1 = h->cmove(d); return adj(h1, h->c.spin(d));
+    }
   virtual void draw() {
     printf("undrawable\n");
     }
