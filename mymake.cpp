@@ -30,7 +30,7 @@ string compiler =
 string linker = 
   "g++ -rdynamic -o hyper";
  
-string libs = " savepng-loc.o -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
+string libs = " savepng.o -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
 
 vector<string> modules;
 
@@ -56,7 +56,7 @@ bool file_exists(string fname) {
 int main(int argc, char **argv) {
   for(string fname: {"Makefile.loc", "Makefile.simple", "Makefile"})
     if(file_exists(fname))
-      system("make -f " + fname + " language-data.cpp autohdr.h savepng-loc.o");
+      system("make -f " + fname + " language-data.cpp autohdr.h savepng.o");
   for(int i=1; i<argc; i++) {
     string s = argv[i];
     if(s.substr(0, 2) == "-D") {
