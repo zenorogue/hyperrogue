@@ -1512,8 +1512,9 @@ EX void movecost(cell* from, cell *to, int phase) {
     }
   
 #if CAP_TOUR
-  if(from->land != to->land && tour::on && (phase & 2))
-    tour::checkGoodLand(to->land);
+  if(from->land != to->land && tour::on && (phase & 2)) {
+    changes.at_commit([to] { tour::checkGoodLand(to->land); });
+    }
 #endif
   
   if(to->land ==laCrossroads4 && !got_crossroads && !geometry && (phase & 2) && !cheater) {
