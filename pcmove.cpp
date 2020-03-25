@@ -553,16 +553,22 @@ void apply_chaos() {
   changes.ccell(cb);
   gcell coa = *ca;
   gcell cob = *cb;
+  if(ca->monst != cb->monst)
+    markOrb(itOrbChaos);
+  if(ca->wall != cb->wall)
+    markOrb(itOrbChaos);
+  if(ca->item != cb->item)
+    markOrb(itOrbChaos);
   copy_metadata(ca, &cob);
   copy_metadata(cb, &coa);
   if(!switch_lhu_in(ca->land)) ca->LHU = coa.LHU;
   if(!switch_lhu_in(cb->land)) cb->LHU = cob.LHU;
   int sa = ca->mondir - ((cwt+1)+wstep).spin;
   int sb = cb->mondir - ((cwt-1)+wstep).spin;
-  if(!(isFriendly(ca) && markOrb(itOrbEmpathy)))
-    ca->stuntime = min(ca->stuntime + 3, 15);
-  if(!(isFriendly(cb) && markOrb(itOrbEmpathy)))
-    cb->stuntime = min(cb->stuntime + 3, 15);
+  if(ca->monst && !(isFriendly(ca) && markOrb(itOrbEmpathy)))
+    ca->stuntime = min(ca->stuntime + 3, 15), markOrb(itOrbChaos);
+  if(cb->monst && !(isFriendly(cb) && markOrb(itOrbEmpathy)))
+    cb->stuntime = min(cb->stuntime + 3, 15), markOrb(itOrbChaos);
   ca->monmirror = !ca->monmirror;
   cb->monmirror = !cb->monmirror;
   if(ca->mondir < ca->type)
