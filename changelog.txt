@@ -3868,3 +3868,12 @@ Geometries:
 - fire-related orbs are now useless in Wetland
 - Orb of the Fish is no longer useless in Wetland and Frog Park
 - some 3D models were created incorrectly in S2xE geometry (they were asymmetrical)
+
+2020-03-25 13:51 Update 11.3f:
+- updated the number of lands given in a slide of the Guided Tour
+- fixed a serious bug (it caused crashes in Solv racing, but it could cause other issues too)
+- fixed two bugs in inverse_exp in Solv (one caused wobbling, other caused possible crashes)
+- fixed the interaction of Orb of Chaos and Orb of Time
+- fixed a crash in paracompact honeycombs
+- fixed a crash bug in {4,3,5}
+- fixed a (broken) help screen displayed when mousing over another land in the Guided Tour
