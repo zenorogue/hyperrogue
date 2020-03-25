@@ -5262,7 +5262,7 @@ S("Hyperbolic geometry has been discovered by the 19th century mathematicians wh
   "Wander further, and you should find Crossroads quickly -- "
   "the Great Walls are straight lines, and indeed, they work differently than in "
   "Euclidean. On the other side of Great Walls, you see other lands -- "
-  "there are about 50 lands in HyperRogue, based "
+  "there are about 60 lands in HyperRogue, based "
   "on different mechanics and aspects of hyperbolic geometry.",
   
   "Hyperbolickou geometrii objevili matematikové z 19. století, kteří "
@@ -5276,7 +5276,7 @@ S("Hyperbolic geometry has been discovered by the 19th century mathematicians wh
   "Půjdeš-li dál, měl bys rychle narazit na Křižovatku -- Velké zdi "
   "jsou přímky a skutečně fungují jinak než v eukleidovské geometrii. "
   "Na druhé straně Velkých zdí uvidíš jiné kraje -- HyperRogue obsahuje "
-  "zhruba 50 krajů založených na různých mechanikách a aspektech "
+  "zhruba 60 krajů založených na různých mechanikách a aspektech "
   "hyperbolické geometrie.")
 
 S("Running Dogs", "Běžící psi")

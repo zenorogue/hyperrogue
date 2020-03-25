@@ -503,7 +503,7 @@ EX slide default_slides[] = {
     "Wander further, and you should find Crossroads quickly -- "
     "the Great Walls are straight lines, and indeed, they work differently than in "
     "Euclidean. On the other side of Great Walls, you see other lands -- "
-    "there are about 50 lands in HyperRogue, based "
+    "there are about 60 lands in HyperRogue, based "
     "on different mechanics and aspects of hyperbolic geometry.",
     [] (presmode mode) {
       GETNEXT {
