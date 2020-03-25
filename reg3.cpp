@@ -417,8 +417,10 @@ EX namespace reg3 {
         set<int> plane_indices;
         for(auto cw: plane) plane_indices.insert(cw.at->master->fieldval);
 
+        int fN = isize(f->matrices);
+
         set<int> nwi;
-        for(int i=0; i<currfp_n(); i++) {
+        for(int i=0; i<fN; i++) {
           bool ok = true;
           for(auto o: plane_indices) {
             int j = f->gmul(i, o * f->local_group) / f->local_group;
@@ -444,7 +446,7 @@ EX namespace reg3 {
         int u = 0;
         for(int a=0; a<5; a++) {
           for(int o: plane_indices) {
-            int j = currfp_gmul(u, o * f->local_group) / f->local_group;
+            int j = f->gmul(u, o * f->local_group) / f->local_group;
             allcells()[j]->master->zebraval |= 2;
             }
           u = f->gmul(u, gpow);
