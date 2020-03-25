@@ -558,8 +558,8 @@ EX namespace sn {
     
     ld ix = h[0] >= 0. ? sn::x_to_ix(h[0]) : sn::x_to_ix(-h[0]);
     ld iy = h[1] >= 0. ? sn::x_to_ix(h[1]) : sn::x_to_ix(-h[1]);
-    ld iz = tanh(h[2]);
-    
+    ld iz = sn::z_to_iz(h[2]);
+
     if(h[2] < 0.) { iz = -iz; swap(ix, iy); }
     
     hyperpoint res = s.get(ix, iy, iz, lazy);
@@ -579,7 +579,7 @@ EX namespace sn {
     
     ld ix = h[0] >= 0. ? sn::x_to_ix(h[0]) : sn::x_to_ix(-h[0]);
     ld iy = h[1] >= 0. ? sn::x_to_ix(h[1]) : sn::x_to_ix(-h[1]);
-    ld iz = (tanh(h[2]/4)+1)/2;
+    ld iz = sn::z_to_iz(h[2]);
     
     hyperpoint res = s.get(ix, iy, iz, lazy);
   
