@@ -1057,7 +1057,8 @@ EX void setvideomode() {
   
 #if CAP_GL
   if(vid.usingGL) {
-    flags = SDL_OPENGL | SDL_HWSURFACE | SDL_GL_DOUBLEBUFFER;
+    flags = SDL_OPENGL | SDL_HWSURFACE;
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
     if(vsync_off) disable_vsync();
     if(vid.antialias & AA_MULTI) {
