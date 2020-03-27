@@ -518,7 +518,6 @@ EX void placeLocalOrbs(cell *c) {
     int ch = hrand(oi.lchance);
     if(ch == 1 && chaosmode && hrand(2) == 0 && items[treasureType(oi.l)] * landMultiplier(oi.l) >= (11+hrand(15)))
       ch = 0;
-    if(tactic::trailer && ch < 5) ch = 0;
     int tc = items[treasureType(oi.l)] * landMultiplier(oi.l);
     int tcmin = treasureForLocal();
     if(inv::on) {

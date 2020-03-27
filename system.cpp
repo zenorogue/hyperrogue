@@ -75,7 +75,6 @@ EX hookset<bool()> *hooks_welcome_message;
 /** Print the welcome message during the start of game. Depends on the current mode and other settings. */
 EX void welcomeMessage() {
   if(callhandlers(false, hooks_welcome_message)) return;
-  else if(tactic::trailer) return;
 #if CAP_TOUR
   else if(tour::on) return; // displayed by tour
 #endif
@@ -137,10 +136,6 @@ EX void welcomeMessage() {
   addMessage(XLAT("Press F1 or right-click things for help."));
 #endif
   }
-
-int trailer_cash0 = 5;
-int trailer_cash1 = 15;
-bool trailer_safety = true;
 
 /** These hooks are called at the start of initgame. */
 EX hookset<void()> *hooks_initgame;
@@ -231,9 +226,6 @@ EX void initgame() {
     if(hiitemsMax(itWine) >= 25) items[itWine] = min(hiitemsMax(itWine), 50);
     }
   
-  if(tactic::on && tactic::trailer)
-    items[treasureType(firstland)] = trailer_cash0;
-
   yendor::lastchallenge = yendor::challenge;
   
   if(shmup::on) shmup::init();
@@ -273,9 +265,7 @@ EX void initgame() {
   // extern int sightrange; sightrange = 9;
   // cwt.at->land = laHell; items[itHell] = 10;
   for(int i=BARLEV; i>=7 - getDistLimit() - genrange_bonus; i--) {
-    if(tactic::trailer && cwt.at->land != laClearing) safety = trailer_safety;
     setdist(cwt.at, i, NULL);
-    if(tactic::trailer) safety = false;
 
     currentmap->verify();
     }
@@ -309,9 +299,6 @@ EX void initgame() {
     multi::whereto[i].d = MD_UNDECIDED;
     }
     
-  if(tactic::on && tactic::trailer)
-    items[treasureType(firstland)] = trailer_cash1;
-  
   yendor::init(3);
   peace::simon::init();
   
@@ -1037,8 +1024,7 @@ EX void saveStats(bool emergency IS(false)) {
   
 #if ISMOBILE==0
   DEBB(DF_INIT, ("Game statistics saved to ", scorefile));
-  if(!tactic::trailer)
-    addMessage(XLAT("Game statistics saved to %1", scorefile));
+  addMessage(XLAT("Game statistics saved to %1", scorefile));
 #endif
   fclose(f);
   }

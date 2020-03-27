@@ -1359,7 +1359,7 @@ EX int wallchance(cell *c, bool deepOcean) {
     l == laCrossroads4 ? (weirdhyperbolic ? 5000 : 0) :
     (l == laMirror && !yendor::generating) ? 6000 :
     l == laTerracotta ? 250 :
-    (tactic::on && !tactic::trailer) ? 0 :
+    tactic::on ? 0 :
     racing::on ? 0 :
     l == laCaribbean ? 500 :
     (l == laWarpSea || l == laWarpCoast) ? 500 :

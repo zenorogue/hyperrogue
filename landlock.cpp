@@ -154,7 +154,7 @@ EX void countHyperstoneQuest(int& i1, int& i2) {
 
 EX bool hyperstonesUnlocked() {
   int i1, i2;
-  if(tactic::on && isCrossroads(specialland) && !tactic::trailer) return true;
+  if(tactic::on && isCrossroads(specialland)) return true;
   countHyperstoneQuest(i1, i2);
   return i1 == i2;
   }
@@ -331,7 +331,7 @@ EX eLand getNewLand(eLand old) {
     }
   #endif
 
-  if(tactic::on && !(tactic::trailer && old == specialland)) return specialland;
+  if(tactic::on) return specialland;
   if((weirdhyperbolic || cheater) && specialland != old && specialland != laCrossroads4 && specialland != laIce && !chaosmode && old != laBarrier && !isCyclic(specialland) && specialland != laBrownian)
     return specialland;
 

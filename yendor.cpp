@@ -807,7 +807,6 @@ EX namespace yendor {
 #define MAXTAC 20
 EX namespace tactic {
 
-  EX bool trailer = false;
   EX bool on = false;
   EX int id;
   
