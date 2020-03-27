@@ -8,7 +8,9 @@
 #include "hyper.h"
 namespace hr { 
 
-/** Orb Strategy Mode */
+/** \brief Implementation of the Orb Strategy Mode. 
+ * The most important functions called outside is hr::inv::show(). 
+ */
 EX namespace inv {
 
 #if CAP_INV
