@@ -392,7 +392,11 @@ bool havesave = true;
 
 #if CAP_SAVE
 
-/** a namespace for loading and saving scores and saved games */
+/** \brief A namespace for loading and saving scores and saved games (system.cpp), and for displaying these scores (scores.cpp).
+ *
+ * Most ApplyBox functions are used both for saving savegames and scores to the logfile, loading savegames and scores from the logfile, 
+ * and loading highscore information from the logfile. The flags saving, loading, and loadingHi specify what is actually done.
+ */
 EX namespace scores {
 
 #if HDR
@@ -410,7 +414,7 @@ struct score {
 #endif
 
 /** the current save */
-score save;
+EX score save;
 /** the index of the next box */
 EX int boxid;
 
@@ -442,7 +446,7 @@ void applyBoxBignum(bignum& tb) {
   if(loading) tb = bignum(tf);
   }
 
-/** the next box should contain @i, and possibly be named @name */
+/** the next box should contain i, and possibly be named name */
 EX void applyBoxNum(int& i, string name IS("")) {
   fakebox[boxid] = (name == "");
   boxname[boxid] = name;
@@ -450,7 +454,7 @@ EX void applyBoxNum(int& i, string name IS("")) {
   applyBox(i);
   }
 
-/** the next box should contain @b, and possibly be named @name */
+/** the next box should contain b, and possibly be named name */
 void applyBoxBool(bool& b, string name = "") {
   int i = b;
   applyBoxNum(i, name);
@@ -458,14 +462,14 @@ void applyBoxBool(bool& b, string name = "") {
   b = i;
   }
 
-/** Save i while saving, do nothing while loading. Use together with hr::applyBoxLoad and boxid++ */
+/** Save i while saving, do nothing while loading. Use together with hr::scores::applyBoxLoad and boxid++ */
 void applyBoxSave(int i, string name = "") {
   fakebox[boxid] = (name == "");
   boxname[boxid] = name;
   applyBox(i);
   }
 
-/** Load i while loading, do nothing while saving. Use together with hr::applyBoxSave and boxid++ */
+/** Load i while loading, do nothing while saving. Use together with hr::scores::applyBoxSave and boxid++ */
 int applyBoxLoad(string name = "") {
   fakebox[boxid] = (name == "");
   boxname[boxid] = name;
@@ -519,7 +523,7 @@ void applyBoxM(eMonster m, bool f = false) {
   applyBox(kills[m]);
   }
 
-/** Call applyBox for all the required values. This will save the values if hr::saving==true, load if hr::loading==true, load into highscores if hr::loadingHi==true */
+/** Call applyBox for all the required values. This will save the values if hr::scores::saving==true, load if hr::scores::loading==true, load into highscores if hr::scores::loadingHi==true */
 EX void applyBoxes() {
   invorb.clear();
 
