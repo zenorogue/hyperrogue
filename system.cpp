@@ -9,7 +9,7 @@
 namespace hr {
 
 #if HDR
-/** This namespace has constants used as parameters in functions such as restart_game and wrongmode. */
+/** \brief This namespace has constants used as parameters in functions such as restart_game and wrongmode. */
 namespace rg {
   static const char nothing = 0;
   static const char peace = 'P';
@@ -27,11 +27,11 @@ namespace rg {
   static const char dualmode = 'U';
   static const char heptagons = '7';
   
-  /** wrongmode only -- marks 'global' achievements not related to the current mode */
+  /** \brief wrongmode only -- marks 'global' achievements not related to the current mode */
   static const char global = 'x'; 
-  /** wrongmode only -- change vid.scfg.players then restart_game(rg::nothing) instead */
+  /** \brief wrongmode only -- change vid.scfg.players then restart_game(rg::nothing) instead */
   static const char multi = 'm';
-  /** wrongmode only -- mark achievements for special geometries/variations */
+  /** \brief wrongmode only -- mark achievements for special geometries/variations */
   static const char special_geometry = 'g';
   }
 #endif
