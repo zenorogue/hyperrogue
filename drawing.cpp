@@ -35,28 +35,51 @@ static const int POLY_TRIANGLES = (1<<22);      // made of TRIANGLES, not TRIANG
 static const int POLY_INTENSE = (1<<23);        // extra intense colors
 static const int POLY_DEBUG = (1<<24);          // debug this shape
 
+/** HyperRogue map rendering functions do not draw its data immediately; instead, they call the 'queue' functions
+ *  which store the data to draw in hr::ptds. This approach lets us draw the elements in the correct order. 
+ */
+
 struct drawqueueitem {
+  /** The higher the priority, the earlier we should draw this object. */
   PPR prio;
+  /** Color of this object. */
   color_t color;
+  /** Some priorities need extra sorting inside the given class. This attribute is used to specify the inner sorting priority. */
   int subprio;
+  /** Draw the object. */
   virtual void draw() = 0;
+  /** Draw the object as background. */
   virtual void draw_back() {}
-  virtual void draw_pre() {}
   virtual ~drawqueueitem() {}
-  void draw_darker();
+  /** When minimizing OpenGL calls, we need to group items of the same color, etc. together. This value is used as an extra sorting key. */
   virtual color_t outline_group() = 0;
   };
 
+/** Drawqueueitem used to draw polygons. The majority of drawqueueitems fall here. */
 struct dqi_poly : drawqueueitem {
+  /** see hr::band_shift */
   ld band_shift;
+  /** matrix used to transform the model */
   transmatrix V;
+  /** a vector of GL vertices where the model is stored */
   const vector<glvertex> *tab;
-  int offset, cnt, offset_texture;
+  /** the where does the model start */
+  int offset;
+  /** how many vertices in the model */
+  int cnt;
+  /** the offset in the texture vertices */
+  int offset_texture;
+  /** outline color */
   color_t outline;
+  /** width of boundary lines */
   double linewidth;
+  /** various flags */
   int flags;
+  /** Texture data for textured polygons. Requires POLY_TRIANGLES flag */
   struct basic_textureinfo *tinf;
+  /** used to find the correct side to draw in spherical geometries */
   hyperpoint intester;
+  /** temporarily cached data */
   float cache;
   void draw();
   void gldraw();
@@ -64,31 +87,54 @@ struct dqi_poly : drawqueueitem {
   virtual color_t outline_group() { return outline; }
   };
 
+/** Drawqueueitem used to draw lines */
 struct dqi_line : drawqueueitem {
+  /** see hr::band_shift */
   ld band_shift;
+  /** starting and ending point */
   hyperpoint H1, H2;
+  /** how accurately to render the line */
   int prf;
+  /** width of this line */
   double width;
   void draw();
   void draw_back();
   virtual color_t outline_group() { return color; }
   };
-      
+
+/** Drawqueueitem used to draw strings, using sccreen coodinates */      
 struct dqi_string : drawqueueitem {
+  /** text */
   string str;
-  int x, y, shift, size, frame;
+  /** onscreen position */
+  int x, y;
+  /** shift in anaglyph mode */
+  int shift;
+  /** font size */
+  int size;
+  /** frame color */
+  int frame;
+  /** alignment (0-8-16) */
   int align;
   void draw();
   virtual color_t outline_group() { return 1; }
   };
 
+/** Drawqueueitem used to draw circles, using screen coordinates */
 struct dqi_circle : drawqueueitem {
-  int x, y, size, fillcolor;
+  /* onscreen position */
+  int x, y;
+  /* circle size */
+  int size;
+  /* which color should it be filled with */
+  color_t fillcolor;
+  /* width of the circle */
   double linewidth;
   void draw();
   virtual color_t outline_group() { return 2; }
   };
 
+/** Perform an arbitrary action. May temporarily change the model, etc. */
 struct dqi_action : drawqueueitem {
   reaction_t action;
   dqi_action(const reaction_t& a) : action(a) {}
@@ -97,6 +143,9 @@ struct dqi_action : drawqueueitem {
   };
 #endif
 
+/** Return a reference to i-th component of col. 
+ *  \arg i For colors with alpha, A=0, R=1, G=2, B=3. For colors without alpha, R=0, G=1, B=2.
+ */
 EX unsigned char& part(color_t& col, int i) {
   unsigned char* c = (unsigned char*) &col;
 #if ISMOBILE
