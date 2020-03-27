@@ -35,7 +35,7 @@ template<class T>
 void ignore(T&&) {
   }
 
-const void *voidp(const void *p) {
+inline const void *voidp(const void *p) {
   // a simple static_cast<void*> for use with printf("%p")
   return p;
   }
