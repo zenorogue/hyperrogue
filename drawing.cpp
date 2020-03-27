@@ -1944,11 +1944,12 @@ EX void drawqueue() {
   for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,
     PPR::LAKEWALL, PPR::INLAKEWALL, PPR::BELOWBOTTOM, PPR::ASHALLOW, PPR::BSHALLOW}) {
     int pp = int(p);
+    if(qp0[pp] == qp[pp]) continue;
     for(int i=qp0[pp]; i<qp[pp]; i++) {
       auto ap = (dqi_poly&) *ptds[i];
       ap.cache = xintval(ap.V * xpush0(.1));
       }
-    sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
+    sort(&ptds[qp0[pp]], &ptds[qp[pp]], 
       [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
         auto ap1 = (dqi_poly&) *p1;
         auto ap2 = (dqi_poly&) *p2;
@@ -1956,11 +1957,14 @@ EX void drawqueue() {
         });
     }
 
-  for(PPR p: {PPR::TRANSPARENT_WALL})
+  for(PPR p: {PPR::TRANSPARENT_WALL}) {
+    int pp = int(p);
+    if(qp0[pp] == qp[pp]) continue;
     sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]], 
       [] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
         return p1->subprio > p2->subprio;
         });
+    }
 
   profile_stop(3);
 
