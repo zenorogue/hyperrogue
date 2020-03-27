@@ -48,7 +48,6 @@ EX int asteroids_generated, asteroid_orbs_generated;
 EX time_t timerstart, savetime;
 EX bool timerstopped;
 EX int savecount;
-EX bool showoff = false;
 EX bool doCross = false;
 
 EX bool gamegen_failure;
@@ -951,8 +950,6 @@ EX void saveStats(bool emergency IS(false)) {
     saveposition = ftell(f);
 //  if(!timerghost) addMessage(XLAT("Emergency save at ") + its(saveposition));
     }
-  
-  if(showoff) { fclose(f); return; }
   
   time_t timer;
   timer = time(NULL);

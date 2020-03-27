@@ -284,7 +284,7 @@ void celldrawer::setcolors() {
       else if(c->wall == waBigTree) wcol = 0x0080C0;
       break;
     case laTemple: {
-      int d = showoff ? 0 : (eubinary||c->master->alt) ? celldistAlt(c) : 99;
+      int d = (eubinary||c->master->alt) ? celldistAlt(c) : 99;
       if(chaosmode)
         fcol = 0x405090;
       else if(d % temple_layer_size() == 0)
@@ -369,7 +369,7 @@ void celldrawer::setcolors() {
     #endif
   
     case laCamelot: {
-      int d = showoff ? 0 : ((eubinary||c->master->alt) ? celldistAltRelative(c) : 0);
+      int d = ((eubinary||c->master->alt) ? celldistAltRelative(c) : 0);
   #if CAP_TOUR
       if(!tour::on) camelotcheat = false;
       if(camelotcheat) 

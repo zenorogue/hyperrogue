@@ -314,7 +314,6 @@ EX void showMission() {
 #endif
     (cheater && !autocheat)? XLAT("It is a shame to cheat!") : 
     racing::on ? "racing mode" :
-    showoff ? XLAT("Showoff mode") :
     (canmove && princess::challenge) ? XLAT("%1 Challenge", moPrincess) :
     canmove ? XLAT("Quest status") : 
     XLAT("GAME OVER"), 

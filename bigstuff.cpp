@@ -1332,10 +1332,13 @@ EX bool quickfind(eLand l) {
 #define I2000 (INVLUCK?600:2000)
 #define I10000 (INVLUCK?3000:10000)
 
+EX hookset<int(cell*, bool)> *hooks_wallchance;
+
 EX int wallchance(cell *c, bool deepOcean) {
+  int i = callhandlers(-1, hooks_wallchance, c, deepOcean);
+  if(i != -1) return i;
   eLand l = c->land;
   return
-    showoff ? (cwt.at->mpdist > 7 ? 0 : 10000) : 
     inmirror(c) ? 0 :
     isGravityLand(l) ? 0 :
     generatingEquidistant ? 0 :
