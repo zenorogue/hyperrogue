@@ -557,7 +557,7 @@ struct hrmap_archimedean : hrmap {
 
   heptagon *create_step(heptagon *h, int d) override {
   
-    DEBB(DF_GEOM, (format("%p.%d ~ ?\n", h, d)));
+    DEBB(DF_GEOM, (format("%p.%d ~ ?\n", hr::voidp(h), d)));
   
     heptspin hi(h, d);
     
@@ -707,7 +707,7 @@ EX hrmap *new_map() { return new hrmap_archimedean; }
 heptagon *build_child(heptspin p, pair<int, int> adj) {
   indenter ind;
   auto h = buildHeptagon1(tailored_alloc<heptagon> (isize(current.adjacent[adj.first])), p.at, p.spin, hstate(1), 0);
-  DEBB(DF_GEOM, (format("NEW %p.%d ~ %p.0\n", p.at, p.spin, h)));
+  DEBB(DF_GEOM, (format("NEW %p.%d ~ %p.0\n", hr::voidp(p.at), p.spin, hr::voidp(h))));
   id_of(h) = adj.first;
   parent_index_of(h) = adj.second;
   int nei = neighbors_of(h);
@@ -751,13 +751,13 @@ void connect_digons_too(heptspin h1, heptspin h2) {
     // no need to specify archimedean_gmatrix and altmap
     hnew->c.connect(1, h2);
     h1--, h2++;
-    DEBB(DF_GEOM, (format("OL2 %p.%d ~ %p.%d\n", h1.at, h1.spin, h2.at, h2.spin)));
+    DEBB(DF_GEOM, (format("OL2 %p.%d ~ %p.%d\n", hr::voidp(h1.at), h1.spin, hr::voidp(h2.at), h2.spin)));
     h1.at->c.connect(h1.spin, h2);
     }
   }
 
 void connectHeptagons(heptspin hi, heptspin hs) {
-  DEBB(DF_GEOM, (format("OLD %p.%d ~ %p.%d\n", hi.at, hi.spin, hs.at, hs.spin)));
+  DEBB(DF_GEOM, (format("OLD %p.%d ~ %p.%d\n", hr::voidp(hi.at), hi.spin, hr::voidp(hs.at), hs.spin)));
   if(hi.at->move(hi.spin) == hs.at && hi.at->c.spin(hi.spin) == hs.spin) {
     DEBB(DF_GEOM, (format("WARNING: already connected\n")));
     return;
@@ -1144,7 +1144,7 @@ function<void()> setcanvas(char c) {
     patterns::whichCanvas = c;
     start_game();
     };
-  };
+  }
 
 EX void show() {
   if(lastsample < isize(samples)) {

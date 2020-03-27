@@ -144,7 +144,7 @@ void rebase(cellinfo& ci) {
   cell *cx = ci.owner;
   virtualRebase(ci.owner, ci.p);
   if(ci.owner != cx) {
-    printf("rebased %p to %p\n", cx, ci.owner);
+    printf("rebased %p to %p\n", hr::voidp(cx), hr::voidp(ci.owner));
     set_relmatrices(ci);
     }
   }
@@ -463,7 +463,7 @@ bool step(int delta) {
       
       int heptas = 0;
       for(auto p: cells_of_heptagon) {
-        printf("%p: %d\n", p.first, isize(p.second));
+        printf("%p: %d\n", hr::voidp(p.first), isize(p.second));
         heptas++;
         }
       
@@ -583,7 +583,7 @@ struct heptinfo {
 EX map<heptagon*, heptinfo> periodmap;
 
 EX void link_to_base(heptagon *h, heptspin base) {
-  // printf("linking %p to %p/%d\n", h, base.at, base.spin);
+  // printf("linking %p to %p/%d\n", hr::voidp(h), hr::voidp(base.at), base.spin);
   auto &hi = periodmap[h];
   hi.base = base;
   for(int k: cells_of_heptagon[base.at]) {
@@ -612,7 +612,7 @@ EX void link_start(heptagon *h) {
 EX void link_next(heptagon *parent, int d) {
   if(!periodmap.count(parent))
     link_to_base(parent, heptspin(cells[0].owner->master, 0));
-  // printf("linking next: %p direction %d [s%d]\n", parent, d, parent->c.spin(d));
+  // printf("linking next: %p direction %d [s%d]\n", hr::voidp(parent), d, parent->c.spin(d));
   auto *h = parent->move(d);
   heptspin hs = periodmap[parent].base + d + wstep - parent->c.spin(d);
   link_to_base(h, hs);
@@ -625,7 +625,7 @@ EX void may_link_next(heptagon *parent, int d) {
 
 
 EX void link_cell(cell *c, int d) {
-  // printf("linking cell: %p direction %d\n", c, d);
+  // printf("linking cell: %p direction %d\n", hr::voidp(c), d);
   int ci = cellindex[c];
   auto& sc = cells[ci];
   int ci2 = sc.neid[d];
@@ -644,7 +644,7 @@ EX void link_cell(cell *c, int d) {
       heptspin hss(c->master, d);
       hss += wstep;
       master2 = hss.at;
-      // printf("master2 is %p; base = %p; should be = %p\n", master2, periodmap[master2].base.at, sc2.owner->master);
+      // printf("master2 is %p; base = %p; should be = %p\n", hr::voidp(master2), hr::voidp(periodmap[master2].base.at), hr::voidp(sc2.owner->master));
       dirs++;
       }
     if(dirs != 1) { printf("dirs error\n"); exit(1); }
@@ -674,7 +674,7 @@ map<heptagon*, heptagon*> last_on_horocycle;
 void compute_horocycle(heptagon *);
 
 void compute_distances(heptagon *h, bool alts) {
-  /* if(alts) printf("[%p] compute_distances %p\n", h->alt->alt, h);
+  /* if(alts) printf("[%p] compute_distances %p\n", hr::voidp(h->alt->alt), hr::voidp(h));
   printf("neighbors:"); for(int i=0; i<S7; i++) printf(" %p", createStep(h, i)); printf("\n"); */
   
   if(alts) {
@@ -741,7 +741,7 @@ void erase_alt(heptagon *alt) {
 
 void compute_horocycle(heptagon *alt) {
   heptagon *master = last_on_horocycle[alt];
-  // printf("computing horocycle, master distance = %d [M=%p, A=%p]\n", master->alt->distance, master, alt);
+  // printf("computing horocycle, master distance = %d [M=%p, A=%p]\n", master->alt->distance, hr::voidp(master), hr::voidp(alt));
   
   static const int LOOKUP = 16;
   set<heptagon*> hs[LOOKUP];

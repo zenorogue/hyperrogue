@@ -755,11 +755,11 @@ void gotoHelpFor(eItem i) {
 
 void gotoHelpFor(eWall w) {
   help = generateHelpForWall(w);
-  };
+  }
 
 void gotoHelpFor(eMonster m) {
   help = generateHelpForMonster(m);
-  };
+  }
 
 EX void appendHelp(string s) {
   auto h = helpgenerator;
@@ -832,7 +832,7 @@ EX void describeMouseover() {
     if(c->land == laTortoise && tortoise::seek()) out += " " + tortoise::measure(getBits(c));
 
     if(buggyGeneration) {
-      char buf[80]; sprintf(buf, " %p H=%d M=%d", c, c->landparam, c->mpdist); out += buf;
+      char buf[80]; sprintf(buf, " %p H=%d M=%d", hr::voidp(c), c->landparam, c->mpdist); out += buf;
       }
     
     if(randomPatternsMode)
@@ -877,7 +877,7 @@ EX void describeMouseover() {
           "Trees in this forest can be chopped down. Big trees take two turns to chop down.";
       else 
         if(c->wall != waSea && c->wall != waPalace && c->wall != waDeadfloor)
-        if(!((c->wall == waCavefloor || c->wall == waCavewall) && (c->land == laEmerald && c->land == laCaves)))
+        if(!((c->wall == waCavefloor || c->wall == waCavewall) && (c->land == laEmerald || c->land == laCaves)))
         if(!((isAlch(c->wall) && c->land == laAlchemist)))
           help = bygen([c] () { gotoHelpFor(c->wall); });
       }

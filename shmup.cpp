@@ -238,7 +238,7 @@ bool isMonster(monster *m) { return m->type != moPlayer && m->type != moBullet; 
 
 EX hookset<bool(shmup::monster*)> *hooks_kill;
 
-void killMonster(monster* m, eMonster who_kills, int flags = 0) {
+void killMonster(monster* m, eMonster who_kills, flagtype flags = 0) {
   int tk = tkills();
   if(callhandlers(false, hooks_kill, m)) return;
   if(m->dead) return;

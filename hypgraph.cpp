@@ -307,7 +307,7 @@ hyperpoint compute_hybrid(hyperpoint H, int rootid) {
   return ret;
   }
 
-EX ld signed_sqrt(ld x) { return x > 0 ? sqrt(x) : -sqrt(-x); };
+EX ld signed_sqrt(ld x) { return x > 0 ? sqrt(x) : -sqrt(-x); }
 
 EX void applymodel(hyperpoint H, hyperpoint& ret) {
 

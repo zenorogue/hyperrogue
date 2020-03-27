@@ -918,7 +918,7 @@ EX void remove_emergency_save() {
   }
 
 EX void saveStats(bool emergency IS(false)) {
-  DEBBI(DF_INIT, ("saveStats [%s]", scorefile));
+  DEBBI(DF_INIT, ("saveStats [", scorefile, "]"));
 
   if(autocheat) return;
   #if CAP_TOUR
@@ -1572,5 +1572,5 @@ addHook(hooks_removecells, 0, [] () {
   eliminate_if(butterflies, [] (pair<cell*,int>& p) { return is_cell_removed(p.first); });
   for(int i=0; i<SHSIZE; i++) for(int p=0; p<MAXPLAYER; p++)
     set_if_removed(shpos[p][i], NULL);
-  });;
+  });
 }

@@ -25,7 +25,7 @@ string preprocessor =
   "g++ -E";
 
 string compiler = 
-  "g++ -Wall -Wextra -Wno-maybe-uninitialized -Wno-missing-field-initializers -Wno-unused-parameter -Wno-implicit-fallthrough -rdynamic -fdiagnostics-color=always -c";
+  "g++ -Wall -Wextra -Wno-maybe-uninitialized -Wno-unused-parameter -Wno-implicit-fallthrough -rdynamic -fdiagnostics-color=always -c";
 
 string linker = 
   "g++ -rdynamic -o hyper";

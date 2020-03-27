@@ -2889,7 +2889,7 @@ EX namespace linepatterns {
     dialog::display();
     }
     
-  };
+  }
 
 int val46(cell *c) {
   patterns::patterninfo si;

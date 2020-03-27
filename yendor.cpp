@@ -1354,7 +1354,7 @@ EX namespace peace {
     }
     
   auto aNext = addHook(hooks_nextland, 100, getNext);
-  };
+  }
 
 #if CAP_COMMANDLINE
 int read_mode_args() {

@@ -192,7 +192,7 @@ bool flag_clamp_max(ld& coord, ld maxv) {
 
 bool flag_clamp(ld& coord, ld minv, ld maxv) {
   return flag_clamp_min(coord, minv) & flag_clamp_max(coord, maxv);
-  };
+  }
 
 bool flag_clamp_sym(ld& coord, ld v) {
   return flag_clamp(coord, -v, v);

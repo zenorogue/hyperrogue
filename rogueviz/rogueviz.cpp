@@ -72,7 +72,8 @@ color_t parse1(const string& s) {
   // color can be given as RRGGBB
   // or as 'Rmax,min,alpha,step,start', for rainbow Collatz
   if(s[0] == 'R') {
-    int mh = 192, minh = 0, alpha = 255, step = 50, start = 0;
+    color_t mh = 192, minh = 0, alpha = 255;
+    int step = 50, start = 0;
     sscanf(s.c_str(), "R%x,%x,%x,%d,%d", &mh, &minh, &alpha, &step, &start);
     vector<color_t> hues;
     color_t difh = mh - minh;
@@ -2474,7 +2475,7 @@ auto hooks  =
   addHook(hooks_markers, 100, search_marker) +
  0;
 
-};
+}
 
 #include "kohonen.cpp"
 #include "staircase.cpp"

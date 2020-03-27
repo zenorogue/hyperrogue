@@ -325,7 +325,7 @@ int main() {
   printf("#define NUMEXTRA %d\n", isize(vchars));
   printf("#define NATCHARS {");
   for(auto&& elt : vchars) printf("\"%s\",", elt.c_str());
-  printf("};\n");
+  printf("}\n");
   printf("extern const char* natchars[NUMEXTRA];\n");
   printf("#endif\n");
   printf("#endif\n");

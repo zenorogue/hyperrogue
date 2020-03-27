@@ -480,14 +480,14 @@ void verify_crawlers() {
     if(allcrawlers.count(id.first)) {
       bool b = verify_crawler(allcrawlers[id.first], cellwalker(c, id.second));
       if(!b) {
-        printf("cell %p: type = %d id = %d dir = %d / earlier crawler failed\n", c, c->type, id.first, id.second);
+        printf("cell %p: type = %d id = %d dir = %d / earlier crawler failed\n", hr::voidp(c), c->type, id.first, id.second);
         failures++;
         }
       }
     else {
       for(int i=0; i<c->type; i++)
       for(auto& cc: allcrawlers) if(verify_crawler(cc.second, cellwalker(c, i))) {
-        printf("cell %p: type = %d id = %d dir = %d / also works id %d in direction %d\n", c, c->type, id.first, id.second, cc.first, i);
+        printf("cell %p: type = %d id = %d dir = %d / also works id %d in direction %d\n", hr::voidp(c), c->type, id.first, id.second, cc.first, i);
         uniq--;
         goto breakcheck;
         }

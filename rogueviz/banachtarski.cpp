@@ -151,10 +151,8 @@ void recursive_paint(cwpath& pinv, vector<int>& way, int noway) {
   else
     gid = 3;
   
-  infos[c] = cellinfo{c, gid, 0};
-  infos[c].way = way;
-  infos[c].pinv = pinv;
-  
+  infos[c] = cellinfo{c, gid, 0, waNone, itNone, laNone, moNone, way, pinv};
+
   // c->landparam ^= ((isize(way)&1) * 0x3F3F3F);
   // c->landparam = hsh; // d * 5 + 256 * (hsh&0xFFFF) + 0x400000;
   if(cidd>112899) c->landparam = 0x101010;

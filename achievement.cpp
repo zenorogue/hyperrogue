@@ -964,7 +964,7 @@ EX void achievement_display() {
 
 EX bool isAscending(int i) { 
   return i == 13 || i == 14 || i == 15 || i == 16 || i == 29 || i == 30 || i == 45;
-  };
+  }
 
 EX int score_default(int i) {
   if(isAscending(i)) return 1999999999;

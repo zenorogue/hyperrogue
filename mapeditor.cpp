@@ -2141,7 +2141,7 @@ namespace mapeditor {
   addHook(hooks_removecells, 0, [] () {
     modelcell.clear();
     set_if_removed(mapeditor::copysource.at, NULL);
-    });;;  
+    });
 #endif
 
   EX void initdraw(cell *c) {

@@ -483,7 +483,7 @@ EX namespace tortoise {
       
     return gradient(0x487830, mcol, 0, dd, 0xFF);
     }
-  EX };
+  EX }
 
 double footfun(double d) {
   d -= floor(d);
@@ -595,7 +595,7 @@ transmatrix otherbodyparts(const transmatrix& V, color_t col, eMonster who, doub
 #define VAHEAD mmscale(V, cgi.AHEAD)
 
 #define VFISH V
-#define VBIRD  ((GDIM == 3 || (where && bird_disruption(where))) ? (WDIM == 2 ? mmscale(V, cgi.BIRD) : V) : mmscale(V, cgi.BIRD + .05 * sintick(1000, (int) (size_t(where))/1000.)))
+#define VBIRD  ((GDIM == 3 || (where && bird_disruption(where))) ? (WDIM == 2 ? mmscale(V, cgi.BIRD) : V) : mmscale(V, cgi.BIRD + .05 * sintick(1000, static_cast<int>(reinterpret_cast<size_t>(where))/1000.)))
 #define VGHOST  mmscale(V, cgi.GHOST)
 
 #define VSLIMEEYE  mscale(V, cgi.FLATEYE)
@@ -750,7 +750,7 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
 #else
   char xch = iinf[it].glyph;
   auto sinptick = [c, pticks] (int period) { return c ? sintick(period) : sin(animation_factor * pticks / period);};
-  auto spinptick = [c, pticks] (int period, ld phase=0) { return c ? spintick(period, phase) : spin((animation_factor * pticks + phase) / period); };
+  auto spinptick = [c, pticks] (int period, ld phase) { return c ? spintick(period, phase) : spin((animation_factor * pticks + phase) / period); };
   int ct6 = c ? ctof(c) : 1;
   hpcshape *xsh = 
     (it == itPirate || it == itKraken) ? &cgi.shPirateX :
@@ -805,17 +805,17 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
     }
   
   else if(it == itStrongWind) {
-    queuepoly(Vit * spinptick(750), cgi.shFan, darkena(icol, 0, 255));
+    queuepoly(Vit * spinptick(750, 0), cgi.shFan, darkena(icol, 0, 255));
     }
 
   else if(it == itWarning) {
-    queuepoly(Vit * spinptick(750), cgi.shTriangle, darkena(icol, 0, 255));
+    queuepoly(Vit * spinptick(750, 0), cgi.shTriangle, darkena(icol, 0, 255));
     }
     
   else if(it == itBabyTortoise) {
     int bits = c ? tortoise::babymap[c] : tortoise::last;
     int over = c && c->monst == moTortoise;
-    tortoise::draw(Vit * spinptick(5000) * ypush(cgi.crossf*.15), bits, over ? 4 : 2, 0);
+    tortoise::draw(Vit * spinptick(5000, 0) * ypush(cgi.crossf*.15), bits, over ? 4 : 2, 0);
     // queuepoly(Vit, cgi.shHeptaMarker, darkena(tortoise::getMatchColor(bits), 0, 0xC0));
     }
   
@@ -903,12 +903,12 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
   
   else if(it == itRose) {
     for(int u=0; u<4; u++)
-      queuepoly(Vit * spinptick(1500) * spin(2*M_PI / 3 / 4 * u), cgi.shRoseItem, darkena(icol, 0, hidden ? 0x30 : 0xA0));
+      queuepoly(Vit * spinptick(1500, 0) * spin(2*M_PI / 3 / 4 * u), cgi.shRoseItem, darkena(icol, 0, hidden ? 0x30 : 0xA0));
     }
 
   else if(it == itBarrow && c) {
     for(int i = 0; i<c->landparam; i++)
-      queuepolyat(Vit * spin(2 * M_PI * i / c->landparam) * xpush(.15) * spinptick(1500), *xsh, darkena(icol, 0, hidden ? 0x40 : 
+      queuepolyat(Vit * spin(2 * M_PI * i / c->landparam) * xpush(.15) * spinptick(1500, 0), *xsh, darkena(icol, 0, hidden ? 0x40 : 
         (highwall(c) && wmspatial) ? 0x60 : 0xFF),
         PPR::HIDDEN);
 
@@ -923,7 +923,7 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
     if(it == itLotus) icol = 0x101010;
     if(it == itSwitch) icol = minf[active_switch()].color;
     
-    transmatrix V2 = Vit * spinptick(1500);
+    transmatrix V2 = Vit * spinptick(1500, 0);
   
     if(xsh == &cgi.shBookCover && mmitem) {
       if(GDIM == 3)
@@ -957,11 +957,11 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
     color_t col = darkena(icol, 0, int(0x80 + 0x70 * sinptick(300)));
     
     if(it == itOrbFish)
-      queuepolyat(Vit * spinptick(1500), cgi.shFishTail, col, PPR::ITEM_BELOW);
+      queuepolyat(Vit * spinptick(1500, 0), cgi.shFishTail, col, PPR::ITEM_BELOW);
 
     queuepolyat(Vit, cgi.shDisk, darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), prio);
 
-    queuepolyat(Vit * spinptick(1500), orbshape(iinf[it].orbshape), col, prio);
+    queuepolyat(Vit * spinptick(1500, 0), orbshape(iinf[it].orbshape), col, prio);
     }
 
   else if(it) return true;
@@ -5019,7 +5019,7 @@ namespace sm {
   static const int DIALOG_STRICT_X = 32768; // do not interpret dialog clicks outside of the X region
   static const int EXPANSION = (1<<16);
   static const int HEXEDIT = (1<<17);
-  };
+  }
 #endif
 
 EX int cmode;

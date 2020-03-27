@@ -516,7 +516,7 @@ namespace lv {
   static const flagtype appears_in_ptm = 8;
   static const flagtype display_in_help = 16;
   static const flagtype one_and_half = 32;
-  };
+  }
 
 struct land_validity_t {
   int quality_level; // 0 (dont show), 1 (1/2), 2 (ok), 3(1!)

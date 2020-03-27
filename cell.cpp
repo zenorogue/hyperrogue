@@ -87,7 +87,7 @@ struct hrmap_hyperbolic : hrmap_standard {
   heptagon *getOrigin() override { return origin; }
   ~hrmap_hyperbolic() {
     // verifycells(origin);
-    // printf("Deleting hyperbolic map: %p\n", this);
+    // printf("Deleting hyperbolic map: %p\n", hr::voidp(this));
     clearfrom(origin);
     }
   void verify() override { verifycells(origin); }
@@ -205,7 +205,7 @@ EX cell *createMov(cell *c, int d) {
   else if(GOLDBERG) {
     gp::extend_map(c, d);
     if(!c->move(d)) {
-      printf("extend failed to create for %p/%d\n", c, d);
+      printf("extend failed to create for %p/%d\n", hr::voidp(c), d);
       exit(1);
       }
     hybrid::link();
@@ -316,9 +316,9 @@ EX void initcells() {
 
 EX void clearcell(cell *c) {
   if(!c) return;
-  DEBB(DF_MEMORY, (format("c%d %p\n", c->type, c)));
+  DEBB(DF_MEMORY, (format("c%d %p\n", c->type, hr::voidp(c))));
   for(int t=0; t<c->type; t++) if(c->move(t)) {
-    DEBB(DF_MEMORY, (format("mov %p [%p] S%d\n", c->move(t), c->move(t)->move(c->c.spin(t)), c->c.spin(t))));
+    DEBB(DF_MEMORY, (format("mov %p [%p] S%d\n", hr::voidp(c->move(t)), hr::voidp(c->move(t)->move(c->c.spin(t))), c->c.spin(t))));
     if(c->move(t)->move(c->c.spin(t)) != NULL &&
       c->move(t)->move(c->c.spin(t)) != c) {
         DEBB(DF_MEMORY | DF_ERROR, (format("cell error: type = %d %d -> %d\n", c->type, t, c->c.spin(t))));
@@ -326,7 +326,7 @@ EX void clearcell(cell *c) {
         }
     c->move(t)->move(c->c.spin(t)) = NULL;
     }
-  DEBB(DF_MEMORY, (format("DEL %p\n", c)));
+  DEBB(DF_MEMORY, (format("DEL %p\n", hr::voidp(c))));
   tailored_delete(c);
   }
 
@@ -418,7 +418,7 @@ EX void verifycell(cell *c) {
     if(c2) {
       if(BITRUNCATED && c == c->master->c7) verifycell(c2);
       if(c2->move(c->c.spin(i)) && c2->move(c->c.spin(i)) != c) {
-        printf("cell error %p:%d [%d] %p:%d [%d]\n", c, i, c->type, c2, c->c.spin(i), c2->type);
+        printf("cell error %p:%d [%d] %p:%d [%d]\n", hr::voidp(c), i, c->type, hr::voidp(c2), c->c.spin(i), c2->type);
         exit(1);
         }
       }
@@ -428,7 +428,7 @@ EX void verifycell(cell *c) {
 EX void verifycells(heptagon *at) {
   if(GOLDBERG || IRREGULAR || arcm::in()) return;
   for(int i=0; i<at->type; i++) if(at->move(i) && at->move(i)->move(at->c.spin(i)) && at->move(i)->move(at->c.spin(i)) != at) {
-    printf("hexmix error %p [%d s=%d] %p %p\n", at, i, at->c.spin(i), at->move(i), at->move(i)->move(at->c.spin(i)));
+    printf("hexmix error %p [%d s=%d] %p %p\n", hr::voidp(at), i, at->c.spin(i), hr::voidp(at->move(i)), hr::voidp(at->move(i)->move(at->c.spin(i))));
     }
   if(!sphere && !quotient) 
     for(int i=0; i<S7; i++) if(at->move(i) && at->c.spin(i) == 0 && at->s != hsOrigin)
