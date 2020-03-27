@@ -36,16 +36,16 @@ namespace rg {
   }
 #endif
 
-/** is a game map currently loaded (it is false after hr::stop_game and true after hr::start_game) */
+/** \brief is a game map currently loaded (it is false after hr::stop_game and true after hr::start_game) */
 EX bool game_active;
 
-/** God mode */
+/** \brief God mode */
 EX bool autocheat;
 
-/** which wall should we fill the Canvas with */
+/** \brief which wall should we fill the Canvas with */
 EX eWall canvas_default_wall = waNone;
 
-/** the number of Black Lotuses collected -- but updated only if we manage to escape */
+/** \brief the number of Black Lotuses collected -- but updated only if we manage to escape */
 EX int truelotus;
 
 EX int asteroids_generated, asteroid_orbs_generated;
@@ -59,7 +59,7 @@ EX bool gamegen_failure;
 
 EX eLand top_land;
 
-/** a comparator for version number strings */
+/** \brief a comparator for version number strings */
 EX bool verless(string v, string cmp) {
   if(isdigit(v[0]) && isdigit(v[1])) 
     v = "A" + v;
@@ -68,17 +68,17 @@ EX bool verless(string v, string cmp) {
   return v < cmp;
   }
 
-/** should we set the starting land to specialland */
+/** \brief should we set the starting land to specialland */
 bool do_use_special_land() {
   return
     !safety &&
     (peace::on || tactic::on || geometry || NONSTDVAR || randomPatternsMode || yendor::on || racing::on);
   }
 
-/** Hooks for welcomeMessage. Return true to capture.. */
+/** \brief Hooks for welcomeMessage. Return true to capture. */
 EX hookset<bool()> *hooks_welcome_message;
 
-/** Print the welcome message during the start of game. Depends on the current mode and other settings. */
+/** \brief Print the welcome message during the start of game. Depends on the current mode and other settings. */
 EX void welcomeMessage() {
   if(callhandlers(false, hooks_welcome_message)) return;
 #if CAP_TOUR
@@ -143,10 +143,10 @@ EX void welcomeMessage() {
 #endif
   }
 
-/** These hooks are called at the start of initgame. */
+/** \brief These hooks are called at the start of initgame. */
 EX hookset<void()> *hooks_initgame;
 
-/** initialize the game */
+/** \brief initialize the game */
 EX void initgame() {
   DEBBI(DF_INIT, ("initGame"));
   callhooks(hooks_initgame); 
@@ -400,42 +400,42 @@ bool havesave = true;
 EX namespace scores {
 
 #if HDR
-/** the amount of boxes reserved for each hr::score item */
+/** \brief the amount of boxes reserved for each hr::score item */
 #define MAXBOX 500
-/** currently used boxes in hr::score */
+/** \brief currently used boxes in hr::score */
 #define POSSCORE 387
-/** a struct to keep local score from an earlier game */
+/** \brief a struct to keep local score from an earlier game */
 struct score {
-  /** version used */
+  /** \brief version used */
   string ver;
-  /** all the data of the saved score, see applyBoxes() */
+  /** \brief all the data of the saved score, see applyBoxes() */
   int box[MAXBOX];
   };
 #endif
 
-/** the current save */
+/** \brief the current save */
 EX score save;
-/** the index of the next box */
+/** \brief the index of the next box */
 EX int boxid;
 
-/** see hr::applyBox */
+/** \brief see hr::applyBox */
 EX bool saving, loading, loadingHi;
 
-/** names of all the boxes */
+/** \brief names of all the boxes */
 EX string boxname[MAXBOX];
-/** 'fake' boxes should not appear when examining local scores */
+/** \brief 'fake' boxes should not appear when examining local scores */
 EX bool fakebox[MAXBOX];
-/** does this box contain monster kills */
+/** \brief does this box contain monster kills */
 EX bool monsbox[MAXBOX];
 
-/** the next box should contain t */
+/** \brief the next box should contain t */
 void applyBox(int& t) {
   if(saving) save.box[boxid++] = t;
   else if(loading) t = save.box[boxid++];
   else boxid++;
   }
 
-/** the next box should contain tb */
+/** \brief the next box should contain tb */
 void applyBoxBignum(bignum& tb) {
   float tf;
   int ti;
@@ -446,7 +446,7 @@ void applyBoxBignum(bignum& tb) {
   if(loading) tb = bignum(tf);
   }
 
-/** the next box should contain i, and possibly be named name */
+/** \brief the next box should contain i, and possibly be named name */
 EX void applyBoxNum(int& i, string name IS("")) {
   fakebox[boxid] = (name == "");
   boxname[boxid] = name;
@@ -454,7 +454,7 @@ EX void applyBoxNum(int& i, string name IS("")) {
   applyBox(i);
   }
 
-/** the next box should contain b, and possibly be named name */
+/** \brief the next box should contain b, and possibly be named name */
 void applyBoxBool(bool& b, string name = "") {
   int i = b;
   applyBoxNum(i, name);
@@ -462,14 +462,14 @@ void applyBoxBool(bool& b, string name = "") {
   b = i;
   }
 
-/** Save i while saving, do nothing while loading. Use together with hr::scores::applyBoxLoad and boxid++ */
+/** \brief Save i while saving, do nothing while loading. Use together with hr::scores::applyBoxLoad and boxid++ */
 void applyBoxSave(int i, string name = "") {
   fakebox[boxid] = (name == "");
   boxname[boxid] = name;
   applyBox(i);
   }
 
-/** Load i while loading, do nothing while saving. Use together with hr::scores::applyBoxSave and boxid++ */
+/** \brief Load i while loading, do nothing while saving. Use together with hr::scores::applyBoxSave and boxid++ */
 int applyBoxLoad(string name = "") {
   fakebox[boxid] = (name == "");
   boxname[boxid] = name;
@@ -477,7 +477,7 @@ int applyBoxLoad(string name = "") {
   return i;
   }
 
-/** the next box is the number of collected items it */
+/** \brief the next box is the number of collected items it */
 void applyBoxI(eItem it, bool f = false) {
   boxname[boxid] = iinf[it].name;
   fakebox[boxid] = f;
@@ -494,13 +494,13 @@ void addinv(eItem it) {
   invorb.push_back(it);
   }
 
-/** Handle the information about orb it. Need to call list_invorb later */
+/** \brief Handle the information about orb it. Need to call list_invorb later */
 void applyBoxOrb(eItem it) {
   applyBoxI(it, true);
   invorb.push_back(it);
   }  
 
-/** Handle the OSM information for all orbs that applyBoxOrb has been called for so far */
+/** \brief Handle the OSM information for all orbs that applyBoxOrb has been called for so far */
 void list_invorb() {
   for(eItem it: invorb) {
 #if CAP_INV
@@ -515,7 +515,7 @@ void list_invorb() {
   invorb.clear();
   }
 
-/** handle the number of monsters of type m killed */
+/** \brief handle the number of monsters of type m killed */
 void applyBoxM(eMonster m, bool f = false) {
   fakebox[boxid] = f;
   boxname[boxid] = minf[m].name;
@@ -523,7 +523,7 @@ void applyBoxM(eMonster m, bool f = false) {
   applyBox(kills[m]);
   }
 
-/** Call applyBox for all the required values. This will save the values if hr::scores::saving==true, load if hr::scores::loading==true, load into highscores if hr::scores::loadingHi==true */
+/** \brief Call applyBox for all the required values. This will save the values if hr::scores::saving==true, load if hr::scores::loading==true, load into highscores if hr::scores::loadingHi==true */
 EX void applyBoxes() {
   invorb.clear();
 
@@ -875,18 +875,18 @@ EX void applyBoxes() {
   if(isize(invorb)) { println(hlog, "ERROR: Orbs not taken into account"); exit(1); }
   }
 
-/** save the current game values to save */
+/** \brief save the current game values to save */
 EX void saveBox() {
   boxid = 0; saving = true; applyBoxes(); saving = false;
   }
 
-/** load the current game values from save */
+/** \brief load the current game values from save */
 void loadBox() {
   // have boxid
   boxid = 0; loading = true; applyBoxes(); loading = false;
   }
 
-/** load the current game values from save into the highscore tables */
+/** \brief load the current game values from save into the highscore tables */
 void loadBoxHigh() {
 
   dynamicval<int> sp1(multi::players, save.box[197]);
