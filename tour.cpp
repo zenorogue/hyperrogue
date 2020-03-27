@@ -8,17 +8,23 @@
 #include "hyper.h"
 namespace hr { 
 #if CAP_TOUR
+
+/** Variables and function related to Guided Tour and other presentations. */
 EX namespace tour {
 
+/** are we currently in a presentation */
 EX bool on;
 
+/** should the presentation texts be shown */
 EX bool texts = true;
 
 EX string tourhelp;
 
+/** index of the current slide */
 EX int currentslide;
 
 #if HDR
+/** a parameter for the slides' action function */
 enum presmode { 
   pmStartAll = 0,
   pmStart = 1, pmFrame = 2, pmStop = 3, pmKey = 4, pmRestart = 5,
@@ -26,23 +32,38 @@ enum presmode {
   pmGeometry = 11, pmGeometryReset = 13, pmGeometryStart = 15
   };
 
+/** slide definition */
 struct slide { 
-  const char *name; int unused_id; int flags; const char *help; 
+  /** title of this slide */
+  const char *name; 
+  /** ID (currently unused */
+  int unused_id; 
+  /** various flags */
+  flagtype flags; 
+  /** the helptext */
+  const char *help; 
+  /** This function is called while this slide is displayed. Parameter hr::tour::presmode mode says what should be done */
   function<void(presmode mode)> action;
   };  
 
-static const int LEGAL_NONE=0;
-static const int LEGAL_UNLIMITED=1;
-static const int LEGAL_HYPERBOLIC=2;
-static const int LEGAL_ANY=3;
-static const int LEGAL_NONEUC=4;
-static const int QUICKSKIP=8;
-static const int FINALSLIDE=16;
-static const int QUICKGEO=32;
-static const int SIDESCREEN = 64;
-static const int USE_SLIDE_NAME = 128;
+/** in which geometries does this slide work */
+namespace LEGAL {
+  enum flagtype { NONE, UNLIMITED, HYPERBOLIC, ANY, NONEUC };
+  }
+
+/** when Enter pressed while showing the text, skip to the next slide immediately */
+static const flagtype QUICKSKIP=8;
+/** The final slide. Shows where the presentation ends */
+static const flagtype FINALSLIDE=16;
+/** Pressing Enter while in another geometry should change slides immediately */
+static const flagtype QUICKGEO=32;
+/** This slide should be displayed in sidescreen mode */
+static const flagtype SIDESCREEN = 64;
+/** When changing geometries, show the name of the slide, instead of the current land */
+static const flagtype USE_SLIDE_NAME = 128;
 #endif
 
+/** an auxiliary function to enable a visualization in the Canvas land */
 EX void setCanvas(presmode mode, char canv) {
   static char wc;
   static eLand ld;
@@ -62,6 +83,7 @@ EX void setCanvas(presmode mode, char canv) {
     }
   }
 
+/** static mode: we get Orbs of Teleport to use them instead of movement */
 bool sickmode;
 
 EX function<eLand(eLand)> getNext;
@@ -72,10 +94,13 @@ EX function<bool(eLand)> showland;
 #define QUICKFIND quickfind = [](eLand l)
 #define SHOWLAND(f) showland = [](eLand l) { return f; }
 
+/** the caption of the special command (executed by pressing '5') in the current slide */
 EX string slidecommand;
 
+/** hooks to execute after calling presentation */
 EX hookset<void(int)> *hooks_slide;
 
+/** call action(mode) for the current slide. Also sets up some default stuff */
 EX void presentation(presmode mode) {
 
   cheater = 0;
@@ -93,6 +118,7 @@ EX void presentation(presmode mode) {
   callhooks(hooks_slide, mode);
   }
 
+/** display the help text for the current slide if texts enabled */
 EX void slidehelp() {
   if(texts && slides[currentslide].help[0])
     gotoHelp(
@@ -102,6 +128,7 @@ EX void slidehelp() {
       );
   }
 
+/** return from a subgame launched while in presentation */
 void return_geometry() {
   gamestack::pop();
   vid.scale = 1; vid.alpha = 1;
@@ -143,19 +170,19 @@ bool handleKeyTour(int sym, int uni) {
   if(NUMBERKEY == '1' || NUMBERKEY == '2') {
     int legal = slides[currentslide].flags & 7;
 
-    if(legal == LEGAL_NONE || legal == LEGAL_HYPERBOLIC) {
+    if(legal == LEGAL::NONE || legal == LEGAL::HYPERBOLIC) {
       addMessage(XLAT("You cannot change geometry in this slide."));
       return true;
       }
-    if(legal == LEGAL_UNLIMITED && NUMBERKEY == '1') {
+    if(legal == LEGAL::UNLIMITED && NUMBERKEY == '1') {
       addMessage(XLAT("This does not work in bounded geometries."));
       return true;
       }
-    if(legal == LEGAL_NONEUC && NUMBERKEY == '2') {
+    if(legal == LEGAL::NONEUC && NUMBERKEY == '2') {
       addMessage(XLAT("This does not work in Euclidean geometry."));
       return true;
       }
-    if(legal == LEGAL_HYPERBOLIC && NUMBERKEY != '3') {
+    if(legal == LEGAL::HYPERBOLIC && NUMBERKEY != '3') {
       addMessage(XLAT("This works only in hyperbolic geometry."));
       return true;
       }
@@ -370,9 +397,10 @@ EX void start() {
     }
   }
 
+/** the default presentation (the Guided Tour)
 EX slide default_slides[] = {
 #if ISMOBILE
-  {"Note for mobiles", 10, LEGAL_NONE | QUICKSKIP,
+  {"Note for mobiles", 10, LEGAL::NONE | QUICKSKIP,
     "This tour is designed for computers, "
     "and keys are given for all actions. It will "
     "work without a keyboard though, although less "
@@ -390,7 +418,7 @@ EX slide default_slides[] = {
       }
     },
 #endif
-  {"Introduction", 10, LEGAL_NONE | QUICKSKIP,
+  {"Introduction", 10, LEGAL::NONE | QUICKSKIP,
     "This tour is mostly aimed to show what is "
     "special about the geometry used by HyperRogue. "
     "It also shows the basics of gameplay, and "
@@ -408,7 +436,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laIce );
       }
     },
-  {"Basics of gameplay", 11, LEGAL_ANY,
+  {"Basics of gameplay", 11, LEGAL::ANY,
     "The game starts in the Icy Lands. Collect the Ice Diamonds "
     "(press F1 if you do not know how to move). "
     "After you collect many of them, monsters will start to pose a challenge.\n"
@@ -429,7 +457,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laIce );
       }
     }, 
-  {"Hypersian Rug model", 21, LEGAL_HYPERBOLIC,
+  {"Hypersian Rug model", 21, LEGAL::HYPERBOLIC,
     "New players think that the action of HyperRogue takes place on a sphere. "
 #if CAP_RUG
     "This is not true -- the next slide will show the surface HyperRogue "
@@ -456,7 +484,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laIce );
       }
     },
-  {"Expansion", 22, LEGAL_ANY | USE_SLIDE_NAME,
+  {"Expansion", 22, LEGAL::ANY | USE_SLIDE_NAME,
     "The next slide shows the number of cells in distance 1, 2, 3, ... from you. "
     "It grows exponentially: there are more than 10^100 cells "
     "in radius 1000 around you, and you will move further away during the game!\n\n"
@@ -476,7 +504,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laIce );
       }
     },
-  {"Tiling and Tactics", 23, LEGAL_ANY | USE_SLIDE_NAME, 
+  {"Tiling and Tactics", 23, LEGAL::ANY | USE_SLIDE_NAME, 
     "The tactics of fighting simple monsters, such as the Yetis from the Icy Lands, "
     "might appear shallow, but hyperbolic geometry is essential even there. "
     "In the next slide, you are attacked by two monsters at once. "
@@ -492,7 +520,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laCanvas );
       }
     },
-  {"Straight Lines", 24, LEGAL_ANY, 
+  {"Straight Lines", 24, LEGAL::ANY, 
     "Hyperbolic geometry has been discovered by the 19th century mathematicians who "
     "wondered about the nature of paralellness. Take a line L and a point A. "
     "Can a world exist where there is more than one line passing through A "
@@ -519,7 +547,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laCrossroads || l == laIce );
       }
     },
-  {"Running Dogs", 25, LEGAL_ANY,
+  {"Running Dogs", 25, LEGAL::ANY,
     "To learn more about straight lines, "
     "wander further, and you should find the Land of Eternal Motion. "
     "Try to run in a straight line, with a Running Dog next to you. "
@@ -541,7 +569,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laCrossroads || l == laMotion );
       }
     },
-  {"Equidistants", 27, LEGAL_ANY,
+  {"Equidistants", 27, LEGAL::ANY,
     "Equidistants are curves which are at some fixed distance from a "
     "straight line. Some lands in HyperRogue are based on equidistants; "
     "you should see them after wandering a bit more.\n\n"
@@ -558,7 +586,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laCrossroads || l == laDungeon || l == laOcean || l == laIvoryTower || l == laEndorian );
       }
     },
-  {"Circles", 26, LEGAL_ANY,
+  {"Circles", 26, LEGAL::ANY,
     "Circles are strange in hyperbolic geometry too. "
     "Look for the Castle of Camelot in the Crossroads; "
     "the Round Table inside is a circle of radius 28. "
@@ -581,7 +609,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laCrossroads || l == laCamelot );
       }
     },
-  {"Horocycles", 28, LEGAL_ANY,
+  {"Horocycles", 28, LEGAL::ANY,
     "Horocycles are similar to circles, but you cannot reach their center at all -- "
     "they can be understood as limit circles of infinite radius centered in some point "
     "in infinity (also called an ideal point).\n\n"
@@ -600,7 +628,7 @@ EX slide default_slides[] = {
       SHOWLAND ( l == laCrossroads || l == laRlyeh || l == laTemple );
       }
     },
-  {"Half-plane model", 47, LEGAL_HYPERBOLIC,
+  {"Half-plane model", 47, LEGAL::HYPERBOLIC,
     "The game is normally displayed in the so called Poincaré disk model, "
     "which is a kind of a map of the infinite hyperbolic world. "
     "There are many projections of Earth, but since Earth is curved, "
@@ -617,7 +645,7 @@ EX slide default_slides[] = {
       if(mode == 3) pmodel = mdDisk, models::rotation = 0, vid.use_smart_range = smart;
       }
     },
-  {"Curvature", 29, LEGAL_ANY,
+  {"Curvature", 29, LEGAL::ANY,
     "Now, go to the Burial Grounds and find an Orb of the Sword. The Sword appears to "
     "always be facing in the same direction whatever you do, and it appears that "
     "you have to rotate the sword to excavate the treasures; "
@@ -641,7 +669,7 @@ EX slide default_slides[] = {
       SHOWLAND ( l == laCrossroads || l == laBurial );
       }
     },
-  {"Periodic patterns", 30, LEGAL_UNLIMITED | USE_SLIDE_NAME,
+  {"Periodic patterns", 30, LEGAL::UNLIMITED | USE_SLIDE_NAME,
     "Hyperbolic geometry yields much more interesting periodic patterns "
     "than Euclidean.",
     [] (presmode mode) {
@@ -655,7 +683,7 @@ EX slide default_slides[] = {
       SHOWLAND ( l == laCanvas );
       }
     },
-  {"Periodic patterns: application", 31, LEGAL_ANY,
+  {"Periodic patterns: application", 31, LEGAL::ANY,
     "Many lands in HyperRogue are based around periodic patterns. "
     "For example, both Zebra and Windy Plains are based on the pattern "
     "shown in the previous slide. "
@@ -675,7 +703,7 @@ EX slide default_slides[] = {
       l == laEmerald || l == laWineyard || l == laPower );
       }
     },
-  {"Fractal landscapes", 32, LEGAL_UNLIMITED | USE_SLIDE_NAME,
+  {"Fractal landscapes", 32, LEGAL::UNLIMITED | USE_SLIDE_NAME,
     "On the following slide, the colors change smoothly in the whole infinite world. "
     "Again, this works better than in Euclidean geometry.",
     [] (presmode mode) {
@@ -683,7 +711,7 @@ EX slide default_slides[] = {
       SHOWLAND ( l == laCanvas );
       }
     },
-  {"Fractal landscapes: application", 33, LEGAL_ANY,
+  {"Fractal landscapes: application", 33, LEGAL::ANY,
     "This is applied in HyperRogue to create landscapes, such as the chasms in the "
     "land of Reptiles or the Dragon Chasms, which you should find quickly. "
     "Also in the Dragon Chasms, you can find a Baby Tortoise, and try to find "
@@ -711,7 +739,7 @@ EX slide default_slides[] = {
       SHOWLAND ( l == laCrossroads || l == laReptile || l == laDragon || l == laTortoise );
       }
     },
-  {"Poincaré Ball model", 41, LEGAL_HYPERBOLIC,
+  {"Poincaré Ball model", 41, LEGAL::HYPERBOLIC,
     "The Poincaré disk model is a model of a hyperbolic *plane* -- you "
     "might wonder why are the walls rendered in 3D then.\n\n"
     "HyperRogue actually assumes that the floor level is an equidistant surface "
@@ -725,7 +753,7 @@ EX slide default_slides[] = {
       if(mode == 3) pmodel = mdDisk;
       }
     },
-  {"Hyperboloid model", 42, LEGAL_ANY,
+  {"Hyperboloid model", 42, LEGAL::ANY,
     "Let's see more models of the hyperbolic plane. "
     "This model uses a hyperboloid in the Minkowski geometry; "
     "it is used internally by HyperRogue.",
@@ -734,14 +762,14 @@ EX slide default_slides[] = {
       if(mode == 3) pmodel = mdDisk;
       }
     },
-  {"Beltrami-Klein model", 43, LEGAL_ANY | USE_SLIDE_NAME,
+  {"Beltrami-Klein model", 43, LEGAL::ANY | USE_SLIDE_NAME,
     "This model renders straight lines as straight, but it distorts angles.",
     [] (presmode mode) {
       if(mode == 1 || mode == pmGeometryReset || mode == pmGeometry) vid.alpha = 0;
       if(mode == 3) vid.alpha = 1;
       }
     },
-  {"Gans model", 44, LEGAL_ANY | USE_SLIDE_NAME,
+  {"Gans model", 44, LEGAL::ANY | USE_SLIDE_NAME,
     "Yet another model, which corresponds to orthographic projection of the "
     "sphere. Poincaré disk model, Beltrami-Klein model, and the Gans "
     "model are all obtained by looking at either the hyperboloid model or an "
@@ -751,7 +779,7 @@ EX slide default_slides[] = {
       if(mode == 3) vid.alpha = vid.scale = 1;
       }
     },
-  {"Band model", 45, LEGAL_NONEUC | USE_SLIDE_NAME, 
+  {"Band model", 45, LEGAL::NONEUC | USE_SLIDE_NAME, 
     "The band model is the hyperbolic analog of the Mercator projection of the sphere: "
     "a given straight line is rendered as a straight line, and the rest of the "
     "world is mapped conformally, that is, angles are not distorted. "
@@ -780,7 +808,7 @@ EX slide default_slides[] = {
 #endif
       }
     },
-/*{"Conformal square model", 46, LEGAL_HYPERBOLIC,
+/*{"Conformal square model", 46, LEGAL::HYPERBOLIC,
     "The world can be mapped conformally to a square too.",
     [] (presmode mode) {
       if(mode == 1) pmodel = mdPolygonal, polygonal::solve();
@@ -788,7 +816,7 @@ EX slide default_slides[] = {
       }
     }, */
 #if !ISWEB
-  {"Shoot'em up mode", 52, LEGAL_NONE | USE_SLIDE_NAME,
+  {"Shoot'em up mode", 52, LEGAL::NONE | USE_SLIDE_NAME,
     "In the shoot'em up mode, space and time is continuous. "
     "You attack by throwing knives. "
     "Very fun with two players!\n\n"
@@ -809,7 +837,7 @@ EX slide default_slides[] = {
       }
     },
 #endif
-  {"THE END", 99, LEGAL_ANY | FINALSLIDE,
+  {"THE END", 99, LEGAL::ANY | FINALSLIDE,
     "This tour shows just a small part of what you can see in the world of HyperRogue. "
     "For example, "
     "hyperbolic mazes are much nicer than their Euclidean counterparts. "
@@ -822,6 +850,7 @@ EX slide default_slides[] = {
     }
   };
 
+/** currently used set of slides */
 EX slide *slides = default_slides;
 
 auto a1 = addHook(hooks_frame, 100, [] () { if(tour::on) tour::presentation(tour::pmFrame); });

@@ -2180,7 +2180,7 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
 #define RVPATH HYPERPATH "rogueviz/"
 
 slide rvslides[] = {
-    {"RogueViz", 999, LEGAL_ANY, 
+    {"RogueViz", 999, LEGAL::ANY, 
       "This is a presentation of RogueViz, which "
       "is an adaptation of HyperRogue as a visualization tool "
       "rather than a game. Hyperbolic space is great "
@@ -2200,7 +2200,7 @@ slide rvslides[] = {
           }
         }
       },
-    {"straight lines in the Palace", 999, LEGAL_ANY, 
+    {"straight lines in the Palace", 999, LEGAL::ANY, 
       "One simple slide about HyperRogue. Press '5' to show some hyperbolic straight lines.",
       [] (presmode mode) {
        using namespace linepatterns;
@@ -2209,7 +2209,7 @@ slide rvslides[] = {
        if(mode == 3) patPalace.color = 0xFFD50000;
         }
       },
-  {"Collatz conjecture", 51, LEGAL_UNLIMITED | QUICKGEO,
+  {"Collatz conjecture", 51, LEGAL::UNLIMITED | QUICKGEO,
     "The following slide is a visualization of the Collatz conjecture. "
     "Press '5' for a spiral rendering of the Collatz conjecture visualization.\n\n"
     "Note that this, and many other RogueViz visualizations, have "
@@ -2235,7 +2235,7 @@ slide rvslides[] = {
       })
     },
 
-  {"Roguelikes", 63, LEGAL_UNLIMITED | QUICKGEO,
+  {"Roguelikes", 63, LEGAL::UNLIMITED | QUICKGEO,
     "A visualization of roguelikes, based on discussion on /r/reddit. "
     "See: http://www.roguetemple.com/z/hyper/reddit.php",
     roguevizslide('0', [] () {
@@ -2256,7 +2256,7 @@ slide rvslides[] = {
       rogueviz::sag::loadsnake(RVPATH "roguelikes/" + cname());
       })    
     },
-  {"Programming languages of GitHub", 64, LEGAL_UNLIMITED | QUICKGEO,
+  {"Programming languages of GitHub", 64, LEGAL::UNLIMITED | QUICKGEO,
     "A visualization of programming languages.",
     roguevizslide('0', [] () {
       rogueviz::dftcolor = 0x282828FF;
@@ -2277,7 +2277,7 @@ slide rvslides[] = {
       if(euclid) rogueviz::legend.clear();
       })
     },
-    {"Boardgames", 62, LEGAL_UNLIMITED | QUICKGEO,
+    {"Boardgames", 62, LEGAL::UNLIMITED | QUICKGEO,
         "A visualization of board games, based on discussions on Reddit.",
     roguevizslide('0', [] () {
       rogueviz::dftcolor = 0x282828FF;
@@ -2297,7 +2297,7 @@ slide rvslides[] = {
       rogueviz::sag::loadsnake(RVPATH "boardgames/" + cname());
       })
         },
-    {"Tree of Life", 61, LEGAL_UNLIMITED | QUICKGEO,
+    {"Tree of Life", 61, LEGAL::UNLIMITED | QUICKGEO,
       "Not described.",
 
     roguevizslide('0', [] () {
@@ -2313,7 +2313,7 @@ slide rvslides[] = {
 
       rogueviz::tree::read(RVPATH "treeoflife/tol.txt");
       })},
-    {"Spiral Staircase", 62, LEGAL_NONE | QUICKGEO,
+    {"Spiral Staircase", 62, LEGAL::NONE | QUICKGEO,
      "Spiral Staircase Demo. Press '5' to change the curvature or other parameters.",
      
     [] (presmode mode) {
@@ -2322,7 +2322,7 @@ slide rvslides[] = {
       slidecommand = "staircase menu";
       if(mode == 4) pushScreen(staircase::showMenu);
       }},
-    {"Banach-Tarski-like", 62, LEGAL_NONE,
+    {"Banach-Tarski-like", 62, LEGAL::NONE,
      "Banach-Tarski-like decomposition. Break a hyperbolic plane into two hyperbolic planes.\n\n"
      "Press '5' to show the decomposition. Press any key to stop.\n\n"
      "You will see a map of the decomposition. Press '5' again to return.",
@@ -2357,7 +2357,7 @@ slide rvslides[] = {
           }
         }
       }},
-    {"Pentagonal Exploration", 62, LEGAL_NONE | QUICKGEO,
+    {"Pentagonal Exploration", 62, LEGAL::NONE | QUICKGEO,
      "Pentagonal Exploration explained at: http://www.roguetemple.com/z/sims/snub/\n\n"
      "Move the mouse nearer and further away from the X.\n\n"
      "Press 3 4 5 6 7 8 9 shift+4 shift+5 shift+6 to change the geometry.",
@@ -2374,7 +2374,7 @@ slide rvslides[] = {
         start_game();
         }
       }},
-  {"THE END", 99, LEGAL_ANY | FINALSLIDE,
+  {"THE END", 99, LEGAL::ANY | FINALSLIDE,
     "Press '5' to leave the presentation.",
     [] (presmode mode) {
       firstland = specialland = laIce;
