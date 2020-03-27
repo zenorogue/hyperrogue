@@ -397,7 +397,7 @@ EX void start() {
     }
   }
 
-/** the default presentation (the Guided Tour)
+/** the default presentation (the Guided Tour) */
 EX slide default_slides[] = {
 #if ISMOBILE
   {"Note for mobiles", 10, LEGAL::NONE | QUICKSKIP,
