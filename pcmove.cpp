@@ -13,37 +13,37 @@ EX bool keepLightning = false;
 
 EX bool seenSevenMines = false;
 
-/** have we been warned about the Haunted Woods? */
+/** \brief have we been warned about the Haunted Woods? */
 EX bool hauntedWarning;
 
-/** is the Survivalist achievement still valid? have we received it? */
+/** \brief is the Survivalist achievement still valid? have we received it? */
 EX bool survivalist;
 
 EX void fail_survivalist() {
   changes.value_set(survivalist, false);
   }
 
-/** last move was invisible */
+/** \brief last move was invisible */
 EX bool invismove = false;
-/** last move was invisible due to Orb of Fish (thus Fish still see you)*/
+/** \brief last move was invisible due to Orb of Fish (thus Fish still see you)*/
 EX bool invisfish = false;
 
-/** if false, make the PC look in direction cwt.spin (after attack); otherwise, make them look the other direction (after move) */
+/** \brief if false, make the PC look in direction cwt.spin (after attack); otherwise, make them look the other direction (after move) */
 EX bool flipplayer = true;
 
-/** Cellwalker describing the single player. Also used temporarily in shmup and multiplayer modes. */
+/** \brief Cellwalker describing the single player. Also used temporarily in shmup and multiplayer modes. */
 EX cellwalker cwt;
 
 EX cell*& singlepos() { return cwt.at; }
 EX inline bool singleused() { return !(shmup::on || multi::players > 1); }
 
-/** should we center the screen on the PC? */
+/** \brief should we center the screen on the PC? */
 EX bool playermoved = true;
 
-/** did the player cheat? how many times? */
+/** \brief did the player cheat? how many times? */
 EX int  cheater = 0;
 
-/** lands visited -- unblock some modes */
+/** \brief lands visited -- unblock some modes */
 EX bool landvisited[landtypes];
 
 EX int noiseuntil; // noise until the given turn
@@ -401,7 +401,8 @@ EX void copy_metadata(cell *x, const gcell *y) {
 
 extern void playSound(cell *c, const string& fname, int vol);
 
-/** A structure to keep track of changes made during the player movement.
+/** \brief A structure to keep track of changes made during the player movement.
+ *
  *  This is a singleton object, \link hr::changes \endlink.
  */
 
@@ -412,7 +413,8 @@ struct changes_t {
   bool checking;
   
   /**
-   * Start keeping track of changes, perform changes.
+   * \brief Start keeping track of changes, perform changes.
+   *
    * init(false) if you intend to commit the changes (if successful), or 
    * init(true) if you just want to check whether the move would be successful, 
    * without performing it if it is.
@@ -428,9 +430,7 @@ struct changes_t {
     checking = ch;
     }
 
-  /**
-   * Commit the changes. Should only be called after init(false).
-   */
+  /** \brief Commit the changes. Should only be called after init(false). */
 
   void commit() { 
     on = false; 
@@ -439,9 +439,7 @@ struct changes_t {
     commits.clear();
     }
 
-  /**
-   * Rollback the changes. Should only be called after init(true).
-   */
+  /** \brief Rollback the changes. */
 
   void rollback(int pos = 0) { 
     on = false;
@@ -453,18 +451,14 @@ struct changes_t {
     commits.clear();
     }
   
-  /**
-   * The changes to cell c will be rolled back when rollback() is called.
-   */
+  /** \brief The changes to cell c will be rolled back when rollback() is called. */
   void ccell(cell *c) {
     if(!on) return;
     gcell a = *c;
     rollbacks.push_back([c, a] { copy_metadata(c, &a); });
     }
   
-  /**
-   * Set the value of what to value. This change will be rolled back if necessary.
-   */
+  /** \brief Set the value of what to value. This change will be rolled back if necessary. */
   template<class T> void value_set(T& what, T value) {
     if(!on) { what = value; return; }
     if(what == value) return;
@@ -473,9 +467,7 @@ struct changes_t {
     what = value;
     }
 
-  /**
-   * Add step to the value of what. This change will be rolled back if necessary.
-   */
+  /** \brief Add step to the value of what. This change will be rolled back if necessary. */
 
   template<class T> void value_add(T& what, T step) {
     value_keep(what); what += step;
@@ -483,9 +475,7 @@ struct changes_t {
 
   template<class T> void value_inc(T& what) { value_add(what, 1); }
 
-  /**
-   * Any change to the value of what will be rolled back if necessary.
-   */
+  /** \brief Any change to the value of what will be rolled back if necessary. */
 
   template<class T> void value_keep(T& what) {
     if(!on) return;
@@ -493,9 +483,7 @@ struct changes_t {
     rollbacks.push_back([&what, old] { what = old; });
     }
   
-  /**
-   * Like value_keep but for maps.
-   */
+  /** \brief Like value_keep but for maps. */
 
   template<class T, class U, class V> void map_value(map<T, U>& vmap, V& key) {
     if(vmap.count(key)) {
@@ -507,18 +495,14 @@ struct changes_t {
       }
     }
   
-  /**
-   * Perform the given action on commit. @see LATE
-   */
+  /** \brief Perform the given action on commit. @see LATE */
    
   void at_commit(reaction_t act) {
     if(!on) act();
     else commits.emplace_back(act);
     }
 
-  /**
-   * Perform the given action on rollback.
-   */
+  /** \brief Perform the given action on rollback. */
 
   void at_rollback(reaction_t act) {
     if(on) rollbacks.emplace_back(act);
@@ -526,9 +510,7 @@ struct changes_t {
   };
 #endif
 
-/**
- * The only instance of hr::changes_t
- */
+/** \brief The only instance of hr::changes_t */
 EX changes_t changes;
 
 /**
@@ -539,8 +521,9 @@ bool switch_lhu_in(eLand l) {
   return among(l, laBrownian, laMinefield, laTerracotta, laHive);
   }
 
-/**
- * Apply the Orb of Chaos. We assume that the player moves from cwt.peek, in
+/** \brief Apply the Orb of Chaos.
+ *
+ * We assume that the player moves from cwt.peek, in
  * in the direction given by cwt.spin.
  */
 void apply_chaos() {
