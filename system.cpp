@@ -27,18 +27,17 @@ namespace rg {
   static const char dualmode = 'U';
   static const char heptagons = '7';
   
-  // wrongmode only -- marks 'global' achievements not related to the current mode
+  /** wrongmode only -- marks 'global' achievements not related to the current mode */
   static const char global = 'x'; 
-  // wrongmode only -- change vid.scfg.players then restart_game(rg::nothing) instead
+  /** wrongmode only -- change vid.scfg.players then restart_game(rg::nothing) instead */
   static const char multi = 'm';
-  // wrongmode only -- mark achievements for special geometries/variations
+  /** wrongmode only -- mark achievements for special geometries/variations */
   static const char special_geometry = 'g';
   }
 #endif
 
 EX bool game_active;
 
-EX bool cblind;
 EX bool autocheat;
 EX eWall canvas_default_wall = waNone;
 

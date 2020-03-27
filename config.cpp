@@ -643,7 +643,7 @@ EX void initConfig() {
   addsaver(nilv::nilperiod[1], "nilperiod_y");
   addsaver(nilv::nilperiod[2], "nilperiod_z");
   
-  addsaver(neon_mode, "neon_mode");
+  addsaverenum(neon_mode, "neon_mode");
   addsaver(noshadow, "noshadow");
   addsaver(bright, "bright");
   addsaver(cblind, "cblind");
@@ -1142,16 +1142,15 @@ EX void showGraphConfig() {
           }
         else dialog::addBreak(100);
         
-        dialog::addBoolItem("standard graphics", neon_mode == 0, 'A');
-        dialog::add_action([] { neon_mode = 0; });
-        dialog::addBoolItem("neon mode", neon_mode == 1, 'B');
-        dialog::add_action([] { neon_mode = 1; });
-        dialog::addBoolItem("no boundary mode", neon_mode == 2, 'C');
-        dialog::add_action([] { neon_mode = 2; });
-        dialog::addBoolItem("neon mode II", neon_mode == 3, 'D');
-        dialog::add_action([] { neon_mode = 3; });
-        dialog::addBoolItem("illustration mode", neon_mode == 4, 'E');
-        dialog::add_action([] { neon_mode = 4; });
+        auto neon_option = [&] (string s, eNeon val, char key) {
+          dialog::addBoolItem(XLAT(s), neon_mode == val, key);
+          dialog::add_action([val] { neon_mode = (neon_mode == val) ? eNeon::none : val; });
+          };
+        
+        neon_option("neon mode", eNeon::neon, 'B');
+        neon_option("no boundary mode", eNeon::no_boundary, 'C');
+        neon_option("neon mode II", eNeon::neon2, 'D');
+        neon_option("illustration mode", eNeon::illustration, 'E');
         dialog::addBreak(100);
         dialog::addInfo(XLAT("hint: press Alt while testing modes"));
         dialog::addBreak(100);
@@ -2526,7 +2525,7 @@ EX int read_config_args() {
     }
   else if(argis("-neon")) {
     PHASEFROM(2);
-    shift(); neon_mode = argi();
+    shift(); neon_mode = eNeon(argi());
     }
   else if(argis("-precw")) {
     PHASEFROM(2);

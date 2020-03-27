@@ -2039,21 +2039,37 @@ template<class T, class... U> T& queuea(PPR prio, U... u) {
   }
 #endif
 
-EX int neon_mode = 0;
+/** colorblind mode */
+EX bool cblind;
+
+#if HDR
+enum class eNeon { none, neon, no_boundary, neon2, illustration};
+#endif
+
+EX eNeon neon_mode;
 
 EX void apply_neon(color_t& col, int& r) {
   switch(neon_mode) {
-    case 0: break;
-    case 1: poly_outline = col << 8; col = 0; break;
-    case 2: r = 0; break;
-    case 3: poly_outline = col << 8; col &= 0xFEFEFE; col >>= 1; break;
+    case eNeon::none: 
+    case eNeon::illustration:
+      break;
+    case eNeon::neon: 
+      poly_outline = col << 8; col = 0; 
+      break;      
+    case eNeon::no_boundary: 
+      r = 0;
+      break;
+    case eNeon::neon2:
+      poly_outline = col << 8; col &= 0xFEFEFE; col >>= 1; 
+      break;
     }
   }
 
 #if CAP_SHAPES
 
+/** used when neon_mode is eNeon::illustration */
 EX color_t magentize(color_t x) {
-  if(neon_mode != 4) return x;
+  if(neon_mode != eNeon::illustration) return x;
   int green = part(x,2);
   int magenta = (part(x, 1) + part(x, 3)) / 2;
   int nm = max(magenta, green);
@@ -2095,27 +2111,27 @@ EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, P
     part(col,1) = b; */
     part(col,2) = part(col,3) = (part(col,2) * 2 + part(col,3) + 1)/3;
     }
-  if(neon_mode == 0 || (h.flags & POLY_TRIANGLES)) {
+  if(neon_mode == eNeon::none || (h.flags & POLY_TRIANGLES)) {
     ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
     ptd.outline = poly_outline;
     }
   else switch(neon_mode) {
-    case 1:
+    case eNeon::neon:
       ptd.color = (poly_outline & 0xFFFFFF00) | (col & 0xFF);
       ptd.outline = (darkened(col >> 8) << 8) | (col & 0xFF);
       if(col == 0xFF) ptd.outline = 0xFFFFFFFF;
       break;
-    case 2:
+    case eNeon::no_boundary:
       ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
       ptd.outline = 0;
       break;
-    case 3:
+    case eNeon::neon2:
       ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF) + ((col & 0xFF) >> 2);
       ptd.outline = (darkened(col >> 8) << 8) + (col & 0xFF);
       if(col == 0xFF) ptd.outline = 0xFFFFFFFF;
       if(poly_outline != 0xFF) ptd.outline = poly_outline;
       break;
-    case 4: {
+    case eNeon::illustration: {
       if(poly_outline && (poly_outline>>8) != bordcolor) {
         ptd.color = magentize(col);
         ptd.outline = 0xFF;
@@ -2128,6 +2144,7 @@ EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, P
       if(ptd.outline & 0xFF) ptd.outline |= 0xFF;
       break;
       }
+    case eNeon::none: ;
     }
   ptd.linewidth = vid.linewidth;
   ptd.flags = h.flags;
@@ -2254,24 +2271,24 @@ EX void queuestr(const transmatrix& V, double size, const string& chr, color_t c
   
 EX void queuestrn(const transmatrix& V, double size, const string& chr, color_t col, int frame IS(0), int align IS(8)) {
   switch(neon_mode) {
-    case 0:
+    case eNeon::none:
       queuestr(V, size, chr, col, frame, align);
       break;
-    case 1: {
+    case eNeon::neon: {
       dynamicval<color_t> c(poly_outline, col << 8);
       queuestr(V, size, chr, 0, frame, align);
       break;
       }
-    case 2: {
+    case eNeon::no_boundary: {
       queuestr(V, size, chr, col, 0, align);
       break;
       }
-    case 3: {
+    case eNeon::neon2: {
       dynamicval<color_t> c(poly_outline, (col << 8) | 0xFF);
       queuestr(V, size, chr, (col & 0xFEFEFE) >> 1, frame, align);
       break;
       }
-    case 4: {
+    case eNeon::illustration: {
       dynamicval<color_t> c(poly_outline, poly_outline);
       if(poly_outline && (poly_outline>>8) != bordcolor) {
         col = magentize(col << 8) >> 8;
