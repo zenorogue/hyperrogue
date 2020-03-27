@@ -204,7 +204,7 @@ void show() {
     bool cur = S.box[MAXBOX-1];
     if(cur) {
       saveBox(); 
-      for(int i=0; i<POSSCORE; i++) S.box[i] = savebox[i];
+      for(int i=0; i<POSSCORE; i++) S.box[i] = save.box[i];
       S.box[0] = S.box[65];
       }
     color_t col = cur ? 0xFFD500 : 0xC0C0C0;
@@ -331,7 +331,7 @@ void load() {
 
   saveBox();
   score sc; 
-  for(int i=0; i<POSSCORE; i++) sc.box[i] = savebox[i];
+  for(int i=0; i<POSSCORE; i++) sc.box[i] = save.box[i];
   sc.box[POSSCORE] = 0;
   sc.box[MAXBOX-1] = 1; sc.ver = "NOW";
   scores.push_back(sc);
