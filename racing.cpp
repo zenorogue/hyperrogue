@@ -8,6 +8,7 @@
 #include "hyper.h"
 namespace hr {
 
+/** \brief Racing mode */
 EX namespace racing {
 
 #if CAP_RACING

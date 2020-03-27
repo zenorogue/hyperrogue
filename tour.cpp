@@ -9,22 +9,22 @@
 namespace hr { 
 #if CAP_TOUR
 
-/** Variables and function related to Guided Tour and other presentations. */
+/** \brief Variables and function related to Guided Tour and other presentations. */
 EX namespace tour {
 
-/** are we currently in a presentation */
+/** \brief are we currently in a presentation */
 EX bool on;
 
-/** should the presentation texts be shown */
+/** \brief should the presentation texts be shown */
 EX bool texts = true;
 
 EX string tourhelp;
 
-/** index of the current slide */
+/** \brief index of the current slide */
 EX int currentslide;
 
 #if HDR
-/** a parameter for the slides' action function */
+/** \brief a parameter for the slides' action function */
 enum presmode { 
   pmStartAll = 0,
   pmStart = 1, pmFrame = 2, pmStop = 3, pmKey = 4, pmRestart = 5,
@@ -32,38 +32,38 @@ enum presmode {
   pmGeometry = 11, pmGeometryReset = 13, pmGeometryStart = 15
   };
 
-/** slide definition */
+/** \brief slide definition */
 struct slide { 
-  /** title of this slide */
+  /** \brief title of this slide */
   const char *name; 
-  /** ID (currently unused */
+  /** \brief ID (currently unused */
   int unused_id; 
-  /** various flags */
+  /** \brief various flags */
   flagtype flags; 
-  /** the helptext */
+  /** \brief the helptext */
   const char *help; 
-  /** This function is called while this slide is displayed. Parameter hr::tour::presmode mode says what should be done */
+  /** \brief This function is called while this slide is displayed. Parameter hr::tour::presmode mode says what should be done */
   function<void(presmode mode)> action;
   };  
 
-/** in which geometries does this slide work */
+/** \brief in which geometries does this slide work */
 namespace LEGAL {
   enum flagtype { NONE, UNLIMITED, HYPERBOLIC, ANY, NONEUC };
   }
 
-/** when Enter pressed while showing the text, skip to the next slide immediately */
+/** \brief when Enter pressed while showing the text, skip to the next slide immediately */
 static const flagtype QUICKSKIP=8;
-/** The final slide. Shows where the presentation ends */
+/** \brief The final slide. Shows where the presentation ends */
 static const flagtype FINALSLIDE=16;
-/** Pressing Enter while in another geometry should change slides immediately */
+/** \brief Pressing Enter while in another geometry should change slides immediately */
 static const flagtype QUICKGEO=32;
-/** This slide should be displayed in sidescreen mode */
+/** \brief This slide should be displayed in sidescreen mode */
 static const flagtype SIDESCREEN = 64;
-/** When changing geometries, show the name of the slide, instead of the current land */
+/** \brief When changing geometries, show the name of the slide, instead of the current land */
 static const flagtype USE_SLIDE_NAME = 128;
 #endif
 
-/** an auxiliary function to enable a visualization in the Canvas land */
+/** \brief an auxiliary function to enable a visualization in the Canvas land */
 EX void setCanvas(presmode mode, char canv) {
   static char wc;
   static eLand ld;
@@ -83,7 +83,7 @@ EX void setCanvas(presmode mode, char canv) {
     }
   }
 
-/** static mode: we get Orbs of Teleport to use them instead of movement */
+/** \brief static mode: we get Orbs of Teleport to use them instead of movement */
 bool sickmode;
 
 EX function<eLand(eLand)> getNext;
@@ -94,13 +94,13 @@ EX function<bool(eLand)> showland;
 #define QUICKFIND quickfind = [](eLand l)
 #define SHOWLAND(f) showland = [](eLand l) { return f; }
 
-/** the caption of the special command (executed by pressing '5') in the current slide */
+/** \brief the caption of the special command (executed by pressing '5') in the current slide */
 EX string slidecommand;
 
-/** hooks to execute after calling presentation */
+/** \brief hooks to execute after calling presentation */
 EX hookset<void(int)> *hooks_slide;
 
-/** call action(mode) for the current slide. Also sets up some default stuff */
+/** \brief call action(mode) for the current slide. Also sets up some default stuff */
 EX void presentation(presmode mode) {
 
   cheater = 0;
@@ -118,7 +118,7 @@ EX void presentation(presmode mode) {
   callhooks(hooks_slide, mode);
   }
 
-/** display the help text for the current slide if texts enabled */
+/** \brief display the help text for the current slide if texts enabled */
 EX void slidehelp() {
   if(texts && slides[currentslide].help[0])
     gotoHelp(
@@ -128,7 +128,7 @@ EX void slidehelp() {
       );
   }
 
-/** return from a subgame launched while in presentation */
+/** \brief return from a subgame launched while in presentation */
 void return_geometry() {
   gamestack::pop();
   vid.scale = 1; vid.alpha = 1;
@@ -397,7 +397,7 @@ EX void start() {
     }
   }
 
-/** the default presentation (the Guided Tour) */
+/** \brief the default presentation (the Guided Tour) */
 EX slide default_slides[] = {
 #if ISMOBILE
   {"Note for mobiles", 10, LEGAL::NONE | QUICKSKIP,
@@ -850,7 +850,7 @@ EX slide default_slides[] = {
     }
   };
 
-/** currently used set of slides */
+/** \brief currently used set of slides */
 EX slide *slides = default_slides;
 
 auto a1 = addHook(hooks_frame, 100, [] () { if(tour::on) tour::presentation(tour::pmFrame); });

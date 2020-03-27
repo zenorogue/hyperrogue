@@ -8,7 +8,7 @@
 #include "hyper.h"
 namespace hr {
 
-// --- quotient geometry ---
+/** \brief quotient spaces */
 
 EX namespace quotientspace {
   

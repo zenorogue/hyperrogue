@@ -20,7 +20,7 @@ namespace binary {
   hyperpoint deparabolic3(hyperpoint h);
   }
 
-/** regular three-dimensional tessellations */
+/** \brief regular three-dimensional tessellations */
 EX namespace reg3 {
 
   #if HDR
@@ -41,7 +41,7 @@ EX namespace reg3 {
   EX ld strafedist;
   EX bool dirs_adjacent[16][16];
 
-  /** for adjacent directions a,b, next_dir[a][b] is the next direction adjacent to a, in (counter?)clockwise order from b */
+  /** \brief for adjacent directions a,b, next_dir[a][b] is the next direction adjacent to a, in (counter?)clockwise order from b */
   EX int next_dir[16][16];
 
   template<class T> ld binsearch(ld dmin, ld dmax, const T& f) {
@@ -455,7 +455,7 @@ EX namespace reg3 {
       }
     };
 
-  /** homology cover of the Seifert-Weber space */
+  /** \brief homology cover of the Seifert-Weber space */
   namespace seifert_weber {
   
     using crystal::coord;
@@ -909,7 +909,7 @@ EX namespace reg3 {
       fclose(f);
       }
     
-    /** address = (fieldvalue, state) */
+    /** \brief address = (fieldvalue, state) */
     typedef pair<int, int> address;
     
     /** nles[x] lists the addresses from which we can reach address x 

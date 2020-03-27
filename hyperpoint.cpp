@@ -22,6 +22,7 @@ eVariation variation;
 
 #if HDR
 /** \brief A point in our continuous space
+ *
  *  Originally used for representing points in the hyperbolic plane.
  *  Currently used for all kinds of supported spaces, as well as
  *  for all vector spaces (up to 4 dimensions). We are using
@@ -100,6 +101,7 @@ struct hyperpoint : array<ld, MAXMDIM> {
   };
 
 /** \brief A matrix acting on hr::hyperpoint 
+ *
  *  Since we are using homogeneous coordinates for hr::hyperpoint,
  *  rotations and translations can be represented
  *  as matrix multiplications. Other applications of matrices in HyperRogue 
@@ -711,6 +713,7 @@ EX transmatrix rgpushxto0(const hyperpoint& H) {
   }
 
 /** \brief Fix the numerical inaccuracies in the isometry T
+ *
  *  The nature of hyperbolic geometry makes the computations numerically unstable.
  *  The numerical errors tend to accumulate, eventually destroying the projection.
  *  This function fixes this problem by replacing T with a 'correct' isometry.

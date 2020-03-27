@@ -8,7 +8,7 @@
 #include "hyper.h"
 namespace hr {
 
-/** the main random number generator for the game.
+/** \brief the main random number generator for the game.
  *  
  * All the random calls related to the game mechanics (land generation, AI...) should use hrngen.
  *
@@ -18,15 +18,16 @@ namespace hr {
  */
 EX std::mt19937 hrngen;
 
-/** initialize \link hrngen \endlink */
+/** \brief initialize \link hrngen \endlink */
 EX void shrand(int i) {
   hrngen.seed(i);
   }
 
-/** generate a large number with \link hrngen \endlink */
+/** \brief generate a large number with \link hrngen \endlink */
 EX int hrandpos() { return hrngen() & HRANDMAX; }
 
-/** A random integer from [0..i), generated from \link hrngen \endlink.
+/** \brief A random integer from [0..i), generated from \link hrngen \endlink.
+ *
  *  We are using our own implementations rather than ones from <random>,
  *  to make sure that they return the same values on different compilers.
  **/
@@ -430,7 +431,7 @@ EX cell *wormhead(cell *c) {
   return c;
   }  
   
-/** currently works for worms only */
+/** \brief currently works for worms only */
 EX bool sameMonster(cell *c1, cell *c2) {
   if(!c1 || !c2) return false;
   if(c1 == c2) return true;

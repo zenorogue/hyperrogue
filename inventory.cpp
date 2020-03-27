@@ -9,26 +9,27 @@
 namespace hr { 
 
 /** \brief Implementation of the Orb Strategy Mode. 
+ *
  * The most important functions called outside is hr::inv::show(). 
  */
 EX namespace inv {
 
 #if CAP_INV
-  /** is the Orb Strategy Mode active? */
+  /** \brief is the Orb Strategy Mode active? */
   EX bool on;
-  /** the number of Orbs used up in each type */
+  /** \brief the number of Orbs used up in each type */
   EX array<int, ittypes> usedup;
-  /** the number of Orbs remaining in each type -- it is recalculated based on your treasure and hr::inv::usedup after every move */
+  /** \brief the number of Orbs remaining in each type -- it is recalculated based on your treasure and hr::inv::usedup after every move */
   EX array<int, ittypes> remaining;
-  /** extra orbs can be added to OSM using -IX commandline option */
+  /** \brief extra orbs can be added to OSM using -IX commandline option */
   EX array<int, ittypes> extra_orbs;
 
-  /** random seed used for hr::inv::invr */
+  /** \brief random seed used for hr::inv::invr */
   EX int rseed;
-  /** have we used any 'forbidden' orbs? */
+  /** \brief have we used any 'forbidden' orbs? */
   EX bool usedForbidden;
   
-  /** initialize the OSM data for a new game */
+  /** \brief initialize the OSM data for a new game */
   EX void init() {
     rseed = hrandpos();
     usedForbidden = false;
@@ -67,7 +68,7 @@ EX namespace inv {
     {itGreenGrass, itOrbThorns}
     };
 
-  /** how many orbs can we get from Orb-of-Mirroring orb */
+  /** \brief how many orbs can we get from Orb-of-Mirroring orb */
   int mirrorqty0(eItem orb) {
     if(shmup::on && isShmupLifeOrb(orb)) 
       return 3;
@@ -114,15 +115,15 @@ EX namespace inv {
     return int(mirrorqty0(orb) * sqrt(1.000001+items[itPower]/20.));
     }
   
-  /** PRNG used for calculating how many Orbs you get for your collected treasure */
+  /** \brief PRNG used for calculating how many Orbs you get for your collected treasure */
   std::mt19937 invr;
   
-  /** initialize hr::inv::invr */
+  /** \brief initialize hr::inv::invr */
   void sirand(int i) {
     invr.seed(i);
     }
   
-  /** get the next random value from hr::inv::invr */
+  /** \brief get the next random value from hr::inv::invr */
   int irand(int i) {    
     return invr() % i;
     }
@@ -279,7 +280,7 @@ EX namespace inv {
       extra += extraline(tr, itr >= at ? (its(at)+"!") : "10-50");
     }
   
-  /** Compute how many orbs you get for your current treasure. This is called after every move, and should give consistent results */
+  /** \brief Compute how many orbs you get for your current treasure. This is called after every move, and should give consistent results */
   EX void compute() {
     extra = "";
     orbinfoline = "";
@@ -482,7 +483,7 @@ EX namespace inv {
   
   EX bool activating;
 
-  /** show the OSM Orb screen */
+  /** \brief show the OSM Orb screen */
   EX void show() {
   
     multi::cpid = 0; /* just in case */
