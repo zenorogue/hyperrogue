@@ -9,7 +9,7 @@
 
 namespace hr {
 
-/** raycaster */
+/** \brief raycaster */
 EX namespace ray {
 
 #if CAP_RAY
