@@ -9,8 +9,8 @@
 namespace hr {
 
 #if HDR
+/** This namespace has constants used as parameters in functions such as restart_game and wrongmode. */
 namespace rg {
-  // possible parameters e.g. for restart_game and wrongmode
   static const char nothing = 0;
   static const char peace = 'P';
   static const char inv = 'i';
@@ -56,6 +56,7 @@ EX bool gamegen_failure;
 
 EX eLand top_land;
 
+/** a comparator for version number strings */
 EX bool verless(string v, string cmp) {
   if(isdigit(v[0]) && isdigit(v[1])) 
     v = "A" + v;
@@ -70,8 +71,10 @@ bool do_use_special_land() {
     (peace::on || tactic::on || geometry || NONSTDVAR || randomPatternsMode || yendor::on || racing::on);
   }
 
+/** Hooks for welcomeMessage. Return true to capture.. */
 EX hookset<bool()> *hooks_welcome_message;
 
+/** Print the welcome message during the start of game. Depends on the current mode and other settings. */
 EX void welcomeMessage() {
   if(callhandlers(false, hooks_welcome_message)) return;
   else if(tactic::trailer) return;
@@ -141,9 +144,10 @@ int trailer_cash0 = 5;
 int trailer_cash1 = 15;
 bool trailer_safety = true;
 
+/** These hooks are called at the start of initgame. */
 EX hookset<void()> *hooks_initgame;
 
-// initialize the game
+/** initialize the game */
 EX void initgame() {
   DEBBI(DF_INIT, ("initGame"));
   callhooks(hooks_initgame); 
