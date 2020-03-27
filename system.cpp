@@ -42,7 +42,6 @@ EX bool autocheat;
 EX eWall canvas_default_wall = waNone;
 
 EX int truelotus;
-EX int gamecount;
 
 EX int asteroids_generated, asteroid_orbs_generated;
 
@@ -1055,8 +1054,6 @@ EX void loadsave() {
 #endif
   DEBBI(DF_INIT, ("loadSave"));
 
-  gamecount = 0;
-
   FILE *f = fopen(scorefile, "rt");
   havesave = f;
   if(!f) return;
@@ -1068,7 +1065,6 @@ EX void loadsave() {
     char buf[120];
     if(fgets(buf, 120, f) == NULL) break;
     if(buf[0] == 'H' && buf[1] == 'y') {
-      gamecount++;
       if(fscanf(f, "%s", buf) <= 0) break;
       sc.ver = buf;
       if(sc.ver[1] != '.') sc.ver = '0' + sc.ver;
