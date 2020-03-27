@@ -386,6 +386,9 @@ bool havesave = true;
 
 #if CAP_SAVE
 
+/** a namespace for loading and saving scores and saved games */
+EX namespace scores {
+
 #if HDR
 #define MAXBOX 500
 #define POSSCORE 384 // update this when new boxes are added!
@@ -872,6 +875,8 @@ void loadBoxHigh() {
     }
   }
 
+EX }
+
 // certify that saves and achievements were received
 // in an official version of HyperRogue
 
@@ -887,7 +892,7 @@ EX }
 EX namespace anticheat {
   EX bool tampered;
   void save(FILE *f) {}
-  bool load(FILE *f, score& sc, const string& ver) {return true; }
+  bool load(FILE *f, scores::score& sc, const string& ver) {return true; }
   int certify(const string& s, int a, int b, int c, int d) { return d; }
   int check(int cv, const string& ver, const string& s, int a, int b, int c, int d=0) { return cv==d; }
   void nextid(int& tid, const string& ver, int cert) { tid++; }
@@ -987,9 +992,9 @@ EX void saveStats(bool emergency IS(false)) {
     if(!shmup::on) kills[moPrincessArmedMoved] = countMyGolems(moPrincessArmed); 
     if(!shmup::on) princess::saveHP = countMyGolemsHP(moPrincess); 
     if(!shmup::on) princess::saveArmedHP = countMyGolemsHP(moPrincessArmed); 
-    saveBox();
+    scores::saveBox();
     
-    for(int i=0; i<boxid; i++) fprintf(f, " %d", savebox[i]);
+    for(int i=0; i<scores::boxid; i++) fprintf(f, " %d", scores::savebox[i]);
     anticheat::save(f);
 
     fprintf(f, "\n");
@@ -1040,7 +1045,7 @@ EX void loadsave() {
   FILE *f = fopen(scorefile, "rt");
   havesave = f;
   if(!f) return;
-  score sc;
+  scores::score sc;
   bool ok = false;
   bool tamper = false;
   int coh = counthints();
@@ -1055,10 +1060,11 @@ EX void loadsave() {
       ok = true;
       for(int i=0; i<MAXBOX; i++) {
         if(fscanf(f, "%d", &sc.box[i]) <= 0) {
-          boxid = i;
+          scores::boxid = i;
                     
           tamper = anticheat::load(f, sc, sc.ver);
 
+          using namespace scores;
           for(int i=0; i<boxid; i++) savebox[i] = sc.box[i];
           for(int i=boxid; i<MAXBOX; i++) savebox[i] = 0, sc.box[i] = 0;
 
@@ -1134,6 +1140,7 @@ EX void loadsave() {
     anticheat::tampered = tamper;
 //  printf("box = %d (%d)\n", sc.box[65 + 4 + itOrbSafety - itOrbLightning], boxid);
 //  printf("boxid = %d\n", boxid);
+    using namespace scores;
     for(int i=0; i<boxid; i++) savebox[i] = sc.box[i];
     for(int i=boxid; i<MAXBOX; i++) savebox[i] = 0;
 //  for(int i=160; i<200; i++) printf("%d: %d ", i, savebox[i]);

@@ -673,7 +673,7 @@ EX namespace inv {
 
 #if CAP_SAVE
   EX void applyBox(eItem it) {
-    applyBoxNum(usedup[it]);
+    scores::applyBoxNum(inv::usedup[it]);
     }
 #endif
   
