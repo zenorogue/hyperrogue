@@ -427,10 +427,12 @@ EX namespace sn {
           case 8:
             return xpush(bw*(4.5-j)) * zpush(-1) * ypush(bw*(i-7));
           }
+        break;
         }
 
-      default: throw "not nihsolv";
+      default: break;
       }
+      throw "not nihsolv";
       }
 
     transmatrix adj(heptagon *h, int d) override {

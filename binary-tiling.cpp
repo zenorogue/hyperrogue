@@ -284,6 +284,7 @@ EX namespace bt {
               else
                 return path(h, 4, 2, {3, 4, 1});
             }
+          break;
           }
         case gTernary: {
           switch(d) {
@@ -302,6 +303,7 @@ EX namespace bt {
               else
                 return path(h, 5, 3, {4, 5, 2});
             }
+          break;
           }
         #if MAXMDIM >= 4         
         case gBinary3: {
@@ -336,6 +338,7 @@ EX namespace bt {
               else
                 return path(h, 7, 6, {8, 7, parent->c.spin(8) ^ 2});
             }
+          break;
           }
         case gHoroRec: {
           switch(d) {
@@ -362,6 +365,7 @@ EX namespace bt {
               parent->cmove(6);
               return path(h, 5, 3, {6, 2, parent->c.spin(6)});
             }
+          break;
           }
         case gHoroTris: {            
           switch(d) {
@@ -376,6 +380,7 @@ EX namespace bt {
               else if(s == d-3) return path(h, d, d, {7, 0});
               else return path(h, d, d, {7, d, 9-d-s});
             }
+          break;
           }
         case gHoroHex: {
           // the comment is a picture...
@@ -409,8 +414,9 @@ EX namespace bt {
               return path(h, 12, (z+1)%3+3, {13, z+6});
             }
           }
+          break;
         #endif
-        default: ;
+        default: break;
         }
       printf("error: case not handled in binary tiling\n");
       breakhere();
@@ -470,6 +476,8 @@ EX namespace bt {
             add(-2 * t0 + shift1);
             }
           }
+          // WARNING! UNINTENTIONAL FALLTHROUGH??
+          goto fallthru; fallthru:
         case gHoroRec: {
           ld r2 = sqrt(2);
           for(int y=-1; y<=1; y++) for(int x=-1; x<=1; x+=2) for(int z=-1; z<=1; z++)

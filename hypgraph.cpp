@@ -1072,6 +1072,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         if(pconf.skiprope) 
           ret = mobius(ret, pconf.skiprope, 1);
         }
+      break;
       }
     
     case mdGUARD: case mdManual: break;
@@ -1909,7 +1910,10 @@ EX void draw_model_elements() {
         }
 
       queuereset(pmodel, PPR::CIRCLE);
-      /* fallthrough */
+      ld a = -pconf.model_orientation * degree;
+      queuestr(shiftless(xspinpush0(a, +pconf.twopoint_param)), vid.xres / 100, "X", ringcolor >> 8);
+      queuestr(shiftless(xspinpush0(a, -pconf.twopoint_param)), vid.xres / 100, "X", ringcolor >> 8);
+      return;
       }
 
     case mdTwoPoint: case mdSimulatedPerspective: {
