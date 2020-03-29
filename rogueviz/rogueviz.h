@@ -88,12 +88,6 @@ namespace rogueviz {
   
   inline hookset<void(vertexdata&, cell*, shmup::monster*, int)> *hooks_drawvertex;
   
-  namespace collatz { 
-    extern double s2, s3, p2, p3; 
-    void start(); 
-    void act(vertexdata&, cell*, shmup::monster*, int); 
-    void lookup(long long reached, int bits);
-    }
   void readcolor(const string& cfname);
   extern bool on;
 
