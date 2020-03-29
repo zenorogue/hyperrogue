@@ -75,6 +75,7 @@ namespace collatz {
     }
 
   void act(vertexdata& vd, cell *c, shmup::monster *m, int i) {
+    if(kind != kCollatz) return;
     if(c->cpdist > 7 && euclid) ;
     else if(vd.data == 2) {
       // doubler vertex
@@ -329,7 +330,9 @@ int ah = addHook(hooks_args, 100, readArgs) +
       rogueviz::collatz::start();
       })
     });
-    });
+    })
++ addHook(hooks_drawvertex, 100, act);
+  
 
 EX }
 

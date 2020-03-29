@@ -85,6 +85,9 @@ namespace rogueviz {
   extern bool rvwarp;
 
   extern colorpair dftcolor;
+  
+  inline hookset<void(vertexdata&, cell*, shmup::monster*, int)> *hooks_drawvertex;
+  
   namespace collatz { 
     extern double s2, s3, p2, p3; 
     void start(); 

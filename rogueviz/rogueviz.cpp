@@ -822,8 +822,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       }
     }
 
-  if(kind == kCollatz) 
-    collatz::act(vd, c, m, i);
+  callhooks(hooks_drawvertex, vd, c, m, i);
 
   return true;
   }
