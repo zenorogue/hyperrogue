@@ -2,6 +2,8 @@
 #define _ROGUEVIZ_H_
 // See: http://www.roguetemple.com/z/hyper/rogueviz.php
 
+#include "../hyper.h"
+
 namespace rogueviz {
   using namespace hr;
 
@@ -82,17 +84,6 @@ namespace rogueviz {
   extern bool rog3;
   extern bool rvwarp;
 
-  namespace kohonen {
-    extern int samples;
-    int showsample(int id);
-    int showsample(string id);
-    void describe(cell *c);
-    void steps();
-    void showMenu();
-    bool handleMenu(int sym, int uni);
-    void clear();
-    }
-  
   extern colorpair dftcolor;
   namespace collatz { 
     extern double s2, s3, p2, p3; 
@@ -113,7 +104,7 @@ namespace rogueviz {
   
   namespace rvtour {
     using namespace hr::tour;
-    extern hookset<void(vector<slide>&)> *hooks_build_rvtour;
+    inline hookset<void(vector<slide>&)> *hooks_build_rvtour;
     slide *gen_rvtour();
     }
 
