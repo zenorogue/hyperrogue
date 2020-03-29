@@ -393,4 +393,13 @@ EX string as_cstring(string o) {
 #endif
 #endif
 
+
+#if HDR
+template<class... T> string lalign(int len, T... t) {
+  shstream hs;
+  print(hs, t...);
+  while(isize(hs.s) < len) hs.s += " ";
+  return hs.s;
+  }
+#endif
 }
