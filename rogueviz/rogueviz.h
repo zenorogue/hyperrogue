@@ -96,6 +96,7 @@ namespace rogueviz {
   extern colorpair dftcolor;
   
   inline hookset<void(vertexdata&, cell*, shmup::monster*, int)> *hooks_drawvertex;
+  inline hookset<bool(edgeinfo*, bool store)> *hooks_alt_edges;
   
   void readcolor(const string& cfname);
 
