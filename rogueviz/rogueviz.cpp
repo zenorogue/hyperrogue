@@ -254,62 +254,6 @@ void storeall(int from) {
 
 colorpair dftcolor = 0x282828FF;
 
-namespace spiral {
-
-  int spiral_id;
-
-  ld mul;
-  
-  transmatrix at(double d) {
-    return spin(log(d) * 2 * M_PI / log(mul)) * xpush(log(d));
-    }
-
-  void place(int N, ld _mul) {
-    mul = _mul;
-    init(&spiral_id, RV_GRAPH | RV_HAVE_WEIGHT | RV_INVERSE_WEIGHT);
-    weight_label = "extent";
-    vdata.resize(N);
-  
-    for(int i=0; i<N; i++) {
-      vertexdata& vd = vdata[i];
-      
-      double d = i + 1;
-      
-      transmatrix h = at(d);
-  
-      createViz(i, cwt.at, h);
-      vd.name = its(i+1);
-      virtualRebase(vd.m);
-  
-      vd.cp = dftcolor;
-      }
-  
-    storeall();
-    }
-  
-  void edge(ld shift, ld mul) {
-    int N = isize(vdata);
-    auto t = add_edgetype(fts(shift)+" " + fts(mul));
-    t->visible_from = 1. / (N+.5);
-    for(int i=0; i<N; i++) {
-      int i0 = i+1;
-      int j0 = int(i0 * mul + shift) - 1;
-      if(j0 >= 0 && j0 < N) addedge(i, j0, 1/(i+1), false, t);
-      }
-    }
-  
-  void color(ld start, ld period, colorpair c) {
-    int N = isize(vdata);
-    int maxw = N;
-    while(start >= 0 && start < N) {
-      int i = int(start);
-      vdata[i].cp = c;
-      start += period;
-      maxw--; if(maxw <= 0) break;
-      }
-    }
-  }
-
 int readLabel(fhstream& f) {
   string s = scan<string>(f);
   if(s == "") return -1;
@@ -720,23 +664,11 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         col &= 0xFF;
         col |= (forecolor << 8);
         }
+      
+      if(callhandlers(false, hooks_alt_edges, ei, false)) ;
 
-      bool onspiral = (vizid == &spiral::spiral_id) && abs(ei->i - ei->j) == 1;
-
-      if((pmodel || onspiral) && !fat_edges) {
-        if(onspiral) {
-          const int prec = 20; 
-          transmatrix T = ggmatrix(currentmap->gamestart());
-          hyperpoint l1 = T*tC0(spiral::at(1+ei->i));
-          for(int z=1; z<=prec; z++) {
-            hyperpoint l2 = T*tC0(spiral::at(1+ei->i+(ei->j-ei->i) * z / (prec+.0)));
-            queueline(l1, l2, col, vid.linequality).prio = PPR::STRUCT0;
-            l1 = l2;
-            }
-          }
-        else {
-          queueline(h1, h2, col, 2 + vid.linequality).prio = PPR::STRUCT0;
-          }
+      else if(pmodel && !fat_edges) {
+        queueline(h1, h2, col, 2 + vid.linequality).prio = PPR::STRUCT0;
         }
       else {
       
@@ -750,7 +682,8 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
           
           transmatrix T = inverse(ggmatrix(ei->orig));
           
-          if(fat_edges) {
+          if(callhandlers(false, hooks_alt_edges, ei, true)) ;
+          else if(fat_edges) {
             ei->tinf.tvertices.clear();
             transmatrix T1 = inverse(gm1 * vd1.m->at);
             hyperpoint goal = T1 * h2;
@@ -767,17 +700,6 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
               store(a+30, 0);
               store(a, d);
               store(a+30, d);
-              }
-            }
-          else if((vizid == spiral::place) && abs(ei->i - ei->j) == 1) {
-            ei->orig = currentmap->gamestart();
-            hyperpoint l1 = tC0(spiral::at(1+ei->i));
-            storevertex(ei->prec, l1);
-            const int prec = 20; 
-            for(int z=1; z<=prec; z++) {
-              hyperpoint l2 = tC0(spiral::at(1+ei->i+(ei->j-ei->i) * z / (prec+.0)));
-              storeline(ei->prec, l1, l2);
-              l1 = l2;
               }
             }
           else 
@@ -1031,38 +953,6 @@ int readArgs() {
     PHASE(3); shift(); anygraph::read(args());
     }
   
-// draw spirals 
-//--------------
-
-// example commandline:
-// -spiral 2,10000 -spiraledge 0,2 -spiraledge 1,1 -lab -spiralcolor 2 FF4040FF
-
-  else if(argis("-spiral")) {
-    PHASE(3); 
-    ld mul = 2;
-    int N = 1000;
-    shift(); sscanf(argcs(), LDF ",%d", &mul, &N);
-    spiral::place(N, mul);
-    }
-
-  else if(argis("-spiraledge")) {
-    PHASE(3); 
-    ld shft = 1;
-    ld mul = 1;
-    shift(); sscanf(argcs(), LDF "," LDF, &shft, &mul);
-    spiral::edge(shft, mul);
-    }
-
-  else if(argis("-spiralcolor")) {
-    PHASE(3); 
-    ld period = 1;
-    ld start = 1;
-    shift(); sscanf(argcs(), LDF "," LDF, &period, &start);
-    start--;
-    shift();
-    spiral::color(start, period, parse(args()));
-    }
-
 // graphical parameters
 //------------------
 
