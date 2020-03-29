@@ -2038,6 +2038,7 @@ int rugArgs() {
     }
 
   else if(argis("-rugon")) {
+    start_game();
     PHASE(3); 
     calcparam();
     rug::init();
