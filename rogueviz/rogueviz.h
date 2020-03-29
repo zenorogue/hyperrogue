@@ -6,15 +6,24 @@
 
 namespace rogueviz {
   using namespace hr;
+  
+  inline void *vizid;
+  
+  constexpr flagtype RV_GRAPH = 1;
+  constexpr flagtype RV_WHICHWEIGHT = 2; // sag
+  constexpr flagtype RV_AUTO_MAXWEIGHT = 4; // sag
+  constexpr flagtype RV_COMPRESS_LABELS = 8; // do not display some labels
+  constexpr flagtype RV_COLOR_TREE = 16; // color vertex together with tree parents
+  constexpr flagtype RV_HAVE_WEIGHT = 32; // edges have weights
+  constexpr flagtype RV_INVERSE_WEIGHT = 64; // edit weight, not 1/weight
+  
+  inline flagtype vizflags;
+  string weight_label;
 
-  enum eVizkind { kNONE, kAnyGraph, kTree, kSpiral, kSAG, kCollatz, kFullNet, kKohonen, kFlocking };
-  extern eVizkind kind;
-
-  extern bool on;
   void drawExtra();
   void close();
 
-  void init();
+  void init(void *vizid, flagtype flags);
   
   struct edgetype {
     double visible_from;
@@ -89,7 +98,6 @@ namespace rogueviz {
   inline hookset<void(vertexdata&, cell*, shmup::monster*, int)> *hooks_drawvertex;
   
   void readcolor(const string& cfname);
-  extern bool on;
 
   void close();
   extern bool showlabels;
