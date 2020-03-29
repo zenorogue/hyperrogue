@@ -952,11 +952,6 @@ void readcolor(const string& cfname) {
   }
 
 void init(void *_vizid, flagtype _vizflags) {
-  bool was_on = vizid;
-  vizid = _vizid;
-  vizflags = _vizflags;
-
-  if(was_on) return;
 
   autocheat = true; 
   showstartmenu = false;
@@ -978,7 +973,9 @@ void init(void *_vizid, flagtype _vizflags) {
   calcparam();
   drawthemap();
   gmatrix0 = gmatrix;
-  addMessage("RogueViz enabled");
+
+  vizid = _vizid;
+  vizflags = _vizflags;
   }
 
 int search_for = -1;
