@@ -93,24 +93,6 @@ namespace rogueviz {
     void clear();
     }
   
-  namespace staircase {
-    extern bool on;
-    void showMenu();
-    void make_staircase();
-    }
-  
-  namespace banachtarski {
-    extern bool on;
-    void init_bantar();
-    void bantar_anim();    
-    extern bool bmap;
-    extern void init_bantar_map();
-    }
-  
-  namespace pentagonal {
-    void run_snub(int v, int w);
-    }
-
   extern colorpair dftcolor;
   namespace collatz { 
     extern double s2, s3, p2, p3; 
@@ -131,6 +113,7 @@ namespace rogueviz {
   
   namespace rvtour {
     using namespace hr::tour;
+    extern hookset<void(vector<slide>&)> *hooks_build_rvtour;
     slide *gen_rvtour();
     }
 

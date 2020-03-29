@@ -347,6 +347,10 @@ int readArgs() {
 
 int phooks = addHook(hooks_args, 100, readArgs)
   + addHook(hooks_fixticks, 100, check)
+  + addHook(hooks_rvmenu_replace, 100, [] {
+     if(staircase::on) { staircase::showMenu(); return true; }
+     return false;
+     })
   + addHook(rvtour::hooks_build_rvtour, 100, [] (vector<tour::slide>& v) {
     using namespace tour;
     v.push_back(

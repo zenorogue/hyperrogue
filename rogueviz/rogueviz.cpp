@@ -1277,8 +1277,10 @@ void showVertexSearch() {
 
 purehookset hooks_rvmenu;
 
+hookset<bool()> *hooks_rvmenu_replace;
+
 void showMenu() {
-  if(staircase::on) { staircase::showMenu(); return; }
+  if(callhandlers(false, hooks_rvmenu_replace)) return;
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
   gamescreen(0);  
 
