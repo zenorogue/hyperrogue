@@ -644,13 +644,13 @@ template<class T, class U> int addHook(hookset<T>*& m, int prio, const U& hook) 
   return 0;
   }
 
-template<class T, class... U> void callhooks(hookset<T> *h, U... args) {
-  if(h) for(auto& p: *h) p.second(args...);
+template<class T, class... U> void callhooks(hookset<T> *h, U&&... args) {
+  if(h) for(auto& p: *h) p.second(std::forward<U>(args)...);
   }
 
-template<class T, class V, class... U> V callhandlers(V zero, hookset<T> *h, U&... args) {
+template<class T, class V, class... U> V callhandlers(V zero, hookset<T> *h, U&&... args) {
   if(h) for(auto& p: *h) {
-    auto z = p.second(args...);
+    auto z = p.second(std::forward<U>(args)...);
     if(z != zero) return z;
     }
   return zero;
