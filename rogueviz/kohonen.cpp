@@ -1531,10 +1531,23 @@ bool turn(int delta) {
   // shmup::pc[0]->rebase();
   }
 
+bool kohonen_color(int& c2, string& lab, FILE *f) {
+  if(c2 == '+') {
+    int known_id = kohonen::showsample(lab);
+    c2 = fgetc(f);
+    if(c2 == '@') {
+      legend.push_back(known_id);
+      return true;
+      }
+    }
+  return false;
+  }
+
 auto hooks2 = addHook(hooks_frame, 50, levelline::draw)
   + addHook(hooks_mouseover, 100, describe_cell)
   + addHook(shmup::hooks_turn, 100, turn)
-  + addHook(rogueviz::hooks_rvmenu, 100, showMenu);
+  + addHook(rogueviz::hooks_rvmenu, 100, showMenu)
+  + addHook(hooks_readcolor, 100, kohonen_color);
 
 void clear() {
   printf("clearing Kohonen...\n");

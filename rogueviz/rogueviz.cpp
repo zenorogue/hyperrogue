@@ -910,6 +910,8 @@ void drawExtra() {
     }
   }
 
+inline hookset<bool(int&, string&, FILE*)> *hooks_readcolor;
+
 void readcolor(const string& cfname) {
   FILE *f = fopen(cfname.c_str(), "rt");
   if(!f) { printf("color file missing\n"); exit(1); }
@@ -926,19 +928,9 @@ void readcolor(const string& cfname) {
     colorpair x;
     int c2 = fgetc(f);
     int known_id = -1;
-    bool force = false;
-
-    if(kohonen::samples && c2 == '!') {
-      force = true;
-      c2 = fgetc(f);
-      if(c2 == 10 || c2 == 13) continue;
-      }
     
-    if(kohonen::samples && c2 == '+') {
-      known_id = kohonen::showsample(lab);
-      c2 = fgetc(f);
-      if(c2 == 10 || c2 == 13) continue;
-      }
+    if(callhandlers(false, hooks_readcolor, c2, lab, f)) continue;
+
     if(c2 == '#') {
       while(c2 != 10 && c2 != 13 && c2 != -1) c2 = fgetc(f);
       continue;
@@ -977,7 +969,7 @@ void readcolor(const string& cfname) {
           vdata[i].cp = x;
           }
       }
-    else if(kohonen::samples && !force) {
+    else if(isize(lab) && lab[0] == '!') {
       for(int i=0; i<isize(vdata); i++)
         if(vdata[i].name == lab) {
           vdata[i].cp = x;
