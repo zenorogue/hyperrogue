@@ -1273,7 +1273,7 @@ EX void drawRugScene() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
   glDisable(GL_BLEND);
-  current_display->next_shader_flags = GF_LIGHTFOG | GF_TEXTURE;
+  current_display->next_shader_flags = GF_VARCOLOR | GF_TEXTURE;
   glhr::set_depthtest(true);
   glhr::set_depthwrite(true);
   glDepthFunc(invert_depth ? GL_GREATER : GL_LESS);
