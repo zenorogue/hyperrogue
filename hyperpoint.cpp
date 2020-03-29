@@ -1209,4 +1209,8 @@ EX int bucketer(hyperpoint h) {
   return dx;
   }  
 
+EX hyperpoint lerp(hyperpoint a0, hyperpoint a1, ld x) {
+  return a0 + (a1-a0) * x;
+  }
+
 }
