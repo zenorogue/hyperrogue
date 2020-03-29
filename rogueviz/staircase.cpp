@@ -346,6 +346,20 @@ int readArgs() {
 #endif
 
 int phooks = addHook(hooks_args, 100, readArgs)
-  + addHook(hooks_fixticks, 100, check);
+  + addHook(hooks_fixticks, 100, check)
+  + addHook(rvtour::hooks_build_rvtour, 100, [] (vector<tour::slide>& v) {
+    using namespace tour;
+    v.push_back(
+      tour::slide{"Spiral Staircase", 62, LEGAL::NONE | QUICKGEO,
+     "Spiral Staircase Demo. Press '5' to change the curvature or other parameters.",
+     
+    [] (presmode mode) {
+      if(mode == 1) staircase::make_staircase();
+      if(mode == 3) rug::close();
+      slidecommand = "staircase menu";
+      if(mode == 4) pushScreen(staircase::showMenu);
+      }}
+      );
+    });
 
 }}

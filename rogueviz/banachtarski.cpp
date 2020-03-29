@@ -553,6 +553,46 @@ int readArgs() {
 
 auto hook = addHook(hooks_args, 100, readArgs)
   + addHook(hooks_initgame, 100, bantar)
-  + addHook(hooks_frame, 100, bantar_stats);
+  + addHook(hooks_frame, 100, bantar_stats)
+  + addHook(rvtour::hooks_build_rvtour, 100, [] (vector<tour::slide>& v) {
+    using namespace rvtour;
+    v.push_back(
+      tour::slide{"Banach-Tarski-like", 62, LEGAL::NONE,
+     "Banach-Tarski-like decomposition. Break a hyperbolic plane into two hyperbolic planes.\n\n"
+     "Press '5' to show the decomposition. Press any key to stop.\n\n"
+     "You will see a map of the decomposition. Press '5' again to return.",
+     
+    [] (presmode mode) {
+      slidecommand = "Banach-Tarski switch";
+      if(mode == 3) {
+        while(gamestack::pushed()) stop_game(), gamestack::pop();
+        banachtarski::bmap = false;
+        banachtarski::on = false;
+        }
+      if(mode == 4) {
+        if(!banachtarski::on) {
+          bool b = mapeditor::drawplayer;
+          specialland = cwt.at->land;
+          gamestack::push();
+          banachtarski::init_bantar();
+          airmap.clear();
+          dynamicval<int> vs(sightrange_bonus, 3);
+          dynamicval<int> vg(genrange_bonus, 3);
+          doOvergenerate();
+          banachtarski::bantar_anim();
+          quitmainloop = false;
+          mapeditor::drawplayer = b;
+          banachtarski::init_bantar_map();
+          resetview();
+          }
+        else if(banachtarski::on && banachtarski::bmap) {
+          banachtarski::bmap = false;
+          banachtarski::on = false;
+          gamestack::pop();
+          }
+        }
+      }}
+      );
+    });
 
 }}

@@ -119,7 +119,28 @@ int readArgs() {
   return 0;
   }
 
-int ah = addHook(hooks_args, 100, readArgs);
+int ah = addHook(hooks_args, 100, readArgs)
++ addHook(rvtour::hooks_build_rvtour, 100, [] (vector<tour::slide>& v) {
+    using namespace rvtour;
+    v.push_back(
+      tour::slide{"Tree of Life", 61, LEGAL::UNLIMITED | QUICKGEO,
+      "Not described.",
+
+    roguevizslide('0', [] () {
+
+      rogueviz::dftcolor = 0x206020FF;
+
+      rogueviz::showlabels = true;
+      
+      rogueviz::on = true;
+      gmatrix.clear();
+      drawthemap();
+      gmatrix0 = gmatrix;
+
+      rogueviz::tree::read(RVPATH "treeoflife/tol.txt");
+      })}
+      );
+    });
 #endif
   }
 
