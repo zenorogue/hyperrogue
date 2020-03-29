@@ -203,7 +203,6 @@ void enable_raycaster() {
     "uniform mediump float uIPD;\n"
     "uniform mediump mat4 uStart;\n"
     "uniform mediump mat4 uM[84];\n"
-    "uniform mediump mat4 uTest;\n"
     "uniform mediump vec2 uStartid;\n"
     "uniform mediump sampler2D tConnections;\n"
     "uniform mediump sampler2D tWallcolor;\n"
