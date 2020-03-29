@@ -1162,12 +1162,6 @@ namespace rvtour {
 
 using namespace tour;
 
-string cname() {
-  if(euclid) return "coord-6.txt";
-  if(PURE) return "coord-7.txt";
-  return "coord-67.txt";
-  }
-
 template<class T> function<void(presmode)> roguevizslide(char c, const T& t) {
   return [c,t] (presmode mode) {
     patterns::canvasback = 0x101010;

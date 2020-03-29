@@ -543,6 +543,12 @@ bool turn(int delta) {
   // shmup::pc[0]->rebase();
   }
 
+string cname() {
+  if(euclid) return "coord-6.txt";
+  if(PURE) return "coord-7.txt";
+  return "coord-67.txt";
+  }
+
 int ah = addHook(hooks_args, 100, readArgs)
   + addHook(shmup::hooks_turn, 100, turn)
   + addHook(rogueviz::hooks_close, 100, [] { sag::sagedges.clear(); })
