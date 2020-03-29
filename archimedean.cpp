@@ -1016,7 +1016,7 @@ int cHyperSemi = 0xC04040;
 
 int cWeird = 0xA000A0;
 
-vector<pair<string, int> > samples = {
+EX vector<pair<string, int> > samples = {
   /* Euclidean */
   {"(3,3,3,3,3,3)", cEucRegular},
   {"(4,4,4,4)", cEucRegular},
@@ -1091,6 +1091,9 @@ vector<pair<string, int> > samples = {
   {"(3l,5l,5,5,5,5) (0 1)(2 4)[3 5]", cHyperSemi},
   {"(3l,5l,5,5,5,5) (0 1)[2 4](3)(5)", cHyperSemi}, 
   {"(3,5,5,5,5,5) (0 1)(2)(3)(4)(5)", cHyperSemi}, 
+  {"(3,3,4,3,5)(0,4)(1)(2,3)", cHyperSemi},
+  {"(3,14,14)", cHyperSemi},
+  {"(3,3,3,3,3,4)[0](1,2)(3,4)[5]", cHyperSemi},
   
   /* interesting symmetry variants */
   {"(3,3,3,3,3,3) (0,1)(2,3)(4,5)", cEucRegular},
