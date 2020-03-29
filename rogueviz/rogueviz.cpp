@@ -880,33 +880,6 @@ bool rogueviz_hud() {
   return true;
   }
 
-void drawExtra() {
-  
-  if(kind == kFullNet) {
-    for(map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
-      cell *c = it->first;
-      c->wall = waChasm;
-      }
-    int index = 0;
-
-    for(map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
-      cell *c = it->first;
-      bool draw = true;
-      for(int i=0; i<isize(named); i++) if(named[i] == c) draw = false;
-      if(draw && gmatrix.count(c))
-        queuedisk(it->second, dftcolor, false, NULL, index++);
-        // queuepolyat(it->second, shDisk, dftcolor., PPR::LINE);
-      }
-    
-    for(int i=0; i<isize(named); i++) if(gmatrix.count(named[i])) {
-      string s = ""; s += 'A'+i;
-      queuestr(gmatrix[named[i]], 1, s, forecolor, 1);
-      }
-    
-    canmove = true; items[itOrbAether] = true;
-    }
-  }
-
 inline hookset<bool(int&, string&, FILE*)> *hooks_readcolor;
 
 void readcolor(const string& cfname) {
@@ -1079,14 +1052,6 @@ int readArgs() {
     int N = 1000;
     shift(); sscanf(argcs(), LDF ",%d", &mul, &N);
     spiral::place(N, mul);
-    }
-
-  else if(argis("-net")) {
-    PHASE(3);
-    init(); kind = kFullNet;
-    linepatterns::patTriTree.color = 0x30;
-    linepatterns::patTriOther.color = 0x10;
-    linepatterns::patTriRings.color = 0xFF;
     }
 
   else if(argis("-spiraledge")) {
@@ -1449,7 +1414,6 @@ named_functionality o_key() {
   }
 
 auto hooks  = 
-  addHook(hooks_frame, 0, drawExtra) +
 #if CAP_COMMANDLINE
   addHook(hooks_args, 100, readArgs) +
 #endif
@@ -1513,3 +1477,4 @@ auto hooks  =
 #include "sag.cpp"
 #include "collatz.cpp"
 #include "tree.cpp"
+#include "fullnet.cpp"
