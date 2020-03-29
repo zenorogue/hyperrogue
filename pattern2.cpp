@@ -2600,7 +2600,7 @@ EX namespace linepatterns {
       )
     );
 
-  linepattern patZebraTriangles("zebra triangles", 0x40FF4000, stdhyp_only,
+  EX linepattern patZebraTriangles = linepattern("zebra triangles", 0x40FF4000, stdhyp_only,
     ALLCELLS(
       if(zebra40(c) / 4 == 10) {
         bool all = true;
@@ -2613,7 +2613,7 @@ EX namespace linepatterns {
         }
       )
     );
-  linepattern patZebraLines("zebra lines", 0xFF000000, stdhyp_only, 
+  EX linepattern patZebraLines = linepattern("zebra lines", 0xFF000000, stdhyp_only, 
     ALLCELLS(
       if(!pseudohept(c)) for(int i=0; i<c->type; i+=2) {
         cell *c2 = createMov(c, i);
@@ -2666,7 +2666,7 @@ EX namespace linepatterns {
                             col, 1 + vid.linequality);
       )
     );
-  linepattern patPalace("firewall lines: Palace", 0xFFD50000, stdhyp_only, 
+  EX linepattern patPalace = linepattern("firewall lines: Palace", 0xFFD50000, stdhyp_only, 
     ALLCELLS(
       bool a = polarb50(c);
       if(pseudohept(c)) for(int i=0; i<7; i++) {

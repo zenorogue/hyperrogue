@@ -20,12 +20,6 @@
 #include "../hyper.h"
 #include "rogueviz.h"
 
-namespace hr {
-  namespace linepatterns {
-    extern linepattern patPalace, patZebraTriangles, patZebraLines;
-    }
-  }
-
 namespace rogueviz {
 
 ld fat_edges = 0;
