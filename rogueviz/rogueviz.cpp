@@ -1155,7 +1155,7 @@ int readArgs() {
     }
 #if CAP_RVSLIDES
   else if(argis("-rvpres")) {
-    tour::slides = rvtour::rvslides;
+    tour::slides = rvtour::gen_rvtour();
     }
 #endif
   else if(argis("-nolegend")) {
@@ -1367,7 +1367,26 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
 
 #define RVPATH HYPERPATH "rogueviz/"
 
-slide rvslides[] = {
+vector<slide> rvslides;
+extern vector<slide> rvslides_default;
+
+purehookset hooks_build_rvtour;
+
+slide *gen_rvtour() {
+  rvslides = rvslides_default;
+  callhooks(hooks_build_rvtour);
+  rvslides.push_back(
+    {"THE END", 99, LEGAL::ANY | FINALSLIDE,
+    "Press '5' to leave the presentation.",
+    [] (presmode mode) {
+      firstland = specialland = laIce;
+      if(mode == 4) restart_game(rg::tour);
+      }
+    });
+  return &rvslides[0];
+  }
+
+vector<slide> rvslides_default = {
     {"RogueViz", 999, LEGAL::ANY, 
       "This is a presentation of RogueViz, which "
       "is an adaptation of HyperRogue as a visualization tool "
@@ -1562,13 +1581,6 @@ slide rvslides[] = {
         start_game();
         }
       }},
-  {"THE END", 99, LEGAL::ANY | FINALSLIDE,
-    "Press '5' to leave the presentation.",
-    [] (presmode mode) {
-      firstland = specialland = laIce;
-      if(mode == 4) restart_game(rg::tour);
-      }
-    }
   };
 
 int rvtour_hooks = 
@@ -1582,7 +1594,7 @@ int rvtour_hooks =
           "common HyperRogue tutorial first is useful too, "
           "as an introduction to hyperbolic geometry.";         
       if(mode == 4) {
-        slides = rogueviz::rvtour::rvslides;
+        slides = gen_rvtour();
         while(tour::on) restart_game(rg::tour);
         tour::start();
         }
@@ -1626,15 +1638,20 @@ auto hooks  =
 #if CAP_COMMANDLINE
   addHook(hooks_args, 100, readArgs) +
 #endif
-#if CAP_RVSLIDES
-  addHook(hooks_config, 0, [] () { tour::ss::list(rogueviz::rvtour::rvslides); }) +
-#endif
   addHook(clearmemory, 0, close) +
   addHook(hooks_prestats, 100, rogueviz_hud) +
   addHook(shmup::hooks_draw, 100, drawVertex) +
   addHook(shmup::hooks_describe, 100, describe_monster) +
   addHook(shmup::hooks_kill, 100, activate) +
   addHook(hooks_o_key, 100, o_key) +
+  
+  addHook(tour::ss::extra_slideshows, 100, [] (bool view) {
+    if(!view) return 1;
+    dialog::addBoolItem(XLAT("RogueViz Tour"), tour::ss::wts == &rvtour::rvslides[0], 'r');
+    dialog::add_action([] { tour::ss::wts = rvtour::gen_rvtour(); popScreen(); });    
+    return 0;
+    }) +
+  
   addHook(dialog::hooks_display_dialog, 100, [] () {
     if(current_screen_cfunction() == showMainMenu) {
       dialog::addItem(XLAT("rogueviz menu"), 'u'); 
@@ -1644,8 +1661,8 @@ auto hooks  =
     if(current_screen_cfunction() == showStartMenu) {
       dialog::addBreak(100);
       dialog::addBigItem(XLAT("RogueViz"), 'r');
-      dialog::add_action([] () {
-        tour::slides = rogueviz::rvtour::rvslides;
+      dialog::add_action([] () {        
+        tour::slides = rogueviz::rvtour::gen_rvtour();
         popScreenAll();
         tour::start();
         printf("tour start\n");

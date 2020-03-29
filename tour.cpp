@@ -326,16 +326,21 @@ EX void checkGoodLand(eLand l) {
   }
 
 EX namespace ss {
-  vector<slide*> slideshows;
-  slide *wts;
-
-  EX void list(slide *ss) {
-    for(auto s: slideshows) if (s == ss) return;
-    slideshows.push_back(ss);
-    }
+  EX slide *wts;
 
   string slidechars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ23456789!@#$%^&*(";
-   
+  
+  EX hookset<int(bool)> *extra_slideshows;
+
+  EX void slideshow_menu() {
+    dialog::init(XLAT("slideshows"), forecolor, 150, 100);
+    dialog::addBoolItem(XLAT("Guided Tour"), wts == default_slides, 't');
+    dialog::add_action([] { wts = default_slides; popScreen(); });
+    callhooks(extra_slideshows, true);
+    dialog::addBack();
+    dialog::display();
+    }
+  
   EX void showMenu() {
     if(!wts) wts = slides; 
 
@@ -362,15 +367,10 @@ EX namespace ss {
       if(wts[i].flags & FINALSLIDE) break;
       }
     dialog::addBreak(50);
-    if(isize(slideshows) > 1) {
+    bool b = false;
+    if(callhandlers(0, extra_slideshows, b)) {
       dialog::addItem(XLAT("change slideshow"), '1');
-      dialog::add_action([] {
-        list(wts);
-        for(int i=0; i<isize(slideshows)-1; i++) if(slideshows[i] == wts) {
-          wts = slideshows[i+1]; return;
-          }
-        wts = slideshows[0];
-        });
+      dialog::add_action_push(slideshow_menu);
       }
     dialog::addBack();
     dialog::display();
@@ -379,7 +379,6 @@ EX namespace ss {
   EX }
   
 EX void start() {
-  ss::list(default_slides);
   currentslide = 0;
   vid.scale = 1;
   vid.alpha = 1;
