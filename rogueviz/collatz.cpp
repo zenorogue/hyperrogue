@@ -12,8 +12,10 @@ namespace collatz {
   
   edgetype *collatz1, *collatz2;
   
+  int collatz_id;
+  
   void start() {
-    init(); kind = kCollatz;
+    init(&collatz_id, RV_GRAPH);
     collatz1 = add_edgetype("1");
     collatz2 = add_edgetype("2");
     vdata.resize(1);
@@ -75,7 +77,7 @@ namespace collatz {
     }
 
   void act(vertexdata& vd, cell *c, shmup::monster *m, int i) {
-    if(kind != kCollatz) return;
+    if(vizid != &collatz_id) return;
     if(c->cpdist > 7 && euclid) ;
     else if(vd.data == 2) {
       // doubler vertex
@@ -140,7 +142,7 @@ namespace collatz {
 
 // see: https://www.youtube.com/watch?v=4Vu3F95jpQ4&t=6s (Collatz)
 void collatz_video(const string &fname) {
-  if(kind == kCollatz) {
+  if(vizid == &collatz_id) {
     sightrange_bonus = 3;
     genrange_bonus = 3;
     dronemode = true; vid.camera_angle = -45; rog3 = true; patterns::whichShape = '8';
@@ -263,7 +265,7 @@ int readArgs() {
     }
 
   else if(argis("-collatz-go")) {
-    if(kind != kCollatz) { printf("not in Collatz\n"); throw hr_exception(); }
+    if(vizid != &collatz_id) { printf("not in Collatz\n"); throw hr_exception(); }
     shift(); int i = argi(); shift(); int j = argi();
     if(i <= 0) i = 763;
     if(j < 0 || j > 61) j = 61;
@@ -288,7 +290,7 @@ int readArgs() {
     }
 
   #if CAP_SHOT
-  else if(argis("-rvvideo") && kind == kCollatz) {
+  else if(argis("-rvvideo") && vizid == &collatz_id) {
     shift(); collatz_video(arg::args());
     }
   #endif
@@ -322,7 +324,6 @@ int ah = addHook(hooks_args, 100, readArgs) +
 
       rogueviz::showlabels = true;
       
-      rogueviz::on = true;
       gmatrix.clear();
       drawthemap();
       gmatrix0 = gmatrix;

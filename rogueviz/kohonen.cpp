@@ -6,6 +6,8 @@
 
 namespace rogueviz { namespace kohonen {
 
+int kohonen_id;
+
 int columns;
 
 typedef vector<double> kohvec;
@@ -277,7 +279,7 @@ void analyze() {
   }
 
 bool coloring_3d(cell *c, const transmatrix& V) {
-  if(WDIM == 3 && on && kind == kKohonen) 
+  if(WDIM == 3 && vizid == &kohonen_id) 
     queuepoly(face_the_player(V), cgi.shRing, darkena(c->landparam_color, 0, 0xFF));
   return false;
   }
@@ -646,7 +648,8 @@ void sominit(int initto, bool load_compressed) {
       exit(1);
       }
     
-    init(); kind = kKohonen;
+    init(&kohonen_id, RV_GRAPH | RV_HAVE_WEIGHT);
+    weight_label = "quantity";
     
     printf("Initializing SOM (1)\n");
   
@@ -740,7 +743,7 @@ void sominit(int initto, bool load_compressed) {
 
 void describe_cell(cell *c) {
   if(cmode & sm::HELP) return;
-  if(kind != kKohonen) return;
+  if(vizid != &kohonen_id) return;
   neuron *n = getNeuronSlow(c);
   if(!n) return;
   string h;
@@ -1204,7 +1207,7 @@ void shift_color(int i) {
   }
 
 void showMenu() {
-  if(kind != kKohonen) return;
+  if(vizid != &kohonen_id) return;
   string parts[3] = {"red", "green", "blue"};
   for(int i=0; i<3; i++) {
     string c;
@@ -1525,8 +1528,7 @@ auto hooks = addHook(hooks_args, 100, readArgs);
 #endif
 
 bool turn(int delta) {
-  if(!on) return false;
-  if(kind == kKohonen) kohonen::steps(), timetowait = 0;
+  if(vizid == &kohonen_id) kohonen::steps(), timetowait = 0;
   return false;
   // shmup::pc[0]->rebase();
   }
@@ -1569,7 +1571,7 @@ void clear() {
 namespace rogueviz {
   void mark(cell *c) {
     using namespace kohonen;
-    if(kind == kKohonen && inited >= 1) {
+    if(vizid == &kohonen_id && inited >= 1) {
       distfrom = getNeuronSlow(c);
       coloring();
       }

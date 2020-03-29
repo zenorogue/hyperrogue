@@ -35,8 +35,6 @@ using namespace hr;
 
 edgetype default_edgetype = { .1, .1, .1, DEFAULT_COLOR, 0xFF0000FF, "default" };
 
-void init();
-
 bool showlabels = false;
 bool specialmark = false;
 bool edge_legend = false;
@@ -49,10 +47,6 @@ string fname;
 
 // const char *fname;
 // const char *cfname;
-
-eVizkind kind;
-
-bool on;
 
 vector<shared_ptr<edgetype>> edgetypes;
 
@@ -268,6 +262,8 @@ colorpair dftcolor = 0x282828FF;
 
 namespace spiral {
 
+  int spiral_id;
+
   ld mul;
   
   transmatrix at(double d) {
@@ -276,7 +272,8 @@ namespace spiral {
 
   void place(int N, ld _mul) {
     mul = _mul;
-    init(); kind = kSpiral;
+    init(&spiral_id, RV_GRAPH | RV_HAVE_WEIGHT | RV_INVERSE_WEIGHT);
+    weight_label = "extent";
     vdata.resize(N);
   
     for(int i=0; i<N; i++) {
@@ -330,7 +327,8 @@ namespace anygraph {
   vector<pair<double, double> > coords;
   
   edgetype *any;
-
+  
+  int vzid;
   
   int N;
                
@@ -347,7 +345,7 @@ namespace anygraph {
   void tst() {}
 
   void read(string fn, bool subdiv, bool doRebase, bool doStore) {
-    init(); kind = kAnyGraph;
+    init(&vzid, RV_GRAPH);
     any = add_edgetype("embedded edges");
     fname = fn;
     fhstream f(fn + "-coordinates.txt", "rt");
@@ -451,7 +449,7 @@ void rogueviz_help(int id, int pagenumber) {
     int k = ei->i ^ ei->j ^ id;
     hex.text = vdata[k].name;
     hex.color = vdata[k].cp.color1 >> 8;
-    if(kind == kSAG) {
+    if(vizflags & RV_WHICHWEIGHT) {
       if(which_weight)
         hex.subtext = fts(ei->weight2);
       else
@@ -471,7 +469,7 @@ void rogueviz_help(int id, int pagenumber) {
     help_extensions.push_back(hex);
     }
   
-  if(kind == kSAG && noedges) {
+  if((vizflags & RV_WHICHWEIGHT) && noedges) {
     help_extension hex;
     hex.key = 'w';
     hex.text = "displayed weight";
@@ -677,7 +675,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       color_t col = (hilite ? ei->type->color_hi : ei->type->color);
       auto& alpha = part(col, 0);
       
-      if(kind == kSAG) {
+      if(vizflags & RV_AUTO_MAXWEIGHT) {
         if(ei->weight2 > maxweight) maxweight = ei->weight2;
         alpha *= pow(ei->weight2 / maxweight, ggamma);
         }
@@ -729,7 +727,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         col |= (forecolor << 8);
         }
 
-      bool onspiral = kind == kSpiral && abs(ei->i - ei->j) == 1;      
+      bool onspiral = (vizid == &spiral::spiral_id) && abs(ei->i - ei->j) == 1;
 
       if((pmodel || onspiral) && !fat_edges) {
         if(onspiral) {
@@ -777,7 +775,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
               store(a+30, d);
               }
             }
-          else if(kind == kSpiral && abs(ei->i - ei->j) == 1) {
+          else if((vizid == spiral::place) && abs(ei->i - ei->j) == 1) {
             ei->orig = currentmap->gamestart();
             hyperpoint l1 = tC0(spiral::at(1+ei->i));
             storevertex(ei->prec, l1);
@@ -806,7 +804,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
   
   if(showlabels) {
     bool doshow = true;
-    if(kind == kTree && i > 0 && !vd.virt) {
+    if((vizflags & RV_COMPRESS_LABELS) && i > 0 && !vd.virt) {
       vertexdata& vdp = vdata[vd.data];
       hyperpoint h2 = ggmatrix(vdp.m->base) * vdp.m->at * C0;
       if(hdist(h2, V * m->at * C0) < 0.1) doshow = false;
@@ -835,7 +833,7 @@ color_t chosen_legend_color = DEFAULT_COLOR;
 
 bool rogueviz_hud() {
   color_t legend_color = chosen_legend_color == DEFAULT_COLOR ? forecolor : chosen_legend_color;
-  if(!rogueviz::on) return false;
+  if(!vizid) return false;
   if(cmode & sm::DRAW) return false;
 
   int qet = isize(edgetypes);
@@ -978,7 +976,7 @@ void readcolor(const string& cfname) {
       int i = getid(lab);
       again: vdata[i].cp = x;
       
-      if(kind == kTree) {
+      if(vizflags & RV_COLOR_TREE) {
         i = vdata[i].data;
         if(i >= 0) goto again;
         }
@@ -986,8 +984,13 @@ void readcolor(const string& cfname) {
     }
   }
 
-void init() {
-  if(on) return;
+void init(void *_vizid, flagtype _vizflags) {
+  bool was_on = vizid;
+  vizid = _vizid;
+  vizflags = _vizflags;
+
+  if(was_on) return;
+
   autocheat = true; 
   showstartmenu = false;
 #if !ISWEB
@@ -1000,7 +1003,6 @@ void init() {
   firstland = specialland = laCanvas;
   restart_game(rg::nothing);
 #endif
-  on = true;
   autocheat = true;
   items[itOrbLife] = 0;
   timerghost = false;
@@ -1028,7 +1030,7 @@ void close() {
   anygraph::coords.clear();
   callhooks(hooks_close);
   edgetypes.clear();
-  on = false;
+  vizid = nullptr;
   relmatrices.clear();
   }
 
@@ -1176,7 +1178,6 @@ void configure_edge_display() {
   static int mode = 0;
   gamescreen(0);  
   dialog::init(XLAT("rogueviz edges"));
-  string s3 = kind == kSAG ? "min weight" : kind == kKohonen ? "quantity" : "extent";
   for(int i=0; i<isize(edgetypes); i++) {
     auto t = edgetypes[i];
     switch(mode) {
@@ -1189,7 +1190,7 @@ void configure_edge_display() {
           });
         break;
       case 1:
-        if(kind == kSAG) {
+        if(!(vizflags & RV_INVERSE_WEIGHT)) {
           dialog::addSelItem(t->name, fts(t->visible_from), 'a'+i);
           dialog::add_action([t] {
             dialog::editNumber(t->visible_from, 0.001, 1000, .1, .1, "min weight", "");
@@ -1198,10 +1199,10 @@ void configure_edge_display() {
           }
         else {
           dialog::addSelItem(t->name, its(1 / t->visible_from), 'a'+i);
-          dialog::add_action([t,s3] {
+          dialog::add_action([t] {
             static int i;
             i = 1 / t->visible_from;
-            dialog::editNumber(i, 1, 1000000, 1, 500, s3, "");
+            dialog::editNumber(i, 1, 1000000, 1, 500, weight_label, "");
             dialog::reaction = [t] () { t->visible_from = i ? 1. / i : 5; };
             dialog::scaleLog(); dialog::ne.step = .2;
             });
@@ -1211,9 +1212,9 @@ void configure_edge_display() {
       }
     }
   dialog::addBreak(100);
-  if(among(kind, kSAG, kKohonen, kSpiral)) {
+  if(vizflags & RV_HAVE_WEIGHT) {
     dialog::addBoolItem_choice("color/alpha", mode, 0, '1');
-    dialog::addBoolItem_choice(s3, mode, 1, '2');
+    dialog::addBoolItem_choice(weight_label, mode, 1, '2');
     }
   else mode = 0;
   
@@ -1432,30 +1433,18 @@ int rvtour_hooks =
 #endif
 
 bool default_help() {
-  if(!rogueviz::on) return false;
+  if(!vizid) return false;
 
   help = 
     "This is RogueViz, a visualization engine based on HyperRogue.\n\nUse WASD to move, v for menu.\n\n"
     "Read more about RogueViz on : http://roguetemple.com/z/hyper/rogueviz.php\n\n";
-  if(kind == kAnyGraph)
-    help += "Current visualization: any graph\n\n" + fname;
-  if(kind == kTree)
-    help += "Current visualization: tree\n\n" + fname;
-  if(kind == kSpiral)
-    help += "Current visualization: spiral\n\n";
-  if(kind == kSAG)
-    help += "Current visualization: SAG\n\n" + fname;
-  if(kind == kCollatz)
-    help += "Current visualization: Collatz conjecture\n\n";
-  if(kind == kFullNet)
-    help += "Current visualization: full net\n\n";
 
   help_extensions.push_back(help_extension{'u', XLAT("RogueViz menu"), [] () { popScreen(); pushScreen(showMenu); }});    
   return true;
   }
 
 named_functionality o_key() {
-  if(rogueviz::on) return named_dialog(XLAT("rogueviz menu"), rogueviz::showMenu);
+  if(vizid) return named_dialog(XLAT("rogueviz menu"), rogueviz::showMenu);
   return named_functionality();
   }
 
@@ -1498,8 +1487,8 @@ auto hooks  =
     #endif
     }) +
   addHook(hooks_welcome_message, 100, [] () {
-    if(rogueviz::on) addMessage(XLAT("Welcome to RogueViz!"));
-    return rogueviz::on;
+    if(vizid) addMessage(XLAT("Welcome to RogueViz!"));
+    return bool(vizid);
     }) +
   addHook(hooks_default_help, 100, default_help) +
   addHook(hooks_markers, 100, search_marker) +

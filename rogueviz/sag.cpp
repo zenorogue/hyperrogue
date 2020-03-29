@@ -12,6 +12,8 @@ namespace rogueviz {
 
 namespace sag {
 
+  int sag_id;
+
   int sagpar = 0;
 
   enum eSagmode { sagOff, sagHC, sagSA };
@@ -419,7 +421,8 @@ namespace sag {
 
   void read(string fn) {
     fname = fn;
-    init(); kind = kSAG;
+    init(&sag_id, RV_GRAPH | RV_WHICHWEIGHT | RV_AUTO_MAXWEIGHT | RV_HAVE_WEIGHT);
+    weight_label = "min weight";
     temperature = 0; sagmode = sagOff;
     readsag(fname.c_str());
     
@@ -535,8 +538,7 @@ int readArgs() {
   }
 
 bool turn(int delta) {
-  if(!on) return false;
-  if(kind == kSAG) sag::iterate(), timetowait = 0;
+  if(vizid == &sag_id) sag::iterate(), timetowait = 0;
   return false;
   // shmup::pc[0]->rebase();
   }
@@ -545,7 +547,7 @@ int ah = addHook(hooks_args, 100, readArgs)
   + addHook(shmup::hooks_turn, 100, turn)
   + addHook(rogueviz::hooks_close, 100, [] { sag::sagedges.clear(); })
   + addHook(rogueviz::hooks_rvmenu, 100, [] { 
-    if(kind != kSAG) return;
+    if(vizid != &sag_id) return;
     dialog::addSelItem(XLAT("temperature"), fts(sag::temperature), 't');
     dialog::add_action([] {
       dialog::editNumber(sag::temperature, sag::lowtemp, sag::hightemp, 1, 0, XLAT("temperature"), "");
@@ -567,7 +569,6 @@ int ah = addHook(hooks_args, 100, readArgs)
           rogueviz::sag::edgepower = 1;
           rogueviz::sag::edgemul = 1;
           
-          rogueviz::on = true;
           gmatrix.clear();
           drawthemap();
           gmatrix0 = gmatrix;
@@ -588,7 +589,6 @@ int ah = addHook(hooks_args, 100, readArgs)
       rogueviz::sag::edgepower = .4;
       rogueviz::sag::edgemul = .02;
       
-      rogueviz::on = true;
       gmatrix.clear();
       drawthemap();
       gmatrix0 = gmatrix;
@@ -610,7 +610,6 @@ int ah = addHook(hooks_args, 100, readArgs)
       rogueviz::sag::edgepower = 1;
       rogueviz::sag::edgemul = 1;
       
-      rogueviz::on = true;
       gmatrix.clear();
       drawthemap();
       gmatrix0 = gmatrix;

@@ -8,6 +8,8 @@ namespace rogueviz {
 
 namespace tree {
 
+  int tree_id;
+  
   edgetype *tree_edge;
 
   struct treevertex {
@@ -61,7 +63,7 @@ namespace tree {
     
   void read(string fn) {
     fname = fn;
-    init(); kind = kTree;
+    init(&tree_id, RV_GRAPH | RV_COMPRESS_LABELS | RV_COLOR_TREE);
     tree_edge = add_edgetype("tree edge");
     printf("Reading the tree of life...\n");
     FILE *f = fopen(fname.c_str(), "rt");
@@ -132,7 +134,6 @@ int ah = addHook(hooks_args, 100, readArgs)
 
       rogueviz::showlabels = true;
       
-      rogueviz::on = true;
       gmatrix.clear();
       drawthemap();
       gmatrix0 = gmatrix;

@@ -44,6 +44,8 @@ namespace rogueviz {
 
 namespace flocking {
 
+  int flock_id;
+
   int N;
   
   bool draw_lines = false;
@@ -85,7 +87,7 @@ namespace flocking {
       return;
       }
     stop_game();
-    rogueviz::init(); kind = kFlocking;
+    rogueviz::init(&flock_id, RV_GRAPH);
     vdata.resize(N);
     
     const auto v = currentmap->allcells();
@@ -277,8 +279,8 @@ namespace flocking {
     }
 
   bool turn(int delta) {
-    if(!on) return false;
-    if(kind == kFlocking) simulate(delta), timetowait = 0;
+    if(vizid != &flock_id) return false;
+    simulate(delta), timetowait = 0;
     
     if(follow) {
 
@@ -496,7 +498,7 @@ namespace flocking {
     }
     
   named_functionality o_key() {
-    if(kind == kFlocking) return named_dialog("flocking", show);
+    if(vizid == &flock_id) return named_dialog("flocking", show);
     return named_functionality();
     }
 
