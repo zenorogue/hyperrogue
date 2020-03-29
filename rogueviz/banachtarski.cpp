@@ -477,6 +477,32 @@ void init_bantar_map() {
     }
   }
   
+// see: https://twitter.com/ZenoRogue/status/1001127253747658752
+// see also: https://twitter.com/ZenoRogue/status/1000043540985057280 (older version)
+
+void bantar_record() {
+  int TSIZE = rug::texturesize; // recommended 2048
+  resetbuffer rb;
+  renderbuffer rbuf(TSIZE, TSIZE, true);
+
+  int fr = 0;
+  
+  for(int i=0; i < 10000; i += 33) {
+    if(i % 1000 == 999) i++;
+    ticks = i;
+
+    rbuf.enable();
+    vid.xres = vid.yres = TSIZE;
+    banachtarski::bantar_frame();
+    
+    IMAGESAVE(rbuf.render(), ("bantar/" + format("%05d", fr) + IMAGEEXT).c_str());
+    printf("GL %5d/%5d\n", i, 10000);
+    fr++;
+    }
+  
+  rb.reset();
+  }
+
 int readArgs() {
   using namespace arg;
            
@@ -511,6 +537,15 @@ int readArgs() {
     }
   else if(argis("-btry")) {
     shift(); notry = argi();
+    }
+  else if(argis("-bantar_record")) {
+    using namespace banachtarski;
+    PHASE(3);
+    peace::on = true;
+    airmap.clear();
+    ForInfos if(cci.second.c->monst == moAirElemental)
+      cci.second.c->monst = moFireElemental;
+    bantar_record();
     }
   else return 1;
   return 0;

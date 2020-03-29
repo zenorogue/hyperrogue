@@ -429,7 +429,7 @@ void create_grigorchuk_geometry() {
   gi.shortname = "Grig";
   }
 
-int args() {
+int readArgsG() {
   using namespace arg;
            
   if(0) ;
@@ -459,7 +459,7 @@ int args() {
   return 0;
   }
 
-auto hook = addHook(hooks_args, 100, args)
+auto hook = addHook(hooks_args, 100, readArgsG)
   + addHook(hooks_newmap, 100, [] { return geometry == gGrigorchuk ? new hrmap_grigorchuk : nullptr; })
   + addHook(patterns::hooks_generate_canvas, 100, [] (cell* c) {
     if(patterns::whichCanvas == 'G' && geometry == gGrigorchuk) 

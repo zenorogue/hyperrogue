@@ -290,6 +290,40 @@ void showMenu() {
     };
   }
 
+// see: https://www.youtube.com/watch?v=HZNRo6mr5pk
+
+void staircase_video(int from, int num, int step) {
+  int TSIZE = rug::texturesize; // recommended 4096
+  resetbuffer rb;
+  renderbuffer rbuf(TSIZE, TSIZE, true);
+  vid.stereo_mode = sODS;
+
+  for(int i=from; i<num; i+=step) { 
+    ld t = i * 1. / num;
+    t = pow(t, .3);
+    staircase::scurvature = t * t * (t-.95) * 4;
+    staircase::progress = i / 30.;
+    
+    staircase::strafex = (sin(i / 240.) - sin(i / 501.)) / 2.5;
+    staircase::strafey = (cos(i / 240.) - cos(i / 501.)) / 2.5;
+    
+    staircase::make_staircase();
+
+    rbuf.enable();
+    dynamicval<int> vx(vid.xres, TSIZE);
+    dynamicval<int> vy(vid.yres, TSIZE);
+    dynamicval<int> vxc(current_display->xcenter, TSIZE/2);
+    dynamicval<int> vyc(current_display->ycenter, TSIZE/2);
+    printf("draw scene\n");
+    rug::drawRugScene();
+    
+    IMAGESAVE(rbuf.render(), ("staircase/" + format("%05d", i) + IMAGEEXT).c_str());
+    printf("GL %5d/%5d\n", i, num);
+    }
+  
+  rb.reset();
+  }
+
 #if CAP_COMMANDLINE
 int readArgs() {
   using namespace arg;
@@ -300,6 +334,10 @@ int readArgs() {
     showstartmenu = false;
     ctick = ticks + 2000;
     pushScreen(showMenu);
+    }
+
+  else if(argis("-staircase_video")) {
+    staircase_video(0, 128*30, 1); // goal: 168*30
     }
 
   else return 1;

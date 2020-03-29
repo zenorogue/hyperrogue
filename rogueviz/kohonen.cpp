@@ -1197,7 +1197,14 @@ void steps() {
     }
   }
 
+void shift_color(int i) {
+  whattodraw[i]++;
+  if(whattodraw[i] == columns) whattodraw[i] = -5;
+  coloring();
+  }
+
 void showMenu() {
+  if(kind != kKohonen) return;
   string parts[3] = {"red", "green", "blue"};
   for(int i=0; i<3; i++) {
     string c;
@@ -1209,28 +1216,15 @@ void showMenu() {
     else if(whattodraw[i] == -6) c = "sample names to colors";
     else c = colnames[whattodraw[i]];
     dialog::addSelItem(XLAT("coloring (%1)", parts[i]), c, '1'+i);
+    dialog::add_action([i] { shift_color(i); });
     }
   dialog::addItem("coloring (all)", '0');
+  dialog::add_action([] {
+    shift_color(0); shift_color(1); shift_color(2);
+    });
+    
   dialog::addItem("level lines", '4');
-  }
-
-bool handleMenu(int sym, int uni) {
-  if(uni >= '1' && uni <= '3') {
-    int i = uni - '1';
-    whattodraw[i]++;
-    if(whattodraw[i] == columns) whattodraw[i] = -5;
-    coloring();
-    return true;
-    }
-  if(uni == '0') {
-    for(char x: {'1','2','3'}) handleMenu(x, x);
-    return true;
-    }
-  if(uni == '4') {
-    pushScreen(levelline::show);
-    return true;
-    }
-  return false;
+  dialog::add_action_push(levelline::show);
   }
 
 void save_compressed(string name) {
@@ -1530,8 +1524,17 @@ int readArgs() {
 auto hooks = addHook(hooks_args, 100, readArgs);
 #endif
 
+bool turn(int delta) {
+  if(!on) return false;
+  if(kind == kKohonen) kohonen::steps(), timetowait = 0;
+  return false;
+  // shmup::pc[0]->rebase();
+  }
+
 auto hooks2 = addHook(hooks_frame, 50, levelline::draw)
-  + addHook(hooks_mouseover, 100, describe_cell);
+  + addHook(hooks_mouseover, 100, describe_cell)
+  + addHook(shmup::hooks_turn, 100, turn)
+  + addHook(rogueviz::hooks_rvmenu, 100, showMenu);
 
 void clear() {
   printf("clearing Kohonen...\n");

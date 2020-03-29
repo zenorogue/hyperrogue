@@ -1,3 +1,5 @@
+#ifndef _ROGUEVIZ_H_
+#define _ROGUEVIZ_H_
 // See: http://www.roguetemple.com/z/hyper/rogueviz.php
 
 namespace rogueviz {
@@ -115,7 +117,12 @@ namespace rogueviz {
     }
 
   extern colorpair dftcolor;
-  namespace collatz { extern double s2, s3, p2, p3; void start(); }
+  namespace collatz { 
+    extern double s2, s3, p2, p3; 
+    void start(); 
+    void act(vertexdata&, cell*, shmup::monster*, int); 
+    void lookup(long long reached, int bits);
+    }
   namespace tree { void read(string fn); }
   namespace sag { extern ld edgepower, edgemul; 
     void read(string fn);  
@@ -130,3 +137,4 @@ namespace rogueviz {
   void createViz(int id, cell *c, transmatrix at);
   }
 
+#endif
