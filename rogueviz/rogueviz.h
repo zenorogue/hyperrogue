@@ -4,6 +4,8 @@
 
 #include "../hyper.h"
 
+#define RVPATH HYPERPATH "rogueviz/"
+
 namespace rogueviz {
   using namespace hr;
   
@@ -18,7 +20,8 @@ namespace rogueviz {
   constexpr flagtype RV_INVERSE_WEIGHT = 64; // edit weight, not 1/weight
   
   inline flagtype vizflags;
-  string weight_label;
+  extern string weight_label;
+  extern ld maxweight;
 
   void drawExtra();
   void close();
@@ -32,6 +35,8 @@ namespace rogueviz {
     unsigned color, color_hi;
     string name;
     };
+
+  edgetype *add_edgetype(const string& name);
   
   static const unsigned DEFAULT_COLOR = 0x471293B5;
 
@@ -49,6 +54,13 @@ namespace rogueviz {
     edgetype *type;
     edgeinfo(edgetype *t) { orig = NULL; lastdraw = -1; type = t; }
     };
+
+  extern vector<edgeinfo*> edgeinfos;
+  void addedge0(int i, int j, edgeinfo *ei);
+  void addedge(int i, int j, edgeinfo *ei);
+  void addedge(int i, int j, double wei, bool subdiv, edgetype *t);
+  extern vector<int> legend;
+  extern vector<cell*> named;
   
   struct rvimage {
     basic_textureinfo tinf;
@@ -97,6 +109,10 @@ namespace rogueviz {
   
   inline hookset<void(vertexdata&, cell*, shmup::monster*, int)> *hooks_drawvertex;
   inline hookset<bool(edgeinfo*, bool store)> *hooks_alt_edges;
+  inline purehookset hooks_rvmenu;
+  inline hookset<bool()> *hooks_rvmenu_replace;
+  inline hookset<bool(int&, string&, FILE*)> *hooks_readcolor;
+  inline purehookset hooks_close;
   
   void readcolor(const string& cfname);
 
@@ -107,9 +123,56 @@ namespace rogueviz {
     using namespace hr::tour;
     inline hookset<void(vector<slide>&)> *hooks_build_rvtour;
     slide *gen_rvtour();
+
+template<class T> function<void(presmode)> roguevizslide(char c, const T& t) {
+  return [c,t] (presmode mode) {
+    patterns::canvasback = 0x101010;
+    setCanvas(mode, c);
+    if(mode == 1 || mode == pmGeometryStart) t();
+  
+    if(mode == 3 || mode == pmGeometry || mode == pmGeometryReset) {
+      rogueviz::close();
+      shmup::clearMonsters();
+      if(mode == pmGeometryReset) t();
+      }
+  
+    slidecommand = "toggle the player";
+    if(mode == 4) 
+      mapeditor::drawplayer = !mapeditor::drawplayer;
+    pd_from = NULL;
+    };
+  }
+
+template<class T, class U>
+function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) {
+  return [c,t,act] (presmode mode) {
+    patterns::canvasback = 0x101010;
+    setCanvas(mode, c);
+    if(mode == pmStart || mode == pmGeometryStart) t();
+  
+    act(mode);
+
+    if(mode == pmStop || mode == pmGeometry || mode == pmGeometryReset) {
+      rogueviz::close();
+      shmup::clearMonsters();
+      if(mode == pmGeometryReset) t();
+      }
+  
+    };
+  }
+
     }
 
   void createViz(int id, cell *c, transmatrix at);
+
+  extern map<string, int> labeler;
+  int getid(const string& s);
+  int getnewid(string s);
+  extern string fname;
+
+  colorpair perturb(colorpair cp);
+  void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const string* info, int i);
+
   }
 
 #endif
