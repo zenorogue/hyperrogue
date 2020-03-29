@@ -1,3 +1,5 @@
+#include "rogueviz.h"
+
 namespace rogueviz {
 
 #if CAP_ARCM

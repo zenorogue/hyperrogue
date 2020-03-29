@@ -1364,8 +1364,6 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
 vector<slide> rvslides;
 extern vector<slide> rvslides_default;
 
-hookset<void(vector<slide>&)> *hooks_build_rvtour;
-
 slide *gen_rvtour() {
   rvslides = rvslides_default;
   callhooks(hooks_build_rvtour, rvslides);
