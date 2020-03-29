@@ -121,7 +121,7 @@
 #include "dpgen.cpp"
 
 #if CAP_ROGUEVIZ
-#include "rogueviz/rogueviz.cpp"
+#include "rogueviz/rogueviz-all.cpp"
 #endif
 
 #if CAP_DAILY

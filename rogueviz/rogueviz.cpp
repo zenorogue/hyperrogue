@@ -21,6 +21,8 @@
 
 namespace rogueviz {
 
+string weight_label;
+
 ld fat_edges = 0;
 ld ggamma = 1;
 
@@ -795,8 +797,6 @@ bool rogueviz_hud() {
   return true;
   }
 
-inline hookset<bool(int&, string&, FILE*)> *hooks_readcolor;
-
 void readcolor(const string& cfname) {
   FILE *f = fopen(cfname.c_str(), "rt");
   if(!f) { printf("color file missing\n"); exit(1); }
@@ -901,8 +901,6 @@ void init(void *_vizid, flagtype _vizflags) {
 
 int search_for = -1;
 
-purehookset hooks_close;
-
 void close() { 
   search_for = -1;
   for(int i=0; i<isize(vdata); i++)
@@ -922,16 +920,6 @@ void close() {
 #ifndef CAP_RVSLIDES
 #define CAP_RVSLIDES (CAP_TOUR && !ISWEB)
 #endif
-
-int dimid(char x) {
-  if(x >= 'a' && x < 'a' + GDIM) return x - 'a';
-  else if(x >= '0' && x < '0' + GDIM) return x - '0';
-  else if(x >= 'x' && x < 'x' + GDIM) return x - 'x';
-  else {
-    println(hlog, "incorrect dimension ID");
-    throw hr_exception();
-    }
-  }
 
 #if CAP_COMMANDLINE
 int readArgs() {
@@ -1112,10 +1100,6 @@ void showVertexSearch() {
 
   }
 
-purehookset hooks_rvmenu;
-
-hookset<bool()> *hooks_rvmenu_replace;
-
 void showMenu() {
   if(callhandlers(false, hooks_rvmenu_replace)) return;
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
@@ -1160,45 +1144,6 @@ void showMenu() {
 namespace rvtour {
 
 using namespace tour;
-
-template<class T> function<void(presmode)> roguevizslide(char c, const T& t) {
-  return [c,t] (presmode mode) {
-    patterns::canvasback = 0x101010;
-    setCanvas(mode, c);
-    if(mode == 1 || mode == pmGeometryStart) t();
-  
-    if(mode == 3 || mode == pmGeometry || mode == pmGeometryReset) {
-      rogueviz::close();
-      shmup::clearMonsters();
-      if(mode == pmGeometryReset) t();
-      }
-  
-    slidecommand = "toggle the player";
-    if(mode == 4) 
-      mapeditor::drawplayer = !mapeditor::drawplayer;
-    pd_from = NULL;
-    };
-  }
-
-template<class T, class U>
-function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) {
-  return [c,t,act] (presmode mode) {
-    patterns::canvasback = 0x101010;
-    setCanvas(mode, c);
-    if(mode == pmStart || mode == pmGeometryStart) t();
-  
-    act(mode);
-
-    if(mode == pmStop || mode == pmGeometry || mode == pmGeometryReset) {
-      rogueviz::close();
-      shmup::clearMonsters();
-      if(mode == pmGeometryReset) t();
-      }
-  
-    };
-  }
-
-#define RVPATH HYPERPATH "rogueviz/"
 
 vector<slide> rvslides;
 extern vector<slide> rvslides_default;
@@ -1333,22 +1278,3 @@ auto hooks  =
  0;
 
 }
-
-#include "kohonen.cpp"
-#include "staircase.cpp"
-#include "banachtarski.cpp"
-#include "pentagonal.cpp"
-#include "functions.cpp"
-#include "fundamental.cpp"
-#include "sunflower.cpp"
-#include "flocking.cpp"
-#include "magiccube.cpp"
-#include "cvl.cpp"
-#include "newconf.cpp"
-#include "grigorchuk.cpp"
-#include "qtm.cpp"
-#include "rewriting.cpp"
-#include "sag.cpp"
-#include "collatz.cpp"
-#include "tree.cpp"
-#include "fullnet.cpp"

@@ -40,6 +40,8 @@ template<class T> auto parallelize(long long N, T action) -> decltype(action(0,0
 #endif
   }
 
+#include "rogueviz.h"
+
 namespace rogueviz {
 
 namespace flocking {

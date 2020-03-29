@@ -1,4 +1,3 @@
-#include "../hyper.h"
 #include "rogueviz.h"
 
 // SAG visualizer (e.g. Reddit roguelikes, GitHub languages)

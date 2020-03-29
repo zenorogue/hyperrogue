@@ -4,6 +4,8 @@
 // Kohonen's self-organizing maps. 
 // This is a part of RogueViz, not a part of HyperRogue.
 
+#include "rogueviz.h"
+
 namespace rogueviz { namespace kohonen {
 
 int kohonen_id;

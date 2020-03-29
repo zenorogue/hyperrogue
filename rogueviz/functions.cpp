@@ -1,3 +1,5 @@
+#include "rogueviz.h"
+
 namespace rogueviz {
 
 namespace graph {

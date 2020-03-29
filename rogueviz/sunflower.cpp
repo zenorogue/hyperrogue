@@ -6,6 +6,8 @@
 
 // for spherical geometry, density is set automatically to cover the whole sphere
 
+#include "rogueviz.h"
+
 namespace hr {
 
 namespace sunflower {

@@ -251,6 +251,16 @@ struct storydata { int s; int e; const char *text; } story[] = {
 
 string its05(int i) { char buf[64]; sprintf(buf, "%05d", i); return buf; }
 
+int dimid(char x) {
+  if(x >= 'a' && x < 'a' + GDIM) return x - 'a';
+  else if(x >= '0' && x < '0' + GDIM) return x - '0';
+  else if(x >= 'x' && x < 'x' + GDIM) return x - 'x';
+  else {
+    println(hlog, "incorrect dimension ID");
+    throw hr_exception();
+    }
+  }
+
 int readArgs() {
 #if CAP_COMMANDLINE
   using namespace arg;

@@ -1,6 +1,8 @@
 // show the fundamental domain for quotient spaces
 // Copyright (C) 2018 Zeno and Tehora Rogue, see 'hyper.cpp' for details
 
+#include "rogueviz.h"
+
 namespace hr {
 
 namespace fundamental {

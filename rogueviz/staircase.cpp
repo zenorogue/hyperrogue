@@ -4,6 +4,8 @@
 // Kohonen's self-organizing networks. 
 // This is a part of RogueViz, not a part of HyperRogue.
 
+#include "rogueviz.h"
+
 namespace rogueviz { namespace staircase {
 
 ld scurvature = 0;

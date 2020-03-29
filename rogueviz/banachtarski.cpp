@@ -4,6 +4,8 @@
 // good parameters: -fixx 10 -W Cros -bantar_anim
 // use -bantar_map to see how it works
 
+#include "rogueviz.h"
+
 namespace rogueviz { namespace banachtarski {
 
 bool on;
