@@ -170,6 +170,23 @@ void archimedean_tiling::prepare() {
     errors++;
     return;
     }
+  
+  for(int i=0; i<N; i++) {
+    bool forward = false;
+    int f = faces[i];
+    int i0 = i;
+    for(int k=0; k<f; k++) {
+      forward ^= invert[i0];
+      i0 = adj[i0];
+      if(forward) { if(faces[i0] != f) { errormsg = XLAT("face mismatch"); errors++; return; } i0++; if(i0 == N) i0 = 0; }
+      else { if(i0 == 0) i0 = N; i0--; if(faces[i0] != f) { errormsg = XLAT("face mismatch"); errors++; return; } }
+      }
+    for(int k=0; k<N; k++) {
+      f = faces[(i+N-k-1) % N];
+      if(forward) { if(faces[i0] != f) { errormsg = XLAT("face mismatch II "); errors++; return; } i0++; if(i0 == N) i0 = 0; }
+      else { if(i0 == 0) i0 = N; i0--; if(faces[i0] != f) { errormsg = XLAT("face mismatch II"); errors++; return; } }
+      }
+    }
 
   if(real_faces) {
     for(int i=1; i<isize(faces); i++) if(faces[i] == 2 && faces[i-1] == 2) {
