@@ -81,11 +81,6 @@ namespace rogueviz {
 
   extern bool rog3;
   extern bool rvwarp;
-#if CAP_TOUR
-  namespace rvtour {
-    extern tour::slide rvslides[];
-    }
-#endif
 
   namespace kohonen {
     extern int samples;
@@ -133,6 +128,11 @@ namespace rogueviz {
 
   void close();
   extern bool showlabels;
+  
+  namespace rvtour {
+    using namespace hr::tour;
+    slide *gen_rvtour();
+    }
 
   void createViz(int id, cell *c, transmatrix at);
   }

@@ -1370,13 +1370,13 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
 vector<slide> rvslides;
 extern vector<slide> rvslides_default;
 
-purehookset hooks_build_rvtour;
+hookset<void(vector<slide>&)> *hooks_build_rvtour;
 
 slide *gen_rvtour() {
   rvslides = rvslides_default;
-  callhooks(hooks_build_rvtour);
-  rvslides.push_back(
-    {"THE END", 99, LEGAL::ANY | FINALSLIDE,
+  callhooks(hooks_build_rvtour, rvslides);
+  rvslides.emplace_back(
+    slide{"THE END", 99, LEGAL::ANY | FINALSLIDE,
     "Press '5' to leave the presentation.",
     [] (presmode mode) {
       firstland = specialland = laIce;
@@ -1416,94 +1416,6 @@ vector<slide> rvslides_default = {
        if(mode == 3) patPalace.color = 0xFFD50000;
         }
       },
-  {"Collatz conjecture", 51, LEGAL::UNLIMITED | QUICKGEO,
-    "The following slide is a visualization of the Collatz conjecture. "
-    "Press '5' for a spiral rendering of the Collatz conjecture visualization.\n\n"
-    "Note that this, and many other RogueViz visualizations, have "
-    "Euclidean versions (press ESC).\n",
-    roguevizslide('d', [] () {
-      rogueviz::dftcolor = 0x206020FF;
-      
-      int fac = euclid ? 2 : 1;
-
-      rogueviz::collatz::s2 = .3;
-      rogueviz::collatz::p2 = .5 * fac;
-      rogueviz::collatz::s3 = -.4;
-      rogueviz::collatz::p3 = .4 * fac;
-
-      rogueviz::showlabels = true;
-      
-      rogueviz::on = true;
-      gmatrix.clear();
-      drawthemap();
-      gmatrix0 = gmatrix;
-
-      rogueviz::collatz::start();
-      })
-    },
-
-  {"Roguelikes", 63, LEGAL::UNLIMITED | QUICKGEO,
-    "A visualization of roguelikes, based on discussion on /r/reddit. "
-    "See: http://www.roguetemple.com/z/hyper/reddit.php",
-    roguevizslide('0', [] () {
-      rogueviz::dftcolor = 0x282828FF;
-
-      rogueviz::showlabels = true;
-      part(rogueviz::default_edgetype.color, 0) = 181;
-      rogueviz::sag::edgepower = 1;
-      rogueviz::sag::edgemul = 1;
-      
-      rogueviz::on = true;
-      gmatrix.clear();
-      drawthemap();
-      gmatrix0 = gmatrix;
-
-      rogueviz::sag::read(RVPATH "roguelikes/edges.csv");
-      rogueviz::readcolor(RVPATH "roguelikes/color.csv");
-      rogueviz::sag::loadsnake(RVPATH "roguelikes/" + cname());
-      })    
-    },
-  {"Programming languages of GitHub", 64, LEGAL::UNLIMITED | QUICKGEO,
-    "A visualization of programming languages.",
-    roguevizslide('0', [] () {
-      rogueviz::dftcolor = 0x282828FF;
-
-      rogueviz::showlabels = true;
-      part(rogueviz::default_edgetype.color, 0) = 128;
-      rogueviz::sag::edgepower = .4;
-      rogueviz::sag::edgemul = .02;
-      
-      rogueviz::on = true;
-      gmatrix.clear();
-      drawthemap();
-      gmatrix0 = gmatrix;
-
-      rogueviz::sag::read(RVPATH "lang/edges.csv");
-      rogueviz::readcolor(RVPATH "lang/color.csv");
-      rogueviz::sag::loadsnake(RVPATH "lang/" + cname());
-      if(euclid) rogueviz::legend.clear();
-      })
-    },
-    {"Boardgames", 62, LEGAL::UNLIMITED | QUICKGEO,
-        "A visualization of board games, based on discussions on Reddit.",
-    roguevizslide('0', [] () {
-      rogueviz::dftcolor = 0x282828FF;
-
-      rogueviz::showlabels = true;
-      part(rogueviz::default_edgetype.color, 0) = 157;
-      rogueviz::sag::edgepower = 1;
-      rogueviz::sag::edgemul = 1;
-      
-      rogueviz::on = true;
-      gmatrix.clear();
-      drawthemap();
-      gmatrix0 = gmatrix;
-
-      rogueviz::sag::read(RVPATH "boardgames/edges.csv");
-      rogueviz::readcolor(RVPATH "boardgames/color.csv");
-      rogueviz::sag::loadsnake(RVPATH "boardgames/" + cname());
-      })
-        },
     {"Tree of Life", 61, LEGAL::UNLIMITED | QUICKGEO,
       "Not described.",
 
