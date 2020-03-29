@@ -91,11 +91,6 @@ namespace rogueviz {
     void act(vertexdata&, cell*, shmup::monster*, int); 
     void lookup(long long reached, int bits);
     }
-  namespace tree { void read(string fn); }
-  namespace sag { extern ld edgepower, edgemul; 
-    void read(string fn);  
-    void loadsnake(const string& fn);
-    }
   void readcolor(const string& cfname);
   extern bool on;
 
