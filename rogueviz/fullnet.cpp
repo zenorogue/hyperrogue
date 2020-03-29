@@ -1,21 +1,7 @@
 // Hyperbolic Rogue
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
-// Hyperbolic geometry is a good tool to visualize data,
-// especially trees and scale-free networks. This file
-// uses HyperRogue to browse such vizualizations.
-
-// Since it is not of use for general HyperRogue players, 
-// it is disabled by default -- compile with the ROGUEVIZ flag to enable this.
-
-// How to use:
-
-// hyper -embed <start of filename> -- visualize a social network
-//   embedded into hyperbolic plane, see:
-//   https://bitbucket.org/HaiZhung/hyperbolic-embedder/overview
-//   (it uses the same format)
-
-// hyper -tess <parameter file> -- visualize a horocyclic tesselation,
+// a CLI option to label tiles
 
 #include "rogueviz.h"
 
