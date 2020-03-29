@@ -797,6 +797,8 @@ static const flagtype qSINGLE          = Flag(20);
 static const flagtype qDEPRECATED      = Flag(21);
 static const flagtype qINFMIXED        = Flag(22);
 
+static const flagtype qRAYONLY         = Flag(23);
+
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
 static const int OINF = 100;

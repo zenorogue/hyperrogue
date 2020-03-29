@@ -78,6 +78,7 @@ EX bool available() {
 
 /** do we want to use the raycaster? */
 EX bool requested() {
+  if(cgflags & qRAYONLY) return true;
   if(!want_use) return false;
   #if CAP_TEXTURE
   if(texture::config.tstate == texture::tsActive) return false;
@@ -87,6 +88,7 @@ EX bool requested() {
   return racing::on || quotient;
   }
 
+#if HDR
 struct raycaster : glhr::GLprogram {
   GLint uStart, uStartid, uM, uLength, uFovX, uFovY, uIPD, uShift;
   GLint uWallstart, uWallX, uWallY;
@@ -96,7 +98,11 @@ struct raycaster : glhr::GLprogram {
   GLint uBLevel;
   GLint uPosX, uPosY;
   
-  raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
+  raycaster(string vsh, string fsh);
+  };
+#endif
+
+raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     println(hlog, "assigning");
     uStart = glGetUniformLocation(_program, "uStart");
     uStartid = glGetUniformLocation(_program, "uStartid");
@@ -122,8 +128,6 @@ struct raycaster : glhr::GLprogram {
     uExpDecay = glGetUniformLocation(_program, "uExpDecay");
     uExpStart = glGetUniformLocation(_program, "uExpStart");
 
-    uShift = glGetUniformLocation(_program, "uShift");
-
     uBLevel = glGetUniformLocation(_program, "uBLevel");
   
     tConnections = glGetUniformLocation(_program, "tConnections");
@@ -133,7 +137,6 @@ struct raycaster : glhr::GLprogram {
     uPosX = glGetUniformLocation(_program, "uPosX");
     uPosY = glGetUniformLocation(_program, "uPosY");
     }
-  };
 
 shared_ptr<raycaster> our_raycaster;
 
@@ -165,6 +168,9 @@ string build_getter(string type, string name, int index) {
 #else
 #define GET(array, index) array "[" index "]"
 #endif
+
+EX hookset<void(string&, string&)> *hooks_rayshader;
+EX hookset<bool(shared_ptr<raycaster>)> *hooks_rayset;
 
 void enable_raycaster() {
   if(geometry != last_geometry) reset_raycaster();
@@ -814,7 +820,9 @@ void enable_raycaster() {
       "  }";
 
     fsh += fmain;    
- 
+
+    callhooks(hooks_rayshader, vsh, fsh);
+      
     our_raycaster = make_shared<raycaster> (vsh, fsh);
     }
   full_enable(our_raycaster);
@@ -879,7 +887,11 @@ EX void cast() {
   cd->set_mask(global_projection);
   glUniform1f(o->uFovX, cd->tanfov / (vid.stereo_mode == sLR ? 2 : 1));
   glUniform1f(o->uFovY, cd->tanfov * cd->ysize / cd->xsize);
+
+  glUniform1f(o->uPosX, -((cd->xcenter-cd->xtop)*2./cd->xsize - 1));
+  glUniform1f(o->uPosY, -((cd->ycenter-cd->ytop)*2./cd->ysize - 1));
   
+  if(!callhandlers(false, hooks_rayset, o)) {
   deg = S7;
   if(prod) deg += 2;
   
@@ -934,9 +946,6 @@ EX void cast() {
   glUniform1f(o->uIPD, vid.ipd);
   GLERR("uniform mediump IPD");
 
-  glUniform1f(o->uPosX, -((cd->xcenter-cd->xtop)*2./cd->xsize - 1));
-  glUniform1f(o->uPosY, -((cd->ycenter-cd->ytop)*2./cd->ysize - 1));
-  
   vector<transmatrix> ms;
   for(int j=0; j<S7; j++) ms.push_back(currentmap->iadj(cwt.at, j));
   if(prod) ms.push_back(mscale(Id, +cgi.plevel));
@@ -1056,6 +1065,8 @@ EX void cast() {
   
   auto cols = glhr::acolor(darkena(backcolor, 0, 0xFF));
   glUniform4f(o->uFogColor, cols[0], cols[1], cols[2], cols[3]);
+  
+  }
 
   glVertexAttribPointer(hr::aPosition, 4, GL_FLOAT, GL_FALSE, sizeof(glvertex), &screen[0]);
   if(ray::comparison_mode)

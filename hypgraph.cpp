@@ -2060,8 +2060,12 @@ EX transmatrix& get_view_orientation() {
   return prod ? NLP : View;
   }
 
+EX hookset<bool(const transmatrix&)> *hooks_rotate_view;
+EX hookset<bool(const hyperpoint&)> *hooks_shift_view;
+
 /** rotate the view using the given rotation matrix */
 EX void rotate_view(transmatrix T) {
+  if(callhandlers(false, hooks_rotate_view, T)) return;
   transmatrix& which = get_view_orientation();
   which = T * which;
   if(!prod && !nonisotropic) current_display->which_copy = T * current_display->which_copy;
@@ -2085,6 +2089,7 @@ EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V) {
 
 /** shift the view according to the given tangent vector */
 EX void shift_view(hyperpoint H) {
+  if(callhandlers(false, hooks_shift_view, H)) return;
   auto oView = View;
   View = get_shift_view_of(H, View);
   auto& wc = current_display->which_copy;
