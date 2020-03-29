@@ -19,7 +19,8 @@ using namespace std;
 
 string opts = "-DFHS -DLINUX -DWHATEVER -DMYMAKE -I/usr/include/SDL";
 
-string standard = " -std=c++11";
+string default_standard = " -std=c++11";
+string standard = default_standard;
 
 string preprocessor = 
   "g++ -E";
@@ -85,6 +86,21 @@ int main(int argc, char **argv) {
       }
     else if(s.substr(0, 2) == "-I")
       opts += " " + s;
+    else if(s == "-rv") {
+      
+      if(standard == default_standard) {
+        standard = "-std=c++17";
+        }
+      ifstream ifs("rogueviz/rogueviz-all.cpp");
+      string s;
+      while(getline(ifs, s)) {
+        if(s.substr(0, 10) == "#include \"") {
+          string t = s.substr(10);
+          t = t.substr(0, t.find(".cpp\""));
+          modules.push_back("rogueviz/" + t);
+          }
+        }
+      }
     else {
       if(s.size() >= 5 && s.substr(s.size() - 4) == ".cpp")
         s = s.substr(0, s.size() - 4);
