@@ -44,15 +44,6 @@ EX namespace reg3 {
   /** \brief for adjacent directions a,b, next_dir[a][b] is the next direction adjacent to a, in (counter?)clockwise order from b */
   EX int next_dir[16][16];
 
-  template<class T> ld binsearch(ld dmin, ld dmax, const T& f) {
-    for(int i=0; i<200; i++) {
-      ld d = (dmin + dmax) / 2;
-      if(f(d)) dmax = d;
-      else dmin = d;
-      }
-    return dmin;
-    } 
-
   EX void generate() {
   
     if(S7 == 4) face = 3;

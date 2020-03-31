@@ -772,6 +772,18 @@ template <class T> void texture_order(const T& f) {
     }
   }
 
+/** find the smallest value of x in range [dmin..dmax] such that f(x) returns true */
+
+template<class T> ld binsearch(ld dmin, ld dmax, const T& f) {
+  for(int i=0; i<200; i++) {
+    ld d = (dmin + dmax) / 2;
+    if(dmin == d || dmax == d) break;
+    if(f(d)) dmax = d;
+    else dmin = d;
+    }
+  return dmin;
+  } 
+
 static const color_t NOCOLOR = 0;
 
   static const int max_vec = (1<<14);
