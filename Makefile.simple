@@ -167,5 +167,7 @@ hyper.emscripten-sources: *.cpp autohdr.h
 .PHONY: clean
 
 clean:
-	rm -f hyperrogue$(EXE_EXTENSION) hyper$(OBJ_EXTENSION) $(hyper_RES) langen$(EXE_EXTENSION) language-data.cpp savepng$(OBJ_EXTENSION)
+	rm -f langen$(EXE_EXTENSION) language-data.cpp
+	rm -f makeh$(EXE_EXTENSION) autohdr.h
+	rm -f hyperrogue$(EXE_EXTENSION) hyper$(OBJ_EXTENSION) $(hyper_RES) savepng$(OBJ_EXTENSION)
 	rm -f hyper.html hyper.js hyper.wasm
