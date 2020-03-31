@@ -13,7 +13,11 @@
 namespace hr {
 
 #if HDR
+constexpr ld full_circle = 2 * M_PI;
+constexpr ld quarter_circle = M_PI / 2;
 static const ld degree = M_PI / 180;
+constexpr ld golden_phi = (sqrt(5)+1)/2;
+constexpr ld log_golden_phi = log(golden_phi);
 #endif
 
 eGeometry geometry;

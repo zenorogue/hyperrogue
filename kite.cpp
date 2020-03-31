@@ -50,7 +50,7 @@ hyperpoint mhpxy(ld x, ld y) {
   else return bt::parabolic3(x, y) * C0;
   }
 
-const ld phi = (1 + sqrt(5)) / 2;
+const ld phi = golden_phi;
 const ld rphi = 1 / phi;
 
 const ld down = 1 / tan(36 * degree);

@@ -951,7 +951,7 @@ EX void check_cgi() {
     for(auto& t: cgis) timestamps.emplace_back(-t.second.timestamp, t.first);
     sort(timestamps.begin(), timestamps.end());
     while(isize(timestamps) > 4) {
-      println(hlog, "erasing geometry ", timestamps.back().second);
+      DEBB(DF_GEOM, ("erasing geometry ", timestamps.back().second));
       cgis.erase(timestamps.back().second);
       timestamps.pop_back();
       }
