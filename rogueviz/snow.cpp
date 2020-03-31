@@ -23,6 +23,9 @@ bool snow_test = false;
 /* a funny glitch */
 bool snow_glitch = false;
 
+/* disable textures */
+bool snow_texture = true;
+
 int snow_shape = 0;
 
 map<cell*, vector<transmatrix> > matrices_at;
@@ -110,8 +113,10 @@ bool draw_snow(cell *c, const transmatrix& V) {
     }
   
   poly_outline = 0xFF;
-  for(auto& T: matrices_at[c])
-    queuepoly(V * T, shapeid(snow_shape), 0xFFFFFFFF).tinf = nullptr;
+  for(auto& T: matrices_at[c]) {
+    auto& p = queuepoly(V * T, shapeid(snow_shape), 0xFFFFFFFF);
+    if(!snow_texture) p.tinf = nullptr;
+    }
 
   return false;
   }
@@ -136,6 +141,9 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
     }
   else if(argis("-snow-test")) {
     snow_test = true;
+    }
+  else if(argis("-snow-no-texture")) {
+    snow_texture = false;
     }
   else if(argis("-snow-glitch")) {
     snow_test = true;
