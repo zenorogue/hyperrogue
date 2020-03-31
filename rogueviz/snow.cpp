@@ -43,6 +43,49 @@ hpcshape& shapeid(int i) {
     }
   }
 
+transmatrix random_snow_matrix(cell *c) {
+  if(snow_glitch) {
+    // in the standard tiling, this is incorrect but fun
+    hyperpoint h = C0;
+    h[0] = randd() - .5;
+    h[1] = randd() - .5;
+    h[2] = randd() - .5;
+    h[2] = -h[2];
+    return rgpushxto0(h);
+    }
+  else if(nonisotropic || bt::in()) {
+
+    int co = bt::expansion_coordinate();
+    ld aer = bt::area_expansion_rate();
+
+    hyperpoint h;
+    // randd() - .5;
+    
+    for(int a=0; a<3; a++) {
+      if(a != co || aer == 1)
+        h[a] = randd() * 2 - 1;
+      else {
+        ld r = randd();
+        h[co] = log(lerp(1, aer, r)) / log(aer) * 2 - 1;
+        }
+      }
+    return bt::normalized_at(h);
+    }
+  else {
+    while(true) {
+      ld maxr = WDIM == 2 ? cgi.rhexf : cgi.corner_bonus;
+      ld vol = randd() * wvolarea_auto(maxr);
+      ld r = binsearch(0, maxr, [vol] (ld r) { return wvolarea_auto(r) > vol; });
+      transmatrix T = random_spin();
+      hyperpoint h = T * xpush0(r);
+      cell* c1 = c;
+      virtualRebase(c1, h);
+      if(c1 == c)
+        return T * xpush(r);
+      }
+    }
+  }
+
 bool draw_snow(cell *c, const transmatrix& V) {
   
   if(!matrices_at.count(c)) {
@@ -64,52 +107,9 @@ bool draw_snow(cell *c, const transmatrix& V) {
         cnt = snow_lambda;
         }
       }      
-    
-    if(snow_glitch) {
-      // in the standard tiling, this is incorrect but fun
-      for(int t=0; t<cnt; t++) {
-        hyperpoint h = C0;
-        h[0] = randd() - .5;
-        h[1] = randd() - .5;
-        h[2] = randd() - .5;
-        h[2] = -h[2];
-        v.push_back(rgpushxto0(h));
-        }
-      }
-    else if(nonisotropic || bt::in()) {
 
-      int co = bt::expansion_coordinate();
-      ld aer = bt::area_expansion_rate();
-
-      for(int t=0; t<cnt; t++) {
-        hyperpoint h;
-        // randd() - .5;
-        
-        for(int a=0; a<3; a++) {
-          if(a != co || aer == 1)
-            h[a] = randd() * 2 - 1;
-          else {
-            ld r = randd();
-            h[co] = log(lerp(1, aer, r)) / log(aer) * 2 - 1;
-            }
-          }
-        h = tC0(bt::normalized_at(h));
-        v.push_back(rgpushxto0(h));
-        }
-      }
-    else {
-      while(isize(v) < cnt) {
-        ld maxr = WDIM == 2 ? cgi.rhexf : cgi.corner_bonus;
-        ld vol = randd() * wvolarea_auto(maxr);
-        ld r = binsearch(0, maxr, [vol] (ld r) { return wvolarea_auto(r) > vol; });
-        transmatrix T = random_spin();
-        hyperpoint h = T * xpush0(r);
-        cell* c1 = c;
-        virtualRebase(c1, h);
-        if(c1 == c)
-          v.push_back(T * xpush(r));
-        }
-      }
+    for(int t=0; t<cnt; t++) 
+      v.push_back(random_snow_matrix(c));
     }
   
   poly_outline = 0xFF;
