@@ -828,7 +828,7 @@ void celldrawer::draw_grid() {
     int ofs = wall_offset(c);
     for(int t=0; t<c->type; t++) {
       if(!c->move(t)) continue;
-      if(bt::in() && !sol && !among(t, 5, 6, 8)) continue;
+      if(bt::in() && !sn::in() && !among(t, 5, 6, 8)) continue;
       if(!bt::in() && c->move(t) < c) continue;
       dynamicval<color_t> g(poly_outline, gridcolor(c, c->move(t)));          
       queuepoly(V, cgi.shWireframe3D[ofs + t], 0);
