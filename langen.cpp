@@ -21,6 +21,7 @@
 #endif
 
 template<class T> int isize(const T& x) { return x.size(); }
+template<class T, int N> int isize(const T (&x)[N]) { return N; }
 
 #define NUMLAN 7
 
@@ -30,9 +31,75 @@ std::string current_language;
 
 const char *escape(std::string s, const std::string& dft);
 
+#include "all-string-literals.ipp"
+
+int edit_distance(const std::string &s1, const std::string &s2, int bail)
+{
+  const int m = s1.size();
+  const int n = s2.size();
+  if( m==0 ) return n;
+  if( n==0 ) return m;
+  std::vector<int> costs(n+1);
+  for (int k=0; k<=n; k++) costs[k] = k;
+  int i = 0;
+  for (auto it1 = s1.begin(); it1 != s1.end(); ++it1, ++i ) {
+    costs[0] = i+1;
+    int corner = i;
+    int j = 0;
+    for (auto it2 = s2.begin(); it2 != s2.end(); ++it2, ++j ) {
+      int upper = costs[j+1];
+      if (toupper(*it1) == toupper(*it2)) {
+        costs[j+1] = corner;
+      } else {
+        costs[j+1] = std::min(costs[j], std::min(upper, corner)) + 1;
+      }
+      corner = upper;
+    }
+  }
+  return costs[n];
+}
+
+static auto program_string_set = std::set<std::string>(
+    program_strings, program_strings + isize(program_strings)
+);
+static std::map<std::string, std::vector<std::string>> useless_translations;
+
+static void check_program_strings_for(const std::string& s)
+{
+    if (program_string_set.find(s) != program_string_set.end()) {
+        return;
+    }
+    useless_translations[s].push_back(current_language);
+}
+
+static void print_useless_translations()
+{
+    for (auto&& kv : useless_translations) {
+        const std::string& s = kv.first;
+
+        int min_d = INT_MAX;
+        std::string min_p;
+        for (const std::string& p : program_string_set) {
+            int d = edit_distance(p, s, min_d);
+            if (d < min_d) {
+                min_d = d;
+                min_p = p;
+            }
+        }
+        std::string langs = kv.second[0];
+        for (size_t i=1; i < kv.second.size(); ++i) {
+            langs += ',';
+            langs += kv.second[i];
+        }
+        fprintf(stderr, "Unused translation in %s: %s\n", langs.c_str(), escape(s, s));
+        fprintf(stderr, "Closest match in program: %s\n", escape(min_p, min_p));
+    }
+}
+
 template<class T> struct dictionary {
   std::map<std::string, T> m;
   void add(const std::string& s, T val) {
+    check_program_strings_for(s);
     auto it = m.find(s);
     if (it == m.end()) {
       m.emplace(s, std::move(val));
@@ -442,5 +509,7 @@ int main() {
     }
 
   printf("  };\n");
+
+  print_useless_translations();
 
   }
