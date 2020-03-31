@@ -4587,11 +4587,11 @@ S(
   "are not about points on the ground level, but "
   "about the matching points on the plane P -- "
   "divide them by the factor above to get actual "
-  "distances.",
+  "distances.)",
   
   "(Vzdálenosti v editoru vektorové "
   "grafiky nejsou vzdálenosti bodů na úrovni země, ale odpovídajících bodů v rovině "
-  "P -- skutečné vzdálenosti získáte jejich vydělením výše zmíněným faktorem.")
+  "P -- skutečné vzdálenosti získáte jejich vydělením výše zmíněným faktorem.)")
 
 S( "If we are viewing an equidistant g absolute units below a plane, "
    "from a point c absolute units above the plane, this corresponds "
@@ -6146,7 +6146,7 @@ S("would be destroyed in %the1", "by%l1by zničen%1 %abl1")
 S(" to go cold", " vychladnout")
 S("%The1 is destroyed by lava!", "Láva zničila %a1!")
 S("%The1 is killed by lava!", "Láva zabila %a1!")
-S("Run away from the lava!", "Utíkej od lávy!")
+S("Run away from the magma!", "Utíkej od lávy!")
 
 // Terracotta Army
 //-----------------
@@ -6693,7 +6693,7 @@ N("Chrysoberyl", GEN_O, "Chryzoberyl", "Chryzoberyly", "Chryzoberyl", "Chryzober
 S("Fragment of the past glory.", "Fragment minulé slávy.")
 
 N("Red Raider", GEN_M, "Èervený nájezdník", "Èervení nájezdníci", "Èerveného nájezdníka", "Èerveným nájezdníkem")
-S("Red Raiders travel in pairs. They have promised to always watch another one's back. They are able to destroy walls on their way",
+S("Red Raiders travel in pairs. They have promised to always watch each other's backs. They are able to destroy walls on their way.",
   "Èervení nájezdníci cestují ve dvojicích. Slíbili si, že si vždycky budou navzájem "
   "hlídat záda. Po cestì mohou nièit zdi.")
 
@@ -7682,7 +7682,7 @@ S("A large bug native to the Brown Islands. Cannot be killed easily due to their
 
 N("Acid Gull", GEN_M, "Kyselinoracek", "Kyselinorackové", "Kyselinoracka", "Kyselinorackem")
 
-S("Where did this strange bird come from?...\n\n Acid Gulls dissolve the land on which they fall when they die. ",
+S("Where did this strange bird come from?...\n\nAcid Gulls dissolve the land on which they fall when they die. ",
 
   "Kde se tu vzal tenhle podivný pták...?\n\nKdyž Kyselinoracek zemře, rozpustí terén, na který dopadne.")
 
@@ -7767,7 +7767,7 @@ S("These guys look a bit strange, but they have no special properties.",
 
 N("Torbernite", GEN_O, "Torbernit", "Torbernity", "Torbernit", "Torbernitem")
 
-S("Crystals emiting magical radiation.", "Drahokamy vyzařující prospěšnou magickou radiaci.")
+S("Crystals emitting magical radiation.", "Drahokamy vyzařující prospěšnou magickou radiaci.")
 
 N("fire trap", GEN_F, "ohnivá past", "ohnivé pasti", "ohnivou past", "ohnivou pastí")
 
@@ -7845,7 +7845,7 @@ S(
 
 N("Torbernite", GEN_O, "Torbernit", "Torbernity", "Torbernit", "Torbernitem")
 
-S("Crystals emiting magical radiation.", "Krystaly vyzařující magickou radiaci.")
+S("Crystals emitting magical radiation.", "Krystaly vyzařující magickou radiaci.")
 
 // other things:
 
@@ -7936,7 +7936,7 @@ S("Crystal", "Krystal")
 
 #define Cell(x) \
   S(x "-cell", x "-nadstěn") \
-  S(x "-cell (elliptic space", x "-nadstěn (eliptický prostor)")
+  S(x "-cell (elliptic space)", x "-nadstěn (eliptický prostor)")
 
 Cell("{3,3,3} 5") Cell("{4,3,3} 8") Cell("{3,3,4} 16") Cell("{3,4,3} 24") Cell("{5,3,3} 120") Cell("{3,3,5} 600")
 #undef Cell
@@ -8408,7 +8408,7 @@ S("Hint: this is more playable with pure {7,3} or pure {5,4}", "Nápověda: toto
 
 S("view the underlying geometry", "zobraz základní geometrii")
 
-S("The space you are currently in the space of rotations of the underlying hyperbolic or spherical geometry. ",
+S("The space you are currently in is the space of rotations of the underlying hyperbolic or spherical geometry. ",
   "Prostor, ve kterém se právě nacházíš, je prostorem rotací základní hyperbolické nebo sférické geometrie. ")
 
 S("This option lets you see the underlying space. Lands and some walls (e.g. in the Graveyard) are based on "
