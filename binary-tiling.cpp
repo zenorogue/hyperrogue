@@ -654,6 +654,8 @@ EX namespace bt {
    *
    *  Otherwise: just return h
    *
+   *  See also: in devmods/tests.cpp, -bt-test tests whether this works correctly
+   *
    */
 
   EX transmatrix normalized_at(hyperpoint h) {
