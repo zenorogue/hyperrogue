@@ -234,6 +234,7 @@ EX ld acos_auto(ld x) {
     }
   }
 
+/** \brief volume of a three-dimensional ball of radius r in the current isotropic geometry */
 EX ld volume_auto(ld r) {
   switch(cgclass) {
     case gcEuclid: return 4 * r * r * r / 3 * M_PI;
@@ -241,6 +242,22 @@ EX ld volume_auto(ld r) {
     case gcSphere: return M_PI * (2 * r - sin(2*r));
     default: return 0;
     }
+  }
+
+/** \brief area of a circle of radius r in the current isotropic geometry */
+EX ld area_auto(ld r) {
+  switch(cgclass) {
+    case gcEuclid: return r * r * M_PI;
+    case gcHyperbolic: return 2 * M_PI * (cosh(r) - 1);
+    case gcSphere: return 2 * M_PI * (1 - cos(r));
+    default: return 0;
+    }
+  }
+
+/** \brief volume in 3D, area in 2D */
+EX ld wvolarea_auto(ld r) {
+  if(WDIM == 3) return volume_auto(r);
+  else return area_auto(r);
   }
 
 EX ld asin_clamp(ld x) { return x>1 ? M_PI/2 : x<-1 ? -M_PI/2 : std::isnan(x) ? 0 : asin(x); }
