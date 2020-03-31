@@ -1156,24 +1156,24 @@ EX struct fpattern& getcurrfp() {
     DEBB(DF_FIELD, ("set prime = ", fp.Prime));
     return fp;
     }
-  if(S7 == 8 && S3 == 3) {
+  if(S7 == 8 && S3 == 3 && !bt::in()) {
     static fpattern fp(17);
     return fp;
     }
-  if(S7 == 5 && S3 == 4) {
+  if(S7 == 5 && S3 == 4 && !bt::in()) {
     static fpattern fp(11);
     return fp;
     }
-  if(S7 == 6 && S3 == 4) {
+  if(S7 == 6 && S3 == 4 && !bt::in()) {
     static fpattern fp(13);
     return fp;
     }
-  if(S7 == 7 && S3 == 4) {
+  if(S7 == 7 && S3 == 4 && !bt::in()) {
     static fpattern fp(13);
     return fp;
     }
   if(sphere || euclid) return fp_invalid;
-  if(S7 == 7 && S3 == 3)
+  if(S7 == 7 && S3 == 3 && !bt::in())
     return fp43;
   return fp_invalid;
   }
