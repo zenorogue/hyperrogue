@@ -794,7 +794,9 @@ EX namespace bt {
       t[10] = it * t[6] * t[2];
       t[11] = it * t[1];
 
-      for(int a=0; a<12; a++) println(hlog, t[a]);
+      if(debugflags & DF_GEOM)
+        for(int a=0; a<12; a++) 
+          println(hlog, t[a]);
 
       use_direct >>= 1;
       }
