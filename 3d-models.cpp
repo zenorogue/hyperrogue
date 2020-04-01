@@ -1068,7 +1068,7 @@ void geometry_information::make_3d_models() {
   DEBB(DF_POLY, ("balls"));
   make_ball(shDisk, orbsize*.2, 2);
   make_ball(shHeptaMarker, zhexf*.2, 1);
-  make_ball(shSnowball, zhexf*.1, 0);
+  make_ball(shSnowball, zhexf*.1, 1);
   if(euclid) {
     make_ball(shSun, 0.5, 2);
     make_euclidean_sky();
