@@ -1815,6 +1815,22 @@ EX namespace rots {
     return cspin(3, 2, -z) * cspin(0, 1, -z);
     }
   
+  EX transmatrix lift_matrix(const transmatrix& T) {
+    hyperpoint d;
+    ld alpha, beta, distance;
+    transmatrix Spin;
+    hybrid::in_underlying_geometry([&] {
+      hyperpoint h = tC0(T);
+      Spin = inverse(gpushxto0(h) * T);
+      d = hr::inverse_exp(h, iTable);
+      alpha = atan2(Spin[0][1], Spin[0][0]);
+      distance = hdist0(h);
+      beta = atan2(h[1], h[0]);
+      });
+    for(int k=0; k<3; k++) Spin[3][k] = Spin[k][3] = 0; Spin[3][3] = 1;
+    return spin(beta) * uxpush(distance/2) * spin(-beta+alpha);
+    }
+  
   struct hrmap_rotation_space : hybrid::hrmap_hybrid {
 
     std::unordered_map<int, transmatrix> saved_matrices;
@@ -1830,26 +1846,8 @@ EX namespace rots {
       auto &M = saved_matrices[id];
       if(M[3][3]) return M;
       
-      /*if(PURE && hybrid::underlying != gArchimedean) {
-        ld A = master_to_c7_angle();
-        transmatrix Q = spin(-A + 2 * M_PI * i / S7) * uxpush(cgi.tessf) * spin(M_PI - 2 * M_PI * j / S7 + A);
-        return Q;
-        } */
-      hyperpoint d;
-      ld alpha, beta, distance;
-      transmatrix Spin;
       cell *cw = where[c1].first;
-      in_underlying([&] {
-        transmatrix T = currentmap->adj(cw, i);
-        hyperpoint h = tC0(T);
-        Spin = inverse(gpushxto0(h) * T);
-        d = hr::inverse_exp(h, iTable);
-        alpha = atan2(Spin[0][1], Spin[0][0]);
-        distance = hdist0(h);
-        beta = atan2(h[1], h[0]);
-        });
-      for(int k=0; k<3; k++) Spin[3][k] = Spin[k][3] = 0; Spin[3][3] = 1;
-      return M = spin(beta) * uxpush(distance/2) * spin(-beta+alpha);
+      return M = lift_matrix(PIU(currentmap->adj(cw, i)));      
       }
     
     virtual transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override { 
