@@ -18,7 +18,7 @@ EX namespace quotientspace {
   
   code get(heptspin hs) {
     code res;
-    res.connections.resize(S7);
+    res.connections.resize(S7+1);
     res.connections[0] = cod(hs.at);
     for(int i=1; i<=S7; i++) {
       res.connections[i] = cod((hs + wstep).at);
