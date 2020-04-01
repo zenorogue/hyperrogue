@@ -452,6 +452,23 @@ EX void menu() {
   dialog::addBoolItem_action(XLAT("disable the HUD"), hide_hud, 'h');
 
   dialog::addBoolItem_action_neg(XLAT("hide the player"), mapeditor::drawplayer, 'H');
+  
+  if(WDIM == 2) {
+    dialog::addItem(XLAT("centering"), 'x');
+    dialog::add_action([] {
+      dialog::editNumber(vid.fixed_facing_dir, 0, 360, 15, 90, XLAT("centering"), 
+        XLAT("You can pick the angle. Note: the direction the PC is facing matters."));
+      dialog::reaction = fullcenter;
+      dialog::extra_options = [] () { 
+        dialog::addBoolItem(XLAT("face"), centering == eCentering::face, 'F');
+        dialog::add_action([] { centering = eCentering::face; fullcenter(); });
+        dialog::addBoolItem(XLAT("edge"), centering == eCentering::edge, 'E');
+        dialog::add_action([] { centering = eCentering::edge; fullcenter(); });
+        dialog::addBoolItem(XLAT("vertex"), centering == eCentering::vertex, 'V');
+        dialog::add_action([] { centering = eCentering::vertex; fullcenter(); });
+        };
+      });
+    }
 
   dialog::addItem(XLAT("colors & aura"), 'c');
   dialog::add_action_push(show_color_dialog);

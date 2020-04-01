@@ -9,6 +9,12 @@
 namespace hr {
 
 #if HDR
+enum eCentering { face, edge, vertex };
+#endif
+
+EX eCentering centering;
+
+#if HDR
 struct supersaver {
   string name;
   virtual string save() = 0;
@@ -647,6 +653,8 @@ EX void initConfig() {
   addsaver(noshadow, "noshadow");
   addsaver(bright, "bright");
   addsaver(cblind, "cblind");
+  
+  addsaverenum(centering, "centering");
 
   callhooks(hooks_configfile);
 

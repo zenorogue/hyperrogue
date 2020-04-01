@@ -1442,10 +1442,22 @@ EX void resetview() {
     View = iddspin(cwt.at, cwt.spin);
     if(!flipplayer) View = pispin * View;
     if(cwt.mirrored) View = Mirror * View;
+
+    if(centering) {
+      hyperpoint vl = View * get_corner_position(cwt.at, cwt.spin);
+      hyperpoint vr = View * get_corner_position(cwt.at, (cwt.spin+1) % cwt.at->type);
+
+      hyperpoint vm = (centering == eCentering::edge) ? mid(vl, vr) : vl;
+      
+      transmatrix rm = gpushxto0(vm);
+
+      View = spintox(rm*vr) * rm * View;
+      }
+
     if(GDIM == 2) View = spin(M_PI + vid.fixed_facing_dir * degree) * View;
     if(GDIM == 3 && !prod) View = cspin(0, 2, M_PI/2) * View;
     if(prod) NLP = cspin(0, 2, M_PI/2);
-    if(cheater && eqmatrix(View, lView)) {
+    if(cheater && eqmatrix(View, lView) && !centering) {
       View = Id;
       static ld cyc = 0;
       cyc += 90 * degree;
@@ -1483,10 +1495,10 @@ EX void fullcenter() {
     bfs();
     resetview();
     drawthemap();
-    centerpc(INF);
+    if(!centering) centerpc(INF);
     centerover = cwt.at;
     }
-  playermoved = true;
+  playermoved = !centering;
   }
 
 transmatrix screenpos(ld x, ld y) {

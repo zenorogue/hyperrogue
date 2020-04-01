@@ -566,7 +566,9 @@ void cheat_move(char c) {
   else if(c == 'r') cheat(), cwt += rev;
   else if(c == 'm') cheat(), cwt += wmirror;
   else if(c == 'z') cheat(), cwt.spin = 0, cwt.mirrored = false;
-  else if(c == 'F') fullcenter();
+  else if(c == 'F') centering = eCentering::face, fullcenter();
+  else if(c == 'E') centering = eCentering::edge, fullcenter();
+  else if(c == 'V') centering = eCentering::vertex, fullcenter();
   else if(c == 'a') cheat(), history::save_end();
   else println(hlog, "unknown move command: ", c);
   }
