@@ -567,6 +567,7 @@ void cheat_move(char c) {
   else if(c == 'm') cheat(), cwt += wmirror;
   else if(c == 'z') cheat(), cwt.spin = 0, cwt.mirrored = false;
   else if(c == 'F') fullcenter();
+  else if(c == 'a') cheat(), history::save_end();
   else println(hlog, "unknown move command: ", c);
   }
 

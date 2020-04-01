@@ -1476,7 +1476,8 @@ EX void panning(hyperpoint hf, hyperpoint ht) {
 EX int cells_drawn, cells_generated;
 
 EX void fullcenter() {
-  history::path_for_lineanimation.clear();
+  if(history::saved_ends == 0)
+    history::path_for_lineanimation.clear();
   if(playerfound && false) centerpc(INF);
   else {
     bfs();
