@@ -211,7 +211,7 @@ int arg::readCommon() {
     }
 #endif
   else if(argis("-draw")) {
-    PHASE(3); drawscreen();
+    PHASE(3); start_game(); drawscreen();
     }
   else if(argis("-rotate")) {
     PHASE(3);  start_game();
