@@ -1243,12 +1243,14 @@ auto hooks  =
   addHook(shmup::hooks_kill, 100, activate) +
   addHook(hooks_o_key, 100, o_key) +
   
+#if CAP_RVSLIDES
   addHook(tour::ss::extra_slideshows, 100, [] (bool view) {
     if(!view) return 1;
     dialog::addBoolItem(XLAT("RogueViz Tour"), tour::ss::wts == &rvtour::rvslides[0], 'r');
     dialog::add_action([] { tour::ss::wts = rvtour::gen_rvtour(); popScreen(); });    
     return 0;
     }) +
+#endif
   
   addHook(dialog::hooks_display_dialog, 100, [] () {
     if(current_screen_cfunction() == showMainMenu) {
