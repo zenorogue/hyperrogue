@@ -548,6 +548,7 @@ EX int getHemisphere(cell *c, int which) {
     }
   }
 
+/** \brief Various functions related to map patterns. */
 EX namespace patterns {
 
   #if HDR
