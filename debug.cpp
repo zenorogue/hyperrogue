@@ -557,6 +557,19 @@ EX void viewall() {
     }
   }
 
+/** perform a move for the -cmove command */
+
+void cheat_move(char c) {
+  using arg::cheat;
+  if(c >= '0' && c <= '9') cheat(), cwt += (c - '0');
+  else if(c == 's') cheat(), cwt += wstep, playermoved = false;
+  else if(c == 'r') cheat(), cwt += rev;
+  else if(c == 'm') cheat(), cwt += wmirror;
+  else if(c == 'z') cheat(), cwt.spin = 0, cwt.mirrored = false;
+  else if(c == 'F') fullcenter();
+  else println(hlog, "unknown move command: ", c);
+  }
+
 /** launch a debugging screen, and continue normal working only after this screen is closed */
 EX void modalDebug(cell *c) {
   centerover = c; View = Id;
@@ -645,6 +658,10 @@ int read_cheat_args() {
   else if(argis("-SM")) {
     PHASEFROM(2);
     shift(); vid.stereo_mode = eStereo(argi());
+    }
+  else if(argis("-cmove")) {
+    PHASE(3); shift();
+    for(char c: args()) cheat_move(c);
     }
   else if(argis("-ipd")) {
     PHASEFROM(2);
