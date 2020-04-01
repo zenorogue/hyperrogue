@@ -20,7 +20,12 @@ namespace hr {
 
 ld snow_lambda = 1;
 
+color_t snow_color = 0xFFFFFFFF;
+
 bool snow_test = false;
+
+/* intense brightness */
+bool snow_intense = false;
 
 /* a funny glitch */
 bool snow_glitch = false;
@@ -123,8 +128,9 @@ bool draw_snow(cell *c, const transmatrix& V) {
   
   poly_outline = 0xFF;
   for(auto& T: matrices_at[c]) {
-    auto& p = queuepoly(V * T, shapeid(snow_shape), 0xFFFFFFFF);
+    auto& p = queuepoly(V * T, shapeid(snow_shape), snow_color);
     if(!snow_texture) p.tinf = nullptr;
+    if(snow_intense) p.flags |= POLY_INTENSE;
     }
 
   return false;
@@ -150,6 +156,12 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
     }
   else if(argis("-snow-test")) {
     snow_test = true;
+    }
+  else if(argis("-snow-color")) {
+    shift(); snow_color = arghex();
+    }
+  else if(argis("-snow-intense")) {
+    snow_intense = true;
     }
   else if(argis("-snow-no-texture")) {
     snow_texture = false;
