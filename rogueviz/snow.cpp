@@ -10,7 +10,9 @@
  *  The snow_lambda parameter gives the expected number of snowballs per cell.
  *  (The number in every region has Poisson distribution with mean proportional to its area.)
  *
- *  Not implemented for: product
+ *  Freezes for tessellations with ideal vertices
+ *
+ * 
  *
  **/
 
@@ -52,6 +54,13 @@ transmatrix random_snow_matrix(cell *c) {
     h[2] = randd() - .5;
     h[2] = -h[2];
     return rgpushxto0(h);
+    }
+  else if(prod) {
+    transmatrix T = PIU(random_snow_matrix(c));
+    return mscale(T, (randd() - .5) * cgi.plevel);
+    }
+  else if(hybri && !prod) {
+    return rots::lift_matrix(PIU(random_snow_matrix(c))); // * zpush((randd() - .5) * cgi.plevel);
     }
   else if(nonisotropic || bt::in()) {
 
