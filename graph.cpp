@@ -4378,6 +4378,7 @@ EX bool allowIncreasedSight() {
   if(racing::on) return true;
   if(quotient || !hyperbolic || arcm::in() || arb::in()) return true;
   if(WDIM == 3) return true;
+  if(!canmove) return true;
   return false;
   }
 
