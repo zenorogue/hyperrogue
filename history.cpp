@@ -187,11 +187,11 @@ EX namespace history {
   EX transmatrix first_center_view;
   
   EX void save_end() {
-    if(canmove && !cheater) {
+    if(!allowIncreasedSight()) {
       addMessage("Enable cheat mode or GAME OVER to use this");
       return;
       }
-    if(canmove && cheater) cheater++;
+    if(cheater) cheater++;
     switch(saved_ends) {
       case 0:
         first_center_at = centerover;
@@ -572,11 +572,11 @@ EX namespace history {
     if(uni == 'e' || uni == 'E' || uni == 'E'-64) {
       if(on) clear();
       else {
-        if(canmove && !cheater) {
+        if(!allowIncreasedSight()) {
           addMessage("Enable cheat mode or GAME OVER to use this");
           return;
           }
-        if(canmove && cheater) cheater++;
+        if(cheater) cheater++;
         if(uni == 'E') create_recenter_to_view(false);
         else if(uni == 'E'-64) create_recenter_to_view(true);
         else create_playerpath();
@@ -603,11 +603,11 @@ EX namespace history {
         );
     else if(uni == 'g') { dospiral = !dospiral; }
     else if(uni == 'i') { 
-      if(canmove && !cheater) {
+      if(!allowIncreasedSight()) {
         addMessage("Enable cheat mode or GAME OVER to use this");
         return;
         }
-      if(canmove && cheater) cheater++;
+      if(cheater) cheater++;
       includeHistory = !includeHistory; 
       }
 #if CAP_SDL
