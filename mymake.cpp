@@ -17,21 +17,41 @@
 
 using namespace std;
 
-string opts = "-DFHS -DLINUX -DWHATEVER -DMYMAKE -I/usr/include/SDL";
+string opts;
 
 string default_standard = " -std=c++11";
 string standard = default_standard;
 
-string preprocessor = 
-  "g++ -E";
+string preprocessor;
+string compiler;
+string linker;
+string libs;
 
-string compiler = 
-  "g++ -Wall -Wextra -Wno-maybe-uninitialized -Wno-unused-parameter -Wno-implicit-fallthrough -rdynamic -fdiagnostics-color=always -c";
+void set_linux() {
+  preprocessor = "g++ -E";
+  compiler = "g++ -Wall -Wextra -Wno-maybe-uninitialized -Wno-unused-parameter -Wno-implicit-fallthrough -rdynamic -fdiagnostics-color=always -c";
+  linker = "g++ -rdynamic -o hyper";
+  opts = "-DFHS -DLINUX -I/usr/include/SDL";
+  libs = " savepng.o -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
+  }
 
-string linker = 
-  "g++ -rdynamic -o hyper";
- 
-string libs = " savepng.o -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
+void set_mac() {
+  preprocessor = "g++ -E";
+  compiler = "g++ -march=native -W -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-implicit-fallthrough -c";
+  linker = "g++ -o hyper";
+  opts = "-DMAC -I/usr/local/include";
+  libs = " savepng.o -L/usr/local/lib -framework AppKit -framework OpenGL -lSDL -lSDLMain -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpng -lpthread -lz";
+  }
+
+void set_win() {
+  preprocessor = "g++ -E";
+  compiler = "runbat bwin-g.bat -c";
+  linker = "runbat bwin-linker.bat";
+  opts = "-DFHS -DLINUX -I/usr/include/SDL";
+  libs = "";
+
+  standard = "";
+  }
 
 vector<string> modules;
 
@@ -55,6 +75,13 @@ bool file_exists(string fname) {
   }
   
 int main(int argc, char **argv) {
+#if defined(MAC)
+  set_mac();
+#elif defined(WINDOWS)
+  set_win();
+#else
+  set_linux();
+#endif
   for(string fname: {"Makefile.loc", "Makefile.simple", "Makefile"})
     if(file_exists(fname))
       system("make -f " + fname + " language-data.cpp autohdr.h savepng.o");
@@ -68,10 +95,21 @@ int main(int argc, char **argv) {
         if(c == '=' || c == '-' || c == '/') obj_dir += "_"; 
         else obj_dir += c;      
       }
-    else if(s == "-win")
-      compiler = "runbat bwin-g.bat -c", obj_dir += "/win", setdir += "../", standard = "",
-      linker = "runbat bwin-linker.bat", libs = "";
-
+    else if(s == "-win") {
+      set_win();
+      obj_dir += "/win";
+      setdir += "../";
+      }
+    else if(s == "-mac") {
+      set_mac();
+      obj_dir += "/mac";
+      setdir += "../";
+      }
+    else if(s == "-linux") {
+      set_linux();
+      obj_dir += "/linux";
+      setdir += "../";
+      }
     else if(s == "-O2")
       optimized = 2, compiler += " -O2", obj_dir += "/O2", setdir += "../";
     else if(s == "-O3")
@@ -109,6 +147,7 @@ int main(int argc, char **argv) {
     }
   if(!optimized)
     compiler += " -g3";
+  preprocessor += " " + standard;
   compiler += " " + standard;
   ifstream fs("hyper.cpp");
 
@@ -125,8 +164,8 @@ int main(int argc, char **argv) {
       string iext = "";
       for(char c: s) if(c == '"') in = !in; else if(!in) ; else if(c == '.') ext = !ext; else if(!ext) t += c; else iext += c;
       if(iext == "h") { fsm << "#include \"" + setdir + "hyper.h\"\n"; continue; }
-      if(iext != "cpp") printf("unknown extension: %s\n", iext);
-      fsm << "INCLUDE(___" << t << ")\n";
+      if(iext != "cpp") printf("unknown extension: %s\n", iext.c_str());
+      fsm << "INCLUDE(\"" << t << "\")\n";
       continue;
       }
     fsm << s << "\n";
@@ -140,8 +179,8 @@ int main(int argc, char **argv) {
     ifstream fs2(obj_dir+"/hyper.E");
     while(getline(fs2, s)) {
       if(s.substr(0, 7) == "INCLUDE") {
-        s = s.substr(11);
-        s = s.substr(0,s.size() - 1);
+        s = s.substr(9);
+        s = s.substr(0,s.size() - 2);
         modules.push_back(s);
         }
       }

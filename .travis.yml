@@ -85,6 +85,41 @@ matrix:
       TRAVIS_OS_NAME=linux
       TRAVIS_COMPILER_NAME=emscripten
       TRAVIS_BUILD_SYSTEM=emscripten
+  - os: osx
+    compiler: clang
+    env: >-
+      TRAVIS_OS_NAME=osx
+      TRAVIS_COMPILER_NAME=clang
+      TRAVIS_BUILD_SYSTEM=mymake
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=1
+  - os: osx
+    compiler: clang
+    env: >-
+      TRAVIS_OS_NAME=osx
+      TRAVIS_COMPILER_NAME=clang
+      TRAVIS_BUILD_SYSTEM=mymake
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=1
+      HYPERROGUE_USE_ROGUEVIZ=1
+  - os: linux
+    compiler: gcc
+    env: >-
+      TRAVIS_OS_NAME=linux
+      TRAVIS_COMPILER_NAME=gcc
+      TRAVIS_BUILD_SYSTEM=mymake
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=1
+  - os: linux
+    dist: bionic
+    compiler: gcc
+    env: >-
+      TRAVIS_OS_NAME=linux
+      TRAVIS_COMPILER_NAME=gcc
+      TRAVIS_BUILD_SYSTEM=mymake
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=1
+      HYPERROGUE_USE_ROGUEVIZ=1
 
 before_install:
 - |-
@@ -143,6 +178,13 @@ script:
     make
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
     make -f Makefile.simple
+  elif [[ "$TRAVIS_BUILD_SYSTEM" == "mymake" ]]; then
+    make -f Makefile.simple mymake
+    if [[ "$HYPERROGUE_USE_ROGUEVIZ" == "1" ]]; then
+      ./mymake -rv
+    else
+      ./mymake
+    fi
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "emscripten" ]]; then
     docker run --rm -v $(pwd):/src trzeci/emscripten make -f Makefile.simple emscripten
   else
@@ -152,6 +194,8 @@ script:
   # Test hyperrogue.
   if [[ "$TRAVIS_BUILD_SYSTEM" == "emscripten" ]]; then
     ls -lAF hyper.html hyper.js hyper.wasm
+  elif [[ "$TRAVIS_BUILD_SYSTEM" == "mymake" ]]; then
+    ./hyper --help
   else
     ./hyperrogue --help
   fi
