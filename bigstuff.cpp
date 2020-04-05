@@ -202,7 +202,7 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
 #if MAXMDIM >= 4
 EX int hrandom_adjacent(int d) {
   vector<int> choices = {d};
-  for(int a=0; a<S7; a++) if(reg3::dirs_adjacent[d][a]) choices.push_back(a);
+  for(int a=0; a<S7; a++) if(cgi.dirs_adjacent[d][a]) choices.push_back(a);
   return hrand_elt(choices, d);
   }
 #endif
@@ -693,7 +693,7 @@ EX void buildEquidistant(cell *c) {
           if(cw.at->landparam != c->landparam-1) continue;
           if(!cw.at->landflags) continue;
           if(S7 == 6) c->landflags = 1;
-          else for(int j=0; j<S7; j++) if(cw.at->move(j) && cw.at->move(j)->landparam == c->landparam - 2 && !reg3::dirs_adjacent[j][cw.spin])
+          else for(int j=0; j<S7; j++) if(cw.at->move(j) && cw.at->move(j)->landparam == c->landparam - 2 && !cgi.dirs_adjacent[j][cw.spin])
             if(c->landparam == 2 ? cw.at->move(j)->land != laEndorian : cw.at->move(j)->landparam)
               c->landflags = 1;
           }
@@ -717,7 +717,7 @@ EX void buildEquidistant(cell *c) {
           if(cw.at->landparam != c->landparam-1) continue;
           if(!cw.at->landflags) continue;
           if(S7 == 6) c->landflags = 1;
-          else for(int j=0; j<S7; j++) if(cw.at->move(j) && cw.at->move(j)->landparam == c->landparam - 2 && !reg3::dirs_adjacent[j][cw.spin] && cw.at->move(j)->landflags)
+          else for(int j=0; j<S7; j++) if(cw.at->move(j) && cw.at->move(j)->landparam == c->landparam - 2 && !cgi.dirs_adjacent[j][cw.spin] && cw.at->move(j)->landflags)
             c->landflags = 1;
           }
         }

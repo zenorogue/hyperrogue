@@ -482,8 +482,8 @@ bool fpattern::generate_all3() {
   add1(Id);
   fullv = {hr::Id};
   for(int i=0; i<isize(matrices); i++) {
-    add1(mmul(matrices[i], R), fullv[i] * reg3::full_R);
-    add1(mmul(matrices[i], X), fullv[i] * reg3::full_X);
+    add1(mmul(matrices[i], R), fullv[i] * cgi.full_R);
+    add1(mmul(matrices[i], X), fullv[i] * cgi.full_X);
     }
   local_group = isize(matrices);
   for(int i=0; i<(int)matrices.size(); i++) {
@@ -507,7 +507,7 @@ int fpattern::solve3() {
 
   int cmb = 0;
   
-  int N = isize(reg3::rels);
+  int N = isize(cgi.rels);
   
   vector<int> fails(N);
   
@@ -516,18 +516,18 @@ int fpattern::solve3() {
   for(auto& M: iso3) {
     if(check_order(M, 2)) 
       possible_X.push_back(M);
-    if(check_order(M, reg3::r_order)) 
+    if(check_order(M, cgi.r_order)) 
       possible_R.push_back(M);
     }
   for(auto& M: iso4) 
     if(check_order(M, 2)) 
       possible_P.push_back(M);
     
-  DEBB(DF_FIELD, ("field = ", Field, " #P = ", isize(possible_P), " #X = ", isize(possible_X), " #R = ", isize(possible_R), " r_order = ", reg3::r_order, " xp_order = ", reg3::xp_order));
+  DEBB(DF_FIELD, ("field = ", Field, " #P = ", isize(possible_P), " #X = ", isize(possible_X), " #R = ", isize(possible_R), " r_order = ", cgi.r_order, " xp_order = ", cgi.xp_order));
                                                                                                                                
   for(auto& xX: possible_X)
-  for(auto& xP: possible_P) if(check_order(mmul(xP, xX), reg3::xp_order))
-  for(auto& xR: possible_R) if(check_order(mmul(xR, xX), reg3::rx_order)) { // if(xR[0][0] == 1 && xR[0][1] == 0) 
+  for(auto& xP: possible_P) if(check_order(mmul(xP, xX), cgi.xp_order))
+  for(auto& xR: possible_R) if(check_order(mmul(xR, xX), cgi.rx_order)) { // if(xR[0][0] == 1 && xR[0][1] == 0) 
     #if CAP_THREAD
     if(dis) dis->check_suspend();
     if(dis && dis->stop_it) return 0;
@@ -535,9 +535,9 @@ int fpattern::solve3() {
     auto by = [&] (char ch) -> matrix& { return ch == 'X' ? xX : ch == 'R' ? xR : xP; };
     for(int i=0; i<N; i++) {
       matrix ml = Id;
-      for(char c: reg3::rels[i].first) { ml = mmul(ml, by(c)); if(ml == Id) { fails[i]++; goto bad; }}
+      for(char c: cgi.rels[i].first) { ml = mmul(ml, by(c)); if(ml == Id) { fails[i]++; goto bad; }}
       matrix mr = Id;
-      for(char c: reg3::rels[i].second) { mr = mmul(mr, by(c)); if(mr == Id) { fails[i]++; goto bad; }}
+      for(char c: cgi.rels[i].second) { mr = mmul(mr, by(c)); if(mr == Id) { fails[i]++; goto bad; }}
       if(ml != mr) { fails[i]++; goto bad;}
       }
     P = xP; R = xR; X = xX;
@@ -554,7 +554,7 @@ int fpattern::solve3() {
   ok:
 
   DEBB(DF_FIELD, ("cmb = ", cmb, " for field = ", Field));
-  for(int i=0; i<N; i++) if(fails[i]) DEBB(DF_FIELD, (reg3::rels[i], " fails = ", fails[i]));
+  for(int i=0; i<N; i++) if(fails[i]) DEBB(DF_FIELD, (cgi.rels[i], " fails = ", fails[i]));
   
   return cmb;
   }

@@ -622,27 +622,27 @@ struct hrmap_crystal : hrmap_standard {
     for(int a=0; a<S7/2; a++) id = (2*id) + ((co[a]>>1) & 1);
     id = S7*id + d;
     if(adjs.count(id)) return adjs[id];
-    transmatrix T = reg3::adjmoves[d];
+    transmatrix T = cgi.adjmoves[d];
     reg3::generate_cellrotations();
     auto st = get_canonical(co);
     auto co1 = co + st[d];
     auto st1 = get_canonical(co1);
     int qty = 0;
     transmatrix res;
-    ld gdist = S7 == 12 ? hdist0(tC0(reg3::adjmoves[0])) : reg3::strafedist;
+    ld gdist = S7 == 12 ? hdist0(tC0(cgi.adjmoves[0])) : cgi.strafedist;
 
     for(auto& cr: cgi.cellrotations) {
 
       transmatrix U = T * cr.M;
       
-      ld go = hdist0(U * tC0(reg3::adjmoves[h->c.spin(d)]));
+      ld go = hdist0(U * tC0(cgi.adjmoves[h->c.spin(d)]));
       if(go > 1e-2) continue;
 
       for(int s=0; s<S7; s++) 
-        if(reg3::dirs_adjacent[d][s])
+        if(cgi.dirs_adjacent[d][s])
           for(int t=0; t<S7; t++) 
             if(st1[t] == st[s]) {
-              if(hdist(U * tC0(reg3::adjmoves[t]), tC0(reg3::adjmoves[s])) > gdist + .1)
+              if(hdist(U * tC0(cgi.adjmoves[t]), tC0(cgi.adjmoves[s])) > gdist + .1)
                 goto wrong;
               }
       res = U;

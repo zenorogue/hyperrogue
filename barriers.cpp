@@ -760,7 +760,7 @@ EX void extend3D(cell *c) {
     cw1.at->bardir = cw1.spin;
     }
 
-  for(int j=0; j<S7; j++) if(reg3::dirs_adjacent[cw.spin][j]) {
+  for(int j=0; j<S7; j++) if(cgi.dirs_adjacent[cw.spin][j]) {
     cellwalker bb2 = reg3::strafe(cw, j);
     if(S3 == 5) { bb2 += rev; bb2 += wstep; }
 
@@ -796,7 +796,7 @@ EX bool buildBarrier3D(cell *c, eLand l2, int forced_dir) {
     if(bb.at->bardir != NODIR) return false;
     for(int j=0; j<S7; j++) {
       if(S3 == 5 && i <= 5) bb.at->cmove(j);
-      if(reg3::dirs_adjacent[bb.spin][j] && bb.at->move(j)) {
+      if(cgi.dirs_adjacent[bb.spin][j] && bb.at->move(j)) {
         cellwalker bb2 = reg3::strafe(bb, j);
         if(listed_cells.count(bb2.at)) continue;
         listed_cells.insert(bb2.at);

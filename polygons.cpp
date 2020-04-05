@@ -1021,13 +1021,12 @@ void geometry_information::create_wall3d() {
       }
     }
 
-  if(GDIM == 3 && !euclid && !bt::in() && !nonisotropic && !hybri && !kite::in()) {
-    reg3::generate();
-    int facesize = isize(reg3::cellshape) / S7;
+  if(reg3::in()) {
+    int facesize = isize(cgi.cellshape) / S7;
     for(int w=0; w<S7; w++) {
       vector<hyperpoint> vertices;
       for(int a=0; a<facesize; a++)
-        vertices.push_back(reg3::cellshape[w*facesize+a]);
+        vertices.push_back(cgi.cellshape[w*facesize+a]);
       make_wall(w, vertices);
       }
     }

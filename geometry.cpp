@@ -115,6 +115,30 @@ struct geometry_information {
   /** distance from heptagon center to heptagon vertex (either hexf or hcrossf) */
   ld rhexf;
 
+  /** basic parameters for 3D geometries */
+  map<int, int> close_distances;
+
+  int loop;
+  int face;
+
+  vector<hyperpoint> cellshape;
+  vector<hyperpoint> vertices_only;
+  
+  transmatrix spins[12], adjmoves[12];
+
+  ld adjcheck;
+  ld strafedist;
+  bool dirs_adjacent[16][16];
+
+  /** \brief for adjacent directions a,b, next_dir[a][b] is the next direction adjacent to a, in (counter?)clockwise order from b */
+  int next_dir[16][16];
+
+  vector<pair<string, string> > rels;
+  int xp_order, r_order, rx_order;
+
+  transmatrix full_X, full_R, full_P;
+  
+  /** for 2D geometries */
   vector<transmatrix> heptmove, hexmove, invhexmove;
 
   int base_distlimit;
@@ -540,6 +564,7 @@ void geometry_information::prepare_basics() {
   #if CAP_BT && MAXMDIM >= 4
   if(bt::in()) bt::build_tmatrix();
   #endif
+  if(reg3::in()) reg3::generate();
   
   hybrid_finish:
   
