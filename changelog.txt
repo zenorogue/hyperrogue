@@ -3877,3 +3877,15 @@ Geometries:
 - fixed a crash in paracompact honeycombs
 - fixed a crash bug in {4,3,5}
 - fixed a (broken) help screen displayed when mousing over another land in the Guided Tour
+
+2020-04-02 14:05 Update 11.3g:
+- The powers you get for Orb of Yendor are now consistent with useless/dangerous/forbidden rules
+- Fixed a bug with the three new orbs not being saved correctly in OSM
+- face/edge/vertex centering
+- in line animation, you can now choose to precisely specify the first and last point to animate
+- you can now increase the view distance after death, and use line animation whenever you can increase the range
+- fixed the hotkey in 3d->camera rotation
+- fixed a crash bug in Zebra quotient space and some horospherical tessellations
+- fixed random_spin() in three dimensions
+- fixed the grid display in nonisotropic hyperbolic geometry
+- Archimedean tessellations: added some more samples, and some additional checking
