@@ -559,10 +559,19 @@ EX void viewall() {
 
 /** perform a move for the -cmove command */
 
+int cheat_move_gen = 7;
+
 void cheat_move(char c) {
   using arg::cheat;
-  if(c >= '0' && c <= '9') cheat(), cwt += (c - '0');
-  else if(c == 's') cheat(), cwt += wstep, playermoved = false;
+  if(c >= '0' && c <= '9' && cheat_move_gen == -1) cheat_move_gen = (c - '0');
+  else if(c >= '0' && c <= '9') cheat(), cwt += (c - '0');
+  else if(c == 's') {
+    cheat();
+    cwt += wstep; 
+    playermoved = false;
+    setdist(cwt.at, cheat_move_gen, cwt.peek());
+    if(geometry_supports_cdata()) getCdata(cwt.at, 0);
+    }
   else if(c == 'r') cheat(), cwt += rev;
   else if(c == 'm') cheat(), cwt += wmirror;
   else if(c == 'z') cheat(), cwt.spin = 0, cwt.mirrored = false;
@@ -570,6 +579,7 @@ void cheat_move(char c) {
   else if(c == 'E') centering = eCentering::edge, fullcenter();
   else if(c == 'V') centering = eCentering::vertex, fullcenter();
   else if(c == 'a') cheat(), history::save_end();
+  else if(c == 'g') cheat_move_gen = -1;
   else println(hlog, "unknown move command: ", c);
   }
 
