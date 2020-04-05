@@ -979,9 +979,12 @@ EX void moveivy() {
     while(c->monst != moIvyRoot) {
       if(!isIvy(c->monst)) {
         raiseBuggyGeneration(c, "that's not an Ivy!");
+        break;
         }
-      if(c->mondir == NODIR)
+      if(c->mondir == NODIR) {
         raiseBuggyGeneration(c, "wrong mondir!");
+        break;
+        }
         
       forCellIdEx(c2, j, c) {
         if(canAttack(c, c->monst, c2, c2->monst, AF_ONLY_FRIEND | AF_GETPLAYER)) {
