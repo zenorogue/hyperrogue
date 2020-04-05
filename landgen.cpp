@@ -2733,6 +2733,24 @@ EX void setland_randomwalk(cell *c) {
     }
   }
 
+EX void set_land_for_geometry(cell *c) {
+  if(0);
+  else if(chaosmode > 1) ;
+  #if CAP_CRYSTAL
+  else if(cryst) crystal::set_land(c);
+  #endif
+  #if MAXMDIM == 4
+  else if(euc::in(3)) euc::set_land(c);
+  #endif
+  else if(hybri) setLandHybrid(c);
+  else if(sphere || (euclid && bounded)) setLandSphere(c);
+  else if(euclid) setLandEuclid(c);
+  else if(quotient) { setland(c, specialland); setLandQuotient(c); }
+  else if(sol) setLandSol(c);
+  else if(nil) setLandNil(c);
+  else if(weirdhyperbolic) setLandWeird(c);
+  }
+
 EX void setdist(cell *c, int d, cell *from) {
   
   if(c->mpdist <= d) return;
@@ -2816,21 +2834,7 @@ EX void setdist(cell *c, int d, cell *from) {
 #else
     if(true) {
 #endif
-      if(0);
-      else if(chaosmode > 1) ;
-      #if CAP_CRYSTAL
-      else if(cryst) crystal::set_land(c);
-      #endif
-      #if MAXMDIM == 4
-      else if(euc::in(3)) euc::set_land(c);
-      #endif
-      else if(hybri) setLandHybrid(c);
-      else if(sphere || (euclid && bounded)) setLandSphere(c);
-      else if(euclid) setLandEuclid(c);
-      else if(quotient) { setland(c, specialland); setLandQuotient(c); }
-      else if(sol) setLandSol(c);
-      else if(nil) setLandNil(c);
-      else if(weirdhyperbolic) setLandWeird(c);
+      set_land_for_geometry(c);
       }
     
     // if(chaosmode) setland(c, getCLand(c));
