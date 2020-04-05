@@ -44,6 +44,7 @@ EX hyperpoint perspective_to_space(hyperpoint h, ld alpha IS(vid.alpha), eGeomet
     return hpxy(hx * (1 + alpha), hy * (1 + alpha));
     
   ld hr = hx*hx+hy*hy;
+  if(LDIM == 3) hr += h[2]*h[2];
   
   if(hr > .9999 && gc == gcHyperbolic) return Hypc;
   
@@ -65,6 +66,7 @@ EX hyperpoint perspective_to_space(hyperpoint h, ld alpha IS(vid.alpha), eGeomet
   hyperpoint H;
   H[0] = hx * (hz+alpha);
   H[1] = hy * (hz+alpha);
+  if(LDIM == 3) H[2] = h[2] * (hz + alpha);
   H[LDIM] = hz;
   
   return H;  
