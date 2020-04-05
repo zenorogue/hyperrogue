@@ -1943,6 +1943,13 @@ EX namespace dq {
     }
 
   EX queue<tuple<cell*, transmatrix, ld>> drawqueue_c;
+  EX set<cell*> visited_c;
+
+  EX void enqueue_c(cell *c, const transmatrix& T) {
+    if(!c || visited_c.count(c)) { return; }
+    visited_c.insert(c);
+    drawqueue_c.emplace(c, T, band_shift);
+    }
 
   EX void enqueue_by_matrix_c(cell *c, const transmatrix& T) {
     if(!c) return;
