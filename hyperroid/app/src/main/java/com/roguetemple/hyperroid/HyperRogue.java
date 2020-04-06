@@ -525,22 +525,22 @@ public class HyperRogue extends Activity implements SensorEventListener {
   if(curland == 17) id = R.raw.graveyard; // Dead Cave
   if(curland == 18) id = R.raw.motion; // Hive
   if(curland == 19) id = R.raw.mirror; // Land of Power
-  if(curland == 20) id = R.raw.hell; // Camelot
+  if(curland == 20) id = R.raw.palace; // Camelot
   if(curland == 21) id = R.raw.rlyeh; // Temple of Cthulhu
   if(curland == 22) id = R.raw.crossroads; // Crossroads II
-  if(curland == 23) id = R.raw.crossroads; // Caribbean
+  if(curland == 23) id = R.raw.caribbean; // Caribbean
   if(curland == 24) id = R.raw.desert; // Red Rock Valley
   if(curland == 25) id = R.raw.hell; // Minefield
-  if(curland == 26) id = R.raw.caves; // Ocean
+  if(curland == 26) id = R.raw.ocean; // Ocean
   if(curland == 27) id = R.raw.rlyeh; // Whirlpool
-  if(curland == 28) id = R.raw.crossroads; // Palace
-  if(curland == 29) id = R.raw.caves; // Living Fjord
-  if(curland == 30) id = R.raw.hell; // Ivory Tower
+  if(curland == 28) id = R.raw.palace; // Palace
+  if(curland == 29) id = R.raw.ocean; // Living Fjord
+  if(curland == 30) id = R.raw.ivory; // Ivory Tower
   if(curland == 31) id = R.raw.motion; // Zebra
   if(curland == 32) id = R.raw.hell; // Plane of Fire
   if(curland == 33) id = R.raw.motion; // Plane of Air
   if(curland == 34) id = R.raw.caves; // Plane of Earth
-  if(curland == 35) id = R.raw.crossroads; // Plane of Water
+  if(curland == 35) id = R.raw.caribbean; // Plane of Water
   if(curland == 36) id = R.raw.crossroads; // Crossroads III
   if(curland == 39) id = R.raw.laboratory; // Canvas
   if(curland == 41) id = R.raw.caves; // Wild West
@@ -548,21 +548,21 @@ public class HyperRogue extends Activity implements SensorEventListener {
   if(curland == 43) id = R.raw.jungle; // Overgrown Woods
   if(curland == 44) id = R.raw.jungle; // Clearing
   if(curland == 45) id = R.raw.graveyard; // Haunted Woods
-  if(curland == 48) id = R.raw.laboratory; // Windy Plains
+  if(curland == 48) id = R.raw.ivory; // Windy Plains
   if(curland == 49) id = R.raw.hell; // Rose Garden
-  if(curland == 50) id = R.raw.caves; // Warped Coast
+  if(curland == 50) id = R.raw.ocean; // Warped Coast
   if(curland == 52) id = R.raw.crossroads; // Crossroads IV
-  if(curland == 53) id = R.raw.laboratory; // Yendorian Forest
+  if(curland == 53) id = R.raw.ivory; // Yendorian Forest
   if(curland == 54) id = R.raw.crossroads; // Gal�pagos
   if(curland == 55) id = R.raw.caves; // Dragon Chasms
   if(curland == 56) id = R.raw.rlyeh; // Kraken Depths
   if(curland == 57) id = R.raw.graveyard; // Burial Grounds
   if(curland == 58) id = R.raw.desert; // Trollheim
-  if(curland == 56) id = R.raw.rlyeh; // Kraken Depths
+  if(curland == 56) id = R.raw.ocean; // Kraken Depths
   if(curland == 57) id = R.raw.graveyard; // Burial Grounds
   if(curland == 58) id = R.raw.desert; // Trollheim
   if(curland == 59) id = R.raw.graveyard; // Halloween
-  if(curland == 60) id = R.raw.desert; // Dungeon
+  if(curland == 60) id = R.raw.palace; // Dungeon
   if(curland == 61) id = R.raw.rlyeh; // Lost Mountain
   if(curland == 62) id = R.raw.mirror; // Reptiles
   if(curland == 63) id = R.raw.rlyeh; // Prairie
