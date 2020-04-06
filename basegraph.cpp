@@ -607,11 +607,11 @@ EX void resetGL() {
 
 vector<int> graphdata;
 
-void gdpush(int t) {
+EX void gdpush(int t) {
   graphdata.push_back(t);
   }
 
-bool displaychr(int x, int y, int shift, int size, char chr, color_t col) {
+EX bool displaychr(int x, int y, int shift, int size, char chr, color_t col) {
   gdpush(2); gdpush(x); gdpush(y); gdpush(8);
   gdpush(col); gdpush(size); gdpush(0);
   gdpush(1); gdpush(chr); 

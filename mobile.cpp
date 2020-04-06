@@ -8,8 +8,6 @@
 #include "hyper.h"
 namespace hr {
 
-#if CU_INIT
-
 #if ISANDROID
 string buildScoreDescription() {
   string s;
@@ -50,7 +48,9 @@ string buildScoreDescription() {
 
 int andmode;
 
-bool lclicked = false, clicked = false;
+bool lclicked = false;
+EX bool clicked = false;
+EX bool buttonclicked = false;
 string lmouseovers;
 bool inmenu = false;
 
@@ -90,9 +90,9 @@ void handleclick(MOBPAR_FORMAL) {
       else if(statkeys && getcstat == 't') {
         if(playermoved && items[itStrongWind]) {
           cell *c = whirlwind::jumpDestination(cwt.at);
-          if(c) centerover.at = c, centerover.spin = 0;
+          if(c) centerover = c;
           }
-        targetRangedOrb(centerover.at, roKeyboard);
+        targetRangedOrb(centerover, roKeyboard);
         getcstat = 0;
         }
 
@@ -112,7 +112,7 @@ void handleclick(MOBPAR_FORMAL) {
                 ors::reset();
                 centerpc(INF);
                 View = Id;
-                centerover = cwt.at->master;
+                centerover = cwt.at;
                 }
               andmode = 11;
               }
@@ -151,7 +151,7 @@ void handleclick(MOBPAR_FORMAL) {
       if(!playerfound) {
         centerpc(INF);
         View = Id;
-        centerover = cwt.at->master;
+        centerover = cwt.at;
         }
       playermoved = true;
       }
@@ -198,7 +198,7 @@ void apply_orientation() {
   }
 #endif
 
-void mobile_draw(MOBPAR_FORMAL) {
+EX void mobile_draw(MOBPAR_FORMAL) {
 
   apply_memory_reserve();
   optimizeview();
@@ -358,7 +358,7 @@ void mobile_draw(MOBPAR_FORMAL) {
   lticks_rug = ticks;
 
   if(andmode == 1 && lclicked && !clicked && normal_reaction && mouseover)
-    performMarkCommand(mouseover);
+    mine::performMarkCommand(mouseover);
 
   if(clicked && andmode == 2 && (mouseover != lmouseover || mouseovers != lmouseovers) && normal_reaction) {
     addMessage(mouseovers);
@@ -391,12 +391,6 @@ void mobile_draw(MOBPAR_FORMAL) {
   controlMusic(ticks - lastt);
   #endif
   }
-
-#endif
-
-#if !CAP_AUDIO
-void playSound(cell*, const string &s, int vol) { printf("play sound: %s vol %d\n", s.c_str(), vol); }
-#endif
 
 #endif
 

@@ -14,9 +14,14 @@ bool hide_hud = true;
 namespace shot { void default_screenshot_content(); }
 #endif
 
-#if CAP_SVG
 // svg renderer
 EX namespace svg {
+
+#if !CAP_SVG
+EX always_false in;
+#endif
+
+#if CAP_SVG
   #if ISWEB
   shstream f;
   #else
@@ -225,8 +230,9 @@ int read_args() {
 
 auto ah = addHook(hooks_args, 0, read_args);
 #endif
-EX }
 #endif
+EX }
+
 
 #if CAP_PNG
 void IMAGESAVE(SDL_Surface *s, const char *fname) {

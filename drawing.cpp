@@ -1965,7 +1965,11 @@ EX void draw_main() {
 
     if(ray::in_use && ray::comparison_mode) {
       glDepthFunc(GL_LEQUAL);
+#ifdef GLES_ONLY
+      glClearDepthf(1.0f);
+#else
       glClearDepth(1.0f);
+#endif
       glClear(GL_DEPTH_BUFFER_BIT);
       ray::cast();
       }

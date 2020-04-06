@@ -5,6 +5,7 @@
 #define MOBPAR_FORMAL int
 #define MOBPAR_ACTUAL 0
 #define MIX_MAX_VOLUME 128
+#define NOMAIN
 #include <string>
 
 namespace hr {
@@ -39,6 +40,8 @@ transmatrix getOrientation() {
     }
   return Orient;
   }
+
+void resetmusic() { printf("resetmusic\n"); }
 
 void playSound(cell *c, const string& fname, int vol) {
   printf("Play sound: %s\n", fname.c_str());

@@ -8,6 +8,11 @@
 #include "hyper.h"
 namespace hr {
 
+#if HDR
+void playSound(cell *c, const string& fname, int vol = 100);
+void resetmusic();
+#endif
+
 EX const char *musicfile = "";
 EX bool audio;
 EX string musiclicense;
@@ -215,7 +220,7 @@ string wheresounds = HYPERPATH "sounds/";
 
 hookset<bool(const string& s, int vol)> *hooks_sound;
 
-EX void playSound(cell *c, const string& fname, int vol IS(100)) {
+EX void playSound(cell *c, const string& fname, int vol) {
   LATE( hr::playSound(c, fname, vol); )
   if(effvolume == 0) return;
   if(callhandlers(false, hooks_sound, fname, vol)) return;
@@ -284,8 +289,8 @@ auto ah_sound = addHook(hooks_args, 0, read_sound_args) + addHook(hooks_clear_ca
 
 #endif
 
-#if !CAP_SDLAUDIO
-EX void playSound(cell *c, const string& fname, int vol IS(100)) { }
+#if !CAP_AUDIO
+EX void playSound(cell *c, const string& fname, int vol) { }
 EX void resetmusic() { }
 #endif
 

@@ -63,7 +63,9 @@ struct renderbuffer {
 
 struct resetbuffer {
   GLint drawFboId, readFboId;
+  #if CAP_SDL
   SDL_Surface *sreset;
+  #endif
   resetbuffer();
   void reset();
   };

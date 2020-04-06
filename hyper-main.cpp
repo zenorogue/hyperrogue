@@ -35,6 +35,7 @@ EX int hyper_main(int argc, char **argv) {
   using namespace hr; 
 #if ISWEB
   emscripten_get_commandline();
+#elif ISMOBILE
 #else
   arg::init(argc, argv);
 #endif

@@ -130,5 +130,6 @@
 namespace hr { namespace daily { bool on; } }
 #endif
 
+#include "mobile.cpp"
 #include "hyper-main.cpp"
 

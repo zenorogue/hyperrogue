@@ -22,6 +22,7 @@
 #define CAP_VERTEXBUFFER 0
 #define CAP_TIMEOFDAY 1
 #define NO_STD_HYPOT
+#define NOMAIN
 
 #define HNEW 1
 
@@ -60,7 +61,7 @@ bool settingsChanged = false;
 struct transmatrix getOrientation();
 }
 
-#include "../../../../../init.cpp"
+#include "../../../../../hyper.cpp"
 
 namespace hr {
 
@@ -168,19 +169,19 @@ Java_com_roguetemple_hyperroid_HyperRogue_glhrinit(MOBPAR_FORMAL)
 extern "C" int
 Java_com_roguetemple_hyperroid_HyperRogue_getaPosition(MOBPAR_FORMAL)
 {
-  return glhr::aPosition;
+  return aPosition;
   }
 
 extern "C" int
 Java_com_roguetemple_hyperroid_HyperRogue_getaTexture(MOBPAR_FORMAL)
 {
-  return glhr::aTexture;
+  return aTexture;
   }
 
 extern "C" int
 Java_com_roguetemple_hyperroid_HyperRogue_getuColor(MOBPAR_FORMAL)
 {
-  return glhr::current->uColor;
+  return glhr::current_glprogram->uColor;
   }
 
 const char *scorefile;
@@ -289,7 +290,7 @@ extern "C" void Java_com_roguetemple_hyperroid_HyperRogue_draw(MOBPAR_FORMAL) {
   glhr::be_nontextured();
 
   #if CAP_SHADER
-  glEnableVertexAttribArray(glhr::aPosition);
+  glEnableVertexAttribArray(aPosition);
   #else
   glEnableClientState(GL_VERTEX_ARRAY);
   #endif 
@@ -349,8 +350,11 @@ extern "C" void Java_com_roguetemple_hyperroid_HyperRogue_update
   // delref;
 //  if(debfile) fprintf(debfile, "update stopped.\n"), fflush(debfile);
   }
+
+void resetmusic() {}
     
 void playSound(cell *c, const string& fname, int vol) {
+  LATE( hr::playSound(c, fname, vol); )
   soundsToPlay.push_back(make_pair(fname, vol));
   }
 
