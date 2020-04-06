@@ -356,6 +356,7 @@ void ge_select_tiling() {
     if(arcm::in() && !CAP_ARCM) continue;
     if(cryst && !CAP_CRYSTAL) continue;
     if(sol && !CAP_SOLV) continue;
+    if(arb::in() && (ISMOBILE || ISWEB)) continue;
     if(WDIM == 3 && MAXMDIM == 3) continue;
     if(geometry == gFieldQuotient && !CAP_FIELD) continue;
     if(!current_filter->test()) continue;
