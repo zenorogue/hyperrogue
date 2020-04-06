@@ -112,7 +112,7 @@ EX namespace orbbull {
     }
 EX }
 
-EX bool checkNeedMove(bool checkonly, bool attacking) {
+bool pcmove::checkNeedMove(bool checkonly, bool attacking) {
   if(items[itOrbDomination] > ORBBASE && cwt.at->monst) 
     return false;
   int flags = 0;
@@ -124,45 +124,46 @@ EX bool checkNeedMove(bool checkonly, bool attacking) {
     }
   else if(cwt.at->wall == waRoundTable) {
     if(markOrb2(itOrbAether)) return false;
-    if(checkonly) return true;
-    addMessage(XLAT("It would be impolite to land on the table!"));
+    if(vmsg()) 
+      addMessage(XLAT("It would be impolite to land on the table!"));
     }
   else if(cwt.at->wall == waLake) {
     if(markOrb2(itOrbAether)) return false;
     if(markOrb2(itOrbFish)) return false;
     if(in_gravity_zone(cwt.at) && passable(cwt.at, NULL, P_ISPLAYER)) return false;
     flags |= AF_FALL;
-    addMessage(XLAT("Ice below you is melting! RUN!"));
+    if(vmsg()) addMessage(XLAT("Ice below you is melting! RUN!"));
     }
   else if(!attacking && cellEdgeUnstable(cwt.at)) {
     if(markOrb2(itOrbAether)) return false;
     if(in_gravity_zone(cwt.at) && passable(cwt.at, NULL, P_ISPLAYER)) return false;
-    addMessage(XLAT("Nothing to stand on here!"));
+    if(vmsg()) addMessage(XLAT("Nothing to stand on here!"));
+    return true;
     }
   else if(among(cwt.at->wall, waSea, waCamelotMoat, waLake, waDeepWater)) {
     if(markOrb(itOrbFish)) return false;
     if(markOrb2(itOrbAether)) return false;
     if(in_gravity_zone(cwt.at) && passable(cwt.at, NULL, P_ISPLAYER)) return false;
-    addMessage(XLAT("You have to run away from the water!"));
+    if(vmsg()) addMessage(XLAT("You have to run away from the water!"));
     }
   else if(cwt.at->wall == waClosedGate) {
     if(markOrb2(itOrbAether)) return false;
-    addMessage(XLAT("The gate is closing right on you! RUN!"));
+    if(vmsg()) addMessage(XLAT("The gate is closing right on you! RUN!"));
     }
   else if(isFire(cwt.at) && !markOrb(itOrbWinter) && !markOrb2(itOrbShield)) {
     if(markOrb2(itOrbAether)) return false;
-    addMessage(XLAT("This spot will be burning soon! RUN!"));
+    if(vmsg()) addMessage(XLAT("This spot will be burning soon! RUN!"));
     }
   else if(cwt.at->wall == waMagma && !markOrb(itOrbWinter) && !markOrb2(itOrbShield)) {
     if(markOrb2(itOrbAether)) return false;
     if(in_gravity_zone(cwt.at) && passable(cwt.at, cwt.at, P_ISPLAYER)) return false;
-    addMessage(XLAT("Run away from the magma!"));
+    if(vmsg()) addMessage(XLAT("Run away from the magma!"));
     }
   else if(cwt.at->wall == waChasm) {
     if(markOrb2(itOrbAether)) return false;
     if(in_gravity_zone(cwt.at) && passable(cwt.at, cwt.at, P_ISPLAYER)) return false;
     flags |= AF_FALL;
-    addMessage(XLAT("The floor has collapsed! RUN!"));
+    if(vmsg()) addMessage(XLAT("The floor has collapsed! RUN!"));
     }
   else if(items[itOrbAether] > ORBBASE && !passable(cwt.at, NULL, P_ISPLAYER | P_NOAETHER)) {
     if(markOrb2(itOrbAether)) return false;
@@ -171,7 +172,7 @@ EX bool checkNeedMove(bool checkonly, bool attacking) {
   else if(!passable(cwt.at, NULL, P_ISPLAYER)) {
     if(isFire(cwt.at)) return false; // already checked: have Shield
     if(markOrb2(itOrbAether)) return false;
-    addMessage(XLAT("Your Aether power has expired! RUN!"));
+    if(vmsg()) addMessage(XLAT("Your Aether power has expired! RUN!"));
     }
   else return false;
   if(hardcore && !checkonly) 
@@ -209,6 +210,8 @@ struct pcmove {
   bool after_escape();
   bool move_if_okay();
   bool attack();
+  
+  bool checkNeedMove(bool checkonly, bool attacking);
 
   void tell_why_cannot_attack();
   void tell_why_impassable();
