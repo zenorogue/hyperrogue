@@ -58,6 +58,8 @@ void shareScore(MOBPAR_FORMAL);
 
 bool settingsChanged = false;
 
+const char *scorefile;
+
 struct transmatrix getOrientation();
 }
 
@@ -183,8 +185,6 @@ Java_com_roguetemple_hyperroid_HyperRogue_getuColor(MOBPAR_FORMAL)
 {
   return glhr::current_glprogram->uColor;
   }
-
-const char *scorefile;
 
 string sscorefile, sconffile, scachefile;
 
