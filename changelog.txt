@@ -3889,3 +3889,18 @@ Geometries:
 - fixed random_spin() in three dimensions
 - fixed the grid display in nonisotropic hyperbolic geometry
 - Archimedean tessellations: added some more samples, and some additional checking
+
+2020-04-06 11:43 Update 11.3h:
+- neon mode works in 3D (textured things are drawn as wireframes), an option to not fill neons
+- 3D geometries no longer crash when OpenGL is off 
+- fixed a bug when switching between various binary tilings
+- fixed flashes disappearing
+- fixed some achievements awarded before making the move
+- fixed cell counter
+- fixed the achievements for Elemental Gems and Ancient Jewelry
+- Wetland rebalanced
+- less awkward map position in portrait mode
+- added vertical margins for mobile screens
+- reverse FPP mode on iOS should be fixed
+- fixed the missing message when PC could not stay in place
+- fixed a potential rare crash
