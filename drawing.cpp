@@ -668,12 +668,30 @@ void dqi_poly::gldraw() {
         }
       }
     
-    if(outline && !(flags & POLY_TRIANGLES)) {
+    if(outline && !tinf) {
       glhr::color2(outline);
       glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
       glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW && prio != PPR::EUCLIDEAN_SKY);
       glhr::set_fogbase(prio == PPR::SKY ? 1.0 + (euclid ? 20 : 5 / sightranges[geometry]) : 1.0);
-      glDrawArrays(GL_LINE_STRIP, offset, cnt);
+
+      if(flags & POLY_TRIANGLES) {
+        vector<glvertex> v1;
+        v1.reserve(cnt * 2);
+        for(int i=0; i<cnt; i+= 3) {
+          v1.push_back(v[offset+i]);
+          v1.push_back(v[offset+i+1]);
+          v1.push_back(v[offset+i+1]);
+          v1.push_back(v[offset+i+2]);
+          v1.push_back(v[offset+i+2]);
+          v1.push_back(v[offset+i]);
+          }
+        glhr::vertices(v1);
+        glDrawArrays(GL_LINES, 0, cnt*2);
+        // glDrawArrays(GL_LINE_STRIP, ioffset, cnt);
+        }
+
+      else
+        glDrawArrays(GL_LINE_STRIP, offset, cnt);
       }
     }
 
