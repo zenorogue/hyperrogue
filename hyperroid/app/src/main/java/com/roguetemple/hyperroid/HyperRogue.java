@@ -581,6 +581,13 @@ public class HyperRogue extends Activity implements SensorEventListener {
   if(curland == 80) id = R.raw.graveyard; // Ruined City
   if(curland == 81) id = R.raw.caves; // Magnetosphere
   if(curland == 82) id = R.raw.laboratory; // Jelly Kingdom
+  if(curland == 84) id = R.raw.caribbean; // Brown Island
+  if(curland == 85) id = R.raw.ivory; // Free Fall
+  if(curland == 86) id = R.raw.palace; // Irradiated Field
+  if(curland == 87) id = R.raw.crossroads;
+  if(curland == 88) id = R.raw.graveyard;
+  if(curland == 89) id = R.raw.laboratory;
+  if(curland == 90) id = R.raw.palace;
 
           if(id > 0) backgroundmusic = MediaPlayer.create(this, id);
     	  if(backgroundmusic != null) {
