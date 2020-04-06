@@ -2221,6 +2221,7 @@ EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, P
   if(neon_mode == eNeon::none) {
     ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
     ptd.outline = poly_outline;
+    if(h.flags & POLY_TRIANGLES) ptd.outline = 0;
     }
   else switch(neon_mode) {
     case eNeon::neon:
