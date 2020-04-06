@@ -4268,6 +4268,9 @@ void drawFlashes() {
       draw_flash(f, V * currentmap->iadj(f.where, id), kill);
       copies = true;
       }
+    if(f.t > ticks - 800 && !copies) {
+      kill = false;
+      }
     if(kill) {
       f = flashes[isize(flashes)-1];
       flashes.pop_back(); k--;
