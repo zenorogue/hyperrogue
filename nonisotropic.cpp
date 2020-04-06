@@ -2065,6 +2065,7 @@ EX namespace nisot {
     return NULL;
     }
   
+  #if CAP_COMMANDLINE
   auto config = addHook(hooks_args, 0, [] () {
     using namespace arg;
     #if CAP_SOLV
@@ -2161,7 +2162,7 @@ EX namespace nisot {
       }
     return 1;
     });
-    
+  #endif  
   }
 
 }

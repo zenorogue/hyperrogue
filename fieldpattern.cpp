@@ -1301,6 +1301,7 @@ int hk =
       discoveries.clear();
       })
 #endif
+#if CAP_COMMANDLINE
   + addHook(hooks_args, 0, [] {
       using namespace arg;
       if(0) ;
@@ -1309,7 +1310,9 @@ int hk =
       else if(argis("-q3-limitv")) { shift(); limitv = argi(); }
       else return 1;
       return 0;
-      });
+      })
+#endif
+  + 0;
 
 EX purehookset on_geometry_change;
 

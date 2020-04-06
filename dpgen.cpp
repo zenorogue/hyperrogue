@@ -234,6 +234,7 @@ EX void show_menu() {
   dialog::display();
   }
 
+#if CAP_COMMANDLINE
 auto sbhook = addHook(hooks_args, 100, [] {
   using namespace arg;
            
@@ -261,6 +262,7 @@ auto sbhook = addHook(hooks_args, 100, [] {
     if(in) return named_dialog(XLAT("select a puzzle"), show_menu);
     else return named_functionality();
     });
+#endif
 
 EX }
 }

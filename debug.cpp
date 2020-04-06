@@ -557,6 +557,7 @@ EX void viewall() {
     }
   }
 
+#if CAP_COMMANDLINE
 /** perform a move for the -cmove command */
 
 int cheat_move_gen = 7;
@@ -582,6 +583,7 @@ void cheat_move(char c) {
   else if(c == 'g') cheat_move_gen = -1;
   else println(hlog, "unknown move command: ", c);
   }
+#endif
 
 /** launch a debugging screen, and continue normal working only after this screen is closed */
 EX void modalDebug(cell *c) {
