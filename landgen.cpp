@@ -2631,9 +2631,9 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         // if(wet::wetdata.empty()) wet::build_data();
         eWall wetwalls[10] = {waNone, waNone, waDeepWater, waDeepWater, waDeepWater, waShallow, waShallow, waShallow, waStone, waStone};
         c->wall = wetwalls[hrand(10)]; // wet::wetdata[windmap::getId(c)]];
-        if(among(c->wall, waDeepWater, waShallow) && hrand_monster(2000) < 2 * (items[itWet] + yendor::hardness() + 5))
+        if(among(c->wall, waDeepWater, waShallow) && hrand_monster(4000) < 2 * (items[itWet] + yendor::hardness() + 5))
           c->monst = hrand(100) >= 90 ? moRusalka : moPike;
-        if(c->wall == waShallow && hrand(2000) < PT(100 + 2 * kills[moPike] + 3 * kills[moRusalka], 200) && notDippingFor(itWet))
+        if(c->wall == waShallow && hrand(2000) < min(PT(100 + kills[moPike] + kills[moRusalka], 150), 150) && notDippingFor(itWet))
           c->item = itWet;
         }
       break;
