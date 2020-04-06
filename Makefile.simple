@@ -80,19 +80,22 @@ ifeq (${OS},osx)
 endif
 
 ifeq (${TOOLCHAIN},clang)
-  CXXFLAGS_EARLY += -std=c++11 -march=native
+  CXXFLAGS_STD = -std=c++11
+  CXXFLAGS_EARLY += -march=native
   CXXFLAGS_EARLY += -W -Wall -Wextra -Werror -pedantic
   CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized -Wno-unknown-warning-option
 endif
 
 ifeq (${TOOLCHAIN},gcc)
-  CXXFLAGS_EARLY += -std=c++11 -march=native
+  CXXFLAGS_STD = -std=c++11
+  CXXFLAGS_EARLY += -march=native
   CXXFLAGS_EARLY += -W -Wall -Wextra -Werror -pedantic
   CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized
 endif
 
 ifeq (${TOOLCHAIN},mingw)
-  CXXFLAGS_EARLY += -std=c++11 -march=native
+  CXXFLAGS_STD = -std=c++11
+  CXXFLAGS_EARLY += -march=native
   CXXFLAGS_EARLY += -W -Wall -Wextra -Werror
   CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized
 endif
@@ -121,7 +124,8 @@ else
 endif
 
 ifeq (${HYPERROGUE_USE_ROGUEVIZ},1)
-  # Enable RogueViz.
+  # Enable RogueViz. RogueViz requires C++17.
+  CXXFLAGS_STD = -std=c++17
   CXXFLAGS_EARLY += -DCAP_ROGUEVIZ=1
 endif
 
@@ -130,7 +134,7 @@ endif
 ## Begin the Makefile proper.
 
 
-override CXXFLAGS := $(CXXFLAGS_EARLY) $(CXXFLAGS) ${EXTRA_CXXFLAGS}
+override CXXFLAGS := $(CXXFLAGS_STD) $(CXXFLAGS_EARLY) $(CXXFLAGS) ${EXTRA_CXXFLAGS}
 override LDFLAGS := $(LDFLAGS_EARLY) $(LDFLAGS) ${EXTRA_LDFLAGS}
 
 hyperrogue$(EXE_EXTENSION): $(hyper_OBJS) $(hyper_RES)
@@ -167,5 +171,7 @@ hyper.emscripten-sources: *.cpp autohdr.h
 .PHONY: clean
 
 clean:
-	rm -f hyperrogue$(EXE_EXTENSION) hyper$(OBJ_EXTENSION) $(hyper_RES) langen$(EXE_EXTENSION) language-data.cpp savepng$(OBJ_EXTENSION)
+	rm -f langen$(EXE_EXTENSION) language-data.cpp
+	rm -f makeh$(EXE_EXTENSION) autohdr.h
+	rm -f hyperrogue$(EXE_EXTENSION) hyper$(OBJ_EXTENSION) $(hyper_RES) savepng$(OBJ_EXTENSION)
 	rm -f hyper.html hyper.js hyper.wasm
