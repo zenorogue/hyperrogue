@@ -1058,12 +1058,7 @@ EX void showGraphConfig() {
       (vid.antialias & AA_MULTI) ? "multisampling" :
       "NO", 'O');
 
-  if(vid.usingGL) {
-    dialog::addSelItem(XLAT("line width"), fts(vid.linewidth), 'w');
-//    dialog::addBoolItem(XLAT("finer lines at the boundary"), vid.antialias & AA_LINEWIDTH, 'b');
-    }
-  else
-    dialog::addBreak(100);
+  dialog::addSelItem(XLAT("vector graphics modes"), fts(vid.linewidth), 'w');
   
   dialog::addSelItem(XLAT("line quality"), its(vid.linequality), 'L');
 
@@ -1132,8 +1127,9 @@ EX void showGraphConfig() {
     
     // if(xuni == 'b') vid.antialias ^= AA_LINEWIDTH;
    
-    else if(xuni == 'w' && vid.usingGL) {
-      dialog::editNumber(vid.linewidth, 0, 10, 0.1, 1, XLAT("line width"), "");
+    else if(xuni == 'w') {
+      dialog::editNumber(vid.linewidth, 0, 10, 0.1, 1, XLAT("line width"), 
+        vid.usingGL ? "" : XLAT("Line width setting is only taken into account in OpenGL."));
       dialog::extra_options = [] () {
         dialog::addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'O');
         dialog::add_action([] () { 
