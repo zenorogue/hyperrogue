@@ -1433,7 +1433,7 @@ EX void sideAttack(cell *mf, int dir, eMonster who, int bonuskill) {
 
   if(who == moPlayer) {
     int kills = tkills() - k + bonuskill;
-    if(kills >= 5) achievement_gain("MELEE5");
+    if(kills >= 5) achievement_gain_once("MELEE5");
     }
   }
 
@@ -1504,22 +1504,22 @@ EX void movecost(cell* from, cell *to, int phase) {
 #endif
   
   if(to->land ==laCrossroads4 && !got_crossroads && !geometry && (phase & 2) && !cheater) {
-    achievement_gain("CR4");
+    achievement_gain_once("CR4");
     got_crossroads = true;
     chaosUnlocked = true;
     }
 
   if(isHaunted(from->land) && !isHaunted(to->land) && (phase & 2)) {
     updateHi(itLotus, truelotus = items[itLotus]);
-    if(items[itLotus] >= 1) achievement_gain("LOTUS1");
-    if(items[itLotus] >= (big_unlock ? 25 : 10)) achievement_gain("LOTUS2");
-    if(items[itLotus] >= (big_unlock ? 50 : 25)) achievement_gain("LOTUS3");
-    if(items[itLotus] >= 50 && !big_unlock) achievement_gain("LOTUS4");
+    if(items[itLotus] >= 1) achievement_gain_once("LOTUS1");
+    if(items[itLotus] >= (big_unlock ? 25 : 10)) achievement_gain_once("LOTUS2");
+    if(items[itLotus] >= (big_unlock ? 50 : 25)) achievement_gain_once("LOTUS3");
+    if(items[itLotus] >= 50 && !big_unlock) achievement_gain_once("LOTUS4");
     achievement_final(false);
     }
   
   if(geometry == gNormal && celldist(to) == 0 && !usedSafety && gold() >= 100 && (phase & 2))
-    achievement_gain("COMEBACK");
+    achievement_gain_once("COMEBACK");
   
   bool tortoiseOK = 
     to->land == from->land || to->land == laTortoise ||

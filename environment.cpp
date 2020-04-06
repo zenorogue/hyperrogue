@@ -557,7 +557,7 @@ EX void moverefresh(bool turn IS(true)) {
       
       if(c->monst && !survivesChasm(c->monst) && c->monst != moReptile && normal_gravity_at(c)) {
         if(c->monst != moRunDog && c->land == laMotion) 
-          achievement_gain("FALLDEATH1");
+          achievement_gain_once("FALLDEATH1");
         addMessage(XLAT("%The1 falls!", c->monst));
         fallMonster(c, AF_FALL);
         }

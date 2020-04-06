@@ -116,7 +116,7 @@ EX void moveMonster(const movei& mi) {
   moveEffect(mi, m);
   if(ct->wall == waCamelotMoat && 
     (m == moShark || m == moCShark || m == moGreaterShark))
-      achievement_gain("MOATSHARK");
+      achievement_gain_once("MOATSHARK");
   if(m == moTentacleGhost) { 
     cf->monst = moTentacletail;
     m = moGhost;
@@ -313,7 +313,7 @@ EX void moveMonster(const movei& mi) {
     }
   if(sword::at(ct) && canAttack(NULL, moPlayer, ct, m, AF_SWORD_INTO)) {
     attackMonster(ct, AF_SWORD_INTO | AF_MSG, moPlayer);
-    achievement_gain("GOSWORD");
+    achievement_gain_once("GOSWORD");
     }
   }
 
@@ -858,7 +858,7 @@ EX void moveWorm(cell *c) {
         addMessage(XLAT("The sandworm explodes!"));
       playSound(NULL, "explosion");
       if(geometry == gZebraQuotient)
-        achievement_gain("ZEBRAWORM", rg::special_geometry);
+        achievement_gain_once("ZEBRAWORM", rg::special_geometry);
       }
     return;
     }

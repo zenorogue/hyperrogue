@@ -464,10 +464,8 @@ EX void gainItem(eItem it) {
   if(it == itHyperstone && items[itHyperstone] == 10)
     achievement_victory(true);
 
-  if(chaosmode && gold() >= 300 && !chaosAchieved) {
-    achievement_gain("CHAOS", rg::chaos);
-    chaosAchieved = true;
-    }
+  if(chaosmode && gold() >= 300)
+    achievement_gain_once("CHAOS", rg::chaos);
 
 #if ISMOBILE==1
   if(g < lastsafety + R30*3/2 && g2 >= lastsafety + R30*3/2)

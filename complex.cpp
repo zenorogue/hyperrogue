@@ -630,7 +630,7 @@ struct info {
 #if CAP_INV
         if(!inv::on || !inv::usedForbidden)
 #endif
-          achievement_gain("PRINCESS1");
+          achievement_gain_once("PRINCESS1");
         princess::saved = true;
         princess::everSaved = true;
         if(inv::on && !princess::reviveAt)
@@ -639,9 +639,9 @@ struct info {
         }
       if(newdist == OUT_OF_PRISON && princess::challenge) {
         addMessage(XLAT("Congratulations! Your score is %1.", its(i->value)));
-        achievement_gain("PRINCESS2");
+        achievement_gain_once("PRINCESS2");
         if(!cheater) achievement_score(36, i->value);
-        showMissionScreen();
+        LATE( showMissionScreen(); )
         }
       }
     if(i->princess->land == laDungeon && !saved && !nodungeon) {
@@ -2318,8 +2318,6 @@ EX }
 
 bool gardener = false;
 
-bool lifebrought = false; // was Life brought to the Dead Caves?
-
 EX void livecaves() {
   vector<cell*>& allcells = currentmap->allcells();
   int dcs = isize(allcells);
@@ -2449,7 +2447,7 @@ EX void livecaves() {
         c->wall = waCavewall;
         if(c->land != laCaves && c->land != laDeadCaves && c->land != laEmerald && !gardener) {
           gardener = true;
-          achievement_gain("GARDENER");
+          achievement_gain_once("GARDENER");
           }
         }
       }
@@ -2467,10 +2465,8 @@ EX void livecaves() {
   
   for(int i=0; i<isize(bringlife); i++) {
     cell *c = bringlife[i];
-    if(c->land == laDeadCaves && !lifebrought) { 
-      lifebrought = true;
-      achievement_gain("LIFEBRINGER");
-      }
+    if(c->land == laDeadCaves)
+      achievement_gain_once("LIFEBRINGER");
     if(c->wall == waDeadfloor) c->wall = waCavefloor;
     if(c->wall == waDeadfloor2) c->wall = waCavewall;
     if(c->wall == waDeadwall) c->wall = waCavewall;

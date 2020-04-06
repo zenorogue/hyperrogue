@@ -500,7 +500,7 @@ EX namespace yendor {
       addMessage(XLAT("You feel that these directions are %1 turns old.", yi[byi].age.get_str(100)));
     if(yii != byi) {
       yii = byi;
-      achievement_gain("YENDOR1");
+      achievement_gain_once("YENDOR1");
       playSound(yendor, "pickup-yendor");
       return true;
       }
