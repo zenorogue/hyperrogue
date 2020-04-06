@@ -378,6 +378,14 @@ EX ld crosshair_size = 0;
 
 EX bool long_kills;
 
+/** HUD margin in pixels. In mobile devices we need this margin because the corners are hidden. side==0: top, side==1: bottom */
+EX int hud_margin(int side) {
+  if(ISIOS) return 24;
+  if(ISANDROID) return 8;
+  if(ISFAKEMOBILE) return 8;
+  return 0;
+  }
+
 EX void drawStats() {
   if(nohud || vid.stereo_mode == sLR) return;
   if(callhandlers(false, hooks_prestats)) return;
@@ -541,9 +549,9 @@ EX void drawStats() {
   
       int cx, cy;
       if(portrait)
-        cx = 8 + buttonsize * rowid[z], cy = vid.fsize*2 + buttonsize * (colid[z]) + buttonsize/2;
+        cx = 8 + buttonsize * rowid[z], cy = vid.fsize*2 + buttonsize * (colid[z]) + buttonsize/2 + hud_margin(0);
       else
-        cx = 8 + buttonsize * (colid[z]), cy = vid.fsize * 3 + buttonsize * rowid[z];
+        cx = 8 + buttonsize * (colid[z]), cy = vid.fsize * 3 + buttonsize * rowid[z] + hud_margin(0);
       
       if(!portrait && z < 2) cx = vid.xres - cx - buttonsize;
   
@@ -555,6 +563,8 @@ EX void drawStats() {
   }
   glflush();
   calcparam();
+
+  int top_y = vid.fsize + hud_margin(0);
   
   string s0;
   if(racing::on) {
@@ -571,27 +581,27 @@ EX void drawStats() {
       col = 0xFFFFFF;
     
     dynamicval<int> x(vid.fsize, vid.fsize*2);
-    if(displayButtonS(vid.xres - 8, vid.fsize, racetimeformat(ticks - race_start_tick), col, 16, vid.fsize)) getcstat = 'o';
+    if(displayButtonS(vid.xres - 8, top_y, racetimeformat(ticks - race_start_tick), col, 16, vid.fsize)) getcstat = 'o';
 
     for(int i=0; i<multi::players; i++) {
       if(race_finish_tick[i]) {
         multi::cpid = i;
-        if(displayButtonS(vid.xres - 8, vid.fsize * (3+2*i), racetimeformat(race_finish_tick[i] - race_start_tick), (getcs().uicolor >> 8), 16, vid.fsize))
+        if(displayButtonS(vid.xres - 8, top_y + vid.fsize * (2+2*i), racetimeformat(race_finish_tick[i] - race_start_tick), (getcs().uicolor >> 8), 16, vid.fsize))
           getcstat = 'o';
         }
       else {
         int comp = get_percentage(i);
-        if(displayButtonS(vid.xres - 8, vid.fsize * (3+2*i), its(comp) + "%", (getcs().uicolor >> 8), 16, vid.fsize))
+        if(displayButtonS(vid.xres - 8, top_y + vid.fsize * (2+2*i), its(comp) + "%", (getcs().uicolor >> 8), 16, vid.fsize))
           getcstat = 'o';
         }
-      if(displayButtonS(vid.xres - 8, vid.fsize * (4+2*i), fts_fixed(shmup::pc[i]->vel * SCALE * 1000/600, 2), (getcs().uicolor >> 8), 16, vid.fsize))
+      if(displayButtonS(vid.xres - 8, top_y + vid.fsize * (3+2*i), fts_fixed(shmup::pc[i]->vel * SCALE * 1000/600, 2), (getcs().uicolor >> 8), 16, vid.fsize))
         getcstat = 'o';
       }
     #endif
     }
   else if(!peace::on) {
     string scoreline = XLAT("score: %1", its(gold()));
-    if(displayButtonS(vid.xres - 8, vid.fsize, scoreline, forecolor, 16, vid.fsize)) {
+    if(displayButtonS(vid.xres - 8, top_y, scoreline, forecolor, 16, vid.fsize)) {
       mouseovers = XLAT("Your total wealth"),
       instat = true,
       getcstat = SDLK_F1,
@@ -614,7 +624,7 @@ EX void drawStats() {
       while(siz > 4 && textwidth(siz, s) > vid.xres - textwidth(vid.fsize, scoreline)) siz--;
       }
     
-    if(displayButtonS(8, vid.fsize, s, forecolor, 0, siz)) {
+    if(displayButtonS(8, top_y, s, forecolor, 0, siz)) {
       instat = true;
       getcstat = SDLK_F1;
       if(long_kills) { mouseovers = " "; help = generateHelpForMonster(moMutant); }
@@ -635,12 +645,12 @@ EX void drawStats() {
   #if CAP_MEMORY_RESERVE
   if(reserve_limit && reserve_count < reserve_limit) {
     vers += " " + its(reserve_count) + "/" + its(reserve_limit) + " MB";
-    if(displayButtonS(4, vid.yres - 4 - vid.fsize/2, vers, 0xFF2020, 0, vid.fsize/2)) 
+    if(displayButtonS(4, vid.yres - 4 - vid.fsize/2 - hud_margin(1), vers, 0xFF2020, 0, vid.fsize/2)) 
       getcstat = PSEUDOKEY_MEMORY, instat = true;
     }
   else 
   #endif
-  if(displayButtonS(4, vid.yres - 4 - vid.fsize/2, vers, 0x202020, 0, vid.fsize/2)) {
+  if(displayButtonS(4, vid.yres - 4 - vid.fsize/2 - hud_margin(1), vers, 0x202020, 0, vid.fsize/2)) {
     mouseovers = XLAT("frames per second"),
     getcstat = SDLK_F1,
     instat = true,

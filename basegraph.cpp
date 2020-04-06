@@ -904,7 +904,7 @@ EX void drawmessages() {
     }
   msgs.resize(i);
   if(vid.msgleft == 2) {
-    int y = vid.yres - vid.fsize - (ISIOS ? 4 : 0);
+    int y = vid.yres - vid.fsize - hud_margin(1);
     for(int j=isize(msgs)-1; j>=0; j--) {
       int age = msgs[j].flashout * (t - msgs[j].stamp);
       poly_outline = gradient(bordcolor, backcolor, 0, age, 256*vid.flashtime) << 8;
