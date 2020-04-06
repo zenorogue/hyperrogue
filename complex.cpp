@@ -2144,7 +2144,7 @@ EX namespace heat {
           hdiff /= divby;
 
           #if CAP_FIELD
-          if(ct->land == laBlizzard) {
+          if(ct->land == laBlizzard && c->land == laBlizzard) {
             int v = (windmap::at(ct) - windmap::at(c)) & 255;
             if(v > 128) v -= 256;
             if(v < windmap::NOWINDFROM && v > -windmap::NOWINDFROM)
