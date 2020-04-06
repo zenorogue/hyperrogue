@@ -194,12 +194,14 @@ void achievement_gain(const char* s, char flags IS(0)) {
 
 // gain the achievement for collecting a number of 'it'.
 EX void achievement_collection(eItem it) {
+  achievement_collection2(it, items[it]);
+  }
+
+EX void achievement_collection2(eItem it, int q) {
   if(cheater) return;
   if(randomPatternsMode) return;
-  LATE( achievement_collection(it); )
+  LATE( achievement_collection2(it, q); )
 
-  int q = items[it];
-  
   if(it == itTreat && q == 50 && (geometry == gSphere || geometry == gElliptic) && BITRUNCATED) 
     achievement_gain("HALLOWEEN1", rg::special_geometry);
 
