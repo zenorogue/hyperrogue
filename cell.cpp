@@ -138,12 +138,18 @@ EX int dirdiff(int dd, int t) {
 
 EX int cellcount = 0;
 
+EX void destroy_cell(cell *c) {
+  tailored_delete(c);
+  cellcount--;
+  }
+
 EX cell *newCell(int type, heptagon *master) {
   cell *c = tailored_alloc<cell> (type);
   c->type = type;
   c->master = master;
   initcell(c);
   hybrid::will_link(c);
+  cellcount++;
   return c;
   }
 
@@ -327,7 +333,7 @@ EX void clearcell(cell *c) {
     c->move(t)->move(c->c.spin(t)) = NULL;
     }
   DEBB(DF_MEMORY, (format("DEL %p\n", hr::voidp(c))));
-  tailored_delete(c);
+  destroy_cell(c);
   }
 
 EX heptagon deletion_marker;

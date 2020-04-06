@@ -1147,7 +1147,7 @@ EX namespace hybrid {
     
     ~hrmap_hybrid() {
       in_underlying([] { delete currentmap; });
-      for(auto& p: at) tailored_delete(p.second);
+      for(auto& p: at) destroy_cell(p.second);
       }
   
     virtual transmatrix spin_to(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return in_underlying([&] { return currentmap->spin_to(c, d, bonus); }); }

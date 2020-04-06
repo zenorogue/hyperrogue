@@ -98,12 +98,11 @@ struct gcell {
   int cellid;
   #endif
   
-  gcell() { cellcount++; 
+  gcell() {
     #ifdef CELLID
     cellid = cellcount;  
     #endif
     }
-  ~gcell() { cellcount--; }
   };
 
 #define landparam LHU.landpar
