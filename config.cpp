@@ -650,6 +650,7 @@ EX void initConfig() {
   addsaver(nilv::nilperiod[2], "nilperiod_z");
   
   addsaverenum(neon_mode, "neon_mode");
+  addsaverenum(neon_nofill, "neon_nofill");
   addsaver(noshadow, "noshadow");
   addsaver(bright, "bright");
   addsaver(cblind, "cblind");
@@ -1162,9 +1163,11 @@ EX void showGraphConfig() {
         dialog::addBreak(100);
         dialog::addInfo(XLAT("hint: press Alt while testing modes"));
         dialog::addBreak(100);
-        dialog::addBoolItem_action("disable shadows", noshadow, 'F');
-        dialog::addBoolItem_action("bright mode", bright, 'G');
-        dialog::addBoolItem_action("colorblind simulation", cblind, 'H');
+        dialog::addBoolItem_action(XLAT("disable shadows"), noshadow, 'F');
+        dialog::addBoolItem_action(XLAT("bright mode"), bright, 'G');
+        dialog::addBoolItem_action(XLAT("colorblind simulation"), cblind, 'H');
+
+        dialog::addBoolItem_action(XLAT("no fill in neon mode"), neon_nofill, 'N');
         };
       }
     

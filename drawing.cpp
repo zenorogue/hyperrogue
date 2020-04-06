@@ -2135,6 +2135,7 @@ enum class eNeon { none, neon, no_boundary, neon2, illustration};
 #endif
 
 EX eNeon neon_mode;
+EX bool neon_nofill;
 
 EX void apply_neon(color_t& col, int& r) {
   switch(neon_mode) {
@@ -2199,7 +2200,9 @@ EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, P
     part(col,1) = b; */
     part(col,2) = part(col,3) = (part(col,2) * 2 + part(col,3) + 1)/3;
     }
-  if(neon_mode == eNeon::none || (h.flags & POLY_TRIANGLES)) {
+  if(neon_mode != eNeon::none && (h.flags & POLY_TRIANGLES))
+    ptd.tinf = nullptr;
+  if(neon_mode == eNeon::none) {
     ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
     ptd.outline = poly_outline;
     }
@@ -2208,6 +2211,7 @@ EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, P
       ptd.color = (poly_outline & 0xFFFFFF00) | (col & 0xFF);
       ptd.outline = (darkened(col >> 8) << 8) | (col & 0xFF);
       if(col == 0xFF) ptd.outline = 0xFFFFFFFF;
+      if(neon_nofill && ptd.color == 0xFF) ptd.color = 0; 
       break;
     case eNeon::no_boundary:
       ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
@@ -2218,6 +2222,7 @@ EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, P
       ptd.outline = (darkened(col >> 8) << 8) + (col & 0xFF);
       if(col == 0xFF) ptd.outline = 0xFFFFFFFF;
       if(poly_outline != 0xFF) ptd.outline = poly_outline;
+      if(neon_nofill && ptd.color == 0xFF) ptd.color = 0; 
       break;
     case eNeon::illustration: {
       if(poly_outline && (poly_outline>>8) != bordcolor) {
