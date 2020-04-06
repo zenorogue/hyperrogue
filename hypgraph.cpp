@@ -165,7 +165,7 @@ ld find_zlev(hyperpoint& H) {
   }
 
 ld get_tz(hyperpoint H) {
-  ld tz = euclid ? (1+vid.alpha) : vid.alpha+H[LDIM];
+  ld tz = vid.alpha+H[LDIM];
   if(tz < BEHIND_LIMIT && tz > -BEHIND_LIMIT) tz = BEHIND_LIMIT;
   return tz;
   }

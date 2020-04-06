@@ -1086,6 +1086,7 @@ void draw_shape_for_texture(floorshape* sh) {
 /** copy the texture vertices so that there are at least qty of them */
 EX void ensure_vertex_number(basic_textureinfo& bti, int qty) {
   int s = isize(bti.tvertices);
+  if(!s) return;
   while(isize(bti.tvertices) <= qty) {
     for(int i=0; i<s; i++) bti.tvertices.push_back(bti.tvertices[i]);
     }

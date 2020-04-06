@@ -585,6 +585,7 @@ void geometry_information::make_revolution_cut(hpcshape &sh, int each, ld push, 
     shDogStripes = shDogTorso;
     add_texture(shDogStripes);
     auto& utt = models_texture;
+    if(utt.tvertices.empty()) return;
     int a = (6 * 360 / step);
     for(int i=0; i<shDogStripes.e - shDogStripes.s; i++)
       if(i % (2 * a) < a)
@@ -770,7 +771,8 @@ void geometry_information::adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye
     for(int i=eye.s; i<s; i++) {
       hpcpush(MirrorY * hpc[i]);
       auto& utt = models_texture;
-      utt.tvertices.push_back(utt.tvertices[i - eye.s + eye.texture_offset]);
+      if(!utt.tvertices.empty())
+        utt.tvertices.push_back(utt.tvertices[i - eye.s + eye.texture_offset]);
       }
 
   finishshape();

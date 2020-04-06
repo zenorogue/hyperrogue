@@ -407,6 +407,12 @@ void coords_to_poly() {
     }
   }
 
+bool behind3(hyperpoint h) {
+  if(pmodel == mdGeodesic)
+    h = lp_apply(inverse_exp(h, iTable));
+  return h[2] < 0;
+  }
+
 void addpoly(const transmatrix& V, const vector<glvertex> &tab, int ofs, int cnt) {
   if(pmodel == mdPixel) {
     for(int i=ofs; i<ofs+cnt; i++) {
@@ -418,6 +424,24 @@ void addpoly(const transmatrix& V, const vector<glvertex> &tab, int ofs, int cnt
     return;
     }
   tofix.clear(); knowgood = false;
+  if(among(pmodel, mdPerspective, mdGeodesic)) {
+    if(poly_flags & POLY_TRIANGLES) {
+      for(int i=ofs; i<ofs+cnt; i+=3) {
+        hyperpoint h0 = V * glhr::gltopoint(tab[i]);
+        hyperpoint h1 = V * glhr::gltopoint(tab[i+1]);
+        hyperpoint h2 = V * glhr::gltopoint(tab[i+2]);
+        if(!behind3(h0) && !behind3(h1) && !behind3(h2)) 
+          addpoint(h0), addpoint(h1), addpoint(h2);
+        }
+      }
+    else {
+      for(int i=ofs; i<ofs+cnt; i++) {
+        hyperpoint h = V * glhr::gltopoint(tab[i]);
+        if(!behind3(h)) addpoint(h);
+        }
+      }
+    return;
+    }
   hyperpoint last = V * glhr::gltopoint(tab[ofs]);
   bool last_behind = is_behind(last);
   if(!last_behind) addpoint(last);
@@ -1614,7 +1638,12 @@ void dqi_poly::draw() {
       coords_to_poly();
       color_t col = color;
       if(poly_flags & POLY_INVERSE) col = 0;
-      svg::polygon(polyx, polyy, polyi, col, outline, get_width(this));
+      if(poly_flags & POLY_TRIANGLES) {
+        for(int i=0; i<polyi; i+=3)
+          svg::polygon(polyx+i, polyy+i, 3, col, outline, get_width(this));
+        }        
+      else
+        svg::polygon(polyx, polyy, polyi, col, outline, get_width(this));
       continue;
       }
   #endif
@@ -1644,7 +1673,11 @@ void dqi_poly::draw() {
         }
       filledPolygonColorI(s, polyx, polyy, polyi+5, color);
       }
-    else  
+    else if(poly_flags & POLY_TRIANGLES) {
+      for(int i=0; i<polyi; i+=3)
+      filledPolygonColorI(s, polyx+i, polyy+i, 3, color);
+      }
+    else
       filledPolygonColorI(s, polyx, polyy, polyi, color);
   
     if(current_display->stereo_active()) filledPolygonColorI(aux, polyxr, polyy, polyi, color);

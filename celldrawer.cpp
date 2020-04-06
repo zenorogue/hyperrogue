@@ -1618,7 +1618,7 @@ void celldrawer::draw_features_and_walls_3d() {
             poly.tinf = &texture::config.tinf3;
             poly.offset_texture = 0;
             }
-          else 
+          else if(!floor_texture_vertices.empty())
           #endif
           {
             poly.tinf = &floor_texture_vertices[qfi.fshape->id];
