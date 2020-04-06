@@ -4768,7 +4768,7 @@ EX void calcparam() {
   current_display->sidescreen = permaside;
   
   if(vid.xres < vid.yres - 2 * vid.fsize && !inHighQual && !in_perspective()) {
-    cd->ycenter = vid.yres - cd->scrsize - vid.fsize;
+    cd->ycenter = lerp(vid.fsize + cd->scrsize, vid.yres - cd->scrsize - vid.fsize, .8);
     }
   else {
     if(vid.xres > vid.yres * 4/3+16 && (cmode & sm::SIDE))
