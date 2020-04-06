@@ -159,6 +159,13 @@ struct geometry_information {
   int single_step;
   /** the number of levels in SL2 */
   int steps;
+
+  /** for binary tilings */
+  transmatrix direct_tmatrix[14];
+  transmatrix inverse_tmatrix[14];
+
+  /** a bitmask for hr::bt::use_direct_for */  
+  int use_direct;
   
   /** various parameters related to the 3D view */
   ld INFDEEP, BOTTOM, HELLSPIKE, LAKE, WALL, FLOOR, STUFF,

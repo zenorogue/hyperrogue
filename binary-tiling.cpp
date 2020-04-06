@@ -530,10 +530,10 @@ EX namespace bt {
           throw "unknown direction";
         }
       else if(use_direct_for(dir))
-        return direct_tmatrix[dir];
+        return cgi.direct_tmatrix[dir];
       else {
         h->cmove(dir);
-        return inverse_tmatrix[h->c.spin(dir)];
+        return cgi.inverse_tmatrix[h->c.spin(dir)];
         }
       }
 
@@ -584,18 +584,12 @@ EX namespace bt {
 
   EX hrmap *new_alt_map(heptagon *o) { return new hrmap_binary(o); }
 
-  EX transmatrix direct_tmatrix[14];
-  EX transmatrix inverse_tmatrix[14];
-
-  /** a bitmask for hr::bt::use_direct_for */  
-  int use_direct;
-
   /** \brief return if ew should use direct_tmatrix[dir] to get the adjacent cell the given direction
    *  
    *  Otherwise, this is the 'up' direction and thus we should use inverse_tmatrix for the inverse direction
    */
   EX bool use_direct_for(int dir) {
-    return (use_direct >> dir) & 1;
+    return (cgi.use_direct >> dir) & 1;
     }
 
   /** \brief which coordinate is expanding */
@@ -726,7 +720,10 @@ EX namespace bt {
   
   EX void build_tmatrix() {
     if(among(geometry, gBinaryTiling, gSol, gArnoldCat)) return; // unused
-    use_direct = (1 << (S7-1)) - 1;
+    auto& direct_tmatrix = cgi.direct_tmatrix;
+    auto& inverse_tmatrix = cgi.inverse_tmatrix;
+    auto& use_direct = cgi.use_direct;
+    use_direct = (1 << (S7-1)) - 1;    
     if(geometry == gBinary4) {
       use_direct = 3;
       direct_tmatrix[0] = xpush(-log(2)) * parabolic(-0.5);
