@@ -1892,7 +1892,7 @@ EX void draw_backside() {
     }
   else {
     reverse_side_priorities();
-    for(int i=ptds.size()-1; i>=0; i--) 
+    for(int i=isize(ptds)-1; i>=0; i--) 
       if(!among(ptds[i]->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
         ptds[i]->draw_back();
     

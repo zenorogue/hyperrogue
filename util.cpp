@@ -476,7 +476,7 @@ bignum bignum::randomized_div(int x) const {
     carry += digits[i];
     // strange compiler buug:
     // if I do / and %, function 'divmod' is called, and it complains on launch that divmod is unimplemented
-    res.digits[i] = carry / x;
+    res.digits[i] = int(carry / x);
     carry -= res.digits[i] * (long long)(x);
     }
   while(isize(res.digits) && res.digits.back() == 0) res.digits.pop_back();
@@ -494,10 +494,10 @@ void bignum::addmul(const bignum& b, int factor) {
     l += carry;
     if(i < K) l += b.digits[i] * factor;
     carry = 0;
-    if(l >= BASE) carry = l / BASE;
-    if(l < 0) carry = -(BASE-1-l) / BASE;
+    if(l >= BASE) carry = int(l / BASE);
+    if(l < 0) carry = -int((BASE-1-l) / BASE);
     l -= carry * BASE;
-    digits[i] = l;
+    digits[i] = int(l);
     }
   if(carry < 0) digits.back() -= BASE;
   while(isize(digits) && digits.back() == 0) digits.pop_back();
@@ -578,7 +578,7 @@ EX string short_form(bignum b) {
 
     int digits = q * 9;
     while(val >= 1000) { val /= 10; digits++; }
-    string str = its(val) + "E" + its(digits + 2);
+    string str = its(int(val)) + "E" + its(digits + 2);
     str.insert(1, ".");
     return str;
     }

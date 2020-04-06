@@ -2922,7 +2922,7 @@ bool celldrawer::draw_shmup_monster() {
         isBullet(m) ? 0x00FFFFFF :
         (isFriendly(m->type) || m->type == moPlayer) ? 0x00FF00FF : 0xFF0000FF;
 
-    int q = ptds.size();
+    int q = isize(ptds);
     if(q != isize(ptds) && !m->inBoat) pushdown(c, q, view, zlev, true, false);
 
     if(callhandlers(false, hooks_draw, V, c, m)) continue;

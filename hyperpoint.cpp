@@ -1214,12 +1214,12 @@ EX ld raddif(ld a, ld b) {
   return d;
   }
 
-EX int bucketer(ld x) {
-  return (long long)(x * 10000 + 100000.5) - 100000;
+EX unsigned bucketer(ld x) {
+  return unsigned((long long)(x * 10000 + 100000.5) - 100000);
   }
 
-EX int bucketer(hyperpoint h) {
-  int dx = 0;
+EX unsigned bucketer(hyperpoint h) {
+  unsigned dx = 0;
   if(prod) {
     auto d = product_decompose(h);
     h = d.second;

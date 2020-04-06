@@ -853,7 +853,7 @@ EX namespace tactic {
     return hiitemsMax(treasureType(l)) * landMultiplier(l) >= 20;
     }
 
-  EX void record(eLand land, int score, int xc IS(modecode())) {
+  EX void record(eLand land, int score, flagtype xc IS(modecode())) {
     if(land >=0 && land < landtypes) {
       for(int i=MAXTAC-1; i; i--) lsc[xc][land][i] = lsc[xc][land][i-1];
       tactic::lsc[xc][land][0] = score;
@@ -868,7 +868,7 @@ EX namespace tactic {
     record(lasttactic, items[treasureType(lasttactic)]);
     }
 
-  void unrecord(eLand land, int xc = modecode()) {
+  void unrecord(eLand land, flagtype xc = modecode()) {
     if(land >=0 && land < landtypes) {
       for(int i=0; i<MAXTAC-1; i++) lsc[xc][land][i] = lsc[xc][land][i+1];
       lsc[xc][land][MAXTAC-1] = -1;
@@ -904,7 +904,7 @@ EX namespace tactic {
   
   EX void showMenu() {
 
-    int xc = modecode();
+    flagtype xc = modecode();
     
     if(xc == 0) set_priority_board(LB_PURE_TACTICS);
     if(xc == 2) set_priority_board(LB_PURE_TACTICS_SHMUP);

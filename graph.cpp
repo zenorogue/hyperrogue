@@ -2835,7 +2835,7 @@ EX bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, col
     else if(isWorm(m)) {
       ld depth = geom3::factor_to_lev(wormhead(c) == c ? cgi.AHEAD : cgi.ABODY);
       footphase = 0;
-      int q = ptds.size();
+      int q = isize(ptds);
       drawMonsterType(moPlayer, c, Vs, col, footphase, asciicol);
       pushdown(c, q, Vs, -depth, true, false);
       }

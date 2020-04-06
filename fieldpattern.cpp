@@ -192,7 +192,7 @@ struct fpattern {
   
   void add(const matrix& M) {
     if(!matcode.count(M)) {
-      int i = matrices.size();
+      int i = isize(matrices);
       matcode[M] = i, matrices.push_back(M);
       for(int j=0; j<isize(qcoords); j++)
         addas(mmul(M, qcoords[j]), i);
@@ -445,14 +445,14 @@ vector<matrix> fpattern::generate_isometries3() {
 
 void fpattern::add1(const matrix& M) {
   if(!matcode.count(M)) {
-    int i = matrices.size();
+    int i = isize(matrices);
     matcode[M] = i, matrices.push_back(M);
     }
   }
 
 void fpattern::add1(const matrix& M, const transmatrix& Full) {
   if(!matcode.count(M)) {
-    int i = matrices.size();
+    int i = isize(matrices);
     matcode[M] = i, matrices.push_back(M), fullv.push_back(Full);
     }
   }
@@ -801,7 +801,7 @@ void fpattern::analyze() {
     }
     
   DEBB(DF_FIELD, ("variation = %d\n", int(variation)));
-  int N = connections.size();
+  int N = isize(connections);
   
   markers.resize(N);
   
@@ -1214,7 +1214,7 @@ EX void nextPrime(fgeomextra& ex) {
     fp.Prime = nextprime;
     if(fp.solve() == 0) {
       fp.build();
-      int cells = fp.matrices.size() / S7;
+      int cells = isize(fp.matrices) / S7;
       ex.primes.emplace_back(primeinfo{nextprime, cells, (bool) fp.wsquare});
       ex.dualval.emplace_back(fp.dual);
       break;

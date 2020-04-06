@@ -140,7 +140,7 @@ bool handleKeyTour(int sym, int uni) {
   if(!tour::on) return false;
   if(!(cmode & sm::DOTOUR)) return false;
   bool inhelp = cmode & sm::HELP;
-  int flags = slides[currentslide].flags;
+  flagtype flags = slides[currentslide].flags;
   if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (!inhelp || (flags & QUICKSKIP))) {
     popScreenAll();
     if(gamestack::pushed()) { 
