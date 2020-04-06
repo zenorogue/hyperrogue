@@ -1618,9 +1618,9 @@ void celldrawer::draw_features_and_walls_3d() {
             poly.tinf = &texture::config.tinf3;
             poly.offset_texture = 0;
             }
-          else if(!floor_texture_vertices.empty())
+          else
           #endif
-          {
+          if(!floor_texture_vertices.empty() && neon_mode == eNeon::none) {
             poly.tinf = &floor_texture_vertices[qfi.fshape->id];
             ensure_vertex_number(*poly.tinf, poly.cnt);
             poly.offset_texture = 0;

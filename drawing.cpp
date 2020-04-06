@@ -2200,8 +2200,6 @@ EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, P
     part(col,1) = b; */
     part(col,2) = part(col,3) = (part(col,2) * 2 + part(col,3) + 1)/3;
     }
-  if(neon_mode != eNeon::none && (h.flags & POLY_TRIANGLES))
-    ptd.tinf = nullptr;
   if(neon_mode == eNeon::none) {
     ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
     ptd.outline = poly_outline;
@@ -2242,6 +2240,8 @@ EX dqi_poly& queuepolyat(const transmatrix& V, const hpcshape& h, color_t col, P
   ptd.linewidth = vid.linewidth;
   ptd.flags = h.flags;
   ptd.tinf = h.tinf;
+  if(neon_mode != eNeon::none && (h.flags & POLY_TRIANGLES))
+    ptd.tinf = nullptr;
   ptd.offset_texture = h.texture_offset;
   ptd.intester = h.intester;
   return ptd;
