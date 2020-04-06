@@ -2534,6 +2534,10 @@ EX int read_config_args() {
     PHASEFROM(2);
     shift(); neon_mode = eNeon(argi());
     }
+  else if(argis("-neonnf")) {
+    PHASEFROM(2);
+    shift(); neon_nofill = argi();
+    }
   else if(argis("-precw")) {
     PHASEFROM(2);
     shift_arg_formula(precise_width);
