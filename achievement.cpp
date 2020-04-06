@@ -130,11 +130,12 @@ EX bool wrongMode(char flags) {
 
 EX set<string> got_achievements;
 
-EX void achievement_gain_once(const string& s) {
-  LATE(achievement_gain_once(s));
+EX void achievement_gain_once(const string& s, char flags IS(0)) {
+  LATE(achievement_gain_once(s, flags));
+  if(wrongMode(flags)) return;
   if(got_achievements.count(s)) return;
   got_achievements.insert(s);
-  achievement_gain(s.c_str());
+  achievement_gain(s.c_str(), flags);
   }
 
 EX void achievement_log(const char* s, char flags) {
