@@ -20,3 +20,4 @@
 #include "tree.cpp"
 #include "fullnet.cpp"
 #include "snow.cpp"
+#include "impossible-ring.cpp"

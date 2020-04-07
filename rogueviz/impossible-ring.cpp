@@ -1,4 +1,4 @@
-#include "../hyper.h"
+#include "rogueviz.h"
 
 // Impossible Ring visualization
 
@@ -6,11 +6,19 @@
 // https://youtu.be/3WejR74o6II
 // https://youtu.be/ztodGQDK810
 
-namespace hr {
+// usage: -cylon
+
+namespace rogueviz {
+
+namespace cylon {
+
+bool on;
 
 ld cscale = .2;
 
 struct iring {
+
+  geometry_information *icgi;
 
   static const int frames = 32;
   
@@ -25,6 +33,8 @@ struct iring {
   vector<transmatrix> path;
   
   void init() {
+  
+    icgi = &cgi;
   
     unsigned difh = 256;
     int mh = 255;
@@ -188,8 +198,17 @@ struct iring {
 
 iring *ir;
 
+void reset() {
+  if(ir) delete ir;
+  ir = nullptr;
+  }
+
 bool draw_ptriangle(cell *c, const transmatrix& V) {
+
+  if(!on) return false;
   
+  if(ir && ir->icgi != &cgi) reset();
+   
   if(!ir) { ir = new iring; ir->init(); 
     // growthrate();
     }
@@ -211,12 +230,24 @@ bool draw_ptriangle(cell *c, const transmatrix& V) {
 
 bool cylanim = false;
 
+named_functionality o_key() {
+  if(on) return named_functionality("ring size", [] { 
+    dialog::editNumber(cscale, 0, 1, .01, .1, "", "");
+    dialog::reaction = reset;
+    });
+  return named_functionality();
+  }
+
 auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
 
+#if CAP_COMMANDLINE
 + addHook(hooks_args, 100, [] {
   using namespace arg;
            
   if(0) ;
+  else if(argis("-cylon")) {
+    on = true;
+    }
   else if(argis("-cyls")) {
     shift_arg_formula(cscale);
     }
@@ -226,17 +257,48 @@ auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
   else return 1;
   return 0;
   })
+#endif
 
 + addHook(anims::hooks_anim, 100, [] {
-  if(!ir || !cylanim) return;
+  if(!ir || !cylanim || !on) return;
   centerover = currentmap->gamestart();
   long long isp = isize(ir->path);
   View = ir->path[isp-1 - (ticks * isp / int(anims::period)) % isp];
   shift_view(point3(0, 0.3, 0));
   anims::moved();
+  })
+
++ addHook(hooks_o_key, 80, o_key)
+
++ addHook(rvtour::hooks_build_rvtour, 141, [] (vector<tour::slide>& v) {
+  using namespace tour;
+  v.push_back(
+    tour::slide{"Impossible architecture in Nil/impossible ring", 18, LEGAL::NONE | QUICKGEO, 
+      "Ring with a square cross-section. Cut it in half. Rotate one of the two halves by 90°, "
+      "keeping one of the two ends connected to the other half. Do this in Nil geometry, so the other pair of ends remains connected too.\n\n"
+      "Move with mouse/arrows/PgUpDn. Press '5' to enable animation, 'o' to change ring size.\n\n",
+   
+  [] (presmode mode) {
+    setCanvas(mode, '0');
+    
+    if(mode == pmKey) {
+      tour::slide_backup(cylanim, !cylanim);
+      }
+    
+    if(mode == pmStart) {
+      stop_game();
+      set_geometry(gNil);
+      tour::slide_backup(mapeditor::drawplayer, false);
+      tour::slide_backup(on, true);
+      tour::slide_backup(smooth_scrolling, true);
+      tour::slide_backup(nilv::nilperiod, make_array(3, 3, 3));
+      start_game();
+      playermoved = false;
+      }
+    }}
+    );
   });
-  
 
 
 
-}
+}}
