@@ -133,7 +133,7 @@ template<class T> function<void(presmode)> roguevizslide(char c, const T& t) {
     if(mode == 3 || mode == pmGeometry || mode == pmGeometryReset) {
       rogueviz::close();
       shmup::clearMonsters();
-      if(mode == pmGeometryReset) t();
+      if(mode == pmGeometryReset && !(slides[currentslide].flags & QUICKGEO)) t();
       }
   
     slidecommand = "toggle the player";
@@ -155,7 +155,7 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
     if(mode == pmStop || mode == pmGeometry || mode == pmGeometryReset) {
       rogueviz::close();
       shmup::clearMonsters();
-      if(mode == pmGeometryReset) t();
+      if(mode == pmGeometryReset && !(slides[currentslide].flags & QUICKGEO)) t();
       }
   
     };
