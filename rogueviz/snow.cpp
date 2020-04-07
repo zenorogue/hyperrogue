@@ -1,4 +1,4 @@
-#include "../hyper.h"
+#include "rogueviz.h"
 
 /** \brief Snowball visualization
  *
@@ -16,9 +16,9 @@
  *
  **/
 
-namespace hr {
+namespace rogueviz {
 
-ld snow_lambda = 1;
+ld snow_lambda = 0;
 
 color_t snow_color = 0xFFFFFFFF;
 
@@ -138,6 +138,41 @@ bool draw_snow(cell *c, const transmatrix& V) {
 
 bool cylanim = false;
 
+string cap = "non-Euclidean snowballs/";
+
+void snow_slide(vector<tour::slide>& v, string title, string desc, reaction_t t) {
+  using namespace tour;
+  v.push_back(
+    tour::slide{cap + title, 18, LEGAL::NONE | QUICKGEO, desc, 
+   
+  [t] (presmode mode) {
+    println(hlog, "mode=", mode, " land = ", dnameof(firstland));
+    setCanvas(mode, '0');
+
+    if(mode == pmKey) {
+      using namespace anims;
+      println(hlog, "key pressed");
+      tour::slide_backup(ma, ma == maTranslation ? maNone : maTranslation);
+      tour::slide_backup<ld>(shift_angle, 0);
+      tour::slide_backup<ld>(movement_angle, 90);
+      }
+    
+    if(mode == pmStart) {
+      println(hlog, "im pmStart, mode=", mode, " land = ", dnameof(firstland));
+      stop_game();
+      tour::slide_backup(mapeditor::drawplayer, false);
+      tour::slide_backup<ld>(snow_lambda, 1);
+      tour::slide_backup(snow_color, 0xC0C0C0FF);
+      tour::slide_backup(snow_intense, true);
+      t();
+      start_game();
+      playermoved = false;
+      println(hlog, "in pmStart II, mode=", mode, " land = ", dnameof(firstland));
+      }
+    }}
+    );
+  }
+
 auto hchook = addHook(hooks_drawcell, 100, draw_snow)
 
 + addHook(clearmemory, 40, [] () {
@@ -171,6 +206,73 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
     }
   else return 1;
   return 0;
+  })
+
++ addHook(rvtour::hooks_build_rvtour, 140, [] (vector<tour::slide>& v) {
+  v.push_back(tour::slide{
+    cap+"intro", 10, tour::LEGAL::NONE | tour::QUICKSKIP,
+    "Non-Euclidean visualizations usually show some regular constructions. Could we visualize the geometries themselves? Let's distribute the snowballs randomly."
+    "\n\n"
+    "You can use mouse to look in different directions. Press 5 to turn the automatic movement on or off."
+    ,
+    [] (tour::presmode mode) {}
+    });
+  snow_slide(v, "Euclidean geometry", "This is the Euclidean space. Looks a bit like space flight in some old video games.", [] {
+    set_geometry(gCubeTiling);
+    snow_lambda = 20;
+    });
+  snow_slide(v, "Euclidean geometry (torus)", 
+    "Some gamers incorrectly call warped worlds (like Asteroids) \"non-Euclidean\"; the animation for them would look the same, just a bit more regular. When playing these games, I have always wondered why the stars move so fast. Such far objects should not move.", [] {
+    auto& T0 = euc::eu_input.user_axes;
+    auto bak = T0;
+    for(int i=0; i<3; i++)
+    for(int j=0; j<3; j++) 
+      T0[i][j] = i==j? 1: 0;
+    euc::build_torus3();
+    set_geometry(gCubeTiling);
+    snow_lambda = 20;
+    tour::on_restore([bak, &T0] { stop_game(); T0 = bak; euc::build_torus3(); start_game(); });
+    });
+  snow_slide(v, "Hyperbolic geometry", "To the contrary, in hyperbolic geometry, parallax works in a completely different way. Everything moves. This space is expanding everywhere. Exponentially. In every geometry, snowballs close to us behave in a similar way as in the Euclidean space.", [] {
+    set_geometry(gSpace534);
+    snow_lambda = 20;
+    });
+  snow_slide(v, "H2xE", "This geometry is non-isotropic: it is hyperbolic in horizontal direction and Euclidean in (roughly) vertical direction. Since the space expands faster horizontally, the snowballs no longer look circular.", [] {
+    set_geometry(gNormal);
+    set_variation(eVariation::pure);
+    set_geometry(gProduct);    
+    snow_lambda = 20;
+    });
+  snow_slide(v, "Non-isotropic hyperbolic geometry", "This geometry is hyperbolic in both directions, but the curvatures are different.", [] {
+    set_geometry(gNIH);
+    snow_lambda = 20;
+    });
+  snow_slide(v, "Spherical geometry", "Do not forget about the spherical geometry. It is weird in general. When we leave the snowballs behind us, they look as if they were in front of us. Due to geometric lensing, snowballs in the antipodal point look as if they were close to us.", [] {
+    set_geometry(gCell120);
+    snow_lambda = 5;
+    });
+  snow_slide(v, "S2xE geometry", "Snowballs which are directly above or below us will look like rings, but it is hard to catch them in exactly the right spot.", [] {
+    set_geometry(gSphere);
+    set_variation(eVariation::pure);
+    set_geometry(gProduct);    
+    snow_lambda = 20;
+    });
+  snow_slide(v, "Nil", "Nil geometry, used for impossible figure constructions. Euclidean plane with another dimension added. Making a loop in the Euclidean plane makes you move in this third dimension, proportionally to the area of the loop. (Using larger snowballs here.)", [] {
+    set_geometry(gNil);
+    tour::slide_backup<ld>(sightranges[geometry], 7);
+    tour::slide_backup(snow_shape, 2);
+    snow_lambda = 5;
+    });
+  snow_slide(v, "SL(2,R)", "Here is SL(2,R), like Nil but based on hyperbolic plane instead. Geometric lensing effects are strong in both Nil and SL(2,R). (Starting with spherical plane yields spherical geometry.)", [] {
+    set_geometry(gNormal);
+    set_variation(eVariation::pure);
+    set_geometry(gRotSpace);
+    snow_lambda = 5;
+    });
+  snow_slide(v, "Solv", "Solv geometry. Like the non-isotropic hyperbolic space (#4) but where the horizontal and vertical curvatures work in the other way.", [] {
+    set_geometry(gSol);
+    snow_lambda = 20;
+    });
   });
 
 }
