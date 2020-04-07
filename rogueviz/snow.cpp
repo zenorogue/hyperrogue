@@ -269,10 +269,12 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
     set_geometry(gRotSpace);
     snow_lambda = 5;
     });
+#if CAP_SOLV
   snow_slide(v, "Solv", "Solv geometry. Like the non-isotropic hyperbolic space (#4) but where the horizontal and vertical curvatures work in the other way.", [] {
     set_geometry(gSol);
     snow_lambda = 20;
     });
+#endif
   });
 
 }
