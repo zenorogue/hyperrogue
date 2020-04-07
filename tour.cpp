@@ -63,23 +63,40 @@ static const flagtype SIDESCREEN = 64;
 static const flagtype USE_SLIDE_NAME = 128;
 #endif
 
+EX vector<reaction_t> restorers;
+
+#if HDR
+template<class T> void slide_backup(T& what, T value) {
+  T backup = what;
+  restorers.push_back([&what, backup] { what = backup; });
+  what = value;
+  }
+#endif
+
+EX void on_restore(const reaction_t& t) {
+  restorers.push_back(t);
+  }
+
+EX void slide_restore_all() {
+  while(!restorers.empty()) {
+    restorers.back()();
+    restorers.pop_back();
+    }
+  }
+
 /** \brief an auxiliary function to enable a visualization in the Canvas land */
 EX void setCanvas(presmode mode, char canv) {
-  static char wc;
-  static eLand ld;
   if(mode == pmStart) {
     gamestack::push();
-    wc = patterns::whichCanvas;
-    patterns::whichCanvas = canv;
-    ld = firstland;
-    firstland = laCanvas;
+    slide_backup(patterns::whichCanvas, canv);
+    slide_backup(firstland, laCanvas);
+    slide_backup(specialland, laCanvas);
     start_game();
     resetview();
     }
   if(mode == pmStop) {
     gamestack::pop();
-    patterns::whichCanvas = wc;
-    firstland = ld;
+    slide_restore_all();
     }
   }
 
