@@ -88,14 +88,15 @@ bool sunflower_cell(cell *c, transmatrix V) {
         curvepoint(ps[i]);
         curvepoint(ps[inext[i]]);
         curvepoint(ps[inext2[i]]);
-        queuecurve(0xFFFFFFFF, 0x00C000FF, PPR::LINE);
+        // queuecurve(0xFFFFFFFF, 0x00C000FF, PPR::LINE);
+        queuecurve(0x000000FF, 0xC04000FF, PPR::LINE);
         }      
       else {
         curvepoint(ps[i]);
         curvepoint(ps[inext[i]]);
         curvepoint(ps[inext[i] + inext2[i] - i]);
         curvepoint(ps[inext2[i]]);
-        queuecurve(0xFFFFFFFF, 0x0000C0FF, PPR::LINE);
+        queuecurve(0x000000FF, 0xFFD500FF, PPR::LINE);
         }
       }
     }
