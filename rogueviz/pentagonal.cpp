@@ -347,10 +347,10 @@ auto xhook = addHook(hooks_args, 100, readArgs)
 + addHook(hooks_handleKey, 0, handleKey)
 + addHook(hooks_prestats, 0, frame)
 + addHook(clearmemory, 40, [] () { snubon = false; } )
-+ addHook(rvtour::hooks_build_rvtour, 100, [] (vector<tour::slide>& v) {
++ addHook(rvtour::hooks_build_rvtour, 142, [] (vector<tour::slide>& v) {
     using namespace tour;
     v.push_back(
-      tour::slide{"Pentagonal Exploration", 62, LEGAL::NONE | QUICKGEO,
+      tour::slide{"unsorted/Pentagonal Exploration", 62, LEGAL::NONE | QUICKGEO,
      "Pentagonal Exploration explained at: http://www.roguetemple.com/z/sims/snub/\n\n"
      "Move the mouse nearer and further away from the X.\n\n"
      "Press 3 4 5 6 7 8 9 shift+4 shift+5 shift+6 to change the geometry.",
