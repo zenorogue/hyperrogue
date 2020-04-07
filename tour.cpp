@@ -41,7 +41,7 @@ struct slide {
   /** \brief various flags */
   flagtype flags; 
   /** \brief the helptext */
-  const char *help; 
+  string help; 
   /** \brief This function is called while this slide is displayed. Parameter hr::tour::presmode mode says what should be done */
   function<void(presmode mode)> action;
   };  
