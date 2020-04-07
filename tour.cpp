@@ -35,7 +35,7 @@ enum presmode {
 /** \brief slide definition */
 struct slide { 
   /** \brief title of this slide */
-  const char *name; 
+  string name; 
   /** \brief ID (currently unused */
   int unused_id; 
   /** \brief various flags */
@@ -118,12 +118,39 @@ EX void presentation(presmode mode) {
   callhooks(hooks_slide, mode);
   }
 
+string parent_folder(const string& s) {
+  for(int k=isize(s)-2; k>=0; k--) if(s[k] == '/') return s.substr(0, k+1);
+  return "";
+  }
+
+string get_slidename(const string& s) {
+  int i = 0;
+  for(int k=0; k<isize(s); k++) if(s[k] == '/') i = k+1;
+  return s.substr(i);
+  }
+
+string get_foldername(const string& s) {
+  int i = 0;
+  for(int k=0; k<isize(s); k++) if(s[k] == '/') i = k+1;
+  return s.substr(0, i);
+  }
+
+bool in_folder(const string& s, const string& folder) {
+  return s.substr(0, isize(folder)) == folder;
+  }
+
+string get_subname(const string& s, const string& folder) {
+  for(int k=isize(folder); k<isize(s); k++) if(s[k] == '/') 
+    return s.substr(isize(folder), k+1 - isize(folder));
+  return s.substr(isize(folder));
+  }
+
 /** \brief display the help text for the current slide if texts enabled */
 EX void slidehelp() {
   if(texts && slides[currentslide].help[0])
     gotoHelp(
       help = 
-        helptitle(XLAT(slides[currentslide].name), 0xFF8000) + 
+        helptitle(XLAT(get_slidename(slides[currentslide].name)), 0xFF8000) + 
         XLAT(slides[currentslide].help)
       );
   }
@@ -230,8 +257,8 @@ bool handleKeyTour(int sym, int uni) {
     presentation(pmGeometryStart);
     string x;
     if(slides[currentslide].flags & USE_SLIDE_NAME) {
-      if(NUMBERKEY == '1') x = XLAT("Spherical version of %the1. ", s0 + "'" + slides[currentslide].name + "'");
-      if(NUMBERKEY == '2') x = XLAT("Euclidean version of %the1. ", s0 + "'" + slides[currentslide].name + "'");
+      if(NUMBERKEY == '1') x = XLAT("Spherical version of %the1. ", s0 + "'" + get_slidename(slides[currentslide].name) + "'");
+      if(NUMBERKEY == '2') x = XLAT("Euclidean version of %the1. ", s0 + "'" + get_slidename(slides[currentslide].name) + "'");
       }
     else {
       if(NUMBERKEY == '1') x = XLAT("Spherical version of %the1. ", cwt.at->land);
@@ -299,6 +326,7 @@ bool handleKeyTour(int sym, int uni) {
     return true;
     }
   if(NUMBERKEY == '9') {
+    ss::current_folder = get_foldername(slides[currentslide].name);
     pushScreen(ss::showMenu);
     return true;
     }
@@ -327,8 +355,10 @@ EX void checkGoodLand(eLand l) {
 
 EX namespace ss {
   EX slide *wts;
+  
+  EX string current_folder;
 
-  string slidechars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ23456789!@#$%^&*(";
+  string slidechars = "abcdefghijklmnopqrsvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ23456789!@#$%^&*(";
   
   EX hookset<int(bool)> *extra_slideshows;
 
@@ -346,9 +376,33 @@ EX namespace ss {
 
     dialog::init(XLAT("slides"), forecolor, 150, 100);
     
-    for(int i=0;; i++) {
-      dialog::addBoolItem(XLAT(wts[i].name), wts == slides && i == currentslide, slidechars[i]);
-      dialog::add_action([i] {
+    if(current_folder != "") {
+      dialog::addTitle(current_folder, 0xFFFFFFFF, 120);
+      dialog::addItem(XLAT("go up"), 'u');
+      dialog::add_action([] { current_folder = parent_folder(current_folder); });
+      dialog::addBreak(100);
+      }
+    
+    string last = "";
+    
+    int key = 0;
+    
+    for(int i=0; (i==0 || !(wts[i-1].flags & FINALSLIDE)); i++) {
+      if(!in_folder(wts[i].name, current_folder)) continue;
+      string sf = get_subname(wts[i].name, current_folder);
+      if(sf == last) continue;
+      last = sf;
+      string sfd;
+
+      if(sf.back() == '/') sfd = XLAT(sf.substr(0, isize(sf)-1)) + "/  ";
+      else sfd = XLAT(sf);
+
+      dialog::addBoolItem(XLAT(sf), wts == slides && in_folder(slides[currentslide].name, current_folder+sf), slidechars[key++]);
+      dialog::add_action([i, sf] {
+        if(sf.back() == '/') {
+          current_folder += sf;
+          return;
+          }
         if(gamestack::pushed()) {
           gamestack::pop();
           presentation(pmGeometryReset);
@@ -364,7 +418,6 @@ EX namespace ss {
         presentation(pmStart);
         slidehelp();
         });
-      if(wts[i].flags & FINALSLIDE) break;
       }
     dialog::addBreak(50);
     bool b = false;
@@ -395,6 +448,11 @@ EX void start() {
     presentation(pmStart);
     }
   }
+
+string bog = "Basics of Gameplay/";
+string shapes = "Hyperbolic Shapes/";
+string models = "Projections of Hyperbolic Space/";
+string pcg = "Procedural Generation/";
 
 /** \brief the default presentation (the Guided Tour) */
 EX slide default_slides[] = {
@@ -435,7 +493,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laIce );
       }
     },
-  {"Basics of gameplay", 11, LEGAL::ANY,
+  {bog+"Basics of gameplay", 11, LEGAL::ANY,
     "The game starts in the Icy Lands. Collect the Ice Diamonds "
     "(press F1 if you do not know how to move). "
     "After you collect many of them, monsters will start to pose a challenge.\n"
@@ -456,7 +514,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laIce );
       }
     }, 
-  {"Hypersian Rug model", 21, LEGAL::HYPERBOLIC,
+  {bog+"Hypersian Rug model", 21, LEGAL::HYPERBOLIC,
     "New players think that the action of HyperRogue takes place on a sphere. "
 #if CAP_RUG
     "This is not true -- the next slide will show the surface HyperRogue "
@@ -483,7 +541,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laIce );
       }
     },
-  {"Expansion", 22, LEGAL::ANY | USE_SLIDE_NAME,
+  {bog+"Expansion", 22, LEGAL::ANY | USE_SLIDE_NAME,
     "The next slide shows the number of cells in distance 1, 2, 3, ... from you. "
     "It grows exponentially: there are more than 10^100 cells "
     "in radius 1000 around you, and you will move further away during the game!\n\n"
@@ -503,7 +561,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laIce );
       }
     },
-  {"Tiling and Tactics", 23, LEGAL::ANY | USE_SLIDE_NAME, 
+  {bog+"Tiling and Tactics", 23, LEGAL::ANY | USE_SLIDE_NAME, 
     "The tactics of fighting simple monsters, such as the Yetis from the Icy Lands, "
     "might appear shallow, but hyperbolic geometry is essential even there. "
     "In the next slide, you are attacked by two monsters at once. "
@@ -519,7 +577,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laCanvas );
       }
     },
-  {"Straight Lines", 24, LEGAL::ANY, 
+  {shapes+"Straight Lines", 24, LEGAL::ANY, 
     "Hyperbolic geometry has been discovered by the 19th century mathematicians who "
     "wondered about the nature of paralellness. Take a line L and a point A. "
     "Can a world exist where there is more than one line passing through A "
@@ -546,7 +604,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laCrossroads || l == laIce );
       }
     },
-  {"Running Dogs", 25, LEGAL::ANY,
+  {shapes+"Running Dogs", 25, LEGAL::ANY,
     "To learn more about straight lines, "
     "wander further, and you should find the Land of Eternal Motion. "
     "Try to run in a straight line, with a Running Dog next to you. "
@@ -568,7 +626,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laCrossroads || l == laMotion );
       }
     },
-  {"Equidistants", 27, LEGAL::ANY,
+  {shapes+"Equidistants", 27, LEGAL::ANY,
     "Equidistants are curves which are at some fixed distance from a "
     "straight line. Some lands in HyperRogue are based on equidistants; "
     "you should see them after wandering a bit more.\n\n"
@@ -585,7 +643,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laCrossroads || l == laDungeon || l == laOcean || l == laIvoryTower || l == laEndorian );
       }
     },
-  {"Circles", 26, LEGAL::ANY,
+  {shapes+"Circles", 26, LEGAL::ANY,
     "Circles are strange in hyperbolic geometry too. "
     "Look for the Castle of Camelot in the Crossroads; "
     "the Round Table inside is a circle of radius 28. "
@@ -608,7 +666,7 @@ EX slide default_slides[] = {
       SHOWLAND( l == laCrossroads || l == laCamelot );
       }
     },
-  {"Horocycles", 28, LEGAL::ANY,
+  {shapes+"Horocycles", 28, LEGAL::ANY,
     "Horocycles are similar to circles, but you cannot reach their center at all -- "
     "they can be understood as limit circles of infinite radius centered in some point "
     "in infinity (also called an ideal point).\n\n"
@@ -627,7 +685,7 @@ EX slide default_slides[] = {
       SHOWLAND ( l == laCrossroads || l == laRlyeh || l == laTemple );
       }
     },
-  {"Half-plane model", 47, LEGAL::HYPERBOLIC,
+  {shapes+"Half-plane model", 47, LEGAL::HYPERBOLIC,
     "The game is normally displayed in the so called Poincaré disk model, "
     "which is a kind of a map of the infinite hyperbolic world. "
     "There are many projections of Earth, but since Earth is curved, "
@@ -668,7 +726,7 @@ EX slide default_slides[] = {
       SHOWLAND ( l == laCrossroads || l == laBurial );
       }
     },
-  {"Periodic patterns", 30, LEGAL::UNLIMITED | USE_SLIDE_NAME,
+  {pcg+"Periodic patterns", 30, LEGAL::UNLIMITED | USE_SLIDE_NAME,
     "Hyperbolic geometry yields much more interesting periodic patterns "
     "than Euclidean.",
     [] (presmode mode) {
@@ -682,7 +740,7 @@ EX slide default_slides[] = {
       SHOWLAND ( l == laCanvas );
       }
     },
-  {"Periodic patterns: application", 31, LEGAL::ANY,
+  {pcg+"Periodic patterns: application", 31, LEGAL::ANY,
     "Many lands in HyperRogue are based around periodic patterns. "
     "For example, both Zebra and Windy Plains are based on the pattern "
     "shown in the previous slide. "
@@ -702,7 +760,7 @@ EX slide default_slides[] = {
       l == laEmerald || l == laWineyard || l == laPower );
       }
     },
-  {"Fractal landscapes", 32, LEGAL::UNLIMITED | USE_SLIDE_NAME,
+  {pcg+"Fractal landscapes", 32, LEGAL::UNLIMITED | USE_SLIDE_NAME,
     "On the following slide, the colors change smoothly in the whole infinite world. "
     "Again, this works better than in Euclidean geometry.",
     [] (presmode mode) {
@@ -710,7 +768,7 @@ EX slide default_slides[] = {
       SHOWLAND ( l == laCanvas );
       }
     },
-  {"Fractal landscapes: application", 33, LEGAL::ANY,
+  {pcg+"Fractal landscapes: application", 33, LEGAL::ANY,
     "This is applied in HyperRogue to create landscapes, such as the chasms in the "
     "land of Reptiles or the Dragon Chasms, which you should find quickly. "
     "Also in the Dragon Chasms, you can find a Baby Tortoise, and try to find "
@@ -738,7 +796,7 @@ EX slide default_slides[] = {
       SHOWLAND ( l == laCrossroads || l == laReptile || l == laDragon || l == laTortoise );
       }
     },
-  {"Poincaré Ball model", 41, LEGAL::HYPERBOLIC,
+  {models+"Poincaré Ball model", 41, LEGAL::HYPERBOLIC,
     "The Poincaré disk model is a model of a hyperbolic *plane* -- you "
     "might wonder why are the walls rendered in 3D then.\n\n"
     "HyperRogue actually assumes that the floor level is an equidistant surface "
@@ -752,7 +810,7 @@ EX slide default_slides[] = {
       if(mode == 3) pmodel = mdDisk;
       }
     },
-  {"Hyperboloid model", 42, LEGAL::ANY,
+  {models+"Hyperboloid model", 42, LEGAL::ANY,
     "Let's see more models of the hyperbolic plane. "
     "This model uses a hyperboloid in the Minkowski geometry; "
     "it is used internally by HyperRogue.",
@@ -761,14 +819,14 @@ EX slide default_slides[] = {
       if(mode == 3) pmodel = mdDisk;
       }
     },
-  {"Beltrami-Klein model", 43, LEGAL::ANY | USE_SLIDE_NAME,
+  {models+"Beltrami-Klein model", 43, LEGAL::ANY | USE_SLIDE_NAME,
     "This model renders straight lines as straight, but it distorts angles.",
     [] (presmode mode) {
       if(mode == 1 || mode == pmGeometryReset || mode == pmGeometry) vid.alpha = 0;
       if(mode == 3) vid.alpha = 1;
       }
     },
-  {"Gans model", 44, LEGAL::ANY | USE_SLIDE_NAME,
+  {models+"Gans model", 44, LEGAL::ANY | USE_SLIDE_NAME,
     "Yet another model, which corresponds to orthographic projection of the "
     "sphere. Poincaré disk model, Beltrami-Klein model, and the Gans "
     "model are all obtained by looking at either the hyperboloid model or an "
@@ -778,7 +836,7 @@ EX slide default_slides[] = {
       if(mode == 3) vid.alpha = vid.scale = 1;
       }
     },
-  {"Band model", 45, LEGAL::NONEUC | USE_SLIDE_NAME, 
+  {models+"Band model", 45, LEGAL::NONEUC | USE_SLIDE_NAME, 
     "The band model is the hyperbolic analog of the Mercator projection of the sphere: "
     "a given straight line is rendered as a straight line, and the rest of the "
     "world is mapped conformally, that is, angles are not distorted. "
