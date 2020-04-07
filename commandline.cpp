@@ -203,6 +203,7 @@ int arg::readCommon() {
     }
 #if CAP_TOUR
   else if(argis("-tour")) {
+    showstartmenu = false;
     PHASEFROM(2); start_game(); tour::start();
     }
   else if(argis("-presentation")) {
