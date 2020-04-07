@@ -18,6 +18,8 @@
 
 namespace rogueviz {
 
+namespace snow {
+
 ld snow_lambda = 0;
 
 color_t snow_color = 0xFFFFFFFF;
@@ -146,19 +148,16 @@ void snow_slide(vector<tour::slide>& v, string title, string desc, reaction_t t)
     tour::slide{cap + title, 18, LEGAL::NONE | QUICKGEO, desc, 
    
   [t] (presmode mode) {
-    println(hlog, "mode=", mode, " land = ", dnameof(firstland));
     setCanvas(mode, '0');
 
     if(mode == pmKey) {
       using namespace anims;
-      println(hlog, "key pressed");
       tour::slide_backup(ma, ma == maTranslation ? maNone : maTranslation);
       tour::slide_backup<ld>(shift_angle, 0);
       tour::slide_backup<ld>(movement_angle, 90);
       }
     
     if(mode == pmStart) {
-      println(hlog, "im pmStart, mode=", mode, " land = ", dnameof(firstland));
       stop_game();
       tour::slide_backup(mapeditor::drawplayer, false);
       tour::slide_backup<ld>(snow_lambda, 1);
@@ -167,10 +166,34 @@ void snow_slide(vector<tour::slide>& v, string title, string desc, reaction_t t)
       t();
       start_game();
       playermoved = false;
-      println(hlog, "in pmStart II, mode=", mode, " land = ", dnameof(firstland));
       }
     }}
     );
+  }
+
+void show() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);
+  dialog::init(XLAT("snowballs"), 0xFFFFFFFF, 150, 0);
+
+  dialog::addSelItem("lambda", fts(snow_lambda), 'l');
+  dialog::add_action([]() {
+    dialog::editNumber(snow_lambda, 0, 100, 1, 10, "lambda", "snowball density");
+    dialog::reaction = [] { matrices_at.clear(); };
+    });
+
+  dialog::addSelItem("size", fts(snow_shape), 's');
+  dialog::add_action([]() {
+    snow_shape = (1 + snow_shape) % 3;
+    });
+
+  dialog::addBack();
+  dialog::display();    
+  }
+
+named_functionality o_key() {
+  if(snow_lambda) return named_dialog("snowballs", show);
+  return named_functionality();
   }
 
 auto hchook = addHook(hooks_drawcell, 100, draw_snow)
@@ -179,6 +202,9 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
     matrices_at.clear();
     })
 
++ addHook(hooks_o_key, 80, o_key)
+
+#if CAP_COMMANDLINE
 + addHook(hooks_args, 100, [] {
   using namespace arg;
            
@@ -207,13 +233,14 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
   else return 1;
   return 0;
   })
+#endif
 
 + addHook(rvtour::hooks_build_rvtour, 140, [] (vector<tour::slide>& v) {
   v.push_back(tour::slide{
     cap+"intro", 10, tour::LEGAL::NONE | tour::QUICKSKIP,
     "Non-Euclidean visualizations usually show some regular constructions. Could we visualize the geometries themselves? Let's distribute the snowballs randomly."
     "\n\n"
-    "You can use mouse to look in different directions. Press 5 to turn the automatic movement on or off."
+    "You can use mouse to look in different directions. Press 5 to turn the automatic movement on or off. Press 'o' to change density and shape."
     ,
     [] (tour::presmode mode) {}
     });
@@ -277,4 +304,5 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
 #endif
   });
 
+}
 }
