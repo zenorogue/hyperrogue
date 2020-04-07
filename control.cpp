@@ -702,28 +702,28 @@ EX void mainloopiter() {
     lastticks = ticks;
     Uint8 *keystate = SDL_GetKeyState(NULL);
     if(keystate[SDLK_END] && GDIM == 3 && DEFAULTNOR(SDLK_END))
-      View = cpush(2, -t) * View, didsomething = true, playermoved = false;
+      shift_view(ctangent(2, -t)), didsomething = true, playermoved = false;
     if(keystate[SDLK_HOME] && GDIM == 3 && DEFAULTNOR(SDLK_HOME))
-      View = cpush(2, t) * View, didsomething = true, playermoved = false;
+      shift_view(ctangent(2, t)), didsomething = true, playermoved = false;
     if(keystate[SDLK_RIGHT] && DEFAULTNOR(SDLK_RIGHT))
-      View = (GDIM == 2 ? xpush(-t) : cspin(0, 2, -t)) * View, didsomething = true, playermoved = playermoved && GDIM == 3;
+      rotate_view(GDIM == 2 ? xpush(-t) : cspin(0, 2, -t)), didsomething = true, playermoved = playermoved && GDIM == 3;
     if(keystate[SDLK_LEFT] && DEFAULTNOR(SDLK_LEFT))
-      View = (GDIM == 2 ? xpush(t) : cspin(0, 2, t)) * View, didsomething = true, playermoved = playermoved && GDIM == 3;
+      rotate_view(GDIM == 2 ? xpush(t) : cspin(0, 2, t)), didsomething = true, playermoved = playermoved && GDIM == 3;
     if(keystate[SDLK_UP] && DEFAULTNOR(SDLK_UP))
-      View = (GDIM == 2 ? ypush(t) : cspin(1, 2, t)) * View, didsomething = true, playermoved = playermoved && GDIM == 3;
+      rotate_view(GDIM == 2 ? ypush(t) : cspin(1, 2, t)), didsomething = true, playermoved = playermoved && GDIM == 3;
     if(keystate[SDLK_DOWN] && DEFAULTNOR(SDLK_DOWN))
-      View = (GDIM == 2 ? ypush(-t) : cspin(1, 2, -t)) * View, didsomething = true, playermoved = playermoved && GDIM == 3;
+      rotate_view(GDIM == 2 ? ypush(-t) : cspin(1, 2, -t)), didsomething = true, playermoved = playermoved && GDIM == 3;
     if(keystate[SDLK_PAGEUP] && DEFAULTNOR(SDLK_PAGEUP)) {
       if(history::on)
         models::rotation+=t;
       else
-        View = spin(t) * View, didsomething = true;
+        rotate_view(spin(t)), didsomething = true;
       }
     if(keystate[SDLK_PAGEDOWN] && DEFAULTNOR(SDLK_PAGEDOWN)) {
       if(history::on)
         models::rotation-=t;
       else
-        View = spin(-t) * View, didsomething = true;
+        rotate_view(spin(-t)), didsomething = true;
       }
     }
 
