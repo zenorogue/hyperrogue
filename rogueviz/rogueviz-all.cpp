@@ -19,3 +19,4 @@
 #include "collatz.cpp"
 #include "tree.cpp"
 #include "fullnet.cpp"
+#include "snow.cpp"
