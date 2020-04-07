@@ -560,10 +560,11 @@ int ah = addHook(hooks_args, 100, readArgs)
     dialog::addSelItem(XLAT("SAG mode"), sag::sagmodes[sag::sagmode], 'm'); 
     dialog::add_action([] { sag::sagmode = sag::eSagmode( (1+sag::sagmode) % 3 ); });
     })
-  + addHook(rvtour::hooks_build_rvtour, 100, [] (vector<tour::slide>& v) {
+  + addHook(rvtour::hooks_build_rvtour, 120, [] (vector<tour::slide>& v) {
     using namespace rvtour;
+    string sagf = "hyperbolic geometry and data/SAG/";
     v.push_back(
-      slide{"Roguelikes", 63, LEGAL::UNLIMITED | QUICKGEO,
+      slide{sagf+"Roguelikes", 63, LEGAL::UNLIMITED | QUICKGEO,
         "A visualization of roguelikes, based on discussion on /r/reddit. "
         "See: http://www.roguetemple.com/z/hyper/reddit.php",
         roguevizslide('0', [] () {
@@ -584,7 +585,7 @@ int ah = addHook(hooks_args, 100, readArgs)
           })    
         }
       );
-    v.push_back(slide  {"Programming languages of GitHub", 64, LEGAL::UNLIMITED | QUICKGEO,
+    v.push_back(slide  {sagf+"Programming languages of GitHub", 64, LEGAL::UNLIMITED | QUICKGEO,
     "A visualization of programming languages.",
     roguevizslide('0', [] () {
       rogueviz::dftcolor = 0x282828FF;
@@ -605,7 +606,7 @@ int ah = addHook(hooks_args, 100, readArgs)
       })
     });
     
-    v.push_back(slide {"Boardgames", 62, LEGAL::UNLIMITED | QUICKGEO,
+    v.push_back(slide {sagf+"Boardgames", 62, LEGAL::UNLIMITED | QUICKGEO,
         "A visualization of board games, based on discussions on Reddit.",
     roguevizslide('0', [] () {
       rogueviz::dftcolor = 0x282828FF;
