@@ -35,18 +35,11 @@
 char android_log_buf[1000000];
 int android_log_bufpos = 0;
 
+FILE *slog;
+
 #define SPECIAL_LOGGER
 
-void special_log(char c) {
-  if(c == 10 || android_log_bufpos == 999999) {
-    android_log_buf[android_log_bufpos] = 0;
-    __android_log_print(ANDROID_LOG_VERBOSE, "HRLOG", "%s", android_log_buf); 
-    android_log_bufpos = 0;
-    }
-  else {
-    android_log_buf[android_log_bufpos++] = c;
-    }
-  }
+void special_log(char c);
 
 #include <jni.h>
 #include <string>
@@ -56,14 +49,27 @@ void gdpush(int t);
 
 void shareScore(MOBPAR_FORMAL);
 
-bool settingsChanged = false;
-
 const char *scorefile;
+
+bool settingsChanged = false;
 
 struct transmatrix getOrientation();
 }
 
 #include "../../../../../hyper.cpp"
+
+void special_log(char c) {
+  if(slog) fprintf(slog, "%c", c), fflush(slog); /*
+  if(c == 10 || android_log_bufpos == 999999) {
+    android_log_buf[android_log_bufpos] = 0;
+    __android_log_print(ANDROID_LOG_VERBOSE, "HRLOG", "%s", android_log_buf); 
+    android_log_bufpos = 0;
+    }
+  else {
+    android_log_buf[android_log_bufpos++] = c;
+    } */
+  }
+ 
 
 namespace hr {
 
@@ -204,6 +210,7 @@ Java_com_roguetemple_hyperroid_HyperRogue_setFilesDir(MOBPAR_FORMAL, jstring dir
   chmod(scorefile, 0777);
   chmod(conffile, 0777);
   chmod(nativeString, 0777);
+  chmod((string(nativeString)+"/..").c_str(), 0777);
   env->ReleaseStringUTFChars(dir, nativeString);
   }
 
@@ -301,7 +308,9 @@ extern "C" void Java_com_roguetemple_hyperroid_HyperRogue_draw(MOBPAR_FORMAL) {
 
   #if HNEW
   // text is drawn with 'textured'  
-  glhr::be_textured();
+  dynamicval<eModel> p(pmodel, mdManual);
+  current_display->next_shader_flags = GF_TEXTURE;
+  current_display->set_all(0);
   glhr::set_depthtest(false);
   current_display->set_viewport(0);
   current_display->set_mask(0);
@@ -344,7 +353,6 @@ extern "C" void Java_com_roguetemple_hyperroid_HyperRogue_update
   mousex = _mousex;
   mousey = _mousey;
   clicked = _clicked;
-  // ticks = _ticks;
   uploadAll(MOBPAR_ACTUAL);
   UNLOCK
   // delref;
@@ -358,7 +366,7 @@ void playSound(cell *c, const string& fname, int vol) {
   soundsToPlay.push_back(make_pair(fname, vol));
   }
 
-transmatrix orientation;
+transmatrix orientation = Id;
 bool orientation_requested;
 
 transmatrix getOrientation() {
@@ -375,6 +383,9 @@ void uploadAll(JNIEnv *env, jobject thiz) {
     for(int i=0; i<3; i++)
     for(int j=0; j<3; j++)
       orientation[i][j] = env->CallDoubleMethod(thiz, mid, i, j);
+    for(int i=0; i<3; i++)
+      orientation[i][3] = orientation[3][i] = 0;
+    orientation[3][3] = 1;
     orientation_requested = false;
     }
   

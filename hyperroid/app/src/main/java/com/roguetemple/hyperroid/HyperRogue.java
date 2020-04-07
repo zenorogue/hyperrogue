@@ -635,8 +635,8 @@ public class HyperRogue extends Activity implements SensorEventListener {
 
      Sensor mRotation; // mAccelerometer, mMagneticField;
 
-     final int[] msgn = {1, 1, -1};
-     final int[] msgnl = {1, -1, 1};
+     final int[] msgn = {1, 1, 1};
+     final int[] msgnl = {1, 1, -1};
      final int[] lsc = {1, 0, 2};
 
   double getOrientation(int i, int j) {
@@ -656,11 +656,23 @@ public class HyperRogue extends Activity implements SensorEventListener {
         }});
       }
       int rotation =  getWindowManager().getDefaultDisplay().getRotation();
-      if((rotation & 1) == 1)
-          return mRotationMatrix[lsc[j]+3*lsc[i]]*msgnl[i]*msgnl[j];
 
+      switch(rotation) {
+        case android.view.Surface.ROTATION_0:
+          return mRotationMatrix[j+3*i];
 
-      return mRotationMatrix[j+3*i]*msgn[i]*msgn[j];
+        case android.view.Surface.ROTATION_90:
+          return mRotationMatrix[lsc[j]+3*i] * (j==0?-1:1);
+
+        case android.view.Surface.ROTATION_270:
+          return mRotationMatrix[lsc[j]+3*i]*(j==1?-1:1);
+
+        case android.view.Surface.ROTATION_180:
+          return mRotationMatrix[j+3*i]*(j<2?-1:1);
+
+        default:
+          return mRotationMatrix[j+3*i];
+        }
     }
 
  @Override
@@ -705,6 +717,7 @@ class HRConfigChooser implements EGLConfigChooser {
                 EGL10.EGL_GREEN_SIZE, 6,
                 EGL10.EGL_BLUE_SIZE, 5,
                 EGL10.EGL_STENCIL_SIZE, 1,
+                EGL10.EGL_DEPTH_SIZE, 8,
                 EGL10.EGL_NONE
          };
 
@@ -730,9 +743,10 @@ class HRConfigChooser implements EGLConfigChooser {
             int b = getValue(egl, display, config, EGL10.EGL_BLUE_SIZE);
             int a = getValue(egl, display, config, EGL10.EGL_ALPHA_SIZE);
             int score = 10000;
-            if (s == 0) score -= 1000;
+            if (s == 0) score -= 2000;
             score -= s;
-            score -= d;
+            if (d < 8) score -= 1000;
+            score += d;
             score -= a;
             int all = r + g + b;
             if (all < 24) score -= 10 * (24 - all);
