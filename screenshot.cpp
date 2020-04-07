@@ -520,11 +520,13 @@ EX }
 #if CAP_ANIMATIONS
 EX namespace anims {
 
+#if HDR
 enum eMovementAnimation {
   maNone, maTranslation, maRotation, maCircle, maParabolic, maTranslationRotation
   };
+#endif
 
-eMovementAnimation ma;
+EX eMovementAnimation ma;
 
 EX ld shift_angle, movement_angle;
 EX ld normal_angle = 90;
