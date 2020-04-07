@@ -1,4 +1,4 @@
-#include "../hyper.h"
+#include "rogueviz.h"
 
 // Impossible Triangle visualization
 
@@ -16,13 +16,12 @@
 
 // ./hyper -geo Nil -canvas x -tri-net
 
-namespace hr {
+namespace rogueviz {
+namespace itri {
+
+bool on = false;
 
 bool net = false;
-
-EX hyperpoint lerp(hyperpoint a0, hyperpoint a1, ld x) {
-  return a0 + (a1-a0) * x;
-  }
 
 hyperpoint operator+(hyperpoint x) { return x; }
 
@@ -49,6 +48,8 @@ struct triangledata {
 
 struct trianglemaker {
 
+  geometry_information *icgi;
+
   map<cell*, vector<triangledata> > tds;
 
   array<hpcshape, 6> ptriangle;
@@ -60,6 +61,8 @@ struct trianglemaker {
   ld scale;
   
   void init() {
+
+    icgi = &cgi;
 
     ld rest = sqrt(8/9.);
     ld rex = sqrt(1 - 1/9. - pow(rest/2., 2));
@@ -319,6 +322,11 @@ struct trianglemaker {
 
 trianglemaker *mkr;
 
+void reset() {
+  if(mkr) delete mkr;
+  mkr = nullptr;
+  }
+
 // Magic Cube (aka Rubik Cube) colors
 
 color_t magiccolors[6] = { 0xFFFF00FF, 0xFFFFFFFF, 0x0000FFFF, 0x00FF00FF, 0xFF0000FF, 0xFF8000FF};
@@ -450,7 +458,11 @@ color_t tcolors[3] = { 0xFF0000FF, 0x00FF00FF, 0x0000FFFF };
 
 
 bool draw_ptriangle(cell *c, const transmatrix& V) {
+
+  if(!on) return false;
   
+  if(mkr && mkr->icgi != &cgi) reset();
+     
   if(!mkr) { mkr = new trianglemaker; mkr->init(); 
     growthrate();
     }
@@ -469,6 +481,33 @@ bool draw_ptriangle(cell *c, const transmatrix& V) {
   return false;
   }
 
+void slide_itri(tour::presmode mode, int id) {
+  using namespace tour;
+  setCanvas(mode, '0');
+  
+  if(mode == pmStart) {
+    stop_game();
+    set_geometry(gNil);
+    tour::slide_backup(mapeditor::drawplayer, false);
+    tour::slide_backup(on, true);
+    tour::slide_backup(net, id == 2 ? true : false);
+    tour::slide_backup(smooth_scrolling, true);
+    if(id == 0)
+      tour::slide_backup(nilv::nilperiod, make_array(3, 3, 3));
+    if(id == 1) {
+      tour::slide_backup(nilv::nilperiod, make_array(1, 10, 1));
+      tour::slide_backup(nilv::nilwidth, .9);
+      tour::slide_backup(how, 32);
+      tour::slide_backup(how1, 31);
+      tour::slide_backup(isteps, 992);
+      }
+    /* do nothing for id == 2 */
+    start_game();
+    playermoved = false;
+    tour::on_restore(reset);
+    }
+  }
+
 
 auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
 
@@ -482,12 +521,52 @@ auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
     shift(); isteps = argi();
     }
   else if(argis("-tri-net")) {
-    net = true;
+    on = true; net = true;
+    }
+  else if(argis("-tri-net")) {
+    on = true; net = false;
     }
   else return 1;
   return 0;
+  })
+
+
++ addHook(rvtour::hooks_build_rvtour, 141, [] (vector<tour::slide>& v) {
+  using namespace tour;
+
+  v.push_back(
+    tour::slide{"Impossible architecture in Nil/impossible triangle", 18, LEGAL::NONE | QUICKGEO, 
+      "This form of impossible triangle was first created by Oscar Reutersvärd. "
+      "It was later independently discovered by Lionel Penrose and Roger Penrose, and popularized by M. C. Escher.\n\n"
+      "Move with mouse/arrows/PgUpDn. Press '5' to enable animation, 'o' to change ring size.",
+   
+  [] (presmode mode) {
+  
+    slide_itri(mode, 0);
+    }});
+
+  v.push_back(
+    tour::slide{"Impossible architecture in Nil/impossible triangle chainmail", 18, LEGAL::NONE | QUICKGEO, 
+      "Here we try to link the impossible triangles into a construction reminiscent of a chainmail.",
+   
+  [] (presmode mode) {
+  
+    slide_itri(mode, 1);
+    }});
+
+  v.push_back(
+    tour::slide{"Impossible architecture in Nil/impossible triangle network", 18, LEGAL::NONE | QUICKGEO, 
+      "It is not possible to reconstruct Escher's Waterfall in Nil geometry, because one of the three triangles there "
+      "has opposite orientation. For this reason, that one triangle would not connect correctly. Penrose triangles "
+      "in Nil would not create a planar structure, but rather a three-dimensional one. This slide shows the picture. "
+      "Note that, while the structure is three-dimensional, the number of nodes connected in d steps grows as the "
+      "fourth power of d.",
+    
+  [] (presmode mode) {
+  
+    slide_itri(mode, 2);
+    }});
   });
 
-
-
+}
 }
