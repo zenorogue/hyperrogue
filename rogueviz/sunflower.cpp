@@ -2,8 +2,24 @@
 // Copyright (C) 2018 Zeno and Tehora Rogue, see 'hyper.cpp' for details
 
 // use: commandline parameter -sunflower <quantity> <density>
-// e.g.: hyper -sunflower 10000 0.01
-// e.g.: hyper -sunflower 5 0.01
+// e.g.: hyper -sunflower-qd 10000 1
+// e.g.: hyper -sunflower-dr 1 4.5
+
+// Commandlines for https://twitter.com/ZenoRogue/status/1247900522905886723 :
+
+// Part 1:
+// -geo 1 -sunflower-node 1 -sunflower-qd "1..10..20..60..100..140..180..220..|1000..1040..|2000..2040..|5000..5040..|10000..10040" 1 -zoom "sqrt(1000/(100+sunq))" -animperiod 20000 -shott 0 -back A0E0A0 -lw 16 -shotxy 1000 1000 -shotaa 2
+
+// Part 2:
+// -rugtsize 8192 -rugon -run -rugv 4000000 -run -sunflower-dr "0.001..0.002..0.005..0.01..0.02..0.04..0.06..0.07..0.08..0.09" 3..4.1..4.5..4.5..4.5..4.5..4.5..4.5..4.5 -lw 4 -sunflower-out 1 -shott 0 -back A0E0A0 -shotxy 1000 1000 -shotaa 2 -sunflower-adj 16 -animrec 600 curv%04d.png
+// rotate the rug; press F10; wait until rug has millions of vertices; press F10; animation will be recorded
+
+// Part 3:
+// -rugtsize 8192 -rugon -rugv 1000000 -sunflower-dr .5 4.5 -lw 16 -shott 0 -back A0E0A0 -shotxy 1000 1000 -shotaa 2 -sunflower-adj 6
+// (rotation animation set manually)
+
+// Part 4:
+// -geo 2 -sunflower-dr .1 pi -shott 0 -back A0E0A0 -shotxy 1000 1000 -shotaa 2 -animmove "2*pi" 0 0
 
 #include "rogueviz.h"
 
@@ -13,18 +29,30 @@ namespace sunflower {
 
 bool on;
 
-int qty = 100;
+bool nodes;
+
+ld qty = 100;
 ld density = 1, zdensity;
 ld range;
+
+ld distance_per_rug;
+
+bool adjust_rug;
 
 /* which property to infer from the other two: 'd'ensity, 'q'ty or 'r'ange */
 char infer;
 
 vector<hyperpoint> ps;
 
+int iqty;
+
+ld qfrac;
+
+bool outward = false;
+
 hyperpoint p(int i) {
   ld step = M_PI * (3 - sqrt(5));
-  return spin(i * step) * xpush(sphere ? (i+.5) * density : euclid ? sqrt((i+.5) * density) : acosh(1 + (i+.5) * density)) * C0;
+  return spin((outward ? i : i-iqty) * step) * xpush(sphere ? (acos(1 - (i+.5+qfrac) * density)) : euclid ? sqrt((i+.5+qfrac) * density) : acosh(1 + (i+.5+qfrac) * density)) * C0;
   }
 
 vector<int> inext, inext2;
@@ -39,8 +67,8 @@ bool sunflower_cell(cell *c, transmatrix V) {
   
   if(sphere) {
     if(infer == 'r') 
-      range = qty * density;
-    else qd = range;
+      range = qty * density * M_PI/2;
+    else qd = range * 2/M_PI;
     }
   else if(euclid) {
     if(infer == 'r')
@@ -56,19 +84,35 @@ bool sunflower_cell(cell *c, transmatrix V) {
   
   if(infer == 'q') qty = qd / density;
   if(infer == 'd') density = qd / qty;
+
+  if(adjust_rug) {
+    using namespace rug;
+    if(rug_perspective)
+      push_all_points(2, +model_distance);
+
+    model_distance = sqrt(zdensity) * distance_per_rug;
+
+    if(rug_perspective)
+      push_all_points(2, -model_distance);
+    }
   
-  ps.resize(qty);
-  inext.resize(qty);
-  inext2.resize(qty);
-  while(fibs.back() < qty) {
+  iqty = qty;
+  qfrac = qty - iqty;
+  if(outward) qfrac = 0;
+  if(iqty < 0 || iqty > 2000000) return false;
+  
+  ps.resize(iqty);
+  inext.resize(iqty);
+  inext2.resize(iqty);
+  while(fibs.back() < iqty) {
     auto add = fibs.back() + *(fibs.end()-2);
     fibs.push_back(add);
     }
   
   if(c == cwt.at) {
-    for(int i=0; i<qty; i++) ps[i] = V * p(i);
+    for(int i=0; i<iqty; i++) ps[i] = V * p(i);
 
-    for(int i=0; i<qty; i++) {
+    for(int i=0; i<iqty; i++) {
       ld ba = 99;
       ld bb = 99;
       int bi = 0, bj = 0;
@@ -83,7 +127,7 @@ bool sunflower_cell(cell *c, transmatrix V) {
       inext2[i] = bj;
       }
 
-    for(int i=0; i<qty; i++) {    
+    for(int i=0; i<iqty; i++) {    
       if(inext[inext[i]] == inext2[i] || inext2[inext[i]] == inext2[i] || inext[inext2[i]] == inext[i] || inext2[inext2[i]] == inext[i]) {
         curvepoint(ps[i]);
         curvepoint(ps[inext[i]]);
@@ -98,61 +142,129 @@ bool sunflower_cell(cell *c, transmatrix V) {
         curvepoint(ps[inext2[i]]);
         queuecurve(0x000000FF, 0xFFD500FF, PPR::LINE);
         }
+      if(nodes) queuepolyat(rgpushxto0(ps[i]), cgi.shSnowball, 0xFF, PPR::SUPERLINE);
       }
     }
   return true;
+  }
+
+void insert_param() {  
+  params.insert({"sund", zdensity});
+  params.insert({"sunq", qty});
+  params.insert({"sunr", range});
+  params.insert({"sunf", distance_per_rug});
   }
 
 int readArgs() {
   using namespace arg;
            
   if(0) ;
-  else if(argis("-sunflower")) {
+  else if(argis("-sunflower-qd")) {
     on = true;
     infer = 'r';
-    shift(); qty = argi();    
-    shift(); zdensity = argf() * 100;
+    shift_arg_formula(qty);
+    shift_arg_formula(zdensity);
     patterns::whichShape = '9';
+    insert_param();
     nohud = true;
     }
   else if(argis("-sunflower-qr")) {
     on = true;
     infer = 'd';
-    shift(); qty = argi();    
-    shift(); range = argf();
+    shift_arg_formula(qty);
+    shift_arg_formula(range);
     patterns::whichShape = '9';
+    insert_param();
     nohud = true;
     }
   else if(argis("-sunflower-dr")) {
     on = true;
     infer = 'q';
-    shift(); density = argi();    
-    shift(); range = argf();
+    shift_arg_formula(zdensity);
+    shift_arg_formula(range);
     patterns::whichShape = '9';
+    insert_param();
     nohud = true;
+    }
+  else if(argis("-sunflower-node")) {
+    shift(); nodes = argi();
+    }
+  else if(argis("-sunflower-out")) {
+    shift(); outward = argi();
+    }
+  else if(argis("-sunflower-adj")) {
+    adjust_rug = true;
+    shift_arg_formula(distance_per_rug);
     }
   else return 1;
   return 0;
   }
 
-ld distance_per_rug;
+void show() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);
+  dialog::init(XLAT("sunflower spirals"), 0xFFFFFFFF, 150, 0);
+  
+  dialog::addSelItem("density", fts(zdensity), 'd');
+  dialog::add_action([] {
+    if(infer == 'd') infer = 'q';
+    dialog::editNumber(zdensity, 0, 2, .1, 1, "density", "density");
+    });
+  
+  dialog::addSelItem("quantity", fts(qty), 'q');
+  dialog::add_action([] {
+    if(infer == 'q') infer = 'r';
+    dialog::editNumber(qty, 1, 100000, .1, 1000, "quantity", "quantity");
+    dialog::scaleLog();
+    });
 
-bool adjust_rug;
+  dialog::addSelItem("radius", fts(range), 'q');
+  dialog::add_action([] {
+    if(infer == 'r') infer = 'd';
+    dialog::editNumber(range, 0, 10, .1, 2*M_PI, "range", "range");
+    dialog::scaleLog();
+    });
+  
+  dialog::addSelItem("infer", infer == 'd' ? "density" : infer == 'q' ? "quantity" : "range", 'i');
+  dialog::add_action([] {
+    if(infer == 'r') infer = 'd';
+    else if(infer == 'd') infer = 'q';
+    else infer = 'r';
+    });
+  
+  if(rug::rugged) {
+    dialog::addBoolItem("adjust Rug curvature", adjust_rug, 'a');
+    dialog::add_action([] {
+      adjust_rug = !adjust_rug;
+      distance_per_rug = rug::model_distance / sqrt(zdensity);
+      });
+    if(adjust_rug) {
+      dialog::addSelItem("factor", fts(distance_per_rug), 'f');
+      dialog::add_action([] {
+        dialog::editNumber(distance_per_rug, 0, 10, .1, 4, 
+          "factor", "factor");
+        });
+      }
+    else {
+      dialog::addItem("disable the Hypersian Rug", 'f');
+      dialog::add_action(rug::close);
+      }
+    }
+  else {
+    dialog::addItem("enable the Hypersian Rug", 'a');
+    dialog::add_action(rug::init);
+    }
+  
+  dialog::addBoolItem("draw the seeds", nodes, 's');
+
+  dialog::addBoolItem("grow at the edge", outward, 'o');
+
+  dialog::addBack();
+  dialog::display();
+  }
 
 named_functionality o_key() {
-  if(on) return named_functionality("sunflower density", [] { 
-    dialog::editNumber(zdensity, 0, 1, .1, 1, "density", "density");
-    dialog::reaction = [] {
-      if(adjust_rug) 
-        rug::model_distance = sqrt(zdensity) * distance_per_rug;
-      else
-        distance_per_rug = rug::model_distance / sqrt(zdensity);
-      };
-    distance_per_rug = rug::model_distance / sqrt(zdensity);
-    dialog::extra_options = [] {
-      dialog::addBoolItem_action("auto-adjust the Rug", adjust_rug, 'A');
-      };
-    });
+  if(on) return named_dialog("sunflowers", show);
   return named_functionality();
   }
 
@@ -195,10 +307,11 @@ auto hook = 0
       stop_game();
       
       tour::slide_backup(on, true);
-      tour::slide_backup(range, sphere ? 2 * M_PI : euclid ? 10 : 6);
+      tour::slide_backup(range, sphere ? 2 : euclid ? 10 : 4.3);
       tour::slide_backup<ld>(zdensity, 1);
       tour::slide_backup(infer, 'q');
-
+  
+      insert_param();
       start_game();
       }
     }}
