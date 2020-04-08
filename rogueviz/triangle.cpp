@@ -531,7 +531,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
   })
 
 
-+ addHook(rvtour::hooks_build_rvtour, 141, [] (vector<tour::slide>& v) {
++ addHook(rvtour::hooks_build_rvtour, 151, [] (vector<tour::slide>& v) {
   using namespace tour;
 
   v.push_back(

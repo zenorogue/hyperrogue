@@ -270,7 +270,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
 
 + addHook(hooks_o_key, 80, o_key)
 
-+ addHook(rvtour::hooks_build_rvtour, 141, [] (vector<tour::slide>& v) {
++ addHook(rvtour::hooks_build_rvtour, 152, [] (vector<tour::slide>& v) {
   using namespace tour;
   v.push_back(
     tour::slide{"Impossible architecture in Nil/impossible ring", 18, LEGAL::NONE | QUICKGEO, 
