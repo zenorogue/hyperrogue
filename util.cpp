@@ -64,6 +64,10 @@ EX ld lerp(ld a0, ld a1, ld x) {
   return a0 + (a1-a0) * x;
   }
 
+EX cld lerp(cld a0, cld a1, ld x) {
+  return a0 + (a1-a0) * x;
+  }
+
 EX ld ilerp(ld a0, ld a1, ld x) {
   return (x-a0) / (a1-a0);
   }
@@ -340,21 +344,43 @@ cld exp_parser::parse(int prio) {
   while(true) {
     #if CAP_ANIMATIONS
     if(next() == '.' && next(1) == '.' && prio == 0) {
-      vector<pair<cld, cld>> rest = { {res, res} };
+      static const cld NO_DERIVATIVE(3.1, 2.5);
+      vector<array<cld, 4>> rest = { make_array(res, NO_DERIVATIVE, res, NO_DERIVATIVE) };
+      bool second = true;
       while(next() == '.' && next(1) == '.') {
-        if(next(2) == '|') {
+        /* spline interpolation */
+        if(next(2) == '/') {
           at += 3;
-          rest.back().second = parse(10);
+          rest.back()[second ? 3 : 1] = parse(10);
+          continue;
+          }
+        /* sharp end */
+        else if(next(2) == '|') {
+          at += 3;
+          rest.back()[2] = parse(10);
+          rest.back()[3] = NO_DERIVATIVE;
+          second = true;
           }
         at += 2; 
         auto val = parse(10);
-        rest.emplace_back(val, val);
+        rest.emplace_back(make_array(val, NO_DERIVATIVE, val, NO_DERIVATIVE));
+        second = false;
         }
       ld v = ticks * (isize(rest)-1.) / anims::period;
       int vf = v;
       v -= vf;
       vf %= (isize(rest)-1);
-      res = rest[vf].second + (rest[vf+1].first - rest[vf].second) * v;
+      auto& lft = rest[vf];
+      auto& rgt = rest[vf+1];
+      if(lft[3] == NO_DERIVATIVE && rgt[1] == NO_DERIVATIVE)
+        res = lerp(lft[2], rgt[0], v);
+      else if(rgt[1] == NO_DERIVATIVE)
+        res = lerp(lft[2] + lft[3] * v, rgt[0], v*v);
+      else if(lft[3] == NO_DERIVATIVE)
+        res = lerp(lft[2], rgt[0] + rgt[1] * (v-1), (2-v)*v);
+      else {
+        res = lerp(lft[2] + lft[3] * v, rgt[0] + rgt[1] * (v-1), v*v*(3-2*v));
+        }
       return res;
       }
     else 
