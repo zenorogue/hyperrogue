@@ -340,15 +340,21 @@ cld exp_parser::parse(int prio) {
   while(true) {
     #if CAP_ANIMATIONS
     if(next() == '.' && next(1) == '.' && prio == 0) {
-      vector<cld> rest = { res };
+      vector<pair<cld, cld>> rest = { {res, res} };
       while(next() == '.' && next(1) == '.') {
-        at += 2; rest.push_back(parse(10));
+        if(next(2) == '|') {
+          at += 3;
+          rest.back().second = parse(10);
+          }
+        at += 2; 
+        auto val = parse(10);
+        rest.emplace_back(val, val);
         }
       ld v = ticks * (isize(rest)-1.) / anims::period;
       int vf = v;
       v -= vf;
       vf %= (isize(rest)-1);
-      res = rest[vf] + (rest[vf+1] - rest[vf]) * v;
+      res = rest[vf].second + (rest[vf+1].first - rest[vf].second) * v;
       return res;
       }
     else 
