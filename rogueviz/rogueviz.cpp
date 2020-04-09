@@ -159,10 +159,6 @@ colorpair parse(string s) {
 
 vector<vertexdata> vdata;
 
-transmatrix cspin(int i, int ch) {
-  return spin(M_PI + (2 * M_PI * (i+1)) / (ch+1));
-  }
-
 map<string, int> labeler;
 
 int getid(const string& s) {
