@@ -2035,6 +2035,7 @@ int rugArgs() {
 
   else if(argis("-rugv")) {
     shift(); vertex_limit = argi();
+    err_zero_current = err_zero;
     }
 
   else if(argis("-rugon")) {
