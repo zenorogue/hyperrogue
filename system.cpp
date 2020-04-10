@@ -1508,7 +1508,10 @@ EX int startseed = 0;
 
 EX eLand firstland0;
 
+EX purehookset hooks_initialize;
+
 EX void initAll() {
+  callhooks(hooks_initialize);
   init_floorcolors();
   showstartmenu = true;
   ca::init();
