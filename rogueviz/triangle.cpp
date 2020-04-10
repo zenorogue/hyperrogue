@@ -225,7 +225,7 @@ struct trianglemaker {
         int d1 = (d+1) % 3;
         int d2 = (d+2) % 3;
   
-        hyperpoint path[isteps+1];
+        vector<hyperpoint> path(isteps+1);
         for(int i=0; i<isteps; i++) {
           path[i] = at;
           at = nisot::translate(at) * (start + ds[d] * ca * (dx >= 3 ? -1 : 1));
