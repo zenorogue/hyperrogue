@@ -259,7 +259,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
     euc::build_torus3();
     set_geometry(gCubeTiling);
     snow_lambda = 20;
-    tour::on_restore([bak, &T0] { stop_game(); T0 = bak; euc::build_torus3(); start_game(); });
+    tour::on_restore([bak] { auto& T0 = euc::eu_input.user_axes; stop_game(); T0 = bak; euc::build_torus3(); start_game(); });
     });
   snow_slide(v, "Hyperbolic geometry", "To the contrary, in hyperbolic geometry, parallax works in a completely different way. Everything moves. This space is expanding everywhere. Exponentially. In every geometry, snowballs close to us behave in a similar way as in the Euclidean space.", [] {
     set_geometry(gSpace534);
