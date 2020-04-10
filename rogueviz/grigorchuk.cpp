@@ -393,13 +393,13 @@ struct hrmap_grigorchuk : hrmap_standard {
 
       if(grigorchuk::view_labels) queuestr(V, 0.3, grigorchuk::deform(dec[c->master]), 0xFFFFFF);
       
-      drawcell(c, V);
+      drawcell(c, V * master_relative(c, false));
       
       for(int i=0; i<3; i++) if(c->move(i))
-        dq::enqueue_by_matrix(h->cmove(i), V * ddspin(c, i) * xpush(cgi.tessf) * iddspin(c->move(i), c->c.spin(i), M_PI));
+        dq::enqueue_by_matrix(h->cmove(i), V * adj(h, i));
       }
     }
-
+  
   transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
     if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
       return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
@@ -426,7 +426,10 @@ void create_grigorchuk_geometry() {
   gi.flags = qANYQ | qEXPERIMENTAL;
   gi.tiling_name = "{3,8}";
   gi.quotient_name = "Grigorchuk";
+  gi.menu_displayed_name = "Grigorchuk group";
   gi.shortname = "Grig";
+  gi.xcode = 0x31400;
+  gi.default_variation = eVariation::pure;
   }
 
 int readArgsG() {
@@ -471,7 +474,8 @@ auto hook = addHook(hooks_args, 100, readArgsG)
       dialog::addBoolItem_action(XLAT("Grigorchuk lines"), grigorchuk::view_lines, 'L'); 
       dialog::addBoolItem_action(XLAT("Grigorchuk labels"), grigorchuk::view_labels, 'M'); 
       }
-    });
+    })
+   + addHook(hooks_initialize, 100, create_grigorchuk_geometry);
   
 }
 
