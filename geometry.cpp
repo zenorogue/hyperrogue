@@ -571,7 +571,9 @@ void geometry_information::prepare_basics() {
   #if CAP_BT && MAXMDIM >= 4
   if(bt::in()) bt::build_tmatrix();
   #endif
+  #if MAXMDIM >= 4
   if(reg3::in()) reg3::generate();
+  #endif
   
   hybrid_finish:
   
