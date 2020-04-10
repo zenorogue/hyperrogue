@@ -291,7 +291,6 @@ ld alphaof(hyperpoint h) {
 #define ForInfos for(auto& cci: infos) 
 
 void bantar_frame() {
-  setGLProjection();
   
   ForInfos
     cci.second.w = cci.second.c->wall,
@@ -387,7 +386,7 @@ void bantar_frame() {
     
     gmatrix.clear();
     
-    currentmap->draw();
+    drawthemap();
     if(0) for(auto p: parent) if(gmatrix.count(p.first) && gmatrix.count(p.second) && infos[p.first].gid == i && infos[p.second].gid == i)
       queueline(tC0(gmatrix[p.first]), tC0(gmatrix[p.second]), 0xFFFFFFFF, 2);
     subscr[i] = move(ptds);
@@ -414,6 +413,8 @@ void bantar_frame() {
     cci.second.c->item = cci.second.it,
     cci.second.c->monst = cci.second.mo,
     cci.second.c->land = cci.second.land;
+  
+  ptds.clear();
   }
 
 void bantar_anim() {
@@ -425,9 +426,10 @@ void bantar_anim() {
   while(!breakanim) {
     ticks = SDL_GetTicks() - t;
     
-    bantar_frame();
+    pushScreen(bantar_frame);
+    drawscreen();
+    popScreen();
     
-    SDL_GL_SwapBuffers();
     SDL_Event ev;
     while(SDL_PollEvent(&ev)) 
       if(ev.type == SDL_KEYDOWN || ev.type == SDL_MOUSEBUTTONDOWN)
