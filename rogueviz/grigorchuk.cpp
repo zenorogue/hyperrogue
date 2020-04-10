@@ -36,7 +36,7 @@
  *
  */
 
-#include "../hyper.h"
+#include "rogueviz.h"
 
 namespace grigorchuk {
 
@@ -228,6 +228,7 @@ string deform(prep x2) {
     else if(x2->last == 'd') t += 'd', x2 = mul(x2, &grig_d);
     else if(x2->last == 'A') t += "ca", x2 = mul(mul(x2, &grig_c), &grig_a);
     else if(x2->last == 'C') t += "ac", x2 = mul(mul(x2, &grig_a), &grig_c);
+    else return "?" + t + "?";
     }
   reverse(t.begin(), t.end());
   return t;
@@ -239,6 +240,38 @@ prep ac, ca;
 
 int grig_limit = 10000;
 
+int prepared_dists = 0;
+int next;
+int length = 0;
+
+vector<prep> all;
+
+void visit(prep x, char l, int d) { 
+  if(!x->visited) x->visited = true, x->last = l, all.push_back(x), x->len = d;
+  }
+
+void prepare_to_next(bool verbose) {
+  while(true) {
+    int i = prepared_dists++;
+    prep x = all[i];
+    if(!x->visited) println(hlog, "visited or not");
+    if(1) {
+      // printf("%s\n", deform(x).c_str());
+      }
+    visit(mul(x, &grig_b), 'b', x->len + 1);
+    visit(mul(x, ac), 'A', x->len + 1);
+    visit(mul(x, ca), 'C', x->len + 1);
+
+    if(i == next) {
+      if(verbose)
+        addMessage("there are "+its(i)+" elements in distance up to "+its(length));
+      println(hlog, "Grigorchuk: ", tie(length, i));
+      next = all.size(), length++;
+      break;
+      }
+    }
+  }
+
 void prepare() {
   prepared = true;
   
@@ -249,6 +282,7 @@ void prepare() {
   // prep where = &grig_I;
   
   string s = "";
+  all.clear();
 
   
   /*
@@ -269,27 +303,13 @@ void prepare() {
   
   // printf("TEST %s\n", encode("bcd").c_str());
 
-  vector<prep> all;
-  auto visit = [&] (prep x, char l, int d) { 
-    if(!x->visited) x->visited = true, x->last = l, all.push_back(x), x->len = d;
-    };
   visit(&grig_I, 0, 0);
-  int length = 0;
-  int next = all.size();
+  length = 0;
+  next = all.size();
   
-  for(int i=0; i<grig_limit; i++) {
-    if(i == next) {
-      printf("%d @ %d\n", i/4, length);
-      next = all.size(), length++;
-      }
-    prep x = all[i];
-    if(1) {
-      // printf("%s\n", deform(x).c_str());
-      }
-    visit(mul(x, &grig_b), 'b', x->len + 1);
-    visit(mul(x, ac), 'A', x->len + 1);
-    visit(mul(x, ca), 'C', x->len + 1);
-    }
+  prepared_dists = 0;
+
+  while(prepared_dists < grig_limit) prepare_to_next(false);
   
   prep test = &grig_b;
   test = mul(test, &grig_a);
@@ -353,7 +373,7 @@ struct hrmap_grigorchuk : hrmap_standard {
       // println(hlog, deform(pr), "*", "acd"[d], " = ", deform(pr1));
       }
     else {
-      pr->last = "ACb" [d];
+      if(!pr->visited) pr->last = "ACb" [d];
 
       h = tailored_alloc<heptagon> (S7);
       h->s = hsOrigin;
@@ -392,6 +412,9 @@ struct hrmap_grigorchuk : hrmap_standard {
       if(grigorchuk::view_lines) queueline(V * ddspin(c, 2) * xpush0(cgi.tessf/2), V * ddspin(c, 2) * xpush0(-cgi.tessf), 0xFF00FFFF, 2);
 
       if(grigorchuk::view_labels) queuestr(V, 0.3, grigorchuk::deform(dec[c->master]), 0xFFFFFF);
+
+      if(patterns::whichCanvas == 'G' && c->landparam == 0)
+        c->landparam = 0x102008 * (1 + ((hrmap_grigorchuk*)currentmap)->dec[c->master]->len);
       
       drawcell(c, V * master_relative(c, false));
       
@@ -475,7 +498,42 @@ auto hook = addHook(hooks_args, 100, readArgsG)
       dialog::addBoolItem_action(XLAT("Grigorchuk labels"), grigorchuk::view_labels, 'M'); 
       }
     })
-   + addHook(hooks_initialize, 100, create_grigorchuk_geometry);
-  
+   + addHook(hooks_initialize, 100, create_grigorchuk_geometry)
+
+  + addHook(rogueviz::rvtour::hooks_build_rvtour, 140, [] (vector<tour::slide>& v) {
+    using namespace rogueviz::rvtour;
+    v.push_back(tour::slide{
+      "unsorted/Grigorchuk group", 10, tour::LEGAL::NONE,
+
+      "This is a visualization of the Grigorchuk group. It is the first known group with "
+      "intermediate growth (i.e., superpolynomial and subexponential).\n\n"
+      "Each tile corresponds to two elements of the Grigorchuk group.\n\n"
+      "Every element of the Grigorchuk group has finite order. Therefore, if you choose a specific "
+      "way of travelling (e.g. turn left, go, turn right, go) you will always eventually reach the "
+      "starting point.\n\n"
+      "Cells are color-coded by the distance to the origin. Distance is only known for a given number of cells "
+      "(initially 10000); if you want to compute more distances, press '5'. Press 'o' to enable/disable lines.\n\n"
+      "See grigorchuk.cpp for more comments.",
+
+      [] (tour::presmode mode) {
+        if(mode == pmStart) {
+          grigorchuk::grig_limit = 10000;
+          gamestack::push();
+          slide_backup(patterns::whichCanvas, 'G');
+          slide_backup(firstland, laCanvas);
+          slide_backup(specialland, laCanvas);          
+          set_geometry(gGrigorchuk);
+          start_game();
+          resetview();
+          }
+        if(mode == pmKey) {
+          grigorchuk::prepare_to_next(true);
+          }
+        if(mode == pmStop) {
+          gamestack::pop();
+          slide_restore_all();
+          }
+        }}
+      );});
 }
 
