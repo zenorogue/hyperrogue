@@ -13,6 +13,7 @@
 #include "cvl.cpp"
 #include "newconf.cpp"
 #include "grigorchuk.cpp"
+#include "janko.cpp"
 #include "qtm.cpp"
 #include "rewriting.cpp"
 #include "sag.cpp"
