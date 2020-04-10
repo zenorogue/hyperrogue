@@ -4809,7 +4809,7 @@ EX void calcparam() {
   reset_projection();
   }
 
-function<void()> wrap_drawfullmap = drawfullmap;
+EX function<void()> wrap_drawfullmap = drawfullmap;
 
 bool force_sphere_outline = false;
 
