@@ -660,7 +660,9 @@ EX void showEuclideanMenu() {
       break;
     
     default: 
-      println(hlog, "warning: Euler characteristics unknown");
+      worldsize = isize(currentmap->allcells());
+      println(hlog, "warning: Euler characteristics unknown, worldsize = ", worldsize);
+      euler = 2 * worldsize * denom / nom;
       break;
     }
   
