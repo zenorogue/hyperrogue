@@ -76,7 +76,7 @@ bool do_use_special_land() {
   }
 
 /** \brief Hooks for welcomeMessage. Return true to capture. */
-EX hookset<bool()> *hooks_welcome_message;
+EX hookset<bool()> hooks_welcome_message;
 
 /** \brief Print the welcome message during the start of game. Depends on the current mode and other settings. */
 EX void welcomeMessage() {
@@ -144,7 +144,7 @@ EX void welcomeMessage() {
   }
 
 /** \brief These hooks are called at the start of initgame. */
-EX hookset<void()> *hooks_initgame;
+EX hookset<void()> hooks_initgame;
 
 /** \brief initialize the game */
 EX void initgame() {

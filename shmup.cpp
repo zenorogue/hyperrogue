@@ -236,7 +236,7 @@ bool isBullet(monster *m) {
 bool isPlayer(monster *m) { return m->type == moPlayer; }
 bool isMonster(monster *m) { return m->type != moPlayer && m->type != moBullet; }
 
-EX hookset<bool(shmup::monster*)> *hooks_kill;
+EX hookset<bool(shmup::monster*)> hooks_kill;
 
 void killMonster(monster* m, eMonster who_kills, flagtype flags = 0) {
   int tk = tkills();
@@ -2456,7 +2456,7 @@ EX void fixStorage() {
   for(monster *m: restore) m->store();
   }
 
-EX hookset<bool(int)> *hooks_turn;
+EX hookset<bool(int)> hooks_turn;
 
 EX void turn(int delta) {
 
@@ -2771,7 +2771,7 @@ EX bool boatAt(cell *c) {
   return false;
   }
 
-EX hookset<bool(const transmatrix&, cell*, shmup::monster*)> *hooks_draw;
+EX hookset<bool(const transmatrix&, cell*, shmup::monster*)> hooks_draw;
 
 EX void clearMonsters() {
   for(mit it = monstersAt.begin(); it != monstersAt.end(); it++)
@@ -2833,7 +2833,7 @@ EX void virtualRebase(shmup::monster *m) {
   virtualRebase(m->base, m->at);
   }
 
-EX hookset<bool(shmup::monster*, string&)> *hooks_describe;
+EX hookset<bool(shmup::monster*, string&)> hooks_describe;
 
 EX void addShmupHelp(string& out) {
   if(shmup::mousetarget && sqdist(mouseh, tC0(shmup::mousetarget->pat)) < .1) {

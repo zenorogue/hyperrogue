@@ -328,7 +328,7 @@ void displayglyph2(int cx, int cy, int buttonsize, int i) {
 
 EX bool nohud, nomenukey;
 
-EX hookset<bool()> *hooks_prestats;
+EX hookset<bool()> hooks_prestats;
 
 #if CAP_SHAPES
 void drawMobileArrow(int i) {

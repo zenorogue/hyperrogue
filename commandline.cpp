@@ -347,7 +347,7 @@ int arg::readCommon() {
 
 EX purehookset hooks_config;
 
-EX hookset<int()> *hooks_args;
+EX hookset<int()> hooks_args;
 
 namespace arg {
 

@@ -1666,7 +1666,7 @@ EX namespace patterns {
       }
     }
   
-  EX hookset<int(cell*)> *hooks_generate_canvas;
+  EX hookset<int(cell*)> hooks_generate_canvas;
 
   EX int generateCanvas(cell *c) {
     

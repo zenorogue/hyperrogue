@@ -82,7 +82,7 @@ void gamedata::restoregame() {
   gamedata_all(*this);
   }
 
-EX hookset<void(gamedata*)> *hooks_gamedata;
+EX hookset<void(gamedata*)> hooks_gamedata;
 
 EX namespace gamestack {
 

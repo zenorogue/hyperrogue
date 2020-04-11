@@ -115,7 +115,7 @@ EX function<bool(eLand)> showland;
 EX string slidecommand;
 
 /** \brief hooks to execute after calling presentation */
-EX hookset<void(int)> *hooks_slide;
+EX hookset<void(int)> hooks_slide;
 
 /** \brief call action(mode) for the current slide. Also sets up some default stuff */
 EX void presentation(presmode mode) {
@@ -377,7 +377,7 @@ EX namespace ss {
 
   string slidechars = "abcdefghijklmnopqrsvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ23456789!@#$%^&*(";
   
-  EX hookset<int(bool)> *hooks_extra_slideshows;
+  EX hookset<int(bool)> hooks_extra_slideshows;
 
   EX void slideshow_menu() {
     dialog::init(XLAT("slideshows"), forecolor, 150, 100);

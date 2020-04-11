@@ -2028,7 +2028,7 @@ EX void draw_main() {
   }
 
 #if CAP_VR
-EX hookset<bool()> *hooks_vr_draw_all;
+EX hookset<bool()> hooks_vr_draw_all;
 #endif
   
 EX void drawqueue() {

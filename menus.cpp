@@ -951,7 +951,7 @@ typedef pair<string, reaction_t> named_functionality;
 inline named_functionality named_dialog(string x, reaction_t dialog) { return named_functionality(x, [dialog] () { pushScreen(dialog); }); }
 #endif
 
-EX hookset<named_functionality()> *hooks_o_key;
+EX hookset<named_functionality()> hooks_o_key;
 
 EX named_functionality get_o_key() {
 

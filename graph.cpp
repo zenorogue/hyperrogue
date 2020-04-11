@@ -40,8 +40,8 @@ EX bool hide_player() {
 
 #define ADC(V,c) for(const transmatrix& V: current_display->all_drawn_copies[c])
 
-EX hookset<bool(int sym, int uni)> *hooks_handleKey;
-EX hookset<bool(cell *c, const transmatrix& V)> *hooks_drawcell;
+EX hookset<bool(int sym, int uni)> hooks_handleKey;
+EX hookset<bool(cell *c, const transmatrix& V)> hooks_drawcell;
 EX purehookset hooks_frame, hooks_markers;
 
 EX ld animation_factor = 1;

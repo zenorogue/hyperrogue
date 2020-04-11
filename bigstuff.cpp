@@ -1332,7 +1332,7 @@ EX bool quickfind(eLand l) {
 #define I2000 (INVLUCK?600:2000)
 #define I10000 (INVLUCK?3000:10000)
 
-EX hookset<int(cell*, bool)> *hooks_wallchance;
+EX hookset<int(cell*, bool)> hooks_wallchance;
 
 EX int wallchance(cell *c, bool deepOcean) {
   int i = callhandlers(-1, hooks_wallchance, c, deepOcean);

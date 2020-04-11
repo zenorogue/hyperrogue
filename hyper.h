@@ -407,8 +407,9 @@ struct movedir {
 
 // shmup
 
-template<class T> class hookset : public map<int, function<T>> {};
-typedef hookset<void()> *purehookset;
+template<class T> class hookset_impl : public map<int, function<T>> {};
+template<class T> using hookset = hookset_impl<T> *;
+using purehookset = hookset_impl<void()> *;
 
 static const int NOHINT = -1;
 
@@ -633,8 +634,8 @@ color_t darkena(color_t c, int lev, int a);
 
 static const int DISTANCE_UNKNOWN = 127;
 
-template<class T, class U> int addHook(hookset<T>*& m, int prio, const U& hook) {
-  if(!m) m = new hookset<T> ();
+template<class T, class U> int addHook(hookset<T>& m, int prio, const U& hook) {
+  if(!m) m = new hookset_impl<T> ();
   while(m->count(prio)) {
     prio++;
     }
@@ -642,11 +643,11 @@ template<class T, class U> int addHook(hookset<T>*& m, int prio, const U& hook) 
   return 0;
   }
 
-template<class T, class... U> void callhooks(hookset<T> *h, U&&... args) {
+template<class T, class... U> void callhooks(hookset<T> h, U&&... args) {
   if(h) for(auto& p: *h) p.second(std::forward<U>(args)...);
   }
 
-template<class T, class V, class... U> V callhandlers(V zero, hookset<T> *h, U&&... args) {
+template<class T, class V, class... U> V callhandlers(V zero, hookset<T> h, U&&... args) {
   if(h) for(auto& p: *h) {
     auto z = p.second(std::forward<U>(args)...);
     if(z != zero) return z;

@@ -554,7 +554,7 @@ EX bool mightBeMine(cell *c) {
   return c->wall == waMineUnknown || c->wall == waMineMine;
   }
 
-EX hookset<bool(cell*)> *hooks_mark;
+EX hookset<bool(cell*)> hooks_mark;
 
 EX void performMarkCommand(cell *c) {
   if(!c) return;
