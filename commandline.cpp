@@ -357,12 +357,13 @@ namespace arg {
     curphase = phase;
     callhooks(hooks_config);
     while(pos < isize(argument)) {
-      for(auto& h: *hooks_args) {
-        int r = h.second(); if(r == 2) return; if(r == 0) { lshift(); goto cont; }
+      int r = callhandlers(1, hooks_args);
+      switch (r) {
+        case 0: lshift(); break;
+        case 1: printf("Unknown option: %s\n", argcs()); exit(3); break;
+        case 2: return;
+        default: assert(false);
         }
-      printf("Unknown option: %s\n", argcs());
-      exit(3);
-      cont: ;
       }
     }
   }
