@@ -25,7 +25,7 @@ EX int want_use = 1;
 
 EX ld exp_start = 1, exp_decay_exp = 4, exp_decay_poly = 10;
 
-EX ld maxstep_sol = .02;
+EX ld maxstep_sol = .05;
 EX ld maxstep_nil = .1;
 EX ld minstep = .001;
 
@@ -479,6 +479,10 @@ void enable_raycaster() {
         "  return vec4(x*vel.y*tra.y - 0.5*dot(vel.yz,tra.zy), -.5*x*dot(vel.yx,tra.xy) + .5 * dot(vel.zx,tra.xz), -.5*(x*x-1.)*dot(vel.yx,tra.xy)+.5*x*dot(vel.zx,tra.xz), 0.);\n"
 //        "  return vec4(0.,0.,0.,0.);\n"
         "  }\n";
+
+      fsh += "mediump vec4 get_acc(mediump vec4 pos, mediump vec4 vel) {\n"
+        "  return christoffel(pos, vel, vel);\n"
+        "  }\n";
       
       if(sn::in() && !asonov) fsh += "uniform mediump float uBinaryWidth;\n";
       
@@ -502,12 +506,13 @@ void enable_raycaster() {
       if(nil) fmain += "tangent = translate(position, itranslate(position, tangent));\n";
       
       if(sn::in()) fmain +=
-        "mediump vec4 acc = christoffel(position, tangent, tangent);\n"
-        "mediump vec4 pos2 = position + tangent * dist / 2.;\n"
-        "mediump vec4 tan2 = tangent + acc * dist / 2.;\n"
-        "mediump vec4 acc2 = christoffel(pos2, tan2, tan2);\n"
-        "mediump vec4 nposition = position + tangent * dist + acc2 / 2. * dist * dist;\n";
-      
+        "mediump vec4 vel = tangent * dist;\n"
+        "mediump vec4 acc1 = get_acc(position, vel);\n"
+        "mediump vec4 acc2 = get_acc(position + vel / 2., vel + acc1/2.);\n"
+        "mediump vec4 acc3 = get_acc(position + vel / 2. + acc1/4., vel + acc2/2.);\n"
+        "mediump vec4 acc4 = get_acc(position + vel + acc2/2., vel + acc3/2.);\n"
+        "mediump vec4 nposition = position + vel + (acc1+acc2+acc3)/6.;\n";
+
       if(nil) {
         fmain +=
           "mediump vec4 xp, xt;\n"
@@ -629,7 +634,7 @@ void enable_raycaster() {
         "position = nposition;\n";
       
       if(!nil) fmain +=
-        "tangent = tangent + acc * dist;\n";
+        "tangent = tangent + (acc1+2.*acc2+2.*acc3+acc4)/(6.*dist);\n";
       }
     else fmain += 
       "position = position + tangent * dist;\n";
@@ -1138,7 +1143,7 @@ EX void configure() {
   if(nonisotropic) {
     dialog::addSelItem(XLAT("max step"), fts(maxstep_current()), 'x');
     dialog::add_action([] {
-      dialog::editNumber(maxstep_current(), 1e-6, 1, 0.1, sol ? 0.03 : 0.1, XLAT("max step"), "affects the precision of solving the geodesic equation in Solv");
+      dialog::editNumber(maxstep_current(), 1e-6, 1, 0.1, sol ? 0.05 : 0.1, XLAT("max step"), "affects the precision of solving the geodesic equation in Solv");
       dialog::scaleLog();
       dialog::bound_low(1e-9);
       dialog::reaction = reset_raycaster;
