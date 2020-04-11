@@ -1188,7 +1188,7 @@ namespace mapeditor {
   unsigned gridcolor = 0xC0C0C040;
   
   hyperpoint in_front_dist(ld d) {
-    return direct_exp(lp_iapply(ztangent(d)), 100);
+    return direct_exp(lp_iapply(ztangent(d)));
     }
   
   hyperpoint find_mouseh3() {
@@ -1203,7 +1203,7 @@ namespace mapeditor {
       ld d1 = front_edit;
       hyperpoint h1 = in_front_dist(d);
       if(front_config == eFront::sphere_center) 
-        d1 = geo_dist(drawtrans * C0, h1, iTable);
+        d1 = geo_dist(drawtrans * C0, h1);
       if(front_config == eFront::equidistants) {
         hyperpoint h = idt * in_front_dist(d);
         d1 = asin_auto(h[2]);
@@ -1246,7 +1246,7 @@ namespace mapeditor {
         }
       if(front_config == eFront::sphere_center) for(int i=0; i<4; i+=2) {
         auto pt = [&] (ld a, ld b) {
-          return d2 * direct_exp(spin(a*degree) * cspin(0, 2, b*degree) * xtangent(front_edit), 100);
+          return d2 * direct_exp(spin(a*degree) * cspin(0, 2, b*degree) * xtangent(front_edit));
           };
         for(int ai=0; ai<parallels; ai++) {
           ld a = ai * 360 / parallels;
@@ -1524,7 +1524,7 @@ namespace mapeditor {
       displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("z: %1", fts(mh[2],4)), 0xC0C0C0, 16);
       if(MDIM == 4)
         displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("w: %1", fts(mh[3],4)), 0xC0C0C0, 16);
-      mh = inverse_exp(mh, iTable, false);
+      mh = inverse_exp(mh);
       displayfr(vid.xres-8, vid.yres-8-fs*3, 2, vid.fsize, XLAT("r: %1", fts(hypot_d(3, mh),4)), 0xC0C0C0, 16);
       if(GDIM == 3) {
         displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[2], hypot_d(2, mh)) / degree,4)), 0xC0C0C0, 16);

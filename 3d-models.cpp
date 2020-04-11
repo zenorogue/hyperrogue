@@ -623,16 +623,16 @@ void geometry_information::slimetriangle(hyperpoint a, hyperpoint b, hyperpoint 
   texture_order([&] (ld x, ld y) {
     ld z = 1-x-y;
     ld r = scalefactor * hcrossf7 * (0 + pow(max(x,max(y,z)), .3) * 0.8) * (hybri ? .5 : 1);
-    hyperpoint h = direct_exp(tangent_length(a*x+b*y+c*z, r), 10);
+    hyperpoint h = direct_exp(tangent_length(a*x+b*y+c*z, r));
     hpcpush(h);
     });  
   }
 
 void geometry_information::balltriangle(hyperpoint a, hyperpoint b, hyperpoint c, ld rad, int lev) {
   if(lev == 0) {
-    hpcpush(direct_exp(a, 10));
-    hpcpush(direct_exp(b, 10));
-    hpcpush(direct_exp(c, 10));
+    hpcpush(direct_exp(a));
+    hpcpush(direct_exp(b));
+    hpcpush(direct_exp(c));
     }
   else {
     auto midpoint = [&] (hyperpoint h1, hyperpoint h2) {

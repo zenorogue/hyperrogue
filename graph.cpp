@@ -2884,7 +2884,7 @@ void apply_joukowsky_aura(hyperpoint& h) {
     h = ret;
     }
   if(nonisotropic) {
-    h = lp_apply(inverse_exp(h, iTable, true));
+    h = lp_apply(inverse_exp(h, pfNO_DISTANCE));
     }
   }
 
@@ -3667,7 +3667,7 @@ bool celldrawer::cell_clipped() {
     hyperpoint H = tC0(V);
     if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
     else {
-      hyperpoint H2 = inverse_exp(H, iLazy);
+      hyperpoint H2 = inverse_exp(H, pQUICK);
       for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -.4) return true;
       }
     noclipped++;
@@ -3676,7 +3676,7 @@ bool celldrawer::cell_clipped() {
     hyperpoint H = tC0(V);
     if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
     else {
-      hyperpoint H2 = inverse_exp(H, iLazy);
+      hyperpoint H2 = inverse_exp(H, pQUICK);
       for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -2) return true;
       }
     noclipped++;
@@ -4470,12 +4470,12 @@ EX void precise_mouseover() {
   if(WDIM == 3) { 
     mouseover2 = mouseover = centerover;
     ld best = HUGE_VAL;
-    hyperpoint h = direct_exp(lp_iapply(ztangent(0.01)), 100);
+    hyperpoint h = direct_exp(lp_iapply(ztangent(0.01)));
 
     transmatrix cov = ggmatrix(mouseover2);
     forCellIdEx(c1, i, mouseover2) {
       hyperpoint h1 = tC0(cov * currentmap->adj(mouseover2, i));
-      ld dist = geo_dist(h, h1, iTable) - geo_dist(C0, h1, iTable);
+      ld dist = geo_dist(h, h1) - geo_dist(C0, h1);
       if(dist < best) mouseover = c1, best = dist;
       }
     return; 

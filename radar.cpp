@@ -26,7 +26,7 @@ pair<bool, hyperpoint> makeradar(hyperpoint h) {
   ld d = hdist0(h);
 
   if(sol && nisot::geodesic_movement) {
-    h = inverse_exp(h, iLazy);
+    h = inverse_exp(h, pQUICK);
     ld r = hypot_d(3, h);
     if(r < 1) h = h * (atanh(r) / r);
     else return {false, h};

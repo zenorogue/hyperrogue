@@ -409,7 +409,7 @@ void coords_to_poly() {
 
 bool behind3(hyperpoint h) {
   if(pmodel == mdGeodesic)
-    h = lp_apply(inverse_exp(h, iTable));
+    h = lp_apply(inverse_exp(h));
   return h[2] < 0;
   }
 

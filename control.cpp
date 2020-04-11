@@ -76,7 +76,7 @@ EX movedir vectodir(hyperpoint P) {
   transmatrix U = ggmatrix(cwt.at);
   if(GDIM == 3 && WDIM == 2)  U = radar_transform * U;
 
-  P = direct_exp(lp_iapply(P), 100);
+  P = direct_exp(lp_iapply(P));
 
   hyperpoint H = sphereflip * tC0(U);
   transmatrix Centered = sphereflip * rgpushxto0(H);
@@ -87,8 +87,8 @@ EX movedir vectodir(hyperpoint P) {
 
   for(int i=0; i<cwt.at->type; i++) {
     transmatrix T = currentmap->adj(cwt.at, (cwt + i).spin);
-    ld d1 = geo_dist(U * T * C0, Centered * P, iTable);
-    ld d2 = geo_dist(U * T * C0, Centered * C0, iTable);
+    ld d1 = geo_dist(U * T * C0, Centered * P);
+    ld d2 = geo_dist(U * T * C0, Centered * C0);
     dirdist[i] = d1 - d2;
     //xspinpush0(-i * 2 * M_PI /cwt.at->type, .5), P);
     }

@@ -337,7 +337,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
       }
 
     case mdGeodesic: {
-      auto S = lp_apply(inverse_exp(H, iTable));
+      auto S = lp_apply(inverse_exp(H, pNORMAL | pfNO_DISTANCE));
       ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
       ret[0] = S[0]/S[2] * ratio;
       ret[1] = S[1]/S[2] * ratio;
@@ -360,7 +360,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     
     case mdDisk: {
       if(nonisotropic) {
-        ret = lp_apply(inverse_exp(H, iTable, true));
+        ret = lp_apply(inverse_exp(H, pNORMAL | pfNO_DISTANCE));
         ld w;
         if(sn::in()) {
           // w = 1 / sqrt(1 - sqhypot_d(3, ret));
@@ -546,7 +546,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     case mdFisheye: {
       ld zlev;
       if(nonisotropic) {
-        H = lp_apply(inverse_exp(H, iTable, false));
+        H = lp_apply(inverse_exp(H));
         zlev = 1;
         }
       else {
@@ -768,7 +768,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     
     case mdEquidistant: case mdEquiarea: case mdEquivolume: {
       if(nonisotropic || prod) {
-        ret = lp_apply(inverse_exp(H, iTable, false));
+        ret = lp_apply(inverse_exp(H));
         ret[3] = 1;
         break;
         }
@@ -1002,7 +1002,7 @@ EX transmatrix actualV(const heptspin& hs, const transmatrix& V) {
 EX bool point_behind(hyperpoint h) {
   if(sphere) return false;
   if(!in_perspective()) return false;
-  if(pmodel == mdGeodesic) h = inverse_exp(h, iLazy);
+  if(pmodel == mdGeodesic) h = inverse_exp(h, pQUICK);
   if(pmodel == mdPerspective && prod) h = product::inverse_exp(h);
   h = lp_apply(h);
   return h[2] < 1e-8;
@@ -1995,7 +1995,7 @@ EX bool do_draw(cell *c, const transmatrix& T) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
     if(cells_drawn < 50) { limited_generation(c); return true; }
     if(nil && pmodel == mdGeodesic) {
-      ld dist = hypot_d(3, inverse_exp(tC0(T), iLazy));
+      ld dist = hypot_d(3, inverse_exp(tC0(T), pQUICK));
       if(dist > sightranges[geometry] + (vid.sloppy_3d ? 0 : 0.9)) return false;
       if(dist <= extra_generation_distance && !limited_generation(c)) return false;
       }
@@ -2004,7 +2004,7 @@ EX bool do_draw(cell *c, const transmatrix& T) {
       if(!limited_generation(c)) return false;
       }
     else if(pmodel == mdGeodesic && nih) {
-      hyperpoint h = inverse_exp(tC0(T), iLazy, false);
+      hyperpoint h = inverse_exp(tC0(T), pQUICK);
       ld dist = hypot_d(3, h);
       if(dist > sightranges[geometry] + (vid.sloppy_3d ? 0 : cgi.corner_bonus)) return false;
       if(dist <= extra_generation_distance && !limited_generation(c)) return false;
@@ -2096,7 +2096,7 @@ EX void rotate_view(transmatrix T) {
 /** shift the view according to the given tangent vector */
 EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V) {
   if(!nonisotropic) {
-    return rgpushxto0(direct_exp(lp_iapply(H), 100)) * V;
+    return rgpushxto0(direct_exp(lp_iapply(H))) * V;
     }
   else if(!nisot::geodesic_movement) {
     transmatrix IV = inverse(V);
@@ -2132,7 +2132,7 @@ void multiply_view(transmatrix T) {
 
 EX void shift_view_to(hyperpoint H) {
   if(!nonisotropic) multiply_view(gpushxto0(H));
-  else shift_view(-inverse_exp(H, iTable, false));
+  else shift_view(-inverse_exp(H));
   }
 
 EX void shift_view_towards(hyperpoint H, ld l) {
@@ -2141,7 +2141,7 @@ EX void shift_view_towards(hyperpoint H, ld l) {
   else if(nonisotropic && !nisot::geodesic_movement)
     shift_view(tangent_length(H-C0, -l));
   else {
-    hyperpoint ie = inverse_exp(H, iTable, true);
+    hyperpoint ie = inverse_exp(H, pNORMAL | pfNO_DISTANCE);
     if(prod) ie = lp_apply(ie);
     shift_view(tangent_length(ie, -l));
     }
