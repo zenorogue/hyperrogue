@@ -1846,7 +1846,7 @@ ld xintval(const hyperpoint& h) {
 
 EX ld backbrightness = .25;
 
-purehookset hook_drawqueue;
+purehookset hooks_drawqueue;
 
 constexpr int PMAX = int(PPR::MAX);
 int qp[PMAX], qp0[PMAX];
@@ -2032,7 +2032,7 @@ EX hookset<bool()> *hooks_vr_draw_all;
 #endif
   
 EX void drawqueue() {
-  callhooks(hook_drawqueue);
+  callhooks(hooks_drawqueue);
   current_display->next_shader_flags = 0;
   reset_projection();
   // reset_projection() is not sufficient here, because we need to know shaderside_projection

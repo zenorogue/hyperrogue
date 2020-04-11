@@ -377,13 +377,13 @@ EX namespace ss {
 
   string slidechars = "abcdefghijklmnopqrsvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ23456789!@#$%^&*(";
   
-  EX hookset<int(bool)> *extra_slideshows;
+  EX hookset<int(bool)> *hooks_extra_slideshows;
 
   EX void slideshow_menu() {
     dialog::init(XLAT("slideshows"), forecolor, 150, 100);
     dialog::addBoolItem(XLAT("Guided Tour"), wts == default_slides, 't');
     dialog::add_action([] { wts = default_slides; popScreen(); });
-    callhooks(extra_slideshows, true);
+    callhooks(hooks_extra_slideshows, true);
     dialog::addBack();
     dialog::display();
     }
@@ -438,7 +438,7 @@ EX namespace ss {
       }
     dialog::addBreak(50);
     bool b = false;
-    if(callhandlers(0, extra_slideshows, b)) {
+    if(callhandlers(0, hooks_extra_slideshows, b)) {
       dialog::addItem(XLAT("change slideshow"), '1');
       dialog::add_action_push(slideshow_menu);
       }

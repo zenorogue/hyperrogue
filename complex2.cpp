@@ -198,7 +198,7 @@ EX namespace brownian {
     vector<cell*> to_remove;
     for(auto p: futures) if(is_cell_removed(p.first)) to_remove.push_back(p.first);
     for(auto r: to_remove) futures.erase(r);
-    }) + addHook(clearmemory, 0, [] () { futures.clear(); })
+    }) + addHook(hooks_clearmemory, 0, [] () { futures.clear(); })
     + addHook(hooks_gamedata, 0, [] (gamedata* gd) { gd->store(futures); });
 
 EX }

@@ -1246,11 +1246,11 @@ eModel default_model() {
   return mdDisk;
   }
 
-EX purehookset on_geometry_change;
+EX purehookset hooks_on_geometry_change;
 
 EX void set_geometry(eGeometry target) {
   bool was_default = pmodel == default_model();
-  callhooks(on_geometry_change);
+  callhooks(hooks_on_geometry_change);
   if(geometry != target) {
     int old_DIM = GDIM;
     stop_game();
@@ -1497,10 +1497,10 @@ EX void stop_game_and_switch_mode(char switchWhat IS(rg::nothing)) {
   switch_game_mode(switchWhat);
   }
 
-EX purehookset clearmemory;
+EX purehookset hooks_clearmemory;
 
 EX void clearMemory() {
-  callhooks(clearmemory);
+  callhooks(hooks_clearmemory);
   }
 
 EX bool fixseed = false;
@@ -1544,7 +1544,7 @@ EX void initAll() {
   polygonal::solve();
   }
 
-EX purehookset final_cleanup;
+EX purehookset hooks_final_cleanup;
 
 EX void finishAll() {
   achievement_final(!items[itOrbSafety]);
@@ -1558,11 +1558,11 @@ EX void finishAll() {
 #endif
   
   achievement_close();  
-  callhooks(final_cleanup);
+  callhooks(hooks_final_cleanup);
   }
 
 
-auto cgm = addHook(clearmemory, 40, [] () {
+auto cgm = addHook(hooks_clearmemory, 40, [] () {
   pathq.clear();
   dcal.clear();
   clearshadow();

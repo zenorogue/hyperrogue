@@ -2844,7 +2844,7 @@ EX void addShmupHelp(string& out) {
     }
   }
 
-auto hooks = addHook(clearmemory, 0, shmup::clearMemory) +
+auto hooks = addHook(hooks_clearmemory, 0, shmup::clearMemory) +
   addHook(hooks_gamedata, 0, shmup::gamedata) +
   addHook(hooks_removecells, 0, [] () {
     for(mit it = monstersAt.begin(); it != monstersAt.end();) {

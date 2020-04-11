@@ -1175,7 +1175,7 @@ EX void clearCellMemory() {
   gp::gp_adj.clear();
   }
 
-auto cellhooks = addHook(clearmemory, 500, clearCellMemory);
+auto cellhooks = addHook(hooks_clearmemory, 500, clearCellMemory);
 
 EX bool isNeighbor(cell *c1, cell *c2) {
   for(int i=0; i<c1->type; i++) if(c1->move(i) == c2) return true;

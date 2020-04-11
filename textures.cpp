@@ -1725,7 +1725,7 @@ int textureArgs() {
 
 auto texture_hook = 
   addHook(hooks_args, 100, textureArgs)
-+ addHook(clearmemory, 100, [] () { config.data.pixels_to_draw.clear(); });
++ addHook(hooks_clearmemory, 100, [] () { config.data.pixels_to_draw.clear(); });
 
 int lastupdate;
 

@@ -251,7 +251,7 @@ EX void drawArrowTraps() {
     }
   }
 
-auto ccm_blizzard = addHook(clearmemory, 0, [] () {
+auto ccm_blizzard = addHook(hooks_clearmemory, 0, [] () {
   arrowtraps.clear();
   blizzardcells.clear();
   bcells.clear();

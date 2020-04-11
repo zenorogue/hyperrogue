@@ -5150,7 +5150,7 @@ EX void clearAnimations() {
   fallanims.clear();
   }
   
-auto graphcm = addHook(clearmemory, 0, [] () {
+auto graphcm = addHook(hooks_clearmemory, 0, [] () {
   DEBBI(DF_MEMORY, ("clear graph memory"));
   mouseover = centerover = lmouseover = NULL;  
   gmatrix.clear(); gmatrix0.clear(); current_display->all_drawn_copies.clear();
