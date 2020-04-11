@@ -1970,18 +1970,20 @@ EX namespace nisot {
     #endif
     return true;
     }
+
+  hyperpoint get_acceleration(const hyperpoint& at, const hyperpoint& vel) {
+    return christoffel(at, vel, vel);
+    }
   
-  EX void geodesic_step(hyperpoint& at, hyperpoint& velocity) {
-    auto acc = christoffel(at, velocity, velocity);
+  EX void geodesic_step(hyperpoint& at, hyperpoint& vel) {
+    /* RK4 method */
+    auto acc1 = get_acceleration(at, vel);
+    auto acc2 = get_acceleration(at + vel/2, vel + acc1/2);
+    auto acc3 = get_acceleration(at + vel/2 + acc1/4, vel + acc2/2);
+    auto acc4 = get_acceleration(at + vel + acc2/2, vel + acc3);
     
-    auto at2 = at + velocity / 2;
-    auto velocity2 = velocity + acc / 2;
-    
-    auto acc2 = christoffel(at2, velocity2, velocity2);
-    
-    at = at + velocity + acc2 / 2;
-    
-    velocity = velocity + acc;
+    at += vel + (acc1+acc2+acc3)/6;
+    vel += (acc1+2*acc2+2*acc3+acc4)/6;
     }
   
   EX hyperpoint numerical_exp(hyperpoint v, int steps) {
