@@ -1987,7 +1987,6 @@ EX namespace nisot {
     }
   
   EX int rk_steps = 20;
-  EX int pt_steps = 100;
 
   EX hyperpoint numerical_exp(hyperpoint v) {
     hyperpoint at = point31(0, 0, 0);
@@ -2014,13 +2013,34 @@ EX namespace nisot {
       }
     else h = Pos * h;
 
-    int steps = 100;
+    int steps = rk_steps;
     h /= steps;
     
+    auto& at = tPos[3];
+    auto& vel = h;
+    
     for(int i=0; i<steps; i++) {
-      for(int j=0; j<3; j++)
-        tPos[j] += christoffel(tPos[3], h, tPos[j]);
-      geodesic_step(tPos[3], h);
+      auto acc1 = get_acceleration(at, vel);
+      auto at1 = at + vel/2; auto vel1 = vel + acc1/2;
+      auto acc2 = get_acceleration(at1, vel1);
+      auto at2 = at1 + acc1/4; auto vel2 = vel + acc2/2;
+      auto acc3 = get_acceleration(at2, vel2);
+      auto at3 = at + vel + acc2/2; auto vel3 = vel + acc3;
+      auto acc4 = get_acceleration(at3, vel3);
+
+      for(int j=0; j<3; j++) {
+        auto& tra = tPos[j];
+        
+        auto tacc1 = christoffel(at, vel, tra);
+        auto tacc2 = christoffel(at1, vel1, tra + tacc1/2);
+        auto tacc3 = christoffel(at2, vel2, tra + tacc2/2);
+        auto tacc4 = christoffel(at3, vel3, tra + tacc3);
+        
+        tra += (tacc1+tacc2*2+tacc3*2+tacc4) / 6;
+        }
+
+      at += vel + (acc1+acc2+acc3)/6;
+      vel += (acc1+2*acc2+2*acc3+acc4)/6;
       }
                                                                                   
     if(sl2) {
