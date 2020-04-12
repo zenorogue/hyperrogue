@@ -225,6 +225,9 @@ EX void initgame() {
     items[itOrbWinter] = 30;
     items[itOrbFlash] = 30;
     }
+  
+  if(firstland == laCA)
+    items[itOrbAether] = 2;
 
   if(tactic::on && firstland == laCaribbean) {
     if(hiitemsMax(itRedGem) >= 25) items[itRedGem] = min(hiitemsMax(itRedGem), 50);

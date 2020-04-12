@@ -3409,6 +3409,7 @@ EX namespace ca {
 
   EX void simulate() {
     if(cwt.at->land != laCA) return;
+    if(items[itOrbAether] < 2) items[itOrbAether] = 2;
     vector<cell*> allcells;
     for(cell *c: changed) allcells.push_back(c);
     changed.clear();
