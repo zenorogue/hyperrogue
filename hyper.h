@@ -633,8 +633,6 @@ color_t darkena(color_t c, int lev, int a);
 
 static const int DISTANCE_UNKNOWN = 127;
 
-#include <functional>
-
 template<class T, class U> int addHook(hookset<T>*& m, int prio, const U& hook) {
   if(!m) m = new hookset<T> ();
   while(m->count(prio)) {
