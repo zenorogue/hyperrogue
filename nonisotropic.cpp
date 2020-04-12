@@ -104,7 +104,7 @@ EX namespace sn {
     hyperpoint res;
     
     if(lazy) {
-      return decompress(get_int(int(ix), int(iy), int(iz)));
+      return decompress(get_int(int(ix+.5), int(iy+.5), int(iz+.5)));
       }
     
     else {
