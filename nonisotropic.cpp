@@ -1971,7 +1971,7 @@ EX namespace nisot {
     return true;
     }
 
-  hyperpoint get_acceleration(const hyperpoint& at, const hyperpoint& vel) {
+  EX hyperpoint get_acceleration(const hyperpoint& at, const hyperpoint& vel) {
     return christoffel(at, vel, vel);
     }
   
