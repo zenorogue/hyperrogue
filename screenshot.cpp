@@ -779,6 +779,7 @@ bool record_animation() {
     int newticks = i * period / noframes;
     cmode = (env_shmup ? sm::NORMAL : 0);
     while(ticks < newticks) shmup::turn(1), ticks++;
+    ca::simulate();
     if(playermoved) centerpc(INF), optimizeview();
     dynamicval<bool> v2(inHighQual, true);
     apply();
