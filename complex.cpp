@@ -3372,6 +3372,12 @@ EX namespace ca {
       shift(); wlive = eWall(argi());
       return 0;
       }
+    if(argis("-carun")) {
+      shift(); int iter = argi();
+      start_game();
+      for(int i=0; i<iter; i++) simulate();
+      return 0;
+      }
     if(args()[0] != '-') return 1;
     if(args()[1] != 'c') return 1;
     int livedead = args()[2] - '0';
