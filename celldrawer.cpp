@@ -143,11 +143,21 @@ void celldrawer::setcolors() {
     case laCrossroads2: case laCrossroads3: case laCrossroads4: case laCrossroads5:
     case laRose: case laPower: case laWildWest: case laHalloween: case laRedRock:
     case laDragon: case laStorms: case laTerracotta: case laMercuryRiver:
-    case laDesert: case laKraken: case laDocks: case laCA:
+    case laDesert: case laKraken: case laDocks: 
     case laMotion: case laGraveyard: case laWineyard: case laLivefjord: 
     case laRlyeh: case laHell: case laCrossroads: case laJungle:
     case laAlchemist: case laFrog:
       fcol = floorcolors[c->land]; break;
+    
+    case laCA:
+      fcol = floorcolors[c->land]; 
+      if(geosupport_chessboard()) {
+        if(chessvalue(c)) fcol += 0x202020;
+        }
+      else if(geosupport_threecolor()) {
+        fcol += 0x202020 * pattern_threecolor(c);
+        }
+      break;
     
     case laWet:
       fcol = 0x40FF40; break;
