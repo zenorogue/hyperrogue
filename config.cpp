@@ -2534,6 +2534,10 @@ EX int read_config_args() {
     PHASEFROM(2);
     shift(); neon_mode = eNeon(argi());
     }
+  else if(argis("-smooths")) {
+    PHASEFROM(2);
+    shift(); smooth_scrolling = argi();
+    }
   else if(argis("-neonnf")) {
     PHASEFROM(2);
     shift(); neon_nofill = argi();
