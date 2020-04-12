@@ -111,9 +111,9 @@ struct trianglemaker {
     
     // println(hlog, "uds = ", uds);
   
-    for(int a=0; a<3; a++) println(hlog, sqhypot_d(3, inverse_exp(start + ds[a] * ca, iTable, false)));
+    for(int a=0; a<3; a++) println(hlog, sqhypot_d(3, inverse_exp(start + ds[a] * ca)));
   
-    for(int a=0; a<3; a++) println(hlog, sqhypot_d(3, inverse_exp(uds[a], iTable, false)));
+    for(int a=0; a<3; a++) println(hlog, sqhypot_d(3, inverse_exp(uds[a])));
     
     // compute cube vertices
   
