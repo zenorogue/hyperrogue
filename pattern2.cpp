@@ -81,7 +81,7 @@ bool ishex2(cell *c) {
   else return c->master->c7 != c;
   }
 
-int chessvalue(cell *c) {
+EX int chessvalue(cell *c) {
   #if CAP_ARCM
   if(arcm::in()) 
     return arcm::chessvalue(c);
