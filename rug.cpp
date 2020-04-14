@@ -622,22 +622,13 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp=false, double
 
   transmatrix iT1 = inverse(T1);
   
-  println(hlog, sqhypot_d(4, iT1 * C0 - m1.native));
-  println(hlog, sqhypot_d(4, iT1 * xpush0(t) - m1.native));
-  
   for(int i=0; i<MDIM; i++) if(std::isnan(m1.native[i])) { 
     addMessage("Failed!");
     throw rug_exception();
     }
   
-  exit(4);
-  
-  print(hlog, tie(m1.native, m2.native));
-
   m1.native = iT1 * xpush0(d1*forcev);
   m2.native = iT1 * xpush0(t-d2*forcev);
-
-  println(hlog, " -> ", tie(m1.native, m2.native));
 
   if(nonzero && d2>0) enqueue(&m2);
   return nonzero;
@@ -780,7 +771,6 @@ EX void subdivide() {
       if(!good_shape) {
         USING_NATIVE_GEOMETRY;
         mm->native = mid(m->native, m2->native);
-        println(hlog, "mid of ", m->native, " and ", m2->native, " is ", mm->native);
         }
       mm->valid = m->valid && m2->valid; 
       if(mm->valid) qvalid++;
@@ -1081,8 +1071,6 @@ EX void drawRugScene() {
   for(auto t: triangles) drawTriangle(t);
   
   auto& rug = queuecurve(0, 0xFFFFFFFF, PPR::LINE);
-  
-  println(hlog, "rugView = ", rugView);
   
   rug.V = rugView;
   rug.offset_texture = 0;
