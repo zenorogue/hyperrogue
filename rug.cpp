@@ -42,8 +42,8 @@ bool computed = false;
     bool valid;
     bool inqueue;
     double dist;
-    hyperpoint h;    // point in the represented space
-    hyperpoint flat; // point in the native space, in azeq
+    hyperpoint h;      // point in the represented space
+    hyperpoint native; // point in the native space
     hyperpoint precompute;
     vector<edge> edges;
     vector<edge> anticusp_edges;
@@ -52,8 +52,8 @@ bool computed = false;
     rugpoint *getglue() {
       return glue ? (glue = glue->getglue()) : this;
       }
-    hyperpoint& glueflat() {
-      return glue->flat;
+    hyperpoint& gluenative() {
+      return glue->native;
       }
     rugpoint() { glue = NULL; }
     void glueto(rugpoint *x) {
@@ -91,9 +91,14 @@ EX void subdivide();
 EX ld modelscale = 1;
 EX ld model_distance = 4;
 
-EX eGeometry gwhere = gEuclid;
+const eGeometry rgHyperbolic = gSpace534;
+const eGeometry rgEuclid = gCubeTiling;
+const eGeometry rgSphere = gCell120;
+const eGeometry rgElliptic = gECell120;
 
-#define USING_NATIVE_GEOMETRY dynamicval<eGeometry> gw(geometry, gwhere == gElliptic ? gSphere : gwhere)
+EX eGeometry gwhere = rgEuclid;
+
+#define USING_NATIVE_GEOMETRY dynamicval<eGeometry> gw(geometry, hr::rug::gwhere)
 
 // hypersian rug datatypes and globals
 //-------------------------------------
@@ -121,120 +126,35 @@ EX rugpoint *finger_center;
 EX ld finger_range = .1;
 EX ld finger_force = 1;
 
-EX int rugdim;
+// EX eModel rug_model = mdEquidistant;
 
-EX bool rug_perspective = ISANDROID;
-
-// extra geometry functions
-//--------------------------
-
-// returns a matrix M
-// such that inverse(M) * h1 = ( |h1|, 0, 0) and inverse(M) * h2 = ( .., .., 0)
-
-transmatrix orthonormalize(hyperpoint h1, hyperpoint h2) {
-
-  hyperpoint vec[3] = {h1, h2, h1 ^ h2};
-  
-  for(int i=0; i<3; i++) {
-    for(int j=0; j<i; j++) vec[i] -= vec[j] * (vec[i] | vec[j]);
-    if(zero_d(3, vec[i])) {
-      // 'random' direction
-      vec[i] = hpxyz(1.12, 1.512+i, 1.12904+i);
-      for(int j=0; j<i; j++) vec[i] -= vec[j] * (vec[i] | vec[j]);
-      }
-    vec[i] /= hypot_d(3, vec[i]);
-    }
-
-  transmatrix M;
-  for(int i=0; i<3; i++) for(int j=0; j<3; j++)
-    M[i][j] = vec[j][i];
-  
-  return M;
-  }
-
-hyperpoint azeq_to_hyperboloid(hyperpoint h) {
-  if(abs(h[2])>1e-4) {
-    println(hlog, "Error: h[2] = ", h[2]);
-    rug_failure = true;
-    }
-  if(euclid) {
-    h[2] = 1;
-    return h;
-    }
-  ld d = hypot(h[0], h[1]);
-  if(d == 0) {
-    h[2] = 1;
-    return h;
-    }
-  if(sphere) {
-    ld d0 = d ? d : 1;
-    h[0] = sin(d) * h[0]/d0;
-    h[1] = sin(d) * h[1]/d0;
-    h[2] = cos(d);
-    }
-  else {
-    ld d0 = d ? d : 1;
-    h[0] = sinh(d) * h[0]/d0;
-    h[1] = sinh(d) * h[1]/d0;
-    h[2] = cosh(d);
-    }
-  return h;
-  }
-
-hyperpoint hyperboloid_to_azeq(hyperpoint h) {
-  if(euclid) {
-    h[2] = 0;
-    return h;
-    }
-  else {
-    ld d = hdist0(h);
-    if(d == 0) { h[2] = 0; return h; }
-    ld d2 = hypot_d(2, h);
-    if(d2 == 0) { h[2] = 0; return h; }
-    h[0] = d * h[0] / d2;
-    h[1] = d * h[1] / d2;
-    h[2] = 0;
-    return h;
-    }
-  }
-
-struct normalizer {
-
-  transmatrix M, Mi;
-  
-  dynamicval<eGeometry> gw;
- 
-  normalizer (hyperpoint h1, hyperpoint h2) : gw(geometry, gwhere == gElliptic ? gSphere : gwhere) {
-    M = orthonormalize(h1, h2);
-    Mi = inverse(M);
-    }
-  
-  hyperpoint operator() (hyperpoint h) { return azeq_to_hyperboloid(Mi*h); }
-  hyperpoint operator[] (hyperpoint h) { return M*hyperboloid_to_azeq(h); }
-  };
+EX bool rug_perspective = false;
 
 void push_point(hyperpoint& h, int coord, ld val) {
-  if(fast_euclidean && gwhere == gEuclid) 
+  USING_NATIVE_GEOMETRY;
+  if(fast_euclidean && euclid) 
     h[coord] += val;
   else if(!val) return;
   else {
-    // if(zero_d(3, h)) { h[0] = 1e-9; h[1] = 1e-10; h[2] = 1e-11; }
-    normalizer n(hpxyz(coord==0,coord==1,coord==2), h);
-    hyperpoint f = n(h);
-    h = n[xpush(val) * f];
+    h = cpush(coord, val) * h;
     }
   }
   
 EX void push_all_points(int coord, ld val) {
   if(!val) return;
   else for(int i=0; i<isize(points); i++)
-    push_point(points[i]->flat, coord, val);
+    push_point(points[i]->native, coord, val);
   }
 
 // construct the graph
 //---------------------
 
 int hyprand;
+
+bool rug_euclid() { USING_NATIVE_GEOMETRY; return euclid; }
+bool rug_hyperbolic() { USING_NATIVE_GEOMETRY; return hyperbolic; }
+bool rug_sphere() { USING_NATIVE_GEOMETRY; return sphere; }
+bool rug_elliptic() { USING_NATIVE_GEOMETRY; return elliptic; }
 
 EX rugpoint *addRugpoint(hyperpoint h, double dist) {
   rugpoint *m = new rugpoint;
@@ -269,73 +189,74 @@ EX rugpoint *addRugpoint(hyperpoint h, double dist) {
     if(z==0) z = 1;
     hpoint = hpoint * hpdist / z;
     
-    m->flat = hpxyz(hpoint[0], hpoint[1] * sin(a*2*M_PI), hpoint[1]*cos(a*2*M_PI));
+    m->native = point31(hpoint[0], hpoint[1] * sin(a*2*M_PI), hpoint[1]*cos(a*2*M_PI));
     }
   else if(sphere) {
     m->valid = good_shape = true;
     ld scale;
-    if(gwhere == gEuclid) {
+    USING_NATIVE_GEOMETRY;
+    if(euclid) {
       scale = modelscale;
       }
-    else if(gwhere == gNormal) {
+    else if(hyperbolic) {
       // sinh(scale) = modelscale
       scale = asinh(modelscale);
       }
-    else /* sphere/elliptic*/ {
+    else if(sphere) {
       if(modelscale >= 1) 
         // do as good as we can...
         scale = M_PI / 2 - 1e-3, good_shape = false, m->valid = false;
       else scale = asin(modelscale);
       }
-    m->flat = h * scale;
+    else
+      scale = 1;
+    m->native = h * scale;
+    m->native = hpxy3(m->native[0], m->native[1], m->native[2]);
     }
 
-  else if(euclid && gwhere == gEuclid) {
-    m->flat = h * modelscale;
+  else if(euclid && rug_euclid()) {
+    m->native = h * modelscale;
+    m->native[2] = 0;
+    m->native[3] = 1;
     m->valid = good_shape = true;
     }
   
-  else if(gwhere == gNormal && (euclid || (hyperbolic && modelscale >= 1))) {
+  else if(rug_hyperbolic() && euclid) {
+    m->valid = good_shape = true;
+    USING_NATIVE_GEOMETRY;
+    m->native = tC0(parabolic13(h[0]*modelscale, h[1]*modelscale));
+    }
+
+  else if(rug_hyperbolic() && hyperbolic && modelscale >= 1) {
     m->valid = good_shape = true;
 
-    ld d = hdist0(h);
-    ld d0 = hypot_d(2, h); if(!d0) d0 = 1;
+    // radius of the equidistant
+    ld r = acosh(modelscale);
     
-    hyperpoint hpoint;
-    bool orig_euclid = euclid;
+    h[3] = h[2]; h[2] = 0;
+    
     USING_NATIVE_GEOMETRY;
     
-    if(orig_euclid) {
-      d *= modelscale;
-      // point on a horocycle going through C0, in distance d along the horocycle
-      hpoint = hpxy(d*d/2, d);
-      }
-    else {
-      // radius of the equidistant
-      ld r = acosh(modelscale);
-      // point on an equdistant going through C0 in distance d along the guiding line
-      // hpoint = hpxy(cosh(r) * sinh(r) * (cosh(d) - 1), sinh(d) * cosh(r));
-      hpoint = xpush(r) * ypush(d) * xpush0(-r);
-      hpoint[0] = -hpoint[0];
-      }
-
-    ld hpdist = hdist0(hpoint);
-    ld z = hypot_d(2, hpoint);
-    if(z==0) z = 1;
-    m->flat = hpxyz(hpdist * h[0]/d0 * hpoint[1] / z, hpdist * h[1]/d0 * hpoint[1] / z, -hpdist * hpoint[0] / z);    
+    m->native = rgpushxto0(h) * cpush0(2, r);
     }
   
   else {
-    m->flat = h;
+    m->native = h;
     ld hd = h[LDIM];
-    for(int d=GDIM; d<rugdim; d++)
-      m->flat[d] = (hd - .99) * (rand() % 1000 - rand() % 1000) / 1000;
+    for(int d=GDIM; d<4; d++) {
+      m->native[d] = (hd - .99) * (rand() % 1000 - rand() % 1000) / 1000;
+      }
+    USING_NATIVE_GEOMETRY;
+    if(euclid)
+      m->native[3] = 1;
+    else
+      m->native = normalize(m->native);
     }
 
   if(rug_perspective)
-    push_point(m->flat, 2, -model_distance);
+    push_point(m->native, 2, -model_distance);
   
-  // if(rug_perspective && gwhere == gEuclid) m->flat[2] -= 3;
+  // if(rug_perspective && gwhere == gEuclid) m->native[2] -= 3;
   m->inqueue = false;
   m->dist = dist;
   points.push_back(m);
@@ -343,8 +264,9 @@ EX rugpoint *addRugpoint(hyperpoint h, double dist) {
   }
 
 EX rugpoint *findRugpoint(hyperpoint h) {
+  USING_NATIVE_GEOMETRY;
   for(int i=0; i<isize(points); i++) 
-    if(sqhypot_d(rugdim, points[i]->h - h) < 1e-5) return points[i];
+    if(geo_dist_q(points[i]->h, h) < 1e-5) return points[i];
   return NULL;
   }
 
@@ -414,7 +336,7 @@ EX void sort_rug_points() {
 void calcLengths() {
   for(auto p: points) 
     for(auto& edge: p->edges) 
-      edge.len = hdist(p->h, edge.target->h) * modelscale;
+      edge.len = geo_dist_q(p->h, edge.target->h) * modelscale;
   }
 
 EX void calcparam_rug() {
@@ -480,23 +402,28 @@ EX void buildTorusRug() {
     
     ld ax = alpha + 1.124651, bx = beta + 1.214893;
     ld x = xfactor * sin(ax), y = xfactor * cos(ax), z = yfactor * sin(bx), t = yfactor * cos(bx);
-
-    ld d;
-    ld hxyz = sqrt(x*x+y*y+z*z);
-
-    if(gwhere == gNormal) {
-      d = hxyz / (1-t) / mx;
-      d *= .95;
-      hyperpoint test = hpxy(d, 0);
-      test = perspective_to_space(test, 1, gcHyperbolic);
-      d = acosh(test[2]) / hxyz;
-      }
-    else {
-      d = (gwhere == gSphere) ? acos(t) / hxyz : modelscale * 3 / (1-t) / mx;
-      }
     
-    r->flat = r->h = hpxyz(x*d, y*d, z*d);
+    if(1) {
+      hyperpoint hp = hyperpoint(x, y, z, t);
       
+      USING_NATIVE_GEOMETRY;
+      
+      /* spherical coordinates are already good, otherwise... */
+      
+      if(!sphere) {
+        /* stereographic projection to get Euclidean conformal torus */
+        hp[3] += 1;
+        hp /= hp[3];
+        hp /= mx;
+        hp[3] = 1;
+        }
+      
+      /* ... in H^3, use inverse Poincare to get hyperbolic conformal torus */
+
+      if(hyperbolic) 
+        hp = perspective_to_space(hp, 1, gcHyperbolic);
+      }
+        
     r->valid = true;
     
     static const int X = 100003; // a prime
@@ -562,14 +489,8 @@ EX void verify() {
       auto m2 = e.target;
       ld l = e.len;
       
-      ld l0;
-      if(fast_euclidean) l0 = sqhypot_d(rugdim, m->flat - m2->flat);
-      else {      
-        normalizer n(m->flat, m2->flat);
-        hyperpoint h1 = n(m->flat);
-        hyperpoint h2 = n(m2->flat);
-        l0 = hdist(h1, h2);
-        }
+      USING_NATIVE_GEOMETRY;
+      ld l0 = geo_dist_q(m->native, m2->native);
 
       ratios.push_back(l0 / l);
       }
@@ -668,17 +589,18 @@ EX void enqueue(rugpoint *m) {
 
 bool force_euclidean(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp = false, double d1=1, double d2=1) {
   if(!m1.valid || !m2.valid) return false;
-  // double rd = hdist(m1.h, m2.h) * xd;
-  double t = sqhypot_d(rugdim, m1.flat - m2.flat);
+  USING_NATIVE_GEOMETRY;
+  // double rd = geo_dist_q(m1.h, m2.h) * xd;
+  double t = sqhypot_d(3, m1.native - m2.native);
   if(is_anticusp && t > rd*rd) return false;
   t = sqrt(t);
   current_total_error += (t-rd) * (t-rd);
   bool nonzero = abs(t-rd) > err_zero_current;
   double force = (t - rd) / t / 2; // 20.0;
-  for(int i=0; i<rugdim; i++) {
-    double di = (m2.flat[i] - m1.flat[i]) * force;
-    m1.flat[i] += di * d1;
-    m2.flat[i] -= di * d2;
+  for(int i=0; i<3; i++) {
+    double di = (m2.native[i] - m1.native[i]) * force;
+    m1.native[i] += di * d1;
+    m2.native[i] -= di * d2;
     if(nonzero && d2>0) enqueue(&m2);
     }  
   return nonzero;
@@ -686,35 +608,42 @@ bool force_euclidean(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp = f
 
 bool force(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp=false, double d1=1, double d2=1) {
   if(!m1.valid || !m2.valid) return false;
-  if(gwhere == gEuclid && fast_euclidean) {
+  if(rug_euclid() && fast_euclidean) {
     return force_euclidean(m1, m2, rd, is_anticusp, d1, d2);
     }
-  normalizer n(m1.flat, m2.flat);
-  hyperpoint f1 = n(m1.flat);
-  hyperpoint f2 = n(m2.flat);
+  USING_NATIVE_GEOMETRY;
   
-  ld t = hdist(f1, f2);
+  ld t = geo_dist_q(m1.native, m2.native);
   if(is_anticusp && t > rd) return false;
   current_total_error += (t-rd) * (t-rd);
   bool nonzero = abs(t-rd) > err_zero_current;
   double forcev = (t - rd) / 2; // 20.0;
   
-  transmatrix T = gpushxto0(f1);
-  transmatrix T1 = spintox(T * f2) * T;
+  println(hlog, normalize(m1.native) - m1.native);
+  println(hlog, normalize(m1.native) - m2.native);
+  
+  transmatrix T = gpushxto0(m1.native);
+  transmatrix T1 = spintox(T * m2.native) * T;
 
   transmatrix iT1 = inverse(T1);
   
-  for(int i=0; i<3; i++) if(std::isnan(m1.flat[i])) { 
+  println(hlog, sqhypot_d(4, iT1 * C0 - m1.native));
+  println(hlog, sqhypot_d(4, iT1 * xpush0(t) - m1.native));
+  
+  for(int i=0; i<MDIM; i++) if(std::isnan(m1.native[i])) { 
     addMessage("Failed!");
     throw rug_exception();
     }
-
-  f1 = iT1 * xpush0(d1*forcev);
-  f2 = iT1 * xpush0(t-d2*forcev);
-
-  m1.flat = n[f1];
-  m2.flat = n[f2];
   
+  exit(4);
+  
+  print(hlog, tie(m1.native, m2.native));
+
+  m1.native = iT1 * xpush0(d1*forcev);
+  m2.native = iT1 * xpush0(t-d2*forcev);
+
+  println(hlog, " -> ", tie(m1.native, m2.native));
+
   if(nonzero && d2>0) enqueue(&m2);
   return nonzero;
   }
@@ -724,8 +653,8 @@ vector<pair<ld, rugpoint*> > preset_points;
 EX void preset(rugpoint *m) {
   if(GDIM == 3) return;
   int q = 0;
-  hyperpoint h;
-  for(int i=0; i<3; i++) h[i] = 0;
+  USING_NATIVE_GEOMETRY;
+  hyperpoint h = Hypc;
   
   preset_points.clear();
   
@@ -757,10 +686,10 @@ EX void preset(rugpoint *m) {
       double ah = sqrt(a1*a1 - az*az + 1e-10);
       
       // c->h = a->h + (b->h-a->h) * cz + ch * ort
-      hyperpoint ort = (c->flat - a->flat - cz * (b->flat-a->flat)) / ch;
+      hyperpoint ort = (c->native - a->native - cz * (b->native-a->native)) / ch;
 
       // m->h = a->h + (b->h-a->h) * az - ah * ort
-      hyperpoint res = a->flat + (b->flat-a->flat) * az - ah * ort;
+      hyperpoint res = a->native + (b->native-a->native) * az - ah * ort;
       
       h += res;
       
@@ -769,9 +698,9 @@ EX void preset(rugpoint *m) {
       }
     }
     
-  if(q>0) m->flat = h/q;
-  // printf("preset (%d) -> %s\n", q, display(m->flat));
-  if(std::isnan(m->flat[0]) || std::isnan(m->flat[1]) || std::isnan(m->flat[2]))
+  if(q>0) m->native = normalize(h);
+  // printf("preset (%d) -> %s\n", q, display(m->native));
+  if(std::isnan(m->native[0]) || std::isnan(m->native[1]) || std::isnan(m->native[2]))
     throw rug_exception();
   }
 
@@ -779,15 +708,8 @@ ld sse(const hyperpoint& h) {
   ld sse = 0;
   for(auto& p: preset_points) {
     ld l = p.first;
-    ld l0;
-    if(fast_euclidean) 
-      l0 = hypot_d(rugdim, h - p.second->flat);
-    else {
-      normalizer n(h, p.second->flat);
-      hyperpoint h1 = n(h);
-      hyperpoint h2 = n(p.second->flat);
-      l0 = hdist(h1, h2);
-      }
+    USING_NATIVE_GEOMETRY;
+    ld l0 = geo_dist_q(h, p.second->native);
     sse += (l0-l) * (l0-l);
     }
   
@@ -801,16 +723,17 @@ EX void optimize(rugpoint *m, bool do_preset) {
     // int ed0 = isize(preset_points);
     for(auto& e: m->edges) if(e.target->valid) 
       preset_points.emplace_back(e.len, e.target);
-    if(gwhere >= gSphere || GDIM == 3) {
-      ld cur = sse(m->flat);
+    if(!rug_euclid()) {
+      ld cur = sse(m->native);
       for(int it=0; it<500; it++) {
         ld ex = exp(-it/60);
         again:
-        hyperpoint last = m->flat;
-        m->flat[(it/2)%rugdim] += ((it&1)?1:-1) * ex;
-        ld now = sse(m->flat);
+        hyperpoint last = m->native;
+        USING_NATIVE_GEOMETRY;
+        m->native = rgpushxto0(m->native) * cpush0((it/2)%3, (it&1)?ex:-ex);
+        ld now = sse(m->native);
         if(now < cur) { cur = now; ex *= 1.2; goto again; }
-        else m->flat = last;
+        else m->native = last;
         }
       }
     }
@@ -860,10 +783,9 @@ EX void subdivide() {
       rugpoint *mm = addRugpoint(mid(m->h, m2->h), (m->dist+m2->dist)/2);
       halves[make_pair(m, m2)] = mm;
       if(!good_shape) {
-        normalizer n(m->flat, m2->flat);
-        hyperpoint h1 = n(m->flat);
-        hyperpoint h2 = n(m2->flat);
-        mm->flat = n[mid(h1, h2)];
+        USING_NATIVE_GEOMETRY;
+        mm->native = mid(m->native, m2->native);
+        println(hlog, "mid of ", m->native, " and ", m2->native, " is ", mm->native);
         }
       mm->valid = m->valid && m2->valid; 
       if(mm->valid) qvalid++;
@@ -880,33 +802,9 @@ EX void subdivide() {
   println(hlog, "result ", make_tuple(isize(points), isize(triangles)));
   }
 
-EX ld slow_modeldist(const hyperpoint& h1, const hyperpoint& h2) {
-  normalizer n(h1, h2);
-  hyperpoint f1 = n(h1);
-  hyperpoint f2 = n(h2);
-  return hdist(f1, f2);
-  }
-
-typedef array<ld, 4> hyperpoint4;
-
-hyperpoint4 azeq_to_4(const hyperpoint& h) {
-  array<ld, 4> res;
-  ld rad = hypot_d(3, h);
-  res[3] = cos(rad);
-  ld sr = sin(rad) / rad;
-  for(int j=0; j<3; j++) res[j] = h[j] * sr;
-  return res;
-  }
-
 EX ld modeldist(const hyperpoint& h1, const hyperpoint& h2) {
-  if(gwhere == gSphere) {
-    hyperpoint4 coord[2] = { azeq_to_4(h1), azeq_to_4(h2) };
-    ld edist = 0;
-    for(int j=0; j<4; j++) edist += sqr(coord[0][j] - coord[1][j]);
-    return 2 * asin(sqrt(edist) / 2);
-    }
-    
-  return slow_modeldist(h1, h2);
+  USING_NATIVE_GEOMETRY;
+  return geo_dist_q(h1, h2);
   }
 
 typedef long long bincode;
@@ -925,8 +823,7 @@ bincode get_bincode(hyperpoint h) {
     case gcHyperbolic:
       return acd_bin(hypot_d(3, h));
     case gcSphere: {
-      auto p = azeq_to_4(h);
-      return acd_bin(p[0]) + acd_bin(p[1]) * sY + acd_bin(p[2]) * sZ + acd_bin(p[3]) * sT;
+      return acd_bin(h[0]) + acd_bin(h[1]) * sY + acd_bin(h[2]) * sZ + acd_bin(h[3]) * sT;
       }
     }
   return 0;
@@ -946,7 +843,7 @@ void generate_deltas(vector<bincode>& target, int dim, bincode offset) {
 int detect_cusp_at(rugpoint *p, rugpoint *q) {
   if(hdist(p->h, q->h) * modelscale <= anticusp_dist)
     return 0;
-  else if(modeldist(p->flat, q->flat) > anticusp_dist - err_zero_current)
+  else if(modeldist(p->native, q->native) > anticusp_dist - err_zero_current)
     return 1;
   else {
     add_anticusp_edge(p, q);
@@ -967,7 +864,7 @@ int detect_cusps() {
 
   map<bincode, vector<rugpoint*> > code_to_point;
   for(auto p: points) if(p->valid)
-    code_to_point[get_bincode(p->flat)].push_back(p);
+    code_to_point[get_bincode(p->native)].push_back(p);
   
   vector<bincode> deltas;
   generate_deltas(deltas, gwhere == gEuclid ? 3 : gwhere == gNormal ? 1 : 4, 0);
@@ -1068,35 +965,16 @@ EX void physics() {
 
 bool use_precompute;
 
-void getco(rugpoint *m, hyperpoint& h, int &spherepoints) {
-  h = use_precompute ? m->getglue()->precompute : m->getglue()->flat;
-  if(rug_perspective && gwhere >= gSphere) {
-    if(h[2] > 0) {
-      ld rad = hypot_d(3, h);
-      // turn M_PI to -M_PI
-      // the only difference between sphere and elliptic is here:
-      // in elliptic, we subtract PI from the distance
-      ld rad_to = (gwhere == gSphere ? M_PI + M_PI : M_PI) - rad;
-      ld r = -rad_to / rad;
-      h *= r;
-      spherepoints++;
-      }
-    }
-  }
-
 extern int besti;
 
 #if CAP_ODS
 /* these functions are for the ODS projection, used in VR videos */
 
-bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
+bool project_ods(hyperpoint h, hyperpoint& h1, hyperpoint& h2, bool eye) {
   USING_NATIVE_GEOMETRY;
   
-  ld d = hypot_d(3, azeq);
-  ld sindbd = sin_auto(d)/d, cosd = cos_auto(d);
-  
-  return ods::project(hyperpoint(azeq[0] * sindbd, azeq[1] * sindbd, azeq[2] * sindbd, cosd), h1, h2, eye);
-  
+  return ods::project(h, h1, h2, eye);
+
 //  printf("%10.5lf %10.5lf %10.5lf ", azeq[0], azeq[1], azeq[2]);
 //  printf(" => %10.5lf %10.5lf %10.5lf %10.5lf", x, y, z, t);
   
@@ -1126,7 +1004,7 @@ void drawTriangle(triangle& t) {
     if(num == 2) return; 
 
     for(int i=0; i<num; i++)
-      pts[i] = t.m[i]->getglue()->flat;    
+      pts[i] = t.m[i]->getglue()->native;    
       
     hyperpoint hc = (pts[1] - pts[0]) ^ (pts[2] - pts[0]);  
     double hch = hypot_d(3, hc);
@@ -1178,7 +1056,7 @@ void drawTriangle(triangle& t) {
         if(h[s+1][0] > +M_PI || h[s+2][0] > +M_PI) fst--;
         for(int x=fst; x<=lst; x++) for(int i=0; i<3; i++) {
           ct_array.emplace_back(
-            hpxyz(h[s+i][0] + 2*M_PI*x, h[s+i][1], h[s+i][2]),
+            point31(h[s+i][0] + 2*M_PI*x, h[s+i][1], h[s+i][2]),
             t.m[i]->x1, t.m[i]->y1,
             col);
           }
@@ -1191,7 +1069,10 @@ void drawTriangle(triangle& t) {
 
   int spherepoints = 0;
   array<hyperpoint,3> h;
-  for(int i=0; i<num; i++) getco(t.m[i], h[i], spherepoints);
+  for(int i=0; i<num; i++) {
+    h[i] = t.m[i]->native;
+    // todo if(rug_elliptic() && h[i][3] > 0) { h[i] = -h[i]; spherepoints++; }
+    }
   if(spherepoints == 1 || spherepoints == 2) return;
   
   ld col = 1;
@@ -1311,7 +1192,7 @@ EX void drawRugScene() {
         else {
           use_precompute = true;
           for(auto p: points) {
-            p->precompute = p->flat;
+            p->precompute = p->native;
             push_point(p->precompute, 0, vid.ipd*ed/2);
             }
           }
@@ -1388,7 +1269,6 @@ EX void ensure_glbuf() {
 
 EX void reopen() {
   if(rugged) return;
-  rugdim = 2 * GDIM - 1;
   when_enabled = 0;
   GLERR("before init");
   ensure_glbuf();
@@ -1476,7 +1356,7 @@ EX void apply_rotation(const transmatrix& t) {
   if(in_crystal()) crystal::apply_rotation(t);
   else
   #endif
-  for(auto p: points) p->flat = t * p->flat;
+  for(auto p: points) p->native = t * p->native;
   }
 
 EX void move_forward(ld distance) {
@@ -1487,6 +1367,7 @@ EX void move_forward(ld distance) {
 #define CAP_HOLDKEYS (CAP_SDL && !ISWEB)
 
 EX bool handlekeys(int sym, int uni) {
+  USING_NATIVE_GEOMETRY;
   if(NUMBERKEY == '1') {
     ld bdist = 1e12;
     if(finger_center) 
@@ -1547,7 +1428,7 @@ EX bool handlekeys(int sym, int uni) {
 EX void finger_on(int coord, ld val) {
   for(auto p: points) {
     ld d = hdist(finger_center->h, p->getglue()->h);
-    push_point(p->flat, coord, val * finger_force * exp( - sqr(d / finger_range)));
+    push_point(p->native, coord, val * finger_force * exp( - sqr(d / finger_range)));
     }
   enqueue(finger_center), good_shape = false;
   }
@@ -1646,6 +1527,7 @@ EX void actDraw() {
     push_all_points(1, strafey * ruggospeed);
     }
   else {
+    USING_NATIVE_GEOMETRY;
     if(finger_center)
       perform_finger();
     else {
@@ -1676,18 +1558,6 @@ EX void actDraw() {
 
 int besti;
 
-void getco_pers(rugpoint *r, hyperpoint& p, int& spherepoints, bool& error) {
-  getco(r, p, spherepoints);
-  if(rug_perspective) {
-    if(p[2] >= 0)
-      error = true;
-    else {
-      p[0] /= p[2];
-      p[1] /= p[2];
-      }
-    }
-  }
-
 static const ld RADAR_INF = 1e12;
 ld radar_distance = RADAR_INF;
 
@@ -1709,9 +1579,22 @@ EX hyperpoint gethyper(ld x, ld y) {
     hyperpoint p0, p1, p2;
     bool error = false;
     int spherepoints = 0;
-    getco_pers(r0, p0, spherepoints, error);
-    getco_pers(r1, p1, spherepoints, error);
-    getco_pers(r2, p2, spherepoints, error);
+    if(1) {
+      USING_NATIVE_GEOMETRY;
+      // USING_RUG_PMODEL;
+      // dynamicval<eModel> m(pmodel, mdEquidistant);
+
+      if(elliptic && pmodel == mdDisk) {
+        int sp = 
+          (r0->native[3] < 0) + (r1->native[3] < 0) + (r2->native[3] < 0);
+        if(sp == 1 || sp == 2) continue;
+        }
+    
+      applymodel(r0->native, p0);
+      applymodel(r1->native, p1);
+      applymodel(r2->native, p2);
+      }
+
     if(error || spherepoints == 1 || spherepoints == 2) continue;
     double dx1 = p1[0] - p0[0];
     double dy1 = p1[1] - p0[1];
@@ -1786,6 +1669,27 @@ void change_texturesize() {
 
 ld old_distance;
 
+EX void rug_geometry_choice() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);
+  dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
+  
+  dialog::addBoolItem("Euclidean", rug_euclid(), 'a');
+  dialog::add_action([] { gwhere = rgEuclid; popScreen(); });
+
+  dialog::addBoolItem("hyperbolic", rug_hyperbolic(), 'b');
+  dialog::add_action([] { gwhere = rgHyperbolic; popScreen(); });
+
+  dialog::addBoolItem("spherical", rug_sphere() && !rug_elliptic(), 'c');
+  dialog::add_action([] { gwhere = rgSphere; popScreen(); });
+
+  dialog::addBoolItem("elliptic", rug_elliptic(), 'd');
+  dialog::add_action([] { gwhere = rgElliptic; popScreen(); });
+
+  dialog::addBack();
+  dialog::display();
+  }
+
 EX void show() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
@@ -1808,7 +1712,7 @@ EX void show() {
   dialog::addSelItem(XLAT("model distance"), fts(model_distance), 'd');
   dialog::addBoolItem(XLAT("projection"), rug_perspective, 'p');
   dialog::lastItem().value = XLAT(rug_perspective ? "perspective" : 
-    gwhere == gEuclid ? "orthogonal" : "azimuthal equidistant");
+    rug_euclid() ? "orthogonal" : "azimuthal equidistant");
   if(!rug::rugged)
     dialog::addSelItem(XLAT("native geometry"), geometry_name(gwhere), 'n');
   else
@@ -1830,11 +1734,10 @@ EX void show() {
   edit_levellines('L');
 
 #if CAP_SURFACE  
-  if(hyperbolic) {
-    if(gwhere == gEuclid)
-      dialog::addItem(XLAT("smooth surfaces"), 'c');
-    else dialog::addBreak(100);
-    }
+  if(hyperbolic && rug_euclid())
+    dialog::addItem(XLAT("smooth surfaces"), 'c');
+  else
+    dialog::addBreak(100);
 #endif
 
   dialog::addBreak(50);
@@ -1914,7 +1817,7 @@ EX void show() {
           if(!camera_center) push_all_points(2, model_distance);
           for(auto p:points) {
             if(adjust_edges) for(auto& e: p->edges) e.len *= modelscale / last;
-            if(adjust_points) p->flat *= modelscale / last;
+            if(adjust_points) p->native *= modelscale / last;
             enqueue(p);
             }
           if(adjust_distance) model_distance = model_distance * modelscale / last;
@@ -1955,8 +1858,8 @@ EX void show() {
       }
     else if(uni == 'f') 
       pushScreen(showStereo);
-    else if(uni == 'n' && !rug::rugged)
-      gwhere = eGeometry((gwhere+1) % 4);
+    else if(uni == 'n' && !rug::rugged) 
+      pushScreen(rug_geometry_choice);
     else if(uni == 'g' && !rug::rugged && CAP_SDL)
       rendernogl = !rendernogl;
     else if(uni == 's') {
@@ -1989,6 +1892,10 @@ int rugArgs() {
 
   else if(argis("-ruggeo")) {
     shift(); gwhere = (eGeometry) argi();
+    if(gwhere == gEuclid) gwhere = rgEuclid;
+    if(gwhere == gSphere) gwhere = rgSphere;
+    if(gwhere == gNormal) gwhere = rgHyperbolic;
+    if(gwhere == gElliptic) gwhere = rgElliptic;
     }
 
   else if(argis("-rugpers")) {
