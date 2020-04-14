@@ -69,6 +69,7 @@ bool computed = false;
 
   struct triangle {
     rugpoint *m[3];
+    triangle() { m[0] = m[1] = m[2] = nullptr; }
     triangle(rugpoint *m1, rugpoint *m2, rugpoint *m3) {
       m[0] = m1; m[1] = m2; m[2] = m3;
       }
@@ -1614,6 +1615,88 @@ EX void select() {
   pushScreen(rug::show);
   }
 
+EX void rug_save(string fname) {
+  fhstream f(fname, "wb");
+  if(!f.f) {
+    addMessage(XLAT("Failed to save rug to %1", fname));
+    return;
+    }
+  f.write(f.vernum);
+  f.write(gwhere);
+  USING_NATIVE_GEOMETRY;
+  int N = isize(points);
+  f.write(N);
+  map<rugpoint*, int> ids;
+  for(int i=0; i<isize(points); i++) ids[points[i]] = i;
+  f.write(surface::sh);
+  for(int i=0; i<4; i++) for(int j=0; j<4; j++) 
+    f.write(rugView[i][j]);
+  auto get_id = [&] (rugpoint *r) {
+    if(!r) return int(-1);
+    return ids[r];
+    };
+  for(auto p: points) {
+    f.write(p->valid);
+    f.write(p->x1);
+    f.write(p->y1);
+    f.write(p->native);
+    f.write(get_id(p->glue));
+    }
+  int M = isize(triangles);
+  f.write(M);
+  for(auto t: triangles) {
+    f.write(get_id(t.m[0]));
+    f.write(get_id(t.m[1]));
+    f.write(get_id(t.m[2]));
+    }
+
+  int cp = isize(surface::coverage);
+  f.write(cp);
+  for(auto p: surface::coverage) f.write(p.first), f.write(p.second);
+  }
+
+EX void rug_load(string fname) {
+  clear_model();
+  fhstream f(fname, "rb");
+  if(!f.f) {
+    addMessage(XLAT("Failed to load rug from %1", fname));
+    return;
+    }
+  f.read(f.vernum);
+  f.read(gwhere);
+  USING_NATIVE_GEOMETRY;
+  int N = f.get<int>();
+  println(hlog, "N = ", N);
+  points.resize(N);
+  for(int i=0; i<N; i++) 
+    points[i] = new rugpoint;
+  f.read(surface::sh);
+  for(int i=0; i<4; i++) for(int j=0; j<4; j++) 
+    f.read(rugView[i][j]);
+  auto by_id = [&] (rugpoint *& p) {
+    int i = f.get<int>();
+    if(i == -1) p = nullptr;
+    else p = points[i];
+    };
+  for(auto p: points) {
+    f.read(p->valid);
+    f.read(p->x1);
+    f.read(p->y1);
+    f.read(p->native);
+    by_id(p->glue);
+    }
+  triangles.resize(f.get<int>());
+  for(auto& t: triangles) {
+    by_id(t.m[0]);
+    by_id(t.m[1]);
+    by_id(t.m[2]);
+    }
+
+  surface::coverage.resize(f.get<int>());
+  for(auto p: surface::coverage) f.read(p.first), f.read(p.second);
+  good_shape = true;
+  }
+
 #if CAP_COMMANDLINE
 int rugArgs() {
   using namespace arg;
@@ -1637,6 +1720,18 @@ int rugArgs() {
 
   else if(argis("-rugonce")) {
     renderonce = true;
+    }
+
+  else if(argis("-rugsave")) {
+    shift(); rug_save(args());
+    }
+
+  else if(argis("-rugload")) {
+    PHASE(3); 
+    start_game();
+    calcparam();
+    rug::init();
+    shift(); rug_load(args());
     }
 
   else if(argis("-rugdist")) {
