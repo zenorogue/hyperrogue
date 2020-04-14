@@ -1197,6 +1197,12 @@ EX ld geo_dist(const hyperpoint h1, const hyperpoint h2, flagtype prec IS(pNORMA
   return hypot_d(3, inverse_exp(inverse(nisot::translate(h1)) * h2, prec));
   }
 
+EX ld geo_dist_q(const hyperpoint h1, const hyperpoint h2, flagtype prec IS(pNORMAL)) {
+  auto d = geo_dist(h1, h2, prec);
+  if(elliptic && d > M_PI/2) return M_PI - d;
+  return d;
+  }
+
 EX hyperpoint lp_iapply(const hyperpoint h) {
   return nisot::local_perspective_used() ? inverse(NLP) * h : h;
   }
