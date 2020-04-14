@@ -727,12 +727,10 @@ EX void apply() {
   #if CAP_RUG
   if(rug::rugged) {
     if(rug_rotation1) {
-      rug::apply_rotation(cspin(1, 2, rug_angle * degree));
-      rug::apply_rotation(cspin(0, 2, rug_rotation1 * 2 * M_PI * t / period));
-      rug::apply_rotation(cspin(1, 2, -rug_angle * degree));
+      rug::rugView = cspin(1, 2, -rug_angle * degree) * cspin(0, 2, rug_rotation1 * 2 * M_PI * t / period) * cspin(1, 2, rug_angle * degree) * rug::rugView;
       }
     if(rug_rotation2) {
-      rug::apply_rotation(rug::currentrot * cspin(0, 1, rug_rotation2 * 2 * M_PI * t / period) * inverse(rug::currentrot));
+      rug::rugView = rug::rugView * cspin(0, 1, rug_rotation2 * 2 * M_PI * t / period);
       }
     }
   #endif
@@ -1225,9 +1223,8 @@ startanim rug { "Hypersian Rug", [] {
   rug::init(), rug::rugged = false; }, [] {
   dynamicval<bool> b(rug::rugged, true);
   rug::physics();
-  rug::apply_rotation(cspin(1, 2, ticks / 3000.));
+  dynamicval<transmatrix> t(rug::rugView, cspin(1, 2, ticks / 3000.) * rug::rugView);
   gamescreen(2);
-  rug::apply_rotation(cspin(1, 2, -ticks / 3000.));
   if(!rug::rugged) current = &null_animation;
   explorable([] { rug::rugged = true; pushScreen(rug::show); });
   }};

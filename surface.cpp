@@ -605,8 +605,6 @@ EX void run_shape(eShape s) {
   coverage.clear();
   need_mouseh = true;
   sh = s;
-  transmatrix crot = rug::rugged ? rug::currentrot : Id;
-  rug::apply_rotation(inverse(crot));
   
   if(rug::rugged) rug::close();
 
@@ -663,10 +661,6 @@ EX void run_shape(eShape s) {
     for(auto p: rug::points) if(p->valid)
       p->native[2] += shift;
     }
-
-  rug::apply_rotation(crot);
-  if(rug::rug_perspective)
-    rug::push_all_points(2, -rug::model_distance);
   }
 
 void cancel_shape() {

@@ -19,6 +19,8 @@ EX bool rug_failure = false;
 
 EX namespace rug {
 
+EX transmatrix rugView;
+
 EX ld lwidth = 2;
 
 EX bool in_crystal() { return surface::sh == surface::dsCrystal; }
@@ -126,9 +128,9 @@ EX rugpoint *finger_center;
 EX ld finger_range = .1;
 EX ld finger_force = 1;
 
-// EX eModel rug_model = mdEquidistant;
+EX eModel rug_projection = mdEquidistant;
 
-EX bool rug_perspective = false;
+EX bool perspective() { return among(rug_projection, mdPerspective, mdGeodesic); }
 
 void push_point(hyperpoint& h, int coord, ld val) {
   USING_NATIVE_GEOMETRY;
@@ -253,10 +255,6 @@ EX rugpoint *addRugpoint(hyperpoint h, double dist) {
       m->native = normalize(m->native);
     }
 
-  if(rug_perspective)
-    push_point(m->native, 2, -model_distance);
-  
-  // if(rug_perspective && gwhere == gEuclid) m->native[2] -= 3;
   m->inqueue = false;
   m->dist = dist;
   points.push_back(m);
@@ -476,9 +474,6 @@ EX void buildTorusRug() {
   for(auto p: points) if(!p->glue) qvalid++;
   println(hlog, "qvalid = ", qvalid);
 
-  if(rug_perspective)
-    push_all_points(2, -model_distance);  
-  
   return;
   }
 
@@ -988,102 +983,29 @@ vector<glhr::ct_vertex> ct_array;
 
 vector<glhr::ct_vertex> cp_array;
 
+basic_textureinfo tinf;
+
 void drawTriangle(triangle& t) {
-  int num = t.m[2] ? 3 : 2;
-  for(int i=0; i<num; i++) {
+  for(int i=0; i<3; i++) {
+    if(!t.m[i]) return;
     if(!t.m[i]->valid) return;
-    // if(t.m[i]->dist >= get_sightrange()+.51) return;
     }
-  dt++;
-
-#if CAP_ODS
-  if(vid.stereo_mode == sODS) {
-    hyperpoint pts[3];
-
-    // not implemented
-    if(num == 2) return; 
-
-    for(int i=0; i<num; i++)
-      pts[i] = t.m[i]->getglue()->native;    
-      
-    hyperpoint hc = (pts[1] - pts[0]) ^ (pts[2] - pts[0]);  
-    double hch = hypot_d(3, hc);
-    
-    ld col = (2 + hc[0]/hch) / 3;
-    
-    bool natsph = among(gwhere, gSphere, gElliptic);
-    
-    bool ok = true;
-    array<hyperpoint, 6> h;
-    for(int eye=0; eye<2; eye++) {
-      if(true) {
-        for(int i=0; i<3; i++)
-          ok = ok && project_ods(pts[i], h[i], h[i+3], eye);
-        if(!ok) return;
-        for(int i=0; i<6; i++) {
-          // let Delta be from 0 to 2PI
-          if(h[i][2]<0) h[i][2] += 2 * M_PI;
-          // Theta is from -PI/2 to PI/2. Let it be from 0 to PI
-          h[i][1] += (eye?-1:1) * M_PI/2;
-          }
-        }
-      else {
-        for(int i=0; i<6; i++) 
-          h[i][0] = -h[i][0],
-          h[i][1] = -h[i][1],
-          h[i][2] = 2*M_PI-h[i][2];
-        }
-      if(natsph) {
-        if(raddif(h[4][0], h[0][0]) < raddif(h[1][0], h[0][0]))
-          swap(h[1], h[4]);
-        if(raddif(h[5][0], h[0][0]) < raddif(h[2][0], h[0][0]))
-          swap(h[5], h[2]);
-        }
-      else {
-        if(h[0][2] < 0) swap(h[0], h[3]);
-        if(h[1][2] < 0) swap(h[1], h[4]);
-        if(h[2][2] < 0) swap(h[2], h[5]);
-        }
-      if(abs(h[1][1] - h[0][1]) > M_PI/2) return;
-      if(abs(h[2][1] - h[0][1]) > M_PI/2) return;
-      cyclefix(h[1][0], h[0][0]);
-      cyclefix(h[2][0], h[0][0]);
-      cyclefix(h[4][0], h[3][0]);
-      cyclefix(h[5][0], h[3][0]);
-      for(int s: {0, 3}) {
-        int fst = 0, lst = 0;
-        if(h[s+1][0] < -M_PI || h[s+2][0] < -M_PI) lst++;
-        if(h[s+1][0] > +M_PI || h[s+2][0] > +M_PI) fst--;
-        for(int x=fst; x<=lst; x++) for(int i=0; i<3; i++) {
-          ct_array.emplace_back(
-            point31(h[s+i][0] + 2*M_PI*x, h[s+i][1], h[s+i][2]),
-            t.m[i]->x1, t.m[i]->y1,
-            col);
-          }
-        if(!natsph) break;
-        }
-      }
-    return;
-    }
-#endif  
-
-  int spherepoints = 0;
-  array<hyperpoint,3> h;
-  for(int i=0; i<num; i++) {
-    h[i] = t.m[i]->native;
-    // todo if(rug_elliptic() && h[i][3] > 0) { h[i] = -h[i]; spherepoints++; }
-    }
-  if(spherepoints == 1 || spherepoints == 2) return;
   
+  /*
   ld col = 1;
   if(num == 3) {
     hyperpoint hc = (h[1] - h[0]) ^ (h[2] - h[0]);  
     double hch = hypot_d(3, hc);  
     col = (2 + hc[0]/hch) / 3;
     }
-  
-  for(int i=0; i<num; i++) 
-    (num==3?ct_array:cp_array).emplace_back(h[i], t.m[i]->x1, t.m[i]->y1, col);
+  */
+
+  for(int i=0; i<3; i++)  {
+    if(t.m[i]->native[3] != 1)
+      println(hlog, "bad point: ", t.m[i]->native);
+    curvepoint(t.m[i]->native);
+    tinf.tvertices.push_back(glhr::pointtogl(point3(t.m[i]->x1, t.m[i]->y1, 0)));
+    }
   }
 
 EX struct renderbuffer *glbuf;
@@ -1137,114 +1059,39 @@ EX GLuint alternate_texture;
 
 EX bool invert_depth;
 
-EX void drawRugScene() {
-  glbuf->use_as_texture();
-  if(alternate_texture)
-    glBindTexture( GL_TEXTURE_2D, alternate_texture);
+EX bool rug_control() { return rug::rugged; }
 
-  if(backcolor == 0) 
-    glClearColor(0.05f,0.05f,0.05f,1.0f);
-  else
-    glhr::colorClear(backcolor << 8 | 0xFF);
-#ifdef GLES_ONLY
-  glClearDepthf(invert_depth ? -1.0f : 1.0f);
-#else
-  glClearDepth(invert_depth ? -1.0f : 1.0f);
+#if HDR
+
+struct using_rugview {
+  using_rugview() { if(rug_control()) swap(View, rugView), swap(geometry, gwhere); }
+  ~using_rugview() { if(rug_control()) swap(View, rugView), swap(geometry, gwhere); }
+  };
+
 #endif
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+EX void drawRugScene() {
+  USING_NATIVE_GEOMETRY;
+  tinf.texture_id = alternate_texture ? alternate_texture : glbuf->renderedTexture;
+  tinf.tvertices.clear();
   
-  glDisable(GL_BLEND);
-  current_display->next_shader_flags = GF_VARCOLOR | GF_TEXTURE;
-  glhr::set_depthtest(true);
-  glhr::set_depthwrite(true);
-  glDepthFunc(invert_depth ? GL_GREATER : GL_LESS);
+  ptds.clear();
   
-  for(int ed=current_display->stereo_active() && vid.stereo_mode != sODS ? -1 : 0; ed < 2; ed += 2) {
-    use_precompute = false;
-    ct_array.clear();
-    cp_array.clear();
-    if(ed == 1 && vid.stereo_mode == sAnaglyph)
-      glClear(GL_DEPTH_BUFFER_BIT);
-    
-    dynamicval<eModel> p(pmodel, mdManual);
-    current_display->set_all(ed);
-    eyewidth_translate(ed);
+  for(auto t: triangles) drawTriangle(t);
+  
+  auto& rug = queuecurve(0, 0xFFFFFFFF, PPR::LINE);
+  
+  println(hlog, "rugView = ", rugView);
+  
+  rug.V = rugView;
+  rug.offset_texture = 0;
+  rug.tinf = &tinf;
+  rug.flags = POLY_TRIANGLES;
 
-    if(glhr::current_glprogram->uLevelLines != -1)
-      glUniform1f(glhr::current_glprogram->uLevelLines, levellines);
-
-    if(vid.stereo_mode == sODS) {
-      glhr::projection_multiply(glhr::ortho(M_PI, M_PI, 100)); // 2*M_PI));
-      }
-    else if(rug_perspective || current_display->stereo_active()) {
-
-      xview = current_display->tanfov;
-      yview = current_display->tanfov * vid.yres / vid.xres;
-      
-      glhr::projection_multiply(glhr::frustum(xview, yview, lowrug, hirug));
-      xview = -xview; yview = -yview;
-
-      if(!rug_perspective) 
-        glhr::projection_multiply(glhr::translate(0, 0, -model_distance));
-      if(ed) {
-        if(gwhere == gEuclid)
-          glhr::projection_multiply(glhr::translate(vid.ipd*ed/2, 0, 0));
-        else {
-          use_precompute = true;
-          for(auto p: points) {
-            p->precompute = p->native;
-            push_point(p->precompute, 0, vid.ipd*ed/2);
-            }
-          }
-        }
-      }
-    else {
-      xview = current_display->tanfov * model_distance;
-      yview = current_display->tanfov * model_distance * vid.yres / vid.xres;
-      // glOrtho(-xview, xview, yview, -yview, -1000, 1000);
-
-      glhr::projection_multiply(glhr::ortho(xview, yview, -1000));
-      }
-    glhr::color2(0xFFFFFFFF);
-    
-    glhr::fog_max(
-      no_fog ? 1000 :
-      gwhere == gSphere && rug_perspective ? 10 : 
-      gwhere == gElliptic && rug_perspective ? 4 :
-      100,
-      darkena(backcolor, 0, 0xFF)
-      );
-    GLERR("fog_max");
-      
-    for(int t=0; t<isize(triangles); t++)
-      drawTriangle(triangles[t]);
-      
-    glhr::id_modelview();
-    
-    if(isize(ct_array) > 0) {
-      glhr::prepare(ct_array);
-      glDrawArrays(GL_TRIANGLES, 0, isize(ct_array));
-      }
-
-    GLERR("rugz");
-    if(isize(cp_array) > 0) {
-      glhr::prepare(cp_array);
-      glLineWidth(lwidth);
-      glDrawArrays(GL_LINES, 0, isize(cp_array));
-      }
-    GLERR("rugt");
-
-    current_display->set_mask(0);
-    GLERR("afterrug");
-    }
-
-  glEnable(GL_BLEND);
-
-  if(rug_failure) {
-    rug::close();
-    rug::clear_model();
-    rug::init();
-    }
+  dynamicval<eModel> p(pmodel, rug_projection);
+  
+  drawqueue();
   }
 
 // organization
@@ -1326,10 +1173,19 @@ EX void init_model() {
     }
   }
 
+EX void reset_view() {
+  rugView = Id;
+  if(perspective()) {
+    using_rugview urv;
+    shift_view(ztangent(model_distance));
+    }
+  }
+
 EX void init() {
   if(dual::state) return;
   reopen();
   if(rugged) init_model();
+  reset_view();
   }
 
 EX void clear_model() {
@@ -1349,20 +1205,6 @@ EX void close() {
 int lastticks;
 
 ld protractor = 0;
-
-EX void apply_rotation(const transmatrix& t) {
-  if(!rug_perspective) currentrot = t * currentrot;
-  #if CAP_CRYSTAL
-  if(in_crystal()) crystal::apply_rotation(t);
-  else
-  #endif
-  for(auto p: points) p->native = t * p->native;
-  }
-
-EX void move_forward(ld distance) {
-  if(rug_perspective) push_all_points(2, distance);
-  else model_distance /= exp(distance);
-  }
 
 #define CAP_HOLDKEYS (CAP_SDL && !ISWEB)
 
@@ -1388,7 +1230,7 @@ EX bool handlekeys(int sym, int uni) {
       crystal::switch_z_coordinate();
     else
     #endif
-      apply_rotation(cspin(0, 2, M_PI));
+      rotate_view(cspin(0, 2, M_PI));
     return true;
     }
   else if(NUMBERKEY == '3') {
@@ -1397,7 +1239,7 @@ EX bool handlekeys(int sym, int uni) {
       crystal::flip_z();
     else
     #endif
-      apply_rotation(cspin(0, 2, M_PI/2));
+      rotate_view(cspin(0, 2, M_PI/2));
     return true;
     }
   #if CAP_CRYSTAL
@@ -1406,22 +1248,6 @@ EX bool handlekeys(int sym, int uni) {
     return true;
     }
   #endif
-#if !CAP_HOLDKEYS
-  else if(sym == SDLK_PAGEUP || uni == '[') {
-    move_forward(.1);
-    return true;
-    }
-  else if(sym == SDLK_PAGEDOWN || uni == ']') {
-    move_forward(-.1);
-    return true;
-    }
-  else if(sym == SDLK_HOME)  { apply_rotation(cspin(0, 1, .1)); return true; }
-  else if(sym == SDLK_END)   { apply_rotation(cspin(1, 0, .1)); return true; }
-  else if(sym == SDLK_DOWN)  { apply_rotation(cspin(2, 1, .1)); return true; }
-  else if(sym == SDLK_UP)    { apply_rotation(cspin(1, 2, .1)); return true; }
-  else if(sym == SDLK_LEFT)  { apply_rotation(cspin(2, 0, .1)); return true; }
-  else if(sym == SDLK_RIGHT) { apply_rotation(cspin(0, 2, .1)); return true; }
-#endif
   else return false;
   }
 
@@ -1451,29 +1277,16 @@ EX void actDraw() {
   physics();
   drawRugScene();
   
-  #if CAP_ORIENTATION
-  if(!when_enabled) ticks = when_enabled;
-  if(ticks < when_enabled + 500)
-    last_orientation = getOrientation();
-  else {
-    transmatrix next_orientation = getOrientation();
-    apply_rotation(inverse(next_orientation) * last_orientation);
-    last_orientation = next_orientation;
-    }        
-  #endif
-  
-  int qm = 0;
   double alpha = (ticks - lastticks) / 1000.0;
   lastticks = ticks;
 
-  if(ruggo) move_forward(ruggo * alpha);
+  // if(ruggo) move_forward(ruggo * alpha);
 
   #if CAP_HOLDKEYS
   Uint8 *keystate = SDL_GetKeyState(NULL);
   if(keystate[SDLK_LALT]) alpha /= 10;
+  #endif
 
-  transmatrix t = Id;
-  
   auto perform_finger = [=] () {
     if(keystate[SDLK_HOME]) finger_range /= exp(alpha);
     if(keystate[SDLK_END]) finger_range *= exp(alpha);
@@ -1485,71 +1298,9 @@ EX void actDraw() {
     if(keystate[SDLK_PAGEUP]) finger_on(2, +alpha);
     };
 
-  if(cmode & sm::NUMBER) {
-    }
-  else if(rug_perspective) {
+  if(finger_center)
+    perform_finger();
     
-    ld strafex = 0, strafey = 0, push = 0;
-
-    if(finger_center) 
-      perform_finger();
-    else {
-      if(keystate[SDLK_HOME]) qm++, t = t * cspin(0, 1, alpha), protractor += alpha;
-      if(keystate[SDLK_END]) qm++, t = t * cspin(1, 0, alpha), protractor -= alpha;
-      if(!keystate[SDLK_LSHIFT]) {
-        if(keystate[SDLK_DOWN]) qm++, t = t * cspin(2, 1, alpha), protractor += alpha;
-        if(keystate[SDLK_UP]) qm++, t =  t * cspin(1, 2, alpha), protractor -= alpha;
-        if(keystate[SDLK_LEFT]) qm++, t = t * cspin(2, 0, alpha), protractor += alpha;
-        if(keystate[SDLK_RIGHT]) qm++, t =  t * cspin(0, 2, alpha), protractor -= alpha;
-        }
-      if(keystate[SDLK_PAGEDOWN]) push -= alpha;
-      if(keystate[SDLK_PAGEUP]) push += alpha;
-      
-      if(keystate[SDLK_LSHIFT]) {    
-        if(keystate[SDLK_LEFT]) strafex += alpha;
-        if(keystate[SDLK_RIGHT]) strafex -= alpha;
-        if(keystate[SDLK_UP]) strafey -= alpha;
-        if(keystate[SDLK_DOWN]) strafey += alpha;
-        }
-      }
-
-    if(qm) {
-      if(keystate[SDLK_LCTRL]) 
-        push_all_points(2, +model_distance);
-      apply_rotation(t);
-      if(keystate[SDLK_LCTRL]) 
-        push_all_points(2, -model_distance);
-      }
-    
-    model_distance -= push;
-    push_all_points(2, push * ruggospeed);
-    push_all_points(0, strafex * ruggospeed);
-    push_all_points(1, strafey * ruggospeed);
-    }
-  else {
-    USING_NATIVE_GEOMETRY;
-    if(finger_center)
-      perform_finger();
-    else {
-      if(keystate[SDLK_HOME] && !in_crystal()) qm++, t = inverse(currentrot);
-      if(keystate[SDLK_END]) {
-        qm++;
-        if(in_crystal()) t = t * cspin(0, 1, alpha);
-        else t = currentrot * cspin(0, 1, alpha) * inverse(currentrot);
-        }
-      if(keystate[SDLK_DOWN]) qm++, t = t * cspin(1, 2, alpha);
-      if(keystate[SDLK_UP]) qm++, t =  t * cspin(2, 1, alpha);
-      if(keystate[SDLK_LEFT]) qm++, t = t * cspin(0, 2, alpha);
-      if(keystate[SDLK_RIGHT]) qm++, t =  t * cspin(2, 0, alpha);
-      if(keystate[SDLK_PAGEUP]) model_distance /= exp(alpha * ruggospeed);
-      if(keystate[SDLK_PAGEDOWN]) model_distance *= exp(alpha * ruggospeed);
-      }
-  
-    if(qm) {
-      apply_rotation(t);
-      }
-    }
-  #endif
     }
   catch(rug_exception) {
     rug::close();
@@ -1610,7 +1361,7 @@ EX hyperpoint gethyper(ld x, ld y) {
     tx /= det; ty /= det;
     if(tx >= 0 && ty >= 0 && tx+ty <= 1) {
       double rz1 = p0[2] * (1-tx-ty) + p1[2] * tx + p2[2] * ty;
-      rz1 = -rz1; if(!rug_perspective) rz1 += model_distance;
+      rz1 = -rz1;
       if(rz1 < radar_distance) {
         radar_distance = rz1;
         rx1 = r0->x1 + (r1->x1 - r0->x1) * tx + (r2->x1 - r0->x1) * ty;
@@ -1710,9 +1461,8 @@ EX void show() {
     dialog::lastItem().value += " (" + its(qvalid) + ")";
   
   dialog::addSelItem(XLAT("model distance"), fts(model_distance), 'd');
-  dialog::addBoolItem(XLAT("projection"), rug_perspective, 'p');
-  dialog::lastItem().value = XLAT(rug_perspective ? "perspective" : 
-    rug_euclid() ? "orthogonal" : "azimuthal equidistant");
+  { USING_NATIVE_GEOMETRY;
+  dialog::addSelItem(XLAT("projection"), models::get_model_name(rug_projection), 'p'); }
   if(!rug::rugged)
     dialog::addSelItem(XLAT("native geometry"), geometry_name(gwhere), 'n');
   else
@@ -1828,13 +1578,7 @@ EX void show() {
         }
       }
     else if(uni == 'p') {
-      rug_perspective = !rug_perspective;
-      if(rugged) {
-        if(rug_perspective) 
-          push_all_points(2, -model_distance);
-        else
-          push_all_points(2, +model_distance);
-        }
+      rug_projection = rug_projection == mdEquidistant ? mdPerspective : mdEquidistant;
       }
     else if(uni == 'd') {
       dialog::editNumber(model_distance, -10, 10, .1, 1, XLAT("model distance"), 
@@ -1843,8 +1587,9 @@ EX void show() {
         );
       old_distance = model_distance;
       dialog::reaction = [] () { 
-        if(rug::rugged && rug_perspective) {
-          push_all_points(2, old_distance - model_distance);
+        if(rug::rugged && perspective()) {
+          using_rugview rv;
+          shift_view(ztangent(old_distance - model_distance));
           }
         old_distance = model_distance;
         };
@@ -1899,7 +1644,7 @@ int rugArgs() {
     }
 
   else if(argis("-rugpers")) {
-    rug_perspective = true;
+    rug_projection = mdPerspective;
     }
 
   else if(argis("-rugonce")) {
@@ -1928,7 +1673,7 @@ int rugArgs() {
     }
 
   else if(argis("-rugorth")) {
-    rug_perspective = false;
+    rug_projection = mdEquidistant;
     }
 
   else if(argis("-rugerr")) {

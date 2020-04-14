@@ -308,9 +308,7 @@ EX void handlePanning(int sym, int uni) {
     if(sym == PSEUDOKEY_WHEELDOWN) shift_view(ztangent(0.05*shiftmul)), didsomething = true, playermoved = false;
     }
 
-  if(rug::rugged || smooth_scrolling) {
-    return;
-    }
+  rug::using_rugview urv;
     
 #if !ISPANDORA
   if(sym == SDLK_END && GDIM == 3) { 
@@ -353,26 +351,26 @@ EX void handlePanning(int sym, int uni) {
     }
 #endif
   if(sym == SDLK_PAGEUP) {
-    if(history::on)
+    if(history::on && !rug::rug_control())
       models::rotation++;
     else
       rotate_view(spin(M_PI/cgi.S21/2*shiftmul)), didsomething = true;
     }
   if(sym == SDLK_PAGEDOWN) {
-    if(history::on)
+    if(history::on && !rug::rug_control())
       models::rotation++;
     else
       rotate_view(spin(-M_PI/cgi.S21/2*shiftmul)), didsomething = true;
     }
   
   if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
-    if(isGravityLand(cwt.at->land)) playermoved = false;
+    if(isGravityLand(cwt.at->land) && !rug::rug_control()) playermoved = false;
 
   if(sym == PSEUDOKEY_WHEELUP && GDIM == 2) {
     ld jx = (mousex - current_display->xcenter - .0) / current_display->radius / 10;
     ld jy = (mousey - current_display->ycenter - .0) / current_display->radius / 10;
     playermoved = false;
-    View = gpushxto0(hpxy(jx, jy)) * View;
+    rotate_view(gpushxto0(hpxy(jx, jy)));
     sym = 1;
     }
   }
@@ -493,8 +491,12 @@ EX void handleKeyNormal(int sym, int uni) {
     pushScreen(inv::show);
 #endif
   
-  if(((sym == SDLK_HOME && GDIM == 2) || sym == SDLK_F3 || sym == ' ') && DEFAULTNOR(sym)) 
-    fullcenter();
+  if(((sym == SDLK_HOME && GDIM == 2) || sym == SDLK_F3 || sym == ' ') && DEFAULTNOR(sym)) {
+    if(rug::rug_control())
+      rug::reset_view();
+    else
+      fullcenter();
+    }
   
   if(sym == 'v' && DEFAULTNOR(sym)) 
     pushScreen(showMainMenu);
@@ -696,7 +698,8 @@ EX void mainloopiter() {
     #endif
     }
   
-  if(smooth_scrolling && !shmup::on && !rug::rugged) {
+  if(smooth_scrolling && !shmup::on) {
+    rug::using_rugview urv;
     static int lastticks;
     ld t = (ticks - lastticks) * shiftmul / 1000.;
     lastticks = ticks;
