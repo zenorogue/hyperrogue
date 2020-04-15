@@ -35,6 +35,7 @@ static const int POLY_TRIANGLES = (1<<22);      // made of TRIANGLES, not TRIANG
 static const int POLY_INTENSE = (1<<23);        // extra intense colors
 static const int POLY_DEBUG = (1<<24);          // debug this shape
 static const int POLY_PRINTABLE = (1<<25);      // these walls are printable
+static const int POLY_FAT = (1<<26);            // fatten this model in WRL export (used for Rug)
 
 /** \brief A graphical element that can be drawn. Objects are not drawn immediately but rather queued.
  *

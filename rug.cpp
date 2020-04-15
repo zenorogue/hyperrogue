@@ -1076,7 +1076,7 @@ EX void drawRugScene() {
   rug.V = rugView;
   rug.offset_texture = 0;
   rug.tinf = &tinf;
-  rug.flags = POLY_TRIANGLES;
+  rug.flags = POLY_TRIANGLES | POLY_FAT | POLY_PRINTABLE;
 
   dynamicval<eModel> p(pmodel, rug_projection);
   

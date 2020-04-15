@@ -244,6 +244,8 @@ EX always_false in;
   
   EX bool print;
   
+  EX ld rug_width = .01;
+  
   fhstream f;
   
   string coord(ld val) {
@@ -263,6 +265,68 @@ EX always_false in;
     char buf[100];
     snprintf(buf, 100, "%.3f %.3f %.3f", part(col, 0)*v/255, part(col, 1)*v/255, part(col, 2)*v/255);
     return buf;
+    }
+  
+  typedef unsigned long long hashtype;
+  hashtype hash(ld x) { return hashtype(x * 1000000 + .5); }
+  
+  hashtype hash(hyperpoint h) {
+    return hash(h[0]) + 7 * hash(h[1]) + 13 * hash(h[2]);
+    }
+  
+  EX void fatten(vector<hyperpoint>& data) {
+    map<hashtype, hyperpoint> normals;
+    for(int i=0; i<isize(data); i++) 
+      normals[hash(data[i])] = Hypc;
+    for(int i=0; i<isize(data); i++) {
+      int j = i%3 ? i-1 : i+2;
+      int k = j%3 ? j-1 : j+2;
+      hyperpoint normal = (data[j] - data[i]) ^ (data[k] - data[i]);
+      normal[3] = 0;
+      if(sqhypot_d(3, normal) < 1e-6) {
+        println(hlog, "bug ", tie(data[i], data[j], data[k]));
+        }
+      normal /= hypot_d(3, normal);
+      auto& res = normals[hash(data[i])];
+      ld q = res[3];
+      if((res | normal) < 0) res -= normal;
+      else res += normal;
+      res[3] = q + 1;
+      }
+    for(auto& p: normals) {
+      auto w = hypot_d(3, p.second);
+      if(w == 0) println(hlog, "width is 0, ", p.second, " appeared ", p.second[3], " times");
+      if(isnan(w)) println(hlog, "width is NAN, ", p.second, " appeared ", p.second[3], " times");
+      p.second = p.second * (rug_width / w);
+      }
+    vector<hyperpoint> data2;
+    for(int i=0; i<isize(data); i+=3) {
+      auto a = data[i], b = data[i+1], c = data[i+2];
+      hyperpoint normal = (b-a) ^ (c-a);
+      auto na = normals[hash(a)];
+      auto nb = normals[hash(b)];
+      auto nc = normals[hash(c)];
+      if((normal | na) > 0) na = -na;
+      if((normal | nb) > 0) nb = -nb;
+      if((normal | nc) > 0) nc = -nc;
+      bool bad = false;
+      for(int i=0; i<3; i++) {
+        if(isnan(na[i]) || isnan(nb[i]) || isnan(nc[i])) bad = true;
+        }
+      if(bad) {
+        println(hlog, "bad vertex");
+        continue;
+        }
+      data2.push_back(a+na); data2.push_back(b+nb); data2.push_back(c+nc);
+      data2.push_back(b+nb); data2.push_back(a+na); data2.push_back(a-na);
+      data2.push_back(b+nb); data2.push_back(a-na); data2.push_back(b-nb);
+      data2.push_back(c+nc); data2.push_back(b+nb); data2.push_back(b-nb);
+      data2.push_back(c+nc); data2.push_back(b-nb); data2.push_back(c-nc);
+      data2.push_back(a+na); data2.push_back(c+nc); data2.push_back(c-nc);
+      data2.push_back(a+na); data2.push_back(c-nc); data2.push_back(a-na);
+      data2.push_back(b-nb); data2.push_back(a-na); data2.push_back(c-nc);
+      }
+    data = data2;
     }
   
   EX void polygon(dqi_poly& p) {
@@ -288,7 +352,11 @@ EX always_false in;
       h = p.V * d;
       applymodel(h, d);
       }
-    if(print) {
+    if(print && (p.flags & POLY_FAT)) {
+      fatten(data);
+      p.cnt = isize(data);
+      }
+    else if(print) {
       hyperpoint ctr1;
       applymodel(p.V * p.intester, ctr1);
       ld sdet = 0;
