@@ -2938,6 +2938,10 @@ int read_pattern_args() {
         lp->color = arghex();
     }
 
+  else if(argis("-fat-edges")) {
+    PHASEFROM(2); shift(); fat_edges = argi();
+    }
+
   else if(argis("-palw")) {
     PHASEFROM(2); 
     shift(); string ss = args();
