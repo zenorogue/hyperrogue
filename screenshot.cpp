@@ -336,6 +336,7 @@ EX always_false in;
     println(f, "  appearance Appearance {");
     println(f, "    material Material {");
     println(f, "      diffuseColor ", color(p.color, .8));
+    if(part(p.color, 0) != 255) println(f, "      transparency ", (255 - part(p.color, 0)) / 255.);
     println(f, "      }");
     println(f, "    }");
     // println(f, "# V = ", p.V);
@@ -402,6 +403,7 @@ EX always_false in;
   
   EX void take(const string& fname, const function<void()>& what IS(shot::default_screenshot_content)) {
     dynamicval<bool> v2(in, true);
+    dynamicval<bool> v3(noshadow, true);
     
     f.f = fopen(fname.c_str(), "wt");
     
