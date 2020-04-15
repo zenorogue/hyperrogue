@@ -233,6 +233,89 @@ auto ah = addHook(hooks_args, 0, read_args);
 #endif
 EX }
 
+/** wrl renderer */
+EX namespace wrl {
+#if !CAP_WRL
+EX always_false in;
+#endif
+
+#if CAP_WRL
+  EX bool in;
+  
+  fhstream f;
+  
+  string coord(ld val) {
+    char buf[100];
+    snprintf(buf, 100, "%f", val);
+    return buf;
+    }
+
+  string coord(const hyperpoint& v, int q) {
+    char buf[100];
+    if(q == 3) snprintf(buf, 100, "%f, %f, %f", v[0], v[1], v[2]);
+    if(q == 2) snprintf(buf, 100, "%f, %f", v[0], v[1]);
+    return buf;
+    }
+  
+  string color(color_t col, ld v) {
+    char buf[100];
+    snprintf(buf, 100, "%.3f %.3f %.3f", part(col, 0)*v/255, part(col, 1)*v/255, part(col, 2)*v/255);
+    return buf;
+    }
+  
+  EX void polygon(dqi_poly& p) {
+    if(!(p.flags & POLY_TRIANGLES)) return;
+    println(f, "Shape {");     
+    println(f, "  appearance Appearance {");
+    println(f, "    material Material {");
+    println(f, "      diffuseColor ", color(p.color, .8));
+    println(f, "      }");
+    println(f, "    }");
+    // println(f, "# V = ", p.V);
+    println(f, "  geometry IndexedFaceSet {");    
+    println(f, "    coord Coordinate {");
+    println(f, "      point [");
+    for(int i=0; i<p.cnt; i++) {
+      glvertex v = p.tab[0][p.offset+i];
+      hyperpoint h = p.V * glhr::gltopoint(v);
+      // println(f, "#      ", glhr::gltopoint(v));
+      hyperpoint h1;
+      applymodel(h, h1);
+      println(f, "       ", coord(h1, 3), ",");
+      }
+    println(f, "        ]");
+    println(f, "      }");
+    println(f, "    coordIndex [");
+    for(int i=0; i<p.cnt; i+=3) {
+      println(f, "        ", i, " ", i+1, " ", i+2, " -1,");
+      }
+    println(f, "      ]");
+    println(f, "    creaseAngle 0.0 convex FALSE solid TRUE ccw FALSE");
+    println(f, "    }");
+    println(f, "  }");
+    }                          
+  
+  EX void render() {
+    for(auto& p: ptds) {
+      auto p2 = dynamic_cast<dqi_poly*>(&*p);
+      if(p2)
+        polygon(*p2);
+      }
+    }
+  
+  EX void take(const string& fname, const function<void()>& what IS(shot::default_screenshot_content)) {
+    dynamicval<bool> v2(in, true);
+    
+    f.f = fopen(fname.c_str(), "wt");
+    
+    println(f, "#VRML V2.0 utf8");
+    println(f, "WorldInfo { title \"3D model exported from HyperRogue\" info [ \"3D models exported from HyperRogue are public domain\" ] }");
+    
+    ptds.clear();
+    what();
+    }
+#endif
+EX }
 
 #if CAP_PNG
 void IMAGESAVE(SDL_Surface *s, const char *fname) {
@@ -250,6 +333,7 @@ purehookset hooks_hqshot;
 EX int shotx = 2000;
 EX int shoty = 2000;
 EX bool make_svg = false;
+EX bool make_wrl = false;
 EX bool transparent = true;
 EX ld gamma = 1;
 EX int shotformat = -1;
@@ -351,8 +435,14 @@ EX void take(string fname, const function<void()>& what IS(default_screenshot_co
   calcparam();
   models::configure();
   callhooks(hooks_take);
+
+  if(make_wrl) {
+    #if CAP_WRL
+    wrl::take(fname);
+    #endif
+    }
   
-  if(make_svg) {
+  else if(make_svg) {
     #if CAP_SVG
     svg::render(fname, what);
     #endif
@@ -416,6 +506,12 @@ int png_read_args() {
     }
   else if(argis("-shotaa")) {
     shift(); shot_aa = argi();
+    }
+  else if(argis("-wrlshot")) {
+    PHASE(3); shift(); start_game();
+    printf("saving WRL screenshot to %s\n", argcs());
+    shot::make_wrl = true;
+    shot::take(argcs());
     }
   else return 1;
   return 0;

@@ -2032,6 +2032,9 @@ EX hookset<bool()> *hooks_vr_draw_all;
 #endif
   
 EX void drawqueue() {
+
+  if(wrl::in) { wrl::render(); return; }
+  
   callhooks(hook_drawqueue);
   current_display->next_shader_flags = 0;
   reset_projection();
