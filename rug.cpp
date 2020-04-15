@@ -974,7 +974,7 @@ vector<glhr::ct_vertex> ct_array;
 
 vector<glhr::ct_vertex> cp_array;
 
-basic_textureinfo tinf;
+EX basic_textureinfo tinf;
 
 void drawTriangle(triangle& t) {
   for(int i=0; i<3; i++) {

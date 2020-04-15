@@ -247,6 +247,7 @@ EX always_false in;
   EX ld rug_width = .01;
   
   fhstream f;
+  string filename;
   
   string coord(ld val) {
     char buf[100];
@@ -274,7 +275,7 @@ EX always_false in;
     return hash(h[0]) + 7 * hash(h[1]) + 13 * hash(h[2]);
     }
   
-  EX void fatten(vector<hyperpoint>& data) {
+  EX void fatten(vector<hyperpoint>& data, vector<glvertex>& tdata) {
     map<hashtype, hyperpoint> normals;
     for(int i=0; i<isize(data); i++) 
       normals[hash(data[i])] = Hypc;
@@ -300,6 +301,7 @@ EX always_false in;
       p.second = p.second * (rug_width / w);
       }
     vector<hyperpoint> data2;
+    vector<glvertex> tdata2;
     for(int i=0; i<isize(data); i+=3) {
       auto a = data[i], b = data[i+1], c = data[i+2];
       hyperpoint normal = (b-a) ^ (c-a);
@@ -325,28 +327,45 @@ EX always_false in;
       data2.push_back(a+na); data2.push_back(c+nc); data2.push_back(c-nc);
       data2.push_back(a+na); data2.push_back(c-nc); data2.push_back(a-na);
       data2.push_back(b-nb); data2.push_back(a-na); data2.push_back(c-nc);
+      if(isize(tdata)) {
+        auto ta = tdata[i], tb = tdata[i+1], tc = tdata[i+2];
+        for(auto p: {ta, tb, tc, tb, ta, ta, tb, ta, tb, tc, tb, tb, tc, tb, tc, ta, tc, tc, ta, tc, ta, tb, ta, tc})
+          tdata2.push_back(p);
+        }
       }
     data = data2;
+    tdata = tdata2;
     }
+  
+  bool used_rug;
   
   EX void polygon(dqi_poly& p) {
     if(print && !(p.flags & POLY_PRINTABLE)) return;
     if(!(p.flags & POLY_TRIANGLES)) return;
-    println(f, "Shape {");     
+    println(f, "Shape {");
     println(f, "  appearance Appearance {");
     println(f, "    material Material {");
     println(f, "      diffuseColor ", color(p.color, .8));
     if(part(p.color, 0) != 255) println(f, "      transparency ", (255 - part(p.color, 0)) / 255.);
     println(f, "      }");
+    if(p.tinf && p.tinf == &rug::tinf) {
+      println(f, "    texture ImageTexture {");
+      println(f, "      url \"", filename, "-rug.png\"");
+      println(f, "      }");
+      used_rug = true;
+      }      
     println(f, "    }");
     // println(f, "# V = ", p.V);
     println(f, "  geometry IndexedFaceSet {");    
     println(f, "    coord Coordinate {");
-    println(f, "      point [");
+
     vector<hyperpoint> data;
+    vector<glvertex> tdata;
     for(int i=0; i<p.cnt; i++) {
       glvertex v = p.tab[0][p.offset+i];
       data.push_back(glhr::gltopoint(v));
+      if(p.tinf) 
+        tdata.push_back(p.tinf->tvertices[p.offset_texture+i]);
       }
     for(auto& d: data) {
       hyperpoint h;
@@ -354,7 +373,7 @@ EX always_false in;
       applymodel(h, d);
       }
     if(print && (p.flags & POLY_FAT)) {
-      fatten(data);
+      fatten(data, tdata);
       p.cnt = isize(data);
       }
     else if(print) {
@@ -372,14 +391,28 @@ EX always_false in;
           }
         if(sdet > 0)
           for(int i=0; i<p.cnt; i+=3) 
-            swap(data[i+1], data[i+2]);
+            swap(data[i+1], data[i+2]),
+            swap(tdata[i+1], tdata[i+2]);
         }
       }    
+
+    println(f, "      point [");
     for(int i=0; i<p.cnt; i++) {
       println(f, "       ", coord(data[i], 3), ",");
       }
     println(f, "        ]");
     println(f, "      }");
+
+    if(p.tinf) {
+      println(f, "      texCoord TextureCoordinate {");
+      println(f, "        point [");
+      for(int i=0; i<p.cnt; i++) {
+        println(f, "          ", coord(tdata[i][0]), " ", coord(tdata[i][1]), ",");
+        }
+      }
+    println(f, "        ]");
+    println(f, "      }");
+
     println(f, "    coordIndex [");
     for(int i=0; i<p.cnt; i+=3) {
       println(f, "        ", i, " ", i+1, " ", i+2, " -1,");
@@ -404,6 +437,7 @@ EX always_false in;
   EX void take(const string& fname, const function<void()>& what IS(shot::default_screenshot_content)) {
     dynamicval<bool> v2(in, true);
     dynamicval<bool> v3(noshadow, true);
+    filename = fname;
     
     f.f = fopen(fname.c_str(), "wt");
     
@@ -412,6 +446,15 @@ EX always_false in;
     
     ptds.clear();
     what();
+    
+    if(used_rug) {
+      resetbuffer rb;
+      rug::glbuf->enable();
+      SDL_Surface *s = rug::glbuf->render();
+      dynamicval<int> dx(shot::shotx, rug::texturesize);
+      dynamicval<int> dy(shot::shoty, rug::texturesize);
+      shot::postprocess(filename + "-rug.png", s, s);
+      }
     }
 #endif
 EX }
@@ -471,7 +514,7 @@ EX void default_screenshot_content() {
   }
 
 #if CAP_PNG
-void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
+EX void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
   if(gamma == 1 && shot_aa == 1 && sdark == sbright) {
     IMAGESAVE(sdark, fname.c_str());
     return;
