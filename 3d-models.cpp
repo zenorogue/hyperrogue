@@ -1254,7 +1254,16 @@ hpcshape& geometry_information::generate_pipe(ld length, ld width) {
       }
     }
 
-  last->flags |= POLY_TRIANGLES;
+  for(int a=0; a<MAX_R; a++) {
+    hpcpush(at(MAX_X, a));
+    hpcpush(at(MAX_X, a+1));
+    hpcpush(xpush0(length));
+    hpcpush(at(MAX_X, a+1));
+    hpcpush(at(MAX_X, a));
+    hpcpush(C0);
+    }
+
+  last->flags |= POLY_TRIANGLES | POLY_PRINTABLE;
   add_texture(*last);
   finishshape();
   extra_vertices();
