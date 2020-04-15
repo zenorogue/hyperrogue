@@ -263,7 +263,7 @@ EX always_false in;
   
   string color(color_t col, ld v) {
     char buf[100];
-    snprintf(buf, 100, "%.3f %.3f %.3f", part(col, 0)*v/255, part(col, 1)*v/255, part(col, 2)*v/255);
+    snprintf(buf, 100, "%.3f %.3f %.3f", part(col, 3)*v/255, part(col, 2)*v/255, part(col, 1)*v/255);
     return buf;
     }
   
