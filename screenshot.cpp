@@ -242,6 +242,8 @@ EX always_false in;
 #if CAP_WRL
   EX bool in;
   
+  EX bool print;
+  
   fhstream f;
   
   string coord(ld val) {
@@ -264,6 +266,7 @@ EX always_false in;
     }
   
   EX void polygon(dqi_poly& p) {
+    if(print && !(p.flags & POLY_PRINTABLE)) return;
     if(!(p.flags & POLY_TRIANGLES)) return;
     println(f, "Shape {");     
     println(f, "  appearance Appearance {");
@@ -275,13 +278,36 @@ EX always_false in;
     println(f, "  geometry IndexedFaceSet {");    
     println(f, "    coord Coordinate {");
     println(f, "      point [");
+    vector<hyperpoint> data;
     for(int i=0; i<p.cnt; i++) {
       glvertex v = p.tab[0][p.offset+i];
-      hyperpoint h = p.V * glhr::gltopoint(v);
-      // println(f, "#      ", glhr::gltopoint(v));
-      hyperpoint h1;
-      applymodel(h, h1);
-      println(f, "       ", coord(h1, 3), ",");
+      data.push_back(glhr::gltopoint(v));
+      }
+    for(auto& d: data) {
+      hyperpoint h;
+      h = p.V * d;
+      applymodel(h, d);
+      }
+    if(print) {
+      hyperpoint ctr1;
+      applymodel(p.V * p.intester, ctr1);
+      ld sdet = 0;
+      if(1) {
+        dynamicval<eGeometry> g(geometry, gEuclid);
+        for(int i=0; i<p.cnt; i+=3) {
+          transmatrix T;
+          T[0] = data[i];
+          T[1] = data[i+1];
+          T[2] = data[i+2];
+          sdet += det(T);
+          }
+        if(sdet > 0)
+          for(int i=0; i<p.cnt; i+=3) 
+            swap(data[i+1], data[i+2]);
+        }
+      }    
+    for(int i=0; i<p.cnt; i++) {
+      println(f, "       ", coord(data[i], 3), ",");
       }
     println(f, "        ]");
     println(f, "      }");
@@ -290,7 +316,10 @@ EX always_false in;
       println(f, "        ", i, " ", i+1, " ", i+2, " -1,");
       }
     println(f, "      ]");
-    println(f, "    creaseAngle 0.0 convex FALSE solid TRUE ccw FALSE");
+    if(print)
+      println(f, "    creaseAngle 0.0 convex FALSE solid TRUE ccw FALSE");
+    else
+      println(f, "    creaseAngle 0.0 convex FALSE solid FALSE");
     println(f, "    }");
     println(f, "  }");
     }                          
@@ -507,10 +536,16 @@ int png_read_args() {
   else if(argis("-shotaa")) {
     shift(); shot_aa = argi();
     }
-  else if(argis("-wrlshot")) {
+  else if(argis("-modelshot")) {
     PHASE(3); shift(); start_game();
-    printf("saving WRL screenshot to %s\n", argcs());
-    shot::make_wrl = true;
+    printf("saving WRL model to %s\n", argcs());
+    shot::make_wrl = true; wrl::print = false;
+    shot::take(argcs());
+    }
+  else if(argis("-printshot")) {
+    PHASE(3); shift(); start_game();
+    printf("saving 3D printable model to %s\n", argcs());
+    shot::make_wrl = true; wrl::print = true;
     shot::take(argcs());
     }
   else return 1;

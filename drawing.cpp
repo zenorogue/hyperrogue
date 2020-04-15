@@ -34,6 +34,7 @@ static const int POLY_ALWAYS_IN = (1<<21);      // always draw this
 static const int POLY_TRIANGLES = (1<<22);      // made of TRIANGLES, not TRIANGLE_FAN
 static const int POLY_INTENSE = (1<<23);        // extra intense colors
 static const int POLY_DEBUG = (1<<24);          // debug this shape
+static const int POLY_PRINTABLE = (1<<25);      // these walls are printable
 
 /** \brief A graphical element that can be drawn. Objects are not drawn immediately but rather queued.
  *

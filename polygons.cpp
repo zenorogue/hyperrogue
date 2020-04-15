@@ -756,7 +756,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
   ld yy = log(2) / 2;
 
   bshape(shWall3D[id], PPR::WALL);
-  last->flags |= POLY_TRIANGLES;
+  last->flags |= POLY_TRIANGLES | POLY_PRINTABLE;
   
   hyperpoint center = Hypc;
   int n = isize(vertices);
@@ -842,8 +842,13 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
     hpcpush(mid(C0, hpc[a]));
   if(shWall3D[id].flags & POLY_TRIANGLES)
     last->flags |= POLY_TRIANGLES;
+  if(shWall3D[id].flags & POLY_PRINTABLE)
+    last->flags |= POLY_PRINTABLE;
 
   finishshape();
+  
+  shWall3D[id].intester = C0;
+  shMiniWall3D[id].intester = C0;
 
   shPlainWall3D[id] = shWall3D[id]; // force_triangles ? shWall3D[id] : shWireframe3D[id];
   }
