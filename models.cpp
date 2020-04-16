@@ -227,6 +227,15 @@ EX namespace models {
       among(pmodel, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral, mdSimulatedPerspective, mdTwoHybrid, mdHorocyclic) || mdBandAny();
     }
   
+  EX bool model_is_perspective(eModel m IS(pmodel)) {
+    return among(m, mdPerspective, mdGeodesic);
+    }
+
+  EX bool model_is_3d() {
+    if(GDIM == 3) return true;
+    return pmodel == mdBall || pmodel == mdHyperboloid || pmodel == mdHemisphere || (pmodel == mdSpiral && spiral_cone != 360);
+    }
+  
   EX bool model_has_transition() {
     return among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdBand) && GDIM == 2;
     }
@@ -534,7 +543,7 @@ EX namespace models {
         });
       }
     
-    if(pmodel == mdBall || pmodel == mdHyperboloid || pmodel == mdHemisphere || (pmodel == mdSpiral && spiral_cone != 360)) {
+    if(model_is_3d()) {
       dialog::addSelItem(XLAT("camera rotation in 3D models"), fts(vid.ballangle) + "°", 'b');
       dialog::add_action(config_camera_rotation);
       }

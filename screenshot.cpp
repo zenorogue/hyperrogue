@@ -215,7 +215,7 @@ int read_args() {
   else if(argis("-svgshot")) {
     PHASE(3); shift(); start_game();
     printf("saving SVG screenshot to %s\n", argcs());
-    shot::make_svg = true;
+    shot::format = shot::screenshot_format::svg;
     shot::take(argcs());
     }
   else if(argis("-svgtwm")) {
@@ -243,6 +243,7 @@ EX always_false in;
   EX bool in;
   
   EX bool print;
+  EX bool textures = true;
   
   EX ld rug_width = .01;
   
@@ -264,7 +265,15 @@ EX always_false in;
   
   string color(color_t col, ld v) {
     char buf[100];
-    snprintf(buf, 100, "%.3f %.3f %.3f", part(col, 3)*v/255, part(col, 2)*v/255, part(col, 1)*v/255);
+    ld cols[4];
+    for(int i=0; i<4; i++) {
+
+      cols[i] = part(col, i);
+      cols[i] /= 255;
+      cols[i] = pow(cols[i], shot::gamma) * shot::fade * v;
+      }
+          
+    snprintf(buf, 100, "%.3f %.3f %.3f", cols[3], cols[2], cols[1]);
     return buf;
     }
   
@@ -346,9 +355,10 @@ EX always_false in;
     return make_pair(p.color, p.tinf->tvertices[0]);
     }
 
-  /** 0 = no/unknown texture, 1 = rug, 2 = gradient, 3 = floor texture */
+  /** 0 = no/unknown/disabled texture, 1 = rug, 2 = gradient, 3 = floor texture */
   EX int texture_type(dqi_poly& p) {
     if(!p.tinf) return 0;
+    if(!textures) return 0;
     if(p.tinf == &rug::tinf) return 1;
     if(p.tinf->texture_id == (int) floor_textures->renderedTexture)
       return (p.tinf->tvertices[0][0] == 0) ? 2 : 3;
@@ -484,6 +494,7 @@ EX always_false in;
     filename = fname;
     
     ptds.clear();
+    all_data.clear();
     what();
 
     f.f = fopen(fname.c_str(), "wt");
@@ -558,10 +569,11 @@ EX always_false in;
         color_t col = p.first.first;
         int xs = p.first.second[0] * FLOORTEXTURESIZE - fts_int/2;
         int ys = p.first.second[1] * FLOORTEXTURESIZE - fts_int/2;
+        swap(xs, ys); // I do not understand why
         for(int y=0; y<fts_int; y++)
         for(int x=0; x<fts_int; x++) {
           auto& tgt = qpixel(s, nx*fts_int+x, fts-1-(ny*fts_int+y));
-          auto& src = qpixel(floor, xs+x, ys+y);
+          auto& src = qpixel(floor, xs+x, FLOORTEXTURESIZE-1-(ys+y));
           for(int p=0; p<3; p++)
             part(tgt, p) = (part(src, p) * part(col, p+1) + 127) / 255;
           part(tgt, 3) = 0xFF;
@@ -570,6 +582,9 @@ EX always_false in;
       IMAGESAVE(s, (filename + "-floors.png").c_str());
       SDL_FreeSurface(s);
       }
+    
+    fclose(f.f);
+    f.f = nullptr;
     }
 #endif
 EX }
@@ -587,10 +602,13 @@ EX namespace shot {
 
 purehookset hooks_hqshot;
 
+#if HDR
+enum screenshot_format { png, svg, wrl };
+#endif
+
 EX int shotx = 2000;
 EX int shoty = 2000;
-EX bool make_svg = false;
-EX bool make_wrl = false;
+EX screenshot_format format;
 EX bool transparent = true;
 EX ld gamma = 1;
 EX int shotformat = -1;
@@ -672,12 +690,46 @@ EX void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
 
 EX purehookset hooks_take;
 
+#if CAP_PNG
+void render_png(string fname, const function<void()>& what) {
+  resetbuffer rb;
+
+  renderbuffer glbuf(vid.xres, vid.yres, vid.usingGL);
+  glbuf.enable();
+  current_display->set_viewport(0);
+
+  dynamicval<color_t> v8(backcolor, transparent ? 0xFF000000 : backcolor);
+  #if CAP_RUG
+  if(rug::rugged && !rug::renderonce) rug::prepareTexture();
+  #endif
+  glbuf.clear(backcolor);
+  what();
+  
+  SDL_Surface *sdark = glbuf.render();
+
+  if(transparent) {
+    renderbuffer glbuf1(vid.xres, vid.yres, vid.usingGL);
+    backcolor = 0xFFFFFFFF;
+    #if CAP_RUG
+    if(rug::rugged && !rug::renderonce) rug::prepareTexture();
+    #endif
+    glbuf1.enable();
+    glbuf1.clear(backcolor);
+    current_display->set_viewport(0);
+    what();
+    
+    postprocess(fname, sdark, glbuf1.render());
+    }
+  else postprocess(fname, sdark, sdark);
+  }
+#endif
+
 EX void take(string fname, const function<void()>& what IS(default_screenshot_content)) {
 
   if(cheater) doOvergenerate();
-
+  
   #if CAP_SVG  
-  int multiplier = make_svg ? svg::divby : shot_aa;
+  int multiplier = (format == screenshot_format::svg) ? svg::divby : shot_aa;
   #else
   int multiplier = shot_aa;
   #endif
@@ -696,52 +748,25 @@ EX void take(string fname, const function<void()>& what IS(default_screenshot_co
   calcparam();
   models::configure();
   callhooks(hooks_take);
-
-  if(make_wrl) {
-    #if CAP_WRL
-    wrl::take(fname);
-    #endif
-    }
   
-  else if(make_svg) {
-    #if CAP_SVG
-    svg::render(fname, what);
-    #endif
-    }
-  
-  else {  
-    #if CAP_PNG
-    resetbuffer rb;
-
-    renderbuffer glbuf(vid.xres, vid.yres, vid.usingGL);
-    glbuf.enable();
-    current_display->set_viewport(0);
-
-    dynamicval<color_t> v8(backcolor, transparent ? 0xFF000000 : backcolor);
-    #if CAP_RUG
-    if(rug::rugged && !rug::renderonce) rug::prepareTexture();
-    #endif
-    glbuf.clear(backcolor);
-    what();
-    
-    SDL_Surface *sdark = glbuf.render();
-
-    if(transparent) {
-      renderbuffer glbuf1(vid.xres, vid.yres, vid.usingGL);
-      backcolor = 0xFFFFFFFF;
-      #if CAP_RUG
-      if(rug::rugged && !rug::renderonce) rug::prepareTexture();
+  switch(format) {
+    case screenshot_format::wrl:
+      #if CAP_WRL
+      wrl::take(fname);
       #endif
-      glbuf1.enable();
-      glbuf1.clear(backcolor);
-      current_display->set_viewport(0);
-      what();
-      
-      postprocess(fname, sdark, glbuf1.render());
-      }
-    else postprocess(fname, sdark, sdark);
-    #endif
-    }  
+      return;
+    
+    case screenshot_format::svg:
+      #if CAP_SVG
+      svg::render(fname, what);
+      #endif
+      return;
+    
+    case screenshot_format::png:
+      #if CAP_PNG
+      render_png(fname, what);
+      #endif
+    }
   }
 
 #if CAP_COMMANDLINE
@@ -750,7 +775,7 @@ int png_read_args() {
   if(argis("-pngshot")) {
     PHASE(3); shift(); start_game();
     printf("saving PNG screenshot to %s\n", argcs());
-    make_svg = false;
+    format = screenshot_format::png;
     shot::take(argcs());
     }
   else if(argis("-pngsize")) {
@@ -771,13 +796,13 @@ int png_read_args() {
   else if(argis("-modelshot")) {
     PHASE(3); shift(); start_game();
     printf("saving WRL model to %s\n", argcs());
-    shot::make_wrl = true; wrl::print = false;
+    shot::format = screenshot_format::wrl; wrl::print = false;
     shot::take(argcs());
     }
   else if(argis("-printshot")) {
     PHASE(3); shift(); start_game();
     printf("saving 3D printable model to %s\n", argcs());
-    shot::make_wrl = true; wrl::print = true;
+    shot::format = screenshot_format::wrl; wrl::print = true;
     shot::take(argcs());
     }
   else return 1;
@@ -787,30 +812,116 @@ int png_read_args() {
 auto ah_png = addHook(hooks_args, 0, png_read_args);
 #endif
 
+EX string format_name() {
+  if(format == screenshot_format::svg) return "SVG";
+  if(format == screenshot_format::wrl) return "WRL";
+  if(format == screenshot_format::png) return "PNG";
+  return "?";
+  }
+
+EX string format_extension() {
+  if(format == screenshot_format::svg) return ".svg";
+  if(format == screenshot_format::wrl) return ".wrl";
+  if(format == screenshot_format::png) return ".png";
+  return "?";
+  }
+
+
+EX void choose_screenshot_format() {
+  cmode = sm::SIDE; 
+  gamescreen(0);
+  dialog::init(XLAT("screenshots"), iinf[itPalace].color, 150, 100);
+  #if CAP_PNG
+  dialog::addItem(XLAT("PNG"), 'p');
+  dialog::add_action([] { format = screenshot_format::png; popScreen(); });
+  #endif
+  #if CAP_SVG
+  dialog::addItem(XLAT("SVG"), 's');
+  dialog::add_action([] { format = screenshot_format::svg; popScreen(); });
+  #endif
+  #if CAP_WRL
+  dialog::addItem(XLAT("WRL"), 'w');
+  dialog::add_action([] { format = screenshot_format::wrl; popScreen(); });
+  #endif
+  dialog::addBack();
+  dialog::display();
+  }
+
 EX void menu() {
   cmode = sm::SIDE; 
   gamescreen(0);
-  if(!CAP_SVG) make_svg = false;
-  if(!CAP_PNG) make_svg = true;
+  if(format == screenshot_format::svg && !CAP_SVG) 
+    format = screenshot_format::png;
+  if(format == screenshot_format::png && !CAP_PNG) 
+    format = screenshot_format::svg;
   dialog::init(XLAT("screenshots"), iinf[itPalace].color, 150, 100);
-  dialog::addSelItem(XLAT("format"), make_svg ? "SVG" : "PNG", 'f');
-  dialog::add_action([] { make_svg = !make_svg; });
-  dialog::addSelItem(XLAT("pixels (X)"), its(shotx), 'x');
-  dialog::add_action([] { shotformat = -1; dialog::editNumber(shotx, 500, 8000, 100, 2000, XLAT("pixels (X)"), ""); });
-  dialog::addSelItem(XLAT("pixels (Y)"), its(shoty), 'y');
-  dialog::add_action([] { shotformat = -1; dialog::editNumber(shoty, 500, 8000, 100, 2000, XLAT("pixels (Y)"), ""); });
-  if(make_svg) {
-    #if CAP_SVG
-    using namespace svg;
-    dialog::addSelItem(XLAT("precision"), "1/"+its(divby), 'p');
-    dialog::add_action([] { divby *= 10; if(divby > 1000000) divby = 1; });
-    #endif
+  dialog::addSelItem(XLAT("format"), format_name(), 'f');
+  dialog::add_action_push(choose_screenshot_format);
+  bool dowrl = format == screenshot_format::wrl;
+  if(!dowrl) {
+    dialog::addSelItem(XLAT("pixels (X)"), its(shotx), 'x');
+    dialog::add_action([] { shotformat = -1; dialog::editNumber(shotx, 500, 8000, 100, 2000, XLAT("pixels (X)"), ""); });
+    dialog::addSelItem(XLAT("pixels (Y)"), its(shoty), 'y');
+    dialog::add_action([] { shotformat = -1; dialog::editNumber(shoty, 500, 8000, 100, 2000, XLAT("pixels (Y)"), ""); });
     }
-  else {
-    dialog::addSelItem(XLAT("supersampling"), its(shot_aa), 's');
-    dialog::add_action([] { shot_aa *= 2; if(shot_aa > 16) shot_aa = 1; });
+  
+  switch(format) {
+    case screenshot_format::svg: {
+      #if CAP_SVG
+      using namespace svg;
+      dialog::addSelItem(XLAT("precision"), "1/"+its(divby), 'p');
+      dialog::add_action([] { divby *= 10; if(divby > 1000000) divby = 1; });
+      #endif
+      
+      if(models::model_is_3d() || rug::rugged) {
+        dialog::addInfo("SVG screenshots do not work in this 3D mode", 0xFF0000);
+        if(GDIM == 2 && !rug::rugged) {
+          dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
+          dialog::add_action_push(models::model_menu);
+          }
+        #if CAP_WRL
+        else {
+          dialog::addItem(XLAT("WRL"), 'w');
+          dialog::add_action([] { format = screenshot_format::wrl; });
+          }
+        #endif
+        }
+
+      #if CAP_TEXTURE
+      if(texture::config.tstate == texture::tsActive)
+        dialog::addInfo("SVG screenshots do not work with textures", 0xFF0000);
+      #endif
+      break;
+      }
+    
+    case screenshot_format::png: {
+      #if CAP_PNG
+      dialog::addSelItem(XLAT("supersampling"), its(shot_aa), 's');
+      dialog::add_action([] { shot_aa *= 2; if(shot_aa > 16) shot_aa = 1; });
+      #endif
+      break;
+      }
+
+    case screenshot_format::wrl: {
+      #if CAP_WRL
+      if(!models::model_is_3d() && !rug::rugged) {
+        dialog::addInfo("this format is for 3D projections", 0xFF0000);
+        if(GDIM == 2) {
+          dialog::addItem(XLAT("hypersian rug mode"), 'u');
+          dialog::add_action_push(rug::show);
+          }
+        }
+      else if(rug::rugged ? rug::perspective() : models::model_is_perspective()) {
+        dialog::addInfo("this does not work well in perspective projections", 0xFF8000);
+        dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
+        dialog::add_action_push(models::model_menu);
+        }
+      dialog::addBoolItem_action("generate a model for 3D printing", wrl::print, 'p');
+      dialog::addBoolItem_action("use textures", wrl::textures, 'u');
+      #endif
+      }      
     }
-  dialog::addBoolItem_action(XLAT("transparent"), transparent, 't');
+  if(!dowrl) dialog::addBoolItem_action(XLAT("transparent"), transparent, 't');
 
   dialog::addSelItem(XLAT("gamma"), fts(gamma), 'g');
   dialog::add_action([] { dialog::editNumber(gamma, 0, 2, .1, .5, XLAT("gamma"), "higher value = darker"); });
@@ -818,10 +929,11 @@ EX void menu() {
   dialog::addSelItem(XLAT("brightness"), fts(fade), 'b');
   dialog::add_action([] { dialog::editNumber(fade, 0, 2, .1, 1, XLAT("brightness"), "higher value = lighter"); });
 
-  dialog::addBoolItem_action(XLAT("disable the HUD"), hide_hud, 'h');
-
-  dialog::addBoolItem_action_neg(XLAT("hide the player"), mapeditor::drawplayer, 'H');
+  if(!dowrl) dialog::addBoolItem_action(XLAT("disable the HUD"), hide_hud, 'h');
   
+  dialog::addBoolItem_action_neg(XLAT("hide the player"), mapeditor::drawplayer, 'H');
+  if(dowrl && wrl::print) dialog::lastItem().value = XLAT("N/A");
+
   if(WDIM == 2) {
     dialog::addItem(XLAT("centering"), 'x');
     dialog::add_action([] {
@@ -846,18 +958,6 @@ EX void menu() {
 
   dialog::addBreak(100);
   
-#if CAP_RUG
-  if(make_svg && rug::rugged)
-    dialog::addInfo("SVG screenshots do not work in this 3D mode", 0xFF0000);
-  else
-#endif
-#if CAP_TEXTURE
-  if(make_svg && texture::config.tstate == texture::tsActive)
-    dialog::addInfo("SVG screenshots do not work with textures", 0xFF0000);
-  else
-#endif
-   dialog::addBreak(100);
-  
   dialog::addItem(XLAT("take screenshot"), 'z');
   dialog::add_action([] () { 
     #if ISWEB
@@ -865,8 +965,13 @@ EX void menu() {
     #else
     static string pngfile = "hqshot.png";
     static string svgfile = "svgshot.svg";
-    string& file = make_svg ? svgfile : pngfile;
-    dialog::openFileDialog(file, XLAT("screenshot"), make_svg ? ".svg" : ".png", [&file] () {
+    static string wrlfile = "model.wrl";
+    string& file = 
+      format == screenshot_format::png ? pngfile :
+      format == screenshot_format::svg ? svgfile :
+      wrlfile;
+
+    dialog::openFileDialog(file, XLAT("screenshot"), format_extension(), [&file] () {
       dynamicval<int> cgl(vid.cells_generated_limit, 9999999);
       shot::take(file);
       return true;
@@ -1404,7 +1509,8 @@ EX void show() {
   dialog::add_action([] () { dialog::editNumber(noframes, 0, 300, 30, 5, XLAT("frames to record"), ""); });
   dialog::addSelItem(XLAT("record to a file"), animfile, 'R');
   dialog::add_action([] () { 
-    dialog::openFileDialog(animfile, XLAT("record to a file"), shot::make_svg ? ".svg" : ".png", record_animation);
+    dialog::openFileDialog(animfile, XLAT("record to a file"), 
+      shot::format_extension(), record_animation);
     });
   #endif
   dialog::addBack();

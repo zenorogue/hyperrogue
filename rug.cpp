@@ -131,7 +131,7 @@ EX ld finger_force = 1;
 
 EX eModel rug_projection = mdEquidistant;
 
-EX bool perspective() { return among(rug_projection, mdPerspective, mdGeodesic); }
+EX bool perspective() { return models::model_is_perspective(rug_projection); }
 
 void push_point(hyperpoint& h, int coord, ld val) {
   USING_NATIVE_GEOMETRY;

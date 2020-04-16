@@ -521,7 +521,7 @@ EX void initConfig() {
   #if CAP_SHOT
   addsaver(shot::shotx, "shotx");
   addsaver(shot::shoty, "shoty");
-  addsaver(shot::make_svg, "shotsvg");
+  addsaverenum(shot::format, "shotsvg");
   addsaver(shot::transparent, "shottransparent");
   addsaver(shot::gamma, "shotgamma");
   addsaver(shot::caption, "shotcaption");
