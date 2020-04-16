@@ -317,37 +317,35 @@ EX void handlePanning(int sym, int uni) {
   if(sym == SDLK_HOME && GDIM == 3) { 
     shift_view(ztangent(+0.2*shiftmul)), didsomething = true, playermoved = false;
     }
-  if(sym == SDLK_RIGHT) { 
+
+  auto roll = [&] (int dir, ld val) {
+    if(GDIM == 3 && anyshiftclick) 
+      shift_view(ctangent(dir, -val)), didsomething = true, playermoved = false; /* -val because shift reverses */
+    else if(GDIM == 3)
+      rotate_view(cspin(dir, 2, val)), didsomething = true;
+    else
+      View = cpush(dir, val) * View, playermoved = false, didsomething = true;      
+    };
+
+  if(sym == SDLK_RIGHT) {
     if(history::on)
       history::lvspeed += 0.1 * shiftmul;
-    else if(GDIM == 3)
-      rotate_view(cspin(0, 2, -0.2*shiftmul)), didsomething = true;
-    else
-      View = xpush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
+    else roll(0, -0.2*shiftmul);
     }
   if(sym == SDLK_LEFT) {
     if(history::on)
       history::lvspeed -= 0.1 * shiftmul;
-    else if(GDIM == 3)
-      rotate_view(cspin(0, 2, 0.2*shiftmul)), didsomething = true;
-    else
-      View = xpush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
+    else roll(0, 0.2*shiftmul);
     }
   if(sym == SDLK_UP) {
     if(history::on)
       history::lvspeed += 0.1 * shiftmul;
-    else if(GDIM == 3)
-      rotate_view(cspin(1, 2, 0.2*shiftmul)), didsomething = true;
-    else
-      View = ypush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
+    else roll(1, 0.2*shiftmul);
     }
   if(sym == SDLK_DOWN) {
     if(history::on)
       history::lvspeed -= 0.1 * shiftmul;
-    else if(GDIM == 3)
-      rotate_view(cspin(1, 2, -0.2*shiftmul)), didsomething = true;
-    else
-      View = ypush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
+    else roll(1, -0.2*shiftmul);
     }
 #endif
   if(sym == SDLK_PAGEUP) {
@@ -708,14 +706,19 @@ EX void mainloopiter() {
       shift_view(ctangent(2, -t)), didsomething = true, playermoved = false;
     if(keystate[SDLK_HOME] && GDIM == 3 && DEFAULTNOR(SDLK_HOME))
       shift_view(ctangent(2, t)), didsomething = true, playermoved = false;
-    if(keystate[SDLK_RIGHT] && DEFAULTNOR(SDLK_RIGHT))
-      rotate_view(GDIM == 2 ? xpush(-t) : cspin(0, 2, -t)), didsomething = true, playermoved = playermoved && GDIM == 3;
-    if(keystate[SDLK_LEFT] && DEFAULTNOR(SDLK_LEFT))
-      rotate_view(GDIM == 2 ? xpush(t) : cspin(0, 2, t)), didsomething = true, playermoved = playermoved && GDIM == 3;
-    if(keystate[SDLK_UP] && DEFAULTNOR(SDLK_UP))
-      rotate_view(GDIM == 2 ? ypush(t) : cspin(1, 2, t)), didsomething = true, playermoved = playermoved && GDIM == 3;
-    if(keystate[SDLK_DOWN] && DEFAULTNOR(SDLK_DOWN))
-      rotate_view(GDIM == 2 ? ypush(-t) : cspin(1, 2, -t)), didsomething = true, playermoved = playermoved && GDIM == 3;
+    
+    auto roll = [&] (int dir, ld val) {
+      if(GDIM == 3 && anyshiftclick) 
+        shift_view(ctangent(dir, -val)); /* -val because shift reverses */
+      else 
+        rotate_view(GDIM == 2 ? cpush(dir, val) : cspin(dir, 2, val));
+      didsomething = true, playermoved = playermoved && GDIM == 3;
+      };
+
+    if(keystate[SDLK_RIGHT] && DEFAULTNOR(SDLK_RIGHT)) roll(0, -t);
+    if(keystate[SDLK_LEFT] && DEFAULTNOR(SDLK_LEFT)) roll(0, t);
+    if(keystate[SDLK_UP] && DEFAULTNOR(SDLK_UP)) roll(1, t);
+    if(keystate[SDLK_DOWN] && DEFAULTNOR(SDLK_DOWN)) roll(1, -t);
     if(keystate[SDLK_PAGEUP] && DEFAULTNOR(SDLK_PAGEUP)) {
       if(history::on)
         models::rotation+=t;
