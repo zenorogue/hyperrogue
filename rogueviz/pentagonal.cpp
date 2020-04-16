@@ -34,7 +34,7 @@ array<hyperpoint, 3> mts;
 
 rug::rugpoint *pt(hyperpoint h, hyperpoint c, int id) {
   auto r = rug::addRugpoint(C0, -1);
-  r->flat = h;
+  r->native = h;
   r->x1 = (1 + c[0]) / 16 + (id/8) / 8.;
   r->y1 = (1 + c[1]) / 16 + (id%8) / 8.;
   r->valid = true;
@@ -190,7 +190,7 @@ void run_snub(int v, int w) {
   create_model();
   printf("points = %d tris = %d side = %d\n", isize(rug::points), isize(rug::triangles), isize(sideangles));
   rug::model_distance = euclid ? 4 : 2;
-  rug::rug_perspective = hyperbolic;
+  rug::rug_projection = hyperbolic ? mdPerspective : mdEquidistant;
   showstartmenu = false;
   snubon = true;
   rug::invert_depth = hyperbolic;

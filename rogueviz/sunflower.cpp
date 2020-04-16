@@ -87,13 +87,9 @@ bool sunflower_cell(cell *c, transmatrix V) {
 
   if(adjust_rug) {
     using namespace rug;
-    if(rug_perspective)
-      push_all_points(2, +model_distance);
 
     model_distance = sqrt(zdensity) * distance_per_rug;
 
-    if(rug_perspective)
-      push_all_points(2, -model_distance);
     }
   
   iqty = qty;
