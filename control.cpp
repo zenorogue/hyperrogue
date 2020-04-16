@@ -871,7 +871,7 @@ EX void handle_event(SDL_Event& ev) {
       else if(ev.button.button==SDL_BUTTON_MIDDLE || rightclick) {
         sym = 1, didsomething = true;
         if(anyshift)
-          vid.xposition = vid.yposition = 0;
+          pconf.xposition = pconf.yposition = 0;
         }
       else if(ev.button.button == SDL_BUTTON_LEFT) {
         sym = getcstat, uni = getcstat, shiftmul = getcshift;
@@ -880,12 +880,12 @@ EX void handle_event(SDL_Event& ev) {
       else if(ev.button.button==SDL_BUTTON_WHEELDOWN) {
         if(anyctrl && anyshift && !rug::rugged && GDIM == 2) {
           mapeditor::scaleall(1/1.2);
-          vid.alpha /= 1.2;
+          pconf.alpha /= 1.2;
           }
         else if(anyctrl && !rug::rugged && GDIM == 2)
           mapeditor::scaleall(pow(2, -.25));
         else if(anyshift && !rug::rugged && GDIM == 2)
-          vid.alpha -= 0.25;
+          pconf.alpha -= 0.25;
         else if(rollchange) {
           sym = getcstat, uni = getcstat, shiftmul = getcshift, wheelclick = true;
           }
@@ -896,12 +896,12 @@ EX void handle_event(SDL_Event& ev) {
       if(ev.button.button==SDL_BUTTON_WHEELUP) {
         if(anyctrl && anyshift && !rug::rugged && GDIM == 2) {
           mapeditor::scaleall(1.2);
-          vid.alpha *= 1.2;
+          pconf.alpha *= 1.2;
           }
         else if(anyctrl && !rug::rugged && GDIM == 2)
           mapeditor::scaleall(pow(2, .25));
         else if(anyshift && !rug::rugged && GDIM == 2)
-          vid.alpha += 0.25;
+          pconf.alpha += 0.25;
         else if(rollchange) {
           sym = getcstat, uni = getcstat, shiftmul = -getcshift, wheelclick = true;
           }
@@ -935,8 +935,8 @@ EX void handle_event(SDL_Event& ev) {
       if((rightclick || (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && !mouseout2()) {
         fix_mouseh();
         if(anyctrl) {
-          vid.xposition += (mousex - lmousex) * 1. / current_display->scrsize,
-          vid.yposition += (mousey - lmousey) * 1. / current_display->scrsize;
+          pconf.xposition += (mousex - lmousex) * 1. / current_display->scrsize,
+          pconf.yposition += (mousey - lmousey) * 1. / current_display->scrsize;
           }
         else if(mouseh[LDIM] < 50 && mouseoh[LDIM] < 50) {
           panning(mouseoh, mouseh);
@@ -1053,7 +1053,7 @@ EX bool gmodekeys(int sym, int uni) {
 
   if(GDIM == 2) {
     if(among(NUMBERKEY, '1', '2', '3') && !rug::rugged && euclid && WDIM == 2) {
-      vid.xposition = vid.yposition = 0;
+      pconf.xposition = pconf.yposition = 0;
       ld maxs = 0;
       auto& cd = current_display;
       for(auto& p: gmatrix) for(int i=0; i<p.first->type; i++) {
@@ -1063,15 +1063,15 @@ EX bool gmodekeys(int sym, int uni) {
         maxs = max(maxs, onscreen[0] / cd->xsize);
         maxs = max(maxs, onscreen[1] / cd->ysize);
         }
-      vid.alpha = 1;
-      vid.scale = vid.scale / 2 / maxs / cd->radius;
-      if(NUMBERKEY == '3') vid.scale *= 2;
-      if(NUMBERKEY == '1') vid.scale /= 2;
+      pconf.alpha = 1;
+      pconf.scale = pconf.scale / 2 / maxs / cd->radius;
+      if(NUMBERKEY == '3') pconf.scale *= 2;
+      if(NUMBERKEY == '1') pconf.scale /= 2;
       }
-    else if(NUMBERKEY == '1' && !rug::rugged) { vid.alpha = 999; vid.scale = 998; vid.xposition = vid.yposition = 0; }
-    else if(NUMBERKEY == '2' && !rug::rugged) { vid.alpha = 1; vid.scale = 0.4; vid.xposition = vid.yposition = 0; }
-    else if(NUMBERKEY == '3' && !rug::rugged) { vid.alpha = 1; vid.scale = 1; vid.xposition = vid.yposition = 0; }
-    else if(NUMBERKEY == '4' && !rug::rugged) { vid.alpha = 0; vid.scale = 1; vid.xposition = vid.yposition = 0; }
+    else if(NUMBERKEY == '1' && !rug::rugged) { pconf.alpha = 999; pconf.scale = 998; pconf.xposition = pconf.yposition = 0; }
+    else if(NUMBERKEY == '2' && !rug::rugged) { pconf.alpha = 1; pconf.scale = 0.4; pconf.xposition = pconf.yposition = 0; }
+    else if(NUMBERKEY == '3' && !rug::rugged) { pconf.alpha = 1; pconf.scale = 1; pconf.xposition = pconf.yposition = 0; }
+    else if(NUMBERKEY == '4' && !rug::rugged) { pconf.alpha = 0; pconf.scale = 1; pconf.xposition = pconf.yposition = 0; }
     else if(NUMBERKEY == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 7; }
     else if(NUMBERKEY == '8') { vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 6; }  
     else if(uni == '%') { 
@@ -1189,10 +1189,10 @@ EX void show() {
   dialog::addItem(XLAT("experiment with geometry"), 'g');
   dialog::add_action([] () { runGeometryExperiments(); });
 
-  dialog::addSelItem(XLAT("projection"), fts(vid.alpha), 'p');
+  dialog::addSelItem(XLAT("projection"), fts(vpconf.alpha), 'p');
   dialog::add_action([] () { projectionDialog(); });
 
-  dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
+  dialog::addSelItem(XLAT("scale factor"), fts(vpconf.scale), 'z');
   dialog::add_action([] () { editScale(); });
 
   dialog::addItem(XLAT("spherical VR"), 'v');
@@ -1201,7 +1201,7 @@ EX void show() {
     mode = 0; fullcenter();
     mode = 2; sensitivity = 1;
     vid.stereo_mode = sLR; vid.ipd = 0.2;
-    vid.alpha = 0; vid.scale = 1;
+    vpconf.alpha = 0; vpconf.scale = 1;
     });
 
   dialog::addBreak(100);

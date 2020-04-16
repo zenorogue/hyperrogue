@@ -1066,10 +1066,10 @@ void draw_shape_for_texture(floorshape* sh) {
     hyperpoint inmodel;
     applymodel(center, inmodel);
     glvertex tmap;
-    tmap[0] = (1 + inmodel[0] * vid.scale) / 2;
-    tmap[1] = (1 - inmodel[1] * vid.scale) / 2;
+    tmap[0] = (1 + inmodel[0] * pconf.scale) / 2;
+    tmap[1] = (1 - inmodel[1] * pconf.scale) / 2;
     applymodel(center + v1, inmodel);
-    tmap[2] = (1 + inmodel[0] * vid.scale) / 2 - tmap[0];
+    tmap[2] = (1 + inmodel[0] * pconf.scale) / 2 - tmap[0];
     floor_texture_map[sh->id] = tmap;
     }
 
@@ -1078,8 +1078,8 @@ void draw_shape_for_texture(floorshape* sh) {
     hyperpoint inmodel;
     applymodel(h, inmodel);
     glvec2 v;
-    v[0] = (1 + inmodel[0] * vid.scale) / 2;
-    v[1] = (1 - inmodel[1] * vid.scale) / 2;
+    v[0] = (1 + inmodel[0] * pconf.scale) / 2;
+    v[1] = (1 - inmodel[1] * pconf.scale) / 2;
     return v;
     };
   
@@ -1121,9 +1121,9 @@ void geometry_information::make_floor_textures_here() {
   dynamicval<videopar> vi(vid, vid);
   vid.xres = FLOORTEXTURESIZE;
   vid.yres = FLOORTEXTURESIZE;
-  vid.scale = 0.125;
-  vid.camera_angle = 0;
-  vid.alpha = 1;
+  pconf.scale = 0.125;
+  pconf.camera_angle = 0;
+  pconf.alpha = 1;
   dynamicval<ld> lw(vid.linewidth, 2);
 
   floor_textures = new renderbuffer(vid.xres, vid.yres, vid.usingGL);
@@ -1138,7 +1138,7 @@ void geometry_information::make_floor_textures_here() {
   cd->xsize = cd->ysize = FLOORTEXTURESIZE;
   cd->xcenter = cd->ycenter = cd->scrsize = FLOORTEXTURESIZE/2;
   
-  cd->radius = cd->scrsize * vid.scale;
+  cd->radius = cd->scrsize * pconf.scale;
 
   floor_textures->enable();
   floor_textures->clear(0); // 0xE8E8E8 = 1

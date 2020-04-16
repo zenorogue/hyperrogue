@@ -43,16 +43,16 @@ EX namespace mapeditor {
      // mx = xb + ssiz*xpos + mrx * scale
      // mx = xb + ssiz*xpos' + mrx * scale' 
      
-     ld mrx = (.0 + mousex - current_display->xcenter) / vid.scale;
-     ld mry = (.0 + mousey - current_display->ycenter) / vid.scale;
+     ld mrx = (.0 + mousex - current_display->xcenter) / vpconf.scale;
+     ld mry = (.0 + mousey - current_display->ycenter) / vpconf.scale;
      
      if(vid.xres > vid.yres) {      
-       vid.xposition += (vid.scale - vid.scale*z) * mrx / current_display->scrsize;
-       vid.yposition += (vid.scale - vid.scale*z) * mry / current_display->scrsize;
+       vpconf.xposition += (vpconf.scale - vpconf.scale*z) * mrx / current_display->scrsize;
+       vpconf.yposition += (vpconf.scale - vpconf.scale*z) * mry / current_display->scrsize;
        }
 
-     vid.scale *= z;
-     // printf("scale = " LDF "\n", vid.scale);
+     vpconf.scale *= z;
+     // printf("scale = " LDF "\n", vpconf.scale);
      #if CAP_TEXTURE
      // display(texture::itt);
      texture::config.itt = xyscale(texture::config.itt, 1/z);

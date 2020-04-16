@@ -362,7 +362,7 @@ EX namespace history {
     }
   
   ld measureLength() {
-    ld r = bandhalf * vid.scale;
+    ld r = bandhalf * pconf.scale;
     
     ld tpixels = 0;
     int siz = isize(v);
@@ -526,7 +526,7 @@ EX namespace history {
     dialog::addBoolItem(XLAT("include history"), (includeHistory), 'i');
     
     // bool notconformal0 = (pmodel >= 5 && pmodel <= 6) && !euclid;
-    // bool notconformal = notconformal0 || abs(vid.alpha-1) > 1e-3;
+    // bool notconformal = notconformal0 || abs(pconf.alpha-1) > 1e-3;
 
     dialog::addSelItem(XLAT("projection"), current_proj_name(), 'm');
     

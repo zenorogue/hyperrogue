@@ -323,7 +323,7 @@ EX void showMainMenu() {
 // -- display modes --
 
 EX void editScale() {
-  dialog::editNumber(vid.scale, .001, 1000, .1, 1, XLAT("scale factor"), 
+  dialog::editNumber(vpconf.scale, .001, 1000, .1, 1, XLAT("scale factor"), 
     XLAT("Scale the displayed model."));
   dialog::scaleSinh();
   }
@@ -335,10 +335,10 @@ EX void showGraphQuickKeys() {
   dialog::init(XLAT("quick options"));
 
   if(GDIM == 2) {
-    dialog::addBoolItem(XLAT("orthogonal projection"), vid.alpha >= 500, '1');
-    dialog::addBoolItem(XLAT(sphere ? "stereographic projection" : euclid ? "zoomed out" : "small Poincaré model"), vid.alpha == 1 && vid.scale < 1, '2');
-    dialog::addBoolItem(XLAT(sphere ? "zoomed stereographic projection" : euclid ? "zoomed in" : "big Poincaré model"), vid.alpha == 1 && vid.scale >= 1, '3');
-    dialog::addBoolItem(XLAT((sphere || euclid) ? "gnomonic projection" : "Klein-Beltrami model"), vid.alpha == 0, '4');
+    dialog::addBoolItem(XLAT("orthogonal projection"), vpconf.alpha >= 500, '1');
+    dialog::addBoolItem(XLAT(sphere ? "stereographic projection" : euclid ? "zoomed out" : "small Poincaré model"), vpconf.alpha == 1 && vpconf.scale < 1, '2');
+    dialog::addBoolItem(XLAT(sphere ? "zoomed stereographic projection" : euclid ? "zoomed in" : "big Poincaré model"), vpconf.alpha == 1 && vpconf.scale >= 1, '3');
+    dialog::addBoolItem(XLAT((sphere || euclid) ? "gnomonic projection" : "Klein-Beltrami model"), vpconf.alpha == 0, '4');
     }
   else {
     dialog::addBoolItem(XLAT("first person perspective"), vid.yshift == 0 && vid.sspeed > -5, '1');
@@ -875,8 +875,8 @@ EX void showStartMenu() {
         specialland = laHalloween;
         set_geometry(gSphere);
         start_game();
-        vid.alpha = 999;
-        vid.scale = 998;
+        pconf.alpha = 999;
+        pconf.scale = 998;
         }
       }
 #if CAP_RACING
@@ -889,13 +889,13 @@ EX void showStartMenu() {
       specialland = racing::race_lands[rand() % isize(racing::race_lands)];
       start_game();
       pmodel = mdBand;
-      models::model_orientation = racing::race_angle;
+      pconf.model_orientation = racing::race_angle;
       racing::race_advance = 1;
       vid.yshift = 0;
-      vid.camera_angle = 0;
-      vid.xposition = 0;
-      vid.yposition = 0;
-      vid.scale = 1;
+      pconf.camera_angle = 0;
+      pconf.xposition = 0;
+      pconf.yposition = 0;
+      pconf.scale = 1;
       vid.use_smart_range = 1;
       vid.smart_range_detail = 3;
       }

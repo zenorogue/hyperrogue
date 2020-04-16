@@ -516,10 +516,10 @@ EX namespace inv {
     dynamicval<eModel> pm(pmodel, flat_model());
     glClear(GL_DEPTH_BUFFER_BIT);
     // dynamicval<videopar> v(vid, vid);
-    // vid.alpha = vid.scale = 1;
-    dynamicval<ld> va(vid.alpha, 1);
-    dynamicval<ld> vs(vid.scale, 1);
-    dynamicval<ld> vc(vid.camera_angle, 0);
+    // pconf.alpha = vid.scale = 1;
+    dynamicval<ld> va(pconf.alpha, 1);
+    dynamicval<ld> vs(pconf.scale, 1);
+    dynamicval<ld> vc(pconf.camera_angle, 0);
     calcparam();
 
     for(int i=0; i<ittypes; i++) {

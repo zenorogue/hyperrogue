@@ -381,21 +381,21 @@ void ge_select_tiling() {
 
 EX string current_proj_name() {
   bool h = hyperbolic || sn::in();
-  if(pmodel != mdDisk)
-    return models::get_model_name(pmodel);
-  else if(h && vid.alpha == 1)
+  if(vpconf.model != mdDisk)
+    return models::get_model_name(vpconf.model);
+  else if(h && vpconf.alpha == 1)
     return XLAT("Poincaré model");
-  else if(h && vid.alpha == 0)
+  else if(h && vpconf.alpha == 0)
     return XLAT("Klein-Beltrami model");
-  else if(h && vid.alpha == -1)
+  else if(h && vpconf.alpha == -1)
     return XLAT("inverted Poincaré model");
-  else if(sphere && vid.alpha == 1)
+  else if(sphere && vpconf.alpha == 1)
     return XLAT("stereographic projection");
-  else if(sphere && vid.alpha == 0)
+  else if(sphere && vpconf.alpha == 0)
     return XLAT("gnomonic projection");
-  else if(sphere && vid.alpha >= 999)
+  else if(sphere && vpconf.alpha >= 999)
     return XLAT("orthographic projection");
-  else if(h && vid.alpha >= 999)
+  else if(h && vpconf.alpha >= 999)
     return XLAT("Gans model");
   else 
     return XLAT("general perspective");

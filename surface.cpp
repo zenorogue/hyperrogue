@@ -11,8 +11,6 @@
 #if CAP_SURFACE
 namespace hr { 
 
-#define USING_NATIVE_GEOMETRY dynamicval<eGeometry> gw(geometry, hr::rug::gwhere)
-
 EX namespace surface {
 
 ld sech(ld d) { return 1 / cosh(d); }

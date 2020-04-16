@@ -307,7 +307,7 @@ EX namespace netgen {
     renderbuffer rbuf(2000, 2000, vid.usingGL);
 
     dynamicval<videopar> dv(vid, vid);
-    vid.xres = vid.yres = 2000; vid.scale = 0.99; 
+    vid.xres = vid.yres = 2000; pconf.scale = 0.99; 
     
     if(1) {
       resetbuffer rb;

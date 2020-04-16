@@ -939,15 +939,15 @@ void race_projection() {
   
   dialog::init(XLAT("racing projections"));
 
-  dialog::addBoolItem(XLAT("Poincaré disk model"), pmodel == mdDisk && !vid.camera_angle, '1');
+  dialog::addBoolItem(XLAT("Poincaré disk model"), pmodel == mdDisk && !pconf.camera_angle, '1');
   dialog::add_action([] () {
     pmodel = mdDisk;
     race_advance = 0;
     vid.yshift = 0;
-    vid.camera_angle = 0;
-    vid.xposition = 0;
-    vid.yposition = 0;
-    vid.scale = 1;
+    pconf.camera_angle = 0;
+    pconf.xposition = 0;
+    pconf.yposition = 0;
+    pconf.scale = 1;
     vid.use_smart_range = 0;
     vid.smart_range_detail = 3;
     });
@@ -955,13 +955,13 @@ void race_projection() {
   dialog::addBoolItem(XLAT("band"), pmodel == mdBand, '2');
   dialog::add_action([] () {
     pmodel = mdBand;
-    models::model_orientation = race_angle;
+    pconf.model_orientation = race_angle;
     race_advance = 1;
     vid.yshift = 0;
-    vid.camera_angle = 0;
-    vid.xposition = 0;
-    vid.yposition = 0;
-    vid.scale = 1;
+    pconf.camera_angle = 0;
+    pconf.xposition = 0;
+    pconf.yposition = 0;
+    pconf.scale = 1;
     vid.use_smart_range = 1;
     vid.smart_range_detail = 3;
     });
@@ -969,26 +969,26 @@ void race_projection() {
   dialog::addBoolItem(XLAT("half-plane"), pmodel == mdHalfplane, '3');
   dialog::add_action([] () {
     pmodel = mdHalfplane;
-    models::model_orientation = race_angle + 90;
+    pconf.model_orientation = race_angle + 90;
     race_advance = 0.5;
     vid.yshift = 0;
-    vid.camera_angle = 0;
-    vid.xposition = 0;
-    vid.yposition = 0;
-    vid.scale = 1;
+    pconf.camera_angle = 0;
+    pconf.xposition = 0;
+    pconf.yposition = 0;
+    pconf.scale = 1;
     vid.use_smart_range = 1;
     vid.smart_range_detail = 3;
     });
 
-  dialog::addBoolItem(XLAT("third-person perspective"), pmodel == mdDisk && vid.camera_angle, '4');
+  dialog::addBoolItem(XLAT("third-person perspective"), pmodel == mdDisk && pconf.camera_angle, '4');
   dialog::add_action([] () {
     pmodel = mdDisk;
     race_advance = 0;
     vid.yshift = -0.3;
-    vid.camera_angle = -45;
-    vid.scale = 18/16. * vid.xres / vid.yres / multi::players;
-    vid.xposition = 0;
-    vid.yposition = -0.9;
+    pconf.camera_angle = -45;
+    pconf.scale = 18/16. * vid.xres / vid.yres / multi::players;
+    pconf.xposition = 0;
+    pconf.yposition = -0.9;
     vid.use_smart_range = 1;
     vid.smart_range_detail = 3;
     });
@@ -1011,8 +1011,8 @@ void race_projection() {
     dialog::addSelItem(XLAT("race angle"), fts(race_angle), 'a');
     dialog::add_action([] () { 
       dialog::editNumber(race_angle, 0, 360, 15, 90, XLAT("race angle"), "");
-      int q = models::model_orientation - race_angle;
-      dialog::reaction = [q] () { models::model_orientation = race_angle + q; };
+      int q = pconf.model_orientation - race_angle;
+      dialog::reaction = [q] () { pconf.model_orientation = race_angle + q; };
       });
     }
 

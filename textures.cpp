@@ -355,7 +355,7 @@ hyperpoint texture_config::texture_coordinates(hyperpoint h) {
   hyperpoint inmodel;
   applymodel(h, inmodel);
   inmodel[0] *= current_display->radius * 1. / current_display->scrsize;
-  inmodel[1] *= current_display->radius * vid.stretch / current_display->scrsize;
+  inmodel[1] *= current_display->radius * pconf.stretch / current_display->scrsize;
   inmodel[2] = 1;
   inmodel = itt * inmodel;
   inmodel[0] = (inmodel[0] + 1) / 2;
@@ -531,7 +531,7 @@ void texture_config::mark_triangles() {
       }
   }
 
-static const auto current_texture_parameters = tie(geometry, variation, patterns::whichPattern, patterns::subpattern_flags, pmodel, vid.scale, vid.alpha);
+static const auto current_texture_parameters = tie(geometry, variation, patterns::whichPattern, patterns::subpattern_flags, pmodel, pconf.scale, pconf.alpha);
 
 void texture_config::clear_texture_map() {
   texture_map.clear();
@@ -624,9 +624,9 @@ void texture_config::saveFullTexture(string tn) {
   addMessage(XLAT("Saving full texture to %1...", tn));
   dynamicval<color_t> dd(grid_color, 0);
   dynamicval<color_t> dm(mesh_color, 0);
-  dynamicval<ld> dx(vid.xposition, 0);
-  dynamicval<ld> dy(vid.yposition, 0);
-  dynamicval<ld> dvs(vid.scale, (pmodel == mdDisk && !euclid) ? 1 : vid.scale);
+  dynamicval<ld> dx(pconf.xposition, 0);
+  dynamicval<ld> dy(pconf.yposition, 0);
+  dynamicval<ld> dvs(pconf.scale, (pmodel == mdDisk && !euclid) ? 1 : pconf.scale);
   dynamicval<bool> dro(rug::rugged, false);
   dynamicval<bool> dnh(nohud, true);
   texture::saving = true;
@@ -741,9 +741,9 @@ struct magic_param {
   
   void apply(ld delta) {
     if(have_mp(mpProjection))
-      vid.alpha *= exp(delta * proj);
+      pconf.alpha *= exp(delta * proj);
     if(have_mp(mpScale))
-      vid.scale *= exp(delta * scale);
+      pconf.scale *= exp(delta * scale);
 
     if(do_spin) {
       if(have_mp(mpRotate))
@@ -853,7 +853,7 @@ void mousemovement() {
       // do not zoom in portrait!
       if(nonzero && !newmove) {
         View = inverse(spintox(mouseeu)) * spintox(lastmouse) * View;
-        vid.scale = vid.scale * sqhypot_d(2, mouseeu) / sqhypot_d(2, lastmouse);
+        pconf.scale = pconf.scale * sqhypot_d(2, mouseeu) / sqhypot_d(2, lastmouse);
         config.perform_mapping();
         }
       if(nonzero) lastmouse = mouseeu;
@@ -863,7 +863,7 @@ void mousemovement() {
     
     case tpsProjection: {
       if(nonzero && !newmove) {          
-        vid.alpha = vid.alpha * sqhypot_d(2, mouseeu) / sqhypot_d(2, lastmouse);
+        pconf.alpha = pconf.alpha * sqhypot_d(2, mouseeu) / sqhypot_d(2, lastmouse);
         }
       if(nonzero) lastmouse = mouseeu;
       newmove = false;
@@ -958,9 +958,9 @@ void init_textureconfig() {
   addsaverenum(targetgeometry, "geometry", gNormal);
   addsaverenum(pmodel, "used model", mdDisk);
   addsaver(vid.yshift, "Y shift", 0);
-  addsaver(vid.yposition, "Y position", 0);
-  addsaver(vid.xposition, "X position", 0);
-  addsaver(vid.camera_angle, "camera angle", 0);
+  addsaver(pconf.yposition, "Y position", 0);
+  addsaver(pconf.xposition, "X position", 0);
+  addsaver(pconf.camera_angle, "camera angle", 0);
   addsaverenum(targetvariation, "bitruncated", eVariation::bitruncated);
   // ... geometry parameters
 
@@ -977,9 +977,9 @@ void init_textureconfig() {
   addsaver(config.color_alpha, "alpha color", 0);
   addsaver(config.mesh_color, "mesh color", 0);
   
-  addsaver(vid.alpha, "projection", 1);
-  addsaver(vid.scale, "scale", 1);
-  addsaver(vid.stretch, "stretch", 1);
+  addsaver(pconf.alpha, "projection", 1);
+  addsaver(pconf.scale, "scale", 1);
+  addsaver(pconf.stretch, "stretch", 1);
   addsaver(vid.binary_width, "binary-tiling-width", 1);
   
   addsaver(config.texturename, "texture filename", "");

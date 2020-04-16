@@ -305,10 +305,10 @@ EX void initConfig() {
   addsaver(precise_width, "precisewidth", .5);
   addsaver(linepatterns::width, "pattern-linewidth", 1);
   addsaver(fat_edges, "fat-edges");
-  addsaver(vid.scale, "scale", 1);
-  addsaver(vid.xposition, "xposition", 0);
-  addsaver(vid.yposition, "yposition", 0);
-  addsaver(vid.alpha, "projection", 1);
+  addsaver(pconf.scale, "scale", 1);
+  addsaver(pconf.xposition, "xposition", 0);
+  addsaver(pconf.yposition, "yposition", 0);
+  addsaver(pconf.alpha, "projection", 1);
   addsaver(vid.sspeed, "scrollingspeed", 0);
   addsaver(vid.mspeed, "movement speed", 1);
   addsaver(vid.full, "fullscreen", false);
@@ -329,14 +329,14 @@ EX void initConfig() {
   
   // special graphics
 
-  addsaver(vid.ballangle, "ball angle", 20);
+  addsaver(pconf.ballangle, "ball angle", 20);
   addsaver(vid.yshift, "Y shift", 0);
   addsaver(vid.use_wall_radar, "wallradar", true);
   addsaver(vid.fixed_facing, "fixed facing", 0);
   addsaver(vid.fixed_facing_dir, "fixed facing dir", 90);
   addsaver(vid.fixed_yz, "fixed YZ", true);
-  addsaver(vid.camera_angle, "camera angle", 0);
-  addsaver(vid.ballproj, "ballproj", 1);
+  addsaver(pconf.camera_angle, "camera angle", 0);
+  addsaver(pconf.ballproj, "ballproj", 1);
   addsaver(vid.monmode, "monster display mode", DEFAULT_MONMODE);
   addsaver(vid.wallmode, "wall display mode", DEFAULT_WALLMODE);
 
@@ -389,16 +389,16 @@ EX void initConfig() {
   addsaver(models::rotation_xz, "conformal rotation_xz");
   addsaver(models::rotation_xy2, "conformal rotation_2");
   addsaver(models::do_rotate, "conformal rotation mode", 1);
-  addsaver(models::model_orientation, "model orientation", 0);
-  addsaver(models::model_orientation_yz, "model orientation-yz", 0);
-  addsaver(models::top_z, "topz", 5);
-  addsaver(models::model_transition, "model transition", 1);
-  addsaver(models::halfplane_scale, "halfplane scale", 1);
+  addsaver(pconf.model_orientation, "model orientation", 0);
+  addsaver(pconf.model_orientation_yz, "model orientation-yz", 0);
+  addsaver(pconf.top_z, "topz", 5);
+  addsaver(pconf.model_transition, "model transition", 1);
+  addsaver(pconf.halfplane_scale, "halfplane scale", 1);
   addsaver(history::autoband, "automatic band");
   addsaver(history::autobandhistory, "automatic band history");
   addsaver(history::dospiral, "do spiral");
-  addsaver(models::clip_min, "clip-min", -1);
-  addsaver(models::clip_max, "clip-max", +1);
+  addsaver(pconf.clip_min, "clip-min", -1);
+  addsaver(pconf.clip_max, "clip-max", +1);
   
   addsaver(vid.backeffects, "background particle effects", (ISMOBILE || ISPANDORA) ? false : true);
   // control
@@ -468,13 +468,13 @@ EX void initConfig() {
   addsaver(vid.fov, "field-of-vision", 90);
   addsaver(vid.desaturate, "desaturate", 0);
   addsaverenum(vid.stereo_mode, "stereo-mode");
-  addsaver(vid.euclid_to_sphere, "euclid to sphere projection", 1.5);
-  addsaver(vid.twopoint_param, "twopoint parameter", 1);
-  addsaver(vid.fisheye_param, "fisheye parameter", 1);
-  addsaver(vid.stretch, "stretch", 1);
+  addsaver(pconf.euclid_to_sphere, "euclid to sphere projection", 1.5);
+  addsaver(pconf.twopoint_param, "twopoint parameter", 1);
+  addsaver(pconf.fisheye_param, "fisheye parameter", 1);
+  addsaver(pconf.stretch, "stretch", 1);
   addsaver(vid.binary_width, "binary-tiling-width", 1);
-  addsaver(vid.collignon_parameter, "collignon-parameter", 1);
-  addsaver(vid.collignon_reflected, "collignon-reflect", false);
+  addsaver(pconf.collignon_parameter, "collignon-parameter", 1);
+  addsaver(pconf.collignon_reflected, "collignon-reflect", false);
 
   addsaver(vid.plevel_factor, "plevel_factor", 0.7);
 
@@ -545,11 +545,11 @@ EX void initConfig() {
   addsaver(slr::steps, "slr-steps");
   addsaver(slr::range_xy, "slr-range-xy");
   
-  addsaver(vid.skiprope, "mobius", 0);
+  addsaver(pconf.skiprope, "mobius", 0);
   
-  addsaver(models::formula, "formula");
-  addsaverenum(models::basic_model, "basic model");
-  addsaver(models::use_atan, "use_atan");
+  addsaver(pconf.formula, "formula");
+  addsaverenum(pconf.basic_model, "basic model");
+  addsaver(pconf.use_atan, "use_atan");
   
   addsaver(arcm::current.symbol, "arcm-symbol", "4^5");
   addsaverenum(hybrid::underlying, "product-underlying");
@@ -670,7 +670,7 @@ EX bool inSpecialMode() {
     tour::on ||
   #endif
     yendor::on || tactic::on || randomPatternsMode ||
-    geometry != gNormal || pmodel != mdDisk || vid.alpha != 1 || vid.scale != 1 || 
+    geometry != gNormal || pmodel != mdDisk || pconf.alpha != 1 || pconf.scale != 1 || 
     rug::rugged || vid.monmode != DEFAULT_MONMODE ||
     vid.wallmode != DEFAULT_WALLMODE;
   }
@@ -697,7 +697,7 @@ EX bool have_current_settings() {
   }
 
 EX bool have_current_graph_settings() {
-  if(vid.xposition || vid.yposition || vid.alpha != 1 || vid.scale != 1)
+  if(pconf.xposition || pconf.yposition || pconf.alpha != 1 || pconf.scale != 1)
     return true;
   if(pmodel != mdDisk || vid.monmode != DEFAULT_MONMODE || vid.wallmode != DEFAULT_WALLMODE)
     return true;
@@ -708,8 +708,8 @@ EX bool have_current_graph_settings() {
   }
 
 EX void reset_graph_settings() {
-  pmodel = mdDisk; vid.alpha = 1; vid.scale = 1;
-  vid.xposition = vid.yposition = 0;
+  pmodel = mdDisk; pconf.alpha = 1; pconf.scale = 1;
+  pconf.xposition = pconf.yposition = 0;
   #if CAP_RUG
   if(rug::rugged) rug::close();
   #endif
@@ -1431,7 +1431,7 @@ EX void showJoyConfig() {
 
 EX void projectionDialog() {
   vid.tc_alpha = ticks;
-  dialog::editNumber(vid.alpha, -5, 5, .1, 1,
+  dialog::editNumber(vpconf.alpha, -5, 5, .1, 1,
     XLAT("projection"),
     XLAT("HyperRogue uses the Minkowski hyperboloid model internally. "
     "Klein and Poincaré models can be obtained by perspective, "
@@ -1449,17 +1449,17 @@ EX void projectionDialog() {
       "tanh(g)/tanh(c) units below the center. This in turn corresponds to "
       "the Poincaré model for g=c, and Klein-Beltrami model for g=0."));
     dialog::addSelItem(sphere ? "stereographic" : "Poincaré model", "1", 'P');
-    dialog::add_action([] () { *dialog::ne.editwhat = 1; vid.scale = 1; dialog::ne.s = "1"; });
+    dialog::add_action([] () { *dialog::ne.editwhat = 1; vpconf.scale = 1; dialog::ne.s = "1"; });
     dialog::addSelItem(sphere ? "gnomonic" : "Klein model", "0", 'K');
-    dialog::add_action([] () { *dialog::ne.editwhat = 0; vid.scale = 1; dialog::ne.s = "0"; });
+    dialog::add_action([] () { *dialog::ne.editwhat = 0; vpconf.scale = 1; dialog::ne.s = "0"; });
     if(hyperbolic) {
       dialog::addSelItem("inverted Poincaré model", "-1", 'I');
-      dialog::add_action([] () { *dialog::ne.editwhat = -1; vid.scale = 1; dialog::ne.s = "-1"; });
+      dialog::add_action([] () { *dialog::ne.editwhat = -1; vpconf.scale = 1; dialog::ne.s = "-1"; });
       }
     dialog::addItem(sphere ? "orthographic" : "Gans model", 'O');
-    dialog::add_action([] () { vid.alpha = vid.scale = 999; dialog::ne.s = dialog::disp(vid.alpha); });
+    dialog::add_action([] () { vpconf.alpha = vpconf.scale = 999; dialog::ne.s = dialog::disp(vpconf.alpha); });
     dialog::addItem(sphere ? "towards orthographic" : "towards Gans model", 'T');
-    dialog::add_action([] () { double d = 1.1; vid.alpha *= d; vid.scale *= d; dialog::ne.s = dialog::disp(vid.alpha); });
+    dialog::add_action([] () { double d = 1.1; vpconf.alpha *= d; vpconf.scale *= d; dialog::ne.s = dialog::disp(vpconf.alpha); });
     };
   }
 
@@ -1564,7 +1564,7 @@ EX void showStereo() {
   }
 
 EX void config_camera_rotation() {
-  dialog::editNumber(vid.ballangle, 0, 90, 5, 0, XLAT("camera rotation in 3D models"), 
+  dialog::editNumber(pconf.ballangle, 0, 90, 5, 0, XLAT("camera rotation in 3D models"), 
     "Rotate the camera in 3D models (ball model, hyperboloid, and hemisphere). "
     "Note that hyperboloid and hemisphere models are also available in the "
     "Hypersian Rug surfaces menu, but they are rendered differently there -- "
@@ -1648,9 +1648,9 @@ EX void show3D() {
     
   
     if(GDIM == 2)
-      dialog::addSelItem(XLAT("Projection at the ground level"), fts(vid.alpha), 'p');
+      dialog::addSelItem(XLAT("Projection at the ground level"), fts(pconf.alpha), 'p');
     else if(!in_perspective())
-      dialog::addSelItem(XLAT("Projection distance"), fts(vid.alpha), 'p');
+      dialog::addSelItem(XLAT("Projection distance"), fts(pconf.alpha), 'p');
     
     dialog::addBreak(50);
     dialog::addSelItem(XLAT("Height of walls"), fts(vid.wall_height), 'w');
@@ -1676,7 +1676,7 @@ EX void show3D() {
       dialog::editNumber(mouseaim_sensitivity, -1, 1, 0.002, 0.01, XLAT("mouse aiming sensitivity"), "set to 0 to disable");
       });
     }
-  dialog::addSelItem(XLAT("camera rotation"), fts(vid.camera_angle), 's');
+  dialog::addSelItem(XLAT("camera rotation"), fts(vpconf.camera_angle), 's');
   if(GDIM == 2) {
     dialog::addSelItem(XLAT("fixed facing"), vid.fixed_facing ? fts(vid.fixed_facing_dir) : XLAT("OFF"), 'f');
     dialog::add_action([] () { vid.fixed_facing = !vid.fixed_facing; 
@@ -1730,7 +1730,7 @@ EX void show3D() {
     }
   #endif
   if(GDIM == 2) {
-    dialog::addBoolItem(XLAT("configure TPP automatically"), pmodel == mdDisk && vid.camera_angle, 'T');
+    dialog::addBoolItem(XLAT("configure TPP automatically"), pmodel == mdDisk && pconf.camera_angle, 'T');
     dialog::add_action(geom3::switch_tpp);
     }
   
@@ -1902,7 +1902,7 @@ EX void show3D() {
         };
       }
     else if(uni == 's') 
-      dialog::editNumber(vid.camera_angle, -180, 180, 5, 0, XLAT("camera rotation"), 
+      dialog::editNumber(vpconf.camera_angle, -180, 180, 5, 0, XLAT("camera rotation"), 
         XLAT("Rotate the camera. Can be used to obtain a first person perspective, "
         "or third person perspective when combined with Y shift.")
         );
@@ -1961,9 +1961,9 @@ EX void showCustomizeChar() {
   
   dynamicval<eModel> pm(pmodel, flat_model());
   glClear(GL_DEPTH_BUFFER_BIT);
-  dynamicval<ld> va(vid.alpha, 1);
-  dynamicval<ld> vs(vid.scale, 1);
-  dynamicval<ld> vc(vid.camera_angle, 0);
+  dynamicval<ld> va(pconf.alpha, 1);
+  dynamicval<ld> vs(pconf.scale, 1);
+  dynamicval<ld> vc(pconf.camera_angle, 0);
 
   initquickqueue();
   transmatrix V = atscreenpos(vid.xres/2, firsty, scale);
@@ -2465,7 +2465,7 @@ EX int read_config_args() {
   else if(argis("-yca")) {
     PHASEFROM(2); 
     shift_arg_formula(vid.yshift);
-    shift_arg_formula(vid.camera_angle);
+    shift_arg_formula(pconf.camera_angle);
     }
   else if(argis("-pside")) {
     PHASEFROM(2); 
@@ -2473,8 +2473,8 @@ EX int read_config_args() {
     }
   else if(argis("-xy")) {
     PHASEFROM(2); 
-    shift_arg_formula(vid.xposition);
-    shift_arg_formula(vid.yposition);
+    shift_arg_formula(pconf.xposition);
+    shift_arg_formula(pconf.yposition);
     }
   else if(argis("-fixdir")) {
     PHASEFROM(2); 
@@ -2582,15 +2582,15 @@ auto ah_config = addHook(hooks_args, 0, read_config_args) + addHook(hooks_args, 
 EX unordered_map<string, ld&> params = {
   {"linewidth", vid.linewidth},
   {"patternlinewidth", linepatterns::width},
-  {"scale", vid.scale},
-  {"xposition", vid.xposition},
-  {"yposition", vid.yposition},
-  {"projection", vid.alpha},
+  {"scale", pconf.scale},
+  {"xposition", pconf.xposition},
+  {"yposition", pconf.yposition},
+  {"projection", pconf.alpha},
   {"sspeed", vid.sspeed},
   {"mspeed", vid.mspeed},
-  {"ballangle", vid.ballangle},
+  {"ballangle", pconf.ballangle},
   {"yshift", vid.yshift},
-  {"cameraangle", vid.camera_angle},
+  {"cameraangle", pconf.camera_angle},
   {"eye", vid.eye},
   {"depth", vid.depth},
   {"camera", vid.camera},
@@ -2607,22 +2607,22 @@ EX unordered_map<string, ld&> params = {
   {"star", polygonal::STAR},
   {"lvspeed", history::lvspeed},
   {"rotation", models::rotation},
-  {"mori", models::model_orientation},
-  {"mori_yz", models::model_orientation_yz},
-  {"clipmin", models::clip_min},
-  {"clipmax", models::clip_max},
-  {"topz", models::top_z},
-  {"mtrans", models::model_transition},
-  {"hp", models::halfplane_scale},
+  {"mori", pconf.model_orientation},
+  {"mori_yz", pconf.model_orientation_yz},
+  {"clipmin", pconf.clip_min},
+  {"clipmax", pconf.clip_max},
+  {"topz", pconf.top_z},
+  {"mtrans", pconf.model_transition},
+  {"hp", pconf.halfplane_scale},
   {"back", backbrightness},
   {"ipd", vid.ipd},
   {"lr", vid.lr_eyewidth},
   {"anaglyph", vid.anaglyph_eyewidth},
   {"fov", vid.fov},
-  {"ets", vid.euclid_to_sphere},
-  {"stretch", vid.stretch},
-  {"twopoint", vid.twopoint_param},
-  {"fisheye", vid.fisheye_param},
+  {"ets", pconf.euclid_to_sphere},
+  {"stretch", pconf.stretch},
+  {"twopoint", pconf.twopoint_param},
+  {"fisheye", pconf.fisheye_param},
   {"bwidth", vid.binary_width},
   #if CAP_ANIMATIONS
   {"aperiod", anims::period},
@@ -2634,10 +2634,10 @@ EX unordered_map<string, ld&> params = {
   {"a", anims::a},
   {"b", anims::b},
   #endif
-  {"mobius", vid.skiprope},
-  {"sang", models::spiral_angle},
-  {"spiralx", models::spiral_x},
-  {"spiraly", models::spiral_y},
+  {"mobius", pconf.skiprope},
+  {"sang", pconf.spiral_angle},
+  {"spiralx", pconf.spiral_x},
+  {"spiraly", pconf.spiral_y},
   #if CAP_CRYSTAL
   {"cprob", crystal::compass_probability},
   #endif
@@ -2646,7 +2646,7 @@ EX unordered_map<string, ld&> params = {
   {"fade", shot::fade},
   {"mgrid", vid.multiplier_grid},
   {"mring", vid.multiplier_ring},
-  {"collignon", vid.collignon_parameter},
+  {"collignon", pconf.collignon_parameter},
   {"levellines", levellines},
   #endif
   };

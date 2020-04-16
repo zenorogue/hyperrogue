@@ -103,7 +103,10 @@ constexpr eGeometry rgElliptic = gECell120;
 
 EX eGeometry gwhere = rgEuclid;
 
+#if HDR
+#define USING_NATIVE_GEOMETRY_IN_RUG dynamicval<eGeometry> gw(geometry, rug::rugged ? hr::rug::gwhere : geometry)
 #define USING_NATIVE_GEOMETRY dynamicval<eGeometry> gw(geometry, hr::rug::gwhere)
+#endif
 
 // hypersian rug datatypes and globals
 //-------------------------------------
@@ -131,9 +134,9 @@ EX rugpoint *finger_center;
 EX ld finger_range = .1;
 EX ld finger_force = 1;
 
-EX eModel rug_projection = mdEquidistant;
+#define rconf (vid.rug_config)
 
-EX bool perspective() { return models::model_is_perspective(rug_projection); }
+EX bool perspective() { return models::is_perspective(rconf.model); }
 
 void push_point(hyperpoint& h, int coord, ld val) {
   USING_NATIVE_GEOMETRY;
@@ -166,15 +169,15 @@ EX rugpoint *addRugpoint(hyperpoint h, double dist) {
   m->h = h;
   
   /*
-  ld tz = vid.alpha+h[2];
+  ld tz = pconf.alpha+h[2];
   m->x1 = (1 + h[0] / tz) / 2;
   m->y1 = (1 + h[1] / tz) / 2;
   */
 
   hyperpoint onscreen;
   applymodel(m->h, onscreen);
-  m->x1 = (1 + onscreen[0] * vid.scale) / 2;
-  m->y1 = (1 - onscreen[1] * vid.scale) / 2;
+  m->x1 = (1 + onscreen[0] * pconf.scale) / 2;
+  m->y1 = (1 - onscreen[1] * pconf.scale) / 2;
   m->valid = false;
 
   if(euclid && quotient && !bounded) {
@@ -347,7 +350,7 @@ EX void calcparam_rug() {
   cd->xsize = cd->ysize = TEXTURESIZE;
   cd->xcenter = cd->ycenter = cd->scrsize = HTEXTURESIZE;
   
-  cd->radius = cd->scrsize * vid.scale;
+  cd->radius = cd->scrsize * pconf.scale;
   }
 
 EX void buildTorusRug() {
@@ -467,11 +470,11 @@ EX void buildTorusRug() {
   for(auto p: points)
     maxz = max(maxz, max(abs(p->x1), abs(p->y1)));
   
-  if(1) vid.scale = 1 / maxz;
+  if(1) pconf.scale = 1 / maxz;
 
   if(1) for(auto p: points)
-    p->x1 = (1 + vid.scale * p->x1)/2,
-    p->y1 = (1 - vid.scale * p->y1)/2;
+    p->x1 = (1 + pconf.scale * p->x1)/2,
+    p->y1 = (1 - pconf.scale * p->y1)/2;
   
   qvalid = 0;
   for(auto p: points) if(!p->glue) qvalid++;
@@ -1080,7 +1083,7 @@ EX void drawRugScene() {
   rug.tinf = &tinf;
   rug.flags = POLY_TRIANGLES | POLY_FAT | POLY_PRINTABLE;
 
-  dynamicval<eModel> p(pmodel, rug_projection);
+  dynamicval<projection_configuration> p(pconf, rconf);
   
   drawqueue();
   }
@@ -1147,7 +1150,7 @@ EX void init_model() {
       if(r->x1<0 || r->x1>1 || r->y1<0 || r->y1 > 1)
         valid = false;
     
-    if(sphere && pmodel == mdDisk && vid.alpha > 1)
+    if(sphere && pmodel == mdDisk && pconf.alpha > 1)
       valid = false;
     
     if(display_warning && !valid)
@@ -1453,8 +1456,10 @@ EX void show() {
     dialog::lastItem().value += " (" + its(qvalid) + ")";
   
   dialog::addSelItem(XLAT("model distance"), fts(model_distance), 'd');
-  { USING_NATIVE_GEOMETRY;
-  dialog::addSelItem(XLAT("projection"), models::get_model_name(rug_projection), 'p'); }
+  if(rug::rugged) {
+    dialog::addSelItem(XLAT("projection"), models::get_model_name(rconf.model), 'p'); 
+    }
+  else dialog::addBreak(100);
   if(!rug::rugged)
     dialog::addSelItem(XLAT("native geometry"), geometry_name(gwhere), 'n');
   else
@@ -1570,7 +1575,7 @@ EX void show() {
         }
       }
     else if(uni == 'p') {
-      rug_projection = rug_projection == mdEquidistant ? mdPerspective : mdEquidistant;
+      pushScreen(models::model_menu);
       }
     else if(uni == 'd') {
       dialog::editNumber(model_distance, -10, 10, .1, 1, XLAT("model distance"), 
@@ -1718,7 +1723,7 @@ int rugArgs() {
     }
 
   else if(argis("-rugpers")) {
-    rug_projection = mdPerspective;
+    rconf.model = mdPerspective;
     }
 
   else if(argis("-rugonce")) {
@@ -1759,7 +1764,7 @@ int rugArgs() {
     }
 
   else if(argis("-rugorth")) {
-    rug_projection = mdEquidistant;
+    rconf.model = mdEquidistant;
     }
 
   else if(argis("-rugerr")) {

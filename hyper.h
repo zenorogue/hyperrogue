@@ -228,9 +228,46 @@ enum eStereo { sOFF, sAnaglyph, sLR, sODS };
 
 enum eModel : int;
 
+/** configuration of the projection */
+struct projection_configuration {
+  eModel model;            /**< which projection, see classes.cpp */
+  ld xposition, yposition; /**< move the center to another position */
+  ld scale, alpha, camera_angle, fisheye_param, twopoint_param, stretch, ballangle, ballproj, euclid_to_sphere;
+  ld clip_min, clip_max;
+  ld model_orientation, halfplane_scale, model_orientation_yz;  
+  ld collignon_parameter; 
+  bool collignon_reflected;
+  string formula;
+  eModel basic_model;
+  ld top_z;
+  ld model_transition;
+  ld spiral_angle;
+  ld spiral_x;
+  ld spiral_y;
+  bool use_atan;
+  ld right_spiral_multiplier;
+  ld any_spiral_multiplier;
+  ld sphere_spiral_multiplier;
+  ld spiral_cone;
+  ld skiprope;
+  ld product_z_scale;
+
+  projection_configuration() { 
+    formula = "z^2"; top_z = 5; model_transition = 1; spiral_angle = 70; spiral_x = 10; spiral_y = 7; 
+    right_spiral_multiplier = 1;
+    any_spiral_multiplier = 1;
+    sphere_spiral_multiplier = 2;
+    spiral_cone = 360;
+    use_atan = false;
+    product_z_scale = 1;
+    }
+  };
+
 struct videopar {
-  ld scale, alpha, sspeed, mspeed, yshift, camera_angle;
-  ld ballangle, ballproj, euclid_to_sphere, twopoint_param, fisheye_param, stretch, binary_width, fixed_facing_dir;
+  projection_configuration projection_config, rug_config;
+  ld yshift;
+  ld sspeed, mspeed;
+  ld binary_width, fixed_facing_dir;
   int mobilecompasssize;
   int radarsize; // radar for 3D geometries
   ld radarrange;
@@ -250,8 +287,6 @@ struct videopar {
   int xres, yres, framelimit;
   
   int xscr, yscr;
-  
-  ld xposition, yposition;
   
   bool grid;
   bool particles;
@@ -304,8 +339,6 @@ struct videopar {
   int cells_drawn_limit;
   int cells_generated_limit; // limit on cells generated per frame
   
-  ld skiprope;
-
   eStereo stereo_mode;
   ld ipd;
   ld lr_eyewidth, anaglyph_eyewidth;
@@ -319,7 +352,6 @@ struct videopar {
   ld depth;      // world level below the plane
   ld camera;     // camera level above the plane
   ld wall_height, creature_scale, height_width;
-  eModel vpmodel;
   ld lake_top, lake_bottom;
   ld rock_wall_ratio;
   ld human_wall_ratio;
@@ -331,7 +363,6 @@ struct videopar {
   ld eye;
   bool auto_eye;
 
-  ld collignon_parameter; bool collignon_reflected;
   ld plevel_factor;
   bool bubbles_special, bubbles_threshold, bubbles_all;
   int joysmooth;
@@ -627,7 +658,9 @@ enum orbAction { roMouse, roKeyboard, roCheck, roMouseForce, roMultiCheck, roMul
 
 #define MODELCOUNT ((int) mdGUARD)
 
-#define pmodel (vid.vpmodel)
+#define pconf vid.projection_config
+#define vpconf (rug::rugged ? vid.rug_config : vid.projection_config)
+#define pmodel (pconf.model)
 
 color_t darkena(color_t c, int lev, int a);
 

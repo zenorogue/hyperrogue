@@ -2858,10 +2858,10 @@ int haveaura_cached;
 EX int haveaura() {
   if(!(vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL))) return 0;
   if(sphere && mdAzimuthalEqui()) return 0;
-  if(among(pmodel, mdJoukowsky, mdJoukowskyInverted) && hyperbolic && models::model_transition < 1) 
+  if(among(pmodel, mdJoukowsky, mdJoukowskyInverted) && hyperbolic && pconf.model_transition < 1) 
     return 2;
   if(pmodel == mdFisheye) return 1;
-  return pmodel == mdDisk && (!sphere || vid.alpha > 10) && !euclid;
+  return pmodel == mdDisk && (!sphere || pconf.alpha > 10) && !euclid;
   }
   
 vector<pair<int, int> > auraspecials; 
@@ -2930,10 +2930,10 @@ void drawaura() {
   if(!haveaura()) return;
   if(vid.stereo_mode) return;
   double rad = current_display->radius;
-  if(sphere && !mdAzimuthalEqui()) rad /= sqrt(vid.alpha*vid.alpha - 1);
+  if(sphere && !mdAzimuthalEqui()) rad /= sqrt(pconf.alpha*pconf.alpha - 1);
   if(hyperbolic && pmodel == mdFisheye) {
     ld h = 1;
-    h /= vid.fisheye_param;
+    h /= pconf.fisheye_param;
     ld nrad = h / sqrt(2 + h*h);
     rad *= nrad;
     }
@@ -2959,9 +2959,9 @@ void drawaura() {
     for(int x=0; x<vid.xres; x++) {
 
       ld hx = (x * 1. - current_display->xcenter) / rad;
-      ld hy = (y * 1. - current_display->ycenter) / rad / vid.stretch;
+      ld hy = (y * 1. - current_display->ycenter) / rad / pconf.stretch;
   
-      if(vid.camera_angle) camrotate(hx, hy);
+      if(pconf.camera_angle) camrotate(hx, hy);
       
       ld fac = sqrt(hx*hx+hy*hy);
       if(fac < 1) continue;
@@ -3007,8 +3007,8 @@ void drawaura() {
   facs[10] = 10;
   cmul[1] = cmul[0];
   
-  bool inversion = vid.alpha <= -1 || pmodel == mdJoukowsky;
-  bool joukowsky = among(pmodel, mdJoukowskyInverted, mdJoukowsky) && hyperbolic && models::model_transition < 1;
+  bool inversion = pconf.alpha <= -1 || pmodel == mdJoukowsky;
+  bool joukowsky = among(pmodel, mdJoukowskyInverted, mdJoukowsky) && hyperbolic && pconf.model_transition < 1;
 
   for(int r=0; r<=AURA; r++) for(int z=0; z<11; z++) {
     float rr = (M_PI * 2 * r) / AURA;
@@ -3024,7 +3024,7 @@ void drawaura() {
       else        
         models::apply_orientation(c1, s1);
 
-      ld& mt = models::model_transition;
+      ld& mt = pconf.model_transition;
       ld mt2 = 1 - mt;
 
       ld m = sqrt(c1*c1 + s1*s1 / mt2 / mt2);
@@ -3034,7 +3034,7 @@ void drawaura() {
       }
 
     cx[r][z][0] = rad0 * c;
-    cx[r][z][1] = rad0 * s * vid.stretch;
+    cx[r][z][1] = rad0 * s * pconf.stretch;
     
     for(int u=0; u<3; u++)
       cx[r][z][u+2] = bak[u] + (aurac[rm][u] / (aurac[rm][3]+.1) - bak[u]) * cmul[z];
@@ -4560,7 +4560,7 @@ EX void drawthemap() {
   #endif
   if(non_spatial_model())
     spatial_graphics = false;
-  if(pmodel == mdDisk && abs(vid.alpha) < 1e-6) spatial_graphics = false;
+  if(pmodel == mdDisk && abs(pconf.alpha) < 1e-6) spatial_graphics = false;
   
   if(!spatial_graphics) wmspatial = mmspatial = false;
   if(GDIM == 3) wmspatial = mmspatial = true;
@@ -4763,7 +4763,7 @@ EX void calcparam() {
   cd->xcenter = cd->xtop + cd->xsize / 2;
   cd->ycenter = cd->ytop + cd->ysize / 2;
 
-  if(vid.scale > -1e-2 && vid.scale < 1e-2) vid.scale = 1;
+  if(pconf.scale > -1e-2 && pconf.scale < 1e-2) pconf.scale = 1;
   
   ld realradius = min(cd->xsize / 2, cd->ysize / 2);
   
@@ -4785,11 +4785,11 @@ EX void calcparam() {
     if(current_display->sidescreen) cd->xcenter = vid.yres/2;
     }
 
-  cd->radius = vid.scale * cd->scrsize;
+  cd->radius = pconf.scale * cd->scrsize;
   if(GDIM == 3 && in_perspective()) cd->radius = cd->scrsize;
   realradius = min(realradius, cd->radius);
   
-  ld aradius = sphere ? cd->radius / (vid.alpha - 1) : cd->radius;
+  ld aradius = sphere ? cd->radius / (pconf.alpha - 1) : cd->radius;
   
   if(dronemode) { cd->ycenter -= cd->radius; cd->ycenter += vid.fsize/2; cd->ycenter += vid.fsize/2; cd->radius *= 2; }
   
@@ -4801,8 +4801,8 @@ EX void calcparam() {
       cd->xcenter = cd->xtop + cd->xsize - vid.fsize - aradius;
     }
 
-  cd->xcenter += cd->scrsize * vid.xposition;
-  cd->ycenter += cd->scrsize * vid.yposition;
+  cd->xcenter += cd->scrsize * pconf.xposition;
+  cd->ycenter += cd->scrsize * pconf.yposition;
   
   cd->tanfov = tan(vid.fov * degree / 2);
   

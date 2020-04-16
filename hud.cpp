@@ -404,11 +404,11 @@ EX void drawStats() {
   dynamicval<eModel> pm(pmodel, flat_model());
   glClear(GL_DEPTH_BUFFER_BIT);
   // dynamicval<videopar> v(vid, vid);
-  // vid.alpha = vid.scale = 1;
-  dynamicval<ld> va(vid.alpha, 1);
-  dynamicval<ld> vs(vid.scale, 1);
-  dynamicval<ld> vc(vid.camera_angle, 0);
-  if(prod) vid.alpha = 30, vid.scale = 30;
+  // pconf.alpha = vid.scale = 1;
+  dynamicval<ld> va(pconf.alpha, 1);
+  dynamicval<ld> vs(pconf.scale, 1);
+  dynamicval<ld> vc(pconf.camera_angle, 0);
+  if(prod) pconf.alpha = 30, pconf.scale = 30;
   
   auto& cd = current_display;
   auto xc = cd->xcenter;
@@ -469,7 +469,7 @@ EX void drawStats() {
         int spots = 0;
         for(int u=vid.fsize; u<vid.xres/2-s; u += s)
         for(int v=vid.fsize; v<vid.yres/2-s; v += s)
-          if(hypot(vid.xres/2-u-s, (vid.yres/2-v-s) / vid.stretch) > rad) {
+          if(hypot(vid.xres/2-u-s, (vid.yres/2-v-s) / pconf.stretch) > rad) {
             spots++;
             }
         if(spots >= bycorner[cor] && spots >= 3) {
@@ -482,7 +482,7 @@ EX void drawStats() {
             }
           for(int u=vid.fsize; u<vid.xres/2-s; u += s)
           for(int v=vid.fsize; v<vid.yres/2-s; v += s)
-            if(hypot(vid.xres/2-u-s, (vid.yres/2-v-s) / vid.stretch) > rad) {
+            if(hypot(vid.xres/2-u-s, (vid.yres/2-v-s) / pconf.stretch) > rad) {
               if(next >= isize(glyphstoshow)) break;
 
               int cx = u;

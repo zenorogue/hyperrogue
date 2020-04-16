@@ -359,7 +359,7 @@ void display_data::set_projection(int ed) {
 
   if(pmodel == mdManual) return;
   
-  if(vid.stretch != 1 && (shader_flags & SF_DIRECT)) glhr::projection_multiply(glhr::scale(vid.stretch, 1, 1));
+  if(pconf.stretch != 1 && (shader_flags & SF_DIRECT)) glhr::projection_multiply(glhr::scale(pconf.stretch, 1, 1));
 
   if(vid.stereo_mode != sODS)
     eyewidth_translate(ed);
@@ -367,10 +367,8 @@ void display_data::set_projection(int ed) {
   auto ortho = [&] (ld x, ld y) {
     glhr::glmatrix M = glhr::ortho(x, y, 1);
     if(shader_flags & SF_ZFOG) {
-      using models::clip_max; 
-      using models::clip_min;
-      M[2][2] = 2 / (clip_max - clip_min);
-      M[3][2] = (clip_min + clip_max) / (clip_max - clip_min);
+      M[2][2] = 2 / (pconf.clip_max - pconf.clip_min);
+      M[3][2] = (pconf.clip_min + pconf.clip_max) / (pconf.clip_max - pconf.clip_min);
       auto cols = glhr::acolor(darkena(backcolor, 0, 0xFF));
       glUniform4f(selected->uFogColor, cols[0], cols[1], cols[2], cols[3]);
       }
@@ -409,7 +407,7 @@ void display_data::set_projection(int ed) {
     glhr::fog_max(1/sightranges[geometry], darkena(backcolor, 0, 0xFF));
     }
   else {
-    if(vid.alpha > -1) {
+    if(pconf.alpha > -1) {
       // Because of the transformation from H3 to the Minkowski hyperboloid,
       // points with negative Z can be generated in some 3D settings.
       // This happens for points below the camera, but above the plane.
@@ -420,14 +418,14 @@ void display_data::set_projection(int ed) {
     GLfloat sc = current_display->radius / (cd->ysize/2.);
     glhr::projection_multiply(glhr::frustum(cd->xsize / cd->ysize, 1));
     glhr::projection_multiply(glhr::scale(sc, -sc, -1));
-    glhr::projection_multiply(glhr::translate(0, 0, vid.alpha));
+    glhr::projection_multiply(glhr::translate(0, 0, pconf.alpha));
     if(ed) glhr::projection_multiply(glhr::translate(vid.ipd * ed/2, 0, 0));
     }
 
   if(selected->uPP != -1) {
     glhr::glmatrix pp = glhr::id;
     if(get_shader_flags() & SF_USE_ALPHA)
-      pp[3][2] = GLfloat(vid.alpha);
+      pp[3][2] = GLfloat(pconf.alpha);
 
     if(get_shader_flags() & SF_ORIENT) {
       if(GDIM == 3) for(int a=0; a<4; a++) 
@@ -440,7 +438,7 @@ void display_data::set_projection(int ed) {
     }
   
   if(selected->uAlpha != -1)
-    glhr::set_ualpha(vid.alpha);
+    glhr::set_ualpha(pconf.alpha);
 
   if(selected->uLevelLines != -1) {
     glUniform1f(selected->uLevelLines, levellines);
@@ -458,12 +456,12 @@ void display_data::set_projection(int ed) {
   if(selected->shader_flags & SF_HALFPLANE) {
     glhr::projection_multiply(glhr::translate(0, 1, 0));      
     glhr::projection_multiply(glhr::scale(-1, 1, 1));
-    glhr::projection_multiply(glhr::scale(models::halfplane_scale, models::halfplane_scale, GDIM == 3 ? models::halfplane_scale : 1));
+    glhr::projection_multiply(glhr::scale(pconf.halfplane_scale, pconf.halfplane_scale, GDIM == 3 ? pconf.halfplane_scale : 1));
     glhr::projection_multiply(glhr::translate(0, 0.5, 0));
     }      
   
-  if(vid.camera_angle && pmodel != mdPixel) {
-    ld cam = vid.camera_angle * degree;
+  if(pconf.camera_angle && pmodel != mdPixel) {
+    ld cam = pconf.camera_angle * degree;
 
     GLfloat cc = cos(cam);
     GLfloat ss = sin(cam);

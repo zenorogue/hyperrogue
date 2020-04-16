@@ -175,7 +175,7 @@ EX void slidehelp() {
 /** \brief return from a subgame launched while in presentation */
 void return_geometry() {
   gamestack::pop();
-  vid.scale = 1; vid.alpha = 1;
+  pconf.scale = 1; pconf.alpha = 1;
   presentation(pmGeometryReset);
   addMessage(XLAT("Returned to your game."));
   }
@@ -262,11 +262,11 @@ bool handleKeyTour(int sym, int uni) {
         break;
       case '1':
         set_geometry(gSphere);
-        vid.alpha = 1, vid.scale = .5;
+        pconf.alpha = 1, pconf.scale = .5;
         break;
       case '2':
         set_geometry(gEuclid);
-        vid.alpha = 1, vid.scale = .5;
+        pconf.alpha = 1, pconf.scale = .5;
         break;
       }      
     start_game();
@@ -288,7 +288,7 @@ bool handleKeyTour(int sym, int uni) {
     return true;
     }
   if(NUMBERKEY == '3' && sphere) {
-    if(vid.alpha < 2) vid.scale = 400, vid.alpha = 400; else vid.scale = .5, vid.alpha = 1;
+    if(pconf.alpha < 2) pconf.scale = 400, pconf.alpha = 400; else pconf.scale = .5, pconf.alpha = 1;
     addMessage(XLAT("Changed the projection."));
     return true;
     }
@@ -450,8 +450,8 @@ EX namespace ss {
   
 EX void start() {
   currentslide = 0;
-  vid.scale = 1;
-  vid.alpha = 1;
+  pconf.scale = 1;
+  pconf.alpha = 1;
   pmodel = mdDisk;
   if(!tour::on) presentation(pmStartAll);
   else {
@@ -839,8 +839,8 @@ EX slide default_slides[] = {
   {models+"Beltrami-Klein model", 43, LEGAL::ANY | USE_SLIDE_NAME,
     "This model renders straight lines as straight, but it distorts angles.",
     [] (presmode mode) {
-      if(mode == 1 || mode == pmGeometryReset || mode == pmGeometry) vid.alpha = 0;
-      if(mode == 3) vid.alpha = 1;
+      if(mode == 1 || mode == pmGeometryReset || mode == pmGeometry) pconf.alpha = 0;
+      if(mode == 3) pconf.alpha = 1;
       }
     },
   {models+"Gans model", 44, LEGAL::ANY | USE_SLIDE_NAME,
@@ -849,8 +849,8 @@ EX slide default_slides[] = {
     "model are all obtained by looking at either the hyperboloid model or an "
     "equidistant surface from various distances.",
     [] (presmode mode) {
-      if(mode == 1 || mode == pmGeometryReset || mode == pmGeometry) vid.alpha = 400, vid.scale = 150;
-      if(mode == 3) vid.alpha = vid.scale = 1;
+      if(mode == 1 || mode == pmGeometryReset || mode == pmGeometry) pconf.alpha = 400, pconf.scale = 150;
+      if(mode == 3) pconf.alpha = pconf.scale = 1;
       }
     },
   {models+"Band model", 45, LEGAL::NONEUC | USE_SLIDE_NAME, 

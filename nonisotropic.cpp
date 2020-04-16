@@ -1933,8 +1933,8 @@ EX namespace rots {
       dynamicval<transmatrix> m3(playerV, Id);
       dynamicval<transmatrix> m4(actual_view_transform, Id);
       dynamicval<eModel> pm(pmodel, mdDisk);
-      dynamicval<ld> pss(vid.scale, (sphere ? 10 : 1) * underlying_scale);
-      dynamicval<ld> psa(vid.alpha, sphere ? 10 : 1);
+      dynamicval<ld> pss(pconf.scale, (sphere ? 10 : 1) * underlying_scale);
+      dynamicval<ld> psa(pconf.alpha, sphere ? 10 : 1);
       dynamicval<hrmap*> p(hybrid::pmap, NULL);
       dynamicval<int> psr(sightrange_bonus, 0);
       calcparam();

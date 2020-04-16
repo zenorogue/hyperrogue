@@ -842,12 +842,12 @@ EX ld realradius() {
   ld vradius = current_display->radius;
   if(sphere) {
     if(sphereflipped()) 
-      vradius /= sqrt(vid.alpha*vid.alpha - 1);
+      vradius /= sqrt(pconf.alpha*pconf.alpha - 1);
     else
       vradius = 1e12; // use the following
     }
   if(euclid)
-    vradius = current_display->radius * get_sightrange() / (1 + vid.alpha) / 2.5;
+    vradius = current_display->radius * get_sightrange() / (1 + pconf.alpha) / 2.5;
   vradius = min<ld>(vradius, min(vid.xres, vid.yres) / 2);
   return vradius;
   }
@@ -857,14 +857,14 @@ EX void drawmessage(const string& s, int& y, color_t col) {
   int space;
   if(dual::state)
     space = vid.xres;
-  else if(y > current_display->ycenter + rrad * vid.stretch)
+  else if(y > current_display->ycenter + rrad * pconf.stretch)
     space = vid.xres;
   else if(y > current_display->ycenter)
-    space = current_display->xcenter - rhypot(rrad, (y-current_display->ycenter) / vid.stretch);
+    space = current_display->xcenter - rhypot(rrad, (y-current_display->ycenter) / pconf.stretch);
   else if(y > current_display->ycenter - vid.fsize)
     space = current_display->xcenter - rrad;
-  else if(y > current_display->ycenter - vid.fsize - rrad * vid.stretch)
-    space = current_display->xcenter - rhypot(rrad, (current_display->ycenter-vid.fsize-y) / vid.stretch);
+  else if(y > current_display->ycenter - vid.fsize - rrad * pconf.stretch)
+    space = current_display->xcenter - rhypot(rrad, (current_display->ycenter-vid.fsize-y) / pconf.stretch);
   else
     space = vid.xres;
 
@@ -949,7 +949,7 @@ EX void drawCircle(int x, int y, int size, color_t color, color_t fillcolor IS(0
     if(ISMOBILE && pts > 72) pts = 72;
     for(int r=0; r<pts; r++) {
       float rr = (M_PI * 2 * r) / pts;
-      glcoords.push_back(glhr::makevertex(x + size * sin(rr), y + size * vid.stretch * cos(rr), 0));
+      glcoords.push_back(glhr::makevertex(x + size * sin(rr), y + size * pconf.stretch * cos(rr), 0));
       }
     current_display->set_all(0);
     glhr::vertices(glcoords);
@@ -969,13 +969,13 @@ EX void drawCircle(int x, int y, int size, color_t color, color_t fillcolor IS(0
 #if CAP_XGD
   gdpush(4); gdpush(color); gdpush(x); gdpush(y); gdpush(size);
 #elif CAP_SDLGFX
-  if(vid.stretch == 1) {
+  if(pconf.stretch == 1) {
     if(fillcolor) filledCircleColor(s, x, y, size, fillcolor);
     if(color) ((vid.antialias && AA_NOGL)?aacircleColor:circleColor) (s, x, y, size, color);
     }
   else {
-    if(fillcolor) filledEllipseColor(s, x, y, size, size * vid.stretch, fillcolor);
-    if(color) ((vid.antialias && AA_NOGL)?aaellipseColor:ellipseColor) (s, x, y, size, size * vid.stretch, color);
+    if(fillcolor) filledEllipseColor(s, x, y, size, size * pconf.stretch, fillcolor);
+    if(color) ((vid.antialias && AA_NOGL)?aaellipseColor:ellipseColor) (s, x, y, size, size * pconf.stretch, color);
     }
 #elif CAP_SDL
   int pts = size * 4;
@@ -1022,7 +1022,7 @@ EX void displayColorButton(int x, int y, const string& name, int key, int align,
   }
 
 ld textscale() { 
-  return vid.fsize / (current_display->radius * cgi.crossf) * (1+vid.alpha) * 2;
+  return vid.fsize / (current_display->radius * cgi.crossf) * (1+pconf.alpha) * 2;
   }
   
 EX bool setfsize = true;

@@ -86,10 +86,10 @@ EX always_false in;
   
   EX void circle(int x, int y, int size, color_t col, color_t fillcol, double linewidth) {
     if(!invisible(col) || !invisible(fillcol)) {
-      if(vid.stretch == 1)
+      if(pconf.stretch == 1)
         println(f, "<circle cx='", coord(x), "' cy='", coord(y), "' r='", coord(size), "' ", stylestr(fillcol, col, linewidth), "/>");
       else
-        println(f, "<ellipse cx='", coord(x), "' cy='", coord(y), "' rx='", coord(size), "' ry='", coord(size*vid.stretch), "' ", stylestr(fillcol, col), "/>");
+        println(f, "<ellipse cx='", coord(x), "' cy='", coord(y), "' rx='", coord(size), "' ry='", coord(size*pconf.stretch), "' ", stylestr(fillcol, col), "/>");
       }
     }
   
@@ -879,7 +879,7 @@ EX void menu() {
       dialog::add_action([] { divby *= 10; if(divby > 1000000) divby = 1; });
       #endif
       
-      if(models::model_is_3d() || rug::rugged) {
+      if(models::is_3d(vpconf) || rug::rugged) {
         dialog::addInfo("SVG screenshots do not work in this 3D mode", 0xFF0000);
         if(GDIM == 2 && !rug::rugged) {
           dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
@@ -910,14 +910,14 @@ EX void menu() {
 
     case screenshot_format::wrl: {
       #if CAP_WRL
-      if(!models::model_is_3d() && !rug::rugged) {
+      if(!models::is_3d(vpconf) && !rug::rugged) {
         dialog::addInfo("this format is for 3D projections", 0xFF0000);
         if(GDIM == 2) {
           dialog::addItem(XLAT("hypersian rug mode"), 'u');
           dialog::add_action_push(rug::show);
           }
         }
-      else if(rug::rugged ? rug::perspective() : models::model_is_perspective()) {
+      else if(rug::rugged ? rug::perspective() : models::is_perspective(vpconf.model)) {
         dialog::addInfo("this does not work well in perspective projections", 0xFF8000);
         dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
         dialog::add_action_push(models::model_menu);
@@ -1212,23 +1212,23 @@ EX void apply() {
       }
     }
   #endif
-  vid.skiprope += skiprope_rotation * t * 2 * M_PI / period;
+  pconf.skiprope += skiprope_rotation * t * 2 * M_PI / period;
 
   if(ballangle_rotation) {
-    if(models::model_has_orientation())
-      models::model_orientation += ballangle_rotation * 360 * t / period;
+    if(models::has_orientation(vpconf.model))
+      vpconf.model_orientation += ballangle_rotation * 360 * t / period;
     else
-      vid.ballangle += ballangle_rotation * 360 * t / period;
+      vpconf.ballangle += ballangle_rotation * 360 * t / period;
     }
   if(joukowsky_anim) {
     ld t = ticks / period;
     t = t - floor(t);
     if(pmodel == mdBand) {
-      models::model_transition = t * 4 - 1;
+      vpconf.model_transition = t * 4 - 1;
       }
     else {
-      models::model_transition = t / 1.1;
-      vid.scale = (1 - models::model_transition) / 2.;
+      vpconf.model_transition = t / 1.1;
+      vpconf.scale = (1 - vpconf.model_transition) / 2.;
       }
     }
   apply_animated_parameters();
@@ -1487,7 +1487,7 @@ EX void show() {
       });
     }
   #endif
-  if(models::model_has_orientation())
+  if(models::has_orientation(vpconf.model))
     animator(XLAT("model rotation"), ballangle_rotation, 'I');
   else if(among(pmodel, mdHyperboloid, mdHemisphere, mdBall))
     animator(XLAT("3D rotation"), ballangle_rotation, '3');
@@ -1666,9 +1666,9 @@ startanim null_animation { "", no_init, [] { gamescreen(2); }};
 
 startanim joukowsky { "Joukowsky transform", no_init, [] {
   dynamicval<eModel> dm(pmodel, mdJoukowskyInverted);
-  dynamicval<ld> dt(models::model_orientation, ticks / 25.);
+  dynamicval<ld> dt(pconf.model_orientation, ticks / 25.);
   dynamicval<int> dv(vid.use_smart_range, 2);
-  dynamicval<ld> ds(vid.scale, 1/4.);
+  dynamicval<ld> ds(pconf.scale, 1/4.);
   models::configure();
   dynamicval<color_t> dc(ringcolor, 0);  
   gamescreen(2);
@@ -1677,7 +1677,7 @@ startanim joukowsky { "Joukowsky transform", no_init, [] {
 
 startanim bandspin { "spinning in the band model", no_init, [] {
   dynamicval<eModel> dm(pmodel, mdBand);
-  dynamicval<ld> dt(models::model_orientation, ticks / 25.);
+  dynamicval<ld> dt(pconf.model_orientation, ticks / 25.);
   dynamicval<int> dv(vid.use_smart_range, 2);
   models::configure();
   gamescreen(2);
@@ -1690,8 +1690,8 @@ startanim perspective { "projection distance", no_init, [] {
   x /= 2;
   x *= 1.5;
   x = tan(x);
-  dynamicval<ld> da(vid.alpha, x);
-  dynamicval<ld> ds(vid.scale, (1+x)/2);
+  dynamicval<ld> da(pconf.alpha, x);
+  dynamicval<ld> ds(pconf.scale, (1+x)/2);
   calcparam();
   gamescreen(2);
   explorable(projectionDialog);
@@ -1709,8 +1709,8 @@ startanim rug { "Hypersian Rug", [] {
   }};
 
 startanim spin_around { "spinning around", no_init,  [] {
-  dynamicval<ld> da(vid.alpha, 999);
-  dynamicval<ld> ds(vid.scale, 500);
+  dynamicval<ld> da(pconf.alpha, 999);
+  dynamicval<ld> ds(pconf.scale, 500);
   ld alpha = 2 * M_PI * ticks / 10000.;
   ld circle_radius = acosh(2.);
   dynamicval<transmatrix> dv(View, spin(-cos_auto(circle_radius)*alpha) * xpush(circle_radius) * spin(alpha) * View);
