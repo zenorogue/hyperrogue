@@ -94,10 +94,12 @@ EX void subdivide();
 EX ld modelscale = 1;
 EX ld model_distance = 4;
 
-const eGeometry rgHyperbolic = gSpace534;
-const eGeometry rgEuclid = gCubeTiling;
-const eGeometry rgSphere = gCell120;
-const eGeometry rgElliptic = gECell120;
+#if HDR
+constexpr eGeometry rgHyperbolic = gSpace534;
+constexpr eGeometry rgEuclid = gCubeTiling;
+constexpr eGeometry rgSphere = gCell120;
+constexpr eGeometry rgElliptic = gECell120;
+#endif
 
 EX eGeometry gwhere = rgEuclid;
 
