@@ -78,7 +78,7 @@ void shape::build_from_angles_edges() {
 bool correct_index(int index, int size) { return index >= 0 && index < size; }
 template<class T> bool correct_index(int index, const T& v) { return correct_index(index, isize(v)); }
 
-template<class T> void verify_index(int index, const T& v) { if(!correct_index(index, v)) throw hr_parse_exception("bad index"); }
+template<class T> void verify_index(int index, const T& v, exp_parser& ep) { if(!correct_index(index, v)) throw hr_parse_exception("bad index: " + its(index) + " at " + ep.where()); }
 
 string unnamed = "unnamed";
 
@@ -102,7 +102,7 @@ EX void load(const string& fname) {
     int ai;
     if(ep.next() == ')') ai = isize(c.shapes)-1;
     else ai = ep.iparse();
-    verify_index(ai, c.shapes); 
+    verify_index(ai, c.shapes, ep); 
     c.shapes[ai].flags |= f;
     ep.force_eat(")");
     };
@@ -171,7 +171,12 @@ EX void load(const string& fname) {
         else if(ep.eat(")")) break;
         else throw hr_parse_exception("expecting , or )");
         }
-      cc.build_from_angles_edges();
+      try {
+        cc.build_from_angles_edges();
+        }
+      catch(hr_parse_exception& ex) {
+        throw hr_parse_exception(ex.s + ep.where());
+        }
       cc.connections.resize(cc.size());
       for(int i=0; i<isize(cc.connections); i++)
         cc.connections[i] = make_tuple(cc.id, i, false);
@@ -191,8 +196,15 @@ EX void load(const string& fname) {
         else if(ep.eat(")")) break;
         else throw hr_parse_exception("expecting , or )");
         }
-      cc.build_from_angles_edges();
+      try {
+        cc.build_from_angles_edges();
+        }
+      catch(hr_parse_exception& ex) {
+        throw hr_parse_exception(ex.s + ep.where());
+        }
       cc.connections.resize(cc.size());
+      for(int i=0; i<isize(cc.connections); i++)
+        cc.connections[i] = make_tuple(cc.id, i, false);
       }
     else if(ep.eat("conway(\"")) {
       string s = "";
@@ -201,7 +213,7 @@ EX void load(const string& fname) {
         if(ep.eat("(")) m = 0;
         else if(ep.eat("[")) m = 1;
         else if(ep.eat("\"")) break;
-        else throw hr_parse_exception("cannot parse Conway notation");
+        else throw hr_parse_exception("cannot parse Conway notation, " + ep.where());
 
         int ai = 0;
         int as = ep.iparse();
@@ -221,18 +233,18 @@ EX void load(const string& fname) {
       ep.force_eat(")");
       }
     else if(ep.eat("c(")) {
-      int ai = ep.iparse(); verify_index(ai, c.shapes); ep.force_eat(",");
-      int as = ep.iparse(); verify_index(as, c.shapes[ai]); ep.force_eat(",");
-      int bi = ep.iparse(); verify_index(bi, c.shapes); ep.force_eat(",");
-      int bs = ep.iparse(); verify_index(bs, c.shapes[bi]); ep.force_eat(",");
+      int ai = ep.iparse(); verify_index(ai, c.shapes, ep); ep.force_eat(",");
+      int as = ep.iparse(); verify_index(as, c.shapes[ai], ep); ep.force_eat(",");
+      int bi = ep.iparse(); verify_index(bi, c.shapes, ep); ep.force_eat(",");
+      int bs = ep.iparse(); verify_index(bs, c.shapes[bi], ep); ep.force_eat(",");
       int m = ep.iparse(); ep.force_eat(")");
       c.shapes[ai].connections[as] = make_tuple(bi, bs, m);
       c.shapes[bi].connections[bs] = make_tuple(ai, as, m);
       }
     else if(ep.eat("subline(")) {
-      int ai = ep.iparse(); verify_index(ai, c.shapes); ep.force_eat(",");
-      int as = ep.iparse(); verify_index(as, c.shapes[ai]); ep.force_eat(",");
-      int bs = ep.iparse(); verify_index(bs, c.shapes[ai]); ep.force_eat(")");
+      int ai = ep.iparse(); verify_index(ai, c.shapes, ep); ep.force_eat(",");
+      int as = ep.iparse(); verify_index(as, c.shapes[ai], ep); ep.force_eat(",");
+      int bs = ep.iparse(); verify_index(bs, c.shapes[ai], ep); ep.force_eat(")");
       c.shapes[ai].sublines.emplace_back(as, bs);
       }
     else if(ep.eat("sublines(")) {
@@ -252,7 +264,7 @@ EX void load(const string& fname) {
             }
         }
       }
-    else throw hr_parse_exception("expecting command");
+    else throw hr_parse_exception("expecting command, " + ep.where());
     }
   }
 
@@ -520,6 +532,8 @@ EX void choose() {
     catch(hr_parse_exception& ex) {
       println(hlog, "failed: ", ex.s);
       set_geometry(gNormal);
+      start_game();
+      addMessage("failed: " + ex.s);
       }
     start_game();
     return true;

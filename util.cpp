@@ -134,7 +134,13 @@ struct hr_parse_exception : hr_exception {
 struct exp_parser {
   string s;
   int at;
-  exp_parser() { at = 0; }
+  int line_number, last_line;
+  exp_parser() { at = 0; line_number = 1; last_line = 0; }
+  
+  string where() { 
+    if(s.find('\n')) return "(line " + its(line_number) + ", pos " + its(at-last_line) + ")";
+    else return "(pos " + its(at) + ")";
+    }
   
   map<string, cld> extra_params;
 
@@ -168,14 +174,21 @@ struct exp_parser {
   
   void force_eat(const char *c) {
     skip_white();
-    if(!eat(c)) throw hr_parse_exception("expected: " + string(c));
+    if(!eat(c)) throw hr_parse_exception("expected: " + string(c) + " at " + where());
     }
 
   };
 #endif
 
 void exp_parser::skip_white() {
-  while(next() == ' ' || next() == '\n' || next() == '\r' || next() == '\t') at++;
+  while(next() == ' ' || next() == '\n' || next() == '\r' || next() == '\t') {
+    if(next() == '\r') last_line++;
+    if(next() == '\n') {
+      println(hlog, "new line at ", at);
+      line_number++, last_line = at;
+      }
+    at++;
+    }
   }
 
 string exp_parser::next_token() {
