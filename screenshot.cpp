@@ -339,25 +339,38 @@ EX always_false in;
   
   bool used_rug;
   
+  map<pair<color_t, glvertex>, int> texture_position;
+  map<color_t, int> gradient_position;
+
+  pair<color_t, glvertex> texid(dqi_poly& p) {
+    return make_pair(p.color, p.tinf->tvertices[0]);
+    }
+
+  /** 0 = no/unknown texture, 1 = rug, 2 = gradient, 3 = floor texture */
+  EX int texture_type(dqi_poly& p) {
+    if(!p.tinf) return 0;
+    if(p.tinf == &rug::tinf) return 1;
+    if(p.tinf->texture_id == (int) floor_textures->renderedTexture)
+      return (p.tinf->tvertices[0][0] == 0) ? 2 : 3;
+    return 0;
+    }
+
+  EX void prepare(dqi_poly& p) {
+    if(print && !(p.flags & POLY_PRINTABLE)) return;
+    if(!(p.flags & POLY_TRIANGLES)) return;
+    int tt = texture_type(p);
+    if(tt == 2) gradient_position[p.color] = 0;
+    if(tt == 3) texture_position[texid(p)] = 0;
+    }
+  
+  int fts_int, fts, fts_row;
+  
+  map<string, pair<vector<hyperpoint>, vector<glvertex>>> all_data;
+  
   EX void polygon(dqi_poly& p) {
     if(print && !(p.flags & POLY_PRINTABLE)) return;
     if(!(p.flags & POLY_TRIANGLES)) return;
-    println(f, "Shape {");
-    println(f, "  appearance Appearance {");
-    println(f, "    material Material {");
-    println(f, "      diffuseColor ", color(p.color, .8));
-    if(part(p.color, 0) != 255) println(f, "      transparency ", (255 - part(p.color, 0)) / 255.);
-    println(f, "      }");
-    if(p.tinf && p.tinf == &rug::tinf) {
-      println(f, "    texture ImageTexture {");
-      println(f, "      url \"", filename, "-rug.png\"");
-      println(f, "      }");
-      used_rug = true;
-      }      
-    println(f, "    }");
-    // println(f, "# V = ", p.V);
-    println(f, "  geometry IndexedFaceSet {");    
-    println(f, "    coord Coordinate {");
+    int tt = texture_type(p);
 
     vector<hyperpoint> data;
     vector<glvertex> tdata;
@@ -379,54 +392,85 @@ EX always_false in;
     else if(print) {
       hyperpoint ctr1;
       applymodel(p.V * p.intester, ctr1);
+      println(hlog, "intester = ", p.intester);
       ld sdet = 0;
       if(1) {
         dynamicval<eGeometry> g(geometry, gEuclid);
         for(int i=0; i<p.cnt; i+=3) {
           transmatrix T;
-          T[0] = data[i];
-          T[1] = data[i+1];
-          T[2] = data[i+2];
+          T[0] = data[i] - ctr1;
+          T[1] = data[i+1] - ctr1;
+          T[2] = data[i+2] - ctr1;
           sdet += det(T);
           }
+        println(hlog, "sdet = ", sdet);
         if(sdet > 0)
-          for(int i=0; i<p.cnt; i+=3) 
-            swap(data[i+1], data[i+2]),
-            swap(tdata[i+1], tdata[i+2]);
-        }
-      }    
-
-    println(f, "      point [");
-    for(int i=0; i<p.cnt; i++) {
-      println(f, "       ", coord(data[i], 3), ",");
-      }
-    println(f, "        ]");
-    println(f, "      }");
-
-    if(p.tinf) {
-      println(f, "      texCoord TextureCoordinate {");
-      println(f, "        point [");
-      for(int i=0; i<p.cnt; i++) {
-        println(f, "          ", coord(tdata[i][0]), " ", coord(tdata[i][1]), ",");
+          for(int i=0; i<p.cnt; i+=3) {
+            swap(data[i+1], data[i+2]);
+            if(!tdata.empty())
+              swap(tdata[i+1], tdata[i+2]);
+            }
         }
       }
-    println(f, "        ]");
-    println(f, "      }");
-
-    println(f, "    coordIndex [");
-    for(int i=0; i<p.cnt; i+=3) {
-      println(f, "        ", i, " ", i+1, " ", i+2, " -1,");
+    
+    shstream app;
+    println(app, "    material Material {");
+    if(!tt) println(app, "      diffuseColor ", color(p.color, .8));
+    if(part(p.color, 0) != 255) println(app, "      transparency ", (255 - part(p.color, 0)) / 255.);
+    println(app, "      }");
+    if(tt == 1) {
+      println(f, "    texture ImageTexture {");
+      println(app, "      url \"", filename, "-rug.png\"");
+      println(app, "      }");
+      used_rug = true;
+      }      
+    if(tt == 2 || tt == 3) {
+      println(app, "    texture ImageTexture {");
+      println(app, "      url \"", filename, "-floors.png\"");
+      println(app, "      }");
       }
-    println(f, "      ]");
-    if(print)
-      println(f, "    creaseAngle 0.0 convex FALSE solid TRUE ccw FALSE");
-    else
-      println(f, "    creaseAngle 0.0 convex FALSE solid FALSE");
-    println(f, "    }");
-    println(f, "  }");
-    }                          
+    
+    auto &ad = all_data[app.s];
+    for(auto& d: data) ad.first.push_back(d);
+
+    if(tt == 2) {
+      ld x = (fts - .5 - gradient_position[p.color]) / fts;
+      for(auto& d: tdata) d[0] = x;
+      }
+    
+    if(tt == 3) {
+      int tp = texture_position[texid(p)];
+      auto xy = make_array<int>(tp % fts_row, tp / fts_row);
+      auto zero = p.tinf->tvertices[0];
+      ld sca = FLOORTEXTURESIZE*1./fts_int;
+      for(auto& d: tdata) 
+        for(int c: {0, 1})
+          d[c] = ((d[c] - zero[c])*sca + xy[c] + .5) * fts_int / fts;
+      }
+
+    for(auto& d: tdata) ad.second.push_back(d);
+    }
   
   EX void render() {
+    for(auto& p: ptds) {
+      auto p2 = dynamic_cast<dqi_poly*>(&*p);
+      if(p2)
+        prepare(*p2);
+      }
+
+    int tps = 0;
+    for(auto& p: texture_position) p.second = tps++;
+    int gps = 0;
+    for(auto& p: gradient_position) p.second = gps++;
+    
+    fts_int = floor_texture_square_size * FLOORTEXTURESIZE + 4;
+    fts = 64;
+    
+    while(fts < gps || (fts-gps)/fts_int * fts/fts_int < tps)
+      fts *= 2;    
+    
+    fts_row = (fts-gps)/fts_int;
+    
     for(auto& p: ptds) {
       auto p2 = dynamic_cast<dqi_poly*>(&*p);
       if(p2)
@@ -439,13 +483,54 @@ EX always_false in;
     dynamicval<bool> v3(noshadow, true);
     filename = fname;
     
+    ptds.clear();
+    what();
+
     f.f = fopen(fname.c_str(), "wt");
     
     println(f, "#VRML V2.0 utf8");
     println(f, "WorldInfo { title \"3D model exported from HyperRogue\" info [ \"3D models exported from HyperRogue are public domain\" ] }");
     
-    ptds.clear();
-    what();
+    for(auto& p: all_data) {
+      const string& app = p.first;
+      auto& data = p.second.first;
+      auto& tdata = p.second.second;
+      
+      println(f, "Shape {");
+      println(f, "  appearance Appearance {");
+      println(f, app);
+      println(f, "    }");
+      // println(f, "# V = ", p.V);
+      println(f, "  geometry IndexedFaceSet {");    
+      println(f, "    coord Coordinate {");
+      
+      println(f, "      point [");
+      for(auto& d: data) println(f, "       ", coord(d, 3), ",");
+      println(f, "        ]");
+      println(f, "      }");
+  
+      if(!tdata.empty()) {
+        println(f, "      texCoord TextureCoordinate {");
+        println(f, "        point [");
+  
+        for(auto& d: tdata)
+          println(f, "          ", coord(glhr::gltopoint(d), 2), ",");
+        println(f, "        ]");
+        println(f, "      }");
+        }
+      
+      println(f, "    coordIndex [");
+      for(int i=0; i<isize(data); i+=3) {
+        println(f, "        ", i, " ", i+1, " ", i+2, " -1,");
+        }
+      println(f, "      ]");
+      if(print)
+        println(f, "    creaseAngle 0.0 convex FALSE solid TRUE ccw FALSE");
+      else
+        println(f, "    creaseAngle 0.0 convex FALSE solid FALSE");
+      println(f, "    }");
+      println(f, "  }");
+      }
     
     if(used_rug) {
       resetbuffer rb;
@@ -454,6 +539,36 @@ EX always_false in;
       dynamicval<int> dx(shot::shotx, rug::texturesize);
       dynamicval<int> dy(shot::shoty, rug::texturesize);
       shot::postprocess(filename + "-rug.png", s, s);
+      }
+    
+    if(isize(texture_position) || isize(gradient_position)) {
+      SDL_Surface *s = shot::empty_surface(fts, fts, false);
+      for(auto& p: gradient_position) {
+        int x = fts - p.second - 1;
+        for(int y=0; y<fts; y++) {
+          qpixel(s, x, fts-y-1) = gradient(0, p.first, 0, y, fts-1) >> 8;
+          part(qpixel(s, x, y), 3) = 0xFF;
+          }
+        }
+      
+      SDL_Surface *floor = floor_textures->render();
+      for(auto& p: texture_position) {
+        int nx = p.second % fts_row;
+        int ny = p.second / fts_row;
+        color_t col = p.first.first;
+        int xs = p.first.second[0] * FLOORTEXTURESIZE - fts_int/2;
+        int ys = p.first.second[1] * FLOORTEXTURESIZE - fts_int/2;
+        for(int y=0; y<fts_int; y++)
+        for(int x=0; x<fts_int; x++) {
+          auto& tgt = qpixel(s, nx*fts_int+x, fts-1-(ny*fts_int+y));
+          auto& src = qpixel(floor, xs+x, ys+y);
+          for(int p=0; p<3; p++)
+            part(tgt, p) = (part(src, p) * part(col, p+1) + 127) / 255;
+          part(tgt, 3) = 0xFF;
+          }
+        }
+      IMAGESAVE(s, (filename + "-floors.png").c_str());
+      SDL_FreeSurface(s);
       }
     }
 #endif
@@ -513,6 +628,10 @@ EX void default_screenshot_content() {
   drawStats();    
   }
 
+EX SDL_Surface *empty_surface(int x, int y, bool alpha) {
+  return SDL_CreateRGBSurface(SDL_SWSURFACE,x,y,32,0xFF<<16,0xFF<<8,0xFF, (alpha) ? (0xFF<<24) : 0);
+  }
+
 #if CAP_PNG
 EX void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
   if(gamma == 1 && shot_aa == 1 && sdark == sbright) {
@@ -520,7 +639,7 @@ EX void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
     return;
     }
 
-  SDL_Surface *sout = SDL_CreateRGBSurface(SDL_SWSURFACE,shotx,shoty,32,0xFF<<16,0xFF<<8,0xFF, (sdark == sbright) ? 0 : (0xFF<<24));
+  SDL_Surface *sout = empty_surface(shotx, shoty, sdark != sbright);
   for(int y=0; y<shoty; y++)
   for(int x=0; x<shotx; x++) {
     int val[2][4];
