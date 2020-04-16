@@ -489,7 +489,7 @@ EX void handleKeyNormal(int sym, int uni) {
     pushScreen(inv::show);
 #endif
   
-  if(((sym == SDLK_HOME && GDIM == 2) || sym == SDLK_F3 || sym == ' ') && DEFAULTNOR(sym)) {
+  if(((sym == SDLK_HOME && GDIM == 2 && !rug::rugged) || sym == SDLK_F3 || sym == ' ') && DEFAULTNOR(sym)) {
     if(rug::rug_control())
       rug::reset_view();
     else
