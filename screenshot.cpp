@@ -358,6 +358,7 @@ EX always_false in;
   /** 0 = no/unknown/disabled texture, 1 = rug, 2 = gradient, 3 = floor texture */
   EX int texture_type(dqi_poly& p) {
     if(!p.tinf) return 0;
+    if(!CAP_PNG) return 0;
     if(!textures) return 0;
     if(p.tinf == &rug::tinf) return 1;
     if(p.tinf->texture_id == (int) floor_textures->renderedTexture)
@@ -543,6 +544,7 @@ EX always_false in;
       println(f, "  }");
       }
     
+    #if CAP_PNG
     if(used_rug) {
       resetbuffer rb;
       rug::glbuf->enable();
@@ -582,6 +584,7 @@ EX always_false in;
       IMAGESAVE(s, (filename + "-floors.png").c_str());
       SDL_FreeSurface(s);
       }
+    #endif
     
     fclose(f.f);
     f.f = nullptr;
@@ -766,6 +769,7 @@ EX void take(string fname, const function<void()>& what IS(default_screenshot_co
       #if CAP_PNG
       render_png(fname, what);
       #endif
+      return;
     }
   }
 
@@ -793,6 +797,7 @@ int png_read_args() {
   else if(argis("-shotaa")) {
     shift(); shot_aa = argi();
     }
+  #if CAP_WRL
   else if(argis("-modelshot")) {
     PHASE(3); shift(); start_game();
     printf("saving WRL model to %s\n", argcs());
@@ -805,6 +810,7 @@ int png_read_args() {
     shot::format = screenshot_format::wrl; wrl::print = true;
     shot::take(argcs());
     }
+  #endif
   else return 1;
   return 0;
   }
@@ -917,7 +923,9 @@ EX void menu() {
         dialog::add_action_push(models::model_menu);
         }
       dialog::addBoolItem_action("generate a model for 3D printing", wrl::print, 'p');
+      #if CAP_PNG
       dialog::addBoolItem_action("use textures", wrl::textures, 'u');
+      #endif
       #endif
       }      
     }
@@ -932,7 +940,9 @@ EX void menu() {
   if(!dowrl) dialog::addBoolItem_action(XLAT("disable the HUD"), hide_hud, 'h');
   
   dialog::addBoolItem_action_neg(XLAT("hide the player"), mapeditor::drawplayer, 'H');
+  #if CAP_WRL
   if(dowrl && wrl::print) dialog::lastItem().value = XLAT("N/A");
+  #endif
 
   if(WDIM == 2) {
     dialog::addItem(XLAT("centering"), 'x');

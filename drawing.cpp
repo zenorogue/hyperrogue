@@ -2035,7 +2035,9 @@ EX hookset<bool()> *hooks_vr_draw_all;
   
 EX void drawqueue() {
 
+  #if CAP_WRL
   if(wrl::in) { wrl::render(); return; }
+  #endif
   
   callhooks(hook_drawqueue);
   current_display->next_shader_flags = 0;

@@ -228,7 +228,7 @@
 #endif
 
 #ifndef CAP_WRL
-#define CAP_WRL (CAP_FILES && !ISMOBILE && !ISMINI)
+#define CAP_WRL (CAP_FILES && !ISMOBILE && !ISMINI && !ISWEB)
 #endif
 
 #ifndef CAP_POLY

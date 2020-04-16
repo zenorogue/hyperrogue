@@ -1276,6 +1276,7 @@ EX void actDraw() {
   if(keystate[SDLK_LALT]) alpha /= 10;
   #endif
 
+  #if CAP_HOLDKEYS
   auto perform_finger = [=] () {
     if(keystate[SDLK_HOME]) finger_range /= exp(alpha);
     if(keystate[SDLK_END]) finger_range *= exp(alpha);
@@ -1288,8 +1289,8 @@ EX void actDraw() {
     };
 
   if(finger_center)
-    perform_finger();
-    
+    perform_finger();    
+  #endif
     }
   catch(rug_exception) {
     rug::close();

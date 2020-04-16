@@ -1590,6 +1590,10 @@ void celldrawer::draw_features_and_walls_3d() {
       if(c->move(a) && (among(pmodel, mdPerspective, mdGeodesic) || gmatrix0.count(c->move(a))))
         b = (patterns::innerwalls && (tC0(V)[2] < tC0(V * currentmap->adj(c, a))[2])) || !isWall3(c->move(a), dummy);
       if(b) {
+        #if CAP_WRL
+        /* always render */
+        if(wrl::in && wrl::print) ; else
+        #endif
         if(pmodel == mdPerspective && !sphere && !quotient && !kite::in() && !nonisotropic && !hybri && !experimental && !nih) {
           if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(centerover)) continue;
           else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(centerover)) continue;
