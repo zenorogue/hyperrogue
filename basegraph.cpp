@@ -492,8 +492,6 @@ int gl_width(int size, const char *s) {
   return x;
   }
 
-vector<glhr::textured_vertex> tver;
-
 glhr::textured_vertex charvertex(int x1, int y1, ld tx, ld ty) {
   glhr::textured_vertex res;
   res.coords[0] = x1;
