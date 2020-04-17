@@ -58,10 +58,10 @@ int readArgs() {
       int cx = (co + 1) % WDIM;
       int cy = (co + 2) % WDIM;
       auto oxy = [&] (ld x, ld y, ld z) { hyperpoint h = Hypc; h[co] = z; h[cx] = x; if(WDIM == 3) h[cy] = y; return tC0(bt::normalized_at(h)); };
-      ld shrunk_x = geo_dist(oxy(0,0,-1), oxy(.01,0,-1), iTable);
-      ld shrunk_y = geo_dist(oxy(0,0,-1), oxy(0,.01,-1), iTable);
-      ld expand_x = geo_dist(oxy(0,0,+1), oxy(.01,0,+1), iTable);
-      ld expand_y = geo_dist(oxy(0,0,+1), oxy(0,.01,+1), iTable);
+      ld shrunk_x = geo_dist(oxy(0,0,-1), oxy(.01,0,-1));
+      ld shrunk_y = geo_dist(oxy(0,0,-1), oxy(0,.01,-1));
+      ld expand_x = geo_dist(oxy(0,0,+1), oxy(.01,0,+1));
+      ld expand_y = geo_dist(oxy(0,0,+1), oxy(0,.01,+1));
       if(WDIM == 2) shrunk_y = expand_y = 1;
       println(hlog, "should be 1: ", lalign(10, (shrunk_x * shrunk_y * bt::area_expansion_rate()) / (expand_x * expand_y)), " : ", tie(shrunk_x, shrunk_y, expand_x, expand_y, aer));
       if(geometry == gArnoldCat)
