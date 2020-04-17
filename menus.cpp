@@ -879,7 +879,7 @@ EX void showStartMenu() {
         pconf.scale = 998;
         }
       }
-#if CAP_RACING
+#if CAP_RACING && MAXMDIM >= 4
     else if(uni == 'r' - 96) {
       popScreenAll();
       resetModes();

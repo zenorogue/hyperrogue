@@ -1060,6 +1060,7 @@ void race_projection() {
 
   bool alternate = false;
   
+  #if MAXMDIM >= 4
   EX void thurston_racing() {
     gamescreen(1);
     dialog::init(XLAT("racing in Thurston geometries"));
@@ -1112,6 +1113,7 @@ void race_projection() {
     dialog::addBack();
     dialog::display();
     }
+  #endif
 
   void raceconfigurer() {
   
@@ -1199,8 +1201,10 @@ void race_projection() {
         });
       }
     
+    #if MAXMDIM >= 4
     dialog::addItem(XLAT("racing in Thurston geometries"), 'T');
     dialog::add_action_push(thurston_racing);
+    #endif
 
     dialog::addBack();
     dialog::display();
