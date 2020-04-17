@@ -1511,7 +1511,7 @@ EX void show() {
   edit_levellines('L');
 
 #if CAP_SURFACE  
-  if(hyperbolic && rug_euclid())
+  if(hyperbolic)
     dialog::addItem(XLAT("smooth surfaces"), 'c');
   else
     dialog::addBreak(100);

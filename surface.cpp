@@ -605,6 +605,7 @@ EX void run_shape(eShape s) {
   sh = s;
   
   if(rug::rugged) rug::close();
+  rug::gwhere = rug::rgEuclid;
 
   rug::init();
   // if(!rug::rugged) rug::reopen();
@@ -706,6 +707,13 @@ EX void show_surfaces() {
   if((rug::rugged && sh && sh != dsHyperboloid && sh != dsHemisphere) || coverage_style)
     dialog::addSelItem(XLAT("display coverage"), cstyles[coverage_style], 'c');
   else dialog::addBreak(100);
+  
+  #if CAP_FILES
+  if(rug::rugged)
+    dialog::addItem(XLAT("save the current embedding"), 's');
+  else
+    dialog::addItem(XLAT("load a saved embedding"), 's');
+  #endif
 
   dialog::addHelp();
   dialog::addBack();
@@ -725,6 +733,15 @@ EX void show_surfaces() {
         "For convenience, you can also choose other 3D models from this menu."
         ));
 
+    #if CAP_FILES
+    else if(uni == 's') {
+      static string rugname = "saved.rug";
+      if(rug::rugged) 
+        dialog::openFileDialog(rugname, XLAT("save embedding to:"), ".rug", [] () { rug::rug_save(rugname); return true; });
+      else 
+        dialog::openFileDialog(rugname, XLAT("load embedding from:"), ".rug", [] () { rug::init(); rug::rug_load(rugname); return true; });
+      }
+    #endif
     else if(uni == '1')
       run_shape(dsTractricoid);
     else if(uni == '2')
