@@ -128,6 +128,19 @@ EX namespace mapeditor {
         sh.draw(V);
         }
       }
+
+    if(drawing_tool && (cmode & sm::DRAW)) {
+      dynamicval<ld> lw(vid.linewidth, vid.linewidth * texture::penwidth * 100);
+      if(holdmouse && mousekey == 'c')
+        queue_hcircle(rgpushxto0(lstart), hdist(lstart, mouseh));
+      else if(holdmouse && mousekey == 'l')
+        queueline(lstart, mouseh, texture::config.paint_color, 4 + vid.linequality, PPR::LINE);
+      else if(!holdmouse) {
+        transmatrix T = rgpushxto0(mouseh);
+        queueline(T * xpush0(-.1), T * xpush0(.1), texture::config.paint_color);
+        queueline(T * ypush0(-.1), T * ypush0(.1), texture::config.paint_color);
+        }
+      }
     }
   
   /** dtshapes takes ownership of sh */
@@ -228,7 +241,7 @@ EX namespace mapeditor {
       dtshapes.erase(dtshapes.begin() + nearest_id);
     }
   
-  hyperpoint lstart;
+  EX hyperpoint lstart;
   cell *lstartcell;
   ld front_edit = 0.5;
   enum class eFront { sphere_camera, sphere_center, equidistants, const_x, const_y };
@@ -1359,7 +1372,7 @@ namespace mapeditor {
     else if(uni == 'G') 
       push_debug_screen();
     else if(sym == SDLK_F5) {
-      restart_game();
+      dialog::push_confirm_dialog([] { restart_game(); }, XLAT("Are you sure you want to clear the map?"));
       }
     else if(sym == SDLK_F2) save_level();
     else if(sym == SDLK_F3) load_level();
@@ -1487,6 +1500,7 @@ namespace mapeditor {
   ld equi_range = 1;
     
   EX void drawGrid() {
+    if(!drawcell) drawcell = cwt.at;
     color_t lightgrid = gridcolor;
     lightgrid -= (lightgrid & 0xFF) / 2;
     transmatrix d2 = drawtrans * rgpushxto0(ccenter) * rspintox(gpushxto0(ccenter) * coldcenter);
@@ -1634,21 +1648,6 @@ namespace mapeditor {
       }
 #endif
 
-    if(drawing_tool && !mouseout()) {
-      initquickqueue();
-      dynamicval<ld> lw(vid.linewidth, vid.linewidth * texture::penwidth * 100);
-      if(holdmouse && mousekey == 'c')
-        queue_hcircle(rgpushxto0(lstart), hdist(lstart, mouseh));
-      else if(holdmouse && mousekey == 'l')
-        queueline(lstart, mouseh, texture::config.paint_color, 4 + vid.linequality, PPR::LINE);
-      else if(!holdmouse) {
-        transmatrix T = rgpushxto0(mouseh);
-        queueline(T * xpush0(-.1), T * xpush0(.1), texture::config.paint_color);
-        queueline(T * ypush0(-.1), T * ypush0(.1), texture::config.paint_color);
-        }
-      quickqueue();
-      }
-    
     if(!freedraw) {
 
       sg = drawcellShapeGroup();
@@ -2217,15 +2216,19 @@ namespace mapeditor {
       if(sym == SDLK_F2) save_level();
       if(sym == SDLK_F3) load_level();
       if(sym == SDLK_F5) {
-        stop_game();
-        firstland = specialland = laCanvas;
-        canvas_default_wall = waInvisibleFloor;
-        patterns::whichCanvas = 'g';
-        patterns::canvasback = 0xFFFFFF;
-        texture::config.paint_color = (forecolor << 8) | 255;
-        drawplayer = false;
-        vid.use_smart_range = 2;
-        start_game();
+        dialog::push_confirm_dialog([] {
+          stop_game();
+          firstland = specialland = laCanvas;
+          canvas_default_wall = waInvisibleFloor;
+          patterns::whichCanvas = 'g';
+          patterns::canvasback = 0xFFFFFF;
+          texture::config.paint_color = (forecolor << 8) | 255;
+          drawplayer = false;
+          vid.use_smart_range = 2;
+          start_game();
+          },
+          XLAT("Are you sure you want to restart? This will let you draw on a blank screen.")
+          );
         }
       }
 
@@ -2469,6 +2472,7 @@ namespace mapeditor {
     mapeditor::dtshapes.clear();
     mapeditor::cfree = nullptr;
     mapeditor::cfree_at = nullptr;    
+    drawcell = nullptr;
     }) + 
   addHook(hooks_removecells, 0, [] () {
     modelcell.clear();

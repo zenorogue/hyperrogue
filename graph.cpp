@@ -3363,7 +3363,7 @@ bool openorsafe(cell *c) {
 EX color_t stdgridcolor = 0x202020FF;
 
 EX int gridcolor(cell *c1, cell *c2) {
-  if(cmode & sm::DRAW) return Dark(forecolor);
+  if(cmode & sm::DRAW && !mapeditor::drawing_tool) return Dark(forecolor);
   if(!c2)
     return 0x202020 >> darken;
   int rd1 = rosedist(c1), rd2 = rosedist(c2);
