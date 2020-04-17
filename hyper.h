@@ -372,7 +372,7 @@ extern videopar vid;
 
 #define WDIM cginf.g.gameplay_dimension
 #define GDIM cginf.g.graphical_dimension
-#define MDIM cginf.g.homogeneous_dimension
+#define MDIM (MAXMDIM == 3 ? 3 : cginf.g.homogeneous_dimension)
 #define LDIM (MDIM-1)
 #define cclass g.kind
 
