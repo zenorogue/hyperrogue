@@ -1390,7 +1390,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t 
           }
         else {
           queuepoly(VHEAD1, cgi.shPHead,  0xF0A0D0FF);
-          queuepoly(VBS, cgi.shFlowerHand,  0xC00000FF);
+          queuepoly(VBODY * VBS, cgi.shFlowerHand,  0xC00000FF);
           queuepoly(VBODY2 * VBS, cgi.shSuspenders,  0xC00000FF);
           }
         }
