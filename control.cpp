@@ -321,6 +321,10 @@ EX void handlePanning(int sym, int uni) {
   auto roll = [&] (int dir, ld val) {
     if(GDIM == 3 && anyshiftclick) 
       shift_view(ctangent(dir, -val)), didsomething = true, playermoved = false; /* -val because shift reverses */
+    #if CAP_CRYSTAL
+    else if(rug::rug_control() && rug::in_crystal())
+      crystal::apply_rotation(cspin(dir, 2, val));
+    #endif
     else if(GDIM == 3)
       rotate_view(cspin(dir, 2, val)), didsomething = true;
     else
@@ -710,6 +714,10 @@ EX void mainloopiter() {
     auto roll = [&] (int dir, ld val) {
       if(GDIM == 3 && anyshiftclick) 
         shift_view(ctangent(dir, -val)); /* -val because shift reverses */
+      #if CAP_CRYSTAL
+      else if(rug::rug_control() && rug::in_crystal())
+        crystal::apply_rotation(cspin(dir, 2, val));
+      #endif
       else 
         rotate_view(GDIM == 2 ? cpush(dir, val) : cspin(dir, 2, val));
       didsomething = true, playermoved = playermoved && GDIM == 3;
