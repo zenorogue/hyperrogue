@@ -366,8 +366,8 @@ EX void initConfig() {
   addsaverenum(rconf.model, "rug-projection", mdEquidistant);
   addsaver(rconf.scale, "rug-projection-scale", 1);
   addsaver(rconf.alpha, "rug-projection-alpha", 1);
-  addsaver(rconf.clip_min, "rug-projection-clip-min", -1);
-  addsaver(rconf.clip_max, "rug-projection-clip-max", +1);
+  addsaver(rconf.clip_min, "rug-projection-clip-min", -100);
+  addsaver(rconf.clip_max, "rug-projection-clip-max", +10);
   addsaver(rconf.stretch, "rug-projection-stretch", 1);
   addsaver(rconf.halfplane_scale, "rug-projection-halfplane scale", 1);
   addsaver(rconf.collignon_parameter, "rug-collignon-parameter", 1);
