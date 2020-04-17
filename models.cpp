@@ -570,10 +570,11 @@ EX namespace models {
       
     if(among(vpmodel, mdTwoPoint, mdSimulatedPerspective, mdTwoHybrid)) {
       dialog::addSelItem(XLAT("parameter"), fts(vpconf.twopoint_param), 'b');
-      dialog::add_action([](){
+      dialog::add_action([vpmodel](){
         dialog::editNumber(vpconf.twopoint_param, 1e-3, 10, .1, 1, XLAT("parameter"), 
+          s0 + (vpmodel == mdTwoPoint ?
           "This model maps the world so that the distances from two points "
-          "are kept. This parameter gives the distance from the two points to "
+          "are kept. " : "") + "This parameter gives the distance from the two points to "
           "the center."
           );
         dialog::scaleLog();
