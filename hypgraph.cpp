@@ -400,6 +400,7 @@ EX void applymodel(hyperpoint H, hyperpoint& ret) {
     case mdCentralInversion: {
       ld tz = get_tz(H);
       for(int d=0; d<GDIM; d++) ret[d] = H[d] / tz;
+      for(int d=GDIM; d<MAXMDIM; d++) ret[d] = 1;
       ld r = 0;
       for(int d=0; d<GDIM; d++) r += ret[d]*ret[d];
       for(int d=0; d<GDIM; d++) ret[d] /= r;
