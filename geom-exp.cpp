@@ -405,7 +405,7 @@ EX string dim_name() {
   return " (" + its(WDIM) + "D)";
   }
 
-#if CAP_THREAD
+#if CAP_THREAD && MAXMDIM >= 4
 EX void showQuotientConfig3() {
 
   using namespace fieldpattern;
@@ -528,7 +528,7 @@ EX void select_quotient_screen() {
             println(hlog, "set prime = ", currfp.Prime);
             start_game();
             }
-          #if CAP_THREAD
+          #if CAP_THREAD && MAXMDIM >= 4
           pushScreen(showQuotientConfig3);
           #endif
           }

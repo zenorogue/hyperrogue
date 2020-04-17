@@ -284,7 +284,7 @@ struct fpattern {
     
   fpattern(int p) {
     force_hash = 0;
-    #if CAP_THREAD
+    #if CAP_THREAD && MAXMDIM >= 4
     dis = nullptr;
     #endif
     if(!p) return;
@@ -317,7 +317,7 @@ struct fpattern {
   #endif
   };
 
-#if CAP_THREAD
+#if CAP_THREAD && MAXMDIM >= 4
 struct discovery {
   fpattern experiment;
   std::shared_ptr<std::thread> discoverer;
@@ -404,7 +404,7 @@ vector<matrix> fpattern::generate_isometries3() {
   for(T[3][1]=low; T[3][1]<Prime; T[3][1]++)
   if(colprod(1, 1) == 1)
   if(colprod(1, 0) == 0) {
-    #if CAP_THREAD
+    #if CAP_THREAD && MAXMDIM >= 4
     if(dis) dis->check_suspend();
     if(dis && dis->stop_it) return res;
     #endif
@@ -528,7 +528,7 @@ int fpattern::solve3() {
   for(auto& xX: possible_X)
   for(auto& xP: possible_P) if(check_order(mmul(xP, xX), cgi.xp_order))
   for(auto& xR: possible_R) if(check_order(mmul(xR, xX), cgi.rx_order)) { // if(xR[0][0] == 1 && xR[0][1] == 0) 
-    #if CAP_THREAD
+    #if CAP_THREAD && MAXMDIM >+ 4
     if(dis) dis->check_suspend();
     if(dis && dis->stop_it) return 0;
     #endif
@@ -542,7 +542,7 @@ int fpattern::solve3() {
       }
     P = xP; R = xR; X = xX;
     if(!generate_all3()) continue;
-    #if CAP_THREAD
+    #if CAP_THREAD && MAXMDIM >= 4
     if(dis) { dis->discovered(); continue; }
     #endif
     if(force_hash && compute_hash() != force_hash) continue;
@@ -1254,7 +1254,7 @@ EX void field_from_current() {
   fieldpattern::quotient_field_changed = true;  
   }
 
-#if CAP_THREAD
+#if CAP_THREAD && MAXMDIM >= 4
 EX map<string, discovery> discoveries;
 
 void discovery::activate() {
@@ -1294,7 +1294,7 @@ discovery::~discovery() { schedule_destruction(); if(discoverer) discoverer->joi
 #endif
 
 int hk = 
-#if CAP_THREAD
+#if CAP_THREAD && MAXMDIM >= 4
   + addHook(on_geometry_change, 100, [] { for(auto& d:discoveries) if(!d.second.is_suspended) d.second.suspend(); })
   + addHook(final_cleanup, 100, [] { 
       for(auto& d:discoveries) { d.second.schedule_destruction(); if(d.second.is_suspended) d.second.activate(); }
