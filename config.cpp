@@ -370,6 +370,12 @@ EX void initConfig() {
   addsaver(rconf.clip_max, "rug-projection-clip-max", +1);
   addsaver(rconf.stretch, "rug-projection-stretch", 1);
   addsaver(rconf.halfplane_scale, "rug-projection-halfplane scale", 1);
+  addsaver(rconf.collignon_parameter, "rug-collignon-parameter", 1);
+  addsaver(rconf.collignon_reflected, "rug-collignon-reflect", false);
+  addsaver(rconf.euclid_to_sphere, "rug-euclid to sphere projection", 1.5);
+  addsaver(rconf.twopoint_param, "rug-twopoint parameter", 1);
+  addsaver(rconf.fisheye_param, "rug-fisheye parameter", 1);
+  addsaver(rconf.model_transition, "rug-model transition", 1);
   addsaver(rug::renderonce, "rug-renderonce");
   addsaver(rug::rendernogl, "rug-rendernogl");
   addsaver(rug::texturesize, "rug-texturesize");
