@@ -4630,6 +4630,8 @@ EX void drawthemap() {
   profile_stop(4);
   drawFlashes();
   
+  mapeditor::draw_dtshapes();
+  
   if(multi::players > 1 && !shmup::on) {
     if(multi::centerplayer != -1) 
       cwtV = multi::whereis[multi::centerplayer];

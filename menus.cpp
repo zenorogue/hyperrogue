@@ -433,10 +433,22 @@ EX void showCreative() {
 #endif
 
 #if CAP_EDIT
-  dialog::addItem(XLAT("vector graphics editor"), 'g');
+  dialog::addItem(XLAT("shape editor"), 'g');
   dialog::add_action([] {
+    mapeditor::drawing_tool = false;
     pushScreen(mapeditor::showDrawEditor);
     mapeditor::initdraw(cwt.at);
+    });
+#endif
+
+#if CAP_EDIT
+  dialog::addItem(XLAT("drawing tool"), 'd');
+  dialog::add_action([] {
+    dialog::cheat_if_confirmed([] {
+      mapeditor::drawing_tool = true;
+      pushScreen(mapeditor::showDrawEditor);
+      mapeditor::initdraw(cwt.at);
+      });
     });
 #endif
 
