@@ -980,7 +980,7 @@ namespace mapeditor {
     displayButton(8, vid.yres-8-fs*11, XLAT("F1 = help"), SDLK_F1, 0);
     displayButton(8, vid.yres-8-fs*10, XLAT("F2 = save"), SDLK_F2, 0);
     displayButton(8, vid.yres-8-fs*9, XLAT("F3 = load"), SDLK_F3, 0);
-    displayButton(8, vid.yres-8-fs*7, XLAT("F5 = restart"), SDLK_F5, 0);
+    displayButton(8, vid.yres-8-fs*7, drawing_tool ? XLAT("F5 = clear") : XLAT("F5 = restart"), SDLK_F5, 0);
     #if CAP_SHOT
     displayButton(8, vid.yres-8-fs*6, XLAT("F6 = HQ shot"), SDLK_F6, 0);
     #endif
@@ -2216,11 +2216,25 @@ namespace mapeditor {
     if(drawing_tool) {
       if(sym == SDLK_F2) save_level();
       if(sym == SDLK_F3) load_level();
+      if(sym == SDLK_F5) {
+        stop_game();
+        firstland = specialland = laCanvas;
+        canvas_default_wall = waInvisibleFloor;
+        patterns::whichCanvas = 'g';
+        patterns::canvasback = 0xFFFFFF;
+        texture::config.paint_color = (forecolor << 8) | 255;
+        drawplayer = false;
+        vid.use_smart_range = 2;
+        start_game();
+        }
       }
 
     if(uni == ' ' && (cheater || autocheat)) {
-      popScreen();
-      pushScreen(showMapEditor);
+      drawing_tool = !drawing_tool;
+      if(!drawing_tool) {
+        popScreen();
+        pushScreen(showMapEditor);
+        }
       }
 
     if(uni == 'z' && GDIM == 3) {
