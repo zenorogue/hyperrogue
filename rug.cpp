@@ -1050,8 +1050,6 @@ EX void prepareTexture() {
   rb.reset();
   }
 
-double xview, yview;
-
 EX bool no_fog;
 
 EX ld lowrug = 1e-2;
@@ -1323,8 +1321,16 @@ static const ld RADAR_INF = 1e12;
 ld radar_distance = RADAR_INF;
 
 EX hyperpoint gethyper(ld x, ld y) {
-  double mx = (x - current_display->xcenter)/vid.xres * 2 * xview;
-  double my = (current_display->ycenter - y)/vid.yres * 2 * yview;
+  
+  projection_configuration bak = pconf;
+  pconf = rconf;
+  calcparam(); 
+
+  double mx = (x - current_display->xcenter)/current_display->radius;
+  double my = (y - current_display->ycenter)/current_display->radius/pconf.stretch;
+  
+  calcparam();
+  
   radar_distance = RADAR_INF;
   
   double rx1=0, ry1=0;
@@ -1381,6 +1387,7 @@ EX hyperpoint gethyper(ld x, ld y) {
       }
     }
   
+  pconf = bak;
   if(!found) return Hypc;
   
   double px = rx1 * TEXTURESIZE, py = (1-ry1) * TEXTURESIZE;
