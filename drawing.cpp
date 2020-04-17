@@ -36,6 +36,7 @@ static const int POLY_INTENSE = (1<<23);        // extra intense colors
 static const int POLY_DEBUG = (1<<24);          // debug this shape
 static const int POLY_PRINTABLE = (1<<25);      // these walls are printable
 static const int POLY_FAT = (1<<26);            // fatten this model in WRL export (used for Rug)
+static const int POLY_SHADE_TEXTURE = (1<<27);  // texture has 'z' coordinate for shading
 
 /** \brief A graphical element that can be drawn. Objects are not drawn immediately but rather queued.
  *
@@ -596,6 +597,7 @@ void dqi_poly::gldraw() {
   
   if(tinf) {
     glhr::be_textured();
+    if(flags & POLY_SHADE_TEXTURE) current_display->next_shader_flags |= GF_TEXTURE_SHADED;
     glBindTexture(GL_TEXTURE_2D, tinf->texture_id);
     glhr::vertices_texture(v, tinf->tvertices, offset, offset_texture);
     ioffset = 0;

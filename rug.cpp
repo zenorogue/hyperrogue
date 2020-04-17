@@ -987,20 +987,18 @@ void drawTriangle(triangle& t) {
     if(!t.m[i]->valid) return;
     }
   
-  /*
   ld col = 1;
-  if(num == 3) {
-    hyperpoint hc = (h[1] - h[0]) ^ (h[2] - h[0]);  
+  if(true) {
+    hyperpoint hc = (t.m[1]->native - t.m[0]->native) ^ (t.m[2]->native - t.m[0]->native);  
     double hch = hypot_d(3, hc);  
     col = (2 + hc[0]/hch) / 3;
     }
-  */
 
   for(int i=0; i<3; i++)  {
     if(t.m[i]->native[3] != 1)
       println(hlog, "bad point: ", t.m[i]->native);
     curvepoint(t.m[i]->native);
-    tinf.tvertices.push_back(glhr::pointtogl(point3(t.m[i]->x1, t.m[i]->y1, 0)));
+    tinf.tvertices.push_back(glhr::pointtogl(point3(t.m[i]->x1, t.m[i]->y1, col)));
     }
   }
 
@@ -1081,7 +1079,7 @@ EX void drawRugScene() {
   rug.V = rugView;
   rug.offset_texture = 0;
   rug.tinf = &tinf;
-  rug.flags = POLY_TRIANGLES | POLY_FAT | POLY_PRINTABLE | POLY_ALWAYS_IN | POLY_ISSIDE;
+  rug.flags = POLY_TRIANGLES | POLY_FAT | POLY_PRINTABLE | POLY_ALWAYS_IN | POLY_ISSIDE | POLY_SHADE_TEXTURE;
 
   dynamicval<projection_configuration> p(pconf, rconf);
   calcparam();

@@ -16,8 +16,9 @@ constexpr flagtype GF_TEXTURE  = 1;
 constexpr flagtype GF_VARCOLOR = 2;
 constexpr flagtype GF_LIGHTFOG = 4;
 constexpr flagtype GF_LEVELS   = 8;
+constexpr flagtype GF_TEXTURE_SHADED  = 16;
 
-constexpr flagtype GF_which    = 15;
+constexpr flagtype GF_which    = 31;
 
 constexpr flagtype SF_PERS3        = 256;
 constexpr flagtype SF_BAND         = 512;
@@ -62,7 +63,15 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   varying += "varying mediump vec4 vColor;\n";
 
   fmain += "gl_FragColor = vColor;\n";
-  if(shader_flags & GF_TEXTURE) {
+  if(shader_flags & GF_TEXTURE_SHADED) {
+    vsh += "attribute mediump vec3 aTexture;\n";
+    varying += "varying mediump vec3 vTexCoord;\n";
+    fsh += "uniform mediump sampler2D tTexture;\n";
+    vmain += "vTexCoord = aTexture;\n";
+    fmain += "gl_FragColor *= texture2D(tTexture, vTexCoord.xy);\n";
+    fmain += "gl_FragColor.rgb *= vTexCoord.z;\n";
+    }
+  else if(shader_flags & GF_TEXTURE) {
     vsh += "attribute mediump vec2 aTexture;\n";
     varying += "varying mediump vec2 vTexCoord;\n";
     fsh += "uniform mediump sampler2D tTexture;\n";
