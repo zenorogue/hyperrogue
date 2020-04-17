@@ -6,6 +6,20 @@ namespace hr {
 
 namespace tests {
 
+string test_eq(hyperpoint h1, hyperpoint h2, ld err = 1e-6) {
+  if(sqhypot_d(MDIM, h1 -h2) < err)
+    return "OK";
+  else
+    return "ERROR";
+  }
+
+string test_eq(transmatrix T1, transmatrix T2, ld err = 1e-6) {
+  if(eqmatrix(T1, T2, err))
+    return "OK";
+  else
+    return "ERROR";
+  }
+
 int readArgs() {
   using namespace arg;
            
@@ -66,6 +80,20 @@ int readArgs() {
       println(hlog, "should be 1: ", lalign(10, (shrunk_x * shrunk_y * bt::area_expansion_rate()) / (expand_x * expand_y)), " : ", tie(shrunk_x, shrunk_y, expand_x, expand_y, aer));
       if(geometry == gArnoldCat)
         println(hlog, "(but not in Arnold's cat)");
+      }
+    }
+  else if(argis("-test-push")) {
+    PHASEFROM(3);
+    for(eGeometry g: {gSol, gNil, gCubeTiling, gSpace534, gCell120}) {
+      stop_game();
+      set_geometry(g);
+      println(hlog, "testing geometry: ", geometry_name());
+      hyperpoint h = hyperpoint(.1, .2, .3, 1);
+      h = normalize(h);
+      println(hlog, "h = ", h);
+      println(hlog, "test rgpushxto0: ", test_eq(rgpushxto0(h) * C0, h));
+      println(hlog, "test gpushxto0: ", test_eq(gpushxto0(h) * h, C0));
+      println(hlog, "test inverses: ", test_eq(inverse(rgpushxto0(h)), gpushxto0(h)));
       }
     }
   else return 1;
