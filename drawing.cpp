@@ -184,6 +184,7 @@ vector<glvertex> line_vertices;
 #endif
 
 EX void glflush() {
+  DEBBI(DF_GRAPH, ("glflush"));
   #if MINIMIZE_GL_CALLS
   if(isize(triangle_vertices)) {
     // printf("%08X %08X | %d shapes, %d/%d vertices\n", triangle_color, line_color, shapes_merged, isize(triangle_vertices), isize(line_vertices));
@@ -1879,6 +1880,8 @@ void dqi_line::draw_back() {
   }
 
 EX void sort_drawqueue() {
+
+  DEBBI(DF_GRAPH, ("sort_drawqueue"));
   
   for(int a=0; a<PMAX; a++) qp[a] = 0;
   
@@ -1929,6 +1932,7 @@ EX void reverse_side_priorities() {
 
 // on the sphere, parts on the back are drawn first
 EX void draw_backside() {
+  DEBBI(DF_GRAPH, ("draw_backside"));
   if(pmodel == mdHyperboloid && hyperbolic) {
     dynamicval<eModel> dv (pmodel, mdHyperboloidFlat);
     for(auto& ptd: ptds) 
@@ -1968,6 +1972,7 @@ EX void reverse_transparent_walls() {
   }
 
 EX void draw_main() {
+  DEBBI(DF_GRAPH, ("draw_main"));
   if(sphere && GDIM == 3 && pmodel == mdPerspective) {
     for(int p: {1, 0, 2, 3}) {
       if(elliptic && p < 2) continue;
@@ -2037,6 +2042,8 @@ EX hookset<bool()> *hooks_vr_draw_all;
   
 EX void drawqueue() {
 
+  DEBBI(DF_GRAPH, ("drawqueue"));
+
   #if CAP_WRL
   if(wrl::in) { wrl::render(); return; }
   #endif
@@ -2054,6 +2061,8 @@ EX void drawqueue() {
   profile_start(3);
   
   sort_drawqueue();
+
+  DEBB(DF_GRAPH, ("sort walls"));
   
   if(GDIM == 2) 
   for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,

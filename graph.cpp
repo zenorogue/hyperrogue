@@ -2927,6 +2927,7 @@ void sumaura(int v) {
 vector<glhr::colored_vertex> auravertices;
 
 void drawaura() {
+  DEBBI(DF_GRAPH, ("draw aura"));
   if(!haveaura()) return;
   if(vid.stereo_mode) return;
   double rad = current_display->radius;
