@@ -362,6 +362,14 @@ EX void initConfig() {
   addsaver(reserve_limit, "memory_reserve", 128);
   addsaver(show_memory_warning, "show_memory_warning");
 
+  auto& rconf = vid.rug_config;
+  addsaverenum(rconf.model, "rug-projection", mdEquidistant);
+  addsaver(rconf.scale, "rug-projection-scale", 1);
+  addsaver(rconf.alpha, "rug-projection-alpha", 1);
+  addsaver(rconf.clip_min, "rug-projection-clip-min", -1);
+  addsaver(rconf.clip_max, "rug-projection-clip-max", +1);
+  addsaver(rconf.stretch, "rug-projection-stretch", 1);
+  addsaver(rconf.halfplane_scale, "rug-projection-halfplane scale", 1);
   addsaver(rug::renderonce, "rug-renderonce");
   addsaver(rug::rendernogl, "rug-rendernogl");
   addsaver(rug::texturesize, "rug-texturesize");
@@ -893,6 +901,7 @@ string solhelp() {
   }
 
 EX void edit_sightrange() {
+  USING_NATIVE_GEOMETRY_IN_RUG;
   if(vid.use_smart_range) {
     ld& det = WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3;
     dialog::editNumber(det, 1, 50, 1, WDIM == 2 ? 8 : 30, XLAT("minimum visible cell in pixels"), "");

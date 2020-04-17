@@ -1081,9 +1081,10 @@ EX void drawRugScene() {
   rug.V = rugView;
   rug.offset_texture = 0;
   rug.tinf = &tinf;
-  rug.flags = POLY_TRIANGLES | POLY_FAT | POLY_PRINTABLE;
+  rug.flags = POLY_TRIANGLES | POLY_FAT | POLY_PRINTABLE | POLY_ALWAYS_IN | POLY_ISSIDE;
 
   dynamicval<projection_configuration> p(pconf, rconf);
+  calcparam();
   
   drawqueue();
   }

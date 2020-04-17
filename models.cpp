@@ -343,18 +343,19 @@ EX namespace models {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
     dialog::init(XLAT("models & projections"));
+    USING_NATIVE_GEOMETRY_IN_RUG;
 
     for(int i=0; i<mdGUARD; i++) {
       eModel m = eModel(i);
       if(m == mdFormula && ISMOBILE) continue;
       if(model_available(m)) {
-        dialog::addBoolItem(get_model_name(m), pmodel == m, (i < 26 ? 'a'+i : 'A'+i-26));
+        dialog::addBoolItem(get_model_name(m), vpconf.model == m, (i < 26 ? 'a'+i : 'A'+i-26));
         dialog::add_action([m] () {
           if(m == mdFormula) {
             edit_formula();
             return;
             }
-          pmodel = m;
+          vpconf.model = m;
           polygonal::solve();
           vpconf.alpha = 1; vpconf.scale = 1;
           if(pmodel == mdBand && sphere)
@@ -401,7 +402,7 @@ EX namespace models {
     USING_NATIVE_GEOMETRY_IN_RUG;
     dialog::init(XLAT("models & projections"));
     
-    dialog::addSelItem(XLAT("projection type"), get_model_name(pmodel), 'm');
+    dialog::addSelItem(XLAT("projection type"), get_model_name(vpconf.model), 'm');
     dialog::add_action_push(model_list);
     
     if(nonisotropic && !sl2)
@@ -527,7 +528,7 @@ EX namespace models {
         });
       }
     
-    if(is_3d(vpconf)) {
+    if(is_3d(vpconf) && GDIM == 2) {
       dialog::addSelItem(XLAT("camera rotation in 3D models"), fts(vpconf.ballangle) + "°", 'b');
       dialog::add_action(config_camera_rotation);
       }
@@ -670,7 +671,7 @@ EX namespace models {
     dialog::addItem(XLAT("history mode"), 'a');
     dialog::add_action_push(history::history_menu);
 #if CAP_RUG
-    if(GDIM == 2) {
+    if(GDIM == 2 || rug::rugged) {
       dialog::addItem(XLAT("hypersian rug mode"), 'u');
       dialog::add_action_push(rug::show);
       }
