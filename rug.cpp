@@ -225,7 +225,9 @@ EX rugpoint *addRugpoint(hyperpoint h, double dist) {
   else if(euclid && rug_euclid()) {
     m->native = h * modelscale;
     m->native[2] = 0;
+    #if MAXMDIM >= 4
     m->native[3] = 1;
+    #endif
     m->valid = good_shape = true;
     }
   
@@ -251,14 +253,16 @@ EX rugpoint *addRugpoint(hyperpoint h, double dist) {
   else {
     m->native = h;
     ld hd = h[LDIM];
-    for(int d=GDIM; d<4; d++) {
+    for(int d=GDIM; d<MAXMDIM; d++) {
       m->native[d] = (hd - .99) * (rand() % 1000 - rand() % 1000) / 1000;
       }
     USING_NATIVE_GEOMETRY;
+    #if MAXMDIM >= 4
     if(euclid)
       m->native[3] = 1;
     else
       m->native = normalize(m->native);
+    #endif
     }
 
   m->inqueue = false;
@@ -416,10 +420,11 @@ EX void buildTorusRug() {
       
       if(!sphere) {
         /* stereographic projection to get Euclidean conformal torus */
-        hp[3] += 1;
-        hp /= hp[3];
+        hp /= (t+1);
         hp /= mx;
+        #if MAXMDIM >= 4
         hp[3] = 1;
+        #endif
         }
       
       /* ... in H^3, use inverse Poincare to get hyperbolic conformal torus */
@@ -690,7 +695,12 @@ EX void preset(rugpoint *m) {
       }
     }
     
+  #if MAXMDIM >= 4
   if(q>0) m->native = normalize(h);
+  #else
+  if(q>0) m->native = h / q;
+  #endif
+
   // printf("preset (%d) -> %s\n", q, display(m->native));
   if(std::isnan(m->native[0]) || std::isnan(m->native[1]) || std::isnan(m->native[2]))
     throw rug_exception();
@@ -775,8 +785,12 @@ EX void subdivide() {
       rugpoint *mm = addRugpoint(mid(m->h, m2->h), (m->dist+m2->dist)/2);
       halves[make_pair(m, m2)] = mm;
       if(!good_shape) {
+        #if MAXMDIM >= 4
         USING_NATIVE_GEOMETRY;
         mm->native = mid(m->native, m2->native);
+        #else
+        mm->native = (m->native + m2->native) / 2;
+        #endif
         }
       mm->valid = m->valid && m2->valid; 
       if(mm->valid) qvalid++;
@@ -995,8 +1009,10 @@ void drawTriangle(triangle& t) {
     }
 
   for(int i=0; i<3; i++)  {
+    #if MAXMDIM >= 4
     if(t.m[i]->native[3] != 1)
       println(hlog, "bad point: ", t.m[i]->native);
+    #endif
     curvepoint(t.m[i]->native);
     tinf.tvertices.push_back(glhr::pointtogl(point3(t.m[i]->x1, t.m[i]->y1, col)));
     }
@@ -1599,8 +1615,10 @@ EX void show() {
       }
     else if(uni == 'f') 
       pushScreen(showStereo);
+    #if MAXMDIM >= 4
     else if(uni == 'n' && !rug::rugged) 
       pushScreen(rug_geometry_choice);
+    #endif
     else if(uni == 'g' && !rug::rugged && CAP_SDL)
       rendernogl = !rendernogl;
     else if(uni == 's') {
