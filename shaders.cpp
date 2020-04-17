@@ -368,7 +368,7 @@ void display_data::set_projection(int ed) {
 
   if(pmodel == mdManual) return;
   
-  if(pconf.stretch != 1 && (shader_flags & SF_DIRECT)) glhr::projection_multiply(glhr::scale(pconf.stretch, 1, 1));
+  if(pconf.stretch != 1 && (shader_flags & SF_DIRECT) && pmodel != mdPixel) glhr::projection_multiply(glhr::scale(1, pconf.stretch, 1));
 
   if(vid.stereo_mode != sODS)
     eyewidth_translate(ed);
