@@ -253,15 +253,13 @@ EX rugpoint *addRugpoint(hyperpoint h, double dist) {
   else {
     m->native = h;
     ld hd = h[LDIM];
-    for(int d=GDIM; d<MAXMDIM; d++) {
+    for(int d=GDIM; d<MAXMDIM-1; d++) {
       m->native[d] = (hd - .99) * (rand() % 1000 - rand() % 1000) / 1000;
       }
     USING_NATIVE_GEOMETRY;
     #if MAXMDIM >= 4
-    if(euclid)
-      m->native[3] = 1;
-    else
-      m->native = normalize(m->native);
+    m->native[3] = 1;
+    m->native = normalize(m->native);
     #endif
     }
 
@@ -701,7 +699,6 @@ EX void preset(rugpoint *m) {
   if(q>0) m->native = h / q;
   #endif
 
-  // printf("preset (%d) -> %s\n", q, display(m->native));
   if(std::isnan(m->native[0]) || std::isnan(m->native[1]) || std::isnan(m->native[2]))
     throw rug_exception();
   }
@@ -1006,6 +1003,7 @@ void drawTriangle(triangle& t) {
     hyperpoint hc = (t.m[1]->native - t.m[0]->native) ^ (t.m[2]->native - t.m[0]->native);  
     double hch = hypot_d(3, hc);  
     col = (2 + hc[0]/hch) / 3;
+    if(nonisotropic) col = (9+col) / 10;
     }
 
   for(int i=0; i<3; i++)  {
@@ -1091,8 +1089,16 @@ EX void drawRugScene() {
   for(auto t: triangles) drawTriangle(t);
   
   auto& rug = queuecurve(0, 0xFFFFFFFF, PPR::LINE);
-  
-  rug.V = rugView;
+
+  if(nonisotropic) {
+    transmatrix T2 = eupush( tC0(inverse(rugView)) );
+    NLP = rugView * T2;  
+    rug.V = inverse(NLP) * rugView;
+    }
+  else {
+    rug.V = rugView;
+    }
+   
   rug.offset_texture = 0;
   rug.tinf = &tinf;
   rug.flags = POLY_TRIANGLES | POLY_FAT | POLY_PRINTABLE | POLY_ALWAYS_IN | POLY_ISSIDE | POLY_SHADE_TEXTURE;
@@ -1435,17 +1441,25 @@ EX void rug_geometry_choice() {
   gamescreen(0);
   dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
   
-  dialog::addBoolItem("Euclidean", rug_euclid(), 'a');
+  USING_NATIVE_GEOMETRY; 
+  
+  dialog::addBoolItem("Euclidean", euclid, 'a');
   dialog::add_action([] { gwhere = rgEuclid; popScreen(); });
 
-  dialog::addBoolItem("hyperbolic", rug_hyperbolic(), 'b');
+  dialog::addBoolItem("hyperbolic", hyperbolic, 'b');
   dialog::add_action([] { gwhere = rgHyperbolic; popScreen(); });
 
-  dialog::addBoolItem("spherical", rug_sphere() && !rug_elliptic(), 'c');
+  dialog::addBoolItem("spherical", sphere && !elliptic, 'c');
   dialog::add_action([] { gwhere = rgSphere; popScreen(); });
 
-  dialog::addBoolItem("elliptic", rug_elliptic(), 'd');
+  dialog::addBoolItem("elliptic", elliptic, 'd');
   dialog::add_action([] { gwhere = rgElliptic; popScreen(); });
+
+  dialog::addBoolItem("Nil", nil, 'e');
+  dialog::add_action([] { gwhere = gNil; popScreen(); });
+
+  dialog::addBoolItem("Solv", sol, 'e');
+  dialog::add_action([] { gwhere = gSol; popScreen(); });
 
   dialog::addBack();
   dialog::display();
@@ -1732,7 +1746,7 @@ int rugArgs() {
     }
 
   else if(argis("-ruggeo")) {
-    shift(); gwhere = (eGeometry) argi();
+    shift(); gwhere = readGeo(args());
     if(gwhere == gEuclid) gwhere = rgEuclid;
     if(gwhere == gSphere) gwhere = rgSphere;
     if(gwhere == gNormal) gwhere = rgHyperbolic;
@@ -1740,7 +1754,8 @@ int rugArgs() {
     }
 
   else if(argis("-rugpers")) {
-    rconf.model = mdPerspective;
+    USING_NATIVE_GEOMETRY;
+    rconf.model = nonisotropic ? mdGeodesic : mdPerspective;
     }
 
   else if(argis("-rugonce")) {
