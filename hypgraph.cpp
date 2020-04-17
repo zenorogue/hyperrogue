@@ -1518,6 +1518,27 @@ transmatrix screenpos(ld x, ld y) {
 
 EX eModel flat_model() { return MDIM == 4 ? mdPixel : mdDisk; }
 
+/** \brief enable the 'flat' model for drawing HUD. See hr::flat_model_enabler */
+EX void enable_flat_model() {
+  glClear(GL_DEPTH_BUFFER_BIT);
+  pmodel = flat_model();
+  pconf.alpha = 1;
+  pconf.scale = 1;
+  pconf.camera_angle = 0;
+  pconf.stretch = 1;
+  if(prod) pconf.alpha = 30, pconf.scale = 30;
+  calcparam();
+  }
+
+#if HDR
+/** \brief enable the 'flat' model for drawing HUD. Use RAII so it will be switched back later */
+struct flat_model_enabler {
+  projection_configuration bak;
+  flat_model_enabler() { bak = pconf; enable_flat_model(); }
+  ~flat_model_enabler() { pconf = bak; calcparam(); }
+  };
+#endif
+
 EX transmatrix atscreenpos(ld x, ld y, ld size) {
   transmatrix V = Id;
   

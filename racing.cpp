@@ -1381,8 +1381,7 @@ EX void drawStats() {
 
   if(!racing::on) return;
   
-  dynamicval<eModel> pm(pmodel, flat_model());
-  glClear(GL_DEPTH_BUFFER_BIT);
+  flat_model_enabler fme;
   initquickqueue();
   
   int bsize = vid.fsize * 2;

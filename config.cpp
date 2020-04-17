@@ -1974,11 +1974,7 @@ EX void showCustomizeChar() {
   int firsty = dialog::items[0].position / 2;
   int scale = firsty - 2 * vid.fsize;
   
-  dynamicval<eModel> pm(pmodel, flat_model());
-  glClear(GL_DEPTH_BUFFER_BIT);
-  dynamicval<ld> va(pconf.alpha, 1);
-  dynamicval<ld> vs(pconf.scale, 1);
-  dynamicval<ld> vc(pconf.camera_angle, 0);
+  flat_model_enabler fme;
 
   initquickqueue();
   transmatrix V = atscreenpos(vid.xres/2, firsty, scale);

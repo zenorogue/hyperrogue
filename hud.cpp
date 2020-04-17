@@ -401,20 +401,12 @@ EX void drawStats() {
   if(geometry == gRotSpace || geometry == gProduct) rots::draw_underlying(!cornermode);
   
   {
-  dynamicval<eModel> pm(pmodel, flat_model());
-  glClear(GL_DEPTH_BUFFER_BIT);
-  // dynamicval<videopar> v(vid, vid);
-  // pconf.alpha = vid.scale = 1;
-  dynamicval<ld> va(pconf.alpha, 1);
-  dynamicval<ld> vs(pconf.scale, 1);
-  dynamicval<ld> vc(pconf.camera_angle, 0);
-  if(prod) pconf.alpha = 30, pconf.scale = 30;
   
   auto& cd = current_display;
   auto xc = cd->xcenter;
   auto yc = cd->ycenter;
 
-  calcparam();
+  flat_model_enabler fme;
 
   if(crosshair_color && crosshair_size > 0) {
     initquickqueue();
