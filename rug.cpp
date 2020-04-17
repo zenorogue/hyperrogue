@@ -623,21 +623,19 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp=false, double
   bool nonzero = abs(t-rd) > err_zero_current;
   double forcev = (t - rd) / 2; // 20.0;
   
-  println(hlog, normalize(m1.native) - m1.native);
-  println(hlog, normalize(m1.native) - m2.native);
-  
-  transmatrix T = gpushxto0(m1.native);
-  transmatrix T1 = spintox(T * m2.native) * T;
+  transmatrix T = inverse(rgpushxto0(m1.native));
+  hyperpoint ie = inverse_exp(T * m2.native);
 
-  transmatrix iT1 = inverse(T1);
+  transmatrix iT = rgpushxto0(m1.native);
   
   for(int i=0; i<MDIM; i++) if(std::isnan(m1.native[i])) { 
     addMessage("Failed!");
+    println(hlog, "m1 = ", m1.native);
     throw rug_exception();
     }
-  
-  m1.native = iT1 * xpush0(d1*forcev);
-  m2.native = iT1 * xpush0(t-d2*forcev);
+
+  m1.native = iT * direct_exp(ie * (d1*forcev/t));
+  m2.native = iT * direct_exp(ie * ((t-d2*forcev)/t));
 
   if(nonzero && d2>0) enqueue(&m2);
   return nonzero;
@@ -1007,10 +1005,6 @@ void drawTriangle(triangle& t) {
     }
 
   for(int i=0; i<3; i++)  {
-    #if MAXMDIM >= 4
-    if(t.m[i]->native[3] != 1)
-      println(hlog, "bad point: ", t.m[i]->native);
-    #endif
     curvepoint(t.m[i]->native);
     tinf.tvertices.push_back(glhr::pointtogl(point3(t.m[i]->x1, t.m[i]->y1, col)));
     }
