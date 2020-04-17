@@ -702,6 +702,8 @@ EX transmatrix rpushxto0(const hyperpoint& H) {
 
 EX transmatrix ggpushxto0(const hyperpoint& H, ld co) {
   if(translatable) {
+    if(nonisotropic)
+      return co > 0 ? eupush(H) : inverse(eupush(H));
     return eupush(co * H);
     }
   if(prod) {
