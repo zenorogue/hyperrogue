@@ -361,8 +361,10 @@ EX always_false in;
     if(!CAP_PNG) return 0;
     if(!textures) return 0;
     if(p.tinf == &rug::tinf) return 1;
+    #if MAXMDIM >= 4
     if(p.tinf->texture_id == (int) floor_textures->renderedTexture)
       return (p.tinf->tvertices[0][0] == 0) ? 2 : 3;
+    #endif
     return 0;
     }
 
@@ -374,7 +376,9 @@ EX always_false in;
     if(tt == 3) texture_position[texid(p)] = 0;
     }
   
+  #if MAXMDIM >= 4
   int fts_int, fts, fts_row;
+  #endif
   
   map<string, pair<vector<hyperpoint>, vector<glvertex>>> all_data;
   
@@ -444,6 +448,7 @@ EX always_false in;
     auto &ad = all_data[app.s];
     for(auto& d: data) ad.first.push_back(d);
 
+    #if MAXMDIM >= 4
     if(tt == 2) {
       ld x = (fts - .5 - gradient_position[p.color]) / fts;
       for(auto& d: tdata) d[0] = x;
@@ -458,11 +463,13 @@ EX always_false in;
         for(int c: {0, 1})
           d[c] = ((d[c] - zero[c])*sca + xy[c] + .5) * fts_int / fts;
       }
+    #endif
 
     for(auto& d: tdata) ad.second.push_back(d);
     }
   
   EX void render() {
+    #if MAXMDIM >= 4
     for(auto& p: ptds) {
       auto p2 = dynamic_cast<dqi_poly*>(&*p);
       if(p2)
@@ -481,6 +488,7 @@ EX always_false in;
       fts *= 2;    
     
     fts_row = (fts-gps)/fts_int;
+    #endif
     
     for(auto& p: ptds) {
       auto p2 = dynamic_cast<dqi_poly*>(&*p);
@@ -554,6 +562,7 @@ EX always_false in;
       shot::postprocess(filename + "-rug.png", s, s);
       }
     
+    #if MAXMDIM >= 4
     if(isize(texture_position) || isize(gradient_position)) {
       SDL_Surface *s = shot::empty_surface(fts, fts, false);
       for(auto& p: gradient_position) {
@@ -584,6 +593,7 @@ EX always_false in;
       IMAGESAVE(s, (filename + "-floors.png").c_str());
       SDL_FreeSurface(s);
       }
+    #endif
     #endif
     
     fclose(f.f);
