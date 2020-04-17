@@ -638,11 +638,11 @@ void draw_ncee() {
   nctinf2.tvertices.clear();
   
   ld map_ypos = vid.yres * (mapping_split + 1) / 2 - cd->ycenter;
-  ld sca2 = (vid.yres * (1-mapping_split) / 2 - 10)  / vid.scale;
+  ld sca2 = (vid.yres * (1-mapping_split) / 2 - 10)  / pconf.scale;
 
   if(show_mapping) {
     for(int iter=-10; iter<=10; iter++) {
-      ld maxx = period * vid.scale / 4;
+      ld maxx = period * pconf.scale / 4;
       ld scax = sca2 * maxx / 0.5;
       ld xpos = scax * 2 * iter;
       curvepoint(hpxy(xpos-scax, map_ypos-sca2));
@@ -714,7 +714,7 @@ void draw_ncee() {
     z = !z;
     for(int s=0; s<3; s++) {
       curvepoint(hc(c[s].x, c[s].y)); 
-      nctinf.tvertices.push_back(glhr::makevertex((vx[c[s].y][c[s].x]/cscale-delta)*vid.scale/2+.5, vy[c[s].y][c[s].x]*vid.scale/2+.5, 0));
+      nctinf.tvertices.push_back(glhr::makevertex((vx[c[s].y][c[s].x]/cscale-delta)*pconf.scale/2+.5, vy[c[s].y][c[s].x]*pconf.scale/2+.5, 0));
       }
     };
     
@@ -800,7 +800,7 @@ void prepare_ncee_map() {
   dynamicval<int> cgl(vid.cells_generated_limit, 9999999);
   dynamicval<bool> r(rug::display_warning, false);
   // vid.consider_shader_projection = false;
-  vid.scale = 0.5;
+  pconf.scale = 0.5;
   rug::init();
   rug::prepareTexture();
   rug::rugged = false;

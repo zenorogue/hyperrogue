@@ -190,7 +190,7 @@ void run_snub(int v, int w) {
   create_model();
   printf("points = %d tris = %d side = %d\n", isize(rug::points), isize(rug::triangles), isize(sideangles));
   rug::model_distance = euclid ? 4 : 2;
-  rug::rug_projection = hyperbolic ? mdPerspective : mdEquidistant;
+  vid.rug_config.model = hyperbolic ? mdPerspective : mdEquidistant;
   showstartmenu = false;
   snubon = true;
   rug::invert_depth = hyperbolic;

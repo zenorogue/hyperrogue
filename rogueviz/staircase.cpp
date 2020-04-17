@@ -120,7 +120,7 @@ void make_staircase() {
 
   println(hlog, "scurvature = ", scurvature, " progress = ", progress, " strafe=", strafex, ",", strafey);
   rug::renderonce = true;
-  rug::rug_projection = mdPerspective;
+  vid.rug_config.model = mdPerspective;
   if(scurvature > -1e-6 && scurvature < 1e-6) { 
     rug::gwhere = rug::rgEuclid;
     acurvature = 1;
