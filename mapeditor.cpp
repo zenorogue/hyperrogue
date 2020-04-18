@@ -17,7 +17,9 @@ EX namespace mapeditor {
   static const int USERSHAPEGROUPS = 5;
   #endif
   
-  color_t dtfill;
+  EX color_t dtfill = 0;
+  EX color_t dtcolor = 0x000000FF;
+  EX ld dtwidth = .02;
 
   /* drawing_tool shapes */
   struct dtshape {
@@ -131,15 +133,15 @@ EX namespace mapeditor {
       }
 
     if(drawing_tool && (cmode & sm::DRAW)) {
-      dynamicval<ld> lw(vid.linewidth, vid.linewidth * texture::penwidth * 100);
+      dynamicval<ld> lw(vid.linewidth, vid.linewidth * dtwidth * 100);
       if(holdmouse && mousekey == 'c')
         queue_hcircle(rgpushxto0(lstart), hdist(lstart, mouseh));
       else if(holdmouse && mousekey == 'l')
-        queueline(lstart, mouseh, texture::config.paint_color, 4 + vid.linequality, PPR::LINE);
+        queueline(lstart, mouseh, dtcolor, 4 + vid.linequality, PPR::LINE);
       else if(!holdmouse) {
         transmatrix T = rgpushxto0(mouseh);
-        queueline(T * xpush0(-.1), T * xpush0(.1), texture::config.paint_color);
-        queueline(T * ypush0(-.1), T * ypush0(.1), texture::config.paint_color);
+        queueline(T * xpush0(-.1), T * xpush0(.1), dtcolor);
+        queueline(T * ypush0(-.1), T * ypush0(.1), dtcolor);
         }
       }
     }
@@ -147,9 +149,9 @@ EX namespace mapeditor {
   /** dtshapes takes ownership of sh */
   void dt_add(cell *where, dtshape *sh) {
     sh->where = where;
-    sh->col = texture::config.paint_color;
+    sh->col = dtcolor;
     sh->fill = dtfill;
-    sh->lw = texture::penwidth * 100;
+    sh->lw = dtwidth * 100;
 
     dtshapes.push_back(unique_ptr<dtshape>(sh));
     }
@@ -1747,7 +1749,7 @@ namespace mapeditor {
         displayButton(8, 8+fs*16, XLAT("p = color"), 'p', 0);
       if(drawing_tool)
         displayButton(8, 8+fs*17, XLAT("f = fill") + (dtfill ? " (on)" : " (off)"), 'f', 0);
-      displayButton(8, 8+fs*4, XLAT("b = brush size: %1", fts(texture::penwidth)), 'b', 0);
+      displayButton(8, 8+fs*4, XLAT("b = brush size: %1", fts(dtwidth)), 'b', 0);
       displayButton(8, 8+fs*5, XLAT("u = undo"), 'u', 0);
       displaymm('d', 8, 8+fs*7, 2, vid.fsize, XLAT("d = draw"), 0);
       displaymm('l', 8, 8+fs*8, 2, vid.fsize, XLAT("l = line"), 0);
@@ -1779,7 +1781,7 @@ namespace mapeditor {
       if(8 + fs * (6+i) < vid.yres - 8 - fs * 7)
         displayColorButton(vid.xres-8, 8+fs*(6+i), "###", 1000 + i, 16, 1, dialog::displaycolor(texture_colors[i+1]));
 
-      if(displayfr(vid.xres-8 - fs * 3, 8+fs*(6+i), 0, vid.fsize, its(i+1), texture::penwidth == brush_sizes[i] ? 0xFF8000 : 0xC0C0C0, 16))
+      if(displayfr(vid.xres-8 - fs * 3, 8+fs*(6+i), 0, vid.fsize, its(i+1), dtwidth == brush_sizes[i] ? 0xFF8000 : 0xC0C0C0, 16))
         getcstat = 2000+i;
       }
 
@@ -2223,7 +2225,7 @@ namespace mapeditor {
           canvas_default_wall = waInvisibleFloor;
           patterns::whichCanvas = 'g';
           patterns::canvasback = 0xFFFFFF;
-          texture::config.paint_color = (forecolor << 8) | 255;
+          dtcolor = (forecolor << 8) | 255;
           drawplayer = false;
           vid.use_smart_range = 2;
           start_game();
@@ -2314,7 +2316,7 @@ namespace mapeditor {
 
     if(freedraw) {
     
-      int tcolor = (texture::config.paint_color >> 8) | ((texture::config.paint_color & 0xFF) << 24);
+      int tcolor = (dtcolor >> 8) | ((dtcolor & 0xFF) << 24);
       
       if(uni == '-' && !clickused) {
         if(mousekey == 'e') {
@@ -2351,7 +2353,7 @@ namespace mapeditor {
         else if(mousekey == 'c' && intexture) { 
           texture::config.data.undoLock();
           ld rad = hdist(lstart, mouseh);
-          int circp = int(1 + 3 * (circlelength(rad) / texture::penwidth));
+          int circp = int(1 + 3 * (circlelength(rad) / dtwidth));
           if(circp > 1000) circp = 1000;
           transmatrix T = rgpushxto0(lstart);
           texture::where = lstartcell;
@@ -2370,10 +2372,10 @@ namespace mapeditor {
         }
       
       if(uni >= 1000 && uni < 1010)
-        texture::config.paint_color = texture_colors[uni - 1000 + 1];
+        dtcolor = texture_colors[uni - 1000 + 1];
 
       if(uni >= 2000 && uni < 2010)
-        texture::penwidth = brush_sizes[uni - 2000];
+        dtwidth = brush_sizes[uni - 2000];
 
       if(uni == '0')
         texture::texturesym = !texture::texturesym;
@@ -2384,18 +2386,18 @@ namespace mapeditor {
       
       if(uni == 'p') {
         if(!clickused)
-          dialog::openColorDialog(texture::config.paint_color, texture_colors);
+          dialog::openColorDialog(dtcolor, texture_colors);
         }
 
       if(uni == 'f') {
-        if(dtfill == texture::config.paint_color)
+        if(dtfill == dtcolor)
           dtfill = 0;
         else
-          dtfill = texture::config.paint_color;
+          dtfill = dtcolor;
         }
 
       if(uni == 'b') 
-        dialog::editNumber(texture::penwidth, 0, 0.1, 0.005, 0.02, XLAT("brush size"), XLAT("brush size"));
+        dialog::editNumber(dtwidth, 0, 0.1, 0.005, 0.02, XLAT("brush size"), XLAT("brush size"));
       }
 
     else {
@@ -2506,7 +2508,7 @@ namespace mapeditor {
       pts.push_back(Ctr * xspinpush0(M_PI*j*2/circp, radius));
     for(int j=0; j<circp; j++) curvepoint(pts[j]);
     curvepoint(pts[0]);
-    queuecurve(texture::config.paint_color, 0, PPR::LINE);
+    queuecurve(dtcolor, 0, PPR::LINE);
     }
 
 #if CAP_POLY
@@ -2545,10 +2547,10 @@ namespace mapeditor {
             queue_hcircle(M2 * ml, hdist(lstart, mouseh));
             break;
           case 'l':
-            queueline(M2 * mh * C0, M2 * ml * C0, texture::config.paint_color, 4 + vid.linequality, PPR::LINE);
+            queueline(M2 * mh * C0, M2 * ml * C0, dtcolor, 4 + vid.linequality, PPR::LINE);
             break;
           default:
-            queue_hcircle(M2 * mh, texture::penwidth);
+            queue_hcircle(M2 * mh, dtwidth);
           }                
         }
       }

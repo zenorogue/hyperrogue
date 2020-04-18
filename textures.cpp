@@ -65,7 +65,6 @@ struct texture_data {
 struct texture_config {
   string texturename;
   string configname;
-  color_t paint_color;
   eTextureState tstate;
   eTextureState tstate_max;
 
@@ -121,7 +120,6 @@ struct texture_config {
     texturename = "textures/hyperrogue-texture.png";
     configname = "textures/hyperrogue.txc";
     itt = Id; 
-    paint_color = 0x000000FF;
     grid_color = 0;
     mesh_color = 0;
     master_color = 0xFFFFFF30;
@@ -1449,8 +1447,6 @@ array<point, 3> ptc(const array<hyperpoint, 3>& h) {
   return make_array(ptc(h[0]), ptc(h[1]), ptc(h[2]));
   }
 
-EX ld penwidth = .02;
-
 int texture_distance(pair<int, int> p1, pair<int, int> p2) {
   return max(abs(p1.first-p2.first), abs(p1.second - p2.second));
   }
@@ -1521,7 +1517,7 @@ void filltriangle(const array<hyperpoint, 3>& v, const array<point, 3>& p, color
 
 void splitseg(const transmatrix& A, const array<ld, 2>& angles, const array<hyperpoint, 2>& h, const array<point, 2>& p, color_t col, int lev) {
   ld newangle = (angles[0] + angles[1]) / 2;
-  hyperpoint nh = A * xspinpush0(newangle, penwidth);
+  hyperpoint nh = A * xspinpush0(newangle, mapeditor::dtwidth);
   auto np = ptc(nh);
   
   filltriangle(make_array(h[0],h[1],nh), make_array(p[0],p[1],np), col, lev);
@@ -1538,7 +1534,7 @@ void fillcircle(hyperpoint h, color_t col) {
   
   ld step = M_PI * 2/3;
   
-  array<hyperpoint, 3> mh = make_array(A * xpush0(penwidth), A * xspinpush0(step, penwidth), A * xspinpush0(-step, penwidth));
+  array<hyperpoint, 3> mh = make_array(A * xpush0(mapeditor::dtwidth), A * xspinpush0(step, mapeditor::dtwidth), A * xspinpush0(-step, mapeditor::dtwidth));
   auto mp = ptc(mh);
 
   filltriangle(mh, mp, col, 0);
@@ -1596,7 +1592,7 @@ EX void drawPixel(hyperpoint h, color_t col) {
   }
 
 EX void drawLine(hyperpoint h1, hyperpoint h2, color_t col, int steps IS(10)) {
-  if(steps > 0 && hdist(h1, h2) > penwidth / 3) {
+  if(steps > 0 && hdist(h1, h2) > mapeditor::dtwidth / 3) {
     hyperpoint h3 = mid(h1, h2);
     drawLine(h1, h3, col, steps-1);
     drawLine(h3, h2, col, steps-1);
