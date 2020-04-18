@@ -30,6 +30,7 @@ EX namespace mapeditor {
     virtual dtshape* load(hstream& hs) = 0;
     virtual void draw(const transmatrix& V) = 0;
     virtual ld distance(hyperpoint h) = 0;
+    virtual ~dtshape() {}
     };
   
   struct dtline : dtshape {
