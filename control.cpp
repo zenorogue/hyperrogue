@@ -301,7 +301,15 @@ transmatrix zforward_push(ld z) {
   return T;
   }
 
-EX void rotate_camera(int dir, ld val) {
+EX void full_forward_camera(ld t) {
+  if(GDIM == 3) {
+    shift_view(ctangent(2, t));
+    didsomething = true;
+    playermoved = false;
+    }
+  }
+
+EX void full_rotate_camera(int dir, ld val) {
   if(history::on)
     history::lvspeed += (dir?1:-1) * val / 2;
   else if(GDIM == 3 && anyshiftclick)
@@ -316,7 +324,7 @@ EX void rotate_camera(int dir, ld val) {
     View = cpush(dir, val) * View, playermoved = false, didsomething = true;      
   };
 
-EX void rotate_view_or_history(ld h, ld v) {
+EX void full_rotate_view(ld h, ld v) {
   if(history::on && !rug::rug_control())
     models::rotation += h;
   else {
@@ -337,20 +345,15 @@ EX void handlePanning(int sym, int uni) {
   rug::using_rugview urv;
     
 #if !ISPANDORA
-  if(sym == SDLK_END && GDIM == 3) { 
-    shift_view(ztangent(-0.2*shiftmul)), didsomething = true, playermoved = false;
-    }
-  if(sym == SDLK_HOME && GDIM == 3) { 
-    shift_view(ztangent(+0.2*shiftmul)), didsomething = true, playermoved = false;
-    }
-
-  if(sym == SDLK_RIGHT) rotate_camera(0, -0.2*shiftmul);
-  if(sym == SDLK_LEFT) rotate_camera(0, 0.2*shiftmul);
-  if(sym == SDLK_UP) rotate_camera(1, 0.2*shiftmul);
-  if(sym == SDLK_DOWN) rotate_camera(1, -0.2*shiftmul);
+  if(sym == SDLK_END) full_forward_camera(-0.2*shiftmul);
+  if(sym == SDLK_HOME) full_forward_camera(0.2*shiftmul);
+  if(sym == SDLK_RIGHT) full_rotate_camera(0, -0.2*shiftmul);
+  if(sym == SDLK_LEFT) full_rotate_camera(0, 0.2*shiftmul);
+  if(sym == SDLK_UP) full_rotate_camera(1, 0.2*shiftmul);
+  if(sym == SDLK_DOWN) full_rotate_camera(1, -0.2*shiftmul);
 #endif
-  if(sym == SDLK_PAGEUP) rotate_view_or_history(1, M_PI/cgi.S21/2*shiftmul);
-  if(sym == SDLK_PAGEDOWN) rotate_view_or_history(-1, -M_PI/cgi.S21/2*shiftmul);
+  if(sym == SDLK_PAGEUP) full_rotate_view(1, M_PI/cgi.S21/2*shiftmul);
+  if(sym == SDLK_PAGEDOWN) full_rotate_view(-1, -M_PI/cgi.S21/2*shiftmul);
   
   if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
     if(isGravityLand(cwt.at->land) && !rug::rug_control()) playermoved = false;
@@ -693,17 +696,15 @@ EX void mainloopiter() {
     ld t = (ticks - lastticks) * shiftmul / 1000.;
     lastticks = ticks;
     Uint8 *keystate = SDL_GetKeyState(NULL);
-    if(keystate[SDLK_END] && GDIM == 3 && DEFAULTNOR(SDLK_END))
-      shift_view(ctangent(2, -t)), didsomething = true, playermoved = false;
-    if(keystate[SDLK_HOME] && GDIM == 3 && DEFAULTNOR(SDLK_HOME))
-      shift_view(ctangent(2, t)), didsomething = true, playermoved = false;
-    
-    if(keystate[SDLK_RIGHT] && DEFAULTNOR(SDLK_RIGHT)) rotate_camera(0, -t);
-    if(keystate[SDLK_LEFT] && DEFAULTNOR(SDLK_LEFT)) rotate_camera(0, t);
-    if(keystate[SDLK_UP] && DEFAULTNOR(SDLK_UP)) rotate_camera(1, t);
-    if(keystate[SDLK_DOWN] && DEFAULTNOR(SDLK_DOWN)) rotate_camera(1, -t);
-    if(keystate[SDLK_PAGEUP] && DEFAULTNOR(SDLK_PAGEUP)) rotate_view_or_history(t * 180 / M_PI, t);
-    if(keystate[SDLK_PAGEDOWN] && DEFAULTNOR(SDLK_PAGEDOWN)) rotate_view_or_history(-t * 180 / M_PI, t);
+
+    if(keystate[SDLK_END] && GDIM == 3 && DEFAULTNOR(SDLK_END)) full_forward_camera(-t);
+    if(keystate[SDLK_HOME] && GDIM == 3 && DEFAULTNOR(SDLK_HOME)) full_forward_camera(t);
+    if(keystate[SDLK_RIGHT] && DEFAULTNOR(SDLK_RIGHT)) full_rotate_camera(0, -t);
+    if(keystate[SDLK_LEFT] && DEFAULTNOR(SDLK_LEFT)) full_rotate_camera(0, t);
+    if(keystate[SDLK_UP] && DEFAULTNOR(SDLK_UP)) full_rotate_camera(1, t);
+    if(keystate[SDLK_DOWN] && DEFAULTNOR(SDLK_DOWN)) full_rotate_camera(1, -t);
+    if(keystate[SDLK_PAGEUP] && DEFAULTNOR(SDLK_PAGEUP)) full_rotate_view(t * 180 / M_PI, t);
+    if(keystate[SDLK_PAGEDOWN] && DEFAULTNOR(SDLK_PAGEDOWN)) full_rotate_view(-t * 180 / M_PI, t);
     }
 
   achievement_pump();  
