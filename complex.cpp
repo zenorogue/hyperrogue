@@ -3441,7 +3441,7 @@ EX namespace ca {
     }
 EX }
 
-auto ccm = addHook(clearmemory, 0, [] () {
+auto ccm = addHook(hooks_clearmemory, 0, [] () {
   heat::offscreen_heat.clear();
   heat::offscreen_fire.clear();
   princess::clear();

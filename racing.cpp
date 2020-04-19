@@ -835,7 +835,7 @@ heptspin sview;
 #if CAP_COMMANDLINE
 auto hook = 
   addHook(hooks_args, 100, readArgs)
-+ addHook(clearmemory, 0, []() {
++ addHook(hooks_clearmemory, 0, []() {
     track_ready = false;
     track.clear();
     rti.clear();

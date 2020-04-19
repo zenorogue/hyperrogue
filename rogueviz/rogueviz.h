@@ -107,11 +107,11 @@ namespace rogueviz {
 
   extern colorpair dftcolor;
   
-  inline hookset<void(vertexdata&, cell*, shmup::monster*, int)> *hooks_drawvertex;
-  inline hookset<bool(edgeinfo*, bool store)> *hooks_alt_edges;
+  inline hookset<void(vertexdata&, cell*, shmup::monster*, int)> hooks_drawvertex;
+  inline hookset<bool(edgeinfo*, bool store)> hooks_alt_edges;
   inline purehookset hooks_rvmenu;
-  inline hookset<bool()> *hooks_rvmenu_replace;
-  inline hookset<bool(int&, string&, FILE*)> *hooks_readcolor;
+  inline hookset<bool()> hooks_rvmenu_replace;
+  inline hookset<bool(int&, string&, FILE*)> hooks_readcolor;
   inline purehookset hooks_close;
   
   void readcolor(const string& cfname);
@@ -121,7 +121,7 @@ namespace rogueviz {
   
   namespace rvtour {
     using namespace hr::tour;
-    inline hookset<void(vector<slide>&)> *hooks_build_rvtour;
+    inline hookset<void(vector<slide>&)> hooks_build_rvtour;
     slide *gen_rvtour();
 
 template<class T> function<void(presmode)> roguevizslide(char c, const T& t) {

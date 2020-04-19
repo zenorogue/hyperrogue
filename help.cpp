@@ -772,7 +772,7 @@ EX void appendHelp(string s) {
 unsigned char lastval;
 int windtotal;
 
-EX hookset<void(cell*)> *hooks_mouseover;
+EX hookset<void(cell*)> hooks_mouseover;
 
 EX void describeMouseover() {
   DEBBI(DF_GRAPH, ("describeMouseover"));
@@ -1017,7 +1017,7 @@ EX void showHelp() {
     };
   }
 
-EX hookset<bool()> *hooks_default_help;
+EX hookset<bool()> hooks_default_help;
 
 EX void gotoHelp(const string& h) {
   help = h;

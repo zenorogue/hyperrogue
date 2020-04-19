@@ -346,7 +346,7 @@ bool handleKey(int sym, int uni) {
 auto xhook = addHook(hooks_args, 100, readArgs)
 + addHook(hooks_handleKey, 0, handleKey)
 + addHook(hooks_prestats, 0, frame)
-+ addHook(clearmemory, 40, [] () { snubon = false; } )
++ addHook(hooks_clearmemory, 40, [] () { snubon = false; } )
 + addHook(rvtour::hooks_build_rvtour, 142, [] (vector<tour::slide>& v) {
     using namespace tour;
     v.push_back(

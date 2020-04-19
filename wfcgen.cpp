@@ -288,7 +288,7 @@ auto wfc_hook =
     });
 #endif
 
-auto cgm = addHook(clearmemory, 40, [] () { centers.clear(); }) +  addHook(hooks_removecells, 0, [] () { eliminate_if(centers, is_cell_removed); });
+auto cgm = addHook(hooks_clearmemory, 40, [] () { centers.clear(); }) +  addHook(hooks_removecells, 0, [] () { eliminate_if(centers, is_cell_removed); });
 
 EX }
 

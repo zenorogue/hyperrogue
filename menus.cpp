@@ -959,18 +959,22 @@ EX void showStartMenu() {
 // -- overview --
 
 #if HDR
-typedef pair<string, reaction_t> named_functionality;
+struct named_functionality {
+    std::string first;
+    reaction_t second;
+    explicit named_functionality() = default;
+    explicit named_functionality(std::string s, reaction_t r) : first(std::move(s)), second(std::move(r)) {}
+    friend bool operator==(const named_functionality& a, const named_functionality& b) { return a.first == b.first; }
+    friend bool operator!=(const named_functionality& a, const named_functionality& b) { return a.first != b.first; }
+};
 inline named_functionality named_dialog(string x, reaction_t dialog) { return named_functionality(x, [dialog] () { pushScreen(dialog); }); }
 #endif
 
-EX hookset<named_functionality()> *hooks_o_key;
+EX hookset<named_functionality()> hooks_o_key;
 
 EX named_functionality get_o_key() {
-
-  if(hooks_o_key) for(auto& h: *hooks_o_key) {
-    auto res = h.second();
-    if(res.first != "") return res;
-    }
+  auto res = callhandlers(named_functionality(), hooks_o_key);
+  if (res != named_functionality()) return res;
   
 #if CAP_DAILY
   if(daily::on) 

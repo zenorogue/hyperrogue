@@ -219,7 +219,7 @@ void setcameraangle(bool b) { }
 #if CAP_GL
 
 #if CAP_VR
-EX hookset<bool()> *hooks_vr_eye_view, *hooks_vr_eye_projection;
+EX hookset<bool()> hooks_vr_eye_view, hooks_vr_eye_projection;
 #endif
 
 EX void eyewidth_translate(int ed) {

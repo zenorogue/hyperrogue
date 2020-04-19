@@ -689,7 +689,7 @@ EX namespace history {
   auto hookArg = addHook(hooks_args, 100, readArgs);
   #endif  
 
-  auto hooks = addHook(clearmemory, 0, [] () {
+  auto hooks = addHook(hooks_clearmemory, 0, [] () {
     history::renderAutoband();
     history::on = false;
     history::killhistory.clear();

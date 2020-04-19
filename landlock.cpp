@@ -276,7 +276,7 @@ EX bool createOnSea(eLand old) {
     (old == laOcean && (chaosmode ? hrand(2) : !generatingEquidistant));
   }
 
-EX hookset<eLand(eLand)> *hooks_nextland;
+EX hookset<eLand(eLand)> hooks_nextland;
 
 EX eLand getNewLand(eLand old) {
 

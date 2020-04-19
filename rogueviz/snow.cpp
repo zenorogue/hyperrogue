@@ -199,7 +199,7 @@ named_functionality o_key() {
 
 auto hchook = addHook(hooks_drawcell, 100, draw_snow)
 
-+ addHook(clearmemory, 40, [] () {
++ addHook(hooks_clearmemory, 40, [] () {
     matrices_at.clear();
     })
 

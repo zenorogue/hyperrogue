@@ -799,7 +799,7 @@ EX namespace yendor {
     achievement_victory(false);
     }
   
-  auto hooks = addHook(clearmemory, 0, [] () {
+  auto hooks = addHook(hooks_clearmemory, 0, [] () {
     yendor::yii = NOYENDOR; yendor::yi.clear();
     }) + addHook(hooks_removecells, 0, [] () {
     eliminate_if(yendor::yi, [] (yendorinfo& i) {

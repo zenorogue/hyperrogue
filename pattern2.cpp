@@ -1666,7 +1666,7 @@ EX namespace patterns {
       }
     }
   
-  EX hookset<int(cell*)> *hooks_generate_canvas;
+  EX hookset<int(cell*)> hooks_generate_canvas;
 
   EX int generateCanvas(cell *c) {
     
@@ -3017,7 +3017,7 @@ int read_pattern_args() {
   return 0;
   }
 
-auto ah_pattern = addHook(hooks_args, 0, read_pattern_args) + addHook(clearmemory, 100, [] { patterns::computed_nearer_map.clear(); patterns::computed_furthest_map.clear(); });
+auto ah_pattern = addHook(hooks_args, 0, read_pattern_args) + addHook(hooks_clearmemory, 100, [] { patterns::computed_nearer_map.clear(); patterns::computed_furthest_map.clear(); });
 #endif
 
 }

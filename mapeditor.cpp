@@ -2463,7 +2463,7 @@ namespace mapeditor {
     }
 #endif    
 
-  auto hooks = addHook(clearmemory, 0, [] () {
+  auto hooks = addHook(hooks_clearmemory, 0, [] () {
     if(mapeditor::painttype == 4) 
       mapeditor::painttype = 0, mapeditor::paintwhat = 0,
       mapeditor::paintwhat_str = "clear monster";

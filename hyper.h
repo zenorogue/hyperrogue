@@ -438,8 +438,41 @@ struct movedir {
 
 // shmup
 
-template<class T> class hookset : public map<int, function<T>> {};
-typedef hookset<void()> *purehookset;
+template<class T>
+class hookset {
+    std::map<int, std::function<T>> *map_ = nullptr;
+
+public:
+    template<class U>
+    int add(int prio, U&& hook) {
+        if (map_ == nullptr) map_ = new std::map<int, std::function<T>>();
+        while (map_->count(prio)) {
+            prio++;
+        }
+        map_->emplace(prio, static_cast<U&&>(hook));
+        return 0;
+    }
+
+    template<class... U>
+    void callhooks(U&&... args) const {
+        if (map_ == nullptr) return;
+        for (const auto& p : *map_) {
+            p.second(static_cast<U&&>(args)...);
+        }
+    }
+
+    template<class V, class... U>
+    V callhandlers(V zero, U&&... args) const {
+        if (map_ == nullptr) return zero;
+        for (const auto& p : *map_) {
+            auto z = p.second(static_cast<U&&>(args)...);
+            if (z != zero) return z;
+        }
+        return zero;
+    }
+};
+
+using purehookset = hookset<void()>;
 
 static const int NOHINT = -1;
 
@@ -666,27 +699,16 @@ color_t darkena(color_t c, int lev, int a);
 
 static const int DISTANCE_UNKNOWN = 127;
 
-#include <functional>
-
-template<class T, class U> int addHook(hookset<T>*& m, int prio, const U& hook) {
-  if(!m) m = new hookset<T> ();
-  while(m->count(prio)) {
-    prio++;
-    }
-  (*m)[prio] = hook;
-  return 0;
+template<class T, class U> int addHook(hookset<T>& m, int prio, U&& hook) {
+  return m.add(prio, static_cast<U&&>(hook));
   }
 
-template<class T, class... U> void callhooks(hookset<T> *h, U&&... args) {
-  if(h) for(auto& p: *h) p.second(std::forward<U>(args)...);
+template<class T, class... U> void callhooks(const hookset<T>& h, U&&... args) {
+  return h.callhooks(static_cast<U&&>(args)...);
   }
 
-template<class T, class V, class... U> V callhandlers(V zero, hookset<T> *h, U&&... args) {
-  if(h) for(auto& p: *h) {
-    auto z = p.second(std::forward<U>(args)...);
-    if(z != zero) return z;
-    }
-  return zero;
+template<class T, class V, class... U> V callhandlers(V zero, const hookset<T>& h, U&&... args) {
+  return h.callhandlers(zero, static_cast<U&&>(args)...);
   }
 
 string XLAT(string);

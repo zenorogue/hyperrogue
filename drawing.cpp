@@ -1851,7 +1851,7 @@ ld xintval(const hyperpoint& h) {
 
 EX ld backbrightness = .25;
 
-purehookset hook_drawqueue;
+purehookset hooks_drawqueue;
 
 constexpr int PMAX = int(PPR::MAX);
 int qp[PMAX], qp0[PMAX];
@@ -2037,7 +2037,7 @@ EX void draw_main() {
   }
 
 #if CAP_VR
-EX hookset<bool()> *hooks_vr_draw_all;
+EX hookset<bool()> hooks_vr_draw_all;
 #endif
   
 EX void drawqueue() {

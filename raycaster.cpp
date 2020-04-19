@@ -169,8 +169,8 @@ string build_getter(string type, string name, int index) {
 #define GET(array, index) array "[" index "]"
 #endif
 
-EX hookset<void(string&, string&)> *hooks_rayshader;
-EX hookset<bool(shared_ptr<raycaster>)> *hooks_rayset;
+EX hookset<void(string&, string&)> hooks_rayshader;
+EX hookset<bool(shared_ptr<raycaster>)> hooks_rayset;
 
 void enable_raycaster() {
   if(geometry != last_geometry) reset_raycaster();

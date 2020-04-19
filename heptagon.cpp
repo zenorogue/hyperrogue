@@ -217,7 +217,7 @@ void addSpin(heptagon *h, int d, heptagon *from, int rot, int spin) {
 
 extern int hrand(int);
 
-EX hookset<void(heptagon*, int)> *hooks_createStep;
+EX hookset<void(heptagon*, int)> hooks_createStep;
 
 // create h->move(d) if not created yet
 heptagon *createStep(heptagon *h, int d) {
