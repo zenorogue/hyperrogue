@@ -1410,11 +1410,6 @@ EX string makehelp() {
     "the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option "
     "will make the rendering faster, but the surface will be rendered only once, so "
     "you won't be able to play a game on it.\n\n" */
-    #if !ISMOBILE
-  + XLAT("Use arrow keys to rotate, Page Up/Down to zoom.")
-    + "\n\n" + 
-    XLAT("In the perspective projection, you can use arrows to rotate the camera, Page Up/Down to go forward/backward, Shift+arrows to strafe, and Ctrl+arrows to rotate the model.")
-    #endif
      ;
   }
 
