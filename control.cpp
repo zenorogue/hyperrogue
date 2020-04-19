@@ -322,9 +322,22 @@ EX void full_forward_camera(ld t) {
   }
 
 EX void full_rotate_camera(int dir, ld val) {
-  if(history::on)
+  if(rug::rug_control() && lshiftclick) {
+    hyperpoint h;
+    if(nonisotropic) {
+      transmatrix T2 = eupush( tC0(inverse(View)) );
+      transmatrix nlp = View * T2;  
+      auto rV = inverse(nlp) * View;
+      h = nlp * inverse_exp(tC0(rV));
+      }
+    else h = inverse_exp(tC0(View));
+    shift_view(-h);
+    rotate_view(cspin(dir, 2, val));
+    shift_view(h);    
+    }
+  else if(history::on)
     history::lvspeed += (dir?1:-1) * val / 2;
-  else if(GDIM == 3 && anyshiftclick)
+  else if(GDIM == 3 && rshiftclick)
     shift_view(ctangent(dir, -val)), didsomething = true, playermoved = false; /* -val because shift reverses */
   #if CAP_CRYSTAL
   else if(rug::rug_control() && rug::in_crystal())
