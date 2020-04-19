@@ -1299,7 +1299,7 @@ EX void spinEdge(ld aspd) {
     if(ds.qty && GDIM == 2) {
       downspin += models::rotation * degree;
       }
-    if(GDIM == 2) {
+    if(ds.qty) {
       cyclefix(downspin, 0);      
       downspin = downspin * min(ds.speed, (double)1);
       }
