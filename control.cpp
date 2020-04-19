@@ -318,8 +318,23 @@ EX void full_rotate_camera(int dir, ld val) {
   else if(rug::rug_control() && rug::in_crystal())
     crystal::apply_rotation(cspin(dir, 2, val));
   #endif
-  else if(GDIM == 3)
-    rotate_view(cspin(dir, 2, val)), didsomething = true;
+  else if(GDIM == 3) {
+    if(keep_vertical()) {
+      hyperpoint vv = vertical_vector();
+      ld alpha = -atan2(vv[2], vv[1]);
+      rotate_view(cspin(2, 1, alpha));
+      ld max_angle = quarter_circle - 1e-4;
+      if(dir == 1 && alpha + val > max_angle)
+        val = max_angle - alpha;
+      if(dir == 1 && alpha + val < -max_angle)
+        val = -max_angle - alpha;
+      rotate_view(cspin(dir, 2, val));
+      rotate_view(cspin(1, 2, alpha));
+      }
+    else
+      rotate_view(cspin(dir, 2, val));
+    if(!rug::rug_control()) didsomething = true;
+    }
   else
     View = cpush(dir, val) * View, playermoved = false, didsomething = true;      
   };

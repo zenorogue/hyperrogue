@@ -1252,6 +1252,24 @@ void hrmap_standard::draw() {
     }
   }
 
+EX bool keep_vertical() {
+  if(CAP_ORIENTATION) return false;
+  if((WDIM == 2 || prod) && GDIM == 3 && vid.fixed_yz) return true;
+  if(downseek.qty) return true;
+  return false;
+  }
+
+EX hyperpoint vertical_vector() {
+  auto& ds = downseek;
+  if((WDIM == 2 || prod) && GDIM == 3 && vid.fixed_yz) 
+    return get_view_orientation() * ztangent(1);  
+  else if(ds.qty && prod)
+    return get_view_orientation() * product::inverse_exp(ds.point);
+  else if(ds.qty)
+    return ds.point;
+  return C0;
+  }
+
 EX void spinEdge(ld aspd) { 
   ld downspin = 0;
   auto& ds = downseek;
@@ -1272,33 +1290,20 @@ EX void spinEdge(ld aspd) {
     downspin = atan2(H[1], H[0]);
     downspin += vid.fixed_facing_dir * degree;
     if(flipplayer) downspin += M_PI;
-    while(downspin < -M_PI) downspin += 2*M_PI;
-    while(downspin > +M_PI) downspin -= 2*M_PI;
+    cyclefix(downspin, 0);
     aspd = (1 + 2 * abs(downspin)) * aspd;
     }
-  else if((WDIM == 2 || prod) && GDIM == 3 && vid.fixed_yz && !CAP_ORIENTATION) {
-    aspd = 999999;
-    auto& vo = get_view_orientation();
-    // does not work well (also need change auto& to auto)
-    // if(hybri && !prod) vo = vo * inverse(nisot::translate(tC0(vo)));
-    if(ds.qty) {
-      auto sdp = ds.point;
-      if(prod) sdp = vo * product::inverse_exp(sdp);
-      if(sdp[0])
-        downspin = models::rotation * degree - atan2(sdp[0], sdp[1]);
+  else if(keep_vertical()) {
+    hyperpoint h = vertical_vector();
+    downspin = -atan2(h[0], h[1]);
+    if(ds.qty && GDIM == 2) {
+      downspin += models::rotation * degree;
       }
-    else {
-      if(vo[0][2]) 
-        downspin = -atan2(vo[0][2], vo[1][2]);
+    if(GDIM == 2) {
+      cyclefix(downspin, 0);      
+      downspin = downspin * min(ds.speed, (double)1);
       }
-    }
-  else if(ds.qty) {
-    downspin = atan2(ds.point[1], ds.point[0]);
-    downspin -= M_PI/2;
-    downspin += models::rotation * degree;
-    while(downspin < -M_PI) downspin += 2*M_PI;
-    while(downspin > +M_PI) downspin -= 2*M_PI;
-    downspin = downspin * min(ds.speed, (double)1);
+    else aspd = 999999;
     }
   if(downspin >  aspd) downspin =  aspd;
   if(downspin < -aspd) downspin = -aspd;
