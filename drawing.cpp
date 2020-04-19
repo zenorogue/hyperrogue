@@ -2048,7 +2048,7 @@ EX void drawqueue() {
   if(wrl::in) { wrl::render(); return; }
   #endif
   
-  callhooks(hook_drawqueue);
+  callhooks(hooks_drawqueue);
   current_display->next_shader_flags = 0;
   reset_projection();
   // reset_projection() is not sufficient here, because we need to know shaderside_projection
