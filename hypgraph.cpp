@@ -8,16 +8,15 @@
 #include "hyper.h"
 namespace hr {
 
-ld ghx, ghy, ghgx, ghgy;
-hyperpoint ghpm = C0;
+hyperpoint ghxy, ghgxy, ghpm = C0;
 
 #if HDR
 inline bool sphereflipped() { return sphere && pconf.alpha > 1.1 && GDIM == 3; }
 #endif
 
 void ghcheck(hyperpoint &ret, const hyperpoint &H) {
-  if(hypot(ret[0]-ghx, ret[1]-ghy) < hypot(ghgx-ghx, ghgy-ghy)) {
-    ghpm = H; ghgx = ret[0]; ghgy = ret[1];
+  if(hypot_d(2, ret-ghxy) < hypot_d(2, ghgxy-ghxy)) {
+    ghpm = H; ghgxy = ret;
     }
   }
 
@@ -89,10 +88,38 @@ EX hyperpoint gethyper(ld x, ld y) {
 
   ld hx = (x - current_display->xcenter) / current_display->radius;
   ld hy = (y - current_display->ycenter) / current_display->radius / pconf.stretch;
+  hyperpoint hxy = point3(hx, hy, 0);
   
   if(pmodel) {
-    ghx = hx, ghy = hy;
-    return ghpm;
+    ghxy = hxy;
+    
+    transmatrix T = rgpushxto0(ghpm);
+    
+    auto distance_at = [&] (const transmatrix& T1) {
+      hyperpoint h1;
+      applymodel(tC0(T1), h1);
+      return sqhypot_d(2, hxy - h1);
+      };
+
+    ld best = distance_at(T);    
+
+    for(int it=0; it<50; it++) 
+      for(int s=0; s<4; s++) {
+        transmatrix T1 = T * spin(s * quarter_circle) * xpush(pow(1.2, -it));
+        ld dist = distance_at(T1);
+        if(dist < best) best = dist, T = T1;
+        if(mdBandAny()) {
+          band_shift += 2 * M_PI;
+          dist = distance_at(T1);
+          if(dist < best) best = dist, T = T1;
+          band_shift -= 4 * M_PI;
+          dist = distance_at(T1);
+          if(dist < best) best = dist, T = T1;
+          band_shift += 2 * M_PI;
+          }
+        }
+    
+    return tC0(T);
     }
   
   if(pconf.camera_angle) camrotate(hx, hy);
