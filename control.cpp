@@ -892,7 +892,7 @@ EX void handle_event(SDL_Event& ev) {
       if(ev.button.button == SDL_BUTTON_LEFT) {
         if(ISPANDORA ? pandora_rightclick : lctrlclick)
           ev.button.button = SDL_BUTTON_MIDDLE;
-        else if(ISPANDORA ? pandora_leftclick : lshiftclick)
+        else if((ISPANDORA ? pandora_leftclick : lshiftclick) && !(vid.shifttarget&1))
           ev.button.button = SDL_BUTTON_RIGHT;
         }
       
