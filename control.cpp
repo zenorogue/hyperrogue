@@ -301,6 +301,32 @@ transmatrix zforward_push(ld z) {
   return T;
   }
 
+EX void rotate_camera(int dir, ld val) {
+  if(history::on)
+    history::lvspeed += (dir?1:-1) * val / 2;
+  else if(GDIM == 3 && anyshiftclick)
+    shift_view(ctangent(dir, -val)), didsomething = true, playermoved = false; /* -val because shift reverses */
+  #if CAP_CRYSTAL
+  else if(rug::rug_control() && rug::in_crystal())
+    crystal::apply_rotation(cspin(dir, 2, val));
+  #endif
+  else if(GDIM == 3)
+    rotate_view(cspin(dir, 2, val)), didsomething = true;
+  else
+    View = cpush(dir, val) * View, playermoved = false, didsomething = true;      
+  };
+
+EX void rotate_view_or_history(ld h, ld v) {
+  if(history::on && !rug::rug_control())
+    models::rotation += h;
+  else {
+    rotate_view(spin(v));
+    didsomething = true;
+    if(isGravityLand(cwt.at->land) && !rug::rug_control())
+      playermoved = false;
+    }
+  }
+
 EX void handlePanning(int sym, int uni) {
   if(mousepan && dual::split([=] { handlePanning(sym, uni); })) return;
   if(GDIM == 3) {
@@ -318,52 +344,13 @@ EX void handlePanning(int sym, int uni) {
     shift_view(ztangent(+0.2*shiftmul)), didsomething = true, playermoved = false;
     }
 
-  auto roll = [&] (int dir, ld val) {
-    if(GDIM == 3 && anyshiftclick) 
-      shift_view(ctangent(dir, -val)), didsomething = true, playermoved = false; /* -val because shift reverses */
-    #if CAP_CRYSTAL
-    else if(rug::rug_control() && rug::in_crystal())
-      crystal::apply_rotation(cspin(dir, 2, val));
-    #endif
-    else if(GDIM == 3)
-      rotate_view(cspin(dir, 2, val)), didsomething = true;
-    else
-      View = cpush(dir, val) * View, playermoved = false, didsomething = true;      
-    };
-
-  if(sym == SDLK_RIGHT) {
-    if(history::on)
-      history::lvspeed += 0.1 * shiftmul;
-    else roll(0, -0.2*shiftmul);
-    }
-  if(sym == SDLK_LEFT) {
-    if(history::on)
-      history::lvspeed -= 0.1 * shiftmul;
-    else roll(0, 0.2*shiftmul);
-    }
-  if(sym == SDLK_UP) {
-    if(history::on)
-      history::lvspeed += 0.1 * shiftmul;
-    else roll(1, 0.2*shiftmul);
-    }
-  if(sym == SDLK_DOWN) {
-    if(history::on)
-      history::lvspeed -= 0.1 * shiftmul;
-    else roll(1, -0.2*shiftmul);
-    }
+  if(sym == SDLK_RIGHT) rotate_camera(0, -0.2*shiftmul);
+  if(sym == SDLK_LEFT) rotate_camera(0, 0.2*shiftmul);
+  if(sym == SDLK_UP) rotate_camera(1, 0.2*shiftmul);
+  if(sym == SDLK_DOWN) rotate_camera(1, -0.2*shiftmul);
 #endif
-  if(sym == SDLK_PAGEUP) {
-    if(history::on && !rug::rug_control())
-      models::rotation++;
-    else
-      rotate_view(spin(M_PI/cgi.S21/2*shiftmul)), didsomething = true;
-    }
-  if(sym == SDLK_PAGEDOWN) {
-    if(history::on && !rug::rug_control())
-      models::rotation++;
-    else
-      rotate_view(spin(-M_PI/cgi.S21/2*shiftmul)), didsomething = true;
-    }
+  if(sym == SDLK_PAGEUP) rotate_view_or_history(1, M_PI/cgi.S21/2*shiftmul);
+  if(sym == SDLK_PAGEDOWN) rotate_view_or_history(-1, -M_PI/cgi.S21/2*shiftmul);
   
   if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
     if(isGravityLand(cwt.at->land) && !rug::rug_control()) playermoved = false;
@@ -711,34 +698,12 @@ EX void mainloopiter() {
     if(keystate[SDLK_HOME] && GDIM == 3 && DEFAULTNOR(SDLK_HOME))
       shift_view(ctangent(2, t)), didsomething = true, playermoved = false;
     
-    auto roll = [&] (int dir, ld val) {
-      if(GDIM == 3 && anyshiftclick) 
-        shift_view(ctangent(dir, -val)); /* -val because shift reverses */
-      #if CAP_CRYSTAL
-      else if(rug::rug_control() && rug::in_crystal())
-        crystal::apply_rotation(cspin(dir, 2, val));
-      #endif
-      else 
-        rotate_view(GDIM == 2 ? cpush(dir, val) : cspin(dir, 2, val));
-      didsomething = true, playermoved = playermoved && GDIM == 3;
-      };
-
-    if(keystate[SDLK_RIGHT] && DEFAULTNOR(SDLK_RIGHT)) roll(0, -t);
-    if(keystate[SDLK_LEFT] && DEFAULTNOR(SDLK_LEFT)) roll(0, t);
-    if(keystate[SDLK_UP] && DEFAULTNOR(SDLK_UP)) roll(1, t);
-    if(keystate[SDLK_DOWN] && DEFAULTNOR(SDLK_DOWN)) roll(1, -t);
-    if(keystate[SDLK_PAGEUP] && DEFAULTNOR(SDLK_PAGEUP)) {
-      if(history::on)
-        models::rotation+=t;
-      else
-        rotate_view(spin(t)), didsomething = true;
-      }
-    if(keystate[SDLK_PAGEDOWN] && DEFAULTNOR(SDLK_PAGEDOWN)) {
-      if(history::on)
-        models::rotation-=t;
-      else
-        rotate_view(spin(-t)), didsomething = true;
-      }
+    if(keystate[SDLK_RIGHT] && DEFAULTNOR(SDLK_RIGHT)) rotate_camera(0, -t);
+    if(keystate[SDLK_LEFT] && DEFAULTNOR(SDLK_LEFT)) rotate_camera(0, t);
+    if(keystate[SDLK_UP] && DEFAULTNOR(SDLK_UP)) rotate_camera(1, t);
+    if(keystate[SDLK_DOWN] && DEFAULTNOR(SDLK_DOWN)) rotate_camera(1, -t);
+    if(keystate[SDLK_PAGEUP] && DEFAULTNOR(SDLK_PAGEUP)) rotate_view_or_history(t * 180 / M_PI, t);
+    if(keystate[SDLK_PAGEDOWN] && DEFAULTNOR(SDLK_PAGEDOWN)) rotate_view_or_history(-t * 180 / M_PI, t);
     }
 
   achievement_pump();  
