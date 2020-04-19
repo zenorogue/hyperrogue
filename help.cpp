@@ -80,8 +80,8 @@ vector<string> extra_keys_3d = {
   "lshift+arrows = rotate the model (in rug mode)",
   "end = move camera forward",
   "home = move camera backward",
+  "shift+Home/End = zoom",
   "PageUp/Down = rotate the screen",
-  "shift+PageUp/Down = zoom",
   "move mouse = rotate camera (in rug, only with lctrl)",
   };
 
