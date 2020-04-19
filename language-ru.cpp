@@ -484,10 +484,10 @@ S(
  "информацию про объекты. Кликая по изображаемым числам, можно смотреть, "
  "что они означают.\n")
 
-S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. "
+S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Space. "
   "To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n",
  "Двигайтесь с помощью мышки, нумпада, qweadzxc или hjklyubn. Ждите, нажимая 's' или '.'. "
- "Поворачивайте карту стрелками, PageUp/Down или Home/Space. "
+ "Поворачивайте карту стрелками, PageUp/Down или Space. "
  "Чтобы сохраниться, Вам нужна сфера безопасности. Нажмите 'v' для настроек, Esc для статуса квеста или меню.")
  
 S("See more on the website: ", "Смотрите далее на сайте: ")

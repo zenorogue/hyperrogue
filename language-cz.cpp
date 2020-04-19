@@ -510,10 +510,10 @@ S(
  "nebo získat informace o objektech na mapě). Také se můžeš dotknout zobrazených čísel, "
  "abys zjistil jejich význam.\n")
 
-S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. "
+S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Space. "
     "To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n",
  "Pohybuješ se pomocí myši, numerické klávesnice, kláves qweadzxc nebo kláves hjklyubn. Klávesy 's' nebo '.' ti umožňují čekat na místě. "
- "Šipky, klávesy PgUp/PgDn a Home nebo mezerník ti umožňují otáčet svět. Nastavení můžeš otevřít klávesou 'v', úkoly a menu klávesou ESC.\n\n")
+ "Šipky, klávesy PgUp/PgDn a mezerník ti umožňují otáčet svět. Nastavení můžeš otevřít klávesou 'v', úkoly a menu klávesou ESC.\n\n")
 
 S("See more on the website: ", "Více informací najdeš na webové stránce: ")
 

@@ -459,10 +459,10 @@ S(
  "Normalde haritada bir yere dokunarak hareket edersin, haritanın dört köşesindeki tuşlara dokunarak bunu değiştirebilirsin."
 " (haritayı çevirmek ya da haritadaki nesneler hakkında bilgi almak için). Gösterilen numaralara dokunarak da anlamlarını görebilirsin. \n")
 
-S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. "
+S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Space. "
  "To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n",
  "Fareyle, sayı tuşlarıyla, qweadzxc ile, veya hjklyubn ile hareket et.  's' ya da '.' ile bekle. "
- "Oklarla, PageUp/Down ile veya  Home/Space ile dünyayı çevirebilirsin. Oyunu kaydetmek için Güvenlik Küresine ihtiyacın var. Ayarlar için 'v'ye görev durumu ve menü için 'ESC'ye bas.\n\n")
+ "Oklarla, PageUp/Down ile veya Space ile dünyayı çevirebilirsin. Oyunu kaydetmek için Güvenlik Küresine ihtiyacın var. Ayarlar için 'v'ye görev durumu ve menü için 'ESC'ye bas.\n\n")
 
 S("See more on the website: ", "Daha fazlasını websitesinde görüntüleyin: ")
 

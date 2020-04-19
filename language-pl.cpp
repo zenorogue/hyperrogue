@@ -482,10 +482,10 @@ S(
  "zdobyć informacje). Możesz też dotknąć liczb na ekranie, by poznać ich "
  "znaczenie.\n")
 
-S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. "
+S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Space. "
  "To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n",
  "Ruszasz się myszą, klawiaturą numeryczną, qweadzxc, lub hjklyubn. Czekasz naciskając 's' lub '.'. "
- "Obracasz świat strzałkami, PgUp/Dn, lub Home/Space. Naciśnij 'v' by przejść do menu (konfiguracja, tryby specjalne itd.), ESC "
+ "Obracasz świat strzałkami, PgUp/Dn, lub Space. Naciśnij 'v' by przejść do menu (konfiguracja, tryby specjalne itd.), ESC "
  "by zobaczyć stan misji.\n\n")
 
 S("See more on the website: ", "Więcej na stronie: ")
