@@ -31,8 +31,13 @@ const char *escape(std::string s, const std::string& dft);
 template<class T> struct dictionary {
   std::map<std::string, T> m;
   void add(const std::string& s, T val) {
-    if(m.count(s)) add(s + " [repeat]", std::move(val));
-    else m[s] = std::move(val);
+    auto it = m.find(s);
+    if (it == m.end()) {
+      m.emplace(s, std::move(val));
+      }
+    else if (val != it->second) {
+      printf("// #warning Two translations for %s\n", escape(s, s));
+      }
     }
   T& operator [] (const std::string& s) { return m[s]; }
   int count(const std::string& s) const { return m.count(s); }
@@ -53,6 +58,12 @@ struct noun {
   std::string nom, nomp, acc, abl;
   noun() = default;
   noun(const noun2& n) : genus(n.genus), nom(n.nom), nomp(n.nomp), acc(n.acc), abl(n.abl) {}
+  friend bool operator==(const noun& a, const noun& b) {
+    return std::tie(a.genus, a.nom, a.nomp, a.acc, a.abl) == std::tie(b.genus, b.nom, b.nomp, b.acc, b.abl);
+    }
+  friend bool operator!=(const noun& a, const noun& b) {
+    return std::tie(a.genus, a.nom, a.nomp, a.acc, a.abl) != std::tie(b.genus, b.nom, b.nomp, b.acc, b.abl);
+    }
   };
 
 dictionary<noun> nouns[NUMLAN];
@@ -93,14 +104,7 @@ typedef unsigned hashcode;
 
 hashcode hashval;
 
-bool isrepeat(const std::string& s) {
-  return s.find(" [repeat]") != std::string::npos;
-  }
-  
 hashcode langhash(const std::string& s) {
-  if(isrepeat(s)) {
-    return langhash(s.substr(0, s.size() - 9)) + 1;
-    }
   hashcode r = 0;
   for (char ch : s) r = hashval * r + ch;
   return r;
@@ -265,13 +269,11 @@ void compute_completeness(const T& dict)
       else
         mis1 += which;
       }
-    if(mis != "" && !isrepeat(elt))
+    if(mis != "")
       printf("// #warning Missing [%s/%s]: %s\n", mis.c_str(), mis1.c_str(), escape(elt, "?"));
 
-    if(!isrepeat(elt)) {
-      completeness[0]++;
-      for(int i=1; i<NUMLAN; i++) if(dict[i].count(elt)) completeness[i]++;
-      }
+    completeness[0]++;
+    for(int i=1; i<NUMLAN; i++) if(dict[i].count(elt)) completeness[i]++;
     }
   }
   
@@ -389,11 +391,9 @@ int main() {
   
   for(auto&& elt : ms) {
     const std::string& s = elt.second;
-    if(isrepeat(s)) printf("#if REPEATED\n");    
     printf("  {0x%x, { // %s\n", elt.first, escape(s, s));
     for(int i=1; i<NUMLAN; i++) printf("   %s,\n", escape(d[i][s], s));
     printf("    }},\n");
-    if(isrepeat(s)) printf("#endif\n");
     }
   printf("  };\n\n");
 
@@ -401,7 +401,6 @@ int main() {
   
   for(auto&& elt : mn) {
     const std::string& s = elt.second;
-    if(isrepeat(s)) printf("#if REPEATED\n");
     printf("  {0x%x, %d, { // \"%s\"\n", elt.first,
       (nothe.count(s) ? 1:0) + (plural.count(s) ? 2:0),
       escape(s, s));
@@ -415,7 +414,6 @@ int main() {
       }
     
     printf("    }},\n");
-    if(isrepeat(s)) printf("#endif\n");
     }
 
   printf("  };\n");

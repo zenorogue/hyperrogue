@@ -322,7 +322,7 @@ MONSTER( 'Y', 0xFF8000, "Yendorian Researcher", moResearcher, ZERO, RESERVED, mo
     "They have no special features, other than wearing a strange hat."
     )
 MONSTER( 'K', 0xA8A8A8, "Sparrowhawk", moSparrowhawk, CF_FACE_SIDE | CF_BIRD | CF_FLYING | CF_IGNORE_PLATE, RESERVED, moEagle, 
-    "A bird who hunts in the treetops of Yendorian Forest."
+    "A bird who hunts in the treetops of the Yendorian Forest."
     )
 MONSTER( 'K', 0xD0A0A0, "Kraken", moKrakenH, ZERO | CF_NOGHOST | CF_NOBLOW | CF_MULTITILE | CF_KRAKEN | CF_FACING, RESERVED, moNone, krakendesc)
 MONSTER( 'K', 0xC07070, "Kraken Tentacle", moKrakenT, ZERO | CF_NOGHOST | CF_NOBLOW | CF_PART | CF_MULTITILE | CF_KRAKEN, RESERVED, moNone, krakendesc)
@@ -398,7 +398,7 @@ MONSTER( 'W', 0x202020, "Hunting Dog (regrouping)", moHunterChanging, ZERO, RESE
     "When your plan has clearly failed, it is better to abandon it and go to a safe place, to have a chance of succeeding next time. This dog clearly knows this.")
 MONSTER( 'B', 0xC00000, "North Pole", moNorthPole, ZERO | CF_MAGNETIC | CF_FACING, RESERVED, moYeti, NODESCYET)
 MONSTER( 'B', 0x0000C0, "South Pole", moSouthPole, ZERO | CF_MAGNETIC | CF_FACING, RESERVED, moYeti, NODESCYET)
-MONSTER( 'P', 0xC03000, "Red Raider", moPair, CF_FACE_UP | CF_RAIDER | CF_FACING, RESERVED, moYeti, "Red Raiders travel in pairs. They have promised to always watch another one's back. They are able to destroy walls on their way.")
+MONSTER( 'P', 0xC03000, "Red Raider", moPair, CF_FACE_UP | CF_RAIDER | CF_FACING, RESERVED, moYeti, "Red Raiders travel in pairs. They have promised to always watch each other's backs. They are able to destroy walls on their way.")
 MONSTER( 'H', 0xC0C0C0, "Gray Raider", moHexDemon, CF_FACE_UP | CF_RAIDER, RESERVED, moHexDemon, "Gray Raiders never step on gray cells.")
 MONSTER( 'A', 0x80B080, "Green Raider", moAltDemon, CF_FACE_UP | CF_RAIDER, RESERVED, moAltDemon, "Green Raiders never step from one green cell to another.")
 MONSTER( 'M', 0x904000, "Brown Raider", moMonk, CF_FACE_UP | CF_RAIDER, RESERVED, moMonk, "Brown Raiders never move adjacent to an item.")
@@ -665,7 +665,7 @@ ITEM( '%', 0x606060, "Black Lotus", itLotus, IC_TREASURE, ZERO, RESERVED, osNone
     "without preparation.\n"
     )
 ITEM( 'o', 0x505050, "Orb of Undeath", itOrbUndeath, IC_ORB, ZERO | IF_EMPATHY | IF_SHMUPLIFE | IF_REVIVAL, RESERVED, osFriend, 
-    "Monsters slain by you in melee are turned into friendly ghosts, "
+    "Monsters slain by you in melee are turned into friendly ghosts. "
     "Does not affect plants and friends."
     )
 ITEM( '*', 0x8080FF, "White Dove Feather", itWindstone, IC_TREASURE, ZERO, RESERVED, osNone, 
@@ -733,7 +733,7 @@ ITEM( 'o', 0x900000, "Orb of Domination", itOrbDomination, IC_ORB, ZERO | IF_RAN
    "Simply move onto such a creature to ride them; while riding, you are protected from dangerous terrains "
    "and partially from attacks (they cause you to lose half of your Domination power), "
    "but you cannot collect items.\n\n"
-   /*When only one charge is left, "
+   /*"When only one charge is left, "
    "you have to dismount this turn -- be very careful to make this possible, "
    "as your mount could attack you immediately!\n\n" */
    "While riding, "
@@ -849,7 +849,7 @@ ITEM( '*', 0xFFA860, "Tiger's Eye", itBrownian, IC_TREASURE, ZERO, RESERVED, osN
 ITEM( '$', 0xF0C0C0, "Meteorite", itWest, IC_TREASURE, ZERO, RESERVED, osNone, 
     "These rocks falling from the sky have been captured to fall forever in the artificial gravity. Meteorite iron is believed to be a valuable material for magical weapons.")
 ITEM( '*', 0x30FF30, "Torbernite", itVarTreasure, IC_TREASURE, ZERO, RESERVED, osNone, 
-    "Crystals emiting magical radiation.")
+    "Crystals emitting magical radiation.")
 ITEM( 'o', 0x703800, "Orb of Intensity", itOrbIntensity, IC_ORB, ZERO, RESERVED, osNone, 
     "When you have this, initial and maximal charge amounts of all Orbs are increased by 20%."
     )
