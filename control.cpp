@@ -311,7 +311,7 @@ EX void zoom_or_fov(ld t) {
     vid.fov = atan(tanfov) * 2 / degree;
     }
   else
-    pconf.scale *= t;
+    vpconf.scale *= t;
   }
 
 EX void full_forward_camera(ld t) {
