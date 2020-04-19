@@ -700,7 +700,8 @@ EX void mainloopiter() {
   
   if(GDIM == 3 && !shmup::on && !rug::rugged) {
     #if CAP_MOUSEGRAB
-    rotate_view(cspin(0, 2, -mouseaim_x) * cspin(1, 2, -mouseaim_y));
+    full_rotate_camera(0, -mouseaim_x);
+    full_rotate_camera(1, -mouseaim_y);
     mouseaim_x = mouseaim_y = 0;
     #endif
     }
