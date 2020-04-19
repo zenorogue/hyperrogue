@@ -1418,16 +1418,6 @@ EX string makehelp() {
      ;
   }
 
-EX string geometry_name(eGeometry g) {
-  switch(g) {
-    case gNormal: return XLAT("hyperbolic");
-    case gEuclid: return XLAT("Euclidean");
-    case gSphere: return XLAT("spherical");
-    case gElliptic: return XLAT("elliptic");
-    default: return XLAT("unknown");
-    }
-  }
-
 void change_texturesize() {
   if(rugged) {
     close();
@@ -1490,8 +1480,11 @@ EX void show() {
     dialog::addSelItem(XLAT("projection"), models::get_model_name(rconf.model), 'p'); 
     }
   else dialog::addBreak(100);
-  if(!rug::rugged)
-    dialog::addSelItem(XLAT("native geometry"), geometry_name(gwhere), 'n');
+  if(!rug::rugged) {
+    dynamicval<eGeometry> g(geometry, gwhere);
+    dialog::addSelItem(XLAT("native geometry"), geometry_name(), 'n');
+    if(gwhere == rgElliptic) dialog::lastItem().value += " (e)";
+    }
   else
     dialog::addSelItem(XLAT("radar"), radar_distance == RADAR_INF ? "∞" : fts(radar_distance, 4), 'r');
   dialog::addSelItem(XLAT("model scale factor"), fts(modelscale), 'm');
