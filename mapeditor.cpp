@@ -262,22 +262,16 @@ EX namespace mapeditor {
   EX editwhat ew, ewsearch;
   EX bool autochoose = ISMOBILE;
   
-  EX void scaleall(ld z) { 
+  EX void scaleall(ld z, bool keep_mouse) { 
      
-     // (mx,my) = (xcb,ycb) + ss * (xpos,ypos) + (mrx,mry) * scale
-     
-     // (mrx,mry) * (scale-scale') =
-     // ss * ((xpos',ypos')-(xpos,ypos))
-     
-     // mx = xb + ssiz*xpos + mrx * scale
-     // mx = xb + ssiz*xpos' + mrx * scale' 
-     
-     ld mrx = (.0 + mousex - current_display->xcenter) / vpconf.scale;
-     ld mry = (.0 + mousey - current_display->ycenter) / vpconf.scale;
-     
-     if(vid.xres > vid.yres) {      
-       vpconf.xposition += (vpconf.scale - vpconf.scale*z) * mrx / current_display->scrsize;
-       vpconf.yposition += (vpconf.scale - vpconf.scale*z) * mry / current_display->scrsize;
+     if(keep_mouse) {
+       ld mrx = (.0 + mousex - current_display->xcenter) / vpconf.scale;
+       ld mry = (.0 + mousey - current_display->ycenter) / vpconf.scale;
+       
+       if(vid.xres > vid.yres) {      
+         vpconf.xposition += (vpconf.scale - vpconf.scale*z) * mrx / current_display->scrsize;
+         vpconf.yposition += (vpconf.scale - vpconf.scale*z) * mry / current_display->scrsize;
+         }
        }
 
      vpconf.scale *= z;

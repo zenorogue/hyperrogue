@@ -14,8 +14,11 @@ EX bool outoffocus = false;
 EX int mousex, mousey;
 EX hyperpoint mouseh, mouseoh;
 
-EX bool leftclick, rightclick, targetclick, hiliteclick, anyshiftclick, wheelclick;
-EX bool forcetarget, lshiftclick, lctrlclick, numlock_on;
+EX bool pandora_leftclick, pandora_rightclick;
+
+EX bool lshiftclick, rshiftclick, lctrlclick, rctrlclick, anyshiftclick, anyctrlclick, wheelclick;
+
+EX bool targetclick, hiliteclick, forcetarget, numlock_on;
 EX bool gtouched;
 
 EX bool holdmouse;
@@ -463,8 +466,8 @@ EX void handleKeyNormal(int sym, int uni) {
   if(DEFAULTCONTROL) {
     if(sym == SDLK_RIGHT) movepckeydir(0);
     if(sym == SDLK_LEFT) movepckeydir(4);
-    if(sym == SDLK_DOWN) movepckeydir(2 + (leftclick?1:0) - (rightclick?1:0));
-    if(sym == SDLK_UP) movepckeydir(6 - (leftclick?1:0) + (rightclick?1:0));
+    if(sym == SDLK_DOWN) movepckeydir(2 + (pandora_leftclick?1:0) - (pandora_rightclick?1:0));
+    if(sym == SDLK_UP) movepckeydir(6 - (pandora_leftclick?1:0) + (pandora_rightclick?1:0));
     }
 #endif
 
@@ -691,13 +694,20 @@ EX void mainloopiter() {
     }      
 
   Uint8 *keystate = SDL_GetKeyState(NULL);
-  rightclick = keystate[SDLK_RCTRL];
-  leftclick = keystate[SDLK_RSHIFT];
-  lctrlclick = keystate[SDLK_LCTRL];
+
+  pandora_rightclick = keystate[SDLK_RCTRL];
+  pandora_leftclick = keystate[SDLK_RSHIFT];
+
   lshiftclick = keystate[SDLK_LSHIFT];
-  forcetarget = (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
+  rshiftclick = keystate[SDLK_RSHIFT];
+  anyshiftclick = lshiftclick | rshiftclick;
+
+  lctrlclick = keystate[SDLK_LCTRL];
+  rctrlclick = keystate[SDLK_RCTRL];
+  anyctrlclick = lctrlclick | rctrlclick;
+  
+  forcetarget = anyshiftclick;
   hiliteclick = keystate[SDLK_LALT] | keystate[SDLK_RALT];
-  anyshiftclick = keystate[SDLK_LSHIFT] | keystate[SDLK_RSHIFT];
   wheelclick = false;
 
   getcshift = 1;
@@ -708,11 +718,14 @@ EX void mainloopiter() {
   didsomething = false;
   
   if(vid.shifttarget&1) {
-    leftclick = false;
+    #if ISPANDORA
+    targetclick = pandora_leftclick | pandora_rightclick;
+    pandora_leftclick = pandora_rightclick = 0;
+    #else
     targetclick = keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT];
+    #endif
     }
   else {
-    leftclick = keystate[SDLK_RSHIFT];
     targetclick = true;
     }
   
@@ -759,8 +772,6 @@ EX void mainloopiter() {
   
 EX void handle_event(SDL_Event& ev) {
   bool normal = cmode & sm::NORMAL;
-  Uint8 *keystate = SDL_GetKeyState(NULL);
-
     DEBB(DF_GRAPH, ("got event type #%d\n", ev.type));
     int sym = 0;
     int uni = 0;
@@ -855,9 +866,6 @@ EX void handle_event(SDL_Event& ev) {
     
     bool rollchange = (cmode & sm::OVERVIEW) && getcstat >= 2000 && cheater;
 
-    bool anyctrl = keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL];
-    bool anyshift = keystate[SDLK_LSHIFT] || keystate[SDLK_RSHIFT];
-
     if(ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP) {
       mousepressed = ev.type == SDL_MOUSEBUTTONDOWN;
       if(mousepressed) flashMessages();
@@ -880,49 +888,47 @@ EX void handle_event(SDL_Event& ev) {
       if(was_holdmouse && ev.type == SDL_MOUSEBUTTONUP)
         sym = uni = PSEUDOKEY_RELEASE;
       
+      /* simulate RMB and MMB for Mac users etc. */
+      if(ev.button.button == SDL_BUTTON_LEFT) {
+        if(ISPANDORA ? pandora_rightclick : lctrlclick)
+          ev.button.button = SDL_BUTTON_MIDDLE;
+        else if(ISPANDORA ? pandora_leftclick : lshiftclick)
+          ev.button.button = SDL_BUTTON_RIGHT;
+        }
+      
       if(!act) ;
 
-      else if(ev.button.button==SDL_BUTTON_RIGHT || leftclick) 
+      else if(ev.button.button==SDL_BUTTON_RIGHT)
         sym = SDLK_F1;
-      else if(ev.button.button==SDL_BUTTON_MIDDLE || rightclick) {
+      else if(ev.button.button==SDL_BUTTON_MIDDLE)
         sym = 1, didsomething = true;
-        if(anyshift)
-          pconf.xposition = pconf.yposition = 0;
-        }
       else if(ev.button.button == SDL_BUTTON_LEFT) {
         sym = getcstat, uni = getcstat, shiftmul = getcshift;
         }
       
-      else if(ev.button.button==SDL_BUTTON_WHEELDOWN) {
-        if(anyctrl && anyshift && !rug::rugged && GDIM == 2) {
-          mapeditor::scaleall(1/1.2);
-          pconf.alpha /= 1.2;
+      else if(ev.button.button==SDL_BUTTON_WHEELDOWN || ev.button.button == SDL_BUTTON_WHEELUP) {
+        ld dir = ev.button.button == SDL_BUTTON_WHEELUP ? 0.25 : -0.25;
+        if(lshiftclick && rshiftclick && !rug::rugged && GDIM == 2) {
+          mapeditor::scaleall(pow(2, dir), lctrlclick);
+          pconf.alpha *= pow(2, dir);
           }
-        else if(anyctrl && !rug::rugged && GDIM == 2)
-          mapeditor::scaleall(pow(2, -.25));
-        else if(anyshift && !rug::rugged && GDIM == 2)
-          pconf.alpha -= 0.25;
+        else if(lshiftclick && !rug::rugged && GDIM == 2)
+          mapeditor::scaleall(pow(2, dir), lctrlclick);
+        else if(rshiftclick && !rug::rugged && GDIM == 2)
+          pconf.alpha -= dir;
+        else if(lctrlclick) {
+          if(dir>0) {
+            pconf.xposition += (.0 + mousex - current_display->xcenter) / vpconf.scale / current_display->scrsize;
+            pconf.yposition += (.0 + mousey - current_display->ycenter) / vpconf.scale / current_display->scrsize;
+            }
+          else
+            pconf.xposition = pconf.yposition = 0;
+          }
         else if(rollchange) {
-          sym = getcstat, uni = getcstat, shiftmul = getcshift, wheelclick = true;
+          sym = getcstat, uni = getcstat, shiftmul = -dir*4*getcshift, wheelclick = true;
           }
         else {
-          sym = uni = PSEUDOKEY_WHEELDOWN;
-          }
-        }
-      if(ev.button.button==SDL_BUTTON_WHEELUP) {
-        if(anyctrl && anyshift && !rug::rugged && GDIM == 2) {
-          mapeditor::scaleall(1.2);
-          pconf.alpha *= 1.2;
-          }
-        else if(anyctrl && !rug::rugged && GDIM == 2)
-          mapeditor::scaleall(pow(2, .25));
-        else if(anyshift && !rug::rugged && GDIM == 2)
-          pconf.alpha += 0.25;
-        else if(rollchange) {
-          sym = getcstat, uni = getcstat, shiftmul = -getcshift, wheelclick = true;
-          }
-        else {
-          sym = uni = PSEUDOKEY_WHEELUP;
+          sym = uni = dir > 0 ? PSEUDOKEY_WHEELUP : PSEUDOKEY_WHEELDOWN;
           }
         }
       }
@@ -948,9 +954,9 @@ EX void handle_event(SDL_Event& ev) {
 
       if(holdmouse && getcstat == '-') sym = uni = getcstat, fix_mouseh();
 
-      if((rightclick || (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && !mouseout2()) {
+      if(((SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && !mouseout2()) {
         fix_mouseh();
-        if(anyctrl) {
+        if(lctrlclick) {
           pconf.xposition += (mousex - lmousex) * 1. / current_display->scrsize,
           pconf.yposition += (mousey - lmousey) * 1. / current_display->scrsize;
           }
@@ -981,17 +987,17 @@ EX void handle_event(SDL_Event& ev) {
       else quitmainloop = true;
       }
     
-    if(sym == SDLK_F4 && anyshift) {
+    if(sym == SDLK_F4 && anyshiftclick) {
       nomap = !nomap;
       sym = 0;
       }
       
-    if(sym == SDLK_F2 && anyshift) {
+    if(sym == SDLK_F2 && anyshiftclick) {
       nohud = !nohud;
       sym = 0;
       }
       
-    if(sym == SDLK_F3 && anyshift) {
+    if(sym == SDLK_F3 && anyshiftclick) {
       nofps = !nofps;
       sym = 0;
       }
