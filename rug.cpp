@@ -1511,6 +1511,7 @@ EX void show() {
 
   dialog::display();
   keyhandler = [] (int sym, int uni) {
+    handlePanning(sym, uni);
     dialog::handleNavigation(sym, uni);
 
     if(uni == 'h' || uni == SDLK_F1) gotoHelp(makehelp());
