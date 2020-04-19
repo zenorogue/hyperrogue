@@ -1357,9 +1357,9 @@ EX hyperpoint gethyper(ld x, ld y) {
         if(sp == 1 || sp == 2) continue;
         }
     
-      applymodel(r0->native, p0);
-      applymodel(r1->native, p1);
-      applymodel(r2->native, p2);
+      applymodel(inverse(NLP) * rugView * r0->native, p0);
+      applymodel(inverse(NLP) * rugView * r1->native, p1);
+      applymodel(inverse(NLP) * rugView * r2->native, p2);
       }
 
     if(error || spherepoints == 1 || spherepoints == 2) continue;
