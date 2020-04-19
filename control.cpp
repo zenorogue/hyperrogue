@@ -912,7 +912,7 @@ EX void handle_event(SDL_Event& ev) {
           mapeditor::scaleall(pow(2, dir), lctrlclick);
           pconf.alpha *= pow(2, dir);
           }
-        else if(lshiftclick && !rug::rugged && GDIM == 2)
+        else if(lshiftclick && GDIM == 2)
           mapeditor::scaleall(pow(2, dir), lctrlclick);
         else if(rshiftclick && !rug::rugged && GDIM == 2)
           pconf.alpha -= dir;
