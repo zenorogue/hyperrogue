@@ -274,13 +274,13 @@ EX hint hints[] = {
         specialland = laHalloween;
         set_geometry(gSphere);
         start_game();
-        vid.alpha = 999;
-        vid.scale = 998;
+        pconf.alpha = 999;
+        pconf.scale = 998;
         }
       else {
         resetModes();
-        vid.alpha = 1;
-        vid.scale = 1;
+        pconf.alpha = 1;
+        pconf.scale = 1;
         }
       }
     },
@@ -415,7 +415,7 @@ EX void showMission() {
     if(canmove) {
       if(sphere) {
         dialog::addItem(XLAT("return to your game"), '1');
-        dialog::addItem(XLAT(vid.alpha < 2 ? "orthogonal projection" : "stereographic projection"), '3');
+        dialog::addItem(XLAT(pconf.alpha < 2 ? "orthogonal projection" : "stereographic projection"), '3');
         }
       else if(euclid) {
         dialog::addItem(XLAT("return to your game"), '2');

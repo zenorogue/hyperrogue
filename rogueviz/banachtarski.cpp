@@ -395,15 +395,15 @@ void bantar_frame() {
   map<int, map<int, vector<unique_ptr<drawqueueitem>>>> xptds;
   for(int i=0; i<4; i++) for(auto& p: subscr[i])
     xptds[int(p->prio)][i].push_back(move(p));
-  
+
   for(auto& sm: xptds) for(auto& sm2: sm.second) {
     int i = sm2.first;
     ptds.clear();
     for(auto& p: sm2.second) ptds.push_back(move(p));
 
-    vid.scale = .5;
-    vid.xposition = (!(i&2)) ? xdst : -xdst;
-    vid.yposition = (!(i&1)) ? ydst : -ydst;
+    pconf.scale = .5;
+    pconf.xposition = (!(i&2)) ? xdst : -xdst;
+    pconf.yposition = (!(i&1)) ? ydst : -ydst;
     calcparam();
     drawqueue();
     }
@@ -436,8 +436,8 @@ void bantar_anim() {
         breakanim = true;      
     }
   mapeditor::drawplayer = true;
-  vid.xposition = vid.yposition = 0;
-  vid.scale = 1;
+  pconf.xposition = pconf.yposition = 0;
+  pconf.scale = 1;
   }
 
 bool bmap;

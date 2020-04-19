@@ -34,6 +34,9 @@ static const int POLY_ALWAYS_IN = (1<<21);      // always draw this
 static const int POLY_TRIANGLES = (1<<22);      // made of TRIANGLES, not TRIANGLE_FAN
 static const int POLY_INTENSE = (1<<23);        // extra intense colors
 static const int POLY_DEBUG = (1<<24);          // debug this shape
+static const int POLY_PRINTABLE = (1<<25);      // these walls are printable
+static const int POLY_FAT = (1<<26);            // fatten this model in WRL export (used for Rug)
+static const int POLY_SHADE_TEXTURE = (1<<27);  // texture has 'z' coordinate for shading
 
 /** \brief A graphical element that can be drawn. Objects are not drawn immediately but rather queued.
  *
@@ -181,6 +184,7 @@ vector<glvertex> line_vertices;
 #endif
 
 EX void glflush() {
+  DEBBI(DF_GRAPH, ("glflush"));
   #if MINIMIZE_GL_CALLS
   if(isize(triangle_vertices)) {
     // printf("%08X %08X | %d shapes, %d/%d vertices\n", triangle_color, line_color, shapes_merged, isize(triangle_vertices), isize(line_vertices));
@@ -262,13 +266,13 @@ void add1(const hyperpoint& H) {
   }  
 
 bool is_behind(const hyperpoint& H) {
-  return pmodel == mdDisk && (hyperbolic ? H[2] >= 0 : true) && (nonisotropic ? false : vid.alpha + H[2] <= BEHIND_LIMIT);
+  return pmodel == mdDisk && (hyperbolic ? H[2] >= 0 : true) && (nonisotropic ? false : pconf.alpha + H[2] <= BEHIND_LIMIT);
   }
 
 hyperpoint be_just_on_view(const hyperpoint& H1, const hyperpoint &H2) {
-  // H1[2] * t + H2[2] * (1-t) == BEHIND_LIMIT - vid.alpha
-  // H2[2]- BEHIND_LIMIT + vid.alpha = t * (H2[2] - H1[2])
-  ld t = (H2[2] - BEHIND_LIMIT + vid.alpha) / (H2[2] - H1[2]);
+  // H1[2] * t + H2[2] * (1-t) == BEHIND_LIMIT - pconf.alpha
+  // H2[2]- BEHIND_LIMIT + pconf.alpha = t * (H2[2] - H1[2])
+  ld t = (H2[2] - BEHIND_LIMIT + pconf.alpha) / (H2[2] - H1[2]);
   return H1 * t + H2 * (1-t);
   }
 
@@ -289,14 +293,14 @@ EX bool two_sided_model() {
   if(pmodel == mdDisk) return sphere;
   if(pmodel == mdHemisphere) return true;
   if(pmodel == mdRotatedHyperboles) return true;
-  if(pmodel == mdSpiral && models::spiral_cone < 360) return true;
+  if(pmodel == mdSpiral && pconf.spiral_cone < 360) return true;
   return false;
   }
 
 EX int get_side(const hyperpoint& H) {
   if(pmodel == mdDisk && sphere) {
     double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
-    double horizon = curnorm / vid.alpha;
+    double horizon = curnorm / pconf.alpha;
     return (H[2] <= -horizon) ? -1 : 1;
     }
   if(pmodel == mdRotatedHyperboles)
@@ -310,7 +314,7 @@ EX int get_side(const hyperpoint& H) {
     applymodel(H, res);
     return res[2] < 0 ? -1 : 1;
     }
-  if(pmodel == mdSpiral && models::spiral_cone < 360) {    
+  if(pmodel == mdSpiral && pconf.spiral_cone < 360) {    
     return cone_side(H);
     }
   return 0;
@@ -334,13 +338,13 @@ void fixpoint(glvertex& hscr, hyperpoint H) {
     }
   hyperpoint Hscr;
   applymodel(good, Hscr); 
-  hscr = glhr::makevertex(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*vid.stretch, Hscr[2]*current_display->radius); 
+  hscr = glhr::makevertex(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*pconf.stretch, Hscr[2]*current_display->radius); 
   }
 
 void addpoint(const hyperpoint& H) {
   if(true) {
     ld z = current_display->radius;
-    // if(vid.alpha + H[2] <= BEHIND_LIMIT && pmodel == mdDisk) poly_flags |= POLY_BEHIND;
+    // if(pconf.alpha + H[2] <= BEHIND_LIMIT && pmodel == mdDisk) poly_flags |= POLY_BEHIND;
     
     if(spherespecial) {
       
@@ -350,7 +354,7 @@ void addpoint(const hyperpoint& H) {
         } 
       else if(sphere && (poly_flags & POLY_ISSIDE)) {
         double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
-        double horizon = curnorm / vid.alpha;
+        double horizon = curnorm / pconf.alpha;
         poly_flags |= POLY_NOTINFRONT;
         if(last_infront && nif_error_in(glcoords.back()[0], glcoords.back()[1], H[0], H[1]))
           poly_flags |= POLY_NIF_ERROR;
@@ -358,8 +362,8 @@ void addpoint(const hyperpoint& H) {
         last_infront = true;
         
         z *=
-          (sqrt(curnorm - horizon*horizon) / (vid.alpha - horizon)) / 
-          (sqrt(curnorm - H[2]*H[2]) / (vid.alpha+H[2]));
+          (sqrt(curnorm - horizon*horizon) / (pconf.alpha - horizon)) / 
+          (sqrt(curnorm - H[2]*H[2]) / (pconf.alpha+H[2]));
         }
       else {
         poly_flags |= POLY_NOTINFRONT;
@@ -385,12 +389,12 @@ void addpoint(const hyperpoint& H) {
       }
     if(GDIM == 2) {
       for(int i=0; i<3; i++) Hscr[i] *= z;
-      Hscr[1] *= vid.stretch;
+      Hscr[1] *= pconf.stretch;
       }
     else {
       Hscr[0] *= z;
-      Hscr[1] *= z * vid.stretch;
-      Hscr[2] = 1 - 2 * (-Hscr[2] - models::clip_min) / (models::clip_max - models::clip_min);
+      Hscr[1] *= z * pconf.stretch;
+      Hscr[2] = 1 - 2 * (-Hscr[2] - pconf.clip_min) / (pconf.clip_max - pconf.clip_min);
       }
     add1(Hscr);
     }
@@ -409,7 +413,7 @@ void coords_to_poly() {
 
 bool behind3(hyperpoint h) {
   if(pmodel == mdGeodesic)
-    h = lp_apply(inverse_exp(h, iTable));
+    h = lp_apply(inverse_exp(h));
   return h[2] < 0;
   }
 
@@ -482,11 +486,11 @@ void addpoly(const transmatrix& V, const vector<glvertex> &tab, int ofs, int cnt
     /*
     hyperpoint Hscr;
     applymodel(goodpoint, Hscr); 
-    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius+10, Hscr[1]*current_display->radius*vid.stretch, Hscr[2]*vid.radius)); 
-    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*vid.stretch+10, Hscr[2]*vid.radius)); 
-    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius-10, Hscr[1]*current_display->radius*vid.stretch, Hscr[2]*vid.radius)); 
-    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*vid.stretch-10, Hscr[2]*vid.radius)); 
-    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius+10, Hscr[1]*current_display->radius*vid.stretch, Hscr[2]*vid.radius));  */
+    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius+10, Hscr[1]*current_display->radius*pconf.stretch, Hscr[2]*vid.radius)); 
+    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*pconf.stretch+10, Hscr[2]*vid.radius)); 
+    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius-10, Hscr[1]*current_display->radius*pconf.stretch, Hscr[2]*vid.radius)); 
+    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*pconf.stretch-10, Hscr[2]*vid.radius)); 
+    glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius+10, Hscr[1]*current_display->radius*pconf.stretch, Hscr[2]*vid.radius));  */
     }
   }
 
@@ -594,6 +598,7 @@ void dqi_poly::gldraw() {
   
   if(tinf) {
     glhr::be_textured();
+    if(flags & POLY_SHADE_TEXTURE) current_display->next_shader_flags |= GF_TEXTURE_SHADED;
     glBindTexture(GL_TEXTURE_2D, tinf->texture_id);
     glhr::vertices_texture(v, tinf->tvertices, offset, offset_texture);
     ioffset = 0;
@@ -715,7 +720,7 @@ EX ld scale_at(const transmatrix& T) {
 
 EX ld linewidthat(const hyperpoint& h) {
   if(!(vid.antialias & AA_LINEWIDTH)) return 1;
-  else if(hyperbolic && pmodel == mdDisk && vid.alpha == 1 && !ISWEB) {
+  else if(hyperbolic && pmodel == mdDisk && pconf.alpha == 1 && !ISWEB) {
     double dz = h[LDIM];
     if(dz < 1) return 1;
     else {
@@ -750,7 +755,7 @@ vector<ld> periods;
 ld period_at(ld y) {
   
   ld m = current_display->radius;
-  y /= (m * vid.stretch);
+  y /= (m * pconf.stretch);
   
   switch(pmodel) {
     case mdBand:
@@ -760,8 +765,8 @@ ld period_at(ld y) {
     case mdMollweide:
       return m * 2 * sqrt(1 - y*y*4);
     case mdCollignon: {
-      if(vid.collignon_reflected && y > 0) y = -y;
-      y += signed_sqrt(vid.collignon_parameter);
+      if(pconf.collignon_reflected && y > 0) y = -y;
+      y += signed_sqrt(pconf.collignon_parameter);
       return abs(m*y*2/1.2);
       }
     default:
@@ -785,7 +790,7 @@ void adjust(bool tinf) {
   
   ld cmin = -chypot/2, cmax = chypot/2, dmin = -chypot, dmax = chypot;
   
-  ld z = vid.stretch * current_display->radius;
+  ld z = pconf.stretch * current_display->radius;
 
   switch(pmodel) {
     case mdSinusoidal: case mdBandEquidistant: case mdMollweide:
@@ -797,9 +802,9 @@ void adjust(bool tinf) {
       break;
 
     case mdCollignon:      
-      dmin = z * (signed_sqrt(vid.collignon_parameter - 1) - signed_sqrt(vid.collignon_parameter));      
-      if(vid.collignon_reflected) dmax = -dmin;
-      else dmax = z * (signed_sqrt(vid.collignon_parameter + 1) - signed_sqrt(vid.collignon_parameter));
+      dmin = z * (signed_sqrt(pconf.collignon_parameter - 1) - signed_sqrt(pconf.collignon_parameter));      
+      if(pconf.collignon_reflected) dmax = -dmin;
+      else dmax = z * (signed_sqrt(pconf.collignon_parameter + 1) - signed_sqrt(pconf.collignon_parameter));
       break;
     
     default: ;
@@ -889,7 +894,7 @@ void compute_side_by_centerin(dqi_poly *p, bool& nofill) {
     else
       nofill = true; 
     }
-  applymodel(h1, hscr); hscr[0] *= current_display->radius; hscr[1] *= current_display->radius * vid.stretch;
+  applymodel(h1, hscr); hscr[0] *= current_display->radius; hscr[1] *= current_display->radius * pconf.stretch;
   for(int i=0; i<isize(glcoords)-1; i++) {
     double x1 = glcoords[i][0] - hscr[0];
     double y1 = glcoords[i][1] - hscr[1];
@@ -914,11 +919,11 @@ void compute_side_by_centerin(dqi_poly *p, bool& nofill) {
   
   /*
   if(poly_flags & POLY_BADCENTERIN) {
-    glcoords.push_back(glhr::makevertex(hscr[0]+10, hscr[1]*vid.stretch, hscr[2]));
-    glcoords.push_back(glhr::makevertex(hscr[0], hscr[1]*vid.stretch+10, hscr[2]));
-    glcoords.push_back(glhr::makevertex(hscr[0]-10, hscr[1]*vid.stretch, hscr[2]));
-    glcoords.push_back(glhr::makevertex(hscr[0], hscr[1]*vid.stretch-10, hscr[2]));
-    glcoords.push_back(glhr::makevertex(hscr[0]+10, hscr[1]*vid.stretch, hscr[2]));
+    glcoords.push_back(glhr::makevertex(hscr[0]+10, hscr[1]*pconf.stretch, hscr[2]));
+    glcoords.push_back(glhr::makevertex(hscr[0], hscr[1]*pconf.stretch+10, hscr[2]));
+    glcoords.push_back(glhr::makevertex(hscr[0]-10, hscr[1]*pconf.stretch, hscr[2]));
+    glcoords.push_back(glhr::makevertex(hscr[0], hscr[1]*pconf.stretch-10, hscr[2]));
+    glcoords.push_back(glhr::makevertex(hscr[0]+10, hscr[1]*pconf.stretch, hscr[2]));
     } */
   }
 
@@ -1430,7 +1435,7 @@ void dqi_poly::draw() {
         for(int j=0; j<MAX_PHASE; j++) {
           twopoint_sphere_flips = j;
           hyperpoint h2; applymodel(h1, h2);
-          glvertex h = glhr::pointtogl(h2 * current_display->radius); h[1] *= vid.stretch;
+          glvertex h = glhr::pointtogl(h2 * current_display->radius); h[1] *= pconf.stretch;
           if(i == 0)
             phases[j].push_back(h);
           else {
@@ -1458,7 +1463,7 @@ void dqi_poly::draw() {
         for(int i=0; i<cnt; i++) {
 
           hyperpoint h1 = V * glhr::gltopoint((*tab)[offset+i]);
-          hyperpoint mh1; applymodel(h1, mh1); mh1[1] *= vid.stretch;
+          hyperpoint mh1; applymodel(h1, mh1); mh1[1] *= pconf.stretch;
           phases[cpha].push_back(glhr::pointtogl(mh1 * current_display->radius));
 
           // check if the i-th edge intersects the boundary of the ellipse
@@ -1474,7 +1479,7 @@ void dqi_poly::draw() {
           if(c1 < 0) c1 = -c1, c2 = -c2;
           hyperpoint h = ah1 * c1 + ah2 * c2;
           h /= hypot_d(3, h);
-          if(h[2] < 0 && abs(h[0]) < sin(vid.twopoint_param)) cpha = 1-cpha, pha = 2;
+          if(h[2] < 0 && abs(h[0]) < sin(pconf.twopoint_param)) cpha = 1-cpha, pha = 2;
           }
         if(cpha == 1) pha = 0;
         }
@@ -1530,7 +1535,7 @@ void dqi_poly::draw() {
   last_infront = false;
   
   addpoly(V, *tab, offset, cnt);
-  if(!(sphere && vid.alpha < .9)) if(pmodel != mdJoukowsky) if(!(flags & POLY_ALWAYS_IN)) for(int i=1; i<isize(glcoords); i++) {
+  if(!(sphere && pconf.alpha < .9)) if(pmodel != mdJoukowsky) if(!(flags & POLY_ALWAYS_IN)) for(int i=1; i<isize(glcoords); i++) {
     ld dx = glcoords[i][0] - glcoords[i-1][0];
     ld dy = glcoords[i][1] - glcoords[i-1][1];
     if(dx > vid.xres * 2 || dy > vid.yres * 2) return;
@@ -1556,7 +1561,7 @@ void dqi_poly::draw() {
 
   if(poly_flags & POLY_NIF_ERROR) return;
   
-  if(spherespecial == 1 && sphere && (poly_flags & POLY_INFRONT) && (poly_flags & POLY_NOTINFRONT) && vid.alpha <= 1) {
+  if(spherespecial == 1 && sphere && (poly_flags & POLY_INFRONT) && (poly_flags & POLY_NOTINFRONT) && pconf.alpha <= 1) {
     bool around_center = false;
     for(int i=0; i<isize(glcoords)-1; i++) {
       double x1 = glcoords[i][0];
@@ -1574,9 +1579,9 @@ void dqi_poly::draw() {
   bool can_have_inverse = false;  
   if(sphere && pmodel == mdDisk && (spherespecial > 0 || equi)) can_have_inverse = true;
   if(pmodel == mdJoukowsky) can_have_inverse = true;
-  if(pmodel == mdJoukowskyInverted && vid.skiprope) can_have_inverse = true;
-  if(pmodel == mdDisk && hyperbolic && vid.alpha <= -1) can_have_inverse = true;
-  if(pmodel == mdSpiral && vid.skiprope) can_have_inverse = true;
+  if(pmodel == mdJoukowskyInverted && pconf.skiprope) can_have_inverse = true;
+  if(pmodel == mdDisk && hyperbolic && pconf.alpha <= -1) can_have_inverse = true;
+  if(pmodel == mdSpiral && pconf.skiprope) can_have_inverse = true;
   if(pmodel == mdCentralInversion) can_have_inverse = true;
     
   if(can_have_inverse && !(poly_flags & POLY_ISSIDE)) {
@@ -1591,7 +1596,7 @@ void dqi_poly::draw() {
       }
     
     if(poly_flags & POLY_INVERSE) {
-      if(curradius < vid.alpha - 1e-6) return;
+      if(curradius < pconf.alpha - 1e-6) return;
       if(!sphere) return;
       }
     
@@ -1620,7 +1625,7 @@ void dqi_poly::draw() {
         ld h = atan2(glcoords[0][0], glcoords[0][1]);
         for(int i=0; i<=360; i++) {
           ld a = i * degree + h;
-          glcoords.push_back(glhr::makevertex(current_display->radius * sin(a), current_display->radius * vid.stretch * cos(a), 0));
+          glcoords.push_back(glhr::makevertex(current_display->radius * sin(a), current_display->radius * pconf.stretch * cos(a), 0));
           }
         poly_flags ^= POLY_INVERSE;
         }
@@ -1853,7 +1858,7 @@ int qp[PMAX], qp0[PMAX];
 
 color_t darken_color(color_t& color, bool outline) {
   int alpha = color & 255;
-  if(sphere && pmodel == mdDisk && vid.alpha <= 1)
+  if(sphere && pmodel == mdDisk && pconf.alpha <= 1)
     return 0;
   else {
     if(outline && alpha < 255) 
@@ -1875,6 +1880,8 @@ void dqi_line::draw_back() {
   }
 
 EX void sort_drawqueue() {
+
+  DEBBI(DF_GRAPH, ("sort_drawqueue"));
   
   for(int a=0; a<PMAX; a++) qp[a] = 0;
   
@@ -1925,6 +1932,7 @@ EX void reverse_side_priorities() {
 
 // on the sphere, parts on the back are drawn first
 EX void draw_backside() {
+  DEBBI(DF_GRAPH, ("draw_backside"));
   if(pmodel == mdHyperboloid && hyperbolic) {
     dynamicval<eModel> dv (pmodel, mdHyperboloidFlat);
     for(auto& ptd: ptds) 
@@ -1964,6 +1972,7 @@ EX void reverse_transparent_walls() {
   }
 
 EX void draw_main() {
+  DEBBI(DF_GRAPH, ("draw_main"));
   if(sphere && GDIM == 3 && pmodel == mdPerspective) {
     for(int p: {1, 0, 2, 3}) {
       if(elliptic && p < 2) continue;
@@ -2032,7 +2041,14 @@ EX hookset<bool()> hooks_vr_draw_all;
 #endif
   
 EX void drawqueue() {
-  callhooks(hooks_drawqueue);
+
+  DEBBI(DF_GRAPH, ("drawqueue"));
+
+  #if CAP_WRL
+  if(wrl::in) { wrl::render(); return; }
+  #endif
+  
+  callhooks(hook_drawqueue);
   current_display->next_shader_flags = 0;
   reset_projection();
   // reset_projection() is not sufficient here, because we need to know shaderside_projection
@@ -2045,6 +2061,8 @@ EX void drawqueue() {
   profile_start(3);
   
   sort_drawqueue();
+
+  DEBB(DF_GRAPH, ("sort walls"));
   
   if(GDIM == 2) 
   for(PPR p: {PPR::REDWALLs, PPR::REDWALLs2, PPR::REDWALLs3, PPR::WALL3s,
@@ -2353,7 +2371,7 @@ EX void getcoord0(const hyperpoint& h, int& xc, int &yc, int &sc) {
   hyperpoint hscr;
   applymodel(h, hscr);
   xc = current_display->xcenter + current_display->radius * hscr[0];
-  yc = current_display->ycenter + current_display->radius * vid.stretch * hscr[1];
+  yc = current_display->ycenter + current_display->radius * pconf.stretch * hscr[1];
   sc = 0;
   // EYETODO sc = vid.eye * current_display->radius * hscr[2];
   }

@@ -113,7 +113,7 @@ int readArgs() {
 
   if(0) ;
 
-  else if(argis("-tol")) {
+  else if(argis("-tree")) {
     PHASE(3); shift(); tree::read(args());
     }
   

@@ -3347,6 +3347,14 @@ EX namespace ca {
   
   EX eWall wlive = waFloorA;
   
+  EX unordered_set<cell*> changed;
+
+  EX void list_adj(cell *c) {
+    changed.insert(c);
+    for(cell* c1: adj_minefield_cells(c))
+      changed.insert(c1);
+    }
+
   // you can also do -mineadj
   
   EX string fillup(string s) {
@@ -3372,6 +3380,12 @@ EX namespace ca {
       shift(); wlive = eWall(argi());
       return 0;
       }
+    if(argis("-carun")) {
+      shift(); int iter = argi();
+      start_game();
+      for(int i=0; i<iter; i++) simulate();
+      return 0;
+      }
     if(args()[0] != '-') return 1;
     if(args()[1] != 'c') return 1;
     int livedead = args()[2] - '0';
@@ -3395,13 +3409,16 @@ EX namespace ca {
 
   EX void simulate() {
     if(cwt.at->land != laCA) return;
-    vector<cell*>& allcells = currentmap->allcells();
+    if(items[itOrbAether] < 2) items[itOrbAether] = 2;
+    vector<cell*> allcells;
+    for(cell *c: changed) allcells.push_back(c);
+    changed.clear();
     int dcs = isize(allcells);
     std::vector<bool> willlive(dcs);
     int old = 0, xold = 0;
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
-      if(c->land != laCA) return;
+      if(c->land != laCA) continue;
       int nei = 0, live = 0;
       for(cell *c2: adj_minefield_cells(c)) {
         nei++; if(c2->wall == wlive) live++;
@@ -3412,9 +3429,15 @@ EX namespace ca {
       }
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
+      auto last = c->wall;
       c->wall = willlive[i] ? wlive : waNone;
+      if(c->wall != last) {
+        dynamicval<ld> d(prob, 0);
+        setdist(c, 7, nullptr);
+        list_adj(c);
+        }
       }
-    println(hlog, tie(dcs, old, xold));
+    println(hlog, make_tuple(dcs, old, xold, isize(changed)));
     }
 EX }
 

@@ -81,7 +81,7 @@ bool ishex2(cell *c) {
   else return c->master->c7 != c;
   }
 
-int chessvalue(cell *c) {
+EX int chessvalue(cell *c) {
   #if CAP_ARCM
   if(arcm::in()) 
     return arcm::chessvalue(c);
@@ -2936,6 +2936,10 @@ int read_pattern_args() {
     for(auto& lp: linepatterns::patterns)
       if(appears(lp->lpname, ss))
         lp->color = arghex();
+    }
+
+  else if(argis("-fat-edges")) {
+    PHASEFROM(2); shift(); fat_edges = argi();
     }
 
   else if(argis("-palw")) {

@@ -86,10 +86,10 @@ EX always_false in;
   
   EX void circle(int x, int y, int size, color_t col, color_t fillcol, double linewidth) {
     if(!invisible(col) || !invisible(fillcol)) {
-      if(vid.stretch == 1)
+      if(pconf.stretch == 1)
         println(f, "<circle cx='", coord(x), "' cy='", coord(y), "' r='", coord(size), "' ", stylestr(fillcol, col, linewidth), "/>");
       else
-        println(f, "<ellipse cx='", coord(x), "' cy='", coord(y), "' rx='", coord(size), "' ry='", coord(size*vid.stretch), "' ", stylestr(fillcol, col), "/>");
+        println(f, "<ellipse cx='", coord(x), "' cy='", coord(y), "' rx='", coord(size), "' ry='", coord(size*pconf.stretch), "' ", stylestr(fillcol, col), "/>");
       }
     }
   
@@ -215,7 +215,7 @@ int read_args() {
   else if(argis("-svgshot")) {
     PHASE(3); shift(); start_game();
     printf("saving SVG screenshot to %s\n", argcs());
-    shot::make_svg = true;
+    shot::format = shot::screenshot_format::svg;
     shot::take(argcs());
     }
   else if(argis("-svgtwm")) {
@@ -233,6 +233,374 @@ auto ah = addHook(hooks_args, 0, read_args);
 #endif
 EX }
 
+/** wrl renderer */
+EX namespace wrl {
+#if !CAP_WRL
+EX always_false in;
+#endif
+
+#if CAP_WRL
+  EX bool in;
+  
+  EX bool print;
+  EX bool textures = true;
+  
+  EX ld rug_width = .01;
+  
+  fhstream f;
+  string filename;
+  
+  string coord(ld val) {
+    char buf[100];
+    snprintf(buf, 100, "%f", val);
+    return buf;
+    }
+
+  string coord(const hyperpoint& v, int q) {
+    char buf[100];
+    if(q == 3) snprintf(buf, 100, "%f, %f, %f", v[0], v[1], v[2]);
+    if(q == 2) snprintf(buf, 100, "%f, %f", v[0], v[1]);
+    return buf;
+    }
+  
+  string color(color_t col, ld v) {
+    char buf[100];
+    ld cols[4];
+    for(int i=0; i<4; i++) {
+
+      cols[i] = part(col, i);
+      cols[i] /= 255;
+      cols[i] = pow(cols[i], shot::gamma) * shot::fade * v;
+      }
+          
+    snprintf(buf, 100, "%.3f %.3f %.3f", cols[3], cols[2], cols[1]);
+    return buf;
+    }
+  
+  typedef unsigned long long hashtype;
+  hashtype hash(ld x) { return hashtype(x * 1000000 + .5); }
+  
+  hashtype hash(hyperpoint h) {
+    return hash(h[0]) + 7 * hash(h[1]) + 13 * hash(h[2]);
+    }
+  
+  EX void fatten(vector<hyperpoint>& data, vector<glvertex>& tdata) {
+    map<hashtype, hyperpoint> normals;
+    for(int i=0; i<isize(data); i++) 
+      normals[hash(data[i])] = Hypc;
+    for(int i=0; i<isize(data); i++) {
+      int j = i%3 ? i-1 : i+2;
+      int k = j%3 ? j-1 : j+2;
+      hyperpoint normal = (data[j] - data[i]) ^ (data[k] - data[i]);
+      normal[3] = 0;
+      if(sqhypot_d(3, normal) < 1e-6) {
+        println(hlog, "bug ", tie(data[i], data[j], data[k]));
+        }
+      normal /= hypot_d(3, normal);
+      auto& res = normals[hash(data[i])];
+      ld q = res[3];
+      if((res | normal) < 0) res -= normal;
+      else res += normal;
+      res[3] = q + 1;
+      }
+    for(auto& p: normals) {
+      auto w = hypot_d(3, p.second);
+      if(w == 0) println(hlog, "width is 0, ", p.second, " appeared ", p.second[3], " times");
+      if(isnan(w)) println(hlog, "width is NAN, ", p.second, " appeared ", p.second[3], " times");
+      p.second = p.second * (rug_width / w);
+      }
+    vector<hyperpoint> data2;
+    vector<glvertex> tdata2;
+    for(int i=0; i<isize(data); i+=3) {
+      auto a = data[i], b = data[i+1], c = data[i+2];
+      hyperpoint normal = (b-a) ^ (c-a);
+      auto na = normals[hash(a)];
+      auto nb = normals[hash(b)];
+      auto nc = normals[hash(c)];
+      if((normal | na) > 0) na = -na;
+      if((normal | nb) > 0) nb = -nb;
+      if((normal | nc) > 0) nc = -nc;
+      bool bad = false;
+      for(int i=0; i<3; i++) {
+        if(isnan(na[i]) || isnan(nb[i]) || isnan(nc[i])) bad = true;
+        }
+      if(bad) {
+        println(hlog, "bad vertex");
+        continue;
+        }
+      data2.push_back(a+na); data2.push_back(b+nb); data2.push_back(c+nc);
+      data2.push_back(b+nb); data2.push_back(a+na); data2.push_back(a-na);
+      data2.push_back(b+nb); data2.push_back(a-na); data2.push_back(b-nb);
+      data2.push_back(c+nc); data2.push_back(b+nb); data2.push_back(b-nb);
+      data2.push_back(c+nc); data2.push_back(b-nb); data2.push_back(c-nc);
+      data2.push_back(a+na); data2.push_back(c+nc); data2.push_back(c-nc);
+      data2.push_back(a+na); data2.push_back(c-nc); data2.push_back(a-na);
+      data2.push_back(b-nb); data2.push_back(a-na); data2.push_back(c-nc);
+      if(isize(tdata)) {
+        auto ta = tdata[i], tb = tdata[i+1], tc = tdata[i+2];
+        for(auto p: {ta, tb, tc, tb, ta, ta, tb, ta, tb, tc, tb, tb, tc, tb, tc, ta, tc, tc, ta, tc, ta, tb, ta, tc})
+          tdata2.push_back(p);
+        }
+      }
+    data = data2;
+    tdata = tdata2;
+    }
+  
+  bool used_rug;
+  
+  map<pair<color_t, glvertex>, int> texture_position;
+  map<color_t, int> gradient_position;
+
+  pair<color_t, glvertex> texid(dqi_poly& p) {
+    return make_pair(p.color, p.tinf->tvertices[0]);
+    }
+
+  /** 0 = no/unknown/disabled texture, 1 = rug, 2 = gradient, 3 = floor texture */
+  EX int texture_type(dqi_poly& p) {
+    if(!p.tinf) return 0;
+    if(!CAP_PNG) return 0;
+    if(!textures) return 0;
+    if(p.tinf == &rug::tinf) return 1;
+    #if MAXMDIM >= 4
+    if(p.tinf->texture_id == (int) floor_textures->renderedTexture)
+      return (p.tinf->tvertices[0][0] == 0) ? 2 : 3;
+    #endif
+    return 0;
+    }
+
+  EX void prepare(dqi_poly& p) {
+    if(print && !(p.flags & POLY_PRINTABLE)) return;
+    if(!(p.flags & POLY_TRIANGLES)) return;
+    int tt = texture_type(p);
+    if(tt == 2) gradient_position[p.color] = 0;
+    if(tt == 3) texture_position[texid(p)] = 0;
+    }
+  
+  #if MAXMDIM >= 4
+  int fts_int, fts, fts_row;
+  #endif
+  
+  map<string, pair<vector<hyperpoint>, vector<glvertex>>> all_data;
+  
+  EX void polygon(dqi_poly& p) {
+    if(print && !(p.flags & POLY_PRINTABLE)) return;
+    if(!(p.flags & POLY_TRIANGLES)) return;
+    int tt = texture_type(p);
+
+    vector<hyperpoint> data;
+    vector<glvertex> tdata;
+    for(int i=0; i<p.cnt; i++) {
+      glvertex v = p.tab[0][p.offset+i];
+      data.push_back(glhr::gltopoint(v));
+      if(p.tinf) 
+        tdata.push_back(p.tinf->tvertices[p.offset_texture+i]);
+      }
+    for(auto& d: data) {
+      hyperpoint h;
+      h = p.V * d;
+      applymodel(h, d);
+      }
+    if(print && (p.flags & POLY_FAT)) {
+      fatten(data, tdata);
+      p.cnt = isize(data);
+      }
+    else if(print) {
+      hyperpoint ctr1;
+      applymodel(p.V * p.intester, ctr1);
+      println(hlog, "intester = ", p.intester);
+      ld sdet = 0;
+      if(1) {
+        dynamicval<eGeometry> g(geometry, gEuclid);
+        for(int i=0; i<p.cnt; i+=3) {
+          transmatrix T;
+          T[0] = data[i] - ctr1;
+          T[1] = data[i+1] - ctr1;
+          T[2] = data[i+2] - ctr1;
+          sdet += det(T);
+          }
+        println(hlog, "sdet = ", sdet);
+        if(sdet > 0)
+          for(int i=0; i<p.cnt; i+=3) {
+            swap(data[i+1], data[i+2]);
+            if(!tdata.empty())
+              swap(tdata[i+1], tdata[i+2]);
+            }
+        }
+      }
+    
+    shstream app;
+    println(app, "    material Material {");
+    if(!tt) println(app, "      diffuseColor ", color(p.color, .8));
+    if(part(p.color, 0) != 255) println(app, "      transparency ", (255 - part(p.color, 0)) / 255.);
+    println(app, "      }");
+    if(tt == 1) {
+      println(f, "    texture ImageTexture {");
+      println(app, "      url \"", filename, "-rug.png\"");
+      println(app, "      }");
+      used_rug = true;
+      }      
+    if(tt == 2 || tt == 3) {
+      println(app, "    texture ImageTexture {");
+      println(app, "      url \"", filename, "-floors.png\"");
+      println(app, "      }");
+      }
+    
+    auto &ad = all_data[app.s];
+    for(auto& d: data) ad.first.push_back(d);
+
+    #if MAXMDIM >= 4
+    if(tt == 2) {
+      ld x = (fts - .5 - gradient_position[p.color]) / fts;
+      for(auto& d: tdata) d[0] = x;
+      }
+    
+    if(tt == 3) {
+      int tp = texture_position[texid(p)];
+      auto xy = make_array<int>(tp % fts_row, tp / fts_row);
+      auto zero = p.tinf->tvertices[0];
+      ld sca = FLOORTEXTURESIZE*1./fts_int;
+      for(auto& d: tdata) 
+        for(int c: {0, 1})
+          d[c] = ((d[c] - zero[c])*sca + xy[c] + .5) * fts_int / fts;
+      }
+    #endif
+
+    for(auto& d: tdata) ad.second.push_back(d);
+    }
+  
+  EX void render() {
+    #if MAXMDIM >= 4
+    for(auto& p: ptds) {
+      auto p2 = dynamic_cast<dqi_poly*>(&*p);
+      if(p2)
+        prepare(*p2);
+      }
+
+    int tps = 0;
+    for(auto& p: texture_position) p.second = tps++;
+    int gps = 0;
+    for(auto& p: gradient_position) p.second = gps++;
+    
+    fts_int = floor_texture_square_size * FLOORTEXTURESIZE + 4;
+    fts = 64;
+    
+    while(fts < gps || (fts-gps)/fts_int * fts/fts_int < tps)
+      fts *= 2;    
+    
+    fts_row = (fts-gps)/fts_int;
+    #endif
+    
+    for(auto& p: ptds) {
+      auto p2 = dynamic_cast<dqi_poly*>(&*p);
+      if(p2)
+        polygon(*p2);
+      }
+    }
+  
+  EX void take(const string& fname, const function<void()>& what IS(shot::default_screenshot_content)) {
+    dynamicval<bool> v2(in, true);
+    dynamicval<bool> v3(noshadow, true);
+    filename = fname;
+    
+    ptds.clear();
+    all_data.clear();
+    what();
+
+    f.f = fopen(fname.c_str(), "wt");
+    
+    println(f, "#VRML V2.0 utf8");
+    println(f, "WorldInfo { title \"3D model exported from HyperRogue\" info [ \"3D models exported from HyperRogue are public domain\" ] }");
+    
+    for(auto& p: all_data) {
+      const string& app = p.first;
+      auto& data = p.second.first;
+      auto& tdata = p.second.second;
+      
+      println(f, "Shape {");
+      println(f, "  appearance Appearance {");
+      println(f, app);
+      println(f, "    }");
+      // println(f, "# V = ", p.V);
+      println(f, "  geometry IndexedFaceSet {");    
+      println(f, "    coord Coordinate {");
+      
+      println(f, "      point [");
+      for(auto& d: data) println(f, "       ", coord(d, 3), ",");
+      println(f, "        ]");
+      println(f, "      }");
+  
+      if(!tdata.empty()) {
+        println(f, "      texCoord TextureCoordinate {");
+        println(f, "        point [");
+  
+        for(auto& d: tdata)
+          println(f, "          ", coord(glhr::gltopoint(d), 2), ",");
+        println(f, "        ]");
+        println(f, "      }");
+        }
+      
+      println(f, "    coordIndex [");
+      for(int i=0; i<isize(data); i+=3) {
+        println(f, "        ", i, " ", i+1, " ", i+2, " -1,");
+        }
+      println(f, "      ]");
+      if(print)
+        println(f, "    creaseAngle 0.0 convex FALSE solid TRUE ccw FALSE");
+      else
+        println(f, "    creaseAngle 0.0 convex FALSE solid FALSE");
+      println(f, "    }");
+      println(f, "  }");
+      }
+    
+    #if CAP_PNG
+    if(used_rug) {
+      resetbuffer rb;
+      rug::glbuf->enable();
+      SDL_Surface *s = rug::glbuf->render();
+      dynamicval<int> dx(shot::shotx, rug::texturesize);
+      dynamicval<int> dy(shot::shoty, rug::texturesize);
+      shot::postprocess(filename + "-rug.png", s, s);
+      }
+    
+    #if MAXMDIM >= 4
+    if(isize(texture_position) || isize(gradient_position)) {
+      SDL_Surface *s = shot::empty_surface(fts, fts, false);
+      for(auto& p: gradient_position) {
+        int x = fts - p.second - 1;
+        for(int y=0; y<fts; y++) {
+          qpixel(s, x, fts-y-1) = gradient(0, p.first, 0, y, fts-1) >> 8;
+          part(qpixel(s, x, y), 3) = 0xFF;
+          }
+        }
+      
+      SDL_Surface *floor = floor_textures->render();
+      for(auto& p: texture_position) {
+        int nx = p.second % fts_row;
+        int ny = p.second / fts_row;
+        color_t col = p.first.first;
+        int xs = p.first.second[0] * FLOORTEXTURESIZE - fts_int/2;
+        int ys = p.first.second[1] * FLOORTEXTURESIZE - fts_int/2;
+        swap(xs, ys); // I do not understand why
+        for(int y=0; y<fts_int; y++)
+        for(int x=0; x<fts_int; x++) {
+          auto& tgt = qpixel(s, nx*fts_int+x, fts-1-(ny*fts_int+y));
+          auto& src = qpixel(floor, xs+x, FLOORTEXTURESIZE-1-(ys+y));
+          for(int p=0; p<3; p++)
+            part(tgt, p) = (part(src, p) * part(col, p+1) + 127) / 255;
+          part(tgt, 3) = 0xFF;
+          }
+        }
+      IMAGESAVE(s, (filename + "-floors.png").c_str());
+      SDL_FreeSurface(s);
+      }
+    #endif
+    #endif
+    
+    fclose(f.f);
+    f.f = nullptr;
+    }
+#endif
+EX }
 
 #if CAP_PNG
 void IMAGESAVE(SDL_Surface *s, const char *fname) {
@@ -247,9 +615,13 @@ EX namespace shot {
 
 purehookset hooks_hqshot;
 
+#if HDR
+enum screenshot_format { png, svg, wrl };
+#endif
+
 EX int shotx = 2000;
 EX int shoty = 2000;
-EX bool make_svg = false;
+EX screenshot_format format;
 EX bool transparent = true;
 EX ld gamma = 1;
 EX int shotformat = -1;
@@ -287,14 +659,18 @@ EX void default_screenshot_content() {
   drawStats();    
   }
 
+EX SDL_Surface *empty_surface(int x, int y, bool alpha) {
+  return SDL_CreateRGBSurface(SDL_SWSURFACE,x,y,32,0xFF<<16,0xFF<<8,0xFF, (alpha) ? (0xFF<<24) : 0);
+  }
+
 #if CAP_PNG
-void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
+EX void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
   if(gamma == 1 && shot_aa == 1 && sdark == sbright) {
     IMAGESAVE(sdark, fname.c_str());
     return;
     }
 
-  SDL_Surface *sout = SDL_CreateRGBSurface(SDL_SWSURFACE,shotx,shoty,32,0xFF<<16,0xFF<<8,0xFF, (sdark == sbright) ? 0 : (0xFF<<24));
+  SDL_Surface *sout = empty_surface(shotx, shoty, sdark != sbright);
   for(int y=0; y<shoty; y++)
   for(int x=0; x<shotx; x++) {
     int val[2][4];
@@ -327,12 +703,46 @@ void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
 
 EX purehookset hooks_take;
 
+#if CAP_PNG
+void render_png(string fname, const function<void()>& what) {
+  resetbuffer rb;
+
+  renderbuffer glbuf(vid.xres, vid.yres, vid.usingGL);
+  glbuf.enable();
+  current_display->set_viewport(0);
+
+  dynamicval<color_t> v8(backcolor, transparent ? 0xFF000000 : backcolor);
+  #if CAP_RUG
+  if(rug::rugged && !rug::renderonce) rug::prepareTexture();
+  #endif
+  glbuf.clear(backcolor);
+  what();
+  
+  SDL_Surface *sdark = glbuf.render();
+
+  if(transparent) {
+    renderbuffer glbuf1(vid.xres, vid.yres, vid.usingGL);
+    backcolor = 0xFFFFFFFF;
+    #if CAP_RUG
+    if(rug::rugged && !rug::renderonce) rug::prepareTexture();
+    #endif
+    glbuf1.enable();
+    glbuf1.clear(backcolor);
+    current_display->set_viewport(0);
+    what();
+    
+    postprocess(fname, sdark, glbuf1.render());
+    }
+  else postprocess(fname, sdark, sdark);
+  }
+#endif
+
 EX void take(string fname, const function<void()>& what IS(default_screenshot_content)) {
 
   if(cheater) doOvergenerate();
-
+  
   #if CAP_SVG  
-  int multiplier = make_svg ? svg::divby : shot_aa;
+  int multiplier = (format == screenshot_format::svg) ? svg::divby : shot_aa;
   #else
   int multiplier = shot_aa;
   #endif
@@ -352,45 +762,25 @@ EX void take(string fname, const function<void()>& what IS(default_screenshot_co
   models::configure();
   callhooks(hooks_take);
   
-  if(make_svg) {
-    #if CAP_SVG
-    svg::render(fname, what);
-    #endif
-    }
-  
-  else {  
-    #if CAP_PNG
-    resetbuffer rb;
-
-    renderbuffer glbuf(vid.xres, vid.yres, vid.usingGL);
-    glbuf.enable();
-    current_display->set_viewport(0);
-
-    dynamicval<color_t> v8(backcolor, transparent ? 0xFF000000 : backcolor);
-    #if CAP_RUG
-    if(rug::rugged && !rug::renderonce) rug::prepareTexture();
-    #endif
-    glbuf.clear(backcolor);
-    what();
-    
-    SDL_Surface *sdark = glbuf.render();
-
-    if(transparent) {
-      renderbuffer glbuf1(vid.xres, vid.yres, vid.usingGL);
-      backcolor = 0xFFFFFFFF;
-      #if CAP_RUG
-      if(rug::rugged && !rug::renderonce) rug::prepareTexture();
+  switch(format) {
+    case screenshot_format::wrl:
+      #if CAP_WRL
+      wrl::take(fname);
       #endif
-      glbuf1.enable();
-      glbuf1.clear(backcolor);
-      current_display->set_viewport(0);
-      what();
-      
-      postprocess(fname, sdark, glbuf1.render());
-      }
-    else postprocess(fname, sdark, sdark);
-    #endif
-    }  
+      return;
+    
+    case screenshot_format::svg:
+      #if CAP_SVG
+      svg::render(fname, what);
+      #endif
+      return;
+    
+    case screenshot_format::png:
+      #if CAP_PNG
+      render_png(fname, what);
+      #endif
+      return;
+    }
   }
 
 #if CAP_COMMANDLINE
@@ -399,7 +789,7 @@ int png_read_args() {
   if(argis("-pngshot")) {
     PHASE(3); shift(); start_game();
     printf("saving PNG screenshot to %s\n", argcs());
-    make_svg = false;
+    format = screenshot_format::png;
     shot::take(argcs());
     }
   else if(argis("-pngsize")) {
@@ -417,6 +807,20 @@ int png_read_args() {
   else if(argis("-shotaa")) {
     shift(); shot_aa = argi();
     }
+  #if CAP_WRL
+  else if(argis("-modelshot")) {
+    PHASE(3); shift(); start_game();
+    printf("saving WRL model to %s\n", argcs());
+    shot::format = screenshot_format::wrl; wrl::print = false;
+    shot::take(argcs());
+    }
+  else if(argis("-printshot")) {
+    PHASE(3); shift(); start_game();
+    printf("saving 3D printable model to %s\n", argcs());
+    shot::format = screenshot_format::wrl; wrl::print = true;
+    shot::take(argcs());
+    }
+  #endif
   else return 1;
   return 0;
   }
@@ -424,30 +828,118 @@ int png_read_args() {
 auto ah_png = addHook(hooks_args, 0, png_read_args);
 #endif
 
+EX string format_name() {
+  if(format == screenshot_format::svg) return "SVG";
+  if(format == screenshot_format::wrl) return "WRL";
+  if(format == screenshot_format::png) return "PNG";
+  return "?";
+  }
+
+EX string format_extension() {
+  if(format == screenshot_format::svg) return ".svg";
+  if(format == screenshot_format::wrl) return ".wrl";
+  if(format == screenshot_format::png) return ".png";
+  return "?";
+  }
+
+
+EX void choose_screenshot_format() {
+  cmode = sm::SIDE; 
+  gamescreen(0);
+  dialog::init(XLAT("screenshots"), iinf[itPalace].color, 150, 100);
+  #if CAP_PNG
+  dialog::addItem(XLAT("PNG"), 'p');
+  dialog::add_action([] { format = screenshot_format::png; popScreen(); });
+  #endif
+  #if CAP_SVG
+  dialog::addItem(XLAT("SVG"), 's');
+  dialog::add_action([] { format = screenshot_format::svg; popScreen(); });
+  #endif
+  #if CAP_WRL
+  dialog::addItem(XLAT("WRL"), 'w');
+  dialog::add_action([] { format = screenshot_format::wrl; popScreen(); });
+  #endif
+  dialog::addBack();
+  dialog::display();
+  }
+
 EX void menu() {
   cmode = sm::SIDE; 
   gamescreen(0);
-  if(!CAP_SVG) make_svg = false;
-  if(!CAP_PNG) make_svg = true;
+  if(format == screenshot_format::svg && !CAP_SVG) 
+    format = screenshot_format::png;
+  if(format == screenshot_format::png && !CAP_PNG) 
+    format = screenshot_format::svg;
   dialog::init(XLAT("screenshots"), iinf[itPalace].color, 150, 100);
-  dialog::addSelItem(XLAT("format"), make_svg ? "SVG" : "PNG", 'f');
-  dialog::add_action([] { make_svg = !make_svg; });
-  dialog::addSelItem(XLAT("pixels (X)"), its(shotx), 'x');
-  dialog::add_action([] { shotformat = -1; dialog::editNumber(shotx, 500, 8000, 100, 2000, XLAT("pixels (X)"), ""); });
-  dialog::addSelItem(XLAT("pixels (Y)"), its(shoty), 'y');
-  dialog::add_action([] { shotformat = -1; dialog::editNumber(shoty, 500, 8000, 100, 2000, XLAT("pixels (Y)"), ""); });
-  if(make_svg) {
-    #if CAP_SVG
-    using namespace svg;
-    dialog::addSelItem(XLAT("precision"), "1/"+its(divby), 'p');
-    dialog::add_action([] { divby *= 10; if(divby > 1000000) divby = 1; });
-    #endif
+  dialog::addSelItem(XLAT("format"), format_name(), 'f');
+  dialog::add_action_push(choose_screenshot_format);
+  bool dowrl = format == screenshot_format::wrl;
+  if(!dowrl) {
+    dialog::addSelItem(XLAT("pixels (X)"), its(shotx), 'x');
+    dialog::add_action([] { shotformat = -1; dialog::editNumber(shotx, 500, 8000, 100, 2000, XLAT("pixels (X)"), ""); });
+    dialog::addSelItem(XLAT("pixels (Y)"), its(shoty), 'y');
+    dialog::add_action([] { shotformat = -1; dialog::editNumber(shoty, 500, 8000, 100, 2000, XLAT("pixels (Y)"), ""); });
     }
-  else {
-    dialog::addSelItem(XLAT("supersampling"), its(shot_aa), 's');
-    dialog::add_action([] { shot_aa *= 2; if(shot_aa > 16) shot_aa = 1; });
+  
+  switch(format) {
+    case screenshot_format::svg: {
+      #if CAP_SVG
+      using namespace svg;
+      dialog::addSelItem(XLAT("precision"), "1/"+its(divby), 'p');
+      dialog::add_action([] { divby *= 10; if(divby > 1000000) divby = 1; });
+      #endif
+      
+      if(models::is_3d(vpconf) || rug::rugged) {
+        dialog::addInfo("SVG screenshots do not work in this 3D mode", 0xFF0000);
+        if(GDIM == 2 && !rug::rugged) {
+          dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
+          dialog::add_action_push(models::model_menu);
+          }
+        #if CAP_WRL
+        else {
+          dialog::addItem(XLAT("WRL"), 'w');
+          dialog::add_action([] { format = screenshot_format::wrl; });
+          }
+        #endif
+        }
+
+      #if CAP_TEXTURE
+      if(texture::config.tstate == texture::tsActive)
+        dialog::addInfo("SVG screenshots do not work with textures", 0xFF0000);
+      #endif
+      break;
+      }
+    
+    case screenshot_format::png: {
+      #if CAP_PNG
+      dialog::addSelItem(XLAT("supersampling"), its(shot_aa), 's');
+      dialog::add_action([] { shot_aa *= 2; if(shot_aa > 16) shot_aa = 1; });
+      #endif
+      break;
+      }
+
+    case screenshot_format::wrl: {
+      #if CAP_WRL
+      if(!models::is_3d(vpconf) && !rug::rugged) {
+        dialog::addInfo("this format is for 3D projections", 0xFF0000);
+        if(GDIM == 2) {
+          dialog::addItem(XLAT("hypersian rug mode"), 'u');
+          dialog::add_action_push(rug::show);
+          }
+        }
+      else if(rug::rugged ? rug::perspective() : models::is_perspective(vpconf.model)) {
+        dialog::addInfo("this does not work well in perspective projections", 0xFF8000);
+        dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
+        dialog::add_action_push(models::model_menu);
+        }
+      dialog::addBoolItem_action("generate a model for 3D printing", wrl::print, 'p');
+      #if CAP_PNG
+      dialog::addBoolItem_action("use textures", wrl::textures, 'u');
+      #endif
+      #endif
+      }      
     }
-  dialog::addBoolItem_action(XLAT("transparent"), transparent, 't');
+  if(!dowrl) dialog::addBoolItem_action(XLAT("transparent"), transparent, 't');
 
   dialog::addSelItem(XLAT("gamma"), fts(gamma), 'g');
   dialog::add_action([] { dialog::editNumber(gamma, 0, 2, .1, .5, XLAT("gamma"), "higher value = darker"); });
@@ -455,10 +947,13 @@ EX void menu() {
   dialog::addSelItem(XLAT("brightness"), fts(fade), 'b');
   dialog::add_action([] { dialog::editNumber(fade, 0, 2, .1, 1, XLAT("brightness"), "higher value = lighter"); });
 
-  dialog::addBoolItem_action(XLAT("disable the HUD"), hide_hud, 'h');
-
-  dialog::addBoolItem_action_neg(XLAT("hide the player"), mapeditor::drawplayer, 'H');
+  if(!dowrl) dialog::addBoolItem_action(XLAT("disable the HUD"), hide_hud, 'h');
   
+  dialog::addBoolItem_action_neg(XLAT("hide the player"), mapeditor::drawplayer, 'H');
+  #if CAP_WRL
+  if(dowrl && wrl::print) dialog::lastItem().value = XLAT("N/A");
+  #endif
+
   if(WDIM == 2) {
     dialog::addItem(XLAT("centering"), 'x');
     dialog::add_action([] {
@@ -483,18 +978,6 @@ EX void menu() {
 
   dialog::addBreak(100);
   
-#if CAP_RUG
-  if(make_svg && rug::rugged)
-    dialog::addInfo("SVG screenshots do not work in this 3D mode", 0xFF0000);
-  else
-#endif
-#if CAP_TEXTURE
-  if(make_svg && texture::config.tstate == texture::tsActive)
-    dialog::addInfo("SVG screenshots do not work with textures", 0xFF0000);
-  else
-#endif
-   dialog::addBreak(100);
-  
   dialog::addItem(XLAT("take screenshot"), 'z');
   dialog::add_action([] () { 
     #if ISWEB
@@ -502,8 +985,13 @@ EX void menu() {
     #else
     static string pngfile = "hqshot.png";
     static string svgfile = "svgshot.svg";
-    string& file = make_svg ? svgfile : pngfile;
-    dialog::openFileDialog(file, XLAT("screenshot"), make_svg ? ".svg" : ".png", [&file] () {
+    static string wrlfile = "model.wrl";
+    string& file = 
+      format == screenshot_format::png ? pngfile :
+      format == screenshot_format::svg ? svgfile :
+      wrlfile;
+
+    dialog::openFileDialog(file, XLAT("screenshot"), format_extension(), [&file] () {
       dynamicval<int> cgl(vid.cells_generated_limit, 9999999);
       shot::take(file);
       return true;
@@ -727,32 +1215,30 @@ EX void apply() {
   #if CAP_RUG
   if(rug::rugged) {
     if(rug_rotation1) {
-      rug::apply_rotation(cspin(1, 2, rug_angle * degree));
-      rug::apply_rotation(cspin(0, 2, rug_rotation1 * 2 * M_PI * t / period));
-      rug::apply_rotation(cspin(1, 2, -rug_angle * degree));
+      rug::rugView = cspin(1, 2, -rug_angle * degree) * cspin(0, 2, rug_rotation1 * 2 * M_PI * t / period) * cspin(1, 2, rug_angle * degree) * rug::rugView;
       }
     if(rug_rotation2) {
-      rug::apply_rotation(rug::currentrot * cspin(0, 1, rug_rotation2 * 2 * M_PI * t / period) * inverse(rug::currentrot));
+      rug::rugView = rug::rugView * cspin(0, 1, rug_rotation2 * 2 * M_PI * t / period);
       }
     }
   #endif
-  vid.skiprope += skiprope_rotation * t * 2 * M_PI / period;
+  pconf.skiprope += skiprope_rotation * t * 2 * M_PI / period;
 
   if(ballangle_rotation) {
-    if(models::model_has_orientation())
-      models::model_orientation += ballangle_rotation * 360 * t / period;
+    if(models::has_orientation(vpconf.model))
+      vpconf.model_orientation += ballangle_rotation * 360 * t / period;
     else
-      vid.ballangle += ballangle_rotation * 360 * t / period;
+      vpconf.ballangle += ballangle_rotation * 360 * t / period;
     }
   if(joukowsky_anim) {
     ld t = ticks / period;
     t = t - floor(t);
     if(pmodel == mdBand) {
-      models::model_transition = t * 4 - 1;
+      vpconf.model_transition = t * 4 - 1;
       }
     else {
-      models::model_transition = t / 1.1;
-      vid.scale = (1 - models::model_transition) / 2.;
+      vpconf.model_transition = t / 1.1;
+      vpconf.scale = (1 - vpconf.model_transition) / 2.;
       }
     }
   apply_animated_parameters();
@@ -779,6 +1265,7 @@ bool record_animation() {
     int newticks = i * period / noframes;
     cmode = (env_shmup ? sm::NORMAL : 0);
     while(ticks < newticks) shmup::turn(1), ticks++;
+    ca::simulate();
     if(playermoved) centerpc(INF), optimizeview();
     dynamicval<bool> v2(inHighQual, true);
     apply();
@@ -1010,7 +1497,7 @@ EX void show() {
       });
     }
   #endif
-  if(models::model_has_orientation())
+  if(models::has_orientation(vpconf.model))
     animator(XLAT("model rotation"), ballangle_rotation, 'I');
   else if(among(pmodel, mdHyperboloid, mdHemisphere, mdBall))
     animator(XLAT("3D rotation"), ballangle_rotation, '3');
@@ -1042,7 +1529,8 @@ EX void show() {
   dialog::add_action([] () { dialog::editNumber(noframes, 0, 300, 30, 5, XLAT("frames to record"), ""); });
   dialog::addSelItem(XLAT("record to a file"), animfile, 'R');
   dialog::add_action([] () { 
-    dialog::openFileDialog(animfile, XLAT("record to a file"), shot::make_svg ? ".svg" : ".png", record_animation);
+    dialog::openFileDialog(animfile, XLAT("record to a file"), 
+      shot::format_extension(), record_animation);
     });
   #endif
   dialog::addBack();
@@ -1188,9 +1676,9 @@ startanim null_animation { "", no_init, [] { gamescreen(2); }};
 
 startanim joukowsky { "Joukowsky transform", no_init, [] {
   dynamicval<eModel> dm(pmodel, mdJoukowskyInverted);
-  dynamicval<ld> dt(models::model_orientation, ticks / 25.);
+  dynamicval<ld> dt(pconf.model_orientation, ticks / 25.);
   dynamicval<int> dv(vid.use_smart_range, 2);
-  dynamicval<ld> ds(vid.scale, 1/4.);
+  dynamicval<ld> ds(pconf.scale, 1/4.);
   models::configure();
   dynamicval<color_t> dc(ringcolor, 0);  
   gamescreen(2);
@@ -1199,7 +1687,7 @@ startanim joukowsky { "Joukowsky transform", no_init, [] {
 
 startanim bandspin { "spinning in the band model", no_init, [] {
   dynamicval<eModel> dm(pmodel, mdBand);
-  dynamicval<ld> dt(models::model_orientation, ticks / 25.);
+  dynamicval<ld> dt(pconf.model_orientation, ticks / 25.);
   dynamicval<int> dv(vid.use_smart_range, 2);
   models::configure();
   gamescreen(2);
@@ -1212,8 +1700,8 @@ startanim perspective { "projection distance", no_init, [] {
   x /= 2;
   x *= 1.5;
   x = tan(x);
-  dynamicval<ld> da(vid.alpha, x);
-  dynamicval<ld> ds(vid.scale, (1+x)/2);
+  dynamicval<ld> da(pconf.alpha, x);
+  dynamicval<ld> ds(pconf.scale, (1+x)/2);
   calcparam();
   gamescreen(2);
   explorable(projectionDialog);
@@ -1224,16 +1712,15 @@ startanim rug { "Hypersian Rug", [] {
   rug::init(), rug::rugged = false; }, [] {
   dynamicval<bool> b(rug::rugged, true);
   rug::physics();
-  rug::apply_rotation(cspin(1, 2, ticks / 3000.));
+  dynamicval<transmatrix> t(rug::rugView, cspin(1, 2, ticks / 3000.) * rug::rugView);
   gamescreen(2);
-  rug::apply_rotation(cspin(1, 2, -ticks / 3000.));
   if(!rug::rugged) current = &null_animation;
   explorable([] { rug::rugged = true; pushScreen(rug::show); });
   }};
 
 startanim spin_around { "spinning around", no_init,  [] {
-  dynamicval<ld> da(vid.alpha, 999);
-  dynamicval<ld> ds(vid.scale, 500);
+  dynamicval<ld> da(pconf.alpha, 999);
+  dynamicval<ld> ds(pconf.scale, 500);
   ld alpha = 2 * M_PI * ticks / 10000.;
   ld circle_radius = acosh(2.);
   dynamicval<transmatrix> dv(View, spin(-cos_auto(circle_radius)*alpha) * xpush(circle_radius) * spin(alpha) * View);

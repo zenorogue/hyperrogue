@@ -122,8 +122,8 @@ EX namespace reg3 {
       vertex_distance = binsearch(0, M_PI, [&] (ld d) {
         // sometimes breaks in elliptic
         dynamicval<eGeometry> g(geometry, elliptic ? gCell120 : geometry);
-        hyperpoint v2 = direct_exp(dir_v2 * d, iTable);
-        hyperpoint v3 = direct_exp(dir_v3 * d, iTable);
+        hyperpoint v2 = direct_exp(dir_v2 * d);
+        hyperpoint v3 = direct_exp(dir_v3 * d);
         return hdist(v2, v3) >= edge_length;
         });
       }
@@ -131,7 +131,7 @@ EX namespace reg3 {
     DEBB(DF_GEOM, ("vertex_distance = ", vertex_distance));
     
     /* actual vertex */
-    hyperpoint v2 = direct_exp(dir_v2 * vertex_distance, iTable);
+    hyperpoint v2 = direct_exp(dir_v2 * vertex_distance);
 
     hyperpoint mid = Hypc;
     for(int i=0; i<face; i++) mid += cspin(1, 2, 2*i*M_PI/face) * v2;

@@ -76,7 +76,7 @@ EX movedir vectodir(hyperpoint P) {
   transmatrix U = ggmatrix(cwt.at);
   if(GDIM == 3 && WDIM == 2)  U = radar_transform * U;
 
-  P = direct_exp(lp_iapply(P), 100);
+  P = direct_exp(lp_iapply(P));
 
   hyperpoint H = sphereflip * tC0(U);
   transmatrix Centered = sphereflip * rgpushxto0(H);
@@ -87,8 +87,8 @@ EX movedir vectodir(hyperpoint P) {
 
   for(int i=0; i<cwt.at->type; i++) {
     transmatrix T = currentmap->adj(cwt.at, (cwt + i).spin);
-    ld d1 = geo_dist(U * T * C0, Centered * P, iTable);
-    ld d2 = geo_dist(U * T * C0, Centered * C0, iTable);
+    ld d1 = geo_dist(U * T * C0, Centered * P);
+    ld d2 = geo_dist(U * T * C0, Centered * C0);
     dirdist[i] = d1 - d2;
     //xspinpush0(-i * 2 * M_PI /cwt.at->type, .5), P);
     }
@@ -308,9 +308,7 @@ EX void handlePanning(int sym, int uni) {
     if(sym == PSEUDOKEY_WHEELDOWN) shift_view(ztangent(0.05*shiftmul)), didsomething = true, playermoved = false;
     }
 
-  if(rug::rugged || smooth_scrolling) {
-    return;
-    }
+  rug::using_rugview urv;
     
 #if !ISPANDORA
   if(sym == SDLK_END && GDIM == 3) { 
@@ -319,60 +317,62 @@ EX void handlePanning(int sym, int uni) {
   if(sym == SDLK_HOME && GDIM == 3) { 
     shift_view(ztangent(+0.2*shiftmul)), didsomething = true, playermoved = false;
     }
-  if(sym == SDLK_RIGHT) { 
+
+  auto roll = [&] (int dir, ld val) {
+    if(GDIM == 3 && anyshiftclick) 
+      shift_view(ctangent(dir, -val)), didsomething = true, playermoved = false; /* -val because shift reverses */
+    #if CAP_CRYSTAL
+    else if(rug::rug_control() && rug::in_crystal())
+      crystal::apply_rotation(cspin(dir, 2, val));
+    #endif
+    else if(GDIM == 3)
+      rotate_view(cspin(dir, 2, val)), didsomething = true;
+    else
+      View = cpush(dir, val) * View, playermoved = false, didsomething = true;      
+    };
+
+  if(sym == SDLK_RIGHT) {
     if(history::on)
       history::lvspeed += 0.1 * shiftmul;
-    else if(GDIM == 3)
-      rotate_view(cspin(0, 2, -0.2*shiftmul)), didsomething = true;
-    else
-      View = xpush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
+    else roll(0, -0.2*shiftmul);
     }
   if(sym == SDLK_LEFT) {
     if(history::on)
       history::lvspeed -= 0.1 * shiftmul;
-    else if(GDIM == 3)
-      rotate_view(cspin(0, 2, 0.2*shiftmul)), didsomething = true;
-    else
-      View = xpush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
+    else roll(0, 0.2*shiftmul);
     }
   if(sym == SDLK_UP) {
     if(history::on)
       history::lvspeed += 0.1 * shiftmul;
-    else if(GDIM == 3)
-      rotate_view(cspin(1, 2, 0.2*shiftmul)), didsomething = true;
-    else
-      View = ypush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
+    else roll(1, 0.2*shiftmul);
     }
   if(sym == SDLK_DOWN) {
     if(history::on)
       history::lvspeed -= 0.1 * shiftmul;
-    else if(GDIM == 3)
-      rotate_view(cspin(1, 2, -0.2*shiftmul)), didsomething = true;
-    else
-      View = ypush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
+    else roll(1, -0.2*shiftmul);
     }
 #endif
   if(sym == SDLK_PAGEUP) {
-    if(history::on)
+    if(history::on && !rug::rug_control())
       models::rotation++;
     else
       rotate_view(spin(M_PI/cgi.S21/2*shiftmul)), didsomething = true;
     }
   if(sym == SDLK_PAGEDOWN) {
-    if(history::on)
+    if(history::on && !rug::rug_control())
       models::rotation++;
     else
       rotate_view(spin(-M_PI/cgi.S21/2*shiftmul)), didsomething = true;
     }
   
   if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
-    if(isGravityLand(cwt.at->land)) playermoved = false;
+    if(isGravityLand(cwt.at->land) && !rug::rug_control()) playermoved = false;
 
   if(sym == PSEUDOKEY_WHEELUP && GDIM == 2) {
     ld jx = (mousex - current_display->xcenter - .0) / current_display->radius / 10;
     ld jy = (mousey - current_display->ycenter - .0) / current_display->radius / 10;
     playermoved = false;
-    View = gpushxto0(hpxy(jx, jy)) * View;
+    rotate_view(gpushxto0(hpxy(jx, jy)));
     sym = 1;
     }
   }
@@ -493,8 +493,12 @@ EX void handleKeyNormal(int sym, int uni) {
     pushScreen(inv::show);
 #endif
   
-  if(((sym == SDLK_HOME && GDIM == 2) || sym == SDLK_F3 || sym == ' ') && DEFAULTNOR(sym)) 
-    fullcenter();
+  if(((sym == SDLK_HOME && GDIM == 2 && !rug::rugged) || sym == SDLK_F3 || sym == ' ') && DEFAULTNOR(sym)) {
+    if(rug::rug_control())
+      rug::reset_view();
+    else
+      fullcenter();
+    }
   
   if(sym == 'v' && DEFAULTNOR(sym)) 
     pushScreen(showMainMenu);
@@ -696,7 +700,8 @@ EX void mainloopiter() {
     #endif
     }
   
-  if(smooth_scrolling && !shmup::on && !rug::rugged) {
+  if(smooth_scrolling && !shmup::on) {
+    rug::using_rugview urv;
     static int lastticks;
     ld t = (ticks - lastticks) * shiftmul / 1000.;
     lastticks = ticks;
@@ -705,14 +710,23 @@ EX void mainloopiter() {
       shift_view(ctangent(2, -t)), didsomething = true, playermoved = false;
     if(keystate[SDLK_HOME] && GDIM == 3 && DEFAULTNOR(SDLK_HOME))
       shift_view(ctangent(2, t)), didsomething = true, playermoved = false;
-    if(keystate[SDLK_RIGHT] && DEFAULTNOR(SDLK_RIGHT))
-      rotate_view(GDIM == 2 ? xpush(-t) : cspin(0, 2, -t)), didsomething = true, playermoved = playermoved && GDIM == 3;
-    if(keystate[SDLK_LEFT] && DEFAULTNOR(SDLK_LEFT))
-      rotate_view(GDIM == 2 ? xpush(t) : cspin(0, 2, t)), didsomething = true, playermoved = playermoved && GDIM == 3;
-    if(keystate[SDLK_UP] && DEFAULTNOR(SDLK_UP))
-      rotate_view(GDIM == 2 ? ypush(t) : cspin(1, 2, t)), didsomething = true, playermoved = playermoved && GDIM == 3;
-    if(keystate[SDLK_DOWN] && DEFAULTNOR(SDLK_DOWN))
-      rotate_view(GDIM == 2 ? ypush(-t) : cspin(1, 2, -t)), didsomething = true, playermoved = playermoved && GDIM == 3;
+    
+    auto roll = [&] (int dir, ld val) {
+      if(GDIM == 3 && anyshiftclick) 
+        shift_view(ctangent(dir, -val)); /* -val because shift reverses */
+      #if CAP_CRYSTAL
+      else if(rug::rug_control() && rug::in_crystal())
+        crystal::apply_rotation(cspin(dir, 2, val));
+      #endif
+      else 
+        rotate_view(GDIM == 2 ? cpush(dir, val) : cspin(dir, 2, val));
+      didsomething = true, playermoved = playermoved && GDIM == 3;
+      };
+
+    if(keystate[SDLK_RIGHT] && DEFAULTNOR(SDLK_RIGHT)) roll(0, -t);
+    if(keystate[SDLK_LEFT] && DEFAULTNOR(SDLK_LEFT)) roll(0, t);
+    if(keystate[SDLK_UP] && DEFAULTNOR(SDLK_UP)) roll(1, t);
+    if(keystate[SDLK_DOWN] && DEFAULTNOR(SDLK_DOWN)) roll(1, -t);
     if(keystate[SDLK_PAGEUP] && DEFAULTNOR(SDLK_PAGEUP)) {
       if(history::on)
         models::rotation+=t;
@@ -865,7 +879,7 @@ EX void handle_event(SDL_Event& ev) {
       else if(ev.button.button==SDL_BUTTON_MIDDLE || rightclick) {
         sym = 1, didsomething = true;
         if(anyshift)
-          vid.xposition = vid.yposition = 0;
+          pconf.xposition = pconf.yposition = 0;
         }
       else if(ev.button.button == SDL_BUTTON_LEFT) {
         sym = getcstat, uni = getcstat, shiftmul = getcshift;
@@ -874,12 +888,12 @@ EX void handle_event(SDL_Event& ev) {
       else if(ev.button.button==SDL_BUTTON_WHEELDOWN) {
         if(anyctrl && anyshift && !rug::rugged && GDIM == 2) {
           mapeditor::scaleall(1/1.2);
-          vid.alpha /= 1.2;
+          pconf.alpha /= 1.2;
           }
         else if(anyctrl && !rug::rugged && GDIM == 2)
           mapeditor::scaleall(pow(2, -.25));
         else if(anyshift && !rug::rugged && GDIM == 2)
-          vid.alpha -= 0.25;
+          pconf.alpha -= 0.25;
         else if(rollchange) {
           sym = getcstat, uni = getcstat, shiftmul = getcshift, wheelclick = true;
           }
@@ -890,12 +904,12 @@ EX void handle_event(SDL_Event& ev) {
       if(ev.button.button==SDL_BUTTON_WHEELUP) {
         if(anyctrl && anyshift && !rug::rugged && GDIM == 2) {
           mapeditor::scaleall(1.2);
-          vid.alpha *= 1.2;
+          pconf.alpha *= 1.2;
           }
         else if(anyctrl && !rug::rugged && GDIM == 2)
           mapeditor::scaleall(pow(2, .25));
         else if(anyshift && !rug::rugged && GDIM == 2)
-          vid.alpha += 0.25;
+          pconf.alpha += 0.25;
         else if(rollchange) {
           sym = getcstat, uni = getcstat, shiftmul = -getcshift, wheelclick = true;
           }
@@ -929,8 +943,8 @@ EX void handle_event(SDL_Event& ev) {
       if((rightclick || (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && !mouseout2()) {
         fix_mouseh();
         if(anyctrl) {
-          vid.xposition += (mousex - lmousex) * 1. / current_display->scrsize,
-          vid.yposition += (mousey - lmousey) * 1. / current_display->scrsize;
+          pconf.xposition += (mousex - lmousex) * 1. / current_display->scrsize,
+          pconf.yposition += (mousey - lmousey) * 1. / current_display->scrsize;
           }
         else if(mouseh[LDIM] < 50 && mouseoh[LDIM] < 50) {
           panning(mouseoh, mouseh);
@@ -1047,7 +1061,7 @@ EX bool gmodekeys(int sym, int uni) {
 
   if(GDIM == 2) {
     if(among(NUMBERKEY, '1', '2', '3') && !rug::rugged && euclid && WDIM == 2) {
-      vid.xposition = vid.yposition = 0;
+      pconf.xposition = pconf.yposition = 0;
       ld maxs = 0;
       auto& cd = current_display;
       for(auto& p: gmatrix) for(int i=0; i<p.first->type; i++) {
@@ -1057,15 +1071,15 @@ EX bool gmodekeys(int sym, int uni) {
         maxs = max(maxs, onscreen[0] / cd->xsize);
         maxs = max(maxs, onscreen[1] / cd->ysize);
         }
-      vid.alpha = 1;
-      vid.scale = vid.scale / 2 / maxs / cd->radius;
-      if(NUMBERKEY == '3') vid.scale *= 2;
-      if(NUMBERKEY == '1') vid.scale /= 2;
+      pconf.alpha = 1;
+      pconf.scale = pconf.scale / 2 / maxs / cd->radius;
+      if(NUMBERKEY == '3') pconf.scale *= 2;
+      if(NUMBERKEY == '1') pconf.scale /= 2;
       }
-    else if(NUMBERKEY == '1' && !rug::rugged) { vid.alpha = 999; vid.scale = 998; vid.xposition = vid.yposition = 0; }
-    else if(NUMBERKEY == '2' && !rug::rugged) { vid.alpha = 1; vid.scale = 0.4; vid.xposition = vid.yposition = 0; }
-    else if(NUMBERKEY == '3' && !rug::rugged) { vid.alpha = 1; vid.scale = 1; vid.xposition = vid.yposition = 0; }
-    else if(NUMBERKEY == '4' && !rug::rugged) { vid.alpha = 0; vid.scale = 1; vid.xposition = vid.yposition = 0; }
+    else if(NUMBERKEY == '1' && !rug::rugged) { pconf.alpha = 999; pconf.scale = 998; pconf.xposition = pconf.yposition = 0; }
+    else if(NUMBERKEY == '2' && !rug::rugged) { pconf.alpha = 1; pconf.scale = 0.4; pconf.xposition = pconf.yposition = 0; }
+    else if(NUMBERKEY == '3' && !rug::rugged) { pconf.alpha = 1; pconf.scale = 1; pconf.xposition = pconf.yposition = 0; }
+    else if(NUMBERKEY == '4' && !rug::rugged) { pconf.alpha = 0; pconf.scale = 1; pconf.xposition = pconf.yposition = 0; }
     else if(NUMBERKEY == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 7; }
     else if(NUMBERKEY == '8') { vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 6; }  
     else if(uni == '%') { 
@@ -1183,10 +1197,10 @@ EX void show() {
   dialog::addItem(XLAT("experiment with geometry"), 'g');
   dialog::add_action([] () { runGeometryExperiments(); });
 
-  dialog::addSelItem(XLAT("projection"), fts(vid.alpha), 'p');
+  dialog::addSelItem(XLAT("projection"), fts(vpconf.alpha), 'p');
   dialog::add_action([] () { projectionDialog(); });
 
-  dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
+  dialog::addSelItem(XLAT("scale factor"), fts(vpconf.scale), 'z');
   dialog::add_action([] () { editScale(); });
 
   dialog::addItem(XLAT("spherical VR"), 'v');
@@ -1195,7 +1209,7 @@ EX void show() {
     mode = 0; fullcenter();
     mode = 2; sensitivity = 1;
     vid.stereo_mode = sLR; vid.ipd = 0.2;
-    vid.alpha = 0; vid.scale = 1;
+    vpconf.alpha = 0; vpconf.scale = 1;
     });
 
   dialog::addBreak(100);

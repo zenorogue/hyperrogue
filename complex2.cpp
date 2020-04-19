@@ -559,10 +559,14 @@ EX hookset<bool(cell*)> hooks_mark;
 EX void performMarkCommand(cell *c) {
   if(!c) return;
   if(callhandlers(false, hooks_mark, c)) return;
-  if(c->land == laCA && c->wall == waNone) 
-    c->wall = waFloorA;
-  else if(c->land == laCA && c->wall == waFloorA)
+  if(c->land == laCA && c->wall == waNone) {
+    c->wall = ca::wlive;
+    ca::list_adj(c);
+    }
+  else if(c->land == laCA && c->wall == ca::wlive) {
     c->wall = waNone; 
+    ca::list_adj(c);
+    }
   if(c->land != laMinefield) return;
   if(c->item) return;
   if(!mightBeMine(c)) return;

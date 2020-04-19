@@ -1230,8 +1230,8 @@ void cut_triangle2(const hyperpoint pa, const hyperpoint pb, const hyperpoint pc
   
   rug::rugpoint *rac = rug::addRugpoint(hac, 0);
   rug::rugpoint *rbc = rug::addRugpoint(hbc, 0);
-  rac->flat = pac;
-  rbc->flat = pbc;
+  rac->native = pac;
+  rbc->native = pbc;
   rac->valid = true;
   rbc->valid = true;
   rug::triangles.push_back(rug::triangle(rac, rbc, NULL));
@@ -1270,7 +1270,7 @@ EX void build_rugdata() {
     
     if(!draw_cut) {
       rugpoint *v = addRugpoint(tC0(V), 0);
-      v->flat = coord_to_flat(co);
+      v->native = coord_to_flat(co);
       v->valid = true;
       
       rugpoint *p[MAX_EDGE_CRYSTAL];
@@ -1278,7 +1278,7 @@ EX void build_rugdata() {
       for(int i=0; i<c->type; i++) {
         p[i] = addRugpoint(V * get_corner_position(c, i), 0);
         p[i]->valid = true;
-        p[i]->flat = coord_to_flat(vcoord[i]);
+        p[i]->native = coord_to_flat(vcoord[i]);
         }
   
       for(int i=0; i<c->type; i++) addTriangle(v, p[i], p[(i+1) % c->type]);

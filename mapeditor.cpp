@@ -10,12 +10,241 @@ namespace hr {
 
 EX namespace mapeditor {
 
+  EX bool drawing_tool;
+
   #if HDR
   enum eShapegroup { sgPlayer, sgMonster, sgItem, sgFloor, sgWall };
   static const int USERSHAPEGROUPS = 5;
   #endif
+  
+  EX color_t dtfill = 0;
+  EX color_t dtcolor = 0x000000FF;
+  EX ld dtwidth = .02;
 
-  hyperpoint lstart;
+  /* drawing_tool shapes */
+  struct dtshape {
+    cell *where;
+    color_t col, fill;
+    ld lw;
+    
+    virtual void rotate(const transmatrix& T) = 0;
+    virtual void save(hstream& hs) = 0;
+    virtual dtshape* load(hstream& hs) = 0;
+    virtual void draw(const transmatrix& V) = 0;
+    virtual ld distance(hyperpoint h) = 0;
+    virtual ~dtshape() {}
+    };
+  
+  struct dtline : dtshape {
+  
+    hyperpoint s, e;
+
+    void rotate(const transmatrix& T) override {
+      s = T * s;
+      e = T * e;
+      }
+    void save(hstream& hs) override {
+      hs.write<char>(1);
+      hs.write(s);
+      hs.write(e);
+      }
+    dtshape *load(hstream& hs) override {
+      hs.read(s);
+      hs.read(e);
+      return this;
+      }
+    void draw(const transmatrix& V) override {
+      queueline(V*s, V*e, col, 2 + vid.linequality);
+      }
+    ld distance(hyperpoint h) override {
+      return hdist(s, h) + hdist(e, h) - hdist(s, e);
+      }
+    };
+  
+  struct dtcircle : dtshape {
+  
+    hyperpoint s; ld radius;
+
+    void rotate(const transmatrix& T) override {
+      s = T * s;
+      }
+    void save(hstream& hs) override {
+      hs.write<char>(2);
+      hs.write(s);
+      hs.write(radius);
+      }
+    dtshape *load(hstream& hs) override {
+      hs.read(s);
+      hs.read(radius);
+      return this;
+      }
+    void draw(const transmatrix& V) override {
+      ld len = sin_auto(radius);
+      int ll = ceil(360 * len);
+      transmatrix W = V * rgpushxto0(s);
+      for(int i=0; i<=ll; i++)
+        curvepoint(W * xspinpush0(360*degree*i/ll, radius));
+      queuecurve(col, fill, PPR::LINE);
+      }
+
+    ld distance(hyperpoint h) override {
+      return abs(hdist(s, h) - radius);
+      }
+    };
+  
+  struct dtfree : dtshape {
+  
+    vector<hyperpoint> lh;
+
+    void rotate(const transmatrix& T) override {
+      for(auto& h: lh) h = T * h;
+      }
+    void save(hstream& hs) override {
+      hs.write<char>(3);
+      hs.write(lh);
+      }
+    dtshape *load(hstream& hs) override {
+      hs.read(lh);
+      return this;
+      }
+    void draw(const transmatrix& V) override {
+      for(auto& p: lh) curvepoint(V*p);
+      queuecurve(col, fill, PPR::LINE);
+      }    
+
+    ld distance(hyperpoint h) override {
+      ld mind = 99;
+      for(auto h1: lh) mind = min(mind, hdist(h, h1));
+      return mind;
+      }
+    };
+  
+  vector<unique_ptr<dtshape>> dtshapes;
+  
+  EX void draw_dtshapes() {
+    for(auto& shp: dtshapes) {
+      if(shp == nullptr) continue;
+      auto& sh = *shp;
+      cell*& c = sh.where;
+      for(const transmatrix& V: current_display->all_drawn_copies[c]) {
+        dynamicval<ld> lw(vid.linewidth, vid.linewidth * sh.lw);
+        sh.draw(V);
+        }
+      }
+
+    if(drawing_tool && (cmode & sm::DRAW)) {
+      dynamicval<ld> lw(vid.linewidth, vid.linewidth * dtwidth * 100);
+      if(holdmouse && mousekey == 'c')
+        queue_hcircle(rgpushxto0(lstart), hdist(lstart, mouseh));
+      else if(holdmouse && mousekey == 'l')
+        queueline(lstart, mouseh, dtcolor, 4 + vid.linequality, PPR::LINE);
+      else if(!holdmouse) {
+        transmatrix T = rgpushxto0(mouseh);
+        queueline(T * xpush0(-.1), T * xpush0(.1), dtcolor);
+        queueline(T * ypush0(-.1), T * ypush0(.1), dtcolor);
+        }
+      }
+    }
+  
+  /** dtshapes takes ownership of sh */
+  void dt_add(cell *where, dtshape *sh) {
+    sh->where = where;
+    sh->col = dtcolor;
+    sh->fill = dtfill;
+    sh->lw = dtwidth * 100;
+
+    dtshapes.push_back(unique_ptr<dtshape>(sh));
+    }
+  
+  EX void dt_add_line(hyperpoint h1, hyperpoint h2, int maxl) {
+    if(hdist(h1, h2) > 1 && maxl > 0) {
+      hyperpoint h3 = mid(h1, h2);
+      dt_add_line(h1, h3, maxl-1);
+      dt_add_line(h3, h2, maxl-1);
+      return;
+      }
+    cell *b = centerover;
+    transmatrix T = rgpushxto0(h1);
+    
+    auto T1 = inverse(ggmatrix(b)) * T;
+    virtualRebase(b, T1);
+    
+    auto l = new dtline;
+    l->s = tC0(T1);
+    l->e = T1 * gpushxto0(h1) * h2;
+    dt_add(b, l);
+    }
+
+  EX void dt_add_circle(hyperpoint h1, hyperpoint h2) {
+    cell *b = centerover;
+    
+    auto d = hdist(h1, h2);
+    
+    h1 = inverse(ggmatrix(b)) * h1;
+    virtualRebase(b, h1);
+    
+    auto l = new dtcircle;
+    l->s = h1;
+    l->radius = d;
+    dt_add(b, l);
+    }
+  
+  dtshape *load_shape(hstream& hs) {
+    char type = hs.get<char>();
+    switch(type) {
+      case 1:
+        return (new dtline)->load(hs);
+      case 2:
+        return (new dtcircle)->load(hs);
+      case 3:
+        return (new dtfree)->load(hs);
+      default:
+        return nullptr;
+      }
+    }
+  
+  dtfree *cfree;
+  cell *cfree_at;
+  transmatrix cfree_T;
+  
+  EX void dt_add_free(hyperpoint h) {
+
+    cell *b = centerover;
+    transmatrix T = rgpushxto0(h);
+    auto T1 = inverse(ggmatrix(b)) * T;
+    virtualRebase(b, T1);
+    
+    if(cfree)
+      cfree->lh.push_back(cfree_T * h);    
+    
+    if(b != cfree_at && !(dtfill && cfree_at)) {
+      cfree = new dtfree;
+      dt_add(b, cfree);
+      cfree_T = T1 * gpushxto0(h);
+      cfree->lh.push_back(cfree_T * h);
+      cfree_at = b;
+      }
+    }
+  
+  EX void dt_erase(hyperpoint h) {  
+    ld nearest = 1;
+    int nearest_id = -1;
+    int id = -1;
+    for(auto& shp: dtshapes) {
+      id++;
+      if(shp == nullptr) continue;
+      auto& sh = *shp;
+      cell*& c = sh.where;
+      for(const transmatrix& V: current_display->all_drawn_copies[c]) {
+        ld dist = sh.distance(inverse(V) * h);
+        if(dist < nearest) nearest = dist, nearest_id = id;
+        }
+      }
+    if(nearest_id >= 0)
+      dtshapes.erase(dtshapes.begin() + nearest_id);
+    }
+  
+  EX hyperpoint lstart;
   cell *lstartcell;
   ld front_edit = 0.5;
   enum class eFront { sphere_camera, sphere_center, equidistants, const_x, const_y };
@@ -43,16 +272,16 @@ EX namespace mapeditor {
      // mx = xb + ssiz*xpos + mrx * scale
      // mx = xb + ssiz*xpos' + mrx * scale' 
      
-     ld mrx = (.0 + mousex - current_display->xcenter) / vid.scale;
-     ld mry = (.0 + mousey - current_display->ycenter) / vid.scale;
+     ld mrx = (.0 + mousex - current_display->xcenter) / vpconf.scale;
+     ld mry = (.0 + mousey - current_display->ycenter) / vpconf.scale;
      
      if(vid.xres > vid.yres) {      
-       vid.xposition += (vid.scale - vid.scale*z) * mrx / current_display->scrsize;
-       vid.yposition += (vid.scale - vid.scale*z) * mry / current_display->scrsize;
+       vpconf.xposition += (vpconf.scale - vpconf.scale*z) * mrx / current_display->scrsize;
+       vpconf.yposition += (vpconf.scale - vpconf.scale*z) * mry / current_display->scrsize;
        }
 
-     vid.scale *= z;
-     // printf("scale = " LDF "\n", vid.scale);
+     vpconf.scale *= z;
+     // printf("scale = " LDF "\n", vpconf.scale);
      #if CAP_TEXTURE
      // display(texture::itt);
      texture::config.itt = xyscale(texture::config.itt, 1/z);
@@ -100,6 +329,39 @@ namespace mapstream {
   std::map<cell*, int> cellids;
   vector<cell*> cellbyid;
   vector<char> relspin;
+  
+  void load_drawing_tool(fhstream& hs) {
+    using namespace mapeditor;
+    if(hs.vernum < 0xA82A) return;
+    int i = hs.get<int>();
+    while(i--) {
+      auto sh = load_shape(hs);
+      if(!sh) continue;
+      hs.read(sh->col);
+      hs.read(sh->fill);
+      hs.read(sh->lw);
+      int id = hs.get<int>();
+      sh->where = cellbyid[id];
+      sh->rotate(spin(currentmap->spin_angle(sh->where, relspin[id]) - currentmap->spin_angle(sh->where, 0)));
+      dtshapes.push_back(unique_ptr<dtshape>(sh));
+      }
+    }
+  
+  void save_drawing_tool(hstream& hs) {
+    using namespace mapeditor;
+    hs.write<int>(isize(dtshapes));
+    for(auto& shp: dtshapes) {
+      if(shp == nullptr) { hs.write<char>(0); }
+      else {
+        auto& sh = *shp;
+        sh.save(hs);
+        hs.write(sh.col);
+        hs.write(sh.fill);
+        hs.write(sh.lw);
+        hs.write(cellids[sh.where]);
+        }
+      }
+    }
   
   
   void addToQueue(cell* c) {
@@ -325,6 +587,8 @@ namespace mapstream {
     int32_t n = -1; f.write(n);
     int32_t id = cellids.count(cwt.at) ? cellids[cwt.at] : -1;
     f.write(id);
+    
+    save_drawing_tool(f);
 
     f.write(vid.always3);
     f.write(mutantphase);
@@ -507,6 +771,8 @@ namespace mapstream {
     savecount = 0; savetime = 0;
     cheater = 1;
     
+    load_drawing_tool(f);
+
     dynamicval<bool> a3(vid.always3, vid.always3);
     if(f.vernum >= 0xA616) { f.read(vid.always3); geom3::apply_always3(); }
     
@@ -730,7 +996,7 @@ namespace mapeditor {
     displayButton(8, vid.yres-8-fs*11, XLAT("F1 = help"), SDLK_F1, 0);
     displayButton(8, vid.yres-8-fs*10, XLAT("F2 = save"), SDLK_F2, 0);
     displayButton(8, vid.yres-8-fs*9, XLAT("F3 = load"), SDLK_F3, 0);
-    displayButton(8, vid.yres-8-fs*7, XLAT("F5 = restart"), SDLK_F5, 0);
+    displayButton(8, vid.yres-8-fs*7, drawing_tool ? XLAT("F5 = clear") : XLAT("F5 = restart"), SDLK_F5, 0);
     #if CAP_SHOT
     displayButton(8, vid.yres-8-fs*6, XLAT("F6 = HQ shot"), SDLK_F6, 0);
     #endif
@@ -983,6 +1249,32 @@ namespace mapeditor {
     if(d == -1 && fix) d = hrand(mouseover->type);
     return cellwalker(mouseover, d);
     }
+
+  void save_level() {
+    dialog::openFileDialog(levelfile, XLAT("level to save:"), ".lev", [] () {
+      if(mapstream::saveMap(levelfile.c_str())) {
+        addMessage(XLAT("Map saved to %1", levelfile));
+        return true;
+        }
+      else {
+        addMessage(XLAT("Failed to save map to %1", levelfile));
+        return false;
+        }
+      });
+    }
+
+  void load_level() {
+    dialog::openFileDialog(levelfile, XLAT("level to load:"), ".lev", [] () {
+      if(mapstream::loadMap(levelfile.c_str())) {
+        addMessage(XLAT("Map loaded from %1", levelfile));
+        return true;
+        }
+      else {
+        addMessage(XLAT("Failed to load map from %1", levelfile));
+        return false;
+        }
+      });
+    }
   
   void showList() {
     dialog::v.clear();
@@ -1083,31 +1375,10 @@ namespace mapeditor {
     else if(uni == 'G') 
       push_debug_screen();
     else if(sym == SDLK_F5) {
-      restart_game();
+      dialog::push_confirm_dialog([] { restart_game(); }, XLAT("Are you sure you want to clear the map?"));
       }
-    else if(sym == SDLK_F2) {
-      dialog::openFileDialog(levelfile, XLAT("level to save:"), ".lev", [] () {
-        if(mapstream::saveMap(levelfile.c_str())) {
-          addMessage(XLAT("Map saved to %1", levelfile));
-          return true;
-          }
-        else {
-          addMessage(XLAT("Failed to save map to %1", levelfile));
-          return false;
-          }
-        });
-      }
-    else if(sym == SDLK_F3)
-      dialog::openFileDialog(levelfile, XLAT("level to load:"), ".lev", [] () {
-        if(mapstream::loadMap(levelfile.c_str())) {
-          addMessage(XLAT("Map loaded from %1", levelfile));
-          return true;
-          }
-        else {
-          addMessage(XLAT("Failed to load map from %1", levelfile));
-          return false;
-          }
-        });
+    else if(sym == SDLK_F2) save_level();
+    else if(sym == SDLK_F3) load_level();
 #if CAP_SHOT
     else if(sym == SDLK_F6) {
       pushScreen(shot::menu);
@@ -1188,7 +1459,7 @@ namespace mapeditor {
   unsigned gridcolor = 0xC0C0C040;
   
   hyperpoint in_front_dist(ld d) {
-    return direct_exp(lp_iapply(ztangent(d)), 100);
+    return direct_exp(lp_iapply(ztangent(d)));
     }
   
   hyperpoint find_mouseh3() {
@@ -1203,7 +1474,7 @@ namespace mapeditor {
       ld d1 = front_edit;
       hyperpoint h1 = in_front_dist(d);
       if(front_config == eFront::sphere_center) 
-        d1 = geo_dist(drawtrans * C0, h1, iTable);
+        d1 = geo_dist(drawtrans * C0, h1);
       if(front_config == eFront::equidistants) {
         hyperpoint h = idt * in_front_dist(d);
         d1 = asin_auto(h[2]);
@@ -1232,6 +1503,7 @@ namespace mapeditor {
   ld equi_range = 1;
     
   EX void drawGrid() {
+    if(!drawcell) drawcell = cwt.at;
     color_t lightgrid = gridcolor;
     lightgrid -= (lightgrid & 0xFF) / 2;
     transmatrix d2 = drawtrans * rgpushxto0(ccenter) * rspintox(gpushxto0(ccenter) * coldcenter);
@@ -1246,7 +1518,7 @@ namespace mapeditor {
         }
       if(front_config == eFront::sphere_center) for(int i=0; i<4; i+=2) {
         auto pt = [&] (ld a, ld b) {
-          return d2 * direct_exp(spin(a*degree) * cspin(0, 2, b*degree) * xtangent(front_edit), 100);
+          return d2 * direct_exp(spin(a*degree) * cspin(0, 2, b*degree) * xtangent(front_edit));
           };
         for(int ai=0; ai<parallels; ai++) {
           ld a = ai * 360 / parallels;
@@ -1363,6 +1635,9 @@ namespace mapeditor {
     usershape *us = NULL;
     
     bool intexture = false;
+    (void) intexture;
+    
+    bool freedraw = drawing_tool;
 
 #if CAP_TEXTURE        
     if(texture::config.tstate == texture::tsActive) {
@@ -1371,12 +1646,12 @@ namespace mapeditor {
       line2 = "";
       texture::config.data.update();
       intexture = true;
+      freedraw = true;
+      drawing_tool = false;
       }
-#else
-    if(0);
 #endif
-    
-    else {
+
+    if(!freedraw) {
 
       sg = drawcellShapeGroup();
       
@@ -1419,7 +1694,7 @@ namespace mapeditor {
     // displayButton(8, 8+fs*9, XLAT("l = lands"), 'l', 0);
     displayfr(8, 8+fs, 2, vid.fsize, line1, 0xC0C0C0, 0);
     
-    if(!intexture) {
+    if(!freedraw) {
       if(sg == sgFloor)
         displayButton(8, 8+fs*2, line2 + XLAT(" (r = complex tesselations)"), 'r', 0);
       else
@@ -1466,17 +1741,21 @@ namespace mapeditor {
 
       }
 #if CAP_TEXTURE
-    else if(texture::config.tstate == texture::tsActive) {
+    else if(freedraw) {
       displayButton(8, 8+fs*2, XLAT(texture::texturesym ? "0 = symmetry" : "0 = asymmetry"), '0', 0);
       if(mousekey == 'g')
         displayButton(8, 8+fs*16, XLAT("p = grid color"), 'p', 0);
       else
         displayButton(8, 8+fs*16, XLAT("p = color"), 'p', 0);
-      displayButton(8, 8+fs*4, XLAT("b = brush size: %1", fts(texture::penwidth)), 'b', 0);
+      if(drawing_tool)
+        displayButton(8, 8+fs*17, XLAT("f = fill") + (dtfill ? " (on)" : " (off)"), 'f', 0);
+      displayButton(8, 8+fs*4, XLAT("b = brush size: %1", fts(dtwidth)), 'b', 0);
       displayButton(8, 8+fs*5, XLAT("u = undo"), 'u', 0);
       displaymm('d', 8, 8+fs*7, 2, vid.fsize, XLAT("d = draw"), 0);
       displaymm('l', 8, 8+fs*8, 2, vid.fsize, XLAT("l = line"), 0);
       displaymm('c', 8, 8+fs*9, 2, vid.fsize, XLAT("c = circle"), 0);
+      if(drawing_tool)
+        displaymm('e', 8, 8+fs*10, 2, vid.fsize, XLAT("e = erase"), 0);
       int s = isize(texture::config.data.pixels_to_draw);
       if(s) displaymm(0, 8, 8+fs*11, 2, vid.fsize, its(s), 0);
       }
@@ -1498,15 +1777,15 @@ namespace mapeditor {
     displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
 
 #if CAP_TEXTURE    
-    if(intexture) for(int i=0; i<10; i++) {
+    if(freedraw) for(int i=0; i<10; i++) {
       if(8 + fs * (6+i) < vid.yres - 8 - fs * 7)
         displayColorButton(vid.xres-8, 8+fs*(6+i), "###", 1000 + i, 16, 1, dialog::displaycolor(texture_colors[i+1]));
 
-      if(displayfr(vid.xres-8 - fs * 3, 8+fs*(6+i), 0, vid.fsize, its(i+1), texture::penwidth == brush_sizes[i] ? 0xFF8000 : 0xC0C0C0, 16))
+      if(displayfr(vid.xres-8 - fs * 3, 8+fs*(6+i), 0, vid.fsize, its(i+1), dtwidth == brush_sizes[i] ? 0xFF8000 : 0xC0C0C0, 16))
         getcstat = 2000+i;
       }
 
-    if(texture::config.tstate != texture::tsActive)
+    if(!freedraw)
       displaymm('e', vid.xres-8, 8+fs, 2, vid.fsize, XLAT("e = edit this"), 16);
 #endif
 
@@ -1524,7 +1803,7 @@ namespace mapeditor {
       displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("z: %1", fts(mh[2],4)), 0xC0C0C0, 16);
       if(MDIM == 4)
         displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("w: %1", fts(mh[3],4)), 0xC0C0C0, 16);
-      mh = inverse_exp(mh, iTable, false);
+      mh = inverse_exp(mh);
       displayfr(vid.xres-8, vid.yres-8-fs*3, 2, vid.fsize, XLAT("r: %1", fts(hypot_d(3, mh),4)), 0xC0C0C0, 16);
       if(GDIM == 3) {
         displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[2], hypot_d(2, mh)) / degree,4)), 0xC0C0C0, 16);
@@ -1933,12 +2212,35 @@ namespace mapeditor {
     if(mkuni == 'g') 
       coldcenter = ccenter, ccenter = mh, clickused = true;
     
-    if(uni == 'd' || uni == 'l' || uni == 'c')
+    if(uni == 'd' || uni == 'l' || uni == 'c' || uni == 'e')
       mousekey = uni;
 
+    if(drawing_tool) {
+      if(sym == SDLK_F2) save_level();
+      if(sym == SDLK_F3) load_level();
+      if(sym == SDLK_F5) {
+        dialog::push_confirm_dialog([] {
+          stop_game();
+          firstland = specialland = laCanvas;
+          canvas_default_wall = waInvisibleFloor;
+          patterns::whichCanvas = 'g';
+          patterns::canvasback = 0xFFFFFF;
+          dtcolor = (forecolor << 8) | 255;
+          drawplayer = false;
+          vid.use_smart_range = 2;
+          start_game();
+          },
+          XLAT("Are you sure you want to restart? This will let you draw on a blank screen.")
+          );
+        }
+      }
+
     if(uni == ' ' && (cheater || autocheat)) {
-      popScreen();
-      pushScreen(showMapEditor);
+      drawing_tool = !drawing_tool;
+      if(!drawing_tool) {
+        popScreen();
+        pushScreen(showMapEditor);
+        }
       }
 
     if(uni == 'z' && GDIM == 3) {
@@ -2001,35 +2303,57 @@ namespace mapeditor {
 
     if(sym == SDLK_F10) popScreen();
 
-#if CAP_TEXTURE
-    if(texture::config.tstate == texture::tsActive) {
+    (void)clickused;
     
-      int tcolor = (texture::config.paint_color >> 8) | ((texture::config.paint_color & 0xFF) << 24);
+    
+    bool freedraw = drawing_tool;
+    #if CAP_TEXTURE
+    bool intexture = texture::config.tstate == texture::tsActive;
+    freedraw |= intexture;
+    #else
+    always_false intexture;
+    #endif
+
+    if(freedraw) {
+    
+      int tcolor = (dtcolor >> 8) | ((dtcolor & 0xFF) << 24);
       
       if(uni == '-' && !clickused) {
-        if(mousekey == 'l' || mousekey == 'c') {
+        if(mousekey == 'e') {
+          dt_erase(mouseh);
+          clickused = true;
+          }
+        else if(mousekey == 'l' || mousekey == 'c') {
           if(!holdmouse) lstart = mouseh, lstartcell = mouseover, holdmouse = true;
           }
-        else {
+        else if(intexture) {
           if(!holdmouse) texture::config.data.undoLock();
           texture::drawPixel(mouseover, mouseh, tcolor);
           holdmouse = true; lstartcell = NULL;
+          }
+        else {
+          dt_add_free(mouseh);
+          holdmouse = true;
           }
         }
       
       if(sym == PSEUDOKEY_RELEASE) {
         printf("release\n");
-        if(mousekey == 'l') { 
+        if(mousekey == 'l' && intexture) { 
           texture::config.data.undoLock();
           texture::where = mouseover;
           texture::drawPixel(mouseover, mouseh, tcolor);
           texture::drawLine(mouseh, lstart, tcolor);
           lstartcell = NULL;
           }
-        if(mousekey == 'c') { 
+        else if(mousekey == 'l') {
+          dt_add_line(mouseh, lstart, 10);
+          lstartcell = NULL;
+          }
+        else if(mousekey == 'c' && intexture) { 
           texture::config.data.undoLock();
           ld rad = hdist(lstart, mouseh);
-          int circp = int(1 + 3 * (circlelength(rad) / texture::penwidth));
+          int circp = int(1 + 3 * (circlelength(rad) / dtwidth));
           if(circp > 1000) circp = 1000;
           transmatrix T = rgpushxto0(lstart);
           texture::where = lstartcell;
@@ -2037,13 +2361,21 @@ namespace mapeditor {
             texture::drawPixel(T * xspinpush0(2 * M_PI * i / circp, rad), tcolor);
           lstartcell = NULL;
           }
+        else if(mousekey == 'c') {
+          dt_add_circle(lstart, mouseh);
+          lstartcell = NULL;
+          }
+        else {
+          cfree = nullptr;
+          cfree_at = nullptr;
+          }
         }
       
       if(uni >= 1000 && uni < 1010)
-        texture::config.paint_color = texture_colors[uni - 1000 + 1];
+        dtcolor = texture_colors[uni - 1000 + 1];
 
       if(uni >= 2000 && uni < 2010)
-        texture::penwidth = brush_sizes[uni - 2000];
+        dtwidth = brush_sizes[uni - 2000];
 
       if(uni == '0')
         texture::texturesym = !texture::texturesym;
@@ -2054,16 +2386,19 @@ namespace mapeditor {
       
       if(uni == 'p') {
         if(!clickused)
-          dialog::openColorDialog(texture::config.paint_color, texture_colors);
+          dialog::openColorDialog(dtcolor, texture_colors);
+        }
+
+      if(uni == 'f') {
+        if(dtfill == dtcolor)
+          dtfill = 0;
+        else
+          dtfill = dtcolor;
         }
 
       if(uni == 'b') 
-        dialog::editNumber(texture::penwidth, 0, 0.1, 0.005, 0.02, XLAT("brush size"), XLAT("brush size"));
+        dialog::editNumber(dtwidth, 0, 0.1, 0.005, 0.02, XLAT("brush size"), XLAT("brush size"));
       }
-#else
-    (void)clickused;
-    if(0);
-#endif    
 
     else {
       dslayer %= USERLAYERS;
@@ -2137,6 +2472,10 @@ namespace mapeditor {
     if(!cheater) patterns::displaycodes = false;
     if(!cheater) patterns::whichShape = 0;
     modelcell.clear();
+    mapeditor::dtshapes.clear();
+    mapeditor::cfree = nullptr;
+    mapeditor::cfree_at = nullptr;    
+    drawcell = nullptr;
     }) + 
   addHook(hooks_removecells, 0, [] () {
     modelcell.clear();
@@ -2159,8 +2498,7 @@ namespace mapeditor {
   
   transmatrix textrans;
 
-#if CAP_TEXTURE
-  void queue_hcircle(transmatrix Ctr, ld radius) {
+  EX void queue_hcircle(transmatrix Ctr, ld radius) {
     vector<hyperpoint> pts;
     int circp = int(6 * pow(2, vid.linequality));
     if(radius > 0.04) circp *= 2;
@@ -2170,9 +2508,8 @@ namespace mapeditor {
       pts.push_back(Ctr * xspinpush0(M_PI*j*2/circp, radius));
     for(int j=0; j<circp; j++) curvepoint(pts[j]);
     curvepoint(pts[0]);
-    queuecurve(texture::config.paint_color, 0, PPR::LINE);
+    queuecurve(dtcolor, 0, PPR::LINE);
     }
-#endif
 
 #if CAP_POLY
   EX bool haveUserShape(eShapegroup group, int id) {
@@ -2210,10 +2547,10 @@ namespace mapeditor {
             queue_hcircle(M2 * ml, hdist(lstart, mouseh));
             break;
           case 'l':
-            queueline(M2 * mh * C0, M2 * ml * C0, texture::config.paint_color, 4 + vid.linequality, PPR::LINE);
+            queueline(M2 * mh * C0, M2 * ml * C0, dtcolor, 4 + vid.linequality, PPR::LINE);
             break;
           default:
-            queue_hcircle(M2 * mh, texture::penwidth);
+            queue_hcircle(M2 * mh, dtwidth);
           }                
         }
       }

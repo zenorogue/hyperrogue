@@ -104,7 +104,7 @@ EX namespace sn {
     hyperpoint res;
     
     if(lazy) {
-      return decompress(get_int(int(ix), int(iy), int(iz)));
+      return decompress(get_int(int(ix+.5), int(iy+.5), int(iz+.5)));
       }
     
     else {
@@ -552,7 +552,7 @@ EX namespace sn {
       }
     }
   
-  EX hyperpoint get_inverse_exp_symsol(hyperpoint h, bool lazy, bool just_direction) {
+  EX hyperpoint get_inverse_exp_symsol(hyperpoint h, flagtype flags) {
     auto& s = get_tabled();
     s.load();
     
@@ -562,18 +562,17 @@ EX namespace sn {
 
     if(h[2] < 0.) { iz = -iz; swap(ix, iy); }
     
-    hyperpoint res = s.get(ix, iy, iz, lazy);
+    hyperpoint res = s.get(ix, iy, iz, flags & pfNO_INTERPOLATION);
   
     if(h[2] < 0.) { swap(res[0], res[1]); res[2] = -res[2]; }
     if(h[0] < 0.) res[0] = -res[0];
     if(h[1] < 0.) res[1] = -res[1];
     
-    if(!just_direction) return table_to_azeq(res);
-
-    return res;
+    if(flags & pfNO_DISTANCE) return res;
+    return table_to_azeq(res);
     }
 
-  EX hyperpoint get_inverse_exp_nsym(hyperpoint h, bool lazy, bool just_direction) {
+  EX hyperpoint get_inverse_exp_nsym(hyperpoint h, flagtype flags) {
     auto& s = get_tabled();
     s.load();
     
@@ -581,14 +580,13 @@ EX namespace sn {
     ld iy = h[1] >= 0. ? sn::x_to_ix(h[1]) : sn::x_to_ix(-h[1]);
     ld iz = sn::z_to_iz(h[2]);
     
-    hyperpoint res = s.get(ix, iy, iz, lazy);
+    hyperpoint res = s.get(ix, iy, iz, flags & pfNO_INTERPOLATION);
   
     if(h[0] < 0.) res[0] = -res[0];
     if(h[1] < 0.) res[1] = -res[1];
     
-    if(!just_direction) return table_to_azeq(res);
-
-    return res;
+    if(flags & pfNO_DISTANCE) return res;
+    return table_to_azeq(res);
     }
 
   EX string shader_symsol = sn::common +
@@ -745,7 +743,7 @@ EX namespace nilv {
       );
     }
   
-  EX hyperpoint get_inverse_exp(hyperpoint h, int iterations) {
+  EX hyperpoint get_inverse_exp(hyperpoint h, flagtype prec IS(pNORMAL)) {
     ld wmin, wmax;
     
     ld side = h[2] - h[0] * h[1] / 2;
@@ -769,11 +767,13 @@ EX namespace nilv {
     
     ld s = sin(2 * alpha_total);
     
+    int max_iter = (prec & pfLOW_BS_ITER) ? 5 : 20;
+    
     for(int it=0;; it++) {
       ld w = (wmin + wmax) / 2;
       ld z = b * b * (s + (sin(w) - w)/(cos(w) - 1)) + w;
 
-      if(it == iterations) {
+      if(it == max_iter) {
         ld alpha = alpha_total - w/2;
         ld c = b / sin(w/2);
         return point3(c * w * cos(alpha), c * w * sin(alpha), w);
@@ -967,7 +967,7 @@ EX namespace nilv {
 
   EX hyperpoint on_geodesic(hyperpoint s0, hyperpoint s1, ld x) {
     hyperpoint local = inverse(nisot::translate(s0)) * s1;
-    hyperpoint h = get_inverse_exp(local, 100);
+    hyperpoint h = get_inverse_exp(local);
     return nisot::translate(s0) * formula_exp(h * x);
     }
 
@@ -1822,7 +1822,7 @@ EX namespace rots {
     hybrid::in_underlying_geometry([&] {
       hyperpoint h = tC0(T);
       Spin = inverse(gpushxto0(h) * T);
-      d = hr::inverse_exp(h, iTable);
+      d = hr::inverse_exp(h);
       alpha = atan2(Spin[0][1], Spin[0][0]);
       distance = hdist0(h);
       beta = atan2(h[1], h[0]);
@@ -1933,8 +1933,8 @@ EX namespace rots {
       dynamicval<transmatrix> m3(playerV, Id);
       dynamicval<transmatrix> m4(actual_view_transform, Id);
       dynamicval<eModel> pm(pmodel, mdDisk);
-      dynamicval<ld> pss(vid.scale, (sphere ? 10 : 1) * underlying_scale);
-      dynamicval<ld> psa(vid.alpha, sphere ? 10 : 1);
+      dynamicval<ld> pss(pconf.scale, (sphere ? 10 : 1) * underlying_scale);
+      dynamicval<ld> psa(pconf.alpha, sphere ? 10 : 1);
       dynamicval<hrmap*> p(hybrid::pmap, NULL);
       dynamicval<int> psr(sightrange_bonus, 0);
       calcparam();
@@ -1970,25 +1970,29 @@ EX namespace nisot {
     #endif
     return true;
     }
-  
-  EX void geodesic_step(hyperpoint& at, hyperpoint& velocity) {
-    auto acc = christoffel(at, velocity, velocity);
-    
-    auto at2 = at + velocity / 2;
-    auto velocity2 = velocity + acc / 2;
-    
-    auto acc2 = christoffel(at2, velocity2, velocity2);
-    
-    at = at + velocity + acc2 / 2;
-    
-    velocity = velocity + acc;
+
+  EX hyperpoint get_acceleration(const hyperpoint& at, const hyperpoint& vel) {
+    return christoffel(at, vel, vel);
     }
   
-  EX hyperpoint numerical_exp(hyperpoint v, int steps) {
+  EX void geodesic_step(hyperpoint& at, hyperpoint& vel) {
+    /* RK4 method */
+    auto acc1 = get_acceleration(at, vel);
+    auto acc2 = get_acceleration(at + vel/2, vel + acc1/2);
+    auto acc3 = get_acceleration(at + vel/2 + acc1/4, vel + acc2/2);
+    auto acc4 = get_acceleration(at + vel + acc2/2, vel + acc3);
+    
+    at += vel + (acc1+acc2+acc3)/6;
+    vel += (acc1+2*acc2+2*acc3+acc4)/6;
+    }
+  
+  EX int rk_steps = 20;
+
+  EX hyperpoint numerical_exp(hyperpoint v) {
     hyperpoint at = point31(0, 0, 0);
-    v /= steps;
+    v /= rk_steps;
     v[3] = 0;
-    for(int i=0; i<steps; i++) geodesic_step(at, v);
+    for(int i=0; i<rk_steps; i++) geodesic_step(at, v);
     return at;
     }
 
@@ -2009,13 +2013,34 @@ EX namespace nisot {
       }
     else h = Pos * h;
 
-    int steps = 100;
+    int steps = rk_steps;
     h /= steps;
     
+    auto& at = tPos[3];
+    auto& vel = h;
+    
     for(int i=0; i<steps; i++) {
-      for(int j=0; j<3; j++)
-        tPos[j] += christoffel(tPos[3], h, tPos[j]);
-      geodesic_step(tPos[3], h);
+      auto acc1 = get_acceleration(at, vel);
+      auto at1 = at + vel/2; auto vel1 = vel + acc1/2;
+      auto acc2 = get_acceleration(at1, vel1);
+      auto at2 = at1 + acc1/4; auto vel2 = vel + acc2/2;
+      auto acc3 = get_acceleration(at2, vel2);
+      auto at3 = at + vel + acc2/2; auto vel3 = vel + acc3;
+      auto acc4 = get_acceleration(at3, vel3);
+
+      for(int j=0; j<3; j++) {
+        auto& tra = tPos[j];
+        
+        auto tacc1 = christoffel(at, vel, tra);
+        auto tacc2 = christoffel(at1, vel1, tra + tacc1/2);
+        auto tacc3 = christoffel(at2, vel2, tra + tacc2/2);
+        auto tacc4 = christoffel(at3, vel3, tra + tacc3);
+        
+        tra += (tacc1+tacc2*2+tacc3*2+tacc4) / 6;
+        }
+
+      at += vel + (acc1+acc2+acc3)/6;
+      vel += (acc1+2*acc2+2*acc3+acc4)/6;
       }
                                                                                   
     if(sl2) {
@@ -2043,12 +2068,12 @@ EX namespace nisot {
     return parallel_transport_bare(P, direction);
     }
   
-  EX transmatrix spin_towards(const transmatrix Position, const hyperpoint goal) {
+  EX transmatrix spin_towards(const transmatrix Position, const hyperpoint goal, flagtype prec IS(pNORMAL)) {
 
     hyperpoint at = tC0(Position);
     transmatrix push_back = inverse(translate(at));
     hyperpoint back_goal = push_back * goal;
-    back_goal = inverse_exp(back_goal, iTable);
+    back_goal = inverse_exp(back_goal, prec);
     
     transmatrix back_Position = push_back * Position;
 
@@ -2131,6 +2156,11 @@ EX namespace nisot {
       shift_arg_formula(nilv::nilwidth);
       return 0;
       }
+    else if(argis("-rk-steps")) {
+      PHASEFROM(2);
+      shift(); rk_steps = argi();
+      return 0;
+      }      
     else if(argis("-nilv")) {
       PHASEFROM(2);
       if(nil) stop_game();

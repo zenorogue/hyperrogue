@@ -3904,3 +3904,14 @@ Geometries:
 - reverse FPP mode on iOS should be fixed
 - fixed the missing message when PC could not stay in place
 - fixed a potential rare crash
+
+2020-04-17 21:00 Update 11.3j:
+- the Hypersian Rug mode now uses HyperRogue's 3D engine. As a result, its controls are consistent with HyperRogue 3D (which has received shift-strafe for this consistency), you can now view it in all models, and embed in Solv and Nil geometries.
+- a drawing tool (see creative mode). Contrary to Vector Graphics Editor (now called Shape Editor) and texture editor, this simulates on using a huge non-Euclidean blackboard (unless played in Euclidean geometry or in a quotient space, of course).
+- WRL export (export e.g. your Hypersian Rug or a hyperbolic honeycomb in ball model to a 3D modelling tool or a 3D printer)
+- fixed some issues with 'vertical stretch' (acted inconsistently, stretched text)
+- fixed central inversion in 3D models
+- better error information when trying to read an illegal tes file
+- CA mode now automatically awards Orb of Aether (so you can step space) and is simulated on every step in animation mode
+- more accurate Solv rendering (using RK4 method instead of buggy midpoint)
+- when giving values, you can use "..|" (animate with sharp changes); "../" can be also used for spline interpolation

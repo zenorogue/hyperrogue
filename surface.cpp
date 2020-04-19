@@ -24,7 +24,7 @@ string shape_name[] = { "hypersian rug", "tractricoid", "Dini's surface", "Kuen 
   
 EX eShape sh;
 
-hyperpoint unit_vector[3] = {hpxyz(1,0,0), hpxyz(0,1,0), hpxyz(0,0,1)};
+hyperpoint unit_vector[3] = {point3(1,0,0), point3(0,1,0), point3(0,0,1)};
 
 ld last_int_of = 0, last_int = 0;
 
@@ -67,7 +67,7 @@ hyperpoint coord(hyperpoint h) {
       ld r = 1 / cosh(t);
       ld x = t - tanh(t);
 
-      return hpxyz( r * sin(v), r * cos(v), x );
+      return point31( r * sin(v), r * cos(v), x );
       break;
       }
     
@@ -77,7 +77,7 @@ hyperpoint coord(hyperpoint h) {
       
       ld a = sqrt(1-dini_b*dini_b);
       
-      return hpxyz( a * sin(v) * sin(t), a * cos(v) * sin(t),  a * (cos(t) + log(tan(t/2))) + dini_b * v );
+      return point31( a * sin(v) * sin(t), a * cos(v) * sin(t),  a * (cos(t) + log(tan(t/2))) + dini_b * v );
       break;
       }
     
@@ -87,7 +87,7 @@ hyperpoint coord(hyperpoint h) {
       
       ld deno = 1 / (1 + u * u * sin(v) * sin(v));
       
-      return hpxyz(
+      return point31(
         2 * (cos(u) + u * sin(u)) * sin(v) * deno,
         2 * (sin(u) - u * cos(u)) * sin(v) * deno,
         log(tan(v/2)) + 2 * cos(v) * deno
@@ -101,7 +101,7 @@ hyperpoint coord(hyperpoint h) {
       ld phi = hyper_b * cosh(v);
       ld psi = integral(v);
       
-      return hpxyz( phi * cos(u), phi * sin(u), psi );
+      return point31( phi * cos(u), phi * sin(u), psi );
       }
     
     default:
@@ -122,10 +122,10 @@ hyperpoint coord_derivative(hyperpoint h, int cc) {
       ld v = h[1];
       if(cc == 0) {
         ld phi = hyper_b * cosh(v);
-        return hpxyz( phi * -sin(u), phi * cos(u), 0 );
+        return point3( phi * -sin(u), phi * cos(u), 0 );
         }
       else {
-        return hpxyz( hyper_b * sinh(v) * cos(u), hyper_b * sinh(v) * sin(u), f(v) );
+        return point3( hyper_b * sinh(v) * cos(u), hyper_b * sinh(v) * sin(u), f(v) );
         }
       }
     case dsKuen: {
@@ -134,12 +134,12 @@ hyperpoint coord_derivative(hyperpoint h, int cc) {
       ld denom = pow(sin(v),2)*(u*u)+1;
       ld denom2 = denom * denom;
       if(cc == 1) 
-        return hpxyz (
+        return point3(
           2*sin(v)/denom*u*cos(u)+-4*(sin(u)*u+cos(u))*pow(sin(v),3)/denom2*u,
           -4*pow(sin(v),3)*(sin(u)-u*cos(u))/denom2*u+2*sin(u)*sin(v)/denom*u,
           -4*pow(sin(v),2)/denom2*u*cos(v)
           );
-      else return hpxyz (
+      else return point3(
           2*(sin(u)*u+cos(u))/denom*cos(v)+-4*(sin(u)*u+cos(u))*pow(sin(v),2)/denom2*(u*u)*cos(v),
           2*(sin(u)-u*cos(u))/denom*cos(v)+-4*pow(sin(v),2)*(sin(u)-u*cos(u))/denom2*(u*u)*cos(v),
          -4*sin(v)/denom2*(u*u)*pow(cos(v),2)+1/tan(v/2)*(pow(tan(v/2),2)+1)/2+-2*sin(v)/denom
@@ -166,13 +166,13 @@ ld compute_curvature(hyperpoint at) {
 hyperpoint shape_origin() {
   switch(sh) {
     case dsDini:
-      return hpxyz(M_PI * .82, 0, 0);
+      return point31(M_PI * .82, 0, 0);
     case dsTractricoid:
-      return hpxyz(1, 0, 0);
+      return point31(1, 0, 0);
     case dsKuen:
-      return hpxyz(M_PI * .500001, M_PI * 1, 0);
+      return point31(M_PI * .500001, M_PI * 1, 0);
     case dsHyperlike:
-      return hpxyz(0,0,0);
+      return point31(0,0,0);
     default:
       return Hypc;
     }
@@ -284,7 +284,7 @@ transmatrix create_M_matrix(hyperpoint zero, hyperpoint v1) {
   transmatrix T = build_matrix(Te0, Te1, Hypc, C03);
 
   v1 = v1 / hypot_d(3, T*v1);
-  hyperpoint v2 = hpxyz(1e-3, 1e-4, 0);
+  hyperpoint v2 = point3(1e-3, 1e-4, 0);
   v2 = v2 - v1 * ((T*v1) | (T*v2)) / hypot_d(3, T*v1);
   v2 = v2 / hypot_d(3, T*v2);
   
@@ -307,9 +307,9 @@ dexp_origin at_zero(hyperpoint zero, transmatrix start) {
   println(hlog, "zero = ", zero);
 
   println(hlog, "curvature at zero = ", compute_curvature(zero));
-  println(hlog, "curvature at X1 = ", compute_curvature(zero + hpxyz(.3, 0, 0)));
-  println(hlog, "curvature at X2 = ", compute_curvature(zero + hpxyz(0, .3, 0)));
-  println(hlog, "curvature at X3 = ", compute_curvature(zero + hpxyz(.4, .3, 0)));
+  println(hlog, "curvature at X1 = ", compute_curvature(zero + point3(.3, 0, 0)));
+  println(hlog, "curvature at X2 = ", compute_curvature(zero + point3(0, .3, 0)));
+  println(hlog, "curvature at X3 = ", compute_curvature(zero + point3(.4, .3, 0)));
   
   return {start, create_M_matrix(zero, unit_vector[0]), zero};
   }
@@ -338,14 +338,14 @@ void addTriangleV(rug::rugpoint *t1, rug::rugpoint *t2, rug::rugpoint *t3, ld le
   }
 
 hyperpoint kuen_cross(ld v, ld u) {
-  auto du = coord_derivative(hpxyz(v,u,0), 0);
-  auto dv = coord_derivative(hpxyz(v,u,0), 1);
+  auto du = coord_derivative(point3(v,u,0), 0);
+  auto dv = coord_derivative(point3(v,u,0), 1);
   return du^dv;
   }
 
 ld kuen_hypot(ld v, ld u) {
-  auto du = coord_derivative(hpxyz(v,u,0), 0);
-  auto dv = coord_derivative(hpxyz(v,u,0), 1);
+  auto du = coord_derivative(point3(v,u,0), 0);
+  auto dv = coord_derivative(point3(v,u,0), 1);
   auto n = hypot_d(3, du^dv);
   return n;
   }
@@ -368,7 +368,7 @@ int dexp_comb_colors[16] = {
    };
 
 int coverage_style;
-vector<pair<hyperpoint, int> > coverage;
+EX vector<pair<hyperpoint, int> > coverage;
 
 #ifndef CAP_KUEN_MAP
 #define CAP_KUEN_MAP 0
@@ -385,8 +385,8 @@ void draw_kuen_map() {
     for(int h=0; h<512; h++) {
       ld v = M_PI * (r+.5) / 512;
       ld u = 2 * M_PI * (h+.5) / 512;
-      auto du = coord_derivative(hpxyz(v,u,0), 0);
-      auto dv = coord_derivative(hpxyz(v,u,0), 1);
+      auto du = coord_derivative(point3(v,u,0), 0);
+      auto dv = coord_derivative(point3(v,u,0), 1);
       auto n = hypot_d(3, du^dv);
 
       if(n > nmax) nmax = n;
@@ -459,7 +459,8 @@ void run_hyperlike() {
     int sgn = y > 0 ? 1 : -1;
     ld phi = hyper_b * cosh(y);
     int pt = y * precision * sgn / hyperlike_bound();
-    p->flat = hpxyz(phi * cos(x), phi * sin(x), sgn * integral_table[pt]);
+    USING_NATIVE_GEOMETRY;
+    p->native = point31(phi * cos(x), phi * sin(x), sgn * integral_table[pt]);
     p->valid = true;
     }
   }
@@ -520,7 +521,8 @@ void run_kuen() {
         np->inqueue = false;
         np->dist = 0;
         np->h = p->h;
-        np->flat = coord(px.params);
+        USING_NATIVE_GEOMETRY;
+        np->native = coord(px.params);
         np->surface_point = px;
         np->dexp_id = p->dexp_id;
         coverages[p->dexp_id] |= pid[part];
@@ -534,9 +536,11 @@ void run_kuen() {
       for(int i=0; i<3; i++)
         if(!r[i]) looks_good = false;
       if(!looks_good) continue;
-      for(int i=0; i<3; i++)
-        if(hypot_d(3, r[i]->flat - r[(i+1)%3]->flat) > .2)
+      for(int i=0; i<3; i++) {
+        USING_NATIVE_GEOMETRY;
+        if(hypot_d(3, r[i]->native - r[(i+1)%3]->native) > .2)
           looks_good = false;
+        }
       if(looks_good)
         addTriangleV(r[0], r[1], r[2]);
       }
@@ -557,9 +561,11 @@ void run_kuen() {
 
 template<class T> void run_function(T f) {
   full_mesh();
-  for(auto p: rug::points)
-    p->flat = f(p->h),
+  for(auto p: rug::points) {
+    USING_NATIVE_GEOMETRY;
+    p->native = f(p->h),
     p->valid = true;
+    }
   }
 
 void run_other() {
@@ -572,7 +578,10 @@ void run_other() {
     auto h = p->h;
 
     p->surface_point = map_to_surface(h, dp);
-    p->flat = coord(p->surface_point.params);
+    if(1) {
+      USING_NATIVE_GEOMETRY;    
+      p->native = coord(p->surface_point.params);
+      }
     history::progress(XLAT("solving the geodesics on: %1, %2/%3", XLAT(shape_name[sh]), its(it), its(isize(rug::points))));
     if(p->surface_point.remaining_distance == 0)
       coverage.emplace_back(h, rchar(it) + 256 * 7);
@@ -594,10 +603,9 @@ EX void run_shape(eShape s) {
   coverage.clear();
   need_mouseh = true;
   sh = s;
-  transmatrix crot = rug::rugged ? rug::currentrot : Id;
-  rug::apply_rotation(inverse(crot));
   
   if(rug::rugged) rug::close();
+  rug::gwhere = rug::rgEuclid;
 
   rug::init();
   // if(!rug::rugged) rug::reopen();
@@ -641,8 +649,8 @@ EX void run_shape(eShape s) {
     ld minx = 1e9, maxx = -1e9;
   
     for(auto p: rug::points) if(p->valid) {
-      minx = min(p->flat[2], minx);
-      maxx = max(p->flat[2], maxx);
+      minx = min(p->native[2], minx);
+      maxx = max(p->native[2], maxx);
       rug::qvalid++;
       }
     
@@ -650,12 +658,8 @@ EX void run_shape(eShape s) {
   
     ld shift = -(minx + maxx) / 2;
     for(auto p: rug::points) if(p->valid)
-      p->flat[2] += shift;
+      p->native[2] += shift;
     }
-
-  rug::apply_rotation(crot);
-  if(rug::rug_perspective)
-    rug::push_all_points(2, -rug::model_distance);
   }
 
 void cancel_shape() {
@@ -703,6 +707,13 @@ EX void show_surfaces() {
   if((rug::rugged && sh && sh != dsHyperboloid && sh != dsHemisphere) || coverage_style)
     dialog::addSelItem(XLAT("display coverage"), cstyles[coverage_style], 'c');
   else dialog::addBreak(100);
+  
+  #if CAP_FILES
+  if(rug::rugged)
+    dialog::addItem(XLAT("save the current embedding"), 's');
+  else
+    dialog::addItem(XLAT("load a saved embedding"), 's');
+  #endif
 
   dialog::addHelp();
   dialog::addBack();
@@ -722,6 +733,15 @@ EX void show_surfaces() {
         "For convenience, you can also choose other 3D models from this menu."
         ));
 
+    #if CAP_FILES
+    else if(uni == 's') {
+      static string rugname = "saved.rug";
+      if(rug::rugged) 
+        dialog::openFileDialog(rugname, XLAT("save embedding to:"), ".rug", [] () { rug::rug_save(rugname); return true; });
+      else 
+        dialog::openFileDialog(rugname, XLAT("load embedding from:"), ".rug", [] () { rug::init(); rug::rug_load(rugname); return true; });
+      }
+    #endif
     else if(uni == '1')
       run_shape(dsTractricoid);
     else if(uni == '2')
@@ -747,7 +767,7 @@ EX void show_surfaces() {
       }
     else if(uni == 'x')
       for(auto p: rug::points)
-        p->flat = p->surface_point.params;
+        p->native = p->surface_point.params;
     else if(uni == '#')
       dialog::editNumber(dini_b, -1, 1, .05, .15, XLAT("parameter"),
         XLAT("The larger the number, the more twisted it is.")

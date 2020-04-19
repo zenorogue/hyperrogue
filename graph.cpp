@@ -1390,7 +1390,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const transmatrix& V1, color_t 
           }
         else {
           queuepoly(VHEAD1, cgi.shPHead,  0xF0A0D0FF);
-          queuepoly(VBS, cgi.shFlowerHand,  0xC00000FF);
+          queuepoly(VBODY * VBS, cgi.shFlowerHand,  0xC00000FF);
           queuepoly(VBODY2 * VBS, cgi.shSuspenders,  0xC00000FF);
           }
         }
@@ -2858,10 +2858,10 @@ int haveaura_cached;
 EX int haveaura() {
   if(!(vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL))) return 0;
   if(sphere && mdAzimuthalEqui()) return 0;
-  if(among(pmodel, mdJoukowsky, mdJoukowskyInverted) && hyperbolic && models::model_transition < 1) 
+  if(among(pmodel, mdJoukowsky, mdJoukowskyInverted) && hyperbolic && pconf.model_transition < 1) 
     return 2;
   if(pmodel == mdFisheye) return 1;
-  return pmodel == mdDisk && (!sphere || vid.alpha > 10) && !euclid;
+  return pmodel == mdDisk && (!sphere || pconf.alpha > 10) && !euclid;
   }
   
 vector<pair<int, int> > auraspecials; 
@@ -2884,7 +2884,7 @@ void apply_joukowsky_aura(hyperpoint& h) {
     h = ret;
     }
   if(nonisotropic) {
-    h = lp_apply(inverse_exp(h, iTable, true));
+    h = lp_apply(inverse_exp(h, pfNO_DISTANCE));
     }
   }
 
@@ -2927,13 +2927,14 @@ void sumaura(int v) {
 vector<glhr::colored_vertex> auravertices;
 
 void drawaura() {
+  DEBBI(DF_GRAPH, ("draw aura"));
   if(!haveaura()) return;
   if(vid.stereo_mode) return;
   double rad = current_display->radius;
-  if(sphere && !mdAzimuthalEqui()) rad /= sqrt(vid.alpha*vid.alpha - 1);
+  if(sphere && !mdAzimuthalEqui()) rad /= sqrt(pconf.alpha*pconf.alpha - 1);
   if(hyperbolic && pmodel == mdFisheye) {
     ld h = 1;
-    h /= vid.fisheye_param;
+    h /= pconf.fisheye_param;
     ld nrad = h / sqrt(2 + h*h);
     rad *= nrad;
     }
@@ -2959,9 +2960,9 @@ void drawaura() {
     for(int x=0; x<vid.xres; x++) {
 
       ld hx = (x * 1. - current_display->xcenter) / rad;
-      ld hy = (y * 1. - current_display->ycenter) / rad / vid.stretch;
+      ld hy = (y * 1. - current_display->ycenter) / rad / pconf.stretch;
   
-      if(vid.camera_angle) camrotate(hx, hy);
+      if(pconf.camera_angle) camrotate(hx, hy);
       
       ld fac = sqrt(hx*hx+hy*hy);
       if(fac < 1) continue;
@@ -3007,8 +3008,8 @@ void drawaura() {
   facs[10] = 10;
   cmul[1] = cmul[0];
   
-  bool inversion = vid.alpha <= -1 || pmodel == mdJoukowsky;
-  bool joukowsky = among(pmodel, mdJoukowskyInverted, mdJoukowsky) && hyperbolic && models::model_transition < 1;
+  bool inversion = pconf.alpha <= -1 || pmodel == mdJoukowsky;
+  bool joukowsky = among(pmodel, mdJoukowskyInverted, mdJoukowsky) && hyperbolic && pconf.model_transition < 1;
 
   for(int r=0; r<=AURA; r++) for(int z=0; z<11; z++) {
     float rr = (M_PI * 2 * r) / AURA;
@@ -3024,7 +3025,7 @@ void drawaura() {
       else        
         models::apply_orientation(c1, s1);
 
-      ld& mt = models::model_transition;
+      ld& mt = pconf.model_transition;
       ld mt2 = 1 - mt;
 
       ld m = sqrt(c1*c1 + s1*s1 / mt2 / mt2);
@@ -3034,7 +3035,7 @@ void drawaura() {
       }
 
     cx[r][z][0] = rad0 * c;
-    cx[r][z][1] = rad0 * s * vid.stretch;
+    cx[r][z][1] = rad0 * s * pconf.stretch;
     
     for(int u=0; u<3; u++)
       cx[r][z][u+2] = bak[u] + (aurac[rm][u] / (aurac[rm][3]+.1) - bak[u]) * cmul[z];
@@ -3362,7 +3363,7 @@ bool openorsafe(cell *c) {
 EX color_t stdgridcolor = 0x202020FF;
 
 EX int gridcolor(cell *c1, cell *c2) {
-  if(cmode & sm::DRAW) return Dark(forecolor);
+  if(cmode & sm::DRAW && !mapeditor::drawing_tool) return Dark(forecolor);
   if(!c2)
     return 0x202020 >> darken;
   int rd1 = rosedist(c1), rd2 = rosedist(c2);
@@ -3667,7 +3668,7 @@ bool celldrawer::cell_clipped() {
     hyperpoint H = tC0(V);
     if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
     else {
-      hyperpoint H2 = inverse_exp(H, iLazy);
+      hyperpoint H2 = inverse_exp(H, pQUICK);
       for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -.4) return true;
       }
     noclipped++;
@@ -3676,7 +3677,7 @@ bool celldrawer::cell_clipped() {
     hyperpoint H = tC0(V);
     if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
     else {
-      hyperpoint H2 = inverse_exp(H, iLazy);
+      hyperpoint H2 = inverse_exp(H, pQUICK);
       for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -2) return true;
       }
     noclipped++;
@@ -3697,7 +3698,8 @@ EX void gridline(const transmatrix& V1, const hyperpoint h1, const transmatrix& 
   if(WDIM == 3 && fat_edges) {
     transmatrix T = V1 * rgpushxto0(h1);
     transmatrix S = rspintox(inverse(T) * V2 * h2);
-    queuepoly(T * S, cgi.generate_pipe(d, vid.linewidth), col);
+    auto& p = queuepoly(T * S, cgi.generate_pipe(d, vid.linewidth), col);
+    p.intester = xpush0(d/2);
     return;
     }
   #endif
@@ -4470,12 +4472,12 @@ EX void precise_mouseover() {
   if(WDIM == 3) { 
     mouseover2 = mouseover = centerover;
     ld best = HUGE_VAL;
-    hyperpoint h = direct_exp(lp_iapply(ztangent(0.01)), 100);
+    hyperpoint h = direct_exp(lp_iapply(ztangent(0.01)));
 
     transmatrix cov = ggmatrix(mouseover2);
     forCellIdEx(c1, i, mouseover2) {
       hyperpoint h1 = tC0(cov * currentmap->adj(mouseover2, i));
-      ld dist = geo_dist(h, h1, iTable) - geo_dist(C0, h1, iTable);
+      ld dist = geo_dist(h, h1) - geo_dist(C0, h1);
       if(dist < best) mouseover = c1, best = dist;
       }
     return; 
@@ -4559,7 +4561,7 @@ EX void drawthemap() {
   #endif
   if(non_spatial_model())
     spatial_graphics = false;
-  if(pmodel == mdDisk && abs(vid.alpha) < 1e-6) spatial_graphics = false;
+  if(pmodel == mdDisk && abs(pconf.alpha) < 1e-6) spatial_graphics = false;
   
   if(!spatial_graphics) wmspatial = mmspatial = false;
   if(GDIM == 3) wmspatial = mmspatial = true;
@@ -4627,6 +4629,8 @@ EX void drawthemap() {
   drawMarkers();
   profile_stop(4);
   drawFlashes();
+  
+  mapeditor::draw_dtshapes();
   
   if(multi::players > 1 && !shmup::on) {
     if(multi::centerplayer != -1) 
@@ -4762,7 +4766,7 @@ EX void calcparam() {
   cd->xcenter = cd->xtop + cd->xsize / 2;
   cd->ycenter = cd->ytop + cd->ysize / 2;
 
-  if(vid.scale > -1e-2 && vid.scale < 1e-2) vid.scale = 1;
+  if(pconf.scale > -1e-2 && pconf.scale < 1e-2) pconf.scale = 1;
   
   ld realradius = min(cd->xsize / 2, cd->ysize / 2);
   
@@ -4784,11 +4788,11 @@ EX void calcparam() {
     if(current_display->sidescreen) cd->xcenter = vid.yres/2;
     }
 
-  cd->radius = vid.scale * cd->scrsize;
+  cd->radius = pconf.scale * cd->scrsize;
   if(GDIM == 3 && in_perspective()) cd->radius = cd->scrsize;
   realradius = min(realradius, cd->radius);
   
-  ld aradius = sphere ? cd->radius / (vid.alpha - 1) : cd->radius;
+  ld aradius = sphere ? cd->radius / (pconf.alpha - 1) : cd->radius;
   
   if(dronemode) { cd->ycenter -= cd->radius; cd->ycenter += vid.fsize/2; cd->ycenter += vid.fsize/2; cd->radius *= 2; }
   
@@ -4800,8 +4804,8 @@ EX void calcparam() {
       cd->xcenter = cd->xtop + cd->xsize - vid.fsize - aradius;
     }
 
-  cd->xcenter += cd->scrsize * vid.xposition;
-  cd->ycenter += cd->scrsize * vid.yposition;
+  cd->xcenter += cd->scrsize * pconf.xposition;
+  cd->ycenter += cd->scrsize * pconf.yposition;
   
   cd->tanfov = tan(vid.fov * degree / 2);
   

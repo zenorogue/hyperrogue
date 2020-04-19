@@ -710,24 +710,24 @@ EX namespace geom3 {
   void geometry_information::prepare_compute3() {
     using namespace geom3;
     DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("geom3::compute"));
-    // tanh(depth) / tanh(camera) == vid.alpha
+    // tanh(depth) / tanh(camera) == pconf.alpha
     invalid = "";
     
     if(GDIM == 3) ;
     else if(vid.tc_alpha < vid.tc_depth && vid.tc_alpha < vid.tc_camera)
-      vid.alpha = tan_auto(vid.depth) / tan_auto(vid.camera);
+      pconf.alpha = tan_auto(vid.depth) / tan_auto(vid.camera);
     else if(vid.tc_depth < vid.tc_alpha && vid.tc_depth < vid.tc_camera) {
-      ld v = vid.alpha * tan_auto(vid.camera);
+      ld v = pconf.alpha * tan_auto(vid.camera);
       if(hyperbolic && (v<1e-6-12 || v>1-1e-12)) invalid = "cannot adjust depth", vid.depth = vid.camera;
       else vid.depth = atan_auto(v);
       }
     else {
-      ld v = tan_auto(vid.depth) / vid.alpha;
+      ld v = tan_auto(vid.depth) / pconf.alpha;
       if(hyperbolic && (v<1e-12-1 || v>1-1e-12)) invalid = "cannot adjust camera", vid.camera = vid.depth;
       else vid.camera = atan_auto(v);
       }
     
-    if(fabs(vid.alpha) < 1e-6) invalid = "does not work with perfect Klein";
+    if(fabs(pconf.alpha) < 1e-6) invalid = "does not work with perfect Klein";
   
     if(invalid != "") {
       INFDEEP = .7;
@@ -851,20 +851,20 @@ EX void switch_always3() {
 
   EX void switch_tpp() {
     if(dual::split(switch_fpp)) return;
-    if(pmodel == mdDisk && vid.camera_angle) {
+    if(pmodel == mdDisk && pconf.camera_angle) {
       vid.yshift = 0;
-      vid.camera_angle = 0;
-      vid.xposition = 0;
-      vid.yposition = 0;
-      vid.scale = 1;      
+      pconf.camera_angle = 0;
+      pconf.xposition = 0;
+      pconf.yposition = 0;
+      pconf.scale = 1;      
       vid.fixed_facing = false;
       }
     else {
       vid.yshift = -0.3;
-      vid.camera_angle = -45;
-      vid.scale = 18/16. * vid.xres / vid.yres / multi::players;
-      vid.xposition = 0;
-      vid.yposition = -0.9;
+      pconf.camera_angle = -45;
+      pconf.scale = 18/16. * vid.xres / vid.yres / multi::players;
+      pconf.xposition = 0;
+      pconf.yposition = -0.9;
       vid.fixed_facing = true;
       vid.fixed_facing_dir = 90;
       }

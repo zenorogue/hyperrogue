@@ -702,6 +702,8 @@ EX transmatrix rpushxto0(const hyperpoint& H) {
 
 EX transmatrix ggpushxto0(const hyperpoint& H, ld co) {
   if(translatable) {
+    if(nonisotropic)
+      return co > 0 ? eupush(H) : inverse(eupush(H));
     return eupush(co * H);
     }
   if(prod) {
@@ -1030,13 +1032,13 @@ EX bool asign(ld y1, ld y2) { return signum(y1) != signum(y2); }
 
 EX ld xcross(ld x1, ld y1, ld x2, ld y2) { return x1 + (x2 - x1) * y1 / (y1 - y2); }
 
-EX transmatrix parallel_transport(const transmatrix Position, const transmatrix& ori, const hyperpoint direction, int precision IS(100)) {
+EX transmatrix parallel_transport(const transmatrix Position, const transmatrix& ori, const hyperpoint direction) {
   if(nonisotropic) return nisot::parallel_transport(Position, direction);
   else if(prod) {
     hyperpoint h = product::direct_exp(ori * direction);
     return Position * rgpushxto0(h);
     }
-  else return Position * rgpushxto0(direct_exp(direction, precision));
+  else return Position * rgpushxto0(direct_exp(direction));
   }
 
 EX void apply_parallel_transport(transmatrix& Position, const transmatrix orientation, const hyperpoint direction) {
@@ -1151,8 +1153,8 @@ EX hyperpoint tangent_length(hyperpoint dir, ld length) {
   }
 
 /** exponential function: follow the geodesic given by v */
-EX hyperpoint direct_exp(hyperpoint v, int steps) {
-  if(sn::in()) return nisot::numerical_exp(v, steps);
+EX hyperpoint direct_exp(hyperpoint v) {
+  if(sn::in()) return nisot::numerical_exp(v);
   if(nil) return nilv::formula_exp(v);
   if(sl2) return slr::formula_exp(v);
   if(prod) return product::direct_exp(v);
@@ -1163,20 +1165,26 @@ EX hyperpoint direct_exp(hyperpoint v, int steps) {
   }
 
 #if HDR
-enum iePrecision { iLazy, iTable };
+constexpr flagtype pfNO_INTERPOLATION = 1; /**< in tables (sol/nih geometries), do not use interpolations */
+constexpr flagtype pfNO_DISTANCE      = 2; /**< we just need the directions -- this makes it a bit faster in sol/nih geometries */
+constexpr flagtype pfLOW_BS_ITER      = 4; /**< low iterations in binary search (nil geometry, sl2 not affected currently) */
+
+constexpr flagtype pQUICK     = pfNO_INTERPOLATION | pfLOW_BS_ITER;
+
+constexpr flagtype pNORMAL    = 0;
 #endif
   
 /** inverse exponential function \see hr::direct_exp */
-EX hyperpoint inverse_exp(const hyperpoint h, iePrecision p, bool just_direction IS(true)) {
+EX hyperpoint inverse_exp(const hyperpoint h, flagtype prec IS(pNORMAL)) {
   #if CAP_SOLV
   if(sn::in()) {
     if(nih) 
-      return sn::get_inverse_exp_nsym(h, p == iLazy, just_direction);
+      return sn::get_inverse_exp_nsym(h, prec);
     else
-      return sn::get_inverse_exp_symsol(h, p == iLazy, just_direction);
+      return sn::get_inverse_exp_symsol(h, prec);
     }
   #endif
-  if(nil) return nilv::get_inverse_exp(h, p == iLazy ? 5 : 20);
+  if(nil) return nilv::get_inverse_exp(h, prec);
   if(sl2) return slr::get_inverse_exp(h);
   if(prod) return product::inverse_exp(h);
   ld d = acos_auto_clamp(h[GDIM]);
@@ -1186,9 +1194,15 @@ EX hyperpoint inverse_exp(const hyperpoint h, iePrecision p, bool just_direction
   return v;
   }
 
-EX ld geo_dist(const hyperpoint h1, const hyperpoint h2, iePrecision p) {
+EX ld geo_dist(const hyperpoint h1, const hyperpoint h2, flagtype prec IS(pNORMAL)) {
   if(!nonisotropic) return hdist(h1, h2);
-  return hypot_d(3, inverse_exp(inverse(nisot::translate(h1)) * h2, p, false));
+  return hypot_d(3, inverse_exp(inverse(nisot::translate(h1)) * h2, prec));
+  }
+
+EX ld geo_dist_q(const hyperpoint h1, const hyperpoint h2, flagtype prec IS(pNORMAL)) {
+  auto d = geo_dist(h1, h2, prec);
+  if(elliptic && d > M_PI/2) return M_PI - d;
+  return d;
   }
 
 EX hyperpoint lp_iapply(const hyperpoint h) {

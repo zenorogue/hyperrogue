@@ -1263,6 +1263,10 @@ EX namespace dialog {
     else act();
     }
 
+  inline void push_confirm_dialog(const reaction_t& act, const string& s) {
+    pushScreen([act, s] () { confirm_dialog(s, act); });
+    }
+
   inline reaction_t add_confirmation(const reaction_t& act) {
     return [act] { do_if_confirmed(act); };
     }

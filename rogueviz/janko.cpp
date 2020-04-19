@@ -2,6 +2,8 @@
 
 #include "../hyper.h"
 
+#if !ISWEB
+
 namespace hr {
 
 eGeometry gJanko1(eGeometry(-1));
@@ -27,7 +29,7 @@ struct jmatrix : array<array<int, 7>, 7> {
   };
 
 vector<jmatrix> jms;
-unordered_map<jmatrix, int> ids;
+std::unordered_map<jmatrix, int> ids;
 
 jmatrix J, Z, id;
 
@@ -142,3 +144,4 @@ auto shot_hooks = addHook(hooks_args, 100, [] {
 
 }
 
+#endif

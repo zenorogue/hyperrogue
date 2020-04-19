@@ -143,11 +143,21 @@ void celldrawer::setcolors() {
     case laCrossroads2: case laCrossroads3: case laCrossroads4: case laCrossroads5:
     case laRose: case laPower: case laWildWest: case laHalloween: case laRedRock:
     case laDragon: case laStorms: case laTerracotta: case laMercuryRiver:
-    case laDesert: case laKraken: case laDocks: case laCA:
+    case laDesert: case laKraken: case laDocks: 
     case laMotion: case laGraveyard: case laWineyard: case laLivefjord: 
     case laRlyeh: case laHell: case laCrossroads: case laJungle:
     case laAlchemist: case laFrog:
       fcol = floorcolors[c->land]; break;
+    
+    case laCA:
+      fcol = floorcolors[c->land]; 
+      if(geosupport_chessboard()) {
+        if(chessvalue(c)) fcol += 0x202020;
+        }
+      else if(geosupport_threecolor()) {
+        fcol += 0x202020 * pattern_threecolor(c);
+        }
+      break;
     
     case laWet:
       fcol = 0x40FF40; break;
@@ -1580,6 +1590,10 @@ void celldrawer::draw_features_and_walls_3d() {
       if(c->move(a) && (among(pmodel, mdPerspective, mdGeodesic) || gmatrix0.count(c->move(a))))
         b = (patterns::innerwalls && (tC0(V)[2] < tC0(V * currentmap->adj(c, a))[2])) || !isWall3(c->move(a), dummy);
       if(b) {
+        #if CAP_WRL
+        /* always render */
+        if(wrl::in && wrl::print) ; else
+        #endif
         if(pmodel == mdPerspective && !sphere && !quotient && !kite::in() && !nonisotropic && !hybri && !experimental && !nih) {
           if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(centerover)) continue;
           else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(centerover)) continue;

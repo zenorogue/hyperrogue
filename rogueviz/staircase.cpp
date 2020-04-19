@@ -30,7 +30,7 @@ hyperpoint spcoord(hyperpoint h) {
 
 rug::rugpoint *pt(hyperpoint h, hyperpoint c) {
   auto r = rug::addRugpoint(C0, -1);
-  r->flat = spcoord(h);
+  r->native = spcoord(h);
   r->x1 = c[0];
   r->y1 = c[1];
   r->valid = true;
@@ -120,17 +120,17 @@ void make_staircase() {
 
   println(hlog, "scurvature = ", scurvature, " progress = ", progress, " strafe=", strafex, ",", strafey);
   rug::renderonce = true;
-  rug::rug_perspective = true;
+  vid.rug_config.model = mdPerspective;
   if(scurvature > -1e-6 && scurvature < 1e-6) { 
-    rug::gwhere = gEuclid;
+    rug::gwhere = rug::rgEuclid;
     acurvature = 1;
     }
   else if(scurvature < 0) {
-    rug::gwhere = gNormal;
+    rug::gwhere = rug::rgHyperbolic;
     acurvature = -scurvature;
     }
   else {
-    rug::gwhere = gSphere;
+    rug::gwhere = rug::rgSphere;
     acurvature = scurvature;
     }
   rug::ruggospeed = acurvature;

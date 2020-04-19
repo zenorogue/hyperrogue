@@ -227,6 +227,10 @@
 #define CAP_SVG (CAP_FILES && !ISMOBILE && !ISMINI)
 #endif
 
+#ifndef CAP_WRL
+#define CAP_WRL (CAP_FILES && !ISMOBILE && !ISMINI && !ISWEB)
+#endif
+
 #ifndef CAP_POLY
 #define CAP_POLY (CAP_SDLGFX || CAP_GL || CAP_SVG)
 #endif
