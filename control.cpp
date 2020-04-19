@@ -620,7 +620,7 @@ EX void mainloopiter() {
     if(cwt.mirrored) playerV = playerV * Mirror;
     }
   
-  mousepan = (cmode & (sm::NORMAL | sm::DRAW | sm::MAP)) && GDIM == 3 && mouseaim_sensitivity;
+  mousepan = (cmode & (sm::NORMAL | sm::DRAW | sm::MAP)) && (GDIM == 3 || (rug::rugged && lctrlclick)) && mouseaim_sensitivity;
   if(mousepan != oldmousepan) {
     oldmousepan = mousepan;
     #if CAP_MOUSEGRAB
@@ -698,7 +698,8 @@ EX void mainloopiter() {
   SDL_Event ev;
   DEBB(DF_GRAPH, ("polling for events\n"));
   
-  if(GDIM == 3 && !shmup::on && !rug::rugged) {
+  if((GDIM == 3 && !shmup::on) || (lctrlclick && rug::rugged)) {
+    rug::using_rugview urv;
     #if CAP_MOUSEGRAB
     full_rotate_camera(0, -mouseaim_x);
     full_rotate_camera(1, -mouseaim_y);
