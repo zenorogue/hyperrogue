@@ -423,6 +423,7 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <cassert>
 #include <map>
 #include <queue>
 #include <sstream>
