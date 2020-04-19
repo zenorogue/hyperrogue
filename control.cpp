@@ -301,8 +301,20 @@ transmatrix zforward_push(ld z) {
   return T;
   }
 
+EX void zoom_or_fov(ld t) {
+  if(in_perspective()) {
+    auto tanfov = tan(vid.fov * degree / 2);
+    tanfov *= t;
+    vid.fov = atan(tanfov) * 2 / degree;
+    }
+  else
+    pconf.scale *= t;
+  }
+
 EX void full_forward_camera(ld t) {
-  if(GDIM == 3) {
+  if(anyshiftclick) 
+    zoom_or_fov(exp(-t/10.));
+  else if(GDIM == 3) {
     shift_view(ctangent(2, t));
     didsomething = true;
     playermoved = false;
