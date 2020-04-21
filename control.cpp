@@ -737,8 +737,9 @@ EX void mainloopiter() {
   DEBB(DF_GRAPH, ("polling for events\n"));
   
   if((GDIM == 3 && !shmup::on) || (lctrlclick && rug::rugged)) {
-    rug::using_rugview urv;
     #if CAP_MOUSEGRAB
+    rug::using_rugview urv;
+    dynamicval<bool> ds(didsomething, didsomething);
     full_rotate_camera(0, -mouseaim_x);
     full_rotate_camera(1, -mouseaim_y);
     mouseaim_x = mouseaim_y = 0;
