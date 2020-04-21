@@ -554,8 +554,9 @@ EX void buildRug() {
       cell *c3 = c->modmove(j+1);
       rugpoint *w2 = vptr.at(c3);
       
-      if(a4) {
-        cell *c4 = (cellwalker(c,j) + wstep - 1).cpeek();
+      cell *c4 = (cellwalker(c,j) + wstep - 1).cpeek();      
+      
+      if(c4 != c3) {
         cell *cm = c; comp(cm, c); comp(cm, c2); comp(cm, c3); comp(cm, c4);
         if(cm == c || cm == c4)
           addTriangle(v, w, w2);
