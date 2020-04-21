@@ -1386,7 +1386,12 @@ EX namespace ods {
 
 void dqi_poly::draw() {
   if(flags & POLY_DEBUG) debug_this();
-  
+  if(debugflags & DF_VERTEX) {
+    println(hlog, tie(band_shift, V, offset, cnt, offset_texture, outline, linewidth, flags, intester, cache), (cell*) tinf);
+    for(int i=0; i<cnt; i++) print(hlog, (*tab)[i]);
+    println(hlog);
+    }
+
   #if CAP_ODS  
   if(vid.stereo_mode == sODS) {
     ods::draw_ods(this);
@@ -2007,17 +2012,20 @@ EX void draw_main() {
       }
     }
   else {
+    DEBB(DF_GRAPH, ("draw_main1"));
     if(ray::in_use && !ray::comparison_mode) {
       ray::cast();
       reset_projection();
       }
 
+    DEBB(DF_GRAPH, ("outcircle"));
     for(auto& ptd: ptds) if(ptd->prio == PPR::OUTCIRCLE)
       ptd->draw();
     
     if(two_sided_model()) draw_backside();
   
     for(auto& ptd: ptds) if(ptd->prio != PPR::OUTCIRCLE) {
+      DEBBI(DF_VERTEX, ("prio: ", int(ptd->prio), " color ", ptd->color));
       dynamicval<int> ss(spherespecial, among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE) ? 0 : spherespecial);
       ptd->draw();
       }

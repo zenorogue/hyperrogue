@@ -25,7 +25,8 @@ EX FILE *debugfile;
 #define DF_GP             2048
 #define DF_POLY           4096
 #define DF_LOG            8192
-#define DF_KEYS "imwesxufgbtopl"
+#define DF_VERTEX        16384
+#define DF_KEYS "imwesxufgbtoplv"
 #endif
 
 EX int debugflags = DF_INIT | DF_ERROR | DF_WARN | DF_MSG | DF_TIME | DF_LOG;
