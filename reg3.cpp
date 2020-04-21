@@ -1472,6 +1472,7 @@ int dist_alt(cell *c) {
 #if MAXMDIM >= 4
 EX cellwalker strafe(cellwalker cw, int j) {
   hyperpoint hfront = tC0(cgi.adjmoves[cw.spin]);
+  cw.at->cmove(j);
   transmatrix T = currentmap->adj(cw.at, j);
   for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
     if(hdist(hfront, T * tC0(cgi.adjmoves[i])) < cgi.strafedist + .01)
