@@ -3915,3 +3915,20 @@ Geometries:
 - CA mode now automatically awards Orb of Aether (so you can step space) and is simulated on every step in animation mode
 - more accurate Solv rendering (using RK4 method instead of buggy midpoint)
 - when giving values, you can use "..|" (animate with sharp changes); "../" can be also used for spline interpolation
+
+2020-04-22 01:46 Update 11.3k:
+- Orb of the Sword now destroys shrubs
+- more accurate mouse when in 2D projections
+- fixed horocycles in bitruncated {4,x}
+- fixed Great Walls in {5,3,4}
+- Hypersian Rug/camera improvements: 
+- - camera rotation now works better in 3D scenes with gravity (including product geometries, 2D-in-3D and gravity lands)
+- - now displays geometry correctly
+- - removed outdated documentation
+- - panning enabled in the menu
+- - shift+mousewheel for zoom works in rug
+- - zoom hotkeys now change FOV in perspective modes
+- - lshift+arrows now rotate the model in rug
+- - shift+PageUp/Down now zooms
+- - rug can now be mouse-rotated with Ctrl
+- - fixed in standard binary tiling and in *.tes tilings
