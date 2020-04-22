@@ -365,7 +365,7 @@ EX void full_rotate_camera(int dir, ld val) {
     }
   else
     View = cpush(dir, val) * View, playermoved = false, didsomething = true;      
-  };
+  }
 
 EX void full_rotate_view(ld h, ld v) {
   if(history::on && !rug::rug_control())
