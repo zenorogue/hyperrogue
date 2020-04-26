@@ -49,18 +49,63 @@ EX arbi_tiling current;
 
 EX short& id_of(heptagon *h) { return h->zebraval; }
 
+struct hr_polygon_error : hr_exception {
+  vector<transmatrix> v;
+  eGeometryClass c;
+  int id;
+  hr_polygon_error(const vector<transmatrix>& _v, int _id) : v(_v), c(cgclass), id(_id) {}
+  ~hr_polygon_error() noexcept(true) {}
+  };
+
+void start_debugger(hr_polygon_error& err) {
+  stop_game();
+  if(err.c != cgclass) {
+    if(err.c == gcEuclid) set_geometry(gEuclid);
+    if(err.c == gcHyperbolic) set_geometry(gNormal);
+    if(err.c == gcSphere) set_geometry(gSphere);
+    }
+
+  if(specialland != laCanvas) {   
+    canvas_default_wall = waInvisibleFloor;
+    patterns::whichCanvas = 'g';
+    patterns::canvasback = 0xFFFFFF;
+    firstland = specialland = laCanvas;
+    }
+
+  start_game();
+  drawthemap();
+
+  mapeditor::drawing_tool = true;
+  pushScreen(mapeditor::showDrawEditor);
+  mapeditor::initdraw(cwt.at);
+  
+  int n = isize(err.v);
+  
+  mapeditor::dtcolor = 0xFF0000FF;
+  mapeditor::dtwidth = 0.02;
+  for(int i=0; i<n-1; i++)
+    mapeditor::dt_add_line(tC0(err.v[i]), tC0(err.v[i+1]), 0);
+  
+  mapeditor::dtcolor = 0xFFFFFFFF;
+  for(int i=0; i<n; i++)
+    mapeditor::dt_add_text(tC0(err.v[i]), 0.5, its(i));
+  }
+
 void shape::build_from_angles_edges() {
   transmatrix at = Id;
   vertices.clear();
   int n = isize(angles);
   hyperpoint ctr = Hypc;
+  vector<transmatrix> matrices;
   for(int i=0; i<n; i++) {
+    matrices.push_back(at);
     println(hlog, "at = ", at);
     vertices.push_back(tC0(at));
     ctr += tC0(at);
     at = at * xpush(edges[i]) * spin(angles[i]);
     }
-  if(!eqmatrix(at, Id)) throw hr_parse_exception("polygon error");
+  matrices.push_back(at);
+  if(!eqmatrix(at, Id)) throw hr_polygon_error(matrices, id);
   if(sqhypot_d(3, ctr) < 1e-2) {
     // this may happen for some spherical tilings
     // try to move towards the center
@@ -482,6 +527,33 @@ struct hrmap_arbi : hrmap {
 
 EX hrmap *new_map() { return new hrmap_arbi; }
 
+void run(string fname) {
+  stop_game();
+  eGeometry g = geometry;
+  arbi_tiling t = current;
+  auto v = variation;
+  set_geometry(gArbitrary);
+  try {
+     load(fname);
+     ginf[gArbitrary].tiling_name = current.name;
+     }
+   catch(hr_polygon_error& poly) {
+     set_geometry(g);
+     set_variation(v);
+     current = t;
+     start_debugger(poly);
+     addMessage("polygon error, debugger started");
+     }
+   catch(hr_parse_exception& ex) {
+     println(hlog, "failed: ", ex.s);
+     set_geometry(g);
+     current = t;
+     start_game();
+     addMessage("failed: " + ex.s);
+     }
+  start_game();
+  }
+
 #if CAP_COMMANDLINE  
 int readArgs() {
   using namespace arg;
@@ -489,17 +561,8 @@ int readArgs() {
   if(0) ;
   else if(argis("-arbi")) {
     PHASEFROM(2);
-    stop_game();
     shift(); 
-    set_geometry(gArbitrary);
-    try {
-      load(args());
-      }
-    catch(hr_parse_exception& ex) {
-      println(hlog, "failed: ", ex.s);
-      exit(3);
-      }
-    ginf[gArbitrary].tiling_name = current.name;
+    run(args());
     }
   else return 1;
   return 0;
@@ -510,7 +573,7 @@ auto hook = addHook(hooks_args, 100, readArgs);
 
 EX bool in() { return geometry == gArbitrary; }
 
-EX string tes = "tessellations/marjorie-rice.tes";
+EX string tes = "tessellations/sample/marjorie-rice.tes";
 
 EX bool linespattern(cell *c) {
   return current.shapes[id_of(c->master)].flags & arcm::sfLINE;
@@ -523,19 +586,7 @@ EX bool pseudohept(cell *c) {
 EX void choose() {
   dialog::openFileDialog(tes, XLAT("open a tiling"), ".tes", 
   [] () {
-    stop_game();
-    set_geometry(gArbitrary);
-    try {
-      load(tes);
-      ginf[gArbitrary].tiling_name = current.name;
-      }
-    catch(hr_parse_exception& ex) {
-      println(hlog, "failed: ", ex.s);
-      set_geometry(gNormal);
-      start_game();
-      addMessage("failed: " + ex.s);
-      }
-    start_game();
+    run(tes);
     return true;
     });
   }
