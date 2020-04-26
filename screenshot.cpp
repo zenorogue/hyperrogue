@@ -955,12 +955,21 @@ EX void menu() {
   #endif
 
   if(WDIM == 2) {
-    dialog::addItem(XLAT("centering"), 'x');
+    dialog::addItem(XLAT("centering"), 'C');
     dialog::add_action([] {
       dialog::editNumber(vid.fixed_facing_dir, 0, 360, 15, 90, XLAT("centering"), 
         XLAT("You can pick the angle. Note: the direction the PC is facing matters."));
       dialog::reaction = fullcenter;
       dialog::extra_options = [] () { 
+        dialog::addBoolItem(XLAT("rotate PC"), centering == eCentering::face, 'R');
+        dialog::add_action([] { 
+          flipplayer = false;
+          cwt++;
+          mirror::act(1, mirror::SPINSINGLE);
+          cwt.at->mondir++;
+          cwt.at->mondir %= cwt.at->type;
+          fullcenter();
+          });
         dialog::addBoolItem(XLAT("face"), centering == eCentering::face, 'F');
         dialog::add_action([] { centering = eCentering::face; fullcenter(); });
         dialog::addBoolItem(XLAT("edge"), centering == eCentering::edge, 'E');
