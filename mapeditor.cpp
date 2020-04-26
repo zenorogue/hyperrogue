@@ -91,6 +91,38 @@ EX namespace mapeditor {
       return abs(hdist(s, h) - radius);
       }
     };
+
+  struct dttext : dtshape {
+    hyperpoint where;
+    ld size;
+    string caption;
+
+    void rotate(const transmatrix& T) override {
+      where = T * where;
+      }
+
+    void save(hstream& hs) override {
+      hs.write<char>(4);
+      hs.write(where);
+      hs.write(size);
+      hs.write(caption);
+      }
+
+    dtshape *load(hstream& hs) override {
+      hs.read(where);
+      hs.read(size);
+      hs.read(caption);
+      return this;
+      }
+
+    void draw(const transmatrix& V) override {
+      queuestr(V * rgpushxto0(where), size, caption, col);
+      }
+    
+    ld distance(hyperpoint h) override {
+      return hdist(h, where);
+      }
+    };
   
   struct dtfree : dtshape {
   
@@ -186,6 +218,19 @@ EX namespace mapeditor {
     auto l = new dtcircle;
     l->s = h1;
     l->radius = d;
+    dt_add(b, l);
+    }
+  
+  EX void dt_add_text(hyperpoint h, ld size, string cap) {
+    cell *b = centerover;
+    
+    h = inverse(ggmatrix(b)) * h;
+    virtualRebase(b, h);
+    
+    auto l = new dttext;
+    l->where = h;
+    l->size = size;
+    l->caption = cap;
     dt_add(b, l);
     }
   
