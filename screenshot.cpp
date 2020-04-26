@@ -1256,16 +1256,23 @@ EX string animfile = "animation-%04d.png";
 
 int min_frame = 0, max_frame = 999999;
 
+int numturns = 0;
+
 bool record_animation() {
   lastticks = 0;
   ticks = 0;
+  int oldturn = -1;
   for(int i=0; i<noframes; i++) {
     if(i < min_frame || i > max_frame) continue;
     printf("%d/%d\n", i, noframes);
     int newticks = i * period / noframes;
     cmode = (env_shmup ? sm::NORMAL : 0);
     while(ticks < newticks) shmup::turn(1), ticks++;
-    ca::simulate();
+    if(cheater && numturns) {
+      int nturn = numturns * i / noframes;
+      if(nturn != oldturn) monstersTurn();
+      oldturn = nturn;
+      }
     if(playermoved) centerpc(INF), optimizeview();
     dynamicval<bool> v2(inHighQual, true);
     apply();
@@ -1474,6 +1481,12 @@ EX void show() {
   animator(XLATN("Ocean"), env_ocean, 'o');
   animator(XLATN("Volcanic Wasteland"), env_volcano, 'v');
   if(shmup::on) dialog::addBoolItem_action(XLAT("shmup action"), env_shmup, 'T');
+  if(cheater) {
+    dialog::addSelItem(XLAT("monster turns"), its(numturns), 'n');
+    dialog::add_action([] {      
+      dialog::editNumber(numturns, 0, 100, 1, 0, XLAT("monster turns"), XLAT("Number of turns to pass. Useful when simulating butterflies or cellular automata."));
+      });
+    }
 
   #if CAP_RUG
   if(rug::rugged) {
