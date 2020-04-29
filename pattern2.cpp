@@ -2888,7 +2888,7 @@ EX namespace linepatterns {
 
     dialog::addSelItem("line width", fts(width), 'W');
     dialog::add_action([] () { 
-      dialog::editNumber(width, 0, 10, 1, 1, XLAT("line width"), "");
+      dialog::editNumber(width, 0, 10, 0.1, 1, XLAT("line width"), "");
       });
 
     dialog::addBoolItem_action("edit widths individually", indiv, 'I');
