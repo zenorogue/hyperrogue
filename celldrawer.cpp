@@ -841,7 +841,17 @@ void celldrawer::draw_grid() {
       if(bt::in() && !sn::in() && !among(t, 5, 6, 8)) continue;
       if(!bt::in() && c->move(t) < c) continue;
       dynamicval<color_t> g(poly_outline, gridcolor(c, c->move(t)));          
-      queuepoly(V, cgi.shWireframe3D[ofs + t], 0);
+      if(fat_edges && reg3::in()) {
+        for(int i=0; i<S7; i++) if(c < c->move(i)) {
+          for(int j=0; j<cgi.face-1; j++) {
+            gridline(V, cgi.cellshape[i*cgi.face+j], cgi.cellshape[i*cgi.face+j+1], gridcolor(c, c->move(t)), prec);
+            }
+          gridline(V, cgi.cellshape[i*cgi.face], cgi.cellshape[(i+1)*cgi.face-1], gridcolor(c, c->move(t)), prec);
+          }
+        }
+      else {
+        queuepoly(V, cgi.shWireframe3D[ofs + t], 0);
+        }
       }
     }
   #endif
