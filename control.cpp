@@ -388,18 +388,21 @@ EX void handlePanning(int sym, int uni) {
   rug::using_rugview urv;
     
 #if !ISPANDORA
-  if(sym == SDLK_END) full_forward_camera(-0.2*shiftmul);
-  if(sym == SDLK_HOME) full_forward_camera(0.2*shiftmul);
-  if(sym == SDLK_RIGHT) full_rotate_camera(0, -0.2*shiftmul);
-  if(sym == SDLK_LEFT) full_rotate_camera(0, 0.2*shiftmul);
-  if(sym == SDLK_UP) full_rotate_camera(1, 0.2*shiftmul);
-  if(sym == SDLK_DOWN) full_rotate_camera(1, -0.2*shiftmul);
+  if(!smooth_scrolling) {
+    if(sym == SDLK_END) full_forward_camera(-0.2*shiftmul);
+    if(sym == SDLK_HOME) full_forward_camera(0.2*shiftmul);
+    if(sym == SDLK_RIGHT) full_rotate_camera(0, -0.2*shiftmul);
+    if(sym == SDLK_LEFT) full_rotate_camera(0, 0.2*shiftmul);
+    if(sym == SDLK_UP) full_rotate_camera(1, 0.2*shiftmul);
+    if(sym == SDLK_DOWN) full_rotate_camera(1, -0.2*shiftmul);
+    }
 #endif
-  if(sym == SDLK_PAGEUP) full_rotate_view(1, M_PI/cgi.S21/2*shiftmul);
-  if(sym == SDLK_PAGEDOWN) full_rotate_view(-1, -M_PI/cgi.S21/2*shiftmul);
-  
-  if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
-    if(isGravityLand(cwt.at->land) && !rug::rug_control()) playermoved = false;
+  if(!smooth_scrolling) {
+    if(sym == SDLK_PAGEUP) full_rotate_view(1, M_PI/cgi.S21/2*shiftmul);
+    if(sym == SDLK_PAGEDOWN) full_rotate_view(-1, -M_PI/cgi.S21/2*shiftmul);
+    if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
+      if(isGravityLand(cwt.at->land) && !rug::rug_control()) playermoved = false;
+    }
 
   if(sym == PSEUDOKEY_WHEELUP && GDIM == 2) {
     ld jx = (mousex - current_display->xcenter - .0) / current_display->radius / 10;
