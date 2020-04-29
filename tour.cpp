@@ -29,7 +29,8 @@ enum presmode {
   pmStartAll = 0,
   pmStart = 1, pmFrame = 2, pmStop = 3, pmKey = 4, pmRestart = 5,
   pmAfterFrame = 6,
-  pmGeometry = 11, pmGeometryReset = 13, pmGeometryStart = 15
+  pmGeometry = 11, pmGeometryReset = 13, pmGeometryStart = 15,
+  pmGeometrySpecial = 16
   };
 
 /** \brief slide definition */
@@ -48,7 +49,7 @@ struct slide {
 
 /** \brief in which geometries does this slide work */
 namespace LEGAL {
-  enum flagtype { NONE, UNLIMITED, HYPERBOLIC, ANY, NONEUC };
+  enum flagtype { NONE, UNLIMITED, HYPERBOLIC, ANY, NONEUC, SPECIAL };
   }
 
 /** \brief when Enter pressed while showing the text, skip to the next slide immediately */
@@ -213,6 +214,11 @@ bool handleKeyTour(int sym, int uni) {
     }
   if(NUMBERKEY == '1' || NUMBERKEY == '2') {
     int legal = slides[currentslide].flags & 7;
+    
+    if(legal == LEGAL::SPECIAL) {
+      presentation(pmGeometrySpecial);
+      return true;
+      }
 
     if(legal == LEGAL::NONE || legal == LEGAL::HYPERBOLIC) {
       addMessage(XLAT("You cannot change geometry in this slide."));
