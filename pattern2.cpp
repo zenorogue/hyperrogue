@@ -1667,6 +1667,10 @@ EX namespace patterns {
     }
   
   EX hookset<int(cell*)> hooks_generate_canvas;
+  
+  EX int jhole = 0;
+  EX int jblock = 0;
+  EX int rwalls = 50;
 
   EX int generateCanvas(cell *c) {
     
@@ -1737,7 +1741,8 @@ EX namespace patterns {
       case 'g':
         return canvasback;
       case 'r': {
-        color_t r = hrand(0x1FFFFFF + 1);
+        color_t r = hrand(0xFFFFFF + 1);
+        if(hrand(100) < rwalls) r |= 0x1000000;
         if(c == cwt.at) r &= 0xFFFFFF;
         return r;
         }
@@ -1801,16 +1806,23 @@ EX namespace patterns {
       case 'v':
         return colortables['v'][sevenval(c)];
       case 'j': {
+        if(c == currentmap->gamestart()) return canvasback;
         int d = c->master->distance;
         if(geometry == gNil) d = c->master->zebraval;
-        if(d % 2 == 0 || d < -5 || d > 5) return canvasback;
-        return colortables['j'][(d+5)/2];
+        if(d % 2 == 0 || d < -5 || d > 5) return hrand(100) < jblock ? 0xFFFFFFFF : canvasback;
+        return hrand(100) < jhole ? canvasback : colortables['j'][(d+5)/2];
         }
       case 'J': {
+        if(c == currentmap->gamestart()) return canvasback;
         int d = c->master->distance;
         if(geometry == gNil) d = c->master->zebraval;
-        if(d % 2 == 0 || d < -5 || d > 5) return hrand(100) < 10 ? 0xFFFFFFFF : canvasback;
-        return hrand(100) < 50 ? 0 : colortables['j'][(d+5)/2];
+        if((d&3) != 2) return hrand(100) < jblock ? 0xFFFFFFFF : canvasback;
+        return hrand(100) < jhole ? canvasback : colortables['j'][(d+10)/4];
+        }
+      case 'G': {
+        color_t r = hrand(0xFFFFFF + 1);
+        if(hrand(100) < rwalls && pseudohept(c) && c != cwt.at) r |= 0x1000000;
+        return r;
         }
       case 'f': {
         color_t res;
@@ -2988,6 +3000,13 @@ int read_pattern_args() {
     else if(args().size() == 1) patterns::whichCanvas = args()[0];
     else patterns::canvasback = arghex();
     stop_game_and_switch_mode(rg::nothing);
+    }
+  else if(argis("-canvas-random")) {
+    PHASEFROM(2);
+    stop_game();
+    firstland = specialland = laCanvas;
+    patterns::whichCanvas = 'r';
+    shift(); patterns::rwalls = argi();
     }
   else if(argis("-cformula")) {
     PHASEFROM(2);
