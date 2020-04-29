@@ -351,8 +351,6 @@ cld exp_parser::parse(int prio) {
     else if(number == "random") res = randd();
     else if(number == "mousez") res = cld(mousex - current_display->xcenter, mousey - current_display->ycenter) / cld(current_display->radius, 0);
     else if(number == "shot") res = inHighQual ? 1 : 0;
-    else if(extra_params.count(number)) res = extra_params[number];
-    else if(params.count(number)) res = params.at(number);
     else if(number[0] >= 'a' && number[0] <= 'z') throw hr_parse_exception("unknown value: " + number);
     else { std::stringstream ss; res = 0; ss << number; ss >> res; }
     }
