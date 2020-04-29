@@ -402,29 +402,27 @@ void archimedean_tiling::compute_geometry() {
     ld alpha_total = 0;
 
     for(int i=0; i<N; i++) {
-      ld crmin = 0, crmax = sphere ? M_PI/2 : 10;
-      ld el = 0;
-      for(int q=0; q<100; q++) {
-        circumradius[i] = (crmin + crmax) / 2;
-        hyperpoint p1 = xpush0(circumradius[i]);
-        hyperpoint p2 = spin(2 * M_PI / faces[i]) * p1;
-        inradius[i] = hdist0(mid(p1, p2));
-        el = hdist(p1, p2);
-        if(el > edgelength) crmax = circumradius[i];
-        else crmin = circumradius[i];
-        }
-      if(el < edgelength - 1e-3) alpha_total += 100; // could not make an edge that long
-      hyperpoint h = xpush(edgelength/2) * xspinpush0(M_PI/2, inradius[i]);
-      ld a = atan2(-h[1], h[0]);
-      if(a < 0) a += 2 * M_PI;
+
+      ld gamma = M_PI / faces[i];
+      
+      auto& c = circumradius[i];
+
+      c = asin_auto(sin_auto(edgelength/2) / sin(gamma));
+      inradius[i] = hdist0(mid(xpush0(circumradius[i]), xspinpush0(2*gamma, circumradius[i])));
+      
+      hyperpoint h = xpush(c) * spin(M_PI - 2*gamma) * xpush0(c);
+      ld a = atan2(h);
+      cyclefix(a, 0);
+      if(a < 0) a = -a;
       alphas[i] = a;
-      // printf("  H = %s alp = %f\n", display(h), (float) atan2(-h[1], h[0]));
       alpha_total += alphas[i];
       }
     
-    // printf("el = %f alpha = %f\n", float(edgelength), float(alpha_total));
-
-    if(sphere ^ (alpha_total > M_PI)) elmin = edgelength;
+    if(debugflags & DF_GEOM)
+      println(hlog, "edgelength = ", edgelength, " angles = ", alphas, " inradius = ", inradius, " circumradius = ", circumradius);
+    
+    if(isnan(alpha_total)) elmax = edgelength;
+    else if(sphere ^ (alpha_total > M_PI)) elmin = edgelength;
     else elmax = edgelength;
     if(euclid) break;
     }
