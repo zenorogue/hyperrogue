@@ -355,6 +355,7 @@ cld exp_parser::parse(int prio) {
     else { std::stringstream ss; res = 0; ss << number; ss >> res; }
     }
   while(true) {
+    skip_white();
     #if CAP_ANIMATIONS
     if(next() == '.' && next(1) == '.' && prio == 0) {
       static const cld NO_DERIVATIVE(3.1, 2.5);
