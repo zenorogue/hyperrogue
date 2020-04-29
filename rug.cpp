@@ -1834,7 +1834,7 @@ auto rug_hook =
   addHook(hooks_args, 100, rugArgs);
 #endif
 
-}
+EX }
 
 #else
 
