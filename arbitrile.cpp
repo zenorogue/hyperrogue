@@ -202,6 +202,8 @@ EX void load(const string& fname) {
       string tok = ep.next_token();
       ep.force_eat("=");
       ep.extra_params[tok] =ep.parsepar();
+      if(debugflags & DF_GEOM)
+        println(hlog, "let ", tok, " = ", real(ep.extra_params[tok]));
       }
     else if(ep.eat("unittile(")) {
       c.shapes.emplace_back();
