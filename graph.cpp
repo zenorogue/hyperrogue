@@ -3669,7 +3669,7 @@ bool celldrawer::cell_clipped() {
     if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
     else {
       hyperpoint H2 = inverse_exp(H, pQUICK);
-      for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -.4) return true;
+      for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -.6) return true;
       }
     noclipped++;
     }
