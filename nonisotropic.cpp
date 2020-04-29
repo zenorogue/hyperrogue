@@ -607,9 +607,25 @@ EX namespace sn {
     "float cz = iz*(1.-1./PRECZ) + .5/PRECZ;"
 
     // "if(ix > .5 && iy > .6 && ix < iy + .05 && iz < .2 && iz < (iy - 0.5) * 0.6)"
-    "if(ix > .65 + iz * .25 && iy > .55) res = vec4(0.,0.,0.,1.); "
-    
-     "else "
+    "\n#ifndef SOLV_ALL\n"
+
+    "bool ok = true;"
+
+    // hard to tell which triangles fall on the other sides
+    "if(iz < .03 && ix > .65 && iy > .65) ok = false;"
+    "if(iz < .013 && ix > .55 && iy > .55) ok = false;"
+    "if(iz < .0075 && ix > .45 && iy > .45) ok = false;"  
+    "if(iz > 0.004 && ix > 0.4 && iy > 0.4 && ix < .6 && iy < .6) ok = true;"
+    "if(iz > 0.000004 && ix > 0.4 && ix < 0.7 && iy > 0.4 && iy < 0.7) ok = true;"
+    "if(iz < 0.04 && ix > 0.70 && ix < 0.8 && iy > 0.5 && iy < 0.7) ok = false;"
+    "if(iz < 0.05 && ix > .45 && iy > .75 && ix < .55 && iy < .95) ok = false;"
+    "if(iz < 0.05 && ix > .85 && iy > .45 && iy < .75) ok = false;"
+    "if(iz < 0.025 && ix > .65 && iy > .65 && ix < .8 && iy < .8) ok = false;"
+
+    "if(!ok) res = vec4(0,0,0,1);"
+    "else "
+
+    "\n#endif\n"
   
       "res = texture3D(tInvExpTable, vec3(cx, cy, cz));"
 

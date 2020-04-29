@@ -32,6 +32,8 @@ constexpr flagtype SF_ZFOG         = 65536;
 constexpr flagtype SF_ODSBOX       = (1<<17);
 #endif
 
+EX bool solv_all;
+
 #if HDR
 /* standard attribute bindings */
 /* taken from: https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/attributes.php */
@@ -189,6 +191,9 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
       case gcSolNIH:
         switch(sn::geom()) {
           case gSol:
+            if(solv_all) {
+              vsh += "\n#define SOLV_ALL\n";
+              }
             vsh += sn::shader_symsol;
             break;
           case gNIH:
@@ -320,6 +325,7 @@ void display_data::set_projection(int ed) {
   id <<= 6; id |= spherephase;
   id <<= 1; if(vid.consider_shader_projection) id |= 1;
   id <<= 2; id |= (spherespecial & 3);
+  if(sol && solv_all) id |= 1;
   if(in_h2xe()) id |= 1;
   if(in_s2xe()) id |= 2;
   shared_ptr<glhr::GLprogram> selected;
