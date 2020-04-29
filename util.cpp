@@ -335,7 +335,9 @@ cld exp_parser::parse(int prio) {
   else if(next() == '(') at++, res = parsepar(); 
   else {
     string number = next_token();
-    if(number == "e") res = exp(1);
+    if(extra_params.count(number)) res = extra_params[number];
+    else if(params.count(number)) res = params.at(number);
+    else if(number == "e") res = exp(1);
     else if(number == "i") res = cld(0, 1);
     else if(number == "p" || number == "pi") res = M_PI;
     else if(number == "" && next() == '-') { at++; res = -parse(prio); }
