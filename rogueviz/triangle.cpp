@@ -37,6 +37,14 @@ int how1 = how - 1;
 // precision: number of substeps to simulate (best if divisible by how and how1)
 int isteps = 4 * 1024;
 
+/* the generators correspond to: */
+
+nilv::mvec a(1,0,0);
+nilv::mvec b(0,1,0);
+nilv::mvec c = (a * b).inverse();
+  
+vector<nilv::mvec> gens = { a, b, c, a.inverse(), b.inverse(), c.inverse() };
+
 struct triangledata {
   hyperpoint at;
   bool computed;
