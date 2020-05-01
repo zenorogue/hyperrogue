@@ -53,6 +53,7 @@ struct hr_polygon_error : hr_exception {
   vector<transmatrix> v;
   eGeometryClass c;
   int id;
+  map<string, cld> params;
   hr_polygon_error(const vector<transmatrix>& _v, int _id) : v(_v), c(cgclass), id(_id) {}
   ~hr_polygon_error() noexcept(true) {}
   };
@@ -150,6 +151,10 @@ EX void load_tile(exp_parser& ep, bool unit) {
     }
   catch(hr_parse_exception& ex) {
     throw hr_parse_exception(ex.s + ep.where());
+    }
+  catch(hr_polygon_error& poly) {
+    poly.params = ep.extra_params;
+    throw;
     }
   cc.connections.resize(cc.size());
   for(int i=0; i<isize(cc.connections); i++)
@@ -527,7 +532,11 @@ void run(string fname) {
      set_variation(v);
      current = t;
      start_debugger(poly);
-     addMessage("polygon error, debugger started");
+     string help = XLAT("Polygon number %1 did not close correctly. Here is the picture to help you understand the issue.\n\n", its(poly.id));
+     showstartmenu = false;
+     for(auto& p: poly.params)
+       help += lalign(-1, p.first, " = ", p.second, "\n");
+     gotoHelp(help);
      }
    catch(hr_parse_exception& ex) {
      println(hlog, "failed: ", ex.s);
