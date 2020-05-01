@@ -311,6 +311,7 @@ EX void load(const string& fname) {
       }
     else if(ep.eat("debug(")) {
       int i = ep.iparse(0);
+      verify_index(i, c.shapes, ep);
       ep.force_eat(")");
       throw connection_debug_request(i);
       }
