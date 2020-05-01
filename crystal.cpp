@@ -461,7 +461,7 @@ shifttable get_canonical(coord co) {
   }
 #endif
 
-int crystal_period = 0;
+EX int crystal_period = 0;
 
 struct hrmap_crystal : hrmap_standard {
   heptagon *getOrigin() override { return get_heptagon_at(c0, S7); }
