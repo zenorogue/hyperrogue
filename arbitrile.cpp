@@ -134,12 +134,12 @@ EX void load_tile(exp_parser& ep, bool unit) {
   cc.id = isize(current.shapes) - 1;
   cc.flags = 0;
   while(ep.next() != ')') {
-    ld dist = 1;
+    cld dist = 1;
     if(!unit) {
-      dist = ep.rparse(0);
+      dist = ep.parse(0);
       ep.force_eat(",");
       }
-    ld angle = ep.rparse(0);
+    cld angle = ep.parse(0);
     cc.edges.push_back(real(dist * ep.extra_params["distunit"]));
     cc.angles.push_back(real(angle * ep.extra_params["angleunit"] + ep.extra_params["angleofs"]));
     if(ep.eat(",")) continue;
