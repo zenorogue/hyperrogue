@@ -422,7 +422,9 @@ void find_coefficients() {
   }
 
 void growthrate() {
-  /*
+
+  cnts.resize(20);
+
   for(int a=0; a<CTO; a++) {
     int cnt = 0;
     map<cell*, int> howmany;
@@ -435,22 +437,28 @@ void growthrate() {
     cnts[a] = cnt;
     if(a >= 4) println(hlog, "D4 = ", cnts[a-4] - 4 * cnts[a-3] + 6 * cnts[a-2] - 4 * cnts[a-1] + cnts[a]);
     println(hlog, "cnts = ", cnts);
-    }*/
+    }
   
-  cnts = {1,7,31,113,299,681,1363,2501,4181,6570,9874,14256,20027,27601,37171,48815,62993,79912,100181,123868,151680,184339,222347,265733,314523,369424,431221,500952,578350,665794,763300,871250,988488,1116635,1256293,1409165,1575969,1758327,1958977,2174877};
-  find_coefficients();
+  auto cnt2 = cnts;
+  for(int i=isize(cnt2)-1; i>=1; i--) cnt2[i] -= cnt2[i-1];
+  println(hlog, "cnts dif = ", cnt2);
+  
+  // this was computed on integers, not using the program above
+
+  cnts = 
+  {1,6,24,80,186,368,644,1046,1574,2260,3128,4198,5482,7006,8788,10860,13228,15918,18948,22350,26130,30314,34926,39986,45506,51518,58034,65086,72680,80842,89596,98968,108964,119610,130930,142950,155676,169140,183354,198350,214140,230744,248186,266492,285668,305746,326744,348688,371584,395464,420346,446256,473206,501216,530310,560520,591846,624320,657960,692792,728828,766094,804608,844396,885470,927856,971572,1016650,1063090,1110924,1160176,1210866,1263006,1316622,1371732,1428368,1486536,1546262,1607564,1670474,1734998,1801162,1868990,1938502,2009710,2082646,2157322,2233770,2311996,2392026,2473884,2557596,2643168,2730626,2819994,2911298,3004544,3099764,3196970,3296194,3397448,3500752,3606130,3713608,3823192};
   
   println(hlog, "coefficients_known = ", coefficients_known);
   if(coefficients_known == 2) {
     string fmt = "a(d+" + its(isize(coef)) + ") = ";
     bool first = true;
-    for(int i=0; i<isize(coef); i++) if(coef[i]) {
-      if(first && coef[i] == 1) ;
-      else if(first) fmt += its(coef[i]);
-      else if(coef[i] == 1) fmt += " + ";
-      else if(coef[i] == -1) fmt += " - ";
-      else if(coef[i] > 1) fmt += " + " + its(coef[i]);
-      else if(coef[i] < -1) fmt += " - " + its(-coef[i]);
+    for(int i=0; i<isize(coef); i++) if(kz(coef[i])) {
+      if(first && !kz(coef[i]-1)) ;
+      else if(first) fmt += fts(coef[i]);
+      else if(!kz(coef[i]-1)) fmt += " + ";
+      else if(!kz(coef[i]+1)) fmt += " - ";
+      else if(coef[i] > 0) fmt += " + " + fts(coef[i]);
+      else if(coef[i] < 0) fmt += " - " + fts(-coef[i]);
       fmt += "a(d";
       if(i != isize(coef) - 1)
         fmt += "+" + its(isize(coef) - 1 - i);
@@ -472,7 +480,7 @@ bool draw_ptriangle(cell *c, const transmatrix& V) {
   if(mkr && mkr->icgi != &cgi) reset();
      
   if(!mkr) { mkr = new trianglemaker; mkr->init(); 
-    growthrate();
+    // growthrate();
     }
   
   for(auto& td: mkr->tds[c]) {
