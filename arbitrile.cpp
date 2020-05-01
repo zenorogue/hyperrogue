@@ -127,6 +127,35 @@ template<class T> void verify_index(int index, const T& v, exp_parser& ep) { if(
 
 string unnamed = "unnamed";
 
+EX void load_tile(exp_parser& ep, bool unit) {
+  current.shapes.emplace_back();
+  auto& cc = current.shapes.back();
+  cc.id = isize(current.shapes) - 1;
+  cc.flags = 0;
+  while(ep.next() != ')') {
+    ld dist = 1;
+    if(!unit) {
+      dist = ep.rparse(0);
+      ep.force_eat(",");
+      }
+    ld angle = ep.rparse(0);
+    cc.edges.push_back(real(dist * ep.extra_params["distunit"]));
+    cc.angles.push_back(real(angle * ep.extra_params["angleunit"] + ep.extra_params["angleofs"]));
+    if(ep.eat(",")) continue;
+    else if(ep.eat(")")) break;
+    else throw hr_parse_exception("expecting , or )");
+    }
+  try {
+    cc.build_from_angles_edges();
+    }
+  catch(hr_parse_exception& ex) {
+    throw hr_parse_exception(ex.s + ep.where());
+    }
+  cc.connections.resize(cc.size());
+  for(int i=0; i<isize(cc.connections); i++)
+    cc.connections[i] = make_tuple(cc.id, i, false);
+  }
+
 EX void load(const string& fname) {
   fhstream f(fname, "rt");
   string s;
@@ -205,54 +234,8 @@ EX void load(const string& fname) {
       if(debugflags & DF_GEOM)
         println(hlog, "let ", tok, " = ", real(ep.extra_params[tok]));
       }
-    else if(ep.eat("unittile(")) {
-      c.shapes.emplace_back();
-      auto& cc = c.shapes.back();
-      cc.id = isize(c.shapes) - 1;
-      cc.flags = 0;
-      while(ep.next() != ')') {
-        ld angle = ep.rparse(0);
-        cc.edges.push_back(distunit);
-        cc.angles.push_back(angle * angleunit + angleofs);
-        if(ep.eat(",")) continue;
-        else if(ep.eat(")")) break;
-        else throw hr_parse_exception("expecting , or )");
-        }
-      try {
-        cc.build_from_angles_edges();
-        }
-      catch(hr_parse_exception& ex) {
-        throw hr_parse_exception(ex.s + ep.where());
-        }
-      cc.connections.resize(cc.size());
-      for(int i=0; i<isize(cc.connections); i++)
-        cc.connections[i] = make_tuple(cc.id, i, false);
-      }
-    else if(ep.eat("tile(")) {
-      c.shapes.emplace_back();
-      auto& cc = c.shapes.back();
-      cc.id = isize(c.shapes) - 1;
-      cc.flags = 0;
-      while(ep.next() != ')') {
-        ld dist = ep.rparse(0);
-        ep.force_eat(",");
-        ld angle = ep.rparse(0);
-        cc.edges.push_back(dist * distunit);
-        cc.angles.push_back(angle * angleunit + angleofs);
-        if(ep.eat(",")) continue;
-        else if(ep.eat(")")) break;
-        else throw hr_parse_exception("expecting , or )");
-        }
-      try {
-        cc.build_from_angles_edges();
-        }
-      catch(hr_parse_exception& ex) {
-        throw hr_parse_exception(ex.s + ep.where());
-        }
-      cc.connections.resize(cc.size());
-      for(int i=0; i<isize(cc.connections); i++)
-        cc.connections[i] = make_tuple(cc.id, i, false);
-      }
+    else if(ep.eat("unittile(")) load_tile(ep, true);
+    else if(ep.eat("tile(")) load_tile(ep, false);
     else if(ep.eat("conway(\"")) {
       string s = "";
       while(true) {
