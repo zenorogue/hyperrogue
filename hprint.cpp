@@ -279,7 +279,21 @@ struct indenter_finish : indenter {
 
 #endif
 
-EX void print(hstream& hs, cld x) { print(hs, real(x)); if(kz(imag(x))) print(hs, "+", imag(x), "i"); }
+EX void print(hstream& hs, cld x) { 
+  int parts = 0;
+  if(kz(real(x))) {
+    print(hs, real(x)); 
+    parts++;
+    }
+  
+  if(kz(imag(x))) {
+    if(parts && imag(x) > 0) print(hs, "+");
+    parts++;
+    print(hs, imag(x), "i"); 
+    }
+  
+  if(!parts) print(hs, 0);
+  }
 
 EX string fts_fixed(ld x, int prec IS(6)) {
   std::stringstream ss;
