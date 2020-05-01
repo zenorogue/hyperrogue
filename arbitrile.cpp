@@ -140,8 +140,8 @@ EX void load_tile(exp_parser& ep, bool unit) {
       ep.force_eat(",");
       }
     cld angle = ep.parse(0);
-    cc.edges.push_back(real(dist * ep.extra_params["distunit"]));
-    cc.angles.push_back(real(angle * ep.extra_params["angleunit"] + ep.extra_params["angleofs"]));
+    cc.edges.push_back(ep.validate_real(dist * ep.extra_params["distunit"]));
+    cc.angles.push_back(ep.validate_real(angle * ep.extra_params["angleunit"] + ep.extra_params["angleofs"]));
     if(ep.eat(",")) continue;
     else if(ep.eat(")")) break;
     else throw hr_parse_exception("expecting , or )");
