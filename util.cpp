@@ -163,13 +163,18 @@ struct exp_parser {
 
   cld parse(int prio = 0);
 
-  ld rparse(int prio = 0) { return real(parse(prio)); }
+  ld rparse(int prio = 0) { return validate_real(parse(prio)); }
   int iparse(int prio = 0) { return int(floor(rparse(prio) + .5)); }
 
   cld parsepar() {
     cld res = parse();
     force_eat(")");
     return res;
+    }
+
+  ld validate_real(cld x) {
+    if(kz(imag(x))) throw hr_parse_exception("expected real number but " + lalign(-1, x) + " found at " + where());
+    return real(x);
     }
   
   void force_eat(const char *c) {
@@ -225,8 +230,8 @@ cld exp_parser::parse(int prio) {
   else if(eat("re(")) res = real(parsepar());
   else if(eat("im(")) res = imag(parsepar());
   else if(eat("conj(")) res = std::conj(parsepar());
-  else if(eat("floor(")) res = floor(real(parsepar()));
-  else if(eat("frac(")) { res = parsepar(); res = res - floor(real(res)); }
+  else if(eat("floor(")) res = floor(validate_real(parsepar()));
+  else if(eat("frac(")) { res = parsepar(); res = res - floor(validate_real(res)); }
   else if(eat("to01(")) { res = parsepar(); return atan(res) / ld(M_PI) + ld(0.5); }
   else if(eat("edge(")) {
     ld a = rparse(0);
@@ -260,25 +265,22 @@ cld exp_parser::parse(int prio) {
       res /= extra_params["distunit"];
     }
   else if(eat("regangle(")) {
-    ld edgelen = rparse(0);
+    cld edgelen = parse(0);
     if(extra_params.count("distunit")) {
-      println(hlog, "got edgelen = ", edgelen);
-      println(hlog, "distunit = ", real(extra_params["distunit"]));
-      edgelen = real(edgelen * extra_params["distunit"]); 
-      println(hlog, "got edgelen = ", edgelen);
+      edgelen = edgelen * extra_params["distunit"];
       }
     
     force_eat(",");
-    int edges = iparse(0);
+    ld edges = rparse(0);
     force_eat(")");
     ld alpha = M_PI / edges;
-    ld c = asin_auto(sin_auto(edgelen/2) / sin(alpha));
+    ld c = asin_auto(sin_auto(validate_real(edgelen)/2) / sin(alpha));
     hyperpoint h = xpush(c) * spin(M_PI - 2*alpha) * xpush0(c);
-    res = 2 * atan2(h);
-    if(real(res) < 0) res = -res;
-    while(real(res) > 2 * M_PI) res -= 2 * M_PI;
-    if(real(res) > M_PI) res = 2 * M_PI - res;
-    res = M_PI - res;
+    ld result = 2 * atan2(h);
+    if(result < 0) result = -result;
+    while(result > 2 * M_PI) result -= 2 * M_PI;
+    if(result > M_PI) result = 2 * M_PI - result;
+    res = M_PI - result;
 
     if(extra_params.count("angleofs"))
       res -= extra_params["angleofs"];
@@ -288,7 +290,7 @@ cld exp_parser::parse(int prio) {
     }
   else if(eat("test(")) {
     res = parsepar();
-    println(hlog, "res = ", make_pair(real(res), imag(res)));
+    println(hlog, "res = ", res);
     }
   else if(eat("ifp(")) {
     cld cond = parse(0);
