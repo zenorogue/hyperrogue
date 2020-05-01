@@ -153,6 +153,8 @@ EX namespace mapeditor {
   
   vector<unique_ptr<dtshape>> dtshapes;
   
+  EX void clear_dtshapes() { dtshapes.clear(); }
+  
   EX void draw_dtshapes() {
     for(auto& shp: dtshapes) {
       if(shp == nullptr) continue;
@@ -2784,6 +2786,14 @@ int read_editor_args() {
   if(argis("-lev")) { shift(); levelfile = args(); }
   else if(argis("-pic")) { shift(); picfile = args(); }
   else if(argis("-load")) { PHASE(3); shift(); mapstream::loadMap(args()); }
+  else if(argis("-d:draw")) { PHASE(3); 
+    #if CAP_EDIT
+    start_game();
+    mapeditor::drawing_tool = true;
+    mapeditor::initdraw(cwt.at);
+    launch_dialog(mapeditor::showDrawEditor);
+    #endif
+    }
   #if CAP_POLY
   else if(argis("-picload")) { PHASE(3); shift(); mapeditor::loadPicFile(args()); }
   #endif
