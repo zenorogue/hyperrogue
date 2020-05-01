@@ -82,15 +82,15 @@ struct trianglemaker {
     
     hyperpoint start = point31(0, 0, 0);
       
-    double lastz;
-    
-    double lasta;
-    
     double ca;
     
     // compute how to scale this in Nil so that everything fits
     
-    for(ld a = 1e-5;; a+=1e-5) {
+    ld amin = 0, amax = 1;
+    
+    for(int it=0; it<100; it++) {
+      ld a = (amin + amax) / 2;
+      ca = a;
       hyperpoint at = start;
       for(int d=0; d<3; d++) {
         for(int i=0; i<isteps; i++) {
@@ -100,11 +100,11 @@ struct trianglemaker {
       
       println(hlog, "at = ", at, " for a = ", a, " sq = ", at[2] / a / a);
       if(at[2] > 0) {
-        ld z = at[2];
-        ca = lerp(lasta, a, ilerp(lastz, z, 0));
-        break;
+        amax = a;
         }
-      lastz = at[2]; lasta  =a;
+      else {
+        amin = a;
+        }
       }
     
     // compute the shift between the cubes
