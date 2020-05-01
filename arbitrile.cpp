@@ -377,7 +377,7 @@ void connection_debugger() {
   int N = isize(sh.edges);
   for(int k=0; k<N; k++) {
     auto con = sh.connections[k];
-    string cap = its(k) + primes(last.second) + " -> " + its(get<0>(con)) + primes(get<1>(con)) + (get<2>(con) ? " (m) " : "");
+    string cap = its(k) + primes(last.second) + " -> " + its(get<1>(con)) + primes(get<0>(con)) + (get<2>(con) ? " (m) " : "");
     dialog::addSelItem(cap, "go", '0' + k);
     
     dialog::add_action([k, last, &sh, con] {
