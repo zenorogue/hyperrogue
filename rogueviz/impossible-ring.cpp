@@ -281,6 +281,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
   [] (presmode mode) {
     setCanvas(mode, '0');
     
+    slidecommand = "animation";
     if(mode == pmKey) {
       tour::slide_backup(cylanim, !cylanim);
       }

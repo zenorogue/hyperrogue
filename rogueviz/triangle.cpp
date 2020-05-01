@@ -523,7 +523,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
   else if(argis("-tri-net")) {
     on = true; net = true;
     }
-  else if(argis("-tri-net")) {
+  else if(argis("-tri-one")) {
     on = true; net = false;
     }
   else return 1;

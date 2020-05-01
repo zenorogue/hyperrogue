@@ -150,6 +150,7 @@ void snow_slide(vector<tour::slide>& v, string title, string desc, reaction_t t)
   [t] (presmode mode) {
     setCanvas(mode, '0');
 
+    slidecommand = "auto-movement";
     if(mode == pmKey) {
       using namespace anims;
       tour::slide_backup(ma, ma == maTranslation ? maNone : maTranslation);
@@ -238,7 +239,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
 
 + addHook(rvtour::hooks_build_rvtour, 140, [] (vector<tour::slide>& v) {
   v.push_back(tour::slide{
-    cap+"intro", 10, tour::LEGAL::NONE | tour::QUICKSKIP,
+    cap+"snowball visualization", 10, tour::LEGAL::NONE | tour::QUICKSKIP,
     "Non-Euclidean visualizations usually show some regular constructions. Could we visualize the geometries themselves? Let's distribute the snowballs randomly."
     "\n\n"
     "You can use mouse to look in different directions. Press 5 to turn the automatic movement on or off. Press 'o' to change density and shape."
@@ -291,16 +292,17 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
     tour::slide_backup(snow_shape, 2);
     snow_lambda = 5;
     });
-  snow_slide(v, "SL(2,R)", "Here is SL(2,R), like Nil but based on hyperbolic plane instead. Geometric lensing effects are strong in both Nil and SL(2,R). (Starting with spherical plane yields spherical geometry.)", [] {
+  snow_slide(v, "SL(2,R)", "Here is SL(2,R), like Nil but based on hyperbolic plane instead. Geometric lensing effects are strong in both Nil and SL(2,R). (Starting with S^2 yields spherical geometry.)", [] {
     set_geometry(gNormal);
     set_variation(eVariation::pure);
     set_geometry(gRotSpace);
     snow_lambda = 5;
     });
 #if CAP_SOLV
-  snow_slide(v, "Solv", "Solv geometry. Like the non-isotropic hyperbolic space (#4) but where the horizontal and vertical curvatures work in the other way.", [] {
+  snow_slide(v, "Solv", "Solv geometry. Like the non-isotropic hyperbolic geometry but where the horizontal and vertical curvatures work in the other way.", [] {
     set_geometry(gSol);
-    snow_lambda = 20;
+    // tour::slide_backup(snow_shape, 2);
+    snow_lambda = 3;
     });
 #endif
   });
