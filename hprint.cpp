@@ -279,6 +279,8 @@ struct indenter_finish : indenter {
 
 #endif
 
+EX void print(hstream& hs, cld x) { print(hs, real(x)); if(kz(imag(x))) print(hs, "+", imag(x), "i"); }
+
 EX string fts_fixed(ld x, int prec IS(6)) {
   std::stringstream ss;
   ss.precision(prec);
