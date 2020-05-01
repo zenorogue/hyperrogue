@@ -3932,3 +3932,16 @@ Geometries:
 - - shift+PageUp/Down now zooms
 - - rug can now be mouse-rotated with Ctrl
 - - fixed in standard binary tiling and in *.tes tilings
+
+2020-05-01 18:57 Update 11.3l:
+- Tessellation files: 
+- - added a debug screen if the polygon does not end correctly
+- - added a command debug(tilenumber) to debug connections
+- - if you define constants, they take precedence over predefined constants
+- - expression parser now accepts whitespace in expressions
+- fixed a bug when scrolling with arrows then moving in quotient spaces
+- fixed 'smooth scrolling' option not making scrolling very smooth
+- an option to fatten regular (isotropic non-Euclidean) honeycomb edges
+- better centering in screenshot, 'rotate PC' option
+- in animation, 'monster turns' can be configured (useful for animating CA or butterflies)
+- fixed Butterflies in non-orientable geometries
