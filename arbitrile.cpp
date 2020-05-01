@@ -58,12 +58,18 @@ struct hr_polygon_error : hr_exception {
   ~hr_polygon_error() noexcept(true) {}
   };
 
-void start_debugger(hr_polygon_error& err) {
+struct connection_debug_request : hr_exception {
+  int id;
+  eGeometryClass c;
+  connection_debug_request(int i): id(i), c(cgclass) {}
+  };
+
+void ensure_geometry(eGeometryClass c) {
   stop_game();
-  if(err.c != cgclass) {
-    if(err.c == gcEuclid) set_geometry(gEuclid);
-    if(err.c == gcHyperbolic) set_geometry(gNormal);
-    if(err.c == gcSphere) set_geometry(gSphere);
+  if(c != cgclass) {
+    if(c == gcEuclid) set_geometry(gEuclid);
+    if(c == gcHyperbolic) set_geometry(gNormal);
+    if(c == gcSphere) set_geometry(gSphere);
     }
 
   if(specialland != laCanvas) {   
@@ -72,8 +78,12 @@ void start_debugger(hr_polygon_error& err) {
     patterns::canvasback = 0xFFFFFF;
     firstland = specialland = laCanvas;
     }
-
   start_game();
+  }
+
+void start_poly_debugger(hr_polygon_error& err) {
+  ensure_geometry(err.c);
+
   drawthemap();
 
   mapeditor::drawing_tool = true;
@@ -299,8 +309,90 @@ EX void load(const string& fname) {
             }
         }
       }
+    else if(ep.eat("debug(")) {
+      int i = ep.iparse(0);
+      ep.force_eat(")");
+      throw connection_debug_request(i);
+      }
     else throw hr_parse_exception("expecting command, " + ep.where());
     }
+  }
+
+arbi_tiling debugged;
+vector<pair<transmatrix, int> > debug_polys;
+
+string primes(int i) {
+  string res;
+  while(i--) res += "'";
+  return res;
+  }
+
+void connection_debugger() {
+  cmode = sm::SIDE | sm::DIALOG_STRICT_X;
+  gamescreen(0);
+  
+  auto& last = debug_polys.back();
+  
+  initquickqueue();
+  for(auto& p: debug_polys) {
+    int id = p.second;
+    
+    transmatrix V = gmatrix[cwt.at] * p.first;        
+    
+    auto& sh = debugged.shapes[id].vertices;
+    
+    for(auto& v: sh)
+      curvepoint(V * v);
+
+    curvepoint(V * sh[0]);
+    
+    color_t col = colortables['A'][id];
+    col = darkena(col, 0, 0xFF);
+    
+    if(&p == &last) {
+      vid.linewidth *= 2;
+      queuecurve(0xFFFF00FF, col, PPR::LINE);
+      vid.linewidth /= 2;
+      for(int i=0; i<isize(sh); i++)
+        queuestr(V * sh[i], vid.fsize, its(i), 0xFFFFFFFF);
+      }
+    else
+      queuecurve(0xFFFFFFFF, col, PPR::LINE);
+    }
+  quickqueue();
+
+  dialog::init(XLAT("connection debugger"));
+  
+  dialog::addInfo(debugged.name);
+  dialog::addHelp(debugged.comment);
+  
+  dialog::addBreak(50);
+
+  dialog::addInfo("face index " + its(last.second));
+
+  dialog::addBreak(50);  
+  
+  auto& sh = debugged.shapes[last.second];
+  int N = isize(sh.edges);
+  for(int k=0; k<N; k++) {
+    auto con = sh.connections[k];
+    string cap = its(k) + primes(last.second) + " -> " + its(get<0>(con)) + primes(get<1>(con)) + (get<2>(con) ? " (m) " : "");
+    dialog::addSelItem(cap, "go", '0' + k);
+    
+    dialog::add_action([k, last, &sh, con] {
+      debug_polys.emplace_back(last.first * get_adj(debugged, last.second, k, -1), get<0>(con));
+      });
+    
+    }    
+  
+  dialog::addBack();
+  dialog::display();
+
+  keyhandler = [] (int sym, int uni) {
+    handlePanning(sym, uni);
+    dialog::handleNavigation(sym, uni);
+    if(doexiton(sym, uni)) popScreen();
+    };
   }
 
 geometryinfo1& arbi_tiling::get_geometry() {
@@ -314,6 +406,48 @@ EX map<heptagon*, pair<heptagon*, transmatrix>> arbi_matrix;
 EX hrmap *current_altmap;
 
 heptagon *build_child(heptspin p, pair<int, int> adj);
+
+EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int xdl) {
+  
+  auto& sh = c.shapes[t];
+  
+  int dr = gmod(dl+1, sh.size());
+
+  auto& co = sh.connections[dl];
+  int xt = get<0>(co);
+  if(xdl == -1) xdl = get<1>(co);
+  int m = get<2>(co);
+
+  auto& xsh = c.shapes[xt];
+  int xdr = gmod(xdl+1, xsh.size());
+
+  hyperpoint vl = sh.vertices[dl];
+  hyperpoint vr = sh.vertices[dr];
+  hyperpoint vm = mid(vl, vr);
+      
+  transmatrix rm = gpushxto0(vm);
+  
+  hyperpoint xvl = xsh.vertices[xdl];
+  hyperpoint xvr = xsh.vertices[xdr];
+  hyperpoint xvm = mid(xvl, xvr);
+  
+  transmatrix xrm = gpushxto0(xvm);
+  
+  transmatrix Res = rgpushxto0(vm) * rspintox(rm*vr);
+  if(m) Res = Res * MirrorX;
+  Res = Res * spintox(xrm*xvl) * xrm;
+  
+  if(m) swap(vl, vr);
+  
+  if(hdist(vl, Res*xvr) + hdist(vr, Res*xvl) > .1) {
+    println(hlog, "s1 = ", kz(spintox(rm*vr)), " s2 = ", kz(rspintox(xrm*xvr)));    
+    println(hlog, tie(t, dl), " = ", kz(Res));    
+    println(hlog, hdist(vl, Res * xvr), " # ", hdist(vr, Res * xvl));
+    exit(3);
+    }
+        
+  return Res;
+  }
 
 struct hrmap_arbi : hrmap {
   heptagon *origin;
@@ -377,48 +511,7 @@ struct hrmap_arbi : hrmap {
   void verify() override { }
 
   transmatrix adj(heptagon *h, int dl) override { 
-    auto& c = current;
-    int t = id_of(h);
-    auto& sh = c.shapes[t];
-    
-    int dr = gmod(dl+1, sh.size());
-
-    auto& co = sh.connections[dl];
-    int xt = get<0>(co);
-    int xdl = get<1>(co);
-    int m = get<2>(co);
-
-    if(h->c.move(dl)) xdl = h->c.spin(dl);
-
-    auto& xsh = c.shapes[xt];
-    int xdr = gmod(xdl+1, xsh.size());
-
-    hyperpoint vl = sh.vertices[dl];
-    hyperpoint vr = sh.vertices[dr];
-    hyperpoint vm = mid(vl, vr);
-        
-    transmatrix rm = gpushxto0(vm);
-    
-    hyperpoint xvl = xsh.vertices[xdl];
-    hyperpoint xvr = xsh.vertices[xdr];
-    hyperpoint xvm = mid(xvl, xvr);
-    
-    transmatrix xrm = gpushxto0(xvm);
-    
-    transmatrix Res = rgpushxto0(vm) * rspintox(rm*vr);
-    if(m) Res = Res * MirrorX;
-    Res = Res * spintox(xrm*xvl) * xrm;
-    
-    if(m) swap(vl, vr);
-    
-    if(hdist(vl, Res*xvr) + hdist(vr, Res*xvl) > .1) {
-      println(hlog, "s1 = ", kz(spintox(rm*vr)), " s2 = ", kz(rspintox(xrm*xvr)));    
-      println(hlog, tie(t, dl), " = ", kz(Res));    
-      println(hlog, hdist(vl, Res * xvr), " # ", hdist(vr, Res * xvl));
-      exit(3);
-      }
-        
-    return Res;
+    return get_adj(current, id_of(h), dl, h->c.move(dl) ? h->c.spin(dl) : -1);
     }
 
   heptagon *create_step(heptagon *h, int d) override {
@@ -531,7 +624,7 @@ void run(string fname) {
      set_geometry(g);
      set_variation(v);
      current = t;
-     start_debugger(poly);
+     start_poly_debugger(poly);
      string help = XLAT("Polygon number %1 did not close correctly. Here is the picture to help you understand the issue.\n\n", its(poly.id));
      showstartmenu = false;
      for(auto& p: poly.params)
@@ -545,6 +638,15 @@ void run(string fname) {
      start_game();
      addMessage("failed: " + ex.s);
      }
+  catch(connection_debug_request& cr) {
+    set_geometry(g);     
+    debugged = current;
+    current = t;
+    ensure_geometry(cr.c);
+    debug_polys.clear();
+    debug_polys.emplace_back(Id, cr.id);
+    pushScreen(connection_debugger);
+    }
   start_game();
   }
 
