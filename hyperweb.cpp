@@ -30,10 +30,6 @@
 #define EMSCRIPTEN
 #endif
 
-#ifndef CAP_ORIENTATION
-#define CAP_ORIENTATION 1
-#endif
-
 #ifdef FAKEWEB
 namespace hr { void mainloopiter(); }
 template<class A, class B, class C> void emscripten_set_main_loop(A a, B b, C c) { while(true) mainloopiter(); }

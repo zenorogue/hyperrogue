@@ -8,7 +8,7 @@
  */
 
 #include "hyper.h"
-#ifdef CAP_COMPLEX2
+#if CAP_COMPLEX2
 
 namespace hr {
 

@@ -731,7 +731,7 @@ struct colortable: vector<color_t> {
 
 namespace scores { void load(); }
 
-#if ISMOBILE==1
+#if ISMOBILE
 namespace leader { void showMenu(); void handleKey(int sym, int uni); }
 #endif
 
@@ -740,7 +740,7 @@ int textwidth(int siz, const string &str);
 int gl_width(int size, const char *s);
 #endif
 
-#ifdef ISMOBILE
+#if ISMOBILE
 extern int andmode;
 extern bool longclick;
 extern bool useRangedOrb;

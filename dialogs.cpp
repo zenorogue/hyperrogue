@@ -803,7 +803,7 @@ EX namespace dialog {
     else
       addSlider(ne.sc.direct(ne.vmin), ne.sc.direct(*ne.editwhat), ne.sc.direct(ne.vmax), 500);
     addBreak(100);
-#if ISMOBILE==0
+#if !ISMOBILE
     addHelp(XLAT("You can scroll with arrow keys -- Ctrl to fine-tune"));
     addBreak(100);
 #endif

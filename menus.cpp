@@ -230,7 +230,7 @@ EX void showMainMenu() {
   dialog::addItem(XLAT(inSpecialMode() ? "reset special modes" : "back to the start menu"), 'R');
   
   string q;
-  #if ISMOBILE==1
+  #if ISMOBILE
   dialog::addItem(XLAT("visit the website"), 'q');
   #else
   q = quitsaves() ? "save" : "quit"; 
@@ -248,7 +248,7 @@ EX void showMainMenu() {
   if(inv::on)
     dialog::addItem(XLAT("inventory"), 'i');    
 
-#if ISMOBILE==1
+#if ISMOBILE
 #if CAP_ACHIEVE
   dialog::addItem(XLAT("leaderboards/achievements"), '3'); 
 #endif
@@ -305,7 +305,7 @@ EX void showMainMenu() {
 #endif
     else if(sym == SDLK_ESCAPE) 
       showMissionScreen();
-  #if ISMOBILE==1
+  #if ISMOBILE
   #ifdef HAVE_ACHIEVEMENTS
     else if(NUMBERKEY == '3') {
       achievement_final(false);
@@ -382,7 +382,7 @@ EX void enable_cheat() {
   else if(!cheater) dialog::cheat_if_confirmed([] {
     cheater++;
     addMessage(XLAT("You activate your demonic powers!"));
-#if ISMOBILE==0
+#if !ISMOBILE
     addMessage(XLAT("Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, etc."));
 #endif
     popScreen();

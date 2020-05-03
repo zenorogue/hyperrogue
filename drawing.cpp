@@ -239,7 +239,7 @@ EX void glflush() {
   }
 #endif
 
-#if ISMOBILE==0
+#if !ISMOBILE
 SDL_Surface *aux;
 #endif
 
@@ -1661,7 +1661,7 @@ void dqi_poly::draw() {
       }
   #endif
   
-  #if CAP_SVG==1
+  #if CAP_SVG
     if(svg::in) {
       coords_to_poly();
       color_t col = color;
@@ -1678,10 +1678,10 @@ void dqi_poly::draw() {
   
     coords_to_poly();
   
-  #if CAP_XGD==1
+  #if CAP_XGD
     gdpush(1); gdpush(color); gdpush(outline); gdpush(polyi);
     for(int i=0; i<polyi; i++) gdpush(polyx[i]), gdpush(polyy[i]);
-  #elif CAP_SDLGFX==1
+  #elif CAP_SDLGFX
   
     if(tinf) {
       #if CAP_TEXTURE
@@ -1803,7 +1803,7 @@ void dqi_string::draw() {
     return;
     }
   #endif
-  #if ISMOBILE==0
+  #if !ISMOBILE
   int fr = frame & 255;
   displayfrSP(x, y, shift, fr, size, str, color, align, frame >> 8);
   #else

@@ -4052,7 +4052,7 @@ EX void queuecircleat(cell *c, double rad, color_t col) {
   }
 #endif
 
-#if ISMOBILE==1
+#if ISMOBILE
 #define MOBON (clicked)
 #else
 #define MOBON true

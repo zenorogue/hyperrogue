@@ -800,7 +800,7 @@ EX void saveConfig() {
     fprintf(f, "%s=%s\n", s->name.c_str(), s->save().c_str());
   
   fclose(f);
-#if ISMOBILE==0
+#if !ISMOBILE
   addMessage(s0 + "Configuration saved to: " + conffile);
 #else
   addMessage(s0 + "Configuration saved");
