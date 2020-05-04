@@ -407,7 +407,6 @@ extern "C" {
 #define CAP_GLEW (CAP_GL && !ISMOBILE && !ISMAC && !ISLINUX && !ISWEB)
 #endif
 
-#if CAP_GL
 #if CAP_GLEW
   #include <GL/glew.h>
 #else
@@ -429,7 +428,6 @@ extern "C" {
     #include <GL/gl.h>
     #include <GL/glu.h>
     #include <GL/glext.h>
-    #endif
   #endif
 #endif
 
