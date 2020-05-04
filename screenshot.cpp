@@ -358,13 +358,14 @@ EX always_false in;
   /** 0 = no/unknown/disabled texture, 1 = rug, 2 = gradient, 3 = floor texture */
   EX int texture_type(dqi_poly& p) {
     if(!p.tinf) return 0;
-    if(!CAP_PNG) return 0;
+#if CAP_PNG
     if(!textures) return 0;
     if(p.tinf == &rug::tinf) return 1;
     #if MAXMDIM >= 4
     if(p.tinf->texture_id == (int) floor_textures->renderedTexture)
       return (p.tinf->tvertices[0][0] == 0) ? 2 : 3;
     #endif
+#endif
     return 0;
     }
 
@@ -1730,8 +1731,13 @@ startanim perspective { "projection distance", no_init, [] {
   }};
 
 startanim rug { "Hypersian Rug", [] { 
-  if(!CAP_RUG) { pick(); return; }
-  rug::init(), rug::rugged = false; }, [] {
+#if CAP_RUG
+  rug::init();
+  rug::rugged = false;
+#else
+  pick();
+#endif
+  }, [] {
   dynamicval<bool> b(rug::rugged, true);
   rug::physics();
   dynamicval<transmatrix> t(rug::rugView, cspin(1, 2, ticks / 3000.) * rug::rugView);
