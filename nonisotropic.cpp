@@ -1931,6 +1931,17 @@ EX namespace rots {
 
   /** reinterpret the given point of rotspace as a rotation matrix in the underlying geometry */
   EX transmatrix qtm(hyperpoint h) {
+
+    if(hyperbolic) {
+      hyperpoint k = slr::to_phigans(h);
+      ld z = k[2]; k[2] = 0;
+      ld r = hypot_d(2, k);
+      // k[1] = -k[1];
+      k[0] = -k[0];
+      if(r) k = tangent_length(k, asinh(r) * 2);
+      return spin(-z * 2) * rgpushxto0(direct_exp(k));
+      }
+
     ld& x = h[0];
     ld& y = h[1];
     ld& z = h[2];
