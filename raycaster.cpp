@@ -1367,12 +1367,24 @@ int readArgs() {
     PHASEFROM(2);
     want_use = 1;
     }
+  else if(argis("-ray-range")) {
+    PHASEFROM(2);
+    shift_arg_formula(exp_start);
+    shift_arg_formula(exp_decay_current());
+    want_use = 1;
+    }
   else if(argis("-ray-out")) {
     PHASEFROM(2); shift(); color_out_of_range = arghex();
     }
   else if(argis("-ray-comp")) {
     PHASEFROM(2);
     comparison_mode = true;
+    }
+  else if(argis("-ray-sol")) {
+    PHASEFROM(2);
+    shift(); max_iter_sol = argi();
+    shift_arg_formula(maxstep_sol, reset_raycaster);
+    reset_raycaster();
     }
   else if(argis("-ray-cells")) {
     PHASEFROM(2); shift();
