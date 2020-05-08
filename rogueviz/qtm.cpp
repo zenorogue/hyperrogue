@@ -100,6 +100,28 @@ int args() {
     qtm_on = true;
     }
 
+  else if(argis("-spheredemo")) {
+    start_game();
+    auto c = currentmap->allcells();
+    for(cell* cx: c) cx->wall = waNone, cx->item = itNone, cx->land = laCanvas, cx->landparam = 0;
+    c[1]->wall = waPalace;
+    c[1]->land = laPalace;
+    int N = isize(c);
+    
+    int i = 1+N/4;
+    int j = 1+2*N/4 + 4;
+    int k = 1+3*N/4;
+
+    c[i]->wall = waIcewall;
+    c[i]->land = laIce;
+
+    c[j]->wall = waBigTree;
+    c[j]->land = laDryForest;
+
+    c[k]->wall = waWaxWall;
+    c[k]->landparam = 0xFF0000;
+    }
+
   else return 1;
   return 0;
   }
