@@ -371,6 +371,13 @@ EX transmatrix kz(transmatrix h) {
   return h;
   }
 
+#if HDR
+template<class T> vector<T> kz(vector<T> v) {
+  for(auto& el: v) el = kz(el);
+  return v;
+  }
+#endif
+
 EX string pick123() { return cts('1' + rand() % 3); }
 EX string pick12() { return cts('1' + rand() % 2); }
 
