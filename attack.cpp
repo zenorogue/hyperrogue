@@ -1185,8 +1185,7 @@ EX void killThePlayer(eMonster m, int id, flagtype flags) {
     items[itOrbSafety] = 0;
     }
   else {
-//  printf("confused!\n");
-    addMessage(XLAT("%The1 is confused!", m));
+    addMessage(XLAT("Surprisingly, %the1 does not kill you!"));
     }
   }
 

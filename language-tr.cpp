@@ -161,7 +161,7 @@ S("Stab them by walking around them.", "Etrafında yürüyerek bıçaklayın.")
 S("You feel more experienced in demon fighting!", "Şeytanlarla savaşmada daha deneyimli hissediyorsun!")
 S("Cthulhu withdraws his tentacle!", "Cthulhu dokungacını çekti!")
 S("The sandworm explodes in a cloud of Spice!", "Kumkurdu patladı ve etrafa baharat saçtı!")
-S("%The1 is confused!", "%1 sersemledi.")
+S("Surprisingly, %the1 does not kill you!", "%1 sersemledi.") //TODO UPDATE
 S("%The1 raises some undead!", "%1 ölü çağırdı!")
 S("%The1 throws fire at you!", "%1 sana ateş attı!")
 S("%The1 shows you two fingers.", "%1 sana iki parmağını gösterdi.")

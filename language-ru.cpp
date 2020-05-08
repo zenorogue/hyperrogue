@@ -186,7 +186,7 @@ S("Stab them by walking around them.", "Нападите на него сбок�
 S("You feel more experienced in demon fighting!", "Теперь Вы более опытны в борьбе с демонами!")
 S("Cthulhu withdraws his tentacle!", "Ктулху забирает свой щупальце!")
 S("The sandworm explodes in a cloud of Spice!", "Червь взорвался и стал облаком пряностей")
-S("%The1 is confused!", "%1 в замешательстве")
+S("Surprisingly, %the1 does not kill you!", "%1 в замешательстве") //TODO UPDATE
 S("%The1 raises some undead!", "%1 восстал из мёртвых!")
 S("%The1 throws fire at you!", "%1 бросил в Вас огнём!")
 S("%The1 shows you two fingers.", "%1 показал%E1 Вам два пальца.")
