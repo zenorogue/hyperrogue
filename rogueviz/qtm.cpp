@@ -21,6 +21,8 @@ namespace hybrid { extern hrmap *pmap; }
 
 namespace qtm {
 
+int mode;
+
 color_t rcolor() {
   color_t res;
   part(res, 0) = hrand(0x80);
@@ -40,6 +42,14 @@ void set_cell(cell *c) {
     c->landparam = c1->landparam;
     c->item = itNone;
     c->monst = moNone;
+    if(mode == 1) {
+      if(hybrid::get_where(c).second == 0)
+        c->landparam = 0xFFFFFF;
+      }
+    if(mode == 2) {
+      if(hybrid::get_where(c).second != 0)
+        c->wall = waNone;
+      }
     }
   else {
     if(c->land == laHive) return;
@@ -76,6 +86,15 @@ int args() {
   using namespace arg;
            
   if(0) ;
+  else if(argis("-qtm-stripe")) {
+    mode = 1;
+    }
+  else if(argis("-qtm-no-stripe")) {
+    mode = 0;
+    }
+  else if(argis("-qtm-stripe-only")) {
+    mode = 2;
+    }
   else if(argis("-qtm")) {
     PHASEFROM(2);
     qtm_on = true;
