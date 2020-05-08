@@ -653,6 +653,8 @@ EX void default_screenshot_content() {
   #endif
     drawfullmap();
 
+  rots::draw_underlying(false);
+
   if(caption != "")
     displayfr(vid.xres/2, vid.fsize+vid.fsize/4, 3, vid.fsize*2, caption, forecolor, 8);
   callhooks(hooks_hqshot);
