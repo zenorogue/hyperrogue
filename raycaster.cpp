@@ -45,12 +45,12 @@ EX ld& exp_decay_current() {
   }
 
 EX int& max_iter_current() {
-  if(nonisotropic) return max_iter_sol;
+  if(nonisotropic || rots_twist::in()) return max_iter_sol;
   else return max_iter_iso;
   }
 
 ld& maxstep_current() {
-  if(sn::in()) return maxstep_sol;
+  if(sn::in() || rots_twist::in()) return maxstep_sol;
   else return maxstep_nil;
   }
 
@@ -65,13 +65,17 @@ EX bool available() {
   if(WDIM == 2) return false;
   if(hyperbolic && pmodel == mdPerspective && !kite::in())
     return true;
+  if(sphere && pmodel == mdPerspective && !rotspace)
+    return true;
   if(nil && S7 == 8)
     return false;
   if((sn::in() || nil) && pmodel == mdGeodesic)
     return true;
   if(euclid && pmodel == mdPerspective && !bt::in())
     return true;
-  if(prod && PURE)
+  if(prod && (PURE || BITRUNCATED))
+    return true;
+  if(sphere && pmodel == mdPerspective && rots_twist::in())
     return true;
   return false;
   }
@@ -79,6 +83,7 @@ EX bool available() {
 /** do we want to use the raycaster? */
 EX bool requested() {
   if(cgflags & qRAYONLY) return true;
+  if(rots_twist::in()) return true;
   if(!want_use) return false;
   #if CAP_TEXTURE
   if(texture::config.tstate == texture::tsActive) return false;
@@ -250,8 +255,8 @@ void enable_raycaster() {
       flat1 = bt::dirs_outer();
       flat2 -= bt::dirs_inner();
       }
-
-    if(IN_ODS || hyperbolic) fsh += 
+    
+    if(hyperbolic) fsh += 
 
     "mediump mat4 xpush(float x) { return mat4("
          "cosh(x), 0., 0., sinh(x),\n"
@@ -259,7 +264,16 @@ void enable_raycaster() {
          "0., 0., 1., 0.,\n"
          "sinh(x), 0., 0., cosh(x)"
          ");}\n";
-    
+
+    if(sphere) fsh += 
+
+    "mediump mat4 xpush(float x) { return mat4("
+         "cos(x), 0., 0., sin(x),\n"
+         "0., 1., 0., 0.,\n"
+         "0., 0., 1., 0.,\n"
+         "-sin(x), 0., 0., cos(x)"
+         ");}\n";
+        
     if(IN_ODS) fsh += 
 
     "mediump mat4 xzspin(float x) { return mat4("
@@ -276,13 +290,22 @@ void enable_raycaster() {
          "0., 0., 0., 1."
          ");}\n";    
     
+   if(bi) {
+     fsh += "int walloffset, sides;\n";
+     }
+   else {
+     fsh += "const int walloffset = 0;\n"
+       "const int sides = " + its(centerover->type) + ";\n";
+     }
+     
+    
    fsh += 
      "mediump vec2 map_texture(mediump vec4 pos, int which) {\n";
    if(nil) fsh += "if(which == 2 || which == 5) pos.z = 0.;\n";
    else if(hyperbolic && bt::in()) fsh += 
        "pos = vec4(-log(pos.w-pos.x), pos.y, pos.z, 1);\n"
        "pos.yz *= exp(pos.x);\n";
-   else if(hyperbolic) fsh += 
+   else if(hyperbolic || sphere) fsh += 
        "pos /= pos.w;\n";
    else if(prod) fsh +=
      "pos = vec4(pos.x/pos.z, pos.y/pos.z, pos.w, 0);\n";
@@ -297,6 +320,8 @@ void enable_raycaster() {
          "}\n"
        "return vec2(1, 1);\n"
        "}\n";
+   
+   bool stepbased = nonisotropic || rots_twist::in();
     
    string fmain = "void main() {\n";
    
@@ -321,9 +346,12 @@ void enable_raycaster() {
     "  at0.xyz = at0.xyz / length(at0.xyz);\n";
       
     if(hyperbolic) fsh += "  mediump float len(mediump vec4 x) { return x[3]; }\n";
+    else if(sphere && rotspace) fsh += "  mediump float len(mediump vec4 x) { return 1.+x.x*x.x+x.y*x.y-x.z*x.z-x.w*x.w; }\n";
+    else if(sphere) fsh += "  mediump float len(mediump vec4 x) { return 1.-x[3]; }\n";
+
     else fsh += "  mediump float len(mediump vec4 x) { return length(x.xyz); }\n";
     
-    if(nonisotropic) fmain += 
+    if(stepbased) fmain += 
       "  const mediump float maxstep = " + fts(maxstep_current()) + ";\n"
       "  const mediump float minstep = " + fts(minstep) + ";\n"
       "  mediump float next = maxstep;\n";
@@ -347,6 +375,14 @@ void enable_raycaster() {
       "  mediump vec4 position = vw * vec4(0., 0., 0., 1.);\n"
       "  mediump vec4 tangent = vw * at0;\n";
       
+    if(rots_twist::in()) {
+      fmain += 
+        "tangent = s_itranslate(position) * tangent;\n"
+        "tangent[2] /= sqrt(1.+stretch);\n"
+        "tangent = s_translate(position) * tangent;\n";
+        ;
+      }
+    
     if(bi) fmain += "  walloffset = uWallOffset; sides = uSides;\n";
     
     fmain +=     
@@ -371,7 +407,7 @@ void enable_raycaster() {
       "      }\n"
       "    }\n";
     
-    if(!nonisotropic) {
+    if(!stepbased) {
     
       fmain +=
         "  if(which == -1) {\n";
@@ -405,6 +441,11 @@ void enable_raycaster() {
           "    mediump float d = atanh(v);\n"
           "    mediump vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
           "    if(next_tangent[3] < (uM[i] * next_tangent)[3]) continue;\n";
+      else if(sphere) fmain +=
+          "    mediump float v = ((position - uM[i] * position)[3] / (uM[i] * tangent - tangent)[3]);\n"
+          "    mediump float d = atan(v);\n"
+          "    mediump vec4 next_tangent = -position * sin(d) + tangent * cos(d);\n"
+          "    if(next_tangent[3] > (uM[i] * next_tangent)[3]) continue;\n";
       else fmain += 
           "    mediump float deno = dot(position, tangent) - dot(uM[i]*position, uM[i]*tangent);\n"
           "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
@@ -454,7 +495,9 @@ void enable_raycaster() {
       fmain +=
         "  if(which == -1 && dist == 0.) return;";    
       }
-        
+      
+    fsh += "const mediump float stretch = float(" + fts(rots::stretch_factor) + ");\n";
+
     // shift d units
     if(use_reflect) fmain += 
       "bool reflect = false;\n";
@@ -474,12 +517,19 @@ void enable_raycaster() {
     else if(in_e2xe()) fmain +=
       "  position = position + tangent * dist * xspeed;\n"
       "  zpos += dist * zspeed;\n";
-    else if(hyperbolic) fmain += 
+    else if(hyperbolic && !stepbased) fmain += 
       "  mediump float ch = cosh(dist); mediump float sh = sinh(dist);\n"
       "  mediump vec4 v = position * ch + tangent * sh;\n"
       "  tangent = tangent * ch + position * sh;\n"
       "  position = v;\n";
-    else if(nonisotropic) {
+    else if(sphere && !stepbased) fmain += 
+      "  mediump float ch = cos(dist); mediump float sh = sin(dist);\n"
+      "  mediump vec4 v = position * ch + tangent * sh;\n"
+      "  tangent = tangent * ch - position * sh;\n"
+      "  position = v;\n";
+    else if(stepbased) {
+    
+      bool use_christoffel = true;
     
       if(sol && nih) fsh += 
         "mediump vec4 christoffel(mediump vec4 pos, mediump vec4 vel, mediump vec4 tra) {\n"
@@ -493,14 +543,31 @@ void enable_raycaster() {
         "mediump vec4 christoffel(mediump vec4 pos, mediump vec4 vel, mediump vec4 tra) {\n"
         "  return vec4(-vel.z*tra.x - vel.x*tra.z, vel.z*tra.y + vel.y * tra.z, vel.x*tra.x * exp(2.*pos.z) - vel.y * tra.y * exp(-2.*pos.z), 0.);\n"
         "  }\n";
-      else fsh +=
+      else if(nil && false) fsh +=
         "mediump vec4 christoffel(mediump vec4 pos, mediump vec4 vel, mediump vec4 tra) {\n"
         "  mediump float x = pos.x;\n"
         "  return vec4(x*vel.y*tra.y - 0.5*dot(vel.yz,tra.zy), -.5*x*dot(vel.yx,tra.xy) + .5 * dot(vel.zx,tra.xz), -.5*(x*x-1.)*dot(vel.yx,tra.xy)+.5*x*dot(vel.zx,tra.xz), 0.);\n"
 //        "  return vec4(0.,0.,0.,0.);\n"
         "  }\n";
+      else if(rots_twist::in()) {
+        fsh += "mediump mat4 s_translate(vec4 h) {\n"
+          "return mat4(h.w,h.z,-h.y,-h.x,-h.z,h.w,h.x,-h.y,h.y,-h.x,h.w,-h.z,h.x,h.y,h.z,h.w);\n"
+          "}\n";
+        fsh += "mediump mat4 s_itranslate(vec4 h) {\n"
+          "h.xyz = -h.xyz; return s_translate(h);\n"
+          "}\n";
+        fsh += "mediump vec4 christoffel(mediump vec4 pos, mediump vec4 vel, mediump vec4 tra) {\n"
+          "vel = s_itranslate(pos) * vel;\n"
+          "tra = s_itranslate(pos) * tra;\n"
+          "return s_translate(pos) * vec4(\n"
+          "  (vel.y*tra.z+vel.z*tra.y) * -stretch, "
+          "  (vel.x*tra.z+vel.z*tra.x) * stretch, "
+          "  0, 0);\n"
+          "}\n";
+        }
+      else use_christoffel = false;
 
-      fsh += "mediump vec4 get_acc(mediump vec4 pos, mediump vec4 vel) {\n"
+      if(use_christoffel) fsh += "mediump vec4 get_acc(mediump vec4 pos, mediump vec4 vel) {\n"
         "  return christoffel(pos, vel, vel);\n"
         "  }\n";
       
@@ -525,13 +592,16 @@ void enable_raycaster() {
                 
       if(nil) fmain += "tangent = translate(position, itranslate(position, tangent));\n";
       
-      if(sn::in()) fmain +=
+      if(use_christoffel) fmain +=
         "mediump vec4 vel = tangent * dist;\n"
         "mediump vec4 acc1 = get_acc(position, vel);\n"
         "mediump vec4 acc2 = get_acc(position + vel / 2., vel + acc1/2.);\n"
         "mediump vec4 acc3 = get_acc(position + vel / 2. + acc1/4., vel + acc2/2.);\n"
         "mediump vec4 acc4 = get_acc(position + vel + acc2/2., vel + acc3/2.);\n"
         "mediump vec4 nposition = position + vel + (acc1+acc2+acc3)/6.;\n";
+      
+      if(rots_twist::in()) fmain += 
+        "nposition = nposition / sqrt(dot(nposition, nposition));\n";
 
       if(nil) {
         fmain +=
@@ -575,11 +645,49 @@ void enable_raycaster() {
         fsh += "uniform mediump mat4 uStraighten;\n";
         fmain += "mediump vec4 sp = uStraighten * nposition;\n";
         }
+      
+      if(hyperbolic) {
+        fmain += 
+        "  mediump float ch = cosh(dist); mediump float sh = sinh(dist);\n"
+        "  mediump vec4 v = position * ch + tangent * sh;\n"
+        "  mediump vec4 ntangent = tangent * ch + position * sh;\n"
+        "  mediump vec4 nposition = v;\n";
+        }
 
+      if(sphere && !use_christoffel) {
+        fmain += 
+        "  mediump float ch = cos(dist); mediump float sh = sin(dist);\n"
+        "  mediump vec4 v = position * ch + tangent * sh;\n"
+        "  mediump vec4 ntangent = tangent * ch - position * sh;\n"
+        "  mediump vec4 nposition = v;\n";
+        }
+
+      bool reg = hyperbolic || sphere || euclid;
+
+      if(reg) {
+        fsh += "mediump float len_h(vec4 h) { return 1. - h[3]; }\n";
+        string s = rotspace ? "-2" : "";
+        fmain +=
+      "    mediump float best = len(nposition);\n"
+      "    for(int i=0; i<sides"+s+"; i++) {\n"
+      "      mediump float cand = len(uM[walloffset+i] * nposition);\n"
+      "      if(cand < best) { best = cand; which = i; }\n"
+      "      }\n";
+        if(rotspace) fmain +=
+      "   if(which == -1) {\n"
+      "     best = len_h(nposition);\n"
+      "     mediump float cand1 = len_h(uM[walloffset+sides-2]*nposition);\n"
+      "     if(cand1 < best) { best = cand1; which = sides-2; }\n"
+      "     mediump float cand2 = len_h(uM[walloffset+sides-1]*nposition);\n"
+      "     if(cand2 < best) { best = cand2; which = sides-1; }\n"
+      "     }\n";
+        }
+        
       fmain +=
         "if(next >= minstep) {\n";
       
-      if(asonov) fmain +=
+      if(reg) fmain += "if(which != -1) {\n";
+      else if(asonov) fmain +=
           "if(abs(sp.x) > 1. || abs(sp.y) > 1. || abs(sp.z) > 1.) {\n";      
       else if(nih) fmain +=
           "if(abs(nposition.x) > uBinaryWidth || abs(nposition.y) > uBinaryWidth || abs(nposition.z) > .5) {\n";
@@ -635,7 +743,7 @@ void enable_raycaster() {
           "if(nposition.z > log(2.)/2.) which = nposition.x > 0. ? 3 : 2;\n"
           "if(nposition.z <-log(2.)/2.) which = nposition.y > 0. ? 7 : 6;\n";
         }
-      else fmain +=
+      else if(nil) fmain +=
           "if(nposition.x > .5) which = 3;\n"
           "if(nposition.x <-.5) which = 0;\n"
           "if(nposition.y > .5) which = 4;\n"
@@ -647,14 +755,24 @@ void enable_raycaster() {
           "next = maxstep;\n"
           "}\n";
       
-      if(nil) fmain +=
-        "tangent = translatev(position, xt);\n";
-
       fmain +=
         "position = nposition;\n";
       
-      if(!nil) fmain +=
+      if(use_christoffel) fmain +=
         "tangent = tangent + (acc1+2.*acc2+2.*acc3+acc4)/(6.*dist);\n";
+      else if(nil) fmain +=
+        "tangent = translatev(position, xt);\n";
+      else fmain +=
+        "tangent = ntangent;\n";
+      
+      if(rots_twist::in()) {
+        fmain += 
+          "tangent = s_itranslate(position) * tangent;\n"
+          "tangent[3] = 0.;\n"
+          "float nvelsquared = dot(tangent.xy, tangent.xy) + (1.+stretch) * tangent.z * tangent.z;\n"
+          "tangent /= sqrt(nvelsquared);\n"
+          "tangent = s_translate(position) * tangent;\n";
+        }
       }
     else fmain += 
       "position = position + tangent * dist;\n";
@@ -1188,7 +1306,7 @@ EX void configure() {
       });
     }
 
-  if(nonisotropic) {
+  if(nonisotropic || rots_twist::in()) {
     dialog::addSelItem(XLAT("max step"), fts(maxstep_current()), 'x');
     dialog::add_action([] {
       dialog::editNumber(maxstep_current(), 1e-6, 1, 0.1, sol ? 0.05 : 0.1, XLAT("max step"), "affects the precision of solving the geodesic equation in Solv");

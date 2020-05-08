@@ -1081,6 +1081,7 @@ EX namespace hybrid {
         });
       return T;
       }
+    if(rotspace) return inverse(rots::ray_adj(c, i));
     return currentmap->iadj(c, i);
     }
   
@@ -1838,6 +1839,8 @@ EX }
 
 EX namespace rots {
 
+  EX ld stretch_factor;
+  
   EX transmatrix uxpush(ld x) { 
     if(sl2) return xpush(x);
     return cspin(1, 3, x) * cspin(0, 2, x);
@@ -1869,6 +1872,34 @@ EX namespace rots {
     return spin(beta) * uxpush(distance/2) * spin(-beta+alpha);
     }
   
+  std::unordered_map<int, transmatrix> saved_matrices_ray;
+
+  EX transmatrix ray_adj(cell *c1, int i) {
+    if(i == c1->type-2) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
+    if(i == c1->type-1) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
+    cell *c2 = c1->cmove(i);
+    int id1 = hybrid::underlying == gArchimedean ? arcm::id_of(c1->master) + 20 * arcm::parent_index_of(c1->master) : shvid(c1);
+    int id2 = hybrid::underlying == gArchimedean ? arcm::id_of(c2->master) + 20 * arcm::parent_index_of(c2->master) : shvid(c2);
+    int j = c1->c.spin(i);
+    int id = id1 + (id2 << 10) + (i << 20) + (j << 26);
+    auto &M = saved_matrices_ray[id];
+    if(M[3][3]) return M;
+    
+    cell *cw = hybrid::get_where(c1).first;
+    
+    transmatrix T;
+    hybrid::in_underlying_geometry([&] {
+      hyperpoint h0 = get_corner_position(cw, i);
+      hyperpoint h1 = get_corner_position(cw, (i+1));
+      hyperpoint hm = mid(h0, h1);
+      ld d = hdist0(hm);
+      d *= 2;
+      T = rspintox(hm) * xpush(d);
+      });
+
+    return M = lift_matrix(T);
+    }
+
   struct hrmap_rotation_space : hybrid::hrmap_hybrid {
 
     std::unordered_map<int, transmatrix> saved_matrices;
@@ -1968,6 +1999,7 @@ EX namespace rots {
       dynamicval<bool> pf(playerfound, true);
       dynamicval<cell*> m5(centerover, co);
       dynamicval<transmatrix> m2(View, inprod ? pView : ypush(0) * qtm(h));
+      if(PURE) View = View * pispin;
       dynamicval<transmatrix> m3(playerV, Id);
       dynamicval<transmatrix> m4(actual_view_transform, Id);
       dynamicval<eModel> pm(pmodel, mdDisk);
@@ -1991,6 +2023,64 @@ EX namespace rots {
 
 EX }
 
+/** twisted S2xE */
+EX namespace rots_twist {
+
+  EX bool applicable() {
+    return among(geometry, gCell120, gECell120, gCell24, gECell24, gCell8, gECell8);
+    }
+
+  EX bool in() { return rots::stretch_factor && sphere && (rotspace || applicable()); }
+
+  EX transmatrix translate(hyperpoint h) {
+    return matrix4(
+      h[3], -h[2],  h[1],  h[0],
+      h[2],  h[3], -h[0],  h[1],
+     -h[1],  h[0],  h[3],  h[2],
+     -h[0], -h[1], -h[2],  h[3]
+      );
+    }
+  
+  EX transmatrix itranslate(hyperpoint h) {
+    h[0] = -h[0];
+    h[1] = -h[1];
+    h[2] = -h[2];
+    return translate(h);
+    }
+
+  hyperpoint mulz(const hyperpoint at, const hyperpoint velocity, ld factor) {
+    auto vel = itranslate(at) * velocity;
+    vel[2] *= factor;
+    return translate(at) * vel;
+    }
+  
+  hyperpoint isometric_to_actual(const hyperpoint at, const hyperpoint velocity) {
+    return mulz(at, velocity, 1/sqrt(1+rots::stretch_factor));
+    }
+  
+  hyperpoint actual_to_isometric(const hyperpoint at, const hyperpoint velocity) {
+    return mulz(at, velocity, sqrt(1+rots::stretch_factor));
+    }
+  
+  hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
+  
+    auto vel = itranslate(at) * velocity;
+    auto tra = itranslate(at) * transported;  
+    
+    hyperpoint c;
+    
+    auto K = rots::stretch_factor;
+    
+    c[0] = -K * (vel[1] * tra[2] + vel[2] * tra[1]);
+    c[1] =  K * (vel[0] * tra[2] + vel[2] * tra[0]);
+    c[2] = 0;
+    c[3] = 0;
+    
+    return translate(at) * c;
+    }  
+  
+EX }
+
 EX namespace nisot {
 
   EX hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
@@ -1999,6 +2089,7 @@ EX namespace nisot {
     else if(sn::in()) return sn::christoffel(at, velocity, transported);
     #endif
     else if(sl2) return slr::christoffel(at, velocity, transported);
+    else if(rots_twist::in()) return rots_twist::christoffel(at, velocity, transported);
     else return point3(0, 0, 0);
     }
 
@@ -2036,12 +2127,14 @@ EX namespace nisot {
 
   EX transmatrix parallel_transport_bare(transmatrix Pos, hyperpoint h) {
   
-    h[3] = 0;
+    bool stretch = rots_twist::in();
+    
+    if(!stretch) h[3] = 0;
   
     auto tPos = transpose(Pos);
     
     const ld eps = 1e-4;
-
+    
     if(sl2) {
       hyperpoint p = slr::to_phigans(tPos[3]);
       for(int i=0; i<3; i++)
@@ -2057,6 +2150,18 @@ EX namespace nisot {
     auto& at = tPos[3];
     auto& vel = h;
     
+    array<ld, 4> ms;
+
+    if(stretch) {
+      for(int i=0; i<3; i++) {
+        ms[i] = sqhypot_d(4, tPos[i]);
+        tPos[i] = rots_twist::isometric_to_actual(at, tPos[i]);
+        }
+      ms[3] = sqhypot_d(4, vel);
+      if(!ms[3]) return Pos;
+      vel = rots_twist::isometric_to_actual(at, vel);
+      }
+
     for(int i=0; i<steps; i++) {
       auto acc1 = get_acceleration(at, vel);
       auto at1 = at + vel/2; auto vel1 = vel + acc1/2;
@@ -2079,6 +2184,29 @@ EX namespace nisot {
 
       at += vel + (acc1+acc2+acc3)/6;
       vel += (acc1+2*acc2+2*acc3+acc4)/6;
+      
+      if(stretch) {
+        at = normalize(at);
+        
+        auto fix = [&] (hyperpoint& h, ld& m) {
+          h = rots_twist::itranslate(at) * h;
+          h[3] = 0;
+          ld m1 = h[0] * h[0] + h[1] * h[1] + h[2] * h[2] * (1+rots::stretch_factor);
+          h /= sqrt(m1/m);
+          h = rots_twist::translate(at) * h;
+          };
+
+        if(i == 0) println(hlog, vel);
+        fix(vel, ms[3]); 
+        if(i == 0) println(hlog, vel);
+        for(int i=0; i<3; i++) fix(tPos[i], ms[i]);
+        }
+
+      }
+
+    if(stretch) {
+      vel = rots_twist::actual_to_isometric(at, vel);
+      for(int i=0; i<3; i++) tPos[i] = rots_twist::actual_to_isometric(at, tPos[i]);
       }
                                                                                   
     if(sl2) {
@@ -2092,6 +2220,7 @@ EX namespace nisot {
     }
 
   EX void fixmatrix(transmatrix& T) {
+    if(sphere) return hr::fixmatrix(T);
     transmatrix push = eupush( tC0(T) );
     transmatrix push_back = inverse(push);
     transmatrix gtl = push_back * T;
@@ -2219,6 +2348,11 @@ EX namespace nisot {
       if(prod) stop_game();
       shift(); product::csteps = argi();
       hybrid::reconfigure();
+      return 0;
+      }
+    else if(argis("-rot-stretch")) {
+      PHASEFROM(2);
+      shift_arg_formula(rots::stretch_factor, ray::reset_raycaster);
       return 0;
       }
     else if(argis("-prodturn")) {

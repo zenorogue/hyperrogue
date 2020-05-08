@@ -2149,7 +2149,7 @@ EX void rotate_view(transmatrix T) {
 
 /** shift the view according to the given tangent vector */
 EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V) {
-  if(!nonisotropic) {
+  if(!nonisotropic && !rots_twist::in()) {
     return rgpushxto0(direct_exp(lp_iapply(H))) * V;
     }
   else if(!nisot::geodesic_movement) {
@@ -2169,7 +2169,7 @@ EX void shift_view(hyperpoint H) {
   auto oView = View;
   View = get_shift_view_of(H, View);
   auto& wc = current_display->which_copy;
-  if(nonisotropic) {
+  if(nonisotropic || rots_twist::in()) {
     transmatrix ioldv = eupush(tC0(inverse(oView)));
     transmatrix newv = inverse(eupush(tC0(inverse(View))));
     wc = newv * ioldv * wc;

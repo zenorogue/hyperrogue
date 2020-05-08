@@ -186,6 +186,13 @@ EX namespace reg3 {
     
     if(loop == 4) cgi.strafedist = adjcheck;
     else cgi.strafedist = hdist(cgi.adjmoves[0] * C0, cgi.adjmoves[1] * C0);
+    
+    if(rots_twist::applicable()) {
+      transmatrix T = cspin(0, 2, 90 * degree);
+      transmatrix iT = inverse(T);
+      for(auto& v: cgi.adjmoves) v = T * v * iT;
+      for(auto& v: cellshape) v = T * v;
+      }
 
     vertices_only.clear();
     for(hyperpoint h: cellshape) {
@@ -695,6 +702,11 @@ EX namespace reg3 {
       fixmatrix(T);
       auto hT = tC0(T);
       
+      bool hopf = rots_twist::applicable();
+
+      if(hopf)
+        T = rots_twist::translate(hT);      
+      
       if(DEB) println(hlog, "searching at ", alt, ":", hT);
 
       if(DEB) for(auto& p2: altmap[alt]) println(hlog, "for ", tC0(p2.second), " intval is ", intval(tC0(p2.second), hT));
@@ -706,7 +718,8 @@ EX namespace reg3 {
         // println(hlog, "YES found in ", isize(altmap[alt]));
         if(DEB) println(hlog, "-> found ", p2.first);
         int fb = 0;
-        hyperpoint old = T * (inverse(T1) * tC0(p1.second));
+        hyperpoint old = tC0(p1.second);;
+        if(!hopf) T * (inverse(T1) * old);
         #if CAP_FIELD
         if(quotient_map) {
           p2.first->c.connect(counterpart(parent)->c.spin(d), parent, d, false);
@@ -745,6 +758,19 @@ EX namespace reg3 {
         fv = cp->c.move(d)->fieldval;
         }
       #endif
+      if(hopf) {
+        hyperpoint old = tC0(p1.second);
+        for(d2=0; d2<S7; d2++) {
+          hyperpoint back = T * tC0(cgi.adjmoves[d2]);
+          if((err = intval(back, old)) < 1e-3) 
+            break;
+          }
+        if(d2 == S7) { 
+          d2 = 0; 
+          println(hlog, "Hopf connection failed"); 
+          }
+        println(hlog, "found d2 = ", d2);
+        }
       heptagon *created = tailored_alloc<heptagon> (S7);
       created->c7 = newCell(S7, created);
       if(sphere) spherecells.push_back(created->c7);

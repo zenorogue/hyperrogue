@@ -1979,6 +1979,13 @@ EX void reverse_transparent_walls() {
 EX void draw_main() {
   DEBBI(DF_GRAPH, ("draw_main"));
   if(sphere && GDIM == 3 && pmodel == mdPerspective) {
+
+    if(ray::in_use && !ray::comparison_mode) {
+      ray::cast();
+      reset_projection();
+      return;
+      }
+
     for(int p: {1, 0, 2, 3}) {
       if(elliptic && p < 2) continue;
       glhr::set_depthwrite(true);
