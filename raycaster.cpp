@@ -97,6 +97,7 @@ struct raycaster : glhr::GLprogram {
   GLint uLinearSightRange, uExpStart, uExpDecay;
   GLint uBLevel;
   GLint uPosX, uPosY;
+  GLint uWallOffset, uSides;
   
   raycaster(string vsh, string fsh);
   };
@@ -133,6 +134,9 @@ raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     tConnections = glGetUniformLocation(_program, "tConnections");
     tWallcolor = glGetUniformLocation(_program, "tWallcolor");
     tTextureMap = glGetUniformLocation(_program, "tTextureMap");
+    
+    uWallOffset = glGetUniformLocation(_program, "uWallOffset");
+    uSides = glGetUniformLocation(_program, "uSides");
     
     uPosX = glGetUniformLocation(_program, "uPosX");
     uPosY = glGetUniformLocation(_program, "uPosY");
@@ -173,12 +177,22 @@ EX hookset<void(string&, string&)> hooks_rayshader;
 EX hookset<bool(shared_ptr<raycaster>)> hooks_rayset;
 
 void enable_raycaster() {
-  if(geometry != last_geometry) reset_raycaster();
+  if(geometry != last_geometry) {
+    reset_raycaster();
+    }
+  
+  deg = 0;
+  if(hybri)
+    for(auto c: hybrid::samples) deg = max<int>(deg, c->type);
+  else
+    deg = centerover->type;
+  
   last_geometry = geometry;
-  deg = S7; if(prod) deg += 2;
   if(!our_raycaster) { 
     bool asonov = hr::asonov::in();
     bool use_reflect = reflect_val && !nil && !levellines;
+    
+    bool bi = BITRUNCATED;
 
     string vsh = 
       "attribute mediump vec4 aPosition;\n"
@@ -211,7 +225,7 @@ void enable_raycaster() {
     "uniform mediump vec4 uWallX["+rays+"];\n"
     "uniform mediump vec4 uWallY["+rays+"];\n"
     "uniform mediump vec4 uFogColor;\n"
-    "uniform mediump int uWallstart["+its(deg+1)+"];\n"
+    "uniform mediump int uWallstart["+its(isize(cgi.wallstart))+"];\n"
     "uniform mediump float uLinearSightRange, uExpStart, uExpDecay;\n";
     
     #ifdef GLES_ONLY
@@ -225,8 +239,12 @@ void enable_raycaster() {
       "uniform mediump float uPLevel;\n"
       "uniform mediump mat4 uLP;\n";
     
-    int flat1 = 0, flat2 = S7;
+    if(bi) fsh += 
+      "uniform int uWallOffset, uSides;\n";
     
+    int flat1 = 0, flat2 = deg;
+    if(prod || rotspace) flat2 -= 2;
+
     if(hyperbolic && bt::in()) {
       fsh += "uniform mediump float uBLevel;\n";
       flat1 = bt::dirs_outer();
@@ -328,6 +346,8 @@ void enable_raycaster() {
     else fmain +=
       "  mediump vec4 position = vw * vec4(0., 0., 0., 1.);\n"
       "  mediump vec4 tangent = vw * at0;\n";
+      
+    if(bi) fmain += "  walloffset = uWallOffset; sides = uSides;\n";
     
     fmain +=     
       "  mediump float go = 0.;\n"
@@ -345,7 +365,7 @@ void enable_raycaster() {
     if(IN_ODS) fmain += 
       "  if(go == 0.) {\n"
       "    mediump float best = len(position);\n"
-      "    for(int i=0; i<"+its(S7)+"; i++) {\n"
+      "    for(int i=0; i<sides; i++) {\n"
       "      mediump float cand = len(uM[i] * position);\n"
       "      if(cand < best - .001) { dist = 0.; best = cand; which = i; }\n"
       "      }\n"
@@ -356,28 +376,28 @@ void enable_raycaster() {
       fmain +=
         "  if(which == -1) {\n";
       
-      fmain += "for(int i="+its(flat1)+"; i<"+its(flat2)+"; i++) {\n";
+      fmain += "for(int i="+its(flat1)+"; i<"+(prod ? "sides-2" : its(flat2))+"; i++) {\n";
       
       if(in_h2xe()) fmain +=
-          "    mediump float v = ((position - uM[i] * position)[2] / (uM[i] * tangent - tangent)[2]);\n"
+          "    mediump float v = ((position - uM[walloffset+i] * position)[2] / (uM[walloffset+i] * tangent - tangent)[2]);\n"
           "    if(v > 1. || v < -1.) continue;\n"
           "    mediump float d = atanh(v);\n"
           "    mediump vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
-          "    if(next_tangent[2] < (uM[i] * next_tangent)[2]) continue;\n"
+          "    if(next_tangent[2] < (uM[walloffset+i] * next_tangent)[2]) continue;\n"
           "    d /= xspeed;\n";
       else if(in_s2xe()) fmain +=
-          "    mediump float v = ((position - uM[i] * position)[2] / (uM[i] * tangent - tangent)[2]);\n"
+          "    mediump float v = ((position - uM[walloffset+i] * position)[2] / (uM[walloffset+i] * tangent - tangent)[2]);\n"
           "    mediump float d = atan(v);\n"
           "    mediump vec4 next_tangent = tangent * cos(d) - position * sin(d);\n"
-          "    if(next_tangent[2] > (uM[i] * next_tangent)[2]) continue;\n"
+          "    if(next_tangent[2] > (uM[walloffset+i] * next_tangent)[2]) continue;\n"
           "    d /= xspeed;\n";
       else if(in_e2xe()) fmain +=
-          "    mediump float deno = dot(position, tangent) - dot(uM[i]*position, uM[i]*tangent);\n"
+          "    mediump float deno = dot(position, tangent) - dot(uM[walloffset+i]*position, uM[walloffset+i]*tangent);\n"
           "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
-          "    mediump float d = (dot(uM[i]*position, uM[i]*position) - dot(position, position)) / 2. / deno;\n"
+          "    mediump float d = (dot(uM[walloffset+i]*position, uM[walloffset+i]*position) - dot(position, position)) / 2. / deno;\n"
           "    if(d < 0.) continue;\n"
           "    mediump vec4 next_position = position + d * tangent;\n"
-          "    if(dot(next_position, tangent) < dot(uM[i]*next_position, uM[i]*tangent)) continue;\n"
+          "    if(dot(next_position, tangent) < dot(uM[walloffset+i]*next_position, uM[walloffset+i]*tangent)) continue;\n"
           "    d /= xspeed;\n";
       else if(hyperbolic) fmain +=
           "    mediump float v = ((position - uM[i] * position)[3] / (uM[i] * tangent - tangent)[3]);\n"
@@ -423,8 +443,8 @@ void enable_raycaster() {
         }
           
       if(prod) fmain += 
-        "if(zspeed > 0.) { mediump float d = (uPLevel - zpos) / zspeed; if(d < dist) { dist = d; which = "+its(S7)+"+1; }}\n"
-        "if(zspeed < 0.) { mediump float d = (-uPLevel - zpos) / zspeed; if(d < dist) { dist = d; which = "+its(S7)+"; }}\n";
+        "if(zspeed > 0.) { mediump float d = (uPLevel - zpos) / zspeed; if(d < dist) { dist = d; which = sides-1; }}\n"
+        "if(zspeed < 0.) { mediump float d = (-uPLevel - zpos) / zspeed; if(d < dist) { dist = d; which = sides-2; }}\n";
       
       fmain += "}\n";
 
@@ -681,7 +701,7 @@ void enable_raycaster() {
       fmain += "    if(go > float(" + fts(hard_limit) + ")) { gl_FragDepth = 1.; return; }\n";
     
     if(!(levellines && disable_texture)) fmain +=
-      "    mediump vec2 inface = map_texture(position, which);\n"
+      "    mediump vec2 inface = map_texture(position, which+walloffset);\n"
       "    mediump vec3 tmap = texture2D(tTextureMap, u).rgb;\n"
       "    if(tmap.z == 0.) col.xyz *= min(1., (1.-inface.x)/ tmap.x);\n"
       "    else {\n"
@@ -745,7 +765,7 @@ void enable_raycaster() {
       "    }\n";
 
     if(use_reflect) {
-      if(prod) fmain += "if(reflect && which >= "+its(S7)+") { zspeed = -zspeed; continue; }\n";
+      if(prod) fmain += "if(reflect && which >= "+its(deg-2)+") { zspeed = -zspeed; continue; }\n";
       if(hyperbolic && bt::in()) fmain +=
         "if(reflect && (which < "+its(flat1)+" || which >= "+its(flat2)+")) {\n"
         "  mediump float x = -log(position.w - position.x);\n"
@@ -800,15 +820,23 @@ void enable_raycaster() {
       "  cid = connection.xy;\n";
     
     if(prod) fmain +=
-      "  if(which == "+its(S7)+") { zpos += uPLevel+uPLevel; }\n"
-      "  if(which == "+its(S7)+"+1) { zpos -= uPLevel+uPLevel; }\n";
+      "  if(which == sides-2) { zpos += uPLevel+uPLevel; }\n"
+      "  if(which == sides-1) { zpos -= uPLevel+uPLevel; }\n";
     
     fmain +=
       "  int mid = int(connection.z * 1024.);\n"
-      "  mediump mat4 m = " GET("uM", "mid") " * " GET("uM", "which") ";\n"
+      "  mediump mat4 m = " GET("uM", "mid") " * " GET("uM", "walloffset+which") ";\n"
       "  position = m * position;\n"
       "  tangent = m *  tangent;\n";
     
+    if(bi) {
+      fmain += 
+        "walloffset = int(connection.w * 256.);\n"
+        "sides = int(connection.w * 4096.) - 16 * walloffset;\n";
+      
+      // fmain += "if(sides != 8) { gl_FragColor = vec4(.5,float(sides)/8.,.5,1); return; }";
+      }
+
     fmain += 
       "  }\n"
       "  gl_FragColor.xyz += left * uFogColor.xyz;\n";
@@ -896,8 +924,6 @@ EX void cast() {
   glUniform1f(o->uPosY, -((cd->ycenter-cd->ytop)*2./cd->ysize - 1));
   
   if(!callhandlers(false, hooks_rayset, o)) {
-  deg = S7;
-  if(prod) deg += 2;
   
   length = 4096;
   per_row = length / deg;
@@ -949,14 +975,28 @@ EX void cast() {
   GLERR("uniform mediump startid");
   glUniform1f(o->uIPD, vid.ipd);
   GLERR("uniform mediump IPD");
+  
+  if(o->uWallOffset != -1) {
+    glUniform1i(o->uWallOffset, wall_offset(centerover));
+    glUniform1i(o->uSides, centerover->type);
+    }
 
+  vector<cell*> sa = {centerover};
+  if(hybri) sa = hybrid::samples;
+  
   vector<transmatrix> ms;
-  for(int j=0; j<S7; j++) ms.push_back(currentmap->iadj(cwt.at, j));
-  if(prod) ms.push_back(mscale(Id, +cgi.plevel));
-  if(prod) ms.push_back(mscale(Id, -cgi.plevel));
+  for(auto c: sa) {
+    for(int j=0; j<c->type; j++) {
+      if(hybri)
+        ms.push_back(hybrid::ray_iadj(c, j));
+      else
+        ms.push_back(currentmap->iadj(c, j));
+      }
+    }
   
   if(!sol && !nil && reflect_val) {
-    for(int j=0; j<S7; j++) {
+    if(BITRUNCATED) exit(1);
+    for(int j=0; j<centerover->type; j++) {
       transmatrix T = inverse(ms[j]);
       hyperpoint h = tC0(T);
       ld d = hdist0(h);
@@ -1011,18 +1051,26 @@ EX void cast() {
           }
         }
       
-      transmatrix T = currentmap->iadj(c, i) * inverse(ms[i]);
+      transmatrix T = currentmap->iadj(c, i) * inverse(ms[wall_offset(c) + i]);
       for(int k=0; k<=isize(ms); k++) {
         if(k < isize(ms) && !eqmatrix(ms[k], T)) continue;
         if(k == isize(ms)) ms.push_back(T);
         connections[u][2] = (k+.5) / 1024.;
         break;
         }
+      connections[u][3] = (wall_offset(c1) / 256.) + (c1->type + .5) / 4096.;
       }
     }
-  
-  if(prod) ms[S7] = ms[S7+1] = Id;
 
+  if(prod) {
+    int id = 0;
+    for(auto c: sa) {
+      ms[id+c->type-2] = Id;
+      ms[id+c->type-1] = Id;
+      id += c->type;
+      }
+    }
+    
   vector<GLint> wallstart;
   for(auto i: cgi.wallstart) wallstart.push_back(i);
   glUniform1iv(o->uWallstart, isize(wallstart), &wallstart[0]);  

@@ -1064,6 +1064,25 @@ EX namespace hybrid {
   EX geometry_information *underlying_cgip;
 
   EX eGeometryClass under_class() { return ginf[hybrid::underlying].cclass; }  
+
+  EX transmatrix ray_iadj(cell *c, int i) {
+    if(prod && i == c->type-2) return (mscale(Id, +cgi.plevel));
+    if(prod && i == c->type-1) return (mscale(Id, -cgi.plevel));
+    if(prod) {
+      transmatrix T;
+      cell *cw = hybrid::get_where(c).first;
+      hybrid::in_underlying_geometry([&] {
+        hyperpoint h0 = get_corner_position(cw, i);
+        hyperpoint h1 = get_corner_position(cw, (i+1));
+        hyperpoint hm = mid(h0, h1);
+        ld d = hdist0(hm);
+        d *= 2;
+        T = xpush(-d) * spintox(hm);
+        });
+      return T;
+      }
+    return currentmap->iadj(c, i);
+    }
   
   EX void configure(eGeometry g) {
     if(WDIM == 3) return;
@@ -1257,11 +1276,14 @@ EX namespace hybrid {
       }
     }
   
+  EX vector<cell*> samples;
+  
   EX int wall_offset(cell *c) {
     int id = hybrid::underlying == gArchimedean ? arcm::id_of(c->master) + 20 * arcm::parent_index_of(c->master) : shvid(c);
     if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, -1);
     int &wo = cgi.walloffsets[id];
     if(wo == -1) {
+      samples.push_back(c);
       cell *c1 = hybrid::get_where(c).first;
       wo = isize(cgi.shWall3D);
       int won = wo + c->type;
