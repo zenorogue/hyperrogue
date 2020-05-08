@@ -142,6 +142,7 @@ void addMessage(string s, char spamtype = 0);
 #define sl2 (cgclass == gcSL2)
 #define prod (cgclass == gcProduct)
 #define hybri (cgflags & qHYBRID)
+#define rotspace (geometry == gRotSpace)
 #define hyperbolic (cgclass == gcHyperbolic)
 #define nonisotropic (among(cgclass, gcSolNIH, gcNil, gcSL2))
 #define translatable (euclid || nonisotropic)
