@@ -1791,6 +1791,8 @@ EX namespace patterns {
         return colortables['x'][zebra3(c)];
       case 'w':
         return colortables['w'][randpattern(c, subcanvas) ? 1 : 0];
+      case 'H':
+        return colortables['c'][c->master->c7 == c ? 0 : 1];
       case 'l': 
         return random_landscape(c, 3, 1, 17, 0x808080);
       case 'd':
