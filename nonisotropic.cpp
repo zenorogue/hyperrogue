@@ -1839,8 +1839,6 @@ EX }
 
 EX namespace rots {
 
-  EX ld stretch_factor;
-  
   EX transmatrix uxpush(ld x) { 
     if(sl2) return xpush(x);
     return cspin(1, 3, x) * cspin(0, 2, x);
@@ -2034,16 +2032,21 @@ EX namespace rots {
 
 EX }
 
-/** twisted S2xE */
-EX namespace rots_twist {
+/** stretched rotation space (S3 or SLR) */
+EX namespace stretch {
+
+  EX ld factor;  
 
   EX bool applicable() {
-    return among(geometry, gCell120, gECell120, gCell24, gECell24, gCell8, gECell8);
+    return rotspace || among(geometry, gCell120, gECell120, gCell24, gECell24, gCell8, gECell8);
     }
 
-  EX bool in() { return rots::stretch_factor && sphere && (rotspace || applicable()); }
+  EX bool in() {
+    return factor && applicable();
+    }
 
   EX transmatrix translate(hyperpoint h) {
+    if(!sphere) return slr::translate(h);
     return matrix4(
       h[3], -h[2],  h[1],  h[0],
       h[2],  h[3], -h[0],  h[1],
@@ -2056,6 +2059,7 @@ EX namespace rots_twist {
     h[0] = -h[0];
     h[1] = -h[1];
     h[2] = -h[2];
+    if(!sphere) return slr::translate(h);
     return translate(h);
     }
 
@@ -2066,11 +2070,11 @@ EX namespace rots_twist {
     }
   
   hyperpoint isometric_to_actual(const hyperpoint at, const hyperpoint velocity) {
-    return mulz(at, velocity, 1/sqrt(1+rots::stretch_factor));
+    return mulz(at, velocity, 1/sqrt(1+factor));
     }
   
   hyperpoint actual_to_isometric(const hyperpoint at, const hyperpoint velocity) {
-    return mulz(at, velocity, sqrt(1+rots::stretch_factor));
+    return mulz(at, velocity, sqrt(1+factor));
     }
   
   hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
@@ -2080,7 +2084,9 @@ EX namespace rots_twist {
     
     hyperpoint c;
     
-    auto K = rots::stretch_factor;
+    auto K = factor;
+    
+    if(!sphere) K = -2 - K;
     
     c[0] = -K * (vel[1] * tra[2] + vel[2] * tra[1]);
     c[1] =  K * (vel[0] * tra[2] + vel[2] * tra[0]);
@@ -2089,7 +2095,13 @@ EX namespace rots_twist {
     
     return translate(at) * c;
     }  
-  
+
+  EX ld sqnorm(hyperpoint at, hyperpoint h) {
+    if(sphere)
+      return sqhypot_d(4, h);
+    h = itranslate(at) * h;    
+    return h[0] * h[0] + h[1] * h[1] + h[2] * h[2];
+    }
 EX }
 
 EX namespace nisot {
@@ -2099,8 +2111,8 @@ EX namespace nisot {
     #if CAP_SOLV
     else if(sn::in()) return sn::christoffel(at, velocity, transported);
     #endif
+    else if(stretch::in()) return stretch::christoffel(at, velocity, transported);
     else if(sl2) return slr::christoffel(at, velocity, transported);
-    else if(rots_twist::in()) return rots_twist::christoffel(at, velocity, transported);
     else return point3(0, 0, 0);
     }
 
@@ -2138,15 +2150,15 @@ EX namespace nisot {
 
   EX transmatrix parallel_transport_bare(transmatrix Pos, hyperpoint h) {
   
-    bool stretch = rots_twist::in();
-    
-    if(!stretch) h[3] = 0;
+    bool stretch = stretch::in();
+
+    h[3] = 0;
   
     auto tPos = transpose(Pos);
     
     const ld eps = 1e-4;
     
-    if(sl2) {
+    if(sl2 && !stretch) {
       hyperpoint p = slr::to_phigans(tPos[3]);
       for(int i=0; i<3; i++)
         tPos[i] = (slr::to_phigans(tPos[3] + tPos[i] * eps) - p) / eps;
@@ -2162,15 +2174,15 @@ EX namespace nisot {
     auto& vel = h;
     
     array<ld, 4> ms;
-
+    
     if(stretch) {
       for(int i=0; i<3; i++) {
-        ms[i] = sqhypot_d(4, tPos[i]);
-        tPos[i] = rots_twist::isometric_to_actual(at, tPos[i]);
+        ms[i] = stretch::sqnorm(at, tPos[i]);
+        tPos[i] = stretch::isometric_to_actual(at, tPos[i]);
         }
-      ms[3] = sqhypot_d(4, vel);
+      ms[3] = stretch::sqnorm(at, vel);
       if(!ms[3]) return Pos;
-      vel = rots_twist::isometric_to_actual(at, vel);
+      vel = stretch::isometric_to_actual(at, vel);
       }
 
     for(int i=0; i<steps; i++) {
@@ -2200,27 +2212,25 @@ EX namespace nisot {
         at = normalize(at);
         
         auto fix = [&] (hyperpoint& h, ld& m) {
-          h = rots_twist::itranslate(at) * h;
+          h = stretch::itranslate(at) * h;
           h[3] = 0;
-          ld m1 = h[0] * h[0] + h[1] * h[1] + h[2] * h[2] * (1+rots::stretch_factor);
+          ld m1 = h[0] * h[0] + h[1] * h[1] + h[2] * h[2] * (1 + stretch::factor);
           h /= sqrt(m1/m);
-          h = rots_twist::translate(at) * h;
+          h = stretch::translate(at) * h;
           };
 
-        if(i == 0) println(hlog, vel);
-        fix(vel, ms[3]); 
-        if(i == 0) println(hlog, vel);
         for(int i=0; i<3; i++) fix(tPos[i], ms[i]);
+        fix(vel, ms[3]); 
         }
 
       }
 
     if(stretch) {
-      vel = rots_twist::actual_to_isometric(at, vel);
-      for(int i=0; i<3; i++) tPos[i] = rots_twist::actual_to_isometric(at, tPos[i]);
+      vel = stretch::actual_to_isometric(at, vel);
+      for(int i=0; i<3; i++) tPos[i] = stretch::actual_to_isometric(at, tPos[i]);
       }
-                                                                                  
-    if(sl2) {
+    
+    else if(sl2) {
       hyperpoint p = slr::from_phigans(tPos[3]);
       for(int i=0; i<3; i++)
         tPos[i] = (slr::from_phigans(tPos[3] + tPos[i] * eps) - p) / eps;
@@ -2363,7 +2373,7 @@ EX namespace nisot {
       }
     else if(argis("-rot-stretch")) {
       PHASEFROM(2);
-      shift_arg_formula(rots::stretch_factor, ray::reset_raycaster);
+      shift_arg_formula(stretch::factor, ray::reset_raycaster);
       return 0;
       }
     else if(argis("-prodturn")) {

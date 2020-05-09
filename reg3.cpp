@@ -187,7 +187,7 @@ EX namespace reg3 {
     if(loop == 4) cgi.strafedist = adjcheck;
     else cgi.strafedist = hdist(cgi.adjmoves[0] * C0, cgi.adjmoves[1] * C0);
     
-    if(rots_twist::applicable()) {
+    if(stretch::applicable()) {
       transmatrix T = cspin(0, 2, 90 * degree);
       transmatrix iT = inverse(T);
       for(auto& v: cgi.adjmoves) v = T * v * iT;
@@ -698,14 +698,14 @@ EX namespace reg3 {
         dynamicval<hrmap*> cm(currentmap, binary_map);
         binary_map->virtualRebase(alt, T);
         }
-      
+
       fixmatrix(T);
       auto hT = tC0(T);
       
-      bool hopf = rots_twist::applicable();
+      bool hopf = stretch::applicable();
 
       if(hopf)
-        T = rots_twist::translate(hT);      
+        T = stretch::translate(hT);      
       
       if(DEB) println(hlog, "searching at ", alt, ":", hT);
 
