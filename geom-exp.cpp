@@ -843,7 +843,7 @@ EX void showEuclideanMenu() {
         XLAT(
           "Stretch the metric along the fibers. This can currently be done in rotation spaces and in 8-cell, 24-cell and 120-cell. "
           "Value of 0 means not stretched, -1 means S2xE or H2xE (works only in the limit). "
-          "Only the raycaster is implemented for stretched geometry, so you will see only walls."
+          "Only the raycaster is implemented for stretched geometry, so you will see only walls. (Must be > -1)"
           )
         );
       dialog::reaction = ray::reset_raycaster;

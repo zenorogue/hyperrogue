@@ -2082,12 +2082,20 @@ EX namespace stretch {
     return translate(at) * vel;
     }
   
+  EX ld squared() {
+    return abs(1 + factor);
+    }
+
+  EX ld not_squared() {
+    return sqrt(squared());
+    }
+  
   hyperpoint isometric_to_actual(const hyperpoint at, const hyperpoint velocity) {
-    return mulz(at, velocity, 1/sqrt(1+factor));
+    return mulz(at, velocity, 1/not_squared());
     }
   
   hyperpoint actual_to_isometric(const hyperpoint at, const hyperpoint velocity) {
-    return mulz(at, velocity, sqrt(1+factor));
+    return mulz(at, velocity, not_squared());
     }
   
   hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
@@ -2227,7 +2235,7 @@ EX namespace nisot {
         auto fix = [&] (hyperpoint& h, ld& m) {
           h = stretch::itranslate(at) * h;
           h[3] = 0;
-          ld m1 = h[0] * h[0] + h[1] * h[1] + h[2] * h[2] * (1 + stretch::factor);
+          ld m1 = h[0] * h[0] + h[1] * h[1] + h[2] * h[2] * stretch::squared();
           h /= sqrt(m1/m);
           h = stretch::translate(at) * h;
           };
