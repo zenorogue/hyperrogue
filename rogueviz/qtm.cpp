@@ -32,6 +32,30 @@ color_t rcolor() {
   swap(part(res, 2), part(res, rand() % 3));
   return res;
   }
+
+color_t rainbow_color(hyperpoint h) {
+  ld sat = 1 - 1 / h[2];
+  ld hue = atan2(h[0], h[1]) / (2 * M_PI);
+  
+  hue = frac(hue);
+  
+  if(hue < 0) hue++;
+  
+  hue *= 6;
+  
+  color_t res;
+  
+  if(hue<1) res = gradient(0xFF0000, 0xFFFF00, 0, hue, 1);
+  else if(hue<2) res = gradient(0x00FF00, 0xFFFF00, 2, hue, 1);
+  else if(hue<3) res = gradient(0x00FF00, 0x00FFFF, 2, hue, 3);
+  else if(hue<4) res = gradient(0x0000FF, 0x00FFFF, 4, hue, 3);
+  else if(hue<5) res = gradient(0x0000FF, 0xFF00FF, 4, hue, 5);
+  else if(hue<6) res = gradient(0xFF0000, 0xFF00FF, 6, hue, 5);
+  
+  println(hlog, "sat = ", sat, " hue = ", hue);
+
+  return gradient(0xFFFFFF, res, 0, sat, 1);
+  }
   
 void set_cell(cell *c) {
   if(hybri) {
@@ -54,8 +78,10 @@ void set_cell(cell *c) {
   else {
     if(c->land == laHive) return;
     color_t col;
-    if(hyperbolic)
-      col = rcolor();
+    if(hyperbolic) {
+      hyperpoint h = calc_relative_matrix(c, currentmap->gamestart(), C0) * C0;
+      col = rainbow_color(h);
+      }
     else if(nil) {
       part(col, 0) = 128 + c->master->zebraval * 50;
       part(col, 1) = 128 + c->master->emeraldval * 50;
