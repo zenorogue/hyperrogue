@@ -1277,14 +1277,13 @@ EX namespace hybrid {
       }
     }
   
-  EX vector<cell*> samples;
-  
   EX int wall_offset(cell *c) {
     int id = hybrid::underlying == gArchimedean ? arcm::id_of(c->master) + 20 * arcm::parent_index_of(c->master) : shvid(c);
-    if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, -1);
-    int &wo = cgi.walloffsets[id];
+    if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, {-1, nullptr});
+    auto &wop = cgi.walloffsets[id];
+    int &wo = wop.first;
+    if(!wop.second) wop.second = c;
     if(wo == -1) {
-      samples.push_back(c);
       cell *c1 = hybrid::get_where(c).first;
       wo = isize(cgi.shWall3D);
       int won = wo + c->type;
@@ -1333,6 +1332,20 @@ EX namespace hybrid {
       cgi.extra_vertices();
       }
     return wo;
+    }
+
+  auto clear_samples = addHook(hooks_clearmemory, 40, [] () {
+    for(auto& c: cgis) for(auto& v: c.second.walloffsets)
+      v.second = nullptr;
+    });
+  
+  EX vector<pair<int, cell*>> gen_sample_list() {
+    if(!hybri) return {make_pair(0, centerover), make_pair(centerover->type, nullptr)};
+    vector<pair<int, cell*>> result;
+    for(auto& v: cgi.walloffsets) if(v.first >= 0) result.push_back(v);
+    sort(result.begin(), result.end());
+    result.emplace_back(isize(cgi.wallstart)-1, nullptr);
+    return result;
     }
 
   vector<cell*> to_link;

@@ -329,7 +329,7 @@ hpcshape
 
   int SD3, SD6, SD7, S12, S14, S21, S28, S42, S36, S84;
   
-  vector<int> walloffsets;
+  vector<pair<int, cell*>> walloffsets;
   
   vector<array<int, 3>> symmetriesAt;
   

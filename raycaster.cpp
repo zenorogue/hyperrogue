@@ -189,10 +189,10 @@ void enable_raycaster() {
     }
   
   deg = 0;
-  if(hybri)
-    for(auto c: hybrid::samples) deg = max<int>(deg, c->type);
-  else
-    deg = centerover->type;
+
+  auto samples = hybrid::gen_sample_list();
+  for(int i=0; i<isize(samples)-1; i++)
+    deg = max(deg, samples[i+1].first - samples[i].first);
   
   last_geometry = geometry;
   if(!our_raycaster) { 
@@ -1119,18 +1119,19 @@ EX void cast() {
     glUniform1i(o->uSides, centerover->type);
     }
 
-  vector<cell*> sa = {centerover};
-  if(hybri) sa = hybrid::samples;
+  auto sa = hybrid::gen_sample_list();
   
-  vector<transmatrix> ms;
-  for(auto c: sa) {
-    for(int j=0; j<c->type; j++) {
-      if(hybri)
-        ms.push_back(hybrid::ray_iadj(c, j));
-      else
-        ms.push_back(currentmap->iadj(c, j));
-      }
+  vector<transmatrix> ms(sa.back().first, Id);
+  
+  for(auto& p: sa) {
+    int id = p.first;
+    cell *c = p.second;
+    if(!c) continue;
+    for(int j=0; j<c->type; j++)
+      ms[id+j] = hybrid::ray_iadj(c, j);
     }
+  
+  // println(hlog, ms);
   
   if(!sol && !nil && reflect_val) {
     if(BITRUNCATED) exit(1);
@@ -1201,11 +1202,11 @@ EX void cast() {
     }
 
   if(prod) {
-    int id = 0;
-    for(auto c: sa) {
-      ms[id+c->type-2] = Id;
-      ms[id+c->type-1] = Id;
-      id += c->type;
+    for(auto p: sa) {
+      int id =p.first;
+      if(id == 0) continue;
+      ms[id-2] = Id;
+      ms[id-1] = Id;
       }
     }
     
