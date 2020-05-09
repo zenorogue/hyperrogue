@@ -183,6 +183,7 @@ EX hookset<void(string&, string&)> hooks_rayshader;
 EX hookset<bool(shared_ptr<raycaster>)> hooks_rayset;
 
 void enable_raycaster() {
+  using glhr::to_glsl;
   if(geometry != last_geometry) {
     reset_raycaster();
     }
@@ -380,7 +381,7 @@ void enable_raycaster() {
     if(stretch::in()) {
       fmain += 
         "tangent = s_itranslate(position) * tangent;\n"
-        "tangent[2] /= sqrt(1.+stretch);\n"
+        "tangent[2] /= " + to_glsl(stretch::not_squared()) + ";\n"
         "tangent = s_translate(position) * tangent;\n";
         ;
       }
@@ -498,9 +499,6 @@ void enable_raycaster() {
         "  if(which == -1 && dist == 0.) return;";    
       }
     
-    if(stretch::in() || sl2)
-      fsh += "const mediump float stretch = float(" + fts(stretch::factor) + ");\n";
-
     // shift d units
     if(use_reflect) fmain += 
       "bool reflect = false;\n";
@@ -563,8 +561,8 @@ void enable_raycaster() {
           "vel = s_itranslate(pos) * vel;\n"
           "tra = s_itranslate(pos) * tra;\n"
           "return s_translate(pos) * vec4(\n"
-          "  (vel.y*tra.z+vel.z*tra.y) * -(-stretch-2.), "
-          "  (vel.x*tra.z+vel.z*tra.x) * (-stretch-2.), "
+          "  (vel.y*tra.z+vel.z*tra.y) * " + to_glsl(-(-stretch::factor-2)) + ", "
+          "  (vel.x*tra.z+vel.z*tra.x) * " + to_glsl(-stretch::factor-2.) + ", "
           "  0, 0);\n"
           "}\n";
         }
@@ -579,8 +577,8 @@ void enable_raycaster() {
           "vel = s_itranslate(pos) * vel;\n"
           "tra = s_itranslate(pos) * tra;\n"
           "return s_translate(pos) * vec4(\n"
-          "  (vel.y*tra.z+vel.z*tra.y) * -stretch, "
-          "  (vel.x*tra.z+vel.z*tra.x) * stretch, "
+          "  (vel.y*tra.z+vel.z*tra.y) * " + to_glsl(-stretch::factor) + ", "
+          "  (vel.x*tra.z+vel.z*tra.x) * " + to_glsl(stretch::factor) + ", "
           "  0, 0);\n"
           "}\n";
         }
@@ -791,7 +789,7 @@ void enable_raycaster() {
         fmain += 
           "tangent = s_itranslate(position) * tangent;\n"
           "tangent[3] = 0.;\n"
-          "float nvelsquared = dot(tangent.xy, tangent.xy) + (1.+stretch) * tangent.z * tangent.z;\n"
+          "float nvelsquared = dot(tangent.xy, tangent.xy) + " + to_glsl(stretch::squared()) + " * tangent.z * tangent.z;\n"
           "tangent /= sqrt(nvelsquared);\n"
           "tangent = s_translate(position) * tangent;\n";
         }
@@ -838,7 +836,7 @@ void enable_raycaster() {
       "  if(col[3] > 0.0) {\n";
 
     if(hard_limit < NO_LIMIT)
-      fmain += "    if(go > float(" + fts(hard_limit) + ")) { gl_FragDepth = 1.; return; }\n";
+      fmain += "    if(go > " + to_glsl(hard_limit) + ") { gl_FragDepth = 1.; return; }\n";
     
     if(!(levellines && disable_texture)) fmain +=
       "    mediump vec2 inface = map_texture(position, which+walloffset);\n"
@@ -858,7 +856,7 @@ void enable_raycaster() {
     
     if(use_reflect) fmain +=
       "  if(col.w == 1.) {\n"
-      "    col.w = float("+fts(1-reflect_val)+");\n"
+      "    col.w = " + to_glsl(1-reflect_val)+";\n"
       "    reflect = true;\n"
       "    }\n";
     
@@ -890,7 +888,7 @@ void enable_raycaster() {
 
     #ifndef GLES_ONLY
     fmain +=    
-      "      gl_FragDepth = (-float("+fts(vnear+vfar)+")+w*float("+fts(2*vnear*vfar)+")/z)/float("+fts(vnear-vfar)+");\n"
+      "      gl_FragDepth = (" + to_glsl(-vnear+vfar)+"+w*" + to_glsl(2*vnear*vfar)+"/z)/" + to_glsl(vnear-vfar)+";\n"
       "      gl_FragDepth = (gl_FragDepth + 1.) / 2.;\n";
     #endif
     

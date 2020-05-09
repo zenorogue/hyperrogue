@@ -42,6 +42,12 @@ EX void glError(const char* GLcall, const char* file, const int line) {
 
 EX namespace glhr {
 
+EX string to_glsl(ld x) {
+  char buf[64];
+  snprintf(buf, 64, "float(%.10e)", x);
+  return buf;
+  }
+
 #if HDR
 struct glmatrix {
   GLfloat a[4][4];
