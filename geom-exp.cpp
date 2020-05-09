@@ -742,6 +742,16 @@ EX void showEuclideanMenu() {
 
   dialog::add_action(select_quotient);
   
+  if(arcm::in()) {
+    dialog::addItem(XLAT("advanced parameters"), '4');
+    dialog::add_action_push(arcm::show);
+    }
+
+  if(cryst) {
+    dialog::addItem(XLAT("advanced parameters"), '4');
+    dialog::add_action_push(crystal::show);
+    }
+  
   #if CAP_IRR
   if(hyperbolic && IRREGULAR) {
     nom = isize(irr::cells);
