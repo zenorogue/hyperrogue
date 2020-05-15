@@ -1228,9 +1228,8 @@ EX void configure_race() {
   }
 
 auto hooks1 = 
-  addHook(hooks_o_key, 90, [] { 
-    if(racing::on) { set_race_configurer();  return named_dialog(XLAT("racing menu"), raceconfigurer); }
-    else return named_functionality();
+  addHook(hooks_o_key, 90, [] (o_funcs& v) { 
+    if(racing::on) { set_race_configurer();  v.push_back(named_dialog(XLAT("racing menu"), raceconfigurer)); }
     });
 
 map<string, map<eLand, int> > scoreboard;

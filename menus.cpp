@@ -970,41 +970,57 @@ struct named_functionality {
 inline named_functionality named_dialog(string x, reaction_t dialog) { return named_functionality(x, [dialog] () { pushScreen(dialog); }); }
 #endif
 
-EX hookset<named_functionality()> hooks_o_key;
+#if HDR
+using o_funcs = vector<named_functionality>;
+#endif
+
+EX hookset<void(o_funcs&)> hooks_o_key;
 
 EX named_functionality get_o_key() {
-  auto res = callhandlers(named_functionality(), hooks_o_key);
-  if (res != named_functionality()) return res;
+  vector<named_functionality> res;
+  callhooks(hooks_o_key, res);
+
+  if(in_full_game())
+    res.push_back(named_dialog(XLAT("world overview"), showOverview));
   
 #if CAP_DAILY
   if(daily::on) 
-    return named_functionality(XLAT("Strange Challenge"), [] () {
+    res.push_back(named_functionality(XLAT("Strange Challenge"), [] () {
       achievement_final(false);
       pushScreen(daily::showMenu);
-      });
+      }));
 #endif
 
   if(viewdists)
-    return named_functionality(XLAT("experiment with geometry"), runGeometryExperiments);
+    res.push_back(named_functionality(XLAT("experiment with geometry"), runGeometryExperiments));
 
   if(tactic::on)
-    return named_dialog(XLAT("Pure Tactics mode"), tactic::showMenu);
+    res.push_back(named_dialog(XLAT("Pure Tactics mode"), tactic::showMenu));
     
   if(yendor::on)
-    return named_dialog(XLAT("Yendor Challenge"), yendor::showMenu);
+    res.push_back(named_dialog(XLAT("Yendor Challenge"), yendor::showMenu));
 
   if(peace::on)
-    return named_dialog(XLAT("peaceful mode"), peace::showMenu);
+    res.push_back(named_dialog(XLAT("peaceful mode"), peace::showMenu));
 
   dialog::infix = "";
 
-  if(in_full_game())
-    return named_dialog(XLAT("world overview"), showOverview);
+  if((geometry != gNormal || NONSTDVAR) && !daily::on)
+    res.push_back(named_functionality(XLAT("experiment with geometry"), runGeometryExperiments));
   
-  if(geometry != gNormal || NONSTDVAR)
-    return named_functionality(XLAT("experiment with geometry"), runGeometryExperiments);
-
-  return named_dialog(XLAT("world overview"), showOverview);
+  if(res.empty()) return named_dialog(XLAT("world overview"), showOverview);
+  
+  if(isize(res) == 1) return res[0];
+  
+  return named_dialog(res[0].first + "/...", [res] {
+    dialog::init();
+    char id = 'o';
+    for(auto& r: res) {
+      dialog::addItem(r.first, id++);
+      dialog::add_action([r] { popScreen(); r.second(); });
+      }
+    dialog::display();
+    });
   }
 
 EX int messagelogpos;

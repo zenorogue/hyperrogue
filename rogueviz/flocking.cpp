@@ -499,9 +499,8 @@ namespace flocking {
     dialog::display();
     }
     
-  named_functionality o_key() {
-    if(vizid == &flock_id) return named_dialog("flocking", show);
-    return named_functionality();
+  void o_key(o_funcs& v) {
+    if(vizid == &flock_id) v.push_back(named_dialog("flocking", show));
     }
 
   auto hooks  = 

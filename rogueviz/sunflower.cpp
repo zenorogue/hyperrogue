@@ -259,9 +259,8 @@ void show() {
   dialog::display();
   }
 
-named_functionality o_key() {
-  if(on) return named_dialog("sunflowers", show);
-  return named_functionality();
+void o_key(o_funcs& v) {
+  if(on) v.push_back(named_dialog("sunflowers", show));
   }
 
 auto hook = 0

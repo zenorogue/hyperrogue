@@ -193,9 +193,8 @@ void show() {
   dialog::display();    
   }
 
-named_functionality o_key() {
-  if(snow_lambda) return named_dialog("snowballs", show);
-  return named_functionality();
+void o_key(o_funcs& v) {
+  if(snow_lambda) v.push_back(named_dialog("snowballs", show));
   }
 
 auto hchook = addHook(hooks_drawcell, 100, draw_snow)

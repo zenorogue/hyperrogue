@@ -230,12 +230,11 @@ bool draw_ptriangle(cell *c, const transmatrix& V) {
 
 bool cylanim = false;
 
-named_functionality o_key() {
-  if(on) return named_functionality("ring size", [] { 
+void o_key(o_funcs& v) {
+  if(on) v.push_back(named_functionality("ring size", [] { 
     dialog::editNumber(cscale, 0, 1, .01, .1, "", "");
     dialog::reaction = reset;
-    });
-  return named_functionality();
+    }));
   }
 
 auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)

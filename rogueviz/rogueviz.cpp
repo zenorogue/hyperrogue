@@ -1219,9 +1219,8 @@ bool default_help() {
   return true;
   }
 
-named_functionality o_key() {
-  if(vizid) return named_dialog(XLAT("rogueviz menu"), rogueviz::showMenu);
-  return named_functionality();
+void o_key(o_funcs& v) {
+  if(vizid) v.push_back(named_dialog(XLAT("rogueviz menu"), rogueviz::showMenu));
   }
 
 auto hooks  = 
