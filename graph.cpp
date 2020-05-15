@@ -4754,9 +4754,7 @@ EX void drawmovestar(double dx, double dy) {
     if(rightclick && (d == 2 || d == 6 || d == 3 || d == 5)) col &= 0xFFFFFF3F;
     if(!leftclick && !rightclick && (d&1)) col &= 0xFFFFFF3F;
 #endif
-//  EUCLIDEAN
-
-    queueline(tC0(Centered), Centered * xspinpush0(d * M_PI / 4, euclid ? 0.5 : d==0?.7:d==2?.5:.2), col, 3 + vid.linequality);
+    queueline(tC0(Centered), Centered * xspinpush0(d * M_PI / 4, cgi.scalefactor/2), col, 3 + vid.linequality);
 #endif
     }
   }
