@@ -1,15 +1,10 @@
 #include "../hyper.h"
 
-namespace hr {
+namespace rogueviz {
 
 #if CAP_CRYSTAL
 
-void curvepoint(const hyperpoint& H1);
-dqi_poly& queuecurve(color_t linecol, color_t fillcol, PPR prio);
-
 namespace magic {
-
-bool on = false;
 
 int back = 0x202020;
 
@@ -52,7 +47,7 @@ void magic(int sides) {
   start_game();
   
   build(crystal::c0, 0);
-  on = true;
+  vizid = (void*) &magic;
   }
 
 void curveline(hyperpoint a, hyperpoint b, int lev) {
@@ -65,7 +60,7 @@ void curveline(hyperpoint a, hyperpoint b, int lev) {
   }
 
 bool magic_markers(cell *c, const transmatrix& V) {
-  if(!on) return false;
+  if(vizid != &magic) return false;
   timerghost = false;
   if(c->landparam == back) {
     if(GDIM == 2)
@@ -132,7 +127,7 @@ void twos_to_fours(vector<int>& zeros, crystal::coord co, int d) {
   }
 
 bool magic_rotate(cell *c) {
-  if(!on) return false;
+  if(vizid != &magic) return false;
   if(c->landparam != back) return false;
   vector<int> zeros;
   auto co = crystal::get_coord(c->master);
@@ -149,20 +144,21 @@ bool magic_rotate(cell *c) {
   }
 
 bool magic_rugkey(int sym, int uni) {
-  if((cmode & sm::NORMAL) && uni == 'p' && on) {
+  if(vizid != &magic) return false;
+  if((cmode & sm::NORMAL) && uni == 'p') {
     rug::texturesize = 4096;
     if(rug::rugged) rug::close();
     else rug::init();
     return true;
     }
-  if((cmode & sm::NORMAL) && uni == 'r' && on) {
+  if((cmode & sm::NORMAL) && uni == 'r') {
     mine::performMarkCommand(mouseover);
     return true;
     }
-  if((cmode & sm::NORMAL) && uni == 'R' && on) {
+  if((cmode & sm::NORMAL) && uni == 'R') {
     build(crystal::c0, 0);
-    }    
-  if((cmode & sm::NORMAL) && uni == 'k' && on) {
+    }  
+  if((cmode & sm::NORMAL) && uni == 'k') {
     crystal::view_coordinates = !crystal::view_coordinates;
     return true;
     }
