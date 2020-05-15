@@ -85,7 +85,7 @@ eLand cid = laNone;
 
 hookset<bool(eLand&)> hooks_music;
 
-bool music_out_of_focus = false;
+EX bool music_out_of_focus = false;
 
 EX void handlemusic() {
   DEBBI(DF_GRAPH, ("handle music"));
