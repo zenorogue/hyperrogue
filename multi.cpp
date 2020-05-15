@@ -407,9 +407,9 @@ struct shmup_configurer {
       dialog::addItem(XLAT("configure player 5"), '5');
     else if(!shmup::on && !multi::alwaysuse) {
       if(GDIM == 2) {
-        const char *axmodes[5] = {"OFF", "auto", "light", "heavy", "arrows"};
+        const char *axmodes[7] = {"OFF", "auto", "light", "heavy", "arrows", "WASD keys", "VI keys"};
         dialog::addSelItem(XLAT("help for keyboard users"), XLAT(axmodes[vid.axes]), 'h');
-        dialog::add_action([] {vid.axes += 60 + (shiftmul > 0 ? 1 : -1); vid.axes %= 5; } );
+        dialog::add_action([] {vid.axes += 70 + (shiftmul > 0 ? 1 : -1); vid.axes %= 7; } );
         }
       else dialog::addBreak(100);
       }

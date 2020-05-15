@@ -3115,6 +3115,11 @@ EX transmatrix applyDowndir(cell *c, const cellfunction& cf) {
 void draw_movement_arrows(cell *c, const transmatrix& V, int df) {
 
   if(viewdists) return;
+  
+  string keylist = "";
+  const ld keysize = .6;      
+
+  color_t col = getcs().uicolor;
 
   for(int d=0; d<8; d++) {
   
@@ -3125,19 +3130,33 @@ void draw_movement_arrows(cell *c, const transmatrix& V, int df) {
     if(xc.at == c) {
       transmatrix fixrot = sphereflip * rgpushxto0(sphereflip * tC0(V));
       // make it more transparent
-      color_t col = getcs().uicolor;
       col -= (col & 0xFF) >> 1;
       poly_outline = OUTLINE_DEFAULT;
-      queuepoly(fixrot * spin(-d * M_PI/4), cgi.shArrow, col);
+      
+      char key = 0;
+      if(vid.axes >= 5)
+        key = (vid.axes == 5 ? keys_wasd : keys_vi)[d];
+      
+      if(vid.axes >= 5) keylist += key;
+      else
+        queuepoly(fixrot * spin(-d * M_PI/4), cgi.shArrow, col);
 
       if((c->type & 1) && (isStunnable(c->monst) || isPushable(c->wall))) {
         transmatrix Centered = rgpushxto0(tC0(cwtV));
         int sd = md.subdir;
-        queuepoly(inverse(Centered) * rgpushxto0(Centered * tC0(V)) * rspintox(Centered*tC0(V)) * spin(-sd * M_PI/S7) * xpush(0.2), cgi.shArrow, col);
+        
+        transmatrix T = inverse(Centered) * rgpushxto0(Centered * tC0(V)) * rspintox(Centered*tC0(V)) * spin(-sd * M_PI/S7) * xpush(0.2);
+        
+        if(vid.axes >= 5)
+          queuestr(T, keysize, s0 + key, col >> 8, 1);
+        
+        else
+          queuepoly(T, cgi.shArrow, col);
         }
       else if(!confusingGeometry()) break;
       }
     }
+  if(keylist != "") queuestr(V, keysize, keylist, col >> 8, 1);
   }
 
 EX int celldistAltPlus(cell *c) { return 1000000 + celldistAlt(c); }
@@ -4168,12 +4187,12 @@ EX void drawMarkers() {
 
     // process mouse
     #if CAP_SHAPES
-    if((vid.axes == 4 || (vid.axes == 1 && !mousing)) && !shmup::on && GDIM == 2) {
+    if((vid.axes >= 4 || (vid.axes == 1 && !mousing)) && !shmup::on && GDIM == 2) {
       if(multi::players == 1) {
         forCellIdAll(c2, d, cwt.at) if(gmatrix.count(cwt.at)) draw_movement_arrows(c2, gmatrix[cwt.at] * currentmap->adj(cwt.at, d), d);
         }
       else if(multi::players > 1) for(int p=0; p<multi::players; p++) {
-        if(multi::playerActive(p) && (vid.axes == 4 || !drawstaratvec(multi::mdx[p], multi::mdy[p]))) 
+        if(multi::playerActive(p) && (vid.axes >= 4 || !drawstaratvec(multi::mdx[p], multi::mdy[p]))) 
         forCellIdAll(c2, d, multi::player[p].at) if(gmatrix.count(cwt.at)) {
           multi::cpid = p;
           dynamicval<transmatrix> ttm(cwtV, multi::whereis[p]);
@@ -4715,7 +4734,7 @@ EX void drawmovestar(double dx, double dy) {
   int rax = vid.axes;
   if(rax == 1) rax = drawstaratvec(dx, dy) ? 2 : 0;
   
-  if(rax == 0 || vid.axes == 4) return;
+  if(rax == 0 || vid.axes >= 4) return;
 
   int starcol = getcs().uicolor;
   ignore(starcol);
