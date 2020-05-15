@@ -150,7 +150,7 @@ langen$(EXE_EXTENSION): langen.cpp language-??.cpp language-ptbr.cpp
 	$(CXX) -O0 $(CXXFLAGS) $(langen_CXXFLAGS) langen.cpp $(LDFLAGS) -o $@
 
 makeh$(EXE_EXTENSION): makeh.cpp
-	$(CXX) makeh.cpp -o $@
+	$(CXX) -O2 makeh.cpp -o $@
 
 autohdr.h: makeh$(EXE_EXTENSION) *.cpp
 	./makeh classes.cpp locations.cpp hyperpoint.cpp geometry.cpp goldberg.cpp init.cpp floorshapes.cpp cell.cpp multi.cpp shmup.cpp pattern2.cpp mapeditor.cpp graph.cpp textures.cpp hprint.cpp language.cpp util.cpp complex.cpp *.cpp > autohdr.h
@@ -160,6 +160,9 @@ language-data.cpp: langen$(EXE_EXTENSION)
 
 savepng$(OBJ_EXTENSION): savepng.cpp
 	$(CXX) -O2 $(CXXFLAGS) -c savepng.cpp -o $@
+
+mymake$(EXE_EXTENSION): mymake.cpp
+	$(CXX) -O2 $(CXXFLAGS) mymake.cpp -o $@
 
 emscripten: hyper.html
 
@@ -173,5 +176,6 @@ hyper.emscripten-sources: *.cpp autohdr.h
 clean:
 	rm -f langen$(EXE_EXTENSION) language-data.cpp
 	rm -f makeh$(EXE_EXTENSION) autohdr.h
+	rm -rf mymake$(EXE_EXTENSION) mymake_files/
 	rm -f hyperrogue$(EXE_EXTENSION) hyper$(OBJ_EXTENSION) $(hyper_RES) savepng$(OBJ_EXTENSION)
 	rm -f hyper.html hyper.js hyper.wasm

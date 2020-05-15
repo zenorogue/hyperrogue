@@ -572,12 +572,6 @@ void IMAGESAVE(SDL_Surface *s, const char *fname);
 
 #endif
 
-// for some reason I need this to compile under OSX
-
-#if ISMAC
-extern "C" { void *_Unwind_Resume = 0; }
-#endif
-
 template<class T> struct dynamicval {
   T& where;
   T backup;
