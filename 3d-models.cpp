@@ -684,7 +684,7 @@ void geometry_information::make_star(hpcshape& sh, ld rad) {
   int steps = (BADMODEL ? 8 : 64);
   for(int a=0; a<steps; a++) {
     ld z0 = (a-steps/2)*2.0/steps;
-    ld z1 = (a-steps/2-1)*2.0/steps;
+    ld z1 = (a-steps/2+1)*2.0/steps;
     ld r0 = sqrt(1 - z0*z0) * rad;
     ld r1 = sqrt(1 - z1*z1) * rad;
     z0 *= rad;
