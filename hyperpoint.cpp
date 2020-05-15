@@ -384,6 +384,30 @@ EX ld hypot_d(int d, const hyperpoint& h) {
   return sqrt(sqhypot_d(d, h));
   }
 
+/** @brief h1 and h2 define a line; to_other_side(h1,h2)*x is x moved orthogonally to this line, by double the distance from C0 
+ *  (I suppose it could be done better)
+ */
+EX transmatrix to_other_side(hyperpoint h1, hyperpoint h2) {
+
+  ld d = hdist(h1, h2);
+  
+  hyperpoint v;  
+  if(euclid)
+    v = (h2 - h1) / d;    
+  else
+    v = (h1 * cos_auto(d) - h2) / sin_auto(d);
+
+  ld d1;
+  if(euclid)
+    d1 = -(v|h1) / (v|v);
+  else
+    d1 = atan_auto(-v[LDIM] / h1[LDIM]);
+  
+  hyperpoint hm = h1 * cos_auto(d1) + v * sin_auto(d1);
+  
+  return rspintox(hm) * xpush(-hdist0(hm) * 2) * spintox(hm);
+  }
+
 /** @brief positive for a material vertex, 0 for ideal vertex, negative for ultra-ideal vertex */
 EX ld material(const hyperpoint& h) {
   if(sphere) return intval(h, Hypc);

@@ -1072,12 +1072,7 @@ EX namespace hybrid {
       transmatrix T;
       cell *cw = hybrid::get_where(c).first;
       hybrid::in_underlying_geometry([&] {
-        hyperpoint h0 = get_corner_position(cw, i);
-        hyperpoint h1 = get_corner_position(cw, (i+1));
-        hyperpoint hm = mid(h0, h1);
-        ld d = hdist0(hm);
-        d *= 2;
-        T = xpush(-d) * spintox(hm);
+        T = to_other_side(get_corner_position(cw, i), get_corner_position(cw, (i+1)));
         });
       return T;
       }

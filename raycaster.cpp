@@ -74,7 +74,7 @@ EX bool available() {
     return true;
   if(euclid && pmodel == mdPerspective && !bt::in())
     return true;
-  if(prod && (PURE || BITRUNCATED))
+  if(prod)
     return true;
   if(pmodel == mdPerspective && stretch::in())
     return true;
@@ -199,7 +199,7 @@ void enable_raycaster() {
     bool asonov = hr::asonov::in();
     bool use_reflect = reflect_val && !nil && !levellines;
     
-    bool bi = BITRUNCATED;
+    bool bi = arcm::in() || kite::in() || arb::in() || !PURE;
 
     string vsh = 
       "attribute mediump vec4 aPosition;\n"
