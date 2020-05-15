@@ -137,6 +137,7 @@ int args() {
     int i = 1+N/4;
     int j = 1+2*N/4 + 4;
     int k = 1+3*N/4;
+    j %= N;
 
     c[i]->wall = waIcewall;
     c[i]->land = laIce;
@@ -146,6 +147,21 @@ int args() {
 
     c[k]->wall = waWaxWall;
     c[k]->landparam = 0xFF0000;
+    }
+
+  else if(argis("-two-way")) {
+    start_game();
+    cwt.at->move(0)->wall = waWaxWall;
+    cwt.at->move(0)->landparam = 0xFF0000;
+
+    cwt.at->move(6)->wall = waWaxWall;
+    cwt.at->move(6)->landparam = 0xFFFF40;
+    }
+
+  else if(argis("-one-center")) {
+    start_game();
+    cwt.at->wall = waWaxWall;
+    cwt.at->landparam = 0xFFD500;
     }
 
   else return 1;
