@@ -1411,7 +1411,7 @@ EX cell *lastmountpos[MAXPLAYER];
 EX void clearshadow() {
   shpos.resize(SHSIZE);
   for(int i=0; i<SHSIZE; i++) for(int p=0; p<MAXPLAYER; p++)
-    shpos[p][i] = NULL;
+    shpos[i][p] = NULL;
   }
 
 EX void moveshadow() {
