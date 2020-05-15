@@ -1021,7 +1021,7 @@ EX void mainloop() {
 #endif
   }
 
-#if ISMOBILE==1
+#if ISMOBILE
 EX void displayabutton(int px, int py, string s, int col) {
   // TMP
   int siz = vid.yres > vid.xres ? vid.fsize*2 : vid.fsize * 3/2;

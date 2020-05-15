@@ -9,11 +9,17 @@
 namespace hr {
 
 EX namespace bt {
-#if CAP_BT
 
   /** note: nihsolv and kd3 tilings return bt::in(). They are defined elsewhere, although some of bt:: functions are used for them */
-  EX bool in() { return cgflags & qBINARY; }
+  EX bool in() {
+#if CAP_BT
+    return cgflags & qBINARY;
+#else
+    return false;
+#endif
+    }
   
+#if CAP_BT
   #if HDR
   enum bindir {
     bd_right = 0,

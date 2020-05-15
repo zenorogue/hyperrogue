@@ -370,10 +370,6 @@ int dexp_comb_colors[16] = {
 int coverage_style;
 EX vector<pair<hyperpoint, int> > coverage;
 
-#ifndef CAP_KUEN_MAP
-#define CAP_KUEN_MAP 0
-#endif
-
 #if CAP_KUEN_MAP
 void draw_kuen_map() {
   SDL_Surface *kuen_map = SDL_CreateRGBSurface(SDL_SWSURFACE,512,512,32,0,0,0,0);

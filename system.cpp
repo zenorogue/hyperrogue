@@ -1068,7 +1068,7 @@ EX void saveStats(bool emergency IS(false)) {
   
   fprintf(f, "\n\n\n");
   
-#if ISMOBILE==0
+#if !ISMOBILE
   DEBB(DF_INIT, ("Game statistics saved to ", scorefile));
   addMessage(XLAT("Game statistics saved to %1", scorefile));
 #endif
@@ -1556,7 +1556,7 @@ EX void finishAll() {
   saveStats();
 #endif
   clearMemory();
-#if ISMOBILE==0
+#if !ISMOBILE
   cleargraph();
 #endif
   

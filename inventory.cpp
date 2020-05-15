@@ -588,7 +588,7 @@ EX namespace inv {
           displaystr(vid.xres/2, vid.yres - vid.fsize*6, 2, vid.fsize, osminfo(which), icol, 8);
           }
 
-#if ISMOBILE==0
+#if !ISMOBILE
         string hot = XLAT1("Hotkey: "); hot += getcstat;
         displaystr(vid.xres/2, vid.yres - vid.fsize*5, 2, vid.fsize, hot, icol, 8);
 #endif

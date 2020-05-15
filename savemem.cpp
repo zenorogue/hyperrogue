@@ -285,7 +285,7 @@ EX void show_memory_menu() {
   }
 
 EX bool protect_memory() {
-  if(!CAP_MEMORY_RESERVE) return false;
+#if CAP_MEMORY_RESERVE
   apply_memory_reserve();
   if(reserve_limit && reserve_count < reserve_limit && !ignored_memory_warning) {
     pushScreen(show_memory_menu);
@@ -295,6 +295,7 @@ EX bool protect_memory() {
     pushScreen(show_memory_menu);
     return true;
     }
+#endif
   return false;
   }
 

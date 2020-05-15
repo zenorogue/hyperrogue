@@ -44,7 +44,7 @@ string buildScoreDescription() {
   }
 #endif
 
-#if ISMOBILE==1
+#if ISMOBILE
 
 int andmode;
 

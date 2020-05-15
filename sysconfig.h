@@ -63,6 +63,14 @@
 #define ISMINI 0
 #endif
 
+#ifndef CAP_NCONF
+#define CAP_NCONF 0
+#endif
+
+#ifndef CAP_DRAW
+#define CAP_DRAW 0
+#endif
+
 #ifndef CAP_XGD
 #define CAP_XGD (ISANDROID || ISFAKEMOBILE)
 #endif
@@ -83,6 +91,10 @@
 
 #ifndef NOLICENSE
 #define NOLICENSE ISSTEAM
+#endif
+
+#ifndef CAP_VERTEXBUFFER
+#define CAP_VERTEXBUFFER (ISWEB)
 #endif
 
 #ifndef CAP_SHADER
@@ -153,6 +165,10 @@
 #define CAP_SURFACE CAP_RUG
 #endif
 
+#ifndef CAP_KUEN_MAP
+#define CAP_KUEN_MAP 0
+#endif
+
 #ifndef CAP_EDIT
 #define CAP_EDIT (CAP_FILES && !ISWEB && !ISMINI)
 #endif
@@ -197,6 +213,10 @@
 #define CAP_ROGUEVIZ 0
 #endif
 
+#ifndef CAP_RVSLIDES
+#define CAP_RVSLIDES (CAP_TOUR && !ISWEB)
+#endif
+
 #ifndef CAP_PROFILING
 #define CAP_PROFILING 0
 #endif
@@ -210,7 +230,7 @@
 #endif
 
 #ifndef CAP_ORIENTATION
-#define CAP_ORIENTATION ISMOBILE
+#define CAP_ORIENTATION (ISMOBILE || ISWEB)
 #endif
 
 #ifndef CAP_MOUSEGRAB
@@ -387,7 +407,6 @@ extern "C" {
 #define CAP_GLEW (CAP_GL && !ISMOBILE && !ISMAC && !ISLINUX && !ISWEB)
 #endif
 
-#if CAP_GL
 #if CAP_GLEW
   #include <GL/glew.h>
 #else
@@ -409,7 +428,6 @@ extern "C" {
     #include <GL/gl.h>
     #include <GL/glu.h>
     #include <GL/glext.h>
-    #endif
   #endif
 #endif
 

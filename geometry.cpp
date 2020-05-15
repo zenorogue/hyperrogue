@@ -433,16 +433,16 @@ hpcshape
     ld alpha;
     int area;
     };
-  shared_ptr<gpdata_t> gpdata;
+  shared_ptr<gpdata_t> gpdata = nullptr;
   #endif
   
-  int state;
-  int usershape_state;
+  int state = 0;
+  int usershape_state = 0;
 
   /** contains the texture point coordinates for 3D models */
   basic_textureinfo models_texture;
   
-  geometry_information() { last = NULL; state = usershape_state = 0; gpdata = NULL; }
+  geometry_information() { last = NULL; }
   
   void require_basics() { if(state & 1) return; state |= 1; prepare_basics(); }
   void require_shapes() { if(state & 2) return; state |= 2; prepare_shapes(); }

@@ -800,7 +800,7 @@ EX void saveConfig() {
     fprintf(f, "%s=%s\n", s->name.c_str(), s->save().c_str());
   
   fclose(f);
-#if ISMOBILE==0
+#if !ISMOBILE
   addMessage(s0 + "Configuration saved to: " + conffile);
 #else
   addMessage(s0 + "Configuration saved");
@@ -1269,36 +1269,34 @@ EX void configureOther() {
 
   // dialog::addBoolItem_action(XLAT("forget faraway cells"), memory_saving_mode, 'y');
   
-  #if CAP_AUDIO
-  if(CAP_AUDIO) {
-    dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
-    dialog::add_action([] {
-      dialog::editNumber(musicvolume, 0, 128, 10, 60, XLAT("background music volume"), "");
-      dialog::reaction = [] () {
-        #if CAP_SDLAUDIO
-        Mix_VolumeMusic(musicvolume);
-        #endif
-        #if ISANDROID
-        settingsChanged = true;
-        #endif
-        };
-      dialog::bound_low(0);
-      dialog::bound_up(MIX_MAX_VOLUME);
-      });
+#if CAP_AUDIO
+  dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
+  dialog::add_action([] {
+    dialog::editNumber(musicvolume, 0, 128, 10, 60, XLAT("background music volume"), "");
+    dialog::reaction = [] () {
+#if CAP_SDLAUDIO
+      Mix_VolumeMusic(musicvolume);
+#endif
+#if ISANDROID
+      settingsChanged = true;
+#endif
+      };
+    dialog::bound_low(0);
+    dialog::bound_up(MIX_MAX_VOLUME);
+    });
 
-    dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
-    dialog::add_action([] {
-      dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
-      dialog::reaction = [] () {
-        #if ISANDROID
-        settingsChanged = true;
-        #endif
-        };
-      dialog::bound_low(0);
-      dialog::bound_up(MIX_MAX_VOLUME);
-      });
-    }
-  #endif
+  dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
+  dialog::add_action([] {
+    dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
+    dialog::reaction = [] () {
+#if ISANDROID
+      settingsChanged = true;
+#endif
+      };
+    dialog::bound_low(0);
+    dialog::bound_up(MIX_MAX_VOLUME);
+    });
+#endif
 
   menuitem_sightrange('r');
 
@@ -1317,12 +1315,10 @@ EX void configureInterface() {
   gamescreen(3);
   dialog::init(XLAT("interface"));
 
-  #if CAP_TRANS
-  if(CAP_TRANS) {
-    dialog::addSelItem(XLAT("language"), XLAT("EN"), 'l');
-    dialog::add_action_push(selectLanguageScreen);
-    }
-  #endif
+#if CAP_TRANS
+  dialog::addSelItem(XLAT("language"), XLAT("EN"), 'l');
+  dialog::add_action_push(selectLanguageScreen);
+#endif
 
   dialog::addSelItem(XLAT("player character"), numplayers() > 1 ? "" : csname(vid.cs), 'g');
   dialog::add_action_push(showCustomizeChar);
@@ -2312,11 +2308,9 @@ EX void showSettings() {
   dialog::addItem(XLAT("colors & aura"), 'c');
   dialog::add_action_push(show_color_dialog);
 
-#if CAP_SHMUP
-  if(CAP_SHMUP && !ISMOBILE) {
-    dialog::addSelItem(XLAT("keyboard & joysticks"), "", 'k');
-    dialog::add_action(multi::configure);
-    }
+#if CAP_SHMUP && !ISMOBILE
+  dialog::addSelItem(XLAT("keyboard & joysticks"), "", 'k');
+  dialog::add_action(multi::configure);
 #endif
 
   dialog::addSelItem(XLAT("mouse & touchscreen"), "", 'm');

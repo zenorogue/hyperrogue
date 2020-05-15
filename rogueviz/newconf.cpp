@@ -4,14 +4,7 @@
 
 #include "../hyper.h"
 
-#ifndef CAP_NCONF
-#define CAP_NCONF 0
-#endif
-
 #if CAP_NCONF
-#ifndef CAP_DRAW
-#define CAP_DRAW 0
-#endif
 #define main nconf_main
 #undef unordered_map
 #undef self
