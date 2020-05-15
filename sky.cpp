@@ -164,6 +164,13 @@ void celldrawer::draw_ceiling() {
             }
           break;
 
+        case laFrog:
+          col = 0x4040FF;
+          if(zebra40(c) / 4 == 1) {
+            queuepolyat(V * zpush(cgi.SKY+1), cgi.shSun, 0xFFFF00FF, PPR::SKY);
+            }
+          break;
+
         case laPower:
           col = c->landparam ? 0xFF2010 : 0x000020;
           break;

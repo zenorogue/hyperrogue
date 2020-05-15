@@ -3812,7 +3812,6 @@ EX int ceiling_category(cell *c) {
     case laDual:
     case laWestWall:
     case laAsteroids:
-    case laEclectic:
       return 1;
     
     case laPower:
@@ -3843,6 +3842,8 @@ EX int ceiling_category(cell *c) {
     case laBrownian: 
     case laHell:
     case laVariant:    
+    case laFrog:
+    case laWet:
       return 2;
     
     case laBarrier: 
@@ -3868,6 +3869,7 @@ EX int ceiling_category(cell *c) {
     case laMercuryRiver:
     case laMagnetic:
     case laSwitch:
+    case laEclectic:
       return 3;
     
     case laPalace:
