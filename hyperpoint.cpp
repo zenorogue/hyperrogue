@@ -114,7 +114,7 @@ struct hyperpoint : array<ld, MAXMDIM> {
 struct transmatrix {
   ld tab[MAXMDIM][MAXMDIM];
   hyperpoint& operator [] (int i) { return (hyperpoint&)tab[i][0]; }
-  const ld * operator [] (int i) const { return tab[i]; }
+  const hyperpoint& operator [] (int i) const { return (const hyperpoint&)tab[i]; }
   
   inline friend hyperpoint operator * (const transmatrix& T, const hyperpoint& H) {
     hyperpoint z;
