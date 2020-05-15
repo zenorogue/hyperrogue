@@ -388,6 +388,7 @@ EX ld hypot_d(int d, const hyperpoint& h) {
 EX ld material(const hyperpoint& h) {
   if(sphere) return intval(h, Hypc);
   else if(hyperbolic) return -intval(h, Hypc);
+  else if(sl2) return h[2]*h[2] + h[3]*h[3] - h[0]*h[0] - h[1]*h[1];
   else return h[LDIM] - 1;
   }
 
