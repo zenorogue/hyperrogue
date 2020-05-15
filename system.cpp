@@ -1132,7 +1132,7 @@ EX void loadsave() {
       char buf1[80], ver[10];
       int tid, land, score, tc, t, ts, cert;
       int xc = -1;
-      sscanf(buf, "%70s%10s%d%d%d%d%d%d%d%d",
+      sscanf(buf, "%70s%9s%d%d%d%d%d%d%d%d",
         buf1, ver, &tid, &land, &score, &tc, &t, &ts, &cert, &xc);
       
       eLand l2 = eLand(land);
@@ -1156,7 +1156,7 @@ EX void loadsave() {
     if(buf[0] == 'Y' && buf[1] == 'E' && buf[2] == 'N') {
       char buf1[80], ver[10];
       int cid, oy, won, tc, t, ts, cert=0, xc = -1;
-      sscanf(buf, "%70s%10s%d%d%d%d%d%d%d%d",
+      sscanf(buf, "%70s%9s%d%d%d%d%d%d%d%d",
         buf1, ver, &cid, &oy, &won, &tc, &t, &ts, &cert, &xc);
 
       if(xc == -1)
