@@ -376,6 +376,7 @@ cld exp_parser::parse(int prio) {
           rest.back()[2] = parse(10);
           rest.back()[3] = NO_DERIVATIVE;
           second = true;
+          continue;
           }
         at += 2; 
         auto val = parse(10);
