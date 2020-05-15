@@ -1142,6 +1142,8 @@ void geometry_information::prepare_shapes() {
   if(GDIM == 3 && !floor_textures) make_floor_textures();
   #endif
 
+  if(fake::in()) { FPIU( cgi.require_shapes() ); }
+
   symmetriesAt.clear();
   allshapes.clear();
   #if CAP_GP

@@ -58,14 +58,14 @@ int eupattern4(cell *c) {
 
 EX bool ishept(cell *c) {
   // EUCLIDEAN
-  if(euclid && PURE) return eupattern(c) == 0;
+  if(euc::in() && PURE) return eupattern(c) == 0;
   else if(hybri) { cell *c1 = hybrid::get_where(c).first; return c1 == c1->master->c7; }
   else return c == c->master->c7;
   }
 
 EX bool ishex1(cell *c) {
   // EUCLIDEAN
-  if(euclid && PURE) return eupattern(c) == 1;
+  if(euc::in() && PURE) return eupattern(c) == 1;
   #if CAP_GP
   else if(GOLDBERG) return c->master->c7 != c && !pseudohept(c->move(0));
   #endif
@@ -74,7 +74,7 @@ EX bool ishex1(cell *c) {
 
 bool ishex2(cell *c) {
   // EUCLIDEAN
-  if(euclid && PURE) return eupattern(c) == 1;
+  if(euc::in() && PURE) return eupattern(c) == 1;
   #if CAP_GP
   else if(GOLDBERG) return c->master->c7 != c && gp::pseudohept_val(c) == 1;
   #endif
@@ -372,6 +372,7 @@ EX pair<int, bool> fieldval(cell *c) {
   }
 
 EX int fieldval_uniq(cell *c) {
+  if(fake::in()) return FPIU(fieldval_uniq(c));
   if(experimental) return 0;
   else if(hybri) { 
     auto c1 = hybrid::get_where(c).first; 
@@ -388,7 +389,7 @@ EX int fieldval_uniq(cell *c) {
     if(ctof(c)) return c->master->fieldval;
     else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
     }
-  else if(euclid && !kite::in() && !arcm::in()) {
+  else if(euc::in()) {
     auto p = euc2_coordinates(c);
     if(bounded) return p.first + (p.second << 16);
     return gmod(p.first - 22 * p.second, 3*127);
@@ -1405,7 +1406,7 @@ EX bool pseudohept(cell *c) {
   #if MAXMDIM == 4
   if(WDIM == 3) {
     if(geometry == gField435) return false;
-    else if(euclid) return euc::pseudohept(c);
+    else if(euc::in()) return euc::pseudohept(c);
     else return reg3::pseudohept(c);
     }
   #endif

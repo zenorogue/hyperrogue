@@ -28,10 +28,16 @@ EX namespace reg3 {
   #endif
   
   EX bool in() {
+    if(fake::in()) return FPIU(in());
     return GDIM == 3 && !euclid && !bt::in() && !nonisotropic && !hybri && !kite::in();
     }
 
   EX void generate() {
+
+    if(fake::in()) {
+      fake::generate();
+      return;
+      }
   
     int& loop = cgi.loop;
     int& face = cgi.face;
@@ -1330,6 +1336,7 @@ EX int celldistance(cell *c1, cell *c2) {
 EX bool pseudohept(cell *c) {
   auto m = regmap();
   if(cgflags & qSINGLE) return true;
+  if(fake::in()) return FPIU(reg3::pseudohept(c));
   if(sphere) {
     hyperpoint h = tC0(m->relative_matrix(c->master, regmap()->origin, C0));
     if(S7 == 12) {

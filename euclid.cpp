@@ -306,10 +306,13 @@ EX namespace euc {
     };
   
   hrmap_euclidean* cubemap() {
+    if(fake::in()) return FPIU(cubemap());
     return ((hrmap_euclidean*) currentmap);
     }
 
-  hrmap_euclidean* eucmap() { return cubemap(); }
+  hrmap_euclidean* eucmap() { 
+    return cubemap(); 
+    }
 
   EX vector<coord>& get_current_shifttable() { return cubemap()->shifttable; }
   EX map<coord, heptagon*>& get_spacemap() { return cubemap()->spacemap; }
@@ -1171,6 +1174,11 @@ EX int cyldist(gp::loc a, gp::loc b) {
 
 EX void generate() {
 
+  if(fake::in()) {
+    fake::generate();
+    return;
+    }
+
   auto v = euc::get_shifttable();
   
   auto& cs = cgi.cellshape;
@@ -1238,6 +1246,7 @@ EX void generate() {
  *  (For example, Archimedean, kite, or fake with underlying non-Euclidean geometry returns false)
  */
 EX bool in() { 
+  if(fake::in()) return FPIU(in()); 
   return euclid && standard_tiling(); 
   }
 

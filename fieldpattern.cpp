@@ -1085,6 +1085,7 @@ EX bool quotient_field_changed;
 #define STR(x) string(x, sizeof(x))
 
 EX struct fpattern& getcurrfp() {
+  if(fake::in()) return *FPIU(&getcurrfp());
   if(geometry == gFieldQuotient && quotient_field_changed)
     return current_quotient_field;
   if(geometry == gSpace535) {
@@ -1156,6 +1157,7 @@ EX struct fpattern& getcurrfp() {
     DEBB(DF_FIELD, ("set prime = ", fp.Prime));
     return fp;
     }
+  if(!hyperbolic) return fp_invalid;
   if(S7 == 8 && S3 == 3 && !bt::in()) {
     static fpattern fp(17);
     return fp;

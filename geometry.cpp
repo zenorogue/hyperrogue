@@ -933,6 +933,13 @@ EX string cgi_string() {
   V("GEO", its(int(geometry)));
   V("VAR", its(int(variation)));
   
+  if(fake::in()) {
+    if(hyperbolic) V("H", fts(fake::scale));
+    if(euclid) V("E", fts(fake::scale));
+    if(sphere) V("S", fts(fake::scale));
+    V("G", FPIU(cgi_string()));
+    }
+  
   if(GOLDBERG) V("GP", its(gp::param.first) + "," + its(gp::param.second));
   if(IRREGULAR) V("IRR", its(irr::irrid));
 
@@ -986,6 +993,7 @@ EX void check_cgi() {
   cgip = &cgis[s];
   cgi.timestamp = ++ntimestamp;
   if(hybri) hybrid::underlying_cgip->timestamp = ntimestamp;
+  if(fake::in()) fake::underlying_cgip->timestamp = ntimestamp;
   
   if(isize(cgis) > 4) {
     vector<pair<int, string>> timestamps;

@@ -40,6 +40,7 @@
 #include "arbitrile.cpp"
 #include "euclid.cpp"
 #include "sphere.cpp"
+#include "fake.cpp"
 #include "quotient.cpp"
 #include "crystal.cpp"
 #include "reg3.cpp"

@@ -2755,6 +2755,8 @@ EX void set_land_for_geometry(cell *c) {
   }
 
 EX void setdist(cell *c, int d, cell *from) {
+
+  if(fake::in()) return FPIU(setdist(c, d, from));
   
   if(c->mpdist <= d) return;
   if(c->mpdist > d+1 && d < BARLEV) setdist(c, d+1, from);

@@ -41,6 +41,7 @@ EX int max_cells = 2048;
 EX bool rays_generate = true;
 
 EX ld& exp_decay_current() {
+  if(fake::in()) return *FPIU(&exp_decay_current());
   return (sn::in() || hyperbolic || sl2) ? exp_decay_exp : exp_decay_poly;
   }
 
@@ -90,8 +91,7 @@ EX bool requested() {
   #endif
   if(!available()) return false;
   if(want_use == 2) return true;
-  if(sphere) return false; /* currently incompatible with primitives */
-  return racing::on || quotient;
+  return racing::on || quotient || fake::in();
   }
 
 #if HDR

@@ -745,7 +745,7 @@ EX color_t colorize(cell *c, char whichCanvas) {
     for(int a=0; a<3; a++) co[a] = i%5, i /= 5;
     }
   #endif
-  else if(euclid) {
+  else if(euc::in()) {
     auto tab = euc::get_ispacemap()[c->master];
     for(int a=0; a<3; a++) co[a] = tab[a];
     if(PURE) for(int a=0; a<3; a++) co[a] *= 2;

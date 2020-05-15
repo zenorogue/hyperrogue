@@ -359,6 +359,7 @@ void ge_select_tiling() {
     if(arb::in() && (ISMOBILE || ISWEB)) continue;
     if(WDIM == 3 && MAXMDIM == 3) continue;
     if(geometry == gFieldQuotient && !CAP_FIELD) continue;
+    if(geometry == gFake) continue;
     if(!current_filter->test()) continue;
     if(orig_el) {
       for(int j=0; j<isize(ginf); j++) 
