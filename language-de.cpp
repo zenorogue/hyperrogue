@@ -488,8 +488,8 @@ S("Usually, you move by touching somewhere on the map; you can also touch one "
   "vier Knöpfe in den Ecken antippen um dies zu ändern (um die Karte zu scrollen oder Infos "
   "über Objekte zu bekommen). Du kannst auch die Zahlen antippen um ihre Bedeutung zu erfahren.\n")
 
-S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n",
-  "Bewege dich mit der Maus, dem Numpad, qweadzxc, oder hjklyubn. Warte mit 's' oder '.'. Drehe die Welt mit den Pfeiltasten, Bild auf/ab und Pos1/Space. " // FIXME: Leertaste?
+S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Space. To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n",
+  "Bewege dich mit der Maus, dem Numpad, qweadzxc, oder hjklyubn. Warte mit 's' oder '.'. Drehe die Welt mit den Pfeiltasten, Bild auf/ab und Space. " // FIXME: Leertaste?
   "Um zu speichern, benötigst du einen Orb der Geborgenheit. Drücke V für Einstellungen, ESC für den Quest-Status und das Menü.\n\n")
 
 S("See more on the website: ", "Mehr auf der Website: ")

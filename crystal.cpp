@@ -461,7 +461,7 @@ shifttable get_canonical(coord co) {
   }
 #endif
 
-int crystal_period = 0;
+EX int crystal_period = 0;
 
 struct hrmap_crystal : hrmap_standard {
   heptagon *getOrigin() override { return get_heptagon_at(c0, S7); }
@@ -745,7 +745,7 @@ EX color_t colorize(cell *c, char whichCanvas) {
     for(int a=0; a<3; a++) co[a] = i%5, i /= 5;
     }
   #endif
-  else if(euclid) {
+  else if(euc::in()) {
     auto tab = euc::get_ispacemap()[c->master];
     for(int a=0; a<3; a++) co[a] = tab[a];
     if(PURE) for(int a=0; a<3; a++) co[a] *= 2;
@@ -822,12 +822,12 @@ EX bool crystal_cell(cell *c, transmatrix V) {
 
   if(!cryst) return false;
 
-  if(view_east && cheater) {
+  if(view_east && allowIncreasedSight()) {
     int d = dist_alt(c);
     queuestr(V, 0.3, its(d), 0xFFFFFF, 1);
     }
 
-  if(view_coordinates && cheater && WDIM == 2) {
+  if(view_coordinates && WDIM == 2 && allowIncreasedSight()) {
     
     auto m = crystal_map();
     
@@ -1230,8 +1230,8 @@ void cut_triangle2(const hyperpoint pa, const hyperpoint pb, const hyperpoint pc
   
   rug::rugpoint *rac = rug::addRugpoint(hac, 0);
   rug::rugpoint *rbc = rug::addRugpoint(hbc, 0);
-  rac->flat = pac;
-  rbc->flat = pbc;
+  rac->native = pac;
+  rbc->native = pbc;
   rac->valid = true;
   rbc->valid = true;
   rug::triangles.push_back(rug::triangle(rac, rbc, NULL));
@@ -1270,7 +1270,7 @@ EX void build_rugdata() {
     
     if(!draw_cut) {
       rugpoint *v = addRugpoint(tC0(V), 0);
-      v->flat = coord_to_flat(co);
+      v->native = coord_to_flat(co);
       v->valid = true;
       
       rugpoint *p[MAX_EDGE_CRYSTAL];
@@ -1278,7 +1278,7 @@ EX void build_rugdata() {
       for(int i=0; i<c->type; i++) {
         p[i] = addRugpoint(V * get_corner_position(c, i), 0);
         p[i]->valid = true;
-        p[i]->flat = coord_to_flat(vcoord[i]);
+        p[i]->native = coord_to_flat(vcoord[i]);
         }
   
       for(int i=0; i<c->type; i++) addTriangle(v, p[i], p[(i+1) % c->type]);

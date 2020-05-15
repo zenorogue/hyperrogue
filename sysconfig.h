@@ -85,6 +85,10 @@
 #define NOLICENSE ISSTEAM
 #endif
 
+#ifndef CAP_VERTEXBUFFER
+#define CAP_VERTEXBUFFER (ISWEB)
+#endif
+
 #ifndef CAP_SHADER
 #define CAP_SHADER CAP_GL
 #endif
@@ -153,6 +157,10 @@
 #define CAP_SURFACE CAP_RUG
 #endif
 
+#ifndef CAP_KUEN_MAP
+#define CAP_KUEN_MAP 0
+#endif
+
 #ifndef CAP_EDIT
 #define CAP_EDIT (CAP_FILES && !ISWEB && !ISMINI)
 #endif
@@ -210,7 +218,7 @@
 #endif
 
 #ifndef CAP_ORIENTATION
-#define CAP_ORIENTATION ISMOBILE
+#define CAP_ORIENTATION (ISMOBILE || ISWEB)
 #endif
 
 #ifndef CAP_MOUSEGRAB
@@ -225,6 +233,10 @@
 
 #ifndef CAP_SVG
 #define CAP_SVG (CAP_FILES && !ISMOBILE && !ISMINI)
+#endif
+
+#ifndef CAP_WRL
+#define CAP_WRL (CAP_FILES && !ISMOBILE && !ISMINI && !ISWEB)
 #endif
 
 #ifndef CAP_POLY
@@ -383,7 +395,6 @@ extern "C" {
 #define CAP_GLEW (CAP_GL && !ISMOBILE && !ISMAC && !ISLINUX && !ISWEB)
 #endif
 
-#if CAP_GL
 #if CAP_GLEW
   #include <GL/glew.h>
 #else
@@ -405,7 +416,6 @@ extern "C" {
     #include <GL/gl.h>
     #include <GL/glu.h>
     #include <GL/glext.h>
-    #endif
   #endif
 #endif
 
@@ -419,6 +429,7 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <cassert>
 #include <map>
 #include <queue>
 #include <sstream>

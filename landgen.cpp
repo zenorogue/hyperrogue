@@ -1054,8 +1054,11 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laCA:
-      if(fargen)
+      if(fargen) {
         c->wall = (hrand(1000000) < ca::prob * 1000000) ? ca::wlive : waNone;
+        if(c->wall == ca::wlive)
+          ca::list_adj(c);
+        }
       break;
     
     case laLivefjord:
@@ -2752,6 +2755,8 @@ EX void set_land_for_geometry(cell *c) {
   }
 
 EX void setdist(cell *c, int d, cell *from) {
+
+  if(fake::in()) return FPIU(setdist(c, d, from));
   
   if(c->mpdist <= d) return;
   if(c->mpdist > d+1 && d < BARLEV) setdist(c, d+1, from);
@@ -2911,7 +2916,7 @@ EX void setdist(cell *c, int d, cell *from) {
   
   // the number of tiles in the standard geometry has about 7553 digits!
   int gdist = abs(c->master->distance);
-  if(gdist > global_distance_limit) {
+  if(gdist > global_distance_limit && hyperbolic) {
     gdist -= global_distance_limit;
     if(d == 8 && hrand(100) < gdist) {
       if(!isMultitile(c)) c->monst = moNone;

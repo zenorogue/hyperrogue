@@ -730,7 +730,7 @@ enum eGeometry {
   gTernary, gNIH, gSolN, gInfOrder, gSpace336, gSpace344, gCrystal344,
   gArnoldCat, gArbitrary, gInfOrder4, gCrystal534,
   gSpace535, gSpace536, gSeifertCover, gSeifertWeber, gHomologySphere,
-  gInfOrderMixed, gSpace436,
+  gInfOrderMixed, gSpace436, gFake,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSolNIH, gcNil, gcProduct, gcSL2 };
@@ -798,6 +798,7 @@ static const flagtype qDEPRECATED      = Flag(21);
 static const flagtype qINFMIXED        = Flag(22);
 
 static const flagtype qRAYONLY         = Flag(23);
+static const flagtype qAFFINE          = Flag(24);
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
@@ -875,13 +876,13 @@ EX vector<geometryinfo> ginf = {
   {"{4,3,5}","none",    "{4,3,5} hyperbolic honeycomb",               "435",      6, 5, 0,         giHyperb3, 0x31600, {{7, 2}}, eVariation::pure},
   {"{3,3,3}","none",    "{3,3,3} 5-cell",                             "333",      4, 3, qsSMALLB,  giSphere3, 0x38000, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{3,3,4}","none",    "{3,3,4} 16-cell",                            "334",      4, 4, qsSMALLB,  giSphere3, 0x38200, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
-  {"{3,3,4}","elliptic","{3,3,4} 16-cell (elliptic)",                 "e334",     4, 4, qsSMALLBE, giSphere3, 0x39200, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
+  {"{3,3,4}","elliptic","{3,3,4} 16-cell (elliptic space)",           "e334",     4, 4, qsSMALLBE, giSphere3, 0x39200, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{4,3,3}","none",    "{4,3,3} 8-cell",                             "433",      6, 4, qsSMALLB,  giSphere3, 0x38400, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
-  {"{4,3,3}","elliptic","{4,3,3} 8-cell (elliptic)",                  "e433",     6, 4, qsSMALLBE, giSphere3, 0x39400, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
+  {"{4,3,3}","elliptic","{4,3,3} 8-cell (elliptic space)",            "e433",     6, 4, qsSMALLBE, giSphere3, 0x39400, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{3,4,3}","none",    "{3,4,3} 24-cell",                            "343",      8, 3, qsSMALLB,  giSphere3, 0x38600, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
-  {"{3,4,3}","elliptic","{3,4,3} 24-cell (elliptic)",                 "e343",     8, 3, qsSMALLBE, giSphere3, 0x39600, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
+  {"{3,4,3}","elliptic","{3,4,3} 24-cell (elliptic space)",           "e343",     8, 3, qsSMALLBE, giSphere3, 0x39600, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{3,3,5}","none",    "{3,3,5} 600-cell",                           "335",      4, 3, qsSMALLB,  giSphere3, 0x41000, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
-  {"{3,3,5}","elliptic","{3,3,5} 600-cell (elliptic)",                "e335",     4, 3, qsSMALLBE, giSphere3, 0x41200, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
+  {"{3,3,5}","elliptic","{3,3,5} 600-cell (elliptic space)",          "e335",     4, 3, qsSMALLBE, giSphere3, 0x41200, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"bin{3,6}", "none",  "{3,6} on horospheres",                       "bin36",    8, 3, qBINARY,   giHyperb3, 0x40000, {{7, 3}}, eVariation::pure},
   {"bin-rect", "none",  "rectangles on horospheres",                  "bin44/2",  7, 3, qBINARY,   giHyperb3, 0x40200, {{7, 3}}, eVariation::pure},
   {"bin{6,3}", "none",  "{6,3} on horospheres",                       "bin63",   14, 3, qBINARY,   giHyperb3, 0x40400, {{7, 3}}, eVariation::pure},
@@ -912,6 +913,7 @@ EX vector<geometryinfo> ginf = {
   {"{5,3,3}","SW",      "Poincaré homology sphere",                   "533s",    12, 3, qsSINGLE,  giSphere3, 0x31400, {{7, 2}}, eVariation::pure},
   {"{?,oo}", "none",    "{3/4,∞} (infinite triangles and squares)",   "ooxm",     3, OINF, qIDEAL | qINFMIXED,  giHyperb2, 0x49400, {{6, 6}}, eVariation::pure},
   {"{4,3,6}","none",    "{4,3,6} hyperbolic honeycomb",               "436",      6, 6, qIDEAL,    giHyperb3, 0x31400, {{7, 2}}, eVariation::pure},
+  {"?",      "none",    "fake",                                       "",         0, 0, qRAYONLY,  giHyperb3, 0x31400, {{7, 2}}, eVariation::pure}
   };
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 

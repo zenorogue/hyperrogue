@@ -1,6 +1,8 @@
 /* explore the Janko group J1: https://en.wikipedia.org/wiki/Janko_group_J1 */
 
-#include "../hyper.h"
+#include "rogueviz.h"
+
+#if !ISWEB
 
 namespace hr {
 
@@ -27,7 +29,7 @@ struct jmatrix : array<array<int, 7>, 7> {
   };
 
 vector<jmatrix> jms;
-unordered_map<jmatrix, int> ids;
+std::unordered_map<jmatrix, int> ids;
 
 jmatrix J, Z, id;
 
@@ -142,3 +144,4 @@ auto shot_hooks = addHook(hooks_args, 100, [] {
 
 }
 
+#endif

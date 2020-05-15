@@ -482,10 +482,10 @@ S(
  "zdobyć informacje). Możesz też dotknąć liczb na ekranie, by poznać ich "
  "znaczenie.\n")
 
-S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. "
+S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Space. "
  "To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n",
  "Ruszasz się myszą, klawiaturą numeryczną, qweadzxc, lub hjklyubn. Czekasz naciskając 's' lub '.'. "
- "Obracasz świat strzałkami, PgUp/Dn, lub Home/Space. Naciśnij 'v' by przejść do menu (konfiguracja, tryby specjalne itd.), ESC "
+ "Obracasz świat strzałkami, PgUp/Dn, lub Space. Naciśnij 'v' by przejść do menu (konfiguracja, tryby specjalne itd.), ESC "
  "by zobaczyć stan misji.\n\n")
 
 S("See more on the website: ", "Więcej na stronie: ")
@@ -4501,10 +4501,10 @@ S("(Distances reported by the vector graphics editor "
   "are not about points on the ground level, but "
   "about the matching points on the plane P -- "
   "divide them by the factor above to get actual "
-  "distances.",
+  "distances.)",
   
   "(Odległości wyświetlane przez edytor grafiki "
-  "dotyczą odległości między odpowiednimi punktami na płaszczyźnie P.")
+  "dotyczą odległości między odpowiednimi punktami na płaszczyźnie P.)")
 
 S( "If we are viewing an equidistant g absolute units below a plane, "
    "from a point c absolute units above the plane, this corresponds "
@@ -5057,7 +5057,7 @@ S("firewall lines: Palace", "linie ścian ognia: Pałac")
 S("firewall lines: Power", "linie ścian ognia: Moc")
 
 S("(ESC) tour menu", "(ESC) menu ucznia")
-S("Try the Guided tour to help with understanding the "
+S("Try the Guided Tour to help with understanding the "
   "geometry of HyperRogue (menu -> special modes).\n\n",
   "Uruchom Wycieczkę, by zrozumieć geometrię HyperRogue (menu -> tryby specjalne).\n\n")
 
@@ -6037,7 +6037,7 @@ S("would be destroyed in %the1", "by%ł1by zniszczon%y1 %abl1")
 S(" to go cold", " by ostygnąć")
 S("%The1 is destroyed by lava!", "%The1 jest zniszczon%y1 przez lawę!")
 S("%The1 is killed by lava!", "%The1 jest zabit%y1 przez lawę!")
-S("Run away from the lava!", "Uciekaj od lawy!")
+S("Run away from the magma!", "Uciekaj od lawy!")
 
 // Terracotta Army
 //-----------------
@@ -6535,7 +6535,7 @@ N("Chrysoberyl", GEN_O, "Chryzoberyl", "Chryzoberyle", "Chryzoberyl", "Chryzober
 S("Fragment of the past glory.", "Fragment dawnej chwały.")
 
 N("Red Raider", GEN_M, "Czerwony Najeźdźca", "Czerwoni Najeźdźcy", "Czerwonego Najeźdźcę", "Czerwonym Najeźdźcą")
-S("Red Raiders travel in pairs. They have promised to always watch another one's back. They are able to destroy walls on their way",
+S("Red Raiders travel in pairs. They have promised to always watch each other's backs. They are able to destroy walls on their way.",
   "Czerwoni Najeźdźcy podróżują parami. Obiecali sobie nawzajem, że zawsze będą chronić swoje tyły. Mogą niszczyć ściany na swojej drodze.")
 
 N("Gray Raider", GEN_M, "Szary Najeźdźca", "Szarzy Najeźdźcy", "Szarego Najeźdźcę", "Szarym Najeźdźcą")
@@ -7429,7 +7429,7 @@ S("A large bug native to the Brown Islands. Cannot be killed easily due to their
 
 N("Acid Gull", GEN_F, "Kwaśna Mewa", "Kwaśne Mewy", "Kwaśną Mewę", "Kwaśną Mewą")
 
-S("Where did this strange bird come from?...\n\n Acid Gulls dissolve the land on which they fall when they die. ",
+S("Where did this strange bird come from?...\n\nAcid Gulls dissolve the land on which they fall when they die. ",
 
   "Skąd się wziął ten dziwny ptak?...\n\nKwaśne Mewy rozpuszczają ląd, na który spadają, gdy zostaną zabite. ")
 
@@ -7572,7 +7572,7 @@ S(
 
 N("Torbernite", GEN_O, "Torbernit", "Torbernity", "Torbernit", "Torbernitem")
 
-S("Crystals emiting magical radiation.", "Te kryształy emitują magiczne promieniowanie.")
+S("Crystals emitting magical radiation.", "Te kryształy emitują magiczne promieniowanie.")
 
 // other things:
 
@@ -7661,7 +7661,7 @@ S("Crystal", "Kryształ")
 
 #define Cell(x) \
   S(x "-cell", x "-komórka") \
-  S(x "-cell (elliptic space", x "-komórka (przestrzeń eliptyczna)")
+  S(x "-cell (elliptic space)", x "-komórka (przestrzeń eliptyczna)")
 
 Cell("{3,3,3} 5") Cell("{4,3,3} 8") Cell("{3,3,4} 16") Cell("{3,4,3} 24") Cell("{5,3,3} 120") Cell("{3,3,5} 600")
 #undef Cell

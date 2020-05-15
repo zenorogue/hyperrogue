@@ -1,15 +1,10 @@
-#include "../hyper.h"
+#include "rogueviz.h"
 
-namespace hr {
+namespace rogueviz {
 
 #if CAP_CRYSTAL
 
-void curvepoint(const hyperpoint& H1);
-dqi_poly& queuecurve(color_t linecol, color_t fillcol, PPR prio);
-
 namespace magic {
-
-bool on = false;
 
 int back = 0x202020;
 
@@ -31,8 +26,10 @@ void build(crystal::coord co, int at) {
   setdist(c, 7, NULL);
   if(twos == 0) 
     c->landparam = back;
-  else if(twos == 1)
+  else if(twos == 1) {
     c->landparam = magiccolors[index];
+    if(WDIM == 3) c->wall = waWaxWall;
+    }
 
   println(hlog, co, " twos = ", twos, " index = ", index, " set = ", format("%06X", c->landparam));
   
@@ -52,7 +49,7 @@ void magic(int sides) {
   start_game();
   
   build(crystal::c0, 0);
-  on = true;
+  vizid = (void*) &magic;
   }
 
 void curveline(hyperpoint a, hyperpoint b, int lev) {
@@ -65,9 +62,13 @@ void curveline(hyperpoint a, hyperpoint b, int lev) {
   }
 
 bool magic_markers(cell *c, const transmatrix& V) {
-  if(!on) return false;
+  if(vizid != &magic) return false;
   timerghost = false;
   if(c->landparam == back) {
+    if(GDIM == 2) {
+      auto co = crystal::get_coord(c->master);
+      for(int a=0; a<S7/2; a++) if(co[a] >= 6 || co[a] <= -6) c->landparam = 0;
+      }
     if(GDIM == 2)
     for(int i=0; i<S7; i++) {
       cell *c2 = c->move(i);
@@ -132,7 +133,7 @@ void twos_to_fours(vector<int>& zeros, crystal::coord co, int d) {
   }
 
 bool magic_rotate(cell *c) {
-  if(!on) return false;
+  if(vizid != &magic) return false;
   if(c->landparam != back) return false;
   vector<int> zeros;
   auto co = crystal::get_coord(c->master);
@@ -140,6 +141,7 @@ bool magic_rotate(cell *c) {
   for(int i=0; i<crystal::get_dim(); i++) {
     if(co[i] == 0) zeros.push_back(i);
     else if(co[i] == 2 || co[i] == -2) ;
+    else if(co[i] == 4 || co[i] == -4) ;
     else return false;
     }
   println(hlog, "zeros = ", zeros);
@@ -149,20 +151,21 @@ bool magic_rotate(cell *c) {
   }
 
 bool magic_rugkey(int sym, int uni) {
-  if((cmode & sm::NORMAL) && uni == 'p' && on) {
+  if(vizid != &magic) return false;
+  if((cmode & sm::NORMAL) && uni == 'p') {
     rug::texturesize = 4096;
     if(rug::rugged) rug::close();
     else rug::init();
     return true;
     }
-  if((cmode & sm::NORMAL) && uni == 'r' && on) {
+  if((cmode & sm::NORMAL) && uni == 'r') {
     mine::performMarkCommand(mouseover);
     return true;
     }
-  if((cmode & sm::NORMAL) && uni == 'R' && on) {
+  if((cmode & sm::NORMAL) && uni == 'R') {
     build(crystal::c0, 0);
-    }    
-  if((cmode & sm::NORMAL) && uni == 'k' && on) {
+    }  
+  if((cmode & sm::NORMAL) && uni == 'k') {
     crystal::view_coordinates = !crystal::view_coordinates;
     return true;
     }

@@ -115,20 +115,13 @@ inline bool mdPseudocylindrical() { return mdBandAny() && !(mdinf[pmodel].flags 
 
 EX namespace models {
 
-  EX string formula = "z^2";
-  EX eModel basic_model;
-
   EX ld rotation = 0;
   EX ld rotation_xz = 90;
   EX ld rotation_xy2 = 90;
   EX int do_rotate = 1;
-  EX ld model_orientation, halfplane_scale, model_orientation_yz;
-  EX ld clip_min, clip_max;
   EX ld ocos, osin, ocos_yz, osin_yz;
   EX ld cos_ball, sin_ball;
   EX bool model_straight, model_straight_yz;
-  EX ld top_z = 5;
-  EX ld model_transition = 1;
 
   #if HDR
     // screen coordinates to logical coordinates: apply_orientation(x,y)
@@ -146,53 +139,43 @@ EX namespace models {
     return spin(rotation_xy2 * degree) * cspin(0, 2, -rotation_xz * degree) * spin(rotation * degree);
     }
   
-  EX ld spiral_angle = 70;
-  EX ld spiral_x = 10;
-  EX ld spiral_y = 7;
   int spiral_id = 7;
-  EX bool use_atan = false;
   
   EX cld spiral_multiplier;
-  EX ld right_spiral_multiplier = 1;
-  EX ld any_spiral_multiplier = 1;
-  EX ld sphere_spiral_multiplier = 2;
-  EX ld spiral_cone = 360;
   EX ld spiral_cone_rad;
   EX bool ring_not_spiral;
   
   /** the matrix to rotate the Euclidean view from the standard coordinates to the screen coordinates */
   EX transmatrix euclidean_spin;
   
-  EX ld product_z_scale = 1;
-
   EX void configure() {
-    ld ball = -vid.ballangle * degree;
+    ld ball = -pconf.ballangle * degree;
     cos_ball = cos(ball), sin_ball = sin(ball);
-    ocos = cos(model_orientation * degree);
-    osin = sin(model_orientation * degree);
-    ocos_yz = cos(model_orientation_yz * degree);
-    osin_yz = sin(model_orientation_yz * degree);
+    ocos = cos(pconf.model_orientation * degree);
+    osin = sin(pconf.model_orientation * degree);
+    ocos_yz = cos(pconf.model_orientation_yz * degree);
+    osin_yz = sin(pconf.model_orientation_yz * degree);
     model_straight = (ocos > 1 - 1e-9);
     model_straight_yz = GDIM == 2 || (ocos_yz > 1-1e-9);
     if(history::on) history::apply();
     
     if(!euclid) {
-      ld b = spiral_angle * degree;
+      ld b = pconf.spiral_angle * degree;
       ld cos_spiral = cos(b);
       ld sin_spiral = sin(b);
-      spiral_cone_rad = spiral_cone * degree;
+      spiral_cone_rad = pconf.spiral_cone * degree;
       ring_not_spiral = abs(cos_spiral) < 1e-3;
       ld mul = 1;
-      if(sphere) mul = .5 * sphere_spiral_multiplier;
-      else if(ring_not_spiral) mul = right_spiral_multiplier;
-      else mul = any_spiral_multiplier * cos_spiral;
+      if(sphere) mul = .5 * pconf.sphere_spiral_multiplier;
+      else if(ring_not_spiral) mul = pconf.right_spiral_multiplier;
+      else mul = pconf.any_spiral_multiplier * cos_spiral;
       
       spiral_multiplier = cld(cos_spiral, sin_spiral) * cld(spiral_cone_rad * mul / 2., 0);
       }
     if(euclid) {
       euclidean_spin = pispin * inverse(cview() * master_relative(centerover, true));
       euclidean_spin = gpushxto0(euclidean_spin * C0) * euclidean_spin;
-      hyperpoint h = inverse(euclidean_spin) * (C0 + (euc::eumove(gp::loc{1,0})*C0 - C0) * spiral_x + (euc::eumove(gp::loc{0,1})*C0 - C0) * spiral_y);
+      hyperpoint h = inverse(euclidean_spin) * (C0 + (euc::eumove(gp::loc{1,0})*C0 - C0) * vpconf.spiral_x + (euc::eumove(gp::loc{0,1})*C0 - C0) * vpconf.spiral_y);
       spiral_multiplier = cld(0, 2 * M_PI) / cld(h[0], h[1]);
       }
     
@@ -222,18 +205,27 @@ EX namespace models {
     return true;
     }    
   
-  EX bool model_has_orientation() {
+  EX bool has_orientation(eModel m) {
     return
-      among(pmodel, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral, mdSimulatedPerspective, mdTwoHybrid, mdHorocyclic) || mdBandAny();
+      among(m, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral, mdSimulatedPerspective, mdTwoHybrid, mdHorocyclic) || mdBandAny();
     }
   
-  EX bool model_has_transition() {
-    return among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdBand) && GDIM == 2;
+  EX bool is_perspective(eModel m) {
+    return among(m, mdPerspective, mdGeodesic);
+    }
+
+  EX bool is_3d(const projection_configuration& p) {
+    if(GDIM == 3) return true;
+    return among(p.model, mdBall, mdHyperboloid, mdHemisphere) || (p.model == mdSpiral && p.spiral_cone != 360);
     }
   
-  EX bool product_model() {
+  EX bool has_transition(eModel m) {
+    return among(m, mdJoukowsky, mdJoukowskyInverted, mdBand) && GDIM == 2;
+    }
+  
+  EX bool product_model(eModel m) {
     if(!prod) return false;
-    if(among(pmodel, mdPerspective, mdHyperboloid, mdEquidistant)) return false;
+    if(among(m, mdPerspective, mdHyperboloid, mdEquidistant)) return false;
     return true;
     }
   
@@ -286,16 +278,16 @@ EX namespace models {
     dialog::editNumber(spiral_id, 0, isize(torus_zeros)-1, 1, 10, XLAT("match the period of the torus"), "");
     dialog::reaction = [] () {
       auto& co = torus_zeros[spiral_id];
-      spiral_x = co.first;
-      spiral_y = co.second;
+      vpconf.spiral_x = co.first;
+      vpconf.spiral_y = co.second;
       };
     dialog::bound_low(0);
     dialog::bound_up(isize(torus_zeros)-1);
     }
   
   EX void edit_formula() {
-    if(pmodel != mdFormula) basic_model = pmodel;
-    dialog::edit_string(formula, "formula", 
+    if(vpconf.model != mdFormula) vpconf.basic_model = vpconf.model;
+    dialog::edit_string(vpconf.formula, "formula", 
       XLAT(
       "This lets you specify the projection as a formula f. "
       "The formula has access to the value 'z', which is a complex number corresponding to the (x,y) coordinates in the currently selected model; "
@@ -314,12 +306,12 @@ EX namespace models {
         curvepoint(point2(a*current_display->radius, +M_PI/2*current_display->radius));
         queuecurve(forecolor, 0, PPR::LINE);
         }
-      queuereset(pmodel, PPR::LINE);
+      queuereset(vpconf.model, PPR::LINE);
       quickqueue();
       };
     #endif
     dialog::reaction_final = [] () {
-      pmodel = mdFormula;
+      vpconf.model = mdFormula;
       };
     }
   
@@ -351,24 +343,25 @@ EX namespace models {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
     dialog::init(XLAT("models & projections"));
+    USING_NATIVE_GEOMETRY_IN_RUG;
 
     for(int i=0; i<mdGUARD; i++) {
       eModel m = eModel(i);
       if(m == mdFormula && ISMOBILE) continue;
       if(model_available(m)) {
-        dialog::addBoolItem(get_model_name(m), pmodel == m, (i < 26 ? 'a'+i : 'A'+i-26));
+        dialog::addBoolItem(get_model_name(m), vpconf.model == m, (i < 26 ? 'a'+i : 'A'+i-26));
         dialog::add_action([m] () {
           if(m == mdFormula) {
             edit_formula();
             return;
             }
-          pmodel = m;
+          vpconf.model = m;
           polygonal::solve();
-          vid.alpha = 1; vid.scale = 1;
+          vpconf.alpha = 1; vpconf.scale = 1;
           if(pmodel == mdBand && sphere)
-            vid.scale = .3;
+            vpconf.scale = .3;
           if(pmodel == mdDisk && sphere)
-            vid.scale = .4;
+            vpconf.scale = .4;
           popScreen();
           });
         }
@@ -378,24 +371,24 @@ EX namespace models {
     }
       
   void edit_stretch() {
-    dialog::editNumber(vid.stretch, 0, 10, .1, 1, XLAT("vertical stretch"), 
+    dialog::editNumber(vpconf.stretch, 0, 10, .1, 1, XLAT("vertical stretch"), 
       "Vertical stretch factor."
       );
     dialog::extra_options = [] () {
       dialog::addBreak(100);
       if(sphere && pmodel == mdBandEquiarea) {
-        dialog::addBoolItem("Gall-Peters", vid.stretch == 2, 'O');
-        dialog::add_action([] { vid.stretch = 2; dialog::ne.s = "2"; });
+        dialog::addBoolItem("Gall-Peters", vpconf.stretch == 2, 'O');
+        dialog::add_action([] { vpconf.stretch = 2; dialog::ne.s = "2"; });
         }
       if(pmodel == mdBandEquiarea) {
         // y = K * sin(phi)
         // cos(phi) * cos(phi) = 1/K
-        if(sphere && vid.stretch >= 1) {
-          ld phi = acos(sqrt(1/vid.stretch));
+        if(sphere && vpconf.stretch >= 1) {
+          ld phi = acos(sqrt(1/vpconf.stretch));
           dialog::addInfo(XLAT("The current value makes the map conformal at the latitude of %1 (%2°).", fts(phi), fts(phi / degree)));
           }
-        else if(hyperbolic && abs(vid.stretch) <= 1 && abs(vid.stretch) >= 1e-9) {
-          ld phi = acosh(abs(sqrt(1/vid.stretch)));
+        else if(hyperbolic && abs(vpconf.stretch) <= 1 && abs(vpconf.stretch) >= 1e-9) {
+          ld phi = acosh(abs(sqrt(1/vpconf.stretch)));
           dialog::addInfo(XLAT("The current value makes the map conformal %1 units from the main line.", fts(phi)));
           }
         else dialog::addInfo("");
@@ -406,9 +399,12 @@ EX namespace models {
   EX void model_menu() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
+    USING_NATIVE_GEOMETRY_IN_RUG;
     dialog::init(XLAT("models & projections"));
     
-    dialog::addSelItem(XLAT("projection type"), get_model_name(pmodel), 'm');
+    auto vpmodel = vpconf.model;
+    
+    dialog::addSelItem(XLAT("projection type"), get_model_name(vpmodel), 'm');
     dialog::add_action_push(model_list);
     
     if(nonisotropic && !sl2)
@@ -420,61 +416,61 @@ EX namespace models {
       dialog::lastItem().value += " " + its(rotation) + "°";
     else
       dialog::lastItem().value += " " + its(rotation) + "°" + its(rotation_xz) + "°" + its(rotation_xy2) + "°";
-    dialog::add_action([] { edit_rotation(models::rotation); });
+    dialog::add_action([] { edit_rotation(rotation); });
     
-    // if(pmodel == mdBand && sphere)
+    // if(vpmodel == mdBand && sphere)
     if(!in_perspective()) {
-      dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
+      dialog::addSelItem(XLAT("scale factor"), fts(vpconf.scale), 'z');
       dialog::add_action(editScale);
       }
     
-    if(abs(vid.alpha-1) > 1e-3 && pmodel != mdBall && pmodel != mdHyperboloid && pmodel != mdHemisphere && pmodel != mdDisk) {
+    if(abs(pconf.alpha-1) > 1e-3 && vpmodel != mdBall && vpmodel != mdHyperboloid && vpmodel != mdHemisphere && vpmodel != mdDisk) {
       dialog::addBreak(50);
       dialog::addInfo("NOTE: this works 'correctly' only if the Poincaré model/stereographic projection is used.");
       dialog::addBreak(50);
       }
     
-    if(among(pmodel, mdDisk, mdBall, mdHyperboloid, mdRotatedHyperboles)) {
-      dialog::addSelItem(XLAT("projection distance"), fts(vid.alpha) + " (" + current_proj_name() + ")", 'p');
+    if(among(vpmodel, mdDisk, mdBall, mdHyperboloid, mdRotatedHyperboles)) {
+      dialog::addSelItem(XLAT("projection distance"), fts(vpconf.alpha) + " (" + current_proj_name() + ")", 'p');
       dialog::add_action(projectionDialog);
       }
                                   
-    if(model_has_orientation()) {
-      dialog::addSelItem(XLAT("model orientation"), fts(model_orientation) + "°", 'l');
+    if(has_orientation(vpmodel)) {
+      dialog::addSelItem(XLAT("model orientation"), fts(vpconf.model_orientation) + "°", 'l');
       dialog::add_action([] () {
-        dialog::editNumber(model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
+        dialog::editNumber(vpconf.model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
         });
       if(GDIM == 3) {
-        dialog::addSelItem(XLAT("model orientation (y/z plane)"), fts(model_orientation_yz) + "°", 'L');
+        dialog::addSelItem(XLAT("model orientation (y/z plane)"), fts(vpconf.model_orientation_yz) + "°", 'L');
         dialog::add_action([] () {
-          dialog::editNumber(model_orientation_yz, 0, 360, 90, 0, XLAT("model orientation (y/z plane)"), "");
+          dialog::editNumber(vpconf.model_orientation_yz, 0, 360, 90, 0, XLAT("model orientation (y/z plane)"), "");
           });
         }
       }
         
-  if(GDIM == 3 && pmodel != mdPerspective) {
+  if(GDIM == 3 && vpmodel != mdPerspective) {
     const string cliphelp = XLAT(
       "Your view of the 3D model is naturally bounded from four directions by your window. "
       "Here, you can also set up similar bounds in the Z direction. Radius of the ball/band "
       "models, and the distance from the center to the plane in the halfspace model, are 1.\n\n");
-    dialog::addSelItem(XLAT("near clipping plane"), fts(clip_max), 'c');
+    dialog::addSelItem(XLAT("near clipping plane"), fts(vpconf.clip_max), 'c');
     dialog::add_action([cliphelp] () {
-      dialog::editNumber(clip_max, -10, 10, 0.2, 1, XLAT("near clipping plane"), 
+      dialog::editNumber(vpconf.clip_max, -10, 10, 0.2, 1, XLAT("near clipping plane"), 
         cliphelp + XLAT("Objects with Z coordinate "
           "bigger than this parameter are not shown. This is useful with the models which "
           "extend infinitely in the Z direction, or if you want things close to your character "
           "to be not obscured by things closer to the camera."));
       });
-    dialog::addSelItem(XLAT("far clipping plane"), fts(clip_min), 'C');
+    dialog::addSelItem(XLAT("far clipping plane"), fts(vpconf.clip_min), 'C');
     dialog::add_action([cliphelp] () {
-      dialog::editNumber(clip_min, -10, 10, 0.2, -1, XLAT("far clipping plane"), 
+      dialog::editNumber(vpconf.clip_min, -10, 10, 0.2, -1, XLAT("far clipping plane"), 
         cliphelp + XLAT("Objects with Z coordinate "
           "smaller than this parameter are not shown; it also affects the fog effect"
           " (near clipping plane = 0% fog, far clipping plane = 100% fog)."));
       });
     }
     
-    if(pmodel == mdPolynomial) {
+    if(vpmodel == mdPolynomial) {
       dialog::addSelItem(XLAT("coefficient"), 
         fts(polygonal::coefr[polygonal::coefid]), 'x');
       dialog::add_action([] () {
@@ -496,26 +492,26 @@ EX namespace models {
         });
       }
 
-    if(pmodel == mdHalfplane) {
-      dialog::addSelItem(XLAT("half-plane scale"), fts(halfplane_scale), 'b');
+    if(vpmodel == mdHalfplane) {
+      dialog::addSelItem(XLAT("half-plane scale"), fts(vpconf.halfplane_scale), 'b');
       dialog::add_action([] () {
-        dialog::editNumber(halfplane_scale, 0, 2, 0.25, 1, XLAT("half-plane scale"), "");
+        dialog::editNumber(vpconf.halfplane_scale, 0, 2, 0.25, 1, XLAT("half-plane scale"), "");
         });
       }
 
-    if(pmodel == mdRotatedHyperboles) {
-      dialog::addBoolItem_action(XLAT("use atan to make it finite"), use_atan, 'x');
+    if(vpmodel == mdRotatedHyperboles) {
+      dialog::addBoolItem_action(XLAT("use atan to make it finite"), vpconf.use_atan, 'x');
       }
 
-    if(pmodel == mdBall) {
-      dialog::addSelItem(XLAT("projection in ball model"), fts(vid.ballproj), 'x');
+    if(vpmodel == mdBall) {
+      dialog::addSelItem(XLAT("projection in ball model"), fts(vpconf.ballproj), 'x');
       dialog::add_action([] () {
-        dialog::editNumber(vid.ballproj, 0, 100, .1, 0, XLAT("projection in ball model"), 
+        dialog::editNumber(vpconf.ballproj, 0, 100, .1, 0, XLAT("projection in ball model"), 
           "This parameter affects the ball model the same way as the projection parameter affects the disk model.");
         });
       }
 
-    if(pmodel == mdPolygonal) {
+    if(vpmodel == mdPolygonal) {
       dialog::addSelItem(XLAT("polygon sides"), its(polygonal::SI), 'x');
       dialog::add_action([] () {
         dialog::editNumber(polygonal::SI, 3, 10, 1, 4, XLAT("polygon sides"), "");
@@ -534,90 +530,91 @@ EX namespace models {
         });
       }
     
-    if(pmodel == mdBall || pmodel == mdHyperboloid || pmodel == mdHemisphere || (pmodel == mdSpiral && spiral_cone != 360)) {
-      dialog::addSelItem(XLAT("camera rotation in 3D models"), fts(vid.ballangle) + "°", 'b');
+    if(is_3d(vpconf) && GDIM == 2) {
+      dialog::addSelItem(XLAT("camera rotation in 3D models"), fts(vpconf.ballangle) + "°", 'b');
       dialog::add_action(config_camera_rotation);
       }
     
-    if(pmodel == mdHyperboloid) {
-      dialog::addSelItem(XLAT("maximum z coordinate to show"), fts(top_z), 'l');
+    if(vpmodel == mdHyperboloid) {
+      dialog::addSelItem(XLAT("maximum z coordinate to show"), fts(vpconf.top_z), 'l');
       dialog::add_action([](){
-        dialog::editNumber(top_z, 1, 20, 0.25, 4, XLAT("maximum z coordinate to show"), "");
+        dialog::editNumber(vpconf.top_z, 1, 20, 0.25, 4, XLAT("maximum z coordinate to show"), "");
         });
       }
     
-    if(model_has_transition()) {
-      dialog::addSelItem(XLAT("model transition"), fts(model_transition), 't');
+    if(has_transition(vpmodel)) {
+      dialog::addSelItem(XLAT("model transition"), fts(vpconf.model_transition), 't');
       dialog::add_action([]() {
-        dialog::editNumber(model_transition, 0, 1, 0.1, 1, XLAT("model transition"), 
+        dialog::editNumber(vpconf.model_transition, 0, 1, 0.1, 1, XLAT("model transition"), 
           "You can change this parameter for a transition from another model to this one."
           );
         });
       }
 
-    if(among(pmodel, mdJoukowsky, mdJoukowskyInverted, mdSpiral) && GDIM == 2) {
-      dialog::addSelItem(XLAT("Möbius transformations"), fts(vid.skiprope) + "°", 'S');
+    if(among(vpmodel, mdJoukowsky, mdJoukowskyInverted, mdSpiral) && GDIM == 2) {
+      dialog::addSelItem(XLAT("Möbius transformations"), fts(vpconf.skiprope) + "°", 'S');
       dialog::add_action([](){
-        dialog::editNumber(vid.skiprope, 0, 360, 15, 0, XLAT("Möbius transformations"), "");
+        dialog::editNumber(vpconf.skiprope, 0, 360, 15, 0, XLAT("Möbius transformations"), "");
         });
       }
     
-    if(pmodel == mdHemisphere && euclid) {
-      dialog::addSelItem(XLAT("parameter"), fts(vid.euclid_to_sphere), 'l');
+    if(vpmodel == mdHemisphere && euclid) {
+      dialog::addSelItem(XLAT("parameter"), fts(vpconf.euclid_to_sphere), 'l');
       dialog::add_action([] () {
-        dialog::editNumber(vid.euclid_to_sphere, 0, 10, .1, 1, XLAT("parameter"), 
+        dialog::editNumber(vpconf.euclid_to_sphere, 0, 10, .1, 1, XLAT("parameter"), 
           "Stereographic projection to a sphere. Choose the radius of the sphere."
           );
         dialog::scaleLog();
         });
       }
       
-    if(among(pmodel, mdTwoPoint, mdSimulatedPerspective, mdTwoHybrid)) {
-      dialog::addSelItem(XLAT("parameter"), fts(vid.twopoint_param), 'b');
-      dialog::add_action([](){
-        dialog::editNumber(vid.twopoint_param, 1e-3, 10, .1, 1, XLAT("parameter"), 
+    if(among(vpmodel, mdTwoPoint, mdSimulatedPerspective, mdTwoHybrid)) {
+      dialog::addSelItem(XLAT("parameter"), fts(vpconf.twopoint_param), 'b');
+      dialog::add_action([vpmodel](){
+        dialog::editNumber(vpconf.twopoint_param, 1e-3, 10, .1, 1, XLAT("parameter"), 
+          s0 + (vpmodel == mdTwoPoint ?
           "This model maps the world so that the distances from two points "
-          "are kept. This parameter gives the distance from the two points to "
+          "are kept. " : "") + "This parameter gives the distance from the two points to "
           "the center."
           );
         dialog::scaleLog();
         });
       }
     
-    if(pmodel == mdFisheye) {
-      dialog::addSelItem(XLAT("parameter"), fts(vid.fisheye_param), 'b');
+    if(vpmodel == mdFisheye) {
+      dialog::addSelItem(XLAT("parameter"), fts(vpconf.fisheye_param), 'b');
       dialog::add_action([](){
-        dialog::editNumber(vid.fisheye_param, 1e-3, 10, .1, 1, XLAT("parameter"), 
+        dialog::editNumber(vpconf.fisheye_param, 1e-3, 10, .1, 1, XLAT("parameter"), 
           "Size of the fish eye."
           );
         dialog::scaleLog();
         });
       }
     
-    if(pmodel == mdCollignon) {
-      dialog::addSelItem(XLAT("parameter"), fts(vid.collignon_parameter) + (vid.collignon_reflected ? " (r)" : ""), 'b');
+    if(vpmodel == mdCollignon) {
+      dialog::addSelItem(XLAT("parameter"), fts(vpconf.collignon_parameter) + (vpconf.collignon_reflected ? " (r)" : ""), 'b');
       dialog::add_action([](){
-        dialog::editNumber(vid.collignon_parameter, -1, 1, .1, 1, XLAT("parameter"), 
+        dialog::editNumber(vpconf.collignon_parameter, -1, 1, .1, 1, XLAT("parameter"), 
           ""
           );
         dialog::extra_options = [] {
-          dialog::addBoolItem_action(XLAT("reflect"), vid.collignon_reflected, 'R');
+          dialog::addBoolItem_action(XLAT("reflect"), vpconf.collignon_reflected, 'R');
           };
         });
       }
     
-    if(pmodel == mdSpiral && !euclid) {
-      dialog::addSelItem(XLAT("spiral angle"), fts(spiral_angle) + "°", 'x');
+    if(vpmodel == mdSpiral && !euclid) {
+      dialog::addSelItem(XLAT("spiral angle"), fts(vpconf.spiral_angle) + "°", 'x');
       dialog::add_action([](){
-        dialog::editNumber(spiral_angle, 0, 360, 15, 0, XLAT("spiral angle"), 
+        dialog::editNumber(vpconf.spiral_angle, 0, 360, 15, 0, XLAT("spiral angle"), 
           XLAT("set to 90° for the ring projection")
           );
         });
 
       ld& which =
-        sphere ? sphere_spiral_multiplier :
-        ring_not_spiral ? right_spiral_multiplier :
-        any_spiral_multiplier;
+        sphere ? vpconf.sphere_spiral_multiplier :
+        ring_not_spiral ? vpconf.right_spiral_multiplier :
+        vpconf.any_spiral_multiplier;
                 
       dialog::addSelItem(XLAT("spiral multiplier"), fts(which) + "°", 'M');
       dialog::add_action([&which](){
@@ -631,20 +628,20 @@ EX namespace models {
           );
         });
 
-      dialog::addSelItem(XLAT("spiral cone"), fts(spiral_cone) + "°", 'C');
+      dialog::addSelItem(XLAT("spiral cone"), fts(vpconf.spiral_cone) + "°", 'C');
       dialog::add_action([](){
-        dialog::editNumber(spiral_cone, 0, 360, -45, 360, XLAT("spiral cone"), "");
+        dialog::editNumber(vpconf.spiral_cone, 0, 360, -45, 360, XLAT("spiral cone"), "");
         });
       }
 
-    if(pmodel == mdSpiral && euclid) {
-      dialog::addSelItem(XLAT("spiral period: x"), fts(spiral_x), 'x');
+    if(vpmodel == mdSpiral && euclid) {
+      dialog::addSelItem(XLAT("spiral period: x"), fts(vpconf.spiral_x), 'x');
       dialog::add_action([](){
-        dialog::editNumber(spiral_x, -20, 20, 1, 10, XLAT("spiral period: x"), "");
+        dialog::editNumber(vpconf.spiral_x, -20, 20, 1, 10, XLAT("spiral period: x"), "");
         });
-      dialog::addSelItem(XLAT("spiral period: y"), fts(spiral_y), 'y');
+      dialog::addSelItem(XLAT("spiral period: y"), fts(vpconf.spiral_y), 'y');
       dialog::add_action([](){
-        dialog::editNumber(spiral_y, -20, 20, 1, 10, XLAT("spiral period: y"), "");
+        dialog::editNumber(vpconf.spiral_y, -20, 20, 1, 10, XLAT("spiral period: y"), "");
         });
       if(euclid && quotient) {
         dialog::addSelItem(XLAT("match the period"), its(spiral_id), 'n');
@@ -652,13 +649,13 @@ EX namespace models {
         }
       }
 
-    dialog::addSelItem(XLAT("vertical stretch"), fts(vid.stretch), 's');
+    dialog::addSelItem(XLAT("vertical stretch"), fts(vpconf.stretch), 's');
     dialog::add_action(edit_stretch);
     
-    if(product_model()) {
-      dialog::addSelItem(XLAT("product Z stretch"), fts(product_z_scale), 'Z');
+    if(product_model(vpmodel)) {
+      dialog::addSelItem(XLAT("product Z stretch"), fts(vpconf.product_z_scale), 'Z');
       dialog::add_action([] {
-        dialog::editNumber(product_z_scale, 0.1, 10, 0.1, 1, XLAT("product Z stretch"), "");        
+        dialog::editNumber(vpconf.product_z_scale, 0.1, 10, 0.1, 1, XLAT("product Z stretch"), "");        
         dialog::scaleLog();
         });
       }
@@ -667,7 +664,7 @@ EX namespace models {
     bool shaderside_projection = get_shader_flags() & SF_DIRECT;
     if(vid.consider_shader_projection && !shaderside_projection)
       dialog::lastItem().value = XLAT("N/A");
-    if(vid.consider_shader_projection && shaderside_projection && pmodel)
+    if(vid.consider_shader_projection && shaderside_projection && vpmodel)
       dialog::lastItem().value += XLAT(" (2D only)");
     dialog::add_action([] { vid.consider_shader_projection = !vid.consider_shader_projection; });
 
@@ -677,7 +674,7 @@ EX namespace models {
     dialog::addItem(XLAT("history mode"), 'a');
     dialog::add_action_push(history::history_menu);
 #if CAP_RUG
-    if(GDIM == 2) {
+    if(GDIM == 2 || rug::rugged) {
       dialog::addItem(XLAT("hypersian rug mode"), 'u');
       dialog::add_action_push(rug::show);
       }
@@ -707,39 +704,39 @@ EX namespace models {
       shift_arg_formula(history::extra_line_steps);
       }
     else if(argis("-stretch")) {
-      PHASEFROM(2); shift_arg_formula(vid.stretch);
+      PHASEFROM(2); shift_arg_formula(vpconf.stretch);
       }
     else if(argis("-PM")) { 
-      PHASEFROM(2); shift(); pmodel = read_model(args());
-      if(pmodel == mdFormula) {
-        shift(); basic_model = eModel(argi());
-        shift(); formula = args();
+      PHASEFROM(2); shift(); vpconf.model = read_model(args());
+      if(vpconf.model == mdFormula) {
+        shift(); vpconf.basic_model = eModel(argi());
+        shift(); vpconf.formula = args();
         }
       }
     else if(argis("-ballangle")) { 
       PHASEFROM(2); 
-      shift_arg_formula(vid.ballangle);
+      shift_arg_formula(vpconf.ballangle);
       }
     else if(argis("-topz")) { 
       PHASEFROM(2); 
-      shift_arg_formula(models::top_z);
+      shift_arg_formula(vpconf.top_z);
       }
     else if(argis("-twopoint")) { 
       PHASEFROM(2); 
-      shift_arg_formula(vid.twopoint_param);
+      shift_arg_formula(vpconf.twopoint_param);
       }
     else if(argis("-hp")) { 
       PHASEFROM(2); 
-      shift_arg_formula(models::halfplane_scale);
+      shift_arg_formula(vpconf.halfplane_scale);
       }
     else if(argis("-mori")) { 
       PHASEFROM(2); 
-      shift_arg_formula(models::model_orientation);
+      shift_arg_formula(vpconf.model_orientation);
       }
     else if(argis("-mori2")) { 
       PHASEFROM(2); 
-      shift_arg_formula(models::model_orientation);
-      shift_arg_formula(models::model_orientation_yz);
+      shift_arg_formula(vpconf.model_orientation);
+      shift_arg_formula(vpconf.model_orientation_yz);
       }
     else if(argis("-crot")) { 
       PHASEFROM(2); 
@@ -749,43 +746,43 @@ EX namespace models {
       }
     else if(argis("-clip")) { 
       PHASEFROM(2); 
-      shift_arg_formula(models::clip_min);
-      shift_arg_formula(models::clip_max);
+      shift_arg_formula(vpconf.clip_min);
+      shift_arg_formula(vpconf.clip_max);
       }
     else if(argis("-mtrans")) { 
       PHASEFROM(2); 
-      shift_arg_formula(models::model_transition);
+      shift_arg_formula(vpconf.model_transition);
       }
     else if(argis("-sang")) { 
       PHASEFROM(2); 
-      shift_arg_formula(models::spiral_angle);
+      shift_arg_formula(vpconf.spiral_angle);
       if(sphere)
-        shift_arg_formula(models::sphere_spiral_multiplier);
-      else if(models::spiral_angle == 90)
-        shift_arg_formula(models::right_spiral_multiplier);
+        shift_arg_formula(vpconf.sphere_spiral_multiplier);
+      else if(vpconf.spiral_angle == 90)
+        shift_arg_formula(vpconf.right_spiral_multiplier);
       }
     else if(argis("-ssm")) { 
       PHASEFROM(2);
-      shift_arg_formula(models::any_spiral_multiplier);
+      shift_arg_formula(vpconf.any_spiral_multiplier);
       }
     else if(argis("-scone")) { 
       PHASEFROM(2); 
-      shift_arg_formula(models::spiral_cone);
+      shift_arg_formula(vpconf.spiral_cone);
       }
     else if(argis("-sxy")) { 
       PHASEFROM(2); 
-      shift_arg_formula(models::spiral_x);
-      shift_arg_formula(models::spiral_y);
+      shift_arg_formula(vpconf.spiral_x);
+      shift_arg_formula(vpconf.spiral_y);
       }
     else if(argis("-mob")) { 
       PHASEFROM(2); 
-      shift_arg_formula(vid.skiprope);
+      shift_arg_formula(vpconf.skiprope);
       }
     else if(argis("-zoom")) { 
-      PHASEFROM(2); shift_arg_formula(vid.scale);
+      PHASEFROM(2); shift_arg_formula(vpconf.scale);
       }
     else if(argis("-alpha")) { 
-      PHASEFROM(2); shift_arg_formula(vid.alpha);
+      PHASEFROM(2); shift_arg_formula(vpconf.alpha);
       }
     else if(argis("-d:model")) 
       launch_dialog(model_menu);

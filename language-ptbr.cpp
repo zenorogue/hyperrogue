@@ -4579,7 +4579,7 @@ S("Ground level is actually an equidistant surface, "
   "are not about points on the ground level, but "
   "about the matching points on the plane P -- "
   "divide them by the factor above to get actual "
-  "distances.",
+  "distances.)",
   
   "Poziom podłoża jest w rzeczywistości ekwidystantną powierzchnią "
   "%1 jednostek pod płaszczyzną P. Teoretycznie, ta wartość "
@@ -4587,7 +4587,7 @@ S("Ground level is actually an equidistant surface, "
   "szybciej latając powyżej poziomu podłoża, na wysokości płaszczyzny "
   "P -- ale nie wpływa to na mechanikę gry w żaden sposób. "
   "(Odległości wyświetlane przez edytor grafiki "
-  "dotyczą odległości między odpowiednimi punktami na płaszczyźnie P.")
+  "dotyczą odległości między odpowiednimi punktami na płaszczyźnie P.)")
 
 S( "If we are viewing an equidistant g absolute units below a plane, "
    "from a point c absolute units above the plane, this corresponds "

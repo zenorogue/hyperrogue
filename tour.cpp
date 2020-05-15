@@ -29,7 +29,8 @@ enum presmode {
   pmStartAll = 0,
   pmStart = 1, pmFrame = 2, pmStop = 3, pmKey = 4, pmRestart = 5,
   pmAfterFrame = 6,
-  pmGeometry = 11, pmGeometryReset = 13, pmGeometryStart = 15
+  pmGeometry = 11, pmGeometryReset = 13, pmGeometryStart = 15,
+  pmGeometrySpecial = 16
   };
 
 /** \brief slide definition */
@@ -48,7 +49,7 @@ struct slide {
 
 /** \brief in which geometries does this slide work */
 namespace LEGAL {
-  enum flagtype { NONE, UNLIMITED, HYPERBOLIC, ANY, NONEUC };
+  enum flagtype { NONE, UNLIMITED, HYPERBOLIC, ANY, NONEUC, SPECIAL };
   }
 
 /** \brief when Enter pressed while showing the text, skip to the next slide immediately */
@@ -115,7 +116,7 @@ EX function<bool(eLand)> showland;
 EX string slidecommand;
 
 /** \brief hooks to execute after calling presentation */
-EX hookset<void(int)> *hooks_slide;
+EX hookset<void(int)> hooks_slide;
 
 /** \brief call action(mode) for the current slide. Also sets up some default stuff */
 EX void presentation(presmode mode) {
@@ -175,7 +176,7 @@ EX void slidehelp() {
 /** \brief return from a subgame launched while in presentation */
 void return_geometry() {
   gamestack::pop();
-  vid.scale = 1; vid.alpha = 1;
+  pconf.scale = 1; pconf.alpha = 1;
   presentation(pmGeometryReset);
   addMessage(XLAT("Returned to your game."));
   }
@@ -213,6 +214,11 @@ bool handleKeyTour(int sym, int uni) {
     }
   if(NUMBERKEY == '1' || NUMBERKEY == '2') {
     int legal = slides[currentslide].flags & 7;
+    
+    if(legal == LEGAL::SPECIAL) {
+      presentation(pmGeometrySpecial);
+      return true;
+      }
 
     if(legal == LEGAL::NONE || legal == LEGAL::HYPERBOLIC) {
       addMessage(XLAT("You cannot change geometry in this slide."));
@@ -262,11 +268,11 @@ bool handleKeyTour(int sym, int uni) {
         break;
       case '1':
         set_geometry(gSphere);
-        vid.alpha = 1, vid.scale = .5;
+        pconf.alpha = 1, pconf.scale = .5;
         break;
       case '2':
         set_geometry(gEuclid);
-        vid.alpha = 1, vid.scale = .5;
+        pconf.alpha = 1, pconf.scale = .5;
         break;
       }      
     start_game();
@@ -288,7 +294,7 @@ bool handleKeyTour(int sym, int uni) {
     return true;
     }
   if(NUMBERKEY == '3' && sphere) {
-    if(vid.alpha < 2) vid.scale = 400, vid.alpha = 400; else vid.scale = .5, vid.alpha = 1;
+    if(pconf.alpha < 2) pconf.scale = 400, pconf.alpha = 400; else pconf.scale = .5, pconf.alpha = 1;
     addMessage(XLAT("Changed the projection."));
     return true;
     }
@@ -377,13 +383,13 @@ EX namespace ss {
 
   string slidechars = "abcdefghijklmnopqrsvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ23456789!@#$%^&*(";
   
-  EX hookset<int(bool)> *extra_slideshows;
+  EX hookset<int(bool)> hooks_extra_slideshows;
 
   EX void slideshow_menu() {
     dialog::init(XLAT("slideshows"), forecolor, 150, 100);
     dialog::addBoolItem(XLAT("Guided Tour"), wts == default_slides, 't');
     dialog::add_action([] { wts = default_slides; popScreen(); });
-    callhooks(extra_slideshows, true);
+    callhooks(hooks_extra_slideshows, true);
     dialog::addBack();
     dialog::display();
     }
@@ -438,7 +444,7 @@ EX namespace ss {
       }
     dialog::addBreak(50);
     bool b = false;
-    if(callhandlers(0, extra_slideshows, b)) {
+    if(callhandlers(0, hooks_extra_slideshows, b)) {
       dialog::addItem(XLAT("change slideshow"), '1');
       dialog::add_action_push(slideshow_menu);
       }
@@ -450,8 +456,8 @@ EX namespace ss {
   
 EX void start() {
   currentslide = 0;
-  vid.scale = 1;
-  vid.alpha = 1;
+  pconf.scale = 1;
+  pconf.alpha = 1;
   pmodel = mdDisk;
   if(!tour::on) presentation(pmStartAll);
   else {
@@ -839,8 +845,8 @@ EX slide default_slides[] = {
   {models+"Beltrami-Klein model", 43, LEGAL::ANY | USE_SLIDE_NAME,
     "This model renders straight lines as straight, but it distorts angles.",
     [] (presmode mode) {
-      if(mode == 1 || mode == pmGeometryReset || mode == pmGeometry) vid.alpha = 0;
-      if(mode == 3) vid.alpha = 1;
+      if(mode == 1 || mode == pmGeometryReset || mode == pmGeometry) pconf.alpha = 0;
+      if(mode == 3) pconf.alpha = 1;
       }
     },
   {models+"Gans model", 44, LEGAL::ANY | USE_SLIDE_NAME,
@@ -849,8 +855,8 @@ EX slide default_slides[] = {
     "model are all obtained by looking at either the hyperboloid model or an "
     "equidistant surface from various distances.",
     [] (presmode mode) {
-      if(mode == 1 || mode == pmGeometryReset || mode == pmGeometry) vid.alpha = 400, vid.scale = 150;
-      if(mode == 3) vid.alpha = vid.scale = 1;
+      if(mode == 1 || mode == pmGeometryReset || mode == pmGeometry) pconf.alpha = 400, pconf.scale = 150;
+      if(mode == 3) pconf.alpha = pconf.scale = 1;
       }
     },
   {models+"Band model", 45, LEGAL::NONEUC | USE_SLIDE_NAME, 

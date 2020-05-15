@@ -835,7 +835,7 @@ heptspin sview;
 #if CAP_COMMANDLINE
 auto hook = 
   addHook(hooks_args, 100, readArgs)
-+ addHook(clearmemory, 0, []() {
++ addHook(hooks_clearmemory, 0, []() {
     track_ready = false;
     track.clear();
     rti.clear();
@@ -939,15 +939,15 @@ void race_projection() {
   
   dialog::init(XLAT("racing projections"));
 
-  dialog::addBoolItem(XLAT("Poincaré disk model"), pmodel == mdDisk && !vid.camera_angle, '1');
+  dialog::addBoolItem(XLAT("Poincaré disk model"), pmodel == mdDisk && !pconf.camera_angle, '1');
   dialog::add_action([] () {
     pmodel = mdDisk;
     race_advance = 0;
     vid.yshift = 0;
-    vid.camera_angle = 0;
-    vid.xposition = 0;
-    vid.yposition = 0;
-    vid.scale = 1;
+    pconf.camera_angle = 0;
+    pconf.xposition = 0;
+    pconf.yposition = 0;
+    pconf.scale = 1;
     vid.use_smart_range = 0;
     vid.smart_range_detail = 3;
     });
@@ -955,13 +955,13 @@ void race_projection() {
   dialog::addBoolItem(XLAT("band"), pmodel == mdBand, '2');
   dialog::add_action([] () {
     pmodel = mdBand;
-    models::model_orientation = race_angle;
+    pconf.model_orientation = race_angle;
     race_advance = 1;
     vid.yshift = 0;
-    vid.camera_angle = 0;
-    vid.xposition = 0;
-    vid.yposition = 0;
-    vid.scale = 1;
+    pconf.camera_angle = 0;
+    pconf.xposition = 0;
+    pconf.yposition = 0;
+    pconf.scale = 1;
     vid.use_smart_range = 1;
     vid.smart_range_detail = 3;
     });
@@ -969,26 +969,26 @@ void race_projection() {
   dialog::addBoolItem(XLAT("half-plane"), pmodel == mdHalfplane, '3');
   dialog::add_action([] () {
     pmodel = mdHalfplane;
-    models::model_orientation = race_angle + 90;
+    pconf.model_orientation = race_angle + 90;
     race_advance = 0.5;
     vid.yshift = 0;
-    vid.camera_angle = 0;
-    vid.xposition = 0;
-    vid.yposition = 0;
-    vid.scale = 1;
+    pconf.camera_angle = 0;
+    pconf.xposition = 0;
+    pconf.yposition = 0;
+    pconf.scale = 1;
     vid.use_smart_range = 1;
     vid.smart_range_detail = 3;
     });
 
-  dialog::addBoolItem(XLAT("third-person perspective"), pmodel == mdDisk && vid.camera_angle, '4');
+  dialog::addBoolItem(XLAT("third-person perspective"), pmodel == mdDisk && pconf.camera_angle, '4');
   dialog::add_action([] () {
     pmodel = mdDisk;
     race_advance = 0;
     vid.yshift = -0.3;
-    vid.camera_angle = -45;
-    vid.scale = 18/16. * vid.xres / vid.yres / multi::players;
-    vid.xposition = 0;
-    vid.yposition = -0.9;
+    pconf.camera_angle = -45;
+    pconf.scale = 18/16. * vid.xres / vid.yres / multi::players;
+    pconf.xposition = 0;
+    pconf.yposition = -0.9;
     vid.use_smart_range = 1;
     vid.smart_range_detail = 3;
     });
@@ -1011,8 +1011,8 @@ void race_projection() {
     dialog::addSelItem(XLAT("race angle"), fts(race_angle), 'a');
     dialog::add_action([] () { 
       dialog::editNumber(race_angle, 0, 360, 15, 90, XLAT("race angle"), "");
-      int q = models::model_orientation - race_angle;
-      dialog::reaction = [q] () { models::model_orientation = race_angle + q; };
+      int q = pconf.model_orientation - race_angle;
+      dialog::reaction = [q] () { pconf.model_orientation = race_angle + q; };
       });
     }
 
@@ -1060,6 +1060,7 @@ void race_projection() {
 
   bool alternate = false;
   
+  #if MAXMDIM >= 4
   EX void thurston_racing() {
     gamescreen(1);
     dialog::init(XLAT("racing in Thurston geometries"));
@@ -1085,16 +1086,20 @@ void race_projection() {
       add_thurston_race(XLAT("Euclidean"), [] { stop_game(); euc::clear_torus3(); set_geometry(gBitrunc3); });
       add_thurston_race(XLAT("hyperbolic"), [] { set_geometry(gBinary3); vid.texture_step = 4; });
       add_thurston_race(XLAT("spherical"), [] { set_geometry(gCell120); });
+      #if CAP_SOLV
       add_thurston_race(XLAT("Solv geometry"), [] { sn::solrange_xy = 10; sn::solrange_z = 3; set_geometry(gSol); });
+      #endif
       add_thurston_race(XLAT("S2xE"), [] { set_geometry(gSphere); set_variation(eVariation::bitruncated); set_geometry(gProduct); });
       add_thurston_race(XLAT("H2xE"), [] { set_geometry(gNormal); set_variation(eVariation::bitruncated); set_geometry(gProduct); });
       add_thurston_race(XLAT("Nil"), [] { stop_game(); nilv::nilperiod[0] = 0; set_geometry(gNil); });
       add_thurston_race(XLAT("PSL(2,R)"), [] { set_geometry(gNormal); set_variation(eVariation::pure); set_geometry(gRotSpace); });
       }
     else {
+      #if CAP_SOLV
       add_thurston_race(XLAT("stretched hyperbolic"), [] { set_geometry(gNIH); vid.texture_step = 4; });
       add_thurston_race(XLAT("stretched Solv"), [] { set_geometry(gSolN); sn::solrange_xy = 10; sn::solrange_z = 3; vid.texture_step = 4; });
       add_thurston_race(XLAT("periodic Solv"), [] { stop_game(); sn::solrange_xy = 5; sn::solrange_z = 2; asonov::period_xy = 8; asonov::period_z = 0; asonov::set_flags(); set_geometry(gArnoldCat); });
+      #endif
       add_thurston_race(XLAT("hyperbolic crystal"), [] { set_geometry(gCrystal344); vid.texture_step = 4; });
       add_thurston_race(XLAT("torus x E"), [] { stop_game(); euc::eu_input = euc::torus3(4, 4, 0); set_geometry(gCubeTiling); });
       add_thurston_race(XLAT("hyperbolic regular"), [] { set_geometry(gSpace534); });
@@ -1108,6 +1113,7 @@ void race_projection() {
     dialog::addBack();
     dialog::display();
     }
+  #endif
 
   void raceconfigurer() {
   
@@ -1195,8 +1201,10 @@ void race_projection() {
         });
       }
     
+    #if MAXMDIM >= 4
     dialog::addItem(XLAT("racing in Thurston geometries"), 'T');
     dialog::add_action_push(thurston_racing);
+    #endif
 
     dialog::addBack();
     dialog::display();
@@ -1373,8 +1381,7 @@ EX void drawStats() {
 
   if(!racing::on) return;
   
-  dynamicval<eModel> pm(pmodel, flat_model());
-  glClear(GL_DEPTH_BUFFER_BIT);
+  flat_model_enabler fme;
   initquickqueue();
   
   int bsize = vid.fsize * 2;

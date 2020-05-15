@@ -49,7 +49,7 @@ void loadOldConfig(FILE *f) {
   float a, b, c, d;
   err=fscanf(f, "%f%f%f%f\n", &a, &b, &c, &d);
   if(err == 4) {
-    vid.scale = a; vid.alpha = c; vid.sspeed = d;
+    vid.scale = a; pconf.alpha = c; vid.sspeed = d;
     }
   err=fscanf(f, "%d%d%d%d%d%d%d", &vid.wallmode, &vid.monmode, &vid.axes, &musicvolume, &vid.framelimit, &gl, &vid.antialias);
   vid.usingGL = gl;

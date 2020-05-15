@@ -119,9 +119,16 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
       if(h->c.spin(0) == 2 && h->move(0)) {
         int d = h->c.spin(0);
         int d1 = (d+S7-1)%S7;
-        heptagon* h1 = createStep(h->move(0), d1);
-        if(h1->distance <= h->move(0)->distance)
-          h->distance = h->move(0)->distance+1;
+        bool missing0 = !h->move(0)->move(d1);
+        if(missing0) {
+          if(s == 1) 
+            h->distance = h->move(0)->distance + 1; 
+          }
+        else {
+          heptagon* h1 = createStep(h->move(0), d1);
+          if(h1->distance <= h->move(0)->distance)
+            h->distance = h->move(0)->distance+1;
+          }
         }
       if((h->s == hsB && h->move(0)->s == hsB) || h->move(0)->s == hsA) {
         int d = h->c.spin(0);
@@ -129,11 +136,23 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
         if(h1->distance <= h->move(0)->distance)
           h->distance = h->move(0)->distance+1;
         }
-      if(h->c.spin(0) == S7-1 && h->move(0)->distance != 0)
-        h->distance = min(
-          h->move(0)->move(0)->distance + 2,
-          createStep(h, S7-1)->distance + 1
-          );
+      if(h->c.spin(0) == S7-1 && (h->move(0)->s != hsOrigin) && BITRUNCATED) {
+        bool missing = !h->move(S7-1);
+        if(missing) {
+          h->distance = parent->distance;
+          if(
+            parent->distance - h->move(0)->move(0)->distance == 1 &&
+            h->c.spin(0) == S7 - 1 &&
+            h->move(0)->c.spin(0) == 2)
+            h->distance++;
+          }
+        else {
+          h->distance = min(
+            h->move(0)->move(0)->distance + 2,
+            createStep(h, S7-1)->distance + 1
+            );
+          }
+        }
       }
     else if(parent->s == hsOrigin) h->distance = parent->distance + gp::dist_2();
     #if CAP_GP
@@ -190,6 +209,9 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
     }
   else {
     h->distance = parent->distance - gp::dist_2();
+    if(S3 == 4 && S7 > 5 && BITRUNCATED) {
+      h->distance = parent->distance - 2;
+      }
     if(S3 == 4 && S7 == 5) {
       if(h->s == hsOrigin) {
         printf("had to cheat!\n");
@@ -217,7 +239,7 @@ void addSpin(heptagon *h, int d, heptagon *from, int rot, int spin) {
 
 extern int hrand(int);
 
-EX hookset<void(heptagon*, int)> *hooks_createStep;
+EX hookset<void(heptagon*, int)> hooks_createStep;
 
 // create h->move(d) if not created yet
 heptagon *createStep(heptagon *h, int d) {

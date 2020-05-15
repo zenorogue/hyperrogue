@@ -37,6 +37,14 @@ int how1 = how - 1;
 // precision: number of substeps to simulate (best if divisible by how and how1)
 int isteps = 4 * 1024;
 
+/* the generators correspond to: */
+
+nilv::mvec a(1,0,0);
+nilv::mvec b(0,1,0);
+nilv::mvec c = (a * b).inverse();
+  
+vector<nilv::mvec> gens = { a, b, c, a.inverse(), b.inverse(), c.inverse() };
+
 struct triangledata {
   hyperpoint at;
   bool computed;
@@ -74,15 +82,15 @@ struct trianglemaker {
     
     hyperpoint start = point31(0, 0, 0);
       
-    double lastz;
-    
-    double lasta;
-    
     double ca;
     
     // compute how to scale this in Nil so that everything fits
     
-    for(ld a = 1e-5;; a+=1e-5) {
+    ld amin = 0, amax = 1;
+    
+    for(int it=0; it<100; it++) {
+      ld a = (amin + amax) / 2;
+      ca = a;
       hyperpoint at = start;
       for(int d=0; d<3; d++) {
         for(int i=0; i<isteps; i++) {
@@ -92,11 +100,11 @@ struct trianglemaker {
       
       println(hlog, "at = ", at, " for a = ", a, " sq = ", at[2] / a / a);
       if(at[2] > 0) {
-        ld z = at[2];
-        ca = lerp(lasta, a, ilerp(lastz, z, 0));
-        break;
+        amax = a;
         }
-      lastz = at[2]; lasta  =a;
+      else {
+        amin = a;
+        }
       }
     
     // compute the shift between the cubes
@@ -111,9 +119,9 @@ struct trianglemaker {
     
     // println(hlog, "uds = ", uds);
   
-    for(int a=0; a<3; a++) println(hlog, sqhypot_d(3, inverse_exp(start + ds[a] * ca, iTable, false)));
+    for(int a=0; a<3; a++) println(hlog, sqhypot_d(3, inverse_exp(start + ds[a] * ca)));
   
-    for(int a=0; a<3; a++) println(hlog, sqhypot_d(3, inverse_exp(uds[a], iTable, false)));
+    for(int a=0; a<3; a++) println(hlog, sqhypot_d(3, inverse_exp(uds[a])));
     
     // compute cube vertices
   
@@ -414,7 +422,9 @@ void find_coefficients() {
   }
 
 void growthrate() {
-  /*
+
+  cnts.resize(20);
+
   for(int a=0; a<CTO; a++) {
     int cnt = 0;
     map<cell*, int> howmany;
@@ -427,22 +437,28 @@ void growthrate() {
     cnts[a] = cnt;
     if(a >= 4) println(hlog, "D4 = ", cnts[a-4] - 4 * cnts[a-3] + 6 * cnts[a-2] - 4 * cnts[a-1] + cnts[a]);
     println(hlog, "cnts = ", cnts);
-    }*/
+    }
   
-  cnts = {1,7,31,113,299,681,1363,2501,4181,6570,9874,14256,20027,27601,37171,48815,62993,79912,100181,123868,151680,184339,222347,265733,314523,369424,431221,500952,578350,665794,763300,871250,988488,1116635,1256293,1409165,1575969,1758327,1958977,2174877};
-  find_coefficients();
+  auto cnt2 = cnts;
+  for(int i=isize(cnt2)-1; i>=1; i--) cnt2[i] -= cnt2[i-1];
+  println(hlog, "cnts dif = ", cnt2);
+  
+  // this was computed on integers, not using the program above
+
+  cnts = 
+  {1,6,24,80,186,368,644,1046,1574,2260,3128,4198,5482,7006,8788,10860,13228,15918,18948,22350,26130,30314,34926,39986,45506,51518,58034,65086,72680,80842,89596,98968,108964,119610,130930,142950,155676,169140,183354,198350,214140,230744,248186,266492,285668,305746,326744,348688,371584,395464,420346,446256,473206,501216,530310,560520,591846,624320,657960,692792,728828,766094,804608,844396,885470,927856,971572,1016650,1063090,1110924,1160176,1210866,1263006,1316622,1371732,1428368,1486536,1546262,1607564,1670474,1734998,1801162,1868990,1938502,2009710,2082646,2157322,2233770,2311996,2392026,2473884,2557596,2643168,2730626,2819994,2911298,3004544,3099764,3196970,3296194,3397448,3500752,3606130,3713608,3823192};
   
   println(hlog, "coefficients_known = ", coefficients_known);
   if(coefficients_known == 2) {
     string fmt = "a(d+" + its(isize(coef)) + ") = ";
     bool first = true;
-    for(int i=0; i<isize(coef); i++) if(coef[i]) {
-      if(first && coef[i] == 1) ;
-      else if(first) fmt += its(coef[i]);
-      else if(coef[i] == 1) fmt += " + ";
-      else if(coef[i] == -1) fmt += " - ";
-      else if(coef[i] > 1) fmt += " + " + its(coef[i]);
-      else if(coef[i] < -1) fmt += " - " + its(-coef[i]);
+    for(int i=0; i<isize(coef); i++) if(kz(coef[i])) {
+      if(first && !kz(coef[i]-1)) ;
+      else if(first) fmt += fts(coef[i]);
+      else if(!kz(coef[i]-1)) fmt += " + ";
+      else if(!kz(coef[i]+1)) fmt += " - ";
+      else if(coef[i] > 0) fmt += " + " + fts(coef[i]);
+      else if(coef[i] < 0) fmt += " - " + fts(-coef[i]);
       fmt += "a(d";
       if(i != isize(coef) - 1)
         fmt += "+" + its(isize(coef) - 1 - i);
@@ -464,7 +480,7 @@ bool draw_ptriangle(cell *c, const transmatrix& V) {
   if(mkr && mkr->icgi != &cgi) reset();
      
   if(!mkr) { mkr = new trianglemaker; mkr->init(); 
-    growthrate();
+    // growthrate();
     }
   
   for(auto& td: mkr->tds[c]) {
@@ -523,7 +539,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
   else if(argis("-tri-net")) {
     on = true; net = true;
     }
-  else if(argis("-tri-net")) {
+  else if(argis("-tri-one")) {
     on = true; net = false;
     }
   else return 1;

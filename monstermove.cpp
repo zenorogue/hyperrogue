@@ -354,8 +354,9 @@ EX int angledist(int t, int d1, int d2) {
   return dd;
   }
 
-EX int angledistButterfly(int t, int d1, int d2) {
+EX int angledistButterfly(int t, int d1, int d2, bool mirrored) {
   int dd = d1 - d2;
+  if(mirrored) dd = -dd;
   while(dd<0) dd += t;
   return dd;
   }
@@ -485,7 +486,7 @@ EX int moveval(cell *c1, cell *c2, int d, flagtype mf) {
   if(m == moBat && batsAfraid(c2)) return 790;
   
   if(m == moButterfly)
-    return 1500 + angledistButterfly(c1->type, c1->mondir, d);
+    return 1500 + angledistButterfly(c1->type, c1->mondir, d, c1->monmirror);
   
   if(m == moRagingBull && c1->mondir != NODIR)
     return 1500 - bulldist(c2);
@@ -1410,7 +1411,7 @@ EX cell *lastmountpos[MAXPLAYER];
 EX void clearshadow() {
   shpos.resize(SHSIZE);
   for(int i=0; i<SHSIZE; i++) for(int p=0; p<MAXPLAYER; p++)
-    shpos[p][i] = NULL;
+    shpos[i][p] = NULL;
   }
 
 EX void moveshadow() {

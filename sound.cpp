@@ -83,7 +83,7 @@ int musfadeval = 2000;
 
 eLand cid = laNone;
 
-hookset<bool(eLand&)> *hooks_music;
+hookset<bool(eLand&)> hooks_music;
 
 bool music_out_of_focus = false;
 
@@ -129,7 +129,7 @@ EX void handlemusic() {
     }
   }
 
-hookset<bool(eLand&)> *hooks_resetmusic;
+hookset<bool(eLand&)> hooks_resetmusic;
 
 EX void resetmusic() {
   if(audio && musicvolume) {
@@ -218,7 +218,7 @@ string wheresounds = SOUNDDESTDIR;
 string wheresounds = HYPERPATH "sounds/";
 #endif
 
-hookset<bool(const string& s, int vol)> *hooks_sound;
+hookset<bool(const string& s, int vol)> hooks_sound;
 
 EX void playSound(cell *c, const string& fname, int vol) {
   LATE( hr::playSound(c, fname, vol); )

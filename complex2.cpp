@@ -8,7 +8,7 @@
  */
 
 #include "hyper.h"
-#ifdef CAP_COMPLEX2
+#if CAP_COMPLEX2
 
 namespace hr {
 
@@ -198,7 +198,7 @@ EX namespace brownian {
     vector<cell*> to_remove;
     for(auto p: futures) if(is_cell_removed(p.first)) to_remove.push_back(p.first);
     for(auto r: to_remove) futures.erase(r);
-    }) + addHook(clearmemory, 0, [] () { futures.clear(); })
+    }) + addHook(hooks_clearmemory, 0, [] () { futures.clear(); })
     + addHook(hooks_gamedata, 0, [] (gamedata* gd) { gd->store(futures); });
 
 EX }
@@ -554,15 +554,19 @@ EX bool mightBeMine(cell *c) {
   return c->wall == waMineUnknown || c->wall == waMineMine;
   }
 
-EX hookset<bool(cell*)> *hooks_mark;
+EX hookset<bool(cell*)> hooks_mark;
 
 EX void performMarkCommand(cell *c) {
   if(!c) return;
   if(callhandlers(false, hooks_mark, c)) return;
-  if(c->land == laCA && c->wall == waNone) 
-    c->wall = waFloorA;
-  else if(c->land == laCA && c->wall == waFloorA)
+  if(c->land == laCA && c->wall == waNone) {
+    c->wall = ca::wlive;
+    ca::list_adj(c);
+    }
+  else if(c->land == laCA && c->wall == ca::wlive) {
     c->wall = waNone; 
+    ca::list_adj(c);
+    }
   if(c->land != laMinefield) return;
   if(c->item) return;
   if(!mightBeMine(c)) return;

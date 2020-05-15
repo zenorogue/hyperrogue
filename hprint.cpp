@@ -25,7 +25,8 @@ EX FILE *debugfile;
 #define DF_GP             2048
 #define DF_POLY           4096
 #define DF_LOG            8192
-#define DF_KEYS "imwesxufgbtopl"
+#define DF_VERTEX        16384
+#define DF_KEYS "imwesxufgbtoplv"
 #endif
 
 EX int debugflags = DF_INIT | DF_ERROR | DF_WARN | DF_MSG | DF_TIME | DF_LOG;
@@ -278,6 +279,22 @@ struct indenter_finish : indenter {
 
 #endif
 
+EX void print(hstream& hs, cld x) { 
+  int parts = 0;
+  if(kz(real(x))) {
+    print(hs, real(x)); 
+    parts++;
+    }
+  
+  if(kz(imag(x))) {
+    if(parts && imag(x) > 0) print(hs, "+");
+    parts++;
+    print(hs, imag(x), "i"); 
+    }
+  
+  if(!parts) print(hs, 0);
+  }
+
 EX string fts_fixed(ld x, int prec IS(6)) {
   std::stringstream ss;
   ss.precision(prec);
@@ -353,6 +370,13 @@ EX transmatrix kz(transmatrix h) {
     h[d][e] = kz(h[d][e]);
   return h;
   }
+
+#if HDR
+template<class T> vector<T> kz(vector<T> v) {
+  for(auto& el: v) el = kz(el);
+  return v;
+  }
+#endif
 
 EX string pick123() { return cts('1' + rand() % 3); }
 EX string pick12() { return cts('1' + rand() % 2); }

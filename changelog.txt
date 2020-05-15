@@ -3904,3 +3904,44 @@ Geometries:
 - reverse FPP mode on iOS should be fixed
 - fixed the missing message when PC could not stay in place
 - fixed a potential rare crash
+
+2020-04-17 21:00 Update 11.3j:
+- the Hypersian Rug mode now uses HyperRogue's 3D engine. As a result, its controls are consistent with HyperRogue 3D (which has received shift-strafe for this consistency), you can now view it in all models, and embed in Solv and Nil geometries.
+- a drawing tool (see creative mode). Contrary to Vector Graphics Editor (now called Shape Editor) and texture editor, this simulates on using a huge non-Euclidean blackboard (unless played in Euclidean geometry or in a quotient space, of course).
+- WRL export (export e.g. your Hypersian Rug or a hyperbolic honeycomb in ball model to a 3D modelling tool or a 3D printer)
+- fixed some issues with 'vertical stretch' (acted inconsistently, stretched text)
+- fixed central inversion in 3D models
+- better error information when trying to read an illegal tes file
+- CA mode now automatically awards Orb of Aether (so you can step space) and is simulated on every step in animation mode
+- more accurate Solv rendering (using RK4 method instead of buggy midpoint)
+- when giving values, you can use "..|" (animate with sharp changes); "../" can be also used for spline interpolation
+
+2020-04-22 01:46 Update 11.3k:
+- Orb of the Sword now destroys shrubs
+- more accurate mouse when in 2D projections
+- fixed horocycles in bitruncated {4,x}
+- fixed Great Walls in {5,3,4}
+- Hypersian Rug/camera improvements: 
+- - camera rotation now works better in 3D scenes with gravity (including product geometries, 2D-in-3D and gravity lands)
+- - now displays geometry correctly
+- - removed outdated documentation
+- - panning enabled in the menu
+- - shift+mousewheel for zoom works in rug
+- - zoom hotkeys now change FOV in perspective modes
+- - lshift+arrows now rotate the model in rug
+- - shift+PageUp/Down now zooms
+- - rug can now be mouse-rotated with Ctrl
+- - fixed in standard binary tiling and in *.tes tilings
+
+2020-05-01 18:57 Update 11.3l:
+- Tessellation files: 
+- - added a debug screen if the polygon does not end correctly
+- - added a command debug(tilenumber) to debug connections
+- - if you define constants, they take precedence over predefined constants
+- - expression parser now accepts whitespace in expressions
+- fixed a bug when scrolling with arrows then moving in quotient spaces
+- fixed 'smooth scrolling' option not making scrolling very smooth
+- an option to fatten regular (isotropic non-Euclidean) honeycomb edges
+- better centering in screenshot, 'rotate PC' option
+- in animation, 'monster turns' can be configured (useful for animating CA or butterflies)
+- fixed Butterflies in non-orientable geometries

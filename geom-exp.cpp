@@ -359,6 +359,7 @@ void ge_select_tiling() {
     if(arb::in() && (ISMOBILE || ISWEB)) continue;
     if(WDIM == 3 && MAXMDIM == 3) continue;
     if(geometry == gFieldQuotient && !CAP_FIELD) continue;
+    if(geometry == gFake) continue;
     if(!current_filter->test()) continue;
     if(orig_el) {
       for(int j=0; j<isize(ginf); j++) 
@@ -381,21 +382,21 @@ void ge_select_tiling() {
 
 EX string current_proj_name() {
   bool h = hyperbolic || sn::in();
-  if(pmodel != mdDisk)
-    return models::get_model_name(pmodel);
-  else if(h && vid.alpha == 1)
+  if(vpconf.model != mdDisk)
+    return models::get_model_name(vpconf.model);
+  else if(h && vpconf.alpha == 1)
     return XLAT("Poincaré model");
-  else if(h && vid.alpha == 0)
+  else if(h && vpconf.alpha == 0)
     return XLAT("Klein-Beltrami model");
-  else if(h && vid.alpha == -1)
+  else if(h && vpconf.alpha == -1)
     return XLAT("inverted Poincaré model");
-  else if(sphere && vid.alpha == 1)
+  else if(sphere && vpconf.alpha == 1)
     return XLAT("stereographic projection");
-  else if(sphere && vid.alpha == 0)
+  else if(sphere && vpconf.alpha == 0)
     return XLAT("gnomonic projection");
-  else if(sphere && vid.alpha >= 999)
+  else if(sphere && vpconf.alpha >= 999)
     return XLAT("orthographic projection");
-  else if(h && vid.alpha >= 999)
+  else if(h && vpconf.alpha >= 999)
     return XLAT("Gans model");
   else 
     return XLAT("general perspective");
@@ -405,7 +406,7 @@ EX string dim_name() {
   return " (" + its(WDIM) + "D)";
   }
 
-#if CAP_THREAD
+#if CAP_THREAD && MAXMDIM >= 4
 EX void showQuotientConfig3() {
 
   using namespace fieldpattern;
@@ -512,6 +513,7 @@ EX void select_quotient_screen() {
   char key = 'a';
   for(int i=0; i<isize(ginf); i++) {
     auto g = eGeometry(i);
+    if(ginf[g].flags & qDEPRECATED) continue;
     if(same_tiling(g)) {
       dialog::addBoolItem(
         (ginf[g].flags & qANYQ) ? 
@@ -528,7 +530,7 @@ EX void select_quotient_screen() {
             println(hlog, "set prime = ", currfp.Prime);
             start_game();
             }
-          #if CAP_THREAD
+          #if CAP_THREAD && MAXMDIM >= 4
           pushScreen(showQuotientConfig3);
           #endif
           }
@@ -742,6 +744,16 @@ EX void showEuclideanMenu() {
 
   dialog::add_action(select_quotient);
   
+  if(arcm::in()) {
+    dialog::addItem(XLAT("advanced parameters"), '4');
+    dialog::add_action_push(arcm::show);
+    }
+
+  if(cryst) {
+    dialog::addItem(XLAT("advanced parameters"), '4');
+    dialog::add_action_push(crystal::show);
+    }
+  
   #if CAP_IRR
   if(hyperbolic && IRREGULAR) {
     nom = isize(irr::cells);
@@ -813,7 +825,7 @@ EX void showEuclideanMenu() {
     dialog::add_action([] {
       dialog::editNumber(rots::underlying_scale, 0, 1, 0.05, 0.25, XLAT("view the underlying geometry"),
         XLAT(
-          geometry == gRotSpace ? "The space you are currently in the space of rotations of the underlying hyperbolic or spherical geometry. "
+          geometry == gRotSpace ? "The space you are currently in is the space of rotations of the underlying hyperbolic or spherical geometry. "
             : "You are currently in a product space.") +
         XLAT(
           "This option lets you see the underlying space. Lands and some walls (e.g. in the Graveyard) are based on "
@@ -823,6 +835,20 @@ EX void showEuclideanMenu() {
       dialog::bound_low(0);
       dialog::bound_up(1);
       dialog::extra_options = [] () { rots::draw_underlying(true); };
+      });
+    }
+  
+  if(stretch::applicable()) {
+    dialog::addSelItem(XLAT("stretched geometry"), fts(stretch::factor), 'S');
+    dialog::add_action([] {
+      dialog::editNumber(stretch::factor, -1, 9, 0.1, 0, XLAT("stretched geometry"),
+        XLAT(
+          "Stretch the metric along the fibers. This can currently be done in rotation spaces and in 8-cell, 24-cell and 120-cell. "
+          "Value of 0 means not stretched, -1 means S2xE or H2xE (works only in the limit). "
+          "Only the raycaster is implemented for stretched geometry, so you will see only walls. (Must be > -1)"
+          )
+        );
+      dialog::reaction = ray::reset_raycaster;
       });
     }
   
@@ -940,7 +966,7 @@ EX void runGeometryExperiments() {
 
 #if CAP_COMMANDLINE
 
-eGeometry readGeo(const string& ss) {
+EX eGeometry readGeo(const string& ss) {
   for(int i=0; i<isize(ginf); i++) if(ginf[i].shortname == ss) return eGeometry(i);
   bool numeric = true;
   for(char c: ss) if(c < '0' || c > '9') numeric = false;

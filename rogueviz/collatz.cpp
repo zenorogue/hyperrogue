@@ -1,4 +1,3 @@
-#include "../hyper.h"
 #include "rogueviz.h"
 
 namespace rogueviz {
@@ -145,7 +144,7 @@ void collatz_video(const string &fname) {
   if(vizid == &collatz_id) {
     sightrange_bonus = 3;
     genrange_bonus = 3;
-    dronemode = true; vid.camera_angle = -45; rog3 = true; patterns::whichShape = '8';
+    dronemode = true; pconf.camera_angle = -45; rog3 = true; patterns::whichShape = '8';
     vid.aurastr = 512;
     
     collatz::lookup(763, 60);

@@ -287,6 +287,23 @@ void virtualRebase_cell(cell*& base, T& at, const U& check) {
 template<class T, class U> 
 void virtualRebase(cell*& base, T& at, const U& check) {
 
+  if(nil) {
+    hyperpoint h = check(at);
+    auto step = [&] (int i) {
+      at = currentmap->iadj(base, i) * at; 
+      base = base->cmove(i);
+      h = check(at);
+      };
+    
+    while(h[1] < -0.5) step(1);
+    while(h[1] >= 0.5) step(4);
+    while(h[0] < -0.5) step(0);
+    while(h[0] >= 0.5) step(3);
+    while(h[2] < -0.5) step(2);
+    while(h[2] >= 0.5) step(5);
+    return;
+    }
+
   if(prod) {
     auto d = product_decompose(check(at)).first;
     while(d > cgi.plevel / 2)  { 

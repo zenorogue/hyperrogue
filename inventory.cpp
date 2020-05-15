@@ -513,14 +513,7 @@ EX namespace inv {
     int j = 0, oc = 6;
 
     if(1) {
-    dynamicval<eModel> pm(pmodel, flat_model());
-    glClear(GL_DEPTH_BUFFER_BIT);
-    // dynamicval<videopar> v(vid, vid);
-    // vid.alpha = vid.scale = 1;
-    dynamicval<ld> va(vid.alpha, 1);
-    dynamicval<ld> vs(vid.scale, 1);
-    dynamicval<ld> vc(vid.camera_angle, 0);
-    calcparam();
+    flat_model_enabler fme;
 
     for(int i=0; i<ittypes; i++) {
       eItem o = eItem(i);
@@ -595,7 +588,7 @@ EX namespace inv {
           displaystr(vid.xres/2, vid.yres - vid.fsize*6, 2, vid.fsize, osminfo(which), icol, 8);
           }
 
-#if ISMOBILE==0
+#if !ISMOBILE
         string hot = XLAT1("Hotkey: "); hot += getcstat;
         displaystr(vid.xres/2, vid.yres - vid.fsize*5, 2, vid.fsize, hot, icol, 8);
 #endif
@@ -689,7 +682,7 @@ EX namespace inv {
 
 #if CAP_SAVE
   EX void applyBox(eItem it) {
-    scores::applyBoxNum(inv::usedup[it]);
+    scores::applyBoxNum(inv::usedup[it], "@inv-" + dnameof(it));
     }
 #endif
   

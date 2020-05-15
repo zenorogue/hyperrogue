@@ -585,7 +585,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
 
   int lid = shmup::lmousetarget ? shmup::lmousetarget->pid : -2;
   
-  if(!leftclick) for(int j=0; j<isize(vd.edges); j++) {
+  if(!lshiftclick) for(int j=0; j<isize(vd.edges); j++) {
     edgeinfo *ei = vd.edges[j].second;
     vertexdata& vd1 = vdata[ei->i];
     vertexdata& vd2 = vdata[ei->j];
@@ -913,10 +913,6 @@ void close() {
   relmatrices.clear();
   }
 
-#ifndef CAP_RVSLIDES
-#define CAP_RVSLIDES (CAP_TOUR && !ISWEB)
-#endif
-
 #if CAP_COMMANDLINE
 int readArgs() {
   using namespace arg;
@@ -1232,7 +1228,7 @@ auto hooks  =
 #if CAP_COMMANDLINE
   addHook(hooks_args, 100, readArgs) +
 #endif
-  addHook(clearmemory, 0, close) +
+  addHook(hooks_clearmemory, 0, close) +
   addHook(hooks_prestats, 100, rogueviz_hud) +
   addHook(shmup::hooks_draw, 100, drawVertex) +
   addHook(shmup::hooks_describe, 100, describe_monster) +
@@ -1240,7 +1236,7 @@ auto hooks  =
   addHook(hooks_o_key, 100, o_key) +
   
 #if CAP_RVSLIDES
-  addHook(tour::ss::extra_slideshows, 100, [] (bool view) {
+  addHook(tour::ss::hooks_extra_slideshows, 100, [] (bool view) {
     if(!view) return 1;
     dialog::addBoolItem(XLAT("RogueViz Tour"), tour::ss::wts == &rvtour::rvslides[0], 'r');
     dialog::add_action([] { tour::ss::wts = rvtour::gen_rvtour(); popScreen(); });    

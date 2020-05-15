@@ -24,10 +24,6 @@ EX void glError(const char* GLcall, const char* file, const int line) {
     }
   }
 
-#ifndef CAP_VERTEXBUFFER
-#define CAP_VERTEXBUFFER (ISWEB)
-#endif
-
 #if HDR
 #if CAP_SHADER && CAP_NOSHADER
 #define WITHSHADER(x, y) if(glhr::noshaders) y else x
@@ -41,6 +37,12 @@ EX void glError(const char* GLcall, const char* file, const int line) {
 #endif
 
 EX namespace glhr {
+
+EX string to_glsl(ld x) {
+  char buf[64];
+  snprintf(buf, 64, "float(%.10e)", x);
+  return buf;
+  }
 
 #if HDR
 struct glmatrix {

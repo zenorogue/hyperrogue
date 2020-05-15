@@ -236,7 +236,7 @@ bool isBullet(monster *m) {
 bool isPlayer(monster *m) { return m->type == moPlayer; }
 bool isMonster(monster *m) { return m->type != moPlayer && m->type != moBullet; }
 
-EX hookset<bool(shmup::monster*)> *hooks_kill;
+EX hookset<bool(shmup::monster*)> hooks_kill;
 
 void killMonster(monster* m, eMonster who_kills, flagtype flags = 0) {
   int tk = tkills();
@@ -815,7 +815,7 @@ void movePlayer(monster *m, int delta) {
       hyperpoint jh = hpxy(mdx/100.0, mdy/100.0);
       hyperpoint ctr = m->pat * C0;
   
-      if(sphere && vid.alpha > 1.001) for(int i=0; i<3; i++) ctr[i] = -ctr[i];
+      if(sphere && pconf.alpha > 1.001) for(int i=0; i<3; i++) ctr[i] = -ctr[i];
   
       hyperpoint h = inverse(m->pat) * rgpushxto0(ctr) * jh;
       
@@ -1104,7 +1104,7 @@ void movePlayer(monster *m, int delta) {
         int i0 = i;
         for(int a=0; a<3; a++) v[a] = (i0 % 3) - 1, i0 /= 3;
         v = v * .1 / hypot_d(3, v);
-        transmatrix T1 = (i == 13) ? nat : parallel_transport(nat, m->ori, v, 2);
+        transmatrix T1 = (i == 13) ? nat : parallel_transport(nat, m->ori, v);
         cell *c3 = c2;
         while(true) {
           cell *c4 = findbaseAround(tC0(T1), c3, 1);
@@ -1619,10 +1619,10 @@ void moveBullet(monster *m, int delta) {
     m->dead = true;
 
   if(inertia_based) {
-    nat = parallel_transport(nat, m->ori, m->inertia * delta, 10);
+    nat = parallel_transport(nat, m->ori, m->inertia * delta);
     }
   else 
-    nat = parallel_transport(nat, m->ori, fronttangent(delta * SCALE * m->vel / speedfactor()), 10);
+    nat = parallel_transport(nat, m->ori, fronttangent(delta * SCALE * m->vel / speedfactor()));
   cell *c2 = m->findbase(nat, 1);
 
   if(m->parent && isPlayer(m->parent) && markOrb(itOrbLava) && c2 != m->base && !isPlayerOn(m->base)) 
@@ -2106,14 +2106,14 @@ void moveMonster(monster *m, int delta) {
   
   if(inertia_based) {
     if(igo) return;
-    nat = parallel_transport(nat, m->ori, m->inertia * delta, 10);
+    nat = parallel_transport(nat, m->ori, m->inertia * delta);
     }
   else if(WDIM == 3 && igo) {
     ld fspin = rand() % 1000;  
-    nat = parallel_transport(nat0, m->ori, cspin(1,2,fspin) * spin(igospan[igo]) * xtangent(step), 10);
+    nat = parallel_transport(nat0, m->ori, cspin(1,2,fspin) * spin(igospan[igo]) * xtangent(step));
     }
   else {
-    nat = parallel_transport(nat0, m->ori, spin(igospan[igo]) * xtangent(step), 10);
+    nat = parallel_transport(nat0, m->ori, spin(igospan[igo]) * xtangent(step));
     }
 
   if(m->type != moRagingBull && !peace::on)
@@ -2456,7 +2456,7 @@ EX void fixStorage() {
   for(monster *m: restore) m->store();
   }
 
-EX hookset<bool(int)> *hooks_turn;
+EX hookset<bool(int)> hooks_turn;
 
 EX void turn(int delta) {
 
@@ -2771,7 +2771,7 @@ EX bool boatAt(cell *c) {
   return false;
   }
 
-EX hookset<bool(const transmatrix&, cell*, shmup::monster*)> *hooks_draw;
+EX hookset<bool(const transmatrix&, cell*, shmup::monster*)> hooks_draw;
 
 EX void clearMonsters() {
   for(mit it = monstersAt.begin(); it != monstersAt.end(); it++)
@@ -2833,7 +2833,7 @@ EX void virtualRebase(shmup::monster *m) {
   virtualRebase(m->base, m->at);
   }
 
-EX hookset<bool(shmup::monster*, string&)> *hooks_describe;
+EX hookset<bool(shmup::monster*, string&)> hooks_describe;
 
 EX void addShmupHelp(string& out) {
   if(shmup::mousetarget && sqdist(mouseh, tC0(shmup::mousetarget->pat)) < .1) {
@@ -2844,7 +2844,7 @@ EX void addShmupHelp(string& out) {
     }
   }
 
-auto hooks = addHook(clearmemory, 0, shmup::clearMemory) +
+auto hooks = addHook(hooks_clearmemory, 0, shmup::clearMemory) +
   addHook(hooks_gamedata, 0, shmup::gamedata) +
   addHook(hooks_removecells, 0, [] () {
     for(mit it = monstersAt.begin(); it != monstersAt.end();) {

@@ -103,7 +103,7 @@ namespace flocking {
       for(int i=0; i<isize(cl.lst); i++) {
         cell *c2 = cl.lst[i];
         transmatrix T = calc_relative_matrix(c2, c1, C0);
-        if(hypot_d(WDIM, inverse_exp(tC0(T), iTable, false)) <= check_range) {
+        if(hypot_d(WDIM, inverse_exp(tC0(T))) <= check_range) {
           relmatrices[c1][c2] = T;
           forCellEx(c3, c2) cl.add(c3);
           }
@@ -198,7 +198,7 @@ namespace flocking {
           // at2 is like m2->at but relative to m->at
           
           // m2's position relative to m (tC0 means *(0,0,1))
-          hyperpoint ac = inverse_exp(tC0(at2), iTable, false);
+          hyperpoint ac = inverse_exp(tC0(at2));
           if(use_rot) ac = Rot * ac;
           
           // distance and azimuth to m2

@@ -26,19 +26,25 @@ struct help_extension {
 
 EX vector<help_extension> help_extensions;
 
-vector<string> extra_keys = {
-  "1 = orthogonal/Gans model",
-  "2 = small Poincare model/stereographic projection",
-  "3 = big Poincare model/stereographic projection",
+vector<string> quick_keys = {
+  "1 = orthogonal/Gans model/FPP",
+  "2 = small Poincare model/stereographic projection/SPP",
+  "3 = big Poincare model/stereographic projection/TPP",
   "4 = Klein model/gnomonic projection",
   "5 = change wall display mode",
   "6 = change grid",
   "7 = change heptagon marking",
-//  "8 = change background color",
-//  "9 = hyperboloid model",
+  "8 = monster display mode"
+  };
+
+vector<string> normal_keys = {
   "qweasdzxc, hjklyubn, numpad = move/skip turn",
-  "arrows = panning",
-  "o = world overview",
+  "g = drop a Dead Orb",
+  "t = use a ranged Orb (target center of the screen)"
+  };
+
+vector<string> extra_keys = {
+  "o = world overview (or another meaning in special modes)",
   "v = menu",
   "F1 = help",
   "F5 = restart game",
@@ -46,22 +52,37 @@ vector<string> extra_keys = {
   "Esc = quest status",
   "Alt+Enter = full screen",
   "Alt = highlight interesting stuff",
-  "t = use a ranged Orb (target center of the screen)",
-  "g = drop a Dead Orb",
   "click left mouse button = move/skip",
-  "shift+click left mouse button = use ranged Orb",
+  "[shift+]click left mouse button = use ranged Orb (depending on mouse settings)",
   "click right mouse button = context help",
   "mousewheel up = panning",
   "hold middle mouse button = panning",
+  "lctrl + hold middle button = move the screen",
   "mousewheel down = move/skip",
-  "shift + mousewheel = change projection",
-  "ctrl + mousewheel = change zoom",
-  "ctrl + shift + mousewheel = change both projection and zoom",
-  "ctrl + hold middle button = move the screen",
-  "shift + middle button = reset position",
+  "rshift + mousewheel = change projection",
+  "lshift + mousewheel = change zoom (lctrl to keep center)",
+  "lctrl + mousewheel = reset the map center",
   "shift + F2 = disable the HUD",
   "shift + F3 = disable the FPS",
-  "shift + F4 = disable the map"
+  "shift + F4 = disable the map",
+  "space = recenter",
+  "ctrl + <key> = more precision"
+  };
+
+vector<string> extra_keys_2d = {
+  "arrows = panning",
+  "PageUp/Down = rotate the screen",
+  };
+
+vector<string> extra_keys_3d = {
+  "arrows = rotate the camera",
+  "rshift+arrows = strafe",
+  "lshift+arrows = rotate the model (in rug mode)",
+  "end = move camera forward",
+  "home = move camera backward",
+  "shift+Home/End = zoom",
+  "PageUp/Down = rotate the screen",
+  "move mouse = rotate camera (in rug, only with lctrl)",
   };
 
 void buildHelpText() {
@@ -147,7 +168,7 @@ void buildHelpText() {
 #else
   if(DEFAULTCONTROL)
     help += XLAT(
-      "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. "
+      "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Space. "
       "To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n"
       );
   help += XLAT(
@@ -173,7 +194,18 @@ void buildHelpText() {
 #if ISMOBILE == 0
   help_extensions.push_back(help_extension{'k', XLAT("advanced keyboard shortcuts"), [] () { 
     help = "";
-    for(string s: extra_keys) help += s, help += "\n\n";
+    for(string s: normal_keys) help += s, help += "\n";
+    for(string s: extra_keys) help += s, help += "\n";
+    help += "\n\nQuick keys:\n";
+    for(string s: quick_keys) help += s, help += "\n";
+    if(GDIM == 3 || rug::rugged) {
+      help += "\n\nIn 3D modes:\n";
+      for(string s: extra_keys_3d) help += s, help += "\n";
+      }
+    else {
+      help += "\n\nIn 2D modes:\n";
+      for(string s: extra_keys_2d) help += s, help += "\n";
+      }
     }});
 #endif
   }
@@ -325,7 +357,7 @@ EX string generateHelpForItem(eItem it) {
        " You need to go deep to collect lots of them.");
      }
      
-#if ISMOBILE==1
+#if ISMOBILE
    if(it == itOrbSafety)
      help += XLAT("This might be very useful for devices with limited memory.");
 #else
@@ -493,7 +525,7 @@ void addMinefieldExplanation(string& s) {
     );
 
   s += "\n\n";
-#if ISMOBILE==0
+#if !ISMOBILE
   s += XLAT("Known mines may be marked by pressing 'm'. Your allies won't step on marked mines.");
 #else
   s += XLAT("Known mines may be marked by touching while in drag mode. Your allies won't step on marked mines.");
@@ -772,7 +804,7 @@ EX void appendHelp(string s) {
 unsigned char lastval;
 int windtotal;
 
-EX hookset<void(cell*)> *hooks_mouseover;
+EX hookset<void(cell*)> hooks_mouseover;
 
 EX void describeMouseover() {
   DEBBI(DF_GRAPH, ("describeMouseover"));
@@ -1017,7 +1049,7 @@ EX void showHelp() {
     };
   }
 
-EX hookset<bool()> *hooks_default_help;
+EX hookset<bool()> hooks_default_help;
 
 EX void gotoHelp(const string& h) {
   help = h;
@@ -1030,6 +1062,13 @@ EX void gotoHelp(const string& h) {
 #if CAP_RUG
     if(rug::rugged) {
       help = rug::makehelp();
+      
+      help += "\n\n";
+
+      for(string s: extra_keys_3d) help += s, help += "\n";
+
+      help += "\n\n";
+
       help_extensions.push_back(help_extension{'m', XLAT("Hypersian Rug menu"), [] () { popScreen(); rug::select(); }});    
       help_extensions.push_back(help_extension{'h', XLAT("HyperRogue help"), [] () { buildHelpText(); }});    
       return;

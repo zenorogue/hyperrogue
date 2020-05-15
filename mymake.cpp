@@ -110,6 +110,15 @@ int main(int argc, char **argv) {
       obj_dir += "/linux";
       setdir += "../";
       }
+    else if(s.substr(0, 2) == "-f") {
+      opts += " " + s;
+      obj_dir += "/";
+      setdir += "../";
+      for(char c: s) 
+        if(c == '=' || c == '-' || c == '/') obj_dir += "_"; 
+        else obj_dir += c;
+      linker += " " + s;
+      }
     else if(s == "-O2")
       optimized = 2, compiler += " -O2", obj_dir += "/O2", setdir += "../";
     else if(s == "-O3")

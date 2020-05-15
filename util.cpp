@@ -134,7 +134,13 @@ struct hr_parse_exception : hr_exception {
 struct exp_parser {
   string s;
   int at;
-  exp_parser() { at = 0; }
+  int line_number, last_line;
+  exp_parser() { at = 0; line_number = 1; last_line = 0; }
+  
+  string where() { 
+    if(s.find('\n')) return "(line " + its(line_number) + ", pos " + its(at-last_line) + ")";
+    else return "(pos " + its(at) + ")";
+    }
   
   map<string, cld> extra_params;
 
@@ -157,7 +163,7 @@ struct exp_parser {
 
   cld parse(int prio = 0);
 
-  ld rparse(int prio = 0) { return real(parse(prio)); }
+  ld rparse(int prio = 0) { return validate_real(parse(prio)); }
   int iparse(int prio = 0) { return int(floor(rparse(prio) + .5)); }
 
   cld parsepar() {
@@ -165,17 +171,29 @@ struct exp_parser {
     force_eat(")");
     return res;
     }
+
+  ld validate_real(cld x) {
+    if(kz(imag(x))) throw hr_parse_exception("expected real number but " + lalign(-1, x) + " found at " + where());
+    return real(x);
+    }
   
   void force_eat(const char *c) {
     skip_white();
-    if(!eat(c)) throw hr_parse_exception("expected: " + string(c));
+    if(!eat(c)) throw hr_parse_exception("expected: " + string(c) + " at " + where());
     }
 
   };
 #endif
 
 void exp_parser::skip_white() {
-  while(next() == ' ' || next() == '\n' || next() == '\r' || next() == '\t') at++;
+  while(next() == ' ' || next() == '\n' || next() == '\r' || next() == '\t') {
+    if(next() == '\r') last_line++;
+    if(next() == '\n') {
+      println(hlog, "new line at ", at);
+      line_number++, last_line = at;
+      }
+    at++;
+    }
   }
 
 string exp_parser::next_token() {
@@ -212,8 +230,8 @@ cld exp_parser::parse(int prio) {
   else if(eat("re(")) res = real(parsepar());
   else if(eat("im(")) res = imag(parsepar());
   else if(eat("conj(")) res = std::conj(parsepar());
-  else if(eat("floor(")) res = floor(real(parsepar()));
-  else if(eat("frac(")) { res = parsepar(); res = res - floor(real(res)); }
+  else if(eat("floor(")) res = floor(validate_real(parsepar()));
+  else if(eat("frac(")) { res = parsepar(); res = res - floor(validate_real(res)); }
   else if(eat("to01(")) { res = parsepar(); return atan(res) / ld(M_PI) + ld(0.5); }
   else if(eat("edge(")) {
     ld a = rparse(0);
@@ -247,25 +265,22 @@ cld exp_parser::parse(int prio) {
       res /= extra_params["distunit"];
     }
   else if(eat("regangle(")) {
-    ld edgelen = rparse(0);
+    cld edgelen = parse(0);
     if(extra_params.count("distunit")) {
-      println(hlog, "got edgelen = ", edgelen);
-      println(hlog, "distunit = ", real(extra_params["distunit"]));
-      edgelen = real(edgelen * extra_params["distunit"]); 
-      println(hlog, "got edgelen = ", edgelen);
+      edgelen = edgelen * extra_params["distunit"];
       }
     
     force_eat(",");
-    int edges = iparse(0);
+    ld edges = rparse(0);
     force_eat(")");
     ld alpha = M_PI / edges;
-    ld c = asin_auto(sin_auto(edgelen/2) / sin(alpha));
+    ld c = asin_auto(sin_auto(validate_real(edgelen)/2) / sin(alpha));
     hyperpoint h = xpush(c) * spin(M_PI - 2*alpha) * xpush0(c);
-    res = 2 * atan2(h);
-    if(real(res) < 0) res = -res;
-    while(real(res) > 2 * M_PI) res -= 2 * M_PI;
-    if(real(res) > M_PI) res = 2 * M_PI - res;
-    res = M_PI - res;
+    ld result = 2 * atan2(h);
+    if(result < 0) result = -result;
+    while(result > 2 * M_PI) result -= 2 * M_PI;
+    if(result > M_PI) result = 2 * M_PI - result;
+    res = M_PI - result;
 
     if(extra_params.count("angleofs"))
       res -= extra_params["angleofs"];
@@ -275,7 +290,7 @@ cld exp_parser::parse(int prio) {
     }
   else if(eat("test(")) {
     res = parsepar();
-    println(hlog, "res = ", make_pair(real(res), imag(res)));
+    println(hlog, "res = ", res);
     }
   else if(eat("ifp(")) {
     cld cond = parse(0);
@@ -322,7 +337,9 @@ cld exp_parser::parse(int prio) {
   else if(next() == '(') at++, res = parsepar(); 
   else {
     string number = next_token();
-    if(number == "e") res = exp(1);
+    if(extra_params.count(number)) res = extra_params[number];
+    else if(params.count(number)) res = params.at(number);
+    else if(number == "e") res = exp(1);
     else if(number == "i") res = cld(0, 1);
     else if(number == "p" || number == "pi") res = M_PI;
     else if(number == "" && next() == '-') { at++; res = -parse(prio); }
@@ -336,12 +353,11 @@ cld exp_parser::parse(int prio) {
     else if(number == "random") res = randd();
     else if(number == "mousez") res = cld(mousex - current_display->xcenter, mousey - current_display->ycenter) / cld(current_display->radius, 0);
     else if(number == "shot") res = inHighQual ? 1 : 0;
-    else if(extra_params.count(number)) res = extra_params[number];
-    else if(params.count(number)) res = params.at(number);
     else if(number[0] >= 'a' && number[0] <= 'z') throw hr_parse_exception("unknown value: " + number);
     else { std::stringstream ss; res = 0; ss << number; ss >> res; }
     }
   while(true) {
+    skip_white();
     #if CAP_ANIMATIONS
     if(next() == '.' && next(1) == '.' && prio == 0) {
       static const cld NO_DERIVATIVE(3.1, 2.5);
@@ -360,6 +376,7 @@ cld exp_parser::parse(int prio) {
           rest.back()[2] = parse(10);
           rest.back()[3] = NO_DERIVATIVE;
           second = true;
+          continue;
           }
         at += 2; 
         auto val = parse(10);

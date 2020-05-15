@@ -328,7 +328,7 @@ void displayglyph2(int cx, int cy, int buttonsize, int i) {
 
 EX bool nohud, nomenukey;
 
-EX hookset<bool()> *hooks_prestats;
+EX hookset<bool()> hooks_prestats;
 
 #if CAP_SHAPES
 void drawMobileArrow(int i) {
@@ -401,20 +401,12 @@ EX void drawStats() {
   if(geometry == gRotSpace || geometry == gProduct) rots::draw_underlying(!cornermode);
   
   {
-  dynamicval<eModel> pm(pmodel, flat_model());
-  glClear(GL_DEPTH_BUFFER_BIT);
-  // dynamicval<videopar> v(vid, vid);
-  // vid.alpha = vid.scale = 1;
-  dynamicval<ld> va(vid.alpha, 1);
-  dynamicval<ld> vs(vid.scale, 1);
-  dynamicval<ld> vc(vid.camera_angle, 0);
-  if(prod) vid.alpha = 30, vid.scale = 30;
   
   auto& cd = current_display;
   auto xc = cd->xcenter;
   auto yc = cd->ycenter;
 
-  calcparam();
+  flat_model_enabler fme;
 
   if(crosshair_color && crosshair_size > 0) {
     initquickqueue();
@@ -469,7 +461,7 @@ EX void drawStats() {
         int spots = 0;
         for(int u=vid.fsize; u<vid.xres/2-s; u += s)
         for(int v=vid.fsize; v<vid.yres/2-s; v += s)
-          if(hypot(vid.xres/2-u-s, (vid.yres/2-v-s) / vid.stretch) > rad) {
+          if(hypot(vid.xres/2-u-s, (vid.yres/2-v-s) / pconf.stretch) > rad) {
             spots++;
             }
         if(spots >= bycorner[cor] && spots >= 3) {
@@ -482,7 +474,7 @@ EX void drawStats() {
             }
           for(int u=vid.fsize; u<vid.xres/2-s; u += s)
           for(int v=vid.fsize; v<vid.yres/2-s; v += s)
-            if(hypot(vid.xres/2-u-s, (vid.yres/2-v-s) / vid.stretch) > rad) {
+            if(hypot(vid.xres/2-u-s, (vid.yres/2-v-s) / pconf.stretch) > rad) {
               if(next >= isize(glyphstoshow)) break;
 
               int cx = u;

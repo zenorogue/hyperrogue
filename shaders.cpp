@@ -16,8 +16,9 @@ constexpr flagtype GF_TEXTURE  = 1;
 constexpr flagtype GF_VARCOLOR = 2;
 constexpr flagtype GF_LIGHTFOG = 4;
 constexpr flagtype GF_LEVELS   = 8;
+constexpr flagtype GF_TEXTURE_SHADED  = 16;
 
-constexpr flagtype GF_which    = 15;
+constexpr flagtype GF_which    = 31;
 
 constexpr flagtype SF_PERS3        = 256;
 constexpr flagtype SF_BAND         = 512;
@@ -30,6 +31,8 @@ constexpr flagtype SF_BOX          = 32768;
 constexpr flagtype SF_ZFOG         = 65536;
 constexpr flagtype SF_ODSBOX       = (1<<17);
 #endif
+
+EX bool solv_all;
 
 #if HDR
 /* standard attribute bindings */
@@ -62,7 +65,15 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   varying += "varying mediump vec4 vColor;\n";
 
   fmain += "gl_FragColor = vColor;\n";
-  if(shader_flags & GF_TEXTURE) {
+  if(shader_flags & GF_TEXTURE_SHADED) {
+    vsh += "attribute mediump vec3 aTexture;\n";
+    varying += "varying mediump vec3 vTexCoord;\n";
+    fsh += "uniform mediump sampler2D tTexture;\n";
+    vmain += "vTexCoord = aTexture;\n";
+    fmain += "gl_FragColor *= texture2D(tTexture, vTexCoord.xy);\n";
+    fmain += "gl_FragColor.rgb *= vTexCoord.z;\n";
+    }
+  else if(shader_flags & GF_TEXTURE) {
     vsh += "attribute mediump vec2 aTexture;\n";
     varying += "varying mediump vec2 vTexCoord;\n";
     fsh += "uniform mediump sampler2D tTexture;\n";
@@ -180,6 +191,9 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
       case gcSolNIH:
         switch(sn::geom()) {
           case gSol:
+            if(solv_all) {
+              vsh += "\n#define SOLV_ALL\n";
+              }
             vsh += sn::shader_symsol;
             break;
           case gNIH:
@@ -311,6 +325,7 @@ void display_data::set_projection(int ed) {
   id <<= 6; id |= spherephase;
   id <<= 1; if(vid.consider_shader_projection) id |= 1;
   id <<= 2; id |= (spherespecial & 3);
+  if(sol && solv_all) id |= 1;
   if(in_h2xe()) id |= 1;
   if(in_s2xe()) id |= 2;
   shared_ptr<glhr::GLprogram> selected;
@@ -359,7 +374,7 @@ void display_data::set_projection(int ed) {
 
   if(pmodel == mdManual) return;
   
-  if(vid.stretch != 1 && (shader_flags & SF_DIRECT)) glhr::projection_multiply(glhr::scale(vid.stretch, 1, 1));
+  if(pconf.stretch != 1 && (shader_flags & SF_DIRECT) && pmodel != mdPixel) glhr::projection_multiply(glhr::scale(1, pconf.stretch, 1));
 
   if(vid.stereo_mode != sODS)
     eyewidth_translate(ed);
@@ -367,10 +382,8 @@ void display_data::set_projection(int ed) {
   auto ortho = [&] (ld x, ld y) {
     glhr::glmatrix M = glhr::ortho(x, y, 1);
     if(shader_flags & SF_ZFOG) {
-      using models::clip_max; 
-      using models::clip_min;
-      M[2][2] = 2 / (clip_max - clip_min);
-      M[3][2] = (clip_min + clip_max) / (clip_max - clip_min);
+      M[2][2] = 2 / (pconf.clip_max - pconf.clip_min);
+      M[3][2] = (pconf.clip_min + pconf.clip_max) / (pconf.clip_max - pconf.clip_min);
       auto cols = glhr::acolor(darkena(backcolor, 0, 0xFF));
       glUniform4f(selected->uFogColor, cols[0], cols[1], cols[2], cols[3]);
       }
@@ -409,7 +422,7 @@ void display_data::set_projection(int ed) {
     glhr::fog_max(1/sightranges[geometry], darkena(backcolor, 0, 0xFF));
     }
   else {
-    if(vid.alpha > -1) {
+    if(pconf.alpha > -1) {
       // Because of the transformation from H3 to the Minkowski hyperboloid,
       // points with negative Z can be generated in some 3D settings.
       // This happens for points below the camera, but above the plane.
@@ -420,14 +433,14 @@ void display_data::set_projection(int ed) {
     GLfloat sc = current_display->radius / (cd->ysize/2.);
     glhr::projection_multiply(glhr::frustum(cd->xsize / cd->ysize, 1));
     glhr::projection_multiply(glhr::scale(sc, -sc, -1));
-    glhr::projection_multiply(glhr::translate(0, 0, vid.alpha));
+    glhr::projection_multiply(glhr::translate(0, 0, pconf.alpha));
     if(ed) glhr::projection_multiply(glhr::translate(vid.ipd * ed/2, 0, 0));
     }
 
   if(selected->uPP != -1) {
     glhr::glmatrix pp = glhr::id;
     if(get_shader_flags() & SF_USE_ALPHA)
-      pp[3][2] = GLfloat(vid.alpha);
+      pp[3][2] = GLfloat(pconf.alpha);
 
     if(get_shader_flags() & SF_ORIENT) {
       if(GDIM == 3) for(int a=0; a<4; a++) 
@@ -440,7 +453,7 @@ void display_data::set_projection(int ed) {
     }
   
   if(selected->uAlpha != -1)
-    glhr::set_ualpha(vid.alpha);
+    glhr::set_ualpha(pconf.alpha);
 
   if(selected->uLevelLines != -1) {
     glUniform1f(selected->uLevelLines, levellines);
@@ -458,12 +471,12 @@ void display_data::set_projection(int ed) {
   if(selected->shader_flags & SF_HALFPLANE) {
     glhr::projection_multiply(glhr::translate(0, 1, 0));      
     glhr::projection_multiply(glhr::scale(-1, 1, 1));
-    glhr::projection_multiply(glhr::scale(models::halfplane_scale, models::halfplane_scale, GDIM == 3 ? models::halfplane_scale : 1));
+    glhr::projection_multiply(glhr::scale(pconf.halfplane_scale, pconf.halfplane_scale, GDIM == 3 ? pconf.halfplane_scale : 1));
     glhr::projection_multiply(glhr::translate(0, 0.5, 0));
     }      
   
-  if(vid.camera_angle && pmodel != mdPixel) {
-    ld cam = vid.camera_angle * degree;
+  if(pconf.camera_angle && pmodel != mdPixel) {
+    ld cam = pconf.camera_angle * degree;
 
     GLfloat cc = cos(cam);
     GLfloat ss = sin(cam);

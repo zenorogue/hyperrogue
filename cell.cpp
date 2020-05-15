@@ -202,6 +202,9 @@ EX cell *createMov(cell *c, int d) {
   else if(kite::in())
     kite::find_cell_connection(c, d);
   #endif
+  else if(fake::in()) {
+    return FPIU(createMov(c, d));
+    }
   #if CAP_IRR
   else if(IRREGULAR) {
     irr::link_cell(c, d);
@@ -279,7 +282,7 @@ EX void eumerge(cell* c1, int s1, cell *c2, int s2, bool mirror) {
 
 //  map<pair<eucoord, eucoord>, cell*> euclidean;
 
-EX hookset<hrmap*()> *hooks_newmap;
+EX hookset<hrmap*()> hooks_newmap;
 
 /** create a map in the current geometry */
 EX void initcells() {
@@ -287,6 +290,7 @@ EX void initcells() {
   
   hrmap* res = callhandlers((hrmap*)nullptr, hooks_newmap);
   if(res) currentmap = res;  
+  else if(fake::in()) currentmap = fake::new_map();
   else if(asonov::in()) currentmap = asonov::new_map();
   else if(nonisotropic || hybri) currentmap = nisot::new_map();
   #if CAP_CRYSTAL
@@ -1175,7 +1179,7 @@ EX void clearCellMemory() {
   gp::gp_adj.clear();
   }
 
-auto cellhooks = addHook(clearmemory, 500, clearCellMemory);
+auto cellhooks = addHook(hooks_clearmemory, 500, clearCellMemory);
 
 EX bool isNeighbor(cell *c1, cell *c2) {
   for(int i=0; i<c1->type; i++) if(c1->move(i) == c2) return true;

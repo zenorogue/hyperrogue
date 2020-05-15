@@ -49,18 +49,74 @@ EX arbi_tiling current;
 
 EX short& id_of(heptagon *h) { return h->zebraval; }
 
+struct hr_polygon_error : hr_exception {
+  vector<transmatrix> v;
+  eGeometryClass c;
+  int id;
+  map<string, cld> params;
+  hr_polygon_error(const vector<transmatrix>& _v, int _id) : v(_v), c(cgclass), id(_id) {}
+  ~hr_polygon_error() noexcept(true) {}
+  };
+
+struct connection_debug_request : hr_exception {
+  int id;
+  eGeometryClass c;
+  connection_debug_request(int i): id(i), c(cgclass) {}
+  };
+
+void ensure_geometry(eGeometryClass c) {
+  stop_game();
+  if(c != cgclass) {
+    if(c == gcEuclid) set_geometry(gEuclid);
+    if(c == gcHyperbolic) set_geometry(gNormal);
+    if(c == gcSphere) set_geometry(gSphere);
+    }
+
+  if(specialland != laCanvas) {   
+    canvas_default_wall = waInvisibleFloor;
+    patterns::whichCanvas = 'g';
+    patterns::canvasback = 0xFFFFFF;
+    firstland = specialland = laCanvas;
+    }
+  start_game();
+  }
+
+void start_poly_debugger(hr_polygon_error& err) {
+  ensure_geometry(err.c);
+
+  drawthemap();
+
+  mapeditor::drawing_tool = true;
+  pushScreen(mapeditor::showDrawEditor);
+  mapeditor::initdraw(cwt.at);
+  
+  int n = isize(err.v);
+  
+  mapeditor::dtcolor = 0xFF0000FF;
+  mapeditor::dtwidth = 0.02;
+  for(int i=0; i<n-1; i++)
+    mapeditor::dt_add_line(tC0(err.v[i]), tC0(err.v[i+1]), 0);
+  
+  mapeditor::dtcolor = 0xFFFFFFFF;
+  for(int i=0; i<n; i++)
+    mapeditor::dt_add_text(tC0(err.v[i]), 0.5, its(i));
+  }
+
 void shape::build_from_angles_edges() {
   transmatrix at = Id;
   vertices.clear();
   int n = isize(angles);
   hyperpoint ctr = Hypc;
+  vector<transmatrix> matrices;
   for(int i=0; i<n; i++) {
+    matrices.push_back(at);
     println(hlog, "at = ", at);
     vertices.push_back(tC0(at));
     ctr += tC0(at);
     at = at * xpush(edges[i]) * spin(angles[i]);
     }
-  if(!eqmatrix(at, Id)) throw hr_parse_exception("polygon error");
+  matrices.push_back(at);
+  if(!eqmatrix(at, Id)) throw hr_polygon_error(matrices, id);
   if(sqhypot_d(3, ctr) < 1e-2) {
     // this may happen for some spherical tilings
     // try to move towards the center
@@ -78,9 +134,42 @@ void shape::build_from_angles_edges() {
 bool correct_index(int index, int size) { return index >= 0 && index < size; }
 template<class T> bool correct_index(int index, const T& v) { return correct_index(index, isize(v)); }
 
-template<class T> void verify_index(int index, const T& v) { if(!correct_index(index, v)) throw hr_parse_exception("bad index"); }
+template<class T> void verify_index(int index, const T& v, exp_parser& ep) { if(!correct_index(index, v)) throw hr_parse_exception("bad index: " + its(index) + " at " + ep.where()); }
 
 string unnamed = "unnamed";
+
+EX void load_tile(exp_parser& ep, bool unit) {
+  current.shapes.emplace_back();
+  auto& cc = current.shapes.back();
+  cc.id = isize(current.shapes) - 1;
+  cc.flags = 0;
+  while(ep.next() != ')') {
+    cld dist = 1;
+    if(!unit) {
+      dist = ep.parse(0);
+      ep.force_eat(",");
+      }
+    cld angle = ep.parse(0);
+    cc.edges.push_back(ep.validate_real(dist * ep.extra_params["distunit"]));
+    cc.angles.push_back(ep.validate_real(angle * ep.extra_params["angleunit"] + ep.extra_params["angleofs"]));
+    if(ep.eat(",")) continue;
+    else if(ep.eat(")")) break;
+    else throw hr_parse_exception("expecting , or )");
+    }
+  try {
+    cc.build_from_angles_edges();
+    }
+  catch(hr_parse_exception& ex) {
+    throw hr_parse_exception(ex.s + ep.where());
+    }
+  catch(hr_polygon_error& poly) {
+    poly.params = ep.extra_params;
+    throw;
+    }
+  cc.connections.resize(cc.size());
+  for(int i=0; i<isize(cc.connections); i++)
+    cc.connections[i] = make_tuple(cc.id, i, false);
+  }
 
 EX void load(const string& fname) {
   fhstream f(fname, "rt");
@@ -102,7 +191,7 @@ EX void load(const string& fname) {
     int ai;
     if(ep.next() == ')') ai = isize(c.shapes)-1;
     else ai = ep.iparse();
-    verify_index(ai, c.shapes); 
+    verify_index(ai, c.shapes, ep); 
     c.shapes[ai].flags |= f;
     ep.force_eat(")");
     };
@@ -131,16 +220,19 @@ EX void load(const string& fname) {
       ginf[gArbitrary].g = giEuclid2;
       ginf[gArbitrary].sides = 7;
       set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
+      set_flag(ginf[gArbitrary].flags, qAFFINE, true);
       }
     else if(ep.eat("h2.")) {
       ginf[gArbitrary].g = giHyperb2;
       ginf[gArbitrary].sides = 7;
       set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
+      set_flag(ginf[gArbitrary].flags, qAFFINE, false);
       }
     else if(ep.eat("s2.")) {
       ginf[gArbitrary].g = giSphere2;
       ginf[gArbitrary].sides = 5;
       set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
+      set_flag(ginf[gArbitrary].flags, qAFFINE, false);
       }
     else if(ep.eat("angleunit(")) angleunit = real(ep.parsepar());
     else if(ep.eat("angleofs(")) angleofs = real(ep.parsepar());
@@ -157,43 +249,11 @@ EX void load(const string& fname) {
       string tok = ep.next_token();
       ep.force_eat("=");
       ep.extra_params[tok] =ep.parsepar();
+      if(debugflags & DF_GEOM)
+        println(hlog, "let ", tok, " = ", real(ep.extra_params[tok]));
       }
-    else if(ep.eat("unittile(")) {
-      c.shapes.emplace_back();
-      auto& cc = c.shapes.back();
-      cc.id = isize(c.shapes) - 1;
-      cc.flags = 0;
-      while(ep.next() != ')') {
-        ld angle = ep.rparse(0);
-        cc.edges.push_back(distunit);
-        cc.angles.push_back(angle * angleunit + angleofs);
-        if(ep.eat(",")) continue;
-        else if(ep.eat(")")) break;
-        else throw hr_parse_exception("expecting , or )");
-        }
-      cc.build_from_angles_edges();
-      cc.connections.resize(cc.size());
-      for(int i=0; i<isize(cc.connections); i++)
-        cc.connections[i] = make_tuple(cc.id, i, false);
-      }
-    else if(ep.eat("tile(")) {
-      c.shapes.emplace_back();
-      auto& cc = c.shapes.back();
-      cc.id = isize(c.shapes) - 1;
-      cc.flags = 0;
-      while(ep.next() != ')') {
-        ld dist = ep.rparse(0);
-        ep.force_eat(",");
-        ld angle = ep.rparse(0);
-        cc.edges.push_back(dist * distunit);
-        cc.angles.push_back(angle * angleunit + angleofs);
-        if(ep.eat(",")) continue;
-        else if(ep.eat(")")) break;
-        else throw hr_parse_exception("expecting , or )");
-        }
-      cc.build_from_angles_edges();
-      cc.connections.resize(cc.size());
-      }
+    else if(ep.eat("unittile(")) load_tile(ep, true);
+    else if(ep.eat("tile(")) load_tile(ep, false);
     else if(ep.eat("conway(\"")) {
       string s = "";
       while(true) {
@@ -201,7 +261,7 @@ EX void load(const string& fname) {
         if(ep.eat("(")) m = 0;
         else if(ep.eat("[")) m = 1;
         else if(ep.eat("\"")) break;
-        else throw hr_parse_exception("cannot parse Conway notation");
+        else throw hr_parse_exception("cannot parse Conway notation, " + ep.where());
 
         int ai = 0;
         int as = ep.iparse();
@@ -221,18 +281,18 @@ EX void load(const string& fname) {
       ep.force_eat(")");
       }
     else if(ep.eat("c(")) {
-      int ai = ep.iparse(); verify_index(ai, c.shapes); ep.force_eat(",");
-      int as = ep.iparse(); verify_index(as, c.shapes[ai]); ep.force_eat(",");
-      int bi = ep.iparse(); verify_index(bi, c.shapes); ep.force_eat(",");
-      int bs = ep.iparse(); verify_index(bs, c.shapes[bi]); ep.force_eat(",");
+      int ai = ep.iparse(); verify_index(ai, c.shapes, ep); ep.force_eat(",");
+      int as = ep.iparse(); verify_index(as, c.shapes[ai], ep); ep.force_eat(",");
+      int bi = ep.iparse(); verify_index(bi, c.shapes, ep); ep.force_eat(",");
+      int bs = ep.iparse(); verify_index(bs, c.shapes[bi], ep); ep.force_eat(",");
       int m = ep.iparse(); ep.force_eat(")");
       c.shapes[ai].connections[as] = make_tuple(bi, bs, m);
       c.shapes[bi].connections[bs] = make_tuple(ai, as, m);
       }
     else if(ep.eat("subline(")) {
-      int ai = ep.iparse(); verify_index(ai, c.shapes); ep.force_eat(",");
-      int as = ep.iparse(); verify_index(as, c.shapes[ai]); ep.force_eat(",");
-      int bs = ep.iparse(); verify_index(bs, c.shapes[ai]); ep.force_eat(")");
+      int ai = ep.iparse(); verify_index(ai, c.shapes, ep); ep.force_eat(",");
+      int as = ep.iparse(); verify_index(as, c.shapes[ai], ep); ep.force_eat(",");
+      int bs = ep.iparse(); verify_index(bs, c.shapes[ai], ep); ep.force_eat(")");
       c.shapes[ai].sublines.emplace_back(as, bs);
       }
     else if(ep.eat("sublines(")) {
@@ -252,8 +312,91 @@ EX void load(const string& fname) {
             }
         }
       }
-    else throw hr_parse_exception("expecting command");
+    else if(ep.eat("debug(")) {
+      int i = ep.iparse(0);
+      verify_index(i, c.shapes, ep);
+      ep.force_eat(")");
+      throw connection_debug_request(i);
+      }
+    else throw hr_parse_exception("expecting command, " + ep.where());
     }
+  }
+
+arbi_tiling debugged;
+vector<pair<transmatrix, int> > debug_polys;
+
+string primes(int i) {
+  string res;
+  while(i--) res += "'";
+  return res;
+  }
+
+void connection_debugger() {
+  cmode = sm::SIDE | sm::DIALOG_STRICT_X;
+  gamescreen(0);
+  
+  auto& last = debug_polys.back();
+  
+  initquickqueue();
+  for(auto& p: debug_polys) {
+    int id = p.second;
+    
+    transmatrix V = gmatrix[cwt.at] * p.first;        
+    
+    auto& sh = debugged.shapes[id].vertices;
+    
+    for(auto& v: sh)
+      curvepoint(V * v);
+
+    curvepoint(V * sh[0]);
+    
+    color_t col = colortables['A'][id];
+    col = darkena(col, 0, 0xFF);
+    
+    if(&p == &last) {
+      vid.linewidth *= 2;
+      queuecurve(0xFFFF00FF, col, PPR::LINE);
+      vid.linewidth /= 2;
+      for(int i=0; i<isize(sh); i++)
+        queuestr(V * sh[i], vid.fsize, its(i), 0xFFFFFFFF);
+      }
+    else
+      queuecurve(0xFFFFFFFF, col, PPR::LINE);
+    }
+  quickqueue();
+
+  dialog::init(XLAT("connection debugger"));
+  
+  dialog::addInfo(debugged.name);
+  dialog::addHelp(debugged.comment);
+  
+  dialog::addBreak(50);
+
+  dialog::addInfo("face index " + its(last.second));
+
+  dialog::addBreak(50);  
+  
+  auto& sh = debugged.shapes[last.second];
+  int N = isize(sh.edges);
+  for(int k=0; k<N; k++) {
+    auto con = sh.connections[k];
+    string cap = its(k) + primes(last.second) + " -> " + its(get<1>(con)) + primes(get<0>(con)) + (get<2>(con) ? " (m) " : "");
+    dialog::addSelItem(cap, "go", '0' + k);
+    
+    dialog::add_action([k, last, con] {
+      debug_polys.emplace_back(last.first * get_adj(debugged, last.second, k, -1), get<0>(con));
+      });
+    
+    }    
+  
+  dialog::addBack();
+  dialog::display();
+
+  keyhandler = [] (int sym, int uni) {
+    handlePanning(sym, uni);
+    dialog::handleNavigation(sym, uni);
+    if(doexiton(sym, uni)) popScreen();
+    };
   }
 
 geometryinfo1& arbi_tiling::get_geometry() {
@@ -267,6 +410,56 @@ EX map<heptagon*, pair<heptagon*, transmatrix>> arbi_matrix;
 EX hrmap *current_altmap;
 
 heptagon *build_child(heptspin p, pair<int, int> adj);
+
+EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int xdl) {
+  
+  auto& sh = c.shapes[t];
+  
+  int dr = gmod(dl+1, sh.size());
+
+  auto& co = sh.connections[dl];
+  int xt = get<0>(co);
+  if(xdl == -1) xdl = get<1>(co);
+  int m = get<2>(co);
+
+  auto& xsh = c.shapes[xt];
+  int xdr = gmod(xdl+1, xsh.size());
+
+  hyperpoint vl = sh.vertices[dl];
+  hyperpoint vr = sh.vertices[dr];
+  hyperpoint vm = mid(vl, vr);
+      
+  transmatrix rm = gpushxto0(vm);
+  
+  hyperpoint xvl = xsh.vertices[xdl];
+  hyperpoint xvr = xsh.vertices[xdr];
+  hyperpoint xvm = mid(xvl, xvr);
+  
+  transmatrix xrm = gpushxto0(xvm);
+  
+  transmatrix Res = rgpushxto0(vm) * rspintox(rm*vr);
+    
+  if(cgflags & qAFFINE) {
+    ld sca = hdist(vl, vr) / hdist(xvl, xvr);
+    transmatrix Tsca = Id;
+    Tsca[0][0] = Tsca[1][1] = sca;
+    Res = Res * Tsca;
+    }
+
+  if(m) Res = Res * MirrorX;
+  Res = Res * spintox(xrm*xvl) * xrm;
+  
+  if(m) swap(vl, vr);
+  
+  if(hdist(vl, Res*xvr) + hdist(vr, Res*xvl) > .1) {
+    println(hlog, "s1 = ", kz(spintox(rm*vr)), " s2 = ", kz(rspintox(xrm*xvr)));    
+    println(hlog, tie(t, dl), " = ", kz(Res));    
+    println(hlog, hdist(vl, Res * xvr), " # ", hdist(vr, Res * xvl));
+    exit(3);
+    }
+        
+  return Res;
+  }
 
 struct hrmap_arbi : hrmap {
   heptagon *origin;
@@ -309,6 +502,8 @@ struct hrmap_arbi : hrmap {
     celllister cl(origin->c7, 1000, 200, NULL);
     ginf[geometry].distlimit[0] = cgi.base_distlimit = cl.dists.back();
     if(sphere) cgi.base_distlimit = SEE_ALL;
+    
+    if(cgflags & qAFFINE) cgi.base_distlimit = 3;
     }
 
   ~hrmap_arbi() {
@@ -330,58 +525,13 @@ struct hrmap_arbi : hrmap {
   void verify() override { }
 
   transmatrix adj(heptagon *h, int dl) override { 
-    auto& c = current;
-    int t = id_of(h);
-    auto& sh = c.shapes[t];
-    
-    int dr = gmod(dl+1, sh.size());
-
-    auto& co = sh.connections[dl];
-    int xt = get<0>(co);
-    int xdl = get<1>(co);
-    int m = get<2>(co);
-
-    if(h->c.move(dl)) xdl = h->c.spin(dl);
-
-    auto& xsh = c.shapes[xt];
-    int xdr = gmod(xdl+1, xsh.size());
-
-    hyperpoint vl = sh.vertices[dl];
-    hyperpoint vr = sh.vertices[dr];
-    hyperpoint vm = mid(vl, vr);
-        
-    transmatrix rm = gpushxto0(vm);
-    
-    hyperpoint xvl = xsh.vertices[xdl];
-    hyperpoint xvr = xsh.vertices[xdr];
-    hyperpoint xvm = mid(xvl, xvr);
-    
-    transmatrix xrm = gpushxto0(xvm);
-    
-    transmatrix Res = rgpushxto0(vm) * rspintox(rm*vr);
-    if(m) Res = Res * MirrorX;
-    Res = Res * spintox(xrm*xvl) * xrm;
-    
-    if(m) swap(vl, vr);
-    
-    if(hdist(vl, Res*xvr) + hdist(vr, Res*xvl) > .1) {
-      println(hlog, "s1 = ", kz(spintox(rm*vr)), " s2 = ", kz(rspintox(xrm*xvr)));    
-      println(hlog, tie(t, dl), " = ", kz(Res));    
-      println(hlog, hdist(vl, Res * xvr), " # ", hdist(vr, Res * xvl));
-      exit(3);
-      }
-        
-    return Res;
+    return get_adj(current, id_of(h), dl, h->c.move(dl) ? h->c.spin(dl) : -1);
     }
 
   heptagon *create_step(heptagon *h, int d) override {
   
     int t = id_of(h);
   
-    const auto& p = arbi_matrix[h];
-    
-    heptagon *alt = p.first;
-    
     auto& sh = current.shapes[t];
     
     auto& co = sh.connections[d];
@@ -390,6 +540,48 @@ struct hrmap_arbi : hrmap {
     int e = get<1>(co);
     int m = get<2>(co);
     auto& xsh = current.shapes[xt];
+    
+    if(cgflags & qAFFINE) {
+      set<heptagon*> visited;
+      
+      vector<pair<heptagon*, transmatrix> > v;
+      
+      visited.insert(h);
+      v.emplace_back(h, Id);
+      
+      transmatrix goal = adj(h, d);
+      
+      for(int i=0; i<200 && i < isize(v); i++) {
+        transmatrix T = v[i].second;
+        heptagon *h2 = v[i].first;
+        if(eqmatrix(T, goal)) {
+          h->c.connect(d, h2, e, m);
+          return h2;
+          }
+        for(int i=0; i<h2->type; i++) {
+          heptagon *h3 = h2->move(i);
+          if(!h3) continue;
+          if(visited.count(h3)) continue;
+          visited.insert(h3);
+          v.emplace_back(h3, T * adj(h2, i));
+          }
+        }
+      
+      auto h1 = tailored_alloc<heptagon> (current.shapes[xt].size());
+      h1->distance = h->distance + 1;
+      h1->zebraval = xt;
+      h1->c7 = newCell(h1->type, h1);
+      h1->alt = nullptr;
+      h1->cdata = nullptr;
+      h1->emeraldval = h->emeraldval ^ m;
+      h->c.connect(d, h1, e, m);
+      
+      return h1;
+      }
+
+    const auto& p = arbi_matrix[h];
+    
+    heptagon *alt = p.first;
     
     transmatrix T = p.second * adj(h, d);
     
@@ -470,6 +662,46 @@ struct hrmap_arbi : hrmap {
 
 EX hrmap *new_map() { return new hrmap_arbi; }
 
+void run(string fname) {
+  stop_game();
+  eGeometry g = geometry;
+  arbi_tiling t = current;
+  auto v = variation;
+  set_geometry(gArbitrary);
+  try {
+     load(fname);
+     ginf[gArbitrary].tiling_name = current.name;
+     }
+   catch(hr_polygon_error& poly) {
+     set_geometry(g);
+     set_variation(v);
+     current = t;
+     start_poly_debugger(poly);
+     string help = XLAT("Polygon number %1 did not close correctly. Here is the picture to help you understand the issue.\n\n", its(poly.id));
+     showstartmenu = false;
+     for(auto& p: poly.params)
+       help += lalign(-1, p.first, " = ", p.second, "\n");
+     gotoHelp(help);
+     }
+   catch(hr_parse_exception& ex) {
+     println(hlog, "failed: ", ex.s);
+     set_geometry(g);
+     current = t;
+     start_game();
+     addMessage("failed: " + ex.s);
+     }
+  catch(connection_debug_request& cr) {
+    set_geometry(g);     
+    debugged = current;
+    current = t;
+    ensure_geometry(cr.c);
+    debug_polys.clear();
+    debug_polys.emplace_back(Id, cr.id);
+    pushScreen(connection_debugger);
+    }
+  start_game();
+  }
+
 #if CAP_COMMANDLINE  
 int readArgs() {
   using namespace arg;
@@ -477,17 +709,8 @@ int readArgs() {
   if(0) ;
   else if(argis("-arbi")) {
     PHASEFROM(2);
-    stop_game();
     shift(); 
-    set_geometry(gArbitrary);
-    try {
-      load(args());
-      }
-    catch(hr_parse_exception& ex) {
-      println(hlog, "failed: ", ex.s);
-      exit(3);
-      }
-    ginf[gArbitrary].tiling_name = current.name;
+    run(args());
     }
   else return 1;
   return 0;
@@ -498,7 +721,7 @@ auto hook = addHook(hooks_args, 100, readArgs);
 
 EX bool in() { return geometry == gArbitrary; }
 
-EX string tes = "tessellations/marjorie-rice.tes";
+EX string tes = "tessellations/sample/marjorie-rice.tes";
 
 EX bool linespattern(cell *c) {
   return current.shapes[id_of(c->master)].flags & arcm::sfLINE;
@@ -511,17 +734,7 @@ EX bool pseudohept(cell *c) {
 EX void choose() {
   dialog::openFileDialog(tes, XLAT("open a tiling"), ".tes", 
   [] () {
-    stop_game();
-    set_geometry(gArbitrary);
-    try {
-      load(tes);
-      ginf[gArbitrary].tiling_name = current.name;
-      }
-    catch(hr_parse_exception& ex) {
-      println(hlog, "failed: ", ex.s);
-      set_geometry(gNormal);
-      }
-    start_game();
+    run(tes);
     return true;
     });
   }

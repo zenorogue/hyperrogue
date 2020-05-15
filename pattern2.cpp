@@ -58,14 +58,14 @@ int eupattern4(cell *c) {
 
 EX bool ishept(cell *c) {
   // EUCLIDEAN
-  if(euclid && PURE) return eupattern(c) == 0;
+  if(euc::in() && PURE) return eupattern(c) == 0;
   else if(hybri) { cell *c1 = hybrid::get_where(c).first; return c1 == c1->master->c7; }
   else return c == c->master->c7;
   }
 
 EX bool ishex1(cell *c) {
   // EUCLIDEAN
-  if(euclid && PURE) return eupattern(c) == 1;
+  if(euc::in() && PURE) return eupattern(c) == 1;
   #if CAP_GP
   else if(GOLDBERG) return c->master->c7 != c && !pseudohept(c->move(0));
   #endif
@@ -74,14 +74,14 @@ EX bool ishex1(cell *c) {
 
 bool ishex2(cell *c) {
   // EUCLIDEAN
-  if(euclid && PURE) return eupattern(c) == 1;
+  if(euc::in() && PURE) return eupattern(c) == 1;
   #if CAP_GP
   else if(GOLDBERG) return c->master->c7 != c && gp::pseudohept_val(c) == 1;
   #endif
   else return c->master->c7 != c;
   }
 
-int chessvalue(cell *c) {
+EX int chessvalue(cell *c) {
   #if CAP_ARCM
   if(arcm::in()) 
     return arcm::chessvalue(c);
@@ -372,6 +372,7 @@ EX pair<int, bool> fieldval(cell *c) {
   }
 
 EX int fieldval_uniq(cell *c) {
+  if(fake::in()) return FPIU(fieldval_uniq(c));
   if(experimental) return 0;
   else if(hybri) { 
     auto c1 = hybrid::get_where(c).first; 
@@ -388,7 +389,7 @@ EX int fieldval_uniq(cell *c) {
     if(ctof(c)) return c->master->fieldval;
     else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
     }
-  else if(euclid && !kite::in() && !arcm::in()) {
+  else if(euc::in()) {
     auto p = euc2_coordinates(c);
     if(bounded) return p.first + (p.second << 16);
     return gmod(p.first - 22 * p.second, 3*127);
@@ -1405,7 +1406,7 @@ EX bool pseudohept(cell *c) {
   #if MAXMDIM == 4
   if(WDIM == 3) {
     if(geometry == gField435) return false;
-    else if(euclid) return euc::pseudohept(c);
+    else if(euc::in()) return euc::pseudohept(c);
     else return reg3::pseudohept(c);
     }
   #endif
@@ -1666,7 +1667,11 @@ EX namespace patterns {
       }
     }
   
-  EX hookset<int(cell*)> *hooks_generate_canvas;
+  EX hookset<int(cell*)> hooks_generate_canvas;
+  
+  EX int jhole = 0;
+  EX int jblock = 0;
+  EX int rwalls = 50;
 
   EX int generateCanvas(cell *c) {
     
@@ -1737,7 +1742,8 @@ EX namespace patterns {
       case 'g':
         return canvasback;
       case 'r': {
-        color_t r = hrand(0x1FFFFFF + 1);
+        color_t r = hrand(0xFFFFFF + 1);
+        if(hrand(100) < rwalls) r |= 0x1000000;
         if(c == cwt.at) r &= 0xFFFFFF;
         return r;
         }
@@ -1786,6 +1792,8 @@ EX namespace patterns {
         return colortables['x'][zebra3(c)];
       case 'w':
         return colortables['w'][randpattern(c, subcanvas) ? 1 : 0];
+      case 'H':
+        return colortables['c'][c->master->c7 == c ? 0 : 1];
       case 'l': 
         return random_landscape(c, 3, 1, 17, 0x808080);
       case 'd':
@@ -1801,16 +1809,24 @@ EX namespace patterns {
       case 'v':
         return colortables['v'][sevenval(c)];
       case 'j': {
+        if(c == currentmap->gamestart()) return canvasback;
         int d = c->master->distance;
         if(geometry == gNil) d = c->master->zebraval;
-        if(d % 2 == 0 || d < -5 || d > 5) return canvasback;
-        return colortables['j'][(d+5)/2];
+        if(euc::in()) d = euc::get_ispacemap()[c->master][0];
+        if(d % 2 == 0 || d < -5 || d > 5) return hrand(100) < jblock ? 0xFFFFFFFF : canvasback;
+        return hrand(100) < jhole ? canvasback : colortables['j'][(d+5)/2];
         }
       case 'J': {
+        if(c == currentmap->gamestart()) return canvasback;
         int d = c->master->distance;
         if(geometry == gNil) d = c->master->zebraval;
-        if(d % 2 == 0 || d < -5 || d > 5) return hrand(100) < 10 ? 0xFFFFFFFF : canvasback;
-        return hrand(100) < 50 ? 0 : colortables['j'][(d+5)/2];
+        if((d&3) != 2) return hrand(100) < jblock ? 0xFFFFFFFF : canvasback;
+        return hrand(100) < jhole ? canvasback : colortables['j'][(d+10)/4];
+        }
+      case 'G': {
+        color_t r = hrand(0xFFFFFF + 1);
+        if(hrand(100) < rwalls && pseudohept(c) && c != cwt.at) r |= 0x1000000;
+        return r;
         }
       case 'f': {
         color_t res;
@@ -2876,7 +2892,7 @@ EX namespace linepatterns {
 
     dialog::addSelItem("line width", fts(width), 'W');
     dialog::add_action([] () { 
-      dialog::editNumber(width, 0, 10, 1, 1, XLAT("line width"), "");
+      dialog::editNumber(width, 0, 10, 0.1, 1, XLAT("line width"), "");
       });
 
     dialog::addBoolItem_action("edit widths individually", indiv, 'I');
@@ -2938,6 +2954,10 @@ int read_pattern_args() {
         lp->color = arghex();
     }
 
+  else if(argis("-fat-edges")) {
+    PHASEFROM(2); shift(); fat_edges = argi();
+    }
+
   else if(argis("-palw")) {
     PHASEFROM(2); 
     shift(); string ss = args();
@@ -2985,6 +3005,13 @@ int read_pattern_args() {
     else patterns::canvasback = arghex();
     stop_game_and_switch_mode(rg::nothing);
     }
+  else if(argis("-canvas-random")) {
+    PHASEFROM(2);
+    stop_game();
+    firstland = specialland = laCanvas;
+    patterns::whichCanvas = 'r';
+    shift(); patterns::rwalls = argi();
+    }
   else if(argis("-cformula")) {
     PHASEFROM(2);
     stop_game();
@@ -3013,7 +3040,7 @@ int read_pattern_args() {
   return 0;
   }
 
-auto ah_pattern = addHook(hooks_args, 0, read_pattern_args) + addHook(clearmemory, 100, [] { patterns::computed_nearer_map.clear(); patterns::computed_furthest_map.clear(); });
+auto ah_pattern = addHook(hooks_args, 0, read_pattern_args) + addHook(hooks_clearmemory, 100, [] { patterns::computed_nearer_map.clear(); patterns::computed_furthest_map.clear(); });
 #endif
 
 }

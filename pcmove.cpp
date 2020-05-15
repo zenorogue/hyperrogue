@@ -1300,8 +1300,8 @@ EX void produceGhost(cell *c, eMonster victim, eMonster who) {
 EX bool swordAttack(cell *mt, eMonster who, cell *c, int bb) {
   eMonster m = c->monst;
   if(c->wall == waCavewall) markOrb(bb ? itOrbSword2: itOrbSword);
-  if(c->wall == waSmallTree || c->wall == waBigTree || c->wall == waRose || c->wall == waCTree || c->wall == waVinePlant ||
-    thruVine(mt, c) || c->wall == waBigBush || c->wall == waSmallBush || c->wall == waSolidBranch || c->wall == waWeakBranch) {
+  if(among(c->wall, waSmallTree, waBigTree, waRose, waCTree, waVinePlant, waBigBush, waSmallBush, waSolidBranch, waWeakBranch, waShrub)
+    || thruVine(mt, c)) {
     changes.ccell(c);
     playSound(NULL, "hit-axe"+pick123());
     markOrb(bb ? itOrbSword2: itOrbSword);

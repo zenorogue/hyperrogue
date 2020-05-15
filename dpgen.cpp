@@ -66,7 +66,7 @@ void launch(int seed, int elimit, int hlimit) {
   dual::switch_to(0);
   specialland = firstland = laCanvas;
   canvas_default_wall = waSea;
-  vid.scale = .5;
+  pconf.scale = .5;
   dual::switch_to(1);
   specialland = firstland = laCanvas;
   shrand(seed);

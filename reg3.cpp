@@ -28,10 +28,16 @@ EX namespace reg3 {
   #endif
   
   EX bool in() {
+    if(fake::in()) return FPIU(in());
     return GDIM == 3 && !euclid && !bt::in() && !nonisotropic && !hybri && !kite::in();
     }
 
   EX void generate() {
+
+    if(fake::in()) {
+      fake::generate();
+      return;
+      }
   
     int& loop = cgi.loop;
     int& face = cgi.face;
@@ -122,8 +128,8 @@ EX namespace reg3 {
       vertex_distance = binsearch(0, M_PI, [&] (ld d) {
         // sometimes breaks in elliptic
         dynamicval<eGeometry> g(geometry, elliptic ? gCell120 : geometry);
-        hyperpoint v2 = direct_exp(dir_v2 * d, iTable);
-        hyperpoint v3 = direct_exp(dir_v3 * d, iTable);
+        hyperpoint v2 = direct_exp(dir_v2 * d);
+        hyperpoint v3 = direct_exp(dir_v3 * d);
         return hdist(v2, v3) >= edge_length;
         });
       }
@@ -131,7 +137,7 @@ EX namespace reg3 {
     DEBB(DF_GEOM, ("vertex_distance = ", vertex_distance));
     
     /* actual vertex */
-    hyperpoint v2 = direct_exp(dir_v2 * vertex_distance, iTable);
+    hyperpoint v2 = direct_exp(dir_v2 * vertex_distance);
 
     hyperpoint mid = Hypc;
     for(int i=0; i<face; i++) mid += cspin(1, 2, 2*i*M_PI/face) * v2;
@@ -186,6 +192,13 @@ EX namespace reg3 {
     
     if(loop == 4) cgi.strafedist = adjcheck;
     else cgi.strafedist = hdist(cgi.adjmoves[0] * C0, cgi.adjmoves[1] * C0);
+    
+    if(stretch::applicable()) {
+      transmatrix T = cspin(0, 2, 90 * degree);
+      transmatrix iT = inverse(T);
+      for(auto& v: cgi.adjmoves) v = T * v * iT;
+      for(auto& v: cellshape) v = T * v;
+      }
 
     vertices_only.clear();
     for(hyperpoint h: cellshape) {
@@ -282,6 +295,7 @@ EX namespace reg3 {
     return Id;
     }
     
+#if CAP_CRYSTAL
   int encode_coord(const crystal::coord& co) {
     int c = 0;
     for(int i=0; i<4; i++) c |= ((co[i]>>1) & 3) << (2*i);
@@ -314,6 +328,7 @@ EX namespace reg3 {
         }
       }        
     };
+#endif
 
   struct hrmap_field3 : reg3::hrmap_quotient3 {
   
@@ -691,9 +706,14 @@ EX namespace reg3 {
         dynamicval<hrmap*> cm(currentmap, binary_map);
         binary_map->virtualRebase(alt, T);
         }
-      
+
       fixmatrix(T);
       auto hT = tC0(T);
+      
+      bool hopf = stretch::applicable();
+
+      if(hopf)
+        T = stretch::translate(hT);      
       
       if(DEB) println(hlog, "searching at ", alt, ":", hT);
 
@@ -706,7 +726,8 @@ EX namespace reg3 {
         // println(hlog, "YES found in ", isize(altmap[alt]));
         if(DEB) println(hlog, "-> found ", p2.first);
         int fb = 0;
-        hyperpoint old = T * (inverse(T1) * tC0(p1.second));
+        hyperpoint old = tC0(p1.second);;
+        if(!hopf) T * (inverse(T1) * old);
         #if CAP_FIELD
         if(quotient_map) {
           p2.first->c.connect(counterpart(parent)->c.spin(d), parent, d, false);
@@ -745,6 +766,19 @@ EX namespace reg3 {
         fv = cp->c.move(d)->fieldval;
         }
       #endif
+      if(hopf) {
+        hyperpoint old = tC0(p1.second);
+        for(d2=0; d2<S7; d2++) {
+          hyperpoint back = T * tC0(cgi.adjmoves[d2]);
+          if((err = intval(back, old)) < 1e-3) 
+            break;
+          }
+        if(d2 == S7) { 
+          d2 = 0; 
+          println(hlog, "Hopf connection failed"); 
+          }
+        println(hlog, "found d2 = ", d2);
+        }
       heptagon *created = tailored_alloc<heptagon> (S7);
       created->c7 = newCell(S7, created);
       if(sphere) spherecells.push_back(created->c7);
@@ -1304,6 +1338,7 @@ EX int celldistance(cell *c1, cell *c2) {
 EX bool pseudohept(cell *c) {
   auto m = regmap();
   if(cgflags & qSINGLE) return true;
+  if(fake::in()) return FPIU(reg3::pseudohept(c));
   if(sphere) {
     hyperpoint h = tC0(m->relative_matrix(c->master, regmap()->origin, C0));
     if(S7 == 12) {
@@ -1472,6 +1507,7 @@ int dist_alt(cell *c) {
 #if MAXMDIM >= 4
 EX cellwalker strafe(cellwalker cw, int j) {
   hyperpoint hfront = tC0(cgi.adjmoves[cw.spin]);
+  cw.at->cmove(j);
   transmatrix T = currentmap->adj(cw.at, j);
   for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
     if(hdist(hfront, T * tC0(cgi.adjmoves[i])) < cgi.strafedist + .01)
