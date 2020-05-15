@@ -467,7 +467,7 @@ EX void gainItem(eItem it) {
   if(chaosmode && gold() >= 300)
     achievement_gain_once("CHAOS", rg::chaos);
 
-#if ISMOBILE==1
+#if ISMOBILE
   if(g < lastsafety + R30*3/2 && g2 >= lastsafety + R30*3/2)
     addMessage(XLAT("The Orb of Safety from the Land of Eternal Motion might save you."));
 #endif

@@ -122,7 +122,7 @@ EX hint hints[] = {
     []() { return true; },
     []() { 
       dialog::addInfo(XLAT(
-#if ISMOBILE==1
+#if ISMOBILE
         "The 'world overview' shows all the lands in HyperRogue."
 #else
         "Press 'o' to see all the lands in HyperRogue."
@@ -457,12 +457,12 @@ EX void showMission() {
       dialog::addItem(XLAT("inventory"), 'i');
     if(racing::on)
       dialog::addItem(XLAT("racing menu"), 'o');
-    #if ISMOBILE==0
+#if !ISMOBILE
     dialog::addItem(XLAT(quitsaves() ? "save" : "quit"), SDLK_F10);
-    #endif
-    #if CAP_ANDROIDSHARE
+#endif
+#if CAP_ANDROIDSHARE
     dialog::addItem(XLAT("SHARE"), 's'-96);
-    #endif
+#endif
     }
   dialog::addItem(XLAT("message log"), 'l');
   

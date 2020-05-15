@@ -549,7 +549,7 @@ EX void initConfig() {
   t[(int)'s'] = 16 + 6;
   t[(int)'a'] = 16 + 7;
 
-#if ISMOBILE==0
+#if !ISMOBILE
   t[SDLK_KP8] = 16 + 4;
   t[SDLK_KP6] = 16 + 5;
   t[SDLK_KP2] = 16 + 6;
@@ -572,7 +572,7 @@ EX void initConfig() {
   t[(int)'p'] = 32 + 10;
   t[(int)'['] = 32 + pcCenter;
 
-#if ISMOBILE==0
+#if !ISMOBILE
   t[SDLK_UP] = 48 ;
   t[SDLK_RIGHT] = 48 + 1;
   t[SDLK_DOWN] = 48 + 2;

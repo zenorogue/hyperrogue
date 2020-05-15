@@ -913,10 +913,6 @@ void close() {
   relmatrices.clear();
   }
 
-#ifndef CAP_RVSLIDES
-#define CAP_RVSLIDES (CAP_TOUR && !ISWEB)
-#endif
-
 #if CAP_COMMANDLINE
 int readArgs() {
   using namespace arg;

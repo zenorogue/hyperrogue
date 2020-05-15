@@ -289,6 +289,7 @@ EX namespace reg3 {
     return Id;
     }
     
+#if CAP_CRYSTAL
   int encode_coord(const crystal::coord& co) {
     int c = 0;
     for(int i=0; i<4; i++) c |= ((co[i]>>1) & 3) << (2*i);
@@ -321,6 +322,7 @@ EX namespace reg3 {
         }
       }        
     };
+#endif
 
   struct hrmap_field3 : reg3::hrmap_quotient3 {
   

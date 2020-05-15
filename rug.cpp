@@ -1624,8 +1624,10 @@ EX void show() {
     else if(uni == 'n' && !rug::rugged) 
       pushScreen(rug_geometry_choice);
     #endif
-    else if(uni == 'g' && !rug::rugged && CAP_SDL)
+#if CAP_SDL
+    else if(uni == 'g' && !rug::rugged)
       rendernogl = !rendernogl;
+#endif
     else if(uni == 's') {
       texturesize *= 2;
       if(texturesize == 8192) texturesize = 64;

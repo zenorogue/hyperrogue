@@ -3848,12 +3848,12 @@ EX namespace halloween {
       }
     int id = hrand(100);
     if(items[itTreat] == 1) {
-#if ISMOBILE==0
+#if !ISMOBILE
       addMessage(XLAT("Hint: use arrow keys to scroll."));
 #endif
       }
     else if(items[itTreat] == 2) {
-#if ISMOBILE==0
+#if !ISMOBILE
       addMessage(XLAT("Hint: press 1 2 3 4 to change the projection."));
 #endif
       }

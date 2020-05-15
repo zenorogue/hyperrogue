@@ -952,12 +952,12 @@ EX void achievement_display() {
     col /= 10; col *= 0x10101;
     displayfr(vid.xres/2, vid.yres/4, 2, vid.fsize * 2, achievementMessage[0], col & 0xFFFF00, 8);
     int w = 2 * vid.fsize;
-#if ISMOBILE==0
+#if !ISMOBILE
     while(w>3 && textwidth(w, achievementMessage[1]) > vid.xres) w--;
 #endif
     displayfr(vid.xres/2, vid.yres/4 + vid.fsize*2, 2, w, achievementMessage[1], col, 8);
     w = vid.fsize;
-#if ISMOBILE==0
+#if !ISMOBILE
     while(w>3 && textwidth(w, achievementMessage[2]) > vid.xres) w--;
 #endif
     displayfr(vid.xres/2, vid.yres/4 + vid.fsize*4, 2, w, achievementMessage[2], col, 8);
