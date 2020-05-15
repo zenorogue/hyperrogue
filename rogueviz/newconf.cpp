@@ -2,9 +2,14 @@
 // example commandline: -noplayer -rugtsize 4096 -smart 1 -canvas B -ncee
 // set CAP_NCONF (and change the path) if you have access to newconformist
 
-#include "../hyper.h"
+#include "rogueviz.h"
 
 #if CAP_NCONF
+
+#ifndef CAP_DRAW
+#define CAP_DRAW 0
+#endif
+
 #define main nconf_main
 #undef unordered_map
 #undef self

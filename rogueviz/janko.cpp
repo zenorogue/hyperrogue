@@ -1,6 +1,6 @@
 /* explore the Janko group J1: https://en.wikipedia.org/wiki/Janko_group_J1 */
 
-#include "../hyper.h"
+#include "rogueviz.h"
 
 #if !ISWEB
 

@@ -63,14 +63,6 @@
 #define ISMINI 0
 #endif
 
-#ifndef CAP_NCONF
-#define CAP_NCONF 0
-#endif
-
-#ifndef CAP_DRAW
-#define CAP_DRAW 0
-#endif
-
 #ifndef CAP_XGD
 #define CAP_XGD (ISANDROID || ISFAKEMOBILE)
 #endif
@@ -211,10 +203,6 @@
 
 #ifndef CAP_ROGUEVIZ
 #define CAP_ROGUEVIZ 0
-#endif
-
-#ifndef CAP_RVSLIDES
-#define CAP_RVSLIDES (CAP_TOUR && !ISWEB)
 #endif
 
 #ifndef CAP_PROFILING

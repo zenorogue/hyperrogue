@@ -1,4 +1,3 @@
-#include "../hyper.h"
 #include "rogueviz.h"
 
 namespace rogueviz {

@@ -6,6 +6,14 @@
 
 #define RVPATH HYPERPATH "rogueviz/"
 
+#ifndef CAP_NCONF
+#define CAP_NCONF 0
+#endif
+
+#ifndef CAP_RVSLIDES
+#define CAP_RVSLIDES (CAP_TOUR && !ISWEB)
+#endif
+
 namespace rogueviz {
   using namespace hr;
   
