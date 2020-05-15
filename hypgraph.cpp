@@ -1044,7 +1044,7 @@ EX bool invalid_matrix(const transmatrix T) {
   for(int i=0; i<GDIM; i++) for(int j=0; j<GDIM; j++)
     if(std::isnan(T[i][j]) || T[i][j] > 1e8 || T[i][j] < -1e8 || std::isinf(T[i][j]))
       return true;
-  if(prod) {
+  if(prod || (cgflags & qAFFINE)) {
     for(int i=0; i<GDIM; i++) for(int j=0; j<GDIM; j++) if(abs(T[i][j]) > 1e-60) return false;
     }
   else 
