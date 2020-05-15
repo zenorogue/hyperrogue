@@ -2337,6 +2337,14 @@ EX bool applyAnimation(cell *c, transmatrix& V, double& footphase, int layer) {
       }
     a.wherenow = a.wherenow * rspintox(wnow);
     a.wherenow = a.wherenow * xpush(aspd);
+    if(cgflags & qAFFINE) {
+      transmatrix T = a.wherenow;
+      fixmatrix_euclid(T);
+      a.wherenow = inverse(T) * a.wherenow;
+      for(int i=0; i<MDIM; i++)
+        a.wherenow[i] = lerp(a.wherenow[i], Id[i], aspd / R);
+      a.wherenow = T * a.wherenow;
+      }
     fixmatrix(a.wherenow);
     a.footphase += a.attacking == 2 ? -aspd : aspd;
     footphase = a.footphase;
