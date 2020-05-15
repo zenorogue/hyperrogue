@@ -1278,6 +1278,11 @@ EX namespace hybrid {
     }
   
   EX int wall_offset(cell *c) {
+    if(GOLDBERG) {
+      /* a bit slow... */
+      cell *c1 = get_where(c).first;
+      gp::draw_li = PIU(gp::get_local_info(c1));
+      }
     int id = hybrid::underlying == gArchimedean ? arcm::id_of(c->master) + 20 * arcm::parent_index_of(c->master) : shvid(c);
     if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, {-1, nullptr});
     auto &wop = cgi.walloffsets[id];
