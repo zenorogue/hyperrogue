@@ -85,7 +85,7 @@ EX namespace sn {
   void tabled_inverses::load() {
     if(loaded) return;
     FILE *f = fopen(fname.c_str(), "rb");
-    // if(!f) f = fopen("/usr/lib/soltable.dat", "rb");
+    if(!f) f = fopen((rsrcdir + fname).c_str(), "rb");
     if(!f) { addMessage(XLAT("geodesic table missing")); pmodel = mdPerspective; return; }
     ignore(fread(&PRECX, 4, 1, f));
     ignore(fread(&PRECY, 4, 1, f));

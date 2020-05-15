@@ -911,6 +911,7 @@ EX namespace reg3 {
     
     void load_ruleset(string fname) {
       FILE *f = fopen(fname.c_str(), "rb");
+      if(!f) f = fopen((rsrcdir + fname).c_str(), "rb");
       string buf;
       buf.resize(1000000);
       int qty = fread(&buf[0], 1, 1000000, f);

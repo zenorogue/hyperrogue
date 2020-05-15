@@ -8,6 +8,14 @@
 #include "hyper.h"
 namespace hr {
 
+#ifdef RESOURCEDESTDIR
+EX string rsrcdir = RESOURCEDESTDIR;
+#endif
+
+#ifndef RESOURCEDESTDIR
+EX string rsrcdir = "";
+#endif
+
 #if CAP_COMMANDLINE
 EX const char *scorefile = "hyperrogue.log";
 
@@ -142,6 +150,7 @@ int arg::readCommon() {
 // first phase options
 
   if(argis("-s")) { PHASE(1); shift(); scorefile = argcs(); }
+  else if(argis("-rsrc")) { PHASE(1); shift(); rsrcdir = args(); }
   else if(argis("-nogui")) { PHASE(1); noGUI = true; }
 #ifndef EMSCRIPTEN
   else if(argis("-font")) { PHASE(1); shift(); fontpath = args(); }
