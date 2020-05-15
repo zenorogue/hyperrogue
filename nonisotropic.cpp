@@ -1076,7 +1076,7 @@ EX namespace hybrid {
         });
       return T;
       }
-    if(rotspace) return inverse(rots::ray_adj(c, i));
+    if(rotspace) return rots::ray_iadj(c, i);
     return currentmap->iadj(c, i);
     }
   
@@ -1885,9 +1885,9 @@ EX namespace rots {
   
   std::unordered_map<int, transmatrix> saved_matrices_ray;
 
-  EX transmatrix ray_adj(cell *c1, int i) {
-    if(i == c1->type-2) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
-    if(i == c1->type-1) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
+  EX transmatrix ray_iadj(cell *c1, int i) {
+    if(i == c1->type-1) return uzpush(+cgi.plevel) * spin(-2*cgi.plevel);
+    if(i == c1->type-2) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
     cell *c2 = c1->cmove(i);
     int id1 = hybrid::underlying == gArchimedean ? arcm::id_of(c1->master) + 20 * arcm::parent_index_of(c1->master) : shvid(c1);
     int id2 = hybrid::underlying == gArchimedean ? arcm::id_of(c2->master) + 20 * arcm::parent_index_of(c2->master) : shvid(c2);
@@ -1902,10 +1902,7 @@ EX namespace rots {
     hybrid::in_underlying_geometry([&] {
       hyperpoint h0 = get_corner_position(cw, i);
       hyperpoint h1 = get_corner_position(cw, (i+1));
-      hyperpoint hm = mid(h0, h1);
-      ld d = hdist0(hm);
-      d *= 2;
-      T = rspintox(hm) * xpush(d);
+      T = to_other_side(h0, h1);
       });
 
     return M = lift_matrix(T);
