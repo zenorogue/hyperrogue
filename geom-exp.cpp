@@ -472,6 +472,8 @@ EX string geometry_name() {
       return XLAT("hyperbolic") + dim_name();
 
     case gcEuclid: 
+      if(cgflags & qAFFINE)
+        return XLAT("affine") + dim_name();
       return XLAT("flat") + dim_name();
     
     case gcSphere:
