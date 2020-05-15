@@ -927,7 +927,7 @@ EX int last_texture_step;
 
 int ntimestamp;
 
-EX void check_cgi() {
+EX string cgi_string() {
   string s;
   auto V = [&] (string a, string b) { s += a; s += ": "; s += b; s += "; "; };
   V("GEO", its(int(geometry)));
@@ -976,6 +976,12 @@ EX void check_cgi() {
   if(WDIM == 3) V("HTW", fts(vid.height_width));
 
   V("LQ", its(vid.linequality));
+  
+  return s;
+  }
+
+EX void check_cgi() {
+  string s = cgi_string();
   
   cgip = &cgis[s];
   cgi.timestamp = ++ntimestamp;
