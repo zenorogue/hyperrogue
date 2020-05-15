@@ -997,7 +997,7 @@ EX ld spherity(const transmatrix& V) {
   }
 
 EX bool confusingGeometry() {
-  return quotient;
+  return quotient || elliptic;
   }
 
 EX ld master_to_c7_angle() {
