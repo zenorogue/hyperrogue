@@ -2144,7 +2144,7 @@ EX void rotate_view(transmatrix T) {
   if(callhandlers(false, hooks_rotate_view, T)) return;
   transmatrix& which = get_view_orientation();
   which = T * which;
-  if(!prod && !nonisotropic) current_display->which_copy = T * current_display->which_copy;
+  if(!prod && !nonisotropic && !rug::rugged) current_display->which_copy = T * current_display->which_copy;
   }
 
 /** shift the view according to the given tangent vector */
