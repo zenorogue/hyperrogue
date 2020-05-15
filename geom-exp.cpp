@@ -616,11 +616,11 @@ EX void showEuclideanMenu() {
   int denom = (2*ts + 2*tv - ts * tv);
   
   #if CAP_GP
-  if(GOLDBERG && S3)
-    nom = 2 * (2*tv + ts * (cgi.gpdata->area-1));
-
-  if(GOLDBERG && S3 == 4)
-    nom = 2 * (2*tv + 2 * ts * (cgi.gpdata->area-1));
+  if(GOLDBERG) {
+    ld area = PIU(cgi.gpdata->area);
+  
+    nom = 2 * (2*tv + (S3-2) * ts * (area-1));
+    }
   #endif
 
   int worldsize;
