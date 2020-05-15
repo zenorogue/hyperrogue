@@ -2029,6 +2029,10 @@ EX namespace rots {
       dynamicval<ld> psa(pconf.alpha, sphere ? 10 : 1);
       dynamicval<hrmap*> p(hybrid::pmap, NULL);
       dynamicval<int> psr(sightrange_bonus, 0);
+
+      dynamicval<int> psx(vid.use_smart_range, 2);
+      dynamicval<ld> psy(vid.smart_range_detail, 1);
+
       calcparam();
       reset_projection(); current_display->set_all(0);
       ptds.clear();
