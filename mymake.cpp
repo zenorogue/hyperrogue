@@ -68,6 +68,15 @@ int main(int argc, char **argv) {
         if(c == '=' || c == '-' || c == '/') obj_dir += "_"; 
         else obj_dir += c;      
       }
+    else if(s.substr(0, 2) == "-f") {
+      opts += " " + s;
+      obj_dir += "/";
+      setdir += "../";
+      for(char c: s) 
+        if(c == '=' || c == '-' || c == '/') obj_dir += "_"; 
+        else obj_dir += c;
+      linker += " " + s;
+      }
     else if(s == "-win")
       compiler = "runbat bwin-g.bat -c", obj_dir += "/win", setdir += "../", standard = "",
       linker = "runbat bwin-linker.bat", libs = "";
