@@ -294,6 +294,7 @@ EX void initConfig() {
   addsaver(vid.drawmousecircle, "mouse circle", ISMOBILE || ISPANDORA);
   addsaver(vid.revcontrol, "reverse control", false);
   addsaver(musicvolume, "music volume");
+  addsaver(music_out_of_focus, "music out of focus", false);
   addsaver(effvolume, "sound effect volume");
   addsaverenum(glyphsortorder, "glyph sort order");
   
@@ -1283,6 +1284,9 @@ EX void configureOther() {
       };
     dialog::bound_low(0);
     dialog::bound_up(MIX_MAX_VOLUME);
+    dialog::extra_options = [] {
+      dialog::addBoolItem_action(XLAT("play music when out of focus"), music_out_of_focus, 'A');
+      };
     });
 
   dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
