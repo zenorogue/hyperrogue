@@ -1014,7 +1014,7 @@ void geometry_information::make_3d_models() {
   make_revolution(shBugArmor, 180, ABODY);
   make_revolution_cut(shBugAntenna, 90, ABODY);
   
-  make_revolution(shFrogBody, 180, ABODY);
+  make_revolution(shFrogBody, 180, WDIM == 2 ? g : ABODY);
   
   make_revolution_cut(shButterflyBody, 180, 0);
   make_revolution_cut(shButterflyWing, 180, 0, 0.05*S);
@@ -1173,7 +1173,7 @@ void geometry_information::make_3d_models() {
   adjust_eye(shWolfEyes, shWolfHead, AHEAD, AHEAD, 1);
   
   adjust_eye(shPikeEye, shPikeBody, 0, 0, 1);
-  adjust_eye(shFrogEye, shFrogBody, ABODY, AHEAD, 1);
+  adjust_eye(shFrogEye, shFrogBody, 0, 0, 1);
 
   adjust_eye(shReptileEye, shReptileHead, AHEAD, AHEAD, 1);
   adjust_eye(shGadflyEye, shGadflyBody, 0, 0, 1);
