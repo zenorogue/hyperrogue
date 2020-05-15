@@ -220,16 +220,19 @@ EX void load(const string& fname) {
       ginf[gArbitrary].g = giEuclid2;
       ginf[gArbitrary].sides = 7;
       set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
+      set_flag(ginf[gArbitrary].flags, qAFFINE, true);
       }
     else if(ep.eat("h2.")) {
       ginf[gArbitrary].g = giHyperb2;
       ginf[gArbitrary].sides = 7;
       set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
+      set_flag(ginf[gArbitrary].flags, qAFFINE, false);
       }
     else if(ep.eat("s2.")) {
       ginf[gArbitrary].g = giSphere2;
       ginf[gArbitrary].sides = 5;
       set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
+      set_flag(ginf[gArbitrary].flags, qAFFINE, false);
       }
     else if(ep.eat("angleunit(")) angleunit = real(ep.parsepar());
     else if(ep.eat("angleofs(")) angleofs = real(ep.parsepar());
@@ -435,6 +438,14 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int xdl) {
   transmatrix xrm = gpushxto0(xvm);
   
   transmatrix Res = rgpushxto0(vm) * rspintox(rm*vr);
+    
+  if(cgflags & qAFFINE) {
+    ld sca = hdist(vl, vr) / hdist(xvl, xvr);
+    transmatrix Tsca = Id;
+    Tsca[0][0] = Tsca[1][1] = sca;
+    Res = Res * Tsca;
+    }
+
   if(m) Res = Res * MirrorX;
   Res = Res * spintox(xrm*xvl) * xrm;
   
@@ -491,6 +502,8 @@ struct hrmap_arbi : hrmap {
     celllister cl(origin->c7, 1000, 200, NULL);
     ginf[geometry].distlimit[0] = cgi.base_distlimit = cl.dists.back();
     if(sphere) cgi.base_distlimit = SEE_ALL;
+    
+    if(cgflags & qAFFINE) cgi.base_distlimit = 3;
     }
 
   ~hrmap_arbi() {
@@ -519,10 +532,6 @@ struct hrmap_arbi : hrmap {
   
     int t = id_of(h);
   
-    const auto& p = arbi_matrix[h];
-    
-    heptagon *alt = p.first;
-    
     auto& sh = current.shapes[t];
     
     auto& co = sh.connections[d];
@@ -531,6 +540,48 @@ struct hrmap_arbi : hrmap {
     int e = get<1>(co);
     int m = get<2>(co);
     auto& xsh = current.shapes[xt];
+    
+    if(cgflags & qAFFINE) {
+      set<heptagon*> visited;
+      
+      vector<pair<heptagon*, transmatrix> > v;
+      
+      visited.insert(h);
+      v.emplace_back(h, Id);
+      
+      transmatrix goal = adj(h, d);
+      
+      for(int i=0; i<200 && i < isize(v); i++) {
+        transmatrix T = v[i].second;
+        heptagon *h2 = v[i].first;
+        if(eqmatrix(T, goal)) {
+          h->c.connect(d, h2, e, m);
+          return h2;
+          }
+        for(int i=0; i<h2->type; i++) {
+          heptagon *h3 = h2->move(i);
+          if(!h3) continue;
+          if(visited.count(h3)) continue;
+          visited.insert(h3);
+          v.emplace_back(h3, T * adj(h2, i));
+          }
+        }
+      
+      auto h1 = tailored_alloc<heptagon> (current.shapes[xt].size());
+      h1->distance = h->distance + 1;
+      h1->zebraval = xt;
+      h1->c7 = newCell(h1->type, h1);
+      h1->alt = nullptr;
+      h1->cdata = nullptr;
+      h1->emeraldval = h->emeraldval ^ m;
+      h->c.connect(d, h1, e, m);
+      
+      return h1;
+      }
+
+    const auto& p = arbi_matrix[h];
+    
+    heptagon *alt = p.first;
     
     transmatrix T = p.second * adj(h, d);
     

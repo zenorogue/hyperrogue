@@ -744,6 +744,7 @@ EX transmatrix rgpushxto0(const hyperpoint& H) {
 
 EX void fixmatrix(transmatrix& T) {
   if(nonisotropic) ; // T may be inverse... do not do that
+  else if(cgflags & qAFFINE) ; // affine
   else if(prod) {
     auto z = zlevel(tC0(T));
     T = mscale(T, -z);
