@@ -381,7 +381,14 @@ EX ld sqhypot_d(int d, const hyperpoint& h) {
 EX ld hypot_d(int d, const hyperpoint& h) {
   return sqrt(sqhypot_d(d, h));
   }
-  
+
+/** @brief positive for a material vertex, 0 for ideal vertex, negative for ultra-ideal vertex */
+EX ld material(const hyperpoint& h) {
+  if(sphere) return intval(h, Hypc);
+  else if(hyperbolic) return -intval(h, Hypc);
+  else return h[LDIM] - 1;
+  }
+
 EX ld zlevel(const hyperpoint &h) {
   if(sl2) return sqrt(-intval(h, Hypc));
   else if(translatable) return h[LDIM];
@@ -410,6 +417,14 @@ EX hyperpoint normalize(hyperpoint H) {
   ld Z = zlevel(H);
   for(int c=0; c<MDIM; c++) H[c] /= Z;
   return H;
+  }
+
+/** like normalize but makes (ultra)ideal points material */
+EX hyperpoint ultra_normalize(hyperpoint H) {
+  if(material(H) <= 0) {
+    H[MDIM-1] = hypot_d(MDIM-1, H) + 1e-6;
+    }
+  return normalize(H);
   }
 
 /** normalize, and in product geometry, also flatten */
