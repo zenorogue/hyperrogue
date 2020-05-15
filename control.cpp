@@ -436,6 +436,11 @@ bool handleTune(int sym, int uni) {
 #endif
 
 EX purehookset hooks_fixticks;
+
+array<int, 8> 
+  keys_vi = {'l', 'n', 'j', 'b', 'h', 'y', 'k', 'u'},
+  keys_wasd = {'d', 'c', 'x', 'z', 'a', 'q', 'w', 'e'},
+  keys_numpad = {SDLK_KP6, SDLK_KP3, SDLK_KP2, SDLK_KP1, SDLK_KP4, SDLK_KP7, SDLK_KP8, SDLK_KP9};
   
 EX void handleKeyNormal(int sym, int uni) {
 
@@ -455,14 +460,9 @@ EX void handleKeyNormal(int sym, int uni) {
 #endif
 
   if(!(uni >= 'A' && uni <= 'Z') && DEFAULTCONTROL) {
-    if(sym == 'l' || sym == 'd' || sym == SDLK_KP6) movepckeydir(0);
-    if(sym == 'n' || sym == 'c' || sym == SDLK_KP3) movepckeydir(1);
-    if(sym == 'j' || sym == 'x' || sym == SDLK_KP2) movepckeydir(2);
-    if(sym == 'b' || sym == 'z' || sym == SDLK_KP1) movepckeydir(3);
-    if(sym == 'h' || sym == 'a' || sym == SDLK_KP4) movepckeydir(4);
-    if(sym == 'y' || sym == 'q' || sym == SDLK_KP7) movepckeydir(5);
-    if(sym == 'k' || sym == 'w' || sym == SDLK_KP8) movepckeydir(6);
-    if(sym == 'u' || sym == 'e' || sym == SDLK_KP9) movepckeydir(7);
+    for(int i=0; i<8; i++)
+      if(among(sym, keys_vi[i], keys_wasd[i], keys_numpad[i]))
+        movepckeydir(i);
     }
 
 #if ISPANDORA
