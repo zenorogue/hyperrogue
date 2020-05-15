@@ -328,7 +328,9 @@ EX ld edge_of_triangle_with_angles(ld alpha, ld beta, ld gamma) {
   }
 
 EX hyperpoint hpxy(ld x, ld y) { 
-  return PIU(hpxyz(x,y, sl2 ? sqrt(1+x*x+y*y) : translatable ? 1 : sphere ? sqrt(1-x*x-y*y) : sqrt(1+x*x+y*y)));
+  if(sl2) return hyperpoint(x, y, 0, sqrt(1+x*x+y*y));
+  if(rotspace) return hyperpoint(x, y, 0, sqrt(1-x*x-y*y));
+  return PIU(hpxyz(x,y, translatable ? 1 : sphere ? sqrt(1-x*x-y*y) : sqrt(1+x*x+y*y)));
   }
 
 EX hyperpoint hpxy3(ld x, ld y, ld z) { 
