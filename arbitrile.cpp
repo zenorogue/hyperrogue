@@ -12,6 +12,8 @@ namespace hr {
 
 EX namespace arb {
 
+EX int affine_limit = 200;
+
 #if HDR
 
 struct shape {
@@ -24,6 +26,7 @@ struct shape {
   int size() const { return isize(vertices); }
   void build_from_angles_edges();
   vector<pair<int, int> > sublines;
+  vector<pair<ld, ld>> stretch_shear;
   };
 
 struct arbi_tiling {
@@ -169,6 +172,7 @@ EX void load_tile(exp_parser& ep, bool unit) {
   cc.connections.resize(cc.size());
   for(int i=0; i<isize(cc.connections); i++)
     cc.connections[i] = make_tuple(cc.id, i, false);
+  cc.stretch_shear.resize(cc.size(), make_pair(1, 0));
   }
 
 EX void load(const string& fname) {
@@ -220,7 +224,14 @@ EX void load(const string& fname) {
       ginf[gArbitrary].g = giEuclid2;
       ginf[gArbitrary].sides = 7;
       set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
+      set_flag(ginf[gArbitrary].flags, qAFFINE, false);
+      }
+    else if(ep.eat("a2.")) {
+      ginf[gArbitrary].g = giEuclid2;
+      ginf[gArbitrary].sides = 7;
+      set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
       set_flag(ginf[gArbitrary].flags, qAFFINE, true);
+      affine_limit = 200;
       }
     else if(ep.eat("h2.")) {
       ginf[gArbitrary].g = giHyperb2;
@@ -254,6 +265,10 @@ EX void load(const string& fname) {
       }
     else if(ep.eat("unittile(")) load_tile(ep, true);
     else if(ep.eat("tile(")) load_tile(ep, false);
+    else if(ep.eat("affine_limit(")) {
+      affine_limit = ep.iparse();
+      ep.force_eat(")");
+      }
     else if(ep.eat("conway(\"")) {
       string s = "";
       while(true) {
@@ -318,7 +333,43 @@ EX void load(const string& fname) {
       ep.force_eat(")");
       throw connection_debug_request(i);
       }
+    else if(ep.eat("stretch_shear(")) {
+      ld stretch = ep.rparse(0);
+      ep.force_eat(",");
+      ld shear = ep.rparse(0);
+      ep.force_eat(",");
+      int i = ep.iparse(0);
+      verify_index(i, c.shapes, ep);
+      ep.force_eat(",");
+      int j = ep.iparse(0);
+      verify_index(j, c.shapes[i], ep);
+      ep.force_eat(")");
+      auto& sh = c.shapes[i];
+      sh.stretch_shear[j] = {stretch, shear};
+      auto& co = sh.connections[j];
+      int i2 = get<0>(co);
+      int j2 = get<1>(co);
+      auto& xsh = c.shapes[i2];
+      ld scale = sh.edges[j] / xsh.edges[j2];
+      println(hlog, "scale = ", scale);
+      xsh.stretch_shear[j2] = {1/stretch, shear * (get<2>(co) ? 1 : -1) * stretch };
+      }
     else throw hr_parse_exception("expecting command, " + ep.where());
+    }
+  if(!(cgflags & qAFFINE)) {
+    for(int i=0; i<isize(c.shapes); i++) {
+      auto& sh = c.shapes[i];
+      for(int j=0; j<isize(sh.edges); j++) {
+        ld d1 = hdist(sh.vertices[j], sh.vertices[j+1]);
+        auto con = sh.connections[j];
+        int i2 = get<0>(con);
+        int j2 = get<1>(con);
+        auto& xsh = c.shapes[get<0>(con)];
+        ld d2 = hdist(xsh.vertices[j2], xsh.vertices[j2+1]);
+        if(abs(d1 - d2) > 1e-6)
+          throw hr_parse_exception(lalign(0, "connecting ", make_pair(i,j), " to ", make_pair(i2,j2), " of different lengths only possible in a2"));
+        }
+      }
     }
   }
 
@@ -384,7 +435,9 @@ void connection_debugger() {
     dialog::addSelItem(cap, "go", '0' + k);
     
     dialog::add_action([k, last, con] {
+      if(euclid) cgflags |= qAFFINE;
       debug_polys.emplace_back(last.first * get_adj(debugged, last.second, k, -1), get<0>(con));
+      if(euclid) cgflags &= ~qAFFINE;
       });
     
     }    
@@ -443,6 +496,11 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int xdl) {
     ld sca = hdist(vl, vr) / hdist(xvl, xvr);
     transmatrix Tsca = Id;
     Tsca[0][0] = Tsca[1][1] = sca;
+
+    auto& ss = sh.stretch_shear[dl];
+    Tsca[0][1] = ss.first * ss.second * sca;
+    Tsca[1][1] *= ss.first;
+    
     Res = Res * Tsca;
     }
 
@@ -502,8 +560,6 @@ struct hrmap_arbi : hrmap {
     celllister cl(origin->c7, 1000, 200, NULL);
     ginf[geometry].distlimit[0] = cgi.base_distlimit = cl.dists.back();
     if(sphere) cgi.base_distlimit = SEE_ALL;
-    
-    if(cgflags & qAFFINE) cgi.base_distlimit = 3;
     }
 
   ~hrmap_arbi() {
@@ -551,7 +607,7 @@ struct hrmap_arbi : hrmap {
       
       transmatrix goal = adj(h, d);
       
-      for(int i=0; i<200 && i < isize(v); i++) {
+      for(int i=0; i<affine_limit && i < isize(v); i++) {
         transmatrix T = v[i].second;
         heptagon *h2 = v[i].first;
         if(eqmatrix(T, goal)) {
