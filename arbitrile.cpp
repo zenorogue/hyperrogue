@@ -242,7 +242,7 @@ EX void load(const string& fname) {
     else if(ep.eat("s2.")) {
       ginf[gArbitrary].g = giSphere2;
       ginf[gArbitrary].sides = 5;
-      set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
+      set_flag(ginf[gArbitrary].flags, qBOUNDED, true);
       set_flag(ginf[gArbitrary].flags, qAFFINE, false);
       }
     else if(ep.eat("angleunit(")) angleunit = real(ep.parsepar());
