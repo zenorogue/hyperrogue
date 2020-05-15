@@ -513,6 +513,7 @@ EX void select_quotient_screen() {
   char key = 'a';
   for(int i=0; i<isize(ginf); i++) {
     auto g = eGeometry(i);
+    if(ginf[g].flags & qDEPRECATED) continue;
     if(same_tiling(g)) {
       dialog::addBoolItem(
         (ginf[g].flags & qANYQ) ? 
