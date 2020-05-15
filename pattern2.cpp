@@ -1812,6 +1812,7 @@ EX namespace patterns {
         if(c == currentmap->gamestart()) return canvasback;
         int d = c->master->distance;
         if(geometry == gNil) d = c->master->zebraval;
+        if(euc::in()) d = euc::get_ispacemap()[c->master][0];
         if(d % 2 == 0 || d < -5 || d > 5) return hrand(100) < jblock ? 0xFFFFFFFF : canvasback;
         return hrand(100) < jhole ? canvasback : colortables['j'][(d+5)/2];
         }
