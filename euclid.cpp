@@ -1169,7 +1169,78 @@ EX int cyldist(gp::loc a, gp::loc b) {
   return best;
   }
 
-EX bool in() { return euclid && standard_tiling(); }
+EX void generate() {
+
+  auto v = euc::get_shifttable();
+  
+  auto& cs = cgi.cellshape;
+
+  if(S7 == 6) {
+    cgi.adjcheck = 1;
+    cgi.face = 4;
+    for(int w=0; w<6; w++) {
+      for(int a=0; a<4; a++) {
+        int t[3];
+        t[0] = (w>=3) ? -1 : 1;
+        t[1] = among(a, 0, 3) ? -1 : 1;
+        t[2] = among(a, 2, 3) ? -1 : 1;
+        int x = w%3;
+        int y = (x+2)%3;
+        int z = (y+2)%3;
+        cs.push_back(hpxy3(t[x]/2., t[y]/2., t[z]/2.));
+        }
+      }
+    }
+
+  if(S7 == 12) {
+    cgi.adjcheck = sqrt(2);
+    cgi.face = 4;
+    for(int w=0; w<12; w++) {
+      auto co = v[w];
+      vector<int> valid;
+      for(int c=0; c<3; c++) if(co[c]) valid.push_back(c);
+      int third = 3 - valid[1] - valid[0];
+      hyperpoint v0 = cpush0(valid[0], co[valid[0]] > 0 ? 1 : -1);
+      hyperpoint v1 = cpush0(valid[1], co[valid[1]] > 0 ? 1 : -1);
+      cs.push_back(v0);
+      cs.push_back(v0/2 + v1/2 + cpush0(third, .5) - C0);
+      cs.push_back(v1);
+      cs.push_back(v0/2 + v1/2 + cpush0(third, -.5) - C0);
+      }
+    }
+
+  if(S7 == 14) {
+    cgi.adjcheck = 2;
+    cgi.face = 4; /* the first face */
+    auto v = euc::get_shifttable();
+    for(int w=0; w<14; w++) {
+      if(w%7 < 3) {
+        int z = w>=7?-1:1;
+        cs.push_back(cpush0(w%7, z) + cpush0((w%7+1)%3, 1/2.) - C0);
+        cs.push_back(cpush0(w%7, z) + cpush0((w%7+2)%3, 1/2.) - C0);
+        cs.push_back(cpush0(w%7, z) + cpush0((w%7+1)%3,-1/2.) - C0);
+        cs.push_back(cpush0(w%7, z) + cpush0((w%7+2)%3,-1/2.) - C0);
+        }
+      else {
+        auto t = v[w];
+        ld x = t[0], y = t[1], z = t[2];
+        for(hyperpoint h: {
+          hpxy3(x, y/2, 0), hpxy3(x/2, y, 0), hpxy3(0, y, z/2),
+          hpxy3(0, y/2, z), hpxy3(x/2, 0, z), hpxy3(x, 0, z/2)
+          }) cs.push_back(h);
+        }
+      }
+    }
+
+  }
+
+/** @brief returns true if the current geometry is based on this module 
+ *  (For example, Archimedean, kite, or fake with underlying non-Euclidean geometry returns false)
+ */
+EX bool in() { 
+  return euclid && standard_tiling(); 
+  }
+
 EX bool in(int dim) { return in() && WDIM == dim; }
 EX bool in(int dim, int s7) { return in(dim) && S7 == s7; }
 

@@ -573,6 +573,7 @@ void geometry_information::prepare_basics() {
   #endif
   #if MAXMDIM >= 4
   if(reg3::in()) reg3::generate();
+  if(euc::in(3)) euc::generate();
   #endif
   
   hybrid_finish:
