@@ -793,19 +793,27 @@ EX void fixmatrix(transmatrix& T) {
     PIU(fixmatrix(T));
     T = mscale(T, +z);
     }
-  else if(euclid) {
-    for(int x=0; x<GDIM; x++) for(int y=0; y<=x; y++) {
-      ld dp = 0;
-      for(int z=0; z<GDIM; z++) dp += T[z][x] * T[z][y];
-      
-      if(y == x) dp = 1 - sqrt(1/dp);
-      
-      for(int z=0; z<GDIM; z++) T[z][x] -= dp * T[z][y];
-      }
-    for(int x=0; x<GDIM; x++) T[LDIM][x] = 0;
-    T[LDIM][LDIM] = 1;
+  else if(euclid)
+    fixmatrix_euclid(T);
+  else
+    orthonormalize(T);
+  }
+
+EX void fixmatrix_euclid(transmatrix& T) {
+  for(int x=0; x<GDIM; x++) for(int y=0; y<=x; y++) {
+    ld dp = 0;
+    for(int z=0; z<GDIM; z++) dp += T[z][x] * T[z][y];
+    
+    if(y == x) dp = 1 - sqrt(1/dp);
+    
+    for(int z=0; z<GDIM; z++) T[z][x] -= dp * T[z][y];
     }
-  else for(int x=0; x<MDIM; x++) for(int y=0; y<=x; y++) {
+  for(int x=0; x<GDIM; x++) T[LDIM][x] = 0;
+  T[LDIM][LDIM] = 1;
+  }
+
+EX void orthonormalize(transmatrix& T) {
+  for(int x=0; x<MDIM; x++) for(int y=0; y<=x; y++) {
     ld dp = 0;
     for(int z=0; z<MDIM; z++) dp += T[z][x] * T[z][y] * sig(z);
     
