@@ -365,6 +365,7 @@ void set_gfake(ld _around) {
   auto& u = underlying_cgip;
   
   ginf[gFake].tiling_name = lalign(0, "{", u->face, ",", get_middle(), ",", around, "}");
+  ginf[gFake].xcode = no_code;
   
   if(currentmap) new hrmap_fake(currentmap);
   }
