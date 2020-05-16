@@ -254,15 +254,12 @@ EX ld compute_around(bool setup) {
   h2 = gpushxto0(u) * h2;
   u = gpushxto0(u) * u;
   
-  println(hlog, "h = ", hdist0(h), " ucgi = ", format("%p", &ucgi), " @ ", hyperbolic, " / ", sphere, " h2 = ", h2);
-  
   ld x = hypot(h2[1], h2[2]);
   ld y = h2[0];
   return 360 / (90 + atan(y/x) / degree);
   }
 
 EX void generate() {
-  println(hlog, "Generating fake");
   FPIU( cgi.require_basics() );
   auto &ucgi = *underlying_cgip;
   
@@ -300,8 +297,6 @@ EX void compute_scale() {
 
   ld good = compute_euclidean();
   
-  println(hlog, "good = ", good);
-  
   if(around < 0) around = good;
   
   if(abs(good - around) < 1e-6) good = around;
@@ -324,7 +319,6 @@ EX void compute_scale() {
     }
 
   ld around_ideal = 1/(1/2. - 1./get_middle());
-  println(hlog, "around_ideal = ", around_ideal);
   
   if(euclid) scale = 1;
   else if(abs(around_ideal - around) < 1e-6) {
@@ -336,15 +330,12 @@ EX void compute_scale() {
     hyperpoint h = h0;
     auto h1 = h / h[WDIM] * scale;
     h1[WDIM] = 1;
-    
-    println(hlog, "material = ", material(h1));
     }
   else {
     ld minscale = 0, maxscale = 10;
     for(int it=0; it<100; it++) {
       scale = (minscale + maxscale) /  2;
       ld ar = compute_around(false);
-      println(hlog, "scale = ", scale, " ar = ", ar);
       if(sphere) {
         if(ar < around) maxscale = scale;
         else minscale = scale;
