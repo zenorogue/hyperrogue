@@ -8,6 +8,8 @@ EX namespace fake {
 
   EX ld scale;
   
+  EX bool multiple;
+  
   EX eGeometry underlying;
   EX geometry_information *underlying_cgip;
   EX hrmap *pmap;
@@ -147,11 +149,9 @@ EX namespace fake {
         return;
         }
       
-      bool bymatrix = true;
-      
       dq::visited_c.clear();
       dq::visited_by_matrix.clear();
-      auto enqueue = (bymatrix ? dq::enqueue_by_matrix_c : dq::enqueue_c);
+      auto enqueue = (multiple ? dq::enqueue_by_matrix_c : dq::enqueue_c);
       enqueue(centerover, cview());
       
       while(!dq::drawqueue_c.empty()) {
@@ -284,6 +284,11 @@ EX void compute_scale() {
   println(hlog, "good = ", good);
   
   if(abs(good - around) < 1e-6) good = around;
+
+  multiple = false;
+  for(int k=1; k<10; k++)
+    if(abs(around - underlying_cgip->loop) < 1e-6)
+      multiple = true;
 
   if(around == good) {  
     ginf[gFake].g = WDIM == 3 ? giEuclid3 : giEuclid2;
