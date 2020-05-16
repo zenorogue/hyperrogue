@@ -3945,3 +3945,27 @@ Geometries:
 - better centering in screenshot, 'rotate PC' option
 - in animation, 'monster turns' can be configured (useful for animating CA or butterflies)
 - fixed Butterflies in non-orientable geometries
+
+2020-05-16 11:26 Update 11.3m:
+
+gameplay:
+- Orb of Safety in multiplayer should be fixed
+- fixed a potential crash while clearing the map
+
+configuration:
+- recently added lands should work better for FPP (correct skies, Frog model; also fixed the Sun)
+- allow setting the resource dir
+- rewritten the o-key functionality to let the user choose from several applicable options
+- you can now configure the music to play while out of focus in the menus (see "music volume")
+- 'light' movestar now has size adjusting to geometry
+- help for keyboard users options includes help for VI keys and WASD keys
+- fixed movement while in rug
+
+geometry:
+- tes files can now define "affine tessellations"
+- 'change curvature' option (in regular 3D honeycombs you can change the curvature of the cells)
+- raycaster for the spherical and SL2 geometry [does not draw vertical walls well]
+- raycaster in rotation/product spaces now works also for non-regular base tessellation
+- stretched spherical/SL2 geometry (raycaster only)
+- 3D models were buggy in rotation spaces
+ 
