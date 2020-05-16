@@ -468,7 +468,7 @@ EX int celldist(cell *c) {
   if(hybri) 
     return hybrid::celldistance(c, currentmap->gamestart());
   if(nil && !quotient) return DISTANCE_UNKNOWN;
-  if(euclid) return celldistance(currentmap->gamestart(), c);
+  if(euc::in()) return celldistance(currentmap->gamestart(), c);
   if(sphere || bt::in() || WDIM == 3 || cryst || sn::in() || kite::in()) return celldistance(currentmap->gamestart(), c);
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
@@ -1073,6 +1073,8 @@ EX int clueless_celldistance(cell *c1, cell *c2) {
 
 EX int celldistance(cell *c1, cell *c2) {
 
+  if(fake::in()) return FPIU(celldistance(c1, c2));
+
   if(hybri) return hybrid::celldistance(c1, c2);
   
   #if CAP_FIELD
@@ -1103,7 +1105,7 @@ EX int celldistance(cell *c1, cell *c2) {
   #endif
   
   #if MAXMDIM >= 4
-  if(euclid && !kite::in() && !arcm::in()) 
+  if(euc::in()) 
     return euc::celldistance(c1, c2);
   
   if(hyperbolic && WDIM == 3) return reg3::celldistance(c1, c2);
