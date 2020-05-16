@@ -890,7 +890,7 @@ void enable_raycaster() {
 
     #ifndef GLES_ONLY
     fmain +=    
-      "      gl_FragDepth = (" + to_glsl(-vnear+vfar)+"+w*" + to_glsl(2*vnear*vfar)+"/z)/" + to_glsl(vnear-vfar)+";\n"
+      "      gl_FragDepth = (" + to_glsl(-vnear-vfar)+"+w*" + to_glsl(2*vnear*vfar)+"/z)/" + to_glsl(vnear-vfar)+";\n"
       "      gl_FragDepth = (gl_FragDepth + 1.) / 2.;\n";
     #endif
     
