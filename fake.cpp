@@ -346,7 +346,6 @@ EX void compute_scale() {
         }
       }
     }  
-  sightranges[gFake] = sightranges[underlying] * scale;
   }
 
 void set_gfake(ld _around) {
@@ -373,19 +372,30 @@ void set_gfake(ld _around) {
 EX void change_around() {
   if(around >= 0 && around <= 2) return;
 
+  ld t = in() ? scale : 1;
+  hyperpoint h = inverse_exp(tC0(View));
+  transmatrix T = gpushxto0(tC0(View)) * View;
+  
+  ld range = sightranges[geometry];
+  
   if(!fake::in()) {
     if(around == cgi.loop) return; /* do nothing */
     set_gfake(around);
-    return;
     }
   
-  else {
-    ld t = sightranges[gFake] / (sightranges[underlying] * scale);
+  else {    
     compute_scale();
     ray::reset_raycaster();
-    sightranges[gFake] *= t;
     }
-  };
+
+  println(hlog, "scale = ", t, " -> ", scale, " range = ", range);
+  t = scale / t;
+  println(hlog, "t = ", t, " h distance = ", hypot_d(3, h));
+  h *= t;
+  View = rgpushxto0(direct_exp(h)) * T;
+  playermoved = false;
+  sightranges[gFake] = range * t;
+  }
 
 EX void configure() {
   if(!in()) {
