@@ -360,12 +360,12 @@ EX void load(const string& fname) {
     for(int i=0; i<isize(c.shapes); i++) {
       auto& sh = c.shapes[i];
       for(int j=0; j<isize(sh.edges); j++) {
-        ld d1 = hdist(sh.vertices[j], sh.vertices[j+1]);
+        ld d1 = sh.edges[j];
         auto con = sh.connections[j];
         int i2 = get<0>(con);
         int j2 = get<1>(con);
         auto& xsh = c.shapes[get<0>(con)];
-        ld d2 = hdist(xsh.vertices[j2], xsh.vertices[j2+1]);
+        ld d2 = xsh.edges[j2];
         if(abs(d1 - d2) > 1e-6)
           throw hr_parse_exception(lalign(0, "connecting ", make_pair(i,j), " to ", make_pair(i2,j2), " of different lengths only possible in a2"));
         }
