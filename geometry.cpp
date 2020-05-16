@@ -581,6 +581,16 @@ void geometry_information::prepare_basics() {
   scalefactor = crossf / hcrossf7;
   orbsize = crossf;
 
+  if(fake::in()) {
+    auto& u = fake::underlying_cgip;
+    crossf = u->crossf * fake::scale;
+    scalefactor = u->scalefactor * fake::scale;
+    orbsize = u->orbsize * fake::scale;
+    hexf = u->hexf * fake::scale;
+    rhexf = u->rhexf * fake::scale;
+    hexvdist = u->hexvdist * fake::scale;
+    }
+
   if(scale_used()) scalefactor *= vid.creature_scale;
 
   zhexf = BITRUNCATED ? hexf : crossf* .55;
