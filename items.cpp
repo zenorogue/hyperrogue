@@ -147,8 +147,10 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
 
     playSound(c2, "pickup-orb"); // TODO safety
     if(!dual::state) items[c2->item] = 7;
-    if(shmup::on)
+    if(shmup::on || multi::players > 1) {
       shmup::delayed_safety = true;
+      shmup::delayed_safety_land = c2->land;
+      }
     else 
       activateSafety(c2->land);
     return true;

@@ -927,10 +927,17 @@ EX void handleInput(int delta) {
         }
       
       multi::cpid = 0;
-      if(multimove()) {
+      if(multimove()) {      
         multi::aftermove = false;
-        monstersTurn();
-        checklastmove();
+        if(shmup::delayed_safety) {
+          activateSafety(shmup::delayed_safety_land);
+          shmup::delayed_safety = false;
+          checklastmove();
+          }
+        else {          
+          monstersTurn();
+          checklastmove();
+          }
         }
       }
     }

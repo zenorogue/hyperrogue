@@ -100,6 +100,7 @@ ld fabsl(ld x) { return x>0?x:-x; }
 
 EX bool on = false;
 EX bool delayed_safety = false;
+EX eLand delayed_safety_land;
 
 bool lastdead = false;
 
@@ -2697,7 +2698,7 @@ EX void turn(int delta) {
   additional.clear();
   
   if(delayed_safety) { 
-    activateSafety(pc[0]->base->land);
+    activateSafety(delayed_safety_land);
     delayed_safety = false;
     }
 

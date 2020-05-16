@@ -158,7 +158,8 @@ EX bool monstersnear2() {
   bool recorduse[ittypes];
   for(int i=0; i<ittypes; i++) recorduse[i] = orbused[i];
   if(multi::cpid == multi::players || multi::players == 1 || multi::checkonly) {
-  
+
+    if(shmup::delayed_safety) return false;
     dynamicval<eMonster> sw(passive_switch, passive_switch);
 
     for(int i=0; i<isize(stalemate::moves); i++)
