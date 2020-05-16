@@ -756,6 +756,11 @@ EX void showEuclideanMenu() {
     dialog::add_action_push(crystal::show);
     }
   
+  if(fake::available()) {
+    dialog::addItem(XLAT("change curvature"), '4');
+    dialog::add_action(fake::configure);
+    }
+  
   #if CAP_IRR
   if(hyperbolic && IRREGULAR) {
     nom = isize(irr::cells);

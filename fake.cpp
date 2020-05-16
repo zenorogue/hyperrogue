@@ -17,6 +17,13 @@ EX namespace fake {
   EX eGeometry actual_geometry;
   
   EX bool in() { return geometry == gFake; }
+  
+  EX bool available() {
+    if(in()) return true;
+    if(GDIM == 2) return false;
+    if(among(geometry, gRhombic3, gBitrunc3)) return false;
+    return euc::in() || reg3::in();
+    }
 
   // a dummy map that does nothing
   struct hrmap_fake : hrmap {
@@ -388,6 +395,33 @@ EX void change_around() {
     sightranges[gFake] *= t;
     }
   };
+
+EX void configure() {
+  if(!in()) {
+    underlying_cgip = cgip;
+    around = cgi.loop;
+    }
+  dialog::editNumber(around, 2.01, 10, 1, around, "change curvature", 
+    "This feature lets you construct the same regular honeycomb, but "
+    "from regular polyhedra of different curvature.\n\n"
+    "The number you give here is the number of cells around an edge.\n\n"
+    "This geometry is drawn correctly, except if the value entered is "
+    "the multiple of the actual one, or when using the raycaster."
+    );
+  if(fake::in())
+    dialog::reaction = change_around;
+  else  
+    dialog::reaction_final = change_around;
+  dialog::extra_options = [] {
+    ld e = compute_euclidean();
+    dialog::addSelItem("Euclidean", fts(e), 'E');
+    dialog::add_action([e] {
+      around = e;
+      popScreen();
+      change_around();
+      });
+    };
+  }
   
 int readArgs() {
   using namespace arg;
