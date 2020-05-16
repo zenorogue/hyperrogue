@@ -36,10 +36,18 @@ EX namespace fake {
     
     cell* gamestart() override { return in_underlying([this] { return underlying_map->gamestart(); }); }
 
+    hrmap_fake(hrmap *u) {
+      underlying_map = u;
+      for(hrmap*& m: allmaps) if(m == underlying_map) m = this;
+      if(currentmap == u) currentmap = this;
+      }
+
     hrmap_fake() {
       in_underlying([this] { initcells(); underlying_map = currentmap; });
       for(hrmap*& m: allmaps) if(m == underlying_map) m = NULL;
       }
+    
+    ~hrmap_fake() { delete underlying_map; }
     
     heptagon *create_step(heptagon *parent, int d) override {
       parent->c.connect(d, parent, d, false);
@@ -274,14 +282,20 @@ int get_middle() {
 
 EX ld around;
 
-EX void compute_scale() {
-
+/** @brief the value of 'around' which makes the tiling Euclidean */
+EX ld compute_euclidean() {
   int middle = get_middle();
   
-  // the value of 'around' which makes the tiling Euclidean
-  ld good = M_PI / asin(cos(M_PI/middle) / sin(M_PI/underlying_cgip->face));
+  return M_PI / asin(cos(M_PI/middle) / sin(M_PI/underlying_cgip->face));
+  }
+
+EX void compute_scale() {
+
+  ld good = compute_euclidean();
   
   println(hlog, "good = ", good);
+  
+  if(around < 0) around = good;
   
   if(abs(good - around) < 1e-6) good = around;
 
@@ -337,27 +351,37 @@ EX void compute_scale() {
   sightranges[gFake] = sightranges[underlying] * scale;
   }
 
-void set_gfake(int c, ld _around) {
-  stop_game();
+void set_gfake(ld _around) {
   cgi.require_basics();
   fake::scale = scale;
   underlying = geometry;
   underlying_cgip = cgip;  
   ginf[gFake] = ginf[underlying];
   
-  set_geometry(gFake);
+  geometry = gFake;
   
   around = _around;
   
   compute_scale();
   check_cgi();
-
-  compute_scale();
-  check_cgi();
+  
+  auto& u = underlying_cgip;
+  
+  ginf[gFake].tiling_name = lalign(0, "{", u->face, ",", get_middle(), ",", around, "}");
+  
+  if(currentmap) new hrmap_fake(currentmap);
   }
 
 EX void change_around() {
-  if(around > 2) {
+  if(around >= 0 && around <= 2) return;
+
+  if(!fake::in()) {
+    if(around == cgi.loop) return; /* do nothing */
+    set_gfake(around);
+    return;
+    }
+  
+  else {
     ld t = sightranges[gFake] / (sightranges[underlying] * scale);
     compute_scale();
     ray::reset_raycaster();
@@ -370,13 +394,7 @@ int readArgs() {
            
   if(0) ;
   else if(argis("-gfake")) {
-    if(fake::in()) shift_arg_formula(around, change_around);
-    else {
-      shift(); int c = argi();
-      ld around;
-      shift_arg_formula(around);
-      set_gfake(c, around);
-      }
+    shift_arg_formula(around, change_around);
     }
   else return 1;
   return 0;
