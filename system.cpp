@@ -967,6 +967,7 @@ EX void saveStats(bool emergency IS(false)) {
   if(peace::on) return;
   if(dpgen::in) return;
   if(experimental) return;
+  if(ginf[geometry].xcode == no_code) return;
   if(!gold()) return;
   
   remove_emergency_save();
