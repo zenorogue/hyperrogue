@@ -25,6 +25,8 @@ EX int want_use = 1;
 
 EX ld exp_start = 1, exp_decay_exp = 4, exp_decay_poly = 10;
 
+const int gms_limit = 84;
+
 EX ld maxstep_sol = .05;
 EX ld maxstep_nil = .1;
 EX ld minstep = .001;
@@ -223,7 +225,7 @@ void enable_raycaster() {
     "uniform mediump int uLength;\n"
     "uniform mediump float uIPD;\n"
     "uniform mediump mat4 uStart;\n"
-    "uniform mediump mat4 uM[84];\n"
+    "uniform mediump mat4 uM[" + its(gms_limit) + "];\n"
     "uniform mediump vec2 uStartid;\n"
     "uniform mediump sampler2D tConnections;\n"
     "uniform mediump sampler2D tWallcolor;\n"
@@ -239,7 +241,7 @@ void enable_raycaster() {
     fsh += build_getter("mediump vec4", "uWallX", irays);
     fsh += build_getter("mediump vec4", "uWallY", irays);
     fsh += build_getter("mediump int", "uWallstart", deg+1);
-    fsh += build_getter("mediump mat4", "uM", 84);
+    fsh += build_getter("mediump mat4", "uM", gms_limit);
     #endif
     
     if(prod) fsh += 
@@ -1029,6 +1031,8 @@ array<float, 2> enc(int i, int a) {
 
 color_t color_out_of_range = 0x0F0800FF;
 
+int gms_size;
+
 EX void cast() {
   enable_raycaster();
   
@@ -1249,7 +1253,8 @@ EX void cast() {
   vector<glhr::glmatrix> gms;
   for(auto& m: ms) gms.push_back(glhr::tmtogl_transpose3(m));
   glUniformMatrix4fv(o->uM, isize(gms), 0, gms[0].as_array());
-
+  gms_size = isize(gms);
+  
   bind_array(wallcolor, o->tWallcolor, txWallcolor, 4);
   bind_array(connections, o->tConnections, txConnections, 3);
   bind_array(texturemap, o->tTextureMap, txTextureMap, 5);
@@ -1364,6 +1369,11 @@ EX void configure() {
         });
       };
     });
+  
+  if(gms_size > gms_limit && ray::in_use) {
+    dialog::addBreak(100);
+    dialog::addHelp(XLAT("unfortunately this honeycomb is too complex for the current implementation (%1>%2)", its(gms_size), its(gms_limit)));
+    }
 
   edit_levellines('L');
   
