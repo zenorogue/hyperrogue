@@ -2436,7 +2436,22 @@ EX bool drawMonster(const transmatrix& Vparam, int ct, cell *c, color_t col, col
       (isPlayerOn(c) || isFriendly(c)) ? OUTLINE_FRIEND : 
       noHighlight(c->monst) ? OUTLINE_NONE :
       OUTLINE_ENEMY;
-    
+
+  // highlight faraway enemies if that's needed
+  if (vid.faraway_highlight) {
+    bool need_highlight = isActiveEnemy(c, moPlayer) && c->cpdist >= 6;
+    if (need_highlight) {
+      int hd;
+      if (c->cpdist >= 7) hd = 1;
+      else hd = 3;
+      // basic red-green oscillation
+      color_t r = ceil(255*abs(sintick(1000, 0.25))) / hd;
+      color_t g = ceil(255*abs(sintick(1000, 0.00))) / hd;
+      color_t hlc = (r<<16) + (g<<8);
+      addauraspecial(tC0(Vparam), hlc, 0);
+      }
+    }
+
   bool nospins = false, nospinb = false;
   double footphaseb = 0, footphase = 0;
   

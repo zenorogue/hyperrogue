@@ -367,6 +367,8 @@ struct videopar {
   ld plevel_factor;
   bool bubbles_special, bubbles_threshold, bubbles_all;
   int joysmooth;
+
+  bool faraway_highlight; // draw attention to monsters on the horizon
   };
 
 extern videopar vid;

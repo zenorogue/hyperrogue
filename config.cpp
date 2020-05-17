@@ -340,6 +340,7 @@ EX void initConfig() {
   addsaver(pconf.ballproj, "ballproj", 1);
   addsaver(vid.monmode, "monster display mode", DEFAULT_MONMODE);
   addsaver(vid.wallmode, "wall display mode", DEFAULT_WALLMODE);
+  addsaver(vid.faraway_highlight, "highlight faraway monsters", false);
 
   addsaver(vid.depth, "3D depth", 1);
   addsaver(vid.camera, "3D camera level", 1);
@@ -1303,6 +1304,8 @@ EX void configureOther() {
 #endif
 
   menuitem_sightrange('r');
+
+  dialog::addBoolItem_action(XLAT("highlight faraway monsters"), vid.faraway_highlight, 'h');
 
 #ifdef WHATEVER
   dialog::addSelItem(XLAT("whatever"), fts(whatever[0]), 'j');
