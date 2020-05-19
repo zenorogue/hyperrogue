@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
       obj_dir += "/";
       setdir += "../";
       for(char c: s) 
-        if(c == '=' || c == '-' || c == '/' || c == '"' || c == '\\') obj_dir += "_"; 
+        if(!isalnum(c)) obj_dir += "_"; 
         else obj_dir += c;      
       }
     else if(s == "-win") {
@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
       obj_dir += "/";
       setdir += "../";
       for(char c: s) 
-        if(c == '=' || c == '-' || c == '/') obj_dir += "_"; 
+        if(!isalnum(c)) obj_dir += "_"; 
         else obj_dir += c;
       linker += " " + s;
       }
