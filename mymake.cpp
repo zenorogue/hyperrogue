@@ -83,8 +83,10 @@ int main(int argc, char **argv) {
   set_linux();
 #endif
   for(string fname: {"Makefile.loc", "Makefile.simple", "Makefile"})
-    if(file_exists(fname))
+    if(file_exists(fname)) {
       system("make -f " + fname + " language-data.cpp autohdr.h savepng.o");
+      break;
+      }
   for(int i=1; i<argc; i++) {
     string s = argv[i];
     if(s.substr(0, 2) == "-D") {
@@ -92,7 +94,7 @@ int main(int argc, char **argv) {
       obj_dir += "/";
       setdir += "../";
       for(char c: s) 
-        if(c == '=' || c == '-' || c == '/') obj_dir += "_"; 
+        if(c == '=' || c == '-' || c == '/' || c == '"' || c == '\\') obj_dir += "_"; 
         else obj_dir += c;      
       }
     else if(s == "-win") {
