@@ -105,22 +105,14 @@ endif
 ## Begin customization points for user-specifiable HYPERROGUE_USE_XXX macros.
 
 
-hyper_OBJS = hyper$(OBJ_EXTENSION)
-hyper_LDFLAGS = $(LDFLAGS_GL) $(LDFLAGS_SDL)
+hyper_OBJS = hyper$(OBJ_EXTENSION) savepng$(OBJ_EXTENSION)
+hyper_LDFLAGS = $(LDFLAGS_GL) $(LDFLAGS_PNG) $(LDFLAGS_SDL)
 
 ifeq (${HYPERROGUE_USE_GLEW},1)
   CXXFLAGS_EARLY += -DCAP_GLEW=1
   hyper_LDFLAGS += $(LDFLAGS_GLEW)
 else
   CXXFLAGS_EARLY += -DCAP_GLEW=0
-endif
-
-ifeq (${HYPERROGUE_USE_PNG},1)
-  CXXFLAGS_EARLY += -DCAP_PNG=1
-  hyper_LDFLAGS += $(LDFLAGS_PNG)
-  hyper_OBJS += savepng$(OBJ_EXTENSION)
-else
-  CXXFLAGS_EARLY += -DCAP_PNG=0
 endif
 
 ifeq (${HYPERROGUE_USE_ROGUEVIZ},1)

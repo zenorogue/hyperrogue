@@ -900,10 +900,14 @@ EX void choose_screenshot_format() {
 EX void menu() {
   cmode = sm::SIDE; 
   gamescreen(0);
-  if(format == screenshot_format::svg && !CAP_SVG) 
+#if CAP_PNG && !CAP_SVG
+  if(format == screenshot_format::svg)
     format = screenshot_format::png;
-  if(format == screenshot_format::png && !CAP_PNG) 
+#endif
+#if CAP_SVG && !CAP_PNG
+  if(format == screenshot_format::png)
     format = screenshot_format::svg;
+#endif
   dialog::init(XLAT("screenshots"), iinf[itPalace].color, 150, 100);
   dialog::addSelItem(XLAT("format"), format_name(), 'f');
   dialog::add_action_push(choose_screenshot_format);

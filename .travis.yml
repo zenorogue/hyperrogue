@@ -10,7 +10,6 @@ matrix:
       TRAVIS_COMPILER_NAME=gcc
       TRAVIS_BUILD_SYSTEM=autotools
       HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
   - os: osx
     compiler: clang
     env: >-
@@ -18,7 +17,6 @@ matrix:
       TRAVIS_COMPILER_NAME=clang
       TRAVIS_BUILD_SYSTEM=autotools
       HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
   - os: linux
     compiler: gcc
     env: >-
@@ -26,7 +24,6 @@ matrix:
       TRAVIS_COMPILER_NAME=gcc
       TRAVIS_BUILD_SYSTEM=Makefile
       HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
   - os: linux
     compiler: clang
     env: >-
@@ -34,7 +31,6 @@ matrix:
       TRAVIS_COMPILER_NAME=clang
       TRAVIS_BUILD_SYSTEM=Makefile
       HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
   - os: linux
     dist: bionic
     compiler: gcc
@@ -43,7 +39,6 @@ matrix:
       TRAVIS_COMPILER_NAME=gcc
       TRAVIS_BUILD_SYSTEM=Makefile
       HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
       HYPERROGUE_USE_ROGUEVIZ=1
   - os: linux
     compiler: clang
@@ -52,7 +47,6 @@ matrix:
       TRAVIS_COMPILER_NAME=clang
       TRAVIS_BUILD_SYSTEM=Makefile
       HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
       HYPERROGUE_USE_ROGUEVIZ=1
   - os: osx
     compiler: clang
@@ -61,7 +55,6 @@ matrix:
       TRAVIS_COMPILER_NAME=clang
       TRAVIS_BUILD_SYSTEM=Makefile
       HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
   - os: osx
     compiler: gcc
     env: >-
@@ -69,7 +62,6 @@ matrix:
       TRAVIS_COMPILER_NAME=gcc
       TRAVIS_BUILD_SYSTEM=Makefile
       HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
       HYPERROGUE_USE_ROGUEVIZ=1
   - os: osx
     compiler: clang
@@ -78,7 +70,6 @@ matrix:
       TRAVIS_COMPILER_NAME=clang
       TRAVIS_BUILD_SYSTEM=Makefile
       HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
       HYPERROGUE_USE_ROGUEVIZ=1
   - os: linux
     env: >-
@@ -92,7 +83,6 @@ matrix:
       TRAVIS_COMPILER_NAME=clang
       TRAVIS_BUILD_SYSTEM=mymake
       HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
   - os: osx
     compiler: clang
     env: >-
@@ -100,7 +90,6 @@ matrix:
       TRAVIS_COMPILER_NAME=clang
       TRAVIS_BUILD_SYSTEM=mymake
       HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
       HYPERROGUE_USE_ROGUEVIZ=1
   - os: linux
     compiler: gcc
@@ -109,7 +98,6 @@ matrix:
       TRAVIS_COMPILER_NAME=gcc
       TRAVIS_BUILD_SYSTEM=mymake
       HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
   - os: linux
     dist: bionic
     compiler: gcc
@@ -118,7 +106,6 @@ matrix:
       TRAVIS_COMPILER_NAME=gcc
       TRAVIS_BUILD_SYSTEM=mymake
       HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
       HYPERROGUE_USE_ROGUEVIZ=1
 
 before_install:
@@ -147,15 +134,13 @@ before_install:
     fi
   fi
 - |-
-  # Install libpng if asked for
-  if [[ "$HYPERROGUE_USE_PNG" == "1" ]]; then
-    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      echo 'libpng is installed by default'
-    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      brew install libpng
-    else
-      exit 'Unsupported OS'
-    fi
+  # Install libpng
+  if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    echo 'libpng is installed by default'
+  elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    brew install libpng
+  else
+    exit 'Unsupported OS'
   fi
 - |-
   # Install autotools if asked for
