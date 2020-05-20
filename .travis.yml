@@ -132,6 +132,22 @@ before_install:
     brew install sdl sdl_gfx sdl_mixer sdl_ttf
     # work around https://stackoverflow.com/questions/51034399/ for now
     (cd /usr/local/include && ln -sf SDL/SDL.h)
+  elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+    [[ ! -f C:/tools/msys64/msys2_shell.cmd ]] && rm -rf C:/tools/msys64
+    choco uninstall -y mingw
+    choco upgrade --no-progress -y msys2
+    export msys2='cmd //C RefreshEnv.cmd '
+    export msys2+='& set MSYS=winsymlinks:nativestrict '
+    export msys2+='& C:\\tools\\msys64\\msys2_shell.cmd -defterm -no-start'
+    export mingw64="$msys2 -mingw64 -full-path -here -c "\"\$@"\" --"
+    export msys2+=" -msys2 -c "\"\$@"\" --"
+    $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-toolchain
+    ## Install more MSYS2 packages from https://packages.msys2.org/base here
+    $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-SDL mingw-w64-x86_64-SDL_gfx mingw-w64-x86_64-SDL_mixer mingw-w64-x86_64-SDL_ttf
+    taskkill //IM gpg-agent.exe //F  # https://travis-ci.community/t/4967
+    taskkill //IM dirmngr.exe //F # this process also seemed to hang after install
+    export PATH=/C/tools/msys64/mingw64/bin:$PATH
+    export MAKE=mingw32-make  # so that Autotools can find it
   else
     exit 'Unsupported OS'
   fi
@@ -142,6 +158,8 @@ before_install:
       sudo apt-get install -qq libglew-dev
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew install glew
+    elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+      $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-glew
     else
       exit 'Unsupported OS'
     fi
@@ -153,6 +171,8 @@ before_install:
       echo 'libpng is installed by default'
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew install libpng
+    elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+      $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-libpng
     else
       exit 'Unsupported OS'
     fi
@@ -164,6 +184,8 @@ before_install:
       echo 'autotools is installed by default'
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew install automake
+    elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+      $msys2 pacman --sync --noconfirm --needed automake-wrapper
     else
       exit 'Unsupported OS'
     fi
