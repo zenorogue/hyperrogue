@@ -150,9 +150,11 @@ before_install:
     export MSYS2+='& C:\\tools\\msys64\\msys2_shell.cmd -defterm -no-start'
     export MINGW64="$MSYS2 -mingw64 -full-path -here -c "\"\$@"\" --"
     export MSYS2+=" -msys2 -c "\"\$@"\" --"
-    $MSYS2 pacman --sync --noconfirm --needed mingw-w64-x86_64-toolchain
+    $MSYS2 pacman -Sy --noconfirm --needed mingw-w64-x86_64-toolchain
     ## Install more MSYS2 packages from https://packages.msys2.org/base here
-    $MSYS2 pacman --sync --noconfirm --needed make mingw-w64-x86_64-SDL mingw-w64-x86_64-SDL_gfx mingw-w64-x86_64-SDL_mixer mingw-w64-x86_64-SDL_ttf
+    $MSYS2 pacman -Sy --noconfirm --needed make mingw-w64-x86_64-SDL mingw-w64-x86_64-SDL_gfx mingw-w64-x86_64-SDL_mixer mingw-w64-x86_64-SDL_ttf
+    sed -i'.orig' 's/<SDL.h>/"SDL.h"/' /C/tools/msys64/mingw64/include/SDL/SDL_gfxPrimitives.h # otherwise header can't be located
+    
     taskkill //IM gpg-agent.exe //F  # https://travis-ci.community/t/4967
     taskkill //IM dirmngr.exe //F # this process also seemed to hang after install
     export PATH=/C/tools/msys64/mingw64/bin:$PATH
@@ -193,7 +195,7 @@ before_install:
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew install automake
     elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
-      $MSYS2 pacman --sync --noconfirm --needed automake-wrapper
+      $MSYS2 pacman --sync --noconfirm --needed automake-wrapper autoconf
     else
       exit 'Unsupported OS'
     fi
@@ -206,8 +208,10 @@ script:
     autoreconf -vi
     ./configure CXXFLAGS="-W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-maybe-uninitialized -Wno-unknown-warning-option"
     make
-  elif [[ "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
+  elif [[ "$TRAVIS_BUILD_SYSTEM" == "Makefile" && "$TRAVIS_OS_NAME" == "windows" ]]; then
     $MINGW64 make -f Makefile.simple
+  elif [[ "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
+    make -f Makefile.simple
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "mymake" ]]; then
     make -f Makefile.simple mymake
     if [[ "$HYPERROGUE_USE_ROGUEVIZ" == "1" ]]; then
