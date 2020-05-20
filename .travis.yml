@@ -145,14 +145,14 @@ before_install:
     [[ ! -f C:/tools/msys64/msys2_shell.cmd ]] && rm -rf C:/tools/msys64
     choco uninstall -y mingw
     choco upgrade --no-progress -y msys2
-    export msys2='cmd //C RefreshEnv.cmd '
-    export msys2+='& set MSYS=winsymlinks:nativestrict '
-    export msys2+='& C:\\tools\\msys64\\msys2_shell.cmd -defterm -no-start'
-    export mingw64="$msys2 -mingw64 -full-path -here -c "\"\$@"\" --"
-    export msys2+=" -msys2 -c "\"\$@"\" --"
-    $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-toolchain
+    export MSYS2='cmd //C RefreshEnv.cmd '
+    export MSYS2+='& set MSYS=winsymlinks:nativestrict '
+    export MSYS2+='& C:\\tools\\msys64\\msys2_shell.cmd -defterm -no-start'
+    export MINGW64="$MSYS2 -mingw64 -full-path -here -c "\"\$@"\" --"
+    export MSYS2+=" -msys2 -c "\"\$@"\" --"
+    $MSYS2 pacman --sync --noconfirm --needed mingw-w64-x86_64-toolchain
     ## Install more MSYS2 packages from https://packages.msys2.org/base here
-    $msys2 pacman --sync --noconfirm --needed make mingw-w64-x86_64-SDL mingw-w64-x86_64-SDL_gfx mingw-w64-x86_64-SDL_mixer mingw-w64-x86_64-SDL_ttf
+    $MSYS2 pacman --sync --noconfirm --needed make mingw-w64-x86_64-SDL mingw-w64-x86_64-SDL_gfx mingw-w64-x86_64-SDL_mixer mingw-w64-x86_64-SDL_ttf
     taskkill //IM gpg-agent.exe //F  # https://travis-ci.community/t/4967
     taskkill //IM dirmngr.exe //F # this process also seemed to hang after install
     export PATH=/C/tools/msys64/mingw64/bin:$PATH
@@ -167,7 +167,7 @@ before_install:
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew install glew
     elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
-      $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-glew
+      $MSYS2 pacman --sync --noconfirm --needed mingw-w64-x86_64-glew
     else
       exit 'Unsupported OS'
     fi
@@ -180,7 +180,7 @@ before_install:
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew install libpng
     elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
-      $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-libpng
+      $MSYS2 pacman --sync --noconfirm --needed mingw-w64-x86_64-libpng
     else
       exit 'Unsupported OS'
     fi
@@ -193,7 +193,7 @@ before_install:
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew install automake
     elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
-      $msys2 pacman --sync --noconfirm --needed automake-wrapper
+      $MSYS2 pacman --sync --noconfirm --needed automake-wrapper
     else
       exit 'Unsupported OS'
     fi
@@ -207,7 +207,7 @@ script:
     ./configure CXXFLAGS="-W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-maybe-uninitialized -Wno-unknown-warning-option"
     make
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
-    $mingw64 make -f Makefile.simple
+    $MINGW64 make -f Makefile.simple
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "mymake" ]]; then
     make -f Makefile.simple mymake
     if [[ "$HYPERROGUE_USE_ROGUEVIZ" == "1" ]]; then
