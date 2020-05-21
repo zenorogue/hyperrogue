@@ -19,6 +19,8 @@ using namespace std;
 
 string opts;
 
+int batch_size = 6; // how many modules to compile in parallel
+
 string default_standard = " -std=c++11";
 string standard = default_standard;
 
@@ -129,6 +131,8 @@ int main(int argc, char **argv) {
       standard = s;
     else if(s.substr(0, 2) == "-l")
       linker += " " + s;
+    else if(s.substr(0, 2) == "-j")
+      batch_size = stoi(s.substr(2));
     else if(s == "-I") {
       opts += " " + s + " " + argv[i+1];
       i++;
@@ -203,29 +207,37 @@ int main(int argc, char **argv) {
     }
   
   string allobj = " " + obj_dir + "/hyper.o";
-  
-  int id = 0;
-  for(string m: modules) {
-    id++;
-    string src = m + ".cpp";
-    string m2 = m;
-    for(char& c: m2) if(c == '/') c = '_';
-    string obj = obj_dir + "/" + m2 + ".o";
-    time_t src_time = get_file_time(src);
-    if(!src_time) { 
-      printf("file not found: %s\n", src.c_str());
-      exit(1);
+
+  const int module_amt = modules.size();
+  for (int i = 0; i < module_amt; i += batch_size) {
+    string batch_cmd = "";
+    string batch_str = "";
+    for (int j = i; j < i + batch_size; j++) {
+      if (j >= module_amt) break;
+      string m = modules[j];
+      string src = m + ".cpp";
+      string m2 = m;
+      for(char& c: m2) if(c == '/') c = '_';
+      string obj = obj_dir + "/" + m2 + ".o";
+      time_t src_time = get_file_time(src);
+      if(!src_time) { 
+        printf("file not found: %s\n", src.c_str());
+        exit(1);
+        }
+      time_t obj_time = get_file_time(obj);
+      if(src_time > obj_time) {
+        batch_str += "compiling " + m + " [" + to_string(j+1) + "/" + to_string(module_amt) + "]\n";
+        batch_cmd += compiler + " " + opts + " " + src + " -o " + obj + " &";
+        }
+      else {
+        batch_str += "ok: " + m + "\n";
+        }
+      allobj += " ";
+      allobj += obj;
       }
-    time_t obj_time = get_file_time(obj);
-    if(src_time > obj_time) {
-      printf("compiling %s... [%d/%d]\n", m.c_str(), id, int(modules.size()));
-      if(system(compiler + " " + opts + " " + src + " -o " + obj)) { printf("error\n"); exit(1); }
-      }
-    else {
-      printf("ok: %s\n", m.c_str());
-      }
-    allobj += " ";
-    allobj += obj;
+    batch_cmd += "wait";
+    printf("%s", batch_str.c_str());
+    if (system(batch_cmd)) { printf("compilation error!\n"); exit(1); }
     }
   
   printf("linking...\n");
