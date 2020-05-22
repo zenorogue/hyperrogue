@@ -85,6 +85,7 @@ void ensure_geometry(eGeometryClass c) {
   }
 
 void start_poly_debugger(hr_polygon_error& err) {
+  #if CAP_EDIT
   ensure_geometry(err.c);
 
   drawthemap();
@@ -103,6 +104,7 @@ void start_poly_debugger(hr_polygon_error& err) {
   mapeditor::dtcolor = 0xFFFFFFFF;
   for(int i=0; i<n; i++)
     mapeditor::dt_add_text(tC0(err.v[i]), 0.5, its(i));
+  #endif
   }
 
 void shape::build_from_angles_edges() {
