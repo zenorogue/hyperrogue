@@ -37,7 +37,7 @@ namespace collatz {
         reached = (2*reached-1) / 3;
       else reached *= 2;
       }
-    printf("reached = %lld\n", reached);
+    println(hlog, "reached = ", llts(reached));
     vector<string> seq;
     while(reached>1) { 
       seq.push_back(llts(reached));
