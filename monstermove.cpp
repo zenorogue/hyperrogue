@@ -62,7 +62,9 @@ EX void moveEffect(const movei& mi, eMonster m) {
 
   mayExplodeMine(ct, m);
   
+  #if CAP_COMPLEX2
   if(!isNonliving(m)) terracotta::check_around(ct);
+  #endif
  
   if(ct->wall == waMineUnknown && !ct->item && !ignoresPlates(m) && normal_gravity_at(ct)) 
     ct->landparam |= 2; // mark as safe
@@ -84,7 +86,9 @@ EX void moveEffect(const movei& mi, eMonster m) {
     
   if(cf && isPrincess(m)) princess::move(mi);
   
+  #if CAP_COMPLEX2
   if(cf && m == moKnight) camelot::move_knight(cf, ct);
+  #endif
   
   if(cf && m == moTortoise) {
     tortoise::move_adult(cf, ct);
@@ -1533,9 +1537,11 @@ EX int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
 
   else if(monstersnear(c2, m, NULL, c)) val = 50; // linked with mouse suicide!
   else if(passable_for(m, c2, c, 0)) {
+#if CAP_COMPLEX2
     if(mine::marked_mine(c2) && !ignoresPlates(m))
       val = 50;
     else
+#endif
       val = 4000;
     }
   else if(passable_for(m, c2, c, P_DEADLY)) val = -1100;
@@ -1938,12 +1944,16 @@ EX void movehex_all() {
   }
   
 EX void movemonsters() {
+  #if CAP_COMPLEX2
   ambush::distance = 0;
+  #endif
 
   DEBB(DF_TURN, ("lava1"));
   orboflava(1);
   
+  #if CAP_COMPLEX2
   ambush::check_state();
+  #endif
 
   sagefresh = true;
   turncount++;

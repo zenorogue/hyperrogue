@@ -789,7 +789,9 @@ EX void monstersTurn() {
 
   orbbull::check();
 
+  #if CAP_COMPLEX2
   if(!phase1) terracotta::check();
+  #endif
   
   if(items[itOrbFreedom])
     for(int i=0; i<numplayers(); i++)

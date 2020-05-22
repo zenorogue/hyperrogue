@@ -815,7 +815,9 @@ bool pcmove::after_escape() {
     return false;
     }
   else if(c2->monst == moKnight) {
+    #if CAP_COMPLEX2
     if(vmsg()) camelot::knightFlavorMessage(c2);
+    #endif
     return false;
     }
   else if(c2->monst && (!isFriendly(c2) || c2->monst == moTameBomberbird || isMountable(c2->monst))
@@ -833,8 +835,10 @@ bool pcmove::after_escape() {
 
 bool pcmove::move_if_okay() {
   cell*& c2 = mi.t;
+  #if CAP_COMPLEX2
   if(mine::marked_mine(c2) && !mine::safe() && !checkonly && warningprotection(XLAT("Are you sure you want to step there?")))
     return false;
+  #endif
   
   if(snakelevel(c2) <= snakelevel(cwt.at)-2) {
     bool can_leave = false;
@@ -1002,12 +1006,14 @@ bool pcmove::perform_actual_move() {
     else
       c2->wall = cwt.at->wall;
     }
+  #if CAP_COMPLEX2
   if(c2->wall == waRoundTable) {
     addMessage(XLAT("You jump over the table!"));
     }
   
   if(cwt.at->wall == waRoundTable) 
     camelot::roundTableMessage(c2);
+  #endif
   
   invismove = (turncount >= noiseuntil) && items[itOrbInvis] > 0;
   
@@ -1240,7 +1246,9 @@ EX void playerMoveEffects(cell *c1, cell *c2) {
   
   destroyWeakBranch(c1, c2, moPlayer);
 
+  #if CAP_COMPLEX2
   mine::uncover_full(c2);
+  #endif
   
   if((c2->wall == waClosePlate || c2->wall == waOpenPlate) && normal_gravity_at(c2) && !markOrb(itOrbAether))
     toggleGates(c2, c2->wall);

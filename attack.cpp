@@ -566,12 +566,16 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     playSound(c, "splash" + pick12());
     destroyHalfvine(c);
     minerEffect(c);
+    #if CAP_COMPLEX2
     brownian::dissolve_brownian(c, 1);
+    #endif
     forCellEx(c1, c) if(passable(c1, c, P_MONSTER | P_MIRROR | P_CLIMBUP | P_CLIMBDOWN)) {
       changes.ccell(c1);
       destroyHalfvine(c1);
       minerEffect(c1);
+      #if CAP_COMPLEX2
       brownian::dissolve_brownian(c1, 1);
+      #endif
       if(c1->monst == moSlime || c1->monst == moSlimeNextTurn)
         killMonster(c1, who);
       }
