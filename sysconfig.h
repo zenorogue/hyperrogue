@@ -173,6 +173,10 @@
 #define CAP_ODS 0
 #endif
 
+#ifndef CAP_VIDEO
+#define CAP_VIDEO (CAP_SHOT && ISLINUX && CAP_SDL)
+#endif
+
 #ifndef MAXMDIM
 #define MAXMDIM 4
 #endif
@@ -439,6 +443,10 @@ extern "C" {
 #include <random>
 #include <complex>
 #include <new>
+
+#if CAP_VIDEO
+#include <sys/wait.h>
+#endif
 
 #if CAP_ZLIB
 #include <zlib.h>

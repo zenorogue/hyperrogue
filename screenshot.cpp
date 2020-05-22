@@ -617,8 +617,10 @@ EX namespace shot {
 purehookset hooks_hqshot;
 
 #if HDR
-enum screenshot_format { png, svg, wrl };
+enum screenshot_format { png, svg, wrl, rawfile };
 #endif
+
+EX int rawfile_handle;
 
 EX int shotx = 2000;
 EX int shoty = 2000;
@@ -667,9 +669,19 @@ EX SDL_Surface *empty_surface(int x, int y, bool alpha) {
   }
 
 #if CAP_PNG
+
+void output(SDL_Surface* s, const string& fname) {
+  if(format == screenshot_format::rawfile) {
+    for(int y=0; y<shoty; y++)
+      write(rawfile_handle, &qpixel(s, 0, y), 4 * shotx);
+    }
+  else
+    IMAGESAVE(s, fname.c_str());
+  }
+
 EX void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
   if(gamma == 1 && shot_aa == 1 && sdark == sbright) {
-    IMAGESAVE(sdark, fname.c_str());
+    output(sdark, fname);
     return;
     }
 
@@ -699,7 +711,7 @@ EX void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
       part(pix, p) = v;
       }
     }
-  IMAGESAVE(sout, fname.c_str());
+  output(sout, fname);
   SDL_FreeSurface(sout);
   }
 #endif
@@ -779,6 +791,7 @@ EX void take(string fname, const function<void()>& what IS(default_screenshot_co
       return;
     
     case screenshot_format::png:
+    case screenshot_format::rawfile:
       #if CAP_PNG
       render_png(fname, what);
       #endif
@@ -913,6 +926,7 @@ EX void menu() {
       break;
       }
     
+    case screenshot_format::rawfile:
     case screenshot_format::png: {
       #if CAP_PNG
       dialog::addSelItem(XLAT("supersampling"), its(shot_aa), 's');
@@ -1266,11 +1280,13 @@ EX void rollback() {
 #if CAP_FILES && CAP_SHOT
 EX string animfile = "animation-%04d.png";
 
+EX string videofile = "animation.mp4";
+
 int min_frame = 0, max_frame = 999999;
 
 int numturns = 0;
 
-bool record_animation() {
+EX bool record_animation() {
   lastticks = 0;
   ticks = 0;
   int oldturn = -1;
@@ -1304,6 +1320,41 @@ bool record_animation() {
     }
   lastticks = ticks = SDL_GetTicks();
   return true;
+  }
+#endif
+
+#if CAP_VIDEO
+EX bool record_video(string fname IS(videofile), bool_reaction_t rec IS(record_animation)) {
+  
+  array<int, 2> tab;
+  if(pipe(&tab[0])) {
+    addMessage(format("Error: %s", strerror(errno)));
+    return false;
+    }
+  println(hlog, "tab = ", tab);
+  
+  int pid = fork();
+  if(pid == 0) {
+    close(0);
+    dup(tab[0]);
+    close(tab[1]);
+    close(tab[0]);
+    string fformat = "ffmpeg -y -f rawvideo -pix_fmt bgra -s " + its(shot::shotx) + "x" + its(shot::shoty) + " -r 60 -i - -pix_fmt yuv420p -codec:v libx264 \"" + fname + "\"";    
+    system(fformat.c_str());
+    exit(0);
+    }
+  
+  close(tab[0]);
+  shot::rawfile_handle = tab[1];
+  dynamicval<shot::screenshot_format> sf(shot::format, shot::screenshot_format::rawfile);
+  rec();
+  close(tab[1]);
+  wait(nullptr);
+  return true;
+  }
+
+EX bool record_video_std() {
+  return record_video(videofile, record_animation);
   }
 #endif
 
@@ -1552,10 +1603,17 @@ EX void show() {
     dialog::addBreak(100);
   dialog::addSelItem(XLAT("frames to record"), its(noframes), 'n');
   dialog::add_action([] () { dialog::editNumber(noframes, 0, 300, 30, 5, XLAT("frames to record"), ""); });
-  dialog::addSelItem(XLAT("record to a file"), animfile, 'R');
-  dialog::add_action([] () { 
-    dialog::openFileDialog(animfile, XLAT("record to a file"), 
+  dialog::addSelItem(XLAT("record to sequence of image files"), animfile, 'R');
+  dialog::add_action([] () {
+    dialog::openFileDialog(animfile, XLAT("record to sequence of image files"), 
       shot::format_extension(), record_animation);
+    });
+  #endif
+  #if CAP_VIDEO
+  dialog::addSelItem(XLAT("record to video file"), videofile, 'M');
+  dialog::add_action([] () {
+    dialog::openFileDialog(videofile, XLAT("record to video file"), 
+      ".mp4", record_video_std);
     });
   #endif
   dialog::addBack();
@@ -1582,6 +1640,10 @@ int readArgs() {
   else if(argis("-animrecord") || argis("-animrec")) {
     PHASE(3); shift(); noframes = argi();
     shift(); animfile = args(); record_animation();
+    }
+  else if(argis("-animvideo")) {
+    PHASE(3); shift(); noframes = argi();
+    shift(); videofile = args(); record_video();
     }
   else if(argis("-record-only")) {
     PHASEFROM(2); 
