@@ -437,9 +437,9 @@ bool handleTune(int sym, int uni) {
 
 EX purehookset hooks_fixticks;
 
-EX array<int, 8> keys_vi = {'l', 'n', 'j', 'b', 'h', 'y', 'k', 'u'};
-EX array<int, 8> keys_wasd = {'d', 'c', 'x', 'z', 'a', 'q', 'w', 'e'};
-EX array<int, 8> keys_numpad = {SDLK_KP6, SDLK_KP3, SDLK_KP2, SDLK_KP1, SDLK_KP4, SDLK_KP7, SDLK_KP8, SDLK_KP9};
+EX array<int, 8> keys_vi = {{'l', 'n', 'j', 'b', 'h', 'y', 'k', 'u'}};
+EX array<int, 8> keys_wasd = {{'d', 'c', 'x', 'z', 'a', 'q', 'w', 'e'}};
+EX array<int, 8> keys_numpad = {{SDLK_KP6, SDLK_KP3, SDLK_KP2, SDLK_KP1, SDLK_KP4, SDLK_KP7, SDLK_KP8, SDLK_KP9}};
   
 EX void handleKeyNormal(int sym, int uni) {
 
