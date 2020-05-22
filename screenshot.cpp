@@ -673,7 +673,7 @@ EX SDL_Surface *empty_surface(int x, int y, bool alpha) {
 void output(SDL_Surface* s, const string& fname) {
   if(format == screenshot_format::rawfile) {
     for(int y=0; y<shoty; y++)
-      write(rawfile_handle, &qpixel(s, 0, y), 4 * shotx);
+      ignore(write(rawfile_handle, &qpixel(s, 0, y), 4 * shotx));
     }
   else
     IMAGESAVE(s, fname.c_str());
@@ -1336,11 +1336,11 @@ EX bool record_video(string fname IS(videofile), bool_reaction_t rec IS(record_a
   int pid = fork();
   if(pid == 0) {
     close(0);
-    dup(tab[0]);
-    close(tab[1]);
-    close(tab[0]);
+    if(dup(tab[0]) != 0) exit(1);
+    if(close(tab[1]) != 0) exit(1);
+    if(close(tab[0]) != 0) exit(1);
     string fformat = "ffmpeg -y -f rawvideo -pix_fmt bgra -s " + its(shot::shotx) + "x" + its(shot::shoty) + " -r 60 -i - -pix_fmt yuv420p -codec:v libx264 \"" + fname + "\"";    
-    system(fformat.c_str());
+    ignore(system(fformat.c_str()));
     exit(0);
     }
   
