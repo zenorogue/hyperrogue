@@ -1608,5 +1608,12 @@ EX void construct_relations() {
 
 EX }
 #endif
+
+#if MAXMDIM == 3
+EX namespace reg3 {
+  bool in() { return false; }
+EX }
+#endif
+
 }
 
