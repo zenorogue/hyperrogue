@@ -188,7 +188,7 @@ EX namespace fake {
       }
     };
   
-  EX hrmap* new_map() { return new hrmap_fake; };
+  EX hrmap* new_map() { return new hrmap_fake; }
 
   EX hrmap* get_umap() { if(!dynamic_cast<hrmap_fake*>(currentmap)) return nullptr; else return ((hrmap_fake*)currentmap)->underlying_map; }
 
@@ -350,7 +350,6 @@ EX void compute_scale() {
 
 void set_gfake(ld _around) {
   cgi.require_basics();
-  fake::scale = scale;
   underlying = geometry;
   underlying_cgip = cgip;  
   ginf[gFake] = ginf[underlying];
