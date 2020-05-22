@@ -3,7 +3,7 @@ hyperroguedir = $(datadir)/hyperrogue
 hyperrogue_SOURCES = hyper.cpp savepng.cpp
 hyperrogue_CPPFLAGS = -DFONTDESTDIR=\"$(pkgdatadir)/DejaVuSans-Bold.ttf\" -DMUSICDESTDIR=\"$(pkgdatadir)/hyperrogue-music.txt\" -DSOUNDDESTDIR=\"$(pkgdatadir)/sounds/\" -DRESOURCEDESTDIR=\"$(pkgdatadir)/\"
 hyperrogue_CXXFLAGS = -O2 -std=c++11 ${AM_CXXFLAGS}
-dist_hyperrogue_DATA = hyperrogue-music.txt DejaVuSans-Bold.ttf solv-geodesics.dat shyp-geodesics.dat ssol-geodesics.dat honeycomb-435.dat honeycomb-534.dat honeycomb-535.dat
+dist_hyperrogue_DATA = hyperrogue-music.txt DejaVuSans-Bold.ttf solv-geodesics.dat shyp-geodesics.dat ssol-geodesics.dat honeycomb-rules-435.dat honeycomb-rules-534.dat honeycomb-rules-535.dat
 
 # docdir
 dist_doc_DATA = README.md
