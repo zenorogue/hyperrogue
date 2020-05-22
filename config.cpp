@@ -294,7 +294,9 @@ EX void initConfig() {
   addsaver(vid.drawmousecircle, "mouse circle", ISMOBILE || ISPANDORA);
   addsaver(vid.revcontrol, "reverse control", false);
   addsaver(musicvolume, "music volume");
+  #if CAP_SDLAUDIO
   addsaver(music_out_of_focus, "music out of focus", false);
+  #endif
   addsaver(effvolume, "sound effect volume");
   addsaverenum(glyphsortorder, "glyph sort order");
   
