@@ -62,7 +62,7 @@ void curveline(hyperpoint a, hyperpoint b, int lev) {
   }
 
 bool magic_markers(cell *c, const transmatrix& V) {
-  if(vizid != &magic) return false;
+  if(vizid != (void*) &magic) return false;
   timerghost = false;
   if(c->landparam == back) {
     if(GDIM == 2) {
@@ -133,7 +133,7 @@ void twos_to_fours(vector<int>& zeros, crystal::coord co, int d) {
   }
 
 bool magic_rotate(cell *c) {
-  if(vizid != &magic) return false;
+  if(vizid != (void*) &magic) return false;
   if(c->landparam != back) return false;
   vector<int> zeros;
   auto co = crystal::get_coord(c->master);
@@ -151,7 +151,7 @@ bool magic_rotate(cell *c) {
   }
 
 bool magic_rugkey(int sym, int uni) {
-  if(vizid != &magic) return false;
+  if(vizid != (void*) &magic) return false;
   if((cmode & sm::NORMAL) && uni == 'p') {
     rug::texturesize = 4096;
     if(rug::rugged) rug::close();
