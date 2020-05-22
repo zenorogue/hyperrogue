@@ -57,28 +57,55 @@ bool fixed_orientation;
 
 transmatrix orientation_to_fix;
 
+EX int step_smoothing = 1;
+
+EX int steps_to_change;
+
+ld next_stepdist = stepdist;
+ld next_stepang = stepang;
+
+string videofile;
+
+void move_camera1(transmatrix T) {
+  saved.emplace_back(View, current_display->local_perspective, centerover);
+  if(spinning_around) {
+    for(int s=0; s<100; s++) 
+      shift_view(ztangent(-spin_distance/100));
+    rotate_view(T);
+    for(int s=0; s<100; s++) 
+      shift_view(ztangent(spin_distance/100));
+    }
+  else {
+    shift_view(ztangent(-stepdist));
+    spin_distance += stepdist;
+    rotate_view(T);
+    }
+  if(fixed_orientation) {
+    println(hlog, "cat ", inverse(View) * C0);
+    transmatrix iView = inverse(View);
+    iView = nisot::translate(iView * C0) * orientation_to_fix;
+    View = inverse(iView);
+    println(hlog, "cat ", inverse(View) * C0);
+    }
+  }
+
 bool move_camera(transmatrix T) {
+  for(int it=0; it<5; it++) 
+    move_camera1(T);
+  println(hlog, "frames = ", isize(saved), " distance = ", spin_distance);
+  playermoved = false;
+  return true;
+  }
+
+template<class Type> bool move_camera_smoothchange(const Type& T) {
   for(int it=0; it<5; it++) {
-    saved.emplace_back(View, current_display->local_perspective, centerover);
-    if(spinning_around) {
-      for(int s=0; s<100; s++) 
-        shift_view(ztangent(-spin_distance/100));
-      rotate_view(T);
-      for(int s=0; s<100; s++) 
-        shift_view(ztangent(spin_distance/100));
+    println(hlog, "steps_to_change = ", steps_to_change, " stepdist = ", stepdist);
+    if(steps_to_change) {
+      stepang = stepang + (next_stepang-stepang) / steps_to_change;
+      stepdist = stepdist + (next_stepdist-stepdist) / steps_to_change;
+      steps_to_change--;
       }
-    else {
-      shift_view(ztangent(-stepdist));
-      spin_distance += stepdist;
-      rotate_view(T);
-      }
-    if(fixed_orientation) {
-      println(hlog, "cat ", inverse(View) * C0);
-      transmatrix iView = inverse(View);
-      iView = nisot::translate(iView * C0) * orientation_to_fix;
-      View = inverse(iView);
-      println(hlog, "cat ", inverse(View) * C0);
-      }
+    move_camera1(T());
     }
   println(hlog, "frames = ", isize(saved), " distance = ", spin_distance);
   playermoved = false;
@@ -233,17 +260,87 @@ void smoothen() {
 
 string mrec_file = "devmods/manual/%05d.png";
 
-int mrec_x = 1920;
-int mrec_y = 1080;
-int mrec_cells = 24000;
+int mrec_fps = 60;
 
 int mrec_first = 0, mrec_last = 999999;
 
-ld mrec_sightrange = 6;
+int mrec_first_opt = 0, mrec_last_opt = 0;
 
-int mrec_drawn = 10;
-int mrec_generated = 1000;
+void set_stepdist(ld x) {
+  println(hlog, "stepdist = ", x);
+  next_stepdist = x;
+  steps_to_change = step_smoothing;
+  }
 
+void set_stepang(ld x) {
+  println(hlog, "stepang = ", x);
+  next_stepang = x;
+  steps_to_change = step_smoothing;
+  }
+
+void do_recording() {
+  recording = true;
+  if(mouseaim_sensitivity) {
+    mouseaim_sensitivity = 0;
+    println(hlog, "disabled mouseaim");
+    return;
+    }
+  if(musicvolume) {
+    println(hlog, "disabled music");
+    musicvolume = 0;
+    Mix_VolumeMusic(0);
+    return;
+    }
+  
+  dynamicval dp(arg::pos, arg::pos);
+  dynamicval vs(vid, vid);
+  for(arg::pos=mrec_first_opt; arg::pos < mrec_last_opt; arg::pos++) {
+    int r = callhandlers(1, hooks_args);
+    switch (r) {
+      case 0: arg::lshift(); break;
+      case 1: 
+        printf("Unknown option: %s\n", arg::argcs()); break;
+      case 2:
+        printf("Error\n"); break;
+      }
+    }
+
+  println(hlog, "starting recording");
+  shot::take("anim/start.png");
+  saving_positions = false;
+//      vid.cells_drawn_limit = 1000000;      
+  int i = 0;
+
+  system("mkdir -p devmods/manual/");
+  
+  auto f = [&] {
+    for(auto& p: saved) {
+      recall(p);
+      ticks = i * 1000 / mrec_fps;
+      
+      if(i >= mrec_first && i < mrec_last) {
+        string s = format(mrec_file.c_str(), i);
+        println(hlog, "recording frame ", i, "/", isize(saved), " to ", s);
+        shot::take(s);
+        }
+      else 
+        println(hlog, "skipping frame ", i);
+      
+      i++;
+      }
+    return true;
+    };
+    
+  if(videofile != "") {
+    anims::record_video(videofile, f);
+    }
+  else 
+    f();
+
+  // lasti = i;
+  recording = false;
+  }
+  
 bool trailer_handleKey(int sym, int uni) {  
 
   if(sym == 'f' && (cmode & sm::NORMAL)) {
@@ -273,33 +370,36 @@ bool trailer_handleKey(int sym, int uni) {
       dialog::scaleLog();
       } */
                 
-    if(sym == 's') return move_camera(Id);
+    if(sym == 's') return move_camera_smoothchange([&] { return Id; });
       
-    if(sym == 'a') return move_camera(cspin(0, 2, stepang));
+    if(sym == 'a') return move_camera_smoothchange([&] { return cspin(0, 2, stepang); });
   
-    if(sym == 'd') return move_camera(cspin(0, 2, -stepang));
+    if(sym == 'd') return move_camera_smoothchange([&] { return cspin(0, 2, -stepang); });
   
-    if(sym == 'q') return move_camera(cspin(0, 2, stepang) * cspin(1, 2, stepang));
-    if(sym == 'w') return move_camera(cspin(1, 2, stepang));
-    if(sym == 'e') return move_camera(cspin(0, 2, -stepang) * cspin(1, 2, stepang));
+    if(sym == 'q') return move_camera_smoothchange([&] { return cspin(0, 2, stepang) * cspin(1, 2, stepang); });
+    if(sym == 'w') return move_camera_smoothchange([&] { return cspin(1, 2, stepang); });
+    if(sym == 'e') return move_camera_smoothchange([&] { return cspin(0, 2, -stepang) * cspin(1, 2, stepang); });
   
-    if(sym == 'z') return move_camera(cspin(0, 2, stepang) * cspin(1, 2, -stepang));
-    if(sym == 'x') return move_camera(cspin(1, 2, -stepang));
-    if(sym == 'c') return move_camera(cspin(0, 2, -stepang) * cspin(1, 2, -stepang));
+    if(sym == 'z') return move_camera_smoothchange([&] { return cspin(0, 2, stepang) * cspin(1, 2, -stepang); });
+    if(sym == 'x') return move_camera_smoothchange([&] { return cspin(1, 2, -stepang); });
+    if(sym == 'c') return move_camera_smoothchange([&] { return cspin(0, 2, -stepang) * cspin(1, 2, -stepang); });
 
     
-    if(sym == '1') { stepdist = 0; println(hlog, "dist = ", stepdist); return true; }
-    if(sym == '2') { stepdist = 0.01; println(hlog, "dist = ", stepdist); return true; }
-    if(sym == '3') { stepdist = 0.02; println(hlog, "dist = ", stepdist); return true; }
-    if(sym == '4') { stepdist = 0.05; println(hlog, "dist = ", stepdist); return true; }
+    if(sym == '1') { set_stepdist(0); return true; }
+    if(sym == '2') { set_stepdist(0.005); return true; }
+    if(sym == '3') { set_stepdist(0.02); return true; }
+    if(sym == '4') { set_stepang(0); return true; }
 
-    if(sym == '6') { stepang = 0.001; println(hlog, "ang = ", stepang); return true; }
-    if(sym == '7') { stepang = 0.003; println(hlog, "ang = ", stepang); return true; }
-    if(sym == '8') { stepang = 0.01; println(hlog, "ang = ", stepang); return true; }
-    if(sym == '9') { stepang = 0.03; println(hlog, "ang = ", stepang); return true; }
-    if(sym == '0') { stepang = 0.1; println(hlog, "ang = ", stepang); return true; }
+    if(sym == '6') { set_stepang(0.001); return true; }
+    if(sym == '7') { set_stepang(0.003); return true; }
+    if(sym == '8') { set_stepang(0.01); return true; }
+    if(sym == '9') { set_stepang(0.03); return true; }
+    if(sym == '0') { set_stepang(0.1); return true; }
     
     if(sym == 'p') { get_b4_distance(); return true; }
+    
+    if(sym == 'm') { step_smoothing = 1; println(hlog, "step_smoothing = ", step_smoothing); return true; }
+    if(sym == 'n') { step_smoothing = 15; println(hlog, "step_smoothing = ", step_smoothing); return true; }
     
     if(sym == 'o') { 
       println(hlog, "spin_distance = ", spin_distance, " reset to 0, i to spin");
@@ -369,70 +469,8 @@ bool trailer_handleKey(int sym, int uni) {
     if(sym == ']') load_animation("devmods/manan-record.mar");
     
     if(sym == 'r') {
-      recording = true;
-      if(mouseaim_sensitivity) {
-        mouseaim_sensitivity = 0;
-        println(hlog, "disabled mouseaim");
-        return true;
-        }
-      if(musicvolume) {
-        println(hlog, "disabled music");
-        musicvolume = 0;
-        Mix_VolumeMusic(0);
-        return true;
-        }
-      println(hlog, "starting recording");
-      saving_positions = false;
-//      vid.cells_drawn_limit = 1000000;      
-      int i = 0;
-      shot::take("anim/start.png");
-      shot::transparent = false;
-
-      shot::shotx = mrec_x;
-      shot::shoty = mrec_y;
-      
-//       shot::shotx = 4096;
-//      shot::shoty = 4096;
-
-//      shot::shotx = 1920;
-//      shot::shoty = 1080;
-//      shot::shot_aa = 2;
-      // solnihv::solrange_xy = 30;
-      // solnihv::solrange_z = 6;
-
-      sightranges[geometry] = mrec_sightrange;
-      vid.cells_drawn_limit = mrec_drawn;
-      vid.cells_generated_limit = mrec_generated;
-      
-      // vid.stereo_mode = sODS;
-      // sightranges[geometry] = 7;
-      // sightranges[geometry] += 1;
-      // static int lasti = 68;
-      
-      ray::max_cells = mrec_cells;
-      // 60..4352
-      
-      system("mkdir -p devmods/manual/");
-        
-      for(auto& p: saved) {
-        // sightranges[geometry] = 4 + i * 2. / isize(saved);
-        recall(p);
-        // tie(View, current_display->local_perspective, centerover) = p;
-        ticks = i * 1000 / 30;
-        // if(i % 10 != 0) {i++; continue; }
-        
-        if(i >= mrec_first && i < mrec_last) {
-          println(hlog, "recording frame ", i);
-          shot::take(format(mrec_file.c_str(), i));
-          }
-        else 
-          println(hlog, "skipping frame ", i);
-        
-        i++;
-        }
-
-      // lasti = i;
-      recording = false;
+      do_recording();
+      return true;
       }
     }
     
@@ -453,21 +491,6 @@ int readArgs() {
     denan();
     for(int i=0; i<nsm; i++) smoothen();
     }
-  else if(argis("-mrecxy")) {
-    PHASEFROM(2);
-    shift(); mrec_x = argi();
-    shift(); mrec_y = argi();
-    }
-  else if(argis("-mrecq")) {
-    PHASEFROM(2);
-    shift(); mrec_cells = argi();
-    }
-  else if(argis("-mrecr")) {
-    PHASEFROM(2);
-    shift(); mrec_sightrange = argf();
-    shift(); mrec_drawn = argi();
-    shift(); mrec_generated = argi();
-    }
   else if(argis("-mrecf")) {
     PHASEFROM(2);
     shift(); mrec_first = argi();
@@ -479,6 +502,26 @@ int readArgs() {
   else if(argis("-mrec-to")) {
     PHASEFROM(2);
     shift(); mrec_file = args();
+    }
+  else if(argis("-mrecv")) {
+    PHASEFROM(2);
+    shift(); videofile = args();
+    }
+  else if(argis("-mrec-fps")) {
+    PHASEFROM(2);
+    shift(); mrec_fps = argi();    
+    }
+  else if(argis("-shot-half")) {
+    shot::shotx /= 2;
+    shot::shoty /= 2;
+    }
+  else if(argis("-mrec-opt")) {
+    PHASEFROM(2);
+    shift(); string cap = args();
+    shift(); mrec_first_opt = pos;
+    while(args() != cap) shift();
+    mrec_last_opt = pos;
+    shift();
     }
   else return 1;
   return 0;
