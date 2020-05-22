@@ -1659,14 +1659,16 @@ int readArgs() {
     PHASE(3); shift(); noframes = argi();
     shift(); animfile = args(); record_animation();
     }
-  else if(argis("-animvideo")) {
-    PHASE(3); shift(); noframes = argi();
-    shift(); videofile = args(); record_video();
-    }
   else if(argis("-record-only")) {
     PHASEFROM(2); 
     shift(); min_frame = argi();
     shift(); max_frame = argi();
+    }
+#endif
+#if CAP_VIDEO
+  else if(argis("-animvideo")) {
+    PHASE(3); shift(); noframes = argi();
+    shift(); videofile = args(); record_video();
     }
 #endif
   else if(argis("-animcircle")) {
