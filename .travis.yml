@@ -230,6 +230,8 @@ script:
     ls -lAF hyper.html hyper.js hyper.wasm
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "mymake" ]]; then
     ./hyper --help
+  elif [[ "$TRAVIS_OS_NAME" == "windows" && "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
+    $MINGW64 ./hyperrogue --help
   else
     ./hyperrogue --help
   fi
