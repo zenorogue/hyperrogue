@@ -14,7 +14,7 @@
 #define CAP_INV 0
 #define CAP_URL 1
 #define GLES_ONLY
-#define CAP_COMPLEX2 0
+#define CAP_COMPLEX2 1
 
 #if CAP_ROGUEVIZ
 #define MAXMDIM 4
