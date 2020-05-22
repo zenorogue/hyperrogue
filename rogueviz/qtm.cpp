@@ -43,7 +43,7 @@ color_t rainbow_color(hyperpoint h) {
   
   hue *= 6;
   
-  color_t res;
+  color_t res = 0;
   
   if(hue<1) res = gradient(0xFF0000, 0xFFFF00, 0, hue, 1);
   else if(hue<2) res = gradient(0x00FF00, 0xFFFF00, 2, hue, 1);
