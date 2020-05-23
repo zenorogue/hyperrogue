@@ -142,7 +142,7 @@ before_install:
     export MSYS2+='& C:\\tools\\msys64\\msys2_shell.cmd -defterm -no-start'
     export MINGW64="$MSYS2 -mingw64 -full-path -here -c "\"\$@"\" --"
     export MSYS2+=" -msys2 -c "\"\$@"\" --"
-    $MSYS2 pacman -Sy --noconfirm --needed mingw-w64-x86_64-toolchain make
+    $MSYS2 pacman -Sy --noconfirm --needed mingw-w64-x86_64-gcc make
     export PATH=/C/tools/msys64/mingw64/bin:$PATH
   fi
 - |-
