@@ -1,6 +1,10 @@
 language: cpp
 services:
   - docker
+cache:
+    directories:
+    - $HOME/AppData/Local/Temp/chocolatey
+    - /C/tools/msys64
 matrix:
   include:
   - os: linux
@@ -143,7 +147,7 @@ before_install:
     export MINGW64="$MSYS2 -mingw64 -full-path -here -c "\"\$@"\" --"
     export MSYS2+=" -msys2 -c "\"\$@"\" --"
     $MSYS2 pacman -Sy --noconfirm --needed mingw-w64-x86_64-gcc make
-    export PATH=/C/tools/msys64/mingw64/bin:$PATH
+    export PATH=/c/tools/msys64/mingw64/bin:$PATH
   fi
 - |-
   # Install SDL
@@ -243,3 +247,13 @@ script:
 - |-
   # Test "sudo make install".
   if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then sudo make install; fi
+
+before_cache:
+- |-
+    case $TRAVIS_OS_NAME in
+      windows)
+        # https://unix.stackexchange.com/a/137322/107554
+        $MSYS2 pacman --sync --clean --noconfirm
+        ;;
+    esac
+  
