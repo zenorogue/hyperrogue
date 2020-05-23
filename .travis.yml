@@ -231,6 +231,8 @@ script:
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "mymake" ]]; then
     ./hyper --help
   elif [[ "$TRAVIS_OS_NAME" == "windows" && "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
+    echo $PATH
+    echo $MINGW64
     $MINGW64 ./hyperrogue --help
   else
     ./hyperrogue --help
