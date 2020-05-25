@@ -616,6 +616,8 @@ EX void resize_screen_to(int x, int y) {
 
 int lastframe;
 
+EX int sc_ticks;
+
 EX void mainloopiter() {
 
   DEBB(DF_GRAPH, ("main loop\n"));
@@ -748,9 +750,9 @@ EX void mainloopiter() {
     #endif
     }
   
-  if(smooth_scrolling && !shmup::on) {
+  if(smooth_scrolling && !shmup::on && (cmode & sm::NORMAL)) {
     rug::using_rugview urv;
-    static int lastticks;
+    auto& lastticks = sc_ticks;
     ld t = (ticks - lastticks) * shiftmul / 1000.;
     lastticks = ticks;
     Uint8 *keystate = SDL_GetKeyState(NULL);
@@ -764,6 +766,7 @@ EX void mainloopiter() {
     if(keystate[SDLK_PAGEUP] && DEFAULTNOR(SDLK_PAGEUP)) full_rotate_view(t * 180 / M_PI, t);
     if(keystate[SDLK_PAGEDOWN] && DEFAULTNOR(SDLK_PAGEDOWN)) full_rotate_view(-t * 180 / M_PI, t);
     }
+  else sc_ticks = ticks;
 
   achievement_pump();  
   while(SDL_PollEvent(&ev)) handle_event(ev);
