@@ -2,9 +2,9 @@
 
 /** \brief Non-Euclidean reverb (and also Doppler effect)
  *
- *  Compile with HyperRogue, run with -geo [geometry] -reverb filename.raw (e.g. -geo 534h -reverb)
+ *  Compile with HyperRogue, run with -geo [geometry] -reverb sounds/seen-eagle.ogg (e.g. -geo 534h -reverb)
  *
- *  filename.raw should be in raw audio format (44100Hz, signed 16 bit, two channels).
+ *  you can also supply filename.raw in raw audio format (signed 16 bit, two channels; frequency set by -rev-freq).
  *
  *  Press oo to configure the physical parameters.
  *
