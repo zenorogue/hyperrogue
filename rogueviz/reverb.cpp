@@ -160,15 +160,30 @@ void reverb_queue() {
   lock.unlock();
   }
 
+int maxvol = 1;
+
 /** draw bird, and also record the distance data about cell c */
 bool draw_bird(cell *c, const transmatrix& V) {
 
   if(!in) return false;
 
   if(!started) start_audio();
-
-  if(c == cwt.at) 
-    queuepoly(V * cspin(1, 2, M_PI/2) * cspin(0, 2, M_PI/2), GDIM == 3 ? cgi.shAnimatedTinyEagle[wingphase(200)] : cgi.shTinyBird, 0xFFFFFFFF); 
+  
+  if(c == cwt.at) {
+    int& used_ticks = inHighQual ? ticks : sc_ticks;
+    int nextt = (used_ticks * (long long)(freq)) / 1000;
+    ld tot = 0;
+    nextt %= isize(orig);
+    int id = curt % isize(orig);
+    while(id != nextt) {
+      tot = max<int>(tot, max<int>(abs<int>(orig[id][0]), abs<int>(orig[id][1]))); 
+      id++; if(id == isize(orig)) id = 0;
+      }
+    id = tot * WINGS / maxvol / 2;
+    queuepoly(rgpushxto0(tC0(V)) * cspin(0, 2, M_PI/2) * cspin(1, 2, 90 * degree) * cspin(0, 2, 45 * degree),
+       GDIM == 3 ? cgi.shAnimatedTinyEagle[id] : cgi.shTinyBird, 0xFFFFFFFF
+       ); 
+    }
   
   auto& ci = infos[c];
   ci.curframe = frameid;
