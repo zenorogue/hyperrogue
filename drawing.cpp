@@ -1858,7 +1858,7 @@ ld xintval(const hyperpoint& h) {
 
 EX ld backbrightness = .25;
 
-purehookset hooks_drawqueue;
+EX purehookset hooks_drawqueue;
 
 constexpr int PMAX = int(PPR::MAX);
 int qp[PMAX], qp0[PMAX];
