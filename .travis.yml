@@ -255,6 +255,6 @@ before_cache:
   # Fix up Windows environment for caching
   if [[ $TRAVIS_OS_NAME == "windows" ]]; then
     # https://unix.stackexchange.com/a/137322/107554
-    $msys2 pacman --sync --clean --noconfirm
+    $MSYS2 pacman -Sc --noconfirm
     rm -rf /C/tools/msys64/var/log/* # so that new logfiles don't invalidate cache
   fi
