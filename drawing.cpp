@@ -37,6 +37,7 @@ static const int POLY_DEBUG = (1<<24);          // debug this shape
 static const int POLY_PRINTABLE = (1<<25);      // these walls are printable
 static const int POLY_FAT = (1<<26);            // fatten this model in WRL export (used for Rug)
 static const int POLY_SHADE_TEXTURE = (1<<27);  // texture has 'z' coordinate for shading
+static const int POLY_ONE_LEVEL = (1<<28);      // only one level of the universal cover in SL(2,R)
 
 /** \brief A graphical element that can be drawn. Objects are not drawn immediately but rather queued.
  *
@@ -1516,6 +1517,7 @@ void dqi_poly::draw() {
       min_slr = ceil((-zr - z) / M_PI);
       max_slr = floor((zr - z) / M_PI);
       if(min_slr > max_slr) return;
+      if(flags & POLY_ONE_LEVEL) min_slr = max_slr = 0;
       glhr::set_index_sl(M_PI * min_slr);
       }
     set_width(get_width(this));
