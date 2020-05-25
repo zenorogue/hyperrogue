@@ -3,7 +3,8 @@ services:
   - docker
 cache:
     directories:
-    - /C/tools/msys64
+    - /C/tools/msys64/mingw64
+    - /C/tools/msys64/usr
 matrix:
   include:
   - os: linux
@@ -173,7 +174,7 @@ before_install:
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew install glew
     elif [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
-      $MSYS2 pacman -Sy --noconfirm --needed mingw-w64-x86_64-glew
+      $MSYS2 pacman -Sy --noconfirm --needed mingw-w64-x86_64-glew mingw-w64-x86_64-mesa
     else
       exit 'Unsupported OS'
     fi
@@ -246,13 +247,4 @@ script:
 - |-
   # Test "sudo make install".
   if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then sudo make install; fi
-
-before_cache:
-- |-
-    case $TRAVIS_OS_NAME in
-      windows)
-        # https://unix.stackexchange.com/a/137322/107554
-        $MSYS2 pacman --sync --clean --noconfirm
-        ;;
-    esac
   
