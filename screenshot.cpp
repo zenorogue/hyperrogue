@@ -823,19 +823,19 @@ int png_read_args() {
   else if(argis("-shot-fhd")) {
     shot::shotformat = -1;
     shot::shotx = 1920;
-    shot::shotx = 1080;
+    shot::shoty = 1080;
     shot::transparent = false;
     }
   else if(argis("-shot-hd")) {
     shot::shotformat = -1;
     shot::shotx = 1280;
-    shot::shotx = 720;
+    shot::shoty = 720;
     shot::transparent = false;
     }
   else if(argis("-shot-1000")) {
     shot::shotformat = -1;
     shot::shotx = 1000;
-    shot::shotx = 1000;
+    shot::shoty = 1000;
     shot::transparent = false;
     }
   else if(argis("-shotaa")) {
