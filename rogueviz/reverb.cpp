@@ -14,6 +14,8 @@ namespace rogueviz {
 
 namespace embed {
 
+int freq = 44100;
+
 bool in = false;
 
 bool started = false;
@@ -60,7 +62,7 @@ void myAudio(void *userdata, Uint8* stream, int len) {
 
 void start_audio() {
   SDL_AudioSpec spec;
-  spec.freq = 44100;
+  spec.freq = freq;
   spec.format = AUDIO_S16SYS;
   spec.channels = 2;
   spec.samples = 4096;
@@ -97,9 +99,9 @@ void reverb_queue() {
   prevt = curt;
   int& used_ticks = inHighQual ? ticks : sc_ticks;
   
-  curt = (used_ticks * (long long)(44100)) / 1000;
+  curt = (used_ticks * (long long)(freq)) / 1000;
   if(prevt > curt) prevt = curt;
-  if(curt - prevt > 44100) return;
+  if(curt - prevt > freq) return;
 
   sndbuffer.resize(curt, {0, 0});
   
@@ -109,30 +111,41 @@ void reverb_queue() {
     if(p.lastframe != p.curframe-1)
       p.lastdist = p.curdist;
     int dist = celldistance(ps.first, cwt.at);
-    ld base = pow(1-absorption, dist);
-    if(dist > 2 && !inHighQual) continue;
     // if(ps.first == cwt.at) println(hlog, (p.curdist - p.lastdist) / (curt - prevt));
+
+    if(dist > (sphere?3:2) && !inHighQual) continue;
+    
+    for(int s=0; s<(sphere?10:1); s++) {
+    
+    ld dist1 = dist + 3 * s;
+
+    ld base = pow(1-absorption, dist1);
     
     ld att0[2];
     ld att1[2];
     
-    for(int ch=0; ch<2; ch++)
-      att0[ch] = min<ld>(base / sin_auto(p.lastdist[ch]), 5);
+    /* no need to add abs or pi*s to sin */
 
-    for(int ch=0; ch<2; ch++)
-      att1[ch] = min<ld>(base / sin_auto(p.curdist[ch]), 5);
-
+    for(int ch=0; ch<2; ch++) {
+      att0[ch] = base / sin_auto(p.lastdist[ch]);
+      att1[ch] = base / sin_auto(p.curdist[ch]);
+      if(att0[ch] > 5) println(hlog, att0[ch], "capped to 5");
+      if(att0[ch] > 5) att0[ch] = 5;
+      if(att1[ch] > 5) att1[ch] = 5;
+      }
+    
     for(int ch: {0,1})
       for(int i=prevt; i<curt; i++) {
         ld a = ilerp(prevt, curt, i);
-        ld d = lerp(p.lastdist[ch], p.curdist[ch], a);
-        int tim = (i - d * 44100 * speed_of_sound);
-        if(tim < 0) continue;
+        ld d = lerp(p.lastdist[ch], p.curdist[ch], a) + M_PI * s;
+        int tim = (i - d * freq * speed_of_sound);
         tim %= isize(orig);
+        if(tim < 0) tim += isize(orig);
           sndbuffer[i][ch] += orig[tim][ch] * lerp(att0[ch], att1[ch], a);
         }
     p.lastframe = p.curframe;
     p.lastdist = p.curdist;
+    }
     }
 
   for(int i=prevt; i<curt; i++) for(int ch: {0,1})
@@ -180,7 +193,7 @@ void show() {
     dialog::editNumber(absorption, 0, 1, .1, .01, "absorption", "");
     });
 
-  dialog::addSelItem("resynchronize", fts((current_sample - curt) / 44100.), 'r');
+  dialog::addSelItem("resynchronize", fts((current_sample - curt) * 1. / freq), 'r');
   dialog::add_action([]() {
     current_sample = curt;
     });
