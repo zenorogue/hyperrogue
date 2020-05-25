@@ -148,7 +148,7 @@ before_install:
   # Set up MinGW64 if needed
   if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
     [[ ! -f C:/tools/msys64/msys2_shell.cmd ]] && rm -rf C:/tools/msys64
-    choco uninstall -y mingw
+    choco uninstall -v -y mingw
     choco upgrade --no-progress -y msys2
     export MSYS2='cmd //C RefreshEnv.cmd '
     export MSYS2+='& set MSYS=winsymlinks:nativestrict '
@@ -203,7 +203,7 @@ before_install:
   fi
 - |-
   # Install autotools if asked for
-  if [[ "$TRAVIS_USE_AUTOTOOLS" == "1" ]]; then
+  if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       echo 'autotools is installed by default'
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
