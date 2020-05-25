@@ -1987,7 +1987,7 @@ EX void draw_main() {
       reset_projection();
       /* currently incompatible with primitive-based renderer */
       /* also not implemented in stretch */
-      return;
+      if(stretch::factor) return;
       }
 
     for(int p: {1, 0, 2, 3}) {
