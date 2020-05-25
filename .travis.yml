@@ -148,7 +148,8 @@ before_install:
   # Set up MinGW64 if needed
   if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
     [[ ! -f C:/tools/msys64/msys2_shell.cmd ]] && rm -rf C:/tools/msys64
-    choco uninstall -v -y mingw
+    choco uninstall -y mingw
+    cat /C/ProgramData/chocolatey/logs/chocolatey.log
     choco upgrade --no-progress -y msys2
     export MSYS2='cmd //C RefreshEnv.cmd '
     export MSYS2+='& set MSYS=winsymlinks:nativestrict '
@@ -156,7 +157,7 @@ before_install:
     export MINGW64="$MSYS2 -mingw64 -full-path -here -c "\"\$@"\" --"
     export MSYS2+=" -msys2 -c "\"\$@"\" --"
     $MSYS2 pacman -S --noconfirm --needed mingw-w64-x86_64-gcc make
-    export PATH=/c/tools/msys64/mingw64/bin:$PATH
+    export PATH=/C/tools/msys64/mingw64/bin:$PATH
     setx -m PATH "C:\\tools\\msys64\\mingw64\\bin;%PATH%"
   fi
 - |-
@@ -217,7 +218,7 @@ before_install:
 - |-
   # Prepare MinGW DLLs
   if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
-    cp /c/tools/msys64/mingw64/bin/*.dll .
+    cp /C/tools/msys64/mingw64/bin/*.dll .
   fi
 
 script:
@@ -267,6 +268,6 @@ before_cache:
     $MSYS2 pacman -Sc --noconfirm
     # clean up various volatile things so that they don't invalidate the cache
     rm -rf /C/tools/msys64/var/log/*
-    rm -f /c/tools/msys64/update.log /C/tools/msys64/mingw64/include/SDL/SDL_gfxPrimitives.h.orig
+    rm -f /C/tools/msys64/update.log /C/tools/msys64/mingw64/include/SDL/SDL_gfxPrimitives.h.orig
     rm -rf $HOME/AppData/Local/Temp/chocolatey/mingw
   fi
