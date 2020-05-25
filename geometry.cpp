@@ -50,9 +50,13 @@ struct hpcshape {
 #define SIDE_BSHA 12
 #define SIDEPARS  13
 
+#ifndef BADMODEL
 #define BADMODEL 0
+#endif
 
+#ifndef WINGS
 static const int WINGS = (BADMODEL ? 1 : 4);
+#endif
 
 typedef array<hpcshape, WINGS+1> hpcshape_animated;
 
