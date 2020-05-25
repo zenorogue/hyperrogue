@@ -205,6 +205,11 @@ before_install:
       exit 'Unsupported OS'
     fi
   fi
+- |-
+  # Prepare MinGW DLLs
+  if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+    cp /c/tools/msys64/mingw64/bin/*.dll .
+  fi
 
 script:
 - |-
@@ -235,9 +240,6 @@ script:
     ls -lAF hyper.html hyper.js hyper.wasm
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "mymake" ]]; then
     ./hyper --help
-  elif [[ "$TRAVIS_OS_NAME" == "windows" && "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
-    cp /c/tools/msys64/mingw64/bin/*.dll .
-    ./hyperrogue --help
   else
     ./hyperrogue --help
   fi
@@ -247,4 +249,3 @@ script:
 - |-
   # Test "sudo make install".
   if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then sudo make install; fi
-  
