@@ -235,6 +235,7 @@ script:
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "mymake" ]]; then
     ./hyper --help
   elif [[ "$TRAVIS_OS_NAME" == "windows" && "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
+    cp /c/tools/msys64/mingw64/bin/*.dll .
     ./hyperrogue --help
   else
     ./hyperrogue --help
