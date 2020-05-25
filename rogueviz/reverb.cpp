@@ -37,7 +37,7 @@ ld maxsnd = 1;
 ld absorption = .1;
 
 /** how much time does it take to go 1 absolute unit, in seconds */
-ld speed_of_sound = 10000 / 44100.;
+ld speed_of_sound = .25;
 
 /** inter-aural distance */
 ld iad = .05;
