@@ -348,6 +348,24 @@ auto hchook = addHook(hooks_drawcell, 100, draw_bird)
     /* disable the frustum culling (we need sound from every direction) */
     frustum_culling = false;
     }
+
+  /* auto-sync sample length with animation period */
+  else if(argis("-rev-length-auto")) {
+    int ap = anims::period / 1000. * freq;
+    ld d = ap / isize(orig);
+    println(hlog, "d = ", d);
+    int di = d;
+    if(di) {
+      int size_to = ap / di;
+      orig.resize(size_to);
+      }
+    }
+  
+  /* sample length in seconds */
+  else if(argis("-rev-length")) {
+    shift();
+    orig.resize(argi() * freq);
+    }
   else return 1;
   return 0;
   });
