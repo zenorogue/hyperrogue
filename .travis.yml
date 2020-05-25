@@ -133,6 +133,15 @@ matrix:
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=1
       HYPERROGUE_USE_ROGUEVIZ=1
+  - os: windows
+    compiler: gcc
+    env: >-
+      TRAVIS_OS_NAME=windows
+      TRAVIS_COMPILER_NAME=gcc
+      TRAVIS_BUILD_SYSTEM=autotools
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=1
+      HYPERROGUE_USE_ROGUEVIZ=1
 
 before_install:
 - |-
