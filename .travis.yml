@@ -148,8 +148,9 @@ before_install:
   # Set up MinGW64 if needed
   if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
     [[ ! -f C:/tools/msys64/msys2_shell.cmd ]] && rm -rf C:/tools/msys64
-    choco uninstall -y mingw
-    cat /C/ProgramData/chocolatey/logs/chocolatey.log
+    # remove existing mingw installation
+    rm -rf /C/ProgramData/chocolatey/lib/mingw
+    # choco uninstall -y mingw
     choco upgrade --no-progress -y msys2
     export MSYS2='cmd //C RefreshEnv.cmd '
     export MSYS2+='& set MSYS=winsymlinks:nativestrict '
@@ -224,7 +225,11 @@ before_install:
 script:
 - |-
   # Build hyperrogue.
-  if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then
+  if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" && "$TRAVIS_OS_NAME" == "windows" ]]; then
+    $MINGW64 autoreconf -vi
+    $MINGW64 ./configure CXXFLAGS="-W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-maybe-uninitialized -Wno-unknown-warning-option"
+    $MINGW64 make
+  elif [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then
     autoreconf -vi
     ./configure CXXFLAGS="-W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-maybe-uninitialized -Wno-unknown-warning-option"
     make
@@ -269,5 +274,4 @@ before_cache:
     # clean up various volatile things so that they don't invalidate the cache
     rm -rf /C/tools/msys64/var/log/*
     rm -f /C/tools/msys64/update.log /C/tools/msys64/mingw64/include/SDL/SDL_gfxPrimitives.h.orig
-    rm -rf $HOME/AppData/Local/Temp/chocolatey/mingw
   fi
