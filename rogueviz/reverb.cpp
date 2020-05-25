@@ -245,6 +245,8 @@ void save_raw_audio() {
     }
   }
 
+bool auto_anim;
+
 auto hchook = addHook(hooks_drawcell, 100, draw_bird)
 
 + addHook(hooks_frame, 100, reverb_queue)
@@ -253,10 +255,49 @@ auto hchook = addHook(hooks_drawcell, 100, draw_bird)
 
 + addHook(anims::hooks_after_video, 80, save_raw_audio)
 
++ addHook(anims::hooks_anim, 100, [] {
+  if(!auto_anim) return;
+  if(cgi.cellshape.empty()) return;
+  hyperpoint h1 = cgi.cellshape[0];
+  hyperpoint h2 = normalize(cgi.cellshape[0] + cgi.cellshape[1]);
+  hyperpoint wc = Hypc;
+  for(int i=0; i<cgi.face; i++) wc += cgi.cellshape[i];
+  hyperpoint h3 = normalize(wc);
+  hyperpoint h4 = mid(h3, C0);
+  vector<hyperpoint> all = {h1, h2, h3, h4, h1, h1};
+  ld id = parseld("0../0..1../0..|1../0..2../0..|2../0..3../0..|3../0..4../0");
+  // println(hlog, "d = ", id);
+  hyperpoint h = all[int(id)] * (1-id+int(id)) + all[int(id+1)] * (id-int(id));
+  h = normalize(h);
+  centerover = currentmap->gamestart();
+  View = /* cspin(2, 0, M_PI/2) * rspintox(gpushxto0(h) * C0) * */ gpushxto0(h);
+  View = spintox(View * C0) * View;
+  View = cspin(2, 0, M_PI/2) * View;
+
+  shift_view(point3(0, 0, -1e-2));
+
+  anims::moved();
+  })
+
 + addHook(hooks_args, 100, [] {
   using namespace arg;
            
   if(0) ;
+  else if(argis("-rev-abs")) {
+    shift_arg_formula(absorption);
+    }
+  else if(argis("-rev-ss")) {
+    shift_arg_formula(speed_of_sound);
+    }
+  else if(argis("-rev-iad")) {
+    shift_arg_formula(iad);
+    }
+  else if(argis("-rev-freq")) {
+    shift(); freq = argi();
+    }
+  else if(argis("-rev-anim")) {
+    auto_anim = true;
+    }
   else if(argis("-reverb")) {
     shift();
     string fname = args();
