@@ -16,6 +16,8 @@ namespace embed {
 
 int freq = 44100;
 
+bool auto_anim = false;
+
 bool in = false;
 
 bool started = false;
@@ -25,23 +27,26 @@ struct sample {
   Sint16& operator [] (int i) { return (&left) [i]; }
   };
 
-/** original audio data */
+/** @brief original audio data */
 vector<sample> orig;
+
+/** @brief original size of orig */
+int orig_size;
 
 int current_sample = 0, prevt = 0, curt = 0;
 
 std::mutex lock;
 
-/** controls the volume */
+/** @brief controls the volume */
 ld maxsnd = 1;
 
-/** 0 = no absorption on walls, 1 = full absorption */
+/** @brief 0 = no absorption on walls, 1 = full absorption */
 ld absorption = .1;
 
-/** how much time does it take to go 1 absolute unit, in seconds */
+/** @brief how much time does it take to go 1 absolute unit, in seconds */
 ld speed_of_sound = .25;
 
-/** inter-aural distance */
+/** @brief inter-aural distance */
 ld iad = .05;
 
 vector<sample> to_play;
@@ -193,6 +198,8 @@ bool draw_bird(cell *c, const transmatrix& V) {
   return false;
   }
 
+static int isor;
+
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
@@ -223,6 +230,18 @@ void show() {
     dialog::editNumber(maxsnd, 1, 1e6, .1, 1, "max volume", "large number -> more silent; will increase automatically if too loud");
     });
 
+  isor = isize(orig);
+  dialog::addSelItem("sample length", its(isize(orig)) + "/" + its(freq), 'l');
+  
+  dialog::add_action([]() {
+    dialog::editNumber(isor, orig_size, orig_size*2, orig_size / 10, orig_size, "sample length", "warning: sample is cut off if you shorten it and then lengthen it again");
+    dialog::reaction = [] {
+      orig.resize(isor);
+      };
+    });
+
+  dialog::addBoolItem_action("auto-loop", auto_anim, 'o');
+
   dialog::addBack();
   dialog::display();    
   }
@@ -244,8 +263,6 @@ void save_raw_audio() {
     fclose(f);
     }
   }
-
-bool auto_anim;
 
 auto hchook = addHook(hooks_drawcell, 100, draw_bird)
 
@@ -327,9 +344,9 @@ auto hchook = addHook(hooks_drawcell, 100, draw_bird)
       memcpy(&orig[0], chunk->abuf, chunk->alen);
       Mix_FreeChunk(chunk);
       }
-
-    println(hlog, "original size = ", isize(orig));
     
+    orig_size = isize(orig);
+
     for(auto& o: orig) {
       maxvol = max(maxvol, abs<int>(o[0]));
       maxvol = max(maxvol, abs<int>(o[1]));
