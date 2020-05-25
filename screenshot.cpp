@@ -1341,6 +1341,8 @@ EX bool record_animation() {
   }
 #endif
 
+EX purehookset hooks_after_video;
+
 #if CAP_VIDEO
 EX bool record_video(string fname IS(videofile), bool_reaction_t rec IS(record_animation)) {
   
@@ -1368,6 +1370,7 @@ EX bool record_video(string fname IS(videofile), bool_reaction_t rec IS(record_a
   rec();
   close(tab[1]);
   wait(nullptr);
+  callhooks(hooks_after_video);
   return true;
   }
 
