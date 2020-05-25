@@ -16,6 +16,8 @@ bool on;
 
 ld cscale = .2;
 
+ld cylball;
+
 struct iring {
 
   geometry_information *icgi;
@@ -31,6 +33,8 @@ struct iring {
   vector<color_t> huess[2];
   
   vector<transmatrix> path;
+  
+  hpcshape ball;
   
   void init() {
   
@@ -192,6 +196,13 @@ struct iring {
       cgi.finishshape();
       cgi.extra_vertices();
       }
+    
+    if(cylball) {
+      ball.prio = PPR::WALL;
+      cgi.make_ball(ball, cylball, 2);
+      cgi.finishshape();
+      cgi.extra_vertices();
+      }
     }
     
   };
@@ -223,6 +234,13 @@ bool draw_ptriangle(cell *c, const transmatrix& V) {
       /* auto& s1 = queuepoly(V * nisot::translate(td.at), ir->pcube[side], gradient(tcolors[td.tcolor], magiccolors[side], 0, .2, 1));
       ensure_vertex_number(*s1.tinf, s1.cnt); */
       }
+    
+    if(cylball) {
+      long long isp = isize(ir->path);
+      transmatrix T = ir->path[isp-1 - (ticks * isp / int(anims::period)) % isp];
+      T = nisot::parallel_transport(inverse(T), -point3(0, cscale + cylball, 0));
+      queuepoly(V * T, ir->ball, 0xFFFFFFFF);
+      }
     }
 
   return false;
@@ -252,6 +270,9 @@ auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
     }
   else if(argis("-cylanim")) {
     cylanim = !cylanim;
+    }
+  else if(argis("-cylball")) {
+    shift_arg_formula(cylball);
     }
   else return 1;
   return 0;
