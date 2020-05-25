@@ -236,6 +236,11 @@ auto hchook = addHook(hooks_drawcell, 100, draw_bird)
     fclose(f);
     println(hlog, "original size = ", isize(orig));
     
+    for(auto& o: orig) {
+      maxvol = max(maxvol, abs<int>(o[0]));
+      maxvol = max(maxvol, abs<int>(o[1]));
+      }
+    
     in = true;
     firstland = specialland = laCanvas;
     patterns::whichCanvas = 'r';
