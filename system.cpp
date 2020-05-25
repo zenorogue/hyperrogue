@@ -1244,7 +1244,7 @@ EX void stop_game() {
 #endif
   }
 
-eModel default_model() {
+EX eModel default_model() {
   if(nonisotropic) return mdGeodesic;
   if(GDIM == 3) return mdPerspective;
   return mdDisk;
