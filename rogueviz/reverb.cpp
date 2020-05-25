@@ -341,8 +341,8 @@ auto hchook = addHook(hooks_drawcell, 100, draw_bird)
     patterns::rwalls = 100;
     mapeditor::drawplayer = false;
     start_game();
-    if(!euclid)
-      println(hlog, "edge = ", hdist(cgi.vertices_only[0], cgi.vertices_only[1]) * 10000 / 44100);
+    if(!cgi.cellshape.empty())
+      println(hlog, "edge = ", hdist(cgi.cellshape[0], cgi.cellshape[1]));
     /* Doppler effect is weird if scrolling if not smooth */
     smooth_scrolling = true;
     /* disable the frustum culling (we need sound from every direction) */
