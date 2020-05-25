@@ -46,6 +46,7 @@ vector<sample> to_play;
 
 void myAudio(void *userdata, Uint8* stream, int len) {
   if(isize(to_play) < current_sample + len) return;
+  if(inHighQual) return;
   sample* samples = (sample*) stream;
   len /= sizeof(sample);
 
