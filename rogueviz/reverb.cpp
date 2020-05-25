@@ -260,12 +260,33 @@ auto hchook = addHook(hooks_drawcell, 100, draw_bird)
   else if(argis("-reverb")) {
     shift();
     string fname = args();
-    FILE *f = fopen(fname.c_str(), "rb");
-    fseek(f, 0, SEEK_END);
-    orig.resize(ftell(f)/sizeof(sample));
-    fseek(f, 0, SEEK_SET);
-    fread(&orig[0], 4, orig.size(), f);
-    fclose(f);
+    
+    if(fname.substr(isize(fname) - 4) == ".raw") {
+      FILE *f = fopen(fname.c_str(), "rb");
+      if(!f) {
+        printf("failed to load\n");
+        return 1;
+        }
+      fseek(f, 0, SEEK_END);
+      orig.resize(ftell(f)/sizeof(sample));
+      fseek(f, 0, SEEK_SET);
+      fread(&orig[0], 4, orig.size(), f);
+      fclose(f);
+      }
+    
+    else {
+      Mix_CloseAudio();
+      Mix_OpenAudio(freq, AUDIO_S16LSB, 2, 4096);
+      auto chunk = Mix_LoadWAV(fname.c_str());
+      if(!chunk) {
+        printf("failed to load\n");
+        return 1;
+        }
+      orig.resize(chunk->alen / 4);
+      memcpy(&orig[0], chunk->abuf, chunk->alen);
+      Mix_FreeChunk(chunk);
+      }
+
     println(hlog, "original size = ", isize(orig));
     
     for(auto& o: orig) {
