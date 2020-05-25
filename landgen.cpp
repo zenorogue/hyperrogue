@@ -1190,6 +1190,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laTerracotta: 
+      #if CAP_COMPLEX2
       if(fargen) {
         if(hrand(500) < 15) 
           createArrowTrapAt(c, laTerracotta);
@@ -1219,6 +1220,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         if(hrand_monster(20000) < t)
           c->monst = moJiangshi;
         }
+      #endif
       break;
     
     case laOvergrown:
