@@ -236,6 +236,10 @@ void save_raw_audio() {
     /* save the output as raw audio file */
     /* (it can be added to the video using ffmpeg */
     FILE *f = fopen("raw-audio.raw", "wb");
+
+    for(int i=0; i<curt; i++) for(int ch: {0,1})
+      to_play[i][ch] = sndbuffer[i][ch] / maxsnd * 30000;
+
     fwrite(&to_play[0], 4, to_play.size(), f);
     fclose(f);
     }
