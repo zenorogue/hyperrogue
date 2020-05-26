@@ -280,7 +280,13 @@ auto hchook = addHook(hooks_drawcell, 100, draw_bird)
   hyperpoint wc = Hypc;
   for(int i=0; i<cgi.face; i++) wc += cgi.cellshape[i];
   hyperpoint h3 = normalize(wc);
+  if(cgflags & qIDEAL) {  
+    println(hlog, "h1 was: ", h1);
+    h1 = rspintox(h1) * xpush0(hdist0(h2)*4);
+    println(hlog, "h1 is: ", h1);
+    }
   hyperpoint h4 = mid(h3, C0);
+  println(hlog, "distances: ", make_tuple(hdist0(h1), hdist0(h2), hdist0(h3), hdist0(h4)));
   vector<hyperpoint> all = {h1, h2, h3, h4, h1, h1};
   ld id = parseld("0../0..1../0..|1../0..2../0..|2../0..3../0..|3../0..4../0");
   // println(hlog, "d = ", id);
