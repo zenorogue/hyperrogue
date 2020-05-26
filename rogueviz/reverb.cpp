@@ -8,6 +8,25 @@
  *
  *  Press oo to configure the physical parameters.
  *
+ *  This https://twitter.com/ZenoRogue/status/1265297322369581057 has been created with:
+ *
+
+./hyper -debf g -geo 534h -ray-do -ray-reflect .5 -sight3 6 -smartlimit 200000 -genlimit 200000 -reverb sounds/seen-eagle.ogg -rev-abs 0.2 -shott 0 -shotxy 500 500 -animperiod 20000 -rev-anim -animvideo 1200 caw.mp4 -exit
+ffmpeg -i caw.mp4 -f s16le -ar 44100 -ac 2 -i raw-audio.raw -c:v copy caw-hyperbolic.mp4
+
+./hyper -debf g -geo beti -ray-do -ray-reflect .5 -smartlimit 200000 -genlimit 200000 -reverb sounds/seen-eagle.ogg -rev-abs 0.2 -shott 0 -shotxy 500 500 -animperiod 20000 -rev-anim -animvideo 1200 caw.mp4 -exit
+ffmpeg -i caw.mp4 -f s16le -ar 44100 -ac 2 -i raw-audio.raw -c:v copy caw-euclidean.mp4
+
+./hyper -debf g -geo 16c -ray-do -ray-reflect .5 -smartlimit 200000 -genlimit 200000 -reverb sounds/seen-eagle.ogg -rev-abs 0.2 -shott 0 -shotxy 500 500 -animperiod 20000 -rev-anim -animvideo 1200 caw.mp4 -exit
+ffmpeg -i caw.mp4 -f s16le -ar 44100 -ac 2 -i raw-audio.raw -c:v copy caw-spherical.mp4
+
+./hyper -debf g -geo 344h -ray-do -ray-reflect .6 -sight3 6 -smartlimit 200000 -genlimit 200000 -reverb sounds/seen-eagle.ogg -rev-abs 0.2 -shott 0 -shotxy 500 500 -animperiod 20000 -rev-anim -animvideo 1200 caw.mp4 -exit
+ffmpeg -i caw.mp4 -f s16le -ar 44100 -ac 2 -i raw-audio.raw -c:v copy caw-hyperbolic-ideal.mp4
+
+./hyper -debf g -geo 534h -ray-do -ray-reflect .5 -sight3 6 -smartlimit 200000 -genlimit 200000 -reverb sounds/seen-eagle.ogg -rev-abs 0.2 -rev-ss 4 -shott 0 -shotxy 500 500 -animperiod 40000 -rev-anim -animvideo 2400 caw.mp4 -exit
+ffmpeg -i caw.mp4 -f s16le -ar 44100 -ac 2 -i raw-audio.raw -c:v copy caw-hyperbolic-doppler.mp4
+
+ *
  **/
 
 namespace rogueviz {
