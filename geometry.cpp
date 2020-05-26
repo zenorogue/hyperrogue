@@ -122,20 +122,19 @@ struct geometry_information {
   /** basic parameters for 3D geometries */
   map<int, int> close_distances;
 
-  int loop;
-  int face;
+  int loop, face, schmid;
 
   vector<hyperpoint> cellshape;
   vector<hyperpoint> vertices_only;
   
-  transmatrix spins[12], adjmoves[12];
+  transmatrix spins[32], adjmoves[32];
 
   ld adjcheck;
   ld strafedist;
-  bool dirs_adjacent[16][16];
+  bool dirs_adjacent[32][32];
 
   /** \brief for adjacent directions a,b, next_dir[a][b] is the next direction adjacent to a, in (counter?)clockwise order from b */
-  int next_dir[16][16];
+  int next_dir[32][32];
 
   vector<pair<string, string> > rels;
   int xp_order, r_order, rx_order;

@@ -47,103 +47,129 @@ EX namespace reg3 {
     auto& adjcheck = cgi.adjcheck;
     auto& dirs_adjacent = cgi.dirs_adjacent;
   
-    if(S7 == 4) face = 3;
+    int& mid = cgi.schmid;
+    mid = 3;
+    
+    face = 3;
     if(S7 == 6) face = 4;
+    if(S7 == 8) mid = 4;
     if(S7 == 12) face = 5;
-    if(S7 == 8) face = 3;
+    if(S7 == 20) mid = 5;
     /* icosahedron not implemented */
     loop = ginf[geometry].tiling_name[5] - '0';
-    DEBB(DF_GEOM, ("face = ", face, " loop = ", loop, " S7 = ", S7));
+    DEBB(DF_GEOM, ("face = ", face, " loop = ", loop, " S7 = ", S7));    
     
-    /* dual_angle : the angle between two face centers in the dual cell */
-    ld dual_angle = binsearch(0, M_PI, [&] (ld d) {
-      hyperpoint h0 = cpush(0, 1) * C0;
-      hyperpoint h1 = cspin(0, 1, d) * h0;
-      hyperpoint h2 = cspin(1, 2, 2*M_PI/loop) * h1;
-      return hdist(h0, h1) > hdist(h1, h2);
-      });
-
-    /* angle_between_faces : the distance between two face centers of cells */
-    ld angle_between_faces = binsearch(0, M_PI, [&] (ld d) {
-      hyperpoint h0 = cpush(0, 1) * C0;
-      hyperpoint h1 = cspin(0, 1, d) * h0;
-      hyperpoint h2 = cspin(1, 2, 2*M_PI/face) * h1;
-      return hdist(h0, h1) > hdist(h1, h2);
-      });
-    
-    if(S7 == 8) {
-      angle_between_faces = min(angle_between_faces, M_PI - angle_between_faces);
-      /* 24-cell is a special case because it is the only one with '4' in the middle of the Schlaefli symbol. */
-      /* The computations above assume 3 */
-      hyperpoint h1 = hpxy3(.5,.5,.5);
-      hyperpoint h2 = hpxy3(.5,.5,-.5);
-      dual_angle = hdist(h1, h2);
-      }
-    
-    DEBB(DF_GEOM, ("angle between faces = ", angle_between_faces));
-    DEBB(DF_GEOM, ("dual angle = ", dual_angle));
-    
-    ld inp_length = binsearch(0, 1.55, [&] (ld d) {
-      hyperpoint h = xpush(-d) * spin(2*M_PI/face) * xpush0(d);
-      ld alpha = M_PI - atan2(-h[1], h[0]);
-      return (alpha < dual_angle / 2) ? hyperbolic : sphere;
-      });
-    
-    DEBB(DF_GEOM, ("inp length = ", inp_length));
-    
-    ld edge_length = hdist(xpush0(inp_length), spin(2*M_PI/face) * xpush0(inp_length));
-    if(S7 == 8) edge_length = hdist(normalize(hpxyz3(1,1,0,0)), normalize(hpxyz3(1,0,1,0))); 
-    DEBB(DF_GEOM, ("edge length = ", edge_length));
+    ld angle_between_faces, hcrossf;
     
     /* frontal face direction */
-    hyperpoint h0 = xtangent(1);
+    hyperpoint h0, h1, h2, h3, h012, h013;
+        
+    if(1) {
+      dynamicval<eGeometry> dg(geometry, gSphere);
+      angle_between_faces = edge_of_triangle_with_angles(2*M_PI/mid, M_PI/face, M_PI/face);
+      
+      h0 = xtangent(1);
+      h1 = cspin(0, 1, angle_between_faces) * h0;
+      h2 = cspin(1, 2, 2*M_PI/face) * h1;
+      h3 = cspin(1, 2, -2*M_PI/face) * h1;
 
-    /* three faces adjacent to frontal face direction */
-    hyperpoint h1 = cspin(0, 1, angle_between_faces) * h0;
-    hyperpoint h2 = cspin(1, 2, 2*M_PI/face) * h1;
-    hyperpoint h3 = cspin(1, 2, -2*M_PI/face) * h1;
+      hcrossf = edge_of_triangle_with_angles(M_PI/2, M_PI/mid, M_PI/face);
 
-    /* directions of vertices [h0,h1,h2] and [h0,h1,h3] */
-    hyperpoint dir_v2 = S7 == 8 ? (h1 + h2) : (h0 + h1 + h2);
-    hyperpoint dir_v3 = S7 == 8 ? (h1 + h3) : (h0 + h1 + h3);
-
-    DEBB(DF_GEOM, ("dir_v2 = ", dir_v2));
-    DEBB(DF_GEOM, ("dir_v3 = ", dir_v3));
-    
-    dir_v2 = tangent_length(dir_v2, 1);
-    dir_v3 = tangent_length(dir_v3, 1);
-    
-    DEBB(DF_GEOM, ("S7 = ", S7));
-    DEBB(DF_GEOM, ("dir_v2 = ", dir_v2));
-    DEBB(DF_GEOM, ("dir_v3 = ", dir_v3));
-    
-    /* the distance from cell center to cell vertex */
-    ld vertex_distance;
-    
-    if(cgflags & qIDEAL) {
-      vertex_distance = 13;
+      h012 = cspin(1, 2, M_PI/face) * cspin(0, 1, hcrossf) * h0;
+      h013 = cspin(1, 2, -M_PI/face) * cspin(0, 1, hcrossf) * h0;
       }
     
-    else {    
-      vertex_distance = binsearch(0, M_PI, [&] (ld d) {
-        // sometimes breaks in elliptic
-        dynamicval<eGeometry> g(geometry, elliptic ? gCell120 : geometry);
-        hyperpoint v2 = direct_exp(dir_v2 * d);
-        hyperpoint v3 = direct_exp(dir_v3 * d);
-        return hdist(v2, v3) >= edge_length;
-        });
-      }
+    for(auto hx: {&h0, &h1, &h2, &h3, &h012, &h013}) (*hx)[3] = 0;
     
-    DEBB(DF_GEOM, ("vertex_distance = ", vertex_distance));
+    ld klein_scale = binsearch(0, 10, [&] (ld d) {
+      dynamicval<eGeometry> g(geometry, elliptic ? gCell120 : geometry);
+
+      /* center of an edge */
+      hyperpoint u = C0 + (h012 + h013) * d / 2;
+
+      if(material(u) <= 0) {
+        println(hlog, "klein_scale = ", d, " bad");
+        return true;
+        }
+
+      u = normalize(u);
+
+      hyperpoint h = C0 * face;
+      for(int i=0; i<face; i++) h += d * (cspin(1, 2, M_PI*2*i/face) * h012);
+      h = normalize(h);
+
+      hyperpoint h2 = rspintox(h) * xpush0(2 * hdist0(h));
+      
+      h2 = spintox(u) * h2;
+      u = spintox(u) * u;
+      
+      h2 = gpushxto0(u) * h2;
+      u = gpushxto0(u) * u;
+      
+      ld x = hypot(h2[1], h2[2]);
+      ld y = h2[0];
+    
+      ld loop2 = 360 / (90 + atan(y/x) / degree);
+      
+      println(hlog, "d=", d, " loop2= ", loop2);
+      
+      if(sphere) return loop2 < loop;
+      return loop2 > loop;
+      });
+    
+    /* precise ideal vertex */
+    if(klein_scale > 1-1e-5 && klein_scale < 1+1e-5) klein_scale = 1;
     
     /* actual vertex */
-    hyperpoint v2 = direct_exp(dir_v2 * vertex_distance);
+    hyperpoint v2 = C0 + klein_scale * h012;
 
-    hyperpoint mid = Hypc;
-    for(int i=0; i<face; i++) mid += cspin(1, 2, 2*i*M_PI/face) * v2;
-    mid = normalize(mid);
-    ld between_centers = 2 * hdist0(mid);
+    hyperpoint midface = Hypc;
+    for(int i=0; i<face; i++) midface += cspin(1, 2, 2*i*M_PI/face) * v2;
+    midface = normalize(midface);
+    ld between_centers = 2 * hdist0(midface);
     DEBB(DF_GEOM, ("between_centers = ", between_centers));
+    
+    if(hyperbolic && klein_scale > 1) {
+      transmatrix T = spintox(h012);
+      hyperpoint a = T * (C0 + klein_scale * h012);
+      hyperpoint b = T * (C0 + klein_scale * h013);
+      ld f0 = 0.5;
+      println(hlog, "a=", a, " b=", b);
+      ld f1 = binsearch(0.5, 1, [&] (ld d) {
+        hyperpoint c = lerp(b, a, d);
+        println(hlog, "d=", d, " c= ", c, " material = ", material(c));
+        return material(c) <= 0;
+        });
+      println(hlog, "f1 = ", f1);
+      auto f = [&] (ld d) {
+        hyperpoint c = lerp(b, a, d);
+        c = normalize(c);
+        return c[1] * c[1] + c[2] * c[2];
+        };
+      for(int it=0; it<100; it++) {
+        ld fa = (f0*2+f1) / 3;
+        ld fb = (f0*1+f1*2) / 3;
+        println(hlog, "f(", fa, ") = ", f(fa), " f(", fb, ") = ", f(fb));
+        if(f(fa) > f(fb)) f0 = fa;
+        else f1 = fb;
+        }
+
+      hyperpoint c = lerp(b, a, f0);
+      c = normalize(c);
+      c[1] = c[2] = 0;
+      c = normalize(c);
+      mirrordist = hdist0(c);
+      println(hlog, "mirrordist = ", mirrordist);
+      }
+    
+    if(S7 == 20) {
+      spins[0] = Id;
+      spins[1] = cspin(0, 1, angle_between_faces) * cspin(1, 2, M_PI);
+      spins[2] = spins[1] * cspin(1, 2, -2 * M_PI/face) * spins[1];
+      spins[3] = spins[1] * cspin(1, 2, +2 * M_PI/face) * spins[1];
+      for(int a=4; a<10; a++) spins[a] = cspin(1, 2, 2*M_PI/face) * spins[a-3];
+      for(int a=S7/2; a<S7; a++) spins[a] = spins[a-S7/2] * cspin(0, 1, M_PI);
+      }
 
     if(S7 == 12 || S7 == 8) {
       spins[0] = Id;
@@ -1536,8 +1562,8 @@ EX void generate_fulls() {
     };
   
   cgi.full_P = cgi.adjmoves[0];
-  cgi.full_R = S7 == 8 ? cons(1, 7, 0) : cons(1, 2, 0);
-  cgi.full_X = S7 == 8 ? cons(1, 0, 6) : S7 == 6 ? cons(1, 0, 5) : cons(1, 0, cgi.face);
+  cgi.full_R = S7 == 8 ? cons(1, 7, 0) : S7 == 20 ? cons(1,2,6) : cons(1, 2, 0);
+  cgi.full_X = S7 == 8 ? cons(1, 0, 6) : S7 == 6 ? cons(1, 0, 5) : S7 == 20 ? cons(1,0,7) : cons(1, 0, cgi.face);
   
   cgi.xp_order = matrix_order(cgi.full_X * cgi.full_P);
   cgi.r_order = matrix_order(cgi.full_R);
