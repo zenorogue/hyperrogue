@@ -236,6 +236,14 @@ int arg::readCommon() {
     shift(); ld b = argf();
     View = View * cspin(1, 2, M_PI * 2 * a / b);
     }
+  else if(argis("-face-vertex")) {
+    PHASE(3);  start_game();
+    View = cspin(0, 2, M_PI/2) * spintox(cgi.vertices_only[0]);
+    }
+  else if(argis("-face-face")) {
+    PHASE(3);  start_game();
+    View = cspin(0, 2, M_PI/2);
+    }
   else if(argis("-grotate")) {
     PHASE(3);  start_game();
     shift(); int i = argi();
