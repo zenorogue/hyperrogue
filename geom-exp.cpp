@@ -444,7 +444,7 @@ EX void showQuotientConfig3() {
     auto&l = ds.hashes_found;
     for(auto& v: l) {
       char x = 'a';
-      string s = XLAT("#%1, cells: %2", itsh(v.first), its(get<5>(v.second)));
+      string s = XLAT("#%1, cells: %2, p=%3", itsh(v.first), its(get<5>(v.second)), its(get<0>(v.second)) + (get<1>(v.second) ? "²" : ""));
       dialog::addItem(s, x++);
       dialog::add_action([&v] {
         stop_game();
