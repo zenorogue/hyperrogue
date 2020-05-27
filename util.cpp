@@ -349,6 +349,8 @@ cld exp_parser::parse(int prio) {
     else if(number[0] == '0' && number[1] == 'x') res = strtoll(number.c_str()+2, NULL, 16);
     else if(number == "mousex") res = mousex;
     else if(number == "deg") res = degree;
+    else if(number == "ultra_mirror_dist") res = cgi.ultra_mirror_dist;
+    else if(number == "step") res = hdist0(tC0(currentmap->adj(cwt.at, 0)));
     else if(number == "mousey") res = mousey;
     else if(number == "random") res = randd();
     else if(number == "mousez") res = cld(mousex - current_display->xcenter, mousey - current_display->ycenter) / cld(current_display->radius, 0);
