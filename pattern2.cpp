@@ -2815,6 +2815,17 @@ EX namespace linepatterns {
         gridlinef(V, sh.vertices[p.first], sh.vertices[p.second], col, 2 + vid.linequality);
       )
     );
+
+  linepattern patUltra("ultra-connection", 0xFFFF8000, [] { return cgflags & qULTRA; }, 
+    ALLCELLS(
+      ignore(c);
+      color_t col2 = col;
+      if(col2 == 0xFF)
+        col2 = darkena(c->landparam, 0, 0xFF);
+      for(auto U: cgi.ultra_mirrors)
+        gridlinef(V, C0, V, mid(C0, U*C0), col2, 2 + vid.linequality);
+      )
+    );
   
   #if HDR
   extern linepattern patTriTree, patTriRings, patTriOther;
@@ -2827,7 +2838,7 @@ EX namespace linepatterns {
     &patVine, &patPalacelike, &patPalace, &patPower, &patHorocycles,
     &patTriRings, &patTriTree, &patTriOther,
     &patGoldbergTree, &patIrregularMaster, &patGoldbergSep, &patHeawood, &patArcm,
-    &patCircles, &patRadii, &patMeridians, &patParallels, &patSublines
+    &patCircles, &patRadii, &patMeridians, &patParallels, &patSublines, &patUltra
     };
 
   EX void clearAll() {

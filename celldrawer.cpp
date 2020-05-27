@@ -843,10 +843,28 @@ void celldrawer::draw_grid() {
       dynamicval<color_t> g(poly_outline, gridcolor(c, c->move(t)));          
       if(fat_edges && reg3::in()) {
         for(int i=0; i<S7; i++) if(c < c->move(i)) {
-          for(int j=0; j<cgi.face-1; j++) {
-            gridline(V, cgi.cellshape[i*cgi.face+j], cgi.cellshape[i*cgi.face+j+1], gridcolor(c, c->move(t)), prec);
+          for(int j=0; j<cgi.face; j++) {
+            int jj = j == cgi.face-1 ? 0 : j+1;
+            int jjj = jj == cgi.face-1 ? 0 : jj+1;
+            hyperpoint a = cgi.cellshape[i*cgi.face+j];
+            hyperpoint b = cgi.cellshape[i*cgi.face+jj];
+            if(cgflags & qIDEAL) {
+              ld mm = cgi.ultra_mirror_part;
+              if((cgflags & qULTRA) && !reg3::ultra_mirror_in())
+                mm = lerp(1-cgi.ultra_material_part, cgi.ultra_material_part, .99);
+              tie(a, b) = make_pair(normalize(lerp(a, b, mm)), normalize(lerp(b, a, mm)));
+              }
+            gridline(V, a, b, gridcolor(c, c->move(t)), prec);            
+
+            if(reg3::ultra_mirror_in()) {
+              hyperpoint a = cgi.cellshape[i*cgi.face+j];
+              hyperpoint b = cgi.cellshape[i*cgi.face+jj];
+              hyperpoint d = cgi.cellshape[i*cgi.face+jjj];
+              auto& mm = cgi.ultra_mirror_part;
+              tie(a, d) = make_pair(normalize(lerp(a, b, mm)), normalize(lerp(d, b, mm)));
+              gridline(V, a, d, stdgridcolor, prec);
+              }
             }
-          gridline(V, cgi.cellshape[i*cgi.face], cgi.cellshape[(i+1)*cgi.face-1], gridcolor(c, c->move(t)), prec);
           }
         }
       else {
