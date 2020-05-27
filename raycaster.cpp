@@ -25,7 +25,7 @@ EX int want_use = 1;
 
 EX ld exp_start = 1, exp_decay_exp = 4, exp_decay_poly = 10;
 
-const int gms_limit = 84;
+const int gms_limit = 110;
 
 EX ld maxstep_sol = .05;
 EX ld maxstep_nil = .1;
@@ -1426,7 +1426,10 @@ int readArgs() {
     PHASEFROM(2);
     shift_arg_formula(exp_start);
     shift_arg_formula(exp_decay_current());
-    want_use = 1;
+    }
+  else if(argis("-ray-hard")) {
+    PHASEFROM(2);
+    shift_arg_formula(hard_limit);
     }
   else if(argis("-ray-out")) {
     PHASEFROM(2); shift(); color_out_of_range = arghex();
