@@ -1150,10 +1150,33 @@ EX struct fpattern& getcurrfp() {
     fp.Prime = 5; fp.force_hash = 0x9FDE7B38u; fp.solve();
     return fp;
     }
+  if(geometry == gSpace345) {
+    static fpattern fp(0);
+    if(fp.Prime) return fp;
+    // 30 cells in 02ADCAA4 (3^2)
+    // 650 cells in 7EFE8D98 (5^2)
+    // 55 cells in F447F75C (11)
+    fp.Prime = 11; fp.force_hash = 0xF447F75Cu; fp.solve();
+    return fp;
+    }
+  if(geometry == gSpace353) {
+    static fpattern fp(0);
+    if(fp.Prime) return fp;
+    // 130 cells in 1566EBAC (5^2)
+    // 11 cells in 5A2E2B88 (11)
+    fp.Prime = 11; fp.force_hash = 0x5A2E2B88u; fp.solve();
+    return fp;
+    }
+  if(geometry == gSpace354) {
+    static fpattern fp(0);
+    if(fp.Prime) return fp;
+    fp.Prime = 11; fp.force_hash = 0x363D8DA4u; fp.solve();
+    return fp;
+    }
   if(WDIM == 3 && !quotient && !hybri && !bt::in()) {
     static fpattern fp(0);
     if(fp.Prime) return fp;
-    for(int p=2; p<8; p++) { fp.Prime = p; if(!fp.solve()) break; }
+    for(int p=2; p<20; p++) { fp.Prime = p; if(!fp.solve()) break; }
     DEBB(DF_FIELD, ("set prime = ", fp.Prime));
     return fp;
     }
