@@ -2399,6 +2399,7 @@ EX int read_config_args() {
   else if(argis("-noshadow")) { noshadow = true; }
   else if(argis("-bright")) { bright = true; }
   else if(argis("-gridon")) { vid.grid = true; }
+  else if(argis("-gridoff")) { vid.grid = false; }
 
 // non-configurable options
   else if(argis("-vsync_off")) {
