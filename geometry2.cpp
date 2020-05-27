@@ -284,7 +284,7 @@ void virtualRebase_cell(cell*& base, T& at, const U& check) {
     }
   if(reg3::ultra_mirror_in()) {
     again:
-    for(auto& v: cgi.mirror_matrices) {
+    for(auto& v: cgi.ultra_mirrors) {
       T cand_at = v * at;
       horo_distance newz(check(cand_at));
       if(newz < currz) {
