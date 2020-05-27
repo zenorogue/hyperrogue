@@ -1020,6 +1020,7 @@ int read_geom_args() {
     set_geometry(gFieldQuotient);
     }
   else if(argis("-to-fq")) {
+    cgi.require_basics();
     shift(); unsigned hash = arghex();
     stop_game_and_switch_mode(rg::nothing);
     fieldpattern::field_from_current();
