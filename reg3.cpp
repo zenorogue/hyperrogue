@@ -249,10 +249,10 @@ EX namespace reg3 {
 
     compute_ultra();
     
-    for(int a=0; a<12; a++)
-    for(int b=0; b<12; b++)
+    for(int a=0; a<S7; a++)
+    for(int b=0; b<S7; b++)
       if(cgi.dirs_adjacent[a][b]) 
-        for(int c=0; c<12; c++)
+        for(int c=0; c<S7; c++)
           if(cgi.dirs_adjacent[a][c] && cgi.dirs_adjacent[b][c]) {
             transmatrix t = build_matrix(tC0(cgi.adjmoves[a]), tC0(cgi.adjmoves[b]), tC0(cgi.adjmoves[c]), C0);
             if(det(t) > 1e-3) cgi.next_dir[a][b] = c;
