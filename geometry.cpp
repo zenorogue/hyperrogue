@@ -133,6 +133,10 @@ struct geometry_information {
   ld strafedist;
   bool dirs_adjacent[32][32];
 
+  ld ultra_mirror_dist, ultra_material_part, ultra_mirror_part;
+  
+  vector<transmatrix> ultra_mirrors;  
+
   /** \brief for adjacent directions a,b, next_dir[a][b] is the next direction adjacent to a, in (counter?)clockwise order from b */
   int next_dir[32][32];
 

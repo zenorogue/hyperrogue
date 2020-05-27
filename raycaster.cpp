@@ -462,6 +462,19 @@ void enable_raycaster() {
       fmain += 
           "  if(d < dist) { dist = d; which = i; }\n"
             "}\n";
+
+      if(hyperbolic && reg3::ultra_mirror_in()) {
+        fmain += "for(int i="+its(S7*2)+"; i<"+its(S7*2+isize(cgi.vertices_only))+"; i++) {\n";
+        fmain +=
+          "    mediump float v = ((position - uM[i] * position)[3] / (uM[i] * tangent - tangent)[3]);\n"
+          "    if(v > 1. || v < -1.) continue;\n"
+          "    mediump float d = atanh(v);\n"
+          "    mediump vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
+          "    if(next_tangent[3] < (uM[i] * next_tangent)[3]) continue;\n"
+          "    if(d < dist) { dist = d; which = i; }\n"
+            "}\n";
+        }
+      
     
       // 20: get to horosphere +uBLevel (take smaller root)
       // 21: get to horosphere -uBLevel (take larger root)
@@ -831,6 +844,12 @@ void enable_raycaster() {
         
     if(prod) fmain += "position.w = -zpos;\n";
     
+    if(reg3::ultra_mirror_in()) fmain += 
+      "if(which >= " + its(S7) + ") {"
+      "  tangent = uM[which] * tangent;\n"
+      "  continue;\n"
+      "  }\n";
+      
     // apply wall color
     fmain +=
       "  mediump vec2 u = cid + vec2(float(which) / float(uLength), 0);\n"
@@ -1137,7 +1156,7 @@ EX void cast() {
   
   // println(hlog, ms);
   
-  if(!sol && !nil && reflect_val) {
+  if(!sol && !nil && (reflect_val || reg3::ultra_mirror_in())) {
     if(BITRUNCATED) exit(1);
     for(int j=0; j<centerover->type; j++) {
       transmatrix T = inverse(ms[j]);
@@ -1145,6 +1164,11 @@ EX void cast() {
       ld d = hdist0(h);
       transmatrix U = rspintox(h) * xpush(d/2) * MirrorX * xpush(-d/2) * spintox(h);
       ms.push_back(U);
+      }
+    
+    if(reg3::ultra_mirror_in()) {
+      for(auto v: cgi.ultra_mirrors) 
+        ms.push_back(v);
       }
     }
   

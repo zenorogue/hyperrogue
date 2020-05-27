@@ -770,6 +770,14 @@ EX void showEuclideanMenu() {
     }
   #endif
   
+  if(cgflags & qULTRA) {
+    dialog::addBoolItem(XLAT("truncate ultra-vertices with mirrors"), reg3::ultra_mirror_on, 'Z');
+    dialog::add_action([] { 
+      reg3::ultra_mirror_on = !reg3::ultra_mirror_on;
+      ray::reset_raycaster();
+      });
+    }
+  
   if(prod) {
     dialog::addSelItem(XLAT("Z-level height factor"), fts(vid.plevel_factor), 'Z');
     dialog::add_action([] {
@@ -1071,6 +1079,9 @@ int read_geom_args() {
   else if(argis("-qs")) {
     cheat();
     shift(); currfp.qpaths.push_back(args());
+    }
+  else if(argis("-truncate-ultra")) {
+    shift(); reg3::ultra_mirror_on = argi();
     }
   else if(argis("-d:quotient")) 
     launch_dialog(showQuotientConfig);

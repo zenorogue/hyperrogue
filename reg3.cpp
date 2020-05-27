@@ -27,9 +27,56 @@ EX namespace reg3 {
   inline short& altdist(heptagon *h) { return h->emeraldval; }
   #endif
   
+  EX bool ultra_mirror_on;
+
+  EX bool ultra_mirror_in() { return (cgflags & qULTRA) && ultra_mirror_on; }
+  
   EX bool in() {
     if(fake::in()) return FPIU(in());
     return GDIM == 3 && !euclid && !bt::in() && !nonisotropic && !hybri && !kite::in();
+    }
+
+  EX void compute_ultra() {
+    cgi.ultra_mirror_part = .99;    
+    cgi.ultra_material_part = .99;
+    
+    if(cgflags & qULTRA) {
+      transmatrix T = spintox(cgi.cellshape[0]);
+      hyperpoint a = T * cgi.cellshape[0];
+      hyperpoint b = T * cgi.cellshape[1];
+      ld f0 = 0.5;
+      ld f1 = binsearch(0.5, 1, [&] (ld d) {
+        hyperpoint c = lerp(b, a, d);
+        if(debugflags & DF_GEOM) 
+          println(hlog, "d=", d, " c= ", c, " material = ", material(c));
+        return material(c) <= 0;
+        });
+      cgi.ultra_material_part = f1;
+      auto f = [&] (ld d) {
+        hyperpoint c = lerp(b, a, d);
+        c = normalize(c);
+        return c[1] * c[1] + c[2] * c[2];
+        };
+      for(int it=0; it<100; it++) {
+        ld fa = (f0*2+f1) / 3;
+        ld fb = (f0*1+f1*2) / 3;
+        if(debugflags & DF_GEOM) 
+          println(hlog, "f(", fa, ") = ", f(fa), " f(", fb, ") = ", f(fb));
+        if(f(fa) > f(fb)) f0 = fa;
+        else f1 = fb;
+        }
+      
+      cgi.ultra_mirror_part = f0;
+
+      hyperpoint c = lerp(b, a, f0);
+      c = normalize(c);
+      c[1] = c[2] = 0;
+      c = normalize(c);
+      cgi.ultra_mirror_dist = hdist0(c);
+      }
+
+    if(cgflags & qULTRA) for(auto v: cgi.vertices_only)
+      cgi.ultra_mirrors.push_back(rspintox(v) * xpush(cgi.ultra_mirror_dist*2) * MirrorX * spintox(v));
     }
 
   EX void generate() {
@@ -129,39 +176,6 @@ EX namespace reg3 {
     ld between_centers = 2 * hdist0(midface);
     DEBB(DF_GEOM, ("between_centers = ", between_centers));
     
-    if(hyperbolic && klein_scale > 1) {
-      transmatrix T = spintox(h012);
-      hyperpoint a = T * (C0 + klein_scale * h012);
-      hyperpoint b = T * (C0 + klein_scale * h013);
-      ld f0 = 0.5;
-      println(hlog, "a=", a, " b=", b);
-      ld f1 = binsearch(0.5, 1, [&] (ld d) {
-        hyperpoint c = lerp(b, a, d);
-        println(hlog, "d=", d, " c= ", c, " material = ", material(c));
-        return material(c) <= 0;
-        });
-      println(hlog, "f1 = ", f1);
-      auto f = [&] (ld d) {
-        hyperpoint c = lerp(b, a, d);
-        c = normalize(c);
-        return c[1] * c[1] + c[2] * c[2];
-        };
-      for(int it=0; it<100; it++) {
-        ld fa = (f0*2+f1) / 3;
-        ld fb = (f0*1+f1*2) / 3;
-        println(hlog, "f(", fa, ") = ", f(fa), " f(", fb, ") = ", f(fb));
-        if(f(fa) > f(fb)) f0 = fa;
-        else f1 = fb;
-        }
-
-      hyperpoint c = lerp(b, a, f0);
-      c = normalize(c);
-      c[1] = c[2] = 0;
-      c = normalize(c);
-      mirrordist = hdist0(c);
-      println(hlog, "mirrordist = ", mirrordist);
-      }
-    
     if(S7 == 20) {
       spins[0] = Id;
       spins[1] = cspin(0, 1, angle_between_faces) * cspin(1, 2, M_PI);
@@ -233,6 +247,8 @@ EX namespace reg3 {
       if(!found) vertices_only.push_back(h);
       }
 
+    compute_ultra();
+    
     for(int a=0; a<12; a++)
     for(int b=0; b<12; b++)
       if(cgi.dirs_adjacent[a][b]) 
@@ -302,6 +318,10 @@ EX namespace reg3 {
       if(!do_draw(c, V)) continue;
       drawcell(c, V);
       if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
+      
+      if(ultra_mirror_in())
+        for(auto& T: cgi.ultra_mirrors) 
+          dq::enqueue_by_matrix(h, V * T);
   
       for(int d=0; d<S7; d++)
         dq::enqueue_by_matrix(h->move(d), V * tmatrices[h->fieldval][d]);
@@ -869,10 +889,9 @@ EX namespace reg3 {
     void draw() override {
       sphereflip = Id;
       
-      // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
-      
-      dq::visited.clear();
-      dq::enqueue(centerover->master, cview());
+      dq::clear_all();
+      auto& enq = (ultra_mirror_in() ? dq::enqueue_by_matrix : dq::enqueue);
+      enq(centerover->master, cview());
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();
@@ -887,9 +906,15 @@ EX namespace reg3 {
         if(!do_draw(c, V)) continue;
         drawcell(c, V);
         if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
+        
+        if(sightranges[geometry] == 0) return;
+
+        if(ultra_mirror_in())
+          for(auto& T: cgi.ultra_mirrors) 
+            dq::enqueue_by_matrix(h, V * T);
     
         for(int i=0; i<S7; i++) if(h->move(i)) {
-          dq::enqueue(h->move(i), V * adj(h, i));
+          enq(h->move(i), V * adj(h, i));
           }
         }
       }

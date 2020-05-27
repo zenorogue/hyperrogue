@@ -997,7 +997,7 @@ EX ld spherity(const transmatrix& V) {
   }
 
 EX bool confusingGeometry() {
-  return quotient || elliptic;
+  return quotient || elliptic || reg3::ultra_mirror_in();
   }
 
 EX ld master_to_c7_angle() {
@@ -2012,6 +2012,14 @@ EX namespace dq {
     if(visited_by_matrix.count(b)) { return; }
     visited_by_matrix.insert(b);
     drawqueue_c.emplace(c, T, band_shift);
+    }
+  
+  EX void clear_all() {
+    visited.clear();
+    visited_by_matrix.clear();
+    visited_c.clear();
+    drawqueue_c = {};
+    drawqueue = {};
     }
 
 

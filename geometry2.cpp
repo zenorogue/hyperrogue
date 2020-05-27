@@ -282,6 +282,18 @@ void virtualRebase_cell(cell*& base, T& at, const U& check) {
     base = newbase;
     at = best_at;
     }
+  if(reg3::ultra_mirror_in()) {
+    again:
+    for(auto& v: cgi.mirror_matrices) {
+      T cand_at = v * at;
+      horo_distance newz(check(cand_at));
+      if(newz < currz) {
+        currz = newz;
+        at = cand_at;
+        goto again;
+        }
+      }
+    }
   }
 
 template<class T, class U> 

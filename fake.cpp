@@ -253,6 +253,8 @@ EX ld compute_around(bool setup) {
   
   h2 = gpushxto0(u) * h2;
   u = gpushxto0(u) * u;
+
+  reg3::compute_ultra();  
   
   ld x = hypot(h2[1], h2[2]);
   ld y = h2[0];
