@@ -265,6 +265,7 @@ EX void generate() {
   
   cgi.loop = ucgi.loop;
   cgi.face = ucgi.face;
+  cgi.schmid = ucgi.schmid;
 
   for(int a=0; a<16; a++)
   for(int b=0; b<16; b++) {
@@ -330,8 +331,12 @@ EX void compute_scale() {
     hyperpoint h = h0;
     auto h1 = h / h[WDIM] * scale;
     h1[WDIM] = 1;
+    set_flag(ginf[gFake].flags, qIDEAL, true);
+    set_flag(ginf[gFake].flags, qULTRA, false);
     }
   else {
+    set_flag(ginf[gFake].flags, qIDEAL, false);
+    set_flag(ginf[gFake].flags, qULTRA, around > around_ideal);
     ld minscale = 0, maxscale = 10;
     for(int it=0; it<100; it++) {
       scale = (minscale + maxscale) /  2;
@@ -346,6 +351,9 @@ EX void compute_scale() {
         }
       }
     }  
+
+  auto& u = underlying_cgip;
+  ginf[gFake].tiling_name = lalign(0, "{", u->face, ",", get_middle(), ",", around, "}");
   }
 
 void set_gfake(ld _around) {
@@ -363,7 +371,6 @@ void set_gfake(ld _around) {
   
   auto& u = underlying_cgip;
   
-  ginf[gFake].tiling_name = lalign(0, "{", u->face, ",", get_middle(), ",", around, "}");
   ginf[gFake].xcode = no_code;
   
   if(currentmap) new hrmap_fake(currentmap);
