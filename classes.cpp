@@ -731,7 +731,7 @@ enum eGeometry {
   gArnoldCat, gArbitrary, gInfOrder4, gCrystal534,
   gSpace535, gSpace536, gSeifertCover, gSeifertWeber, gHomologySphere,
   gInfOrderMixed, gSpace436, gFake,
-  gSpace345, gSpace353, gSpace354,
+  gSpace345, gSpace353, gSpace354, gSpace355,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSolNIH, gcNil, gcProduct, gcSL2 };
@@ -800,6 +800,8 @@ static const flagtype qINFMIXED        = Flag(22);
 
 static const flagtype qRAYONLY         = Flag(23);
 static const flagtype qAFFINE          = Flag(24);
+
+static const flagtype qULTRA           = Flag(25);
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
@@ -916,9 +918,10 @@ EX vector<geometryinfo> ginf = {
   {"{?,oo}", "none",    "{3/4,∞} (infinite triangles and squares)",   "ooxm",     3, OINF, qIDEAL | qINFMIXED,  giHyperb2, no_code, {{6, 6}}, eVariation::pure},
   {"{4,3,6}","none",    "{4,3,6} hyperbolic honeycomb",               "436",      6, 6, qIDEAL,    giHyperb3, no_code, {{7, 2}}, eVariation::pure},
   {"?",      "none",    "fake",                                       "",         0, 0, qRAYONLY,  giHyperb3, no_code, {{7, 2}}, eVariation::pure},
-  {"{3,4,5}","none",    "{3,4,5} hyperbolic honeycomb",               "345",      8, 5, qIDEAL,    giHyperb3, no_code, {{7, 2}}, eVariation::pure},
+  {"{3,4,5}","none",    "{3,4,5} hyperbolic honeycomb",               "345",      8, 5, qIDEAL | qULTRA,    giHyperb3, no_code, {{7, 2}}, eVariation::pure},
   {"{3,5,3}","none",    "{3,5,3} hyperbolic honeycomb",               "353",     20, 5, 0,         giHyperb3, no_code, {{7, 2}}, eVariation::pure},
-  {"{3,5,4}","none",    "{3,5,4} hyperbolic honeycomb",               "354",     20, 5, qIDEAL,    giHyperb3, no_code, {{7, 2}}, eVariation::pure},
+  {"{3,5,4}","none",    "{3,5,4} hyperbolic honeycomb",               "354",     20, 5, qIDEAL | qULTRA,    giHyperb3, no_code, {{7, 2}}, eVariation::pure},
+  {"{3,5,5}","none",    "{3,5,5} hyperbolic honeycomb",               "355",     20, 5, qIDEAL | qULTRA,    giHyperb3, no_code, {{7, 2}}, eVariation::pure},
   };
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 
