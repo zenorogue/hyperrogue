@@ -2918,7 +2918,7 @@ EX void setdist(cell *c, int d, cell *from) {
   
   // the number of tiles in the standard geometry has about 7553 digits!
   int gdist = abs(c->master->distance);
-  if(gdist > global_distance_limit && hyperbolic) {
+  if(gdist > global_distance_limit && hyperbolic && !quotient) {
     gdist -= global_distance_limit;
     if(d == 8 && hrand(100) < gdist) {
       if(!isMultitile(c)) c->monst = moNone;
