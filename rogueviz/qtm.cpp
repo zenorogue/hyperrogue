@@ -33,10 +33,7 @@ color_t rcolor() {
   return res;
   }
 
-color_t rainbow_color(hyperpoint h) {
-  ld sat = 1 - 1 / h[2];
-  ld hue = atan2(h[0], h[1]) / (2 * M_PI);
-  
+color_t rainbow_color(ld sat, ld hue) {
   hue = frac(hue);
   
   if(hue < 0) hue++;
@@ -52,9 +49,13 @@ color_t rainbow_color(hyperpoint h) {
   else if(hue<5) res = gradient(0x0000FF, 0xFF00FF, 4, hue, 5);
   else if(hue<6) res = gradient(0xFF0000, 0xFF00FF, 6, hue, 5);
   
-  println(hlog, "sat = ", sat, " hue = ", hue);
-
   return gradient(0xFFFFFF, res, 0, sat, 1);
+  }
+
+color_t rainbow_color(hyperpoint h) {
+  ld sat = 1 - 1 / h[2];
+  ld hue = atan2(h[0], h[1]) / (2 * M_PI);
+  return rainbow_color(sat, hue);
   }
   
 void set_cell(cell *c) {
@@ -162,6 +163,54 @@ int args() {
     start_game();
     cwt.at->wall = waWaxWall;
     cwt.at->landparam = 0xFFD500;
+    }
+
+  else if(argis("-one-line")) {
+    start_game();
+    cell *c = cwt.at;
+    int i = 0;
+    do {
+      c = c->cmove(0);
+      i++;
+      }
+    while(c != cwt.at);
+    for(int j=0; j<i; j++) {
+      c->wall = waWaxWall;
+      c->landparam = rainbow_color(1, j * 1. / i);
+      c = c->cmove(0);
+      }
+    }
+  else if(argis("-two-line")) {
+    start_game();
+    cell *c = cwt.at;
+    int i = 0;
+    do {
+      c = c->cmove(0);
+      i++;
+      }
+    while(c != cwt.at);
+    for(int j=0; j<i; j++) {
+      c->wall = waWaxWall;
+      c->landparam = rainbow_color(1, j * 1. / i);
+      c = c->cmove(0);
+      }
+    vector<cell*> a;
+    for(cell *x: currentmap->allcells()) {
+      bool good = true;
+      forCellCM(y, x) if(y->wall == waWaxWall) good = false;
+      if(good) a.push_back(x);
+      }
+    for(cell *x: a) {
+      x->wall = waWaxWall;
+      x->landparam = 0xFFFFFF;
+      }
+    vector<cell*> b;
+    for(cell *x: a) {
+      bool good = false;
+      forCellCM(y, x) if(y->wall != waWaxWall) good = true;
+      if(good) b.push_back(x);
+      }
+    for(cell *x: b) x->wall = waNone;
     }
 
   else return 1;
