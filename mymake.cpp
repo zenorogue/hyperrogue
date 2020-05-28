@@ -210,6 +210,8 @@ int main(int argc, char **argv) {
   
   string allobj = " " + obj_dir + "/hyper.o";
 
+  printf("compiling modules using batch size of %d:\n", batch_size);
+
   int id = 0;
   vector<pair<int, string>> tasks;
   for(string m: modules) {
