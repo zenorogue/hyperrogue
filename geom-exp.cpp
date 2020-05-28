@@ -81,6 +81,8 @@ void showQuotientConfig() {
   dialog::addItem("find the next prime", 'p');
   dialog::addItem("activate", 'x');
   dialog::addItem("default", 'c');
+  
+  dialog::addBack();
 
   keyhandler = [&gxcur] (int sym, int uni) {
     if(uni >= 'a' && uni < 'a' + isize(fgeomextras))
