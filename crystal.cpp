@@ -509,6 +509,15 @@ struct hrmap_crystal : hrmap_standard {
     h->alt = NULL;
     h->cdata = NULL;
     h->c7 = newCell(deg, h);
+    
+    /* in {6,4} we need emeraldval for some patterns, including (bitruncated) football and (bitruncated) three-color */
+    h->emeraldval = (c[0] ^ c[1] ^ c[2]) & 2;    
+    h->emeraldval ^= (c[1] & 4);
+    h->emeraldval ^= (c[0] & 4);
+    h->emeraldval ^= (c[2] & 4);
+    h->emeraldval ^= ((c[2] & 2) << 1);    
+    if(c[0] & 2) h->emeraldval ^= 1;
+
     h->distance = 0;
     if(ginf[gCrystal].vertex == 3) 
       h->fiftyval = fiftyrule(c);    
