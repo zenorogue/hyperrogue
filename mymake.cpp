@@ -29,7 +29,7 @@ string compiler;
 string linker;
 string libs;
 
-int batch_size = 1;
+int batch_size = thread::hardware_concurrency() + 1;
 
 void set_linux() {
   preprocessor = "g++ -E";
@@ -134,9 +134,7 @@ int main(int argc, char **argv) {
     else if(s.substr(0, 2) == "-l")
       linker += " " + s;
     else if(s.substr(0, 2) == "-j")
-      if (s.length() == 2 || stoi(s.substr(2)) < 1)
-        batch_size = thread::hardware_concurrency() + 1;
-      else batch_size = stoi(s.substr(2));
+      batch_size = stoi(s.substr(2));
     else if(s == "-I") {
       opts += " " + s + " " + argv[i+1];
       i++;
