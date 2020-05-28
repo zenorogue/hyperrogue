@@ -399,6 +399,7 @@ EX void change_around() {
 //  println(hlog, "t = ", t, " h distance = ", hypot_d(3, h), " for ", h);
   h *= t;
   View = rgpushxto0(direct_exp(h)) * T;
+  fixmatrix(View);
   playermoved = false;
   sightranges[gFake] = range * t;
   }
