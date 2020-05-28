@@ -254,8 +254,6 @@ EX ld compute_around(bool setup) {
   h2 = gpushxto0(u) * h2;
   u = gpushxto0(u) * u;
 
-  reg3::compute_ultra();  
-  
   ld x = hypot(h2[1], h2[2]);
   ld y = h2[0];
   return 360 / (90 + atan(y/x) / degree);
@@ -279,6 +277,7 @@ EX void generate() {
     cgi.spins[b] = ucgi.spins[b];
   
   compute_around(true);
+  reg3::compute_ultra();  
   }
 
 int get_middle() {
@@ -371,8 +370,6 @@ void set_gfake(ld _around) {
   compute_scale();
   check_cgi();
   
-  auto& u = underlying_cgip;
-  
   ginf[gFake].xcode = no_code;
   
   if(currentmap) new hrmap_fake(currentmap);
@@ -399,7 +396,7 @@ EX void change_around() {
 
   println(hlog, "scale = ", t, " -> ", scale, " range = ", range);
   t = scale / t;
-  println(hlog, "t = ", t, " h distance = ", hypot_d(3, h));
+//  println(hlog, "t = ", t, " h distance = ", hypot_d(3, h), " for ", h);
   h *= t;
   View = rgpushxto0(direct_exp(h)) * T;
   playermoved = false;

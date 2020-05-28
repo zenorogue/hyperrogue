@@ -74,7 +74,8 @@ EX namespace reg3 {
       c = normalize(c);
       cgi.ultra_mirror_dist = hdist0(c);
       }
-
+    
+    cgi.ultra_mirrors.clear();
     if(cgflags & qULTRA) for(auto v: cgi.vertices_only)
       cgi.ultra_mirrors.push_back(rspintox(v) * xpush(cgi.ultra_mirror_dist*2) * MirrorX * spintox(v));
     }

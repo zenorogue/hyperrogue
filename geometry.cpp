@@ -955,6 +955,7 @@ EX string cgi_string() {
     if(euclid) V("E", fts(fake::scale));
     if(sphere) V("S", fts(fake::scale));
     V("G", FPIU(cgi_string()));
+    return s;
     }
   
   if(GOLDBERG) V("GP", its(gp::param.first) + "," + its(gp::param.second));
