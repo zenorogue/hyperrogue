@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <chrono>
 #include <future>
+#include <functional>
 
 using namespace std;
 
@@ -213,7 +214,7 @@ int main(int argc, char **argv) {
   printf("compiling modules using batch size of %d:\n", batch_size);
 
   int id = 0;
-  vector<pair<int, string>> tasks;
+  vector<pair<int, function<int(void)>>> tasks;
   for(string m: modules) {
     string src = m + ".cpp";
     string m2 = m;
@@ -226,7 +227,8 @@ int main(int argc, char **argv) {
       }
     time_t obj_time = get_file_time(obj);
     if(src_time > obj_time) {
-      pair<int, string> task(id, compiler + " " + opts + " " + src + " -o " + obj);
+      string cmdline = compiler + " " + opts + " " + src + " -o " + obj;
+      pair<int, function<int(void)>> task(id, [cmdline]() { return system(cmdline); });
       tasks.push_back(task);
       }
     else {
@@ -259,9 +261,9 @@ int main(int argc, char **argv) {
     else if (tasks_taken < tasks_amt) {
       auto task = tasks[tasks_taken];
       int mid = task.first;
-      string cmdline = task.second;
+      function<int(void)> do_work = task.second;
       printf("compiling %s... [%d/%d]\n", modules[mid].c_str(), tasks_taken+1, tasks_amt);
-      worker = async(launch::async, (int (*)(string))system, cmdline);
+      worker = async(launch::async, do_work);
       ++tasks_taken;
       }
     else if (tasks_done == tasks_amt) { finished = true; break; }
