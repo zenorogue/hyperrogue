@@ -14,6 +14,8 @@
 #include <vector>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <chrono>
+#include <future>
 
 using namespace std;
 
@@ -26,6 +28,8 @@ string preprocessor;
 string compiler;
 string linker;
 string libs;
+
+int batch_size = 1;
 
 void set_linux() {
   preprocessor = "g++ -E";
@@ -129,6 +133,10 @@ int main(int argc, char **argv) {
       standard = s;
     else if(s.substr(0, 2) == "-l")
       linker += " " + s;
+    else if(s.substr(0, 2) == "-j")
+      if (s.length() == 2 || stoi(s.substr(2)) < 1)
+        batch_size = thread::hardware_concurrency() + 1;
+      else batch_size = stoi(s.substr(2));
     else if(s == "-I") {
       opts += " " + s + " " + argv[i+1];
       i++;
@@ -203,10 +211,10 @@ int main(int argc, char **argv) {
     }
   
   string allobj = " " + obj_dir + "/hyper.o";
-  
+
   int id = 0;
+  vector<pair<int, string>> tasks;
   for(string m: modules) {
-    id++;
     string src = m + ".cpp";
     string m2 = m;
     for(char& c: m2) if(c == '/') c = '_';
@@ -218,14 +226,45 @@ int main(int argc, char **argv) {
       }
     time_t obj_time = get_file_time(obj);
     if(src_time > obj_time) {
-      printf("compiling %s... [%d/%d]\n", m.c_str(), id, int(modules.size()));
-      if(system(compiler + " " + opts + " " + src + " -o " + obj)) { printf("error\n"); exit(1); }
+      pair<int, string> task(id, compiler + " " + opts + " " + src + " -o " + obj);
+      tasks.push_back(task);
       }
     else {
       printf("ok: %s\n", m.c_str());
       }
     allobj += " ";
     allobj += obj;
+    id++;
+    }
+
+  chrono::milliseconds quantum(25);
+  vector<future<int>> workers(batch_size);
+
+  int tasks_amt = tasks.size();
+  int tasks_taken = 0, tasks_done = 0;
+  bool finished = tasks.empty();
+
+  while (!finished)
+  for (auto & worker : workers) {
+    check_lollygagging:
+    if (worker.valid()) {
+      if (worker.wait_for(quantum) != future_status::ready) continue;
+      else {
+        int res = worker.get();
+        if (res) { printf("compilation error!\n"); exit(1); }
+        ++tasks_done;
+        goto check_lollygagging;
+        }
+      }
+    else if (tasks_taken < tasks_amt) {
+      auto task = tasks[tasks_taken];
+      int mid = task.first;
+      string cmdline = task.second;
+      printf("compiling %s... [%d/%d]\n", modules[mid].c_str(), tasks_taken+1, tasks_amt);
+      worker = async(launch::async, (int (*)(string))system, cmdline);
+      ++tasks_taken;
+      }
+    else if (tasks_done == tasks_amt) { finished = true; break; }
     }
   
   printf("linking...\n");

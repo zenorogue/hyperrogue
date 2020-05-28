@@ -162,7 +162,7 @@ savepng$(OBJ_EXTENSION): savepng.cpp
 	$(CXX) -O2 $(CXXFLAGS) -c savepng.cpp -o $@
 
 mymake$(EXE_EXTENSION): mymake.cpp
-	$(CXX) -O2 $(CXXFLAGS) mymake.cpp -o $@
+	$(CXX) -O2 $(CXXFLAGS) -lpthread mymake.cpp -o $@
 
 emscripten: hyper.html
 
