@@ -339,6 +339,10 @@ EX namespace euc {
     }
 
   EX int dist_alt(cell *c) {
+    if(WDIM == 2) {
+      auto v = full_coords2(c);
+      return euclidAlt(v.first, v.second);
+      }
     if(specialland == laCamelot) return dist_relative(c) + roundTableRadius(c);
     auto v = cubemap()->ispacemap[c->master];
     if(S7 == 6) return v[2];
@@ -391,8 +395,10 @@ EX namespace euc {
       }
     }
 
-  EX int celldistance(cell *c1, cell *c2) {
+  EX int celldistance(cell *c1, cell *c2) {    
     auto cm = cubemap();
+    if(GDIM == 2)
+      return dist(full_coords2(c1), full_coords2(c2));
     return celldistance(basic_canonicalize(cm->ispacemap[c1->master] - cm->ispacemap[c2->master]));
     }
 

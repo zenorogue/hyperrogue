@@ -511,7 +511,7 @@ EX int celldistAlt(cell *c) {
     return celldist(c) - 3;
     }
   #if MAXMDIM >= 4
-  if(euc::in(3)) return euc::dist_alt(c);
+  if(euc::in()) return euc::dist_alt(c);
   if(hyperbolic && WDIM == 3 && !reg3::in_rule())
     return reg3::altdist(c->master);
   #endif
