@@ -626,6 +626,7 @@ struct hrmap_crystal : hrmap_standard {
   map<int, transmatrix> adjs;
   
   transmatrix adj(heptagon *h, int d) override {
+    if(!crystal3()) return adj(h->c7, d);
     auto co = hcoords[h];
     int id = 0;
     for(int a=0; a<S7/2; a++) id = (2*id) + ((co[a]>>1) & 1);
