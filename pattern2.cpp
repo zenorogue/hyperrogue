@@ -2575,7 +2575,7 @@ EX namespace linepatterns {
       if(is_master(c)) {
         int dir = updir(c->master);
         if(dir == -1) continue;
-        cell *c2 = c->master->move(dir)->c7;
+        cell *c2 = c->master->cmove(dir)->c7;
         if(gmatrix.count(c2)) {
           if(S3 >= OINF)
             gridlinef(V, C0, Id, mid(tC0(V), tC0(V * currentmap->adj(c, dir))), col, 2 + vid.linequality);
