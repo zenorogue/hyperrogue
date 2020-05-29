@@ -912,6 +912,8 @@ EX void switch_always3() {
       if(pmodel == mdDisk) pmodel = mdPerspective;
       swapmatrix(View);
       callhooks(hooks_swapdim);
+      if(cgflags & qIDEAL && vid.texture_step < 32)
+        vid.texture_step = 32;
 #if CAP_RACING
       racing::player_relative = true;
 #endif

@@ -1290,6 +1290,7 @@ EX void set_geometry(eGeometry target) {
       variation = eVariation::pure;
     if(was_default) pmodel = default_model();
     if(nonisotropic && old_DIM == 2 && vid.texture_step < 4) vid.texture_step = 4;
+    if(WDIM == 2 && (cgflags & qIDEAL) && vid.always3 && vid.texture_step < 32) vid.texture_step = 32;
     if(prod) { pmodel = mdPerspective; if(vid.texture_step < 4) vid.texture_step = 4; }
     if(WDIM == 3 && (cgflags & qIDEAL) && vid.texture_step < 4) vid.texture_step = 4;
     if(sl2) nisot::geodesic_movement = true;
