@@ -252,7 +252,7 @@ void celldrawer::setcolors() {
       break;    
     case laMountain:
       if(eubinary || sphere || c->master->alt)
-        fcol = celldistAlt(c) & 1 ? 0x604020 : 0x302010;
+        fcol = 0x181008 * flip_dark(celldistAlt(c), 2, 4);
       else fcol = 0;
       if(c->wall == waPlatform) wcol = 0xF0F0A0;
       break;
@@ -321,11 +321,11 @@ void celldrawer::setcolors() {
       break;
   
     case laIvoryTower:
-      fcol = 0x10101 * (32 + (c->landparam&1) * 32) - 0x000010;
+      fcol = 0x10101 * flip_dark(c->landparam, 32, 64) - 0x000010;
       break;
     
     case laWestWall:
-      fcol = 0x10101 * ((c->landparam&1) * 32) + floorcolors[c->land];
+      fcol = 0x10101 * flip_dark(c->landparam, 0, 32) + floorcolors[c->land];
       break;
     
     case laDungeon: {
@@ -345,7 +345,7 @@ void celldrawer::setcolors() {
     case laEndorian: {
       int clev = pd_from->land == laEndorian ? edgeDepth(pd_from) : 0;
         // xcol = (c->landparam&1) ? 0xD00000 : 0x00D000;
-      fcol = 0x10101 * (32 + (c->landparam&1) * 32) - 0x000010;
+      fcol = 0x10101 * flip_dark(c->landparam, 32, 64) - 0x000010;
       int ed = edgeDepth(c);
       int sr = get_sightrange_ambush();
       
@@ -360,7 +360,8 @@ void celldrawer::setcolors() {
   
       if(c->wall == waCanopy || c->wall == waSolidBranch || c->wall == waWeakBranch) {
         fcol = winf[waCanopy].color;
-        if(c->landparam & 1) fcol = gradient(0, fcol, 0, .75, 1);
+        int f = flip_dark(c->landparam, 0, 2);
+        if(f) fcol = gradient(0, fcol, 8, f, 0);
         }
       break;
       }
@@ -368,7 +369,7 @@ void celldrawer::setcolors() {
     #if CAP_FIELD
     case laPrairie:
       if(prairie::isriver(c)) {
-        fcol = ((c->LHU.fi.rval & 1) ? 0x402000: 0x503000);
+        fcol = flip_dark(c->LHU.fi.rval, 0x402000, 0x503000);
         }
       else {
         fcol = 0x004000 + 0x001000 * c->LHU.fi.walldist;
@@ -383,7 +384,7 @@ void celldrawer::setcolors() {
   #if CAP_TOUR
       if(!tour::on) camelotcheat = false;
       if(camelotcheat) 
-          fcol = (d&1) ? 0xC0C0C0 : 0x606060;
+          fcol = 0x10101 * flip_dark(d, 0x60, 0xC0);
       else 
   #endif
       if(d < 0) {

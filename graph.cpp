@@ -158,6 +158,17 @@ EX int weakfirecolor(int phase) {
   return gradient(0xFF8000, 0xFF0000, -1, sintick(500, phase/1000./M_PI), 1);
   }
 
+/** @brief used to alternate colors depending on distance to something. In chessboard-patterned geometries, also use a third step */
+
+EX int flip_dark(int f, int a0, int a1) {
+  if(geosupport_chessboard()) {
+    f = gmod(f, 3);
+    return a0 + (a1-a0) * f / 2;
+    }
+  else
+    return (f&1) ? a1 : a0;
+  }
+
 color_t fc(int ph, color_t col, int z) {
   if(items[itOrbFire]) col = darkena(firecolor(ph), 0, 0xFF);
   if(items[itOrbAether]) col = (col &~0XFF) | (col&0xFF) / 2;
