@@ -3969,3 +3969,27 @@ geometry:
 - stretched spherical/SL2 geometry (raycaster only)
 - 3D models were buggy in rotation spaces
  
+2020-05-29 10:41 Update 11.3n:
+
+new geometries:
+- icosahedral hyperbolic honeycombs
+- hyperbolic honeycombs with ultra-ideal vertices
+- an option to truncae ultra-ideal vertices (both in 'real' and curvature-changed honeycombs)
+
+new features:
+- random pattern mode for Zebra, Wet and Frog
+- record animations directly to a video file (currently only Linux 60fps using ffmpeg)
+
+bugfixes:
+- fixed freeze while drawing the sky in {n,infty} FPP
+- fixed possible crash when doing 'underlying tree' in some geometries
+- fixed some bugs when curvature-changing Euclidean geometry
+- fixed the monster list in Snake Nest
+- in checkerboard tessellations, the two-color distance shading in some lands is replaced with a three-color one
+- added 'back' in quotient config
+- fixed some patterns in Crystal bitruncated {6,4} (this also fixes incorrect tile graphics)
+- fixed (horo)cycle-based lands in Euclidean
+- fixed raycasting glitches in hyperbolic space
+- fixed incorrect farlands generation in quotient geometries
+- fixed incorrect wall shape in some geometries (e.g. Euclidean)
+- fixed a bug in 16-cell
