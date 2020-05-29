@@ -708,7 +708,8 @@ EX vector<landtacinfo> land_tac = {
 EX vector<eLand> randlands = {
   laIce, laDesert, laCaves, laAlchemist, laGraveyard, laPower, laLivefjord, laZebra,
   laRlyeh, laDryForest, laEmerald, laWineyard, laDeadCaves, laRedRock,
-  laOvergrown, laWildWest, laWarpCoast, laRuins, laBull, laDragon, laReptile, laDocks
+  laOvergrown, laWildWest, laWarpCoast, laRuins, laBull, laDragon, laReptile, laDocks,
+  laFrog, laWet, laZebra
   };
 
 #if HDR

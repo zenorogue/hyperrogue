@@ -744,7 +744,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laZebra:
       if(d==8) 
-        c->wall = is_zebra_trapdoor(c) ? waTrapdoor : waNone;
+        c->wall = (randomPatternsMode ? RANDPAT : is_zebra_trapdoor(c)) ? waTrapdoor : waNone;
       
       ONEMPTY {
         if(c->wall == waNone && hrand(2500) < PT(100 + 2 * (kills[moOrangeDog]), 300) && notDippingFor(itZebra))
@@ -756,7 +756,9 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laWineyard:
       if(d==8) {
-        if(euclid && bounded) ;
+        if(randomPatternsMode)
+          c->wall = RANDPAT ? waVinePlant : waNone;
+        else if(euclid && bounded) ;
         #if CAP_ARCM
         else if(arcm::in() && arcm::current.have_line)
           c->wall = arcm::linespattern(c) ? waVinePlant : waNone;
@@ -786,8 +788,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           if(v == 0) c->wall = waStone;
           else {
             int w = v / 4;
-            if(randomPatternsMode) c->wall = RANDPAT ? waVinePlant : waNone;
-            else if(w == 9 || w == 10 || w == 7 || w == 8) {
+            if(w == 9 || w == 10 || w == 7 || w == 8) {
               c->wall = waVinePlant;
               }
             else if(v == 24 || v == 58 || v == 26 || v == 56)
@@ -2636,6 +2637,13 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         // if(wet::wetdata.empty()) wet::build_data();
         eWall wetwalls[10] = {waNone, waNone, waDeepWater, waDeepWater, waDeepWater, waShallow, waShallow, waShallow, waStone, waStone};
         c->wall = wetwalls[hrand(10)]; // wet::wetdata[windmap::getId(c)]];
+        if(randomPatternsMode) {
+          int a = 0;
+          if(RANDPAT) a++;
+          if(RANDPATV(laAsteroids)) a += 2;
+          eWall wetwalls[4] = { waNone, waShallow, waStone, waDeepWater };
+          c->wall = wetwalls[a];
+          }
         if(among(c->wall, waDeepWater, waShallow) && hrand_monster(4000) < 2 * (items[itWet] + yendor::hardness() + 5))
           c->monst = hrand(100) >= 90 ? moRusalka : moPike;
         if(c->wall == waShallow && hrand(2000) < min(PT(100 + kills[moPike] + kills[moRusalka], 150), 150) && notDippingFor(itWet))
@@ -2645,7 +2653,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laFrog:
       if(d == 9) {
-        if(!is_zebra_trapdoor(c)) {
+        if(randomPatternsMode ? RANDPAT : !is_zebra_trapdoor(c)) {
           if(hrand(2000) < PT(100 + 2 * kills[moFrog] + 2 * kills[moPhaser] + 2 * kills[moVaulter], 100) && notDippingFor(itFrog)) {
             bool ok = true;
             forCellCM(c1, c) if(c1->item) ok = false;
