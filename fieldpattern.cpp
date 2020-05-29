@@ -1173,6 +1173,7 @@ EX struct fpattern& getcurrfp() {
     fp.Prime = 11; fp.force_hash = 0x363D8DA4u; fp.solve();
     return fp;
     }
+  if(!hyperbolic) return fp_invalid;
   if(WDIM == 3 && !quotient && !hybri && !bt::in()) {
     static fpattern fp(0);
     if(fp.Prime) return fp;
@@ -1180,7 +1181,6 @@ EX struct fpattern& getcurrfp() {
     DEBB(DF_FIELD, ("set prime = ", fp.Prime));
     return fp;
     }
-  if(!hyperbolic) return fp_invalid;
   if(S7 == 8 && S3 == 3 && !bt::in()) {
     static fpattern fp(17);
     return fp;

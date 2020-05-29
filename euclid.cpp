@@ -1189,6 +1189,9 @@ EX void generate() {
   
   auto& cs = cgi.cellshape;
 
+  cgi.loop = 4;
+  cgi.schmid = 3;
+
   if(S7 == 6) {
     cgi.adjcheck = 1;
     cgi.face = 4;
@@ -1245,6 +1248,8 @@ EX void generate() {
         }
       }
     }
+  
+  reg3::make_vertices_only();
 
   }
 

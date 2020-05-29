@@ -80,6 +80,16 @@ EX namespace reg3 {
       cgi.ultra_mirrors.push_back(rspintox(v) * xpush(cgi.ultra_mirror_dist*2) * MirrorX * spintox(v));
     }
 
+  EX void make_vertices_only() {
+    auto& vertices_only = cgi.vertices_only;
+    vertices_only.clear();
+    for(hyperpoint h: cgi.cellshape) {
+      bool found = false;
+      for(hyperpoint h2: vertices_only) if(hdist(h, h2) < 1e-6) found = true;
+      if(!found) vertices_only.push_back(h);
+      }
+    }
+
   EX void generate() {
 
     if(fake::in()) {
@@ -89,7 +99,6 @@ EX namespace reg3 {
   
     int& loop = cgi.loop;
     int& face = cgi.face;
-    auto& vertices_only = cgi.vertices_only;
     auto& spins = cgi.spins;
     auto& cellshape = cgi.cellshape;
     auto& adjcheck = cgi.adjcheck;
@@ -241,13 +250,7 @@ EX namespace reg3 {
       for(auto& v: cellshape) v = T * v;
       }
 
-    vertices_only.clear();
-    for(hyperpoint h: cellshape) {
-      bool found = false;
-      for(hyperpoint h2: vertices_only) if(hdist(h, h2) < 1e-6) found = true;
-      if(!found) vertices_only.push_back(h);
-      }
-
+    make_vertices_only();
     compute_ultra();
     
     for(int a=0; a<S7; a++)
