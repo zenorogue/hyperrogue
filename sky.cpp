@@ -39,7 +39,7 @@ EX void prepare_sky() {
     queuepoly(T, cgi.shEuclideanSky, 0x0044e4FF);
     queuepolyat(T * zpush(cgi.SKY+0.5) * xpush(cgi.SKY+0.5), cgi.shSun, 0xFFFF00FF, PPR::SKY);
     }
-  else {
+  else if(!(cgflags & qIDEAL)) {
     sky = &queuea<dqi_sky> (PPR::SKY);
     }
   }
@@ -133,6 +133,12 @@ void celldrawer::draw_ceiling() {
 
   if(pmodel != mdPerspective || sphere) return;
   
+  auto add_to_sky = [this] (color_t col) {
+    if(cgflags & qIDEAL)
+      draw_shapevec(c, V, qfi.fshape->levels[SIDE_HIGH], darkena(col, 0, 0xFF), PPR::WALL);
+    else if(sky) sky->sky.emplace_back(c, V, col);
+    };
+  
   switch(ceiling_category(c)) {
     /* ceilingless levels */
     case 1: {
@@ -140,7 +146,7 @@ void celldrawer::draw_ceiling() {
       if(fieldpattern::fieldval_uniq(c) % 3 == 0) {
         queuepolyat(V * zpush(cgi.SKY+1), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         }
-      if(sky) sky->sky.emplace_back(sky_item{c, V, 0x00000F});
+      add_to_sky(0x00000F);
       if(c->land == laAsteroids) {
         if(fieldpattern::fieldval_uniq(c) % 9 < 3) {
           queuepolyat(V * zpush(-1-cgi.SKY), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
@@ -201,12 +207,12 @@ void celldrawer::draw_ceiling() {
         default: 
           col = skycolor(c);        
         }
-      if(sky) sky->sky.emplace_back(c, V, col);
+      add_to_sky(col);
       return;
       }
     
     case 3: {
-      if(sky) sky->sky.emplace_back(c, V, 0);
+      add_to_sky(0);
       if(camera_level <= cgi.WALL) return;
       if(c->land == laMercuryRiver) fcol = linf[laTerracotta].color, fd = 1;
       if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
@@ -221,7 +227,7 @@ void celldrawer::draw_ceiling() {
       }
     
     case 4: {
-      if(sky) sky->sky.emplace_back(c, V, 0x00000F);
+      add_to_sky(0x00000F);
       if(camera_level <= cgi.HIGH2) return;
       auto ispal = [&] (cell *c0) { return c0->land == laPalace && among(c0->wall, waPalace, waClosedGate, waOpenGate); };
       color_t wcol2 = 0xFFD500;
@@ -247,7 +253,7 @@ void celldrawer::draw_ceiling() {
       }
     
     case 6: {
-      if(sky) sky->sky.emplace_back(c, V, skycolor(c));
+      add_to_sky(skycolor(c));
       if(camera_level <= cgi.HIGH2) return;
       color_t wcol2 = winf[waRuinWall].color;
       if(c->landparam == 1)
@@ -264,7 +270,7 @@ void celldrawer::draw_ceiling() {
       }
     
     case 7: {
-      if(sky) sky->sky.emplace_back(c, V, 0x00000F);
+      add_to_sky(0x00000F);
       if(fieldpattern::fieldval_uniq(c) % 5 < 2) {
         queuepolyat(V * zpush(cgi.SKY+1), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         }
@@ -284,7 +290,7 @@ void celldrawer::draw_ceiling() {
       }
     
     case 5: {
-      if(sky) sky->sky.emplace_back(c, V, 0x00000F);
+      add_to_sky(0x00000F);
       if(camera_level <= cgi.WALL) return;
     
       if(pseudohept(c)) {
