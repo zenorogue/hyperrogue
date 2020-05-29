@@ -2018,8 +2018,8 @@ EX namespace dq {
     visited.clear();
     visited_by_matrix.clear();
     visited_c.clear();
-    drawqueue_c = {};
-    drawqueue = {};
+    while(!drawqueue_c.empty()) drawqueue_c.pop();
+    while(!drawqueue.empty()) drawqueue.pop();
     }
 
 
