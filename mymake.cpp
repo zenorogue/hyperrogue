@@ -248,17 +248,15 @@ int main(int argc, char **argv) {
 
   while (!finished)
   for (auto & worker : workers) {
-    check_lollygagging:
     if (worker.valid()) {
       if (worker.wait_for(quantum) != future_status::ready) continue;
       else {
         int res = worker.get();
         if (res) { printf("compilation error!\n"); exit(1); }
         ++tasks_done;
-        goto check_lollygagging;
         }
       }
-    else if (tasks_taken < tasks_amt) {
+    if (tasks_taken < tasks_amt) {
       auto task = tasks[tasks_taken];
       int mid = task.first;
       function<int(void)> do_work = task.second;
