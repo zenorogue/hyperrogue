@@ -59,8 +59,9 @@ struct hr_polygon_error : hr_exception {
   vector<transmatrix> v;
   eGeometryClass c;
   int id;
+  transmatrix end;
   map<string, cld> params;
-  hr_polygon_error(const vector<transmatrix>& _v, int _id) : v(_v), c(cgclass), id(_id) {}
+  hr_polygon_error(const vector<transmatrix>& _v, int _id, transmatrix _e) : v(_v), c(cgclass), id(_id), end(_e) {}
   ~hr_polygon_error() noexcept(true) {}
   };
 
@@ -124,7 +125,9 @@ void shape::build_from_angles_edges() {
     at = at * xpush(edges[i]) * spin(angles[i]);
     }
   matrices.push_back(at);
-  if(!eqmatrix(at, Id)) throw hr_polygon_error(matrices, id);
+  if(!eqmatrix(at, Id)) {
+    throw hr_polygon_error(matrices, id, at);
+    }
   if(sqhypot_d(3, ctr) < 1e-2) {
     // this may happen for some spherical tilings
     // try to move towards the center
@@ -744,7 +747,15 @@ EX void run(string fname) {
      set_variation(v);
      current = t;
      start_poly_debugger(poly);
-     string help = XLAT("Polygon number %1 did not close correctly. Here is the picture to help you understand the issue.\n\n", its(poly.id));
+     
+     cld dist = (hdist0(tC0(poly.end)) / poly.params["distunit"]);
+     bool angle = abs(dist) < 1e-9;
+     if(angle) dist = (atan2(poly.end * xpush0(1)) / poly.params["angleunit"]);
+     
+     string help = XLAT("Polygon number %1 did not close correctly (%2 %3). Here is the picture to help you understand the issue.\n\n", its(poly.id), 
+       angle ? "angle" : "distance",
+       lalign(0, dist)
+       );
      showstartmenu = false;
      for(auto& p: poly.params)
        help += lalign(-1, p.first, " = ", p.second, "\n");
