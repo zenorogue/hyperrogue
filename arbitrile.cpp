@@ -37,6 +37,8 @@ struct arbi_tiling {
   vector<shape> shapes;
   string name;
   string comment;
+  
+  ld cscale;
 
   geometryinfo1& get_geometry();
   eGeometryClass get_class() { return get_geometry().kind; }
@@ -190,6 +192,7 @@ EX void load(const string& fname) {
   c.shapes.clear();
   c.name = unnamed;
   c.comment = "";
+  c.cscale = 1;
   exp_parser ep;
   ep.s = s;
   ld angleunit = 1, distunit = 1, angleofs = 0;
@@ -269,6 +272,10 @@ EX void load(const string& fname) {
     else if(ep.eat("tile(")) load_tile(ep, false);
     else if(ep.eat("affine_limit(")) {
       affine_limit = ep.iparse();
+      ep.force_eat(")");
+      }
+    else if(ep.eat("cscale(")) {
+      c.cscale = ep.rparse();
       ep.force_eat(")");
       }
     else if(ep.eat("conway(\"")) {

@@ -597,6 +597,13 @@ void geometry_information::prepare_basics() {
     rhexf = u->rhexf * fake::scale;
     hexvdist = u->hexvdist * fake::scale;
     }
+  
+  if(arb::in()) {
+    auto& csc = arb::current.cscale;
+    scalefactor = csc;
+    hcrossf = crossf = orbsize = hcrossf7 * csc;
+    hexf = rhexf = hexvdist = csc * .5;
+    }
 
   if(scale_used()) scalefactor *= vid.creature_scale;
 
