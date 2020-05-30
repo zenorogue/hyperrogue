@@ -1274,8 +1274,8 @@ EX void showMenu() {
     dialog::addItem(XLAT("cancel the texture"), 'T');
     dialog::addBoolItem_choice(XLAT("move the model"), panstate, tpsModel, 'm');
     dialog::addBoolItem_choice(XLAT("move the texture"), panstate, tpsMove, 'a');
-    dialog::addBoolItem_choice(XLAT("zoom/scale the texture"), panstate, tpsScale, 'x');
-    dialog::addBoolItem_choice(XLAT("zoom/scale the model"), panstate, tpsZoom, 'z');
+    dialog::addBoolItem_choice(XLAT("scale/rotate the texture"), panstate, tpsScale, 'x');
+    dialog::addBoolItem_choice(XLAT("scale/rotate the model"), panstate, tpsZoom, 'z');
     dialog::addBoolItem_choice(XLAT("projection"), panstate, tpsProjection, 'p');
     dialog::addBoolItem_choice(XLAT("affine transformations"), panstate, tpsAffine, 'y');
     dialog::addBoolItem(XLAT("magic"), false, 'A');
