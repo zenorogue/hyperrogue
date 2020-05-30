@@ -11,6 +11,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <thread>
 #include <vector>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -239,17 +240,17 @@ int main(int argc, char **argv) {
     id++;
     }
 
-  chrono::milliseconds quantum(25);
+  chrono::milliseconds quantum(40);
   vector<future<int>> workers(batch_size);
 
   int tasks_amt = tasks.size();
   int tasks_taken = 0, tasks_done = 0;
   bool finished = tasks.empty();
 
-  while (!finished)
+  while (!finished) {
   for (auto & worker : workers) {
     if (worker.valid()) {
-      if (worker.wait_for(quantum) != future_status::ready) continue;
+      if (worker.wait_for(chrono::seconds(0)) != future_status::ready) continue;
       else {
         int res = worker.get();
         if (res) { printf("compilation error!\n"); exit(1); }
@@ -265,7 +266,7 @@ int main(int argc, char **argv) {
       ++tasks_taken;
       }
     else if (tasks_done == tasks_amt) { finished = true; break; }
-    }
+    } this_thread::sleep_for(quantum); }
   
   printf("linking...\n");
   system(linker + allobj + libs);
