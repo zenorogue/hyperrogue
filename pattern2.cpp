@@ -1027,7 +1027,15 @@ EX namespace patterns {
       if(sub & SPF_EXTRASYM) si.reflect = true;
       return si;
       }
-    
+
+    if(arb::in()) {
+      si.id = arb::id_of(c->master);
+      si.dir = 0;
+      si.symmetries = 1;
+      si.reflect = false;
+      return si;
+      }
+        
     #if CAP_ARCM
     if(arcm::in() && pat == 0) {
       if(sub & SPF_FOOTBALL) {
