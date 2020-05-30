@@ -942,6 +942,8 @@ eGeometry targetgeometry;
 
 string csymbol;
 
+string tes;
+
 void init_textureconfig() {
 #if CAP_CONFIG
   texturesavers = move(savers);  
@@ -954,6 +956,7 @@ void init_textureconfig() {
     addsaver(View[i][j], "viewmatrix_" + its(i) + its(j), i==j ? 1 : 0);
 
   addsaverenum(targetgeometry, "geometry", gNormal);
+  addsaver(tes, "tes", "");
   addsaverenum(pmodel, "used model", mdDisk);
   addsaver(vid.yshift, "Y shift", 0);
   addsaver(pconf.yposition, "Y position", 0);
@@ -1011,6 +1014,8 @@ bool texture_config::save() {
 
   cell *ctr = centerover;
   si_save = patterns::getpatterninfo0(ctr);
+
+  if(arb::in()) tes = arb::current.filename;
   
   if(arcm::in()) csymbol = arcm::current.symbol;
   else csymbol = "";
@@ -1050,6 +1055,10 @@ bool texture_config::load() {
           addMessage("Error: " + arcm::current.errormsg);
           return false;
           }
+        }
+      if(targetgeometry == gArbitrary) {
+        arb::run(tes);
+        stop_game();
         }
       set_geometry(targetgeometry);
       start_game();
