@@ -39,6 +39,7 @@ struct arbi_tiling {
   string comment;
   
   ld cscale;
+  string filename;
 
   geometryinfo1& get_geometry();
   eGeometryClass get_class() { return get_geometry().kind; }
@@ -192,6 +193,7 @@ EX void load(const string& fname) {
   c.shapes.clear();
   c.name = unnamed;
   c.comment = "";
+  c.filename = fname;
   c.cscale = 1;
   exp_parser ep;
   ep.s = s;
@@ -727,7 +729,7 @@ struct hrmap_arbi : hrmap {
 
 EX hrmap *new_map() { return new hrmap_arbi; }
 
-void run(string fname) {
+EX void run(string fname) {
   stop_game();
   eGeometry g = geometry;
   arbi_tiling t = current;
