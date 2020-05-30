@@ -1614,7 +1614,7 @@ void texture_config::true_remap() {
   models::configure();
   drawthemap();
   if(GDIM == 3) return;
-  clear_texture_map();
+  texture_map.clear();
   missing_cells_known.clear();
   for(cell *c: dcal) {
     auto si = patterns::getpatterninfo0(c);
