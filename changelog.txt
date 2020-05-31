@@ -4001,7 +4001,7 @@ bugfixes:
 - more detailed explanation if the polygon does not end
 - in texture mode, relabeled "zoom/scale" to correct "scale/rotate"
 - parser: edge_angles function
-- fake curvature: not works in 2D; improved net showing; new options
+- fake curvature: not works in 2D (regular, bitruncated, and Archimedean); improved net showing; new options
 - Nil: fixed the raycaster, and a freeze when changing the 'width' parameter
 - fixed a crash when changing wall quality in some geometries
 - when selecting singlecolor/randomcolor pattern in 3D, you can now specify the wall probability
