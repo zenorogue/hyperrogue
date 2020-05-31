@@ -606,8 +606,9 @@ EX namespace dialog {
       for(int i=0; i<10; i++) if(colorhistory[i] == (color << shift))
         inHistory = true;
       if(!inHistory) { colorhistory[lch] = (color << shift); lch++; lch %= 10; }
-      if(reaction) reaction();
       popScreen();
+      if(reaction) reaction();
+      if(reaction_final) reaction_final();
       }
     else if(uni >= '0' && uni <= '9') {
       color = colorhistory[uni - '0'] >> shift;
@@ -631,6 +632,7 @@ EX namespace dialog {
       }
     else if(doexiton(sym, uni)) {
       popScreen();
+      if(reaction_final) reaction_final();
       }
     }
   
