@@ -843,7 +843,7 @@ void celldrawer::draw_grid() {
       if(!bt::in() && c->move(t) < c) continue;
       dynamicval<color_t> g(poly_outline, gridcolor(c, c->move(t)));          
       if(fat_edges && reg3::in()) {
-        for(int i=0; i<S7; i++) if(c < c->move(i)) {
+        for(int i=0; i<S7; i++) if(c < c->move(i) || fake::in()) {
           for(int j=0; j<cgi.face; j++) {
             int jj = j == cgi.face-1 ? 0 : j+1;
             int jjj = jj == cgi.face-1 ? 0 : jj+1;
@@ -897,7 +897,7 @@ void celldrawer::draw_grid() {
     }
   else {
     for(int t=0; t<c->type; t++)
-      if(c->move(t) && (c->move(t) < c || isWarped(c->move(t))))
+      if(c->move(t) && (c->move(t) < c || isWarped(c->move(t)) || fake::in()))
       gridline(V, get_corner_position(c, t%c->type), get_corner_position(c, (t+1)%c->type), gridcolor(c, c->move(t)), prec);
     }
   }
