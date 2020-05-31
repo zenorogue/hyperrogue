@@ -1002,6 +1002,9 @@ EX named_functionality get_o_key() {
 
   if(peace::on)
     res.push_back(named_dialog(XLAT("peaceful mode"), peace::showMenu));
+  
+  if(texture::config.tstate)
+    res.push_back(named_dialog(XLAT("texture mode"), texture::showMenu));
 
   dialog::infix = "";
 
