@@ -480,6 +480,8 @@ void geometry_information::prepare_basics() {
   ld ALPHA = 2 * M_PI / S7;
   
   ld fmin, fmax;  
+  
+  ld s3, beta;
 
   if(arcm::in() && !prod) 
     ginf[gArchimedean].cclass = gcHyperbolic;
@@ -507,12 +509,17 @@ void geometry_information::prepare_basics() {
     hexhexdist = 0.566256;
     goto finish;
     }
+  
+  s3 = S3;
+  if(fake::in()) s3 = fake::around;
+  
+  beta = (S3 >= OINF && !fake::in()) ? 0 : 2*M_PI/s3;
 
-  tessf = euclid ? 1 : edge_of_triangle_with_angles(S3 >= OINF ? 0 : 2*M_PI/S3, M_PI/S7, M_PI/S7);
+  tessf = euclid ? 1 : edge_of_triangle_with_angles(beta, M_PI/S7, M_PI/S7);
   
-  if(elliptic && S7 == 4) tessf = M_PI/2;
+  if(elliptic && S7 == 4 && !fake::in()) tessf = M_PI/2;
   
-  hcrossf = euclid ? (S3 == 3 ? sqrt(3)/3 : sqrt(2)/2) : edge_of_triangle_with_angles(M_PI/2, M_PI/S7, M_PI/S3);
+  hcrossf = euclid ? tessf / 2 / sin(M_PI/s3) : edge_of_triangle_with_angles(M_PI/2, M_PI/S7, beta/2);
 
   crossf = BITRUNCATED ? hcrossf : tessf;
   
@@ -523,6 +530,22 @@ void geometry_information::prepare_basics() {
     hyperpoint H1 = spin(2*M_PI/S7) * H;
     hyperpoint H2 = xpush0(tessf-f);
     ld v1 = intval(H, H1), v2 = intval(H, H2);
+
+    if(fake::in() && WDIM == 2) {
+      hexvdist = hdist(xpush0(f), xspinpush0(ALPHA/2, hcrossf));
+      v2 = hdist(
+        spin(M_PI/2/S3) * xpush0(hexvdist),
+        spin(-M_PI/2/S3) * xpush0(hexvdist)
+        );
+      
+      v1 = hdist(
+        spin(M_PI/S7) * xpush0(f),
+        spin(-M_PI/S7) * xpush0(f)
+        );
+      
+      println(hlog, f, " : ", tie(v1, v2));
+      }
+
     if(v1 < v2) fmin = f; else fmax = f;
     }
   hexf = fmin;
@@ -546,10 +569,12 @@ void geometry_information::prepare_basics() {
 
   for(int d=0; d<S7; d++) invhexmove[d] = inverse(hexmove[d]);
 
-  hexhexdist = hdist(xpush0(crossf), xspinpush0(M_PI*2/S7, crossf));
-  
   hexvdist = hdist(xpush0(hexf), xspinpush0(ALPHA/2, hcrossf));
 
+  hexhexdist = fake::in() ?
+    2 * hdist0(mid(xspinpush0(M_PI/S6, hexvdist), xspinpush0(-M_PI/S6, hexvdist)))
+    : hdist(xpush0(crossf), xspinpush0(M_PI*2/S7, crossf));
+  
   DEBB(DF_GEOM | DF_POLY,
     (format("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
     hexhexdist, hexvdist)));  
@@ -588,7 +613,18 @@ void geometry_information::prepare_basics() {
   scalefactor = crossf / hcrossf7;
   orbsize = crossf;
 
-  if(fake::in()) {
+  if(fake::in() && WDIM == 2) {
+    auto& u = *fake::underlying_cgip;
+    geometry = fake::underlying;
+    ld orig = xpush0(u.hcrossf)[0] / xpush0(u.hcrossf)[WDIM];
+    geometry = gFake;
+    ld our = xpush0(hcrossf)[0] / xpush0(hcrossf)[WDIM];
+    fake::scale = our / orig;
+    // if(debugflags & DF_GEOM) 
+    println(hlog, "scale set to ", fake::scale);
+    }
+
+  if(fake::in() && WDIM == 3) {
     auto& u = fake::underlying_cgip;
     crossf = u->crossf * fake::scale;
     scalefactor = u->scalefactor * fake::scale;
@@ -596,6 +632,7 @@ void geometry_information::prepare_basics() {
     hexf = u->hexf * fake::scale;
     rhexf = u->rhexf * fake::scale;
     hexvdist = u->hexvdist * fake::scale;
+    hcrossf = u->hcrossf * fake::scale;
     }
   
   if(arb::in()) {
@@ -960,9 +997,9 @@ EX string cgi_string() {
   V("VAR", its(int(variation)));
   
   if(fake::in()) {
-    if(hyperbolic) V("H", fts(fake::scale));
-    if(euclid) V("E", fts(fake::scale));
-    if(sphere) V("S", fts(fake::scale));
+    if(hyperbolic) V("H", fts(fake::around));
+    if(euclid) V("E", fts(fake::around));
+    if(sphere) V("S", fts(fake::around));
     V("G", FPIU(cgi_string()));
     return s;
     }

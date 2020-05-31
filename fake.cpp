@@ -73,20 +73,17 @@ EX namespace fake {
         });
       
       if(WDIM == 2) {
-        
-        hyperpoint a1, a2, b1, b2;
-
-        in_underlying([c, d, &a1, &a2, &b1, &b2] {
-          a1 = get_corner_position(c, d);
-          a2 = get_corner_position(c, (d+1) % c->type);
-          
-          auto c1 = c->move(d);
-          auto d1 = c->c.spin(d);
-          b1 = get_corner_position(c1, d1);
-          b2 = get_corner_position(c1, (d1+1) % c1->type);
+      
+        ld dist;
+        in_underlying([c, d, &dist] {
+          dist = currentmap->spacedist(c, d);
           });
         
-        cgi.adjcheck = hdist0(mid(befake(a1), befake(a2))) + hdist0(mid(befake(b1), befake(b2)));
+        auto& u = *underlying_cgip;
+        if(dist == u.tessf) cgi.adjcheck = cgi.tessf;
+        else if(dist == u.crossf) cgi.adjcheck = cgi.crossf;
+        else if(dist == u.hexhexdist) cgi.adjcheck = cgi.hexhexdist;
+        else cgi.adjcheck = dist * scale;        
         }
       
       return S1 * xpush(cgi.adjcheck) * S2;
@@ -159,7 +156,7 @@ EX namespace fake {
       
       // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
       
-      if(pmodel == mdDisk && WDIM == 2) {
+      if(pmodel == mdDisk && WDIM == 2 && false) {
         draw_recursive(centerover, cview(), -1, -1, nullptr, 0);
         return;
         }
@@ -181,7 +178,7 @@ EX namespace fake {
         drawcell(c, V);
         if(in_wallopt() && isWall3(c) && isize(dq::drawqueue_c) > 1000) continue;
     
-        for(int i=0; i<S7; i++) if(c->move(i)) {
+        for(int i=0; i<c->type; i++) if(c->move(i)) {
           enqueue(c->move(i), V * adj(c, i));
           }
         }
@@ -290,8 +287,10 @@ EX ld around;
 
 /** @brief the value of 'around' which makes the tiling Euclidean */
 EX ld compute_euclidean() {
+  if(WDIM == 2) return 4 / (S7-2.) + 2;
+
   int middle = get_middle();
-  
+    
   return M_PI / asin(cos(M_PI/middle) / sin(M_PI/underlying_cgip->face));
   }
 
@@ -302,11 +301,12 @@ EX void compute_scale() {
   if(around < 0) around = good;
   
   if(abs(good - around) < 1e-6) good = around;
+  
+  int s3 = WDIM == 2 ? S3 : underlying_cgip->loop;
 
   multiple = false;
-  for(int k=1; k<10; k++)
-    if(abs(around - underlying_cgip->loop) < 1e-6)
-      multiple = true;
+  int mcount = int(around / s3 + .5);
+  multiple = abs(around - mcount * s3) < 1e-6;
 
   if(around == good) {  
     ginf[gFake].g = WDIM == 3 ? giEuclid3 : giEuclid2;
@@ -322,7 +322,11 @@ EX void compute_scale() {
 
   ld around_ideal = 1/(1/2. - 1./get_middle());
   
-  if(euclid) scale = 1;
+  if(WDIM == 2) {
+    ginf[gFake].tiling_name = lalign(0, "{", S7, ",", around, "}");
+    return;
+    }
+  else if(euclid) scale = 1;
   else if(abs(around_ideal - around) < 1e-6) {
     hyperpoint h0 = underlying_cgip->cellshape[0];
     auto s = kleinize(h0);
@@ -385,13 +389,17 @@ EX void change_around() {
   ld range = sightranges[geometry];
   
   if(!fake::in()) {
-    if(around == cgi.loop) return; /* do nothing */
+    if(around == (WDIM == 2 ? S3 : cgi.loop)) return; /* do nothing */
     set_gfake(around);
     }
   
   else {    
     compute_scale();
     ray::reset_raycaster();
+
+    /* to compute scale */
+    if(WDIM == 2)
+      cgi.prepare_basics();
     }
 
   println(hlog, "scale = ", t, " -> ", scale, " range = ", range);
