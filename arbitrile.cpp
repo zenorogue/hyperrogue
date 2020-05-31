@@ -27,6 +27,7 @@ struct shape {
   void build_from_angles_edges();
   vector<pair<int, int> > sublines;
   vector<pair<ld, ld>> stretch_shear;
+  int repeat_value;
   };
 
 struct arbi_tiling {
@@ -154,6 +155,7 @@ EX void load_tile(exp_parser& ep, bool unit) {
   auto& cc = current.shapes.back();
   cc.id = isize(current.shapes) - 1;
   cc.flags = 0;
+  cc.repeat_value = 1;
   while(ep.next() != ')') {
     cld dist = 1;
     if(!unit) {
@@ -340,6 +342,22 @@ EX void load(const string& fname) {
               }
             }
         }
+      }
+    else if(ep.eat("repeat(")) {
+      int i = ep.iparse(0);
+      verify_index(i, c.shapes, ep);
+      ep.force_eat(",");
+      int rep = ep.iparse(0);
+      ep.force_eat(")");
+      auto& sh = c.shapes[i];
+      int N = isize(sh.angles);
+      if(N % rep) 
+        throw hr_parse_exception("repeat value should be a factor of the number of vertices, " + ep.where());
+      sh.repeat_value = rep;
+      
+      int d = N / rep;
+      for(int i=d; i<N; i++)
+        sh.connections[i] = sh.connections[i-d];
       }
     else if(ep.eat("debug(")) {
       int i = ep.iparse(0);

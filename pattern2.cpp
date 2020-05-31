@@ -586,6 +586,7 @@ EX namespace patterns {
     int id;
     int dir;
     bool reflect;
+    /** 1 if no symmetries, more otherwise */
     int symmetries;
     };
   #endif
@@ -1031,7 +1032,7 @@ EX namespace patterns {
     if(arb::in()) {
       si.id = arb::id_of(c->master);
       si.dir = 0;
-      si.symmetries = 1;
+      si.symmetries = arb::current.shapes[si.id].repeat_value;
       si.reflect = false;
       return si;
       }
