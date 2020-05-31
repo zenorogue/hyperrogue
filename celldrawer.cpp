@@ -1617,7 +1617,7 @@ void celldrawer::draw_features_and_walls_3d() {
     for(int a=0; a<c->type; a++) {
       bool b = true;
       if(c->move(a) && (among(pmodel, mdPerspective, mdGeodesic) || gmatrix0.count(c->move(a))))
-        b = (patterns::innerwalls && (tC0(V)[2] < tC0(V * currentmap->adj(c, a))[2])) || !isWall3(c->move(a), dummy);
+        b = (patterns::innerwalls && (tC0(V)[2] < tC0(V * currentmap->adj(c, a))[2])) || fake::in() || !isWall3(c->move(a), dummy);
       if(b) {
         #if CAP_WRL
         /* always render */
