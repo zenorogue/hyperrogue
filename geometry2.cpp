@@ -307,12 +307,13 @@ void virtualRebase(cell*& base, T& at, const U& check) {
       h = check(at);
       };
     
-    while(h[1] < -0.5) step(1);
-    while(h[1] >= 0.5) step(4);
-    while(h[0] < -0.5) step(0);
-    while(h[0] >= 0.5) step(3);
-    while(h[2] < -0.5) step(2);
-    while(h[2] >= 0.5) step(5);
+    auto& nw = nilv::nilwidth;
+    while(h[1] < -0.5 * nw) step(1);
+    while(h[1] >= 0.5 * nw) step(4);
+    while(h[0] < -0.5 * nw) step(0);
+    while(h[0] >= 0.5 * nw) step(3);
+    while(h[2] < -0.5 * nw * nw) step(2);
+    while(h[2] >= 0.5 * nw * nw) step(5);
     return;
     }
 
