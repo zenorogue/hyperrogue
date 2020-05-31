@@ -485,14 +485,14 @@ EX void configure() {
       });
 
     dialog::addSelItem("original", fts(around_orig()), 'O');
-    dialog::add_action([e] {
+    dialog::add_action([] {
       around = around_orig();
       popScreen();
       change_around();
       });
 
     dialog::addSelItem("double original", fts(2 * around_orig()), 'D');
-    dialog::add_action([e] {
+    dialog::add_action([] {
       around = 2 * around_orig();
       popScreen();
       change_around();
