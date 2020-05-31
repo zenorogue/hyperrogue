@@ -542,8 +542,6 @@ void geometry_information::prepare_basics() {
         spin(M_PI/S7) * xpush0(f),
         spin(-M_PI/S7) * xpush0(f)
         );
-      
-      println(hlog, f, " : ", tie(v1, v2));
       }
 
     if(v1 < v2) fmin = f; else fmax = f;
