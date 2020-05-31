@@ -307,7 +307,7 @@ cld exp_parser::parse(int prio) {
     }
   else if(eat("test(")) {
     res = parsepar();
-    println(hlog, "res = ", res);
+    println(hlog, "res = ", res, ": ", fts(real(res), 10), ",", fts(imag(res), 10));
     }
   else if(eat("ifp(")) {
     cld cond = parse(0);
