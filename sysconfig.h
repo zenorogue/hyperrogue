@@ -443,6 +443,7 @@ extern "C" {
 #include <random>
 #include <complex>
 #include <new>
+#include <limits.h>
 
 #if CAP_VIDEO
 #include <sys/wait.h>
