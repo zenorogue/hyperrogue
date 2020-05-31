@@ -240,6 +240,23 @@ cld exp_parser::parse(int prio) {
     force_eat(")");
     res = edge_of_triangle_with_angles(2*M_PI/a, M_PI/b, M_PI/b);
     }
+  else if(eat("edge_angles(")) {
+    cld a = rparse(0);
+    force_eat(",");
+    cld b = rparse(0);
+    force_eat(",");
+    cld c = rparse(0);
+    force_eat(")");
+
+    if(extra_params.count("angleunit")) {    
+      
+      a *= extra_params["angleunit"];
+      b *= extra_params["angleunit"];
+      c *= extra_params["angleunit"];
+      }
+
+    return edge_of_triangle_with_angles(real(a), real(b), real(c));
+    }
   else if(eat("regradius(")) {
     ld a = rparse(0);
     force_eat(",");
