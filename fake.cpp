@@ -363,7 +363,11 @@ EX void compute_scale() {
 
   ld around_ideal = 1/(1/2. - 1./get_middle());
   
-  if(WDIM == 2) {
+  if(arcm::in()) {
+    ginf[gFake].tiling_name = "(" + ginf[gArchimedean].tiling_name + ")^" + fts(around / around_orig());
+    return;
+    }
+  else if(WDIM == 2) {
     ginf[gFake].tiling_name = lalign(0, "{", S7, ",", around, "}");
     return;
     }
