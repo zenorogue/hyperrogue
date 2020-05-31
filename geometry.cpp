@@ -511,7 +511,7 @@ void geometry_information::prepare_basics() {
     }
   
   s3 = S3;
-  if(fake::in()) s3 = fake::around;
+  if(fake::in() && !arcm::in()) s3 = fake::around;
   
   beta = (S3 >= OINF && !fake::in()) ? 0 : 2*M_PI/s3;
 
@@ -589,10 +589,12 @@ void geometry_information::prepare_basics() {
   #endif
   #if CAP_ARCM
   if(arcm::in()) {
-    arcm::current.compute_geometry();
-    crossf = hcrossf7 * arcm::current.scale();
-    hexvdist = arcm::current.scale() * .5;
-    rhexf = arcm::current.scale() * .5;
+    auto& ac = arcm::current_or_fake();
+    if(fake::in()) ac = arcm::current;
+    ac.compute_geometry();
+    crossf = hcrossf7 * ac.scale();
+    hexvdist = ac.scale() * .5;
+    rhexf = ac.scale() * .5;
     }
   #endif
   #if CAP_BT

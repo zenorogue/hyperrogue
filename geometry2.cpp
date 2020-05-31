@@ -512,7 +512,7 @@ EX hyperpoint get_corner_position(cell *c, int cid, ld cf IS(3)) {
   #endif
   #if CAP_ARCM
   if(arcm::in()) {
-    auto &ac = arcm::current;
+    auto &ac = arcm::current_or_fake();
     if(PURE) {
       if(arcm::id_of(c->master) >= ac.N*2) return C0;
       auto& t = ac.get_triangle(c->master, cid-1);

@@ -54,7 +54,11 @@ EX namespace fake {
       for(hrmap*& m: allmaps) if(m == underlying_map) m = NULL;
       }
     
-    ~hrmap_fake() { delete underlying_map; }
+    ~hrmap_fake() { 
+      in_underlying([this] {
+        delete underlying_map; 
+        });
+      }
     
     heptagon *create_step(heptagon *parent, int d) override {
       parent->c.connect(d, parent, d, false);
@@ -65,6 +69,7 @@ EX namespace fake {
       transmatrix S1, S2;
       ld dist;
       in_underlying([c, d, &S1, &S2, &dist] {
+        dynamicval<bool> u(arcm::use_gmatrix, false);
         transmatrix T = currentmap->adj(c, d);
         S1 = rspintox(tC0(T));
         transmatrix T1 = spintox(tC0(T)) * T;
@@ -72,7 +77,14 @@ EX namespace fake {
         S2 = xpush(-dist) * T1;
         });
       
-      if(WDIM == 2) {
+      if(arcm::in()) {
+        int t = arcm::id_of(c->master);
+        int t2 = arcm::id_of(c->move(d)->master);
+        auto& cof = arcm::current_or_fake();
+        cgi.adjcheck = cof.inradius[t/2] + cof.inradius[t2/2];
+        }
+      
+      else if(WDIM == 2) {
       
         ld dist;
         in_underlying([c, d, &dist] {
@@ -139,6 +151,7 @@ EX namespace fake {
       }
 
     transmatrix relative_matrix(cell *h2, cell *h1, const hyperpoint& hint) override {
+      if(arcm::in()) return underlying_map->relative_matrix(h2, h1, hint);
       if(h1 == h2) return Id;
   
       for(int a=0; a<h1->type; a++) if(h1->move(a) == h2)
@@ -148,6 +161,7 @@ EX namespace fake {
       }
 
     transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+      if(arcm::in()) return underlying_map->relative_matrix(h2, h1, hint);
       return relative_matrix(h2->c7, h1->c7, hint);
       }
 
@@ -190,6 +204,10 @@ EX namespace fake {
           enqueue(c->move(i), V * adj(c, i));
           }
         }
+      }
+
+    ld spin_angle(cell *c, int d) override {
+      return underlying_map->spin_angle(c,d);
       }
     };
   
@@ -295,11 +313,21 @@ EX ld around;
 
 /** @brief the value of 'around' which makes the tiling Euclidean */
 EX ld compute_euclidean() {
+  if(arcm::in()) return arcm::current.N * 2 / arcm::current.euclidean_angle_sum;
   if(WDIM == 2) return 4 / (S7-2.) + 2;
 
   int middle = get_middle();
     
   return M_PI / asin(cos(M_PI/middle) / sin(M_PI/underlying_cgip->face));
+  }
+
+EX int around_orig() {
+  if(arcm::in())
+    return arcm::current.N;
+  if(WDIM == 2)
+    return S3;
+  return
+    underlying_cgip->loop;
   }
 
 EX void compute_scale() {
@@ -310,7 +338,7 @@ EX void compute_scale() {
   
   if(abs(good - around) < 1e-6) good = around;
   
-  int s3 = WDIM == 2 ? S3 : underlying_cgip->loop;
+  int s3 = around_orig();
 
   multiple = false;
   int mcount = int(around / s3 + .5);
@@ -381,6 +409,7 @@ void set_gfake(ld _around) {
   
   compute_scale();
   check_cgi();
+  cgi.require_basics();
   
   ginf[gFake].xcode = no_code;
   
@@ -397,7 +426,7 @@ EX void change_around() {
   ld range = sightranges[geometry];
   
   if(!fake::in()) {
-    if(around == (WDIM == 2 ? S3 : cgi.loop)) return; /* do nothing */
+    if(around == around_orig()) return; /* do nothing */
     set_gfake(around);
     }
   

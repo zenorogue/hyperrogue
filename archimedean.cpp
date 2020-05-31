@@ -76,10 +76,12 @@ struct archimedean_tiling {
   string world_size();
   void get_nom_denom(int& anom, int& adenom);
   
-  geometryinfo1& get_geometry();
+  geometryinfo1& get_geometry(ld mul = 1);
   eGeometryClass get_class() { return get_geometry().kind; }
 
   bool get_step_values(int& steps, int& single_step);
+
+  transmatrix adjcell_matrix(heptagon *h, int d);
   
   ld scale();
   };
@@ -96,6 +98,12 @@ static const int sfSEMILINE = 16;
 #endif
 
 EX archimedean_tiling current;
+EX archimedean_tiling fake_current;
+
+EX archimedean_tiling& current_or_fake() {
+  if(fake::in()) return fake_current;
+  return current;
+  }
 
 /** id of vertex in the archimedean tiling
  *  odd numbers = reflected tiles
@@ -354,9 +362,9 @@ void archimedean_tiling::regroup() {
     }
   }
 
-geometryinfo1& archimedean_tiling::get_geometry() {
-  if(euclidean_angle_sum < 1.999999) return ginf[gSphere].g;
-  else if(euclidean_angle_sum > 2.000001) return ginf[gNormal].g;
+geometryinfo1& archimedean_tiling::get_geometry(ld mul) {
+  if(euclidean_angle_sum * mul < 1.999999) return ginf[gSphere].g;
+  else if(euclidean_angle_sum * mul > 2.000001) return ginf[gNormal].g;
   else return ginf[gEuclid].g;
   }
 
@@ -366,6 +374,8 @@ void archimedean_tiling::compute_geometry() {
   
   DEBB(DF_GEOM, (format("euclidean_angle_sum = %f\n", float(euclidean_angle_sum))));
   
+  bool infake = fake::in();
+  
   dynamicval<eGeometry> dv(geometry, gArchimedean);
   
   /* compute the geometry */
@@ -373,6 +383,15 @@ void archimedean_tiling::compute_geometry() {
   circumradius.resize(N);
   alphas.resize(N);
   ld elmin = 0, elmax = hyperbolic ? 10 : sphere ? M_PI : 1;
+  
+  ld total = M_PI;
+
+  dynamicval<geometryinfo1> dgi(ginf[geometry].g, ginf[geometry].g);
+
+  if(infake) {
+    total *= N / fake::around;
+    ginf[geometry].g = get_geometry(fake::around / N);
+    }
   
   /* inradius[N] is used in farcorner and nearcorner. Probably a bug */
   
@@ -422,7 +441,7 @@ void archimedean_tiling::compute_geometry() {
       println(hlog, "edgelength = ", edgelength, " angles = ", alphas, " inradius = ", inradius, " circumradius = ", circumradius);
     
     if(isnan(alpha_total)) elmax = edgelength;
-    else if(sphere ^ (alpha_total > M_PI)) elmin = edgelength;
+    else if(sphere ^ (alpha_total > total)) elmin = edgelength;
     else elmax = edgelength;
     if(euclid) break;
     }
@@ -474,7 +493,13 @@ bool skip_digons(heptspin hs, int step);
 void connect_digons_too(heptspin h1, heptspin h2);
 void fixup_matrix(transmatrix& T, const transmatrix& X, ld step);
 void connectHeptagons(heptspin hi, heptspin hs);
-transmatrix adjcell_matrix(heptagon *h, int d);
+
+/** @brief should we use gmatrix to compute relative_matrix faster? (not while in fake Archimedean) */
+EX bool use_gmatrix = true;
+
+/** @brief like adj, but in pure 
+ *  not used by arcm itself, but used in fake arcm
+ */
 
 struct hrmap_archimedean : hrmap {
   map<gp::loc, struct cdata> eucdata;
@@ -573,7 +598,9 @@ struct hrmap_archimedean : hrmap {
   heptagon *create_step(heptagon *h, int d) override {
   
     DEBB(DF_GEOM, (format("%p.%d ~ ?\n", hr::voidp(h), d)));
-  
+
+    dynamicval<geometryinfo1> gi(ginf[geometry].g, ginf[gArchimedean].g);
+    
     heptspin hi(h, d);
     
     while(skip_digons(hi, 1)) hi++;
@@ -668,7 +695,7 @@ struct hrmap_archimedean : hrmap {
         if(DUAL && (i&1)) continue;
         h->cmove(i);
         if(PURE && id >= 2*current.N && h->move(i) && id_of(h->move(i)) >= 2*current.N) continue;
-        transmatrix V1 = V * adjcell_matrix(h, i);
+        transmatrix V1 = V * current.adjcell_matrix(h, i);
         bandfixer bf(V1);
         dq::enqueue(h->move(i), V1);
         }
@@ -680,21 +707,22 @@ struct hrmap_archimedean : hrmap {
     }
   
   transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
-    if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
+    if(use_gmatrix && gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
       return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
     transmatrix gm = Id, where = Id;
+    auto& cof = current_or_fake();
     while(h1 != h2) {
       for(int i=0; i<neighbors_of(h1); i++) {
         if(h1->move(i) == h2) {
-          return gm * adjcell_matrix(h1, i) * where;
+          return gm * cof.adjcell_matrix(h1, i) * where;
           }
         }
       if(h1->distance > h2->distance) {
-        gm = gm * adjcell_matrix(h1, 0);
+        gm = gm * cof.adjcell_matrix(h1, 0);
         h1 = h1->move(0);
         }
       else {
-        where = inverse(adjcell_matrix(h2, 0)) * where;
+        where = inverse(cof.adjcell_matrix(h2, 0)) * where;
         h2 = h2->move(0);
         }
       }
@@ -702,16 +730,17 @@ struct hrmap_archimedean : hrmap {
     }
       
   ld spin_angle(cell *c, int d) override {
+    auto &cof = current_or_fake();
     if(PURE) {
-      auto& t1 = arcm::current.get_triangle(c->master, d-1);
+      auto& t1 = cof.get_triangle(c->master, d-1);
       return -(t1.first + M_PI / c->type);
       }
     else if(DUAL) {
-      auto& t1 = arcm::current.get_triangle(c->master, 2*d);
+      auto& t1 = cof.get_triangle(c->master, 2*d);
       return -t1.first;
       }
     else { /* BITRUNCATED */
-      auto& t1 = arcm::current.get_triangle(c->master, d);
+      auto& t1 = cof.get_triangle(c->master, d);
       return -t1.first;
       }
     }
@@ -826,13 +855,13 @@ pair<ld, ld>& archimedean_tiling::get_triangle(const pair<int, int>& p, int delt
   return triangles[p.first][gmod(p.second + delta, isize(adjacent[p.first]))];
   }
 
-transmatrix adjcell_matrix(heptagon *h, int d) {
-  auto& t1 = current.get_triangle(h, d);
+transmatrix archimedean_tiling::adjcell_matrix(heptagon *h, int d) {
+  auto& t1 = get_triangle(h, d);
 
   heptagon *h2 = h->move(d);
 
   int d2 = h->c.spin(d);
-  auto& t2 = current.get_triangle(h2, d2);
+  auto& t2 = get_triangle(h2, d2);
   
   return spin(-t1.first) * xpush(t1.second) * spin(M_PI + t2.first);
   }

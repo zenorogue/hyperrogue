@@ -1083,7 +1083,7 @@ void geometry_information::configure_floorshapes() {
   if(0);
   #if CAP_ARCM
   else if(arcm::in())
-    shFullFloor.configure(arcm::current.scale()/2, arcm::current.scale()/2);
+    shFullFloor.configure(arcm::current_or_fake().scale()/2, arcm::current_or_fake().scale()/2);
   #endif
   else
     shFullFloor.configure(hexvdist, rhexf);
