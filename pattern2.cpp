@@ -1681,6 +1681,12 @@ EX namespace patterns {
   EX int jhole = 0;
   EX int jblock = 0;
   EX int rwalls = 50;
+  
+  EX void edit_rwalls() {
+    if(WDIM == 2) return;
+    dialog::editNumber(rwalls, 0, 100, 10, 50, XLAT("probability of a wall (%)"), "");
+    dialog::reaction = [] { stop_game(); start_game(); };
+    }  
 
   EX int generateCanvas(cell *c) {
     
@@ -1748,8 +1754,12 @@ EX namespace patterns {
         if(!hyperbolic) return canvasback;
         return 0x3F1F0F * fieldpattern::subval(c).second + 0x000080;
       #endif
-      case 'g':
-        return canvasback;
+      case 'g': {
+        color_t r = canvasback;
+        if(hrand(100) < rwalls) r |= 0x1000000;
+        if(c == cwt.at) r &= 0xFFFFFF;
+        return r;
+        }
       case 'r': {
         color_t r = hrand(0xFFFFFF + 1);
         if(hrand(100) < rwalls) r |= 0x1000000;
@@ -1981,6 +1991,7 @@ EX namespace patterns {
             canvasback = c >> 8;
             }
           };
+        dialog::reaction_final = edit_rwalls;
         }
       else if(uni == 'i') {
         if(instant) 
@@ -2046,6 +2057,8 @@ EX namespace patterns {
           randomPatternsMode = false;
           start_game();
           }
+        if(uni == 'r') 
+          edit_rwalls();
         if(uni == 'x' || uni == 'z' || uni == 't')
           whichPattern = PAT_ZEBRA, subpattern_flags = SPF_SYM0123 | SPF_ROT;
         if(uni == 'e')
