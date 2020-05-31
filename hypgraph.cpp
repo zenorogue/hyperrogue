@@ -997,7 +997,7 @@ EX ld spherity(const transmatrix& V) {
   }
 
 EX bool confusingGeometry() {
-  #if MAXMDIM
+  #if MAXMDIM >= 4
   if(reg3::ultra_mirror_in()) return true;
   #endif
   return quotient || elliptic || (fake::in() && fake::multiple);
