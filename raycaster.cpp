@@ -559,12 +559,15 @@ void enable_raycaster() {
         "mediump vec4 christoffel(mediump vec4 pos, mediump vec4 vel, mediump vec4 tra) {\n"
         "  return vec4(-vel.z*tra.x - vel.x*tra.z, vel.z*tra.y + vel.y * tra.z, vel.x*tra.x * exp(2.*pos.z) - vel.y * tra.y * exp(-2.*pos.z), 0.);\n"
         "  }\n";
-      else if(nil && false) fsh +=
+      else if(nil) {
+        fsh +=
         "mediump vec4 christoffel(mediump vec4 pos, mediump vec4 vel, mediump vec4 tra) {\n"
         "  mediump float x = pos.x;\n"
         "  return vec4(x*vel.y*tra.y - 0.5*dot(vel.yz,tra.zy), -.5*x*dot(vel.yx,tra.xy) + .5 * dot(vel.zx,tra.xz), -.5*(x*x-1.)*dot(vel.yx,tra.xy)+.5*x*dot(vel.zx,tra.xz), 0.);\n"
 //        "  return vec4(0.,0.,0.,0.);\n"
         "  }\n";
+        use_christoffel = false;
+        }
       else if(sl2) {
         fsh += "mediump mat4 s_translate(vec4 h) {\n"
           "return mat4(h.w,h.z,h.y,h.x,-h.z,h.w,-h.x,h.y,h.y,-h.x,h.w,-h.z,h.x,h.y,h.z,h.w);\n"
