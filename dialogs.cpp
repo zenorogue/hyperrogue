@@ -1246,6 +1246,18 @@ EX namespace dialog {
     dialog::add_action([&b] { b = !b; });
     }
 
+  EX bool cheat_forbidden() {
+    if(tactic::on && !cheater) {
+      addMessage(XLAT("Not available in the pure tactics mode!"));
+      return true;
+      }
+    if(daily::on) {
+      addMessage(XLAT("Not available in the daily challenge!"));
+      return true;
+      }
+    return false;
+    }
+
   #if HDR
 
   template<class T> void addBoolItem_choice(const string&  s, T& b, T val, char c) {
@@ -1254,6 +1266,8 @@ EX namespace dialog {
     }
 
   inline void cheat_if_confirmed(const reaction_t& act) {
+    if(cheat_forbidden())
+      return;
     if(needConfirmationEvenIfSaved()) pushScreen([act] () { confirm_dialog(XLAT("This will enable the cheat mode, making this game ineligible for scoring. Are you sure?"), act); });
     else act();
     }

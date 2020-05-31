@@ -418,12 +418,7 @@ EX void showCreative() {
 #if CAP_EDIT
   dialog::addItem(XLAT("map editor"), 'm');
   dialog::add_action([] {
-    if(tactic::on) 
-      addMessage(XLAT("Not available in the pure tactics mode!"));
-    else if(daily::on) {
-      addMessage(XLAT("Not available in the daily challenge!"));
-      }
-    else dialog::cheat_if_confirmed([] {
+    dialog::cheat_if_confirmed([] {
       cheater++;
       pushScreen(mapeditor::showMapEditor);
       lastexplore = turncount;
