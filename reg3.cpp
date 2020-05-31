@@ -1117,6 +1117,7 @@ EX namespace reg3 {
         target->zebraval = 0;
         return;
         }
+      generate_cellrotations();
       auto& cr = cgi.cellrotations;
       if(evmemo.empty()) {
         println(hlog, "starting");
