@@ -1242,15 +1242,48 @@ EX void showMenu() {
   if(config.tstate == tsOff) {
     dialog::init(XLAT("texture mode (off)"));
     dialog::addItem(XLAT("select geometry/pattern"), 'r');
-    if(config.tstate_max == tsAdjusting || config.tstate_max == tsActive)
+    dialog::add_action(patterns::pushChangeablePatterns);
+    if(config.tstate_max == tsAdjusting || config.tstate_max == tsActive) {
       dialog::addItem(XLAT("reactivate the texture"), 't');
-    if(GDIM == 2 && !rug::rugged) dialog::addItem(XLAT("open PNG as texture"), 'o');
+      dialog::add_action([] {
+        config.tstate = config.tstate_max;
+        });    
+      }
+    if(GDIM == 2 && !rug::rugged) {
+      dialog::addItem(XLAT("open PNG as texture"), 'o');
+      dialog::add_action([] {
+        dialog::openFileDialog(config.texturename, XLAT("open PNG as texture"), ".png", 
+          [] () {
+            if(config.data.readtexture(config.texturename) && config.data.loadTextureGL()) {
+              if(config.tstate_max == tsOff) config.tstate_max = tsAdjusting;
+              config.tstate = config.tstate_max;
+              config.perform_mapping();
+              config.finish_mapping();
+              return true;
+              }
+            else return false;
+            });
+        });
+      }
     dialog::addItem(XLAT("load texture config"), 'l');
+    dialog::add_action([] {
+      dialog::openFileDialog(config.configname, XLAT("load texture config"), ".txc", 
+        [] () {
+          return config.load();
+          });
+      });
     dialog::addSelItem(XLAT("texture size"), its(config.data.twidth), 'w');
+    dialog::add_action([] {
+      config.data.twidth *= 2;
+      if(config.data.twidth > 9000) config.data.twidth = 256;
+      config.tstate_max = tsOff;
+      });
 #if CAP_EDIT
-    if(GDIM == 2) dialog::addItem(XLAT("paint a new texture"), 'n');
+    if(GDIM == 2) {
+      dialog::addItem(XLAT("paint a new texture"), 'n');
+      dialog::add_action(start_editor);
+      }
 #endif
-    dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
 
     dialog::addBoolItem(XLATN("Canvas"), specialland == laCanvas, 'X');
     dialog::add_action([] () {
@@ -1270,8 +1303,17 @@ EX void showMenu() {
   if(config.tstate == tsAdjusting) {
     dialog::init(XLAT("texture mode (overlay)"));
     dialog::addItem(XLAT("select the texture's pattern"), 'r');
+    dialog::add_action(patterns::pushChangeablePatterns);
     dialog::addItem(XLAT("enable the texture"), 't');
+    dialog::add_action([] {
+      config.tstate = config.tstate_max = tsActive;
+      config.finish_mapping();
+      });
     dialog::addItem(XLAT("cancel the texture"), 'T');
+    dialog::add_action([] {
+      config.tstate = tsOff;
+      config.tstate_max = tsOff;
+      });    
     dialog::addBoolItem_choice(XLAT("move the model"), panstate, tpsModel, 'm');
     dialog::addBoolItem_choice(XLAT("move the texture"), panstate, tpsMove, 'a');
     dialog::addBoolItem_choice(XLAT("scale/rotate the texture"), panstate, tpsScale, 'x');
@@ -1279,6 +1321,7 @@ EX void showMenu() {
     dialog::addBoolItem_choice(XLAT("projection"), panstate, tpsProjection, 'p');
     dialog::addBoolItem_choice(XLAT("affine transformations"), panstate, tpsAffine, 'y');
     dialog::addBoolItem(XLAT("magic"), false, 'A');
+    dialog::add_action_push(showMagicMenu);
     
     dialog::addBreak(50);
 
@@ -1287,39 +1330,76 @@ EX void showMenu() {
     dialog::addBoolItem_choice(XLAT("fine tune vertices"), panstate, tpsTune, 'F');
 
     dialog::addColorItem(XLAT("grid color (master)"), config.master_color, 'M');
+    dialog::add_action([] { dialog::openColorDialog(config.master_color, NULL); });
     dialog::addColorItem(XLAT("grid color (copy)"), config.slave_color, 'K');
-    
+    dialog::add_action([] { dialog::openColorDialog(config.slave_color, NULL); });    
+
     dialog::addBreak(50);
     
-    dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
 #if CAP_SHOT
     dialog::addItem(XLAT("save the raw texture"), 'S');
+    dialog::add_action([] {
+      dialog::openFileDialog(config.texturename, XLAT("save the raw texture"), ".png", 
+        [] () {
+          config.data.saveRawTexture(config.texturename); return true;
+          });
+      });
 #endif
     }
   
   if(config.tstate == tsActive) {
     dialog::init(XLAT("texture mode (active)"));
-    /* dialog::addSelItem(XLAT("texture scale"), fts(iscale), 's');
-    dialog::addSelItem(XLAT("texture angle"), fts(irotate), 'a');
-    dialog::addSelItem(XLAT("texture position X"), fts(ix), 'x');
-    dialog::addSelItem(XLAT("texture position Y"), fts(iy), 'y'); */
     dialog::addItem(XLAT("deactivate the texture"), 't');
+    dialog::add_action([] { config.tstate = tsOff; });
     dialog::addItem(XLAT("back to overlay mode"), 'T');
+    dialog::add_action([] {config.tstate = tsAdjusting; });
     dialog::addItem(XLAT("change the geometry"), 'r');
+    dialog::add_action(patterns::pushChangeablePatterns);
     dialog::addColorItem(XLAT("grid color"), config.grid_color, 'g');
+    dialog::add_action([] { dialog::openColorDialog(config.grid_color, NULL); });
     dialog::addColorItem(XLAT("mesh color"), config.mesh_color, 'm');
+    dialog::add_action([] { dialog::openColorDialog(config.mesh_color, NULL); });
     dialog::addSelItem(XLAT("color alpha"), its(config.color_alpha), 'c');
-    dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
+    dialog::add_action([] {
+      dialog::editNumber(config.color_alpha, 0, 255, 15, 0, XLAT("color alpha"),      
+        XLAT("The higher the value, the less important the color of underlying terrain is."));
+      });
     dialog::addBoolItem_action(XLAT("aura from texture"), texture_aura, 'a');
 #if CAP_EDIT
-    if(GDIM == 2) dialog::addItem(XLAT("edit the texture"), 'e');
+    if(GDIM == 2) {
+      dialog::addItem(XLAT("edit the texture"), 'e');
+      dialog::add_action([] {
+        mapeditor::initdraw(cwt.at);
+        pushScreen(mapeditor::showDrawEditor);
+        });
+      }
 #endif
 #if CAP_SHOT
     dialog::addItem(XLAT("save the full texture image"), 'S');
+    dialog::add_action([] {
+      dialog::openFileDialog(config.texturename, XLAT("save the full texture image"), ".png", 
+        [] () {
+          config.saveFullTexture(config.texturename);
+          return true;
+          });
+      });
 #endif
     dialog::addItem(XLAT("save texture config"), 's');
+    dialog::add_action([] {
+      dialog::openFileDialog(config.configname, XLAT("save texture config"), ".txc", 
+        [] () {
+          return config.save();
+          });
+      });
     }
   
+  dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
+  dialog::add_action([] {
+    dialog::editNumber(config.gsplits, 0, 4, 1, 1, XLAT("precision"),
+      XLAT("precision"));
+    if(config.tstate == tsActive) dialog::reaction = [] () { config.finish_mapping();
+      };
+    });
   dialog::addHelp();
   dialog::addBack();
   
@@ -1331,113 +1411,13 @@ EX void showMenu() {
   
   keyhandler = [] (int sym, int uni) {
     // handlePanning(sym, uni);
-    dialog::handleNavigation(sym, uni);
-    
+    dialog::handleNavigation(sym, uni);    
     if(uni == '-' && config.tstate == tsAdjusting) {
       if(!holdmouse) {
         holdmouse = true;
         newmove = true;
         }
       }
-
-    else if(uni == 'A' && config.tstate == tsAdjusting) 
-      pushScreen(showMagicMenu);
-
-    else if(uni == 's' && config.tstate == tsActive) 
-      dialog::openFileDialog(config.configname, XLAT("save texture config"), ".txc", 
-        [] () {
-          return config.save();
-          });
-
-    else if(uni == 'l' && config.tstate == tsOff) 
-      dialog::openFileDialog(config.configname, XLAT("load texture config"), ".txc", 
-        [] () {
-          return config.load();
-          });
-
-    else if(uni == 'r')
-      patterns::pushChangeablePatterns();
-
-    else if(uni == 'o' && config.tstate == tsOff) 
-      dialog::openFileDialog(config.texturename, XLAT("open PNG as texture"), ".png", 
-        [] () {
-          if(config.data.readtexture(config.texturename) && config.data.loadTextureGL()) {
-            if(config.tstate_max == tsOff) config.tstate_max = tsAdjusting;
-            config.tstate = config.tstate_max;
-            config.perform_mapping();
-            config.finish_mapping();
-            return true;
-            }
-          else return false;
-          });
-
-    else if(uni == 'w' && config.tstate == tsOff) {
-      config.data.twidth *= 2;
-      if(config.data.twidth > 9000) config.data.twidth = 256;
-      config.tstate_max = tsOff;
-      }
-
-#if CAP_EDIT    
-    else if(uni == 'e' && config.tstate == tsActive) {
-      mapeditor::initdraw(cwt.at);
-      pushScreen(mapeditor::showDrawEditor);
-      }
-
-    else if(uni == 'n' && config.tstate == tsOff) start_editor();
-#endif
-
-    else if(uni == 't' && config.tstate == tsOff) 
-      config.tstate = config.tstate_max;
-    
-    else if(uni == 't' && config.tstate == tsAdjusting) {
-      config.tstate = config.tstate_max = tsActive;
-      config.finish_mapping();
-      }
-
-    else if(uni == 't' && config.tstate == tsActive) 
-      config.tstate = tsOff;
-      
-    else if(uni == 'T' && config.tstate == tsAdjusting) {
-      config.tstate = tsOff;
-      config.tstate_max = tsOff;
-      }
-      
-    else if(uni == 'T' && config.tstate == tsActive)
-      config.tstate = tsAdjusting;
-        
-    else if(uni == 'g' && config.tstate == tsActive) 
-      dialog::openColorDialog(config.grid_color, NULL);
-    else if(uni == 'm' && config.tstate == tsActive) 
-      dialog::openColorDialog(config.mesh_color, NULL);
-
-    else if(uni == 'M' && config.tstate == tsAdjusting) 
-      dialog::openColorDialog(config.master_color, NULL);
-    else if(uni == 'K' && config.tstate == tsAdjusting) 
-      dialog::openColorDialog(config.slave_color, NULL);
-
-    else if(uni == 'c' && config.tstate == tsActive) {
-      dialog::editNumber(config.color_alpha, 0, 255, 15, 0, XLAT("color alpha"),
-        XLAT("The higher the value, the less important the color of underlying terrain is."));
-      }    
-    else if(uni == 'P') {
-      dialog::editNumber(config.gsplits, 0, 4, 1, 1, XLAT("precision"),
-        XLAT("precision"));
-      if(config.tstate == tsActive) dialog::reaction = [] () { config.finish_mapping();
-        };
-      }
-#if CAP_SHOT
-    else if(uni == 'S' && config.tstate == tsAdjusting) 
-      dialog::openFileDialog(config.texturename, XLAT("save the raw texture"), ".png", 
-        [] () {
-          config.data.saveRawTexture(config.texturename); return true;
-          });
-    else if(uni == 'S' && config.tstate == tsActive) 
-      dialog::openFileDialog(config.texturename, XLAT("save the full texture image"), ".png", 
-        [] () {
-          config.saveFullTexture(config.texturename);
-          return true;
-          });
-#endif
     else if(uni == SDLK_F1)
       gotoHelp(texturehelp);
     else if(doexiton(sym, uni))
