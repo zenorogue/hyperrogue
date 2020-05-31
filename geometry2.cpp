@@ -282,6 +282,7 @@ void virtualRebase_cell(cell*& base, T& at, const U& check) {
     base = newbase;
     at = best_at;
     }
+  #if MAXMDIM >= 4
   if(reg3::ultra_mirror_in()) {
     again:
     for(auto& v: cgi.ultra_mirrors) {
@@ -294,6 +295,7 @@ void virtualRebase_cell(cell*& base, T& at, const U& check) {
         }
       }
     }
+  #endif
   }
 
 template<class T, class U> 

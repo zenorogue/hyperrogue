@@ -778,6 +778,7 @@ EX void showEuclideanMenu() {
     }
   #endif
   
+  #if MAXMDIM >= 4
   if(cgflags & qULTRA) {
     dialog::addBoolItem(XLAT("truncate ultra-vertices with mirrors"), reg3::ultra_mirror_on, 'Z');
     dialog::add_action([] { 
@@ -785,6 +786,7 @@ EX void showEuclideanMenu() {
       ray::reset_raycaster();
       });
     }
+  #endif
   
   if(prod) {
     dialog::addSelItem(XLAT("Z-level height factor"), fts(vid.plevel_factor), 'Z');
@@ -1089,9 +1091,11 @@ int read_geom_args() {
     cheat();
     shift(); currfp.qpaths.push_back(args());
     }
+  #if MAXMDIM >= 4
   else if(argis("-truncate-ultra")) {
     shift(); reg3::ultra_mirror_on = argi();
     }
+  #endif
   else if(argis("-d:quotient")) 
     launch_dialog(showQuotientConfig);
   #endif

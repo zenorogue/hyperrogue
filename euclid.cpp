@@ -1180,6 +1180,7 @@ EX int cyldist(gp::loc a, gp::loc b) {
 
 EX void generate() {
 
+  #if MAXMDIM >= 4
   if(fake::in()) {
     fake::generate();
     return;
@@ -1250,6 +1251,7 @@ EX void generate() {
     }
   
   reg3::make_vertices_only();
+  #endif
 
   }
 

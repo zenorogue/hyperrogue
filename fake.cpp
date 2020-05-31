@@ -289,6 +289,7 @@ EX ld compute_around(bool setup) {
 
 EX void generate() {
   FPIU( cgi.require_basics() );
+  #if MAXMDIM >= 4
   auto &ucgi = *underlying_cgip;
   
   cgi.loop = ucgi.loop;
@@ -306,6 +307,7 @@ EX void generate() {
   
   compute_around(true);
   reg3::compute_ultra();  
+  #endif
   }
 
 int get_middle() {

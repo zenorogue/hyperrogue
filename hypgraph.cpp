@@ -997,7 +997,10 @@ EX ld spherity(const transmatrix& V) {
   }
 
 EX bool confusingGeometry() {
-  return quotient || elliptic || reg3::ultra_mirror_in() || (fake::in() && fake::multiple);
+  #if MAXMDIM
+  if(reg3::ultra_mirror_in()) return true;
+  #endif
+  return quotient || elliptic || (fake::in() && fake::multiple);
   }
 
 EX ld master_to_c7_angle() {
