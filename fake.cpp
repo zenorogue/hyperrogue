@@ -166,8 +166,14 @@ EX namespace fake {
       auto enqueue = (multiple ? dq::enqueue_by_matrix_c : dq::enqueue_c);
       enqueue(centerover, cview());
       
+      int id = 0;
+      int limit = 100 * pow(1.2, sightrange_bonus);
+      if(WDIM == 3 || vid.use_smart_range) 
+        limit = INT_MAX;
+      
       while(!dq::drawqueue_c.empty()) {
         auto& p = dq::drawqueue_c.front();
+        id++;
         cell *c = get<0>(p);
         transmatrix V = get<1>(p);
         dynamicval<ld> b(band_shift, get<2>(p));
@@ -177,6 +183,8 @@ EX namespace fake {
         if(!do_draw(c, V)) continue;
         drawcell(c, V);
         if(in_wallopt() && isWall3(c) && isize(dq::drawqueue_c) > 1000) continue;
+        
+        if(id > limit) continue;
     
         for(int i=0; i<c->type; i++) if(c->move(i)) {
           enqueue(c->move(i), V * adj(c, i));
