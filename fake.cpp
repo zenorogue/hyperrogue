@@ -10,6 +10,9 @@ EX namespace fake {
   
   EX bool multiple;
   
+  EX bool multiple_special_draw = true;
+  EX bool recursive_draw = false;
+  
   EX eGeometry underlying;
   EX geometry_information *underlying_cgip;
   EX hrmap *pmap;
@@ -20,6 +23,8 @@ EX namespace fake {
   
   EX bool available() {
     if(in()) return true;
+    if(GDIM == 2 && standard_tiling() && (PURE || BITRUNCATED)) return true;
+    if(arcm::in() && PURE) return true;
     if(GDIM == 2) return false;
     if(among(geometry, gRhombic3, gBitrunc3)) return false;
     return euc::in() || reg3::in();
@@ -170,14 +175,14 @@ EX namespace fake {
       
       // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
       
-      if(pmodel == mdDisk && WDIM == 2 && false) {
+      if(pmodel == mdDisk && WDIM == 2 && recursive_draw) {
         draw_recursive(centerover, cview(), -1, -1, nullptr, 0);
         return;
         }
       
       dq::visited_c.clear();
       dq::visited_by_matrix.clear();
-      auto enqueue = (multiple ? dq::enqueue_by_matrix_c : dq::enqueue_c);
+      auto enqueue = (multiple && multiple_special_draw ? dq::enqueue_by_matrix_c : dq::enqueue_c);
       enqueue(centerover, cview());
       
       int id = 0;
@@ -452,14 +457,13 @@ EX void change_around() {
 EX void configure() {
   if(!in()) {
     underlying_cgip = cgip;
-    around = cgi.loop;
+    around = around_orig();
     }
-  dialog::editNumber(around, 2.01, 10, 1, around, "change curvature", 
-    "This feature lets you construct the same regular honeycomb, but "
-    "from regular polyhedra of different curvature.\n\n"
-    "The number you give here is the number of cells around an edge.\n\n"
-    "This geometry is drawn correctly, except if the value entered is "
-    "the multiple of the actual one, or when using the raycaster."
+  dialog::editNumber(around, 2.01, 10, 1, around, "fake curvature", 
+    "This feature lets you construct the same tiling, but "
+    "from shapes of different curvature.\n\n"
+    "The number you give here is (2D) vertex degree or (3D) "
+    "the number of cells around an edge.\n\n"
     );
   if(fake::in())
     dialog::reaction = change_around;
@@ -473,6 +477,24 @@ EX void configure() {
       popScreen();
       change_around();
       });
+
+    dialog::addSelItem("original", fts(around_orig()), 'O');
+    dialog::add_action([e] {
+      around = around_orig();
+      popScreen();
+      change_around();
+      });
+
+    dialog::addSelItem("double original", fts(2 * around_orig()), 'D');
+    dialog::add_action([e] {
+      around = 2 * around_orig();
+      popScreen();
+      change_around();
+      });
+    
+    dialog::addBoolItem_action("draw all if multiple of original", multiple_special_draw, 'M');
+    dialog::addBoolItem_action("draw copies (2D only)", recursive_draw, 'C');
+
     };
   }
   

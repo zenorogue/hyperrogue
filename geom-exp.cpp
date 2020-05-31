@@ -759,8 +759,14 @@ EX void showEuclideanMenu() {
     }
   
   if(fake::available()) {
-    dialog::addItem(XLAT("change curvature"), '4');
-    dialog::add_action(fake::configure);
+    dialog::addItem(XLAT("fake curvature"), '4');
+    
+    dialog::add_action([] {
+      if(fake::in()) fake::configure();
+      else dialog::cheat_if_confirmed(
+        fake::configure
+        );
+      });
     }
   
   #if CAP_IRR
