@@ -64,6 +64,16 @@ struct hr_polygon_error : hr_exception {
   map<string, cld> params;
   hr_polygon_error(const vector<transmatrix>& _v, int _id, transmatrix _e) : v(_v), c(cgclass), id(_id), end(_e) {}
   ~hr_polygon_error() noexcept(true) {}
+  string generate_error() {
+    cld dist = (hdist0(tC0(end)) / params["distunit"]);
+    bool angle = abs(dist) < 1e-9;
+    if(angle) dist = (atan2(end * xpush0(1)) / params["angleunit"]);     
+    return
+      XLAT("Polygon number %1 did not close correctly (%2 %3). Here is the picture to help you understand the issue.\n\n", its(id), 
+        angle ? "angle" : "distance",
+        lalign(0, dist)
+        );
+    }
   };
 
 struct connection_debug_request : hr_exception {
@@ -764,16 +774,8 @@ EX void run(string fname) {
      set_geometry(g);
      set_variation(v);
      current = t;
-     start_poly_debugger(poly);
-     
-     cld dist = (hdist0(tC0(poly.end)) / poly.params["distunit"]);
-     bool angle = abs(dist) < 1e-9;
-     if(angle) dist = (atan2(poly.end * xpush0(1)) / poly.params["angleunit"]);
-     
-     string help = XLAT("Polygon number %1 did not close correctly (%2 %3). Here is the picture to help you understand the issue.\n\n", its(poly.id), 
-       angle ? "angle" : "distance",
-       lalign(0, dist)
-       );
+     start_poly_debugger(poly);     
+     string help = poly.generate_error();
      showstartmenu = false;
      for(auto& p: poly.params)
        help += lalign(-1, p.first, " = ", p.second, "\n");
