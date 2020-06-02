@@ -113,17 +113,27 @@ typedef multimap<cell*, monster*>::iterator mit;
 vector<monster*> active, nonvirtual, additional;
 
 cell *findbaseAround(hyperpoint p, cell *around, int maxsteps) {
+
+  if(fake::in()) {
+    auto p0 = inverse(ggmatrix(around)) * p;
+    virtualRebase(around, p0);
+    return around;
+    }
+
+  cell *best = around;
+  transmatrix T = ggmatrix(around);
+  horo_distance d0(p, T);
+
   for(int k=0; k<maxsteps; k++) {
-    cell *best = around;
-    horo_distance d0(p, ggmatrix(around));
     for(int i=0; i<around->type; i++) {
       cell *c2 = around->move(i);
       if(c2) {
-        horo_distance d1(p, ggmatrix(c2));
-        if(d1 < d0) { best = c2; d0 = d1; }
+        transmatrix U = fake::in() ? T * currentmap->adj(around, i) : ggmatrix(c2);
+        horo_distance d1(p, U);
+        if(d1 < d0) { best = c2; d0 = d1; T = U; }
         }
       }
-    if(best == around) return best;
+    if(best == around) break;
     around = best;
     }
   return around;
@@ -177,15 +187,18 @@ void monster::rebasePat(const transmatrix& new_pat, cell *c2) {
       current_display->which_copy = ggmatrix(base);
     return;
     }
-  if(quotient) {
+  if(quotient || fake::in()) {
     at = inverse(gmatrix[base]) * new_pat;
     transmatrix old_at = at;
     virtualRebase(this);
     fix_to_2(at);
     if(base != c2) {
-      auto T = calc_relative_matrix(c2, base, tC0(at));
-      base = c2;
-      at = inverse(T) * at;
+      if(fake::in()) println(hlog, "fake error");
+      else {
+        auto T = calc_relative_matrix(c2, base, tC0(at));
+        base = c2;
+        at = inverse(T) * at;
+        }
       }
     if(multi::players == 1 && this == shmup::pc[0] && !eqmatrix(old_at, at))
       current_display->which_copy = current_display->which_copy * old_at * inverse(at);
@@ -1624,7 +1637,7 @@ void moveBullet(monster *m, int delta) {
     }
   else 
     nat = parallel_transport(nat, m->ori, fronttangent(delta * SCALE * m->vel / speedfactor()));
-  cell *c2 = m->findbase(nat, 1);
+  cell *c2 = m->findbase(nat, fake::in() ? 10 : 1);
 
   if(m->parent && isPlayer(m->parent) && markOrb(itOrbLava) && c2 != m->base && !isPlayerOn(m->base)) 
     makeflame(m->base, 5, false);
