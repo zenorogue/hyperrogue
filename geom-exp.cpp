@@ -769,6 +769,11 @@ EX void showEuclideanMenu() {
       });
     }
   
+  if(arb::in() && !arb::current.sliders.empty()) {
+    dialog::addItem(XLAT("tessellation sliders"), '4');
+    dialog::add_action_push(arb::set_sliders);
+    }
+  
   #if CAP_IRR
   if(hyperbolic && IRREGULAR) {
     nom = isize(irr::cells);

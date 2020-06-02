@@ -636,7 +636,7 @@ void geometry_information::prepare_basics() {
     }
   
   if(arb::in()) {
-    auto& csc = arb::current.cscale;
+    auto csc = arb::current_or_slided().cscale;
     scalefactor = csc;
     hcrossf = crossf = orbsize = hcrossf7 * csc;
     hexf = rhexf = hexvdist = csc * .5;
@@ -995,6 +995,11 @@ EX string cgi_string() {
   auto V = [&] (string a, string b) { s += a; s += ": "; s += b; s += "; "; };
   V("GEO", its(int(geometry)));
   V("VAR", its(int(variation)));
+  
+  if(arb::in() && arb::using_slided) {
+    for(auto& sl: arb::current.sliders)
+      V("AS", fts(sl.current));
+    }
   
   if(fake::in()) {
     if(hyperbolic) V("H", fts(fake::around));

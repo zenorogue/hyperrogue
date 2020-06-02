@@ -535,7 +535,7 @@ EX hyperpoint get_corner_position(cell *c, int cid, ld cf IS(3)) {
     }
   #endif
   if(arb::in()) {
-    auto& sh = arb::current.shapes[arb::id_of(c->master)];
+    auto& sh = arb::current_or_slided().shapes[arb::id_of(c->master)];
     return normalize(C0 + (sh.vertices[gmod(cid, c->type)] - C0) * 3 / cf);
     }
   if(PURE) {

@@ -30,6 +30,14 @@ struct shape {
   int repeat_value;
   };
 
+struct slider {
+  string name;
+  ld zero;
+  ld current;
+  ld min;
+  ld max;
+  };
+
 struct arbi_tiling {
 
   int order;
@@ -38,6 +46,8 @@ struct arbi_tiling {
   vector<shape> shapes;
   string name;
   string comment;
+  
+  vector<slider> sliders;
   
   ld cscale;
   string filename;
@@ -51,6 +61,13 @@ struct arbi_tiling {
 
 EX arbi_tiling current;
 
+EX bool using_slided;
+
+EX arbi_tiling slided;
+
+EX arbi_tiling& current_or_slided() {
+  return using_slided ? slided : current;
+  }
 
 /** id of vertex in the arbitrary tiling */
 
@@ -160,10 +177,10 @@ template<class T> void verify_index(int index, const T& v, exp_parser& ep) { if(
 
 string unnamed = "unnamed";
 
-EX void load_tile(exp_parser& ep, bool unit) {
-  current.shapes.emplace_back();
-  auto& cc = current.shapes.back();
-  cc.id = isize(current.shapes) - 1;
+EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
+  c.shapes.emplace_back();
+  auto& cc = c.shapes.back();
+  cc.id = isize(c.shapes) - 1;
   cc.flags = 0;
   cc.repeat_value = 1;
   while(ep.next() != ')') {
@@ -195,7 +212,7 @@ EX void load_tile(exp_parser& ep, bool unit) {
   cc.stretch_shear.resize(cc.size(), make_pair(1, 0));
   }
 
-EX void load(const string& fname) {
+EX void load(const string& fname, bool after_sliding IS(false)) {
   fhstream f(fname, "rt");
   string s;
   while(true) {
@@ -203,9 +220,10 @@ EX void load(const string& fname) {
     if(c < 0) break;
     s += c;
     }
-  auto& c = current;
+  auto& c = after_sliding ? slided : current;
   c.order++;
   c.shapes.clear();
+  c.sliders.clear();
   c.name = unnamed;
   c.comment = "";
   c.filename = fname;
@@ -278,15 +296,31 @@ EX void load(const string& fname) {
       addflag(arcm::sfPH);
       c.have_ph = true;
       }
+    else if(ep.eat("slider(")) {
+      slider sl;
+      sl.name = ep.next_token();
+      ep.force_eat(",");
+      sl.current = sl.zero = ep.rparse();
+      ep.force_eat(",");
+      sl.min = ep.rparse();
+      ep.force_eat(",");
+      sl.max = ep.rparse();
+      ep.force_eat(")");
+      c.sliders.push_back(sl);
+      if(after_sliding)
+        ep.extra_params[sl.name] = current.sliders[isize(c.sliders)-1].current;
+      else
+        ep.extra_params[sl.name] = sl.zero;
+      }
     else if(ep.eat("let(")) {
       string tok = ep.next_token();
       ep.force_eat("=");
       ep.extra_params[tok] =ep.parsepar();
       if(debugflags & DF_GEOM)
-        println(hlog, "let ", tok, " = ", real(ep.extra_params[tok]));
+        println(hlog, "let ", tok, " = ", ep.extra_params[tok]);
       }
-    else if(ep.eat("unittile(")) load_tile(ep, true);
-    else if(ep.eat("tile(")) load_tile(ep, false);
+    else if(ep.eat("unittile(")) load_tile(ep, c, true);
+    else if(ep.eat("tile(")) load_tile(ep, c, false);
     else if(ep.eat("affine_limit(")) {
       affine_limit = ep.iparse();
       ep.force_eat(")");
@@ -413,6 +447,7 @@ EX void load(const string& fname) {
         }
       }
     }
+  if(!after_sliding) slided = current;
   }
 
 arbi_tiling debugged;
@@ -623,11 +658,12 @@ struct hrmap_arbi : hrmap {
   void verify() override { }
 
   transmatrix adj(heptagon *h, int dl) override { 
-    return get_adj(current, id_of(h), dl, h->c.move(dl) ? h->c.spin(dl) : -1);
+    return get_adj(current_or_slided(), id_of(h), dl, h->c.move(dl) ? h->c.spin(dl) : -1);
     }
 
   heptagon *create_step(heptagon *h, int d) override {
   
+    dynamicval<bool> sl(using_slided, false);
     int t = id_of(h);
   
     auto& sh = current.shapes[t];
@@ -798,6 +834,42 @@ EX void run(string fname) {
     pushScreen(connection_debugger);
     }
   start_game();
+  }
+
+string slider_error;
+
+EX void sliders_changed() {
+  try {
+    load(current.filename, true);
+    using_slided = true;
+    slider_error = "OK";
+    texture::config.remap();
+    }
+  catch(hr_parse_exception& ex) {
+    using_slided = false;
+    slider_error = ex.s;
+    }
+  catch(hr_polygon_error& poly) {
+    using_slided = false;
+    slider_error = poly.generate_error();
+    }
+  }
+
+EX void set_sliders() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(1);
+  dialog::init(XLAT("tessellation sliders"));
+  char ch = 'A';
+  for(auto& sl: current.sliders) {
+    dialog::addSelItem(sl.name, fts(sl.current), ch++);
+    dialog::add_action([&] {
+      dialog::editNumber(sl.current, sl.min, sl.max, 1, sl.zero, sl.name, sl.name);
+      dialog::reaction = sliders_changed;
+      });
+    }
+  dialog::addInfo(slider_error);
+  dialog::addBack();
+  dialog::display();
   }
 
 #if CAP_COMMANDLINE  
