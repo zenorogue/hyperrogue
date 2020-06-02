@@ -458,6 +458,7 @@ EX void change_around() {
   fixmatrix(View);
   playermoved = false;
   sightranges[gFake] = range * t;
+  texture::config.remap();
   }
 
 EX void configure() {
