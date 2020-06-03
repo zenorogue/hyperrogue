@@ -2859,7 +2859,7 @@ EX void setdist(cell *c, int d, cell *from) {
     color_t col = patterns::generateCanvas(c);
     c->landparam = col;
     c->wall = canvas_default_wall;
-    if(WDIM == 3 && (col & 0x1000000)) c->wall = waWaxWall;
+    if(GDIM == 3 && (col & 0x1000000)) c->wall = waWaxWall;
     }
 
   #if CAP_FIELD
