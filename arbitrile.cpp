@@ -216,6 +216,7 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
 
 EX void load(const string& fname, bool after_sliding IS(false)) {
   fhstream f(fname, "rt");
+  if(!f.f) throw hr_parse_exception("file " + fname + " does not exist");
   string s;
   while(true) {
     int c = fgetc(f.f);
