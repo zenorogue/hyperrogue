@@ -65,7 +65,8 @@ eGeometry last_geometry;
 EX bool available() {
   if(noGUI) return false;
   if(!vid.usingGL) return false;
-  if(WDIM == 2) return false;
+  if(GDIM == 2) return false;
+  if(WDIM == 2 && (kite::in() || bt::in())) return false;
   if(hyperbolic && pmodel == mdPerspective && !kite::in())
     return true;
   if(sphere && pmodel == mdPerspective && !rotspace)
@@ -154,7 +155,7 @@ shared_ptr<raycaster> our_raycaster;
 
 EX void reset_raycaster() { our_raycaster = nullptr; }
 
-int deg;
+int deg, irays;
 
 #ifdef GLES_ONLY
 void add(string& tgt, string type, string name, int min_index, int max_index) {
@@ -190,6 +191,8 @@ void enable_raycaster() {
     reset_raycaster();
     }
   
+  wall_offset(centerover); /* so raywall is not empty and deg is not zero */
+
   deg = 0;
 
   auto samples = hybrid::gen_sample_list();
@@ -217,7 +220,7 @@ void enable_raycaster() {
   #endif
       "  }\n";
   
-    int irays = isize(cgi.raywall);
+    irays = isize(cgi.raywall);
     string rays = its(irays);
   
     string fsh = 
@@ -299,7 +302,7 @@ void enable_raycaster() {
      }
    else {
      fsh += "const int walloffset = 0;\n"
-       "const int sides = " + its(centerover->type) + ";\n";
+       "const int sides = " + its(centerover->type+(WDIM == 2 ? 2 : 0)) + ";\n";
      }
      
     
@@ -417,47 +420,49 @@ void enable_raycaster() {
       fmain +=
         "  if(which == -1) {\n";
       
-      fmain += "for(int i="+its(flat1)+"; i<"+(prod ? "sides-2" : its(flat2))+"; i++) {\n";
+      fmain += "for(int i="+its(flat1)+"; i<"+(prod ? "sides-2" : WDIM == 2 ? "sides" : its(flat2))+"; i++) {\n";
+      
+      fmain += "int woi = walloffset+i;\n";
       
       if(in_h2xe()) fmain +=
-          "    mediump float v = ((position - uM[walloffset+i] * position)[2] / (uM[walloffset+i] * tangent - tangent)[2]);\n"
+          "    mediump float v = ((position - uM[woi] * position)[2] / (uM[woi] * tangent - tangent)[2]);\n"
           "    if(v > 1. || v < -1.) continue;\n"
           "    mediump float d = atanh(v);\n"
           "    mediump vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
-          "    if(next_tangent[2] < (uM[walloffset+i] * next_tangent)[2]) continue;\n"
+          "    if(next_tangent[2] < (uM[woi] * next_tangent)[2]) continue;\n"
           "    d /= xspeed;\n";
       else if(in_s2xe()) fmain +=
-          "    mediump float v = ((position - uM[walloffset+i] * position)[2] / (uM[walloffset+i] * tangent - tangent)[2]);\n"
+          "    mediump float v = ((position - uM[woi] * position)[2] / (uM[woi] * tangent - tangent)[2]);\n"
           "    mediump float d = atan(v);\n"
           "    mediump vec4 next_tangent = tangent * cos(d) - position * sin(d);\n"
-          "    if(next_tangent[2] > (uM[walloffset+i] * next_tangent)[2]) continue;\n"
+          "    if(next_tangent[2] > (uM[woi] * next_tangent)[2]) continue;\n"
           "    d /= xspeed;\n";
       else if(in_e2xe()) fmain +=
-          "    mediump float deno = dot(position, tangent) - dot(uM[walloffset+i]*position, uM[walloffset+i]*tangent);\n"
+          "    mediump float deno = dot(position, tangent) - dot(uM[woi]*position, uM[woi]*tangent);\n"
           "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
-          "    mediump float d = (dot(uM[walloffset+i]*position, uM[walloffset+i]*position) - dot(position, position)) / 2. / deno;\n"
+          "    mediump float d = (dot(uM[woi]*position, uM[woi]*position) - dot(position, position)) / 2. / deno;\n"
           "    if(d < 0.) continue;\n"
           "    mediump vec4 next_position = position + d * tangent;\n"
-          "    if(dot(next_position, tangent) < dot(uM[walloffset+i]*next_position, uM[walloffset+i]*tangent)) continue;\n"
+          "    if(dot(next_position, tangent) < dot(uM[woi]*next_position, uM[woi]*tangent)) continue;\n"
           "    d /= xspeed;\n";
       else if(hyperbolic) fmain +=
-          "    mediump float v = ((position - uM[i] * position)[3] / (uM[i] * tangent - tangent)[3]);\n"
+          "    mediump float v = ((position - uM[woi] * position)[3] / (uM[woi] * tangent - tangent)[3]);\n"
           "    if(v > 1. || v < -1.) continue;\n"
           "    mediump float d = atanh(v);\n"
           "    mediump vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
-          "    if(next_tangent[3] < (uM[i] * next_tangent)[3]) continue;\n";
+          "    if(next_tangent[3] < (uM[woi] * next_tangent)[3]) continue;\n";
       else if(sphere) fmain +=
-          "    mediump float v = ((position - uM[i] * position)[3] / (uM[i] * tangent - tangent)[3]);\n"
+          "    mediump float v = ((position - uM[woi] * position)[3] / (uM[woi] * tangent - tangent)[3]);\n"
           "    mediump float d = atan(v);\n"
           "    mediump vec4 next_tangent = -position * sin(d) + tangent * cos(d);\n"
-          "    if(next_tangent[3] > (uM[i] * next_tangent)[3]) continue;\n";
+          "    if(next_tangent[3] > (uM[woi] * next_tangent)[3]) continue;\n";
       else fmain += 
-          "    mediump float deno = dot(position, tangent) - dot(uM[i]*position, uM[i]*tangent);\n"
+          "    mediump float deno = dot(position, tangent) - dot(uM[woi]*position, uM[woi]*tangent);\n"
           "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
-          "    mediump float d = (dot(uM[i]*position, uM[i]*position) - dot(position, position)) / 2. / deno;\n"
+          "    mediump float d = (dot(uM[woi]*position, uM[woi]*position) - dot(position, position)) / 2. / deno;\n"
           "    if(d < 0.) continue;\n"
           "    mediump vec4 next_position = position + d * tangent;\n"
-          "    if(dot(next_position, tangent) < dot(uM[i]*next_position, uM[i]*tangent)) continue;\n";
+          "    if(dot(next_position, tangent) < dot(uM[woi]*next_position, uM[woi]*tangent)) continue;\n";
   
       fmain += 
           "  if(d < dist) { dist = d; which = i; }\n"
@@ -1140,7 +1145,7 @@ EX void cast() {
   
   if(o->uWallOffset != -1) {
     glUniform1i(o->uWallOffset, wall_offset(centerover));
-    glUniform1i(o->uSides, centerover->type);
+    glUniform1i(o->uSides, centerover->type + (WDIM == 2 ? 2 : 0));
     }
 
   auto sa = hybrid::gen_sample_list();
@@ -1153,6 +1158,18 @@ EX void cast() {
     if(!c) continue;
     for(int j=0; j<c->type; j++)
       ms[id+j] = hybrid::ray_iadj(c, j);
+    if(WDIM == 2) for(int a: {0, 1}) {
+      int z = a ? 1 : -1;
+      hyperpoint h = Hypc;
+      for(int a=0; a<c->type; a++) {
+        hyperpoint corner = hybrid::get_corner(c, a, 0, z);
+        h += corner;
+        }
+      h = normalize(h);
+      ld d = hdist0(h);
+      if(h[2] > 0) d = -d;
+      ms[id+c->type+a] = zpush(2*d);
+      }
     }
   
   // println(hlog, ms);
@@ -1219,17 +1236,35 @@ EX void cast() {
           }
         }
       
-      transmatrix T = currentmap->iadj(c, i) * inverse(ms[wall_offset(c) + i]);
+      int wo = wall_offset(c);
+      if(wo >= irays) {
+        println(hlog, "wo=", wo, " irays = ", irays);
+        return;
+        }
+      transmatrix T = currentmap->iadj(c, i) * inverse(ms[wo + i]);
       for(int k=0; k<=isize(ms); k++) {
         if(k < isize(ms) && !eqmatrix(ms[k], T)) continue;
         if(k == isize(ms)) ms.push_back(T);
         connections[u][2] = (k+.5) / 1024.;
         break;
         }
-      connections[u][3] = (wall_offset(c1) / 256.) + (c1->type + .5) / 4096.;
+      connections[u][3] = (wall_offset(c1) / 256.) + (c1->type + (WDIM == 2 ? 2 : 0) + .5) / 4096.;
+      }
+    if(WDIM == 2) for(int a: {0, 1}) {
+      celldrawer dd;
+      dd.c = c;
+      dd.setcolors();
+      transmatrix Vf;
+      dd.set_land_floor(Vf);
+      int u = (id/per_row*length) + (id%per_row * deg) + c->type + a;
+      wallcolor[u] = glhr::acolor(darkena(dd.fcol, 0, 0xFF));
+      if(qfi.fshape) 
+        texturemap[u] = floor_texture_map[qfi.fshape->id];
+      else
+        texturemap[u] = glhr::makevertex(0.1,0,0);
       }
     }
-
+  
   if(prod) {
     for(auto p: sa) {
       int id =p.first;

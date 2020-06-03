@@ -1068,6 +1068,9 @@ EX namespace hybrid {
   EX transmatrix ray_iadj(cell *c, int i) {
     if(prod && i == c->type-2) return (mscale(Id, +cgi.plevel));
     if(prod && i == c->type-1) return (mscale(Id, -cgi.plevel));
+    if(WDIM == 2) {
+      return to_other_side(get_corner_position(c, i), get_corner_position(c, (i+1)));
+      }
     if(prod) {
       transmatrix T;
       cell *cw = hybrid::get_where(c).first;
@@ -1253,6 +1256,11 @@ EX namespace hybrid {
 
   EX hyperpoint get_corner(cell *c, int i, int next, ld z) {
     ld lev = cgi.plevel * z / 2;
+    if(WDIM == 2) {
+      ld zz = lerp(cgi.FLOOR, cgi.WALL, (1+z) / 2);
+      hyperpoint h = zshift(get_corner_position(c, i+next), zz);
+      return h;
+      }
     if(prod) {
       dynamicval<eGeometry> g(geometry, hybrid::underlying);
       dynamicval<geometry_information*> gc(cgip, hybrid::underlying_cgip);
@@ -1276,24 +1284,25 @@ EX namespace hybrid {
   EX int wall_offset(cell *c) {
     if(GOLDBERG) {
       /* a bit slow... */
-      cell *c1 = get_where(c).first;
-      gp::draw_li = PIU(gp::get_local_info(c1));
+      cell *c1 = WDIM == 2 ? c : get_where(c).first;
+      gp::draw_li = WDIM == 2 ? gp::get_local_info(c1) : PIU(gp::get_local_info(c1));
       }
-    int id = hybrid::underlying == gArchimedean ? arcm::id_of(c->master) + 20 * arcm::parent_index_of(c->master) : shvid(c);
+    auto ugeometry = hybri ? hybrid::underlying : geometry;    
+    int id = ugeometry == gArchimedean ? arcm::id_of(c->master) + 20 * arcm::parent_index_of(c->master) : shvid(c);
     if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, {-1, nullptr});
     auto &wop = cgi.walloffsets[id];
     int &wo = wop.first;
     if(!wop.second) wop.second = c;
     if(wo == -1) {
-      cell *c1 = hybrid::get_where(c).first;
+      cell *c1 = hybri ? hybrid::get_where(c).first : c;
       wo = isize(cgi.shWall3D);
-      int won = wo + c->type;
+      int won = wo + c->type + (WDIM == 2 ? 2 : 0);
       if(!cgi.wallstart.empty()) cgi.wallstart.pop_back();
       cgi.reserve_wall3d(won);
       
-      if(prod) for(int i=0; i<c1->type; i++) {
+      if(prod || WDIM == 2) for(int i=0; i<c1->type; i++) {
         hyperpoint w;
-        ((hrmap_hybrid*)currentmap)->in_underlying([&] { 
+        auto f = [&] { 
           /* mirror image of C0 in the axis h1-h2 */
           hyperpoint h1 = get_corner_position(c1, i);
           hyperpoint h2 = get_corner_position(c1, i+1);
@@ -1302,7 +1311,11 @@ EX namespace hybrid {
           w = T * C0;
           w[1] = -w[1];
           w = inverse(T) * w;
-          });
+          };
+        if(prod)
+          ((hrmap_hybrid*)currentmap)->in_underlying(f);
+        else
+          f();
         cgi.walltester[wo + i] = w;
         } 
 
@@ -1314,7 +1327,7 @@ EX namespace hybrid {
         int z = a ? 1 : -1;
         hyperpoint ctr = zpush0(z * cgi.plevel/2);
         for(int i=0; i<c1->type; i++)
-          if(prod)
+          if(prod || WDIM == 2)
             l.push_back(hybrid::get_corner(c1, i, 0, z));
           else {
             l.push_back(ctr);
@@ -1341,7 +1354,7 @@ EX namespace hybrid {
     });
   
   EX vector<pair<int, cell*>> gen_sample_list() {
-    if(!hybri) return {make_pair(0, centerover), make_pair(centerover->type, nullptr)};
+    if(!hybri && WDIM != 2) return {make_pair(0, centerover), make_pair(centerover->type, nullptr)};
     vector<pair<int, cell*>> result;
     for(auto& v: cgi.walloffsets) if(v.first >= 0) result.push_back(v);
     sort(result.begin(), result.end());

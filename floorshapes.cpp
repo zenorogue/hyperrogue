@@ -914,6 +914,7 @@ EX int shvid(cell *c) {
   }
 
 EX struct dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, color_t col, PPR prio IS(PPR::DEFAULT)) {
+  if(no_wall_rendering) return NULL;
   if(!c) return &queuepolyat(V, shv[0], col, prio);
   else if(WDIM == 3) return NULL;
   #if CAP_GP
@@ -950,10 +951,12 @@ EX struct dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hp
   }
 
 EX void draw_floorshape(cell *c, const transmatrix& V, const floorshape &fsh, color_t col, PPR prio IS(PPR::DEFAULT)) {
+  if(no_wall_rendering) return;
   draw_shapevec(c, V, fsh.b, col, prio);
   }
 
 EX void draw_qfi(cell *c, const transmatrix& V, color_t col, PPR prio IS(PPR::DEFAULT), vector<hpcshape> floorshape::* tab IS(&floorshape::b)) {
+  if(no_wall_rendering) return;
   if(qfi.shape)
     queuepolyat(V * qfi.spin, *qfi.shape, col, prio);
   else if(qfi.usershape >= 0) {

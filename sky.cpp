@@ -34,6 +34,7 @@ EX void prepare_sky() {
   sky = NULL;
   if(euclid) {
     if(WDIM == 3 || GDIM == 2) return;
+    if(no_wall_rendering) return;
     transmatrix T = ggmatrix(currentmap->gamestart());
     T = gpushxto0(tC0(T)) * T;
     queuepoly(T, cgi.shEuclideanSky, 0x0044e4FF);

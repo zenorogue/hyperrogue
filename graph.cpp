@@ -3769,7 +3769,7 @@ EX void gridline(const transmatrix& V, const hyperpoint h1, const hyperpoint h2,
   }
 
 EX int wall_offset(cell *c) {
-  if(hybri) return hybrid::wall_offset(c);
+  if(hybri || WDIM == 2) return hybrid::wall_offset(c);
   if(kite::in() && kite::getshape(c->master) == kite::pKite) return 10;
   return 0;
   }

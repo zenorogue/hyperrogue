@@ -616,12 +616,11 @@ void geometry_information::prepare_basics() {
   if(fake::in() && WDIM == 2) {
     auto& u = *fake::underlying_cgip;
     geometry = fake::underlying;
-    ld orig = xpush0(u.hcrossf)[0] / xpush0(u.hcrossf)[WDIM];
+    ld orig = xpush0(u.hcrossf)[0] / xpush0(u.hcrossf)[GDIM];
     geometry = gFake;
-    ld our = xpush0(hcrossf)[0] / xpush0(hcrossf)[WDIM];
+    ld our = xpush0(hcrossf)[0] / xpush0(hcrossf)[GDIM];
     fake::scale = our / orig;
     // if(debugflags & DF_GEOM) 
-    println(hlog, "scale set to ", fake::scale);
     }
 
   if(fake::in() && WDIM == 3) {

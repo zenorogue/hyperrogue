@@ -26,9 +26,9 @@ EX namespace fake {
   
   EX bool available() {
     if(in()) return true;
-    if(GDIM == 2 && standard_tiling() && (PURE || BITRUNCATED)) return true;
+    if(WDIM == 2 && standard_tiling() && (PURE || BITRUNCATED)) return true;
     if(arcm::in() && PURE) return true;
-    if(GDIM == 2) return false;
+    if(WDIM == 2) return false;
     if(among(geometry, gRhombic3, gBitrunc3)) return false;
     return euc::in() || reg3::in();
     }
@@ -366,6 +366,7 @@ EX void compute_scale() {
     ginf[gFake].g = WDIM == 3 ? giSphere3 : giSphere2;
     }
 
+  geom3::apply_always3();
   ld around_ideal = 1/(1/2. - 1./get_middle());
   
   if(arcm::in()) {
@@ -461,6 +462,7 @@ EX void change_around() {
   fixmatrix(View);
   sightranges[gFake] = range * t;
   texture::config.remap();
+  geom3::apply_always3();
   }
 
 EX void configure() {

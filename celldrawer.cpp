@@ -662,6 +662,8 @@ int celldrawer::getSnakelevColor(int i, int last) {
 
 void celldrawer::draw_wall() {
 
+  if(no_wall_rendering) return;
+
   if(GDIM == 3 && WDIM == 2) {
     if(!qfi.fshape) qfi.fshape = &cgi.shFullFloor;
     if(conegraph(c)) {
