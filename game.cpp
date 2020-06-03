@@ -218,7 +218,7 @@ EX void saveRecall(cellwalker cw2) {
     }
   }
 
-EX void activateSafety(eLand l) {
+EX void teleportToLand(eLand l, bool make_it_safe) {
   if(recallCell.at && activateRecall()) 
     return;
   savePrincesses();
@@ -242,7 +242,7 @@ EX void activateSafety(eLand l) {
   safetyland = l;
   safetyseed = hrandpos();
   clear_euland(firstland);
-  safety = true; avengers = 0;
+  safety = make_it_safe; avengers = 0;
   clearMemory();
   initcells();
   initgame();
@@ -253,6 +253,11 @@ EX void activateSafety(eLand l) {
   restoreGolems(gp1, moPrincess, gph1); 
   restoreGolems(gp2, moPrincessArmed, gph2); 
   restartGraph();  
+  }
+
+
+EX void activateSafety(eLand l) {
+  teleportToLand(l, true);
   }
 
 EX void placeGolem(cell *on, cell *moveto, eMonster m) {

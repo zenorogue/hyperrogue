@@ -649,10 +649,16 @@ int read_cheat_args() {
     PHASEFROM(2); cheat(); reptilecheat = true;
     }
 // cheats
-  else if(argis("-WT")) {
+  else if(argis("-WS")) {
     PHASE(3);
     shift(); 
     activateSafety(readland(args()));
+    cheat();
+    }
+  else if(argis("-WT")) {
+    PHASE(3);
+    shift(); 
+    teleportToLand(readland(args()), false);
     cheat();
     }
   else if(argis("-W2")) {
