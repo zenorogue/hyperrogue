@@ -649,6 +649,24 @@ int read_cheat_args() {
     PHASEFROM(2); cheat(); reptilecheat = true;
     }
 // cheats
+  else if(argis("-g")) {
+    /* debugging mode */
+    if(curphase == 1) {
+      /* use a separate score file */
+      scorefile = "xx";
+      /* set seed for reproducible results */
+      if(!fixseed) {
+        fixseed = true; autocheat = true;
+        startseed = 1;      
+        }
+      }
+    PHASE(2);
+    /* causes problems in gdb */
+    mouseaim_sensitivity = 0;
+    /* do not any play sounds while debugging */
+    effvolume = 0;
+    musicvolume = 0;
+    }
   else if(argis("-WS")) {
     PHASE(3);
     shift(); 
