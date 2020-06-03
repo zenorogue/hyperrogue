@@ -1295,6 +1295,23 @@ EX unsigned bucketer(hyperpoint h) {
   return dx;
   }  
 
+/** @brief project the origin to the triangle [h1,h2,h3] */
+EX hyperpoint project_on_triangle(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
+  h1 /= h1[3];
+  h2 /= h2[3];
+  h3 /= h3[3];
+  transmatrix T;
+  T[0] = h1; T[1] = h2; T[2] = h3;
+  T[3] = C0;
+  ld det_orig = det(T);
+  hyperpoint orthogonal = (h2 - h1) ^ (h3 - h1);
+  T[0] = orthogonal; T[1] = h2-h1; T[2] = h3-h1;
+  ld det_orth = det(T);
+  hyperpoint result = orthogonal * (det_orig / det_orth);
+  result[3] = 1;
+  return normalize(result);
+  }
+
 EX hyperpoint lerp(hyperpoint a0, hyperpoint a1, ld x) {
   return a0 + (a1-a0) * x;
   }
