@@ -1239,6 +1239,7 @@ EX void cast() {
       int wo = wall_offset(c);
       if(wo >= irays) {
         println(hlog, "wo=", wo, " irays = ", irays);
+        reset_raycaster();
         return;
         }
       transmatrix T = currentmap->iadj(c, i) * inverse(ms[wo + i]);
