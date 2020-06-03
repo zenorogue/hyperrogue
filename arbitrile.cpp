@@ -268,6 +268,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       ginf[gArbitrary].sides = 7;
       set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
       set_flag(ginf[gArbitrary].flags, qAFFINE, false);
+      geom3::apply_always3();
       }
     else if(ep.eat("a2.")) {
       ginf[gArbitrary].g = giEuclid2;
@@ -275,18 +276,21 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
       set_flag(ginf[gArbitrary].flags, qAFFINE, true);
       affine_limit = 200;
+      geom3::apply_always3();
       }
     else if(ep.eat("h2.")) {
       ginf[gArbitrary].g = giHyperb2;
       ginf[gArbitrary].sides = 7;
       set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
       set_flag(ginf[gArbitrary].flags, qAFFINE, false);
+      geom3::apply_always3();
       }
     else if(ep.eat("s2.")) {
       ginf[gArbitrary].g = giSphere2;
       ginf[gArbitrary].sides = 5;
       set_flag(ginf[gArbitrary].flags, qBOUNDED, true);
       set_flag(ginf[gArbitrary].flags, qAFFINE, false);
+      geom3::apply_always3();
       }
     else if(ep.eat("angleunit(")) angleunit = real(ep.parsepar());
     else if(ep.eat("angleofs(")) angleofs = real(ep.parsepar());
