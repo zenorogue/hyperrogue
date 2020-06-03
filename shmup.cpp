@@ -128,9 +128,9 @@ cell *findbaseAround(hyperpoint p, cell *around, int maxsteps) {
     for(int i=0; i<around->type; i++) {
       cell *c2 = around->move(i);
       if(c2) {
-        transmatrix U = fake::in() ? T * currentmap->adj(around, i) : ggmatrix(c2);
+        transmatrix U = ggmatrix(c2);
         horo_distance d1(p, U);
-        if(d1 < d0) { best = c2; d0 = d1; T = U; }
+        if(d1 < d0) { best = c2; d0 = d1; }
         }
       }
     if(best == around) break;
