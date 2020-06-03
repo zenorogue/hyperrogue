@@ -85,7 +85,7 @@ void celldrawer::drawcell_in_radar() {
 
 void celldrawer::radar_grid() {
   for(int t=0; t<c->type; t++)
-    if(c->move(t) && c->move(t) < c)
+    if(c->move(t) && (c->move(t) < c || fake::split()))
       addradar(V*get_corner_position(c, t%c->type), V*get_corner_position(c, (t+1)%c->type), gridcolor(c, c->move(t)));
   }
 
