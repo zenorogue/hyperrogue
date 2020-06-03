@@ -634,6 +634,9 @@ EX land_validity_t& land_validity(eLand l) {
   if(old_daily_id < frog_when && among(l, laFrog, laEclectic, laWet))
     return not_implemented;
   
+  if(arb::in() && among(l, laWarpCoast, laDual, laEclectic, laReptile, laKraken))
+    return not_implemented;
+  
   if(l == laEclectic && !(geometry == gNormal && BITRUNCATED))
     return pattern_not_implemented_weird;
   
