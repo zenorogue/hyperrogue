@@ -513,6 +513,7 @@ int readArgs() {
            
   if(0) ;
   else if(argis("-gfake")) {
+    start_game();
     shift_arg_formula(around, change_around);
     }
   else return 1;
