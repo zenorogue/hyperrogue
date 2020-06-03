@@ -931,5 +931,16 @@ EX void choose() {
     });
   }
 
+#if MAXMDIM >= 4
+auto hooksw = addHook(hooks_swapdim, 100, [] {
+  for(auto& p: {&current, &slided}) 
+    for(auto& s: p->shapes)
+      for(auto& v: s.vertices)
+        swapmatrix(v);
+  for(auto& p: altmap) for(auto& pp: p.second) swapmatrix(pp.second);
+  for(auto& p: arbi_matrix) swapmatrix(p.second.second);
+  });
+#endif
+
 EX }
 }
