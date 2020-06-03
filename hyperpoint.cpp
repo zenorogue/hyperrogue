@@ -575,7 +575,7 @@ EX hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
   if(nil) return nisot::translate(h) * cpush0(2, z);
   if(translatable) return hpxy3(h[0], h[1], h[2] + z);
   ld u = 1;
-  if(h[2]) z += asin_auto(h[2]), u /= acos_auto(z);
+  if(h[2]) z += asin_auto(h[2]), u /= cos_auto(asin_auto(h[2]));
   u *= cos_auto(z);
   return hpxy3(h[0] * u, h[1] * u, sinh(z));
   }
