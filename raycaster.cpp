@@ -1160,15 +1160,27 @@ EX void cast() {
       ms[id+j] = hybrid::ray_iadj(c, j);
     if(WDIM == 2) for(int a: {0, 1}) {
       int z = a ? 1 : -1;
-      hyperpoint h = Hypc;
-      for(int a=0; a<c->type; a++) {
-        hyperpoint corner = hybrid::get_corner(c, a, 0, z);
-        h += corner;
+      
+      if(c->type == 3) {
+        hyperpoint h = 
+          project_on_triangle(
+            hybrid::get_corner(c, a, 0, z),
+            hybrid::get_corner(c, a, 1, z),
+            hybrid::get_corner(c, a, 2, z)
+            );
+        ms[id+c->type+a] = rspintox(h) * xpush(-2*hdist0(h)) * spintox(h);
         }
-      h = normalize(h);
-      ld d = hdist0(h);
-      if(h[2] > 0) d = -d;
-      ms[id+c->type+a] = zpush(2*d);
+      else {
+        hyperpoint h = Hypc;
+        for(int a=0; a<c->type; a++) {
+          hyperpoint corner = hybrid::get_corner(c, a, 0, z);
+          h += corner;
+          }
+        h = normalize(h);
+        ld d = hdist0(h);
+        if(h[2] > 0) d = -d;
+        ms[id+c->type+a] = zpush(2*d);
+        }
       }
     }
   
