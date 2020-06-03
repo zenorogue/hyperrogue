@@ -459,7 +459,6 @@ EX void change_around() {
   h *= t;
   View = rgpushxto0(direct_exp(h)) * T;
   fixmatrix(View);
-  playermoved = false;
   sightranges[gFake] = range * t;
   texture::config.remap();
   }
