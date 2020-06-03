@@ -1144,8 +1144,8 @@ EX void cast() {
   GLERR("uniform mediump IPD");
   
   if(o->uWallOffset != -1) {
-    glUniform1i(o->uWallOffset, wall_offset(centerover));
-    glUniform1i(o->uSides, centerover->type + (WDIM == 2 ? 2 : 0));
+    glUniform1i(o->uWallOffset, wall_offset(cs));
+    glUniform1i(o->uSides, cs->type + (WDIM == 2 ? 2 : 0));
     }
 
   auto sa = hybrid::gen_sample_list();
@@ -1176,7 +1176,7 @@ EX void cast() {
   
   if(!sol && !nil && (reflect_val || reg3::ultra_mirror_in())) {
     if(BITRUNCATED) exit(1);
-    for(int j=0; j<centerover->type; j++) {
+    for(int j=0; j<cs->type; j++) {
       transmatrix T = inverse(ms[j]);
       hyperpoint h = tC0(T);
       ld d = hdist0(h);
