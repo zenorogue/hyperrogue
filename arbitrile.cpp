@@ -885,6 +885,21 @@ int readArgs() {
     shift(); 
     run(args());
     }
+  else if(argis("-arb-slider")) {
+    PHASEFROM(2);
+    shift();
+    string slider = args();
+    bool found = true;
+    for(auto& sl: current.sliders)
+      if(sl.name == slider) {
+        shift_arg_formula(sl.current, sliders_changed);
+        found = true;
+        }
+    if(!found) {
+      println(hlog, "warning: no slider named ", slider, " found");
+      shift();
+      }
+    }
   else return 1;
   return 0;
   }
