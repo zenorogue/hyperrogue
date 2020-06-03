@@ -681,7 +681,7 @@ void celldrawer::draw_wall() {
     color_t wcol2 = gradient(0, wcol0, 0, .8, 1);
     draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(wcol, 0, 0xFF), PPR::WALL);
     forCellIdEx(c2, i, c) 
-      if(!highwall(c2) || conegraph(c2) || c2->wall == waClosedGate)
+      if(!highwall(c2) || conegraph(c2) || c2->wall == waClosedGate || fake::split())
         placeSidewall(c, i, SIDE_WALL, V, darkena(wcol2, fd, 255));
 
     dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
@@ -843,7 +843,7 @@ void celldrawer::draw_grid() {
       if(!bt::in() && c->move(t) < c) continue;
       dynamicval<color_t> g(poly_outline, gridcolor(c, c->move(t)));          
       if(fat_edges && reg3::in()) {
-        for(int i=0; i<S7; i++) if(c < c->move(i) || fake::in()) {
+        for(int i=0; i<S7; i++) if(c < c->move(i) || fake::split()) {
           for(int j=0; j<cgi.face; j++) {
             int jj = j == cgi.face-1 ? 0 : j+1;
             int jjj = jj == cgi.face-1 ? 0 : jj+1;
@@ -897,7 +897,7 @@ void celldrawer::draw_grid() {
     }
   else {
     for(int t=0; t<c->type; t++)
-      if(c->move(t) && (c->move(t) < c || isWarped(c->move(t)) || fake::in()))
+      if(c->move(t) && (c->move(t) < c || isWarped(c->move(t)) || fake::split()))
       gridline(V, get_corner_position(c, t%c->type), get_corner_position(c, (t+1)%c->type), gridcolor(c, c->move(t)), prec);
     }
   }
@@ -1617,7 +1617,7 @@ void celldrawer::draw_features_and_walls_3d() {
     for(int a=0; a<c->type; a++) {
       bool b = true;
       if(c->move(a) && (among(pmodel, mdPerspective, mdGeodesic) || gmatrix0.count(c->move(a))))
-        b = (patterns::innerwalls && (tC0(V)[2] < tC0(V * currentmap->adj(c, a))[2])) || fake::in() || !isWall3(c->move(a), dummy);
+        b = (patterns::innerwalls && (tC0(V)[2] < tC0(V * currentmap->adj(c, a))[2])) || fake::split() || !isWall3(c->move(a), dummy);
       if(b) {
         #if CAP_WRL
         /* always render */
@@ -1835,7 +1835,7 @@ void celldrawer::bookkeeping() {
     else {
       playerV = V * ddspin(c, cwt.spin, 0);
       if(cwt.mirrored) playerV = playerV * Mirror;
-      if((!confusingGeometry() && !fake::in() && !inmirrorcount) || eqmatrix(V, current_display->which_copy, 1e-2))
+      if((!confusingGeometry() && !fake::split() && !inmirrorcount) || eqmatrix(V, current_display->which_copy, 1e-2))
         current_display->which_copy = V;
       if(orig) cwtV = playerV;
       }

@@ -114,7 +114,7 @@ vector<monster*> active, nonvirtual, additional;
 
 cell *findbaseAround(hyperpoint p, cell *around, int maxsteps) {
 
-  if(fake::in() || arb::in_slided()) {
+  if(fake::split()) {
     auto p0 = inverse(ggmatrix(around)) * p;
     virtualRebase(around, p0);
     return around;
@@ -187,13 +187,13 @@ void monster::rebasePat(const transmatrix& new_pat, cell *c2) {
       current_display->which_copy = ggmatrix(base);
     return;
     }
-  if(quotient || fake::in() || arb::in_slided()) {
+  if(quotient || fake::split()) {
     at = inverse(gmatrix[base]) * new_pat;
     transmatrix old_at = at;
     virtualRebase(this);
     fix_to_2(at);
     if(base != c2) {
-      if(fake::in() || arb::in_slided()) println(hlog, "fake error");
+      if(fake::split()) println(hlog, "fake error");
       else {
         auto T = calc_relative_matrix(c2, base, tC0(at));
         base = c2;
@@ -1637,7 +1637,7 @@ void moveBullet(monster *m, int delta) {
     }
   else 
     nat = parallel_transport(nat, m->ori, fronttangent(delta * SCALE * m->vel / speedfactor()));
-  cell *c2 = m->findbase(nat, fake::in() ? 10 : 1);
+  cell *c2 = m->findbase(nat, fake::split() ? 10 : 1);
 
   if(m->parent && isPlayer(m->parent) && markOrb(itOrbLava) && c2 != m->base && !isPlayerOn(m->base)) 
     makeflame(m->base, 5, false);

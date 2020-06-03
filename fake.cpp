@@ -21,6 +21,9 @@ EX namespace fake {
   
   EX bool in() { return geometry == gFake; }
   
+  /** like in() but takes slided arb into account */
+  EX bool split() { return in() || arb::in_slided(); }
+  
   EX bool available() {
     if(in()) return true;
     if(GDIM == 2 && standard_tiling() && (PURE || BITRUNCATED)) return true;

@@ -65,6 +65,8 @@ EX bool using_slided;
 
 EX arbi_tiling slided;
 
+EX bool in_slided() { return in() && using_slided; }
+
 EX arbi_tiling& current_or_slided() {
   return using_slided ? slided : current;
   }
