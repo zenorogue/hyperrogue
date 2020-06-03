@@ -1059,6 +1059,7 @@ color_t color_out_of_range = 0x0F0800FF;
 int gms_size;
 
 EX void cast() {
+  if(isize(cgi.raywall) > irays) reset_raycaster();
   enable_raycaster();
   
   if(comparison_mode) 
