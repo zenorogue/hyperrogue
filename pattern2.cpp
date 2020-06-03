@@ -989,6 +989,7 @@ EX namespace patterns {
     }
   
   EX patterninfo getpatterninfo(cell *c, ePattern pat, int sub) {
+    if(fake::in()) return FPIU(getpatterninfo(c, pat, sub));
     if(!(sub & SPF_NO_SUBCODES)) {
       auto si = getpatterninfo(c, pat, sub | SPF_NO_SUBCODES);
       if(1) ;
@@ -2440,6 +2441,7 @@ EX namespace patterns {
     }
   
   EX void computeCgroup() {
+    if(fake::in()) { FPIU(computeCgroup()); return; }
     cgroup = cpUnknown;
     if(whichPattern == PAT_SINGLETYPE) {
       cgroup = cpSingle;

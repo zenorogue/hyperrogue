@@ -1642,6 +1642,11 @@ void texture_config::true_remap() {
 
 void texture_config::remap() {
   if(tstate == tsActive) {
+    if(geometry == gFake) {
+      /* always correct */
+      true_remap();
+      return;
+      }
     patterns::computeCgroup();
     correctly_mapped = patterns::compatible(texture::cgroup, patterns::cgroup);
     if(!correctly_mapped)
