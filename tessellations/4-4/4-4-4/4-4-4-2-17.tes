@@ -1,9 +1,0 @@
-## {4,4}, tetromino 2 (L), solution 17
-e2.
-angleunit(pi/2)
-# the line below lets us specify internal angles
-angleofs(pi)
-unittile(1,1,2,1,2,2,1,1,2,3)
-# the Conway notation
-conway("(0 7)(1 6)(2 3)(4 5)(8 9)")
-sublines(1)
