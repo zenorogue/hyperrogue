@@ -1,0 +1,7 @@
+## Golden Spiral as an affine tessellation
+a2.
+angleunit(deg)
+let(fi = (1+sqrt(5))/2)
+let(one = test(1/fi + 1/fi^3 + 1/fi^4))
+tile(1,90,1,90,1,90,1/fi,180,1/fi^4,180,1/fi^3,90)
+conway("(0 3)(1 4)(2 5)")

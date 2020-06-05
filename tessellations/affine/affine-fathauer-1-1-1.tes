@@ -1,0 +1,7 @@
+## Fathauer triangle spiral, family 1, m=1, n=3
+a2.
+angleunit(deg)
+let(fi = (1+sqrt(5))/2)
+let(one = test(1/fi + 1/fi^2))
+tile(1,36,fi,36,1/fi,180,1/fi^2,108)
+conway("(0 2)(1 3)")

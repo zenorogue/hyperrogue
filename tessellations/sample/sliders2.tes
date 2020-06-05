@@ -1,0 +1,21 @@
+## triangle alpha-beta-gamma, where alpha+beta+gamma = 120 degrees
+##
+## You can change alpha, beta, and gamma using 'tessellation sliders' in the geometry experiments menu.
+##
+## You can choose all three angles. Sliders are not allowed to change the structure of the map,
+## so if they do not add up to 120 degrees, they will not match.
+##
+h2.
+angleunit(deg)
+
+slider(a,40,0,120)
+slider(b,40,0,120)
+slider(c,40,0,120)
+
+let(ea=edge_angles(a,b,c))
+let(eb=edge_angles(b,c,a))
+let(ec=edge_angles(c,a,b))
+
+tile(ea, b, ec, a, eb, c)
+conway("(0)(1)(2)")
+

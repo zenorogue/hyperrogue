@@ -1,0 +1,20 @@
+## triangle alpha-beta-gamma, where alpha+beta+gamma = 120 degrees
+##
+## You can change alpha, beta, and gamma using 'tessellation sliders' in the geometry experiments menu.
+##
+h2.
+angleunit(deg)
+
+slider(a,40,0,120)
+slider(b,40,0,120)
+
+let(c = 120-a-b)
+
+let(ea=edge_angles(a,b,c))
+let(eb=edge_angles(b,c,a))
+let(ec=edge_angles(c,a,b))
+
+tile(ea, b, ec, a, eb, c)
+conway("(0)(1)(2)")
+
+cscale(.75)

@@ -1,0 +1,22 @@
+## {4,6}, tromino 1S, solution 1
+s2.
+
+# we compute the edge length
+#distunit(edge(5/2,3))
+#distunit(edge(5,5/2))
+distunit(edge(5/2,5))
+
+# note: subsequent results of arcmedge are given in terms of distunit
+
+# regangle(A,B) returns the internal angle of a B-gon with sidelength A
+
+
+#let(u5 = 2*pi/3)
+#let(u5 = 4*pi/5)
+let(u5 = 2*pi/5)
+
+unittile(u5,u5,u5,u5,u5)
+
+c(0,0,0,0,0)
+c(0,1,0,3,0)
+c(0,2,0,4,0)

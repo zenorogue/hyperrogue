@@ -1,0 +1,26 @@
+## HyperRogue standard tiling
+h2.
+
+# we compute the edge length of the Archimedean tessellation we are using
+distunit(arcmedge(6,6,7))
+# note: subsequent results of arcmedge are given in terms of distunit
+
+# regangle(A,B) returns the internal angle of a B-gon with sidelength A
+
+let(u6 = regangle(1, 6))
+let(u7 = regangle(1, 7))
+
+unittile(u6,u6,u6,u6,u6,u6)
+unittile(u7,u7,u7,u7,u7,u7,u7)
+
+c(0,0,0,0,0)
+c(0,2,0,2,0)
+c(0,4,0,4,0)
+c(0,1,1,0,0)
+c(0,3,1,1,0)
+c(0,5,1,2,0)
+c(0,1,1,3,0)
+c(0,3,1,4,0)
+c(0,5,1,5,0)
+c(0,1,1,6,0)
+
