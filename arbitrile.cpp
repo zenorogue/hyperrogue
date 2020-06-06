@@ -371,6 +371,10 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
           if(ep.eat("@")) bi = ep.iparse();
           }          
         if(ep.eat(")") || ep.eat("]")) {}
+        verify_index(ai, c.shapes, ep);
+        verify_index(as, c.shapes[ai], ep);
+        verify_index(bi, c.shapes, ep);
+        verify_index(bs, c.shapes[bi], ep);
         c.shapes[ai].connections[as] = make_tuple(bi, bs, m);
         c.shapes[bi].connections[bs] = make_tuple(ai, as, m);
         }
