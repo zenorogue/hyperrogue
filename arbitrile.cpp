@@ -75,6 +75,7 @@ EX arbi_tiling& current_or_slided() {
 
 EX short& id_of(heptagon *h) { return h->zebraval; }
 
+#if HDR
 struct hr_polygon_error : hr_exception {
   vector<transmatrix> v;
   eGeometryClass c;
@@ -83,17 +84,20 @@ struct hr_polygon_error : hr_exception {
   map<string, cld> params;
   hr_polygon_error(const vector<transmatrix>& _v, int _id, transmatrix _e) : v(_v), c(cgclass), id(_id), end(_e) {}
   ~hr_polygon_error() noexcept(true) {}
-  string generate_error() {
-    cld dist = (hdist0(tC0(end)) / params["distunit"]);
-    bool angle = abs(dist) < 1e-9;
-    if(angle) dist = (atan2(end * xpush0(1)) / params["angleunit"]);     
-    return
-      XLAT("Polygon number %1 did not close correctly (%2 %3). Here is the picture to help you understand the issue.\n\n", its(id), 
-        angle ? "angle" : "distance",
-        lalign(0, dist)
-        );
-    }
+  string generate_error();
   };
+#endif
+
+string hr_polygon_error::generate_error() {
+  cld dist = (hdist0(tC0(end)) / params["distunit"]);
+  bool angle = abs(dist) < 1e-9;
+  if(angle) dist = (atan2(end * xpush0(1)) / params["angleunit"]);     
+  return
+    XLAT("Polygon number %1 did not close correctly (%2 %3). Here is the picture to help you understand the issue.\n\n", its(id), 
+      angle ? "angle" : "distance",
+      lalign(0, dist)
+      );
+  }
 
 struct connection_debug_request : hr_exception {
   int id;
