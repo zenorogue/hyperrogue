@@ -189,7 +189,6 @@ void exp_parser::skip_white() {
   while(next() == ' ' || next() == '\n' || next() == '\r' || next() == '\t') {
     if(next() == '\r') last_line++;
     if(next() == '\n') {
-      println(hlog, "new line at ", at);
       line_number++, last_line = at;
       }
     at++;

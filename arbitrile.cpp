@@ -156,7 +156,7 @@ void shape::build_from_angles_edges() {
   if(!legacy) for(auto& a: angles) a += M_PI;
   for(int i=0; i<n; i++) {
     matrices.push_back(at);
-    println(hlog, "at = ", at);
+    if(debugflags & DF_GEOM) println(hlog, "at = ", at);
     vertices.push_back(tC0(at));
     ctr += tC0(at);
     at = at * xpush(edges[i]) * spin(angles[i]);
@@ -168,12 +168,12 @@ void shape::build_from_angles_edges() {
   if(sqhypot_d(3, ctr) < 1e-2) {
     // this may happen for some spherical tilings
     // try to move towards the center
-    println(hlog, "special case encountered");
+    if(debugflags & DF_GEOM) println(hlog, "special case encountered");
     for(int i=0; i<n; i++) {
       ctr += at * xpush(edges[i]) * spin((angles[i]+M_PI)/2) * xpush0(.01);
       at = at * xpush(edges[i]) * spin(angles[i]);
       }
-    println(hlog, "ctr = ", ctr);
+    if(debugflags & DF_GEOM) println(hlog, "ctr = ", ctr);
     }
   if(!legacy) for(auto& a: angles) a -= M_PI;
   ctr = normalize(ctr);
@@ -403,7 +403,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
             ld dist = hdist(sh.vertices[i], sh.vertices[j]);
             if(abs(dist - d) < eps) {
               sh.sublines.emplace_back(i, j);
-              println(hlog, "add subline ", i, "-", j);
+              if(debugflags & DF_GEOM) println(hlog, "add subline ", i, "-", j);
               }
             }
         }
