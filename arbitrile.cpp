@@ -402,7 +402,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       ep.force_eat(")");
       for(auto& sh: c.shapes) {
         for(int i=0; i<isize(sh.vertices); i++)
-        for(int j=0; j<isize(sh.vertices); j++)
+        for(int j=0; j<i; j++)
           if(j != i+1 && i != j+1 && !(i==0 && j == isize(sh.vertices)-1) && !(j==0 && i == isize(sh.vertices)-1) && i != j) {
             ld dist = hdist(sh.vertices[i], sh.vertices[j]);
             if(abs(dist - d) < eps) {
