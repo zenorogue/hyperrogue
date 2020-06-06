@@ -904,7 +904,7 @@ int readArgs() {
   using namespace arg;
            
   if(0) ;
-  else if(argis("-arbi")) {
+  else if(argis("-tes") || argis("-arbi")) {
     PHASEFROM(2);
     shift(); 
     run(args());
