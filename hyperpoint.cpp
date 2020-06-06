@@ -403,7 +403,7 @@ EX transmatrix to_other_side(hyperpoint h1, hyperpoint h2) {
   else
     d1 = atan_auto(-v[LDIM] / h1[LDIM]);
   
-  hyperpoint hm = h1 * cos_auto(d1) + v * sin_auto(d1);
+  hyperpoint hm = h1 * cos_auto(d1) + (sphere ? -1 : 1) * v * sin_auto(d1);
   
   return rspintox(hm) * xpush(-hdist0(hm) * 2) * spintox(hm);
   }
