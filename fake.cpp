@@ -461,7 +461,9 @@ EX void change_around() {
   View = rgpushxto0(direct_exp(h)) * T;
   fixmatrix(View);
   sightranges[gFake] = range * t;
+  #if CAP_TEXTURE
   texture::config.remap();
+  #endif
   geom3::apply_always3();
   }
 

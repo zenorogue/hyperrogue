@@ -868,7 +868,9 @@ EX void sliders_changed() {
     load(current.filename, true);
     using_slided = true;
     slider_error = "OK";
+    #if CAP_TEXTURE
     texture::config.remap();
+    #endif
     }
   catch(hr_parse_exception& ex) {
     using_slided = false;
