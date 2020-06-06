@@ -14,6 +14,8 @@ EX namespace arb {
 
 EX int affine_limit = 200;
 
+EX bool legacy; /* angleofs command */
+
 #if HDR
 
 struct shape {
@@ -151,6 +153,7 @@ void shape::build_from_angles_edges() {
   int n = isize(angles);
   hyperpoint ctr = Hypc;
   vector<transmatrix> matrices;
+  if(!legacy) for(auto& a: angles) a += M_PI;
   for(int i=0; i<n; i++) {
     matrices.push_back(at);
     println(hlog, "at = ", at);
@@ -172,6 +175,7 @@ void shape::build_from_angles_edges() {
       }
     println(hlog, "ctr = ", ctr);
     }
+  if(!legacy) for(auto& a: angles) a -= M_PI;
   ctr = normalize(ctr);
   for(auto& v: vertices) v = gpushxto0(ctr) * v;
   }
@@ -296,8 +300,14 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       set_flag(ginf[gArbitrary].flags, qAFFINE, false);
       geom3::apply_always3();
       }
+    else if(ep.eat("legacysign.")) {
+      if(legacy) angleunit *= -1;
+      }
     else if(ep.eat("angleunit(")) angleunit = real(ep.parsepar());
-    else if(ep.eat("angleofs(")) angleofs = real(ep.parsepar());
+    else if(ep.eat("angleofs(")) {
+      angleofs = real(ep.parsepar());
+      if(!legacy) angleofs = 0;
+      }
     else if(ep.eat("distunit(")) distunit = real(ep.parsepar());
     else if(ep.eat("line(")) {
       addflag(arcm::sfLINE);
@@ -892,6 +902,9 @@ int readArgs() {
     PHASEFROM(2);
     shift(); 
     run(args());
+    }
+  else if(argis("-arb-legacy")) {
+    legacy = true;
     }
   else if(argis("-arb-slider")) {
     PHASEFROM(2);

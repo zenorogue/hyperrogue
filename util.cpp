@@ -297,10 +297,14 @@ cld exp_parser::parse(int prio) {
     if(result < 0) result = -result;
     while(result > 2 * M_PI) result -= 2 * M_PI;
     if(result > M_PI) result = 2 * M_PI - result;
-    res = M_PI - result;
-
-    if(extra_params.count("angleofs"))
-      res -= extra_params["angleofs"];
+    
+    if(arb::legacy) {
+      res = M_PI - result;
+      if(extra_params.count("angleofs"))
+        res -= extra_params["angleofs"];
+      }
+    else
+      res = result;
 
     if(extra_params.count("angleunit"))
       res /= extra_params["angleunit"];    
