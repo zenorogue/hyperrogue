@@ -4006,3 +4006,15 @@ bugfixes:
 - fixed a crash when changing wall quality in some geometries
 - when selecting singlecolor/randomcolor pattern in 3D, you can now specify the wall probability
 
+2020-06-07 19:18 Update 11.3p:
+- simplified the tes format (removed angleofs(pi) which is now the default)
+- tes files now can include 'slider' values, which can be changed live during the game
+- only a few sample tes files are now included (the full collection is maintained at: https://github.com/zenorogue/tes-catalog )
+- a basic raycaster is now available in 2D geometries in FPP mode
+- minor tes improvements: better error messages, removed debug output
+- fixed a glitch in the raycaster
+- option -WT to teleport to a land, but without safety generation
+- fixed crashes when drawing boats in some geometries
+- throw an exception when file does not exist
+- improved shmup in fake/slided geometries
+- fixed texture remapping in fake curvature
