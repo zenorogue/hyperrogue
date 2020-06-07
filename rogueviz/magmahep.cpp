@@ -5,15 +5,20 @@
 
 namespace hr {
 
-vector<pair<transmatrix, color_t>> heps;
-
+/* vertices of the Magma's heptagon */
 array<hyperpoint, 8> vertices;
+
+/* how are all Magma's heptagons transformed and colored */
+vector<pair<transmatrix, color_t>> heps;
 
 int magmashape = 0;
 
 int magmacount = 1000;
 
 int magmalong = 10;
+
+/* transformation from the original to the next heptagon; 
+   edge a of the original heptagon matches edge b of the next heptagon */
 
 EX transmatrix get_adj(int a, int b) {
   
@@ -37,6 +42,8 @@ EX transmatrix get_adj(int a, int b) {
   }
 
 void make() {
+
+  /* compute the vertices */
   for(int i=0; i<=7; i++)
     vertices[i] = spin(2*M_PI*i/7) * xpush0(1);
   ld xx = vertices[2][0];
@@ -51,6 +58,8 @@ void make() {
     heps.emplace_back(T, heps.back().second ^ 0xFFFF00);
     };
   
+  /* create the core */
+
   switch(magmashape) {
   
     case 1:
@@ -100,6 +109,8 @@ void make() {
       break;
     }
   
+  /* center the core */
+
   hyperpoint center = Hypc;
   for(auto& h: heps) for(int i=0; i<7; i++)
     center += h.first * vertices[i];
@@ -107,47 +118,46 @@ void make() {
   center = normalize(center);
   
   for(auto& h: heps) h.first = gpushxto0(center) * h.first;
-
-  if(1) {
   
-    for(int a=0; a<magmacount; a++) {
-      hyperpoint p = heps.back().first * vertices[2];
-      int small = 0;      
-      int big = 0;
-      int inner = 0;
-      for(auto h: heps)
-        for(int a=0; a<7; a++)
-          if(hdist(h.first * vertices[a], p) < .001) {
-            if(a == 2 || a == 5)
-              small ++;
-            else if(a == 3 || a == 4)
-              inner ++;
-            else
-              big++;
-            }
-          
-      if(small == 14 && inner == 0 && big == 0) 
-        advance(5, 5, true);
+  /* grow */
 
-      else if(small == 4 && big == 2 && inner == 0) 
-        advance(5, 5, true);
+  for(int a=0; a<magmacount; a++) {
+    hyperpoint p = heps.back().first * vertices[2];
+    int small = 0;      
+    int big = 0;
+    int inner = 0;
+    for(auto h: heps)
+      for(int a=0; a<7; a++)
+        if(hdist(h.first * vertices[a], p) < .001) {
+          if(a == 2 || a == 5)
+            small ++;
+          else if(a == 3 || a == 4)
+            inner ++;
+          else
+            big++;
+          }
+        
+    if(small == 14 && inner == 0 && big == 0) 
+      advance(5, 5, true);
 
-      else if(small == 9 && big == 1 && inner == 0)
-        advance(5, 5, true);
+    else if(small == 4 && big == 2 && inner == 0) 
+      advance(5, 5, true);
 
-      else if(inner == 1 && small == 5 && big == 0)
-        advance(5, 5, true);
-      
-      else if(small == 4 && big == 1 && inner == 0)
-        advance(3, 6);
-      else if(big == 1 && small < 4 && inner == 0)
-        advance(3, 0);
-      else if(big == 2 && small < 4 && inner == 0)
-        advance(3, 0);
-      
-      else {
-        println(hlog, "big = ", big, "small = ", small);
-        }
+    else if(small == 9 && big == 1 && inner == 0)
+      advance(5, 5, true);
+
+    else if(inner == 1 && small == 5 && big == 0)
+      advance(5, 5, true);
+    
+    else if(small == 4 && big == 1 && inner == 0)
+      advance(3, 6);
+    else if(big == 1 && small < 4 && inner == 0)
+      advance(3, 0);
+    else if(big == 2 && small < 4 && inner == 0)
+      advance(3, 0);
+    
+    else {
+      println(hlog, "big = ", big, "small = ", small);
       }
     }
 
