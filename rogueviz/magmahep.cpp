@@ -45,51 +45,57 @@ void make() {
   
   heps.emplace_back(Id, 0xFFFFFFFF);
   
+  auto advance = [&] (int i, int j, bool mirror = false) {
+    transmatrix T = heps.back().first * get_adj(i, j);
+    if(mirror) T = T * MirrorY;   
+    heps.emplace_back(T, heps.back().second ^ 0xFFFF00);
+    };
+  
   switch(magmashape) {
   
     case 1:
       for(int i=0; i<13; i++)
-        heps.emplace_back(heps.back().first * get_adj(0, 3), heps.back().second ^ 0xFFFF00);
+        advance(0, 3);
       break;
 
     case 2:
       for(int i=0; i<8; i++)
-        heps.emplace_back(heps.back().first * get_adj(3, 0), heps.back().second ^ 0xFFFF00);
-      heps.emplace_back(heps.back().first * get_adj(3, 6), heps.back().second ^ 0xFFFF00);
+        advance(3, 0);
+      advance(3, 6);
       break;
     
     case 3:
       for(int a=0; a<2; a++) {
-        heps.emplace_back(heps.back().first * get_adj(2, 0), heps.back().second ^ 0xFFFF00);
+        advance(2, 0);
         for(int i=a; i<8; i++)
-          heps.emplace_back(heps.back().first * get_adj(3, 0), heps.back().second ^ 0xFFFF00);
+          advance(3, 0);
         }
       break;
     
     case 4:
       for(int a=0; a<4; a++)
-        heps.emplace_back(heps.back().first * get_adj(3, 0), heps.back().second ^ 0xFFFF00);
-      heps.emplace_back(heps.back().first * get_adj(3, 1), heps.back().second ^ 0xFFFF00);
+        advance(3, 0);
+      advance(3, 1);
       for(int a=0; a<4; a++)
-        heps.emplace_back(heps.back().first * get_adj(3, 0), heps.back().second ^ 0xFFFF00);
+        advance(3, 0);
       break;
     
     case 5:
       for(int a=0; a<6; a++) {
-        heps.emplace_back(heps.back().first * get_adj(3, 0), heps.back().second ^ 0xFFFF00);
+        advance(3, 0);
         }
       for(int b=0; b<magmalong; b++) {
-        heps.emplace_back(heps.back().first * get_adj(3, 6), heps.back().second ^ 0xFFFF00);
-        heps.emplace_back(heps.back().first * get_adj(3, 0), heps.back().second ^ 0xFFFF00);
+        advance(3, 6);
+        advance(3, 0);
         }
   
       for(int a=0; a<7; a++) {
-        heps.emplace_back(heps.back().first * get_adj(3, 0), heps.back().second ^ 0xFFFF00);
+        advance(3, 0);
         }
   
       for(int b=0; b<magmalong; b++) {
-        heps.emplace_back(heps.back().first * get_adj(3, 6), heps.back().second ^ 0xFFFF00);
-        heps.emplace_back(heps.back().first * get_adj(3, 0), heps.back().second ^ 0xFFFF00);
+        advance(3, 6);
+        advance(3, 0);
         }
       break;
     }
@@ -121,23 +127,23 @@ void make() {
             }
           
       if(small == 14 && inner == 0 && big == 0) 
-        heps.emplace_back(heps.back().first * get_adj(5, 5) * MirrorY, heps.back().second ^ 0xFFFF00);
+        advance(5, 5, true);
 
       else if(small == 4 && big == 2 && inner == 0) 
-        heps.emplace_back(heps.back().first * get_adj(5, 5) * MirrorY, heps.back().second ^ 0xFFFF00);
+        advance(5, 5, true);
 
       else if(small == 9 && big == 1 && inner == 0)
-        heps.emplace_back(heps.back().first * get_adj(5, 5) * MirrorY, heps.back().second ^ 0xFFFF00);
+        advance(5, 5, true);
 
       else if(inner == 1 && small == 5 && big == 0)
-        heps.emplace_back(heps.back().first * get_adj(5, 5) * MirrorY, heps.back().second ^ 0xFFFF00);
+        advance(5, 5, true);
       
       else if(small == 4 && big == 1 && inner == 0)
-        heps.emplace_back(heps.back().first * get_adj(3, 6), heps.back().second ^ 0xFFFF00);
+        advance(3, 6);
       else if(big == 1 && small < 4 && inner == 0)
-        heps.emplace_back(heps.back().first * get_adj(3, 0), heps.back().second ^ 0xFFFF00);
+        advance(3, 0);
       else if(big == 2 && small < 4 && inner == 0)
-        heps.emplace_back(heps.back().first * get_adj(3, 0), heps.back().second ^ 0xFFFF00);
+        advance(3, 0);
       
       else {
         println(hlog, "big = ", big, "small = ", small);
