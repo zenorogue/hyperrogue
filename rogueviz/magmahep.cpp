@@ -152,14 +152,10 @@ void draw_at(transmatrix T, color_t col) {
   }
 
 void draw_magma() {
-  if() {
-    if(heps.empty()) make();
-    transmatrix V = ggmatrix(currentmap.gamestart());
-    println(hlog, "V = ", V);
-    for(auto h: heps)
-      draw_at(V * h.first, h.second);
-    }
-  return false;
+  if(heps.empty()) make();
+  transmatrix V = ggmatrix(currentmap->gamestart());
+  for(auto h: heps)
+    draw_at(V * h.first, h.second);
   }
 
 int readArgs() {
