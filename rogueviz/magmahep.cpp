@@ -151,9 +151,11 @@ void draw_at(transmatrix T, color_t col) {
 
   }
 
-bool may_set_cell(cell *c, const transmatrix& V) {
-  if(c == cwt.at && magmashape) {
+void draw_magma() {
+  if() {
     if(heps.empty()) make();
+    transmatrix V = ggmatrix(currentmap.gamestart());
+    println(hlog, "V = ", V);
     for(auto h: heps)
       draw_at(V * h.first, h.second);
     }
@@ -181,7 +183,7 @@ int readArgs() {
   }
 
 
-auto msc = addHook(hooks_drawcell, 100, may_set_cell)
+auto msc = addHook(hooks_frame, 100, draw_magma)
  + addHook(hooks_args, 100, readArgs);
 
 }
