@@ -43,7 +43,7 @@ void make() {
   vertices[3][0] = 2 * xx - vertices[3][0];
   vertices[4][0] = 2 * xx - vertices[4][0];
   
-  heps.emplace_back(gpushxto0(vertices[2]), 0xFFFFFFFF);
+  heps.emplace_back(Id, 0xFFFFFFFF);
   
   switch(magmashape) {
   
@@ -93,6 +93,14 @@ void make() {
         }
       break;
     }
+  
+  hyperpoint center = Hypc;
+  for(auto& h: heps) for(int i=0; i<7; i++)
+    center += h.first * vertices[i];
+  
+  center = normalize(center);
+  
+  for(auto& h: heps) h.first = gpushxto0(center) * h.first;
 
   if(1) {
   
