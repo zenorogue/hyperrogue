@@ -47,6 +47,10 @@ EX transmatrix get_adj(int a, int b) {
   return Res;
   }
 
+pair<int, int> hash(hyperpoint h) {
+  return {int(h[0] * 1000000 + .5), int(h[1] * 1000000 + .5)};
+  }
+
 void make() {
 
   int& v = magmav;
@@ -66,6 +70,26 @@ void make() {
   for(int i=0; i<magmav; i++) hcenter += vertices[i];
   hcenter = normalize(hcenter);
   
+  vertices.resize(magmav);
+  for(int i=0; i<magmav; i++) vertices.push_back(vertices[i]);
+  for(int i=0; i<magmav; i++) vertices.push_back(vertices[i]);
+  
+  unordered_map<pair<int, int>, int> counts;
+  
+  int big = v - 2;
+  
+  auto rehash = [&] (const transmatrix& T) {
+    for(int a=0; a<v; a++) {
+      auto hashval = hash(T * vertices[a]);
+      if(a == 2 || a == down)
+        counts[hashval]++;
+      else if(a > 2 && a < down)
+        counts[hashval] += 2*v - big;
+      else 
+        counts[hashval] += big;
+      }
+    };
+
   heps.emplace_back(Id, 0xFFFFFFFF);
   
   auto advance = [&] (int i, int j, bool mirror = false) {
@@ -140,26 +164,16 @@ void make() {
   
   for(auto& h: heps) h.first = gpushxto0(center) * h.first;
   
+  counts.clear();
+  for(auto& h: heps) rehash(h.first);
+  
   /* grow */
 
   for(int a=0; a<magmacount; a++) {
     hyperpoint p = heps.back().first * vertices[2];
     
-    int total = 0;
+    int total = counts[hash(p)];
     
-    int big = v - 2;
-
-    for(auto& h: heps)
-      for(int a=0; a<v; a++)
-        if(hdist(h.first * vertices[a], p) < .001) {
-          if(a == 2 || a == down)
-            total ++;
-          else if(a > 2 && a < down)
-            total += 2*v - big;
-          else 
-            total += big;
-          }
-        
       println(hlog, "total ", total);
     if(total == 2*v) 
       advance(down, down, true);
@@ -170,6 +184,8 @@ void make() {
       advance(t, 0);
     else
       break;
+
+    rehash(heps.back().first);
     }
 
   }
