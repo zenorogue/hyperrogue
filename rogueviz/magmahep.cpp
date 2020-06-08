@@ -113,7 +113,6 @@ void make() {
     case 2:
       for(int i=0; i<t+1; i++)
         advance(t, 0);
-      advance(t, last);
       break;
     
     case 3:
