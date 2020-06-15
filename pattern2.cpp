@@ -389,10 +389,16 @@ EX int fieldval_uniq(cell *c) {
     if(ctof(c)) return c->master->fieldval;
     else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
     }
-  else if(euc::in()) {
+  else if(euc::in(2)) {
     auto p = euc2_coordinates(c);
     if(bounded) return p.first + (p.second << 16);
     return gmod(p.first - 22 * p.second, 3*127);
+    }
+  else if(euc::in(3)) {
+    auto co = euc::get_ispacemap()[c->master];
+    println(hlog, "co = ", co);
+    if(bounded) return co[0] + (co[1] << 10) + (co[2] << 20);
+    return gmod(co[0] + 3 * co[1] + 9 * co[2], 3*127);
     }
   else if(bt::in() || arcm::in() || nil || S3 >= OINF || (cgflags & qIDEAL)) return 0;
   else if(&currfp == &fp_invalid) return 0;
