@@ -111,7 +111,7 @@ void loadOldConfig(FILE *f) {
     err=fscanf(f, "%lf%lf", &re, &im);
     polygonal::coefr[i] = re;
     polygonal::coefi[i] = im;
-    }
+  }
   
   aa=vid.revcontrol; bb=vid.drawmousecircle;
   d = vid.mspeed;
