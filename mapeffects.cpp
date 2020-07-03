@@ -696,7 +696,8 @@ EX bool makeEmpty(cell *c) {
     else c->monst = moNone;
     }
 
-  if(c->land == laCocytus)
+  if(c->land == laCanvas) ;
+  else if(c->land == laCocytus)
     c->wall = waFrozenLake;
   else if(c->land == laAlchemist || c->land == laCanvas)
     ;
