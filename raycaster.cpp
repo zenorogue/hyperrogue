@@ -1058,6 +1058,34 @@ color_t color_out_of_range = 0x0F0800FF;
 
 int gms_size;
 
+transmatrix get_ms(cell *c, int a, bool mirror) {
+  int z = a ? 1 : -1;
+  
+  if(c->type == 3) {
+    hyperpoint h = 
+      project_on_triangle(
+        hybrid::get_corner(c, a, 0, z),
+        hybrid::get_corner(c, a, 1, z),
+        hybrid::get_corner(c, a, 2, z)
+        );
+    transmatrix T = rspintox(h);
+    if(mirror) T = T * MirrorX;
+    return T * xpush(-2*hdist0(h)) * spintox(h);
+    }
+  else {
+    hyperpoint h = Hypc;
+    for(int a=0; a<c->type; a++) {
+      hyperpoint corner = hybrid::get_corner(c, a, 0, z);
+      h += corner;
+      }
+    h = normalize(h);
+    ld d = hdist0(h);
+    if(h[2] > 0) d = -d;
+    if(mirror) return MirrorZ * zpush(2*d);
+    return zpush(2*d);
+    }
+  }
+
 EX void cast() {
   if(isize(cgi.raywall) > irays) reset_raycaster();
   enable_raycaster();
@@ -1160,28 +1188,7 @@ EX void cast() {
     for(int j=0; j<c->type; j++)
       ms[id+j] = hybrid::ray_iadj(c, j);
     if(WDIM == 2) for(int a: {0, 1}) {
-      int z = a ? 1 : -1;
-      
-      if(c->type == 3) {
-        hyperpoint h = 
-          project_on_triangle(
-            hybrid::get_corner(c, a, 0, z),
-            hybrid::get_corner(c, a, 1, z),
-            hybrid::get_corner(c, a, 2, z)
-            );
-        ms[id+c->type+a] = rspintox(h) * xpush(-2*hdist0(h)) * spintox(h);
-        }
-      else {
-        hyperpoint h = Hypc;
-        for(int a=0; a<c->type; a++) {
-          hyperpoint corner = hybrid::get_corner(c, a, 0, z);
-          h += corner;
-          }
-        h = normalize(h);
-        ld d = hdist0(h);
-        if(h[2] > 0) d = -d;
-        ms[id+c->type+a] = zpush(2*d);
-        }
+      ms[id+c->type+a] = get_ms(c, a, false);
       }
     }
   
@@ -1196,6 +1203,11 @@ EX void cast() {
       transmatrix U = rspintox(h) * xpush(d/2) * MirrorX * xpush(-d/2) * spintox(h);
       ms.push_back(U);
       }
+    
+    if(WDIM == 2) 
+      for(int a: {0, 1}) {
+        ms.push_back(get_ms(cs, a, true));
+        }
     
     if(reg3::ultra_mirror_in()) {
       for(auto v: cgi.ultra_mirrors) 
