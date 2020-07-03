@@ -212,6 +212,9 @@ int read_args() {
   else if(argis("-svggamma")) {
     shift_arg_formula(shot::gamma);
     }
+  else if(argis("-svgfade")) {
+    shift_arg_formula(shot::fade);
+    }
   else if(argis("-svgshot")) {
     PHASE(3); shift(); start_game();
     printf("saving SVG screenshot to %s\n", argcs());
@@ -820,6 +823,9 @@ int png_read_args() {
     }
   else if(argis("-shotxy")) {
     shift(); shotformat = -1; shotx = argi(); shift(); shoty = argi();
+    }
+  else if(argis("-shothud")) {
+    shift(); hide_hud = !argi();
     }
   else if(argis("-shott")) {
     shift(); shot::transparent = argi();
