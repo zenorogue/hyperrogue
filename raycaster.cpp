@@ -1138,6 +1138,19 @@ EX void cast() {
 
   virtualRebase(cs, T);
   
+  int ray_fixes = 0;
+  
+  back:
+  for(int a=0; a<cs->type; a++)
+    if(hdist0(hybrid::ray_iadj(cs, a) * tC0(T)) < hdist0(tC0(T))) {
+      println(hlog, "ray error");
+      T = currentmap->iadj(cs, a) * T;
+      cs = cs->move(a);
+      ray_fixes++;
+      if(ray_fixes > 100) return;
+      goto back;
+      }
+  
   if(true) {
     manual_celllister cl;
     cl.add(cs);
@@ -1486,8 +1499,8 @@ int readArgs() {
     }
   else if(argis("-ray-range")) {
     PHASEFROM(2);
-    shift_arg_formula(exp_start);
-    shift_arg_formula(exp_decay_current());
+    shift_arg_formula(exp_start, reset_raycaster);
+    shift_arg_formula(exp_decay_current(), reset_raycaster);
     }
   else if(argis("-ray-hard")) {
     PHASEFROM(2);
@@ -1506,6 +1519,10 @@ int readArgs() {
     shift_arg_formula(maxstep_sol, reset_raycaster);
     reset_raycaster();
     }
+  else if(argis("-ray-iter")) {
+    PHASEFROM(2);
+    shift(); max_iter_current() = argi();
+    }
   else if(argis("-ray-cells")) {
     PHASEFROM(2); shift();
     rays_generate = true;
@@ -1513,7 +1530,7 @@ int readArgs() {
     }
   else if(argis("-ray-reflect")) {
     PHASEFROM(2); 
-    shift_arg_formula(reflect_val);
+    shift_arg_formula(reflect_val, reset_raycaster);
     }
   else if(argis("-ray-cells-no")) {
     PHASEFROM(2); shift();
