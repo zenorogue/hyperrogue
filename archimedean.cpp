@@ -32,6 +32,8 @@ struct archimedean_tiling {
 
   int repetition;
   int N;
+  
+  bool regular;
 
   ld euclidean_angle_sum;
 
@@ -471,7 +473,9 @@ void archimedean_tiling::compute_geometry() {
     for(auto& t: ts) DEBB0(DF_GEOM, (format(" %f@%f", float(t.first), float(t.second))));
     DEBB(DF_GEOM, ());
     }
-  
+
+  regular = true;
+  for(int i: faces) if(i != faces[0]) regular = false;  
   }
 
 ld archimedean_tiling::scale() {

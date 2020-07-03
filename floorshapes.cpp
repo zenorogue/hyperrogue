@@ -696,6 +696,7 @@ void geometry_information::generate_floorshapes() {
     arcm::parent_index_of(&modelh) = 0;
     auto &ac = arcm::current;
     for(int i=0; i<2*ac.N + 2; i++) {
+      if(ac.regular && i>=2 && i < 2*ac.N) continue;
       arcm::id_of(&modelh) = i;
       model.type = isize(ac.triangles[i]);
       if(DUAL) model.type /= 2, arcm::parent_index_of(&modelh) = !(i&1);
@@ -867,8 +868,12 @@ EX int shvid(cell *c) {
     return gp::get_plainshape_id(c);
   else if(IRREGULAR)
     return irr::cellindex[c];
-  else if(arcm::in())
-    return arcm::id_of(c->master);
+  else if(arcm::in()) {
+    auto& ac = arcm::current;
+    int id = arcm::id_of(c->master);
+    if(ac.regular && id>=2 && id < 2*ac.N) id &= 1;    
+    return id;
+    }
   else if(arb::in())
     return arb::id_of(c->master);
   else if(geosupport_football() == 2)
@@ -935,7 +940,7 @@ EX struct dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hp
   #endif
   #if CAP_ARCM
   else if(arcm::in()) {
-    return &queuepolyat(V, shv[arcm::id_of(c->master)], col, prio);
+    return &queuepolyat(V, shv[shvid(c)], col, prio);
     }
   #endif
   else if(GOLDBERG && ishex1(c)) 
