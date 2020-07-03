@@ -227,7 +227,7 @@ template<class... T> void print(hstream& hs, const tuple<T...> & t) {
 inline void special_log(char c) { if(debugfile) fputc(c, debugfile); putchar(c); }
 #endif
 
-#if !CAP_SDL && !ISFAKEMOBILE
+#if !CAP_SDL && CAP_TIMEOFDAY
 int SDL_GetTicks();
 #endif
 

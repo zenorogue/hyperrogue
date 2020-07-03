@@ -2943,9 +2943,11 @@ void sumaura(int v) {
   aurac[AURA][v] = aurac[0][v];
   }
 
+#if CAP_GL
 vector<glhr::colored_vertex> auravertices;
+#endif
 
-void drawaura() {
+EX void drawaura() {
   DEBBI(DF_GRAPH, ("draw aura"));
   if(!haveaura()) return;
   if(vid.stereo_mode) return;

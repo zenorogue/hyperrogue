@@ -110,6 +110,7 @@ void geometry_information::shift_shape_orthogonally(hpcshape& sh, ld z) {
 extern renderbuffer *floor_textures;
 
 void geometry_information::add_texture(hpcshape& sh) {
+#if CAP_GL
   if(!floor_textures) return;
   auto& utt = models_texture;
   sh.tinf = &utt;
@@ -121,6 +122,7 @@ void geometry_information::add_texture(hpcshape& sh) {
     ld factor = 0.50 + (0.17 * h[2] + 0.13 * h[1] + 0.15 * h[0]) / rad;
     utt.tvertices.push_back(glhr::makevertex(0, factor, 0));
     }
+#endif
   }
 
 vector<hyperpoint> scaleshape(const vector<hyperpoint>& vh, ld s) {
@@ -834,12 +836,14 @@ void geometry_information::make_3d_models() {
   eyepos = WDIM == 2 ? 0.875 : 0.925;
   DEBBI(DF_POLY, ("make_3d_models"));
   shcenter = C0;
-  
+
+#if CAP_GL  
   if(floor_textures) {
     auto& utt = models_texture;
     utt.tvertices.clear();
     utt.texture_id = floor_textures->renderedTexture;
     }
+#endif
   
   if(WDIM == 2) {
     DEBB(DF_POLY, ("shadows"));

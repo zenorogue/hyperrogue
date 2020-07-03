@@ -209,7 +209,7 @@ EX namespace netgen {
   void blackline(vec v1, vec v2, color_t col = 0x000000FF) {
 #if CAP_SDLGFX
     aalineColor(s, int(v1.x), int(v1.y), int(v2.x), int(v2.y), col);
-#else
+#elseif CAP_SDL
     SDL_LockSurface(s);
     int len = abs(v1.x-v2.x) + abs(v1.y-v2.y);
     for(int i=0; i<=len; i++) 
@@ -227,7 +227,7 @@ EX namespace netgen {
     polyy[1] = int(v2.y);
     polyy[2] = int(v3.y);
     filledPolygonColorI(s, polyx, polyy, 3, col);
-#else
+#elseif CAP_SDL
     SDL_LockSurface(s);
     int len = abs(v1.x-v2.x) + abs(v1.y-v2.y);
     for(int i=0; i<=len; i++) for(int j=0; j<=len; j++) if(i+j <= len)

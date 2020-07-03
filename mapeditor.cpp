@@ -1607,7 +1607,6 @@ namespace mapeditor {
 
   void drawHandleKey(int sym, int uni);
   
-#if CAP_TEXTURE
   static ld brush_sizes[10] = {
     0.001, 0.002, 0.005, 0.0075, 0.01, 0.015, 0.02, 0.05, 0.075, 0.1};
   
@@ -1626,7 +1625,6 @@ namespace mapeditor {
     0x404040FF,
     0x804000FF
     };
-#endif
 
   bool area_in_pi = false;
 
@@ -2367,11 +2365,13 @@ namespace mapeditor {
         else if(mousekey == 'l' || mousekey == 'c') {
           if(!holdmouse) lstart = mouseh, lstartcell = mouseover, holdmouse = true;
           }
+#if CAP_TEXTURE
         else if(intexture) {
           if(!holdmouse) texture::config.data.undoLock();
           texture::drawPixel(mouseover, mouseh, tcolor);
           holdmouse = true; lstartcell = NULL;
           }
+#endif
         else {
           dt_add_free(mouseh);
           holdmouse = true;
@@ -2380,6 +2380,7 @@ namespace mapeditor {
       
       if(sym == PSEUDOKEY_RELEASE) {
         printf("release\n");
+#if CAP_TEXTURE
         if(mousekey == 'l' && intexture) { 
           texture::config.data.undoLock();
           texture::where = mouseover;
@@ -2387,10 +2388,13 @@ namespace mapeditor {
           texture::drawLine(mouseh, lstart, tcolor);
           lstartcell = NULL;
           }
-        else if(mousekey == 'l') {
+        else 
+#endif
+        if(mousekey == 'l') {
           dt_add_line(mouseh, lstart, 10);
           lstartcell = NULL;
           }
+#if CAP_TEXTURE
         else if(mousekey == 'c' && intexture) { 
           texture::config.data.undoLock();
           ld rad = hdist(lstart, mouseh);
@@ -2402,6 +2406,7 @@ namespace mapeditor {
             texture::drawPixel(T * xspinpush0(2 * M_PI * i / circp, rad), tcolor);
           lstartcell = NULL;
           }
+#endif          
         else if(mousekey == 'c') {
           dt_add_circle(lstart, mouseh);
           lstartcell = NULL;
@@ -2418,12 +2423,14 @@ namespace mapeditor {
       if(uni >= 2000 && uni < 2010)
         dtwidth = brush_sizes[uni - 2000];
 
+#if CAP_TEXTURE
       if(uni == '0')
         texture::texturesym = !texture::texturesym;
 
       if(uni == 'u') {
         texture::config.data.undo();
         }        
+#endif
       
       if(uni == 'p') {
         if(!clickused)

@@ -902,7 +902,9 @@ EX void apply_always3() {
   #if MAXMDIM >= 4
 EX void switch_always3() {
     if(dual::split(switch_always3)) return;
+    #if CAP_GL
     if(rug::rugged) rug::close();
+    #endif
     vid.always3 = !vid.always3;
     apply_always3();
     swapmatrix(View);
@@ -933,7 +935,9 @@ EX void switch_always3() {
     
   EX void switch_fpp() {
 #if MAXMDIM >= 4
+    #if CAP_GL
     if(rug::rugged) rug::close();
+    #endif
     if(dual::split(switch_fpp)) return;
     check_cgi(); cgi.require_basics();
     View = inverse(models::rotmatrix()) * View;

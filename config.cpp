@@ -910,7 +910,9 @@ string solhelp() {
   }
 
 EX void edit_sightrange() {
+  #if CAP_RUG
   USING_NATIVE_GEOMETRY_IN_RUG;
+  #endif
   if(vid.use_smart_range) {
     ld& det = WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3;
     dialog::editNumber(det, 1, 50, 1, WDIM == 2 ? 8 : 30, XLAT("minimum visible cell in pixels"), "");
@@ -2403,8 +2405,10 @@ EX int read_config_args() {
 
 // non-configurable options
   else if(argis("-vsync_off")) {
+    #if CAP_SDL && CAP_GL
     vsync_off = true;
     if(curphase == 3) setvideomode();
+    #endif
     }
   else if(argis("-aura")) {
     PHASEFROM(2);

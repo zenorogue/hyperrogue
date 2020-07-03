@@ -1838,16 +1838,21 @@ auto rug_hook =
 
 EX }
 
-#else
+#endif
+
+#if !CAP_RUG
 
 // fake for mobile
-namespace rug {
-    bool rugged = false;
-    bool renderonce = false;
-    bool rendernogl = true;
-    int texturesize = 512;
-    ld scale = 1.0f;
-}
+EX namespace rug {
+    EX bool rugged = false;
+    EX bool renderonce = false;
+    EX bool rendernogl = true;
+    EX int texturesize = 512;
+    EX ld scale = 1.0f;
+    EX bool rug_control() { return false; }
+    EX bool in_crystal() { return false; }
+    EX void reset_view() { }
+EX }
 
 #endif
 }

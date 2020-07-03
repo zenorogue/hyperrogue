@@ -186,7 +186,7 @@
 #endif
 
 #ifndef CAP_MODEL
-#define CAP_MODEL (!ISMOBWEB && !ISMINI)
+#define CAP_MODEL (!ISMOBWEB && !ISMINI && CAP_SDL)
 #endif
 
 #ifndef CAP_SAVE
@@ -399,6 +399,7 @@ extern "C" {
 #define CAP_GLEW (CAP_GL && !ISMOBILE && !ISMAC && !ISLINUX && !ISWEB)
 #endif
 
+#if CAP_GL
 #if CAP_GLEW
   #include <GL/glew.h>
 #else
@@ -421,6 +422,10 @@ extern "C" {
     #include <GL/glu.h>
     #include <GL/glext.h>
   #endif
+#endif
+#else
+typedef int GLint;
+typedef unsigned GLuint;
 #endif
 
 #include <functional>
@@ -560,7 +565,7 @@ union SDL_Event;
 #endif
 
 #ifndef CAP_RAY
-#define CAP_RAY (MAXMDIM >= 4 && !ISWEB && !ISMOBILE)
+#define CAP_RAY (MAXMDIM >= 4 && !ISWEB && !ISMOBILE && CAP_GL)
 #endif
 
 #ifndef CAP_MEMORY_RESERVE

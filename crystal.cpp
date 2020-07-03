@@ -1182,6 +1182,7 @@ EX void flip_z() {
     crug_rotation[i][2] *= -1;
   }
 
+#if CAP_RUG
 hyperpoint coord_to_flat(ldcoord co, int dim = 3) {
   auto& cs = crystal_map()->cs;
   hyperpoint res = Hypc;
@@ -1314,6 +1315,7 @@ EX void build_rugdata() {
   
   println(hlog, "cut ", cut_level, "r ", crug_rotation);
   }
+#endif
 
 EX void set_land(cell *c) {
   setland(c, specialland); 
@@ -1481,6 +1483,7 @@ EX void show() {
     dialog::editNumber(compass_probability, 0, 1, 0.1, 1, XLAT("compass probability"), compass_help()); 
     dialog::bound_low(0);
     });
+#if CAP_RUG
   if(cryst && WDIM == 2) {
     dialog::addBoolItem(XLAT("3D display"), rug::rugged, 'r');
     dialog::add_action_push(rug::show);
@@ -1499,6 +1502,7 @@ EX void show() {
       });
     }
   else dialog::addBreak(100);
+#endif
   dialog::addSelItem(XLAT("Crystal torus"), its(crystal_period), 'C');
   dialog::add_action([] {
     dialog::editNumber(crystal_period, 0, 16, 2, 0, XLAT("Crystal torus"), 

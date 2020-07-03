@@ -11,6 +11,41 @@
 #include "hyper.h"
 namespace hr {
 
+EX namespace glhr {
+EX glvertex pointtogl(const hyperpoint& t) {
+  glvertex h;
+  h[0] = t[0]; h[1] = t[1]; h[2] = t[2]; 
+  if(SHDIM == 4) h[3] = (MDIM == 4) ? t[3] : 1;
+  return h;
+  }
+
+EX hyperpoint gltopoint(const glvertex& t) {
+  hyperpoint h;
+  h[0] = t[0]; h[1] = t[1]; h[2] = t[2]; 
+  if(SHDIM == 4 && MAXMDIM == 4) h[3] = t[3];
+  return h;
+  }
+
+#if CAP_SHADER
+EX bool noshaders = false;
+#endif
+#if !CAP_SHADER
+EX bool noshaders = true;
+#endif
+
+#if HDR
+  inline glvertex makevertex(GLfloat x, GLfloat y, GLfloat z) {
+    #if SHDIM == 3
+    return make_array(x, y, z);
+    #else
+    return make_array<GLfloat>(x, y, z, 1);
+    #endif
+    }
+#endif
+
+EX }
+
+#if CAP_GL
 #ifndef DEBUG_GL
 #define DEBUG_GL 0
 #endif
@@ -55,16 +90,6 @@ struct glmatrix {
   const array<float, 16>& as_stdarray() const { return *(array<float, 16>*)this; }
   };
 
-glvertex pointtogl(const hyperpoint& t);
-
-  inline glvertex makevertex(GLfloat x, GLfloat y, GLfloat z) {
-    #if SHDIM == 3
-    return make_array(x, y, z);
-    #else
-    return make_array<GLfloat>(x, y, z, 1);
-    #endif
-    }
-  
   struct colored_vertex {
     glvertex coords;
     glvec4 color;
@@ -103,12 +128,6 @@ glvertex pointtogl(const hyperpoint& t);
       }
     };  
 
-#endif
-
-#if CAP_SHADER
-EX bool noshaders = false;
-#else
-EX bool noshaders = true;
 #endif
 
 bool glew   = false;
@@ -647,20 +666,6 @@ void init() {
   #endif
   }
 
-EX hyperpoint gltopoint(const glvertex& t) {
-  hyperpoint h;
-  h[0] = t[0]; h[1] = t[1]; h[2] = t[2]; 
-  if(SHDIM == 4 && MAXMDIM == 4) h[3] = t[3];
-  return h;
-  }
-
-EX glvertex pointtogl(const hyperpoint& t) {
-  glvertex h;
-  h[0] = t[0]; h[1] = t[1]; h[2] = t[2]; 
-  if(SHDIM == 4) h[3] = (MDIM == 4) ? t[3] : 1;
-  return h;
-  }
-
 #if CAP_VERTEXBUFFER
 template<class T> void bindbuffer(T& v) {
   if(current_vertices == buffered_vertices || current_vertices == nullptr) {
@@ -839,7 +844,7 @@ EX void oldvertices(GLfloat *f, int qty) {
    )
   }
 
-
+#endif
 }
 
 #define glMatrixMode DISABLED

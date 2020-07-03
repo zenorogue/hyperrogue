@@ -216,6 +216,12 @@ EX color_t darkena(color_t c, int lev, int a) {
 void setcameraangle(bool b) { }
 #endif
 
+#if !CAP_GL
+EX void reset_projection() { }
+EX void glflush() { }
+EX bool model_needs_depth() { return false; }
+#endif
+
 #if CAP_GL
 
 #if CAP_VR
@@ -1034,7 +1040,7 @@ EX void do_setfsize() {
   }
 
 EX void disable_vsync() {
-#if !ISMOBWEB
+#if CAP_SDL && CAP_GL && !ISMOBWEB
   SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 0 ); 
 #endif
   }

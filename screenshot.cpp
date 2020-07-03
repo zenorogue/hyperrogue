@@ -455,6 +455,7 @@ EX always_false in;
       for(auto& d: tdata) d[0] = x;
       }
     
+    #if CAP_GL
     if(tt == 3) {
       int tp = texture_position[texid(p)];
       auto xy = make_array<int>(tp % fts_row, tp / fts_row);
@@ -464,6 +465,7 @@ EX always_false in;
         for(int c: {0, 1})
           d[c] = ((d[c] - zero[c])*sca + xy[c] + .5) * fts_int / fts;
       }
+    #endif
     #endif
 
     for(auto& d: tdata) ad.second.push_back(d);
@@ -482,6 +484,7 @@ EX always_false in;
     int gps = 0;
     for(auto& p: gradient_position) p.second = gps++;
     
+    #if CAP_TEXTURE
     fts_int = floor_texture_square_size * FLOORTEXTURESIZE + 4;
     fts = 64;
     
@@ -489,6 +492,7 @@ EX always_false in;
       fts *= 2;    
     
     fts_row = (fts-gps)/fts_int;
+    #endif
     #endif
     
     for(auto& p: ptds) {
@@ -642,9 +646,7 @@ void set_shotx() {
     }
   }
 
-#if CAP_SDL
 EX int shot_aa = 1;
-#endif
 
 EX void default_screenshot_content() {
   #if CAP_RUG
@@ -664,9 +666,11 @@ EX void default_screenshot_content() {
   drawStats();    
   }
 
+#if CAP_SDL
 EX SDL_Surface *empty_surface(int x, int y, bool alpha) {
   return SDL_CreateRGBSurface(SDL_SWSURFACE,x,y,32,0xFF<<16,0xFF<<8,0xFF, (alpha) ? (0xFF<<24) : 0);
   }
+#endif
 
 #if CAP_PNG
 
@@ -957,12 +961,18 @@ EX void menu() {
       #if CAP_WRL
       if(!models::is_3d(vpconf) && !rug::rugged) {
         dialog::addInfo("this format is for 3D projections", 0xFF0000);
+        #if CAP_RUG
         if(GDIM == 2) {
           dialog::addItem(XLAT("hypersian rug mode"), 'u');
           dialog::add_action_push(rug::show);
           }
+        #endif
         }
+      #if CAP_RUG
       else if(rug::rugged ? rug::perspective() : models::is_perspective(vpconf.model)) {
+      #else
+      else if(models::is_perspective(vpconf.model)) {
+      #endif
         dialog::addInfo("this does not work well in perspective projections", 0xFF8000);
         dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
         dialog::add_action_push(models::model_menu);
@@ -1825,12 +1835,14 @@ startanim rug { "Hypersian Rug", [] {
   pick();
 #endif
   }, [] {
+  #if CAP_RUG
   dynamicval<bool> b(rug::rugged, true);
   rug::physics();
   dynamicval<transmatrix> t(rug::rugView, cspin(1, 2, ticks / 3000.) * rug::rugView);
   gamescreen(2);
   if(!rug::rugged) current = &null_animation;
   explorable([] { rug::rugged = true; pushScreen(rug::show); });
+  #endif
   }};
 
 startanim spin_around { "spinning around", no_init,  [] {

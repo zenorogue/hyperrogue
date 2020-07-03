@@ -154,7 +154,9 @@ int arg::readCommon() {
   else if(argis("-rsrc")) { PHASE(1); shift(); rsrcdir = args(); }
   else if(argis("-nogui")) { PHASE(1); noGUI = true; }
 #ifndef EMSCRIPTEN
+#if CAP_SDL
   else if(argis("-font")) { PHASE(1); shift(); fontpath = args(); }
+#endif
 #endif
 
   else if(argis("-test")) 

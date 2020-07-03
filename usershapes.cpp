@@ -57,7 +57,7 @@ void geometry_information::pushShape(usershapelayer& ds) {
   
   if(GDIM == 2) hpcpush(T * ds.list[0]);
 
-  #if MAXMDIM >= 4
+  #if MAXMDIM >= 4 && CAP_GL
   if(GDIM == 3) {
     auto& utt = user_triangles_texture;
     utt.texture_id = floor_textures->renderedTexture;

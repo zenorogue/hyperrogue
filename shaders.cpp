@@ -11,6 +11,7 @@ namespace hr {
 EX ld levellines;
 EX bool disable_texture;
 
+#if CAP_GL
 #if HDR
 constexpr flagtype GF_TEXTURE  = 1;
 constexpr flagtype GF_VARCOLOR = 2;
@@ -546,5 +547,5 @@ EX void glapplymatrix(const transmatrix& V) {
   glhr::set_modelview(glhr::as_glmatrix(mat));
   }
 
-
+#endif
 }

@@ -687,7 +687,11 @@ enum orbAction { roMouse, roKeyboard, roCheck, roMouseForce, roMultiCheck, roMul
 #define MODELCOUNT ((int) mdGUARD)
 
 #define pconf vid.projection_config
+#if CAP_RUG
 #define vpconf (rug::rugged ? vid.rug_config : vid.projection_config)
+#else
+#define vpconf pconf
+#endif
 #define pmodel (pconf.model)
 
 color_t darkena(color_t c, int lev, int a);

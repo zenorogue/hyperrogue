@@ -240,7 +240,7 @@ EX void glflush() {
   }
 #endif
 
-#if !ISMOBILE
+#if CAP_SDL && !ISMOBILE
 SDL_Surface *aux;
 #endif
 
@@ -743,7 +743,9 @@ EX void set_width(ld w) {
   #if MINIMIZE_GL_CALLS
   if(w != glhr::current_linewidth) glflush();
   #endif
+  #if CAP_GL
   glhr::set_linewidth(w);
+  #endif
   }
 
 // this part makes cylindrical projections on the sphere work
@@ -1400,10 +1402,12 @@ void dqi_poly::draw() {
     }
   #endif
 
+  #if CAP_GL
   if(in_s2xe() && vid.usingGL && pmodel == mdPerspective && (current_display->set_all(global_projection), (get_shader_flags() & SF_DIRECT))) {
     s2xe::draw_s2xe(this);
     return;
     }
+  #endif
 
   dynamicval<ld> bs(hr::band_shift, band_shift);
   if(!hyperbolic && among(pmodel, mdPolygonal, mdPolynomial)) {
@@ -1990,6 +1994,7 @@ EX void draw_main() {
       if(stretch::factor) return;
       }
 
+    #if CAP_GL
     for(int p: {1, 0, 2, 3}) {
       if(elliptic && p < 2) continue;
       glhr::set_depthwrite(true);
@@ -2021,6 +2026,7 @@ EX void draw_main() {
         }
       // glflush();
       }
+    #endif
     }
   else {
     DEBB(DF_GRAPH, ("draw_main1"));
@@ -2043,6 +2049,7 @@ EX void draw_main() {
       }
     glflush();
 
+#if CAP_RAY
     if(ray::in_use && ray::comparison_mode) {
       glDepthFunc(GL_LEQUAL);
 #ifdef GLES_ONLY
@@ -2053,6 +2060,7 @@ EX void draw_main() {
       glClear(GL_DEPTH_BUFFER_BIT);
       ray::cast();
       }
+#endif
     }
   }
 
@@ -2136,15 +2144,20 @@ EX void drawqueue() {
   #if CAP_VR
   if(callhandlers(false, hooks_vr)) {} else
   #endif
+  #if CAP_GL
   if(model_needs_depth() && current_display->stereo_active()) {
     global_projection = -1;
     draw_main();
+    #if CAP_GL
     glClear(GL_DEPTH_BUFFER_BIT);
+    #endif
     global_projection = +1;
     draw_main();
     global_projection = 0;
     }
-  else {
+  else 
+#endif
+  {
     draw_main();
     }    
 

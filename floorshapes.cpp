@@ -1012,7 +1012,13 @@ auto floor_hook =
 #endif
 #endif
 
-#if MAXMDIM >= 4
+#if MAXMDIM < 4 || !CAP_GL
+EX void ensure_vertex_number(basic_textureinfo& bti, int qty) {}
+EX void ensure_vertex_number(hpcshape& sh) {}
+EX void bind_floor_texture(hpcshape& li, int id) {}
+#endif
+
+#if MAXMDIM >= 4 && CAP_GL
 
 EX ld floor_texture_square_size;
 

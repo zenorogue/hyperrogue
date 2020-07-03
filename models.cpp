@@ -343,7 +343,9 @@ EX namespace models {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
     dialog::init(XLAT("models & projections"));
+    #if CAP_RUG
     USING_NATIVE_GEOMETRY_IN_RUG;
+    #endif
 
     for(int i=0; i<mdGUARD; i++) {
       eModel m = eModel(i);
@@ -399,7 +401,9 @@ EX namespace models {
   EX void model_menu() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
+    #if CAP_RUG
     USING_NATIVE_GEOMETRY_IN_RUG;
+    #endif
     dialog::init(XLAT("models & projections"));
     
     auto vpmodel = vpconf.model;
@@ -660,6 +664,7 @@ EX namespace models {
         });
       }
 
+    #if CAP_GL
     dialog::addBoolItem(XLAT("use GPU to compute projections"), vid.consider_shader_projection, 'G');
     bool shaderside_projection = get_shader_flags() & SF_DIRECT;
     if(vid.consider_shader_projection && !shaderside_projection)
@@ -667,6 +672,7 @@ EX namespace models {
     if(vid.consider_shader_projection && shaderside_projection && vpmodel)
       dialog::lastItem().value += XLAT(" (2D only)");
     dialog::add_action([] { vid.consider_shader_projection = !vid.consider_shader_projection; });
+    #endif
 
     menuitem_sightrange('R');
       

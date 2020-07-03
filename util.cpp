@@ -13,7 +13,7 @@ namespace hr {
 int lastusec;
 int uticks;
 
-int SDL_GetTicks() {
+EX int SDL_GetTicks() {
   struct timeval tim;
   gettimeofday(&tim, NULL);
   int newusec = tim.tv_usec;

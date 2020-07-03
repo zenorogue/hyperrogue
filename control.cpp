@@ -342,7 +342,7 @@ EX void full_rotate_camera(int dir, ld val) {
     history::lvspeed += (dir?1:-1) * val / 2;
   else if(GDIM == 3 && rshiftclick)
     shift_view(ctangent(dir, -val)), didsomething = true, playermoved = false; /* -val because shift reverses */
-  #if CAP_CRYSTAL
+  #if CAP_CRYSTAL && CAP_RUG
   else if(rug::rug_control() && rug::in_crystal())
     crystal::apply_rotation(cspin(dir, 2, val));
   #endif
@@ -385,7 +385,9 @@ EX void handlePanning(int sym, int uni) {
     if(sym == PSEUDOKEY_WHEELDOWN) shift_view(ztangent(0.05*shiftmul)), didsomething = true, playermoved = false;
     }
 
+  #if CAP_RUG
   rug::using_rugview urv;
+  #endif
     
 #if !ISPANDORA
   if(!smooth_scrolling) {

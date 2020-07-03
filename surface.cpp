@@ -8,9 +8,9 @@
  */
 
 #include "hyper.h"
-#if CAP_SURFACE
 namespace hr { 
 
+#if CAP_SURFACE
 EX namespace surface {
 
 ld sech(ld d) { return 1 / cosh(d); }
@@ -841,9 +841,9 @@ int surface_args() {
   else return 1;
   return 0;
   }
+#endif
 
 auto surface_hook = addHook(hooks_args, 100, surface_args);
-#endif
 
 void display_coverage() {
 
@@ -860,5 +860,6 @@ void display_coverage() {
 
 auto surface_hook2 = addHook(hooks_frame, 0, display_coverage);
 
-}}
+EX }
 #endif
+}

@@ -858,7 +858,9 @@ int read_cheat_args() {
     shift(); steplimit = argi();
     }
   else if(argis("-dgl")) {
+    #if CAP_GL
     glhr::debug_gl = true;
+    #endif
     }
   else if(argis("-mgen-off")) {
     PHASEFROM(3);

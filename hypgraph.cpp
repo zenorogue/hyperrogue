@@ -33,7 +33,11 @@ EX bool non_spatial_model() {
     return true;
   if(pmodel == mdSpiral && euclid)
     return true;
+  #if CAP_GL
   return pmodel && vid.consider_shader_projection && (get_shader_flags() & SF_DIRECT);
+  #else
+  return false;
+  #endif
   }
 
 EX hyperpoint perspective_to_space(hyperpoint h, ld alpha IS(pconf.alpha), eGeometryClass gc IS(ginf[geometry].cclass)) {
@@ -1345,7 +1349,7 @@ EX void centerpc(ld aspd) {
   if(subscreens::split([=] () {centerpc(aspd);})) return;
   if(dual::split([=] () { centerpc(aspd); })) return;
 
-  #if CAP_CRYSTAL
+  #if CAP_CRYSTAL && CAP_RUG
   if(cryst)
     crystal::centerrug(aspd);
   #endif
@@ -1555,7 +1559,9 @@ EX eModel flat_model() { return MDIM == 4 ? mdPixel : mdDisk; }
 
 /** \brief enable the 'flat' model for drawing HUD. See hr::flat_model_enabler */
 EX void enable_flat_model() {
+  #if CAP_GL
   glClear(GL_DEPTH_BUFFER_BIT);
+  #endif
   pmodel = flat_model();
   pconf.alpha = 1;
   pconf.scale = 1;
