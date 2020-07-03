@@ -306,6 +306,7 @@ EX void initConfig() {
   addsaver(vid.antialias, "antialias", AA_NOGL | AA_FONT | (ISWEB ? AA_MULTI : AA_LINES) | AA_LINEWIDTH | AA_VERSION);
   addsaver(vid.linewidth, "linewidth", 1);
   addsaver(precise_width, "precisewidth", .5);
+  addsaver(perfect_linewidth, "perfect_linewidth", 1);
   addsaver(linepatterns::width, "pattern-linewidth", 1);
   addsaver(fat_edges, "fat-edges");
   addsaver(pconf.scale, "scale", 1);
@@ -1155,6 +1156,11 @@ EX void showGraphConfig() {
         dialog::add_action([] () { 
           vid.antialias ^= AA_LINEWIDTH; 
           });
+
+        dialog::addBoolItem("perfect width", perfect_linewidth == 2, 'P');
+        if(perfect_linewidth == 1) 
+          dialog::lastItem().value = XLAT("shots only");
+        dialog::add_action([] { perfect_linewidth = (1 + perfect_linewidth) % 3; });
 
         if(vid.antialias & AA_LINEWIDTH) {
           dialog::addSelItem("variable width", fts(precise_width), 'M');

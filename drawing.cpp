@@ -719,6 +719,8 @@ EX ld scale_at(const transmatrix& T) {
   return sqrt(hypot_d(2, h2-h1) * hypot_d(2, h3-h1) / .0001);
   }
 
+EX int perfect_linewidth = 1;
+
 EX ld linewidthat(const hyperpoint& h) {
   if(!(vid.antialias & AA_LINEWIDTH)) return 1;
   else if(hyperbolic && pmodel == mdDisk && pconf.alpha == 1 && !ISWEB) {
@@ -731,7 +733,7 @@ EX ld linewidthat(const hyperpoint& h) {
       return dfc;
       }
     }
-  else if(svg::in || inHighQual) {
+  else if(perfect_linewidth >= (inHighQual ? 1 : 2)) {
     hyperpoint h0 = h / zlevel(h);
     transmatrix T = rgpushxto0(h0);
     return scale_at(T);
