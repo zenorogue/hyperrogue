@@ -1770,7 +1770,7 @@ EX namespace patterns {
       case 'r': {
         color_t r = hrand(0xFFFFFF + 1);
         if(hrand(100) < rwalls) r |= 0x1000000;
-        if(c == cwt.at) r &= 0xFFFFFF;
+        if(c == cwt.at && rwalls <= 100) r &= 0xFFFFFF;
         return r;
         }
       case '^': {
