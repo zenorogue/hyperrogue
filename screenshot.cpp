@@ -1612,7 +1612,7 @@ EX void show() {
   #endif
   if(models::has_orientation(vpconf.model))
     animator(XLAT("model rotation"), ballangle_rotation, 'I');
-  else if(among(pmodel, mdHyperboloid, mdHemisphere, mdBall))
+  else if(models::is_3d(vpconf))
     animator(XLAT("3D rotation"), ballangle_rotation, '3');
   
   dialog::addSelItem(XLAT("animate parameters"), fts(a), 'a');
