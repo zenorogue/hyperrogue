@@ -40,44 +40,56 @@ EX namespace reg3 {
     cgi.ultra_mirror_part = .99;    
     cgi.ultra_material_part = .99;
     
-    if(cgflags & qULTRA) {
-      transmatrix T = spintox(cgi.cellshape[0]);
-      hyperpoint a = T * cgi.cellshape[0];
-      hyperpoint b = T * cgi.cellshape[1];
-      ld f0 = 0.5;
-      ld f1 = binsearch(0.5, 1, [&] (ld d) {
-        hyperpoint c = lerp(b, a, d);
-        if(debugflags & DF_GEOM) 
-          println(hlog, "d=", d, " c= ", c, " material = ", material(c));
-        return material(c) <= 0;
-        });
-      cgi.ultra_material_part = f1;
-      auto f = [&] (ld d) {
-        hyperpoint c = lerp(b, a, d);
-        c = normalize(c);
-        return c[1] * c[1] + c[2] * c[2];
-        };
-      for(int it=0; it<100; it++) {
-        ld fa = (f0*2+f1) / 3;
-        ld fb = (f0*1+f1*2) / 3;
-        if(debugflags & DF_GEOM) 
-          println(hlog, "f(", fa, ") = ", f(fa), " f(", fb, ") = ", f(fb));
-        if(f(fa) > f(fb)) f0 = fa;
-        else f1 = fb;
-        }
-      
-      cgi.ultra_mirror_part = f0;
-
-      hyperpoint c = lerp(b, a, f0);
-      c = normalize(c);
-      c[1] = c[2] = 0;
-      c = normalize(c);
-      cgi.ultra_mirror_dist = hdist0(c);
-      }
-    
     cgi.ultra_mirrors.clear();
-    if(cgflags & qULTRA) for(auto v: cgi.vertices_only)
-      cgi.ultra_mirrors.push_back(rspintox(v) * xpush(cgi.ultra_mirror_dist*2) * MirrorX * spintox(v));
+
+    if(cgflags & qULTRA) {
+    
+      for(auto& v: cgi.vertices_only) {
+      
+        hyperpoint nei;
+      
+        for(int i=0; i<isize(cgi.cellshape); i++)
+          if(sqhypot_d(WDIM, cgi.cellshape[i]-v) < 1e-6)
+            nei = cgi.cellshape[i % cgi.face ? i-1 : i+1]; 
+            
+        transmatrix T = spintox(v);
+        hyperpoint a = T * v;
+        hyperpoint b = T * nei;
+        ld f0 = 0.5;
+        ld f1 = binsearch(0.5, 1, [&] (ld d) {
+          hyperpoint c = lerp(b, a, d);
+          if(debugflags & DF_GEOM) 
+            println(hlog, "d=", d, " c= ", c, " material = ", material(c));
+          return material(c) <= 0;
+          });
+        cgi.ultra_material_part = f1;
+        auto f = [&] (ld d) {
+          hyperpoint c = lerp(b, a, d);
+          c = normalize(c);
+          return c[1] * c[1] + c[2] * c[2];
+          };
+        for(int it=0; it<100; it++) {
+          ld fa = (f0*2+f1) / 3;
+          ld fb = (f0*1+f1*2) / 3;
+          if(debugflags & DF_GEOM) 
+            println(hlog, "f(", fa, ") = ", f(fa), " f(", fb, ") = ", f(fb));
+          if(f(fa) > f(fb)) f0 = fa;
+          else f1 = fb;
+          }
+        
+        cgi.ultra_mirror_part = f0;
+  
+        hyperpoint c = lerp(b, a, f0);
+        c = normalize(c);
+        c[1] = c[2] = 0;
+        c = normalize(c);
+        cgi.ultra_mirror_dist = hdist0(c);
+        
+        if(cgi.ultra_mirror_part >= 1-1e-6) continue;
+        
+        cgi.ultra_mirrors.push_back(rspintox(v) * xpush(cgi.ultra_mirror_dist*2) * MirrorX * spintox(v));
+        }
+      }    
     }
 
   EX void make_vertices_only() {

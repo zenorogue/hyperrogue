@@ -31,7 +31,7 @@ EX namespace fake {
     if(WDIM == 2 && standard_tiling() && (PURE || BITRUNCATED)) return true;
     if(arcm::in() && PURE) return true;
     if(WDIM == 2) return false;
-    if(among(geometry, gRhombic3, gBitrunc3)) return false;
+    if(among(geometry, gBitrunc3)) return false;
     return euc::in() || reg3::in();
     }
   
@@ -108,6 +108,12 @@ EX namespace fake {
         else if(dist == u.crossf) cgi.adjcheck = cgi.crossf;
         else if(dist == u.hexhexdist) cgi.adjcheck = cgi.hexhexdist;
         else cgi.adjcheck = dist * scale;        
+        }
+      
+      else if(underlying == gBitrunc3) {
+        ld x = (d % 7 < 3) ? 1 : sqrt(3)/2;
+        x *= scale;
+        cgi.adjcheck = 2 * atanh(x);
         }
       
       return S1 * xpush(cgi.adjcheck) * S2;
@@ -326,15 +332,29 @@ EX ld compute_around(bool setup) {
   if(setup)
     cgi.adjcheck = 2 * hdist0(h);
 
-  hyperpoint u = Hypc;
-  u += fcs[0];
-  u += fcs[1];
+  hyperpoint h2 = rspintox(h) * xpush0(2 * hdist0(h));
   
+  auto kh= kleinize(h);
+  auto k0 = kleinize(fcs[0]);
+  auto k1 = kleinize(fcs[1]);
+  
+  auto vec = k1 - k0;
+  
+  // u = fcs[0] + vec * z
+
+  // (f1-u) | (vec-u) = 0
+  // (f1 - f0 + vec*z) | 
+  
+  // (vec | h2-vec*z)  == (vec | h2) - (vec | vec*z) == 0
+  
+  auto z = (vec|(kh-k0)) / (vec|vec);
+  
+  hyperpoint u = k0 + vec * z;
+
   if(material(u) <= 0) 
     return HUGE_VAL;
 
   u = normalize(u);
-  hyperpoint h2 = rspintox(h) * xpush0(2 * hdist0(h));
   
   h2 = spintox(u) * h2;
   u = spintox(u) * u;
@@ -344,7 +364,10 @@ EX ld compute_around(bool setup) {
 
   ld x = hypot(h2[1], h2[2]);
   ld y = h2[0];
-  return 360 / (90 + atan(y/x) / degree);
+  
+  ld ans = 360 / (90 + atan(y/x) / degree);
+  
+  return ans;
   }
 
 EX void generate() {
@@ -383,18 +406,34 @@ EX ld compute_euclidean() {
   if(arcm::in()) return arcm::current.N * 2 / arcm::current.euclidean_angle_sum;
   if(WDIM == 2) return 4 / (S7-2.) + 2;
 
+  if(underlying == gRhombic3) return 3;
+  if(underlying == gBitrunc3) return 2.55208;
   int middle = get_middle();
     
   return M_PI / asin(cos(M_PI/middle) / sin(M_PI/underlying_cgip->face));
   }
 
-EX int around_orig() {
+EX ld around_orig() {
   if(arcm::in())
     return arcm::current.N;
   if(WDIM == 2)
     return S3;
+  if(underlying == gRhombic3)
+    return 3;
+  if(underlying == gBitrunc3)
+    return 2.24259;
   return
-    underlying_cgip->loop;
+    geometry == gFake ? underlying_cgip->loop : cgi.loop;
+  }
+
+EX geometryinfo1 geometry_of_curvature(ld curvature, int dim) {
+  if(curvature == 0)
+    return WDIM == 3 ? giEuclid3 : giEuclid2;
+
+  if(curvature < 0)
+    return WDIM == 3 ? giHyperb3 : giHyperb2;
+    
+  return WDIM == 3 ? giSphere3 : giSphere2;
   }
 
 EX void compute_scale() {
@@ -410,21 +449,14 @@ EX void compute_scale() {
   multiple = false;
   int mcount = int(around / s3 + .5);
   multiple = abs(around - mcount * s3) < 1e-6;
-
-  if(around == good) {  
-    ginf[gFake].g = WDIM == 3 ? giEuclid3 : giEuclid2;
-    }
   
-  if(around > good) {
-    ginf[gFake].g = WDIM == 3 ? giHyperb3 : giHyperb2;
-    }
-
-  if(around < good) {
-    ginf[gFake].g = WDIM == 3 ? giSphere3 : giSphere2;
-    }
+  ginf[gFake].g = geometry_of_curvature(good - around, WDIM);
 
   geom3::apply_always3();
   ld around_ideal = 1/(1/2. - 1./get_middle());
+  
+  bool have_ideal = abs(around_ideal - around) < 1e-6;
+  if(underlying == gRhombic3 || underlying == gBitrunc3) have_ideal = false;
   
   if(arcm::in()) {
     ginf[gFake].tiling_name = "(" + ginf[gArchimedean].tiling_name + ")^" + fts(around / around_orig());
@@ -435,7 +467,7 @@ EX void compute_scale() {
     return;
     }
   else if(euclid) scale = 1;
-  else if(abs(around_ideal - around) < 1e-6) {
+  else if(have_ideal) {
     hyperpoint h0 = underlying_cgip->cellshape[0];
     auto s = kleinize(h0);
     ld d = hypot_d(LDIM, s);
@@ -463,8 +495,14 @@ EX void compute_scale() {
         else minscale = scale;
         }
       }
-    }  
-
+    
+    /* ultra a bit earlier */    
+    if(underlying == gRhombic3 || underlying == gBitrunc3) {
+      auto fcs = befake(underlying_cgip->cellshape[0]);
+      set_flag(ginf[gFake].flags, qULTRA, material(fcs) < 0);
+      }
+    }
+  
   auto& u = underlying_cgip;
   ginf[gFake].tiling_name = lalign(0, "{", u->face, ",", get_middle(), ",", around, "}");
   }
@@ -498,6 +536,7 @@ EX void change_around() {
   ld range = sightranges[geometry];
   
   if(!fake::in()) {
+    underlying = geometry;
     if(around == around_orig()) return; /* do nothing */
     set_gfake(around);
     }
@@ -511,12 +550,11 @@ EX void change_around() {
       cgi.prepare_basics();
     }
 
-  println(hlog, "scale = ", t, " -> ", scale, " range = ", range);
   t = scale / t;
-//  println(hlog, "t = ", t, " h distance = ", hypot_d(3, h), " for ", h);
   h *= t;
   View = rgpushxto0(direct_exp(h)) * T;
   fixmatrix(View);
+  
   sightranges[gFake] = range * t;
   #if CAP_TEXTURE
   texture::config.remap();
