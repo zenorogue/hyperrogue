@@ -1239,7 +1239,7 @@ EX hyperpoint inverse_exp(const hyperpoint h, flagtype prec IS(pNORMAL)) {
   if(sl2) return slr::get_inverse_exp(h);
   if(prod) return product::inverse_exp(h);
   ld d = acos_auto_clamp(h[GDIM]);
-  hyperpoint v;
+  hyperpoint v = Hypc;
   if(d && sin_auto(d)) for(int i=0; i<GDIM; i++) v[i] = h[i] * d / sin_auto(d);
   v[3] = 0;
   return v;
