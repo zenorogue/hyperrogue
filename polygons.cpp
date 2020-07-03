@@ -222,7 +222,7 @@ void geometry_information::bshape(hpcshape& sh, PPR prio, double shzoom, int sha
   while(polydata[whereis + 2*qty] != NEWSHAPE) qty++;
   double shzoomx = shzoom;
   double shzoomy = shzoom;
-  if(shzoom == WOLF) shzoomx = 1.5 * (!BITRUNCATED && !arcm::in() ? scalefactor : 1), shzoomy = 1.6 * (!BITRUNCATED && !arcm::in() ? scalefactor : 1);
+  if(shzoom == WOLF) shzoomx = 1.5 * scalefactor, shzoomy = 1.6 * scalefactor;
   if(&sh == &cgi.shPikeBody) shzoomx *= 1.1, shzoomy *= 1.5;
   if(&sh == &cgi.shPikeEye) shzoomx *= 1.1, shzoomy *= 1.5;
   int rots2 = rots;
@@ -527,9 +527,9 @@ void geometry_information::procedural_shapes() {
     }
 
   bshape(shEgg, PPR::ITEM);
-
+  
   RING(i)
-    hpcpush(hpxy(sin(i*2*M_PI/S84)*.15, cos(i*2*M_PI/S84)*.11));
+    hpcpush(hpxy(sin(i*2*M_PI/S84)*0.242 * orbsize, cos(i*2*M_PI/S84)*0.177*orbsize));
 
   bshape(shRing, PPR::ITEM);
   RING(i)
