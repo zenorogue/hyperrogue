@@ -2080,7 +2080,9 @@ void celldrawer::draw_wall_full() {
     #if MAXMDIM >= 4
     // draw the ceiling
     if(WDIM == 2 && GDIM == 3) {
+      #if CAP_GL
       draw_ceiling();
+      #endif
 
       int rd = rosedist(c);
       if(rd) {
