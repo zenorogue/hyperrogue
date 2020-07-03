@@ -18,6 +18,8 @@ EX namespace fake {
   EX hrmap *pmap;
   EX geometry_information *pcgip;
   EX eGeometry actual_geometry;
+
+  EX int ordered_mode = 0;
   
   EX bool in() { return geometry == gFake; }
   
@@ -32,6 +34,8 @@ EX namespace fake {
     if(among(geometry, gRhombic3, gBitrunc3)) return false;
     return euc::in() || reg3::in();
     }
+  
+  map<cell*, ld> random_order;
 
   // a dummy map that does nothing
   struct hrmap_fake : hrmap {
@@ -183,15 +187,68 @@ EX namespace fake {
         return;
         }
       
-      dq::visited_c.clear();
-      dq::visited_by_matrix.clear();
-      auto enqueue = (multiple && multiple_special_draw ? dq::enqueue_by_matrix_c : dq::enqueue_c);
-      enqueue(centerover, cview());
+      dq::clear_all();
       
       int id = 0;
       int limit = 100 * pow(1.2, sightrange_bonus);
       if(WDIM == 3 || vid.use_smart_range) 
         limit = INT_MAX;
+        
+      if(ordered_mode && !(multiple && multiple_special_draw)) {
+        using pct = pair<cell*, transmatrix>;
+        auto comparer = [] (pct& a1, pct& a2) { 
+          if(ordered_mode > 2) {
+            auto val = [] (pct& a) {
+              if(!random_order.count(a.first))
+                random_order[a.first] = randd() * 2;
+              return random_order[a.first] + hdist0(tC0(a.second));
+              };
+            return val(a1) > val(a2);
+            }
+          return a1.second[LDIM][LDIM] > a2.second[LDIM][LDIM]; 
+          };
+        std::priority_queue<pct, std::vector<pct>, decltype(comparer)> myqueue(comparer);
+        
+        auto enq = [&] (cell *c, const transmatrix& V) {
+          if(!c) return;
+          if(ordered_mode == 1 || ordered_mode == 3) {
+            if(dq::visited_c.count(c)) return;
+            dq::visited_c.insert(c);
+            }
+          myqueue.emplace(c, V);          
+          };
+
+        enq(centerover, cview());
+
+        while(!myqueue.empty()) {
+          auto& p = myqueue.top();
+          id++;
+          cell *c = get<0>(p);
+          transmatrix V = get<1>(p);
+          myqueue.pop();
+          
+          if(ordered_mode == 2 || ordered_mode == 4) {
+            if(dq::visited_c.count(c)) continue;
+            dq::visited_c.insert(c);
+            }
+
+          if(!do_draw(c, V)) continue;
+          drawcell(c, V);
+
+          if(in_wallopt() && isWall3(c) && isize(dq::drawqueue_c) > 1000) continue;
+
+          if(id > limit) continue;
+    
+          for(int i=0; i<c->type; i++) if(c->move(i)) {
+            enq(c->move(i), V * adj(c, i));
+            }
+          }
+        
+        return;
+        }
+
+      auto enqueue = (multiple && multiple_special_draw ? dq::enqueue_by_matrix_c : dq::enqueue_c);
+      enqueue(centerover, cview());      
       
       while(!dq::drawqueue_c.empty()) {
         auto& p = dq::drawqueue_c.front();
@@ -508,6 +565,10 @@ EX void configure() {
     dialog::addBoolItem_action("draw all if multiple of original", multiple_special_draw, 'M');
     dialog::addBoolItem_action("draw copies (2D only)", recursive_draw, 'C');
 
+    dialog::addBoolItem_choice("unordered", ordered_mode, 0, 'U');
+    dialog::addBoolItem_choice("pre-ordered", ordered_mode, 1, 'P');
+    dialog::addBoolItem_choice("post-ordered", ordered_mode, 2, 'Q');
+
     };
   }
   
@@ -518,6 +579,9 @@ int readArgs() {
   else if(argis("-gfake")) {
     start_game();
     shift_arg_formula(around, change_around);
+    }
+  else if(argis("-gfake-order")) {
+    shift(); ordered_mode = argi();
     }
   else return 1;
   return 0;
