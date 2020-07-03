@@ -1116,6 +1116,7 @@ EX namespace s2xe {
       }
     }
   
+#if CAP_GL
 void draw_s2xe(dqi_poly *p) {
   if(!p->cnt) return;
   if(p->flags & POLY_TRIANGLES) {
@@ -1157,6 +1158,7 @@ void draw_s2xe(dqi_poly *p) {
     }
   else draw_s2xe0(p);
   }
+#endif
 
 struct point_data {
   hyperpoint direction;
@@ -1165,6 +1167,7 @@ struct point_data {
   int bad;
   };
 
+#if CAP_GL
 void draw_s2xe0(dqi_poly *p) {
   if(!p->cnt) return;
   dqi_poly npoly = *p;
@@ -1244,6 +1247,7 @@ void draw_s2xe0(dqi_poly *p) {
     npoly.gldraw();
     }
   }
+#endif
 EX }
 
 EX namespace ods {

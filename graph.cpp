@@ -4884,7 +4884,7 @@ EX void drawfullmap() {
   draw_boundary(1);
   
   draw_model_elements();
-  #if MAXMDIM >= 4
+  #if MAXMDIM >= 4 && CAP_GL
   prepare_sky();
   #endif
   #endif

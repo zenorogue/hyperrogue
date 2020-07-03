@@ -220,6 +220,7 @@ void setcameraangle(bool b) { }
 EX void reset_projection() { }
 EX void glflush() { }
 EX bool model_needs_depth() { return false; }
+void display_data::set_all(int ed) {}
 #endif
 
 #if CAP_GL

@@ -1141,7 +1141,7 @@ void geometry_information::configure_floorshapes() {
 void geometry_information::prepare_shapes() {
   require_basics();
   if(cgflags & qRAYONLY) return;
-  #if MAXMDIM >= 4
+  #if MAXMDIM >= 4 && CAP_GL
   if(GDIM == 3 && !floor_textures) make_floor_textures();
   #endif
 

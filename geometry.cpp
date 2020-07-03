@@ -1084,7 +1084,7 @@ EX void check_cgi() {
     floor_textures = NULL;
     }
   
-  #if MAXMDIM >= 4
+  #if MAXMDIM >= 4 && CAP_GL
   if(!floor_textures && GDIM == 3 && (cgi.state & 2)) 
     make_floor_textures();
   #endif

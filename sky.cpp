@@ -2,8 +2,8 @@
 
 namespace hr {
 
-#if MAXMDIM >= 4 && CAP_GL
 EX ld camera_level;
+#if MAXMDIM >= 4 && CAP_GL
 
 EX int get_skybrightness(int mul IS(1)) {
   ld s = 1 - mul * (camera_level - cgi.WALL) / -2;
