@@ -1349,7 +1349,15 @@ EX bool reg3_rule_available = true;
 EX bool in_rule() {
   return reg3_rule_available && among(geometry, gSpace534, gSpace435, gSpace535, gSpace353);
   }
-  
+
+EX int rule_get_root(int i) {
+  return ((hrmap_reg3_rule*)currentmap)->root[i];
+  }
+
+EX const vector<short>& rule_get_children() {
+  return ((hrmap_reg3_rule*)currentmap)->children;
+  }
+
 EX hrmap* new_map() {
   if(geometry == gSeifertCover) return new seifert_weber::hrmap_seifert_cover;
   if(geometry == gSeifertWeber) return new seifert_weber::hrmap_singlecell(108*degree);
