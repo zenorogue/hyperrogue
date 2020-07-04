@@ -3,7 +3,7 @@ services:
   - docker
 matrix:
   include:
-  - os: linux
+  - os: linux                           # Linux GCC, autotools
     compiler: gcc
     env: >-
       TRAVIS_OS_NAME=linux
@@ -11,7 +11,7 @@ matrix:
       TRAVIS_BUILD_SYSTEM=autotools
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=1
-  - os: osx
+  - os: osx                             # OSX, autotools
     compiler: clang
     env: >-
       TRAVIS_OS_NAME=osx
@@ -19,7 +19,7 @@ matrix:
       TRAVIS_BUILD_SYSTEM=autotools
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=1
-  - os: linux
+  - os: linux                           # Linux GCC, make
     compiler: gcc
     env: >-
       TRAVIS_OS_NAME=linux
@@ -27,15 +27,15 @@ matrix:
       TRAVIS_BUILD_SYSTEM=Makefile
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=1
-  - os: linux
-    compiler: clang
+  - os: linux                           # Linux GCC, make, no libpng
+    compiler: gcc
     env: >-
       TRAVIS_OS_NAME=linux
-      TRAVIS_COMPILER_NAME=clang
+      TRAVIS_COMPILER_NAME=gcc
       TRAVIS_BUILD_SYSTEM=Makefile
       HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
-  - os: linux
+      HYPERROGUE_USE_PNG=0
+  - os: linux                           # Linux GCC, make, Rogueviz
     dist: bionic
     compiler: gcc
     env: >-
@@ -45,7 +45,15 @@ matrix:
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=1
       HYPERROGUE_USE_ROGUEVIZ=1
-  - os: linux
+  - os: linux                           # Linux Clang, make
+    compiler: clang
+    env: >-
+      TRAVIS_OS_NAME=linux
+      TRAVIS_COMPILER_NAME=clang
+      TRAVIS_BUILD_SYSTEM=Makefile
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=1
+  - os: linux                           # Linux Clang, make, Rogueviz
     compiler: clang
     env: >-
       TRAVIS_OS_NAME=linux
@@ -54,7 +62,7 @@ matrix:
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=1
       HYPERROGUE_USE_ROGUEVIZ=1
-  - os: osx
+  - os: osx                             # OSX, make
     compiler: clang
     env: >-
       TRAVIS_OS_NAME=osx
@@ -62,64 +70,63 @@ matrix:
       TRAVIS_BUILD_SYSTEM=Makefile
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=1
-  - os: osx
+  - os: osx                             # OSX, make, no libpng
+    compiler: clang
+    env: >-
+      TRAVIS_OS_NAME=osx
+      TRAVIS_COMPILER_NAME=clang
+      TRAVIS_BUILD_SYSTEM=Makefile
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=0
+  - os: osx                             # OSX, make, Rogueviz
+    compiler: clang
+    env: >-
+      TRAVIS_OS_NAME=osx
+      TRAVIS_COMPILER_NAME=clang
+      TRAVIS_BUILD_SYSTEM=Makefile
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=1
+      HYPERROGUE_USE_ROGUEVIZ=1
+  - os: linux                           # Linux GCC, mymake
     compiler: gcc
     env: >-
-      TRAVIS_OS_NAME=osx
+      TRAVIS_OS_NAME=linux
       TRAVIS_COMPILER_NAME=gcc
-      TRAVIS_BUILD_SYSTEM=Makefile
+      TRAVIS_BUILD_SYSTEM=mymake
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=1
+  - os: linux                           # Linux GCC, mymake, Rogueviz
+    dist: bionic
+    compiler: gcc
+    env: >-
+      TRAVIS_OS_NAME=linux
+      TRAVIS_COMPILER_NAME=gcc
+      TRAVIS_BUILD_SYSTEM=mymake
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=1
       HYPERROGUE_USE_ROGUEVIZ=1
-  - os: osx
+  - os: osx                             # OSX, mymake
     compiler: clang
     env: >-
       TRAVIS_OS_NAME=osx
       TRAVIS_COMPILER_NAME=clang
-      TRAVIS_BUILD_SYSTEM=Makefile
+      TRAVIS_BUILD_SYSTEM=mymake
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=1
+  - os: osx                             # OSX, mymake, Rogueviz
+    compiler: clang
+    env: >-
+      TRAVIS_OS_NAME=osx
+      TRAVIS_COMPILER_NAME=clang
+      TRAVIS_BUILD_SYSTEM=mymake
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=1
       HYPERROGUE_USE_ROGUEVIZ=1
-  - os: linux
+  - os: linux                           # Emscripten
     env: >-
       TRAVIS_OS_NAME=linux
       TRAVIS_COMPILER_NAME=emscripten
       TRAVIS_BUILD_SYSTEM=emscripten
-  - os: osx
-    compiler: clang
-    env: >-
-      TRAVIS_OS_NAME=osx
-      TRAVIS_COMPILER_NAME=clang
-      TRAVIS_BUILD_SYSTEM=mymake
-      HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
-  - os: osx
-    compiler: clang
-    env: >-
-      TRAVIS_OS_NAME=osx
-      TRAVIS_COMPILER_NAME=clang
-      TRAVIS_BUILD_SYSTEM=mymake
-      HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
-      HYPERROGUE_USE_ROGUEVIZ=1
-  - os: linux
-    compiler: gcc
-    env: >-
-      TRAVIS_OS_NAME=linux
-      TRAVIS_COMPILER_NAME=gcc
-      TRAVIS_BUILD_SYSTEM=mymake
-      HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
-  - os: linux
-    dist: bionic
-    compiler: gcc
-    env: >-
-      TRAVIS_OS_NAME=linux
-      TRAVIS_COMPILER_NAME=gcc
-      TRAVIS_BUILD_SYSTEM=mymake
-      HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
-      HYPERROGUE_USE_ROGUEVIZ=1
 
 before_install:
 - |-
