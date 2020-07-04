@@ -507,6 +507,15 @@ struct bignum {
     return digits[0] + digits[1] * (long long) BASE;
     }
   
+  #if CAP_GMP
+  mpq_class as_mpq() const {
+    string s = get_str(999999);
+    string t;
+    for(char c: s) if(c != ' ') t += c;
+    return mpq_class(t);
+    }
+  #endif
+  
   friend inline bignum operator +(bignum a, const bignum& b) { a.addmul(b, 1); return a; }
   friend inline bignum operator -(bignum a, const bignum& b) { a.addmul(b, -1); return a; }
   };

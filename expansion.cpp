@@ -30,7 +30,11 @@ struct expansion_analyzer {
   vector<vector<int> > children;  
   int rootid, diskid;
   int coefficients_known;
+  #if CAP_GMP
+  vector<mpq_class> coef;
+  #else
   vector<int> coef;
+  #endif
   int valid_from, tested_to;
   ld growth;
   
@@ -189,36 +193,61 @@ bignum& expansion_analyzer::get_descendants(int level, int type) {
 
 bool expansion_analyzer::verify(int id) {
   if(id < isize(coef)) return false;
+  #if CAP_GMP
+  mpq_class res = 0;
+  for(int t=0; t<isize(coef); t++)
+    res += coef[t] * get_descendants(id-t-1).as_mpq();
+  return res == get_descendants(id).as_mpq();
+  #else
   long long res = 0;
   for(int t=0; t<isize(coef); t++)
     res += coef[t] * get_descendants(id-t-1).approx_ll();
   return res == get_descendants(id).approx_ll();
+  #endif
   }
 
 int expansion_analyzer::valid(int v, int step) {
   if(step < 0) return 0;
-  if(get_descendants(step+v+v+5).approx_int() >= bignum::BASE) return 0;
-  ld matrix[100][128];
+  println(hlog, "try ", v, ", ", step);
+  int more = reg3::in_rule() ? 1 : 5;
+  #if CAP_GMP == 0
+  if(get_descendants(step+v+v+more).approx_int() >= bignum::BASE) return 0;
+  typedef ld val;
+  const val unit = 1;
+  #else
+  typedef mpq_class val;
+  const val unit = 1;
+  #endif
+  val matrix[100][128];
   for(int i=0; i<v; i++)
   for(int j=0; j<v+1; j++)
-    matrix[i][j] = get_descendants(step+i+j).approx();
-  
+    #if CAP_GMP == 0
+    matrix[i][j] = get_descendants(step+i+j).approx_ll();
+    #else
+    matrix[i][j] = get_descendants(step+i+j).as_mpq();
+    #endif
+
   for(int k=0; k<v; k++) {
     int nextrow = k;
+    #if CAP_GMP == 0
     while(nextrow < v && std::abs(matrix[nextrow][k]) < 1e-6)
       nextrow++;
+    #else
+    while(nextrow < v && matrix[nextrow][k] == 0)
+      nextrow++;
+    #endif
     if(nextrow == v) return 1;
     if(nextrow != k) {
       // printf("swap %d %d\n", k, nextrow);
       for(int l=0; l<=v; l++) swap(matrix[k][l], matrix[nextrow][l]);
       // display();
       }
-    ld divv = 1. / matrix[k][k];
+    val divv = unit / matrix[k][k];
     for(int k1=k; k1<=v; k1++) matrix[k][k1] *= divv;
     // printf("divide %d\n", k);
     // display();
     for(int k1=k+1; k1<v; k1++) if(matrix[k1][k] != 0) {
-      ld coef = -matrix[k1][k];
+      val coef = -matrix[k1][k];
       for(int k2=k; k2<=v; k2++) matrix[k1][k2] += matrix[k][k2] * coef;
       }
     // printf("zeros below %d\n", k);
@@ -230,11 +259,18 @@ int expansion_analyzer::valid(int v, int step) {
     if(matrix[l][k]) matrix[l][v] -= matrix[l][k] * matrix[k][v];
   
   coef.resize(v);
+  #if CAP_GMP
+  for(int i=0; i<v; i++) coef[i] = matrix[v-1-i][v];
+  #else
   for(int i=0; i<v; i++) coef[i] = int(floor(matrix[v-1-i][v] + .5));
+  #endif
     
-  for(int t=step+v; t<step+v+v+5; t++) if(!verify(t)) return 2;
-  tested_to = step+v+v+5;
-  while(tested_to < step+v+v+100 && get_descendants(tested_to).approx_ll() < bignum::BASE2) {
+  for(int t=step+v; t<step+v+v+more; t++) if(!verify(t)) return 2;
+  tested_to = step+v+v+more;
+  while(tested_to < step+v+v+100) {
+    #if !CAP_GMP
+    if(get_descendants(tested_to).approx_ll() >= bignum::BASE2) break;
+    #endif
     if(!verify(tested_to)) return 2;
     tested_to++;
     }
@@ -247,7 +283,7 @@ void expansion_analyzer::find_coefficients() {
   if(coefficients_known) return;
   if(!N) preliminary_grouping(), reduce_grouping();
   for(int v=1; v<25; v++) 
-  for(int step=0; step<1000; step++) { 
+  for(int step=0; step<3 * v; step++) { 
     int val = valid(v, step);
     if(val == 0) break;
     if(val == 3) { coefficients_known = 2; return; }
@@ -584,6 +620,29 @@ const int scrollspeed = 100;
 
 bool not_only_descendants = false;
 
+#if CAP_GMP
+string produce_coef_formula(vector<mpq_class> coef) {
+#else
+string produce_coef_formula(vector<int> coef) {
+#endif
+  string fmt = "a(d+" + its(isize(coef)) + ") = ";
+  bool first = true;
+  for(int i=0; i<isize(coef); i++) if(coef[i]) {
+    if(first && coef[i] == 1) ;
+    else if(first) fmt += its(coef[i]);
+    else if(coef[i] == 1) fmt += " + ";
+    else if(coef[i] == -1) fmt += " - ";
+    else if(coef[i] > 1) fmt += " + " + its(coef[i]);
+    else if(coef[i] < -1) fmt += " - " + its(-coef[i]);
+    fmt += "a(d";
+    if(i != isize(coef) - 1)
+      fmt += "+" + its(isize(coef) - 1 - i);
+    fmt += ")";
+    first = false;
+    }
+  return fmt;
+  }
+
 void expansion_analyzer::view_distances_dialog() {
   static int lastticks;
   if(scrolling_distances && !bounded) {
@@ -617,6 +676,7 @@ void expansion_analyzer::view_distances_dialog() {
       celllister cl(cwt.at, bounded ? maxlen-1 : gamerange(), 100000, NULL);
       for(cell *c: cl.lst) if((not_only_descendants || is_descendant(c)) && curr_dist(c) < maxlen) qty[curr_dist(c)]++;
       }
+    #if !CAP_GMP
     if(sizes_known() && !not_only_descendants) {
       find_coefficients();
       if(gamerange()+1 >= valid_from && coefficients_known == 2) {
@@ -626,6 +686,7 @@ void expansion_analyzer::view_distances_dialog() {
             }
         }
       }
+    #endif
     }
   
   dialog::addBreak(100 - 100 * scrolltime / scrollspeed);
@@ -645,21 +706,7 @@ void expansion_analyzer::view_distances_dialog() {
       
       find_coefficients();
       if(coefficients_known == 2) {
-        string fmt = "a(d+" + its(isize(coef)) + ") = ";
-        bool first = true;
-        for(int i=0; i<isize(coef); i++) if(coef[i]) {
-          if(first && coef[i] == 1) ;
-          else if(first) fmt += its(coef[i]);
-          else if(coef[i] == 1) fmt += " + ";
-          else if(coef[i] == -1) fmt += " - ";
-          else if(coef[i] > 1) fmt += " + " + its(coef[i]);
-          else if(coef[i] < -1) fmt += " - " + its(-coef[i]);
-          fmt += "a(d";
-          if(i != isize(coef) - 1)
-            fmt += "+" + its(isize(coef) - 1 - i);
-          fmt += ")";
-          first = false;
-          }
+        string fmt = produce_coef_formula(coef);
         fmt += " (d>" + its(valid_from-1) + ")";
         dialog::addHelp(fmt);
         }
@@ -705,14 +752,15 @@ void compute_coefficients() {
   start_game();
   
     printf("  sizes:");
-    for(int i=0; i<10; i++) printf(" %d", expansion.get_descendants(i).approx_int());
+    for(int i=0; i<expansion.valid_from+10; i++) printf(" %d", expansion.get_descendants(i).approx_int());
     
     printf("  N = %d\n", expansion.N);
 
   expansion.find_coefficients();      
   if(expansion.coefficients_known == 2) {
-    printf("  coefficients:"); for(int x: expansion.coef) printf(" %d", x);
-    printf(" (tested on %d to %d)\n", expansion.valid_from, expansion.tested_to);
+    println(hlog, "  coefficients:"); 
+    for(auto& x: expansion.coef) println(hlog, " ", x);
+    println(hlog, " (tested on %d to %d)\n", expansion.valid_from, expansion.tested_to);
     }
   }
 
@@ -760,8 +808,23 @@ int expansion_readArgs() {
     println(hlog, "growth = ", expansion.get_growth());
     expansion.find_coefficients();      
     if(expansion.coefficients_known == 2) {
-      printf("coefficients:"); for(int x: expansion.coef) printf(" %d", x);
-      printf(", valid from %d to %d\n", expansion.valid_from, expansion.tested_to);
+
+      println(hlog, "  sizes:");
+      for(int i=0; i<expansion.valid_from+10; i++) 
+        println(hlog, "[", i, "] = ", expansion.get_descendants(i).get_str(10000));
+
+      println(hlog, "  disks:");
+      for(int i=0; i<expansion.valid_from+10; i++) 
+        println(hlog, "[", i, "] = ", expansion.get_descendants(i, expansion.diskid).get_str(10000));
+      
+      vector<string> disks;
+      for(int i=0; i<expansion.valid_from+10; i++) 
+        disks.push_back(expansion.get_descendants(i, expansion.diskid).get_str(10000));      
+      println(hlog, "disks = ", disks);
+
+      println(hlog, "coefficients: ", expansion.coef); 
+      println(hlog, "i.e. ", produce_coef_formula(expansion.coef)); 
+      println(hlog, "coefficients tested from ", expansion.valid_from, " to ", expansion.tested_to);
       }
     }
   #if CAP_GP

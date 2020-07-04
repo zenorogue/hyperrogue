@@ -75,6 +75,10 @@
 #define CAP_ZLIB 1
 #endif
 
+#ifndef CAP_GMP
+#define CAP_GMP 0
+#endif
+
 #define CAP_FRAMELIMIT (!ISMOBWEB)
 
 #if ISMOBILE
@@ -456,6 +460,10 @@ typedef unsigned GLuint;
 
 #if CAP_ZLIB
 #include <zlib.h>
+#endif
+
+#if CAP_GMP
+#include <gmpxx.h>
 #endif
 
 #if CAP_THREAD

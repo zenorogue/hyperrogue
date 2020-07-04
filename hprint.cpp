@@ -417,6 +417,12 @@ EX string as_cstring(string o) {
 #endif
 #endif
 
+#if CAP_GMP
+EX string its(mpq_class x) { std::stringstream ss; ss << x; return ss.str(); }
+EX void print(hstream& hs, const mpq_class& x) {
+  std::stringstream ss; ss << x; print(hs, ss.str()); 
+  }
+#endif
 
 #if HDR
 template<class... T> string lalign(int len, T... t) {
