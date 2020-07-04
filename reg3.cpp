@@ -1069,6 +1069,7 @@ EX namespace reg3 {
     hrmap_reg3_rule() : fp(0) {
 
       if(S7 == 6) load_ruleset("honeycomb-rules-435.dat");
+      else if(S7 == 20) load_ruleset("honeycomb-rules-353.dat");
       else if(ginf[geometry].vertex == 5) load_ruleset("honeycomb-rules-535.dat");
       else load_ruleset("honeycomb-rules-534.dat");
       
@@ -1187,7 +1188,14 @@ EX namespace reg3 {
       
       int id1 = children[S7*id+d];
       int pos = otherpos[S7*id+d];
-      // println(hlog, "id=", id, " d=", d, " d2=", d2, " id1=", id1, " pos=", pos);
+      
+      if(id1 == -1 && false) {
+        int kk = pos;
+        string s;
+        while(other[kk] != ',') s += other[kk++];
+        println(hlog, "id=", id, " d=", d, " d2=", d2, " id1=", id1, " pos=", pos, " s = ", s);
+        }
+        
       if(id1 != -1) {
         res = tailored_alloc<heptagon> (S7);
         if(parent->c7)
@@ -1321,7 +1329,7 @@ EX void link_structures(heptagon *h, heptagon *alt, hstate firststate) {
 EX bool reg3_rule_available = true;
 
 EX bool in_rule() {
-  return reg3_rule_available && among(geometry, gSpace534, gSpace435, gSpace535);
+  return reg3_rule_available && among(geometry, gSpace534, gSpace435, gSpace535, gSpace353);
   }
   
 EX hrmap* new_map() {
