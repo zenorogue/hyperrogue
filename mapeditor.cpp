@@ -2349,13 +2349,13 @@ namespace mapeditor {
     #if CAP_TEXTURE
     bool intexture = texture::config.tstate == texture::tsActive;
     freedraw |= intexture;
-    #else
-    always_false intexture;
     #endif
 
     if(freedraw) {
-    
+
+#if CAP_TEXTURE    
       int tcolor = (dtcolor >> 8) | ((dtcolor & 0xFF) << 24);
+#endif
       
       if(uni == '-' && !clickused) {
         if(mousekey == 'e') {
