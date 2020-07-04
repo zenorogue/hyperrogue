@@ -103,13 +103,27 @@ template<class T, class U> vector<int> get_children_codes(cell *c, const T& dist
 void expansion_analyzer::preliminary_grouping() {
   samples.clear();
   codeid.clear();
-  children.clear();
-  sample_id(currentmap->gamestart());
-  // queue for, do not change to range-based for
-  for(int i=0; i<isize(samples); i++) 
-    children.push_back(get_children_codes(samples[i], celldist, [this] (cell *c) { return sample_id(c); }));
-  N = isize(samples);
-  rootid = 0;
+  children.clear();  
+  if(reg3::in_rule()) {
+    rootid = reg3::rule_get_root(0);
+    auto& chi = reg3::rule_get_children();
+    N = isize(chi) / S7;    
+    children.resize(N);
+    int k = 0;
+    for(int i=0; i<N; i++) for(int j=0; j<S7; j++) {
+      if(chi[k] >= 0)
+        children[i].push_back(chi[k]);
+      k++;
+      }
+    }
+  else {
+    sample_id(currentmap->gamestart());
+    // queue for, do not change to range-based for
+    for(int i=0; i<isize(samples); i++) 
+      children.push_back(get_children_codes(samples[i], celldist, [this] (cell *c) { return sample_id(c); }));
+    N = isize(samples);
+    rootid = 0;
+    }
   diskid = N;
   children.push_back(children[rootid]);
   children[diskid].push_back(diskid);
@@ -117,6 +131,7 @@ void expansion_analyzer::preliminary_grouping() {
   }
 
 void expansion_analyzer::reduce_grouping() {
+  if(reg3::in_rule()) return;
   int old_N = N;
   vector<int> grouping;
   grouping.resize(N);
@@ -362,7 +377,7 @@ int type_in_quick(expansion_analyzer& ea, cell *c, const cellfunction& f) {
   }
 
 EX bool sizes_known() {
-  if(GDIM == 3) return false;
+  if(reg3::in_rule()) return true;
   if(bounded) return false;
   // Castle Anthrax is infinite
   if(bt::in()) return false;
@@ -539,7 +554,19 @@ void celldrawer::do_viewdist() {
       break;
       }
     case ncType: {
-      int t = type_in_reduced(expansion, c, curr_dist);
+      int t = -1;
+      if(reg3::in_rule()) switch(distance_from) {
+        case dfPlayer: 
+          t = -1;
+          break;
+        case dfStart:
+          t = c->master->fiftyval;
+          break;
+        case dfWorld:
+          if(c->master->alt) t = c->master->alt->fiftyval;
+          break;
+        }
+      else t = type_in_reduced(expansion, c, curr_dist);
       if(t >= 0) label = its(t), dc = distribute_color(t);
       break;
       }
@@ -662,7 +689,13 @@ void expansion_analyzer::view_distances_dialog() {
   bool really_use_analyzer = use_analyzer && sizes_known();
   
   if(really_use_analyzer) {
-    int t = type_in_reduced(expansion, cwt.at, curr_dist);
+    int t;
+    if(reg3::in_rule()) {
+      if(!N) preliminary_grouping();      
+      t = rootid;
+      }
+    else 
+      t = type_in_reduced(expansion, cwt.at, curr_dist);
     for(int r=0; r<maxlen; r++)
       qty[r] = expansion.get_descendants(r, t);
     }
