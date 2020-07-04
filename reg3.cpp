@@ -27,6 +27,8 @@ EX namespace reg3 {
   inline short& altdist(heptagon *h) { return h->emeraldval; }
   #endif
   
+  EX int extra_verification;
+  
   EX bool ultra_mirror_on;
 
   EX bool ultra_mirror_in() { return (cgflags & qULTRA) && ultra_mirror_on; }
@@ -753,6 +755,20 @@ EX namespace reg3 {
       return quotient_map->allh[h->fieldval];
       }
 
+    void verify_neighbors(heptagon *alt, int steps, const hyperpoint& hT) {
+      ld err;
+      for(auto& p2: altmap[alt]) if((err = intval(tC0(p2.second), hT)) < 1e-3) {
+        println(hlog, "FAIL");
+        exit(3);
+        }
+      if(steps) { 
+        dynamicval<eGeometry> g(geometry, gBinary3);
+        dynamicval<hrmap*> cm(currentmap, binary_map);
+        for(int i=0; i<alt->type; i++)
+          verify_neighbors(alt->cmove(i), steps-1, currentmap->iadj(alt, i) * hT);
+        }
+      }
+
     heptagon *create_step(heptagon *parent, int d) override {
       auto& p1 = reg_gmatrix[parent];
       if(DEB) println(hlog, "creating step ", parent, ":", d, ", at ", p1.first, tC0(p1.second));
@@ -818,6 +834,8 @@ EX namespace reg3 {
           }
         return p2.first;
         }
+      
+      if(extra_verification) verify_neighbors(alt, extra_verification, hT);
       
       if(DEB) println(hlog, "-> not found");
       int d2 = 0, fv = isize(reg_gmatrix);
