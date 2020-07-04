@@ -7,10 +7,26 @@ Usage:
 ./hyper -geo 534h -gen-rule honeycomb-rules-534.dat -quit
 ./hyper -geo 535h -gen-rule honeycomb-rules-535.dat -quit
 ./hyper -geo 435h -gen-rule honeycomb-rules-435.dat -quit
+./hyper -geo 353h -gen-rule honeycomb-rules-353.dat -quit
 
 You need to change the value of XS7 to 6 (for 435) or 12 (for others)
 
 You also need to select 'fp used for rules' 
+
+This algorithm works as follows:
+
+- We use a DFS-like algorithm to identify all the required states. To tell whether two cells
+  c1 and c2 are in the same state, we compute its generate_ext_nei -- the same generate_ext_nei
+  is the same state. To compute generate_ext_nei(c), we list all cells vertex-adjacent to c,
+  and for each c' in this list, we compute FV(c')-FV(c), where dist is the distance from
+  some central tile. It is crucial to identify the directions in unique way (in 2D we can simply
+  use clockwise order, in 3D it is more difficult) -- we do this by using a regular pattern
+  (see get_id).
+  
+  After all states are identified, we construct the tree of states -- every non-root state is
+  attached to the first neighbor (according to the direction order) which has smaller FV.
+  For non-tree directions, we construct a path going through nodes with smaller values of FV --
+  this guarantees termination of the algorithm in amortized time O(1).
 
 */
 
@@ -21,15 +37,27 @@ namespace hr {
 
 map<string, map<string,int> > rules;
 
-#define XS7 12
+/** \brief S7 -- for efficiency this is a fixed constant */
+#define XS7 20
+
+/** \brief distance from the center */
 #define FV master->fiftyval
 
+/** \brief change i into a string containing a displayable character */
 auto dis = [] (int i, char init='a') { return s0 + char(init + i); };
 
+/** \brief we use a regular pattern to make sure that the directions are identified consistently.
+    In {5,3,5} we can just use the Seifert-Weber space for this identification; otherwise,
+    we use the field pattern. */
+    
 int get_id(cell *c) { 
   if(geometry == gSpace535) return 0;
   return c->master->fieldval;
   }
+
+/** \brief aux function for find_path which limits path length 
+ *  the rule is that we make some moves which decrease FV, then we make some moves which increase FV
+ */
 
 string find_path(cell *x, cell *y, int steps) {
   if(x->FV != y->FV) {
@@ -49,8 +77,51 @@ string find_path(cell *x, cell *y, int steps) {
   return "?";
   }
 
+/** \brief aux function for find_path which limits path length 
+ *  the rule is that we keep to a fixed FV-level (this works better in {x,x,3})
+ */
+
+string find_path_side(cell *x, cell *y, int steps) {
+  if(x->FV != y->FV) {
+    println(hlog, x, y, " steps=", steps, " d=", x->FV, " vs ", y->FV);
+    exit(3);
+    }
+  if(x == y) return "";
+  if(steps == 0) return "?";
+  for(int i=0; i<S7; i++)
+    if(x->move(i) && x->move(i)->FV == x->FV) {
+      string ch = find_path_side(x->move(i), y, steps-1);
+      if(ch == "?") continue;
+      return dis(i) + ch;
+      }
+  return "?";
+  }
+
+/** \brief find the sequence of moves we need to take to get from y to x (x and y must be the same fv-level)
+ *  return '?' if nothing found
+ */
+
 string find_path(cell *x, cell *y) {
   if(x == y) return "";
+
+  if(geometry == gSpace353) {
+    static int max_steps = -1;
+    
+    for(int steps=0; steps<5; steps++) {
+      string f = find_path_side(x, y, steps);
+      if(f != "?") {
+        if(steps > max_steps) {
+          println(hlog, "found a sidepath with ", max_steps = steps, " steps");
+          }
+        return f;
+        }
+      }
+    
+    if(max_steps < 10) {
+      max_steps = 10;
+      println(hlog, "failed to find_path_side");
+      }
+    }
   
   for(int steps=0;; steps++) {
     string f = find_path(x, y, steps);
@@ -60,21 +131,22 @@ string find_path(cell *x, cell *y) {
 
 vector<array<string, XS7>> rule_list;
 
+/** a map of all the cells vertex-adjacent to c */
 struct ext_nei_rules_t {
   vector<int> from, dir, original;
   };
 
+/** ext_nei_rules_t need to be created only once for each get_id */
 map<int, ext_nei_rules_t> ext_nei_rules;
 
-set<cell*> visi;
-
-void listnear(cell *c, ext_nei_rules_t& e, const transmatrix& T, int id) {
+/** aux recursive function of construct_rules */
+void listnear(cell *c, ext_nei_rules_t& e, const transmatrix& T, int id, set<cell*>& visi) {
   visi.insert(c);
   int a = 0, b = 0;
   for(int i=0; i<S7; i++) {
     bool ok = false;
     transmatrix U = T * currentmap->adj(c, i);
-    for(auto v: reg3::vertices_only) for(auto w: reg3::vertices_only)
+    for(auto v: cgi.vertices_only) for(auto w: cgi.vertices_only)
       if(hdist(v, U*w) < 1e-3) ok = true;
     if(!ok) continue;
     cell *c1 = c->cmove(i);
@@ -85,22 +157,24 @@ void listnear(cell *c, ext_nei_rules_t& e, const transmatrix& T, int id) {
     e.original.push_back(!visi.count(c1));
     if(e.original.back()) {
       b++;
-      listnear(c1, e, U, id1);
+      listnear(c1, e, U, id1, visi);
       }
     }
   }
 
+/** \brief create ext_nei_rules_t for the given c */
 void construct_rules(cell *c, ext_nei_rules_t& e) {
-  visi.clear();
   e.from = {-1};
   e.dir = {-1};
   e.original = {1};
-  listnear(c, e, Id, 0);
+  set<cell*> visi;
+  listnear(c, e, Id, 0, visi);
   int orgc = 0;
   for(auto i: e.original) orgc += i;
   println(hlog, "id ", get_id(c), " list length = ", isize(e.original), " original = ", orgc);
   }
 
+/** \brief we learn that a and b are connected -- make sure that their FV's match */
 void fix_dist(cell *a, cell *b) {
   if(a->FV > b->FV+1) {
     a->FV = b->FV+1;
@@ -111,6 +185,8 @@ void fix_dist(cell *a, cell *b) {
     forCellEx(c, b) fix_dist(b, c);
     }  
   }
+
+/** \brief compute ext_nei_rules_t for the given cell, and make it into a string form; also do fix_dist */
 
 string generate_ext_nei(cell *c) {
   int fv = get_id(c);
@@ -128,15 +204,23 @@ string generate_ext_nei(cell *c) {
   return its(fv) + ":" + res;
   }
 
+/** cells become 'candidates' before their generate_ext_nei is checked in order to let them become states */
 set<cell*> candidates;
 vector<cell*> candidates_list;
+
+/** the state ID for a given string returned by generate_ext_nei */
 map<string, int> id_of;
+
+/** cell representing the given state ID */
 vector<cell*> rep_of;
 
+/** current number of states */
 int number_states = 0;
 
+/** \brief for state s, child_rules[s][i] is -1 if i-th neighbor not a child; otherwise, the state index of that neighbor */
 vector<array<int, XS7> > child_rules;
 
+/** \brief if child_rules[s][i] is -1, the rules to get to that neighbor */
 vector<array<string, XS7> > side_rules;
 
 void add_candidate(cell *c) {
@@ -145,6 +229,7 @@ void add_candidate(cell *c) {
   candidates_list.push_back(c);
   }
 
+/** the main function */
 void test_canonical(string fname) {
   if(S7 != XS7) { println(hlog, "fix XS7=", S7); exit(4); }
   stop_game();
@@ -155,23 +240,27 @@ void test_canonical(string fname) {
   
   vector<cell*> c0;
   
+  /* we start from a 'center' in every get_id-type */
   if(geometry == gSpace535) {
     c0.resize(qc, cwt.at);
     }
   else {
     for(int fv=0; fv<qc; fv++) {
       cell *c = cwt.at;
-      for(int i=0; i<100 || c->master->fieldval != fv; i++) c = c->cmove(hrand(S7));
+      /* 100 to ensure that the FV-spheres around candidates do not interact */
+      for(int i=0; i<100 || get_id(c) != fv; i++) c = c->cmove(hrand(S7));
       c->FV = 0;
       c0.push_back(c);
       }
     }
 
   for(cell* c: c0) add_candidate(c);
-  
+
   array<int, XS7> empty;
   for(auto& e: empty) e = -1;
   println(hlog, "empty = ", empty);
+  
+  /** generate candidate_list using a BFS-like algorithm, starting from c0 */
   
   for(int i=0; i<isize(candidates_list); i++) {
     cell *c = candidates_list[i];
@@ -187,10 +276,17 @@ void test_canonical(string fname) {
   child_rules.resize(number_states, empty);
   
   println(hlog, "found ", its(number_states), " states");
-  fflush(stdout);
+  
+  /** generate child_rules */
 
   for(int i=0; i<number_states; i++) {
     cell *c = rep_of[i];
+
+    string st = generate_ext_nei(c);
+    if(!id_of.count(st) || id_of[st] != i) {
+      println(hlog, "error: ext_nei changed");
+      }
+
     for(int a=0; a<S7; a++) {
       cell *c1 = c->move(a);
       if(c1->FV <= c->FV) continue;
@@ -198,17 +294,23 @@ void test_canonical(string fname) {
         cell *c2 = c1->move(b);
         if(c2->FV != c->FV) continue;
         if(c2 == c) {
-          child_rules[i][a] = id_of[generate_ext_nei(c1)];
+          string st = generate_ext_nei(c1);
+          if(!id_of.count(st)) {
+            println(hlog, "error: new state generated while generating child_rules");
+            }
+          child_rules[i][a] = id_of[st];
           }
         break;
         }
       continue;
       }
     }
-  
-  if(true) {
 
-    println(hlog, "original rules: ", child_rules);
+  if(true) {
+  
+    /* minimize the automaton */
+
+    // println(hlog, "original rules: ", child_rules);
     fflush(stdout);
 
     vector<int> ih(number_states, 0);
@@ -227,14 +329,14 @@ void test_canonical(string fname) {
         }
       int qids = 0;
       for(auto hash: found) ids[hash] = qids++;
-      println(hlog, "qids = ", qids);
+      println(hlog, "minimization step: ", qids, " states");
       if(qids == lqids) break;
       lqids = qids;
       for(int i=0; i<number_states; i++)
         ih[i] = ids[v[i]];
       }
     
-    println(hlog, "lqids = ", lqids);
+    println(hlog, "reduced states to = ", lqids);
     vector<array<int, XS7> > new_child_rules;
     new_child_rules.resize(lqids, empty);  
     for(int i=0; i<number_states; i++) {
@@ -251,14 +353,16 @@ void test_canonical(string fname) {
     fflush(stdout);
     }
 
-  for(auto& a: child_rules) for(auto i:a) print(hlog, i, ",");
+  // for(auto& a: child_rules) for(auto i:a) print(hlog, i, ",");
   println(hlog);
   
+  /* generate side rules */
   side_rules.resize(number_states);
 
   for(int i=0; i<isize(candidates_list); i++) {
     cell *c = candidates_list[i];
     string s = generate_ext_nei(c);
+    if(!id_of.count(s)) println(hlog, "error: MISSING");
     int id = id_of[s];
     
     cell *cpar = nullptr;
@@ -305,7 +409,7 @@ void test_canonical(string fname) {
         cell *r = rep_of[id];
         println(hlog, r, " at ", r->FV);
         cell *r1 = r->move(a);
-        if(!r1) { println(hlog, "r1 missing"); continue; }
+        if(!r1) { println(hlog, "error: r1 missing"); continue; }
         println(hlog, r1, " at ", r1->FV);
         for(int a=0; a<S7; a++) if(r1->move(a)) println(hlog, a, ":", r1->move(a), " at ", r1->move(a)->FV);
         fflush(stdout);
@@ -326,7 +430,7 @@ void test_canonical(string fname) {
       auto& sr = side_rules[id][a];
       
       if(sr != "" && sr != solu) {
-        println(hlog, "conflict: ", solu, " vs ", sr);
+        println(hlog, "conflict: ", solu, " vs ", sr, " FV = ", c->FV, " vs ", c1->FV);
         if(isize(sr) < isize(solu)) continue;
         }
 
@@ -335,8 +439,8 @@ void test_canonical(string fname) {
       continue;
       }
     }
-  
-  println(hlog, side_rules);
+
+  // println(hlog, side_rules);
   
   string side_data;
   for(auto& a: side_rules) for(auto&b :a) if(b != "") side_data += b + ",";
