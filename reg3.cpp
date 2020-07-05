@@ -1714,6 +1714,7 @@ EX }
 #if MAXMDIM == 3
 EX namespace reg3 {
 EX bool in() { return false; }
+EX bool in_rule() { return false; }
 EX }
 #endif
 
