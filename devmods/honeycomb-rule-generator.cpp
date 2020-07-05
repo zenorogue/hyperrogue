@@ -18,7 +18,7 @@ This algorithm works as follows:
 - We use a DFS-like algorithm to identify all the required states. To tell whether two cells
   c1 and c2 are in the same state, we compute its generate_ext_nei -- the same generate_ext_nei
   is the same state. To compute generate_ext_nei(c), we list all cells vertex-adjacent to c,
-  and for each c' in this list, we compute FV(c')-FV(c), where dist is the distance from
+  and for each c' in this list, we compute FV(c')-FV(c), where FV is the distance from
   some central tile. It is crucial to identify the directions in unique way (in 2D we can simply
   use clockwise order, in 3D it is more difficult) -- we do this by using a regular pattern
   (see get_id).
