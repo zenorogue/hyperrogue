@@ -105,6 +105,7 @@ void expansion_analyzer::preliminary_grouping() {
   codeid.clear();
   children.clear();  
   if(reg3::in_rule()) {
+#if MAXMDIM >= 4
     rootid = reg3::rule_get_root(0);
     auto& chi = reg3::rule_get_children();
     N = isize(chi) / S7;    
@@ -115,6 +116,7 @@ void expansion_analyzer::preliminary_grouping() {
         children[i].push_back(chi[k]);
       k++;
       }
+#endif
     }
   else {
     sample_id(currentmap->gamestart());
