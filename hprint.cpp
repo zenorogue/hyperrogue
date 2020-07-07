@@ -44,7 +44,7 @@ EX string fts(ld x, int prec IS(6)) {
   return ss.str();
   }
 
-map<void*, int> pointer_indices;
+EX map<void*, int> pointer_indices;
 
 EX string index_pointer(void *v) {
   if(v == nullptr) return "0";
