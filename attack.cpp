@@ -319,6 +319,7 @@ EX void spill(cell* c, eWall t, int rad) {
 
 EX void degradeDemons() {
   addMessage(XLAT("You feel more experienced in demon fighting!"));
+  playSound(cwt.at, "levelup");  
   int dcs = isize(dcal);
   for(int i=0; i<dcs; i++) {
     cell *c = dcal[i];
@@ -428,7 +429,10 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     c->hitpoints = 0;
     c->stuntime = 1;
     cell *head = kraken::head(c);
-    if(kraken::totalhp(head) == 0) kraken::kill(head, who);
+    if(kraken::totalhp(head) == 0) {
+      kraken::kill(head, who);
+      playSound(head, "die-kraken");
+      }
     return;
     }
   

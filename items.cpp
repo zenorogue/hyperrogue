@@ -251,6 +251,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
       if(ch == '*') playSound(c2, "pickup-gem");
       else if(ch == '$' || ch == 'x') playSound(c2, "pickup-gold");
       else if(ch == '%' || ch == ';') playSound(c2, "pickup-potion");
+      else if(c2->item == itApple) playSound(c2, "apple");
       else playSound(c2, "pickup-scroll");
       }
     }
@@ -460,6 +461,7 @@ EX void gainItem(eItem it) {
     gainItem(itElemental);
     gainItem(itElemental);
     addMessage(XLAT("You construct some Elemental Gems!", it) + itemcounter(items[itElemental]));
+    playSound(cwt.at, "elementalgem");
     }          
 
   if(it == itBounty) 
