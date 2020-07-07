@@ -1922,6 +1922,12 @@ void celldrawer::draw_cellstat() {
     queuestr(V, .5, label, 0xFF000000 + col);
     }
   #endif
+
+  if(debug_cellnames && pointer_indices.count(c)) {
+    shstream ss; print(ss, c);
+    queuestr(V, .5, ss.s, 0xFFFFFFFF);    
+    queuepoly(V * ddspin(c, 0), cgi.shAsymmetric, darkena(0x000000, 0, 0xC0));
+    }
   }
 
 void celldrawer::draw_wall_full() {

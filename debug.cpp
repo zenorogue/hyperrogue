@@ -11,6 +11,7 @@ namespace hr {
 EX int steplimit = 0;
 EX int cstep;
 EX bool buggyGeneration = false;
+EX bool debug_cellnames = false;
 
 EX vector<cell*> buggycells;
 
@@ -847,6 +848,9 @@ int read_cheat_args() {
   else if(argis("-fix")) {
     PHASE(1);
     fixseed = true; autocheat = true;
+    }
+  else if(argis("-cellnames")) {
+    cheat(); debug_cellnames = true;
     }
   else if(argis("-fixx")) {
     PHASE(1);
