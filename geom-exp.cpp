@@ -969,7 +969,7 @@ EX void showEuclideanMenu() {
     its(worldsize),
     '3');
   
-  if(WDIM == 2) dialog::add_action([] {
+  if(WDIM == 2 || reg3::in_rule()) dialog::add_action([] {
     if(!viewdists) { enable_viewdists(); pushScreen(viewdist_configure_dialog); }
     else if(viewdists) viewdists = false;
     });
