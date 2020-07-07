@@ -1036,11 +1036,17 @@ int read_geom_args() {
     }
   else if(argis("-to-fq")) {
     cgi.require_basics();
-    shift(); unsigned hash = arghex();
+    int p = 2;
+    shift();
+    if(args() == "p") {
+      shift(); p = argi();
+      shift(); 
+      }
+    unsigned hash = arghex();
     stop_game_and_switch_mode(rg::nothing);
     fieldpattern::field_from_current();
     set_geometry(gFieldQuotient);
-    for(int p=2;; p++) { currfp.Prime = p; currfp.force_hash = hash; if(!currfp.solve()) break; }
+    for(;; p++) { currfp.Prime = p; currfp.force_hash = hash; if(!currfp.solve()) break; }
     println(hlog, "set prime = ", currfp.Prime);
     }
   else if(argis("-cs")) {
