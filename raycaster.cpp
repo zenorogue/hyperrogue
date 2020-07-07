@@ -15,7 +15,7 @@ EX namespace ray {
 #if CAP_RAY
 
 /** texture IDs */
-GLuint txConnections = 0, txWallcolor = 0, txTextureMap = 0;
+GLuint txConnections = 0, txWallcolor = 0, txTextureMap = 0, txVolumetric = 0;
 
 EX bool in_use;
 EX bool comparison_mode;
@@ -101,7 +101,7 @@ EX bool requested() {
 struct raycaster : glhr::GLprogram {
   GLint uStart, uStartid, uM, uLength, uFovX, uFovY, uIPD, uShift;
   GLint uWallstart, uWallX, uWallY;
-  GLint tConnections, tWallcolor, tTextureMap;
+  GLint tConnections, tWallcolor, tTextureMap, tVolumetric;
   GLint uBinaryWidth, uPLevel, uLP, uStraighten, uReflectX, uReflectY;
   GLint uLinearSightRange, uExpStart, uExpDecay;
   GLint uBLevel;
@@ -143,6 +143,7 @@ raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     tConnections = glGetUniformLocation(_program, "tConnections");
     tWallcolor = glGetUniformLocation(_program, "tWallcolor");
     tTextureMap = glGetUniformLocation(_program, "tTextureMap");
+    tVolumetric = glGetUniformLocation(_program, "tVolumetric");
     
     uWallOffset = glGetUniformLocation(_program, "uWallOffset");
     uSides = glGetUniformLocation(_program, "uSides");
@@ -232,6 +233,7 @@ void enable_raycaster() {
     "uniform mediump vec2 uStartid;\n"
     "uniform mediump sampler2D tConnections;\n"
     "uniform mediump sampler2D tWallcolor;\n"
+    "uniform mediump sampler2D tVolumetric;\n"
     "uniform mediump sampler2D tTexture;\n"
     "uniform mediump sampler2D tTextureMap;\n"
     "uniform mediump vec4 uWallX["+rays+"];\n"
@@ -844,10 +846,21 @@ void enable_raycaster() {
           "}\n";
       }
     
-    fmain += "  go = go + dist;\n";
+    if(volumetric::on) fmain += 
+      "if(dist > 0. && go < " + to_glsl(hard_limit) + ") {\n"
+      "   if(dist > "+to_glsl(hard_limit)+" - go) dist = "+to_glsl(hard_limit)+" - go;\n"
+      "   mediump float d = uExpStart * exp(-go / uExpDecay);\n"
+      "   mediump vec4 col = texture2D(tVolumetric, cid);\n"
+      "   mediump float factor = col.w; col.w = 1.;\n"
+      "   mediump float frac = (1.-exp(-(factor + 1. / uExpDecay) * dist));\n"
+      "   col = frac * (col * d + uFogColor * (1.-d));\n"
+      "   gl_FragColor += left * col;\n"
+      "   }\n;";
+        
+    fmain += "  go = go + dist;\n";          
 
     fmain += "if(which == -1) continue;\n";
-        
+
     if(prod) fmain += "position.w = -zpos;\n";
     
     if(reg3::ultra_mirror_in()) fmain += 
@@ -874,8 +887,14 @@ void enable_raycaster() {
       "      col.xyz *= texture2D(tTexture, inface2).rgb;\n"
       "      }\n";
 
+    if(volumetric::on)
+      fmain += "    mediump float d = uExpStart * exp(-go / uExpDecay);\n";
+
+    else
+      fmain +=
+      "    mediump float d = max(1. - go / uLinearSightRange, uExpStart * exp(-go / uExpDecay));\n";
+    
     fmain +=
-      "    mediump float d = max(1. - go / uLinearSightRange, uExpStart * exp(-go / uExpDecay));\n"
       "    col.xyz = col.xyz * d + uFogColor.xyz * (1.-d);\n";
     
     if(nil) fmain +=
@@ -1231,9 +1250,19 @@ EX void cast() {
   vector<array<float, 4>> connections(length * rows);
   vector<array<float, 4>> wallcolor(length * rows);
   vector<array<float, 4>> texturemap(length * rows);
-
+  vector<array<float, 4>> volumetric(length * rows);
+  
   if(1) for(cell *c: lst) {
     int id = ids[c];
+    auto& vmap = volumetric::vmap;
+    if(volumetric::on && vmap.count(c) && (vmap[c] & 0xFF)) {
+      celldrawer dd;
+      dd.c = c;
+      dd.setcolors();
+      int u = (id/per_row*length) + (id%per_row * deg);
+      color_t vcolor = (dd.fcol << 8) | vmap[c];
+      volumetric[u] = glhr::acolor(vcolor);
+      }
     forCellIdEx(c1, i, c) { 
       int u = (id/per_row*length) + (id%per_row * deg) + i;
       if(!ids.count(c1)) {
@@ -1344,8 +1373,11 @@ EX void cast() {
   if(o->uBLevel != -1)
     glUniform1f(o->uBLevel, log(bt::expansion()) / 2);
   
-  glUniform1f(o->uLinearSightRange, sightranges[geometry]);
+  if(o->uLinearSightRange != -1)
+    glUniform1f(o->uLinearSightRange, sightranges[geometry]);
+
   glUniform1f(o->uExpDecay, exp_decay_current());
+  
   glUniform1f(o->uExpStart, exp_start);
 
 
@@ -1357,6 +1389,7 @@ EX void cast() {
   bind_array(wallcolor, o->tWallcolor, txWallcolor, 4);
   bind_array(connections, o->tConnections, txConnections, 3);
   bind_array(texturemap, o->tTextureMap, txTextureMap, 5);
+  if(volumetric::on) bind_array(volumetric, o->tVolumetric, txVolumetric, 6);
   
   auto cols = glhr::acolor(darkena(backcolor, 0, 0xFF));
   glUniform4f(o->uFogColor, cols[0], cols[1], cols[2], cols[3]);
@@ -1378,6 +1411,71 @@ EX void cast() {
   glDrawArrays(GL_TRIANGLES, 0, 6);
   GLERR("finish");
   }
+
+EX namespace volumetric {
+
+EX bool on;
+
+EX map<cell*, color_t> vmap;
+
+int intensity = 16;
+
+EX void enable() {
+  if(!on) {
+    on = true;
+    reset_raycaster();
+    }
+  }
+
+EX void random_fog() {
+  enable();
+  for(cell *c: currentmap->allcells())
+    vmap[c] = ((rand() % 0x1000000) << 8) | intensity;
+  }
+
+EX void menu() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);
+  dialog::init(XLAT("volumetric raycasting"));  
+
+  dialog::addBoolItem(XLAT("active"), on, 'a');
+  dialog::add_action([&] {
+    on = !on;
+    reset_raycaster();
+    });
+  
+  dialog::addSelItem(XLAT("intensity of random coloring"), its(intensity), 'i');
+  dialog::add_action([] { 
+    dialog::editNumber(intensity, 0, 255, 5, 15, "", "");
+    dialog::reaction = random_fog;
+    });
+
+  dialog::addItem(XLAT("color randomly"), 'r');
+  dialog::add_action(random_fog);
+
+  dialog::addColorItem("color cell under cursor", vmap.count(centerover) ? vmap[centerover] : 0, 'c');
+  dialog::add_action([&] {
+    enable();
+    dialog::openColorDialog(vmap[centerover]); 
+    dialog::dialogflags |= sm::SIDE;      
+    });
+
+  dialog::addColorItem("color cell under player", vmap.count(cwt.at) ? vmap[cwt.at] : 0, 'p');
+  dialog::add_action([&] {
+    enable();
+    dialog::openColorDialog(vmap[cwt.at]); 
+    dialog::dialogflags |= sm::SIDE;      
+    });
+  
+  dialog::addBreak(150);
+  dialog::addHelp("This fills all the cells with glowing fog, for cool visualizations");
+  dialog::addBreak(150);
+
+  dialog::addBack();
+  dialog::display();
+  }
+  
+EX }
 
 EX void configure() {
   cmode = sm::SIDE | sm::MAYDARK;
@@ -1448,7 +1546,10 @@ EX void configure() {
       dialog::reaction = reset_raycaster;
       });
     }
-  
+
+  dialog::addBoolItem(XLAT("volumetric raytracing"), volumetric::on, 'v');
+  dialog::add_action_push(volumetric::menu);
+
   dialog::addSelItem(XLAT("iterations"), its(max_iter_current()), 's');
   dialog::add_action([&] {
     dialog::editNumber(max_iter_current(), 0, 600, 1, 60, XLAT("iterations"), "in H3/H2xE/E3 this is the number of cell boundaries; in nonisotropic, the number of simulation steps");
