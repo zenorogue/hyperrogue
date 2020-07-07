@@ -477,6 +477,12 @@ auto fqhook =
   using namespace arg;
            
   if(0) ;
+  else if(argis("-extra-verification")) {
+    reg3::extra_verification++;
+    }
+  else if(argis("-no-rule")) {
+    reg3::reg3_rule_available = false;
+    }
   else if(argis("-gen-rule")) {
     shift(); test_canonical(args());
     }
