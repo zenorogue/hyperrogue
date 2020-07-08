@@ -849,12 +849,11 @@ void enable_raycaster() {
     if(volumetric::on) fmain += 
       "if(dist > 0. && go < " + to_glsl(hard_limit) + ") {\n"
       "   if(dist > "+to_glsl(hard_limit)+" - go) dist = "+to_glsl(hard_limit)+" - go;\n"
-      "   mediump float d = uExpStart * exp(-go / uExpDecay);\n"
       "   mediump vec4 col = texture2D(tVolumetric, cid);\n"
       "   mediump float factor = col.w; col.w = 1.;\n"
-      "   mediump float frac = (1.-exp(-(factor + 1. / uExpDecay) * dist));\n"
-      "   col = frac * (col * d + uFogColor * (1.-d));\n"
-      "   gl_FragColor += left * col;\n"
+      "   mediump float frac = exp(-(factor + 1. / uExpDecay) * dist);\n"
+      "   gl_FragColor += left * (1.-frac) * col;\n"
+      "   left *= frac;\n"
       "   }\n;";
         
     fmain += "  go = go + dist;\n";          
@@ -894,7 +893,7 @@ void enable_raycaster() {
       fmain +=
       "    mediump float d = max(1. - go / uLinearSightRange, uExpStart * exp(-go / uExpDecay));\n";
     
-    fmain +=
+    if(!volumetric::on) fmain +=
       "    col.xyz = col.xyz * d + uFogColor.xyz * (1.-d);\n";
     
     if(nil) fmain +=
@@ -1255,12 +1254,16 @@ EX void cast() {
   if(1) for(cell *c: lst) {
     int id = ids[c];
     auto& vmap = volumetric::vmap;
-    if(volumetric::on && vmap.count(c) && (vmap[c] & 0xFF)) {
+    if(volumetric::on) {
       celldrawer dd;
       dd.c = c;
       dd.setcolors();
       int u = (id/per_row*length) + (id%per_row * deg);
-      color_t vcolor = (dd.fcol << 8) | vmap[c];
+      color_t vcolor;
+      if(vmap.count(c))
+        vcolor = vmap[c];
+      else 
+        vcolor = (backcolor << 8);
       volumetric[u] = glhr::acolor(vcolor);
       }
     forCellIdEx(c1, i, c) { 
@@ -1392,7 +1395,8 @@ EX void cast() {
   if(volumetric::on) bind_array(volumetric, o->tVolumetric, txVolumetric, 6);
   
   auto cols = glhr::acolor(darkena(backcolor, 0, 0xFF));
-  glUniform4f(o->uFogColor, cols[0], cols[1], cols[2], cols[3]);
+  if(o->uFogColor != -1)
+    glUniform4f(o->uFogColor, cols[0], cols[1], cols[2], cols[3]);
   
   }
 
@@ -1637,6 +1641,16 @@ int readArgs() {
     PHASEFROM(2); shift();
     rays_generate = false;
     max_cells = argi();
+    }
+  else if(argis("-ray-random")) {
+    start_game();
+    shift(); volumetric::intensity = argi();
+    volumetric::random_fog();
+    }
+  else if(argis("-ray-cursor")) {
+    start_game();
+    volumetric::enable();
+    shift(); volumetric::vmap[centerover] = arghex();
     }
   else return 1;
   return 0;
