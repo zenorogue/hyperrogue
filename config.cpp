@@ -1079,7 +1079,7 @@ EX void showGraphConfig() {
       (vid.antialias & AA_MULTI) ? "multisampling" :
       "NO", 'O');
 
-  dialog::addSelItem(XLAT("vector graphics modes"), fts(vid.linewidth), 'w');
+  dialog::addSelItem(XLAT("vector graphics modes"), XLAT("width") + " " + fts(vid.linewidth), 'w');
   
   dialog::addSelItem(XLAT("line quality"), its(vid.linequality), 'L');
 
