@@ -225,7 +225,6 @@ bool expansion_analyzer::verify(int id) {
 
 int expansion_analyzer::valid(int v, int step) {
   if(step < 0) return 0;
-  println(hlog, "try ", v, ", ", step);
   int more = reg3::in_rule() ? 1 : 5;
   #if CAP_GMP == 0
   if(get_descendants(step+v+v+more).approx_int() >= bignum::BASE) return 0;
