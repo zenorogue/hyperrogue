@@ -1365,7 +1365,7 @@ EX void centerpc(ld aspd) {
     centerover = pc->base;
     transmatrix T = pc->at;
     int sl = snakelevel(cwt.at);
-    if(sl && WDIM == 2) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR);
+    if((sl || vid.eye) && WDIM == 2) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR + vid.eye);
     View = inverse(T);
     if(prod) NLP = inverse(pc->ori);
     if(WDIM == 2) rotate_view( cspin(0, 1, M_PI) * cspin(2, 1, M_PI/2 + shmup::playerturny[id]) * spin(-M_PI/2) );
