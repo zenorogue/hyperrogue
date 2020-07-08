@@ -832,12 +832,12 @@ EX bool crystal_cell(cell *c, transmatrix V) {
 
   if(!cryst) return false;
 
-  if(view_east && allowIncreasedSight()) {
+  if(view_east && cheater) {
     int d = dist_alt(c);
     queuestr(V, 0.3, its(d), 0xFFFFFF, 1);
     }
 
-  if(view_coordinates && WDIM == 2 && allowIncreasedSight()) {
+  if(view_coordinates && WDIM == 2 && cheater) {
     
     auto m = crystal_map();
     
