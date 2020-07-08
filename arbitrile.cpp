@@ -543,6 +543,12 @@ void connection_debugger() {
       });
     
     }    
+
+  dialog::addItem("undo", 'u');
+  dialog::add_action([] {
+    if(isize(debug_polys) > 1)
+      debug_polys.pop_back();
+    });
   
   dialog::addBack();
   dialog::display();
