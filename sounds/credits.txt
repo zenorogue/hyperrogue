@@ -67,6 +67,11 @@ pickup-mirror: https://www.freesound.org/people/wjl/sounds/267889/
 message-roar: https://www.freesound.org/people/JoelAudio/sounds/85568/
 opengate: https://www.freesound.org/people/Qat/sounds/107640/
 steamhiss: http://freesound.org/people/toiletrolltube/sounds/181488/
+frog1: https://freesound.org/people/AntumDeluge/sounds/417822/ [mutant-frog-2]
+frog2: https://freesound.org/people/AntumDeluge/sounds/417821/ [mutant-frog-1]
+frog3: https://freesound.org/people/katzlbt/sounds/361117/
+elementalgem: https://freesound.org/people/Varnsworth/sounds/425165/
+die-kraken: https://freesound.org/people/cylon8472/sounds/341173/
 
 from Freesounds, under the CC BY 3.0 license: 
 =============================================
@@ -82,6 +87,8 @@ closegate: https://www.freesound.org/people/JavierZumer/sounds/257233/
 message-troll: https://www.freesound.org/people/daalvinz/sounds/364216/
 hit-orbsword: https://www.freesound.org/people/Vicces1212/sounds/123765/
 bull: https://www.freesound.org/people/confusion_music/sounds/103425/
+apple: https://freesound.org/people/jgriffie919/sounds/400174/
+levelup: https://freesound.org/people/InspectorJ/sounds/411460/
 
 recorded by Tehora Rogue:
 =========================
@@ -118,13 +125,9 @@ Sounds yet missing, might be added soon:
 ========================================
 
 seen-avenger
-seen-leader
-seen-pyrocultist
 die-kraken
 die-dragon
 hit-vampire
-elementalgem
-levelup
 falldeath
 burndeath
 orb-safety
