@@ -362,7 +362,8 @@ EX bool makeflame(cell *c, int timeout, bool checkonly) {
     return false;
   else if(c->wall == waBoat) {
     if(isPlayerOn(c) && markOrb(itOrbWinter)) {
-      addMessage(XLAT("%the1 protects your boat!", itOrbWinter));
+      if(!checkonly) addMessage(XLAT("%the1 protects your boat!", itOrbWinter));
+      return true;
       }
     if(checkonly) return true;
     if(c->cpdist <= 7)
