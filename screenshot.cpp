@@ -1090,6 +1090,7 @@ EX ld rug_rotation1, rug_rotation2, ballangle_rotation, env_ocean, env_volcano;
 EX bool env_shmup;
 EX ld rug_angle;
 
+EX ld rotation_distance;
 cell *rotation_center;
 transmatrix rotation_center_View;
 
@@ -1217,6 +1218,7 @@ EX void apply() {
       break;
 
     case maRotation:
+      shift_view(ztangent(-rotation_distance));
       if(GDIM == 3) {
         rotate_view(spin(-movement_angle * degree));
         rotate_view(cspin(1, 2, normal_angle * degree));
@@ -1226,6 +1228,8 @@ EX void apply() {
         rotate_view(cspin(2, 1, normal_angle * degree));
         rotate_view(spin(movement_angle * degree));
         }
+      shift_view(ztangent(rotation_distance));
+      moved();
       break;
     
     case maTranslationRotation:
@@ -1570,6 +1574,11 @@ EX void show() {
           dialog::editNumber(movement_angle, 0, 360, 15, 0, XLAT("movement angle"), ""); 
           });
         dialog::addBreak(100);
+        dialog::addSelItem(XLAT("distance from rotation center"), fts(rotation_distance), 'r');
+        dialog::add_action([] () { 
+          dialog::editNumber(rotation_distance, 0, 10, .1, 0, XLAT("distance from rotation center"), ""); 
+          });
+        dialog::addBreak(100);
         }
       else
         dialog::addBreak(300);
@@ -1727,6 +1736,11 @@ int readArgs() {
       shift_arg_formula(movement_angle);
       shift_arg_formula(normal_angle);
       }
+    }
+  else if(argis("-animrotd")) {
+    start_game();
+    ma = maRotation;
+    shift_arg_formula(rotation_distance);
     }
   else if(argis("-animrug")) {
     shift_arg_formula(rug_rotation1);
