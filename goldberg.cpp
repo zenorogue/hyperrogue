@@ -1262,6 +1262,13 @@ EX namespace gp {
   EX hrmap* get_underlying_map() { return inv_map()->underlying_map; }
   EX cell* get_mapped(cell *c) { return inv_map()->get_mapped(c, 0); }
   EX int untruncated_shift(cell *c) { return inv_map()->shift[c]; }
+
+  EX void delete_mapped(cell *c) { 
+    if(!pmap) return;
+    auto i = (hrmap_inverse*) pmap;
+    if(i->mapping.count(c))
+      destroy_cell(i->mapping[c]);
+    }
   
   EX cell *inverse_move(cell *c, int d) { return inv_map()->create_move(c, d); }
 

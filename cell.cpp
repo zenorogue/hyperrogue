@@ -342,6 +342,7 @@ EX void clearcell(cell *c) {
     }
   DEBB(DF_MEMORY, (format("DEL %p\n", hr::voidp(c))));
   destroy_cell(c);
+  gp::delete_mapped(c);
   }
 
 EX heptagon deletion_marker;
