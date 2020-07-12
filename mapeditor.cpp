@@ -246,6 +246,8 @@ EX namespace mapeditor {
         return (new dtcircle)->load(hs);
       case 3:
         return (new dtfree)->load(hs);
+      case 4:
+        return (new dttext)->load(hs);
       default:
         return nullptr;
       }
