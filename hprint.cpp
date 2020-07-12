@@ -82,6 +82,8 @@ inline void hwrite(hstream& hs, const string& s) {
     hs.write_char((char)255);
     hs.write<int>(isize(s));
     }
+  else 
+    hs.write_char(isize(s));    
   for(char c: s) hs.write_char(c);
   }
 inline void hread(hstream& hs, string& s) {
