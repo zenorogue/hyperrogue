@@ -196,11 +196,7 @@ void addMessage(string s, char spamtype = 0);
 #define STDVAR (PURE || BITRUNCATED)
 #define NONSTDVAR (!STDVAR)
 
-#if CAP_ARCM
-#define VALENCE (BITRUNCATED ? 3 : arcm::in() ? arcm::valence() : S3)
-#else
-#define VALENCE (BITRUNCATED ? 3 : S3)
-#endif
+#define VALENCE current_valence()
 
 #define NUMWITCH 7
 

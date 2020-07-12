@@ -2397,7 +2397,7 @@ void celldrawer::add_map_effects() {
         }
       for(int u: {-1, 1}) {
         cellwalker cw = cellwalker(c, t) + wstep + u;
-        if(u == -1 && VALENCE == 4) continue;
+        if(u == -1 && valence() == 4) continue;
         cell *c2 = cw.peek();
         if(c2 && c2->ligon) {
           int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
