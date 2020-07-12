@@ -4018,3 +4018,19 @@ bugfixes:
 - throw an exception when file does not exist
 - improved shmup in fake/slided geometries
 - fixed texture remapping in fake curvature
+
+2020-07-08 16:36 Update 11.3q:
+- extra sound effects (frogs appearing, Kraken death, elemental gem, apple, demon levelup)
+- fixed 'disable texture' in rug levellines
+- an option to rotate not around the center in 3D
+- view coordinates no longer works outside of cheat mode
+- an option for volumetric raytracing (i.e. glowing fog visualization)
+- fixed the boat protection given by Orb of Winter
+- tes files: undo in connection debugger
+- eyelevel setting now works in the first-person shooter mode
+- expansion in reg3::in_rule() activable [test]
+- added efficient generation rules for 353
+- fixed the graphical sizes of wolves and orbs in some geometries
+- fake curvature in the rhombic honeycomb
+- ordered net creation in fake curvature
+- new 3D Euclidean quotient space: Hantzsche-Wendt (double cube) manifold
