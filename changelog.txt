@@ -4034,3 +4034,8 @@ bugfixes:
 - fake curvature in the rhombic honeycomb
 - ordered net creation in fake curvature
 - new 3D Euclidean quotient space: Hantzsche-Wendt (double cube) manifold
+
+2020-07-13 01:32 Update 11.3r:
+- inverse variation
+- redone some Guided Tour slides and possible crash
+- you can now add text in the Drawing Tool
