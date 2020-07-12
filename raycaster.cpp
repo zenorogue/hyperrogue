@@ -1442,6 +1442,14 @@ EX void menu() {
   gamescreen(0);
   dialog::init(XLAT("volumetric raycasting"));  
 
+  if(!cheater) {
+    dialog::addItem(XLAT("enable the cheat mode for additional options"), 'X');
+    dialog::add_action(enable_cheat);
+    dialog::addBack();
+    dialog::display();
+    return;
+    }
+  
   dialog::addBoolItem(XLAT("active"), on, 'a');
   dialog::add_action([&] {
     on = !on;
