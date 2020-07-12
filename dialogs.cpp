@@ -1259,6 +1259,10 @@ EX namespace dialog {
       }
     return false;
     }
+  
+  EX void add_action_confirmed(const reaction_t& act) {
+    dialog::add_action(dialog::add_confirmation(act));
+    }
 
   #if HDR
 
