@@ -828,20 +828,24 @@ EX namespace gp {
     if(style == 2) {
       dialog::addBoolItem(XLAT("inverse rectify"), UNRECTIFIED, 'r');
       dialog::add_action_confirmed([v0] {
+        param = univ_param();
         if(UNRECTIFIED) set_variation(v0);
         else set_variation(eVariation::unrectified);
         start_game();
+        config = human_representation(univ_param());
         });
       }
     else if(style == 3) {
       dialog::addBoolItem(XLAT("inverse truncate"), UNTRUNCATED, 't');
       dialog::add_action_confirmed([v0] {
+        param = univ_param();
         if(UNTRUNCATED) set_variation(v0);
         else set_variation(eVariation::untruncated);
         start_game();
         });
       dialog::addBoolItem(XLAT("warped version"), WARPED, 'w');
       dialog::add_action_confirmed([v0] {
+        param = univ_param();
         if(WARPED) set_variation(v0);
         else set_variation(eVariation::warped);
         start_game();
@@ -865,18 +869,22 @@ EX namespace gp {
           whirl_set(p * loc(1, 1));
           set_variation(eVariation::untruncated);
           start_game();
+          config = human_representation(univ_param());
           }
         else if(S3 == 4 && !UNRECTIFIED) {
           whirl_set(p * loc(1, 1));
           set_variation(eVariation::unrectified);
           start_game();
+          config = human_representation(univ_param());
           }
         else if(S3 == 3 && UNTRUNCATED) {
           println(hlog, "whirl_set to ", (p * loc(1,1)) / 3);
           whirl_set((p * loc(1,1)) / 3);
+          config = human_representation(univ_param());
           }
         else if(S3 == 4 && UNRECTIFIED) {
           whirl_set((p * loc(1,1)) / 2);
+          config = human_representation(univ_param());
           }
         });
       }
