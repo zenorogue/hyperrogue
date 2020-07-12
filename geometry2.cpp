@@ -649,8 +649,8 @@ EX hyperpoint farcorner(cell *c, int i, int which) {
   if(GOLDBERG) {
     cellwalker cw(c, i);
     cw += wstep;
-    if(!cw.mirrored) cw.spin += (which?-1:2);
-    else cw.spin += (which?2:-1);
+    if(!cw.mirrored) cw += (which?-1:2);
+    else cw += (which?2:-1);
     transmatrix cwm = currentmap->adj(c, i);
     auto li1 = gp::get_local_info(cw.at);
     return cwm * get_corner_position(li1, cw.spin);
