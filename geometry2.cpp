@@ -493,6 +493,11 @@ EX hyperpoint randomPointIn(int t) {
     }
   }
 
+/** /brief get the coordinates of the vertex of cell c indexed with cid
+ *  the two vertices c and c->move(cid) share are indexed cid and gmod(cid+1, c->type)
+ *  cf=3 is the vertex itself; larger values are closer to the center
+ */  
+
 EX hyperpoint get_corner_position(cell *c, int cid, ld cf IS(3)) {
   #if CAP_GP
   if(GOLDBERG) return gp::get_corner_position(c, cid, cf);
@@ -551,6 +556,8 @@ EX hyperpoint get_corner_position(cell *c, int cid, ld cf IS(3)) {
   }
 
 EX bool approx_nearcorner = false;
+
+/** /brief get the coordinates of the center of c->move(i) */
 
 EX hyperpoint nearcorner(cell *c, int i) {
   if(GOLDBERG) {
@@ -643,6 +650,10 @@ EX hyperpoint nearcorner(cell *c, int i) {
   double d = cellgfxdist(c, i);
   return ddspin(c, i) * xpush0(d);
   }
+
+/** /brief get the coordinates of the another vertex of c->move(i)
+ *  this is useful for tessellation remapping TODO COMMENT
+ */
 
 EX hyperpoint farcorner(cell *c, int i, int which) {
   #if CAP_GP
