@@ -518,7 +518,7 @@ EX slide default_slides[] = {
     },
   {bog+"Basics of gameplay", 11, LEGAL::ANY,
     "The game starts in the Icy Lands. Collect the Ice Diamonds "
-    "(press F1 if you do not know how to move). "
+    "(press F1 if you do not know how to move or the end goal). "
     "After you collect many of them, monsters will start to pose a challenge.\n"
     "As is typical in roguelikes and other games based on tactical skill rather "
     "than story, if you lose, you have to start a new one from the start. "
@@ -537,10 +537,25 @@ EX slide default_slides[] = {
       SHOWLAND( l == laIce );
       }
     }, 
-  {bog+"Hypersian Rug model", 21, LEGAL::HYPERBOLIC,
+  {bog+"Hyperbolic Soccerball", 23, LEGAL::ANY | USE_SLIDE_NAME, 
     "New players think that the action of HyperRogue takes place on a sphere. "
+    "This is not true -- in fact, just the opposite is true!\n\n"
+    "A sphere can be tiled with hexagons and pentagons (the classic soccer ball); "
+    "pentagons cause the world to close.\n\n"
+    "The world of HyperRogue is tiled with hexagons "
+    "and heptagons; heptagons give extra space!\n\n",
+    [] (presmode mode) {
+      setCanvas(mode, 'F');
+      if(mode == 5) {
+        cwt.at->move(0)->monst = moRunDog;
+        cwt.at->move(1)->monst = moGoblin;
+        }
+      SHOWLAND( l == laCanvas );
+      }
+    },
+  {bog+"Hypersian Rug model", 21, LEGAL::HYPERBOLIC,
 #if CAP_RUG
-    "This is not true -- the next slide will show the surface HyperRogue "
+    "The next slide will show the rendering of the surface HyperRogue "
     "actually takes place on.\n\n"
     "Use arrow keys to rotate the model, and Page Up/Down to zoom.\n\n"
     "If you do not see anything, press '5' to try a safer renderer.",
