@@ -395,6 +395,12 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
       if(!siid) {
         for(int i=0; i<cor; i++) cornerlist.push_back(hpxy(0,0));
         }
+      else if(geosupport_chessboard()) {
+        for(int i=0; i<cor; i++) {
+          hyperpoint nc = nearcorner(c, i);
+          cornerlist.push_back(mid_at(hpxy(0,0), nc, .94));
+          }
+        }
       else {
         for(int i=0; i<cor; i++) {
           int ri = i;

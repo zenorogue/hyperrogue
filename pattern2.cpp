@@ -1979,9 +1979,18 @@ EX namespace patterns {
     dialog::addBreak(100);
 
     dialog::addBoolItem_action(XLAT("display the inner walls"), innerwalls, '5');
-    dialog::addBoolItem(XLAT("display only hexagons"), (whichShape == '6'), '6');
-    dialog::addBoolItem(XLAT("display only heptagons"), (whichShape == '7'), '7');
-    dialog::addBoolItem(XLAT("display the triheptagonal grid"), (whichShape == '8'), '8');
+    
+    if(geosupport_threecolor() == 2) {    
+      dialog::addBoolItem(XLAT("display only hexagons"), (whichShape == '6'), '6');
+      dialog::addBoolItem(XLAT("display only heptagons"), (whichShape == '7'), '7');
+      dialog::addBoolItem(XLAT("display the triheptagonal grid"), (whichShape == '8'), '8');
+      }
+    
+    if(geosupport_chessboard()) {
+      dialog::addBoolItem(XLAT("display only chessboard white"), (whichShape == '6'), '6');
+      dialog::addBoolItem(XLAT("display only chessboard black"), (whichShape == '7'), '7');
+      }
+
     dialog::addBoolItem(XLAT("display full floors"), (whichShape == '9'), '9');
     dialog::addSelItem(XLAT("floor type"), XLATN(winf[canvas_default_wall].name), 'i');
 
