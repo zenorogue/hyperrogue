@@ -1081,6 +1081,18 @@ int read_geom_args() {
     shift(); gp::param.second = argi();
     set_variation(eVariation::goldberg);
     }
+  else if(argis("-unrectified")) {
+    PHASEFROM(2);
+    set_variation(eVariation::unrectified);
+    }
+  else if(argis("-untruncated")) {
+    PHASEFROM(2);
+    set_variation(eVariation::untruncated);
+    }
+  else if(argis("-warped")) {
+    PHASEFROM(2);
+    set_variation(eVariation::warped);
+    }
   #endif
   #if CAP_FIELD
   else if(argis("-fi")) {

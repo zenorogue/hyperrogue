@@ -176,6 +176,14 @@ void addMessage(string s, char spamtype = 0);
 #define SG3 (S3==3?3:2)
 #define SG2 (S3==3?2:1)
 
+#define GOLDBERG_INV (GOLDBERG || INVERSE)
+
+#define INVERSE among(variation, eVariation::unrectified, eVariation::warped, eVariation::untruncated )
+
+#define UNRECTIFIED (variation == eVariation::unrectified)
+#define WARPED (variation == eVariation::warped)
+#define UNTRUNCATED (variation == eVariation::untruncated)
+
 #define GOLDBERG (variation == eVariation::goldberg)
 #define IRREGULAR (variation == eVariation::irregular)
 #define PURE (variation == eVariation::pure)

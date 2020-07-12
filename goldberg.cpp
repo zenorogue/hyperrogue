@@ -10,6 +10,11 @@
 #include "hyper.h"
 namespace hr { 
 
+#if HDR
+struct hrmap;
+extern hrmap *currentmap;
+#endif
+
 EX namespace gp {
 
   #if HDR
@@ -34,6 +39,15 @@ EX namespace gp {
     loc operator*(int i) {
       return loc(first*i, second*i);
       }  
+
+    int operator %(int i) {
+      return gmod(first, i) + gmod(second, i);
+      }
+
+    loc operator /(int i) {
+      return loc(first/i, second/i);
+      }
+
     };
 
   struct local_info {
@@ -96,6 +110,10 @@ EX namespace gp {
     }
   
   EX local_info get_local_info(cell *c) {
+    if(INVERSE) {
+      c = get_mapped(c);
+      return UIU(get_local_info(c));
+      }
     local_info li;
     if(c == c->master->c7) {
       li.relative = loc(0,0);
@@ -609,9 +627,9 @@ EX namespace gp {
     
   map<pair<int, int>, loc> center_locs;
   
-  EX void compute_geometry() {
+  EX void compute_geometry(bool inv) {
     center_locs.clear();
-    if(GOLDBERG) {
+    if(GOLDBERG_INV || inv) {
       if(!cgi.gpdata) cgi.gpdata = make_shared<geometry_information::gpdata_t>();
       gp::clear_plainshapes();
       int x = param.first;
@@ -622,6 +640,7 @@ EX namespace gp {
         cgi.gpdata->area = x * x + y * y;
       next = point3(x+y/2., -y * sqrt(3) / 2, 0);
       ld scale = 1 / hypot_d(2, next);
+      if(!GOLDBERG) scale = 1;
       cgi.crossf *= scale;
       cgi.hepvdist *= scale;
       cgi.hexhexdist *= scale;
@@ -660,6 +679,14 @@ EX namespace gp {
     if(S3 == 3) while(x < 0 || y < 0 || (x == 0 && y > 0))
       v = v * loc(0, 1);
     return v;
+    }
+  
+  EX eVariation variation_for(loc xy) {
+    if(xy.first == 1 && xy.second == 0) 
+      return eVariation::pure;
+    if(xy.first == 1 && xy.second == 1 && S3 == 3) 
+      return eVariation::bitruncated;
+    return eVariation::goldberg;
     }
   
   void whirl_set(loc xy) {
@@ -713,31 +740,56 @@ EX namespace gp {
       }
 #endif    
     if(min_quality == 0 && min_quality_chess == 0) {
-      dialog::addBoolItem(XLAT("pure"), univ_param() == loc(1,0) && !IRREGULAR, 'a');
+      dialog::addBoolItem(XLAT("pure"), PURE || (GOLDBERG && univ_param() == loc(1,0)), 'a');
       dialog::lastItem().value = "GP(1,0)";
+      dialog::add_action_confirmed([] { whirl_set(loc(1, 0)); });
       }
     
-    if(min_quality_chess == 0)
+    if(min_quality_chess == 0) {
       dialog::addBoolItem(XLAT("bitruncated"), BITRUNCATED, 'b');  
+      dialog::add_action_confirmed([] { 
+        if(S3 == 4) {
+          if(!BITRUNCATED) {
+            stop_game();
+            set_variation(eVariation::bitruncated);
+            start_game();
+            }
+          }
+        else 
+          whirl_set(loc(1, 1));
+        });
+      }
+
     dialog::lastItem().value = S3 == 3 ? "GP(1,1)" : XLAT(BITRUNCATED ? "ON" : "OFF");
 
     if(min_quality == 0 || min_quality_chess) {
-      dialog::addBoolItem(XLAT(S3 == 3 ? "chamfered" : "expanded"), univ_param() == loc(2,0), 'c');
+      dialog::addBoolItem(XLAT(S3 == 3 ? "chamfered" : "expanded"), univ_param() == loc(2,0) && GOLDBERG, 'c');
       dialog::lastItem().value = "GP(2,0)";
+      dialog::add_action_confirmed([] { 
+        whirl_set(loc(2, 0));
+        });
       }
 
     if(S3 == 3) {
-      dialog::addBoolItem(XLAT("2x bitruncated"), univ_param() == loc(3,0), 'd');
+      dialog::addBoolItem(XLAT("2x bitruncated"), GOLDBERG && univ_param() == loc(3,0), 'd');
       dialog::lastItem().value = "GP(3,0)";
+      dialog::add_action_confirmed([] { 
+        whirl_set(loc(3, 0));
+        });
       }
     else {
       dialog::addBoolItem(XLAT("rectified"), param == loc(1,1) && GOLDBERG, 'd');
       dialog::lastItem().value = "GP(1,1)";
+      dialog::add_action_confirmed([] { 
+        whirl_set(loc(1, 1));
+        });
       }
 
     dialog::addBreak(100);
     dialog::addSelItem("x", its(config.first), 'x');
+    dialog::add_action([] { dialog::editNumber(config.first, 0, 8, 1, 1, "x", helptext()); });
     dialog::addSelItem("y", its(config.second), 'y');
+    dialog::add_action([] { dialog::editNumber(config.second, 0, 8, 1, 1, "y", helptext()); });
     
     if(config.second && config.second != config.first && nonorientable) {
       dialog::addInfo(XLAT("This does not work in non-orientable geometries"));
@@ -748,6 +800,9 @@ EX namespace gp {
       dialog::addInfo(XLAT("This pattern needs x-y divisible by 2"));
     else    
       dialog::addBoolItem(XLAT("select"), param == internal_representation(config) && !IRREGULAR, 'f');
+    dialog::add_action_confirmed([] { whirl_set(config); });
+
+    dialog::addBreak(100);
       
     if(irr::supports(geometry)) {
       dialog::addBoolItem(XLAT("irregular"), IRREGULAR, 'i');
@@ -760,52 +815,81 @@ EX namespace gp {
         if(!IRREGULAR) irr::visual_creator(); 
         }));
       }
+
+    dialog::addBreak(100);
+    int style = 0;
+    auto v0 = variation_for(param);
+    bool bad_bi = BITRUNCATED && a4;
+    if(!bad_bi) {
+      dynamicval<eVariation> v(variation, v0);
+      if(geosupport_football() == 2) style = 3;
+      if(geosupport_chessboard()) style = 2;
+      }
+    if(style == 2) {
+      dialog::addBoolItem(XLAT("inverse rectify"), UNRECTIFIED, 'r');
+      dialog::add_action_confirmed([v0] {
+        if(UNRECTIFIED) set_variation(v0);
+        else set_variation(eVariation::unrectified);
+        start_game();
+        });
+      }
+    else if(style == 3) {
+      dialog::addBoolItem(XLAT("inverse truncate"), UNTRUNCATED, 't');
+      dialog::add_action_confirmed([v0] {
+        if(UNTRUNCATED) set_variation(v0);
+        else set_variation(eVariation::untruncated);
+        start_game();
+        });
+      dialog::addBoolItem(XLAT("warped version"), WARPED, 'w');
+      dialog::add_action_confirmed([v0] {
+        if(WARPED) set_variation(v0);
+        else set_variation(eVariation::warped);
+        start_game();
+        });
+      }
+
+    dialog::addBreak(100);
+    dialog::addItem(XLAT("swap x and y"), 'z');
+    dialog::add_action([] { swap(config.first, config.second); });
+
+    bool have_dual = !bad_bi && !IRREGULAR && !WARPED;
+    if(S3 == 3 && UNTRUNCATED && (univ_param()*loc(1,1)) % 3) have_dual = false;
+    if(S3 == 4 && UNRECTIFIED && (univ_param()*loc(1,1)) % 2) have_dual = false;
+    
+    if(have_dual) {
+      dialog::addItem(XLAT("dual of current"), 'D');
+      dialog::add_action([] { 
+        auto p = univ_param();
+        if(S3 == 3 && !UNTRUNCATED) {
+          println(hlog, "set param to ", p * loc(1,1));
+          whirl_set(p * loc(1, 1));
+          set_variation(eVariation::untruncated);
+          start_game();
+          }
+        else if(S3 == 4 && !UNRECTIFIED) {
+          whirl_set(p * loc(1, 1));
+          set_variation(eVariation::unrectified);
+          start_game();
+          }
+        else if(S3 == 3 && UNTRUNCATED) {
+          println(hlog, "whirl_set to ", (p * loc(1,1)) / 3);
+          whirl_set((p * loc(1,1)) / 3);
+          }
+        else if(S3 == 4 && UNRECTIFIED) {
+          whirl_set((p * loc(1,1)) / 2);
+          }
+        });
+      }
     
     dialog::addBreak(100);
     dialog::addHelp();
+    dialog::add_action([] { gotoHelp(helptext()); });
     dialog::addBack();
     dialog::display();
-
-    keyhandler = [] (int sym, int uni) {
-      dialog::handleNavigation(sym, uni);
-      if(uni == 'a') dialog::do_if_confirmed([] {
-        whirl_set(loc(1, 0));
-        });
-      else if(uni == 'b') dialog::do_if_confirmed([] {
-        if(S3 == 4) {
-          if(!BITRUNCATED) {
-            stop_game();
-            set_variation(eVariation::bitruncated);
-            start_game();
-            }
-          }
-        else 
-          whirl_set(loc(1, 1));
-        });
-      else if(uni == 'c') dialog::do_if_confirmed([] {
-        whirl_set(loc(2, 0));
-        });
-      else if(uni == 'd') dialog::do_if_confirmed([] {
-        whirl_set(S3 == 3 ? loc(3, 0) : loc(1,1));
-        });
-      else if(uni == 'f') dialog::do_if_confirmed([] {
-        whirl_set(config);
-        });
-      else if(uni == 'x')
-        dialog::editNumber(config.first, 0, 8, 1, 1, "x", helptext());
-      else if(uni == 'y')
-        dialog::editNumber(config.second, 0, 8, 1, 1, "y", helptext());
-      else if(uni == 'z')
-        swap(config.first, config.second);
-      else if(uni == '?' || sym == SDLK_F1 || uni == 'h' || uni == '2')
-        gotoHelp(helptext());
-      else if(doexiton(sym, uni))
-        popScreen();
-      };
     }
   
   EX loc univ_param() {
-    if(GOLDBERG) return param;
+    if(GOLDBERG_INV) return param;
     else if(PURE) return loc(1,0);
     else return loc(1,1);
     }
@@ -892,6 +976,7 @@ EX namespace gp {
     }
   
   EX int compute_dist(cell *c, int master_function(cell*)) {
+    if(!GOLDBERG) return master_function(c);
     auto li = get_local_info(c);
     be_in_triangle(li);
     
@@ -934,6 +1019,10 @@ EX namespace gp {
   EX array<heptagon*, 3> get_masters(cell *c) {
     if(0);
     #if CAP_GP
+    else if(INVERSE) {
+      c = get_mapped(c);
+      return UIU(get_masters(c));
+      }
     else if(GOLDBERG) {
       auto li = get_local_info(c);
       be_in_triangle(li);      
@@ -963,23 +1052,232 @@ EX namespace gp {
     else if(BITRUNCATED)
       return XLAT("bitruncated");
     #if CAP_GP
-    else if(param == loc(1, 0))
+    else if(GOLDBERG && param == loc(1, 0))
       return XLAT("pure");
-    else if(param == loc(1, 1) && S3 == 3)
+    else if(GOLDBERG && param == loc(1, 1) && S3 == 3)
       return XLAT("bitruncated");
-    else if(param == loc(1, 1) && S3 == 4)
+    else if(GOLDBERG && param == loc(1, 1) && S3 == 4)
       return XLAT("rectified");
-    else if(param == loc(2, 0))
+    else if(UNRECTIFIED && param == loc(1, 1) && S3 == 4)
+      return XLAT("dual");
+    else if(UNTRUNCATED && param == loc(1, 1) && S3 == 3)
+      return XLAT("dual");
+    else if(GOLDBERG && param == loc(2, 0))
       return S3 == 3 ? XLAT("chamfered") : XLAT("expanded");
-    else if(param == loc(3, 0) && S3 == 3)
+    else if(GOLDBERG && param == loc(3, 0) && S3 == 3)
       return XLAT("2x bitruncated");
     else {
       auto p = human_representation(param);
-      return "GP(" + its(p.first) + "," + its(p.second) + ")";
+      string s = "GP(" + its(p.first) + "," + its(p.second) + ")";
+      if(UNRECTIFIED) return XLAT("unrectified") + " " + s;
+      if(WARPED) return XLAT("warped") + " " + s;
+      if(UNTRUNCATED) return XLAT("untruncated") + " " + s;
+      return s;
       }
     #else
     else return "UNSUPPORTED";
     #endif
     }
+  
+  /* inverse map */
+  
+  EX hrmap *pmap;
+  // EX geometry_information *underlying_cgip;
+  
+  struct hrmap_inverse : hrmap {
+    hrmap *underlying_map;
+    
+    map<cell*, cell*> mapping;
+    map<cell*, int> shift;
+    
+    template<class T> auto in_underlying(const T& t) -> decltype(t()) {
+      dynamicval<hrmap*> gpm(pmap, this);
+      dynamicval<eVariation> gva(variation, variation_for(param));
+      dynamicval<hrmap*> gu(currentmap, underlying_map);
+      // dynamicval<geometry_information*> gc(cgip, underlying_cgip);
+      return t();
+      }
+    
+    cell* get_mapped(cell *underlying_cell, int set_shift) {
+      if(mapping.count(underlying_cell))
+        return mapping[underlying_cell];
+      int d = underlying_cell->type;
+      if(UNTRUNCATED) d /= 2;
+      if(WARPED && set_shift < 2) d /= 2;
+      cell *c = newCell(d, underlying_cell->master);
+      mapping[underlying_cell] = c;
+      if(!UNRECTIFIED) shift[c] = set_shift;
+      mapping[c] = underlying_cell;
+      return c;
+      }
+    
+    ~hrmap_inverse() {
+      in_underlying([this] { delete underlying_map; });
+      }
+
+    heptagon *getOrigin() override { return in_underlying([this] { return underlying_map->getOrigin(); }); }
+    
+    cell *gs;
+    
+    cell* gamestart() override { 
+      return gs; 
+      }
+
+    hrmap_inverse() {
+      if(0) {
+        println(hlog, "making ucgi");
+        dynamicval<eVariation> gva(variation, variation_for(param));
+        check_cgi();
+        cgi.require_basics();
+        // underlying_cgip = cgip;
+        println(hlog, "done ucgi");
+        }
+      bool warped = WARPED;
+      in_underlying([&,this] { 
+        initcells(); 
+        underlying_map = currentmap; 
+        gs = currentmap->gamestart();
+        if(!warped) gs = gs->cmove(0);
+        });
+      if(UNTRUNCATED) gs = get_mapped(gs, 1);
+      else gs = get_mapped(gs, 2);
+      for(hrmap*& m: allmaps) if(m == underlying_map) m = NULL;
+      }
+    
+    cell *create_move(cell *parent, int d) {
+      if(UNRECTIFIED) {
+        cellwalker cw(mapping[parent], d);
+        in_underlying([&] {
+          cw += wstep;
+          cw --;
+          cw += wstep;
+          cw --;
+          });
+        cw.at = get_mapped(cw.at, 0);
+        parent->c.connect(d, cw.at, cw.spin, cw.mirrored);
+        return cw.at;
+        }
+      if(UNTRUNCATED) {
+        cellwalker cw(mapping[parent], 2*d+shift[parent]);
+        in_underlying([&] {
+          cw += wstep;
+          });
+        cw.at = get_mapped(cw.at, cw.spin & 1);
+        parent->c.connect(d, cw.at, cw.spin / 2, cw.mirrored);
+        return cw.at;
+        }
+      if(WARPED) {
+        int sh = shift[parent];
+        if(sh == 2) {
+          cellwalker cw(mapping[parent], d);
+          in_underlying([&] { cw += wstep; });
+          cw.at = get_mapped(cw.at, cw.spin & 1);
+          parent->c.connect(d, cw.at, cw.spin / 2, cw.mirrored);
+          return cw.at;
+          }
+        else {
+          cellwalker cw(mapping[parent], 2*d+sh);
+          in_underlying([&] {
+            cw += wstep;
+            });
+          cw.at = get_mapped(cw.at, 2);
+          parent->c.connect(d, cw.at, cw.spin, cw.mirrored);
+          return cw.at;
+          }
+        }
+      throw "unimplemented";
+      }
+
+    transmatrix adj(cell *c, int d) override {
+      transmatrix T;
+      if(UNRECTIFIED) {
+        cellwalker cw(mapping[c], d);
+        in_underlying([&] {
+          T = currentmap->adj(cw.at, cw.spin);
+          cw += wstep;
+          cw --;
+          T = T * currentmap->adj(cw.at, cw.spin);
+          });
+        }
+      if(UNTRUNCATED) {
+        cellwalker cw(mapping[c], 2*d+shift[c]);
+        in_underlying([&] { T = currentmap->adj(cw.at, cw.spin); });
+        }
+      if(WARPED) {
+        int sh = shift[c];
+        if(sh == 2) {
+          auto c1 = mapping[c];
+          in_underlying([&] { T = currentmap->adj(c1, d); });
+          }
+        else {
+          cellwalker cw(mapping[c], 2*d+shift[c]);
+          in_underlying([&] { T = currentmap->adj(cw.at, cw.spin); });
+          }
+        }
+      return T;
+      }
+    
+    void draw() override {
+      
+      dq::clear_all();
+      
+      auto enqueue = (quotient ? dq::enqueue_by_matrix_c : dq::enqueue_c);
+      enqueue(centerover, cview());      
+
+      while(!dq::drawqueue_c.empty()) {
+        auto& p = dq::drawqueue_c.front();
+        cell *c = get<0>(p);
+        transmatrix V = get<1>(p);
+        dynamicval<ld> b(band_shift, get<2>(p));
+        bandfixer bf(V);
+        auto c1 = get_mapped(c, 0);
+        
+        in_underlying([&] {
+          if(GOLDBERG) {
+            gp::draw_li = gp::get_local_info(c1);
+            }
+          else {
+            gp::draw_li.relative.first = shvid(c1);
+            gp::draw_li.relative.second = shift[c];
+            }
+          });
+      
+       
+        dq::drawqueue_c.pop();
+
+        if(!do_draw(c, V)) continue;
+        drawcell(c, V);
+        
+        for(int i=0; i<c->type; i++) if(c->cmove(i))
+          enqueue(c->move(i), V * adj(c, i));
+        }
+      }
+
+    };
+  
+  EX hrmap* new_inverse() { return new hrmap_inverse; }
+  
+  hrmap_inverse* inv_map() { return (hrmap_inverse*)currentmap; }
+
+  EX hrmap* get_underlying_map() { return inv_map()->underlying_map; }
+  EX cell* get_mapped(cell *c) { return inv_map()->get_mapped(c, 0); }
+  EX int untruncated_shift(cell *c) { return inv_map()->shift[c]; }
+  
+  EX cell *inverse_move(cell *c, int d) { return inv_map()->create_move(c, d); }
+
+  #if HDR
+  template<class T> auto in_underlying_geometry(const T& f) -> decltype(f()) {
+    if(!INVERSE) return f();
+    dynamicval<hrmap*> gpm(pmap, currentmap);
+    dynamicval<eVariation> gva(variation, variation_for(param));
+    dynamicval<hrmap*> gu(currentmap, get_underlying_map());
+    // dynamicval<geometry_information*> gc(cgip, underlying_cgip);
+    return f();
+    }
+  
+  #define UIU(x) hr::gp::in_underlying_geometry([&] { return (x); })
+  #endif
+
+
     
   }}

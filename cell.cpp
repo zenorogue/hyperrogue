@@ -219,6 +219,9 @@ EX cell *createMov(cell *c, int d) {
       }
     hybrid::link();
     }
+  else if(INVERSE) {
+    return gp::inverse_move(c, d);
+    }
   #endif
   #if CAP_ARCM
   else if(arcm::in() && PURE) {
@@ -289,7 +292,8 @@ EX void initcells() {
   DEBB(DF_INIT, ("initcells"));
   
   hrmap* res = callhandlers((hrmap*)nullptr, hooks_newmap);
-  if(res) currentmap = res;  
+  if(res) currentmap = res;
+  else if(INVERSE) currentmap = gp::new_inverse();
   else if(fake::in()) currentmap = fake::new_map();
   else if(asonov::in()) currentmap = asonov::new_map();
   else if(nonisotropic || hybri) currentmap = nisot::new_map();
@@ -475,6 +479,11 @@ EX int celldist(cell *c) {
   #endif
   if(arcm::in() || ctof(c)) return c->master->distance;
   #if CAP_GP
+  if(INVERSE) {
+    cell *c1 = gp::get_mapped(c);
+    return UIU(gp::compute_dist(c1, celldist)) / 2;
+    /* TODO */
+    }
   if(GOLDBERG) return gp::compute_dist(c, celldist);
   #endif
   int dx[MAX_S3];

@@ -675,7 +675,7 @@ void geometry_information::generate_floorshapes() {
     }
   #endif
     
-  else if(GOLDBERG) { /* will be generated on the fly */ }
+  else if(GOLDBERG_INV) { /* will be generated on the fly */ }
 
   else if(inforder::mixed()) { /* will be generated on the fly */ }
   
@@ -800,22 +800,38 @@ EX namespace gp {
   
   int get_plainshape_id(cell *c) {
     int siid, sidir;
-    if(geosupport_threecolor() == 2) {
-      auto si = patterns::getpatterninfo(c, patterns::PAT_COLORING, patterns::SPF_NO_SUBCODES);
-      siid = si.id>>2;
-      // if(siid == 2) si.dir++;
-      // if(siid != pattern_threecolor(c)) printf("threecolor mismatch\n");
-      // if(pattern_threecolor(createMov(c, c->fixd(si.dir))) != (siid+1)%3) printf("threecolor mismatch direction\n");
-      sidir = c->c.fix(si.dir);
+    cell *c1 = c;
+    auto f = [&] {
+      if(geosupport_threecolor() == 2) {
+        auto si = patterns::getpatterninfo(c1, patterns::PAT_COLORING, patterns::SPF_NO_SUBCODES);
+        siid = si.id>>2;
+        // if(siid == 2) si.dir++;
+        // if(siid != pattern_threecolor(c)) printf("threecolor mismatch\n");
+        // if(pattern_threecolor(createMov(c, c->fixd(si.dir))) != (siid+1)%3) printf("threecolor mismatch direction\n");
+        sidir = c1->c.fix(si.dir);
+        }
+      else if(geosupport_football() == 2) {
+        siid = !pseudohept(c1);
+        sidir = !ishex1(c1);
+        }
+      else if(geosupport_chessboard()) {
+        siid = !chessvalue(c1);
+        sidir = 0;
+        }
+      else {
+        siid = 0;
+        sidir = 0;
+        }
+      };
+    if(INVERSE && gp::variation_for(gp::param) == eVariation::goldberg) {
+      c1 = gp::get_mapped(c);
+      UIU(f());
       }
-    else if(geosupport_football() == 2) {
-      siid = !pseudohept(c);
-      sidir = !ishex1(c);
-      }
-    else {
+    else if(INVERSE) {
       siid = 0;
       sidir = 0;
       }
+    else f();
     auto& id = cgi.gpdata->pshid[siid][sidir][draw_li.relative.first&31][draw_li.relative.second&31][gmod(draw_li.total_dir, S6)];
     if(id == -1 && sphere && isize(cgi.shFloor.b) > 0) {
       forCellEx(c1, c) if(!gmatrix0.count(c1)) return 0;
@@ -862,7 +878,7 @@ EX int shvid(cell *c) {
     cell *c1 = hybrid::get_where(c).first; 
     return PIU( shvid(c1) );
     }
-  else if(GOLDBERG)
+  else if(GOLDBERG_INV)
     return gp::get_plainshape_id(c);
   else if(IRREGULAR)
     return irr::cellindex[c];

@@ -87,6 +87,11 @@ EX int chessvalue(cell *c) {
     return arcm::chessvalue(c);
   else
   #endif
+  #if CAP_GP
+  if(WARPED)
+    return gp::untruncated_shift(c) == 2;
+  else
+  #endif
     return celldist(c) & 1;
   }
 
@@ -269,7 +274,7 @@ EX int fiftyval200(cell *c) {
 // zebraval
 
 int dir_bitrunc457(cell *c) {
-  if(GOLDBERG) return c->master->zebraval / 10;
+  if(GOLDBERG_INV) return c->master->zebraval / 10;
   int wset = 0;
   int has1 = 0;
   for(int i=0; i<4; i++) {
@@ -291,6 +296,10 @@ int val46(cell *c);
 EX int zebra40(cell *c) {
   if(euclid) return pattern_threecolor(c);
   else if(IRREGULAR) return c->master->zebraval/10;
+  else if(INVERSE) {
+    cell *c1 = gp::get_mapped(c);
+    return UIU(zebra40(c1));
+    }
   else if(a46) {
     int v = val46(c);
     if(v<4) return v;
@@ -384,7 +393,7 @@ EX int fieldval_uniq(cell *c) {
     else if(IRREGULAR) return irr::cellindex[c];
     #endif
     #if CAP_GP
-    else if(GOLDBERG) return (get_code(gp::get_local_info(c)) << 8) | (c->master->fieldval / S7);
+    else if(GOLDBERG_INV) return (get_code(gp::get_local_info(c)) << 8) | (c->master->fieldval / S7);
     #endif
     if(ctof(c)) return c->master->fieldval;
     else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
@@ -1228,6 +1237,8 @@ EX bool geosupport_chessboard() {
     (arcm::in() && PURE) ? arcm::current.support_chessboard() : 
     (arcm::in() && DUAL) ? arcm::current.support_threecolor_bitruncated() :
 #endif
+    WARPED ? true :
+    INVERSE ? false :
     (bt::in() || kite::in()) ? 0 :
     (S3 >= OINF) ? true :
     (valence() % 2 == 0);
@@ -1241,6 +1252,7 @@ EX int geosupport_threecolor() {
   if(arcm::in() && BITRUNCATED) return arcm::current.support_threecolor_bitruncated();
   if(arcm::in() && DUAL) return 0; // it sometimes does support threecolor, but it can be obtained in other ways then
   #endif
+  if(INVERSE) return 0;
   if(BITRUNCATED && S3 == 3) {
     if(S7 % 2) return 1;
     return 2;
@@ -1256,6 +1268,7 @@ EX int geosupport_threecolor() {
 EX int geosupport_football() {
   // always works in bitrunc geometries
   if(BITRUNCATED) return 2;
+  if(INVERSE) return 0;
   if(bt::in() || kite::in()) return 0;
 
 #if CAP_ARCM  
@@ -1431,6 +1444,7 @@ EX bool pseudohept(cell *c) {
   #endif
   if(arb::in()) return arb::pseudohept(c);
   #if CAP_GP
+  if(INVERSE) return false;
   if(GOLDBERG && gp_threecolor() == 2)
     return gp::pseudohept_val(c) == 0;
   if(GOLDBERG && gp_threecolor() == 1 && (S7&1) && (S3 == 3))

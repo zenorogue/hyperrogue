@@ -737,7 +737,7 @@ enum eGeometry {
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSolNIH, gcNil, gcProduct, gcSL2 };
 
-enum class eVariation { bitruncated, pure, goldberg, irregular, dual };  
+enum class eVariation { bitruncated, pure, goldberg, irregular, dual, untruncated, warped, unrectified };
 
 typedef flagtype modecode_t;
 

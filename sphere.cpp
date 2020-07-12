@@ -167,6 +167,7 @@ struct hrmap_spherical : hrmap_standard {
       #endif
       swap(gmatrix, gmatrix0);
       just_gmatrix = true;
+      dynamicval<cell*> cco(centerover, gamestart());
       draw();
       just_gmatrix = false;
       swap(gmatrix, gmatrix0);

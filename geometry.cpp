@@ -487,6 +487,13 @@ void geometry_information::prepare_basics() {
 
   if(arcm::in() && !prod) 
     ginf[gArchimedean].cclass = gcHyperbolic;
+  
+  dynamicval<eVariation> gv(variation, variation);
+  bool inv = INVERSE;
+  if(INVERSE) {
+    variation = gp::variation_for(gp::param);
+    println(hlog, "bitruncated = ", BITRUNCATED);
+    }
 
   if(hybri) {
     auto t = this;
@@ -582,7 +589,7 @@ void geometry_information::prepare_basics() {
   base_distlimit = ginf[geometry].distlimit[!BITRUNCATED];
 
   #if CAP_GP
-  gp::compute_geometry();  
+  gp::compute_geometry(inv);  
   #endif
   #if CAP_IRR
   irr::compute_geometry();
@@ -1014,7 +1021,7 @@ EX string cgi_string() {
     return s;
     }
   
-  if(GOLDBERG) V("GP", its(gp::param.first) + "," + its(gp::param.second));
+  if(GOLDBERG_INV) V("GP", its(gp::param.first) + "," + its(gp::param.second));
   if(IRREGULAR) V("IRR", its(irr::irrid));
 
   if(arcm::in()) V("ARCM", arcm::current.symbol);

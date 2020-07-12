@@ -501,6 +501,37 @@ EX hyperpoint randomPointIn(int t) {
 EX hyperpoint get_corner_position(cell *c, int cid, ld cf IS(3)) {
   #if CAP_GP
   if(GOLDBERG) return gp::get_corner_position(c, cid, cf);
+  if(UNTRUNCATED) {
+    cell *c1 = gp::get_mapped(c);
+    cellwalker cw(c1, cid*2);
+    if(!gp::untruncated_shift(c)) cw--;
+    hyperpoint h = UIU(nearcorner(c1, cw.spin));
+    return mid_at_actual(h, 3/cf);
+    }
+  if(UNRECTIFIED) {
+    cell *c1 = gp::get_mapped(c);
+    hyperpoint h = UIU(nearcorner(c1, cid));
+    return mid_at_actual(h, 3/cf);
+    }
+  if(WARPED) {
+    int sh = gp::untruncated_shift(c);
+    cell *c1 = gp::get_mapped(c);
+    if(sh == 2) {
+      cellwalker cw(c, cid);
+      hyperpoint h1 = UIU(tC0(currentmap->adj(c1, cid)));
+      cw--;
+      hyperpoint h2 = UIU(tC0(currentmap->adj(c1, cw.spin)));
+      hyperpoint h = mid(h1, h2);
+      return mid_at_actual(h, 3/cf);
+      }
+    else {
+      cellwalker cw(c1, cid*2);
+      if(!gp::untruncated_shift(c)) cw--;
+      hyperpoint h = UIU(nearcorner(c1, cw.spin));
+      h = mid(h, C0);
+      return mid_at_actual(h, 3/cf);
+      }
+    }
   #endif
   #if CAP_IRR
   if(IRREGULAR) {
@@ -560,7 +591,7 @@ EX bool approx_nearcorner = false;
 /** /brief get the coordinates of the center of c->move(i) */
 
 EX hyperpoint nearcorner(cell *c, int i) {
-  if(GOLDBERG) {
+  if(GOLDBERG_INV) {
     cellwalker cw(c, i);
     cw += wstep;
     transmatrix cwm = currentmap->adj(c, i);
@@ -657,14 +688,19 @@ EX hyperpoint nearcorner(cell *c, int i) {
 
 EX hyperpoint farcorner(cell *c, int i, int which) {
   #if CAP_GP
-  if(GOLDBERG) {
+  if(GOLDBERG_INV) {
     cellwalker cw(c, i);
     cw += wstep;
     if(!cw.mirrored) cw += (which?-1:2);
     else cw += (which?2:-1);
     transmatrix cwm = currentmap->adj(c, i);
-    auto li1 = gp::get_local_info(cw.at);
-    return cwm * get_corner_position(li1, cw.spin);
+    if(gp::variation_for(gp::param) == eVariation::goldberg) {
+      auto li1 = gp::get_local_info(cw.at);
+      return cwm * get_corner_position(li1, cw.spin);
+      }
+    else {
+      return cwm * get_corner_position(cw.at, cw.spin, 3);
+      }
     }
   #endif
   #if CAP_IRR
