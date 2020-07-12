@@ -910,6 +910,7 @@ EX land_validity_t& land_validity(eLand l) {
       }
     if(arcm::in() || kite::in()) return not_implemented;
     if(bounded) return unbounded_only;
+    if(INVERSE) return not_implemented;
     }
   
   if(chaosmode && isCrossroads(l))

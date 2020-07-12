@@ -1375,6 +1375,7 @@ EX int wallchance(cell *c, bool deepOcean) {
 
 /** should we generate the horocycles in the current geometry? */
 EX bool horo_ok() {  
+  if(INVERSE) return false;
   return hyperbolic && !bt::in() && !arcm::in() && !kite::in() && !experimental && !hybri;
   }
 
@@ -1421,6 +1422,7 @@ EX bool deep_ocean_at(cell *c, cell *from) {
 EX bool good_for_wall(cell *c) {
   if(arcm::in()) return true;
   if(WDIM == 3) return true;
+  if(INVERSE) return true;
   return pseudohept(c);
   }
 

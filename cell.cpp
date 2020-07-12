@@ -531,6 +531,11 @@ EX int celldistAlt(cell *c) {
   if(ctof(c)) return c->master->alt->distance;
   #if CAP_GP
   if(GOLDBERG) return gp::compute_dist(c, celldistAlt);
+  if(INVERSE) {
+    cell *c1 = gp::get_mapped(c);
+    return UIU(gp::compute_dist(c1, celldistAlt)) / 2;
+    /* TODO */
+    }
   #endif
   int dx[MAX_S3]; dx[0] = 0;
   for(int u=0; u<S3; u++) if(createMov(c, u+u)->master->alt == NULL)
@@ -1122,6 +1127,13 @@ EX int celldistance(cell *c1, cell *c2) {
   if(hyperbolic && WDIM == 3) return reg3::celldistance(c1, c2);
   #endif
 
+  if(INVERSE) {
+    c1 = gp::get_mapped(c1);
+    c2 = gp::get_mapped(c2);
+    return UIU(celldistance(c1, c2)) / 2;
+    /* TODO */
+    }
+
   return hyperbolic_celldistance(c1, c2);
   }
 
@@ -1316,7 +1328,8 @@ EX bool standard_tiling() {
   }
 
 EX int valence() {
-  if(BITRUNCATED) return 3;
+  if(BITRUNCATED || IRREGULAR) return 3;
+  if(INVERSE) return WARPED ? 4 : max(S3, S7);
   #if CAP_ARCM
   if(arcm::in()) return arcm::valence();
   #endif
