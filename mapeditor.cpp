@@ -234,6 +234,7 @@ EX namespace mapeditor {
     l->size = size;
     l->caption = cap;
     dt_add(b, l);
+    l->col >>= 8;
     }
   
   dtshape *load_shape(hstream& hs) {
@@ -1794,9 +1795,11 @@ namespace mapeditor {
       displaymm('l', 8, 8+fs*8, 2, vid.fsize, XLAT("l = line"), 0);
       displaymm('c', 8, 8+fs*9, 2, vid.fsize, XLAT("c = circle"), 0);
       if(drawing_tool)
-        displaymm('e', 8, 8+fs*10, 2, vid.fsize, XLAT("e = erase"), 0);
+        displaymm('T', 8, 8+fs*10, 10, vid.fsize, XLAT("T = text"), 0);
+      if(drawing_tool)
+        displaymm('e', 8, 8+fs*11, 2, vid.fsize, XLAT("e = erase"), 0);
       int s = isize(texture::config.data.pixels_to_draw);
-      if(s) displaymm(0, 8, 8+fs*11, 2, vid.fsize, its(s), 0);
+      if(s) displaymm(0, 8, 8+fs*12, 2, vid.fsize, its(s), 0);
       }
 #endif
     else {
@@ -2251,7 +2254,7 @@ namespace mapeditor {
     if(mkuni == 'g') 
       coldcenter = ccenter, ccenter = mh, clickused = true;
     
-    if(uni == 'd' || uni == 'l' || uni == 'c' || uni == 'e')
+    if(uni == 'd' || uni == 'l' || uni == 'c' || uni == 'e' || uni == 'T')
       mousekey = uni;
 
     if(drawing_tool) {
@@ -2362,7 +2365,7 @@ namespace mapeditor {
           dt_erase(mouseh);
           clickused = true;
           }
-        else if(mousekey == 'l' || mousekey == 'c') {
+        else if(mousekey == 'l' || mousekey == 'c' || mousekey == 'T') {
           if(!holdmouse) lstart = mouseh, lstartcell = mouseover, holdmouse = true;
           }
 #if CAP_TEXTURE
@@ -2410,6 +2413,16 @@ namespace mapeditor {
         else if(mousekey == 'c') {
           dt_add_circle(lstart, mouseh);
           lstartcell = NULL;
+          }
+        else if(mousekey == 'T') {
+          static string text = "";
+          dialog::edit_string(text, "", "");
+          hyperpoint h = mouseh;
+          dialog::reaction_final = [h] {
+            if(text != "")
+              dt_add_text(h, dtwidth * 50, text);
+            };
+          lstartcell = nullptr;          
           }
         else {
           cfree = nullptr;
