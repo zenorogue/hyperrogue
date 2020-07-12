@@ -773,8 +773,6 @@ void geometry_information::generate_floorshapes() {
 
 #if CAP_GP
 EX namespace gp {
-  int pshid[3][8][32][32][8];
-  int nextid;
   
   EX void clear_plainshapes() {
     for(int m=0; m<3; m++)
@@ -782,12 +780,12 @@ EX namespace gp {
     for(int i=0; i<32; i++)
     for(int j=0; j<32; j++)
     for(int k=0; k<8; k++)
-      pshid[m][sd][i][j][k] = -1;
-    nextid = 0;
+      cgi.gpdata->pshid[m][sd][i][j][k] = -1;
+    cgi.gpdata->nextid = 0;
     }
 
   void build_plainshape(int& id, gp::local_info& li, cell *c0, int siid, int sidir) {
-    id = nextid++;
+    id = cgi.gpdata->nextid++;
   
     bool master = !(li.relative.first||li.relative.second);
     int cor = master ? S7 : SG6;
@@ -818,7 +816,7 @@ EX namespace gp {
       siid = 0;
       sidir = 0;
       }
-    auto& id = pshid[siid][sidir][draw_li.relative.first&31][draw_li.relative.second&31][gmod(draw_li.total_dir, S6)];
+    auto& id = cgi.gpdata->pshid[siid][sidir][draw_li.relative.first&31][draw_li.relative.second&31][gmod(draw_li.total_dir, S6)];
     if(id == -1 && sphere && isize(cgi.shFloor.b) > 0) {
       forCellEx(c1, c) if(!gmatrix0.count(c1)) return 0;
       }

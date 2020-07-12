@@ -1149,9 +1149,6 @@ void geometry_information::prepare_shapes() {
 
   symmetriesAt.clear();
   allshapes.clear();
-  #if CAP_GP
-  gp::clear_plainshapes();
-  #endif
   DEBBI(DF_POLY, ("buildpolys"));
 
   if(WDIM == 3 && !hybri) {

@@ -439,6 +439,8 @@ hpcshape
     transmatrix corners;
     ld alpha;
     int area;
+    int pshid[3][8][32][32][8];
+    int nextid;
     };
   shared_ptr<gpdata_t> gpdata = nullptr;
   #endif

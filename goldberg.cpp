@@ -613,6 +613,7 @@ EX namespace gp {
     center_locs.clear();
     if(GOLDBERG) {
       if(!cgi.gpdata) cgi.gpdata = make_shared<geometry_information::gpdata_t>();
+      gp::clear_plainshapes();
       int x = param.first;
       int y = param.second;
       if(S3 == 3)
