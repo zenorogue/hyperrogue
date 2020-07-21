@@ -2039,7 +2039,6 @@ EX void draw_main() {
     if(ray::in_use && !ray::comparison_mode) {
       ray::cast();
       reset_projection();
-      if(stretch::in()) return; /*primitive not implemented */
       }
 
     DEBB(DF_GRAPH, ("outcircle"));

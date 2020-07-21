@@ -274,7 +274,7 @@ struct GLprogram {
   GLuint vertShader, fragShader;
 
   GLint uFog, uFogColor, uColor, tTexture, tInvExpTable, uMV, uProjection, uAlpha, uFogBase, uPP;
-  GLint uPRECX, uPRECY, uPRECZ, uIndexSL, uIterations, uLevelLines;
+  GLint uPRECX, uPRECY, uPRECZ, uIndexSL, uIterations, uLevelLines, uSV;
   
   flagtype shader_flags;
   
@@ -397,6 +397,7 @@ GLprogram::GLprogram(string vsh, string fsh) {
   uPRECY = glGetUniformLocation(_program, "PRECY");
   uPRECZ = glGetUniformLocation(_program, "PRECZ");
   uIndexSL = glGetUniformLocation(_program, "uIndexSL");
+  uSV = glGetUniformLocation(_program, "uSV");
   uIterations = glGetUniformLocation(_program, "uIterations");  
   uLevelLines = glGetUniformLocation(_program, "uLevelLines");
   }
@@ -409,6 +410,10 @@ GLprogram::~GLprogram() {
 
 EX void set_index_sl(ld x) {
   glUniform1f(glhr::current_glprogram->uIndexSL, x);
+  }
+
+EX void set_sv(ld x) {
+  glUniform1f(glhr::current_glprogram->uSV, x);
   }
 
 EX void set_sl_iterations(int steps) {

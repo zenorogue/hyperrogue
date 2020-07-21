@@ -87,7 +87,7 @@ EX bool available() {
 /** do we want to use the raycaster? */
 EX bool requested() {
   if(cgflags & qRAYONLY) return true;
-  if(stretch::in()) return true;
+  if(stretch::in() && sphere) return true;
   if(!want_use) return false;
   #if CAP_TEXTURE
   if(texture::config.tstate == texture::tsActive) return false;

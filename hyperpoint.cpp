@@ -211,6 +211,7 @@ EX ld sin_auto(ld x) {
     case gcHyperbolic: return sinh(x);
     case gcSphere: return sin(x);
     case gcProduct: return PIU(sin_auto(x));
+    case gcSL2: return sinh(x);
     default: return x;
     }
   }
@@ -221,6 +222,7 @@ EX ld asin_auto(ld x) {
     case gcHyperbolic: return asinh(x);
     case gcSphere: return asin(x);
     case gcProduct: return PIU(asin_auto(x));
+    case gcSL2: return asinh(x);
     default: return x;
     }
   }
@@ -230,6 +232,7 @@ EX ld acos_auto(ld x) {
     case gcHyperbolic: return acosh(x);
     case gcSphere: return acos(x);
     case gcProduct: return PIU(acos_auto(x));
+    case gcSL2: return acosh(x);
     default: return x;
     }
   }
@@ -266,6 +269,7 @@ EX ld asin_auto_clamp(ld x) {
   switch(cgclass) {
     case gcEuclid: return x;
     case gcHyperbolic: return asinh(x);
+    case gcSL2: return asinh(x);
     case gcSphere: return asin_clamp(x);
     default: return x;
     }
@@ -274,6 +278,7 @@ EX ld asin_auto_clamp(ld x) {
 EX ld acos_auto_clamp(ld x) {
   switch(cgclass) {
     case gcHyperbolic: return x < 1 ? 0 : acosh(x);
+    case gcSL2: return x < 1 ? 0 : acosh(x);
     case gcSphere: return x > 1 ? 0 : x < -1 ? M_PI : acos(x);
     case gcProduct: return PIU(acos_auto_clamp(x));
     default: return x;
@@ -284,6 +289,7 @@ EX ld cos_auto(ld x) {
   switch(cgclass) {
     case gcEuclid: return 1;
     case gcHyperbolic: return cosh(x);
+    case gcSL2: return cosh(x);
     case gcSphere: return cos(x);
     case gcProduct: return PIU(cos_auto(x));
     default: return 1;
@@ -296,6 +302,7 @@ EX ld tan_auto(ld x) {
     case gcHyperbolic: return tanh(x);
     case gcSphere: return tan(x);
     case gcProduct: return PIU(tan_auto(x));
+    case gcSL2: return tanh(x);
     default: return 1;
     }
   }
@@ -306,6 +313,7 @@ EX ld atan_auto(ld x) {
     case gcHyperbolic: return atanh(x);
     case gcSphere: return atan(x);
     case gcProduct: return PIU(atan_auto(x));
+    case gcSL2: return atanh(x);
     default: return x;
     }
   }
@@ -314,6 +322,7 @@ EX ld atan2_auto(ld y, ld x) {
   switch(cgclass) {
     case gcEuclid: return y/x;
     case gcHyperbolic: return atanh(y/x);
+    case gcSL2: return atanh(y/x);
     case gcSphere: return atan2(y, x);
     case gcProduct: return PIU(atan2_auto(y, x));
     default: return y/x;
@@ -1207,7 +1216,7 @@ EX hyperpoint tangent_length(hyperpoint dir, ld length) {
 EX hyperpoint direct_exp(hyperpoint v) {
   if(sn::in()) return nisot::numerical_exp(v);
   if(nil) return nilv::formula_exp(v);
-  if(sl2) return slr::formula_exp(v);
+  if(sl2 || stretch::in()) return rots::formula_exp(v);
   if(prod) return product::direct_exp(v);
   ld d = hypot_d(GDIM, v);
   if(d > 0) for(int i=0; i<GDIM; i++) v[i] = v[i] * sin_auto(d) / d;

@@ -1586,69 +1586,8 @@ EX }
 
 EX namespace slr {
 
-  /* This implementation is based on:
-  // https://pdfs.semanticscholar.org/bf46/824df892593a1b6d1c84a5f99e90eece7c54.pdf
-  // However, to make it consistent with the conventions in HyperRogue,
-  // coordinates 0<->2 and 1<->3 are swapped,
-  // then coordinates 2<->3 are swapped
-  */
-
   EX ld range_xy = 2;
   EX int steps = 15;
-
-  EX hyperpoint from_phigans(hyperpoint h) {
-    ld r = asinh(hypot_d(2, h));
-    ld x = h[0];
-    ld y = h[1];
-    ld z = h[2];
-    return hyperpoint(x * cos(z) + y * sin(z), y * cos(z) - x * sin(z), cosh(r) * sin(z), cosh(r) * cos(z));
-    }
-  
-  EX hyperpoint to_phigans(hyperpoint h) {
-    ld z = atan2(h[2], h[3]);
-    ld x = h[0];
-    ld y = h[1];
-    return point31(x * cos(z) - y * sin(z), y * cos(z) + x * sin(z), z);
-    }
-
-  /** in the 'phigans' model */
-  hyperpoint christoffel(const hyperpoint Position, const hyperpoint Velocity, const hyperpoint Transported) {
-    ld x = Position[0];
-    ld y = Position[1];
-    ld s = x*x + y*y + 1;
-    ld x2 = x * x;
-    ld y2 = y * y;
-    ld x4 = x2 * x2;
-    ld y4 = y2 * y2;
-    return point3(
-     + Velocity[ 0 ] * Transported[ 0 ] * (x*(4*x2*y2 + 4*y4 + 9*y2 + 1))
-     + Velocity[ 0 ] * Transported[ 1 ] * (-y*(4*x4 + 4*x2*y2 + 9*x2 + 2))
-     + Velocity[ 0 ] * Transported[ 2 ] * (-x*y*(x2 + y2 + 2))
-     + Velocity[ 1 ] * Transported[ 0 ] * (-y*(4*x4 + 4*x2*y2 + 9*x2 + 2))
-     + Velocity[ 1 ] * Transported[ 1 ] * (x*(4*x4 + 4*x2*y2 + 9*x2 + 5))
-     + Velocity[ 1 ] * Transported[ 2 ] * (x4 + x2*y2 + 2*x2 + 1)
-     + Velocity[ 2 ] * Transported[ 0 ] * (-x*y*(x2 + y2 + 2))
-     + Velocity[ 2 ] * Transported[ 1 ] * (x4 + x2*y2 + 2*x2 + 1),
-  
-     + Velocity[ 0 ] * Transported[ 0 ] *  (y*(4*x2*y2 + 4*y4 + 9*y2 + 5))
-     + Velocity[ 0 ] * Transported[ 1 ] *  (-x*(4*x2*y2 + 4*y4 + 9*y2 + 2))
-     + Velocity[ 0 ] * Transported[ 2 ] *  (-x2*y2 - y4 - 2*y2 - 1)
-     + Velocity[ 1 ] * Transported[ 0 ] *  (-x*(4*x2*y2 + 4*y4 + 9*y2 + 2))
-     + Velocity[ 1 ] * Transported[ 1 ] *  (y*(4*x4 + 4*x2*y2 + 9*x2 + 1))
-     + Velocity[ 1 ] * Transported[ 2 ] *  (x*y*(x2 + y2 + 2))
-     + Velocity[ 2 ] * Transported[ 0 ] *  (-x2*y2 - y4 - 2*y2 - 1)
-     + Velocity[ 2 ] * Transported[ 1 ] *  (x*y*(x2 + y2 + 2)),
-  
-     + Velocity[ 0 ] * Transported[ 0 ] *  (-4*x*y)
-     + Velocity[ 0 ] * Transported[ 1 ] *  (2*x2 - 2*y2)
-     + Velocity[ 0 ] * Transported[ 2 ] *  x
-     + Velocity[ 1 ] * Transported[ 0 ] *  (2*x2 - 2*y2)
-     + Velocity[ 1 ] * Transported[ 1 ] *  4*x*y
-     + Velocity[ 1 ] * Transported[ 2 ] *  y
-     + Velocity[ 2 ] * Transported[ 0 ] *  x
-     + Velocity[ 2 ] * Transported[ 1 ] *  y
-       ) / s;
-    }
 
   EX transmatrix translate(hyperpoint h) {
     return matrix4(
@@ -1662,204 +1601,324 @@ EX namespace slr {
   EX hyperpoint polar(ld r, ld theta, ld phi) {
     return hyperpoint(sinh(r) * cos(theta-phi), sinh(r) * sin(theta-phi), cosh(r) * sin(phi), cosh(r) * cos(phi));
     }
-  
+
   EX hyperpoint xyz_point(ld x, ld y, ld z) {
     ld r = hypot(x, y);
     ld f = r ? sinh(r) / r : 1;
     return hyperpoint(x * f * cos(z) + y * f * sin(z), y * f * cos(z) - x * f * sin(z), cosh(r) * sin(z), cosh(r) * cos(z));
     }
   
-  ld rootsin(ld square, ld s) {
-    if(square > 0) return sinh(sqrt(square) * s) / sqrt(square);
-    else if(square < 0) return sin(sqrt(-square) * s) / sqrt(-square);
-    else return s;
-    }
-  
-  /** it==0 is standard asin, it==1 is the next solution (PI-asin) */
-  ld asin_it(ld z, int it) {
-    auto ans = asin(z);
-    if(it & 1) ans = M_PI - ans;
-    return ans;
-    }
-  
-  ld arootsin(ld square, ld v, int it) {
-    if(square > 0) return asinh(v * sqrt(square)) / sqrt(square);
-    else if(square < 0) return asin_it(v * sqrt(-square), it) / sqrt(-square);
-    else return v;
-    }
-  
-  ld roottan(ld square, ld s) {
-    if(square > 0) return tanh(sqrt(square) * s) / sqrt(square);
-    else if(square < 0) return tan(sqrt(-square) * s) / sqrt(-square);
-    else return s;
-    }
-
-  hyperpoint geodesic_polar(ld alpha, ld beta, ld s) {
-    auto c = cos(2*alpha);
-    
-    ld t;
-    if(c > 0) 
-      t = atan(sin(alpha) * tanh(sqrt(c) * s) / sqrt(c));
-    else if(c < 0) {
-      /* the formula in the paper is roughly atan(k*tan(s))
-       * however, atan is not always to be taken in [-PI/2,PI/2]:
-       * if s is in [kPI-PI/2, kPI+PI/2], we should also increase the result by kPI
-       */
-      ld x = sqrt(-c) * s;
-      ld steps = floor(x/M_PI + 0.5);
-      t = atan(sin(alpha) * tan(sqrt(-c) * s) / sqrt(-c)) + M_PI * steps;
-      }
-    else t = atan(sin(alpha) * s);
-    
-    return polar(
-      asinh(cos(alpha) * rootsin(c, s)),
-      beta - t,
-      2*sin(alpha)*s - t
-      );
-    }
-
-  EX hyperpoint formula_exp(hyperpoint h) {
-    ld s = hypot_d(3, h);
-    ld beta = atan2(h[1], h[0]);
-    ld alpha = asin(h[2] / s);
-    return geodesic_polar(alpha, beta, s);
-    }
-
-  void find_alpha(ld phi, ld r, ld theta, ld &alpha, ld &s, ld &beta) {
-    if(phi < 0) { find_alpha(-phi, r, -theta, alpha, s, beta); alpha = -alpha; beta = -beta; return; }
-    ld mina = 0, maxa = M_PI/2;
-  
-    bool next_nan = true;
-    ld c;
-    
-    for(int it=0; it<40; it++) {
-      alpha = (mina + maxa) / 2;
-  
-      c = cos(2 * alpha);    
-      s = arootsin(c, sinh(r) / cos(alpha), 0);
-      if(isnan(s)) { next_nan = true, maxa = alpha; continue; }
-      ld got_phi = 2*sin(alpha)*s - atan(sin(alpha) * roottan(c, s));
-      if(got_phi > phi) next_nan = false, maxa = alpha;
-      else mina = alpha;
-      }
-    
-    if(next_nan) {
-      mina = M_PI/4;
-  
-      for(int it=0; it<40; it++) {
-        alpha = (mina + maxa) / 2;
-        c = cos(2 * alpha);    
-        s = arootsin(c, sinh(r) / cos(alpha), 1);
-        ld got_phi = 2*sin(alpha)*s - atan(sin(alpha) * roottan(c, s)) - M_PI;
-        if(got_phi < phi) maxa = alpha;
-        else mina = alpha;
-        }
-      beta = theta + atan(sin(alpha) * roottan(c, s)) + M_PI;
-      }
-    else beta = theta + atan(sin(alpha) * roottan(c, s));
-    }
-
   EX hyperpoint get_inverse_exp(hyperpoint h, ld index IS(0)) {
-    if(sqhypot_d(2, h) < 1e-12) return point3(0, 0, atan2(h[2], h[3]) + index);
-    ld r = asinh(hypot_d(2, h));
+    ld xy = hypot_d(2, h);
     ld phi = atan2(h[2], h[3]) + index;
-    ld theta = atan2(h[1], h[0]) + phi + index;
+
+    bool flipped = phi > 0;
+    if(flipped) phi = -phi, h[2] *= -1, h[0] *= -1;
     
-    ld alpha, s, beta;
-    find_alpha(phi, r, theta, alpha, s, beta);
+    ld SV = stretch::not_squared();
+    ld K = -1;
     
-    return point3(s * cos(beta) * cos(alpha), s * sin(beta) * cos(alpha), s * sin(alpha));
+    ld alpha = atan2(h[1], -h[0]);  
+    
+    hyperpoint res;
+    
+    ld fiber_barrier = atan(1/SV);
+    
+    ld flip_barrier = atan( 1 / tanh(asinh(xy)) / SV);
+    
+    // test the side of the flip barrier
+    
+    int part = -1;
+    
+    if(1) {
+      ld kk = flip_barrier;
+      
+      ld x_part = cos(kk);
+      ld z_part = sin(kk);
+  
+      ld rparam = x_part / z_part / SV;
+      
+      ld r = atanh(rparam);
+      
+      ld cr = cosh(r);
+      ld sr = sinh(r);
+      
+      // sinh(r) = xy
+      // r = tanh(sinh(xy))
+      
+  
+      ld z = cr * (K - 1/SV/SV);
+  
+      ld k = M_PI/2;
+      ld a = k / K;
+      ld zw = xy * cr / sr;
+      ld u = z * a;
+  
+      ld phi1 = atan2(zw, cos(k)) - u;
+      
+      if(phi < phi1) part = 2;
+      }
+    
+    if(part == -1) {
+      ld zw = xy;
+  
+      ld u = xy * (K - 1/SV/SV) / K;
+      ld phi1 = atan2(zw, 1) - u;
+      
+      if(phi > phi1) part = 0; else part = 1;
+      }
+    
+    if(part == 2) {
+      ld min_k = fiber_barrier;
+      ld max_k = flip_barrier;
+  
+      for(int it=0; it<30; it++) {
+        ld kk = (min_k + max_k) / 2;
+        
+        ld x_part = cos(kk);
+        ld z_part = sin(kk);
+        
+        ld rparam = x_part / z_part / SV;
+        
+        assert(rparam <= 1);
+  
+        ld r = atanh(rparam);      
+        ld cr = cosh(r);
+        ld sr = sinh(r);
+  
+        ld z = cr * (K - 1/SV/SV);
+  
+        ld k = M_PI - asin(xy / sr);
+        ld a = k / K;
+        ld len = a * hypot(sr, cr/SV);
+        ld zw = xy * cr / sr;
+        ld u = z * a;
+  
+        ld phi1 = atan2(zw, cos(k)) - u;
+  
+        if(phi < phi1) max_k = kk;
+        else min_k = kk;
+  
+        ld r_angle = alpha + u;
+        res = point3(cos(r_angle) * x_part * len, -sin(r_angle) * x_part * len, z_part * len);
+        }
+      }
+    
+    if(part == 0) {
+      ld min_k = 0;
+      ld max_k = fiber_barrier;
+  
+      for(int it=0; it<30; it++) {
+        ld kk = (min_k + max_k) / 2;
+        
+        ld x_part = cos(kk);
+        ld z_part = sin(kk);
+    
+        ld rparam = x_part / z_part / SV;
+        
+        ld cr = 1 / sqrt(rparam*rparam - 1);
+        ld sr = rparam * cr;
+  
+        ld z = cr * (K - 1/SV/SV);
+        
+        ld k = asinh(xy / sr);
+        ld a = k / K;
+        ld len = a * hypot(sr, cr/SV);
+  
+        ld zw = xy * cr / sr;
+  
+        ld u = z * a;
+        ld phi1 = atan2(zw, cosh(k)) - u;
+        
+        if(phi > phi1) max_k = kk; else min_k = kk;
+        
+        ld r_angle = alpha + u;
+        res = point3(cos(r_angle) * x_part * len, -sin(r_angle) * x_part * len, z_part * len);
+        }
+      }
+    
+    if(part == 1) {
+      ld min_k = fiber_barrier;
+      ld max_k = flip_barrier;
+  
+      for(int it=0; it<30; it++) {
+        ld kk = (min_k + max_k) / 2;
+        
+        ld x_part = cos(kk);
+        ld z_part = sin(kk);
+    
+        ld rparam = x_part / z_part / SV;
+        
+        ld r = atanh(rparam);      
+        ld cr = cosh(r);
+        ld sr = sinh(r);
+  
+        ld z = cr * (K - 1/SV/SV);
+  
+        ld k = asin(xy / sr);
+        ld a = k / K;
+        ld len = a * hypot(sr, cr/SV);
+        ld zw = xy * cr / sr;
+        ld u = z * a;
+  
+        ld phi1 = atan2(zw, cos(k)) - u;
+        
+        if(isnan(phi1)) max_k = kk;
+        else if(phi > phi1) max_k = kk;
+        else min_k = kk;
+  
+        ld r_angle = alpha + u;
+        res = point3(cos(r_angle) * x_part * len, -sin(r_angle) * x_part * len, z_part * len);
+        }      
+      }
+    
+    if(flipped) res[0] *= -1, res[2] *= -1;
+
+    return res;
     }
+
+#if ISWEB
+#define ITERATE "  for(int it=0; it<50; it++) { if(it >= uIterations) break; "
+#else
+#define ITERATE "  for(int it=0; it<uIterations; it++) {"
+#endif
 
   EX string slshader = 
 
     "uniform mediump float uIndexSL;"
     "uniform mediump int uIterations;"
+    "uniform mediump float uSV;"
     
     "vec4 inverse_exp(vec4 h) {"
-      "if(h[0]*h[0] + h[1] * h[1] < 1e-6) return vec4(0, 0, atan2(h[2], h[3]) + uIndexSL, 1);"
-      "float r = asinh(sqrt(h[0] * h[0] + h[1] * h[1]));"
+
+      "float xy = length(h.xy);"
       "float phi = atan2(h[2], h[3]) + uIndexSL;"
-      "float theta = atan2(h[1], h[0]) + phi + uIndexSL;"
-      "float alpha;"
-      "float s;"
-      "float beta;"
-      "float sgn = 1.;"
-      "float bound = .999;"
-      "if(phi < 0.) { phi = -phi; theta = -theta; sgn = -1.; }"
-      "float c;"
-      "s = sinh(r) / cos(PI/4.);"
-      "float gphi = 2.*sin(PI/4.)*s - atan(sin(PI/4.) * s);"
-      "float lo_gphi = gphi;"
-      "float lo_s = s;"
-      "float lo_alpha = PI/4.;"
-      "float lx_gphi = gphi;"
-      "float lx_s = s;"
-      "float lx_alpha = PI/4.;"
-      "float hi_gphi = gphi;"
-      "float hi_s = s;"
-      "float hi_alpha = PI/4.;"
-      "if(gphi > phi) {"
-      "  float mina = 0.;"
-      "  float maxa = PI/4.;"
-      "  lo_gphi = 0.; lo_s = r; lo_alpha = 0.;"
-#if ISWEB
-      "  for(int it=0; it<50; it++) { if(it >= uIterations) break; "
-#else
-      "  for(int it=0; it<uIterations; it++) {"
-#endif
-      "    alpha = (mina + maxa) / 2.;"
-      "    c = sqrt(cos(2. * alpha));"
-      "    s = asinh(sinh(r) / cos(alpha) * c) / c;"
-      "    gphi = 2.*sin(alpha)*s - atan(sin(alpha) * tanh(c * s) / c);"
-      "    if(gphi > phi) { maxa = alpha; hi_alpha = alpha; hi_s = s; hi_gphi = gphi; }"
-      "    else { mina = alpha; lo_alpha = alpha; lo_s = s; lo_gphi = gphi; }"
-      "    }"
-      "  }"
-      "else {"
-      "  hi_gphi = phi; hi_s = phi; hi_alpha = 9.;"
-      "  int next_nan = 1;"
-      "  float mina = PI/4.;"
-      "  float maxa = PI/2.;"
-#if ISWEB
-      "  for(int it=0; it<50; it++) { if(it >= uIterations) break; "
-#else
-      "  for(int it=0; it<uIterations; it++) {"
-#endif
-      "    alpha = (mina + maxa) / 2.;"
-      "    c = sqrt(-cos(2. * alpha));"
-      "    if(sinh(r) * c > bound * cos(alpha)) { next_nan = 1; maxa = alpha; continue; }"
-      "    s = asin(sinh(r) * c / cos(alpha)) / c;"
-      "    gphi = 2.*sin(alpha)*s - atan(sin(alpha) * tan(c*s) / c);"
-      "    if(gphi > phi) { next_nan = 0; maxa = alpha; hi_gphi = gphi; hi_s = s; hi_alpha = alpha; }"
-      "    else { mina = alpha; lx_gphi = lo_gphi; lx_s = lo_s; lx_alpha = lo_alpha; lo_gphi = gphi; lo_s = s; lo_alpha = alpha; }"
-      "    }"
-      "  if(next_nan != 0) {"
-      "    mina = PI/4.; "
-#if ISWEB
-      "    for(int it=0; it<50; it++) { if(it >= uIterations) break; "
-#else
-      "    for(int it=0; it<uIterations; it++) {"
-#endif
-      "      alpha = (mina + maxa) / 2.;"
-      "      c = sqrt(-cos(2. * alpha));"
-      "      float z = sinh(r) * c / cos(alpha);"
-      "      if(z>bound) { maxa = alpha; next_nan = 1; continue; }"
-      "      float s1 = PI - asin(z);"
-      "      s = s1 / c;"
-      "      gphi = 2.*sin(alpha)*s - atan(sin(alpha) * tan(s1) / c) - PI;"
-      "      if(gphi < phi) { next_nan = 0; maxa = alpha; hi_gphi = gphi; hi_s = s; hi_alpha = alpha; }"
-      "      else { mina = alpha; lo_gphi = gphi; lo_s = s; lo_alpha = alpha; }"
-      "      }"
-      "    }"
-      "  }"
-      "if(hi_alpha <= 9.) { hi_gphi = lx_gphi; hi_s = lx_s; hi_alpha = lx_alpha; } "
-        "float fr = (phi-lo_gphi) / (hi_gphi-lo_gphi);"
-        "alpha = lo_alpha + (hi_alpha-lo_alpha) * fr;"
-        "s = lo_s + (hi_s-lo_s) * fr;"
-      "beta = theta - phi + 2.*sin(alpha)*s;"
-      "alpha = alpha * sgn; beta = beta * sgn;"
-      "return vec4(s * cos(beta) * cos(alpha), s * sin(beta) * cos(alpha), s * sin(alpha), 1.);"
+
+      "vec4 res = vec4(sqrt(-1.),sqrt(-1.),sqrt(-1.),sqrt(-1.));"
+      
+      "bool flipped = phi > 0.;"
+      "if(flipped) phi = -phi, h[2] *= -1, h[0] *= -1;"
+      
+      "float alpha = atan2(h[1], -h[0]) + uIndexSL;"
+      
+      "float fiber_barrier = atan(1./uSV);"
+    
+      "float flip_barrier = atan(1. / tanh(asinh(xy)) / uSV);"      
+      
+      "int part = 0;"
+      
+      "if(true) {"
+        "float x_part = cos(flip_barrier);"
+        "float z_part = sin(flip_barrier);"
+        "float rparam = x_part / z_part / uSV;"
+        "float r = atanh(rparam);"
+        "float cr = cosh(r);"
+        "float sr = sinh(r);"
+        "float z = cr * (-1.-1./uSV/uSV);"
+        "float k = PI/2.;"
+        "float a = -k;"
+        "float zw = xy * cr / sr;"
+        "float u = z * a;"
+        "float phi1 = atan2(zw, cos(k)) - u;"
+        "if(phi < phi1) part = 2;"
+        "}\n"
+      
+      "if(part == 0) {"
+        "float zw = xy;"
+        "float u = xy * (1. + 1./uSV/uSV);"
+        "float phi1 = atan2(zw, 1.) - u;"
+        "if(phi > phi1) part = 0; else part = 1;"
+        "}\n"
+      
+      "if(part == 2) {"
+        "float min_k = fiber_barrier;"
+        "float max_k = flip_barrier;"
+  
+        ITERATE
+          "float kk = (min_k + max_k) / 2.;"
+          "float x_part = cos(kk);"
+          "float z_part = sin(kk);"        
+          "float rparam = x_part / z_part / uSV;"
+          "float r = atanh(rparam);"
+          "float cr = cosh(r);"
+          "float sr = sinh(r);"
+          
+          "float z = cr * (-1. - 1./uSV/uSV);"
+          "float k = PI - asin(xy / sr);"
+          "float a = -k;"
+          "float len = a * length(vec2(sr, cr/uSV));"
+          "float zw = xy * cr / sr;"
+          "float u = z * a;"
+          "float phi1 = atan2(zw, cos(k)) - u;"
+          "if(phi < phi1) max_k = kk; else min_k = kk;"
+          "float r_angle = alpha + u;"
+          "res = vec4(cos(r_angle) * x_part * len, -sin(r_angle) * x_part * len, z_part * len, 1);"
+          "}"
+        "}\n"
+      
+      "if(part == 0) {"
+        "float min_k = 0.;"
+        "float max_k = fiber_barrier;"
+  
+        ITERATE
+          "float kk = (min_k + max_k) / 2.;"
+          "float x_part = cos(kk);"
+          "float z_part = sin(kk);"    
+          "float rparam = x_part / z_part / uSV;"        
+          "float cr = 1. / sqrt(rparam*rparam - 1.);"
+          "float sr = rparam * cr;"  
+          "float z = cr * (-1. - 1./uSV/uSV);"
+          "float k = asinh(xy / sr);"
+          "float a = -k;"
+          "float len = a * length(vec2(sr, cr/uSV));"  
+          "float zw = xy * cr / sr;"  
+          "float u = z * a;"
+          "float phi1 = atan2(zw, cosh(k)) - u;"
+        
+          "if(phi > phi1) max_k = kk; else min_k = kk;"
+        
+          "float r_angle = alpha + u;"
+          "res = vec4(cos(r_angle) * x_part * len, -sin(r_angle) * x_part * len, z_part * len, 1);"
+          "}"
+        "}\n"
+    
+      "if(part == 1) {"
+        "float min_k = fiber_barrier;"
+        "float max_k = flip_barrier;"
+  
+        ITERATE
+          "float kk = (min_k + max_k) / 2.;"
+        
+          "float x_part = cos(kk);"
+          "float z_part = sin(kk);"
+    
+          "float rparam = x_part / z_part / uSV;"
+        
+          "float r = atanh(rparam);"
+          "float cr = cosh(r);"
+          "float sr = sinh(r);"
+  
+          "float z = cr * (-1. - 1./uSV/uSV);"
+  
+          "float k = asin(xy / sr);"
+          "float a = -k;"
+          "float len = a * length(vec2(sr, cr/uSV));"
+          "float zw = xy * cr / sr;"
+          "float u = z * a;"
+  
+          "float phi1 = atan2(zw, cos(k)) - u;"
+        
+          "if(phi > phi1) max_k = kk;"
+          "else min_k = kk;"
+  
+          "float r_angle = alpha + u;"
+          "res = vec4(cos(r_angle) * x_part * len, -sin(r_angle) * x_part * len, z_part * len, 1);"
+          "}"
+        "}\n"
+    
+      "if(flipped) res[0] *= -1., res[2] *= -1.;"
+
+      "return res;"
       "}";
 
 EX }
@@ -2058,6 +2117,63 @@ EX namespace rots {
     reset_projection(); current_display->set_all(0);
     }
 
+  /** @brief exponential function for both slr and Berger sphere */
+
+  EX hyperpoint formula_exp(hyperpoint vel) {
+    bool sp = sphere;
+    ld K = sp ? 1 : -1;    
+  
+    ld len = hypot_d(3, vel);
+  
+    if(vel[2] < 0) len = -len;
+    
+    ld z_part = vel[2]/len;
+    ld x_part = sqrt(1 - z_part * z_part);
+  
+    ld SV = stretch::not_squared();
+    
+    ld rparam = x_part / z_part / SV;
+    
+    ld beta = atan2(vel[1], vel[0]);
+    if(len < 0) beta += M_PI;
+    
+    if(sl2 && rparam > 1) {  
+      ld cr = 1 / sqrt(rparam*rparam - 1); // *i
+      ld sr = rparam * cr;                 // *i
+  
+      ld z = cr * (K - 1/SV/SV); // *i
+  
+      ld a = len / hypot(sr, cr/SV); // /i
+  
+      ld k = K*a; // /i
+      ld u = z*a;
+  
+      ld xy = sr * sinh(k);
+      ld zw = cr * sinh(k);
+      
+      return hyperpoint(K*xy * cos(u+beta), K*xy * sin(u+beta), zw * cos(u) - cosh(k) * sin(u), zw * sin(u) + cosh(k)*cos(u));
+      }
+  
+    else {
+      ld r = atan_auto(rparam);      
+      ld cr = cos_auto(r);
+      ld sr = sin_auto(r);
+    
+      ld z = cr * (K - 1/SV/SV);
+      
+      ld a = len / hypot(sr, cr/SV);
+    
+      ld k = K*a;
+      ld u = z*a;
+      
+      ld xy = sr * sin(k);  
+      ld zw = cr * sin(k);    
+      
+      return hyperpoint(K*xy * cos(u+beta), K*xy * sin(u+beta), zw * cos(u) - cos(k) * sin(u), zw * sin(u) + cos(k)*cos(u));
+      }
+    }
+
+
 EX }
 
 /** stretched rotation space (S3 or SLR) */
@@ -2105,15 +2221,15 @@ EX namespace stretch {
     return sqrt(squared());
     }
   
-  hyperpoint isometric_to_actual(const hyperpoint at, const hyperpoint velocity) {
+  EX hyperpoint isometric_to_actual(const hyperpoint at, const hyperpoint velocity) {
     return mulz(at, velocity, 1/not_squared());
     }
   
-  hyperpoint actual_to_isometric(const hyperpoint at, const hyperpoint velocity) {
+  EX hyperpoint actual_to_isometric(const hyperpoint at, const hyperpoint velocity) {
     return mulz(at, velocity, not_squared());
     }
   
-  hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
+  EX hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
   
     auto vel = itranslate(at) * velocity;
     auto tra = itranslate(at) * transported;  
@@ -2147,8 +2263,7 @@ EX namespace nisot {
     #if CAP_SOLV
     else if(sn::in()) return sn::christoffel(at, velocity, transported);
     #endif
-    else if(stretch::in()) return stretch::christoffel(at, velocity, transported);
-    else if(sl2) return slr::christoffel(at, velocity, transported);
+    else if(stretch::in() || sl2) return stretch::christoffel(at, velocity, transported);
     else return point3(0, 0, 0);
     }
 
@@ -2186,22 +2301,13 @@ EX namespace nisot {
 
   EX transmatrix parallel_transport_bare(transmatrix Pos, hyperpoint h) {
   
-    bool stretch = stretch::in();
+    bool stretch = stretch::in() || sl2;
 
     h[3] = 0;
   
     auto tPos = transpose(Pos);
     
-    const ld eps = 1e-4;
-    
-    if(sl2 && !stretch) {
-      hyperpoint p = slr::to_phigans(tPos[3]);
-      for(int i=0; i<3; i++)
-        tPos[i] = (slr::to_phigans(tPos[3] + tPos[i] * eps) - p) / eps;
-      tPos[3] = p; 
-      h = transpose(tPos) * h;
-      }
-    else h = Pos * h;
+    h = Pos * h;
 
     int steps = rk_steps;
     h /= steps;
@@ -2266,13 +2372,6 @@ EX namespace nisot {
       for(int i=0; i<3; i++) tPos[i] = stretch::actual_to_isometric(at, tPos[i]);
       }
     
-    else if(sl2) {
-      hyperpoint p = slr::from_phigans(tPos[3]);
-      for(int i=0; i<3; i++)
-        tPos[i] = (slr::from_phigans(tPos[3] + tPos[i] * eps) - p) / eps;
-      tPos[3] = p;
-      }
-
     return transpose(tPos);
     }
 
