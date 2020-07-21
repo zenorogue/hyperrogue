@@ -4036,6 +4036,6 @@ bugfixes:
 - new 3D Euclidean quotient space: Hantzsche-Wendt (double cube) manifold
 
 2020-07-13 01:32 Update 11.3r:
-- inverse variation
+- new options in the variation menu, which allow e.g. playing / map editing on the duals of Goldberg tessellations, or e.g. warped GP(2,1) {8,3}
 - redone some Guided Tour slides and possible crash
 - you can now add text in the Drawing Tool
