@@ -741,12 +741,38 @@ EX void showEuclideanMenu() {
     spf = "[4..8]^3";
   #endif
   #if CAP_GP
+  else if(UNRECTIFIED || UNTRUNCATED) {
+    if(UNRECTIFIED && (gp::param.first-gp::param.second) % 2 != 0)
+      spf = "(?)";
+    else if(UNTRUNCATED && (gp::param.first-gp::param.second) % 3 != 0)
+      spf = "(?)";
+    else {      
+      string each = UNRECTIFIED ? "4" : "3";
+      int first = UNRECTIFIED ? 4 : 6;
+      int second = S7;
+      if(gp::param == gp::loc(1, 1))
+        first = second;
+      else if(second < first)
+        swap(first, second);
+      spf = each;
+      for(int z=1; z<first; z++) spf += "," + each;
+      if(first != second) {
+        spf += "[";
+        for(int z=first; z<second; z++) spf += "," + each;
+        spf += "]";
+        }
+      }
+    }
   else if(GOLDBERG && S3 == 4 && gp::param == gp::loc(1, 1))
     spf = spf + ",4," + spf + ",4";
   else if(GOLDBERG && S3 == 4 && gp::param == gp::loc(2, 0))
     spf = spf + ",4,4,4";
   else if(GOLDBERG && S3 == 4)
     spf = "[" + spf + ",4],4,4,4";
+  else if(WARPED && S3 == 3 && gp::param == gp::loc(1,1))
+    spf = spf + ",3,3";
+  else if(WARPED && S3 == 3)
+    spf = "[" + spf + ",6],3,3";
   else if(GOLDBERG && S3 == 3)
     spf = "[" + spf + ",6],6,6";
   #endif
