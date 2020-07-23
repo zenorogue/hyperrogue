@@ -939,6 +939,8 @@ bool pcmove::attack() {
   plague_kills = 0;
 
   if(good_tortoise) {
+    changes.ccell(c2);
+    c2->stuntime = 2;
     changes.at_commit([c2] {
       items[itBabyTortoise] += 4;
       updateHi(itBabyTortoise, items[itBabyTortoise]);
@@ -946,7 +948,6 @@ bool pcmove::attack() {
       tortoise::babymap[c2] = tortoise::seekbits;
       playSound(c2, playergender() ? "heal-princess" : "heal-prince");
       addMessage(XLAT(playergender() == GEN_F ? "You are now a tortoise heroine!" : "You are now a tortoise hero!"));
-      c2->stuntime = 2;
       achievement_collection(itBabyTortoise);
       });
     }
