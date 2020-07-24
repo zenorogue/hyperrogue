@@ -1255,6 +1255,80 @@ void draw_s2xe0(dqi_poly *p) {
 #endif
 EX }
 
+EX int berger_limit = 2;
+
+void draw_stretch(dqi_poly *p) {
+
+  if(!(p->flags & POLY_TRIANGLES)) return;
+  
+  dqi_poly npoly = *p;
+  
+  npoly.offset = 0;
+  npoly.tab = &glcoords;
+  npoly.V = Id;
+  npoly.flags &= ~(POLY_INVERSE | POLY_FORCE_INVERTED);
+  
+  transmatrix T2 = stretch::translate( tC0(inverse(View)) );
+  transmatrix U = View * T2;
+  
+  transmatrix iUV = inverse(U) * p->V;
+  
+  vector<hyperpoint> hs;
+  vector<hyperpoint> ths;
+  hs.resize(p->cnt);
+  ths.resize(p->cnt);
+  for(int i=0; i<p->cnt; i++) 
+    hs[i] = iUV * glhr::gltopoint( (*p->tab)[p->offset+i] );
+    
+  vector<vector<hyperpoint> > results;
+  results.resize(p->cnt);
+
+  auto& stinf = s2xe::stinf;
+
+  if(p->tinf) {
+    npoly.tinf = &stinf;
+    npoly.offset_texture = 0;
+    stinf.texture_id = p->tinf->texture_id;
+    stinf.tvertices.clear();
+    }
+  else {
+    npoly.tinf = NULL;
+    }
+  npoly.V = Id;
+  set_width(1);
+  glcoords.clear();
+
+  for(int i=0; i<p->cnt; i++) results[i] = stretch::inverse_exp_all(hs[i], berger_limit);
+
+  for(int i=0; i<p->cnt; i+=3) {
+    auto &la = results[i];
+    auto &lb = results[i+1];
+    auto &lc = results[i+2];
+    
+    int ia = 0, ib = 0, ic = 0;
+    
+    auto test = [] (hyperpoint a, hyperpoint b) -> bool {
+      return sqhypot_d(3, a-b) < 2;
+      };
+   
+    for(auto& ha: la) for(auto& hb: lb) if(test(ha, hb))
+      for(auto& hc: lc) if(test(ha, hc) && test(hb, hc)) {
+      
+      glcoords.push_back(glhr::pointtogl(U * ha));
+      glcoords.push_back(glhr::pointtogl(U * hb));
+      glcoords.push_back(glhr::pointtogl(U * hc));
+      if(p->tinf) 
+        for(int j=0; j<3; j++)
+          stinf.tvertices.push_back(p->tinf->tvertices[p->offset_texture+i+j]);
+      ia++; ib++; ic++;
+      }
+    }
+  
+  npoly.cnt = isize(glcoords);
+  
+  npoly.gldraw();
+  }
+
 EX namespace ods {
 #if CAP_ODS
   
@@ -1522,6 +1596,11 @@ void dqi_poly::draw() {
     return;
     } */
 
+  if(vid.usingGL && (current_display->set_all(global_projection), get_shader_flags() & SF_DIRECT) && sphere && (stretch::factor || ray::in_use)) {
+    draw_stretch(this);  
+    return;
+    }
+    
 #if CAP_GL
   if(vid.usingGL && (current_display->set_all(global_projection), get_shader_flags() & SF_DIRECT)) {
     if(sl2 && pmodel == mdGeodesic && hybrid::csteps) {
@@ -1997,14 +2076,11 @@ EX void reverse_transparent_walls() {
 
 EX void draw_main() {
   DEBBI(DF_GRAPH, ("draw_main"));
-  if(sphere && GDIM == 3 && pmodel == mdPerspective) {
+  if(sphere && GDIM == 3 && pmodel == mdPerspective && !stretch::in() && !ray::in_use) {
 
     if(ray::in_use && !ray::comparison_mode) {
       ray::cast();
       reset_projection();
-      /* currently incompatible with primitive-based renderer */
-      /* also not implemented in stretch */
-      if(stretch::factor) return;
       }
 
     #if CAP_GL

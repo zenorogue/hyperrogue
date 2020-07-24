@@ -1573,10 +1573,13 @@ EX void enable_flat_model() {
 
 #if HDR
 /** \brief enable the 'flat' model for drawing HUD. Use RAII so it will be switched back later */
+namespace stretch { extern ld factor; }
+
 struct flat_model_enabler {
   projection_configuration bak;
-  flat_model_enabler() { bak = pconf; enable_flat_model(); }
-  ~flat_model_enabler() { pconf = bak; calcparam(); }
+  ld sf;
+  flat_model_enabler() { bak = pconf; sf = stretch::factor; stretch::factor = 0; enable_flat_model(); }
+  ~flat_model_enabler() { pconf = bak; stretch::factor = sf; calcparam(); }
   };
 #endif
 

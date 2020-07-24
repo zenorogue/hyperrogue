@@ -248,7 +248,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     shader_flags |= SF_PERS3 | SF_DIRECT;
     if(hyperbolic)
       distfun = "acosh(t[3])", treset = true;
-    else if(euclid || nonisotropic)
+    else if(euclid || nonisotropic || stretch::in() || (sphere && ray::in_use))
       distfun = "length(t.xyz)", treset = true;
     else {
       if(spherephase & 4) coordinator += "t = -t;\n";

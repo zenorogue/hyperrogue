@@ -2404,6 +2404,129 @@ EX namespace stretch {
     h = itranslate(at) * h;    
     return h[0] * h[0] + h[1] * h[1] + h[2] * h[2];
     }
+
+  EX vector<hyperpoint> inverse_exp_all(hyperpoint h, int generations) {
+  
+    vector<hyperpoint> res;
+    
+    if(stretch::factor == 0) {
+      ld d = hypot_d(3, h);
+      if(h[3] >= 1 || h[3] <= -1|| d == 0) return res;
+      ld a = acos(h[3]);
+      
+      res.push_back(point31(h[0] * a / d, h[1] * a / d, h[2] * a / d));
+      
+      a = a - 2 * M_PI;
+
+      res.push_back(point31(h[0] * a / d, h[1] * a / d, h[2] * a / d));
+      
+      return res;
+      }
+    
+    ld xy = hypot_d(2, h);
+    ld SV = stretch::not_squared();
+  
+    ld base_min_a = asin(xy);
+    ld base_max_a = M_PI - base_min_a;
+  
+    ld seek = M_PI/2-atan2(h[3], h[2]);
+  
+    auto ang = [&] (ld a) {
+      ld rp = xy / sin(a);
+      ld co = abs(rp) >= 1 ? 0 : sqrt(1-rp*rp);
+      
+      return atan2(co * sin(a), cos(a)) - co * (1 - 1/SV/SV) * a;
+      
+      // while(a0 > M_PI) a0 -= 2 * M_PI;
+      // while(a0 < -M_PI) a0 += 2 * M_PI;
+      };
+    
+    for(int shift=-generations; shift<generations; shift++) {
+      ld min_a = base_min_a + M_PI * shift;
+      ld max_a = base_max_a + M_PI * shift;
+  
+      ld ang_min = ang(min_a);
+      ld ang_max = ang(max_a);
+      
+      for(int mi=0; mi<2; mi++) {
+        // 0 : minimum, 1 : maximum
+        ld tl = min_a, tr = max_a;
+        for(int it=0; it<20; it++) {
+          ld t1 = tl * .51 + tr * .49;
+          ld t2 = tl * .49 + tr * .51;
+          if((ang(t1) < ang(t2)) == mi) 
+            tr = t1;
+          else
+            tl = t2;
+          }
+        ld extreme = (tl + tr) / 2;
+        ld ang_extreme = ang(extreme);
+        for(int t=0; t<2; t++) {
+          ld mmin = t == 0 ? min_a : extreme;
+          ld mmax = t == 0 ? extreme : max_a;
+          ld vmin = t == 0 ? ang_min : ang_extreme;
+          ld vmax = t == 0 ? ang_extreme : ang_max;
+          
+          // make it increasing
+          if(t != mi) swap(mmin, mmax), swap(vmin, vmax);
+          
+          // println(hlog, "*** ", mi, t, " ** ", tie(min_a, ang_min), tie(extreme, ang_extreme), tie(max_a, ang_max), " -> ", vmin, " to ", vmax);
+          
+          int cmin = ceil((vmin - seek) / 2 / M_PI);
+          int cmax = floor((vmax - seek) / 2 / M_PI);
+          for(int c = cmin; c <= cmax; c++) {
+            ld cseek = seek + c * 2 * M_PI;
+  
+            for(int it=0; it<40; it++) {
+            
+              ld a = (mmin + mmax) / 2;
+              
+              ld cros = ang(a);
+              if(cros > cseek) mmax = a; else mmin = a;
+              }
+            
+            ld a = (mmin + mmax) / 2;
+            
+            ld r = asin_clamp( xy / sin(a) );
+          
+            ld z_part = 1;
+            ld x_part = SV * tan(r);
+            
+            ld db = hypot(x_part, z_part);
+            x_part /= db;
+            z_part /= db;
+            
+            ld alpha = atan2(-h[1], h[0]);
+          
+            ld z = cos(r) * (1 - 1/SV/SV);
+            ld u = z * a;
+          
+            ld r_angle = alpha + u;
+             
+            ld len = a * hypot(sin_auto(r), cos_auto(r)/SV);
+      
+            auto answer = point3(cos(r_angle) * x_part * len, -sin(r_angle) * x_part * len, z_part * len);
+            
+            // int id = (shift << 10) + (mi << 9) + (t << 8) + c;
+            
+            /*
+            auto f = formula_exp(answer);
+            
+            ld err = sqhypot_d(4, f - h);
+            
+            println(hlog, "************************* ", answer, ": error = ", err, " id = ", id, " params = ", tie(shift, mi, t, c));
+            */
+  
+            res.emplace_back(answer);
+            }
+          }
+        }    
+      }
+    
+    return res;
+    }
+
+
 EX }
 
 EX namespace nisot {

@@ -673,6 +673,8 @@ EX void initConfig() {
   addsaver(bright, "bright");
   addsaver(cblind, "cblind");
   
+  addsaver(berger_limit, "berger_limit");
+  
   addsaverenum(centering, "centering");
 
   callhooks(hooks_configfile);
@@ -1726,6 +1728,16 @@ EX void show3D() {
     dialog::add_action([] () {
       dialog::editNumber(vid.radarsize, 0, 360, 15, 90, "", XLAT("set to 0 to disable"));
       dialog::extra_options = [] () { draw_radar(true); };
+      });
+    }
+  
+  if(WDIM == 3 && sphere && stretch::factor) {
+    dialog::addItem(XLAT("Berger sphere limit"), berger_limit);
+    dialog::add_action([] () {
+      dialog::editNumber(berger_limit, 0, 10, 1, 2, "", 
+        XLAT("Primitive-based rendering of Berger sphere is currently very slow and low quality. "
+          "Here you can choose how many images to draw.")
+        );
       });
     }
   
