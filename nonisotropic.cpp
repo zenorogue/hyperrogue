@@ -1916,9 +1916,9 @@ EX namespace slr {
       
       "bool flipped = phi > 0.;"
       
-      "float alpha = atan2(h[1], -h[0]) + uIndexSL;"
+      "if(flipped) phi = -phi;"
       
-      "if(flipped) phi = -phi, alpha = atan2(h[1], h[0]) - uIndexSL;"
+      "float alpha = flipped ? atan2(h[1], h[0]) - uIndexSL : atan2(h[1], -h[0]) + uIndexSL;"
       
       "float fiber_barrier = atan(1./uSV);"
     
