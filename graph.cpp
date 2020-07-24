@@ -866,10 +866,11 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
       }
     else {
       if(c) V2 = V2 * spin(M_PI * sintick(100) / 30);
-      queuepoly(V2, cgi.shCompass1, 0xFF8080FF);
-      queuepoly(V2, cgi.shCompass2, 0xFFFFFFFF);
-      queuepoly(V2, cgi.shCompass3, 0xFF0000FF);
-      queuepoly(V2 * pispin, cgi.shCompass3, 0x000000FF);
+      color_t hider = hidden ? 0xFFFFFF20 : 0xFFFFFFFF;
+      queuepoly(V2, cgi.shCompass1, 0xFF8080FF & hider);
+      queuepoly(V2, cgi.shCompass2, 0xFFFFFFFF & hider);
+      queuepoly(V2, cgi.shCompass3, 0xFF0000FF & hider);
+      queuepoly(V2 * pispin, cgi.shCompass3, 0x000000FF & hider);
       }
     xsh = NULL;
     }
@@ -902,10 +903,11 @@ EX bool drawItemType(eItem it, cell *c, const transmatrix& V, color_t icol, int 
     else 
     #endif
     {
+      color_t hider = hidden ? 0xFFFFFF20 : 0xFFFFFFFF;
       transmatrix V2 = Vit * spin(ticks / 1500.);
-      draw_floorshape(c, V2, cgi.shMFloor3, 0xFFD500FF);
-      draw_floorshape(c, V2, cgi.shMFloor4, darkena(icol, 0, 0xFF));
-      queuepoly(V2, cgi.shGem[ct6], 0xFFD500FF);
+      draw_floorshape(c, V2, cgi.shMFloor3, 0xFFD500FF & hider);
+      draw_floorshape(c, V2, cgi.shMFloor4, darkena(icol, 0, 0xFF) & hider);
+      queuepoly(V2, cgi.shGem[ct6], 0xFFD500FF & hider);
       }
     xsh = NULL;
     }
