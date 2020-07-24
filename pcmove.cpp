@@ -1033,6 +1033,14 @@ bool pcmove::perform_actual_move() {
   movecost(cwt.at, c2, 1);
 
   if(!boatmove && collectItem(c2)) return true;
+  if(boatmove && c2->item && cwt.at->item) {
+     eItem it = c2->item;
+     c2->item = cwt.at->item;
+     if(collectItem(c2)) return true;
+     eItem it2 = c2->item;
+     c2->item = it;
+     cwt.at->item = it2;
+     }
   if(doPickupItemsWithMagnetism(c2)) return true;
 
   if(isIcyLand(cwt.at) && cwt.at->wall == waNone && markOrb(itOrbWinter)) {
