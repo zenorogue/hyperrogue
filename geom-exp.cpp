@@ -844,7 +844,8 @@ EX void showEuclideanMenu() {
       });
     }
   else if(hybri) {
-    dialog::addSelItem(XLAT("number of levels"), its(hybrid::csteps / cgi.single_step), 0);
+    dialog::addSelItem(XLAT("number of levels"), its(hybrid::csteps / cgi.single_step), 'L');
+    dialog::add_action(hybrid::configure_period);
     }
   else if(bt::in()) {
     dialog::addSelItem(XLAT("width"), fts(vid.binary_width), 'v');

@@ -1067,6 +1067,8 @@ EX namespace hybrid {
 
   EX int csteps;
   
+  EX int disc_quotient = 0;
+  
   EX transmatrix ray_iadj(cell *c, int i) {
     if(prod && i == c->type-2) return (mscale(Id, +cgi.plevel));
     if(prod && i == c->type-1) return (mscale(Id, -cgi.plevel));
@@ -1101,10 +1103,20 @@ EX namespace hybrid {
       ginf[g].g = sph ? giSphere3 : giSL2;
       ginf[g].tiling_name = "Iso(" + ginf[g].tiling_name + ")";
       string& qn = ginf[g].quotient_name;
-      string qplus = sph ? "elliptic" : qn;
-      if(qn == "none" || qn == "elliptic") qn = qplus;
-      else qn = qn + "/" + qplus;
-      if(sph) ginf[g].flags |= qELLIPTIC;
+      if(csteps && csteps != (sph ? cgi.psl_steps*2 : 0)) {
+        string qplus;
+        if(csteps == cgi.psl_steps)
+          qplus = sph ? "elliptic" : "PSL";
+        else if(csteps == 2 * cgi.psl_steps && !sph)
+          qplus = "SL";
+        else qplus = its(csteps);
+        if(qn == "none") qn = qplus;
+        else qn = qn + "/" + qplus;
+        }
+      if(elliptic) ginf[g].flags |= qELLIPTIC;
+      println(hlog, "set elliptic if: 0=", csteps % cgi.psl_steps);
+      if(csteps && csteps != cgi.psl_steps && csteps != 2*cgi.psl_steps) 
+        ginf[g].flags |= qANYQ;
       }
     else {
       ginf[g].cclass = g == gRotSpace ? gcSL2 : gcProduct;
@@ -1154,7 +1166,7 @@ EX namespace hybrid {
   
     EX vector<int>& make_shift(cell *c) {
       auto& res = shifts[c];
-      if(res.empty()) res = vector<int> (c->type, SHIFT_UNKNOWN);
+      if(res.empty()) res = vector<int> (c->type+1, SHIFT_UNKNOWN);
       return res;
       }
     
@@ -1167,6 +1179,7 @@ EX namespace hybrid {
       }
   
     EX int get_shift(cell *c, int i) {
+      if(S3 >= OINF) return 0;
       auto& v = get_shift_current(c, i);
       if(v != SHIFT_UNKNOWN) return v;
       
@@ -1183,38 +1196,47 @@ EX namespace hybrid {
           cw += wstep;
           cw += a;
           }
-        candidates.push_back(-a * cgi.single_step - s);
+        candidates.push_back(-a * cgi.single_step * (sphere ? -1 : 1) - s);
         next: ;
         }
       
       if(candidates.size() == 2 && candidates[0] != candidates[1]) {
-        println(hlog, "discrepancy found ", candidates);
+        int val = candidates[0] - candidates[1];
+        if(disc_quotient == 0) disc_quotient = val;
+        disc_quotient = gcd(val, disc_quotient);
+        if(disc_quotient < 0) disc_quotient = -disc_quotient;
         }
   
       int val = 0;
+      
+      if(1) {
+        /* the value from PSL, helps to draw the underlying space correctly */
+        auto ps = cgi.psl_steps;
+        val = i*ps / c->type - c->c.spin(i)*ps / c->move(i)->type + ps/2;
+        }
       if(!candidates.empty()) val = candidates[0];
       
       v = val;
       get_shift_current(c->move(i), c->c.spin(i)) = -val;
-
-      for(int a: {1, -1}) {
-        cellwalker cw0(c, i);
-        cellwalker cw = cw0;
-        cw += wstep; cw += a;
-        int s = 0;
-        while(cw != cw0) {
-          if(!have_shift(cw.at, cw.spin)) goto next1;
-          s += shifts[cw.at][cw.spin];
-          cw += wstep;
-          cw += a;
-          }
-        if(val != -a * cgi.single_step - s)
-          println(hlog, "incorrect val after setting");
-        next1: ;
-        }
             
       return val;
       }  
+    
+    EX void ensure_shifts(cell *c) {
+      if(S3 >= OINF) return;
+      if(have_shift(c, c->type)) return;
+      forCellEx(c1, c)
+      for(int a=0; a<c->type; a++) {
+        cellwalker cw0(c, a);
+        cellwalker cw = cw0;
+        while(cw != cw0) {
+          get_shift(cw.at, cw.spin);
+          cw += wstep;
+          cw += a;
+          }
+        }
+      get_shift_current(c, c->type) = 0;
+      }
     
     template<class T> auto in_underlying(const T& t) -> decltype(t()) {
       pcgip = cgip; 
@@ -1245,6 +1267,7 @@ EX namespace hybrid {
   
     hrmap_hybrid() {
       twisted = false;
+      disc_quotient = 0;
       in_underlying([this] { initcells(); underlying_map = currentmap; });
       for(hrmap*& m: allmaps) if(m == underlying_map) m = NULL;
       }
@@ -1324,12 +1347,9 @@ EX namespace hybrid {
       int d1 = cu->c.spin(d);
       int s = 0;
       if(geometry == gRotSpace) {
-        if(csteps && cgi.psl_steps % csteps == 0) {
-          auto ps = cgi.psl_steps;
-          s = d*ps / cu->type - d1*ps / cu1->type + ps/2;
-          }
-        else 
-          s = ((hrmap_hybrid*)currentmap)->get_shift(cu, d);
+        auto cm = (hrmap_hybrid*)currentmap;
+        m->in_underlying([&] { cm->ensure_shifts(cu); });
+        s = ((hrmap_hybrid*)currentmap)->get_shift(cu, d);
         }
       cell *c1 = get_at(cu1, m->where[c].second + s);
       c->c.connect(d, c1, d1, cu->c.mirror(d));
@@ -1520,9 +1540,17 @@ EX namespace hybrid {
   EX void configure_period() {
     static int s;
     s = csteps / cgi.single_step;
-    dialog::editNumber(s, 0, 16, 1, 0, XLAT("%1 period", "Z"), "");
+    string str = "";
+    if(rotspace)
+      str = XLAT(
+        "Theoretically, the double period ('sphere') works in underlying spherical geometry, "
+        "any value works in (full) hyperbolic geometry, and single period ('PSL(2,R)') "
+        "works in hyperbolic quotient spaces; quotients of these numbers work too. "
+        "(The current implementation in HyperRogue is not perfect, though, so only single is guaranteed to work.) "
+        "We won't stop you from trying illegal numbers, but they won't work correctly.");
+    dialog::editNumber(s, 0, 16, 1, 0, XLAT("%1 period", "Z"), str);
     dialog::bound_low(0);
-    auto set_s = [] (int s1) {
+    auto set_s = [] (int s1, bool ret) {
       return [s1] {
         if(csteps == s1) return;
         stop_game();
@@ -1530,24 +1558,27 @@ EX namespace hybrid {
         hybrid::reconfigure();
         start_game();
         };
+      if(ret) popScreen();
       };
     dialog::extra_options = [=] () { 
       if(rotspace) {
         int e_steps = cgi.psl_steps / gcd(cgi.single_step, cgi.psl_steps); 
         dialog::addSelItem( XLAT(sphere ? "elliptic" : "PSL(2,R)"), its(e_steps), 'P');
-        dialog::add_action(set_s(e_steps));
+        dialog::add_action(set_s(e_steps, true));
         dialog::addSelItem( XLAT(sphere ? "sphere" : "SL(2,R)"), its(2*e_steps), 'P');
-        dialog::add_action(set_s(2*e_steps));
+        dialog::add_action(set_s(2*e_steps, true));
         if(sl2) {
           dialog::addSelItem( XLAT("universal cover"), its(0), 'P');
-          dialog::add_action(set_s(0));
+          dialog::add_action(set_s(0, true));
           }
+        dialog::addSelItem( XLAT("works correctly so far"), its(disc_quotient), 'Q');
+        dialog::add_action(set_s(disc_quotient, true));
         }
       else {
         dialog::addSelItem( XLAT("non-periodic"), its(0), 'N');
-        dialog::add_action(set_s(0));
+        dialog::add_action(set_s(0, true));
         }
-      dialog::reaction_final = set_s(s);
+      dialog::reaction_final = set_s(s, false);
       };
     }
 
