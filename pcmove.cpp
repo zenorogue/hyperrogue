@@ -1262,6 +1262,9 @@ EX void playerMoveEffects(cell *c1, cell *c2) {
     changes.ccell(c2);
     c2->wparam = 1;
     }
+  
+  if(c2->wall == waReptile)
+    c2->wparam = -1;
     
   princess::playernear(c2);
 

@@ -76,6 +76,8 @@ EX void moveEffect(const movei& mi, eMonster m) {
     cf->wall = waChasm;
     }
   
+  if(ct->wall == waReptile) ct->wparam = -1;
+    
   if(ct->wall == waArrowTrap && !ignoresPlates(m) && normal_gravity_at(ct))
     activateArrowTrap(ct);
 
