@@ -115,7 +115,7 @@ transmatrix hrmap::adj(heptagon *h, int i) { return relative_matrix(h->cmove(i),
 
 vector<cell*>& hrmap::allcells() { 
   static vector<cell*> default_allcells;
-  if(bounded && !(cgflags & qHUGE_BOUNDED) && !(prod && product::csteps == 0)) {
+  if(bounded && !(cgflags & qHUGE_BOUNDED) && !(hybri && hybrid::csteps == 0)) {
     celllister cl(gamestart(), 1000000, 1000000, NULL);
     default_allcells = cl.lst;
     return default_allcells;

@@ -464,9 +464,13 @@ namespace mapstream {
       f.write(asonov::period_xy);
       f.write(asonov::period_z);
       }
-    if(geometry == gProduct) {
-      f.write(product::csteps);
+    if(prod) {
+      f.write(hybrid::csteps);
       f.write(product::cspin);
+      f.write(product::cmirror);
+      }
+    if(rotspace) {
+      f.write(hybrid::csteps);
       }
     if(hybri) {
       hybrid::in_underlying_geometry([&] { save_geometry(f); });
@@ -550,8 +554,12 @@ namespace mapstream {
       asonov::set_flags();
       }
     if(geometry == gProduct && f.vernum >= 0xA80C) {
-      f.read(product::csteps);
+      f.read(hybrid::csteps);
       if(f.vernum >= 0xA80D) f.read(product::cspin);
+      if(f.vernum >= 0xA833) f.read(product::cmirror);
+      }
+    if(geometry == gRotSpace && f.vernum >= 0xA833) {
+      f.read(hybrid::csteps);
       }
     if(hybri && f.vernum >= 0xA80C) {
       auto g = geometry;

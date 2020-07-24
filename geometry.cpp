@@ -164,8 +164,8 @@ struct geometry_information {
   ld plevel;
   /** level for a z-step */
   int single_step;
-  /** the number of levels in SL2 */
-  int steps;
+  /** the number of levels in PSL */
+  int psl_steps;
 
   /** for binary tilings */
   transmatrix direct_tmatrix[14];
@@ -668,19 +668,18 @@ void geometry_information::prepare_basics() {
     }
   
   plevel = vid.plevel_factor * scalefactor;
-  steps = product::csteps;
   single_step = 1;
   if(hybri && !prod) {
     if(hybrid::underlying == gArchimedean) 
-      arcm::current.get_step_values(steps, single_step);
+      arcm::current.get_step_values(psl_steps, single_step);
     else {
       single_step = S3 * S7 - 2 * S7 - 2 * S3;
-      steps = 2 * S7;    
-      if(BITRUNCATED) steps *= S3;
+      psl_steps = 2 * S7;    
+      if(BITRUNCATED) psl_steps *= S3;
       if(single_step < 0) single_step = -single_step;
       }
-    DEBB(DF_GEOM | DF_POLY, ("steps = ", steps, " / ", single_step));
-    plevel = M_PI * single_step / steps;
+    DEBB(DF_GEOM | DF_POLY, ("steps = ", psl_steps, " / ", single_step));
+    plevel = M_PI * single_step / psl_steps;
     }
   
   if(hybri) {
@@ -1036,8 +1035,6 @@ EX string cgi_string() {
   
   if(prod) V("PL", fts(vid.plevel_factor));
 
-  if(prod) V("PS", its(product::csteps));
-  
   if(geometry == gFieldQuotient) { V("S3=", its(S3)); V("S7=", its(S7)); }
   if(nil) V("NIL", its(S7));
   

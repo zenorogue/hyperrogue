@@ -1065,6 +1065,8 @@ EX namespace hybrid {
 
   EX eGeometryClass under_class() { return ginf[hybrid::underlying].cclass; }  
 
+  EX int csteps;
+  
   EX transmatrix ray_iadj(cell *c, int i) {
     if(prod && i == c->type-2) return (mscale(Id, +cgi.plevel));
     if(prod && i == c->type-1) return (mscale(Id, -cgi.plevel));
@@ -1109,7 +1111,7 @@ EX namespace hybrid {
       ginf[g].g.gameplay_dimension++;
       ginf[g].g.graphical_dimension++;
       ginf[g].tiling_name += "xZ";
-      if(product::csteps) ginf[g].flags |= qANYQ, ginf[g].tiling_name += its(product::csteps);
+      if(csteps) ginf[g].flags |= qANYQ, ginf[g].tiling_name += its(csteps);
       }
     ginf[g].flags |= qHYBRID;
     }
@@ -1146,6 +1148,73 @@ EX namespace hybrid {
     map<cell*, pair<cell*, int>> where;
     
     heptagon *getOrigin() override { return underlying_map->getOrigin(); }
+
+    const int SHIFT_UNKNOWN = 30000;
+    map<cell*, vector<int>> shifts;
+  
+    EX vector<int>& make_shift(cell *c) {
+      auto& res = shifts[c];
+      if(res.empty()) res = vector<int> (c->type, SHIFT_UNKNOWN);
+      return res;
+      }
+    
+    EX int& get_shift_current(cell *c, int i) {
+      return make_shift(c)[i];
+      }
+    
+    EX bool have_shift(cell *c, int i) {
+      return shifts.count(c) && get_shift_current(c, i) != SHIFT_UNKNOWN;
+      }
+  
+    EX int get_shift(cell *c, int i) {
+      auto& v = get_shift_current(c, i);
+      if(v != SHIFT_UNKNOWN) return v;
+      
+      vector<int> candidates;
+      
+      for(int a: {1, -1}) {
+        cellwalker cw0(c, i);
+        cellwalker cw = cw0;
+        cw += wstep; cw += a;
+        int s = 0;
+        while(cw != cw0) {
+          if(!have_shift(cw.at, cw.spin)) goto next;
+          s += shifts[cw.at][cw.spin];
+          cw += wstep;
+          cw += a;
+          }
+        candidates.push_back(-a * cgi.single_step - s);
+        next: ;
+        }
+      
+      if(candidates.size() == 2 && candidates[0] != candidates[1]) {
+        println(hlog, "discrepancy found ", candidates);
+        }
+  
+      int val = 0;
+      if(!candidates.empty()) val = candidates[0];
+      
+      v = val;
+      get_shift_current(c->move(i), c->c.spin(i)) = -val;
+
+      for(int a: {1, -1}) {
+        cellwalker cw0(c, i);
+        cellwalker cw = cw0;
+        cw += wstep; cw += a;
+        int s = 0;
+        while(cw != cw0) {
+          if(!have_shift(cw.at, cw.spin)) goto next1;
+          s += shifts[cw.at][cw.spin];
+          cw += wstep;
+          cw += a;
+          }
+        if(val != -a * cgi.single_step - s)
+          println(hlog, "incorrect val after setting");
+        next1: ;
+        }
+            
+      return val;
+      }  
     
     template<class T> auto in_underlying(const T& t) -> decltype(t()) {
       pcgip = cgip; 
@@ -1162,11 +1231,11 @@ EX namespace hybrid {
         if(!spins.count(u))
           println(hlog, "link missing: ", u);
         else {
-          while(h >= cgi.steps) h -= cgi.steps, u = spins[u].first.at;
-          while(h < 0) h += cgi.steps, u = spins[u].second.at;
+          while(h >= csteps) h -= csteps, u = spins[u].first.at;
+          while(h < 0) h += csteps, u = spins[u].second.at;
           }
         }
-      h = zgmod(h, cgi.steps);
+      h = zgmod(h, csteps);
       cell*& c = at[make_pair(u, h)];
       if(!c) { c = newCell(u->type+2, u->master); where[c] = {u, h}; }
       return c;
@@ -1190,6 +1259,8 @@ EX namespace hybrid {
 
     void draw() override {
       cell* start = centerover;
+      band_shift = 0;
+      auto period = (M_PI * csteps) / cgi.psl_steps;
       
       dq::visited_by_matrix.clear();
       dq::enqueue_by_matrix_c(start, cview());
@@ -1198,6 +1269,7 @@ EX namespace hybrid {
         auto& p = dq::drawqueue_c.front();
         cell *c = get<0>(p);
         transmatrix V = get<1>(p);
+        band_shift = get<2>(p);
         dq::drawqueue_c.pop();
         
         if(!do_draw(c, V)) continue;
@@ -1207,7 +1279,24 @@ EX namespace hybrid {
 
         for(int i=0; i<c->type; i++) {
           cell *c1 = c->cmove(i);
-          dq::enqueue_by_matrix_c(c1, V * adj(c, i));
+          transmatrix V1 = V * adj(c, i);
+          dynamicval<ld> bs(band_shift, band_shift);
+          if(sl2) {
+            ld alpha = atan2(V1[2][3], V1[3][3]);
+            band_shift += alpha;
+            ld ca = cos(alpha), sa = sin(alpha);
+            if(alpha) for(int a=0; a<4; a++) {
+              tie(V1[2][a], V1[3][a]) = make_pair(V1[2][a] * ca - V1[3][a] * sa, V1[3][a] * ca + V1[2][a] * sa);
+              tie(V1[0][a], V1[1][a]) = make_pair(V1[0][a] * ca - V1[1][a] * sa, V1[1][a] * ca + V1[0][a] * sa);
+              }
+            if(csteps) {
+              while(band_shift > period*.4999)
+                band_shift -= period;
+              while(band_shift < -period*.5001)
+                band_shift += period;
+              }
+            }
+          dq::enqueue_by_matrix_c(c1, V1);
           }
         }
       }
@@ -1220,19 +1309,28 @@ EX namespace hybrid {
     }
   
   EX pair<cell*, int> get_where(cell *c) { return hmap()->where[c]; }
-
+  
   EX void find_cell_connection(cell *c, int d) {
     auto m = hmap();
     if(d >= c->type - 2) {
       int s = cgi.single_step;
-      cell *c1 = get_at(m->where[c].first, m->where[c].second + (d == c->type-1 ? s : -s));
+      int lev = m->where[c].second + (d == c->type-1 ? s : -s);
+      cell *c1 = get_at(m->where[c].first, lev);
       c->c.connect(d, c1, c1->type - 3 + c->type - d, false);
       }
     else {
       auto cu = m->where[c].first;
       auto cu1 = m->in_underlying([&] { return cu->cmove(d); });
       int d1 = cu->c.spin(d);
-      int s = (geometry == gRotSpace && cgi.steps) ? d*cgi.steps / cu->type - d1*cgi.steps / cu1->type + cgi.steps/2 : 0;
+      int s = 0;
+      if(geometry == gRotSpace) {
+        if(csteps && cgi.psl_steps % csteps == 0) {
+          auto ps = cgi.psl_steps;
+          s = d*ps / cu->type - d1*ps / cu1->type + ps/2;
+          }
+        else 
+          s = ((hrmap_hybrid*)currentmap)->get_shift(cu, d);
+        }
       cell *c1 = get_at(cu1, m->where[c].second + s);
       c->c.connect(d, c1, d1, cu->c.mirror(d));
       }
@@ -1397,7 +1495,7 @@ EX namespace hybrid {
       auto w1 = hybrid::get_where(c1), w2 = hybrid::get_where(c2); 
       return PIU (hr::celldistance(w1.first, w2.first));
       }
-    else if(cgi.steps == 0) {
+    else if(csteps == 0) {
       auto w1 = hybrid::get_where(c1), w2 = hybrid::get_where(c2); 
       return PIU (hr::celldistance(w1.first, w2.first)) + abs(w1.second - w2.second);
       }
@@ -1419,6 +1517,40 @@ EX namespace hybrid {
       }
     }
 
+  EX void configure_period() {
+    static int s;
+    s = csteps / cgi.single_step;
+    dialog::editNumber(s, 0, 16, 1, 0, XLAT("%1 period", "Z"), "");
+    dialog::bound_low(0);
+    auto set_s = [] (int s1) {
+      return [s1] {
+        if(csteps == s1) return;
+        stop_game();
+        csteps = s1 * cgi.single_step;
+        hybrid::reconfigure();
+        start_game();
+        };
+      };
+    dialog::extra_options = [=] () { 
+      if(rotspace) {
+        int e_steps = cgi.psl_steps / gcd(cgi.single_step, cgi.psl_steps); 
+        dialog::addSelItem( XLAT(sphere ? "elliptic" : "PSL(2,R)"), its(e_steps), 'P');
+        dialog::add_action(set_s(e_steps));
+        dialog::addSelItem( XLAT(sphere ? "sphere" : "SL(2,R)"), its(2*e_steps), 'P');
+        dialog::add_action(set_s(2*e_steps));
+        if(sl2) {
+          dialog::addSelItem( XLAT("universal cover"), its(0), 'P');
+          dialog::add_action(set_s(0));
+          }
+        }
+      else {
+        dialog::addSelItem( XLAT("non-periodic"), its(0), 'N');
+        dialog::add_action(set_s(0));
+        }
+      dialog::reaction_final = set_s(s);
+      };
+    }
+
 EX }
   
 EX namespace product {
@@ -1427,11 +1559,11 @@ EX namespace product {
   
   struct hrmap_product : hybrid::hrmap_hybrid {
     transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override {
-      return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, hint); }) * mscale(Id, cgi.plevel * szgmod(where[c2].second - where[c1].second, csteps));
+      return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, hint); }) * mscale(Id, cgi.plevel * szgmod(where[c2].second - where[c1].second, hybrid::csteps));
       }
 
     transmatrix adj(cell *c, int i) override {
-      if(twisted && i == c->type-1 && where[c].second == cgi.steps-1) {
+      if(twisted && i == c->type-1 && where[c].second == hybrid::csteps-1) {
         auto b = spins[where[c].first].first;
         transmatrix T = mscale(Id, cgi.plevel);
         T = T * spin(2 * M_PI * b.spin / b.at->type);
@@ -1453,6 +1585,7 @@ EX namespace product {
   
     hrmap_product() {
       current_spin_invalid = false;
+      using hybrid::csteps;
       if((cspin || cmirror) && csteps) {
         in_underlying([&] {
           twisted = validate_spin();
@@ -1475,11 +1608,9 @@ EX namespace product {
       }
     };
 
-  EX bool current_spin_invalid;
-
-  EX int csteps, cspin;
-  EX bool cmirror;
-  
+  EX bool current_spin_invalid, cmirror;
+  EX int cspin;
+    
   EX hyperpoint inverse_exp(hyperpoint h) {
     hyperpoint res;
     res[2] = zlevel(h);
@@ -1533,43 +1664,30 @@ EX namespace product {
       }
     return true;
     }
-    
+
   EX void show_config() {
     cmode = sm::SIDE | sm::MAYDARK;
-    gamescreen(1);  
+    gamescreen(1);
     dialog::init(XLAT("quotient product spaces"));
-    dialog::addSelItem(XLAT("%1 period", "Z"), its(product::csteps), 'z');
-    dialog::add_action([] {
-      static int s;
-      s = product::csteps;
-      dialog::editNumber(s, 0, 16, 1, 0, XLAT("%1 period", "Z"),
-            XLAT("Set to 0 to make it non-periodic."));
-      dialog::bound_low(0);
-      dialog::reaction_final = [] {
-        product::csteps = s;
-        if(product::csteps == cgi.steps) return;
-        hybrid::reconfigure();
-        start_game();
-        println(hlog, "csteps = ", cgi.steps);
-        };
-      });
-    dialog::addSelItem(XLAT("rotation"), its(product::cspin), 'r');
+    dialog::addSelItem(XLAT("%1 period", "Z"), its(hybrid::csteps), 'z');
+    dialog::add_action(hybrid::configure_period);
+    dialog::addSelItem(XLAT("rotation"), its(cspin), 'r');
     dialog::add_action([] {
       static int s;
       dialog::editNumber(s, 0, 16, 1, 0, XLAT("rotation", "Z"), 
         XLAT("Works if the underlying space is symmetric.")
         );
       dialog::reaction_final = [] {
-        if(s == product::cspin) return;
+        if(s == cspin) return;
         stop_game();
-        product::cspin = s;
+        cspin = s;
         start_game();
         };
       });
-    dialog::addBoolItem(XLAT("reflect"), product::cmirror, 'f');
+    dialog::addBoolItem(XLAT("reflect"), cmirror, 'f');
     dialog::add_action([]{
       stop_game();
-      product::cmirror = !product::cmirror;
+      cmirror = !cmirror;
       start_game();
       });
     if(current_spin_invalid) 
@@ -1797,9 +1915,10 @@ EX namespace slr {
       "vec4 res = vec4(sqrt(-1.),sqrt(-1.),sqrt(-1.),sqrt(-1.));"
       
       "bool flipped = phi > 0.;"
-      "if(flipped) phi = -phi, h[2] *= -1, h[0] *= -1;"
       
       "float alpha = atan2(h[1], -h[0]) + uIndexSL;"
+      
+      "if(flipped) phi = -phi, alpha = atan2(h[1], h[0]) - uIndexSL;"
       
       "float fiber_barrier = atan(1./uSV);"
     
@@ -2502,7 +2621,7 @@ EX namespace nisot {
     else if(argis("-prodperiod")) {
       PHASEFROM(2);
       if(prod) stop_game();
-      shift(); product::csteps = argi();
+      shift(); hybrid::csteps = argi();
       hybrid::reconfigure();
       return 0;
       }

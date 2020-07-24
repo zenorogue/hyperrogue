@@ -615,6 +615,10 @@ void dqi_poly::gldraw() {
     if(global_projection && global_projection != ed) continue;
     current_display->set_all(ed);
     bool draw = color;
+
+    if(min_slr < max_slr) {
+      glhr::set_index_sl(band_shift + M_PI * min_slr * hybrid::csteps / cgi.psl_steps);
+      }
     
     flagtype sp = get_shader_flags();
     
@@ -701,9 +705,8 @@ void dqi_poly::gldraw() {
       }
     }
 
-  if(min_slr < max_slr) {
+  if(min_slr+1 < max_slr) {
     min_slr++;
-    glhr::set_index_sl(M_PI * min_slr);
     goto next_slr;
     }
   }
@@ -1521,15 +1524,19 @@ void dqi_poly::draw() {
 
 #if CAP_GL
   if(vid.usingGL && (current_display->set_all(global_projection), get_shader_flags() & SF_DIRECT)) {
-    if(sl2 && pmodel == mdGeodesic) {
-      ld z = atan2(V[2][3], V[3][3]);
+    if(sl2 && pmodel == mdGeodesic && hybrid::csteps) {
+      ld z = atan2(V[2][3], V[3][3]) + band_shift;
       auto zr = sightranges[geometry];
-      min_slr = ceil((-zr - z) / M_PI);
-      max_slr = floor((zr - z) / M_PI);
+      ld ns = stretch::not_squared();
+      ld db = cgi.psl_steps / M_PI / ns / hybrid::csteps;
+
+      min_slr = floor((-zr - z) * db);
+      max_slr = ceil((zr - z) * db);
       if(min_slr > max_slr) return;
       if(flags & POLY_ONE_LEVEL) min_slr = max_slr = 0;
-      glhr::set_index_sl(M_PI * min_slr);
+      max_slr++;
       }
+    else min_slr = 0, max_slr = 1;
     set_width(get_width(this));
     flags &= ~POLY_INVERSE;
     gldraw();

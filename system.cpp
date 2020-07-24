@@ -119,7 +119,10 @@ EX void welcomeMessage() {
   else if(nil)
     addMessage(XLAT("Welcome to NilRogue!"));
   else if(sl2) {
-    addMessage(XLAT("Welcome to PSL(2,R)-ogue!"));
+    if(cgi.psl_steps % hybrid::csteps == 0)
+      addMessage(XLAT("Welcome to PSL(2,R)-ogue!"));
+    else
+      addMessage(XLAT("Welcome to SL(2,R)-ogue!"));
     if(hybrid::underlying == gNormal && BITRUNCATED)
       addMessage(XLAT("Hint: this is more playable with pure {7,3} or pure {5,4}"));
     }
@@ -1262,6 +1265,7 @@ EX void set_geometry(eGeometry target) {
     ors::reset();
     if(among(target, gProduct, gRotSpace)) {
       if(vid.always3) { vid.always3 = false; geom3::apply_always3(); }
+      if(target == gRotSpace) hybrid::csteps = 0;
       hybrid::configure(target);
       }
     geometry = target;
@@ -1296,6 +1300,11 @@ EX void set_geometry(eGeometry target) {
     if(prod) { pmodel = mdPerspective; if(vid.texture_step < 4) vid.texture_step = 4; }
     if(WDIM == 3 && (cgflags & qIDEAL) && vid.texture_step < 4) vid.texture_step = 4;
     if(sl2) nisot::geodesic_movement = true;
+
+    if(rotspace) {
+      check_cgi(); cgi.require_basics();            
+      hybrid::csteps = cgi.psl_steps;
+      }
     }
   }
 

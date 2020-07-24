@@ -370,6 +370,8 @@ cld exp_parser::parse(int prio) {
     else if(number == "mousex") res = mousex;
     else if(number == "deg") res = degree;
     else if(number == "ultra_mirror_dist") res = cgi.ultra_mirror_dist;
+    else if(number == "psl_steps") res = cgi.psl_steps;
+    else if(number == "single_step") res = cgi.single_step;
     else if(number == "step") res = hdist0(tC0(currentmap->adj(cwt.at, 0)));
     else if(number == "mousey") res = mousey;
     else if(number == "random") res = randd();

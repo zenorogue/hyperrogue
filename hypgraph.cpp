@@ -1998,8 +1998,7 @@ EX namespace dq {
   EX set<int> visited_by_matrix;
   EX void enqueue_by_matrix(heptagon *h, const transmatrix& T) {
     if(!h) return;
-    if(sl2 && T[3][3] < 0) { enqueue_by_matrix(h, centralsym * T); return; }
-    int b = bucketer(tC0(T));
+    int b = bucketer(tC0(T)) + int(floor(band_shift*81527+.5));
     if(visited_by_matrix.count(b)) { return; }
     visited_by_matrix.insert(b);
     drawqueue.emplace(h, T, band_shift);
@@ -2016,8 +2015,7 @@ EX namespace dq {
 
   EX void enqueue_by_matrix_c(cell *c, const transmatrix& T) {
     if(!c) return;
-    if(sl2 && T[3][3] < 0) { enqueue_by_matrix_c(c, centralsym * T); return; }
-    int b = bucketer(tC0(T));
+    unsigned b = bucketer(tC0(T)) + int(floor(band_shift*81527+.5));
     if(visited_by_matrix.count(b)) { return; }
     visited_by_matrix.insert(b);
     drawqueue_c.emplace(c, T, band_shift);
@@ -2082,6 +2080,7 @@ EX bool do_draw(cell *c, const transmatrix& T) {
       }
     else if(pmodel == mdGeodesic && sl2) {
       if(hypot(tC0(T)[2], tC0(T)[3]) > cosh(slr::range_xy)) return false;
+      if(band_shift * stretch::not_squared() > sightranges[geometry]) return false;
       if(!limited_generation(c)) return false;
       }
     else if(vid.use_smart_range) {

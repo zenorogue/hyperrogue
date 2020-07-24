@@ -569,6 +569,8 @@ EX void select_quotient() {
     }
   else if(prod)
     pushScreen(product::show_config);
+  else if(rotspace)
+    hybrid::configure_period();
   else {
     vector<eGeometry> choices;
     for(int i=0; i<isize(ginf); i++) if(same_tiling(eGeometry(i))) choices.push_back(eGeometry(i));
@@ -691,7 +693,7 @@ EX void showEuclideanMenu() {
   nom *= euler;
   denom *= 2;
         
-  if(hybri && !prod) nom *= cgi.steps, denom *= cgi.single_step;
+  if(hybri) nom *= hybrid::csteps, denom *= cgi.single_step;
 
   int g = gcd(nom, denom);
   if(g) {
@@ -842,7 +844,7 @@ EX void showEuclideanMenu() {
       });
     }
   else if(hybri) {
-    dialog::addSelItem(XLAT("number of levels"), its(cgi.steps / cgi.single_step), 0);
+    dialog::addSelItem(XLAT("number of levels"), its(hybrid::csteps / cgi.single_step), 0);
     }
   else if(bt::in()) {
     dialog::addSelItem(XLAT("width"), fts(vid.binary_width), 'v');
