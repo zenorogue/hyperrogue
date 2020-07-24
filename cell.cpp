@@ -925,7 +925,13 @@ EX gp::loc pseudocoords(cell *c) {
   }
 
 EX cdata *arcmCdata(cell *c) {
-  heptagon *h2 = arcm::archimedean_gmatrix[c->master].first;
+  auto &agm = arcm::archimedean_gmatrix;
+  if(!agm.count(c->master) || !agm[c->master].first) {
+    forCellEx(c1, c) if(agm.count(c->master) && agm[c->master].first) return arcmCdata(c1);
+    static cdata dummy;
+    return &dummy;
+    }
+  heptagon *h2 = agm[c->master].first;
   dynamicval<eGeometry> g(geometry, gNormal); 
   dynamicval<hrmap*> cm(currentmap, arcm::current_altmap);  
   return getHeptagonCdata(h2);
