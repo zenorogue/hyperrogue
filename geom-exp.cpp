@@ -622,25 +622,27 @@ EX void showEuclideanMenu() {
   int denom = (2*ts + 2*tv - ts * tv);
   
   #if CAP_GP
-  ld area = PIU(cgi.gpdata->area);
+  if(GOLDBERG || INVERSE) {
+    ld area = PIU(cgi.gpdata->area);
 
-  if(GOLDBERG || WARPED) {
-    nom = 2 * (2*tv + (S3-2) * ts * (area-1));
-    }
-  else if(UNRECTIFIED) {
-    if((gp::param.first + gp::param.second) % 2 == 0)
-      nom = ts * 2 * area;
-    else
-      nom = (2*tv + (S3-2) * ts * (area-1));    
-    }
-  else if(UNTRUNCATED) {
-    if((gp::param.first - gp::param.second) % 3 == 0) {
-      nom = ts * 4 * area;
-      denom *= 3;
-      }
-    else {
+    if(GOLDBERG || WARPED) {
       nom = 2 * (2*tv + (S3-2) * ts * (area-1));
-      denom *= 3;
+      }
+    else if(UNRECTIFIED) {
+      if((gp::param.first + gp::param.second) % 2 == 0)
+        nom = ts * 2 * area;
+      else
+        nom = (2*tv + (S3-2) * ts * (area-1));    
+      }
+    else if(UNTRUNCATED) {
+      if((gp::param.first - gp::param.second) % 3 == 0) {
+        nom = ts * 4 * area;
+        denom *= 3;
+        }
+      else {
+        nom = 2 * (2*tv + (S3-2) * ts * (area-1));
+        denom *= 3;
+        }
       }
     }
   #endif
