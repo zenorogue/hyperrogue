@@ -1942,6 +1942,8 @@ EX namespace slr {
       "float xy = length(h.xy);"
       "float phi = atan2(h[2], h[3]) + uIndexSL;"
 
+      "if(xy < 1e-6) return vec4(0.,0.,phi,1.);"
+
       "vec4 res = vec4(sqrt(-1.),sqrt(-1.),sqrt(-1.),sqrt(-1.));"
       
       "bool flipped = phi > 0.;"
