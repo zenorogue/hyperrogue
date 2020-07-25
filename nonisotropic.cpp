@@ -1114,7 +1114,6 @@ EX namespace hybrid {
         else qn = qn + "/" + qplus;
         }
       if(elliptic) ginf[g].flags |= qELLIPTIC;
-      println(hlog, "set elliptic if: 0=", csteps % cgi.psl_steps);
       if(csteps && csteps != cgi.psl_steps && csteps != 2*cgi.psl_steps) 
         ginf[g].flags |= qANYQ;
       }
