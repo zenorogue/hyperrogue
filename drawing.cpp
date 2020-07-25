@@ -1259,8 +1259,6 @@ EX int berger_limit = 2;
 
 void draw_stretch(dqi_poly *p) {
 
-  if(!(p->flags & POLY_TRIANGLES)) return;
-  
   dqi_poly npoly = *p;
   
   npoly.offset = 0;
@@ -1300,33 +1298,54 @@ void draw_stretch(dqi_poly *p) {
 
   for(int i=0; i<p->cnt; i++) results[i] = stretch::inverse_exp_all(hs[i], berger_limit);
 
-  for(int i=0; i<p->cnt; i+=3) {
-    auto &la = results[i];
-    auto &lb = results[i+1];
-    auto &lc = results[i+2];
-    
-    int ia = 0, ib = 0, ic = 0;
-    
-    auto test = [] (hyperpoint a, hyperpoint b) -> bool {
-      return sqhypot_d(3, a-b) < 2;
-      };
-   
-    for(auto& ha: la) for(auto& hb: lb) if(test(ha, hb))
-      for(auto& hc: lc) if(test(ha, hc) && test(hb, hc)) {
+  auto test = [] (hyperpoint a, hyperpoint b) -> bool {
+    return sqhypot_d(3, a-b) < 2;
+    };
+ 
+  if(p->flags & POLY_TRIANGLES) {
+    for(int i=0; i<p->cnt; i+=3) {
+      auto &la = results[i];
+      auto &lb = results[i+1];
+      auto &lc = results[i+2];
       
-      glcoords.push_back(glhr::pointtogl(U * ha));
-      glcoords.push_back(glhr::pointtogl(U * hb));
-      glcoords.push_back(glhr::pointtogl(U * hc));
-      if(p->tinf) 
-        for(int j=0; j<3; j++)
-          stinf.tvertices.push_back(p->tinf->tvertices[p->offset_texture+i+j]);
-      ia++; ib++; ic++;
+      int ia = 0, ib = 0, ic = 0;
+      
+      for(auto& ha: la) for(auto& hb: lb) if(test(ha, hb))
+        for(auto& hc: lc) if(test(ha, hc) && test(hb, hc)) {
+        
+        glcoords.push_back(glhr::pointtogl(U * ha));
+        glcoords.push_back(glhr::pointtogl(U * hb));
+        glcoords.push_back(glhr::pointtogl(U * hc));
+        if(p->tinf) 
+          for(int j=0; j<3; j++)
+            stinf.tvertices.push_back(p->tinf->tvertices[p->offset_texture+i+j]);
+        ia++; ib++; ic++;
+        }
       }
+    npoly.cnt = isize(glcoords);  
+    npoly.gldraw();
     }
-  
-  npoly.cnt = isize(glcoords);
-  
-  npoly.gldraw();
+  else if(p->cnt) {
+    for(auto& ha: results[0]) {
+      vector<hyperpoint> has;
+      has.push_back(ha);
+      glcoords.push_back(glhr::pointtogl(U * ha));
+      for(int i=1; i<p->cnt; i++) {
+        hyperpoint best = C0;
+        ld dist = 10;
+        for(auto& hb: results[i]) {
+          ld d = sqhypot_d(3, hb-has.back());
+          if(d < dist) dist = d, best = hb;
+          }
+        if(dist < 2) has.push_back(best);
+        }
+      if(isize(has) < 3) continue;
+      glcoords.clear();
+      for(auto& h: has) glcoords.push_back(glhr::pointtogl(U * h));
+      npoly.cnt = isize(glcoords);  
+      npoly.gldraw();      
+      }
+    }  
   }
 
 EX namespace ods {
