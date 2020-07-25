@@ -4039,3 +4039,17 @@ bugfixes:
 - new options in the variation menu, which allow e.g. playing / map editing on the duals of Goldberg tessellations, or e.g. warped GP(2,1) {8,3}
 - redone some Guided Tour slides and possible crash
 - you can now add text in the Drawing Tool
+
+2020-07-25 02:27 Update 11.3s:
+Bugfixes:
+- the checkmate rule now takes tortoise calming into account
+- fixed colors of underwater compasses and rugs
+- collecting items while moving compass
+- Reptile counters are now reset when fast creatures move over them
+
+Geometries:
+- primitive-based rendering in stretched S3 and SL geometries (replacing the old SL renderer)
+- period can now be changed in rotation spaces, e.g. to obtain SL or the universal cover
+- fixed a crash when walking over a hyperbolic digon in Archimedean tiling
+- fixed a crash in untruncated sphere
+- statistics given in 'experiments in geometry' (world size, faces per vertex) are now correct in new variations
