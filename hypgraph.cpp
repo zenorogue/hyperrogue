@@ -1579,8 +1579,22 @@ struct flat_model_enabler {
   projection_configuration bak;
   ld sf;  
   bool ru;
-  flat_model_enabler() { bak = pconf; sf = stretch::factor; stretch::factor = 0; ru = ray::in_use; ray::in_use = false; enable_flat_model(); }
-  ~flat_model_enabler() { pconf = bak; stretch::factor = sf; ray::in_use = ru; calcparam(); }
+  flat_model_enabler() { 
+    bak = pconf;
+    sf = stretch::factor; stretch::factor = 0; 
+    #if CAP_RAY
+    ru = ray::in_use; ray::in_use = false; 
+    #endif
+    enable_flat_model(); 
+    }
+  ~flat_model_enabler() {
+    pconf = bak;
+    stretch::factor = sf; 
+    #if CAP_RAY
+    ray::in_use = ru; 
+    #endif
+    calcparam();
+    }
   };
 #endif
 
