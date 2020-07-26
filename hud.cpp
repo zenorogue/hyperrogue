@@ -406,16 +406,6 @@ EX void drawStats() {
   auto xc = cd->xcenter;
   auto yc = cd->ycenter;
 
-  flat_model_enabler fme;
-
-  if(crosshair_color && crosshair_size > 0) {
-    initquickqueue();
-    vid.linewidth = 1;
-    queueline(tC0(atscreenpos(xc - crosshair_size, yc, 1)), tC0(atscreenpos(xc + crosshair_size, yc, 1)), crosshair_color).prio = PPR::SUPERLINE;
-    queueline(tC0(atscreenpos(xc, yc - crosshair_size, 1)), tC0(atscreenpos(xc, yc + crosshair_size, 1)), crosshair_color).prio = PPR::SUPERLINE;
-    quickqueue();
-    }
-  
   if(vid.radarsize > 0 && h)
   #if CAP_RACING
     if(!racing::on)
@@ -424,6 +414,16 @@ EX void drawStats() {
     if(!(cmode & sm::MISSION))
       draw_radar(cornermode);
 
+  flat_model_enabler fme;
+  
+  if(crosshair_color && crosshair_size > 0) {
+    initquickqueue();
+    vid.linewidth = 1;
+    queueline(tC0(atscreenpos(xc - crosshair_size, yc, 1)), tC0(atscreenpos(xc + crosshair_size, yc, 1)), crosshair_color).prio = PPR::SUPERLINE;
+    queueline(tC0(atscreenpos(xc, yc - crosshair_size, 1)), tC0(atscreenpos(xc, yc + crosshair_size, 1)), crosshair_color).prio = PPR::SUPERLINE;
+    quickqueue();
+    }
+  
   if(haveMobileCompass()) {
     initquickqueue();
     using namespace shmupballs;

@@ -1555,50 +1555,45 @@ transmatrix screenpos(ld x, ld y) {
   In 2D, this does not work (as HyperRogue reduces matrices to 3x3) so we use the native disk projection
 */
 
-EX eModel flat_model() { return MDIM == 4 ? mdPixel : mdDisk; }
+int flat_on;
+eGeometry backup_geometry;
+projection_configuration backup_pconf;
+bool backup_always3;
 
 /** \brief enable the 'flat' model for drawing HUD. See hr::flat_model_enabler */
-EX void enable_flat_model() {
-  #if CAP_GL
-  glClear(GL_DEPTH_BUFFER_BIT);
-  #endif
-  pmodel = flat_model();
-  pconf.alpha = 1;
-  pconf.scale = 1;
-  pconf.camera_angle = 0;
-  pconf.stretch = 1;
-  if(prod) pconf.alpha = 30, pconf.scale = 30;
-  calcparam();
+EX void enable_flat_model(int val) {
+  if(flat_on < 1 && flat_on + val >= 1) {
+    #if CAP_GL
+    glClear(GL_DEPTH_BUFFER_BIT);
+    #endif
+    backup_geometry = geometry;
+    backup_pconf = pconf;
+    geometry = gNormal;
+    pmodel = mdDisk;
+    pconf.alpha = 1;
+    pconf.scale = 1;
+    pconf.camera_angle = 0;
+    pconf.stretch = 1;
+    backup_always3 = vid.always3;
+    vid.always3 = false;
+    check_cgi();
+    cgi.require_shapes();
+    calcparam();
+    }
+  if(flat_on >= 1 && flat_on + val < 1) {
+    geometry = backup_geometry;
+    pconf = backup_pconf;
+    vid.always3 = backup_always3;
+    calcparam();
+    check_cgi();
+    }
+  flat_on += val;
   }
 
 #if HDR
-/** \brief enable the 'flat' model for drawing HUD. Use RAII so it will be switched back later */
-namespace stretch { extern ld factor; } 
-
-#if CAP_RAY
-namespace ray { extern bool in_use; }
-#endif
-
 struct flat_model_enabler {
-  projection_configuration bak;
-  ld sf;  
-  bool ru;
-  flat_model_enabler() { 
-    bak = pconf;
-    sf = stretch::factor; stretch::factor = 0; 
-    #if CAP_RAY
-    ru = ray::in_use; ray::in_use = false; 
-    #endif
-    enable_flat_model(); 
-    }
-  ~flat_model_enabler() {
-    pconf = bak;
-    stretch::factor = sf; 
-    #if CAP_RAY
-    ray::in_use = ru; 
-    #endif
-    calcparam();
-    }
+  flat_model_enabler() { enable_flat_model(+1); }
+  ~flat_model_enabler() { enable_flat_model(-1); }
   };
 #endif
 
