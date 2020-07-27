@@ -94,6 +94,7 @@ EX bool requested() {
   #endif
   if(!available()) return false;
   if(want_use == 2) return true;
+  if(rotspace) return false; // not very good
   return racing::on || quotient || fake::in();
   }
 
