@@ -417,26 +417,6 @@ EX namespace bt {
       return NULL;
       }
 
-    void draw() override {
-      dq::clear_all();
-      dq::enqueue(centerover->master, cview());
-      
-      while(!dq::drawqueue.empty()) {
-        auto& p = dq::drawqueue.front();
-        heptagon *h = p.first;
-        shiftmatrix V = p.second;
-        dq::drawqueue.pop();
-        
-        
-        cell *c = h->c7;
-        if(!do_draw(c, V)) continue;
-        drawcell(c, V);
-  
-        for(int i=0; i<h->type; i++)
-          dq::enqueue(h->cmove(i), optimized_shift(V * adj(h, i)));
-        }
-      }
-
     int updir_at(heptagon *h) {
       if(geometry != gBinaryTiling) return updir();
       else if(type_of(h) == 6) return bd_down;

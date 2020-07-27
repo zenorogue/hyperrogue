@@ -42,9 +42,8 @@ struct hrmap {
   transmatrix iadj(heptagon *h, int d) { 
     heptagon *h1 = h->cmove(d); return adj(h1, h->c.spin(d));
     }
-  virtual void draw() {
-    printf("undrawable\n");
-    }
+  virtual void draw_all();
+  virtual void draw_at(cell *at, const shiftmatrix& where);
   virtual vector<hyperpoint> get_vertices(cell*);
 
   virtual void virtualRebase(heptagon*& base, transmatrix& at) {
@@ -67,7 +66,7 @@ struct hrmap {
  *  (e.g. Euclidean and Crystal) also inherit from hrmap_standard
  **/
 struct hrmap_standard : hrmap {
-  void draw() override;
+  void draw_at(cell *at, const shiftmatrix& where) override;
   transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override;
   transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override;
   heptagon *create_step(heptagon *h, int direction) override;

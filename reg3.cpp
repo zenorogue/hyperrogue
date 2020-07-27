@@ -292,7 +292,6 @@ EX namespace reg3 {
 
     heptagon *getOrigin() override { return allh[0]; }
 
-    void draw() override;
     transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override;
     
     void initialize(int cell_count);
@@ -313,34 +312,6 @@ EX namespace reg3 {
       allh[a]->zebraval = 0;
       allh[a]->alt = NULL;
       acells.push_back(allh[a]->c7);
-      }
-    }
-
-  void hrmap_quotient3::draw() {
-    sphereflip = Id;
-    
-    // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
-    
-    dq::clear_all();
-    dq::enqueue_by_matrix(centerover->master, cview());
-    
-    while(!dq::drawqueue.empty()) {
-      auto& p = dq::drawqueue.front();
-      heptagon *h = p.first;
-      shiftmatrix V = p.second;
-      dq::drawqueue.pop();
-            
-      cell *c = h->c7;
-      if(!do_draw(c, V)) continue;
-      drawcell(c, V);
-      if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
-      
-      if(ultra_mirror_in())
-        for(auto& T: cgi.ultra_mirrors) 
-          dq::enqueue_by_matrix(h, optimized_shift(V * T));
-  
-      for(int d=0; d<S7; d++)
-        dq::enqueue_by_matrix(h->move(d), optimized_shift(V * tmatrices[h->fieldval][d]));
       }
     }
 
@@ -918,37 +889,6 @@ EX namespace reg3 {
         }
       }
 
-    void draw() override {
-      sphereflip = Id;
-      
-      dq::clear_all();
-      auto& enq = (ultra_mirror_in() ? dq::enqueue_by_matrix : dq::enqueue);
-      enq(centerover->master, cview());
-      
-      while(!dq::drawqueue.empty()) {
-        auto& p = dq::drawqueue.front();
-        heptagon *h = p.first;
-        shiftmatrix V = p.second;
-        dq::drawqueue.pop();
-        
-        
-        cell *c = h->c7;
-        if(!do_draw(c, V)) continue;
-        drawcell(c, V);
-        if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
-        
-        if(sightranges[geometry] == 0) return;
-
-        if(ultra_mirror_in())
-          for(auto& T: cgi.ultra_mirrors) 
-            dq::enqueue_by_matrix(h, optimized_shift(V * T));
-    
-        for(int i=0; i<S7; i++) if(h->move(i)) {
-          enq(h->move(i), optimized_shift(V * adj(h, i)));
-          }
-        }
-      }
-    
     transmatrix adj(heptagon *h, int d) override {
       #if CAP_FIELD
       if(quotient_map) return quotient_map->adj(h, d);
@@ -1262,32 +1202,6 @@ EX namespace reg3 {
     ~hrmap_reg3_rule() {
       if(quotient_map) delete quotient_map;
       clearfrom(origin);
-      }
-    
-    void draw() override {
-      sphereflip = Id;
-      
-      // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
-      
-      dq::clear_all();
-      dq::enqueue(centerover->master, cview());
-      
-      while(!dq::drawqueue.empty()) {
-        auto& p = dq::drawqueue.front();
-        heptagon *h = p.first;
-        shiftmatrix V = p.second;
-        dq::drawqueue.pop();
-        
-        
-        cell *c = h->c7;
-        if(!do_draw(c, V)) continue;
-        drawcell(c, V);
-        if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
-    
-        for(int i=0; i<S7; i++) if(h->move(i)) {
-          dq::enqueue(h->move(i), optimized_shift(V * adj(h, i)));
-          }
-        }
       }
     
     transmatrix adj(heptagon *h, int d) override {

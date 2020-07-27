@@ -4663,7 +4663,7 @@ EX void drawthemap() {
 
   profile_start(1);
   make_actual_view();
-  currentmap->draw();
+  currentmap->draw_all();
   drawWormSegments();
   drawBlizzards();
   drawArrowTraps();
@@ -4949,7 +4949,7 @@ EX void gamescreen(int _darken) {
     View = subscreens::player_displays[0].view_matrix;
     centerover = subscreens::player_displays[0].precise_center;
     just_gmatrix = true;
-    currentmap->draw();
+    currentmap->draw_all();
     just_gmatrix = false;
     return;
     }

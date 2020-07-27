@@ -676,9 +676,9 @@ struct hrmap_archimedean : hrmap {
     return hnew;
     }
   
-  void draw() override {
+  void draw_at(cell *at, const shiftmatrix& where) override {
     dq::clear_all();
-    dq::enqueue(centerover->master, cview());
+    dq::enqueue(at->master, where);
     
     while(!dq::drawqueue.empty()) {
       auto& p = dq::drawqueue.front();

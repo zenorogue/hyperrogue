@@ -670,31 +670,9 @@ struct hrmap_crystal : hrmap_standard {
     return hrmap_standard::adj(c, d); 
     }
 
-  void draw() override {
-    if(!crystal3()) { hrmap_standard::draw(); return; }
-    sphereflip = Id;
-    
-    // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
-    
-    dq::clear_all();
-    dq::enqueue_by_matrix(centerover->master, cview());
-    
-    while(!dq::drawqueue.empty()) {
-      auto& p = dq::drawqueue.front();
-      heptagon *h = p.first;
-      shiftmatrix V = p.second;
-      dq::drawqueue.pop();
-            
-      cell *c = h->c7;
-      if(!do_draw(c, V)) continue;
-      drawcell(c, V);
-      
-      if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
-  
-      for(int d=0; d<S7; d++) {
-        dq::enqueue_by_matrix(h->move(d), optimized_shift(V * adj(h, d)));
-        }
-      }
+  void draw_at(cell *at, const shiftmatrix& where) override {
+    if(!crystal3()) { hrmap_standard::draw_at(at, where); return; }
+    else hrmap::draw_at(at, where);
     }
 
   virtual transmatrix relative_matrix(cell *h2, cell *h1, const hyperpoint& hint) override { 

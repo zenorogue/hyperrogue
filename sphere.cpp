@@ -168,7 +168,7 @@ struct hrmap_spherical : hrmap_standard {
       swap(gmatrix, gmatrix0);
       just_gmatrix = true;
       dynamicval<cell*> cco(centerover, gamestart());
-      draw();
+      draw_all();
       just_gmatrix = false;
       swap(gmatrix, gmatrix0);
       #if CAP_GP

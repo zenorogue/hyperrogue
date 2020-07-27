@@ -343,35 +343,6 @@ struct hrmap_kite : hrmap {
     origin = newtile(pKite, 0);
     }
 
-  void draw() override {
-             
-    dq::clear_all();
-    dq::enqueue(centerover->master, cview());
-    
-    while(!dq::drawqueue.empty()) {
-      auto& p = dq::drawqueue.front();
-      heptagon *h = p.first;
-      shiftmatrix V = p.second;
-      dq::drawqueue.pop();
-
-      cell *c = h->c7;
-      if(!do_draw(c, V)) continue;
-      drawcell(c, V);
-      
-      for(int i=0; i<c->type; i++)
-        dq::enqueue(c->cmove(i)->master, optimized_shift(V * adj(c, i)));
-          /*
-          ld err = hdist(where[h->c7->cmove(i)->master] * C0, where[h] * M * C0);
-          if(err > -.01)
-          println(hlog, 
-            " for ", make_tuple(getshape(h), i, getshape(h->c7->cmove(i)->master), h->c7->c.spin(i)),
-            " error = ",  format("%f", float(err)),
-            " source = ", s0+source[{h->c7, h->c7->cmove(i)}]
-            );
-            */
-      }
-    }
-  
   ~hrmap_kite() {
     clearfrom(origin);
     }

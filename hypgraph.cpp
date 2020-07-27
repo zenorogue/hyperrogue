@@ -1232,38 +1232,59 @@ EX bool drawcell_subs(cell *c, const shiftmatrix& V) {
   return draw;
   }
 
-void hrmap_standard::draw() {
-  static ld shift = 0;
-  static bool in_multi = false;
-  if(sphere && pmodel == mdSpiral && !in_multi) {
-    /* todo other types? */
-    in_multi = true;
+void hrmap::draw_all() {
+  if(sphere && pmodel == mdSpiral) {
     if(models::ring_not_spiral) {
       int qty = ceil(1. / pconf.sphere_spiral_multiplier);
       if(qty > 100) qty = 100;
-      for(int i=-qty; i < qty; i++) {
-        shift = 2 * M_PI * i;
-        draw();
-        }
+      for(int i=-qty; i < qty; i++)
+        draw_at(centerover, cview(2 * M_PI * i));
       }
     else {
-      shift = 0;
-      draw();
+      draw_at(centerover, cview());
       if(vid.use_smart_range) for(int i=1;; i++) {
         int drawn = cells_drawn;
-        shift = 2 * M_PI * i;
-        draw();
-        shift = -2 * M_PI * i;
-        draw();
+        draw_at(centerover, cview(2 * M_PI * i));
+        draw_at(centerover, cview(-2 * M_PI * i));
         if(drawn == cells_drawn) break;
         }
       }
-    in_multi = false;
-    shift = 0;
-    return;
     }
+  else
+    draw_at(centerover, cview());
+  }
+
+void hrmap::draw_at(cell *at, const shiftmatrix& where) {
+  dq::clear_all();
+  auto& enq = confusingGeometry() ? dq::enqueue_by_matrix_c : dq::enqueue_c;
+  
+  enq(at, where);
+      
+  while(!dq::drawqueue_c.empty()) {
+    auto& p = dq::drawqueue_c.front();
+    cell *c = p.first;
+    shiftmatrix V = p.second;
+    dq::drawqueue_c.pop();
+    
+    if(!do_draw(c, V)) continue;
+    drawcell(c, V);
+    if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
+
+    if(reg3::ultra_mirror_in())
+      for(auto& T: cgi.ultra_mirrors) 
+        enq(c, optimized_shift(V * T));
+
+    for(int i=0; i<c->type; i++) {
+      // note: need do cmove before c.spin
+      cell *c1 = c->cmove(i);      
+      enq(c1, optimized_shift(V * adj(c, i)));
+      }
+    }
+  }
+
+void hrmap_standard::draw_at(cell *at, const shiftmatrix& where) {
   drawn_cells.clear();
-  drawn_cells.emplace_back(centerover->master, hsOrigin, cview(shift) * master_relative(centerover, true));
+  drawn_cells.emplace_back(at->master, hsOrigin, where * master_relative(at, true));
   for(int i=0; i<isize(drawn_cells); i++) {    
     // prevent reallocation due to insertion
     if(drawn_cells.capacity() < drawn_cells.size() + 16)

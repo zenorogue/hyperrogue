@@ -1225,12 +1225,12 @@ EX namespace gp {
       return T;
       }
     
-    void draw() override {
+    void draw_at(cell *at, const shiftmatrix& where) override {
       
       dq::clear_all();
       
       auto enqueue = (quotient ? dq::enqueue_by_matrix_c : dq::enqueue_c);
-      enqueue(centerover, cview());      
+      enqueue(at, where);
 
       while(!dq::drawqueue_c.empty()) {
         auto& p = dq::drawqueue_c.front();

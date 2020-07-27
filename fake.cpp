@@ -182,13 +182,13 @@ EX namespace fake {
       return relative_matrix(h2->c7, h1->c7, hint);
       }
 
-    void draw() override {
+    void draw_at(cell *at, const shiftmatrix& where) override {
       sphereflip = Id;
       
       // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
       
       if(pmodel == mdDisk && WDIM == 2 && recursive_draw) {
-        draw_recursive(centerover, cview(), -1, -1, nullptr, 0);
+        draw_recursive(at, where, -1, -1, nullptr, 0);
         return;
         }
       
@@ -253,7 +253,7 @@ EX namespace fake {
         }
 
       auto enqueue = (multiple && multiple_special_draw ? dq::enqueue_by_matrix_c : dq::enqueue_c);
-      enqueue(centerover, cview());      
+      enqueue(at, where);
       
       while(!dq::drawqueue_c.empty()) {
         auto& p = dq::drawqueue_c.front();

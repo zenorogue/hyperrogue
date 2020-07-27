@@ -226,9 +226,9 @@ EX namespace euc {
       else return hrmap_standard::adj(c, i);
       }
 
-    void draw() override {
+    void draw_at(cell *at, const shiftmatrix& where) override {
       dq::clear_all();
-      dq::enqueue_by_matrix(centerover->master, cview() * master_relative(centerover, true));
+      dq::enqueue_by_matrix(at->master, where * master_relative(centerover, true));
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();

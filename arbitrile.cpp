@@ -794,27 +794,6 @@ struct hrmap_arbi : hrmap {
     return h1;
     }
   
-  void draw() override {
-    dq::clear_all();
-    dq::enqueue(centerover->master, cview());
-    
-    while(!dq::drawqueue.empty()) {
-      auto& p = dq::drawqueue.front();
-      heptagon *h = p.first;
-      shiftmatrix V = p.second;
-      dq::drawqueue.pop();
-  
-      if(do_draw(h->c7, V)) drawcell(h->c7, V);
-      else continue;
-  
-      for(int i=0; i<h->type; i++) {
-        shiftmatrix V1 = V * adj(h, i);
-        optimize_shift(V1);
-        dq::enqueue(h->move(i), V1);
-        }
-      }
-    }
-
   transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
     return relative_matrix_recursive(h2, h1);
     }

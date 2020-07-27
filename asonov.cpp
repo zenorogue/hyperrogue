@@ -176,27 +176,6 @@ struct hrmap_asonov : hrmap {
     for(int a=0; a<S7; a++) if(h2 == h1->move(a)) return adjmatrix(a);
     return coord_to_matrix(coords[h2], coords[h1]);
     }
-
-  void draw() override {
-    dq::clear_all();
-
-    dq::enqueue_by_matrix(centerover->master, cview());
-    
-    while(!dq::drawqueue.empty()) {
-      auto& p = dq::drawqueue.front();
-      heptagon *h = p.first;
-      shiftmatrix V = p.second;
-      dq::drawqueue.pop();
-      
-      cell *c = h->c7;
-      if(!do_draw(c, V)) continue;
-      drawcell(c, V);
-      if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
-
-      for(int i=0; i<S7; i++)
-        dq::enqueue_by_matrix(h->cmove(i), V * adjmatrix(i));
-      }
-    }
   };
 
 EX hrmap *new_map() { return new hrmap_asonov; }

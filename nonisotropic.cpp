@@ -458,31 +458,6 @@ EX namespace sn {
       while(coords[h1].second != coords[h2].second) front = front * adj(h1, up), back = iadj(h2, up) * back, h1 = h1->cmove(up), h2 = h2->cmove(up);
       return front * back;
       }
-
-    void draw() override {
-      dq::clear_all();
-
-      dq::enqueue(centerover->master, cview());
-      
-      while(!dq::drawqueue.empty()) {
-        auto& p = dq::drawqueue.front();
-        heptagon *h = p.first;
-        shiftmatrix V = p.second;
-        dq::drawqueue.pop();
-        
-        cell *c = h->c7;
-        if(!do_draw(c, V)) continue;
-        drawcell(c, V);
-        if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
-  
-        for(int i=0; i<S7; i++) {
-          // note: need do cmove before c.spin
-          heptagon *h1 = h->cmove(i);
-          dq::enqueue(h1, V * adjmatrix(i, h->c.spin(i)));
-          }
-        }
-      }
-
     };
 
   EX pair<heptagon*,heptagon*> getcoord(heptagon *h) {
@@ -937,38 +912,8 @@ EX namespace nilv {
       for(int a=0; a<3; a++) p[a] = szgmod(p[a], nilperiod[a]);     
       return nisot::translate(mvec_to_point(p));
       }
-
-    void draw() override {
-      dq::clear_all();
-
-      dq::enqueue_by_matrix(centerover->master, cview());
-      
-      while(!dq::drawqueue.empty()) {
-        auto& p = dq::drawqueue.front();
-        heptagon *h = p.first;
-        shiftmatrix V = p.second;
-        dq::drawqueue.pop();
-        
-        cell *c = h->c7;
-        if(!do_draw(c, V)) continue;
-        drawcell(c, V);
-        if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
-
-        if(0) for(int t=0; t<c->type; t++) {
-          if(!c->move(t)) continue;
-          dynamicval<color_t> g(poly_outline, darkena((0x142968*t) & 0xFFFFFF, 0, 255) );
-          queuepoly(V, cgi.shWireframe3D[t], 0);
-          }
-  
-        for(int i=0; i<S7; i++) {
-          // note: need do cmove before c.spin
-          heptagon *h1 = h->cmove(i);
-          dq::enqueue_by_matrix(h1, V * adjmatrix(i));
-          }
-        }
-      }
     };
-  
+
   EX mvec get_coord(heptagon *h) { return ((hrmap_nil*)currentmap)->coords[h]; }
 
   EX heptagon *get_heptagon_at(mvec m) { return ((hrmap_nil*)currentmap)->get_at(m); }
@@ -1278,33 +1223,6 @@ EX namespace hybrid {
   
     virtual transmatrix spin_to(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return in_underlying([&] { return currentmap->spin_to(c, d, bonus); }); }
     virtual transmatrix spin_from(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return in_underlying([&] { return currentmap->spin_from(c, d, bonus); }); }
-
-    void draw() override {
-      cell* start = centerover;
-      
-      dq::clear_all();
-      dq::enqueue_by_matrix_c(start, cview());
-      
-      while(!dq::drawqueue_c.empty()) {
-        auto& p = dq::drawqueue_c.front();
-        cell *c = get<0>(p);
-
-        shiftmatrix V = get<1>(p);
-        dq::drawqueue_c.pop();
-        
-        if(!do_draw(c, V)) continue;
-        drawcell(c, V);
-
-        if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
-
-        for(int i=0; i<c->type; i++) {
-          cell *c1 = c->cmove(i);
-          shiftmatrix V1 = V * adj(c, i);
-          optimize_shift(V1);
-          dq::enqueue_by_matrix_c(c1, V1);
-          }
-        }
-      }
     };
   
   hrmap_hybrid* hmap() { return (hrmap_hybrid*) currentmap; }
@@ -2122,7 +2040,7 @@ EX namespace rots {
 
     std::unordered_map<int, transmatrix> saved_matrices;
 
-    transmatrix adj(cell *c1, int i) override {
+    transmatrix adj(cell *c1, int i) override {    
       if(i == c1->type-2) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
       if(i == c1->type-1) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
       cell *c2 = c1->cmove(i);
