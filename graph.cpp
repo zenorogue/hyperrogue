@@ -2807,7 +2807,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
     
     if(!nospins) {
       if(WDIM == 2 || prod) {
-        hyperpoint V0 = inverse_shift(cwtV, tC0(Vs));
+        hyperpoint V0 = inverse_shift(Vs, tC0(cwtV));
         ld z = 0;
         if(prod) {
           auto d = product_decompose(V0);
@@ -2815,16 +2815,14 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
           V0 = d.second;
           }
           
-        hyperpoint V1 = spintox(V0) * V0;
-  
         if(hypot_d(2, tC0(unshift(Vs))) > 1e-3) {
-          Vs = cwtV * rspintox(V0) * rpushxto0(V1) * pispin;
+          Vs = Vs * rspintox(V0);
           if(prod) Vs = mscale(Vs, z);
           }
         }
       else if(!sl2) {
-        hyperpoint V0 = inverse_shift(cwtV, tC0(Vs));
-        Vs = cwtV * rspintox(V0) * xpush(hdist0(V0)) * cspin(0, 2, -M_PI);
+        hyperpoint V0 = inverse_shift(Vs, tC0(cwtV));
+        Vs = Vs * rspintox(V0);
         // cwtV * rgpushxto0(inverse(cwtV) * tC0(Vs));
         }
       if(c->monst == moHunterChanging)  
