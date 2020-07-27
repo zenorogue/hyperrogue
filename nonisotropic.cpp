@@ -1744,13 +1744,15 @@ EX namespace slr {
     ld xy = hypot_d(2, h.h);
     ld phi = atan2(h[2], h[3]) + h.shift;
 
+    if(xy < 1e-6) return point31(0.,0.,phi);
+
     bool flipped = phi > 0;
-    if(flipped) phi = -phi, h[2] *= -1, h[0] *= -1;
+    if(flipped) phi = -phi;
     
     ld SV = stretch::not_squared();
     ld K = -1;
     
-    ld alpha = atan2(h[1], -h[0]); /* todo shift */
+    ld alpha = flipped ? atan2(h[1], h[0]) - h.shift : atan2(h[1], -h[0]) + h.shift;
     
     hyperpoint res;
     
