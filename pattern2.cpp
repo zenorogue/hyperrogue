@@ -854,7 +854,7 @@ EX namespace patterns {
     if(IRREGULAR || arcm::in() || bt::in() || arb::in() || WDIM == 3) si.symmetries = c->type;
     else if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
-    else if(S7 < 6 && S3 == 3 && !INVERSE) valSibling(c, si, sub, pat);
+    else if(S7 < 6 && S3 == 3 && !INVERSE && !kite::in()) valSibling(c, si, sub, pat);
     else if(euc::in(2,4)) valEuclid4(c, si, sub);
     else if(euc::in(2,6)) valEuclid6(c, si, sub);
     else if(a4) val457(c, si, sub);
