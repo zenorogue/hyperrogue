@@ -1428,7 +1428,7 @@ EX namespace hybrid {
         if(w1.second == w2.second) {
           int d = PIU(hr::celldistance(w1.first, w2.first));
           a = min(s+d, a);
-          b = max(s-d, a);
+          b = max(s-d, b);
           }
         c = c->cmove(c1->type-1); s++;
         }
