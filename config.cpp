@@ -2003,7 +2003,7 @@ EX void showCustomizeChar() {
   
   double alpha = atan2(mousex - vid.xres/2, mousey - firsty) - M_PI/2;
   V = V * spin(alpha);
-  drawMonsterType(moPlayer, NULL, V, 0, cc_footphase / scale, NOCOLOR);
+  drawMonsterType(moPlayer, NULL, shiftless(V), 0, cc_footphase / scale, NOCOLOR);
   quickqueue();
   
   keyhandler = [] (int sym, int uni) {

@@ -14,9 +14,9 @@ EX int get_skybrightness(int mul IS(1)) {
 
 struct sky_item {
   cell *c;
-  transmatrix T;
+  shiftmatrix T;
   color_t color;
-  sky_item(cell *_c, const struct transmatrix _T, color_t _color) : c(_c), T(_T), color(_color) {}
+  sky_item(cell *_c, const struct shiftmatrix _T, color_t _color) : c(_c), T(_T), color(_color) {}
   };
 
 struct dqi_sky : drawqueueitem {
@@ -35,8 +35,8 @@ EX void prepare_sky() {
   if(euclid) {
     if(WDIM == 3 || GDIM == 2) return;
     if(no_wall_rendering) return;
-    transmatrix T = ggmatrix(currentmap->gamestart());
-    T = gpushxto0(tC0(T)) * T;
+    shiftmatrix T = ggmatrix(currentmap->gamestart());
+    T.T = gpushxto0(tC0(T.T)) * T.T;
     queuepoly(T, cgi.shEuclideanSky, 0x0044e4FF);
     queuepolyat(T * zpush(cgi.SKY+0.5) * xpush(cgi.SKY+0.5), cgi.shSun, 0xFFFF00FF, PPR::SKY);
     }
@@ -83,7 +83,8 @@ void dqi_sky::draw() {
           
         this_poly.clear();
   
-        transmatrix T1 = Tsh * si.T;
+        transmatrix T1 = unshift(si.T);
+        T1 = Tsh * T1;
         do {
           this_poly.emplace_back(T1 * skypoint, colors[cw.at]);
           T1 = T1 * currentmap->adj(cw.at, cw.spin);
@@ -108,7 +109,7 @@ void dqi_sky::draw() {
   for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
     if(global_projection && global_projection != ed) continue;
     current_display->next_shader_flags = GF_VARCOLOR;
-    current_display->set_all(ed);
+    current_display->set_all(ed, 0);
     if(global_projection)
       glhr::projection_multiply(glhr::tmtogl(xpush(-vid.ipd * global_projection/2)));
     glapplymatrix(Id);

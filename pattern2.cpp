@@ -2541,12 +2541,12 @@ EX namespace linepatterns {
     return col;
     }
   
-  void gridlinef(const transmatrix& V1, const hyperpoint& h1, const transmatrix& V2, const hyperpoint& h2, color_t col, int par) {
+  void gridlinef(const shiftmatrix& V1, const hyperpoint& h1, const shiftmatrix& V2, const hyperpoint& h2, color_t col, int par) {
     if(!elliptic)
       gridline(V1, h1, V2, h2, col, par);
     else {
-      hyperpoint vh1 = V1 * h1;
-      hyperpoint vh2 = V2 * h2;
+      hyperpoint vh1 = V1.T * h1;
+      hyperpoint vh2 = unshift(V2, V1.shift) * h2;
       ld cros = vh1[0]*vh2[0] + vh1[1]*vh2[1] + vh1[2]*vh2[2];
       if(cros > 0)
         gridline(V1, h1, V2, h2, col, par),
@@ -2557,13 +2557,13 @@ EX namespace linepatterns {
       }
     }
 
-  void gridlinef(const transmatrix& V, const hyperpoint& h1, const hyperpoint& h2, color_t col, int par) { gridlinef(V, h1, V, h2, col, par); }
+  void gridlinef(const shiftmatrix& V, const hyperpoint& h1, const hyperpoint& h2, color_t col, int par) { gridlinef(V, h1, V, h2, col, par); }
 
   #define ALLCELLS(R) \
     [] (linepattern *lp) { auto& col = lp->color; for(auto& p: current_display->all_drawn_copies) for(auto& V: p.second) { cell *c = p.first; R } }
   
   #define ATCENTER(T) \
-    [] (linepattern *lp) { auto& col = lp->color; transmatrix V = gmatrix[cwt.at]; T}
+    [] (linepattern *lp) { auto& col = lp->color; shiftmatrix V = gmatrix[cwt.at]; T}
       
   linepattern patDual("dual grid", 0xFFFFFF00, always_available,
     ALLCELLS(
@@ -2631,7 +2631,7 @@ EX namespace linepatterns {
         cell *c2 = c->master->cmove(dir)->c7;
         if(gmatrix.count(c2)) {
           if(S3 >= OINF)
-            gridlinef(V, C0, Id, mid(tC0(V), tC0(V * currentmap->adj(c, dir))), col, 2 + vid.linequality);
+            gridlinef(V, C0, V, mid(C0, tC0(currentmap->adj(c, dir))), col, 2 + vid.linequality);
           else 
              gridlinef(V, C0, V * master_relative(c, true) * currentmap->adj(c->master, dir), C0, col, 2 + vid.linequality);
            }
@@ -2648,7 +2648,7 @@ EX namespace linepatterns {
             cell *c2 = c->master->move(i)->c7;
             if(gmatrix.count(c2)) {
               if(S3 >= OINF) {
-                gridlinef(V, C0, Id, mid(tC0(V), tC0(gmatrix[c2])), col, 2 + vid.linequality);
+                gridlinef(V, C0, V, mid(C0, tC0(inverse_shift(V, gmatrix[c2]))), col, 2 + vid.linequality);
                 }
               else 
                 gridlinef(V, C0, V*master_relative(c, true) * currentmap->adj(c->master,i), C0, col, 2 + vid.linequality);
@@ -2674,7 +2674,7 @@ EX namespace linepatterns {
     ALLCELLS(
       if(zebra40(c) / 4 == 10) {
         bool all = true;
-        transmatrix tri[3];
+        shiftmatrix tri[3];
         for(int i=0; i<3; i++)
           tri[i] = V * currentmap->adj(c, i*2);
         
@@ -2821,7 +2821,7 @@ EX namespace linepatterns {
         for(int j=0; j<360; j+=15) {
           for(int k=0; k<=15; k++) 
             curvepoint(xspinpush0((j+k) * degree, i * degree));
-          queuecurve(col, 0, PPR::LINE).V=V;
+          queuecurve(shiftless(Id), col, 0, PPR::LINE).V=V;
           }
         }
       )
@@ -2833,7 +2833,7 @@ EX namespace linepatterns {
         for(int j=0; j<180; j+=15) {
           for(int k=0; k<=15; k++)
             curvepoint(xspinpush0(i * degree, (j+k) * degree));
-          queuecurve(col, 0, PPR::LINE).V=V;
+          queuecurve(shiftless(Id), col, 0, PPR::LINE).V=V;
           }
         }
       )
@@ -2843,8 +2843,8 @@ EX namespace linepatterns {
       for(int j=-180; j<=180; j+=15) {
         for(int i=-90; i<90; i+=15) {
           for(int k=0; k<=15; k++)
-            curvepoint(V * xpush(j * degree) * ypush0((i+k) * degree));
-          queuecurve(col, 0, PPR::LINE).V=V;
+            curvepoint(xpush(j * degree) * ypush0((i+k) * degree));
+          queuecurve(V, col, 0, PPR::LINE).V=V;
           }
         }
       )
@@ -2854,8 +2854,8 @@ EX namespace linepatterns {
       for(int i=-90; i<=90; i += 15) {
         for(int j=-180; j<180; j+=15) {
           for(int k=0; k<=15; k++) 
-            curvepoint(V * xpush((j+k) * degree) * ypush0(i * degree));
-          queuecurve(col, 0, PPR::LINE).V=V;
+            curvepoint(xpush((j+k) * degree) * ypush0(i * degree));
+          queuecurve(V, col, 0, PPR::LINE).V=V;
           }
         }
       )

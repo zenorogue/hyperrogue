@@ -55,8 +55,8 @@ EX namespace multi {
         }
     }
   
-  EX transmatrix whereis[MAXPLAYER];
-  EX transmatrix crosscenter[MAXPLAYER];
+  EX shiftmatrix whereis[MAXPLAYER];
+  EX shiftmatrix crosscenter[MAXPLAYER];
   EX double ccdist[MAXPLAYER];
   EX cell *ccat[MAXPLAYER];
   
@@ -804,7 +804,7 @@ EX void handleInput(int delta) {
   EX void handleMulti(int delta) {
     multi::handleInput(delta);
     
-    transmatrix bcwtV = cwtV;
+    shiftmatrix bcwtV = cwtV;
     cellwalker bcwt = cwt;
     
     bool alldecided = !needinput;

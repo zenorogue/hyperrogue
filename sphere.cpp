@@ -176,7 +176,7 @@ struct hrmap_spherical : hrmap_standard {
       #endif
       }
     if(gmatrix0.count(c2) && gmatrix0.count(c1)) {
-      transmatrix T = inverse(gmatrix0[c1]) * gmatrix0[c2];
+      transmatrix T = inverse_shift(gmatrix0[c1], gmatrix0[c2]);
       if(elliptic && T[LDIM][LDIM] < 0)
         T = centralsym * T;
       return T;

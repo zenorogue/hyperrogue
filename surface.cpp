@@ -431,7 +431,7 @@ void run_hyperlike() {
   int lim = (int) sqrt(rug::vertex_limit);
   for(int r=0; r<lim; r++)
   for(int h=0; h<lim; h++) 
-    rug::addRugpoint(xpush(2 * M_PI * hyper_b * (2*r-lim) / lim) * ypush(hyperlike_bound() * (2*h-lim) / lim) * C0, -1);
+    rug::addRugpoint(shiftless(xpush(2 * M_PI * hyper_b * (2*r-lim) / lim) * ypush(hyperlike_bound() * (2*h-lim) / lim) * C0), -1);
   for(int r=0; r<lim-1; r++)
   for(int h=0; h<lim-1; h++) {
     addTriangle(rug::points[lim*r+h], rug::points[lim*r+h+1], rug::points[lim*r+h+lim]);
@@ -444,7 +444,7 @@ void run_hyperlike() {
 
   int id = 0;
   for(auto p: rug::points) {
-    auto h = p->h;
+    auto h = unshift(p->h);
     coverage.emplace_back(h, rchar(id++) + 7 * 256);
     
     ld y = asinh(h[1]);
@@ -496,7 +496,7 @@ void run_kuen() {
     
     vector<rug::rugpoint*> newmesh(isize(mesh), nullptr);
     for(auto p: mesh) {
-      auto px = map_to_surface(p->h, m);
+      auto px = map_to_surface(unshift(p->h), m);
       p->surface_point = px;
       history::progress(XLAT("solving the geodesics on: %1, %2/%3", XLAT(captions[part]), its(p->dexp_id), its(isize(mesh))));
       }
@@ -544,7 +544,7 @@ void run_kuen() {
   
   for(auto t: mesh) {
     int c = coverages[t->dexp_id];
-    coverage.emplace_back(t->h, rchar(t->dexp_id) + 256 * c);
+    coverage.emplace_back(unshift(t->h), rchar(t->dexp_id) + 256 * c);
     }
 
   // delete the old mesh
@@ -559,7 +559,7 @@ template<class T> void run_function(T f) {
   full_mesh();
   for(auto p: rug::points) {
     USING_NATIVE_GEOMETRY;
-    p->native = f(p->h),
+    p->native = f(unshift(p->h)),
     p->valid = true;
     }
   }
@@ -571,7 +571,7 @@ void run_other() {
   int it = 0;
   for(auto p: rug::points) {
     it++;
-    auto h = p->h;
+    auto h = unshift(p->h);
 
     p->surface_point = map_to_surface(h, dp);
     if(1) {
@@ -783,7 +783,7 @@ EX void show_surfaces() {
       if(coverage_style == 2) {
         if(rug::rugged) rug::close();
         }
-      coverage_matrix = inverse(ggmatrix(coverage_center = cwt.at));
+      coverage_matrix = inverse(unshift(ggmatrix(coverage_center = cwt.at)));
       }
     else if(rug::handlekeys(sym, uni)) ;
     else if(doexiton(sym, uni)) popScreen();
@@ -847,9 +847,9 @@ auto surface_hook = addHook(hooks_args, 100, surface_args);
 
 void display_coverage() {
 
-  transmatrix M = 
+  shiftmatrix M = 
     coverage_style == 3 ? ggmatrix(coverage_center) * coverage_matrix
-    : Id;
+    : shiftless(Id);
 
   if(coverage_style)
     for(auto p : coverage)

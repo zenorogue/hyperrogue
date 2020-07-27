@@ -139,11 +139,11 @@ void start_poly_debugger(hr_polygon_error& err) {
   mapeditor::dtcolor = 0xFF0000FF;
   mapeditor::dtwidth = 0.02;
   for(int i=0; i<n-1; i++)
-    mapeditor::dt_add_line(tC0(err.v[i]), tC0(err.v[i+1]), 0);
+    mapeditor::dt_add_line(shiftless(tC0(err.v[i])), shiftless(tC0(err.v[i+1])), 0);
   
   mapeditor::dtcolor = 0xFFFFFFFF;
   for(int i=0; i<n; i++)
-    mapeditor::dt_add_text(tC0(err.v[i]), 0.5, its(i));
+    mapeditor::dt_add_text(shiftless(tC0(err.v[i])), 0.5, its(i));
   #endif
   }
 
@@ -494,27 +494,27 @@ void connection_debugger() {
   for(auto& p: debug_polys) {
     int id = p.second;
     
-    transmatrix V = gmatrix[cwt.at] * p.first;        
+    shiftmatrix V = gmatrix[cwt.at] * p.first;
     
     auto& sh = debugged.shapes[id].vertices;
     
     for(auto& v: sh)
-      curvepoint(V * v);
+      curvepoint(v);
 
-    curvepoint(V * sh[0]);
+    curvepoint(sh[0]);
     
     color_t col = colortables['A'][id];
     col = darkena(col, 0, 0xFF);
     
     if(&p == &last) {
       vid.linewidth *= 2;
-      queuecurve(0xFFFF00FF, col, PPR::LINE);
+      queuecurve(V, 0xFFFF00FF, col, PPR::LINE);
       vid.linewidth /= 2;
       for(int i=0; i<isize(sh); i++)
         queuestr(V * sh[i], vid.fsize, its(i), 0xFFFFFFFF);
       }
     else
-      queuecurve(0xFFFFFFFF, col, PPR::LINE);
+      queuecurve(V, 0xFFFFFFFF, col, PPR::LINE);
     }
   quickqueue();
 
@@ -795,22 +795,21 @@ struct hrmap_arbi : hrmap {
     }
   
   void draw() override {
-    dq::visited.clear();
+    dq::clear_all();
     dq::enqueue(centerover->master, cview());
     
     while(!dq::drawqueue.empty()) {
       auto& p = dq::drawqueue.front();
-      heptagon *h = get<0>(p);
-      transmatrix V = get<1>(p);
-      dynamicval<ld> b(band_shift, get<2>(p));
+      heptagon *h = p.first;
+      shiftmatrix V = p.second;
       dq::drawqueue.pop();
   
       if(do_draw(h->c7, V)) drawcell(h->c7, V);
       else continue;
   
       for(int i=0; i<h->type; i++) {
-        transmatrix V1 = V * adj(h, i);
-        bandfixer bf(V1);
+        shiftmatrix V1 = V * adj(h, i);
+        optimize_shift(V1);
         dq::enqueue(h->move(i), V1);
         }
       }

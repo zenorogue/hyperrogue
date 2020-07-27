@@ -552,7 +552,7 @@ EX void compute_geometry() {
     }
   }
 
-bool draw_cell_schematics(cell *c, transmatrix V) {
+bool draw_cell_schematics(cell *c, const shiftmatrix& V) {
   if(gridmaking) {
     heptagon *h = c->master;
     for(int i: cells_of_heptagon[h]) {

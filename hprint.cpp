@@ -216,6 +216,9 @@ inline void print(hstream& hs, const transmatrix T) {
   for(int j=0; j<MDIM; j++) c(T[i][j]);
   print(hs, ")"); }
 
+inline void print(hstream& hs, const shiftpoint h) { print(hs, h.h, "@", h.shift); }
+inline void print(hstream& hs, const shiftmatrix T) { print(hs, T.T, "@", T.shift); }
+
 template<class T, class U> void print(hstream& hs, const pair<T, U> & t) { print(hs, "(", t.first, ",", t.second, ")"); }
 
 template<class... T> void print(hstream& hs, const tuple<T...> & t) { 

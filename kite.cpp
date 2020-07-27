@@ -327,7 +327,7 @@ struct hrmap_kite : hrmap {
 
   transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
     if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
-      return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
+      return inverse_shift(gmatrix0[h1->c7], gmatrix0[h2->c7]);
     transmatrix gm = Id, where = Id;
     while(h1 != h2) {
       if(h1->distance <= h2->distance)
@@ -345,15 +345,13 @@ struct hrmap_kite : hrmap {
 
   void draw() override {
              
-    dq::visited.clear();
+    dq::clear_all();
     dq::enqueue(centerover->master, cview());
     
     while(!dq::drawqueue.empty()) {
       auto& p = dq::drawqueue.front();
-      heptagon *h = get<0>(p);
-      transmatrix V = get<1>(p);
-      dynamicval<ld> b(band_shift, get<2>(p));
-      bandfixer bf(V);
+      heptagon *h = p.first;
+      shiftmatrix V = p.second;
       dq::drawqueue.pop();
 
       cell *c = h->c7;
@@ -361,7 +359,7 @@ struct hrmap_kite : hrmap {
       drawcell(c, V);
       
       for(int i=0; i<c->type; i++)
-        dq::enqueue(c->cmove(i)->master, V * adj(c, i));
+        dq::enqueue(c->cmove(i)->master, optimized_shift(V * adj(c, i)));
           /*
           ld err = hdist(where[h->c7->cmove(i)->master] * C0, where[h] * M * C0);
           if(err > -.01)

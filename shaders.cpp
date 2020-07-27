@@ -313,7 +313,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     }    
   }
 
-void display_data::set_projection(int ed) {  
+void display_data::set_projection(int ed, ld shift) {
   flagtype shader_flags = current_display->next_shader_flags;
   unsigned id;
   id = geometry;
@@ -467,8 +467,9 @@ void display_data::set_projection(int ed) {
   if(selected->shader_flags & SF_BAND)
     glhr::projection_multiply(glhr::scale(2 / M_PI, 2 / M_PI, GDIM == 3 ? 2/M_PI : 1));
 
-  if(selected->shader_flags & SF_BAND)
-    glhr::projection_multiply(glhr::translate(band_shift, 0, 0));
+  if(selected->shader_flags & SF_BAND) {
+    glhr::projection_multiply(glhr::translate(shift, 0, 0));
+    }
 
   if(selected->shader_flags & SF_HALFPLANE) {
     glhr::projection_multiply(glhr::translate(0, 1, 0));      

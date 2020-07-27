@@ -10,7 +10,7 @@ namespace hr {
 
 struct snowball {
   transmatrix T;
-  transmatrix global;
+  shiftmatrix global;
   snowball *prev;
   snowball *next;
   double phase;
@@ -25,7 +25,7 @@ struct blizzardcell {
   cell *c;
   int frame;
   int tmp;
-  transmatrix *gm;
+  shiftmatrix *gm;
   char wmap;
   int inward, outward, ward;
   vector<int> qty;
@@ -123,10 +123,10 @@ EX void drawBlizzards() {
       sball.next = &sball2;
       sball2.prev = &sball;
       
-      hyperpoint t = inverse(sball.global) * tC0(sball2.global);
+      hyperpoint t = inverse_shift(sball.global, tC0(sball2.global));
       double at0 = at + sball.phase;
       if(at0>1) at0 -= 1;
-      transmatrix tpartial = sball.global * rspintox(t) * xpush(hdist0(t) * at0);
+      shiftmatrix tpartial = sball.global * rspintox(t) * xpush(hdist0(t) * at0);
       
       if(wmascii || wmblack)
         queuestr(tpartial, .2, ".", 0xFFFFFF);
@@ -222,8 +222,8 @@ EX void drawArrowTraps() {
     auto r = traplimits(c);
     
     try {
-      transmatrix& t0 = gmatrix.at(r[0]);
-      transmatrix& t1 = gmatrix.at(r[4]);
+      shiftmatrix& t0 = gmatrix.at(r[0]);
+      shiftmatrix& t1 = gmatrix.at(r[4]);
       ignore(t0);
       ignore(t1);
 
@@ -236,10 +236,10 @@ EX void drawArrowTraps() {
         int tt = int(fractick(64) * 401);
         
         for(int u=0; u<2; u++) {
-          transmatrix& tu = u ? t0 : t1;
-          transmatrix& tv = u ? t1 : t0;
-          hyperpoint trel = inverse(tu) * tC0(tv);
-          transmatrix tpartial = tu * rspintox(trel) * xpush(hdist0(trel) * tt / 401.0);
+          shiftmatrix& tu = u ? t0 : t1;
+          shiftmatrix& tv = u ? t1 : t0;
+          hyperpoint trel = inverse_shift(tu, tC0(tv));
+          shiftmatrix tpartial = tu * rspintox(trel) * xpush(hdist0(trel) * tt / 401.0);
           tpartial = tpartial * ypush(.05);
           if(GDIM == 3) tpartial = tpartial * cspin(1, 2, M_PI/2);
           queuepoly(tpartial, cgi.shTrapArrow, 0xFFFFFFFF);

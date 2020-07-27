@@ -12,7 +12,7 @@ EX int frames;
 EX bool outoffocus = false;
 
 EX int mousex, mousey;
-EX hyperpoint mouseh, mouseoh;
+EX shiftpoint mouseh, mouseoh;
 
 EX bool pandora_leftclick, pandora_rightclick;
 
@@ -66,17 +66,17 @@ EX int lastt;
 
 EX bool mouseout() {
   if((getcstat != '-' && getcstat) || (lgetcstat && lgetcstat != '-')) return true;
-  return outofmap(mouseh);
+  return outofmap(mouseh.h);
   }
 
 EX bool mouseout2() {
   if((getcstat && getcstat != '-') || (lgetcstat && lgetcstat != '-')) return true;
-  return outofmap(mouseh) || outofmap(mouseoh);
+  return outofmap(mouseh.h) || outofmap(mouseoh.h);
   }
 
 EX movedir vectodir(hyperpoint P) {
 
-  transmatrix U = ggmatrix(cwt.at);
+  transmatrix U = unshift(ggmatrix(cwt.at));
   if(GDIM == 3 && WDIM == 2)  U = radar_transform * U;
 
   P = direct_exp(lp_iapply(P));
@@ -137,18 +137,18 @@ EX void movepckeydir(int d) {
 EX void calcMousedest() {
   if(mouseout()) return;
   if(vid.revcontrol == true) { mouseh[0] = -mouseh[0]; mouseh[1] = -mouseh[1]; }
-  ld mousedist = intval(mouseh, tC0(ggmatrix(cwt.at)));
+  ld mousedist = hdist(mouseh, tC0(ggmatrix(cwt.at)));
   mousedest.d = -1;
   
   cellwalker bcwt = cwt;
   
   vector<ld> dists(cwt.at->type);
   
-  transmatrix U = ggmatrix(cwt.at);
+  shiftmatrix U = ggmatrix(cwt.at);
   
   for(int i=0; i<cwt.at->type; i++) {
     transmatrix T = currentmap->adj(cwt.at, i);
-    dists[i] = intval(mouseh, U * T * C0);
+    dists[i] = hdist(mouseh, U * T * C0);
     }
   
   for(int i=0; i<cwt.at->type; i++) if(dists[i] < mousedist) {
@@ -331,9 +331,9 @@ EX void full_rotate_camera(int dir, ld val) {
       transmatrix T2 = eupush( tC0(inverse(View)) );
       transmatrix nlp = View * T2;  
       auto rV = inverse(nlp) * View;
-      h = nlp * inverse_exp(tC0(rV));
+      h = nlp * inverse_exp(shiftless(tC0(rV)));
       }
-    else h = inverse_exp(tC0(View));
+    else h = inverse_exp(shiftless(tC0(View)));
     shift_view(-h);
     rotate_view(cspin(dir, 2, val));
     shift_view(h);    
@@ -1087,7 +1087,7 @@ EX bool gmodekeys(int sym, int uni) {
       ld maxs = 0;
       auto& cd = current_display;
       for(auto& p: gmatrix) for(int i=0; i<p.first->type; i++) {
-        hyperpoint h = tC0(p.second * currentmap->adj(p.first, i));
+        shiftpoint h = tC0(p.second * currentmap->adj(p.first, i));
         hyperpoint onscreen;
         applymodel(h, onscreen);
         maxs = max(maxs, onscreen[0] / cd->xsize);

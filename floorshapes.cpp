@@ -938,7 +938,7 @@ EX int shvid(cell *c) {
     return ctof(c);
   }
 
-EX struct dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, color_t col, PPR prio IS(PPR::DEFAULT)) {
+EX struct dqi_poly *draw_shapevec(cell *c, const shiftmatrix& V, const vector<hpcshape> &shv, color_t col, PPR prio IS(PPR::DEFAULT)) {
   if(no_wall_rendering) return NULL;
   if(!c) return &queuepolyat(V, shv[0], col, prio);
   else if(WDIM == 3) return NULL;
@@ -975,12 +975,12 @@ EX struct dqi_poly *draw_shapevec(cell *c, const transmatrix& V, const vector<hp
     return &queuepolyat(V, shv[shvid(c)], col, prio);
   }
 
-EX void draw_floorshape(cell *c, const transmatrix& V, const floorshape &fsh, color_t col, PPR prio IS(PPR::DEFAULT)) {
+EX void draw_floorshape(cell *c, const shiftmatrix& V, const floorshape &fsh, color_t col, PPR prio IS(PPR::DEFAULT)) {
   if(no_wall_rendering) return;
   draw_shapevec(c, V, fsh.b, col, prio);
   }
 
-EX void draw_qfi(cell *c, const transmatrix& V, color_t col, PPR prio IS(PPR::DEFAULT), vector<hpcshape> floorshape::* tab IS(&floorshape::b)) {
+EX void draw_qfi(cell *c, const shiftmatrix& V, color_t col, PPR prio IS(PPR::DEFAULT), vector<hpcshape> floorshape::* tab IS(&floorshape::b)) {
   if(no_wall_rendering) return;
   if(qfi.shape)
     queuepolyat(V * qfi.spin, *qfi.shape, col, prio);
@@ -1002,15 +1002,15 @@ EX void draw_qfi(cell *c, const transmatrix& V, color_t col, PPR prio IS(PPR::DE
 EX bool floorshape_debug;
 EX void viewmat() {
   if(floorshape_debug) {
-    transmatrix V = ggmatrix(cwt.at);
+    shiftmatrix V = ggmatrix(cwt.at);
     
     for(int i=0; i<cwt.at->type; i++) {
-      hyperpoint ci = V * get_corner_position(cwt.at, i);
-      hyperpoint ci1 = V * get_corner_position(cwt.at, (i+1) % cwt.at->type);
+      shiftpoint ci = V * get_corner_position(cwt.at, i);
+      shiftpoint ci1 = V * get_corner_position(cwt.at, (i+1) % cwt.at->type);
 
-      hyperpoint cn = V * nearcorner(cwt.at, i);
-      hyperpoint cf0 = V * farcorner(cwt.at, i, 0);
-      hyperpoint cf1 = V * farcorner(cwt.at, i, 1);
+      shiftpoint cn = V * nearcorner(cwt.at, i);
+      shiftpoint cf0 = V * farcorner(cwt.at, i, 0);
+      shiftpoint cf1 = V * farcorner(cwt.at, i, 1);
       queuestr(ci, 20, its(i), 0x0000FF, 1);
       if(vid.grid)
         queuestr(cn, 20, its(i), 0x00FF00, 1);
@@ -1065,17 +1065,17 @@ void draw_shape_for_texture(floorshape* sh) {
     curvepoint(eupush(gx-s1, gy+s1) * C0);
     curvepoint(eupush(gx-s1, gy-s1) * C0);
     curvepoint(eupush(gx+s1, gy-s1) * C0);
-    queuecurve(0x000000FF, 0xFFFFFFFF - 0x1010100 * (sh->pstrength * 24/10), PPR::LAKELEV);
+    queuecurve(shiftless(Id), 0x000000FF, 0xFFFFFFFF - 0x1010100 * (sh->pstrength * 24/10), PPR::LAKELEV);
     }
 
   poly_outline = 0xFFFFFFFF - 0x1010100 * (sh->pstrength * 3/2);
 
   for(int a=-1; a<=1; a++)
   for(int b=-1; b<=1; b++)
-    queuepoly(eupush(gx+a, gy+b), sh->b[0], 0xFFFFFFFF);
+    queuepoly(shiftless(eupush(gx+a, gy+b)), sh->b[0], 0xFFFFFFFF);
 
   if(sh == &cgi.shCrossFloor) {
-    queuepoly(eupush(gx, gy) * spin(M_PI/4), cgi.shCross, 0x808080FF);
+    queuepoly(shiftless(eupush(gx, gy) * spin(M_PI/4)), cgi.shCross, 0x808080FF);
     }
 
   if(1) {
@@ -1085,7 +1085,7 @@ void draw_shape_for_texture(floorshape* sh) {
     curvepoint(eupush(gx-sd, gy+sd) * C0);
     curvepoint(eupush(gx-sd, gy-sd) * C0);
     curvepoint(eupush(gx+sd, gy-sd) * C0);
-    queuecurve(0x40404000 + sh->fstrength * 192/10, 0, PPR::LINE);
+    queuecurve(shiftless(Id), 0x40404000 + sh->fstrength * 192/10, 0, PPR::LINE);
     }
   
   auto& ftv = floor_texture_vertices[sh->id];
@@ -1098,11 +1098,11 @@ void draw_shape_for_texture(floorshape* sh) {
 
   if(1) {
     hyperpoint inmodel;
-    applymodel(center, inmodel);
+    applymodel(shiftless(center), inmodel);
     glvertex tmap;
     tmap[0] = (1 + inmodel[0] * pconf.scale) / 2;
     tmap[1] = (1 - inmodel[1] * pconf.scale) / 2;
-    applymodel(center + v1, inmodel);
+    applymodel(shiftless(center + v1), inmodel);
     tmap[2] = (1 + inmodel[0] * pconf.scale) / 2 - tmap[0];
     floor_texture_map[sh->id] = tmap;
     }
@@ -1110,7 +1110,7 @@ void draw_shape_for_texture(floorshape* sh) {
   auto tvec_at = [&] (ld x, ld y) {
     hyperpoint h = center + v1 * x + v2 * y;
     hyperpoint inmodel;
-    applymodel(h, inmodel);
+    applymodel(shiftless(h), inmodel);
     glvec2 v;
     v[0] = (1 + inmodel[0] * pconf.scale) / 2;
     v[1] = (1 - inmodel[1] * pconf.scale) / 2;
@@ -1193,7 +1193,7 @@ void geometry_information::make_floor_textures_here() {
   if(1) {
     current_display->next_shader_flags = GF_VARCOLOR;
     dynamicval<eModel> m(pmodel, mdPixel);
-    current_display->set_all(0);
+    current_display->set_all(0,0);
     glhr::new_projection();
     glhr::id_modelview();
     glhr::prepare(gv);

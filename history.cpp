@@ -204,7 +204,7 @@ EX namespace history {
         m->at = inverse(first_center_view);
         m->base = first_center_at;
         v.push_back(m);
-        create(first_center_at, centerover, inverse(ggmatrix(centerover)));
+        create(first_center_at, centerover, inverse(unshift(ggmatrix(centerover))));
         if(on) saved_ends = 2;
         return;
         }
@@ -301,7 +301,7 @@ EX namespace history {
   
   EX void create_recenter_to_view(bool precise) {
     cell *c = centerover ? centerover : cwt.at;
-    create(path_for_lineanimation[0], c, precise ? inverse(ggmatrix(c)) : Id);
+    create(path_for_lineanimation[0], c, precise ? inverse(unshift(ggmatrix(c))) : Id);
     }
   
   EX void movetophase() {
@@ -374,7 +374,7 @@ EX namespace history {
         v[j+1]->at * C0;
         
       hyperpoint nextscr;
-      applymodel(next, nextscr);
+      applymodel(shiftless(next), nextscr);
       tpixels += nextscr[0] * r;
       
       if(j == 0 || j == siz-2)
@@ -452,7 +452,7 @@ EX namespace history {
           drawfullmap();
           
           if(last_base) {
-            hyperpoint last = ggmatrix(last_base) * last_relative;
+            shiftpoint last = ggmatrix(last_base) * last_relative;
             hyperpoint hscr;
             applymodel(last, hscr);
             ld bwidth = -current_display->radius * hscr[0];

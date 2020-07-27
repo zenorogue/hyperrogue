@@ -676,15 +676,13 @@ struct hrmap_crystal : hrmap_standard {
     
     // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
     
-    dq::visited_by_matrix.clear();
+    dq::clear_all();
     dq::enqueue_by_matrix(centerover->master, cview());
     
     while(!dq::drawqueue.empty()) {
       auto& p = dq::drawqueue.front();
-      heptagon *h = get<0>(p);
-      transmatrix V = get<1>(p);
-      dynamicval<ld> b(band_shift, get<2>(p));
-      bandfixer bf(V);
+      heptagon *h = p.first;
+      shiftmatrix V = p.second;
       dq::drawqueue.pop();
             
       cell *c = h->c7;
@@ -694,7 +692,7 @@ struct hrmap_crystal : hrmap_standard {
       if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
   
       for(int d=0; d<S7; d++) {
-        dq::enqueue_by_matrix(h->move(d), V * adj(h, d));
+        dq::enqueue_by_matrix(h->move(d), optimized_shift(V * adj(h, d)));
         }
       }
     }
@@ -704,7 +702,7 @@ struct hrmap_crystal : hrmap_standard {
     if(h2 == h1) return Id;
     for(int i=0; i<S7; i++) if(h2 == h1->move(i)) return adj(h1->master, i);
     if(gmatrix0.count(h2) && gmatrix0.count(h1))
-      return inverse(gmatrix0[h1]) * gmatrix0[h2];
+      return inverse_shift(gmatrix0[h1], gmatrix0[h2]);
     println(hlog, "unknown relmatrix, distance = ", celldistance(h1, h2));
     return xpush(999);
     }
@@ -828,7 +826,7 @@ EX ld compass_angle() {
   return (bitr ? M_PI/8 : 0) - master_to_c7_angle();
   }
       
-EX bool crystal_cell(cell *c, transmatrix V) {
+EX bool crystal_cell(cell *c, shiftmatrix V) {
 
   if(!cryst) return false;
 
@@ -846,7 +844,7 @@ EX bool crystal_cell(cell *c, transmatrix V) {
       ld dist = cellgfxdist(c, 0);
 
       for(int i=0; i<S7; i++)  {
-        transmatrix T = V * spin(compass_angle() - 2 * M_PI * i / S7) * xpush(dist*.3);
+        shiftmatrix T = V * spin(compass_angle() - 2 * M_PI * i / S7) * xpush(dist*.3);
         
         auto co = m->hcoords[c->master];
         auto lw = m->makewalker(co, i);
@@ -1239,8 +1237,8 @@ void cut_triangle2(const hyperpoint pa, const hyperpoint pb, const hyperpoint pc
   
   pac[3] = pbc[3] = 1;
   
-  rug::rugpoint *rac = rug::addRugpoint(hac, 0);
-  rug::rugpoint *rbc = rug::addRugpoint(hbc, 0);
+  rug::rugpoint *rac = rug::addRugpoint(shiftless(hac), 0);
+  rug::rugpoint *rbc = rug::addRugpoint(shiftless(hbc), 0);
   rac->native = pac;
   rbc->native = pbc;
   rac->valid = true;
@@ -1268,7 +1266,7 @@ EX void build_rugdata() {
             
     cell *c = gp.first;
     if(c->wall == waInvisibleFloor) continue;
-    const transmatrix& V = gp.second;
+    const shiftmatrix& V = gp.second;
 
     auto co = m->get_coord(c);
     vector<ldcoord> vcoord(c->type);
@@ -1307,7 +1305,7 @@ EX void build_rugdata() {
       for(int i=0; i<c->type; i++) {
         int j = (i+1) % c->type;
         if((vco[i][3] >= 0) != (hco[3] >= 0) || (vco[j][3] >= 0) != (hco[3] >= 0)) {
-          cut_triangle(hco, vco[i], vco[j], tC0(V), V * get_corner_position(c, i), V * get_corner_position(c, j));
+          cut_triangle(hco, vco[i], vco[j], unshift(tC0(V)), unshift(V * get_corner_position(c, i)), unshift(V * get_corner_position(c, j)));
           }
         }
       }

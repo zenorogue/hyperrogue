@@ -264,7 +264,7 @@ EX namespace netgen {
   
   color_t& hqpixel(hyperpoint h) {
     int hx, hy, hs;
-    getcoord0(h, hx, hy, hs);
+    getcoord0(shiftless(h), hx, hy, hs);
     return qpixel(hqsurface, hx, hy);
     }
   
@@ -657,7 +657,7 @@ EX namespace netgen {
             nei[i][e] >= 0 ? 0x808080 : 
             0xC0C0C0;
     
-          queueline(hvec(i, (e+ofs)%t), hvec(i, (e+1+ofs)%t), (col << 8) + 0xFF, 3);
+          queueline(shiftless(hvec(i, (e+ofs)%t)), shiftless(hvec(i, (e+1+ofs)%t)), (col << 8) + 0xFF, 3);
           }
         }
       quickqueue();

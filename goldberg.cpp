@@ -1234,10 +1234,8 @@ EX namespace gp {
 
       while(!dq::drawqueue_c.empty()) {
         auto& p = dq::drawqueue_c.front();
-        cell *c = get<0>(p);
-        transmatrix V = get<1>(p);
-        dynamicval<ld> b(band_shift, get<2>(p));
-        bandfixer bf(V);
+        cell *c = p.first;
+        shiftmatrix V = p.second;
         auto c1 = get_mapped(c, 0);
         
         in_underlying([&] {
@@ -1257,7 +1255,7 @@ EX namespace gp {
         drawcell(c, V);
         
         for(int i=0; i<c->type; i++) if(c->cmove(i))
-          enqueue(c->move(i), V * adj(c, i));
+          enqueue(c->move(i), optimized_shift(V * adj(c, i)));
         }
       }
 

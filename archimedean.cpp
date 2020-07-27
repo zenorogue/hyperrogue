@@ -677,14 +677,13 @@ struct hrmap_archimedean : hrmap {
     }
   
   void draw() override {
-    dq::visited.clear();
+    dq::clear_all();
     dq::enqueue(centerover->master, cview());
     
     while(!dq::drawqueue.empty()) {
       auto& p = dq::drawqueue.front();
-      heptagon *h = get<0>(p);
-      transmatrix V = get<1>(p);
-      dynamicval<ld> b(band_shift, get<2>(p));
+      heptagon *h = p.first;
+      shiftmatrix V = p.second;
       dq::drawqueue.pop();
   
       int id = id_of(h);
@@ -699,8 +698,8 @@ struct hrmap_archimedean : hrmap {
         if(DUAL && (i&1)) continue;
         h->cmove(i);
         if(PURE && id >= 2*current.N && h->move(i) && id_of(h->move(i)) >= 2*current.N) continue;
-        transmatrix V1 = V * current.adjcell_matrix(h, i);
-        bandfixer bf(V1);
+        shiftmatrix V1 = V * current.adjcell_matrix(h, i);
+        optimize_shift(V1);
         dq::enqueue(h->move(i), V1);
         }
       }
@@ -712,7 +711,7 @@ struct hrmap_archimedean : hrmap {
   
   transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
     if(use_gmatrix && gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
-      return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
+      return inverse_shift(gmatrix0[h1->c7], gmatrix0[h2->c7]);
     transmatrix gm = Id, where = Id;
     auto& cof = current_or_fake();
     while(h1 != h2) {

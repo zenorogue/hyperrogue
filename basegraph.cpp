@@ -20,9 +20,9 @@ struct display_data {
   /** Camera rotation, used in nonisotropic geometries. */
   transmatrix local_perspective;
   /** The view relative to the player character. */
-  transmatrix player_matrix;
+  shiftmatrix player_matrix;
   /** On-screen coordinates for all the visible cells. */
-  unordered_map<cell*, transmatrix> cellmatrices, old_cellmatrices;
+  unordered_map<cell*, shiftmatrix> cellmatrices, old_cellmatrices;
   /** Position of the current map view, relative to the screen (0 to 1). */
   ld xmin, ymin, xmax, ymax;
   /** Position of the current map view, in pixels. */
@@ -43,14 +43,14 @@ struct display_data {
   bool in_anaglyph();
 
   void set_viewport(int ed);
-  void set_projection(int ed);
+  void set_projection(int ed, ld shift);
   void set_mask(int ed);
 
-  void set_all(int ed);
+  void set_all(int ed, ld shift);
   /** Which copy of the player cell? */
   transmatrix which_copy;
   /** On-screen coordinates for all the visible cells. */
-  unordered_map<cell*, vector<transmatrix>> all_drawn_copies;
+  unordered_map<cell*, vector<shiftmatrix>> all_drawn_copies;
   };
 
 #define View (::hr::current_display->view_matrix)
@@ -245,13 +245,13 @@ inline void reset_projection() { new_projection_needed = true; }
 
 EX ld lband_shift;
 
-void display_data::set_all(int ed) {
+void display_data::set_all(int ed, ld shift) {
   auto t = this;
   auto current_projection = tie(ed, pmodel, t, current_rbuffer);
-  if(new_projection_needed || !glhr::current_glprogram || (next_shader_flags & GF_which) != (glhr::current_glprogram->shader_flags & GF_which) || current_projection != last_projection || band_shift != lband_shift) {
+  if(new_projection_needed || !glhr::current_glprogram || (next_shader_flags & GF_which) != (glhr::current_glprogram->shader_flags & GF_which) || current_projection != last_projection || shift != lband_shift) {
     last_projection = current_projection;
-    lband_shift = band_shift;
-    set_projection(ed);
+    lband_shift = shift;
+    set_projection(ed, shift);
     set_mask(ed);
     set_viewport(ed);
     new_projection_needed = false;
@@ -956,7 +956,7 @@ EX void drawCircle(int x, int y, int size, color_t color, color_t fillcolor IS(0
       float rr = (M_PI * 2 * r) / pts;
       glcoords.push_back(glhr::makevertex(x + size * sin(rr), y + size * pconf.stretch * cos(rr), 0));
       }
-    current_display->set_all(0);
+    current_display->set_all(0, lband_shift);
     glhr::vertices(glcoords);
     glhr::set_depthtest(false);
     if(fillcolor) {

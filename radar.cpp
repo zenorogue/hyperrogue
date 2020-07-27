@@ -20,46 +20,50 @@ EX vector<radarline> radarlines;
 
 EX transmatrix radar_transform;
 
-pair<bool, hyperpoint> makeradar(hyperpoint h) {
-  if(GDIM == 3 && WDIM == 2) h = radar_transform * h;
+pair<bool, hyperpoint> makeradar(shiftpoint h) {
+  if(GDIM == 3 && WDIM == 2) h.h = radar_transform * h.h;
 
   ld d = hdist0(h);
 
+  hyperpoint h1;
+  
   if(sol && nisot::geodesic_movement) {
-    h = inverse_exp(h, pQUICK);
-    ld r = hypot_d(3, h);
-    if(r < 1) h = h * (atanh(r) / r);
-    else return {false, h};
+    hyperpoint h1 = inverse_exp(h, pQUICK);
+    ld r = hypot_d(3, h1);
+    if(r < 1) h1 = h1 * (atanh(r) / r);
+    else return {false, h1};
     }
-  if(prod) h = product::inverse_exp(h);
-  if(nisot::local_perspective_used()) h = NLP * h;
+  else
+  if(prod) h1 = product::inverse_exp(unshift(h));
+  
+  if(nisot::local_perspective_used()) h1 = NLP * h1;
   
   if(WDIM == 3) {
-    if(d >= vid.radarrange) return {false, h};
-    if(d) h = h * (d / vid.radarrange / hypot_d(3, h));
+    if(d >= vid.radarrange) return {false, h1};
+    if(d) h1 = h1 * (d / vid.radarrange / hypot_d(3, h1));
     }
   else if(hyperbolic) {
-    for(int a=0; a<3; a++) h[a] = h[a] / (1 + h[3]);
+    for(int a=0; a<3; a++) h1[a] = h1[a] / (1 + h[3]);
     }
   else if(sphere) {
-    h[2] = h[3];
+    h1[2] = h1[3];
     }
   else {
-    if(d > vid.radarrange) return {false, h};
-    if(d) h = h * (d / (vid.radarrange + cgi.scalefactor/4) / hypot_d(3, h));
+    if(d > vid.radarrange) return {false, h1};
+    if(d) h1 = h1 * (d / (vid.radarrange + cgi.scalefactor/4) / hypot_d(3, h1));
     }
-  if(invalid_point(h)) return {false, h};
-  return {true, h};
+  if(invalid_point(h1)) return {false, h1};
+  return {true, h1};
   }
 
-EX void addradar(const transmatrix& V, char ch, color_t col, color_t outline) {
-  hyperpoint h = tC0(V);
+EX void addradar(const shiftmatrix& V, char ch, color_t col, color_t outline) {
+  shiftpoint h = tC0(V);
   auto hp = makeradar(h);
   if(hp.first)
     radarpoints.emplace_back(radarpoint{hp.second, ch, col, outline});
   }
 
-EX void addradar(const hyperpoint h1, const hyperpoint h2, color_t col) {
+EX void addradar(const shiftpoint h1, const shiftpoint h2, color_t col) {
   auto hp1 = makeradar(h1);
   auto hp2 = makeradar(h2);
   if(hp1.first && hp2.first)
@@ -107,10 +111,12 @@ EX void draw_radar(bool cornermode) {
   
   ld cx = dual::state ? (dual::currently_loaded ? vid.xres/2+rad+2 : vid.xres/2-rad-2) : cornermode ? rad+2 : vid.xres-rad-2;
   ld cy = vid.yres-rad-2 - vid.fsize;
+  
+  auto sId = shiftless(Id);
 
   for(int i=0; i<360; i++)
     curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad, 1) * C0);
-  queuecurve(0xFFFFFFFF, 0x000000FF, PPR::ZERO);      
+  queuecurve(sId, 0xFFFFFFFF, 0x000000FF, PPR::ZERO);      
 
   ld alpha = 15 * degree;
   ld co = cos(alpha);
@@ -119,28 +125,28 @@ EX void draw_radar(bool cornermode) {
   if(sph && !d3) {
     for(int i=0; i<360; i++)
       curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad*si, 1) * C0);
-    queuecurve(0, 0x200000FF, PPR::ZERO);
+    queuecurve(sId, 0, 0x200000FF, PPR::ZERO);
     }
 
   if(d3) {
     for(int i=0; i<360; i++)
       curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad*si, 1) * C0);
-    queuecurve(0xFF0000FF, 0x200000FF, PPR::ZERO);
+    queuecurve(sId, 0xFF0000FF, 0x200000FF, PPR::ZERO);
   
     curvepoint(atscreenpos(cx-sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad*si, 1) * C0);
     curvepoint(atscreenpos(cx, cy, 1) * C0);
     curvepoint(atscreenpos(cx+sin(vid.fov*degree/2)*rad, cy-sin(vid.fov*degree/2)*rad*si, 1) * C0);
-    queuecurve(0xFF8000FF, 0, PPR::ZERO);
+    queuecurve(sId, 0xFF8000FF, 0, PPR::ZERO);
     }
   
   if(d3) for(auto& r: radarpoints) {    
-    queueline(atscreenpos(cx+rad * r.h[0], cy - rad * r.h[2] * si + rad * r.h[1] * co, 0)*C0, atscreenpos(cx+rad*r.h[0], cy - rad*r.h[2] * si, 0)*C0, r.line, -1);
+    queueline(sId*atscreenpos(cx+rad * r.h[0], cy - rad * r.h[2] * si + rad * r.h[1] * co, 0)*C0, sId*atscreenpos(cx+rad*r.h[0], cy - rad*r.h[2] * si, 0)*C0, r.line, -1);
     }
   
   if(scompass) {
     auto compassdir = [&] (char dirname, hyperpoint h) {
       h = NLP * h * .8;
-      queueline(atscreenpos(cx+rad * h[0], cy - rad * h[2] * si + rad * h[1] * co, 0)*C0, atscreenpos(cx+rad*h[0], cy - rad*h[2] * si, 0)*C0, 0xA0401040, -1);
+      queueline(sId*atscreenpos(cx+rad * h[0], cy - rad * h[2] * si + rad * h[1] * co, 0)*C0, sId*atscreenpos(cx+rad*h[0], cy - rad*h[2] * si, 0)*C0, 0xA0401040, -1);
       displaychr(int(cx+rad * h[0]), int(cy - rad * h[2] * si + rad * h[1] * co), 0, 8, dirname, 0xA04010);
       };
     compassdir('E', point3(+1, 0, 0));
@@ -165,7 +171,7 @@ EX void draw_radar(bool cornermode) {
     hyperpoint h2 = locate(r.h2);
     h1 = tC0(atscreenpos(h1[0], h1[1], 1));
     h2 = tC0(atscreenpos(h2[0], h2[1], 1));
-    queueline(h1, h2, r.line, -1);
+    queueline(sId*h1, sId*h2, r.line, -1);
     }
 
   quickqueue();

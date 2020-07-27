@@ -824,7 +824,7 @@ EX void set_linewidth(ld lw) {
 EX void switch_to_text(const vector<glvertex>& v, const vector<glvertex>& t) {
   current_display->next_shader_flags = GF_TEXTURE;
   dynamicval<eModel> pm(pmodel, mdPixel);
-  if(!svg::in) current_display->set_all(0);
+  if(!svg::in) current_display->set_all(0, 0);
   vertices_texture(v, t, 0, 0);
   }
 

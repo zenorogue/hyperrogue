@@ -400,8 +400,7 @@ EX always_false in;
         tdata.push_back(p.tinf->tvertices[p.offset_texture+i]);
       }
     for(auto& d: data) {
-      hyperpoint h;
-      h = p.V * d;
+      shiftpoint h = p.V * d;
       applymodel(h, d);
       }
     if(print && (p.flags & POLY_FAT)) {
@@ -1169,11 +1168,11 @@ bool joukowsky_anim;
 
 EX void reflect_view() {
   if(centerover) {
-    transmatrix T = Id;
+    shiftmatrix T = shiftless(Id);
     cell *mbase = centerover;
     cell *c = centerover;
     if(shmup::reflect(c, mbase, T))
-      View = inverse(T) * View;
+      View = inverse(T.T) * View;
     }
   }
 
@@ -1402,14 +1401,14 @@ EX bool record_video_std() {
 void display_animation() {
   if(ma == maCircle && (circle_display_color & 0xFF)) {
     for(int s=0; s<10; s++) {
-      if(s == 0) curvepoint(ggmatrix(rotation_center) * xpush0(circle_radius - .1));
-      for(int z=0; z<100; z++) curvepoint(ggmatrix(rotation_center) * xspinpush0((z+s*100) * 2 * M_PI / 1000., circle_radius));
-      queuecurve(circle_display_color, 0, PPR::LINE);
+      if(s == 0) curvepoint(xpush0(circle_radius - .1));
+      for(int z=0; z<100; z++) curvepoint(xspinpush0((z+s*100) * 2 * M_PI / 1000., circle_radius));
+      queuecurve(ggmatrix(rotation_center), circle_display_color, 0, PPR::LINE);
       }
     if(sphere) for(int s=0; s<10; s++) {
-      if(s == 0) curvepoint(centralsym * ggmatrix(rotation_center) * xpush0(circle_radius - .1));
-      for(int z=0; z<100; z++) curvepoint(centralsym * ggmatrix(rotation_center) * xspinpush0((z+s*100) * 2 * M_PI / 1000., circle_radius));
-      queuecurve(circle_display_color, 0, PPR::LINE);
+      if(s == 0) curvepoint(xpush0(circle_radius - .1));
+      for(int z=0; z<100; z++) curvepoint(xspinpush0((z+s*100) * 2 * M_PI / 1000., circle_radius));
+      queuecurve(ggmatrix(rotation_center) * centralsym, circle_display_color, 0, PPR::LINE);
       }
     }
   }
@@ -1878,13 +1877,14 @@ reaction_t add_to_frame;
 
 #if CAP_STARTANIM
 void draw_ghost(const transmatrix V, int id) {
+  auto sV = shiftless(V);
   if(id % 13 == 0) {
-    queuepoly(V, cgi.shMiniGhost, 0xFFFF00C0);
-    queuepoly(V, cgi.shMiniEyes, 0xFF);
+    queuepoly(sV, cgi.shMiniGhost, 0xFFFF00C0);
+    queuepoly(sV, cgi.shMiniEyes, 0xFF);
     }
   else {
-    queuepoly(V, cgi.shMiniGhost, 0xFFFFFFC0);
-    queuepoly(V, cgi.shMiniEyes, 0xFF);
+    queuepoly(sV, cgi.shMiniGhost, 0xFFFFFFC0);
+    queuepoly(sV, cgi.shMiniEyes, 0xFF);
     }
   }
 
@@ -1914,7 +1914,7 @@ startanim army_of_ghosts { "army of ghosts", no_init, [] {
       for(int y=0;; y++) {
         ld ay = (mod - y)/4.;
         transmatrix U = spin(M_PI/2) * xpush(ay / cosh(ax)) * T;
-        if(!in_smart_range(U)) break;
+        if(!in_smart_range(shiftless(U))) break;
         draw_ghost(U, (-y - t));
         if(y) {
           ay = (mod + y)/4.;

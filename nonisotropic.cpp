@@ -439,7 +439,7 @@ EX namespace sn {
     virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override { 
       for(int i=0; i<h1->type; i++) if(h1->move(i) == h2) return adjmatrix(i, h1->c.spin(i));
       if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
-        return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
+        return inverse_shift(gmatrix0[h1->c7], gmatrix0[h2->c7]);
       
       transmatrix front = Id, back = Id;
       
@@ -460,14 +460,14 @@ EX namespace sn {
       }
 
     void draw() override {
-      dq::visited.clear();
+      dq::clear_all();
 
       dq::enqueue(centerover->master, cview());
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();
-        heptagon *h = get<0>(p);
-        transmatrix V = get<1>(p);
+        heptagon *h = p.first;
+        shiftmatrix V = p.second;
         dq::drawqueue.pop();
         
         cell *c = h->c7;
@@ -939,14 +939,14 @@ EX namespace nilv {
       }
 
     void draw() override {
-      dq::visited_by_matrix.clear();
+      dq::clear_all();
 
       dq::enqueue_by_matrix(centerover->master, cview());
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();
-        heptagon *h = get<0>(p);
-        transmatrix V = get<1>(p);
+        heptagon *h = p.first;
+        shiftmatrix V = p.second;
         dq::drawqueue.pop();
         
         cell *c = h->c7;
@@ -1281,17 +1281,15 @@ EX namespace hybrid {
 
     void draw() override {
       cell* start = centerover;
-      band_shift = 0;
-      auto period = (M_PI * csteps) / cgi.psl_steps;
       
-      dq::visited_by_matrix.clear();
+      dq::clear_all();
       dq::enqueue_by_matrix_c(start, cview());
       
       while(!dq::drawqueue_c.empty()) {
         auto& p = dq::drawqueue_c.front();
         cell *c = get<0>(p);
-        transmatrix V = get<1>(p);
-        band_shift = get<2>(p);
+
+        shiftmatrix V = get<1>(p);
         dq::drawqueue_c.pop();
         
         if(!do_draw(c, V)) continue;
@@ -1301,23 +1299,8 @@ EX namespace hybrid {
 
         for(int i=0; i<c->type; i++) {
           cell *c1 = c->cmove(i);
-          transmatrix V1 = V * adj(c, i);
-          dynamicval<ld> bs(band_shift, band_shift);
-          if(sl2) {
-            ld alpha = atan2(V1[2][3], V1[3][3]);
-            band_shift += alpha;
-            ld ca = cos(alpha), sa = sin(alpha);
-            if(alpha) for(int a=0; a<4; a++) {
-              tie(V1[2][a], V1[3][a]) = make_pair(V1[2][a] * ca - V1[3][a] * sa, V1[3][a] * ca + V1[2][a] * sa);
-              tie(V1[0][a], V1[1][a]) = make_pair(V1[0][a] * ca - V1[1][a] * sa, V1[1][a] * ca + V1[0][a] * sa);
-              }
-            if(csteps) {
-              while(band_shift > period*.4999)
-                band_shift -= period;
-              while(band_shift < -period*.5001)
-                band_shift += period;
-              }
-            }
+          shiftmatrix V1 = V * adj(c, i);
+          optimize_shift(V1);
           dq::enqueue_by_matrix_c(c1, V1);
           }
         }
@@ -1641,6 +1624,7 @@ EX namespace product {
   EX bool current_spin_invalid, cmirror;
   EX int cspin;
     
+  /* todo might need a shiftpoint version */
   EX hyperpoint inverse_exp(hyperpoint h) {
     hyperpoint res;
     res[2] = zlevel(h);
@@ -1756,9 +1740,9 @@ EX namespace slr {
     return hyperpoint(x * f * cos(z) + y * f * sin(z), y * f * cos(z) - x * f * sin(z), cosh(r) * sin(z), cosh(r) * cos(z));
     }
   
-  EX hyperpoint get_inverse_exp(hyperpoint h, ld index IS(0)) {
-    ld xy = hypot_d(2, h);
-    ld phi = atan2(h[2], h[3]) + index;
+  EX hyperpoint get_inverse_exp(shiftpoint h) {
+    ld xy = hypot_d(2, h.h);
+    ld phi = atan2(h[2], h[3]) + h.shift;
 
     bool flipped = phi > 0;
     if(flipped) phi = -phi, h[2] *= -1, h[0] *= -1;
@@ -1766,7 +1750,7 @@ EX namespace slr {
     ld SV = stretch::not_squared();
     ld K = -1;
     
-    ld alpha = atan2(h[1], -h[0]);  
+    ld alpha = atan2(h[1], -h[0]); /* todo shift */
     
     hyperpoint res;
     
@@ -2098,7 +2082,7 @@ EX namespace rots {
     hybrid::in_underlying_geometry([&] {
       hyperpoint h = tC0(T);
       Spin = inverse(gpushxto0(h) * T);
-      d = hr::inverse_exp(h);
+      d = hr::inverse_exp(shiftless(h));
       alpha = atan2(Spin[0][1], Spin[0][0]);
       distance = hdist0(h);
       beta = atan2(h[1], h[0]);
@@ -2154,7 +2138,7 @@ EX namespace rots {
     virtual transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override { 
       if(c1 == c2) return Id;
       if(gmatrix0.count(c2) && gmatrix0.count(c1))
-        return inverse(gmatrix0[c1]) * gmatrix0[c2];
+        return inverse_shift(gmatrix0[c1], gmatrix0[c2]);
       for(int i=0; i<c1->type; i++) if(c1->move(i) == c2) return adj(c1, i);
       return Id; // not implemented yet
       }
@@ -2243,8 +2227,9 @@ EX namespace rots {
       dynamicval<cell*> m5(centerover, co);
       dynamicval<transmatrix> m2(View, inprod ? pView : ypush(0) * qtm(h));
       if(PURE) View = View * pispin;
-      dynamicval<transmatrix> m3(playerV, Id);
+      dynamicval<shiftmatrix> m3(playerV, shiftless(Id));
       dynamicval<transmatrix> m4(actual_view_transform, Id);
+      dynamicval<shiftmatrix> m6(cwtV, shiftless(Id));
       dynamicval<eModel> pm(pmodel, mdDisk);
       dynamicval<ld> pss(pconf.scale, (sphere ? 10 : 1) * underlying_scale);
       dynamicval<ld> psa(pconf.alpha, sphere ? 10 : 1);
@@ -2255,7 +2240,7 @@ EX namespace rots {
       dynamicval<ld> psy(vid.smart_range_detail, 1);
 
       calcparam();
-      reset_projection(); current_display->set_all(0);
+      reset_projection(); current_display->set_all(0, 0);
       ptds.clear();
       drawthemap();
       drawqueue();
@@ -2265,7 +2250,7 @@ EX namespace rots {
     gmatrix = std::move(g);
     gmatrix0 = std::move(g0);
     calcparam();
-    reset_projection(); current_display->set_all(0);
+    reset_projection(); current_display->set_all(0, 0);
     }
 
   /** @brief exponential function for both slr and Berger sphere */
@@ -2670,7 +2655,7 @@ EX namespace nisot {
     hyperpoint at = tC0(Position);
     transmatrix push_back = inverse(translate(at));
     hyperpoint back_goal = push_back * goal;
-    back_goal = inverse_exp(back_goal, prec);
+    back_goal = inverse_exp(shiftless(back_goal), prec);
     
     transmatrix back_Position = push_back * Position;
 

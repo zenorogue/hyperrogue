@@ -579,7 +579,7 @@ EX void teleportTo(cell *dest) {
   cell *from = cwt.at;
   movecost(from, dest, 1);
   playerMoveEffects(cwt.at, dest);
-  current_display->which_copy = ggmatrix(dest);
+  current_display->which_copy = unshift(ggmatrix(dest));
   cwt.at = dest; cwt.spin = hrand(dest->type); flipplayer = !!(hrand(2));
   drainOrb(itOrbTeleport);
 
@@ -666,7 +666,7 @@ EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMons
   
   changes.commit();
 
-  current_display->which_copy = ggmatrix(dest);
+  current_display->which_copy = unshift(ggmatrix(dest));
   countLocalTreasure();
   
   for(int i=9; i>=0; i--)

@@ -418,15 +418,13 @@ EX namespace bt {
       }
 
     void draw() override {
-      dq::visited.clear();
+      dq::clear_all();
       dq::enqueue(centerover->master, cview());
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();
-        heptagon *h = get<0>(p);
-        transmatrix V = get<1>(p);
-        dynamicval<ld> b(band_shift, get<2>(p));
-        bandfixer bf(V);
+        heptagon *h = p.first;
+        shiftmatrix V = p.second;
         dq::drawqueue.pop();
         
         
@@ -435,7 +433,7 @@ EX namespace bt {
         drawcell(c, V);
   
         for(int i=0; i<h->type; i++)
-          dq::enqueue(h->cmove(i), V * adj(h, i));
+          dq::enqueue(h->cmove(i), optimized_shift(V * adj(h, i)));
         }
       }
 
@@ -449,7 +447,7 @@ EX namespace bt {
 
     transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
       if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
-        return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
+        return inverse_shift(gmatrix0[h1->c7], gmatrix0[h2->c7]);
       transmatrix gm = Id, where = Id;
       while(h1 != h2) {
         if(h1->distance <= h2->distance) {
@@ -809,32 +807,32 @@ EX namespace bt {
   
   #if MAXMDIM == 4
 
-  EX void queuecube(const transmatrix& V, ld size, color_t linecolor, color_t facecolor) {
+  EX void queuecube(const shiftmatrix& V, ld size, color_t linecolor, color_t facecolor) {
     ld yy = log(2) / 2;
     const int STEP=3;
     const ld MUL = 1. / STEP;
-    auto at = [&] (ld x, ld y, ld z) { curvepoint(V * parabolic3(size*x, size*y) * xpush0(size*yy*z)); };
+    auto at = [&] (ld x, ld y, ld z) { curvepoint(parabolic3(size*x, size*y) * xpush0(size*yy*z)); };
     for(int a:{-1,1}) {
       for(ld t=-STEP; t<STEP; t++) at(a, 1,t*MUL);
       for(ld t=-STEP; t<STEP; t++) at(a, -t*MUL,1);
       for(ld t=-STEP; t<STEP; t++) at(a, -1,-t*MUL);
       for(ld t=-STEP; t<STEP; t++) at(a, t*MUL,-1);
       at(a, 1,-1);
-      queuecurve(linecolor, facecolor, PPR::LINE);
+      queuecurve(V, linecolor, facecolor, PPR::LINE);
 
       for(ld t=-STEP; t<STEP; t++) at(1,t*MUL,a);
       for(ld t=-STEP; t<STEP; t++) at(-t*MUL,1,a);
       for(ld t=-STEP; t<STEP; t++) at(-1,-t*MUL,a);
       for(ld t=-STEP; t<STEP; t++) at(t*MUL,-1,a);
       at(1,-1,a);
-      queuecurve(linecolor, facecolor, PPR::LINE);
+      queuecurve(V, linecolor, facecolor, PPR::LINE);
 
       for(ld t=-STEP; t<STEP; t++) at(1,a,t*MUL);
       for(ld t=-STEP; t<STEP; t++) at(-t*MUL,a,1);
       for(ld t=-STEP; t<STEP; t++) at(-1,a,-t*MUL);
       for(ld t=-STEP; t<STEP; t++) at(t*MUL,a,-1);
       at(1,a,-1);
-      queuecurve(linecolor, facecolor, PPR::LINE);
+      queuecurve(V, linecolor, facecolor, PPR::LINE);
       }
     /*for(int a:{-1,1}) for(int b:{-1,1}) for(int c:{-1,1}) {
       at(0,0,0); at(a,b,c);  queuecurve(linecolor, facecolor, PPR::LINE);

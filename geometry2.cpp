@@ -8,7 +8,7 @@
 #include "hyper.h"
 namespace hr {
 
-transmatrix &ggmatrix(cell *c);
+shiftmatrix &ggmatrix(cell *c);
 
 EX void fixelliptic(transmatrix& at) {
   if(elliptic && at[LDIM][LDIM] < 0) {
@@ -25,7 +25,7 @@ EX void fixelliptic(hyperpoint& h) {
 /** find relative_matrix via recursing the tree structure */
 EX transmatrix relative_matrix_recursive(heptagon *h2, heptagon *h1) {
   if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
-    return inverse(gmatrix0[h1->c7]) * gmatrix0[h2->c7];
+    return inverse_shift(gmatrix0[h1->c7], gmatrix0[h2->c7]);
   transmatrix gm = Id, where = Id;
   while(h1 != h2) {
     for(int i=0; i<h1->type; i++) {
@@ -195,10 +195,12 @@ transmatrix hrmap_standard::relative_matrix(heptagon *h2, heptagon *h1, const hy
   return gm * where;
   }
 
-EX transmatrix &ggmatrix(cell *c) {
-  transmatrix& t = gmatrix[c];
-  if(t[LDIM][LDIM] == 0)
-    t = actual_view_transform * View * calc_relative_matrix(c, centerover, C0);
+EX shiftmatrix &ggmatrix(cell *c) {
+  shiftmatrix& t = gmatrix[c];
+  if(t[LDIM][LDIM] == 0) {
+    t.T = actual_view_transform * View * calc_relative_matrix(c, centerover, C0);
+    t.shift = 0;
+    }
   return t;
   }
 
@@ -208,7 +210,7 @@ struct horo_distance {
   
   void become(hyperpoint h1);
   horo_distance(hyperpoint h) { become(h); }
-  horo_distance(hyperpoint h1, const transmatrix& T);
+  horo_distance(shiftpoint h1, const shiftmatrix& T);
   bool operator < (const horo_distance z) const;
   friend void print(hstream& hs, horo_distance x) { print(hs, "[", x.a, ":", x.b, "]"); }
   };
@@ -232,14 +234,14 @@ void horo_distance::become(hyperpoint h1) {
     a = 0, b = intval(h1, C0);
   }
 
-horo_distance::horo_distance(hyperpoint h1, const transmatrix& T) {
+horo_distance::horo_distance(shiftpoint h1, const shiftmatrix& T) {
   #if CAP_BT
-  if(bt::in()) become(inverse(T) * h1);
+  if(bt::in()) become(inverse_shift(T, h1));
   else
 #endif
-  if(sn::in() || hybri || nil) become(inverse(T) * h1);
+  if(sn::in() || hybri || nil) become(inverse_shift(T, h1));
   else
-    a = 0, b = intval(h1, tC0(T));
+    a = 0, b = intval(h1.h, unshift(tC0(T), h1.shift));
   }
 
 bool horo_distance::operator < (const horo_distance z) const {
@@ -341,7 +343,7 @@ void virtualRebase(cell*& base, T& at, const U& check) {
   }
 
 EX void virtualRebase(cell*& base, transmatrix& at) {
-  virtualRebase(base, at, tC0);
+  virtualRebase(base, at, tC0_t);
   }
 
 EX void virtualRebase(cell*& base, hyperpoint& h) {

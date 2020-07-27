@@ -151,9 +151,11 @@ EX namespace dual {
   
   EX transmatrix get_orientation() {
     if(WDIM == 2)
-      return gpushxto0(tC0(cwtV)) * cwtV;
-    else if(cwt.at)
-      return gpushxto0(tC0(ggmatrix(cwt.at))) * ggmatrix(cwt.at) * sword::dir[0].T;
+      return gpushxto0(tC0(cwtV.T)) * cwtV.T;      
+    else if(cwt.at) {
+      transmatrix T = unshift(ggmatrix(cwt.at));
+      return gpushxto0(tC0(T)) * T * sword::dir[0].T;
+      }
     else
       return Id;
     }

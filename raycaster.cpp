@@ -1146,7 +1146,7 @@ EX void cast() {
 
   cell *cs = centerover;
 
-  transmatrix T = cview();
+  transmatrix T = cview().T;
   
   if(global_projection)
     T = xpush(vid.ipd * global_projection/2) * T;
@@ -1280,7 +1280,7 @@ EX void cast() {
         celldrawer dd;
         dd.c = c1;
         dd.setcolors();
-        transmatrix Vf;
+        shiftmatrix Vf;
         dd.set_land_floor(Vf);
         color_t wcol = darkena(dd.wcol, 0, 0xFF);
         int dv = get_darkval(c1, c->c.spin(i));
@@ -1325,7 +1325,7 @@ EX void cast() {
       celldrawer dd;
       dd.c = c;
       dd.setcolors();
-      transmatrix Vf;
+      shiftmatrix Vf;
       dd.set_land_floor(Vf);
       int u = (id/per_row*length) + (id%per_row * deg) + c->type + a;
       wallcolor[u] = glhr::acolor(darkena(dd.fcol, 0, 0xFF));

@@ -44,7 +44,7 @@ bool computed = false;
     bool valid;
     bool inqueue;
     double dist;
-    hyperpoint h;      // point in the represented space
+    shiftpoint h;      // point in the represented space
     hyperpoint native; // point in the native space
     hyperpoint precompute;
     vector<edge> edges;
@@ -164,7 +164,7 @@ bool rug_hyperbolic() { USING_NATIVE_GEOMETRY; return hyperbolic; }
 bool rug_sphere() { USING_NATIVE_GEOMETRY; return sphere; }
 bool rug_elliptic() { USING_NATIVE_GEOMETRY; return elliptic; }
 
-EX rugpoint *addRugpoint(hyperpoint h, double dist) {
+EX rugpoint *addRugpoint(shiftpoint h, double dist) {
   rugpoint *m = new rugpoint;
   m->h = h;
   
@@ -218,12 +218,12 @@ EX rugpoint *addRugpoint(hyperpoint h, double dist) {
       }
     else
       scale = 1;
-    m->native = h * scale;
+    m->native = unshift(h) * scale;
     m->native = hpxy3(m->native[0], m->native[1], m->native[2]);
     }
 
   else if(euclid && rug_euclid()) {
-    m->native = h * modelscale;
+    m->native = unshift(h) * modelscale;
     m->native[2] = 0;
     #if MAXMDIM >= 4
     m->native[3] = 1;
@@ -247,11 +247,11 @@ EX rugpoint *addRugpoint(hyperpoint h, double dist) {
     
     USING_NATIVE_GEOMETRY;
     
-    m->native = rgpushxto0(h) * cpush0(2, r);
+    m->native = rgpushxto0(unshift(h)) * cpush0(2, r);
     }
   
   else {
-    m->native = h;
+    m->native = unshift(h);
     ld hd = h[LDIM];
     for(int d=GDIM; d<MAXMDIM-1; d++) {
       m->native[d] = (hd - .99) * (rand() % 1000 - rand() % 1000) / 1000;
@@ -269,14 +269,14 @@ EX rugpoint *addRugpoint(hyperpoint h, double dist) {
   return m;
   }
 
-EX rugpoint *findRugpoint(hyperpoint h) {
+EX rugpoint *findRugpoint(shiftpoint h) {
   USING_NATIVE_GEOMETRY;
   for(int i=0; i<isize(points); i++) 
-    if(geo_dist_q(points[i]->h, h) < 1e-5) return points[i];
+    if(geo_dist_q(points[i]->h.h, unshift(h, points[i]->h.shift)) < 1e-5) return points[i];
   return NULL;
   }
 
-EX rugpoint *findOrAddRugpoint(hyperpoint h, double dist) {
+EX rugpoint *findOrAddRugpoint(shiftpoint h, double dist) {
   rugpoint *r = findRugpoint(h);
   return r ? r : addRugpoint(h, dist);
   }
@@ -342,7 +342,7 @@ EX void sort_rug_points() {
 void calcLengths() {
   for(auto p: points) 
     for(auto& edge: p->edges) 
-      edge.len = geo_dist_q(p->h, edge.target->h) * modelscale;
+      edge.len = geo_dist_q(p->h.h, unshift(edge.target->h, p->h.shift)) * modelscale;
   }
 
 EX void calcparam_rug() {
@@ -396,9 +396,9 @@ EX void buildTorusRug() {
   println(hlog, "mx = ", mx);
   
   auto addToruspoint = [&] (hyperpoint h) {
-    auto r = addRugpoint(C0, 0);
+    auto r = addRugpoint(shiftless(C0), 0);
     hyperpoint onscreen;
-    hyperpoint h1 = gmatrix[gs] * T * h;
+    shiftpoint h1 = gmatrix[gs] * T * h;
     applymodel(h1, onscreen);
     r->x1 = onscreen[0];
     r->y1 = onscreen[1];
@@ -539,7 +539,7 @@ EX void buildRug() {
       for(int j=0; j<c->type; j++) addTriangle(v, p[j], p[(j+1) % c->type]);
       
       if((euclid && quotient) && nonorientable) {
-        transmatrix T = ggmatrix(c) * eumove(euc::eu.user_axes[1]);
+        shiftmatrix T = ggmatrix(c) * eumove(euc::eu.user_axes[1]);
         rugpoint *Tv = addRugpoint(T * C0, 0);
         for(int j=0; j<c->type; j++) p[j] = findOrAddRugpoint(T * get_corner_position(c, j), v->dist);
         for(int j=0; j<c->type; j++) addTriangle(Tv, p[j], p[(j+1) % c->type]);
@@ -625,7 +625,7 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp=false, double
   double forcev = (t - rd) / 2; // 20.0;
   
   transmatrix T = inverse(rgpushxto0(m1.native));
-  hyperpoint ie = inverse_exp(T * m2.native);
+  hyperpoint ie = inverse_exp(shiftless(T * m2.native));
 
   transmatrix iT = rgpushxto0(m1.native);
   
@@ -1041,7 +1041,7 @@ EX void prepareTexture() {
       queueline(tC0(ggmatrix(playerpos(i))), mouseh, 0xFF00FF, 8 + vid.linequality);
     }
   if(finger_center) {
-    transmatrix V = rgpushxto0(finger_center->h);
+    shiftmatrix V = rgpushxto0(finger_center->h);
     queuestr(V, 0.5, "X", 0xFFFFFFFF, 2);
     for(int i=0; i<72; i++)
       queueline(V * xspinpush0(i*M_PI/32, finger_range), V * xspinpush0((i+1)*M_PI/32, finger_range), 0xFFFFFFFF, vid.linequality);
@@ -1081,15 +1081,15 @@ EX void drawRugScene() {
   
   for(auto t: triangles) drawTriangle(t);
   
-  auto& rug = queuecurve(0, 0xFFFFFFFF, PPR::LINE);
+  auto& rug = queuecurve(shiftless(Id), 0, 0xFFFFFFFF, PPR::LINE);
 
   if(nonisotropic) {
     transmatrix T2 = eupush( tC0(inverse(rugView)) );
     NLP = rugView * T2;  
-    rug.V = inverse(NLP) * rugView;
+    rug.V = shiftless(inverse(NLP) * rugView);
     }
   else {
-    rug.V = rugView;
+    rug.V = shiftless(rugView);
     }
    
   rug.offset_texture = 0;
@@ -1322,7 +1322,7 @@ int besti;
 static const ld RADAR_INF = 1e12;
 ld radar_distance = RADAR_INF;
 
-EX hyperpoint gethyper(ld x, ld y) {
+EX shiftpoint gethyper(ld x, ld y) {
   
   projection_configuration bak = pconf;
   pconf = rconf;
@@ -1359,9 +1359,9 @@ EX hyperpoint gethyper(ld x, ld y) {
         if(sp == 1 || sp == 2) continue;
         }
     
-      applymodel(inverse(NLP) * rugView * r0->native, p0);
-      applymodel(inverse(NLP) * rugView * r1->native, p1);
-      applymodel(inverse(NLP) * rugView * r2->native, p2);
+      applymodel(shiftless(inverse(NLP) * rugView * r0->native), p0);
+      applymodel(shiftless(inverse(NLP) * rugView * r1->native), p1);
+      applymodel(shiftless(inverse(NLP) * rugView * r2->native), p2);
       }
 
     if(error || spherepoints == 1 || spherepoints == 2) continue;
@@ -1390,13 +1390,13 @@ EX hyperpoint gethyper(ld x, ld y) {
     }
   
   pconf = bak;
-  if(!found) return Hypc;
+  if(!found) return shiftless(Hypc);
   
   double px = rx1 * TEXTURESIZE, py = (1-ry1) * TEXTURESIZE;
 
   calcparam_rug();
   models::configure();
-  hyperpoint h = hr::gethyper(px, py);
+  shiftpoint h = hr::gethyper(px, py);
   calcparam();
 
   return h;

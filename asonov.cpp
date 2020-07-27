@@ -178,14 +178,14 @@ struct hrmap_asonov : hrmap {
     }
 
   void draw() override {
-    dq::visited_by_matrix.clear();
+    dq::clear_all();
 
     dq::enqueue_by_matrix(centerover->master, cview());
     
     while(!dq::drawqueue.empty()) {
       auto& p = dq::drawqueue.front();
-      heptagon *h = get<0>(p);
-      transmatrix V = get<1>(p);
+      heptagon *h = p.first;
+      shiftmatrix V = p.second;
       dq::drawqueue.pop();
       
       cell *c = h->c7;

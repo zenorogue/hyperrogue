@@ -321,15 +321,13 @@ EX namespace reg3 {
     
     // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
     
-    dq::visited_by_matrix.clear();
+    dq::clear_all();
     dq::enqueue_by_matrix(centerover->master, cview());
     
     while(!dq::drawqueue.empty()) {
       auto& p = dq::drawqueue.front();
-      heptagon *h = get<0>(p);
-      transmatrix V = get<1>(p);
-      dynamicval<ld> b(band_shift, get<2>(p));
-      bandfixer bf(V);
+      heptagon *h = p.first;
+      shiftmatrix V = p.second;
       dq::drawqueue.pop();
             
       cell *c = h->c7;
@@ -339,10 +337,10 @@ EX namespace reg3 {
       
       if(ultra_mirror_in())
         for(auto& T: cgi.ultra_mirrors) 
-          dq::enqueue_by_matrix(h, V * T);
+          dq::enqueue_by_matrix(h, optimized_shift(V * T));
   
       for(int d=0; d<S7; d++)
-        dq::enqueue_by_matrix(h->move(d), V * tmatrices[h->fieldval][d]);
+        dq::enqueue_by_matrix(h->move(d), optimized_shift(V * tmatrices[h->fieldval][d]));
       }
     }
 
@@ -929,10 +927,8 @@ EX namespace reg3 {
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();
-        heptagon *h = get<0>(p);
-        transmatrix V = get<1>(p);
-        dynamicval<ld> b(band_shift, get<2>(p));
-        bandfixer bf(V);
+        heptagon *h = p.first;
+        shiftmatrix V = p.second;
         dq::drawqueue.pop();
         
         
@@ -945,10 +941,10 @@ EX namespace reg3 {
 
         if(ultra_mirror_in())
           for(auto& T: cgi.ultra_mirrors) 
-            dq::enqueue_by_matrix(h, V * T);
+            dq::enqueue_by_matrix(h, optimized_shift(V * T));
     
         for(int i=0; i<S7; i++) if(h->move(i)) {
-          enq(h->move(i), V * adj(h, i));
+          enq(h->move(i), optimized_shift(V * adj(h, i)));
           }
         }
       }
@@ -1273,15 +1269,13 @@ EX namespace reg3 {
       
       // for(int i=0; i<S6; i++) queuepoly(ggmatrix(cwt.at), shWall3D[i], 0xFF0000FF);
       
-      dq::visited.clear();
+      dq::clear_all();
       dq::enqueue(centerover->master, cview());
       
       while(!dq::drawqueue.empty()) {
         auto& p = dq::drawqueue.front();
-        heptagon *h = get<0>(p);
-        transmatrix V = get<1>(p);
-        dynamicval<ld> b(band_shift, get<2>(p));
-        bandfixer bf(V);
+        heptagon *h = p.first;
+        shiftmatrix V = p.second;
         dq::drawqueue.pop();
         
         
@@ -1291,7 +1285,7 @@ EX namespace reg3 {
         if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
     
         for(int i=0; i<S7; i++) if(h->move(i)) {
-          dq::enqueue(h->move(i), V * adj(h, i));
+          dq::enqueue(h->move(i), optimized_shift(V * adj(h, i)));
           }
         }
       }
