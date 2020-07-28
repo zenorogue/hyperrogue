@@ -3476,7 +3476,7 @@ EX void pushdown(cell *c, int& q, const shiftmatrix &V, double down, bool rezoom
     // xyscale = xyscale + (zscale-xyscale) * (1+sin(ticks / 1000.0)) / 2;
     
     ptd.V.T = xyzscale( V.T, xyscale*zscale, zscale)
-      * V.T * ptd.V.T;
+      * inverse(V.T) * unshift(ptd.V, V.shift);
       
     if(!repriority) ;
     else if(nlev < -vid.lake_bottom-1e-3) {
