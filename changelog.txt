@@ -4053,3 +4053,21 @@ Geometries:
 - fixed a crash when walking over a hyperbolic digon in Archimedean tiling
 - fixed a crash in untruncated sphere
 - statistics given in 'experiments in geometry' (world size, faces per vertex) are now correct in new variations
+
+2020-07-28 22:03 Update 11.3t:
+- HUD graphics now always use the default (not the one for the current geometry)
+- fixed a possible crash in kite-and-dart tiling
+- fixed distance computation in periodic product spaces (racing in H2xE no longer freezes)
+- rotation space over closed manifold now works correctly with theoretically correct period (divisor of Euler chi times PSL value)
+- fixed a stupid crash in universal cover of SL
+- fixed distance computation in quotient spaces
+- fixed radar in SL geometry
+- fixed a freeze in Berger sphere primitive
+- better raycaster in Berger sphere/SL geometry (now uses a geodesic formula, also bug fixed), also disabled by default
+- fixed key conflict in 3D config
+- shape editor/drawing tool now work correctly in 3D with mouseaiming off
+- mouse aiming can now be temporarily disabled in the editors using alt
+- drawing tool now works in 3D, and also if you are drawing while playing a movement animation
+- fixed drawing unnecessary cells in SL2
+- fixed a bug while saving/loading maps using new variations
+- improved handling of cases where matrices were not enough to represent positions (long band model, universal cover of SL) -- faraway monsters now face the player correctly, and racing/shmup now works in SL
