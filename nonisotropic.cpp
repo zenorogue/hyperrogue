@@ -1114,28 +1114,27 @@ EX namespace hybrid {
       return res;
       }
     
-    EX int& get_shift_current(cell *c, int i) {
-      return make_shift(c)[i];
+    EX int& get_shift_current(cellwalker cw) {
+      return make_shift(cw.at)[cw.spin];
       }
     
-    EX bool have_shift(cell *c, int i) {
-      return shifts.count(c) && get_shift_current(c, i) != SHIFT_UNKNOWN;
+    EX bool have_shift(cellwalker cw) {
+      return shifts.count(cw.at) && get_shift_current(cw) != SHIFT_UNKNOWN;
       }
-  
-    EX int get_shift(cell *c, int i) {
+    
+    EX int get_shift(cellwalker cw0) {
       if(S3 >= OINF) return 0;
-      auto& v = get_shift_current(c, i);
+      auto& v = get_shift_current(cw0);
       if(v != SHIFT_UNKNOWN) return v;
       
       vector<int> candidates;
       
       for(int a: {1, -1}) {
-        cellwalker cw0(c, i);
         cellwalker cw = cw0;
         cw += wstep; cw += a;
         int s = 0;
         while(cw != cw0) {
-          if(!have_shift(cw.at, cw.spin)) goto next;
+          if(!have_shift(cw)) goto next;
           s += shifts[cw.at][cw.spin];
           cw += wstep;
           cw += a;
@@ -1153,33 +1152,78 @@ EX namespace hybrid {
   
       int val = 0;
       
+      auto cw1 = cw0+wstep;
       if(1) {
         /* the value from PSL, helps to draw the underlying space correctly */
         auto ps = cgi.psl_steps;
-        val = i*ps / c->type - c->c.spin(i)*ps / c->move(i)->type + ps/2;
+        val = cw0.spin*ps / cw0.at->type - cw1.spin*ps / cw1.at->type + ps/2;
         }
       if(!candidates.empty()) val = candidates[0];
       
       v = val;
-      get_shift_current(c->move(i), c->c.spin(i)) = -val;
+      get_shift_current(cw1) = -val;
             
       return val;
       }  
     
     EX void ensure_shifts(cell *c) {
       if(S3 >= OINF) return;
-      if(have_shift(c, c->type)) return;
+      if(!make_shift(c)[c->type]) return;
       forCellEx(c1, c)
       for(int a=0; a<c->type; a++) {
         cellwalker cw0(c, a);
         cellwalker cw = cw0;
         while(cw != cw0) {
-          get_shift(cw.at, cw.spin);
+          get_shift(cw);
           cw += wstep;
           cw += a;
           }
         }
-      get_shift_current(c, c->type) = 0;
+      make_shift(c)[c->type] = 0;
+      }
+    
+    EX int cycle_discrepancy(cellwalker cw0) {
+      int total = 0;
+      auto cw = cw0;
+      do {
+        total += get_shift(cw);
+        cw += wstep;
+        cw++;
+        }
+      while(cw != cw0);
+      return total + cgi.single_step * (sphere ? -1 : 1);
+      }
+    
+    EX void fix_bounded_cycles() {
+      if(!rotspace) return;
+      if(!bounded) return;
+      in_underlying([&] {
+        cellwalker final(currentmap->gamestart(), 0);
+        auto& ac = currentmap->allcells();
+        for(cell *c: ac) for(int i=0; i<c->type; i++) {
+          cellwalker cw(c, i);
+          int cd = cycle_discrepancy(cw);
+          if(!cd) continue;
+          while(cw != final) {
+            if(celldist(cw.peek()) < celldist(cw.at)) {
+              cw += wstep;
+              cw++;
+              }              
+            else {
+              get_shift_current(cw) -= cd;
+              get_shift_current(cw+wstep) += cd;
+              cw++;
+              }
+            }
+          }
+
+        disc_quotient = abs(cycle_discrepancy(final));
+
+        if(debugflags & DF_GEOM) for(cell *c: ac) for(int i=0; i<c->type; i++) {
+          cellwalker cw(c, i);
+          if(cycle_discrepancy(cw)) println(hlog, cw, cycle_discrepancy(cw));
+          }
+        });
       }
     
     template<class T> auto in_underlying(const T& t) -> decltype(t()) {
@@ -1214,6 +1258,7 @@ EX namespace hybrid {
       disc_quotient = 0;
       in_underlying([this] { initcells(); underlying_map = currentmap; });
       for(hrmap*& m: allmaps) if(m == underlying_map) m = NULL;
+      fix_bounded_cycles();
       }
     
     ~hrmap_hybrid() {
@@ -1249,7 +1294,7 @@ EX namespace hybrid {
       if(geometry == gRotSpace) {
         auto cm = (hrmap_hybrid*)currentmap;
         m->in_underlying([&] { cm->ensure_shifts(cu); });
-        s = ((hrmap_hybrid*)currentmap)->get_shift(cu, d);
+        s = ((hrmap_hybrid*)currentmap)->get_shift(cellwalker(cu, d));
         }
       cell *c1 = get_at(cu1, m->where[c].second + s);
       c->c.connect(d, c1, d1, cu->c.mirror(d));
