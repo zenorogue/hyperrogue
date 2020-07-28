@@ -119,7 +119,9 @@ EX void welcomeMessage() {
   else if(nil)
     addMessage(XLAT("Welcome to NilRogue!"));
   else if(sl2) {
-    if(cgi.psl_steps % hybrid::csteps == 0)
+    if(hybrid::csteps == 0)
+      addMessage(XLAT("Welcome to CoverRogue!"));
+    else if(cgi.psl_steps % hybrid::csteps == 0)
       addMessage(XLAT("Welcome to PSL(2,R)-ogue!"));
     else
       addMessage(XLAT("Welcome to SL(2,R)-ogue!"));
