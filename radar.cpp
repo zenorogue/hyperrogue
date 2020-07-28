@@ -33,8 +33,9 @@ pair<bool, hyperpoint> makeradar(shiftpoint h) {
     if(r < 1) h1 = h1 * (atanh(r) / r);
     else return {false, h1};
     }
-  else
-  if(prod) h1 = product::inverse_exp(unshift(h));
+  else if(prod) h1 = product::inverse_exp(unshift(h));
+  else if(sl2) h1 = slr::get_inverse_exp(h);
+  else h1 = unshift(h);
   
   if(nisot::local_perspective_used()) h1 = NLP * h1;
   
