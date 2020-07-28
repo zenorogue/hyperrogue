@@ -167,13 +167,14 @@ EX namespace mapeditor {
       }
 
     if(drawing_tool && (cmode & sm::DRAW)) {
+      shiftpoint moh = GDIM == 2 ? mouseh : find_mouseh3();      
       dynamicval<ld> lw(vid.linewidth, vid.linewidth * dtwidth * 100);
       if(holdmouse && mousekey == 'c')
-        queue_hcircle(rgpushxto0(lstart), hdist(lstart, mouseh));
+        queue_hcircle(rgpushxto0(lstart), hdist(lstart, moh));
       else if(holdmouse && mousekey == 'l')
-        queueline(lstart, mouseh, dtcolor, 4 + vid.linequality, PPR::LINE);
+        queueline(lstart, moh, dtcolor, 4 + vid.linequality, PPR::LINE);
       else if(!holdmouse) {
-        shiftmatrix T = rgpushxto0(mouseh);
+        shiftmatrix T = rgpushxto0(moh);
         queueline(T * xpush0(-.1), T * xpush0(.1), dtcolor);
         queueline(T * ypush0(-.1), T * ypush0(.1), dtcolor);
         }
@@ -254,7 +255,6 @@ EX namespace mapeditor {
   
   dtfree *cfree;
   cell *cfree_at;
-  transmatrix cfree_T;
   
   EX void dt_add_free(shiftpoint h) {
 
@@ -264,13 +264,12 @@ EX namespace mapeditor {
     virtualRebase(b, T1);
     
     if(cfree)
-      cfree->lh.push_back(cfree_T * h.h);    
+      cfree->lh.push_back(inverse_shift(ggmatrix(cfree_at), tC0(T)));
     
     if(b != cfree_at && !(dtfill && cfree_at)) {
       cfree = new dtfree;
       dt_add(b, cfree);
-      cfree_T = T1 * gpushxto0(h.h);
-      cfree->lh.push_back(cfree_T * h.h);
+      cfree->lh.push_back(tC0(T1));
       cfree_at = b;
       }
     }
@@ -294,6 +293,7 @@ EX namespace mapeditor {
     }
   
   EX shiftpoint lstart;
+  EX hyperpoint lstart_rel;
   cell *lstartcell;
   ld front_edit = 0.5;
   enum class eFront { sphere_camera, sphere_center, equidistants, const_x, const_y };
@@ -1513,7 +1513,7 @@ namespace mapeditor {
     return shiftless(direct_exp(lp_iapply(ztangent(d)))); /* todo direct_shift */
     }
   
-  shiftpoint find_mouseh3() {
+  EX shiftpoint find_mouseh3() {
     if(front_config == eFront::sphere_camera)
       return in_front_dist(front_edit);
     ld step = 0.01;
@@ -2365,6 +2365,7 @@ namespace mapeditor {
     #endif
 
     if(freedraw) {
+      if(lstartcell) lstart = ggmatrix(lstartcell) * lstart_rel;
 
 #if CAP_TEXTURE    
       int tcolor = (dtcolor >> 8) | ((dtcolor & 0xFF) << 24);
@@ -2372,21 +2373,21 @@ namespace mapeditor {
       
       if(uni == '-' && !clickused) {
         if(mousekey == 'e') {
-          dt_erase(mouseh);
+          dt_erase(mh);
           clickused = true;
           }
         else if(mousekey == 'l' || mousekey == 'c' || mousekey == 'T') {
-          if(!holdmouse) lstart = mouseh, lstartcell = mouseover, holdmouse = true;
+          if(!holdmouse) lstart = mh, lstartcell = mouseover, lstart_rel = inverse_shift(ggmatrix(mouseover), lstart), holdmouse = true;
           }
 #if CAP_TEXTURE
         else if(intexture) {
           if(!holdmouse) texture::config.data.undoLock();
-          texture::drawPixel(mouseover, mouseh, tcolor);
+          texture::drawPixel(mouseover, mh, tcolor);
           holdmouse = true; lstartcell = NULL;
           }
 #endif
         else {
-          dt_add_free(mouseh);
+          dt_add_free(mh);
           holdmouse = true;
           }
         }
@@ -2397,20 +2398,20 @@ namespace mapeditor {
         if(mousekey == 'l' && intexture) { 
           texture::config.data.undoLock();
           texture::where = mouseover;
-          texture::drawPixel(mouseover, mouseh, tcolor);
-          texture::drawLine(mouseh, lstart, tcolor);
+          texture::drawPixel(mouseover, mh, tcolor);
+          texture::drawLine(mh, lstart, tcolor);
           lstartcell = NULL;
           }
         else 
 #endif
         if(mousekey == 'l') {
-          dt_add_line(mouseh, lstart, 10);
+          dt_add_line(mh, lstart, 10);
           lstartcell = NULL;
           }
 #if CAP_TEXTURE
         else if(mousekey == 'c' && intexture) { 
           texture::config.data.undoLock();
-          ld rad = hdist(lstart, mouseh);
+          ld rad = hdist(lstart, mh);
           int circp = int(1 + 3 * (circlelength(rad) / dtwidth));
           if(circp > 1000) circp = 1000;
           shiftmatrix T = rgpushxto0(lstart);
@@ -2421,13 +2422,13 @@ namespace mapeditor {
           }
 #endif          
         else if(mousekey == 'c') {
-          dt_add_circle(lstart, mouseh);
+          dt_add_circle(lstart, mh);
           lstartcell = NULL;
           }
         else if(mousekey == 'T') {
           static string text = "";
           dialog::edit_string(text, "", "");
-          shiftpoint h = mouseh;
+          shiftpoint h = mh;
           dialog::reaction_final = [h] {
             if(text != "")
               dt_add_text(h, dtwidth * 50, text);
@@ -2686,7 +2687,9 @@ namespace mapeditor {
      
         usershapelayer &ds(us->d[mapeditor::dslayer]);
         
-        hyperpoint mh = inverse_shift(mapeditor::drawtrans, mouseh);
+        shiftpoint moh = GDIM == 2 ? mouseh : find_mouseh3();
+        
+        hyperpoint mh = inverse_shift(mapeditor::drawtrans, moh);
     
         for(int a=0; a<ds.rots; a++) 
         for(int b=0; b<(ds.sym?2:1); b++) {
@@ -2719,7 +2722,7 @@ namespace mapeditor {
             shiftpoint P2 = V * spin(2*M_PI*a/ds.rots) * mirrorif(ds.list[ti], b);
             
             if(!mouseout()) {
-              double d = hdist(mouseh, P2);
+              double d = hdist(moh, P2);
               if(d < ewsearch.dist)
                 ewsearch.dist = d,
                 ewsearch.rotid = a,
@@ -2728,10 +2731,10 @@ namespace mapeditor {
                 ewsearch.c = c,
                 ewsearch.side = b,
                 state = 1,
-                dist2 = d + hdist(mouseh, Plast) - hdist(P2, Plast);
+                dist2 = d + hdist(moh, Plast) - hdist(P2, Plast);
             
               else if(state == 1) {
-                double dist3 = d + hdist(mouseh, Plast) - hdist(P2, Plast);
+                double dist3 = d + hdist(moh, Plast) - hdist(P2, Plast);
                 if(dist3 < dist2) 
                   ewsearch.side = !ewsearch.side;
                 state = 2;
@@ -2758,7 +2761,7 @@ namespace mapeditor {
         if(gstate == 1) queueline(lpsm, V * ds.list[0], 0x90000080), gstate = 0;
         if(state == 1) {
           shiftpoint P2 = V * ds.list[0];
-          if(hdist(mouseh, P2) + hdist(mouseh, Plast) - hdist(P2, Plast) < dist2) 
+          if(hdist(moh, P2) + hdist(moh, Plast) - hdist(P2, Plast) < dist2) 
             ewsearch.side = 1;
           }
         }
