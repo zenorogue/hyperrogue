@@ -1804,7 +1804,7 @@ namespace mapeditor {
       displaymm('l', 8, 8+fs*8, 2, vid.fsize, XLAT("l = line"), 0);
       displaymm('c', 8, 8+fs*9, 2, vid.fsize, XLAT("c = circle"), 0);
       if(drawing_tool)
-        displaymm('T', 8, 8+fs*10, 10, vid.fsize, XLAT("T = text"), 0);
+        displaymm('T', 8, 8+fs*10, 2, vid.fsize, XLAT("T = text"), 0);
       if(drawing_tool)
         displaymm('e', 8, 8+fs*11, 2, vid.fsize, XLAT("e = erase"), 0);
       int s = isize(texture::config.data.pixels_to_draw);
