@@ -2194,8 +2194,8 @@ EX bool do_draw(cell *c, const shiftmatrix& T) {
       if(dist <= extra_generation_distance && !limited_generation(c)) return false;
       }
     else if(pmodel == mdGeodesic && sl2) {
-      if(hypot(tC0(T.T)[2], tC0(T.T)[3]) > cosh(slr::range_xy)) return false;
-      if(T.shift * stretch::not_squared() > sightranges[geometry]) return false;
+      if(hypot(tC0(T.T)[2], tC0(T.T)[3]) > cosh(slr::range_xy)) return false;     
+      if(abs(T.shift * stretch::not_squared()) > sightranges[geometry]) return false;
       if(!limited_generation(c)) return false;
       }
     else if(vid.use_smart_range) {
