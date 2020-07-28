@@ -1510,7 +1510,13 @@ namespace mapeditor {
   unsigned gridcolor = 0xC0C0C040;
   
   shiftpoint in_front_dist(ld d) {
-    return shiftless(direct_exp(lp_iapply(ztangent(d)))); /* todo direct_shift */
+
+    double mx = current_display->tanfov * (mousex - current_display->xcenter)/current_display->radius;
+    double my = current_display->tanfov * (mousey - current_display->ycenter)/current_display->radius/pconf.stretch;
+    hyperpoint tgt = point3(mx, my, 1);
+    tgt *= d / hypot_d(3, tgt);
+
+    return shiftless(direct_exp(lp_iapply(tgt))); /* todo direct_shift */
     }
   
   EX shiftpoint find_mouseh3() {
