@@ -430,7 +430,7 @@ namespace mapstream {
     char nbtype = char(variation);
     f.write(nbtype);
     #if CAP_GP
-    if(GOLDBERG) {
+    if(GOLDBERG || INVERSE) {
       f.write(gp::param.first);
       f.write(gp::param.second);
       }
@@ -489,7 +489,7 @@ namespace mapstream {
     f.read(nbtype);
     variation = eVariation(nbtype);
     #if CAP_GP
-    if(GOLDBERG) {
+    if(GOLDBERG || INVERSE) {
       f.read(gp::param.first);
       f.read(gp::param.second);
       }
