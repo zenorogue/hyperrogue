@@ -654,7 +654,9 @@ EX void mainloopiter() {
     if(cwt.mirrored) playerV = playerV * Mirror;
     }
   
-  mousepan = (cmode & (sm::NORMAL | sm::DRAW | sm::MAP)) && (GDIM == 3 || (rug::rugged && lctrlclick)) && mouseaim_sensitivity;
+  mousepan = cmode & sm::NORMAL;
+  if((cmode & (sm::DRAW | sm::MAP)) && !hiliteclick) mousepan = true;
+  mousepan = mousepan && (GDIM == 3 || (rug::rugged && lctrlclick)) && mouseaim_sensitivity;
   if(mousepan != oldmousepan) {
     oldmousepan = mousepan;
     #if CAP_MOUSEGRAB
