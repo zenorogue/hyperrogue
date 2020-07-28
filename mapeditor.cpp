@@ -1511,8 +1511,9 @@ namespace mapeditor {
   
   shiftpoint in_front_dist(ld d) {
 
-    double mx = current_display->tanfov * (mousex - current_display->xcenter)/current_display->radius;
-    double my = current_display->tanfov * (mousey - current_display->ycenter)/current_display->radius/pconf.stretch;
+    ld ys = current_display->xsize/2;
+    double mx = current_display->tanfov * (mousex - current_display->xcenter)/ys;
+    double my = current_display->tanfov * (mousey - current_display->ycenter)/ys/pconf.stretch;
     hyperpoint tgt = point3(mx, my, 1);
     tgt *= d / hypot_d(3, tgt);
 
