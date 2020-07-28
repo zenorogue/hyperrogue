@@ -1488,35 +1488,36 @@ EX namespace hybrid {
     string str = "";
     if(rotspace)
       str = XLAT(
-        "Theoretically, the double period ('sphere') works in underlying spherical geometry, "
-        "any value works in (full) hyperbolic geometry, and single period ('PSL(2,R)') "
-        "works in hyperbolic quotient spaces; quotients of these numbers work too. "
-        "(The current implementation in HyperRogue is not perfect, though, so only single is guaranteed to work.) "
+        "If the 2D underlying manifold is bounded, the period should be a divisor of the 'rotation space' "
+        "value (PSL(2,R)) times the Euler characteristics of the underlying manifold. "
+        "For unbounded underlying manifold, any value should work (theoretically, "
+        "the current implementation in HyperRogue is not perfect).\n\n"
         "We won't stop you from trying illegal numbers, but they won't work correctly.");
     dialog::editNumber(s, 0, 16, 1, 0, XLAT("%1 period", "Z"), str);
     dialog::bound_low(0);
     auto set_s = [] (int s1, bool ret) {
-      return [s1] {
+      return [s1,ret] {
+        if(ret) popScreen();
         if(csteps == s1) return;
         stop_game();
         csteps = s1 * cgi.single_step;
         hybrid::reconfigure();
         start_game();
         };
-      if(ret) popScreen();
       };
     dialog::extra_options = [=] () { 
       if(rotspace) {
         int e_steps = cgi.psl_steps / gcd(cgi.single_step, cgi.psl_steps); 
+        bool ubounded = PIU(bounded);
         dialog::addSelItem( XLAT(sphere ? "elliptic" : "PSL(2,R)"), its(e_steps), 'P');
         dialog::add_action(set_s(e_steps, true));
         dialog::addSelItem( XLAT(sphere ? "sphere" : "SL(2,R)"), its(2*e_steps), 'P');
         dialog::add_action(set_s(2*e_steps, true));
-        if(sl2) {
+        if(sl2 && !ubounded) {
           dialog::addSelItem( XLAT("universal cover"), its(0), 'P');
           dialog::add_action(set_s(0, true));
           }
-        dialog::addSelItem( XLAT("works correctly so far"), its(disc_quotient), 'Q');
+        dialog::addSelItem(ubounded ? XLAT("maximum") : XLAT("works correctly so far"), its(disc_quotient), 'Q');
         dialog::add_action(set_s(disc_quotient, true));
         }
       else {
