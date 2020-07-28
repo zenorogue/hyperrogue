@@ -583,14 +583,7 @@ void enable_raycaster() {
         fsh += "mediump mat4 s_itranslate(vec4 h) {\n"
           "h.xyz = -h.xyz; return s_translate(h);\n"
           "}\n";
-        fsh += "mediump vec4 christoffel(mediump vec4 pos, mediump vec4 vel, mediump vec4 tra) {\n"
-          "vel = s_itranslate(pos) * vel;\n"
-          "tra = s_itranslate(pos) * tra;\n"
-          "return s_translate(pos) * vec4(\n"
-          "  (vel.y*tra.z+vel.z*tra.y) * " + to_glsl(-(-stretch::factor-2)) + ", "
-          "  (vel.x*tra.z+vel.z*tra.x) * " + to_glsl(-stretch::factor-2.) + ", "
-          "  0, 0);\n"
-          "}\n";
+        use_christoffel = false;
         }
       else if(stretch::in()) {
         fsh += "mediump mat4 s_translate(vec4 h) {\n"
@@ -599,14 +592,7 @@ void enable_raycaster() {
         fsh += "mediump mat4 s_itranslate(vec4 h) {\n"
           "h.xyz = -h.xyz; return s_translate(h);\n"
           "}\n";
-        fsh += "mediump vec4 christoffel(mediump vec4 pos, mediump vec4 vel, mediump vec4 tra) {\n"
-          "vel = s_itranslate(pos) * vel;\n"
-          "tra = s_itranslate(pos) * tra;\n"
-          "return s_translate(pos) * vec4(\n"
-          "  (vel.y*tra.z+vel.z*tra.y) * " + to_glsl(-stretch::factor) + ", "
-          "  (vel.x*tra.z+vel.z*tra.x) * " + to_glsl(stretch::factor) + ", "
-          "  0, 0);\n"
-          "}\n";
+        use_christoffel = false;
         }
       else use_christoffel = false;
 
@@ -643,12 +629,101 @@ void enable_raycaster() {
         "mediump vec4 acc4 = get_acc(position + vel + acc2/2., vel + acc3/2.);\n"
         "mediump vec4 nposition = position + vel + (acc1+acc2+acc3)/6.;\n";
       
-      if(sl2) fmain += 
-        "nposition = nposition / sqrt(dot(position.zw, position.zw) - dot(nposition.xy, nposition.xy));\n";
+      if(sl2 || stretch::in()) {
+        ld SV = stretch::not_squared();
+        ld mul = (sphere?1:-1)-1/SV/SV;
+        fmain += 
+          "vec4 vel = s_itranslate(position) * tangent * dist;\n"
+          "mediump float vlen = length(vel.xyz);\n"
+          "if(vel.z<0.) vlen=-vlen;\n"
+          "float z_part = vel.z/vlen;\n"
+          "float x_part = sqrt(1.-z_part*z_part);\n"
+          "const float SV = " + to_glsl(SV) + ";\n"
+          "float rparam = x_part / z_part / SV;\n"
+          "float beta = atan2(vel.y,vel.x);\n"
+          "if(vlen<0.) beta += PI;\n"
+          "mediump vec4 nposition, ntangent;\n";
+        
+        if(sl2) fmain +=
+          "if(rparam > 1.) {\n"
+            "float cr = 1./sqrt(rparam*rparam-1.);\n"
+            "float sr = rparam*cr;\n"
+            "float z = cr * " + to_glsl(mul) + ";\n"
+            "float a = vlen / length(vec2(sr, cr/SV));\n"
+            "float k = -a;\n"
+            "float u = z*a;\n"
+            "float xy = sr * sinh(k);\n"
+            "float zw = cr * sinh(k);\n"
+            "nposition = vec4("
+              "-xy*cos(u+beta),"
+              "-xy*sin(u+beta),"
+              "zw*cos(u)-cosh(k)*sin(u),"
+              "zw*sin(u)+cosh(k)*cos(u)"
+              ");\n"
 
-      else if(stretch::in()) fmain += 
-        "nposition = nposition / sqrt(dot(nposition, nposition));\n";
-
+            "ntangent = vec4("
+              "-sr*cosh(k)*k*cos(u+beta) + u*xy*sin(u+beta),"
+              "-sr*cosh(k)*k*sin(u+beta) - u*xy*cos(u+beta),"
+              "k*cr*cosh(k)*cos(u)-zw*sin(u)*u-k*sinh(k)*sin(u)-u*cosh(k)*cos(u),"
+              "k*cr*cosh(k)*sin(u)+u*zw*cos(u)+k*sinh(k)*cos(u)-u*cosh(k)*sin(u)"
+              ");\n"
+            "}\n"
+          "else {\n"
+            "float r = atanh(rparam);\n"
+            "float cr = cosh(r);\n"
+            "float sr = sinh(r);\n"
+            "float z = cr * "+to_glsl(mul)+";\n"
+            "float a = vlen / length(vec2(sr, cr/SV));\n"
+            "float k = -a;\n"
+            "float u = z*a;\n"
+            "float xy = sr * sin(k);\n"
+            "float zw = cr * sin(k);\n"
+            "ntangent = vec4("
+               "-sr*cos(k)*k*cos(u+beta) + u*xy*sin(u+beta),"
+               "-sr*cos(k)*k*sin(u+beta) - u*xy*cos(u+beta),"
+               "k*cr*cos(k)*cos(u)-zw*sin(u)*u+k*sin(k)*sin(u)-u*cos(k)*cos(u),"
+               "k*cr*cos(k)*sin(u)+zw*cos(u)*u-k*sin(k)*cos(u)-u*cos(k)*sin(u)"
+               ");\n"
+            "nposition = vec4("
+               "-xy * cos(u+beta),"
+               "-xy * sin(u+beta),"
+               "zw * cos(u) - cos(k) * sin(u),"
+               "zw * sin(u) + cos(k)*cos(u)"
+               ");\n"
+            "}\n";
+          
+        else fmain += 
+          "if(true) {\n"
+            "float r = atan(rparam);\n"
+            "float cr = cos(r);\n"
+            "float sr = sin(r);\n"
+            "float z = cr * "+to_glsl(mul)+";\n"
+            "float a = vlen / length(vec2(sr, cr/SV));\n"
+            "float k = a;\n"
+            "float u = z*a;\n"
+            "float xy = sr * sin(k);\n"
+            "float zw = cr * sin(k);\n"
+            "ntangent = vec4("
+               "sr*cos(k)*k*cos(u+beta) - u*xy*sin(u+beta),"
+               "sr*cos(k)*k*sin(u+beta) + u*xy*cos(u+beta),"
+               "k*cr*cos(k)*cos(u)-zw*sin(u)*u+k*sin(k)*sin(u)-u*cos(k)*cos(u),"
+               "k*cr*cos(k)*sin(u)+zw*cos(u)*u-k*sin(k)*cos(u)-u*cos(k)*sin(u)"
+               ");\n"
+            "nposition = vec4("
+               "xy * cos(u+beta),"
+               "xy * sin(u+beta),"
+               "zw * cos(u) - cos(k) * sin(u),"
+               "zw * sin(u) + cos(k)*cos(u)"
+               ");\n"
+            "}\n";          
+        
+        fmain +=    
+          "ntangent = s_itranslate(nposition) * ntangent / dist;\n"
+          "ntangent.z *= SV;\n"
+          "nposition = s_translate(position) * nposition;\n"
+          "ntangent = s_translate(nposition) * ntangent;\n";
+        }
+      
       if(nil) {
         fmain +=
           "mediump vec4 xp, xt;\n"
@@ -700,7 +775,7 @@ void enable_raycaster() {
         "  mediump vec4 nposition = v;\n";
         }
 
-      if(sphere && !use_christoffel) {
+      if(sphere && !stretch::in()) {
         fmain += 
         "  mediump float ch = cos(dist); mediump float sh = sin(dist);\n"
         "  mediump vec4 v = position * ch + tangent * sh;\n"
@@ -810,15 +885,6 @@ void enable_raycaster() {
         "tangent = translatev(position, xt);\n";
       else fmain +=
         "tangent = ntangent;\n";
-      
-      if(stretch::in() || sl2) {
-        fmain += 
-          "tangent = s_itranslate(position) * tangent;\n"
-          "tangent[3] = 0.;\n"
-          "float nvelsquared = dot(tangent.xy, tangent.xy) + " + to_glsl(stretch::squared()) + " * tangent.z * tangent.z;\n"
-          "tangent /= sqrt(nvelsquared);\n"
-          "tangent = s_translate(position) * tangent;\n";
-        }
       }
     else fmain += 
       "position = position + tangent * dist;\n";
