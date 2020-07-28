@@ -2361,6 +2361,8 @@ EX namespace stretch {
   
     vector<hyperpoint> res;
     
+    ld SV = stretch::not_squared();
+
     if(stretch::factor == 0) {
       ld d = hypot_d(3, h);
       if(h[3] >= 1 || h[3] <= -1|| d == 0) return res;
@@ -2375,8 +2377,17 @@ EX namespace stretch {
       return res;
       }
     
+    if(h[0] == 0 && h[1] == 0) {
+      ld a = atan2(h[2], h[3]);
+      
+      for(int it=-generations; it<generations; it++) {
+        res.push_back(point31(0, 0, (a + 2 * M_PI * it) * SV));
+        }
+      
+      return res;
+      }
+
     ld xy = hypot_d(2, h);
-    ld SV = stretch::not_squared();
   
     ld base_min_a = asin(xy);
     ld base_max_a = M_PI - base_min_a;
