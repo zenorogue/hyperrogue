@@ -2060,7 +2060,7 @@ EX namespace rots {
   std::unordered_map<int, transmatrix> saved_matrices_ray;
 
   EX transmatrix ray_iadj(cell *c1, int i) {
-    if(i == c1->type-1) return uzpush(+cgi.plevel) * spin(-2*cgi.plevel);
+    if(i == c1->type-1) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
     if(i == c1->type-2) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
     cell *c2 = c1->cmove(i);
     int id1 = hybrid::underlying == gArchimedean ? arcm::id_of(c1->master) + 20 * arcm::parent_index_of(c1->master) : shvid(c1);
