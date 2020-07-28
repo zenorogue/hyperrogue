@@ -1703,7 +1703,15 @@ EX void show3D() {
       dialog::editNumber(mouseaim_sensitivity, -1, 1, 0.002, 0.01, XLAT("mouse aiming sensitivity"), "set to 0 to disable");
       });
     }
-  dialog::addSelItem(XLAT("camera rotation"), fts(vpconf.camera_angle), 's');
+  if(true) {
+    dialog::addSelItem(XLAT("camera rotation"), fts(vpconf.camera_angle), 'S');
+    dialog::add_action([] {
+      dialog::editNumber(vpconf.camera_angle, -180, 180, 5, 0, XLAT("camera rotation"), 
+        XLAT("Rotate the camera. Can be used to obtain a first person perspective, "
+        "or third person perspective when combined with Y shift.")
+        );
+      });
+    }
   if(GDIM == 2) {
     dialog::addSelItem(XLAT("fixed facing"), vid.fixed_facing ? fts(vid.fixed_facing_dir) : XLAT("OFF"), 'f');
     dialog::add_action([] () { vid.fixed_facing = !vid.fixed_facing; 
@@ -1938,11 +1946,6 @@ EX void show3D() {
         dialog::addBoolItem_action(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
         };
       }
-    else if(uni == 's') 
-      dialog::editNumber(vpconf.camera_angle, -180, 180, 5, 0, XLAT("camera rotation"), 
-        XLAT("Rotate the camera. Can be used to obtain a first person perspective, "
-        "or third person perspective when combined with Y shift.")
-        );
     else if(uni == 'b') 
       config_camera_rotation();
     else if(uni == 'M') 
