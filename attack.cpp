@@ -1005,7 +1005,24 @@ EX bool attackMonster(cell *c, flagtype flags, eMonster killer) {
   }
 
 EX void pushMonster(const movei& mi) {
-  moveMonster(mi);
+  if(mi.s->monst == moPair || isMagneticPole(mi.s)) {
+    cell *other = mi.s->move(mi.s->mondir);
+    int id = neighborId(mi.t, other);
+    if(id == -1) {
+      killMonster(mi.s, moPlayer);
+      killMonster(other, moPlayer);
+      return;
+      }
+    else {
+      moveMonster(mi);
+      if(mi.t->monst) {
+        mi.t->mondir = id;
+        other->mondir = mi.t->c.spin(id);
+        }
+      }
+    }
+  else 
+    moveMonster(mi);
   auto& cf = mi.s;
   auto& ct = mi.t;
   if(ct->monst == moBrownBug) {
