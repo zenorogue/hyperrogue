@@ -4071,3 +4071,8 @@ Geometries:
 - fixed drawing unnecessary cells in SL2
 - fixed a bug while saving/loading maps using new variations
 - improved handling of cases where matrices were not enough to represent positions (long band model, universal cover of SL) -- faraway monsters now face the player correctly, and racing/shmup now works in SL
+
+2020-07-29 23:02 Update 11.3u:
+- Orb of Air now kills Red Raiders if separating them, instead of crashing
+- fixed bad HUD in 3D
+- redone peaceful mode to puzzle/exploration mode
