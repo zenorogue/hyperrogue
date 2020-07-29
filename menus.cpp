@@ -550,7 +550,7 @@ EX void showChangeMode() {
   multi::cpid = 0;
   dialog::addBoolItem(XLAT("Chaos mode"), (chaosmode), 'C');
   dialog::add_action_push(show_chaos);
-  dialog::addBoolItem(XLAT("peaceful mode"), peace::on, 'p');
+  dialog::addBoolItem(XLAT("puzzle/exploration mode"), peace::on, 'p');
   dialog::addBoolItem(XLAT("Orb Strategy mode"), (inv::on), 'i');
   dialog::addBoolItem(XLAT("pure tactics mode"), (tactic::on), 't');
   dialog::addBoolItem(XLAT("Yendor Challenge"), (yendor::on), 'y');
@@ -996,7 +996,7 @@ EX named_functionality get_o_key() {
     res.push_back(named_dialog(XLAT("Yendor Challenge"), yendor::showMenu));
 
   if(peace::on)
-    res.push_back(named_dialog(XLAT("peaceful mode"), peace::showMenu));
+    res.push_back(named_dialog(XLAT("puzzles and exploration"), peace::showMenu));
   
   #if CAP_TEXTURE
   if(texture::config.tstate)
