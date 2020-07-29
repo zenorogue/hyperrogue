@@ -1595,6 +1595,7 @@ int flat_on;
 eGeometry backup_geometry;
 projection_configuration backup_pconf;
 bool backup_always3;
+ld backup_camera, backup_depth;
 
 /** \brief enable the 'flat' model for drawing HUD. See hr::flat_model_enabler */
 EX void enable_flat_model(int val) {
@@ -1611,7 +1612,10 @@ EX void enable_flat_model(int val) {
     pconf.camera_angle = 0;
     pconf.stretch = 1;
     backup_always3 = vid.always3;
+    backup_camera = vid.camera;
+    backup_depth = vid.depth;
     vid.always3 = false;
+    geom3::apply_always3();
     check_cgi();
     cgi.require_shapes();
     calcparam();
@@ -1620,6 +1624,9 @@ EX void enable_flat_model(int val) {
     geometry = backup_geometry;
     pconf = backup_pconf;
     vid.always3 = backup_always3;
+    geom3::apply_always3();
+    vid.depth = backup_depth;
+    vid.camera = backup_camera;
     calcparam();
     check_cgi();
     }
