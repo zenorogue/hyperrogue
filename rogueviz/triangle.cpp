@@ -119,9 +119,9 @@ struct trianglemaker {
     
     // println(hlog, "uds = ", uds);
   
-    for(int a=0; a<3; a++) println(hlog, sqhypot_d(3, inverse_exp(start + ds[a] * ca)));
+    for(int a=0; a<3; a++) println(hlog, sqhypot_d(3, inverse_exp(shiftless(start + ds[a] * ca))));
   
-    for(int a=0; a<3; a++) println(hlog, sqhypot_d(3, inverse_exp(uds[a])));
+    for(int a=0; a<3; a++) println(hlog, sqhypot_d(3, inverse_exp(shiftless(uds[a]))));
     
     // compute cube vertices
   
@@ -473,7 +473,7 @@ void growthrate() {
 color_t tcolors[3] = { 0xFF0000FF, 0x00FF00FF, 0x0000FFFF };
 
 
-bool draw_ptriangle(cell *c, const transmatrix& V) {
+bool draw_ptriangle(cell *c, const shiftmatrix& V) {
 
   if(!on) return false;
   

@@ -102,7 +102,7 @@ transmatrix random_snow_matrix(cell *c) {
     }
   }
 
-bool draw_snow(cell *c, const transmatrix& V) {
+bool draw_snow(cell *c, const shiftmatrix& V) {
   
   if(!matrices_at.count(c)) {
     auto& v = matrices_at[c];

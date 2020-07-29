@@ -197,8 +197,8 @@ void bantar_note(cell *c) {
 using bantar_config = pair<cell*, cell*>;
 
 tuple<ld,bool,ld> quality(bantar_config cp) {
-  hyperpoint h1 = tC0(ggmatrix(cp.first));
-  hyperpoint h2 = tC0(ggmatrix(cp.second));
+  shiftpoint h1 = tC0(ggmatrix(cp.first));
+  shiftpoint h2 = tC0(ggmatrix(cp.second));
   return make_tuple(hdist0(h1) * hdist0(h2), h2[1] > 0, abs(h2[0] / h2[1]));
   }
 

@@ -59,7 +59,7 @@ vector<int> inext, inext2;
 
 vector<int> fibs = {1, 2};
   
-bool sunflower_cell(cell *c, transmatrix V) {
+bool sunflower_cell(cell *c, shiftmatrix V) {
   if(!on) return false;
   density = zdensity / 100;
   
@@ -106,7 +106,7 @@ bool sunflower_cell(cell *c, transmatrix V) {
     }
   
   if(c == cwt.at) {
-    for(int i=0; i<iqty; i++) ps[i] = V * p(i);
+    for(int i=0; i<iqty; i++) ps[i] = p(i);
 
     for(int i=0; i<iqty; i++) {
       ld ba = 99;
@@ -129,16 +129,16 @@ bool sunflower_cell(cell *c, transmatrix V) {
         curvepoint(ps[inext[i]]);
         curvepoint(ps[inext2[i]]);
         // queuecurve(0xFFFFFFFF, 0x00C000FF, PPR::LINE);
-        queuecurve(0x000000FF, 0xC04000FF, PPR::LINE);
+        queuecurve(shiftless(Id), 0x000000FF, 0xC04000FF, PPR::LINE);
         }      
       else {
         curvepoint(ps[i]);
         curvepoint(ps[inext[i]]);
         curvepoint(ps[inext[i] + inext2[i] - i]);
         curvepoint(ps[inext2[i]]);
-        queuecurve(0x000000FF, 0xFFD500FF, PPR::LINE);
+        queuecurve(V,0x000000FF, 0xFFD500FF, PPR::LINE);
         }
-      if(nodes) queuepolyat(rgpushxto0(ps[i]), cgi.shSnowball, 0xFF, PPR::SUPERLINE);
+      if(nodes) queuepolyat(V * rgpushxto0(ps[i]), cgi.shSnowball, 0xFF, PPR::SUPERLINE);
       }
     }
   return true;

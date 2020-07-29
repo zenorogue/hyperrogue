@@ -73,7 +73,7 @@ namespace flocking {
   
   char shape = 'b';
   
-  vector<tuple<hyperpoint, hyperpoint, color_t> > lines;
+  vector<tuple<shiftpoint, shiftpoint, color_t> > lines;
   
   // parameters of each boid
   // m->base: the cell it is currently on
@@ -103,7 +103,7 @@ namespace flocking {
       for(int i=0; i<isize(cl.lst); i++) {
         cell *c2 = cl.lst[i];
         transmatrix T = calc_relative_matrix(c2, c1, C0);
-        if(hypot_d(WDIM, inverse_exp(tC0(T))) <= check_range) {
+        if(hypot_d(WDIM, inverse_exp(shiftless(tC0(T)))) <= check_range) {
           relmatrices[c1][c2] = T;
           forCellEx(c3, c2) cl.add(c3);
           }
@@ -115,8 +115,8 @@ namespace flocking {
       vertexdata& vd = vdata[i];
       // set initial base and at to random cell and random position there 
       createViz(i, v[hrand(isize(v))], Id);
-      rotate_object(vd.m->pat, vd.m->ori, random_spin());
-      apply_parallel_transport(vd.m->pat, vd.m->ori, xtangent(hrand(100) / 200.));
+      rotate_object(vd.m->pat.T, vd.m->ori, random_spin());
+      apply_parallel_transport(vd.m->pat.T, vd.m->ori, xtangent(hrand(100) / 200.));
       
       vd.name = its(i+1);
       vd.cp = dftcolor;
@@ -198,7 +198,7 @@ namespace flocking {
           // at2 is like m2->at but relative to m->at
           
           // m2's position relative to m (tC0 means *(0,0,1))
-          hyperpoint ac = inverse_exp(tC0(at2));
+          hyperpoint ac = inverse_exp(shiftless(tC0(at2)));
           if(use_rot) ac = Rot * ac;
           
           // distance and azimuth to m2
@@ -288,8 +288,8 @@ namespace flocking {
 
       if(follow == 1) {
         gmatrix.clear();
-        vdata[0].m->pat = View * calc_relative_matrix(vdata[0].m->base, centerover, C0) * vdata[0].m->at;
-        View = inverse(vdata[0].m->pat) * View;
+        vdata[0].m->pat = shiftless(View * calc_relative_matrix(vdata[0].m->base, centerover, C0) * vdata[0].m->at);
+        View = inverse(vdata[0].m->pat.T) * View;
         if(prod) {
           NLP = inverse(vdata[0].m->ori);
           
@@ -318,7 +318,7 @@ namespace flocking {
         ld lev = 0;
         for(int i=0; i<N; i++) if(gmatrix.count(vdata[i].m->base)) {
           vdata[i].m->pat = gmatrix[vdata[i].m->base] * vdata[i].m->at;
-          auto h1 = tC0(vdata[i].m->pat);
+          auto h1 = unshift(tC0(vdata[i].m->pat));
           cnt++;          
           if(prod) {
             auto d1 = product_decompose(h1);

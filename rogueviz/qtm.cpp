@@ -104,7 +104,7 @@ void set_cell(cell *c) {
 
 bool qtm_on;
 
-bool may_set_cell(cell *c, const transmatrix& T) {
+bool may_set_cell(cell *c, const shiftmatrix& T) {
   if(qtm_on) set_cell(c);
   return false;
   }

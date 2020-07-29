@@ -203,7 +203,7 @@ hyperpoint where(int i, cell *base) {
     }
   else {
     // notimpl(); // actually probably that's a buug
-    return inverse(ggmatrix(currentmap->gamestart())) * (ggmatrix(m->base) * tC0(m->at));
+    return inverse_shift(ggmatrix(currentmap->gamestart()), ggmatrix(m->base) * tC0(m->at));
     }
   }
 
@@ -486,7 +486,7 @@ color_t darken_a(color_t c) {
 #define SVG_LINK(x) 
 #endif
 
-void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const string* info, int i) {
+void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const string* info, int i) {
   if(legend && (int) cp.color1 == (int) 0x000000FF && backcolor == 0)
     poly_outline = 0x606060FF;
   else
@@ -494,14 +494,14 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const str
   
   if(cp.img) {
     for(hyperpoint h: cp.img->vertices)
-      curvepoint(V * h);
-    auto& qc = queuecurve(0, 0xFFFFFFFF, PPR::MONSTER_HEAD);
+      curvepoint(h);
+    auto& qc = queuecurve(V, 0, 0xFFFFFFFF, PPR::MONSTER_HEAD);
     qc.tinf = &cp.img->tinf;
     qc.flags |= POLY_TRIANGLES;
     return;
     }
     
-  transmatrix V1;
+  shiftmatrix V1;
   
   auto& sh = 
     vertex_shape == 2 ? cgi.shHeptaMarker :
@@ -557,7 +557,7 @@ transmatrix& memo_relative_matrix(cell *c1, cell *c2) {
   return p;
   }
 
-void queue_prec(const transmatrix& V, edgeinfo*& ei, color_t col) {
+void queue_prec(const shiftmatrix& V, edgeinfo*& ei, color_t col) {
   if(!fat_edges)
     queuetable(V, ei->prec, isize(ei->prec), col, 0, PPR::STRUCT0);
   #if MAXMDIM >= 4
@@ -571,7 +571,7 @@ void queue_prec(const transmatrix& V, edgeinfo*& ei, color_t col) {
   #endif
   }
 
-bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
+bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
   if(m->dead) return true;
   if(m->type != moRogueviz) return false;
   int i = m->pid;
@@ -627,18 +627,18 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       
       alpha >>= darken;
 
-      transmatrix gm1 = 
+      shiftmatrix gm1 = 
         (multidraw || elliptic) ? V * memo_relative_matrix(vd1.m->base, c) :
         ggmatrix(vd1.m->base);
-      transmatrix gm2 = 
+      shiftmatrix gm2 = 
         (multidraw || elliptic) ? V * memo_relative_matrix(vd2.m->base, c) :
         ggmatrix(vd2.m->base);
                 
-      hyperpoint h1 = gm1 * vd1.m->at * C0;
-      hyperpoint h2 = gm2 * vd2.m->at * C0;
+      shiftpoint h1 = gm1 * vd1.m->at * C0;
+      shiftpoint h2 = gm2 * vd2.m->at * C0;
       
-      if(elliptic && intval(h1, h2) > intval(h1, centralsym * h2))
-        h2 = centralsym * h2;
+      if(elliptic && hdist(h1, h2) > hdist(h1.h, centralsym * h2.h))
+        h2.h = centralsym * h2.h;
       
       if(multidraw) {
         int code = int(h1[0]) + int(h1[1]) * 12789117 + int(h2[0]) * 126081253 + int(h2[1]) * 126891531;
@@ -677,14 +677,14 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
           ei->orig = center; // cwt.at;
           ei->prec.clear();
           
-          transmatrix T = inverse(ggmatrix(ei->orig));
+          shiftmatrix T = ggmatrix(ei->orig);
           
           if(callhandlers(false, hooks_alt_edges, ei, true)) ;
           else if(fat_edges) {
             ei->tinf.tvertices.clear();
-            transmatrix T1 = inverse(gm1 * vd1.m->at);
-            hyperpoint goal = T1 * h2;
-            transmatrix S = T * gm1 * vd1.m->at * rspintox(goal);
+            shiftmatrix T1 = gm1 * vd1.m->at;
+            hyperpoint goal = inverse_shift(T1, h2);
+            transmatrix S = inverse_shift(T, gm1) * vd1.m->at * rspintox(goal);
             ld d = hdist0(goal);
             for(int a=0; a<360; a+=30) {
               auto store = [&] (ld a, ld b) {
@@ -700,10 +700,10 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
               }
             }
           else 
-            storeline(ei->prec, T*h1, T*h2);
+            storeline(ei->prec, inverse_shift(T, h1), inverse_shift(T, h2));
           }
         queue_prec(multidraw ? V : ggmatrix(ei->orig), ei, col);
-        if(elliptic) queue_prec(centralsym * ggmatrix(ei->orig), ei, col);
+        if(elliptic) queue_prec(ggmatrix(ei->orig) * centralsym, ei, col);
         }
       }
 /*
@@ -719,12 +719,12 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     bool doshow = true;
     if((vizflags & RV_COMPRESS_LABELS) && i > 0 && !vd.virt) {
       vertexdata& vdp = vdata[vd.data];
-      hyperpoint h2 = ggmatrix(vdp.m->base) * vdp.m->at * C0;
+      shiftpoint h2 = ggmatrix(vdp.m->base) * vdp.m->at * C0;
       if(hdist(h2, V * m->at * C0) < 0.1) doshow = false;
       }
     
-    hyperpoint h = tC0(V * m->at);
-    transmatrix V2 = GDIM == 3 ? V * m->at : rgpushxto0(h) * ypush(PURE ? .3 : .2); // todo-variation
+    shiftpoint h = tC0(V * m->at);
+    shiftmatrix V2 = GDIM == 3 ? V * m->at : rgpushxto0(h) * ypush(PURE ? .3 : .2); // todo-variation
     if(doshow && !behindsphere(V2)) {
       auto info = vd.info;
       if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
@@ -755,7 +755,7 @@ bool rogueviz_hud() {
   int legit = qet + isize(legend);
   
   if(legit == 0) return true;
-
+  
   initquickqueue();
   
   int rad = current_display->radius/10;
@@ -783,8 +783,8 @@ bool rogueviz_hud() {
     transmatrix V = atscreenpos(x, y, current_display->radius/8);
     
     poly_outline = t->color | 0xFF;
-    queuepolyat(V, cgi.shTriangle, 0, PPR::MONSTER_HEAD);
-    
+    queuepolyat(shiftless(V), cgi.shTriangle, 0, PPR::MONSTER_HEAD);
+        
     poly_outline = OUTLINE_DEFAULT;
     queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, t->name, legend_color, 0, 16);
     }
@@ -1053,7 +1053,7 @@ void search_marker() {
     auto& vd = vdata[search_for];
     auto& m = vd.m;
     if(!m) return;
-    hyperpoint H = ggmatrix(m->base) * tC0(m->at);
+    shiftpoint H = ggmatrix(m->base) * tC0(m->at);
     queuestr(H, 2*vid.fsize, "X", 0x10101 * int(128 + 100 * sin(ticks / 150.)));
     addauraspecial(H, iinf[itOrbYendor].color, 0);
     }

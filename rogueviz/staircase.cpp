@@ -29,7 +29,7 @@ hyperpoint spcoord(hyperpoint h) {
   }
 
 rug::rugpoint *pt(hyperpoint h, hyperpoint c) {
-  auto r = rug::addRugpoint(C0, -1);
+  auto r = rug::addRugpoint(shiftless(C0), -1);
   r->native = spcoord(h);
   r->x1 = c[0];
   r->y1 = c[1];

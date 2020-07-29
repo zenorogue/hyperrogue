@@ -14,13 +14,13 @@ int fullnet_id;
 void drawExtra() {
   
   if(vizid == &fullnet_id) {
-    for(map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
+    for(map<cell*, shiftmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
       cell *c = it->first;
       c->wall = waChasm;
       }
     int index = 0;
 
-    for(map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
+    for(map<cell*, shiftmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
       cell *c = it->first;
       bool draw = true;
       for(int i=0; i<isize(named); i++) if(named[i] == c) draw = false;

@@ -214,7 +214,7 @@ void reset() {
   ir = nullptr;
   }
 
-bool draw_ptriangle(cell *c, const transmatrix& V) {
+bool draw_ptriangle(cell *c, const shiftmatrix& V) {
 
   if(!on) return false;
   

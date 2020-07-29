@@ -280,7 +280,7 @@ void analyze() {
   coloring();
   }
 
-bool coloring_3d(cell *c, const transmatrix& V) {
+bool coloring_3d(cell *c, const shiftmatrix& V) {
   if(WDIM == 3 && vizid == &kohonen_id) 
     queuepoly(face_the_player(V), cgi.shRing, darkena(c->landparam_color, 0, 0xFF));
   return false;
@@ -813,7 +813,7 @@ namespace levelline {
     if(!on) return;
     for(auto& g: gmatrix) {
       cell *c1 = g.first;
-      transmatrix T = g.second;
+      shiftmatrix T = g.second;
       neuron *n1 = getNeuron(c1);
       if(!n1) continue;
       for(int i=0; i<c1->type; i++) {

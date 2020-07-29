@@ -103,7 +103,7 @@ struct hrmap_rewrite : hrmap_hyperbolic {
 
   };
 
-bool labeller(cell* c, const transmatrix& V) {
+bool labeller(cell* c, const shiftmatrix& V) {
   auto m = dynamic_cast<hrmap_rewrite*> (currentmap);
   if(m) {
     string s = m->asg[c->master].second;

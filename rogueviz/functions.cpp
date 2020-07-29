@@ -47,19 +47,19 @@ hyperpoint find_point(ld t) {
 hyperpoint gcurvestart = err;
 
 void xcurvepoint(hyperpoint h) {
-  curvepoint(cwtV * h);
+  curvepoint(h);
   if(iserror(gcurvestart))
     gcurvestart = h;
   else if(sphere && intval(gcurvestart, h) > .1) {
-    queuecurve(graphcolor, 0, PPR::LINE);
-    curvepoint(cwtV * h);
+    queuecurve(cwtV, graphcolor, 0, PPR::LINE);
+    curvepoint(h);
     gcurvestart = h;
     }
   }
 
 void finish() {
   if(!iserror(gcurvestart)) {
-    queuecurve(graphcolor, 0, PPR::LINE);
+    queuecurve(cwtV, graphcolor, 0, PPR::LINE);
     gcurvestart = err;
     }
   }

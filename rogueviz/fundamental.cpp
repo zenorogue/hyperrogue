@@ -10,7 +10,7 @@ namespace fundamental {
 color_t color1, color2;
 
 map<cell*, int> same;
-map<cell*, transmatrix> gm;
+map<cell*, shiftmatrix> gm;
 
 bool is_connected(cellwalker cw) {
   return same[cw.at] & (1<<cw.spin);
@@ -28,8 +28,8 @@ void be_connected(cellwalker cw) {
 
 int funmode = 0;
 
-hyperpoint corner(cellwalker cw) {
-  transmatrix T = gm[cw.at];
+shiftpoint corner(cellwalker cw) {
+  shiftmatrix T = gm[cw.at];
   if(funmode == 2) {
     while(cw.at->type != S7) { 
       cw++; 
@@ -47,10 +47,10 @@ transmatrix rel(cellwalker cw) {
 
 ld label_dist = .3;
 
-transmatrix labelpos(hyperpoint h1, hyperpoint h2) {
-  hyperpoint h = mid(h1, h2);
-  transmatrix T = rgpushxto0(h);
-  hyperpoint hx = inverse(T) * h2;
+shiftmatrix labelpos(shiftpoint h1, shiftpoint h2) {
+  shiftpoint h = mid(h1, h2);
+  shiftmatrix T = rgpushxto0(h);
+  hyperpoint hx = inverse_shift(T, h2);
   ld alpha = atan2(-hx[1], hx[0]);
   return T * xspinpush(alpha + M_PI/2, label_dist);
   }
@@ -136,7 +136,7 @@ void fundamental_marker() {
     prev_corner[cw] = cw0;
     }
 
-  vector<transmatrix> nearm;
+  vector<pair<shiftmatrix, shiftmatrix>> nearm;
 
   for(int ci=0; ci<corners; ci++) {
     for(int u=0; u<1; u++) {
@@ -145,9 +145,9 @@ void fundamental_marker() {
       printf("[%d %d %d] ", is_connected(cw), is_connected(cw+1), is_connected(cw+wstep-1));
       printf("[%d %d %d] ", is_connected(cw1), is_connected(cw1+1), is_connected(cw1+wstep-1));
       printf("%d %d;\n", !!next_corner.count(cw1), !!next_corner.count(cw1+wmirror-1)); */
-      transmatrix T_here = gm[cw.at] * rel(cw+u);
-      transmatrix T_there = gm[cw1.at];
-      nearm.push_back(T_here * inverse(T_there));
+      shiftmatrix T_here = gm[cw.at] * rel(cw+u);
+      shiftmatrix T_there = gm[cw1.at];
+      nearm.emplace_back(T_here, T_there);
       }
     cw = next_corner[cw];
     }
@@ -156,18 +156,18 @@ void fundamental_marker() {
 
   for(int ci=0; ci<corners; ci++) {
 
-    hyperpoint h = corner(cw);
+    shiftpoint h = corner(cw);
     cw = next_corner[cw];
-    hyperpoint h2 = corner(cw);
+    shiftpoint h2 = corner(cw);
     
-    for(auto& T: nearm) queueline(T * h, T * h2, color1, 3);
+    for(auto& n: nearm) queueline(n.first * inverse_shift(n.second, h), n.first * inverse_shift(n.second, h2), color1, 3);
     }
     
   for(int ci=0; ci<corners; ci++) {
 
-    hyperpoint h = corner(cw);
+    shiftpoint h = corner(cw);
     cw = next_corner[cw];
-    hyperpoint h2 = corner(cw);
+    shiftpoint h2 = corner(cw);
     
     queueline(h, h2, color2, 3);
     }
@@ -179,7 +179,7 @@ void fundamental_marker() {
       if(!is_connected(cw0)) continue;
       int v = 0;
       for(auto& n: nearm) {
-        queueline(n * gm[cw0.at] * xspinpush0(v, .05), n * gm[cw0.cpeek()] * xspinpush0(v, .05), 0xFF8000FF, 0);
+        queueline(n.first * inverse_shift(n.second, gm[cw0.at]) * xspinpush0(v, .05), n.first * inverse_shift(n.second, gm[cw0.cpeek()]) * xspinpush0(v, .05), 0xFF8000FF, 0);
         v++;
         }
       queueline(gm[cw0.at] * C0, gm[cw0.cpeek()] * C0, 0xFF0000FF, 0);

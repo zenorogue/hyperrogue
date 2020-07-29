@@ -33,7 +33,7 @@ hyperpoint xts0;
 array<hyperpoint, 3> mts;
 
 rug::rugpoint *pt(hyperpoint h, hyperpoint c, int id) {
-  auto r = rug::addRugpoint(C0, -1);
+  auto r = rug::addRugpoint(shiftless(C0), -1);
   r->native = h;
   r->x1 = (1 + c[0]) / 16 + (id/8) / 8.;
   r->y1 = (1 + c[1]) / 16 + (id%8) / 8.;
@@ -132,7 +132,7 @@ void run_snub(int v, int w) {
   drawthemap();
   
   if(euclid || sphere) for(cell *c: currentmap->allcells())
-    gmatrix[c] = arcm::archimedean_gmatrix[c->master].second;
+    gmatrix[c] = shiftless(arcm::archimedean_gmatrix[c->master].second);
 
   cellwalker cw(currentmap->gamestart(), 0);
   p0 = cw.at;
@@ -142,11 +142,11 @@ void run_snub(int v, int w) {
   // p1 = (cw + wstep + 1 + wstep -1 + wstep).at;
   cc = (cw - 1 + wstep - 1 + wstep).at;
   
-  transmatrix rel = inverse(gmatrix[p0]);
+  transmatrix rel = inverse(gmatrix[p0].T);
   
-  ts[0] = rel * gmatrix[t0] * ddspin(t0, (cw - 1 + wstep).spin);
-  ts[1] = rel * gmatrix[t1];
-  ts[2] = rel * gmatrix[t2] * ddspin(t2, (cw + wstep + 1 + wstep - 1).spin);
+  ts[0] = rel * gmatrix[t0].T * ddspin(t0, (cw - 1 + wstep).spin);
+  ts[1] = rel * gmatrix[t1].T;
+  ts[2] = rel * gmatrix[t2].T * ddspin(t2, (cw + wstep + 1 + wstep - 1).spin);
   
   matrix2 = ts[2] * inverse(ts[0]);
   
@@ -156,7 +156,7 @@ void run_snub(int v, int w) {
   for(cell *c: currentmap->allcells()) {
     int id = arcm::id_of(c->master);
     if(among(id, 0, 1)) for(int d=0; d<v; d++) {
-      transmatrix T = rel * ggmatrix(c) * spin(2*M_PI*d/v);
+      transmatrix T = rel * ggmatrix(c).T * spin(2*M_PI*d/v);
       array<hyperpoint,3> hts;
       for(int i=0; i<3; i++) 
         hts[i] = T * ts[i] * C0;
@@ -179,7 +179,7 @@ void run_snub(int v, int w) {
   
   println(hlog, "original ", xts0);
   
-  cor = rel * gmatrix[cc] * C0;
+  cor = rel * gmatrix[cc].T * C0;
 
   rug::reopen();
   for(auto p: rug::points) p->valid = true;

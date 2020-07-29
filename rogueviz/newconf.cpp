@@ -25,6 +25,10 @@ string rfname;
 
 enum class ptype : char { outside, inside, inside_left_up, inside_left_down, top, bottom, left_inf, right_inf, marked };
 
+dqi_line& queueline1(const hyperpoint& H1, const hyperpoint& H2, color_t col, int prf = 0, PPR prio = PPR::LINE) {
+  return queueline(shiftless(H1), shiftless(H2), col, prf, prio);
+  }
+
 void add_border(vector<string>& v, int cy) {
   int Y = isize(v), X = isize(v[0]);
   char nx = '6';
@@ -656,7 +660,7 @@ void draw_ncee() {
       curvepoint(hpxy(xpos+scax, map_ypos+sca2));
       nctinf2.tvertices.push_back(glhr::makevertex(0.5+maxx, 1, 0));
       }
-    auto& q = queuecurve(0, show_mgrid ? 0x404040FF : 0xFFFFFFFF, PPR::LINE);
+    auto& q = queuecurve(shiftless(Id), 0, show_mgrid ? 0x404040FF : 0xFFFFFFFF, PPR::LINE);
     q.tinf = &nctinf2;
     q.flags |= POLY_TRIANGLES;
     q.offset_texture = 0;
@@ -678,7 +682,7 @@ void draw_ncee() {
     bool ineq = 
       in_visualization && fmap[y][x] == '1';
     #endif
-    queuecurve(0, 
+    queuecurve(shiftless(Id), 0, 
     #if CAP_NCONF
       (ineq && nconf::pts[y][x].state == 1) ? 0xFF8000FF :
       (ineq && nconf::pts[y][x].state == 2) ? 0x00FF00FF :
@@ -691,7 +695,7 @@ void draw_ncee() {
     curvepoint(h(x,y+1));
     curvepoint(h(x+1,y+1));
     curvepoint(h(x+1,y));
-    queuecurve(0, 
+    queuecurve(shiftless(Id), 0, 
       typecols[fmap[y][x] - '0'], PPR::LINE);
     }
 
@@ -727,7 +731,7 @@ void draw_ncee() {
       }
     }
   
-  auto& q = queuecurve(0, (show_mgrid && show_mapping) ? 0x404040FF : 0xFFFFFFFF, PPR::LINE);
+  auto& q = queuecurve(shiftless(Id), 0, (show_mgrid && show_mapping) ? 0x404040FF : 0xFFFFFFFF, PPR::LINE);
   q.tinf = &nctinf;
   q.flags |= POLY_TRIANGLES;
   q.offset_texture = 0;
@@ -736,7 +740,7 @@ void draw_ncee() {
 
   pair<int, int> mpt = {(mousex - xc - cd->xcenter - x0) / siz, (mousey - yc - cd->ycenter - y0) / siz};
 
-  queueline(h(0,0), h(0,-1), 0x1010101);
+  queueline1(h(0,0), h(0,-1), 0x1010101);
   
   const color_t gridcol = 0xFFFFFFFF;
   if(inHighQual) ;
@@ -748,14 +752,14 @@ void draw_ncee() {
       if(y < Y-2 && fmap[y][x] > '0' && fmap[y+1][x] > '0') {
         color_t col = (make_pair(x,y) == mpt || make_pair(x,y+1) == mpt) ? 0xFFFF00FF : gridcol;
         dynamicval<ld> lw(vid.linewidth, vid.linewidth * (col == 0xFFFF00FF ? 4 : 1));
-        queueline(hc(x, y), hc(x, y+1), col, 0, PPR::CIRCLE);
-        queueline(vmap[y][x], vmap[y+1][x], col, 0, PPR::CIRCLE);
+        queueline1(hc(x, y), hc(x, y+1), col, 0, PPR::CIRCLE);
+        queueline1(vmap[y][x], vmap[y+1][x], col, 0, PPR::CIRCLE);
         }
       if(x < X-2 && fmap[y][x] > '0' && fmap[y][x+1] > '0') {
         color_t col = (make_pair(x,y) == mpt || make_pair(x+1,y) == mpt) ? 0xFFFF00FF : gridcol;
         dynamicval<ld> lw(vid.linewidth, vid.linewidth * (col == 0xFFFF00FF ? 4 : 1));
-        queueline(hc(x, y), hc(x+1, y), col, 0, PPR::CIRCLE);
-        queueline(vmap[y][x], vmap[y][x+1], col, 0, PPR::CIRCLE);
+        queueline1(hc(x, y), hc(x+1, y), col, 0, PPR::CIRCLE);
+        queueline1(vmap[y][x], vmap[y][x+1], col, 0, PPR::CIRCLE);
         }
       }
     }
@@ -774,17 +778,17 @@ void draw_ncee() {
       else if(fmap[y][x] == '4' || fmap[y][x] == '5')
         col = 0xFFFF00FF;
       }
-    queueline(h(x,y), h(x,y+1), col);
-    queueline(h(x,y), h(x+1,y), col);
-    queueline(h(x+1,y), h(x+1,y+1), col);
-    queueline(h(x,y+1), h(x+1,y+1), col);
+    queueline1(h(x,y), h(x,y+1), col);
+    queueline1(h(x,y), h(x+1,y), col);
+    queueline1(h(x+1,y), h(x+1,y+1), col);
+    queueline1(h(x,y+1), h(x+1,y+1), col);
     vid.linewidth /= 3;
     }
   
-  for(int x=0; x<=X; x++) queueline(h(x,0), h(x,Y), 0x80808080);
-  for(int y=0; y<=Y; y++) queueline(h(0,y), h(X,y), 0x80808080);
+  for(int x=0; x<=X; x++) queueline1(h(x,0), h(x,Y), 0x80808080);
+  for(int y=0; y<=Y; y++) queueline1(h(0,y), h(X,y), 0x80808080);
   
-  queueline(h(0,0), h(0,-1), 0x1010101);
+  queueline1(h(0,0), h(0,-1), 0x1010101);
 
   quickqueue();
   glflush();

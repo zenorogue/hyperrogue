@@ -61,7 +61,7 @@ void curveline(hyperpoint a, hyperpoint b, int lev) {
   curvepoint(b);
   }
 
-bool magic_markers(cell *c, const transmatrix& V) {
+bool magic_markers(cell *c, const shiftmatrix& V) {
   if(vizid != (void*) &magic) return false;
   timerghost = false;
   if(c->landparam == back) {
@@ -73,15 +73,15 @@ bool magic_markers(cell *c, const transmatrix& V) {
     for(int i=0; i<S7; i++) {
       cell *c2 = c->move(i);
       if(c2->landparam != back) {
-        hyperpoint h1 = V * get_corner_position(c, i, 3/.9);
-        hyperpoint h2 = V * get_corner_position(c, i+1, 3/.9);
+        hyperpoint h1 = get_corner_position(c, i, 3/.9);
+        hyperpoint h2 = get_corner_position(c, i+1, 3/.9);
         curvepoint(h1);
         curveline(h1, h2, 3);
-        hyperpoint h3 = V * get_corner_position(c, i, 3/.7);
-        hyperpoint h4 = V * get_corner_position(c, i+1, 3/.7);
+        hyperpoint h3 = get_corner_position(c, i, 3/.7);
+        hyperpoint h4 = get_corner_position(c, i+1, 3/.7);
         curvepoint(h4);
         curveline(h4, h3, 3);
-        queuecurve(0xFF, (c2->landparam << 8) | 0xFF, PPR::LINE);
+        queuecurve(V, 0xFF, (c2->landparam << 8) | 0xFF, PPR::LINE);
         }
       }
     }
