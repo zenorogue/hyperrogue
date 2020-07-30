@@ -1886,6 +1886,11 @@ EX void moreBigStuff(cell *c) {
 
 EX void generate_mines() {
   vector<cell*> candidates;
+
+  if(bounded)
+    for(cell *c: currentmap->allcells())
+      setdist(c, 7, nullptr);
+  
   for(cell *c: currentmap->allcells())
     if(c->wall == waMineUnknown) 
       candidates.push_back(c);
