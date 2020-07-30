@@ -2,8 +2,11 @@
 // this is a plugin which generates branched tilings for newconformist 
 // https://github.com/zenorogue/newconformist (see the option '-cvl')
 
+#include "../hyper.h"
+
 namespace hr {
 #if CAP_SHOT
+
 struct location {
   transmatrix lView;
   cell *lco;
@@ -32,7 +35,7 @@ void cvl_marker() {
     int id = 0;
     for(auto& loc: l.second.locs) {
       if(gmatrix.count(loc.lco)) {
-        transmatrix T = gmatrix[loc.lco] * inverse(loc.lView);
+        shiftmatrix T = gmatrix[loc.lco] * inverse(loc.lView);
         queuepoly(T, cgi.shAsymmetric, 0xFF00FFFF);
         queuestr(T, 1.0, its(l.first)+"/"+its(id), 0xFFFFFF);
         }
