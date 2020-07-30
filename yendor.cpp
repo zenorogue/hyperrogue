@@ -1324,8 +1324,7 @@ EX namespace peace {
       variation = eVariation::bitruncated;
       in_dual = false;
       }
-    };
-    
+    }    
   
   EX void showMenu() {
     string title = XLAT(otherpuzzles ? (explore_other ? "exploration" : "puzzles") : "memory game");
