@@ -770,7 +770,7 @@ bool rogueviz_hud() {
     transmatrix V = atscreenpos(x, y, current_display->radius/4);
     
     poly_outline = OUTLINE_NONE;
-    queuedisk(V, vd.cp, true, NULL, i);
+    queuedisk(shiftless(V), vd.cp, true, NULL, i);
     poly_outline = OUTLINE_DEFAULT;
     queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, vd.name, legend_color, 0, 16);
     }
