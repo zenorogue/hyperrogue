@@ -1270,10 +1270,12 @@ void hrmap::draw_at(cell *at, const shiftmatrix& where) {
     drawcell(c, V);
     if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000) continue;
 
+    #if MAXMDIM >= 4
     if(reg3::ultra_mirror_in())
       for(auto& T: cgi.ultra_mirrors) 
         enq(c, optimized_shift(V * T));
-
+    #endif
+    
     for(int i=0; i<c->type; i++) {
       // note: need do cmove before c.spin
       cell *c1 = c->cmove(i);      

@@ -577,13 +577,13 @@ void dqi_poly::gldraw() {
 
     if((flags & POLY_CCONVEX) && !(flags & POLY_VCONVEX)) {
       vector<glvertex> v2(cnt+1);
-      for(int i=0; i<cnt+1; i++) v2[i] = glhr::pointtogl( V * glhr::gltopoint( v[offset+i-1] ) );
+      for(int i=0; i<cnt+1; i++) v2[i] = glhr::pointtogl( V.T * glhr::gltopoint( v[offset+i-1] ) );
       if(color) for(int i=0; i<cnt; i++) triangle_vertices.push_back(v2[0]), triangle_vertices.push_back(v2[i]), triangle_vertices.push_back(v2[i+1]);
       for(int i=1; i<cnt; i++) line_vertices.push_back(v2[i]), line_vertices.push_back(v2[i+1]);
       }
     else {
       vector<glvertex> v2(cnt);
-      for(int i=0; i<cnt; i++) v2[i] = glhr::pointtogl( V * glhr::gltopoint( v[offset+i] ) );
+      for(int i=0; i<cnt; i++) v2[i] = glhr::pointtogl( V.T * glhr::gltopoint( v[offset+i] ) );
       if(color) for(int i=2; i<cnt-1; i++) triangle_vertices.push_back(v2[0]), triangle_vertices.push_back(v2[i-1]), triangle_vertices.push_back(v2[i]);
       for(int i=1; i<cnt; i++) line_vertices.push_back(v2[i-1]), line_vertices.push_back(v2[i]);
       }

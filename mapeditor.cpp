@@ -156,6 +156,7 @@ EX namespace mapeditor {
   EX void clear_dtshapes() { dtshapes.clear(); }
   
   EX void draw_dtshapes() {
+#if CAP_EDIT
     for(auto& shp: dtshapes) {
       if(shp == nullptr) continue;
       auto& sh = *shp;
@@ -179,6 +180,7 @@ EX namespace mapeditor {
         queueline(T * ypush0(-.1), T * ypush0(.1), dtcolor);
         }
       }
+#endif
     }
   
   /** dtshapes takes ownership of sh */

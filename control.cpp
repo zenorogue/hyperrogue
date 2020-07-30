@@ -1299,9 +1299,9 @@ EX void check_orientation() {
     }
   transmatrix next_orientation = MirrorX * getOrientation();
   transmatrix T = inverse(next_orientation) * last_orientation;
-  if(mode == 1) unrotate(View), unrotate(cwtV);
+  if(mode == 1) unrotate(View), unrotate(cwtV.T);
   relative_matrix = change_geometry(T);
-  if(mode == 1) rerotate(View), rerotate(cwtV);
+  if(mode == 1) rerotate(View), rerotate(cwtV.T);
   if(mode == 2) View = relative_matrix * View, last_orientation = next_orientation;
 #endif
   }
