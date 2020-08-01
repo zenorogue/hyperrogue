@@ -2321,7 +2321,7 @@ void celldrawer::draw_monster_full() {
       asciicol = ((asciicol & 0xFEFEFE) >> 1) + 0x101010;
     }
   
-  if(c->cpdist == 0 && mapeditor::drawplayer) { 
+  if(c->cpdist == 0 && mapeditor::drawplayer && !shmup::on) { 
     asciichar = '@'; 
     if(!mmitem) asciicol = moncol = cheater ? 0xFF3030 : 0xD0D0D0; 
     if(doHighlight())
