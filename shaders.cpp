@@ -67,6 +67,9 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   varying += "varying mediump vec4 vColor;\n";
 
   fmain += "gl_FragColor = vColor;\n";
+  
+  bool have_texture = false;
+  
   if(shader_flags & GF_TEXTURE_SHADED) {
     vsh += "attribute mediump vec3 aTexture;\n";
     varying += "varying mediump vec3 vTexCoord;\n";
@@ -80,7 +83,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     varying += "varying mediump vec2 vTexCoord;\n";
     fsh += "uniform mediump sampler2D tTexture;\n";
     vmain += "vTexCoord = aTexture;\n",
-    fmain += "gl_FragColor *= texture2D(tTexture, vTexCoord);\n";
+    have_texture = true;
     }
   if(shader_flags & GF_LEVELS) {
     fsh += "uniform mediump float uLevelLines;\n";
@@ -282,7 +285,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
         "    pt.xy += vec2(.5, .5);\n"
         "    return texture2D(tAirMap, pt.xy);\n"
         "    }\n";
-
+      
       vmain += 
         "vec4 ending = uRadarTransform * t;\n"
         "float len = acosh(ending.w);\n"
@@ -300,6 +303,18 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
         "if(fogs < 0.) fogs = 0.;\n"
         "fog.xyz /= fog.w;\n"
         "vColor.xyz = vColor.xyz * fogs + fog.xyz * (1.0-fogs);\n";
+      
+      if(have_texture) {
+        varying += "varying mediump vec4 fog_color;\n";
+        vmain += "fog_color = fog;\n";
+        fmain += 
+          "if(vTexCoord.x == 0.) {\n"
+            "vec4 t = texture2D(tTexture, vTexCoord);\n"
+            "gl_FragColor = t * gl_FragColor + (1.-t) * fog_color;\n"
+            "}\n"
+          "else gl_FragColor *= texture2D(tTexture, vTexCoord);\n";
+        have_texture = false;
+        }
       }
     else if(distfun != "") {
       vmain += "mediump float fogs = (uFogBase - " + distfun + " / uFog);\n";
@@ -313,6 +328,9 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     if(treset) vmain += "t[3] = 1.0;\n";
     vmain += "gl_Position = uP * t;\n";
     }
+
+  if(have_texture)
+    fmain += "gl_FragColor *= texture2D(tTexture, vTexCoord);\n";
 
   vsh += 
     "uniform mediump mat4 uMV;\n"
