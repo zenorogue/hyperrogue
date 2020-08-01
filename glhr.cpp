@@ -273,8 +273,8 @@ struct GLprogram {
   GLuint _program;
   GLuint vertShader, fragShader;
 
-  GLint uFog, uFogColor, uColor, tTexture, tInvExpTable, uMV, uProjection, uAlpha, uFogBase, uPP;
-  GLint uPRECX, uPRECY, uPRECZ, uIndexSL, uIterations, uLevelLines, uSV;
+  GLint uFog, uFogColor, uColor, tTexture, tInvExpTable, tAirMap, uMV, uProjection, uAlpha, uFogBase, uPP;
+  GLint uPRECX, uPRECY, uPRECZ, uIndexSL, uIterations, uLevelLines, uSV, uRadarTransform;
   
   flagtype shader_flags;
   
@@ -392,6 +392,7 @@ GLprogram::GLprogram(string vsh, string fsh) {
   uColor = glGetUniformLocation(_program, "uColor");
   tTexture = glGetUniformLocation(_program, "tTexture");
   tInvExpTable = glGetUniformLocation(_program, "tInvExpTable");
+  tAirMap = glGetUniformLocation(_program, "tAirMap");
 
   uPRECX = glGetUniformLocation(_program, "PRECX");
   uPRECY = glGetUniformLocation(_program, "PRECY");
@@ -400,6 +401,7 @@ GLprogram::GLprogram(string vsh, string fsh) {
   uSV = glGetUniformLocation(_program, "uSV");
   uIterations = glGetUniformLocation(_program, "uIterations");  
   uLevelLines = glGetUniformLocation(_program, "uLevelLines");
+  uRadarTransform = glGetUniformLocation(_program, "uRadarTransform");
   }
 
 GLprogram::~GLprogram() {

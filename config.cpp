@@ -582,6 +582,8 @@ EX void initConfig() {
       sightranges[i] = 10;
     else if(ginf[i].cclass == gcSL2)
       sightranges[i] = 4.5;
+    else if(ginf[i].cclass == gcHyperbolic && ginf[i].g.gameplay_dimension == 2)
+      sightranges[i] = 4.5;
     else
       sightranges[i] = 5;
     sightranges[gArchimedean] = 10;

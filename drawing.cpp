@@ -1999,6 +1999,8 @@ void dqi_line::draw_back() {
 
 EX void sort_drawqueue() {
 
+  if(WDIM == 2 && GDIM == 3 && hyperbolic) make_air();
+
   DEBBI(DF_GRAPH, ("sort_drawqueue"));
   
   for(int a=0; a<PMAX; a++) qp[a] = 0;

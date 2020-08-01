@@ -44,6 +44,7 @@ constexpr int aTexture = 8;
 
 /* texture bindings */
 constexpr int INVERSE_EXP_BINDING = 2;
+constexpr int AIR_BINDING = 4;
 #endif
 
 EX map<string, shared_ptr<glhr::GLprogram>> compiled_programs;
@@ -268,7 +269,39 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   if(!skip_t) {
     vmain += "mediump vec4 t = uMV * aPosition;\n";
     vmain += coordinator;
-    if(distfun != "") {
+    if(GDIM == 3 && WDIM == 2) {
+      vsh += 
+        "uniform mediump mat4 uRadarTransform;\n"
+        "uniform mediump sampler2D tAirMap;\n"
+        "uniform mediump float uFog;\n"
+        "uniform mediump float uFogBase;\n"
+        "vec4 color_at(vec4 ending, float dist) {"
+        "    vec3 pt = ending.xyz * sinh(dist);\n"
+        "    pt.xy /= sqrt(pt.z*pt.z+1.);\n"
+        "    pt.xy /= 2. * (1. + sqrt(1.+pt.x*pt.x+pt.y*pt.y));\n"
+        "    pt.xy += vec2(.5, .5);\n"
+        "    return texture2D(tAirMap, pt.xy);\n"
+        "    }\n";
+
+      vmain += 
+        "vec4 ending = uRadarTransform * t;\n"
+        "float len = acosh(ending.w);\n"
+        "float eulen = length(ending.xyz);\n"
+        "ending.xyz /= eulen;\n"
+        "ending.y *= -1.;\n"
+        "vec4 fog = vec4(1e-3,0,1e-3,1e-3);\n"
+        "vec4 last = vec4(0,0,0,0);\n"
+        "for(int i=0; i<50; i++) {\n"
+        "  vec4 px = color_at(ending, ((float(i) + .5) / 50.) * min(len, uFog));\n"
+        "  if(px.r < .9 || px.b < .9 || px.g > .1) last = px;\n"
+        "  fog += last;\n"
+        "  }\n"
+        "mediump float fogs = (uFogBase - len / uFog);\n"
+        "if(fogs < 0.) fogs = 0.;\n"
+        "fog.xyz /= fog.w;\n"
+        "vColor.xyz = vColor.xyz * fogs + fog.xyz * (1.0-fogs);\n";
+      }
+    else if(distfun != "") {
       vmain += "mediump float fogs = (uFogBase - " + distfun + " / uFog);\n";
       vmain += "vColor.xyz = vColor.xyz * fogs + uFogColor.xyz * (1.0-fogs);\n";
       vsh += 
@@ -356,6 +389,16 @@ void display_data::set_projection(int ed, ld shift) {
     glhr::set_solv_prec(tab.PRECX, tab.PRECY, tab.PRECZ);
     }
   #endif
+  
+  if(selected->tAirMap != -1) {
+    glActiveTexture(GL_TEXTURE0 + AIR_BINDING);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D, airbuf->renderedTexture);
+    glUniform1i(selected->tAirMap, AIR_BINDING);
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glUniformMatrix4fv(selected->uRadarTransform, 1, 0, glhr::tmtogl_transpose3(radar_transform).as_array());
+    }
   
   if(selected->uIterations != -1) {
     glhr::set_index_sl(0);
