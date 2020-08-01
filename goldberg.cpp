@@ -698,15 +698,13 @@ EX namespace gp {
     config = human_representation(xy);
     auto g = screens;
     if(xy.first == 0 && xy.second == 0) xy.first = 1;
+    stop_game();
+    param = xy;
     if(xy.first == 1 && xy.second == 0) {
-      stop_game(); set_variation(eVariation::pure);
+      set_variation(eVariation::pure);
       }
     else if(xy.first == 1 && xy.second == 1 && S3 == 3) {
-      stop_game(); set_variation(eVariation::bitruncated);
-      }
-    else {
-      param = xy;
-      stop_game(); set_variation(eVariation::goldberg);
+      set_variation(eVariation::bitruncated);
       }
     start_game();
     screens = g;
