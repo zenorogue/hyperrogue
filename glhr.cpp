@@ -55,7 +55,7 @@ EX }
 EX void glError(const char* GLcall, const char* file, const int line) {
   GLenum errCode = glGetError();
   if(errCode!=GL_NO_ERROR) {
-    println(hlog, format("OPENGL ERROR #%i: in file %s on line %i :: %s\n",errCode,file, line, GLcall));
+    println(hlog, format("OPENGL ERROR #%i: in file %s on line %i :: %s",errCode,file, line, GLcall));
     }
   }
 
