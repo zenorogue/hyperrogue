@@ -208,6 +208,14 @@ void celldrawer::draw_ceiling() {
             }
           break;
 
+        case laDesert:
+          col = 0x2020C0;
+          skycol = 0x8080FF;
+          if(emeraldval(c) / 4 == 11) {
+            queuepolyat(V * zpush(cgi.SKY+1), cgi.shSun, 0xFFFF00FF, PPR::SKY);
+            }
+          break;
+
         case laFrog:
           col = 0x4040FF;
           skycol = 0x8080FF;
@@ -220,10 +228,10 @@ void celldrawer::draw_ceiling() {
           skycol = col = c->landparam ? 0xFF2010 : 0x000020;
           break;
         
-        case laDesert:
+        /* case laDesert:
           col = 0x4040FF;
           skycol = (0xCDA98F & 0xFEFEFE) / 2;
-          break;
+          break; */
         
         case laAlchemist:
           skycol = col = fcol;
