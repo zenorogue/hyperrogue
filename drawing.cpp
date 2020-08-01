@@ -724,7 +724,7 @@ EX int perfect_linewidth = 1;
 
 EX ld linewidthat(const shiftpoint& h) {
   if(!(vid.antialias & AA_LINEWIDTH)) return 1;
-  else if(hyperbolic && pmodel == mdDisk && pconf.alpha == 1 && !ISWEB) {
+  else if(hyperbolic && pmodel == mdDisk && pconf.alpha == 1 && !ISWEB && !flat_on) {
     double dz = h[LDIM];
     if(dz < 1) return 1;
     else {
