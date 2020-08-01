@@ -2,6 +2,8 @@
 
 namespace hr {
 
+EX bool context_fog = true;
+
 EX ld camera_level;
 #if MAXMDIM >= 4 && CAP_GL
 

@@ -269,7 +269,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   if(!skip_t) {
     vmain += "mediump vec4 t = uMV * aPosition;\n";
     vmain += coordinator;
-    if(GDIM == 3 && WDIM == 2) {
+    if(GDIM == 3 && WDIM == 2 && hyperbolic && context_fog) {
       vsh += 
         "uniform mediump mat4 uRadarTransform;\n"
         "uniform mediump sampler2D tAirMap;\n"
@@ -362,6 +362,7 @@ void display_data::set_projection(int ed, ld shift) {
   if(sol && solv_all) id |= 1;
   if(in_h2xe()) id |= 1;
   if(in_s2xe()) id |= 2;
+  if(WDIM == 2 && GDIM == 3 && hyperbolic && context_fog) id |= 1;
   shared_ptr<glhr::GLprogram> selected;
 
   if(matched_programs.count(id)) selected = matched_programs[id];

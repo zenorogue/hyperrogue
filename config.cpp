@@ -2083,6 +2083,9 @@ EX void show_color_dialog() {
 
   dialog::addColorItem(XLAT("background"), backcolor << 8, 'b');
   dialog::add_action([] () { dialog::openColorDialog(backcolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
+  
+  if(WDIM == 2 && GDIM == 3 && hyperbolic)
+    dialog::addBoolItem_action(XLAT("cool fog effect"), context_fog, 'B');
 
   dialog::addColorItem(XLAT("foreground"), forecolor << 8, 'f');
   dialog::add_action([] () { dialog::openColorDialog(forecolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
