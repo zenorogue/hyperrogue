@@ -802,8 +802,14 @@ void celldrawer::draw_boat() {
     }
   if(wmspatial && GDIM == 2)
     queuepolyat(mscale(Vboat, (cgi.LAKE+1)/2), cgi.shBoatOuter, outcol, PPR::BOATLEV2);
-  queuepoly(Vboat, cgi.shBoatOuter, outcol);
-  queuepoly(Vboat, cgi.shBoatInner, incol);
+  if(GDIM == 3) {
+    queuepoly(mscale(Vboat, -0.004), cgi.shBoatOuter, outcol);
+    queuepoly(mscale(Vboat, -0.008), cgi.shBoatInner, incol);
+    }
+  else {
+    queuepoly(Vboat, cgi.shBoatOuter, outcol);
+    queuepoly(Vboat, cgi.shBoatInner, incol);
+    }
   }
 
 void celldrawer::draw_grid() {
