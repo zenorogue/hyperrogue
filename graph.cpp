@@ -1283,8 +1283,9 @@ void drawMimic(eMonster m, cell *where, const shiftmatrix& V, color_t col, doubl
 EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t col, double footphase, color_t asciicol) {
 
 #if MAXMDIM >= 4
-  if(GDIM == 3 && m != moPlayer && asciicol != NOCOLOR)
+  if(GDIM == 3 && asciicol != NOCOLOR) {
     addradar(V1, minf[m].glyph, asciicol, isFriendly(m) ? 0x00FF00FF : 0xFF0000FF);
+    }
 #endif
 
 #if CAP_SHAPES
