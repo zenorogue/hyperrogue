@@ -124,7 +124,7 @@ void create_janko() {
   if(gJanko1 != eGeometry(-1)) return;
   ginf.push_back(ginf[gNormal]);
   gJanko1 = eGeometry(isize(ginf) - 1);
-  variation = eVariation::pure;
+  // variation = eVariation::pure;
   auto& gi = ginf.back();
   gi.flags = qANYQ | qBOUNDED | qEXPERIMENTAL;
   gi.quotient_name = "Janko";

@@ -440,7 +440,6 @@ void create_grigorchuk_geometry() {
   if(gGrigorchuk != eGeometry(-1)) return;
   ginf.push_back(ginf[gNormal]);
   gGrigorchuk = eGeometry(isize(ginf) - 1);
-  variation = eVariation::pure;
   auto& gi = ginf[gGrigorchuk];
   gi.sides = 3;
   gi.vertex = 8;
