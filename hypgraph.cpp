@@ -1593,11 +1593,9 @@ transmatrix screenpos(ld x, ld y) {
   In 2D, this does not work (as HyperRogue reduces matrices to 3x3) so we use the native disk projection
 */
 
-int flat_on;
+EX int flat_on;
 eGeometry backup_geometry;
-projection_configuration backup_pconf;
-bool backup_always3;
-ld backup_camera, backup_depth;
+videopar backup_vid;
 
 /** \brief enable the 'flat' model for drawing HUD. See hr::flat_model_enabler */
 EX void enable_flat_model(int val) {
@@ -1606,17 +1604,19 @@ EX void enable_flat_model(int val) {
     glClear(GL_DEPTH_BUFFER_BIT);
     #endif
     backup_geometry = geometry;
-    backup_pconf = pconf;
+    backup_vid = vid;
     geometry = gNormal;
     pmodel = mdDisk;
     pconf.alpha = 1;
     pconf.scale = 1;
     pconf.camera_angle = 0;
     pconf.stretch = 1;
-    backup_always3 = vid.always3;
-    backup_camera = vid.camera;
-    backup_depth = vid.depth;
+    
     vid.always3 = false;
+    vid.wall_height = .3;
+    vid.human_wall_ratio = .7;
+    vid.camera = 1;
+    vid.depth = 1;
     geom3::apply_always3();
     check_cgi();
     cgi.require_shapes();
@@ -1624,11 +1624,8 @@ EX void enable_flat_model(int val) {
     }
   if(flat_on >= 1 && flat_on + val < 1) {
     geometry = backup_geometry;
-    pconf = backup_pconf;
-    vid.always3 = backup_always3;
+    vid = backup_vid;
     geom3::apply_always3();
-    vid.depth = backup_depth;
-    vid.camera = backup_camera;
     calcparam();
     check_cgi();
     }
