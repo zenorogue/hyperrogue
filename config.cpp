@@ -131,7 +131,8 @@ EX int bounded_mine_quantity, bounded_mine_max;
 
 EX const char *conffile = "hyperrogue.ini";
 
-EX array<ld, gGUARD> sightranges;
+/* extra space if more geometries are added */
+EX array<ld, gGUARD+64> sightranges;
 
 EX videopar vid;
 
