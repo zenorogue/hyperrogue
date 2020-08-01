@@ -424,6 +424,8 @@ EX namespace dialog {
       I.position = mid;
       if(I.type == diTitle || I.type == diInfo) {
         bool xthis = (mousey >= top && mousey < tothei && I.key);
+        if(cmode & sm::DIALOG_STRICT_X)
+          xthis = xthis && (mousex >= dcenter - dialogwidth/2 && mousex <= dcenter + dialogwidth/2);
         displayfr(dcenter, mid, 2, dfsize * I.scale/100, I.body, I.color, 8);
         if(xthis) getcstat = I.key;
         }
