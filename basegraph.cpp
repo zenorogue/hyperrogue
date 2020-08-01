@@ -677,7 +677,7 @@ EX bool displaystr(int x, int y, int shift, int size, const char *str, color_t c
 
   if(strlen(str) == 0) return false;
 
-  if(size < 4 || size > 255) {
+  if(size < 4 || size > 2000) {
     return false;
     }
   
