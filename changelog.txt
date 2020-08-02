@@ -4076,3 +4076,14 @@ Geometries:
 - Orb of Air now kills Red Raiders if separating them, instead of crashing
 - fixed bad HUD in 3D
 - redone peaceful mode to puzzle/exploration mode
+
+2020-08-02 13:24 Update 11.3v:
+- cool fog effects in 2.5D
+- '@' no longer drawn (incorrectly) in 2.5D radar
+- fixed stranded boats in 3D
+- fixed a bug with Orb of Recall
+- fixed Minesweeper on huge bounded maps
+- improved mission screen in Minesweeper (it displays automatically on win now)
+- removed irrelevant hints and progress messages on the mission screen when you are not playing a full game
+- Safety saves / PTM scores / Yendor scores / high scores should now work correctly in all geometries (the system is not fully backward compatible, so some old scores might disappear)
+- a crash when setting new variations should be fixed
