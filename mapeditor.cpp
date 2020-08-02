@@ -461,6 +461,7 @@ EX namespace mapstream {
     #if CAP_ARCM
     if(geometry == gArchimedean) f.write(arcm::current.symbol);
     #endif
+    if(geometry == gArbitrary) f.write(arb::current.filename);
     if(geometry == gNil) {
       f.write(S7);
       f.write(nilv::nilperiod);
@@ -543,6 +544,12 @@ EX namespace mapstream {
         }
       }
     #endif
+    if(geometry == gArbitrary) {
+      string s;
+      f.read(s);
+      arb::run(s);
+      stop_game();
+      }
     #if CAP_ARCM
     if(geometry == gArchimedean) {
       string& symbol = arcm::current.symbol;

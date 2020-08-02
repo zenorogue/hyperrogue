@@ -1209,6 +1209,14 @@ EX void loadsave() {
     for(int i=0; i<boxid; i++) save.box[i] = sc.box[i];
     for(int i=boxid; i<MAXBOX; i++) save.box[i] = 0;
 //  for(int i=160; i<200; i++) printf("%d: %d ", i, save.box[i]);
+
+    if(1) {
+      shstream ss;
+      ss.s = meaning[sc.box[MODECODE_BOX]];
+      ss.read(ss.vernum);
+      mapstream::load_geometry(ss);
+      }
+
     loadBox();
 //  printf("boxid = %d\n", boxid);
     if(items[itHolyGrail]) {
@@ -1226,11 +1234,6 @@ EX void loadsave() {
     randomPatternsMode = false;
     yendor::on = false;
     tour::on = false;
-
-    shstream ss;
-    ss.s = meaning[sc.box[MODECODE_BOX]];
-    ss.read(ss.vernum);
-    mapstream::load_geometry(ss);
     }
   }
 #endif
