@@ -366,9 +366,13 @@ EX namespace mapeditor {
       }
     }
 #endif
-  }
+EX }
 
-namespace mapstream {
+#if HDR
+struct hstream;
+#endif
+
+EX namespace mapstream {
 #if CAP_EDIT
 
   std::map<cell*, int> cellids;
@@ -427,7 +431,7 @@ namespace mapstream {
       return dir;
     }
   
-  void save_geometry(fhstream& f) {
+  EX void save_geometry(hstream& f) {
     f.write(geometry);
     char nbtype = char(variation);
     f.write(nbtype);
@@ -476,6 +480,10 @@ namespace mapstream {
     if(hybri) {
       hybrid::in_underlying_geometry([&] { save_geometry(f); });
       }
+    if(fake::in()) {
+      f.write(fake::around);
+      fake::in_underlying_geometry([&] { save_geometry(f); });
+      }
     if(bt::in()) 
       f.write(vid.binary_width);
     if(euc::in()) {
@@ -485,7 +493,8 @@ namespace mapstream {
     f.write(mine_adjacency_rule);
     }
   
-  void load_geometry(fhstream& f) {
+  EX void load_geometry(hstream& f) {
+    auto vernum = f.get_vernum();
     f.read(geometry);
     char nbtype;
     f.read(nbtype);
@@ -497,7 +506,7 @@ namespace mapstream {
       }
     #endif
     #if CAP_CRYSTAL
-    if(cryst && f.vernum >= 10504) {
+    if(cryst && vernum >= 10504) {
       int sides;
       f.read(sides);
       #if CAP_CRYSTAL
@@ -523,7 +532,7 @@ namespace mapstream {
         auto& ge = fgeomextras[current_extra];
         auto& id = ge.current_prime_id;
         f.read(id);
-        if(f.vernum < 0xA80C) switch(ge.base) {
+        if(vernum < 0xA80C) switch(ge.base) {
           case gNormal: id++; break;
           case g45: id++; break;
           case g46: id+=2; break;
@@ -544,36 +553,43 @@ namespace mapstream {
         }
       }
     #endif
-    if(geometry == gNil && f.vernum >= 0xA80C) {
+    if(geometry == gNil && vernum >= 0xA80C) {
       f.read(S7);
       f.read(nilv::nilperiod);
       nilv::set_flags();
       }
-    if(geometry == gArnoldCat && f.vernum >= 0xA80C) {
+    if(geometry == gArnoldCat && vernum >= 0xA80C) {
       f.read(asonov::period_xy);
       f.read(asonov::period_z);
       asonov::set_flags();
       }
-    if(geometry == gProduct && f.vernum >= 0xA80C) {
+    if(geometry == gProduct && vernum >= 0xA80C) {
       f.read(hybrid::csteps);
-      if(f.vernum >= 0xA80D) f.read(product::cspin);
-      if(f.vernum >= 0xA833) f.read(product::cmirror);
+      if(vernum >= 0xA80D) f.read(product::cspin);
+      if(vernum >= 0xA833) f.read(product::cmirror);
       }
-    if(geometry == gRotSpace && f.vernum >= 0xA833) {
+    if(geometry == gRotSpace && vernum >= 0xA833) {
       f.read(hybrid::csteps);
       }
-    if(hybri && f.vernum >= 0xA80C) {
+    if(hybri && vernum >= 0xA80C) {
       auto g = geometry;
       load_geometry(f);
       set_geometry(g);
       }
-    if(bt::in() && f.vernum >= 0xA80C) 
+    if(fake::in()) {
+      ld ar;
+      f.read(ar);
+      fake::around = ar;
+      load_geometry(f);
+      fake::change_around();
+      }
+    if(bt::in() && vernum >= 0xA80C) 
       f.read(vid.binary_width);
-    if(euc::in() && f.vernum >= 0xA80D) {
+    if(euc::in() && vernum >= 0xA80D) {
       f.read(euc::eu_input.user_axes);
       f.read(euc::eu_input.twisted);
       }
-    if(f.vernum >= 0xA810)
+    if(vernum >= 0xA810)
       f.read(mine_adjacency_rule);
     }
   
@@ -917,9 +933,9 @@ namespace mapstream {
     }
   
 #endif
-  }
+EX }
 
-namespace mapeditor {
+EX namespace mapeditor {
 
   EX bool drawplayer = true;
 

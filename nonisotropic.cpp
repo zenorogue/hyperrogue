@@ -1043,7 +1043,6 @@ EX namespace hybrid {
     auto keep = ginf[g].menu_displayed_name;
     ginf[g] = ginf[underlying];
     ginf[g].menu_displayed_name = keep;
-    ginf[g].xcode = no_code;
     if(g == gRotSpace) {
       ginf[g].g = sph ? giSphere3 : giSL2;
       ginf[g].tiling_name = "Iso(" + ginf[g].tiling_name + ")";

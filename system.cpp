@@ -411,7 +411,7 @@ EX namespace scores {
 /** \brief the amount of boxes reserved for each hr::score item */
 #define MAXBOX 500
 /** \brief currently used boxes in hr::score */
-#define POSSCORE 387
+#define POSSCORE 388
 /** \brief a struct to keep local score from an earlier game */
 struct score {
   /** \brief version used */
@@ -491,7 +491,7 @@ void applyBoxI(eItem it, bool f = false) {
   fakebox[boxid] = f;
   monsbox[boxid] = false;
   if(loadingHi) { 
-    updateHi(it, save.box[boxid++]); 
+    updateHi_for_code(it, save.box[boxid++], saved_modecode);
     }
   else applyBox(items[it]);
   }
@@ -530,6 +530,8 @@ void applyBoxM(eMonster m, bool f = false) {
   monsbox[boxid] = true;
   applyBox(kills[m]);
   }
+
+EX modecode_t saved_modecode;
 
 /** \brief Call applyBox for all the required values. This will save the values if hr::scores::saving==true, load if hr::scores::loading==true, load into highscores if hr::scores::loadingHi==true */
 EX void applyBoxes() {
@@ -879,6 +881,8 @@ EX void applyBoxes() {
   applyBoxM(moRusalka);
   list_invorb();
 
+  applyBoxNum(saved_modecode, "modecode");
+
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   if(isize(invorb)) { println(hlog, "ERROR: Orbs not taken into account"); exit(1); }
   }
@@ -894,11 +898,13 @@ void loadBox() {
   boxid = 0; loading = true; applyBoxes(); loading = false;
   }
 
-/** \brief load the current game values from save into the highscore tables */
-void loadBoxHigh() {
+const int MODECODE_BOX = 387;
 
+modecode_t fill_modecode() {
   dynamicval<int> sp1(multi::players, save.box[197]);
   dynamicval<eGeometry> sp2(geometry, (eGeometry) save.box[116]);
+  if(among(geometry, gArchimedean, gProduct, gRotSpace, gArbitrary))
+    return 6; /* these would not be saved nor loaded correctly */
   dynamicval<bool> sp3(shmup::on, save.box[119]);
   dynamicval<int> sp4(chaosmode, save.box[196]);
   dynamicval<eVariation> sp5(variation, (eVariation) save.box[186]);
@@ -911,14 +917,22 @@ void loadBoxHigh() {
   if(save.box[341]) variation = eVariation::goldberg;
   if(save.box[344]) variation = eVariation::irregular;
 
-  if(multi::players < 1 || multi::players > MAXPLAYER)
+  if(multi::players < 0 || multi::players > MAXPLAYER) 
+    return 6;
+
+  if(multi::players == 0)
     multi::players = 1;
 
-  if(shmup::on && multi::players == 1) ;
-  else {
-    // have boxid
-    boxid = 0; loadingHi = true; applyBoxes(); loadingHi = false;
-    }
+  if(shmup::on && multi::players == 1 && boxid <= 258)
+    return 6; /* not sure why */
+  
+  return modecode(2);
+  }
+
+/** \brief load the current game values from save into the highscore tables */
+void loadBoxHigh() {
+  saved_modecode = save.box[MODECODE_BOX];
+  boxid = 0; loadingHi = true; applyBoxes(); loadingHi = false;
   }
 
 EX }
@@ -964,20 +978,18 @@ EX void saveStats(bool emergency IS(false)) {
   if(tour::on) return;
   #endif
   if(randomPatternsMode) return;
-  if(dual::state) return;
-  if(arcm::in()) return;
-  if(arb::in()) return;
-  if(hybri) return;
   if(daily::on) return;
   if(peace::on) return;
   if(dpgen::in) return;
   if(experimental) return;
-  if(ginf[geometry].xcode == no_code) return;
-  if(INVERSE) return;
   if(!gold()) return;
   
   remove_emergency_save();
+  
+  auto& xcode = scores::saved_modecode;
 
+  xcode = modecode();
+  
   FILE *f = fopen(scorefile, "at");
   
   if(!f) {
@@ -999,15 +1011,13 @@ EX void saveStats(bool emergency IS(false)) {
   if((tactic::on || yendor::on) && !items[itOrbSafety] && !cheater) {
     int t = (int) (timer - timerstart);
 
-    modecode_t xcode = modecode();
-
     if(tactic::on) {
       int score = items[treasureType(specialland)];
       
       if(score) {
         int c = 
           anticheat::certify(dnameof(specialland), turncount, t, (int) timerstart,
-            int(xcode)*999 + tactic::id + 256 * score + (xcode>>32)*7);
+            unsigned(xcode)*999 + tactic::id + 256 * score);
         fprintf(f, "TACTICS %s %d %d %d %d %d %d %d %d date: %s\n", VER,
           tactic::id, specialland, score, turncount, t, int(timerstart), 
           c, int(xcode), buf);
@@ -1020,7 +1030,7 @@ EX void saveStats(bool emergency IS(false)) {
       fprintf(f, "YENDOR %s %d %d %d %d %d %d %d %d date: %s\n", VER,
         yendor::lastchallenge, items[itOrbYendor], yendor::won, turncount, t, int(timerstart), 
         anticheat::certify(yendor::won ? "WON" : "LOST", turncount, t, (int) timerstart,
-          int(xcode)*999 + yendor::lastchallenge + 256 * items[itOrbYendor] + (xcode>>32)*7),
+          unsigned(xcode)*999 + yendor::lastchallenge + 256 * items[itOrbYendor]),
         int(xcode),
         buf);
 
@@ -1098,8 +1108,13 @@ EX void loadsave() {
   bool tamper = false;
   int coh = counthints();
   while(!feof(f)) {
-    char buf[120];
-    if(fgets(buf, 120, f) == NULL) break;
+    char buf[12000];
+    if(fgets(buf, 12000, f) == NULL) break;
+    if(buf[0] == 'M' && buf[1] == 'O') {
+      string s = buf;
+      while(s != "" && s.back() < 32) s.pop_back();
+      load_modecode_line(s);
+      }
     if(buf[0] == 'H' && buf[1] == 'y') {
       if(fscanf(f, "%s", buf) <= 0) break;
       sc.ver = buf;
@@ -1115,6 +1130,8 @@ EX void loadsave() {
           using namespace scores;
           for(int i=0; i<boxid; i++) save.box[i] = sc.box[i];
           for(int i=boxid; i<MAXBOX; i++) save.box[i] = 0, sc.box[i] = 0;
+          
+          if(boxid <= MODECODE_BOX) save.box[MODECODE_BOX] = sc.box[MODECODE_BOX] = fill_modecode();
 
           if(save.box[258] >= 0 && save.box[258] < coh) {
              hints[save.box[258]].last = save.box[1];
@@ -1209,6 +1226,11 @@ EX void loadsave() {
     randomPatternsMode = false;
     yendor::on = false;
     tour::on = false;
+
+    shstream ss;
+    ss.s = meaning[sc.box[MODECODE_BOX]];
+    ss.read(ss.vernum);
+    mapstream::load_geometry(ss);
     }
   }
 #endif

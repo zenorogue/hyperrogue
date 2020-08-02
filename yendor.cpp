@@ -16,7 +16,8 @@ EX int hiitemsMax(eItem it) {
   return mx;
   }
 
-EX modecode_t modecode();
+/** 1 - just return UNKNOWN if id not assigned; 2 - assign without writing to file; 3 - assign with writing to file */
+EX modecode_t modecode(int mode IS(3));
 
 typedef vector<pair<int, string> > subscoreboard;
 
@@ -788,7 +789,6 @@ EX namespace yendor {
     if(yendor::on) {
       changes.value_set(yendor::won, true);
       if(!cheater) {
-        dynamicval<int> c(chaosmode, 0);
         yendor::bestscore[modecode()][yendor::challenge] = 
           max(yendor::bestscore[modecode()][yendor::challenge], items[itOrbYendor]);
         yendor::uploadScore();        
@@ -830,8 +830,8 @@ EX namespace tactic {
     };
   map<modecode_t, vector<scoredata>> scoreboard;
   
-  int chances(eLand l) {
-    if(modecode() != 0 && l != laCamelot) return 3;
+  EX int chances(eLand l, modecode_t xc IS(modecode())) {
+    if(xc != 0 && l != laCamelot) return 3;
     for(auto& ti: land_tac)
       if(ti.l == l) 
         return ti.tries;
@@ -853,12 +853,12 @@ EX namespace tactic {
     return hiitemsMax(treasureType(l)) * landMultiplier(l) >= 20;
     }
 
-  EX void record(eLand land, int score, flagtype xc IS(modecode())) {
+  EX void record(eLand land, int score, modecode_t xc IS(modecode())) {
     if(land >=0 && land < landtypes) {
       for(int i=MAXTAC-1; i; i--) lsc[xc][land][i] = lsc[xc][land][i-1];
       tactic::lsc[xc][land][0] = score;
       }
-    int t = chances(land);
+    int t = chances(land, xc);
     int csum = 0;
     for(int i=0; i<t; i++) if(lsc[xc][land][i] > 0) csum += lsc[xc][land][i];
     if(csum > recordsum[xc][land]) recordsum[xc][land] = csum;
@@ -1029,160 +1029,66 @@ EX namespace tactic {
 
 EX }
 
-// Identifiers for the current combinations of game modes
-// These are recorded in the save file, so it is somewhat
-// important that they do not change for already existing
-// modes, as otherwise the scores would be lost. 
-// Unfortunately, the codes assigned when HyperRogue had
-// just a few special modes did not really follow a specific
-// rule, so this system has grown rather ugly as the
-// number of special modes kept growing...
+map<string, modecode_t> code_for;
+EX map<modecode_t, string> meaning;
 
-// mode codes for 'old' modes, from 0 to 255
+char xcheat;
 
-int modecodetable[42][6] = {
-  {  0, 38, 39, 40, 41, 42}, // softcore hyperbolic
-  {  7, 43, 44, 45, 46, 47}, // hardcore hyperbolic
-  {  2,  4,  9, 11, 48, 49}, // shmup hyperbolic
-  { 13, 50, 51, 52, 53, 54}, // softcore heptagonal hyperbolic
-  { 16, 55, 56, 57, 58, 59}, // hardcore heptagonal hyperbolic
-  { 14, 15, 17, 18, 60, 61}, // shmup heptagonal hyperbolic
-  {  1, 62, 63, 64, 65, 66}, // softcore euclidean
-  {  8, 67, 68, 69, 70, 71}, // hardcore euclidean
-  {  3,  5, 10, 12, 72, 73}, // shmup euclidean
-  {110,111,112,113,114,115}, // softcore spherical
-  {116,117,118,119,120,121}, // hardcore spherical
-  {122,123,124,125,126,127}, // shmup spherical
-  {128,129,130,131,132,133}, // softcore heptagonal spherical
-  {134,135,136,137,138,139}, // hardcore heptagonal spherical
-  {140,141,142,143,144,145}, // shmup heptagonal spherical
-  {146,147,148,149,150,151}, // softcore elliptic
-  {152,153,154,155,156,157}, // hardcore elliptic
-  {158,159,160,161,162,163}, // shmup elliptic
-  {164,165,166,167,168,169}, // softcore heptagonal elliptic
-  {170,171,172,173,174,175}, // hardcore heptagonal elliptic
-  {176,177,178,179,180,181}, // shmup heptagonal elliptic
-  { 19, 74, 75, 76, 77, 78}, // softcore hyperbolic chaosmode
-  { 26, 79, 80, 81, 82, 83}, // hardcore hyperbolic chaosmode
-  { 21, 23, 28, 30, 84, 85}, // shmup hyperbolic chaosmode
-  { 32, 86, 87, 88, 89, 90}, // softcore heptagonal hyperbolic chaosmode
-  { 35, 91, 92, 93, 94, 95}, // hardcore heptagonal hyperbolic chaosmode
-  { 33, 34, 36, 37, 96, 97}, // shmup heptagonal hyperbolic chaosmode
-  { 20, 98, 99,100,101,102}, // softcore euclidean chaosmode
-  { 27,103,104,105,106,107}, // hardcore euclidean chaosmode
-  { 22, 24, 29, 31,108,109}, // shmup euclidean chaosmode
-  {182,183,184,185,186,187}, // softcore spherical chaosmode
-  {188,189,190,191,192,193}, // hardcore spherical chaosmode
-  {194,195,196,197,198,199}, // shmup spherical chaosmode
-  {200,201,202,203,204,205}, // softcore heptagonal spherical chaosmode
-  {206,207,208,209,210,211}, // hardcore heptagonal spherical chaosmode
-  {212,213,214,215,216,217}, // shmup heptagonal spherical chaosmode
-  {218,219,220,221,222,223}, // softcore elliptic chaosmode
-  {224,225,226,227,228,229}, // hardcore elliptic chaosmode
-  {230,231,232,233,234,235}, // shmup elliptic chaosmode
-  {236,237,238,239,240,241}, // softcore heptagonal elliptic chaosmode
-  {242,243,244,245,246,247}, // hardcore heptagonal elliptic chaosmode
-  {248,249,250,251,252,253}, // shmup heptagonal elliptic chaosmode
-  };
-// unused codes: 6 (cheat/tampered), 25, 254, 255
+void save_mode_data(hstream& f) {
+  mapstream::save_geometry(f);
+  
+  if(yendor::on) 
+    f.write<char>(0);
+  else
+    f.write<char>(chaosmode);
+  f.write<char>(shmup::on);
+  f.write<char>(inv::on);
+  f.write<char>(tour::on);
+  f.write<char>(peace::on);
+  f.write<char>(peace::otherpuzzles);
+  f.write<char>(peace::explore_other);
+  f.write<char>(multi::players);
+  f.write<char>(xcheat);
+  }
 
-modecode_t modecode() {
-  // bit 61: product; 62: rotspace
-  if(hybri) return PIU(modecode()) | (1ll << (prod ? 61 : 62));
-#if CAP_SAVE
-  if(anticheat::tampered || cheater || geometry >= gGUARD) return 6;
-#endif
+EX modecode_t modecode(int mode) {
+  modecode_t x = legacy_modecode();
+  if(x != UNKNOWN) return x;
 
-  // compute the old code
-  int xcode = 0;
+  xcheat = (cheater ? 1 : 0);
+  shstream ss;
+  ss.write(ss.vernum);
+  save_mode_data(ss);
+  
+  if(code_for.count(ss.s)) return code_for[ss.s];
 
-  if(shmup::on) xcode += 2;
-  else if(pureHardcore()) xcode ++;
+  if(mode == 1) return UNKNOWN;
   
-  if(euclid) xcode += 6;
-  else if(!BITRUNCATED) xcode += 3;
+  modecode_t next = 100000;
+  while(meaning.count(next)) next++;
   
-  if(sphere) {
-    xcode += 9;
-    if(elliptic) xcode += 6;
-    }
+  meaning[next] = ss.s;
+  code_for[ss.s] = next;
   
-  if(chaosmode) xcode += 21;
+  if(mode == 2) return next;
   
-  int np = numplayers()-1; if(np<0 || np>5) np=5;
-  
-  // bits: 0 to 7
-  modecode_t mct = modecodetable[xcode][np];
+  FILE *f = fopen(scorefile, "at");
+  string s = as_hexstring(ss.s);
+  fprintf(f, "MODE %d %s\n", next, s.c_str());
+  fclose(f);
 
-  // bits: 9, 10, 15, 16, 17, 18
-  mct += ginf[geometry].xcode;
-  
-#if CAP_INV
-  if(inv::on) mct += (1<<11);
-#endif
-  if(peace::on) mct += (1<<12);
-#if CAP_TOUR
-  if(tour::on) mct += (1<<13);
-#endif
-  if(numplayers() == 7) mct += (1<<14);
+  return next;
+  }
 
-  // daily/Yendor/Tactics/standard are saved separately, but are using the same codes (Daily uses no code)
-  // randompattern never records its scores
-  // no specifics of the advanced configuration of torus/fieldquotient currently recorded
-
-  #if CAP_GP  
-  if(GOLDBERG) { 
-    mct += (1 << 19);
-    auto loc = gp::human_representation(gp::param);
-    mct += loc.first << 21; // 4 bits
-    mct += loc.second << 25; // 4 bits
-    }
-  #endif
-  
-  #if CAP_IRR
-  if(IRREGULAR) {
-    mct += (1 << 20);
-    mct += irr::density_code() << 21; // 8 bits
-    }
-  #endif
-  
-  if(DUAL) {
-    mct += (1 << 19);
-    mct += (1 << 20);
-    }
-  
-  typedef long long ll;
-  
-  // 32 bits [29..61) for geometry specifics
-  if(euclid && quotient) {
-    /* todo */
-    }
-  
-  #if CAP_FIELD
-  if(geometry == gFieldQuotient) {
-    using namespace fieldpattern;
-    mct += ll(current_extra) << 29;
-    mct += ll(fgeomextras[current_extra].current_prime_id) << 37;
-    }
-  #endif
-  
-  #if CAP_CRYSTAL
-  if(cryst) {
-    mct += ll(ginf[geometry].sides) << 29;
-    mct += ll(ginf[geometry].vertex) << 37;
-    }
-  #endif
-  
-  #if CAP_ARCM
-  if(geometry == gArchimedean) {
-    unsigned res = 7;
-    for(char c: arcm::current.symbol) res = res * 157 + c;
-    mct += ll(res) << 29;
-    if(PURE) mct ^= (1<<29);
-    }
-  #endif
-  
-  return mct;
+EX void load_modecode_line(string s) {
+  int code = atoi(&s[5]);
+  int pos = 5;
+  while(s[pos] != ' ' && s[pos]) pos++;
+  if(!s[pos]) return;
+  pos++;
+  string t = from_hexstring(s.substr(pos));
+  code_for[t] = code;
+  meaning[code] = t;
   }
 
 EX namespace peace {

@@ -518,8 +518,6 @@ void set_gfake(ld _around) {
   check_cgi();
   cgi.require_basics();
   
-  ginf[gFake].xcode = no_code;
-  
   if(currentmap) new hrmap_fake(currentmap);
   }
 

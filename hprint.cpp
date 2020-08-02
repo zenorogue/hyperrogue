@@ -134,9 +134,11 @@ struct fhstream : hstream {
   };
 
 struct shstream : hstream { 
+  color_t vernum;
+  virtual color_t get_vernum() override { return vernum; }
   string s;
   int pos;
-  shstream(const string& t = "") : s(t) { pos = 0; }
+  shstream(const string& t = "") : s(t) { pos = 0; vernum = VERNUM_HEX; }
   virtual void write_char(char c) { s += c; }
   virtual char read_char() { if(pos == isize(s)) throw hstream_exception(); return s[pos++]; }
   };
@@ -401,6 +403,30 @@ template<class T> T deserialize(const string& s) {
   return data;
   }
 #endif
+
+EX string as_hexstring(string o) {
+  string res;
+  for(char x: o) {
+    char buf[4];
+    sprintf(buf, "%02X", (unsigned char)(x));
+    res += buf;
+    }
+  return res;
+  }
+
+EX string from_hexstring(string o) {
+  string res;
+  for(int i=0; i<isize(o); i+=2) {
+    char buf[4];
+    buf[0] = o[i];
+    buf[1] = o[i+1];
+    buf[2] = 0;
+    int x;
+    sscanf(buf, "%02X", &x);
+    res += char(x);
+    }
+  return res;
+  }
 
 EX string as_cstring(string o) {
   string s = "string(\"";

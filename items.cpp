@@ -433,10 +433,14 @@ EX int maxgold() {
   return mg;
   }
 
-EX void updateHi(eItem it, int v) {
+EX void updateHi_for_code(eItem it, int v, modecode_t xcode) {
   if(!yendor::on)
-    if(v > hiitems[modecode()][it]) 
-      changes.value_set(hiitems[modecode()][it], v);
+    if(v > hiitems[xcode][it]) 
+      changes.value_set(hiitems[xcode][it], v);
+  }
+
+EX void updateHi(eItem it, int v) {
+  updateHi_for_code(it, v, modecode());
   }
 
 EX void gainItem(eItem it) {
