@@ -477,7 +477,7 @@ EX int celldist(cell *c) {
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
   #endif
-  if(arcm::in() || ctof(c)) return c->master->distance;
+  if(arcm::in() || ctof(c) || arb::in()) return c->master->distance;
   #if CAP_GP
   if(INVERSE) {
     cell *c1 = gp::get_mapped(c);
@@ -1116,7 +1116,7 @@ EX int celldistance(cell *c1, cell *c2) {
     return euc::cyldist(euc2_coordinates(c1), euc2_coordinates(c2));
     }
 
-  if(arcm::in() || quotient || sn::in() || (kite::in() && euclid) || experimental || sl2 || nil) 
+  if(arcm::in() || quotient || sn::in() || (kite::in() && euclid) || experimental || sl2 || nil || arb::in()) 
     return clueless_celldistance(c1, c2);
    
    if(S3 >= OINF) return inforder::celldistance(c1, c2);

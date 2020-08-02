@@ -383,6 +383,7 @@ EX pair<int, bool> fieldval(cell *c) {
 EX int fieldval_uniq(cell *c) {
   if(fake::in()) return FPIU(fieldval_uniq(c));
   if(experimental) return 0;
+  else if(arb::in()) return arb::id_of(c->master);
   else if(hybri) { 
     auto c1 = hybrid::get_where(c).first; 
     return PIU ( fieldval_uniq(c1) );
