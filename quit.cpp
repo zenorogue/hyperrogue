@@ -320,10 +320,12 @@ EX void showMission() {
     0xC00000, 200, 100
     );
   keyhandler = handleKeyQuit;
+  
+  bool sweeper = mine::in_minesweeper();
 
-  if(!peace::on && !racing::on)
+  if(!peace::on && !racing::on && !sweeper)
     dialog::addInfo(XLAT("Your score: %1", its(gold())));
-  if(!peace::on && !racing::on)
+  if(!peace::on && !racing::on && !sweeper)
     dialog::addInfo(XLAT("Enemies killed: %1", its(tkills())));
 
 #if CAP_TOUR
@@ -332,6 +334,17 @@ EX void showMission() {
   if(items[itOrbYendor]) {
     dialog::addInfo(XLAT("Orbs of Yendor found: %1", its(items[itOrbYendor])), iinf[itOrbYendor].color);
     dialog::addInfo(XLAT("CONGRATULATIONS!"), iinf[itOrbYendor].color);
+    }
+  else if(mine::in_minesweeper()) {
+    int to_uncover = kills[moBomberbird];
+    if(to_uncover) {
+      dialog::addInfo(XLAT("Uncover all cells which do not contain mines"));
+      dialog::addInfo(XLAT("Cells to uncover: %1", its(to_uncover)));
+      }
+    else {
+      dialog::addInfo(XLAT("CONGRATULATIONS!"), iinf[itOrbYendor].color);
+      dialog::addInfo(XLAT("You won in %1", getgametime_s(mine::victory_time)));      
+      }
     }
   else {
     if(0)
@@ -343,6 +356,7 @@ EX void showMission() {
     else if(racing::on) ;
     else if(princess::challenge) 
       dialog::addInfo(XLAT("Follow the Mouse and escape with %the1!", moPrincess));
+    else if(!in_full_game()) ;
     else if(gold() < R30)
       dialog::addInfo(XLAT("Collect %1 $$$ to access more worlds", its(R30)));
     else if(gold() < R60)
@@ -370,6 +384,7 @@ EX void showMission() {
 #endif
   else if(peace::on) ;
   else if(racing::on) ;
+  else if(!in_full_game()) ;
   else if(tkills() < R100)
     dialog::addInfo(XLAT("Defeat %1 enemies to access the Graveyard", its(R100)));
   else if(kills[moVizier] == 0 && (items[itFernFlower] < U5 || items[itGold] < U5))
