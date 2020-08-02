@@ -23,3 +23,4 @@
 #include "snow.cpp"
 #include "impossible-ring.cpp"
 #include "triangle.cpp"
+#include "sumotron.cpp"
