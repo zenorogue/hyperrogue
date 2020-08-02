@@ -54,7 +54,7 @@ EX hint hints[] = {
   {
     0,
     []() { 
-      return !inv::on && geometry == gNormal && items[localTreasureType()] >= 18;
+      return !inv::on && items[localTreasureType()] >= 18 && in_full_game();
       },    
     []() { 
        dialog::addHelp(XLAT(
@@ -98,7 +98,7 @@ EX hint hints[] = {
 
   {
     0,
-    []() { return !inv::on; },
+    []() { return !inv::on && in_full_game(); },
     []() { 
       dialog::addHelp(XLAT(
         "Collecting 25 treasures in a given land may be dangerous, "
@@ -119,7 +119,7 @@ EX hint hints[] = {
     },
   {
     0,
-    []() { return true; },
+    []() { return in_full_game(); },
     []() { 
       dialog::addInfo(XLAT(
 #if ISMOBILE
