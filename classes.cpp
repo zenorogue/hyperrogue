@@ -907,7 +907,7 @@ EX vector<geometryinfo> ginf = {
   {"{3,4,4}","none",    "{3,4,4} hyperbolic honeycomb",               "344",      8, 4, qIDEAL,    giHyperb3, {{7, 2}}, eVariation::pure},
   {"{3,4,4}","Crystal", "4D crystal in H3",                           "Cryst3" ,  8, 4, qIDEAL | qANYQ | qCRYSTAL, giHyperb3, {{7, 3}}, eVariation::pure},
   {"cat",    "cat",     "Arnold's cat mapping torus",                 "cat",     12, 3, qBINARY | qSOL | qsBQ | qOPTQ, giSolNIH, {{6, 4}}, eVariation::pure},
-  {"file",   "none",    "load from file",                             "file",     7, 3, qEXPERIMENTAL,  giEuclid2, {{7, 5}}, eVariation::pure},
+  {"file",   "none",    "load from file",                             "file",     7, 3, 0,  giEuclid2, {{7, 5}}, eVariation::pure},
   {"{4,oo}", "none",    "{4,∞} (infinite squares)",                   "oox4",     4, OINF, qIDEAL,  giHyperb2, {{5, 5}}, eVariation::pure},
   {"{5,3,4}","Crystal", "6D crystal in H3",                           "Cryst6" , 12, 4, qANYQ | qCRYSTAL, giHyperb3, {{7, 3}}, eVariation::pure},
   {"{5,3,5}","none",    "{5,3,5} hyperbolic honeycomb",               "535",     12, 5, 0,         giHyperb3, {{7, 2}}, eVariation::pure},
