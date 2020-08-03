@@ -430,6 +430,7 @@ EX namespace mapstream {
     else
       return dir;
     }
+#endif
   
   EX void save_geometry(hstream& f) {
     f.write(geometry);
@@ -599,7 +600,8 @@ EX namespace mapstream {
     if(vernum >= 0xA810)
       f.read(mine_adjacency_rule);
     }
-  
+
+#if CAP_EDIT  
   void save_only_map(fhstream& f) {
     f.write(patterns::whichPattern);
     save_geometry(f);

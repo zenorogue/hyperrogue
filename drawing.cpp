@@ -1999,7 +1999,9 @@ void dqi_line::draw_back() {
 
 EX void sort_drawqueue() {
 
+  #if MAXMDIM >= 4 && CAP_GL
   if(WDIM == 2 && GDIM == 3 && hyperbolic) make_air();
+  #endif
 
   DEBBI(DF_GRAPH, ("sort_drawqueue"));
   

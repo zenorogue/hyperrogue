@@ -409,6 +409,7 @@ void display_data::set_projection(int ed, ld shift) {
     }
   #endif
   
+  #if MAXMDIM >= 4
   if(selected->tAirMap != -1) {
     glActiveTexture(GL_TEXTURE0 + AIR_BINDING);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -418,6 +419,7 @@ void display_data::set_projection(int ed, ld shift) {
     glActiveTexture(GL_TEXTURE0 + 0);
     glUniformMatrix4fv(selected->uRadarTransform, 1, 0, glhr::tmtogl_transpose3(radar_transform).as_array());
     }
+  #endif
   
   if(selected->uIterations != -1) {
     glhr::set_index_sl(0);
