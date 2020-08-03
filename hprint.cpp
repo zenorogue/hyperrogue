@@ -139,8 +139,8 @@ struct shstream : hstream {
   string s;
   int pos;
   shstream(const string& t = "") : s(t) { pos = 0; vernum = VERNUM_HEX; }
-  virtual void write_char(char c) { s += c; }
-  virtual char read_char() { if(pos == isize(s)) throw hstream_exception(); return s[pos++]; }
+  virtual void write_char(char c) override { s += c; }
+  virtual char read_char() override { if(pos == isize(s)) throw hstream_exception(); return s[pos++]; }
   };
 
 inline void print(hstream& hs) {}
@@ -421,7 +421,7 @@ EX string from_hexstring(string o) {
     buf[0] = o[i];
     buf[1] = o[i+1];
     buf[2] = 0;
-    int x;
+    unsigned x;
     sscanf(buf, "%02X", &x);
     res += char(x);
     }
