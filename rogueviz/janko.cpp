@@ -129,7 +129,6 @@ void create_janko() {
   gi.flags = qANYQ | qBOUNDED | qEXPERIMENTAL;
   gi.quotient_name = "Janko";
   gi.shortname = "Janko";
-  gi.xcode = 0x31400;
   gi.menu_displayed_name = "Janko group J1";
   }
   

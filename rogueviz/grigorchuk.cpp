@@ -448,7 +448,6 @@ void create_grigorchuk_geometry() {
   gi.quotient_name = "Grigorchuk";
   gi.menu_displayed_name = "Grigorchuk group";
   gi.shortname = "Grig";
-  gi.xcode = 0x31400;
   gi.default_variation = eVariation::pure;
   }
 
