@@ -2903,6 +2903,10 @@ bool celldrawer::draw_shmup_monster() {
     if(c != m->base) continue; // may happen in RogueViz Collatz
     m->pat = ggmatrix(m->base) * m->at;
     shiftmatrix view = V * m->at;
+
+    bool half_elliptic = elliptic && GDIM == 3 && WDIM == 2;
+    bool mirrored = det(view.T) > 0;
+    if(half_elliptic && mirrored) continue;
     
     if(!mouseout()) {
       if(m->no_targetting) ; else
