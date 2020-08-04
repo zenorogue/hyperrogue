@@ -4087,3 +4087,7 @@ Geometries:
 - removed irrelevant hints and progress messages on the mission screen when you are not playing a full game
 - Safety saves / PTM scores / Yendor scores / high scores should now work correctly in all geometries (the system is not fully backward compatible, so some old scores might disappear)
 - a crash when setting new variations should be fixed
+
+2020-08-05 01:29 Update 11.3w:
+- fixed shmup in elliptic
+- fixed a crash with loading old save games
