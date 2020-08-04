@@ -1210,7 +1210,7 @@ EX void loadsave() {
     for(int i=boxid; i<MAXBOX; i++) save.box[i] = 0;
 //  for(int i=160; i<200; i++) printf("%d: %d ", i, save.box[i]);
 
-    if(1) {
+    if(meaning.count(sc.box[MODECODE_BOX])) {
       shstream ss;
       ss.s = meaning[sc.box[MODECODE_BOX]];
       ss.read(ss.vernum);
