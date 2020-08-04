@@ -2110,7 +2110,7 @@ EX namespace rots {
 
     };
 
-  /** reinterpret the given point of rotspace as a rotation matrix in the underlying geometry */
+  /** reinterpret the given point of rotspace as a rotation matrix in the underlying geometry (note: this is the inverse) */
   EX transmatrix qtm(hyperpoint h) {
 
     ld& x = h[0];
