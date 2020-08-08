@@ -2280,14 +2280,101 @@ EX }
 /** stretched rotation space (S3 or SLR) */
 EX namespace stretch {
 
-  EX ld factor;  
+  EX ld factor;
+  
+  EX bool mstretch;
+  
+  EX transmatrix m_itoa, m_atoi, m_pd;
+  EX ld ms_christoffel[3][3][3];
+  
+  EX void enable_mstretch() {
+    mstretch = true;
+
+    for(int a=0; a<4; a++)
+    for(int b=0; b<4; b++)
+      if(a==3 || b==3) m_atoi[a][b] = (a==b);
+
+    m_itoa = inverse3(m_atoi);
+    
+    for(int a=0; a<4; a++)
+    for(int b=0; b<4; b++)
+      if(a==3 || b==3)
+        m_itoa[a][b] = m_atoi[a][b] = 0;
+
+    for(int j=0; j<3; j++)
+    for(int k=0; k<3; k++) {
+      m_pd[j][k] = 0;
+      for(int i=0; i<3; i++)
+        m_pd[j][k] += m_atoi[i][j] * m_atoi[i][k];
+      }
+
+    auto& c = ms_christoffel;
+
+    ld A00 = m_pd[0][0];
+    ld A11 = m_pd[1][1];
+    ld A22 = m_pd[2][2];
+    ld A01 = m_pd[0][1] + m_pd[1][0];
+    ld A02 = m_pd[0][2] + m_pd[2][0];
+    ld A12 = m_pd[2][1] + m_pd[1][2];
+    ld B01 = A01 * A01;
+    ld B02 = A02 * A02;
+    ld B12 = A12 * A12;
+    ld B00 = A00 * A00;
+    ld B11 = A11 * A11;
+    ld B22 = A22 * A22;
+    
+    ld den = (-4*A00*A11*A22 + A00*B12 + B01*A22 - A01*A02*A12 + B02*A11);
+    
+    /* to do: these formulas are not correct for SL; also the engine currently depends on rotational symmetry, which may not hold */
+
+    c[ 0 ][ 0 ][ 0 ] =  (A01*(A01*A12 - 2*A02*A11) + A02*(2*A01*A22 - A02*A12))/den ;
+    c[ 0 ][ 0 ][ 1 ] =  (A02*(4*A11*A22 - B12)/2 + A12*(2*A01*A22 - A02*A12)/2 - (A00 - A11)*(A01*A12 - 2*A02*A11))/den ;
+    c[ 0 ][ 0 ][ 2 ] =  (-A01*(4*A11*A22 - B12)/2 + A12*(A01*A12 - 2*A02*A11)/2 - (A00 - A22)*(2*A01*A22 - A02*A12))/den ;
+    c[ 0 ][ 1 ][ 0 ] =  (A02*(4*A11*A22 - B12)/2 + A12*(2*A01*A22 - A02*A12)/2 - (A00 - A11)*(A01*A12 - 2*A02*A11))/den ;
+    c[ 0 ][ 1 ][ 1 ] =  (-A01*(A01*A12 - 2*A02*A11) + A12*(4*A11*A22 - B12))/den ;
+    c[ 0 ][ 1 ][ 2 ] =  (B01*A22 - B02*A11 + 4*B11*A22 - A11*B12 - 4*A11*B22 + B12*A22)/(4*A00*A11*A22 - A00*B12 - B01*A22 + A01*A02*A12 - B02*A11) ;
+    c[ 0 ][ 2 ][ 0 ] =  (-A01*(4*A11*A22 - B12)/2 + A12*(A01*A12 - 2*A02*A11)/2 - (A00 - A22)*(2*A01*A22 - A02*A12))/den ;
+    c[ 0 ][ 2 ][ 1 ] =  (B01*A22 - B02*A11 + 4*B11*A22 - A11*B12 - 4*A11*B22 + B12*A22)/(4*A00*A11*A22 - A00*B12 - B01*A22 + A01*A02*A12 - B02*A11) ;
+    c[ 0 ][ 2 ][ 2 ] =  -(A02*(2*A01*A22 - A02*A12) + A12*(4*A11*A22 - B12))/den ;
+    c[ 1 ][ 0 ][ 0 ] =  -(A01*(2*A00*A12 - A01*A02) + A02*(4*A00*A22 - B02))/den ;
+    c[ 1 ][ 0 ][ 1 ] =  (-A02*(2*A01*A22 - A02*A12)/2 - A12*(4*A00*A22 - B02)/2 + (A00 - A11)*(2*A00*A12 - A01*A02))/den ;
+    c[ 1 ][ 0 ][ 2 ] =  (-4*B00*A22 + A00*B02 + A00*B12 + 4*A00*B22 - B01*A22 - B02*A22)/(4*A00*A11*A22 - A00*B12 - B01*A22 + A01*A02*A12 - B02*A11) ;
+    c[ 1 ][ 1 ][ 0 ] =  (-A02*(2*A01*A22 - A02*A12)/2 - A12*(4*A00*A22 - B02)/2 + (A00 - A11)*(2*A00*A12 - A01*A02))/den ;
+    c[ 1 ][ 1 ][ 1 ] =  (A01*(2*A00*A12 - A01*A02) - A12*(2*A01*A22 - A02*A12))/den ;
+    c[ 1 ][ 1 ][ 2 ] =  (A01*(4*A00*A22 - B02)/2 + A02*(2*A00*A12 - A01*A02)/2 + (A11 - A22)*(2*A01*A22 - A02*A12))/den ;
+    c[ 1 ][ 2 ][ 0 ] =  (-4*B00*A22 + A00*B02 + A00*B12 + 4*A00*B22 - B01*A22 - B02*A22)/(4*A00*A11*A22 - A00*B12 - B01*A22 + A01*A02*A12 - B02*A11) ;
+    c[ 1 ][ 2 ][ 1 ] =  (A01*(4*A00*A22 - B02)/2 + A02*(2*A00*A12 - A01*A02)/2 + (A11 - A22)*(2*A01*A22 - A02*A12))/den ;
+    c[ 1 ][ 2 ][ 2 ] =  (A02*(4*A00*A22 - B02) + A12*(2*A01*A22 - A02*A12))/den ;
+    c[ 2 ][ 0 ][ 0 ] =  (A01*(4*A00*A11 - B01) + A02*(2*A00*A12 - A01*A02))/den ;
+    c[ 2 ][ 0 ][ 1 ] =  (4*B00*A11 - A00*B01 - 4*A00*B11 - A00*B12 + B01*A11 + B02*A11)/(4*A00*A11*A22 - A00*B12 - B01*A22 + A01*A02*A12 - B02*A11) ;
+    c[ 2 ][ 0 ][ 2 ] =  (-A01*(A01*A12 - 2*A02*A11)/2 + A12*(4*A00*A11 - B01)/2 - (A00 - A22)*(2*A00*A12 - A01*A02))/den ;
+    c[ 2 ][ 1 ][ 0 ] =  (4*B00*A11 - A00*B01 - 4*A00*B11 - A00*B12 + B01*A11 + B02*A11)/(4*A00*A11*A22 - A00*B12 - B01*A22 + A01*A02*A12 - B02*A11) ;
+    c[ 2 ][ 1 ][ 1 ] =  (-A01*(4*A00*A11 - B01) + A12*(A01*A12 - 2*A02*A11))/den ;
+    c[ 2 ][ 1 ][ 2 ] =  (A00*A01*A12 + 2*A00*A02*A11 - B01*A02 + A01*A11*A12 - A01*A12*A22 - 2*A02*B11 + 2*A02*A11*A22)/(4*A00*A11*A22 - A00*B12 - B01*A22 + A01*A02*A12 - B02*A11) ;
+    c[ 2 ][ 2 ][ 0 ] =  (-A01*(A01*A12 - 2*A02*A11)/2 + A12*(4*A00*A11 - B01)/2 - (A00 - A22)*(2*A00*A12 - A01*A02))/den ;
+    c[ 2 ][ 2 ][ 1 ] =  (A00*A01*A12 + 2*A00*A02*A11 - B01*A02 + A01*A11*A12 - A01*A12*A22 - 2*A02*B11 + 2*A02*A11*A22)/(4*A00*A11*A22 - A00*B12 - B01*A22 + A01*A02*A12 - B02*A11) ;
+    c[ 2 ][ 2 ][ 2 ] =  -(A02*(2*A00*A12 - A01*A02) + A12*(A01*A12 - 2*A02*A11))/den ;
+    
+    for(int i=0; i<3; i++)
+    for(int j=0; j<3; j++)
+    for(int k=0; k<3; k++)
+      if(c[i][j][k])
+        println(hlog, tie(i,j,k), " : ", c[i][j][k]);
+      
+    
+    println(hlog, "ATOI = ", m_atoi);
+    println(hlog, "ITOA = ", m_itoa, " vs ", 1/not_squared());
+    println(hlog, "PD   = ", m_pd, " vs ", factor);
+
+    ray::reset_raycaster();
+    }
 
   EX bool applicable() {
     return rotspace || among(geometry, gCell120, gECell120, gCell24, gECell24, gCell8, gECell8);
     }
 
   EX bool in() {
-    return factor && applicable();
+    return (factor || mstretch) && applicable();
     }
 
   EX transmatrix translate(hyperpoint h) {
@@ -2308,26 +2395,32 @@ EX namespace stretch {
     return translate(h);
     }
 
-  hyperpoint mulz(const hyperpoint at, const hyperpoint velocity, ld factor) {
+  hyperpoint mulz(const hyperpoint at, const hyperpoint velocity, ld zf) {
     auto vel = itranslate(at) * velocity;
-    vel[2] *= factor;
+    vel[2] *= zf;
     return translate(at) * vel;
     }
   
   EX ld squared() {
     return abs(1 + factor);
     }
-
+  
   EX ld not_squared() {
     return sqrt(squared());
     }
   
   EX hyperpoint isometric_to_actual(const hyperpoint at, const hyperpoint velocity) {
-    return mulz(at, velocity, 1/not_squared());
+    if(mstretch)
+      return translate(at) * m_itoa * itranslate(at) * velocity;
+    else
+      return mulz(at, velocity, 1/not_squared());
     }
-  
+ 
   EX hyperpoint actual_to_isometric(const hyperpoint at, const hyperpoint velocity) {
-    return mulz(at, velocity, not_squared());
+    if(mstretch)
+      return translate(at) * m_atoi * itranslate(at) * velocity;
+    else
+      return mulz(at, velocity, not_squared());
     }
   
   EX hyperpoint christoffel(const hyperpoint at, const hyperpoint velocity, const hyperpoint transported) {
@@ -2337,15 +2430,22 @@ EX namespace stretch {
     
     hyperpoint c;
     
-    auto K = factor;
+    if(mstretch) {    
+      c = Hypc;
+      for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++)
+      for(int k=0; k<3; k++)
+        c[i] += vel[j] * tra[k] * ms_christoffel[i][j][k];
+      }
     
-    if(!sphere) K = -2 - K;
-    
-    c[0] = -K * (vel[1] * tra[2] + vel[2] * tra[1]);
-    c[1] =  K * (vel[0] * tra[2] + vel[2] * tra[0]);
-    c[2] = 0;
-    c[3] = 0;
-    
+    else {    
+      auto K = factor;    
+      c[0] = (sphere ? -K : K+2) * (vel[1] * tra[2] + vel[2] * tra[1]);
+      c[1] = (sphere ? K : -(K+2)) * (vel[0] * tra[2] + vel[2] * tra[0]);
+      c[2] = 0;
+      c[3] = 0;
+      }
+
     return translate(at) * c;
     }  
 
@@ -2591,7 +2691,14 @@ EX namespace nisot {
         auto fix = [&] (hyperpoint& h, ld& m) {
           h = stretch::itranslate(at) * h;
           h[3] = 0;
-          ld m1 = h[0] * h[0] + h[1] * h[1] + h[2] * h[2] * stretch::squared();
+          ld m1;
+          if(stretch::mstretch) {
+            m1 = 0;
+            for(int i=0; i<3; i++) for(int j=0; j<3; j++)
+              m1 += h[i] * stretch::m_pd[i][j] * h[j];
+            }
+          else
+            m1 = h[0] * h[0] + h[1] * h[1] + h[2] * h[2] * stretch::squared();
           h /= sqrt(m1/m);
           h = stretch::translate(at) * h;
           };
@@ -2744,6 +2851,29 @@ EX namespace nisot {
     else if(argis("-rot-stretch")) {
       PHASEFROM(2);
       shift_arg_formula(stretch::factor, ray::reset_raycaster);
+      return 0;
+      }
+    else if(argis("-mstretch")) {
+      PHASEFROM(2);
+      auto& M = stretch::m_atoi;
+      M = Id;
+      while(true) {
+        shift();
+        string s = args();
+        if(isize(s) == 2 && among(s[0], 'a', 'b','c') && among(s[1], 'a', 'b', 'c'))
+          shift_arg_formula(M[s[0]-'a'][s[1]-'a'], stretch::enable_mstretch);
+        else break;
+        }
+      // shift_arg_formula(stretch::yfactor, ray::reset_raycaster);
+      return 0;
+      }
+    else if(argis("-mstretch1")) {
+      PHASEFROM(2);
+      auto& M = stretch::m_atoi;
+      M = Id;
+      M[2][2] = stretch::not_squared();
+      stretch::enable_mstretch();
+      // shift_arg_formula(stretch::yfactor, ray::reset_raycaster);
       return 0;
       }
     else if(argis("-prodturn")) {

@@ -1300,7 +1300,7 @@ EX hyperpoint tangent_length(hyperpoint dir, ld length) {
 EX hyperpoint direct_exp(hyperpoint v) {
   if(sn::in()) return nisot::numerical_exp(v);
   if(nil) return nilv::formula_exp(v);
-  if(sl2 || stretch::in()) return rots::formula_exp(v);
+  if(sl2 || stretch::in()) return stretch::mstretch ? nisot::numerical_exp(v) : rots::formula_exp(v);
   if(prod) return product::direct_exp(v);
   ld d = hypot_d(GDIM, v);
   if(d > 0) for(int i=0; i<GDIM; i++) v[i] = v[i] * sin_auto(d) / d;
