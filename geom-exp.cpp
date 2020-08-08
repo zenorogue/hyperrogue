@@ -918,6 +918,8 @@ EX void showEuclideanMenu() {
   if(stretch::applicable()) {
     dialog::addSelItem(XLAT("stretched geometry"), fts(stretch::factor), 'S');
     dialog::add_action([] {
+      stretch::mstretch = false;
+      ray::reset_raycaster();
       dialog::editNumber(stretch::factor, -1, 9, 0.1, 0, XLAT("stretched geometry"),
         XLAT(
           "Stretch the metric along the fibers. This can currently be done in rotation spaces and in 8-cell, 24-cell and 120-cell. "
