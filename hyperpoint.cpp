@@ -916,20 +916,23 @@ void inverse_error(const transmatrix& T) {
   }
 
 /** inverse */
-EX transmatrix inverse(const transmatrix& T) {
-  if(MDIM == 3) {
-    ld d = det(T);
-    transmatrix T2;
-    if(d == 0) {
-      inverse_error(T); 
-      return Id;
-      }
-    
-    for(int i=0; i<3; i++) 
-    for(int j=0; j<3; j++) 
-      T2[j][i] = (T[(i+1)%3][(j+1)%3] * T[(i+2)%3][(j+2)%3] - T[(i+1)%3][(j+2)%3] * T[(i+2)%3][(j+1)%3]) / d;
-    return T2;
+EX transmatrix inverse3(const transmatrix& T) {
+  ld d = det(T);
+  transmatrix T2;
+  if(d == 0) {
+    inverse_error(T); 
+    return Id;
     }
+  
+  for(int i=0; i<3; i++) 
+  for(int j=0; j<3; j++) 
+    T2[j][i] = (T[(i+1)%3][(j+1)%3] * T[(i+2)%3][(j+2)%3] - T[(i+1)%3][(j+2)%3] * T[(i+2)%3][(j+1)%3]) / d;
+  return T2;
+  }
+
+EX transmatrix inverse(const transmatrix& T) {
+  if(MDIM == 3) 
+    return inverse3(T);
   else {
     transmatrix T1 = T;
     transmatrix T2 = Id;
