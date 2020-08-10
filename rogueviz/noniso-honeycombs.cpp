@@ -146,6 +146,22 @@ void honey(vector<tour::slide>& v) {
 
   }
 
-auto hooks  = addHook(rvtour::hooks_build_rvtour, 163, honey);
+void start_noniso(vector<tour::slide>& v) {
+  using namespace tour;
+  v.emplace_back(
+    slide{"non-isotropic geometries/intro slide", 999, LEGAL::NONE | QUICKSKIP, 
+      "This is a collection of non-isotropic geometry demos.",
+      [] (presmode mode) {
+        if(mode == pmStart) {
+          stop_game();
+          set_geometry(gCubeTiling);          
+          start_game();
+          }
+        }
+      });
+  }
+
+auto hooks  = addHook(rvtour::hooks_build_rvtour, 163, honey)
+            + addHook(rvtour::hooks_build_rvtour, 160, start_noniso);
 
 } }
