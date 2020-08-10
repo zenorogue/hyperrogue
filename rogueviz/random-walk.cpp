@@ -67,7 +67,7 @@ bool advance_walkers(int delta) {
       continue;
     while(walkers[i].simulated < total_time) {
       walkers[i].simulated++;
-      if(rand() % branch_each == 0) {
+      if(branch_each && rand() % branch_each == 0) {
         walkers.push_back(walkers[i]);
         walkers.back().col = hrandpos() | 0x808080FF;
         walkers[i].col = hrandpos() | 0x808080FF;
@@ -176,13 +176,21 @@ void rw_slide(vector<tour::slide>& v, string title, string desc, reaction_t t) {
     setCanvas(mode, '0');
 
     if(mode == pmStart) {
+      tour::slide_backup(mapeditor::drawplayer, false);
       stop_game();
+      t();
       start_game();
       do_walkers = true;
       }
 
     if(mode == pmStop) {
       do_walkers = false;
+      }
+
+    if(mode == pmKey) {
+      drawn.clear();
+      walkers.clear();
+      total_time = 0;
       }
     }}
     );
@@ -198,11 +206,13 @@ auto msc =
 + addHook(hooks_clearmemory, 40, [] () {
     drawn.clear();
     walkers.clear();
+    total_time = 0;
     })
 + addHook(rvtour::hooks_build_rvtour, 180, [] (vector<tour::slide>& v) {
   v.push_back(tour::slide{
     cap+"random walk visualization", 10, tour::LEGAL::NONE | tour::QUICKSKIP,
     "Here we see random walk in various geometries.\n"
+    "Press '5' to reset.\n"
     ,
     [] (tour::presmode mode) {}
     });
