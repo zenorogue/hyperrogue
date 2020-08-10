@@ -2229,7 +2229,7 @@ EX namespace rots {
     if(vel[2] < 0) len = -len;
     
     ld z_part = vel[2]/len;
-    ld x_part = sqrt(1 - z_part * z_part);
+    ld x_part = sqrt(max<ld>(1 - z_part * z_part, 0));
   
     ld SV = stretch::not_squared();
     
@@ -2241,6 +2241,8 @@ EX namespace rots {
     if(sl2 && rparam > 1) {  
       ld cr = 1 / sqrt(rparam*rparam - 1); // *i
       ld sr = rparam * cr;                 // *i
+      
+      if(z_part == 0) cr = 0, sr = 1;
   
       ld z = cr * (K - 1/SV/SV); // *i
   
