@@ -406,7 +406,6 @@ EX int fieldval_uniq(cell *c) {
     }
   else if(euc::in(3)) {
     auto co = euc::get_ispacemap()[c->master];
-    println(hlog, "co = ", co);
     if(bounded) return co[0] + (co[1] << 10) + (co[2] << 20);
     return gmod(co[0] + 3 * co[1] + 9 * co[2], 3*127);
     }
