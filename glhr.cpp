@@ -663,6 +663,9 @@ void init() {
   WITHSHADER(glEnableVertexAttribArray(aPosition);, glEnableClientState(GL_VERTEX_ARRAY);)
   GLERR("aPosition");
   // #endif
+  
+  glDisableVertexAttribArray(aTexture);
+  glDisableVertexAttribArray(aColor);
 
   #if CAP_VERTEXBUFFER
   glGenBuffers(1, &buf_current);
