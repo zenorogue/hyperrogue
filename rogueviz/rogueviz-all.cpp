@@ -24,3 +24,4 @@
 #include "impossible-ring.cpp"
 #include "triangle.cpp"
 #include "sumotron.cpp"
+#include "noniso-honeycombs.cpp"

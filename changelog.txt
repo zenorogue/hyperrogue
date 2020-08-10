@@ -4091,3 +4091,8 @@ Geometries:
 2020-08-05 01:29 Update 11.3w:
 - fixed shmup in elliptic
 - fixed a crash with loading old save games
+
+2020-08-08 16:10 Update 11.3x:
+- fixed raycaster in twisted geometries; weirdly twisted spherical geometry
+- draw crosshair even if nohud
+- an attempt to fix/debug the crash that some people are reporting on loading a saved game

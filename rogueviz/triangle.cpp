@@ -524,6 +524,7 @@ void slide_itri(tour::presmode mode, int id) {
     }
   }
 
+string cap = "non-isotropic geometries/Impossible architecture in Nil/";
 
 auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
 
@@ -546,12 +547,11 @@ auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
   return 0;
   })
 
-
 + addHook(rvtour::hooks_build_rvtour, 151, [] (vector<tour::slide>& v) {
   using namespace tour;
 
   v.push_back(
-    tour::slide{"Impossible architecture in Nil/impossible triangle", 18, LEGAL::NONE | QUICKGEO, 
+    tour::slide{cap+"impossible triangle", 18, LEGAL::NONE | QUICKGEO, 
       "This form of impossible triangle was first created by Oscar Reutersvärd. "
       "It was later independently discovered by Lionel Penrose and Roger Penrose, and popularized by M. C. Escher.\n\n"
       "Move with mouse/arrows/PgUpDn. Press '5' to enable animation, 'o' to change ring size.",
@@ -562,7 +562,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
     }});
 
   v.push_back(
-    tour::slide{"Impossible architecture in Nil/impossible triangle chainmail", 18, LEGAL::NONE | QUICKGEO, 
+    tour::slide{cap+"impossible triangle chainmail", 18, LEGAL::NONE | QUICKGEO, 
       "Here we try to link the impossible triangles into a construction reminiscent of a chainmail.",
    
   [] (presmode mode) {
@@ -571,7 +571,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
     }});
 
   v.push_back(
-    tour::slide{"Impossible architecture in Nil/impossible triangle network", 18, LEGAL::NONE | QUICKGEO, 
+    tour::slide{cap+"impossible triangle network", 18, LEGAL::NONE | QUICKGEO, 
       "It is not possible to reconstruct Escher's Waterfall in Nil geometry, because one of the three triangles there "
       "has opposite orientation. For this reason, that one triangle would not connect correctly. Penrose triangles "
       "in Nil would not create a planar structure, but rather a three-dimensional one. This slide shows the picture. "

@@ -140,7 +140,7 @@ bool draw_snow(cell *c, const shiftmatrix& V) {
 
 bool cylanim = false;
 
-string cap = "non-Euclidean snowballs/";
+string cap = "non-isotropic geometries/non-Euclidean snowballs/";
 
 void snow_slide(vector<tour::slide>& v, string title, string desc, reaction_t t) {
   using namespace tour;
