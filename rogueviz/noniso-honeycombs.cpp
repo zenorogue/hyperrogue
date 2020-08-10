@@ -146,6 +146,6 @@ void honey(vector<tour::slide>& v) {
 
   }
 
-auto hooks  = addHook(rvtour::hooks_build_rvtour, 147, honey);
+auto hooks  = addHook(rvtour::hooks_build_rvtour, 163, honey);
 
 } }

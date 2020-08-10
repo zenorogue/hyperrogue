@@ -236,7 +236,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
   })
 #endif
 
-+ addHook(rvtour::hooks_build_rvtour, 140, [] (vector<tour::slide>& v) {
++ addHook(rvtour::hooks_build_rvtour, 161, [] (vector<tour::slide>& v) {
   v.push_back(tour::slide{
     cap+"snowball visualization", 10, tour::LEGAL::NONE | tour::QUICKSKIP,
     "Non-Euclidean visualizations usually show some regular constructions. Could we visualize the geometries themselves? Let's distribute the snowballs randomly."
