@@ -129,7 +129,7 @@ bool sunflower_cell(cell *c, shiftmatrix V) {
         curvepoint(ps[inext[i]]);
         curvepoint(ps[inext2[i]]);
         // queuecurve(0xFFFFFFFF, 0x00C000FF, PPR::LINE);
-        queuecurve(shiftless(Id), 0x000000FF, 0xC04000FF, PPR::LINE);
+        queuecurve(V, 0x000000FF, 0xC04000FF, PPR::LINE);
         }      
       else {
         curvepoint(ps[i]);
