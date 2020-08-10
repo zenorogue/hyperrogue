@@ -2,9 +2,9 @@
 
 #include "rogueviz.cpp"
 #include "kohonen.cpp"
-#include "staircase.cpp"
+// #include "staircase.cpp" (currently does not work)
 #include "banachtarski.cpp"
-#include "pentagonal.cpp"
+// #include "pentagonal.cpp" (currently does not work)
 #include "functions.cpp"
 #include "fundamental.cpp"
 #include "sunflower.cpp"
