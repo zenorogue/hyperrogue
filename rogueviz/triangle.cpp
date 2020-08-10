@@ -508,6 +508,7 @@ void slide_itri(tour::presmode mode, int id) {
     tour::slide_backup(on, true);
     tour::slide_backup(net, id == 2 ? true : false);
     tour::slide_backup(smooth_scrolling, true);
+    tour::on_restore(nilv::set_flags);
     if(id == 0)
       tour::slide_backup(nilv::nilperiod, make_array(3, 3, 3));
     if(id == 1) {
@@ -517,7 +518,8 @@ void slide_itri(tour::presmode mode, int id) {
       tour::slide_backup(how1, 31);
       tour::slide_backup(isteps, 992);
       }
-    /* do nothing for id == 2 */
+    nilv::set_flags();
+   /* do nothing for id == 2 */
     start_game();
     playermoved = false;
     tour::on_restore(reset);
