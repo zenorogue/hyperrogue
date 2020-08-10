@@ -404,7 +404,9 @@ EX void draw_crosshair() {
   }
   
 EX void drawStats() {
+  if(vid.stereo_mode == sLR) return;
   draw_crosshair();
+  if(nohud) return;
   if(callhandlers(false, hooks_prestats)) return;
   if(viewdists && show_distance_lists) 
     expansion.view_distances_dialog();
