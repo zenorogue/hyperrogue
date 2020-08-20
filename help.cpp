@@ -664,6 +664,7 @@ void add_reqs(eLand l, string& s) {
       { int now = 0; string t = ""; for(eItem i: list) { if(t!="") t += " + "; t += XLATN(iinf[i].name); now += items[i]; } s += XLAT("Treasure required: %1 x %2.\n", its(z), t); buteol(s, now, z); }
     #define ACCONLY(z) s += XLAT("Accessible only from %the1.\n", z);
     #define ACCONLY2(z,x) s += XLAT("Accessible only from %the1 or %the2.\n", z, x);
+    #define ACCONLY3(z,y,x) s += XLAT("Accessible only from %the1 or %the2.\n", z, y, x);
     #define ACCONLYF(z) s += XLAT("Accessible only from %the1 (until finished).\n", z);
     #include "content.cpp"
 

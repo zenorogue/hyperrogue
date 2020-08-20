@@ -1186,7 +1186,7 @@ LAND( 0xFFFF00, "Land of Power", laPower, ZERO, itPower, RESERVED,
 
 LAND( 0xD0D0D0, "Camelot", laCamelot, ZERO | LF_CYCLIC, itHolyGrail, RESERVED, camelothelp )
   NATIVE((m == moKnight || m == moHedge || m == moFlailer || m == moLancer) ? 1 : 0)
-  REQ(ITEMS(itEmerald, U5) ACCONLY2(laCrossroads, laCrossroads3))
+  REQ(ITEMS(itEmerald, U5) ACCONLY3(laCrossroads, laCrossroads3, laCrossroads4))
 
 LAND( 0xD000D0, "Temple of Cthulhu", laTemple, ZERO | LF_CYCLIC, itGrimoire, RESERVED, templehelp )
   NATIVE((m == moTentacle || m == moCultist || m == moPyroCultist || m == moCultistLeader) ? 1 : 0)
@@ -1674,4 +1674,5 @@ MONSTER( '*', 0,        "vertex", moRogueviz, ZERO | CF_TECHNICAL, RESERVED, moN
 #undef ITEMS_TOTAL
 #undef ACCONLY
 #undef ACCONLY2
+#undef ACCONLY3
 #undef ACCONLYF
