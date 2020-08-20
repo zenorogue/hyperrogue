@@ -1521,7 +1521,7 @@ EX void movecost(cell* from, cell *to, int phase) {
     }
 #endif
   
-  if(to->land ==laDesert && !geometry && (phase & 2) && !cheater) {
+  if(to->land == laCrossroads4 && !geometry && (phase & 2) && !cheater) {
     achievement_gain_once("CR4");
     changes.value_set(chaosUnlocked, true);
     }
