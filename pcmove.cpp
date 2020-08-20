@@ -1505,8 +1505,6 @@ EX bool havePushConflict(cell *pushto, bool checkonly) {
   return false;
   }
 
-bool got_crossroads;
-
 EX void movecost(cell* from, cell *to, int phase) {
   if(from->land == laPower && to->land != laPower && (phase & 1)) {
     int n=0;
@@ -1523,10 +1521,9 @@ EX void movecost(cell* from, cell *to, int phase) {
     }
 #endif
   
-  if(to->land ==laCrossroads4 && !got_crossroads && !geometry && (phase & 2) && !cheater) {
+  if(to->land ==laDesert && !geometry && (phase & 2) && !cheater) {
     achievement_gain_once("CR4");
-    got_crossroads = true;
-    chaosUnlocked = true;
+    changes.value_set(chaosUnlocked, true);
     }
 
   if(isHaunted(from->land) && !isHaunted(to->land) && (phase & 2)) {
