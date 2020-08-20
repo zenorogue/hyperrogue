@@ -870,7 +870,7 @@ void pcmove::tell_why_impassable() {
     addMessage(XLAT("Wrong color!"));
   else if(c2->wall == waRoundTable)
     addMessage(XLAT("It would be impolite to land on the table!"));
-  else if(snakelevel(cwt.at) >= 3 && snakelevel(c2) == 0)
+  else if(snakelevel(cwt.at) >= 3 && snakelevel(c2) == 0 && !isWall(c2))
     addMessage(XLAT("You would get hurt!", c2->wall));
   else if(cellEdgeUnstable(cwt.at) && cellEdgeUnstable(c2)) {
     addMessage(XLAT("Gravity does not allow this!"));
