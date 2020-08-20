@@ -554,6 +554,7 @@ EX void initConfig() {
   addsaver(vid.use_smart_range, "smart-range", 0);
   addsaver(vid.smart_range_detail, "smart-range-detail", 8);
   addsaver(vid.smart_range_detail_3, "smart-range-detail", 30);
+  addsaver(vid.smart_area_based, "smart-area-based", false);
   addsaver(vid.cells_drawn_limit, "limit on cells drawn", 10000);
   addsaver(vid.cells_generated_limit, "limit on cells generated", 250);
   
@@ -1004,6 +1005,9 @@ EX void edit_sightrange() {
         dialog::addSelItem(XLAT("game range bonus"), its(gamerange_bonus), 'S');
         dialog::add_action([] () { gamerange_bonus = sightrange_bonus; doOvergenerate(); });
         }      
+      if(vid.use_smart_range && WDIM == 2) {
+        dialog::addBoolItem_action(XLAT("area-based range"), vid.smart_area_based, 'A');
+        }
       if(!allowChangeRange() || !allowIncreasedSight()) {
         dialog::addItem(XLAT("enable the cheat mode for additional options"), 'X');
         dialog::add_action(enable_cheat);

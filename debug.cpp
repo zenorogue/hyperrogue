@@ -798,6 +798,10 @@ int read_cheat_args() {
     vid.use_smart_range = 2;
     shift_arg_formula(WDIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail);
     }
+  else if(argis("-smartarea")) {
+    PHASEFROM(2); cheat();
+    shift(); vid.smart_area_based = argi();
+    }
   else if(argis("-smartn")) {
     PHASEFROM(2);
     vid.use_smart_range = 1;

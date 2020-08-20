@@ -1168,18 +1168,29 @@ EX bool in_smart_range(const shiftmatrix& T) {
 
   ld epsilon = 0.01;
   
+  transmatrix ar;
+  
   ld dx = 0, dy = 0, dz = 0, dh[MAXMDIM];
   for(int i=0; i<GDIM; i++) {    
     hyperpoint h2;
     applymodel(T * cpush0(i, epsilon), h2);
     ld x1 = current_display->radius * abs(h2[0] - h1[0]) / epsilon;
     ld y1 = current_display->radius * abs(h2[1] - h1[1]) * pconf.stretch / epsilon;
+    
+    for(int j=0; j<GDIM; j++) ar[i][j] = current_display->radius * (h2[j]-h1[j]) / epsilon;
+    
     dx = max(dx, x1); dy = max(dy, y1);
     if(GDIM == 3) dz = max(dz, abs(h2[2] - h1[2]));
     dh[i] = hypot(x1, y1);
     }
   
-  if(GDIM == 3) { 
+  if(GDIM == 2 && vid.smart_area_based) {
+    ld area = det2(ar);
+    ld scale = sqrt(area) * cgi.scalefactor * hcrossf7;
+    if(scale <= vid.smart_range_detail) return false;
+    }
+  
+  else if(GDIM == 3) { 
     if(-h1[2] + 2 * dz < pconf.clip_min || -h1[2] - 2 * dz > pconf.clip_max) return false;
     sort(dh, dh+GDIM); 
     ld scale = sqrt(dh[1] * dh[2]) * cgi.scalefactor * hcrossf7;

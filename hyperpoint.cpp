@@ -897,7 +897,7 @@ EX ld det3(const transmatrix& T) {
 /** determinant */
 EX ld det(const transmatrix& T) {
   if(GDIM == 2) 
-    retrun det3(T);
+    return det3(T);
   else {
     ld det = 1;
     transmatrix M = T;
