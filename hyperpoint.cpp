@@ -879,16 +879,25 @@ EX void orthonormalize(transmatrix& T) {
     }
   }
 
+/** determinant 2x2 */
+EX ld det2(const transmatrix& T) {
+  return T[0][0] * T[1][1] - T[0][1] * T[1][0];
+  }
+
+/** determinant 3x3 */
+EX ld det3(const transmatrix& T) {
+  ld det = 0;
+  for(int i=0; i<3; i++) 
+    det += T[0][i] * T[1][(i+1)%3] * T[2][(i+2)%3];
+  for(int i=0; i<3; i++) 
+    det -= T[0][i] * T[1][(i+2)%3] * T[2][(i+1)%3];
+  return det;
+  }
+
 /** determinant */
 EX ld det(const transmatrix& T) {
-  if(GDIM == 2) {
-    ld det = 0;
-    for(int i=0; i<3; i++) 
-      det += T[0][i] * T[1][(i+1)%3] * T[2][(i+2)%3];
-    for(int i=0; i<3; i++) 
-      det -= T[0][i] * T[1][(i+2)%3] * T[2][(i+1)%3];
-    return det;
-    }
+  if(GDIM == 2) 
+    retrun det3(T);
   else {
     ld det = 1;
     transmatrix M = T;
