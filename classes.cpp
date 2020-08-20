@@ -973,8 +973,8 @@ enum eModel : int {
   // 20..24
   mdEquivolume, mdCentralInversion, mdSimulatedPerspective, mdTwoHybrid, mdGeodesic,
   // 25
-  mdMollweide, mdCentralCyl, mdCollignon, mdHorocyclic,
-  // 29..
+  mdMollweide, mdCentralCyl, mdCollignon, mdHorocyclic, mdQuadrant, mdAxial, mdAntiAxial,
+  // 32..
   mdGUARD, mdPixel, mdHyperboloidFlat, mdPolynomial, mdManual
   };
 #endif
@@ -1016,6 +1016,9 @@ EX vector<modelinfo> mdinf = {
   {X3("central cylindrical"), mf::euc_boring | mf::band, DEFAULTS},
   {X3("Collignon"), mf::pseudoband | mf::equiarea, DEFAULTS},
   {X3("horocyclic coordinates"), mf::euc_boring, DEFAULTS},
+  {X3("quadrant coordinates"), mf::euc_boring, DEFAULTS},
+  {X3("axial coordinates"), mf::euc_boring, DEFAULTS},
+  {X3("anti-axial coordinates"), mf::euc_boring, DEFAULTS},
   {X3("guard"), 0, DEFAULTS},
   {X3("polynomial"), mf::conformal, DEFAULTS},
   };

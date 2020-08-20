@@ -262,14 +262,19 @@ void add1(const hyperpoint& H) {
   glcoords.push_back(glhr::pointtogl(H)); 
   }  
 
+int axial_sign() {
+  return ((axial_x ^ axial_y)&1) ? -1:1;
+  }
+
 bool is_behind(const hyperpoint& H) {
+  if(pmodel == mdAxial && sphere) return axial_sign() * H[2] <= BEHIND_LIMIT;
   return pmodel == mdDisk && (hyperbolic ? H[2] >= 0 : true) && (nonisotropic ? false : pconf.alpha + H[2] <= BEHIND_LIMIT);
   }
 
 hyperpoint be_just_on_view(const hyperpoint& H1, const hyperpoint &H2) {
   // H1[2] * t + H2[2] * (1-t) == BEHIND_LIMIT - pconf.alpha
   // H2[2]- BEHIND_LIMIT + pconf.alpha = t * (H2[2] - H1[2])
-  ld t = (H2[2] - BEHIND_LIMIT + pconf.alpha) / (H2[2] - H1[2]);
+  ld t = (axial_sign() * H2[2] - BEHIND_LIMIT + (pmodel == mdAxial ? 0 : pconf.alpha)) / (H2[2] - H1[2]) * axial_sign();
   return H1 * t + H2 * (1-t);
   }
 
@@ -2135,6 +2140,16 @@ EX void draw_main() {
       // glflush();
       }
     #endif
+    }
+  else if(pmodel == mdAxial && sphere) {
+    for(auto& ptd: ptds) if(ptd->prio == PPR::OUTCIRCLE)
+      ptd->draw();
+    for(axial_x=-4; axial_x<=4; axial_x++) 
+    for(axial_y=-4; axial_y<=4; axial_y++) 
+    for(auto& ptd: ptds) if(ptd->prio != PPR::OUTCIRCLE) {
+      ptd->draw();
+      }
+    glflush();
     }
   else {
     DEBB(DF_GRAPH, ("draw_main1"));

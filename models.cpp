@@ -205,7 +205,7 @@ EX namespace models {
   
   EX bool has_orientation(eModel m) {
     return
-      among(m, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral, mdSimulatedPerspective, mdTwoHybrid, mdHorocyclic) || mdBandAny();
+      among(m, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral, mdSimulatedPerspective, mdTwoHybrid, mdHorocyclic, mdAxial, mdAntiAxial, mdQuadrant) || mdBandAny();
     }
   
   EX bool is_perspective(eModel m) {
@@ -218,7 +218,7 @@ EX namespace models {
     }
   
   EX bool has_transition(eModel m) {
-    return among(m, mdJoukowsky, mdJoukowskyInverted, mdBand) && GDIM == 2;
+    return among(m, mdJoukowsky, mdJoukowskyInverted, mdBand, mdAxial) && GDIM == 2;
     }
   
   EX bool product_model(eModel m) {

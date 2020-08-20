@@ -343,6 +343,8 @@ hyperpoint compute_hybrid(hyperpoint H, int rootid) {
 
 EX ld signed_sqrt(ld x) { return x > 0 ? sqrt(x) : -sqrt(-x); }
 
+EX int axial_x, axial_y;
+
 EX void applymodel(shiftpoint H_orig, hyperpoint& ret) {
 
   hyperpoint H = H_orig.h;
@@ -483,6 +485,73 @@ EX void applymodel(shiftpoint H_orig, hyperpoint& ret) {
       if(MAXMDIM == 4) ret[3] = 1;
       if(zlev != 1 && current_display->stereo_active()) 
         apply_depth(ret, -H[1] * geom3::factor_to_lev(zlev));
+      break;
+      }
+    
+    case mdAxial: {
+      models::apply_orientation_yz(H[1], H[2]);
+      models::apply_orientation(H[0], H[1]);
+      
+      ld& mt = pconf.model_transition;
+      
+      ld z = H[LDIM];
+      if(mt != 1) z += (1-mt) * pconf.alpha;
+
+      ret[0] = H[0] / z;
+      ret[1] = H[1] / z;
+      if(GDIM == 3) ret[2] = H[2] / z;
+      else ret[2] = 0;
+      ret[3] = 1;
+      
+      if(mt) for(int i=0; i<LDIM; i++)  {
+        if(mt < 1) 
+          ret[i] *= mt;
+        ret[i] = atan_auto(ret[i]);
+        if(mt < 1) 
+          ret[i] /= mt;
+        }
+      
+      if(sphere) ret[0] += axial_x * M_PI, ret[1] += axial_y * M_PI;
+
+      models::apply_orientation(ret[1], ret[0]);
+      models::apply_orientation_yz(ret[2], ret[1]);
+      break;
+      }
+    
+    case mdAntiAxial: {
+      models::apply_orientation_yz(H[1], H[2]);
+      models::apply_orientation(H[0], H[1]);
+      
+      ret[0] = asin_auto(H[0]);
+      ret[1] = asin_auto(H[1]);
+
+      ret[2] = 0; ret[3] = 1;
+
+      models::apply_orientation(ret[1], ret[0]);
+      models::apply_orientation_yz(ret[2], ret[1]);
+      break;
+      }
+    
+    case mdQuadrant: {
+      H = space_to_perspective(H);
+      models::apply_orientation_yz(H[1], H[2]);
+      models::apply_orientation(H[0], H[1]);
+      
+      tie(H[0], H[1]) = make_pair((H[0] + H[1]) / sqrt(2), (H[1] - H[0]) / sqrt(2));
+
+      H[1] += 1;
+      double rad = sqhypot_d(GDIM, H);
+      H /= -rad;
+      H[1] += .5;
+      
+      H *= 2;
+      
+      ld x = exp(-H[0]/2);
+      ret[0] = -H[1] * x - 1;
+      ret[1] = H[1] / x + 1;
+
+      models::apply_orientation(ret[1], ret[0]);
+      models::apply_orientation_yz(ret[2], ret[1]);
       break;
       }
     
