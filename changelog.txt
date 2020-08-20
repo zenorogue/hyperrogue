@@ -4096,3 +4096,11 @@ Geometries:
 - fixed raycaster in twisted geometries; weirdly twisted spherical geometry
 - draw crosshair even if nohud
 - an attempt to fix/debug the crash that some people are reporting on loading a saved game
+
+2020-08-20 16:47 Update 11.3y:
+- Chaos Mode unlocking should be fixed
+- correct error message when trying to move from Rock III to a wall
+- Speed Witches are no longer incorrectly considered as threats (but Flash Witches are real threats!)
+- three new projections
+- Camelot help now mentions Crossroads IV
+- fixed premature victory screen in minesweeper
