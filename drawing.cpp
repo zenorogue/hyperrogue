@@ -2308,6 +2308,8 @@ EX void drawqueue() {
   if(!keep_curvedata) {
     curvedata.clear(); curvestart = 0;
     }
+  
+  GLERR("drawqueue");
   }
 
 #if HDR
