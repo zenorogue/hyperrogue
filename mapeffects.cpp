@@ -474,7 +474,7 @@ EX void explodeMine(cell *c) {
   c->wall = waMineOpen;
   explosion(c, 20, 20);
   #if CAP_COMPLEX2
-  mine::auto_teleport_charges();
+  changes.at_commit(mine::auto_teleport_charges);
   #endif
   }
 
