@@ -1299,11 +1299,18 @@ EX void cast() {
   
   int ray_fixes = 0;
   
+  transmatrix msm = stretch::mstretch_matrix;
+
   back:
   for(int a=0; a<cs->type; a++)
     if(hdist0(hybrid::ray_iadj(cs, a) * tC0(T)) < hdist0(tC0(T))) {
       println(hlog, "ray error");
       T = currentmap->iadj(cs, a) * T;
+      if(o->uToOrig != -1) {
+        transmatrix HT = currentmap->adj(cs, a);
+        HT = stretch::itranslate(tC0(HT)) * HT;
+        msm = HT * msm;
+        }
       cs = cs->move(a);
       ray_fixes++;
       if(ray_fixes > 100) return;
