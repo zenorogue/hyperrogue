@@ -104,7 +104,7 @@ void set_cell(cell *c) {
 
 bool qtm_on;
 
-bool may_set_cell(cell *c, const shiftmatrix& T) {
+bool may_set_cell(cell *c, int d, cell *from) {
   if(qtm_on) set_cell(c);
   return false;
   }
@@ -219,7 +219,7 @@ int args() {
 
 
 
-auto hooks = addHook(hooks_drawcell, 100, may_set_cell)
+auto hooks = addHook(hooks_cellgen, 100, may_set_cell)
   + addHook(hooks_args, 100, args);
 
 }
