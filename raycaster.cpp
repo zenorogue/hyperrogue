@@ -1794,6 +1794,11 @@ int readArgs() {
     PHASEFROM(2);
     shift(); max_iter_current() = argi();
     }
+  else if(argis("-ray-step")) {
+    PHASEFROM(2);
+    println(hlog, "maxstep_current() is ", maxstep_current());
+    shift_arg_formula(maxstep_current());
+    }
   else if(argis("-ray-cells")) {
     PHASEFROM(2); shift();
     rays_generate = true;
