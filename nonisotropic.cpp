@@ -2899,6 +2899,7 @@ EX namespace nisot {
       PHASEFROM(2);
       auto& M = stretch::m_atoi;
       M = Id;
+      stretch::enable_mstretch();
       while(true) {
         shift();
         string s = args();
