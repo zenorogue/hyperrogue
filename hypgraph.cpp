@@ -1557,7 +1557,7 @@ EX void optimizeview() {
   cell *c = centerover;
   transmatrix iView = inverse(View);
   virtualRebase(centerover, iView);
-  if(c != centerover && (sphere || sl3)) {
+  if(c != centerover && (sphere || sl2)) {
     transmatrix T = currentmap->relative_matrix(centerover, c, C0);
     T = stretch::itranslate(tC0(T)) * T;
     stretch::mstretch_matrix = T * stretch::mstretch_matrix;
