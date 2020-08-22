@@ -109,6 +109,7 @@ struct raycaster : glhr::GLprogram {
   GLint uPosX, uPosY;
   GLint uWallOffset, uSides;
   GLint uITOA, uATOI;
+  GLint uToOrig, uFromOrig;
   
   raycaster(string vsh, string fsh);
   };
@@ -155,6 +156,8 @@ raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     
     uITOA = glGetUniformLocation(_program, "uITOA");
     uATOI = glGetUniformLocation(_program, "uATOI");
+    uToOrig = glGetUniformLocation(_program, "uToOrig");
+    uFromOrig = glGetUniformLocation(_program, "uFromOrig");
     }
 
 shared_ptr<raycaster> our_raycaster;
@@ -391,20 +394,31 @@ void enable_raycaster() {
       "  mediump vec4 tangent = vw * at0;\n";
       
     if(stretch::in()) {
-      fmain += 
-        "tangent = s_itranslate(position) * tangent;\n";
       if(stretch::mstretch) {
         fsh += "mediump uniform mat4 uITOA;\n";
         fsh += "mediump uniform mat4 uATOI;\n";
+        fsh += "mediump uniform mat4 uToOrig;\n";
+        fsh += "mediump uniform mat4 uFromOrig;\n";
+        fsh += "mediump mat4 toOrig;\n";
+        fsh += "mediump mat4 fromOrig;\n";
+        fmain +=
+          "toOrig = uToOrig;\n"
+          "fromOrig = uFromOrig;\n";
+        fmain += 
+          "tangent = s_itranslate(toOrig * position) * toOrig * tangent;\n";
         fmain += 
           "tangent = uITOA * tangent;\n";
+        fmain += 
+          "tangent = fromOrig * s_translate(toOrig * position) * tangent;\n";
         }
-      else 
+      else {
+        fmain += 
+          "tangent = s_itranslate(position) * tangent;\n";
         fmain +=
           "tangent[2] /= " + to_glsl(stretch::not_squared()) + ";\n";
-      fmain +=
-        "tangent = s_translate(position) * tangent;\n";
-        ;
+        fmain +=
+          "tangent = s_translate(position) * tangent;\n";
+        }
       }
     
     if(bi) fmain += "  walloffset = uWallOffset; sides = uSides;\n";
@@ -605,9 +619,9 @@ void enable_raycaster() {
           "}\n";
         if(stretch::mstretch) {
           fsh += "mediump vec4 christoffel(mediump vec4 pos, mediump vec4 vel, mediump vec4 tra) {\n"
-            "vel = s_itranslate(pos) * vel;\n"
-            "tra = s_itranslate(pos) * tra;\n"
-            "return s_translate(pos) * vec4(\n";
+            "vel = s_itranslate(toOrig * pos) * toOrig * vel;\n"
+            "tra = s_itranslate(toOrig * pos) * toOrig * tra;\n"
+            "return fromOrig * s_translate(toOrig * pos) * vec4(\n";
           
           for(int i=0; i<3; i++) {
             auto &c = stretch::ms_christoffel;
@@ -926,7 +940,7 @@ void enable_raycaster() {
       
       if((stretch::in() || sl2) && use_christoffel) {
         fmain += 
-          "tangent = s_itranslate(position) * tangent;\n"
+          "tangent = s_itranslate(toOrig * position) * toOrig * tangent;\n"
           "tangent[3] = 0.;\n";
         if(stretch::mstretch)
           fmain +=
@@ -937,7 +951,7 @@ void enable_raycaster() {
               + to_glsl(stretch::squared()) + " * tangent.z * tangent.z;\n";
         fmain +=      
           "tangent /= sqrt(nvelsquared);\n"
-          "tangent = s_translate(position) * tangent;\n";
+          "tangent = fromOrig * s_translate(toOrig * position) * tangent;\n";
         }
       }
     else fmain += 
@@ -1131,7 +1145,13 @@ void enable_raycaster() {
       "  int mid = int(connection.z * 1024.);\n"
       "  mediump mat4 m = " GET("uM", "mid") " * " GET("uM", "walloffset+which") ";\n"
       "  position = m * position;\n"
-      "  tangent = m *  tangent;\n";
+      "  tangent = m * tangent;\n";
+    
+    if(stretch::mstretch) fmain += 
+      "  m = s_itranslate(m*vec4(0,0,0,1)) * m;"
+      "  fromOrig = m * fromOrig;\n"
+      "  m[0][1] = -m[0][1]; m[1][0] = -m[1][0];\n" // inverse
+      "  toOrig = toOrig * m;\n";
     
     if(bi) {
       fmain += 
@@ -1327,6 +1347,11 @@ EX void cast() {
   if(o->uITOA != -1) {
     glUniformMatrix4fv(o->uITOA, 1, 0, glhr::tmtogl_transpose3(stretch::m_itoa).as_array());   
     glUniformMatrix4fv(o->uATOI, 1, 0, glhr::tmtogl_transpose3(stretch::m_atoi).as_array());   
+    }
+
+  if(o->uToOrig != -1) {
+    glUniformMatrix4fv(o->uToOrig, 1, 0, glhr::tmtogl_transpose3(msm).as_array());   
+    glUniformMatrix4fv(o->uFromOrig, 1, 0, glhr::tmtogl_transpose3(inverse(msm)).as_array());   
     }
   
   if(o->uWallOffset != -1) {

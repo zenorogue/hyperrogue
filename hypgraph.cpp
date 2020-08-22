@@ -1554,8 +1554,15 @@ EX void optimizeview() {
   if(subscreens::split(optimizeview)) return;
   if(dual::split(optimizeview)) return;
   
+  cell *c = centerover;
   transmatrix iView = inverse(View);
   virtualRebase(centerover, iView);
+  if(c != centerover && (sphere || sl3)) {
+    transmatrix T = currentmap->relative_matrix(centerover, c, C0);
+    T = stretch::itranslate(tC0(T)) * T;
+    stretch::mstretch_matrix = T * stretch::mstretch_matrix;
+    }
+    
   View = inverse(iView);
   fixmatrix(View);
 
@@ -1594,6 +1601,7 @@ EX void resetview() {
   DEBBI(DF_GRAPH, ("reset view"));
   // EUCLIDEAN
   NLP = Id;
+  stretch::mstretch_matrix = Id;
   auto lView = View;
   if(cwt.at) {
     centerover = cwt.at;
