@@ -2764,6 +2764,8 @@ EX void set_land_for_geometry(cell *c) {
   else if(weirdhyperbolic) setLandWeird(c);
   }
 
+EX hookset<bool(cell *c, int d, cell *from)> hooks_cellgen;
+
 EX void setdist(cell *c, int d, cell *from) {
 
   if(fake::in()) return FPIU(setdist(c, d, from));
@@ -2956,6 +2958,8 @@ EX void setdist(cell *c, int d, cell *from) {
       crystal::may_place_compass(c);
     #endif
     }
+
+  callhandlers(false, hooks_cellgen, c, d, from);
 
   if(PURE && c->wall == waMirrorWall && c->land == laMirror)
     c->land = laMirrorWall; // , c->item = itPirate; // not really a proper bugfix
