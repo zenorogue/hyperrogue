@@ -213,7 +213,7 @@ EX color_t darkena(color_t c, int lev, int a) {
   }
 
 #if !CAP_GL
-void setcameraangle(bool b) { }
+EX void setcameraangle(bool b) { }
 #endif
 
 #if !CAP_GL
