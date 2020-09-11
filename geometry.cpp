@@ -530,6 +530,8 @@ void geometry_information::prepare_basics() {
   if(elliptic && S7 == 4 && !fake::in()) tessf = M_PI/2;
   
   hcrossf = euclid ? tessf / 2 / sin(M_PI/s3) : edge_of_triangle_with_angles(M_PI/2, M_PI/S7, beta/2);
+  
+  if(S3 >= OINF) hcrossf = 10;
 
   crossf = BITRUNCATED ? hcrossf : tessf;
   
