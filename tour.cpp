@@ -455,13 +455,23 @@ EX namespace ss {
     }
 
   EX }
+
+EX void initialize_slides() {
+  dynamicval<int> cs(currentslide, 0);
+  for(currentslide=0;; currentslide++) {
+    presentation(pmStartAll);
+    if(slides[currentslide].flags & FINALSLIDE) break;
+    }
+  }
   
 EX void start() {
   currentslide = 0;
   pconf.scale = 1;
   pconf.alpha = 1;
   pmodel = mdDisk;
-  if(!tour::on) presentation(pmStartAll);
+  if(!tour::on) {
+    initialize_slides();
+    }
   else {
     presentation(pmStop);
     stop_game();
