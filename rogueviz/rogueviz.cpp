@@ -1235,9 +1235,9 @@ auto hooks  =
   addHook(hooks_o_key, 100, o_key) +
   
 #if CAP_RVSLIDES
-  addHook(tour::ss::hooks_extra_slideshows, 100, [] (slideshow_callback cb) {
-    if(rvslides.empty()) rvtour::gen_rvtour();
-    cb(XLAT("RogueViz Tour"), &rvtour::rvslides[0], 'r');
+  addHook(tour::ss::hooks_extra_slideshows, 100, [] (tour::ss::slideshow_callback cb) {
+    if(rogueviz::rvtour::rvslides.empty()) rvtour::gen_rvtour();
+    cb(XLAT("RogueViz mixed bag"), &rvtour::rvslides[0], 'r');
     }) +
 #endif
   
