@@ -1755,6 +1755,12 @@ EX transmatrix atscreenpos(ld x, ld y, ld size) {
     V[1][1] = size * 2 * cgi.hcrossf / cgi.crossf;
     if(WDIM == 3) V[2][2] = -1;
     }
+  else if(pmodel == mdHorocyclic) {
+    V[0][3] += (x - current_display->xcenter) * 2 / current_display->radius;
+    V[1][3] += (y - current_display->ycenter) * 2/ current_display->radius;
+    V[0][0] = size * 2 / current_display->radius;
+    V[1][1] = size * 2 / current_display->radius;
+    }
   else { 
     V[0][2] += (x - current_display->xcenter);
     V[1][2] += (y - current_display->ycenter);
