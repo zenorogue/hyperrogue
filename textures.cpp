@@ -38,15 +38,18 @@ enum eTextureState {
 struct texture_data {
   GLuint textureid;
 
-  int twidth;
+  int twidth, theight;
+  bool stretched;
   int tx, ty, origdim;
   
-  texture_data() { textureid = 0; twidth = 2048; }
+  int strx, stry, base_x, base_y;
+  
+  texture_data() { textureid = 0; twidth = 2048; theight = 0; stretched = false; }
 
   vector<color_t> texture_pixels;
 
   color_t& get_texture_pixel(int x, int y) {
-    return texture_pixels[(y&(twidth-1))*twidth+(x&(twidth-1))];
+    return texture_pixels[(y&(theight-1))*twidth+(x&(twidth-1))];
     }
   
   vector<pair<color_t*, color_t>> undos;
@@ -207,7 +210,7 @@ bool texture_data::loadTextureGL() {
   // BGRA may be not supported in the web version
   if(ISWEB) for(auto& p: texture_pixels) swap(part(p, 0), part(p, 2));
   
-  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, twidth, twidth, 0,
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, twidth, theight, 0,
     ISWEB ? GL_RGBA : GL_BGRA, GL_UNSIGNED_BYTE, 
     &texture_pixels[0] );
 
@@ -219,7 +222,8 @@ bool texture_data::loadTextureGL() {
 bool texture_data::whitetexture() {
   undos.clear();
   texture_pixels.resize(0);
-  texture_pixels.resize(twidth * twidth, 0xFFFFFFFF);
+  if(theight == 0) theight = twidth;
+  texture_pixels.resize(twidth * theight, 0xFFFFFFFF);
   pixels_to_draw.clear();
   return true;
   }
@@ -228,7 +232,6 @@ bool texture_data::readtexture(string tn) {
 
 #if CAP_SDL_IMG || CAP_PNG
   undos.clear();
-  texture_pixels.resize(twidth * twidth);
   
 #if CAP_SDL_IMG  
   SDL_Surface *txt = IMG_Load(tn.c_str());
@@ -298,32 +301,51 @@ bool texture_data::readtexture(string tn) {
   printf("texture read OK\n");
 
 #endif
+
+  if(twidth == 0) 
+    twidth = next_p2(tx);
+  if(theight == 0) theight = stretched ? next_p2(ty) : twidth;
+
+  texture_pixels.resize(twidth * theight);
+
+  if(stretched) {
+    int i = 0;
+    println(hlog, tx, " -> " , twidth, " / " , ty, " -> ", theight);
+    for(int y=0; y<theight; y++)
+    for(int x=0; x<twidth; x++)
+      texture_pixels[i++] = pix(x * tx / twidth, y * ty / theight);
+    strx = twidth; stry = theight; base_x = base_y = 0;
+    }
   
-  if(tx == twidth && ty == twidth) {
+  else if(tx == twidth && ty == theight) {
     int i = 0;
     for(int y=0; y<ty; y++)
     for(int x=0; x<tx; x++)
       texture_pixels[i++] = pix(x, y);
+    strx = twidth; stry = theight; base_x = base_y = 0;
     }
    
   else {
   
     origdim = max(tx, ty);
-    int base_x = tx/2 - origdim/2;
-    int base_y = ty/2 - origdim/2;
-  
+    base_x = origdim/2 - tx/2;
+    base_y = origdim/2 - ty/2;
+    
+    strx = twidth * tx / origdim;
+    stry = theight * ty / origdim;
+
     qpixel_pixel_outside = 0; // outside is black
   
     vector<int> half_expanded(twidth * ty);  
     for(int y=0; y<ty; y++)
       scale_colorarray(origdim, twidth,
-        [&] (int x) { return pix(base_x + x,y); },
+        [&] (int x) { return pix(x - base_x,y); },
         [&] (int x, int v) { half_expanded[twidth * y + x] = v; }
         );
 
     for(int x=0; x<twidth; x++)
       scale_colorarray(origdim, twidth,
-        [&] (int y) { return base_y+y < 0 || base_y+y >= ty ? 0 : half_expanded[x + (base_y + y) * twidth]; }, 
+        [&] (int y) { return y-base_y < 0 || y-base_y >= ty ? 0 : half_expanded[x + (y-base_y) * twidth]; }, 
         [&] (int y, int v) { get_texture_pixel(x, y) = v; }
         );
     
