@@ -458,8 +458,12 @@ public:
             prio++;
         }
         map_->emplace(prio, static_cast<U&&>(hook));
-        return 0;
+        return prio;
     }
+
+    void del(int prio) {
+        map_->erase(prio);
+        }
 
     template<class... U>
     void callhooks(U&&... args) const {
@@ -707,6 +711,10 @@ static const int DISTANCE_UNKNOWN = 127;
 
 template<class T, class U> int addHook(hookset<T>& m, int prio, U&& hook) {
   return m.add(prio, static_cast<U&&>(hook));
+  }
+
+template<class T> void delHook(hookset<T>& m, int prio) {
+  m.del(prio);
   }
 
 template<class T, class... U> void callhooks(const hookset<T>& h, U&&... args) {
