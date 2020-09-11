@@ -317,6 +317,8 @@ EX namespace euc {
   EX map<heptagon*, coord>& get_ispacemap() { return cubemap()->ispacemap; }
   EX cell *& get_camelot_center() { return cubemap()->camelot_center; }
 
+  EX heptagon* get_at(coord co) { return cubemap()->get_at(co); }
+
   EX hrmap* new_map() {
     return new hrmap_euclidean;
     }
