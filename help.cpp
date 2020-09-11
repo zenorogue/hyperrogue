@@ -807,6 +807,10 @@ int windtotal;
 
 EX hookset<void(cell*)> hooks_mouseover;
 
+template<class T> void set_help_to(T t) { 
+  help = bygen([t] { gotoHelpFor(t); });
+  }
+
 EX void describeMouseover() {
   DEBBI(DF_GRAPH, ("describeMouseover"));
 
@@ -815,7 +819,7 @@ EX void describeMouseover() {
   if(!c || instat || getcstat != '-') { }
   else if(c->wall != waInvisibleFloor) {
     out = XLAT1(linf[c->land].name);
-    help = bygen([c] () { gotoHelpFor(c->land); });
+    set_help_to(c->land);
     
     if(WDIM == 3 && isGravityLand(c->land)) out += " [" + its(gravityLevel(c)) + "]";
     
@@ -912,7 +916,7 @@ EX void describeMouseover() {
         if(c->wall != waSea && c->wall != waPalace && c->wall != waDeadfloor)
         if(!((c->wall == waCavefloor || c->wall == waCavewall) && (c->land == laEmerald || c->land == laCaves)))
         if(!((isAlch(c->wall) && c->land == laAlchemist)))
-          help = bygen([c] () { gotoHelpFor(c->wall); });
+          set_help_to(c->wall);
       }
     
     if(isActivable(c)) out += XLAT(" (touch to activate)");
@@ -936,8 +940,8 @@ EX void describeMouseover() {
 
       if(c->monst == moTortoise && tortoise::seek()) 
         out += " " + tortoise::measure(tortoise::getb(c));
-
-      help = bygen([c] () { gotoHelpFor(c->monst); });
+        
+      set_help_to(c->monst);
       }
   
     if(c->item && !itemHiddenFromSight(c)) {
@@ -950,8 +954,7 @@ EX void describeMouseover() {
         }
       if(c->item == itBabyTortoise && tortoise::seek()) 
         out += " " + tortoise::measure(tortoise::babymap[c]);
-      if(!c->monst) 
-        help = bygen([c] () { gotoHelpFor(c->item); });
+      if(!c->monst) set_help_to(c->item);
       }
     
     if(isPlayerOn(c) && !shmup::on) out += XLAT(", you"), help = generateHelpForMonster(moPlayer);
