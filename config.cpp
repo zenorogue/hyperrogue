@@ -2586,6 +2586,10 @@ EX int read_config_args() {
     PHASEFROM(2);
     shift(); smooth_scrolling = argi();
     }
+  else if(argis("-via-shader")) {
+    PHASEFROM(2);
+    shift(); vid.consider_shader_projection = argi();
+    }
   else if(argis("-neonnf")) {
     PHASEFROM(2);
     shift(); neon_nofill = argi();
