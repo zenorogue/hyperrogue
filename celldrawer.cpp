@@ -1634,7 +1634,8 @@ void celldrawer::draw_features_and_walls_3d() {
         if(pmodel == mdPerspective && !sphere && !quotient && !kite::in() && !nonisotropic && !hybri && !experimental && !nih) {
           if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(centerover)) continue;
           else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(centerover)) continue;
-          else if(c->move(a)->master->distance > c->master->distance && c->master->distance > centerover->master->distance && !quotient) continue;
+          // this optimization is not correct, need to fix
+          // else if(c->move(a)->master->distance > c->master->distance && c->master->distance > centerover->master->distance && !quotient) continue;
           }
         else if(sol && in_perspective() && !nih && !asonov::in()) {
           ld b = vid.binary_width * log(2) / 2;
