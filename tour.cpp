@@ -384,14 +384,24 @@ EX namespace ss {
   EX string current_folder;
 
   string slidechars = "abcdefghijklmnopqrsvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ23456789!@#$%^&*(";
+    
+  #if HDR
+  using slideshow_callback = function<void(string, slide*, char)>;
+  #endif
   
-  EX hookset<int(bool)> hooks_extra_slideshows;
-
+  EX hookset<void(slideshow_callback)> hooks_extra_slideshows;
+  
+  EX void for_all_slideshows(const slideshow_callback& cb) {
+    cb(XLAT("Guided Tour"), default_slides, 't');
+    callhooks(hooks_extra_slideshows, cb);
+    }
+  
   EX void slideshow_menu() {
     dialog::init(XLAT("slideshows"), forecolor, 150, 100);
-    dialog::addBoolItem(XLAT("Guided Tour"), wts == default_slides, 't');
-    dialog::add_action([] { wts = default_slides; popScreen(); });
-    callhooks(hooks_extra_slideshows, true);
+    for_all_slideshows([] (string title, slide *sl, char ch) {
+      dialog::addBoolItem(title, wts == sl, ch);
+      dialog::add_action([sl] { wts = sl; popScreen(); });
+      });
     dialog::addBack();
     dialog::display();
     }
@@ -445,8 +455,11 @@ EX namespace ss {
         });
       }
     dialog::addBreak(50);
-    bool b = false;
-    if(callhandlers(0, hooks_extra_slideshows, b)) {
+    int cnt = 0;
+
+    for_all_slideshows([&] (string title, slide *sl, char ch) { cnt++; });
+
+    if(cnt > 1) {
       dialog::addItem(XLAT("change slideshow"), '1');
       dialog::add_action_push(slideshow_menu);
       }

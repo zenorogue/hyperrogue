@@ -1235,11 +1235,9 @@ auto hooks  =
   addHook(hooks_o_key, 100, o_key) +
   
 #if CAP_RVSLIDES
-  addHook(tour::ss::hooks_extra_slideshows, 100, [] (bool view) {
-    if(!view) return 1;
-    dialog::addBoolItem(XLAT("RogueViz Tour"), tour::ss::wts == &rvtour::rvslides[0], 'r');
-    dialog::add_action([] { tour::ss::wts = rvtour::gen_rvtour(); popScreen(); });    
-    return 0;
+  addHook(tour::ss::hooks_extra_slideshows, 100, [] (slideshow_callback cb) {
+    if(rvslides.empty()) rvtour::gen_rvtour();
+    cb(XLAT("RogueViz Tour"), &rvtour::rvslides[0], 'r');
     }) +
 #endif
   
