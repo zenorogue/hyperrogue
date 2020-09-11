@@ -845,7 +845,7 @@ void geometry_information::make_3d_models() {
     }
 #endif
   
-  if(WDIM == 2) {
+  if(WDIM == 2 || euclid) {
     DEBB(DF_POLY, ("shadows"));
     for(hpcshape* sh: {&shBatWings, &shBugBody, &shBullBody, &shButterflyWing, &shCatBody, &shDogBody, &shDogTorso,
       &shEagle, &shFemaleBody, &shFlailMissile, &shGadflyWing, &shGargoyleWings, &shHawk, &shJiangShi, &shKnife,
