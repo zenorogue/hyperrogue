@@ -204,6 +204,8 @@ EX namespace models {
     }    
   
   EX bool has_orientation(eModel m) {
+    if(m == mdHorocyclic)
+      return hyperbolic;
     return
       among(m, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral, mdSimulatedPerspective, mdTwoHybrid, mdHorocyclic, mdAxial, mdAntiAxial, mdQuadrant) || mdBandAny();
     }
