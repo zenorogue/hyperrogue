@@ -127,7 +127,7 @@ namespace rogueviz {
   void close();
   extern bool showlabels;
   
-  namespace rvtour {
+  namespace pres {
     using namespace hr::tour;
     inline hookset<void(vector<slide>&)> hooks_build_rvtour;
     slide *gen_rvtour();
