@@ -90,6 +90,7 @@ struct escher_floorshape : floorshape {
 struct basic_textureinfo {
   int texture_id;
   vector<glvertex> tvertices; 
+  vector<glvertex> colors; 
   };
 
 /** basic geometry parameters */

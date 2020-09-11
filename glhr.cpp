@@ -729,6 +729,29 @@ EX void vertices_texture(const vector<glvertex>& v, const vector<glvertex>& t, i
   #endif
   }
 
+EX void vertices_texture_color(const vector<glvertex>& v, const vector<glvertex>& t, const vector<glvertex>& c, int vshift IS(0), int tshift IS(0)) {
+  #if CAP_VERTEXBUFFER
+  int q = min(isize(v)-vshift, isize(t)-tshift);
+  vector<ct_vertex> tv(q);
+  for(int i=0; i<q; i++)
+    tv[i].coords = v[vshift+i],
+    tv[i].texture[0] = t[tshift+i][0],
+    tv[i].texture[1] = t[tshift+i][1],
+    tv[i].color = c[tshift+i];
+  prepare(tv);
+  #else
+  vertices(v, vshift);
+  WITHSHADER({
+    glVertexAttribPointer(aTexture, SHDIM, GL_FLOAT, GL_FALSE, sizeof(glvertex), &t[tshift]);
+    glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(glvertex), &c[tshift]);
+    }, {
+    glTexCoordPointer(SHDIM, GL_FLOAT, 0, &t[tshift]);
+    glColorPointer(4, GL_FLOAT, sizeof(colored_vertex), &c[0]);
+    }
+    )
+  #endif
+  }
+
 EX void prepare(vector<colored_vertex>& v) {
   #if CAP_VERTEXBUFFER
   bindbuffer(v);
@@ -835,6 +858,7 @@ EX void switch_to_text(const vector<glvertex>& v, const vector<glvertex>& t) {
 
 EX void be_nontextured() { current_display->next_shader_flags = 0; }
 EX void be_textured() { current_display->next_shader_flags = GF_TEXTURE; }
+EX void be_color_textured() { current_display->next_shader_flags = GF_TEXTURE | GF_VARCOLOR; }
 
 EX }
 

@@ -598,10 +598,17 @@ void dqi_poly::gldraw() {
 #endif
   
   if(tinf) {
-    glhr::be_textured();
+    bool col = isize(tinf->colors);
+    if(col)
+      glhr::be_color_textured();
+    else
+      glhr::be_textured();
     if(flags & POLY_SHADE_TEXTURE) current_display->next_shader_flags |= GF_TEXTURE_SHADED;
     glBindTexture(GL_TEXTURE_2D, tinf->texture_id);
-    glhr::vertices_texture(v, tinf->tvertices, offset, offset_texture);
+    if(isize(tinf->colors))
+      glhr::vertices_texture_color(v, tinf->tvertices, tinf->colors, offset, offset_texture);
+    else
+      glhr::vertices_texture(v, tinf->tvertices, offset, offset_texture);
     ioffset = 0;
     }
   else { 
