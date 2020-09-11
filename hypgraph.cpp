@@ -2426,4 +2426,48 @@ EX void shift_view_towards(shiftpoint H, ld l) {
     }
   }
 
+EX void set_view(hyperpoint camera, hyperpoint forward, hyperpoint upward) {
+  transmatrix V = gpushxto0(camera);
+  forward = V * forward;
+  upward = V * upward;
+  
+  if(pmodel == mdGeodesic || hyperbolic || sphere) {
+    forward = inverse_exp(shiftless(forward));
+    }
+  else {
+    // apply_nil_rotation(forward);
+    forward -= C0;
+    }
+  
+  if(hypot_d(3, forward) == 0) forward[0] = 1;
+  
+  forward /= hypot_d(3, forward);
+
+  if(pmodel == mdGeodesic || hyperbolic || sphere)
+    upward = inverse_exp(shiftless(upward));
+  else {
+    // apply_nil_rotation(upward);
+    upward -= C0;
+    }
+
+  upward -= (forward|upward) * forward;
+  if(hypot_d(3, upward) == 0) return;
+
+  upward /= hypot_d(3, upward);
+
+  hyperpoint rightward = (forward ^ upward);
+  rightward -= (forward|rightward) * forward;
+  rightward -= (upward|rightward) * upward;
+  rightward /= hypot_d(3, rightward);
+  
+  transmatrix rotator = Id;
+  rotator[2] = forward;
+  rotator[1] = -upward;
+  rotator[0] = -rightward;
+  
+  if(det(rotator) < 0) rotator[0] = -rotator[0];
+  
+  View = rotator * inverse(rgpushxto0(camera));
+  }
+
 }
