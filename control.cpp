@@ -697,6 +697,7 @@ EX void mainloopiter() {
     frames++;
     if(!outoffocus) {
       drawscreen();
+      need_refresh = false;
       }
     lastframe = ticks;
     }      
@@ -779,7 +780,9 @@ EX void mainloopiter() {
   if(joydir.d != -1) checkjoy();
   #endif
   }
-  
+
+EX bool need_refresh;
+
 EX void handle_event(SDL_Event& ev) {
   bool normal = cmode & sm::NORMAL;
     DEBB(DF_GRAPH, ("got event type #%d\n", ev.type));
@@ -1010,6 +1013,15 @@ EX void handle_event(SDL_Event& ev) {
     if(sym == SDLK_F3 && anyshiftclick) {
       nofps = !nofps;
       sym = 0;
+      }
+    
+    if(sym || uni) {
+      if(need_refresh) {
+        just_refreshing = true;
+        screens.back()();
+        just_refreshing = false;
+        }
+      need_refresh = true;
       }
       
     handlekey(sym, uni);

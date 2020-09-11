@@ -4938,7 +4938,11 @@ EX void drawfullmap() {
 extern bool wclick;
 #endif
 
+EX bool just_refreshing;
+
 EX void gamescreen(int _darken) {
+
+  if(just_refreshing) return;
 
   if(subscreens::split([=] () {
     calcparam();
