@@ -1,0 +1,112 @@
+#include "../hyper.h"
+
+// implementation of this demo: https://twitter.com/ZenoRogue/status/1304130700870901761
+
+// compile with: ./mymake rogueviz/pentaroll.cpp
+
+// ./hyper -canvas-random 10 -noplayer -geo 534h -to-fq 72414D0C -pentaroll 1 -sight3 6 -animperiod 30000 -shot-1000
+
+// or -pentaroll 0 if you want to explore yourself
+
+namespace hr {
+
+bool animated;
+
+int args() {
+  using namespace arg;
+           
+  if(0) ;
+
+  else if(argis("-pentaroll")) {
+    PHASEFROM(3);
+    start_game();
+    
+    /* 1 = animated, 0 = not animated */
+    shift(); animated = argi();
+    
+    /* get the list of all close cells */
+    cell *c0 = currentmap->gamestart();
+    celllister cl(c0, 4, 1000, nullptr);
+    
+    /* construct the relative matrices for them */
+    map<cell*, transmatrix> rel;
+    rel[c0] = Id;
+    for(cell *c: cl.lst)
+      for(int i=0; i<c->type; i++)
+        if(rel.count(c->move(i)))
+          rel[c] = rel[c->move(i)] * currentmap->iadj(c, i);
+
+    /* the construction */
+    for(cell *c: cl.lst) {
+      int common = 0;
+      for(auto& v: cgi.vertices_only)
+      for(auto& w: cgi.vertices_only)
+        if(hdist(v, rel[c] * w) < 1e-6)
+          common++;
+        
+      setdist(c, 7, nullptr);
+      
+      if(c == c0) c->wall = waPalace;
+      else if(common > 0) c->wall = waNone;
+      }      
+    
+    c0->wall = waNone;
+    for(int i=1; i<=cgi.face; i++) {
+      int i0 = i;
+      if(cgi.face == 4 && i0 >= 3) i0++;
+      cellwalker cw(c0, i0);
+      cw.peek()->wall = waPlatform;      
+      if(cgi.face == 5)  {
+        cellwalker cw1 = reg3::strafe(cw, (i==1?cgi.face:i-1));
+        cw1.peek()->wall = waWaxWall;
+        cw1.peek()->landparam = hrand(0x1000000) | 0x808080;
+        }
+      }
+    }
+
+  else return 1;
+  return 0;
+  }
+
+auto hooks = 
+    addHook(hooks_args, 100, args)
++ addHook(anims::hooks_anim, 100, [] { 
+
+  if(!animated) return;
+  centerover = currentmap->gamestart();
+  
+  ld t = ticks * 20. / anims::period;
+  
+  int tb = int(t) % cgi.face;
+  
+  hyperpoint h1 = normalize(cgi.vertices_only[tb]);
+  hyperpoint h2 = normalize(cgi.vertices_only[(tb+1) % cgi.face]);
+  hyperpoint h3 = normalize(cgi.vertices_only[(tb+2) % cgi.face]);
+  
+  ld tf = t - floor(t);
+  
+  /* make it more smooth */
+  tf = tf * tf * (3-2*tf);
+  
+  hyperpoint h = lerp(h1, h2, tf);
+
+  h = normalize(h);
+  
+  set_view(h, h2, h3);  
+  
+  /* set_view does not orient correctly, so we rotate it */
+  
+  View = cspin(2, 0, M_PI/2) * View;
+  
+  /* we move the camera backward */
+
+  View = zpush(1) * View;
+  
+  /* we also need to rotate the view to make it smooth */
+  
+  View = spin(-(cgi.face == 4 ? 117 : 90) * degree * int(t)) * View;
+  
+  anims::moved();
+  });
+
+}
