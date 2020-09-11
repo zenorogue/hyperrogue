@@ -413,6 +413,7 @@ EX void initConfig() {
   addsaver(pconf.top_z, "topz", 5);
   addsaver(pconf.model_transition, "model transition", 1);
   addsaver(pconf.halfplane_scale, "halfplane scale", 1);
+  addsaver(pconf.rotational_nil, "rotnil", 1);
   addsaver(history::autoband, "automatic band");
   addsaver(history::autobandhistory, "automatic band history");
   addsaver(history::dospiral, "do spiral");

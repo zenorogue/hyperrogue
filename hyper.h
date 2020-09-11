@@ -256,9 +256,11 @@ struct projection_configuration {
   ld spiral_cone;
   ld skiprope;
   ld product_z_scale;
+  ld rotational_nil;
 
   projection_configuration() { 
     formula = "z^2"; top_z = 5; model_transition = 1; spiral_angle = 70; spiral_x = 10; spiral_y = 7; 
+    rotational_nil = 1;
     right_spiral_multiplier = 1;
     any_spiral_multiplier = 1;
     sphere_spiral_multiplier = 2;

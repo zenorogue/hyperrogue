@@ -345,6 +345,24 @@ EX ld signed_sqrt(ld x) { return x > 0 ? sqrt(x) : -sqrt(-x); }
 
 EX int axial_x, axial_y;
 
+EX void apply_perspective(const hyperpoint& H, hyperpoint& ret) {
+  if(H[2] == 0) { ret[0] = 1e6; ret[1] = 1e6; ret[2] = 1; return; }
+  ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
+  ret[0] = H[0]/H[2] * ratio;
+  ret[1] = H[1]/H[2] * ratio;
+  ret[2] = 1;
+  ret[3] = 1;
+  }
+
+EX void apply_nil_rotation(hyperpoint& H) {
+  if(nil) {
+    H[2] -= H[0] * H[1] / 2;
+    models::apply_orientation(H[0], H[1]);
+    H[2] += H[0] * H[1] / 2 * pconf.rotational_nil;
+    models::apply_orientation(H[1], H[0]);        
+    }
+  }
+
 EX void applymodel(shiftpoint H_orig, hyperpoint& ret) {
 
   hyperpoint H = H_orig.h;
@@ -360,22 +378,16 @@ EX void applymodel(shiftpoint H_orig, hyperpoint& ret) {
   
   switch(pmodel) {
     case mdPerspective: {
-      ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
       if(prod) H = product::inverse_exp(H);
+      apply_nil_rotation(H);
       H = lp_apply(H);
-      if(H[2] == 0) { ret[0] = 1e6; ret[1] = 1e6; ret[2] = 1; return; }
-      ret[0] = H[0]/H[2] * ratio;
-      ret[1] = H[1]/H[2] * ratio;
-      ret[2] = 1;
-      return;
+      apply_perspective(H, ret);
+      return;      
       }
 
     case mdGeodesic: {
       auto S = lp_apply(inverse_exp(H_orig, pNORMAL | pfNO_DISTANCE));
-      ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
-      ret[0] = S[0]/S[2] * ratio;
-      ret[1] = S[1]/S[2] * ratio;
-      ret[2] = 1;
+      apply_perspective(S, ret);
       return;
       }
       
@@ -558,19 +570,25 @@ EX void applymodel(shiftpoint H_orig, hyperpoint& ret) {
     case mdHorocyclic: {
 
       find_zlev(H);
+
+      apply_nil_rotation(H);
       
-      models::apply_orientation_yz(H[1], H[2]);
-      models::apply_orientation(H[0], H[1]);
+      if(hyperbolic) {
+        models::apply_orientation_yz(H[1], H[2]);
+        models::apply_orientation(H[0], H[1]);
+        }
       
       ret = hyperbolic ? deparabolic10(H) : H;
       ret *= .5;
       ret[LDIM] = 1;
-  
-      models::apply_orientation(ret[1], ret[0]);
-      models::apply_orientation_yz(ret[2], ret[1]);
+      
+      if(hyperbolic) {  
+        models::apply_orientation(ret[1], ret[0]);
+        models::apply_orientation_yz(ret[2], ret[1]);
+        }
       
       if(nonisotropic) ret = lp_apply(ret);
-      
+
       break;
       }
     

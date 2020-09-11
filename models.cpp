@@ -449,7 +449,18 @@ EX namespace models {
           });
         }
       }
-        
+     
+    if(among(vpmodel, mdPerspective, mdHorocyclic) && nil) {
+      dialog::addSelItem(XLAT("model orientation"), fts(vpconf.model_orientation) + "°", 'l');
+      dialog::add_action([] () {
+        dialog::editNumber(vpconf.model_orientation, 0, 360, 90, 0, XLAT("model orientation"), "");
+        });
+      dialog::addSelItem(XLAT("rotational or Heisenberg"), fts(vpconf.rotational_nil), 'L');
+      dialog::add_action([] () {
+        dialog::editNumber(vpconf.rotational_nil, 0, 1, 1, 1, XLAT("1 = Heisenberg, 0 = rotational"), "");
+        });
+      }
+
   if(GDIM == 3 && vpmodel != mdPerspective) {
     const string cliphelp = XLAT(
       "Your view of the 3D model is naturally bounded from four directions by your window. "
@@ -736,6 +747,10 @@ EX namespace models {
     else if(argis("-mori")) { 
       PHASEFROM(2); 
       shift_arg_formula(vpconf.model_orientation);
+      }
+    else if(argis("-mnil")) { 
+      PHASEFROM(2); 
+      shift_arg_formula(vpconf.rotational_nil);
       }
     else if(argis("-mori2")) { 
       PHASEFROM(2); 

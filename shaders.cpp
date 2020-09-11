@@ -269,6 +269,12 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     if(dim3) shader_flags |= SF_ZFOG;
     }
 
+  if(nil && pmodel == mdPerspective)  {
+    vsh += "uniform mediump float uRotCos, uRotSin, uRotNil;\n";
+    coordinator +=
+      "t.z += (uRotCos * t.x + uRotSin * t.y) * (uRotCos * t.y - uRotSin * t.x) * uRotNil / 2. - t.x * t.y / 2.;\n";
+    }
+
   if(!skip_t) {
     vmain += "mediump vec4 t = uMV * aPosition;\n";
     vmain += coordinator;
@@ -501,6 +507,12 @@ void display_data::set_projection(int ed, ld shift) {
     glhr::projection_multiply(glhr::scale(sc, -sc, -1));
     glhr::projection_multiply(glhr::translate(0, 0, pconf.alpha));
     if(ed) glhr::projection_multiply(glhr::translate(vid.ipd * ed/2, 0, 0));
+    }
+
+  if(selected->uRotNil != -1) {
+    glUniform1f(selected->uRotCos, models::ocos);
+    glUniform1f(selected->uRotSin, models::osin);
+    glUniform1f(selected->uRotNil, pconf.rotational_nil);
     }
 
   if(selected->uPP != -1) {
