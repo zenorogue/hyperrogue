@@ -416,7 +416,7 @@ void display_data::set_projection(int ed, ld shift) {
   #endif
   
   #if MAXMDIM >= 4
-  if(selected->tAirMap != -1) {
+  if(selected->tAirMap != -1 && airbuf) {
     glActiveTexture(GL_TEXTURE0 + AIR_BINDING);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
