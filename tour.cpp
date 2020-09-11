@@ -134,6 +134,7 @@ EX void presentation(presmode mode) {
   
   slides[currentslide].action(mode);
   callhooks(hooks_slide, mode);
+  if(mode == pmStop) slide_restore_all();
   }
 
 string parent_folder(const string& s) {
@@ -194,6 +195,7 @@ bool handleKeyTour(int sym, int uni) {
       }
     if(flags & FINALSLIDE) return true;
     presentation(pmStop);
+    slide_restore_all();
     currentslide++;
     presentation(pmStart);
     slidehelp();
