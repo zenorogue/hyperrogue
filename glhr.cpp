@@ -738,11 +738,14 @@ EX void vertices_texture_color(const vector<glvertex>& v, const vector<glvertex>
   #if CAP_VERTEXBUFFER
   int q = min(isize(v)-vshift, isize(t)-tshift);
   vector<ct_vertex> tv(q);
-  for(int i=0; i<q; i++)
+  for(int i=0; i<q; i++) {
     tv[i].coords = v[vshift+i],
     tv[i].texture[0] = t[tshift+i][0],
-    tv[i].texture[1] = t[tshift+i][1],
-    tv[i].color = c[tshift+i];
+    tv[i].texture[1] = t[tshift+i][1];
+    for(int i=0; i<SHDIM; i++)
+      tv[i].color[i] = c[tshift+i][i];
+    if(SHDIM == 3) tv[i].color[3] = 1;
+    }
   prepare(tv);
   #else
   vertices(v, vshift);
