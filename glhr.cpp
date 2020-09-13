@@ -119,6 +119,7 @@ struct glmatrix {
     glvertex coords;
     glvec4 color;
     glvec2 texture;
+    ct_vertex() {}
     ct_vertex(const hyperpoint& h, ld x1, ld y1, ld col) {
       coords = pointtogl(h);
       texture[0] = x1;
