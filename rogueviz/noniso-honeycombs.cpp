@@ -161,7 +161,7 @@ void start_noniso(vector<tour::slide>& v) {
       });
   }
 
-auto hooks  = addHook(rvtour::hooks_build_rvtour, 163, honey)
-            + addHook(rvtour::hooks_build_rvtour, 160, start_noniso);
+auto hooks  = addHook(pres::hooks_build_rvtour, 163, honey)
+            + addHook(pres::hooks_build_rvtour, 160, start_noniso);
 
 } }

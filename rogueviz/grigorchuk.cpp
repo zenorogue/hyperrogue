@@ -496,8 +496,8 @@ auto hook = addHook(hooks_args, 100, readArgsG)
     })
    + addHook(hooks_initialize, 100, create_grigorchuk_geometry)
 
-  + addHook(rogueviz::rvtour::hooks_build_rvtour, 140, [] (vector<tour::slide>& v) {
-    using namespace rogueviz::rvtour;
+  + addHook(rogueviz::pres::hooks_build_rvtour, 140, [] (vector<tour::slide>& v) {
+    using namespace rogueviz::pres;
     v.push_back(tour::slide{
       "unsorted/Grigorchuk group", 10, tour::LEGAL::NONE,
 

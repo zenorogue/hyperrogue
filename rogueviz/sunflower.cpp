@@ -269,7 +269,7 @@ auto hook = 0
 #endif
 + addHook(hooks_o_key, 80, o_key)
 + addHook(hooks_drawcell, 100, sunflower_cell)
-+ addHook(rvtour::hooks_build_rvtour, 144, [] (vector<tour::slide>& v) {
++ addHook(pres::hooks_build_rvtour, 144, [] (vector<tour::slide>& v) {
   using namespace tour;
   v.push_back(
     tour::slide{"unsorted/sunflower spirals", 18, LEGAL::ANY | QUICKGEO, 

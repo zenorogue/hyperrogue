@@ -347,7 +347,7 @@ auto xhook = addHook(hooks_args, 100, readArgs)
 + addHook(hooks_handleKey, 0, handleKey)
 + addHook(hooks_prestats, 0, frame)
 + addHook(hooks_clearmemory, 40, [] () { snubon = false; } )
-+ addHook(rvtour::hooks_build_rvtour, 142, [] (vector<tour::slide>& v) {
++ addHook(pres::hooks_build_rvtour, 142, [] (vector<tour::slide>& v) {
     using namespace tour;
     v.push_back(
       tour::slide{"unsorted/Pentagonal Exploration", 62, LEGAL::NONE | QUICKGEO,

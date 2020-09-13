@@ -353,7 +353,7 @@ int phooks = addHook(hooks_args, 100, readArgs)
      if(staircase::on) { staircase::showMenu(); return true; }
      return false;
      })
-  + addHook(rvtour::hooks_build_rvtour, 141, [] (vector<tour::slide>& v) {
+  + addHook(pres::hooks_build_rvtour, 141, [] (vector<tour::slide>& v) {
     using namespace tour;
     v.push_back(
       tour::slide{"unsorted/Spiral Staircase", 62, LEGAL::NONE | QUICKGEO,

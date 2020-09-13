@@ -208,7 +208,7 @@ auto msc =
     walkers.clear();
     total_time = 0;
     })
-+ addHook(rvtour::hooks_build_rvtour, 180, [] (vector<tour::slide>& v) {
++ addHook(pres::hooks_build_rvtour, 180, [] (vector<tour::slide>& v) {
   v.push_back(tour::slide{
     cap+"random walk visualization", 10, tour::LEGAL::NONE | tour::QUICKSKIP,
     "Here we see random walk in various geometries.\n"

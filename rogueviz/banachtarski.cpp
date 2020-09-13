@@ -558,8 +558,8 @@ int readArgs() {
 auto hook = addHook(hooks_args, 100, readArgs)
   + addHook(hooks_initgame, 100, bantar)
   + addHook(hooks_frame, 100, bantar_stats)
-  + addHook(rvtour::hooks_build_rvtour, 140, [] (vector<tour::slide>& v) {
-    using namespace rvtour;
+  + addHook(pres::hooks_build_rvtour, 140, [] (vector<tour::slide>& v) {
+    using namespace pres;
     v.push_back(
       tour::slide{"unsorted/Banach-Tarski-like", 62, LEGAL::NONE,
      "Banach-Tarski-like decomposition. Break a hyperbolic plane into two hyperbolic planes.\n\n"
