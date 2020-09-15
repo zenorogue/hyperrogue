@@ -1180,7 +1180,7 @@ EX namespace patterns {
       if(euclid)
         // use the torus ID
         si.id = fieldpattern::fieldval_uniq(c);
-      else if(PURE && !arcm::in())
+      else if(PURE && standard_tiling())
         // use the actual field codes
         si.id = fieldpattern::fieldval(c).first;
       else          
