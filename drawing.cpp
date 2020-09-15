@@ -1710,6 +1710,7 @@ void dqi_poly::draw() {
   
   bool can_have_inverse = false;  
   if(sphere && pmodel == mdDisk && (spherespecial > 0 || equi)) can_have_inverse = true;
+  if(sphere && among(pmodel, mdEquidistant, mdEquiarea)) can_have_inverse = true;
   if(pmodel == mdJoukowsky) can_have_inverse = true;
   if(pmodel == mdJoukowskyInverted && pconf.skiprope) can_have_inverse = true;
   if(pmodel == mdDisk && hyperbolic && pconf.alpha <= -1) can_have_inverse = true;
