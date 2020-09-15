@@ -998,8 +998,12 @@ EX void describeMouseover() {
   callhooks(hooks_mouseover, c);
   
   if(mousey < vid.fsize * 3/2 && getcstat == '-' && !instat) getcstat = SDLK_F1;
-  if(tour::on && !tour::texts)
-    mouseovers = XLAT(tour::slides[tour::currentslide].name);
+  if(tour::on && !tour::texts) {
+    if(tour::slides[tour::currentslide].flags & tour::NOTITLE)
+      mouseovers = "";
+    else
+      mouseovers = XLAT(tour::slides[tour::currentslide].name);
+    }
   }
 
 EX void showHelp() {
