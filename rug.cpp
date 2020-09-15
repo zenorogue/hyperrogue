@@ -19,6 +19,8 @@ EX bool rug_failure = false;
 
 EX namespace rug {
 
+EX bool mouse_control_rug = false;
+
 EX transmatrix rugView;
 
 EX ld lwidth = 2;

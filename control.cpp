@@ -623,6 +623,11 @@ int lastframe;
 
 EX int sc_ticks;
 
+EX bool mouseaiming(bool shmupon) {
+  return
+    (GDIM == 3 && !shmupon) || (rug::rugged && (lctrlclick ^ rug::mouse_control_rug));
+  }
+
 EX void mainloopiter() {
 
   DEBB(DF_GRAPH, ("main loop\n"));
@@ -659,7 +664,7 @@ EX void mainloopiter() {
   
   mousepan = cmode & sm::NORMAL;
   if((cmode & (sm::DRAW | sm::MAP)) && !hiliteclick) mousepan = true;
-  mousepan = mousepan && (GDIM == 3 || (rug::rugged && lctrlclick)) && mouseaim_sensitivity;
+  mousepan = mousepan && mouseaiming(false) && mouseaim_sensitivity;
   if(mousepan != oldmousepan) {
     oldmousepan = mousepan;
     #if CAP_MOUSEGRAB
@@ -748,7 +753,7 @@ EX void mainloopiter() {
   SDL_Event ev;
   DEBB(DF_GRAPH, ("polling for events\n"));
   
-  if((GDIM == 3 && !shmup::on) || (lctrlclick && rug::rugged)) {
+  if(mouseaiming(shmup::on)) {
     #if CAP_MOUSEGRAB
     rug::using_rugview urv;
     dynamicval<bool> ds(didsomething, didsomething);
