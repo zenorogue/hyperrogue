@@ -476,6 +476,21 @@ EX void initialize_slides() {
     if(slides[currentslide].flags & FINALSLIDE) break;
     }
   }
+
+EX void print() {
+  dynamicval<int> cs(currentslide, 0);
+  for(currentslide=0;; currentslide++) {
+    auto& sl = slides[currentslide];
+    println(hlog, sl.name);
+    string str = sl.name;
+    for(char& c: str) c = '=';
+    println(hlog, str);
+    println(hlog);
+    println(hlog, sl.help);
+    println(hlog);
+    if(slides[currentslide].flags & FINALSLIDE) break;
+    }
+  }
   
 EX void start() {
   currentslide = 0;

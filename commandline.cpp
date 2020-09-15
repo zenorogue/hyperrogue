@@ -222,6 +222,9 @@ int arg::readCommon() {
     PHASEFROM(2); tour::texts = false;
     start_game(); tour::start();
     }
+  else if(argis("-print-tour")) {
+    tour::print();
+    }
 #endif
   else if(argis("-draw")) {
     PHASE(3); start_game(); drawscreen();
