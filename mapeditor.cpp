@@ -1110,7 +1110,7 @@ EX namespace mapeditor {
     displayButton(8, 8+fs*7, XLAT("w = walls"), 'w', 0);
     displayButton(8, 8+fs*8, XLAT("i = items"), 'i', 0);
     displayButton(8, 8+fs*9, XLAT("l = lands"), 'l', 0);
-    displayfr(8, 8+fs*10, 2, vid.fsize, XLAT("c = copy"), 0xC0C0C0, 0);
+    displayButton(8, 8+fs*10, XLAT("c = copy"), 'c', 0);
     displayButton(8, 8+fs*11, XLAT("u = undo"), 'u', 0);
     if(painttype == 4)
       displayButton(8, 8+fs*12, XLAT("f = flip %1", ONOFF(copysource.mirrored)), 'u', 0);
@@ -1234,7 +1234,7 @@ EX namespace mapeditor {
         c->wall = GDIM == 3 ? waWaxWall : waNone;
         c->landparam = paintwhat >> 8;
         break;
-      case 4:
+      case 4: {
         cell *copywhat = where.second.at;
         c->wall = copywhat->wall;
         c->item = copywhat->item;
@@ -1246,6 +1246,14 @@ EX namespace mapeditor {
         c->stuntime = copywhat->stuntime; 
         if(copywhat->mondir == NODIR) c->mondir = NODIR;
         else c->mondir = gmod((where.first.mirrored == where.second.mirrored ? 1 : -1) * (copywhat->mondir - where.second.spin) + cdir, c->type);
+        break;
+        }
+      case 7:
+        if(c) {
+          copysource = c;
+          painttype = 4;
+          paintwhat_str = XLAT("copying");
+          }
         break;
       }
     checkUndo();
@@ -1472,6 +1480,10 @@ EX namespace mapeditor {
       copysource = mouseover_cw(true);
       painttype = 4;
       paintwhat_str = XLAT("copying");
+      }
+    else if(uni == 'c') {
+      painttype = 7;
+      paintwhat_str = XLAT("select area to copy");
       }
     else if(uni == 'f') {
       copysource.mirrored = !copysource.mirrored;
