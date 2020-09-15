@@ -216,7 +216,7 @@ EX bool passable(cell *w, cell *from, flagtype flags) {
     if(from && isWatery(from) && isWatery(w) && F(P_CHAIN) && !againstCurrent(w, from))
       return true;
 
-    if(w->wall == waBigStatue && from && canPushStatueOn(from)) return true;
+    if(w->wall == waBigStatue && from && canPushStatueOn(from, flags)) return true;
     }
   
   if(F(P_EARTHELEM)) {
@@ -402,8 +402,8 @@ bool sharkpassable(cell *w, cell *c) {
   return true;
   }
 
-EX bool canPushStatueOn(cell *c) {
-  return passable(c, NULL, P_MONSTER) && !snakelevel(c) &&
+EX bool canPushStatueOn(cell *c, flagtype flags) {
+  return passable(c, NULL, P_MONSTER | flags) && !snakelevel(c) &&
     !isWorm(c->monst) && !isReptile(c->wall) && !peace::on && 
     !among(c->wall, waBoat, waFireTrap, waArrowTrap);
   }

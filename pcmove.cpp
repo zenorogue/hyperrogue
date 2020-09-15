@@ -734,7 +734,7 @@ bool pcmove::after_escape() {
   cell*& c2 = mi.t;
 
   if(c2->wall == waBigStatue && !c2->monst && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
-    if(!canPushStatueOn(cwt.at)) {
+    if(!canPushStatueOn(cwt.at, P_ISPLAYER)) {
       if(vmsg()) { 
         if(isFire(cwt.at))
           addMessage(XLAT("You have to escape first!"));

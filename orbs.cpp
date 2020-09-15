@@ -1222,7 +1222,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     auto& c2 = mi.t;
     if(!mi.op()) nowhereToBlow = true;
     else if(isBoat(c) && !isWatery(c2) && c2->wall != waNone) nowhereToBlow = true;
-    else if(c->wall == waBigStatue && !canPushStatueOn(c2)) nowhereToBlow = true;
+    else if(c->wall == waBigStatue && !canPushStatueOn(c2, P_BLOW)) nowhereToBlow = true;
     else {
       if(!isCheck(a)) blowoff(mi), apply_impact(c);
       return itOrbAir;

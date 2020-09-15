@@ -1056,7 +1056,7 @@ void movePlayer(monster *m, int delta) {
         if(HEAT(c2) > .5) HEAT(c2) = .5;
         }
   
-      else if(c2->wall == waBigStatue && canPushStatueOn(m->base) && !nonAdjacent(c2, m->base)) {
+      else if(c2->wall == waBigStatue && canPushStatueOn(m->base, P_ISPLAYER) && !nonAdjacent(c2, m->base)) {
         visibleFor(300);
         c2->wall = m->base->wall;
         if(cellUnstable(cwt.at))
@@ -2309,7 +2309,7 @@ void moveMonster(monster *m, int delta) {
     }
   if(isLeader(m->type)) {
     if(c2 != m->base) {
-      if(c2->wall == waBigStatue && canPushStatueOn(m->base)) {
+      if(c2->wall == waBigStatue && canPushStatueOn(m->base, 0)) {
         c2->wall = m->base->wall;
         if(cellUnstable(m->base))
           m->base->wall = waChasm;
