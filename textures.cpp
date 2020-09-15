@@ -349,6 +349,8 @@ bool texture_data::readtexture(string tn) {
         [&] (int y, int v) { get_texture_pixel(x, y) = v; }
         );
     
+    base_x = base_x * twidth / origdim;
+    base_y = base_y * theight / origdim;
     }
 
 #if CAP_SDL_IMG
