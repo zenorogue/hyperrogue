@@ -106,7 +106,7 @@ struct fallanim {
 map<cell*, fallanim> fallanims;
 
 EX bool doHighlight() {
-  return (hiliteclick && darken < 2) ? !mmhigh : mmhigh;
+  return mmhigh;
   }
 
 int dlit;
@@ -4606,8 +4606,10 @@ EX void drawthemap() {
   
   mmitem = vid.monmode >= 1;
   mmmon = vid.monmode >= 2;
-  mmhigh = vid.monmode == 3 || vid.monmode == 5;
-  mmspatial = vid.monmode == 4 || vid.monmode == 5;
+  mmspatial = vid.monmode >= 3;
+  
+  mmhigh = vid.highlightmode >= 1;
+  if(hiliteclick) mmhigh = !mmhigh;
   
   spatial_graphics = wmspatial || mmspatial;
   spatial_graphics = spatial_graphics && GDIM == 2;
@@ -5035,7 +5037,7 @@ EX void normalscreen() {
   if(GDIM == 3 || !outofmap(mouseh.h)) getcstat = '-';
   cmode = sm::NORMAL | sm::DOTOUR | sm::CENTER;
   if(viewdists && show_distance_lists) cmode |= sm::SIDE | sm::MAYDARK;
-  gamescreen(hiliteclick && mmmon ? 1 : 0); drawStats();
+  gamescreen((vid.highlightmode == (hiliteclick ? 0 : 2)) ? 1 : 0); drawStats();
   if(nomenukey || ISMOBILE)
     ;
 #if CAP_TOUR

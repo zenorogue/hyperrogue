@@ -306,7 +306,7 @@ struct videopar {
   int fsize;
   int flashtime;
   
-  int wallmode, monmode, axes;
+  int wallmode, monmode, axes, highlightmode;
   bool axes3;
   bool revcontrol;
   

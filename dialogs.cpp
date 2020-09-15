@@ -162,6 +162,7 @@ EX namespace dialog {
     if(k == 32) return "space";
     if(k >= 1 && k <= 26) { string s = "Ctrl+"; s += (k+64); return s; }
     if(k < 128) { string s; s += k; return s; }
+    if(k == 508) return "Alt+8";
     return "?";
     }
 

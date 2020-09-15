@@ -1125,7 +1125,13 @@ EX bool gmodekeys(int sym, int uni) {
     else if(NUMBERKEY == '3' && !rug::rugged) { pconf.alpha = 1; pconf.scale = 1; pconf.xposition = pconf.yposition = 0; }
     else if(NUMBERKEY == '4' && !rug::rugged) { pconf.alpha = 0; pconf.scale = 1; pconf.xposition = pconf.yposition = 0; }
     else if(NUMBERKEY == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 7; }
-    else if(NUMBERKEY == '8') { vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 6; }  
+    else if((NUMBERKEY == '8' && hiliteclick) || NUMBERKEY == 508) { 
+      vid.highlightmode += 60 + (shiftmul > 0 ? 1 : -1); vid.highlightmode %= 3; 
+      }
+    else if(NUMBERKEY == '8') { 
+      vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 4; 
+      }
+       
     else if(uni == '%') { 
       if(vid.wallmode == 0) vid.wallmode = 6;
       vid.wallmode--;
