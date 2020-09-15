@@ -207,7 +207,15 @@ EX namespace models {
     if(m == mdHorocyclic)
       return hyperbolic;
     return
-      among(m, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral, mdSimulatedPerspective, mdTwoHybrid, mdHorocyclic, mdAxial, mdAntiAxial, mdQuadrant) || mdBandAny();
+      among(m, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral, mdSimulatedPerspective, mdTwoHybrid, mdHorocyclic, mdAxial, mdAntiAxial, mdQuadrant,
+        mdWerner, mdAitoff, mdHammer, mdLoximuthal, mdWinkelTripel) || mdBandAny();
+    }
+
+  /** @brief returns the broken coordinate, or zero */
+  EX int get_broken_coord(eModel m) {
+    if(m == mdWerner) return 1;
+    if(sphere) return (mdinf[m].flags & mf::broken) ? 2 : 0;
+    return 0;
     }
   
   EX bool is_perspective(eModel m) {

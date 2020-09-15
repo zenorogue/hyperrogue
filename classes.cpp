@@ -940,6 +940,7 @@ namespace mf {
   static const flagtype equivolume = 1024;
   static const flagtype twopoint = 2048;
   static const flagtype uses_bandshift = 4096;
+  static const flagtype broken = 8192; /* in spherical case, these are broken along the meridian 180 deg */
   
   static const flagtype band = (cylindrical | pseudocylindrical | uses_bandshift);
   static const flagtype pseudoband = (pseudocylindrical | uses_bandshift);
@@ -972,9 +973,13 @@ enum eModel : int {
   mdRotatedHyperboles, mdSpiral, mdPerspective,
   // 20..24
   mdEquivolume, mdCentralInversion, mdSimulatedPerspective, mdTwoHybrid, mdGeodesic,
-  // 25
-  mdMollweide, mdCentralCyl, mdCollignon, mdHorocyclic, mdQuadrant, mdAxial, mdAntiAxial,
-  // 32..
+  // 25..27
+  mdMollweide, mdCentralCyl, mdCollignon, 
+  // 28..31 
+  mdHorocyclic, mdQuadrant, mdAxial, mdAntiAxial,
+  // 32..38
+  mdWerner, mdAitoff, mdHammer, mdLoximuthal, mdMiller, mdGallStereographic, mdWinkelTripel,
+  // 39..
   mdGUARD, mdPixel, mdHyperboloidFlat, mdPolynomial, mdManual
   };
 #endif
@@ -1019,6 +1024,13 @@ EX vector<modelinfo> mdinf = {
   {X3("quadrant coordinates"), mf::euc_boring, DEFAULTS},
   {X3("axial coordinates"), mf::euc_boring, DEFAULTS},
   {X3("anti-axial coordinates"), mf::euc_boring, DEFAULTS},
+  {X3("Werner projection"), mf::euc_boring | mf::broken, DEFAULTS}, // keep distances from pole, and distances along parallels
+  {X3("Aitoff projection"), mf::euc_boring | mf::broken, DEFAULTS}, // halve longitudes, do azequid, double x
+  {X3("Hammer projection"), mf::euc_boring | mf::broken, DEFAULTS}, // halve longitudes, do azequia, double x
+  {X3("loximuthal projection"), mf::euc_boring | mf::broken, DEFAULTS}, // map loxodromes azimuthally and equidistantly
+  {X3("Miller projection"), mf::euc_boring | mf::band, DEFAULTS}, // scale latitude 4/5 -> Mercator -> 5/4
+  {X3("Gall stereographic"), mf::euc_boring | mf::band, DEFAULTS}, // like central cylindrical but stereographic
+  {X3("Winkel tripel"), mf::euc_boring | mf::broken, DEFAULTS}, // mean of equirec and Aitoff
   {X3("guard"), 0, DEFAULTS},
   {X3("polynomial"), mf::conformal, DEFAULTS},
   };

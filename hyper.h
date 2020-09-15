@@ -241,6 +241,7 @@ struct projection_configuration {
   ld clip_min, clip_max;
   ld model_orientation, halfplane_scale, model_orientation_yz;  
   ld collignon_parameter; 
+  ld aitoff_parameter, miller_parameter, loximuthal_parameter, winkel_parameter;
   bool collignon_reflected;
   string formula;
   eModel basic_model;
@@ -267,6 +268,10 @@ struct projection_configuration {
     spiral_cone = 360;
     use_atan = false;
     product_z_scale = 1;
+    aitoff_parameter = .5;
+    miller_parameter = .8;
+    loximuthal_parameter = 0;
+    winkel_parameter = .5;
     }
   };
 

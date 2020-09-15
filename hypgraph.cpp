@@ -364,10 +364,14 @@ EX void apply_nil_rotation(hyperpoint& H) {
   }
 
 EX void applymodel(shiftpoint H_orig, hyperpoint& ret) {
+  apply_other_model(H_orig, ret, pmodel);
+  }
+
+EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
 
   hyperpoint H = H_orig.h;
   
-  if(models::product_model(pmodel)) {
+  if(models::product_model(md)) {
     ld zlev = zlevel(H_orig.h);
     H_orig.h /= exp(zlev);
     hybrid::in_underlying_geometry([&] { applymodel(H_orig, ret); });
@@ -376,7 +380,7 @@ EX void applymodel(shiftpoint H_orig, hyperpoint& ret) {
     return;    
     }
   
-  switch(pmodel) {
+  switch(md) {
     case mdPerspective: {
       if(prod) H = product::inverse_exp(H);
       apply_nil_rotation(H);
@@ -832,6 +836,25 @@ EX void applymodel(shiftpoint H_orig, hyperpoint& ret) {
       else 
         makeband(H_orig, ret, band_conformal);
       break;
+    
+    case mdMiller:
+      makeband(H_orig, ret, [] (ld& x, ld& y) {
+        // y *= pconf.miller_parameter;
+        band_conformal(x, y);
+        // y /= pconf.miller_parameter;
+        });        
+      break;
+      
+    case mdLoximuthal:
+      makeband(H_orig, ret, [] (ld&x, ld &y) {
+        ld orig_y = y;
+        band_conformal(x, y);
+        y -= pconf.loximuthal_parameter;
+        orig_y -= pconf.loximuthal_parameter;
+        if(y) x = x * orig_y / y;
+        y = orig_y;
+        });
+      break;
       
     case mdTwoPoint: 
       makeband(H_orig, ret, make_twopoint);
@@ -860,6 +883,59 @@ EX void applymodel(shiftpoint H_orig, hyperpoint& ret) {
     case mdCentralCyl: 
       makeband(H_orig, ret, [] (ld& x, ld& y) { y = tan_auto(y); ld top = vid.yres * M_PI / current_display->radius; if(y>top) y=top; if(y<-top) y=-top; });
       break;
+
+    case mdGallStereographic: 
+      makeband(H_orig, ret, [] (ld& x, ld& y) { 
+        y = 2 * sin_auto(y) / (1 + cos_auto(y));
+        ld top = vid.yres * M_PI / current_display->radius; if(y>top) y=top; if(y<-top) y=-top;
+        });
+      break;
+    
+    case mdAitoff: case mdHammer: case mdWinkelTripel:
+      makeband(H_orig, ret, [&] (ld& x, ld& y) {
+        ld ox = x, oy = y;
+        x *= pconf.aitoff_parameter;
+
+        ld x0 = sin_auto(x) * cos_auto(y);
+        ld y0 = cos_auto(x) * cos_auto(y);
+        ld z0 = sin_auto(y);
+        
+        ld d = acos_auto(y0);
+        ld d0 = hypot(x0, z0);
+        
+        if(md == mdAitoff || md == mdWinkelTripel) ;
+        else if(sphere) d = sqrt(2*(1 - cos(d))) * M_PI / 2;
+        else d = sqrt(2*(cosh(d) - 1)) / 1.5;
+
+        x = x0 * d / d0 / pconf.aitoff_parameter, y = z0 * d / d0;
+        if(md == mdWinkelTripel) 
+          x = lerp(x, ox, pconf.model_transition),
+          y = lerp(y, oy, pconf.model_transition);
+          
+        });
+      break;
+    
+    case mdWerner: {
+
+      models::apply_orientation_yz(H[1], H[2]);
+      models::apply_orientation(H[0], H[1]);
+
+      find_zlev(H); // ignored for now
+      
+      ld r = hdist0(H);
+      if(r == 0) { ret = H; return; }
+      ld angle = atan2(H[0], H[1]);
+      angle *= sin_auto(r) / r;
+      
+      ret[0] = sin(angle) * r;
+      ret[1] = cos(angle) * r;
+      ret[2] = 0;
+      ret[3] = 1;
+
+      models::apply_orientation(ret[1], ret[0]);
+      models::apply_orientation_yz(ret[2], ret[1]);
+      break;
+      }
 
     case mdCollignon: 
       find_zlev(H_orig.h);
@@ -1953,6 +2029,23 @@ EX void draw_boundary(int w) {
   if(elliptic && !among(pmodel, mdBand, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdMollweide, mdCollignon))
     circle_around_center(M_PI/2, periodcolor, 0, PPR::CIRCLE);
   
+  int broken_coord = models::get_broken_coord(pmodel);
+  if(broken_coord) {
+    int unbroken_coord = 3 - broken_coord;
+    const ld eps = 1e-3;
+    const ld rem = sqrt(1-eps*eps);
+    for(int s: {-1, 1}) {
+      for(int a=1; a<180; a++) {
+        hyperpoint h = Hypc;
+        h[broken_coord] = -sin_auto(a*degree) * rem;
+        h[0] = sin_auto(a*degree) * eps * s;
+        h[unbroken_coord] = cos_auto(a*degree);
+        curvepoint(h);
+        }
+      queuecurve(shiftless(Id), periodcolor, 0, PPR::CIRCLE).flags |= POLY_FORCEWIDE;
+      }
+    }
+  
   switch(pmodel) {
   
     case mdTwoPoint: {
@@ -1979,10 +2072,12 @@ EX void draw_boundary(int w) {
       return;
       }
     
-    case mdBand: case mdBandEquidistant: case mdBandEquiarea: case mdSinusoidal: case mdMollweide: case mdCentralCyl: case mdCollignon: {
+    case mdBand: case mdBandEquidistant: case mdBandEquiarea: case mdSinusoidal: case mdMollweide: case mdCentralCyl: case mdCollignon: 
+    case mdGallStereographic: case mdMiller:
+    {
       if(GDIM == 3) return;
       if(pmodel == mdBand && pconf.model_transition != 1) return;
-      bool bndband = (among(pmodel, mdBand, mdCentralCyl) ? hyperbolic : sphere);
+      bool bndband = (among(pmodel, mdBand, mdMiller, mdGallStereographic, mdCentralCyl) ? hyperbolic : sphere);
       transmatrix T = spin(-pconf.model_orientation * degree);
       ld right = M_PI/2 - 1e-5;
       if(bndband) 

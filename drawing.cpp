@@ -777,6 +777,7 @@ ld period_at(ld y) {
   
   switch(pmodel) {
     case mdBand:
+    case mdMiller:
       return m * 4;
     case mdSinusoidal:
       return m * 2 * cos(y * M_PI);
@@ -1544,7 +1545,75 @@ void dqi_poly::draw() {
     cnt = i;
     return;
     }
+  
+  int broken_coord = models::get_broken_coord(pmodel);
+  static bool in_broken = false;
+  if(broken_coord && !in_broken) {
 
+    int zcoord = broken_coord;
+    int ycoord = 3 - zcoord;
+    
+    vector<hyperpoint> all;
+    for(int i=0; i<cnt; i++) 
+      all.push_back(V.T * glhr::gltopoint((*tab)[offset+i]));
+    int fail = 0;
+    int last_fail;
+    for(int i=0; i<cnt-1; i++) 
+      if(all[i][0] * all[i+1][0] <= 0 && (all[i][0] * all[i+1][zcoord] - all[i+1][0] * all[i][zcoord]) * (all[i][0] - all[i+1][0]) < 0)
+        last_fail = i, fail++;
+    vector<glvertex> v;
+    dqi_poly p = *this;
+    p.tab = &v;
+    p.offset = 0;
+    p.V.T = Id;
+    if(fail) {
+      dynamicval<bool> ib(in_broken, true);
+      ld part = ilerp(all[last_fail][0], all[last_fail+1][0], 0);
+      hyperpoint initial = normalize(lerp(all[last_fail], all[last_fail+1], 1 - (1-part) * .99));
+      bool have_initial = true;
+      v.push_back(glhr::pointtogl(initial));
+      last_fail++;
+      int at = last_fail;
+      do {
+        v.push_back(glhr::pointtogl(all[at]));
+        if(at == cnt-1 && all[at] != all[0]) {
+          p.cnt = isize(v); p.draw(); v.clear(); at = 0;
+          have_initial = false;
+          }
+        int next = at+1;
+        if(next == cnt) next = 0;
+        if(all[at][0] * all[next][0] <= 0 && (all[at][0] * all[next][zcoord] - all[next][0] * all[at][zcoord]) * (all[at][0] - all[next][0]) < 0) {
+          ld part = ilerp(all[at][0], all[next][0], 0);
+          if(part > .999 || part < .001) { in_broken = false; return; }
+          hyperpoint final = normalize(lerp(all[at], all[next], part * .99));
+          v.push_back(glhr::pointtogl(final));
+          if(have_initial) {
+            int max = 4 << vid.linequality;
+            if(final[0] * initial[0] > 0) {
+              for(int i=1; i<=max; i++)
+                v.push_back(glhr::pointtogl(lerp(final, initial, i * 1. / max)));
+              }
+            else {
+              hyperpoint end = Hypc;
+              end[ycoord] = final[ycoord] > 0 ? 1 : -1;
+              for(int i=1; i<=max; i++)
+                v.push_back(glhr::pointtogl(lerp(final, end, i * 1. / max)));
+              for(int i=1; i<=max; i++)
+                v.push_back(glhr::pointtogl(lerp(end, initial, i * 1. / max)));
+              }
+            }
+          p.cnt = isize(v); p.draw(); v.clear();
+          initial = normalize(lerp(all[at], all[next], 1 - (1-part) * .99));
+          have_initial = true;
+          v.push_back(glhr::pointtogl(initial));
+          }
+        at = next;
+        }
+      while(at != last_fail);
+      return;
+      }
+    }
+  
   if(sphere && pmodel == mdTwoPoint && !in_twopoint) {
     #define MAX_PHASE 4
     vector<glvertex> phases[MAX_PHASE];
