@@ -314,11 +314,14 @@ EX void zoom_or_fov(ld t) {
     vpconf.scale *= t;
   }
 
+EX ld camera_speed = 1;
+EX ld camera_rot_speed = 1;
+
 EX void full_forward_camera(ld t) {
   if(anyshiftclick) 
     zoom_or_fov(exp(-t/10.));
   else if(GDIM == 3) {
-    shift_view(ctangent(2, t));
+    shift_view(ctangent(2, t * camera_speed));
     didsomething = true;
     playermoved = false;
     }
@@ -341,10 +344,10 @@ EX void full_rotate_camera(int dir, ld val) {
   else if(history::on)
     history::lvspeed += (dir?1:-1) * val / 2;
   else if(GDIM == 3 && rshiftclick)
-    shift_view(ctangent(dir, -val)), didsomething = true, playermoved = false; /* -val because shift reverses */
+    shift_view(ctangent(dir, -val * camera_speed)), didsomething = true, playermoved = false; /* -val because shift reverses */
   #if CAP_CRYSTAL && CAP_RUG
   else if(rug::rug_control() && rug::in_crystal())
-    crystal::apply_rotation(cspin(dir, 2, val));
+    crystal::apply_rotation(cspin(dir, 2, val * camera_rot_speed));
   #endif
   else if(GDIM == 3) {
     if(keep_vertical()) {
@@ -364,14 +367,14 @@ EX void full_rotate_camera(int dir, ld val) {
     if(!rug::rug_control()) didsomething = true;
     }
   else
-    shift_view(ctangent(dir, val)), playermoved = false, didsomething = true;      
+    shift_view(ctangent(dir, val * camera_speed)), playermoved = false, didsomething = true;      
   }
 
 EX void full_rotate_view(ld h, ld v) {
   if(history::on && !rug::rug_control())
     models::rotation += h;
   else {
-    rotate_view(spin(v));
+    rotate_view(spin(v * camera_rot_speed));
     didsomething = true;
     if(isGravityLand(cwt.at->land) && !rug::rug_control())
       playermoved = false;
@@ -381,8 +384,8 @@ EX void full_rotate_view(ld h, ld v) {
 EX void handlePanning(int sym, int uni) {
   if(mousepan && dual::split([=] { handlePanning(sym, uni); })) return;
   if(GDIM == 3) {
-    if(sym == PSEUDOKEY_WHEELUP) shift_view(ztangent(-0.05*shiftmul)), didsomething = true, playermoved = false;
-    if(sym == PSEUDOKEY_WHEELDOWN) shift_view(ztangent(0.05*shiftmul)), didsomething = true, playermoved = false;
+    if(sym == PSEUDOKEY_WHEELUP) shift_view(ztangent(-0.05*shiftmul) * camera_speed), didsomething = true, playermoved = false;
+    if(sym == PSEUDOKEY_WHEELDOWN) shift_view(ztangent(0.05*shiftmul) * camera_speed), didsomething = true, playermoved = false;
     }
 
   #if CAP_RUG
