@@ -1526,7 +1526,7 @@ LAND( 0x211F6F, "Free Fall", laWestWall, ZERO | LF_GRAVITY | LF_EQUI, itWest, RE
     " of an infinitely high tower. Jump from the window, and let the magical gravity carry you..."
     )
   NATIVE(among(m, moWestHawk, moFallingDog) ? 2 : 0)
-  REQ(ITEMS(itFeather, 5) ITEMS(itIvory, 5))
+  REQ(ITEMS(itFeather, U5) ITEMS(itIvory, U5))
 
 LAND( 0x30FF30, "Irradiated Field", laVariant, ZERO, itVarTreasure, RESERVED, 
     "These fields are ravaged with many kinds of magical radiation, which not only make the ground glow nicely in various colors, "
