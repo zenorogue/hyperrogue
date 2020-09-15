@@ -4117,6 +4117,8 @@ EX cell *forwardcell() {
   return xc.at;
   }
 
+EX bool draw_centerover = true;
+
 EX void drawMarkers() {
 
   if(!(cmode & sm::NORMAL)) return;
@@ -4207,7 +4209,7 @@ EX void drawMarkers() {
 #endif
 
     #if CAP_QUEUE
-    if(centerover && !playermoved && m && !anims::any_animation() && WDIM == 2)
+    if(centerover && !playermoved && m && !anims::any_animation() && WDIM == 2 && draw_centerover)
       queuecircleat(centerover, .70 - .06 * sintick(200), 
         darkena(int(175 + 25 * sintick(200)), 0, 0xFF));
 
