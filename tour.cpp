@@ -62,12 +62,14 @@ static const flagtype QUICKGEO=32;
 static const flagtype SIDESCREEN = 64;
 /** \brief When changing geometries, show the name of the slide, instead of the current land */
 static const flagtype USE_SLIDE_NAME = 128;
+/** \brief do not display any help line */
+static const flagtype NOTITLE = 256;
 #endif
 
 EX vector<reaction_t> restorers;
 
 #if HDR
-template<class T> void slide_backup(T& what, T value) {
+template<class T, class U> void slide_backup(T& what, U value) {
   T backup = what;
   restorers.push_back([&what, backup] { what = backup; });
   what = value;
