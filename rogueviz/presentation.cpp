@@ -89,6 +89,7 @@ void add_stat(presmode mode, const bool_reaction_t& stat) {
 
 void no_other_hud(presmode mode) {
   add_temporary_hook(mode, hooks_prestats, 300, [] { return true; });
+  clearMessages();
   }
 
 void empty_screen(presmode mode, color_t col = 0xFFFFFFFF) {
@@ -110,9 +111,8 @@ void draw_texture(texture::texture_data& tex) {
 
   ld tx = tex.tx;
   ld ty = tex.ty;
-  ld os = max(tx, ty);
-  ld scalex = (vid.xres/2 - 2 * vid.fsize) / (current_display->radius * tx / os);
-  ld scaley = (vid.yres/2 - 2 * vid.fsize) / (current_display->radius * ty / os);
+  ld scalex = (vid.xres/2 - 2 * vid.fsize) / (current_display->radius * tx);
+  ld scaley = (vid.yres/2 - 2 * vid.fsize) / (current_display->radius * ty);
   ld scale = min(scalex, scaley);
   scale *= 2;
 
@@ -120,16 +120,12 @@ void draw_texture(texture::texture_data& tex) {
     ld cx[4] = {1,0,0,1};
     ld cy[4] = {1,1,0,0};
     rtver[i].texture[0] = (tex.base_x + (cx[i] ? tex.strx : 0.)) / tex.twidth;
-    rtver[i].texture[1] = (tex.base_y + (cy[i] ? tex.stry : 0.)) / tex.twidth;
-    rtver[i].coords[0] = (cx[i]*2-1) * scale * (tx / tex.twidth);
-    rtver[i].coords[1] = (cy[i]*2-1) * scale * (ty / tex.theight);
+    rtver[i].texture[1] = (tex.base_y + (cy[i] ? tex.stry : 0.)) / tex.theight;
+    rtver[i].coords[0] = (cx[i]*2-1) * scale * tx;
+    rtver[i].coords[1] = (cy[i]*2-1) * scale * ty;
     rtver[i].coords[2] = 1;
     rtver[i].coords[3] = 1;
     }
-  
-  println(hlog, tie(tex.tx, tex.base_x, tex.strx, tex.twidth));
-  println(hlog, tie(tex.ty, tex.base_y, tex.stry, tex.theight));
-  println(hlog, tie(tx, ty, os, scalex, scaley, scale));
   
   glhr::be_textured();
   current_display->set_projection(0, false);
@@ -353,7 +349,7 @@ vector<slide> rvslides_default = {
       },
   };
 
-int rvtour_hooks = 
+int pres_hooks = 
   addHook(hooks_slide, 100, [] (int mode) {
     if(currentslide == 0 && slides == default_slides) {
       slidecommand = "RogueViz presentation";
