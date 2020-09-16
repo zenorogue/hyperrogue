@@ -90,6 +90,28 @@ EX int chessvalue(cell *c) {
   #if CAP_GP
   if(WARPED)
     return gp::untruncated_shift(c) == 2;
+  else if(UNRECTIFIED && a4) {
+    auto li = gp::get_local_info(c);
+    bool odd_a = gp::param.first & 1;
+    bool odd_b = gp::param.second & 1;
+    bool odd_S7 = S7 & 1;
+    // odd-odd
+    if(odd_a && odd_b) 
+      return (li.relative.second & 1) ^ (li.last_dir & 1) ^ (c->master->dm4 & 1) ^ ((c->master->emeraldval & 1) ? 1 : 0);
+    else if(odd_a || odd_b) {
+      /* int swapped = 0;
+      cellwalker cw(c, 0);
+      while((li.relative.first ^ li.relative.second) & 1) {
+        cw += wstep; cw += 2; swapped ^= 1;
+        } */
+      if((li.relative.first ^ li.relative.second) & 1)
+        return (li.relative.first & 1) ^ ((c->master->cmove(0)->emeraldval & 4) ? 1 : 0);
+      else
+        return (li.relative.first & 1) ^ ((c->master->emeraldval & 4) ? 1 : 0);
+      }
+    else 
+      return (li.relative.second & 1) ^ (li.last_dir & 1) ^ ((c->master->emeraldval & 1) ? 1 : 0);
+    }
   else
   #endif
     return celldist(c) & 1;
