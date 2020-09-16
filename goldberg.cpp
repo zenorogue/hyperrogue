@@ -706,6 +706,8 @@ EX namespace gp {
     else if(xy.first == 1 && xy.second == 1 && S3 == 3) {
       set_variation(eVariation::bitruncated);
       }
+    else 
+      set_variation(eVariation::goldberg);
     start_game();
     screens = g;
     }
@@ -796,8 +798,10 @@ EX namespace gp {
       dialog::addInfo(XLAT("This pattern needs x-y divisible by 3"));
     else if((config.first-config.second)%2 && min_quality_chess)
       dialog::addInfo(XLAT("This pattern needs x-y divisible by 2"));
-    else    
-      dialog::addBoolItem(XLAT("select"), param == internal_representation(config) && !IRREGULAR, 'f');
+    else {
+      dialog::addBoolItem(XLAT("select"), param == internal_representation(config) && !IRREGULAR && !INVERSE, 'f');
+      dialog::lastItem().value = "GP(x,y)";
+      }
     dialog::add_action_confirmed([] { whirl_set(config); });
 
     dialog::addBreak(100);
