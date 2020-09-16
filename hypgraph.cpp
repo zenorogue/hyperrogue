@@ -2226,6 +2226,7 @@ EX void draw_boundary(int w) {
 #endif
 
 EX void change_shift(shiftpoint& h, ld by) {
+  if(!by) return;
   h.shift += by;
   if((mdinf[pmodel].flags & mf::uses_bandshift) || (sphere && pmodel == mdSpiral)) {
     h.h = spin(pconf.model_orientation * degree) * h.h;
@@ -2240,6 +2241,7 @@ EX void change_shift(shiftpoint& h, ld by) {
   }
 
 EX void change_shift(shiftmatrix& T, ld by) {
+  if(!by) return;
   T.shift += by;
   if((mdinf[pmodel].flags & mf::uses_bandshift) || (sphere && pmodel == mdSpiral)) {
     T.T = spin(pconf.model_orientation * degree) * T.T;

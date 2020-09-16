@@ -566,8 +566,10 @@ EX namespace dialog {
           else if(items[i].body == highlight_text) state = 1;
           }
       for(int i=0; i<isize(items); i++)
-        if(isitem(items[i])) 
+        if(isitem(items[i])) {
           highlight_text = items[i].body;
+          break;
+          }
       uni = sym = 0;
       }
     if(key_actions.count(uni)) {
