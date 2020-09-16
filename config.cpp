@@ -686,6 +686,9 @@ EX void initConfig() {
   addsaver(berger_limit, "berger_limit");
   
   addsaverenum(centering, "centering");
+  
+  addsaver(camera_speed, "camera-speed", 1);
+  addsaver(camera_rot_speed, "camera-rot-speed", 1);
 
   callhooks(hooks_configfile);
 
@@ -1109,6 +1112,19 @@ EX void showGraphConfig() {
 #endif
 
   dialog::addSelItem(XLAT("scrolling speed"), fts(vid.sspeed), 'a');
+
+  dialog::addSelItem(XLAT("camera movement speed"), fts(camera_speed), 'c');
+  dialog::add_action([] { 
+    dialog::editNumber(camera_speed, -10, 10, 0.1, 1, XLAT("camera movement speed"), 
+      "This affects:\n\nin 2D: scrolling with arrow keys and Wheel Up\n\nin 3D: camera movement with Home/End."
+      );
+    });
+  dialog::addSelItem(XLAT("camera rotation speed"), fts(camera_rot_speed), 'r');
+  dialog::add_action([] { 
+    dialog::editNumber(camera_rot_speed, -10, 10, 0.1, 1, XLAT("camera rotation speed"), 
+      "This affects view rotation with Page Up/Down, and in 3D, camera rotation with arrow keys or mouse."
+      );
+    });
     
   dialog::addSelItem(XLAT("movement animation speed"), fts(vid.mspeed), 'm');
 
@@ -2708,6 +2724,8 @@ EX unordered_map<string, ld&> params = {
   {"loxidromic", pconf.loximuthal_parameter},
   {"miller", pconf.miller_parameter},
   {"winkel", pconf.winkel_parameter},
+  {"camspd", camera_speed},
+  {"camrot", camera_rot_speed},
   {"levellines", levellines},
   #endif
   };

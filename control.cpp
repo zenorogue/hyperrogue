@@ -329,6 +329,7 @@ EX void full_forward_camera(ld t) {
 
 EX void full_rotate_camera(int dir, ld val) {
   if(rug::rug_control() && lshiftclick) {
+    val *= camera_rot_speed;
     hyperpoint h;
     if(nonisotropic) {
       transmatrix T2 = eupush( tC0(view_inverse(View)) );
@@ -350,6 +351,7 @@ EX void full_rotate_camera(int dir, ld val) {
     crystal::apply_rotation(cspin(dir, 2, val * camera_rot_speed));
   #endif
   else if(GDIM == 3) {
+    val *= camera_rot_speed;
     if(keep_vertical()) {
       hyperpoint vv = vertical_vector();
       ld alpha = -atan2(vv[2], vv[1]);
@@ -372,7 +374,7 @@ EX void full_rotate_camera(int dir, ld val) {
 
 EX void full_rotate_view(ld h, ld v) {
   if(history::on && !rug::rug_control())
-    models::rotation += h;
+    models::rotation += h * camera_rot_speed;
   else {
     rotate_view(spin(v * camera_rot_speed));
     didsomething = true;
@@ -413,7 +415,7 @@ EX void handlePanning(int sym, int uni) {
     ld jx = (mousex - current_display->xcenter - .0) / current_display->radius / 10;
     ld jy = (mousey - current_display->ycenter - .0) / current_display->radius / 10;
     playermoved = false;
-    rotate_view(gpushxto0(hpxy(jx, jy)));
+    rotate_view(gpushxto0(hpxy(jx * camera_speed, jy * camera_speed)));
     sym = 1;
     }
   }
