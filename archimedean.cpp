@@ -170,13 +170,24 @@ void archimedean_tiling::prepare() {
     errors++;
     return;
     }
-  if(isize(faces) < 2) {
+
+  for(int i: faces) if(i < 2) {
+    errormsg = XLAT("not enough edges");
+    errors++;
+    return;
+    }
+
+  vector<int> nondigonal;
+  for(int i: faces) if(i > 2) nondigonal.push_back(i);
+
+  if(isize(faces) < 2 || isize(nondigonal) == 1) {
     errormsg = XLAT("not enough faces");
     errors++;
     return;
     }
-  for(int i: faces) if(i < 2) {
-    errormsg = XLAT("not enough edges");
+    
+  if(isize(nondigonal) == 2 && faces[0] != faces[1]) {
+    errormsg = XLAT("invalid dihedron");
     errors++;
     return;
     }
