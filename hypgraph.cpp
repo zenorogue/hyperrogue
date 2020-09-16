@@ -912,8 +912,8 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
 
         x = x0 * d / d0 / pconf.aitoff_parameter, y = z0 * d / d0;
         if(md == mdWinkelTripel) 
-          x = lerp(x, ox, pconf.model_transition),
-          y = lerp(y, oy, pconf.model_transition);
+          x = lerp(x, ox, pconf.winkel_parameter),
+          y = lerp(y, oy, pconf.winkel_parameter);
           
         });
       break;
