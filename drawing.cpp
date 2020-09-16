@@ -1529,6 +1529,7 @@ bool broken_projection(dqi_poly& p0) {
     p.offset = 0;
     p.V.T = Id;
     if(fail) {
+      if(p0.tinf) return true;
       dynamicval<bool> ib(in_broken, true);
       ld part = ilerp(all[last_fail][0], all[last_fail+1][0], 0);
       hyperpoint initial = normalize(lerp(all[last_fail], all[last_fail+1], 1 - (1-part) * .99));
