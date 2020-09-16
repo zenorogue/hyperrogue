@@ -210,6 +210,8 @@ EX namespace yendor {
     for(int i=0; i<isize(yi); i++) if(yi[i].path[0] == yendor) byi = i;
     if(byi < isize(yi) && yi[byi].found) return false;
     if(byi == isize(yi)) {
+      retry:
+      int creation_attempt = 0;
       yendorinfo nyi;
       nyi.path[0] = yendor;
       nyi.howfar = 0;
@@ -371,7 +373,10 @@ EX namespace yendor {
               }
             }
 
-          if(inmirror(ycw)) ycw = mirror::reflect(ycw);
+          if(ycw.at->land == laMirror || inmirror(ycw.at))
+            setdist(ycw.at, 7, nullptr);
+
+          ycw = mirror::reflect(ycw);
           ycw += wstep;
           nyi.path[i+1] = ycw.at;
           }
@@ -390,10 +395,21 @@ EX namespace yendor {
 
       setdist(nyi.path[YDIST-1], 7, nyi.path[YDIST-2]);
       cell *key = nyi.path[YDIST-1];
+
+      for(int b=10; b>=5; b--) setdist(key, b, nyi.path[YDIST-2]);
+      
+      if(inmirror(key) || (geometry == gNormal && celldistance(key, yendor) < YDIST/2)) {
+        creation_attempt++;
+        if(creation_attempt > -100) {
+          yendor->item = itNone;
+          addMessage(XLAT("%The1 turned out to be an illusion!", itOrbYendor));
+          return false;
+          }
+        goto retry;
+        }
   
       generating = false;
         
-      for(int b=10; b>=5; b--) setdist(key, b, nyi.path[YDIST-2]);
 
       for(int i=-1; i<key->type; i++) {
         cell *c2 = i >= 0 ? key->move(i) : key;
