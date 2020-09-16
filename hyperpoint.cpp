@@ -1028,12 +1028,16 @@ EX transmatrix z_inverse(const transmatrix& T) {
 
 /** \brief T inverse a matrix T = O*P, where O is orthogonal and P is an isometry (todo optimize) */
 EX transmatrix view_inverse(transmatrix T) {
-  return inverse(T);
+  if(nonisotropic) return inverse(T);
+  if(prod) return z_inverse(T);
+  return iso_inverse(T);
   }
 
 /** \brief T inverse a matrix T = P*O, where O is orthogonal and P is an isometry (todo optimize) */
 EX transmatrix iview_inverse(transmatrix T) {
-  return inverse(T);
+  if(nonisotropic) return inverse(T);
+  if(prod) return z_inverse(T);
+  return iso_inverse(T);
   }
 
 EX pair<ld, hyperpoint> product_decompose(hyperpoint h) {
