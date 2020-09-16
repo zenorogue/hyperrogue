@@ -1,0 +1,80 @@
+name: Github CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  main_matrix:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        compiler: [gcc, clang]
+        build_system: [makefile, autotools, mymake]
+        hyper_use_rviz: [rviz_1, rviz_0]
+        hyper_use_png: [png_1]
+        hyper_use_glew: [glew_1]
+    steps:
+    - uses: actions/checkout@v2
+    - name: envvars_setup
+      run: |
+        cat << ENDOFVARS > .github/workflows/gh_ci_envvars.sh
+        GH_OS=${{ matrix.os }}
+        GH_COMPILER=${{ matrix.compiler }}
+        GH_BUILDSYS=${{ matrix.build_system }}
+        GH_HYP_RVIZ=${{ matrix.hyper_use_rviz }}
+        GH_HYP_PNG=${{ matrix.hyper_use_png }}
+        GH_HYP_GLEW=${{ matrix.hyper_use_glew }}
+        ENDOFVARS
+    - name: install_deps
+      run: .github/workflows/install_deps.sh
+    - name: build
+      run: .github/workflows/build.sh
+    - name: test_simple
+      run: .github/workflows/test_simple.sh
+
+  windows:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        compiler: [gcc]
+        build_system: [makefile, autotools]
+        hyper_use_rviz: [rviz_1, rviz_0]
+        hyper_use_png: [png_1]
+        hyper_use_glew: [glew_1]
+    steps:
+    - uses: actions/checkout@v2
+    - name: envvars_setup
+      shell: cmd.exe /D /E:ON /V:OFF /C "C:\msys64\msys2_shell.cmd -defterm -msys2 -no-start -full-path -here {0}"
+      run: |
+        cat << ENDOFVARS > .github/workflows/gh_ci_envvars.sh
+        GH_OS=${{ matrix.os }}
+        GH_COMPILER=${{ matrix.compiler }}
+        GH_BUILDSYS=${{ matrix.build_system }}
+        GH_HYP_RVIZ=${{ matrix.hyper_use_rviz }}
+        GH_HYP_PNG=${{ matrix.hyper_use_png }}
+        GH_HYP_GLEW=${{ matrix.hyper_use_glew }}
+        ENDOFVARS
+    - name: install_deps
+      run: cmd.exe /D /E:ON /V:OFF /C "C:\msys64\msys2_shell.cmd -defterm -msys2 -no-start -full-path -here .github/workflows/install_deps.sh"
+    - name: build
+      run: cmd.exe /D /E:ON /V:OFF /C "C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -full-path -here .github/workflows/build.sh"
+    - name: test_simple
+      run: cmd.exe /D /E:ON /V:OFF /C "C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -full-path -here .github/workflows/test_simple.sh"
+
+  emscripten:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: build
+      run: |
+        docker run --rm -v $(pwd):/src trzeci/emscripten make -f Makefile.simple emscripten
+    - name: test_simple
+      run: |
+        ls -lAF hyper.html hyper.js hyper.wasm
