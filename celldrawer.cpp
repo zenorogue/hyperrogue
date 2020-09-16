@@ -2520,6 +2520,8 @@ void celldrawer::draw_gravity_particles() {
     }
   }
 
+EX shiftmatrix ocwtV;
+
 void celldrawer::draw() {
 
   cells_drawn++;
@@ -2557,13 +2559,14 @@ void celldrawer::draw() {
       cellwalker cw(c);
       cellwalker cw2 = mirror::reflect(cw);
       int cmc = (cw2.mirrored == cw.mirrored) ? 2 : 1;
+      if(inmirrorcount == 0) ocwtV = cwtV;
       inmirrorcount += cmc;
       draw_grid();
       if(cw2.mirrored != cw.mirrored) V = V * Mirror;
       if(cw2.spin) V = V * spin(2*M_PI*cw2.spin/cw2.at->type);
       cw2.spin = 0;
       dynamicval<shiftmatrix> dc(cwtV, cwtV);
-      cwtV = V * inverse_shift(gmatrix0[c], cwtV);
+      cwtV = V * inverse_shift(ggmatrix(cw2.at), cwtV);
       drawcell(cw2.at, V);
       inmirrorcount -= cmc;
       return;

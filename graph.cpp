@@ -2729,7 +2729,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       if(inmirrorcount&1) mirr = !mirr;
       col = mirrorcolor(geometry == gElliptic ? det(Vs.T) < 0 : mirr);
       if(!mouseout() && !nospins && GDIM == 2) {
-        shiftpoint P2 = Vs * inverse_shift(cwtV, mouseh);
+        shiftpoint P2 = Vs * inverse_shift(inmirrorcount ? ocwtV : cwtV, mouseh);
         queuestr(P2, 10, "x", 0xFF00);
         }     
       if(!nospins && flipplayer) Vs = Vs * pispin;
@@ -2852,6 +2852,12 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
 
     drawPlayerEffects(Vs, c, true);
     if(!mmmon) return true;
+    if(inmirrorcount && !mouseout() && !nospins && GDIM == 2) {
+      hyperpoint h = inverse_shift(ocwtV, mouseh);
+      if(flipplayer) h = pispin * h;
+      shiftpoint P2 = Vs * h;
+      queuestr(P2, 10, "x", 0xFF00);
+      }
     
     if(hide_player()) {
       first_cell_to_draw = false;
