@@ -1001,6 +1001,13 @@ EX transmatrix iso_inverse(const transmatrix& T) {
     return pseudo_ortho_inverse(T);
   if(sphere) 
     return ortho_inverse(T);
+  if(nil) {
+    transmatrix U = Id;    
+    U[2][LDIM] = T[0][LDIM] * T[1][LDIM] - T[2][LDIM];
+    U[1][LDIM] = -T[1][LDIM];
+    U[2][1] = U[0][LDIM] = -T[0][LDIM];
+    return U;
+    }
   if(euclid && !(cgflags & qAFFINE)) {
     transmatrix U = Id;
     for(int i=0; i<MDIM-1; i++)
