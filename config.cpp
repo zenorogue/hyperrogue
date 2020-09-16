@@ -496,6 +496,11 @@ EX void initConfig() {
   addsaver(pconf.collignon_parameter, "collignon-parameter", 1);
   addsaver(pconf.collignon_reflected, "collignon-reflect", false);
 
+  addsaver(pconf.aitoff_parameter, "aitoff-parameter");
+  addsaver(pconf.miller_parameter, "miller-parameter");
+  addsaver(pconf.loximuthal_parameter, "loximuthal_parameter");
+  addsaver(pconf.winkel_parameter, "winkel_parameter");
+
   addsaver(vid.plevel_factor, "plevel_factor", 0.7);
 
   addsaver(vid.creature_scale, "3d-creaturescale", 1);
@@ -2699,6 +2704,10 @@ EX unordered_map<string, ld&> params = {
   {"mgrid", vid.multiplier_grid},
   {"mring", vid.multiplier_ring},
   {"collignon", pconf.collignon_parameter},
+  {"aitoff", pconf.aitoff_parameter},
+  {"loxidromic", pconf.loximuthal_parameter},
+  {"miller", pconf.miller_parameter},
+  {"winkel", pconf.winkel_parameter},
   {"levellines", levellines},
   #endif
   };

@@ -626,6 +626,47 @@ EX namespace models {
         });
       }
     
+    if(vpmodel == mdMiller) {
+      dialog::addSelItem(XLAT("parameter"), fts(vpconf.miller_parameter), 'b');
+      dialog::add_action([](){
+        dialog::editNumber(vpconf.miller_parameter, -1, 1, .1, 4/5., XLAT("parameter"), 
+          "The Miller projection is obtained by multiplying the latitude by 4/5, using Mercator projection, and then multiplying Y by 5/4. "
+          "Here you can change this parameter."
+          );
+        });
+      }
+    
+    if(vpmodel == mdLoximuthal) {
+      dialog::addSelItem(XLAT("parameter"), fts(vpconf.loximuthal_parameter), 'b');
+      dialog::add_action([](){
+        dialog::editNumber(vpconf.loximuthal_parameter, -M_PI/2, M_PI/2, .1, 0, XLAT("parameter"), 
+          "This model is similar to azimuthal equidistant, but based on loxodromes (lines of constant geographic direction) rather than geodesics. "
+          "The loximuthal projection maps (the shortest) loxodromes to straight lines of the same length, going through the starting point. "
+          "This setting changes the latitude of the starting point." 
+          );
+        });
+      }
+
+    if(among(vpmodel, mdAitoff, mdHammer, mdWinkelTripel)) {
+      dialog::addSelItem(XLAT("parameter"), fts(vpconf.aitoff_parameter), 'b');
+      dialog::add_action([](){
+        dialog::editNumber(vpconf.aitoff_parameter, -1, 1, .1, 1/2., XLAT("parameter"), 
+          "The Aitoff projection is obtained by multiplying the longitude by 1/2, using azimuthal equidistant projection, and then multiplying X by 1/2. "
+          "Hammer projection is similar but equi-area projection is used instead. "
+          "Here you can change this parameter."
+          );
+        });
+      }
+    
+    if(vpmodel == mdWinkelTripel) {
+      dialog::addSelItem(XLAT("mixing proportion"), fts(vpconf.winkel_parameter), 'B');
+      dialog::add_action([](){
+        dialog::editNumber(vpconf.winkel_parameter, -1, 1, .1, 1, XLAT("parameter"), 
+          "The Winkel Tripel projection is the average of Aitoff projection and equirectangular projection. Here you can change the proportion."
+          );
+        });
+      }
+    
     if(vpmodel == mdSpiral && !euclid) {
       dialog::addSelItem(XLAT("spiral angle"), fts(vpconf.spiral_angle) + "°", 'x');
       dialog::add_action([](){
