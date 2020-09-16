@@ -751,6 +751,21 @@ EX bool use_standard_centering() {
   return standard_centering || force_standard_centering();
   }
 
+EX transmatrix track_matrix(int at, int dir) {
+  transmatrix res = unshift(ggmatrix(racing::track[at]));
+  while(true) {
+    if(at+dir < 0 || at+dir >= isize(racing::track)) return res;
+    for(int x=0; x<MDIM; x++) for(int y=0; y<MDIM; y++)
+      if(abs(res[y][x]) > 10000) return res;
+    cell *cur = racing::track[at];
+    at += dir;
+    cell *next = racing::track[at];
+    int nei = neighborId(cur, next);
+    if(nei == -1) return res;
+    res = res * currentmap->adj(cur, nei);
+    }
+  }
+
 EX bool set_view() {
 
   multi::cpid = subscreens::in ? subscreens::current_player : 0;
@@ -781,21 +796,24 @@ EX bool set_view() {
     View = iso_inverse(at) * View;
     }
   else {
+    /* this works only in isotropic geometries, but we don't really care about this in 3D */
     int z = get_info(who->base).completion;
-    int steps = euclid ? 1000 : PURE ? 10 :  20;
-    cell *c1 = racing::track[max(z-steps, 0)];
-    cell *c2 = racing::track[min(z+steps, isize(racing::track)-1)];
-    transmatrix T1 = ypush(-vid.yshift) * unshift(ggmatrix(c1));
-    transmatrix T2 = ypush(-vid.yshift) * unshift(ggmatrix(c2));
+    
+    transmatrix T1 = track_matrix(z, -1);
+    transmatrix T2 = track_matrix(z, +1);
+    
     transmatrix iT1 = iso_inverse(T1);
+
     transmatrix T = spintox(iT1 * T2 * C0);
-    hyperpoint h = T * iT1 * at * C0;
+    
+    hyperpoint h = T * iT1 * ypush(vid.yshift) * at * C0;
     ld y = GDIM == 2 ? asin_auto(h[1]) : asin_auto(hypot(h[1], h[2]));
     ld x = asin_auto(h[0] / cos_auto(y));
     x += race_advance;
     if(GDIM == 3 && race_advance == 0 && pmodel == mdPerspective) race_advance = -1;
-    transmatrix Z = T1 * iso_inverse(T) * xpush(x);
-    View = iso_inverse(Z) * View;
+
+    View = xpush(-x) * T * iT1 * ypush(vid.yshift) * View;
+
     if(GDIM == 3) View = cspin(2, 0, M_PI/2) * View;
     fixmatrix(View);
     }
