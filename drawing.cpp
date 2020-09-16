@@ -1515,6 +1515,8 @@ bool broken_projection(dqi_poly& p0) {
       all.push_back(p0.V.T * glhr::gltopoint((*p0.tab)[p0.offset+i]));
     int fail = 0;
     int last_fail;
+
+    for(auto& h: all) models::apply_orientation(h[0], h[1]);
     
     auto break_in = [&] (hyperpoint a, hyperpoint b) {
       return a[0] * b[0] <= 0 && (a[0] * b[zcoord] - b[0] * a[zcoord]) * (a[0] - b[0]) < 0;
@@ -1528,6 +1530,11 @@ bool broken_projection(dqi_poly& p0) {
     p.tab = &v;
     p.offset = 0;
     p.V.T = Id;
+
+    /* we don't rotate h's back, just change p.V */
+    for(int i=0; i<3; i++)
+      models::apply_orientation(p.V.T[i][0], p.V.T[i][1]);
+
     if(fail) {
       if(p0.tinf) return true;
       dynamicval<bool> ib(in_broken, true);

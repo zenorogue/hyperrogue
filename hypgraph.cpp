@@ -2040,6 +2040,7 @@ EX void draw_boundary(int w) {
         h[broken_coord] = -sin_auto(a*degree) * rem;
         h[0] = sin_auto(a*degree) * eps * s;
         h[unbroken_coord] = cos_auto(a*degree);
+        models::apply_orientation(h[1], h[0]);
         curvepoint(h);
         }
       queuecurve(shiftless(Id), periodcolor, 0, PPR::CIRCLE).flags |= POLY_FORCEWIDE;
