@@ -2723,7 +2723,7 @@ EX namespace linepatterns {
         }
       )
     );
-  linepattern patGoldbergTree("Goldberg tree", 0x8438A400, [] { return GOLDBERG; }, 
+  linepattern patGoldbergTree("Goldberg tree", 0x8438A400, [] { return GOLDBERG || INVERSE; }, 
     ALLCELLS(
       if(c->master->c7 != c) 
         gridlinef(V, C0, V*currentmap->adj(c,0), C0, 
@@ -2771,7 +2771,7 @@ EX namespace linepatterns {
           }
       )
     );
-  linepattern patGoldbergSep("Goldberg", 0xFFFF0000, [] { return GOLDBERG; },
+  linepattern patGoldbergSep("Goldberg", 0xFFFF0000, [] { return GOLDBERG || INVERSE; },
     ALLCELLS(
       forCellIdEx(c2, i, c) if(c2->master != c->master)
         gridlinef(V, C0, V*currentmap->adj(c, i), C0, 
