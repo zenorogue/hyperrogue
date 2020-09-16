@@ -94,7 +94,6 @@ EX int chessvalue(cell *c) {
     auto li = gp::get_local_info(c);
     bool odd_a = gp::param.first & 1;
     bool odd_b = gp::param.second & 1;
-    bool odd_S7 = S7 & 1;
     // odd-odd
     if(odd_a && odd_b) 
       return (li.relative.second & 1) ^ (li.last_dir & 1) ^ (c->master->dm4 & 1) ^ ((c->master->emeraldval & 1) ? 1 : 0);
