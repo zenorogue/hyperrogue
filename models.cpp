@@ -823,6 +823,14 @@ EX namespace models {
       PHASEFROM(2); 
       shift_arg_formula(vpconf.model_transition);
       }
+    else if(argis("-mparam")) { 
+      PHASEFROM(2); 
+      if(pmodel == mdCollignon) shift_arg_formula(vpconf.collignon_parameter);
+      else if(pmodel == mdMiller) shift_arg_formula(vpconf.miller_parameter);
+      else if(pmodel == mdLoximuthal) shift_arg_formula(vpconf.loximuthal_parameter);
+      else if(among(pmodel, mdAitoff, mdHammer, mdWinkelTripel)) shift_arg_formula(vpconf.aitoff_parameter);
+      if(pmodel == mdWinkelTripel) shift_arg_formula(vpconf.winkel_parameter);
+      }
     else if(argis("-sang")) { 
       PHASEFROM(2); 
       shift_arg_formula(vpconf.spiral_angle);
