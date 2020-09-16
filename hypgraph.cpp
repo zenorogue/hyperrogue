@@ -849,8 +849,11 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       makeband(H_orig, ret, [] (ld&x, ld &y) {
         ld orig_y = y;
         band_conformal(x, y);
-        y -= pconf.loximuthal_parameter;
+        ld x0 = 0, y0 = pconf.loximuthal_parameter; band_conformal(x0, y0);
+        y -= y0;
+        
         orig_y -= pconf.loximuthal_parameter;
+        
         if(y) x = x * orig_y / y;
         y = orig_y;
         });
