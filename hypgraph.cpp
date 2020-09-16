@@ -9,7 +9,7 @@
 namespace hr {
 
 hyperpoint ghxy, ghgxy;
-shiftpoint ghpm = shiftless(C0);
+shiftpoint ghpm = shiftless(C02);
 
 #if HDR
 inline bool sphereflipped() { return sphere && pconf.alpha > 1.1 && GDIM == 3; }
