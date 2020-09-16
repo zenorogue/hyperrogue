@@ -625,7 +625,7 @@ struct hrmap_archimedean : hrmap {
       dynamicval<hrmap*> cm(currentmap, current_altmap);
       U = T;
       current_altmap->virtualRebase(alt, T);
-      U = U * inverse(T);
+      U = U * iso_inverse(T);
       }
     
     if(euclid) {
@@ -725,7 +725,7 @@ struct hrmap_archimedean : hrmap {
         h1 = h1->move(0);
         }
       else {
-        where = inverse(cof.adjcell_matrix(h2, 0)) * where;
+        where = iso_inverse(cof.adjcell_matrix(h2, 0)) * where;
         h2 = h2->move(0);
         }
       }

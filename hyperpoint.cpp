@@ -567,10 +567,10 @@ EX transmatrix eupush(ld x, ld y) {
   return T;
   }
 
-EX transmatrix eupush(hyperpoint h) {
-  if(nonisotropic) return nisot::translate(h);
+EX transmatrix eupush(hyperpoint h, ld co IS(1)) {
+  if(nonisotropic) return nisot::translate(h, co);
   transmatrix T = Id;
-  for(int i=0; i<GDIM; i++) T[i][LDIM] = h[i];
+  for(int i=0; i<GDIM; i++) T[i][LDIM] = h[i] * co;
   return T;
   }
 
@@ -795,11 +795,8 @@ EX transmatrix rpushxto0(const hyperpoint& H) {
   }
 
 EX transmatrix ggpushxto0(const hyperpoint& H, ld co) {
-  if(translatable) {
-    if(nonisotropic)
-      return co > 0 ? eupush(H) : inverse(eupush(H));
-    return eupush(co * H);
-    }
+  if(translatable) 
+    return eupush(H, co);
   if(prod) {
     auto d = product_decompose(H);
     return mscale(PIU(ggpushxto0(d.second, co)), d.first * co);
@@ -924,7 +921,7 @@ void inverse_error(const transmatrix& T) {
   println(hlog, "Warning: inverting a singular matrix: ", T);
   }
 
-/** inverse */
+/** inverse of a 3x3 matrix */
 EX transmatrix inverse3(const transmatrix& T) {
   ld d = det(T);
   transmatrix T2;
@@ -939,6 +936,7 @@ EX transmatrix inverse3(const transmatrix& T) {
   return T2;
   }
 
+/** \brief inverse of a general matrix */
 EX transmatrix inverse(const transmatrix& T) {
   if(MDIM == 3) 
     return inverse3(T);
@@ -976,6 +974,59 @@ EX transmatrix inverse(const transmatrix& T) {
       }
     return T2;
     }
+  }
+
+/** \brief inverse of an orthogonal matrix, i.e., transposition */
+EX transmatrix ortho_inverse(transmatrix T) {
+  for(int i=1; i<MDIM; i++)
+    for(int j=0; j<i; j++)
+      swap(T[i][j], T[j][i]);
+  return T;
+  }
+
+/** \brief inverse of an orthogonal matrix in Minkowski space */
+EX transmatrix pseudo_ortho_inverse(transmatrix T) {
+  for(int i=1; i<MDIM; i++)
+    for(int j=0; j<i; j++)
+      swap(T[i][j], T[j][i]);
+  for(int i=0; i<MDIM-1; i++)
+    T[i][MDIM-1] = -T[i][MDIM-1],
+    T[MDIM-1][i] = -T[MDIM-1][i];
+  return T;
+  }
+
+/** \brief inverse of an isometry -- in most geometries this can be done more efficiently than using inverse */
+EX transmatrix iso_inverse(const transmatrix& T) {
+  if(hyperbolic)
+    return pseudo_ortho_inverse(T);
+  if(sphere) 
+    return ortho_inverse(T);
+  if(euclid && !(cgflags & qAFFINE)) {
+    transmatrix U = Id;
+    for(int i=0; i<MDIM-1; i++)
+      for(int j=0; j<MDIM-1; j++)
+        U[i][j] = T[j][i];
+    hyperpoint h = U * tC0(T);
+    for(int i=0; i<MDIM-1; i++)
+      U[i][MDIM-1] = -h[i];
+    return U;
+    }
+  return inverse(T);
+  }
+
+/** \brief T inverse a matrix T = O*S, where O is isometry and S is a scaling matrix (todo optimize) */
+EX transmatrix z_inverse(const transmatrix& T) {
+  return inverse(T);
+  }
+
+/** \brief T inverse a matrix T = O*P, where O is orthogonal and P is an isometry (todo optimize) */
+EX transmatrix view_inverse(transmatrix T) {
+  return inverse(T);
+  }
+
+/** \brief T inverse a matrix T = P*O, where O is orthogonal and P is an isometry (todo optimize) */
+EX transmatrix iview_inverse(transmatrix T) {
+  return inverse(T);
   }
 
 EX pair<ld, hyperpoint> product_decompose(hyperpoint h) {
@@ -1050,7 +1101,7 @@ EX ld hdist(const hyperpoint& h1, const hyperpoint& h2) {
       return hypot(PIU(hdist(d1.second, d2.second)), d1.first - d2.first);
       }
     case gcSL2: 
-      return hdist0(inverse(slr::translate(h1)) * h2);
+      return hdist0(stretch::itranslate(h1) * h2);
     default:
       if(iv < 0) return 0;
       return sqrt(iv);
@@ -1349,12 +1400,12 @@ EX hyperpoint inverse_exp(const shiftpoint h, flagtype prec IS(pNORMAL)) {
 
 EX ld geo_dist(const hyperpoint h1, const hyperpoint h2, flagtype prec IS(pNORMAL)) {
   if(!nonisotropic) return hdist(h1, h2);
-  return hypot_d(3, inverse_exp(shiftless(inverse(nisot::translate(h1)) * h2, prec)));
+  return hypot_d(3, inverse_exp(shiftless(nisot::translate(h1, -1) * h2, prec)));
   }
 
 EX ld geo_dist(const shiftpoint h1, const shiftpoint h2, flagtype prec IS(pNORMAL)) {
   if(!nonisotropic) return hdist(h1, h2);
-  return hypot_d(3, inverse_exp(shiftless(inverse(nisot::translate(h1.h)) * h2.h, h2.shift - h1.shift), prec));
+  return hypot_d(3, inverse_exp(shiftless(nisot::translate(h1.h, -1) * h2.h, h2.shift - h1.shift), prec));
   }
 
 EX ld geo_dist_q(const hyperpoint h1, const hyperpoint h2, flagtype prec IS(pNORMAL)) {

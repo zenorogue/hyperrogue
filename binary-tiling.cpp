@@ -762,7 +762,7 @@ EX namespace bt {
       t[0] = parabolic3(horohex_scale, 0) * xpush(-l) * cspin(1, 2, M_PI/2);
       t[1] = cspin(1, 2, 2*M_PI/3) * t[0];
       t[2] = cspin(1, 2, 4*M_PI/3) * t[0];
-      auto it = inverse(t[0]);
+      auto it = iso_inverse(t[0]);
 
       t[5] = it * t[1] * t[1];
       t[6] = it * t[5];
@@ -782,7 +782,7 @@ EX namespace bt {
       use_direct >>= 1;
       }
     for(int i=0; i<S7; i++) if(use_direct_for(i))
-      inverse_tmatrix[i] = inverse(direct_tmatrix[i]);
+      inverse_tmatrix[i] = iso_inverse(direct_tmatrix[i]);
     }
   
   #if MAXMDIM == 4

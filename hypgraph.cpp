@@ -1523,11 +1523,11 @@ EX void spinEdge(ld aspd) {
     fixmatrix(our);
     fixmatrix(their);
     if(GDIM == 2) {
-      transmatrix T = their * inverse(our);
+      transmatrix T = their * iso_inverse(our);
       hyperpoint H = T * xpush0(1);
       downspin = -atan2(H[1], H[0]);
       }
-    else rotate_view(their * inverse(our));
+    else rotate_view(their * iso_inverse(our));
     }
   else if(playerfound && vid.fixed_facing) {
     hyperpoint H = gpushxto0(unshift(playerV) * C0) * unshift(playerV) * xpush0(5);
@@ -1576,8 +1576,8 @@ EX void centerpc(ld aspd) {
     transmatrix T = pc->at;
     int sl = snakelevel(cwt.at);
     if((sl || vid.eye) && WDIM == 2) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR + vid.eye);
-    View = inverse(T);
-    if(prod) NLP = inverse(pc->ori);
+    View = iso_inverse(T);
+    if(prod) NLP = ortho_inverse(pc->ori);
     if(WDIM == 2) rotate_view( cspin(0, 1, M_PI) * cspin(2, 1, M_PI/2 + shmup::playerturny[id]) * spin(-M_PI/2) );
     return;
     }
@@ -1610,7 +1610,7 @@ EX void centerpc(ld aspd) {
     if(sl || vid.eye) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR + vid.eye);
     }
   #endif
-  hyperpoint H = inverse(actual_view_transform) * tC0(T);
+  hyperpoint H = ortho_inverse(actual_view_transform) * tC0(T);
   ld R = (zero_d(GDIM, H) && !prod) ? 0 : hdist0(H);
   if(R < 1e-9) {
     // either already centered or direction unknown
@@ -1649,7 +1649,7 @@ EX void optimizeview() {
   if(dual::split(optimizeview)) return;
   
   cell *c = centerover;
-  transmatrix iView = inverse(View);
+  transmatrix iView = view_inverse(View);
   virtualRebase(centerover, iView);
   if(c != centerover && (sphere || sl2)) {
     transmatrix T = currentmap->relative_matrix(centerover, c, C0);
@@ -1657,7 +1657,7 @@ EX void optimizeview() {
     stretch::mstretch_matrix = T * stretch::mstretch_matrix;
     }
     
-  View = inverse(iView);
+  View = iview_inverse(iView);
   fixmatrix(View);
 
   #if CAP_ANIMATIONS
@@ -1732,7 +1732,7 @@ EX void resetview() {
     }
   cwtV = shiftless(View);
   current_display->which_copy = 
-    nonisotropic ? gpushxto0(tC0(inverse(View))) :
+    nonisotropic ? gpushxto0(tC0(view_inverse(View))) :
     View;
   // SDL_LockSurface(s);
   // SDL_UnlockSurface(s);
@@ -2266,11 +2266,11 @@ EX hyperpoint unshift(shiftpoint T, ld to IS(0)) {
   }
 
 EX transmatrix inverse_shift(const shiftmatrix& T1, const shiftmatrix& T2) {
-  return inverse(T1.T) * unshift(T2, T1.shift);
+  return iso_inverse(T1.T) * unshift(T2, T1.shift);
   }
 
 EX hyperpoint inverse_shift(const shiftmatrix& T1, const shiftpoint& T2) {
-  return inverse(T1.T) * unshift(T2, T1.shift);
+  return iso_inverse(T1.T) * unshift(T2, T1.shift);
   }
 
 EX void optimize_shift(shiftmatrix& T) {
@@ -2497,13 +2497,13 @@ EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V) {
     return rgpushxto0(direct_exp(lp_iapply(H))) * V;
     }
   else if(!nisot::geodesic_movement) {
-    transmatrix IV = inverse(V);
+    transmatrix IV = view_inverse(V);
     nisot::fixmatrix(IV);
-    const transmatrix V1 = inverse(IV);
+    const transmatrix V1 = iview_inverse(IV);
     return V1 * eupush(IV * eupush(H) * V1 * C0);
     }
   else {
-    return inverse(nisot::parallel_transport(inverse(V), -H));
+    return iview_inverse(nisot::parallel_transport(view_inverse(V), -H));
     }
   }
 
@@ -2514,8 +2514,8 @@ EX void shift_view(hyperpoint H) {
   View = get_shift_view_of(H, View);
   auto& wc = current_display->which_copy;
   if(nonisotropic || stretch::in()) {
-    transmatrix ioldv = eupush(tC0(inverse(oView)));
-    transmatrix newv = inverse(eupush(tC0(inverse(View))));
+    transmatrix ioldv = eupush(tC0(view_inverse(oView)));
+    transmatrix newv = inverse(eupush(tC0(view_inverse(View))));
     wc = newv * ioldv * wc;
     }
   else
@@ -2586,7 +2586,7 @@ EX void set_view(hyperpoint camera, hyperpoint forward, hyperpoint upward) {
   
   if(det(rotator) < 0) rotator[0] = -rotator[0];
   
-  View = rotator * inverse(rgpushxto0(camera));
+  View = rotator * iso_inverse(rgpushxto0(camera));
   }
 
 }

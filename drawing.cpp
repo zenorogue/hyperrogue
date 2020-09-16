@@ -1278,10 +1278,10 @@ void draw_stretch(dqi_poly *p) {
   npoly.V = shiftless(Id);
   npoly.flags &= ~(POLY_INVERSE | POLY_FORCE_INVERTED);
   
-  transmatrix T2 = stretch::translate( tC0(inverse(View)) );
+  transmatrix T2 = stretch::translate( tC0(iso_inverse(View)) );
   transmatrix U = View * T2;
   
-  transmatrix iUV = inverse(U) * p->V.T;
+  transmatrix iUV = iso_inverse(U) * p->V.T;
   
   vector<hyperpoint> hs;
   vector<hyperpoint> ths;

@@ -577,7 +577,7 @@ void geometry_information::prepare_basics() {
   for(int d=0; d<S7; d++) 
     hexmove[d] = spin(hexshift-d * ALPHA) * xpush(-crossf)* spin(M_PI);  
 
-  for(int d=0; d<S7; d++) invhexmove[d] = inverse(hexmove[d]);
+  for(int d=0; d<S7; d++) invhexmove[d] = iso_inverse(hexmove[d]);
 
   hexvdist = hdist(xpush0(hexf), xspinpush0(ALPHA/2, hcrossf));
 
@@ -951,7 +951,7 @@ EX void switch_always3() {
     #endif
     if(dual::split(switch_fpp)) return;
     check_cgi(); cgi.require_basics();
-    View = inverse(models::rotmatrix()) * View;
+    View = iso_inverse(models::rotmatrix()) * View;
     if(!vid.always3) {
       vid.always3 = true;
       apply_always3();

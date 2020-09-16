@@ -2315,7 +2315,7 @@ EX bool applyAnimation(cell *c, shiftmatrix& V, double& footphase, int layer) {
   
   if(sl2) {
     a.wherenow = slr::translate(tC0(a.wherenow));
-    hyperpoint h = tC0(inverse(a.wherenow));
+    hyperpoint h = tC0(iso_inverse(a.wherenow));
     hyperpoint ie = slr::get_inverse_exp(shiftless(h));
     auto R = hypot_d(3, ie);
     aspd *= (1+R+(shmup::on?1:0));
@@ -2346,9 +2346,9 @@ EX bool applyAnimation(cell *c, shiftmatrix& V, double& footphase, int layer) {
   else {
     hyperpoint wnow;
     if(a.attacking == 1)
-      wnow = tC0(inverse(a.wherenow) * a.attackat);
+      wnow = tC0(z_inverse(a.wherenow) * a.attackat);
     else
-      wnow = tC0(inverse(a.wherenow));
+      wnow = tC0(z_inverse(a.wherenow));
     
     if(prod) {
       auto d = product_decompose(wnow);
@@ -2778,7 +2778,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       }
     else if(NONSTDVAR) {
       transmatrix T = currentmap->adj(c, c->mondir);
-      Vb = Vb * T * rspintox(tC0(inverse(T))) * xpush(cgi.tentacle_length);
+      Vb = Vb * T * rspintox(tC0(iso_inverse(T))) * xpush(cgi.tentacle_length);
       }
     else {
       Vb = Vb * ddspin(c, c->mondir, M_PI);
@@ -3174,7 +3174,7 @@ void draw_movement_arrows(cell *c, const transmatrix& V, int df) {
         transmatrix Centered = rgpushxto0(unshift(tC0(cwtV)));
         int sd = md.subdir;
         
-        transmatrix T = inverse(Centered) * rgpushxto0(Centered * tC0(V)) * rspintox(Centered*tC0(V)) * spin(-sd * M_PI/S7) * xpush(0.2);
+        transmatrix T = iso_inverse(Centered) * rgpushxto0(Centered * tC0(V)) * rspintox(Centered*tC0(V)) * spin(-sd * M_PI/S7) * xpush(0.2);
         
         if(vid.axes >= 5)
           queuestr(shiftless(T), keysize, s0 + key, col >> 8, 1);
@@ -3477,7 +3477,7 @@ EX void pushdown(cell *c, int& q, const shiftmatrix &V, double down, bool rezoom
     // xyscale = xyscale + (zscale-xyscale) * (1+sin(ticks / 1000.0)) / 2;
     
     ptd.V.T = xyzscale( V.T, xyscale*zscale, zscale)
-      * inverse(V.T) * unshift(ptd.V, V.shift);
+      * z_inverse(V.T) * unshift(ptd.V, V.shift);
       
     if(!repriority) ;
     else if(nlev < -vid.lake_bottom-1e-3) {
@@ -3692,7 +3692,7 @@ void make_clipping_planes() {
     hyperpoint sx = point3(y1 * z2 - y2 * z1, z1 * x2 - z2 * x1, x1 * y2 - x2 * y1);
     sx /= hypot_d(3, sx);
     sx[3] = 0;
-    if(nisot::local_perspective_used()) sx = inverse(NLP) * sx;
+    if(nisot::local_perspective_used()) sx = ortho_inverse(NLP) * sx;
     clipping_planes.push_back(sx);
     };
   ld tx = current_display->tanfov;
@@ -4461,7 +4461,7 @@ EX transmatrix actual_view_transform;
 EX ld wall_radar(cell *c, transmatrix T, transmatrix LPe, ld max) {
   if(!in_perspective() || !vid.use_wall_radar) return max;
   transmatrix ori;
-  if(prod) ori = inverse(LPe);
+  if(prod) ori = ortho_inverse(LPe);
   ld step = max / 20;
   ld fixed_yshift = 0;
   for(int i=0; i<20; i++) {
@@ -4487,30 +4487,30 @@ EX void make_actual_view() {
   if(GDIM == 3) {
     ld max = WDIM == 2 ? vid.camera : vid.yshift;
     if(max) {
-      transmatrix Start = inverse(actual_view_transform * View);
+      transmatrix Start = view_inverse(actual_view_transform * View);
       ld d = wall_radar(centerover, Start, NLP, max);
-      actual_view_transform = get_shift_view_of(ztangent(d), actual_view_transform * View) * inverse(View); 
+      actual_view_transform = get_shift_view_of(ztangent(d), actual_view_transform * View) * view_inverse(View); 
       }
-    camera_level = asin_auto(tC0(inverse(actual_view_transform * View))[2]);
+    camera_level = asin_auto(tC0(view_inverse(actual_view_transform * View))[2]);
     }
   if(nonisotropic) {
     transmatrix T = actual_view_transform * View;
-    transmatrix T2 = eupush( tC0(inverse(T)) );
+    transmatrix T2 = eupush( tC0(view_inverse(T)) );
     NLP = T * T2;
-    actual_view_transform = inverse(NLP) * actual_view_transform;
+    actual_view_transform = ortho_inverse(NLP) * actual_view_transform;
     }
   #endif
   #if MAXMDIM >= 4
   if(GDIM == 3 && WDIM == 2) {
     transmatrix T = actual_view_transform * View;
-    transmatrix U = inverse(T);
+    transmatrix U = view_inverse(T);
     
     if(T[0][2]) 
       T = spin(-atan2(T[0][2], T[1][2])) * T;
     if(T[1][2] && T[2][2]) 
       T = cspin(1, 2, -atan2(T[1][2], T[2][2])) * T;
 
-    ld z = -asin_auto(tC0(inverse(T)) [2]);
+    ld z = -asin_auto(tC0(view_inverse(T)) [2]);
     T = zpush(-z) * T;
 
     radar_transform = T * U;
@@ -5297,7 +5297,7 @@ EX void animateAttack(const movei& m, int layer) {
   bool newanim = !animations[layer].count(m.s);
   animation& a = animations[layer][m.s];
   a.attacking = 1;
-  a.attackat = rspintox(tC0(inverse(T))) * xpush(hdist0(T*C0) / 3);
+  a.attackat = rspintox(tC0(iso_inverse(T))) * xpush(hdist0(T*C0) / 3);
   if(newanim) a.wherenow = Id, a.ltick = ticks, a.footphase = 0;
   }
 

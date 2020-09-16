@@ -16,9 +16,9 @@ EX namespace nisot {
   
   EX bool geodesic_movement = true;
 
-  EX transmatrix translate(hyperpoint h) {
-    if(sl2)
-      return slr::translate(h);
+  EX transmatrix translate(hyperpoint h, ld co IS(1)) {
+    if(sl2 || sphere)
+      return co > 0 ? stretch::translate(h) : stretch::itranslate(h);
     transmatrix T = Id;
     for(int i=0; i<GDIM; i++) T[i][LDIM] = h[i];
     if(sol && nih) {
@@ -35,6 +35,7 @@ EX namespace nisot {
       }
     if(nil) 
       T[2][1] = h[0];
+    if(co < 0) return iso_inverse(T);
     return T;
     }
 
@@ -927,7 +928,7 @@ EX namespace nilv {
     }
 
   EX hyperpoint on_geodesic(hyperpoint s0, hyperpoint s1, ld x) {
-    hyperpoint local = inverse(nisot::translate(s0)) * s1;
+    hyperpoint local = nisot::translate(s0, -1) * s1;
     hyperpoint h = get_inverse_exp(local);
     return nisot::translate(s0) * formula_exp(h * x);
     }
@@ -1372,7 +1373,7 @@ EX namespace hybrid {
           T = spintox(T * h2) * T;
           w = T * C0;
           w[1] = -w[1];
-          w = inverse(T) * w;
+          w = iso_inverse(T) * w;
           };
         if(prod)
           ((hrmap_hybrid*)currentmap)->in_underlying(f);
@@ -2046,7 +2047,7 @@ EX namespace rots {
     transmatrix Spin;
     hybrid::in_underlying_geometry([&] {
       hyperpoint h = tC0(T);
-      Spin = inverse(gpushxto0(h) * T);
+      Spin = iso_inverse(gpushxto0(h) * T);
       d = hr::inverse_exp(shiftless(h));
       alpha = atan2(Spin[0][1], Spin[0][0]);
       distance = hdist0(h);
@@ -2173,7 +2174,7 @@ EX namespace rots {
     auto g = std::move(gmatrix);
     auto g0 = std::move(gmatrix0);
     
-    ld alpha = atan2(inverse(NLP) * point3(1, 0, 0));
+    ld alpha = atan2(ortho_inverse(NLP) * point3(1, 0, 0));
     
     bool inprod = prod;
     transmatrix pView = View;
@@ -2762,7 +2763,7 @@ EX namespace nisot {
   EX void fixmatrix(transmatrix& T) {
     if(sphere) return hr::fixmatrix(T);
     transmatrix push = eupush( tC0(T) );
-    transmatrix push_back = inverse(push);
+    transmatrix push_back = eupush(tC0(T), -1);
     transmatrix gtl = push_back * T;
     { dynamicval<eGeometry> g(geometry, gSphere); hr::fixmatrix(gtl); }
     T = push * gtl;
@@ -2771,14 +2772,14 @@ EX namespace nisot {
   EX transmatrix parallel_transport(const transmatrix Position, const hyperpoint direction) {
     auto P = Position;
     nisot::fixmatrix(P);  
-    if(!geodesic_movement) return inverse(eupush(Position * translate(-direction) * inverse(Position) * C0)) * Position;
+    if(!geodesic_movement) return eupush(Position * translate(-direction) * inverse(Position) * C0, -1) * Position;
     return parallel_transport_bare(P, direction);
     }
   
   EX transmatrix spin_towards(const transmatrix Position, const hyperpoint goal, flagtype prec IS(pNORMAL)) {
 
     hyperpoint at = tC0(Position);
-    transmatrix push_back = inverse(translate(at));
+    transmatrix push_back = translate(at, -1);
     hyperpoint back_goal = push_back * goal;
     back_goal = inverse_exp(shiftless(back_goal), prec);
     

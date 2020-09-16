@@ -69,7 +69,7 @@ EX transmatrix master_relative(cell *c, bool get_inverse IS(false)) {
     else {
       auto li = gp::get_local_info(c);
       transmatrix T = spin(master_to_c7_angle()) * cgi.gpdata->Tf[li.last_dir][li.relative.first&31][li.relative.second&31][gp::fixg6(li.total_dir)];
-      if(get_inverse) T = inverse(T);
+      if(get_inverse) T = iso_inverse(T);
       return T;
       }
     }

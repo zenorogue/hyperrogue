@@ -778,7 +778,7 @@ EX bool set_view() {
   transmatrix at = ypush(-vid.yshift) * unshift(ggmatrix(who->base)) * who->at;
   
   if(racing::player_relative || quotient || (kite::in() && GDIM == 3)) {
-    View = inverse(at) * View;
+    View = iso_inverse(at) * View;
     }
   else {
     int z = get_info(who->base).completion;
@@ -787,14 +787,15 @@ EX bool set_view() {
     cell *c2 = racing::track[min(z+steps, isize(racing::track)-1)];
     transmatrix T1 = ypush(-vid.yshift) * unshift(ggmatrix(c1));
     transmatrix T2 = ypush(-vid.yshift) * unshift(ggmatrix(c2));
-    transmatrix T = spintox(inverse(T1) * T2 * C0);
-    hyperpoint h = T * inverse(T1) * at * C0;
+    transmatrix iT1 = iso_inverse(T1);
+    transmatrix T = spintox(iT1 * T2 * C0);
+    hyperpoint h = T * iT1 * at * C0;
     ld y = GDIM == 2 ? asin_auto(h[1]) : asin_auto(hypot(h[1], h[2]));
     ld x = asin_auto(h[0] / cos_auto(y));
     x += race_advance;
     if(GDIM == 3 && race_advance == 0 && pmodel == mdPerspective) race_advance = -1;
-    transmatrix Z = T1 * inverse(T) * xpush(x);
-    View = inverse(Z) * View;
+    transmatrix Z = T1 * iso_inverse(T) * xpush(x);
+    View = iso_inverse(Z) * View;
     if(GDIM == 3) View = cspin(2, 0, M_PI/2) * View;
     fixmatrix(View);
     }

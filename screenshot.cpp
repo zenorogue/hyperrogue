@@ -1172,7 +1172,7 @@ EX void reflect_view() {
     cell *mbase = centerover;
     cell *c = centerover;
     if(shmup::reflect(c, mbase, T))
-      View = inverse(T.T) * View;
+      View = iso_inverse(T.T) * View;
     }
   }
 

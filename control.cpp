@@ -331,9 +331,9 @@ EX void full_rotate_camera(int dir, ld val) {
   if(rug::rug_control() && lshiftclick) {
     hyperpoint h;
     if(nonisotropic) {
-      transmatrix T2 = eupush( tC0(inverse(View)) );
+      transmatrix T2 = eupush( tC0(view_inverse(View)) );
       transmatrix nlp = View * T2;  
-      auto rV = inverse(nlp) * View;
+      auto rV = ortho_inverse(nlp) * View;
       h = nlp * inverse_exp(shiftless(tC0(rV)));
       }
     else h = inverse_exp(shiftless(tC0(View)));

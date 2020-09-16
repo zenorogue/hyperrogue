@@ -1565,7 +1565,7 @@ EX namespace mapeditor {
     ld step = 0.01;
     ld cdist = 0;
     
-    auto idt = inverse(unshift(drawtrans));
+    auto idt = z_inverse(unshift(drawtrans));
 
     auto qu = [&] (ld d) {
       ld d1 = front_edit;
@@ -1889,7 +1889,7 @@ EX namespace mapeditor {
     if(!mouseout()) {
       hyperpoint mh;
       if(GDIM == 2) {
-        transmatrix T = inverse(unshift(drawtrans)) * rgpushxto0(ccenter); /* todo? */
+        transmatrix T = z_inverse(unshift(drawtrans)) * rgpushxto0(ccenter); /* todo? */
         mh = spintox(gpushxto0(ccenter) * coldcenter) * T * unshift(mouseh);
         }
       else
@@ -2651,7 +2651,7 @@ EX namespace mapeditor {
     
     if(sio.id == sih.id) {
       if(c == ls)
-        textrans = inverse(V.T * applyPatterndir(ls, sio));
+        textrans = z_inverse(V.T * applyPatterndir(ls, sio));
       
       transmatrix mh = textrans * rgpushxto0(unshift(mouseh, V.shift));
       transmatrix ml = textrans * rgpushxto0(unshift(lstart, V.shift));

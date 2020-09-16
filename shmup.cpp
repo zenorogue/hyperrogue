@@ -197,11 +197,11 @@ void monster::rebasePat(const shiftmatrix& new_pat, cell *c2) {
       else {
         auto T = calc_relative_matrix(c2, base, tC0(at));
         base = c2;
-        at = inverse(T) * at;
+        at = iso_inverse(T) * at;
         }
       }
     if(multi::players == 1 && this == shmup::pc[0] && !eqmatrix(old_at, at))
-      current_display->which_copy = current_display->which_copy * old_at * inverse(at);
+      current_display->which_copy = current_display->which_copy * old_at * iso_inverse(at);
     return;
     }
   if(multi::players == 1 && this == shmup::pc[0])
@@ -1354,7 +1354,7 @@ bool reflectmatrix(shiftmatrix& M, cell *c1, cell *c2, bool onlypos) {
   ld d = hdist0(tC0(H));
   transmatrix T = xpush(-d/2) * S * inverse_shift(gmatrix[c1], M);
   if(onlypos && tC0(T)[0] < 0) return false;
-  M = gmatrix[c1] * inverse(S) * xpush(d/2) * MirrorX * T;
+  M = gmatrix[c1] * iso_inverse(S) * xpush(d/2) * MirrorX * T;
   return true;
   }
 

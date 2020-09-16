@@ -183,7 +183,7 @@ EX rugpoint *addRugpoint(shiftpoint h, double dist) {
   m->valid = false;
 
   if(euclid && quotient && !bounded) {
-    hyperpoint h1 = inverse(models::euclidean_spin) * eumove(euc::eu.user_axes[1]) * C0;
+    hyperpoint h1 = iso_inverse(models::euclidean_spin) * eumove(euc::eu.user_axes[1]) * C0;
     h1 /= sqhypot_d(2, h1);
     if(nonorientable) h1 /= 2;
     m->valid = good_shape = true;
@@ -626,7 +626,7 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp=false, double
   bool nonzero = abs(t-rd) > err_zero_current;
   double forcev = (t - rd) / 2; // 20.0;
   
-  transmatrix T = inverse(rgpushxto0(m1.native));
+  transmatrix T = iso_inverse(rgpushxto0(m1.native));
   hyperpoint ie = inverse_exp(shiftless(T * m2.native));
 
   transmatrix iT = rgpushxto0(m1.native);
@@ -1086,9 +1086,9 @@ EX void drawRugScene() {
   auto& rug = queuecurve(shiftless(Id), 0, 0xFFFFFFFF, PPR::LINE);
 
   if(nonisotropic) {
-    transmatrix T2 = eupush( tC0(inverse(rugView)) );
+    transmatrix T2 = eupush( tC0(view_inverse(rugView)) );
     NLP = rugView * T2;  
-    rug.V = shiftless(inverse(NLP) * rugView);
+    rug.V = shiftless(ortho_inverse(NLP) * rugView);
     }
   else {
     rug.V = shiftless(rugView);
@@ -1361,9 +1361,9 @@ EX shiftpoint gethyper(ld x, ld y) {
         if(sp == 1 || sp == 2) continue;
         }
     
-      applymodel(shiftless(inverse(NLP) * rugView * r0->native), p0);
-      applymodel(shiftless(inverse(NLP) * rugView * r1->native), p1);
-      applymodel(shiftless(inverse(NLP) * rugView * r2->native), p2);
+      applymodel(shiftless(ortho_inverse(NLP) * rugView * r0->native), p0);
+      applymodel(shiftless(ortho_inverse(NLP) * rugView * r1->native), p1);
+      applymodel(shiftless(ortho_inverse(NLP) * rugView * r2->native), p2);
       }
 
     if(error || spherepoints == 1 || spherepoints == 2) continue;
