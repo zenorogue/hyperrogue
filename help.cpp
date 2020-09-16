@@ -444,7 +444,8 @@ EX string generateHelpForItem(eItem it) {
     if(it == itOrbYendor || it == itHolyGrail)
       help += XLAT(
         "\n\nCollect %the1 to gain an extra Orb of the Mirror. "
-        "You can gain further Orbs of the Mirror by collecting 2, 4, 8..."
+        "You can gain further Orbs of the Mirror by collecting 2, 4, 8...",
+        it
         );  
     
     if(it == itPower)
