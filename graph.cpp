@@ -4148,7 +4148,7 @@ EX void drawMarkers() {
      
     #if CAP_QUEUE
     if(haveMount()) ADC(V, dragon::target) {
-      queuestr(V, 2*vid.fsize, "X",
+      queuestr(V, 1, "X",
         gradient(0, iinf[itOrbDomination].color, -1, sintick(dragon::whichturn == turncount ? 75 : 150), 1));
       }
     #endif
