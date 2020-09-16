@@ -2807,8 +2807,9 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
     // other monsters face the player
     
     if(!nospins) {
+      shiftmatrix& where = (c->monst == moMirrorSpirit && inmirrorcount) ? ocwtV : cwtV;
       if(WDIM == 2 || prod) {
-        hyperpoint V0 = inverse_shift(Vs, tC0(cwtV));
+        hyperpoint V0 = inverse_shift(Vs, tC0(where));
         ld z = 0;
         if(prod) {
           auto d = product_decompose(V0);
@@ -2822,7 +2823,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
           }
         }
       else if(!sl2) {
-        hyperpoint V0 = inverse_shift(Vs, tC0(cwtV));
+        hyperpoint V0 = inverse_shift(Vs, tC0(where));
         Vs = Vs * rspintox(V0);
         // cwtV * rgpushxto0(inverse(cwtV) * tC0(Vs));
         }
