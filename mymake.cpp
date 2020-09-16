@@ -11,9 +11,13 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <thread>
 #include <vector>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <chrono>
+#include <future>
+#include <functional>
 
 using namespace std;
 
@@ -26,6 +30,8 @@ string preprocessor;
 string compiler;
 string linker;
 string libs;
+
+int batch_size = thread::hardware_concurrency() + 1;
 
 void set_linux() {
   preprocessor = "g++ -E";
@@ -129,6 +135,8 @@ int main(int argc, char **argv) {
       standard = s;
     else if(s.substr(0, 2) == "-l")
       linker += " " + s;
+    else if(s.substr(0, 2) == "-j")
+      batch_size = stoi(s.substr(2));
     else if(s == "-I") {
       opts += " " + s + " " + argv[i+1];
       i++;
@@ -203,10 +211,12 @@ int main(int argc, char **argv) {
     }
   
   string allobj = " " + obj_dir + "/hyper.o";
-  
+
+  printf("compiling modules using batch size of %d:\n", batch_size);
+
   int id = 0;
+  vector<pair<int, function<int(void)>>> tasks;
   for(string m: modules) {
-    id++;
     string src = m + ".cpp";
     string m2 = m;
     for(char& c: m2) if(c == '/') c = '_';
@@ -218,15 +228,45 @@ int main(int argc, char **argv) {
       }
     time_t obj_time = get_file_time(obj);
     if(src_time > obj_time) {
-      printf("compiling %s... [%d/%d]\n", m.c_str(), id, int(modules.size()));
-      if(system(compiler + " " + opts + " " + src + " -o " + obj)) { printf("error\n"); exit(1); }
+      string cmdline = compiler + " " + opts + " " + src + " -o " + obj;
+      pair<int, function<int(void)>> task(id, [cmdline]() { return system(cmdline); });
+      tasks.push_back(task);
       }
     else {
       printf("ok: %s\n", m.c_str());
       }
     allobj += " ";
     allobj += obj;
+    id++;
     }
+
+  chrono::milliseconds quantum(40);
+  vector<future<int>> workers(batch_size);
+
+  int tasks_amt = tasks.size();
+  int tasks_taken = 0, tasks_done = 0;
+  bool finished = tasks.empty();
+
+  while (!finished) {
+  for (auto & worker : workers) {
+    if (worker.valid()) {
+      if (worker.wait_for(chrono::seconds(0)) != future_status::ready) continue;
+      else {
+        int res = worker.get();
+        if (res) { printf("compilation error!\n"); exit(1); }
+        ++tasks_done;
+        }
+      }
+    if (tasks_taken < tasks_amt) {
+      auto task = tasks[tasks_taken];
+      int mid = task.first;
+      function<int(void)> do_work = task.second;
+      printf("compiling %s... [%d/%d]\n", modules[mid].c_str(), tasks_taken+1, tasks_amt);
+      worker = async(launch::async, do_work);
+      ++tasks_taken;
+      }
+    else if (tasks_done == tasks_amt) { finished = true; break; }
+    } this_thread::sleep_for(quantum); }
   
   printf("linking...\n");
   system(linker + allobj + libs);
