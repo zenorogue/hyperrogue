@@ -839,9 +839,9 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
     
     case mdMiller:
       makeband(H_orig, ret, [] (ld& x, ld& y) {
-        // y *= pconf.miller_parameter;
+        y *= pconf.miller_parameter;
         band_conformal(x, y);
-        // y /= pconf.miller_parameter;
+        y /= pconf.miller_parameter;
         });        
       break;
       
