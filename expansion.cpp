@@ -605,6 +605,7 @@ EX void viewdist_configure_dialog() {
   dialog::add_action([] () { 
     scrolling_distances = false;
     dialog::editNumber(first_distance, 0, 3000, 1, 0, XLAT("display distances from"), "");
+    dialog::bound_low(0);
     });
 
   int id = 0;
@@ -679,6 +680,7 @@ void expansion_analyzer::view_distances_dialog() {
     scrolltime %= scrollspeed;
     }
   lastticks = SDL_GetTicks();
+  if(first_distance < 0) first_distance = 0;
   
   dynamicval<color_t> dv(distcolors[0], forecolor);
   dialog::init("");
