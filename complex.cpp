@@ -3727,6 +3727,10 @@ EX namespace halloween {
   EX void getTreat(cell *where) {
     if(!items[itTreat]) reset();
     gainItem(itTreat);
+    changes.at_commit(after_treat);
+    }
+  
+  EX void after_treat() {
     farempty()->item = itTreat;
     int itr = items[itTreat];
     items[itOrbTime] += 30;
