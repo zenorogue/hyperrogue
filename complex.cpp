@@ -3830,7 +3830,7 @@ EX namespace halloween {
       else if(CHANCE(5) && itr >= 60) {
         dragoncount++;
         }
-      else if(dragoncount && BITRUNCATED && !mcount) {
+      else if(dragoncount && BITRUNCATED && geometry == gSphere && !mcount) {
         bool fill = false;
         for(int i=0; i<4; i++) 
           if(!dragoncells[i] || dragoncells[i]->monst)
