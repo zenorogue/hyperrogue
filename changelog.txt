@@ -4104,3 +4104,32 @@ Geometries:
 - three new projections
 - Camelot help now mentions Crossroads IV
 - fixed premature victory screen in minesweeper
+
+2020-09-17 04:32 Update 11.3z:
+
+geometries and projections:
+- Nil can be now viewed in the loximuthal model, or in the Heisenberg model with changed orientation, or a mix
+- several new projections of S2/H2 based on cartography
+- chessboard pattern in 'unrectified' tessellations (also fixed the variation selection)
+- improved correctness checking for Archimedean symbols: 6,5 or 6,4,2 are no longer valid
+
+UI:
+- you can now configure camera movement/rotation speed
+- highlight feature is now separate from monster display, and you can configure permanent superhighlight
+- the 'copy' button in the Map Editor now works with the mouse
+
+game bugfixes:
+- improved Key generation in Land of Mirrors
+- you can now push Statue into Fire with Orb of Winter
+- fixed Free Wall unlock requirements in OSM
+- fix the Crossroads IV achievement (which also enables the Chaos Mode)
+- fixed Halloween (which was working completely incorrectly)
+
+graphics/UI bugfixes:
+- orb of domination X is no longer huge
+- fixed Yendor/Grail collection benefit help message in OSM
+- fixed errors with mirrors walls: monsters face the player correctly (except Mirror Spirits); mimics in mirrors display their X-signs correctly; player in mirror displays their X sign while previously they did not
+- down arrow in menus now works opposite to the up arrow (rolls around)
+- issues with racing (e.g. in band model) should be fixed
+- keys are buffered correctly (no more crash when clicking help quickly)
+- prevented crash when negative numbers are entered in 'view cells by distance'
