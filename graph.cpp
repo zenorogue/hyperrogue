@@ -4552,13 +4552,9 @@ EX void precise_mouseover() {
     if(!gmatrix.count(mouseover)) return;
     hyperpoint r_mouseh = inverse_shift(gmatrix[mouseover], mouseh);
     for(int i=0; i<mouseover->type; i++) {
-      hyperpoint h1 = get_corner_position(mouseover, (i+mouseover->type-1) % mouseover->type);
+      hyperpoint h1 = get_corner_position(mouseover, gmod(i-1, mouseover->type));
       hyperpoint h2 = get_corner_position(mouseover, i);
-      hyperpoint hx = r_mouseh - h1;
-      h2 = h2 - h1;
-      ld z = h2[1] * hx[0] - h2[0] * hx[1];
-      ld z0 = h2[1] * h1[0] - h2[0] * h1[1];
-      if(z * z0 > 0) {
+      if(det3(build_matrix(h1, h2, C0, C0)) * det3(build_matrix(h1, h2, r_mouseh, C0)) < 0) {
         mouseover2 = mouseover;
         mouseover = mouseover->move(i);
         found = true;
