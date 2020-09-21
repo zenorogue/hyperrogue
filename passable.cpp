@@ -330,12 +330,12 @@ EX bool againstWind(cell *cto, cell *cfrom) {
   return false;
   }
 
-EX bool ghostmove(eMonster m, cell* to, cell* from) {
+EX bool ghostmove(eMonster m, cell* to, cell* from, flagtype extra) {
   if(!isGhost(m) && nonAdjacent(to, from)) return false;
   if(sword::at(to, 0)) return false;
   if(!shmup::on && isPlayerOn(to)) return false;
   if(to->monst && !(to->monst == moTentacletail && isGhost(m) && m != moFriendlyGhost)
-    && !(to->monst == moTortoise && isGhost(m) && m != moFriendlyGhost))
+    && !(to->monst == moTortoise && isGhost(m) && m != moFriendlyGhost) && !(extra & P_MONSTER))
     return false;
   if((m == moWitchGhost || m == moWitchWinter) && to->land != laPower)
     return false;
@@ -499,7 +499,7 @@ EX bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
   if(m == moGreaterShark)
     return isWatery(w) || w->wall == waBoat || w->wall == waFrozenLake;
   if(isGhostMover(m) || m == moFriendlyGhost)
-    return ghostmove(m, w, from);
+    return ghostmove(m, w, from, extra);
     // for the purpose of Shmup this is correct
   if(m == moTameBomberbird)
     return passable(w, from, extra | P_FLYING | P_ISFRIEND);
