@@ -166,7 +166,7 @@
 #endif
 
 #ifndef CAP_EDIT
-#define CAP_EDIT (CAP_FILES && !ISWEB && !ISMINI)
+#define CAP_EDIT (CAP_FILES && !ISMINI)
 #endif
 
 #ifndef CAP_SHOT
