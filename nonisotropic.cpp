@@ -1614,7 +1614,7 @@ EX namespace product {
   EX hyperpoint direct_exp(hyperpoint h) {
     hyperpoint res;
     ld d = hypot_d(2, h);
-    ld cd = d == 0 ? 0 : sinh(d) / d;
+    ld cd = d == 0 ? 0 : sin_auto(d) / d;
     res[0] = h[0] * cd;
     res[1] = h[1] * cd;
     res[2] = cos_auto(d);
