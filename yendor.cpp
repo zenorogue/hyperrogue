@@ -252,11 +252,14 @@ EX namespace yendor {
         cellwalker ycw(yendor, odir = hrand(yendor->type));
         ycw--; if(S3 == 3) ycw--;
         setdist(nyi.path[0], 7, NULL);
+        
+        int last_id = 0;
 
         for(int i=0; i<YDIST-1; i++) {
-          
+                  
           if(i > BARLEV-6) {
-            setdist(nyi.path[i+7-BARLEV], 7, nyi.path[i+6-BARLEV]);
+            last_id = i+7-BARLEV;
+            setdist(nyi.path[last_id], 7, nyi.path[i+6-BARLEV]);
             if(challenge && !euclid && ycw.at->land != laIvoryTower) {
               eLand ycl = changeland(i, ycw.at->land);
               if(ycl) {
@@ -372,11 +375,13 @@ EX namespace yendor {
                 }
               }
             }
+          
+          while(last_id < i && (nyi.path[last_id]->land == laMirror || inmirror(nyi.path[last_id]))) {
+            last_id++;
+            setdist(nyi.path[last_id], 7, nullptr);
+            }
 
-          if(ycw.at->land == laMirror || inmirror(ycw.at))
-            setdist(ycw.at, 7, nullptr);
-
-          ycw = mirror::reflect(ycw);
+          if(inmirror(ycw.at)) ycw = mirror::reflect(ycw);
           ycw += wstep;
           nyi.path[i+1] = ycw.at;
           }
@@ -396,11 +401,13 @@ EX namespace yendor {
       setdist(nyi.path[YDIST-1], 7, nyi.path[YDIST-2]);
       cell *key = nyi.path[YDIST-1];
 
+      generating = false;
+              
       for(int b=10; b>=5; b--) setdist(key, b, nyi.path[YDIST-2]);
-      
+
       if(inmirror(key) || (geometry == gNormal && celldistance(key, yendor) < YDIST/2)) {
         creation_attempt++;
-        if(creation_attempt > -100) {
+        if(creation_attempt > 100) {
           yendor->item = itNone;
           addMessage(XLAT("%The1 turned out to be an illusion!", itOrbYendor));
           return false;
@@ -408,9 +415,6 @@ EX namespace yendor {
         goto retry;
         }
   
-      generating = false;
-        
-
       for(int i=-1; i<key->type; i++) {
         cell *c2 = i >= 0 ? key->move(i) : key;
         checkTide(c2);
