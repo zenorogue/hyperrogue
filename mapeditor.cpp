@@ -1349,6 +1349,10 @@ EX namespace mapeditor {
     }
 
   void save_level() {
+    #if ISWEB
+    mapstream::saveMap("web.lev");
+    offer_download("web.lev", "mime/type");
+    #else
     dialog::openFileDialog(levelfile, XLAT("level to save:"), ".lev", [] () {
       if(mapstream::saveMap(levelfile.c_str())) {
         addMessage(XLAT("Map saved to %1", levelfile));
@@ -1359,10 +1363,16 @@ EX namespace mapeditor {
         return false;
         }
       });
+    #endif
     }
 
   void load_level() {
-    dialog::openFileDialog(levelfile, XLAT("level to load:"), ".lev", [] () {
+    #if ISWEB
+    offer_choose_file([] {
+      mapstream::loadMap("data.txt");
+      });
+    #else
+    dialog::openFileDialog(levelfile, XLAT("level to load:"), ".lev", [] () {    
       if(mapstream::loadMap(levelfile.c_str())) {
         addMessage(XLAT("Map loaded from %1", levelfile));
         return true;
@@ -1372,6 +1382,7 @@ EX namespace mapeditor {
         return false;
         }
       });
+    #endif
     }
   
   void showList() {
