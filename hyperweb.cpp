@@ -49,6 +49,8 @@ namespace hr {
   const char *wheresounds;
 
   std::string get_value(std::string name);
+
+  void offer_download(std::string sfilename, std::string smimetype);
   }
 
 #include "hyper.cpp"
@@ -68,6 +70,46 @@ string get_value(string name) {
   string res = str;
   free(str);
   return res;
+  }
+
+void offer_download(string sfilename, string smimetype) {
+
+  EM_ASM({
+    var name = UTF8ToString($0, $1);
+    var mime = UTF8ToString($2, $3);
+
+    let content = Module.FS.readFile(name);
+    console.log(`Offering download of "${name}", with ${content.length} bytes...`);
+  
+    var a = document.createElement('a');
+    a.download = name;
+    a.href = URL.createObjectURL(new Blob([content], {type: mime}));
+    a.style.display = 'none';
+
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+    }, 2000);
+    }, sfilename.c_str(), isize(sfilename), smimetype.c_str(), isize(smimetype)
+    );
+
+  }
+
+reaction_t on_use_file = [] {};
+
+extern "C" {
+  void use_file() { 
+    on_use_file();
+    }
+  }
+
+void offer_choose_file(reaction_t r) {
+  on_use_file = r;
+  EM_ASM({
+    fileElem.click();
+    });
   }
 
 // -- demo --

@@ -496,6 +496,8 @@ static const int NOHINT = -1;
 typedef function<void()> reaction_t;
 typedef function<bool()> bool_reaction_t;
 
+void offer_choose_file(reaction_t r);
+
 #define HELPFUN(x) (help_delegate = x, "HELPFUN")
 
 typedef function<int(struct cell*)> cellfunction;
