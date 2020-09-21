@@ -258,6 +258,11 @@ EX namespace mapeditor {
   dtfree *cfree;
   cell *cfree_at;
   
+  EX void dt_finish() {
+    cfree = nullptr;
+    cfree_at = nullptr;
+    }
+  
   EX void dt_add_free(shiftpoint h) {
 
     cell *b = centerover;
@@ -2481,10 +2486,8 @@ EX namespace mapeditor {
             };
           lstartcell = nullptr;          
           }
-        else {
-          cfree = nullptr;
-          cfree_at = nullptr;
-          }
+        else 
+          dt_finish();
         }
       
       if(uni >= 1000 && uni < 1010)
@@ -2591,8 +2594,7 @@ EX namespace mapeditor {
     if(!cheater) patterns::whichShape = 0;
     modelcell.clear();
     mapeditor::dtshapes.clear();
-    mapeditor::cfree = nullptr;
-    mapeditor::cfree_at = nullptr;    
+    dt_finish();
     drawcell = nullptr;
     }) + 
   addHook(hooks_removecells, 0, [] () {
