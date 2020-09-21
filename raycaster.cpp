@@ -23,7 +23,9 @@ EX bool comparison_mode;
 /** 0 - never use, 2 - always use, 1 = smart selection */
 EX int want_use = 1;
 
-EX ld exp_start = 1, exp_decay_exp = 4, exp_decay_poly = 10;
+EX ld exp_start = 1;
+EX ld exp_decay_exp = 4;
+EX ld exp_decay_poly = 10;
 
 const int gms_limit = 110;
 
