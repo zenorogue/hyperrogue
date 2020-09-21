@@ -375,14 +375,15 @@ EX }
 
 #if HDR
 struct hstream;
+struct fhstream;
 #endif
 
 EX namespace mapstream {
 #if CAP_EDIT
 
-  std::map<cell*, int> cellids;
-  vector<cell*> cellbyid;
-  vector<char> relspin;
+  EX std::map<cell*, int> cellids;
+  EX vector<cell*> cellbyid;
+  EX vector<char> relspin;
   
   void load_drawing_tool(fhstream& hs) {
     using namespace mapeditor;
@@ -605,6 +606,8 @@ EX namespace mapstream {
     if(vernum >= 0xA810)
       f.read(mine_adjacency_rule);
     }
+  
+  EX hookset<void(fhstream&)> hooks_savemap, hooks_loadmap;
 
 #if CAP_EDIT  
   void save_only_map(fhstream& f) {
@@ -684,6 +687,8 @@ EX namespace mapstream {
     if(multi::players > 1)
       for(int i=0; i<multi::players; i++)
         f.write(cellids[multi::player[i].at]);
+      
+    callhooks(hooks_savemap, f);
 
     cellids.clear();
     cellbyid.clear();
@@ -886,6 +891,8 @@ EX namespace mapstream {
           }
       }
 
+    callhooks(hooks_loadmap, f);
+
     cellbyid.clear();
     restartGraph();
     bfs();
@@ -914,7 +921,7 @@ EX namespace mapstream {
     n = -1; f.write(n);
     }
   
-  bool saveMap(const char *fname) {
+  EX bool saveMap(const char *fname) {
     fhstream f(fname, "wb");
     if(!f.f) return false;
     f.write(f.vernum);
@@ -926,7 +933,7 @@ EX namespace mapstream {
     return true;
     }
   
-  bool loadMap(const string& fname) {
+  EX bool loadMap(const string& fname) {
     fhstream f(fname, "rb");
     if(!f.f) return false;
     f.read(f.vernum);
