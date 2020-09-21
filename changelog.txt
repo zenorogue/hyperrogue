@@ -4133,3 +4133,9 @@ graphics/UI bugfixes:
 - issues with racing (e.g. in band model) should be fixed
 - keys are buffered correctly (no more crash when clicking help quickly)
 - prevented crash when negative numbers are entered in 'view cells by distance'
+
+2020-09-21 12:06 Update 11.3ż:
+
+- fixed the issues with Orb of Yendor
+- fixed a bug in S2xE, and choosing cells in sphere
+- fixed Friendly Ghosts
