@@ -32,6 +32,7 @@ string linker;
 string libs;
 
 int batch_size = thread::hardware_concurrency() + 1;
+bool mingw64 = false;
 
 void set_linux() {
   preprocessor = "g++ -E";
@@ -49,14 +50,14 @@ void set_mac() {
   libs = " savepng.o -L/usr/local/lib -framework AppKit -framework OpenGL -lSDL -lSDLMain -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpng -lpthread -lz";
   }
 
-void set_win() {
+void set_mingw64() {
+  mingw64 = true;
   preprocessor = "g++ -E";
-  compiler = "runbat bwin-g.bat -c";
-  linker = "runbat bwin-linker.bat";
-  opts = "-DFHS -DLINUX -I/usr/include/SDL";
-  libs = "";
-
-  standard = "";
+  compiler = "g++ -mwindows -march=native -W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
+  linker = "g++ -o hyper";
+  opts = "-DWINDOWS -DCAP_GLEW=1 -DCAP_PNG=1";
+  libs = " savepng.o hyper.res -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
+  setvbuf(stdout, NULL, _IONBF, 0); // MinGW is quirky with output buffering
   }
 
 vector<string> modules;
@@ -73,6 +74,8 @@ string obj_dir = "mymake_files";
 string setdir = "../";
 
 int system(string cmdline) {
+  if (mingw64)
+    cmdline = "sh -c '" + cmdline + "'"; // because system(arg) passes arg to cmd.exe on MinGW
   return system(cmdline.c_str());
   }
 
@@ -84,7 +87,7 @@ int main(int argc, char **argv) {
 #if defined(MAC)
   set_mac();
 #elif defined(WINDOWS)
-  set_win();
+  set_mingw64();
 #else
   set_linux();
 #endif
@@ -103,9 +106,9 @@ int main(int argc, char **argv) {
         if(!isalnum(c)) obj_dir += "_"; 
         else obj_dir += c;      
       }
-    else if(s == "-win") {
-      set_win();
-      obj_dir += "/win";
+    else if(s == "-mingw64") {
+      set_mingw64();
+      obj_dir += "/mingw64";
       setdir += "../";
       }
     else if(s == "-mac") {
@@ -267,7 +270,9 @@ int main(int argc, char **argv) {
       }
     else if (tasks_done == tasks_amt) { finished = true; break; }
     } this_thread::sleep_for(quantum); }
-  
+
+  if (mingw64) (void)system("windres hyper.rc -O coff -o hyper.res");
+
   printf("linking...\n");
   system(linker + allobj + libs);
   return 0;
