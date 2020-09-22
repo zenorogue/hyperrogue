@@ -1121,6 +1121,14 @@ EX namespace gp {
       return c;
       }
     
+    transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+      return in_underlying([&] { return currentmap->relative_matrix(h2, h1, hint); });
+      }
+
+    transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override {
+      return in_underlying([&] { return currentmap->relative_matrix(c2, c1, hint); });
+      }
+
     ~hrmap_inverse() {
       in_underlying([this] { delete underlying_map; });
       }
