@@ -1142,7 +1142,7 @@ EX void initgraph() {
   }
 
 #if ISWEB
-  vid.xscr = vid.xres = 1200;
+  vid.xscr = vid.xres = 1280;
   vid.yscr = vid.yres = 900;
 #else
   const SDL_VideoInfo *inf = SDL_GetVideoInfo();
