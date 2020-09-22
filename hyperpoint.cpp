@@ -803,7 +803,7 @@ EX transmatrix ggpushxto0(const hyperpoint& H, ld co) {
     }
   transmatrix res = Id;
   if(sqhypot_d(GDIM, H) < 1e-12) return res;
-  ld fac = (H[LDIM]-1) / sqhypot_d(GDIM, H);
+  ld fac = -curvature()/(H[LDIM]+1);
   for(int i=0; i<GDIM; i++)
   for(int j=0; j<GDIM; j++)
     res[i][j] += H[i] * H[j] * fac;
