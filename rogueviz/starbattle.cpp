@@ -282,6 +282,7 @@ void starbattle_puzzle() {
     #else
     mapstream::loadMap("starbattle.lev");
     #endif
+    mapeditor::drawplayer = false;
     });
 
   dialog::addItem("hide menu", 'v');
@@ -432,6 +433,7 @@ int rugArgs() {
     PHASEFROM(3);
     launch();
     mapstream::loadMap("1");    
+    mapeditor::drawplayer = false;
     }
   #endif
 
