@@ -2,7 +2,7 @@ set -e o pipefail
 source .github/workflows/gh_ci_envvars.sh
 
 
-GH_MYMAKE_ARGS=""
+GH_MYMAKE_ARGS="-fPIC"
 GH_AUTOTOOLS_CXXFLAGS="-W -Wall -Wextra -Wno-unused-parameter -Wno-maybe-uninitialized"
 
 HYPERROGUE_USE_GLEW=$GH_HYP_GLEW
