@@ -938,6 +938,10 @@ EX cdata *arcmCdata(cell *c) {
 
 EX int getCdata(cell *c, int j) {
   if(fake::in()) return FPIU(getCdata(c, j));
+  if(INVERSE) {
+    cell *c1 = gp::get_mapped(c);
+    return UIU(getCdata(c1, j));
+    }
   if(hybri) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
   else if(euc::in()) return getEuclidCdata(euc2_coordinates(c))->val[j];
   else if(arcm::in() && euclid)
@@ -957,6 +961,10 @@ EX int getCdata(cell *c, int j) {
 
 EX int getBits(cell *c) {
   if(fake::in()) return FPIU(getBits(c));
+  if(INVERSE) {
+    cell *c1 = gp::get_mapped(c);
+    return UIU(getBits(c1));
+    }
   if(hybri) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
   else if(euc::in()) return getEuclidCdata(euc2_coordinates(c))->bits;
   else if(arcm::in() && euclid)

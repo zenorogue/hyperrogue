@@ -1136,6 +1136,10 @@ EX int dcross(gp::loc e1, gp::loc e2) {
   }
 
 EX gp::loc full_coords2(cell *c) { 
+  if(INVERSE) {
+    cell *c1 = gp::get_mapped(c);
+    return UIU(full_coords2(c1));
+    }
   auto ans = eucmap()->ispacemap[c->master];
   if(S7 == 4 && BITRUNCATED) {
     if(c == c->master->c7) return to_loc(ans) * gp::loc(1,1);
