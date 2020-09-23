@@ -166,6 +166,7 @@ void read_all(int fd, void *buf, int cnt) {
 
 /* note: this loads the whole animation uncompressed into memory, so it is suitable only for short presentations */
 void show_animation(presmode mode, string s, int sx, int sy, int frames, int fps) {
+#if CAP_VIDEO
   if(mode == pmStartAll) {
     array<int, 2> tab;
     if(pipe(&tab[0])) {
@@ -221,7 +222,7 @@ void show_animation(presmode mode, string s, int sx, int sy, int frames, int fps
     draw_texture(tex);
     return false;
     });
-  
+#endif
   }
 
 void choose_presentation() {
