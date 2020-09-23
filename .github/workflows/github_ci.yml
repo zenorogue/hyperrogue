@@ -48,10 +48,16 @@ jobs:
         hyper_use_rviz: [rviz_1, rviz_0]
         hyper_use_png: [png_1]
         hyper_use_glew: [glew_1]
+    defaults:
+      run:
+        shell: msys2 {0}
     steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: 'pactoys'
     - uses: actions/checkout@v2
     - name: envvars_setup
-      shell: cmd.exe /D /E:ON /V:OFF /C "C:\msys64\msys2_shell.cmd -defterm -msys2 -no-start -full-path -here {0}"
       run: |
         cat << ENDOFVARS > .github/workflows/gh_ci_envvars.sh
         GH_OS=${{ matrix.os }}
@@ -62,11 +68,13 @@ jobs:
         GH_HYP_GLEW=${{ matrix.hyper_use_glew }}
         ENDOFVARS
     - name: install_deps
-      run: cmd.exe /D /E:ON /V:OFF /C "C:\msys64\msys2_shell.cmd -defterm -msys2 -no-start -full-path -here .github/workflows/install_deps.sh"
+      env:
+        MSYSTEM: MSYS
+      run: .github/workflows/install_deps.sh
     - name: build
-      run: cmd.exe /D /E:ON /V:OFF /C "C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -full-path -here .github/workflows/build.sh"
+      run: .github/workflows/build.sh
     - name: test_simple
-      run: cmd.exe /D /E:ON /V:OFF /C "C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -full-path -here .github/workflows/test_simple.sh"
+      run: .github/workflows/test_simple.sh
 
   emscripten:
     runs-on: ubuntu-latest
