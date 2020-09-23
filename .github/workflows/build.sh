@@ -2,7 +2,7 @@ set -e o pipefail
 source .github/workflows/gh_ci_envvars.sh
 
 
-GH_MYMAKE_ARGS=""
+GH_MYMAKE_ARGS="-fPIC"
 GH_AUTOTOOLS_CXXFLAGS="-W -Wall -Wextra -Wno-unused-parameter -Wno-maybe-uninitialized"
 
 HYPERROGUE_USE_GLEW=$GH_HYP_GLEW
@@ -14,8 +14,8 @@ export HYPERROGUE_USE_PNG=${HYPERROGUE_USE_PNG: -1}
 HYPERROGUE_USE_ROGUEVIZ=$GH_HYP_RVIZ
 export HYPERROGUE_USE_ROGUEVIZ=${HYPERROGUE_USE_ROGUEVIZ: -1}
 if [[ "$GH_HYP_RVIZ" == "rviz_1" ]]; then
-  GH_MYMAKE_ARGS+=" -rv"
-  GH_AUTOTOOLS_CXXFLAGS+=" -DCAP_ROGUEVIZ=1"
+  GH_MYMAKE_ARGS+=" -std=c++17 -rv"
+  GH_AUTOTOOLS_CXXFLAGS+=" -std=c++17 -DCAP_ROGUEVIZ=1"
 fi
 
 export CC=$GH_COMPILER
