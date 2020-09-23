@@ -64,7 +64,7 @@ EX namespace dialog {
   EX color_t dialogcolor = 0xC0C0C0;
 
   EX void addBack() {
-    addItem(XLAT("go back"), SDLK_ESCAPE);
+    addItem(XLAT("go back"), ISWEB ? SDLK_BACKSPACE : SDLK_ESCAPE);
     }
 
   EX void addHelp() {
