@@ -1,5 +1,4 @@
-set -e o pipefail
-source .github/workflows/gh_ci_envvars.sh
+set -x -e o pipefail
 
 
 GH_MYMAKE_ARGS="-fPIC"
@@ -32,5 +31,6 @@ elif [[ "$GH_BUILDSYS" == "mymake" ]]; then
   ./mymake $GH_MYMAKE_ARGS
   mv hyper hyperrogue
 else
-  exit 'unknown build system'
+  echo 'unknown build system'
+  exit 1
 fi
