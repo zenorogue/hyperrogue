@@ -8,7 +8,7 @@
 #include "hyper.h"
 namespace hr {
 
-bool hide_hud = true;
+EX bool hide_hud = true;
 
 #if HDR
 namespace shot { void default_screenshot_content(); }
