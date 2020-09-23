@@ -9,7 +9,9 @@
 
 namespace hr {
 
-EX namespace sumotron {
+EX namespace starbattle {
+
+eWall empty = waChasm;
 
 bool in = false;
 
@@ -17,7 +19,7 @@ bool dialog_shown = false;
 
 bool view_errors = false;
 bool view_lines = true;
-bool view_regions = false;
+bool view_regions = true;
 
 int stars_per_line = 1;
 int stars_per_region = 1;
@@ -40,7 +42,19 @@ struct starwalker : cellwalker {
     }
   };
 
-using line_t = vector<starwalker>;
+bool stop_undo;
+
+vector<reaction_t> undos;
+
+void push_stop() {
+  undos.push_back([] { stop_undo = true; });
+  }
+
+struct line_t {
+  vector<starwalker> cells;
+  color_t color;
+  };
+ 
 vector<line_t> lines;
 
 starwalker rev(starwalker sw) {
@@ -54,12 +68,25 @@ starwalker change_flip(starwalker sw) {
   return sw;
   }
 
+starwalker add_step(starwalker sw) {
+  sw += wstep;
+  return rev(sw);
+  }
+
 enum ePenMode {
   pmSolve,
   pmDraw,
   pmCreate,
   pmWalls
   };
+
+hyperpoint adjust(starwalker sw) {
+  if(!(sw.at->type & 1)) return C0;
+  hyperpoint h1 = currentmap->adj(sw.at, sw.spin) * C0;
+  auto swr = rev(sw);
+  hyperpoint h2 = currentmap->adj(swr.at, swr.spin) * C0;
+  return normalize(C0 * 2 + h1 + h2);
+  }
 
 void create_lines() {
   set<starwalker> used;
@@ -75,20 +102,37 @@ void create_lines() {
     if(used.count(sw) || used.count(rev(sw))) continue;
     
     starwalker sw0 = sw;
-    vector<starwalker> line;
+    line_t line;
+    line.color = ((hrand(0xFFFFFF) << 8) | 0x80808080) & 0xEFEFEF80;
     bool even = true;
     while(true) {
       if(sw.at->type & 1) even = false;
-      line.push_back(sw);
+      line.cells.push_back(sw);
       used.insert(sw);
-      sw += wstep;
-      sw = rev(sw);
+      sw = add_step(sw);
       if(!sdata.count(sw.at)) break;
       if(sw == sw0) break;
       }
     lines.push_back(line);
-    if(even) for(auto li: line) used.insert(change_flip(li));
+    if(even) for(auto li: line.cells) used.insert(change_flip(li));
     }
+  }
+
+void add_to_puzzle(cell *c) {
+  sdata[c] = stardata{color_t(0xFFFFFF), false, false};
+  c->wall = waNone;
+  c->land = laCanvas;
+  }
+
+void remove_from_puzzle(cell *c) {
+  sdata.erase(c);
+  c->wall = waChasm;
+  c->land = laNone;
+  }
+
+void save_undo(cell *c) {
+  auto old = sdata[c];
+  undos.push_back([c, old] { sdata[c] = old; });
   }
 
 void init_starbattle() {
@@ -100,7 +144,9 @@ void init_starbattle() {
 ePenMode pen = pmSolve;
 
 bool draw_star(cell *c, const shiftmatrix& V) {
-  if(!in || !sdata.count(c)) return false;
+  if(!in) return false;
+  if(c->wall == waSea) c->wall = waChasm;
+  if(!sdata.count(c)) return false;
     
   auto& sd = sdata[c];
   c->wall = waNone;
@@ -145,46 +191,44 @@ color_t new_region() {
   
 color_t extregion;
 
-vector<color_t> linecolors = {
-  0xFF000040, 0x0000FF40, 0x00FF0040, 
-  0xFFFF0040, 0xFF00FF40, 0x00FFFF40, 
-  0xFFD50040, 0x40806040
-  };
-
 void draw_line(line_t& li, color_t col) {
   vid.linewidth *= 10;
-  for(auto& lii: li) {
+  for(auto& lii: li.cells) {
     for(const shiftmatrix& V: current_display->all_drawn_copies[lii.at])
       if(sdata.count(lii.peek()))
-        queueline(V*C0, V*currentmap->adj(lii.at, lii.spin)*C0, col);
+        queueline(V*adjust(lii), V*currentmap->adj(lii.at, lii.spin)*adjust(add_step(lii)), col);
     }
   vid.linewidth /= 10;
   }
-  
+
 void starbattle_puzzle() {
 
   clearMessages();
 
-  if(currentmap->gamestart()->wall == waSea) 
+  if(currentmap->gamestart()->wall == waChasm) 
     init_starbattle();
   
   getcstat = '-';
   cmode = 0;
   if(dialog_shown) cmode = sm::SIDE | sm::DIALOG_STRICT_X | sm::MAYDARK;
+
+  dynamicval d1(vid.use_smart_range);
+  dynamicval d2(vid.smart_range_detail);
+  if(euclid) {
+    vid.use_smart_range = 2;
+    vid.smart_range_detail = 2;
+    }
   gamescreen(0);
   
   if(view_lines && mouseover) {
-    int lci = 0;
     initquickqueue();
-    int dir = neighborId(mouseover, mouseover2);
+    // int dir = neighborId(mouseover, mouseover2);
     for(auto& li: lines) {
       bool has = false;
-      for(auto& lii: li) if(lii.at == mouseover && (dir == -1 || lii.spin == dir || rev(lii).spin == dir)) has = true;
+      for(auto& lii: li.cells) if(lii.at == mouseover /* && (dir == -1 || lii.spin == dir || rev(lii).spin == dir) */) has = true;
       if(has) {
-        draw_line(li, linecolors[lci]);
-        lci++;
-        lci %= isize(linecolors);
-        }        
+        draw_line(li, li.color);
+        }
       }
     quickqueue();
     }
@@ -205,11 +249,15 @@ void starbattle_puzzle() {
           }
     for(auto& li: lines) {
       int sc = 0;
-      for(auto& lii: li) if(sdata[lii.at].starred) sc++;
-      if(sc < stars_per_line)
+      for(auto& lii: li.cells) if(sdata[lii.at].starred) sc++;
+      if(sc < stars_per_line) {
         draw_line(li, 0x0000FF80);
-      if(sc > stars_per_line)
+        draw_line(li, (li.color & 0xFFFFFF00) | 0x10);
+        }
+      if(sc > stars_per_line) {
         draw_line(li, 0xFF000080);
+        draw_line(li, (li.color & 0xFFFFFF00) | 0x10);
+        }
       }
     quickqueue();
     }
@@ -254,6 +302,21 @@ void starbattle_puzzle() {
   
   dialog::addBreak(100);
   
+  dialog::addItem("undo", 'z');
+  dialog::add_action([] {
+    stop_undo = true;
+    while(stop_undo && !undos.empty()) {
+      stop_undo = false;
+      undos.back()();
+      undos.pop_back();
+      }
+    while(!stop_undo && !undos.empty()) {
+      stop_undo = false;
+      undos.back()();
+      undos.pop_back();
+      }
+    });
+
   dialog::addItem("save this puzzle", 'S');
   dialog::add_action([] { 
     mapstream::saveMap("starbattle.lev");
@@ -299,10 +362,14 @@ void starbattle_puzzle() {
   keyhandler = [] (int sym, int uni) {
     handlePanning(sym, uni);
     dialog::handleNavigation(sym, uni);
+    
+    if(among(sym, '-', SDLK_F1) && !holdmouse) push_stop();
+
     if(sym == SDLK_F1 && mouseover && !holdmouse) {
       cell *c = mouseover;
       if(pen == pmSolve) {
         if(!sdata.count(c)) return;
+        save_undo(c);
         auto& sd = sdata[c];
         sd.illegal = !sd.illegal;
         if(sd.illegal) sd.starred = false;
@@ -311,6 +378,7 @@ void starbattle_puzzle() {
         }
       if(pen == pmCreate) {
         if(!sdata.count(c)) return;
+        save_undo(c);
         auto& sd = sdata[c];
         extregion = sd.region;
         }
@@ -318,20 +386,21 @@ void starbattle_puzzle() {
         mapeditor::dt_erase(mouseh);
         }
       if(pen == pmWalls) {
-        if(!sdata.count(c)) return;
-        if(c == currentmap->gamestart()) return;
-        sdata.erase(c);
-        c->wall = waSea;
-        c->land = laNone;
-        create_lines();
         holdmouse = true;
         extregion = 0;
+        if(!sdata.count(c)) return;
+        if(c == currentmap->gamestart()) return;
+        save_undo(c);
+        undos.push_back([c] { add_to_puzzle(c); create_lines(); });
+        remove_from_puzzle(c);
+        create_lines();
         }
       }
     if(sym == '-' && mouseover && !holdmouse) {
       cell *c = mouseover;
       if(pen == pmSolve) {
         if(!sdata.count(c)) return;
+        save_undo(c);
         auto& sd = sdata[c];
         sd.starred = !sd.starred;
         if(sd.starred) sd.illegal = false;
@@ -340,6 +409,7 @@ void starbattle_puzzle() {
         }
       if(pen == pmCreate) {
         if(!sdata.count(c)) return;
+        save_undo(c);
         auto& sd = sdata[c];
         sd.region = extregion = new_region();
         }
@@ -348,42 +418,46 @@ void starbattle_puzzle() {
         holdmouse = true;
         }
       if(pen == pmWalls) {
-        if(sdata.count(c)) return;
-        c->wall = waNone;
-        c->land = laCanvas;
-        sdata[c] = stardata{color_t(0xFFFFFF), false, false};
-        create_lines();
         holdmouse = true;
         extregion = 1;
+        if(sdata.count(c)) return;
+        undos.push_back([c] { remove_from_puzzle(c); create_lines(); });
+        add_to_puzzle(c);
+        create_lines();
         }
       }
     if(mouseover && mousepressed) {
       cell *c = mouseover;
       if(pen == pmSolve) {
         if(!sdata.count(c)) return;
+        save_undo(c);
         auto& sd = sdata[c];
-        if(extregion >= 2)
+        if(extregion >= 2) {
           sd.illegal = extregion == 3;
-        else
+          if(sd.illegal) sd.starred = false;
+          }
+        else {
           sd.starred = extregion == 1;
+          if(sd.starred) sd.illegal = false;
+          }
         }
       if(pen == pmWalls && extregion == 1) {
         if(sdata.count(c)) return;
-        c->wall = waNone;
-        c->land = laCanvas;
-        sdata[c] = stardata{color_t(0xFFFFFF), false, false};
+        undos.push_back([c] { remove_from_puzzle(c); create_lines(); });
+        add_to_puzzle(c);
         create_lines();
         }
       if(pen == pmWalls && extregion == 0) {
         if(!sdata.count(c)) return;
         if(c == currentmap->gamestart()) return;
-        sdata.erase(c);
-        c->wall = waSea;
-        c->land = laNone;
+        save_undo(c);
+        undos.push_back([c] { add_to_puzzle(c); create_lines(); });
+        remove_from_puzzle(c);
         create_lines();
         }
       if(pen == pmCreate) {
         if(!sdata.count(c)) return;
+        save_undo(c);
         auto& sd = sdata[c];
         sd.region = extregion;
         }
@@ -401,7 +475,7 @@ void launch() {
   /* setup */
   stop_game();
   specialland = firstland = laCanvas;
-  canvas_default_wall = waSea;
+  canvas_default_wall = waChasm;
   start_game();
   screens[0] = starbattle_puzzle;
 
@@ -411,8 +485,6 @@ void launch() {
   
   vid.linequality = 2;
   patterns::whichShape = '9';
-  vid.use_smart_range = 2;
-  vid.smart_range_detail = 2;
   
   showstartmenu = false;
   mapeditor::drawplayer = false;
