@@ -77,7 +77,7 @@ struct monster {
   monster() { 
     dead = false; inBoat = false; parent = NULL; nextshot = 0; 
     stunoff = 0; blowoff = 0; footphase = 0; no_targetting = false;
-    swordangle = 0; inertia = Hypc; if(prod) ori = Id;
+    swordangle = 0; inertia = Hypc; ori = Id;
     }
   
   void store();
