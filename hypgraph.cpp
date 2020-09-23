@@ -2050,6 +2050,8 @@ EX void draw_boundary(int w) {
       }
     }
   
+  if(pmodel == mdWerner && hyperbolic) return;
+
   switch(pmodel) {
   
     case mdTwoPoint: {
