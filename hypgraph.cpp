@@ -1874,7 +1874,7 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
   }
 
 EX color_t periodcolor = 0x00FF0080;
-EX color_t ringcolor = darkena(0xFF, 0, 0xFF);
+EX color_t ringcolor = 0xFFFF;
 EX color_t modelcolor = 0;
 
 #if CAP_QUEUE
