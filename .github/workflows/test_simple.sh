@@ -1,5 +1,14 @@
-set -e o pipefail
-source .github/workflows/gh_ci_envvars.sh
+set -x -e o pipefail
 
 
-./hyperrogue --version
+if [[ "$GH_OS" == "windows-latest" && "$GH_BUILDSYS" == "mymake" ]]; then
+
+cat << ENDOFCMDS > .github/workflows/gdb_cmds.txt
+  run --version
+  backtrace
+ENDOFCMDS
+
+  gdb --batch -x .github/workflows/gdb_cmds.txt ./hyperrogue
+else
+  ./hyperrogue --version
+fi
