@@ -91,9 +91,11 @@ int main(int argc, char **argv) {
 #else
   set_linux();
 #endif
+  int retval = 0; // for storing return values of some function calls
   for(string fname: {"Makefile.loc", "Makefile.simple", "Makefile"})
     if(file_exists(fname)) {
-      system("make -f " + fname + " language-data.cpp autohdr.h savepng.o");
+      retval = system("make -f " + fname + " language-data.cpp autohdr.h savepng.o");
+      if (retval) { printf("error during preparation!\n"); exit(retval); }
       break;
       }
   for(int i=1; i<argc; i++) {
@@ -173,7 +175,8 @@ int main(int argc, char **argv) {
   compiler += " " + standard;
   ifstream fs("hyper.cpp");
 
-  system("mkdir -p " + obj_dir);
+  retval = system("mkdir -p " + obj_dir);
+  if (retval) { printf("unable to create output directory!\n"); exit(retval); }
 
   ofstream fsm(obj_dir + "/hyper.cpp");
   fsm << "#if REM\n#define INCLUDE(x)\n#endif\n";
@@ -271,9 +274,13 @@ int main(int argc, char **argv) {
     else if (tasks_done == tasks_amt) { finished = true; break; }
     } this_thread::sleep_for(quantum); }
 
-  if (mingw64) (void)system("windres hyper.rc -O coff -o hyper.res");
+  if (mingw64) {
+    retval = system("windres hyper.rc -O coff -o hyper.res");
+    if (retval) { printf("windres error!\n"); exit(retval); }
+    }
 
   printf("linking...\n");
-  system(linker + allobj + libs);
+  retval = system(linker + allobj + libs);
+  if (retval) { printf("linking error!\n"); exit(retval); }
   return 0;
   }
