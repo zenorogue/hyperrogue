@@ -546,7 +546,7 @@ void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const str
     }
   }
 
-unordered_map<pair<edgeinfo*, int>, int> drawn_edges;
+map<pair<edgeinfo*, int>, int> drawn_edges;
 
 map<pair<cell*, cell*>, transmatrix> relmatrices;
 

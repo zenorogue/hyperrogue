@@ -136,8 +136,8 @@ EX transmatrix adjmatrix(int i) {
   }
   
 struct hrmap_asonov : hrmap {
-  unordered_map<coord, heptagon*> at;
-    unordered_map<heptagon*, coord> coords;
+  map<coord, heptagon*> at;
+    map<heptagon*, coord> coords;
     
   heptagon *getOrigin() override { return get_at(coord(0,0,0)); }
     

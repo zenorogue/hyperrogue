@@ -74,7 +74,7 @@ void make() {
   for(int i=0; i<magmav; i++) vertices.push_back(vertices[i]);
   for(int i=0; i<magmav; i++) vertices.push_back(vertices[i]);
   
-  unordered_map<pair<int, int>, int> counts;
+  map<pair<int, int>, int> counts;
   
   int big = v - 2;
   

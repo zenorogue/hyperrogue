@@ -2119,7 +2119,7 @@ EX void sort_drawqueue() {
   int siz = isize(ptds);
 
   #if MINIMIZE_GL_CALLS
-  unordered_map<color_t, vector<unique_ptr<drawqueueitem>>> subqueue;
+  map<color_t, vector<unique_ptr<drawqueueitem>>> subqueue;
   for(auto& p: ptds) subqueue[(p->prio == PPR::CIRCLE || p->prio == PPR::OUTCIRCLE) ? 0 : p->outline_group()].push_back(move(p));
   ptds.clear();
   for(auto& p: subqueue) for(auto& r: p.second) ptds.push_back(move(r));

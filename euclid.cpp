@@ -100,7 +100,7 @@ EX namespace euc {
     /** ? */  
     intmatrix inverse_axes;
     /** for canonicalization on tori */
-    unordered_map<coord, int> hash;
+    map<coord, int> hash;
     vector<coord> seq;
     int index;
 

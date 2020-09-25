@@ -48,7 +48,6 @@ template<class T, class V, class... U> bool among(T x, V y, U... u) { return x==
 using std::vector;
 using std::map;
 using std::array;
-using std::unordered_map;
 using std::sort;
 using std::multimap;
 using std::set;

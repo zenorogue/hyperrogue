@@ -471,7 +471,7 @@ struct hrmap_crystal : hrmap_standard {
   map<coord, heptagon*> heptagon_at;
   map<int, eLand> landmemo;
   map<coord, eLand> landmemo4;
-  unordered_map<cell*, unordered_map<cell*, int>> distmemo;
+  map<cell*, map<cell*, int>> distmemo;
   map<cell*, ldcoord> sgc;
   cell *camelot_center;
   ldcoord camelot_coord;

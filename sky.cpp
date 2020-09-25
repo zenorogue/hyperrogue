@@ -55,10 +55,7 @@ void dqi_sky::draw() {
 
   int sk = get_skybrightness();
   
-  unordered_map<cell*, pair<color_t, color_t>> colors;
-  #ifdef USE_UNORDERED_MAP
-  colors.reserve(isize(sky));
-  #endif
+  map<cell*, pair<color_t, color_t>> colors;
   for(sky_item& si: sky) colors[si.c] = 
     make_pair(darkena(gradient(0, si.color, 0, sk, 255), 0, 0xFF),
         darkena(si.skycolor, 0, 0xFF)
