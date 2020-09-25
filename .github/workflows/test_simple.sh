@@ -6,6 +6,7 @@ if [[ "$GH_OS" == "windows-latest" && "$GH_BUILDSYS" == "mymake" ]]; then
 cat << ENDOFCMDS > .github/workflows/gdb_cmds.txt
   run --version
   backtrace
+  exit 1
 ENDOFCMDS
 
   gdb --batch -x .github/workflows/gdb_cmds.txt ./hyperrogue
