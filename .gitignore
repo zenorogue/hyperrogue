@@ -9,6 +9,7 @@ config.log
 config.status
 configure
 depcomp
+hyper.html
 Makefile
 install-sh
 missing
