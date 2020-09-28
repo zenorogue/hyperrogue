@@ -577,8 +577,9 @@ void celldrawer::do_viewdist() {
         celldistance(c, distance_from == dfPlayer ? cwt.at : currentmap->gamestart());
       dc = (d != cd) ? 0xFF0000 : 0x00FF00;
       label = its(d);
+      break;
       }
-    case ncNone: ;
+    case ncNone: break;
     }
 
   // string label = its(fieldpattern::getriverdistleft(c)) + its(fieldpattern::getriverdistright(c));

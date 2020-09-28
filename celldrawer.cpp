@@ -533,14 +533,14 @@ void celldrawer::setcolors() {
         wcol = fcol;  
       break;
 
-    case waMineUnknown: case waMineMine: 
-      if(mine::marked_safe(c))
-        fcol = wcol = gradient(wcol, 0x40FF40, 0, 0.2, 1);
+    case waMineUnknown: case waMineMine: case waMineOpen:
+      if(c->wall == waMineOpen)
+        ;
+      else if(mine::marked_safe(c))
+        wcol = gradient(wcol, 0x40FF40, 0, 0.2, 1);
       else if(mine::marked_mine(c))
-        fcol = wcol = gradient(wcol, 0xFF4040, -1, sintick(100), 1);
-      // fallthrough
+        wcol = gradient(wcol, 0xFF4040, -1, sintick(100), 1);
 
-    case waMineOpen:
       if(wmblack || wmascii) {
         wcol &= 0xFEFEFE;
         wcol >>= 1;
@@ -555,6 +555,7 @@ void celldrawer::setcolors() {
     case waEditStatue:
       if(c->land == laCanvas) wcol = c->landparam;
       else wcol = (0x125628 * c->wparam) & 0xFFFFFF;
+      break;
   
     default:
       break;    
@@ -1382,11 +1383,8 @@ void celldrawer::draw_features() {
       break;
       }
     
-    case waTrapdoor:
-      if(c->land == laZebra) break;
-      /* fallthrough */
-    
-    case waClosePlate: case waOpenPlate: {
+    case waTrapdoor: case waClosePlate: case waOpenPlate: {
+      if (c->wall == waTrapdoor && c->land == laZebra) break;
       shiftmatrix V2 = V;
       if(wmescher && geosupport_football() == 2 && pseudohept(c) && c->land == laPalace) V2 = V * spin(M_PI / c->type);
       if(GDIM == 3) {

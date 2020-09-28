@@ -36,7 +36,7 @@ bool mingw64 = false;
 
 void set_linux() {
   preprocessor = "g++ -E";
-  compiler = "g++ -Wall -Wextra -Wno-maybe-uninitialized -Wno-unused-parameter -Wno-implicit-fallthrough -rdynamic -fdiagnostics-color=always -c";
+  compiler = "g++ -Wall -Wextra -Wno-maybe-uninitialized -Wno-unused-parameter -rdynamic -fdiagnostics-color=always -c";
   linker = "g++ -rdynamic -o hyper";
   opts = "-DFHS -DLINUX -I/usr/include/SDL";
   libs = " savepng.o -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
@@ -44,7 +44,7 @@ void set_linux() {
 
 void set_mac() {
   preprocessor = "g++ -E";
-  compiler = "g++ -march=native -W -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-implicit-fallthrough -c";
+  compiler = "g++ -march=native -W -Wall -Wextra -Wimplicit-fallthrough -pedantic -Wno-unused-parameter -c";
   linker = "g++ -o hyper";
   opts = "-DMAC -I/usr/local/include";
   libs = " savepng.o -L/usr/local/lib -framework AppKit -framework OpenGL -lSDL -lSDLMain -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpng -lpthread -lz";
@@ -53,7 +53,7 @@ void set_mac() {
 void set_mingw64() {
   mingw64 = true;
   preprocessor = "g++ -E";
-  compiler = "g++ -mwindows -march=native -W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
+  compiler = "g++ -mwindows -march=native -W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-maybe-uninitialized -c";
   linker = "g++ -o hyper";
   opts = "-DWINDOWS -DCAP_GLEW=1 -DCAP_PNG=1";
   libs = " savepng.o hyper.res -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
