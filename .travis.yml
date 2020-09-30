@@ -178,6 +178,12 @@ before_install:
 
 script:
 - |-
+  make -f Makefile.simple clean
+  if [[ "$(git status --porcelain)" ]]; then
+    git status
+    exit 'A build artifact was committed; git rm it and try again'
+  fi
+- |-
   # Build hyperrogue.
   if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then
     autoreconf -vi
@@ -192,6 +198,7 @@ script:
     else
       ./mymake
     fi
+    mv hyper hyperrogue
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "emscripten" ]]; then
     docker run --rm -v $(pwd):/src trzeci/emscripten make -f Makefile.simple emscripten
   else
@@ -201,10 +208,18 @@ script:
   # Test hyperrogue.
   if [[ "$TRAVIS_BUILD_SYSTEM" == "emscripten" ]]; then
     ls -lAF hyper.html hyper.js hyper.wasm
-  elif [[ "$TRAVIS_BUILD_SYSTEM" == "mymake" ]]; then
-    ./hyper --help
   else
     ./hyperrogue --help
+  fi
+- |-
+  if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then
+    make clean
+  else
+    make -f Makefile.simple clean
+  fi
+  if [[ "$(git status --porcelain)" ]]; then
+    git status
+    exit 'make clean did not return the repository to its pre-build state'
   fi
 - |-
   # Test "make dist". ("make distcheck" is expected to fail.)

@@ -21,6 +21,7 @@ langen_SOURCES = langen.cpp
 langen_CXXFLAGS = -O0 -std=c++11 ${AM_CXXFLAGS}
 makeh_SOURCES = makeh.cpp
 BUILT_SOURCES = language-data.cpp autohdr.h
+CLEANFILES = language-data.cpp autohdr.h
 
 language-data.cpp: langen
 	./langen > language-data.cpp
