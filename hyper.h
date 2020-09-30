@@ -421,6 +421,7 @@ extern videopar vid;
 
 // size casted to int, to prevent warnings and actual errors caused by the unsignedness of x.size()
 template<class T> int isize(const T& x) {return x.size(); }
+template<class T, int N> int isize(const T (&x)[N]) {return N; }
 
 // automatically growing vector
 template<class T> struct grow_vector : public vector<T> {

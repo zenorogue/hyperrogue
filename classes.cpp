@@ -842,7 +842,7 @@ EX geometryinfo1 giSL2     = { gcSL2,        3, 3, 4, {1,1,-1,-1} };
 EX modecode_t no_code = 0x1;
 
 /** list of available geometries */
-EX vector<geometryinfo> ginf = {
+EX geometryinfo ginf[] = {
   {"{7,3}", "none",     "{7,3} (standard HyperRogue map)",            "HR",       7, 3, 0,         giHyperb2, {{7, 5}}, eVariation::bitruncated},
   {"{6,3}", "none",     "{6,3} (euclidean Hex grid)",                 "euclid",   6, 3, qOPTQ,     giEuclid2, {{7, 7}}, eVariation::bitruncated},
   {"{5,3}", "none",     "{5,3} (dodecahedron)",                       "sphere",   5, 3, qsSMALLB,  giSphere2, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
