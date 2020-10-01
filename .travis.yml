@@ -135,7 +135,8 @@ before_install:
     sudo apt-get update -qq
     sudo apt-get install -qq libsdl1.2-dev libsdl-gfx1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev
   elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    brew update
+    # brew update
+    export HOMEBREW_NO_AUTO_UPDATE=1
     brew install sdl sdl_gfx sdl_mixer sdl_ttf
     # work around https://stackoverflow.com/questions/51034399/ for now
     (cd /usr/local/include && ln -sf SDL/SDL.h)
@@ -193,7 +194,7 @@ script:
       ./mymake
     fi
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "emscripten" ]]; then
-    docker run --rm -v $(pwd):/src trzeci/emscripten make -f Makefile.simple emscripten
+    docker run --rm -v $(pwd):/src emscripten/emsdk make -f Makefile.simple emscripten
   else
     exit 'Unsupported build system'
   fi
