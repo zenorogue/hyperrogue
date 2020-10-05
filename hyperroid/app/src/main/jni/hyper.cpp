@@ -310,7 +310,7 @@ extern "C" void Java_com_roguetemple_hyperroid_HyperRogue_draw(MOBPAR_FORMAL) {
   // text is drawn with 'textured'  
   dynamicval<eModel> p(pmodel, mdManual);
   current_display->next_shader_flags = GF_TEXTURE;
-  current_display->set_all(0);
+  current_display->set_all(0, 0);
   glhr::set_depthtest(false);
   current_display->set_viewport(0);
   current_display->set_mask(0);

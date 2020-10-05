@@ -843,7 +843,9 @@ int surface_args() {
   }
 #endif
 
+#if CAP_COMMANDLINE
 auto surface_hook = addHook(hooks_args, 100, surface_args);
+#endif
 
 void display_coverage() {
 

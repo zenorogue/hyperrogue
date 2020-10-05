@@ -1326,7 +1326,9 @@ EX void configureOther() {
     dialog::bound_low(0);
     dialog::bound_up(MIX_MAX_VOLUME);
     dialog::extra_options = [] {
+#if CAP_SDLAUDIO
       dialog::addBoolItem_action(XLAT("play music when out of focus"), music_out_of_focus, 'A');
+#endif
       };
     });
 

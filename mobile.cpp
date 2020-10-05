@@ -250,7 +250,7 @@ EX void mobile_draw(MOBPAR_FORMAL) {
         if(h < rad*SKIPFAC) { lmouseover = cwt.at; mousedest.d = -1; }
         else {
           double d = vid.revcontrol ? -1 : 1;
-          mouseh = hpxy(dx * d / rad, dy * d / rad);
+          mouseh = shiftless(hpxy(dx * d / rad, dy * d / rad));
           calcMousedest();          
           }
         }
@@ -270,7 +270,7 @@ EX void mobile_draw(MOBPAR_FORMAL) {
   inmenu = isize(screens) > 1;
 
   if(!inmenu && vid.stereo_mode == sLR && ors::mode)
-    mousex = vid.xres/2, mousey = vid.yres/2, mouseh = sphereflip * C0;
+    mousex = vid.xres/2, mousey = vid.yres/2, mouseh = shiftless(sphereflip * C0);
 
   frames++;
   models::configure();
@@ -351,8 +351,8 @@ EX void mobile_draw(MOBPAR_FORMAL) {
     }
   
 #if CAP_RUG
-  if(andmode == 1 && normal_reaction && rug::rugged && clicked)
-    rug::move_forward((ticks - lticks_rug) / 2500.);
+  // if(andmode == 1 && normal_reaction && rug::rugged && clicked)
+  //   rug::move_forward((ticks - lticks_rug) / 2500.);
 #endif
   
   lticks_rug = ticks;
