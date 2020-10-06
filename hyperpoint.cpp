@@ -893,20 +893,20 @@ EX ld det3(const transmatrix& T) {
 
 /** determinant */
 EX ld det(const transmatrix& T) {
-  if(GDIM == 2) 
+  if(MDIM == 3) 
     return det3(T);
   else {
     ld det = 1;
     transmatrix M = T;
     for(int a=0; a<MDIM; a++) {
-      for(int b=a; b<=GDIM; b++)
+      for(int b=a; b<MDIM; b++)
         if(M[b][a]) {
           if(b != a)
             for(int c=a; c<MDIM; c++) tie(M[b][c], M[a][c]) = make_pair(-M[a][c], M[b][c]);
           break;
           }
       if(!M[a][a]) return 0;
-      for(int b=a+1; b<=GDIM; b++) {
+      for(int b=a+1; b<MDIM; b++) {
         ld co = -M[b][a] / M[a][a];
         for(int c=a; c<MDIM; c++) M[b][c] += M[a][c] * co;
         }
