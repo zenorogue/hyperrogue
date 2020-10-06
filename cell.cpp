@@ -1108,7 +1108,7 @@ EX int celldistance(cell *c1, cell *c2) {
   if(hybri) return hybrid::celldistance(c1, c2);
   
   #if CAP_FIELD
-  if(geometry == gFieldQuotient) {
+  if(geometry == gFieldQuotient && (PURE || BITRUNCATED)) {
     int d = fieldpattern::field_celldistance(c1, c2);
     if(d != DISTANCE_UNKNOWN) return d;
     }
