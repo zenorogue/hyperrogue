@@ -679,6 +679,7 @@ void geometry_information::prepare_basics() {
       single_step = S3 * S7 - 2 * S7 - 2 * S3;
       psl_steps = 2 * S7;    
       if(BITRUNCATED) psl_steps *= S3;
+      if(inv) psl_steps = 2 * S3;
       if(single_step < 0) single_step = -single_step;
       }
     DEBB(DF_GEOM | DF_POLY, ("steps = ", psl_steps, " / ", single_step));

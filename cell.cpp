@@ -292,10 +292,10 @@ EX void initcells() {
   
   hrmap* res = callhandlers((hrmap*)nullptr, hooks_newmap);
   if(res) currentmap = res;
+  else if(nonisotropic || hybri) currentmap = nisot::new_map();
   else if(INVERSE) currentmap = gp::new_inverse();
   else if(fake::in()) currentmap = fake::new_map();
   else if(asonov::in()) currentmap = asonov::new_map();
-  else if(nonisotropic || hybri) currentmap = nisot::new_map();
   #if CAP_CRYSTAL
   else if(cryst) currentmap = crystal::new_map();
   #endif
@@ -938,11 +938,11 @@ EX cdata *arcmCdata(cell *c) {
 
 EX int getCdata(cell *c, int j) {
   if(fake::in()) return FPIU(getCdata(c, j));
-  if(INVERSE) {
+  if(hybri) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
+  else if(INVERSE) {
     cell *c1 = gp::get_mapped(c);
     return UIU(getCdata(c1, j));
     }
-  if(hybri) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
   else if(euc::in()) return getEuclidCdata(euc2_coordinates(c))->val[j];
   else if(arcm::in() && euclid)
     return getEuclidCdata(pseudocoords(c))->val[j];
@@ -961,11 +961,11 @@ EX int getCdata(cell *c, int j) {
 
 EX int getBits(cell *c) {
   if(fake::in()) return FPIU(getBits(c));
-  if(INVERSE) {
+  if(hybri) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
+  else if(INVERSE) {
     cell *c1 = gp::get_mapped(c);
     return UIU(getBits(c1));
     }
-  if(hybri) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
   else if(euc::in()) return getEuclidCdata(euc2_coordinates(c))->bits;
   else if(arcm::in() && euclid)
     return getEuclidCdata(pseudocoords(c))->bits;

@@ -594,6 +594,7 @@ EX bool approx_nearcorner = false;
 
 EX hyperpoint nearcorner(cell *c, int i) {
   if(GOLDBERG_INV) {
+    i = gmod(i, c->type);
     cellwalker cw(c, i);
     cw += wstep;
     transmatrix cwm = currentmap->adj(c, i);

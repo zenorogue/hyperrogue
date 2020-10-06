@@ -1126,6 +1126,8 @@ EX namespace gp {
       }
 
     transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override {
+      c1 = mapping[c1];
+      c2 = mapping[c2];
       return in_underlying([&] { return currentmap->relative_matrix(c2, c1, hint); });
       }
 

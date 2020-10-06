@@ -1318,7 +1318,7 @@ EX void set_geometry(eGeometry target) {
     if(bt::in() || WDIM == 3 || kite::in() || arb::in()) if(!hybri) variation = eVariation::pure;
     #endif
     if(S3 >= OINF) variation = eVariation::pure;
-    if(INVERSE) variation = gp::variation_for(gp::param);
+    if(INVERSE && !hybri) variation = gp::variation_for(gp::param);
     if(ginf[target].default_variation == eVariation::pure && geometry != gArchimedean)
       variation = eVariation::pure;
     if(was_default) pmodel = default_model();

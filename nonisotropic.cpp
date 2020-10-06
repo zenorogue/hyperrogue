@@ -1231,6 +1231,8 @@ EX namespace hybrid {
       dynamicval<hrmap*> gpm(pmap, this);
       dynamicval<eGeometry> gag(actual_geometry, geometry);
       dynamicval<eGeometry> g(geometry, underlying);
+      dynamicval<int> gss(underlying_cgip->single_step, cgi.single_step);
+      dynamicval<int> gsp(underlying_cgip->psl_steps, cgi.psl_steps);
       dynamicval<geometry_information*> gc(cgip, underlying_cgip);
       dynamicval<hrmap*> gu(currentmap, underlying_map);
       return t();
@@ -1308,6 +1310,8 @@ EX namespace hybrid {
     if(!hybri) return f();
     dynamicval<eGeometry> g(geometry, underlying);
     dynamicval<eGeometry> gag(actual_geometry, geometry);
+    dynamicval<int> gss(underlying_cgip->single_step, cgi.single_step);
+    dynamicval<int> gsp(underlying_cgip->psl_steps, cgi.psl_steps);
     dynamicval<geometry_information*> gc(cgip, underlying_cgip);
     dynamicval<hrmap*> gpm(pmap, currentmap);
     dynamicval<hrmap*> gm(currentmap, get_umap());
@@ -1345,7 +1349,7 @@ EX namespace hybrid {
     }
   
   EX int wall_offset(cell *c) {
-    if(GOLDBERG) {
+    if(GOLDBERG || INVERSE) {
       /* a bit slow... */
       cell *c1 = WDIM == 2 ? c : get_where(c).first;
       gp::draw_li = WDIM == 2 ? gp::get_local_info(c1) : PIU(gp::get_local_info(c1));
