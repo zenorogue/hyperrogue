@@ -547,6 +547,10 @@ void display_data::set_projection(int ed, ld shift) {
     glhr::projection_multiply(glhr::translate(shift, 0, 0));
     }
 
+  if(in_h2xe()) {
+    glhr::projection_multiply(glhr::translate(0, 0, shift));
+    }
+
   if(selected->shader_flags & SF_HALFPLANE) {
     glhr::projection_multiply(glhr::translate(0, 1, 0));      
     glhr::projection_multiply(glhr::scale(-1, 1, 1));
