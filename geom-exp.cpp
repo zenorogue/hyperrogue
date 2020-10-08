@@ -384,7 +384,9 @@ void ge_select_tiling() {
 
 EX string current_proj_name() {
   bool h = hyperbolic || sn::in();
-  if(vpconf.model != mdDisk)
+  if(vpconf.model == mdPanini && vpconf.alpha == 1)
+    return XLAT("stereographic Panini");
+  else if(vpconf.model != mdDisk)
     return models::get_model_name(vpconf.model);
   else if(h && vpconf.alpha == 1)
     return XLAT("Poincaré model");

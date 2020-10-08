@@ -293,6 +293,8 @@ EX bool two_sided_model() {
   if(pmodel == mdHyperboloid) return !euclid;
   // if(pmodel == mdHemisphere) return true;
   if(pmodel == mdDisk) return sphere;
+  if(pmodel == mdRetroLittrow) return sphere;
+  if(pmodel == mdRetroHammer) return sphere;
   if(pmodel == mdHemisphere) return true;
   if(pmodel == mdRotatedHyperboles) return true;
   if(pmodel == mdSpiral && pconf.spiral_cone < 360) return true;
@@ -304,6 +306,12 @@ EX int get_side(const hyperpoint& H) {
     double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
     double horizon = curnorm / pconf.alpha;
     return (H[2] <= -horizon) ? -1 : 1;
+    }
+  if(pmodel == mdRetroLittrow && sphere) {
+    return H[2] >= 0 ? 1 : -1;
+    }
+  if(pmodel == mdRetroHammer && sphere) {
+    return H[2] >= 0 ? 1 : -1;
     }
   if(pmodel == mdRotatedHyperboles)
     return H[1] > 0 ? -1 : 1;

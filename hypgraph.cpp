@@ -1074,6 +1074,76 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         }
       }
     
+    case mdRetroCraig: {
+      makeband(H_orig, ret, [] (ld& x, ld& y) { 
+        if(x)
+          y = x / sin_auto(x) * (sin_auto(y) * cos_auto(x) - tan_auto(pconf.loximuthal_parameter) * cos_auto(y));
+        else
+          y = sin_auto(y) - tan_auto(pconf.loximuthal_parameter) * cos_auto(y);
+        });
+      break;
+      }
+
+    case mdRetroLittrow: {
+      makeband(H_orig, ret, [] (ld& x, ld& y) { 
+        tie(x, y) = make_pair(
+          sin_auto(x) / cos_auto(y),
+          cos_auto(x) * tan_auto(y)
+          );
+        });
+      break;
+      }
+    
+    case mdRetroHammer: {
+      ld d = hdist(H, ypush0(pconf.loximuthal_parameter));
+      makeband(H_orig, ret, [d,H] (ld& x, ld& y) { 
+        if(x == 0 && y == 0) return;
+
+        if(x)
+          y = x / sin_auto(x) * (sin_auto(y) * cos_auto(x) - tan_auto(pconf.loximuthal_parameter) * cos_auto(y));
+        else
+          y = sin_auto(y) - tan_auto(pconf.loximuthal_parameter) * cos_auto(y);
+          
+        ld scale = d / hypot(x, y);
+        if(H[2] < 0) scale = -scale;
+        x *= scale;
+        y *= scale;
+        });
+      break;
+      }
+    
+    case mdPanini: {
+      ld proh = sqrt(H[2]*H[2] + curvature() * H[0] * H[0]);
+      H /= proh;
+      H /= (H[2] + pconf.alpha);
+      ret = H;
+      ret[2] = 0; ret[3] = 1;
+      break;
+      }
+    
+    case mdPoorMan: {
+      find_zlev(H);
+      H = space_to_perspective(H);
+      
+      models::apply_orientation_yz(H[1], H[2]);
+      models::apply_orientation(H[0], H[1]);
+      
+      ld u = H[0], v = H[1];
+      if(abs(u) > 1e-3 && abs(v) > 1e-3) {
+        ld r2 = u*u+v*v;
+        ld scale = sqrt((-r2+sqrt(r2*(r2+4*u*u*v*v*(r2-2))))/(2*(r2-2))) / u / v;
+        if(u*v<0) scale = -scale;
+        H = scale * H;
+        }
+      ret = H;
+      ret[2] = 0;
+      ret[3] = 1;
+  
+      models::apply_orientation(ret[1], ret[0]);
+      models::apply_orientation_yz(ret[2], ret[1]);
+      break;
+      }
+    
     case mdGUARD: case mdManual: break;
     }
 

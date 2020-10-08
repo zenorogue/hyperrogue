@@ -200,6 +200,8 @@ EX namespace models {
     if(GDIM == 2 && pm == mdEquivolume) return false;
     if(GDIM == 3 && among(pm, mdBall, mdHyperboloid, mdFormula, mdPolygonal, mdRotatedHyperboles, mdSpiral, mdHemisphere)) return false;
     if(pm == mdCentralInversion && !euclid) return false;
+    if(pm == mdPoorMan) return hyperbolic;
+    if(pm == mdRetroHammer) return hyperbolic;
     return true;
     }    
   
@@ -442,7 +444,7 @@ EX namespace models {
       dialog::addBreak(50);
       }
     
-    if(among(vpmodel, mdDisk, mdBall, mdHyperboloid, mdRotatedHyperboles)) {
+    if(among(vpmodel, mdDisk, mdBall, mdHyperboloid, mdRotatedHyperboles, mdPanini)) {
       dialog::addSelItem(XLAT("projection distance"), fts(vpconf.alpha) + " (" + current_proj_name() + ")", 'p');
       dialog::add_action(projectionDialog);
       }
@@ -636,13 +638,17 @@ EX namespace models {
         });
       }
     
-    if(vpmodel == mdLoximuthal) {
+    if(among(vpmodel, mdLoximuthal, mdRetroHammer, mdRetroCraig)) {
       dialog::addSelItem(XLAT("parameter"), fts(vpconf.loximuthal_parameter), 'b');
-      dialog::add_action([](){
+      dialog::add_action([vpmodel](){
         dialog::editNumber(vpconf.loximuthal_parameter, -M_PI/2, M_PI/2, .1, 0, XLAT("parameter"), 
+          (vpmodel == mdLoximuthal ?
           "This model is similar to azimuthal equidistant, but based on loxodromes (lines of constant geographic direction) rather than geodesics. "
           "The loximuthal projection maps (the shortest) loxodromes to straight lines of the same length, going through the starting point. "
-          "This setting changes the latitude of the starting point." 
+          "This setting changes the latitude of the starting point." :
+          "In retroazimuthal projections, a point is drawn at such a point that the azimuth *from* that point to the chosen central point is correct. "
+          "For example, if you should move east, the point is drawn to the right. This parameter is the latitude of the central point.")
+          + string(hyperbolic ? "\n\n(In hyperbolic geometry directions are assigned according to the Lobachevsky coordinates.)" : "")
           );
         });
       }
@@ -827,7 +833,7 @@ EX namespace models {
       PHASEFROM(2); 
       if(pmodel == mdCollignon) shift_arg_formula(vpconf.collignon_parameter);
       else if(pmodel == mdMiller) shift_arg_formula(vpconf.miller_parameter);
-      else if(pmodel == mdLoximuthal) shift_arg_formula(vpconf.loximuthal_parameter);
+      else if(among(pmodel, mdLoximuthal, mdRetroCraig, mdRetroHammer)) shift_arg_formula(vpconf.loximuthal_parameter);
       else if(among(pmodel, mdAitoff, mdHammer, mdWinkelTripel)) shift_arg_formula(vpconf.aitoff_parameter);
       if(pmodel == mdWinkelTripel) shift_arg_formula(vpconf.winkel_parameter);
       }
