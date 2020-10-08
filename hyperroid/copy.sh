@@ -11,8 +11,8 @@ mkdir -p app/src/main/res/raw/
 # language-data.cpp is a make dependency of autohdr.h, so it's generated as well
 if [ ! -f ../autohdr.h ]; then
     echo "generating autohdr.h..."
-    pushd ..
+    LAST_PWD=$(pwd); cd ..
     make -f Makefile.simple autohdr.h
-    popd
+    cd $LAST_PWD
 fi
 
