@@ -875,6 +875,11 @@ int read_cheat_args() {
     cheat();
     gen_wandering = false;
     }
+  else if(argis("-hroll")) {
+    shift();
+    int i = argi();
+    while(i>0) i--, hrand(10);
+    }
   else if(argis("-W")) {
     PHASEFROM(2);
     shift(); 
