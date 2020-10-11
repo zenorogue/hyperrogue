@@ -1,10 +1,9 @@
-set -e o pipefail
-source .github/workflows/gh_ci_envvars.sh
+set -x -e o pipefail
 
 
 GH_DEPS_UBUNTU="$GH_COMPILER libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev libsdl-mixer1.2-dev"
 GH_DEPS_MACOS="sdl sdl_gfx sdl_mixer sdl_ttf"
-GH_DEPS_MINGW64="$GH_COMPILER:x SDL:x SDL_ttf:x SDL_gfx:x SDL_mixer:x make"
+GH_DEPS_MINGW64="$GH_COMPILER:x SDL:x SDL_ttf:x SDL_gfx:x SDL_mixer:x make gdb:x"
 
 if [[ "$GH_HYP_GLEW" == "glew_1" ]]; then
   GH_DEPS_UBUNTU+=" libglew-dev"
@@ -36,5 +35,6 @@ elif [[ "$GH_OS" == "windows-latest" ]]; then
   pacboy -Sy --noconfirm --needed $GH_DEPS_MINGW64
   sed -i'.orig' 's/<SDL.h>/"SDL.h"/' /mingw64/include/SDL/SDL_gfxPrimitives.h
 else
-  exit 'unknown OS'
+  echo 'unknown OS'
+  exit 1
 fi

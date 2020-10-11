@@ -8,6 +8,7 @@ on:
 
 jobs:
   main_matrix:
+    name: Unix
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -18,36 +19,40 @@ jobs:
         hyper_use_rviz: [rviz_1, rviz_0]
         hyper_use_png: [png_1]
         hyper_use_glew: [glew_1]
+    env:
+      GH_OS: ${{ matrix.os }}
+      GH_COMPILER: ${{ matrix.compiler }}
+      GH_BUILDSYS: ${{ matrix.build_system }}
+      GH_HYP_RVIZ: ${{ matrix.hyper_use_rviz }}
+      GH_HYP_PNG: ${{ matrix.hyper_use_png }}
+      GH_HYP_GLEW: ${{ matrix.hyper_use_glew }}
     steps:
     - uses: actions/checkout@v2
-    - name: envvars_setup
-      run: |
-        cat << ENDOFVARS > .github/workflows/gh_ci_envvars.sh
-        GH_OS=${{ matrix.os }}
-        GH_COMPILER=${{ matrix.compiler }}
-        GH_BUILDSYS=${{ matrix.build_system }}
-        GH_HYP_RVIZ=${{ matrix.hyper_use_rviz }}
-        GH_HYP_PNG=${{ matrix.hyper_use_png }}
-        GH_HYP_GLEW=${{ matrix.hyper_use_glew }}
-        ENDOFVARS
-    - name: install_deps
+    - name: Install build dependencies
       run: .github/workflows/install_deps.sh
-    - name: build
+    - name: Build
       run: .github/workflows/build.sh
-    - name: test_simple
+    - name: Do a simple test
       run: .github/workflows/test_simple.sh
 
   windows:
-    runs-on: ${{ matrix.os }}
+    name: Windows
+    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest]
         compiler: [gcc]
-        build_system: [makefile, autotools]
+        build_system: [makefile, autotools, mymake]
         hyper_use_rviz: [rviz_1, rviz_0]
         hyper_use_png: [png_1]
         hyper_use_glew: [glew_1]
+    env:
+      GH_OS: windows-latest
+      GH_COMPILER: ${{ matrix.compiler }}
+      GH_BUILDSYS: ${{ matrix.build_system }}
+      GH_HYP_RVIZ: ${{ matrix.hyper_use_rviz }}
+      GH_HYP_PNG: ${{ matrix.hyper_use_png }}
+      GH_HYP_GLEW: ${{ matrix.hyper_use_glew }}
     defaults:
       run:
         shell: msys2 {0}
@@ -57,32 +62,22 @@ jobs:
         update: true
         install: 'pactoys'
     - uses: actions/checkout@v2
-    - name: envvars_setup
-      run: |
-        cat << ENDOFVARS > .github/workflows/gh_ci_envvars.sh
-        GH_OS=${{ matrix.os }}
-        GH_COMPILER=${{ matrix.compiler }}
-        GH_BUILDSYS=${{ matrix.build_system }}
-        GH_HYP_RVIZ=${{ matrix.hyper_use_rviz }}
-        GH_HYP_PNG=${{ matrix.hyper_use_png }}
-        GH_HYP_GLEW=${{ matrix.hyper_use_glew }}
-        ENDOFVARS
-    - name: install_deps
+    - name: Install build dependencies
       env:
         MSYSTEM: MSYS
       run: .github/workflows/install_deps.sh
-    - name: build
+    - name: Build
       run: .github/workflows/build.sh
-    - name: test_simple
+    - name: Do a simple test
       run: .github/workflows/test_simple.sh
 
   emscripten:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: build
+    - name: Build
       run: |
         docker run --rm -v $(pwd):/src trzeci/emscripten make -f Makefile.simple emscripten
-    - name: test_simple
+    - name: Do a simple test
       run: |
         ls -lAF hyper.html hyper.js hyper.wasm
