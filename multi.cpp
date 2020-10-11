@@ -638,6 +638,7 @@ EX void initConfig() {
   multi::scs[5].uicolor = 0x00C0C0FF;
   multi::scs[6].uicolor = 0xC0C0C0FF;
   
+  #if CAP_CONFIG
   addsaver(multi::players, "mode-number of players");
   addsaver(alwaysuse, "use configured keys");  
   // unfortunately we cannot use key names here because SDL is not yet initialized
@@ -656,6 +657,7 @@ EX void initConfig() {
       }
     }
   for(int i=0; i<7; i++) addsaver(multi::scs[i], "player"+its(i));
+  #endif
   }
 
 EX void handleInput(int delta) {

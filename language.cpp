@@ -62,7 +62,10 @@ struct fullnoun {
   };
 
 #if !CAP_TRANS
+#if HDR
 #define NUMEXTRA 11
+extern const char* natchars[NUMEXTRA];
+#endif
 const char* natchars[NUMEXTRA] = {"°","é","á", "²", "½", "Θ", "δ", "π", "ϕ", "ᵈ", "∞"};
 #endif
 

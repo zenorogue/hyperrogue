@@ -206,7 +206,7 @@
 #endif
 
 #ifndef CAP_TOUR
-#define CAP_TOUR (!ISWEB && !ISMINI)
+#define CAP_TOUR (!ISMINI)
 #endif
 
 #ifndef CAP_ROGUEVIZ
@@ -285,7 +285,7 @@
 #endif
 
 #ifndef CAP_SHMUP
-#define CAP_SHMUP 1
+#define CAP_SHMUP (!ISWEB)
 #endif
 
 #ifndef CAP_BITFIELD
@@ -403,6 +403,10 @@ extern "C" {
 #define CAP_GLEW (CAP_GL && !ISMOBILE && !ISMAC && !ISLINUX && !ISWEB)
 #endif
 
+#if ISWEB
+#define GLES_ONLY
+#endif
+
 #if CAP_GL
 #if CAP_GLEW
   #include <GL/glew.h>
@@ -460,6 +464,11 @@ typedef unsigned GLuint;
 
 #if CAP_ZLIB
 #include <zlib.h>
+#endif
+
+#if ISWEB
+#include <emscripten.h>
+#include <emscripten/html5.h>
 #endif
 
 #if CAP_GMP
