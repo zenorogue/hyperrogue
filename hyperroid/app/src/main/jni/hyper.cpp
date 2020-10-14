@@ -169,6 +169,8 @@ Java_com_roguetemple_hyperroid_HyperRogue_glhrinit(MOBPAR_FORMAL)
 {
     __android_log_print(ANDROID_LOG_WARN, "HyperRogue", "glhr::init %d\n", 0);
     #if HNEW
+    // matched_programs get clobbered on activity destruction -- force their re-creation
+    if (!matched_programs.empty()) matched_programs.clear();
     glhr::init();
     #endif
     __android_log_print(ANDROID_LOG_WARN, "HyperRogue", "glhr::init done %d\n", 0);
