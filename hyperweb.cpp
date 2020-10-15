@@ -40,6 +40,7 @@ namespace hr {
   void emscripten_get_commandline();
 
   void loadCompressedChar(int &otwidth, int &otheight, int *tpix);
+  void get_canvas_size();
 
   const char *wheresounds;
 
@@ -220,9 +221,39 @@ EM_BOOL fsc_callback(int eventType, const EmscriptenFullscreenChangeEvent *fulls
   return true;
   }
 
+EX void get_canvas_size() {
+  vid.xscr = vid.xres = EM_ASM_INT({
+    var d = document.getElementById("this_wide");
+    if(!d) return window.innerWidth;
+    return d.clientWidth;
+    });
+  if(vid.full) vid.yscr = vid.yres = EM_ASM_INT({
+    var d = document.getElementById("this_wide");
+    if(!d) return window.innerWidth;
+    return d.clientHeight;
+    });
+  else {
+    vid.xscr = vid.xres = vid.xres - 32;
+    vid.yscr = vid.yres = EM_ASM_INT({
+      return window.innerHeight;
+      }) - 32;
+    vid.yscr = vid.yres = min(vid.yscr, vid.xscr * 9 / 16);
+    vid.xscr = vid.xres = min(vid.xscr, vid.yscr * 16 / 9);    
+    }
+  println(hlog, "X = ", vid.xscr, " Y = ", vid.yscr);
+  }
+  
+EM_BOOL resize_callback(int eventType, const EmscriptenUiEvent *resizeEvent, void *userData) {
+  if(vid.full) return true;
+  get_canvas_size();
+  setvideomode();
+  return true;
+  }
+
 EX void initweb() {
   // toggleanim(false);
   emscripten_set_fullscreenchange_callback(0, NULL, false, fsc_callback);
+  emscripten_set_resize_callback(0, NULL, false, resize_callback);
   printf("showstartmenu = %d\n", showstartmenu);
   if(showstartmenu) pushScreen(showDemo);
   }
