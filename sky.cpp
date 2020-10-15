@@ -238,6 +238,7 @@ void celldrawer::draw_ceiling() {
           break;
         
         case laVariant: {
+          #if CAP_COMPLEX2
           int b = getBits(c);
           col = 0x404040;
           for(int a=0; a<21; a++)
@@ -245,6 +246,7 @@ void celldrawer::draw_ceiling() {
               col += variant::features[a].color_change;
           col = col & 0x00FF00;
           skycol = col;
+          #endif
           break;
           }
         

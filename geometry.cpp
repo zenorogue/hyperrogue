@@ -673,8 +673,12 @@ void geometry_information::prepare_basics() {
   plevel = vid.plevel_factor * scalefactor;
   single_step = 1;
   if(hybri && !prod) {
+    #if CAP_ARCM
     if(hybrid::underlying == gArchimedean) 
       arcm::current.get_step_values(psl_steps, single_step);
+    #else
+    if(0) ;
+    #endif
     else {
       single_step = S3 * S7 - 2 * S7 - 2 * S3;
       psl_steps = 2 * S7;    
@@ -914,7 +918,7 @@ EX void apply_always3() {
   #if MAXMDIM >= 4
 EX void switch_always3() {
     if(dual::split(switch_always3)) return;
-    #if CAP_GL
+    #if CAP_GL && CAP_RUG
     if(rug::rugged) rug::close();
     #endif
     vid.always3 = !vid.always3;
@@ -947,7 +951,7 @@ EX void switch_always3() {
     
   EX void switch_fpp() {
 #if MAXMDIM >= 4
-    #if CAP_GL
+    #if CAP_GL && CAP_RUG
     if(rug::rugged) rug::close();
     #endif
     if(dual::split(switch_fpp)) return;
@@ -1027,7 +1031,9 @@ EX string cgi_string() {
   if(GOLDBERG_INV) V("GP", its(gp::param.first) + "," + its(gp::param.second));
   if(IRREGULAR) V("IRR", its(irr::irrid));
 
+  #if CAP_ARCM
   if(arcm::in()) V("ARCM", arcm::current.symbol);
+  #endif
 
   if(arb::in()) V("ARB", its(arb::current.order));
   

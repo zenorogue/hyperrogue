@@ -300,6 +300,7 @@ void set_or_configure_geometry(eGeometry g) {
           addMessage(XLAT("Only works with (semi-)regular tilings"));
           return;
           }
+        #if CAP_ARCM
         if(arcm::in()) {
           int steps, single_step;
           if(!arcm::current.get_step_values(steps, single_step)) {
@@ -307,6 +308,7 @@ void set_or_configure_geometry(eGeometry g) {
             return;
             }
           }
+        #endif
         }
       }
     dual::may_split_or_do([g] { set_geometry(g); });
@@ -542,8 +544,10 @@ EX void select_quotient_screen() {
           }
         else if(g == gFieldQuotient) 
           pushScreen(showQuotientConfig);
+        #if CAP_CRYSTAL
         else if(g == gCrystal)
           pushScreen(crystal::show);
+        #endif
         else {
           dual::may_split_or_do([g] { set_geometry(g); });
           start_game();
@@ -709,7 +713,9 @@ EX void showEuclideanMenu() {
     worldsize = euc::eu.det;
     if(BITRUNCATED) worldsize *= (a4 ? 2 : 3);
     if(GOLDBERG) worldsize *= cgi.gpdata->area;
+    #if CAP_IRR
     if(IRREGULAR) worldsize *= isize(irr::cells) / isize(irr::cells_of_heptagon);
+    #endif
     }
   else 
   worldsize = denom ? nom / denom : 0;
@@ -796,15 +802,19 @@ EX void showEuclideanMenu() {
 
   dialog::add_action(select_quotient);
   
+  #if CAP_ARCM
   if(arcm::in()) {
     dialog::addItem(XLAT("advanced parameters"), '4');
     dialog::add_action_push(arcm::show);
     }
+  #endif
 
+  #if CAP_CRYSTAL
   if(cryst) {
     dialog::addItem(XLAT("advanced parameters"), '4');
     dialog::add_action_push(crystal::show);
     }
+  #endif
   
   if(fake::available()) {
     dialog::addItem(XLAT("fake curvature"), '4');

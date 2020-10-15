@@ -263,6 +263,7 @@ cld exp_parser::parse(int prio) {
     force_eat(")");
     res = edge_of_triangle_with_angles(M_PI/2, M_PI/a, M_PI/b);
     }
+  #if CAP_ARCM
   else if(eat("arcmedge(")) {
     vector<int> vals;
     vals.push_back(iparse(0));
@@ -280,6 +281,7 @@ cld exp_parser::parse(int prio) {
     if(extra_params.count("distunit"))
       res /= extra_params["distunit"];
     }
+  #endif
   else if(eat("regangle(")) {
     cld edgelen = parse(0);
     if(extra_params.count("distunit")) {

@@ -534,11 +534,13 @@ void celldrawer::setcolors() {
       break;
 
     case waMineUnknown: case waMineMine: 
+      #if CAP_COMPLEX2
       if(mine::marked_safe(c))
         fcol = wcol = gradient(wcol, 0x40FF40, 0, 0.2, 1);
       else if(mine::marked_mine(c))
         fcol = wcol = gradient(wcol, 0xFF4040, -1, sintick(100), 1);
       // fallthrough
+      #endif
 
     case waMineOpen:
       if(wmblack || wmascii) {
@@ -1352,7 +1354,9 @@ void celldrawer::draw_features() {
       }
     
     case waTerraWarrior:
+      #if CAP_COMPLEX2
       drawTerraWarrior(V, terracotta::randterra ? (c->landparam & 7) : (5 - (c->landparam & 7)), 7, 0);
+      #endif
       break;
     
     case waBoat: case waStrandedBoat: 

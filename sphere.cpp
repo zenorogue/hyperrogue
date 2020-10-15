@@ -161,7 +161,9 @@ struct hrmap_spherical : hrmap_standard {
   
   transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
     if(!gmatrix0.count(c2) || !gmatrix0.count(c1)) {
+      #if !ISWEB
       printf("building gmatrix0 (size=%d)\n", isize(gmatrix0));
+      #endif
       #if CAP_GP
       auto bak = gp::draw_li;
       #endif

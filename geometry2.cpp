@@ -398,6 +398,7 @@ ld hrmap_standard::spin_angle(cell *c, int d) {
   ld hexshift = 0;
   if(c == c->master->c7 && (S7 % 2 == 0) && BITRUNCATED) hexshift = cgi.hexshift + 2*M_PI/c->type;
   else if(cgi.hexshift && c == c->master->c7) hexshift = cgi.hexshift;
+  #if CAP_IRR
   if(IRREGULAR) {
     auto id = irr::cellindex[c];
     auto& vs = irr::cells[id];
@@ -405,8 +406,8 @@ ld hrmap_standard::spin_angle(cell *c, int d) {
     auto& p = vs.jpoints[vs.neid[d]];
     return -atan2(p[1], p[0]) - hexshift;
     }
-  else
-    return M_PI - d * 2 * M_PI / c->type - hexshift;
+  #endif
+  return M_PI - d * 2 * M_PI / c->type - hexshift;
   }
 
 EX transmatrix ddspin(cell *c, int d, ld bonus IS(0)) { return currentmap->spin_to(c, d, bonus); }

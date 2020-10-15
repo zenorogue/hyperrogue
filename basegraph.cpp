@@ -79,7 +79,14 @@ int utfsize(char c) {
   }
 
 EX int get_sightrange() { return getDistLimit() + sightrange_bonus; }
-EX int get_sightrange_ambush() { return max(get_sightrange(), ambush::distance); }
+
+EX int get_sightrange_ambush() { 
+  #if CAP_COMPLEX2
+  return max(get_sightrange(), ambush::distance); 
+  #else
+  return get_sightrange();
+  #endif
+  }
 
 bool display_data::in_anaglyph() { return vid.stereo_mode == sAnaglyph; }
 bool display_data::stereo_active() { return vid.stereo_mode != sOFF; }
@@ -603,7 +610,9 @@ EX void resetGL() {
   matched_programs.clear();
   glhr::current_glprogram = nullptr;
   ray::reset_raycaster();
+  #if CAP_RUG
   if(rug::glbuf) rug::close_glbuf();
+  #endif
   }
 
 #endif
@@ -1161,7 +1170,9 @@ EX void initgraph() {
 #if CAP_CONFIG
   loadConfig();
 #endif
+#if CAP_ARCM
   arcm::current.parse();
+#endif
   if(hybri) geometry = hybrid::underlying;
 
 #if CAP_COMMANDLINE

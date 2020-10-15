@@ -1355,7 +1355,11 @@ EX namespace hybrid {
       gp::draw_li = WDIM == 2 ? gp::get_local_info(c1) : PIU(gp::get_local_info(c1));
       }
     auto ugeometry = hybri ? hybrid::underlying : geometry;    
+    #if CAP_ARCM
     int id = ugeometry == gArchimedean ? arcm::id_of(c->master) + 20 * arcm::parent_index_of(c->master) : shvid(c);
+    #else
+    int id = shvid(c);
+    #endif
     if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, {-1, nullptr});
     auto &wop = cgi.walloffsets[id];
     int &wo = wop.first;
@@ -2067,8 +2071,13 @@ EX namespace rots {
     if(i == c1->type-1) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
     if(i == c1->type-2) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
     cell *c2 = c1->cmove(i);
+    #if CAP_ARCM
     int id1 = hybrid::underlying == gArchimedean ? arcm::id_of(c1->master) + 20 * arcm::parent_index_of(c1->master) : shvid(c1);
     int id2 = hybrid::underlying == gArchimedean ? arcm::id_of(c2->master) + 20 * arcm::parent_index_of(c2->master) : shvid(c2);
+    #else
+    int id1 = shvid(c1);
+    int id2 = shvid(c2);
+    #endif
     int j = c1->c.spin(i);
     int id = id1 + (id2 << 10) + (i << 20) + (j << 26);
     auto &M = saved_matrices_ray[id];
@@ -2094,8 +2103,13 @@ EX namespace rots {
       if(i == c1->type-2) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
       if(i == c1->type-1) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
       cell *c2 = c1->cmove(i);
+      #if CAP_ARCM
       int id1 = hybrid::underlying == gArchimedean ? arcm::id_of(c1->master) + 20 * arcm::parent_index_of(c1->master) : shvid(c1);
       int id2 = hybrid::underlying == gArchimedean ? arcm::id_of(c2->master) + 20 * arcm::parent_index_of(c2->master) : shvid(c2);
+      #else
+      int id1 = shvid(c1);
+      int id2 = shvid(c2);
+      #endif
       int j = c1->c.spin(i);
       int id = id1 + (id2 << 10) + (i << 20) + (j << 26);
       auto &M = saved_matrices[id];

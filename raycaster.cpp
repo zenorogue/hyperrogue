@@ -269,11 +269,13 @@ void enable_raycaster() {
     int flat1 = 0, flat2 = deg;
     if(prod || rotspace) flat2 -= 2;
 
+#if CAP_BT
     if(hyperbolic && bt::in()) {
       fsh += "uniform mediump float uBLevel;\n";
       flat1 = bt::dirs_outer();
       flat2 -= bt::dirs_inner();
       }
+#endif
     
     if(hyperbolic) fsh += 
 
@@ -1533,8 +1535,11 @@ EX void cast() {
     }
   if(o->uPLevel != -1)
     glUniform1f(o->uPLevel, cgi.plevel / 2);
+  
+  #if CAP_BT
   if(o->uBLevel != -1)
     glUniform1f(o->uBLevel, log(bt::expansion()) / 2);
+  #endif
   
   if(o->uLinearSightRange != -1)
     glUniform1f(o->uLinearSightRange, sightranges[geometry]);

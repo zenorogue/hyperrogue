@@ -1589,12 +1589,14 @@ EX void show() {
   animator(XLATN("Ocean"), env_ocean, 'o');
   animator(XLATN("Volcanic Wasteland"), env_volcano, 'v');
   if(shmup::on) dialog::addBoolItem_action(XLAT("shmup action"), env_shmup, 'T');
+  #if CAP_FILES && CAP_SHOT
   if(cheater) {
     dialog::addSelItem(XLAT("monster turns"), its(numturns), 'n');
     dialog::add_action([] {      
       dialog::editNumber(numturns, 0, 100, 1, 0, XLAT("monster turns"), XLAT("Number of turns to pass. Useful when simulating butterflies or cellular automata."));
       });
     }
+  #endif
 
   #if CAP_RUG
   if(rug::rugged) {
@@ -1813,6 +1815,7 @@ void no_init() { }
 
 startanim null_animation { "", no_init, [] { gamescreen(2); }};
 
+#if CAP_STARTANIM
 startanim joukowsky { "Joukowsky transform", no_init, [] {
   dynamicval<eModel> dm(pmodel, mdJoukowskyInverted);
   dynamicval<ld> dt(pconf.model_orientation, ticks / 25.);
@@ -1872,6 +1875,7 @@ startanim spin_around { "spinning around", no_init,  [] {
   dynamicval<transmatrix> dv(View, spin(-cos_auto(circle_radius)*alpha) * xpush(circle_radius) * spin(alpha) * View);
   gamescreen(2);
   }};
+#endif
 
 reaction_t add_to_frame;
 

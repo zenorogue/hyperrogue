@@ -577,7 +577,9 @@ EX void initConfig() {
   addsaverenum(pconf.basic_model, "basic model");
   addsaver(pconf.use_atan, "use_atan");
   
+  #if CAP_ARCM
   addsaver(arcm::current.symbol, "arcm-symbol", "4^5");
+  #endif
   addsaverenum(hybrid::underlying, "product-underlying");
   
   for(int i=0; i<isize(ginf); i++) {

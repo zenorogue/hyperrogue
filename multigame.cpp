@@ -295,11 +295,17 @@ EX namespace dual {
         }
       else {
         variation = eVariation::pure;
+        #if CAP_ARCM
         geometry = s == 0 ? gEuclidSquare : gArchimedean;
+        #else
+        geometry = gEuclidSquare;
+        #endif
         }
       firstland = specialland = laCrossroads4;
+      #if CAP_ARCM
       if(geometry == gArchimedean) 
         arcm::current.parse("4,4,4,4,4");
+      #endif
       check_cgi();
       cgi.require_basics();
       dgd[s].storegame();

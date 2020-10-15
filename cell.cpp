@@ -179,8 +179,11 @@ EX heptagon* hyperbolic_origin() {
   h.cdata = NULL;
   h.alt = NULL;
   h.distance = 0;
+  #if CAP_IRR
   if(IRREGULAR) irr::link_start(origin);
-  else h.c7 = newCell(odegree, origin);
+  else 
+  #endif
+  h.c7 = newCell(odegree, origin);
   return origin;
   }
 
@@ -554,7 +557,9 @@ EX int celldistAlt(cell *c) {
 
 /** direction upwards in the tree */
 EX int updir(heptagon *h) {
+  #if CAP_BT
   if(bt::in()) return bt::updir();
+  #endif
   #if MAXMDIM >= 4
   if(WDIM == 3 && reg3::in_rule()) {
     for(int i=0; i<S7; i++) if(h->move(i) && h->move(i)->distance < h->distance) 
@@ -815,10 +820,12 @@ cdata *getHeptagonCdata(heptagon *h) {
   if(sphere || quotient) h = currentmap->gamestart()->master;
   
   bool starting = h->s == hsOrigin;
+  #if CAP_BT
   if(bt::in()) {
     if(bt::mapside(h) == 0) starting = true;
     for(int i=0; i<h->type; i++) if(bt::mapside(h->cmove(i)) == 0) starting = true;
     }
+  #endif
 
   if(starting) {
     h->cdata = new cdata(orig_cdata);
@@ -866,7 +873,12 @@ cdata *getHeptagonCdata(heptagon *h) {
 cdata *getEuclidCdata(gp::loc h) {
 
   int x = h.first, y = h.second;
+  
+  #if CAP_ARCM
   auto& data = arcm::in() ? arcm::get_cdata() : euc::get_cdata();
+  #else
+  auto& data = euc::get_cdata();
+  #endif
     
   // hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
   if(data.count(h)) return &(data[h]);
@@ -918,6 +930,7 @@ int ld_to_int(ld x) {
   return int(x + 1000000.5) - 1000000;
   }
 
+#if CAP_ARCM
 EX gp::loc pseudocoords(cell *c) {
   transmatrix T = arcm::archimedean_gmatrix[c->master].second;
   return {ld_to_int(T[0][LDIM]), ld_to_int((spin(60*degree) * T)[0][LDIM])};
@@ -935,6 +948,7 @@ EX cdata *arcmCdata(cell *c) {
   dynamicval<hrmap*> cm(currentmap, arcm::current_altmap);  
   return getHeptagonCdata(h2);
   }
+#endif
 
 EX int getCdata(cell *c, int j) {
   if(fake::in()) return FPIU(getCdata(c, j));
@@ -944,10 +958,12 @@ EX int getCdata(cell *c, int j) {
     return UIU(getCdata(c1, j));
     }
   else if(euc::in()) return getEuclidCdata(euc2_coordinates(c))->val[j];
+#if CAP_ARCM
   else if(arcm::in() && euclid)
     return getEuclidCdata(pseudocoords(c))->val[j];
   else if(arcm::in() && hyperbolic) 
     return arcmCdata(c)->val[j]*3;
+#endif
   else if(!geometry_supports_cdata()) return 0;
   else if(ctof(c)) return getHeptagonCdata(c->master)->val[j]*3;
   else {
@@ -967,10 +983,12 @@ EX int getBits(cell *c) {
     return UIU(getBits(c1));
     }
   else if(euc::in()) return getEuclidCdata(euc2_coordinates(c))->bits;
-  else if(arcm::in() && euclid)
+  #if CAP_ARCM
+  else if(arcm::in() && euclid)  
     return getEuclidCdata(pseudocoords(c))->bits;
   else if(arcm::in() && (hyperbolic || sl2)) 
     return arcmCdata(c)->bits;
+  #endif
   else if(!geometry_supports_cdata()) return 0;
   else if(c == c->master->c7) return getHeptagonCdata(c->master)->bits;
   else {

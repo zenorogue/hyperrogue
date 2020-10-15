@@ -13,13 +13,6 @@
 namespace hr {
 #if MAXMDIM >= 4
 
-namespace binary {   
-  void build_tmatrix(); 
-  void virtualRebaseSimple(heptagon*& base, transmatrix& at);
-  int celldistance3(heptagon *c1, heptagon *c2);
-  hyperpoint deparabolic3(hyperpoint h);
-  }
-
 /** \brief regular three-dimensional tessellations */
 EX namespace reg3 {
 
@@ -641,10 +634,13 @@ EX namespace reg3 {
       quotient_map = nullptr;
       
       #if CAP_FIELD
+      #if CAP_CRYSTAL
       if(geometry == gSpace344) {
         quotient_map = new hrmap_from_crystal;
         }
-      else if(geometry == gSpace535) {
+      else 
+      #endif
+      if(geometry == gSpace535) {
         quotient_map = new seifert_weber::hrmap_seifert_cover;
         }
       else if(hyperbolic) {
@@ -653,6 +649,7 @@ EX namespace reg3 {
       #endif
       h.zebraval = quotient_map ? quotient_map->allh[0]->zebraval : 0;
       
+      #if CAP_BT
       if(hyperbolic) {
         dynamicval<eGeometry> g(geometry, gBinary3); 
         bt::build_tmatrix();
@@ -667,6 +664,7 @@ EX namespace reg3 {
         binary_map = bt::new_alt_map(alt);
         T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * cspin(0, 2, 1.1249) * xpush(0.07) * Id;
         }
+      #endif
       
       reg_gmatrix[origin] = make_pair(alt, T);
       altmap[alt].emplace_back(origin, T);
@@ -730,12 +728,14 @@ EX namespace reg3 {
         println(hlog, "FAIL");
         exit(3);
         }
+      #if CAP_BT
       if(steps) { 
         dynamicval<eGeometry> g(geometry, gBinary3);
         dynamicval<hrmap*> cm(currentmap, binary_map);
         for(int i=0; i<alt->type; i++)
           verify_neighbors(alt->cmove(i), steps-1, currentmap->iadj(alt, i) * hT);
         }
+      #endif
       }
 
     heptagon *create_step(heptagon *parent, int d) override {
@@ -748,11 +748,13 @@ EX namespace reg3 {
       transmatrix T = p1.second * cgi.adjmoves[d];
       #endif
       transmatrix T1 = T;
+      #if CAP_BT
       if(hyperbolic) {
         dynamicval<eGeometry> g(geometry, gBinary3);
         dynamicval<hrmap*> cm(currentmap, binary_map);
         binary_map->virtualRebase(alt, T);
         }
+      #endif
 
       fixmatrix(T);
       auto hT = tC0(T);
@@ -852,10 +854,12 @@ EX namespace reg3 {
       }
 
     ~hrmap_reg3() {
+      #if CAP_BT
       if(binary_map) {        
         dynamicval<eGeometry> g(geometry, gBinary3);
         delete binary_map;
         }
+      #endif
       if(quotient_map) delete quotient_map;
       clearfrom(origin);
       }
@@ -901,12 +905,14 @@ EX namespace reg3 {
       auto p1 = reg_gmatrix[h1];
       auto p2 = reg_gmatrix[h2];
       transmatrix T = Id;
+      #if CAP_BT
       if(hyperbolic) { 
         dynamicval<eGeometry> g(geometry, gBinary3);
         dynamicval<hrmap*> cm(currentmap, binary_map);
         T = binary_map->relative_matrix(p2.first, p1.first, hint);
         }
-      T = inverse(p1.second) * T * p2.second;
+      #endif
+      T = inverse(p1.second) * T * p2.second;      
       if(elliptic && T[LDIM][LDIM] < 0) T = centralsym * T;
       return T;
       }
@@ -1343,7 +1349,11 @@ EX int celldistance(cell *c1, cell *c2) {
     return clueless_celldistance(c1, c2);
 
   dynamicval<eGeometry> g(geometry, gBinary3);  
+  #if CAP_BT
   return 20 + bt::celldistance3(r->reg_gmatrix[c1->master].first, r->reg_gmatrix[c2->master].first);
+  #else
+  return 20;
+  #endif
   }
 
 EX bool pseudohept(cell *c) {

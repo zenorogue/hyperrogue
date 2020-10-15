@@ -806,6 +806,7 @@ EX namespace gp {
 
     dialog::addBreak(100);
       
+    #if CAP_IRR
     if(irr::supports(geometry)) {
       dialog::addBoolItem(XLAT("irregular"), IRREGULAR, 'i');
       dialog::add_action(dialog::add_confirmation([=] () { 
@@ -817,6 +818,7 @@ EX namespace gp {
         if(!IRREGULAR) irr::visual_creator(); 
         }));
       }
+    #endif
 
     dialog::addBreak(100);
     int style = 0;

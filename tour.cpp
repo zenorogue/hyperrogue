@@ -7,6 +7,13 @@
 
 #include "hyper.h"
 namespace hr { 
+
+#if !CAP_TOUR
+EX namespace tour {
+  EX always_false on;
+EX }
+#endif
+
 #if CAP_TOUR
 
 /** \brief Variables and function related to Guided Tour and other presentations. */

@@ -88,7 +88,9 @@ EX bool reduceOrbPower(eItem it, int cap) {
     return true;
     }
   if(items[it] > cap && timerghost) items[it] = cap;
+  #if CAP_COMPLEX2
   mine::auto_teleport_charges();
+  #endif
   return false;
   }
 
@@ -596,7 +598,9 @@ EX void teleportTo(cell *dest) {
     checkmoveO();
 
   movecost(from, dest, 2);
+  #if CAP_COMPLEX2
   mine::auto_teleport_charges();
+  #endif
   }
 
 EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMonster dashmon IS(moNone)) {

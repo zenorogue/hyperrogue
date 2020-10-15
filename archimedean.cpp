@@ -89,8 +89,6 @@ struct archimedean_tiling {
   };
 #endif
 
-#if CAP_ARCM
-
 #if HDR
 static const int sfPH = 1;
 static const int sfLINE = 2;
@@ -98,6 +96,8 @@ static const int sfCHESS = 4;
 static const int sfTHREE = 8;
 static const int sfSEMILINE = 16;
 #endif
+
+#if CAP_ARCM
 
 EX archimedean_tiling current;
 EX archimedean_tiling fake_current;
@@ -1450,9 +1450,9 @@ EX int valence() {
   return total / isize(current.faces);
   }
  
-#endif
-
 EX map<gp::loc, cdata>& get_cdata() { return ((arcm::hrmap_archimedean*) (currentmap))->eucdata; }
+
+#endif
 
 EX }
 

@@ -886,24 +886,30 @@ EX int shvid(cell *c) {
     }
   else if(GOLDBERG_INV)
     return gp::get_plainshape_id(c);
+  #if CAP_IRR
   else if(IRREGULAR)
     return irr::cellindex[c];
+  #endif
+  #if CAP_ARCM
   else if(arcm::in()) {
     auto& ac = arcm::current;
     int id = arcm::id_of(c->master);
     if(ac.regular && id>=2 && id < 2*ac.N) id &= 1;    
     return id;
     }
+  #endif
   else if(arb::in())
     return arb::id_of(c->master);
   else if(geosupport_football() == 2)
     return pseudohept(c);
+  #if CAP_BT
   else if(geometry == gBinaryTiling)
     return c->type-6;
   else if(kite::in())
     return kite::getshape(c->master);
   else if(geometry == gBinary4 || geometry == gTernary)
     return c->master->zebraval;
+  #endif
   else if(inforder::mixed()) {
     int t = c->type;
     static vector<bool> computed;

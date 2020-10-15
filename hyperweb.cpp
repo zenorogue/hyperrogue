@@ -11,7 +11,7 @@
 #define SCU
 #endif
 
-#if CAP_ROGUEVIZ
+#if CAP_ROGUEVIZ || defined(MAXMDIM)
 #define MAXMDIM 4
 #else
 #define MAXMDIM 3

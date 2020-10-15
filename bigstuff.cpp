@@ -21,6 +21,7 @@ EX int newRoundTableRadius() {
   return 28 + 2 * items[itHolyGrail];
   }
 
+#if CAP_COMPLEX2
 EX int getAnthraxData(cell *c, bool b) {
   int d = celldistAlt(c);
   int rad = 28 + 3 * camelot::anthraxBonus;
@@ -36,10 +37,13 @@ EX int getAnthraxData(cell *c, bool b) {
   if(b) return rad;
   return d;
   }
+#endif
 
 EX int roundTableRadius(cell *c) {
   if(eubinary) return 28;
+  #if CAP_COMPLEX2
   if(tactic::on) return getAnthraxData(c, true);
+  #endif
   if(!c->master->alt) return 28;
   return c->master->alt->alt->emeraldval & GRAIL_RADIUS_MASK;
   }
@@ -55,7 +59,9 @@ EX int celldistAltRelative(cell *c) {
   if(sphere || quotient) {
     return celldist(c) - 3;
     }
+  #if CAP_COMPLEX2
   if(tactic::on) return getAnthraxData(c, false);
+  #endif
   return celldistAlt(c) - roundTableRadius(c);
   }
 
@@ -1805,12 +1811,14 @@ EX void moreBigStuff(cell *c) {
           if(c->master->emeraldval % 2)
             c->wall = waColumn;
           }
+        #if CAP_BT
         else if(geometry == gHoroTris || geometry == gHoroRec) {
           if(c->c.spin(bt::updir()) != 0) c->wall = waColumn;
           }
         else if(geometry == gKiteDart3) {
           if(kite::getshape(c->master) == kite::pKite) c->wall = waColumn;
           }
+        #endif
         else if(in_s2xe()) {
           auto d = hybrid::get_where(c);
           if(!PIU(pseudohept(d.first))) c->wall = waColumn;

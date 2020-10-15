@@ -9,7 +9,6 @@
 namespace hr {
 
 EX namespace crystal {
-#if CAP_CRYSTAL
 
 #if HDR
 static const int MAXDIM = 7;
@@ -33,6 +32,8 @@ struct ldcoord : public array<ld, MAXDIM> {
 
 static const ldcoord ldc0 = {};
 #endif
+
+#if CAP_CRYSTAL
 
 /** Crystal can be bitruncated either by changing variation to bitruncated.
  *  In case of the 4D Crystal, the standard HyperRogue bitruncation becomes

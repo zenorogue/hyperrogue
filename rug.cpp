@@ -1850,11 +1850,15 @@ EX namespace rug {
     EX bool rugged = false;
     EX bool renderonce = false;
     EX bool rendernogl = true;
+    EX bool mouse_control_rug = false;
     EX int texturesize = 512;
     EX ld scale = 1.0f;
     EX bool rug_control() { return false; }
     EX bool in_crystal() { return false; }
     EX void reset_view() { }
+#if HDR
+  struct using_rugview {};
+#endif
 EX }
 
 #endif

@@ -194,7 +194,9 @@ EX void initgame() {
   cwt.at = currentmap->gamestart(); cwt.spin = 0; cwt.mirrored = false;
   cwt.at->land = firstland;
 
+  #if CAP_COMPLEX2
   if(firstland == laBrownian) brownian::init(cwt.at);
+  #endif
   
   chaosAchieved = false;
 
@@ -214,7 +216,9 @@ EX void initgame() {
     }
 
   if((tactic::on || yendor::on || peace::on) && isCyclic(firstland)) {
+    #if CAP_COMPLEX2
     camelot::anthraxBonus = items[itHolyGrail];
+    #endif
     cwt.at->move(0)->land = firstland;
     if(firstland == laWhirlpool) cwt.at->move(0)->wall = waSea;
     
@@ -366,7 +370,9 @@ EX void initgame() {
 #if CAP_INV
     if(inv::on) inv::init();
 #endif
+#if CAP_COMPLEX2
     mine::auto_teleport_charges();
+#endif
     if(!use_special_land) {
       if(firstland != (princess::challenge ? laPalace : laIce)) cheater++;
       }
@@ -1265,7 +1271,9 @@ EX void stop_game() {
   princess::reviveAt = 0;
   princess::forceVizier = false;
   princess::forceMouse = false;
+  #if CAP_COMPLEX2
   camelot::knighted = 0;
+  #endif
   // items[itGreenStone] = 100;
   clearMemory();
   game_active = false;
@@ -1495,7 +1503,9 @@ EX void start_game() {
   ignored_memory_warning = false;
   check_cgi();
   cgi.require_basics();
+  #if CAP_ARCM
   arcm::current.compute_geometry();
+  #endif
   initcells();
   expansion.reset();
 

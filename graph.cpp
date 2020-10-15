@@ -1020,7 +1020,11 @@ EX void drawTerraWarrior(const shiftmatrix& V, int t, int hp, double footphase) 
 
 EX void drawPlayer(eMonster m, cell *where, const shiftmatrix& V, color_t col, double footphase, bool stop IS(false)) {
   charstyle& cs = getcs();
+  #if CAP_COMPLEX2
   auto& knighted = camelot::knighted;
+  #else
+  const bool knighted = false;
+  #endif
 
   if(mapeditor::drawplayer && !mapeditor::drawUserShape(V, mapeditor::sgPlayer, cs.charid, cs.skincolor, where)) {
   
@@ -1264,8 +1268,10 @@ void drawMimic(eMonster m, cell *where, const shiftmatrix& V, color_t col, doubl
     else if(!where || shmup::curtime >= shmup::getPlayer()->nextshot)
       queuepoly(VBODY * VBS, cgi.shPKnife, darkena(col, 0, 0XC0));
 
+    #if CAP_COMPLEX2
     if(camelot::knighted)
       queuepoly(VBODY3 * VBS, cgi.shKnightCloak, darkena(col, 1, 0xC0));
+    #endif
 
     queuepoly(VHEAD1, (cs.charid&1) ? cgi.shFemaleHair : cgi.shPHead,  darkena(col, 1, 0XC0));
     queuepoly(VHEAD, cgi.shPFace,  darkena(col, 0, 0XC0));
@@ -3410,7 +3416,11 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const shiftmatrix& V, color_t
 #endif
 
 bool openorsafe(cell *c) {
+  #if CAP_COMPLEX2
   return c->wall == waMineOpen || mine::marked_safe(c);
+  #else
+  return false;
+  #endif
   }
 
 #define Dark(x) darkena(x,0,0xFF)
@@ -3788,7 +3798,9 @@ EX void gridline(const shiftmatrix& V, const hyperpoint h1, const hyperpoint h2,
 
 EX int wall_offset(cell *c) {
   if(hybri || WDIM == 2) return hybrid::wall_offset(c);
+  #if CAP_BT
   if(kite::in() && kite::getshape(c->master) == kite::pKite) return 10;
+  #endif
   return 0;
   }
 

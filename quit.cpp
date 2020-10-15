@@ -321,7 +321,11 @@ EX void showMission() {
     );
   keyhandler = handleKeyQuit;
   
+  #if CAP_COMPLEX2
   bool sweeper = mine::in_minesweeper();
+  #else
+  const bool sweeper = false;
+  #endif
 
   if(!peace::on && !racing::on && !sweeper)
     dialog::addInfo(XLAT("Your score: %1", its(gold())));
@@ -335,6 +339,7 @@ EX void showMission() {
     dialog::addInfo(XLAT("Orbs of Yendor found: %1", its(items[itOrbYendor])), iinf[itOrbYendor].color);
     dialog::addInfo(XLAT("CONGRATULATIONS!"), iinf[itOrbYendor].color);
     }
+  #if CAP_COMPLEX2
   else if(mine::in_minesweeper()) {
     int to_uncover = kills[moBomberbird];
     if(to_uncover) {
@@ -346,7 +351,8 @@ EX void showMission() {
       dialog::addInfo(XLAT("You won in %1", getgametime_s(mine::victory_time)));      
       }
     }
-  else {
+  #endif
+  else {  
     if(0)
       ;
 #if CAP_TOUR
