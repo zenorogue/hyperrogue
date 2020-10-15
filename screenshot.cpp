@@ -1589,14 +1589,14 @@ EX void show() {
   animator(XLATN("Ocean"), env_ocean, 'o');
   animator(XLATN("Volcanic Wasteland"), env_volcano, 'v');
   if(shmup::on) dialog::addBoolItem_action(XLAT("shmup action"), env_shmup, 'T');
-#if CAP_FILE && CAP_SHOT
+  #if CAP_FILES && CAP_SHOT
   if(cheater) {
     dialog::addSelItem(XLAT("monster turns"), its(numturns), 'n');
     dialog::add_action([] {      
       dialog::editNumber(numturns, 0, 100, 1, 0, XLAT("monster turns"), XLAT("Number of turns to pass. Useful when simulating butterflies or cellular automata."));
       });
     }
-#endif
+  #endif
 
   #if CAP_RUG
   if(rug::rugged) {
