@@ -85,7 +85,9 @@ renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
 
   # if CAP_GL
   if(gl) {
+    GLERR("renderbuffer init");
     resetbuffer rb;
+    GLERR("after resetbuffer");
     tx = next_p2(x);
     ty = next_p2(y);
   
@@ -119,7 +121,7 @@ renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, tx, ty);
     bool has_depth = true;
     if(glGetError() != GL_NO_ERROR) {
-      printf("Could not create: GL_DEPTH24_STENCIL8");
+      println(hlog, "Could not create: GL_DEPTH24_STENCIL8");
       glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, tx, ty);
       has_depth = false;
       }
@@ -243,7 +245,9 @@ resetbuffer::resetbuffer() {
   #if CAP_GL
   drawFboId = 0, readFboId = 0;
   glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFboId);
+  GLERR("getInteger a");
   glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFboId);  
+  GLERR("getInteger b");
   #endif
   #if CAP_SDL
   sreset = s;
