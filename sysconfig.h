@@ -582,7 +582,7 @@ union SDL_Event;
 #endif
 
 #ifndef CAP_RAY
-#define CAP_RAY (MAXMDIM >= 4 && !ISWEB && !ISMOBILE && CAP_GL)
+#define CAP_RAY (MAXMDIM >= 4 && CAP_GL)
 #endif
 
 #ifndef CAP_MEMORY_RESERVE

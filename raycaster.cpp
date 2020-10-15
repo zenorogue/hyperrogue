@@ -27,7 +27,11 @@ EX ld exp_start = 1;
 EX ld exp_decay_exp = 4;
 EX ld exp_decay_poly = 10;
 
+#if GLES_ONLY
+const int gms_limit = 16; /* enough for Bringris -- need to do better */
+#else
 const int gms_limit = 110;
+#endif
 
 EX ld maxstep_sol = .05;
 EX ld maxstep_nil = .1;
@@ -170,6 +174,8 @@ int deg, irays;
 
 #ifdef GLES_ONLY
 void add(string& tgt, string type, string name, int min_index, int max_index) {
+  if(min_index >= max_index) ;
+  else
   if(min_index + 1 == max_index)
     tgt += "{ return " + name + "[" + its(min_index) + "]; }";
   else {
@@ -192,6 +198,11 @@ string build_getter(string type, string name, int index) {
 #else
 #define GET(array, index) array "[" index "]"
 #endif
+
+void replace_str(string& s, string a, string b) {
+  while(s.find(a) != string::npos)
+    s.replace(s.find(a), isize(a), b);
+  }
 
 EX hookset<void(string&, string&)> hooks_rayshader;
 EX hookset<bool(shared_ptr<raycaster>)> hooks_rayset;
@@ -216,6 +227,7 @@ void enable_raycaster() {
     bool use_reflect = reflect_val && !nil && !levellines;
     
     bool bi = arcm::in() || kite::in() || arb::in() || !PURE;
+    bi = false;
 
     string vsh = 
       "attribute mediump vec4 aPosition;\n"
@@ -456,7 +468,7 @@ void enable_raycaster() {
       
       fmain += "for(int i="+its(flat1)+"; i<"+(prod ? "sides-2" : WDIM == 2 ? "sides" : its(flat2))+"; i++) {\n";
       
-      fmain += "int woi = walloffset+i;\n";
+      // fmain += "int woi = walloffset+i;\n";
       
       if(in_h2xe()) fmain +=
           "    mediump float v = ((position - uM[woi] * position)[2] / (uM[woi] * tangent - tangent)[2]);\n"
@@ -497,6 +509,8 @@ void enable_raycaster() {
           "    if(d < 0.) continue;\n"
           "    mediump vec4 next_position = position + d * tangent;\n"
           "    if(dot(next_position, tangent) < dot(uM[woi]*next_position, uM[woi]*tangent)) continue;\n";
+      
+      replace_str(fmain, "[woi]", "[walloffset+i]");
   
       fmain += 
           "  if(d < dist) { dist = d; which = i; }\n"
@@ -1197,12 +1211,20 @@ void bind_array(vector<array<float, 4>>& v, GLint t, GLuint& tx, int id) {
   if(tx == 0) glGenTextures(1, &tx);
 
   glActiveTexture(GL_TEXTURE0 + id);
+  GLERR("activeTexture");
+
   glBindTexture(GL_TEXTURE_2D, tx);
+  GLERR("bindTexture");
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  GLERR("texParameteri");
   
+  #ifdef GLES_ONLY
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, length, isize(v)/length, 0, GL_RGBA, GL_FLOAT, &v[0]);  
+  #else
   glTexImage2D(GL_TEXTURE_2D, 0, 0x8814 /* GL_RGBA32F */, length, isize(v)/length, 0, GL_RGBA, GL_FLOAT, &v[0]);  
+  #endif
   GLERR("bind_array");
   }
 
@@ -1565,7 +1587,13 @@ EX void cast() {
   
   }
 
+  #if CAP_VERTEXBUFFER
+  glhr::bindbuffer_vertex(screen);
+  glVertexAttribPointer(hr::aPosition, 4, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
+  #else
   glVertexAttribPointer(hr::aPosition, 4, GL_FLOAT, GL_FALSE, sizeof(glvertex), &screen[0]);
+  #endif
+  
   if(ray::comparison_mode)
     glhr::set_depthtest(false);
   else {
@@ -1577,6 +1605,7 @@ EX void cast() {
   glActiveTexture(GL_TEXTURE0 + 0);
   glBindTexture(GL_TEXTURE_2D, floor_textures->renderedTexture);
 
+  GLERR("bind");
   glDrawArrays(GL_TRIANGLES, 0, 6);
   GLERR("finish");
   }

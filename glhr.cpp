@@ -694,6 +694,10 @@ template<class T> void bindbuffer(T& v) {
 #define PTR(attrib, q, field) \
   glVertexAttribPointer(attrib, q, GL_FLOAT, GL_FALSE, sizeof(v[0]), (void*) ((char*) &v[0].field - (char*) &v[0]));
 
+EX void bindbuffer_vertex(vector<glvertex>& v) {
+  bindbuffer(v);
+  }
+
 #endif
 
 EX void vertices(const vector<glvertex>& v, int vshift IS(0)) {
