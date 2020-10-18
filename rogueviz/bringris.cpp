@@ -656,7 +656,7 @@ void set_tview(transmatrix T) {
   optimizeview();
   ncenter = centerover;
   // tView = View;
-  if(bgeom == 1)
+  if(bgeom == 4)
     tView = spin(72*degree*at.spin);
   else
     tView = spin(90*degree*at.spin);
