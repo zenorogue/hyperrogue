@@ -1041,7 +1041,10 @@ EX string cgi_string() {
   
   if(bt::in() || GDIM == 3) V("WQ", its(vid.texture_step));
   
-  if(hybri) V("U", its(int(hybrid::underlying)));
+  if(hybri) {
+    V("U", PIU(cgi_string()));
+    // its(int(hybrid::underlying)));
+    }
   
   if(prod) V("PL", fts(vid.plevel_factor));
 
