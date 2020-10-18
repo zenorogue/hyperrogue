@@ -1212,7 +1212,7 @@ void create_game() {
   playermoved = false;
   ray::want_use = 2;
   ray::exp_decay_poly = 200;
-  ray::max_iter() = 200;
+  ray::max_iter_current() = 200;
   mapeditor::drawplayer = false;
   // sightranges[geometry] = 1;
   
