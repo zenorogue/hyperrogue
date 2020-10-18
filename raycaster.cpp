@@ -43,7 +43,8 @@ static const int NO_LIMIT = 999999;
 
 EX ld hard_limit = NO_LIMIT;
 
-EX int max_iter_sol = 600, max_iter_iso = 60;
+EX int max_iter_sol = 600;
+EX int max_iter_iso = 60;
 
 EX int max_cells = 2048;
 EX bool rays_generate = true;
