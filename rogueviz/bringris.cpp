@@ -3,7 +3,7 @@
 
 #ifdef BRINGRIS
 
-#define CUSTOM_CAPTION "Bringris"
+#define CUSTOM_CAPTION "Bringris 1.1"
 
 #define MAXMDIM 4
 
@@ -44,6 +44,111 @@ namespace hr {
 
 namespace bringris {
 
+struct bgeometry {
+  string name;
+  string cap;
+  reaction_t create;
+  };
+
+int bgeom = 0;
+
+int max_piece;
+bool rotate_allowed = false;
+
+vector<bgeometry> bgeoms = {
+  {"Bring surface", "the original Bringris geometry", [] {
+    using namespace fieldpattern;
+    current_extra = 2;
+    auto& gxcur = fgeomextras[current_extra];
+    while(isize(gxcur.primes) < 1) nextPrime(gxcur);
+    fgeomextras[current_extra].current_prime_id = 0;
+    enableFieldChange();
+    set_geometry(gFieldQuotient);
+    
+    gp::param = gp::loc(1, 1);
+    set_variation(eVariation::unrectified);
+
+    set_geometry(gProduct);
+    max_piece = 4;
+    rotate_allowed = false;
+    }},
+
+  {"torus", "Euclidean level geometry", [] {
+    auto& T0 = euc::eu_input.user_axes;
+    T0[0][0] = 5;
+    T0[0][1] = 0;
+    T0[1][0] = 0;
+    T0[1][1] = 5;
+    euc::eu_input.twisted = 0;
+    set_geometry(gEuclidSquare);
+    set_variation(eVariation::pure);
+    set_geometry(gProduct);
+    max_piece = 4;
+    rotate_allowed = true;
+    }},
+
+  {"Cube", "spherical level geometry", [] {
+    set_geometry(gSmallSphere);
+    set_variation(eVariation::pure);
+    set_geometry(gProduct);
+    max_piece = 3;
+    rotate_allowed = false;
+    }},
+
+  {"Klein bottle", "non-orientable manifold", [] {
+    auto& T0 = euc::eu_input.user_axes;
+    T0[0][0] = 5;
+    T0[0][1] = 0;
+    T0[1][0] = 0;
+    T0[1][1] = 5;
+    euc::eu_input.twisted = 8;
+    set_geometry(gEuclidSquare);
+    set_variation(eVariation::pure);
+    set_geometry(gProduct);
+    max_piece = 4;
+    rotate_allowed = true;
+    }},
+
+  {"pentagons", "different tiles on the Bring surface", [] {
+    using namespace fieldpattern;
+    current_extra = 2;
+    auto& gxcur = fgeomextras[current_extra];
+    while(isize(gxcur.primes) < 1) nextPrime(gxcur);
+    fgeomextras[current_extra].current_prime_id = 0;
+    enableFieldChange();
+    set_geometry(gFieldQuotient);
+    set_variation(eVariation::pure);
+    set_geometry(gProduct);
+    max_piece = 4;
+    rotate_allowed = false;
+    }},
+
+  {"double cube", "six squares around a vertex", [] {
+    using namespace fieldpattern;
+    current_extra = 3;
+    auto& gxcur = fgeomextras[current_extra];
+    while(isize(gxcur.primes) < 1) nextPrime(gxcur);
+    fgeomextras[current_extra].current_prime_id = 0;
+    enableFieldChange();
+    set_geometry(gFieldQuotient);
+    
+    gp::param = gp::loc(1, 1);
+    set_variation(eVariation::unrectified);
+
+    set_geometry(gProduct);
+    max_piece = 3;
+    rotate_allowed = true;
+    }},
+
+  {"Nil geometry", "are you sure you want this?", [] {
+    nilv::nilperiod = make_array(5, 0, 5);
+    // nilv::set_flags();
+    set_geometry(gNil);
+    max_piece = 4;
+    rotate_allowed = false;
+    }},
+  };
+  
 using code_t = vector<pair<int, int>>;
 
 struct piecedata {
@@ -56,9 +161,47 @@ struct piecedata {
 
 vector<piecedata> piecelist;
 
+map<set<cell*>, int> seen_blocks;
+
 bool listed(const vector<cellwalker>& v, cell* c) {
   for(auto cw: v) if(cw.at == c) return true;
   return false;
+  }
+
+cell *get_at(cell *lev, int z) {
+  if(prod)
+    return hybrid::get_at(lev, z);
+  else {
+    // auto co = nilv::get_coord(lev->master);
+    // co[2] += z * co[0];
+    // co[1] = z;
+    // return nilv::get_heptagon_at(co)->c7;
+    while(z<0) z++, lev=lev->move(1);
+    while(z>0) z--, lev=lev->move(4);
+    return lev;
+    }
+  }
+
+pair<cell*, int> get_where(cell *what) {
+  if(prod)
+    return hybrid::get_where(what);
+  else {
+    auto co = nilv::get_coord(what->master);
+    int z = co[1];
+    while(co[1]>0) what = what->move(1), co[1]--;
+    while(co[1]<0) what = what->move(4), co[1]++;
+    return {what, z};
+    // co[2] -= co[1] * co[0];
+    // co[1] = 0;
+    // cell *c = nilv::get_heptagon_at(co)->c7;
+    // return {c, z};
+    }
+  }
+
+set<cell*> as_set(const vector<cellwalker>& shape) {
+  set<cell*> res;
+  for(auto sh: shape) res.insert(sh.at);
+  return res;
   }
 
 bool same(const vector<cellwalker>& shape, const vector<cellwalker>& shape2) {
@@ -70,7 +213,10 @@ bool same(const vector<cellwalker>& shape, const vector<cellwalker>& shape2) {
   }
 
 cellwalker flatspin(cellwalker cw, int i) {
-  cw.spin = gmod(cw.spin + i, cw.at->type - (hybri ? 2 : 0));
+  if(nil)
+    cw.spin = i;
+  else
+    cw.spin = gmod(cw.spin + (cw.mirrored ? -i : i), cw.at->type - (hybri ? 2 : 0));
   return cw;
   }
 
@@ -113,12 +259,19 @@ int penalty(const vector<cellwalker>& shape, const code_t& code) {
           dists[c2.at] = min(dists[c2.at], dists[c1.at] + 1);
   for(auto d: dists) p += d.second * 10;
   for(auto c: code) if(c.second == 0 || c.second == 2) p++;
+  if(nil)
+    for(auto s: shape) 
+      if(get_where(s.at).second > get_where(shape[0].at).second)
+        p += 10000;
   return p;
   }
 
-bool builds(const vector<cellwalker>& shape, const code_t& code, int sym = 0) {
-  for(auto sh: shape) for(int i=0; i<sh.at->type; i++) {
+bool builds(const vector<cellwalker>& shape, const code_t& code, int sym = 0, int eliminate = -1) {
+  if(isize(shape) != isize(code)+1) return false;
+  int ori = nil ? 1 : prod ? shape[0].at->type-2 : shape[0].at->type;
+  for(auto sh: shape) for(int i=0; i<ori; i++) {
     vector<cellwalker> shape2 = build_from(code, cellwalker(sh.at, i), sym);
+    if(eliminate != -1) seen_blocks.emplace(as_set(shape2), eliminate);
     if(same(shape, shape2)) 
       return true;
     }
@@ -128,12 +281,39 @@ bool builds(const vector<cellwalker>& shape, const code_t& code, int sym = 0) {
 void generate_shapes_rec(vector<cellwalker>& sofar, code_t& code, int cnt) {
   if(isize(sofar) == cnt) {
     int p = penalty(sofar, code);
-    for(auto& pc: piecelist) 
-      if(builds(sofar, pc.code)) {
+    auto ass = as_set(sofar);
+    
+    if(seen_blocks.count(ass)) {
+      auto& pc = piecelist[seen_blocks[ass]];
+      if(p < pc.penalty) pc.penalty = p, pc.code = code;
+      pc.multi++;
+      return;
+      }
+
+    int id = 0;
+    for(auto& pc: piecelist) {
+      if(builds(sofar, pc.code, 0, id)) {
         if(p < pc.penalty) pc.penalty = p, pc.code = code;
         pc.multi++;
         return;
         }
+      id++;
+      }
+        
+/*    auto inv = build_from(code, sofar[0], 3);
+    
+    
+    for(auto ish: inv) {
+      vector<int> sid;
+      for(int k=0; k<5; k++) {
+        vector<cellwalker> shape2 = build_from(code, flatspin(ish, k), 0);
+        auto ass2 = as_set(shape2);
+        sid.push_back(ass2.count(sofar[0].at));
+        seen_blocks.insert(ass2);
+        }    
+      println(hlog, "sid = ", sid);
+      } */
+    
     int syms = 0;
     for(int i: {0,1,2,3}) if(builds(sofar, code, i)) syms++;
     bool vertical = true;
@@ -228,7 +408,7 @@ color_t get_hipso(ld y) {
 void draw_shape() {
   auto shape = build_from(piecelist[shape_id].code, at);
   for(auto c: shape) {
-    int y = -hybrid::get_where(c.at).second;
+    int y = -get_where(c.at).second;
     c.at->wall = waWaxWall, c.at->landparam = get_hipso(y);
     }
   }
@@ -239,7 +419,7 @@ void remove_shape() {
     c.at->wall = waNone;
   }
 
-bool shape_conflict(cellwalker cw) {
+bool shape_conflict(cellwalker cw) {  
   auto shape = build_from(piecelist[shape_id].code, cw);
   for(auto c: shape)
     if(c.at->wall)
@@ -278,7 +458,7 @@ int choose_piece() {
   }
 
 void new_piece() {
-  at.at = hybrid::get_at(hybrid::get_where(at.at).first, -well_size - 1);  
+  at.at = get_at(get_where(at.at).first, -well_size - 1);  
   shape_id = next_shape_id;
   next_shape_id = choose_piece();
   if(shape_conflict(at)) {
@@ -304,7 +484,7 @@ void find_lines() {
   for(int z=1; z<=well_size; z++) {
     int ct = 0;
     for(auto lev: level) {
-      cell *c = hybrid::get_at(lev, -z);
+      cell *c = get_at(lev, -z);
       ct += (c->wall ? 1 : 0);
       }
     by_level.push_back(ct);
@@ -317,16 +497,16 @@ void find_lines() {
     for(int z=1; z<=well_size; z++) if(by_level[z-1] >= isize(level)) {
       points++;
       for(auto lev: level) {
-        cell *c = hybrid::get_at(lev, -z);
+        cell *c = get_at(lev, -z);
         to_disappear.insert(c);
         }
       }
     }
   else {
-    int lines_found = 0;
+    // int lines_found = 0;
     for(int z=1; z<=well_size; z++) {
       for(auto lev: level) for(int d=0; d<lev->type; d++) {
-        cellwalker cw(hybrid::get_at(lev, -z), d);
+        cellwalker cw(get_at(lev, -z), d);
         cellwalker cw0 = cw;
         bool filled = true;
         do {
@@ -336,7 +516,7 @@ void find_lines() {
           }
         while(cw != cw0);
         if(filled) {
-          lines_found = true;
+          // lines_found = true;
           do {
             to_disappear.insert(cw.at);
             cw += wstep;
@@ -361,16 +541,16 @@ void disappear_lines() {
   for(auto lev: level) {
     int nz = 1;
     for(int z=1; z<=well_size; z++) {
-      cell *c1 = hybrid::get_at(lev, -z);
+      cell *c1 = get_at(lev, -z);
       if(!to_disappear.count(c1)) {
-        cell *c0 = hybrid::get_at(lev, -nz);
+        cell *c0 = get_at(lev, -nz);
         c0->wall = c1->wall;
         c0->landparam = get_hipso(nz);
         nz++;
         }
       }
     while(nz < well_size + camera_level) {
-      cell *c0 = hybrid::get_at(lev, -nz);
+      cell *c0 = get_at(lev, -nz);
       c0->wall = waNone;
       nz++;
       }
@@ -390,13 +570,19 @@ void fallen() {
   cubes += isize(piecelist[shape_id].code)+1;
   state = tsBetween;
   playSound(cwt.at, "closegate");
-  score += 20000000. / (current_move_time_limit() * 3 + move_started - ticks);
+  score += 20000000. / (current_move_time_limit() * 3 + ticks - move_started);
   }
+
+int down_dir() { return nil ? 4 : cwt.at->type-1; }
+
+int last_adjust, when_t;
+transmatrix tView, pView;
+cell* ncenter;
 
 void drop() {
   remove_shape();
   cellwalker fall = at;
-  fall.at = fall.at->cmove(fall.at->type-1);
+  fall.at = fall.at->cmove(down_dir());
   if(shape_conflict(fall))
     fallen();
   else {
@@ -404,28 +590,30 @@ void drop() {
     draw_shape();
     }
   move_at = ticks + current_move_time_limit();
+  if(nil) {
+    pView = pView * currentmap->adj(cwt.at, 4);
+    when_t = ticks + turn_animation;
+    }
   }
 
 void fulldrop() {
   remove_shape();
   cellwalker fall = at;
   int no = 0;
+  auto last = fall;
   while(true) {
-    fall.at = fall.at->cmove(fall.at->type-1);
+    last = fall;
+    fall.at = fall.at->cmove(down_dir());
     if(shape_conflict(fall)) break;
     no++;
     }
   playSound(cwt.at, "hit-crush2");
   // println(hlog, "dropped by ", no);
-  fall.at = fall.at->cmove(fall.at->type-2);
+  fall = last;
   at = fall;
   draw_shape();
   if(!no) fallen();
   }
-
-int last_adjust, when_t;
-transmatrix tView, pView;
-cell* ncenter;
 
 void verify_matrix(transmatrix T) {
   vector<ld> ver;
@@ -435,6 +623,26 @@ void verify_matrix(transmatrix T) {
     ver.push_back(kz(a));
     }
   println(hlog, ver);
+  }
+
+ld move_dist;
+
+void set_view() {
+  move_dist = hdist0(currentmap->adj(cwt.at, 0) * C0);
+  
+  if(in_h2xe() && PURE) {
+    ld dist = PIU(hdist0(get_corner_position(currentmap->gamestart(), 0)));
+    dist -= 1e-4;
+    move_dist = PIU(hdist(get_corner_position(currentmap->gamestart(), 0), get_corner_position(currentmap->gamestart(), 1)));
+    tView = xpush(-dist) * tView;
+    tView = spin(135*degree) * tView;
+    }  
+  if(in_h2xe() && UNRECTIFIED)
+    tView = spin(135*degree) * tView;
+  if(in_s2xe())
+    tView = spin(90*degree) * tView;
+  if(in_e2xe())
+    tView = spin(90*degree) * tView;
   }
 
 void set_tview(transmatrix T) {
@@ -447,8 +655,15 @@ void set_tview(transmatrix T) {
   centerover = ncenter;
   optimizeview();
   ncenter = centerover;
-  tView = View;
-  tView = spin(135*degree - 90*degree*-(at.spin+facing_mod));
+  // tView = View;
+  if(bgeom == 1)
+    tView = spin(72*degree*at.spin);
+  else
+    tView = spin(90*degree*at.spin);
+  if(at.mirrored)
+    tView = MirrorY * tView;
+  // tView = spin(90*degree*at.spin);
+  set_view();  
 
   pView = rel * tView;
   when_t = ticks + turn_animation;
@@ -459,50 +674,57 @@ void rotate_block(int d) {
   cellwalker at1 = flatspin(at, d);
   if(!shape_conflict(at1)) {
     at = at1;
-    facing_mod -= (currentmap->gamestart()->type & 1 ? 2 : 1)*d;
-    // set_tview(spin(d*72*degree));
+    set_tview(spin(d*90*degree));
     }
+  else playSound(cwt.at, "hit-crush3");
   draw_shape();
   }    
 
-void shift_block(int k) {
+int nilmap(int dir) {
+  int nm[4] = {3, 2, 0, 5};
+  return nm[dir];
+  }
+
+void shift_block(int dir) {
   int t = currentmap->gamestart()->type;
   if(prod) t -= 2;
-  if(t&1) {
-    k = gmod(k+facing_mod, 10);
-    int dir = k / 2;
-    int kspin = (k&1?3:2) - dir;
-    remove_shape();
-    cellwalker at1 = flatspin(flatspin(at, dir) + wstep, kspin);
-    ld angle = (dir*2-facing_mod) * 36 * degree;
-    
-    if(!shape_conflict(at1)) {
-      at = at1;
-      set_tview(spin(-angle) * ypush(-cgi.tessf) * spin(angle));
-      facing_mod += (k&1?-1:1);
-      }
-    draw_shape();
+
+  remove_shape();
+  
+  cellwalker at1;
+  
+  if(nil) {
+    at1.at = at.at->cmove(nilmap(dir));
+    }
+  else if(t&1) {
+    if(dir == 3)
+      at1 = flatspin(flatspin(at, 4) + wstep, 3);
+    if(dir == 1)
+      at1 = flatspin(flatspin(at, 2) + wstep, 1);
+    if(dir == 2)
+      at1 = flatspin(flatspin(at, 3) + wstep, 4);
+    if(dir == 0)
+      at1 = flatspin(flatspin(at, 1) + wstep, 2);
     }
   else {
-    k = gmod(k+facing_mod, t);
-    int dir = k;
-    int kspin = (t/2) - dir;
-    remove_shape();
-    
-    cellwalker at1 = flatspin(at, dir);
-    ld dist = hdist0(currentmap->adj(at1.at, at1.spin) * C0);
-    
+    int kspin = (t/2) - dir;     
+    at1 = flatspin(at, dir);  
     at1 = flatspin(at1 + wstep, kspin);
-    ld angle = (dir-facing_mod) * 90 * degree;
-    
-    if(!shape_conflict(at1)) {
-      // playSound(cwt.at, "hit-crush1");
-      at = at1;
-      set_tview(spin(-angle) * ypush(-dist) * spin(angle));
-      }
-    else playSound(cwt.at, "hit-crush3");
-    draw_shape();
     }
+
+  ld angle = dir * 90 * degree;
+  
+  if(!shape_conflict(at1)) {
+    // playSound(cwt.at, "hit-crush1");
+    at = at1;
+    if(nil) {
+      pView = pView * currentmap->adj(cwt.at, nilmap(dir));
+      when_t = ticks + turn_animation;
+      }
+    else
+      set_tview(spin(-angle) * ypush(-move_dist) * spin(angle));
+    }
+  else playSound(cwt.at, "hit-crush3");
   }
 
 int camera_level;
@@ -538,12 +760,28 @@ transmatrix smooth;
 
 void draw_wirecube_at(const transmatrix& smoo, cell *c, int zlev, color_t col) {
 
-  auto where_c = hybrid::get_where(c);
+  if(nil) {
+    auto lev = inverse_shift(gmatrix[at.at], gmatrix[c]);
+    for(const shiftmatrix& V: current_display->all_drawn_copies[c])
+      for(int i=0; i<c->type; i++) {
+        queuepolyat(V * inverse(lev) * smoo * lev, cgi.shWireframe3D[i], 0, PPR::SUPERLINE).outline = col;
+        // queuepolyat(V * smoo, cgi.shWireframe3D[i], 0, PPR::SUPERLINE).outline = col;
+        }
+    return;
+    }
+
+  auto where_c = get_where(c);
   
-  auto c_camera = hybrid::get_at(where_c.first, -camera_level);
+  auto c_camera = get_at(where_c.first, -camera_level);
   
   for(const shiftmatrix& V: current_display->all_drawn_copies[c_camera]) {
-    shiftmatrix VA = shiftless(smoo * V.T, cgi.plevel * (where_c.second - zlev));
+    shiftmatrix VA;
+    if(nil)
+      VA = V;
+    else if(in_h2xe())
+      VA = shiftless(smoo * V.T, cgi.plevel * (where_c.second - zlev));
+    else
+      VA = shiftless(smoo * V.T * zpush(cgi.plevel * (where_c.second - zlev)));
     for(int i=0; i<c->type; i++)
       queuepolyat(VA, cgi.shWireframe3D[i], 0, PPR::SUPERLINE).outline = col;
     }
@@ -554,15 +792,17 @@ void draw_piece(int zlev, int id) {
   initquickqueue();
   auto shape = build_from(piecelist[id].code, at);
 
-  auto where_at = hybrid::get_where(at.at);
+  auto where_at = get_where(at.at);
   
   vid.linewidth *= 3;
 
   for(auto c: shape) {    
-    auto where_c = hybrid::get_where(c.at);      
+    auto where_c = get_where(c.at);      
     color_t levels[4] = {color_t(0xFFFFFFFFF), color_t(0xFFFF00FF), color_t(0xFF8000FF), color_t(0xFF0000FF)};      
     draw_wirecube_at(smooth, c.at, zlev, levels[where_at.second-where_c.second]);
-    }
+    }  
+  
+  // draw_wirecube_at(smooth, at.cpeek(), zlev, 0xFF00FFFF);
 
   vid.linewidth /= 3;
 
@@ -578,7 +818,7 @@ void draw_holes(int zlev) {
   for(auto lev: level) {
     bool covered = false;
     for(int z=well_size; z>=1; z--) {
-      cell *c1 = hybrid::get_at(lev, -z);
+      cell *c1 = get_at(lev, -z);
       if(c1->wall) covered = true;
       else if(covered) {
         vid.linewidth *= 4;
@@ -595,7 +835,7 @@ void draw_holes(int zlev) {
 void start_new_game();
 
 void draw_screen(int xstart, bool show_next) {
-  int steps = camera_level - (-hybrid::get_where(at.at).second);
+  int steps = camera_level - (-get_where(at.at).second);
   if(state != tsFalling) steps = camera_level - (well_size + 1);
   
   dynamicval<display_data> ccd(*current_display);
@@ -611,24 +851,35 @@ void draw_screen(int xstart, bool show_next) {
     mouseaim_sensitivity = 0;
     NLP = Id;
     View = pView;
-    ld lv = -cgi.plevel * steps;
-    shift_view(ztangent(lv));
-    rotate_view(cspin(1, 2, cur_ang));
-    shift_view(ztangent(cgi.plevel * 6));
-    centerover = ncenter;
-    int zlev = hybrid::get_where(centerover).second;  
-    make_actual_view();
-    create_matrices();
+    if(nil) {
+      centerover = at.at;
+      rotate_view(cspin(1, 2, -90*degree));
+      shift_view(ztangent(3 * nilv::nilwidth));
+      rotate_view(cspin(0, 1, -90*degree));
+      }
+    else {
+      ld lv = -cgi.plevel * steps;
+      shift_view(ztangent(lv));
+      rotate_view(cspin(1, 2, cur_ang));
+      shift_view(ztangent(cgi.plevel * (2 + max_piece)));
+      centerover = ncenter;
+      }
+    int zlev = get_where(centerover).second;  
+    if(!nil) {
+      make_actual_view();
+      create_matrices();
+      }
     // anims::moved();
     
-    auto adc = std::move(current_display->all_drawn_copies);
+    decltype(current_display->all_drawn_copies) adc;
+    if(!nil) adc = std::move(current_display->all_drawn_copies);
     
     if(state == tsCollect) for(cell *c: to_disappear) c->landparam = rand() & 0xFFFFFF;
     if(state == tsFalling && !explore && !cur_ang) remove_shape();
     gamescreen(0);
     if(state == tsFalling && !explore && !cur_ang) draw_shape();
 
-    current_display->all_drawn_copies = std::move(adc);
+    if(!nil) current_display->all_drawn_copies = std::move(adc);
         
     if(anyshiftclick) draw_holes(zlev);
     
@@ -659,9 +910,49 @@ void draw_screen(int xstart, bool show_next) {
     }
   }
 
+void create_game();
+
+void geometry_menu() {
+  clearMessages();
+  dialog::init("Bringris geometries");
+  dialog::addBreak(100);
+  for(int i=0; i<7; i++) {
+    dialog::addTitle(bgeoms[i].name, i == bgeom ? 0xFF00 : 0xFF0000, 150);
+    dialog::items.back().key = 'a' + i;
+    dialog::add_action([i] {      
+      stop_game_and_switch_mode(rg::nothing);
+      bgeom = i;
+      bgeoms[bgeom].create();
+      start_game();
+      create_game();
+      state = tsPreGame;
+      });
+    dialog::addInfo(bgeoms[i].cap);
+    dialog::items.back().key = 'a' + i;
+    dialog::addBreak(50);
+    if(i == 6 && bgeom != 6) {
+      dialog::items.pop_back();
+      dialog::items.pop_back();
+      dialog::items.pop_back();
+      }
+    }
+  dialog::addBreak(100);
+  dialog::addSelItem("max piece", its(max_piece), 'm');
+  dialog::add_action([] {
+    max_piece++;
+    if(max_piece == 6) max_piece = 2;
+    create_game();
+    state = tsPreGame;
+    });
+  dialog::addBreak(100);
+  dialog::addBack();
+  dialog::display();
+  }
+
 void run() {
 
   clearMessages();
+  dialog::init();
 
   if(ang < cur_ang) {
     cur_ang -= (ticks - lti) / 1000.;
@@ -681,6 +972,14 @@ void run() {
     View = pView;
     smooth = Id;
     }
+  else if(nil) {
+    ld part = (ticks - last_adjust) * 1. / (when_t - last_adjust);
+    hyperpoint sh = pView * C0;
+    sh = lerp(C0, sh, 1-part);
+    pView = eupush(sh);
+    smooth = inverse(pView);
+    println(hlog, "smooth = ", tC0(smooth));
+    }
   else {
     ld part = (ticks - last_adjust) * 1. / (when_t - last_adjust);
     transmatrix T = pView * inverse(tView);
@@ -695,7 +994,8 @@ void run() {
   
   ray::want_use = 2;
   sightranges[geometry] = 50;
-  vid.cells_drawn_limit = 1;
+  if(!nil) vid.cells_drawn_limit = 1;
+  else vid.cells_drawn_limit = 2000;
 
   cmode = sm::NORMAL | sm::CENTER;
 
@@ -743,13 +1043,14 @@ void run() {
       }
     if(displayButtonS(xx, vid.fsize * 4, "NEW GAME", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 'n';
     if(displayButtonS(xx, vid.fsize * 6, "EXPERT GAME", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 'x';
+    if(displayButtonS(xx, vid.fsize * 8, "GEOMETRY", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 'g';
     if(state != tsPreGame)
-      if(displayButtonS(xx, vid.fsize * 8, "EXPLORE", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 'e';
+      if(displayButtonS(xx, vid.fsize * 10, "EXPLORE", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 'e';
     if(!ISWEB) {
-      if(displayButtonS(xx, vid.fsize * 10, "QUIT", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 'q';
+      if(displayButtonS(xx, vid.fsize * 12, "QUIT", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 'q';
       }
     else if(state == tsGameover)
-      if(displayButtonS(xx, vid.fsize * 10, "TWEET", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 't';
+      if(displayButtonS(xx, vid.fsize * 12, "TWEET", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 't';
     }
   
   keyhandler = [xstart, in_menu] (int sym, int uni) {
@@ -764,32 +1065,20 @@ void run() {
       if(ax > 3) ax = 3;
       int ay = mousey * 3 / vid.yres;
       if(ay > 2) ay = 2;
-      sym = uni = "-w-\ra d\r-s-\r" [ax+4*ay];
+      sym = uni = "qwepa d\r-s-\r" [ax+4*ay];
       }
     if(state == tsFalling && !paused) {
-      int t = currentmap->gamestart()->type;
-      if(t & 1) {
-        if(sym == 'd') rotate_block(1);
-        if(sym == 's') rotate_block(-1);
-        for(int k=0; k<10; k++)
-          if(sym == "cxzaqwerfv"[k])
-            shift_block(k);
-        }
-      else {
-        /*
-        if(sym == 'q') rotate_block(1);
-        if(sym == 'e') rotate_block(-1);
-        */
-        for(int k=0; k<4; k++)
-          if(sym == "sawd"[k])
-            shift_block(k);
-        }
+      if(sym == 'q' && rotate_allowed) rotate_block(1);
+      if(sym == 'e' && rotate_allowed) rotate_block(-1);
+      for(int k=0; k<4; k++)
+        if(sym == "sawd"[k])
+          shift_block(k);
       if(sym == ' ') drop();
       if(sym == 13) fulldrop();
       }
     // if(sym == 'k') ang = 0;
     // if(sym == 'l') ang = 45 * degree;    
-    if(sym == 'p') {
+    if(sym == 'p' || sym == 'c' || (sym == SDLK_ESCAPE && !ISWEB)) {
       if(!paused) move_at = move_at - ticks;
       paused = !paused;
       if(!paused) move_at = move_at - ticks;
@@ -809,6 +1098,7 @@ void run() {
       else {
         out = "Dropped " + its(bricks) + " blocks in #Bringris!";
         }
+      if(bgeom || max_piece != 4) out += " (" + bgeoms[bgeom].name + "/" + its(max_piece) + ")";
       unsigned hash = time(NULL) / 600;
       for(char c: out) hash = 171 * hash + c;
       std::mt19937 invr;
@@ -836,6 +1126,9 @@ void run() {
       pro_game = false;
       playSound(cwt.at, "elementalgem");
       }
+    if(in_menu && sym == 'g') {
+      pushScreen(geometry_menu);
+      }
     if(in_menu && sym == 'x') {
       start_new_game();
       paused = false;
@@ -861,7 +1154,7 @@ void start_new_game() {
   for(auto& p: piecelist) p.count = 0;
 
   for(auto lev: level) for(int z=0; z<=camera_level+1; z++) {
-    cell *c = hybrid::get_at(lev, -z);
+    cell *c = get_at(lev, -z);
     setdist(c, 7, nullptr);
     c->item = itNone;
     c->land = laCanvas;
@@ -873,17 +1166,20 @@ void start_new_game() {
       c->wall = waWaxWall, c->land = laCanvas, c->landparam = 0xC000C0;
     }
   
-  centerover = hybrid::get_at(level[0], -camera_level);
+  centerover = get_at(level[0], -camera_level);
   cwt.at = centerover;
-  ncenter = hybrid::get_at(level[0], -camera_level);
+  ncenter = get_at(level[0], -camera_level);
   
-  at = hybrid::get_at(level[0], -well_size - 1);
+  at = get_at(level[0], -well_size - 1);
   next_shape_id = choose_piece();
   
   state = tsBetween;
 
   NLP = Id;
-  tView = pView = in_h2xe() ? spin(135*degree) : spin(90*degree);
+  tView = Id;
+  
+  set_view();
+  pView = tView;
 
   completed = 0;
   bricks = 0;
@@ -891,37 +1187,41 @@ void start_new_game() {
   score = 0;
   }
   
-void create(int i) {
-  if(!prod) {
+void create_game() {
+  if(!prod && !nil) {
     println(hlog, "need product geometry");
     exit(1);
     }
   level = PIU(currentmap->allcells());
-  generate_shapes(1);
-  generate_shapes(2);
-  generate_shapes(3);
-  generate_shapes(4);
+  if(nil) {
+    level.clear();
+    for(int x=0; x<5; x++)
+    for(int y=0; y<5; y++)
+     level.push_back(nilv::get_heptagon_at(nilv::mvec(x, 0, y))->c7);
+    }
+  piecelist.clear();
+  piecelist.reserve(2000);
+  seen_blocks.clear();
+  for(int ps=1; ps<=max_piece; ps++)  
+    generate_shapes(ps);
   list_all();
   // println(hlog, "level size = ", isize(level));
   
-  camera_level = well_size + i + camera;
+  camera_level = well_size + max_piece + camera;
   
   playermoved = false;
   ray::want_use = 2;
   ray::exp_decay_poly = 200;
+  ray::max_iter() = 200;
   mapeditor::drawplayer = false;
   // sightranges[geometry] = 1;
   
-  
-  pushScreen(run);
-  
+    
   vid.fov = 90;
   vid.plevel_factor = 0.5;
   // vid.grid = true;
 
   mouseaim_sensitivity = 0;  
-  
-  showstartmenu = false;
   
   start_new_game();
   state = tsPreGame;
@@ -943,8 +1243,16 @@ int args() {
   else if(argis("-bringris")) {
     PHASEFROM(3);
     start_game();
-    shift(); int i = argi();
-    create(i);
+    create_game();
+    }
+
+  else if(argis("-bgeo")) {
+    PHASEFROM(2);
+    stop_game_and_switch_mode(rg::nothing);
+    shift(); bgeom = argi();
+    bgeoms[bgeom].create();
+    start_game();
+    create_game();
     }
 
   else return 1;
@@ -959,21 +1267,12 @@ auto hook1=
     addHook(hooks_config, 100, [] {
       if(arg::curphase == 2) {
         stop_game_and_switch_mode(rg::nothing);
-        using namespace fieldpattern;
-        current_extra = 2;
-        auto& gxcur = fgeomextras[current_extra];
-        while(isize(gxcur.primes) < 1) nextPrime(gxcur);
-        fgeomextras[current_extra].current_prime_id = 0;
-        enableFieldChange();
-        set_geometry(gFieldQuotient);
-        
-        gp::param = gp::loc(1, 1);
-        set_variation(eVariation::unrectified);
-
-        set_geometry(gProduct);
+        bgeoms[bgeom].create();
         start_game();
-        create(4);
+        create_game();
         vid.texture_step = 8;
+        showstartmenu = false;
+        pushScreen(run);  
         }
       });
 #endif
