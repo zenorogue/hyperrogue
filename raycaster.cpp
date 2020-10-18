@@ -27,7 +27,7 @@ EX ld exp_start = 1;
 EX ld exp_decay_exp = 4;
 EX ld exp_decay_poly = 10;
 
-#if GLES_ONLY
+#ifdef GLES_ONLY
 const int gms_limit = 16; /* enough for Bringris -- need to do better */
 #else
 const int gms_limit = 110;
