@@ -14,7 +14,8 @@
 #define CAP_SOLV 0
 #define CAP_THREAD 0
 // #define CAP_ZLIB 0
-#define CAP_FILES 0
+#define CAP_FILES 1
+#defien CAP_CONFIG 1
 // #define CAP_ANIMATIONS 0
 
 #define CAP_RUG 0
@@ -27,7 +28,6 @@
 #define CAP_ARCM 0
 #define CAP_HISTORY 0
 #define CAP_STARTANIM 0
-#define CAP_CONFIG 0
 #define CAP_SAVE 0
 #define CAP_TRANS 0
 
@@ -51,6 +51,10 @@ struct bgeometry {
   string cap;
   reaction_t create;
   };
+
+enum eBringrisMove { bmDown, bmLeft, bmUp, bmRight, bmTurnLeft, bmTurnRight, bmDrop, bmFullDrop, bmPause, bmNothing, bmLast };
+
+vector<string> move_names = { "move down", "move left", "move up", "move right", "turn left", "turn right", "drop by one", "full drop", "pause", "do nothing" };
 
 int bgeom = 0;
 
@@ -847,6 +851,16 @@ void shift_block(int dir) {
   else playSound(cwt.at, "hit-crush3");
   }
 
+void bringris_action(int k) {
+  println(hlog, "action ", k);
+  if(k < 4) shift_block(k);
+  if(k == 4) rotate_block(1);
+  if(k == 5) rotate_block(-1);
+  if(k == 6) drop();
+  if(k == 7) fulldrop();
+  if(k == 8) paused = true;
+  }
+
 int camera_level;
 
 ld ang = 0, cur_ang = 0;
@@ -1122,6 +1136,34 @@ void geometry_menu() {
   dialog::display();
   }
 
+void settings_menu() {
+  dialog::init("Bringris settings");
+  dialog::addItem("geometry", 'g');
+  dialog::add_action_push(geometry_menu);
+  dialog::addItem("configure keys", 'k');
+  dialog::add_action_push(multi::get_key_configurer(1, move_names, "keys"));
+
+  #if CAP_AUDIO
+  dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
+  dialog::add_action([] {
+    dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
+    dialog::reaction = [] () {
+#if ISANDROID
+      settingsChanged = true;
+#endif
+      };
+    dialog::bound_low(0);
+    dialog::bound_up(MIX_MAX_VOLUME);
+    });
+#endif
+
+  #if CAP_FILES
+  dialog::addItem("save the current config", 's');
+  dialog::add_action(saveConfig);
+  #endif
+  dialog::display();
+  }
+
 void run() {
 
   clearMessages();
@@ -1216,7 +1258,7 @@ void run() {
       }
     if(displayButtonS(xx, vid.fsize * 4, "NEW GAME", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 'n';
     if(displayButtonS(xx, vid.fsize * 6, "EXPERT GAME", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 'x';
-    if(displayButtonS(xx, vid.fsize * 8, "GEOMETRY", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 'g';
+    if(displayButtonS(xx, vid.fsize * 8, "SETTINGS", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 's';
     if(state != tsPreGame)
       if(displayButtonS(xx, vid.fsize * 10, "EXPLORE", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 'e';
     if(!ISWEB) {
@@ -1230,8 +1272,20 @@ void run() {
     if(explore) handlePanning(sym, uni);
     if(explore && sym == SDLK_BACKSPACE) 
       explore = false;
-    if(sym != 13)
-      dialog::handleNavigation(sym, uni);
+
+    if(state == tsFalling) {
+      multi::handleInput(0);
+      println(hlog, "'s' is : ", multi::scfg.keyaction['s']);
+      bool consumed = false;
+      for(int i=0; i<bmLast; i++)
+        if(multi::actionspressed[16+i] && !multi::lactionpressed[16+i]) {
+          bringris_action(i);
+          consumed = true;
+          }
+      if(consumed) return;
+      }
+
+    dialog::handleNavigation(sym, uni);
     if(in_menu && sym == 'q' && !ISWEB) exit(0);
     if(sym == '-') {
       int ax = mousex * 3 / xstart;
@@ -1240,15 +1294,7 @@ void run() {
       if(ay > 2) ay = 2;
       sym = uni = "qwepa d\r-s-\r" [ax+4*ay];
       }
-    if(state == tsFalling && !paused) {
-      if(sym == 'q' && rotate_allowed) rotate_block(1);
-      if(sym == 'e' && rotate_allowed) rotate_block(-1);
-      for(int k=0; k<4; k++)
-        if(sym == "sawd"[k])
-          shift_block(k);
-      if(sym == ' ') drop();
-      if(sym == 13) fulldrop();
-      }
+    
     // if(sym == 'k') ang = 0;
     // if(sym == 'l') ang = 45 * degree;    
     if(sym == 'p' || sym == 'c' || (sym == SDLK_ESCAPE && !ISWEB)) {
@@ -1299,8 +1345,8 @@ void run() {
       pro_game = false;
       playSound(cwt.at, "elementalgem");
       }
-    if(in_menu && sym == 'g') {
-      pushScreen(geometry_menu);
+    if(in_menu && sym == 's') {
+      pushScreen(settings_menu);
       }
     if(in_menu && sym == 'x') {
       start_new_game();
@@ -1500,8 +1546,34 @@ int args() {
   return 0;
   }
 
+void change_default_key(int key, int val) {
+  char* t = multi::scfg.keyaction;
+  t[key] = val;
+  set_saver_default(t[key]);
+  }
+
+void default_config() {
+  for(int i=0; i<512; i++)
+    if(multi::scfg.keyaction[i] >= 16 && multi::scfg.keyaction[i] < 32)
+      change_default_key(i, 0);
+  
+  change_default_key('s', 16 + 0);
+  change_default_key('a', 16 + 1);
+  change_default_key('w', 16 + 2);
+  change_default_key('d', 16 + 3);
+  change_default_key('q', 16 + 4);
+  change_default_key('e', 16 + 5);
+  change_default_key(' ', 16 + 6);
+  change_default_key('\r',16 + 7);
+  change_default_key('p', 16 + 8);
+
+  addsaver(bgeom, "bringris-geometry");
+  addsaver(use_raycaster, "bringris-ray");
+  }
+
 auto hooks = 
-    addHook(hooks_args, 100, args);
+    addHook(hooks_args, 100, args)
+  + addHook(hooks_configfile, 100, default_config);
 
 #ifdef BRINGRIS
 auto hook1=
@@ -1509,7 +1581,7 @@ auto hook1=
       if(arg::curphase =1 1) 
         conffile = "bringris.ini";
       if(arg::curphase == 2) init_all();      
-      });
+      })
 #endif
 
 }
