@@ -253,6 +253,7 @@ vector<bgeometry> bgeoms = {
     set_geometry(gProduct);
     max_piece = 5;
     rotate_allowed = false;
+    well_size = 5;
     }},
 
   {"torus: shear", "Nil geometry: are you sure you want this?", [] {
@@ -277,6 +278,7 @@ void create_game();
 
 void enable_bgeom() {
   stop_game_and_switch_mode(rg::nothing);
+  well_size = 10;
   bgeoms[bgeom].create();
   start_game();
   create_game();
@@ -395,6 +397,23 @@ vector<cellwalker> build_from(const code_t& code, cellwalker start, int sym = 0)
   return all;
   }
 
+vector<transmatrix> build_shape_matrices(const vector<cellwalker>& cells) {
+  vector<transmatrix> all = {Id};
+  all.reserve(isize(cells));
+  for(int i=1; i<isize(cells); i++) {
+    for(int j=0; j<i; j++) {
+      int nei = neighborId(cells[j].at, cells[i].at);
+      if(nei != -1) {
+        transmatrix T = all[j];
+        T = T * currentmap->adj(cells[j].at, nei);
+        all.push_back(T);
+        break;
+        }
+      }
+    }
+  return all;
+  }
+
 int penalty(const vector<cellwalker>& shape, const code_t& code) {
   int p = 0;
   if(prod) {
@@ -463,7 +482,7 @@ void generate_shapes_rec(vector<cellwalker>& sofar, code_t& code, int cnt) {
     }
   for(int i=0; i<isize(sofar); i++)
   for(int t=0; t<sofar[i].at->type; t++) {
-    if(solnil && !among(t, 4, 5, 10, 11)) continue; 
+    if(sol && !among(t, 4, 5, 10, 11)) continue; 
     cellwalker ncw = add(sofar[i], t);
     if(listed(sofar, ncw.at)) continue;
     code.emplace_back(i, t);
@@ -511,6 +530,7 @@ color_t hipso[] = {
 
 color_t get_hipso(ld y) {
   y += 12;
+  if(well_size <= 5) y *= 2;
   return hipso[gmod(y, 13)];
   }
 
@@ -868,11 +888,20 @@ void create_matrices() {
     current_display->all_drawn_copies[c].push_back(V);
     gmatrix[p.first] = p.second;
     if(id < draw_per_level) {
-      for(int i=0; i<c->type-2; i++) {
+      auto go = [&] (int i) {
         cell *c1 = c->cmove(i);
-        dq::enqueue_by_matrix_c(c1, optimized_shift(V * currentmap->adj(c, i)));
+        dq::enqueue_by_matrix_c(c1, optimized_shift(V * currentmap->adj(c, i)));       
+        };
+      if(prod) {
+        for(int i=0; i<c->type-2; i++) go(i);
         }
-      }
+      else if(sol) {
+        go(4); go(5); go(10); go(11);
+        }
+      else if(nil) {
+        go(0); go(2); go(3); go(5);
+        }
+      }      
     dq::drawqueue_c.pop();
     id++;
     }  
@@ -880,32 +909,26 @@ void create_matrices() {
 
 transmatrix smooth;
 
-void draw_wirecube_at(const transmatrix& smoo, cell *c, int zlev, color_t col) {
-
+void change_depth(shiftmatrix& V, int newlevel, int zlev) {
   if(solnil) {
-    auto lev = inverse_shift(gmatrix[at.at], gmatrix[c]);
-    for(const shiftmatrix& V: current_display->all_drawn_copies[c])
-      for(int i=0; i<c->type; i++) {
-        queuepolyat(V * inverse(lev) * smoo * lev, cgi.shWireframe3D[i], 0, PPR::SUPERLINE).outline = col;
-        // queuepolyat(V * smoo, cgi.shWireframe3D[i], 0, PPR::SUPERLINE).outline = col;
-        }
-    return;
+    while(newlevel > zlev) zlev++, V = V * currentmap->adj(cwt.at, down_dir());
+    while(newlevel < zlev) zlev--, V = V * currentmap->adj(cwt.at, up_dir());
     }
+  else if(in_h2xe())
+    V = shiftless(V.T, cgi.plevel * (newlevel - zlev));
+  else
+    V = shiftless(V.T * zpush(cgi.plevel * (newlevel - zlev)));
+  }
+
+void draw_wirecube_at(cell *c, const transmatrix& rel, int zlev, color_t col) {
 
   auto where_c = get_where(c);
+  auto c_camera = get_at(where_c.first, zlev);
   
-  auto c_camera = get_at(where_c.first, -camera_level);
-  
-  for(const shiftmatrix& V: current_display->all_drawn_copies[c_camera]) {
-    shiftmatrix VA;
-    if(solnil)
-      VA = V;
-    else if(in_h2xe())
-      VA = shiftless(smoo * V.T, cgi.plevel * (where_c.second - zlev));
-    else
-      VA = shiftless(smoo * V.T * zpush(cgi.plevel * (where_c.second - zlev)));
+  for(shiftmatrix V: current_display->all_drawn_copies[c_camera]) {
+    change_depth(V, where_c.second, zlev);
     for(int i=0; i<c->type; i++)
-      queuepolyat(VA, cgi.shWireframe3D[i], 0, PPR::SUPERLINE).outline = col;
+      queuepolyat(V * rel, cgi.shWireframe3D[i], 0, PPR::SUPERLINE).outline = col;
     }
   }
 
@@ -913,19 +936,20 @@ void draw_piece(int zlev, int id) {
   sightranges[geometry] *= 100;
   initquickqueue();
   auto shape = build_from(piecelist[id].code, at);
+  auto matrices = build_shape_matrices(shape);
 
   auto where_at = get_where(at.at);
   
   vid.linewidth *= 3;
 
+  int mid = 0;
+
   for(auto c: shape) {    
-    auto where_c = get_where(c.at);      
-    color_t levels[4] = {color_t(0xFFFFFFFFF), color_t(0xFFFF00FF), color_t(0xFF8000FF), color_t(0xFF0000FF)};      
-    draw_wirecube_at(smooth, c.at, zlev, levels[where_at.second-where_c.second]);
+    auto where_c = get_where(c.at);
+    color_t levels[5] = {color_t(0xFFFFFFFFF), color_t(0xFFFF00FF), color_t(0xFF8000FF), color_t(0xFF0000FF), color_t(0xC000C0FF) };
+    draw_wirecube_at(at.at, smooth * matrices[mid++], zlev, levels[where_at.second-where_c.second]);
     }  
   
-  // draw_wirecube_at(smooth, at.cpeek(), zlev, 0xFF00FFFF);
-
   vid.linewidth /= 3;
 
   quickqueue();
@@ -944,7 +968,7 @@ void draw_holes(int zlev) {
       if(c1->wall) covered = true;
       else if(covered) {
         vid.linewidth *= 4;
-        draw_wirecube_at(Id, c1, zlev, (get_hipso(z) << 8) | 0xFF);
+        draw_wirecube_at(c1, Id, zlev, (get_hipso(z) << 8) | 0xFF);
         vid.linewidth /= 4;
         }
       }
@@ -971,19 +995,14 @@ void draw_all_noray(int zlev) {
           continue;
           }
 
-        auto c_camera = get_at(lev, -camera_level);
+        auto c_camera = get_at(lev, zlev);
         
-        for(const shiftmatrix& V: current_display->all_drawn_copies[c_camera]) {
-          shiftmatrix VA;
-
-          if(in_h2xe())
-            VA = shiftless(V.T, cgi.plevel * (-z - zlev));
-          else
-            VA = shiftless(V.T * zpush(cgi.plevel * (-z - zlev)));
+        for(shiftmatrix V: current_display->all_drawn_copies[c_camera]) {
+          change_depth(V, z, zlev);
 
           forCellIdCM(c2, i, c1)
             if(!c2->wall) {
-              auto &q = queuepolyat(VA, cgi.shWall3D[i], (c1->landparam << 8) | 0xFF, PPR::WALL);
+              auto &q = queuepolyat(V, cgi.shWall3D[i], (c1->landparam << 8) | 0xFF, PPR::WALL);
               if(c1->wall == waBarrier) q.color = (winf[waBarrier].color << 8) | 0xFF;
               q.tinf = &floor_texture_vertices[cgi.shFloor.id];
               ensure_vertex_number(*q.tinf, q.cnt);
@@ -1004,7 +1023,7 @@ void draw_screen(int xstart, bool show_next) {
   
   dynamicval<display_data> ccd(*current_display);
   current_display->xmax = xstart * 1. / vid.xres;
-  ray::max_cells = isize(level) * camera_level;
+  ray::max_cells = isize(level) * (camera_level+2);
   
   if(explore) {
     gamescreen(0);
@@ -1021,12 +1040,14 @@ void draw_screen(int xstart, bool show_next) {
       rotate_view(cspin(1, 2, -90*degree));
       shift_view(ztangent(3 * nilv::nilwidth));
       rotate_view(cspin(0, 1, -90*degree));
+      anims::moved();
       }
     else if(sol) {
       centerover = at.at;
       rotate_view(cspin(1, 2, 180*degree));
       shift_view(ztangent(1));
       rotate_view(cspin(0, 1, -90*degree));
+      anims::moved();
       }
     else {
       ld lv = -cgi.plevel * steps;
@@ -1034,27 +1055,22 @@ void draw_screen(int xstart, bool show_next) {
       rotate_view(cspin(1, 2, cur_ang));
       shift_view(ztangent(cgi.plevel * (2 + max_piece)));
       centerover = ncenter;
+      anims::moved();
       }
     int zlev = get_z(centerover);
-    if(!solnil) {
-      make_actual_view();
-      create_matrices();
-      }
+
+    // make_actual_view();
     // anims::moved();
     
     if(state == tsCollect) for(cell *c: to_disappear) c->landparam = rand() & 0xFFFFFF;
     
-    if(state == tsFalling && !explore && !cur_ang) remove_shape();    
+    if(state == tsFalling && !explore && !cur_ang && !lctrlclick) remove_shape();    
     // just_gmatrix = true;
 
     ray::want_use = use_raycaster ? 2 : 0;
-    if(solnil) {
+    if(1) {
       gamescreen(0);
-      }
-    else {
-      auto adc = std::move(current_display->all_drawn_copies);
-      gamescreen(0);
-      current_display->all_drawn_copies = std::move(adc);
+      create_matrices();
       }
 
     if(!use_raycaster) 
@@ -1155,7 +1171,7 @@ void visual_menu() {
   
 void settings_menu() {
   dialog::init("Bringris settings");
-  dialog::addItem("geometry", 'g');
+  dialog::addItem("alternative geometry", 'g');
   dialog::add_action_push(geometry_menu);
   dialog::addItem("visuals", 's');
   dialog::add_action_push(visual_menu);
@@ -1213,7 +1229,6 @@ void run() {
     sh = lerp(C0, sh, 1-part);
     pView = eupush(sh);
     smooth = inverse(pView);
-    println(hlog, "smooth = ", tC0(smooth));
     }
   else {
     ld part = (ticks - last_adjust) * 1. / (when_t - last_adjust);
@@ -1223,7 +1238,8 @@ void run() {
     ld alpha = atan2(Tspin*xpush0(1));
     pView = spin(alpha * part) * gpushxto0(direct_exp(vec*part)) * pView;
     fixmatrix(pView);
-    smooth = tView * inverse(pView);
+    smooth = inverse(pView) * cview().T;
+    // println(hlog, "smooth = ", smooth);
     }
   last_adjust = ticks;
   
