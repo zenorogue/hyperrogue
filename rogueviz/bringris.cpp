@@ -1327,7 +1327,16 @@ void run() {
       if(ax > 3) ax = 3;
       int ay = mousey * 3 / vid.yres;
       if(ay > 2) ay = 2;
-      sym = uni = "qwepa d\r-s-\r" [ax+4*ay];
+      int id = ay * 4 + ax;
+      eBringrisMove moves[12] = {
+        bmTurnLeft, bmUp, bmTurnRight, bmPause,
+        bmLeft, bmDrop, bmRight, bmFullDrop,
+        bmNothing, bmDown, bmNothing, bmFullDrop
+        };
+      eBringrisMove mov = moves[id];
+      if((state == tsFalling && !paused) || mov == bmPause)  
+        bringris_action(mov);
+      return;
       }
     
     // if(sym == 'k') ang = 0;
@@ -1612,9 +1621,11 @@ auto hooks =
   + addHook(hooks_configfile, 100, default_config)
   + addHook(dialog::hooks_display_dialog, 100, [] () {
       if(dialog::items[0].body == "Bringris keys") {
+        dialog::addBreak(200);
         if(!rotate_allowed)
           dialog::addHelp("note: rotation keys only available when necessary");
         dialog::addHelp("press SHIFT to highlight the holes");
+        dialog::addHelp("mouse control by pressing parts of the game screen");
         }
       }); 
 
