@@ -1173,7 +1173,7 @@ void settings_menu() {
   dialog::init("Bringris settings");
   dialog::addItem("alternative geometry", 'g');
   dialog::add_action_push(geometry_menu);
-  dialog::addItem("visuals", 's');
+  dialog::addItem("visuals", 'v');
   dialog::add_action_push(visual_menu);
   dialog::addItem("configure keys", 'k');
   dialog::add_action_push(multi::get_key_configurer(1, move_names, "Bringris keys"));
