@@ -686,7 +686,7 @@ void disappear_lines() {
         nz++;
         }
       }
-    while(nz < well_size + camera_level) {
+    while(nz <= camera_level) {
       cell *c0 = get_at(lev, -nz);
       c0->wall = waNone;
       nz++;
