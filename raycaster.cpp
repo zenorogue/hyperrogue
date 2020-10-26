@@ -981,6 +981,11 @@ void enable_raycaster() {
       "tangent -= dot(vec4(-position.xyz, position.w), tangent) * position;\n"
       "tangent /= sqrt(dot(tangent.xyz, tangent.xyz) - tangent.w*tangent.w);\n";
     
+    if(in_h2xe()) fmain +=
+      "position /= sqrt(position.z*position.z - dot(position.xy, position.xy));\n"
+      "tangent -= dot(vec3(-position.xy, position.z), tangent.xyz) * position;\n"
+      "tangent /= sqrt(dot(tangent.xy, tangent.xy) - tangent.z*tangent.z);\n";
+    
     if(hyperbolic && bt::in()) {
       fmain += 
         "if(which == 20) {\n"
