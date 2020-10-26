@@ -1004,6 +1004,7 @@ void draw_screen(int xstart, bool show_next) {
   
   dynamicval<display_data> ccd(*current_display);
   current_display->xmax = xstart * 1. / vid.xres;
+  ray::max_cells = isize(level) * camera_level;
   
   if(explore) {
     gamescreen(0);
