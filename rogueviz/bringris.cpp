@@ -56,6 +56,12 @@ enum eBringrisMove { bmDown, bmLeft, bmUp, bmRight, bmTurnLeft, bmTurnRight, bmD
 
 vector<string> move_names = { "move down", "move left", "move up", "move right", "turn left", "turn right", "drop by one", "full drop", "pause", "do nothing" };
 
+int camera_level;
+
+ld ang = 0, cur_ang = 0;
+
+int lti;
+
 int bgeom = 0;
 
 int max_piece;
@@ -79,6 +85,8 @@ int well_size = 10;
 int camera = 3;
 
 int facing_mod = 0;
+
+int draw_per_level = 500;
 
 int shape_id, next_shape_id;
 
@@ -863,12 +871,6 @@ void bringris_action(int k) {
   if(k == 8) paused = true;
   }
 
-int camera_level;
-
-ld ang = 0, cur_ang = 0;
-
-int lti;
-
 void create_matrices() {
   dq::clear_all();
   make_actual_view();
@@ -881,7 +883,7 @@ void create_matrices() {
     shiftmatrix& V = p.second;
     current_display->all_drawn_copies[c].push_back(V);
     gmatrix[p.first] = p.second;
-    if(id < (cur_ang ? 100 : 500)) {
+    if(id < draw_per_level) {
       for(int i=0; i<c->type-2; i++) {
         cell *c1 = c->cmove(i);
         dq::enqueue_by_matrix_c(c1, optimized_shift(V * currentmap->adj(c, i)));
@@ -1138,17 +1140,48 @@ void geometry_menu() {
   dialog::display();
   }
 
+void visual_menu() {
+  dialog::init("Bringris visuals");
+  dialog::addBoolItem_action("use raycasting", use_raycaster, 'r');
+
+  dialog::addSelItem(XLAT("iterations in raycasting"), its(ray::max_iter_current()), 's');
+  dialog::add_action([&] {
+    dialog::numberdark = dialog::DONT_SHOW;
+    dialog::editNumber(ray::max_iter_current(), 0, 600, 1, 60, XLAT("iterations in raycasting"), "");
+    dialog::reaction = ray::reset_raycaster;
+    });
+
+  dialog::addSelItem(XLAT("reflective walls in raycasting"), fts(ray::reflect_val), 'R');
+  dialog::add_action([&] {
+    dialog::editNumber(ray::reflect_val, 0, 1, 0.1, 0, XLAT("reflective walls"), "");
+    dialog::reaction = ray::reset_raycaster;
+    });
+
+  dialog::addSelItem(XLAT("cells to draw per level"), its(draw_per_level), 'R');
+  dialog::add_action([&] {
+    dialog::numberdark = dialog::DONT_SHOW;
+    dialog::editNumber(draw_per_level, 0, 1000, 500, 50, XLAT("cells to draw"), 
+      "If the level size is 30, 600 cells to draw means that every cell is drawn 20 times on average. "
+      "Used when raycasting is off, and to draw the wireframes");
+    });
+
+  dialog::display();
+  }
+  
 void settings_menu() {
   dialog::init("Bringris settings");
   dialog::addItem("geometry", 'g');
   dialog::add_action_push(geometry_menu);
+  dialog::addItem("visuals", 's');
+  dialog::add_action_push(visual_menu);
   dialog::addItem("configure keys", 'k');
-  dialog::add_action_push(multi::get_key_configurer(1, move_names, "keys"));
+  dialog::add_action_push(multi::get_key_configurer(1, move_names, "Bringris keys"));
 
   #if CAP_AUDIO
   dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
   dialog::add_action([] {
     dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
+    dialog::numberdark = dialog::DONT_SHOW;
     dialog::reaction = [] () {
 #if ISANDROID
       settingsChanged = true;
@@ -1571,11 +1604,19 @@ void default_config() {
 
   addsaver(bgeom, "bringris-geometry");
   addsaver(use_raycaster, "bringris-ray");
+  addsaver(draw_per_level, "draw-per-level");
   }
 
 auto hooks = 
     addHook(hooks_args, 100, args)
-  + addHook(hooks_configfile, 100, default_config);
+  + addHook(hooks_configfile, 100, default_config)
+  + addHook(dialog::hooks_display_dialog, 100, [] () {
+      if(dialog::items[0].body == "Bringris keys") {
+        if(!rotate_allowed)
+          dialog::addHelp("note: rotation keys only available when necessary");
+        dialog::addHelp("press SHIFT to highlight the holes");
+        }
+      }); 
 
 #ifdef BRINGRIS
 auto hook1=
@@ -1583,7 +1624,7 @@ auto hook1=
       if(arg::curphase =1 1) 
         conffile = "bringris.ini";
       if(arg::curphase == 2) init_all();      
-      })
+      });
 #endif
 
 }
