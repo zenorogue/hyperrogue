@@ -63,6 +63,40 @@ int last_adjust, when_t;
 transmatrix tView, pView;
 cell* ncenter;
 
+cell *well_center;
+
+vector<cell*> level;
+
+vector<cell*> out_level;
+
+bool pro_game;
+
+int well_size = 10;
+int camera = 3;
+
+int facing_mod = 0;
+
+int shape_id, next_shape_id;
+
+cellwalker at;
+
+int move_started;
+int move_at;
+
+int completed;
+int bricks, cubes;
+
+ld score;
+
+bool paused;
+bool explore;
+
+enum eState {
+  tsPreGame, tsFalling, tsBetween, tsCollect, tsGameover
+  };
+
+eState state = tsPreGame;
+
 vector<bgeometry> bgeoms = {
   {"Bring surface", "the original Bringris geometry", [] {
     using namespace fieldpattern;
@@ -226,6 +260,21 @@ vector<bgeometry> bgeoms = {
     rotate_allowed = false;
     }},
   };
+
+void create_game();
+
+void enable_bgeom() {
+  stop_game_and_switch_mode(rg::nothing);
+  bgeoms[bgeom].create();
+  start_game();
+  create_game();
+  state = tsPreGame;
+  }
+
+void enable_bgeom(int b) {
+  bgeom = b;
+  enable_bgeom();
+  }
   
 using code_t = vector<pair<int, int>>;
 
@@ -438,40 +487,6 @@ void list_all() {
   println(hlog, "number of shapes = ", isize(piecelist));
   // for(auto sh: piecelist) println(hlog, "multi=", sh.multi, " penalty=", sh.penalty, " syms=", sh.symmetries, " => ", sh.code);
   }
-
-cell *well_center;
-
-vector<cell*> level;
-
-vector<cell*> out_level;
-
-bool pro_game;
-
-int well_size = 10;
-int camera = 3;
-
-int facing_mod = 0;
-
-int shape_id, next_shape_id;
-
-cellwalker at;
-
-int move_started;
-int move_at;
-
-int completed;
-int bricks, cubes;
-
-ld score;
-
-enum eState {
-  tsPreGame, tsFalling, tsBetween, tsCollect, tsGameover
-  };
-
-bool paused;
-bool explore;
-
-eState state = tsPreGame;
 
 void water_shape() {
   auto shape = build_from(piecelist[shape_id].code, at);
@@ -1083,12 +1098,7 @@ void geometry_menu() {
     dialog::addTitle(bgeoms[i].name, i == bgeom ? 0xFF00 : 0xFF0000, 150);
     dialog::items.back().key = 'a' + i;
     dialog::add_action([i] {      
-      stop_game_and_switch_mode(rg::nothing);
-      bgeom = i;
-      bgeoms[bgeom].create();
-      start_game();
-      create_game();
-      state = tsPreGame;
+      enable_bgeom(i);
       });
     dialog::addInfo(bgeoms[i].cap);
     dialog::items.back().key = 'a' + i;
@@ -1446,10 +1456,7 @@ void create_game() {
   }
 
 void init_all() {
-  stop_game_and_switch_mode(rg::nothing);
-  bgeoms[bgeom].create();
-  start_game();
-  create_game();
+  enable_bgeom();
   vid.texture_step = 8;
   showstartmenu = false;
   pushScreen(run);  
@@ -1476,11 +1483,8 @@ int args() {
 
   else if(argis("-bgeo")) {
     PHASEFROM(2);
-    stop_game_and_switch_mode(rg::nothing);
-    shift(); bgeom = argi();
-    bgeoms[bgeom].create();
-    start_game();
-    create_game();
+    shift();
+    enable_bgeom(argi());
     }
     
   else if(argis("-bringris"))
