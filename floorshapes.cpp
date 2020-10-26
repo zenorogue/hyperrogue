@@ -771,7 +771,9 @@ void geometry_information::generate_floorshapes() {
     }
 
   else {
-    cell model;
+    static hrmap_standard stdmap;
+    dynamicval<hrmap*> c(currentmap, &stdmap);
+    // cell model;
     model.type = S6; generate_floorshapes_for(0, &model, 0, 0);
     model.type = S7; generate_floorshapes_for(1, &model, bt::in() ? 0 : 1, 0);
     }
