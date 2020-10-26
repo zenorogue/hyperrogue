@@ -801,8 +801,10 @@ void set_tview(transmatrix T) {
   }
 
 void rotate_block(int d) {
-  if(!rotate_allowed) 
+  if(!rotate_allowed) {
     playSound(cwt.at, "hit-crush3");
+    return;
+    }
   remove_shape();
   cellwalker at1 = flatspin(at, d);
   if(!shape_conflict(at1)) {
