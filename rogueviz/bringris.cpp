@@ -1476,12 +1476,19 @@ void get_level() {
   if(geometry == g45) {
     set<cell*> all;
     well_center = currentmap->gamestart();
+    all.insert(well_center);
     for(int i=0; i<4; i++)
+    for(int l: {-1, 0, 1})
     for(int j=0; j<4; j++)
     for(int k: {-1, 1}) {
       cellwalker cw(well_center, i);
       cw += wstep;
       all.insert(cw.at);
+      if(l) {
+        cw += l;
+        cw += wstep;
+        all.insert(cw.at);
+        }
       cw += j;
       cw += wstep;
       all.insert(cw.at);
