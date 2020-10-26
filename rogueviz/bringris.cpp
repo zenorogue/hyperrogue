@@ -1195,7 +1195,10 @@ void settings_menu() {
 
   #if CAP_FILES
   dialog::addItem("save the current config", 's');
-  dialog::add_action(saveConfig);
+  dialog::add_action([] {
+    dynamicval<eGeometry> g(geometry, gNormal);
+    saveConfig();
+    });
   #endif
   dialog::display();
   }
