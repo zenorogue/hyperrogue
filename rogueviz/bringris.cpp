@@ -15,7 +15,7 @@
 #define CAP_THREAD 0
 // #define CAP_ZLIB 0
 #define CAP_FILES 1
-#defien CAP_CONFIG 1
+#define CAP_CONFIG 1
 // #define CAP_ANIMATIONS 0
 
 #define CAP_RUG 0
