@@ -1195,7 +1195,7 @@ void settings_menu() {
 
   dialog::addBreak(100);
 
-  #if CAP_FILES
+  #if CAP_FILES && !ISWEB
   dialog::addItem("save the current config", 's');
   dialog::add_action([] {
     dynamicval<eGeometry> g(geometry, gNormal);
