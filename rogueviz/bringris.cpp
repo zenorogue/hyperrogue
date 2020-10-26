@@ -1415,10 +1415,14 @@ void run() {
     };
   }
 
+cell *get_center() {
+  return well_center ? well_center : level[0];
+  }
+
 void reset_view() {
-  centerover = get_at(level[0], -camera_level);
+  centerover = get_at(get_center(), -camera_level);
   cwt.at = centerover;
-  ncenter = get_at(level[0], -camera_level);
+  ncenter = get_at(get_center(), -camera_level);
   
   NLP = Id;
   tView = Id;
@@ -1452,7 +1456,7 @@ void start_new_game() {
     c->landparam = (get_hipso(z) & 0xFCFCFC) >> 2;
     }
   
-  at = get_at(level[0], -well_size - 1);
+  at = get_at(get_center(), -well_size - 1);
   next_shape_id = choose_piece();
   
   state = tsBetween;
