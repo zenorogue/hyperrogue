@@ -22,6 +22,7 @@
 #define CAP_SHOT 0
 #define CAP_SVG 0
 #define CAP_PNG 0
+#define CAP_WRL 0
 #define CAP_TOUR 0
 #define CAP_IRR 0
 #define CAP_CRYSTAL 0
