@@ -1646,7 +1646,7 @@ auto hooks =
 #ifdef BRINGRIS
 auto hook1=
     addHook(hooks_config, 100, [] {
-      if(arg::curphase =1 1) 
+      if(arg::curphase == 1) 
         conffile = "bringris.ini";
       if(arg::curphase == 2) init_all();      
       });
