@@ -1193,6 +1193,8 @@ void settings_menu() {
     });
 #endif
 
+  dialog::addBreak(100);
+
   #if CAP_FILES
   dialog::addItem("save the current config", 's');
   dialog::add_action([] {
@@ -1200,6 +1202,8 @@ void settings_menu() {
     saveConfig();
     });
   #endif
+  
+  dialog::addBack();
   dialog::display();
   }
 
