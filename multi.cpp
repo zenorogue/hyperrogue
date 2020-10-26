@@ -221,22 +221,15 @@ struct key_configurer {
 
   int sc;
   vector<string>& shmupcmdtable;
+  string caption;
   int setwhat;
 
-  key_configurer(int sc, vector<string>& sct) : sc(sc), shmupcmdtable(sct), setwhat(0) {}
+  key_configurer(int sc, vector<string>& sct, const string& caption) : sc(sc), shmupcmdtable(sct), caption(caption), setwhat(0) {
+    }
 
   void operator() () {
       
-    dialog::init(
-      XLAT(sc == 1 ? "configure player 1" :
-      sc == 2 ? "configure player 2" :
-      sc == 3 ? "configure panning" :
-      sc == 4 ? "configure player 3" :
-      sc == 5 ? "configure player 4" :
-      sc == 6 ? "configure player 5" :
-      sc == 7 ? "configure player 6" :
-      sc == 8 ? "configure player 7" : ""
-      ));
+    dialog::init(caption);
   
     getcstat = ' ';
     
@@ -302,7 +295,21 @@ struct key_configurer {
     }
   };
 
-EX reaction_t get_key_configurer(int sc, vector<string>& sct) { return key_configurer(sc, sct); }
+EX reaction_t get_key_configurer(int sc, vector<string>& sct, string caption) { 
+  return key_configurer(sc, sct, caption); 
+  }
+
+EX reaction_t get_key_configurer(int sc, vector<string>& sct) { 
+  return key_configurer(sc, sct, XLAT(sc == 1 ? "configure player 1" :
+    sc == 2 ? "configure player 2" :
+    sc == 3 ? "configure panning" :
+    sc == 4 ? "configure player 3" :
+    sc == 5 ? "configure player 4" :
+    sc == 6 ? "configure player 5" :
+    sc == 7 ? "configure player 6" :
+    sc == 8 ? "configure player 7" : ""
+    )); 
+  }
 
 #if CAP_SDLJOY
 struct joy_configurer {
@@ -456,14 +463,14 @@ struct shmup_configurer {
     
     if(0) ;
     #if CAP_SDL
-    else if(uni == '1') pushScreen(key_configurer(1, cmdlist));
-    else if(uni == '2') pushScreen(key_configurer(2, cmdlist));
-    else if(uni == 'p') pushScreen(key_configurer(3, GDIM == 3 ? pancmds3 : pancmds));
-    else if(uni == '3') pushScreen(key_configurer(4, cmdlist));
-    else if(uni == '4') pushScreen(key_configurer(5, cmdlist));
-    else if(uni == '5') pushScreen(key_configurer(6, cmdlist));
-    else if(uni == '6') pushScreen(key_configurer(7, cmdlist));
-    else if(uni == '7') pushScreen(key_configurer(8, cmdlist));
+    else if(uni == '1') pushScreen(get_key_configurer(1, cmdlist));
+    else if(uni == '2') pushScreen(get_key_configurer(2, cmdlist));
+    else if(uni == 'p') pushScreen(get_key_configurer(3, GDIM == 3 ? pancmds3 : pancmds));
+    else if(uni == '3') pushScreen(get_key_configurer(4, cmdlist));
+    else if(uni == '4') pushScreen(get_key_configurer(5, cmdlist));
+    else if(uni == '5') pushScreen(get_key_configurer(6, cmdlist));
+    else if(uni == '6') pushScreen(get_key_configurer(7, cmdlist));
+    else if(uni == '7') pushScreen(get_key_configurer(8, cmdlist));
   #if CAP_SDLJOY
     else if(uni == 'j') pushScreen(joy_configurer(players));
   #endif
