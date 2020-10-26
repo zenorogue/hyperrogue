@@ -990,23 +990,20 @@ void draw_all_noray(int zlev) {
       
       if(c1->wall) {
       
-        if(solnil) {
-          for(const shiftmatrix& V: current_display->all_drawn_copies[c1])
-            forCellIdEx(c2, i, c1)
-              if(!c2->wall)
-                queuepolyat(V, cgi.shWall3D[i], (c1->landparam || 8) | 0xFF, PPR::WALL);
-          continue;
-          }
-
         auto c_camera = get_at(lev, zlev);
         
         for(shiftmatrix V: current_display->all_drawn_copies[c_camera]) {
-          change_depth(V, z, zlev);
+          change_depth(V, -z, zlev);
+          
+          color_t wcol = c1->landparam;
+          if(c1->wall == waBarrier) wcol = winf[waBarrier].color;
+
+          int d = (wcol & 0xF0F0F0) >> 4;
 
           forCellIdCM(c2, i, c1)
             if(!c2->wall) {
-              auto &q = queuepolyat(V, cgi.shWall3D[i], (c1->landparam << 8) | 0xFF, PPR::WALL);
-              if(c1->wall == waBarrier) q.color = (winf[waBarrier].color << 8) | 0xFF;
+              color_t col = darkena(wcol - d * get_darkval(c1, i), 0, 0xFF);
+              auto &q = queuepolyat(V, cgi.shWall3D[i], col, PPR::WALL);
               q.tinf = &floor_texture_vertices[cgi.shFloor.id];
               ensure_vertex_number(*q.tinf, q.cnt);
               }
