@@ -1292,7 +1292,7 @@ void run() {
     if(explore && sym == SDLK_BACKSPACE) 
       explore = false;
 
-    if(state == tsFalling) {
+    if(state == tsFalling && !paused) {
       multi::handleInput(0);
       bool consumed = false;
       for(int i=0; i<bmLast; i++)
