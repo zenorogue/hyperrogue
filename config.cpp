@@ -22,6 +22,8 @@ struct supersaver {
   virtual bool dosave() = 0;
   virtual void reset() = 0;
   virtual ~supersaver() {};
+  virtual bool affects(void* v) { return false; }
+  virtual void set_default() = 0;
   };
 
 typedef vector<shared_ptr<supersaver>> saverlist;
@@ -36,6 +38,8 @@ template<class T> struct dsaver : supersaver {
   bool dosave() { return val != dft; }
   void reset() { val = dft; }
   dsaver(T& val) : val(val) { }
+  bool affects(void* v) { return v == &val; }
+  void set_default() { dft = val; }
   };
 
 template<class T> struct saver : dsaver<T> {};
@@ -51,6 +55,18 @@ template<class T> void addsaver(T& i, string name) {
   addsaver(i, name, i);
   }
 
+template<class T> void removesaver(T& val) {
+  for(int i=0; i<isize(savers); i++)
+    if(savers[i]->affects(&val))
+      savers.erase(savers.begin() + i);
+  }
+
+template<class T> void set_saver_default(T& val) {
+  for(auto sav: savers)
+    if(sav->affects(&val))
+      sav->set_default();
+  }
+
 template<class T> struct saverenum : supersaver {
   T& val;
   T dft;
@@ -59,6 +75,8 @@ template<class T> struct saverenum : supersaver {
   saverenum<T>(T& v) : val(v) { }
   string save() { return its(int(val)); }
   void load(const string& s) { val = (T) atoi(s.c_str()); }
+  virtual bool affects(void* v) { return v == &val; }
+  virtual void set_default() { dft = val; }
   };
 
 template<class T, class U> void addsaverenum(T& i, U name, T dft) {
