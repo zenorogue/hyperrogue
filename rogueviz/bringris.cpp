@@ -452,21 +452,6 @@ void generate_shapes_rec(vector<cellwalker>& sofar, code_t& code, int cnt) {
         }
       id++;
       }
-        
-/*    auto inv = build_from(code, sofar[0], 3);
-    
-    
-    for(auto ish: inv) {
-      vector<int> sid;
-      for(int k=0; k<5; k++) {
-        vector<cellwalker> shape2 = build_from(code, flatspin(ish, k), 0);
-        auto ass2 = as_set(shape2);
-        sid.push_back(ass2.count(sofar[0].at));
-        seen_blocks.insert(ass2);
-        }    
-      println(hlog, "sid = ", sid);
-      } */
-    
     int syms = 0;
     for(int i: {0,1,2,3}) if(builds(sofar, code, i)) syms++;
     bool vertical = true;
@@ -862,7 +847,6 @@ void shift_block(int dir) {
   }
 
 void bringris_action(int k) {
-  println(hlog, "action ", k);
   if(k < 4) shift_block(k);
   if(k == 4) rotate_block(1);
   if(k == 5) rotate_block(-1);
@@ -1310,7 +1294,6 @@ void run() {
 
     if(state == tsFalling) {
       multi::handleInput(0);
-      println(hlog, "'s' is : ", multi::scfg.keyaction['s']);
       bool consumed = false;
       for(int i=0; i<bmLast; i++)
         if(multi::actionspressed[16+i] && !multi::lactionpressed[16+i]) {
@@ -1491,7 +1474,7 @@ void get_level() {
   
 void create_game() {
   if(!prod && !solnil) {
-    println(hlog, "need product geometry");
+    println(hlog, "need product or Solnil geometry");
     exit(1);
     }
   if(nil) {
