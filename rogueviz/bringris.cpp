@@ -40,6 +40,8 @@
 
 #include "../hyper.h"
 
+#define solnil (nil || sol)
+
 namespace hr {
 
 namespace bringris {
@@ -54,6 +56,12 @@ int bgeom = 0;
 
 int max_piece;
 bool rotate_allowed = false;
+
+bool use_raycaster = true;
+
+int last_adjust, when_t;
+transmatrix tView, pView;
+cell* ncenter;
 
 vector<bgeometry> bgeoms = {
   {"Bring surface", "the original Bringris geometry", [] {
@@ -140,11 +148,81 @@ vector<bgeometry> bgeoms = {
     rotate_allowed = true;
     }},
 
-  {"Nil geometry", "are you sure you want this?", [] {
+  {"30/6", "six squares around a vertex", [] {
+    using namespace fieldpattern;
+    current_extra = 3;
+    auto& gxcur = fgeomextras[current_extra];
+    while(isize(gxcur.primes) < 1) nextPrime(gxcur);
+    fgeomextras[current_extra].current_prime_id = 2;
+    enableFieldChange();
+    set_geometry(gFieldQuotient);
+    
+    gp::param = gp::loc(1, 1);
+    set_variation(eVariation::unrectified);
+
+    set_geometry(gProduct);
+    max_piece = 4;
+    rotate_allowed = true;
+    }},
+
+  {"42", "seven squares around a vertex", [] {
+    using namespace fieldpattern;
+    current_extra = 4;
+    auto& gxcur = fgeomextras[current_extra];
+    while(isize(gxcur.primes) < 1) nextPrime(gxcur);
+    fgeomextras[current_extra].current_prime_id = 0;
+    enableFieldChange();
+    set_geometry(gFieldQuotient);
+    
+    gp::param = gp::loc(1, 1);
+    set_variation(eVariation::unrectified);
+
+    set_geometry(gProduct);
+    max_piece = 4;
+    rotate_allowed = false;
+    }},
+
+  {"bounded well", "five squares around a vertex", [] {
+    set_geometry(g45);
+    gp::param = gp::loc(1, 1);
+    set_variation(eVariation::unrectified);
+    set_geometry(gProduct);
+
+    max_piece = 4;
+    rotate_allowed = false;
+    }},
+
+  {"giant", "like Bring's but much larger", [] {
+    using namespace fieldpattern;
+    current_extra = 2;
+    auto& gxcur = fgeomextras[current_extra];
+    while(isize(gxcur.primes) < 1) nextPrime(gxcur);
+    fgeomextras[current_extra].current_prime_id = 1;
+    enableFieldChange();
+    set_geometry(gFieldQuotient);
+    
+    gp::param = gp::loc(1, 1);
+    set_variation(eVariation::unrectified);
+
+    set_geometry(gProduct);
+    max_piece = 5;
+    rotate_allowed = false;
+    }},
+
+  {"torus: shear", "Nil geometry: are you sure you want this?", [] {
     nilv::nilperiod = make_array(5, 0, 5);
     // nilv::set_flags();
     set_geometry(gNil);
     max_piece = 4;
+    rotate_allowed = false;
+    }},
+
+  {"torus: Arnold's Cat", "Solv geometry: flat shapes are crazy enough", [] {
+    asonov::period_xy = 5;
+    asonov::period_z = 0;
+    asonov::set_flags();
+    set_geometry(gArnoldCat);
+    max_piece = 2;
     rotate_allowed = false;
     }},
   };
@@ -168,6 +246,9 @@ bool listed(const vector<cellwalker>& v, cell* c) {
   return false;
   }
 
+int down_dir() { return nil ? 4 : sol ? 0 : cwt.at->type-1; }
+int up_dir() { return nil ? 1 : sol ? 6 : cwt.at->type-2; }
+
 cell *get_at(cell *lev, int z) {
   if(prod)
     return hybrid::get_at(lev, z);
@@ -176,20 +257,31 @@ cell *get_at(cell *lev, int z) {
     // co[2] += z * co[0];
     // co[1] = z;
     // return nilv::get_heptagon_at(co)->c7;
-    while(z<0) z++, lev=lev->move(1);
-    while(z>0) z--, lev=lev->move(4);
+    while(z<0) z++, lev=lev->cmove(up_dir());
+    while(z>0) z--, lev=lev->cmove(down_dir());
     return lev;
     }
+  }
+
+int get_z(cell* c) {
+  if(prod) 
+    return hybrid::get_where(c).second;
+  else if(nil)
+    return nilv::get_coord(c->master)[1];
+  else if(sol)
+    return asonov::get_coord(c->master)[2];
+  else
+    exit(1);
   }
 
 pair<cell*, int> get_where(cell *what) {
   if(prod)
     return hybrid::get_where(what);
   else {
-    auto co = nilv::get_coord(what->master);
-    int z = co[1];
-    while(co[1]>0) what = what->move(1), co[1]--;
-    while(co[1]<0) what = what->move(4), co[1]++;
+    int z = get_z(what);
+    int zm = z;
+    while(zm>0) what = what->cmove(up_dir()), zm--;
+    while(zm<0) what = what->cmove(down_dir()), zm++;
     return {what, z};
     // co[2] -= co[1] * co[0];
     // co[1] = 0;
@@ -213,7 +305,7 @@ bool same(const vector<cellwalker>& shape, const vector<cellwalker>& shape2) {
   }
 
 cellwalker flatspin(cellwalker cw, int i) {
-  if(nil)
+  if(solnil)
     cw.spin = i;
   else
     cw.spin = gmod(cw.spin + (cw.mirrored ? -i : i), cw.at->type - (hybri ? 2 : 0));
@@ -259,16 +351,16 @@ int penalty(const vector<cellwalker>& shape, const code_t& code) {
           dists[c2.at] = min(dists[c2.at], dists[c1.at] + 1);
   for(auto d: dists) p += d.second * 10;
   for(auto c: code) if(c.second == 0 || c.second == 2) p++;
-  if(nil)
+  if(solnil)
     for(auto s: shape) 
-      if(get_where(s.at).second > get_where(shape[0].at).second)
+      if(get_z(s.at) > get_z(shape[0].at))
         p += 10000;
   return p;
   }
 
 bool builds(const vector<cellwalker>& shape, const code_t& code, int sym = 0, int eliminate = -1) {
   if(isize(shape) != isize(code)+1) return false;
-  int ori = nil ? 1 : prod ? shape[0].at->type-2 : shape[0].at->type;
+  int ori = (solnil) ? 1 : prod ? shape[0].at->type-2 : shape[0].at->type;
   for(auto sh: shape) for(int i=0; i<ori; i++) {
     vector<cellwalker> shape2 = build_from(code, cellwalker(sh.at, i), sym);
     if(eliminate != -1) seen_blocks.emplace(as_set(shape2), eliminate);
@@ -325,6 +417,7 @@ void generate_shapes_rec(vector<cellwalker>& sofar, code_t& code, int cnt) {
     }
   for(int i=0; i<isize(sofar); i++)
   for(int t=0; t<sofar[i].at->type; t++) {
+    if(solnil && !among(t, 4, 5, 10, 11)) continue; 
     cellwalker ncw = add(sofar[i], t);
     if(listed(sofar, ncw.at)) continue;
     code.emplace_back(i, t);
@@ -346,7 +439,11 @@ void list_all() {
   // for(auto sh: piecelist) println(hlog, "multi=", sh.multi, " penalty=", sh.penalty, " syms=", sh.symmetries, " => ", sh.code);
   }
 
+cell *well_center;
+
 vector<cell*> level;
+
+vector<cell*> out_level;
 
 bool pro_game;
 
@@ -408,7 +505,7 @@ color_t get_hipso(ld y) {
 void draw_shape() {
   auto shape = build_from(piecelist[shape_id].code, at);
   for(auto c: shape) {
-    int y = -get_where(c.at).second;
+    int y = -get_z(c.at);
     c.at->wall = waWaxWall, c.at->landparam = get_hipso(y);
     }
   }
@@ -421,6 +518,7 @@ void remove_shape() {
 
 bool shape_conflict(cellwalker cw) {  
   auto shape = build_from(piecelist[shape_id].code, cw);
+
   for(auto c: shape)
     if(c.at->wall)
       return true;
@@ -457,8 +555,14 @@ int choose_piece() {
   return sel;
   }
 
+void reset_view();
+
 void new_piece() {
-  at.at = get_at(get_where(at.at).first, -well_size - 1);  
+  at.at = get_at(well_center ? well_center : get_where(at.at).first, -well_size - 1);  
+  if(well_center) {
+    at.spin = 0;
+    reset_view();
+    }
   shape_id = next_shape_id;
   next_shape_id = choose_piece();
   if(shape_conflict(at)) {
@@ -573,12 +677,6 @@ void fallen() {
   score += 20000000. / (current_move_time_limit() * 3 + ticks - move_started);
   }
 
-int down_dir() { return nil ? 4 : cwt.at->type-1; }
-
-int last_adjust, when_t;
-transmatrix tView, pView;
-cell* ncenter;
-
 void drop() {
   remove_shape();
   cellwalker fall = at;
@@ -590,8 +688,8 @@ void drop() {
     draw_shape();
     }
   move_at = ticks + current_move_time_limit();
-  if(nil) {
-    pView = pView * currentmap->adj(cwt.at, 4);
+  if(solnil) {
+    pView = pView * currentmap->adj(cwt.at, down_dir());
     when_t = ticks + turn_animation;
     }
   }
@@ -681,8 +779,15 @@ void rotate_block(int d) {
   }    
 
 int nilmap(int dir) {
-  int nm[4] = {3, 2, 0, 5};
-  return nm[dir];
+  if(nil) {
+    int nm[4] = {3, 2, 0, 5};
+    return nm[dir];
+    }
+  if(sol) {
+    int nm[4] = {11, 10, 5, 4};
+    return nm[dir];
+    }
+  exit(1);
   }
 
 void shift_block(int dir) {
@@ -693,7 +798,7 @@ void shift_block(int dir) {
   
   cellwalker at1;
   
-  if(nil) {
+  if(solnil) {
     at1.at = at.at->cmove(nilmap(dir));
     }
   else if(t&1) {
@@ -717,7 +822,7 @@ void shift_block(int dir) {
   if(!shape_conflict(at1)) {
     // playSound(cwt.at, "hit-crush1");
     at = at1;
-    if(nil) {
+    if(solnil) {
       pView = pView * currentmap->adj(cwt.at, nilmap(dir));
       when_t = ticks + turn_animation;
       }
@@ -760,7 +865,7 @@ transmatrix smooth;
 
 void draw_wirecube_at(const transmatrix& smoo, cell *c, int zlev, color_t col) {
 
-  if(nil) {
+  if(solnil) {
     auto lev = inverse_shift(gmatrix[at.at], gmatrix[c]);
     for(const shiftmatrix& V: current_display->all_drawn_copies[c])
       for(int i=0; i<c->type; i++) {
@@ -776,7 +881,7 @@ void draw_wirecube_at(const transmatrix& smoo, cell *c, int zlev, color_t col) {
   
   for(const shiftmatrix& V: current_display->all_drawn_copies[c_camera]) {
     shiftmatrix VA;
-    if(nil)
+    if(solnil)
       VA = V;
     else if(in_h2xe())
       VA = shiftless(smoo * V.T, cgi.plevel * (where_c.second - zlev));
@@ -832,10 +937,52 @@ void draw_holes(int zlev) {
   sightranges[geometry] /= 100;
   }
 
+void draw_all_noray(int zlev) {
+  sightranges[geometry] *= 100;
+  initquickqueue();
+  for(auto lev: level) {
+    for(int z=0; z<=camera_level+1; z++) {
+      cell *c1 = get_at(lev, -z);
+      
+      if(c1->wall) {
+      
+        if(solnil) {
+          for(const shiftmatrix& V: current_display->all_drawn_copies[c1])
+            forCellIdEx(c2, i, c1)
+              if(!c2->wall)
+                queuepolyat(V, cgi.shWall3D[i], (c1->landparam || 8) | 0xFF, PPR::WALL);
+          continue;
+          }
+
+        auto c_camera = get_at(lev, -camera_level);
+        
+        for(const shiftmatrix& V: current_display->all_drawn_copies[c_camera]) {
+          shiftmatrix VA;
+
+          if(in_h2xe())
+            VA = shiftless(V.T, cgi.plevel * (-z - zlev));
+          else
+            VA = shiftless(V.T * zpush(cgi.plevel * (-z - zlev)));
+
+          forCellIdCM(c2, i, c1)
+            if(!c2->wall) {
+              auto &q = queuepolyat(VA, cgi.shWall3D[i], (c1->landparam << 8) | 0xFF, PPR::WALL);
+              if(c1->wall == waBarrier) q.color = (winf[waBarrier].color << 8) | 0xFF;
+              q.tinf = &floor_texture_vertices[cgi.shFloor.id];
+              ensure_vertex_number(*q.tinf, q.cnt);
+              }
+          }
+        }
+      }
+    }
+  quickqueue();
+  sightranges[geometry] /= 100;
+  }
+
 void start_new_game();
 
 void draw_screen(int xstart, bool show_next) {
-  int steps = camera_level - (-get_where(at.at).second);
+  int steps = camera_level - (-get_z(at.at));
   if(state != tsFalling) steps = camera_level - (well_size + 1);
   
   dynamicval<display_data> ccd(*current_display);
@@ -857,6 +1004,12 @@ void draw_screen(int xstart, bool show_next) {
       shift_view(ztangent(3 * nilv::nilwidth));
       rotate_view(cspin(0, 1, -90*degree));
       }
+    else if(sol) {
+      centerover = at.at;
+      rotate_view(cspin(1, 2, 180*degree));
+      shift_view(ztangent(1));
+      rotate_view(cspin(0, 1, -90*degree));
+      }
     else {
       ld lv = -cgi.plevel * steps;
       shift_view(ztangent(lv));
@@ -864,23 +1017,33 @@ void draw_screen(int xstart, bool show_next) {
       shift_view(ztangent(cgi.plevel * (2 + max_piece)));
       centerover = ncenter;
       }
-    int zlev = get_where(centerover).second;  
-    if(!nil) {
+    int zlev = get_z(centerover);
+    if(!solnil) {
       make_actual_view();
       create_matrices();
       }
     // anims::moved();
     
-    decltype(current_display->all_drawn_copies) adc;
-    if(!nil) adc = std::move(current_display->all_drawn_copies);
-    
     if(state == tsCollect) for(cell *c: to_disappear) c->landparam = rand() & 0xFFFFFF;
-    if(state == tsFalling && !explore && !cur_ang) remove_shape();
-    gamescreen(0);
+    
+    if(state == tsFalling && !explore && !cur_ang) remove_shape();    
+    // just_gmatrix = true;
+
+    ray::want_use = use_raycaster ? 2 : 0;
+    if(solnil) {
+      gamescreen(0);
+      }
+    else {
+      auto adc = std::move(current_display->all_drawn_copies);
+      gamescreen(0);
+      current_display->all_drawn_copies = std::move(adc);
+      }
+
+    if(!use_raycaster) 
+      draw_all_noray(zlev);
+
     if(state == tsFalling && !explore && !cur_ang) draw_shape();
 
-    if(!nil) current_display->all_drawn_copies = std::move(adc);
-        
     if(anyshiftclick) draw_holes(zlev);
     
     if(state == tsFalling && !explore && !cur_ang) draw_piece(zlev, shape_id);
@@ -916,7 +1079,7 @@ void geometry_menu() {
   clearMessages();
   dialog::init("Bringris geometries");
   dialog::addBreak(100);
-  for(int i=0; i<7; i++) {
+  for(int i=0; i<isize(bgeoms); i++) {
     dialog::addTitle(bgeoms[i].name, i == bgeom ? 0xFF00 : 0xFF0000, 150);
     dialog::items.back().key = 'a' + i;
     dialog::add_action([i] {      
@@ -930,14 +1093,14 @@ void geometry_menu() {
     dialog::addInfo(bgeoms[i].cap);
     dialog::items.back().key = 'a' + i;
     dialog::addBreak(50);
-    if(i == 6 && bgeom != 6) {
+    if(i >= isize(bgeoms) && bgeom != i) {
       dialog::items.pop_back();
       dialog::items.pop_back();
       dialog::items.pop_back();
       }
     }
   dialog::addBreak(100);
-  dialog::addSelItem("max piece", its(max_piece), 'm');
+  dialog::addSelItem("max piece", its(max_piece), 'M');
   dialog::add_action([] {
     max_piece++;
     if(max_piece == 6) max_piece = 2;
@@ -972,7 +1135,7 @@ void run() {
     View = pView;
     smooth = Id;
     }
-  else if(nil) {
+  else if(solnil) {
     ld part = (ticks - last_adjust) * 1. / (when_t - last_adjust);
     hyperpoint sh = pView * C0;
     sh = lerp(C0, sh, 1-part);
@@ -994,7 +1157,7 @@ void run() {
   
   ray::want_use = 2;
   sightranges[geometry] = 50;
-  if(!nil) vid.cells_drawn_limit = 1;
+  if(!solnil) vid.cells_drawn_limit = 1;
   else vid.cells_drawn_limit = 2000;
 
   cmode = sm::NORMAL | sm::CENTER;
@@ -1149,6 +1312,18 @@ void run() {
     };
   }
 
+void reset_view() {
+  centerover = get_at(level[0], -camera_level);
+  cwt.at = centerover;
+  ncenter = get_at(level[0], -camera_level);
+  
+  NLP = Id;
+  tView = Id;
+  
+  set_view();
+  pView = tView;
+  }
+  
 void start_new_game() {
   
   for(auto& p: piecelist) p.count = 0;
@@ -1165,40 +1340,83 @@ void start_new_game() {
     else 
       c->wall = waWaxWall, c->land = laCanvas, c->landparam = 0xC000C0;
     }
-  
-  centerover = get_at(level[0], -camera_level);
-  cwt.at = centerover;
-  ncenter = get_at(level[0], -camera_level);
+
+  for(auto lev: out_level) for(int z=1; z<=camera_level; z++) {
+    cell *c = get_at(lev, -z);
+    c->item = itNone;
+    c->land = laCanvas;
+    c->wall = waWaxWall;
+    c->landparam = (get_hipso(z) & 0xFCFCFC) >> 2;
+    }
   
   at = get_at(level[0], -well_size - 1);
   next_shape_id = choose_piece();
   
   state = tsBetween;
-
-  NLP = Id;
-  tView = Id;
   
-  set_view();
-  pView = tView;
+  reset_view();
+
+  // reset_view();
 
   completed = 0;
   bricks = 0;
   cubes = 0;
   score = 0;
   }
+
+void get_level() {
+  well_center = nullptr;
+  if(geometry == g45) {
+    set<cell*> all;
+    well_center = currentmap->gamestart();
+    for(int i=0; i<4; i++)
+    for(int j=0; j<4; j++)
+    for(int k: {-1, 1}) {
+      cellwalker cw(well_center, i);
+      cw += wstep;
+      all.insert(cw.at);
+      cw += j;
+      cw += wstep;
+      all.insert(cw.at);
+      cw += k;
+      cw += wstep;
+      all.insert(cw.at);
+      }
+    set<cell*> all_ext;
+    for(cell *c: all)
+      forCellCM(d, c)
+        if(!all.count(d))
+          all_ext.insert(d);
+          
+    level.clear();
+    for(auto c: all) 
+      level.push_back(c);
+    for(auto c: all_ext) 
+      out_level.push_back(c);
+    }
+  else
+    level = currentmap->allcells();
+  }
   
 void create_game() {
-  if(!prod && !nil) {
+  if(!prod && !solnil) {
     println(hlog, "need product geometry");
     exit(1);
     }
-  level = PIU(currentmap->allcells());
   if(nil) {
     level.clear();
     for(int x=0; x<5; x++)
     for(int y=0; y<5; y++)
      level.push_back(nilv::get_heptagon_at(nilv::mvec(x, 0, y))->c7);
     }
+  else if(sol) {
+    level.clear();
+    for(int x=0; x<5; x++)
+    for(int y=0; y<5; y++)
+     level.push_back(asonov::get_at(asonov::coord(x, y, 0))->c7);
+    }
+  else 
+    PIU(get_level());  
   piecelist.clear();
   piecelist.reserve(2000);
   seen_blocks.clear();
@@ -1212,7 +1430,7 @@ void create_game() {
   playermoved = false;
   ray::want_use = 2;
   ray::exp_decay_poly = 200;
-  ray::max_iter_current() = 200;
+  ray::max_iter_current() = solnil ? 600 : 200;
   mapeditor::drawplayer = false;
   // sightranges[geometry] = 1;
   
@@ -1225,6 +1443,16 @@ void create_game() {
   
   start_new_game();
   state = tsPreGame;
+  }
+
+void init_all() {
+  stop_game_and_switch_mode(rg::nothing);
+  bgeoms[bgeom].create();
+  start_game();
+  create_game();
+  vid.texture_step = 8;
+  showstartmenu = false;
+  pushScreen(run);  
   }
 
 int args() {
@@ -1240,7 +1468,7 @@ int args() {
     list_all();
     }
 
-  else if(argis("-bringris")) {
+  else if(argis("-bringris0")) {
     PHASEFROM(3);
     start_game();
     create_game();
@@ -1254,6 +1482,15 @@ int args() {
     start_game();
     create_game();
     }
+    
+  else if(argis("-bringris"))
+    init_all();
+
+  else if(argis("-ray-off"))
+    use_raycaster = false;
+
+  else if(argis("-ray-on"))
+    use_raycaster = true;
 
   else return 1;
   return 0;
@@ -1265,15 +1502,9 @@ auto hooks =
 #ifdef BRINGRIS
 auto hook1=
     addHook(hooks_config, 100, [] {
-      if(arg::curphase == 2) {
-        stop_game_and_switch_mode(rg::nothing);
-        bgeoms[bgeom].create();
-        start_game();
-        create_game();
-        vid.texture_step = 8;
-        showstartmenu = false;
-        pushScreen(run);  
-        }
+      if(arg::curphase =1 1) 
+        conffile = "bringris.ini";
+      if(arg::curphase == 2) init_all();      
       });
 #endif
 
