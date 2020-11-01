@@ -408,7 +408,7 @@ EX void clearfrom(heptagon *at) {
       }
     int edges = at->degree();
     if(bt::in() && WDIM == 2) edges = at->c7->type;
-    for(int i=0; i<edges; i++) if(at->move(i)) {
+    for(int i=0; i<edges; i++) if(at->move(i) && at->move(i) != at) {
       if(at->move(i)->alt != &deletion_marker)
         q.push(at->move(i));    
       unlink_cdata(at->move(i));
