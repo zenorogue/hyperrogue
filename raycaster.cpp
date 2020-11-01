@@ -1096,11 +1096,12 @@ void enable_raycaster() {
       "    if(col.w == 1.) {\n";
     
     if(hyperbolic) fmain +=
-      "      mediump float z = at0.z * sinh(go);\n"
-      "      mediump float w = 1.;\n";
+      "      mediump vec4 t = at0 * sinh(go);\n";
     else fmain +=
-      "      mediump float z = at0.z * go;\n"
-      "      mediump float w = 1.;\n";
+      "      mediump vec4 t = at0 * go;\n";
+
+    fmain += 
+      "      t.w = 1.;\n";
 
     if(levellines) {
       if(hyperbolic) 
@@ -1109,11 +1110,13 @@ void enable_raycaster() {
         fmain += "gl_FragColor.xyz *= 0.5 + 0.5 * cos(z * uLevelLines * 2. * PI);\n";
       fsh += "uniform mediump float uLevelLines;\n";
       }
+    
+    if(panini_alpha) 
+      fmain += panini_shader();
 
     #ifndef GLES_ONLY
-    /* todo: fix for Panini */
     fmain +=    
-      "      gl_FragDepth = (" + to_glsl(-vnear-vfar)+"+w*" + to_glsl(2*vnear*vfar)+"/z)/" + to_glsl(vnear-vfar)+";\n"
+      "      gl_FragDepth = (" + to_glsl(-vnear-vfar)+"+t.w*" + to_glsl(2*vnear*vfar)+"/t.z)/" + to_glsl(vnear-vfar)+";\n"
       "      gl_FragDepth = (gl_FragDepth + 1.) / 2.;\n";
     #endif
     
