@@ -422,7 +422,7 @@ EX int fieldval_uniq(cell *c) {
     }
   else if(euc::in(2)) {
     auto p = euc2_coordinates(c);
-    if(bounded) return p.first + (p.second << 16);
+    if(bounded) return p.first + p.second * (1 << 16);
     return gmod(p.first - 22 * p.second, 3*127);
     }
   else if(euc::in(3)) {
