@@ -423,6 +423,48 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         for(int i=0; i<cor; i++) cornerlist.push_back(hpxy(0,0));
         }
       }
+    
+    else if(arb::in()) {
+      vector<hyperpoint> actual;
+      for(int j=0; j<cor; j++) 
+        actual.push_back(get_corner_position(c, j));
+      
+      ld min_dist = 1e3;
+      for(int j=0; j<cor; j++) 
+      for(int k=0; k<j; k++) {
+        ld dist = hdist(actual[j], actual[k]);
+        if(dist > 1e-6 && dist < min_dist)
+          min_dist = dist;
+        }
+      
+      ld dist = min_dist * (1 - 3 / sca);
+      
+      ld area = 0;
+      for(int j=0; j<cor; j++) {
+        hyperpoint current = kleinize(actual[j]);
+        hyperpoint last = kleinize(actual[j?j-1:cor-1]);
+        area += current[0] * last[1] - last[0] * current[1];
+        }
+      if(area < 0) dist = -dist;      
+      
+      for(int j=0; j<cor; j++) {
+        hyperpoint last = actual[j?j-1:cor-1];
+        hyperpoint current = actual[j];
+        hyperpoint next = actual[j<cor-1?j+1:0];
+        auto T = gpushxto0(current);
+        last = T * last;
+        next = T * next;
+        hyperpoint a = rspintox(last) * ypush0(dist);
+        hyperpoint b = rspintox(last) * xpush(hdist0(last)) * ypush0(dist);
+
+        hyperpoint c = rspintox(next) * ypush0(-dist);
+        hyperpoint d = rspintox(next) * xpush(hdist0(next)) * ypush0(-dist);
+        
+        hyperpoint h = linecross(a, b, c, d);
+        
+        cornerlist.push_back(rgpushxto0(current) * h);
+        }
+      }
   
     else {
       for(int j=0; j<cor; j++)
