@@ -360,7 +360,7 @@ void starbattle_puzzle() {
     }
   
   keyhandler = [] (int sym, int uni) {
-    handlePanning(sym, uni);
+    if(!dialog_shown) handlePanning(sym, uni);
     dialog::handleNavigation(sym, uni);
     
     if(among(sym, '-', SDLK_F1) && !holdmouse) push_stop();
