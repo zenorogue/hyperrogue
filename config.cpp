@@ -1554,6 +1554,7 @@ EX void explain_detail() {
   }
 
 EX ld max_fov_angle() {
+  if(panini_alpha >= 1 || panini_alpha <= -1) return 360;
   return acos(-panini_alpha) * 2 / degree;
   }
 
