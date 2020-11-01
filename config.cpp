@@ -660,7 +660,7 @@ EX void initConfig() {
 
   addsaver(vid.sloppy_3d, "sloppy3d", true);
 
-  addsaver(vid.texture_step, "wall-quality", 1);
+  addsaver(vid.texture_step, "wall-quality", 4);
   
   addsaver(smooth_scrolling, "smooth-scrolling", false);
   addsaver(mouseaim_sensitivity, "mouseaim_sensitivity", 0.01);
