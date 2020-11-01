@@ -713,6 +713,8 @@ EX void initConfig() {
   addsaver(camera_speed, "camera-speed", 1);
   addsaver(camera_rot_speed, "camera-rot-speed", 1);
 
+  addsaver(panini_alpha, "panini_alpha", 0);
+
   callhooks(hooks_configfile);
 
 #if CAP_CONFIG
@@ -1551,17 +1553,48 @@ EX void explain_detail() {
     ));
   }
 
-EX void add_edit_fov(char key IS('f')) {
-  dialog::addSelItem(XLAT("field of view"), fts(vid.fov) + "°", key);
-  dialog::add_action([] {
-    dialog::editNumber(vid.fov, 1, 170, 1, 45, "field of view", 
+EX ld max_fov_angle() {
+  return acos(-panini_alpha) * 2 / degree;
+  }
+
+EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
+
+  string sfov = fts(vid.fov) + "°";
+  if(panini_alpha) {
+    sfov += " / " + fts(max_fov_angle()) + "°";
+    }
+  dialog::addSelItem(XLAT("field of view"), sfov, key);
+  dialog::add_action([=] {
+    if(pop) popScreen();
+    dialog::editNumber(vid.fov, 1, max_fov_angle(), 1, 45, "field of view", 
       XLAT(
         "Horizontal field of view, in angles. "
         "This affects the Hypersian Rug mode (even when stereo is OFF) "
-        "and non-disk models.")
+        "and non-disk models.") + "\n\n" +
+      XLAT(
+        "Must be less than %1°. Panini projection can be used to get higher values.",
+        fts(max_fov_angle())
+        )
         );
     dialog::bound_low(1e-8);
-    dialog::bound_up(179);
+    dialog::bound_up(max_fov_angle() - 0.01);
+    dialog::extra_options = [] {
+      dialog::addSelItem(XLAT("Panini projection"), fts(panini_alpha), 'P');
+      dialog::add_action([] {
+        popScreen();
+        dialog::editNumber(panini_alpha, 0, 1, 0.1, 0, "Panini parameter", 
+          XLAT(
+            "The Panini projection is an alternative perspective projection "
+            "which allows very wide field-of-view values. HyperRogue uses "
+            "a quick implementation, so parameter values too close to 1 may "
+            "be buggy; try e.g. 0.9 instead.")
+            );
+        dialog::reaction = ray::reset_raycaster;
+        dialog::extra_options = [] {
+          add_edit_fov('F', true);
+          };
+        });
+      };
     });
   }
 

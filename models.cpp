@@ -208,6 +208,7 @@ EX namespace models {
   EX bool has_orientation(eModel m) {
     if(m == mdHorocyclic)
       return hyperbolic;
+    if((m == mdPerspective || m == mdGeodesic) && panini_alpha) return true;
     return
       among(m, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral, mdSimulatedPerspective, mdTwoHybrid, mdHorocyclic, mdAxial, mdAntiAxial, mdQuadrant,
         mdWerner, mdAitoff, mdHammer, mdLoximuthal, mdWinkelTripel) || mdBandAny();
@@ -867,6 +868,10 @@ EX namespace models {
     else if(argis("-mob")) { 
       PHASEFROM(2); 
       shift_arg_formula(vpconf.skiprope);
+      }
+    else if(argis("-palpha")) { 
+      PHASEFROM(2); 
+      shift_arg_formula(panini_alpha, reset_all_shaders);
       }
     else if(argis("-zoom")) { 
       PHASEFROM(2); shift_arg_formula(vpconf.scale);

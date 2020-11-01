@@ -60,6 +60,12 @@ glhr::glmatrix model_orientation_gl() {
   return s;
   }
 
+EX void reset_all_shaders() {
+  ray::reset_raycaster();
+  compiled_programs.clear();
+  matched_programs.clear();
+  }
+
 shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   string varying, vsh, fsh, vmain = "void main() {\n", fmain = "void main() {\n";
 
@@ -332,6 +338,21 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
       }
     if(shader_flags & GF_LEVELS) vmain += "vPos = t;\n";  
     if(treset) vmain += "t[3] = 1.0;\n";
+    
+    if(WDIM == 3 && panini_alpha) {
+      vmain += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
+      /* panini */
+      vmain += "t.w += 1.; t *= 2. / t.w; t.w -= 1.;\n";
+      vmain += "float s = t.z;";
+      vmain += "float l = length(t.xyz);";
+      vmain += "t /= max(length(t.xz), 1e-2);\n";
+      vmain += "t.z += " + glhr::to_glsl(panini_alpha) + ";\n";
+      vmain += "t *= l;\n";
+      vmain += "t.w = 1.;\n";
+      frustum_culling = false;
+      shader_flags |= SF_ORIENT;
+      }
+      
     vmain += "gl_Position = uP * t;\n";
     }
 
@@ -485,7 +506,8 @@ void display_data::set_projection(int ed, ld shift) {
         for(int i=0; i<3; i++) NLP[3][i] = NLP[i][3] = 0;
         NLP[3][3] = 1;
         }
-      glhr::projection_multiply(glhr::tmtogl_transpose(NLP));
+      if(!(shader_flags & SF_ORIENT))
+        glhr::projection_multiply(glhr::tmtogl_transpose(NLP));
       }
     if(ed) {
       glhr::using_eyeshift = true;
@@ -519,6 +541,9 @@ void display_data::set_projection(int ed, ld shift) {
     glhr::glmatrix pp = glhr::id;
     if(get_shader_flags() & SF_USE_ALPHA)
       pp[3][2] = GLfloat(pconf.alpha);
+
+    if(nisot::local_perspective_used()) 
+      pp = glhr::tmtogl_transpose(NLP) * pp;
 
     if(get_shader_flags() & SF_ORIENT) {
       if(GDIM == 3) for(int a=0; a<4; a++) 

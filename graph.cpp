@@ -22,6 +22,8 @@ EX bool spatial_graphics;
 EX bool wmspatial, wmescher, wmplain, wmblack, wmascii, wmascii3;
 EX bool mmspatial, mmhigh, mmmon, mmitem;
 
+EX ld panini_alpha = 0;
+
 EX int detaillevel = 0;
 
 EX bool first_cell_to_draw = true;
@@ -4878,7 +4880,8 @@ EX void calcparam() {
   cd->xcenter += cd->scrsize * pconf.xposition;
   cd->ycenter += cd->scrsize * pconf.yposition;
   
-  cd->tanfov = tan(vid.fov * degree / 2);
+  ld fov = vid.fov * degree / 2;
+  cd->tanfov = sin(fov) / (cos(fov) + panini_alpha);
   
   callhooks(hooks_calcparam);
   reset_projection();

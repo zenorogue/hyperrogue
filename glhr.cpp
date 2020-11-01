@@ -154,7 +154,7 @@ void display(const glmatrix& m) {
   printf("\n");
   }
 
-glmatrix operator * (glmatrix m1, glmatrix m2) {
+EX glmatrix operator * (glmatrix m1, glmatrix m2) {
   glmatrix res;
   for(int i=0; i<4; i++)
   for(int j=0; j<4; j++) {

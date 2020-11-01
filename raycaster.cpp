@@ -370,14 +370,34 @@ void enable_raycaster() {
     "  mediump mat4 vw = uStart * xzspin(-lambda) * xpush(eye) * yzspin(phi);\n"
     "  mediump vec4 at0 = vec4(0., 0., 1., 0.);\n";
     
-    else fmain += 
-    "  mediump mat4 vw = uStart;\n"
-    "  mediump vec4 at0 = at;\n"
-    "  gl_FragColor = vec4(0,0,0,1);\n"
-    "  mediump float left = 1.;\n"
-    "  at0.y = -at.y;\n"
-    "  at0.w = 0.;\n"
-    "  at0.xyz = at0.xyz / length(at0.xyz);\n";
+    else {
+      fmain += 
+        "  mediump mat4 vw = uStart;\n"
+        "  mediump vec4 at0 = at;\n"
+        "  gl_FragColor = vec4(0,0,0,1);\n"
+        "  mediump float left = 1.;\n"
+        "  at0.y = -at.y;\n"
+        "  at0.w = 0.;\n";
+      
+      if(panini_alpha) fmain += 
+          "mediump float hr = at0.x*at0.x;\n"
+          "mediump float alpha = " + to_glsl(panini_alpha) + ";\n"
+          "mediump float A = 1. + hr;\n"
+          "mediump float B = -2.*hr*alpha;\n"
+          "mediump float C = 1. - hr*alpha*alpha;\n"
+          "B /= A; C /= A;\n"
+    
+          "mediump float hz = B / 2. + sqrt(C + B*B/4.);\n"
+          "if(abs(hz) > 1e-3) {"
+          "at0.xyz *= hz+alpha;\n"
+          "at0.z = hz;\n}"
+          " else at0.z = 0.;\n"
+"\n"
+          ;
+
+      fmain +=
+        "  at0.xyz = at0.xyz / length(at0.xyz);\n";   
+      }
       
     if(hyperbolic) fsh += "  mediump float len(mediump vec4 x) { return x[3]; }\n";
     else if(sphere && rotspace) fsh += "  mediump float len(mediump vec4 x) { return 1.+x.x*x.x+x.y*x.y-x.z*x.z-x.w*x.w; }\n";
@@ -1091,6 +1111,7 @@ void enable_raycaster() {
       }
 
     #ifndef GLES_ONLY
+    /* todo: fix for Panini */
     fmain +=    
       "      gl_FragDepth = (" + to_glsl(-vnear-vfar)+"+w*" + to_glsl(2*vnear*vfar)+"/z)/" + to_glsl(vnear-vfar)+";\n"
       "      gl_FragDepth = (gl_FragDepth + 1.) / 2.;\n";
