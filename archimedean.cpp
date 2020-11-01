@@ -841,8 +841,8 @@ void connectHeptagons(heptspin hi, heptspin hs) {
 
 /** T and X are supposed to be equal -- move T so that it is closer to X */
 void fixup_matrix(transmatrix& T, const transmatrix& X, ld step) {
-  for(int i=0; i<MDIM; i++)
-  for(int j=0; j<MDIM; j++)
+  for(int i=0; i<MXDIM; i++)
+  for(int j=0; j<MXDIM; j++)
     T[i][j] = (T[i][j] * (1-step) + X[i][j] * step);
 
   /*

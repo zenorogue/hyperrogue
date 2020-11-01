@@ -59,22 +59,22 @@ struct hyperpoint : array<ld, MAXMDIM> {
   #endif
 
   inline hyperpoint& operator *= (ld d) {
-    for(int i=0; i<MDIM; i++) self[i] *= d;
+    for(int i=0; i<MXDIM; i++) self[i] *= d;
     return self;
     }
   
   inline hyperpoint& operator /= (ld d) { 
-    for(int i=0; i<MDIM; i++) self[i] /= d;
+    for(int i=0; i<MXDIM; i++) self[i] /= d;
     return self;
     }
   
   inline hyperpoint& operator += (const hyperpoint h2) { 
-    for(int i=0; i<MDIM; i++) self[i] += h2[i];
+    for(int i=0; i<MXDIM; i++) self[i] += h2[i];
     return self;
     }
 
   inline hyperpoint& operator -= (const hyperpoint h2) { 
-    for(int i=0; i<MDIM; i++) self[i] -= h2[i];
+    for(int i=0; i<MXDIM; i++) self[i] -= h2[i];
     return self;
     }
 
@@ -99,7 +99,7 @@ struct hyperpoint : array<ld, MAXMDIM> {
   // inner product
   inline friend ld operator | (hyperpoint h1, hyperpoint h2) {
     ld sum = 0;
-    for(int i=0; i<MDIM; i++) sum += h1[i] * h2[i];
+    for(int i=0; i<MXDIM; i++) sum += h1[i] * h2[i];
     return sum;
     }    
   };
@@ -118,18 +118,18 @@ struct transmatrix {
   
   inline friend hyperpoint operator * (const transmatrix& T, const hyperpoint& H) {
     hyperpoint z;
-    for(int i=0; i<MDIM; i++) {
+    for(int i=0; i<MXDIM; i++) {
       z[i] = 0;
-      for(int j=0; j<MDIM; j++) z[i] += T[i][j] * H[j];
+      for(int j=0; j<MXDIM; j++) z[i] += T[i][j] * H[j];
       }
     return z;
     }
 
   inline friend transmatrix operator * (const transmatrix& T, const transmatrix& U) {
     transmatrix R;
-    for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++) {
+    for(int i=0; i<MXDIM; i++) for(int j=0; j<MXDIM; j++) {
       R[i][j] = 0;
-      for(int k=0; k<MDIM; k++)
+      for(int k=0; k<MXDIM; k++)
         R[i][j] += T[i][k] * U[k][j];
       }
     return R;
@@ -490,14 +490,14 @@ EX ld hypot_auto(ld x, ld y) {
 EX hyperpoint normalize(hyperpoint H) {
   if(prod) return H;
   ld Z = zlevel(H);
-  for(int c=0; c<MDIM; c++) H[c] /= Z;
+  for(int c=0; c<MXDIM; c++) H[c] /= Z;
   return H;
   }
 
 /** like normalize but makes (ultra)ideal points material */
 EX hyperpoint ultra_normalize(hyperpoint H) {
   if(material(H) <= 0) {
-    H[MDIM-1] = hypot_d(MDIM-1, H) + 1e-6;
+    H[LDIM] = hypot_d(LDIM, H) + 1e-6;
     }
   return normalize(H);
   }
@@ -531,7 +531,7 @@ EX hyperpoint midz(const hyperpoint& H1, const hyperpoint& H2) {
   ld Z = 2;
   
   if(!euclid) Z = zlevel(H3) * 2 / (zlevel(H1) + zlevel(H2));
-  for(int c=0; c<MDIM; c++) H3[c] /= Z;
+  for(int c=0; c<MXDIM; c++) H3[c] /= Z;
   
   return H3;
   }
@@ -611,8 +611,8 @@ EX transmatrix cpush(int cid, ld alpha) {
 EX transmatrix xpush(ld alpha) { return cpush(0, alpha); }
 
 EX bool eqmatrix(transmatrix A, transmatrix B, ld eps IS(.01)) {
-  for(int i=0; i<MDIM; i++)
-  for(int j=0; j<MDIM; j++)
+  for(int i=0; i<MXDIM; i++)
+  for(int j=0; j<MXDIM; j++)
     if(std::abs(A[i][j] - B[i][j]) > eps)
       return false;
   return true;
@@ -702,7 +702,7 @@ EX transmatrix parabolic13(ld u, ld v) {
   }
 
 EX hyperpoint parabolic10(hyperpoint h) {
-  if(euclid) { h[MDIM] = 1; return h; }
+  if(euclid) { h[LDIM] = 1; return h; }
   else if(MDIM == 4) return hyperpoint(sinh(h[0]), h[1]/exp(h[0]), h[2]/exp(h[0]), cosh(h[0]));
   else return hyperpoint(sinh(h[0]), h[1]/exp(h[0]), cosh(h[0]), 0);
   }
@@ -768,18 +768,19 @@ EX transmatrix pushxto0(const hyperpoint& H) {
 
 /** set the i-th column of T to H */
 EX void set_column(transmatrix& T, int i, const hyperpoint& H) {
-  for(int j=0; j<MDIM; j++)
+  for(int j=0; j<MXDIM; j++)
     T[j][i] = H[j];
   }
 
 /** build a matrix using the given vectors as columns */
 EX transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3, hyperpoint h4) {
   transmatrix T;
-  for(int i=0; i<MDIM; i++)
+  for(int i=0; i<MXDIM; i++) {
     T[i][0] = h1[i],
     T[i][1] = h2[i],
     T[i][2] = h3[i];
-  if(MAXMDIM == 4) for(int i=0; i<MDIM; i++) T[i][3] = h4[i];
+    if(MAXMDIM == 4) T[i][3] = h4[i];
+    }
   return T;
   }
 
@@ -868,11 +869,11 @@ EX void fixmatrix_euclid(transmatrix& T) {
 EX void orthonormalize(transmatrix& T) {
   for(int x=0; x<MDIM; x++) for(int y=0; y<=x; y++) {
     ld dp = 0;
-    for(int z=0; z<MDIM; z++) dp += T[z][x] * T[z][y] * sig(z);
+    for(int z=0; z<MXDIM; z++) dp += T[z][x] * T[z][y] * sig(z);
     
     if(y == x) dp = 1 - sqrt(sig(x)/dp);
     
-    for(int z=0; z<MDIM; z++) T[z][x] -= dp * T[z][y];
+    for(int z=0; z<MXDIM; z++) T[z][x] -= dp * T[z][y];
     }
   }
 
@@ -986,7 +987,7 @@ EX transmatrix ortho_inverse(transmatrix T) {
 
 /** \brief inverse of an orthogonal matrix in Minkowski space */
 EX transmatrix pseudo_ortho_inverse(transmatrix T) {
-  for(int i=1; i<MDIM; i++)
+  for(int i=1; i<MXDIM; i++)
     for(int j=0; j<i; j++)
       swap(T[i][j], T[j][i]);
   for(int i=0; i<MDIM-1; i++)
@@ -1127,7 +1128,7 @@ EX hyperpoint mscale(const hyperpoint& t, double fac) {
   if(GDIM == 3 && !prod) return cpush(2, fac) * t;
   if(prod) fac = exp(fac);
   hyperpoint res;
-  for(int i=0; i<MDIM; i++) 
+  for(int i=0; i<MXDIM; i++) 
     res[i] = t[i] * fac;
   return res;
   }
@@ -1143,8 +1144,12 @@ EX transmatrix mscale(const transmatrix& t, double fac) {
     }
   if(prod) fac = exp(fac);
   transmatrix res;
-  for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
-    res[i][j] = t[i][j] * fac;
+  for(int i=0; i<MXDIM; i++) {
+    for(int j=0; j<MDIM; j++)
+      res[i][j] = t[i][j] * fac;
+    for(int j=MDIM; j<MXDIM; j++)
+      res[i][j] = t[i][j];
+    }
   return res;
   }
 
@@ -1154,17 +1159,25 @@ EX shiftmatrix mscale(const shiftmatrix& t, double fac) {
 
 EX transmatrix xyscale(const transmatrix& t, double fac) {
   transmatrix res;
-  for(int i=0; i<MDIM; i++) for(int j=0; j<GDIM; j++)
-    res[i][j] = t[i][j] * fac;
+  for(int i=0; i<MXDIM; i++) {
+    for(int j=0; j<GDIM; j++)
+      res[i][j] = t[i][j] * fac;
+    for(int j=GDIM; j<MXDIM; j++)
+      res[i][j] = t[i][j];
+    }
   return res;
   }
 
 EX transmatrix xyzscale(const transmatrix& t, double fac, double facz) {
   transmatrix res;
-  for(int i=0; i<MDIM; i++) for(int j=0; j<GDIM; j++)
-    res[i][j] = t[i][j] * fac;
-  for(int i=0; i<MDIM; i++) 
-    res[i][LDIM] = t[i][LDIM] * facz;
+  for(int i=0; i<MXDIM; i++) {
+    for(int j=0; j<GDIM; j++)
+      res[i][j] = t[i][j] * fac;
+    res[i][LDIM] = 
+      t[i][LDIM] * facz;
+    for(int j=LDIM+1; j<MXDIM; j++)
+      res[i][j] = t[i][j];
+    }
   return res;
   }
 
@@ -1181,7 +1194,7 @@ EX transmatrix mzscale(const transmatrix& t, double fac) {
   transmatrix res = t * inverse(tcentered) * ypush(-fac) * tcentered;
   fac *= .2;
   fac += 1;
-  for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
+  for(int i=0; i<MXDIM; i++) for(int j=0; j<MXDIM; j++)
     res[i][j] = res[i][j] * fac;
   return res;
   }
@@ -1300,8 +1313,8 @@ EX ld ortho_error(transmatrix T) {
 
 EX transmatrix transpose(transmatrix T) {
   transmatrix result;
-  for(int i=0; i<MDIM; i++)
-    for(int j=0; j<MDIM; j++)
+  for(int i=0; i<MXDIM; i++)
+    for(int j=0; j<MXDIM; j++)
       result[j][i] = T[i][j];
   return result;
   }
@@ -1340,7 +1353,7 @@ inline hyperpoint zpush0(ld x) { return cpush0(2, x); }
 /** T * C0, optimized */
 inline hyperpoint tC0(const transmatrix &T) {
   hyperpoint z;
-  for(int i=0; i<MDIM; i++) z[i] = T[i][LDIM];
+  for(int i=0; i<MXDIM; i++) z[i] = T[i][LDIM];
   return z;
   }
 

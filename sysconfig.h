@@ -185,6 +185,10 @@
 #define MAXMDIM 4
 #endif
 
+#ifndef CAP_MDIM_FIXED
+#define CAP_MDIM_FIXED 0
+#endif
+
 #ifndef CAP_TEXTURE
 #define CAP_TEXTURE (CAP_GL && (CAP_PNG || CAP_SDL_IMG) && !ISMINI)
 #endif

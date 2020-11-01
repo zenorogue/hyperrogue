@@ -755,7 +755,7 @@ EX transmatrix track_matrix(int at, int dir) {
   transmatrix res = unshift(ggmatrix(racing::track[at]));
   while(true) {
     if(at+dir < 0 || at+dir >= isize(racing::track)) return res;
-    for(int x=0; x<MDIM; x++) for(int y=0; y<MDIM; y++)
+    for(int x=0; x<MXDIM; x++) for(int y=0; y<MXDIM; y++)
       if(abs(res[y][x]) > 10000) return res;
     cell *cur = racing::track[at];
     at += dir;

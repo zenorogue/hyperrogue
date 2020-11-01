@@ -383,15 +383,22 @@ struct videopar {
 
 extern videopar vid;
 
+/** \brief How many dimensional is the gameplay. In the FPP mode of a 2D geometry, WDIM is 2 */
 #define WDIM cginf.g.gameplay_dimension
+/** \brief How many dimensional is the graphical representation. In the FPP mode of a 2D geometry, MDIM is 3 */
 #define GDIM cginf.g.graphical_dimension
+/** \brief How many dimensions of the matrix representation are used. It is usually 3 in 2D geometries (not FPP) and in product geometries, 4 in 3D geometries */
 #define MDIM (MAXMDIM == 3 ? 3 : cginf.g.homogeneous_dimension)
+/** \brief What dimension of matrices is used in loops (the 'extra' dimensions have values 0 or 1 as in Id)
+ *  Even if MDIM==3, it may be faster to keep 4x4 matrices and perform computations using them (rather than having another condition due to the variable loop size). 
+ *  The experiments on my computer show it to be the case, but the effect is not significant, and it may be different on another computer.
+ */
+#define MXDIM (CAP_MDIM_FIXED ? MAXMDIM : MDIM)
+/** \brief The 'homogeneous' dimension index */
 #define LDIM (MDIM-1)
 #define cclass g.kind
 
 #define self (*this)
-
-// #define MODFIXER (2*10090080*17)
 
 #define BUGCOLORS 3
 

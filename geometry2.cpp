@@ -12,14 +12,14 @@ shiftmatrix &ggmatrix(cell *c);
 
 EX void fixelliptic(transmatrix& at) {
   if(elliptic && at[LDIM][LDIM] < 0) {
-    for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++)
+    for(int i=0; i<MXDIM; i++) for(int j=0; j<MXDIM; j++)
       at[i][j] = -at[i][j];
     }
   }
 
 EX void fixelliptic(hyperpoint& h) {
   if(elliptic && h[LDIM] < 0)
-    for(int i=0; i<MDIM; i++) h[i] = -h[i];
+    for(int i=0; i<MXDIM; i++) h[i] = -h[i];
   }
 
 /** find relative_matrix via recursing the tree structure */

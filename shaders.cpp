@@ -612,7 +612,7 @@ EX void glapplymatrix(const transmatrix& V) {
   GLfloat mat[16];
   int id = 0;
   
-  if(MDIM == 3) {
+  if(MXDIM == 3) {
     for(int y=0; y<3; y++) {
       for(int x=0; x<3; x++) mat[id++] = V[x][y];
       mat[id++] = 0;
