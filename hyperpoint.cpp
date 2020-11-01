@@ -1485,4 +1485,24 @@ EX hyperpoint lerp(hyperpoint a0, hyperpoint a1, ld x) {
   return a0 + (a1-a0) * x;
   }
 
+EX hyperpoint linecross(hyperpoint a, hyperpoint b, hyperpoint c, hyperpoint d) {  
+  a /= a[LDIM];
+  b /= b[LDIM];
+  c /= c[LDIM];
+  d /= d[LDIM];
+  
+  ld bax = b[0] - a[0];
+  ld dcx = d[0] - c[0];
+  ld cax = c[0] - a[0];
+  ld bay = b[1] - a[1];
+  ld dcy = d[1] - c[1];
+  ld cay = c[1] - a[1];
+  
+  hyperpoint res;
+  res[0] = (cay * dcx * bax + a[0] * bay * dcx - c[0] * dcy * bax) / (bay * dcx - dcy * bax);
+  res[1] = (cax * dcy * bay + a[1] * bax * dcy - c[1] * dcx * bay) / (bax * dcy - dcx * bay);
+  res[2] = 1;
+  return normalize(res);  
+  }
+
 }
