@@ -279,8 +279,9 @@ heptagon *hrmap_standard::create_step(heptagon *h, int d) {
     else 
       buildHeptagon(h, d, transition(h->s, d));
     }
-  else if(S3 > 4) {
-    /* wrong */
+  else if(S3 > 4 && quotient) {
+    /* this branch may be used for some >4-valent quotient spaces outside of standard HyperRogue */
+    /* this is wrong, but we don't care in quotient */
     h->move(d) = h;
     // buildHeptagon(h, d, transition(h->s, d));
     }
