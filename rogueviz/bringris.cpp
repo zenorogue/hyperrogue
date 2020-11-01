@@ -10,8 +10,12 @@
 #define CAP_INV 0
 #define CAP_COMPLEX2 0
 #define CAP_EDIT 0
+
+#ifdef BWEB
 #define CAP_BT 0
 #define CAP_SOLV 0
+#endif
+
 #define CAP_THREAD 0
 // #define CAP_ZLIB 0
 #define CAP_FILES 1
