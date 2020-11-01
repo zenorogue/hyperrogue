@@ -547,7 +547,7 @@ void display_data::set_projection(int ed, ld shift) {
     glhr::projection_multiply(glhr::translate(shift, 0, 0));
     }
 
-  if(in_h2xe()) {
+  if(in_h2xe() || in_s2xe()) {
     glhr::projection_multiply(glhr::translate(0, 0, shift));
     }
 
