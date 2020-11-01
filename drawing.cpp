@@ -2164,7 +2164,7 @@ EX void reverse_side_priorities() {
 // on the sphere, parts on the back are drawn first
 EX void draw_backside() {
   DEBBI(DF_GRAPH, ("draw_backside"));
-  if(pmodel == mdHyperboloid && hyperbolic) {
+  if(pmodel == mdHyperboloid && hyperbolic && pconf.show_hyperboloid_flat) {
     dynamicval<eModel> dv (pmodel, mdHyperboloidFlat);
     for(auto& ptd: ptds) 
       if(!among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))

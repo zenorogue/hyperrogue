@@ -2000,6 +2000,7 @@ EX void draw_model_elements() {
       }
     
     case mdHyperboloid: {
+      if(!pconf.show_hyperboloid_flat) return;
       if(hyperbolic) {
 #if CAP_QUEUE
         curvepoint(point3(0,0,1));

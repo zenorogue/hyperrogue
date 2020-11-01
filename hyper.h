@@ -242,6 +242,7 @@ struct projection_configuration {
   ld model_orientation, halfplane_scale, model_orientation_yz;  
   ld collignon_parameter; 
   ld aitoff_parameter, miller_parameter, loximuthal_parameter, winkel_parameter;
+  bool show_hyperboloid_flat;
   bool collignon_reflected;
   string formula;
   eModel basic_model;
@@ -272,6 +273,7 @@ struct projection_configuration {
     miller_parameter = .8;
     loximuthal_parameter = 0;
     winkel_parameter = .5;
+    show_hyperboloid_flat = true;
     }
   };
 

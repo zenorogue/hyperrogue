@@ -515,6 +515,7 @@ EX void initConfig() {
   addsaver(vid.binary_width, "binary-tiling-width", 1);
   addsaver(pconf.collignon_parameter, "collignon-parameter", 1);
   addsaver(pconf.collignon_reflected, "collignon-reflect", false);
+  addsaver(pconf.show_hyperboloid_flat, "hyperboloid-flat", true);
 
   addsaver(pconf.aitoff_parameter, "aitoff-parameter");
   addsaver(pconf.miller_parameter, "miller-parameter");

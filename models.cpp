@@ -445,6 +445,8 @@ EX namespace models {
       }
     
     if(among(vpmodel, mdDisk, mdBall, mdHyperboloid, mdRotatedHyperboles, mdPanini)) {
+      dynamicval<eModel> v(vpconf.model, vpconf.model);
+      if(vpmodel == mdHyperboloid) vpconf.model = mdDisk;
       dialog::addSelItem(XLAT("projection distance"), fts(vpconf.alpha) + " (" + current_proj_name() + ")", 'p');
       dialog::add_action(projectionDialog);
       }
@@ -614,6 +616,10 @@ EX namespace models {
           );
         dialog::scaleLog();
         });
+      }
+
+    if(vpmodel == mdHyperboloid) {
+      dialog::addBoolItem_action(XLAT("show flat"), pconf.show_hyperboloid_flat, 'b');
       }
     
     if(vpmodel == mdCollignon) {
