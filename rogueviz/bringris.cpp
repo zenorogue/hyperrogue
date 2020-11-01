@@ -3,7 +3,7 @@
 
 #ifdef BRINGRIS
 
-#define CUSTOM_CAPTION "Bringris 1.2"
+#define CUSTOM_CAPTION "Bringris 1.3"
 
 #define MAXMDIM 4
 
@@ -41,6 +41,9 @@
 #else
 #include "../hyper.cpp"
 #endif
+
+#include "subquotient.cpp"
+#define SUBQ
 #endif
 
 #include "../hyper.h"
@@ -49,11 +52,19 @@
 
 namespace hr {
 
+namespace subquotient {
+  #ifndef SUBQ
+  void create_subquotient(int qty = -1, int id = 0);
+  #endif
+  extern eGeometry gSubquotient;
+  }
+
 namespace bringris {
 
 struct bgeometry {
   string name;
   string cap;
+  flagtype flags;
   reaction_t create;
   };
 
@@ -83,6 +94,8 @@ cell *well_center;
 vector<cell*> level;
 
 vector<cell*> out_level;
+
+map<cell*, int> center_distance;
 
 bool pro_game;
 
@@ -114,8 +127,25 @@ enum eState {
 
 eState state = tsPreGame;
 
+constexpr flagtype HYPERBOLIC = 1;
+constexpr flagtype ORBIFOLD = 2;
+constexpr flagtype SECRET = 4;
+constexpr flagtype NONORIENTABLE = 8;
+constexpr flagtype SPHERICAL = 16;
+constexpr flagtype EUCLIDEAN = 32;
+constexpr flagtype SUBQUOTIENT = 64;
+constexpr flagtype HDUAL = 128;
+constexpr flagtype BOUNDED_WELL = 256;
+constexpr flagtype ASYMMETRIC_ONLY = 512;
+constexpr flagtype FLAT_ONLY = 1024;
+
+cell *get_center();
+cell *shift_block_target(int dir);
+void shift_block(int dir, bool camera_only = false);
+void rotate_block(int dir, bool camera_only = false);
+
 vector<bgeometry> bgeoms = {
-  {"Bring surface", "the original Bringris geometry", [] {
+  {"Bring surface", "the original Bringris geometry", HYPERBOLIC, [] {
     using namespace fieldpattern;
     current_extra = 2;
     auto& gxcur = fgeomextras[current_extra];
@@ -132,7 +162,7 @@ vector<bgeometry> bgeoms = {
     rotate_allowed = false;
     }},
 
-  {"torus", "Euclidean level geometry", [] {
+  {"torus", "Euclidean level geometry", EUCLIDEAN, [] {
     auto& T0 = euc::eu_input.user_axes;
     T0[0][0] = 5;
     T0[0][1] = 0;
@@ -146,7 +176,7 @@ vector<bgeometry> bgeoms = {
     rotate_allowed = true;
     }},
 
-  {"Cube", "spherical level geometry", [] {
+  {"Cube", "spherical level geometry", SPHERICAL, [] {
     set_geometry(gSmallSphere);
     set_variation(eVariation::pure);
     set_geometry(gProduct);
@@ -154,7 +184,7 @@ vector<bgeometry> bgeoms = {
     rotate_allowed = false;
     }},
 
-  {"Klein bottle", "non-orientable manifold", [] {
+  {"Klein bottle", "non-orientable manifold", EUCLIDEAN | NONORIENTABLE, [] {
     auto& T0 = euc::eu_input.user_axes;
     T0[0][0] = 5;
     T0[0][1] = 0;
@@ -168,7 +198,7 @@ vector<bgeometry> bgeoms = {
     rotate_allowed = true;
     }},
 
-  {"pentagons", "different tiles on the Bring surface", [] {
+  {"pentagons", "different tiles on the Bring surface", HYPERBOLIC | HDUAL, [] {
     using namespace fieldpattern;
     current_extra = 2;
     auto& gxcur = fgeomextras[current_extra];
@@ -182,7 +212,7 @@ vector<bgeometry> bgeoms = {
     rotate_allowed = false;
     }},
 
-  {"double cube", "six squares around a vertex", [] {
+  {"double cube", "six squares around a vertex", HYPERBOLIC, [] {
     using namespace fieldpattern;
     current_extra = 3;
     auto& gxcur = fgeomextras[current_extra];
@@ -199,7 +229,7 @@ vector<bgeometry> bgeoms = {
     rotate_allowed = true;
     }},
 
-  {"30/6", "six squares around a vertex", [] {
+  {"30/6", "six squares around a vertex", HYPERBOLIC, [] {
     using namespace fieldpattern;
     current_extra = 3;
     auto& gxcur = fgeomextras[current_extra];
@@ -216,7 +246,7 @@ vector<bgeometry> bgeoms = {
     rotate_allowed = true;
     }},
 
-  {"42", "seven squares around a vertex", [] {
+  {"42", "seven squares around a vertex", HYPERBOLIC, [] {
     using namespace fieldpattern;
     current_extra = 4;
     auto& gxcur = fgeomextras[current_extra];
@@ -233,7 +263,7 @@ vector<bgeometry> bgeoms = {
     rotate_allowed = false;
     }},
 
-  {"bounded well", "five squares around a vertex", [] {
+  {"bounded well", "five squares around a vertex", BOUNDED_WELL, [] {
     set_geometry(g45);
     gp::param = gp::loc(1, 1);
     set_variation(eVariation::unrectified);
@@ -243,7 +273,18 @@ vector<bgeometry> bgeoms = {
     rotate_allowed = false;
     }},
 
-  {"giant", "like Bring's but much larger", [] {
+  {"mirrored Bring", "hyperbolic and non-orientable", HYPERBOLIC | NONORIENTABLE | ASYMMETRIC_ONLY, [] {
+    set_geometry(gBring);
+    gp::param = gp::loc(1, 1);
+    set_variation(eVariation::unrectified);
+    start_game();
+    subquotient::create_subquotient(2);
+    set_geometry(gProduct);
+    max_piece = 4;
+    rotate_allowed = false;
+    }},
+
+  {"giant", "like mirrored Bring but much larger", HYPERBOLIC | NONORIENTABLE, [] {
     using namespace fieldpattern;
     current_extra = 2;
     auto& gxcur = fgeomextras[current_extra];
@@ -254,14 +295,33 @@ vector<bgeometry> bgeoms = {
     
     gp::param = gp::loc(1, 1);
     set_variation(eVariation::unrectified);
+    subquotient::create_subquotient(2);
 
     set_geometry(gProduct);
     max_piece = 5;
     rotate_allowed = false;
-    well_size = 5;
+    well_size = 6;
     }},
 
-  {"torus: shear", "Nil geometry: are you sure you want this?", [] {
+  {"orbifold", "one fifth of the giant", HYPERBOLIC | NONORIENTABLE | ORBIFOLD, [] {
+    using namespace fieldpattern;
+    current_extra = 2;
+    auto& gxcur = fgeomextras[current_extra];
+    while(isize(gxcur.primes) < 1) nextPrime(gxcur);
+    fgeomextras[current_extra].current_prime_id = 1;
+    enableFieldChange();
+    set_geometry(gFieldQuotient);
+    
+    gp::param = gp::loc(1, 1);
+    set_variation(eVariation::unrectified);
+    subquotient::create_subquotient(10);
+
+    set_geometry(gProduct);
+    max_piece = 4;
+    rotate_allowed = false;
+    }},
+
+  {"torus: shear", "Nil geometry: are you sure you want this?", SECRET, [] {
     nilv::nilperiod = make_array(5, 0, 5);
     // nilv::set_flags();
     set_geometry(gNil);
@@ -269,7 +329,8 @@ vector<bgeometry> bgeoms = {
     rotate_allowed = false;
     }},
 
-  {"torus: Arnold's Cat", "Solv geometry: flat shapes are crazy enough", [] {
+#if CAP_SOLV
+  {"torus: Arnold's Cat", "Solv geometry: flat shapes are crazy enough", SECRET | FLAT_ONLY, [] {
     asonov::period_xy = 5;
     asonov::period_z = 0;
     asonov::set_flags();
@@ -277,6 +338,7 @@ vector<bgeometry> bgeoms = {
     max_piece = 2;
     rotate_allowed = false;
     }},
+#endif
   };
 
 void create_game();
@@ -294,6 +356,8 @@ void enable_bgeom(int b) {
   bgeom = b;
   enable_bgeom();
   }
+
+flagtype bflags() { return bgeoms[bgeom].flags; }
   
 using code_t = vector<pair<int, int>>;
 
@@ -380,6 +444,20 @@ cellwalker flatspin(cellwalker cw, int i) {
   return cw;
   }
 
+int add_dir(cellwalker orig, int i, int sym = 0) {
+  if(prod) {
+    if(i >= orig.at->type-2) {
+      if(sym&2) i ^= (orig.at->type-1) ^ (orig.at->type-2);
+      return i;
+      }
+    else {
+      if(sym&1) i = -i;
+      return flatspin(orig, i).spin;
+      }
+    }
+  return i;
+  }
+
 cellwalker add(cellwalker orig, int i, int sym = 0) {
   if(prod) {
     if(i >= orig.at->type-2) {
@@ -402,21 +480,14 @@ vector<cellwalker> build_from(const code_t& code, cellwalker start, int sym = 0)
   return all;
   }
 
-vector<transmatrix> build_shape_matrices(const vector<cellwalker>& cells) {
-  vector<transmatrix> all = {Id};
-  all.reserve(isize(cells));
-  for(int i=1; i<isize(cells); i++) {
-    for(int j=0; j<i; j++) {
-      int nei = neighborId(cells[j].at, cells[i].at);
-      if(nei != -1) {
-        transmatrix T = all[j];
-        T = T * currentmap->adj(cells[j].at, nei);
-        all.push_back(T);
-        break;
-        }
-      }
+vector<transmatrix> build_shape_matrices(const code_t& code, cellwalker start, int sym = 0) {
+  vector<cellwalker> all = {start};
+  vector<transmatrix> allm = {Id};
+  for(auto c: code) {
+    all.push_back(add(all[c.first], c.second, sym));
+    allm.push_back(allm[c.first] * currentmap->adj(all[c.first].at, add_dir(all[c.first], c.second, sym)));
     }
-  return all;
+  return allm;
   }
 
 int penalty(const vector<cellwalker>& shape, const code_t& code) {
@@ -477,7 +548,13 @@ void generate_shapes_rec(vector<cellwalker>& sofar, code_t& code, int cnt) {
       id++;
       }
     int syms = 0;
-    for(int i: {0,1,2,3}) if(builds(sofar, code, i)) syms++;
+    bool invalid = false;
+    for(int i: {0,1,2,3}) if(builds(sofar, code, i)) { 
+      syms++; 
+      if((bflags() & ASYMMETRIC_ONLY) && i == 1 && cnt >= 4)
+        invalid = true;
+      }
+    if(invalid) return;
     bool vertical = true;
     for(auto c: code) if(c.second < 4) vertical = false;
     if(vertical) syms *= 2;
@@ -499,7 +576,7 @@ void generate_shapes_rec(vector<cellwalker>& sofar, code_t& code, int cnt) {
   }
 
 void generate_shapes(int cnt) {
-  vector<cellwalker> cws = { cwt };
+  vector<cellwalker> cws = { get_at(get_center(), -well_size - 1) };
   code_t co = {};
   generate_shapes_rec(cws, co, cnt);
   }
@@ -556,6 +633,11 @@ void remove_shape() {
 bool shape_conflict(cellwalker cw) {  
   auto shape = build_from(piecelist[shape_id].code, cw);
 
+  /* self-conflict possible in the orbifold */
+  for(int i=0; i<isize(shape); i++) for(int j=0; j<i; j++)
+    if(shape[i].at == shape[j].at)
+      return true;
+
   for(auto c: shape)
     if(c.at->wall)
       return true;
@@ -593,13 +675,26 @@ int choose_piece() {
   }
 
 void reset_view();
+void set_tview(transmatrix T);
 
 void new_piece() {
-  at.at = get_at(well_center ? well_center : get_where(at.at).first, -well_size - 1);  
-  if(well_center) {
-    at.spin = 0;
-    reset_view();
-    }
+  if(well_center && true) {
+    again:
+    if(get_where(at.at).first != well_center) {
+      at.at = get_at(get_where(at.at).first, -well_size - 1);  
+      int d = center_distance[get_where(at.at).first];
+      for(int i=0; i<4; i++) {
+        auto mov = get_where(shift_block_target(i)).first;
+        if(center_distance.count(mov) && center_distance[mov] < d) {
+          shift_block(i, true);
+          goto again;
+          }
+        }
+      println(hlog, "failed to recenter");
+      }
+    while(at.spin) rotate_block(1, true);
+    }  
+  at.at = get_at(get_where(at.at).first, -well_size - 1);  
   shape_id = next_shape_id;
   next_shape_id = choose_piece();
   if(shape_conflict(at)) {
@@ -765,7 +860,7 @@ ld move_dist;
 void set_view() {
   move_dist = hdist0(currentmap->adj(cwt.at, 0) * C0);
   
-  if(in_h2xe() && PURE) {
+  if(in_h2xe() && PURE && S3 == 4) {
     ld dist = PIU(hdist0(get_corner_position(currentmap->gamestart(), 0)));
     dist -= 1e-4;
     move_dist = PIU(hdist(get_corner_position(currentmap->gamestart(), 0), get_corner_position(currentmap->gamestart(), 1)));
@@ -774,6 +869,8 @@ void set_view() {
     }  
   if(in_h2xe() && UNRECTIFIED)
     tView = spin(135*degree) * tView;
+  if(in_h2xe() && S7 == 4)
+    tView = spin(90*degree) * tView;
   if(in_s2xe())
     tView = spin(90*degree) * tView;
   if(in_e2xe())
@@ -804,19 +901,19 @@ void set_tview(transmatrix T) {
   when_t = ticks + turn_animation;
   }
 
-void rotate_block(int d) {
-  if(!rotate_allowed) {
+void rotate_block(int d, bool camera_only) {
+  if(!rotate_allowed && !camera_only) {
     playSound(cwt.at, "hit-crush3");
     return;
     }
-  remove_shape();
+  if(!camera_only) remove_shape();
   cellwalker at1 = flatspin(at, d);
-  if(!shape_conflict(at1)) {
+  if(camera_only || !shape_conflict(at1)) {
     at = at1;
     set_tview(spin(d*90*degree));
     }
   else playSound(cwt.at, "hit-crush3");
-  draw_shape();
+  if(!camera_only) draw_shape();
   }    
 
 int nilmap(int dir) {
@@ -831,11 +928,15 @@ int nilmap(int dir) {
   exit(1);
   }
 
-void shift_block(int dir) {
+cell *shift_block_target(int dir) {
+  return flatspin(at, dir).cpeek();
+  }
+
+void shift_block(int dir, bool camera_only) {
   int t = currentmap->gamestart()->type;
   if(prod) t -= 2;
 
-  remove_shape();
+  if(!camera_only) remove_shape();
   
   cellwalker at1;
   
@@ -860,7 +961,7 @@ void shift_block(int dir) {
 
   ld angle = dir * 90 * degree;
   
-  if(!shape_conflict(at1)) {
+  if(camera_only || !shape_conflict(at1)) {
     // playSound(cwt.at, "hit-crush1");
     at = at1;
     if(solnil) {
@@ -869,6 +970,7 @@ void shift_block(int dir) {
       }
     else
       set_tview(spin(-angle) * ypush(-move_dist) * spin(angle));
+    if(!camera_only) draw_shape();
     }
   else playSound(cwt.at, "hit-crush3");
   }
@@ -943,7 +1045,7 @@ void draw_piece(int zlev, int id) {
   sightranges[geometry] *= 100;
   initquickqueue();
   auto shape = build_from(piecelist[id].code, at);
-  auto matrices = build_shape_matrices(shape);
+  auto matrices = build_shape_matrices(piecelist[id].code, at);
 
   auto where_at = get_where(at.at);
   
@@ -1126,7 +1228,8 @@ void geometry_menu() {
     dialog::addInfo(bgeoms[i].cap);
     dialog::items.back().key = 'a' + i;
     dialog::addBreak(50);
-    if(i >= isize(bgeoms) && bgeom != i) {
+    if(i == bgeom) bgeoms[i].flags &= ~SECRET;
+    if(bgeoms[i].flags & SECRET) {
       dialog::items.pop_back();
       dialog::items.pop_back();
       dialog::items.pop_back();
@@ -1140,6 +1243,13 @@ void geometry_menu() {
     create_game();
     state = tsPreGame;
     });
+  if(bflags() & ASYMMETRIC_ONLY)
+    dialog::addInfo("(only asymmetric large pieces)");
+  else if(bflags() & FLAT_ONLY)
+    dialog::addInfo("(only flat pieces)");
+  else
+    dialog::addBreak(100);
+
   dialog::addBreak(100);
   dialog::addBack();
   dialog::display();
@@ -1249,6 +1359,7 @@ void run() {
     ld alpha = atan2(Tspin*xpush0(1));
     pView = spin(alpha * part) * gpushxto0(direct_exp(vec*part)) * pView;
     fixmatrix(pView);
+    View = tView;
     smooth = inverse(pView) * cview().T;
     // println(hlog, "smooth = ", smooth);
     }
@@ -1480,8 +1591,7 @@ void start_new_game() {
   }
 
 void get_level() {
-  well_center = nullptr;
-  if(geometry == g45) {
+  if(bflags() & BOUNDED_WELL) {
     set<cell*> all;
     well_center = currentmap->gamestart();
     all.insert(well_center);
@@ -1516,17 +1626,49 @@ void get_level() {
     for(auto c: all_ext) 
       out_level.push_back(c);
     }
-  else
+  else {
     level = currentmap->allcells();
+    if(bflags() & ORBIFOLD) {
+      vector<cell*> clist;
+      set<cell*> visited;
+      auto visit = [&] (cell *c) { 
+        if(!visited.count(c))
+          visited.insert(c),
+          clist.push_back(c);
+        };
+      for(auto c: level) if(isNeighbor(c, c)) visit(c);
+      for(int i=0; i<isize(clist); i++)
+        for(int j=0; j<clist[i]->type; j++)
+          visit(clist[i]->cmove(j));
+      well_center = clist.back();
+      }
+    }
+  if(well_center) {
+    vector<cell*> visited;
+    set<cell*> all;
+    for(auto l: level) all.insert(l);
+    auto visit = [&] (cell *c, int d) { 
+      if(all.count(c) && !center_distance.count(c))
+        center_distance[c] = d,
+        visited.push_back(c);
+      };
+    visit(well_center, 0);
+    for(int i=0; i<isize(visited); i++)
+      for(int j=0; j<visited[i]->type; j++)
+        visit(visited[i]->move(j), center_distance[visited[i]] + 1);
+    }
   }
   
 void create_game() {
+  level.clear();
+  out_level.clear();
+  well_center = nullptr;
+
   if(!prod && !solnil) {
     println(hlog, "need product or Solnil geometry");
     exit(1);
     }
   if(nil) {
-    level.clear();
     for(int x=0; x<5; x++)
     for(int y=0; y<5; y++)
      level.push_back(nilv::get_heptagon_at(nilv::mvec(x, 0, y))->c7);
@@ -1565,6 +1707,8 @@ void create_game() {
   
   start_new_game();
   state = tsPreGame;
+
+  vid.axes3 = false;
   }
 
 void init_all() {
