@@ -279,6 +279,11 @@ heptagon *hrmap_standard::create_step(heptagon *h, int d) {
     else 
       buildHeptagon(h, d, transition(h->s, d));
     }
+  else if(S3 > 4) {
+    /* wrong */
+    h->move(d) = h;
+    // buildHeptagon(h, d, transition(h->s, d));
+    }
   else if(d == 1) {
     addSpin(h, d, h->move(0), h->c.spin(0)-1, -1);
     }

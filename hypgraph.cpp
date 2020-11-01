@@ -1532,6 +1532,10 @@ void hrmap::draw_at(cell *at, const shiftmatrix& where) {
   }
 
 void hrmap_standard::draw_at(cell *at, const shiftmatrix& where) {
+  if(S3 > 4) {
+    hrmap::draw_at(at, where);
+    return;
+    }
   drawn_cells.clear();
   drawn_cells.emplace_back(at->master, hsOrigin, where * master_relative(at, true));
   for(int i=0; i<isize(drawn_cells); i++) {    
