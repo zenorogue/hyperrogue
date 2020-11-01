@@ -4978,12 +4978,21 @@ EX void gamescreen(int _darken) {
     return;
     }
   
+  auto cdc = *current_display;
+  auto gx = vid.xres;
+  auto gy = vid.yres;
+
   if(dual::split([=] () { 
+    *current_display = cdc;
+    vid.xres = gx;
+    vid.yres = gy;
     dual::in_subscreen([=] () { gamescreen(_darken); });
     })) {
     calcparam(); 
     return; 
     }
+  
+  calcparam();
   
   if((cmode & sm::MAYDARK) && !current_display->sidescreen) {
     _darken += 2;
