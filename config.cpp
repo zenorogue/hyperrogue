@@ -491,7 +491,9 @@ EX void initConfig() {
   addsaver(shmup::on, "mode-shmup", false);
   addsaver(hardcore, "mode-hardcore", false);
   addsaver(chaosmode, "mode-chaos");
+  #if CAP_INV
   addsaver(inv::on, "mode-Orb Strategy");
+  #endif
   addsaverenum(variation, "mode-variation", eVariation::bitruncated);
   addsaver(peace::on, "mode-peace");
   addsaver(peace::otherpuzzles, "mode-peace-submode");
