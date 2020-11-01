@@ -66,6 +66,17 @@ EX void reset_all_shaders() {
   matched_programs.clear();
   }
 
+EX string panini_shader() {
+  return
+    "t.w += 1.; t *= 2. / t.w; t.w -= 1.;\n"
+    "float s = t.z;\n"
+    "float l = length(t.xyz);\n"
+    "t /= max(length(t.xz), 1e-2);\n"
+    "t.z += " + glhr::to_glsl(panini_alpha) + ";\n"
+    "t *= l;\n"
+    "t.w = 1.;\n";
+  }
+
 shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   string varying, vsh, fsh, vmain = "void main() {\n", fmain = "void main() {\n";
 
@@ -342,14 +353,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     if(WDIM == 3 && panini_alpha) {
       vmain += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
       /* panini */
-      vmain += "t.w += 1.; t *= 2. / t.w; t.w -= 1.;\n";
-      vmain += "float s = t.z;";
-      vmain += "float l = length(t.xyz);";
-      vmain += "t /= max(length(t.xz), 1e-2);\n";
-      vmain += "t.z += " + glhr::to_glsl(panini_alpha) + ";\n";
-      vmain += "t *= l;\n";
-      vmain += "t.w = 1.;\n";
-      frustum_culling = false;
+      vmain += panini_shader();
       shader_flags |= SF_ORIENT;
       }
       

@@ -3705,7 +3705,7 @@ EX bool frustum_culling = true;
 void make_clipping_planes() {
 #if MAXMDIM >= 4
   clipping_planes.clear();
-  if(!frustum_culling || PIU(sphere) || experimental || vid.stereo_mode == sODS) return;
+  if(!frustum_culling || PIU(sphere) || experimental || vid.stereo_mode == sODS || panini_alpha) return;
   auto add_clipping_plane = [] (ld x1, ld y1, ld x2, ld y2) {
     ld z1 = 1, z2 = 1;
     hyperpoint sx = point3(y1 * z2 - y2 * z1, z1 * x2 - z2 * x1, x1 * y2 - x2 * y1);
