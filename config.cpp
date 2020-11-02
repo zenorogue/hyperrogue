@@ -1085,7 +1085,44 @@ EX void menuitem_sightrange(char c IS('c')) {
     dialog::addSelItem(XLAT("sight range"), its(sightrange_bonus), c);
   dialog::add_action(edit_sightrange);
   }
-  
+
+EX void menuitem_sfx_volume() {
+  dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
+  dialog::add_action([] {
+    dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
+    dialog::numberdark = dialog::DONT_SHOW;
+    dialog::reaction = [] () {
+      #if ISANDROID
+      settingsChanged = true;
+      #endif
+      };
+    dialog::bound_low(0);
+    dialog::bound_up(MIX_MAX_VOLUME);
+    });
+  }
+
+EX void menuitem_music_volume() {
+  if (!audio) return;
+  dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
+  dialog::add_action([] {
+    dialog::editNumber(musicvolume, 0, 128, 10, 60, XLAT("background music volume"), "");
+    dialog::numberdark = dialog::DONT_SHOW;
+    dialog::reaction = [] () {
+      #if CAP_SDLAUDIO
+      Mix_VolumeMusic(musicvolume);
+      #endif
+      #if ISANDROID
+      settingsChanged = true;
+      #endif
+      };
+    dialog::bound_low(0);
+    dialog::bound_up(MIX_MAX_VOLUME);
+    dialog::extra_options = [] {
+      dialog::addBoolItem_action(XLAT("play music when out of focus"), music_out_of_focus, 'A');
+      };
+    });
+  }
+
 EX void showSpecialEffects() {
   cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : sm::MAYDARK;
   gamescreen(0);
@@ -1337,35 +1374,8 @@ EX void configureOther() {
   // dialog::addBoolItem_action(XLAT("forget faraway cells"), memory_saving_mode, 'y');
   
 #if CAP_AUDIO
-  dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
-  dialog::add_action([] {
-    dialog::editNumber(musicvolume, 0, 128, 10, 60, XLAT("background music volume"), "");
-    dialog::reaction = [] () {
-#if CAP_SDLAUDIO
-      Mix_VolumeMusic(musicvolume);
-#endif
-#if ISANDROID
-      settingsChanged = true;
-#endif
-      };
-    dialog::bound_low(0);
-    dialog::bound_up(MIX_MAX_VOLUME);
-    dialog::extra_options = [] {
-      dialog::addBoolItem_action(XLAT("play music when out of focus"), music_out_of_focus, 'A');
-      };
-    });
-
-  dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
-  dialog::add_action([] {
-    dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
-    dialog::reaction = [] () {
-#if ISANDROID
-      settingsChanged = true;
-#endif
-      };
-    dialog::bound_low(0);
-    dialog::bound_up(MIX_MAX_VOLUME);
-    });
+  menuitem_music_volume();
+  menuitem_sfx_volume();
 #endif
 
   menuitem_sightrange('r');

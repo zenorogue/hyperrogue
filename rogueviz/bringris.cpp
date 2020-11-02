@@ -1295,19 +1295,9 @@ void settings_menu() {
   dialog::add_action_push(multi::get_key_configurer(1, move_names, "Bringris keys"));
 
   #if CAP_AUDIO
-  dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
-  dialog::add_action([] {
-    dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
-    dialog::numberdark = dialog::DONT_SHOW;
-    dialog::reaction = [] () {
-#if ISANDROID
-      settingsChanged = true;
-#endif
-      };
-    dialog::bound_low(0);
-    dialog::bound_up(MIX_MAX_VOLUME);
-    });
-#endif
+  menuitem_sfx_volume();
+  menuitem_music_volume();
+  #endif
 
   dialog::addBreak(100);
 
