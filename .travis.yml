@@ -122,6 +122,34 @@ matrix:
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=1
       HYPERROGUE_USE_ROGUEVIZ=1
+  - os: linux                           # Linux, make, Bringris
+    compiler: gcc
+    env: >-
+      TRAVIS_OS_NAME=linux
+      TRAVIS_COMPILER_NAME=gcc
+      TRAVIS_BUILD_SYSTEM=Makefile
+      HYPERROGUE_USE_BRINGRIS=1
+  - os: linux                           # Linux, mymake, Bringris
+    compiler: gcc
+    env: >-
+      TRAVIS_OS_NAME=linux
+      TRAVIS_COMPILER_NAME=gcc
+      TRAVIS_BUILD_SYSTEM=mymake
+      HYPERROGUE_USE_BRINGRIS=1
+  - os: osx                             # OSX, make, Bringris
+    compiler: clang
+    env: >-
+      TRAVIS_OS_NAME=osx
+      TRAVIS_COMPILER_NAME=clang
+      TRAVIS_BUILD_SYSTEM=Makefile
+      HYPERROGUE_USE_BRINGRIS=1
+  - os: osx                             # OSX, mymake, Bringris
+    compiler: clang
+    env: >-
+      TRAVIS_OS_NAME=osx
+      TRAVIS_COMPILER_NAME=clang
+      TRAVIS_BUILD_SYSTEM=mymake
+      HYPERROGUE_USE_BRINGRIS=1
   - os: linux                           # Emscripten
     env: >-
       TRAVIS_OS_NAME=linux
@@ -184,11 +212,18 @@ script:
     ./configure CXXFLAGS="-W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-maybe-uninitialized -Wno-unknown-warning-option"
     make
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
-    make -f Makefile.simple
+    if [[ "$HYPERROGUE_USE_BRINGRIS" == "1" ]]; then
+      make -f Makefile.simple bringris
+      mv bringris hyperrogue
+    else
+      make -f Makefile.simple
+    fi
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "mymake" ]]; then
     make -f Makefile.simple mymake
     if [[ "$HYPERROGUE_USE_ROGUEVIZ" == "1" ]]; then
       ./mymake -rv
+    elif [[ "$HYPERROGUE_USE_BRINGRIS" == "1" ]]; then
+      ./mymake -bringris
     else
       ./mymake
     fi
