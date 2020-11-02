@@ -171,6 +171,9 @@ emscripten: hyper.html
 
 hyper.emscripten-sources: *.cpp autohdr.h
 
+bringris$(EXE_EXTENSION): autohdr.h
+	$(CXX) $(CXXFLAGS) -Wno-error -DBRINGRIS rogueviz/bringris.cpp $(LDFLAGS) $(hyper_LDFLAGS) -o $@
+
 .PHONY: clean
 
 clean:
