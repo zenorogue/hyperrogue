@@ -4139,3 +4139,18 @@ graphics/UI bugfixes:
 - fixed the issues with Orb of Yendor
 - fixed a bug in S2xE, and choosing cells in sphere
 - fixed Friendly Ghosts
+
+2020-11-02 00:08 Update 11.4:
+
+* Panini perspective projection (allows wider vision -- configurable in 3d config -> FOV)
+* Changed the default texture_step to 4
+* An option to hide the flat projection in hyperboloid
+* improved plain floor shapes in arbitrary tessellations
+* fixed the Asonov cat geometry
+* Five new projections: Poor Man (hyperbolic only), Panini, retroazimuthal: Craig, Hammer, Littrow (retro-Hammer buggy on sphere)
+* Various fixes related to product spaces, especially product+inverse
+* Fixed the navigation keys in dialogs
+* fixed duals for Euclidean tessellations
+
+Also, improvements in the Web version -- Backspace not Esc to exit dialogs, auto-resizing, raytracer is available. 
+Not yet in HyperRogue online, but see: https://zenorogue.itch.io/bringris
