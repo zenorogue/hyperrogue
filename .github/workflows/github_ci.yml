@@ -71,6 +71,29 @@ jobs:
     - name: Do a simple test
       run: .github/workflows/test_simple.sh
 
+  bringris:
+    name: Bringris
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        compiler: [gcc, clang]
+        build_system: [makefile, mymake]
+    env:
+      GH_OS: ${{ matrix.os }}
+      GH_COMPILER: ${{ matrix.compiler }}
+      GH_BUILDSYS: ${{ matrix.build_system }}
+      GH_HYP_BRINGRIS: bringris_1
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install build dependencies
+      run: .github/workflows/install_deps.sh
+    - name: Build
+      run: .github/workflows/build.sh
+    - name: Do a simple test
+      run: .github/workflows/test_simple.sh
+
   emscripten:
     runs-on: ubuntu-latest
     steps:
