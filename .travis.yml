@@ -128,6 +128,7 @@ matrix:
       TRAVIS_OS_NAME=linux
       TRAVIS_COMPILER_NAME=gcc
       TRAVIS_BUILD_SYSTEM=Makefile
+      HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_BRINGRIS=1
   - os: linux                           # Linux, mymake, Bringris
     compiler: gcc
@@ -135,6 +136,7 @@ matrix:
       TRAVIS_OS_NAME=linux
       TRAVIS_COMPILER_NAME=gcc
       TRAVIS_BUILD_SYSTEM=mymake
+      HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_BRINGRIS=1
   - os: osx                             # OSX, make, Bringris
     compiler: clang
@@ -142,6 +144,7 @@ matrix:
       TRAVIS_OS_NAME=osx
       TRAVIS_COMPILER_NAME=clang
       TRAVIS_BUILD_SYSTEM=Makefile
+      HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_BRINGRIS=1
   - os: osx                             # OSX, mymake, Bringris
     compiler: clang
@@ -149,6 +152,7 @@ matrix:
       TRAVIS_OS_NAME=osx
       TRAVIS_COMPILER_NAME=clang
       TRAVIS_BUILD_SYSTEM=mymake
+      HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_BRINGRIS=1
   - os: linux                           # Emscripten
     env: >-

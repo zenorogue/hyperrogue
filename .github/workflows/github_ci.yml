@@ -85,6 +85,7 @@ jobs:
       GH_COMPILER: ${{ matrix.compiler }}
       GH_BUILDSYS: ${{ matrix.build_system }}
       GH_HYP_BRINGRIS: bringris_1
+      GH_HYP_GLEW: glew_1
     steps:
     - uses: actions/checkout@v2
     - name: Install build dependencies
