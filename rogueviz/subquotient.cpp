@@ -54,7 +54,9 @@ void create_subquotient(int qty = -1, int id = 0) {
 
     map<int, int> by_cycle;
     
-    for(auto [s, wb]: vmap) {
+    for(auto swb: vmap) {
+      auto& s = swb.first;
+      auto& wb = swb.second;
       if(s == wb.at) { vertex++; continue; }
       bool is_edge = false;
       for(int j=0; j<s->type; j++) if(s->move(j) == wb.at && (wb+j).peek() == s)
