@@ -1745,8 +1745,10 @@ int args() {
     enable_bgeom(argi());
     }
     
-  else if(argis("-bringris"))
+  else if(argis("-bringris")) {
+    PHASEFROM(2);
     init_all();
+    }
 
   else if(argis("-ray-off"))
     use_raycaster = false;
