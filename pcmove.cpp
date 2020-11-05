@@ -357,8 +357,8 @@ bool pcmove::swing() {
   sideAttack(cwt.at, d, moPlayer, 0);
 
   mirror::act(origd, mirror::SPINMULTI | mirror::ATTACK);
-
-  if(monstersnear(cwt.at, moPlayer, nullptr, cwt.at)) {
+  
+  if(monstersnear_add_pmi(movei(cwt.at, STAY))) {
     if(vmsg())
       wouldkill("You would be killed by %the1!");          
     return false;
@@ -510,6 +510,11 @@ struct changes_t {
   void at_rollback(reaction_t act) {
     if(on) rollbacks.emplace_back(act);
     }
+
+  void push_push(cell *tgt) {
+    pushes.push_back(tgt);
+    rollbacks.push_back([] { pushes.pop_back(); });    
+    }  
   };
 #endif
 
@@ -601,7 +606,7 @@ bool pcmove::actual_move() {
     return false;
     }
   
-  if(items[itOrbDomination] > ORBBASE && isMountable(c2->monst) && !monstersnear2() && fmsMove) {
+  if(items[itOrbDomination] > ORBBASE && isMountable(c2->monst) && fmsMove) {
     if(checkonly) { nextmovetype = lmMove; return true; }
     if(!isMountable(cwt.at->monst)) dragon::target = NULL;
     movecost(cwt.at, c2, 3);
@@ -629,6 +634,7 @@ bool pcmove::actual_move() {
     addMessage(XLAT("You push %the1.", c2->wall));
     lastmovetype = lmPush; lastmove = cwt.at;
     pushThumper(mip);
+    changes.push_push(mip.t);
     return perform_actual_move();
     }
 
@@ -646,8 +652,6 @@ bool pcmove::actual_move() {
   
   if(!c2->monst && cwt.at->wall == waBoat && cwt.at->item != itOrbYendor && boatGoesThrough(c2) && markOrb(itOrbWater) && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
 
-    if(havePushConflict(cwt.at, checkonly)) return false;
-
     if(c2->item && !cwt.at->item) moveItem(c2, cwt.at, false), boatmove = true;
     placeWater(c2, cwt.at);
     moveBoat(mi);
@@ -663,7 +667,6 @@ bool pcmove::actual_move() {
 bool pcmove::boat_move() {
 
   cell *& c2 = mi.t;
-  if(havePushConflict(cwt.at, checkonly)) return false;
 
   if(againstWind(c2, cwt.at)) {
     if(vmsg()) addMessage(XLAT(airdist(c2) < 3 ? "The Air Elemental blows you away!" : "You cannot go against the wind!"));
@@ -743,8 +746,6 @@ bool pcmove::after_escape() {
         }
       return false;
       }
-    
-    if(havePushConflict(cwt.at, checkonly)) return false;
     
     changes.ccell(c2);
     changes.ccell(cwt.at);
@@ -849,7 +850,7 @@ bool pcmove::move_if_okay() {
 
   if(switchplace_prevent(cwt.at, c2, checkonly))
     return false;
-  if(!checkonly && warningprotection_hit(do_we_stab_a_friend(cwt.at, c2, moPlayer)))
+  if(!checkonly && warningprotection_hit(do_we_stab_a_friend(mi, moPlayer)))
     return false;
   
   nextmovetype = lmMove; 
@@ -899,7 +900,7 @@ bool pcmove::attack() {
   
   if(!ca) {
     if(forcedmovetype == fmAttack) {
-      if(monstersnear(cwt.at,moPlayer,NULL,cwt.at)) {
+      if(monstersnear_add_pmi(movei(cwt.at, STAY))) {
         if(vmsg()) wouldkill("%The1 would get you!");
         return false;
         }
@@ -922,9 +923,8 @@ bool pcmove::attack() {
     else
       mip.t = c2;
     if(mip.t) changes.ccell(mip.t);
+    changes.push_push(mip.t);
     }
-  
-  if(havePushConflict(mip.t, checkonly)) return false;
   
   if(!(isWatery(cwt.at) && c2->monst == moWaterElemental) && checkNeedMove(checkonly, true))
     return false;
@@ -982,7 +982,7 @@ bool pcmove::attack() {
   lastmovetype = lmAttack; lastmove = c2;
   swordAttackStatic();
 
-  if(monstersnear(cwt.at, moPlayer, nullptr, cwt.at)) {
+  if(monstersnear_add_pmi(movei(cwt.at, STAY))) {
     if(vmsg()) wouldkill("You would be killed by %the1!");
     return false;
     }
@@ -1090,18 +1090,18 @@ bool pcmove::perform_move_or_jump() {
   lastmovetype = lmMove; lastmove = cwt.at;
   apply_chaos();
 
-  stabbingAttack(cwt.at, mi.t, moPlayer);
-  cell *c1 = cwt.at;
+  stabbingAttack(mi, moPlayer);
   changes.value_keep(cwt);
   cwt += wstep;
   
   mirror::act(origd, mirror::SPINMULTI | mirror::ATTACK | mirror::GO);
-
-  playerMoveEffects(c1, mi.t);
+  
+  auto pmi = player_move_info(mi);
+  playerMoveEffects(mi);
 
   if(mi.t->monst == moFriendlyIvy) changes.ccell(mi.t), mi.t->monst = moNone;
   
-  if(monstersnear(cwt.at, moPlayer, nullptr, c1)) {
+  if(monstersnear_add_pmi(pmi)) {
     if(vmsg()) wouldkill("%The1 would kill you there!");
     return false;
     }
@@ -1135,19 +1135,21 @@ bool pcmove::stay() {
     return false;
   swordAttackStatic();
   nextmovetype = lmSkip;
-  if(monstersnear(cwt.at, moPlayer, nullptr, cwt.at)) {
+
+  mi = movei(cwt.at, STAY);
+  if(last_gravity_state && !gravity_state)
+    playerMoveEffects(mi);
+  if(d == -2) 
+    dropGreenStone(cwt.at);
+
+  if(monstersnear_add_pmi(mi)) {
     if(vmsg()) wouldkill("%The1 would get you!");
     return false;
     }
   if(checkonly) return true;
   if(changes.on) changes.commit();
-  if(d == -2) 
-    dropGreenStone(cwt.at);
   if(cellUnstable(cwt.at) && !markOrb(itOrbAether))
-    doesFallSound(cwt.at);
-  
-  if(last_gravity_state && !gravity_state)
-    playerMoveEffects(cwt.at, cwt.at);
+    doesFallSound(cwt.at);    
   
   return after_move();
   }
@@ -1246,12 +1248,14 @@ EX bool playerInPower() {
   return false;
   }
 
-EX void playerMoveEffects(cell *c1, cell *c2) {
+EX void playerMoveEffects(movei mi) {
+  cell *c1 = mi.s;
+  cell *c2 = mi.t;
 
   if(peace::on) items[itOrbSword] = c2->land == laBurial ? 100 : 0;
   
   changes.value_keep(sword::dir[multi::cpid]);
-  sword::dir[multi::cpid] = sword::shift(c1, c2, sword::dir[multi::cpid]);
+  sword::dir[multi::cpid] = sword::shift(mi, sword::dir[multi::cpid]);
   
   destroyWeakBranch(c1, c2, moPlayer);
 
@@ -1457,20 +1461,20 @@ EX void sideAttack(cell *mf, int dir, eMonster who, int bonuskill) {
     }
   }
 
-EX eMonster do_we_stab_a_friend(cell *mf, cell *mt, eMonster who) {
+EX eMonster do_we_stab_a_friend(movei mi, eMonster who) {
   eMonster m = moNone;
-  do_swords(mf, mt, who, [&] (cell *c, int bb) { 
-    if(!peace::on && canAttack(mt, who, c, c->monst, AF_SWORD) && c->monst && isFriendly(c)) m = c->monst;
+  do_swords(mi, who, [&] (cell *c, int bb) { 
+    if(!peace::on && canAttack(mi.t, who, c, c->monst, AF_SWORD) && c->monst && isFriendly(c)) m = c->monst;
     });
 
-  for(int t=0; t<mf->type; t++) {
-    cell *c = mf->move(t);
+  for(int t=0; t<mi.s->type; t++) {
+    cell *c = mi.s->move(t);
     if(!c) continue;
     
     bool stabthere = false;
-    if(logical_adjacent(mt, who, c)) stabthere = true;
+    if(logical_adjacent(mi.t, who, c)) stabthere = true;
     
-    if(stabthere && canAttack(mt,who,c,c->monst,AF_STAB) && isFriendly(c)) 
+    if(stabthere && canAttack(mi.t,who,c,c->monst,AF_STAB) && isFriendly(c)) 
       return c->monst;
     }
   
@@ -1484,25 +1488,12 @@ EX void wouldkill(const char *msg) {
     addMessage(XLAT("Cannot move into the current location of another player!"));
   else if(who_kills_me == moAirball) 
     addMessage(XLAT("Players cannot get that far away!"));
+  else if(who_kills_me == moTongue) 
+    addMessage(XLAT("Cannot push into another player!"));
+  else if(who_kills_me == moCrushball) 
+    addMessage(XLAT("Cannot push into the same location!"));
   else
     addMessage(XLAT(msg, who_kills_me));
-  }
-
-EX bool havePushConflict(cell *pushto, bool checkonly) {
-  if(pushto && multi::activePlayers() > 1) {
-    for(int i=0; i<multi::players; i++)  if(i != multi::cpid && multi::playerActive(i))
-      if(multi::origpos[i] == pushto || multi::origtarget[i] == pushto) {
-        addMessage(XLAT("Cannot push into another player!"));
-        return true;
-        }
-    for(int i=0; i<isize(stalemate::moves); i++)  {
-      if(pushto == stalemate::moves[i].pushto) {
-        addMessage(XLAT("Cannot push into the same location!"));
-        return true;
-        }
-      }
-    }
-  return false;
   }
 
 EX void movecost(cell* from, cell *to, int phase) {

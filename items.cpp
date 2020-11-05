@@ -313,6 +313,8 @@ EX void dropGreenStone(cell *c) {
     return;
     }
   if(items[itGreenStone] && c->item == itNone) {
+    changes.ccell(c);
+    changes.value_keep(items[itGreenStone]);
     items[itGreenStone]--;
     if(false) {
       c->item = itNone;

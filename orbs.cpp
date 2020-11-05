@@ -567,8 +567,8 @@ EX void teleportTo(cell *dest) {
     if(b) {
       killFriendlyIvy();
       drainOrb(itOrbTeleport);
-      movecost(cwt.at, dest, 3);
-      playerMoveEffects(cwt.at, dest);
+      movecost(cwt.at, dest, 3);      
+      playerMoveEffects(movei(cwt.at, dest, TELEPORT));
       afterplayermoved();
       bfs();
       }
@@ -580,7 +580,7 @@ EX void teleportTo(cell *dest) {
   killFriendlyIvy();
   cell *from = cwt.at;
   movecost(from, dest, 1);
-  playerMoveEffects(cwt.at, dest);
+  playerMoveEffects(movei(cwt.at, dest, TELEPORT));
   current_display->which_copy = unshift(ggmatrix(dest));
   cwt.at = dest; cwt.spin = hrand(dest->type); flipplayer = !!(hrand(2));
   drainOrb(itOrbTeleport);
@@ -638,8 +638,9 @@ EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMons
     }
 
   sword::reset();
-  stabbingAttack(c1, dest, moPlayer, bonuskill);
-  playerMoveEffects(c1, dest);
+  auto mi = movei(c1, dest, JUMP);
+  stabbingAttack(mi, moPlayer, bonuskill);
+  playerMoveEffects(mi);
 
   if(itemclass(byWhat) == IC_ORB)
     apply_impact(dest);
@@ -658,7 +659,7 @@ EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMons
 
   mirror::destroyAll();
   
-  if(monstersnearO(a, dest, moPlayer, NULL, c1)) {
+  if(monstersnearO(a, dest)) {
     changes.rollback();
     return false;
     }
@@ -939,7 +940,7 @@ bool gun_attack(orbAction a, cell *dest) {
   attackMonster(dest, AF_GUN, moNone);
   apply_impact(dest);
 
-  if(monstersnearO(a, cwt.at, moPlayer, NULL, cwt.at)) {
+  if(monstersnearO(a, cwt.at)) {
     changes.rollback();
     return false;
     } 
@@ -1068,13 +1069,13 @@ void useOrbOfDragon(cell *c) {
   checkmoveO();
   }
 
-EX bool monstersnearO(orbAction a, cell *c, eMonster who, cell *pushto, cell *comefrom) {
+EX bool monstersnearO(orbAction a, cell *c) {
   // printf("[a = %d] ", a);
   if(shmup::on) return false;
   if(a == roCheck && multi::players > 1) 
     return true;
   else if(a == roMultiCheck) return false;
-  else return monstersnear(c, who, pushto, comefrom);
+  else return monstersnear(c, moPlayer);
   }
 
 EX bool isCheck(orbAction a) { return a == roCheck || a == roMultiCheck; }
@@ -1241,12 +1242,12 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
 
         if(c->monst) {
           if(!canAttack(cf, moFriendlyIvy, c, c->monst, 0)) continue;
-          if(monstersnear(cwt.at, moPlayer, NULL, cwt.at)) continue;
+          if(monstersnear(cwt.at, moPlayer)) continue;
           }
         else {
           if(!passable(c, cf, P_ISPLAYER | P_MONSTER)) continue;
           if(strictlyAgainstGravity(c, cf, false, MF_IVY)) continue;
-          if(monstersnear(cwt.at, moPlayer, c, cwt.at)) continue;
+          if(monstersnear(cwt.at, moPlayer)) continue;
           }
         dirs.push_back(d);
         }

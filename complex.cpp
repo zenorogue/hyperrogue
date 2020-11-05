@@ -2867,10 +2867,13 @@ EX namespace sword {
     }
 
   // from c1 to c2
-  EX sworddir shift(cell *c1, cell *c2, sworddir d) {
-    if(!c1 || !c2) return d;
-    int s1 = neighborId(c1, c2);
-    int s2 = neighborId(c2, c1);
+  EX sworddir shift(movei mi, sworddir d) {
+    cell *c1 = mi.s;
+    cell *c2 = mi.t;
+    if(!mi.proper()) return d;
+    int s1 = mi.d;
+    int s2 = mi.rev_dir();
+    neighborId(c2, c1);
     if(s1 < 0 || s2 < 0) return d;
     if(SWORDDIM == 2) {
       int sub = (hybri) ? 2 : 0;

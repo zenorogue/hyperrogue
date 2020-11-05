@@ -39,15 +39,35 @@ EX bool hasSafeOrb(cell *c) {
   }
 
 #if HDR
-struct stalemate1 {
-  eMonster who;
-  cell *moveto;
-  cell *pushto;
-  cell *comefrom;
+struct player_move_info {
+  movei mi;
   cell *swordlast[2], *swordtransit[2], *swordnext[2];
-  stalemate1(eMonster w, cell *mt, cell *pt, cell *cf) : who(w), moveto(mt), pushto(pt), comefrom(cf) {}
+  player_move_info(movei mi);
   };
 #endif
+
+EX vector<player_move_info> pmi;
+EX vector<cell*> pushes;
+
+player_move_info::player_move_info(movei _mi) : mi(_mi) {
+  for(int b=0; b<2; b++) swordlast[b] = sword::pos(multi::cpid, b);
+
+  dynamicval<sword::sworddir> x7(sword::dir[multi::cpid], sword::shift(mi, sword::dir[multi::cpid]));
+  
+  for(int b=0; b<2; b++) {
+    swordnext[b] = sword::pos(multi::cpid, b);
+    swordtransit[b] = NULL;
+    if(swordnext[b] && swordnext[b] != swordlast[b] && !isNeighbor(swordlast[b], swordnext[b])) {
+      forCellEx(c2, swordnext[b])
+        if(c2 != mi.t && c2 != mi.s && isNeighbor(c2, S3==3 ? swordlast[b] : mi.t))
+          swordtransit[b] = c2;
+      if(S3 == 4)
+        forCellEx(c2, mi.s)
+          if(c2 != mi.s && isNeighbor(c2, swordlast[b]))
+            swordtransit[b] = c2;
+      }
+    }
+  }
 
 EX bool krakensafe(cell *c) {
   return items[itOrbFish] || items[itOrbAether] || 
@@ -55,12 +75,11 @@ EX bool krakensafe(cell *c) {
     (c->item == itOrbAether && c->wall == waBoat);
   }
 
-EX bool monstersnear(stalemate1& sm) {
+EX bool monstersnear(cell *c, eMonster who) {
 
-  cell *c = sm.moveto;
   bool eaten = false;
 
-  if(hardcore && sm.who == moPlayer) return false;
+  if(hardcore && who == moPlayer) return false;
 
   int res = 0;
   bool fast = false;
@@ -76,9 +95,9 @@ EX bool monstersnear(stalemate1& sm) {
     who_kills_me = moCrusher; res++;
     }
 
-  if(sm.who == moPlayer || items[itOrbEmpathy]) {
+  if(who == moPlayer || items[itOrbEmpathy]) {
     fast = (items[itOrbSpeed] && (items[itOrbSpeed] & 1));
-    if(sm.who == moPlayer && sm.moveto->item == itOrbSpeed && !items[itOrbSpeed]) fast = true;
+    if(who == moPlayer && c->item == itOrbSpeed && !items[itOrbSpeed]) fast = true;
     }
   
   if(havewhat&HF_OUTLAW) {
@@ -103,7 +122,7 @@ EX bool monstersnear(stalemate1& sm) {
         if(!logical_adjacent(c3, c3->monst, c2) || !logical_adjacent(c2, c3->monst, c) || (c3->monst == moWitchSpeed && c2->land != laPower))
           continue;
       if(elec::affected(c3)) continue;
-      if(c3->stuntime > (sm.who == moPlayer ? 0 : 1)) continue;
+      if(c3->stuntime > (who == moPlayer ? 0 : 1)) continue;
       // speedwitches can only attack not-fastened monsters,
       // others can only attack if the move is not fastened
       if(c3->monst == moWitchSpeed && items[itOrbSpeed]) continue;
@@ -120,19 +139,19 @@ EX bool monstersnear(stalemate1& sm) {
 
     // consider normal monsters
     if(c2 && 
-      isArmedEnemy(c2, sm.who) && 
-      (c2->monst != moLancer || isUnarmed(sm.who) || !logical_adjacent(c, sm.who, c2))) {
+      isArmedEnemy(c2, who) && 
+      (c2->monst != moLancer || isUnarmed(who) || !logical_adjacent(c, who, c2))) {
       eMonster m = c2->monst;
       if(elec::affected(c2)) continue;
       if(fast && c2->monst != moWitchSpeed) continue;
       // Krakens just destroy boats
-      if(c2->monst == moKrakenT && onboat(sm)) {
+      if(c2->monst == moKrakenT && c->wall == waBoat) {
         if(krakensafe(c)) continue;
         else if(warningprotection(XLAT("This move appears dangerous -- are you sure?")) && res == 0) m = moWarning;
         else continue;
         }
       // they cannot attack through vines
-      if(!canAttack(c2, c2->monst, c, sm.who, AF_NEXTTURN)) continue;
+      if(!canAttack(c2, c2->monst, c, who, AF_NEXTTURN)) continue;
       if(c2->monst == moWorm || c2->monst == moTentacle || c2->monst == moHexSnake) {
         if(passable_for(c2->monst, c, c2, 0))
           eaten = true;
@@ -142,18 +161,16 @@ EX bool monstersnear(stalemate1& sm) {
       }
     }
 
-  if(sm.who == moPlayer && res && (markOrb2(itOrbShield) || markOrb2(itOrbShell)) && !eaten)
+  if(who == moPlayer && res && (markOrb2(itOrbShield) || markOrb2(itOrbShell)) && !eaten)
     res = 0;
 
-  if(sm.who == moPlayer && res && markOrb2(itOrbDomination) && c->monst)
+  if(who == moPlayer && res && markOrb2(itOrbDomination) && c->monst)
     res = 0;
 
   return !!res;
   }
 
-EX bool monstersnear2();
-
-EX bool monstersnear2() {
+EX bool monstersnear_aux() {
   changes.value_set(passive_switch, (gold() & 1) ? moSwitch1 : moSwitch2);
   multi::cpid++;
   bool b = false;
@@ -162,22 +179,33 @@ EX bool monstersnear2() {
   if(multi::cpid == multi::players || multi::players == 1 || multi::checkonly) {
 
     if(shmup::delayed_safety) return false;
-    dynamicval<eMonster> sw(passive_switch, passive_switch);
-
-    for(int i=0; i<isize(stalemate::moves); i++)
-    for(int j=0; j<isize(stalemate::moves); j++) if(i != j) {
-      if(swordConflict(stalemate::moves[i], stalemate::moves[j])) {
+    
+    for(int i=0; i<isize(pmi); i++)
+    for(int j=0; j<isize(pmi); j++) if(i != j) {
+      if(swordConflict(pmi[i], pmi[j])) {
           b = true;
           who_kills_me = moEnergySword;
           }
-      if(multi::player[i].at == multi::player[j].at) 
+      if(pmi[i].mi.t == pmi[j].mi.t) 
         { b = true; who_kills_me = moFireball; }
-      if(celldistance(multi::player[i].at, multi::player[j].at) > 8) 
+      if(celldistance(pmi[i].mi.t, pmi[j].mi.t) > 8) 
         { b = true; who_kills_me = moAirball; }
       }
 
-    for(int i=0; !b && i<isize(stalemate::moves); i++)
-      b = monstersnear(stalemate::moves[i]);
+    for(auto& pushto: pushes)
+    for(auto& mi: pmi)
+      if(pushto == mi.mi.t) {
+        b = true; who_kills_me = moTongue;
+        }
+        
+    for(int i=0; i<isize(pushes); i++)
+      for(int j=0; j<i; j++)
+        if(pushes[i] == pushes[j]) {
+          b = true; who_kills_me = moCrushball;
+          }
+          
+    for(int i=0; !b && i<isize(pmi); i++)
+      b = monstersnear(pmi[i].mi.t, moPlayer);
     }
   else b = !multimove();
   multi::cpid--;
@@ -185,94 +213,17 @@ EX bool monstersnear2() {
   return b;
   }
 
-EX bool monstersnear(cell *c, eMonster who, cell *pushto, cell *comefrom) {
-
-  if(peace::on) return 0; // you are safe
-
-  stalemate1 sm(who, c, pushto, comefrom);
-  
-  if(who == moPlayer) for(int b=0; b<2; b++) sm.swordlast[b] = sword::pos(multi::cpid, b);
-  
-  cell *none = NULL;
-  cell **wcw = &cwt.at;
-  if(who != moPlayer) wcw = &none;
-  else if(multi::players > 1) wcw = &multi::player[multi::cpid].at;
-  
-  dynamicval<cell*> x5(*wcw, c);
-  dynamicval<bool> x6(stalemate::nextturn, true);
-  dynamicval<sword::sworddir> x7(sword::dir[multi::cpid], 
-    who == moPlayer ? sword::shift(comefrom, c, sword::dir[multi::cpid]) :
-    sword::dir[multi::cpid]);
-  
-  for(int b=0; b<2; b++) {
-    if(who == moPlayer) {
-      sm.swordnext[b] = sword::pos(multi::cpid, b);
-      sm.swordtransit[b] = NULL;
-      if(sm.swordnext[b] && sm.swordnext[b] != sm.swordlast[b] && !isNeighbor(sm.swordlast[b], sm.swordnext[b])) {
-        forCellEx(c2, sm.swordnext[b])
-          if(c2 != c && c2 != comefrom && isNeighbor(c2, S3==3 ? sm.swordlast[b] : *wcw))
-            sm.swordtransit[b] = c2;
-        if(S3 == 4)
-          forCellEx(c2, c)
-            if(c2 != comefrom && isNeighbor(c2, sm.swordlast[b]))
-              sm.swordtransit[b] = c2;
-        }
-      }
-    else {
-      sm.swordnext[b] = sm.swordtransit[b] = NULL;
-      }
-    }
-
-  stalemate::moves.push_back(sm);
-  
-  // dynamicval<eMonster> x7(stalemate::who, who);
-  
-  bool b;
-  if(who == moPlayer && c->wall == waBigStatue) {
-    eWall w = comefrom->wall;
-    c->wall = waNone;
-    if(doesnotFall(comefrom)) comefrom->wall = waBigStatue;
-    b = monstersnear2();
-    comefrom->wall = w;
-    c->wall = waBigStatue;
-    }
-  else if(who == moPlayer && isPushable(c->wall)) {
-    eWall w = c->wall;
-    c->wall = waNone;
-    b = monstersnear2();
-    c->wall = w;
-    }
-  else {
-    b = monstersnear2();
-    }
-  stalemate::moves.pop_back();
+/** like monstersnear but add the potential moves of other players into account */
+EX bool monstersnear_add_pmi(player_move_info pmi0) {
+  pmi.push_back(pmi0);
+  bool b = monstersnear_aux();
+  pmi.pop_back();
   return b;
   }
 
-EX namespace stalemate {
-  EX vector<stalemate1> moves;
-  EX bool  nextturn;
-
-  EX bool isMoveto(cell *c) {
-    for(int i=0; i<isize(moves); i++) if(moves[i].moveto == c) return true;
-    return false;
-    }
-
-  EX bool isPushto(cell *c) {
-    for(int i=0; i<isize(moves); i++) if(moves[i].pushto == c) return true;
-    return false;
-    }
-  EX }
-
-EX bool onboat(stalemate1& sm) {
-  cell *c = sm.moveto;
-  cell *cf = sm.comefrom;
-  return (c->wall == waBoat) || (cf->wall == waBoat && c->wall == waSea);
-  }
-  
 EX bool multimove() {
   if(multi::cpid == 0) lastkills = tkills();
-  if(!multi::playerActive(multi::cpid)) return !monstersnear2();
+  if(!multi::playerActive(multi::cpid)) return !monstersnear_aux();
   cellwalker bcwt = cwt;
   cwt = multi::player[multi::cpid];
   bool b = movepcto(multi::whereto[multi::cpid]);
@@ -293,11 +244,11 @@ EX namespace multi {
   EX bool aftermove;
   EX }
 
-EX bool swordConflict(const stalemate1& sm1, const stalemate1& sm2) {
+EX bool swordConflict(const player_move_info& sm1, const player_move_info& sm2) {
   if(items[itOrbSword] || items[itOrbSword2])
   for(int b=0; b<2; b++)
-    if(sm1.comefrom == sm2.swordlast[b] || sm1.comefrom == sm2.swordtransit[b] || sm1.comefrom == sm2.swordnext[b])
-    if(sm1.moveto == sm2.swordlast[b] || sm1.moveto == sm2.swordtransit[b] || sm1.moveto == sm2.swordnext[b])
+    if(sm1.mi.s == sm2.swordlast[b] || sm1.mi.s == sm2.swordtransit[b] || sm1.mi.s == sm2.swordnext[b])
+    if(sm1.mi.t == sm2.swordlast[b] || sm1.mi.t == sm2.swordtransit[b] || sm1.mi.t == sm2.swordnext[b])
       return true;
   return false;
   }

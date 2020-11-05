@@ -1183,19 +1183,19 @@ EX void killThePlayerAt(eMonster m, cell *c, flagtype flags) {
   }
 
 #if HDR
-template<class T> void do_swords(cell *mf, cell *mt, eMonster who, const T& f) {
+template<class T> void do_swords(movei mi, eMonster who, const T& f) {
   for(int bb=0; bb<2; bb++) if(who == moPlayer && sword::orbcount(bb)) {
-    cell *sf = sword::pos(mf, sword::dir[multi::cpid], bb);
-    cell *st = sword::pos(mt, sword::shift(mf, mt, sword::dir[multi::cpid]), bb);
+    cell *sf = sword::pos(mi.s, sword::dir[multi::cpid], bb);
+    cell *st = sword::pos(mi.t, sword::shift(mi, sword::dir[multi::cpid]), bb);
     f(st, bb);
     if(sf != st && !isNeighbor(sf,st)) {
       // also attack the in-transit cell
       if(S3 == 3) {
-        forCellEx(sb, sf) if(isNeighbor(sb, st) && sb != mf && sb != mt) f(sb, bb);
+        forCellEx(sb, sf) if(isNeighbor(sb, st) && sb != mi.s && sb != mi.t) f(sb, bb);
         }
       else {
-        forCellEx(sb, mf) if(isNeighbor(sb, st) && sb != mt) f(sb, bb);
-        forCellEx(sb, mt) if(isNeighbor(sb, sf) && sb != mf) f(sb, bb);
+        forCellEx(sb, mi.s) if(isNeighbor(sb, st) && sb != mi.t) f(sb, bb);
+        forCellEx(sb, mi.t) if(isNeighbor(sb, sf) && sb != mi.s) f(sb, bb);
         }
       }
     }
@@ -1204,14 +1204,16 @@ template<class T> void do_swords(cell *mf, cell *mt, eMonster who, const T& f) {
 
 int lastdouble = -3;
 
-EX void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill IS(0)) {
+EX void stabbingAttack(movei mi, eMonster who, int bonuskill IS(0)) {
   int numsh = 0, numflail = 0, numlance = 0, numslash = 0, numbb[2];
   
   numbb[0] = numbb[1] = 0;
 
-  int backdir = neighborId(mt, mf);
+  cell *mf = mi.s;
+  cell *mt = mi.t;
+  int backdir = mi.rev_dir();
   
-  do_swords(mf, mt, who, [&] (cell *c, int bb) { if(swordAttack(mt, who, c, bb)) numbb[bb]++, numslash++; });
+  do_swords(mi, who, [&] (cell *c, int bb) { if(swordAttack(mt, who, c, bb)) numbb[bb]++, numslash++; });
   
   for(int bb=0; bb<2; bb++) achievement_count("SLASH", numbb[bb], 0);
 
