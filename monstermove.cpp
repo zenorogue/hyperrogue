@@ -1562,8 +1562,9 @@ EX int movevalue(eMonster m, cell *c, int dir, flagtype flags) {
   else if(passable_for(m, c2, c, P_DEADLY)) val = -1100;
   else val = -1750;
 
-  if(c->monst == moGolem )
-    val -= c2->cpdist;
+  if(c->monst == moGolem ) {
+    val -= c2->pathdist;
+    }
   else if(c->monst == moFriendlyGhost )
     val += c2->cpdist - 40;
   else if(c->monst == moMouse) {
@@ -1612,9 +1613,9 @@ EX int movevalue(eMonster m, cell *c, int dir, flagtype flags) {
       val -= 5;
     }
   if(c->monst == moTameBomberbird) {
-    int d = c2->cpdist;
-    if(d == 1 && c->cpdist > 1) d = 5;
-    if(d == 2 && c->cpdist > 2) d = 4;
+    int d = c2->pathdist;
+    if(d == 1 && c->pathdist > 1) d = 5;
+    if(d == 2 && c->pathdist > 2) d = 4;
     val -= d;
     }
   if(c->monst == moKnight && (eubinary || c2->master->alt)) {
@@ -1629,11 +1630,11 @@ EX int movevalue(eMonster m, cell *c, int dir, flagtype flags) {
 EX void movegolems(flagtype flags) {
   if(items[itOrbEmpathy] && items[itOrbSlaying])
     flags |= AF_CRUSH;
-  pathdata pd(moMouse);
   int qg = 0;
   for(int i=0; i<isize(golems); i++) {
     cell *c = golems[i];
-    eMonster m =  c->monst;
+    eMonster m = c->monst;
+    pathdata pd(m, false);
     if(c->stuntime) continue;
     if(m == moGolem || m == moKnight || m == moTameBomberbird || m == moPrincess ||
       m == moPrincessArmed || m == moMouse || m == moFriendlyGhost) {
