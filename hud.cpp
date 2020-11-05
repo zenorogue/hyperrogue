@@ -228,6 +228,7 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
         glyphphase[id] * 2;
       drawItemType(it, NULL, shiftless(V), icol, t, false);
       }
+    sortquickqueue();
     quickqueue();
     }
   else if(glyph == '*')
