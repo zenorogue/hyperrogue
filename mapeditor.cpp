@@ -1276,6 +1276,7 @@ EX namespace mapeditor {
   void list_spill(cellwalker tgt, cellwalker src, manual_celllister& cl) {
     spill_list.clear(); 
     spill_list.emplace_back(tgt, src);
+    if(painttype == 7) return;
     int crad = 0, nextstepat = 0;
     for(int i=0; i<isize(spill_list); i++) {
       if(i == nextstepat) {
