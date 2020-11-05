@@ -309,7 +309,7 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
       return olrUseless;
 
   if(l == laPrincessQuest)
-    if(among(it, itOrbAether, itOrbFlash, itOrbTeleport, itOrbSummon, itOrbFreedom, itOrbFriend, itOrbPhasing))
+    if(among(it, itOrbAether, itOrbFlash, itOrbTeleport, itOrbSummon, itOrbFreedom, itOrbFriend, itOrbPhasing, itOrbChaos))
       return olrForbidden;
     
   if(l == laTemple)
