@@ -3079,7 +3079,7 @@ EX void drawaura() {
       }
 
     ld x = rad0 * c;
-    ld y = rad0 * s * pconf.stretch;
+    ld y = rad0 * s;
     
     if(pconf.camera_angle) {
       ld z = rad0;
@@ -3093,7 +3093,7 @@ EX void drawaura() {
       y *= rad0 / z;
       }
     cx[r][z][0] = x;
-    cx[r][z][1] = y;
+    cx[r][z][1] = y * pconf.stretch;
     
     for(int u=0; u<3; u++)
       cx[r][z][u+2] = bak[u] + (aurac[rm][u] / (aurac[rm][3]+.1) - bak[u]) * cmul[z];
