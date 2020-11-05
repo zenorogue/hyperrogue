@@ -1553,11 +1553,14 @@ EX int movevalue(eMonster m, cell *c, int dir, flagtype flags) {
 #endif
       val = 4000;
 
+    int tk = tkills();
     changes.init(true);
     moveMonster(mi);
+    int tk2 = tkills();
     bool b = monstersnear(mi.t, m);
     changes.rollback();
     if(b) val = 50;
+    else if(tk2 > tk) val += 1000 + 200 * (tk2 - tk);
     }
   else if(passable_for(m, c2, c, P_DEADLY)) val = -1100;
   else val = -1750;
