@@ -513,8 +513,10 @@ struct changes_t {
 
   void push_push(cell *tgt) {
     pushes.push_back(tgt);
-    rollbacks.push_back([] { pushes.pop_back(); });    
-    }  
+    auto v = [] { pushes.pop_back(); };
+    rollbacks.push_back(v);
+    commits.push_back(v);
+    }
   };
 #endif
 
@@ -757,6 +759,7 @@ bool pcmove::after_escape() {
     nextmovetype = lmMove;
     addMessage(XLAT("You push %the1 behind you!", waBigStatue));
     animateMovement(mi.rev(), LAYER_BOAT);
+    changes.push_push(cwt.at);
     return perform_actual_move();
     }
 
