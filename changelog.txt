@@ -4154,3 +4154,18 @@ graphics/UI bugfixes:
 
 Also, improvements in the Web version -- Backspace not Esc to exit dialogs, auto-resizing, raytracer is available. 
 Not yet in HyperRogue online, but see: https://zenorogue.itch.io/bringris
+
+2020-11-05 18:53 Update 11.4a:
+
+- fixed the aura when camera angle changed
+- fixed selecting large regions for copying with mouse
+- messages at 30 treasures etc. should no longer appear in PTM
+- fixed a bug which allowed changing the generation/game range outside of cheat mode
+- fixed drawing of creatures in kill list (visible e.g. for dogs)
+- the RGB/RGBA hex value color is now shown with leading 0s
+- Orb of the Mind now actually kills reptiles
+- Orb of Chaos is now forbidden in the Princess Quest
+- highlight mode setting should be saved now
+- improved the safe move checking (fixes some minor bugs especially in multiplayer)
+- allies use the new safe move checking now (they now know whether attacking hedgehog warriors/pikemen is safe for them and do it if yes)
+- golems and bomberbirds now pathfind correctly
