@@ -362,6 +362,7 @@ EX void initConfig() {
   addsaver(pconf.ballproj, "ballproj", 1);
   addsaver(vid.monmode, "monster display mode", DEFAULT_MONMODE);
   addsaver(vid.wallmode, "wall display mode", DEFAULT_WALLMODE);
+  addsaver(vid.highlightmode, "highlightmode");
 
   addsaver(vid.depth, "3D depth", 1);
   addsaver(vid.camera, "3D camera level", 1);
