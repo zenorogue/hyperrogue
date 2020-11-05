@@ -486,21 +486,23 @@ EX void gainItem(eItem it) {
   
 #define IF(x) if(g < (x) && g2 >= x && !peace::on)
 
-  IF(R60/4) 
-    addMessage(XLAT("Collect treasure to access more different lands..."));
-  IF(R30)
-    addMessage(XLAT("You feel that you have enough treasure to access new lands!"));
-  IF(R30*3/2)
-    addMessage(XLAT("Collect more treasures, there are still more lands waiting..."));
-  IF(R60)
-    addMessage(XLAT("You feel that the stars are right, and you can access R'Lyeh!"));
-  IF(R30*5/2)
-    addMessage(XLAT("Kill monsters and collect treasures, and you may get access to Hell..."));
-  IF(R10 * 9) 
-    addMessage(XLAT("To access Hell, collect %1 treasures each of 9 kinds...", its(R10)));
-  if(landUnlocked(laHell) && !lhu) {
-    addMessage(XLAT("Abandon all hope, the gates of Hell are opened!"));
-    addMessage(XLAT("And the Orbs of Yendor await!"));
+  if(in_full_game()) {
+    IF(R60/4) 
+      addMessage(XLAT("Collect treasure to access more different lands..."));
+    IF(R30)
+      addMessage(XLAT("You feel that you have enough treasure to access new lands!"));
+    IF(R30*3/2)
+      addMessage(XLAT("Collect more treasures, there are still more lands waiting..."));
+    IF(R60)
+      addMessage(XLAT("You feel that the stars are right, and you can access R'Lyeh!"));
+    IF(R30*5/2)
+      addMessage(XLAT("Kill monsters and collect treasures, and you may get access to Hell..."));
+    IF(R10 * 9) 
+      addMessage(XLAT("To access Hell, collect %1 treasures each of 9 kinds...", its(R10)));
+    if(landUnlocked(laHell) && !lhu) {
+      addMessage(XLAT("Abandon all hope, the gates of Hell are opened!"));
+      addMessage(XLAT("And the Orbs of Yendor await!"));
+      }
     }
   }
 
