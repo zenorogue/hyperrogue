@@ -3078,8 +3078,22 @@ EX void drawaura() {
       else rad0 *= m;
       }
 
-    cx[r][z][0] = rad0 * c;
-    cx[r][z][1] = rad0 * s * pconf.stretch;
+    ld x = rad0 * c;
+    ld y = rad0 * s * pconf.stretch;
+    
+    if(pconf.camera_angle) {
+      ld z = rad0;
+
+      ld cam = pconf.camera_angle * degree;
+      GLfloat cc = cos(cam);
+      GLfloat ss = sin(cam);
+      
+      tie(y, z) = make_pair(y * cc - z * ss, z * cc + y * ss);
+      x *= rad0 / z;
+      y *= rad0 / z;
+      }
+    cx[r][z][0] = x;
+    cx[r][z][1] = y;
     
     for(int u=0; u<3; u++)
       cx[r][z][u+2] = bak[u] + (aurac[rm][u] / (aurac[rm][3]+.1) - bak[u]) * cmul[z];
