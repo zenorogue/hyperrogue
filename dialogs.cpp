@@ -708,7 +708,7 @@ EX namespace dialog {
         getcstat = 'A' + i, inslider = true;
       }
     
-    displayColorButton(dcenter, vid.yres/2+vid.fsize * 6, XLAT("select this color") + " : " + itsh(color), ' ', 8, 0, color >> (colorAlpha ? ash : 0));
+    displayColorButton(dcenter, vid.yres/2+vid.fsize * 6, XLAT("select this color") + " : " + format(colorAlpha ? "%08X" : "%06X", color), ' ', 8, 0, color >> (colorAlpha ? ash : 0));
 
     if(extra_options) extra_options();
     
