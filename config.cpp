@@ -2710,7 +2710,7 @@ EX int read_gamemode_args() {
 auto ah_config = addHook(hooks_args, 0, read_config_args) + addHook(hooks_args, 0, read_gamemode_args) + addHook(hooks_args, 0, read_color_args);
 #endif
 
-EX unordered_map<string, ld&> params = {
+EX map<string, ld&> params = {
   {"linewidth", vid.linewidth},
   {"patternlinewidth", linepatterns::width},
   {"scale", pconf.scale},

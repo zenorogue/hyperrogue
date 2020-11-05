@@ -22,7 +22,7 @@ struct display_data {
   /** The view relative to the player character. */
   shiftmatrix player_matrix;
   /** On-screen coordinates for all the visible cells. */
-  unordered_map<cell*, shiftmatrix> cellmatrices, old_cellmatrices;
+  map<cell*, shiftmatrix> cellmatrices, old_cellmatrices;
   /** Position of the current map view, relative to the screen (0 to 1). */
   ld xmin, ymin, xmax, ymax;
   /** Position of the current map view, in pixels. */
@@ -50,7 +50,7 @@ struct display_data {
   /** Which copy of the player cell? */
   transmatrix which_copy;
   /** On-screen coordinates for all the visible cells. */
-  unordered_map<cell*, vector<shiftmatrix>> all_drawn_copies;
+  map<cell*, vector<shiftmatrix>> all_drawn_copies;
   };
 
 #define View (::hr::current_display->view_matrix)

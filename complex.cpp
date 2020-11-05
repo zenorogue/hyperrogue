@@ -3356,7 +3356,7 @@ EX namespace ca {
   
   EX eWall wlive = waFloorA;
   
-  EX unordered_set<cell*> changed;
+  EX set<cell*> changed;
 
   EX void list_adj(cell *c) {
     changed.insert(c);

@@ -601,8 +601,8 @@ EX namespace reg3 {
     hrmap *binary_map;
     hrmap_quotient3 *quotient_map;
     
-    unordered_map<heptagon*, pair<heptagon*, transmatrix>> reg_gmatrix;
-    unordered_map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;
+    map<heptagon*, pair<heptagon*, transmatrix>> reg_gmatrix;
+    map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;
 
     vector<cell*> spherecells;  
 
@@ -1439,7 +1439,7 @@ ld adistance(cell *c) {
   return regmap()->reg_gmatrix[c->master].first->distance * log(2) - h[0];
   }
 
-unordered_map<pair<cell*, cell*>, int> memo;
+map<pair<cell*, cell*>, int> memo;
 
 bool cdd;
 

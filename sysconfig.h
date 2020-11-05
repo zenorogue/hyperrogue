@@ -491,14 +491,6 @@ typedef unsigned GLuint;
 #endif
 #endif
 
-#ifdef USE_UNORDERED_MAP
-#include <unordered_map>
-#include <unordered_set>
-#else
-#define unordered_map map
-#define unordered_set set
-#endif
-
 #include <stdint.h>
 
 #if ISWINDOWS

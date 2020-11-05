@@ -236,8 +236,8 @@ EX namespace sn {
   struct hrmap_solnih : hrmap {
     hrmap *binary_map;
     hrmap *ternary_map; /* nih only */
-    unordered_map<pair<heptagon*, heptagon*>, heptagon*> at;
-    unordered_map<heptagon*, pair<heptagon*, heptagon*>> coords;
+    map<pair<heptagon*, heptagon*>, heptagon*> at;
+    map<heptagon*, pair<heptagon*, heptagon*>> coords;
     
     heptagon *origin;
     
@@ -872,8 +872,8 @@ EX namespace nilv {
      }
     
   struct hrmap_nil : hrmap {
-    unordered_map<mvec, heptagon*> at;
-    unordered_map<heptagon*, mvec> coords;
+    map<mvec, heptagon*> at;
+    map<heptagon*, mvec> coords;
     
     heptagon *getOrigin() override { return get_at(mvec_zero); }
     
@@ -2065,7 +2065,7 @@ EX namespace rots {
     return spin(beta) * uxpush(distance/2) * spin(-beta+alpha);
     }
   
-  std::unordered_map<int, transmatrix> saved_matrices_ray;
+  std::map<int, transmatrix> saved_matrices_ray;
 
   EX transmatrix ray_iadj(cell *c1, int i) {
     if(i == c1->type-1) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
@@ -2097,7 +2097,7 @@ EX namespace rots {
 
   struct hrmap_rotation_space : hybrid::hrmap_hybrid {
 
-    std::unordered_map<int, transmatrix> saved_matrices;
+    std::map<int, transmatrix> saved_matrices;
 
     transmatrix adj(cell *c1, int i) override {    
       if(i == c1->type-2) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
