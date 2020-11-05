@@ -4469,7 +4469,6 @@ EX bool allowChangeRange() {
   if(tour::on) return true;
 #endif
   if(racing::on) return true;
-  if(sightrange_bonus >= 0) return true;
   if(arcm::in() || arb::in()) return true;
   if(WDIM == 3) return true;
   return false;
