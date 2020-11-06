@@ -1118,9 +1118,11 @@ EX void menuitem_music_volume() {
       };
     dialog::bound_low(0);
     dialog::bound_up(MIX_MAX_VOLUME);
+    #if CAP_SDLAUDIO
     dialog::extra_options = [] {
       dialog::addBoolItem_action(XLAT("play music when out of focus"), music_out_of_focus, 'A');
       };
+    #endif
     });
   }
 
