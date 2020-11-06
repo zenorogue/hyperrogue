@@ -9,7 +9,6 @@
 namespace hr {
 
 EX namespace crystal {
-#if CAP_CRYSTAL
 
 #if HDR
 static const int MAXDIM = 7;
@@ -33,6 +32,8 @@ struct ldcoord : public array<ld, MAXDIM> {
 
 static const ldcoord ldc0 = {};
 #endif
+
+#if CAP_CRYSTAL
 
 /** Crystal can be bitruncated either by changing variation to bitruncated.
  *  In case of the 4D Crystal, the standard HyperRogue bitruncation becomes
@@ -470,7 +471,7 @@ struct hrmap_crystal : hrmap_standard {
   map<coord, heptagon*> heptagon_at;
   map<int, eLand> landmemo;
   map<coord, eLand> landmemo4;
-  unordered_map<cell*, unordered_map<cell*, int>> distmemo;
+  map<cell*, map<cell*, int>> distmemo;
   map<cell*, ldcoord> sgc;
   cell *camelot_center;
   ldcoord camelot_coord;

@@ -480,11 +480,13 @@ EX void handleKeyNormal(int sym, int uni) {
     }
 #endif
 
+  #if CAP_COMPLEX2
   if(DEFAULTNOR(sym)) {
     gmodekeys(sym, uni);
     if(uni == 'm' && canmove && (centerover == cwt.at ? mouseover : centerover))
       mine::performMarkCommand(mouseover);
     }
+  #endif
   
   if(DEFAULTCONTROL) {
     if(sym == '.' || sym == 's') movepcto(-1, 1);

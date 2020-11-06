@@ -1063,7 +1063,11 @@ void save_mode_data(hstream& f) {
     f.write<char>(chaosmode);
   f.write<char>(shmup::on);
   f.write<char>(inv::on);
+  #if CAP_TOUR
   f.write<char>(tour::on);
+  #else
+  f.write<char>(false);
+  #endif
   f.write<char>(peace::on);
   f.write<char>(peace::otherpuzzles);
   f.write<char>(peace::explore_other);

@@ -100,7 +100,7 @@ EX namespace euc {
     /** ? */  
     intmatrix inverse_axes;
     /** for canonicalization on tori */
-    unordered_map<coord, int> hash;
+    map<coord, int> hash;
     vector<coord> seq;
     int index;
 
@@ -150,11 +150,13 @@ EX namespace euc {
         tmatrix[i] = eumove(shifttable[i]);
       camelot_center = NULL;
       build_torus3(geometry);    
+      #if CAP_IRR
       if(!valid_irr_torus()) { 
         addMessage(XLAT("Error: period mismatch"));
         eu_input = irr::base_config; 
         build_torus3(geometry); 
         }
+      #endif
       }
 
     heptagon *getOrigin() override {
@@ -168,6 +170,7 @@ EX namespace euc {
         auto h = tailored_alloc<heptagon> (S7);
         if(!IRREGULAR) 
           h->c7 = newCell(S7, h);
+        #if CAP_IRR
         else {
           coord m0 = shifttable[0];
           transmatrix dummy;
@@ -180,6 +183,7 @@ EX namespace euc {
             break;
             }
           }
+        #endif
         h->distance = 0;
         h->cdata = NULL;
         h->alt = NULL;
@@ -534,6 +538,7 @@ EX namespace euc {
     }
   
   EX bool valid_irr_torus() {
+    #if CAP_IRR
     if(!IRREGULAR) return true;
     if(eu.twisted) return false;
     for(int i=0; i<2; i++) {
@@ -547,6 +552,7 @@ EX namespace euc {
       eu.canonicalize(x0, dm0, dummy, mirr);
       if(x0 != euzero || dm0 != eutester) return false;
       }
+    #endif
     return true;
     }
   

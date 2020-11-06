@@ -129,10 +129,11 @@ EX void compute_graphical_distance() {
     }
   }
 
-EX void computePathdist(eMonster param) {
+EX void computePathdist(eMonster param, bool include_allies IS(true)) {
   
   for(cell *c: targets)
-    onpath(c, isPlayerOn(c) ? 0 : 1, hrand(c->type));
+    if(include_allies || isPlayerOn(c))
+      onpath(c, isPlayerOn(c) ? 0 : 1, hrand(c->type));
 
   int qtarg = isize(targets);
   
@@ -157,9 +158,12 @@ EX void computePathdist(eMonster param) {
       int i = (fd+j) % c->type; 
       // printf("i=%d cd=%d\n", i, c->move(i)->cpdist);
       cell *c2 = c->move(i);
+      
+      flagtype f = P_MONSTER | P_REVDIR;
+      if(param == moTameBomberbird) f |= P_FLYING;
 
       if(c2 && c2->pathdist == PINFD &&
-        passable(c2, (qb<qtarg) && !nonAdjacent(c,c2) && !thruVine(c,c2) ?NULL:c, P_MONSTER | P_REVDIR)) {
+        passable(c2, (qb<qtarg) && !nonAdjacent(c,c2) && !thruVine(c,c2) ?NULL:c, f)) {
         
         if(qb >= qtarg) {
           if(param == moTortoise && nogoSlow(c, c2)) continue;
@@ -186,9 +190,9 @@ struct pathdata {
     pathlock--;
     clear_pathdata();
     }
-  pathdata(eMonster m) { 
+  pathdata(eMonster m, bool include_allies IS(true)) { 
     checklock();
-    computePathdist(m); 
+    computePathdist(m, include_allies); 
     }
   pathdata(int i) { 
     checklock();

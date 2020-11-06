@@ -81,7 +81,9 @@ EX namespace fake {
       transmatrix S1, S2;
       ld dist;
       in_underlying([c, d, &S1, &S2, &dist] {
+        #if CAP_ARCM
         dynamicval<bool> u(arcm::use_gmatrix, false);
+        #endif
         transmatrix T = currentmap->adj(c, d);
         S1 = rspintox(tC0(T));
         transmatrix T1 = spintox(tC0(T)) * T;
@@ -89,12 +91,16 @@ EX namespace fake {
         S2 = xpush(-dist) * T1;
         });
       
+      #if CAP_ARCM
       if(arcm::in()) {
         int t = arcm::id_of(c->master);
         int t2 = arcm::id_of(c->move(d)->master);
         auto& cof = arcm::current_or_fake();
         cgi.adjcheck = cof.inradius[t/2] + cof.inradius[t2/2];
         }
+      #else
+      if(0) ;
+      #endif
       
       else if(WDIM == 2) {
       
@@ -400,7 +406,9 @@ EX ld around;
 
 /** @brief the value of 'around' which makes the tiling Euclidean */
 EX ld compute_euclidean() {
+  #if CAP_ARCM
   if(arcm::in()) return arcm::current.N * 2 / arcm::current.euclidean_angle_sum;
+  #endif
   if(WDIM == 2) return 4 / (S7-2.) + 2;
 
   if(underlying == gRhombic3) return 3;
@@ -411,8 +419,10 @@ EX ld compute_euclidean() {
   }
 
 EX ld around_orig() {
+  #if CAP_ARCM
   if(arcm::in())
     return arcm::current.N;
+  #endif
   if(WDIM == 2)
     return S3;
   if(underlying == gRhombic3)

@@ -55,10 +55,7 @@ void dqi_sky::draw() {
 
   int sk = get_skybrightness();
   
-  unordered_map<cell*, pair<color_t, color_t>> colors;
-  #ifdef USE_UNORDERED_MAP
-  colors.reserve(isize(sky));
-  #endif
+  map<cell*, pair<color_t, color_t>> colors;
   for(sky_item& si: sky) colors[si.c] = 
     make_pair(darkena(gradient(0, si.color, 0, sk, 255), 0, 0xFF),
         darkena(si.skycolor, 0, 0xFF)
@@ -238,6 +235,7 @@ void celldrawer::draw_ceiling() {
           break;
         
         case laVariant: {
+          #if CAP_COMPLEX2
           int b = getBits(c);
           col = 0x404040;
           for(int a=0; a<21; a++)
@@ -245,6 +243,7 @@ void celldrawer::draw_ceiling() {
               col += variant::features[a].color_change;
           col = col & 0x00FF00;
           skycol = col;
+          #endif
           break;
           }
         

@@ -631,7 +631,7 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp=false, double
 
   transmatrix iT = rgpushxto0(m1.native);
   
-  for(int i=0; i<MDIM; i++) if(std::isnan(m1.native[i])) { 
+  for(int i=0; i<MXDIM; i++) if(std::isnan(m1.native[i])) { 
     addMessage("Failed!");
     println(hlog, "m1 = ", m1.native);
     throw rug_exception();
@@ -1850,11 +1850,15 @@ EX namespace rug {
     EX bool rugged = false;
     EX bool renderonce = false;
     EX bool rendernogl = true;
+    EX bool mouse_control_rug = false;
     EX int texturesize = 512;
     EX ld scale = 1.0f;
     EX bool rug_control() { return false; }
     EX bool in_crystal() { return false; }
     EX void reset_view() { }
+#if HDR
+  struct using_rugview {};
+#endif
 EX }
 
 #endif

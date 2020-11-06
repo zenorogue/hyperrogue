@@ -89,8 +89,6 @@ struct archimedean_tiling {
   };
 #endif
 
-#if CAP_ARCM
-
 #if HDR
 static const int sfPH = 1;
 static const int sfLINE = 2;
@@ -98,6 +96,8 @@ static const int sfCHESS = 4;
 static const int sfTHREE = 8;
 static const int sfSEMILINE = 16;
 #endif
+
+#if CAP_ARCM
 
 EX archimedean_tiling current;
 EX archimedean_tiling fake_current;
@@ -841,8 +841,8 @@ void connectHeptagons(heptspin hi, heptspin hs) {
 
 /** T and X are supposed to be equal -- move T so that it is closer to X */
 void fixup_matrix(transmatrix& T, const transmatrix& X, ld step) {
-  for(int i=0; i<MDIM; i++)
-  for(int j=0; j<MDIM; j++)
+  for(int i=0; i<MXDIM; i++)
+  for(int j=0; j<MXDIM; j++)
     T[i][j] = (T[i][j] * (1-step) + X[i][j] * step);
 
   /*
@@ -1450,9 +1450,9 @@ EX int valence() {
   return total / isize(current.faces);
   }
  
-#endif
-
 EX map<gp::loc, cdata>& get_cdata() { return ((arcm::hrmap_archimedean*) (currentmap))->eucdata; }
+
+#endif
 
 EX }
 

@@ -806,6 +806,7 @@ EX namespace gp {
 
     dialog::addBreak(100);
       
+    #if CAP_IRR
     if(irr::supports(geometry)) {
       dialog::addBoolItem(XLAT("irregular"), IRREGULAR, 'i');
       dialog::add_action(dialog::add_confirmation([=] () { 
@@ -817,6 +818,7 @@ EX namespace gp {
         if(!IRREGULAR) irr::visual_creator(); 
         }));
       }
+    #endif
 
     dialog::addBreak(100);
     int style = 0;
@@ -1126,6 +1128,8 @@ EX namespace gp {
       }
 
     transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override {
+      c1 = mapping[c1];
+      c2 = mapping[c2];
       return in_underlying([&] { return currentmap->relative_matrix(c2, c1, hint); });
       }
 

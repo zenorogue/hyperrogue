@@ -108,6 +108,8 @@ EX void moveMonster(const movei& mi) {
   auto& cf = mi.s;
   auto& ct = mi.t;
   eMonster m = cf->monst;
+  changes.ccell(cf);
+  changes.ccell(ct);
   bool fri = isFriendly(cf);
   if(isDragon(m)) {
     printf("called for Dragon\n");
@@ -117,6 +119,7 @@ EX void moveMonster(const movei& mi) {
   // the following line is necessary because otherwise plates disappear only inside the sight range
   if(cellUnstable(cf) && !ignoresPlates(m)) {
     fallingFloorAnimation(cf);
+    changes.ccell(cf);
     cf->wall = waChasm;
     }
   moveEffect(mi, m);
@@ -124,6 +127,7 @@ EX void moveMonster(const movei& mi) {
     (m == moShark || m == moCShark || m == moGreaterShark))
       achievement_gain_once("MOATSHARK");
   if(m == moTentacleGhost) { 
+    changes.ccell(cf);
     cf->monst = moTentacletail;
     m = moGhost;
     }
@@ -156,10 +160,11 @@ EX void moveMonster(const movei& mi) {
       }
     }
   
-  if(fri || isBug(m) || items[itOrbDiscord]) stabbingAttack(cf, ct, m);
+  if(fri || isBug(m) || items[itOrbDiscord]) stabbingAttack(mi, m);
   
   if(mi.d == JUMP && m == moVaulter) {
     cell *cm = common_neighbor(cf, ct);
+    changes.ccell(cm);
     if(cm->wall == waShrub) cm->wall = waNone;
     if(cm->wall == waSmallTree) cm->wall = waNone;
     if(cm->wall == waBigTree) cm->wall = waSmallTree;
@@ -1518,7 +1523,10 @@ EX int stayvalue(eMonster m, cell *c) {
   }
 
 /** for an ally m at c, evaluate moving to c2 */
-EX int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
+EX int movevalue(eMonster m, cell *c, int dir, flagtype flags) {
+
+  auto mi = movei(c, dir);
+  auto& c2 = mi.t;
   int val = 0;
   
   if(isPlayerOn(c2)) val = -3000;
@@ -1537,7 +1545,6 @@ EX int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
     isInactiveEnemy(c2,m) ? 1000 :
     -500;
 
-  else if(monstersnear(c2, m, NULL, c)) val = 50; // linked with mouse suicide!
   else if(passable_for(m, c2, c, 0)) {
 #if CAP_COMPLEX2
     if(mine::marked_mine(c2) && !ignoresPlates(m))
@@ -1545,12 +1552,22 @@ EX int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
     else
 #endif
       val = 4000;
+
+    int tk = tkills();
+    changes.init(true);
+    moveMonster(mi);
+    int tk2 = tkills();
+    bool b = monstersnear(mi.t, m);
+    changes.rollback();
+    if(b) val = 50;
+    else if(tk2 > tk) val += 1000 + 200 * (tk2 - tk);
     }
   else if(passable_for(m, c2, c, P_DEADLY)) val = -1100;
   else val = -1750;
 
-  if(c->monst == moGolem )
-    val -= c2->cpdist;
+  if(c->monst == moGolem ) {
+    val -= c2->pathdist;
+    }
   else if(c->monst == moFriendlyGhost )
     val += c2->cpdist - 40;
   else if(c->monst == moMouse) {
@@ -1599,9 +1616,9 @@ EX int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
       val -= 5;
     }
   if(c->monst == moTameBomberbird) {
-    int d = c2->cpdist;
-    if(d == 1 && c->cpdist > 1) d = 5;
-    if(d == 2 && c->cpdist > 2) d = 4;
+    int d = c2->pathdist;
+    if(d == 1 && c->pathdist > 1) d = 5;
+    if(d == 2 && c->pathdist > 2) d = 4;
     val -= d;
     }
   if(c->monst == moKnight && (eubinary || c2->master->alt)) {
@@ -1616,11 +1633,11 @@ EX int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
 EX void movegolems(flagtype flags) {
   if(items[itOrbEmpathy] && items[itOrbSlaying])
     flags |= AF_CRUSH;
-  pathdata pd(moMouse);
   int qg = 0;
   for(int i=0; i<isize(golems); i++) {
     cell *c = golems[i];
-    eMonster m =  c->monst;
+    eMonster m = c->monst;
+    pathdata pd(m, false);
     if(c->stuntime) continue;
     if(m == moGolem || m == moKnight || m == moTameBomberbird || m == moPrincess ||
       m == moPrincessArmed || m == moMouse || m == moFriendlyGhost) {
@@ -1636,8 +1653,7 @@ EX void movegolems(flagtype flags) {
 
       DEBB(DF_TURN, ("moveval"));
       for(int k=0; k<c->type; k++) if(c->move(k)) {
-        cell *c2 = c->move(k);
-        int val = movevalue(m, c, c2, flags);
+        int val = movevalue(m, c, k, flags);
 
         if(val > bestv) bestv = val, bdirs.clear();
         if(val == bestv) bdirs.push_back(k);
@@ -1646,7 +1662,7 @@ EX void movegolems(flagtype flags) {
       if(m == moTameBomberbird) {
         cell *c2 = whirlwind::jumpDestination(c);
         if(c2 && !c2->monst) {
-          int val = movevalue(m, c, c2, flags);
+          int val = movevalue(m, c, STRONGWIND, flags);
           // printf("val = %d bestv = %d\n", 
           if(val > bestv) bestv = val, bdirs.clear();
           if(val == bestv) bdirs.push_back(STRONGWIND);

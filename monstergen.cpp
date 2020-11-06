@@ -318,10 +318,12 @@ EX eItem wanderingTreasure(cell *c) {
 
 /** generate the wandering monsters */
 EX void wandering() {
+  #if CAP_COMPLEX2
   if(mine::in_minesweeper()) {
     mine::count_status();
     return;
     }
+  #endif
   if(!canmove) return;
   if(!gen_wandering) return;
   if(racing::on) return;

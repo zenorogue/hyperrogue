@@ -60,6 +60,23 @@ glhr::glmatrix model_orientation_gl() {
   return s;
   }
 
+EX void reset_all_shaders() {
+  ray::reset_raycaster();
+  compiled_programs.clear();
+  matched_programs.clear();
+  }
+
+EX string panini_shader() {
+  return
+    "t.w += 1.; t *= 2. / t.w; t.w -= 1.;\n"
+    "float s = t.z;\n"
+    "float l = length(t.xyz);\n"
+    "t /= max(length(t.xz), 1e-2);\n"
+    "t.z += " + glhr::to_glsl(panini_alpha) + ";\n"
+    "t *= l;\n"
+    "t.w = 1.;\n";
+  }
+
 shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   string varying, vsh, fsh, vmain = "void main() {\n", fmain = "void main() {\n";
 
@@ -332,6 +349,14 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
       }
     if(shader_flags & GF_LEVELS) vmain += "vPos = t;\n";  
     if(treset) vmain += "t[3] = 1.0;\n";
+    
+    if(WDIM == 3 && panini_alpha) {
+      vmain += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
+      /* panini */
+      vmain += panini_shader();
+      shader_flags |= SF_ORIENT;
+      }
+      
     vmain += "gl_Position = uP * t;\n";
     }
 
@@ -485,7 +510,8 @@ void display_data::set_projection(int ed, ld shift) {
         for(int i=0; i<3; i++) NLP[3][i] = NLP[i][3] = 0;
         NLP[3][3] = 1;
         }
-      glhr::projection_multiply(glhr::tmtogl_transpose(NLP));
+      if(!(shader_flags & SF_ORIENT))
+        glhr::projection_multiply(glhr::tmtogl_transpose(NLP));
       }
     if(ed) {
       glhr::using_eyeshift = true;
@@ -520,6 +546,9 @@ void display_data::set_projection(int ed, ld shift) {
     if(get_shader_flags() & SF_USE_ALPHA)
       pp[3][2] = GLfloat(pconf.alpha);
 
+    if(nisot::local_perspective_used()) 
+      pp = glhr::tmtogl_transpose(NLP) * pp;
+
     if(get_shader_flags() & SF_ORIENT) {
       if(GDIM == 3) for(int a=0; a<4; a++) 
         models::apply_orientation_yz(pp[a][1], pp[a][2]);
@@ -545,6 +574,10 @@ void display_data::set_projection(int ed, ld shift) {
 
   if(selected->shader_flags & SF_BAND) {
     glhr::projection_multiply(glhr::translate(shift, 0, 0));
+    }
+
+  if(in_h2xe() || in_s2xe()) {
+    glhr::projection_multiply(glhr::translate(0, 0, shift));
     }
 
   if(selected->shader_flags & SF_HALFPLANE) {
@@ -608,7 +641,7 @@ EX void glapplymatrix(const transmatrix& V) {
   GLfloat mat[16];
   int id = 0;
   
-  if(MDIM == 3) {
+  if(MXDIM == 3) {
     for(int y=0; y<3; y++) {
       for(int x=0; x<3; x++) mat[id++] = V[x][y];
       mat[id++] = 0;

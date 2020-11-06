@@ -673,12 +673,17 @@ void geometry_information::prepare_basics() {
   plevel = vid.plevel_factor * scalefactor;
   single_step = 1;
   if(hybri && !prod) {
+    #if CAP_ARCM
     if(hybrid::underlying == gArchimedean) 
       arcm::current.get_step_values(psl_steps, single_step);
+    #else
+    if(0) ;
+    #endif
     else {
       single_step = S3 * S7 - 2 * S7 - 2 * S3;
       psl_steps = 2 * S7;    
       if(BITRUNCATED) psl_steps *= S3;
+      if(inv) psl_steps = 2 * S3;
       if(single_step < 0) single_step = -single_step;
       }
     DEBB(DF_GEOM | DF_POLY, ("steps = ", psl_steps, " / ", single_step));
@@ -913,7 +918,7 @@ EX void apply_always3() {
   #if MAXMDIM >= 4
 EX void switch_always3() {
     if(dual::split(switch_always3)) return;
-    #if CAP_GL
+    #if CAP_GL && CAP_RUG
     if(rug::rugged) rug::close();
     #endif
     vid.always3 = !vid.always3;
@@ -946,7 +951,7 @@ EX void switch_always3() {
     
   EX void switch_fpp() {
 #if MAXMDIM >= 4
-    #if CAP_GL
+    #if CAP_GL && CAP_RUG
     if(rug::rugged) rug::close();
     #endif
     if(dual::split(switch_fpp)) return;
@@ -1026,7 +1031,9 @@ EX string cgi_string() {
   if(GOLDBERG_INV) V("GP", its(gp::param.first) + "," + its(gp::param.second));
   if(IRREGULAR) V("IRR", its(irr::irrid));
 
+  #if CAP_ARCM
   if(arcm::in()) V("ARCM", arcm::current.symbol);
+  #endif
 
   if(arb::in()) V("ARB", its(arb::current.order));
   
@@ -1034,7 +1041,10 @@ EX string cgi_string() {
   
   if(bt::in() || GDIM == 3) V("WQ", its(vid.texture_step));
   
-  if(hybri) V("U", its(int(hybrid::underlying)));
+  if(hybri) {
+    V("U", PIU(cgi_string()));
+    // its(int(hybrid::underlying)));
+    }
   
   if(prod) V("PL", fts(vid.plevel_factor));
 

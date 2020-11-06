@@ -18,6 +18,10 @@ EX namespace bt {
     return false;
 #endif
     }
+
+#if !CAP_BT
+  EX int updir() { return 0; }
+#endif
   
 #if CAP_BT
   #if HDR
@@ -1031,7 +1035,6 @@ EX int celldistance3(heptagon *c1, heptagon *c2) {
   }
 
 EX int celldistance3(cell *c1, cell *c2) { return celldistance3(c1->master, c2->master); }
-#endif
 
 EX hyperpoint get_horopoint(ld y, ld x) {
   return xpush(-y) * bt::parabolic(x) * C0;
@@ -1091,6 +1094,7 @@ EX hyperpoint get_corner_horo_coordinates(cell *c, int i) {
 auto hooksw = addHook(hooks_swapdim, 100, [] {
   if(bt::in()) build_tmatrix();
   });
+#endif
 
   }
 

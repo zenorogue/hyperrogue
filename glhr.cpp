@@ -154,7 +154,7 @@ void display(const glmatrix& m) {
   printf("\n");
   }
 
-glmatrix operator * (glmatrix m1, glmatrix m2) {
+EX glmatrix operator * (glmatrix m1, glmatrix m2) {
   glmatrix res;
   for(int i=0; i<4; i++)
   for(int j=0; j<4; j++) {
@@ -693,6 +693,10 @@ template<class T> void bindbuffer(T& v) {
 
 #define PTR(attrib, q, field) \
   glVertexAttribPointer(attrib, q, GL_FLOAT, GL_FALSE, sizeof(v[0]), (void*) ((char*) &v[0].field - (char*) &v[0]));
+
+EX void bindbuffer_vertex(vector<glvertex>& v) {
+  bindbuffer(v);
+  }
 
 #endif
 

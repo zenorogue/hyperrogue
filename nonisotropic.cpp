@@ -236,8 +236,8 @@ EX namespace sn {
   struct hrmap_solnih : hrmap {
     hrmap *binary_map;
     hrmap *ternary_map; /* nih only */
-    unordered_map<pair<heptagon*, heptagon*>, heptagon*> at;
-    unordered_map<heptagon*, pair<heptagon*, heptagon*>> coords;
+    map<pair<heptagon*, heptagon*>, heptagon*> at;
+    map<heptagon*, pair<heptagon*, heptagon*>> coords;
     
     heptagon *origin;
     
@@ -872,8 +872,8 @@ EX namespace nilv {
      }
     
   struct hrmap_nil : hrmap {
-    unordered_map<mvec, heptagon*> at;
-    unordered_map<heptagon*, mvec> coords;
+    map<mvec, heptagon*> at;
+    map<heptagon*, mvec> coords;
     
     heptagon *getOrigin() override { return get_at(mvec_zero); }
     
@@ -1231,6 +1231,8 @@ EX namespace hybrid {
       dynamicval<hrmap*> gpm(pmap, this);
       dynamicval<eGeometry> gag(actual_geometry, geometry);
       dynamicval<eGeometry> g(geometry, underlying);
+      dynamicval<int> gss(underlying_cgip->single_step, cgi.single_step);
+      dynamicval<int> gsp(underlying_cgip->psl_steps, cgi.psl_steps);
       dynamicval<geometry_information*> gc(cgip, underlying_cgip);
       dynamicval<hrmap*> gu(currentmap, underlying_map);
       return t();
@@ -1308,6 +1310,8 @@ EX namespace hybrid {
     if(!hybri) return f();
     dynamicval<eGeometry> g(geometry, underlying);
     dynamicval<eGeometry> gag(actual_geometry, geometry);
+    dynamicval<int> gss(underlying_cgip->single_step, cgi.single_step);
+    dynamicval<int> gsp(underlying_cgip->psl_steps, cgi.psl_steps);
     dynamicval<geometry_information*> gc(cgip, underlying_cgip);
     dynamicval<hrmap*> gpm(pmap, currentmap);
     dynamicval<hrmap*> gm(currentmap, get_umap());
@@ -1345,13 +1349,17 @@ EX namespace hybrid {
     }
   
   EX int wall_offset(cell *c) {
-    if(GOLDBERG) {
+    if(GOLDBERG || INVERSE) {
       /* a bit slow... */
       cell *c1 = WDIM == 2 ? c : get_where(c).first;
       gp::draw_li = WDIM == 2 ? gp::get_local_info(c1) : PIU(gp::get_local_info(c1));
       }
     auto ugeometry = hybri ? hybrid::underlying : geometry;    
+    #if CAP_ARCM
     int id = ugeometry == gArchimedean ? arcm::id_of(c->master) + 20 * arcm::parent_index_of(c->master) : shvid(c);
+    #else
+    int id = shvid(c);
+    #endif
     if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, {-1, nullptr});
     auto &wop = cgi.walloffsets[id];
     int &wo = wop.first;
@@ -2057,14 +2065,19 @@ EX namespace rots {
     return spin(beta) * uxpush(distance/2) * spin(-beta+alpha);
     }
   
-  std::unordered_map<int, transmatrix> saved_matrices_ray;
+  std::map<int, transmatrix> saved_matrices_ray;
 
   EX transmatrix ray_iadj(cell *c1, int i) {
     if(i == c1->type-1) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
     if(i == c1->type-2) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
     cell *c2 = c1->cmove(i);
+    #if CAP_ARCM
     int id1 = hybrid::underlying == gArchimedean ? arcm::id_of(c1->master) + 20 * arcm::parent_index_of(c1->master) : shvid(c1);
     int id2 = hybrid::underlying == gArchimedean ? arcm::id_of(c2->master) + 20 * arcm::parent_index_of(c2->master) : shvid(c2);
+    #else
+    int id1 = shvid(c1);
+    int id2 = shvid(c2);
+    #endif
     int j = c1->c.spin(i);
     int id = id1 + (id2 << 10) + (i << 20) + (j << 26);
     auto &M = saved_matrices_ray[id];
@@ -2084,14 +2097,19 @@ EX namespace rots {
 
   struct hrmap_rotation_space : hybrid::hrmap_hybrid {
 
-    std::unordered_map<int, transmatrix> saved_matrices;
+    std::map<int, transmatrix> saved_matrices;
 
     transmatrix adj(cell *c1, int i) override {    
       if(i == c1->type-2) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
       if(i == c1->type-1) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
       cell *c2 = c1->cmove(i);
+      #if CAP_ARCM
       int id1 = hybrid::underlying == gArchimedean ? arcm::id_of(c1->master) + 20 * arcm::parent_index_of(c1->master) : shvid(c1);
       int id2 = hybrid::underlying == gArchimedean ? arcm::id_of(c2->master) + 20 * arcm::parent_index_of(c2->master) : shvid(c2);
+      #else
+      int id1 = shvid(c1);
+      int id2 = shvid(c2);
+      #endif
       int j = c1->c.spin(i);
       int id = id1 + (id2 << 10) + (i << 20) + (j << 26);
       auto &M = saved_matrices[id];

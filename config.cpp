@@ -22,6 +22,8 @@ struct supersaver {
   virtual bool dosave() = 0;
   virtual void reset() = 0;
   virtual ~supersaver() {};
+  virtual bool affects(void* v) { return false; }
+  virtual void set_default() = 0;
   };
 
 typedef vector<shared_ptr<supersaver>> saverlist;
@@ -36,6 +38,8 @@ template<class T> struct dsaver : supersaver {
   bool dosave() { return val != dft; }
   void reset() { val = dft; }
   dsaver(T& val) : val(val) { }
+  bool affects(void* v) { return v == &val; }
+  void set_default() { dft = val; }
   };
 
 template<class T> struct saver : dsaver<T> {};
@@ -51,6 +55,18 @@ template<class T> void addsaver(T& i, string name) {
   addsaver(i, name, i);
   }
 
+template<class T> void removesaver(T& val) {
+  for(int i=0; i<isize(savers); i++)
+    if(savers[i]->affects(&val))
+      savers.erase(savers.begin() + i);
+  }
+
+template<class T> void set_saver_default(T& val) {
+  for(auto sav: savers)
+    if(sav->affects(&val))
+      sav->set_default();
+  }
+
 template<class T> struct saverenum : supersaver {
   T& val;
   T dft;
@@ -59,6 +75,8 @@ template<class T> struct saverenum : supersaver {
   saverenum<T>(T& v) : val(v) { }
   string save() { return its(int(val)); }
   void load(const string& s) { val = (T) atoi(s.c_str()); }
+  virtual bool affects(void* v) { return v == &val; }
+  virtual void set_default() { dft = val; }
   };
 
 template<class T, class U> void addsaverenum(T& i, U name, T dft) {
@@ -344,6 +362,7 @@ EX void initConfig() {
   addsaver(pconf.ballproj, "ballproj", 1);
   addsaver(vid.monmode, "monster display mode", DEFAULT_MONMODE);
   addsaver(vid.wallmode, "wall display mode", DEFAULT_WALLMODE);
+  addsaver(vid.highlightmode, "highlightmode");
 
   addsaver(vid.depth, "3D depth", 1);
   addsaver(vid.camera, "3D camera level", 1);
@@ -473,7 +492,9 @@ EX void initConfig() {
   addsaver(shmup::on, "mode-shmup", false);
   addsaver(hardcore, "mode-hardcore", false);
   addsaver(chaosmode, "mode-chaos");
+  #if CAP_INV
   addsaver(inv::on, "mode-Orb Strategy");
+  #endif
   addsaverenum(variation, "mode-variation", eVariation::bitruncated);
   addsaver(peace::on, "mode-peace");
   addsaver(peace::otherpuzzles, "mode-peace-submode");
@@ -495,6 +516,7 @@ EX void initConfig() {
   addsaver(vid.binary_width, "binary-tiling-width", 1);
   addsaver(pconf.collignon_parameter, "collignon-parameter", 1);
   addsaver(pconf.collignon_reflected, "collignon-reflect", false);
+  addsaver(pconf.show_hyperboloid_flat, "hyperboloid-flat", true);
 
   addsaver(pconf.aitoff_parameter, "aitoff-parameter");
   addsaver(pconf.miller_parameter, "miller-parameter");
@@ -577,7 +599,9 @@ EX void initConfig() {
   addsaverenum(pconf.basic_model, "basic model");
   addsaver(pconf.use_atan, "use_atan");
   
+  #if CAP_ARCM
   addsaver(arcm::current.symbol, "arcm-symbol", "4^5");
+  #endif
   addsaverenum(hybrid::underlying, "product-underlying");
   
   for(int i=0; i<isize(ginf); i++) {
@@ -637,7 +661,7 @@ EX void initConfig() {
 
   addsaver(vid.sloppy_3d, "sloppy3d", true);
 
-  addsaver(vid.texture_step, "wall-quality", 1);
+  addsaver(vid.texture_step, "wall-quality", 4);
   
   addsaver(smooth_scrolling, "smooth-scrolling", false);
   addsaver(mouseaim_sensitivity, "mouseaim_sensitivity", 0.01);
@@ -689,6 +713,8 @@ EX void initConfig() {
   
   addsaver(camera_speed, "camera-speed", 1);
   addsaver(camera_rot_speed, "camera-rot-speed", 1);
+
+  addsaver(panini_alpha, "panini_alpha", 0);
 
   callhooks(hooks_configfile);
 
@@ -1060,7 +1086,44 @@ EX void menuitem_sightrange(char c IS('c')) {
     dialog::addSelItem(XLAT("sight range"), its(sightrange_bonus), c);
   dialog::add_action(edit_sightrange);
   }
-  
+
+EX void menuitem_sfx_volume() {
+  dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
+  dialog::add_action([] {
+    dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
+    dialog::numberdark = dialog::DONT_SHOW;
+    dialog::reaction = [] () {
+      #if ISANDROID
+      settingsChanged = true;
+      #endif
+      };
+    dialog::bound_low(0);
+    dialog::bound_up(MIX_MAX_VOLUME);
+    });
+  }
+
+EX void menuitem_music_volume() {
+  if (!audio) return;
+  dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
+  dialog::add_action([] {
+    dialog::editNumber(musicvolume, 0, 128, 10, 60, XLAT("background music volume"), "");
+    dialog::numberdark = dialog::DONT_SHOW;
+    dialog::reaction = [] () {
+      #if CAP_SDLAUDIO
+      Mix_VolumeMusic(musicvolume);
+      #endif
+      #if ISANDROID
+      settingsChanged = true;
+      #endif
+      };
+    dialog::bound_low(0);
+    dialog::bound_up(MIX_MAX_VOLUME);
+    dialog::extra_options = [] {
+      dialog::addBoolItem_action(XLAT("play music when out of focus"), music_out_of_focus, 'A');
+      };
+    });
+  }
+
 EX void showSpecialEffects() {
   cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : sm::MAYDARK;
   gamescreen(0);
@@ -1312,37 +1375,8 @@ EX void configureOther() {
   // dialog::addBoolItem_action(XLAT("forget faraway cells"), memory_saving_mode, 'y');
   
 #if CAP_AUDIO
-  dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
-  dialog::add_action([] {
-    dialog::editNumber(musicvolume, 0, 128, 10, 60, XLAT("background music volume"), "");
-    dialog::reaction = [] () {
-#if CAP_SDLAUDIO
-      Mix_VolumeMusic(musicvolume);
-#endif
-#if ISANDROID
-      settingsChanged = true;
-#endif
-      };
-    dialog::bound_low(0);
-    dialog::bound_up(MIX_MAX_VOLUME);
-    dialog::extra_options = [] {
-#if CAP_SDLAUDIO
-      dialog::addBoolItem_action(XLAT("play music when out of focus"), music_out_of_focus, 'A');
-#endif
-      };
-    });
-
-  dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
-  dialog::add_action([] {
-    dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
-    dialog::reaction = [] () {
-#if ISANDROID
-      settingsChanged = true;
-#endif
-      };
-    dialog::bound_low(0);
-    dialog::bound_up(MIX_MAX_VOLUME);
-    });
+  menuitem_music_volume();
+  menuitem_sfx_volume();
 #endif
 
   menuitem_sightrange('r');
@@ -1530,17 +1564,49 @@ EX void explain_detail() {
     ));
   }
 
-EX void add_edit_fov(char key IS('f')) {
-  dialog::addSelItem(XLAT("field of view"), fts(vid.fov) + "°", key);
-  dialog::add_action([] {
-    dialog::editNumber(vid.fov, 1, 170, 1, 45, "field of view", 
+EX ld max_fov_angle() {
+  if(panini_alpha >= 1 || panini_alpha <= -1) return 360;
+  return acos(-panini_alpha) * 2 / degree;
+  }
+
+EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
+
+  string sfov = fts(vid.fov) + "°";
+  if(panini_alpha) {
+    sfov += " / " + fts(max_fov_angle()) + "°";
+    }
+  dialog::addSelItem(XLAT("field of view"), sfov, key);
+  dialog::add_action([=] {
+    if(pop) popScreen();
+    dialog::editNumber(vid.fov, 1, max_fov_angle(), 1, 45, "field of view", 
       XLAT(
         "Horizontal field of view, in angles. "
         "This affects the Hypersian Rug mode (even when stereo is OFF) "
-        "and non-disk models.")
+        "and non-disk models.") + "\n\n" +
+      XLAT(
+        "Must be less than %1°. Panini projection can be used to get higher values.",
+        fts(max_fov_angle())
+        )
         );
     dialog::bound_low(1e-8);
-    dialog::bound_up(179);
+    dialog::bound_up(max_fov_angle() - 0.01);
+    dialog::extra_options = [] {
+      dialog::addSelItem(XLAT("Panini projection"), fts(panini_alpha), 'P');
+      dialog::add_action([] {
+        popScreen();
+        dialog::editNumber(panini_alpha, 0, 1, 0.1, 0, "Panini parameter", 
+          XLAT(
+            "The Panini projection is an alternative perspective projection "
+            "which allows very wide field-of-view values. HyperRogue uses "
+            "a quick implementation, so parameter values too close to 1 may "
+            "be buggy; try e.g. 0.9 instead.")
+            );
+        dialog::reaction = ray::reset_raycaster;
+        dialog::extra_options = [] {
+          add_edit_fov('F', true);
+          };
+        });
+      };
     });
   }
 
@@ -2654,7 +2720,7 @@ EX int read_gamemode_args() {
 auto ah_config = addHook(hooks_args, 0, read_config_args) + addHook(hooks_args, 0, read_gamemode_args) + addHook(hooks_args, 0, read_color_args);
 #endif
 
-EX unordered_map<string, ld&> params = {
+EX map<string, ld&> params = {
   {"linewidth", vid.linewidth},
   {"patternlinewidth", linepatterns::width},
   {"scale", pconf.scale},

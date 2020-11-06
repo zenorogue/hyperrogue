@@ -29,7 +29,7 @@ struct jmatrix : array<array<int, 7>, 7> {
   };
 
 vector<jmatrix> jms;
-std::unordered_map<jmatrix, int> ids;
+std::map<jmatrix, int> ids;
 
 jmatrix J, Z, id;
 

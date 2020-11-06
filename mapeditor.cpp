@@ -1095,8 +1095,8 @@ EX namespace mapeditor {
     displayButton(8, vid.yres-8-fs*2, XLAT("ESC = return to the game"), SDLK_ESCAPE, 0);
     }
   
-  EX unordered_set<cell*> affected;
-  EX unordered_set<int> affected_id;
+  EX set<cell*> affected;
+  EX set<int> affected_id;
 
   EX void showMapEditor() {
     cmode = sm::MAP;
@@ -1276,6 +1276,7 @@ EX namespace mapeditor {
   void list_spill(cellwalker tgt, cellwalker src, manual_celllister& cl) {
     spill_list.clear(); 
     spill_list.emplace_back(tgt, src);
+    if(painttype == 7) return;
     int crad = 0, nextstepat = 0;
     for(int i=0; i<isize(spill_list); i++) {
       if(i == nextstepat) {

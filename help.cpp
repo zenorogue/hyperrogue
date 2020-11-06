@@ -232,7 +232,7 @@ EX void buildCredits() {
     "Kojiguchi Kazuki, baconcow, Alan, SurelyYouJest, hotdogPi, DivisionByZero, xXxWeedGokuxXx, jpystynen, Dmitry Marakasov, Alexandre Moine, Arthur O'Dwyer, "
     "Triple_Agent_AAA, bluetailedgnat, Allalinor, Shitford, KittyTac, Christopher King, KosGD, TravelDemon, Bubbles, rdococ, frozenlake, MagmaMcFry, "
     "Snakebird Priestess, roaringdragon2, Stopping Dog, bengineer8, Sir Light IJIJ, ShadeBlade, Saplou, shnourok, Ralith, madasa, 6% remaining, Chimera245, Remik Pi, alien foxcat thing, "
-    "Piotr Grochowski"
+    "Piotr Grochowski, Ann, still-flow"
     );
 #ifdef EXTRALICENSE
   help += EXTRALICENSE;
@@ -928,8 +928,12 @@ EX void describeMouseover() {
     if(isReptile(c->wall))
       out += " [" + turnstring((unsigned char) c->wparam) + "]";
       
+    #if CAP_COMPLEX2
     if(c->monst == moKnight)
       out += XLAT(", %1 the Knight", camelot::knight_name(c));
+    #else
+    if(0) ;
+    #endif
   
     else if(c->monst) {
       out += ", "; out += XLAT1(minf[c->monst].name); 
@@ -950,10 +954,12 @@ EX void describeMouseover() {
       out += ", "; 
       out += XLAT1(iinf[c->item].name); 
       if(c->item == itBarrow) out += " (x" + its(c->landparam) + ")";
-      if(c->land == laHunting) {
+      #if CAP_COMPLEX2
+      if(c->land == laHunting) {      
         int i = ambush::size(c, c->item);
         if(i) out += " (" + XLAT("ambush:") + " " + its(i) + ")";
         }
+      #endif
       if(c->item == itBabyTortoise && tortoise::seek()) 
         out += " " + tortoise::measure(tortoise::babymap[c]);
       if(!c->monst) set_help_to(c->item);
@@ -1000,12 +1006,14 @@ EX void describeMouseover() {
   callhooks(hooks_mouseover, c);
   
   if(mousey < vid.fsize * 3/2 && getcstat == '-' && !instat) getcstat = SDLK_F1;
+  #if CAP_TOUR
   if(tour::on && !tour::texts) {
     if(tour::slides[tour::currentslide].flags & tour::NOTITLE)
       mouseovers = "";
     else
       mouseovers = XLAT(tour::slides[tour::currentslide].name);
     }
+  #endif
   }
 
 EX void showHelp() {

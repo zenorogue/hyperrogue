@@ -293,6 +293,8 @@ EX bool two_sided_model() {
   if(pmodel == mdHyperboloid) return !euclid;
   // if(pmodel == mdHemisphere) return true;
   if(pmodel == mdDisk) return sphere;
+  if(pmodel == mdRetroLittrow) return sphere;
+  if(pmodel == mdRetroHammer) return sphere;
   if(pmodel == mdHemisphere) return true;
   if(pmodel == mdRotatedHyperboles) return true;
   if(pmodel == mdSpiral && pconf.spiral_cone < 360) return true;
@@ -304,6 +306,12 @@ EX int get_side(const hyperpoint& H) {
     double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
     double horizon = curnorm / pconf.alpha;
     return (H[2] <= -horizon) ? -1 : 1;
+    }
+  if(pmodel == mdRetroLittrow && sphere) {
+    return H[2] >= 0 ? 1 : -1;
+    }
+  if(pmodel == mdRetroHammer && sphere) {
+    return H[2] >= 0 ? 1 : -1;
     }
   if(pmodel == mdRotatedHyperboles)
     return H[1] > 0 ? -1 : 1;
@@ -2111,7 +2119,7 @@ EX void sort_drawqueue() {
   int siz = isize(ptds);
 
   #if MINIMIZE_GL_CALLS
-  unordered_map<color_t, vector<unique_ptr<drawqueueitem>>> subqueue;
+  map<color_t, vector<unique_ptr<drawqueueitem>>> subqueue;
   for(auto& p: ptds) subqueue[(p->prio == PPR::CIRCLE || p->prio == PPR::OUTCIRCLE) ? 0 : p->outline_group()].push_back(move(p));
   ptds.clear();
   for(auto& p: subqueue) for(auto& r: p.second) ptds.push_back(move(r));
@@ -2156,7 +2164,7 @@ EX void reverse_side_priorities() {
 // on the sphere, parts on the back are drawn first
 EX void draw_backside() {
   DEBBI(DF_GRAPH, ("draw_backside"));
-  if(pmodel == mdHyperboloid && hyperbolic) {
+  if(pmodel == mdHyperboloid && hyperbolic && pconf.show_hyperboloid_flat) {
     dynamicval<eModel> dv (pmodel, mdHyperboloidFlat);
     for(auto& ptd: ptds) 
       if(!among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))

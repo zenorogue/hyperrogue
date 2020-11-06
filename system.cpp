@@ -194,7 +194,9 @@ EX void initgame() {
   cwt.at = currentmap->gamestart(); cwt.spin = 0; cwt.mirrored = false;
   cwt.at->land = firstland;
 
+  #if CAP_COMPLEX2
   if(firstland == laBrownian) brownian::init(cwt.at);
+  #endif
   
   chaosAchieved = false;
 
@@ -214,7 +216,9 @@ EX void initgame() {
     }
 
   if((tactic::on || yendor::on || peace::on) && isCyclic(firstland)) {
+    #if CAP_COMPLEX2
     camelot::anthraxBonus = items[itHolyGrail];
+    #endif
     cwt.at->move(0)->land = firstland;
     if(firstland == laWhirlpool) cwt.at->move(0)->wall = waSea;
     
@@ -366,7 +370,9 @@ EX void initgame() {
 #if CAP_INV
     if(inv::on) inv::init();
 #endif
+#if CAP_COMPLEX2
     mine::auto_teleport_charges();
+#endif
     if(!use_special_land) {
       if(firstland != (princess::challenge ? laPalace : laIce)) cheater++;
       }
@@ -1265,7 +1271,9 @@ EX void stop_game() {
   princess::reviveAt = 0;
   princess::forceVizier = false;
   princess::forceMouse = false;
+  #if CAP_COMPLEX2
   camelot::knighted = 0;
+  #endif
   // items[itGreenStone] = 100;
   clearMemory();
   game_active = false;
@@ -1287,7 +1295,6 @@ EX void set_geometry(eGeometry target) {
   bool was_default = pmodel == default_model();
   callhooks(hooks_on_geometry_change);
   if(geometry != target) {
-    int old_DIM = GDIM;
     stop_game();
     ors::reset();
     if(among(target, gProduct, gRotSpace)) {
@@ -1318,14 +1325,11 @@ EX void set_geometry(eGeometry target) {
     if(bt::in() || WDIM == 3 || kite::in() || arb::in()) if(!hybri) variation = eVariation::pure;
     #endif
     if(S3 >= OINF) variation = eVariation::pure;
-    if(INVERSE) variation = gp::variation_for(gp::param);
+    if(INVERSE && !hybri) variation = gp::variation_for(gp::param);
     if(ginf[target].default_variation == eVariation::pure && geometry != gArchimedean)
       variation = eVariation::pure;
     if(was_default) pmodel = default_model();
-    if(nonisotropic && old_DIM == 2 && vid.texture_step < 4) vid.texture_step = 4;
     if(WDIM == 2 && (cgflags & qIDEAL) && vid.always3 && vid.texture_step < 32) vid.texture_step = 32;
-    if(prod) { pmodel = mdPerspective; if(vid.texture_step < 4) vid.texture_step = 4; }
-    if(WDIM == 3 && (cgflags & qIDEAL) && vid.texture_step < 4) vid.texture_step = 4;
     if(sl2) nisot::geodesic_movement = true;
 
     if(rotspace) {
@@ -1495,7 +1499,9 @@ EX void start_game() {
   ignored_memory_warning = false;
   check_cgi();
   cgi.require_basics();
+  #if CAP_ARCM
   arcm::current.compute_geometry();
+  #endif
   initcells();
   expansion.reset();
 

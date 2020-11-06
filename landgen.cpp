@@ -2430,8 +2430,10 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         }
       break;
     
-    case laBrownian:
+    case laBrownian:    
+      #if CAP_COMPLEX2
       brownian::build(c, d);
+      #endif
       break;
     
     case laMirrored:
@@ -2807,6 +2809,7 @@ EX void setdist(cell *c, int d, cell *from) {
   
   if(d >= BARLEV) {
   
+    #if CAP_BT
     if(bt::in() && WDIM == 3 && !c->land && !sn::in()) {
       ld z = vid.binary_width;
       cell *cseek = c;
@@ -2816,6 +2819,7 @@ EX void setdist(cell *c, int d, cell *from) {
       while(z < 3.999 && step < 10) cseek = cseek->cmove(bt::updir()), z *= scale;
       if(cseek->master->emeraldval) setland(c, eLand(cseek->master->emeraldval));
       }
+    #endif
   
     if(!c->land && from && (WDIM == 3 || !among(from->land, laBarrier, laElementalWall, laHauntedWall, laOceanWall)) && !quotient && !(chaosmode > 1)) {
       if(!hasbardir(c)) setland(c, from->land);

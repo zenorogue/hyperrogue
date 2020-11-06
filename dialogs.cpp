@@ -64,7 +64,10 @@ EX namespace dialog {
   EX color_t dialogcolor = 0xC0C0C0;
 
   EX void addBack() {
-    addItem(XLAT("go back"), ISWEB ? SDLK_BACKSPACE : SDLK_ESCAPE);
+    addItem(XLAT("go back"), 
+      (cmode & sm::NUMBER) ? SDLK_RETURN :
+      ISWEB ? SDLK_BACKSPACE :
+      SDLK_ESCAPE);
     }
 
   EX void addHelp() {
@@ -522,21 +525,38 @@ EX namespace dialog {
   bool isitem(item& it) {
     return it.type == diItem || it.type == diBigItem;
     }
+
+  EX void handle_actions(int &sym, int &uni) {
+    if(key_actions.count(uni)) {
+      key_actions[uni]();
+      sym = uni = 0;
+      return;
+      }
+    if(key_actions.count(sym)) {
+      key_actions[sym]();
+      sym = uni = 0;
+      return;
+      }
+    }
   
   EX void handleNavigation(int &sym, int &uni) {
-    if(uni == '\n' || uni == '\r' || DIRECTIONKEY == SDLK_KP5)
+    if(uni == '\n' || uni == '\r' || DIRECTIONKEY == SDLK_KP5) {
       for(int i=0; i<isize(items); i++) 
         if(isitem(items[i]))
           if(items[i].body == highlight_text) {
             uni = sym = items[i].key;
+            handle_actions(sym, uni);
             return;
             }
+      }
     if(DKEY == SDLK_PAGEDOWN) {
+      uni = sym = 0;
       for(int i=0; i<isize(items); i++)
         if(isitem(items[i]))
           highlight_text = items[i].body;
       }
     if(DKEY == SDLK_PAGEUP) {
+      uni = sym = 0;
       for(int i=0; i<isize(items); i++) 
         if(isitem(items[i])) {
           highlight_text = items[i].body;
@@ -544,11 +564,11 @@ EX namespace dialog {
           }
       }    
     if(DKEY == SDLK_UP) {
+      uni = sym = 0;
       string last = "";
       for(int i=0; i<isize(items); i++) 
         if(isitem(items[i]))
           last = items[i].body;
-      uni = sym = 0;
       for(int i=0; i<isize(items); i++)
         if(isitem(items[i])) {
           if(items[i].body == highlight_text) {
@@ -559,6 +579,7 @@ EX namespace dialog {
       highlight_text = last;
       }
     if(DKEY == SDLK_DOWN) {
+      uni = sym = 0;
       int state = 0;
       for(int i=0; i<isize(items); i++)
         if(isitem(items[i])) {
@@ -570,18 +591,8 @@ EX namespace dialog {
           highlight_text = items[i].body;
           break;
           }
-      uni = sym = 0;
       }
-    if(key_actions.count(uni)) {
-      key_actions[uni]();
-      sym = uni = 0;
-      return;
-      }
-    if(key_actions.count(sym)) {
-      key_actions[sym]();
-      sym = uni = 0;
-      return;
-      }
+    handle_actions(sym, uni);
     }
 
   color_t colorhistory[10] = {
@@ -697,7 +708,7 @@ EX namespace dialog {
         getcstat = 'A' + i, inslider = true;
       }
     
-    displayColorButton(dcenter, vid.yres/2+vid.fsize * 6, XLAT("select this color") + " : " + itsh(color), ' ', 8, 0, color >> (colorAlpha ? ash : 0));
+    displayColorButton(dcenter, vid.yres/2+vid.fsize * 6, XLAT("select this color") + " : " + format(colorAlpha ? "%08X" : "%06X", color), ' ', 8, 0, color >> (colorAlpha ? ash : 0));
 
     if(extra_options) extra_options();
     

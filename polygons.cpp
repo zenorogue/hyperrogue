@@ -718,24 +718,26 @@ void geometry_information::procedural_shapes() {
 
 vector<ld> equal_weights(1000, 1);
 
-#if !(CAP_BT && MAXMDIM >= 4)
+#if MAXMDIM < 4
 void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector<ld> weights) { }
 void geometry_information::reserve_wall3d(int i) { }
 void geometry_information::create_wall3d() { }
 void geometry_information::compute_cornerbonus() { }
 #endif
 
-#if CAP_BT && MAXMDIM >= 4
+#if MAXMDIM >= 4
 
 // Make a wall
 
 hyperpoint ray_kleinize(hyperpoint h, int id, ld pz) {
   if(geometry == gNil && among(id, 2, 5)) h[2] = 0;
+  #if CAP_BT
   if(hyperbolic && bt::in()) {
     // ld co = vid.binary_width / log(2) / 4;
     // hyperpoint res = point31(h[2]*log(2)/2, h[0]*co, h[1]*co);
     return deparabolic10(bt::parabolic3(h[0], h[1]) * xpush0(log(2)/2*h[2]));
     }
+  #endif
   if(prod) {
     return point3(h[0]/h[2], h[1]/h[2], pz);
     }
@@ -756,7 +758,9 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
     reverse(vertices.begin(), vertices.end()),
     reverse(weights.begin(), weights.end());
 
+  #if CAP_BT
   ld yy = log(2) / 2;
+  #endif
 
   bshape(shWall3D[id], PPR::WALL);
   last->flags |= POLY_TRIANGLES | POLY_PRINTABLE;
@@ -815,8 +819,13 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
         hpcpush(h); return; 
         }
       if(sn::in() || !bt::in()) { hpcpush(ultra_normalize(h)); return; }
-      hyperpoint res = bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
-      hpcpush(res);
+      #if CAP_BT
+      if(bt::in()) {
+        hyperpoint res = bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
+        hpcpush(res);
+        }
+      #endif
+      hpcpush(h);
       });
     }
 
@@ -833,8 +842,13 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       if(nil)
         h = nilv::on_geodesic(vertices[a], vertices[(a+1)%n], y * 1. / STEP);
       if(sn::in() || !bt::in()) { hpcpush(ultra_normalize(h)); continue; }
-      hyperpoint res = bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
-      hpcpush(res);
+      #if CAP_BT
+      if(bt::in()) {
+        hyperpoint res = bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
+        hpcpush(res);
+        }
+      #endif
+      hpcpush(h);
       }
     hpcpush(hpc[last->s]);
     }
@@ -875,6 +889,8 @@ void geometry_information::reserve_wall3d(int i) {
 void geometry_information::create_wall3d() {
   if(WDIM == 2) return;
   reserve_wall3d(kite::in() ? 22 : hybri ? 0 : S7);
+  
+  #if CAP_BT
   if(GDIM == 3 && bt::in() && geometry == gBinary3) {
     hyperpoint h00 = point3(-1,-1,-1);
     hyperpoint h01 = point3(-1,0,-1);
@@ -970,6 +986,7 @@ void geometry_information::create_wall3d() {
     make_wall(12, {point3(3*h,r3,z), point3(0,2*r3,z), point3(-3*h,r3,z)});
     make_wall(13, {point3(3*h,r3,z), point3(3*h,-r3,z), point3(0,-2*r3,z), point3(-3*h,-r3,z), point3(-3*h,r3,z)});
     }
+  #endif
   
   if(prod) {
     walloffsets.clear();
@@ -1060,6 +1077,7 @@ void geometry_information::create_wall3d() {
       }
     }
   
+  #if CAP_BT
   if(kite::in()) {
     auto kv = kite::make_walls();
     for(auto& v: kv.first) for(auto& h: v) {
@@ -1068,6 +1086,7 @@ void geometry_information::create_wall3d() {
       }
     for(int i=0; i<isize(kv.first); i++) make_wall(i, kv.first[i], kv.second[i]);
     }
+  #endif
 
   wallstart.push_back(isize(raywall));
   compute_cornerbonus();

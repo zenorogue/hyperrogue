@@ -1167,8 +1167,10 @@ void movePlayer(monster *m, int delta) {
       
       cwt.at = c2; afterplayermoved();
       if(c2->item && c2->land == laAlchemist) c2->wall = m->base->wall;
+      #if CAP_COMPLEX2
       if(m->base->wall == waRoundTable)
         camelot::roundTableMessage(c2);
+      #endif
       if(c2->wall == waCloud || c2->wall == waMirror) {
         visibleFor(500);
         cellwalker cw(c2, 0, false);
@@ -1189,7 +1191,9 @@ void movePlayer(monster *m, int delta) {
         items[itOrbLife] = 0;
         m->dead = true;
         }
+      #if CAP_COMPLEX2
       mine::uncover_full(c2);
+      #endif
       
       if(isWatery(c2) && isWatery(m->base) && m->inBoat)
         moveItem(m->base, c2, true);
@@ -2523,7 +2527,7 @@ EX void turn(int delta) {
   if(doall)
     for(cell *c: currentmap->allcells()) activateMonstersAt(c);
   else
-    for(unordered_map<cell*, shiftmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) 
+    for(map<cell*, shiftmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) 
       activateMonstersAt(it->first);
   
   /* printf("size: gmatrix = %ld, active = %ld, monstersAt = %ld, delta = %d\n", 
@@ -2635,7 +2639,9 @@ EX void turn(int delta) {
         #if CAP_INV
         if(inv::on) inv::compute();
         #endif
+        #if CAP_COMPLEX2
         terracotta::check();
+        #endif
         heat::processfires();
         if(havewhat&HF_WHIRLPOOL) whirlpool::move();
         if(havewhat&HF_WHIRLWIND) whirlwind::move();

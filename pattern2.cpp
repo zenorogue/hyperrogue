@@ -422,7 +422,7 @@ EX int fieldval_uniq(cell *c) {
     }
   else if(euc::in(2)) {
     auto p = euc2_coordinates(c);
-    if(bounded) return p.first + (p.second << 16);
+    if(bounded) return p.first + p.second * (1 << 16);
     return gmod(p.first - 22 * p.second, 3*127);
     }
   else if(euc::in(3)) {
@@ -1682,11 +1682,13 @@ EX namespace patterns {
       ep.extra_params["ey"] = y;
       if(S7 == 6) ep.extra_params["ez"] = -x-y;
       }
+    #if CAP_CRYSTAL
     if(cryst) {
       crystal::ldcoord co = crystal::get_ldcoord(c);
       for(int i=0; i<crystal::MAXDIM; i++)
         ep.extra_params["x"+its(i)] = co[i];
       }
+    #endif
     if(asonov::in()) {
       auto co = asonov::get_coord(c->master);
       ep.extra_params["ax"] = szgmod(co[0], asonov::period_xy);

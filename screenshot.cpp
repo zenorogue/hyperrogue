@@ -1815,6 +1815,7 @@ void no_init() { }
 
 startanim null_animation { "", no_init, [] { gamescreen(2); }};
 
+#if CAP_STARTANIM
 startanim joukowsky { "Joukowsky transform", no_init, [] {
   dynamicval<eModel> dm(pmodel, mdJoukowskyInverted);
   dynamicval<ld> dt(pconf.model_orientation, ticks / 25.);
@@ -1874,6 +1875,7 @@ startanim spin_around { "spinning around", no_init,  [] {
   dynamicval<transmatrix> dv(View, spin(-cos_auto(circle_radius)*alpha) * xpush(circle_radius) * spin(alpha) * View);
   gamescreen(2);
   }};
+#endif
 
 reaction_t add_to_frame;
 

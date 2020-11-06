@@ -93,9 +93,11 @@ void launch(int seed, int elimit, int hlimit) {
     cl1 = cl.lst;
     for(cell *c: cl.lst) {
       c->wall = waNone, c->land = laCanvas;
+      #if CAP_ARCM
       int id = arcm::current.tilegroup[arcm::id_of(c->master)];
       color_t yellows[5] = { 0x80C080, 0x80C0C0, 0x8080C0, 0xC080C0, 0xC0C080 };
       c->landparam = yellows[id];
+      #endif
       }
     println(hlog, "c1 size = ", isize(cl.lst));
     }

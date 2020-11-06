@@ -185,6 +185,10 @@
 #define MAXMDIM 4
 #endif
 
+#ifndef CAP_MDIM_FIXED
+#define CAP_MDIM_FIXED 0
+#endif
+
 #ifndef CAP_TEXTURE
 #define CAP_TEXTURE (CAP_GL && (CAP_PNG || CAP_SDL_IMG) && !ISMINI)
 #endif
@@ -206,7 +210,7 @@
 #endif
 
 #ifndef CAP_TOUR
-#define CAP_TOUR (!ISWEB && !ISMINI)
+#define CAP_TOUR (!ISMINI)
 #endif
 
 #ifndef CAP_ROGUEVIZ
@@ -285,7 +289,7 @@
 #endif
 
 #ifndef CAP_SHMUP
-#define CAP_SHMUP 1
+#define CAP_SHMUP (!ISWEB)
 #endif
 
 #ifndef CAP_BITFIELD
@@ -403,6 +407,10 @@ extern "C" {
 #define CAP_GLEW (CAP_GL && !ISMOBILE && !ISMAC && !ISLINUX && !ISWEB)
 #endif
 
+#if ISWEB
+#define GLES_ONLY
+#endif
+
 #if CAP_GL
 #if CAP_GLEW
   #include <GL/glew.h>
@@ -462,6 +470,11 @@ typedef unsigned GLuint;
 #include <zlib.h>
 #endif
 
+#if ISWEB
+#include <emscripten.h>
+#include <emscripten/html5.h>
+#endif
+
 #if CAP_GMP
 #include <gmpxx.h>
 #endif
@@ -476,14 +489,6 @@ typedef unsigned GLuint;
 #include <mutex>
 #include <condition_variable>
 #endif
-#endif
-
-#ifdef USE_UNORDERED_MAP
-#include <unordered_map>
-#include <unordered_set>
-#else
-#define unordered_map map
-#define unordered_set set
 #endif
 
 #include <stdint.h>
@@ -573,7 +578,7 @@ union SDL_Event;
 #endif
 
 #ifndef CAP_RAY
-#define CAP_RAY (MAXMDIM >= 4 && !ISWEB && !ISMOBILE && CAP_GL)
+#define CAP_RAY (MAXMDIM >= 4 && CAP_GL)
 #endif
 
 #ifndef CAP_MEMORY_RESERVE

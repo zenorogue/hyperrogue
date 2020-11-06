@@ -60,6 +60,19 @@ void set_mingw64() {
   setvbuf(stdout, NULL, _IONBF, 0); // MinGW is quirky with output buffering
   }
 
+void set_web() {
+  preprocessor = "/usr/lib/emscripten/em++ -E";
+  compiler = "/usr/lib/emscripten/em++ -c";
+  default_standard = standard = " -std=c++17";
+  opts = "-DISWEB=1";
+  linker = 
+    "/usr/lib/emscripten/em++ -s USE_ZLIB=1 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 -s TOTAL_MEMORY=512MB "
+    "-s EXTRA_EXPORTED_RUNTIME_METHODS='[\"FS\",\"ccall\"]' "
+    "-s EXPORTED_FUNCTIONS=\"['_main', '_use_file']\" "
+    "-s DISABLE_EXCEPTION_CATCHING=0 -o mhyper.html";
+  libs = "";
+  }
+
 vector<string> modules;
 
 time_t get_file_time(const string s) {
@@ -121,6 +134,12 @@ int main(int argc, char **argv) {
     else if(s == "-linux") {
       set_linux();
       obj_dir += "/linux";
+      setdir += "../";
+      }
+    else if(s == "-web") {
+      set_web();
+      modules.push_back("hyperweb");
+      obj_dir += "/web";
       setdir += "../";
       }
     else if(s.substr(0, 2) == "-f") {

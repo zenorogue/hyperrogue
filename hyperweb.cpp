@@ -2,21 +2,16 @@
 // This is the main file when the online version of HyperRogue is compiled with Emscripten.
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+#ifndef ISWEB
 #define ISWEB 1
 #define ISMINI 0
-#define CAP_AUDIO 0
-#define CAP_SDLGFX 0
-#define CAP_PNG 0
-#define CAP_TOUR 1
-#define CAP_SDLTTF 0
-#define CAP_SHMUP 0
-#define CAP_RUG 1
 #define CAP_INV 0
 #define CAP_URL 1
 #define GLES_ONLY
-#define CAP_COMPLEX2 1
+#define SCU
+#endif
 
-#if CAP_ROGUEVIZ
+#if CAP_ROGUEVIZ || defined(MAXMDIM)
 #define MAXMDIM 4
 #else
 #define MAXMDIM 3
@@ -45,6 +40,7 @@ namespace hr {
   void emscripten_get_commandline();
 
   void loadCompressedChar(int &otwidth, int &otheight, int *tpix);
+  void get_canvas_size();
 
   const char *wheresounds;
 
@@ -53,7 +49,11 @@ namespace hr {
   void offer_download(std::string sfilename, std::string smimetype);
   }
 
+#ifdef SCU
 #include "hyper.cpp"
+#else
+#include "hyper.h"
+#endif
 
 namespace hr {
 
@@ -72,7 +72,7 @@ string get_value(string name) {
   return res;
   }
 
-void offer_download(string sfilename, string smimetype) {
+EX void offer_download(string sfilename, string smimetype) {
 
   EM_ASM({
     var name = UTF8ToString($0, $1);
@@ -105,7 +105,7 @@ extern "C" {
     }
   }
 
-void offer_choose_file(reaction_t r) {
+EX void offer_choose_file(reaction_t r) {
   on_use_file = r;
   EM_ASM({
     fileElem.click();
@@ -221,9 +221,39 @@ EM_BOOL fsc_callback(int eventType, const EmscriptenFullscreenChangeEvent *fulls
   return true;
   }
 
-void initweb() {
+EX void get_canvas_size() {
+  vid.xscr = vid.xres = EM_ASM_INT({
+    var d = document.getElementById("this_wide");
+    if(!d) return window.innerWidth;
+    return d.clientWidth;
+    });
+  if(vid.full) vid.yscr = vid.yres = EM_ASM_INT({
+    var d = document.getElementById("this_wide");
+    if(!d) return window.innerWidth;
+    return d.clientHeight;
+    });
+  else {
+    vid.xscr = vid.xres = vid.xres - 32;
+    vid.yscr = vid.yres = EM_ASM_INT({
+      return window.innerHeight;
+      }) - 32;
+    vid.yscr = vid.yres = min(vid.yscr, vid.xscr * 9 / 16);
+    vid.xscr = vid.xres = min(vid.xscr, vid.yscr * 16 / 9);    
+    }
+  println(hlog, "X = ", vid.xscr, " Y = ", vid.yscr);
+  }
+  
+EM_BOOL resize_callback(int eventType, const EmscriptenUiEvent *resizeEvent, void *userData) {
+  if(vid.full) return true;
+  get_canvas_size();
+  setvideomode();
+  return true;
+  }
+
+EX void initweb() {
   // toggleanim(false);
   emscripten_set_fullscreenchange_callback(0, NULL, false, fsc_callback);
+  emscripten_set_resize_callback(0, NULL, false, resize_callback);
   printf("showstartmenu = %d\n", showstartmenu);
   if(showstartmenu) pushScreen(showDemo);
   }
@@ -241,7 +271,7 @@ transmatrix getOrientation() {
   }
 #endif
 
-void emscripten_get_commandline() {
+EX void emscripten_get_commandline() {
 #ifdef EMSCRIPTEN_FIXED_ARG
   string s = EMSCRIPTEN_FIXED_ARG;
 #else

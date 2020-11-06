@@ -263,6 +263,7 @@ cld exp_parser::parse(int prio) {
     force_eat(")");
     res = edge_of_triangle_with_angles(M_PI/2, M_PI/a, M_PI/b);
     }
+  #if CAP_ARCM
   else if(eat("arcmedge(")) {
     vector<int> vals;
     vals.push_back(iparse(0));
@@ -280,6 +281,7 @@ cld exp_parser::parse(int prio) {
     if(extra_params.count("distunit"))
       res /= extra_params["distunit"];
     }
+  #endif
   else if(eat("regangle(")) {
     cld edgelen = parse(0);
     if(extra_params.count("distunit")) {
@@ -373,6 +375,7 @@ cld exp_parser::parse(int prio) {
     else if(number == "psl_steps") res = cgi.psl_steps;
     else if(number == "single_step") res = cgi.single_step;
     else if(number == "step") res = hdist0(tC0(currentmap->adj(cwt.at, 0)));
+    else if(number == "edgelen") res = hdist(get_corner_position(cwt.at, 0), get_corner_position(cwt.at, 1));
     else if(number == "mousey") res = mousey;
     else if(number == "random") res = randd();
     else if(number == "mousez") res = cld(mousex - current_display->xcenter, mousey - current_display->ycenter) / cld(current_display->radius, 0);

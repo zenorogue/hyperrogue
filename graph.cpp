@@ -22,6 +22,8 @@ EX bool spatial_graphics;
 EX bool wmspatial, wmescher, wmplain, wmblack, wmascii, wmascii3;
 EX bool mmspatial, mmhigh, mmmon, mmitem;
 
+EX ld panini_alpha = 0;
+
 EX int detaillevel = 0;
 
 EX bool first_cell_to_draw = true;
@@ -1020,7 +1022,11 @@ EX void drawTerraWarrior(const shiftmatrix& V, int t, int hp, double footphase) 
 
 EX void drawPlayer(eMonster m, cell *where, const shiftmatrix& V, color_t col, double footphase, bool stop IS(false)) {
   charstyle& cs = getcs();
+  #if CAP_COMPLEX2
   auto& knighted = camelot::knighted;
+  #else
+  const bool knighted = false;
+  #endif
 
   if(mapeditor::drawplayer && !mapeditor::drawUserShape(V, mapeditor::sgPlayer, cs.charid, cs.skincolor, where)) {
   
@@ -1264,8 +1270,10 @@ void drawMimic(eMonster m, cell *where, const shiftmatrix& V, color_t col, doubl
     else if(!where || shmup::curtime >= shmup::getPlayer()->nextshot)
       queuepoly(VBODY * VBS, cgi.shPKnife, darkena(col, 0, 0XC0));
 
+    #if CAP_COMPLEX2
     if(camelot::knighted)
       queuepoly(VBODY3 * VBS, cgi.shKnightCloak, darkena(col, 1, 0xC0));
+    #endif
 
     queuepoly(VHEAD1, (cs.charid&1) ? cgi.shFemaleHair : cgi.shPHead,  darkena(col, 1, 0XC0));
     queuepoly(VHEAD, cgi.shPFace,  darkena(col, 0, 0XC0));
@@ -3070,8 +3078,22 @@ EX void drawaura() {
       else rad0 *= m;
       }
 
-    cx[r][z][0] = rad0 * c;
-    cx[r][z][1] = rad0 * s * pconf.stretch;
+    ld x = rad0 * c;
+    ld y = rad0 * s;
+    
+    if(pconf.camera_angle) {
+      ld z = rad0;
+
+      ld cam = pconf.camera_angle * degree;
+      GLfloat cc = cos(cam);
+      GLfloat ss = sin(cam);
+      
+      tie(y, z) = make_pair(y * cc - z * ss, z * cc + y * ss);
+      x *= rad0 / z;
+      y *= rad0 / z;
+      }
+    cx[r][z][0] = x;
+    cx[r][z][1] = y * pconf.stretch;
     
     for(int u=0; u<3; u++)
       cx[r][z][u+2] = bak[u] + (aurac[rm][u] / (aurac[rm][3]+.1) - bak[u]) * cmul[z];
@@ -3410,7 +3432,11 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const shiftmatrix& V, color_t
 #endif
 
 bool openorsafe(cell *c) {
+  #if CAP_COMPLEX2
   return c->wall == waMineOpen || mine::marked_safe(c);
+  #else
+  return false;
+  #endif
   }
 
 #define Dark(x) darkena(x,0,0xFF)
@@ -3693,7 +3719,7 @@ EX bool frustum_culling = true;
 void make_clipping_planes() {
 #if MAXMDIM >= 4
   clipping_planes.clear();
-  if(!frustum_culling || PIU(sphere) || experimental || vid.stereo_mode == sODS) return;
+  if(!frustum_culling || PIU(sphere) || experimental || vid.stereo_mode == sODS || panini_alpha) return;
   auto add_clipping_plane = [] (ld x1, ld y1, ld x2, ld y2) {
     ld z1 = 1, z2 = 1;
     hyperpoint sx = point3(y1 * z2 - y2 * z1, z1 * x2 - z2 * x1, x1 * y2 - x2 * y1);
@@ -3788,7 +3814,9 @@ EX void gridline(const shiftmatrix& V, const hyperpoint h1, const hyperpoint h2,
 
 EX int wall_offset(cell *c) {
   if(hybri || WDIM == 2) return hybrid::wall_offset(c);
+  #if CAP_BT
   if(kite::in() && kite::getshape(c->master) == kite::pKite) return 10;
+  #endif
   return 0;
   }
 
@@ -4455,7 +4483,6 @@ EX bool allowChangeRange() {
   if(tour::on) return true;
 #endif
   if(racing::on) return true;
-  if(sightrange_bonus >= 0) return true;
   if(arcm::in() || arb::in()) return true;
   if(WDIM == 3) return true;
   return false;
@@ -4866,7 +4893,8 @@ EX void calcparam() {
   cd->xcenter += cd->scrsize * pconf.xposition;
   cd->ycenter += cd->scrsize * pconf.yposition;
   
-  cd->tanfov = tan(vid.fov * degree / 2);
+  ld fov = vid.fov * degree / 2;
+  cd->tanfov = sin(fov) / (cos(fov) + panini_alpha);
   
   callhooks(hooks_calcparam);
   reset_projection();
@@ -4966,12 +4994,21 @@ EX void gamescreen(int _darken) {
     return;
     }
   
+  auto cdc = *current_display;
+  auto gx = vid.xres;
+  auto gy = vid.yres;
+
   if(dual::split([=] () { 
+    *current_display = cdc;
+    vid.xres = gx;
+    vid.yres = gy;
     dual::in_subscreen([=] () { gamescreen(_darken); });
     })) {
     calcparam(); 
     return; 
     }
+  
+  calcparam();
   
   if((cmode & sm::MAYDARK) && !current_display->sidescreen) {
     _darken += 2;

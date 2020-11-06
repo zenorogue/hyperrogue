@@ -182,7 +182,7 @@ EX bool activateRecall() {
 
   killFriendlyIvy();
   movecost(cwt.at, recallCell.at, 3);
-  playerMoveEffects(cwt.at, recallCell.at);
+  playerMoveEffects(movei(cwt.at, recallCell.at, TELEPORT));
   mirror::destroyAll();
   
   sword::reset();
