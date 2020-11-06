@@ -446,7 +446,9 @@ EX void make_air() {
     if(vid.antialias & AA_LINES)
       glEnable(GL_LINE_SMOOTH);
 
+#if CAP_SDL
     if(anyshiftclick) IMAGESAVE(airbuf->render(), "air.png");
+#endif
     rb.reset();
     }
 

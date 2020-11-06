@@ -615,6 +615,7 @@ EX void configure() {
     };
   }
   
+#if CAP_COMMANDLINE
 int readArgs() {
   using namespace arg;
            
@@ -631,6 +632,7 @@ int readArgs() {
   }
 
 auto fundamentalhook = addHook(hooks_args, 100, readArgs);
+#endif
 
 EX }
 

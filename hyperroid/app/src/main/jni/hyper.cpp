@@ -169,6 +169,8 @@ Java_com_roguetemple_hyperroid_HyperRogue_glhrinit(MOBPAR_FORMAL)
 {
     __android_log_print(ANDROID_LOG_WARN, "HyperRogue", "glhr::init %d\n", 0);
     #if HNEW
+    // matched_programs get clobbered on activity destruction -- force their re-creation
+    if (!matched_programs.empty()) matched_programs.clear();
     glhr::init();
     #endif
     __android_log_print(ANDROID_LOG_WARN, "HyperRogue", "glhr::init done %d\n", 0);
@@ -310,7 +312,7 @@ extern "C" void Java_com_roguetemple_hyperroid_HyperRogue_draw(MOBPAR_FORMAL) {
   // text is drawn with 'textured'  
   dynamicval<eModel> p(pmodel, mdManual);
   current_display->next_shader_flags = GF_TEXTURE;
-  current_display->set_all(0);
+  current_display->set_all(0, 0);
   glhr::set_depthtest(false);
   current_display->set_viewport(0);
   current_display->set_mask(0);

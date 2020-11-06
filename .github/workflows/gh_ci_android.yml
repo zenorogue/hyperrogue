@@ -1,0 +1,68 @@
+name: Github CI on Android
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  android_build:
+    name: Test build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Validate gradle-wrapper.jar
+      uses: gradle/wrapper-validation-action@v1
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install gcc libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev libsdl-mixer1.2-dev libglew-dev libpng-dev
+    - name: Build
+      run: |
+        cd hyperroid
+        ./copy.sh
+        ./gradlew assembleDebug
+    - name: Upload APK
+      uses: actions/upload-artifact@v2
+      with:
+        name: hyperroid_debug
+        path: hyperroid/app/build/outputs/apk/debug/app-debug.apk
+
+  android_test:
+    needs: android_build
+    name: Test-run in emulator
+    runs-on: macos-latest
+    steps:
+    - name: Download APK
+      uses: actions/download-artifact@v2
+      with:
+        name: hyperroid_debug
+    - name: Create a helper wait script
+      run: |
+        cat > wait-for-load.sh << ENDOFSCRIPT
+        #!/bin/sh
+        while ! adb logcat -d "HyperRogue:V" "*:S" | grep "Game initialized"
+        do
+          sleep 2
+        done
+        ENDOFSCRIPT
+        chmod u+x wait-for-load.sh
+    - name: Run in emulator
+      uses: ReactiveCircus/android-emulator-runner@v2.11.1
+      with:
+        api-level: 28
+        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-snapstorage -noaudio -no-boot-anim -skin 1440x2560
+        script: |
+          adb wait-for-device
+          adb install -t app-debug.apk
+          adb shell am start -W -n com.roguetemple.hyperroid/com.roguetemple.hyperroid.HyperRogue
+          ./wait-for-load.sh
+          adb shell input keyevent 41 # send "M" keypress to display main menu
+          adb shell screencap /sdcard/hyperroid.png
+          adb pull /sdcard/hyperroid.png
+    - name: Upload screenshot
+      uses: actions/upload-artifact@v2
+      with:
+        name: screenshot
+        path: hyperroid.png
