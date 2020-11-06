@@ -19,6 +19,7 @@ EX string musiclicense;
 EX string musfname[landtypes];
 EX int musicvolume = 60;
 EX int effvolume = 60;
+EX bool music_available;
 
 EX eLand getCurrentLandForMusic() {
   eLand id = ((anims::center_music()) && centerover) ? centerover->land : cwt.at->land;
@@ -162,6 +163,7 @@ EX bool loadMusicInfo(string dir) {
         if(id >= 0 && id < landtypes) {
           if(buf[5] == '*' && buf[6] == '/') musfname[id] = dir2 + (buf+7);
           else musfname[id] = buf+5;
+          music_available = true;
           }
         else {
           fprintf(stderr, "warning: bad soundtrack id, use the following format:\n");

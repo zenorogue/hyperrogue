@@ -1088,6 +1088,7 @@ EX void menuitem_sightrange(char c IS('c')) {
   }
 
 EX void menuitem_sfx_volume() {
+  #if CAP_AUDIO
   dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
   dialog::add_action([] {
     dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
@@ -1100,10 +1101,12 @@ EX void menuitem_sfx_volume() {
     dialog::bound_low(0);
     dialog::bound_up(MIX_MAX_VOLUME);
     });
+  #endif
   }
 
 EX void menuitem_music_volume() {
-  if (!audio) return;
+  #if CAP_AUDIO
+  if (!music_available) return;
   dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
   dialog::add_action([] {
     dialog::editNumber(musicvolume, 0, 128, 10, 60, XLAT("background music volume"), "");
@@ -1124,6 +1127,7 @@ EX void menuitem_music_volume() {
       };
     #endif
     });
+  #endif
   }
 
 EX void showSpecialEffects() {
