@@ -11,7 +11,6 @@
 #endif
 
 #define main nconf_main
-#undef map
 #undef self
 #include "nconf.cpp"
 #undef main
