@@ -1687,7 +1687,7 @@ EX void centerpc(ld aspd) {
     if(sl || vid.eye) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR + vid.eye);
     }
   #endif
-  hyperpoint H = ortho_inverse(actual_view_transform) * tC0(T);
+  hyperpoint H = iso_inverse(actual_view_transform) * tC0(T);
   ld R = (zero_d(GDIM, H) && !prod) ? 0 : hdist0(H);
   if(R < 1e-9) {
     // either already centered or direction unknown
