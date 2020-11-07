@@ -343,6 +343,15 @@ GLprogram::GLprogram(string vsh, string fsh) {
     uAlpha = -1;
     uLevelLines = -1;
     uFogColor = -1;
+    
+    uColor = tTexture = tInvExpTable = tAirMap = -1;
+    uFogBase = -1;
+    uPRECX = uPRECY = uPRECZ = uIndexSL = -1;
+    uSV = uRadarTransform = -1;
+
+    uRotCos = -1;
+    uRotSin = -1;
+    uRotNil = -1;
     return;    
     }
   
