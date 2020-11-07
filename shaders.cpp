@@ -295,7 +295,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   if(!skip_t) {
     vmain += "mediump vec4 t = uMV * aPosition;\n";
     vmain += coordinator;
-    if(GDIM == 3 && WDIM == 2 && hyperbolic && context_fog) {
+    if(GDIM == 3 && WDIM == 2 && hyperbolic && context_fog && pmodel == mdPerspective) {
       vsh += 
         "uniform mediump mat4 uRadarTransform;\n"
         "uniform mediump sampler2D tAirMap;\n"
