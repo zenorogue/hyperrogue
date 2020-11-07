@@ -1757,6 +1757,19 @@ EX void show3D() {
   gamescreen(0);
   dialog::init(XLAT("3D configuration"));
 
+  if(GDIM == 2) {
+    dialog::addBoolItem(XLAT("configure TPP automatically"), pmodel == mdDisk && pconf.camera_angle, 'T');
+    dialog::add_action(geom3::switch_tpp);
+    }
+  
+#if MAXMDIM >=4
+  if(WDIM == 2) {
+    dialog::addBoolItem(XLAT("configure FPP automatically"), GDIM == 3, 'F');
+    dialog::add_action(geom3::switch_fpp);
+    }
+#endif
+  dialog::addBreak(50);
+
 #if MAXMDIM >= 4
   if(WDIM == 2) {
     dialog::addBoolItem(XLAT("use the full 3D models"), vid.always3, 'U');
@@ -1871,23 +1884,11 @@ EX void show3D() {
   if(GDIM == 3) add_edit_wall_quality('W');
   #endif
   
-  dialog::addBreak(50);
   #if CAP_RUG
   if(rug::rugged) {
     dialog::addBoolItem_action(XLAT("3D monsters/walls on the surface"), rug::spatial_rug, 'S');
     }
   #endif
-  if(GDIM == 2) {
-    dialog::addBoolItem(XLAT("configure TPP automatically"), pmodel == mdDisk && pconf.camera_angle, 'T');
-    dialog::add_action(geom3::switch_tpp);
-    }
-  
-#if MAXMDIM >=4
-  if(WDIM == 2) {
-    dialog::addBoolItem(XLAT("configure FPP automatically"), GDIM == 3, 'F');
-    dialog::add_action(geom3::switch_fpp);
-    }
-#endif
 
   if(0);
   #if CAP_RUG
