@@ -496,6 +496,8 @@ void display_data::set_projection(int ed, ld shift) {
     glhr::id_modelview();
     };
 
+  bool u_alpha = false;
+  
   if(shader_flags & SF_PIXELS) ortho(cd->xsize/2, -cd->ysize/2);
   else if(shader_flags & SF_BOX) ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2);
   else if(shader_flags & SF_ODSBOX) {
@@ -531,8 +533,7 @@ void display_data::set_projection(int ed, ld shift) {
     GLfloat sc = current_display->radius / (cd->ysize/2.);
     glhr::projection_multiply(glhr::frustum(cd->xsize / cd->ysize, 1));
     glhr::projection_multiply(glhr::scale(sc, -sc, -1));
-    glhr::projection_multiply(glhr::translate(0, 0, pconf.alpha));
-    if(ed) glhr::projection_multiply(glhr::translate(vid.ipd * ed/2, 0, 0));
+    u_alpha = true;
     }
 
   if(selected->uRotNil != -1) {
@@ -601,6 +602,11 @@ void display_data::set_projection(int ed, ld shift) {
       };
     
     glhr::projection_multiply(glhr::as_glmatrix(yzspin));
+    }
+  
+  if(u_alpha) {
+    glhr::projection_multiply(glhr::translate(0, 0, pconf.alpha));
+    if(ed) glhr::projection_multiply(glhr::translate(vid.ipd * ed/2, 0, 0));
     }
   }
 
