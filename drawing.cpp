@@ -1741,7 +1741,7 @@ void dqi_poly::draw() {
       if(flags & POLY_ONE_LEVEL) min_slr = max_slr = 0;
       max_slr++;
       }
-    else min_slr = 0, max_slr = 1;
+    else min_slr = 0, max_slr = 0;
     set_width(get_width(this));
     flags &= ~POLY_INVERSE;
     gldraw();
