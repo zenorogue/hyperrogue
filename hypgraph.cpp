@@ -1687,6 +1687,8 @@ EX void centerpc(ld aspd) {
     if(sl || vid.eye) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR + vid.eye);
     }
   #endif
+  // ortho_inverse does not work in 2.5D, iso_inverse does not work in Nil. 
+  // just use inverse
   hyperpoint H = inverse(actual_view_transform) * tC0(T);
   ld R = (zero_d(GDIM, H) && !prod) ? 0 : hdist0(H);
   if(R < 1e-9) {
