@@ -558,6 +558,12 @@ EX void initConfig() {
   addsaver(anims::rug_angle, "animation rug angle");
   addsaver(anims::circle_radius, "animation circle radius");
   addsaver(anims::circle_spins, "animation circle spins");
+  addsaver(anims::rug_movement_angle, "rug forward movement angle", 90);
+  addsaver(anims::rug_shift_angle, "rug forward shift angle", 0);
+  #endif
+
+  #if CAP_RUG
+  addsaver(rug::move_on_touch, "rug move on touch");
   #endif
   
   #if CAP_CRYSTAL

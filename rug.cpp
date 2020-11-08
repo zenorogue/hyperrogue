@@ -123,7 +123,6 @@ EX int renderlate  = 0;
 EX bool rendernogl  = false;
 EX int  texturesize = 1024;
 EX ld scale = 1;
-EX ld ruggo = 0;
 
 EX ld anticusp_factor = 1;
 EX ld anticusp_dist;
@@ -1272,7 +1271,7 @@ EX void finger_on(int coord, ld val) {
 
 transmatrix last_orientation;
 
-EX ld ruggospeed = 1;
+EX ld move_on_touch = 1;
 
 EX void actDraw() {
   try {
@@ -1290,8 +1289,6 @@ EX void actDraw() {
   
   double alpha = (ticks - lastticks) / 1000.0;
   lastticks = ticks;
-
-  // if(ruggo) move_forward(ruggo * alpha);
 
   #if CAP_HOLDKEYS
   Uint8 *keystate = SDL_GetKeyState(NULL);
@@ -1496,7 +1493,9 @@ EX void show() {
     if(rug::rugged)
       dialog::lastItem().value += " (" + fts(err_zero_current) + ")";
     }
-  dialog::addSelItem(XLAT("automatic move speed"), fts(ruggo), 'G');
+  #if ISMOBILE
+  dialog::addSelItem(XLAT("move on touch"), fts(move_on_touch), 'G');
+  #endif
   dialog::addSelItem(XLAT("anti-crossing"), fts(anticusp_factor), 'A');
   dialog::addBoolItem(XLAT("3D monsters/walls on the surface"), spatial_rug, 'S');
   dialog::add_action([] () { spatial_rug = !spatial_rug; });
@@ -1539,9 +1538,8 @@ EX void show() {
     else if(uni == 'o')
       renderonce = !renderonce;
     else if(uni == 'G') {
-      dialog::editNumber(ruggo, -1, 1, .1, 0, XLAT("automatic move speed"),
-        XLAT("Move automatically without pressing any keys.")
-        );
+      dialog::editNumber(move_on_touch, -1, 1, .1, 0, XLAT("move on touch"), "");
+      dialog::extra_options = anims::rug_angle_options;
       }
     else if(uni == 'A') {
       dialog::editNumber(anticusp_factor, 0, 1.5, .1, 0, XLAT("anti-crossing"),
@@ -1785,10 +1783,6 @@ int rugArgs() {
 
   else if(argis("-ruglwidth")) {
     shift_arg_formula(lwidth);
-    }
-
-  else if(argis("-rugauto")) {
-    shift_arg_formula(ruggo);
     }
 
   else if(argis("-rugorth")) {

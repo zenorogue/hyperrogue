@@ -1085,7 +1085,7 @@ EX ld skiprope_rotation;
 
 int lastticks, bak_turncount;
 
-EX ld rug_rotation1, rug_rotation2, ballangle_rotation, env_ocean, env_volcano;
+EX ld rug_rotation1, rug_rotation2, rug_forward, ballangle_rotation, env_ocean, env_volcano, rug_movement_angle, rug_shift_angle;
 EX bool env_shmup;
 EX ld rug_angle;
 
@@ -1179,6 +1179,13 @@ EX void reflect_view() {
 bool clearup;
 
 EX purehookset hooks_anim;
+
+EX void animate_rug_movement(ld t) {
+  rug::using_rugview urv;
+  shift_view(
+    cspin(0, GDIM-1, rug_movement_angle * degree) * spin(rug_shift_angle * degree) * xtangent(t)
+    );
+  }
 
 EX void apply() {
   int t = ticks - lastticks;
@@ -1283,6 +1290,8 @@ EX void apply() {
     if(rug_rotation2) {
       rug::rugView = rug::rugView * cspin(0, 1, rug_rotation2 * 2 * M_PI * t / period);
       }
+    if(rug_forward) 
+      animate_rug_movement(rug_forward * t / period);
     }
   #endif
   pconf.skiprope += skiprope_rotation * t * 2 * M_PI / period;
@@ -1451,6 +1460,19 @@ void list_animated_parameters() {
 
 ld animation_period;
 
+EX void rug_angle_options() {
+  dialog::addSelItem(XLAT("shift"), fts(rug_shift_angle) + "°", 'C');
+  dialog::add_action([] () { 
+    popScreen();
+    dialog::editNumber(rug_shift_angle, 0, 90, 15, 0, XLAT("shift"), ""); 
+    });
+  dialog::addSelItem(XLAT("movement angle"), fts(rug_movement_angle) + "°", 'M');
+  dialog::add_action([] () { 
+    popScreen();
+    dialog::editNumber(rug_movement_angle, 0, 360, 15, 0, XLAT("movement angle"), ""); 
+    });
+  }
+
 EX void show() {
   cmode = sm::SIDE; needs_highqual = false;
   animation_lcm = 1;
@@ -1609,14 +1631,16 @@ EX void show() {
       }
     else dialog::addBreak(100);
     animator(XLAT("model-relative rotation"), rug_rotation2, 'r');
-    animator(XLAT("automatic move speed"), rug::ruggo, 'M');
+    animator(XLAT("automatic move speed"), rug_forward, 'M');
     dialog::add_action([] () { 
-      dialog::editNumber(rug::ruggo, 0, 10, 1, 1, XLAT("automatic move speed"), XLAT("Move automatically without pressing any keys."));
-      if(among(rug::gwhere, gSphere, gElliptic)) 
-        dialog::extra_options = [] () {
+      dialog::editNumber(rug_forward, 0, 10, 1, 1, XLAT("automatic move speed"), XLAT("Move automatically without pressing any keys."));
+      dialog::extra_options = [] () {
+        if(among(rug::gwhere, gSphere, gElliptic))  {
           dialog::addItem(XLAT("synchronize"), 'S');
-          dialog::add_action([] () { rug::ruggo = 2 * M_PI * 1000 / period; popScreen(); });
-          };
+          dialog::add_action([] () { rug_forward = 2 * M_PI; popScreen(); });
+          }
+        rug_angle_options();
+        };
       });
     }
   #endif

@@ -350,9 +350,9 @@ EX void mobile_draw(MOBPAR_FORMAL) {
       }
     }
   
-#if CAP_RUG
-  if(andmode == 1 && normal_reaction && rug::rugged && clicked)
-    rug::finger_on(2, (ticks - lticks_rug) / 2500.);
+#if CAP_RUG && CAP_ANIMATIONS
+  if(andmode == 1 && normal_reaction && rug::rugged && clicked && rug::move_on_touch)
+    anims::animate_rug_movement(rug::move_on_touch * (ticks - lticks_rug) / 2500.);
 #endif
   
   lticks_rug = ticks;

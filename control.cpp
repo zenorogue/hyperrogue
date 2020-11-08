@@ -306,9 +306,11 @@ transmatrix zforward_push(ld z) {
 
 EX void zoom_or_fov(ld t) {
   if(in_perspective_v()) {
+    vid.fov *= 180 / max_fov_angle();
     auto tanfov = tan(vid.fov * degree / 2);
     tanfov *= t;
     vid.fov = atan(tanfov) * 2 / degree;
+    vid.fov *= max_fov_angle() / 180;
     }
   else
     vpconf.scale *= t;
