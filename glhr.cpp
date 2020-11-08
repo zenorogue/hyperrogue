@@ -60,6 +60,24 @@ EX void glError(const char* GLcall, const char* file, const int line) {
   }
 
 #if HDR
+struct glwrap {
+  const char* msg;
+  int line;
+  void act(const char *when);
+  glwrap(const char *m, int l) : msg(m), line(l) { act("before"); }
+  ~glwrap() { act("after"); }
+  };
+#define GLWRAP glwrap w##__line(__FILE__, __LINE__)
+#endif
+
+void glwrap::act(const char *when) {
+  GLenum errCode = glGetError();
+  if(errCode!=GL_NO_ERROR) {
+    println(hlog, format("GL error %i %s: %s:%i", errCode, when, msg, line));
+    }
+  }
+
+#if HDR
 #if CAP_SHADER && CAP_NOSHADER
 #define WITHSHADER(x, y) if(glhr::noshaders) y else x
 #else
