@@ -434,12 +434,12 @@ EX namespace models {
     dialog::add_action([] { edit_rotation(rotation); });
     
     // if(vpmodel == mdBand && sphere)
-    if(!in_perspective()) {
+    if(!in_perspective_v()) {
       dialog::addSelItem(XLAT("scale factor"), fts(vpconf.scale), 'z');
       dialog::add_action(editScale);
       }
     
-    if(abs(pconf.alpha-1) > 1e-3 && vpmodel != mdBall && vpmodel != mdHyperboloid && vpmodel != mdHemisphere && vpmodel != mdDisk) {
+    if(abs(vpconf.alpha-1) > 1e-3 && vpmodel != mdBall && vpmodel != mdHyperboloid && vpmodel != mdHemisphere && vpmodel != mdDisk) {
       dialog::addBreak(50);
       dialog::addInfo("NOTE: this works 'correctly' only if the Poincaré model/stereographic projection is used.");
       dialog::addBreak(50);

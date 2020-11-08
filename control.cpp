@@ -305,7 +305,7 @@ transmatrix zforward_push(ld z) {
   }
 
 EX void zoom_or_fov(ld t) {
-  if(in_perspective()) {
+  if(in_perspective_v()) {
     auto tanfov = tan(vid.fov * degree / 2);
     tanfov *= t;
     vid.fov = atan(tanfov) * 2 / degree;

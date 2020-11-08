@@ -29,7 +29,11 @@ EX int detaillevel = 0;
 EX bool first_cell_to_draw = true;
 
 EX bool in_perspective() {
-  return among(pmodel, mdPerspective, mdGeodesic);
+  return among(pconf.model, mdPerspective, mdGeodesic);
+  }
+
+EX bool in_perspective_v() {
+  return among(vpconf.model, mdPerspective, mdGeodesic);
   }
 
 EX bool hide_player() {
