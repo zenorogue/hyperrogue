@@ -576,6 +576,7 @@ extern renderbuffer *floor_textures;
 #endif
 
 void dqi_poly::gldraw() {
+  GLWRAP;
   auto& v = *tab;
   int ioffset = offset;
   

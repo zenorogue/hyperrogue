@@ -633,7 +633,7 @@ EX bool mouseaiming(bool shmupon) {
   }
 
 EX void mainloopiter() {
-
+  GLWRAP;
   DEBB(DF_GRAPH, ("main loop\n"));
 
   #if !CAP_SDLGFX && !CAP_GL 

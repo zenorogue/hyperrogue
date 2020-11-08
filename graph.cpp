@@ -5136,6 +5136,7 @@ EX int cmode;
 EX void drawscreen() {
 
   DEBBI(DF_GRAPH, ("drawscreen"));
+  GLWRAP;
 
   if(vid.xres == 0 || vid.yres == 0) return;
 
