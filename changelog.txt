@@ -4169,3 +4169,15 @@ Not yet in HyperRogue online, but see: https://zenorogue.itch.io/bringris
 - improved the safe move checking (fixes some minor bugs especially in multiplayer)
 - allies use the new safe move checking now (they now know whether attacking hedgehog warriors/pikemen is safe for them and do it if yes)
 - golems and bomberbirds now pathfind correctly
+
+2020-11-08 12:37 Update 11.4b:
+
+- fixed projections other than perspective not working in 2.5D
+- fixed the incorrect positioning with "camera angle" option on
+- in 3D config, automatic TPP/FPP now appears on top, as you usually want this, not 'use 3D models'
+- fixed a crash on picking up items without OpenGL
+- fixed rug movement animation
+- LShift+PgUp/Dn now changes the FOV in rug perspective
+- fixed unstable camera problems in 2.5D
+- show music volume setting when music is available
+
