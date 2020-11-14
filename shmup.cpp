@@ -173,7 +173,14 @@ void fix_to_2(transmatrix& T) {
     for(int i=0; i<4; i++) T[i][2] = 0, T[2][i] = 0;
     T[2][2] = 1;
     }
-  fixmatrix(T);
+  if(nonisotropic) {
+    hyperpoint h = tC0(T);
+    transmatrix rot = gpushxto0(h) * T;
+    { dynamicval<eGeometry> g(geometry, gSphere); fixmatrix(rot); }
+    T = rgpushxto0(h) * rot;
+    }
+  else
+    fixmatrix(T);
   fixelliptic(T);
   }
 
