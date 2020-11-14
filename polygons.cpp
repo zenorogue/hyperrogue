@@ -823,6 +823,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       if(bt::in()) {
         hyperpoint res = bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
         hpcpush(res);
+        return;
         }
       #endif
       hpcpush(h);
@@ -846,6 +847,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       if(bt::in()) {
         hyperpoint res = bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
         hpcpush(res);
+        continue;
         }
       #endif
       hpcpush(h);
