@@ -877,6 +877,14 @@ EX void orthonormalize(transmatrix& T) {
     }
   }
 
+/** fix a 3D rotation matrix */
+EX void fix_rotation(transmatrix& rot) {
+  dynamicval<eGeometry> g(geometry, gSphere); 
+  fixmatrix(rot); 
+  for(int i=0; i<3; i++) rot[i][3] = rot[3][i] = 0;
+  rot[3][3] = 1;
+  }
+
 /** determinant 2x2 */
 EX ld det2(const transmatrix& T) {
   return T[0][0] * T[1][1] - T[0][1] * T[1][0];

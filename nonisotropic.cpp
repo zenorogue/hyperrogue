@@ -2791,7 +2791,7 @@ EX namespace nisot {
     transmatrix push = eupush( tC0(T) );
     transmatrix push_back = eupush(tC0(T), -1);
     transmatrix gtl = push_back * T;
-    { dynamicval<eGeometry> g(geometry, gSphere); hr::fixmatrix(gtl); }
+    fix_rotation(gtl);
     T = push * gtl;
     }
 

@@ -176,7 +176,7 @@ void fix_to_2(transmatrix& T) {
   if(nonisotropic) {
     hyperpoint h = tC0(T);
     transmatrix rot = gpushxto0(h) * T;
-    { dynamicval<eGeometry> g(geometry, gSphere); fixmatrix(rot); }
+    fix_rotation(rot);
     T = rgpushxto0(h) * rot;
     }
   else
