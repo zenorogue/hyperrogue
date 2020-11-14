@@ -2810,7 +2810,7 @@ EX void setdist(cell *c, int d, cell *from) {
   if(d >= BARLEV) {
   
     #if CAP_BT
-    if(bt::in() && WDIM == 3 && !c->land && !sn::in()) {
+    if(bt::in() && WDIM == 3 && !c->land && !sn::in() && !hybri) {
       ld z = vid.binary_width;
       cell *cseek = c;
       int step = 0;
