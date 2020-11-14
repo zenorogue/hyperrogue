@@ -33,6 +33,8 @@ const int gms_limit = 16; /* enough for Bringris -- need to do better */
 const int gms_limit = 110;
 #endif
 
+EX int gms_array_size = 16;
+
 EX ld maxstep_sol = .05;
 EX ld maxstep_nil = .1;
 EX ld minstep = .001;
@@ -68,12 +70,19 @@ ld& maxstep_current() {
 
 eGeometry last_geometry;
 
+bool need_many_cell_types() {
+  return isize(hybrid::gen_sample_list()) > 1;
+  }
+
 /** is the raycaster available? */
 EX bool available() {
   if(noGUI) return false;
   if(!vid.usingGL) return false;
   if(GDIM == 2) return false;
   if(WDIM == 2 && (kite::in() || bt::in())) return false;
+  #if GLES_ONLY
+  if(need_many_cell_types()) return false;
+  #endif
   if(hyperbolic && pmodel == mdPerspective && !kite::in())
     return true;
   if(sphere && pmodel == mdPerspective && !rotspace)
@@ -227,9 +236,8 @@ void enable_raycaster() {
     bool asonov = hr::asonov::in();
     bool use_reflect = reflect_val && !nil && !levellines;
     
-    bool bi = arcm::in() || kite::in() || arb::in() || !PURE;
-    bi = false;
-
+    bool many_cell_types = need_many_cell_types();
+    
     string vsh = 
       "attribute mediump vec4 aPosition;\n"
       "uniform mediump float uFovX, uFovY, uPosX, uPosY, uShift;\n"
@@ -276,7 +284,7 @@ void enable_raycaster() {
       "uniform mediump float uPLevel;\n"
       "uniform mediump mat4 uLP;\n";
     
-    if(bi) fsh += 
+    if(many_cell_types) fsh += 
       "uniform int uWallOffset, uSides;\n";
     
     int flat1 = 0, flat2 = deg;
@@ -324,7 +332,7 @@ void enable_raycaster() {
          "0., 0., 0., 1."
          ");}\n";    
     
-   if(bi) {
+   if(many_cell_types) {
      fsh += "int walloffset, sides;\n";
      }
    else {
@@ -458,7 +466,7 @@ void enable_raycaster() {
         }
       }
     
-    if(bi) fmain += "  walloffset = uWallOffset; sides = uSides;\n";
+    if(many_cell_types) fmain += "  walloffset = uWallOffset; sides = uSides;\n";
     
     fmain +=     
       "  mediump float go = 0.;\n"
@@ -1201,7 +1209,7 @@ void enable_raycaster() {
       "  m[0][1] = -m[0][1]; m[1][0] = -m[1][0];\n" // inverse
       "  toOrig = toOrig * m;\n";
     
-    if(bi) {
+    if(many_cell_types) {
       fmain += 
         "walloffset = int(connection.w * 256.);\n"
         "sides = int(connection.w * 4096.) - 16 * walloffset;\n";
@@ -1271,8 +1279,6 @@ array<float, 2> enc(int i, int a) {
 
 color_t color_out_of_range = 0x0F0800FF;
 
-int gms_size;
-
 transmatrix get_ms(cell *c, int a, bool mirror) {
   int z = a ? 1 : -1;
   
@@ -1301,15 +1307,28 @@ transmatrix get_ms(cell *c, int a, bool mirror) {
     }
   }
 
+int nesting;
+
 EX void cast() {
+  // may call itself recursively in case of bugs -- just in case...
+  dynamicval<int> dn(nesting, nesting+1);
+  if(nesting > 10) return;
+  
   if(isize(cgi.raywall) > irays) reset_raycaster();
+    
   enable_raycaster();
+
+  auto& o = our_raycaster;
+  
+  if(need_many_cell_types() && o->uWallOffset == -1) {
+    reset_raycaster();
+    cast();
+    return;
+    }  
   
   if(comparison_mode) 
     glColorMask( GL_TRUE,GL_FALSE,GL_FALSE,GL_TRUE );
 
-  auto& o = our_raycaster;
-  
   vector<glvertex> screen = {
     glhr::makevertex(-1, -1, 1),
     glhr::makevertex(-1, +1, 1),
@@ -1600,11 +1619,17 @@ EX void cast() {
   
   glUniform1f(o->uExpStart, exp_start);
 
-
   vector<glhr::glmatrix> gms;
   for(auto& m: ms) gms.push_back(glhr::tmtogl_transpose3(m));
   glUniformMatrix4fv(o->uM, isize(gms), 0, gms[0].as_array());
-  gms_size = isize(gms);
+  
+  if(isize(gms) > gms_array_size) {
+    gms_array_size = isize(gms);
+    println(hlog, "changing gms_array_size to ", gms_array_size);
+    reset_raycaster();
+    cast();
+    return;
+    }
   
   bind_array(wallcolor, o->tWallcolor, txWallcolor, 4);
   bind_array(connections, o->tConnections, txConnections, 3);
@@ -1806,9 +1831,9 @@ EX void configure() {
       };
     });
   
-  if(gms_size > gms_limit && ray::in_use) {
+  if(gms_array_size > gms_limit && ray::in_use) {
     dialog::addBreak(100);
-    dialog::addHelp(XLAT("unfortunately this honeycomb is too complex for the current implementation (%1>%2)", its(gms_size), its(gms_limit)));
+    dialog::addHelp(XLAT("unfortunately this honeycomb is too complex for the current implementation (%1>%2)", its(gms_array_size), its(gms_limit)));
     }
 
   edit_levellines('L');
