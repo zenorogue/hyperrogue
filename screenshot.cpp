@@ -1328,7 +1328,7 @@ int min_frame = 0, max_frame = 999999;
 
 int numturns = 0;
 
-EX bool record_animation() {
+EX bool record_animation_of(reaction_t content) {
   lastticks = 0;
   ticks = 0;
   int oldturn = -1;
@@ -1360,6 +1360,10 @@ EX bool record_animation() {
     }
   lastticks = ticks = SDL_GetTicks();
   return true;
+  }
+
+EX bool record_animation() {
+  return record_animation_of(shot::default_screenshot_content);
   }
 #endif
 

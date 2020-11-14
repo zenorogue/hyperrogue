@@ -71,7 +71,7 @@ ld& maxstep_current() {
 eGeometry last_geometry;
 
 bool need_many_cell_types() {
-  return isize(hybrid::gen_sample_list()) > 1;
+  return isize(hybrid::gen_sample_list()) > 2;
   }
 
 /** is the raycaster available? */
