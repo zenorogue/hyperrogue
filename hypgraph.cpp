@@ -1653,7 +1653,11 @@ EX void centerpc(ld aspd) {
     transmatrix T = pc->at;
     int sl = snakelevel(cwt.at);
     if((sl || vid.eye) && WDIM == 2) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR + vid.eye);
-    View = iso_inverse(T);
+    /* in nonisotropic geometries, T is isometry * rotation, so iso_inverse does not work */
+    if(nonisotropic)
+      View = inverse(T);
+    else
+      View = iso_inverse(T);
     if(prod) NLP = ortho_inverse(pc->ori);
     if(WDIM == 2) rotate_view( cspin(0, 1, M_PI) * cspin(2, 1, M_PI/2 + shmup::playerturny[id]) * spin(-M_PI/2) );
     return;
