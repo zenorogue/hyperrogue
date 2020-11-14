@@ -1613,7 +1613,7 @@ EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
             "a quick implementation, so parameter values too close to 1 may "
             "be buggy; try e.g. 0.9 instead.")
             );
-        dialog::reaction = ray::reset_raycaster;
+        dialog::reaction = reset_all_shaders;
         dialog::extra_options = [] {
           add_edit_fov('F', true);
           };
