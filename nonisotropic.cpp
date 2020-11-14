@@ -1355,11 +1355,19 @@ EX namespace hybrid {
       gp::draw_li = WDIM == 2 ? gp::get_local_info(c1) : PIU(gp::get_local_info(c1));
       }
     auto ugeometry = hybri ? hybrid::underlying : geometry;    
+    
+    int id;
+
     #if CAP_ARCM
-    int id = ugeometry == gArchimedean ? arcm::id_of(c->master) + 20 * arcm::parent_index_of(c->master) : shvid(c);
-    #else
-    int id = shvid(c);
+    if(ugeometry == gArchimedean)
+      id = arcm::id_of(c->master) + 20 * arcm::parent_index_of(c->master);
+    else
     #endif
+    if(PURE && !kite::in() && !bt::in())
+      id = 0;
+    else
+      id = shvid(c);
+
     if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, {-1, nullptr});
     auto &wop = cgi.walloffsets[id];
     int &wo = wop.first;
