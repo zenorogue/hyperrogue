@@ -4998,12 +4998,10 @@ EX void gamescreen(int _darken) {
     return;
     }
   
-  auto cdc = *current_display;
   auto gx = vid.xres;
   auto gy = vid.yres;
 
   if(dual::split([=] () { 
-    *current_display = cdc;
     vid.xres = gx;
     vid.yres = gy;
     dual::in_subscreen([=] () { gamescreen(_darken); });
@@ -5014,7 +5012,7 @@ EX void gamescreen(int _darken) {
   
   calcparam();
   
-  if((cmode & sm::MAYDARK) && !current_display->sidescreen) {
+  if((cmode & sm::MAYDARK) && !current_display->sidescreen && !inHighQual) {
     _darken += 2;
     }
 
@@ -5039,7 +5037,7 @@ EX void gamescreen(int _darken) {
   
   buttonclicked = false;
   
-  if((cmode & sm::NORMAL) && vid.stereo_mode != sLR) {
+  if((cmode & sm::NORMAL) && vid.stereo_mode != sLR && !inHighQual) {
     if(andmode == 0 && shmup::on) {
       using namespace shmupballs;
       calc();

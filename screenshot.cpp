@@ -651,16 +651,8 @@ void set_shotx() {
 EX int shot_aa = 1;
 
 EX void default_screenshot_content() {
-  #if CAP_RUG
-  if(rug::rugged) {
-    if(rug::in_crystal()) rug::physics();
-    rug::drawRugScene();
-    }
-  else
-  #endif
-    drawfullmap();
 
-  rots::draw_underlying(false);
+  gamescreen(0);
 
   if(caption != "")
     displayfr(vid.xres/2, vid.fsize+vid.fsize/4, 3, vid.fsize*2, caption, forecolor, 8);
@@ -1353,7 +1345,6 @@ EX bool record_animation() {
       }
     if(playermoved) centerpc(INF), optimizeview();
     dynamicval<bool> v2(inHighQual, true);
-    apply();
     models::configure();
     if(history::on) {
       ld len = (isize(history::v)-1) + 2 * history::extra_line_steps;
@@ -1365,8 +1356,7 @@ EX bool record_animation() {
     
     char buf[1000];
     snprintf(buf, 1000, animfile.c_str(), i);
-    shot::take(buf);
-    rollback();
+    shot::take(buf, content);
     }
   lastticks = ticks = SDL_GetTicks();
   return true;
