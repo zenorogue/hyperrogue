@@ -350,7 +350,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     if(shader_flags & GF_LEVELS) vmain += "vPos = t;\n";  
     if(treset) vmain += "t[3] = 1.0;\n";
     
-    if(WDIM == 3 && panini_alpha) {
+    if(shader_flags & SF_PERS3) {
       vmain += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
       /* panini */
       vmain += panini_shader();
