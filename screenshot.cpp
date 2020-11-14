@@ -1187,6 +1187,8 @@ EX void animate_rug_movement(ld t) {
     );
   }
 
+vector<reaction_t> on_rollback;
+
 EX void apply() {
   int t = ticks - lastticks;
   lastticks = ticks;
@@ -1278,7 +1280,8 @@ EX void apply() {
     turncount -= ticks * tidalsize / period;
     }
   if(env_volcano) {
-    bak_turncount = turncount;
+    auto bak_turncount = turncount;
+    on_rollback.push_back([bak_turncount] { turncount = bak_turncount; });
     turncount += env_volcano * ticks * 64 / period;
     for(auto& p: gmatrix) if(p.first->land == laVolcano) checkTide(p.first);
     }
@@ -1318,8 +1321,9 @@ EX void apply() {
   }
 
 EX void rollback() {
-  if(env_volcano) {
-    turncount = bak_turncount;
+  while(!on_rollback.empty()) {
+    on_rollback.back()();
+    on_rollback.pop_back();
     }
   }
 
