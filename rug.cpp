@@ -1037,7 +1037,7 @@ EX void prepareTexture() {
   #endif
 
   drawthemap();
-  if(mousing && !renderonce) {
+  if(mousing && !renderonce && !inHighQual) {
     for(int i=0; i<numplayers(); i++) if(multi::playerActive(i))
       queueline(tC0(ggmatrix(playerpos(i))), mouseh, 0xFF00FF, 8 + vid.linequality);
     }
