@@ -108,11 +108,13 @@ map<string, texture::texture_data> textures;
 
 void draw_texture(texture::texture_data& tex) {
   static vector<glhr::textured_vertex> rtver(4);
-
+  
+  int fs = inHighQual ? 0 : 2 * vid.fsize;
+  
   ld tx = tex.tx;
   ld ty = tex.ty;
-  ld scalex = (vid.xres/2 - 2 * vid.fsize) / (current_display->radius * tx);
-  ld scaley = (vid.yres/2 - 2 * vid.fsize) / (current_display->radius * ty);
+  ld scalex = (vid.xres/2 - fs) / (current_display->radius * tx);
+  ld scaley = (vid.yres/2 - fs) / (current_display->radius * ty);
   ld scale = min(scalex, scaley);
   scale *= 2;
 
