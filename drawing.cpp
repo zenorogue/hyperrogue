@@ -2291,10 +2291,6 @@ EX void draw_main() {
     }
   }
 
-#if CAP_VR
-EX hookset<bool()> hooks_vr_draw_all;
-#endif
-  
 EX void drawqueue() {
 
   DEBBI(DF_GRAPH, ("drawqueue"));
@@ -2368,9 +2364,6 @@ EX void drawqueue() {
   spherephase = 0;
   reset_projection();
   
-  #if CAP_VR
-  if(callhandlers(false, hooks_vr)) {} else
-  #endif
   #if CAP_GL
   if(model_needs_depth() && current_display->stereo_active()) {
     global_projection = -1;

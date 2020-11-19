@@ -232,15 +232,8 @@ void display_data::set_all(int ed) {}
 
 #if CAP_GL
 
-#if CAP_VR
-EX hookset<bool()> hooks_vr_eye_view, hooks_vr_eye_projection;
-#endif
-
 EX void eyewidth_translate(int ed) {
   glhr::using_eyeshift = false;
-#if CAP_VR
-  if(callhandlers(false, hooks_vr_eye_view)) ; else
-#endif
   if(ed) glhr::projection_multiply(glhr::translate(-ed * current_display->eyewidth(), 0, 0));
   }
 
