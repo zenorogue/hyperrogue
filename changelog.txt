@@ -4181,3 +4181,12 @@ Not yet in HyperRogue online, but see: https://zenorogue.itch.io/bringris
 - fixed unstable camera problems in 2.5D
 - show music volume setting when music is available
 
+2020-11-14 15:12 Update 11.4c:
+- Panini projection now works in any perspective (previously it did not work 2.5D and Hypersian rug, but it was incorrectly applied in orthogonally projected views)
+- fixed shader reset on Panini configuration
+- fixed the dual geometry mode
+- the screenshot feature should now correctly render the dual geometry mode (and some other things)
+- fixed the horosphere honeycombs (graphics)
+- fixed the game freezing on the generation of binary tiling x R
+- fixed the camera not rotating in Nil shmup
+- fixed the numerical inaccuracy explosion problem in nonisotropic shmup
