@@ -76,6 +76,9 @@ bool need_many_cell_types() {
 
 /** is the raycaster available? */
 EX bool available() {
+  #if CAP_VR
+  if(vrhr::state) return false; /* not implemented */
+  #endif
   if(noGUI) return false;
   if(!vid.usingGL) return false;
   if(GDIM == 2) return false;

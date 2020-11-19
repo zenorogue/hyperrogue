@@ -1021,6 +1021,9 @@ EX void prepareTexture() {
   
   dynamicval<eStereo> d(vid.stereo_mode, sOFF);
   dynamicval<ld> dl(levellines, 0);
+  #if CAP_VR
+  dynamicval<int> i(vrhr::state, 0);
+  #endif
   calcparam_rug();
   models::configure();
   
@@ -1083,6 +1086,9 @@ EX void drawRugScene() {
   for(auto t: triangles) drawTriangle(t);
   
   auto& rug = queuecurve(shiftless(Id), 0, 0xFFFFFFFF, PPR::LINE);
+
+  dynamicval<transmatrix> tV(View, View);
+  View = Id; /* needed for vr */
 
   if(nonisotropic) {
     transmatrix T2 = eupush( tC0(view_inverse(rugView)) );

@@ -1911,6 +1911,12 @@ EX void show3D() {
     dialog::addInfo(XLAT("parameters set correctly"));
   dialog::addBreak(50);
   dialog::addItem(XLAT("stereo vision config"), 'e');
+  
+  #if CAP_VR
+  dialog::addBoolItem(XLAT("VR settings"), vrhr::state > 0, 'v');
+  dialog::add_action_push(vrhr::show_vr_settings);
+  #endif
+
   dialog::addBack();
   dialog::display();
   

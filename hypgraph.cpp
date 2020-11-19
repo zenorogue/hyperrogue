@@ -1592,6 +1592,38 @@ EX hyperpoint vertical_vector() {
   }
 
 EX void spinEdge(ld aspd) { 
+
+  #if CAP_VR
+  if(vrhr::state && keep_vertical()) {
+    transmatrix T = vrhr::hmd_ref_at;
+    T = vrhr::sm * inverse(T);
+    vrhr::be_33(T);
+    
+    transmatrix V = T * get_view_orientation();
+
+    hyperpoint h = inverse(V) * C0;
+    V = V * rgpushxto0(h);
+    
+    V = cspin(2, 1, 90 * degree) * V;
+
+    if(1) {
+      dynamicval<eGeometry> g(geometry, gSphere);
+      bool b = vid.always3;
+      vid.always3 = false;
+      geom3::apply_always3();
+      V = gpushxto0(V*C0) * V;
+      if(b) {
+        vid.always3 = b;
+        geom3::apply_always3();
+        }
+      }
+    
+    V = cspin(1, 2, 90 * degree) * V;
+    get_view_orientation() = inverse(T) * V * gpushxto0(h);
+    return;
+    }
+  #endif
+
   ld downspin = 0;
   auto& ds = downseek;
   if(dual::state == 2 && (dual::one_euclidean ? !euclid : dual::currently_loaded != dual::main_side)) {

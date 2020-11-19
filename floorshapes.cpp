@@ -1235,6 +1235,9 @@ void geometry_information::make_floor_textures_here() {
   cd->radius = cd->scrsize * pconf.scale;
 
   floor_textures->enable();
+  #if CAP_VR
+  dynamicval<int> i(vrhr::state, 0);
+  #endif
   floor_textures->clear(0); // 0xE8E8E8 = 1
   
   // gradient vertices

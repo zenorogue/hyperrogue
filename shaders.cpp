@@ -202,7 +202,13 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
         "mediump float d = dot(t.xyz, t.xyz);\n"
         "mediump float hz = (1.+d) / (1.-d);\n"
         "mediump float ad = acosh(hz);\n"
-        "mediump float m = d == 0. ? 0. : d >= 1. ? 1.e4 : (hz+1.) * ad / sinh(ad);\n"
+        "mediump float m = d == 0. ? 0. : d >= 1. ? 1.e4 : (hz+1.) * ad / sinh(ad);\n";
+      #if CAP_VR
+      if(vrhr::state == 2)
+        coordinator += "t.xyz *= ad/d;\n";
+      else
+      #endif
+      coordinator +=
         "t.xyz *= m;\n";
       distfun = "ad";
       }
@@ -295,7 +301,11 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   if(!skip_t) {
     vmain += "mediump vec4 t = uMV * aPosition;\n";
     vmain += coordinator;
-    if(GDIM == 3 && WDIM == 2 && hyperbolic && context_fog && pmodel == mdPerspective) {
+    bool ok = true;
+    #if CAP_VR
+    if(vrhr::state) ok = false;
+    #endif
+    if(GDIM == 3 && WDIM == 2 && hyperbolic && context_fog && ok && pmodel == mdPerspective) {
       vsh += 
         "uniform mediump mat4 uRadarTransform;\n"
         "uniform mediump sampler2D tAirMap;\n"
@@ -407,6 +417,9 @@ void display_data::set_projection(int ed, ld shift) {
   id <<= 6; id |= shader_flags;
   id <<= 6; id |= spherephase;
   id <<= 1; if(vid.consider_shader_projection) id |= 1;
+  #if CAP_VR
+  id <<= 3; id |= vrhr::state;
+  #endif
   id <<= 2; id |= (spherespecial & 3);
   if(sol && solv_all) id |= 1;
   if(in_h2xe()) id |= 1;
@@ -459,22 +472,28 @@ void display_data::set_projection(int ed, ld shift) {
     }
 
   glhr::new_projection();
-
-  if(ed && vid.stereo_mode == sLR) {
-    glhr::projection_multiply(glhr::translate(ed, 0, 0));
-    glhr::projection_multiply(glhr::scale(2, 1, 1));
-    }      
-
-  ld tx = (cd->xcenter-cd->xtop)*2./cd->xsize - 1;
-  ld ty = (cd->ycenter-cd->ytop)*2./cd->ysize - 1;
-  glhr::projection_multiply(glhr::translate(tx, -ty, 0));
-
-  if(pmodel == mdManual) return;
   
-  if(pconf.stretch != 1 && (shader_flags & SF_DIRECT) && pmodel != mdPixel) glhr::projection_multiply(glhr::scale(1, pconf.stretch, 1));
+  #if CAP_VR
+  if(vrhr::state != 2) {
+  #else
+  if(true) {
+  #endif
+    if(ed && vid.stereo_mode == sLR) {
+      glhr::projection_multiply(glhr::translate(ed, 0, 0));
+      glhr::projection_multiply(glhr::scale(2, 1, 1));
+      }      
+  
+    ld tx = (cd->xcenter-cd->xtop)*2./cd->xsize - 1;
+    ld ty = (cd->ycenter-cd->ytop)*2./cd->ysize - 1;
+    glhr::projection_multiply(glhr::translate(tx, -ty, 0));
 
-  if(vid.stereo_mode != sODS)
-    eyewidth_translate(ed);
+    if(pmodel == mdManual) return;
+    
+    if(pconf.stretch != 1 && (shader_flags & SF_DIRECT) && pmodel != mdPixel) glhr::projection_multiply(glhr::scale(1, pconf.stretch, 1));
+  
+    if(vid.stereo_mode != sODS)
+      eyewidth_translate(ed);
+    }
   
   auto ortho = [&] (ld x, ld y) {
     glhr::glmatrix M = glhr::ortho(x, y, 1);
@@ -498,26 +517,44 @@ void display_data::set_projection(int ed, ld shift) {
 
   bool u_alpha = false;
   
-  if(shader_flags & SF_PIXELS) ortho(cd->xsize/2, -cd->ysize/2);
+  if(shader_flags & SF_PIXELS) {
+    #if CAP_VR
+    if(vrhr::state == 2) {
+      glhr::projection_multiply(glhr::tmtogl_transpose(vrhr::hmd_mvp));
+      glhr::id_modelview();
+      }
+    else
+    #endif 
+    ortho(cd->xsize/2, -cd->ysize/2);
+    }
   else if(shader_flags & SF_BOX) ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2);
   else if(shader_flags & SF_ODSBOX) {
     ortho(M_PI, M_PI);
     glhr::fog_max(1/sightranges[geometry], darkena(backcolor, 0, 0xFF));
     }
   else if(shader_flags & SF_PERS3) {
-    glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * cd->ysize / cd->xsize));
-    glhr::projection_multiply(glhr::scale(1, -1, -1));
-    if(nisot::local_perspective_used()) {
-      if(prod) {
-        for(int i=0; i<3; i++) NLP[3][i] = NLP[i][3] = 0;
-        NLP[3][3] = 1;
-        }
-      if(!(shader_flags & SF_ORIENT))
-        glhr::projection_multiply(glhr::tmtogl_transpose(NLP));
+    #if CAP_VR
+    if(vrhr::state == 2) {
+      glhr::projection_multiply(glhr::tmtogl_transpose(vrhr::hmd_mvp));
       }
-    if(ed) {
-      glhr::using_eyeshift = true;
-      glhr::eyeshift = glhr::tmtogl(xpush(vid.ipd * ed/2));
+    #else
+    if(1) {}
+    #endif
+    else {
+      glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * cd->ysize / cd->xsize));
+      glhr::projection_multiply(glhr::scale(1, -1, -1));
+      if(nisot::local_perspective_used()) {
+        if(prod) {
+          for(int i=0; i<3; i++) NLP[3][i] = NLP[i][3] = 0;
+          NLP[3][3] = 1;
+          }
+        if(!(shader_flags & SF_ORIENT))
+          glhr::projection_multiply(glhr::tmtogl_transpose(NLP));
+        }
+      if(ed) {
+        glhr::using_eyeshift = true;
+        glhr::eyeshift = glhr::tmtogl(xpush(vid.ipd * ed/2));
+        }
       }
     glhr::fog_max(1/sightranges[geometry], darkena(backcolor, 0, 0xFF));
     }
@@ -644,12 +681,20 @@ EX flagtype get_shader_flags() {
   }
 
 EX void glapplymatrix(const transmatrix& V) {
+  #if CAP_VR
+  transmatrix V3;
+  bool use_vr = vrhr::state;
+  if(use_vr) V3 = vrhr::hmd_pre * V;
+  const transmatrix& V2 = use_vr ? V3 : V;
+  #else
+  const transmatrix& V2 = V;
+  #endif
   GLfloat mat[16];
   int id = 0;
   
   if(MXDIM == 3) {
     for(int y=0; y<3; y++) {
-      for(int x=0; x<3; x++) mat[id++] = V[x][y];
+      for(int x=0; x<3; x++) mat[id++] = V2[x][y];
       mat[id++] = 0;
       }
     mat[12] = 0;
@@ -659,7 +704,7 @@ EX void glapplymatrix(const transmatrix& V) {
     }
   else {
     for(int y=0; y<4; y++) 
-      for(int x=0; x<4; x++) mat[id++] = V[x][y];
+      for(int x=0; x<4; x++) mat[id++] = V2[x][y];
     }
   glhr::set_modelview(glhr::as_glmatrix(mat));
   }

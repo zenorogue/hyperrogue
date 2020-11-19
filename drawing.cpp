@@ -208,22 +208,31 @@ EX void glflush() {
     }
   shapes_merged = 0;
   #endif
-
+  
   if(isize(text_vertices)) {
-    // printf("%08X | %d texts, %d vertices\n", text_color, texts_merged, isize(text_vertices));
     current_display->next_shader_flags = GF_TEXTURE;
     dynamicval<eModel> m(pmodel, mdPixel);
     if(!svg::in) current_display->set_all(0,0);
-    glBindTexture(GL_TEXTURE_2D, text_texture);
-    glhr::color2(text_color);
-    glhr::set_depthtest(false);
-    for(int ed = (current_display->stereo_active() && text_shift)?-1:0; ed<2; ed+=2) {
-      glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, 0));
-      current_display->set_mask(ed);
-  
+    
+    auto drawer = [] {
+      glhr::color2(text_color);
+      glBindTexture(GL_TEXTURE_2D, text_texture);
+      glhr::set_depthtest(false);
       glhr::current_vertices = NULL;
       glhr::prepare(text_vertices);
       glDrawArrays(GL_TRIANGLES, 0, isize(text_vertices));
+      };
+
+    #if CAP_VR
+    if(vrhr::state == 1 && !(cmode & sm::NORMAL)) 
+      vrhr::in_vr_ui(drawer);
+    
+    else
+    #endif
+    for(int ed = (current_display->stereo_active() && text_shift)?-1:0; ed<2; ed+=2) {
+      glhr::set_modelview(glhr::translate(-ed*text_shift-current_display->xcenter,-current_display->ycenter, 0));
+      current_display->set_mask(ed);
+      drawer();
       
       GLERR("print");
       }
@@ -2294,9 +2303,16 @@ EX void draw_main() {
 EX void drawqueue() {
 
   DEBBI(DF_GRAPH, ("drawqueue"));
-
+  
   #if CAP_WRL
   if(wrl::in) { wrl::render(); return; }
+  #endif
+  
+  #if CAP_VR
+  if(vrhr::state == 1) { 
+    vrhr::render();
+    return;
+    }
   #endif
   
   callhooks(hooks_drawqueue);

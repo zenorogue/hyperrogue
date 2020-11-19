@@ -3724,6 +3724,10 @@ void make_clipping_planes() {
 #if MAXMDIM >= 4
   clipping_planes.clear();
   if(!frustum_culling || PIU(sphere) || experimental || vid.stereo_mode == sODS || panini_alpha) return;
+  #if CAP_VR
+  if(vrhr::state) return;
+  #endif
+
   auto add_clipping_plane = [] (ld x1, ld y1, ld x2, ld y2) {
     ld z1 = 1, z2 = 1;
     hyperpoint sx = point3(y1 * z2 - y2 * z1, z1 * x2 - z2 * x1, x1 * y2 - x2 * y1);
@@ -4151,6 +4155,11 @@ EX void queuecircleat(cell *c, double rad, color_t col) {
 #endif
 
 EX cell *forwardcell() {
+  #if CAP_VR
+  if(vrhr::state) {
+    return vrhr::forward_cell;
+    }
+  #endif
   movedir md = vectodir(move_destination_vec(6));
   cellwalker xc = cwt + md.d + wstep;
   return xc.at;
@@ -4279,7 +4288,7 @@ EX void drawMarkers() {
     
     if(GDIM == 3 && !inHighQual && !shmup::on && vid.axes3 && playermoved) {
       cell *c = forwardcell();
-      queuecircleat(c, .8, getcs().uicolor);
+      if(c) queuecircleat(c, .8, getcs().uicolor);
       }
     
     #endif
@@ -4868,10 +4877,14 @@ EX void calcparam() {
     cd->ycenter = lerp(vid.fsize + cd->scrsize, vid.yres - cd->scrsize - vid.fsize, .8);
     }
   else {
-    if(vid.xres > vid.yres * 4/3+16 && (cmode & sm::SIDE))
+    bool ok = true;
+    #if CAP_VR
+    ok = ok && !vrhr::state;
+    #endif
+    if(vid.xres > vid.yres * 4/3+16 && (cmode & sm::SIDE) && ok)
       current_display->sidescreen = true;
 #if CAP_TOUR
-    if(tour::on && (tour::slides[tour::currentslide].flags & tour::SIDESCREEN))
+    if(tour::on && (tour::slides[tour::currentslide].flags & tour::SIDESCREEN) && ok)
       current_display->sidescreen = true;
 #endif
 
@@ -5017,6 +5030,9 @@ EX void gamescreen(int _darken) {
     }
 
   darken = _darken;
+  #if CAP_VR
+  if(vrhr::state) darken = 0;
+  #endif
   
   if(history::includeHistory) history::restore();
 
@@ -5062,6 +5078,31 @@ EX void gamescreen(int _darken) {
   if(texture::config.tstate == texture::tsAdjusting) 
     texture::config.drawRawTexture();
 #endif
+
+  #if CAP_VR
+  if(vrhr::state && _darken) {
+    int xsi = current_display->xsize;
+    int ysi = current_display->ysize;
+    color_t col = 0x000000C0;
+    current_display->next_shader_flags = 0;
+    dynamicval<eModel> m(pmodel, mdPixel);
+    
+    vrhr::in_vr_ui([&] {
+      glhr::color2(col);
+      glhr::set_depthtest(false);
+      vector<glvertex> vs;
+      vs.emplace_back(glhr::makevertex(0, 0, 0));
+      vs.emplace_back(glhr::makevertex(xsi, 0, 0));
+      vs.emplace_back(glhr::makevertex(xsi, ysi, 0));
+      vs.emplace_back(glhr::makevertex(0, 0, 0));
+      vs.emplace_back(glhr::makevertex(0, ysi, 0));
+      vs.emplace_back(glhr::makevertex(xsi, ysi, 0));
+      glhr::current_vertices = NULL;
+      glhr::vertices(vs);
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+      });
+    }
+  #endif
   }
 
 EX bool nohelp;
@@ -5232,6 +5273,11 @@ EX void drawscreen() {
 
   glflush();
   DEBB(DF_GRAPH, ("swapbuffers"));
+
+  #if CAP_VR
+  vrhr::submit();
+  #endif
+
 #if CAP_SDL
 #if CAP_GL
   if(vid.usingGL) SDL_GL_SwapBuffers(); else

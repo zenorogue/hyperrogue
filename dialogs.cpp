@@ -379,7 +379,17 @@ EX namespace dialog {
 
   EX purehookset hooks_display_dialog;
   
+  EX vector<int> key_queue;
+  
+  EX void queue_key(int key) { key_queue.push_back(key); }
+  
   EX void display() {
+
+    #if CAP_VR
+    for(auto h: vrhr::get_hits())
+      displaystr(h.x, h.y, 2, vid.fsize * 2, "X", 0xFFD500, 8);
+    #endif
+
     callhooks(hooks_display_dialog);
     int N = items.size();
     dfsize = vid.fsize;
@@ -432,6 +442,16 @@ EX namespace dialog {
           xthis = xthis && (mousex >= dcenter - dialogwidth/2 && mousex <= dcenter + dialogwidth/2);
         displayfr(dcenter, mid, 2, dfsize * I.scale/100, I.body, I.color, 8);
         if(xthis) getcstat = I.key;
+
+        #if CAP_VR
+        for(auto h: vrhr::get_hits()) {
+          bool vrthis = (h.y >= top && h.y < tothei);
+          if(cmode & sm::DIALOG_STRICT_X)
+            vrthis = vrthis && (mousex >= dcenter - dialogwidth/2 && mousex <= dcenter + dialogwidth/2);
+          if(vrthis) I.color = I.colors;
+          if(vrthis && h.clicked) queue_key(I.key);
+          }
+        #endif
         }
       else if(I.type == diItem || I.type == diBigItem) {
         bool xthis = (mousey >= top && mousey < tothei);
@@ -449,6 +469,19 @@ EX namespace dialog {
           I.color = (xthis&&mousepressed&&actonrelease) ? I.colorc : I.colors;
           }
 #endif        
+
+        #if CAP_VR
+        for(auto h: vrhr::get_hits()) {
+          bool vrthis = (h.y >= top && h.y < tothei);
+          if(cmode & sm::DIALOG_STRICT_X)
+            vrthis = vrthis && (mousex >= dcenter - dialogwidth/2 && mousex <= dcenter + dialogwidth/2);
+          if(vrthis) I.color = I.colors;
+          if(vrthis && h.clicked) {
+            queue_key(I.key);
+            }
+          }
+        #endif
+
         if(I.type == diBigItem) {
           displayfr(dcenter, mid, 2, dfsize * I.scale/100, I.body, I.color, 8);
           }
@@ -482,7 +515,17 @@ EX namespace dialog {
           displayfr(sl + double(sw * I.p1 / I.p2), mid, 2, dfsize * I.scale/100, "#", I.color, 8);
           displayfr(sr, mid, 2, dfsize * I.scale/100, "}", I.color, 0);
           }
-        if(xthis) getcstat = I.key, inslider = true;
+        if(xthis) getcstat = I.key, inslider = true, slider_x = mousex;
+
+        #if CAP_VR
+        for(auto h: vrhr::get_hits()) {
+          bool vrthis = (h.y >= top && h.y < tothei);
+          if(cmode & sm::DIALOG_STRICT_X)
+            vrthis = vrthis && (mousex >= dcenter - dialogwidth/2 && mousex <= dcenter + dialogwidth/2);
+          if(vrthis) I.color = I.colors;
+          if(vrthis && h.clicked) queue_key(I.key), inslider = true, slider_x = h.x;
+          }
+        #endif
         }
       else if(I.type == diKeyboard) {
         int len = 0;
@@ -612,7 +655,7 @@ EX namespace dialog {
     int shift = colorAlpha ? 0 : 8;
 
     if(uni >= 'A' && uni <= 'D') {
-      int x = (mousex - (dcenter-dwidth/4)) * 510 / dwidth;
+      int x = (slider_x - (dcenter-dwidth/4)) * 510 / dwidth;
       if(x < 0) x = 0;
       if(x > 255) x = 255;
       part(color, uni - 'A') = x;
@@ -705,7 +748,14 @@ EX namespace dialog {
       displayColorButton(dcenter - dwidth/4 + dwidth * part(color, i) / 510, y, "#", 0, 8, 0, col);
       
       if(mousey >= y - vid.fsize && mousey < y + vid.fsize)
-        getcstat = 'A' + i, inslider = true;
+        getcstat = 'A' + i, inslider = true, slider_x = mousex;
+
+      #if CAP_VR
+      for(auto h: vrhr::get_hits()) {
+        bool vrthis = (h.y >= y - vid.fsize && h.y < y + vid.fsize);
+        if(vrthis && h.clicked) queue_key('A' + i), inslider = true, slider_x = h.x;
+        }
+      #endif
       }
     
     displayColorButton(dcenter, vid.yres/2+vid.fsize * 6, XLAT("select this color") + " : " + format(colorAlpha ? "%08X" : "%06X", color), ' ', 8, 0, color >> (colorAlpha ? ash : 0));
@@ -884,7 +934,7 @@ EX namespace dialog {
           sl = vid.yres + vid.fsize*2, sr = vid.xres - vid.fsize*2;
         else
           sl = vid.xres/4, sr = vid.xres*3/4;
-        ld d = (mousex - sl + .0) / (sr-sl);
+        ld d = (slider_x - sl + .0) / (sr-sl);
         ld val = ne.sc.inverse(d * (ne.sc.direct(ne.vmax) - ne.sc.direct(ne.vmin)) + ne.sc.direct(ne.vmin));
         ld nextval = ne.sc.inverse((mousex + 1. - sl) / (sr - sl) * (ne.sc.direct(ne.vmax) - ne.sc.direct(ne.vmin)) + ne.sc.direct(ne.vmin));
         ld dif = abs(val - nextval);

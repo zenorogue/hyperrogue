@@ -598,7 +598,7 @@ EX namespace sn {
     "if(iz < 0.05 && ix > .85 && iy > .45 && iy < .75) ok = false;"
     "if(iz < 0.025 && ix > .65 && iy > .65 && ix < .8 && iy < .8) ok = false;"
 
-    "if(!ok) res = vec4(0,0,0,1);"
+    "if(!ok) res = vec4(0./0.,0./0.,0./0.,1);"
     "else "
 
     "\n#endif\n"

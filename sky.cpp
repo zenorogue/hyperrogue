@@ -374,6 +374,9 @@ EX struct renderbuffer *airbuf;
 
 EX void make_air() {
   if(!sky) return;
+  #if CAP_VR
+  if(vrhr::state) return;
+  #endif
   const int AIR_TEXTURE = 512;
   if(!airbuf) {
     airbuf = new renderbuffer(AIR_TEXTURE, AIR_TEXTURE, true);

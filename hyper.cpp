@@ -120,6 +120,7 @@
 #include "multigame.cpp"
 #include "inforder.cpp"
 #include "dpgen.cpp"
+#include "vr.cpp"
 
 #if CAP_ROGUEVIZ
 #include "rogueviz/rogueviz-all.cpp"

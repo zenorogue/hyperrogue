@@ -224,6 +224,8 @@
 #define PSEUDOKEY_WHEELDOWN 2501
 #define PSEUDOKEY_WHEELUP 2502
 #define PSEUDOKEY_RELEASE 2503
+#define PSEUDOKEY_EXIT 2504
+#define PSEUDOKEY_MENU 2505
 
 #ifndef CAP_PNG
 #define CAP_PNG (!ISMOBWEB)
@@ -310,6 +312,10 @@
 
 #ifndef CAP_RACING
 #define CAP_RACING (!ISMOBWEB && !ISMINI)
+#endif
+
+#ifndef CAP_VR
+#define CAP_VR ISSTEAM
 #endif
 
 #ifndef CAP_LEGACY
@@ -461,6 +467,10 @@ typedef unsigned GLuint;
 #include <complex>
 #include <new>
 #include <limits.h>
+
+#if CAP_VR
+#include "openvr.h"
+#endif
 
 #if CAP_VIDEO
 #include <sys/wait.h>

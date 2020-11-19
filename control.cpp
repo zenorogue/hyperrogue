@@ -26,6 +26,7 @@ EX bool holdmouse;
 EX int getcstat, lgetcstat;
 EX ld getcshift;
 EX bool inslider;
+EX int slider_x;
 
 EX function <void(int sym, int uni)> keyhandler = [] (int sym, int uni) {};
 EX function <bool(SDL_Event &ev)> joyhandler = [] (SDL_Event &ev) {return false;};
@@ -131,6 +132,11 @@ EX void movepckeydir(int d) {
   
   movedir md = vectodir(move_destination_vec(d));
     
+  if(!canmove) movepcto(md), remission(); else movepcto(md);
+  }
+
+EX void movevrdir(hyperpoint vec) {
+  movedir md = vectodir(vec);    
   if(!canmove) movepcto(md), remission(); else movepcto(md);
   }
 
@@ -278,6 +284,7 @@ EX bool quitmainloop = false;
 EX bool doexiton(int sym, int uni) {
   if(sym == SDLK_ESCAPE) return true;
   if(sym == SDLK_F10) return true;
+  if(sym == PSEUDOKEY_EXIT) return true;
   if(sym == PSEUDOKEY_RELEASE) return false;
   #ifndef FAKE_SDL
   if(sym == SDLK_LSHIFT) return false;
@@ -324,6 +331,14 @@ EX void full_forward_camera(ld t) {
     zoom_or_fov(exp(-t/10.));
   else if(GDIM == 3) {
     shift_view(ctangent(2, t * camera_speed));
+    didsomething = true;
+    playermoved = false;
+    }
+  }
+
+EX void full_strafe_camera(ld t) {
+  if(GDIM == 3) {
+    shift_view(ctangent(0, t * camera_speed));
     didsomething = true;
     playermoved = false;
     }
@@ -548,6 +563,9 @@ EX void handleKeyNormal(int sym, int uni) {
   
   if(sym == 'v' && DEFAULTNOR(sym)) 
     pushScreen(showMainMenu);
+
+  if(sym == PSEUDOKEY_MENU) 
+    pushScreen(showMainMenu);
   
   if(sym == '-' || sym == PSEUDOKEY_WHEELDOWN) {
     actonrelease = false;
@@ -642,6 +660,10 @@ EX void mainloopiter() {
   vid.wallmode = 0;
   vid.monmode = 0;
   #endif
+
+  #if CAP_VR
+  vrhr::vr_shift();
+  #endif  
 
   optimizeview();
   
@@ -759,6 +781,18 @@ EX void mainloopiter() {
   SDL_Event ev;
   DEBB(DF_GRAPH, ("polling for events\n"));
   
+  #if CAP_VR
+  if(vrhr::state) {
+    rug::using_rugview urv;
+    dynamicval<bool> ds(didsomething, didsomething);
+    using namespace vrhr;
+    if(vraim_x) full_rotate_camera(0, -vraim_x / 20);
+    if(vraim_y) full_rotate_camera(1, vraim_y / 20);
+    if(vrgo_y) full_forward_camera(-vrgo_y / 20);
+    if(vrgo_x) full_strafe_camera(-vrgo_x / 20);
+    }
+  #endif
+  
   if(mouseaiming(shmup::on)) {
     #if CAP_MOUSEGRAB
     rug::using_rugview urv;
@@ -787,7 +821,17 @@ EX void mainloopiter() {
     }
   else sc_ticks = ticks;
 
+  #if CAP_VR
+  vrhr::vr_control();
+  #endif
   achievement_pump();  
+
+  for(auto d: dialog::key_queue) {
+    println(hlog, "handling key ", d);
+    handlekey(d, d);
+    }
+  dialog::key_queue.clear();
+      
   while(SDL_PollEvent(&ev)) handle_event(ev);
   fix_mouseh();
   #if CAP_SDLJOY
