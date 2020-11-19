@@ -1083,6 +1083,23 @@ EX void setvideomode() {
 #endif
 
   int sizeflag = (vid.full ? SDL_FULLSCREEN : SDL_RESIZABLE);
+
+  #ifdef WINDOWS
+  static bool set_awareness = true;
+  if(set_awareness) {
+    set_awareness = false;
+    HMODULE user32_dll = LoadLibraryA("User32.dll");
+    if (user32_dll) {
+      DPI_AWARENESS_CONTEXT (WINAPI * Loaded_SetProcessDpiAwarenessContext) (DPI_AWARENESS_CONTEXT) =
+        (DPI_AWARENESS_CONTEXT (WINAPI *) (DPI_AWARENESS_CONTEXT))
+        GetProcAddress(user32_dll, "SetProcessDpiAwarenessContext");
+      if(Loaded_SetProcessDpiAwarenessContext) {
+        Loaded_SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+        }
+      FreeLibrary(user32_dll);
+      }
+    }
+  #endif
   
   s = s_screen = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | sizeflag);
   
