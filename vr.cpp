@@ -128,7 +128,7 @@ struct vrdata_t {
 vrdata_t vrdata;
 
 /** should we try to access VR */
-EX bool enabled = true;
+EX bool enabled = false;
 
 /** we tried to access VR but failed */
 EX bool failed;
@@ -382,7 +382,7 @@ EX void vr_shift() {
     }
   }
 
-EX ld absolute_unit_in_meters = 1;
+EX ld absolute_unit_in_meters = 3;
 
 void move_according_to(vr::ETrackedControllerRole role, bool last, bool cur) {
   if(!last && !cur) return;
