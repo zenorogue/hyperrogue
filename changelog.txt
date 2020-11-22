@@ -4190,3 +4190,8 @@ Not yet in HyperRogue online, but see: https://zenorogue.itch.io/bringris
 - fixed the game freezing on the generation of binary tiling x R
 - fixed the camera not rotating in Nil shmup
 - fixed the numerical inaccuracy explosion problem in nonisotropic shmup
+
+2020-11-22 17:55 Update 11.4d:
+- an attempt to set DPI awareness on Windows
+- a bit of Panini projection was still used even when off
+- preliminary implementation of VR (see: http://roguetemple.com/z/hyper/vr-status.txt for the current status)
