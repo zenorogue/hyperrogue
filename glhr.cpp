@@ -11,6 +11,8 @@
 #include "hyper.h"
 namespace hr {
 
+EX bool detailed_shader = false;
+
 EX namespace glhr {
 EX glvertex pointtogl(const hyperpoint& t) {
   glvertex h;
@@ -489,6 +491,9 @@ EX void set_modelview(const glmatrix& modelview) {
   auto& cur = current_glprogram;
   if(!cur) return;
 
+  if(detailed_shader) println(hlog, "\n*** ENABLING MODELVIEW:\n", modelview.as_stdarray());
+  if(detailed_shader) println(hlog, "\n*** ENABLING PROJECTION:\n", projection.as_stdarray());
+
   if(using_eyeshift) {
     glmatrix mvp = modelview * eyeshift;
     #if MINIMIZE_GL_CALLS
@@ -550,6 +555,7 @@ EX void full_enable(shared_ptr<GLprogram> p) {
   cur = p;
   GLERR("pre_switch_mode");
   WITHSHADER({
+    if(detailed_shader) println(hlog, "\n*** ENABLING VERTEX SHADER:\n", cur->_vsh, "\n\nENABLING FRAGMENT SHADER:\n", cur->_fsh, "\n");
     glUseProgram(cur->_program);
     GLERR("after_enable");
     }, {
