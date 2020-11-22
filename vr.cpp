@@ -189,7 +189,7 @@ string device_class_name(vr::ETrackedDeviceClass v) {
   return "unknown";
   }
 
-bool first = true;
+EX bool first = true;
 
 EX transmatrix hmd_at = Id;
 EX transmatrix hmd_ref_at = Id;
@@ -286,7 +286,6 @@ void track_all() {
   track_actions();
 
   E4;
-  sm = Id; sm[1][1] = sm[2][2] = -1;
   // println(hlog, "tracking");
   vr::VRCompositor()->WaitGetPoses(vrdata.poses, vr::k_unMaxTrackedDeviceCount, NULL, 0 );
   // println(hlog, "poses received");
@@ -551,6 +550,8 @@ EX void track_actions() {
   }
 
 EX void start_vr() {
+
+  if(true) { sm = Id; sm[1][1] = sm[2][2] = -1; }
 
   vr::EVRInitError eError = vr::VRInitError_None;
   vrdata.vr = vr::VR_Init( &eError, vr::VRApplication_Scene );

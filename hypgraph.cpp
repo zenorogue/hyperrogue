@@ -1594,7 +1594,7 @@ EX hyperpoint vertical_vector() {
 EX void spinEdge(ld aspd) { 
 
   #if CAP_VR
-  if(vrhr::state && keep_vertical()) {
+  if(vrhr::state && keep_vertical() && !vrhr::first) {
     transmatrix T = vrhr::hmd_ref_at;
     T = vrhr::sm * inverse(T);
     vrhr::be_33(T);
@@ -1618,6 +1618,8 @@ EX void spinEdge(ld aspd) {
         }
       }
     
+    vrhr::be_33(V);
+
     V = cspin(1, 2, 90 * degree) * V;
     get_view_orientation() = inverse(T) * V * gpushxto0(h);
     return;
