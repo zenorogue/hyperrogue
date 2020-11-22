@@ -315,7 +315,7 @@
 #endif
 
 #ifndef CAP_VR
-#define CAP_VR ISSTEAM
+#define CAP_VR (ISSTEAM && !ISMAC)
 #endif
 
 #ifndef CAP_LEGACY
@@ -469,7 +469,11 @@ typedef unsigned GLuint;
 #include <limits.h>
 
 #if CAP_VR
+#ifdef __MINGW32__
+#include "openvr_mingw.hpp"
+#else
 #include "openvr.h"
+#endif
 #endif
 
 #if CAP_VIDEO
