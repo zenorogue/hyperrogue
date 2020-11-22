@@ -454,6 +454,12 @@ vector<digital_action_data> dads = {
   digital_action_data("/actions/game/in/MoveRight", [] { return (cmode && sm::NORMAL); }, [] (bool last, bool curr) {
     move_according_to(vr::TrackedControllerRole_RightHand, last, curr);
     }),
+  digital_action_data("/actions/game/in/Drop", [] { return (cmode && sm::NORMAL); }, [] (bool last, bool curr) {
+    if(curr && !last) dialog::queue_key('g');
+    }),
+  digital_action_data("/actions/game/in/Skip turn", [] { return (cmode && sm::NORMAL); }, [] (bool last, bool curr) {
+    if(curr && !last) dialog::queue_key('s');
+    }),
   digital_action_data("/actions/game/in/EnterMenu", [] { return (cmode && sm::NORMAL); }, [] (bool last, bool curr) {
     if(curr && !last) dialog::queue_key(PSEUDOKEY_MENU);
     }),
