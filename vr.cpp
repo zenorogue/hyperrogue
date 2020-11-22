@@ -748,10 +748,11 @@ EX void render() {
       mu[i][j] = i!=j ? 0 : i==3 ? 1 : absolute_unit_in_meters;
 
     if(1) {
+      make_actual_view();
+      shiftmatrix Tv = cview();
       dynamicval<transmatrix> tN(NLP, NLP);
       dynamicval<transmatrix> tV(View, View);
       dynamicval<transmatrix> tC(current_display->which_copy, current_display->which_copy);
-      shiftmatrix Tv = cview();
       
       if(hsm == eHeadset::rotation_only) {
         transmatrix T = hmd_at;
