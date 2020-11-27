@@ -449,7 +449,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
       
       for(int j=0; j<cor; j++) {
         hyperpoint last = actual[j?j-1:cor-1];
-        hyperpoint current = actual[j];
+        hyperpoint current = ypush(1e-6 * randd()) * xpush(1e-6) * actual[j];
         hyperpoint next = actual[j<cor-1?j+1:0];
         auto T = gpushxto0(current);
         last = T * last;
