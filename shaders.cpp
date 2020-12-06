@@ -538,7 +538,7 @@ void display_data::set_projection(int ed, ld shift) {
       glhr::projection_multiply(glhr::tmtogl_transpose(vrhr::hmd_mvp));
       }
     #else
-    if(1) {}
+    if(0) {}
     #endif
     else {
       glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * cd->ysize / cd->xsize));
