@@ -132,7 +132,8 @@ struct glmatrix {
   
   struct textured_vertex {
     glvertex coords;
-    glvec2 texture;
+    /* texture uses the 'z' for shading with POLY_SHADE_TEXTURE
+    glvec3 texture;
     };
   
   struct ct_vertex {
@@ -761,7 +762,8 @@ EX void vertices_texture(const vector<glvertex>& v, const vector<glvertex>& t, i
   for(int i=0; i<q; i++)
     tv[i].coords = v[vshift+i],
     tv[i].texture[0] = t[tshift+i][0],
-    tv[i].texture[1] = t[tshift+i][1];
+    tv[i].texture[1] = t[tshift+i][1],
+    tv[i].texture[2] = t[tshift+i][2];
   prepare(tv);
   #else
   vertices(v, vshift);
@@ -820,7 +822,7 @@ EX void prepare(vector<textured_vertex>& v) {
   #if CAP_VERTEXBUFFER
   bindbuffer(v);
   PTR(aPosition, SHDIM, coords);
-  PTR(aTexture, 2, texture);
+  PTR(aTexture, 3, texture);
   #else
   if(current_vertices == &v[0]) return;
   current_vertices = &v[0];
@@ -829,7 +831,7 @@ EX void prepare(vector<textured_vertex>& v) {
     glVertexAttribPointer(aTexture, SHDIM, GL_FLOAT, GL_FALSE, sizeof(textured_vertex), &v[0].texture);
     }, {    
     glVertexPointer(SHDIM, GL_FLOAT, sizeof(textured_vertex), &v[0].coords);
-    glTexCoordPointer(2, GL_FLOAT, sizeof(textured_vertex), &v[0].texture);
+    glTexCoordPointer(3, GL_FLOAT, sizeof(textured_vertex), &v[0].texture);
     })
   #endif
   // color2(col);
