@@ -248,7 +248,7 @@ template<class T, class U, class V> void addsaver(T& i, U name, V dft) {
 
 template<class T, class U> void addsaver(T& i, U name) {}
 template<class T, class U> void addsaverenum(T& i, U name) {}
-template<class T, class U> void addsaverenum(T& i, U name, T dft) {}
+template<class T, class U> void addsaverenum(T& i, U name, T dft) { i = dft; }
 #endif
 
 EX void addsaver(charstyle& cs, string s) {
