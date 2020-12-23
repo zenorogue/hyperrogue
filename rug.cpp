@@ -1101,7 +1101,7 @@ EX void drawRugScene() {
    
   rug.offset_texture = 0;
   rug.tinf = &tinf;
-  if(disable_texture) rug.tinf = nullptr;
+  if(levellines && disable_texture) rug.tinf = nullptr;
   rug.flags = POLY_TRIANGLES | POLY_FAT | POLY_PRINTABLE | POLY_ALWAYS_IN | POLY_ISSIDE | POLY_SHADE_TEXTURE;
 
   dynamicval<projection_configuration> p(pconf, rconf);
@@ -1282,7 +1282,7 @@ EX ld move_on_touch = 1;
 EX void actDraw() {
   try {
 
-  if(!renderonce && !disable_texture) prepareTexture();
+  if(!renderonce && !(levellines && disable_texture)) prepareTexture();
   else if(renderlate) {
     renderlate--;
     prepareTexture();
