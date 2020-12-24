@@ -1607,7 +1607,7 @@ EX int movevalue(eMonster m, cell *c, int dir, flagtype flags) {
     }
   if(isPrincess(c->monst)) {
     
-    int d = c2->cpdist;
+    int d = c2->pathdist;
     if(d <= 3) val -= d;
     else val -= 10 * d;
     
