@@ -246,8 +246,10 @@ resetbuffer::resetbuffer() {
   drawFboId = 0, readFboId = 0;
   glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFboId);
   GLERR("getInteger a");
+  #ifndef GLES_ONLY
   glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFboId);  
   GLERR("getInteger b");
+  #endif
   #endif
   #if CAP_SDL
   sreset = s;
