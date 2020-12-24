@@ -1313,6 +1313,26 @@ void settings_menu() {
   dialog::display();
   }
 
+void adjust_animation(ld part) {
+  if(solnil) {
+    hyperpoint sh = pView * C0;
+    sh = lerp(C0, sh, 1-part);
+    pView = eupush(sh);
+    smooth = inverse(pView);
+    }
+  else {
+    transmatrix T = pView * inverse(tView);
+    hyperpoint vec = inverse_exp(shiftless(tC0(T)));
+    transmatrix Tspin = gpushxto0(tC0(T)) * T;
+    ld alpha = atan2(Tspin*xpush0(1));
+    println(hlog, "vec=", vec, " part = ", part);
+    pView = spin(alpha * part) * gpushxto0(direct_exp(vec*part)) * pView;
+    fixmatrix(pView);
+    View = tView;
+    smooth = inverse(pView) * cview().T;
+    }
+  }
+
 void run() {
 
   clearMessages();
@@ -1336,25 +1356,8 @@ void run() {
     View = pView;
     smooth = Id;
     }
-  else if(solnil) {
-    ld part = (ticks - last_adjust) * 1. / (when_t - last_adjust);
-    hyperpoint sh = pView * C0;
-    sh = lerp(C0, sh, 1-part);
-    pView = eupush(sh);
-    smooth = inverse(pView);
-    }
-  else {
-    ld part = (ticks - last_adjust) * 1. / (when_t - last_adjust);
-    transmatrix T = pView * inverse(tView);
-    hyperpoint vec = inverse_exp(shiftless(tC0(T)));
-    transmatrix Tspin = gpushxto0(tC0(T)) * T;
-    ld alpha = atan2(Tspin*xpush0(1));
-    pView = spin(alpha * part) * gpushxto0(direct_exp(vec*part)) * pView;
-    fixmatrix(pView);
-    View = tView;
-    smooth = inverse(pView) * cview().T;
-    // println(hlog, "smooth = ", smooth);
-    }
+  else adjust_animation((ticks - last_adjust) * 1. / (when_t - last_adjust));
+
   last_adjust = ticks;
   
   ray::want_use = 2;
