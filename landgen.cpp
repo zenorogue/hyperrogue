@@ -39,7 +39,7 @@ EX bool notDippingFor(eItem i) {
   int v = items[i] - currentLocalTreasure;
   if(v <= 10) return true;
   if(v >= 20) return false;
-  return v >= hrand(10) + 10;
+  return v < hrand(10) + 10;
   }
 
 EX bool notDippingForExtra(eItem i, eItem x) {
