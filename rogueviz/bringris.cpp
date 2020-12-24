@@ -106,7 +106,7 @@ int camera = 3;
 
 int facing_mod = 0;
 
-int draw_per_level = 500;
+int draw_per_level = 2000;
 
 int shape_id, next_shape_id;
 
@@ -1803,6 +1803,10 @@ int args() {
 
   else if(argis("-ray-on"))
     use_raycaster = true;
+
+  else if(argis("-dpl")) {
+    shift(); draw_per_level = argi();
+    }
 
   else return 1;
   return 0;
