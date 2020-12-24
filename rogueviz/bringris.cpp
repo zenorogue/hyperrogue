@@ -1526,6 +1526,55 @@ void run() {
       vid.linewidth /= 2;
       }
     #endif
+    #ifdef MAKE_VIDEO
+    if(sym == '[') {
+      perfect_linewidth = 0;
+      shot::shot_aa = 4;
+      vid.linewidth *= 5;
+      int dir = 3;
+      int fpm = in_s2xe() ? 60 : 30;
+      int steps = 0;
+      auto att = at;
+      bool boundedw = bflags() & BOUNDED_WELL;
+      if(boundedw) steps = 20;
+      else do {
+        steps++;
+        shift_block(dir);
+        }
+      while(at != att);
+      println(hlog, steps, " steps of ", fpm, " frames each");
+      anims::noframes = steps * fpm;
+      anims::period = steps * fpm;
+      int lt = -1;
+      int p = addHook(anims::hooks_anim, 200, [&] {
+        int t = ticks;
+        if(t == lt) {
+          println(hlog, "ignore");
+          return;
+          }
+        lt = t;
+        println(hlog, "t = ", t);
+        if(t % fpm == 0) {
+          pView = tView; 
+          View = pView;
+          smooth = Id;
+          shift_block(dir);
+          if(boundedw) dir = (1+dir) % 4;
+          }
+        if(boundedw) {
+          auto f = [fpm] (ld k) { k /= fpm; return k * k * (3 - 2 * k); };
+          ld a = f(t % fpm);
+          ld b = f(t % fpm + 1);
+          adjust_animation((b-a) / (1-a));
+          }
+        else
+          adjust_animation(1. / (fpm - t % fpm));
+        });
+      anims::record_video("bringris.mp4", [] { return anims::record_animation_of( [] { println(hlog, "called"); draw_screen(vid.xres, false); } ); });
+      delHook(anims::hooks_anim, p); 
+      vid.linewidth /= 5;
+      }
+    #endif
     };
   }
 
