@@ -132,7 +132,7 @@ struct glmatrix {
   
   struct textured_vertex {
     glvertex coords;
-    /* texture uses the 'z' for shading with POLY_SHADE_TEXTURE
+    /* texture uses the 'z' for shading with POLY_SHADE_TEXTURE */
     glvec3 texture;
     };
   
