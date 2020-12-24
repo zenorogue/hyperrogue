@@ -129,6 +129,45 @@ EX void compute_graphical_distance() {
     }
   }
 
+const int max_radius = 16;
+
+struct visit_set {
+  set<cell*> visited;
+  queue<cell*> q;
+  void visit(cell *c) {
+    if(visited.count(c)) return;
+    visited.insert(c);
+    q.push(c);
+    }
+  };
+
+struct princess_ai {
+  array<visit_set, max_radius+1> info;
+  void visit_gate(cell *g) { info[0].visit(g); }
+  void run();
+  };
+
+void princess_ai::run() {
+  int radius = toggle_radius(waOpenPlate);
+  int d = pathq.back()->pathdist;
+  if(d == PINFD - 1) return;
+  d++;
+  if(d < 5) d = 5; /* the Princess AI avoids plates when too close to the player */
+  hassert(radius <= max_radius);
+
+  for(int k=0; k<=radius; k++) while(!info[k].q.empty()) {
+    cell *c = info[k].q.front();
+    info[k].q.pop();
+    if(k < radius) forCellEx(c1, c) {
+      info[k+1].visit(c1);
+      if(k == 0 && c1->wall == waClosedGate)
+        info[0].visit(c1);
+      }
+    if(k == radius && c->wall == waOpenPlate && c->pathdist == PINFD)
+      onpath(c, d, hrand(c->type));
+    }
+  }
+
 EX void computePathdist(eMonster param, bool include_allies IS(true)) {
   
   for(cell *c: targets)
@@ -138,8 +177,14 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
   int qtarg = isize(targets);
   
   int limit = gamerange();
+  
+  int qb = 0;
 
-  for(int qb=0; qb < isize(pathq); qb++) {
+  bool princess = isPrincess(param);
+  princess_ai gd;
+  princess_retry:
+  
+  for(; qb < isize(pathq); qb++) {
     cell *c = pathq[qb];
     int fd = reachedfrom[qb] + c->type/2;
     if(c->monst && !isBug(c) && !(isFriendly(c) && !c->stuntime)) {
@@ -175,7 +220,15 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
 
         onpath(c2, d+1, c->c.spin(i));
         }
+      
+      else if(c2->wall == waClosedGate && princess)
+        gd.visit_gate(c2);
       }
+    }
+  
+  if(princess) {
+    gd.run(); 
+    if(qb < isize(pathq)) goto princess_retry;
     }
   }
 
