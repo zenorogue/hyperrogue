@@ -791,13 +791,17 @@ EX void toggleGates(cell *c, eWall type, int rad) {
     }
   }
 
+EX int toggle_radius(eWall type) {
+  if(type == waClosePlate && PURE)
+    return 2;
+  else
+    return (GOLDBERG && !sphere && !a4) ? gp::dist_3() : 3;
+  }
+
 EX void toggleGates(cell *ct, eWall type) {
   playSound(ct, "click");
   numgates = 0;
-  if(type == waClosePlate && PURE)
-    toggleGates(ct, type, 2);
-  else
-    toggleGates(ct, type, (GOLDBERG && !sphere && !a4) ? gp::dist_3() : 3);
+  toggleGates(ct, type, toggle_radius(type));
   if(numgates && type == waClosePlate)
     playSound(ct, "closegate");
   if(numgates && type == waOpenPlate)
