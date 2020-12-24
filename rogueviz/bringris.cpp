@@ -513,6 +513,12 @@ int penalty(const vector<cellwalker>& shape, const code_t& code) {
     for(auto s: shape) 
       if(get_z(s.at) > get_z(shape[0].at))
         p += 10000;
+  if(bflags() & HDUAL) {
+    if(!dists.count(shape[0].at->move(2)))
+      p += 40000;
+    if(!dists.count(shape[0].at->move(3)))
+      p += 20000;
+    }
   return p;
   }
 
