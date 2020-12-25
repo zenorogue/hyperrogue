@@ -5366,7 +5366,8 @@ EX void animateMovement(const movei& m, int layer) {
   if(found_s) {
     a = animations[layer][m.s];
     a.wherenow = T * a.wherenow;
-    animations[layer].erase(m.s);
+    if(m.s != m.t)
+      animations[layer].erase(m.s);
     a.attacking = 0;
     }
   else {
