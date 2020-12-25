@@ -340,7 +340,7 @@ EX bool wantsToStay(eMonster m) {
 
 EX bool batsAfraid(cell *c) {
   // bats 
-  for(int i=-1; i<isize(targets); i++)
+  for(int i=0; i<isize(targets); i++)
     if(c == targets[i] || isNeighbor(c, targets[i])) {
       if(!targets[i]->monst && invismove) continue;
       bool enear = false;
