@@ -149,6 +149,7 @@ struct princess_ai {
 
 void princess_ai::run() {
   int radius = toggle_radius(waOpenPlate);
+  if(pathq.empty()) return;
   int d = pathq.back()->pathdist;
   if(d == PINFD - 1) return;
   d++;
