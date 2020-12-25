@@ -890,7 +890,7 @@ static inline void set_flag(flagtype& f, flagtype which, bool b) {
 #ifdef NDEBUG
 #define hassert(condition) if(!(condition)) __builtin_unreachable()
 #else
-#define hassert(condition) if(!(condition)) println(hlog, __FILE__, ":", __LINE__, ":", __func__, ": assertion failed: ", #condition)
+#define hassert(condition) if(!(condition)) printf("%s:%d:%s: assertion failed: %s\n", __FILE__, __LINE__, __func__, #condition)
 #endif
 
 #define IS(z) = z
