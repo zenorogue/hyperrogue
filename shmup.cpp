@@ -1829,12 +1829,10 @@ void moveBullet(monster *m, int delta) {
       // Orb of Winter protects from fireballs
       if(m->type == moFireball && ((isPlayer(m2) && markOrb(itOrbWinter)) || m2->type == moWitchWinter)) 
         continue;
-      bool revive = m2->type == moMirrorSpirit && !m2->dead;
-      killMonster(m2, m->parent ? m->parent->type : moNone);
-      if(revive && m2->dead) {
-        hr::kills[moMirrorSpirit]--;
+      int ms = mirrorspirits;
+      killMonster(m2, m->get_parenttype());
+      if(mirrorspirits > ms) {
         multi::kills[cpid]--;
-        mirrorspirits++;
         }
       if(m2->dead && m2->type == moAsteroid) {
         gainItem(itAsteroid);
