@@ -1211,7 +1211,7 @@ EX void stabbingAttack(movei mi, eMonster who, int bonuskill IS(0)) {
 
   cell *mf = mi.s;
   cell *mt = mi.t;
-  int backdir = mi.rev_dir();
+  int backdir = mi.rev_dir_mirror();
   
   do_swords(mi, who, [&] (cell *c, int bb) { if(swordAttack(mt, who, c, bb)) numbb[bb]++, numslash++; });
   
@@ -1279,7 +1279,7 @@ EX void stabbingAttack(movei mi, eMonster who, int bonuskill IS(0)) {
     if(!logical_adjacent(mt, who, c)) continue;
     eMonster mm = c->monst;
     int flag = AF_APPROACH;
-    if(anglestraight(mt, backdir, t)) flag |= AF_HORNS;
+    if(proper(mt, backdir) && anglestraight(mt, backdir, t)) flag |= AF_HORNS;
     if(canAttack(mt,who,c,c->monst, flag)) {
       changes.ccell(c);
       if(attackMonster(c, flag | AF_MSG, who)) numlance++;

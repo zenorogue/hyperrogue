@@ -765,12 +765,12 @@ EX void mountmove(const movei& mi, bool fp) {
       animateMovement(mi, LAYER_SMALL);
       if(multi::players > 1) {
         multi::player[i].at = mi.t;
-        multi::player[i].spin = mi.rev_dir();
+        multi::player[i].spin = mi.rev_dir_force();
         multi::flipped[i] = fp;
         }
       else {
         cwt.at = mi.t;
-        cwt.spin = mi.rev_dir();
+        cwt.spin = mi.rev_dir_force();
         flipplayer = fp;
         }
       afterplayermoved();

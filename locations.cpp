@@ -452,6 +452,8 @@ inline cellwalker operator+ (heptspin hs, cth_t) { return cellwalker(hs.at->c7, 
 
 #endif
 
+EX bool proper(cell *c, int d) { return d >= 0 && d < c->type; }
+
 #if HDR
 
 constexpr int STRONGWIND = 99;
@@ -485,7 +487,8 @@ struct movei {
   movei rev() const { return movei(t, s, rev_dir_or(d)); }
   int dir_or(int x) const { return proper() ? d : x; }
   int rev_dir_or(int x) const { return proper() ? s->c.spin(d) : x; }
-  int rev_dir() const { return s->c.spin(d); }
+  int rev_dir_mirror() const { return proper() ? s->c.spin(d) : d; }
+  int rev_dir_force() const { hassert(proper()); return s->c.spin(d); }
   bool mirror() { return s->c.mirror(d); }
   };
 #endif

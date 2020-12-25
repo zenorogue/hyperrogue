@@ -2872,7 +2872,7 @@ EX namespace sword {
     cell *c2 = mi.t;
     if(!mi.proper()) return d;
     int s1 = mi.d;
-    int s2 = mi.rev_dir();
+    int s2 = mi.rev_dir_force();
     neighborId(c2, c1);
     if(s1 < 0 || s2 < 0) return d;
     if(SWORDDIM == 2) {
