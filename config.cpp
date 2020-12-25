@@ -1590,7 +1590,7 @@ EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
   dialog::addSelItem(XLAT("field of view"), sfov, key);
   dialog::add_action([=] {
     if(pop) popScreen();
-    dialog::editNumber(vid.fov, 1, max_fov_angle(), 1, 45, "field of view", 
+    dialog::editNumber(vid.fov, 1, max_fov_angle(), 1, 90, "field of view", 
       XLAT(
         "Horizontal field of view, in angles. "
         "This affects the Hypersian Rug mode (even when stereo is OFF) "
