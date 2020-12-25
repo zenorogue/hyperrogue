@@ -62,7 +62,6 @@ struct monster {
   bool inBoat;
   bool no_targetting;
   monster *parent; // who shot this missile
-  eMonster parenttype; // type of the parent
   int nextshot;    // when will it be able to shot (players/flailers)
   int pid;         // player ID
   int hitpoints;   // hitpoints; or time elapsed in Asteroids
@@ -74,12 +73,16 @@ struct monster {
   bool isVirtual;  // off the screen: gmatrix is unknown, and pat equals at
   hyperpoint inertia;// for frictionless lands
   
+  int refs;         // +1 for every reference (parent, lists of active monsters)
+  
   monster() { 
     dead = false; inBoat = false; parent = NULL; nextshot = 0; 
     stunoff = 0; blowoff = 0; footphase = 0; no_targetting = false;
-    swordangle = 0; inertia = Hypc; ori = Id;
+    swordangle = 0; inertia = Hypc; ori = Id; refs = 1;
     }
   
+  eMonster get_parenttype() { return parent ? parent->type : moNone; }
+
   void store();
     
   void findpat();
@@ -87,6 +90,20 @@ struct monster {
   cell *findbase(const shiftmatrix& T, int maxsteps);
 
   void rebasePat(const shiftmatrix& new_pat, cell *tgt);
+  
+  void remove_reference() {
+    refs--;
+    if(!refs) {
+      if(parent) parent->remove_reference();
+      delete this;
+      }
+    }
+  
+  void set_parent(monster *par) {
+    if(parent) parent->remove_reference();
+    parent = par;
+    parent->refs++;
+    }
 
   };  
 #endif
@@ -337,10 +354,9 @@ void awakenMimics(monster *m, cell *c2) {
     m2->base = c;
     
     if(isBullet(m)) {
-      m2->parenttype = m->parenttype;
       m2->type = m->type;
       m2->vel = m->vel;
-      m2->parent = m->parent;
+      m2->set_parent(m->parent);
       m2->pid = m->pid;
       }
     else
@@ -402,9 +418,8 @@ void shootBullet(monster *m) {
   if(WDIM == 3) bullet->at = bullet->at * cpush(2, 0.15 * SCALE);
   if(prod) bullet->ori = m->ori;
   bullet->type = moBullet;
-  bullet->parent = m;
+  bullet->set_parent(m);
   bullet->pid = m->pid;
-  bullet->parenttype = m->type;
   bullet->inertia = m->inertia;
   bullet->inertia[frontdir()] += bullet_velocity(m->type) * SCALE;
   bullet->hitpoints = 0;
@@ -422,9 +437,8 @@ void shootBullet(monster *m) {
     if(prod) bullet->ori = m->ori;
     if(WDIM == 3) bullet->at = bullet->at * cpush(2, 0.15 * SCALE);
     bullet->type = moBullet;
-    bullet->parent = m;
+    bullet->set_parent(m);
     bullet->pid = m->pid;
-    bullet->parenttype = m->type;
     bullet->hitpoints = 0;
     bullet->inertia = cspin(0, WDIM-1, -M_PI/4 * i) * m->inertia;
     bullet->inertia[frontdir()] += bullet_velocity(m->type) * SCALE;
@@ -642,7 +656,7 @@ EX void activateArrow(cell *c) {
     traplist.emplace(ticks + 500, c);
   }
 
-monster arrowtrap_fakeparent;
+monster arrowtrap_fakeparent, dragon_fakeparent;
 
 void doTraps() {
   while(true) { 
@@ -662,9 +676,9 @@ void doTraps() {
         bullet->base = tl[i];
         bullet->at = rspintox(inverse_shift(tu, tC0(tv)));
         bullet->type = moArrowTrap;
-        bullet->parent = &arrowtrap_fakeparent;
+        bullet->set_parent(&arrowtrap_fakeparent);
+        arrowtrap_fakeparent.type = moArrowTrap;
         bullet->pid = 0;
-        bullet->parenttype = moArrowTrap;
         additional.push_back(bullet);
         }
       catch(out_of_range&) {}
@@ -1487,9 +1501,8 @@ void shoot(eItem it, monster *m) {
   /* ori */
   if(WDIM == 3) bullet->at = bullet->at * cpush(2, 0.15 * SCALE);
   bullet->type = it == itOrbDragon ? moFireball : it == itOrbAir ? moAirball : moBullet;
-  bullet->parent = m;
+  bullet->set_parent(m);
   bullet->pid = m->pid;
-  bullet->parenttype = m->type;
   items[it]--;
   additional.push_back(bullet);
   }
@@ -1596,9 +1609,7 @@ void spawn_asteroids(monster *bullet, monster *target) {
     child->at = target->at;
     child->ori = target->ori;
     child->type = target->type;
-    child->parent = NULL;
     child->pid = target->pid;
-    child->parenttype = target->type;
     child->inertia = target->inertia;
     child->inertia += bullet_inertia / 5;
     child->hitpoints = target->hitpoints - 1;
@@ -1668,7 +1679,8 @@ void moveBullet(monster *m, int delta) {
   
   if(m->type != moTongue && !(godragon || (c2==m->base && m->type == moArrowTrap) || passable(c2, m->base, P_BULLET | P_MIRRORWALL))) {
     m->dead = true;
-    if(m->type != moAirball) killMonster(c2, m->parent ? m->parent->type : moNone);
+    if(m->type != moAirball)
+      killMonster(c2, m->get_parenttype());
     // cell *c = m->base;
     if(m->parent && isPlayer(m->parent)) {
       if(c2->wall == waBigTree) {
@@ -1809,7 +1821,7 @@ void moveBullet(monster *m, int delta) {
           nat = spin_towards(nat, m->ori, tC0(m->parent->pat), bulletdir(), 1);
           m->rebasePat(nat, m->base);
           }
-        m->parent = m2;
+        m->set_parent(m2);
         continue;
         }
       m->dead = true;
@@ -1844,7 +1856,7 @@ EX bool dragonbreath(cell *dragon) {
   bullet->base = dragon;
   bullet->at = spin_towards(Id, bullet->ori, inverse_shift(gmatrix[dragon], tC0(pc[randplayer]->pat)), bulletdir(), 1);
   bullet->type = moFireball;
-  bullet->parent = bullet;
+  bullet->set_parent(&dragon_fakeparent); dragon_fakeparent.type = moDragonHead;
   bullet->pid = randplayer;
   additional.push_back(bullet);
   return true;
@@ -2214,8 +2226,7 @@ void moveMonster(monster *m, int delta) {
       bullet->at = m->at;
       bullet->ori = m->ori;
       bullet->type = moTongue;
-      bullet->parent = m;
-      bullet->parenttype = m->type;
+      bullet->set_parent(m);
       bullet->pid = whichPlayerOn(c2);
       additional.push_back(bullet);
       return;
@@ -2287,8 +2298,7 @@ void moveMonster(monster *m, int delta) {
           undead->base = c2;
           undead->at = Id;
           undead->type = moZombie;
-          undead->parent = m;
-          undead->parenttype = m->type;
+          undead->set_parent(m);
           undead->pid = 0;
           undead->findpat();
           additional.push_back(undead);
@@ -2297,8 +2307,7 @@ void moveMonster(monster *m, int delta) {
           undead->base = c3;
           undead->at = Id;
           undead->type = moGhost;
-          undead->parent = m;
-          undead->parenttype = m->type;
+          undead->set_parent(m);
           undead->findpat();
           undead->pid = 0;
           additional.push_back(undead);
@@ -2367,7 +2376,7 @@ void moveMonster(monster *m, int delta) {
       bullet->at = m->at;
       bullet->ori = m->ori;
       bullet->type = moFireball;
-      bullet->parent = m;
+      bullet->set_parent(m);
       additional.push_back(bullet);
       bullet->pid = directi;
       if(m->type == moPyroCultist) 
@@ -2381,8 +2390,7 @@ void moveMonster(monster *m, int delta) {
       bullet->at = m->at;
       bullet->ori = m->ori;
       bullet->type = moBullet;
-      bullet->parent = m;
-      bullet->parenttype = moOutlaw;
+      bullet->set_parent(m);
       bullet->pid = directi;
       additional.push_back(bullet);
       m->nextshot = curtime + 1500;
@@ -2394,7 +2402,7 @@ void moveMonster(monster *m, int delta) {
       bullet->at = m->at;
       bullet->ori = m->ori;
       bullet->type = moAirball;
-      bullet->parent = m;
+      bullet->set_parent(m);
       bullet->pid = i;
       additional.push_back(bullet);
       m->nextshot = curtime + 1500;
@@ -2414,7 +2422,7 @@ void moveMonster(monster *m, int delta) {
       bullet->at = m->at;
       bullet->ori = m->ori;
       bullet->type = moFlailBullet;
-      bullet->parent = m;
+      bullet->set_parent(m);
       bullet->vel = 1/400.0;
       bullet->pid = i;
       additional.push_back(bullet);
@@ -2428,7 +2436,7 @@ void moveMonster(monster *m, int delta) {
       bullet->at = m->at;
       bullet->ori = m->ori;
       bullet->type = moCrushball;
-      bullet->parent = m;
+      bullet->set_parent(m);
       bullet->pid = i;
       additional.push_back(bullet);
       break;
@@ -2730,11 +2738,9 @@ EX void turn(int delta) {
   // deactivate all monsters
   for(monster *m: active)
     if(m->dead && m->type != moPlayer) {
-      for(monster *m2: active) if(m2->parent == m)
-        m2->parent = m->parent;
       if(m == mousetarget) mousetarget = NULL;
       if(m == lmousetarget) lmousetarget = NULL;
-      delete m;
+      m->remove_reference();
       }
     else {
       m->store();
@@ -2802,7 +2808,7 @@ EX hookset<bool(const shiftmatrix&, cell*, shmup::monster*)> hooks_draw;
 EX void clearMonsters() {
   for(mit it = monstersAt.begin(); it != monstersAt.end(); it++)
     delete(it->second);
-  for(monster *m: active) delete m;
+  for(monster *m: active) m->remove_reference();
   mousetarget = NULL;
   lmousetarget = NULL;
   monstersAt.clear();
@@ -3005,12 +3011,12 @@ bool celldrawer::draw_shmup_monster() {
       case moBullet: {
         color_t col;
         cpid = m->pid;
-        if(m->parenttype == moPlayer)
+        if(m->get_parenttype() == moPlayer)
           col = getcs().swordcolor;
-        else if(m->parenttype == moMimic)
+        else if(m->get_parenttype() == moMimic)
           col = (mirrorcolor(det(view.T) < 0) << 8) | 0xFF;
         else
-          col = (minf[m->parenttype].color << 8) | 0xFF;
+          col = (minf[m->get_parenttype()].color << 8) | 0xFF;
         if(getcs().charid >= 4) {
           queuepoly(mmscale(view, 1.15), cgi.shPHead, col);
           ShadowV(view, cgi.shPHead);
@@ -3032,7 +3038,7 @@ bool celldrawer::draw_shmup_monster() {
         break;
         }
       case moTongue: {
-        queuepoly(mmscale(view, 1.15), cgi.shTongue, (minf[m->parenttype].color << 8) | 0xFF);
+        queuepoly(mmscale(view, 1.15), cgi.shTongue, (minf[m->get_parenttype()].color << 8) | 0xFF);
         ShadowV(view, cgi.shTongue);
         break;
         }
