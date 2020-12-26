@@ -569,6 +569,29 @@ EX transmatrix eupush(ld x, ld y) {
   return T;
   }
 
+EX transmatrix euclidean_translate(ld x, ld y, ld z) {
+  transmatrix T = Id;
+  T[0][LDIM] = x;
+  T[1][LDIM] = y;
+  T[2][LDIM] = z;
+  return T;
+  }
+
+EX transmatrix euscale(ld x, ld y) {
+  transmatrix T = Id;
+  T[0][0] = x;
+  T[1][1] = y;
+  return T;
+  }
+
+EX transmatrix euscale3(ld x, ld y, ld z) {
+  transmatrix T = Id;
+  T[0][0] = x;
+  T[1][1] = y;
+  T[2][2] = z;
+  return T;
+  }
+
 EX transmatrix eupush(hyperpoint h, ld co IS(1)) {
   if(nonisotropic) return nisot::translate(h, co);
   transmatrix T = Id;
