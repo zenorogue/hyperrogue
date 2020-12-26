@@ -222,7 +222,7 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
         onpath(c2, d+1, c->c.spin(i));
         }
       
-      else if(c2->wall == waClosedGate && princess)
+      else if(c2 && c2->wall == waClosedGate && princess)
         gd.visit_gate(c2);
       }
     }
