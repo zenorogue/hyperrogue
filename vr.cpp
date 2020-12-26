@@ -13,7 +13,7 @@ EX namespace vrhr {
 #if CAP_VR
 
 #if HDR
-enum class eHeadset { none, rotation_only, reference, holonomy };
+enum class eHeadset { none, rotation_only, reference, holonomy, model_viewing };
 enum class eEyes { none, equidistant, truesim };
 enum class eCompScreen { none, reference, single, eyes };
 #endif
@@ -31,7 +31,8 @@ vector<pair<string, string> > headset_desc = {
   {"rotation only", "Ignore the headset movement but do not ignore its rotation."},
   {"reference", "The reference point in the real world corresponds to the reference point in VR. When you move your head in a loop, you return to where you started."},
   {"holonomy", "Headsets movements in the real world are translated to the same movements in VR. Since the geometry is different, when you move your head in a loop, you usually don't return "
-   "to where you started."}
+   "to where you started."},
+  {"view model", "Fix a 3D projection of the non-Euclidean world, and see it from many viewpoints."}
   };
 
 vector<pair<string, string> > eyes_desc = {
@@ -385,6 +386,9 @@ EX void vr_shift() {
   }
 
 EX ld absolute_unit_in_meters = 3;
+
+EX ld vr_scale_factor = 2;
+EX ld vr_zshift = 0;
 
 void move_according_to(vr::ETrackedControllerRole role, bool last, bool cur) {
   if(!last && !cur) return;
@@ -748,9 +752,12 @@ EX void render() {
     calcparam();
     
     transmatrix mu;
+    bool pers = in_perspective();
+    ld sca = pers ? absolute_unit_in_meters : vr_scale_factor;
     for(int i=0; i<4; i++)
     for(int j=0; j<4; j++)
-      mu[i][j] = i!=j ? 0 : i==3 ? 1 : absolute_unit_in_meters;
+      mu[i][j] = i!=j ? 0 : i==3 ? 1 : sca;
+    if(!pers) mu[1][1] *= pconf.stretch;
 
     if(1) {
       make_actual_view();
@@ -787,7 +794,12 @@ EX void render() {
           be_33(NLP);
           hmd_mvp = NLP * hmd_mvp;          
           }
-        hmd_mvp = mu * sm * hmd_mvp;
+        hmd_mvp = sm * hmd_mvp;
+        if(vr_zshift) hmd_mvp = euclidean_translate(0, 0, -vr_zshift) * hmd_mvp;
+        hmd_mvp = mu * hmd_mvp;
+        if(hsm == eHeadset::model_viewing) {
+          hmd_mvp = sm * hmd_at * inverse(hmd_ref_at) * sm * hmd_mvp;
+          }
         if(eyes == eEyes::equidistant) {
           hmd_mvp = inverse(vrdata.eyepos[i]) * hmd_mvp;
           }
@@ -902,6 +914,14 @@ int readArgs() {
   else if(argis("-vr-absunit")) {
     PHASEFROM(2);
     shift_arg_formula(absolute_unit_in_meters);
+    }
+  else if(argis("-vr-scale")) {
+    PHASEFROM(2);
+    shift_arg_formula(vr_scale_factor);
+    }
+  else if(argis("-vr-z")) {
+    PHASEFROM(2);
+    shift_arg_formula(vr_zshift);
     }
   else if(argis("-d:vr")) {
     PHASEFROM(2); launch_dialog(show_vr_settings);

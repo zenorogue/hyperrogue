@@ -291,6 +291,10 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     shader_flags |= SF_PIXELS;
     if(dim3) shader_flags |= SF_ZFOG;
     }
+  
+  /* no z-fog in VR */
+  if((shader_flags & SF_ZFOG) && vrhr::state == 2)
+    shader_flags &= ~SF_ZFOG;
 
   if(nil && pmodel == mdPerspective)  {
     vsh += "uniform mediump float uRotCos, uRotSin, uRotNil;\n";
@@ -527,7 +531,16 @@ void display_data::set_projection(int ed, ld shift) {
     #endif 
     ortho(cd->xsize/2, -cd->ysize/2);
     }
-  else if(shader_flags & SF_BOX) ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2);
+  else if(shader_flags & SF_BOX) {
+    #if CAP_VR
+    if(vrhr::state == 2) {
+      glhr::projection_multiply(glhr::tmtogl_transpose(vrhr::hmd_mvp));
+      glhr::id_modelview();
+      }
+    else
+    #endif
+    ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2);
+    }
   else if(shader_flags & SF_ODSBOX) {
     ortho(M_PI, M_PI);
     glhr::fog_max(1/sightranges[geometry], darkena(backcolor, 0, 0xFF));
