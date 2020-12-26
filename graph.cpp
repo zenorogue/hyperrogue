@@ -2344,20 +2344,22 @@ EX bool applyAnimation(cell *c, shiftmatrix& V, double& footphase, int layer) {
     return true;
     }
 
-  if(a.attacking == 1) 
+  if(among(a.attacking, 1, 3))
     R = hdist(tC0(a.attackat), tC0(a.wherenow));
   else
     R = hdist0(tC0(a.wherenow));
   aspd *= (1+R+(shmup::on?1:0));
+
+  if(a.attacking == 3 && aspd > R) aspd = R;
   
-  if(R < aspd || std::isnan(R) || std::isnan(aspd) || R > 10) {
+  if((R < aspd || std::isnan(R) || std::isnan(aspd) || R > 10) && a.attacking != 3) {
     if(a.attacking == 1) { a.attacking = 2; goto again; }
     animations[layer].erase(c);
     return false;
     }
   else {
     hyperpoint wnow;
-    if(a.attacking == 1)
+    if(a.attacking == 1 || a.attacking == 3)
       wnow = tC0(z_inverse(a.wherenow) * a.attackat);
     else
       wnow = tC0(z_inverse(a.wherenow));
@@ -2382,6 +2384,11 @@ EX bool applyAnimation(cell *c, shiftmatrix& V, double& footphase, int layer) {
       }
     fixmatrix(a.wherenow);
     a.footphase += a.attacking == 2 ? -aspd : aspd;
+    if(a.attacking == 3 && aspd >= R) {
+      a.footphase = 0;
+      hyperpoint h1 = a.wherenow * C0;
+      a.wherenow = rgpushxto0(h1) * rspintox(h1);
+      }
     footphase = a.footphase;
     V = V * a.wherenow;
     if(a.mirrored) V = V * Mirror;
@@ -5327,7 +5334,7 @@ struct animation {
   int ltick;
   double footphase;
   transmatrix wherenow;
-  int attacking;
+  int attacking; /** 0 = no attack animation, 1 = first phase, 2 = second phase, 3 = hugging */
   transmatrix attackat;
   bool mirrored;
   };
@@ -5380,15 +5387,24 @@ EX void animateMovement(const movei& m, int layer) {
     a.mirrored = !a.mirrored;
   }
 
-EX void animateAttack(const movei& m, int layer) {
+EX void animateAttackOrHug(const movei& m, int layer, int phase, ld ratio, ld delta) {
   LATE( animateAttack(m, layer); )
   if(vid.mspeed >= 5) return; // no animations!
   transmatrix T = iadj(m);
   bool newanim = !animations[layer].count(m.s);
   animation& a = animations[layer][m.s];
-  a.attacking = 1;
-  a.attackat = rspintox(tC0(iso_inverse(T))) * xpush(hdist0(T*C0) / 3);
+  a.attacking = phase;
+  if(phase == 3) println(hlog, "distance = ", hdist0(T * C0));
+  a.attackat = rspintox(tC0(iso_inverse(T))) * xpush(hdist0(T*C0) * ratio + delta);
   if(newanim) a.wherenow = Id, a.ltick = ticks, a.footphase = 0;
+  }
+
+EX void animateAttack(const movei& m, int layer) {
+  animateAttackOrHug(m, layer, 1, 1/3., 0);
+  }
+
+EX void animateHug(const movei& m, int layer) {
+  animateAttackOrHug(m, layer, 3, 0.5, -0.0713828 * cgi.scalefactor);
   }
 
 vector<pair<cell*, animation> > animstack;

@@ -506,6 +506,7 @@ struct info {
   int bestnear;   // best dist achieved, by the player
   int value;      // number of Rugs at 120
   cell *princess; // where is the Princess currently
+  int together;   // in which turn have we been together -- for the hug animation
   };
     
 #endif
@@ -542,6 +543,7 @@ struct info {
     i->id = isize(infos);
     i->bestdist = 0;
     i->bestnear = OUT_OF_PRISON;
+    i->together = -INF;
     infos.push_back(i);
     assign(i);
     return i->id;
@@ -555,6 +557,7 @@ struct info {
     i->id = isize(infos);
     i->bestdist = items[itSavedPrincess] ? OUT_OF_PALACE : OUT_OF_PRISON;
     i->bestnear = 0;
+    i->together = -INF;
     infos.push_back(i);
     assign(i);
     }
@@ -673,7 +676,20 @@ struct info {
       changes.value_keep(*i);
       i->princess = ct;
       setdist(i, dist(ct));
-      // printf("newdist = %d (vs %d)\n", newdist, i->bestdist);
+
+      forCellIdEx(cp, j, ct) if(isPlayerOn(cp)) {
+        bool safe = true;
+        for(cell *test: {ct, cp}) forCellEx(c1, test) forCellEx(c2, test)
+          if(isActiveEnemy(c1, moPlayer) || isActiveEnemy(c2, moPlayer))
+            safe = false;
+        if(safe) {
+          if(turncount > i->together + 20) {
+            animateHug(movei(ct, j), LAYER_SMALL);
+            animateHug(movei(ct, j).rev(), LAYER_SMALL);
+            }
+          i->together = turncount;
+          }
+        }
       }
     }
 
