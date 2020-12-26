@@ -2455,8 +2455,11 @@ EX void livecaves() {
     else if(c->land == laLivefjord) {
       if(hv > 0 && c->wall == waStrandedBoat) c->wall = waBoat;
       if(hv > 0 && c->wall == waNone) {
-        if(c->item && c->cpdist == 1 && markOrb(itOrbWater))
+        if(c->item && c->cpdist == 1 && markOrb(itOrbWater)) {
+          bool saf = c->item == itOrbSafety;
           collectItem(c);
+          if(saf) return;
+          }
         c->wall = waSea;
         }
       if(hv < 0 && c->wall == waBoat) c->wall = waStrandedBoat;
