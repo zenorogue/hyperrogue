@@ -1215,7 +1215,11 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   // (0) telekinesis
   if(c->item && !itemHiddenFromSight(c) && !cwt.at->item && items[itOrbSpace] >= fixpower(spacedrain(c).first) && !cantGetGrimoire(c, !isCheck(a))
     && c->item != itBarrow) {
-    if(!isCheck(a)) telekinesis(c), apply_impact(c);
+    if(!isCheck(a)) {
+      bool saf = c->item == itOrbSafety;
+      telekinesis(c);
+      if(!saf) apply_impact(c);
+      }
     return itOrbSpace;
     }
   
