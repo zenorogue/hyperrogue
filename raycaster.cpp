@@ -119,16 +119,16 @@ EX bool requested() {
 
 #if HDR
 struct raycaster : glhr::GLprogram {
-  GLint uStart, uStartid, uM, uLength, uFovX, uFovY, uIPD, uShift;
+  GLint uStart, uStartid, uM, uLength, uIPD;
   GLint uWallstart, uWallX, uWallY;
   GLint tConnections, tWallcolor, tTextureMap, tVolumetric;
   GLint uBinaryWidth, uPLevel, uLP, uStraighten, uReflectX, uReflectY;
   GLint uLinearSightRange, uExpStart, uExpDecay;
   GLint uBLevel;
-  GLint uPosX, uPosY;
   GLint uWallOffset, uSides;
   GLint uITOA, uATOI;
   GLint uToOrig, uFromOrig;
+  GLint uProjection;
   
   raycaster(string vsh, string fsh);
   };
@@ -140,9 +140,7 @@ raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     uStartid = glGetUniformLocation(_program, "uStartid");
     uM = glGetUniformLocation(_program, "uM");
     uLength = glGetUniformLocation(_program, "uLength");
-    uFovX = glGetUniformLocation(_program, "uFovX");
-    uFovY = glGetUniformLocation(_program, "uFovY");
-    uShift = glGetUniformLocation(_program, "uShift");
+    uProjection = glGetUniformLocation(_program, "uProjection");
     uIPD = glGetUniformLocation(_program, "uIPD");
 
     uWallstart = glGetUniformLocation(_program, "uWallstart");
@@ -169,9 +167,6 @@ raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     
     uWallOffset = glGetUniformLocation(_program, "uWallOffset");
     uSides = glGetUniformLocation(_program, "uSides");
-    
-    uPosX = glGetUniformLocation(_program, "uPosX");
-    uPosY = glGetUniformLocation(_program, "uPosY");
     
     uITOA = glGetUniformLocation(_program, "uITOA");
     uATOI = glGetUniformLocation(_program, "uATOI");
@@ -243,16 +238,10 @@ void enable_raycaster() {
     
     string vsh = 
       "attribute mediump vec4 aPosition;\n"
-      "uniform mediump float uFovX, uFovY, uPosX, uPosY, uShift;\n"
+      "uniform mediump mat4 uProjection;\n"
       "varying mediump vec4 at;\n"
       "void main() { \n"
-      "  gl_Position = aPosition; at = aPosition; at.x += uShift;\n"
-      "  at[0] += uPosX; at[1] += uPosY;\n"
-  #if IN_ODS    
-      "  at[0] *= PI; at[1] *= PI; \n"
-  #else
-      "  at[0] *= uFovX; at[1] *= uFovY; \n"
-  #endif
+      "  gl_Position = aPosition; at = uProjection * aPosition; \n"
       "  }\n";
   
     irays = isize(cgi.raywall);
@@ -1345,16 +1334,15 @@ EX void cast() {
   if(vid.stereo_mode == sLR) d = 2 * d - 1;
   else d = -d;
 
-  glUniform1f(o->uShift, -global_projection * d);
-  
   auto& cd = current_display;
   cd->set_viewport(global_projection);
   cd->set_mask(global_projection);
-  glUniform1f(o->uFovX, cd->tanfov / (vid.stereo_mode == sLR ? 2 : 1));
-  glUniform1f(o->uFovY, cd->tanfov * cd->ysize / cd->xsize);
-
-  glUniform1f(o->uPosX, -((cd->xcenter-cd->xtop)*2./cd->xsize - 1));
-  glUniform1f(o->uPosY, -((cd->ycenter-cd->ytop)*2./cd->ysize - 1));
+  
+  transmatrix proj = Id;
+  proj = eupush(-global_projection * d, 0) * proj;
+  proj = euscale(cd->tanfov / (vid.stereo_mode == sLR ? 2 : 1), cd->tanfov * cd->ysize / cd->xsize) * proj;
+  proj = eupush(-((cd->xcenter-cd->xtop)*2./cd->xsize - 1), -((cd->ycenter-cd->ytop)*2./cd->ysize - 1)) * proj;
+  glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(proj).as_array());
   
   if(!callhandlers(false, hooks_rayset, o)) {
   
