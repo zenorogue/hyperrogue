@@ -528,7 +528,7 @@ struct info {
   
   EX int reviveAt;
   
-  vector<info*> infos;
+  EX vector<info*> infos;
   
   void assign(info *i) {
     if(i->alt) i->alt->emeraldval = i->id;
@@ -667,6 +667,7 @@ struct info {
       printf("Warning: unknown princess\n"); 
       if(!cheater) 
         addMessage("Warning: unknown princess (that's a bug, please report)");
+      newFakeInfo(ct);
       }
     else {
       changes.value_keep(*i);
