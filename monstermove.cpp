@@ -931,6 +931,8 @@ EX void ivynext(cell *c) {
   cell *c2 = c;
   while(true) {
     if(c2->monst == moIvyRoot) break;
+    if(!proper(c2, c2->mondir))
+      return; /* incorrect data */
     if(!isIvy(c2->monst)) break;
     if(c2->c.mirror(c2->mondir)) cw.mirrored = !cw.mirrored;
     c2 = c2->move(c2->mondir);
@@ -1031,6 +1033,7 @@ EX void moveivy() {
         mto->monst = moIvyHead; co->monst = moIvyBranch;
         }
       }
+    else if(!proper(co, co->mondir) || !co->move(co->mondir)) ; /* should not happen */
     else if(co->move(co->mondir)->monst != moIvyRoot) {
       // shrink useless branches, but do not remove them completely (at the root)
       if(co->monst == moIvyHead) co->move(co->mondir)->monst = moIvyHead;

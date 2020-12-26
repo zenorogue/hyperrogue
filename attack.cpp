@@ -761,7 +761,8 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
       drawBubble(c, 0xFFFF00, s.get_str(100), .5);
     if(m == moIvyBranch || m == moIvyHead || m == moIvyNext) {
       int qty = 0;
-      cell *c2 = c->move(c->mondir);
+      cell *c2 = proper(c, c->mondir) ? c->move(c->mondir) : nullptr;
+      if(!c2) c2 = c; /* should not happen */
       for(int i=0; i<c2->type; i++)
         if(c2->move(i)->monst == moIvyWait && c2->move(i)->mondir == c2->c.spin(i))
           qty++;
