@@ -77,7 +77,8 @@ bool need_many_cell_types() {
 /** is the raycaster available? */
 EX bool available() {
   #if CAP_VR
-  if(vrhr::state) return false; /* not implemented */
+  /* would need a completely different implementation */
+  if(vrhr::state && vrhr::eyes == vrhr::eEyes::equidistant) return false;
   #endif
   if(noGUI) return false;
   if(!vid.usingGL) return false;
@@ -1338,11 +1339,16 @@ EX void cast() {
   cd->set_viewport(global_projection);
   cd->set_mask(global_projection);
   
-  transmatrix proj = Id;
-  proj = eupush(-global_projection * d, 0) * proj;
-  proj = euscale(cd->tanfov / (vid.stereo_mode == sLR ? 2 : 1), cd->tanfov * cd->ysize / cd->xsize) * proj;
-  proj = eupush(-((cd->xcenter-cd->xtop)*2./cd->xsize - 1), -((cd->ycenter-cd->ytop)*2./cd->ysize - 1)) * proj;
-  glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(proj).as_array());
+  if(vrhr::state == 2) {
+    glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(vrhr::eyeproj).as_array());
+    }
+  else {
+    transmatrix proj = Id;
+    proj = eupush(-global_projection * d, 0) * proj;
+    proj = euscale(cd->tanfov / (vid.stereo_mode == sLR ? 2 : 1), cd->tanfov * cd->ysize / cd->xsize) * proj;
+    proj = eupush(-((cd->xcenter-cd->xtop)*2./cd->xsize - 1), -((cd->ycenter-cd->ytop)*2./cd->ysize - 1)) * proj;
+    glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(proj).as_array());
+    }
   
   if(!callhandlers(false, hooks_rayset, o)) {
   

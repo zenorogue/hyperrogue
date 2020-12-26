@@ -100,6 +100,8 @@ vr_framebuffer::vr_framebuffer(int xsize, int ysize) {
   rb.reset();
   }
 
+EX transmatrix eyeproj;
+
 vr_framebuffer::~vr_framebuffer() {
   glDeleteRenderbuffers( 1, &m_nDepthBufferId );
   glDeleteTextures( 1, &m_nRenderTextureId );
@@ -117,6 +119,7 @@ struct vrdata_t {
   uint32_t xsize, ysize;
   vr_framebuffer *eyes[2];
   transmatrix proj[2];
+  transmatrix iproj[2]; /* inverse of proj */
   transmatrix eyepos[2];
   vr::TrackedDevicePose_t poses[ vr::k_unMaxTrackedDeviceCount ];
   transmatrix pose_matrix[vr::k_unMaxTrackedDeviceCount ];
@@ -588,6 +591,8 @@ EX void start_vr() {
     vrdata.proj[a] = 
       vr_to_hr(vrdata.vr->GetProjectionMatrix(eye, 0.01, 300));
     
+    vrdata.iproj[a] = MirrorZ * inverse(vrdata.proj[a]);
+    
     println(hlog, "projection = ", vrdata.proj[a]);
     
     vrdata.eyepos[a] =
@@ -788,9 +793,10 @@ EX void render() {
           }
         hmd_mvp = vrdata.proj[i] * hmd_mvp;
         }
+      eyeproj = vrdata.iproj[i];
+      drawqueue();
       }
     
-    drawqueue();
     }
 
   rb.reset();
