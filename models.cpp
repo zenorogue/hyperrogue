@@ -120,7 +120,7 @@ EX namespace models {
   EX ld rotation_xy2 = 90;
   EX int do_rotate = 1;
   EX ld ocos, osin, ocos_yz, osin_yz;
-  EX ld cos_ball, sin_ball;
+  EX ld cos_ball, sin_ball, cos_vr, sin_vr;
   EX bool model_straight, model_straight_yz;
 
   #if HDR
@@ -132,6 +132,8 @@ EX namespace models {
   void apply_orientation_yz(A& x, A& y) { if(!model_straight_yz) tie(x,y) = make_pair(x*ocos_yz + y*osin_yz, y*ocos_yz - x*osin_yz); }
   template<class A>
   void apply_ball(A& x, A& y) { tie(x,y) = make_pair(x*cos_ball + y*sin_ball, y*cos_ball - x*sin_ball); }
+  template<class A>
+  void apply_vr(A& x, A& y) { tie(x,y) = make_pair(x*cos_vr + y*sin_vr, y*cos_vr - x*sin_vr); }
   #endif
 
   EX transmatrix rotmatrix() {
@@ -151,6 +153,8 @@ EX namespace models {
   EX void configure() {
     ld ball = -pconf.ballangle * degree;
     cos_ball = cos(ball), sin_ball = sin(ball);
+    ld vr = -pconf.vr_angle * degree;
+    cos_vr = cos(vr), sin_vr = sin(vr);
     ocos = cos(pconf.model_orientation * degree);
     osin = sin(pconf.model_orientation * degree);
     ocos_yz = cos(pconf.model_orientation_yz * degree);

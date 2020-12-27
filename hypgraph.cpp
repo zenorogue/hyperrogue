@@ -147,11 +147,15 @@ void ballmodel(hyperpoint& ret, double alpha, double d, double zl) {
   models::apply_ball(ret[2], ret[1]);
   }
 
+bool use_z_coordinate() {
+  return vrhr::state == 2 || current_display->stereo_active();
+  }
+
 void apply_depth(hyperpoint &f, ld z) {
   if(vid.usingGL)
-    f[2] = z;
+    f[2] = z * pconf.depth_scaling;
   else {
-    z = z * current_display->radius;
+    z = z * current_display->radius * pconf.depth_scaling;
     ld mul = current_display->radius / (current_display->radius + z);
     f[0] = f[0] * mul;
     f[1] = f[1] * mul;
@@ -245,7 +249,7 @@ template<class T> void makeband(shiftpoint H, hyperpoint& ret, const T& f) {
   move_y_to_z(ret, r);
   models::apply_orientation(ret[1], ret[0]);
   models::apply_orientation_yz(ret[2], ret[1]);
-  if(zlev != 1 && current_display->stereo_active()) 
+  if(zlev != 1 && use_z_coordinate()) 
     apply_depth(ret, yzf / M_PI);
   return;
   }
@@ -488,19 +492,22 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       H *= pconf.halfplane_scale;
       
       ret[0] = -models::osin - H[0];
+      ld height = 0;
       if(zlev != 1) {
         if(abs(models::ocos) > 1e-5)
-          H[1] = H[1] * pow(zlev, models::ocos);
+          height += H[1] * (pow(zlev, models::ocos) - 1);
         if(abs(models::ocos) > 1e-5 && models::osin)
-          H[1] += H[0] * models::osin * (pow(zlev, models::ocos) - 1) / models::ocos;
+          height += H[0] * models::osin * (pow(zlev, models::ocos) - 1) / models::ocos;
         else if(models::osin)
-          H[1] += H[0] * models::osin * log(zlev);
+          height += H[0] * models::osin * log(zlev);
         }
       ret[1] = models::ocos + H[1];
       ret[2] = GDIM == 3 ? H[2] : 0;
       if(MAXMDIM == 4) ret[3] = 1;
-      if(zlev != 1 && current_display->stereo_active()) 
-        apply_depth(ret, -H[1] * geom3::factor_to_lev(zlev));
+       if(zlev != 1 && use_z_coordinate())
+        apply_depth(ret, height);
+      else 
+        ret[1] += height * pconf.depth_scaling;
       break;
       }
     
@@ -603,6 +610,11 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
           ld zl = zlevel(H);
           ret = H / H[2];
           ret[2] = sqrt(1 - sqhypot_d(2, ret));
+          if(vrhr::state == 2) {
+            ret = ret * (1 + (1 - zl) * ret[2] * pconf.depth_scaling);
+            models::apply_vr(ret[2], ret[1]);
+            return;
+            }
           ret = ret * (1 + (zl - 1) * ret[2]);
           break;
           }
@@ -646,6 +658,19 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         ret = H;
         break;
         }
+
+      if(vrhr::state == 2) {
+        ret[0] = H[0] * pconf.hyperboloid_scaling;
+        ret[1] = H[1] * pconf.hyperboloid_scaling;
+        ret[2] = (pconf.alpha + H[2]);
+        if(pconf.depth_scaling != 1) {
+          ld v = intval(H, Hypc);
+          ret *= pow(v, (pconf.depth.scaling-1) / 2);
+          }
+        models::apply_vr(ret[2], ret[1]);
+        break;
+        }
+      
       if(pmodel == mdHyperboloid) {
         ld& topz = pconf.top_z;
         if(H[2] > topz) {
@@ -991,7 +1016,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       ret = H * (d * df / rad / M_PI);
       if(GDIM == 2) ret[2] = 0; 
       if(MAXMDIM == 4) ret[3] = 1;
-      if(zlev != 1 && current_display->stereo_active()) 
+      if(zlev != 1 && use_z_coordinate()) 
         apply_depth(ret, d * zf / M_PI);
       
       break;
@@ -1994,6 +2019,8 @@ EX color_t modelcolor = 0;
 #if CAP_QUEUE
 EX void draw_model_elements() {
 
+  if(vrhr::state && pmodel == mdHyperboloid) return;
+
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
   switch(pmodel) {
   
@@ -2127,6 +2154,7 @@ EX void draw_boundary(int w) {
 
   if(w == 1) return;
   if(nonisotropic || euclid || prod) return;
+  if(vrhr::state && pmodel == mdHyperboloid) return;
 
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
 

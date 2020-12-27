@@ -299,12 +299,12 @@ vector<pair<int, hyperpoint>> tofix;
 
 EX bool two_sided_model() {
   if(GDIM == 3) return false;
-  if(pmodel == mdHyperboloid) return !euclid;
+  if(pmodel == mdHyperboloid) return !euclid && vrhr::state != 2;
   // if(pmodel == mdHemisphere) return true;
   if(pmodel == mdDisk) return sphere;
   if(pmodel == mdRetroLittrow) return sphere;
   if(pmodel == mdRetroHammer) return sphere;
-  if(pmodel == mdHemisphere) return true;
+  if(pmodel == mdHemisphere) return vrhr::state != 2;
   if(pmodel == mdRotatedHyperboles) return true;
   if(pmodel == mdSpiral && pconf.spiral_cone < 360) return true;
   return false;
@@ -357,13 +357,18 @@ void fixpoint(glvertex& hscr, hyperpoint H) {
     }
   hyperpoint Hscr;
   applymodel(shiftless(good), Hscr); 
-  hscr = glhr::makevertex(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*pconf.stretch, Hscr[2]*current_display->radius); 
+  if(vrhr::state == 2) 
+    hscr = glhr::makevertex(Hscr[0], Hscr[1]*pconf.stretch, Hscr[2]); 
+  else
+    hscr = glhr::makevertex(Hscr[0]*current_display->radius, Hscr[1]*current_display->radius*pconf.stretch, Hscr[2]*current_display->radius); 
   }
 
 void addpoint(const shiftpoint& H) {
   if(true) {
     ld z = current_display->radius;
     // if(pconf.alpha + H[2] <= BEHIND_LIMIT && pmodel == mdDisk) poly_flags |= POLY_BEHIND;
+    
+    if(vrhr::state == 2) z = 1;
     
     if(spherespecial) {
       auto H0 = H.h;
@@ -405,7 +410,10 @@ void addpoint(const shiftpoint& H) {
         }
       Hlast = Hscr;
       }
-    if(GDIM == 2) {
+    if(vrhr::state == 2) {
+      for(int i=0; i<3; i++) Hscr[i] *= z;
+      }
+    else if(GDIM == 2) {
       for(int i=0; i<3; i++) Hscr[i] *= z;
       Hscr[1] *= pconf.stretch;
       }
