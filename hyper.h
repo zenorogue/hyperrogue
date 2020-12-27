@@ -258,6 +258,10 @@ struct projection_configuration {
   ld skiprope;
   ld product_z_scale;
   ld rotational_nil;
+  
+  ld depth_scaling;
+  ld hyperboloid_scaling;
+  ld vr_angle, vr_zshift, vr_scale_factor;
 
   projection_configuration() { 
     formula = "z^2"; top_z = 5; model_transition = 1; spiral_angle = 70; spiral_x = 10; spiral_y = 7; 
@@ -273,6 +277,11 @@ struct projection_configuration {
     loximuthal_parameter = 0;
     winkel_parameter = .5;
     show_hyperboloid_flat = true;
+    depth_scaling = 1;
+    vr_angle = 0;
+    hyperboloid_scaling = 1;
+    vr_zshift = 0;
+    vr_scale_factor = 1;
     }
   };
 

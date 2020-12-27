@@ -387,9 +387,6 @@ EX void vr_shift() {
 
 EX ld absolute_unit_in_meters = 3;
 
-EX ld vr_scale_factor = 2;
-EX ld vr_zshift = 0;
-
 void move_according_to(vr::ETrackedControllerRole role, bool last, bool cur) {
   if(!last && !cur) return;
   int id = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole(role);
@@ -753,7 +750,7 @@ EX void render() {
     
     transmatrix mu;
     bool pers = in_perspective();
-    ld sca = pers ? absolute_unit_in_meters : vr_scale_factor;
+    ld sca = pers ? absolute_unit_in_meters : pconf.vr_scale_factor;
     for(int i=0; i<4; i++)
     for(int j=0; j<4; j++)
       mu[i][j] = i!=j ? 0 : i==3 ? 1 : sca;
@@ -795,7 +792,7 @@ EX void render() {
           hmd_mvp = NLP * hmd_mvp;          
           }
         hmd_mvp = sm * hmd_mvp;
-        if(vr_zshift) hmd_mvp = euclidean_translate(0, 0, -vr_zshift) * hmd_mvp;
+        if(pconf.vr_zshift) hmd_mvp = euclidean_translate(0, 0, -pconf.vr_zshift) * hmd_mvp;
         hmd_mvp = mu * hmd_mvp;
         if(hsm == eHeadset::model_viewing) {
           hmd_mvp = sm * hmd_at * inverse(hmd_ref_at) * sm * hmd_mvp;
@@ -917,11 +914,11 @@ int readArgs() {
     }
   else if(argis("-vr-scale")) {
     PHASEFROM(2);
-    shift_arg_formula(vr_scale_factor);
+    shift_arg_formula(pconf.vr_scale_factor);
     }
   else if(argis("-vr-z")) {
     PHASEFROM(2);
-    shift_arg_formula(vr_zshift);
+    shift_arg_formula(pconf.vr_zshift);
     }
   else if(argis("-d:vr")) {
     PHASEFROM(2); launch_dialog(show_vr_settings);
