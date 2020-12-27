@@ -179,8 +179,10 @@ bool hypot_zlev(ld zlev, ld& d, ld& df, ld& zf) {
 
     if(d > 0)
       d = hypot_auto(d, z);
-    else
-      d = -hypot_auto(d, z);
+    else {
+      d = -hypot_auto(-d, z);
+      zf = -zf;
+      }
     return true;
     }
   }
