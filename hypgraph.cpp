@@ -148,7 +148,10 @@ void ballmodel(hyperpoint& ret, double alpha, double d, double zl) {
   }
 
 bool use_z_coordinate() {
-  return vrhr::state == 2 || current_display->stereo_active();
+  #if CAP_VR
+  if(vrhr::state == 2) return true;
+  #endif
+  return current_display->stereo_active();
   }
 
 void apply_depth(hyperpoint &f, ld z) {
@@ -612,12 +615,13 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
           ld zl = zlevel(H);
           ret = H / H[2];
           ret[2] = sqrt(1 - sqhypot_d(2, ret));
-          if(vrhr::state == 2) {
-            ret = ret * (1 + (1 - zl) * ret[2] * pconf.depth_scaling);
-            models::apply_vr(ret[2], ret[1]);
-            return;
-            }
-          ret = ret * (1 + (zl - 1) * ret[2]);
+          // need to reverse in VR
+          #if CAP_VR
+          ld dir = vrhr::state == 2 ? -1:1;
+          #else
+          constexpr ld dir = 1;
+          #endif          
+          ret = ret * (1 + (zl - 1) * ret[2] * pconf.depth_scaling * dir);
           break;
           }
           
@@ -630,16 +634,27 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
             ld y = x / hd;
             ret = H * x / hd / pconf.euclid_to_sphere;
             ret[2] = (1 - y);
-            ret = ret * (1 + (H[2]-1) * y / pconf.euclid_to_sphere);
+            ret = ret * (1 + (H[2]-1) * y * pconf.depth_scaling / pconf.euclid_to_sphere);
             }
           break;
           }
         
         case gcSphere: {
           ret = H;
+          if(pconf.depth_scaling != 1) {
+            ld v = intval(H, Hypc);
+            ret *= pow(v, (pconf.depth_scaling-1) / 2);
+            }
           break;
           }
         }
+
+      #if CAP_VR
+      if(vrhr::state == 2) {
+        models::apply_vr(ret[2], ret[1]);
+        return;
+        }
+      #endif
       
       swap(ret[1], ret[2]);
       
@@ -661,18 +676,25 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         break;
         }
 
+      #if CAP_VR
       if(vrhr::state == 2) {
         ret[0] = H[0] * pconf.hyperboloid_scaling;
         ret[1] = H[1] * pconf.hyperboloid_scaling;
         ret[2] = (pconf.alpha + H[2]);
         if(pconf.depth_scaling != 1) {
           ld v = intval(H, Hypc);
-          ret *= pow(v, (pconf.depth.scaling-1) / 2);
+          ret *= pow(v, (pconf.depth_scaling-1) / 2);
           }
         models::apply_vr(ret[2], ret[1]);
         break;
         }
+      #endif
       
+      if(pconf.depth_scaling != 1) {
+        ld v = intval(H, Hypc);
+        H *= pow(v, (pconf.depth_scaling-1) / 2);
+        }
+
       if(pmodel == mdHyperboloid) {
         ld& topz = pconf.top_z;
         if(H[2] > topz) {
@@ -2021,7 +2043,9 @@ EX color_t modelcolor = 0;
 #if CAP_QUEUE
 EX void draw_model_elements() {
 
+  #if CAP_VR
   if(vrhr::state && pmodel == mdHyperboloid) return;
+  #endif
 
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
   switch(pmodel) {
@@ -2156,7 +2180,9 @@ EX void draw_boundary(int w) {
 
   if(w == 1) return;
   if(nonisotropic || euclid || prod) return;
+  #if CAP_VR
   if(vrhr::state && pmodel == mdHyperboloid) return;
+  #endif
 
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
 

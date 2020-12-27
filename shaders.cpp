@@ -292,9 +292,11 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     if(dim3) shader_flags |= SF_ZFOG;
     }
   
+  #if CAP_VR
   /* no z-fog in VR */
   if((shader_flags & SF_ZFOG) && vrhr::state == 2)
     shader_flags &= ~SF_ZFOG;
+  #endif
 
   if(nil && pmodel == mdPerspective)  {
     vsh += "uniform mediump float uRotCos, uRotSin, uRotNil;\n";

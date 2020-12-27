@@ -1339,9 +1339,13 @@ EX void cast() {
   cd->set_viewport(global_projection);
   cd->set_mask(global_projection);
   
+  #if CAP_VR
   if(vrhr::state == 2) {
     glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(vrhr::eyeproj).as_array());
     }
+  #else
+  if(1) ;
+  #endif
   else {
     transmatrix proj = Id;
     proj = eupush(-global_projection * d, 0) * proj;
