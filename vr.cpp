@@ -721,12 +721,6 @@ EX void render() {
   resetbuffer rb;
   state = 2;
   
-  if(GDIM == 2) {
-    state = 3;
-    drawqueue();
-    return;
-    }
-  
   // eyes = lshiftclick ? eEyes::truesim : eEyes::equidistant;
   
   // cscr = lshiftclick ? eCompScreen::eyes : eCompScreen::single;
