@@ -685,7 +685,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         ret[2] = (pconf.alpha + H[2]);
         if(pconf.depth_scaling != 1) {
           ld v = intval(H, Hypc);
-          ret *= pow(v, (pconf.depth_scaling-1) / 2);
+          ret *= pow(v, (pconf.depth_scaling*(sphere?-1:1)-1) / 2);
           }
         models::apply_vr(ret[2], ret[1]);
         break;
