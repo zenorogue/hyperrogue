@@ -610,17 +610,18 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
     
     case mdHemisphere: {
   
+      #if CAP_VR
+      ld dir = vrhr::state == 2 ? -1:1;
+      #else
+      constexpr ld dir = 1;
+      #endif          
+
       switch(cgclass) {
         case gcHyperbolic: {
           ld zl = zlevel(H);
           ret = H / H[2];
           ret[2] = sqrt(1 - sqhypot_d(2, ret));
           // need to reverse in VR
-          #if CAP_VR
-          ld dir = vrhr::state == 2 ? -1:1;
-          #else
-          constexpr ld dir = 1;
-          #endif          
           ret = ret * (1 + (zl - 1) * ret[2] * pconf.depth_scaling * dir);
           break;
           }
@@ -634,7 +635,8 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
             ld y = x / hd;
             ret = H * x / hd / pconf.euclid_to_sphere;
             ret[2] = (1 - y);
-            ret = ret * (1 + (H[2]-1) * y * pconf.depth_scaling / pconf.euclid_to_sphere);
+            ret[2] *= dir;
+            ret = ret * (1 + (H[2]-1) * y * pconf.depth_scaling * dir / pconf.euclid_to_sphere);
             }
           break;
           }
@@ -643,7 +645,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
           ret = H;
           if(pconf.depth_scaling != 1) {
             ld v = intval(H, Hypc);
-            ret *= pow(v, (pconf.depth_scaling-1) / 2);
+            ret *= pow(v, (dir * pconf.depth_scaling-1) / 2);
             }
           break;
           }
