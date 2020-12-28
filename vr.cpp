@@ -914,6 +914,10 @@ int readArgs() {
     PHASEFROM(2);
     shift_arg_formula(pconf.vr_zshift);
     }
+  else if(argis("-vr-angle")) {
+    PHASEFROM(2);
+    shift_arg_formula(pconf.vr_angle);
+    }
   else if(argis("-d:vr")) {
     PHASEFROM(2); launch_dialog(show_vr_settings);
     }

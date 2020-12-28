@@ -816,6 +816,18 @@ EX namespace models {
       PHASEFROM(2); 
       shift_arg_formula(vpconf.model_orientation);
       }
+    else if(argis("-mets")) { 
+      PHASEFROM(2); 
+      shift_arg_formula(vpconf.euclid_to_sphere);
+      }
+    else if(argis("-mhyp")) { 
+      PHASEFROM(2); 
+      shift_arg_formula(vpconf.hyperboloid_scaling);
+      }
+    else if(argis("-mdepth")) { 
+      PHASEFROM(2); 
+      shift_arg_formula(vpconf.depth_scaling);
+      }
     else if(argis("-mnil")) { 
       PHASEFROM(2); 
       shift_arg_formula(vpconf.rotational_nil);
