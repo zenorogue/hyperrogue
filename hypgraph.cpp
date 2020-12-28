@@ -411,7 +411,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
     case mdBall: {
       ld zlev = find_zlev(H);
       
-      ld zl = vid.depth-geom3::factor_to_lev(zlev);
+      ld zl = vid.depth-geom3::factor_to_lev(zlev) * pconf.depth_scaling;
   
       ballmodel(ret, atan2(H), hdist0(H), zl);
       break;      
@@ -433,6 +433,25 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         for(int i=0; i<3; i++) ret[i] *= w;
         ret[3] = 1; 
         break;
+        }
+      if(vrhr::state == 2) {
+        ld zlev = find_zlev(H);
+        ld zl = vid.depth-geom3::factor_to_lev(zlev) * pconf.depth_scaling;
+
+        ld d = hdist0(H);
+        ld dd = hypot_d(2, H);
+
+        hyperpoint H1 = ypush(vid.camera) * xpush(d) * ypush0(zl);
+        ld tzh = pconf.alpha + H1[2];
+        ld ax = H1[0] / tzh;
+        ld ay = H1[1] / tzh;
+  
+        ret[0] = ax * H[0] / dd;
+        ret[1] = ax * H[1] / dd;
+        ret[2] = ay;
+        
+        models::apply_vr(ret[2], ret[1]);
+        return;
         }
       ld tz = get_tz(H);
       if(!pconf.camera_angle) {

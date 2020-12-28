@@ -155,6 +155,35 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     }
   else if(!vid.consider_shader_projection) {
     shader_flags |= SF_PIXELS;
+    }        
+  else if(among(pmodel, mdDisk, mdBall) && GDIM == 2 && vrhr::state == 2 && !sphere) {
+    shader_flags |= SF_DIRECT | SF_BOX;
+    vsh += "uniform mediump float uAlpha, uDepth, uDepthScaling, uCamera;";
+    
+    if(hyperbolic) coordinator += 
+      "float zlev = sqrt(t.z*t.z-t.x*t.x-t.y*t.y);\n"
+      "float zl = uDepth - uDepthScaling * (uDepth - atanh(tanh(uDepth)/zlev));\n"
+      "float dd = sqrt(t.x*t.x+t.y*t.y);\n"
+      "float d  = acosh(t.z/zlev);\n"
+      "float uz = uAlpha + cosh(zl) * cosh(d) * cosh(uCamera) + sinh(zl) * sinh(uCamera);\n"
+      "float ux = cosh(zl) * sinh(d) / uz;\n"      
+      "t.xy = ux * t.xy / dd;\n"
+      "t.z = (sinh(zl) * cosh(uCamera) + sinh(uCamera) * cosh(zl) * cosh(d)) / uz;\n"
+      ;
+    
+    else if(euclid) coordinator +=
+      "t.z = uDepth * (1. - (t.z - 1.) * uDepthScaling) + uAlpha + uCamera;\n";
+
+    else if(sphere) coordinator += 
+      "float zlev = sqrt(t.z*t.z+t.x*t.x+t.y*t.y);\n"
+      "float zl = uDepth - uDepthScaling * (uDepth - atan(tan(uDepth)/zlev));\n"
+      "float dd = sqrt(t.x*t.x+t.y*t.y);\n"
+      "float d  = acos(t.z/zlev);\n"
+      "float uz = uAlpha + cos(zl) * cos(d) * cos(uCamera) + sin(zl) * sin(uCamera);\n"
+      "float ux = cos(zl) * sin(d) / uz;\n"
+      "t.xy = ux * t.xy / dd;\n"
+      "t.z = (sin(uCamera) * cos(zl) * cos(d) - sin(zl) * cos(uCamera)) / uz;\n"
+      ;
     }
   else if(pmodel == mdDisk && MDIM == 3 && !spherespecial && !prod) {
     shader_flags |= SF_DIRECT;
@@ -614,6 +643,15 @@ void display_data::set_projection(int ed, ld shift) {
   
   if(selected->uAlpha != -1)
     glhr::set_ualpha(pconf.alpha);
+
+  if(selected->uDepth != -1)
+    glUniform1f(selected->uDepth, vid.depth);
+
+  if(selected->uCamera != -1)
+    glUniform1f(selected->uCamera, vid.camera);
+
+  if(selected->uDepthScaling != -1)
+    glUniform1f(selected->uDepthScaling, pconf.depth_scaling);
 
   if(selected->uLevelLines != -1) {
     glUniform1f(selected->uLevelLines, levellines);
