@@ -238,7 +238,7 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
   
   if(it == itOrbSlaying && !among(l, 
     laMirror, laHell, laEmerald, laDryForest, laCamelot, laPalace, laStorms, laRose, laTortoise, laBurial, laDungeon, laReptile, 
-    laPrairie, laBull, laVolcano, laTerracotta, laRuins, laVariant))
+    laPrairie, laBull, laVolcano, laTerracotta, laRuins, laVariant, laEclectic, laBrownian))
     return olrUseless;
   
   if(it == itOrbYendor && among(l, laWhirlwind, laWestWall)) return olrUseless;
