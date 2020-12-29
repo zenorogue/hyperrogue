@@ -161,6 +161,9 @@ EX unsigned char& part(color_t& col, int i) {
 #endif
   }
 
+bool in_vr_sphere;
+hyperpoint vr_sphere_center;
+
 bool fatborder;
 
 EX color_t poly_outline;
@@ -277,6 +280,7 @@ int axial_sign() {
 
 bool is_behind(const hyperpoint& H) {
   if(pmodel == mdAxial && sphere) return axial_sign() * H[2] <= BEHIND_LIMIT;
+  if(in_vr_sphere) return false;
   return pmodel == mdDisk && (hyperbolic ? H[2] >= 0 : true) && (nonisotropic ? false : pconf.alpha + H[2] <= BEHIND_LIMIT);
   }
 
@@ -304,6 +308,7 @@ EX bool two_sided_model() {
   constexpr bool in_vr = false;
   #endif
   if(GDIM == 3) return false;
+  if(in_vr_sphere) return true;
   if(pmodel == mdHyperboloid) return !euclid && !in_vr;
   // if(pmodel == mdHemisphere) return true;
   if(pmodel == mdDisk) return sphere;
@@ -316,6 +321,16 @@ EX bool two_sided_model() {
   }
 
 EX int get_side(const hyperpoint& H) {
+  if(in_vr_sphere) {
+    hyperpoint Hscr;
+    applymodel(shiftless(H), Hscr);
+    Hscr[3] = 1;
+    E4;
+    hyperpoint actual = vrhr::hmd_mv * Hscr;
+    ld val = 0;
+    for(int i=0; i<3; i++) val += (vr_sphere_center[i] - actual[i]) * actual[i];
+    return val > 0 ? -1 : 1;
+    }
   if(pmodel == mdDisk && sphere) {
     double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
     double horizon = curnorm / pconf.alpha;
@@ -951,7 +966,10 @@ void compute_side_by_centerin(dqi_poly *p, bool& nofill) {
     else
       nofill = true; 
     }
-  applymodel(h1, hscr); hscr[0] *= current_display->radius; hscr[1] *= current_display->radius * pconf.stretch;
+  applymodel(h1, hscr);
+  if(vrhr::state != 2) {
+    hscr[0] *= current_display->radius; hscr[1] *= current_display->radius * pconf.stretch;
+    }
   for(int i=0; i<isize(glcoords)-1; i++) {
     double x1 = glcoords[i][0] - hscr[0];
     double y1 = glcoords[i][1] - hscr[1];
@@ -1836,6 +1854,7 @@ void dqi_poly::draw() {
   
   bool can_have_inverse = false;  
   if(sphere && pmodel == mdDisk && (spherespecial > 0 || equi)) can_have_inverse = true;
+  if(vrhr::state == 2) can_have_inverse = false;
   if(sphere && among(pmodel, mdEquidistant, mdEquiarea)) can_have_inverse = true;
   if(pmodel == mdJoukowsky) can_have_inverse = true;
   if(pmodel == mdJoukowskyInverted && pconf.skiprope) can_have_inverse = true;
@@ -2234,6 +2253,21 @@ EX void reverse_transparent_walls() {
 
 EX void draw_main() {
   DEBBI(DF_GRAPH, ("draw_main"));
+  
+  in_vr_sphere = false;
+  #if CAP_VR
+  in_vr_sphere = vrhr::state == 2 && among(pmodel, mdDisk, mdBall, mdHyperboloid, mdHalfplane, mdHemisphere);
+  if(in_vr_sphere) {
+    hyperpoint a, b;
+    applymodel(shiftless(point3(0, 0, 1)), a);
+    applymodel(shiftless(point3(0, 0, -1)), b);
+    vr_sphere_center = (a + b) / 2;
+    vr_sphere_center[3] = 1; 
+    E4;
+    vr_sphere_center = vrhr::hmd_mv * vr_sphere_center;
+    }
+  #endif
+  
   if(sphere && GDIM == 3 && pmodel == mdPerspective && !stretch::in() && !ray::in_use) {
 
     if(ray::in_use && !ray::comparison_mode) {

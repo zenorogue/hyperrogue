@@ -143,8 +143,10 @@ EX string error_msg;
 /** 0 = not loaded, 1 = loaded but not currently rendering, 2 = currently rendering the VR screen, 3 = currently rendering the computer screen */
 EX int state = 0;
 
+#if HDR
 // use E4 when working with real-world matrices to ensure that inverses, multiplications, etc. are computed correctly
 #define E4 dynamicval<eGeometry> g(geometry, gCubeTiling)
+#endif
 
 #define IN_E4(x) [&]{ E4; return x; }()
 
@@ -198,7 +200,7 @@ EX bool first = true;
 EX transmatrix hmd_at = Id;
 EX transmatrix hmd_ref_at = Id;
 
-EX transmatrix hmd_mvp, hmd_pre;
+EX transmatrix hmd_mvp, hmd_pre, hmd_mv;
 
 EX transmatrix sm;
 
@@ -794,6 +796,7 @@ EX void render() {
         if(eyes == eEyes::equidistant) {
           hmd_mvp = inverse(vrdata.eyepos[i]) * hmd_mvp;
           }
+        hmd_mv = hmd_mvp;
         hmd_mvp = vrdata.proj[i] * hmd_mvp;
         }
       eyeproj = vrdata.iproj[i];

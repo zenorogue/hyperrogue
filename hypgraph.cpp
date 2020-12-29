@@ -376,6 +376,49 @@ EX void applymodel(shiftpoint H_orig, hyperpoint& ret) {
   apply_other_model(H_orig, ret, pmodel);
   }
 
+EX void vr_sphere(hyperpoint& ret, hyperpoint& H, eModel md) {
+  ret = H;
+  int flip = 1;
+  if(md == mdHalfplane) flip = -flip;
+  if(pconf.alpha < 1) flip = -flip;  
+  ret *= pow(sqhypot_d(3, H), (flip * pconf.depth_scaling-1) / 2);
+  ret[2] += pconf.alpha;
+  if(md == mdHalfplane) {
+    ld d = sqhypot_d(3, ret);
+    ret /= abs(d);
+    }
+  models::apply_vr(ret[2], ret[1]);
+  }
+
+void vr_disk(hyperpoint& ret, hyperpoint& H) {
+  if(euclid) {
+    ret = H;
+    ret[2] = vid.depth * (1 - (ret[2] - 1) * pconf.depth_scaling) + pconf.alpha + vid.camera;    
+    }
+  else if(sphere) {
+    vr_sphere(ret, H, mdDisk);
+    return;
+    }    
+  else {
+    ld zlev = find_zlev(H);
+    ld zl = vid.depth-geom3::factor_to_lev(zlev) * pconf.depth_scaling;
+  
+    ld d = hdist0(H);
+    ld dd = hypot_d(2, H);
+  
+    hyperpoint H1 = ypush(vid.camera) * xpush(d) * ypush0(zl);
+    ld tzh = pconf.alpha + H1[2];
+    ld ax = H1[0] / tzh;
+    ld ay = H1[1] / tzh;
+  
+    ret[0] = ax * H[0] / dd;
+    ret[1] = ax * H[1] / dd;
+    ret[2] = ay;
+    }
+  
+  models::apply_vr(ret[2], ret[1]);
+  }
+
 EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
 
   hyperpoint H = H_orig.h;
@@ -409,6 +452,10 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       return; 
     
     case mdBall: {
+      if(vrhr::state == 2) {
+        vr_disk(ret, H);
+        return;
+        }
       ld zlev = find_zlev(H);
       
       ld zl = vid.depth-geom3::factor_to_lev(zlev) * pconf.depth_scaling;
@@ -435,22 +482,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         break;
         }
       if(vrhr::state == 2) {
-        ld zlev = find_zlev(H);
-        ld zl = vid.depth-geom3::factor_to_lev(zlev) * pconf.depth_scaling;
-
-        ld d = hdist0(H);
-        ld dd = hypot_d(2, H);
-
-        hyperpoint H1 = ypush(vid.camera) * xpush(d) * ypush0(zl);
-        ld tzh = pconf.alpha + H1[2];
-        ld ax = H1[0] / tzh;
-        ld ay = H1[1] / tzh;
-  
-        ret[0] = ax * H[0] / dd;
-        ret[1] = ax * H[1] / dd;
-        ret[2] = ay;
-        
-        models::apply_vr(ret[2], ret[1]);
+        vr_disk(ret, H);
         return;
         }
       ld tz = get_tz(H);
@@ -486,6 +518,10 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       }
     
     case mdHalfplane: {
+      if(sphere && vrhr::state == 2) {
+        vr_sphere(ret, H, md);
+        return;
+        }
       // Poincare to half-plane
       
       ld zlev = find_zlev(H);
@@ -661,6 +697,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
           }
         
         case gcSphere: {
+          if(vrhr::state == 2) { vr_sphere(ret, H, md); return; }
           ret = H;
           if(pconf.depth_scaling != 1) {
             ld v = intval(H, Hypc);
@@ -699,12 +736,13 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
 
       #if CAP_VR
       if(vrhr::state == 2) {
+        if(sphere) { vr_sphere(ret, H, md); return; }
         ret[0] = H[0] * pconf.hyperboloid_scaling;
         ret[1] = H[1] * pconf.hyperboloid_scaling;
         ret[2] = (pconf.alpha + H[2]);
         if(pconf.depth_scaling != 1) {
           ld v = intval(H, Hypc);
-          ret *= pow(v, (pconf.depth_scaling*(sphere?-1:1)-1) / 2);
+          ret *= pow(v, (pconf.depth_scaling-1) / 2);
           }
         models::apply_vr(ret[2], ret[1]);
         break;
