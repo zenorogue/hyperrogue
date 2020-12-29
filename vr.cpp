@@ -394,18 +394,45 @@ void move_according_to(vr::ETrackedControllerRole role, bool last, bool cur) {
   int id = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole(role);
   if(id >= 0 && id < int(vr::k_unMaxTrackedDeviceCount)) {
     hyperpoint h;
-    if(true) {
+    if(in_perspective_v()) {
       E4;
       transmatrix T = (hsm == eHeadset::none ? hmd_at : hmd_ref_at) * vrdata.pose_matrix[id] * sm;
       vrhr::be_33(T);
       h = T * point31(0, 0, -0.01);
+      if(last && !cur)
+        movevrdir(h);
+      else {
+        movedir md = vectodir(h);
+        cellwalker xc = cwt + md.d + wstep;
+        forward_cell = xc.at;
+        }
       }
-    if(last && !cur)
-      movevrdir(h);
     else {
-      movedir md = vectodir(h);
-      cellwalker xc = cwt + md.d + wstep;
-      forward_cell = xc.at;
+      gen_mv();
+      forward_cell = nullptr;
+      ld best = 1e9;
+      dynamicval<int> dvs (vrhr::state, 2);
+      for(auto p: current_display->all_drawn_copies) {
+        for(auto& V: p.second) {
+          hyperpoint hscr;
+          applymodel(V*C0, hscr);
+          bool changed = false;
+          if(1) {
+            E4; hscr[3] = 1;
+            hyperpoint h = inverse(sm * hmd_at * vrdata.pose_matrix[id] * sm) * hmd_mv * hscr;
+
+            if(h[2] > 0.1) continue;
+            ld d = sqhypot_d(2, h);
+            if(d < best) best = d, forward_cell = p.first, changed = true;
+            }
+          if(changed) mouseh = V * C0;
+          }
+        }
+      if(forward_cell && last && !cur) {
+        calcMousedest();
+        if(!canmove) movepcto(mousedest), remission(); else movepcto(mousedest);
+        forward_cell = nullptr;
+        }
       }
     }
   }
@@ -718,6 +745,32 @@ EX void draw_eyes() {
     }
   }
 
+EX void gen_mv() {
+  transmatrix mu;
+  bool pers = in_perspective();
+  ld sca = pers ? absolute_unit_in_meters : pconf.vr_scale_factor;
+  for(int i=0; i<4; i++)
+  for(int j=0; j<4; j++)
+    mu[i][j] = i!=j ? 0 : i==3 ? 1 : sca;
+  if(!pers) mu[1][1] *= pconf.stretch;
+
+  hmd_mv = Id;
+  bool nlpu = nisot::local_perspective_used();
+  if(1) {
+    E4;
+    if(nlpu) {
+      be_33(NLP);
+      hmd_mv = NLP * hmd_mv;          
+      }
+    hmd_mv = sm * hmd_mv;
+    if(pconf.vr_zshift) hmd_mv = euclidean_translate(0, 0, -pconf.vr_zshift) * hmd_mv;
+    hmd_mv = mu * hmd_mv;
+    if(hsm == eHeadset::model_viewing) {
+      hmd_mv = sm * hmd_at * inverse(hmd_ref_at) * sm * hmd_mv;
+      }
+    }
+  }
+
 EX void render() {
 
   resetbuffer rb;
@@ -744,14 +797,6 @@ EX void render() {
 
     calcparam();
     
-    transmatrix mu;
-    bool pers = in_perspective();
-    ld sca = pers ? absolute_unit_in_meters : pconf.vr_scale_factor;
-    for(int i=0; i<4; i++)
-    for(int j=0; j<4; j++)
-      mu[i][j] = i!=j ? 0 : i==3 ? 1 : sca;
-    if(!pers) mu[1][1] *= pconf.stretch;
-
     if(1) {
       make_actual_view();
       shiftmatrix Tv = cview();
@@ -779,27 +824,17 @@ EX void render() {
       // View * inverse(Tv.T);
       // inverse(inverse_shift(cview(), Tv));
       
-      hmd_mvp = Id;
-      bool nlpu = nisot::local_perspective_used();
       if(1) {
+        gen_mv();
         E4;
-        if(nlpu) {
-          be_33(NLP);
-          hmd_mvp = NLP * hmd_mvp;          
+        if(eyes == eEyes::equidistant) {        
+          hmd_mv = inverse(vrdata.eyepos[i]) * hmd_mv;
           }
-        hmd_mvp = sm * hmd_mvp;
-        if(pconf.vr_zshift) hmd_mvp = euclidean_translate(0, 0, -pconf.vr_zshift) * hmd_mvp;
-        hmd_mvp = mu * hmd_mvp;
-        if(hsm == eHeadset::model_viewing) {
-          hmd_mvp = sm * hmd_at * inverse(hmd_ref_at) * sm * hmd_mvp;
-          }
-        if(eyes == eEyes::equidistant) {
-          hmd_mvp = inverse(vrdata.eyepos[i]) * hmd_mvp;
-          }
-        hmd_mv = hmd_mvp;
-        hmd_mvp = vrdata.proj[i] * hmd_mvp;
+        hmd_mvp = vrdata.proj[i] * hmd_mv;
         }
+
       eyeproj = vrdata.iproj[i];
+      
       drawqueue();
       }
     

@@ -4243,7 +4243,12 @@ EX void drawMarkers() {
   
     #if CAP_QUEUE        
     if(lmouseover && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON && WDIM == 2) {
-      queuecircleat(lmouseover, .8, darkena(lmouseover->cpdist > 1 ? 0x00FFFF : 0xFF0000, 0, 0xFF));
+      cell *at = lmouseover;
+      #if CAP_VR
+      if(vrhr::state == 2 && vrhr::forward_cell)
+        at = vrhr::forward_cell;
+      #endif
+      queuecircleat(at, .8, darkena(lmouseover->cpdist > 1 ? 0x00FFFF : 0xFF0000, 0, 0xFF));
       }
 
     if(global_pushto && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON && WDIM == 2) {
