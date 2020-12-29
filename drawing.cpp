@@ -1863,7 +1863,7 @@ void dqi_poly::draw() {
   else poly_flags &=~ POLY_INVERSE;
   
   if(spherespecial) {
-    if(!hiliteclick && !(poly_flags & POLY_INFRONT)) return;
+    if(!(poly_flags & POLY_INFRONT)) return;
     }
     
   int lastl = 0;
