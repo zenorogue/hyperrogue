@@ -12,7 +12,7 @@ hyperpoint ghxy, ghgxy;
 shiftpoint ghpm = shiftless(C02);
 
 #if HDR
-inline bool sphereflipped() { return sphere && pconf.alpha > 1.1 && GDIM == 3; }
+inline bool sphereflipped() { return sphere && pconf.alpha > 1.1; }
 #endif
 
 void ghcheck(hyperpoint &ret, const shiftpoint &H) {
