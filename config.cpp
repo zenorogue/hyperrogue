@@ -2690,6 +2690,10 @@ EX int read_config_args() {
     PHASEFROM(2);
     shift(); neon_mode = eNeon(argi());
     }
+  else if(argis("-dmc")) {
+    PHASEFROM(2);
+    shift(); vid.drawmousecircle = argi();
+    }
   else if(argis("-smooths")) {
     PHASEFROM(2);
     shift(); smooth_scrolling = argi();
