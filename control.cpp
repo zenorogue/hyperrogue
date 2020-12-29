@@ -786,10 +786,25 @@ EX void mainloopiter() {
     rug::using_rugview urv;
     dynamicval<bool> ds(didsomething, didsomething);
     using namespace vrhr;
-    if(vraim_x) full_rotate_camera(0, -vraim_x / 20);
-    if(vraim_y) full_rotate_camera(1, vraim_y / 20);
-    if(vrgo_y) full_forward_camera(-vrgo_y / 20);
-    if(vrgo_x) full_strafe_camera(-vrgo_x / 20);
+    if(in_perspective_v()) {
+      if(vraim_x) full_rotate_camera(0, -vraim_x / 20);
+      if(vraim_y) full_rotate_camera(1, vraim_y / 20);
+      if(vrgo_y) full_forward_camera(-vrgo_y / 20);
+      if(vrgo_x) full_strafe_camera(-vrgo_x / 20);
+      }
+    else {
+      E4;
+      transmatrix T = hmd_at * inverse(hmd_ref_at);
+
+      T = 
+        cspin(0, 2, -vraim_x * camera_speed / 20) * 
+        cspin(1, 2, vraim_y * camera_speed / 20) *
+        cpush(0, -vrgo_x * camera_speed / 20) *
+        cpush(2, -vrgo_y * camera_speed / 20) *
+        T;
+      
+      hmd_ref_at = inverse(T) * hmd_at;
+      }
     }
   #endif
   
