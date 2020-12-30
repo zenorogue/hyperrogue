@@ -60,8 +60,8 @@ vector<pair<string, string> > eyes_desc = {
 /* not implemented */
 vector<pair<string, string> > comp_desc = {
   {"none", "Do not display anything on the computer screen."},
-  {"reference", "Display the view from the reference point."},
-  {"single", "(not implemented)"}, // "Display a single monocular image."},
+  {"reference", "Display the standard HyperRogue view from the reference point."},
+  {"single", "Display a a single monocular image from the headset."},
   {"eyes", "Display a copy of the VR display."},
   };
 
@@ -829,9 +829,6 @@ EX void render() {
 
   for(int i=0; i<3; i++) {
 
-    dynamicval<int> vx(vid.xres, vrdata.xsize);
-    dynamicval<int> vy(vid.yres, vrdata.ysize);
-    
     if(1) {
       make_actual_view();
       shiftmatrix Tv = cview();
@@ -874,6 +871,9 @@ EX void render() {
 
       if(i != 2) {
   
+        dynamicval<int> vx(vid.xres, vrdata.xsize);
+        dynamicval<int> vy(vid.yres, vrdata.ysize);
+    
         auto& ey = vrdata.eyes[i];
         
         glBindFramebuffer( GL_FRAMEBUFFER, ey->m_nRenderFramebufferId );
@@ -887,27 +887,28 @@ EX void render() {
         calcparam();
         drawqueue();
         }
+      
+      if(i == 2) {
+        rb.reset();
+        calcparam();
+        current_display->set_viewport(0);
+        calcparam();
+        current_display->next_shader_flags = 0;
+        current_display->set_all(0, 0);
+
+        if(cscr == eCompScreen::single) {
+          state = 4;
+          drawqueue();
+          }
+      
+        }
             
       }
     
     }
 
-  rb.reset();
-
-  calcparam();
-  current_display->set_viewport(0);
-  calcparam();
-  current_display->next_shader_flags = 0;
-  current_display->set_all(0, 0);
-  
   if(cscr == eCompScreen::eyes) draw_eyes();
   
-  if(cscr == eCompScreen::single) {
-    /* todo */
-    state = 4;
-    drawqueue();
-    }
-
   if(cscr == eCompScreen::reference) {
     state = 3;
     drawqueue();

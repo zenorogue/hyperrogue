@@ -552,40 +552,35 @@ void display_data::set_projection(int ed, ld shift) {
 
   bool u_alpha = false;
   
-  if(shader_flags & SF_PIXELS) {
+  auto use_mv = [cd] {
     #if CAP_VR
     if(vrhr::rendering_eye()) {
       glhr::projection_multiply(glhr::tmtogl_transpose(vrhr::hmd_mvp));
       glhr::id_modelview();
       }
-    else
-    #endif 
-    ortho(cd->xsize/2, -cd->ysize/2);
+    else {
+      glhr::projection_multiply(glhr::frustum(cd->tanfov, cd->tanfov * cd->ysize / cd->xsize));
+      glhr::projection_multiply(glhr::tmtogl_transpose(vrhr::hmd_mv));
+      }
+    #endif
+    };
+  
+  if(shader_flags & SF_PIXELS) {
+    if(vrhr::rendering()) use_mv();
+    else ortho(cd->xsize/2, -cd->ysize/2);
     }
   else if(shader_flags & SF_BOX) {
-    #if CAP_VR
-    if(vrhr::rendering_eye()) {
-      glhr::projection_multiply(glhr::tmtogl_transpose(vrhr::hmd_mvp));
-      glhr::id_modelview();
-      }
-    else
-    #endif
-    ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2);
+    if(vrhr::rendering()) use_mv();
+    else ortho(cd->xsize/current_display->radius/2, -cd->ysize/current_display->radius/2);
     }
   else if(shader_flags & SF_ODSBOX) {
     ortho(M_PI, M_PI);
     glhr::fog_max(1/sightranges[geometry], darkena(backcolor, 0, 0xFF));
     }
   else if(shader_flags & SF_PERS3) {
-    #if CAP_VR
-    if(vrhr::rendering_eye()) {
-      glhr::projection_multiply(glhr::tmtogl_transpose(vrhr::hmd_mvp));
-      }
-    #else
-    if(0) {}
-    #endif
+    if(vrhr::rendering()) use_mv();
     else {
-      glhr::projection_multiply(glhr::frustum(current_display->tanfov, current_display->tanfov * cd->ysize / cd->xsize));
+      glhr::projection_multiply(glhr::frustum(cd->tanfov, cd->tanfov * cd->ysize / cd->xsize));
       glhr::projection_multiply(glhr::scale(1, -1, -1));
       if(nisot::local_perspective_used()) {
         if(prod) {
