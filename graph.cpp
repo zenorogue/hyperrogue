@@ -2910,6 +2910,7 @@ int haveaura_cached;
 /** 0 = no aura, 1 = standard aura, 2 = Joukowsky aura */
 EX int haveaura() {
   if(!(vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL))) return 0;
+  if(vrhr::active()) return 0;
   if(sphere && mdAzimuthalEqui()) return 0;
   if(among(pmodel, mdJoukowsky, mdJoukowskyInverted) && hyperbolic && pconf.model_transition < 1) 
     return 2;
