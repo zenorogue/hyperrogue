@@ -89,42 +89,51 @@ EX hyperpoint space_to_perspective(hyperpoint z, ld alpha IS(pconf.alpha)) {
   return z;
   }
 
+EX shiftpoint find_on_screen(hyperpoint hxy, shiftpoint hint) {
+  shiftmatrix T = rgpushxto0(hint);  
+
+  hyperpoint rel = WDIM == 2 && GDIM == 3 ? zpush0(cgi.FLOOR) : C0;
+  
+  auto distance_at = [&] (const shiftmatrix& T1) {
+    hyperpoint h1;
+    applymodel(T1*rel, h1);
+    return sqhypot_d(2, hxy - h1);
+    };
+
+  ld best = distance_at(T);    
+
+  for(int it=0; it<50; it++) 
+    for(int s=0; s<4; s++) {
+      shiftmatrix T1 = T * spin(s * quarter_circle) * xpush(pow(1.2, -it));
+      ld dist = distance_at(T1);
+      if(dist < best) best = dist, T = T1;
+      if(mdBandAny()) {
+        T1.shift += 2 * M_PI;
+        dist = distance_at(T1);
+        if(dist < best) best = dist, T = T1;
+        T1.shift -= 4 * M_PI;
+        dist = distance_at(T1);
+        if(dist < best) best = dist, T = T1;
+        T1.shift += 2 * M_PI;
+        }
+      }
+  
+  return T*rel;
+  }
+
 EX shiftpoint gethyper(ld x, ld y) {
 
   ld hx = (x - current_display->xcenter) / current_display->radius;
   ld hy = (y - current_display->ycenter) / current_display->radius / pconf.stretch;
   hyperpoint hxy = point3(hx, hy, 0);
   
+  if(WDIM == 2 && GDIM == 3) {
+    return mouseover ? find_on_screen(hxy, ggmatrix(mouseover) * C0) : shiftless(Hypc);
+    }
+  
   if(pmodel) {
     ghxy = hxy;
-    
-    shiftmatrix T = rgpushxto0(ghpm);
-    
-    auto distance_at = [&] (const shiftmatrix& T1) {
-      hyperpoint h1;
-      applymodel(tC0(T1), h1);
-      return sqhypot_d(2, hxy - h1);
-      };
-
-    ld best = distance_at(T);    
-
-    for(int it=0; it<50; it++) 
-      for(int s=0; s<4; s++) {
-        shiftmatrix T1 = T * spin(s * quarter_circle) * xpush(pow(1.2, -it));
-        ld dist = distance_at(T1);
-        if(dist < best) best = dist, T = T1;
-        if(mdBandAny()) {
-          T1.shift += 2 * M_PI;
-          dist = distance_at(T1);
-          if(dist < best) best = dist, T = T1;
-          T1.shift -= 4 * M_PI;
-          dist = distance_at(T1);
-          if(dist < best) best = dist, T = T1;
-          T1.shift += 2 * M_PI;
-          }
-        }
-    
-    return tC0(T);
+    return find_on_screen(hxy, ghpm);
     }
   
   if(pconf.camera_angle) camrotate(hx, hy);
