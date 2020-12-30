@@ -4174,9 +4174,23 @@ EX cell *forwardcell() {
 
 EX bool draw_centerover = true;
 
+EX bool should_draw_mouse_cursor() {
+  if(!mousing || inHighQual) return false;
+  if(outofmap(mouseh.h)) return false;
+  if(rug::rugged && !rug::renderonce) return true;
+  if(vrhr::state) return true;
+  return false;
+  }
+
 EX void drawMarkers() {
 
   if(!(cmode & sm::NORMAL)) return;
+
+  if(should_draw_mouse_cursor()) {
+    for(int i=0; i<numplayers(); i++) if(multi::playerActive(i)) {
+      queueline(ggmatrix(playerpos(i)) * (WDIM == 2 && GDIM == 3 ? zpush0(cgi.WALL) : C0), mouseh, 0xFF00FF, grid_prec() + 1);
+      }
+    }
   
   callhooks(hooks_markers);
   #if CAP_SHAPES

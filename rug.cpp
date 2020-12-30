@@ -1040,10 +1040,6 @@ EX void prepareTexture() {
   #endif
 
   drawthemap();
-  if(mousing && !renderonce && !inHighQual) {
-    for(int i=0; i<numplayers(); i++) if(multi::playerActive(i))
-      queueline(tC0(ggmatrix(playerpos(i))), mouseh, 0xFF00FF, 8 + vid.linequality);
-    }
   if(finger_center) {
     shiftmatrix V = rgpushxto0(finger_center->h);
     queuestr(V, 0.5, "X", 0xFFFFFFFF, 2);
