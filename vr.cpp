@@ -399,8 +399,6 @@ EX void vr_control() {
   
   if(which_pointer) mousemoved = true;
 
-  println(hlog, tie(which_pointer, vr_clicked));
-
   if(vr_clicked && last_vr_clicked && holdmouse) send_click();
   
   mousepressed = vr_clicked;
