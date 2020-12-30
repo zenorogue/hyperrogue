@@ -145,6 +145,9 @@ struct vrdata_t {
   controller_data cdata [ vr::k_unMaxTrackedDeviceCount ];
   };
 
+/** 0,1 == eyes, 2 == headset */
+transmatrix hmd_mv_for[3], hmd_pre_for[3];
+
 vrdata_t vrdata;
 
 /** should we try to access VR */
@@ -156,7 +159,7 @@ EX bool failed;
 /** VR error message */
 EX string error_msg;
 
-/** 0 = not loaded, 1 = loaded but not currently rendering, 2 = currently rendering the VR screen, 3 = currently rendering the computer screen */
+/** 0 = not loaded, 1 = loaded but not currently rendering, 2 = currently rendering the VR screen, 3 = currently rendering the reference computer screen, 4 = currently rendering the single computer screen */
 EX int state = 0;
 
 #if HDR
@@ -824,22 +827,10 @@ EX void render() {
   
   // cscr = lshiftclick ? eCompScreen::eyes : eCompScreen::single;
 
-  for(int i=0; i<2; i++) {
+  for(int i=0; i<3; i++) {
 
     dynamicval<int> vx(vid.xres, vrdata.xsize);
     dynamicval<int> vy(vid.yres, vrdata.ysize);
-    
-    auto& ey = vrdata.eyes[i];
-
-    glBindFramebuffer( GL_FRAMEBUFFER, ey->m_nRenderFramebufferId );
-    glViewport(0, 0, vrdata.xsize, vrdata.ysize );
-    glhr::set_depthtest(false);
-    glhr::set_depthtest(true);
-    glhr::set_depthwrite(false);
-    glhr::set_depthwrite(true);
-    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    calcparam();
     
     if(1) {
       make_actual_view();
@@ -858,12 +849,12 @@ EX void render() {
         apply_movement(IN_E4(hmd_at * inverse(hmd_ref_at)));
         }
 
-      if(eyes == eEyes::truesim) {
+      if(eyes == eEyes::truesim && i != 2) {
         apply_movement(IN_E4(inverse(vrdata.eyepos[i])));
         }
 
       make_actual_view();
-      hmd_pre = cview().T * inverse(Tv.T);
+      hmd_pre = hmd_pre_for[i] = cview().T * inverse(Tv.T);
       // inverse_shift(Tv, cview());
       // View * inverse(Tv.T);
       // inverse(inverse_shift(cview(), Tv));
@@ -871,15 +862,32 @@ EX void render() {
       if(1) {
         gen_mv();
         E4;
-        if(eyes == eEyes::equidistant) {        
+        if(eyes == eEyes::equidistant && i != 2) {
           hmd_mv = inverse(vrdata.eyepos[i]) * hmd_mv;
           }
-        hmd_mvp = vrdata.proj[i] * hmd_mv;
+        hmd_mv_for[i] = hmd_mv;
+        if(i != 2) {
+          hmd_mvp = vrdata.proj[i] * hmd_mv;
+          eyeproj = vrdata.iproj[i];
+          }
         }
 
-      eyeproj = vrdata.iproj[i];
-      
-      drawqueue();
+      if(i != 2) {
+  
+        auto& ey = vrdata.eyes[i];
+        
+        glBindFramebuffer( GL_FRAMEBUFFER, ey->m_nRenderFramebufferId );
+        glViewport(0, 0, vrdata.xsize, vrdata.ysize );
+        glhr::set_depthtest(false);
+        glhr::set_depthtest(true);
+        glhr::set_depthwrite(false);
+        glhr::set_depthwrite(true);
+      // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+        calcparam();
+        drawqueue();
+        }
+            
       }
     
     }
@@ -896,7 +904,7 @@ EX void render() {
   
   if(cscr == eCompScreen::single) {
     /* todo */
-    state = 3;
+    state = 4;
     drawqueue();
     }
 
