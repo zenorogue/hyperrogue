@@ -302,7 +302,12 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     }
   else if(pmodel == mdPerspective) {
     shader_flags |= SF_PERS3 | SF_DIRECT;
-    if(hyperbolic)
+    if(vrhr::rendering() && hyperbolic) {
+      coordinator += 
+        "t = t * acosh(t[3]) / length(t.xyz);\n"
+        "t[3] = 1.;\n";
+      }
+    else if(hyperbolic)
       distfun = "acosh(t[3])", treset = true;
     else if(euclid || nonisotropic || stretch::in() || (sphere && ray::in_use))
       distfun = "length(t.xyz)", treset = true;
