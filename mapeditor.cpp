@@ -1584,6 +1584,8 @@ EX namespace mapeditor {
     }
   
   EX shiftpoint find_mouseh3() {
+    if(vrhr::active() && WDIM == 2)
+      return mouseh;
     if(front_config == eFront::sphere_camera)
       return in_front_dist(front_edit);
     ld step = 0.01;

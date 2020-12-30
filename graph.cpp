@@ -4179,7 +4179,6 @@ EX bool should_draw_mouse_cursor() {
   if(!mousing || inHighQual) return false;
   if(outofmap(mouseh.h)) return false;
   if(rug::rugged && !rug::renderonce) return true;
-  if(vrhr::active()) return true;
   return false;
   }
 

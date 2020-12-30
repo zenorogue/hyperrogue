@@ -150,6 +150,9 @@ transmatrix hmd_mv_for[3], hmd_pre_for[3];
 
 vrdata_t vrdata;
 
+/** how far is the object pointed to */
+EX ld pointer_distance;
+
 /** should we try to access VR */
 EX bool enabled = false;
 
@@ -339,13 +342,15 @@ void track_all() {
         hyperpoint h1 = sm * hmd_at * vrdata.pose_matrix[i] * sm * C0;
         hyperpoint h2 = sm * hmd_at * vrdata.pose_matrix[i] * sm * point31(0, 0, -0.01);
         ld p = ilerp(h1[2], h2[2], -ui_depth);
-        hyperpoint px = lerp(h1, h2, p);
+        hyperpoint pxo = lerp(h1, h2, p);
+        hyperpoint px = pxo;
         px[0] /= ui_size;
         px[1] /= -ui_size;
         px[0] += current_display->xsize/2;
         px[1] += current_display->ysize/2;
         mousex = px[0];
         mousey = px[1];
+        pointer_distance = hdist(pxo, h1);
         }
       
       if(hdist(vrdata.pose_matrix[i] * C0, vrdata.last_pose_matrix[i] * C0) > .05) {
@@ -460,7 +465,7 @@ eModel pmodel_3d_version() {
   return pmodel;
   }
 
-ld vr_distance(shiftpoint h, int id) {
+ld vr_distance(shiftpoint h, int id, ld& dist) {
   hyperpoint hscr;
   h.h = hmd_pre_for[2] * h.h;
   eModel md = pmodel_3d_version();
@@ -468,12 +473,13 @@ ld vr_distance(shiftpoint h, int id) {
   E4; hscr[3] = 1;
   hyperpoint hc = inverse(sm * hmd_at * vrdata.pose_matrix[id] * sm) * hmd_mv * hscr;
   if(hc[2] > 0.1) return 1e6; /* behind */
+  dist = -hc[2];
   return sqhypot_d(2, hc);
   }
 
 EX hyperpoint vr_direction;
 
-EX void compute_point(int id, shiftpoint& res, cell*& c) {
+EX void compute_point(int id, shiftpoint& res, cell*& c, ld& dist) {
 
   if(WDIM == 3) {
     E4;
@@ -498,14 +504,14 @@ EX void compute_point(int id, shiftpoint& res, cell*& c) {
   for(auto p: current_display->all_drawn_copies) {
     for(auto& V: p.second) {
       shiftpoint h = V * pointable();
-      ld d = vr_distance(h, id);
+      ld d = vr_distance(h, id, dist);
       if(d < best) best = d, c = p.first, T = V;
       }
     }
   
   auto rel = pointable();
   
-  T = minimize_point_value(T, [&] (const shiftmatrix& T1) { return vr_distance(T1*rel, id); });
+  T = minimize_point_value(T, [&] (const shiftmatrix& T1) { return vr_distance(T1*rel, id, dist); });
   
   res = T * rel;
   }  
@@ -1098,13 +1104,13 @@ EX void submit() {
         glBindTexture(GL_TEXTURE_2D, vrdata.device_models[i]->texture_id);
         glDrawArrays(GL_TRIANGLES, 0, isize(vrdata.device_models[i]->vertices));
 
-        if(1) {
+        if(i == which_pointer) {
           current_display->next_shader_flags = 0;
           current_display->set_all(0, 0);
           vector<glvertex> vex;
           vex.push_back(glhr::makevertex(0.01, 0, 0));
           vex.push_back(glhr::makevertex(-0.01, 0, 0));
-          vex.push_back(glhr::makevertex(0, 0, -10));
+          vex.push_back(glhr::makevertex(0, 0, -pointer_distance));
           glhr::current_vertices = nullptr;
           glhr::vertices(vex);
           glhr::color2(0xC0FFC0C0);
