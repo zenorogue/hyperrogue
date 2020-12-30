@@ -814,10 +814,15 @@ void celldrawer::draw_boat() {
     }
   }
 
-void celldrawer::draw_grid() {
-
+EX int grid_prec() {
   int prec = sphere ? 3 : 1;
   prec += vid.linequality;
+  return prec;
+  }
+
+void celldrawer::draw_grid() {
+
+  int prec = grid_prec();
   
   if(vid.grid && c->bardir != NODIR && c->bardir != NOBARRIERS && c->land != laHauntedWall &&
     c->barleft != NOWALLSEP_USED && GDIM == 2) {
