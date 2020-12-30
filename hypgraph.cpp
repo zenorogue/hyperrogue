@@ -100,8 +100,8 @@ EX shiftmatrix minimize_point_value(shiftmatrix T, function<ld(const shiftmatrix
   ld best = value(T);
 
   for(int it=0; it<50; it++) 
-    for(int s=0; s<4; s++) {
-      shiftmatrix T1 = T * spin(s * quarter_circle) * xpush(pow(1.2, -it));
+    for(int s=0; s<2*WDIM; s++) {
+      shiftmatrix T1 = T * cpush(s/2, (s&1?1:-1) * pow(1.2, -it));
       ld dist = value(T1);
       if(dist < best) best = dist, T = T1;
       if(mdBandAny()) {
@@ -1111,8 +1111,11 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         d = sqrt(2*(1 - cos(d))) * M_PI / 2;
       else if(pmodel == mdEquiarea && hyperbolic)
         d = sqrt(2*(cosh(d) - 1)) / 1.5;
+      
+      ld factor = d * df / rad;
+      if(!vrhr::rendering()) factor /= M_PI;
 
-      ret = H * (d * df / rad / M_PI);
+      ret = H * factor;
       if(GDIM == 2) ret[2] = 0; 
       if(MAXMDIM == 4) ret[3] = 1;
       if(zlev != 1 && use_z_coordinate()) 

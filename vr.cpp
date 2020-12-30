@@ -41,6 +41,8 @@ EX cell *forward_cell;
 
 EX ld vraim_x, vraim_y, vrgo_x, vrgo_y;
 
+EX ld pointer_length = 1;
+
 vector<pair<string, string> > headset_desc = {
   {"none", "Ignore the headset movement and rotation."},
   {"rotation only", "Ignore the headset movement but do not ignore its rotation."},
@@ -472,9 +474,15 @@ ld vr_distance(shiftpoint h, int id, ld& dist) {
   
   E4; hscr[3] = 1;
   hyperpoint hc = inverse(sm * hmd_at * vrdata.pose_matrix[id] * sm) * hmd_mv * hscr;
-  if(hc[2] > 0.1) return 1e6; /* behind */
-  dist = -hc[2];
-  return sqhypot_d(2, hc);
+  if(WDIM == 2) {
+    if(hc[2] > 0.1) return 1e6; /* behind */
+    dist = -hc[2];
+    return sqhypot_d(2, hc);
+    }
+  else {
+    hc[2] += dist;
+    return sqhypot_d(3, hc);
+    }
   }
 
 EX hyperpoint vr_direction;
@@ -489,8 +497,9 @@ EX void compute_point(int id, shiftpoint& res, cell*& c, ld& dist) {
     movedir md = vectodir(vr_direction);
     cellwalker xc = cwt + md.d + wstep;
     forward_cell = xc.at;
-    return;
     }
+  
+  dist = pointer_length;
 
   gen_mv();
   set_vr_sphere();
