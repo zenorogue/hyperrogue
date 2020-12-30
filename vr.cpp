@@ -745,7 +745,7 @@ EX void clear() {
   }
 
 EX ld ui_depth = 1.5;
-EX ld ui_size = 0.004;
+EX ld ui_size = 0.002;
 
 EX void in_vr_ui(reaction_t what) {
   
