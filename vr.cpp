@@ -418,9 +418,17 @@ EX ld absolute_unit_in_meters = 3;
 
 /** what point and cell is the controller number id pointing to */
 
+eModel pmodel_3d_version() {
+  if(pmodel == mdGeodesic) return mdEquidistant;
+  if(pmodel == mdPerspective) return nonisotropic ? mdHorocyclic : mdEquidistant;
+  return pmodel;
+  }
+
 ld vr_distance(shiftpoint h, int id) {
   hyperpoint hscr;
-  applymodel(h, hscr);
+  h.h = hmd_pre_for[2] * h.h;
+  eModel md = pmodel_3d_version();
+  apply_other_model(h, hscr, md);
   E4; hscr[3] = 1;
   hyperpoint hc = inverse(sm * hmd_at * vrdata.pose_matrix[id] * sm) * hmd_mv * hscr;
   if(hc[2] > 0.1) return 1e6; /* behind */
@@ -428,7 +436,6 @@ ld vr_distance(shiftpoint h, int id) {
   }
 
 EX void compute_point(int id, shiftpoint& res, cell*& c) {
-  println(hlog, "computing point");
   gen_mv();
   c = nullptr;
   ld best = 1e9;
