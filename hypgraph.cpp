@@ -497,7 +497,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         ret[3] = 1; 
         break;
         }
-      if(vrhr::rendering()) {
+      if(vrhr::rendering() && WDIM == 2) {
         vr_disk(ret, H);
         return;
         }
