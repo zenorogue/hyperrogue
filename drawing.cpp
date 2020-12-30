@@ -227,7 +227,7 @@ EX void glflush() {
       };
 
     #if CAP_VR
-    if(vrhr::state == 1 && !(cmode & sm::NORMAL)) 
+    if(vrhr::should_render() && !(cmode & sm::NORMAL)) 
       vrhr::in_vr_ui(drawer);
     
     else
@@ -303,7 +303,7 @@ vector<pair<int, hyperpoint>> tofix;
 
 EX bool two_sided_model() {
   #if CAP_VR
-  bool in_vr = vrhr::state == 2;
+  bool in_vr = vrhr::rendering();
   #else
   constexpr bool in_vr = false;
   #endif
@@ -378,7 +378,7 @@ void fixpoint(glvertex& hscr, hyperpoint H) {
   hyperpoint Hscr;
   applymodel(shiftless(good), Hscr); 
   #if CAP_VR
-  if(vrhr::state == 2) 
+  if(vrhr::rendering()) 
     hscr = glhr::makevertex(Hscr[0], Hscr[1]*pconf.stretch, Hscr[2]); 
   else
   #endif
@@ -391,7 +391,7 @@ void addpoint(const shiftpoint& H) {
     // if(pconf.alpha + H[2] <= BEHIND_LIMIT && pmodel == mdDisk) poly_flags |= POLY_BEHIND;
     
     #if CAP_VR
-    if(vrhr::state == 2) z = 1;
+    if(vrhr::rendering()) z = 1;
     #endif
     
     if(spherespecial) {
@@ -435,7 +435,7 @@ void addpoint(const shiftpoint& H) {
       Hlast = Hscr;
       }
     #if CAP_VR
-    if(vrhr::state == 2) {
+    if(vrhr::rendering()) {
       for(int i=0; i<3; i++) Hscr[i] *= z;
       }
     else
@@ -967,7 +967,7 @@ void compute_side_by_centerin(dqi_poly *p, bool& nofill) {
       nofill = true; 
     }
   applymodel(h1, hscr);
-  if(vrhr::state != 2) {
+  if(!vrhr::rendering()) {
     hscr[0] *= current_display->radius; hscr[1] *= current_display->radius * pconf.stretch;
     }
   for(int i=0; i<isize(glcoords)-1; i++) {
@@ -1854,7 +1854,7 @@ void dqi_poly::draw() {
   
   bool can_have_inverse = false;  
   if(sphere && pmodel == mdDisk && (spherespecial > 0 || equi)) can_have_inverse = true;
-  if(vrhr::state == 2) can_have_inverse = false;
+  if(vrhr::rendering()) can_have_inverse = false;
   if(sphere && among(pmodel, mdEquidistant, mdEquiarea)) can_have_inverse = true;
   if(pmodel == mdJoukowsky) can_have_inverse = true;
   if(pmodel == mdJoukowskyInverted && pconf.skiprope) can_have_inverse = true;
@@ -2256,7 +2256,7 @@ EX void draw_main() {
   
   in_vr_sphere = false;
   #if CAP_VR
-  in_vr_sphere = vrhr::state == 2 && among(pmodel, mdDisk, mdBall, mdHyperboloid, mdHalfplane, mdHemisphere);
+  in_vr_sphere = vrhr::rendering() && among(pmodel, mdDisk, mdBall, mdHyperboloid, mdHalfplane, mdHemisphere);
   if(in_vr_sphere) {
     hyperpoint a, b;
     applymodel(shiftless(point3(0, 0, 1)), a);
@@ -2363,7 +2363,7 @@ EX void drawqueue() {
   #endif
   
   #if CAP_VR
-  if(vrhr::state == 1) { 
+  if(vrhr::should_render() == 1) { 
     vrhr::render();
     return;
     }

@@ -3732,7 +3732,7 @@ void make_clipping_planes() {
   clipping_planes.clear();
   if(!frustum_culling || PIU(sphere) || experimental || vid.stereo_mode == sODS || panini_alpha) return;
   #if CAP_VR
-  if(vrhr::state) return;
+  if(vrhr::active()) return;
   #endif
 
   auto add_clipping_plane = [] (ld x1, ld y1, ld x2, ld y2) {
@@ -4163,7 +4163,7 @@ EX void queuecircleat(cell *c, double rad, color_t col) {
 
 EX cell *forwardcell() {
   #if CAP_VR
-  if(vrhr::state) {
+  if(vrhr::active()) {
     return vrhr::forward_cell;
     }
   #endif
@@ -4178,7 +4178,7 @@ EX bool should_draw_mouse_cursor() {
   if(!mousing || inHighQual) return false;
   if(outofmap(mouseh.h)) return false;
   if(rug::rugged && !rug::renderonce) return true;
-  if(vrhr::state) return true;
+  if(vrhr::active()) return true;
   return false;
   }
 
@@ -4259,7 +4259,7 @@ EX void drawMarkers() {
     if(lmouseover && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON && WDIM == 2) {
       cell *at = lmouseover;
       #if CAP_VR
-      if(vrhr::state == 2 && vrhr::forward_cell)
+      if(vrhr::active() && vrhr::forward_cell)
         at = vrhr::forward_cell;
       #endif
       queuecircleat(at, .8, darkena(lmouseover->cpdist > 1 ? 0x00FFFF : 0xFF0000, 0, 0xFF));
@@ -4903,10 +4903,7 @@ EX void calcparam() {
     cd->ycenter = lerp(vid.fsize + cd->scrsize, vid.yres - cd->scrsize - vid.fsize, .8);
     }
   else {
-    bool ok = true;
-    #if CAP_VR
-    ok = ok && !vrhr::state;
-    #endif
+    bool ok = !vrhr::active();
     if(vid.xres > vid.yres * 4/3+16 && (cmode & sm::SIDE) && ok)
       current_display->sidescreen = true;
 #if CAP_TOUR
@@ -5056,9 +5053,7 @@ EX void gamescreen(int _darken) {
     }
 
   darken = _darken;
-  #if CAP_VR
-  if(vrhr::state) darken = 0;
-  #endif
+  if(vrhr::active()) darken = 0;
   
   if(history::includeHistory) history::restore();
 
@@ -5106,7 +5101,7 @@ EX void gamescreen(int _darken) {
 #endif
 
   #if CAP_VR
-  if(vrhr::state && _darken) {
+  if(vrhr::active() && _darken) {
     int xsi = current_display->xsize;
     int ysi = current_display->ysize;
     color_t col = 0x000000C0;

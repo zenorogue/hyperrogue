@@ -601,7 +601,7 @@ EX bool need_mouseh = false;
 EX void fix_mouseh() {
   if(0) ;
 #if CAP_VR
-  else if(vrhr::state && which_pointer) {
+  else if(vrhr::active() && which_pointer) {
     vrhr::compute_point(which_pointer, mouseh, mouseover);
     }
 #endif
@@ -792,7 +792,7 @@ EX void mainloopiter() {
   DEBB(DF_GRAPH, ("polling for events\n"));
   
   #if CAP_VR
-  if(vrhr::state) {
+  if(vrhr::active()) {
     rug::using_rugview urv;
     dynamicval<bool> ds(didsomething, didsomething);
     using namespace vrhr;

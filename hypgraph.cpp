@@ -165,7 +165,7 @@ void ballmodel(hyperpoint& ret, double alpha, double d, double zl) {
 
 bool use_z_coordinate() {
   #if CAP_VR
-  if(vrhr::state == 2) return true;
+  if(vrhr::rendering()) return true;
   #endif
   return current_display->stereo_active();
   }
@@ -468,7 +468,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       return; 
     
     case mdBall: {
-      if(vrhr::state == 2) {
+      if(vrhr::rendering()) {
         vr_disk(ret, H);
         return;
         }
@@ -497,7 +497,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         ret[3] = 1; 
         break;
         }
-      if(vrhr::state == 2) {
+      if(vrhr::rendering()) {
         vr_disk(ret, H);
         return;
         }
@@ -534,7 +534,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       }
     
     case mdHalfplane: {
-      if(sphere && vrhr::state == 2) {
+      if(sphere && vrhr::rendering()) {
         vr_sphere(ret, H, md);
         return;
         }
@@ -682,7 +682,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
     case mdHemisphere: {
   
       #if CAP_VR
-      ld dir = vrhr::state == 2 ? -1:1;
+      ld dir = vrhr::rendering() ? -1:1;
       #else
       constexpr ld dir = 1;
       #endif          
@@ -713,7 +713,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
           }
         
         case gcSphere: {
-          if(vrhr::state == 2) { vr_sphere(ret, H, md); return; }
+          if(vrhr::rendering()) { vr_sphere(ret, H, md); return; }
           ret = H;
           if(pconf.depth_scaling != 1) {
             ld v = intval(H, Hypc);
@@ -724,7 +724,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         }
 
       #if CAP_VR
-      if(vrhr::state == 2) {
+      if(vrhr::rendering()) {
         models::apply_vr(ret[2], ret[1]);
         return;
         }
@@ -751,7 +751,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         }
 
       #if CAP_VR
-      if(vrhr::state == 2) {
+      if(vrhr::rendering()) {
         if(sphere) { vr_sphere(ret, H, md); return; }
         ret[0] = H[0] * pconf.hyperboloid_scaling;
         ret[1] = H[1] * pconf.hyperboloid_scaling;
@@ -1718,7 +1718,7 @@ EX hyperpoint vertical_vector() {
 EX void spinEdge(ld aspd) { 
 
   #if CAP_VR
-  if(vrhr::state && keep_vertical() && !vrhr::first) {
+  if(vrhr::active() && keep_vertical() && !vrhr::first) {
     transmatrix T = vrhr::hmd_ref_at;
     T = vrhr::sm * inverse(T);
     vrhr::be_33(T);
@@ -2119,7 +2119,7 @@ EX color_t modelcolor = 0;
 EX void draw_model_elements() {
 
   #if CAP_VR
-  if(vrhr::state && pmodel == mdHyperboloid) return;
+  if(vrhr::active() && pmodel == mdHyperboloid) return;
   #endif
 
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
@@ -2256,7 +2256,7 @@ EX void draw_boundary(int w) {
   if(w == 1) return;
   if(nonisotropic || euclid || prod) return;
   #if CAP_VR
-  if(vrhr::state && pmodel == mdHyperboloid) return;
+  if(vrhr::active() && pmodel == mdHyperboloid) return;
   #endif
 
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);

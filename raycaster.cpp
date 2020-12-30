@@ -78,7 +78,7 @@ bool need_many_cell_types() {
 EX bool available() {
   #if CAP_VR
   /* would need a completely different implementation */
-  if(vrhr::state && vrhr::eyes == vrhr::eEyes::equidistant) return false;
+  if(vrhr::active() && vrhr::eyes == vrhr::eEyes::equidistant) return false;
   #endif
   if(noGUI) return false;
   if(!vid.usingGL) return false;
@@ -1340,7 +1340,7 @@ EX void cast() {
   cd->set_mask(global_projection);
   
   #if CAP_VR
-  if(vrhr::state == 2) {
+  if(vrhr::rendering_eye()) {
     glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(vrhr::eyeproj).as_array());
     }
   #else

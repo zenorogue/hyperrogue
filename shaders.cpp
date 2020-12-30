@@ -156,7 +156,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   else if(!vid.consider_shader_projection) {
     shader_flags |= SF_PIXELS;
     }        
-  else if(among(pmodel, mdDisk, mdBall) && GDIM == 2 && vrhr::state == 2 && !sphere) {
+  else if(among(pmodel, mdDisk, mdBall) && GDIM == 2 && vrhr::rendering() && !sphere) {
     shader_flags |= SF_DIRECT | SF_BOX;
     vsh += "uniform mediump float uAlpha, uDepth, uDepthScaling, uCamera;";
     
@@ -233,7 +233,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
         "mediump float ad = acosh(hz);\n"
         "mediump float m = d == 0. ? 0. : d >= 1. ? 1.e4 : (hz+1.) * ad / sinh(ad);\n";
       #if CAP_VR
-      if(vrhr::state == 2)
+      if(vrhr::rendering_eye())
         coordinator += "t.xyz *= ad/d;\n";
       else
       #endif
@@ -323,7 +323,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   
   #if CAP_VR
   /* no z-fog in VR */
-  if((shader_flags & SF_ZFOG) && vrhr::state == 2)
+  if((shader_flags & SF_ZFOG) && vrhr::rendering())
     shader_flags &= ~SF_ZFOG;
   #endif
 
@@ -338,7 +338,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     vmain += coordinator;
     bool ok = true;
     #if CAP_VR
-    if(vrhr::state) ok = false;
+    if(vrhr::active()) ok = false;
     #endif
     if(GDIM == 3 && WDIM == 2 && hyperbolic && context_fog && ok && pmodel == mdPerspective) {
       vsh += 
@@ -509,7 +509,7 @@ void display_data::set_projection(int ed, ld shift) {
   glhr::new_projection();
   
   #if CAP_VR
-  if(vrhr::state != 2) {
+  if(!vrhr::rendering_eye()) {
   #else
   if(true) {
   #endif
@@ -554,7 +554,7 @@ void display_data::set_projection(int ed, ld shift) {
   
   if(shader_flags & SF_PIXELS) {
     #if CAP_VR
-    if(vrhr::state == 2) {
+    if(vrhr::rendering_eye()) {
       glhr::projection_multiply(glhr::tmtogl_transpose(vrhr::hmd_mvp));
       glhr::id_modelview();
       }
@@ -564,7 +564,7 @@ void display_data::set_projection(int ed, ld shift) {
     }
   else if(shader_flags & SF_BOX) {
     #if CAP_VR
-    if(vrhr::state == 2) {
+    if(vrhr::rendering_eye()) {
       glhr::projection_multiply(glhr::tmtogl_transpose(vrhr::hmd_mvp));
       glhr::id_modelview();
       }
@@ -578,7 +578,7 @@ void display_data::set_projection(int ed, ld shift) {
     }
   else if(shader_flags & SF_PERS3) {
     #if CAP_VR
-    if(vrhr::state == 2) {
+    if(vrhr::rendering_eye()) {
       glhr::projection_multiply(glhr::tmtogl_transpose(vrhr::hmd_mvp));
       }
     #else
@@ -736,7 +736,7 @@ EX flagtype get_shader_flags() {
 EX void glapplymatrix(const transmatrix& V) {
   #if CAP_VR
   transmatrix V3;
-  bool use_vr = vrhr::state;
+  bool use_vr = vrhr::rendering();
   if(use_vr) V3 = vrhr::hmd_pre * V;
   const transmatrix& V2 = use_vr ? V3 : V;
   #else

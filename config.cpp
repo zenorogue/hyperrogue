@@ -1913,7 +1913,7 @@ EX void show3D() {
   dialog::addItem(XLAT("stereo vision config"), 'e');
   
   #if CAP_VR
-  dialog::addBoolItem(XLAT("VR settings"), vrhr::state > 0, 'v');
+  dialog::addBoolItem(XLAT("VR settings"), vrhr::active(), 'v');
   dialog::add_action_push(vrhr::show_vr_settings);
   #endif
 

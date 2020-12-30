@@ -10,7 +10,22 @@ namespace hr {
 
 EX namespace vrhr {
 
+#if !CAP_VR
+inline bool active() { return false; }
+inline bool rendering() { return false; }
+inline bool rendering_eye() { return false; }
+#endif
+
 #if CAP_VR
+
+/** VR is active */
+EX bool active() { return state; }
+/** called in drawqueue to see if we should switch to vrhr::render() */
+EX bool should_render() { return state == 1; }
+/** currently rendering a VR-aware screen */
+EX bool rendering() { return state == 2 || state == 4; }
+/** currently rendering a VR eye */
+EX bool rendering_eye() { return state == 2; }
 
 #if HDR
 enum class eHeadset { none, rotation_only, reference, holonomy, model_viewing };
