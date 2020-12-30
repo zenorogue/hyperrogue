@@ -361,11 +361,11 @@ void track_all() {
       cd.y = px[1];
       
       if(hdist(vrdata.pose_matrix[i] * C0, vrdata.last_pose_matrix[i] * C0) > .05) {
-       vrdata.last_pose_matrix[i] = vrdata.pose_matrix[i];
-       mousing = true;
-       which_pointer = i;
-       println(hlog, "setting which_pointer to ", i);
-       }
+        vrdata.last_pose_matrix[i] = vrdata.pose_matrix[i];
+        mousing = true;
+        which_pointer = i;
+        println(hlog, "setting which_pointer to ", i);
+        }
 
       }
     }
