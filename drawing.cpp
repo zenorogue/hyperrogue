@@ -161,7 +161,7 @@ EX unsigned char& part(color_t& col, int i) {
 #endif
   }
 
-bool in_vr_sphere;
+EX bool in_vr_sphere;
 hyperpoint vr_sphere_center;
 
 bool fatborder;
@@ -2251,9 +2251,7 @@ EX void reverse_transparent_walls() {
   reverse(&ptds[qp0[pt]], &ptds[qp[pt]]);
   }
 
-EX void draw_main() {
-  DEBBI(DF_GRAPH, ("draw_main"));
-  
+EX void set_vr_sphere() {
   in_vr_sphere = false;
   #if CAP_VR
   in_vr_sphere = vrhr::rendering() && among(pmodel, mdDisk, mdBall, mdHyperboloid, mdHalfplane, mdHemisphere);
@@ -2267,6 +2265,12 @@ EX void draw_main() {
     vr_sphere_center = vrhr::hmd_mv * vr_sphere_center;
     }
   #endif
+  }
+
+EX void draw_main() {
+  DEBBI(DF_GRAPH, ("draw_main"));
+  
+  set_vr_sphere();  
   
   if(sphere && GDIM == 3 && pmodel == mdPerspective && !stretch::in() && !ray::in_use) {
 

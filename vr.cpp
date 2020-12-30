@@ -470,6 +470,8 @@ ld vr_distance(shiftpoint h, int id, ld& dist) {
   h.h = hmd_pre_for[2] * h.h;
   eModel md = pmodel_3d_version();
   apply_other_model(h, hscr, md);
+  if(in_vr_sphere && get_side(hscr) == (sphereflipped() ? -1 : 1)) return 1e5;
+  
   E4; hscr[3] = 1;
   hyperpoint hc = inverse(sm * hmd_at * vrdata.pose_matrix[id] * sm) * hmd_mv * hscr;
   if(hc[2] > 0.1) return 1e6; /* behind */
@@ -493,6 +495,7 @@ EX void compute_point(int id, shiftpoint& res, cell*& c, ld& dist) {
     }
 
   gen_mv();
+  set_vr_sphere();
   c = nullptr;
   ld best = 1e9;
   
