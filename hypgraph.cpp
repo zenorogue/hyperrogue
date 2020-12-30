@@ -89,36 +89,43 @@ EX hyperpoint space_to_perspective(hyperpoint z, ld alpha IS(pconf.alpha)) {
   return z;
   }
 
-EX shiftpoint find_on_screen(hyperpoint hxy, shiftpoint hint) {
-  shiftmatrix T = rgpushxto0(hint);  
+EX hyperpoint pointable() {
+  return WDIM == 2 && GDIM == 3 ? zpush0(cgi.FLOOR) : C0;
+  }
 
-  hyperpoint rel = WDIM == 2 && GDIM == 3 ? zpush0(cgi.FLOOR) : C0;
+/** find a shiftpoint which minimizes value -- we represent points by matrices to make things a bit simpler */
+
+EX shiftmatrix minimize_point_value(shiftmatrix T, function<ld(const shiftmatrix&)> value) {
   
-  auto distance_at = [&] (const shiftmatrix& T1) {
-    hyperpoint h1;
-    applymodel(T1*rel, h1);
-    return sqhypot_d(2, hxy - h1);
-    };
-
-  ld best = distance_at(T);    
+  ld best = value(T);
 
   for(int it=0; it<50; it++) 
     for(int s=0; s<4; s++) {
       shiftmatrix T1 = T * spin(s * quarter_circle) * xpush(pow(1.2, -it));
-      ld dist = distance_at(T1);
+      ld dist = value(T1);
       if(dist < best) best = dist, T = T1;
       if(mdBandAny()) {
         T1.shift += 2 * M_PI;
-        dist = distance_at(T1);
+        dist = value(T1);
         if(dist < best) best = dist, T = T1;
         T1.shift -= 4 * M_PI;
-        dist = distance_at(T1);
+        dist = value(T1);
         if(dist < best) best = dist, T = T1;
         T1.shift += 2 * M_PI;
         }
       }
   
-  return T*rel;
+  return T;
+  }
+
+EX shiftpoint find_on_screen(hyperpoint hxy, const shiftmatrix& T) {
+  hyperpoint rel = pointable();
+  auto distance_at = [&] (const shiftmatrix& T1) {
+    hyperpoint h1;
+    applymodel(T1*rel, h1);
+    return sqhypot_d(2, hxy - h1);
+    };
+  return minimize_point_value(T, distance_at) * rel;
   }
 
 EX shiftpoint gethyper(ld x, ld y) {
@@ -128,12 +135,12 @@ EX shiftpoint gethyper(ld x, ld y) {
   hyperpoint hxy = point3(hx, hy, 0);
   
   if(WDIM == 2 && GDIM == 3) {
-    return mouseover ? find_on_screen(hxy, ggmatrix(mouseover) * C0) : shiftless(Hypc);
+    return mouseover ? find_on_screen(hxy, ggmatrix(mouseover)): shiftless(Hypc);
     }
-  
+
   if(pmodel) {
     ghxy = hxy;
-    return find_on_screen(hxy, ghpm);
+    return find_on_screen(hxy, rgpushxto0(ghpm));
     }
   
   if(pconf.camera_angle) camrotate(hx, hy);
