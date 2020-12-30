@@ -466,10 +466,12 @@ void move_according_to(vr::ETrackedControllerRole role, bool last, bool cur) {
   if(id >= 0 && id < int(vr::k_unMaxTrackedDeviceCount)) {
     hyperpoint h;
     if(in_perspective_v()) {
-      E4;
-      transmatrix T = (hsm == eHeadset::none ? hmd_at : hmd_ref_at) * vrdata.pose_matrix[id] * sm;
-      vrhr::be_33(T);
-      h = T * point31(0, 0, -0.01);
+      if(1) {
+        E4;
+        transmatrix T = (hsm == eHeadset::none ? hmd_at : hmd_ref_at) * vrdata.pose_matrix[id] * sm;
+        vrhr::be_33(T);
+        h = T * point31(0, 0, -0.01);
+        }
       if(last && !cur)
         movevrdir(h);
       else {
