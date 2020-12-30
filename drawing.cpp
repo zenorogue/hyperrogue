@@ -227,7 +227,7 @@ EX void glflush() {
       };
 
     #if CAP_VR
-    if(vrhr::should_render() && !(cmode & sm::NORMAL)) 
+    if(vrhr::should_render() && vrhr::in_menu()) 
       vrhr::in_vr_ui(drawer);
     
     else

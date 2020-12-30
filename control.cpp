@@ -178,7 +178,15 @@ EX void calcMousedest() {
   }
 
 EX void mousemovement() {
-  if(GDIM == 3) {
+
+  #if CAP_VR
+  if(WDIM == 3 && vrhr::active() && which_pointer) {
+    movevrdir(vrhr::vr_direction);
+    return;
+    }
+  #endif
+
+  if(GDIM == 3 && !which_pointer) {
     if(WDIM == 2) {
       if(View[2][2] < -0.75) 
         movepcto(MD_DROP, 1);

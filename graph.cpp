@@ -5102,7 +5102,8 @@ EX void gamescreen(int _darken) {
 #endif
 
   #if CAP_VR
-  if(vrhr::active() && _darken) {
+  
+  if(vrhr::active() && vrhr::in_menu()) {
     int xsi = current_display->xsize;
     int ysi = current_display->ysize;
     color_t col = 0x000000C0;

@@ -293,20 +293,6 @@ vr_rendermodel *get_render_model(string name) {
   return md;
   }
 
-#if HDR
-struct click {
-  int x, y, clicked;
-  };
-#endif
-
-EX vector<click> get_hits() {
-  vector<click> res;
-  for(auto h: vrhr::vrdata.cdata)
-    if(h.x || h.y)
-      res.emplace_back(click{h.x, h.y, h.clicked});
-  return res;
-  }
-
 void track_all() {
   track_actions();
 
@@ -348,17 +334,19 @@ void track_all() {
             println(hlog, "axis ", i, " = ", tie(cd.cur.rAxis[i].x, cd.cur.rAxis[i].y));
         }
       */
-
-      hyperpoint h1 = sm * hmd_at * vrdata.pose_matrix[i] * sm * C0;
-      hyperpoint h2 = sm * hmd_at * vrdata.pose_matrix[i] * sm * point31(0, 0, -0.01);
-      ld p = ilerp(h1[2], h2[2], -ui_depth);
-      hyperpoint px = lerp(h1, h2, p);
-      px[0] /= ui_size;
-      px[1] /= -ui_size;
-      px[0] += current_display->xsize/2;
-      px[1] += current_display->ysize/2;
-      cd.x = px[0];
-      cd.y = px[1];
+      
+      if(in_menu() && which_pointer == i) {
+        hyperpoint h1 = sm * hmd_at * vrdata.pose_matrix[i] * sm * C0;
+        hyperpoint h2 = sm * hmd_at * vrdata.pose_matrix[i] * sm * point31(0, 0, -0.01);
+        ld p = ilerp(h1[2], h2[2], -ui_depth);
+        hyperpoint px = lerp(h1, h2, p);
+        px[0] /= ui_size;
+        px[1] /= -ui_size;
+        px[0] += current_display->xsize/2;
+        px[1] += current_display->ysize/2;
+        mousex = px[0];
+        mousey = px[1];
+        }
       
       if(hdist(vrdata.pose_matrix[i] * C0, vrdata.last_pose_matrix[i] * C0) > .05) {
         vrdata.last_pose_matrix[i] = vrdata.pose_matrix[i];
@@ -372,6 +360,23 @@ void track_all() {
     
   }
 
+EX void send_click() {
+  holdmouse = false;
+  fix_mouseh();
+  println(hlog, "sending a click, getcstat = ", getcstat, " in menu = ", in_menu());
+  if(in_menu())
+    handlekey(getcstat, getcstat);
+  else
+    handlekey('-', '-');
+  }
+
+EX void send_release() {
+  holdmouse = false;
+  fix_mouseh();
+  println(hlog, "sending a release");
+  handlekey(PSEUDOKEY_RELEASE, PSEUDOKEY_RELEASE);
+  }
+  
 EX void vr_control() {
   if(!enabled || !vid.usingGL) {
     if(state) shutdown_vr();
@@ -383,6 +388,37 @@ EX void vr_control() {
   if(state == 1) {
     track_all();
     }
+  static bool last_vr_clicked = false;
+  
+  shiftmul = getcshift;
+  
+  if(which_pointer) mousemoved = true;
+
+  println(hlog, tie(which_pointer, vr_clicked));
+
+  if(vr_clicked && last_vr_clicked && holdmouse) send_click();
+  
+  mousepressed = vr_clicked;
+
+  if(vr_clicked && !last_vr_clicked && vid.quickmouse) send_click();
+
+  if(vr_clicked && !last_vr_clicked && !vid.quickmouse)
+    actonrelease = true;
+
+  if(!vr_clicked && last_vr_clicked && !vid.quickmouse && actonrelease) {
+    send_click();
+    actonrelease = false;
+    }
+
+  else if(!vr_clicked && last_vr_clicked) {
+    send_release();
+    }
+
+  if(mousepressed && inslider) {
+    send_click();
+    }
+  
+  last_vr_clicked = vr_clicked;
   }
 
 EX void be_33(transmatrix& T) {
@@ -435,7 +471,21 @@ ld vr_distance(shiftpoint h, int id) {
   return sqhypot_d(2, hc);
   }
 
+EX hyperpoint vr_direction;
+
 EX void compute_point(int id, shiftpoint& res, cell*& c) {
+
+  if(WDIM == 3) {
+    E4;
+    transmatrix T = (hsm == eHeadset::none ? hmd_at : hmd_ref_at) * vrdata.pose_matrix[id] * sm;
+    vrhr::be_33(T);
+    vr_direction = T * point31(0, 0, -0.01);
+    movedir md = vectodir(vr_direction);
+    cellwalker xc = cwt + md.d + wstep;
+    forward_cell = xc.at;
+    return;
+    }
+
   gen_mv();
   c = nullptr;
   ld best = 1e9;
@@ -460,34 +510,14 @@ EX void compute_point(int id, shiftpoint& res, cell*& c) {
   res = T * rel;
   }  
 
+EX bool vr_clicked;
+
 void move_according_to(vr::ETrackedControllerRole role, bool last, bool cur) {
-  if(!last && !cur) return;
+  if(cur) vr_clicked = true;
   int id = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole(role);
-  if(id >= 0 && id < int(vr::k_unMaxTrackedDeviceCount)) {
-    hyperpoint h;
-    if(in_perspective_v()) {
-      if(1) {
-        E4;
-        transmatrix T = (hsm == eHeadset::none ? hmd_at : hmd_ref_at) * vrdata.pose_matrix[id] * sm;
-        vrhr::be_33(T);
-        h = T * point31(0, 0, -0.01);
-        }
-      if(last && !cur)
-        movevrdir(h);
-      else {
-        movedir md = vectodir(h);
-        cellwalker xc = cwt + md.d + wstep;
-        forward_cell = xc.at;
-        }
-      }
-    else {
-      compute_point(id, mouseh, forward_cell);
-      if(forward_cell && last && !cur) {
-        calcMousedest();
-        if(!canmove) movepcto(mousedest), remission(); else movepcto(mousedest);
-        forward_cell = nullptr;
-        }
-      }
+  if((last || cur) && id >= 0 && id < int(vr::k_unMaxTrackedDeviceCount)) {
+    println(hlog, "click setting which_pointer to ", id);
+    which_pointer = id;
     }
   }
 
@@ -517,27 +547,10 @@ struct set_data {
   };
 
 vector<digital_action_data> dads = {
-  digital_action_data("/actions/menu/in/SelectLeft", [] { return !(cmode && sm::NORMAL); }, [] (bool last, bool curr) {
-    if(curr && !last) { 
-      int id = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole( vr::TrackedControllerRole_LeftHand);
-      if(id >= 0 && id < int(vr::k_unMaxTrackedDeviceCount))
-        vrdata.cdata[id].clicked = true;
-      }
-    }),
-  digital_action_data("/actions/menu/in/SelectRight", [] { return !(cmode && sm::NORMAL); }, [] (bool last, bool curr) {
-    if(curr && !last) { 
-      int id = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole( vr::TrackedControllerRole_RightHand);
-      if(id >= 0 && id < int(vr::k_unMaxTrackedDeviceCount))
-        vrdata.cdata[id].clicked = true;
-      }
-    }),
-  digital_action_data("/actions/menu/in/Exit", [] { return !(cmode && sm::NORMAL); }, [] (bool last, bool curr) {
-    if(curr && !last) dialog::queue_key(PSEUDOKEY_EXIT);
-    }),
-  digital_action_data("/actions/game/in/MoveLeft", [] { return (cmode && sm::NORMAL); }, [] (bool last, bool curr) {
+  digital_action_data("/actions/general/in/ClickLeft", [] { return true; }, [] (bool last, bool curr) {
     move_according_to(vr::TrackedControllerRole_LeftHand, last, curr);
     }),
-  digital_action_data("/actions/game/in/MoveRight", [] { return (cmode && sm::NORMAL); }, [] (bool last, bool curr) {
+  digital_action_data("/actions/general/in/ClickRight", [] { return true; }, [] (bool last, bool curr) {
     move_according_to(vr::TrackedControllerRole_RightHand, last, curr);
     }),
   digital_action_data("/actions/game/in/Drop", [] { return (cmode && sm::NORMAL); }, [] (bool last, bool curr) {
@@ -546,8 +559,8 @@ vector<digital_action_data> dads = {
   digital_action_data("/actions/game/in/Skip turn", [] { return (cmode && sm::NORMAL); }, [] (bool last, bool curr) {
     if(curr && !last) dialog::queue_key('s');
     }),
-  digital_action_data("/actions/game/in/EnterMenu", [] { return (cmode && sm::NORMAL); }, [] (bool last, bool curr) {
-    if(curr && !last) dialog::queue_key(PSEUDOKEY_MENU);
+  digital_action_data("/actions/general/in/Menu", [] { return true; }, [] (bool last, bool curr) {
+    if(curr && !last) always_show_hud = !always_show_hud;
     }),
   digital_action_data("/actions/general/in/SetReference", [] { return true; }, [] (bool last, bool curr) {
     if(curr && !last) hmd_ref_at = hmd_at;
@@ -565,8 +578,11 @@ vector<analog_action_data> aads = {
     }),
   };
 
+EX bool always_show_hud = false;
+EX bool in_actual_menu() { return !(cmode & (sm::NORMAL | sm::DRAW)); }
+EX bool in_menu() { return always_show_hud || in_actual_menu(); }
+
 vector<set_data> sads = {
-  set_data("/actions/menu", 20, [] { return !(cmode & sm::NORMAL); }),
   set_data("/actions/game", 20, [] { return cmode & sm::NORMAL; }),
   set_data("/actions/general", 10, [] { return true; })
   };
@@ -601,6 +617,8 @@ EX void track_actions() {
 
   for(auto& cd: vrdata.cdata)
     cd.clicked = false;
+  
+  vr_clicked = false;
   
   forward_cell = nullptr;
 

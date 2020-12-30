@@ -385,11 +385,6 @@ EX namespace dialog {
   
   EX void display() {
 
-    #if CAP_VR
-    for(auto h: vrhr::get_hits())
-      displaystr(h.x, h.y, 2, vid.fsize * 2, "X", 0xFFD500, 8);
-    #endif
-
     callhooks(hooks_display_dialog);
     int N = items.size();
     dfsize = vid.fsize;
@@ -442,16 +437,6 @@ EX namespace dialog {
           xthis = xthis && (mousex >= dcenter - dialogwidth/2 && mousex <= dcenter + dialogwidth/2);
         displayfr(dcenter, mid, 2, dfsize * I.scale/100, I.body, I.color, 8);
         if(xthis) getcstat = I.key;
-
-        #if CAP_VR
-        for(auto h: vrhr::get_hits()) {
-          bool vrthis = (h.y >= top && h.y < tothei);
-          if(cmode & sm::DIALOG_STRICT_X)
-            vrthis = vrthis && (mousex >= dcenter - dialogwidth/2 && mousex <= dcenter + dialogwidth/2);
-          if(vrthis) I.color = I.colors;
-          if(vrthis && h.clicked) queue_key(I.key);
-          }
-        #endif
         }
       else if(I.type == diItem || I.type == diBigItem) {
         bool xthis = (mousey >= top && mousey < tothei);
@@ -469,18 +454,6 @@ EX namespace dialog {
           I.color = (xthis&&mousepressed&&actonrelease) ? I.colorc : I.colors;
           }
 #endif        
-
-        #if CAP_VR
-        for(auto h: vrhr::get_hits()) {
-          bool vrthis = (h.y >= top && h.y < tothei);
-          if(cmode & sm::DIALOG_STRICT_X)
-            vrthis = vrthis && (mousex >= dcenter - dialogwidth/2 && mousex <= dcenter + dialogwidth/2);
-          if(vrthis) I.color = I.colors;
-          if(vrthis && h.clicked) {
-            queue_key(I.key);
-            }
-          }
-        #endif
 
         if(I.type == diBigItem) {
           displayfr(dcenter, mid, 2, dfsize * I.scale/100, I.body, I.color, 8);
@@ -516,16 +489,6 @@ EX namespace dialog {
           displayfr(sr, mid, 2, dfsize * I.scale/100, "}", I.color, 0);
           }
         if(xthis) getcstat = I.key, inslider = true, slider_x = mousex;
-
-        #if CAP_VR
-        for(auto h: vrhr::get_hits()) {
-          bool vrthis = (h.y >= top && h.y < tothei);
-          if(cmode & sm::DIALOG_STRICT_X)
-            vrthis = vrthis && (mousex >= dcenter - dialogwidth/2 && mousex <= dcenter + dialogwidth/2);
-          if(vrthis) I.color = I.colors;
-          if(vrthis && h.clicked) queue_key(I.key), inslider = true, slider_x = h.x;
-          }
-        #endif
         }
       else if(I.type == diKeyboard) {
         int len = 0;
@@ -749,13 +712,6 @@ EX namespace dialog {
       
       if(mousey >= y - vid.fsize && mousey < y + vid.fsize)
         getcstat = 'A' + i, inslider = true, slider_x = mousex;
-
-      #if CAP_VR
-      for(auto h: vrhr::get_hits()) {
-        bool vrthis = (h.y >= y - vid.fsize && h.y < y + vid.fsize);
-        if(vrthis && h.clicked) queue_key('A' + i), inslider = true, slider_x = h.x;
-        }
-      #endif
       }
     
     displayColorButton(dcenter, vid.yres/2+vid.fsize * 6, XLAT("select this color") + " : " + format(colorAlpha ? "%08X" : "%06X", color), ' ', 8, 0, color >> (colorAlpha ? ash : 0));
