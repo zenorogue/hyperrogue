@@ -39,6 +39,10 @@ static const auto SKIPFAC = .4;
 // is the player using mouse? (used for auto-cross)
 EX bool mousing = true;
 
+/** /brief 0 for the system pointer, or VR controller ID */
+
+EX int which_pointer = 0;
+
 // is the mouse button pressed?
 EX bool mousepressed = false;
 EX bool mousemoved = false;
@@ -595,7 +599,13 @@ EX void handleKeyNormal(int sym, int uni) {
 EX bool need_mouseh = false;
 
 EX void fix_mouseh() {
-  if(!need_mouseh) ;
+  if(0) ;
+#if CAP_VR
+  else if(vrhr::state && which_pointer) {
+    vrhr::compute_point(which_pointer, mouseh, mouseover);
+    }
+#endif
+  else if(!need_mouseh) ;
 #if CAP_RUG
   else if(rug::rugged)
     mouseh = rug::gethyper(mousex, mousey);
@@ -956,6 +966,7 @@ EX void handle_event(SDL_Event& ev) {
       mousepressed = ev.type == SDL_MOUSEBUTTONDOWN;
       if(mousepressed) flashMessages();
       mousing = true;
+      which_pointer = 0;
       bool was_holdmouse = holdmouse;
       holdmouse = false;
       
@@ -1025,6 +1036,7 @@ EX void handle_event(SDL_Event& ev) {
       int lmousex = mousex, lmousey = mousey;
       
       mousing = true;
+      which_pointer = 0;
       mousemoved = true;
       mousex = ev.motion.x;
       mousey = ev.motion.y;

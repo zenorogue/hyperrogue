@@ -124,6 +124,7 @@ struct vrdata_t {
   transmatrix eyepos[2];
   vr::TrackedDevicePose_t poses[ vr::k_unMaxTrackedDeviceCount ];
   transmatrix pose_matrix[vr::k_unMaxTrackedDeviceCount ];
+  transmatrix last_pose_matrix[ vr::k_unMaxTrackedDeviceCount ];
   vector<vr_rendermodel*> models;
   vr_rendermodel* device_models[ vr::k_unMaxTrackedDeviceCount ];
   controller_data cdata [ vr::k_unMaxTrackedDeviceCount ];
@@ -340,6 +341,14 @@ void track_all() {
       px[1] += current_display->ysize/2;
       cd.x = px[0];
       cd.y = px[1];
+      
+      if(hdist(vrdata.pose_matrix[i] * C0, vrdata.last_pose_matrix[i] * C0) > .05) {
+       vrdata.last_pose_matrix[i] = vrdata.pose_matrix[i];
+       mousing = true;
+       which_pointer = i;
+       println(hlog, "setting which_pointer to ", i);
+       }
+
       }
     }
     
@@ -389,6 +398,43 @@ EX void vr_shift() {
 
 EX ld absolute_unit_in_meters = 3;
 
+/** what point and cell is the controller number id pointing to */
+
+ld vr_distance(shiftpoint h, int id) {
+  hyperpoint hscr;
+  applymodel(h, hscr);
+  E4; hscr[3] = 1;
+  hyperpoint hc = inverse(sm * hmd_at * vrdata.pose_matrix[id] * sm) * hmd_mv * hscr;
+  if(hc[2] > 0.1) return 1e6; /* behind */
+  return sqhypot_d(2, hc);
+  }
+
+EX void compute_point(int id, shiftpoint& res, cell*& c) {
+  println(hlog, "computing point");
+  gen_mv();
+  c = nullptr;
+  ld best = 1e9;
+  
+  shiftmatrix T;
+  
+  // needed so that applymodel gives the VR coordinates
+  dynamicval<int> dvs (vrhr::state, 2); 
+  
+  for(auto p: current_display->all_drawn_copies) {
+    for(auto& V: p.second) {
+      shiftpoint h = V * pointable();
+      ld d = vr_distance(h, id);
+      if(d < best) best = d, c = p.first, T = V;
+      }
+    }
+  
+  auto rel = pointable();
+  
+  T = minimize_point_value(T, [&] (const shiftmatrix& T1) { return vr_distance(T1*rel, id); });
+  
+  res = T * rel;
+  }  
+
 void move_according_to(vr::ETrackedControllerRole role, bool last, bool cur) {
   if(!last && !cur) return;
   int id = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole(role);
@@ -408,26 +454,7 @@ void move_according_to(vr::ETrackedControllerRole role, bool last, bool cur) {
         }
       }
     else {
-      gen_mv();
-      forward_cell = nullptr;
-      ld best = 1e9;
-      dynamicval<int> dvs (vrhr::state, 2);
-      for(auto p: current_display->all_drawn_copies) {
-        for(auto& V: p.second) {
-          hyperpoint hscr;
-          applymodel(V*C0, hscr);
-          bool changed = false;
-          if(1) {
-            E4; hscr[3] = 1;
-            hyperpoint h = inverse(sm * hmd_at * vrdata.pose_matrix[id] * sm) * hmd_mv * hscr;
-
-            if(h[2] > 0.1) continue;
-            ld d = sqhypot_d(2, h);
-            if(d < best) best = d, forward_cell = p.first, changed = true;
-            }
-          if(changed) mouseh = V * C0;
-          }
-        }
+      compute_point(id, mouseh, forward_cell);
       if(forward_cell && last && !cur) {
         calcMousedest();
         if(!canmove) movepcto(mousedest), remission(); else movepcto(mousedest);
@@ -588,6 +615,8 @@ EX void start_vr() {
 
   vr::EVRInitError eError = vr::VRInitError_None;
   vrdata.vr = vr::VR_Init( &eError, vr::VRApplication_Scene );
+  
+  for(auto& m: vrdata.last_pose_matrix) m = Id;
 
   if(eError != vr::VRInitError_None) {
     error_msg = vr::VR_GetVRInitErrorAsEnglishDescription( eError );
