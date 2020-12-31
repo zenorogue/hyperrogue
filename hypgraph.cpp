@@ -1081,7 +1081,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       break;
     
     case mdEquidistant: case mdEquiarea: case mdEquivolume: {
-      if(vrhr::rendering() && GDIM == 3) {
+      if(vrhr::rendering() && GDIM == 3 && pmodel == mdEquidistant) {
         ret = inverse_exp(H_orig);
         ret[3] = 1;
         return;
