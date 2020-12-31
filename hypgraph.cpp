@@ -671,7 +671,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         models::apply_orientation_yz(ret[2], ret[1]);
         }
       
-      if(nonisotropic) ret = lp_apply(ret);
+      if(nonisotropic && !vrhr::rendering()) ret = lp_apply(ret);
 
       break;
       }
@@ -1081,6 +1081,12 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       break;
     
     case mdEquidistant: case mdEquiarea: case mdEquivolume: {
+      if(vrhr::rendering() && GDIM == 3) {
+        ret = inverse_exp(H_orig);
+        ret[3] = 1;
+        return;
+        }
+
       if(nonisotropic || prod) {
         ret = lp_apply(inverse_exp(H_orig));
         ret[3] = 1;
