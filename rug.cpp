@@ -1355,9 +1355,6 @@ EX shiftpoint gethyper(ld x, ld y) {
   
   bool found = false;
 
-  auto md = pmodel;
-  if(vrhr::active()) md = vrhr::pmodel_3d_version();
-  
   for(int i=0; i<isize(triangles); i++) {
     auto r0 = triangles[i].m[0];
     auto r1 = triangles[i].m[1];
@@ -1377,21 +1374,29 @@ EX shiftpoint gethyper(ld x, ld y) {
           (r0->native[3] < 0) + (r1->native[3] < 0) + (r2->native[3] < 0);
         if(sp == 1 || sp == 2) continue;
         }
-    
-      apply_other_model(shiftless(U * r0->native), p0, md);
-      apply_other_model(shiftless(U * r1->native), p1, md);
-      apply_other_model(shiftless(U * r2->native), p2, md);
+      
+
+      auto find = [&] (const hyperpoint &native, hyperpoint& res) {
+        if(!vr) {
+          applymodel(shiftless(U * native), res);
+          }
+        else {
+          dynamicval<int> vi(vrhr::state, 2);
+          bool bad;
+          res = vrhr::model_location(shiftless(U * native), bad);
+          if(bad) error = true;
+          E4; res[3] = 1; res = T * res;
+          }
+        };
+
+      find(r0->native, p0);
+      find(r1->native, p1);
+      find(r2->native, p2);
+      
       }
 
     if(error || spherepoints == 1 || spherepoints == 2) continue;
     
-    if(vr) { 
-      E4;
-      p0[3] = 1; p0 = T * p0; 
-      p1[3] = 1; p1 = T * p1; 
-      p2[3] = 1; p2 = T * p2; 
-      }
-
     double dx1 = p1[0] - p0[0];
     double dy1 = p1[1] - p0[1];
     double dx2 = p2[0] - p0[0];
