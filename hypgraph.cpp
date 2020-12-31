@@ -403,7 +403,6 @@ EX void vr_sphere(hyperpoint& ret, hyperpoint& H, eModel md) {
     ld d = sqhypot_d(3, ret);
     ret /= abs(d);
     }
-  models::apply_vr(ret[2], ret[1]);
   }
 
 void vr_disk(hyperpoint& ret, hyperpoint& H) {
@@ -431,8 +430,6 @@ void vr_disk(hyperpoint& ret, hyperpoint& H) {
     ret[1] = ax * H[1] / dd;
     ret[2] = ay;
     }
-  
-  models::apply_vr(ret[2], ret[1]);
   }
 
 EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
@@ -723,12 +720,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
           }
         }
 
-      #if CAP_VR
-      if(vrhr::rendering()) {
-        models::apply_vr(ret[2], ret[1]);
-        return;
-        }
-      #endif
+      if(vrhr::rendering()) return;
       
       swap(ret[1], ret[2]);
       
@@ -760,8 +752,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
           ld v = intval(H, Hypc);
           ret *= pow(v, (pconf.depth_scaling-1) / 2);
           }
-        models::apply_vr(ret[2], ret[1]);
-        break;
+        return;
         }
       #endif
       

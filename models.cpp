@@ -120,7 +120,7 @@ EX namespace models {
   EX ld rotation_xy2 = 90;
   EX int do_rotate = 1;
   EX ld ocos, osin, ocos_yz, osin_yz;
-  EX ld cos_ball, sin_ball, cos_vr, sin_vr;
+  EX ld cos_ball, sin_ball;
   EX bool model_straight, model_straight_yz;
 
   #if HDR
@@ -132,8 +132,6 @@ EX namespace models {
   void apply_orientation_yz(A& x, A& y) { if(!model_straight_yz) tie(x,y) = make_pair(x*ocos_yz + y*osin_yz, y*ocos_yz - x*osin_yz); }
   template<class A>
   void apply_ball(A& x, A& y) { tie(x,y) = make_pair(x*cos_ball + y*sin_ball, y*cos_ball - x*sin_ball); }
-  template<class A>
-  void apply_vr(A& x, A& y) { tie(x,y) = make_pair(x*cos_vr + y*sin_vr, y*cos_vr - x*sin_vr); }
   #endif
 
   EX transmatrix rotmatrix() {
@@ -153,8 +151,6 @@ EX namespace models {
   EX void configure() {
     ld ball = -pconf.ballangle * degree;
     cos_ball = cos(ball), sin_ball = sin(ball);
-    ld vr = -pconf.vr_angle * degree;
-    cos_vr = cos(vr), sin_vr = sin(vr);
     ocos = cos(pconf.model_orientation * degree);
     osin = sin(pconf.model_orientation * degree);
     ocos_yz = cos(pconf.model_orientation_yz * degree);
@@ -412,6 +408,8 @@ EX namespace models {
         }
       };
     }
+  
+  bool set_vr_settings = true;
 
   EX void model_menu() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
@@ -437,8 +435,16 @@ EX namespace models {
       dialog::lastItem().value += " " + its(rotation) + "°" + its(rotation_xz) + "°" + its(rotation_xy2) + "°";
     dialog::add_action([] { edit_rotation(rotation); });
     
+    bool vr_settings = vrhr::active() && set_vr_settings;
+
+    if(vrhr::active()) {
+      dialog::addBoolItem_action(XLAT("edit VR or non-VR settings"), set_vr_settings, 'V');
+      if(set_vr_settings) dialog::items.back().value = "VR";
+      else dialog::items.back().value = "non-VR";
+      }
+    
     // if(vpmodel == mdBand && sphere)
-    if(!in_perspective_v()) {
+    if(!in_perspective_v() && !vr_settings) {
       dialog::addSelItem(XLAT("scale factor"), fts(vpconf.scale), 'z');
       dialog::add_action(editScale);
       }
@@ -480,7 +486,7 @@ EX namespace models {
         });
       }
 
-  if(GDIM == 3 && vpmodel != mdPerspective) {
+  if(GDIM == 3 && vpmodel != mdPerspective && !vr_settings) {
     const string cliphelp = XLAT(
       "Your view of the 3D model is naturally bounded from four directions by your window. "
       "Here, you can also set up similar bounds in the Z direction. Radius of the ball/band "
@@ -535,7 +541,7 @@ EX namespace models {
       dialog::addBoolItem_action(XLAT("use atan to make it finite"), vpconf.use_atan, 'x');
       }
 
-    if(vpmodel == mdBall) {
+    if(vpmodel == mdBall && !vr_settings) {
       dialog::addSelItem(XLAT("projection in ball model"), fts(vpconf.ballproj), 'x');
       dialog::add_action([] () {
         dialog::editNumber(vpconf.ballproj, 0, 100, .1, 0, XLAT("projection in ball model"), 
@@ -562,9 +568,33 @@ EX namespace models {
         });
       }
     
-    if(is_3d(vpconf) && GDIM == 2) {
+    if(is_3d(vpconf) && GDIM == 2 && !vr_settings) {
       dialog::addSelItem(XLAT("camera rotation in 3D models"), fts(vpconf.ballangle) + "°", 'b');
       dialog::add_action(config_camera_rotation);
+      }
+    
+    if(vr_settings) {
+      dialog::addSelItem(XLAT("VR: rotate the 3D model"), fts(vpconf.vr_angle) + "°", 'B');
+      dialog::add_action([] { 
+        dialog::editNumber(vpconf.vr_angle, 0, 90, 5, 0, XLAT("VR: rotate the 3D model"), 
+          "How the VR model should be rotated."
+          );
+        });
+      dialog::addSelItem(XLAT("VR: shift the 3D model"), fts(vpconf.vr_zshift), 'Z');
+      dialog::add_action([] { 
+        dialog::editNumber(vpconf.vr_zshift, 0, 5, 0.1, 1, XLAT("VR: shift the 3D model"), 
+          "How the VR model should be shifted forward, in units. "
+          "The Poincaré disk has the size of 1 unit. You probably do not want this in perspective projections, but "
+          "it is useful to see e.g. the Poincaré ball not from the center."
+          );
+        });
+      dialog::addSelItem(XLAT("VR: scale the 3D model"), fts(vpconf.vr_scale_factor) + "m", 'S');
+      dialog::add_action([] { 
+        dialog::editNumber(vpconf.vr_scale_factor, 0, 5, 0.1, 1, XLAT("VR: scale the 3D model"), 
+          "How the VR model should be scaled. At scale 1, 1 unit = 1 meter. Does not affect perspective projections, "
+          "where the 'absolute unit' setting is used instead."
+          );
+        });
       }
     
     if(vpmodel == mdHyperboloid) {

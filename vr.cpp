@@ -346,8 +346,8 @@ void track_all() {
         ld p = ilerp(h1[2], h2[2], -ui_depth);
         hyperpoint pxo = lerp(h1, h2, p);
         hyperpoint px = pxo;
-        px[0] /= ui_size;
-        px[1] /= -ui_size;
+        px[0] /= ui_size * ui_size_unit;
+        px[1] /= -ui_size * ui_size_unit;
         px[0] += current_display->xsize/2;
         px[1] += current_display->ysize/2;
         mousex = px[0];
@@ -755,7 +755,11 @@ EX void clear() {
   }
 
 EX ld ui_depth = 1.5;
-EX ld ui_size = 0.002;
+EX ld ui_size = 2;
+
+#if HDR
+const ld ui_size_unit = 0.001;
+#endif
 
 EX void in_vr_ui(reaction_t what) {
   
@@ -778,8 +782,8 @@ EX void in_vr_ui(reaction_t what) {
     hmd_mvp = Id;
     hmd_mvp = xpush(-xsi/2) * ypush(-ysi/2) * hmd_mvp;
     transmatrix Sca = Id;
-    Sca[0][0] *= ui_size;
-    Sca[1][1] *= -ui_size;
+    Sca[0][0] *= ui_size * ui_size_unit;
+    Sca[1][1] *= -ui_size * ui_size_unit;
     Sca[2][2] *= 0;
     hmd_mvp = Sca * hmd_mvp;
     hmd_mvp = zpush(-ui_depth) * hmd_mvp;
@@ -853,6 +857,8 @@ EX void gen_mv() {
       hmd_mv = NLP * hmd_mv;          
       }
     hmd_mv = sm * hmd_mv;
+
+    if(pconf.vr_angle) hmd_mv = cspin(1, 2, -pconf.vr_angle * degree) * hmd_mv;
     if(pconf.vr_zshift) hmd_mv = euclidean_translate(0, 0, -pconf.vr_zshift) * hmd_mv;
     hmd_mv = mu * hmd_mv;
     if(hsm == eHeadset::model_viewing) {
@@ -1010,18 +1016,50 @@ EX void show_vr_settings() {
         "Elements of the HyperRogue world have fixed size in terms of absolute units, "
         "so reducing the absolute unit makes them smaller. "
         "If you are playing in the Euclidean mode, this feature just scales everything "
-        "(e.g., in the cube tiling, the 'absolute unit' is just the edge of the cube)."
+        "(e.g., in the cube tiling, the 'absolute unit' is just the edge of the cube). "
+        "Only perspective projections are affected, other models use the 'VR scale' setting "
+        "from the Projections menu."
         ));
       dialog::scaleLog();
       });
+
+  dialog::addSelItem(XLAT("projection"), current_proj_name(), 'M');
+  dialog::add_action_push(models::model_menu);
     
-  if(hsm == eHeadset::reference) {
+  if(among(hsm, eHeadset::reference, eHeadset::model_viewing)) {
     hyperpoint h = hmd_at * inverse(hmd_ref_at) * C0;
       
     dialog::addSelItem(XLAT("reset the reference point"), state ? fts(hypot_d(3, h)) + "m" : "", 'r');
     dialog::add_action([] { hmd_ref_at = hmd_at; });
     }
   else dialog::addBreak(100);
+
+  dialog::addSelItem(XLAT("pointer length"), fts(pointer_length) + "m", 'p');
+  dialog::add_action([] {
+    dialog::editNumber(pointer_length, 0, 2, 0.1, 1, XLAT("pointer length"), 
+      XLAT(
+        "If the pointer length is 0.5m, the object pointed to is 0.5 meter from the controller. "
+        "This is used in situations where the controller is used as a 3D mouse, e.g., "
+        "the drawing tool in three-dimensional geometries. When pointing at two-dimensional surfaces, "
+        "this is not relevant (the pointer is as long as needed to hit the surface.)."
+        ));
+      });
+
+  dialog::addSelItem(XLAT("UI size"), fts(ui_size) + "mm", 'u');
+  dialog::add_action([] {
+    dialog::editNumber(ui_size, 0, 10, 0.1, 2, XLAT("UI size"), 
+      XLAT(
+        "How big is a pixel of the user interface (HUD and menus). The user interface is as big as the window on the desktop."
+        ));
+      });
+    
+  dialog::addSelItem(XLAT("UI depth"), fts(ui_depth) + "m", 'U');
+  dialog::add_action([] {
+    dialog::editNumber(ui_depth, 0, 2, 0.1, 1, XLAT("UI depth"), 
+      XLAT(
+        "How far to show the user interface (HUD and menus)."
+        ));
+      });    
   
   dialog::addBack();
   dialog::display();
@@ -1070,7 +1108,25 @@ auto hooka = addHook(hooks_args, 100, readArgs);
 #if CAP_CONFIG
 void addconfig() {
   addsaver(enabled, "vr-enabled");
-  addparam(absolute_unit_in_meters, "vr-abs-unit");
+
+  addparamsaver(absolute_unit_in_meters, "vr-abs-unit");
+
+  addparamsaver(pconf.vr_scale_factor, "vr_scale");
+  addparamsaver(pconf.vr_zshift, "vr_zshift");
+  addparamsaver(pconf.vr_angle, "vr_angle");
+
+  auto& rconf = vid.rug_config;
+  addparamsaver(rconf.vr_scale_factor, "rug_vr_scale");
+  addparamsaver(rconf.vr_zshift, "rug_vr_shift");
+  addparamsaver(rconf.vr_angle, "rug_vr_angle");
+
+  addparamsaver(vrhr::pointer_length, "vr_pointer_length");
+  addparamsaver(vrhr::ui_depth, "vr_ui_depth");
+  addparamsaver(vrhr::ui_size, "vr_ui_size");
+  
+  addsaverenum(vrhr::hsm, "vr-headset-mode");
+  addsaverenum(vrhr::eyes, "vr-eyes-mode");
+  addsaverenum(vrhr::cscr, "vr-screen-mode");
   }
 auto hookc = addHook(hooks_configfile, 100, addconfig);
 #endif
