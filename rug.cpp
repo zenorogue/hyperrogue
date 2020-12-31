@@ -1344,7 +1344,7 @@ EX shiftpoint gethyper(ld x, ld y) {
     mx = my = 0;
     E4;
     vrhr::gen_mv();
-    T = vrhr::screen_to_controller(which_pointer);
+    T = vrhr::model_to_controller(which_pointer);
     }
   
   calcparam();

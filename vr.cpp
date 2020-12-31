@@ -148,7 +148,8 @@ struct vrdata_t {
   };
 
 /** 0,1 == eyes, 2 == headset */
-transmatrix hmd_mv_for[3], hmd_pre_for[3];
+EX transmatrix hmd_mv_for[3];
+EX transmatrix hmd_pre_for[3];
 
 vrdata_t vrdata;
 
@@ -475,11 +476,11 @@ EX eModel pmodel_3d_version() {
   }
 
 /** convert model coordinates to controller-relative coordinates */
-EX transmatrix screen_to_controller(int id) {
+EX transmatrix model_to_controller(int id) {
   return inverse(sm * hmd_at * vrdata.pose_matrix[id] * sm) * hmd_mv;
   }
 
-hyperpoint perceived_location(shiftpoint h, int id, bool& bad) {
+EX hyperpoint model_location(shiftpoint h, bool& bad) {
   if(eyes == eEyes::truesim) {
   
     hyperpoint eye_at[2], tangent[2];
@@ -530,10 +531,11 @@ hyperpoint perceived_location(shiftpoint h, int id, bool& bad) {
 ld vr_distance(const shiftpoint& h, int id, ld& dist) {
 
   bool bad;
-  hyperpoint hscr = perceived_location(h, id, bad);
+  hyperpoint hscr = model_location(h, bad);
   if(bad) return 1e5;
-  E4; hyperpoint hc = screen_to_controller(id) * hscr;
-  if(WDIM == 2) {
+  bool flat = WDIM == 2;
+  E4; hyperpoint hc = model_to_controller(id) * hscr;
+  if(flat) {
     if(hc[2] > 0.1) return 1e6; /* behind */
     dist = -hc[2];
     return sqhypot_d(2, hc);
