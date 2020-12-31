@@ -2897,6 +2897,11 @@ int read_editor_args() {
     #endif
     }
   #if CAP_POLY
+  else if(argis("-dred")) {
+    PHASEFROM(2); 
+    mapeditor::dtcolor = 0xFF0000FF;
+    mapeditor::dtwidth = 0.1;
+    }
   else if(argis("-picload")) { PHASE(3); shift(); mapeditor::loadPicFile(args()); }
   #endif
   else return 1;
