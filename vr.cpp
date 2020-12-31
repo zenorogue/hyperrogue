@@ -468,10 +468,15 @@ EX ld absolute_unit_in_meters = 3;
 
 /** what point and cell is the controller number id pointing to */
 
-eModel pmodel_3d_version() {
+EX eModel pmodel_3d_version() {
   if(pmodel == mdGeodesic) return mdEquidistant;
   if(pmodel == mdPerspective) return nonisotropic ? mdHorocyclic : mdEquidistant;
   return pmodel;
+  }
+
+/** convert model coordinates to controller-relative coordinates */
+EX transmatrix screen_to_controller(int id) {
+  return inverse(sm * hmd_at * vrdata.pose_matrix[id] * sm) * hmd_mv;
   }
 
 ld vr_distance(shiftpoint h, int id, ld& dist) {
@@ -482,7 +487,7 @@ ld vr_distance(shiftpoint h, int id, ld& dist) {
   if(in_vr_sphere && get_side(hscr) == (sphereflipped() ? -1 : 1)) return 1e5;
   
   E4; hscr[3] = 1;
-  hyperpoint hc = inverse(sm * hmd_at * vrdata.pose_matrix[id] * sm) * hmd_mv * hscr;
+  hyperpoint hc = screen_to_controller(id) * hscr;
   if(WDIM == 2) {
     if(hc[2] > 0.1) return 1e6; /* behind */
     dist = -hc[2];

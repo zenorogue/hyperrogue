@@ -1331,6 +1331,21 @@ EX shiftpoint gethyper(ld x, ld y) {
 
   double mx = (x - current_display->xcenter)/current_display->radius;
   double my = (y - current_display->ycenter)/current_display->radius/pconf.stretch;
+
+  bool vr = vrhr::active() && which_pointer;
+  transmatrix T = Id, U;
+
+  if(1) {
+    USING_NATIVE_GEOMETRY;
+    U = ortho_inverse(NLP) * rugView;
+    }
+  
+  if(vr) {
+    mx = my = 0;
+    E4;
+    vrhr::gen_mv();
+    T = vrhr::screen_to_controller(which_pointer);
+    }
   
   calcparam();
   
@@ -1339,6 +1354,9 @@ EX shiftpoint gethyper(ld x, ld y) {
   double rx1=0, ry1=0;
   
   bool found = false;
+
+  auto md = pmodel;
+  if(vrhr::active()) md = vrhr::pmodel_3d_version();
   
   for(int i=0; i<isize(triangles); i++) {
     auto r0 = triangles[i].m[0];
@@ -1360,12 +1378,20 @@ EX shiftpoint gethyper(ld x, ld y) {
         if(sp == 1 || sp == 2) continue;
         }
     
-      applymodel(shiftless(ortho_inverse(NLP) * rugView * r0->native), p0);
-      applymodel(shiftless(ortho_inverse(NLP) * rugView * r1->native), p1);
-      applymodel(shiftless(ortho_inverse(NLP) * rugView * r2->native), p2);
+      apply_other_model(shiftless(U * r0->native), p0, md);
+      apply_other_model(shiftless(U * r1->native), p1, md);
+      apply_other_model(shiftless(U * r2->native), p2, md);
       }
 
     if(error || spherepoints == 1 || spherepoints == 2) continue;
+    
+    if(vr) { 
+      E4;
+      p0[3] = 1; p0 = T * p0; 
+      p1[3] = 1; p1 = T * p1; 
+      p2[3] = 1; p2 = T * p2; 
+      }
+
     double dx1 = p1[0] - p0[0];
     double dy1 = p1[1] - p0[1];
     double dx2 = p2[0] - p0[0];
@@ -1381,10 +1407,12 @@ EX shiftpoint gethyper(ld x, ld y) {
     if(tx >= 0 && ty >= 0 && tx+ty <= 1) {
       double rz1 = p0[2] * (1-tx-ty) + p1[2] * tx + p2[2] * ty;
       rz1 = -rz1;
-      if(rz1 < radar_distance) {
+      if(vr && rz1 < 0) { /* behind the controller, ignore */ }
+      else if(rz1 < radar_distance) {
         radar_distance = rz1;
         rx1 = r0->x1 + (r1->x1 - r0->x1) * tx + (r2->x1 - r0->x1) * ty;
         ry1 = r0->y1 + (r1->y1 - r0->y1) * tx + (r2->y1 - r0->y1) * ty;
+        if(vr) vrhr::pointer_distance = radar_distance;
         }
       found = true;
       }
