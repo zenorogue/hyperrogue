@@ -479,15 +479,60 @@ EX transmatrix screen_to_controller(int id) {
   return inverse(sm * hmd_at * vrdata.pose_matrix[id] * sm) * hmd_mv;
   }
 
-ld vr_distance(shiftpoint h, int id, ld& dist) {
-  hyperpoint hscr;
-  h.h = hmd_pre_for[2] * h.h;
-  eModel md = pmodel_3d_version();
-  apply_other_model(h, hscr, md);
-  if(in_vr_sphere && get_side(hscr) == (sphereflipped() ? -1 : 1)) return 1e5;
+hyperpoint perceived_location(shiftpoint h, int id, bool& bad) {
+  if(eyes == eEyes::truesim) {
   
-  E4; hscr[3] = 1;
-  hyperpoint hc = screen_to_controller(id) * hscr;
+    hyperpoint eye_at[2], tangent[2];
+    bad = false;
+    for(int i=0; i<2; i++) {
+      shiftpoint h1 = h;
+      h1.h = hmd_pre_for[i] * h1.h;
+      eModel md = pmodel_3d_version();
+      hyperpoint hscr;
+      apply_other_model(h1, hscr, md);
+      E4;      
+      hscr[3] = 1;
+      eye_at[i] = vrdata.eyepos[i] * C0;
+      tangent[i] = vrdata.eyepos[i] * sm * hmd_mv_for[i] * (hscr - C0);
+      }
+
+    // eye_at[0] + tangent[0] * a == eye_at[1] + tangent[1] * b
+    // (in coordinates 0,2; in nonisotropic geometries, [1] may be different)
+    
+    E4;
+    
+    auto t10 = tangent[1][0];
+    auto t12 = tangent[1][2];
+    auto t00 = tangent[0][0];
+    auto t02 = tangent[0][2];
+    
+    ld a = (t10 * eye_at[0][2] - t12 * eye_at[0][0] - t10 * eye_at[1][2] + t12 * eye_at[1][0]) / (t00 * t12 - t02 * t10);
+    ld b = (t00 * eye_at[1][2] - t02 * eye_at[1][0] - t00 * eye_at[0][2] + t02 * eye_at[0][0]) / (t10 * t02 - t12 * t00);
+    
+    hyperpoint hit0 = eye_at[0] + tangent[0] * a;
+    hyperpoint hit1 = eye_at[1] + tangent[1] * b;
+    // we should have hit0 == hit1, except coordinate [1]
+
+    return (hit0 + hit1) / 2;
+    }
+  else {
+    hyperpoint hscr;
+    h.h = hmd_pre_for[2] * h.h;
+    eModel md = pmodel_3d_version();
+    apply_other_model(h, hscr, md);
+    bad = in_vr_sphere && get_side(hscr) == (sphereflipped() ? -1 : 1);
+  
+    hscr[3] = 1;
+    return hscr;
+    }
+  }
+
+ld vr_distance(const shiftpoint& h, int id, ld& dist) {
+
+  bool bad;
+  hyperpoint hscr = perceived_location(h, id, bad);
+  if(bad) return 1e5;
+  E4; hyperpoint hc = screen_to_controller(id) * hscr;
   if(WDIM == 2) {
     if(hc[2] > 0.1) return 1e6; /* behind */
     dist = -hc[2];
