@@ -1027,6 +1027,7 @@ EX void show_vr_settings() {
   dialog::add_action_push(models::model_menu);
     
   if(among(hsm, eHeadset::reference, eHeadset::model_viewing)) {
+    E4;
     hyperpoint h = hmd_at * inverse(hmd_ref_at) * C0;
       
     dialog::addSelItem(XLAT("reset the reference point"), state ? fts(hypot_d(3, h)) + "m" : "", 'r');
