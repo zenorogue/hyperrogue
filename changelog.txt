@@ -4195,3 +4195,24 @@ Not yet in HyperRogue online, but see: https://zenorogue.itch.io/bringris
 - an attempt to set DPI awareness on Windows
 - a bit of Panini projection was still used even when off
 - preliminary implementation of VR (see: http://roguetemple.com/z/hyper/vr-status.txt for the current status)
+
+2020-12-31 19:18 Update 11.4e:
+  Improvements to VR:
+  - added VR demos
+  - simplified VR controls (reusing the mouse control)
+  - VR controls for shmup/racing
+  - correct pointing in VR in all contexts (including rug, drawing tool in 3D geometries, etc.)
+  - display various 2D and 3D models in VR
+  - "single" computer screen
+  - works with raycasting now
+
+  Other improvements:
+  - Orb of Slaying is now marked useful in Eclectic and Brownian
+  - Princess is now able to open the doors if she cannot reach the player
+  - Princess hug animation
+  - fixed potential crashes on Ivy errors
+  - fixed a crash bug when collecting an Orb of Safety via Orb of Space with Orb of Impact active
+  - fixed a crash bug when collecting an Orb of Safety via Orb of Water
+  - shmup: fixed redundant and incorrect revival of mirror spirits
+  - fixed more possible crashes
+
