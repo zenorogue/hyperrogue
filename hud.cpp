@@ -175,6 +175,7 @@ int glyphflags(int gid) {
 
 EX bool graphglyph() {
   // if(GDIM == 3) return false;
+  if(vrhr::active()) return false;
   return vid.graphglyph == 2 || (vid.graphglyph == 1 && vid.monmode);
   }
 
