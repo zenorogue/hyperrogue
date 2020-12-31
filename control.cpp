@@ -800,7 +800,7 @@ EX void mainloopiter() {
   DEBB(DF_GRAPH, ("polling for events\n"));
   
   #if CAP_VR
-  if(vrhr::active()) {
+  if(vrhr::active() && !shmup::on) {
     static int lastticks = ticks;
     ld t = (ticks - lastticks) * shiftmul / 400;
     lastticks = ticks;

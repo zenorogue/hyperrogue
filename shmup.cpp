@@ -781,6 +781,22 @@ void movePlayer(monster *m, int delta) {
     mdy = (mousey - yb) / (rad/2.);
     }
   #endif
+
+  #if CAP_VR
+  if(vrhr::active()) {
+    if(GDIM == 3) {
+      mouseaim_x += vrhr::vraim_x * delta / 400;
+      mouseaim_y -= vrhr::vraim_y * delta / 400;
+      mdy -= vrhr::vrgo_y;
+      mdx += vrhr::vrgo_x;
+      }
+    else {
+      println(hlog, "2dim");
+      mturn -= vrhr::vraim_x + vrhr::vrgo_x;
+      mgo += vrhr::vrgo_y + vrhr::vraim_y;
+      }
+    }
+  #endif
   
   if(actionspressed[b+pcOrbPower] && !lactionpressed[b+pcOrbPower] && mouseover && !m->dead) {
     cwt.at = m->base;
