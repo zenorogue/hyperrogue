@@ -1105,6 +1105,10 @@ int readArgs() {
     PHASEFROM(2);
     shift_arg_formula(pconf.vr_zshift);
     }
+  else if(argis("-vr-pl")) {
+    PHASEFROM(2);
+    shift_arg_formula(pointer_length);
+    }
   else if(argis("-vr-angle")) {
     PHASEFROM(2);
     shift_arg_formula(pconf.vr_angle);
