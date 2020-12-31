@@ -302,12 +302,16 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     }
   else if(pmodel == mdPerspective) {
     shader_flags |= SF_PERS3 | SF_DIRECT;
-    if(vrhr::rendering() && hyperbolic) {
+    #if CAP_VR
+    if(vrhr::rendering() && hyperbolic && vrhr::eyes != vrhr::eEyes::truesim) {
       coordinator += 
         "t = t * acosh(t[3]) / length(t.xyz);\n"
         "t[3] = 1.;\n";
+      distfun = "length(t.xyz)";
       }
-    else if(hyperbolic)
+    else 
+    #endif
+    if(hyperbolic)
       distfun = "acosh(t[3])", treset = true;
     else if(euclid || nonisotropic || stretch::in() || (sphere && ray::in_use))
       distfun = "length(t.xyz)", treset = true;
@@ -459,6 +463,7 @@ void display_data::set_projection(int ed, ld shift) {
   id <<= 1; if(vid.consider_shader_projection) id |= 1;
   #if CAP_VR
   id <<= 3; id |= vrhr::state;
+  if(vrhr::rendering() && vrhr::eyes == vrhr::eEyes::truesim) id += 3;
   #endif
   id <<= 2; id |= (spherespecial & 3);
   if(sol && solv_all) id |= 1;
