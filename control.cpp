@@ -609,7 +609,7 @@ EX bool need_mouseh = false;
 EX void fix_mouseh() {
   if(0) ;
 #if CAP_VR
-  else if(vrhr::active() && which_pointer && !vrhr::in_menu())
+  else if(vrhr::active() && which_pointer && !vrhr::targeting_menu)
     vrhr::compute_point(which_pointer, mouseh, mouseover, vrhr::pointer_distance);
 #endif
   else if(!need_mouseh) ;

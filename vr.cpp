@@ -341,19 +341,25 @@ void track_all() {
         }
       */
       
-      if(in_menu() && which_pointer == i) {
-        hyperpoint h1 = sm * hmd_at_ui * vrdata.pose_matrix[i] * sm * C0;
-        hyperpoint h2 = sm * hmd_at_ui * vrdata.pose_matrix[i] * sm * point31(0, 0, -0.01);
-        ld p = ilerp(h1[2], h2[2], -ui_depth);
-        hyperpoint pxo = lerp(h1, h2, p);
-        hyperpoint px = pxo;
-        px[0] /= ui_size * ui_size_unit;
-        px[1] /= -ui_size * ui_size_unit;
-        px[0] += current_display->xsize/2;
-        px[1] += current_display->ysize/2;
-        mousex = px[0];
-        mousey = px[1];
-        pointer_distance = hdist(pxo, h1);
+      if(which_pointer == i) {
+        if(in_menu()) {
+          hyperpoint h1 = sm * hmd_at_ui * vrdata.pose_matrix[i] * sm * C0;
+          hyperpoint h2 = sm * hmd_at_ui * vrdata.pose_matrix[i] * sm * point31(0, 0, -0.01);
+          ld p = ilerp(h1[2], h2[2], -ui_depth);
+          hyperpoint pxo = lerp(h1, h2, p);
+          hyperpoint px = pxo;
+          px[0] /= ui_size * ui_size_unit;
+          px[1] /= -ui_size * ui_size_unit;
+          px[0] += current_display->xsize/2;
+          px[1] += current_display->ysize/2;
+          targeting_menu = px[0] >= 0 && px[1] >= 0 && px[1] <= vid.xres && px[1] <= vid.xres;
+          if(targeting_menu) {
+            mousex = px[0];
+            mousey = px[1];
+            pointer_distance = hdist(pxo, h1);
+            }
+          }
+        else targeting_menu = false;
         }
       
       if(hdist(vrdata.pose_matrix[i] * C0, vrdata.last_pose_matrix[i] * C0) > .05) {
@@ -362,18 +368,19 @@ void track_all() {
         which_pointer = i;
         println(hlog, "setting which_pointer to ", i);
         }
-
       }
     }    
 
   if(!in_menu()) hmd_at_ui = hmd_at;
   }
 
+EX bool targeting_menu;
+
 EX void send_click() {
   holdmouse = false;
   fix_mouseh();
   println(hlog, "sending a click, getcstat = ", getcstat, " in menu = ", in_menu());
-  if(in_menu())
+  if(in_menu() && targeting_menu)
     handlekey(getcstat, getcstat);
   else
     handlekey('-', '-');
