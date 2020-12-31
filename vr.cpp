@@ -221,6 +221,7 @@ string device_class_name(vr::ETrackedDeviceClass v) {
 
 EX bool first = true;
 
+EX transmatrix hmd_at_ui = Id;
 EX transmatrix hmd_at = Id;
 EX transmatrix hmd_ref_at = Id;
 
@@ -341,8 +342,8 @@ void track_all() {
       */
       
       if(in_menu() && which_pointer == i) {
-        hyperpoint h1 = sm * hmd_at * vrdata.pose_matrix[i] * sm * C0;
-        hyperpoint h2 = sm * hmd_at * vrdata.pose_matrix[i] * sm * point31(0, 0, -0.01);
+        hyperpoint h1 = sm * hmd_at_ui * vrdata.pose_matrix[i] * sm * C0;
+        hyperpoint h2 = sm * hmd_at_ui * vrdata.pose_matrix[i] * sm * point31(0, 0, -0.01);
         ld p = ilerp(h1[2], h2[2], -ui_depth);
         hyperpoint pxo = lerp(h1, h2, p);
         hyperpoint px = pxo;
@@ -363,8 +364,9 @@ void track_all() {
         }
 
       }
-    }
-    
+    }    
+
+  if(!in_menu()) hmd_at_ui = hmd_at;
   }
 
 EX void send_click() {
@@ -576,7 +578,10 @@ vector<digital_action_data> dads = {
     if(curr && !last) dialog::queue_key('s');
     }),
   digital_action_data("/actions/general/in/Menu", [] { return true; }, [] (bool last, bool curr) {
-    if(curr && !last) always_show_hud = !always_show_hud;
+    if(curr && !last) {
+      always_show_hud = !always_show_hud;
+      hmd_at_ui = hmd_at;
+      }
     }),
   digital_action_data("/actions/general/in/SetReference", [] { return true; }, [] (bool last, bool curr) {
     if(curr && !last) hmd_ref_at = hmd_at;
@@ -787,6 +792,7 @@ EX void in_vr_ui(reaction_t what) {
     Sca[2][2] *= 0;
     hmd_mvp = Sca * hmd_mvp;
     hmd_mvp = zpush(-ui_depth) * hmd_mvp;
+    hmd_mvp = sm * hmd_at * inverse(hmd_at_ui) * sm * hmd_mvp;
     hmd_mvp = vrdata.proj[i] * inverse(vrdata.eyepos[i]) * hmd_mvp;
     reset_projection();
     current_display->set_all(0, 0);
