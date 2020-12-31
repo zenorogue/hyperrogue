@@ -321,6 +321,7 @@ EX bool two_sided_model() {
   }
 
 EX int get_side(const hyperpoint& H) {
+  #if CAP_VR
   if(in_vr_sphere) {
     hyperpoint Hscr;
     applymodel(shiftless(H), Hscr);
@@ -331,6 +332,7 @@ EX int get_side(const hyperpoint& H) {
     for(int i=0; i<3; i++) val += (vr_sphere_center[i] - actual[i]) * actual[i];
     return val > 0 ? -1 : 1;
     }
+  #endif
   if(pmodel == mdDisk && sphere) {
     double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
     double horizon = curnorm / pconf.alpha;

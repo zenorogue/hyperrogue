@@ -1333,19 +1333,22 @@ EX shiftpoint gethyper(ld x, ld y) {
   double my = (y - current_display->ycenter)/current_display->radius/pconf.stretch;
 
   bool vr = vrhr::active() && which_pointer;
-  transmatrix T = Id, U;
+  transmatrix U;
 
   if(1) {
     USING_NATIVE_GEOMETRY;
     U = ortho_inverse(NLP) * rugView;
     }
   
+  #if CAP_VR
+  transmatrix T = Id;
   if(vr) {
     mx = my = 0;
     E4;
     vrhr::gen_mv();
     T = vrhr::model_to_controller(which_pointer);
     }
+  #endif
   
   calcparam();
   
@@ -1380,6 +1383,7 @@ EX shiftpoint gethyper(ld x, ld y) {
         if(!vr) {
           applymodel(shiftless(U * native), res);
           }
+        #if CAP_VR
         else {
           dynamicval<int> vi(vrhr::state, 2);
           bool bad;
@@ -1387,6 +1391,7 @@ EX shiftpoint gethyper(ld x, ld y) {
           if(bad) error = true;
           E4; res[3] = 1; res = T * res;
           }
+        #endif
         };
 
       find(r0->native, p0);
@@ -1417,7 +1422,9 @@ EX shiftpoint gethyper(ld x, ld y) {
         radar_distance = rz1;
         rx1 = r0->x1 + (r1->x1 - r0->x1) * tx + (r2->x1 - r0->x1) * ty;
         ry1 = r0->y1 + (r1->y1 - r0->y1) * tx + (r2->y1 - r0->y1) * ty;
+        #if CAP_VR
         if(vr) vrhr::pointer_distance = radar_distance;
+        #endif
         }
       found = true;
       }

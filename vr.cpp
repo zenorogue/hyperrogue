@@ -11,9 +11,11 @@ namespace hr {
 EX namespace vrhr {
 
 #if !CAP_VR
+#if HDR
 inline bool active() { return false; }
 inline bool rendering() { return false; }
 inline bool rendering_eye() { return false; }
+#endif
 #endif
 
 #if CAP_VR
