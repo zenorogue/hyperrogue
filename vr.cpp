@@ -1053,10 +1053,160 @@ void show_choice(string name, T& value, char key, vector<pair<string, string>> o
     });
   }
 
+EX void show_vr_demos() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);
+  dialog::init(XLAT("VR demos"));
+  dialog::addInfo("warning: these will restart your game!");
+  
+  dialog::addBreak(100);
+
+  dialog::addItem("standard HyperRogue but in VR", 'a');
+  dialog::add_action([] {
+    if(rug::rugged) rug::close();
+    hmd_ref_at = hmd_at;
+    stop_game();
+    set_geometry(gNormal);
+    if(GDIM == 3) geom3::switch_fpp();
+    specialland = laIce;
+    set_variation(eVariation::bitruncated);
+    pmodel = mdDisk;
+    pconf.alpha = 1;
+    pconf.vr_scale_factor = 1;
+    pconf.vr_angle = 0;
+    pconf.vr_zshift = 0;
+    hsm = eHeadset::model_viewing;
+    eyes = eEyes::equidistant;
+    start_game();
+    popScreenAll();
+    });
+
+  dialog::addItem("HyperRogue FPP", 'b');
+  dialog::add_action([] {
+    if(rug::rugged) rug::close();
+    hmd_ref_at = hmd_at;
+    stop_game();
+    pmodel = mdDisk;
+    set_geometry(gNormal);
+    if(GDIM == 2) geom3::switch_fpp();
+    specialland = laIce;
+    set_variation(eVariation::bitruncated);
+    pconf.alpha = 1;
+    pconf.vr_scale_factor = 1;
+    pconf.vr_angle = 0;
+    pconf.vr_zshift = 0;
+    hsm = eHeadset::reference;
+    eyes = eEyes::equidistant;
+    start_game();
+    popScreenAll();
+    });
+
+  dialog::addItem("Hypersian Rug", 'c');
+  dialog::add_action([] {
+    if(rug::rugged) rug::close();
+    hmd_ref_at = hmd_at;
+    stop_game();
+    set_geometry(gNormal);
+    if(GDIM == 3) geom3::switch_fpp();
+    specialland = laIce;
+    set_variation(eVariation::bitruncated);
+    pmodel = mdDisk;
+    pconf.alpha = 1;
+    pconf.vr_scale_factor = 1;
+    pconf.vr_angle = 0;
+    pconf.vr_zshift = 0;
+    hsm = eHeadset::model_viewing;
+    rug::modelscale = 0.5;
+    eyes = eEyes::equidistant;
+    start_game();
+    rug::init();
+    popScreenAll();
+    });
+
+  dialog::addItem("sphere from the inside", 'd');
+  dialog::add_action([] {
+    if(rug::rugged) rug::close();
+    hmd_ref_at = hmd_at;
+    stop_game();
+    set_geometry(gSphere);
+    if(GDIM == 3) geom3::switch_fpp();
+    specialland = laHalloween;
+    set_variation(eVariation::bitruncated);
+    pmodel = mdDisk;
+    pconf.alpha = 0;
+    pconf.vr_scale_factor = 2;
+    pconf.vr_angle = 0;
+    pconf.vr_zshift = 0;
+    hsm = eHeadset::model_viewing;
+    eyes = eEyes::equidistant;
+    start_game();
+    popScreenAll();
+    });
+
+  dialog::addItem("sphere from the outside", 'e');
+  dialog::add_action([] {
+    if(rug::rugged) rug::close();
+    hmd_ref_at = hmd_at;
+    stop_game();
+    set_geometry(gSphere);
+    if(GDIM == 3) geom3::switch_fpp();
+    specialland = laHalloween;
+    set_variation(eVariation::bitruncated);
+    pmodel = mdDisk;
+    pconf.alpha = 2;
+    pconf.vr_scale_factor = 0.5;
+    pconf.vr_angle = 0;
+    pconf.vr_zshift = 0;
+    hsm = eHeadset::model_viewing;
+    eyes = eEyes::equidistant;
+    start_game();
+    popScreenAll();
+    });
+
+  dialog::addItem("Thurston racing", 'f');
+  dialog::add_action([] {
+    if(rug::rugged) rug::close();
+    hmd_ref_at = hmd_at;
+    hsm = eHeadset::reference;
+    eyes = eEyes::equidistant;
+    pushScreen(racing::thurston_racing);
+    popScreenAll();
+    });
+
+  dialog::addItem("raytracing in H3", 'g');
+  dialog::add_action([] {
+    if(rug::rugged) rug::close();
+    hmd_ref_at = hmd_at;
+    hsm = eHeadset::holonomy;
+    eyes = eEyes::truesim;
+    stop_game();
+    specialland = laEmerald;
+    set_geometry(gSpace534);
+    check_cgi();
+    cgi.require_basics();
+    cgi.require_shapes();
+    fieldpattern::field_from_current();
+    set_geometry(gFieldQuotient);
+    int p = 2;
+    for(;; p++) { currfp.Prime = p; currfp.force_hash = 0x72414D0C; if(!currfp.solve()) break; }
+    start_game();
+    popScreenAll();
+    });
+
+  dialog::addBreak(100);
+  dialog::addBack();
+  
+  dialog::display();
+  }
+
 EX void show_vr_settings() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
   dialog::init(XLAT("VR settings"));
+
+  dialog::addItem(XLAT("VR demos"), 'D');
+  dialog::add_action_push(show_vr_demos);
+
   
   dialog::addBoolItem_action(XLAT("VR enabled"), enabled, 'o');
   if(!enabled)
@@ -1164,6 +1314,9 @@ int readArgs() {
     }
   else if(argis("-d:vr")) {
     PHASEFROM(2); launch_dialog(show_vr_settings);
+    }
+  else if(argis("-d:vrd")) {
+    PHASEFROM(2); launch_dialog(show_vr_demos);
     }
   else if(argis("-vr-mode")) {
     PHASEFROM(2); 
