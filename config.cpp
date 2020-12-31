@@ -144,6 +144,16 @@ void addparam(ld& val, const string s) {
   }
 #endif
 
+EX void addparamsaver(ld& val, const string s) {
+  addparam(val, s);
+  addsaver(val, s);
+  }
+
+EX void addparamsaver(ld& val, const string p, const string s) {
+  addparam(val, p);
+  addsaver(val, s);
+  }
+
 EX ld bounded_mine_percentage = 0.1;
 EX int bounded_mine_quantity, bounded_mine_max;
 
