@@ -562,8 +562,9 @@ void display_data::set_projection(int ed, ld shift) {
 
   bool u_alpha = false;
   
-  auto use_mv = [cd] {
+  auto use_mv = [] {
     #if CAP_VR
+    auto cd = current_display;
     if(vrhr::rendering_eye()) {
       glhr::projection_multiply(glhr::tmtogl_transpose(vrhr::hmd_mvp));
       glhr::id_modelview();
