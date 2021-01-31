@@ -241,7 +241,6 @@ auto ah2 = addHook(hooks_config, 100, [] {
   addparamsaver(shot::gamma, "shotgamma");
   addsaver(shot::caption, "shotcaption");
   addparamsaver(shot::fade, "shotfade");
-  #endif  
   });
 
 #endif
