@@ -1407,7 +1407,7 @@ EX void cast() {
     glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(vrhr::eyeproj).as_array());
     }
   #else
-  if(1) ;
+  if(0) ;
   #endif
   else {
     transmatrix proj = Id;
