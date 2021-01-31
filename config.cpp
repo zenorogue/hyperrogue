@@ -43,7 +43,7 @@ struct float_setting {
   void add_as_saver();
   void show_edit_option(char key);
   void show_edit_option() { show_edit_option(default_key); }
-  float_setting *editable(string menu_item_name, ld min_value, ld max_value, ld step, string help_text, char key) {
+  float_setting *editable(ld min_value, ld max_value, ld step, string menu_item_name, string help_text, char key) {
     this->min_value = min_value;
     this->max_value = max_value;
     this->menu_item_name = menu_item_name;

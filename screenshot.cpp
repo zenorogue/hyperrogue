@@ -1801,7 +1801,7 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
     addsaver(anims::noframes, "animation frames");
     addparamsaver(anims::cycle_length, "acycle", "animation cycle length");
     addparamsaver(anims::parabolic_length, "aparabolic", "animation parabolic length")
-      ->editable("cells to go", 0, 10, 1, "", 'c');
+      ->editable(0, 10, 1, "cells to go", "", 'c');
     addparamsaver(anims::rug_angle, "arugangle", "animation rug angle");
     addparamsaver(anims::circle_radius, "acradius", "animation circle radius");
     addparamsaver(anims::circle_spins, "acspins", "animation circle spins");
