@@ -1342,10 +1342,10 @@ void addconfig() {
   addparamsaver(pconf.vr_zshift, "vr_zshift");
   addparamsaver(pconf.vr_angle, "vr_angle");
 
-  auto& rconf = vid.rug_config;
-  addparamsaver(rconf.vr_scale_factor, "rug_vr_scale");
-  addparamsaver(rconf.vr_zshift, "rug_vr_shift");
-  addparamsaver(rconf.vr_angle, "rug_vr_angle");
+  auto& rrconf = vid.rug_config;
+  addparamsaver(rrconf.vr_scale_factor, "rug_vr_scale");
+  addparamsaver(rrconf.vr_zshift, "rug_vr_shift");
+  addparamsaver(rrconf.vr_angle, "rug_vr_angle");
 
   addparamsaver(vrhr::pointer_length, "vr_pointer_length");
   addparamsaver(vrhr::ui_depth, "vr_ui_depth");
