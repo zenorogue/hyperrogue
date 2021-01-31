@@ -233,6 +233,17 @@ int read_args() {
 
 auto ah = addHook(hooks_args, 0, read_args);
 #endif
+auto ah2 = addHook(hooks_config, 100, [] {
+  addsaver(shot::shotx, "shotx");
+  addsaver(shot::shoty, "shoty");
+  addsaverenum(shot::format, "shotsvg");
+  addsaver(shot::transparent, "shottransparent");
+  addparamsaver(shot::gamma, "shotgamma");
+  addsaver(shot::caption, "shotcaption");
+  addparamsaver(shot::fade, "shotfade");
+  #endif  
+  });
+
 #endif
 EX }
 
@@ -1790,7 +1801,19 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
   #if CAP_COMMANDLINE
   + addHook(hooks_args, 100, readArgs)
   #endif
-  ;
+  + addHook(hooks_config, 100, [] {
+    addparamsaver(anims::period, "aperiod", "animation period");
+    addsaver(anims::noframes, "animation frames");
+    addparamsaver(anims::cycle_length, "acycle", "animation cycle length");
+    addparamsaver(anims::parabolic_length, "aparabolic", "animation parabolic length");
+    addparamsaver(anims::rug_angle, "arugangle", "animation rug angle");
+    addparamsaver(anims::circle_radius, "acradius", "animation circle radius");
+    addparamsaver(anims::circle_spins, "acspins", "animation circle spins");
+    addsaver(anims::rug_movement_angle, "rug forward movement angle", 90);
+    addsaver(anims::rug_shift_angle, "rug forward shift angle", 0);
+    addsaver(anims::a, "a", 0);
+    addsaver(anims::b, "b", 0);
+    });
 
 EX bool any_animation() {
   if(history::on) return true;

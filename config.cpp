@@ -499,19 +499,6 @@ EX void initConfig() {
   #if CAP_FILES && CAP_SHOT && CAP_ANIMATIONS
   addsaver(anims::animfile, "animation file format");
   #endif
-  #if CAP_ANIMATIONS
-  addparamsaver(anims::period, "aperiod", "animation period");
-  addsaver(anims::noframes, "animation frames");
-  addparamsaver(anims::cycle_length, "acycle", "animation cycle length");
-  addparamsaver(anims::parabolic_length, "aparabolic", "animation parabolic length");
-  addparamsaver(anims::rug_angle, "arugangle", "animation rug angle");
-  addparamsaver(anims::circle_radius, "acradius", "animation circle radius");
-  addparamsaver(anims::circle_spins, "acspins", "animation circle spins");
-  addsaver(anims::rug_movement_angle, "rug forward movement angle", 90);
-  addsaver(anims::rug_shift_angle, "rug forward shift angle", 0);
-  addsaver(anims::a, "a", 0);
-  addsaver(anims::b, "b", 0);
-  #endif
 
   #if CAP_RUG
   addsaver(rug::move_on_touch, "rug move on touch");
@@ -522,16 +509,6 @@ EX void initConfig() {
   addsaver(crystal::view_coordinates, "crystal-coordinates");
   #endif
   
-  #if CAP_SHOT
-  addsaver(shot::shotx, "shotx");
-  addsaver(shot::shoty, "shoty");
-  addsaverenum(shot::format, "shotsvg");
-  addsaver(shot::transparent, "shottransparent");
-  addparamsaver(shot::gamma, "shotgamma");
-  addsaver(shot::caption, "shotcaption");
-  addparamsaver(shot::fade, "shotfade");
-  #endif
-
 #if CAP_TEXTURE  
   addsaver(texture::texture_aura, "texture-aura", false);
 #endif
@@ -619,16 +596,6 @@ EX void initConfig() {
 
   addsaver(vid.consider_shader_projection, "shader-projection", true);
   
-#if CAP_RACING
-  addsaver(racing::race_advance, "race_advance");
-  addsaver(racing::race_angle, "race_angle");
-  addsaver(racing::ghosts_to_show, "race_ghosts_to_show");
-  addsaver(racing::ghosts_to_save, "race_ghosts_to_save");
-  addsaver(racing::guiding, "race_guiding");
-  addsaver(racing::player_relative, "race_player_relative");
-  addsaver(racing::standard_centering, "race_standard_centering");
-#endif
-
   addsaver(tortoise::shading_enabled, "tortoise_shading", true);
 
   addsaver(bounded_mine_percentage, "bounded_mine_percentage");

@@ -851,9 +851,10 @@ int readArgs() {
 int tstart, tstop;
 heptspin sview;
 
-#if CAP_COMMANDLINE
 auto hook = 
+#if CAP_COMMANDLINE
   addHook(hooks_args, 100, readArgs)
+#endif
 + addHook(hooks_clearmemory, 0, []() {
     track_ready = false;
     track.clear();
@@ -861,9 +862,17 @@ auto hook =
     rti_id.clear();
     for(auto &ch: current_history) ch.clear();
     })
++ addHook(hooks_config, 100, [] {
+    addsaver(racing::race_advance, "race_advance");
+    addsaver(racing::race_angle, "race_angle");
+    addsaver(racing::ghosts_to_show, "race_ghosts_to_show");
+    addsaver(racing::ghosts_to_save, "race_ghosts_to_save");
+    addsaver(racing::guiding, "race_guiding");
+    addsaver(racing::player_relative, "race_player_relative");
+    addsaver(racing::standard_centering, "race_standard_centering");
+    })
 // + addHook(hooks_handleKey, 120, akh);
   ;
-#endif
 
 EX vector<eLand> race_lands = {
   laHunting,
