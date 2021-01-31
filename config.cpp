@@ -52,6 +52,11 @@ struct float_setting {
     default_key = key;
     return this;
     }
+  reaction_t extra, reaction;
+  function<void(float_setting*)> modify_me;
+  float_setting *set_extra(const reaction_t& r) { extra = r; return this; }
+  float_setting *set_reaction(const reaction_t& r) { reaction = r; return this; }
+  float_setting *modif(const function<void(float_setting*)>& r) { modify_me = r; return this; }
   };
 
 #if CAP_CONFIG
@@ -162,10 +167,13 @@ void float_setting::add_as_saver() {
   }
 
 void float_setting::show_edit_option(char key) {
+  if(modify_me) modify_me(this);
   dialog::addSelItem(XLAT(menu_item_name), fts(*value), key);
   dialog::add_action([this] () {
     add_to_changed(this);
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
+    if(reaction) dialog::reaction = reaction;
+    if(extra) dialog::extra_options = extra;
     });
   }
 
@@ -400,32 +408,11 @@ EX void initConfig() {
   
   // special graphics
 
-  addparamsaver(vid.yshift, "yshift", "Y shift", 0);
-  addsaver(vid.use_wall_radar, "wallradar", true);
-  addsaver(vid.fixed_facing, "fixed facing", 0);
-  addsaver(vid.fixed_facing_dir, "fixed facing dir", 90);
-  addsaver(vid.fixed_yz, "fixed YZ", true);
   addsaver(vid.monmode, "monster display mode", DEFAULT_MONMODE);
   addsaver(vid.wallmode, "wall display mode", DEFAULT_WALLMODE);
   addsaver(vid.highlightmode, "highlightmode");
 
-  addparamsaver(vid.depth, "depth", "3D depth", 1);
-  addparamsaver(vid.camera, "camera", "3D camera level", 1);
-  addparamsaver(vid.wall_height, "wall_height", "3D wall height", .3);
-  addparamsaver(vid.rock_wall_ratio, "rock_wall_ratio", "3D rock-wall ratio", .9);
-  addparamsaver(vid.human_wall_ratio, "human_wall_ratio", "3D human-wall ratio", .7);
-  addparamsaver(vid.lake_top, "lake_top", "3D lake top", .25);
-  addparamsaver(vid.lake_bottom, "lake_bottom", "3D lake bottom", .9);
-  addsaver(vid.tc_depth, "3D TC depth", 1);
-  addsaver(vid.tc_camera, "3D TC camera", 2);
-  addsaver(vid.tc_alpha, "3D TC alpha", 3);
-  addparamsaver(vid.highdetail, "highdetail", "3D highdetail", 8);
-  addparamsaver(vid.middetail, "middetail", "3D middetail", 8);
-  addsaver(vid.gp_autoscale_heights, "3D Goldberg autoscaling", true);
   addsaver(vid.always3, "3D always", false);
-  
-  addparamsaver(vid.eye, "eyelevel", 0);
-  addsaver(vid.auto_eye, "auto-eyelevel", false);
   
   addsaver(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA || ISWEB) ? 1 : 0);
   addsaver(reserve_limit, "memory_reserve", 128);
@@ -510,9 +497,6 @@ EX void initConfig() {
   addsaverenum(vid.stereo_mode, "stereo-mode");
 
   addsaver(vid.plevel_factor, "plevel_factor", 0.7);
-
-  addsaver(vid.creature_scale, "3d-creaturescale", 1);
-  addsaver(vid.height_width, "3d-heightwidth", 1.5);
 
   #if CAP_GP
   addsaver(gp::param.first, "goldberg-x", gp::param.first);
@@ -1736,42 +1720,43 @@ EX void show3D() {
     }
 #endif
   if(vid.use_smart_range == 0 && GDIM == 2) {
-    dialog::addSelItem(XLAT("High detail range"), fts(vid.highdetail), 'n');
-    dialog::addSelItem(XLAT("Mid detail range"), fts(vid.middetail), 'm');
+    add_edit(vid.highdetail);
+    add_edit(vid.middetail);
     dialog::addBreak(50);
     }
   
   if(WDIM == 2) {
-    dialog::addSelItem(XLAT(GDIM == 2 ? "Camera level above the plane" : "Z shift"), fts(vid.camera), 'c');
+    add_edit(vid.camera);
     if(GDIM == 3)
-      dialog::addSelItem(XLAT("Eye level"), fts(vid.eye), 'E');
+      add_edit(vid.eye);
 
-    dialog::addSelItem(XLAT("Ground level below the plane"), fts(vid.depth), 'g');
-    
-  
-    if(GDIM == 2)
+    add_edit(vid.depth);
+      
+    if(GDIM == 2) {
       dialog::addSelItem(XLAT("Projection at the ground level"), fts(pconf.alpha), 'p');
+      dialog::add_action(projectionDialog);
+      }
     else if(!in_perspective())
       dialog::addSelItem(XLAT("Projection distance"), fts(pconf.alpha), 'p');
     
     dialog::addBreak(50);
-    dialog::addSelItem(XLAT("Height of walls"), fts(vid.wall_height), 'w');
+    add_edit(vid.wall_height);
     
-    dialog::addSelItem(XLAT("Rock-III to wall ratio"), fts(vid.rock_wall_ratio), 'r');
-    dialog::addSelItem(XLAT("Human to wall ratio"), fts(vid.human_wall_ratio), 'h');
-    dialog::addSelItem(XLAT("Level of water surface"), fts(vid.lake_top), 'l');
-    dialog::addSelItem(XLAT("Level of water bottom"), fts(vid.lake_bottom), 'k');  
+    add_edit(vid.rock_wall_ratio);
+    add_edit(vid.human_wall_ratio);
+    add_edit(vid.lake_top);
+    add_edit(vid.lake_bottom);
     if(scale_used())
-      dialog::addSelItem(XLAT("Creature scale"), fts(vid.creature_scale), 'C');
+      add_edit(vid.creature_scale);
     }
   else {
-    dialog::addSelItem(XLAT("Creature scale"), fts(vid.creature_scale), 'c');
-    dialog::addSelItem(XLAT("Height to width"), fts(vid.height_width), 'h');
+    add_edit(vid.creature_scale);
+    add_edit(vid.height_width);
     menuitem_sightrange('s');
     }
 
   dialog::addBreak(50);
-  dialog::addSelItem(XLAT(GDIM == 3 && WDIM == 2 ? "Y shift" : "third person perspective"), fts(vid.yshift), 'y');
+  add_edit(vid.yshift);
   if(GDIM == 3) {
     dialog::addSelItem(XLAT("mouse aiming sensitivity"), fts(mouseaim_sensitivity), 'a');
     dialog::add_action([] () { 
@@ -1803,6 +1788,7 @@ EX void show3D() {
   if(true) {
     dialog::addBreak(50);
     dialog::addSelItem(XLAT("projection"), current_proj_name(), 'M');
+    dialog::add_action_push(models::model_menu);  
     }
   #if MAXMDIM >= 4
   if(GDIM == 3) add_edit_fov('f');
@@ -1864,6 +1850,7 @@ EX void show3D() {
     dialog::addInfo(XLAT("parameters set correctly"));
   dialog::addBreak(50);
   dialog::addItem(XLAT("stereo vision config"), 'e');
+  dialog::add_action_push(showStereo);
   
   #if CAP_VR
   dialog::addBoolItem(XLAT("VR settings"), vrhr::active(), 'v');
@@ -1872,48 +1859,45 @@ EX void show3D() {
 
   dialog::addBack();
   dialog::display();
-  
-  keyhandler = [] (int sym, int uni) {
-    using namespace geom3;
-    dialog::handleNavigation(sym, uni);
+  }
+
+EX int config3 = addHook(hooks_config, 100, [] {
+  addparamsaver(vid.eye, "eyelevel", 0)
+    ->editable(-5, 5, .1, "eye level", "", 'E')
+    ->set_extra([] {
+      dialog::dialogflags |= sm::CENTER;
+      vid.tc_depth = ticks;
     
-    if(uni == 'n' && GDIM == 2) {
-      dialog::editNumber(vid.highdetail, 0, 5, .5, 7, XLAT("High detail range"), "");
-      dialog::extra_options = explain_detail;
-      dialog::reaction = [] () {
-        if(vid.highdetail > vid.middetail) vid.middetail = vid.highdetail;
-        };
-      }
-    else if(uni == 'm' && GDIM == 2) {
-      dialog::editNumber(vid.middetail, 0, 5, .5, 7, XLAT("Mid detail range"), "");
-      dialog::extra_options = explain_detail;
-      dialog::reaction = [] () {
-        if(vid.highdetail > vid.middetail) vid.highdetail = vid.middetail;
-        };
-      }
-    else if(uni == 'c' && WDIM == 2) 
-      vid.tc_camera = ticks,
-      dialog::editNumber(vid.camera, 0, 5, .1, 1, XLAT(GDIM == 2 ? "Camera level above the plane" : "Z shift"), ""),
-      dialog::extra_options = [] {
-        dialog::addHelp(GDIM == 2 ? XLAT(
-          "Camera is placed %1 absolute units above a plane P in a three-dimensional "
-          "world. Ground level is actually an equidistant surface, %2 absolute units "
-          "below the plane P. The plane P (as well as the ground level or any "
-          "other equidistant surface below it) is viewed at an angle of %3 "
-          "(the tangent of the angle between the point in "
-          "the center of your vision and a faraway location is 1/cosh(c) = %4).",
-          fts(vid.camera),
-          fts(vid.depth),
-          fts(atan(1/cosh(vid.camera))*2/degree),
-          fts(1/cosh(vid.camera))) : XLAT("Look from behind."));
-        if(GDIM == 3 && pmodel == mdPerspective) dialog::extra_options = [] () {
-          dialog::addBoolItem_action(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
-          };
-        };
-    else if(uni == 'g' && WDIM == 2) 
-      vid.tc_depth = ticks,
-      dialog::editNumber(vid.depth, 0, 5, .1, 1, XLAT("Ground level below the plane"), ""),
-      dialog::extra_options = [] {
+      dialog::addHelp(XLAT("In the FPP mode, the camera will be set at this altitude (before applying shifts)."));
+
+      dialog::addBoolItem(XLAT("auto-adjust to eyes on the player model"), vid.auto_eye, 'O');
+      dialog::reaction = [] { vid.auto_eye = false; };
+      dialog::add_action([] () {
+        vid.auto_eye = !vid.auto_eye;
+        geom3::do_auto_eye();
+        });
+      });
+  
+  addsaver(vid.auto_eye, "auto-eyelevel", false);
+
+  addparamsaver(vid.creature_scale, "creature_scale", "3d-creaturescale", 1)
+    ->editable(0, 1, .1, "Creature scale", "", 'C');
+  addparamsaver(vid.height_width, "heiwi", "3d-heightwidth", 1.5)
+    ->editable(0, 1, .1, "Height to width", "", 'h');
+  addparamsaver(vid.yshift, "yshift", "Y shift", 0)
+    ->editable(0, 1, .1, "Y shift", "Don't center on the player character.", 'y')
+    ->set_extra([] {
+      if(WDIM == 3 && pmodel == mdPerspective) 
+        dialog::addBoolItem_action(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
+      });
+  addsaver(vid.use_wall_radar, "wallradar", true);
+  addsaver(vid.fixed_facing, "fixed facing", 0);
+  addsaver(vid.fixed_facing_dir, "fixed facing dir", 90);
+  addsaver(vid.fixed_yz, "fixed YZ", true);
+  addparamsaver(vid.depth, "depth", "3D depth", 1)
+    ->editable(0, 5, .1, "Ground level below the plane", "", 'd')
+    ->set_extra([] {
+        vid.tc_depth = ticks;
         help = XLAT(
           "Ground level is actually an equidistant surface, "
           "%1 absolute units below the plane P. "
