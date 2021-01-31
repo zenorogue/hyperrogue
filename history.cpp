@@ -698,6 +698,17 @@ EX namespace history {
     history::path_for_lineanimation.clear();
     history::saved_ends = 0;
     history::includeHistory = false;
+    }) + addHook(hooks_config, 0, [] {
+
+    addsaver(autobandhistory, "include history"); // check!
+    addparamsaver(lvspeed, "lvspeed", "lineview speed");
+    addsaver(extra_line_steps, "lineview extension");
+      
+    addsaver(bandhalf, "band width");
+    addsaver(bandsegment, "band segment");
+    addsaver(autoband, "automatic band");
+    addsaver(autobandhistory, "automatic band history");
+    addsaver(dospiral, "do spiral");      
     });
 
   }

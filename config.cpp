@@ -343,10 +343,6 @@ EX void initConfig() {
   addsaver(perfect_linewidth, "perfect_linewidth", 1);
   addparamsaver(linepatterns::width, "lpwidth", "pattern-linewidth", 1);
   addsaver(fat_edges, "fat-edges");
-  addparamsaver(pconf.scale, "scale", 1);
-  addparamsaver(pconf.xposition, "xposition", 0);
-  addparamsaver(pconf.yposition, "yposition", 0);
-  addparamsaver(pconf.alpha, "projection", 1);
   addparamsaver(vid.sspeed, "sspeed", "scrollingspeed", 0);
   addparamsaver(vid.mspeed, "mspeed", "movement speed", 1);
   addsaver(vid.full, "fullscreen", false);
@@ -367,14 +363,11 @@ EX void initConfig() {
   
   // special graphics
 
-  addparamsaver(pconf.ballangle, "ballangle", "ball angle", 20);
   addparamsaver(vid.yshift, "yshift", "Y shift", 0);
   addsaver(vid.use_wall_radar, "wallradar", true);
   addsaver(vid.fixed_facing, "fixed facing", 0);
   addsaver(vid.fixed_facing_dir, "fixed facing dir", 90);
   addsaver(vid.fixed_yz, "fixed YZ", true);
-  addparamsaver(pconf.camera_angle, "cameraangle", "camera angle", 0);
-  addsaver(pconf.ballproj, "ballproj", 1);
   addsaver(vid.monmode, "monster display mode", DEFAULT_MONMODE);
   addsaver(vid.wallmode, "wall display mode", DEFAULT_WALLMODE);
   addsaver(vid.highlightmode, "highlightmode");
@@ -401,20 +394,6 @@ EX void initConfig() {
   addsaver(reserve_limit, "memory_reserve", 128);
   addsaver(show_memory_warning, "show_memory_warning");
 
-  auto& rconf = vid.rug_config;
-  addsaverenum(rconf.model, "rug-projection", mdEquidistant);
-  addsaver(rconf.scale, "rug-projection-scale", 1);
-  addsaver(rconf.alpha, "rug-projection-alpha", 1);
-  addsaver(rconf.clip_min, "rug-projection-clip-min", -100);
-  addsaver(rconf.clip_max, "rug-projection-clip-max", +10);
-  addsaver(rconf.stretch, "rug-projection-stretch", 1);
-  addsaver(rconf.halfplane_scale, "rug-projection-halfplane scale", 1);
-  addsaver(rconf.collignon_parameter, "rug-collignon-parameter", 1);
-  addsaver(rconf.collignon_reflected, "rug-collignon-reflect", false);
-  addsaver(rconf.euclid_to_sphere, "rug-euclid to sphere projection", 1.5);
-  addparamsaver(rconf.twopoint_param, "twopoint", "rug-twopoint parameter", 1);
-  addparamsaver(rconf.fisheye_param, "fisheye", "rug-fisheye parameter", 1);
-  addsaver(rconf.model_transition, "rug-model transition", 1);
   addsaver(rug::renderonce, "rug-renderonce");
   addsaver(rug::rendernogl, "rug-rendernogl");
   addsaver(rug::texturesize, "rug-texturesize");
@@ -422,38 +401,6 @@ EX void initConfig() {
   addparamsaver(rug::model_distance, "rug_model_distance", "rug-model-distance");
 #endif
 
-  addsaverenum(pmodel, "used model", mdDisk);
-  addsaver(polygonal::SI, "polygon sides");
-  addparamsaver(polygonal::STAR, "star", "polygon star factor");
-  addsaver(polygonal::deg, "polygonal degree");
-  addsaver(history::autobandhistory, "include history"); // check!
-  addparamsaver(history::lvspeed, "lvspeed", "lineview speed");
-  addsaver(history::extra_line_steps, "lineview extension");
-  
-  addsaver(polygonal::maxcoef, "polynomial degree");
-  for(int i=0; i<polygonal::MSI; i++) {
-    addsaver(polygonal::coefr[i], "polynomial "+its(i)+".real");
-    addsaver(polygonal::coefi[i], "polynomial "+its(i)+".imag");
-    }
-  
-  addsaver(history::bandhalf, "band width");
-  addsaver(history::bandsegment, "band segment");
-  addparamsaver(models::rotation, "rotation", "conformal rotation");
-  addsaver(models::rotation_xz, "conformal rotation_xz");
-  addsaver(models::rotation_xy2, "conformal rotation_2");
-  addsaver(models::do_rotate, "conformal rotation mode", 1);
-  addparamsaver(pconf.model_orientation, "mori", "model orientation", 0);
-  addparamsaver(pconf.model_orientation_yz, "mori_yz", "model orientation-yz", 0);
-  addparamsaver(pconf.top_z, "topz", 5);
-  addparamsaver(pconf.model_transition, "mtrans", "model transition", 1);
-  addparamsaver(pconf.halfplane_scale, "hp", "halfplane scale", 1);
-  addsaver(pconf.rotational_nil, "rotnil", 1);
-  addsaver(history::autoband, "automatic band");
-  addsaver(history::autobandhistory, "automatic band history");
-  addsaver(history::dospiral, "do spiral");
-  addparamsaver(pconf.clip_min, "clipmin", "clip-min", -1);
-  addparamsaver(pconf.clip_max, "clipmax", "clip-max", +1);
-  
   addsaver(vid.backeffects, "background particle effects", (ISMOBILE || ISPANDORA) ? false : true);
   // control
   
@@ -524,19 +471,6 @@ EX void initConfig() {
   addparamsaver(vid.fov, "fov", "field-of-vision", 90);
   addsaver(vid.desaturate, "desaturate", 0);
   addsaverenum(vid.stereo_mode, "stereo-mode");
-  addparamsaver(pconf.euclid_to_sphere, "ets", "euclid to sphere projection", 1.5);
-  addsaver(pconf.twopoint_param, "twopoint parameter", 1);
-  addsaver(pconf.fisheye_param, "fisheye parameter", 1);
-  addparamsaver(pconf.stretch, "stretch", 1);
-  addparamsaver(vid.binary_width, "bwidth", "binary-tiling-width", 1);
-  addparamsaver(pconf.collignon_parameter, "collignon", "collignon-parameter", 1);
-  addsaver(pconf.collignon_reflected, "collignon-reflect", false);
-  addsaver(pconf.show_hyperboloid_flat, "hyperboloid-flat", true);
-
-  addparamsaver(pconf.aitoff_parameter, "aitoff");
-  addparamsaver(pconf.miller_parameter, "miller");
-  addparamsaver(pconf.loximuthal_parameter, "loximuthal");
-  addparamsaver(pconf.winkel_parameter, "winkel");
 
   addsaver(vid.plevel_factor, "plevel_factor", 0.7);
 
@@ -615,12 +549,6 @@ EX void initConfig() {
   #endif
   addsaver(slr::steps, "slr-steps");
   addsaver(slr::range_xy, "slr-range-xy");
-  
-  addparamsaver(pconf.skiprope, "mobius", 0);
-  
-  addsaver(pconf.formula, "formula");
-  addsaverenum(pconf.basic_model, "basic model");
-  addsaver(pconf.use_atan, "use_atan");
   
   #if CAP_ARCM
   addsaver(arcm::current.symbol, "arcm-symbol", "4^5");
@@ -740,10 +668,6 @@ EX void initConfig() {
   addsaver(panini_alpha, "panini_alpha", 0);
 
   callhooks(hooks_configfile);
-  
-  addsaver(pconf.spiral_angle, "sang");
-  addsaver(pconf.spiral_x, "spiralx");
-  addsaver(pconf.spiral_y, "spiraly");
   
   #if CAP_SHOT
   addsaver(levellines, "levellines");
