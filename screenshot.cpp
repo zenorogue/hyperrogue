@@ -1459,7 +1459,7 @@ void list_animated_parameters() {
   dialog::addBreak(50);
   for(auto& ap: aps) {
     string what = "?";
-    for(auto& p: params) if(&p.second == ap.value) what = p.first;
+    for(auto& p: params) if(p.second->value == ap.value) what = p.first;
     dialog::addInfo(what + " = " + ap.formula);
     }
   dialog::addBreak(50);
@@ -1576,12 +1576,8 @@ EX void show() {
             };
           });
         }
-      else {
-        dialog::addSelItem(XLAT("cells to go"), fts(parabolic_length), 'c');
-        dialog::add_action([] () { 
-          dialog::editNumber(parabolic_length, 0, 10, 1, 1, "cells to go", ""); 
-          });
-        }
+      else 
+        add_edit(parabolic_length);
       dialog::addSelItem(XLAT("shift"), fts(shift_angle) + "°", 'C');
       dialog::add_action([] () { 
         dialog::editNumber(shift_angle, 0, 90, 15, 0, XLAT("shift"), ""); 
@@ -1804,7 +1800,8 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
     addparamsaver(anims::period, "aperiod", "animation period");
     addsaver(anims::noframes, "animation frames");
     addparamsaver(anims::cycle_length, "acycle", "animation cycle length");
-    addparamsaver(anims::parabolic_length, "aparabolic", "animation parabolic length");
+    addparamsaver(anims::parabolic_length, "aparabolic", "animation parabolic length")
+      ->editable("cells to go", 0, 10, 1, "", 'c');
     addparamsaver(anims::rug_angle, "arugangle", "animation rug angle");
     addparamsaver(anims::circle_radius, "acradius", "animation circle radius");
     addparamsaver(anims::circle_spins, "acspins", "animation circle spins");

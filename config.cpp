@@ -30,6 +30,30 @@ typedef vector<shared_ptr<supersaver>> saverlist;
 
 extern saverlist savers;
 
+struct float_setting {
+  string parameter_name;
+  ld *value;
+
+  string config_name;
+  string menu_item_name;
+  string help_text;
+  ld dft;
+  ld min_value, max_value, step;
+  char default_key;
+  void add_as_saver();
+  void show_edit_option(char key);
+  void show_edit_option() { show_edit_option(default_key); }
+  float_setting *editable(string menu_item_name, ld min_value, ld max_value, ld step, string help_text, char key) {
+    this->min_value = min_value;
+    this->max_value = max_value;
+    this->menu_item_name = menu_item_name;
+    this->help_text = help_text;
+    this->step = step;
+    default_key = key;
+    return this;
+    }
+  };
+
 #if CAP_CONFIG
 
 template<class T> struct dsaver : supersaver {
@@ -131,32 +155,45 @@ template<> struct saver<ld> : dsaver<ld> {
 #endif
 #endif
 
-EX void addparamsaver(ld& val, const string s) {
-  params.insert({s, val});
-  #if CAP_CONFIG
-  addsaver(val, s);
-  #endif
+void float_setting::add_as_saver() { 
+#if CAP_CONFIG
+  addsaver(*value, config_name);
+#endif
   }
 
-EX void addparamsaver(ld& val, const string p, const string s) {
-  params.insert({p, val});
-  #if CAP_CONFIG
-  addsaver(val, s);
-  #endif
+void float_setting::show_edit_option(char key) {
+  dialog::addSelItem(XLAT(menu_item_name), fts(*value), key);
+  dialog::add_action([this] () {
+    add_to_changed(this);
+    dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
+    });
   }
 
-EX void addparamsaver(ld& val, const string s, ld dft) {
-  params.insert({s, val});
-  #if CAP_CONFIG
-  addsaver(val, s, dft);
-  #endif
+EX float_setting *addparamsaver(ld& val, const string p, const string s, ld dft) {
+  unique_ptr<float_setting> u ( new float_setting );
+  u->parameter_name = p;
+  u->config_name = s;
+  u->menu_item_name = s;
+  u->value = &val;
+  u->min_value = 0;
+  u->max_value = 2 * dft;
+  u->step = dft / 10;
+  u->dft = dft;
+  val = dft;
+  u->add_as_saver();
+  return &* (params[s] = std::move(u));
   }
 
-EX void addparamsaver(ld& val, const string p, const string s, ld dft) {
-  params.insert({p, val});
-  #if CAP_CONFIG
-  addsaver(val, s, dft);
-  #endif
+EX float_setting *addparamsaver(ld& val, const string s) {
+  return addparamsaver(val, s, s, val);
+  }
+
+EX float_setting *addparamsaver(ld& val, const string p, const string s) {
+  return addparamsaver(val, p, s, val);
+  }
+
+EX float_setting *addparamsaver(ld& val, const string s, ld dft) {
+  return addparamsaver(val, s, s, dft);
   }
 
 EX ld bounded_mine_percentage = 0.1;
@@ -2350,6 +2387,72 @@ EX void configureMouse() {
   dialog::display();
   }
 
+vector<float_setting*> last_changed;
+
+EX void add_to_changed(float_setting *f) {
+  for(int i=0; i<isize(last_changed); i++) {
+    if(last_changed[i] == f)
+      return;
+    swap(last_changed[i], f);
+    }
+  last_changed.push_back(f);
+  }
+
+EX void add_edit(ld& val) {
+  for(auto& fs: params)
+    if(fs.second->value == &val)
+      fs.second->show_edit_option();
+  }
+
+EX void find_setting() {
+  cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
+  gamescreen(1); 
+
+  dialog::init(XLAT("find setting"));
+  if(dialog::infix != "") mouseovers = dialog::infix;
+  
+  vector<float_setting*> found;
+  
+  for(auto& p: params) {
+    auto& fs = p.second;
+    string key = fs->parameter_name + "|" + fs->config_name + "|" + fs->menu_item_name;
+    if(dialog::hasInfix(key))
+      found.push_back(&*fs);
+    }
+
+  for(int i=0; i<9; i++) {
+    if(i < isize(found)) {
+      found[i]->show_edit_option('1' + i);
+      }
+    else dialog::addBreak(100);
+    }
+
+  dialog::addSelItem("matching items", its(isize(found)), 0);
+  dialog::display();
+  
+  keyhandler = [] (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);    
+    if(dialog::editInfix(uni)) ;
+    else if(doexiton(sym, uni)) popScreen();
+    };
+  }
+
+EX void edit_all_settings() {
+  gamescreen(1);
+  dialog::init(XLAT("edit all"));
+
+  int id = 0;
+  for(auto l: last_changed) 
+    if(id < 10)
+    l->show_edit_option('a'+(id++));
+
+  dialog::addBreak(100);
+  dialog::addItem(XLAT("find a setting"), '/');
+  dialog::add_action_push(find_setting);
+  dialog::addBack();
+  dialog::display();
+  }
+
 EX void showSettings() {
   gamescreen(1);
   dialog::init(XLAT("settings"));
@@ -2626,6 +2729,9 @@ EX int read_config_args() {
     PHASEFROM(2);
     shift_arg_formula(precise_width);
     }
+  else if(argis("-d:all")) {
+    PHASEFROM(2); launch_dialog(edit_all_settings);
+    }
   else if(argis("-char")) {
     auto& cs = vid.cs;
     shift(); cs.charid = argi();
@@ -2659,7 +2765,7 @@ EX int read_gamemode_args() {
 auto ah_config = addHook(hooks_args, 0, read_config_args) + addHook(hooks_args, 0, read_gamemode_args) + addHook(hooks_args, 0, read_color_args);
 #endif
 
-EX map<string, ld&> params;
+EX map<string, std::unique_ptr<float_setting>> params;
 
 
 }
