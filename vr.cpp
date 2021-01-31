@@ -120,7 +120,7 @@ vr_framebuffer::vr_framebuffer(int xsize, int ysize) {
   rb.reset();
   }
 
-EX transmatrix eyeproj;
+EX transmatrix eyeproj, eyeshift;
 
 vr_framebuffer::~vr_framebuffer() {
   glDeleteRenderbuffers( 1, &m_nDepthBufferId );
@@ -976,8 +976,10 @@ EX void render() {
         gen_mv();
         E4;
         if(eyes == eEyes::equidistant && i != 2) {
-          hmd_mv = inverse(vrdata.eyepos[i]) * hmd_mv;
+          eyeshift = vrdata.eyepos[i];
+          hmd_mv = inverse(eyeshift) * hmd_mv;
           }
+        else eyeshift = Id;
         hmd_mv_for[i] = hmd_mv;
         if(i != 2) {
           hmd_mvp = vrdata.proj[i] * hmd_mv;

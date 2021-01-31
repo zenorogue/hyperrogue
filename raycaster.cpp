@@ -78,13 +78,17 @@ bool need_many_cell_types() {
 EX bool available() {
   #if CAP_VR
   /* would need a completely different implementation */
-  if(vrhr::active() && vrhr::eyes == vrhr::eEyes::equidistant) return false;
+  if(vrhr::active() && vrhr::eyes == vrhr::eEyes::equidistant) {
+    if(reflect_val) return false;
+    if(nonisotropic) return false;
+    if(prod) return false;
+    }
   #endif
   if(noGUI) return false;
   if(!vid.usingGL) return false;
   if(GDIM == 2) return false;
   if(WDIM == 2 && (kite::in() || bt::in())) return false;
-  #if GLES_ONLY
+  #ifdef GLES_ONLY
   if(need_many_cell_types()) return false;
   #endif
   if(hyperbolic && pmodel == mdPerspective && !kite::in())
@@ -130,6 +134,7 @@ struct raycaster : glhr::GLprogram {
   GLint uITOA, uATOI;
   GLint uToOrig, uFromOrig;
   GLint uProjection;
+  GLint uEyeShift, uAbsUnit;
   
   raycaster(string vsh, string fsh);
   };
@@ -173,6 +178,9 @@ raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     uATOI = glGetUniformLocation(_program, "uATOI");
     uToOrig = glGetUniformLocation(_program, "uToOrig");
     uFromOrig = glGetUniformLocation(_program, "uFromOrig");
+
+    uEyeShift = glGetUniformLocation(_program, "uEyeShift");
+    uAbsUnit  = glGetUniformLocation(_program, "uAbsUnit");
     }
 
 shared_ptr<raycaster> our_raycaster;
@@ -355,8 +363,14 @@ void enable_raycaster() {
          "}\n"
        "return vec2(1, 1);\n"
        "}\n";
+
+   #if CAP_VR
+   bool eyes = vrhr::active() && vrhr::eyes == vrhr::eEyes::equidistant;
+   #else
+   const bool eyes = false;
+   #endif
    
-   bool stepbased = nonisotropic || stretch::in();
+   bool stepbased = nonisotropic || stretch::in() || eyes;
     
    string fmain = "void main() {\n";
    
@@ -398,6 +412,8 @@ void enable_raycaster() {
 
       fmain +=
         "  at0.xyz = at0.xyz / length(at0.xyz);\n";   
+
+      if(eyes) fmain += "  at0.xyz /= uAbsUnit;\n";
       }
       
     if(hyperbolic) fsh += "  mediump float len(mediump vec4 x) { return x[3]; }\n";
@@ -407,10 +423,13 @@ void enable_raycaster() {
 
     else fsh += "  mediump float len(mediump vec4 x) { return length(x.xyz); }\n";
     
+    ld s = 1;
+    if(eyes) s *= vrhr::absolute_unit_in_meters;
+    
     if(stepbased) fmain += 
-      "  const mediump float maxstep = " + fts(maxstep_current()) + ";\n"
-      "  const mediump float minstep = " + fts(minstep) + ";\n"
-      "  mediump float next = maxstep;\n";
+      "  const mediump float maxstep = " + fts(maxstep_current() * s) + ";\n"
+      "  const mediump float minstep = " + fts(minstep * s) + ";\n"
+      "  mediump float next = maxstep;\n";          
     
     if(prod) {
       string sgn=in_h2xe() ? "-" : "+";
@@ -427,9 +446,16 @@ void enable_raycaster() {
       "  mediump float xspeed = length(at1.xy);\n"
       "  mediump vec4 tangent = vw * exp(-zpos) * vec4(at1.xy, 0, 0) / xspeed;\n";
       }
-    else fmain +=
-      "  mediump vec4 position = vw * vec4(0., 0., 0., 1.);\n"
-      "  mediump vec4 tangent = vw * at0;\n";
+    else if(!eyes) {
+      fmain +=
+        "  mediump vec4 position = vw * vec4(0., 0., 0., 1.);\n"
+        "  mediump vec4 tangent = vw * at0;\n";
+      }
+    
+    if(eyes) {
+      fsh += "mediump uniform mat4 uEyeShift;\n";
+      fsh += "mediump uniform float uAbsUnit;\n";
+      }
       
     if(stretch::in()) {
       if(stretch::mstretch) {
@@ -859,7 +885,26 @@ void enable_raycaster() {
         fmain += "mediump vec4 sp = uStraighten * nposition;\n";
         }
       
-      if(hyperbolic) {
+      if(eyes) {
+        fmain +=
+        "  mediump float t = go + dist;\n"
+        "  mediump vec4 v = at0 * t;\n"
+        "  v[3] = 1.;\n"
+        "  mediump vec4 azeq = uEyeShift * v;\n"
+        "  mediump float alen = length(azeq.xyz);\n";
+        if(hyperbolic) fmain +=         
+          "  azeq *= sinh(alen) / alen;\n"        
+          "  azeq[3] = cosh(alen);\n";
+        else if(sphere) fmain += 
+          "  azeq *= sin(alen) / alen;\n"
+          "  azeq[3] = cos(alen);\n";
+        else /* euclid */ fmain +=
+          "  azeq[3] = 1;\n";
+        fmain +=
+          "  mediump vec4 nposition = vw * azeq;\n";
+        }
+      
+      else if(hyperbolic) {
         fmain += 
         "  mediump float ch = cosh(dist); mediump float sh = sinh(dist);\n"
         "  mediump vec4 v = position * ch + tangent * sh;\n"
@@ -867,7 +912,7 @@ void enable_raycaster() {
         "  mediump vec4 nposition = v;\n";
         }
 
-      if(sphere && !stretch::in()) {
+      else if(sphere && !stretch::in()) {
         fmain += 
         "  mediump float ch = cos(dist); mediump float sh = sin(dist);\n"
         "  mediump vec4 v = position * ch + tangent * sh;\n"
@@ -972,11 +1017,13 @@ void enable_raycaster() {
         "tangent = tangent + (acc1+2.*acc2+2.*acc3+acc4)/(6.*dist);\n";
       else if(nil) fmain +=
         "tangent = translatev(position, xt);\n";
-      else fmain +=
+      else if(!eyes)
+        fmain +=
         "tangent = ntangent;\n";
 
-      fmain +=
+      if(!eyes) fmain +=
         "position = nposition;\n";
+      else fmain += "vec4 position = nposition;\n";
       
       if((stretch::in() || sl2) && use_christoffel) {
         fmain += 
@@ -996,16 +1043,18 @@ void enable_raycaster() {
       }
     else fmain += 
       "position = position + tangent * dist;\n";
-      
-    if(hyperbolic) fmain +=
-      "position /= sqrt(position.w*position.w - dot(position.xyz, position.xyz));\n"
-      "tangent -= dot(vec4(-position.xyz, position.w), tangent) * position;\n"
-      "tangent /= sqrt(dot(tangent.xyz, tangent.xyz) - tangent.w*tangent.w);\n";
     
-    if(in_h2xe()) fmain +=
-      "position /= sqrt(position.z*position.z - dot(position.xy, position.xy));\n"
-      "tangent -= dot(vec3(-position.xy, position.z), tangent.xyz) * position;\n"
-      "tangent /= sqrt(dot(tangent.xy, tangent.xy) - tangent.z*tangent.z);\n";
+    if(!eyes) {
+      if(hyperbolic) fmain +=
+        "position /= sqrt(position.w*position.w - dot(position.xyz, position.xyz));\n"
+        "tangent -= dot(vec4(-position.xyz, position.w), tangent) * position;\n"
+        "tangent /= sqrt(dot(tangent.xyz, tangent.xyz) - tangent.w*tangent.w);\n";
+      
+      if(in_h2xe()) fmain +=
+        "position /= sqrt(position.z*position.z - dot(position.xy, position.xy));\n"
+        "tangent -= dot(vec3(-position.xy, position.z), tangent.xyz) * position;\n"
+        "tangent /= sqrt(dot(tangent.xy, tangent.xy) - tangent.z*tangent.z);\n";
+      }
     
     if(hyperbolic && bt::in()) {
       fmain += 
@@ -1053,9 +1102,14 @@ void enable_raycaster() {
       "  mediump vec2 u = cid + vec2(float(which) / float(uLength), 0);\n"
       "  mediump vec4 col = texture2D(tWallcolor, u);\n"
       "  if(col[3] > 0.0) {\n";
+    
+    if(eyes)
+      fmain += "    float gou = go / uAbsUnit;\n";
+    else
+      fmain += "    float gou = go;\n";
 
     if(hard_limit < NO_LIMIT)
-      fmain += "    if(go > " + to_glsl(hard_limit) + ") { gl_FragDepth = 1.; return; }\n";
+      fmain += "    if(gou > " + to_glsl(hard_limit) + ") { gl_FragDepth = 1.; return; }\n";
     
     if(!(levellines && disable_texture)) fmain +=
       "    mediump vec2 inface = map_texture(position, which+walloffset);\n"
@@ -1067,11 +1121,11 @@ void enable_raycaster() {
       "      }\n";
 
     if(volumetric::on)
-      fmain += "    mediump float d = uExpStart * exp(-go / uExpDecay);\n";
+      fmain += "    mediump float d = uExpStart * exp(-gou / uExpDecay);\n";
 
     else
       fmain +=
-      "    mediump float d = max(1. - go / uLinearSightRange, uExpStart * exp(-go / uExpDecay));\n";
+      "    mediump float d = max(1. - gou / uLinearSightRange, uExpStart * exp(-gou / uExpDecay));\n";
     
     if(!volumetric::on) fmain +=
       "    col.xyz = col.xyz * d + uFogColor.xyz * (1.-d);\n";
@@ -1096,7 +1150,7 @@ void enable_raycaster() {
     else fmain +=
       "    if(col.w == 1.) {\n";
     
-    if(hyperbolic) fmain +=
+    if(hyperbolic && !eyes) fmain +=
       "      mediump vec4 t = at0 * sinh(go);\n";
     else fmain +=
       "      mediump vec4 t = at0 * go;\n";
@@ -1105,7 +1159,7 @@ void enable_raycaster() {
       "      t.w = 1.;\n";
 
     if(levellines) {
-      if(hyperbolic) 
+      if(hyperbolic && !eyes) 
         fmain += "gl_FragColor.xyz *= 0.5 + 0.5 * cos(z/cosh(go) * uLevelLines * 2. * PI);\n";
       else
         fmain += "gl_FragColor.xyz *= 0.5 + 0.5 * cos(z * uLevelLines * 2. * PI);\n";
@@ -1192,7 +1246,12 @@ void enable_raycaster() {
     
     fmain +=
       "  int mid = int(connection.z * 1024.);\n"
-      "  mediump mat4 m = " GET("uM", "mid") " * " GET("uM", "walloffset+which") ";\n"
+      "  mediump mat4 m = " GET("uM", "mid") " * " GET("uM", "walloffset+which") ";\n";
+    
+    if(eyes) 
+      fmain += "  vw = m * vw;\n";
+    
+    else fmain +=
       "  position = m * position;\n"
       "  tangent = m * tangent;\n";
     
@@ -1340,6 +1399,10 @@ EX void cast() {
   cd->set_mask(global_projection);
   
   #if CAP_VR
+  if(o->uEyeShift != -1) {
+    glUniformMatrix4fv(o->uEyeShift, 1, 0, glhr::tmtogl_transpose3(vrhr::eyeshift).as_array());
+    glUniform1f(o->uAbsUnit, vrhr::absolute_unit_in_meters);
+    }
   if(vrhr::rendering_eye()) {
     glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(vrhr::eyeproj).as_array());
     }
