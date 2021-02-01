@@ -49,7 +49,7 @@ struct setting {
   virtual void show_edit_option(char key) {
     println(hlog, "default called!"); }
   virtual string search_key() { 
-    return parameter_name + "|" + config_name + "|" + menu_item_name;
+    return parameter_name + "|" + config_name + "|" + menu_item_name + "|" + help_text;
     }
   virtual cld get_cld() = 0;
   setting() { restrict = auto_restrict; }
