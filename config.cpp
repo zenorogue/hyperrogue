@@ -60,8 +60,20 @@ struct setting {
       add_to_changed(this);
       }
     }
+  reaction_t sets;
+  setting *set_sets(const reaction_t& s) { sets = s; return this; }
+  setting *set_extra(const reaction_t& r);
+  setting *set_reaction(const reaction_t& r);
   };
 #endif
+
+setting *setting::set_extra(const reaction_t& r) {
+  auto s = sets; set_sets([s, r] { s(); dialog::extra_options = r; }); return this;
+  }
+
+setting *setting::set_reaction(const reaction_t& r) {
+  auto s = sets; set_sets([s, r] { s(); dialog::reaction = r; }); return this;
+  }
 
 EX map<string, std::unique_ptr<setting>> params;
 
@@ -105,11 +117,7 @@ struct float_setting : public setting {
     default_key = key;
     return this;
     }
-  reaction_t extra, reaction, sets;
   function<void(float_setting*)> modify_me;
-  float_setting *set_extra(const reaction_t& r) { extra = r; return this; }
-  float_setting *set_reaction(const reaction_t& r) { reaction = r; return this; }
-  float_setting *set_sets(const reaction_t& s) { sets = s; return this; }
   float_setting *modif(const function<void(float_setting*)>& r) { modify_me = r; return this; }
   void add_as_saver();
   virtual bool affects(void *v) override { return v == value; }
@@ -122,12 +130,8 @@ struct int_setting : public setting {
   int dft;
   int min_value, max_value, step;
   void add_as_saver();
-  reaction_t extra, reaction, sets;
   function<void(int_setting*)> modify_me;
-  int_setting *set_extra(const reaction_t& r) { extra = r; return this; }
-  int_setting *set_reaction(const reaction_t& r) { reaction = r; return this; }
   int_setting *modif(const function<void(int_setting*)>& r) { modify_me = r; return this; }
-  int_setting *set_sets(const reaction_t& s) { sets = s; return this; }
   virtual bool affects(void *v) override { return v == value; }
   virtual void show_edit_option(char key) override;
   virtual cld get_cld() { return *value; }
@@ -288,8 +292,6 @@ void float_setting::show_edit_option(char key) {
     add_to_changed(this);
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
     if(sets) sets();
-    if(reaction) dialog::reaction = reaction;
-    if(extra) dialog::extra_options = extra;
     });
   }
 
@@ -300,8 +302,6 @@ void int_setting::show_edit_option(char key) {
     add_to_changed(this);
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
     if(sets) sets();
-    if(reaction) dialog::reaction = reaction;
-    if(extra) dialog::extra_options = extra;
     });
   }
 
@@ -309,7 +309,7 @@ void bool_setting::show_edit_option(char key) {
   dialog::addBoolItem(XLAT(menu_item_name), *value, key);
   dialog::add_action([this] () {
     add_to_changed(this);
-    switcher();
+    switcher(); if(sets) sets();
     });
   }
 
