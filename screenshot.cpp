@@ -1459,7 +1459,7 @@ void list_animated_parameters() {
   dialog::addBreak(50);
   for(auto& ap: aps) {
     string what = "?";
-    for(auto& p: params) if(p.second->value == ap.value) what = p.first;
+    for(auto& p: params) if(p.second->affects(ap.value)) what = p.first;
     dialog::addInfo(what + " = " + ap.formula);
     }
   dialog::addBreak(50);

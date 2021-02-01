@@ -360,7 +360,7 @@ cld exp_parser::parse(int prio) {
   else {
     string number = next_token();
     if(extra_params.count(number)) res = extra_params[number];
-    else if(params.count(number)) res = params.at(number);
+    else if(params.count(number)) res = params[number]->get_cld();
     else if(number == "e") res = exp(1);
     else if(number == "i") res = cld(0, 1);
     else if(number == "p" || number == "pi") res = M_PI;

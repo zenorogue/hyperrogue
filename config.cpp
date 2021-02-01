@@ -30,19 +30,56 @@ typedef vector<shared_ptr<supersaver>> saverlist;
 
 extern saverlist savers;
 
-struct float_setting {
+struct setting {
   string parameter_name;
-  ld *value;
-
   string config_name;
   string menu_item_name;
   string help_text;
+  char default_key;
+  virtual bool affects(void *v) { return false; }
+  virtual void add_as_saver() {}
+  void show_edit_option() { show_edit_option(default_key); }
+  virtual void show_edit_option(char key) {
+    println(hlog, "default called!"); }
+  virtual string search_key() { 
+    return parameter_name + "|" + config_name + "|" + menu_item_name;
+    }
+  virtual cld get_cld() = 0;
+  };
+#endif
+
+EX map<string, std::unique_ptr<setting>> params;
+
+EX void show_edit_option_enum(char* value, const string& name, const vector<pair<string, string>>& options, char key, setting *s);
+
+#if HDR
+struct list_setting : setting {
+  virtual int get_value() = 0;
+  virtual void set_value(int i) = 0;
+  vector<pair<string, string> > options;
+  list_setting* editable(const vector<pair<string, string> >& o, string menu_item_name, char key) {
+    options = o;
+    this->menu_item_name = menu_item_name;
+    default_key = key;
+    return this;
+    }
+  virtual void show_edit_option(char key) override;
+  };
+
+template<class T> struct enum_setting : list_setting {
+  T *value;
+  T dft;
+  int get_value() override { return (int) *value; }
+  void set_value(int i) override { *value = (T) i; }
+  virtual bool affects(void* v) override { return v == value; }
+  virtual void add_as_saver();
+  virtual cld get_cld() { return get_value(); }
+  };
+
+struct float_setting : public setting {
+  ld *value;
   ld dft;
   ld min_value, max_value, step;
-  char default_key;
-  void add_as_saver();
-  void show_edit_option(char key);
-  void show_edit_option() { show_edit_option(default_key); }
   float_setting *editable(ld min_value, ld max_value, ld step, string menu_item_name, string help_text, char key) {
     this->min_value = min_value;
     this->max_value = max_value;
@@ -57,6 +94,10 @@ struct float_setting {
   float_setting *set_extra(const reaction_t& r) { extra = r; return this; }
   float_setting *set_reaction(const reaction_t& r) { reaction = r; return this; }
   float_setting *modif(const function<void(float_setting*)>& r) { modify_me = r; return this; }
+  void add_as_saver();
+  virtual bool affects(void *v) override { return v == value; }
+  virtual void show_edit_option(char key) override;
+  virtual cld get_cld() { return *value; }
   };
 
 #if CAP_CONFIG
@@ -162,7 +203,7 @@ template<> struct saver<ld> : dsaver<ld> {
 
 void float_setting::add_as_saver() { 
 #if CAP_CONFIG
-  addsaver(*value, config_name);
+  addsaver(*value, config_name, dft);
 #endif
   }
 
@@ -189,18 +230,42 @@ EX float_setting *addparamsaver(ld& val, const string p, const string s, ld dft)
   u->dft = dft;
   val = dft;
   u->add_as_saver();
-  return &* (params[s] = std::move(u));
+  auto f = &*u;
+  params[s] = std::move(u);
+  return f;
   }
 
-EX float_setting *addparamsaver(ld& val, const string s) {
+#if HDR
+template<class T> void enum_setting<T>::add_as_saver() { 
+#if CAP_CONFIG
+  addsaverenum(*value, config_name, dft);
+#endif
+  }
+
+template<class T> enum_setting<T> *addparamsaver_enum(T& val, const string p, const string s, T dft) {
+  unique_ptr<enum_setting<T>> u ( new enum_setting<T> );
+  u->parameter_name = p;
+  u->config_name = s;
+  u->menu_item_name = s;
+  u->value = &val;
+  u->dft = dft;
+  val = dft;
+  u->add_as_saver();
+  auto f = &*u;
+  params[s] = std::move(u);
+  return f;
+  }
+#endif
+
+EX float_setting* addparamsaver(ld& val, const string s) {
   return addparamsaver(val, s, s, val);
   }
 
-EX float_setting *addparamsaver(ld& val, const string p, const string s) {
+EX float_setting* addparamsaver(ld& val, const string p, const string s) {
   return addparamsaver(val, p, s, val);
   }
 
-EX float_setting *addparamsaver(ld& val, const string s, ld dft) {
+EX float_setting* addparamsaver(ld& val, const string s, ld dft) {
   return addparamsaver(val, s, s, dft);
   }
 
@@ -355,7 +420,9 @@ EX void initConfig() {
   
   // basic config
   addsaver(vid.flashtime, "flashtime", 8);
-  addsaver(vid.msgleft, "message style", 2);
+  addparamsaver_enum(vid.msgleft, "message_style", "message style", 2)
+    -> editable({{"centered", ""}, {"left-aligned", ""}, {"line-broken", ""}}, "message style", 'a');
+
   addsaver(vid.msglimit, "message limit", 5);
   addsaver(vid.timeformat, "message log time format", 0);
   addsaver(fontscale, "fontscale", 100);
@@ -377,7 +444,15 @@ EX void initConfig() {
   addsaver(music_out_of_focus, "music out of focus", false);
   #endif
   addsaver(effvolume, "sound effect volume");
-  addsaverenum(glyphsortorder, "glyph sort order");
+  addparamsaver_enum(glyphsortorder, "glyph_sort", "glyph sort order", glyphsortorder)
+    ->editable({
+      {"first on top", ""},
+      {"first on bottom", ""},
+      {"last on top", ""},
+      {"last on bottom", ""},
+      {"by land", ""},
+      {"by number", ""}
+      }, "inventory/kill sorting", 'k');
   
   // basic graphics
   
@@ -393,7 +468,9 @@ EX void initConfig() {
   addsaver(vid.full, "fullscreen", false);
   addsaver(vid.aurastr, "aura strength", ISMOBILE ? 0 : 128);
   addsaver(vid.aurasmoothen, "aura smoothen", 5);
-  addsaver(vid.graphglyph, "graphical items/kills", 1);
+  addparamsaver_enum(vid.graphglyph, "graphglyph", "graphical items/kills", 1)
+  -> editable({{"letters", ""}, {"auto", ""}, {"images", ""}}, "inventory/kill mode", 'd');
+
   addsaver(vid.particles, "extra effects", 1);
   addsaver(vid.framelimit, "frame limit", 75);
   addsaver(vid.xres, "xres");
@@ -494,7 +571,13 @@ EX void initConfig() {
   addparamsaver(vid.anaglyph_eyewidth, "anaglyph", "eyewidth-anaglyph", 0.1);
   addparamsaver(vid.fov, "fov", "field-of-vision", 90);
   addsaver(vid.desaturate, "desaturate", 0);
-  addsaverenum(vid.stereo_mode, "stereo-mode");
+  
+  addparamsaver_enum(vid.stereo_mode, "stereo_mode", "stereo-mode", vid.stereo_mode)
+    ->editable({{"OFF", "no"}, {"anaglyph", ""}, {"side-by-side", ""}
+    #if CAP_ODS
+    , {"ODS", ""}
+    #endif
+    }, "stereo mode", 'm');
 
   addsaver(vid.plevel_factor, "plevel_factor", 0.7);
 
@@ -640,7 +723,12 @@ EX void initConfig() {
   addsaver(nilv::nilperiod[1], "nilperiod_y");
   addsaver(nilv::nilperiod[2], "nilperiod_z");
   
-  addsaverenum(neon_mode, "neon_mode");
+  addparamsaver_enum(neon_mode, "neon_mode", "neon_mode", neon_mode)
+    ->editable(
+        {{"OFF", ""}, {"standard", ""}, {"no boundary mode", ""}, {"neon mode II", ""}, {"illustration mode", ""}}, 
+        "neon mode", 'M'
+        );
+
   addsaverenum(neon_nofill, "neon_nofill");
   addsaver(noshadow, "noshadow");
   addsaver(bright, "bright");
@@ -1216,15 +1304,7 @@ EX void showGraphConfig() {
           }
         else dialog::addBreak(100);
         
-        auto neon_option = [&] (string s, eNeon val, char key) {
-          dialog::addBoolItem(XLAT(s), neon_mode == val, key);
-          dialog::add_action([val] { neon_mode = (neon_mode == val) ? eNeon::none : val; });
-          };
-        
-        neon_option("neon mode", eNeon::neon, 'B');
-        neon_option("no boundary mode", eNeon::no_boundary, 'C');
-        neon_option("neon mode II", eNeon::neon2, 'D');
-        neon_option("illustration mode", eNeon::illustration, 'E');
+        add_edit(neon_mode);        
         dialog::addBreak(100);
         dialog::addInfo(XLAT("hint: press Alt while testing modes"));
         dialog::addBreak(100);
@@ -1368,13 +1448,8 @@ EX void configureInterface() {
     dialog::bound_low(0);
     });
   
-  const char* msgstyles[3] = {"centered", "left-aligned", "line-broken"};
+  add_edit(vid.msgleft);
   
-  dialog::addSelItem(XLAT("message style"), XLAT(msgstyles[vid.msgleft]), 'a');
-  dialog::add_action([] {
-    vid.msgleft = (1+vid.msgleft) % 3;
-    });
-
   dialog::addSelItem(XLAT("font scale"), its(fontscale), 'b');
   dialog::add_action([] {
     dialog::editNumber(fontscale, 25, 400, 10, 100, XLAT("font scale"), "");
@@ -1382,22 +1457,9 @@ EX void configureInterface() {
     dialog::reaction = [] () { setfsize = true; do_setfsize(); };
     dialog::bound_low(minfontscale);
     });  
-
-  const char *glyphsortnames[6] = {
-    "first on top", "first on bottom", 
-    "last on top", "last on bottom",
-    "by land", "by number"
-    };
-  dialog::addSelItem(XLAT("inventory/kill sorting"), XLAT(glyphsortnames[glyphsortorder]), 'k');
-  dialog::add_action([] {
-    glyphsortorder = eGlyphsortorder((glyphsortorder+6+(shiftmul>0?1:-1)) % gsoMAX);
-    });
-
-  const char *glyphmodenames[3] = {"letters", "auto", "images"};
-  dialog::addSelItem(XLAT("inventory/kill mode"), XLAT(glyphmodenames[vid.graphglyph]), 'd');
-  dialog::add_action([] {
-    vid.graphglyph = (1+vid.graphglyph)%3;
-    });    
+  
+  add_edit(glyphsortorder);
+  add_edit(vid.graphglyph);
 
   dialog::addSelItem(XLAT("draw crosshair"), crosshair_size > 0 ? fts(crosshair_size) : ONOFF(false), 'x');
   dialog::add_action([] () { 
@@ -1569,9 +1631,8 @@ EX void showStereo() {
   gamescreen(0);
   dialog::init(XLAT("stereo vision config"));
 
-  string modenames[4] = { "OFF", "anaglyph", "side-by-side", "ODS" };
+  add_edit(vid.stereo_mode);
   
-  dialog::addSelItem(XLAT("stereo mode"), XLAT(modenames[vid.stereo_mode]), 'm');
   dialog::addSelItem(XLAT("pupillary distance"), fts(vid.ipd), 'e');
   
   switch(vid.stereo_mode) {
@@ -1927,86 +1988,81 @@ EX int config3 = addHook(hooks_config, 100, [] {
               "with parameter %2.", fts(current_camera_level), fts(tan_auto(vid.depth) / tan_auto(current_camera_level)));
           }
         dialog::addHelp(help);
-        };
-    else if(uni == 'E' && WDIM == 2 && GDIM == 3) 
-      vid.tc_depth = ticks,
-      dialog::editNumber(vid.eye, -5, 5, .1, 0, XLAT("eye level"), ""),
-      dialog::dialogflags |= sm::CENTER,
-      dialog::extra_options = [] {
-      
-        dialog::addHelp(XLAT("In the FPP mode, the camera will be set at this altitude (before applying shifts)."));
-
-        dialog::addBoolItem(XLAT("auto-adjust to eyes on the player model"), vid.auto_eye, 'O');
-        dialog::reaction = [] { vid.auto_eye = false; };
-        dialog::add_action([] () {
-          vid.auto_eye = !vid.auto_eye;
-          geom3::do_auto_eye();
-          });
-        };
-    else if(uni == 'p' && WDIM == 2) 
-      projectionDialog();
-    else if(uni == 'w' && WDIM == 2) {
-      dialog::editNumber(vid.wall_height, 0, 1, .1, .3, XLAT("Height of walls"), "");
-      dialog::extra_options = [] () {
+        });
+  addparamsaver(vid.camera, "camera", "3D camera level", 1)
+    ->editable(0, 5, .1, "", "", 'c')
+    ->modif([] (float_setting* x) { x->menu_item_name = (GDIM == 2 ? "Camera level above the plane" : "Z shift"); })
+    ->set_extra([] {    
+       vid.tc_camera = ticks;
+       if(GDIM == 2)
+       dialog::addHelp(XLAT(
+         "Camera is placed %1 absolute units above a plane P in a three-dimensional "
+         "world. Ground level is actually an equidistant surface, %2 absolute units "
+         "below the plane P. The plane P (as well as the ground level or any "
+         "other equidistant surface below it) is viewed at an angle of %3 "
+         "(the tangent of the angle between the point in "
+         "the center of your vision and a faraway location is 1/cosh(c) = %4).",
+         fts(vid.camera),
+         fts(vid.depth),
+         fts(atan(1/cosh(vid.camera))*2/degree),
+         fts(1/cosh(vid.camera))));
+       if(GDIM == 3) 
+         dialog::addHelp(XLAT("Look from behind."));
+       if(GDIM == 3 && pmodel == mdPerspective) 
+         dialog::addBoolItem_action(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
+       });
+  addparamsaver(vid.wall_height, "wall_height", "3D wall height", .3)
+    ->editable(0, 1, .1, "Height of walls", "", 'w')
+    ->set_extra([] () {
         dialog::addHelp(GDIM == 3 ? "" : XLAT(
           "The height of walls, in absolute units. For the current values of g and c, "
           "wall height of %1 absolute units corresponds to projection value of %2.",
-          fts(actual_wall_height()), fts(factor_to_projection(cgi.WALL))));
+          fts(geom3::actual_wall_height()), fts(geom3::factor_to_projection(cgi.WALL))));
         dialog::addBoolItem(XLAT("auto-adjust in Goldberg grids"), vid.gp_autoscale_heights, 'O');
         dialog::add_action([] () {
           vid.gp_autoscale_heights = !vid.gp_autoscale_heights;
           });
-        };
-      }
-    else if(uni == 'l' && WDIM == 2) 
-      dialog::editNumber(vid.lake_top, 0, 1, .1, .25, XLAT("Level of water surface"), "");
-    else if(uni == 'k' && WDIM == 2) 
-      dialog::editNumber(vid.lake_bottom, 0, 1, .1, .9, XLAT("Level of water bottom"), "");
-    else if(uni == 'r' && WDIM == 2) 
-      dialog::editNumber(vid.rock_wall_ratio, 0, 1, .1, .9, XLAT("Rock-III to wall ratio"), ""),
-      dialog::extra_options = [] { dialog::addHelp(XLAT(
+        });
+  addparamsaver(vid.rock_wall_ratio, "rock_wall_ratio", "3D rock-wall ratio", .9)
+    ->editable(0, 1, .1, "Rock-III to wall ratio", "", 'r')
+    ->set_extra([] { dialog::addHelp(XLAT(
         "The ratio of Rock III to walls is %1, so Rock III are %2 absolute units high. "
         "Length of paths on the Rock III level is %3 of the corresponding length on the "
         "ground level.",
         fts(vid.rock_wall_ratio), fts(vid.wall_height * vid.rock_wall_ratio),
         fts(cosh(vid.depth - vid.wall_height * vid.rock_wall_ratio) / cosh(vid.depth))));
-        };
-    else if(uni == 'h' && WDIM == 2)
-      dialog::editNumber(vid.human_wall_ratio, 0, 1, .1, .7, XLAT("Human to wall ratio"), ""),
-      dialog::extra_options = [] { dialog::addHelp(XLAT(
+        });
+  addparamsaver(vid.human_wall_ratio, "human_wall_ratio", "3D human-wall ratio", .7)
+    ->editable(0, 1, .1, "Human to wall ratio", "", 'h')
+    ->set_extra([] { dialog::addHelp(XLAT(
         "Humans are %1 "
         "absolute units high. Your head travels %2 times the distance travelled by your "
         "feet.",
         fts(vid.wall_height * vid.human_wall_ratio),
         fts(cosh(vid.depth - vid.wall_height * vid.human_wall_ratio) / cosh(vid.depth)))
         );
-        };
-    else if(uni == 'h' && WDIM == 3)
-      dialog::editNumber(vid.height_width, 0, 1, .1, .7, XLAT("Height to width"), "");
-    else if(uni == 'c' && WDIM == 3)
-      dialog::editNumber(vid.creature_scale, 0, 1, .1, .7, XLAT("Creature scale"), "");
-    else if(uni == 'C' && WDIM == 2 && scale_used())
-      dialog::editNumber(vid.creature_scale, 0, 1, .1, .7, XLAT("Creature scale"), "");
-
-    else if(uni == 'e')
-      pushScreen(showStereo);
-    
-    else if(uni == 'y') {
-      dialog::editNumber(vid.yshift, 0, 1, .1, 0, XLAT("Y shift"), 
-        XLAT("Don't center on the player character.")
-        );
-      if(WDIM == 3 && pmodel == mdPerspective) dialog::extra_options = [] () {
-        dialog::addBoolItem_action(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
-        };
-      }
-    else if(uni == 'b') 
-      config_camera_rotation();
-    else if(uni == 'M') 
-      pushScreen(models::model_menu);  
-    else if(doexiton(sym, uni)) 
-      popScreen();
-    };
-  }
+        });
+  addparamsaver(vid.lake_top, "lake_top", "3D lake top", .25)
+    ->editable(0, 1, .1, "Level of water surface", "", 'l');
+  addparamsaver(vid.lake_bottom, "lake_bottom", "3D lake bottom", .9)
+    ->editable(0, 1, .1, "Level of water bottom", "", 'k');
+  addsaver(vid.tc_depth, "3D TC depth", 1);
+  addsaver(vid.tc_camera, "3D TC camera", 2);
+  addsaver(vid.tc_alpha, "3D TC alpha", 3);
+  addparamsaver(vid.highdetail, "highdetail", "3D highdetail", 8)
+    ->editable(0, 5, .5, "High detail range", "", 'n')
+    ->set_extra(explain_detail)
+    ->set_reaction([] {
+      if(vid.highdetail > vid.middetail) vid.middetail = vid.highdetail;
+      });  
+  addparamsaver(vid.middetail, "middetail", "3D middetail", 8)
+    ->editable(0, 5, .5, "Mid detail range", "", 'm')
+    ->set_extra(explain_detail)
+    ->set_reaction([] {
+      if(vid.highdetail > vid.middetail) vid.highdetail = vid.middetail;
+      });
+  addsaver(vid.gp_autoscale_heights, "3D Goldberg autoscaling", true);  
+  });
 
 EX void switchcolor(unsigned int& c, unsigned int* cs) {
   dialog::openColorDialog(c, cs);
@@ -2371,9 +2427,9 @@ EX void configureMouse() {
   dialog::display();
   }
 
-vector<float_setting*> last_changed;
+vector<setting*> last_changed;
 
-EX void add_to_changed(float_setting *f) {
+EX void add_to_changed(setting *f) {
   for(int i=0; i<isize(last_changed); i++) {
     if(last_changed[i] == f)
       return;
@@ -2382,11 +2438,19 @@ EX void add_to_changed(float_setting *f) {
   last_changed.push_back(f);
   }
 
-EX void add_edit(ld& val) {
+EX void add_edit_ptr(void *val) {
+  int found = 0;
   for(auto& fs: params)
-    if(fs.second->value == &val)
-      fs.second->show_edit_option();
+    if(fs.second->affects(val))
+      fs.second->show_edit_option(), found++;
+  if(found != 1) println(hlog, "found = ", found);
   }
+
+#if HDR
+template<class T> void add_edit(T& val) {
+  add_edit_ptr(&val);
+  }
+#endif
 
 EX void find_setting() {
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
@@ -2395,11 +2459,11 @@ EX void find_setting() {
   dialog::init(XLAT("find setting"));
   if(dialog::infix != "") mouseovers = dialog::infix;
   
-  vector<float_setting*> found;
+  vector<setting*> found;
   
   for(auto& p: params) {
     auto& fs = p.second;
-    string key = fs->parameter_name + "|" + fs->config_name + "|" + fs->menu_item_name;
+    string key = fs->search_key();
     if(dialog::hasInfix(key))
       found.push_back(&*fs);
     }
@@ -2435,6 +2499,28 @@ EX void edit_all_settings() {
   dialog::add_action_push(find_setting);
   dialog::addBack();
   dialog::display();
+  }
+
+void list_setting::show_edit_option(char key) {
+  dialog::addSelItem(XLAT(menu_item_name), XLAT(options[get_value()].first), key);
+  dialog::add_action_push([this] {
+    add_to_changed(this);
+    dialog::init(XLAT(menu_item_name));
+    dialog::addBreak(100);
+    int q = isize(options);
+    for(int i=0; i<q; i++) {
+      dialog::addBoolItem(XLAT(options[i].first), get_value() == i, 'a'+i);
+      dialog::add_action([this, i] { set_value(i); popScreen(); });
+      dialog::addBreak(100);
+      if(options[i].second != "") {
+        dialog::addHelp(XLAT(options[i].second));
+        dialog::addBreak(100);
+        }
+      }
+    dialog::addBreak(100);
+    dialog::addBack();
+    dialog::display();
+    });
   }
 
 EX void showSettings() {
@@ -2748,8 +2834,5 @@ EX int read_gamemode_args() {
 
 auto ah_config = addHook(hooks_args, 0, read_config_args) + addHook(hooks_args, 0, read_gamemode_args) + addHook(hooks_args, 0, read_color_args);
 #endif
-
-EX map<string, std::unique_ptr<float_setting>> params;
-
 
 }

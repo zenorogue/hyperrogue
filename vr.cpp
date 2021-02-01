@@ -1035,26 +1035,6 @@ EX void render() {
   state = 1;  
   }
 
-template<class T> 
-void show_choice(string name, T& value, char key, vector<pair<string, string>> options) {
-  dialog::addSelItem(XLAT(name), XLAT(options[int(value)].first), key);
-  dialog::add_action_push([&value, name, options] {
-    dialog::init(XLAT(name));
-    dialog::addBreak(100);
-    int q = isize(options);
-    for(int i=0; i<q; i++) {
-      dialog::addBoolItem(XLAT(options[i].first), int(value) == i, 'a'+i);
-      dialog::add_action([&value, i] { value = T(i); popScreen(); });
-      dialog::addBreak(100);
-      dialog::addHelp(XLAT(options[i].second));
-      dialog::addBreak(100);
-      }
-    dialog::addBreak(100);
-    dialog::addBack();
-    dialog::display();
-    });
-  }
-
 EX void show_vr_demos() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
@@ -1220,9 +1200,7 @@ EX void show_vr_settings() {
   
   dialog::addBreak(100);
 
-  show_choice("headset movement", hsm, 'h', headset_desc);
-  show_choice("binocular vision", eyes, 'b', eyes_desc);
-  show_choice("computer screen", cscr, 'c', comp_desc);
+  add_edit(hsm); add_edit(eyes); add_edit(cscr);
   
   dialog::addSelItem(XLAT("absolute unit in meters"), fts(absolute_unit_in_meters), 'a');
   dialog::add_action([] {
@@ -1351,9 +1329,12 @@ void addconfig() {
   addparamsaver(vrhr::ui_depth, "vr_ui_depth");
   addparamsaver(vrhr::ui_size, "vr_ui_size");
   
-  addsaverenum(vrhr::hsm, "vr-headset-mode");
-  addsaverenum(vrhr::eyes, "vr-eyes-mode");
-  addsaverenum(vrhr::cscr, "vr-screen-mode");
+  addsaverenum(vrhr::hsm, "vr_headset_mode")
+    ->editable(headset_desc, "VR headset movement", 'h');
+  addsaverenum(vrhr::eyes, "vr_eyes_mode");
+    ->editable(eyes_desc, "VR binocular vision", 'b');
+  addsaverenum(vrhr::cscr, "vr_screen_mode");
+    ->editable(comp_desc, "VR computer screen", 'c');
   }
 auto hookc = addHook(hooks_configfile, 100, addconfig);
 #endif
