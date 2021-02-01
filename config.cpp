@@ -298,7 +298,7 @@ void int_setting::show_edit_option(char key) {
   dialog::addSelItem(XLAT(menu_item_name), its(*value), key);
   dialog::add_action([this] () {
     add_to_changed(this);
-    dialog::editNumber(*value, 0, 100, 1, dft, XLAT(menu_item_name), help_text); 
+    dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
     if(sets) sets();
     if(reaction) dialog::reaction = reaction;
     if(extra) dialog::extra_options = extra;
