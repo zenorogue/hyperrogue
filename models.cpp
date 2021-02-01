@@ -1021,63 +1021,54 @@ EX namespace models {
     addsaver(models::rotation_xz, "conformal rotation_xz");
     addsaver(models::rotation_xy2, "conformal rotation_2");
     addsaver(models::do_rotate, "conformal rotation mode", 1);
-    param_f(pconf.model_orientation, "mori", "model orientation", 0);
-    param_f(pconf.model_orientation_yz, "mori_yz", "model orientation-yz", 0);
-    param_f(pconf.top_z, "topz", 5);
-    param_f(pconf.model_transition, "mtrans", "model transition", 1);
-    param_f(pconf.halfplane_scale, "hp", "halfplane scale", 1);
-    param_f(pconf.rotational_nil, "rotnil", 1);
-
-    param_f(pconf.clip_min, "clipmin", "clip-min", -1);
-    param_f(pconf.clip_max, "clipmax", "clip-max", +1);
-
-    param_f(pconf.euclid_to_sphere, "ets", "euclid to sphere projection", 1.5);
-    param_f(pconf.twopoint_param, "twopoint", "twopoint parameter", 1);
-    param_f(pconf.fisheye_param, "fisheye", "fisheye parameter", 1);
-    param_f(pconf.stretch, "stretch", 1);
-
-    param_f(vid.binary_width, "bwidth", "binary-tiling-width", 1);
-    param_f(pconf.collignon_parameter, "collignon", "collignon-parameter", 1);
-
-    param_f(pconf.aitoff_parameter, "aitoff");
-    param_f(pconf.miller_parameter, "miller");
-    param_f(pconf.loximuthal_parameter, "loximuthal");
-    param_f(pconf.winkel_parameter, "winkel");
-
-    addsaver(pconf.collignon_reflected, "collignon-reflect", false);
-    addsaver(pconf.show_hyperboloid_flat, "hyperboloid-flat", true);
-
-    param_f(pconf.skiprope, "mobius", 0);  
-    addsaver(pconf.formula, "formula");
-    addsaverenum(pconf.basic_model, "basic model");
-    addsaver(pconf.use_atan, "use_atan");  
-
-    addsaver(pconf.spiral_angle, "sang");
-    addsaver(pconf.spiral_x, "spiralx");
-    addsaver(pconf.spiral_y, "spiraly");  
-
-    param_f(pconf.scale, "scale", 1);
-    param_f(pconf.xposition, "xposition", 0);
-    param_f(pconf.yposition, "yposition", 0);
-    param_f(pconf.alpha, "projection", 1);
-    param_f(pconf.ballangle, "ballangle", "ball angle", 20);
-    param_f(pconf.camera_angle, "cameraangle", "camera angle", 0);
-    addsaver(pconf.ballproj, "ballproj", 1);
-
-    auto& rconf = vid.rug_config;
-    addsaverenum(rconf.model, "rug-projection", mdEquidistant);
-    addsaver(rconf.scale, "rug-projection-scale", 1);
-    addsaver(rconf.alpha, "rug-projection-alpha", 1);
-    addsaver(rconf.clip_min, "rug-projection-clip-min", -100);
-    addsaver(rconf.clip_max, "rug-projection-clip-max", +10);
-    addsaver(rconf.stretch, "rug-projection-stretch", 1);
-    addsaver(rconf.halfplane_scale, "rug-projection-halfplane scale", 1);
-    addsaver(rconf.collignon_parameter, "rug-collignon-parameter", 1);
-    addsaver(rconf.collignon_reflected, "rug-collignon-reflect", false);
-    addsaver(rconf.euclid_to_sphere, "rug-euclid to sphere projection", 1.5);
-    param_f(rconf.twopoint_param, "rtwopoint", "rug-twopoint parameter", 1);
-    param_f(rconf.fisheye_param, "rfisheye", "rug-fisheye parameter", 1);
-    addsaver(rconf.model_transition, "rug-model transition", 1);
+    
+    auto add_all = [&] (projection_configuration& p, string pp, string sp) {
+      bool rug = pp != "";
+      param_f(p.model_orientation, pp+"mori", sp+"model orientation", 0);
+      param_f(p.model_orientation_yz, pp+"mori_yz", sp+"model orientation-yz", 0);
+      param_f(p.top_z, sp+"topz", 5);
+      param_f(p.model_transition, pp+"mtrans", sp+"model transition", 1);
+      param_f(p.halfplane_scale, pp+"hp", sp+"halfplane scale", 1);
+      param_f(p.rotational_nil, sp+"rotnil", 1);
+  
+      param_f(p.clip_min, pp+"clipmin", sp+"clip-min", rug ? -100 : -1);
+      param_f(p.clip_max, pp+"clipmax", sp+"clip-max", rug ? +10 : +1);
+  
+      param_f(p.euclid_to_sphere, pp+"ets", sp+"euclid to sphere projection", 1.5);
+      param_f(p.twopoint_param, pp+"twopoint", sp+"twopoint parameter", 1);
+      param_f(p.fisheye_param, pp+"fisheye", sp+"fisheye parameter", 1);
+      param_f(p.stretch, pp+"stretch", 1);
+  
+      param_f(p.collignon_parameter, pp+"collignon", sp+"collignon-parameter", 1);
+  
+      param_f(p.aitoff_parameter, sp+"aitoff");
+      param_f(p.miller_parameter, sp+"miller");
+      param_f(p.loximuthal_parameter, sp+"loximuthal");
+      param_f(p.winkel_parameter, sp+"winkel");
+  
+      param_b(p.collignon_reflected, sp+"collignon-reflect", false);
+      param_b(p.show_hyperboloid_flat, sp+"hyperboloid-flat", true);
+  
+      param_f(p.skiprope, sp+"mobius", 0);
+      addsaver(p.formula, sp+"formula");
+      addsaverenum(p.basic_model, sp+"basic model");
+      addsaver(p.use_atan, sp+"use_atan");  
+  
+      addsaver(p.spiral_angle, sp+"sang");
+      addsaver(p.spiral_x, sp+"spiralx");
+      addsaver(p.spiral_y, sp+"spiraly");  
+  
+      param_f(p.scale, sp+"scale", 1);
+      param_f(p.xposition, sp+"xposition", 0);
+      param_f(p.yposition, sp+"yposition", 0);
+      param_f(p.alpha, sp+"projection", 1);
+      param_f(p.ballangle, pp+"ballangle", sp+"ball angle", 20);
+      param_f(p.camera_angle, pp+"cameraangle", sp+"camera angle", 0);
+      addsaver(p.ballproj, sp+"ballproj", 1);      
+      };
+    
+    add_all(pconf, "", "");
+    add_all(vid.rug_config, "rug_", "rug-");
     }
 
   auto hookArg = addHook(hooks_args, 100, readArgs) + addHook(hooks_config, 100, add_model_config);

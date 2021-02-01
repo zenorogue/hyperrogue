@@ -597,6 +597,8 @@ EX void initConfig() {
   param_enum(vid.graphglyph, "graphglyph", "graphical items/kills", 1)
   -> editable({{"letters", ""}, {"auto", ""}, {"images", ""}}, "inventory/kill mode", 'd');
 
+  param_f(vid.binary_width, "bwidth", "binary-tiling-width", 1);
+ 
   addsaver(vid.particles, "extra effects", 1);
   param_i(vid.framelimit, "frame limit", 75);
   addsaver(vid.xres, "xres");
