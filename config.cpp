@@ -16,6 +16,8 @@ EX eCentering centering;
 
 EX string auto_prefix;
 
+EX void add_to_changed(struct setting *f);
+
 #if HDR
 struct supersaver {
   string name;
@@ -39,6 +41,7 @@ struct setting {
   string menu_item_name;
   string help_text;
   char default_key;
+  cld last_value;
   virtual bool affects(void *v) { return false; }
   virtual void add_as_saver() {}
   void show_edit_option() { show_edit_option(default_key); }
@@ -49,6 +52,13 @@ struct setting {
     }
   virtual cld get_cld() = 0;
   setting() { prefix = auto_prefix; }
+  virtual void check_change() {
+    cld val = get_cld();
+    if(val != last_value) {
+      last_value = val;
+      add_to_changed(this);
+      }
+    }
   };
 #endif
 
@@ -109,6 +119,7 @@ struct float_setting : public setting {
 struct int_setting : public setting {
   int *value;
   int dft;
+  int min_value, max_value, step;
   void add_as_saver();
   reaction_t extra, reaction, sets;
   function<void(int_setting*)> modify_me;
@@ -266,6 +277,7 @@ void float_setting::show_edit_option(char key) {
   dialog::add_action([this] () {
     add_to_changed(this);
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
+    if(sets) sets();
     if(reaction) dialog::reaction = reaction;
     if(extra) dialog::extra_options = extra;
     });
@@ -277,6 +289,7 @@ void int_setting::show_edit_option(char key) {
   dialog::add_action([this] () {
     add_to_changed(this);
     dialog::editNumber(*value, 0, 100, 1, dft, XLAT(menu_item_name), help_text); 
+    if(sets) sets();
     if(reaction) dialog::reaction = reaction;
     if(extra) dialog::extra_options = extra;
     });
@@ -296,6 +309,7 @@ EX float_setting *param_f(ld& val, const string p, const string s, ld dft) {
   u->config_name = s;
   u->menu_item_name = s;
   u->value = &val;
+  u->last_value = dft;
   if(dft == 0) {
     u->min_value = -100;
     u->max_value = +100;
@@ -329,8 +343,17 @@ EX int_setting *param_i(int& val, const string s, int dft) {
   u->config_name = s;
   u->menu_item_name = s;
   u->value = &val;
+  u->last_value = dft;
   u->dft = dft;
   val = dft;
+  if(dft == 0) {
+    u->min_value = -100;
+    u->max_value = +100;
+    }
+  else {
+    u->min_value = 0;
+    u->max_value = 2 * dft;
+    }
   u->add_as_saver();
   auto f = &*u;
   params[s] = std::move(u);
@@ -345,6 +368,7 @@ EX bool_setting *param_b(bool& val, const string s, bool dft) {
   u->config_name = s;
   u->menu_item_name = s;
   u->value = &val;
+  u->last_value = dft;
   u->dft = dft;
   u->switcher = [&val] { val = !val; };
   val = dft;
@@ -371,6 +395,7 @@ template<class T> enum_setting<T> *param_enum(T& val, const string p, const stri
   u->value = &val;
   u->dft = dft;
   val = dft;
+  u->last_value = u->get_cld();
   u->add_as_saver();
   auto f = &*u;
   params[s] = std::move(u);
@@ -397,6 +422,7 @@ custom_setting* param_custom(T& val, const string& s, function<void(char)> menui
   u->parameter_name = param_esc(s);
   u->config_name = s;
   u->menu_item_name = s;
+  u->last_value = (int) val;
   u->custom_viewer = menuitem;
   u->custom_value = [&val] () { return (cld) val; };
   u->custom_affect = [&val] (void *v) { return &val == v; };
@@ -577,11 +603,16 @@ EX void initConfig() {
   addsaver(vid.language, "language", -1);  
   param_b(vid.drawmousecircle, "mouse circle", ISMOBILE || ISPANDORA);
   param_b(vid.revcontrol, "reverse control", false);
-  param_i(musicvolume, "music volume");
+  param_i(musicvolume, "music volume")
+  ->editable(0, 128, 10, "background music volume", "", 'b')
+  ->set_sets(sets_music_volume);
   #if CAP_SDLAUDIO
   addsaver(music_out_of_focus, "music out of focus", false);
   #endif
-  param_i(effvolume, "sound effect volume");
+  param_i(effvolume, "sound effect volume")
+  ->editable(0, 128, 10, "sound effects volume", "", 'e')
+  ->set_sets(sets_sfx_volume);
+  
   param_enum(glyphsortorder, "glyph_sort", "glyph sort order", glyphsortorder)
     ->editable({
       {"first on top", ""},
@@ -898,6 +929,13 @@ EX void initConfig() {
 
   param_custom(sightrange_bonus, "sightrange_bonus", menuitem_sightrange_bonus, 'r');
   param_custom(vid.use_smart_range, "sightrange_style", menuitem_sightrange_style, 's');
+  
+  param_custom(gp::param.first, "Goldberg x", menuitem_change_variation, 0);
+  param_custom(gp::param.second, "Goldberg y", menuitem_change_variation, 0);
+  param_custom(variation, "variation", menuitem_change_variation, 'v')
+  ->help_text = "variation|dual|bitruncated";
+  param_custom(geometry, "geometry", menuitem_change_geometry, 0)
+  ->help_text = "hyperbolic|spherical|Euclidean";
   }
 
 EX bool inSpecialMode() {
@@ -1070,7 +1108,7 @@ EX void loadNewConfig(FILE *f) {
 EX void loadConfig() {
  
   DEBB(DF_INIT, ("load config"));
-  vid.xres = 9999; vid.yres = 9999; vid.framelimit = 300;
+  vid.xres = 9999; vid.yres = 9999; vid.framelimit = 75;
   FILE *f = fopen(conffile, "rt");
   if(f) {
     int err;
@@ -1257,46 +1295,33 @@ EX void menuitem_sightrange(char c IS('c')) {
   dialog::add_action_push(edit_sightrange);
   }
 
-EX void menuitem_sfx_volume() {
-  #if CAP_AUDIO
-  dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
-  dialog::add_action([] {
-    dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
-    dialog::numberdark = dialog::DONT_SHOW;
-    dialog::reaction = [] () {
-      #if ISANDROID
-      settingsChanged = true;
-      #endif
-      };
-    dialog::bound_low(0);
-    dialog::bound_up(MIX_MAX_VOLUME);
-    });
+EX void sets_sfx_volume() {
+  dialog::numberdark = dialog::DONT_SHOW;
+  #if ISANDROID
+  dialog::reaction = [] () {
+    settingsChanged = true;
+    };
   #endif
+  dialog::bound_low(0);
+  dialog::bound_up(MIX_MAX_VOLUME);
   }
 
-EX void menuitem_music_volume() {
-  #if CAP_AUDIO
-  if (!music_available) return;
-  dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
-  dialog::add_action([] {
-    dialog::editNumber(musicvolume, 0, 128, 10, 60, XLAT("background music volume"), "");
-    dialog::numberdark = dialog::DONT_SHOW;
-    dialog::reaction = [] () {
-      #if CAP_SDLAUDIO
-      Mix_VolumeMusic(musicvolume);
-      #endif
-      #if ISANDROID
-      settingsChanged = true;
-      #endif
-      };
-    dialog::bound_low(0);
-    dialog::bound_up(MIX_MAX_VOLUME);
+EX void sets_music_volume() {
+  dialog::numberdark = dialog::DONT_SHOW;
+  dialog::reaction = [] () {
     #if CAP_SDLAUDIO
-    dialog::extra_options = [] {
-      dialog::addBoolItem_action(XLAT("play music when out of focus"), music_out_of_focus, 'A');
-      };
+    Mix_VolumeMusic(musicvolume);
     #endif
-    });
+    #if ISANDROID
+    settingsChanged = true;
+    #endif
+    };
+  dialog::bound_low(0);
+  dialog::bound_up(MIX_MAX_VOLUME);
+  #if CAP_SDLAUDIO
+  dialog::extra_options = [] {
+    dialog::addBoolItem_action(XLAT("play music when out of focus"), music_out_of_focus, 'A');
+    };
   #endif
   }
 
@@ -1552,8 +1577,8 @@ EX void configureOther() {
   // dialog::addBoolItem_action(XLAT("forget faraway cells"), memory_saving_mode, 'y');
   
 #if CAP_AUDIO
-  menuitem_music_volume();
-  menuitem_sfx_volume();
+  add_edit(musicvolume);
+  add_edit(effvolume);
 #endif
 
   menuitem_sightrange('r');
@@ -1683,7 +1708,7 @@ EX void showJoyConfig() {
 EX void projectionDialog() {
   vid.tc_alpha = ticks;
   dialog::editNumber(vpconf.alpha, -5, 5, .1, 1,
-    XLAT("projection"),
+    XLAT("projection distance"),
     XLAT("HyperRogue uses the Minkowski hyperboloid model internally. "
     "Klein and Poincaré models can be obtained by perspective, "
     "and the Gans model is obtained by orthogonal projection. "
@@ -1712,6 +1737,11 @@ EX void projectionDialog() {
     dialog::addItem(sphere ? "towards orthographic" : "towards Gans model", 'T');
     dialog::add_action([] () { double d = 1.1; vpconf.alpha *= d; vpconf.scale *= d; dialog::ne.s = dialog::disp(vpconf.alpha); });
     };
+  }
+
+EX void menuitem_projection_distance(char key) {
+  dialog::addSelItem(XLAT("projection distance"), fts(vpconf.alpha) + " (" + current_proj_name() + ")", key);
+  dialog::add_action(projectionDialog);
   }
 
 EX void explain_detail() {
@@ -2568,26 +2598,32 @@ EX void configureMouse() {
 vector<setting*> last_changed;
 
 EX void add_to_changed(setting *f) {
+  auto orig_f = f;
   for(int i=0; i<isize(last_changed); i++) {
     if(last_changed[i] == f)
       return;
     swap(last_changed[i], f);
+    if(f == orig_f) return;
     }
   last_changed.push_back(f);
   }
 
 EX setting *find_edit(void *val) {
-  for(auto& fs: params)
+  for(auto& fs: params) {
+    fs.second->check_change();
     if(fs.second->affects(val))
       return &*fs.second;
+    }
   return nullptr;
   }
 
 EX void add_edit_ptr(void *val) {
   int found = 0;
-  for(auto& fs: params)
+  for(auto& fs: params) {
+    fs.second->check_change();
     if(fs.second->affects(val))
       fs.second->show_edit_option(), found++;
+    }
   if(found != 1) println(hlog, "found = ", found);
   }
 
@@ -2620,6 +2656,8 @@ EX void find_setting() {
     else dialog::addBreak(100);
     }
 
+  dialog::addBreak(100);
+  dialog::addInfo("press letters to search");
   dialog::addSelItem("matching items", its(isize(found)), 0);
   dialog::display();
   
@@ -2632,7 +2670,9 @@ EX void find_setting() {
 
 EX void edit_all_settings() {
   gamescreen(1);
-  dialog::init(XLAT("edit all"));
+  dialog::init(XLAT("recently changed settings"));
+
+  for(auto &fs: params) fs.second->check_change();
 
   int id = 0;
   for(auto l: last_changed) 
@@ -2704,6 +2744,9 @@ EX void showSettings() {
   dialog::addBreak(100);
 
 #if CAP_CONFIG
+  dialog::addItem(XLAT("recently changed settings"), '/');
+  dialog::add_action_push(edit_all_settings);
+
   dialog::addItem(XLAT("save the current config"), 's');
   dialog::add_action(saveConfig);
 

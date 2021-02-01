@@ -605,6 +605,36 @@ EX string full_geometry_name() {
   return fgname;
   }
 
+void action_change_variation() {
+  if(0) ;
+  #if CAP_ARCM
+  else if(arcm::in()) arcm::next_variation();
+  #endif
+  else if(euc::in(2,4) || !CAP_GP) dialog::do_if_confirmed([] {
+    set_variation(PURE ? eVariation::bitruncated : eVariation::pure);
+    start_game();
+    });
+  #if CAP_GP
+  else // if(S3 == 3) 
+    gp::configure();
+  #endif
+  }
+
+EX void menuitem_change_variation(char key) {
+  dialog::addSelItem(XLAT("variations"), gp::operation_name(), key);    
+  dialog::add_action(action_change_variation);
+  }
+
+EX void menuitem_change_geometry(char key) {
+  dialog::addSelItem(XLAT("geometry/topology/tiling"), full_geometry_name(), key);
+  dialog::add_action_push(current_filter ? ge_select_tiling : ge_select_filter);
+  }
+
+EX void menuitem_projection(char key) {
+  dialog::addSelItem(XLAT("projection"), current_proj_name(), key);
+  dialog::add_action_push(models::model_menu);
+  }
+
 EX void showEuclideanMenu() {
   // for(int i=2; i<lt; i++) landvisited[i] = true;
 
@@ -612,10 +642,10 @@ EX void showEuclideanMenu() {
   gamescreen(0);  
 
   dialog::init(XLAT("experiment with geometry"));
-
-  dialog::addSelItem(XLAT("geometry"), geometry_name(), 'd');
-  dialog::add_action([] { pushScreen(ge_select_tiling); pushScreen(ge_select_filter); });
   
+  dialog::addSelItem(XLAT("geometry"), geometry_name(), 'd');
+  dialog::add_action([] { pushScreen(ge_select_tiling); pushScreen(ge_select_filter); });  
+
   dialog::addSelItem(XLAT("basic tiling"), XLAT(ginf[geometry].tiling_name), 't');
   dialog::add_action([] {  
     if(!current_filter || !current_filter->test()) set_default_filter();
@@ -876,23 +906,8 @@ EX void showEuclideanMenu() {
     add_edit_wall_quality('W');
     }
   else if(WDIM == 3 || kite::in() || arb::in()) dialog::addBreak(100);
-  else {
-    dialog::addSelItem(XLAT("variations"), gp::operation_name(), 'v');    
-    dialog::add_action([] {
-      if(0) ;
-      #if CAP_ARCM
-      else if(arcm::in()) arcm::next_variation();
-      #endif
-      else if(euc::in(2,4) || !CAP_GP) dialog::do_if_confirmed([] {
-        set_variation(PURE ? eVariation::bitruncated : eVariation::pure);
-        start_game();
-        });
-      #if CAP_GP
-      else // if(S3 == 3) 
-        gp::configure();
-      #endif
-      });
-    }
+  else 
+    menuitem_change_variation('v');
 
   if(in_s2xe()) {
     dialog::addSelItem(XLAT("precision of S2xE rings"), its(s2xe::qrings), '5');
@@ -981,8 +996,7 @@ EX void showEuclideanMenu() {
     dialog::addItem(XLAT("3D configuration"), '9');
     dialog::add_action_push(show3D);
     }
-  dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
-  dialog::add_action_push(models::model_menu);
+  menuitem_projection('1');
   if(nonisotropic && !sl2)
     dialog::addBoolItem_action(XLAT("geodesic movement in Sol/Nil"), nisot::geodesic_movement, 'G');
   #if CAP_CRYSTAL && MAXMDIM >= 4

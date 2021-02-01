@@ -1301,8 +1301,8 @@ void settings_menu() {
   dialog::add_action_push(multi::get_key_configurer(1, move_names, "Bringris keys"));
 
   #if CAP_AUDIO
-  menuitem_sfx_volume();
-  menuitem_music_volume();
+  add_edit(effvolume);
+  add_edit(musicvolume);
   #endif
 
   dialog::addBreak(100);

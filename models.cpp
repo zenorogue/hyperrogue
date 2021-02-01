@@ -454,8 +454,7 @@ EX namespace models {
     if(among(vpmodel, mdDisk, mdBall, mdHyperboloid, mdRotatedHyperboles, mdPanini)) {
       dynamicval<eModel> v(vpconf.model, vpconf.model);
       if(vpmodel == mdHyperboloid) vpconf.model = mdDisk;
-      dialog::addSelItem(XLAT("projection distance"), fts(vpconf.alpha) + " (" + current_proj_name() + ")", 'p');
-      dialog::add_action(projectionDialog);
+      add_edit(vpconf.alpha);
       }
                                   
     if(has_orientation(vpmodel)) {
@@ -895,7 +894,6 @@ EX namespace models {
     }
   
   void add_model_config() {
-    addsaverenum(pmodel, "used model", mdDisk);
     addsaver(polygonal::SI, "polygon sides");
     param_f(polygonal::STAR, "star", "polygon star factor");
     addsaver(polygonal::deg, "polygonal degree");
@@ -914,8 +912,13 @@ EX namespace models {
     param_f(pconf.halfplane_scale, "hp", "halfplane scale", 1);
     
     auto add_all = [&] (projection_configuration& p, string pp, string sp) {
+
       bool rug = pp != "";
       dynamicval<string> ds(auto_prefix, rug ? "[rug] " : "");
+
+      addsaverenum(p.model, pp+"used model", mdDisk);
+      param_custom(pmodel, "projection|Poincare|Klein|half-plane|perspective", menuitem_projection, '1');
+
       param_f(p.model_orientation, pp+"mori", sp+"model orientation", 0);
       param_f(p.model_orientation_yz, pp+"mori_yz", sp+"model orientation-yz", 0);
 
@@ -1001,7 +1004,10 @@ EX namespace models {
       param_f(p.scale, sp+"scale", 1);
       param_f(p.xposition, sp+"xposition", 0);
       param_f(p.yposition, sp+"yposition", 0);
-      param_f(p.alpha, sp+"projection", 1);
+
+      addsaver(p.alpha, sp+"projection", 1);
+      param_custom(p.alpha, sp+"projection distance", menuitem_projection_distance, 'p');
+
       param_f(p.camera_angle, pp+"cameraangle", sp+"camera angle", 0);
       addsaver(p.ballproj, sp+"ballproj", 1);      
 

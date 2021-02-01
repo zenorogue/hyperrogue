@@ -936,10 +936,8 @@ EX void menu() {
       
       if(models::is_3d(vpconf) || rug::rugged) {
         dialog::addInfo("SVG screenshots do not work in this 3D mode", 0xFF0000);
-        if(GDIM == 2 && !rug::rugged) {
-          dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
-          dialog::add_action_push(models::model_menu);
-          }
+        if(GDIM == 2 && !rug::rugged) 
+          menuitem_projection('1');
         #if CAP_WRL
         else {
           dialog::addItem(XLAT("WRL"), 'w');
@@ -981,8 +979,7 @@ EX void menu() {
       else if(models::is_perspective(vpconf.model)) {
       #endif
         dialog::addInfo("this does not work well in perspective projections", 0xFF8000);
-        dialog::addSelItem(XLAT("projection"), current_proj_name(), '1');
-        dialog::add_action_push(models::model_menu);
+        menuitem_projection('1');
         }
       dialog::addBoolItem_action("generate a model for 3D printing", wrl::print, 'p');
       #if CAP_PNG
