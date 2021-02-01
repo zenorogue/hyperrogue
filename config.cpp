@@ -1082,7 +1082,6 @@ EX void loadConfig() {
 EX void add_cells_drawn(char c IS('C')) {
   dialog::addSelItem(XLAT("cells drawn"), (noclipped ? its(cells_drawn) + " (" + its(noclipped) + ")" : its(cells_drawn)) + " / " + its(vid.cells_drawn_limit), c);
   dialog::add_action([] () { 
-    popScreen();
     dialog::editNumber(vid.cells_drawn_limit, 100, 1000000, log(10), 10000, XLAT("limit on cells drawn"), 
       XLAT("This limit exists to protect the engine from freezing when too many cells would be drawn according to the current options.")
       );
@@ -1150,9 +1149,7 @@ EX void edit_sightrange() {
     if(GDIM == 3) {
       dialog::addSelItem(XLAT("3D sight range for the fog effect"), fts(sightranges[geometry]), 'R');
       dialog::add_action([] {
-        auto xo = dialog::extra_options;
         dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("fog effect"), "");
-        dialog::extra_options = xo; popScreen();
         });
       }
     }
@@ -1160,30 +1157,22 @@ EX void edit_sightrange() {
   if(pmodel == mdGeodesic && sol) {
     dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(sn::solrange_xy), 'X');
     dialog::add_action([] {
-      auto xo = dialog::extra_options;
       dialog::editNumber(sn::solrange_xy, 0.01, 200, 0.1, 50, XLAT("max difference in X/Y coordinates"), solhelp()), dialog::scaleLog();
-      dialog::extra_options = xo; popScreen();
       });
     dialog::addSelItem(XLAT("max difference in Z coordinate"), fts(sn::solrange_z), 'Z');
     dialog::add_action([] {
-      auto xo = dialog::extra_options;
       dialog::editNumber(sn::solrange_z, 0, 20, 0.1, 6, XLAT("max difference in Z coordinates"), solhelp());
-      dialog::extra_options = xo; popScreen();
       });
     }
   #endif
   if(pmodel == mdGeodesic && sl2) {
     dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(slr::range_xy), 'X');
     dialog::add_action([] {
-      auto xo = dialog::extra_options;
       dialog::editNumber(slr::range_xy, 0, 10, 0.5, 4, XLAT("max difference in X/Y coordinates"), "");
-      dialog::extra_options = xo; popScreen();
       });
     dialog::addSelItem(XLAT("steps"), its(slr::steps), 'Z');
     dialog::add_action([] {
-      auto xo = dialog::extra_options;
       dialog::editNumber(slr::steps, 0, 50, 1, 10, "", "");
-      dialog::extra_options = xo; popScreen();
       });
     }
   if(vid.use_smart_range && WDIM == 2) {
@@ -1201,11 +1190,9 @@ EX void edit_sightrange() {
   if(GDIM == 3 && !vid.use_smart_range) {
     dialog::addSelItem(XLAT("limit generation"), fts(extra_generation_distance), 'E');
     dialog::add_action([] {
-      auto xo = dialog::extra_options;
       dialog::editNumber(extra_generation_distance, 0, 999, 0.5, 999, XLAT("limit generation"), 
         "Cells over this distance will not be generated, but they will be drawn if they are already generated and in the sight range."
         );
-      dialog::extra_options = xo; popScreen();
       });
     }
   add_cells_drawn('C');
@@ -1312,6 +1299,58 @@ EX void showSpecialEffects() {
   dialog::display();
   }
 
+EX void show_vector_settings() {
+  cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : sm::MAYDARK;
+  gamescreen(0);
+  dialog::init(XLAT("vector settings"));
+
+  dialog::addSelItem(XLAT("line width"), fts(vid.linewidth), 'w');
+  dialog::add_action([] {
+     dialog::editNumber(vid.linewidth, 0, 10, 0.1, 1, XLAT("line width"), 
+       vid.usingGL ? "" : XLAT("Line width setting is only taken into account in OpenGL."));
+     });
+
+  dialog::addSelItem(XLAT("line quality"), its(vid.linequality), 'L');
+  dialog::add_action([] {
+    dialog::editNumber(vid.linequality, -3, 5, 1, 1, XLAT("line quality"), 
+      XLAT("Higher numbers make the curved lines smoother, but reduce the performance."));
+    });
+
+  dialog::addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'O');
+  dialog::add_action([] () { 
+    vid.antialias ^= AA_LINEWIDTH; 
+    });
+
+  dialog::addBoolItem("perfect width", perfect_linewidth == 2, 'P');
+  if(perfect_linewidth == 1) 
+    dialog::lastItem().value = XLAT("shots only");
+  dialog::add_action([] { perfect_linewidth = (1 + perfect_linewidth) % 3; });
+
+  if(vid.antialias & AA_LINEWIDTH) {
+    dialog::addSelItem("variable width", fts(precise_width), 'M');
+    dialog::add_action([] () {
+      dialog::editNumber(precise_width, 0, 2, 0.1, 0.5, 
+        XLAT("variable width"), XLAT("lines longer than this value will be split into shorter lines, with width computed separately for each of them.")
+        );
+      });
+    }
+  else dialog::addBreak(100);
+  
+  add_edit(neon_mode);        
+  dialog::addBreak(100);
+  dialog::addInfo(XLAT("hint: press Alt while testing modes"));
+  dialog::addBreak(100);
+  dialog::addBoolItem_action(XLAT("disable shadows"), noshadow, 'F');
+  dialog::addBoolItem_action(XLAT("bright mode"), bright, 'G');
+  dialog::addBoolItem_action(XLAT("colorblind simulation"), cblind, 'H');
+
+  dialog::addBoolItem_action(XLAT("no fill in neon mode"), neon_nofill, 'N');
+
+  dialog::addBreak(50);
+  dialog::addBack();
+  dialog::display();
+  }
+
 EX void showGraphConfig() {
   cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : sm::MAYDARK;
   gamescreen(0);
@@ -1332,10 +1371,9 @@ EX void showGraphConfig() {
       (vid.antialias & AA_MULTI) ? "multisampling" :
       "NO", 'O');
 
-  dialog::addSelItem(XLAT("vector graphics modes"), XLAT("width") + " " + fts(vid.linewidth), 'w');
+  dialog::addSelItem(XLAT("vector settings"), XLAT("width") + " " + fts(vid.linewidth), 'w');
+  dialog::add_action_push(show_vector_settings);
   
-  dialog::addSelItem(XLAT("line quality"), its(vid.linequality), 'L');
-
   #if CAP_FRAMELIMIT
   dialog::addSelItem(XLAT("framerate limit"), its(vid.framelimit), 'l');
   if(getcstat == 'l') 
@@ -1414,48 +1452,6 @@ EX void showGraphConfig() {
     
     // if(xuni == 'b') vid.antialias ^= AA_LINEWIDTH;
    
-    else if(xuni == 'w') {
-      dialog::editNumber(vid.linewidth, 0, 10, 0.1, 1, XLAT("line width"), 
-        vid.usingGL ? "" : XLAT("Line width setting is only taken into account in OpenGL."));
-      dialog::extra_options = [] () {
-        dialog::addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'O');
-        dialog::add_action([] () { 
-          vid.antialias ^= AA_LINEWIDTH; 
-          });
-
-        dialog::addBoolItem("perfect width", perfect_linewidth == 2, 'P');
-        if(perfect_linewidth == 1) 
-          dialog::lastItem().value = XLAT("shots only");
-        dialog::add_action([] { perfect_linewidth = (1 + perfect_linewidth) % 3; });
-
-        if(vid.antialias & AA_LINEWIDTH) {
-          dialog::addSelItem("variable width", fts(precise_width), 'M');
-          dialog::add_action([] () {
-            popScreen();
-            dialog::editNumber(precise_width, 0, 2, 0.1, 0.5, 
-              XLAT("variable width"), XLAT("lines longer than this value will be split into shorter lines, with width computed separately for each of them.")
-              );
-            });
-          }
-        else dialog::addBreak(100);
-        
-        add_edit(neon_mode);        
-        dialog::addBreak(100);
-        dialog::addInfo(XLAT("hint: press Alt while testing modes"));
-        dialog::addBreak(100);
-        dialog::addBoolItem_action(XLAT("disable shadows"), noshadow, 'F');
-        dialog::addBoolItem_action(XLAT("bright mode"), bright, 'G');
-        dialog::addBoolItem_action(XLAT("colorblind simulation"), cblind, 'H');
-
-        dialog::addBoolItem_action(XLAT("no fill in neon mode"), neon_nofill, 'N');
-        };
-      }
-    
-    else if(xuni == 'L') {
-      dialog::editNumber(vid.linequality, -3, 5, 1, 1, XLAT("line quality"), 
-        XLAT("Higher numbers make the curved lines smoother, but reduce the performance."));
-      }
-  
   #if CAP_FRAMELIMIT    
     else if(xuni == 'l') {
       dialog::editNumber(vid.framelimit, 5, 300, 10, 300, XLAT("framerate limit"), "");
