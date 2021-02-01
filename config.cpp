@@ -795,6 +795,9 @@ EX void initConfig() {
   
   ld bonus = 0;
   ld emul = 1;
+  
+  param_b(dialog::onscreen_keyboard, "onscreen_keyboard")
+  ->editable("onscreen keyboard", 'k');
 
   addsaver(sightranges[gBinary3], "sight-binary3", 3.1 + bonus);
   addsaver(sightranges[gCubeTiling], "sight-cubes", 10);
@@ -2571,6 +2574,13 @@ EX void add_to_changed(setting *f) {
     swap(last_changed[i], f);
     }
   last_changed.push_back(f);
+  }
+
+EX setting *find_edit(void *val) {
+  for(auto& fs: params)
+    if(fs.second->affects(val))
+      return &*fs.second;
+  return nullptr;
   }
 
 EX void add_edit_ptr(void *val) {

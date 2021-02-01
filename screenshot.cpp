@@ -1118,14 +1118,16 @@ EX void moved() {
   playermoved = false;
   }
 
+#if HDR
 struct animated_parameter {
   ld *value;
   ld last;
   string formula;
   reaction_t reaction;
   };
+#endif
 
-vector<animated_parameter> aps;
+EX vector<animated_parameter> aps;
 
 EX void deanimate(ld &x) {
   for(int i=0; i<isize(aps); i++) 
@@ -1449,23 +1451,6 @@ void animator(string caption, ld& param, char key) {
 
 EX ld a, b;
 
-void list_animated_parameters() {
-  dialog::addHelp(XLAT(
-    "Most parameters can be animated simply by using '..' in their editing dialog. "
-    "For example, the value of a parameter set to 0..1 will grow linearly from 0 to 1. "
-    "You can also use functions (e.g. cos(0..2*pi)) and refer to other parameters; "
-    "parameters 'a' and 'b' exist for this purpose. "
-    "See the list below for parameters which are currently animated (or changed)."));
-  dialog::addBreak(50);
-  for(auto& ap: aps) {
-    string what = "?";
-    for(auto& p: params) if(p.second->affects(ap.value)) what = p.first;
-    dialog::addInfo(what + " = " + ap.formula);
-    }
-  dialog::addBreak(50);
-  dialog::addHelp(parser_help());
-  }
-
 ld animation_period;
 
 EX void rug_angle_options() {
@@ -1656,13 +1641,11 @@ EX void show() {
   dialog::addSelItem(XLAT("animate parameters"), fts(a), 'a');
   dialog::add_action([] () {
     dialog::editNumber(a, -100, 100, 1, 0, XLAT("animate parameters"), "");
-    dialog::extra_options = list_animated_parameters;
     });
 
   dialog::addSelItem(XLAT("animate parameters"), fts(b), 'b');
   dialog::add_action([] () {
     dialog::editNumber(b, -100, 100, 1, 0, XLAT("animate parameters"), "");
-    dialog::extra_options = list_animated_parameters;
     });
 
   dialog::addBoolItem(XLAT("history mode"), (history::on || history::includeHistory), 'h');

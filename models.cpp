@@ -303,10 +303,11 @@ EX namespace models {
       "This lets you specify the projection as a formula f. "
       "The formula has access to the value 'z', which is a complex number corresponding to the (x,y) coordinates in the currently selected model; "
       "the point z is mapped to f(z). You can also use the underlying coordinates ux, uy, uz."
-      ) + "\n\n" + parser_help()
+      )
       );
     #if CAP_QUEUE && CAP_CURVE
     dialog::extra_options = [] () {
+      dialog::parser_help();
       initquickqueue();
       queuereset(mdPixel, PPR::LINE);              
       for(int a=-1; a<=1; a++) {

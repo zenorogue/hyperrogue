@@ -2085,10 +2085,10 @@ EX namespace patterns {
           );
         
         s += XLAT("see compute_map_function in pattern2.cpp for more\n");
-
-        s += "\n\n" + parser_help();
-
+        
         dialog::edit_string(color_formula, "formula", s);
+
+        dialog::extra_options = dialog::parser_help;
         dialog::reaction_final = [instant] () { 
           if(instant) stop_game();
           whichCanvas = 'f';

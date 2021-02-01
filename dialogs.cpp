@@ -816,6 +816,57 @@ EX namespace dialog {
     addKeyboardItem(lr ? " \t\x1\x2" : " \t");
     }
   
+  EX bool onscreen_keyboard = ISMOBILE;
+
+  EX void number_dialog_help() {    
+    init("number dialog help");
+    dialog::addBreak(100);
+    dialog::addHelp(XLAT("You can enter formulas in this dialog."));
+    dialog::addBreak(100);
+    dialog::addHelp(XLAT("Functions available:"));
+    addHelp(available_functions());
+    dialog::addBreak(100);
+    dialog::addHelp(XLAT("Constants and variables available:"));
+    addHelp(available_constants());
+    if(ne.animatable) {
+      dialog::addBreak(100);
+      dialog::addHelp(XLAT("Animations:"));
+      dialog::addHelp(XLAT("a..b -- animate linearly from a to b"));
+      dialog::addHelp(XLAT("a..b..|c..d -- animate from a to b, then from c to d"));
+      dialog::addHelp(XLAT("a../x..b../y -- change smoothly, x and y are derivatives"));
+      }
+    
+    /* "Most parameters can be animated simply by using '..' in their editing dialog. "
+      "For example, the value of a parameter set to 0..1 will grow linearly from 0 to 1. "
+      "You can also use functions (e.g. cos(0..2*pi)) and refer to other parameters."
+      )); */
+    
+    #if CAP_ANIMATIONS
+    dialog::addBreak(50);
+    auto f = find_edit(ne.intval ? (void*) ne.intval : (void*) ne.editwhat);
+    if(f)
+      dialog::addHelp(XLAT("Parameter names, e.g. '%1'", f->parameter_name));
+    else
+      dialog::addHelp(XLAT("Parameter names"));
+    dialog::addBreak(50);
+    for(auto& ap: anims::aps) {
+      string what = "?";
+      for(auto& p: params) if(p.second->affects(ap.value)) what = p.first;
+      dialog::addInfo(what + " = " + ap.formula);
+      }
+    #endif
+    dialog::addBreak(50);
+    dialog::addHelp(XLAT("These can be combined, e.g. %1", "projection*sin(0..2*pi)"));
+    display();
+    }
+
+  EX void parser_help() {
+    ne.editwhat = nullptr;
+    ne.intval = nullptr;
+    addItem("help", SDLK_F1);
+    add_action_push(number_dialog_help);
+    }
+  
   EX void drawNumberDialog() {
     cmode = sm::NUMBER | dialogflags;
     if(numberdark < DONT_SHOW)
@@ -834,6 +885,9 @@ EX namespace dialog {
     
     dialog::addBack();
     addSelItem(XLAT("default value"), disp(ne.dft), SDLK_HOME);
+    add_edit(onscreen_keyboard);
+    addItem("help", SDLK_F1);
+    add_action_push(number_dialog_help);
 
     addBreak(100);
     
@@ -845,14 +899,16 @@ EX namespace dialog {
 
     if(extra_options) extra_options();
     
-    addBreak(100);
-    formula_keyboard(false);
+    if(onscreen_keyboard) {
+      addBreak(100);
+      formula_keyboard(false);
+      }
     
     display();
     
     keyhandler = [] (int sym, int uni) {
       handleNavigation(sym, uni);
-      if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')', ',', 3) || (uni >= 'a' && uni <= 'z')) {
+      if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')', ',', '|', 3) || (uni >= 'a' && uni <= 'z')) {
         if(uni == 3) ne.s += "pi";
         else ne.s += uni;
         apply_edit();
