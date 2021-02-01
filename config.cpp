@@ -2644,7 +2644,6 @@ template<class T> void add_edit(T& val) {
 #endif
 
 EX void find_setting() {
-  cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
   gamescreen(1); 
 
   dialog::init(XLAT("find setting"));
