@@ -635,6 +635,19 @@ EX void menuitem_projection(char key) {
   dialog::add_action_push(models::model_menu);
   }
 
+EX void menuitem_binary_width(char key) {
+  dialog::addSelItem(XLAT("binary tiling width"), fts(vid.binary_width), key);
+  dialog::add_action([] {
+    dialog::editNumber(vid.binary_width, 0, 2, 0.1, 1, XLAT("binary tiling width"), "");
+    dialog::reaction = [] () {
+      #if CAP_TEXTURE
+      texture::config.remap();
+      #endif
+      if(asonov::in()) asonov::prepare();
+      };
+    });
+  }
+
 EX void showEuclideanMenu() {
   // for(int i=2; i<lt; i++) landvisited[i] = true;
 
@@ -892,16 +905,7 @@ EX void showEuclideanMenu() {
     dialog::add_action(hybrid::configure_period);
     }
   else if(bt::in()) {
-    dialog::addSelItem(XLAT("width"), fts(vid.binary_width), 'v');
-    dialog::add_action([] {
-      dialog::editNumber(vid.binary_width, 0, 2, 0.1, 1, XLAT("binary tiling width"), "");
-      dialog::reaction = [] () {
-        #if CAP_TEXTURE
-        texture::config.remap();
-        #endif
-        if(asonov::in()) asonov::prepare();
-        };
-      });
+    menuitem_binary_width('v');
     extern void add_edit_wall_quality(char);
     add_edit_wall_quality('W');
     }

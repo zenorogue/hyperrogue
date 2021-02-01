@@ -651,6 +651,7 @@ EX void initConfig() {
   -> editable({{"letters", ""}, {"auto", ""}, {"images", ""}}, "inventory/kill mode", 'd');
 
   param_f(vid.binary_width, "bwidth", "binary-tiling-width", 1);
+  param_custom(vid.binary_width, "binary tiling width", menuitem_binary_width, 'v');
  
   addsaver(vid.particles, "extra effects", 1);
   param_i(vid.framelimit, "frame limit", 75);
