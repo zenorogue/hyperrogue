@@ -413,6 +413,7 @@ cld exp_parser::parse(int prio) {
       ld v = ticks * (isize(rest)-1.) / anims::period;
       int vf = v;
       v -= vf;
+      if(isize(rest) == 1) rest.push_back(rest[0]);
       vf %= (isize(rest)-1);
       auto& lft = rest[vf];
       auto& rgt = rest[vf+1];
