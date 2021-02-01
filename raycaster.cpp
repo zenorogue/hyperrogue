@@ -424,7 +424,9 @@ void enable_raycaster() {
     else fsh += "  mediump float len(mediump vec4 x) { return length(x.xyz); }\n";
     
     ld s = 1;
+    #if CAP_VR
     if(eyes) s *= vrhr::absolute_unit_in_meters;
+    #endif
     
     if(stepbased) fmain += 
       "  const mediump float maxstep = " + fts(maxstep_current() * s) + ";\n"
