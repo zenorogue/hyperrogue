@@ -14,6 +14,8 @@ enum eCentering { face, edge, vertex };
 
 EX eCentering centering;
 
+EX string auto_prefix;
+
 #if HDR
 struct supersaver {
   string name;
@@ -31,6 +33,7 @@ typedef vector<shared_ptr<supersaver>> saverlist;
 extern saverlist savers;
 
 struct setting {
+  string prefix;
   string parameter_name;
   string config_name;
   string menu_item_name;
@@ -45,6 +48,7 @@ struct setting {
     return parameter_name + "|" + config_name + "|" + menu_item_name;
     }
   virtual cld get_cld() = 0;
+  setting() { prefix = auto_prefix; }
   };
 #endif
 
@@ -80,6 +84,7 @@ struct float_setting : public setting {
   ld *value;
   ld dft;
   ld min_value, max_value, step;
+  string unit;
   float_setting *editable(ld min_value, ld max_value, ld step, string menu_item_name, string help_text, char key) {
     this->min_value = min_value;
     this->max_value = max_value;
@@ -121,6 +126,7 @@ struct bool_setting : public setting {
   bool dft;
   void add_as_saver();
   reaction_t switcher;
+  void editable(string cap, char key ) { menu_item_name = cap; default_key = key; } 
   virtual bool affects(void *v) override { return v == value; }
   virtual void show_edit_option(char key) override;
   virtual cld get_cld() { return *value ? 1 : 0; }
@@ -256,7 +262,7 @@ void bool_setting::add_as_saver() {
 
 void float_setting::show_edit_option(char key) {
   if(modify_me) modify_me(this);
-  dialog::addSelItem(XLAT(menu_item_name), fts(*value), key);
+  dialog::addSelItem(prefix + XLAT(menu_item_name), fts(*value) + unit, key);
   dialog::add_action([this] () {
     add_to_changed(this);
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
@@ -267,7 +273,7 @@ void float_setting::show_edit_option(char key) {
 
 void int_setting::show_edit_option(char key) {
   if(modify_me) modify_me(this);
-  dialog::addSelItem(XLAT(menu_item_name), its(*value), key);
+  dialog::addSelItem(prefix + XLAT(menu_item_name), its(*value), key);
   dialog::add_action([this] () {
     add_to_changed(this);
     dialog::editNumber(*value, 0, 100, 1, dft, XLAT(menu_item_name), help_text); 
@@ -277,7 +283,7 @@ void int_setting::show_edit_option(char key) {
   }
 
 void bool_setting::show_edit_option(char key) {
-  dialog::addBoolItem(XLAT(menu_item_name), *value, key);
+  dialog::addBoolItem(prefix + XLAT(menu_item_name), *value, key);
   dialog::add_action([this] () {
     add_to_changed(this);
     switcher();
@@ -290,8 +296,14 @@ EX float_setting *param_f(ld& val, const string p, const string s, ld dft) {
   u->config_name = s;
   u->menu_item_name = s;
   u->value = &val;
-  u->min_value = 0;
-  u->max_value = 2 * dft;
+  if(dft == 0) {
+    u->min_value = -100;
+    u->max_value = +100;
+    }
+  else {
+    u->min_value = 0;
+    u->max_value = 2 * dft;
+    }
   u->step = dft / 10;
   u->dft = dft;
   val = dft;
@@ -1828,17 +1840,6 @@ EX void showStereo() {
       
     else if(doexiton(sym, uni)) popScreen();
     };
-  }
-
-EX void config_camera_rotation() {
-  dialog::editNumber(pconf.ballangle, 0, 90, 5, 0, XLAT("camera rotation in 3D models"), 
-    "Rotate the camera in 3D models (ball model, hyperboloid, and hemisphere). "
-    "Note that hyperboloid and hemisphere models are also available in the "
-    "Hypersian Rug surfaces menu, but they are rendered differently there -- "
-    "by making a flat picture first, then mapping it to a surface. "
-    "This makes the output better in some ways, but 3D effects are lost. "
-    "Hypersian Rug model also allows more camera freedom."
-    );
   }
 
 EX void add_edit_wall_quality(char c) {

@@ -383,30 +383,25 @@ EX namespace models {
     dialog::display();
     }
       
-  void edit_stretch() {
-    dialog::editNumber(vpconf.stretch, 0, 10, .1, 1, XLAT("vertical stretch"), 
-      "Vertical stretch factor."
-      );
-    dialog::extra_options = [] () {
-      dialog::addBreak(100);
-      if(sphere && pmodel == mdBandEquiarea) {
-        dialog::addBoolItem("Gall-Peters", vpconf.stretch == 2, 'O');
-        dialog::add_action([] { vpconf.stretch = 2; dialog::ne.s = "2"; });
+  void stretch_extra() {
+    dialog::addBreak(100);
+    if(sphere && pmodel == mdBandEquiarea) {
+      dialog::addBoolItem("Gall-Peters", vpconf.stretch == 2, 'O');
+      dialog::add_action([] { vpconf.stretch = 2; dialog::ne.s = "2"; });
+      }
+    if(pmodel == mdBandEquiarea) {
+      // y = K * sin(phi)
+      // cos(phi) * cos(phi) = 1/K
+      if(sphere && vpconf.stretch >= 1) {
+        ld phi = acos(sqrt(1/vpconf.stretch));
+        dialog::addInfo(XLAT("The current value makes the map conformal at the latitude of %1 (%2°).", fts(phi), fts(phi / degree)));
         }
-      if(pmodel == mdBandEquiarea) {
-        // y = K * sin(phi)
-        // cos(phi) * cos(phi) = 1/K
-        if(sphere && vpconf.stretch >= 1) {
-          ld phi = acos(sqrt(1/vpconf.stretch));
-          dialog::addInfo(XLAT("The current value makes the map conformal at the latitude of %1 (%2°).", fts(phi), fts(phi / degree)));
-          }
-        else if(hyperbolic && abs(vpconf.stretch) <= 1 && abs(vpconf.stretch) >= 1e-9) {
-          ld phi = acosh(abs(sqrt(1/vpconf.stretch)));
-          dialog::addInfo(XLAT("The current value makes the map conformal %1 units from the main line.", fts(phi)));
-          }
-        else dialog::addInfo("");
+      else if(hyperbolic && abs(vpconf.stretch) <= 1 && abs(vpconf.stretch) >= 1e-9) {
+        ld phi = acosh(abs(sqrt(1/vpconf.stretch)));
+        dialog::addInfo(XLAT("The current value makes the map conformal %1 units from the main line.", fts(phi)));
         }
-      };
+      else dialog::addInfo("");
+      }
     }
   
   bool set_vr_settings = true;
@@ -568,10 +563,8 @@ EX namespace models {
         });
       }
     
-    if(is_3d(vpconf) && GDIM == 2 && !vr_settings) {
-      dialog::addSelItem(XLAT("camera rotation in 3D models"), fts(vpconf.ballangle) + "°", 'b');
-      dialog::add_action(config_camera_rotation);
-      }
+    if(is_3d(vpconf) && GDIM == 2 && !vr_settings) 
+      add_edit(vpconf.ballangle);     
     
     if(vr_settings) {
       dialog::addSelItem(XLAT("VR: rotate the 3D model"), fts(vpconf.vr_angle) + "°", 'B');
@@ -597,77 +590,29 @@ EX namespace models {
         });
       }
     
-    if(vpmodel == mdHyperboloid) {
-      dialog::addSelItem(XLAT("maximum z coordinate to show"), fts(vpconf.top_z), 'l');
-      dialog::add_action([](){
-        dialog::editNumber(vpconf.top_z, 1, 20, 0.25, 4, XLAT("maximum z coordinate to show"), "");
-        });
-      }
+    if(vpmodel == mdHyperboloid) 
+      add_edit(vpconf.top_z);
     
-    if(has_transition(vpmodel)) {
-      dialog::addSelItem(XLAT("model transition"), fts(vpconf.model_transition), 't');
-      dialog::add_action([]() {
-        dialog::editNumber(vpconf.model_transition, 0, 1, 0.1, 1, XLAT("model transition"), 
-          "You can change this parameter for a transition from another model to this one."
-          );
-        });
-      }
+    if(has_transition(vpmodel)) 
+      add_edit(vpconf.model_transition);
 
-    if(among(vpmodel, mdJoukowsky, mdJoukowskyInverted, mdSpiral) && GDIM == 2) {
-      dialog::addSelItem(XLAT("Möbius transformations"), fts(vpconf.skiprope) + "°", 'S');
-      dialog::add_action([](){
-        dialog::editNumber(vpconf.skiprope, 0, 360, 15, 0, XLAT("Möbius transformations"), "");
-        });
-      }
+    if(among(vpmodel, mdJoukowsky, mdJoukowskyInverted, mdSpiral) && GDIM == 2) 
+      add_edit(vpconf.skiprope);
     
-    if(vpmodel == mdHemisphere && euclid) {
-      dialog::addSelItem(XLAT("parameter"), fts(vpconf.euclid_to_sphere), 'l');
-      dialog::add_action([] () {
-        dialog::editNumber(vpconf.euclid_to_sphere, 0, 10, .1, 1, XLAT("parameter"), 
-          "Stereographic projection to a sphere. Choose the radius of the sphere."
-          );
-        dialog::scaleLog();
-        });
-      }
+    if(vpmodel == mdHemisphere && euclid) 
+      add_edit(vpconf.euclid_to_sphere);
       
-    if(among(vpmodel, mdTwoPoint, mdSimulatedPerspective, mdTwoHybrid)) {
-      dialog::addSelItem(XLAT("parameter"), fts(vpconf.twopoint_param), 'b');
-      dialog::add_action([vpmodel](){
-        dialog::editNumber(vpconf.twopoint_param, 1e-3, 10, .1, 1, XLAT("parameter"), 
-          s0 + (vpmodel == mdTwoPoint ?
-          "This model maps the world so that the distances from two points "
-          "are kept. " : "") + "This parameter gives the distance from the two points to "
-          "the center."
-          );
-        dialog::scaleLog();
-        });
-      }
+    if(among(vpmodel, mdTwoPoint, mdSimulatedPerspective, mdTwoHybrid)) 
+      add_edit(vpconf.twopoint_param);
     
-    if(vpmodel == mdFisheye) {
-      dialog::addSelItem(XLAT("parameter"), fts(vpconf.fisheye_param), 'b');
-      dialog::add_action([](){
-        dialog::editNumber(vpconf.fisheye_param, 1e-3, 10, .1, 1, XLAT("parameter"), 
-          "Size of the fish eye."
-          );
-        dialog::scaleLog();
-        });
-      }
+    if(vpmodel == mdFisheye) 
+      add_edit(vpconf.fisheye_param);
 
-    if(vpmodel == mdHyperboloid) {
-      dialog::addBoolItem_action(XLAT("show flat"), pconf.show_hyperboloid_flat, 'b');
-      }
+    if(vpmodel == mdHyperboloid) 
+      add_edit(pconf.show_hyperboloid_flat);
     
-    if(vpmodel == mdCollignon) {
-      dialog::addSelItem(XLAT("parameter"), fts(vpconf.collignon_parameter) + (vpconf.collignon_reflected ? " (r)" : ""), 'b');
-      dialog::add_action([](){
-        dialog::editNumber(vpconf.collignon_parameter, -1, 1, .1, 1, XLAT("parameter"), 
-          ""
-          );
-        dialog::extra_options = [] {
-          dialog::addBoolItem_action(XLAT("reflect"), vpconf.collignon_reflected, 'R');
-          };
-        });
-      }
+    if(vpmodel == mdCollignon) 
+      add_edit(vpconf.collignon_parameter);
     
     if(vpmodel == mdMiller) {
       dialog::addSelItem(XLAT("parameter"), fts(vpconf.miller_parameter), 'b');
@@ -679,97 +624,40 @@ EX namespace models {
         });
       }
     
-    if(among(vpmodel, mdLoximuthal, mdRetroHammer, mdRetroCraig)) {
-      dialog::addSelItem(XLAT("parameter"), fts(vpconf.loximuthal_parameter), 'b');
-      dialog::add_action([vpmodel](){
-        dialog::editNumber(vpconf.loximuthal_parameter, -M_PI/2, M_PI/2, .1, 0, XLAT("parameter"), 
-          (vpmodel == mdLoximuthal ?
-          "This model is similar to azimuthal equidistant, but based on loxodromes (lines of constant geographic direction) rather than geodesics. "
-          "The loximuthal projection maps (the shortest) loxodromes to straight lines of the same length, going through the starting point. "
-          "This setting changes the latitude of the starting point." :
-          "In retroazimuthal projections, a point is drawn at such a point that the azimuth *from* that point to the chosen central point is correct. "
-          "For example, if you should move east, the point is drawn to the right. This parameter is the latitude of the central point.")
-          + string(hyperbolic ? "\n\n(In hyperbolic geometry directions are assigned according to the Lobachevsky coordinates.)" : "")
-          );
-        });
-      }
+    if(among(vpmodel, mdLoximuthal, mdRetroHammer, mdRetroCraig)) 
+      add_edit(vpconf.loximuthal_parameter);
 
-    if(among(vpmodel, mdAitoff, mdHammer, mdWinkelTripel)) {
-      dialog::addSelItem(XLAT("parameter"), fts(vpconf.aitoff_parameter), 'b');
-      dialog::add_action([](){
-        dialog::editNumber(vpconf.aitoff_parameter, -1, 1, .1, 1/2., XLAT("parameter"), 
-          "The Aitoff projection is obtained by multiplying the longitude by 1/2, using azimuthal equidistant projection, and then multiplying X by 1/2. "
-          "Hammer projection is similar but equi-area projection is used instead. "
-          "Here you can change this parameter."
-          );
-        });
-      }
+    if(among(vpmodel, mdAitoff, mdHammer, mdWinkelTripel)) 
+      add_edit(vpconf.aitoff_parameter);
     
-    if(vpmodel == mdWinkelTripel) {
-      dialog::addSelItem(XLAT("mixing proportion"), fts(vpconf.winkel_parameter), 'B');
-      dialog::add_action([](){
-        dialog::editNumber(vpconf.winkel_parameter, -1, 1, .1, 1, XLAT("parameter"), 
-          "The Winkel Tripel projection is the average of Aitoff projection and equirectangular projection. Here you can change the proportion."
-          );
-        });
-      }
+    if(vpmodel == mdWinkelTripel) 
+      add_edit(vpconf.winkel_parameter);
     
     if(vpmodel == mdSpiral && !euclid) {
-      dialog::addSelItem(XLAT("spiral angle"), fts(vpconf.spiral_angle) + "°", 'x');
-      dialog::add_action([](){
-        dialog::editNumber(vpconf.spiral_angle, 0, 360, 15, 0, XLAT("spiral angle"), 
-          XLAT("set to 90° for the ring projection")
-          );
-        });
+      add_edit(vpconf.spiral_angle);
 
-      ld& which =
+      add_edit(
         sphere ? vpconf.sphere_spiral_multiplier :
         ring_not_spiral ? vpconf.right_spiral_multiplier :
-        vpconf.any_spiral_multiplier;
-                
-      dialog::addSelItem(XLAT("spiral multiplier"), fts(which) + "°", 'M');
-      dialog::add_action([&which](){
-        dialog::editNumber(which, 0, 10, -.1, 1, XLAT("spiral multiplier"), 
-          XLAT(
-            "This parameter has a bit different scale depending on the settings:\n"
-            "(1) in spherical geometry (with spiral angle=90°, 1 produces a stereographic projection)\n"
-            "(2) in hyperbolic geometry, with spiral angle being +90° or -90°\n"
-            "(3) in hyperbolic geometry, with other spiral angles (1 makes the bands fit exactly)"
-            )
-          );
-        });
+        vpconf.any_spiral_multiplier
+        );
 
-      dialog::addSelItem(XLAT("spiral cone"), fts(vpconf.spiral_cone) + "°", 'C');
-      dialog::add_action([](){
-        dialog::editNumber(vpconf.spiral_cone, 0, 360, -45, 360, XLAT("spiral cone"), "");
-        });
+      add_edit(vpconf.spiral_cone);
       }
 
     if(vpmodel == mdSpiral && euclid) {
-      dialog::addSelItem(XLAT("spiral period: x"), fts(vpconf.spiral_x), 'x');
-      dialog::add_action([](){
-        dialog::editNumber(vpconf.spiral_x, -20, 20, 1, 10, XLAT("spiral period: x"), "");
-        });
-      dialog::addSelItem(XLAT("spiral period: y"), fts(vpconf.spiral_y), 'y');
-      dialog::add_action([](){
-        dialog::editNumber(vpconf.spiral_y, -20, 20, 1, 10, XLAT("spiral period: y"), "");
-        });
+      add_edit(vpconf.spiral_x);
+      add_edit(vpconf.spiral_y);
       if(euclid && quotient) {
         dialog::addSelItem(XLAT("match the period"), its(spiral_id), 'n');
         dialog::add_action(match_torus_period);
         }
       }
 
-    dialog::addSelItem(XLAT("vertical stretch"), fts(vpconf.stretch), 's');
-    dialog::add_action(edit_stretch);
+    add_edit(vpconf.stretch);
     
-    if(product_model(vpmodel)) {
-      dialog::addSelItem(XLAT("product Z stretch"), fts(vpconf.product_z_scale), 'Z');
-      dialog::add_action([] {
-        dialog::editNumber(vpconf.product_z_scale, 0.1, 10, 0.1, 1, XLAT("product Z stretch"), "");        
-        dialog::scaleLog();
-        });
-      }
+    if(product_model(vpmodel))
+      add_edit(vpconf.product_z_scale);
 
     #if CAP_GL
     dialog::addBoolItem(XLAT("use GPU to compute projections"), vid.consider_shader_projection, 'G');
@@ -1021,50 +909,129 @@ EX namespace models {
     addsaver(models::rotation_xz, "conformal rotation_xz");
     addsaver(models::rotation_xy2, "conformal rotation_2");
     addsaver(models::do_rotate, "conformal rotation mode", 1);
+
+    param_f(pconf.halfplane_scale, "hp", "halfplane scale", 1);
     
     auto add_all = [&] (projection_configuration& p, string pp, string sp) {
       bool rug = pp != "";
+      dynamicval<string> ds(auto_prefix, rug ? "[rug] " : "");
       param_f(p.model_orientation, pp+"mori", sp+"model orientation", 0);
       param_f(p.model_orientation_yz, pp+"mori_yz", sp+"model orientation-yz", 0);
-      param_f(p.top_z, sp+"topz", 5);
-      param_f(p.model_transition, pp+"mtrans", sp+"model transition", 1);
-      param_f(p.halfplane_scale, pp+"hp", sp+"halfplane scale", 1);
+
+      param_f(p.top_z, sp+"topz", 5)
+      -> editable(1, 20, .25, "maximum z coordinate to show", "maximum z coordinate to show", 'l');       
+
+      param_f(p.model_transition, pp+"mtrans", sp+"model transition", 1)
+      -> editable(0, 1, .1, "model transition", 
+          "You can change this parameter for a transition from another model to this one.", 't');          
+      
       param_f(p.rotational_nil, sp+"rotnil", 1);
   
       param_f(p.clip_min, pp+"clipmin", sp+"clip-min", rug ? -100 : -1);
       param_f(p.clip_max, pp+"clipmax", sp+"clip-max", rug ? +10 : +1);
   
-      param_f(p.euclid_to_sphere, pp+"ets", sp+"euclid to sphere projection", 1.5);
-      param_f(p.twopoint_param, pp+"twopoint", sp+"twopoint parameter", 1);
-      param_f(p.fisheye_param, pp+"fisheye", sp+"fisheye parameter", 1);
-      param_f(p.stretch, pp+"stretch", 1);
+      param_f(p.euclid_to_sphere, pp+"ets", sp+"euclid to sphere projection", 1.5)
+      -> editable(1e-1, 10, .1, "ETS parameter", "Stereographic projection to a sphere. Choose the radius of the sphere.", 'l')
+      -> set_sets(dialog::scaleLog);
+
+      param_f(p.twopoint_param, pp+"twopoint", sp+"twopoint parameter", 1)
+      -> editable(1e-3, 10, .1, "two-point parameter", "In two-point-based models, this parameter gives the distance from each of the two points to the center.", 'b')
+      -> set_sets(dialog::scaleLog)
+;
+      param_f(p.fisheye_param, pp+"fisheye", sp+"fisheye parameter", 1)
+      -> editable(1e-3, 10, .1, "fisheye parameter", "Size of the fish eye.", 'b')
+      -> set_sets(dialog::scaleLog);
+
+      param_f(p.stretch, pp+"stretch", 1)
+      -> editable(0, 10, .1, "vertical stretch", "Vertical stretch factor.", 's')
+      -> set_extra(stretch_extra);
+      
+      param_f(p.product_z_scale, pp+"zstretch")
+      -> editable(0.1, 10, 0.1, "product Z stretch", "", 'Z');
   
-      param_f(p.collignon_parameter, pp+"collignon", sp+"collignon-parameter", 1);
+      param_f(p.collignon_parameter, pp+"collignon", sp+"collignon-parameter", 1)
+      -> editable(-1, 1, .1, "Collignon parameter", "", 'b')
+      -> modif([] (float_setting* f) {
+        f->unit = vpconf.collignon_reflected ? " (r)" : "";
+        })
+      -> set_extra([&p] { 
+        add_edit(p.collignon_reflected);
+        });
+      param_b(p.collignon_reflected, sp+"collignon-reflect", false)
+      -> editable("Collignon reflect", 'R');
   
-      param_f(p.aitoff_parameter, sp+"aitoff");
+      param_f(p.aitoff_parameter, sp+"aitoff")
+      -> editable(-1, 1, .1, "Aitoff parameter", 
+          "The Aitoff projection is obtained by multiplying the longitude by 1/2, using azimuthal equidistant projection, and then multiplying X by 1/2. "
+          "Hammer projection is similar but equi-area projection is used instead. "
+          "Here you can change this parameter.", 'b');
       param_f(p.miller_parameter, sp+"miller");
-      param_f(p.loximuthal_parameter, sp+"loximuthal");
-      param_f(p.winkel_parameter, sp+"winkel");
+      param_f(p.loximuthal_parameter, sp+"loximuthal")
+      -> editable(-M_PI/2, M_PI/2, .1, "loximuthal parameter", 
+          "Loximuthal is similar to azimuthal equidistant, but based on loxodromes (lines of constant geographic direction) rather than geodesics. "
+          "The loximuthal projection maps (the shortest) loxodromes to straight lines of the same length, going through the starting point. "
+          "This setting changes the latitude of the starting point.\n\n"
+          "In retroazimuthal projections, a point is drawn at such a point that the azimuth *from* that point to the chosen central point is correct. "
+          "For example, if you should move east, the point is drawn to the right. This parameter is the latitude of the central point."
+          "\n\n(In hyperbolic geometry directions are assigned according to the Lobachevsky coordinates.)", 'b'
+          );
+      param_f(p.winkel_parameter, sp+"winkel")
+      -> editable(-1, 1, .1, "Winkel Tripel mixing", 
+        "The Winkel Tripel projection is the average of Aitoff projection and equirectangular projection. Here you can change the proportion.", 'B');
   
-      param_b(p.collignon_reflected, sp+"collignon-reflect", false);
-      param_b(p.show_hyperboloid_flat, sp+"hyperboloid-flat", true);
+      param_b(p.show_hyperboloid_flat, sp+"hyperboloid-flat", true)
+      -> editable("show flat", 'b');
   
-      param_f(p.skiprope, sp+"mobius", 0);
+      param_f(p.skiprope, sp+"mobius", 0)
+      -> editable(0, 360, 15, "Möbius transformations", "", 'S')->unit = "°";
+      
       addsaver(p.formula, sp+"formula");
       addsaverenum(p.basic_model, sp+"basic model");
       addsaver(p.use_atan, sp+"use_atan");  
   
-      addsaver(p.spiral_angle, sp+"sang");
-      addsaver(p.spiral_x, sp+"spiralx");
-      addsaver(p.spiral_y, sp+"spiraly");  
+      param_f(p.spiral_angle, sp+"sang")
+      -> editable(0, 360, 15, "spiral angle", "set to 90° for the ring projection", 'x')
+      -> unit = "°";
+      param_f(p.spiral_x, sp+"spiralx")
+      -> editable(-20, 20, 1, "spiral period: x", "", 'x');
+      param_f(p.spiral_y, sp+"spiraly")
+      -> editable(-20, 20, 1, "spiral period: y", "", 'y');
   
       param_f(p.scale, sp+"scale", 1);
       param_f(p.xposition, sp+"xposition", 0);
       param_f(p.yposition, sp+"yposition", 0);
       param_f(p.alpha, sp+"projection", 1);
-      param_f(p.ballangle, pp+"ballangle", sp+"ball angle", 20);
       param_f(p.camera_angle, pp+"cameraangle", sp+"camera angle", 0);
       addsaver(p.ballproj, sp+"ballproj", 1);      
+
+      param_f(p.ballangle, pp+"ballangle", sp+"ball angle", 20)
+      -> editable(0, 90, 5, "camera rotation in 3D models", 
+        "Rotate the camera in 3D models (ball model, hyperboloid, and hemisphere). "
+        "Note that hyperboloid and hemisphere models are also available in the "
+        "Hypersian Rug surfaces menu, but they are rendered differently there -- "
+        "by making a flat picture first, then mapping it to a surface. "
+        "This makes the output better in some ways, but 3D effects are lost. "
+        "Hypersian Rug model also allows more camera freedom.",
+        'b')
+      -> unit = "°";
+
+      string help =
+        "This parameter has a bit different scale depending on the settings:\n"
+        "(1) in spherical geometry (with spiral angle=90°, 1 produces a stereographic projection)\n"
+        "(2) in hyperbolic geometry, with spiral angle being +90° or -90°\n"
+        "(3) in hyperbolic geometry, with other spiral angles (1 makes the bands fit exactly)";
+      
+      param_f(p.sphere_spiral_multiplier, "sphere_spiral_multiplier")
+      -> editable(0, 10, .1, "sphere spiral multiplier", help, 'M')->unit = "°";
+
+      param_f(p.right_spiral_multiplier, "right_spiral_multiplier")
+      -> editable(0, 10, .1, "right spiral multiplier", help, 'M')->unit = "°";
+
+      param_f(p.any_spiral_multiplier, "any_spiral_multiplier")
+      -> editable(0, 10, .1, "any spiral multiplier", help, 'M')->unit = "°";
+
+      param_f(p.spiral_cone, "spiral_cone")
+      -> editable(0, 360, -45, "spiral cone", "", 'C')->unit = "°";
       };
     
     add_all(pconf, "", "");
