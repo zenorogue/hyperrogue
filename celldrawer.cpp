@@ -2542,7 +2542,7 @@ void celldrawer::draw() {
     return;
     }
 
-  if((cmode & sm::DRAW) && texture::config.tstate == texture::tsActive && !mouseout() && c) 
+  if((cmode & sm::DRAW) && mapeditor::intexture && !mouseout() && c) 
     mapeditor::draw_texture_ghosts(c, V);
 #endif
 

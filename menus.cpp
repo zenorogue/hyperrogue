@@ -423,6 +423,7 @@ EX void showCreative() {
   dialog::addItem(XLAT("shape editor"), 'g');
   dialog::add_action([] {
     mapeditor::drawing_tool = false;
+    mapeditor::intexture = false;
     pushScreen(mapeditor::showDrawEditor);
     mapeditor::initdraw(cwt.at);
     });
@@ -433,6 +434,7 @@ EX void showCreative() {
   dialog::add_action([] {
     dialog::cheat_if_confirmed([] {
       mapeditor::drawing_tool = true;
+      mapeditor::intexture = false;
       pushScreen(mapeditor::showDrawEditor);
       mapeditor::initdraw(cwt.at);
       });

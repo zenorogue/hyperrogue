@@ -11,6 +11,7 @@ namespace hr {
 EX namespace mapeditor {
 
   EX bool drawing_tool;
+  EX bool intexture;
 
   #if HDR
   enum eShapegroup { sgPlayer, sgMonster, sgItem, sgFloor, sgWall };
@@ -1754,19 +1755,21 @@ EX namespace mapeditor {
     string line1, line2;
   
     usershape *us = NULL;
+
+#if CAP_TEXTURE
+    if(texture::config.tstate != texture::tsActive && intexture) {
+      intexture = false; drawing_tool = true;
+      }
+#endif
     
-    bool intexture = false;
-    (void) intexture;
-    
-    bool freedraw = drawing_tool;
+    bool freedraw = drawing_tool || intexture;    
 
 #if CAP_TEXTURE        
-    if(texture::config.tstate == texture::tsActive) {
+    if(intexture) {
       sg = 16;
       line1 = "texture";
       line2 = "";
       texture::config.data.update();
-      intexture = true;
       freedraw = true;
       drawing_tool = false;
       }
@@ -2430,11 +2433,7 @@ EX namespace mapeditor {
     (void)clickused;
     
     
-    bool freedraw = drawing_tool;
-    #if CAP_TEXTURE
-    bool intexture = texture::config.tstate == texture::tsActive;
-    freedraw |= intexture;
-    #endif
+    bool freedraw = drawing_tool || intexture;
 
     if(freedraw) {
       if(lstartcell) lstart = ggmatrix(lstartcell) * lstart_rel;

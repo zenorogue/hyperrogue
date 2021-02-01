@@ -1243,12 +1243,13 @@ string texturehelp =
 
 #if CAP_EDIT
 EX void start_editor() {
-  addMessage("white");
   if(config.data.whitetexture() && config.data.loadTextureGL()) {
     config.tstate = config.tstate_max = tsActive;
     config.perform_mapping();
     config.finish_mapping();
     mapeditor::initdraw(cwt.at);
+    mapeditor::intexture = true;
+    mapeditor::drawing_tool = false;
     pushScreen(mapeditor::showDrawEditor);
     }
   }
@@ -1393,6 +1394,8 @@ EX void showMenu() {
     if(GDIM == 2) {
       dialog::addItem(XLAT("edit the texture"), 'e');
       dialog::add_action([] {
+        mapeditor::intexture = true;
+        mapeditor::drawing_tool = false;
         mapeditor::initdraw(cwt.at);
         pushScreen(mapeditor::showDrawEditor);
         });
