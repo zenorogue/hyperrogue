@@ -906,7 +906,6 @@ EX void showEuclideanMenu() {
     }
   else if(bt::in()) {
     menuitem_binary_width('v');
-    extern void add_edit_wall_quality(char);
     add_edit_wall_quality('W');
     }
   else if(WDIM == 3 || kite::in() || arb::in()) dialog::addBreak(100);
