@@ -1221,14 +1221,14 @@ EX void menuitem_sightrange_style(char c IS('c')) {
     );
   dialog::add_action_push([] {
     dialog::init(XLAT("draw range based on"));
-    dialog::addBoolItem(XLAT("draw range based on distance"), vid.use_smart_range == 0, 'D');
+    dialog::addBoolItem(XLAT("draw range based on distance"), vid.use_smart_range == 0, 'd');
     dialog::add_action([] () { vid.use_smart_range = 0; popScreen(); edit_sightrange(); });
     if(WDIM == 2 && allowIncreasedSight()) {
-      dialog::addBoolItem(XLAT("draw based on size in the projection (no generation)"), vid.use_smart_range == 1, 'N');
+      dialog::addBoolItem(XLAT("draw based on size in the projection (no generation)"), vid.use_smart_range == 1, 'n');
       dialog::add_action([] () { vid.use_smart_range = 1; popScreen(); edit_sightrange(); });
       }
     if(allowChangeRange() && allowIncreasedSight()) {
-      dialog::addBoolItem(XLAT("draw based on size in the projection (generation)"), vid.use_smart_range == 2, 'G');
+      dialog::addBoolItem(XLAT("draw based on size in the projection (generation)"), vid.use_smart_range == 2, 'g');
       dialog::add_action([] () { vid.use_smart_range = 2; popScreen(); edit_sightrange(); });
       }
     if(!allowChangeRange() || !allowIncreasedSight()) {
