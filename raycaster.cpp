@@ -80,8 +80,7 @@ EX bool available() {
   /* would need a completely different implementation */
   if(vrhr::active() && vrhr::eyes == vrhr::eEyes::equidistant) {
     if(reflect_val) return false;
-    if(nonisotropic) return false;
-    if(prod) return false;
+    if(sol || stretch::in()) return false;
     }
   #endif
   if(noGUI) return false;
@@ -442,7 +441,9 @@ void enable_raycaster() {
       "  mediump float zpos = log(position.z);\n";
       else fmain +=
       "  mediump float zpos = log(position.z*position.z"+sgn+"position.x*position.x"+sgn+"position.y*position.y)/2.;\n";
-      fmain +=
+      if(eyes) fmain +=
+      "  vw *= exp(-zpos);\n";
+      else fmain +=
       "  position *= exp(-zpos);\n"
       "  mediump float zspeed = at1.z;\n"
       "  mediump float xspeed = length(at1.xy);\n"
@@ -621,19 +622,19 @@ void enable_raycaster() {
     if(use_reflect) fmain += 
       "bool reflect = false;\n";
       
-    if(in_h2xe()) fmain +=
+    if(in_h2xe() && !stepbased) fmain +=
       "  mediump float ch = cosh(dist*xspeed); mediump float sh = sinh(dist*xspeed);\n"
       "  mediump vec4 v = position * ch + tangent * sh;\n"
       "  tangent = tangent * ch + position * sh;\n"
       "  position = v;\n"
       "  zpos += dist * zspeed;\n";
-    else if(in_s2xe()) fmain +=
+    else if(in_s2xe() && !stepbased) fmain +=
       "  mediump float ch = cos(dist*xspeed); mediump float sh = sin(dist*xspeed);\n"
       "  mediump vec4 v = position * ch + tangent * sh;\n"
       "  tangent = tangent * ch - position * sh;\n"
       "  position = v;\n"
       "  zpos += dist * zspeed;\n";
-    else if(in_e2xe()) fmain +=
+    else if(in_e2xe() && !stepbased) fmain +=
       "  position = position + tangent * dist * xspeed;\n"
       "  zpos += dist * zspeed;\n";
     else if(hyperbolic && !stepbased) fmain += 
@@ -889,21 +890,47 @@ void enable_raycaster() {
       
       if(eyes) {
         fmain +=
-        "  mediump float t = go + dist;\n"
-        "  mediump vec4 v = at0 * t;\n"
-        "  v[3] = 1.;\n"
-        "  mediump vec4 azeq = uEyeShift * v;\n"
-        "  mediump float alen = length(azeq.xyz);\n";
-        if(hyperbolic) fmain +=         
-          "  azeq *= sinh(alen) / alen;\n"        
-          "  azeq[3] = cosh(alen);\n";
-        else if(sphere) fmain += 
-          "  azeq *= sin(alen) / alen;\n"
-          "  azeq[3] = cos(alen);\n";
-        else /* euclid */ fmain +=
-          "  azeq[3] = 1;\n";
+        "  mediump float t = go + dist;\n";
+        fmain += prod ? 
+        "  mediump vec4 v = at1 * t;\n" :
+        "  mediump vec4 v = at0 * t;\n";
         fmain +=
+        "  v[3] = 1.;\n"
+        "  mediump vec4 azeq = uEyeShift * v;\n";        
+        if(prod) {
+          fmain +=
+            "  mediump float alen_xy = length(azeq.xy);\n";
+          fmain += "  mediump float nzpos = zpos + azeq.z;\n";
+          if(in_h2xe()) {
+            fmain += "  azeq.xy *= sinh(alen_xy) / alen_xy;\n";
+            fmain += "  azeq.z = cosh(alen_xy);\n";
+            }
+          else if(in_s2xe()) {
+            fmain += "  azeq.xy *= sin (alen_xy) / alen_xy;\n";
+            fmain += "  azeq.z = cos(alen_xy);\n";
+            }
+          else {
+            /* euclid */
+            fmain += "  azeq.z = 1.;\n";
+            }
+          fmain += "azeq.w = 0.;\n";
+          fmain +=
           "  mediump vec4 nposition = vw * azeq;\n";
+          }
+        else {
+          fmain +=
+            "  mediump float alen = length(azeq.xyz);\n";
+          if(hyperbolic) fmain +=         
+            "  azeq *= sinh(alen) / alen;\n"        
+            "  azeq[3] = cosh(alen);\n";
+          else if(sphere) fmain += 
+            "  azeq *= sin(alen) / alen;\n"
+            "  azeq[3] = cos(alen);\n";
+          else /* euclid */ fmain +=
+            "  azeq[3] = 1;\n";
+          fmain +=
+          "  mediump vec4 nposition = vw * azeq;\n";
+          }
         }
       
       else if(hyperbolic) {
@@ -922,11 +949,11 @@ void enable_raycaster() {
         "  mediump vec4 nposition = v;\n";
         }
 
-      bool reg = hyperbolic || sphere || euclid || sl2;
+      bool reg = hyperbolic || sphere || euclid || sl2 || prod;
 
       if(reg) {
         fsh += "mediump float len_h(vec4 h) { return 1. - h[3]; }\n";
-        string s = rotspace ? "-2" : "";
+        string s = (rotspace || prod) ? "-2" : "";
         fmain +=
       "    mediump float best = len(nposition);\n"
       "    for(int i=0; i<sides"+s+"; i++) {\n"
@@ -941,6 +968,11 @@ void enable_raycaster() {
       "     mediump float cand2 = len_h(uM[walloffset+sides-1]*nposition);\n"
       "     if(cand2 < best) { best = cand2; which = sides-1; }\n"
       "     }\n";
+        if(prod) {
+          fmain +=
+          "if(nzpos > uPLevel) which = sides-1;\n"
+          "if(nzpos <-uPLevel) which = sides-2;\n";
+          }
         }
         
       fmain +=
@@ -1091,7 +1123,8 @@ void enable_raycaster() {
 
     fmain += "if(which == -1) continue;\n";
 
-    if(prod) fmain += "position.w = -zpos;\n";
+    if(prod && eyes) fmain += "position.w = -nzpos;\n";
+    else if(prod) fmain += "position.w = -zpos;\n";
     
     if(reg3::ultra_mirror_in()) fmain += 
       "if(which >= " + its(S7) + ") {"
