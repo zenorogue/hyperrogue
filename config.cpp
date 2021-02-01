@@ -14,7 +14,7 @@ enum eCentering { face, edge, vertex };
 
 EX eCentering centering;
 
-EX string auto_prefix;
+EX function<bool()> auto_restrict;
 
 EX void add_to_changed(struct setting *f);
 
@@ -35,13 +35,14 @@ typedef vector<shared_ptr<supersaver>> saverlist;
 extern saverlist savers;
 
 struct setting {
-  string prefix;
+  function<bool()> restrict;
   string parameter_name;
   string config_name;
   string menu_item_name;
   string help_text;
   char default_key;
   cld last_value;
+  virtual bool available() { if(restrict) return restrict(); return true; }
   virtual bool affects(void *v) { return false; }
   virtual void add_as_saver() {}
   void show_edit_option() { show_edit_option(default_key); }
@@ -51,7 +52,7 @@ struct setting {
     return parameter_name + "|" + config_name + "|" + menu_item_name;
     }
   virtual cld get_cld() = 0;
-  setting() { prefix = auto_prefix; }
+  setting() { restrict = auto_restrict; }
   virtual void check_change() {
     cld val = get_cld();
     if(val != last_value) {
@@ -130,6 +131,15 @@ struct int_setting : public setting {
   virtual bool affects(void *v) override { return v == value; }
   virtual void show_edit_option(char key) override;
   virtual cld get_cld() { return *value; }
+  int_setting *editable(int min_value, int max_value, int step, string menu_item_name, string help_text, char key) {
+    this->min_value = min_value;
+    this->max_value = max_value;
+    this->menu_item_name = menu_item_name;
+    this->help_text = help_text;
+    this->step = step;
+    default_key = key;
+    return this;
+    }
   };
 
 struct bool_setting : public setting {
@@ -273,7 +283,7 @@ void bool_setting::add_as_saver() {
 
 void float_setting::show_edit_option(char key) {
   if(modify_me) modify_me(this);
-  dialog::addSelItem(prefix + XLAT(menu_item_name), fts(*value) + unit, key);
+  dialog::addSelItem(XLAT(menu_item_name), fts(*value) + unit, key);
   dialog::add_action([this] () {
     add_to_changed(this);
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
@@ -285,7 +295,7 @@ void float_setting::show_edit_option(char key) {
 
 void int_setting::show_edit_option(char key) {
   if(modify_me) modify_me(this);
-  dialog::addSelItem(prefix + XLAT(menu_item_name), its(*value), key);
+  dialog::addSelItem(XLAT(menu_item_name), its(*value), key);
   dialog::add_action([this] () {
     add_to_changed(this);
     dialog::editNumber(*value, 0, 100, 1, dft, XLAT(menu_item_name), help_text); 
@@ -296,7 +306,7 @@ void int_setting::show_edit_option(char key) {
   }
 
 void bool_setting::show_edit_option(char key) {
-  dialog::addBoolItem(prefix + XLAT(menu_item_name), *value, key);
+  dialog::addBoolItem(XLAT(menu_item_name), *value, key);
   dialog::add_action([this] () {
     add_to_changed(this);
     switcher();
@@ -424,7 +434,7 @@ custom_setting* param_custom(T& val, const string& s, function<void(char)> menui
   u->menu_item_name = s;
   u->last_value = (int) val;
   u->custom_viewer = menuitem;
-  u->custom_value = [&val] () { return (cld) val; };
+  u->custom_value = [&val] () { return (int) val; };
   u->custom_affect = [&val] (void *v) { return &val == v; };
   u->default_key = key;
   auto f = &*u;
@@ -2645,7 +2655,7 @@ EX void find_setting() {
   for(auto& p: params) {
     auto& fs = p.second;
     string key = fs->search_key();
-    if(dialog::hasInfix(key))
+    if(fs->available() && dialog::hasInfix(key))
       found.push_back(&*fs);
     }
 
@@ -2676,7 +2686,7 @@ EX void edit_all_settings() {
 
   int id = 0;
   for(auto l: last_changed) 
-    if(id < 10)
+    if(l->available() && id < 10)
     l->show_edit_option('a'+(id++));
 
   dialog::addBreak(100);

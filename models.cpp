@@ -914,7 +914,8 @@ EX namespace models {
     auto add_all = [&] (projection_configuration& p, string pp, string sp) {
 
       bool rug = pp != "";
-      dynamicval<string> ds(auto_prefix, rug ? "[rug] " : "");
+      dynamicval<function<bool()>> ds(auto_restrict);
+      auto_restrict = [&p] { return &vpconf == &p; };
 
       addsaverenum(p.model, pp+"used model", mdDisk);
       param_custom(pmodel, "projection|Poincare|Klein|half-plane|perspective", menuitem_projection, '1');
@@ -1006,7 +1007,8 @@ EX namespace models {
       param_f(p.yposition, sp+"yposition", 0);
 
       addsaver(p.alpha, sp+"projection", 1);
-      param_custom(p.alpha, sp+"projection distance", menuitem_projection_distance, 'p');
+      param_custom(p.alpha, sp+"projection", menuitem_projection_distance, 'p')
+      ->help_text = "projection distance|Gans Klein Poincare orthographic stereographic";
 
       param_f(p.camera_angle, pp+"cameraangle", sp+"camera angle", 0);
       addsaver(p.ballproj, sp+"ballproj", 1);      
