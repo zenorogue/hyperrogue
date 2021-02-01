@@ -238,9 +238,9 @@ auto ah2 = addHook(hooks_config, 100, [] {
   addsaver(shot::shoty, "shoty");
   addsaverenum(shot::format, "shotsvg");
   addsaver(shot::transparent, "shottransparent");
-  addparamsaver(shot::gamma, "shotgamma");
+  param_f(shot::gamma, "shotgamma");
   addsaver(shot::caption, "shotcaption");
-  addparamsaver(shot::fade, "shotfade");
+  param_f(shot::fade, "shotfade");
   });
 
 #endif
@@ -1797,14 +1797,14 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
   + addHook(hooks_args, 100, readArgs)
   #endif
   + addHook(hooks_config, 100, [] {
-    addparamsaver(anims::period, "aperiod", "animation period");
+    param_f(anims::period, "aperiod", "animation period");
     addsaver(anims::noframes, "animation frames");
-    addparamsaver(anims::cycle_length, "acycle", "animation cycle length");
-    addparamsaver(anims::parabolic_length, "aparabolic", "animation parabolic length")
+    param_f(anims::cycle_length, "acycle", "animation cycle length");
+    param_f(anims::parabolic_length, "aparabolic", "animation parabolic length")
       ->editable(0, 10, 1, "cells to go", "", 'c');
-    addparamsaver(anims::rug_angle, "arugangle", "animation rug angle");
-    addparamsaver(anims::circle_radius, "acradius", "animation circle radius");
-    addparamsaver(anims::circle_spins, "acspins", "animation circle spins");
+    param_f(anims::rug_angle, "arugangle", "animation rug angle");
+    param_f(anims::circle_radius, "acradius", "animation circle radius");
+    param_f(anims::circle_spins, "acspins", "animation circle spins");
     addsaver(anims::rug_movement_angle, "rug forward movement angle", 90);
     addsaver(anims::rug_shift_angle, "rug forward shift angle", 0);
     addsaver(anims::a, "a", 0);

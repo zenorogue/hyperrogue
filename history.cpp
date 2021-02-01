@@ -701,7 +701,7 @@ EX namespace history {
     }) + addHook(hooks_config, 0, [] {
 
     addsaver(autobandhistory, "include history"); // check!
-    addparamsaver(lvspeed, "lvspeed", "lineview speed");
+    param_f(lvspeed, "lvspeed", "lineview speed");
     addsaver(extra_line_steps, "lineview extension");
       
     addsaver(bandhalf, "band width");

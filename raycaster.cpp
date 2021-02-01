@@ -1987,13 +1987,13 @@ auto hook = addHook(hooks_args, 100, readArgs);
 
 #if CAP_CONFIG
 void addconfig() {
-  addparamsaver(exp_start, "ray_exp_start");
-  addparamsaver(exp_decay_exp, "ray_exp_decay_exp");
-  addparamsaver(maxstep_sol, "ray_maxstep_sol");
-  addparamsaver(maxstep_nil, "ray_maxstep_nil");
-  addparamsaver(minstep, "ray_minstep");
-  addparamsaver(reflect_val, "ray_reflect_val");
-  addparamsaver(hard_limit, "ray_hard_limit");
+  param_f(exp_start, "ray_exp_start");
+  param_f(exp_decay_exp, "ray_exp_decay_exp");
+  param_f(maxstep_sol, "ray_maxstep_sol");
+  param_f(maxstep_nil, "ray_maxstep_nil");
+  param_f(minstep, "ray_minstep");
+  param_f(reflect_val, "ray_reflect_val");
+  param_f(hard_limit, "ray_hard_limit");
   addsaver(want_use, "ray_want_use");
   addsaver(exp_decay_poly, "ray_exp_decay_poly");
   addsaver(max_iter_iso, "ray_max_iter_iso");

@@ -1314,20 +1314,20 @@ auto hooka = addHook(hooks_args, 100, readArgs);
 void addconfig() {
   addsaver(enabled, "vr-enabled");
 
-  addparamsaver(absolute_unit_in_meters, "vr-abs-unit");
+  param_f(absolute_unit_in_meters, "vr-abs-unit");
 
-  addparamsaver(pconf.vr_scale_factor, "vr_scale");
-  addparamsaver(pconf.vr_zshift, "vr_zshift");
-  addparamsaver(pconf.vr_angle, "vr_angle");
+  param_f(pconf.vr_scale_factor, "vr_scale");
+  param_f(pconf.vr_zshift, "vr_zshift");
+  param_f(pconf.vr_angle, "vr_angle");
 
   auto& rrconf = vid.rug_config;
-  addparamsaver(rrconf.vr_scale_factor, "rug_vr_scale");
-  addparamsaver(rrconf.vr_zshift, "rug_vr_shift");
-  addparamsaver(rrconf.vr_angle, "rug_vr_angle");
+  param_f(rrconf.vr_scale_factor, "rug_vr_scale");
+  param_f(rrconf.vr_zshift, "rug_vr_shift");
+  param_f(rrconf.vr_angle, "rug_vr_angle");
 
-  addparamsaver(vrhr::pointer_length, "vr_pointer_length");
-  addparamsaver(vrhr::ui_depth, "vr_ui_depth");
-  addparamsaver(vrhr::ui_size, "vr_ui_size");
+  param_f(vrhr::pointer_length, "vr_pointer_length");
+  param_f(vrhr::ui_depth, "vr_ui_depth");
+  param_f(vrhr::ui_size, "vr_ui_size");
   
   addsaverenum(vrhr::hsm, "vr_headset_mode")
     ->editable(headset_desc, "VR headset movement", 'h');

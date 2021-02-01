@@ -218,7 +218,7 @@ void float_setting::show_edit_option(char key) {
     });
   }
 
-EX float_setting *addparamsaver(ld& val, const string p, const string s, ld dft) {
+EX float_setting *param_f(ld& val, const string p, const string s, ld dft) {
   unique_ptr<float_setting> u ( new float_setting );
   u->parameter_name = p;
   u->config_name = s;
@@ -242,7 +242,7 @@ template<class T> void enum_setting<T>::add_as_saver() {
 #endif
   }
 
-template<class T> enum_setting<T> *addparamsaver_enum(T& val, const string p, const string s, T dft) {
+template<class T> enum_setting<T> *param_enum(T& val, const string p, const string s, T dft) {
   unique_ptr<enum_setting<T>> u ( new enum_setting<T> );
   u->parameter_name = p;
   u->config_name = s;
@@ -257,16 +257,16 @@ template<class T> enum_setting<T> *addparamsaver_enum(T& val, const string p, co
   }
 #endif
 
-EX float_setting* addparamsaver(ld& val, const string s) {
-  return addparamsaver(val, s, s, val);
+EX float_setting* param_f(ld& val, const string s) {
+  return param_f(val, s, s, val);
   }
 
-EX float_setting* addparamsaver(ld& val, const string p, const string s) {
-  return addparamsaver(val, p, s, val);
+EX float_setting* param_f(ld& val, const string p, const string s) {
+  return param_f(val, p, s, val);
   }
 
-EX float_setting* addparamsaver(ld& val, const string s, ld dft) {
-  return addparamsaver(val, s, s, dft);
+EX float_setting* param_f(ld& val, const string s, ld dft) {
+  return param_f(val, s, s, dft);
   }
 
 EX ld bounded_mine_percentage = 0.1;
@@ -420,7 +420,7 @@ EX void initConfig() {
   
   // basic config
   addsaver(vid.flashtime, "flashtime", 8);
-  addparamsaver_enum(vid.msgleft, "message_style", "message style", 2)
+  param_enum(vid.msgleft, "message_style", "message style", 2)
     -> editable({{"centered", ""}, {"left-aligned", ""}, {"line-broken", ""}}, "message style", 'a');
 
   addsaver(vid.msglimit, "message limit", 5);
@@ -444,7 +444,7 @@ EX void initConfig() {
   addsaver(music_out_of_focus, "music out of focus", false);
   #endif
   addsaver(effvolume, "sound effect volume");
-  addparamsaver_enum(glyphsortorder, "glyph_sort", "glyph sort order", glyphsortorder)
+  param_enum(glyphsortorder, "glyph_sort", "glyph sort order", glyphsortorder)
     ->editable({
       {"first on top", ""},
       {"first on bottom", ""},
@@ -458,17 +458,17 @@ EX void initConfig() {
   
   addsaver(vid.usingGL, "usingGL", true);
   addsaver(vid.antialias, "antialias", AA_NOGL | AA_FONT | (ISWEB ? AA_MULTI : AA_LINES) | AA_LINEWIDTH | AA_VERSION);
-  addparamsaver(vid.linewidth, "linewidth", 1);
+  param_f(vid.linewidth, "linewidth", 1);
   addsaver(precise_width, "precisewidth", .5);
   addsaver(perfect_linewidth, "perfect_linewidth", 1);
-  addparamsaver(linepatterns::width, "lpwidth", "pattern-linewidth", 1);
+  param_f(linepatterns::width, "lpwidth", "pattern-linewidth", 1);
   addsaver(fat_edges, "fat-edges");
-  addparamsaver(vid.sspeed, "sspeed", "scrollingspeed", 0);
-  addparamsaver(vid.mspeed, "mspeed", "movement speed", 1);
+  param_f(vid.sspeed, "sspeed", "scrollingspeed", 0);
+  param_f(vid.mspeed, "mspeed", "movement speed", 1);
   addsaver(vid.full, "fullscreen", false);
   addsaver(vid.aurastr, "aura strength", ISMOBILE ? 0 : 128);
   addsaver(vid.aurasmoothen, "aura smoothen", 5);
-  addparamsaver_enum(vid.graphglyph, "graphglyph", "graphical items/kills", 1)
+  param_enum(vid.graphglyph, "graphglyph", "graphical items/kills", 1)
   -> editable({{"letters", ""}, {"auto", ""}, {"images", ""}}, "inventory/kill mode", 'd');
 
   addsaver(vid.particles, "extra effects", 1);
@@ -499,7 +499,7 @@ EX void initConfig() {
   addsaver(rug::rendernogl, "rug-rendernogl");
   addsaver(rug::texturesize, "rug-texturesize");
 #if CAP_RUG
-  addparamsaver(rug::model_distance, "rug_model_distance", "rug-model-distance");
+  param_f(rug::model_distance, "rug_model_distance", "rug-model-distance");
 #endif
 
   addsaver(vid.backeffects, "background particle effects", (ISMOBILE || ISPANDORA) ? false : true);
@@ -526,11 +526,11 @@ EX void initConfig() {
   addsaver(forecolor, "color:foreground");
   addsaver(bordcolor, "color:borders");
   addsaver(ringcolor, "color:ring");
-  addparamsaver(vid.multiplier_ring, "mring", "mult:ring", 1);
+  param_f(vid.multiplier_ring, "mring", "mult:ring", 1);
   addsaver(modelcolor, "color:model");
   addsaver(periodcolor, "color:period");
   addsaver(stdgridcolor, "color:stdgrid"); 
-  addparamsaver(vid.multiplier_grid, "mgrid", "mult:grid", 1);
+  param_f(vid.multiplier_grid, "mgrid", "mult:grid", 1);
   addsaver(dialog::dialogcolor, "color:dialog");
   for(auto& p: colortables)
     savecolortable(p.second, s0+"canvas"+p.first);
@@ -564,15 +564,15 @@ EX void initConfig() {
   addsaverenum(specialland, "land for special modes");
   
   addsaver(viewdists, "expansion mode");
-  addparamsaver(backbrightness, "back", "brightness behind sphere");
+  param_f(backbrightness, "back", "brightness behind sphere");
 
-  addparamsaver(vid.ipd, "ipd", "interpupilar-distance", 0.05);
-  addparamsaver(vid.lr_eyewidth, "lr", "eyewidth-lr", 0.5);
-  addparamsaver(vid.anaglyph_eyewidth, "anaglyph", "eyewidth-anaglyph", 0.1);
-  addparamsaver(vid.fov, "fov", "field-of-vision", 90);
+  param_f(vid.ipd, "ipd", "interpupilar-distance", 0.05);
+  param_f(vid.lr_eyewidth, "lr", "eyewidth-lr", 0.5);
+  param_f(vid.anaglyph_eyewidth, "anaglyph", "eyewidth-anaglyph", 0.1);
+  param_f(vid.fov, "fov", "field-of-vision", 90);
   addsaver(vid.desaturate, "desaturate", 0);
   
-  addparamsaver_enum(vid.stereo_mode, "stereo_mode", "stereo-mode", vid.stereo_mode)
+  param_enum(vid.stereo_mode, "stereo_mode", "stereo-mode", vid.stereo_mode)
     ->editable({{"OFF", "no"}, {"anaglyph", ""}, {"side-by-side", ""}
     #if CAP_ODS
     , {"ODS", ""}
@@ -609,7 +609,7 @@ EX void initConfig() {
   #endif
   
   #if CAP_CRYSTAL
-  addparamsaver(crystal::compass_probability, "cprob", "compass-probability");
+  param_f(crystal::compass_probability, "cprob", "compass-probability");
   addsaver(crystal::view_coordinates, "crystal-coordinates");
   #endif
   
@@ -723,7 +723,7 @@ EX void initConfig() {
   addsaver(nilv::nilperiod[1], "nilperiod_y");
   addsaver(nilv::nilperiod[2], "nilperiod_z");
   
-  addparamsaver_enum(neon_mode, "neon_mode", "neon_mode", neon_mode)
+  param_enum(neon_mode, "neon_mode", "neon_mode", neon_mode)
     ->editable(
         {{"OFF", ""}, {"standard", ""}, {"no boundary mode", ""}, {"neon mode II", ""}, {"illustration mode", ""}}, 
         "neon mode", 'M'
@@ -738,8 +738,8 @@ EX void initConfig() {
   
   addsaverenum(centering, "centering");
   
-  addparamsaver(camera_speed, "camspd", "camera-speed", 1);
-  addparamsaver(camera_rot_speed, "camrot", "camera-rot-speed", 1);
+  param_f(camera_speed, "camspd", "camera-speed", 1);
+  param_f(camera_rot_speed, "camrot", "camera-rot-speed", 1);
 
   addsaver(panini_alpha, "panini_alpha", 0);
 
@@ -1923,7 +1923,7 @@ EX void show3D() {
   }
 
 EX int config3 = addHook(hooks_config, 100, [] {
-  addparamsaver(vid.eye, "eyelevel", 0)
+  param_f(vid.eye, "eyelevel", 0)
     ->editable(-5, 5, .1, "eye level", "", 'E')
     ->set_extra([] {
       dialog::dialogflags |= sm::CENTER;
@@ -1941,11 +1941,11 @@ EX int config3 = addHook(hooks_config, 100, [] {
   
   addsaver(vid.auto_eye, "auto-eyelevel", false);
 
-  addparamsaver(vid.creature_scale, "creature_scale", "3d-creaturescale", 1)
+  param_f(vid.creature_scale, "creature_scale", "3d-creaturescale", 1)
     ->editable(0, 1, .1, "Creature scale", "", 'C');
-  addparamsaver(vid.height_width, "heiwi", "3d-heightwidth", 1.5)
+  param_f(vid.height_width, "heiwi", "3d-heightwidth", 1.5)
     ->editable(0, 1, .1, "Height to width", "", 'h');
-  addparamsaver(vid.yshift, "yshift", "Y shift", 0)
+  param_f(vid.yshift, "yshift", "Y shift", 0)
     ->editable(0, 1, .1, "Y shift", "Don't center on the player character.", 'y')
     ->set_extra([] {
       if(WDIM == 3 && pmodel == mdPerspective) 
@@ -1955,7 +1955,7 @@ EX int config3 = addHook(hooks_config, 100, [] {
   addsaver(vid.fixed_facing, "fixed facing", 0);
   addsaver(vid.fixed_facing_dir, "fixed facing dir", 90);
   addsaver(vid.fixed_yz, "fixed YZ", true);
-  addparamsaver(vid.depth, "depth", "3D depth", 1)
+  param_f(vid.depth, "depth", "3D depth", 1)
     ->editable(0, 5, .1, "Ground level below the plane", "", 'd')
     ->set_extra([] {
         vid.tc_depth = ticks;
@@ -1989,7 +1989,7 @@ EX int config3 = addHook(hooks_config, 100, [] {
           }
         dialog::addHelp(help);
         });
-  addparamsaver(vid.camera, "camera", "3D camera level", 1)
+  param_f(vid.camera, "camera", "3D camera level", 1)
     ->editable(0, 5, .1, "", "", 'c')
     ->modif([] (float_setting* x) { x->menu_item_name = (GDIM == 2 ? "Camera level above the plane" : "Z shift"); })
     ->set_extra([] {    
@@ -2011,7 +2011,7 @@ EX int config3 = addHook(hooks_config, 100, [] {
        if(GDIM == 3 && pmodel == mdPerspective) 
          dialog::addBoolItem_action(XLAT("reduce if walls on the way"), vid.use_wall_radar, 'R');
        });
-  addparamsaver(vid.wall_height, "wall_height", "3D wall height", .3)
+  param_f(vid.wall_height, "wall_height", "3D wall height", .3)
     ->editable(0, 1, .1, "Height of walls", "", 'w')
     ->set_extra([] () {
         dialog::addHelp(GDIM == 3 ? "" : XLAT(
@@ -2023,7 +2023,7 @@ EX int config3 = addHook(hooks_config, 100, [] {
           vid.gp_autoscale_heights = !vid.gp_autoscale_heights;
           });
         });
-  addparamsaver(vid.rock_wall_ratio, "rock_wall_ratio", "3D rock-wall ratio", .9)
+  param_f(vid.rock_wall_ratio, "rock_wall_ratio", "3D rock-wall ratio", .9)
     ->editable(0, 1, .1, "Rock-III to wall ratio", "", 'r')
     ->set_extra([] { dialog::addHelp(XLAT(
         "The ratio of Rock III to walls is %1, so Rock III are %2 absolute units high. "
@@ -2032,7 +2032,7 @@ EX int config3 = addHook(hooks_config, 100, [] {
         fts(vid.rock_wall_ratio), fts(vid.wall_height * vid.rock_wall_ratio),
         fts(cosh(vid.depth - vid.wall_height * vid.rock_wall_ratio) / cosh(vid.depth))));
         });
-  addparamsaver(vid.human_wall_ratio, "human_wall_ratio", "3D human-wall ratio", .7)
+  param_f(vid.human_wall_ratio, "human_wall_ratio", "3D human-wall ratio", .7)
     ->editable(0, 1, .1, "Human to wall ratio", "", 'h')
     ->set_extra([] { dialog::addHelp(XLAT(
         "Humans are %1 "
@@ -2042,20 +2042,20 @@ EX int config3 = addHook(hooks_config, 100, [] {
         fts(cosh(vid.depth - vid.wall_height * vid.human_wall_ratio) / cosh(vid.depth)))
         );
         });
-  addparamsaver(vid.lake_top, "lake_top", "3D lake top", .25)
+  param_f(vid.lake_top, "lake_top", "3D lake top", .25)
     ->editable(0, 1, .1, "Level of water surface", "", 'l');
-  addparamsaver(vid.lake_bottom, "lake_bottom", "3D lake bottom", .9)
+  param_f(vid.lake_bottom, "lake_bottom", "3D lake bottom", .9)
     ->editable(0, 1, .1, "Level of water bottom", "", 'k');
   addsaver(vid.tc_depth, "3D TC depth", 1);
   addsaver(vid.tc_camera, "3D TC camera", 2);
   addsaver(vid.tc_alpha, "3D TC alpha", 3);
-  addparamsaver(vid.highdetail, "highdetail", "3D highdetail", 8)
+  param_f(vid.highdetail, "highdetail", "3D highdetail", 8)
     ->editable(0, 5, .5, "High detail range", "", 'n')
     ->set_extra(explain_detail)
     ->set_reaction([] {
       if(vid.highdetail > vid.middetail) vid.middetail = vid.highdetail;
       });  
-  addparamsaver(vid.middetail, "middetail", "3D middetail", 8)
+  param_f(vid.middetail, "middetail", "3D middetail", 8)
     ->editable(0, 5, .5, "Mid detail range", "", 'm')
     ->set_extra(explain_detail)
     ->set_reaction([] {

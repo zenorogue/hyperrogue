@@ -942,7 +942,7 @@ EX namespace models {
   void add_model_config() {
     addsaverenum(pmodel, "used model", mdDisk);
     addsaver(polygonal::SI, "polygon sides");
-    addparamsaver(polygonal::STAR, "star", "polygon star factor");
+    param_f(polygonal::STAR, "star", "polygon star factor");
     addsaver(polygonal::deg, "polygonal degree");
 
     addsaver(polygonal::maxcoef, "polynomial degree");
@@ -951,37 +951,37 @@ EX namespace models {
       addsaver(polygonal::coefi[i], "polynomial "+its(i)+".imag");
       }
 
-    addparamsaver(models::rotation, "rotation", "conformal rotation");
+    param_f(models::rotation, "rotation", "conformal rotation");
     addsaver(models::rotation_xz, "conformal rotation_xz");
     addsaver(models::rotation_xy2, "conformal rotation_2");
     addsaver(models::do_rotate, "conformal rotation mode", 1);
-    addparamsaver(pconf.model_orientation, "mori", "model orientation", 0);
-    addparamsaver(pconf.model_orientation_yz, "mori_yz", "model orientation-yz", 0);
-    addparamsaver(pconf.top_z, "topz", 5);
-    addparamsaver(pconf.model_transition, "mtrans", "model transition", 1);
-    addparamsaver(pconf.halfplane_scale, "hp", "halfplane scale", 1);
-    addparamsaver(pconf.rotational_nil, "rotnil", 1);
+    param_f(pconf.model_orientation, "mori", "model orientation", 0);
+    param_f(pconf.model_orientation_yz, "mori_yz", "model orientation-yz", 0);
+    param_f(pconf.top_z, "topz", 5);
+    param_f(pconf.model_transition, "mtrans", "model transition", 1);
+    param_f(pconf.halfplane_scale, "hp", "halfplane scale", 1);
+    param_f(pconf.rotational_nil, "rotnil", 1);
 
-    addparamsaver(pconf.clip_min, "clipmin", "clip-min", -1);
-    addparamsaver(pconf.clip_max, "clipmax", "clip-max", +1);
+    param_f(pconf.clip_min, "clipmin", "clip-min", -1);
+    param_f(pconf.clip_max, "clipmax", "clip-max", +1);
 
-    addparamsaver(pconf.euclid_to_sphere, "ets", "euclid to sphere projection", 1.5);
-    addparamsaver(pconf.twopoint_param, "twopoint", "twopoint parameter", 1);
-    addparamsaver(pconf.fisheye_param, "fisheye", "fisheye parameter", 1);
-    addparamsaver(pconf.stretch, "stretch", 1);
+    param_f(pconf.euclid_to_sphere, "ets", "euclid to sphere projection", 1.5);
+    param_f(pconf.twopoint_param, "twopoint", "twopoint parameter", 1);
+    param_f(pconf.fisheye_param, "fisheye", "fisheye parameter", 1);
+    param_f(pconf.stretch, "stretch", 1);
 
-    addparamsaver(vid.binary_width, "bwidth", "binary-tiling-width", 1);
-    addparamsaver(pconf.collignon_parameter, "collignon", "collignon-parameter", 1);
+    param_f(vid.binary_width, "bwidth", "binary-tiling-width", 1);
+    param_f(pconf.collignon_parameter, "collignon", "collignon-parameter", 1);
 
-    addparamsaver(pconf.aitoff_parameter, "aitoff");
-    addparamsaver(pconf.miller_parameter, "miller");
-    addparamsaver(pconf.loximuthal_parameter, "loximuthal");
-    addparamsaver(pconf.winkel_parameter, "winkel");
+    param_f(pconf.aitoff_parameter, "aitoff");
+    param_f(pconf.miller_parameter, "miller");
+    param_f(pconf.loximuthal_parameter, "loximuthal");
+    param_f(pconf.winkel_parameter, "winkel");
 
     addsaver(pconf.collignon_reflected, "collignon-reflect", false);
     addsaver(pconf.show_hyperboloid_flat, "hyperboloid-flat", true);
 
-    addparamsaver(pconf.skiprope, "mobius", 0);  
+    param_f(pconf.skiprope, "mobius", 0);  
     addsaver(pconf.formula, "formula");
     addsaverenum(pconf.basic_model, "basic model");
     addsaver(pconf.use_atan, "use_atan");  
@@ -990,12 +990,12 @@ EX namespace models {
     addsaver(pconf.spiral_x, "spiralx");
     addsaver(pconf.spiral_y, "spiraly");  
 
-    addparamsaver(pconf.scale, "scale", 1);
-    addparamsaver(pconf.xposition, "xposition", 0);
-    addparamsaver(pconf.yposition, "yposition", 0);
-    addparamsaver(pconf.alpha, "projection", 1);
-    addparamsaver(pconf.ballangle, "ballangle", "ball angle", 20);
-    addparamsaver(pconf.camera_angle, "cameraangle", "camera angle", 0);
+    param_f(pconf.scale, "scale", 1);
+    param_f(pconf.xposition, "xposition", 0);
+    param_f(pconf.yposition, "yposition", 0);
+    param_f(pconf.alpha, "projection", 1);
+    param_f(pconf.ballangle, "ballangle", "ball angle", 20);
+    param_f(pconf.camera_angle, "cameraangle", "camera angle", 0);
     addsaver(pconf.ballproj, "ballproj", 1);
 
     auto& rconf = vid.rug_config;
@@ -1009,8 +1009,8 @@ EX namespace models {
     addsaver(rconf.collignon_parameter, "rug-collignon-parameter", 1);
     addsaver(rconf.collignon_reflected, "rug-collignon-reflect", false);
     addsaver(rconf.euclid_to_sphere, "rug-euclid to sphere projection", 1.5);
-    addparamsaver(rconf.twopoint_param, "rtwopoint", "rug-twopoint parameter", 1);
-    addparamsaver(rconf.fisheye_param, "rfisheye", "rug-fisheye parameter", 1);
+    param_f(rconf.twopoint_param, "rtwopoint", "rug-twopoint parameter", 1);
+    param_f(rconf.fisheye_param, "rfisheye", "rug-fisheye parameter", 1);
     addsaver(rconf.model_transition, "rug-model transition", 1);
     }
 
