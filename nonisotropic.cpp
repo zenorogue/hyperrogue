@@ -2890,6 +2890,13 @@ EX namespace nisot {
       shift_arg_formula(nilv::nilwidth);
       return 0;
       }
+    else if(argis("-nilh")) {
+      PHASEFROM(2);
+      stop_game();
+      shift(); ginf[gNil].sides = argi();
+      nilv::set_flags();
+      start_game();
+      }
     else if(argis("-rk-steps")) {
       PHASEFROM(2);
       shift(); rk_steps = argi();
