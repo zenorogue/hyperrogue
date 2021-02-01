@@ -1329,11 +1329,11 @@ void addconfig() {
   param_f(vrhr::ui_depth, "vr_ui_depth");
   param_f(vrhr::ui_size, "vr_ui_size");
   
-  addsaverenum(vrhr::hsm, "vr_headset_mode")
+  param_enum(vrhr::hsm, "vr_headset_mode", "vr_headset_mode", vrhr::hsm)
     ->editable(headset_desc, "VR headset movement", 'h');
-  addsaverenum(vrhr::eyes, "vr_eyes_mode");
+  param_enum(vrhr::eyes, "vr_eyes_mode", "vr_eyes_mode", vrhr::eyes)
     ->editable(eyes_desc, "VR binocular vision", 'b');
-  addsaverenum(vrhr::cscr, "vr_screen_mode");
+  param_enum(vrhr::cscr, "vr_screen_mode", "vr_screen_mode", vrhr::cscr)
     ->editable(comp_desc, "VR computer screen", 'c');
   }
 auto hookc = addHook(hooks_configfile, 100, addconfig);

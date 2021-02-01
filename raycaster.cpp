@@ -501,7 +501,7 @@ void enable_raycaster() {
     fmain +=
       "  int which = -1;\n";
     
-    if(in_e2xe()) fmain += "tangent.w = position.w = 0.;\n";
+    if(in_e2xe() && !eyes) fmain += "tangent.w = position.w = 0.;\n";
       
     if(IN_ODS) fmain += 
       "  if(go == 0.) {\n"
