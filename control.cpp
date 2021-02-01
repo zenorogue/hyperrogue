@@ -1192,28 +1192,11 @@ EX bool gmodekeys(int sym, int uni) {
   if(NUMBERKEY == '6') { vid.grid = !vid.grid; return true; }
   if(NUMBERKEY == '7') { vid.darkhepta = !vid.darkhepta; return true; }
 
+  if(NUMBERKEY == '1') 
+    pushScreen(models::quick_model);
+  
   if(GDIM == 2) {
-    if(among(NUMBERKEY, '1', '2', '3') && !rug::rugged && euclid && WDIM == 2) {
-      pconf.xposition = pconf.yposition = 0;
-      ld maxs = 0;
-      auto& cd = current_display;
-      for(auto& p: gmatrix) for(int i=0; i<p.first->type; i++) {
-        shiftpoint h = tC0(p.second * currentmap->adj(p.first, i));
-        hyperpoint onscreen;
-        applymodel(h, onscreen);
-        maxs = max(maxs, onscreen[0] / cd->xsize);
-        maxs = max(maxs, onscreen[1] / cd->ysize);
-        }
-      pconf.alpha = 1;
-      pconf.scale = pconf.scale / 2 / maxs / cd->radius;
-      if(NUMBERKEY == '3') pconf.scale *= 2;
-      if(NUMBERKEY == '1') pconf.scale /= 2;
-      }
-    else if(NUMBERKEY == '1' && !rug::rugged) { pconf.alpha = 999; pconf.scale = 998; pconf.xposition = pconf.yposition = 0; }
-    else if(NUMBERKEY == '2' && !rug::rugged) { pconf.alpha = 1; pconf.scale = 0.4; pconf.xposition = pconf.yposition = 0; }
-    else if(NUMBERKEY == '3' && !rug::rugged) { pconf.alpha = 1; pconf.scale = 1; pconf.xposition = pconf.yposition = 0; }
-    else if(NUMBERKEY == '4' && !rug::rugged) { pconf.alpha = 0; pconf.scale = 1; pconf.xposition = pconf.yposition = 0; }
-    else if(NUMBERKEY == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 7; }
+    if(NUMBERKEY == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 7; }
     else if((NUMBERKEY == '8' && hiliteclick) || NUMBERKEY == 508) { 
       vid.highlightmode += 60 + (shiftmul > 0 ? 1 : -1); vid.highlightmode %= 3; 
       }
@@ -1229,11 +1212,7 @@ EX bool gmodekeys(int sym, int uni) {
     return true;
     }
   else {
-    auto& ysh = (WDIM == 2 ? vid.camera : vid.yshift);
-    if(NUMBERKEY == '1') { ysh = 0; vid.sspeed = 0; }
-    else if(NUMBERKEY == '2') { ysh = 0; vid.sspeed = -10; }
-    else if(NUMBERKEY == '3') { ysh = 1; vid.sspeed = 0; }
-    else if(NUMBERKEY == '5') { vid.wallmode = vid.wallmode == 5 ? 4 : 5; }
+    if(NUMBERKEY == '5') { vid.wallmode = vid.wallmode == 5 ? 4 : 5; }
     else return false;
     return true;
     }

@@ -2672,7 +2672,7 @@ EX void showSettings() {
   dialog::add_action_push(showGraphQuickKeys);
 
   dialog::addItem(XLAT("models & projections"), 'p');
-  dialog::add_action_push(models::model_menu);
+  dialog::add_action_push(models::quick_model);
 
   dialog::addItem(XLAT("colors & aura"), 'c');
   dialog::add_action_push(show_color_dialog);

@@ -797,6 +797,72 @@ EX namespace models {
     dialog::display();
     mouseovers = XLAT("see http://www.roguetemple.com/z/hyper/models.php");
     }
+    
+  EX void quick_model() {
+    cmode = sm::CENTER;
+    gamescreen(1);
+    dialog::init("models & projections");
+    
+    if(WDIM == 2 && !euclid) {
+      dialog::addItem(XLAT(hyperbolic ? "Gans model" : "orthographic projection"), '1');
+      dialog::add_action([] { if(rug::rugged) rug::close(); pconf.alpha = 999; pconf.scale = 998; pconf.xposition = pconf.yposition = 0; popScreen(); });
+      dialog::addItem(XLAT(hyperbolic ? "Poincaré model" : "stereographic projection"), '2');
+      dialog::add_action([] { if(rug::rugged) rug::close(); pconf.alpha = 1; pconf.scale = 1; pconf.xposition = pconf.yposition = 0; popScreen(); });
+      dialog::addItem(XLAT(hyperbolic ? "Beltrami-Klein model" : "gnomonic projection"), '3');
+      dialog::add_action([] { if(rug::rugged) rug::close(); pconf.alpha = 0; pconf.scale = 1; pconf.xposition = pconf.yposition = 0; popScreen(); });
+      if(sphere) {
+        dialog::addItem(XLAT("stereographic projection") + " " + XLAT("(zoomed out)"), '4');
+        dialog::add_action([] { if(rug::rugged) rug::close(); pconf.alpha = 1; pconf.scale = 0.4; pconf.xposition = pconf.yposition = 0; popScreen(); });
+        }
+      if(hyperbolic) {
+        dialog::addItem(XLAT("Gans model") + " " + XLAT("(zoomed out)"), '4');
+        dialog::add_action([] { if(rug::rugged) rug::close(); pconf.alpha = 999; pconf.scale = 499; pconf.xposition = pconf.yposition = 0; popScreen(); });
+        dialog::addItem(XLAT("Hypersian rug"), 'u');
+        dialog::add_action([] {  
+          if(rug::rugged) pushScreen(rug::show);
+          else {
+            pconf.alpha = 1, pconf.scale = 1; if(!rug::rugged) rug::init(); popScreen(); 
+            }
+          });
+        }
+      }
+    else if(WDIM == 2 && euclid) {
+      auto zoom_to = [] (ld s) {
+        pconf.xposition = pconf.yposition = 0;
+        ld maxs = 0;
+        auto& cd = current_display;
+        for(auto& p: gmatrix) for(int i=0; i<p.first->type; i++) {
+          shiftpoint h = tC0(p.second * currentmap->adj(p.first, i));
+          hyperpoint onscreen;
+          applymodel(h, onscreen);
+          maxs = max(maxs, onscreen[0] / cd->xsize);
+          maxs = max(maxs, onscreen[1] / cd->ysize);
+          }
+        pconf.alpha = 1;
+        pconf.scale = s * pconf.scale / 2 / maxs / cd->radius;
+        popScreen();
+        };
+      dialog::addItem(XLAT("zoom 2x"), '1');
+      dialog::add_action([zoom_to] { zoom_to(2); });
+      dialog::addItem(XLAT("zoom 1x"), '2');
+      dialog::add_action([zoom_to] { zoom_to(1); });
+      dialog::addItem(XLAT("zoom 0.5x"), '3');
+      dialog::add_action([zoom_to] { zoom_to(.5); });
+      }
+    else if(WDIM == 3) {
+      auto& ysh = (WDIM == 2 ? vid.camera : vid.yshift);
+      dialog::addItem(XLAT("first-person perspective"), '1');
+      dialog::add_action([&ysh] { ysh = 0; vid.sspeed = 0; popScreen(); } );
+      dialog::addItem(XLAT("fixed point of view"), '2');
+      dialog::add_action([&ysh] { ysh = 0; vid.sspeed = -10; popScreen(); } );
+      dialog::addItem(XLAT("third-person perspective"), '3');
+      dialog::add_action([&ysh] { ysh = 1; vid.sspeed = 0; popScreen(); } );
+      }
+    dialog::addItem(XLAT("advanced projections"), 'a');
+    dialog::add_action_push(model_menu);
+    dialog::addBack();
+    dialog::display();
+    }
 
   #if CAP_COMMANDLINE
   

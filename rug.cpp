@@ -1222,7 +1222,7 @@ ld protractor = 0;
 
 EX bool handlekeys(int sym, int uni) {
   USING_NATIVE_GEOMETRY;
-  if(NUMBERKEY == '1') {
+  if(NUMBERKEY == '2') {
     ld bdist = 1e12;
     if(finger_center) 
       finger_center = NULL;
@@ -1236,7 +1236,7 @@ EX bool handlekeys(int sym, int uni) {
     if(renderonce) renderlate+=10;
     return true;
     }
-  else if(NUMBERKEY == '2') {
+  else if(NUMBERKEY == '3') {
     #if CAP_CRYSTAL
     if(in_crystal())
       crystal::switch_z_coordinate();
@@ -1245,7 +1245,7 @@ EX bool handlekeys(int sym, int uni) {
       rotate_view(cspin(0, 2, M_PI));
     return true;
     }
-  else if(NUMBERKEY == '3') {
+  else if(NUMBERKEY == '4') {
     #if CAP_CRYSTAL
     if(in_crystal())
       crystal::flip_z();

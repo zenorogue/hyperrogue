@@ -333,18 +333,8 @@ EX void showGraphQuickKeys() {
   gamescreen(0);
 
   dialog::init(XLAT("quick options"));
-
-  if(GDIM == 2) {
-    dialog::addBoolItem(XLAT("orthogonal projection"), vpconf.alpha >= 500, '1');
-    dialog::addBoolItem(XLAT(sphere ? "stereographic projection" : euclid ? "zoomed out" : "small Poincaré model"), vpconf.alpha == 1 && vpconf.scale < 1, '2');
-    dialog::addBoolItem(XLAT(sphere ? "zoomed stereographic projection" : euclid ? "zoomed in" : "big Poincaré model"), vpconf.alpha == 1 && vpconf.scale >= 1, '3');
-    dialog::addBoolItem(XLAT((sphere || euclid) ? "gnomonic projection" : "Klein-Beltrami model"), vpconf.alpha == 0, '4');
-    }
-  else {
-    dialog::addBoolItem(XLAT("first person perspective"), vid.yshift == 0 && vid.sspeed > -5, '1');
-    dialog::addBoolItem(XLAT("fixed point of view"), vid.sspeed <= -5, '2');
-    dialog::addBoolItem(XLAT("third person perspective"), vid.yshift > 0 && vid.sspeed > -5, '3');
-    }
+  
+  dialog::addItem("quick projection", '1');
 
   const char *wdmodes[7] = {"ASCII", "black", "plain", "Escher", "plain/3D", "Escher/3D", "ASCII/3D"};
   dialog::addSelItem(XLAT("wall display mode"), XLAT(wdmodes[vid.wallmode]), '5');
