@@ -845,7 +845,7 @@ void enable_raycaster() {
           "nposition = s_translate(position) * nposition;\n";
         }
       
-      if(nil && !use_christoffel) {
+      if(nil && !use_christoffel && !eyes) {
         fmain +=
           "mediump vec4 xp, xt;\n"
           "mediump vec4 back = itranslatev(position, tangent);\n"
@@ -880,9 +880,6 @@ void enable_raycaster() {
           "mediump vec4 nposition = translate(position, xp);\n";
         }
       
-      if(nil) fmain +=
-        "mediump float rz = (abs(nposition.x) > abs(nposition.y) ?  -nposition.x*nposition.y : 0.) + nposition.z;\n";
-      
       if(asonov) {
         fsh += "uniform mediump mat4 uStraighten;\n";
         fmain += "mediump vec4 sp = uStraighten * nposition;\n";
@@ -896,8 +893,15 @@ void enable_raycaster() {
         "  mediump vec4 v = at0 * t;\n";
         fmain +=
         "  v[3] = 1.;\n"
-        "  mediump vec4 azeq = uEyeShift * v;\n";        
-        if(prod) {
+        "  mediump vec4 azeq = uEyeShift * v;\n";
+        if(nil) fmain +=
+          "  mediump float alpha = atan2(azeq.y, azeq.x);\n"
+          "  mediump float w = azeq.z;\n"
+          "  mediump float c = length(azeq.xy) / azeq.z;\n"
+          "  mediump vec4 xp = vec4(2.*c*sin(w/2.) * cos(w/2.+alpha), 2.*c*sin(w/2.)*sin(w/2.+alpha), w*(1.+(c*c/2.)*((1.-sin(w)/w)+(1.-cos(w))/w * sin(w+2.*alpha))), 1.);\n"
+          "  mediump vec4 orig_position = vw * vec4(0., 0., 0., 1.);\n"
+          "  mediump vec4 nposition = translate(orig_position, xp);\n";
+        else if(prod) {
           fmain +=
             "  mediump float alen_xy = length(azeq.xy);\n";
           fmain += "  mediump float nzpos = zpos + azeq.z;\n";
@@ -975,6 +979,9 @@ void enable_raycaster() {
           }
         }
         
+      if(nil) fmain +=
+        "mediump float rz = (abs(nposition.x) > abs(nposition.y) ?  -nposition.x*nposition.y : 0.) + nposition.z;\n";
+      
       fmain +=
         "if(next >= minstep) {\n";
       
@@ -1049,7 +1056,7 @@ void enable_raycaster() {
       
       if(use_christoffel) fmain +=
         "tangent = tangent + (acc1+2.*acc2+2.*acc3+acc4)/(6.*dist);\n";
-      else if(nil) fmain +=
+      else if(nil && !eyes) fmain +=
         "tangent = translatev(position, xt);\n";
       else if(!eyes)
         fmain +=
@@ -1435,7 +1442,10 @@ EX void cast() {
   
   #if CAP_VR
   if(o->uEyeShift != -1) {
-    glUniformMatrix4fv(o->uEyeShift, 1, 0, glhr::tmtogl_transpose3(vrhr::eyeshift).as_array());
+    transmatrix T = vrhr::eyeshift;
+    if(nonisotropic)
+      T = inverse(NLP) * T;
+    glUniformMatrix4fv(o->uEyeShift, 1, 0, glhr::tmtogl_transpose3(T).as_array());
     glUniform1f(o->uAbsUnit, vrhr::absolute_unit_in_meters);
     }
   if(vrhr::rendering_eye()) {
