@@ -89,10 +89,11 @@ struct float_setting : public setting {
     default_key = key;
     return this;
     }
-  reaction_t extra, reaction;
+  reaction_t extra, reaction, sets;
   function<void(float_setting*)> modify_me;
   float_setting *set_extra(const reaction_t& r) { extra = r; return this; }
   float_setting *set_reaction(const reaction_t& r) { reaction = r; return this; }
+  float_setting *set_sets(const reaction_t& s) { sets = s; return this; }
   float_setting *modif(const function<void(float_setting*)>& r) { modify_me = r; return this; }
   void add_as_saver();
   virtual bool affects(void *v) override { return v == value; }
@@ -100,6 +101,40 @@ struct float_setting : public setting {
   virtual cld get_cld() { return *value; }
   };
 
+struct int_setting : public setting {
+  int *value;
+  int dft;
+  void add_as_saver();
+  reaction_t extra, reaction, sets;
+  function<void(int_setting*)> modify_me;
+  int_setting *set_extra(const reaction_t& r) { extra = r; return this; }
+  int_setting *set_reaction(const reaction_t& r) { reaction = r; return this; }
+  int_setting *modif(const function<void(int_setting*)>& r) { modify_me = r; return this; }
+  int_setting *set_sets(const reaction_t& s) { sets = s; return this; }
+  virtual bool affects(void *v) override { return v == value; }
+  virtual void show_edit_option(char key) override;
+  virtual cld get_cld() { return *value; }
+  };
+
+struct bool_setting : public setting {
+  bool *value;
+  bool dft;
+  void add_as_saver();
+  reaction_t switcher;
+  virtual bool affects(void *v) override { return v == value; }
+  virtual void show_edit_option(char key) override;
+  virtual cld get_cld() { return *value ? 1 : 0; }
+  };
+
+struct custom_setting : public setting {  
+  function<void(char)> custom_viewer;
+  function<cld()> custom_value;
+  function<bool(void*)> custom_affect;
+  virtual void show_edit_option(char key) { custom_viewer(key); }
+  virtual cld get_cld() { return custom_value(); }
+  virtual bool affects(void *v) { return custom_affect(v); }
+  };
+  
 #if CAP_CONFIG
 
 template<class T> struct dsaver : supersaver {
@@ -207,6 +242,18 @@ void float_setting::add_as_saver() {
 #endif
   }
 
+void int_setting::add_as_saver() { 
+#if CAP_CONFIG
+  addsaver(*value, config_name, dft);
+#endif
+  }
+
+void bool_setting::add_as_saver() { 
+#if CAP_CONFIG
+  addsaver(*value, config_name, dft);
+#endif
+  }
+
 void float_setting::show_edit_option(char key) {
   if(modify_me) modify_me(this);
   dialog::addSelItem(XLAT(menu_item_name), fts(*value), key);
@@ -215,6 +262,25 @@ void float_setting::show_edit_option(char key) {
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
     if(reaction) dialog::reaction = reaction;
     if(extra) dialog::extra_options = extra;
+    });
+  }
+
+void int_setting::show_edit_option(char key) {
+  if(modify_me) modify_me(this);
+  dialog::addSelItem(XLAT(menu_item_name), its(*value), key);
+  dialog::add_action([this] () {
+    add_to_changed(this);
+    dialog::editNumber(*value, 0, 100, 1, dft, XLAT(menu_item_name), help_text); 
+    if(reaction) dialog::reaction = reaction;
+    if(extra) dialog::extra_options = extra;
+    });
+  }
+
+void bool_setting::show_edit_option(char key) {
+  dialog::addBoolItem(XLAT(menu_item_name), *value, key);
+  dialog::add_action([this] () {
+    add_to_changed(this);
+    switcher();
     });
   }
 
@@ -234,6 +300,49 @@ EX float_setting *param_f(ld& val, const string p, const string s, ld dft) {
   params[s] = std::move(u);
   return f;
   }
+
+EX string param_esc(string s) {
+  string out;
+  for(char c: s)
+    if(c == ' ' || c == '-' || c == ':')
+      out += '_';
+    else
+      out += c;
+  return out;
+  }
+
+EX int_setting *param_i(int& val, const string s, int dft) {
+  unique_ptr<int_setting> u ( new int_setting );
+  u->parameter_name = param_esc(s);
+  u->config_name = s;
+  u->menu_item_name = s;
+  u->value = &val;
+  u->dft = dft;
+  val = dft;
+  u->add_as_saver();
+  auto f = &*u;
+  params[s] = std::move(u);
+  return f;
+  }
+
+EX int_setting *param_i(int& val, const string s) { return param_i(val, s, val); }
+
+EX bool_setting *param_b(bool& val, const string s, bool dft) {
+  unique_ptr<bool_setting> u ( new bool_setting );
+  u->parameter_name = param_esc(s);
+  u->config_name = s;
+  u->menu_item_name = s;
+  u->value = &val;
+  u->dft = dft;
+  u->switcher = [&val] { val = !val; };
+  val = dft;
+  u->add_as_saver();
+  auto f = &*u;
+  params[s] = std::move(u);
+  return f;
+  }
+
+EX bool_setting *param_b(bool& val, const string s) { return param_b(val, s, val); }
 
 #if HDR
 template<class T> void enum_setting<T>::add_as_saver() { 
@@ -258,7 +367,7 @@ template<class T> enum_setting<T> *param_enum(T& val, const string p, const stri
 #endif
 
 EX float_setting* param_f(ld& val, const string s) {
-  return param_f(val, s, s, val);
+  return param_f(val, param_esc(s), s, val);
   }
 
 EX float_setting* param_f(ld& val, const string p, const string s) {
@@ -266,8 +375,25 @@ EX float_setting* param_f(ld& val, const string p, const string s) {
   }
 
 EX float_setting* param_f(ld& val, const string s, ld dft) {
-  return param_f(val, s, s, dft);
+  return param_f(val, param_esc(s), s, dft);
   }
+
+#if HDR
+template<class T>
+custom_setting* param_custom(T& val, const string& s, function<void(char)> menuitem, char key) {
+  unique_ptr<custom_setting> u ( new custom_setting );
+  u->parameter_name = param_esc(s);
+  u->config_name = s;
+  u->menu_item_name = s;
+  u->custom_viewer = menuitem;
+  u->custom_value = [&val] () { return (cld) val; };
+  u->custom_affect = [&val] (void *v) { return &val == v; };
+  u->default_key = key;
+  auto f = &*u;
+  params[s] = std::move(u);
+  return f;  
+  }
+#endif
 
 EX ld bounded_mine_percentage = 0.1;
 EX int bounded_mine_quantity, bounded_mine_max;
@@ -419,31 +545,31 @@ EX purehookset hooks_configfile;
 EX void initConfig() {
   
   // basic config
-  addsaver(vid.flashtime, "flashtime", 8);
+  param_i(vid.flashtime, "flashtime", 8);
   param_enum(vid.msgleft, "message_style", "message style", 2)
     -> editable({{"centered", ""}, {"left-aligned", ""}, {"line-broken", ""}}, "message style", 'a');
 
-  addsaver(vid.msglimit, "message limit", 5);
-  addsaver(vid.timeformat, "message log time format", 0);
-  addsaver(fontscale, "fontscale", 100);
+  param_i(vid.msglimit, "message limit", 5);
+  param_i(vid.timeformat, "message log time format", 0);
+  param_i(fontscale, "fontscale", 100);
 
-  addsaver(vid.mobilecompasssize, "mobile compass size", 0); // ISMOBILE || ISPANDORA ? 30 : 0);
-  addsaver(vid.radarsize, "radarsize size", 120);
+  param_i(vid.mobilecompasssize, "mobile compass size", 0); // ISMOBILE || ISPANDORA ? 30 : 0);
+  param_i(vid.radarsize, "radarsize size", 120);
   addsaver(vid.radarrange, "radarrange", 2.5);
-  addsaver(vid.axes, "movement help", 1);
-  addsaver(vid.axes3, "movement help3", true);
-  addsaver(vid.shifttarget, "shift-targetting", 2);
+  param_i(vid.axes, "movement help", 1);
+  param_b(vid.axes3, "movement help3", true);
+  param_i(vid.shifttarget, "shift-targetting", 2);
   addsaver(vid.steamscore, "scores to Steam", 1);
   initcs(vid.cs); addsaver(vid.cs, "single");
-  addsaver(vid.samegender, "princess choice", false);
+  param_b(vid.samegender, "princess choice", false);
   addsaver(vid.language, "language", -1);  
-  addsaver(vid.drawmousecircle, "mouse circle", ISMOBILE || ISPANDORA);
-  addsaver(vid.revcontrol, "reverse control", false);
-  addsaver(musicvolume, "music volume");
+  param_b(vid.drawmousecircle, "mouse circle", ISMOBILE || ISPANDORA);
+  param_b(vid.revcontrol, "reverse control", false);
+  param_i(musicvolume, "music volume");
   #if CAP_SDLAUDIO
   addsaver(music_out_of_focus, "music out of focus", false);
   #endif
-  addsaver(effvolume, "sound effect volume");
+  param_i(effvolume, "sound effect volume");
   param_enum(glyphsortorder, "glyph_sort", "glyph sort order", glyphsortorder)
     ->editable({
       {"first on top", ""},
@@ -472,11 +598,11 @@ EX void initConfig() {
   -> editable({{"letters", ""}, {"auto", ""}, {"images", ""}}, "inventory/kill mode", 'd');
 
   addsaver(vid.particles, "extra effects", 1);
-  addsaver(vid.framelimit, "frame limit", 75);
+  param_i(vid.framelimit, "frame limit", 75);
   addsaver(vid.xres, "xres");
   addsaver(vid.yres, "yres");
-  addsaver(vid.fsize, "font size");
-  addsaver(vid.darkhepta, "mark heptagons", false);
+  param_i(vid.fsize, "font size");
+  param_b(vid.darkhepta, "mark heptagons", false);
   
   for(auto& lp: linepatterns::patterns) {
     addsaver(lp->color, "lpcolor-" + lp->lpname);
@@ -492,7 +618,7 @@ EX void initConfig() {
   addsaver(vid.always3, "3D always", false);
   
   addsaver(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA || ISWEB) ? 1 : 0);
-  addsaver(reserve_limit, "memory_reserve", 128);
+  param_i(reserve_limit, "memory_reserve", 128);
   addsaver(show_memory_warning, "show_memory_warning");
 
   addsaver(rug::renderonce, "rug-renderonce");
@@ -502,24 +628,24 @@ EX void initConfig() {
   param_f(rug::model_distance, "rug_model_distance", "rug-model-distance");
 #endif
 
-  addsaver(vid.backeffects, "background particle effects", (ISMOBILE || ISPANDORA) ? false : true);
+  param_b(vid.backeffects, "background particle effects", (ISMOBILE || ISPANDORA) ? false : true);
   // control
   
-  addsaver(vid.joyvalue, "vid.joyvalue", 4800);
-  addsaver(vid.joyvalue2, "vid.joyvalue2", 5600);
-  addsaver(vid.joysmooth, "vid.joysmooth", 200);
-  addsaver(vid.joypanthreshold, "vid.joypanthreshold", 2500);
-  addsaver(vid.joypanspeed, "vid.joypanspeed", ISPANDORA ? 0.0001 : 0);
+  param_i(vid.joyvalue, "vid.joyvalue", 4800);
+  param_i(vid.joyvalue2, "vid.joyvalue2", 5600);
+  param_i(vid.joysmooth, "vid.joysmooth", 200);
+  param_i(vid.joypanthreshold, "vid.joypanthreshold", 2500);
+  param_f(vid.joypanspeed, "vid.joypanspeed", ISPANDORA ? 0.0001 : 0);
   addsaver(autojoy, "autojoy");
     
   vid.killreduction = 0;
   
-  addsaver(vid.skipstart, "skip the start menu", false);
-  addsaver(vid.quickmouse, "quick mouse", !ISPANDORA);
+  param_b(vid.skipstart, "skip the start menu", false);
+  param_b(vid.quickmouse, "quick mouse", !ISPANDORA);
   
   // colors
 
-  addsaver(crosshair_size, "size:crosshair");
+  param_f(crosshair_size, "size:crosshair");
   addsaver(crosshair_color, "color:crosshair");
   
   addsaver(backcolor, "color:background");
@@ -586,8 +712,8 @@ EX void initConfig() {
   addsaver(gp::param.second, "goldberg-y", gp::param.second);
   #endif
   
-  addsaver(nohud, "no-hud", false);
-  addsaver(nofps, "no-fps", false);
+  param_b(nohud, "no-hud", false);
+  param_b(nofps, "no-fps", false);
   
   #if CAP_IRR
   addsaver(irr::density, "irregular-density", 2);
@@ -598,7 +724,7 @@ EX void initConfig() {
   addsaver(irr::rearrange_less, "irregular-rearrangeless", 10);
   #endif
   
-  addsaver(vid.linequality, "line quality", 0);
+  param_i(vid.linequality, "line quality", 0);
   
   #if CAP_FILES && CAP_SHOT && CAP_ANIMATIONS
   addsaver(anims::animfile, "animation file format");
@@ -614,15 +740,15 @@ EX void initConfig() {
   #endif
   
 #if CAP_TEXTURE  
-  addsaver(texture::texture_aura, "texture-aura", false);
+  param_b(texture::texture_aura, "texture-aura", false);
 #endif
 
   addsaver(vid.use_smart_range, "smart-range", 0);
-  addsaver(vid.smart_range_detail, "smart-range-detail", 8);
-  addsaver(vid.smart_range_detail_3, "smart-range-detail", 30);
-  addsaver(vid.smart_area_based, "smart-area-based", false);
-  addsaver(vid.cells_drawn_limit, "limit on cells drawn", 10000);
-  addsaver(vid.cells_generated_limit, "limit on cells generated", 250);
+  param_f(vid.smart_range_detail, "smart-range-detail", 8);
+  param_f(vid.smart_range_detail_3, "smart-range-detail-3", 30);
+  param_b(vid.smart_area_based, "smart-area-based", false);
+  param_i(vid.cells_drawn_limit, "limit on cells drawn", 10000);
+  param_i(vid.cells_generated_limit, "limit on cells generated", 250);
   
   #if CAP_SOLV
   addsaver(sn::solrange_xy, "solrange-xy");
@@ -691,27 +817,27 @@ EX void initConfig() {
   addsaver(sightranges[gSpace344], "sight-344", 4.5);
   addsaver(sightranges[gSpace336], "sight-336", 4);
 
-  addsaver(vid.sloppy_3d, "sloppy3d", true);
+  param_b(vid.sloppy_3d, "sloppy3d", true);
 
-  addsaver(vid.texture_step, "wall-quality", 4);
+  param_i(vid.texture_step, "wall-quality", 4);
   
-  addsaver(smooth_scrolling, "smooth-scrolling", false);
+  param_b(smooth_scrolling, "smooth-scrolling", false);
   addsaver(mouseaim_sensitivity, "mouseaim_sensitivity", 0.01);
 
-  addsaver(vid.consider_shader_projection, "shader-projection", true);
+  param_b(vid.consider_shader_projection, "shader-projection", true);
   
-  addsaver(tortoise::shading_enabled, "tortoise_shading", true);
+  param_b(tortoise::shading_enabled, "tortoise_shading", true);
 
   addsaver(bounded_mine_percentage, "bounded_mine_percentage");
 
-  addsaver(nisot::geodesic_movement, "solv_geodesic_movement", true);
+  param_b(nisot::geodesic_movement, "solv_geodesic_movement", true);
 
   addsaver(s2xe::qrings, "s2xe-rings");
   addsaver(rots::underlying_scale, "rots-underlying-scale");
   
-  addsaver(vid.bubbles_special, "bubbles-special", 1);
-  addsaver(vid.bubbles_threshold, "bubbles-special", 1);
-  addsaver(vid.bubbles_all, "bubbles-special", 0);
+  param_b(vid.bubbles_special, "bubbles-special", 1);
+  param_b(vid.bubbles_threshold, "bubbles-threshold", 1);
+  param_b(vid.bubbles_all, "bubbles-all", 0);
 
 #if CAP_SHMUP  
   multi::initConfig();
@@ -730,9 +856,9 @@ EX void initConfig() {
         );
 
   addsaverenum(neon_nofill, "neon_nofill");
-  addsaver(noshadow, "noshadow");
-  addsaver(bright, "bright");
-  addsaver(cblind, "cblind");
+  param_b(noshadow, "noshadow");
+  param_b(bright, "bright");
+  param_b(cblind, "cblind");
   
   addsaver(berger_limit, "berger_limit");
   
@@ -752,6 +878,9 @@ EX void initConfig() {
 #if CAP_CONFIG
   for(auto s: savers) s->reset();
 #endif
+
+  param_custom(sightrange_bonus, "sightrange_bonus", menuitem_sightrange_bonus, 'r');
+  param_custom(vid.use_smart_range, "sightrange_style", menuitem_sightrange_style, 's');
   }
 
 EX bool inSpecialMode() {
@@ -982,14 +1111,28 @@ string solhelp() {
 #endif
   }
 
+EX void menuitem_sightrange_bonus(char c) {
+  dialog::addSelItem(XLAT("sight range bonus"), its(sightrange_bonus), c);
+  dialog::add_action([]{
+    dialog::editNumber(sightrange_bonus, -5, allowIncreasedSight() ? 3 : 0, 1, 0, XLAT("sight range"), 
+      XLAT("Roughly 42% cells are on the edge of your sight range. Reducing "
+      "the sight range makes HyperRogue work faster, but also makes "
+      "the game effectively harder."));
+    dialog::reaction = doOvergenerate;
+    dialog::bound_low(1-getDistLimit());
+    dialog::bound_up(allowIncreasedSight() ? euclid ? 99 : gp::dist_2() * 5 : 0);
+    });
+  }
+
 EX void edit_sightrange() {
   #if CAP_RUG
   USING_NATIVE_GEOMETRY_IN_RUG;
   #endif
-  if(vid.use_smart_range) {
-    ld& det = WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3;
-    dialog::editNumber(det, 1, 50, 1, WDIM == 2 ? 8 : 30, XLAT("minimum visible cell in pixels"), "");
-    }
+  gamescreen(0);
+  dialog::init("sight range settings");
+  if(WDIM == 2) add_edit(vid.use_smart_range);
+  if(vid.use_smart_range || WDIM == 3)
+    add_edit(WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3);
   else if(WDIM == 3) {
     dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("3D sight range"),
       (pmodel == mdGeodesic && sol) ? solhelp() : XLAT(
@@ -1003,119 +1146,111 @@ EX void edit_sightrange() {
       );
     }
   else {
-    dialog::editNumber(sightrange_bonus, -5, allowIncreasedSight() ? 3 : 0, 1, 0, XLAT("sight range"), 
-      XLAT("Roughly 42% cells are on the edge of your sight range. Reducing "
-      "the sight range makes HyperRogue work faster, but also makes "
-      "the game effectively harder."));
-    dialog::reaction = doOvergenerate;
-    dialog::bound_low(1-getDistLimit());
-    dialog::bound_up(allowIncreasedSight() ? euclid ? 99 : gp::dist_2() * 5 : 0);
-    }
-  dialog::extra_options = [] () {
-    if(pmodel == mdGeodesic && sol) {
-      #if CAP_SOLV
-      dialog::addSelItem(XLAT("fog effect"), fts(sightranges[geometry]), 'R');
-      dialog::add_action([] {
-        auto xo = dialog::extra_options;
-        dialog::editNumber(sightranges[geometry], 0, 10, 0.5, M_PI, solhelp(), "");
-        dialog::extra_options = xo; popScreen();
-        });
-      dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(sn::solrange_xy), 'X');
-      dialog::add_action([] {
-        auto xo = dialog::extra_options;
-        dialog::editNumber(sn::solrange_xy, 0.01, 200, 0.1, 50, XLAT("max difference in X/Y coordinates"), solhelp()), dialog::scaleLog();
-        dialog::extra_options = xo; popScreen();
-        });
-      dialog::addSelItem(XLAT("max difference in Z coordinate"), fts(sn::solrange_z), 'Z');
-      dialog::add_action([] {
-        auto xo = dialog::extra_options;
-        dialog::editNumber(sn::solrange_z, 0, 20, 0.1, 6, XLAT("max difference in Z coordinates"), solhelp());
-        dialog::extra_options = xo; popScreen();
-        });
-      #endif
-      }
-    else if(pmodel == mdGeodesic && sl2) {
-      dialog::addSelItem(XLAT("fog effect"), fts(sightranges[geometry]), 'R');
-      dialog::add_action([] {
-        auto xo = dialog::extra_options;
-        dialog::editNumber(sightranges[geometry], 0, 10, 0.5, M_PI, "", "");
-        dialog::extra_options = xo; popScreen();
-        });
-      dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(slr::range_xy), 'X');
-      dialog::add_action([] {
-        auto xo = dialog::extra_options;
-        dialog::editNumber(slr::range_xy, 0, 10, 0.5, 4, XLAT("max difference in X/Y coordinates"), "");
-        dialog::extra_options = xo; popScreen();
-        });
-      dialog::addSelItem(XLAT("steps"), its(slr::steps), 'Z');
-      dialog::add_action([] {
-        auto xo = dialog::extra_options;
-        dialog::editNumber(slr::steps, 0, 50, 1, 10, "", "");
-        dialog::extra_options = xo; popScreen();
-        });
-      }
-    else {
-      dialog::addBoolItem(XLAT("draw range based on distance"), vid.use_smart_range == 0, 'D');
-      dialog::add_action([] () { vid.use_smart_range = 0; popScreen(); edit_sightrange(); });
-      if(WDIM == 2 && allowIncreasedSight()) {
-        dialog::addBoolItem(XLAT("draw based on size in the projection (no generation)"), vid.use_smart_range == 1, 'N');
-        dialog::add_action([] () { vid.use_smart_range = 1; popScreen(); edit_sightrange(); });
-        }
-      if(allowChangeRange() && allowIncreasedSight()) {
-        dialog::addBoolItem(XLAT("draw based on size in the projection (generation)"), vid.use_smart_range == 2, 'G');
-        dialog::add_action([] () { vid.use_smart_range = 2; popScreen(); edit_sightrange(); });
-        }
-      if(vid.use_smart_range == 0 && allowChangeRange() && WDIM == 2) {
-        dialog::addSelItem(XLAT("generation range bonus"), its(genrange_bonus), 'O');
-        dialog::add_action([] () { genrange_bonus = sightrange_bonus; doOvergenerate(); });
-        dialog::addSelItem(XLAT("game range bonus"), its(gamerange_bonus), 'S');
-        dialog::add_action([] () { gamerange_bonus = sightrange_bonus; doOvergenerate(); });
-        }      
-      if(vid.use_smart_range && WDIM == 2) {
-        dialog::addBoolItem_action(XLAT("area-based range"), vid.smart_area_based, 'A');
-        }
-      if(!allowChangeRange() || !allowIncreasedSight()) {
-        dialog::addItem(XLAT("enable the cheat mode for additional options"), 'X');
-        dialog::add_action(enable_cheat);
-        }
-      if(WDIM == 3 && !vid.use_smart_range) {
-        dialog::addBoolItem_action(XLAT("sloppy range checking"), vid.sloppy_3d, 'S');
-        }
-      if(GDIM == 3 && !vid.use_smart_range) {
-        dialog::addSelItem(XLAT("limit generation"), fts(extra_generation_distance), 'E');
-        dialog::add_action([] {
-          auto xo = dialog::extra_options;
-          dialog::editNumber(extra_generation_distance, 0, 999, 0.5, 999, XLAT("limit generation"), 
-            "Cells over this distance will not be generated, but they will be drawn if they are already generated and in the sight range."
-            );
-          dialog::extra_options = xo; popScreen();
-          });
-        }
-      }
-    add_cells_drawn('C');
-    if(GDIM == 3 && WDIM == 2 && pmodel == mdPerspective) {
-      dialog::addSelItem(XLAT("fog effect"), fts(sightranges[geometry]), 'R');
+    add_edit(sightrange_bonus);
+    if(GDIM == 3) {
+      dialog::addSelItem(XLAT("3D sight range for the fog effect"), fts(sightranges[geometry]), 'R');
       dialog::add_action([] {
         auto xo = dialog::extra_options;
         dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("fog effect"), "");
         dialog::extra_options = xo; popScreen();
         });
-      };
-    };
+      }
+    }
+  #if CAP_SOLV
+  if(pmodel == mdGeodesic && sol) {
+    dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(sn::solrange_xy), 'X');
+    dialog::add_action([] {
+      auto xo = dialog::extra_options;
+      dialog::editNumber(sn::solrange_xy, 0.01, 200, 0.1, 50, XLAT("max difference in X/Y coordinates"), solhelp()), dialog::scaleLog();
+      dialog::extra_options = xo; popScreen();
+      });
+    dialog::addSelItem(XLAT("max difference in Z coordinate"), fts(sn::solrange_z), 'Z');
+    dialog::add_action([] {
+      auto xo = dialog::extra_options;
+      dialog::editNumber(sn::solrange_z, 0, 20, 0.1, 6, XLAT("max difference in Z coordinates"), solhelp());
+      dialog::extra_options = xo; popScreen();
+      });
+    }
+  #endif
+  if(pmodel == mdGeodesic && sl2) {
+    dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(slr::range_xy), 'X');
+    dialog::add_action([] {
+      auto xo = dialog::extra_options;
+      dialog::editNumber(slr::range_xy, 0, 10, 0.5, 4, XLAT("max difference in X/Y coordinates"), "");
+      dialog::extra_options = xo; popScreen();
+      });
+    dialog::addSelItem(XLAT("steps"), its(slr::steps), 'Z');
+    dialog::add_action([] {
+      auto xo = dialog::extra_options;
+      dialog::editNumber(slr::steps, 0, 50, 1, 10, "", "");
+      dialog::extra_options = xo; popScreen();
+      });
+    }
+  if(vid.use_smart_range && WDIM == 2) {
+    dialog::addBoolItem_action(XLAT("area-based range"), vid.smart_area_based, 'A');
+    }
+  if(vid.use_smart_range == 0 && allowChangeRange() && WDIM == 2) {
+    dialog::addSelItem(XLAT("generation range bonus"), its(genrange_bonus), 'O');
+    dialog::add_action([] () { genrange_bonus = sightrange_bonus; doOvergenerate(); });
+    dialog::addSelItem(XLAT("game range bonus"), its(gamerange_bonus), 'S');
+    dialog::add_action([] () { gamerange_bonus = sightrange_bonus; doOvergenerate(); });
+    }
+  if(WDIM == 3 && !vid.use_smart_range) {
+    dialog::addBoolItem_action(XLAT("sloppy range checking"), vid.sloppy_3d, 'S');
+    }
+  if(GDIM == 3 && !vid.use_smart_range) {
+    dialog::addSelItem(XLAT("limit generation"), fts(extra_generation_distance), 'E');
+    dialog::add_action([] {
+      auto xo = dialog::extra_options;
+      dialog::editNumber(extra_generation_distance, 0, 999, 0.5, 999, XLAT("limit generation"), 
+        "Cells over this distance will not be generated, but they will be drawn if they are already generated and in the sight range."
+        );
+      dialog::extra_options = xo; popScreen();
+      });
+    }
+  add_cells_drawn('C');
+  dialog::display();
+  }
+
+EX void menuitem_sightrange_style(char c IS('c')) {
+  dialog::addSelItem(XLAT("draw range based on"), 
+    XLAT(vid.use_smart_range == 0 ? "distance" :
+    vid.use_smart_range == 1 ? "size (no gen)" :
+    "size"),
+    c
+    );
+  dialog::add_action_push([] {
+    dialog::init(XLAT("draw range based on"));
+    dialog::addBoolItem(XLAT("draw range based on distance"), vid.use_smart_range == 0, 'D');
+    dialog::add_action([] () { vid.use_smart_range = 0; popScreen(); edit_sightrange(); });
+    if(WDIM == 2 && allowIncreasedSight()) {
+      dialog::addBoolItem(XLAT("draw based on size in the projection (no generation)"), vid.use_smart_range == 1, 'N');
+      dialog::add_action([] () { vid.use_smart_range = 1; popScreen(); edit_sightrange(); });
+      }
+    if(allowChangeRange() && allowIncreasedSight()) {
+      dialog::addBoolItem(XLAT("draw based on size in the projection (generation)"), vid.use_smart_range == 2, 'G');
+      dialog::add_action([] () { vid.use_smart_range = 2; popScreen(); edit_sightrange(); });
+      }
+    if(!allowChangeRange() || !allowIncreasedSight()) {
+      dialog::addItem(XLAT("enable the cheat mode for additional options"), 'X');
+      dialog::add_action(enable_cheat);
+      }
+    dialog::display();
+    });
   }
 
 EX void menuitem_sightrange(char c IS('c')) {
-  if(vid.use_smart_range)
-    dialog::addSelItem(XLAT("minimum visible cell in pixels"), fts(WDIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail), c);
   #if CAP_SOLV
-  else if(pmodel == mdGeodesic && sol)
-    dialog::addSelItem(XLAT("3D sight range"), fts(sn::solrange_xy) + "x" + fts(sn::solrange_z), c);
+  if(pmodel == mdGeodesic && sol)
+    dialog::addSelItem(XLAT("sight range settings"), fts(sn::solrange_xy) + "x" + fts(sn::solrange_z), c);
   #endif
   else if(WDIM == 3)
-    dialog::addSelItem(XLAT("3D sight range"), fts(sightranges[geometry]), c);
+    dialog::addSelItem(XLAT("sight range settings"), fts(sightranges[geometry]) + "au", c);
+  else if(vid.use_smart_range)
+    dialog::addSelItem(XLAT("sight range settings"), fts(WDIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail) + " px", c);
   else
-    dialog::addSelItem(XLAT("sight range"), its(sightrange_bonus), c);
-  dialog::add_action(edit_sightrange);
+    dialog::addSelItem(XLAT("sight range settings"), format("%+d", sightrange_bonus), c);
+  dialog::add_action_push(edit_sightrange);
   }
 
 EX void menuitem_sfx_volume() {
@@ -2067,6 +2202,7 @@ EX int config3 = addHook(hooks_config, 100, [] {
 EX void switchcolor(unsigned int& c, unsigned int* cs) {
   dialog::openColorDialog(c, cs);
   }
+
 
 double cc_footphase;
 int lmousex, lmousey;
