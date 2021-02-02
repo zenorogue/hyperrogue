@@ -64,6 +64,7 @@ struct setting {
   setting *set_sets(const reaction_t& s) { sets = s; return this; }
   setting *set_extra(const reaction_t& r);
   setting *set_reaction(const reaction_t& r);
+  virtual ~setting() {}
   };
 #endif
 
