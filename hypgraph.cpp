@@ -1726,7 +1726,9 @@ EX void spinEdge(ld aspd) {
     transmatrix V = T * get_view_orientation();
 
     hyperpoint h = inverse(V) * C0;
-    V = V * rgpushxto0(h);
+    if(!prod) {
+      V = V * rgpushxto0(h);
+      }
     
     V = cspin(2, 1, 90 * degree) * V;
 
@@ -1745,7 +1747,9 @@ EX void spinEdge(ld aspd) {
     vrhr::be_33(V);
 
     V = cspin(1, 2, 90 * degree) * V;
-    get_view_orientation() = inverse(T) * V * gpushxto0(h);
+    V = inverse(T) * V;
+    if(!prod) V = V * gpushxto0(h);
+    get_view_orientation() = V;
     return;
     }
   #endif
