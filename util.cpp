@@ -443,7 +443,13 @@ cld exp_parser::parse(int prio) {
 EX ld parseld(const string& s) {
   exp_parser ep;
   ep.s = s;
-  return real(ep.parse());
+  return ep.rparse();
+  }
+
+EX int parseint(const string& s) {
+  exp_parser ep;
+  ep.s = s;
+  return ep.iparse();
   }
 
 EX string available_functions() {
