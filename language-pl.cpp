@@ -7843,6 +7843,7 @@ S("Shoot the Space Rocks for score. Large Rocks will split into two smaller rock
 N("editable statue", GEN_O, "edytowalny pomnik", "edytowalne pomniki", "edytowalny pomnik", "edytowalnym pomnikiem")
 S("These statues are designed to have their graphics edited in the Vector Graphics Editor. Each number has its own, separate graphics.",
   "Można zmienić wygląd tych pomników w Edytorze Grafiki. Każdy indeks ma swoją własną, osobną grafikę.")
+S("The Orb of Yendor is locked in with powerful magic.", "Potężna magia chroni Sferę Yendoru przed przemieszczaniem.")
 
 S("general perspective", "perspektywa ogólna")
 S("formula", "wzór")
