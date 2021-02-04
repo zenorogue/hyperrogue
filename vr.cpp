@@ -302,11 +302,13 @@ vr_rendermodel *get_render_model(string name) {
   return md;
   }
 
-void track_all() {
-  track_actions();
+EX bool need_poses = true;
 
+void track_poses() {
   E4;
-  // println(hlog, "tracking");
+
+  if(!need_poses) return;
+  need_poses = false;
   vr::VRCompositor()->WaitGetPoses(vrdata.poses, vr::k_unMaxTrackedDeviceCount, NULL, 0 );
   // println(hlog, "poses received");
   
@@ -405,7 +407,8 @@ EX void vr_control() {
     start_vr();
     }
   if(state == 1) {
-    track_all();
+    track_actions();
+    need_poses = true;
     }
   static bool last_vr_clicked = false;
   
@@ -935,7 +938,7 @@ EX void gen_mv() {
   }
 
 EX void render() {
-
+  track_poses();  
   resetbuffer rb;
   state = 2;
   
@@ -1416,6 +1419,11 @@ EX void submit() {
     vr::Texture_t texture = {(void*)(uintptr_t)ey->m_nResolveTextureId, vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
     vr::VRCompositor()->Submit(eye, &texture );
     }
+  }
+
+EX void handoff() {
+  if(!state) return;
+  vr::VRCompositor()->PostPresentHandoff();  
   }
 
 #endif

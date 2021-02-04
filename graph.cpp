@@ -5313,6 +5313,8 @@ EX void drawscreen() {
 #endif
   SDL_UpdateRect(s, 0, 0, vid.xres, vid.yres);
 #endif
+
+  vrhr::handoff();
   
 //printf("\ec");
   }
