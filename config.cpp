@@ -66,6 +66,10 @@ struct setting {
   setting *set_extra(const reaction_t& r);
   setting *set_reaction(const reaction_t& r);
   virtual ~setting() {}
+  virtual void load_from(const string& s) {
+    println(hlog, "cannot load this parameter");
+    exit(1);
+    }
   };
 #endif
 
@@ -125,6 +129,8 @@ struct float_setting : public setting {
   virtual bool affects(void *v) override { return v == value; }
   virtual void show_edit_option(char key) override;
   virtual cld get_cld() { return *value; }
+
+  virtual void load_from(const string& s);
   };
 
 struct int_setting : public setting {
@@ -145,6 +151,11 @@ struct int_setting : public setting {
     this->step = step;
     default_key = key;
     return this;
+    }
+
+  virtual void load_from(const string& s) {
+    *value = parseint(s);
+    println(hlog, "set ", parameter_name, " to ", *value);
     }
   };
 
@@ -285,6 +296,10 @@ void bool_setting::add_as_saver() {
 #if CAP_CONFIG
   addsaver(*value, config_name, dft);
 #endif
+  }
+
+void float_setting::load_from(const string& s) {
+  anims::animate_parameter(*value, s, reaction);
   }
 
 void float_setting::show_edit_option(char key) {
@@ -3015,6 +3030,19 @@ EX int read_config_args() {
   return 0;
   }
 
+EX int read_param_args() {
+  auto pos = args().find("=");
+  if(pos == string::npos) return 1;
+  string name = args().substr(0, pos);
+  string value = args().substr(pos+1);
+  PHASEFROM(2);
+  if(!params.count(name))  {
+    println(hlog, "parameter unknown: ", name);
+    exit(1);
+    }
+  params[name]->load_from(value);
+  }
+
 // mode changes:
 
 EX int read_gamemode_args() {
@@ -3035,7 +3063,10 @@ EX int read_gamemode_args() {
   return 0;
   }
 
-auto ah_config = addHook(hooks_args, 0, read_config_args) + addHook(hooks_args, 0, read_gamemode_args) + addHook(hooks_args, 0, read_color_args);
+auto ah_config = 
+  addHook(hooks_args, 0, read_config_args) + 
+  addHook(hooks_args, 0, read_param_args) + 
+  addHook(hooks_args, 0, read_gamemode_args) + addHook(hooks_args, 0, read_color_args);
 #endif
 
 }
