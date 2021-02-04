@@ -820,8 +820,12 @@ EX void initConfig() {
 #endif
 
   addsaver(vid.use_smart_range, "smart-range", 0);
-  param_f(vid.smart_range_detail, "smart-range-detail", 8);
-  param_f(vid.smart_range_detail_3, "smart-range-detail-3", 30);
+  param_f(vid.smart_range_detail, "smart-range-detail", 8)
+  ->editable(1, 50, 1, "minimum visible cell in pixels", "", 'd');
+
+  param_f(vid.smart_range_detail_3, "smart-range-detail-3", 30)
+  ->editable(1, 50, 1, "minimum visible cell in pixels", "", 'd');
+
   param_b(vid.smart_area_based, "smart-area-based", false);
   param_i(vid.cells_drawn_limit, "limit on cells drawn", 10000);
   param_i(vid.cells_generated_limit, "limit on cells generated", 250);
@@ -1216,9 +1220,11 @@ EX void edit_sightrange() {
   gamescreen(0);
   dialog::init("sight range settings");
   if(WDIM == 2) add_edit(vid.use_smart_range);
-  if(vid.use_smart_range || WDIM == 3)
+  if(vid.use_smart_range)
     add_edit(WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3);
   else if(WDIM == 3) {
+    dialog::addSelItem(XLAT("3D sight range for the fog effect"), fts(sightranges[geometry]), 'R');
+    dialog::add_action([] {
     dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("3D sight range"),
       (pmodel == mdGeodesic && sol) ? solhelp() : XLAT(
         "Sight range for 3D geometries is specified in the absolute units. This value also affects the fog effect.\n\n"
