@@ -946,7 +946,7 @@ EX slide default_slides[] = {
         }
 #if CAP_SDL
       slidecommand = "render spiral";
-      if(mode == 4) history::createImage(true);
+      if(mode == 4) history::open_filedialog_to_create_image(true);
       if(mode == 11) history::create_playerpath();
       if(mode == 13) history::clear();
 #endif
