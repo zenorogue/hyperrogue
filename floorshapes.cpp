@@ -1138,12 +1138,14 @@ void draw_shape_for_texture(floorshape* sh) {
     queuecurve(shiftless(Id), 0x40404000 + sh->fstrength * 192/10, 0, PPR::LINE);
     }
   
-  for(int i=0; i<100; i++) {
+  for(int i=0; i<1000; i++) {
     hyperpoint h1 = hpxy(sd * (6*randd()-3), sd * (6*randd()-3));
     hyperpoint h2 = hpxy(sd * (6*randd()-3), sd * (6*randd()-3));
+    ld d = hdist(h1, h2);
+    hyperpoint h3 = h1 + (h2-h1) /d * min(d, .1);
     for(int a=0; a<4; a++) {
       curvepoint(eupush(gx,gy) * eupush(spin(90*degree*a) * h1) * C0);
-      curvepoint(eupush(gx,gy) * eupush(spin(90*degree*a) * h2) * C0);
+      curvepoint(eupush(gx,gy) * eupush(spin(90*degree*a) * h3) * C0);
       queuecurve(shiftless(Id), 0x10101010, 0, PPR::LINE);
       }
     }
