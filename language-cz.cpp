@@ -5155,7 +5155,7 @@ S("This guided tour is different than most other game tutorials -- "
 S("Introduction", "Úvod")
 S("Welcome to the HyperRogue Guided Tour!", "Vítej v tutoriálu HyperRogue!")
 S(
-  "This tutorial is mostly aimed to show what is "
+  "This tour is mostly aimed to show what is "
   "special about the geometry used by HyperRogue. "
   "It also shows the basics of gameplay, and "
   "how is it affected by geometry.\n\n"
@@ -5169,6 +5169,7 @@ S(
   "jak ji geometrie ovlivňuje.\n\n"
   "Když si budeš chtít přestat hrát se současným \"snímkem\" a přejít na další, "
   "stiskni Enter. Stiskem ESC můžeš také zobrazit menu s dalšími možnostmi.")
+// FIX: tutorial changed to tour
 
 S("Basics of gameplay", "Základy hry")
 S("gain Ice Diamonds", "získej Ledové diamanty")
@@ -5953,7 +5954,7 @@ S("save a Princess", "zachraň Princeznu")
   
 S("Note for mobiles", "Poznámka pro mobilní telefony")
 S(
-    "This tutorial is designed for computers, "
+    "This tour is designed for computers, "
     "and keys are given for all actions. It will "
     "work without a keyboard though, although less "
     "comfortably -- just ignore the keys "
@@ -5965,6 +5966,7 @@ S(
     "ne tak pohodlně -- prostě ignorujte udávané klávesy a "
     "vybírejte možnosti z MENU.\n\n"
     "Vyber z MENU 'další snímek'.")
+// FIX: tutorial changed to tour
 
 S("skip the start menu", "přeskoč menu 'start'")
 S("quick mouse", "rychlá myš")

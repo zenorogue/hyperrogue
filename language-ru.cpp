@@ -5250,7 +5250,7 @@ S("This guided tour is different than most other game tutorials -- "
 S("Introduction", "Введение")
 S("Welcome to the HyperRogue Guided Tour!", "Добро пожаловать в руководство HyperRogue!")
 S(
-  "This tutorial is mostly aimed to show what is "
+  "This tour is mostly aimed to show what is "
   "special about the geometry used by HyperRogue. "
   "It also shows the basics of gameplay, and "
   "how is it affected by geometry.\n\n"
@@ -5264,6 +5264,7 @@ S(
   "на них влияет.\n\n"
   "Ты можешь перейти на следующий \"слайд\", "
   "нажав Enter. Нажми ESC, чтобы открыть меню с другими опциями.")
+// FIX: tutorial changed to tour
  
 S("Basics of gameplay", "Начала игры")
 S("gain Ice Diamonds", "собери Ледяные алмазы")
@@ -6035,7 +6036,7 @@ S("save a Princess", "спасти Принцессу")
  
 S("Note for mobiles", "Замечание для мобильных устройств")
 S(
-    "This tutorial is designed for computers, "
+    "This tour is designed for computers, "
     "and keys are given for all actions. It will "
     "work without a keyboard though, although less "
     "comfortably -- just ignore the keys "
@@ -6048,6 +6049,7 @@ S(
     "без клавиатуры, хотя и не так удобно -- "
     "просто игнорируй их и выбирай действия в МЕНЮ.\n\n"
     "Выбери в МЕНЮ 'следующий слайд'.")
+// FIX: tutorial changed to tour
  
 S("skip the start menu", "пропустить начальное меню")
 S("quick mouse", "быстрая мышь")
