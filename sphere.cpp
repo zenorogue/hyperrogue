@@ -181,6 +181,8 @@ struct hrmap_spherical : hrmap_standard {
       transmatrix T = inverse_shift(gmatrix0[c1], gmatrix0[c2]);
       if(elliptic && T[LDIM][LDIM] < 0)
         T = centralsym * T;
+
+      fixmatrix(T);
       return T;
       }
     else {
