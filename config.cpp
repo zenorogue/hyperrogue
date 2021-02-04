@@ -40,6 +40,7 @@ struct setting {
   string config_name;
   string menu_item_name;
   string help_text;
+  reaction_t reaction;
   char default_key;
   cld last_value;
   virtual bool available() { if(restrict) return restrict(); return true; }
@@ -73,7 +74,7 @@ setting *setting::set_extra(const reaction_t& r) {
   }
 
 setting *setting::set_reaction(const reaction_t& r) {
-  auto s = sets; set_sets([s, r] { s(); dialog::reaction = r; }); return this;
+  reaction = r; return this;
   }
 
 EX map<string, std::unique_ptr<setting>> params;
@@ -293,6 +294,7 @@ void float_setting::show_edit_option(char key) {
     add_to_changed(this);
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
     if(sets) sets();
+    if(reaction) reaction();
     });
   }
 
@@ -303,6 +305,7 @@ void int_setting::show_edit_option(char key) {
     add_to_changed(this);
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
     if(sets) sets();
+    if(reaction) reaction();
     });
   }
 
@@ -311,6 +314,7 @@ void bool_setting::show_edit_option(char key) {
   dialog::add_action([this] () {
     add_to_changed(this);
     switcher(); if(sets) sets();
+    if(reaction) reaction();
     });
   }
 
