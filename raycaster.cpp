@@ -215,11 +215,6 @@ string build_getter(string type, string name, int index) {
 #define GET(array, index) array "[" index "]"
 #endif
 
-void replace_str(string& s, string a, string b) {
-  while(s.find(a) != string::npos)
-    s.replace(s.find(a), isize(a), b);
-  }
-
 EX hookset<void(string&, string&)> hooks_rayshader;
 EX hookset<bool(shared_ptr<raycaster>)> hooks_rayset;
 

@@ -690,6 +690,12 @@ bignum::bignum(ld d) {
   while(n >= 0) { digits[n] = int(d); d -= digits[n]; d *= BASE; n--; }
   }
 
+/** in s, replace occurences of a with b */
+EX void replace_str(string& s, string a, string b) {
+  while(s.find(a) != string::npos)
+    s.replace(s.find(a), isize(a), b);
+  }
+
 #if CAP_ZLIB
 /* compression/decompression */
 
