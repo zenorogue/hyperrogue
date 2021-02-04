@@ -990,7 +990,7 @@ void show_gridmaker() {
   dialog::addSelItem(XLAT("bitruncation count"), its(bitruncations_requested), 'b');
   dialog::add_action([] () { 
     dialog::editNumber(bitruncations_requested, 0, 5, 1, 1, XLAT("bitruncation const"),
-      XLAT("Bitruncation introduces some regularity, allowing more sophisiticated floor tilings and textures."));
+      XLAT("Bitruncation introduces some regularity, allowing more sophisticated floor tilings and textures."));
     dialog::reaction = [] () {
       if(bitruncations_requested > bitruncations_performed && runlevel > 5) runlevel = 5;
       if(bitruncations_requested < bitruncations_performed) runlevel = 0;

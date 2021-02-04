@@ -7068,7 +7068,7 @@ S("aura from texture", "aura z tekstury")
 // extra for irregular
 S("bitruncation count", "liczba przycięć")
 
-S("Bitruncation introduces some regularity, allowing more sophisiticated floor tilings and textures.", 
+S("Bitruncation introduces some regularity, allowing more sophisticated floor tilings and textures.", 
   "Przycięcie wprowadza pewną regularność, pozwalając na bardziej zaawansowane posadzki i tekstury."
   )
 
