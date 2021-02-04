@@ -1364,6 +1364,10 @@ EX bool in(int dim, int s7) { return in(dim) && S7 == s7; }
 
 EX }
 
-EX gp::loc euc2_coordinates(cell *c) { return euc::full_coords2(c); }
+EX gp::loc euc2_coordinates(cell *c) { 
+  if(euc::in()) return euc::full_coords2(c); 
+  hyperpoint h = calc_relative_matrix(c, currentmap->gamestart(), C0) * C0;
+  return gp::loc(floor(h[0]), floor(h[1]));
+  }
 
 }
