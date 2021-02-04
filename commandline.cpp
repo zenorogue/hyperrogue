@@ -159,6 +159,9 @@ int arg::readCommon() {
 #endif
 #endif
 
+  else if(argis("-test-ach")) 
+    test_achievements = true;
+
   else if(argis("-test")) 
     callhooks(hooks_tests);
   else if(argis("-offline")) {

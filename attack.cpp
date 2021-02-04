@@ -1298,7 +1298,7 @@ EX void stabbingAttack(movei mi, eMonster who, int bonuskill IS(0)) {
   
     if(numsh == 2) {
       if(lastdouble == turncount-1) achievement_count("STAB", 4, 0);
-      lastdouble = turncount;
+      changes.value_set(lastdouble, turncount);
       }
     }
   }

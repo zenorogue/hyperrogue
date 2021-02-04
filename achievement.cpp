@@ -12,6 +12,8 @@ namespace hr {
 
 #define NUMLEADER 85
 
+EX bool test_achievements = false;
+
 EX bool offlineMode = false;
 
 EX const char* leadernames[NUMLEADER] = {
@@ -132,19 +134,26 @@ EX set<string> got_achievements;
 
 EX void achievement_gain_once(const string& s, char flags IS(0)) {
   LATE(achievement_gain_once(s, flags));
-  if(wrongMode(flags)) return;
   if(got_achievements.count(s)) return;
+  if(wrongMode(flags)) {
+    if(test_achievements) println(hlog, "wrong mode for achievement: ", s);
+    else return;
+    }
   got_achievements.insert(s);
   achievement_gain(s.c_str(), flags);
   }
 
 EX void achievement_log(const char* s, char flags) {
 
-#ifdef PRINT_ACHIEVEMENTS
-  printf("achievement = %s [%d]\n", s, wrongMode(flags));
-#endif
-  
-  if(wrongMode(flags)) return;
+  if(wrongMode(flags)) {
+    if(test_achievements) println(hlog, "wrong mode for achievement: ", s);
+    return;
+    }
+
+  if(test_achievements) {
+    println(hlog, "got achievement:", s);
+    return;
+    }
   
   for(int i=0; i<isize(achievementsReceived); i++)
     if(achievementsReceived[i] == s) return;
@@ -199,7 +208,7 @@ EX void achievement_collection(eItem it) {
   }
 
 EX void achievement_collection2(eItem it, int q) {
-  if(cheater) return;
+  if(cheater && !test_achievements) return;
   if(randomPatternsMode) return;
   LATE( achievement_collection2(it, q); )
 
@@ -529,7 +538,7 @@ EX void achievement_collection2(eItem it, int q) {
  */
 
 EX void achievement_count(const string& s, int current, int prev) {
-  if(cheater) return;
+  if(cheater && !test_achievements) return;
   if(shmup::on) return;
   if(randomPatternsMode) return;
   LATE( achievement_count(s, current, prev); )

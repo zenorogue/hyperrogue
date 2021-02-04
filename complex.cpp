@@ -634,10 +634,10 @@ struct info {
         if(!inv::on || !inv::usedForbidden)
 #endif
           achievement_gain_once("PRINCESS1");
-        princess::saved = true;
-        princess::everSaved = true;
+        changes.value_set(princess::saved, true);
+        changes.value_set(princess::everSaved, true);
         if(inv::on && !princess::reviveAt)
-          princess::reviveAt = gold(NO_LOVE);
+          changes.value_set(princess::reviveAt, gold(NO_LOVE));
         items[itSavedPrincess]++;
         }
       if(newdist == OUT_OF_PRISON && princess::challenge) {
