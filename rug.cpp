@@ -356,25 +356,52 @@ EX void calcparam_rug() {
   cd->radius = cd->scrsize * pconf.scale;
   }
 
-EX void buildTorusRug() {
+#if HDR
+struct clifford_torus {
+  transmatrix T;
+  transmatrix iT;
+  ld xfactor, yfactor;
+  bool flipped;
+  hyperpoint xh, yh;
+  hyperpoint torus_to_s4(hyperpoint t);  
+  hyperpoint actual_to_torus(const hyperpoint& a) {
+    return iT * a;
+    }
+  hyperpoint torus_to_actual(const hyperpoint& t) {
+    return T * t;
+    }
+  clifford_torus();
+  ld get_modelscale() {
+    return hypot_d(2, xh) * xfactor * 2 * M_PI;
+    }
+  ld compute_mx();  
+  };
+#endif
 
-  calcparam_rug();
-  models::configure();
+struct hyperpoint clifford_torus::torus_to_s4(hyperpoint t) {
+  double alpha = -t[0] * 2 * M_PI;
+  double beta = t[1] * 2 * M_PI;
+  
+  ld ax = alpha + 1.124651, bx = beta + 1.214893;
+  return hyperpoint(
+    xfactor * sin(ax), 
+    xfactor * cos(ax), 
+    yfactor * sin(bx),
+    yfactor * cos(bx)
+    );
+  }
 
+clifford_torus::clifford_torus() {
   auto p1 = to_loc(euc::eu.user_axes[0]);
   auto p2 = to_loc(euc::eu.user_axes[1]);
 
-  hyperpoint xh = euc::eumove(p1)*C0-C0;
-  hyperpoint yh = euc::eumove(p2)*C0-C0;
+  xh = euc::eumove(p1)*C0-C0;
+  yh = euc::eumove(p2)*C0-C0;
   if(nonorientable) yh *= 2;
   
-  bool flipped = false; // sqhypot_d(2, xh) < sqhypot_d(2, yh);
+  flipped = false; // sqhypot_d(2, xh) < sqhypot_d(2, yh);
   
   if(flipped) swap(xh, yh);
-  
-  cell *gs = currentmap->gamestart();
-  
-  ld xfactor, yfactor;
   
   ld factor2 = sqhypot_d(2, xh) / sqhypot_d(2, yh);
   ld factor = sqrt(factor2);
@@ -382,36 +409,43 @@ EX void buildTorusRug() {
   yfactor = sqrt(1/(1+factor2));
   xfactor = factor * yfactor;
                                     
-  transmatrix T = build_matrix(xh, yh, C0, C03);  
-  transmatrix iT = inverse(T);
+  T = build_matrix(xh, yh, C0, C03);  
+  iT = inverse(T);
+  }
 
-  if(gwhere == gSphere) 
-    modelscale = hypot_d(2, xh) * xfactor * 2 * M_PI;
-  
-  map<pair<int, int>, rugpoint*> glues;
-  
+ld clifford_torus::compute_mx() {
   ld mx = 0;
   for(int i=0; i<1000; i++)
-    mx = max(mx, hypot(xfactor, yfactor * sin(i)) / (1-yfactor * cos(i)));
-
+    mx = max(mx, hypot(xfactor, yfactor * sin(i)) / (1-yfactor * cos(i)));    
   println(hlog, "mx = ", mx);
+  return mx;
+  }
+
+EX void buildTorusRug() {
+
+  calcparam_rug();
+  models::configure();
   
+  clifford_torus ct;
+
+  if(gwhere == gSphere) 
+    modelscale = ct.get_modelscale();
+  
+  cell *gs = currentmap->gamestart();  
+  map<pair<int, int>, rugpoint*> glues;
+  
+  ld mx = ct.compute_mx();
+    
   auto addToruspoint = [&] (hyperpoint h) {
     auto r = addRugpoint(shiftless(C0), 0);
     hyperpoint onscreen;
-    shiftpoint h1 = gmatrix[gs] * T * h;
+    shiftpoint h1 = gmatrix[gs] * ct.torus_to_actual(h);
     applymodel(h1, onscreen);
     r->x1 = onscreen[0];
     r->y1 = onscreen[1];
-
-    double alpha = -h[0] * 2 * M_PI;
-    double beta = h[1] * 2 * M_PI;
-    
-    ld ax = alpha + 1.124651, bx = beta + 1.214893;
-    ld x = xfactor * sin(ax), y = xfactor * cos(ax), z = yfactor * sin(bx), t = yfactor * cos(bx);
     
     if(1) {
-      hyperpoint hp = hyperpoint(x, y, z, t);
+      hyperpoint hp = ct.torus_to_s4(h);
       
       USING_NATIVE_GEOMETRY;
       
@@ -419,7 +453,7 @@ EX void buildTorusRug() {
       
       if(!sphere) {
         /* stereographic projection to get Euclidean conformal torus */
-        hp /= (t+1);
+        hp /= (hp[3]+1);
         hp /= mx;
         #if MAXMDIM >= 4
         hp[3] = 1;
@@ -448,15 +482,15 @@ EX void buildTorusRug() {
   
   ld rmd = rugmax;
   
-  hyperpoint sx = iT * (currentmap->adj(gs, 0)*C0-C0)/rmd;
-  hyperpoint sy = iT * (currentmap->adj(gs, 1)*C0-C0)/rmd;
+  hyperpoint sx = ct.iT * (currentmap->adj(gs, 0)*C0-C0)/rmd;
+  hyperpoint sy = ct.iT * (currentmap->adj(gs, 1)*C0-C0)/rmd;
   
   for(int leaf=0; leaf<(nonorientable ? 2 : 1); leaf++)
   for(cell *c: currentmap->allcells()) {
         
-    hyperpoint h = iT * calc_relative_matrix(c, gs, C0) * C0;
+    hyperpoint h = ct.iT * calc_relative_matrix(c, gs, C0) * C0;
     
-    if(leaf) h[flipped ? 0 : 1] += .5;
+    if(leaf) h[ct.flipped ? 0 : 1] += .5;
     
     rugpoint *rugarr[32][32];
     for(int yy=0; yy<=rugmax; yy++)
