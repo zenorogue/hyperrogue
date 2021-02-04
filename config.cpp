@@ -674,7 +674,7 @@ EX void initConfig() {
   param_custom(vid.binary_width, "binary tiling width", menuitem_binary_width, 'v');
  
   addsaver(vid.particles, "extra effects", 1);
-  param_i(vid.framelimit, "frame limit", 75);
+  param_i(vid.framelimit, "frame limit", 999);
   addsaver(vid.xres, "xres");
   addsaver(vid.yres, "yres");
   param_i(vid.fsize, "font size");
@@ -1139,7 +1139,7 @@ EX void loadNewConfig(FILE *f) {
 EX void loadConfig() {
  
   DEBB(DF_INIT, ("load config"));
-  vid.xres = 9999; vid.yres = 9999; vid.framelimit = 75;
+  vid.xres = 9999; vid.yres = 9999; vid.framelimit = 999;
   FILE *f = fopen(conffile, "rt");
   if(f) {
     int err;
