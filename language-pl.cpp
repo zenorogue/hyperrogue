@@ -6272,9 +6272,6 @@ S("Useless in Euclidean geometry.", "Bezużyteczne w geometrii euklidesowej.")
 S("Not implemented for spherical geometry. Please tell me if you really want this.",
   "Nie zaimplementowane dla geometrii sferycznej. Jeśli bardzo tego chcesz, powiedz.")
 
-// Hypersian Rug (NOT USED ANYMORE)
-// S("This makes sense only in hyperbolic or Torus geometry.", "To ma sens tylko w geometrii hiperbolicznej i na torusie.")
-
 // === 10.3 ===
 // ============
 

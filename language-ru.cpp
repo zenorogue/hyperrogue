@@ -6496,9 +6496,6 @@ S("Useless in Euclidean geometry.", "Бесполезно в Евклидово�
 S("Not implemented for spherical geometry. Please tell me if you really want this.",
   "Не реализовано для сферической геометрии. Напиши мне, если очень хочешь.")
  
-// Hypersian Rug
-S("This makes sense only in hyperbolic or Torus geometry.", "Имеет смысл только в гиперболической/тор геометрии.")
-
 S("score: %1", "Очки: %1")
 S("kills: %1", "Убийства: %1")
   
