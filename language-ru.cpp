@@ -6811,7 +6811,7 @@ S("A tasty byproduct of the Jelly Revolution.",
   "Вкусный побочный продукт Желейное Революции.")
  
 Orb("Phasing", "Фазы")
-S("This orb lets you pass through walls (one cell wide), and also through as long as they will not attack you in transit.",
+S("This orb lets you pass through walls (one cell wide), and also through monsters, as long as they will not attack you in transit.",
   "Эта сфера позволяет проходить сквозь стены (ширины в одну клетку), если вас в пути не атакуют.")
  
 S("You cannot attack Jellies in their wall form!", "Вы не можете атаковать Желе в форме стен!")

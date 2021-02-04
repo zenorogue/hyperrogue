@@ -6744,7 +6744,7 @@ S("A tasty byproduct of the Jelly Revolution.",
   "Chutný vedlejší produkt Rosolové revoluce.")
 
 Orb("Phasing", "Fázování")
-S("This orb lets you pass through walls (one cell wide), and also through as long as they will not attack you in transit.",
+S("This orb lets you pass through walls (one cell wide), and also through monsters, as long as they will not attack you in transit.",
   "Tato Sféra ti umožòuje procházet zdmi (o tlouš ce jednoho políèka), a také netvory, pokud na tebe pøitom nemohou zaútoèit.")
 
 S("You cannot attack Jellies in their wall form!", "Na Rosoly nemùžeš útoèit, když jsou v podobì zdi!")
