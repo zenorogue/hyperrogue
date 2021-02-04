@@ -862,7 +862,7 @@ auto hook =
     rti_id.clear();
     for(auto &ch: current_history) ch.clear();
     })
-+ addHook(hooks_config, 100, [] {
++ addHook(hooks_configfile, 100, [] {
     addsaver(racing::race_advance, "race_advance");
     addsaver(racing::race_angle, "race_angle");
     addsaver(racing::ghosts_to_show, "race_ghosts_to_show");

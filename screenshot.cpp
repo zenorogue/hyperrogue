@@ -233,7 +233,7 @@ int read_args() {
 
 auto ah = addHook(hooks_args, 0, read_args);
 #endif
-auto ah2 = addHook(hooks_config, 100, [] {
+auto ah2 = addHook(hooks_configfile, 100, [] {
   addsaver(shot::shotx, "shotx");
   addsaver(shot::shoty, "shoty");
   addsaverenum(shot::format, "shotsvg");

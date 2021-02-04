@@ -1047,7 +1047,7 @@ EX namespace models {
     add_all(vid.rug_config, "rug_", "rug-");
     }
 
-  auto hookArg = addHook(hooks_args, 100, readArgs) + addHook(hooks_config, 100, add_model_config);
+  auto hookArg = addHook(hooks_args, 100, readArgs) + addHook(hooks_configfile, 100, add_model_config);
   #endif  
   }
 

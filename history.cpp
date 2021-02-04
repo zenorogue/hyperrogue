@@ -698,7 +698,7 @@ EX namespace history {
     history::path_for_lineanimation.clear();
     history::saved_ends = 0;
     history::includeHistory = false;
-    }) + addHook(hooks_config, 0, [] {
+    }) + addHook(hooks_configfile, 0, [] {
 
     addsaver(autobandhistory, "include history"); // check!
     param_f(lvspeed, "lvspeed", "lineview speed");

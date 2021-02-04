@@ -2101,7 +2101,7 @@ EX void show3D() {
   dialog::display();
   }
 
-EX int config3 = addHook(hooks_config, 100, [] {
+EX int config3 = addHook(hooks_configfile, 100, [] {
   param_f(vid.eye, "eyelevel", 0)
     ->editable(-5, 5, .1, "eye level", "", 'E')
     ->set_extra([] {
