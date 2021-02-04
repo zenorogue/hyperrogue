@@ -736,6 +736,13 @@ EX shiftmatrix face_the_player(const shiftmatrix V) {
   if(hybri) return V * zpush(cos(ptick(750)) * cgi.plevel / 16);
   transmatrix dummy; /* used only in prod anyways */
   if(nonisotropic) return shiftless(spin_towards(unshift(V), dummy, C0, 2, 0));
+  #if CAP_VR
+  if(vrhr::enabled) {
+    shiftpoint h = tC0(V);    
+    hyperpoint uh = unshift(h);
+    return shiftless(rspintox(uh) * xpush(hdist0(uh)) * cspin(0, 2, 90*degree));
+    }
+  #endif
   return rgpushxto0(tC0(V));
   }
 
