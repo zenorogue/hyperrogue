@@ -431,6 +431,9 @@ extern cellwalker cwt;
 EX eLand getPrizeLand(cell *c IS(cwt.at)) {
   eLand l = c->land;
   if(isElemental(l)) l = laElementalWall;
+  if(isHaunted(l)) l = laHaunted;
+  if(l == laMercuryRiver) l = laTerracotta;
+  if(l == laWarpSea) l = laWarpCoast;
   if(l == laPalace && princess::dist(c) < OUT_OF_PRISON)
     l = laPrincessQuest;
   return l;
