@@ -2256,7 +2256,7 @@ EX void reverse_transparent_walls() {
 EX void set_vr_sphere() {
   in_vr_sphere = false;
   #if CAP_VR
-  in_vr_sphere = vrhr::rendering() && among(pmodel, mdDisk, mdBall, mdHyperboloid, mdHalfplane, mdHemisphere);
+  in_vr_sphere = vrhr::rendering() && among(pmodel, mdDisk, mdBall, mdHyperboloid, mdHalfplane, mdHemisphere) && sphere;
   if(in_vr_sphere) {
     hyperpoint a, b;
     applymodel(shiftless(point3(0, 0, 1)), a);
