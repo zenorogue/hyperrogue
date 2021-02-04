@@ -3306,7 +3306,7 @@ Orb("Empathy", "Empatie")
 S(" %1", " %1")
 S(", %1", ", %1")
 
-S(  "This Orb lets your allies to share your Orb powers.\n\n"
+S(  "This Orb lets your allies share your Orb powers.\n\n"
     "The following Orbs are affected:",
 
     "Tato Sféra ti umožňuje dělit se o moc tvých Sfér s kamarády.\n\n"
@@ -6566,7 +6566,7 @@ S("keep shape", "udržovat tvar")
 S("texture mode", "texturový mód")
 
 S(
-  "This mode lets you to change the floor tesselation easily -- "
+  "This mode lets you change the floor tesselation easily -- "
   "select 'paint a new texture' and draw like in a Paint program. "
   "The obtained pattern can then be easily changed to another geometry, "
   "or saved.\n\n"

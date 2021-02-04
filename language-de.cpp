@@ -3098,7 +3098,7 @@ Orb("Empathy", "der Empathie")
 S(" %1", " %1") // ???
 S(", %1", ", %1") // ???
 
-S("This Orb lets your allies to share your Orb powers.\n\n"
+S("This Orb lets your allies share your Orb powers.\n\n"
   "The following Orbs are affected:",
 
   "Dieser Orb erlaubt es deinen Verbündeten deine Orbkräfte zu nutzen.\n\n"

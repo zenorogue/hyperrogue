@@ -3241,7 +3241,7 @@ Orb("Empathy", "Empatii")
 S(" %1", " %1")
 S(", %1", ", %1")
 
-S(  "This Orb lets your allies to share your Orb powers.\n\n"
+S(  "This Orb lets your allies share your Orb powers.\n\n"
     "The following Orbs are affected:",
 
     "Ta sfera pozwala Ci dzielić się mocami Sfer z przyjaciółmi.\n\n"
@@ -6407,7 +6407,7 @@ S("keep shape", "trzymaj kształt")
 S("texture mode", "tryb tekstury")
 
 S(
-  "This mode lets you to change the floor tesselation easily -- "
+  "This mode lets you change the floor tesselation easily -- "
   "select 'paint a new texture' and draw like in a Paint program. "
   "The obtained pattern can then be easily changed to another geometry, "
   "or saved.\n\n"

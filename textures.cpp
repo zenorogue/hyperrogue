@@ -1229,7 +1229,7 @@ void showMagicMenu() {
   }
 
 string texturehelp = 
-  "This mode lets you to change the floor tesselation easily -- "
+  "This mode lets you change the floor tesselation easily -- "
   "select 'paint a new texture' and draw like in a Paint program. "
   "The obtained pattern can then be easily changed to another geometry, "
   "or saved.\n\n"

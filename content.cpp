@@ -671,7 +671,7 @@ ITEM( '*', 0x8080FF, "White Dove Feather", itWindstone, IC_TREASURE, ZERO, RESER
     "This feather is truly beautiful and strong."
     )
 ITEM( 'o', 0xC00060, "Orb of Empathy", itOrbEmpathy, IC_ORB, ZERO | IF_SHMUPLIFE, RESERVED, osFriend, 
-    "This Orb lets your allies to share your Orb powers.\n\n"
+    "This Orb lets your allies share your Orb powers.\n\n"
     "The following Orbs are affected:"
     )
 ITEM( '>', 0x0000FF, "strong wind", itStrongWind, IC_NAI, ZERO, RESERVED, osNone, 
