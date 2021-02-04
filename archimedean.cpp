@@ -393,7 +393,7 @@ void archimedean_tiling::compute_geometry() {
   
   /* compute the geometry */
   inradius.resize(N+1); inradius[N] = 0;
-  circumradius.resize(N);
+  circumradius.resize(N+1); circumradius[N] = 0;
   alphas.resize(N);
   ld elmin = 0, elmax = hyperbolic ? 10 : sphere ? M_PI : 1;
   
