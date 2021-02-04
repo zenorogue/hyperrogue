@@ -26,6 +26,8 @@ template<class T> int isize(const T& x) { return x.size(); }
 
 // language generator
 
+std::string current_language;
+
 const char *escape(std::string s, const std::string& dft);
 
 template<class T> struct dictionary {
@@ -36,7 +38,7 @@ template<class T> struct dictionary {
       m.emplace(s, std::move(val));
       }
     else if (val != it->second) {
-      printf("// #warning Two translations for %s\n", escape(s, s));
+      printf("// #warning Two translations for %s [%s]\n", escape(s, s), current_language.c_str());
       }
     }
   T& operator [] (const std::string& s) { return m[s]; }
@@ -136,7 +138,9 @@ const char *escape(std::string s, const std::string& dft) {
 std::set<std::string> nothe;
 std::set<std::string> plural;
 
+
  void langPL() {
+  current_language = "PL";
   static std::pair<const char *, const char *> ds[] = {
     #define S(a,b) { a, b },
     #define N(a,b,c,d,e,f)
@@ -153,9 +157,11 @@ std::set<std::string> plural;
     };
   for(auto&& elt : ds) d[1].add(elt.first, elt.second);
   for(auto&& elt : ns) nouns[1].add(elt.first, elt.second);
+  current_language = "-";
 }
 
 void langTR() {
+  current_language = "TR";
   static std::pair<const char *, const char *> ds[] = {
     #define S(a,b) { a, b },
     #define N(a,b,c,d,e,f)
@@ -172,9 +178,11 @@ void langTR() {
     };
   for(auto&& elt : ds) d[2].add(elt.first, elt.second);
   for(auto&& elt : ns) nouns[2].add(elt.first, elt.second);
+  current_language = "-";
   }
 
 void langCZ() {
+  current_language = "CZ";
   static std::pair<const char *, const char *> ds[] = {
     #define S(a,b) { a, b },
     #define N(a,b,c,d,e,f)
@@ -191,9 +199,11 @@ void langCZ() {
     };
   for(auto&& elt : ds) d[3].add(elt.first, elt.second);
   for(auto&& elt : ns) nouns[3].add(elt.first, elt.second);
+  current_language = "-";
   }
 
 void langRU() {
+  current_language = "RU";
   static std::pair<const char *, const char *> ds[] = {
     #define S(a,b) { a, b },
     #define N(a,b,c,d,e,f)
@@ -210,9 +220,11 @@ void langRU() {
     };
   for(auto&& elt : ds) d[4].add(elt.first, elt.second);
   for(auto&& elt : ns) nouns[4].add(elt.first, elt.second);
+  current_language = "-";
   }
 
 void langDE() {
+  current_language = "DE";
   static std::pair<const char *, const char *> ds[] = {
     #define S(a,b) { a, b },
     #define N(a,b,c,d,e)
@@ -229,9 +241,11 @@ void langDE() {
     };
   for(auto&& elt : ds) d[5].add(elt.first, elt.second);
   for(auto&& elt : ns) nouns[5].add(elt.first, elt.second);
+  current_language = "-";
   }
 
 void langPT() {
+  current_language = "PT";
   static std::pair<const char *, const char *> ds[] = {
     #define S(a,b) { a, b },
     #define N(a,b,c,d,e)
@@ -248,6 +262,7 @@ void langPT() {
     };
   for(auto&& elt : ds) d[6].add(elt.first, elt.second);
   for(auto&& elt : ns) nouns[6].add(elt.first, elt.second);
+  current_language = "-";
   }
 
 int completeness[NUMLAN];
@@ -261,16 +276,26 @@ void compute_completeness(const T& dict)
       s.insert(elt.first);
   
   for(auto&& elt : s) {
-    std::string mis = "", mis1 = "";
+    std::string mis = "", mis1 = "", exist_in = "";
+    bool in_important = false;
     for(int i=1; i<NUMLAN; i++) if(dict[i].count(elt) == 0) {
       std::string which = d[i]["EN"];
-      if(which != "TR" && which != "DE" && which != "PT-BR")
-        mis += which;
+      if(which != "TR" && which != "DE" && which != "PT-BR" && which != "RU")
+        mis += which + " ";
       else
-        mis1 += which;
+        mis1 += which + " ";
       }
-    if(mis != "")
-      printf("// #warning Missing [%s/%s]: %s\n", mis.c_str(), mis1.c_str(), escape(elt, "?"));
+    else {
+      std::string which = d[i]["EN"];
+      if(which != "PT-BR" && which != "TR" && which != "DE") 
+        in_important = true;
+      exist_in += which + " ";
+      }
+    if(mis != "") mis.pop_back();
+    if(mis1 != "") mis1.pop_back();
+    if(exist_in != "") exist_in.pop_back();
+    if(in_important && mis != "")
+      printf("// #warning Missing [%s : %s] from [%s]: %s\n", mis.c_str(), mis1.c_str(), exist_in.c_str(), escape(elt, "?"));
 
     completeness[0]++;
     for(int i=1; i<NUMLAN; i++) if(dict[i].count(elt)) completeness[i]++;
