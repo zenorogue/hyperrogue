@@ -3031,16 +3031,18 @@ EX int read_config_args() {
   }
 
 EX int read_param_args() {
-  auto pos = args().find("=");
+  const string& s = arg::args();
+  auto pos = s.find("=");
   if(pos == string::npos) return 1;
-  string name = args().substr(0, pos);
-  string value = args().substr(pos+1);
+  string name = s.substr(0, pos);
+  string value = s.substr(pos+1);
   PHASEFROM(2);
   if(!params.count(name))  {
     println(hlog, "parameter unknown: ", name);
     exit(1);
     }
   params[name]->load_from(value);
+  return 0;
   }
 
 // mode changes:
