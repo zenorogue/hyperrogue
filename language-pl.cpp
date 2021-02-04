@@ -3918,8 +3918,6 @@ S("next page", "kolejna strona")
 // new multiplayer
 // ---------------
 
-S("shoot'em up / multiplayer / input", "strzelanka / wielu graczy / sterowanie")
-
 S("Two players cannot move/attack the same location!", "Dwóch graczy nie może celować w to samo miejsce!")
 S("Cannot move into the current location of another player!", "Nie możesz wejść na miejsce innego gracza!")
 S("Players cannot get that far away!", "Gracze nie mogą się tak oddalać!")

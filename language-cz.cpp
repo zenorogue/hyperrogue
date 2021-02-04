@@ -4002,8 +4002,6 @@ S("next page", "další stránka")
 
 // new multiplayer
 
-S("shoot'em up and multiplayer", "střílečka / více hráčů")
-
 S("Two players cannot move/attack the same location!", "Dva hráči nemohou zacílovat stejnou lokaci!")
 S("Cannot move into the current location of another player!", "Nemůžeš vstoupit na políčko obsazené jiným hráčem!")
 S("Players cannot get that far away!", "Hráči se nemohou vzdálit tak daleko!")

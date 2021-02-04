@@ -4039,8 +4039,6 @@ S("next page", "следующая страница")
 // new multiplayer
 // ---------------
 
-S("shoot'em up and multiplayer", "стрельба / игроки")
-
 S("Two players cannot move/attack the same location!", "Два игрока не могут ходить в одну клетку!")
 S("Cannot move into the current location of another player!", "Нельзя пойти в клетку, занятую другим игроком!")
 S("Players cannot get that far away!", "Игроки не могут так сильно отдаляться друг от друга!")
