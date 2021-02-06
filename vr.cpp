@@ -232,6 +232,44 @@ EX transmatrix hmd_mvp, hmd_pre, hmd_mv;
 
 EX transmatrix sm;
 
+EX int ui_xmin, ui_ymin, ui_xmax, ui_ymax;
+
+EX reaction_t change_ui_bounds;
+
+EX void set_ui_bounds() {
+  ui_xmin = 0;
+  ui_ymin = 0;
+  ui_xmax = current_display->xsize;
+  ui_ymax = current_display->ysize;  
+  if(change_ui_bounds)
+    change_ui_bounds();
+  }
+
+EX void size_and_draw_ui_box() {
+  if(!vrhr::active()) return;
+  if(!vrhr::in_menu()) return;
+
+  vrhr::set_ui_bounds();
+  color_t col = 0x000000C0;
+  current_display->next_shader_flags = 0;
+  dynamicval<eModel> m(pmodel, mdPixel);
+  
+  vrhr::in_vr_ui([&] {
+    glhr::color2(col);
+    glhr::set_depthtest(false);
+    vector<glvertex> vs;
+    vs.emplace_back(glhr::makevertex(ui_xmin, ui_ymin, 0));
+    vs.emplace_back(glhr::makevertex(ui_xmax, ui_ymin, 0));
+    vs.emplace_back(glhr::makevertex(ui_xmax, ui_ymax, 0));
+    vs.emplace_back(glhr::makevertex(ui_xmin, ui_ymin, 0));
+    vs.emplace_back(glhr::makevertex(ui_xmin, ui_ymax, 0));
+    vs.emplace_back(glhr::makevertex(ui_xmax, ui_ymax, 0));
+    glhr::current_vertices = NULL;
+    glhr::vertices(vs);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    });
+  }
+
 vr_rendermodel *get_render_model(string name) {
   for(auto& m: vrdata.models)
     if(m->name == name)
@@ -664,7 +702,7 @@ vector<analog_action_data> aads = {
   };
 
 EX bool always_show_hud = false;
-EX bool in_actual_menu() { return !(cmode & (sm::NORMAL | sm::DRAW)); }
+EX bool in_actual_menu() { return (cmode & sm::VR_MENU) || !(cmode & (sm::NORMAL | sm::DRAW)); }
 EX bool in_menu() { return always_show_hud || in_actual_menu(); }
 
 vector<set_data> sads = {
@@ -832,26 +870,43 @@ EX ld ui_size = 2;
 const ld ui_size_unit = 0.001;
 #endif
 
+struct vr_eye_settings {
+  dynamicval<int> vx, vy;
+  dynamicval<ld> xmin, ymin, xmax, ymax;
+  
+  vr_eye_settings() :
+    vx(vid.xres, vrdata.xsize),
+    vy(vid.yres, vrdata.ysize),
+    xmin(current_display->xmin, 0),
+    ymin(current_display->ymin, 0),
+    xmax(current_display->xmax, 1),
+    ymax(current_display->ymax, 1)
+    { }    
+  
+  void use(int i) {
+    glBindFramebuffer( GL_FRAMEBUFFER, vrdata.eyes[i]->m_nRenderFramebufferId );
+    glViewport(0, 0, vrdata.xsize, vrdata.ysize );
+    calcparam();
+    }
+  
+  };
+
 EX void in_vr_ui(reaction_t what) {
   
   resetbuffer rb;
   if(!state) return;
 
-  int xsi = current_display->xsize;
-  int ysi = current_display->ysize;
+  int ui_xmed = (ui_xmin + ui_xmax) / 2;
+  int ui_ymed = (ui_ymin + ui_ymax) / 2;
   state = 2;
 
   for(int i=0; i<2; i++) {
-    dynamicval<int> vx(vid.xres, vrdata.xsize);
-    dynamicval<int> vy(vid.yres, vrdata.ysize);
     E4;
-    auto& ey = vrdata.eyes[i];
-    glBindFramebuffer( GL_FRAMEBUFFER, ey->m_nRenderFramebufferId );
-    glViewport(0, 0, vrdata.xsize, vrdata.ysize );
-    calcparam();
+    vr_eye_settings ey;
+    ey.use(i);
     glhr::set_depthtest(false);
     hmd_mvp = Id;
-    hmd_mvp = xpush(-xsi/2) * ypush(-ysi/2) * hmd_mvp;
+    hmd_mvp = xpush(-ui_xmed) * ypush(-ui_ymed) * hmd_mvp;
     transmatrix Sca = Id;
     Sca[0][0] *= ui_size * ui_size_unit;
     Sca[1][1] *= -ui_size * ui_size_unit;
@@ -862,6 +917,8 @@ EX void in_vr_ui(reaction_t what) {
     hmd_mvp = vrdata.proj[i] * inverse(vrdata.eyepos[i]) * hmd_mvp;
     reset_projection();
     current_display->set_all(0, 0);
+    current_display->xcenter = 0;
+    current_display->ycenter = 0;
     what();
     }
   state = 1;
@@ -994,13 +1051,8 @@ EX void render() {
 
       if(i != 2) {
   
-        dynamicval<int> vx(vid.xres, vrdata.xsize);
-        dynamicval<int> vy(vid.yres, vrdata.ysize);
-    
-        auto& ey = vrdata.eyes[i];
-        
-        glBindFramebuffer( GL_FRAMEBUFFER, ey->m_nRenderFramebufferId );
-        glViewport(0, 0, vrdata.xsize, vrdata.ysize );
+        vr_eye_settings ey;
+        ey.use(i);
         glhr::set_depthtest(false);
         glhr::set_depthtest(true);
         glhr::set_depthwrite(false);
@@ -1357,13 +1409,9 @@ EX void submit() {
       dynamicval<ld> ms(sightranges[geometry], 100);
 
       for(int e=0; e<2; e++) {
-        dynamicval<int> vx(vid.xres, vrdata.xsize);
-        dynamicval<int> vy(vid.yres, vrdata.ysize);
+        vr_eye_settings ey;
+        ey.use(e);
         E4;
-        auto& ey = vrdata.eyes[e];
-        glBindFramebuffer( GL_FRAMEBUFFER, ey->m_nRenderFramebufferId );
-        glViewport(0, 0, vrdata.xsize, vrdata.ysize );
-        calcparam();
 
         hmd_mvp = vrdata.proj[e] * inverse(vrdata.eyepos[e]) * sm * hmd_at * vrdata.pose_matrix[i] * sm * Id;
         hmd_pre = Id;

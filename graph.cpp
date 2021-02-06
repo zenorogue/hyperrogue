@@ -5108,29 +5108,7 @@ EX void gamescreen(int _darken) {
 #endif
 
   #if CAP_VR
-  
-  if(vrhr::active() && vrhr::in_menu()) {
-    int xsi = current_display->xsize;
-    int ysi = current_display->ysize;
-    color_t col = 0x000000C0;
-    current_display->next_shader_flags = 0;
-    dynamicval<eModel> m(pmodel, mdPixel);
-    
-    vrhr::in_vr_ui([&] {
-      glhr::color2(col);
-      glhr::set_depthtest(false);
-      vector<glvertex> vs;
-      vs.emplace_back(glhr::makevertex(0, 0, 0));
-      vs.emplace_back(glhr::makevertex(xsi, 0, 0));
-      vs.emplace_back(glhr::makevertex(xsi, ysi, 0));
-      vs.emplace_back(glhr::makevertex(0, 0, 0));
-      vs.emplace_back(glhr::makevertex(0, ysi, 0));
-      vs.emplace_back(glhr::makevertex(xsi, ysi, 0));
-      glhr::current_vertices = NULL;
-      glhr::vertices(vs);
-      glDrawArrays(GL_TRIANGLES, 0, 6);
-      });
-    }
+  vrhr::size_and_draw_ui_box();  
   #endif
   }
 
@@ -5200,6 +5178,7 @@ namespace sm {
   static const int DIALOG_STRICT_X = 32768; // do not interpret dialog clicks outside of the X region
   static const int EXPANSION = (1<<16);
   static const int HEXEDIT = (1<<17);
+  static const int VR_MENU = (1<<18); // always show the menu in VR
   }
 #endif
 
