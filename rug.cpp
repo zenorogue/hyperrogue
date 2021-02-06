@@ -445,9 +445,8 @@ EX void buildTorusRug() {
     r->y1 = onscreen[1];
     
     if(1) {
-      hyperpoint hp = ct.torus_to_s4(h);
-      
       USING_NATIVE_GEOMETRY;
+      hyperpoint hp = ct.torus_to_s4(h);
       
       /* spherical coordinates are already good, otherwise... */
       
@@ -464,6 +463,8 @@ EX void buildTorusRug() {
 
       if(hyperbolic) 
         hp = perspective_to_space(hp, 1, gcHyperbolic);
+      
+      r->native = hp;
       }
         
     r->valid = true;
