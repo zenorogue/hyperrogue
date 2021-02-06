@@ -1488,6 +1488,14 @@ EX void add_debug(cell *c) {
   }
 #endif
 
+EX void start_thurston() {
+  stop_game();
+  resetModes();
+  start_game();
+  pushScreen(showStartMenu);
+  pushScreen(racing::thurston_racing);
+  }
+
 #if !CAP_RACING
 EX always_false on;
 #endif

@@ -3924,6 +3924,21 @@ EX namespace halloween {
       items[itOrbShell] += 5;
       }
     }
+
+  EX void start_all() {
+      popScreenAll();
+      resetModes('g');
+      stampbase = ticks;
+      if(!sphere) {
+        stop_game();
+        specialland = laHalloween;
+        set_geometry(gSphere);
+        start_game();
+        pconf.alpha = 999;
+        pconf.scale = 998;
+        }
+      }
+
 EX }
 
 // ... also includes the Ivory Tower

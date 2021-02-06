@@ -1439,6 +1439,29 @@ string make_help() {
     );
   }
 
+EX void crystal_knight_help() {  
+  gamescreen(1);    
+  dialog::init();
+  
+  dialog::addHelp(XLAT(
+    "This is a representation of four-dimensional geometry. Can you find the Holy Grail in the center of the Round Table?\n\n"
+    "In 'Knight of the 16-Cell Table', each cell has 8 adjacent cells, "
+    "which correspond to 8 adjacent points in the four-dimensional grid. The Round Table has the shape of a 16-cell.\n\n"
+    "In 'Knight of the 3-Spherical Table', it is the same map, but double bitruncated. The Round Table has the shape of a hypersphere.\n\n"
+    ));
+
+  dialog::addItem(XLAT("let me understand how the coordinates work"), 'e');
+  dialog::add_action([] { cheater = true; view_coordinates = true; compass_probability = 1; restart_game(); popScreenAll(); });
+
+  dialog::addItem(XLAT("thanks, I need no hints (achievement)"), 't');
+  dialog::add_action([] { view_coordinates = false; compass_probability = 0; restart_game(); popScreenAll(); });
+
+  dialog::addItem(XLAT("more about this geometry..."), 'm');
+  dialog::add_action([] { popScreenAll(); pushScreen(show); });
+  
+  dialog::display();
+  }
+
 EX void show() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);  

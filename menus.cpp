@@ -518,6 +518,125 @@ EX void show_chaos() {
   dialog::addBack();
   dialog::display();
   }
+
+EX void mode_higlights() {
+  gamescreen(3);
+  dialog::init(XLAT("highlights & achievements"));
+  
+  dialog::addBigItem(XLAT("Space Rocks"), 'r');
+  dialog::add_action(dialog::add_confirmation([] {
+    popScreenAll();
+    stop_game();
+    resetModes();
+    specialland = laAsteroids;
+    set_geometry(gKleinQuartic);
+    set_variation(eVariation::bitruncated);
+    shmup::on = true;
+    start_game();
+    }));
+  dialog::addInfo(XLAT("classic game except hyperbolic"));
+  dialog::extend();
+
+  dialog::addBigItem(XLAT("Racing in Thurston geometries"), 't'-96);
+  dialog::add_action(dialog::add_confirmation(racing::start_thurston));
+  dialog::addInfo(XLAT("race through a maze in exotic 3D geometry!"));
+  dialog::extend();
+
+  dialog::addBigItem(XLAT1("Halloween"), 'Z');
+  dialog::add_action(dialog::add_confirmation(halloween::start_all));
+  dialog::addInfo(XLAT("Halloween mini-game"));
+  dialog::extend();
+
+  dialog::addBigItem(XLAT1("heptagonal mode"), 'H');
+  dialog::add_action(dialog::add_confirmation([] {
+    popScreenAll();
+    resetModes('7');
+    start_game();
+    clearMessages();
+    welcomeMessage();
+    }));
+  dialog::addInfo(XLAT("can you find the Heptagonal Grail?"));
+  dialog::extend();
+
+  dialog::addBreak(100);
+  dialog::addBigItem(XLAT1("other achievements:"), 0);
+  dialog::addItem(XLAT("General Euclid"), 'e');
+  dialog::add_action(dialog::add_confirmation([] {
+    popScreenAll();
+    resetModes();
+    set_geometry(gEuclid);
+    firstland = specialland = laMirrorOld;
+    start_game();
+    clearMessages();
+    welcomeMessage();
+    }));
+
+  dialog::addItem(XLAT("Worm of the World"), 'w');
+  dialog::add_action(dialog::add_confirmation([] {
+    popScreenAll();
+    resetModes();
+    set_geometry(gZebraQuotient);
+    firstland = specialland = laDesert;
+    start_game();
+    clearMessages();
+    welcomeMessage();
+    }));
+  
+  if(hiitemsMax(itHolyGrail) || cheater || autocheat) {  
+    dialog::addItem(XLAT("Knight of the 16-Cell Table"), '1');
+    dialog::add_action(dialog::add_confirmation([] {
+      popScreenAll();
+      resetModes();
+      crystal::set_crystal(8);
+      firstland = specialland = laCamelot;
+      start_game();
+      clearMessages();
+      welcomeMessage();
+      pushScreen(crystal::crystal_knight_help);
+      }));
+  
+    dialog::addItem(XLAT("Knight of the 3-Spherical Table"), '3');
+    dialog::add_action(dialog::add_confirmation([] {
+      popScreenAll();
+      resetModes();
+      crystal::set_crystal(8);
+      set_variation(eVariation::bitruncated);
+      set_variation(eVariation::bitruncated);
+      firstland = specialland = laCamelot;
+      start_game();
+      clearMessages();
+      welcomeMessage();
+      pushScreen(crystal::crystal_knight_help);
+      }));
+    }
+  else {
+    dialog::addItem("(locked until you find a Holy Grail)", 0);
+    }
+
+  dialog::addBreak(100);
+  dialog::addBigItem(XLAT1("some cool visualizations"), 0);
+  dialog::addItem(XLAT("Emerald Mine in {5,3,4}"), '5');
+  dialog::add_action(dialog::add_confirmation([] {
+    popScreenAll();
+    resetModes();
+    specialland = laEmerald;
+    set_geometry(gSpace534);
+    check_cgi();
+    cgi.require_basics();
+    cgi.require_shapes();
+    fieldpattern::field_from_current();
+    set_geometry(gFieldQuotient);
+    int p = 2;
+    for(;; p++) { currfp.Prime = p; currfp.force_hash = 0x72414D0C; if(!currfp.solve()) break; }
+    start_game();
+    clearMessages();
+    welcomeMessage();
+    }));
+
+  dialog::addBreak(100);
+  dialog::addBack();
+  dialog::display();
+  }  
   
 EX void showChangeMode() {
   gamescreen(3);
@@ -568,6 +687,9 @@ EX void showChangeMode() {
 #endif
 
   dialog::addBreak(50);
+
+  dialog::addItem(XLAT("highlights & achievements"), 'h');
+  dialog::add_action_push(mode_higlights);
   
   dialog::addBack();
   dialog::display();
@@ -867,19 +989,8 @@ EX void showStartMenu() {
       if(uni == 's') 
         multi::configure();
       }
-    else if(uni == 'Z') {
-      popScreenAll();
-      resetModes('g');
-      stampbase = ticks;
-      if(!sphere) {
-        stop_game();
-        specialland = laHalloween;
-        set_geometry(gSphere);
-        start_game();
-        pconf.alpha = 999;
-        pconf.scale = 998;
-        }
-      }
+    else if(uni == 'Z') 
+      halloween::start_all();
 #if CAP_RACING && MAXMDIM >= 4
     else if(uni == 'r' - 96) {
       popScreenAll();
@@ -900,13 +1011,8 @@ EX void showStartMenu() {
       vid.use_smart_range = 1;
       vid.smart_range_detail = 3;
       }
-    else if(uni == 't' - 96) {
-      stop_game();
-      resetModes();
-      start_game();
-      pushScreen(showStartMenu);
-      pushScreen(racing::thurston_racing);
-      }
+    else if(uni == 't' - 96) 
+      racing::start_thurston();
 #endif
 #if CAP_TOUR
     else if(uni == 't') {

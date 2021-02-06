@@ -136,6 +136,10 @@ EX namespace dialog {
     add_key_action(key, action);
     }
   
+  EX void extend() {
+    items.back().key = items[isize(items)-2].key;
+    }
+  
   EX void add_action(const reaction_t& action) {
     add_key_action_adjust(lastItem().key, action);
     }
