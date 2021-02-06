@@ -80,7 +80,7 @@ EX bool available() {
   /* would need a completely different implementation */
   if(vrhr::active() && vrhr::eyes == vrhr::eEyes::equidistant) {
     if(reflect_val) return false;
-    if(sol || stretch::in()) return false;
+    if(sol || stretch::in() || sl2) return false;
     }
   #endif
   if(noGUI) return false;
