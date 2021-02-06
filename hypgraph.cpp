@@ -1715,6 +1715,8 @@ EX hyperpoint vertical_vector() {
   return C0;
   }
 
+EX bool down_is_forward;
+
 EX void spinEdge(ld aspd) { 
 
   #if CAP_VR
@@ -1724,13 +1726,15 @@ EX void spinEdge(ld aspd) {
     vrhr::be_33(T);
     
     transmatrix V = T * get_view_orientation();
-
+    
     hyperpoint h = inverse(V) * C0;
     if(!prod) {
       V = V * rgpushxto0(h);
       }
     
-    V = cspin(2, 1, 90 * degree) * V;
+    int dir = down_is_forward ? 0 : 1;
+
+    V = cspin(2, dir, 90 * degree) * V;
 
     if(1) {
       dynamicval<eGeometry> g(geometry, gSphere);
@@ -1747,7 +1751,7 @@ EX void spinEdge(ld aspd) {
     
     vrhr::be_33(V);
 
-    V = cspin(1, 2, 90 * degree) * V;
+    V = cspin(dir, 2, 90 * degree) * V;
     V = inverse(T) * V;
     if(!prod) V = V * gpushxto0(h);
     get_view_orientation() = V;
