@@ -1284,6 +1284,7 @@ EX void edit_sightrange() {
         "Sight range affects the gameplay, and monsters act iff they are visible. Monster generation takes this into account."
         )
       );
+      });
     }
   else {
     add_edit(sightrange_bonus);
