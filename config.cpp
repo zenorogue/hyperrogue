@@ -164,7 +164,7 @@ struct bool_setting : public setting {
   bool dft;
   void add_as_saver();
   reaction_t switcher;
-  void editable(string cap, char key ) { menu_item_name = cap; default_key = key; } 
+  bool_setting* editable(string cap, char key ) { menu_item_name = cap; default_key = key; return this; } 
   virtual bool affects(void *v) override { return v == value; }
   virtual void show_edit_option(char key) override;
   virtual cld get_cld() { return *value ? 1 : 0; }
@@ -309,7 +309,7 @@ void float_setting::show_edit_option(char key) {
     add_to_changed(this);
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
     if(sets) sets();
-    if(reaction) reaction();
+    if(reaction) dialog::reaction = reaction;
     });
   }
 
@@ -320,7 +320,7 @@ void int_setting::show_edit_option(char key) {
     add_to_changed(this);
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
     if(sets) sets();
-    if(reaction) reaction();
+    if(reaction) dialog::reaction = reaction;
     });
   }
 
