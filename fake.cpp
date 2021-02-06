@@ -22,6 +22,8 @@ EX namespace fake {
   EX int ordered_mode = 0;
   
   EX bool in() { return geometry == gFake; }
+
+  EX void on_dim_change() { pmap->on_dim_change(); }
   
   /** like in() but takes slided arb into account */
   EX bool split() { return in() || arb::in_slided(); }

@@ -130,6 +130,17 @@ EX namespace euc {
     cell *camelot_center;
 
     map<gp::loc, struct cdata> eucdata;
+    
+    void compute_tmatrix() {
+      shifttable = get_shifttable();
+      tmatrix.resize(S7);
+      for(int i=0; i<S7; i++) 
+        tmatrix[i] = eumove(shifttable[i]);
+      }
+    
+    void on_dim_change() override {
+      compute_tmatrix();
+      }
 
     vector<cell*> toruscells;  
     vector<cell*>& allcells() override { 
@@ -144,10 +155,7 @@ EX namespace euc {
       }
 
     hrmap_euclidean() {
-      shifttable = get_shifttable();
-      tmatrix.resize(S7);
-      for(int i=0; i<S7; i++) 
-        tmatrix[i] = eumove(shifttable[i]);
+      compute_tmatrix();
       camelot_center = NULL;
       build_torus3(geometry);    
       #if CAP_IRR

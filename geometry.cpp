@@ -975,6 +975,7 @@ EX void switch_always3() {
       if(pmodel == mdDisk) pmodel = mdPerspective;
       swapmatrix(View);
       callhooks(hooks_swapdim);
+      for(auto m: allmaps) m->on_dim_change();
       if(cgflags & qIDEAL && vid.texture_step < 32)
         vid.texture_step = 32;
 #if CAP_RACING
@@ -991,6 +992,7 @@ EX void switch_always3() {
       if(pmodel == mdPerspective) pmodel = mdDisk;
       swapmatrix(View);
       callhooks(hooks_swapdim);
+      for(auto m: allmaps) m->on_dim_change();
       }
     View = models::rotmatrix() * View;
 #endif

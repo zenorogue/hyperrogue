@@ -19,6 +19,7 @@ struct hrmap {
   virtual ~hrmap() { };
   virtual vector<cell*>& allcells();
   virtual void verify() { }
+  virtual void on_dim_change() { }
   virtual void link_alt(const cellwalker& hs) { }
   virtual void generateAlts(heptagon *h, int levs = default_levs(), bool link_cdata = true);
   heptagon *may_create_step(heptagon *h, int direction) {
