@@ -5293,7 +5293,9 @@ EX void drawscreen() {
   SDL_UpdateRect(s, 0, 0, vid.xres, vid.yres);
 #endif
 
+#if CAP_VR
   vrhr::handoff();
+#endif
   
 //printf("\ec");
   }
