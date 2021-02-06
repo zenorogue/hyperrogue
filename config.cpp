@@ -1272,7 +1272,7 @@ EX void edit_sightrange() {
   if(vid.use_smart_range)
     add_edit(WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3);
   else if(WDIM == 3) {
-    dialog::addSelItem(XLAT("3D sight range for the fog effect"), fts(sightranges[geometry]), 'R');
+    dialog::addSelItem(XLAT("3D sight range for the fog effect"), fts(sightranges[geometry]), 'r');
     dialog::add_action([] {
     dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("3D sight range"),
       (pmodel == mdGeodesic && sol) ? solhelp() : XLAT(
@@ -1289,7 +1289,7 @@ EX void edit_sightrange() {
   else {
     add_edit(sightrange_bonus);
     if(GDIM == 3) {
-      dialog::addSelItem(XLAT("3D sight range for the fog effect"), fts(sightranges[geometry]), 'R');
+      dialog::addSelItem(XLAT("3D sight range for the fog effect"), fts(sightranges[geometry]), 'r');
       dialog::add_action([] {
         dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("fog effect"), "");
         });
@@ -1297,47 +1297,47 @@ EX void edit_sightrange() {
     }
   #if CAP_SOLV
   if(pmodel == mdGeodesic && sol) {
-    dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(sn::solrange_xy), 'X');
+    dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(sn::solrange_xy), 'x');
     dialog::add_action([] {
       dialog::editNumber(sn::solrange_xy, 0.01, 200, 0.1, 50, XLAT("max difference in X/Y coordinates"), solhelp()), dialog::scaleLog();
       });
-    dialog::addSelItem(XLAT("max difference in Z coordinate"), fts(sn::solrange_z), 'Z');
+    dialog::addSelItem(XLAT("max difference in Z coordinate"), fts(sn::solrange_z), 'z');
     dialog::add_action([] {
       dialog::editNumber(sn::solrange_z, 0, 20, 0.1, 6, XLAT("max difference in Z coordinates"), solhelp());
       });
     }
   #endif
   if(pmodel == mdGeodesic && sl2) {
-    dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(slr::range_xy), 'X');
+    dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(slr::range_xy), 'x');
     dialog::add_action([] {
       dialog::editNumber(slr::range_xy, 0, 10, 0.5, 4, XLAT("max difference in X/Y coordinates"), "");
       });
-    dialog::addSelItem(XLAT("steps"), its(slr::steps), 'Z');
+    dialog::addSelItem(XLAT("steps"), its(slr::steps), 'z');
     dialog::add_action([] {
       dialog::editNumber(slr::steps, 0, 50, 1, 10, "", "");
       });
     }
   if(vid.use_smart_range && WDIM == 2) {
-    dialog::addBoolItem_action(XLAT("area-based range"), vid.smart_area_based, 'A');
+    dialog::addBoolItem_action(XLAT("area-based range"), vid.smart_area_based, 'a');
     }
   if(vid.use_smart_range == 0 && allowChangeRange() && WDIM == 2) {
-    dialog::addSelItem(XLAT("generation range bonus"), its(genrange_bonus), 'O');
+    dialog::addSelItem(XLAT("generation range bonus"), its(genrange_bonus), 'o');
     dialog::add_action([] () { genrange_bonus = sightrange_bonus; doOvergenerate(); });
-    dialog::addSelItem(XLAT("game range bonus"), its(gamerange_bonus), 'S');
+    dialog::addSelItem(XLAT("game range bonus"), its(gamerange_bonus), 's');
     dialog::add_action([] () { gamerange_bonus = sightrange_bonus; doOvergenerate(); });
     }
   if(WDIM == 3 && !vid.use_smart_range) {
-    dialog::addBoolItem_action(XLAT("sloppy range checking"), vid.sloppy_3d, 'S');
+    dialog::addBoolItem_action(XLAT("sloppy range checking"), vid.sloppy_3d, 's');
     }
   if(GDIM == 3 && !vid.use_smart_range) {
-    dialog::addSelItem(XLAT("limit generation"), fts(extra_generation_distance), 'E');
+    dialog::addSelItem(XLAT("limit generation"), fts(extra_generation_distance), 'e');
     dialog::add_action([] {
       dialog::editNumber(extra_generation_distance, 0, 999, 0.5, 999, XLAT("limit generation"), 
         "Cells over this distance will not be generated, but they will be drawn if they are already generated and in the sight range."
         );
       });
     }
-  add_cells_drawn('C');
+  add_cells_drawn('c');
   dialog::display();
   }
 

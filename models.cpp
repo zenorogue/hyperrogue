@@ -691,7 +691,7 @@ EX namespace models {
     gamescreen(1);
     dialog::init("models & projections");
     
-    if(WDIM == 2 && !euclid) {
+    if(GDIM == 2 && !euclid) {
       dialog::addItem(XLAT(hyperbolic ? "Gans model" : "orthographic projection"), '1');
       dialog::add_action([] { if(rug::rugged) rug::close(); pconf.alpha = 999; pconf.scale = 998; pconf.xposition = pconf.yposition = 0; popScreen(); });
       dialog::addItem(XLAT(hyperbolic ? "Poincaré model" : "stereographic projection"), '2');
@@ -714,7 +714,7 @@ EX namespace models {
           });
         }
       }
-    else if(WDIM == 2 && euclid) {
+    else if(GDIM == 2 && euclid) {
       auto zoom_to = [] (ld s) {
         pconf.xposition = pconf.yposition = 0;
         ld maxs = 0;
@@ -737,7 +737,7 @@ EX namespace models {
       dialog::addItem(XLAT("zoom 0.5x"), '3');
       dialog::add_action([zoom_to] { zoom_to(.5); });
       }
-    else if(WDIM == 3) {
+    else if(GDIM == 3) {
       auto& ysh = (WDIM == 2 ? vid.camera : vid.yshift);
       dialog::addItem(XLAT("first-person perspective"), '1');
       dialog::add_action([&ysh] { ysh = 0; vid.sspeed = 0; popScreen(); } );
@@ -746,8 +746,13 @@ EX namespace models {
       dialog::addItem(XLAT("third-person perspective"), '3');
       dialog::add_action([&ysh] { ysh = 1; vid.sspeed = 0; popScreen(); } );
       }
+    if(WDIM == 2) {
+      dialog::addItem(XLAT("toggle full 3D graphics"), 'f');
+      dialog::add_action([] { geom3::switch_fpp(); popScreen(); });
+      }
     dialog::addItem(XLAT("advanced projections"), 'a');
     dialog::add_action_push(model_menu);
+    menuitem_sightrange('r');
     dialog::addBack();
     dialog::display();
     }
