@@ -736,6 +736,15 @@ EX namespace models {
       dialog::add_action([zoom_to] { zoom_to(1); });
       dialog::addItem(XLAT("zoom 0.5x"), '3');
       dialog::add_action([zoom_to] { zoom_to(.5); });
+      if(quotient) {
+        dialog::addItem(XLAT("cylinder/donut view"), 'u');
+        dialog::add_action([] {
+          if(rug::rugged) pushScreen(rug::show);
+          else {
+            pconf.alpha = 1, pconf.scale = 1; if(!rug::rugged) rug::init(); popScreen(); 
+            }
+          });
+        }
       }
     else if(GDIM == 3) {
       auto& ysh = (WDIM == 2 ? vid.camera : vid.yshift);
