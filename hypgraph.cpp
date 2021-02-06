@@ -1738,6 +1738,7 @@ EX void spinEdge(ld aspd) {
       vid.always3 = false;
       geom3::apply_always3();
       V = gpushxto0(V*C0) * V;
+      fixmatrix(V);
       if(b) {
         vid.always3 = b;
         geom3::apply_always3();
