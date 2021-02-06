@@ -518,7 +518,7 @@ EX void drawStats() {
     rows = 0;
     while((buttonsize = minsize - vid.killreduction)) {
       columns = colspace / buttonsize;
-      rows = rowspace / buttonsize;
+      rows = rowspace / buttonsize; if(!rows) return;
       int coltaken = 0;
       for(int z=0; z<4; z++) {
         if(z == 2 && !portrait) {

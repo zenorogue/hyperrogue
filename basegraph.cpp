@@ -118,7 +118,15 @@ EX int getnext(const char* s, int& i) {
   }
 
 #if CAP_SDLTTF
-TTF_Font *font[256];
+const int max_font_size = 288;
+TTF_Font* font[max_font_size+1];
+
+void fix_font_size(int& size) {
+  if(size < 1) size = 1;
+  if(size > max_font_size) size = max_font_size;
+  if(size > 72) size &=~ 3;
+  if(size > 144) size &=~ 7;
+  }
 #endif
 
 #if CAP_SDL
@@ -142,6 +150,7 @@ EX color_t& qpixel(SDL_Surface *surf, int x, int y) {
 EX string fontpath = ISWEB ? "sans-serif" : HYPERPATH "DejaVuSans-Bold.ttf";
 
 void loadfont(int siz) {
+  fix_font_size(siz);
   if(!font[siz]) {
     font[siz] = TTF_OpenFont(fontpath.c_str(), siz);
     // Destination set by ./configure (in the GitHub repository)
@@ -160,6 +169,7 @@ void loadfont(int siz) {
 
 #if !ISFAKEMOBILE && !ISANDROID & !ISIOS
 int textwidth(int siz, const string &str) {
+  fix_font_size(siz);
   if(isize(str) == 0) return 0;
 
 #if CAP_SDLTTF
@@ -357,7 +367,8 @@ struct glfont_t {
   float tx0[CHARS], tx1[CHARS], ty0[CHARS], ty1[CHARS];
   };
 
-glfont_t *glfont[256];
+const int max_glfont_size = 72;
+glfont_t *glfont[max_glfont_size+1];
 
 typedef Uint16 texturepixel;
 
@@ -441,12 +452,14 @@ void init_glfont(int size) {
 
 #else
     SDL_Surface *txt;
+    int siz = size;
+    fix_font_size(siz);
     if(ch < 128) {
       str[0] = ch;
-      txt = TTF_RenderText_Blended(font[size], str, white);
+      txt = TTF_RenderText_Blended(font[siz], str, white);
       }
     else {
-      txt = TTF_RenderUTF8_Blended(font[size], natchars[ch-128], white);
+      txt = TTF_RenderUTF8_Blended(font[siz], natchars[ch-128], white);
       }
     if(txt == NULL) continue;
 #if CAP_CREATEFONT
@@ -481,7 +494,7 @@ void init_glfont(int size) {
 
 int gl_width(int size, const char *s) {
   int gsiz = size;
-  if(size > vid.fsize || size > 72) gsiz = 72;
+  if(size > vid.fsize || size > max_glfont_size) gsiz = max_glfont_size;
 
 #if CAP_FIXEDSIZE
   gsiz = CAP_FIXEDSIZE;
@@ -514,7 +527,7 @@ glhr::textured_vertex charvertex(int x1, int y1, ld tx, ld ty) {
 
 bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, int align) {
   int gsiz = size;
-  if(size > vid.fsize || size > 72) gsiz = 72;
+  if(size > vid.fsize || size > max_glfont_size) gsiz = max_glfont_size;
 
 #if CAP_FIXEDSIZE
   gsiz = CAP_FIXEDSIZE;
@@ -584,7 +597,7 @@ EX void resetGL() {
   DEBBI(DF_INIT | DF_GRAPH, ("reset GL"))
   callhooks(hooks_resetGL);
 #if CAP_GLFONT
-  for(int i=0; i<128; i++) if(glfont[i]) {
+  for(int i=0; i<max_glfont_size; i++) if(glfont[i]) {
     delete glfont[i];
     glfont[i] = NULL;
     }
@@ -702,6 +715,7 @@ EX bool displaystr(int x, int y, int shift, int size, const char *str, color_t c
   
   col.r >>= darken; col.g >>= darken; col.b >>= darken;
 
+  fix_font_size(size);
   loadfont(size);
 
   SDL_Surface *txt = ((vid.antialias & AA_FONT)?TTF_RenderUTF8_Blended:TTF_RenderUTF8_Solid)(font[size], str, col);
