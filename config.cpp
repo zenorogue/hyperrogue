@@ -18,6 +18,8 @@ EX function<bool()> auto_restrict;
 
 EX void add_to_changed(struct setting *f);
 
+EX bool return_false() { return false; }
+
 #if HDR
 struct supersaver {
   string name;
@@ -43,6 +45,7 @@ struct setting {
   reaction_t reaction;
   char default_key;
   cld last_value;
+  bool is_editable;
   virtual bool available() { if(restrict) return restrict(); return true; }
   virtual bool affects(void *v) { return false; }
   virtual void add_as_saver() {}
@@ -53,7 +56,7 @@ struct setting {
     return parameter_name + "|" + config_name + "|" + menu_item_name + "|" + help_text;
     }
   virtual cld get_cld() = 0;
-  setting() { restrict = auto_restrict; }
+  setting() { restrict = auto_restrict; is_editable = false; }
   virtual void check_change() {
     cld val = get_cld();
     if(val != last_value) {
@@ -91,6 +94,7 @@ struct list_setting : setting {
   virtual void set_value(int i) = 0;
   vector<pair<string, string> > options;
   list_setting* editable(const vector<pair<string, string> >& o, string menu_item_name, char key) {
+    is_editable = true;
     options = o;
     this->menu_item_name = menu_item_name;
     default_key = key;
@@ -115,6 +119,7 @@ struct float_setting : public setting {
   ld min_value, max_value, step;
   string unit;
   float_setting *editable(ld min_value, ld max_value, ld step, string menu_item_name, string help_text, char key) {
+    is_editable = true;
     this->min_value = min_value;
     this->max_value = max_value;
     this->menu_item_name = menu_item_name;
@@ -136,14 +141,15 @@ struct float_setting : public setting {
 struct int_setting : public setting {
   int *value;
   int dft;
-  int min_value, max_value, step;
+  int min_value, max_value;
+  ld step;
   void add_as_saver();
   function<void(int_setting*)> modify_me;
   int_setting *modif(const function<void(int_setting*)>& r) { modify_me = r; return this; }
   virtual bool affects(void *v) override { return v == value; }
   virtual void show_edit_option(char key) override;
   virtual cld get_cld() { return *value; }
-  int_setting *editable(int min_value, int max_value, int step, string menu_item_name, string help_text, char key) {
+  int_setting *editable(int min_value, int max_value, ld step, string menu_item_name, string help_text, char key) {
     this->min_value = min_value;
     this->max_value = max_value;
     this->menu_item_name = menu_item_name;
@@ -164,7 +170,10 @@ struct bool_setting : public setting {
   bool dft;
   void add_as_saver();
   reaction_t switcher;
-  bool_setting* editable(string cap, char key ) { menu_item_name = cap; default_key = key; return this; } 
+  bool_setting* editable(string cap, char key ) {
+    is_editable = true;
+    menu_item_name = cap; default_key = key; return this; 
+    } 
   virtual bool affects(void *v) override { return v == value; }
   virtual void show_edit_option(char key) override;
   virtual cld get_cld() { return *value ? 1 : 0; }
@@ -302,6 +311,10 @@ void float_setting::load_from(const string& s) {
   anims::animate_parameter(*value, s, reaction);
   }
 
+void non_editable() {
+  dialog::addHelp("Warning: editing this value through this menu may not work correctly");
+  }
+
 void float_setting::show_edit_option(char key) {
   if(modify_me) modify_me(this);
   dialog::addSelItem(XLAT(menu_item_name), fts(*value) + unit, key);
@@ -310,6 +323,7 @@ void float_setting::show_edit_option(char key) {
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
     if(sets) sets();
     if(reaction) dialog::reaction = reaction;
+    if(!is_editable) dialog::extra_options = non_editable;
     });
   }
 
@@ -321,6 +335,7 @@ void int_setting::show_edit_option(char key) {
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
     if(sets) sets();
     if(reaction) dialog::reaction = reaction;
+    if(!is_editable) dialog::extra_options = non_editable;
     });
   }
 
@@ -457,6 +472,7 @@ custom_setting* param_custom(T& val, const string& s, function<void(char)> menui
   u->custom_value = [&val] () { return (int) val; };
   u->custom_affect = [&val] (void *v) { return &val == v; };
   u->default_key = key;
+  u->is_editable = true;
   auto f = &*u;
   params[s] = std::move(u);
   return f;  
@@ -700,15 +716,15 @@ EX void initConfig() {
   param_b(vid.relative_window_size, "window_relative", true)
   ->editable("specify relative window size", 'g');
 
-  param_custom(vid.xres, "xres", [] (char ch) {}, 0);
-  param_custom(vid.yres, "yres", [] (char ch) {}, 0);
+  param_custom(vid.xres, "xres", [] (char ch) {}, 0)->restrict = return_false;
+  param_custom(vid.yres, "yres", [] (char ch) {}, 0)->restrict = return_false;
   
   param_i(vid.fullscreen_x, "fullscreen_x", 1280)
   -> editable(640, 3840, 640, "fullscreen resolution to use (X)", "", 'x')
   -> set_sets([] { dialog::bound_low(640); });
   
   param_i(vid.fullscreen_y, "fullscreen_y", 1024)
-  -> editable(480, 2160, 480, "fullscreen resolution to use (X)", "", 'x')
+  -> editable(480, 2160, 480, "fullscreen resolution to use (Y)", "", 'x')
   -> set_sets([] { dialog::bound_low(480); });
 
   param_i(vid.window_x, "window_x", 1280)
@@ -724,7 +740,7 @@ EX void initConfig() {
   -> set_sets([] { dialog::bound_low(.1); });
 
   param_f(vid.window_rel_y, "window_rel_y", .9)
-  -> editable(.1, 1, .1, "screen size percentage to use (X)", "", 'x')
+  -> editable(.1, 1, .1, "screen size percentage to use (Y)", "", 'x')
   -> set_sets([] { dialog::bound_low(.1); });
 
   param_b(vid.darkhepta, "mark heptagons", false);
