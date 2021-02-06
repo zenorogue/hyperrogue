@@ -89,8 +89,9 @@ namespace spiral {
     velx=1; vely=1;
     bool dosave = false;
 
-    bool saveGL = vid.usingGL;
-    if(saveGL) switchGL(); //  { vid.usingGL = false; setvideomode(); }
+    bool saveGL = vid.wantGL;
+    vid.wantGL = false;
+    apply_screen_settings();
 
     while(true) {
 
@@ -138,7 +139,8 @@ namespace spiral {
     
     breakloop:
     quickmap.clear();
-    if(saveGL) switchGL(); // { vid.usingGL = true; setvideomode(); }
+    vid.wantGL = saveGL;
+    apply_screen_settings();
     }
 
   }

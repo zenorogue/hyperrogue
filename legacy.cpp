@@ -51,10 +51,10 @@ void loadOldConfig(FILE *f) {
   if(err == 4) {
     vid.scale = a; pconf.alpha = c; vid.sspeed = d;
     }
-  err=fscanf(f, "%d%d%d%d%d%d%d", &vid.wallmode, &vid.monmode, &vid.axes, &musicvolume, &vid.framelimit, &gl, &vid.antialias);
+  err=fscanf(f, "%d%d%d%d%d%d%d", &vid.wallmode, &vid.monmode, &vid.axes, &musicvolume, &vid.framelimit, &gl, &vid.want_antialias);
   vid.usingGL = gl;
-  if(vid.antialias == 0) vid.antialias = AA_VERSION | AA_LINES | AA_LINEWIDTH;
-  if(vid.antialias == 1) vid.antialias = AA_NOGL | AA_VERSION | AA_LINES | AA_LINEWIDTH | AA_FONT;
+  if(vid.want_antialias == 0) vid.want_antialias = AA_VERSION | AA_LINES | AA_LINEWIDTH;
+  if(vid.want_antialias == 1) vid.want_antialias = AA_NOGL | AA_VERSION | AA_LINES | AA_LINEWIDTH | AA_FONT;
   double jps = vid.joypanspeed;
   err=fscanf(f, "%d%d%d%lf%d%d", &vid.joyvalue, &vid.joyvalue2, &vid.joypanthreshold, &jps, &aa, &vid.flashtime);
   vid.joypanspeed = jps;

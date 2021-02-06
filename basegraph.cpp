@@ -8,8 +8,6 @@
 #include "hyper.h"
 namespace hr {
 
-EX int fontscale = 100;
-
 #if HDR
 /** configuration of the current view */
 struct display_data {
@@ -1035,48 +1033,103 @@ EX void displayColorButton(int x, int y, const string& name, int key, int align,
 ld textscale() { 
   return vid.fsize / (current_display->radius * cgi.crossf) * (1+pconf.alpha) * 2;
   }
-  
-EX bool setfsize = true;
 
-EX bool vsync_off;
-
-EX void do_setfsize() {
+EX void compute_fsize() {
+  println(hlog, "compute_fsize() called");
   dual::split_or_do([&] {
-    vid.fsize = min(vid.yres * fontscale/ 3200, vid.xres * fontscale/ 4800), setfsize = false;
+    if(vid.relative_font)
+      vid.fsize = min(vid.yres * vid.fontscale/ 3200, vid.xres * vid.fontscale/ 4800);
+    else
+      vid.fsize = vid.abs_fsize;
+    println(hlog, "set fsize to ", vid.fsize);
+    if(vid.fsize < 6) vid.fsize = 6;
     });
   }
 
-EX void disable_vsync() {
-#if CAP_SDL && CAP_GL && !ISMOBWEB
-  SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 0 ); 
-#endif
+EX bool graphics_on;
+
+EX bool want_vsync() {
+  if(vrhr::active())
+    return false;
+  return vid.want_vsync;
   }
+
+EX bool need_to_apply_screen_settings() {
+  if(vid.want_fullscreen != vid.full)
+    return true;
+  if(make_pair(vid.xres, vid.yres) != get_requested_resolution())
+    return true;
+  if(vid.want_antialias != vid.antialias)
+    return true;
+  if(vid.wantGL != vid.usingGL)
+    return true;
+  if(want_vsync() != vid.current_vsync)
+    return true;
+  return false;
+  }
+
+EX void apply_screen_settings() {
+  if(!need_to_apply_screen_settings()) return;
+  if(!graphics_on) return;
+ 
+#if ISANDROID
+  if(vid.full != vid.want_fullscreen)
+    addMessage(XLAT("Reenter HyperRogue to apply this setting"));
+#endif
   
+  SDL_QuitSubSystem(SDL_INIT_VIDEO);
+  graphics_on = false;
+  android_settings_changed();
+  init_graph();
+  if(vid.usingGL) {
+    glhr::be_textured(); glhr::be_nontextured();
+    }
+  }
+
+EX pair<int, int> get_requested_resolution() {
+  if(vid.want_fullscreen && vid.change_fullscr)
+    return { vid.fullscreen_x, vid.fullscreen_y };
+  else if(vid.want_fullscreen)
+    return { vid.xres = vid.xscr, vid.yres = vid.yscr };
+  else if(vid.relative_window_size)
+    return { vid.xscr * vid.window_rel_x + .5, vid.yscr * vid.window_rel_y + .5 };
+  else
+    return { vid.window_x, vid.window_y };
+  }
+
 #if CAP_SDL
 EX void setvideomode() {
 
   DEBBI(DF_INIT | DF_GRAPH, ("setvideomode"));
   
-  if(!vid.full) {
-    if(vid.xres > vid.xscr) vid.xres = vid.xscr * 9/10, setfsize = true;
-    if(vid.yres > vid.yscr) vid.yres = vid.yscr * 9/10, setfsize = true;    
-    }
+  vid.full = vid.want_fullscreen;
   
-  if(setfsize) do_setfsize();
+  tie(vid.xres, vid.yres) = get_requested_resolution();
+    
+  compute_fsize();
 
   int flags = 0;
   
+  vid.antialias = vid.want_antialias;
+    
 #if CAP_GL
+  vid.usingGL = vid.wantGL;
   if(vid.usingGL) {
     flags = SDL_OPENGL | SDL_HWSURFACE;
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
-    if(vsync_off) disable_vsync();
+    vid.current_vsync = want_vsync();
+    if(vid.current_vsync) 
+      SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 1 );
+    else
+      SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 0 ); 
     if(vid.antialias & AA_MULTI) {
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, (vid.antialias & AA_MULTI16) ? 16 : 4);
       }
     }
+#else
+  vid.usingGL = false;
 #endif
 
   int sizeflag = (vid.full ? SDL_FULLSCREEN : SDL_RESIZABLE);
@@ -1103,7 +1156,7 @@ EX void setvideomode() {
   if(vid.full && !s) {
     vid.xres = vid.xscr;
     vid.yres = vid.yscr;
-    do_setfsize();
+    vid.fsize = 10;
     s = s_screen = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | SDL_FULLSCREEN);
     }
 
@@ -1138,7 +1191,80 @@ EX void setvideomode() {
 
 EX bool noGUI = false;
 
-EX void initgraph() {
+#if CAP_SDL
+EX bool sdl_on = false;
+EX int SDL_Init1(Uint32 flags) {
+  if(!sdl_on) {
+    sdl_on = true;
+    return SDL_Init(flags);
+    }
+  else  
+    return SDL_InitSubSystem(flags);
+  }
+#endif
+
+EX void init_font() {
+#if CAP_SDLTTF
+  if(TTF_Init() != 0) {
+    printf("Failed to initialize TTF.\n");
+    exit(2);
+    }
+#endif
+  }
+
+EX void close_font() {
+#if CAP_SDLTTF
+  for(int i=0; i<=max_font_size; i++) if(font[i]) TTF_CloseFont(font[i]);
+  TTF_Quit();
+#endif
+#if CAL_GLFONT
+  for(int i=0; i<=max_glfont_size; i++) if(glfont[i]) delete glfont[i];
+#endif
+  }
+
+EX void init_graph() {
+#if CAP_SDL
+  if (SDL_Init1(SDL_INIT_VIDEO) == -1)
+  {
+    printf("Failed to initialize video.\n");
+    exit(2);
+  }
+  graphics_on = true;
+
+#if ISWEB
+  get_canvas_size();
+#else
+  if(!vid.xscr) {
+    const SDL_VideoInfo *inf = SDL_GetVideoInfo();
+    vid.xscr = vid.xres = inf->current_w;
+    vid.yscr = vid.yres = inf->current_h;
+    }
+#endif
+
+#ifdef CUSTOM_CAPTION  
+  SDL_WM_SetCaption(CUSTOM_CAPTION, CUSTOM_CAPTION);
+#else
+  SDL_WM_SetCaption("HyperRogue " VER, "HyperRogue " VER);
+#endif
+#endif
+  
+#if CAP_SDL
+  setvideomode();
+  if(!s) {
+    printf("Failed to initialize graphics.\n");
+    exit(2);
+    }
+    
+  SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+  SDL_EnableUNICODE(1);
+#endif  
+
+#if ISANDROID
+  vid.full = vid.want_fullscreen;
+#endif
+  }
+
+EX void initialize_all() {
 
   DEBBI(DF_INIT | DF_GRAPH, ("initgraph"));
   
@@ -1157,28 +1283,6 @@ EX void initgraph() {
     return;
     }
 
-#if CAP_SDL
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) == -1)
-  {
-    printf("Failed to initialize video.\n");
-    exit(2);
-  }
-
-#if ISWEB
-  get_canvas_size();
-#else
-  const SDL_VideoInfo *inf = SDL_GetVideoInfo();
-  vid.xscr = vid.xres = inf->current_w;
-  vid.yscr = vid.yres = inf->current_h;
-#endif
-
-#ifdef CUSTOM_CAPTION  
-  SDL_WM_SetCaption(CUSTOM_CAPTION, CUSTOM_CAPTION);
-#else
-  SDL_WM_SetCaption("HyperRogue " VER, "HyperRogue " VER);
-#endif
-#endif
-  
   preparesort();
 #if CAP_CONFIG
   loadConfig();
@@ -1191,26 +1295,12 @@ EX void initgraph() {
 #if CAP_COMMANDLINE
   arg::read(2);
 #endif
+
+  init_graph();
   check_cgi();
   cgi.require_basics();
-
-#if CAP_SDL
-  setvideomode();
-  if(!s) {
-    printf("Failed to initialize graphics.\n");
-    exit(2);
-    }
-    
-  SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-  SDL_EnableUNICODE(1);
-#endif
   
-#if CAP_SDLTTF
-  if(TTF_Init() != 0) {
-    printf("Failed to initialize TTF.\n");
-    exit(2);
-    }
-#endif
+  init_font();
 
 #if CAP_SDLJOY  
   initJoysticks();
@@ -1219,22 +1309,16 @@ EX void initgraph() {
 #if CAP_SDLAUDIO
   initAudio();
 #endif
-    
   }
 
-EX void cleargraph() {
+EX void quit_all() {
   DEBBI(DF_INIT, ("clear graph"));
-#if CAP_SDLTTF
-  for(int i=0; i<256; i++) if(font[i]) TTF_CloseFont(font[i]);
-#endif
-#if CAL_GLFONT
-  for(int i=0; i<128; i++) if(glfont[i]) delete glfont[i];
-#endif
 #if CAP_SDLJOY
   closeJoysticks();
 #endif
 #if CAP_SDL
   SDL_Quit();
+  sdl_on = false;
 #endif
   }
 

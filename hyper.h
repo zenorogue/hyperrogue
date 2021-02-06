@@ -300,7 +300,12 @@ struct videopar {
   
   int linequality;
 
+  bool want_fullscreen;
   bool full;
+  bool change_fullscr;
+  bool relative_window_size;
+  bool want_vsync;
+  bool current_vsync;
   
   int graphglyph; // graphical glyphs
   bool darkhepta;
@@ -310,10 +315,15 @@ struct videopar {
   
   int xscr, yscr;
   
+  int fullscreen_x, fullscreen_y;
+  int window_x, window_y;
+  ld window_rel_x, window_rel_y;
+  
   bool grid;
   bool particles;
   
-  int fsize;
+  bool relative_font;
+  int fsize, abs_fsize, fontscale;
   int flashtime;
   
   int wallmode, monmode, axes, highlightmode;
@@ -322,13 +332,16 @@ struct videopar {
   
   int msgleft, msglimit;
 
+  bool wantGL;
+  int want_antialias;
+  bool fineline;
+  
   bool usingGL;
   int antialias;
   #define AA_NOGL      1
   #define AA_VERSION   2
   #define AA_LINES     4
   #define AA_POLY      8
-  #define AA_LINEWIDTH 16
   #define AA_FONT      32
   #define AA_MULTI     64
   #define AA_MULTI16   128 // not configurable

@@ -1575,7 +1575,7 @@ EX void initAll() {
   firstland0 = firstland;
   
   // initlanguage();
-  initgraph();
+  initialize_all();
 #if CAP_SAVE
   loadsave();
   if(IRREGULAR) irr::auto_creator();
@@ -1603,7 +1603,7 @@ EX void finishAll() {
 #endif
   clearMemory();
 #if !ISMOBILE
-  cleargraph();
+  quit_all();
 #endif
   
   achievement_close();  

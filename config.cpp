@@ -476,11 +476,11 @@ EX videopar vid;
 #define DEFAULT_WALLMODE (ISMOBILE ? 3 : 5)
 #define DEFAULT_MONMODE  (ISMOBILE ? 2 : 4)
 
-#if ISANDROID
-#define ANDROID_SETTINGS settingsChanged = true;
-#else
-#define ANDROID_SETTINGS ;
-#endif
+EX void android_settings_changed() {
+  #if ISANDROID
+  settingsChanged = true;
+  #endif
+  }
 
 extern color_t floorcolors[landtypes];
 
@@ -619,7 +619,19 @@ EX void initConfig() {
 
   param_i(vid.msglimit, "message limit", 5);
   param_i(vid.timeformat, "message log time format", 0);
-  param_i(fontscale, "fontscale", 100);
+
+  param_b(vid.relative_font, "relative_font", true)
+  -> editable("set relative font size", 'r')
+  -> set_reaction(compute_fsize);
+  param_i(vid.fontscale, "fontscale", 100)
+  -> editable(25, 400, 10, "font scale", "", 'b')
+  -> set_reaction(compute_fsize)
+  -> set_sets([] { dialog::bound_low(0); });
+
+  param_i(vid.abs_fsize, "fsize", 12)
+  -> editable(1, 72, 1, "font size", "", 'b')
+  -> set_reaction(compute_fsize)
+  -> set_sets([] { dialog::bound_low(0); });
 
   param_i(vid.mobilecompasssize, "mobile compass size", 0); // ISMOBILE || ISPANDORA ? 30 : 0);
   param_i(vid.radarsize, "radarsize size", 120);
@@ -655,8 +667,11 @@ EX void initConfig() {
   
   // basic graphics
   
-  addsaver(vid.usingGL, "usingGL", true);
-  addsaver(vid.antialias, "antialias", AA_NOGL | AA_FONT | (ISWEB ? AA_MULTI : AA_LINES) | AA_LINEWIDTH | AA_VERSION);
+  param_b(vid.wantGL, "usingGL", true)
+  ->editable("openGL mode", 'o');
+  
+  addsaver(vid.want_antialias, "antialias", AA_NOGL | AA_FONT | (ISWEB ? AA_MULTI : AA_LINES) | AA_VERSION);
+  addsaver(vid.fineline, "fineline", true);
   param_f(vid.linewidth, "linewidth", 1);
   addsaver(precise_width, "precisewidth", .5);
   addsaver(perfect_linewidth, "perfect_linewidth", 1);
@@ -664,7 +679,6 @@ EX void initConfig() {
   addsaver(fat_edges, "fat-edges");
   param_f(vid.sspeed, "sspeed", "scrollingspeed", 0);
   param_f(vid.mspeed, "mspeed", "movement speed", 1);
-  addsaver(vid.full, "fullscreen", false);
   addsaver(vid.aurastr, "aura strength", ISMOBILE ? 0 : 128);
   addsaver(vid.aurasmoothen, "aura smoothen", 5);
   param_enum(vid.graphglyph, "graphglyph", "graphical items/kills", 1)
@@ -675,9 +689,44 @@ EX void initConfig() {
  
   addsaver(vid.particles, "extra effects", 1);
   param_i(vid.framelimit, "frame limit", 999);
-  addsaver(vid.xres, "xres");
-  addsaver(vid.yres, "yres");
-  param_i(vid.fsize, "font size");
+
+  param_b(vid.want_vsync, "vsync", true)
+  ->editable("vsync", 'v');
+  
+  param_b(vid.want_fullscreen, "fullscreen", false)
+  ->editable("fullscreen mode", 'f');
+  param_b(vid.change_fullscr, "fullscreen_change", false)
+  ->editable("use specific fullscreen resolution", 'g');
+  param_b(vid.relative_window_size, "window_relative", true)
+  ->editable("specify relative window size", 'g');
+
+  param_custom(vid.xres, "xres", [] (char ch) {}, 0);
+  param_custom(vid.yres, "yres", [] (char ch) {}, 0);
+  
+  param_i(vid.fullscreen_x, "fullscreen_x", 1280)
+  -> editable(640, 3840, 640, "fullscreen resolution to use (X)", "", 'x')
+  -> set_sets([] { dialog::bound_low(640); });
+  
+  param_i(vid.fullscreen_y, "fullscreen_y", 1024)
+  -> editable(480, 2160, 480, "fullscreen resolution to use (X)", "", 'x')
+  -> set_sets([] { dialog::bound_low(480); });
+
+  param_i(vid.window_x, "window_x", 1280)
+  -> editable(160, 3840, 160, "window resolution to use (X)", "", 'x')
+  -> set_sets([] { dialog::bound_low(160); });
+
+  param_i(vid.window_y, "window_y", 1024)
+  -> editable(120, 2160, 120, "window resolution to use (Y)", "", 'x')
+  -> set_sets([] { dialog::bound_low(120); });
+
+  param_f(vid.window_rel_x, "window_rel_x", .9)
+  -> editable(.1, 1, .1, "screen size percentage to use (X)", "", 'x')
+  -> set_sets([] { dialog::bound_low(.1); });
+
+  param_f(vid.window_rel_y, "window_rel_y", .9)
+  -> editable(.1, 1, .1, "screen size percentage to use (X)", "", 'x')
+  -> set_sets([] { dialog::bound_low(.1); });
+
   param_b(vid.darkhepta, "mark heptagons", false);
   
   for(auto& lp: linepatterns::patterns) {
@@ -1389,24 +1438,21 @@ EX void show_vector_settings() {
        vid.usingGL ? "" : XLAT("Line width setting is only taken into account in OpenGL."));
      });
 
-  dialog::addSelItem(XLAT("line quality"), its(vid.linequality), 'L');
+  dialog::addSelItem(XLAT("line quality"), its(vid.linequality), 'l');
   dialog::add_action([] {
     dialog::editNumber(vid.linequality, -3, 5, 1, 1, XLAT("line quality"), 
       XLAT("Higher numbers make the curved lines smoother, but reduce the performance."));
     });
 
-  dialog::addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'O');
-  dialog::add_action([] () { 
-    vid.antialias ^= AA_LINEWIDTH; 
-    });
-
-  dialog::addBoolItem("perfect width", perfect_linewidth == 2, 'P');
+  dialog::addBoolItem("perfect width", perfect_linewidth == 2, 'p');
   if(perfect_linewidth == 1) 
     dialog::lastItem().value = XLAT("shots only");
   dialog::add_action([] { perfect_linewidth = (1 + perfect_linewidth) % 3; });
 
-  if(vid.antialias & AA_LINEWIDTH) {
-    dialog::addSelItem("variable width", fts(precise_width), 'M');
+  dialog::addBoolItem_action("finer lines at the boundary", vid.fineline, 'O');
+
+  if(vid.fineline) {
+    dialog::addSelItem("variable width", fts(precise_width), 'm');
     dialog::add_action([] () {
       dialog::editNumber(precise_width, 0, 2, 0.1, 0.5, 
         XLAT("variable width"), XLAT("lines longer than this value will be split into shorter lines, with width computed separately for each of them.")
@@ -1419,11 +1465,11 @@ EX void show_vector_settings() {
   dialog::addBreak(100);
   dialog::addInfo(XLAT("hint: press Alt while testing modes"));
   dialog::addBreak(100);
-  dialog::addBoolItem_action(XLAT("disable shadows"), noshadow, 'F');
-  dialog::addBoolItem_action(XLAT("bright mode"), bright, 'G');
-  dialog::addBoolItem_action(XLAT("colorblind simulation"), cblind, 'H');
+  dialog::addBoolItem_action(XLAT("disable shadows"), noshadow, 'f');
+  dialog::addBoolItem_action(XLAT("bright mode"), bright, 'g');
+  dialog::addBoolItem_action(XLAT("colorblind simulation"), cblind, 'h');
 
-  dialog::addBoolItem_action(XLAT("no fill in neon mode"), neon_nofill, 'N');
+  dialog::addBoolItem_action(XLAT("no fill in neon mode"), neon_nofill, 'n');
 
   dialog::addBreak(50);
   dialog::addBack();
@@ -1436,19 +1482,76 @@ EX void showGraphConfig() {
 
   dialog::init(XLAT("graphics configuration"));
 
+#if !ISIOS && !ISWEB
+  add_edit(vid.want_fullscreen);
+  
+  if(vid.want_fullscreen) {
+    add_edit(vid.change_fullscr);
+    if(vid.change_fullscr)
+      add_edit(vid.fullscreen_x), add_edit(vid.fullscreen_y);
+    else
+      dialog::addBreak(200);
+    }
+  else {
+    add_edit(vid.relative_window_size);
+    if(vid.relative_window_size)
+      add_edit(vid.window_rel_x), add_edit(vid.window_rel_y);
+    else
+      add_edit(vid.window_x), add_edit(vid.window_y);
+    }        
+#endif
+
   #if CAP_GLORNOT
-  dialog::addBoolItem(XLAT("openGL mode"), vid.usingGL, 'o');
+  add_edit(vid.wantGL);  
   #endif
 
-  if(!vid.usingGL)
-    dialog::addBoolItem(XLAT("anti-aliasing"), vid.antialias & AA_NOGL, 'O');
-
-  if(vid.usingGL)
+  if(!vid.usingGL) {
+    dialog::addBoolItem(XLAT("anti-aliasing"), vid.want_antialias & AA_NOGL, 'O');
+    dialog::add_action([] {
+      if(!vid.usingGL)
+        vid.want_antialias ^= AA_NOGL | AA_FONT;
+      });
+    }
+  else {
     dialog::addSelItem(XLAT("anti-aliasing"), 
-      (vid.antialias & AA_POLY) ? "polygons" :
-      (vid.antialias & AA_LINES) ? "lines" :
-      (vid.antialias & AA_MULTI) ? "multisampling" :
+      (vid.want_antialias & AA_POLY) ? "polygons" :
+      (vid.want_antialias & AA_LINES) ? "lines" :
+      (vid.want_antialias & AA_MULTI) ? "multisampling" :
       "NO", 'O');
+    dialog::add_action([] {
+      if(vid.want_antialias & AA_MULTI)
+        vid.want_antialias ^= AA_MULTI;
+      else if(vid.want_antialias & AA_POLY)
+        vid.want_antialias ^= AA_POLY | AA_LINES | AA_MULTI;
+      else if(vid.want_antialias & AA_LINES) 
+        vid.want_antialias |= AA_POLY;
+      else 
+        vid.want_antialias |= AA_LINES;
+      });
+    }
+
+  if(vid.usingGL) {
+    if(vrhr::active())
+      dialog::addInfo(XLAT("(vsync disabled in VR)"));
+    else
+      add_edit(vid.want_vsync);
+    }
+  else
+    dialog::addBreak(100);
+
+  if(need_to_apply_screen_settings()) {
+    dialog::addItem(XLAT("apply changes"), 'A');
+    dialog::add_action(apply_screen_settings);
+    dialog::addBreak(100);
+    }
+  else
+    dialog::addBreak(200);  
+
+  add_edit(vid.relative_font);
+  if(vid.relative_font) 
+    add_edit(vid.fontscale);
+  else
+    add_edit(vid.abs_fsize);
 
   dialog::addSelItem(XLAT("vector settings"), XLAT("width") + " " + fts(vid.linewidth), 'w');
   dialog::add_action_push(show_vector_settings);
@@ -1458,11 +1561,7 @@ EX void showGraphConfig() {
   if(getcstat == 'l') 
     mouseovers = XLAT("Reduce the framerate limit to conserve CPU energy");
   #endif
-
-#if !ISIOS && !ISWEB
-  dialog::addBoolItem(XLAT("fullscreen mode"), (vid.full), 'f');
-#endif
-
+  
   dialog::addSelItem(XLAT("scrolling speed"), fts(vid.sspeed), 'a');
 
   dialog::addSelItem(XLAT("camera movement speed"), fts(camera_speed), 'c');
@@ -1489,8 +1588,6 @@ EX void showGraphConfig() {
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
   
-    if(uni == 'O') uni = 'o', shiftmul = -1;
-    
     char xuni = uni | 96;
   
     if((uni >= 32 && uni < 64) || uni == 'L' || uni == 'C') xuni = uni;
@@ -1507,30 +1604,6 @@ EX void showGraphConfig() {
       XLAT("movement animation speed"),
       XLAT("+5 = move instantly"));
   
-    else if(xuni == 'f') switchFullscreen();
-  
-  #if CAP_GLORNOT
-    else if(xuni == 'o' && shiftmul > 0) switchGL();
-  #endif
-  
-    else if(xuni == 'o' && shiftmul < 0) {
-      if(!vid.usingGL)
-        vid.antialias ^= AA_NOGL | AA_FONT;
-      else if(vid.antialias & AA_MULTI)
-        vid.antialias ^= AA_MULTI;
-      else if(vid.antialias & AA_POLY)
-        vid.antialias ^= AA_POLY | AA_LINES | AA_MULTI;
-      else if(vid.antialias & AA_LINES) 
-        vid.antialias |= AA_POLY;
-      else 
-        vid.antialias |= AA_LINES;
-#if CAP_SDL
-      setvideomode();
-#endif
-      }
-    
-    // if(xuni == 'b') vid.antialias ^= AA_LINEWIDTH;
-   
   #if CAP_FRAMELIMIT    
     else if(xuni == 'l') {
       dialog::editNumber(vid.framelimit, 5, 300, 10, 300, XLAT("framerate limit"), "");
@@ -1545,36 +1618,6 @@ EX void showGraphConfig() {
     };
   }
   
-EX void switchFullscreen() {
-  vid.full = !vid.full;
-#if ISANDROID
-  addMessage(XLAT("Reenter HyperRogue to apply this setting"));
-  ANDROID_SETTINGS
-#endif
-#if CAP_SDL
-  if(true) {
-    vid.xres = vid.full ? vid.xscr : 9999;
-    vid.yres = vid.full ? vid.yscr : 9999;
-    extern bool setfsize;
-    setfsize = true;
-    }
-  setvideomode();
-#endif
-  }
-
-EX void switchGL() {
-  vid.usingGL = !vid.usingGL;
-  if(vid.usingGL) addMessage(XLAT("openGL mode enabled"));
-  if(!vid.usingGL) addMessage(XLAT("openGL mode disabled"));
-  ANDROID_SETTINGS;
-#if CAP_SDL
-  setvideomode();
-  if(vid.usingGL) {
-    glhr::be_textured(); glhr::be_nontextured();
-    }
-#endif
-  }
-
 EX void edit_whatever(char type, int index) {
   if(type == 'f') {
     dialog::editNumber(whatever[index], -10, 10, 1, 0, XLAT("whatever"), 
@@ -1659,14 +1702,6 @@ EX void configureInterface() {
     });
   
   add_edit(vid.msgleft);
-  
-  dialog::addSelItem(XLAT("font scale"), its(fontscale), 'b');
-  dialog::add_action([] {
-    dialog::editNumber(fontscale, 25, 400, 10, 100, XLAT("font scale"), "");
-    const int minfontscale = ISMOBILE ? 50 : 25;
-    dialog::reaction = [] () { setfsize = true; do_setfsize(); };
-    dialog::bound_low(minfontscale);
-    });  
   
   add_edit(glyphsortorder);
   add_edit(vid.graphglyph);
@@ -2576,12 +2611,12 @@ EX void selectLanguageScreen() {
     
     if(uni == '0') {
       vid.language = -1;
-      ANDROID_SETTINGS;
+      android_settings_changed();
       }
 
     else if(uni >= 'a' && uni < 'a'+NUMLAN) {
       vid.language = uni - 'a';
-      ANDROID_SETTINGS;
+      android_settings_changed();
       }
     
     else if(doexiton(sym, uni))
@@ -2846,7 +2881,7 @@ EX int read_config_args() {
 
   if(argis("-c")) { PHASE(1); shift(); conffile = argcs(); }
 // change the configuration from the command line
-  else if(argis("-aa")) { PHASEFROM(2); shift(); vid.antialias = argi(); }
+  else if(argis("-aa")) { PHASEFROM(2); shift(); vid.want_antialias = argi(); apply_screen_settings(); }
   else if(argis("-lw")) { PHASEFROM(2); shift_arg_formula(vid.linewidth); }
   else if(argis("-wm")) { PHASEFROM(2); shift(); vid.wallmode = argi(); }
   else if(argis("-mm")) { PHASEFROM(2); shift(); vid.monmode = argi(); }
@@ -2858,10 +2893,8 @@ EX int read_config_args() {
 
 // non-configurable options
   else if(argis("-vsync_off")) {
-    #if CAP_SDL && CAP_GL
-    vsync_off = true;
-    if(curphase == 3) setvideomode();
-    #endif
+    vid.want_vsync = false;
+    apply_screen_settings();
     }
   else if(argis("-aura")) {
     PHASEFROM(2);
@@ -2923,7 +2956,7 @@ EX int read_config_args() {
     sscanf(argcs(), "%dx%dx%d", &clWidth, &clHeight, &clFont);
     if(clWidth) vid.xres = clWidth;
     if(clHeight) vid.yres = clHeight;
-    if(clFont) vid.fsize = clFont;
+    if(clFont) vid.abs_fsize = clFont, vid.relative_font = true;
     }    
   else if(argis("-msm")) {
     PHASEFROM(2); memory_saving_mode = true;
@@ -2969,8 +3002,8 @@ EX int read_config_args() {
   else if(argis("-msens")) {
     PHASEFROM(2); shift_arg_formula(mouseaim_sensitivity);
     }
-  TOGGLE('o', vid.usingGL, switchGL())
-  TOGGLE('f', vid.full, switchFullscreen())
+  TOGGLE('o', vid.usingGL, apply_screen_settings())
+  TOGGLE('f', vid.want_fullscreen, apply_screen_settings())
   else if(argis("-noshaders")) {
     PHASE(1);
     glhr::noshaders = true; 

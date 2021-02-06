@@ -212,6 +212,14 @@ EX SDL_Joystick* sticks[8];
 EX int numsticks;
 
 EX void initJoysticks() {
+
+  if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) == -1)
+  {
+    printf("Failed to initialize joysticks.\n");
+    numsticks = 0;
+    return;
+  }
+
   DEBB(DF_INIT, ("init joysticks"));
   numsticks = SDL_NumJoysticks();
   if(numsticks > 8) numsticks = 8;
@@ -652,12 +660,17 @@ int cframelimit = 1000;
 
 EX void resize_screen_to(int x, int y) {
   dual::split_or_do([&] {
-    vid.xres = x;
-    vid.yres = y;
     vid.killreduction = 0;
+    if(vid.want_fullscreen) return;
+    if(vid.relative_window_size) {
+      vid.window_rel_x = x * 1. / vid.xscr;
+      vid.window_rel_y = y * 1. / vid.yscr;
+      }
+    else {
+      vid.window_x = x;
+      vid.window_y = y;
+      }
     });
-  extern bool setfsize;
-  setfsize = true;
   setvideomode();
   }
 
@@ -963,7 +976,8 @@ EX void handle_event(SDL_Event& ev) {
       numlock_on = ev.key.keysym.mod & KMOD_NUM;
       if(sym == SDLK_RETURN && (ev.key.keysym.mod & (KMOD_LALT | KMOD_RALT))) {
         sym = 0; uni = 0;
-        switchFullscreen();
+        vid.want_fullscreen = !vid.want_fullscreen;
+        apply_screen_settings();
         }
       }
     

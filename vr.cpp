@@ -755,6 +755,8 @@ EX void start_vr() {
     return;
     }  
   else println(hlog, "VR initialized successfully");
+  
+  apply_screen_settings();
 
   string driver = GetTrackedDeviceString( vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_TrackingSystemName_String );
   string display = GetTrackedDeviceString( vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_SerialNumber_String );
