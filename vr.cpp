@@ -1247,7 +1247,12 @@ EX void show_vr_settings() {
   dialog::add_action_push(show_vr_demos);
 
   
-  dialog::addBoolItem_action(XLAT("VR enabled"), enabled, 'o');
+  dialog::addBoolItem(XLAT("VR enabled"), enabled, 'o');
+  dialog::add_action([] {
+    enabled = !enabled;
+    if(enabled && GDIM == 2 && among(hsm, eHeadset::holonomy, eHeadset::reference))
+      hsm = eHeadset::model_viewing;
+    });
   if(!enabled)
     dialog::addBreak(100);
   else if(failed)
@@ -1257,7 +1262,11 @@ EX void show_vr_settings() {
   
   dialog::addBreak(100);
 
-  add_edit(hsm); add_edit(eyes); add_edit(cscr);
+  add_edit(hsm);   
+  if(enabled && GDIM == 2 && among(hsm, eHeadset::holonomy, eHeadset::reference))
+    dialog::addInfo("(this setting is for 3D geometries only, use 'model viewing' instead)");
+  add_edit(eyes);
+  add_edit(cscr);
   
   dialog::addSelItem(XLAT("absolute unit in meters"), fts(absolute_unit_in_meters), 'a');
   dialog::add_action([] {
