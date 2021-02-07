@@ -667,6 +667,7 @@ EX namespace dialog {
   EX void drawColorDialog() {
     cmode = sm::NUMBER | dialogflags;
     if(cmode & sm::SIDE) gamescreen(0);
+    else emptyscreen();
 
     dcenter = vid.xres/2;
     dwidth = vid.xres;
@@ -875,6 +876,7 @@ EX namespace dialog {
     cmode = sm::NUMBER | dialogflags;
     if(numberdark < DONT_SHOW)
     gamescreen(numberdark);
+    else emptyscreen();
     init(ne.title);
     addInfo(ne.s);
     if(ne.intval && ne.sc.direct == &identity_f)
@@ -1267,6 +1269,7 @@ EX namespace dialog {
     cmode = sm::NUMBER | dialogflags;
     if(numberdark < DONT_SHOW)
     gamescreen(numberdark);
+    else emptyscreen();
     init(ne.title);
     addInfo(view_edited_string());
     addBreak(100);

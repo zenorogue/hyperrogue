@@ -5112,6 +5112,12 @@ EX void gamescreen(int _darken) {
   #endif
   }
 
+EX void emptyscreen() {
+  ptds.clear();
+  ray::in_use = false;
+  drawqueue();
+  }
+
 EX bool nohelp;
 EX bool no_find_player;
 
