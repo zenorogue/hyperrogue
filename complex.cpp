@@ -3887,7 +3887,7 @@ EX namespace halloween {
       }
     else if(items[itTreat] == 2) {
 #if !ISMOBILE
-      addMessage(XLAT("Hint: press 1 2 3 4 to change the projection."));
+      addMessage(XLAT("Hint: press 1 to change the projection."));
 #endif
       }
     else if(items[itTreat] == 3) {
