@@ -218,10 +218,29 @@ string build_getter(string type, string name, int index) {
 EX hookset<void(string&, string&)> hooks_rayshader;
 EX hookset<bool(shared_ptr<raycaster>)> hooks_rayset;
 
+tuple<
+  #if CAP_VR
+  int, vrhr::eEyes, 
+  #endif
+  eGeometry
+  > raycaster_state() {
+  return make_tuple(
+    #if CAP_VR
+    vrhr::state, 
+    vrhr::eyes,
+    #endif
+    geometry
+    );
+  }
+
+decltype(raycaster_state()) saved_state;
+
 void enable_raycaster() {
   using glhr::to_glsl;
-  if(geometry != last_geometry) {
+  auto state = raycaster_state();
+  if(state != saved_state) {
     reset_raycaster();
+    saved_state = state;
     }
   
   wall_offset(centerover); /* so raywall is not empty and deg is not zero */
