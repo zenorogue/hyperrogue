@@ -1612,19 +1612,57 @@ void run() {
     dialog::handleNavigation(sym, uni);
     if(in_menu && sym == 'q' && !ISWEB) exit(0);
     if(sym == '-') {
-      int ax = mousex * 3 / xstart;
-      if(ax > 3) ax = 3;
-      int ay = mousey * 3 / vid.yres;
-      if(ay > 2) ay = 2;
-      int id = ay * 4 + ax;
-      eBringrisMove moves[12] = {
-        bmTurnLeft, bmUp, bmTurnRight, bmPause,
-        bmLeft, bmDrop, bmRight, bmFullDrop,
-        bmNothing, bmDown, bmNothing, bmFullDrop
-        };
-      eBringrisMove mov = moves[id];
-      if((state == tsFalling && !paused) || mov == bmPause)  
-        bringris_action(mov);
+      if(!which_pointer) {
+        int ax = mousex * 3 / xstart;
+        if(ax > 3) ax = 3;
+        int ay = mousey * 3 / vid.yres;
+        if(ay > 2) ay = 2;
+        int id = ay * 4 + ax;
+        eBringrisMove moves[12] = {
+          bmTurnLeft, bmUp, bmTurnRight, bmPause,
+          bmLeft, bmDrop, bmRight, bmFullDrop,
+          bmNothing, bmDown, bmNothing, bmFullDrop
+          };
+        eBringrisMove mov = moves[id];
+        if((state == tsFalling && !paused) || mov == bmPause)  
+          bringris_action(mov);
+        }
+#if CAP_VR
+      else {
+        if(explore)
+          explore = !explore;
+        else if(
+          mousex >= vrhr::ui_xmin && mousex <= vrhr::ui_xmax && 
+          mousey >= vrhr::ui_ymin && mousey <= vrhr::ui_ymax)
+            paused = !paused;
+        else {
+          vrhr::compute_vr_direction(which_pointer);
+          ld r = 1 / sqrt(2);        
+          auto& dir = vrhr::vr_direction;
+          vector<pair<eBringrisMove, hyperpoint> > choices = {
+            {bmLeft, hyperpoint(-1, 0, 0, 0)},
+            {bmRight, hyperpoint(1, 0, 0, 0)},
+            {bmUp, hyperpoint(0, -1, 0, 0)},
+            {bmDown, hyperpoint(0, 1, 0, 0)},
+            {bmTurnLeft, hyperpoint(-r, -r, 0, 0)},
+            {bmTurnRight, hyperpoint(r, -r, 0, 0)},
+            {bmDrop, hyperpoint(-r, r, 0, 0)},
+            {bmFullDrop, hyperpoint(r, r, 0, 0)}
+            };
+          
+          eBringrisMove mov = bmNothing;
+          ld best = 0;
+                    
+          for(auto& b: choices) {
+            ld dot = (dir | b.second);
+            if(dot > best) best = dot, mov = b.first;
+            }
+
+          bringris_action(mov);          
+          }
+        println(hlog, vrhr::vr_direction);
+        }
+#endif
       return;
       }
     
