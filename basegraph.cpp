@@ -597,7 +597,7 @@ EX void resetGL() {
   DEBBI(DF_INIT | DF_GRAPH, ("reset GL"))
   callhooks(hooks_resetGL);
 #if CAP_GLFONT
-  for(int i=0; i<max_glfont_size; i++) if(glfont[i]) {
+  for(int i=0; i<=max_glfont_size; i++) if(glfont[i]) {
     delete glfont[i];
     glfont[i] = NULL;
     }
