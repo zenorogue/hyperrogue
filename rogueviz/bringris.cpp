@@ -1129,9 +1129,15 @@ void draw_all_noray(int zlev) {
 
 void start_new_game();
 
+bool use_equidistant;
+
 void bringris_frame() {
   if(!in_bringris) return;
   ray::want_use = use_raycaster ? 2 : 0;
+  #if CAP_VR
+  vrhr::hsm = explore ? vrhr::eHeadset::holonomy : vrhr::eHeadset::reference;
+  vrhr::eyes = use_equidistant ? vrhr::eEyes::equidistant : vrhr::eEyes::truesim;
+  #endif
   
   int zlev = get_z(centerover);
 
@@ -1156,18 +1162,10 @@ void draw_screen(int xstart, bool show_next) {
   if(state != tsFalling) steps = camera_level - (well_size + 1);
 
   #if CAP_VR
-  if(explore)
-    vrhr::hsm = vrhr::eHeadset::holonomy,
-    vrhr::eyes = vrhr::eEyes::truesim;
-  else
-    vrhr::hsm = vrhr::eHeadset::reference,
-    vrhr::eyes = vrhr::eEyes::truesim;
-
   if(!explore) {
     E4;
     vrhr::hmd_at_ui = vrhr::hmd_ref_at * cspin(0, 2, 30*degree);
     }
-
   #endif
     
   
@@ -1315,7 +1313,7 @@ void settings_menu() {
   dialog::init("Bringris settings");
   dialog::addItem("alternative geometry", 'g');
   dialog::add_action_push(geometry_menu);
-  dialog::addItem("visuals", 'v');
+  dialog::addItem("visuals & Virtual Reality", 'v');
   dialog::add_action_push(visual_menu);
   dialog::addItem("configure keys", 'k');
   dialog::add_action_push(multi::get_key_configurer(1, move_names, "Bringris keys"));
@@ -1410,7 +1408,9 @@ void render_next(int xstart) {
     dynamicval<ld> dxma(current_display->xmax, 1);
     dynamicval<ld> dymi(current_display->ymin, 0);
     dynamicval<ld> dyma(current_display->ymax, 1);
+    #if CAP_VR
     dynamicval<int> dvr(vrhr::state, 0);
+    #endif
     calcparam();
     current_display->set_viewport(0);
     setGLProjection();
@@ -1525,11 +1525,13 @@ void run() {
   
   if(show_next) {
     displaystr(xstart + vid.fsize, vid.yres - vid.fsize * 27, 0, vid.fsize, "NEXT:", winf[waBarrier].color, 0);
+    #if CAP_VR
     if(vrhr::active())
       vrhr::in_vr_ui([xstart] {
         display_next(xstart);
         });
     else
+    #endif
       display_next(xstart);
     }
       
@@ -1975,6 +1977,7 @@ void default_config() {
   addsaver(bgeom, "bringris-geometry");
   addsaver(use_raycaster, "bringris-ray");
   addsaver(draw_per_level, "draw-per-level");
+  addsaver(use_equidistant, "bringris-equidistant");
   addsaver(flashes, "bringris-flashes");
   }
 
