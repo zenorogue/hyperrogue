@@ -37,6 +37,7 @@ EX int gms_array_size = 16;
 
 EX ld maxstep_sol = .05;
 EX ld maxstep_nil = .1;
+EX ld maxstep_pro = .5;
 EX ld minstep = .001;
 
 EX ld reflect_val = 0;
@@ -47,6 +48,7 @@ EX ld hard_limit = NO_LIMIT;
 
 EX int max_iter_sol = 600;
 EX int max_iter_iso = 60;
+EX int max_iter_eyes = 200;
 
 EX int max_cells = 2048;
 EX bool rays_generate = true;
@@ -58,12 +60,27 @@ EX ld& exp_decay_current() {
 
 EX int& max_iter_current() {
   if(nonisotropic || stretch::in()) return max_iter_sol;
+  else if(is_eyes()) return max_iter_eyes;
   else return max_iter_iso;
+  }
+
+EX bool is_eyes() {
+  #if CAP_VR
+  return vrhr::active() && vrhr::eyes == vrhr::eEyes::equidistant;
+  #else
+  return false;
+  #endif
+  }
+
+EX bool is_stepbased() {
+  return nonisotropic || stretch::in() || is_eyes();
   }
 
 ld& maxstep_current() {
   if(sn::in() || stretch::in()) return maxstep_sol;
-  else return maxstep_nil;
+  if(vrhr::active() && vrhr::eyes == vrhr::eEyes::equidistant)
+    return maxstep_pro;
+  return maxstep_nil;
   }
 
 #define IN_ODS 0
@@ -377,13 +394,9 @@ void enable_raycaster() {
        "return vec2(1, 1);\n"
        "}\n";
 
-   #if CAP_VR
-   bool eyes = vrhr::active() && vrhr::eyes == vrhr::eEyes::equidistant;
-   #else
-   const bool eyes = false;
-   #endif
+   bool eyes = is_eyes();
    
-   bool stepbased = nonisotropic || stretch::in() || eyes;
+   bool stepbased = is_stepbased();
     
    string fmain = "void main() {\n";
    
@@ -1913,10 +1926,14 @@ EX void configure() {
       });
     }
 
-  if(nonisotropic || stretch::in()) {
+  if(is_stepbased()) {
     dialog::addSelItem(XLAT("max step"), fts(maxstep_current()), 'x');
     dialog::add_action([] {
-      dialog::editNumber(maxstep_current(), 1e-6, 1, 0.1, sol ? 0.05 : 0.1, XLAT("max step"), "affects the precision of solving the geodesic equation in Solv");
+      auto& ms = maxstep_current();
+      dialog::editNumber(maxstep_current(), 1e-6, 1, .1,
+        &ms == &maxstep_pro ? .05 :
+        &ms == &maxstep_nil ? .1 : .5,
+        XLAT("max step"), "affects the precision of solving the geodesic equation in Solv");
       dialog::scaleLog();
       dialog::bound_low(1e-9);
       dialog::reaction = reset_raycaster;
