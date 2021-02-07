@@ -1173,10 +1173,10 @@ void enable_raycaster() {
       "  if(col[3] > 0.0) {\n";
     
     if(eyes)
-      fmain += "    float gou = go / uAbsUnit;\n";
+      fmain += "    mediump float gou = go / uAbsUnit;\n";
     else
-      fmain += "    float gou = go;\n";
-
+      fmain += "    mediump float gou = go;\n";
+    
     if(hard_limit < NO_LIMIT)
       fmain += "    if(gou > " + to_glsl(hard_limit) + ") { gl_FragDepth = 1.; return; }\n";
     
