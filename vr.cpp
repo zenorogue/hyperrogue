@@ -591,13 +591,17 @@ ld vr_distance(const shiftpoint& h, int id, ld& dist) {
 
 EX hyperpoint vr_direction;
 
+EX void compute_vr_direction(int id) {
+  E4;
+  transmatrix T = (hsm == eHeadset::none ? hmd_at : hmd_ref_at) * vrdata.pose_matrix[id] * sm;
+  vrhr::be_33(T);
+  vr_direction = T * point31(0, 0, -0.01);
+  }
+
 EX void compute_point(int id, shiftpoint& res, cell*& c, ld& dist) {
 
   if(WDIM == 3) {
-    E4;
-    transmatrix T = (hsm == eHeadset::none ? hmd_at : hmd_ref_at) * vrdata.pose_matrix[id] * sm;
-    vrhr::be_33(T);
-    vr_direction = T * point31(0, 0, -0.01);
+    compute_vr_direction(id);
     movedir md = vectodir(vr_direction);
     cellwalker xc = cwt + md.d + wstep;
     forward_cell = xc.at;
