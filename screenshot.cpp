@@ -1704,6 +1704,7 @@ int readArgs() {
 #endif
 #if CAP_VIDEO
   else if(argis("-animvideo")) {
+    start_game();
     PHASE(3); shift(); noframes = argi();
     shift(); videofile = args(); record_video();
     }
