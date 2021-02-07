@@ -1128,16 +1128,15 @@ void draw_all_noray(int zlev) {
 void start_new_game();
 
 void bringris_frame() {
-  if(explore) return;
   if(!in_bringris) return;
+  ray::want_use = use_raycaster ? 2 : 0;
+  
   int zlev = get_z(centerover);
 
   if(state == tsCollect) for(cell *c: to_disappear) c->landparam = rand() & 0xFFFFFF;
   
   // just_gmatrix = true;
 
-  ray::want_use = use_raycaster ? 2 : 0;
-  
   create_matrices();
 
   if(!use_raycaster) 
@@ -1278,6 +1277,7 @@ void geometry_menu() {
   }
 
 void visual_menu() {
+  gamescreen(2);
   dialog::init("Bringris visuals");
   dialog::addBoolItem_action("use raycasting", use_raycaster, 'r');
 
@@ -1306,6 +1306,7 @@ void visual_menu() {
   }
   
 void settings_menu() {
+  emptyscreen();
   dialog::init("Bringris settings");
   dialog::addItem("alternative geometry", 'g');
   dialog::add_action_push(geometry_menu);
@@ -1417,6 +1418,12 @@ void render_next(int xstart) {
     }
   }
 
+EX void reset_vr_ref() {
+  #if CAP_VR
+  vrhr::hmd_ref_at = vrhr::hmd_at_ui = vrhr::hmd_at;
+  #endif
+  }
+
 EX void display_next(int xstart) {
 
   if(next_buffer) {
@@ -1472,7 +1479,7 @@ void run() {
 
   last_adjust = ticks;
   
-  ray::want_use = 2;
+  ray::want_use = use_raycaster ? 2 : 0;
   sightranges[geometry] = 50;
   if(!solnil) vid.cells_drawn_limit = 1;
   else vid.cells_drawn_limit = 2000;
@@ -1588,6 +1595,7 @@ void run() {
     // if(sym == 'k') ang = 0;
     // if(sym == 'l') ang = 45 * degree;    
     if(sym == 'p' || sym == 'c' || (sym == SDLK_ESCAPE && !ISWEB)) {
+      reset_vr_ref();      
       if(!paused) move_at = move_at - ticks;
       paused = !paused;
       if(!paused) move_at = move_at - ticks;
@@ -1626,6 +1634,7 @@ void run() {
       #endif
       }
     if(in_menu && sym == 'e') {
+      reset_vr_ref();
       explore = !explore;
       }
     if(in_menu && sym == 'n') {
@@ -1636,6 +1645,7 @@ void run() {
       playSound(cwt.at, "elementalgem");
       }
     if(in_menu && sym == 's') {
+      reset_vr_ref();
       pushScreen(settings_menu);
       }
     if(in_menu && sym == 'x') {
