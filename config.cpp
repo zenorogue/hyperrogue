@@ -109,8 +109,8 @@ template<class T> struct enum_setting : list_setting {
   int get_value() override { return (int) *value; }
   void set_value(int i) override { *value = (T) i; }
   virtual bool affects(void* v) override { return v == value; }
-  virtual void add_as_saver();
-  virtual cld get_cld() { return get_value(); }
+  virtual void add_as_saver() override;
+  virtual cld get_cld() override { return get_value(); }
   };
 
 struct float_setting : public setting {
@@ -130,12 +130,12 @@ struct float_setting : public setting {
     }
   function<void(float_setting*)> modify_me;
   float_setting *modif(const function<void(float_setting*)>& r) { modify_me = r; return this; }
-  void add_as_saver();
+  void add_as_saver() override;
   virtual bool affects(void *v) override { return v == value; }
   virtual void show_edit_option(char key) override;
-  virtual cld get_cld() { return *value; }
+  virtual cld get_cld() override { return *value; }
 
-  virtual void load_from(const string& s);
+  virtual void load_from(const string& s) override;
   };
 
 struct int_setting : public setting {
@@ -143,12 +143,12 @@ struct int_setting : public setting {
   int dft;
   int min_value, max_value;
   ld step;
-  void add_as_saver();
+  void add_as_saver() override;
   function<void(int_setting*)> modify_me;
   int_setting *modif(const function<void(int_setting*)>& r) { modify_me = r; return this; }
   virtual bool affects(void *v) override { return v == value; }
   virtual void show_edit_option(char key) override;
-  virtual cld get_cld() { return *value; }
+  virtual cld get_cld() override { return *value; }
   int_setting *editable(int min_value, int max_value, ld step, string menu_item_name, string help_text, char key) {
     this->min_value = min_value;
     this->max_value = max_value;
@@ -159,16 +159,15 @@ struct int_setting : public setting {
     return this;
     }
 
-  virtual void load_from(const string& s) {
+  virtual void load_from(const string& s) override {
     *value = parseint(s);
-    println(hlog, "set ", parameter_name, " to ", *value);
     }
   };
 
 struct bool_setting : public setting {
   bool *value;
   bool dft;
-  void add_as_saver();
+  void add_as_saver() override;
   reaction_t switcher;
   bool_setting* editable(string cap, char key ) {
     is_editable = true;
@@ -176,16 +175,16 @@ struct bool_setting : public setting {
     } 
   virtual bool affects(void *v) override { return v == value; }
   virtual void show_edit_option(char key) override;
-  virtual cld get_cld() { return *value ? 1 : 0; }
+  virtual cld get_cld() override { return *value ? 1 : 0; }
   };
 
 struct custom_setting : public setting {  
   function<void(char)> custom_viewer;
   function<cld()> custom_value;
   function<bool(void*)> custom_affect;
-  virtual void show_edit_option(char key) { custom_viewer(key); }
-  virtual cld get_cld() { return custom_value(); }
-  virtual bool affects(void *v) { return custom_affect(v); }
+  virtual void show_edit_option(char key) override { custom_viewer(key); }
+  virtual cld get_cld() override { return custom_value(); }
+  virtual bool affects(void *v) override { return custom_affect(v); }
   };
   
 #if CAP_CONFIG
