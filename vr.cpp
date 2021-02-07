@@ -1144,6 +1144,7 @@ EX void show_vr_demos() {
     popScreenAll();
     });
 
+  #if CAP_RUG
   dialog::addItem("Hypersian Rug", 'c');
   dialog::add_action([] {
     if(rug::rugged) rug::close();
@@ -1165,6 +1166,7 @@ EX void show_vr_demos() {
     rug::init();
     popScreenAll();
     });
+  #endif
 
   dialog::addItem("sphere from the inside", 'd');
   dialog::add_action([] {

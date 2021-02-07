@@ -234,6 +234,7 @@ int read_args() {
 auto ah = addHook(hooks_args, 0, read_args);
 #endif
 auto ah2 = addHook(hooks_configfile, 100, [] {
+  #if CAP_CONFIG
   addsaver(shot::shotx, "shotx");
   addsaver(shot::shoty, "shoty");
   addsaverenum(shot::format, "shotsvg");
@@ -241,6 +242,7 @@ auto ah2 = addHook(hooks_configfile, 100, [] {
   param_f(shot::gamma, "shotgamma");
   addsaver(shot::caption, "shotcaption");
   param_f(shot::fade, "shotfade");
+  #endif
   });
 
 #endif
@@ -1778,6 +1780,7 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
   + addHook(hooks_args, 100, readArgs)
   #endif
   + addHook(hooks_config, 100, [] {
+    #if CAP_CONFIG
     param_f(anims::period, "aperiod", "animation period");
     addsaver(anims::noframes, "animation frames");
     param_f(anims::cycle_length, "acycle", "animation cycle length");
@@ -1790,6 +1793,7 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
     addsaver(anims::rug_shift_angle, "rug forward shift angle", 0);
     addsaver(anims::a, "a", 0);
     addsaver(anims::b, "b", 0);
+    #endif
     });
 
 EX bool any_animation() {
