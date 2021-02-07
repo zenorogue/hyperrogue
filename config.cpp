@@ -1284,30 +1284,32 @@ EX void edit_sightrange() {
   #endif
   gamescreen(0);
   dialog::init("sight range settings");
-  if(WDIM == 2) add_edit(vid.use_smart_range);
+  add_edit(vid.use_smart_range);
   if(vid.use_smart_range)
     add_edit(WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3);
-  else if(WDIM == 3) {
-    dialog::addSelItem(XLAT("3D sight range for the fog effect"), fts(sightranges[geometry]), 'r');
-    dialog::add_action([] {
-    dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("3D sight range"),
-      (pmodel == mdGeodesic && sol) ? solhelp() : XLAT(
-        "Sight range for 3D geometries is specified in the absolute units. This value also affects the fog effect.\n\n"
-        "In spherical geometries, the sight range of 2? will let you see things behind you as if they were in front of you, "
-        "and the sight range of ? (or more) will let you see things on the antipodal point just as if they were close to you.\n\n"
-        "In hyperbolic geometries, the number of cells to render depends exponentially on the sight range. More cells to drawn "
-        "reduces the performance.\n\n"
-        "Sight range affects the gameplay, and monsters act iff they are visible. Monster generation takes this into account."
-        )
-      );
-      });
-    }
   else {
-    add_edit(sightrange_bonus);
-    if(GDIM == 3) {
-      dialog::addSelItem(XLAT("3D sight range for the fog effect"), fts(sightranges[geometry]), 'r');
+    if(WDIM == 2) {
+      add_edit(sightrange_bonus);
+      if(GDIM == 3) {
+        dialog::addSelItem(XLAT("3D sight range for the fog effect"), fts(sightranges[geometry]), 'r');
+        dialog::add_action([] {
+          dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("fog effect"), "");
+          });
+        }
+      }
+    if(WDIM == 3) {
+      dialog::addSelItem(XLAT("3D sight range"), fts(sightranges[geometry]), 'r');
       dialog::add_action([] {
-        dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("fog effect"), "");
+      dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("3D sight range"),
+        XLAT(
+          "Sight range for 3D geometries is specified in the absolute units. This value also affects the fog effect.\n\n"
+          "In spherical geometries, the sight range of 2? will let you see things behind you as if they were in front of you, "
+          "and the sight range of ? (or more) will let you see things on the antipodal point just as if they were close to you.\n\n"
+          "In hyperbolic geometries, the number of cells to render depends exponentially on the sight range. More cells to drawn "
+          "reduces the performance.\n\n"
+          "Sight range affects the gameplay, and monsters act iff they are visible. Monster generation takes this into account."
+          )
+        );
         });
       }
     }
@@ -1389,10 +1391,10 @@ EX void menuitem_sightrange(char c IS('c')) {
   if(pmodel == mdGeodesic && sol)
     dialog::addSelItem(XLAT("sight range settings"), fts(sn::solrange_xy) + "x" + fts(sn::solrange_z), c);
   #endif
-  else if(WDIM == 3)
-    dialog::addSelItem(XLAT("sight range settings"), fts(sightranges[geometry]) + "au", c);
   else if(vid.use_smart_range)
     dialog::addSelItem(XLAT("sight range settings"), fts(WDIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail) + " px", c);
+  else if(WDIM == 3)
+    dialog::addSelItem(XLAT("sight range settings"), fts(sightranges[geometry]) + "au", c);
   else
     dialog::addSelItem(XLAT("sight range settings"), format("%+d", sightrange_bonus), c);
   dialog::add_action_push(edit_sightrange);
