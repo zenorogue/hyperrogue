@@ -36,8 +36,6 @@
 #define CAP_SAVE 0
 #define CAP_TRANS 0
 
-#define MINIMIZE_GL_CALLS 0 // minimize does not currently work correctly
-
 #ifdef BWEB
 #include "../hyperweb.cpp"
 #else
