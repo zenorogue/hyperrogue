@@ -78,8 +78,10 @@ EX bool is_stepbased() {
 
 ld& maxstep_current() {
   if(sn::in() || stretch::in()) return maxstep_sol;
+  #if CAP_VR
   if(vrhr::active() && vrhr::eyes == vrhr::eEyes::equidistant)
     return maxstep_pro;
+  #endif
   return maxstep_nil;
   }
 
