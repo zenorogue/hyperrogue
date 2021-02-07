@@ -37,7 +37,7 @@ enum class eCompScreen { none, reference, single, eyes };
 
 EX eHeadset hsm = eHeadset::reference;
 EX eEyes eyes = eEyes::equidistant;
-EX eCompScreen cscr = eCompScreen::single;
+EX eCompScreen cscr = eCompScreen::eyes;
 
 EX cell *forward_cell;
 
