@@ -169,10 +169,10 @@ void loadfont(int siz) {
 
 #if !ISFAKEMOBILE && !ISANDROID & !ISIOS
 int textwidth(int siz, const string &str) {
-  fix_font_size(siz);
   if(isize(str) == 0) return 0;
 
 #if CAP_SDLTTF
+  fix_font_size(siz);
   loadfont(siz);
   
   int w, h;
@@ -1131,10 +1131,12 @@ EX void setvideomode() {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
     vid.current_vsync = want_vsync();
+    #if !ISMOBWEB
     if(vid.current_vsync) 
       SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 1 );
     else
       SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 0 ); 
+    #endif
     if(vid.antialias & AA_MULTI) {
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, (vid.antialias & AA_MULTI16) ? 16 : 4);

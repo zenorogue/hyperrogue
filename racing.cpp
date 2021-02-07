@@ -1486,8 +1486,8 @@ EX void add_debug(cell *c) {
     dialog::addSelItem("completion", its(r.completion), 0);
     }
   }
-#endif
 
+#if MAXMDIM >= 4
 EX void start_thurston() {
   stop_game();
   resetModes();
@@ -1495,6 +1495,8 @@ EX void start_thurston() {
   pushScreen(showStartMenu);
   pushScreen(racing::thurston_racing);
   }
+#endif
+#endif
 
 #if !CAP_RACING
 EX always_false on;

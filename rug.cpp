@@ -1927,6 +1927,7 @@ EX namespace rug {
     EX bool rug_control() { return false; }
     EX bool in_crystal() { return false; }
     EX void reset_view() { }
+    EX void close() { }
 #if HDR
   struct using_rugview {};
 #endif

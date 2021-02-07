@@ -537,10 +537,12 @@ EX void mode_higlights() {
   dialog::addInfo(XLAT("classic game except hyperbolic"));
   dialog::extend();
 
+  #if CAP_RACING && MAXMDIM >= 4
   dialog::addBigItem(XLAT("Racing in Thurston geometries"), 't'-96);
   dialog::add_action(dialog::add_confirmation(racing::start_thurston));
   dialog::addInfo(XLAT("race through a maze in exotic 3D geometry!"));
   dialog::extend();
+  #endif
 
   dialog::addBigItem(XLAT1("Halloween"), 'Z');
   dialog::add_action(dialog::add_confirmation(halloween::start_all));
@@ -582,7 +584,8 @@ EX void mode_higlights() {
     welcomeMessage();
     }));
   
-  if(hiitemsMax(itHolyGrail) || cheater || autocheat) {  
+  #if CAP_CRYSTAL
+  if(hiitemsMax(itHolyGrail) || cheater || autocheat) {
     dialog::addItem(XLAT("Knight of the 16-Cell Table"), '1');
     dialog::add_action(dialog::add_confirmation([] {
       popScreenAll();
@@ -612,7 +615,9 @@ EX void mode_higlights() {
   else {
     dialog::addItem("(locked until you find a Holy Grail)", 0);
     }
+  #endif
 
+  #if MAXMDIM >= 4
   dialog::addBreak(100);
   dialog::addBigItem(XLAT1("some cool visualizations"), 0);
   dialog::addItem(XLAT("Emerald Mine in {5,3,4}"), '5');
@@ -632,6 +637,7 @@ EX void mode_higlights() {
     clearMessages();
     welcomeMessage();
     }));
+  #endif
 
   dialog::addBreak(100);
   dialog::addBack();

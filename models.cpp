@@ -705,6 +705,7 @@ EX namespace models {
       if(hyperbolic) {
         dialog::addItem(XLAT("Gans model") + " " + XLAT("(zoomed out)"), '4');
         dialog::add_action([] { if(rug::rugged) rug::close(); pconf.alpha = 999; pconf.scale = 499; pconf.xposition = pconf.yposition = 0; popScreen(); });
+        #if CAP_RUG
         dialog::addItem(XLAT("Hypersian rug"), 'u');
         dialog::add_action([] {  
           if(rug::rugged) pushScreen(rug::show);
@@ -712,6 +713,7 @@ EX namespace models {
             pconf.alpha = 1, pconf.scale = 1; if(!rug::rugged) rug::init(); popScreen(); 
             }
           });
+        #endif
         }
       }
     else if(GDIM == 2 && euclid) {
@@ -736,6 +738,7 @@ EX namespace models {
       dialog::add_action([zoom_to] { zoom_to(1); });
       dialog::addItem(XLAT("zoom 0.5x"), '3');
       dialog::add_action([zoom_to] { zoom_to(.5); });
+      #if CAP_RUG
       if(quotient) {
         dialog::addItem(XLAT("cylinder/donut view"), 'u');
         dialog::add_action([] {
@@ -745,6 +748,7 @@ EX namespace models {
             }
           });
         }
+      #endif
       }
     else if(GDIM == 3) {
       auto& ysh = (WDIM == 2 ? vid.camera : vid.yshift);

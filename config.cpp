@@ -660,15 +660,19 @@ EX void initConfig() {
   addsaver(vid.language, "language", -1);  
   param_b(vid.drawmousecircle, "mouse circle", ISMOBILE || ISPANDORA);
   param_b(vid.revcontrol, "reverse control", false);
+  #if CAP_AUDIO
   param_i(musicvolume, "music volume")
   ->editable(0, 128, 10, "background music volume", "", 'b')
   ->set_sets(sets_music_volume);
+  #endif
   #if CAP_SDLAUDIO
   addsaver(music_out_of_focus, "music out of focus", false);
   #endif
+  #if CAP_AUDIO
   param_i(effvolume, "sound effect volume")
   ->editable(0, 128, 10, "sound effects volume", "", 'e')
   ->set_sets(sets_sfx_volume);
+  #endif
   
   param_enum(glyphsortorder, "glyph_sort", "glyph sort order", glyphsortorder)
     ->editable({
@@ -705,8 +709,10 @@ EX void initConfig() {
   addsaver(vid.particles, "extra effects", 1);
   param_i(vid.framelimit, "frame limit", 999);
 
+  #if !ISMOBWEB
   param_b(vid.want_vsync, "vsync", true)
   ->editable("vsync", 'v');
+  #endif
   
   param_b(vid.want_fullscreen, "fullscreen", false)
   ->editable("fullscreen mode", 'f');
@@ -1389,8 +1395,9 @@ EX void menuitem_sightrange(char c IS('c')) {
   #if CAP_SOLV
   if(pmodel == mdGeodesic && sol)
     dialog::addSelItem(XLAT("sight range settings"), fts(sn::solrange_xy) + "x" + fts(sn::solrange_z), c);
+  else
   #endif
-  else if(vid.use_smart_range)
+  if(vid.use_smart_range)
     dialog::addSelItem(XLAT("sight range settings"), fts(WDIM == 3 ? vid.smart_range_detail_3 : vid.smart_range_detail) + " px", c);
   else if(WDIM == 3)
     dialog::addSelItem(XLAT("sight range settings"), fts(sightranges[geometry]) + "au", c);
@@ -1400,6 +1407,7 @@ EX void menuitem_sightrange(char c IS('c')) {
   }
 
 EX void sets_sfx_volume() {
+#if CAP_AUDIO
   dialog::numberdark = dialog::DONT_SHOW;
   #if ISANDROID
   dialog::reaction = [] () {
@@ -1408,9 +1416,11 @@ EX void sets_sfx_volume() {
   #endif
   dialog::bound_low(0);
   dialog::bound_up(MIX_MAX_VOLUME);
+#endif
   }
 
 EX void sets_music_volume() {
+#if CAP_AUDIO
   dialog::numberdark = dialog::DONT_SHOW;
   dialog::reaction = [] () {
     #if CAP_SDLAUDIO
@@ -1427,6 +1437,7 @@ EX void sets_music_volume() {
     dialog::addBoolItem_action(XLAT("play music when out of focus"), music_out_of_focus, 'A');
     };
   #endif
+#endif
   }
 
 EX void showSpecialEffects() {
