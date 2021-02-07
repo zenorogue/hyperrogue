@@ -1149,6 +1149,7 @@ EX void setvideomode() {
   int sizeflag = (vid.full ? SDL_FULLSCREEN : SDL_RESIZABLE);
 
   #ifdef WINDOWS
+  #ifndef OLD_MINGW
   static bool set_awareness = true;
   if(set_awareness) {
     set_awareness = false;
@@ -1163,6 +1164,7 @@ EX void setvideomode() {
       FreeLibrary(user32_dll);
       }
     }
+  #endif
   #endif
   
   s = s_screen = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | sizeflag);
