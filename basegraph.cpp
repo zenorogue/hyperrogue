@@ -1049,13 +1049,11 @@ ld textscale() {
   }
 
 EX void compute_fsize() {
-  println(hlog, "compute_fsize() called");
   dual::split_or_do([&] {
     if(vid.relative_font)
       vid.fsize = min(vid.yres * vid.fontscale/ 3200, vid.xres * vid.fontscale/ 4800);
     else
       vid.fsize = vid.abs_fsize;
-    println(hlog, "set fsize to ", vid.fsize);
     if(vid.fsize < 6) vid.fsize = 6;
     });
   }
