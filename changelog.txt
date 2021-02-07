@@ -4216,3 +4216,35 @@ Not yet in HyperRogue online, but see: https://zenorogue.itch.io/bringris
   - shmup: fixed redundant and incorrect revival of mirror spirits
   - fixed more possible crashes
 
+2021-02-07 21:13 Update 11.4f:
+VR updates:
+- minor optimizations
+- pseudo-raycasting in equidistant mode
+- changed the defaults
+- fixed auto-vertical orientation in product spaces
+- items are better at facing the player
+
+Menu improvements:
+- keys '1234' no longer change the projection -- instead, '1' shows a small menu of projections, which also includes other nice options
+- this menu of projections is also used for "models & projections" (some new players explore too much weird projections and are confused)
+- the following menus have been redesigned: sightrange, resolution, vector graphics, sightrange
+- highlights in special modes
+- filename for history band can be changed now
+- [WIP] a menu which lists (automatically or manually) recently changed settings
+- nicer slider-dialog
+
+Game bugfixes:
+- fixed the game not determining the land correctly for Orb generation purposes in Haunted Woods border, mercury river bridges, and Warped Sea
+- fixed the 4xStabber and Princess achievements
+- trying to generate wall lines in non-standard Euclidean geometry no longer crashes the game
+
+Other improvements:
+- fixed bugs when switching FPP in E2 torus
+- drawing tool and shape editor can now be used with texture mode enabled
+- improved the wall/floor textures in 3D modes
+
+Bringris:
+- nicer "pentagons" geometry
+- flashes option
+- fixed disabling the raycaster
+- adapted to VR
