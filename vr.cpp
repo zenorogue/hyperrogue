@@ -393,8 +393,8 @@ void track_poses() {
           hyperpoint px = pxo;
           px[0] /= ui_size * ui_size_unit;
           px[1] /= -ui_size * ui_size_unit;
-          px[0] += current_display->xsize/2;
-          px[1] += current_display->ysize/2;
+          px[0] += (ui_xmin+ui_xmax) / 2;
+          px[1] += (ui_ymin+ui_ymax) / 2;
           targeting_menu = px[0] >= 0 && px[1] >= 0 && px[1] <= vid.xres && px[1] <= vid.xres;
           if(targeting_menu) {
             mousex = px[0];
