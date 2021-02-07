@@ -89,6 +89,8 @@ bool in_bringris;
 
 bool use_raycaster = true;
 
+bool flashes = true;
+
 int last_adjust, when_t;
 transmatrix tView, pView;
 cell* ncenter;
@@ -1133,7 +1135,7 @@ void bringris_frame() {
   
   int zlev = get_z(centerover);
 
-  if(state == tsCollect) for(cell *c: to_disappear) c->landparam = rand() & 0xFFFFFF;
+  if(state == tsCollect) for(cell *c: to_disappear) c->landparam = flashes ? rand() & 0xFFFFFF : 0x101010;
   
   // just_gmatrix = true;
 
@@ -1279,6 +1281,9 @@ void geometry_menu() {
 void visual_menu() {
   gamescreen(2);
   dialog::init("Bringris visuals");
+
+  dialog::addBoolItem_action("flashes on level completed", flashes, 'f');
+
   dialog::addBoolItem_action("use raycasting", use_raycaster, 'r');
 
   dialog::addSelItem(XLAT("iterations in raycasting"), its(ray::max_iter_current()), 's');
@@ -1970,6 +1975,7 @@ void default_config() {
   addsaver(bgeom, "bringris-geometry");
   addsaver(use_raycaster, "bringris-ray");
   addsaver(draw_per_level, "draw-per-level");
+  addsaver(flashes, "bringris-flashes");
   }
 
 auto hooks = 
