@@ -179,6 +179,7 @@ EX int shapes_merged;
 
 #if MINIMIZE_GL_CALLS
 color_t triangle_color, line_color;
+ld m_shift;
 vector<glvertex> triangle_vertices;
 vector<glvertex> line_vertices;
 #endif
@@ -186,6 +187,7 @@ vector<glvertex> line_vertices;
 EX void glflush() {
   DEBBI(DF_GRAPH, ("glflush"));
   #if MINIMIZE_GL_CALLS
+  current_display->set_all(0, m_shift);
   if(isize(triangle_vertices)) {
     // printf("%08X %08X | %d shapes, %d/%d vertices\n", triangle_color, line_color, shapes_merged, isize(triangle_vertices), isize(line_vertices));
     if(triangle_color) {
@@ -628,10 +630,11 @@ void dqi_poly::gldraw() {
   
 #if MINIMIZE_GL_CALLS  
   if(current_display->stereo_active() == 0 && !tinf && (color == 0 || ((flags & (POLY_VCONVEX | POLY_CCONVEX)) && !(flags & (POLY_INVERSE | POLY_FORCE_INVERTED))))) {
-    if(color != triangle_color || outline != line_color || texts_merged) {
+    if(color != triangle_color || outline != line_color || texts_merged || m_shift != V.shift) {
       glflush();
       triangle_color = color;
       line_color = outline;
+      m_shift = V.shift;
       }
     shapes_merged++;
 
