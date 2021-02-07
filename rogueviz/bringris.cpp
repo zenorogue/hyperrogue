@@ -1304,6 +1304,32 @@ void visual_menu() {
       "If the level size is 30, 600 cells to draw means that every cell is drawn 20 times on average. "
       "Used when raycasting is off, and to draw the wireframes");
     });
+  
+  dialog::addBreak(200);
+  
+  #if CAP_VR  
+  dialog::addBoolItem_action(XLAT("VR enabled"), vrhr::enabled, 'o');
+  if(!vrhr::enabled)
+    dialog::addBreak(100);
+  else if(vrhr::failed)
+    dialog::addInfo(XLAT("error: ") + vrhr::error_msg, 0xC00000);
+  else
+    dialog::addInfo(XLAT("VR initialized correctly"), 0x00C000);
+  
+  if(vrhr::active()) {
+    dialog::addBoolItem_action(XLAT("equidistant VR"), use_equidistant, 'e');
+    if(use_equidistant)
+      dialog::addInfo("(distances are seen correctly)");
+    else
+      dialog::addInfo("(simulate non-Euclidean binocular vision)");
+    add_edit(vrhr::cscr);
+    }
+  else
+    dialog::addBreak(300);
+  #endif
+    
+  dialog::addBreak(100);
+  dialog::addBack();  
 
   dialog::display();
   }
@@ -1562,6 +1588,9 @@ void run() {
       }
     else if(state == tsGameover)
       if(displayButtonS(xx, vid.fsize * 12, "TWEET", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 't';
+    
+    if(vrhr::active())
+      if(displayButtonS(xx, vid.fsize * 14, "RESET VR", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 'V';
     }
   
   keyhandler = [xstart, in_menu] (int sym, int uni) {
@@ -1602,7 +1631,6 @@ void run() {
     // if(sym == 'k') ang = 0;
     // if(sym == 'l') ang = 45 * degree;    
     if(sym == 'p' || sym == 'c' || (sym == SDLK_ESCAPE && !ISWEB)) {
-      reset_vr_ref();      
       if(!paused) move_at = move_at - ticks;
       paused = !paused;
       if(!paused) move_at = move_at - ticks;
@@ -1641,8 +1669,10 @@ void run() {
       #endif
       }
     if(in_menu && sym == 'e') {
-      reset_vr_ref();
       explore = !explore;
+      }
+    if(sym == 'V') {
+      reset_vr_ref();
       }
     if(in_menu && sym == 'n') {
       start_new_game();
@@ -1652,7 +1682,6 @@ void run() {
       playSound(cwt.at, "elementalgem");
       }
     if(in_menu && sym == 's') {
-      reset_vr_ref();
       pushScreen(settings_menu);
       }
     if(in_menu && sym == 'x') {
