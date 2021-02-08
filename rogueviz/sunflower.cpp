@@ -145,10 +145,10 @@ bool sunflower_cell(cell *c, shiftmatrix V) {
   }
 
 void insert_param() {  
-  params.insert({"sund", zdensity});
-  params.insert({"sunq", qty});
-  params.insert({"sunr", range});
-  params.insert({"sunf", distance_per_rug});
+  param_f(zdensity, "sund");
+  param_f(qty, "sunq");
+  param_f(range, "sunr");
+  param_f(distance_per_rug, "sunf");
   }
 
 int readArgs() {
