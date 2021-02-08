@@ -39,7 +39,7 @@ void circ_frame() {
     for(int it=0; it<100; it++) {
       ld x = (min + max) / 2;
       ld f = sin_auto(2*x) - ratio * sin_auto(x);
-      if(f > 0 ^ spherical) max = x;
+      if((f > 0) ^ sphere) max = x;
       else min = x;
       }
     circ1 = sin_auto(min);
