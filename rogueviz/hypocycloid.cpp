@@ -17,21 +17,30 @@
 
 namespace hr {
 
+/* what to roll on: 0 = circle, 1 = horocycle, 2 = straight line, 3 = equidistant */
+int shape = 0;
+
 ld circ1 = 0.5; /* circumference of the small circle (actually, circumference divided by 2pi) */
-ld circ2 = 1;   /* circumference of the large circle (actually, circumference divided by 2pi) */
+ld circ2 = 1;   /* circumference of the large circle (actually, circumference divided by 2pi); for shape=3, this determines the radius */
 
 ld show = 0.02; /* radius of the blue circle which shows the moving point */
 
 ld lw = 3;      /* linewidth multiplier */
 
-ld loops = 1;   /* with loops=k, the circle goes around k times during the full animation */
+ld loops = 1;   /* with loops=k, the circle goes around k times during the full animation; the unit is the rotation of the large circle for shape=0 and the rotation of the small circle for shape>0 */
 
 ld ratio = 0;   /* if set to non-zero, circ1 and circ2 are assigned so that the ratio of radii is ratio */
 
+ld xdist = 0;   /* by how much shift the image */
+
 int prec = 360; /* precision */
 
+ld cshift = 0;  /* cshift=0 means that we start at the center point, cshift=.5 means it is in the middle of the route */
+
+ld draw_loops = 1; /* how many loops to draw */
+
 void circ_frame() {
-  ld t = (1. * prec * ticks) / anims::period * loops;
+  ld t = (frac((1. * ticks) / anims::period) - cshift) * prec * loops;
   
   if(ratio) {
     ld min = 0;
@@ -51,33 +60,77 @@ void circ_frame() {
   
   vid.linewidth *= lw;
   
-  shiftmatrix at = shiftless(Id); //  * xpush(rad2);
+  shiftmatrix at = shiftless(Id) * xpush(xdist);
   
   ld kdegree = 2 * M_PI / prec;
-  
-  if(1) {
-    for(int i=0; i<=prec; i++)
-      curvepoint(spin(i*kdegree) * xpush(rad2) * C0);      
+
+  ld cs = 2*M_PI*cshift;
+
+  if(shape) {
+    auto shapefun = [&] (ld x) {
+      if(shape == 1)
+        return parabolic1(x);
+      if(shape == 2)
+        return ypush(x);
+      if(shape == 3)
+        return xpush(-rad2) * ypush(x / cosh(rad2)) * xpush(rad2);
+      return Id;
+      };
+    
+    for(int i=0; i<=prec*draw_loops; i++) {
+      ld t = i*kdegree-cs*draw_loops;
+      curvepoint(shapefun(circ1*t) * C0);
+      }
     queuecurve(at, 0xFF0000FF, 0x200000FF, PPR::LINE);
+
+    for(int i=0; i<=prec; i++)
+      curvepoint(shapefun(circ1*t*kdegree) * xpush(rad1) * spin(i*kdegree) * xpush(rad1) * C0);
+    queuecurve(at, 0x00FF00FF, 0x002000FF, PPR::LINE);
+
+    for(int q=0; q<360; q+=36) queueline(
+      at * shapefun(circ1*t*kdegree) * xpush(rad1) * C0,
+      at * shapefun(circ1*t*kdegree) * xpush(rad1) * spin(q*degree-t*kdegree) * xpush(rad1) * C0,
+      0xFFD500FF, 4);
+    
+    for(int i=0; i<=prec; i++)
+      curvepoint(shapefun(circ1*t*kdegree) * xpush(rad1) * spin(M_PI-t*kdegree) * xpush(rad1) * spin(i*kdegree) * xpush(show) * C0);
+    queuecurve(at, 0xFFFFFFFF, 0xFFFF, PPR::LINE);
+
+    for(int i=0; i<=prec*draw_loops; i++) {
+      ld t = i*kdegree-cs*draw_loops;
+      curvepoint(shapefun(circ1*t) * xpush(rad1) * spin(M_PI-t) * xpush(rad1) * C0);  
+      }
+    queuecurve(at, 0xFFFFFFFF, 0, PPR::LINE);
     }
-
-  for(int i=0; i<=prec; i++)
-    curvepoint(spin(t*kdegree) * xpush(rad2-rad1) * spin(i*kdegree) * xpush(rad1) * C0);
-  queuecurve(at, 0x00FF00FF, 0x002000FF, PPR::LINE);
   
-  for(int q=0; q<360; q+=36) queueline(
-    at * spin(t*kdegree) * xpush(rad2-rad1) * C0, 
-    at * spin(t*kdegree) * xpush(rad2-rad1) * spin(q*degree-t*kdegree*circ2/circ1) * xpush(rad1) * C0,
-    0xFFD500FF, 4);
+  else {
   
-  for(int i=0; i<=prec; i++)
-    curvepoint(spin(i*kdegree) * xpush(rad2-rad1) * spin(-i*kdegree*circ2/circ1) * xpush(rad1) * C0);
-
-  queuecurve(at, 0xFFFFFFFF, 0, PPR::LINE);
-
-  for(int i=0; i<=prec; i++)
-    curvepoint(spin(t*kdegree) * xpush(rad2-rad1) * spin(-t*kdegree*circ2/circ1) * xpush(rad1) * spin(i*kdegree) * xpush(show) * C0);
-  queuecurve(at, 0xFFFFFFFF, 0xFFFF, PPR::LINE);    
+    if(1) {
+      for(int i=0; i<=prec; i++)
+        curvepoint(spin(i*kdegree) * xpush(rad2) * C0);      
+      queuecurve(at, 0xFF0000FF, 0x200000FF, PPR::LINE);
+      }
+  
+    for(int i=0; i<=prec; i++)
+      curvepoint(spin(t*kdegree) * xpush(rad2-rad1) * spin(i*kdegree) * xpush(rad1) * C0);
+    queuecurve(at, 0x00FF00FF, 0x002000FF, PPR::LINE);
+    
+    for(int q=0; q<360; q+=36) queueline(
+      at * spin(t*kdegree) * xpush(rad2-rad1) * C0, 
+      at * spin(t*kdegree) * xpush(rad2-rad1) * spin(q*degree-t*kdegree*circ2/circ1) * xpush(rad1) * C0,
+      0xFFD500FF, 4);
+    
+    for(int i=0; i<=prec*draw_loops; i++) {
+      ld t = i*kdegree-cs*draw_loops;
+      curvepoint(spin(t) * xpush(rad2-rad1) * spin(-t*circ2/circ1) * xpush(rad1) * C0);
+      }
+  
+    queuecurve(at, 0xFFFFFFFF, 0, PPR::LINE);
+  
+    for(int i=0; i<=prec; i++)
+      curvepoint(spin(t*kdegree) * xpush(rad2-rad1) * spin(-t*kdegree*circ2/circ1) * xpush(rad1) * spin(i*kdegree) * xpush(show) * C0);
+    queuecurve(at, 0xFFFFFFFF, 0xFFFF, PPR::LINE);
+    }
 
   vid.linewidth /= lw;
   }
@@ -90,7 +143,11 @@ auto shot_hooks = addHook(hooks_frame, 100, circ_frame)
     param_f(loops, "loops");
     param_f(ratio, "ratio");
     param_i(prec, "prec");
+    param_f(xdist, "xdist");
     param_f(lw, "lw");
+    param_f(cshift, "cshift");
+    param_i(shape, "shape");
+    param_f(draw_loops, "draw_loops");
     });
 
 }
