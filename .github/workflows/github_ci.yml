@@ -77,7 +77,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build
       run: |
-        docker run --rm -v $(pwd):/src trzeci/emscripten make -f Makefile.simple emscripten
+        docker run --rm -v $(pwd):/src emscripten/emsdk make -f Makefile.simple emscripten
     - name: Do a simple test
       run: |
         ls -lAF hyper.html hyper.js hyper.wasm

@@ -57,7 +57,6 @@ void set_mingw64() {
   linker = "g++ -o hyper";
   opts = "-DWINDOWS -DCAP_GLEW=1 -DCAP_PNG=1";
   libs = " savepng.o hyper.res -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
-  setvbuf(stdout, NULL, _IONBF, 0); // MinGW is quirky with output buffering
   }
 
 void set_web() {
@@ -97,6 +96,7 @@ bool file_exists(string fname) {
   }
   
 int main(int argc, char **argv) {
+  setvbuf(stdout, nullptr, _IONBF, 0); // this should help with responsiveness of the real-time CI logs
 #if defined(MAC)
   set_mac();
 #elif defined(WINDOWS)
