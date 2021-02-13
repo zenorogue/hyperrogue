@@ -193,8 +193,8 @@ void celldrawer::draw_ceiling() {
     
     case 2: {
       if(euclid) return;
-      color_t col;
-      color_t skycol;
+      color_t col = skycolor(c);
+      color_t skycol = 0xA0A0FF;
       
       switch(c->land) {
         case laWineyard:

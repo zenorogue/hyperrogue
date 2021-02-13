@@ -5134,8 +5134,7 @@ EX void normalscreen() {
   cmode = sm::NORMAL | sm::DOTOUR | sm::CENTER;
   if(viewdists && show_distance_lists) cmode |= sm::SIDE | sm::MAYDARK;
   gamescreen((vid.highlightmode == (hiliteclick ? 0 : 2)) ? 1 : 0); drawStats();
-  if(nomenukey || ISMOBILE)
-    ;
+  if(nomenukey || ISMOBILE) {}
 #if CAP_TOUR
   else if(tour::on) 
     displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(ESC) tour menu"), SDLK_ESCAPE, 16);

@@ -17,11 +17,20 @@ if [[ "$GH_HYP_RVIZ" == "rviz_1" ]]; then
   GH_AUTOTOOLS_CXXFLAGS+=" -std=c++17 -DCAP_ROGUEVIZ=1"
 fi
 
+if [[ "$GH_HYP_BRINGRIS" == "bringris_1" ]]; then
+  GH_MYMAKE_ARGS+=" -bringris"
+fi
+
 export CC=$GH_COMPILER
 export CXX=${CC%cc}++
 
 if [[ "$GH_BUILDSYS" == "makefile" ]]; then
-  make -f Makefile.simple
+  if [[ "$GH_HYP_BRINGRIS" == "bringris_1" ]]; then
+    make -f Makefile.simple bringris
+    mv bringris hyperrogue
+  else
+    make -f Makefile.simple
+  fi
 elif [[ "$GH_BUILDSYS" == "autotools" ]]; then
   autoreconf -vfi
   ./configure CXXFLAGS="${GH_AUTOTOOLS_CXXFLAGS}"

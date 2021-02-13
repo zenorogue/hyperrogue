@@ -142,6 +142,10 @@ int main(int argc, char **argv) {
       obj_dir += "/web";
       setdir += "../";
       }
+    else if(s == "-bringris") {
+      modules.push_back("rogueviz/bringris");
+      modules.push_back("rogueviz/subquotient");
+      }
     else if(s.substr(0, 2) == "-f") {
       opts += " " + s;
       obj_dir += "/";

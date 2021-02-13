@@ -108,6 +108,9 @@ endif
 hyper_OBJS = hyper$(OBJ_EXTENSION)
 hyper_LDFLAGS = $(LDFLAGS_GL) $(LDFLAGS_SDL)
 
+bringris_CXXFLAGS = -DBRINGRIS -Wno-unused-variable
+bringris_LDFLAGS = $(hyper_LDFLAGS)
+
 ifeq (${HYPERROGUE_USE_GLEW},1)
   CXXFLAGS_EARLY += -DCAP_GLEW=1
   hyper_LDFLAGS += $(LDFLAGS_GLEW)
@@ -170,6 +173,12 @@ emscripten: hyper.html
 	emcc -std=c++11 -O3 -s USE_ZLIB=1 -s LEGACY_GL_EMULATION=1 -s TOTAL_MEMORY=128MB hyperweb.cpp -o hyper.html
 
 hyper.emscripten-sources: *.cpp autohdr.h
+
+bringris.o: rogueviz/bringris.cpp autohdr.h
+	$(CXX) $(CXXFLAGS) $(bringris_CXXFLAGS) rogueviz/bringris.cpp -c -o $@
+
+bringris$(EXE_EXTENSION): bringris.o
+	$(CXX) $(CXXFLAGS) $(bringris_CXXFLAGS) bringris.o $(LDFLAGS) $(bringris_LDFLAGS) -o $@
 
 .PHONY: clean
 
