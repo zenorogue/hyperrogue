@@ -55,12 +55,20 @@ void circ_frame() {
     circ2 = sin_auto(2*min);
     }
   
+  
   ld rad1 = asin_auto(circ1);
   ld rad2 = asin_auto(circ2);
   
+  dynamicval<ld> d(circ2);  
+  if(circ2 > 1) {
+    /* circumference between 1 and 2 means the other hemisphere */
+    circ2 = 2 - circ2;
+    rad2 = M_PI - asin_auto(circ2);
+    }
+  
   vid.linewidth *= lw;
   
-  shiftmatrix at = shiftless(Id) * xpush(xdist);
+  shiftmatrix at = ggmatrix(cwt.at) * xpush(xdist);
   
   ld kdegree = 2 * M_PI / prec;
 
