@@ -23,6 +23,9 @@ EX bool comparison_mode;
 /** 0 - never use, 2 - always use, 1 = smart selection */
 EX int want_use = 1;
 
+/** generate the map for raycasting just once */
+EX bool fixed_map = false;
+
 EX ld exp_start = 1;
 EX ld exp_decay_exp = 4;
 EX ld exp_decay_poly = 10;
@@ -202,8 +205,6 @@ raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     }
 
 shared_ptr<raycaster> our_raycaster;
-
-EX void reset_raycaster() { our_raycaster = nullptr; }
 
 int deg, irays;
 
@@ -1363,9 +1364,7 @@ void enable_raycaster() {
   full_enable(our_raycaster);
   }
 
-int length, per_row, rows;
-
-void bind_array(vector<array<float, 4>>& v, GLint t, GLuint& tx, int id) {
+void bind_array(vector<array<float, 4>>& v, GLint t, GLuint& tx, int id, int length) {
   if(t == -1) println(hlog, "bind to nothing");
   glUniform1i(t, id);
 
@@ -1391,13 +1390,6 @@ void bind_array(vector<array<float, 4>>& v, GLint t, GLuint& tx, int id) {
 
 void uniform2(GLint id, array<float, 2> fl) {
   glUniform2f(id, fl[0], fl[1]);
-  }
-
-array<float, 2> enc(int i, int a) { 
-  array<float, 2> res;
-  res[0] = ((i%per_row) * deg + a + .5) / length;
-  res[1] = ((i / per_row) + .5) / rows;
-  return res;
   }
 
 color_t color_out_of_range = 0x0F0800FF;
@@ -1432,198 +1424,110 @@ transmatrix get_ms(cell *c, int a, bool mirror) {
 
 int nesting;
 
-EX void cast() {
-  // may call itself recursively in case of bugs -- just in case...
-  dynamicval<int> dn(nesting, nesting+1);
-  if(nesting > 10) return;
-  
-  if(isize(cgi.raywall) > irays) reset_raycaster();
-    
-  enable_raycaster();
-
-  auto& o = our_raycaster;
-  
-  if(need_many_cell_types() && o->uWallOffset == -1) {
-    reset_raycaster();
-    cast();
-    return;
-    }  
-  
-  if(comparison_mode) 
-    glColorMask( GL_TRUE,GL_FALSE,GL_FALSE,GL_TRUE );
-
-  vector<glvertex> screen = {
-    glhr::makevertex(-1, -1, 1),
-    glhr::makevertex(-1, +1, 1),
-    glhr::makevertex(+1, -1, 1),
-    glhr::makevertex(-1, +1, 1),
-    glhr::makevertex(+1, -1, 1),
-    glhr::makevertex(+1, +1, 1)
-    };
-
-  ld d = current_display->eyewidth();
-  if(vid.stereo_mode == sLR) d = 2 * d - 1;
-  else d = -d;
-
-  auto& cd = current_display;
-  cd->set_viewport(global_projection);
-  cd->set_mask(global_projection);
-  
-  #if CAP_VR
-  if(o->uEyeShift != -1) {
-    transmatrix T = vrhr::eyeshift;
-    if(nonisotropic)
-      T = inverse(NLP) * T;
-    glUniformMatrix4fv(o->uEyeShift, 1, 0, glhr::tmtogl_transpose3(T).as_array());
-    glUniform1f(o->uAbsUnit, vrhr::absolute_unit_in_meters);
-    }
-  if(vrhr::rendering_eye()) {
-    glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(vrhr::eyeproj).as_array());
-    }
-  #else
-  if(0) ;
-  #endif
-  else {
-    transmatrix proj = Id;
-    proj = eupush(-global_projection * d, 0) * proj;
-    proj = euscale(cd->tanfov / (vid.stereo_mode == sLR ? 2 : 1), cd->tanfov * cd->ysize / cd->xsize) * proj;
-    proj = eupush(-((cd->xcenter-cd->xtop)*2./cd->xsize - 1), -((cd->ycenter-cd->ytop)*2./cd->ysize - 1)) * proj;
-    glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(proj).as_array());
-    }
-  
-  if(!callhandlers(false, hooks_rayset, o)) {
-  
-  length = 4096;
-  per_row = length / deg;
+struct raycast_map {
   
   vector<cell*> lst;
+  map<cell*, int> ids;
 
-  cell *cs = centerover;
+  vector<transmatrix> ms;
 
-  transmatrix T = cview().T;
+  int length, per_row, rows;
+
+  vector<array<float, 4>> connections, wallcolor, texturemap, volumetric;
   
-  if(global_projection)
-    T = xpush(vid.ipd * global_projection/2) * T;
-
-  if(nonisotropic) T = NLP * T;
-  T = inverse(T);
-
-  virtualRebase(cs, T);
+  void apply_shape() {
+    length = 4096;
+    per_row = length / deg;  
+    rows = next_p2((isize(lst)+per_row-1) / per_row);  
+    int q = length * rows;
+    connections.resize(q);
+    wallcolor.resize(q);
+    texturemap.resize(q);
+    volumetric.resize(q);
+    }
   
-  int ray_fixes = 0;
-  
-  transmatrix msm = stretch::mstretch_matrix;
-
-  back:
-  for(int a=0; a<cs->type; a++)
-    if(hdist0(hybrid::ray_iadj(cs, a) * tC0(T)) < hdist0(tC0(T))) {
-      println(hlog, "ray error");
-      T = currentmap->iadj(cs, a) * T;
-      if(o->uToOrig != -1) {
-        transmatrix HT = currentmap->adj(cs, a);
-        HT = stretch::itranslate(tC0(HT)) * HT;
-        msm = HT * msm;
+  void generate_initial_ms(cell *cs) {
+    auto sa = hybrid::gen_sample_list();
+    
+    ms.clear();
+    ms.resize(sa.back().first, Id);
+    
+    for(auto& p: sa) {
+      int id = p.first;
+      cell *c = p.second;
+      if(!c) continue;
+      for(int j=0; j<c->type; j++)
+        ms[id+j] = hybrid::ray_iadj(c, j);
+      if(WDIM == 2) for(int a: {0, 1}) {
+        ms[id+c->type+a] = get_ms(c, a, false);
         }
-      cs = cs->move(a);
-      ray_fixes++;
-      if(ray_fixes > 100) return;
-      goto back;
       }
+    
+    // println(hlog, ms);
+    
+    if(!sol && !nil && (reflect_val || reg3::ultra_mirror_in())) {
+      if(BITRUNCATED) exit(1);
+      for(int j=0; j<cs->type; j++) {
+        transmatrix T = inverse(ms[j]);
+        hyperpoint h = tC0(T);
+        ld d = hdist0(h);
+        transmatrix U = rspintox(h) * xpush(d/2) * MirrorX * xpush(-d/2) * spintox(h);
+        ms.push_back(U);
+        }
+      
+      if(WDIM == 2) 
+        for(int a: {0, 1}) {
+          ms.push_back(get_ms(cs, a, true));
+          }
+      
+      if(reg3::ultra_mirror_in()) {
+        for(auto v: cgi.ultra_mirrors) 
+          ms.push_back(v);
+        }
+      }    
+
+    if(prod) {
+      for(auto p: sa) {
+        int id =p.first;
+        if(id == 0) continue;
+        ms[id-2] = Id;
+        ms[id-1] = Id;
+        }
+      }
+    }
   
-  if(true) {
+  void generate_cell_listing(cell *cs) {
     manual_celllister cl;
     cl.add(cs);
     bool optimize = !isWall3(cs);
+    // vector<int> legaldir = { -1 };
     for(int i=0; i<isize(cl.lst); i++) {
       cell *c = cl.lst[i];
       if(racing::on && i > 0 && c->wall == waBarrier) continue;
       if(optimize && isWall3(c)) continue;
-      forCellCM(c2, c) {
+      forCellIdCM(c2, d, c) {
+        // if(reflect_val == 0 && !((1<<d) & legaldir[i])) continue;
         if(rays_generate) setdist(c2, 7, c);
+        /* if(!cl.listed(c2))
+          legaldir.push_back(legaldir[i] &~ (1<<((d+3)%6)) ); */
         cl.add(c2);
         if(isize(cl.lst) >= max_cells) goto finish;
         }
       }
     finish:
     lst = cl.lst;
-    }
-  
-  rows = next_p2((isize(lst)+per_row-1) / per_row);
-  
-  map<cell*, int> ids;
-  for(int i=0; i<isize(lst); i++) ids[lst[i]] = i;
-
-  glUniform1i(o->uLength, length);
-  GLERR("uniform mediump length");
-  
-  glUniformMatrix4fv(o->uStart, 1, 0, glhr::tmtogl_transpose3(T).as_array());
-  if(o->uLP != -1) glUniformMatrix4fv(o->uLP, 1, 0, glhr::tmtogl_transpose3(inverse(NLP)).as_array());
-  GLERR("uniform mediump start");
-  uniform2(o->uStartid, enc(ids[cs], 0));
-  GLERR("uniform mediump startid");
-  glUniform1f(o->uIPD, vid.ipd);
-  GLERR("uniform mediump IPD");
-  
-  if(o->uITOA != -1) {
-    glUniformMatrix4fv(o->uITOA, 1, 0, glhr::tmtogl_transpose3(stretch::m_itoa).as_array());   
-    glUniformMatrix4fv(o->uATOI, 1, 0, glhr::tmtogl_transpose3(stretch::m_atoi).as_array());   
+    ids.clear();
+    for(int i=0; i<isize(lst); i++) ids[lst[i]] = i;
     }
 
-  if(o->uToOrig != -1) {
-    glUniformMatrix4fv(o->uToOrig, 1, 0, glhr::tmtogl_transpose3(msm).as_array());   
-    glUniformMatrix4fv(o->uFromOrig, 1, 0, glhr::tmtogl_transpose3(inverse(msm)).as_array());   
-    }
-  
-  if(o->uWallOffset != -1) {
-    glUniform1i(o->uWallOffset, wall_offset(cs));
-    glUniform1i(o->uSides, cs->type + (WDIM == 2 ? 2 : 0));
+  array<float, 2> enc(int i, int a) { 
+    array<float, 2> res;
+    res[0] = ((i%per_row) * deg + a + .5) / length;
+    res[1] = ((i / per_row) + .5) / rows;
+    return res;
     }
 
-  auto sa = hybrid::gen_sample_list();
-  
-  vector<transmatrix> ms(sa.back().first, Id);
-  
-  for(auto& p: sa) {
-    int id = p.first;
-    cell *c = p.second;
-    if(!c) continue;
-    for(int j=0; j<c->type; j++)
-      ms[id+j] = hybrid::ray_iadj(c, j);
-    if(WDIM == 2) for(int a: {0, 1}) {
-      ms[id+c->type+a] = get_ms(c, a, false);
-      }
-    }
-  
-  // println(hlog, ms);
-  
-  if(!sol && !nil && (reflect_val || reg3::ultra_mirror_in())) {
-    if(BITRUNCATED) exit(1);
-    for(int j=0; j<cs->type; j++) {
-      transmatrix T = inverse(ms[j]);
-      hyperpoint h = tC0(T);
-      ld d = hdist0(h);
-      transmatrix U = rspintox(h) * xpush(d/2) * MirrorX * xpush(-d/2) * spintox(h);
-      ms.push_back(U);
-      }
-    
-    if(WDIM == 2) 
-      for(int a: {0, 1}) {
-        ms.push_back(get_ms(cs, a, true));
-        }
-    
-    if(reg3::ultra_mirror_in()) {
-      for(auto v: cgi.ultra_mirrors) 
-        ms.push_back(v);
-      }
-    }
-  
-  vector<array<float, 4>> connections(length * rows);
-  vector<array<float, 4>> wallcolor(length * rows);
-  vector<array<float, 4>> texturemap(length * rows);
-  vector<array<float, 4>> volumetric(length * rows);
-  
-  if(1) for(cell *c: lst) {
-    int id = ids[c];
+  void generate_connections(cell *c, int id) {
     auto& vmap = volumetric::vmap;
     if(volumetric::on) {
       celldrawer dd;
@@ -1637,7 +1541,7 @@ EX void cast() {
         vcolor = (backcolor << 8);
       volumetric[u] = glhr::acolor(vcolor);
       }
-    forCellIdEx(c1, i, c) { 
+    forCellIdEx(c1, i, c) {
       int u = (id/per_row*length) + (id%per_row * deg) + i;
       if(!ids.count(c1)) {
         wallcolor[u] = glhr::acolor(color_out_of_range | 0xFF);
@@ -1707,15 +1611,161 @@ EX void cast() {
       }
     }
   
-  if(prod) {
-    for(auto p: sa) {
-      int id =p.first;
-      if(id == 0) continue;
-      ms[id-2] = Id;
-      ms[id-1] = Id;
-      }
+  void generate_connections() {
+    int id = 0;
+    for(cell* c: lst)
+      generate_connections(c, id++);
     }
+  
+  bool gms_exceeded() {
+    return isize(ms) > gms_array_size;
+    }
+
+  void assign_uniforms(raycaster* o) {
+    glUniform1i(o->uLength, length);
+    GLERR("uniform mediump length");
     
+    vector<glhr::glmatrix> gms;
+    for(auto& m: ms) gms.push_back(glhr::tmtogl_transpose3(m));
+    glUniformMatrix4fv(o->uM, isize(gms), 0, gms[0].as_array());
+    
+    bind_array(wallcolor, o->tWallcolor, txWallcolor, 4, length);
+    bind_array(connections, o->tConnections, txConnections, 3, length);
+    bind_array(texturemap, o->tTextureMap, txTextureMap, 5, length);
+    if(volumetric::on) bind_array(volumetric, o->tVolumetric, txVolumetric, 6, length);
+    }
+  
+  void create_all(cell *cs) {
+    generate_initial_ms(cs);
+    generate_cell_listing(cs);
+    apply_shape();
+    generate_connections();
+    }
+  
+  bool need_to_create(cell *cs) {
+    if(!fixed_map) return true;
+    return !ids.count(cs);
+    }
+  };
+
+unique_ptr<raycast_map> rmap;
+
+EX void reset_raycaster() { our_raycaster = nullptr; rmap = nullptr; }
+
+EX void cast() {
+  // may call itself recursively in case of bugs -- just in case...
+  dynamicval<int> dn(nesting, nesting+1);
+  if(nesting > 10) return;
+  
+  if(isize(cgi.raywall) > irays) reset_raycaster();
+    
+  enable_raycaster();
+
+  auto& o = our_raycaster;
+  
+  if(need_many_cell_types() && o->uWallOffset == -1) {
+    reset_raycaster();
+    cast();
+    return;
+    }  
+  
+  if(comparison_mode) 
+    glColorMask( GL_TRUE,GL_FALSE,GL_FALSE,GL_TRUE );
+
+  vector<glvertex> screen = {
+    glhr::makevertex(-1, -1, 1),
+    glhr::makevertex(-1, +1, 1),
+    glhr::makevertex(+1, -1, 1),
+    glhr::makevertex(-1, +1, 1),
+    glhr::makevertex(+1, -1, 1),
+    glhr::makevertex(+1, +1, 1)
+    };
+
+  ld d = current_display->eyewidth();
+  if(vid.stereo_mode == sLR) d = 2 * d - 1;
+  else d = -d;
+
+  auto& cd = current_display;
+  cd->set_viewport(global_projection);
+  cd->set_mask(global_projection);
+  
+  #if CAP_VR
+  if(o->uEyeShift != -1) {
+    transmatrix T = vrhr::eyeshift;
+    if(nonisotropic)
+      T = inverse(NLP) * T;
+    glUniformMatrix4fv(o->uEyeShift, 1, 0, glhr::tmtogl_transpose3(T).as_array());
+    glUniform1f(o->uAbsUnit, vrhr::absolute_unit_in_meters);
+    }
+  if(vrhr::rendering_eye()) {
+    glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(vrhr::eyeproj).as_array());
+    }
+  #else
+  if(0) ;
+  #endif
+  else {
+    transmatrix proj = Id;
+    proj = eupush(-global_projection * d, 0) * proj;
+    proj = euscale(cd->tanfov / (vid.stereo_mode == sLR ? 2 : 1), cd->tanfov * cd->ysize / cd->xsize) * proj;
+    proj = eupush(-((cd->xcenter-cd->xtop)*2./cd->xsize - 1), -((cd->ycenter-cd->ytop)*2./cd->ysize - 1)) * proj;
+    glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(proj).as_array());
+    }
+  
+  if(!callhandlers(false, hooks_rayset, o)) {
+  
+  cell *cs = centerover;
+
+  transmatrix T = cview().T;
+  
+  if(global_projection)
+    T = xpush(vid.ipd * global_projection/2) * T;
+
+  if(nonisotropic) T = NLP * T;
+  T = inverse(T);
+
+  virtualRebase(cs, T);
+  
+  int ray_fixes = 0;
+  
+  transmatrix msm = stretch::mstretch_matrix;
+
+  back:
+  for(int a=0; a<cs->type; a++)
+    if(hdist0(hybrid::ray_iadj(cs, a) * tC0(T)) < hdist0(tC0(T))) {
+      println(hlog, "ray error");
+      T = currentmap->iadj(cs, a) * T;
+      if(o->uToOrig != -1) {
+        transmatrix HT = currentmap->adj(cs, a);
+        HT = stretch::itranslate(tC0(HT)) * HT;
+        msm = HT * msm;
+        }
+      cs = cs->move(a);
+      ray_fixes++;
+      if(ray_fixes > 100) return;
+      goto back;
+      }
+  
+  glUniformMatrix4fv(o->uStart, 1, 0, glhr::tmtogl_transpose3(T).as_array());
+  if(o->uLP != -1) glUniformMatrix4fv(o->uLP, 1, 0, glhr::tmtogl_transpose3(inverse(NLP)).as_array());
+  GLERR("uniform mediump startid");
+  glUniform1f(o->uIPD, vid.ipd);
+  GLERR("uniform mediump IPD");
+  
+  if(o->uITOA != -1) {
+    glUniformMatrix4fv(o->uITOA, 1, 0, glhr::tmtogl_transpose3(stretch::m_itoa).as_array());   
+    glUniformMatrix4fv(o->uATOI, 1, 0, glhr::tmtogl_transpose3(stretch::m_atoi).as_array());   
+    }
+
+  if(o->uToOrig != -1) {
+    glUniformMatrix4fv(o->uToOrig, 1, 0, glhr::tmtogl_transpose3(msm).as_array());   
+    glUniformMatrix4fv(o->uFromOrig, 1, 0, glhr::tmtogl_transpose3(inverse(msm)).as_array());   
+    }
+  
+  if(o->uWallOffset != -1) {
+    glUniform1i(o->uWallOffset, wall_offset(cs));
+    glUniform1i(o->uSides, cs->type + (WDIM == 2 ? 2 : 0));
+    }
+
   vector<GLint> wallstart;
   for(auto i: cgi.wallstart) wallstart.push_back(i);
   glUniform1iv(o->uWallstart, isize(wallstart), &wallstart[0]);  
@@ -1757,27 +1807,25 @@ EX void cast() {
   
   glUniform1f(o->uExpStart, exp_start);
 
-  vector<glhr::glmatrix> gms;
-  for(auto& m: ms) gms.push_back(glhr::tmtogl_transpose3(m));
-  glUniformMatrix4fv(o->uM, isize(gms), 0, gms[0].as_array());
-  
-  if(isize(gms) > gms_array_size) {
-    gms_array_size = isize(gms);
-    println(hlog, "changing gms_array_size to ", gms_array_size);
-    reset_raycaster();
-    cast();
-    return;
-    }
-  
-  bind_array(wallcolor, o->tWallcolor, txWallcolor, 4);
-  bind_array(connections, o->tConnections, txConnections, 3);
-  bind_array(texturemap, o->tTextureMap, txTextureMap, 5);
-  if(volumetric::on) bind_array(volumetric, o->tVolumetric, txVolumetric, 6);
-  
   auto cols = glhr::acolor(darkena(backcolor, 0, 0xFF));
   if(o->uFogColor != -1)
     glUniform4f(o->uFogColor, cols[0], cols[1], cols[2], cols[3]);
+
+  if(!rmap) rmap = (unique_ptr<raycast_map>) new raycast_map;
   
+  if(rmap->need_to_create(cs)) {
+    rmap->create_all(cs);  
+    if(rmap->gms_exceeded()) {
+      gms_array_size = isize(rmap->ms);
+      println(hlog, "changing gms_array_size to ", gms_array_size);
+      reset_raycaster();
+      cast();
+      return;
+      }
+    rmap->assign_uniforms(&*o);
+    }
+  GLERR("uniform mediump start");
+  uniform2(o->uStartid, rmap->enc(rmap->ids[cs], 0));
   }
 
   #if CAP_VERTEXBUFFER
@@ -2078,6 +2126,7 @@ void addconfig() {
   addsaver(max_iter_sol, "ray_max_iter_sol");
   addsaver(max_cells, "ray_max_cells");
   addsaver(rays_generate, "ray_generate");
+  param_b(fixed_map, "ray_fixed_map");
   }
 auto hookc = addHook(hooks_configfile, 100, addconfig);
 #endif
