@@ -1339,6 +1339,8 @@ int min_frame = 0, max_frame = 999999;
 
 int numturns = 0;
 
+EX hookset<void(int, int)> hooks_record_anim;
+
 EX bool record_animation_of(reaction_t content) {
   lastticks = 0;
   ticks = 0;
@@ -1346,6 +1348,7 @@ EX bool record_animation_of(reaction_t content) {
   for(int i=0; i<noframes; i++) {
     if(i < min_frame || i > max_frame) continue;
     printf("%d/%d\n", i, noframes);
+    callhooks(hooks_record_anim, i, noframes);
     int newticks = i * period / noframes;
     cmode = (env_shmup ? sm::NORMAL : 0);
     while(ticks < newticks) shmup::turn(1), ticks++;
