@@ -176,6 +176,9 @@ struct bool_setting : public setting {
   virtual bool affects(void *v) override { return v == value; }
   virtual void show_edit_option(char key) override;
   virtual cld get_cld() override { return *value ? 1 : 0; }
+  virtual void load_from(const string& s) {
+    *value = parseint(s);
+    }
   };
 
 struct custom_setting : public setting {  
