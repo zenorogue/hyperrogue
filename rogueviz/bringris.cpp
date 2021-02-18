@@ -3,7 +3,7 @@
 
 #ifdef BRINGRIS
 
-#define CUSTOM_CAPTION "Bringris 1.3"
+#define CUSTOM_CAPTION "Bringris 1.4"
 
 #define MAXMDIM 4
 
