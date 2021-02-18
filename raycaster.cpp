@@ -2121,7 +2121,7 @@ void addconfig() {
   param_f(reflect_val, "ray_reflect_val");
   param_f(hard_limit, "ray_hard_limit");
   addsaver(want_use, "ray_want_use");
-  addsaver(exp_decay_poly, "ray_exp_decay_poly");
+  param_f(exp_decay_poly, "ray_exp_decay_poly");
   addsaver(max_iter_iso, "ray_max_iter_iso");
   addsaver(max_iter_sol, "ray_max_iter_sol");
   addsaver(max_cells, "ray_max_cells");
