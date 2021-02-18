@@ -370,7 +370,7 @@ EX float_setting *param_f(ld& val, const string p, const string s, ld dft) {
   val = dft;
   u->add_as_saver();
   auto f = &*u;
-  params[s] = std::move(u);
+  params[u->parameter_name] = std::move(u);
   return f;
   }
 
@@ -421,7 +421,7 @@ EX bool_setting *param_b(bool& val, const string s, bool dft) {
   val = dft;
   u->add_as_saver();
   auto f = &*u;
-  params[s] = std::move(u);
+  params[u->parameter_name] = std::move(u);
   return f;
   }
 
