@@ -1023,7 +1023,7 @@ EX void initConfig() {
   param_f(camera_speed, "camspd", "camera-speed", 1);
   param_f(camera_rot_speed, "camrot", "camera-rot-speed", 1);
 
-  addsaver(panini_alpha, "panini_alpha", 0);
+  param_f(panini_alpha, "panini_alpha", 0);
 
   callhooks(hooks_configfile);
   
