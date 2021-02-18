@@ -34,6 +34,7 @@ EX int ctof012(cell *c) {
   }
 
 int gp_threecolor() {
+  if(cgflags & qPORTALSPACE) return 0;
   if(!GOLDBERG) return 0;
   #if CAP_GP
   if(S3 == 3 && (gp::param.first - gp::param.second) % 3 == 0) return 2;
@@ -42,6 +43,7 @@ int gp_threecolor() {
   }
 
 int eupattern(cell *c) {
+  if(cgflags & qPORTALSPACE) return 0;
   auto co = euc2_coordinates(c);
   int x = co.first, y = co.second;
   if(a4)
@@ -57,6 +59,7 @@ int eupattern4(cell *c) {
   }
 
 EX bool ishept(cell *c) {
+  if(cgflags & qPORTALSPACE) return 0;
   // EUCLIDEAN
   if(euc::in() && PURE) return eupattern(c) == 0;
   else if(hybri) { cell *c1 = hybrid::get_where(c).first; return c1 == c1->master->c7; }
@@ -64,6 +67,7 @@ EX bool ishept(cell *c) {
   }
 
 EX bool ishex1(cell *c) {
+  if(cgflags & qPORTALSPACE) return 0;
   // EUCLIDEAN
   if(euc::in() && PURE) return eupattern(c) == 1;
   #if CAP_GP
@@ -73,6 +77,7 @@ EX bool ishex1(cell *c) {
   }
 
 bool ishex2(cell *c) {
+  if(cgflags & qPORTALSPACE) return 0;
   // EUCLIDEAN
   if(euc::in() && PURE) return eupattern(c) == 1;
   #if CAP_GP
@@ -82,6 +87,7 @@ bool ishex2(cell *c) {
   }
 
 EX int chessvalue(cell *c) {
+  if(cgflags & qPORTALSPACE) return 0;
   #if CAP_ARCM
   if(arcm::in()) 
     return arcm::chessvalue(c);

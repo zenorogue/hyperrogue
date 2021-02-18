@@ -953,6 +953,7 @@ EX cdata *arcmCdata(cell *c) {
 
 EX int getCdata(cell *c, int j) {
   if(fake::in()) return FPIU(getCdata(c, j));
+  if(experimental) return 0;
   if(hybri) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
   else if(INVERSE) {
     cell *c1 = gp::get_mapped(c);
@@ -978,6 +979,7 @@ EX int getCdata(cell *c, int j) {
 
 EX int getBits(cell *c) {
   if(fake::in()) return FPIU(getBits(c));
+  if(experimental) return 0;
   if(hybri) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
   else if(INVERSE) {
     cell *c1 = gp::get_mapped(c);

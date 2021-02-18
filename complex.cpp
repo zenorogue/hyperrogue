@@ -3578,6 +3578,7 @@ EX namespace windmap {
     }
 
   EX void create() {
+    if(cgflags & qPORTALSPACE) return;
     samples.clear();
     neighbors.clear();
     getid.clear();

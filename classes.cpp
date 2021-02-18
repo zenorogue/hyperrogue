@@ -803,6 +803,8 @@ static const flagtype qAFFINE          = Flag(24);
 
 static const flagtype qULTRA           = Flag(25);
 
+static const flagtype qPORTALSPACE     = Flag(26);
+
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
 static const int OINF = 100;

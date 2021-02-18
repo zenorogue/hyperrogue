@@ -884,7 +884,7 @@ EX void describeMouseover() {
       out += ")";
       }
 
-    if(cheater && euc::in(3)) {
+    if(cheater && euc::in(3) && !(cgflags & qPORTALSPACE)) {
       auto co = euc::get_ispacemap()[c->master];
       out += " (" + its(co[0]);
       for(int i=1; i<WDIM; i++) out += "," + its(co[i]);

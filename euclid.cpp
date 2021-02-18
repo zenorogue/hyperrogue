@@ -39,7 +39,12 @@ EX namespace euc {
     static const coord D1 = main_axes[1];
     static const coord D2 = main_axes[2];
     vector<coord> shifttable;
-    switch(geometry) {
+        
+    /* for portal spaces... */
+    auto g = geometry;
+    if(S7 == 6 && WDIM == 3) g = gCubeTiling;
+
+    switch(g) {
       case gCubeTiling:
         shifttable = { +D0, +D1, +D2 };
         break;
@@ -340,6 +345,7 @@ EX namespace euc {
     }
   
   EX bool pseudohept(cell *c) {
+    if(cgflags & qPORTALSPACE) return false;
     coord co = cubemap()->ispacemap[c->master];
     if(S7 == 12) {
       for(int i=0; i<3; i++) if((co[i] & 1)) return false;
@@ -415,6 +421,7 @@ EX namespace euc {
     }
 
   EX void set_land(cell *c) {
+    if(cgflags & qPORTALSPACE) return;
     setland(c, specialland); 
     auto m = cubemap();
     auto co = m->ispacemap[c->master];
