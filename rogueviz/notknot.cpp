@@ -128,7 +128,7 @@ struct hrmap_notknot : hrmap {
     /* used for painting walls in a single color */
     ucover *wall_merge;
     color_t wallcolor, wallcolor2;
-    /* 0 = live, 1 = wall, 2 = merged, 3 = overflow */
+    /* 0 = live, 1 = wall, 2 = merged, 4 = overflow */
     int state;
     /* index in the table `all` */
     int index;
@@ -252,7 +252,7 @@ struct hrmap_notknot : hrmap {
         if(!uf || !ut) println(hlog, "null unified");
         /* we always keep the one with the lower index */
         if(uf->index < ut->index) swap(uf, ut);        
-        uf->state = 2; uf->merged_into = ut;
+        uf->state |= 2; uf->merged_into = ut;
         if(uf->where != ut->where)
           println(hlog, "where confusion");
         for(int d=0; d<6; d++) {
@@ -281,7 +281,7 @@ struct hrmap_notknot : hrmap {
       if(i >= isize(all)) break;
       auto u = all[i++];
       if(u->state != 0) continue;
-      if(i > terminate_at) { u->state = 3; continue; }
+      if(i > terminate_at) { u->state |= 4; continue; }
 
       for(int k=0; k<6; k++) gen_adj(u, k);
 
@@ -294,17 +294,45 @@ struct hrmap_notknot : hrmap {
         if(ul->state != 0) continue;
         auto ukl = gen_adj(uk, l);
         auto ulk = gen_adj(ul, k);
-        if(ukl->state != 0) {
-          funion(ukl, ulk);
-          continue;
-          }
+        if(ukl->state != 0) continue;
         if(ulk->state != 0) continue;
         if(ukl == ulk) continue; /* okay */
         if(!ukl || !ulk) println(hlog, "null returned");
         unify.emplace_back(ukl, ulk);
         }
       
-      /* make the walls single-colored */
+      /* try to make it finite */
+      auto ux = u;
+      for(int iter=0; iter<3; iter++)
+        for(int w: {0, 0, 1, 1, 3, 3, 4, 4}) {
+          ux = gen_adj(ux, w);
+          if(ux->state != 0) goto nxt;
+          }
+      unify.emplace_back(u, ux);
+      
+      nxt: ;
+      }
+    
+    /* make the walls single-colored */
+
+    for(int i=0; i<isize(all); i++) {
+      auto u = all[i];
+      if(u->state != 0) continue;
+
+      /* convex corners */
+      for(int k=0; k<6; k++)
+      for(int l=0; l<6; l++) {
+        auto uk = gen_adj(u, k);
+        if(uk->state != 0) continue;
+        auto ul = gen_adj(u, l);
+        if(ul->state != 0) continue;
+        auto ukl = gen_adj(uk, l);
+        auto ulk = gen_adj(ul, k);
+        if(ukl->state != 0)
+          funion(ukl, ulk);
+        }
+
+      /* flat areas */
       for(int k=0; k<6; k++)
       for(int l=0; l<6; l++) {
         auto uk = gen_adj(u, k);
@@ -316,6 +344,7 @@ struct hrmap_notknot : hrmap {
         funion(ul, ukl);        
         }
 
+      /* concave corners */
       for(int k=0; k<6; k++)
       for(int l=0; l<6; l++) {
         auto uk = gen_adj(u, k);
@@ -324,19 +353,7 @@ struct hrmap_notknot : hrmap {
         if(ul->state != 1) continue;
         if(abs(k-l) != 3)
           funion(ul, uk);        
-        }
-      
-      /* try to make it finite */
-      
-      auto ux = u;
-      for(int iter=0; iter<3; iter++)
-        for(int w: {0, 0, 1, 1, 3, 3, 4, 4}) {
-          ux = gen_adj(ux, w);
-          if(ux->state != 0) goto nxt;
-          }
-      unify.emplace_back(u, ux);
-      
-      nxt: ;
+        }      
       }
     
     /* statistics */
@@ -360,7 +377,7 @@ struct hrmap_notknot : hrmap {
     /* create the result map */
     for(int i=0; i<isize(all); i++) {
       auto u = all[i];
-      if(u->state == 2) continue;
+      if(u->state & 2) continue;
       if(u->state == 0) wheres.insert(all[i]->where);
       u->result = tailored_alloc<heptagon> (S7);
       u->result->c7 = newCell(S7, u->result);
@@ -370,7 +387,7 @@ struct hrmap_notknot : hrmap {
 
     for(int i=0; i<isize(all); i++) {
       auto u = all[i];
-      if(u->state == 2) continue;
+      if(u->state & 2) continue;
 
       for(int d=0; d<S7; d++) {        
         cmov(u->where, d);
@@ -391,23 +408,47 @@ struct hrmap_notknot : hrmap {
     
     for(int k=0; k<23; k++) hrand(5);
 
+    int colors_used = 0;
+
     for(int i=0; i<isize(all); i++) 
-      if(true) // if(all[i]->state == 1)
+      all[i]->wallcolor = 0;
+
+    for(int i=0; i<isize(all); i++) 
+      if(all[i]->state == 1)
+        ufind(all[i])->wallcolor++;
+        
+    map<int, int> sizes;
+
+    for(int i=0; i<isize(all); i++) 
+      if((all[i]->state & 1) && ufind(all[i]) == all[i] && all[i]->wallcolor)
+        colors_used++,
+        sizes[all[i]->wallcolor]++;
+    
+    for(auto p: sizes) 
+      println(hlog, "size = ", p.first, " times ", p.second);
+
+    println(hlog, "colors_used = ", colors_used);
+
+    for(int i=0; i<isize(all); i++) 
+      if((all[i]->state & 1) && ufind(all[i]) == all[i]) {
         all[i]->wallcolor = hrand(0x1000000) | 0x404040,
         all[i]->wallcolor2 = hrand(0x1000000) | 0x404040;
-
+        }
+      
     for(int i=0; i<isize(all); i++) {
       auto u = all[i];
       if(!u->result) continue;
       cell *c = u->result->c7;
       setdist(c, 7, c);
       c->land = laCanvas;
-      if(u->state == 1) {
+      if(u->state & 1) {
         c->wall = waWaxWall;
         c->landparam = hrand(100) < 10 ? ufind(u)->wallcolor2 : ufind(u)->wallcolor;
-        if(!(c->landparam & 0x404040)) println(hlog, "color found ", c->landparam);
+        if(!(ufind(u)->state & 1)) println(hlog, "connected to state ", ufind(u)->state);
+        if(ufind(u) == u) c->landparam = 0xFFFFFF;
+        // if(!(c->landparam & 0x404040)) println(hlog, "color found ", c->landparam);
         }
-      else if(u->state == 3)
+      else if(u->state & 4)
         c->wall = waBigTree;
       else 
         c->wall = waNone;
