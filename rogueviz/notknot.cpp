@@ -2,12 +2,19 @@
 
 /** 
 
-Blocky Knot Portal: https://www.youtube.com/watch?v=1TMY2U4_9Qg
+* mg 2 in old video
+
+Blocky Knot Portal: 
 
 compile with: mymake rogueviz/notknot
 
 the video has been created with the following options:
--noplayer -canvas-random 20 -geo notknot -sight3 0.5 -ray-cells 600000 smooth_scrolling=1 camspd=10 panini_alpha=1 fov=150 -shot-hd ray_exp_decay_poly=30 ray_reflect_val=0.15 ray_fixed_map=1
+
+https://youtu.be/1TMY2U4_9Qg
+nk_margin=2 -noplayer -canvas-random 20 -geo notknot -sight3 0.5 -ray-cells 600000 smooth_scrolling=1 camspd=10 panini_alpha=1 fov=150 -shot-hd ray_exp_decay_poly=30 ray_fixed_map=1 
+
+https://youtu.be/eb2DhCcGH7U
+nk_margin=4 -noplayer -canvas-random 20 -geo notknot -sight3 0.5 -ray-cells 600000 smooth_scrolling=1 camspd=10 panini_alpha=1 fov=150 -shot-hd ray_exp_decay_poly=30 ray_fixed_map=1 -ray-iter 100 ray_reflect_val=0.30
 
 The algorithm here is as follows:
 
@@ -28,10 +35,21 @@ The algorithm here is as follows:
 
 */
 
-
 namespace hr {
 
-const int terminate_at = 5000000;
+namespace notknot {
+
+/* how many times we need to loop around the portal frame to get back to the same space */
+/* the number of the worlds is: 1 (loop=1), 6 (loop=2), 24, 96, 600, infinity (loop>5) */
+int loop = 3;
+
+/* extra space around the knot */
+int margin = 4;
+
+/* the scale factor for the knot */
+int knotsize = 3;
+
+int terminate_at = 500000000;
 
 eGeometry gNotKnot(eGeometry(-1));
 
@@ -181,7 +199,7 @@ struct hrmap_notknot : hrmap {
     
     vector<heptagon*> trifoil;
     
-    int step = 3;
+    int step = knotsize;
 
     for(int i=0; i<3; i++) {
       for(auto m: {3, 3, 3, 3, 5, 5, 1, 0, 0, 0, 0, 0}) for(int rep=0; rep<step; rep++) {
@@ -194,7 +212,7 @@ struct hrmap_notknot : hrmap {
         }
       }
     
-    int mg = 2;
+    int& mg = margin;
 
     for(int i=cmin[0]-mg; i<=cmax[0]+mg; i++)
     for(int j=cmin[1]-mg; j<=cmax[1]+mg; j++)
@@ -303,7 +321,7 @@ struct hrmap_notknot : hrmap {
       
       /* try to make it finite */
       auto ux = u;
-      for(int iter=0; iter<3; iter++)
+      for(int iter=0; iter<loop; iter++)
         for(int w: {0, 0, 1, 1, 3, 3, 4, 4}) {
           ux = gen_adj(ux, w);
           if(ux->state != 0) goto nxt;
@@ -445,7 +463,6 @@ struct hrmap_notknot : hrmap {
         c->wall = waWaxWall;
         c->landparam = hrand(100) < 10 ? ufind(u)->wallcolor2 : ufind(u)->wallcolor;
         if(!(ufind(u)->state & 1)) println(hlog, "connected to state ", ufind(u)->state);
-        if(ufind(u) == u) c->landparam = 0xFFFFFF;
         // if(!(c->landparam & 0x404040)) println(hlog, "color found ", c->landparam);
         }
       else if(u->state & 4)
@@ -485,6 +502,14 @@ void create_notknot() {
   gi.menu_displayed_name = "notknot";
   }
   
-auto shot_hooks = addHook(hooks_initialize, 100, create_notknot);
+auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
+  + addHook(hooks_configfile, 100, [] {
+    param_i(loop, "nk_loop");
+    param_i(margin, "nk_margin");
+    param_i(knotsize, "nk_knotsize");
+    param_i(terminate_at, "nk_terminate");
+    });
+
+}
 
 }
