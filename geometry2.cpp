@@ -784,4 +784,68 @@ vector<hyperpoint> hrmap::get_vertices(cell* c) {
   return res;
   }
 
+map<cell*, map<cell*, vector<transmatrix>>> brm_structure;
+
+EX void generate_brm(cell *c1) {
+  set<unsigned> visited_by_matrix;
+  queue<pair<cell*, transmatrix>> q;
+  map<cell*, ld> cutoff;
+  auto& res = brm_structure[c1];
+  
+  auto enqueue = [&] (cell *c, const transmatrix& T) {
+    auto b = bucketer(tC0(T));
+    if(visited_by_matrix.count(b)) return;
+    visited_by_matrix.insert(b);
+    q.emplace(c, T);
+    };
+  
+  enqueue(c1, Id);
+  while(!q.empty()) {
+    cell *c2;
+    transmatrix T;
+    tie(c2,T) = q.front();
+    q.pop();
+    
+    ld mindist = HUGE_VAL, maxdist = 0;
+    for(int i=0; i<c1->type; i++)
+    for(int j=0; j<c2->type; j++) {
+      ld d = hdist(get_corner_position(c1, i), T * get_corner_position(c2, j));
+      if(d < mindist) mindist = d;
+      if(d > maxdist) maxdist = d;
+      }
+    
+    auto& cu = cutoff[c2];
+    if(cu == 0 || cu > maxdist) 
+      cu = maxdist;
+    
+    if(mindist >= cu) continue;
+    res[c2].push_back(T);
+    
+    forCellIdCM(c3, i, c2) enqueue(c3, T * currentmap->adj(c2, i));
+    }
+  
+  vector<int> cts;
+  for(auto& p: res) cts.push_back(isize(p.second));
+  
+  println(hlog, "for ", c1, " : ", isize(cts));
+  }
+
+/** this function exhaustively finds the best transmatrix from (c1,h1) to (c2,h2) */
+EX const transmatrix& brm_get(cell *c1, hyperpoint h1, cell *c2, hyperpoint h2) {
+  if(!brm_structure.count(c1))
+    generate_brm(c1);
+  transmatrix *result = nullptr;
+  ld best = HUGE_VAL;
+  for(auto& t: brm_structure[c1][c2]) {
+    ld d = hdist(h1, t * h2);
+    if(d < best) best = d, result = &t;
+    }
+  return *result;
+  }
+
+int brm_hook = addHook(hooks_clearmemory, 0, []() {
+  brm_structure.clear();
+  });
+
+
   }
