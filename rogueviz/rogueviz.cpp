@@ -1118,7 +1118,9 @@ void showMenu() {
     }
   dialog::addBoolItem_action(XLAT("vertices in 3D"), rog3, 'v');
   dialog::addSelItem(XLAT("vertex shape"), its(vertex_shape), 'w');
-  dialog::add_action_push([] { vertex_shape = (1 + vertex_shape) & 3; });
+  dialog::add_action([] { 
+    vertex_shape = (1 + vertex_shape) & 3; 
+    });
 
   dialog::add_key_action('z', [] {
     for(int i=0; i<isize(named)-1; i++) if(named[i] == cwt.at)
