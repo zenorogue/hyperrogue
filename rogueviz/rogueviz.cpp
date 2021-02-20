@@ -585,8 +585,13 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
 
   int lid = shmup::lmousetarget ? shmup::lmousetarget->pid : -2;
   
+  bool multidraw = quotient;
+  
+  bool use_brm = bounded && isize(currentmap->allcells()) <= 1000;
+        
   if(!lshiftclick) for(int j=0; j<isize(vd.edges); j++) {
     edgeinfo *ei = vd.edges[j].second;
+    if(multidraw && ei->i != i) continue;
     vertexdata& vd1 = vdata[ei->i];
     vertexdata& vd2 = vdata[ei->j];
 
@@ -602,8 +607,6 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
 
     // if(hilite) ghilite = true;
     
-    bool multidraw = quotient;
-        
     if(ei->lastdraw < frameid || multidraw) { 
       ei->lastdraw = frameid;
       
@@ -627,13 +630,21 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
       
       alpha >>= darken;
 
-      shiftmatrix gm1 = 
-        (multidraw || elliptic) ? V * memo_relative_matrix(vd1.m->base, c) :
-        ggmatrix(vd1.m->base);
-      shiftmatrix gm2 = 
-        (multidraw || elliptic) ? V * memo_relative_matrix(vd2.m->base, c) :
-        ggmatrix(vd2.m->base);
-                
+      shiftmatrix gm1, gm2;
+      
+      if(use_brm) {
+        gm1 = V * memo_relative_matrix(vd1.m->base, c);
+        gm2 = gm1 * brm_get(vd1.m->base, tC0(vd1.m->at), vd2.m->base, tC0(vd2.m->at));
+        }
+      else if(multidraw || elliptic) {
+        gm1 = V * memo_relative_matrix(vd1.m->base, c);
+        gm2 = V * memo_relative_matrix(vd2.m->base, c);
+        }
+      else {
+        gm1 = ggmatrix(vd1.m->base);
+        gm2 = ggmatrix(vd2.m->base);
+        }
+      
       shiftpoint h1 = gm1 * vd1.m->at * C0;
       shiftpoint h2 = gm2 * vd2.m->at * C0;
       
@@ -677,7 +688,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
           ei->orig = center; // cwt.at;
           ei->prec.clear();
           
-          shiftmatrix T = ggmatrix(ei->orig);
+          const shiftmatrix& T = multidraw ? V : ggmatrix(ei->orig);
           
           if(callhandlers(false, hooks_alt_edges, ei, true)) ;
           else if(fat_edges) {
@@ -702,7 +713,10 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
           else 
             storeline(ei->prec, inverse_shift(T, h1), inverse_shift(T, h2));
           }
-        queue_prec(multidraw ? V : ggmatrix(ei->orig), ei, col);
+        
+        const shiftmatrix& T = multidraw ? V : ggmatrix(ei->orig);
+
+        queue_prec(T, ei, col);
         if(elliptic) queue_prec(ggmatrix(ei->orig) * centralsym, ei, col);
         }
       }
