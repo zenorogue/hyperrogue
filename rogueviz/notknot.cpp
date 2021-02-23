@@ -636,8 +636,14 @@ auto hook1=
         // fov = 150;
         ray::exp_decay_poly = 30;
         ray::fixed_map = true;
-        ray::max_iter_iso = 40;
+        ray::max_iter_iso = 60;
         showstartmenu = false;
+        #if CAP_VR
+        vrhr::hsm = vrhr::eHeadset::holonomy;
+        vrhr::eyes = vrhr::eEyes::truesim;
+        vrhr::cscr = vrhr::eCompScreen::eyes;
+        vrhr::absolute_unit_in_meters = 0.2;
+        #endif
         // ray::reflect_val = 0.3;
         }
       });
