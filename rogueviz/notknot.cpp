@@ -250,6 +250,7 @@ struct hrmap_notknot : hrmap {
     int i = 0;
 
     all.emplace_back(new ucover(create_trifoil_knot(), 0));    
+    all[0]->index = 0;
     
     bool first = true;
 
