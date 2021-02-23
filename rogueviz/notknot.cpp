@@ -1,3 +1,7 @@
+#ifdef NOTKNOT
+#include "../hyper.cpp"
+#endif
+
 #include "../hyper.h"
 
 /** 
@@ -15,6 +19,10 @@ nk_margin=2 -noplayer -canvas-random 20 -geo notknot -sight3 0.5 -ray-cells 6000
 
 https://youtu.be/eb2DhCcGH7U
 nk_margin=4 -noplayer -canvas-random 20 -geo notknot -sight3 0.5 -ray-cells 600000 smooth_scrolling=1 camspd=10 panini_alpha=1 fov=150 -shot-hd ray_exp_decay_poly=30 ray_fixed_map=1 -ray-iter 100 ray_reflect_val=0.30
+
+https://youtu.be/vFLZ2NGtuGw
+selfhide=1 loop=4 nk_margin=4 -noplayer -canvas-random 20 -geo notknot -sight3 0.5 -ray-cells 600000 smooth_scrolling=1 camspd=10 panini_alpha=1 fov=150 -shot-hd ray_exp_decay_poly=30 ray_fixed_map=1 -ray-iter 100 ray_reflect_val=0.30
+
 
 The algorithm here is as follows:
 
@@ -50,6 +58,9 @@ int margin = 4;
 int knotsize = 3;
 
 int terminate_at = 500000000;
+
+/* make a self-hiding knot */
+bool self_hiding = false;
 
 eGeometry gNotKnot(eGeometry(-1));
 
@@ -223,7 +234,7 @@ struct hrmap_notknot : hrmap {
         at(i,j,k)->zebraval = 0;
       
     for(auto h: trifoil)
-        h->zebraval = 1;
+        h->zebraval = 9;
     
     return at(cmax[0], cmax[1], cmax[2]);
     }
@@ -240,22 +251,29 @@ struct hrmap_notknot : hrmap {
 
     all.emplace_back(new ucover(create_trifoil_knot(), 0));    
     
+    bool first = true;
+
     auto gen_adj = [&] (ucover *u, int d) {
       if(u->ptr[d]) return u->ptr[d];
       cmov(u->where, d);
       auto x = u->where->move(d);
       auto d1 = u->where->c.spin(d);
-      if(x->zebraval > 1) {
+      auto z = x->zebraval;
+      if(z & 6) {
         println(hlog, "zebraval failure!");
         exit(3);
         x->zebraval = 0;
         }
-      u->ptr[d] = new ucover(x, x->zebraval);
+      if(!first && (z & 8))
+        z &=~ 9;
+      u->ptr[d] = new ucover(x, z);
       u->ptr[d]->ptr[d1] = u;
       u->ptr[d]->index = isize(all);
       all.push_back(u->ptr[d]);
       return u->ptr[d];
       };
+    
+    back:
     
     while(true) {
     
@@ -269,7 +287,12 @@ struct hrmap_notknot : hrmap {
         if(uf == ut) continue;
         if(!uf || !ut) println(hlog, "null unified");
         /* we always keep the one with the lower index */
-        if(uf->index < ut->index) swap(uf, ut);        
+        if(uf->index < ut->index) swap(uf, ut);
+
+        /* if a knot is removed, remove the other copy */
+        if((uf->state & 1) && !(ut->state & 1))
+          uf->state &=~ 1;
+
         uf->state |= 2; uf->merged_into = ut;
         if(uf->where != ut->where)
           println(hlog, "where confusion");
@@ -356,9 +379,9 @@ struct hrmap_notknot : hrmap {
         auto uk = gen_adj(u, k);
         if(uk->state != 0) continue;
         auto ul = gen_adj(u, l);
-        if(ul->state != 1) continue;
+        if(!(ul->state & 1)) continue;
         auto ukl = gen_adj(uk, l);
-        if(ukl->state != 1) continue;
+        if(!(ukl->state & 1)) continue;
         funion(ul, ukl);        
         }
 
@@ -366,9 +389,9 @@ struct hrmap_notknot : hrmap {
       for(int k=0; k<6; k++)
       for(int l=0; l<6; l++) {
         auto uk = gen_adj(u, k);
-        if(uk->state != 1) continue;
+        if(!(uk->state & 1)) continue;
         auto ul = gen_adj(u, l);
-        if(ul->state != 1) continue;
+        if(!(ul->state & 1)) continue;
         if(abs(k-l) != 3)
           funion(ul, uk);        
         }      
@@ -379,9 +402,9 @@ struct hrmap_notknot : hrmap {
     
     for(auto v: all) {
       if(v->state == 0) lives++;
-      if(v->state == 1) walls++;
-      if(v->state == 2) merged++;
-      if(v->state == 3) overflow++;
+      if(v->state & 1) walls++;
+      if(v->state & 2) merged++;
+      if(v->state & 4) overflow++;
       }
       
     set<heptagon*> wheres;
@@ -432,7 +455,8 @@ struct hrmap_notknot : hrmap {
       all[i]->wallcolor = 0;
 
     for(int i=0; i<isize(all); i++) 
-      if(all[i]->state == 1)
+      if(all[i]->state & 1)
+      if(!(all[i]->state & 2))
         ufind(all[i])->wallcolor++;
         
     map<int, int> sizes;
@@ -446,6 +470,22 @@ struct hrmap_notknot : hrmap {
       println(hlog, "size = ", p.first, " times ", p.second);
 
     println(hlog, "colors_used = ", colors_used);
+
+    if(first && self_hiding) {
+      ucover *what = nullptr;
+      for(int i=0; i<isize(all); i++) 
+        if((all[i]->state & 1) && (all[i]->state & 8) && !(all[i]->state & 2))
+          what = ufind(all[i]);
+
+      for(int i=0; i<isize(all); i++) 
+        if((all[i]->state & 1) && ufind(all[i]) == what) 
+          all[i]->state &=~ 9;
+        
+      println(hlog, "removed one knot!");
+        
+      first = false; i = 0;
+      goto back;
+      }
 
     for(int i=0; i<isize(all); i++) 
       if((all[i]->state & 1) && ufind(all[i]) == all[i]) {
