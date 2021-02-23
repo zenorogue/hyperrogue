@@ -2108,7 +2108,8 @@ int readArgs() {
   return 0;
   }
 
-auto hook = addHook(hooks_args, 100, readArgs);
+auto hook = addHook(hooks_args, 100, readArgs)
+ + addHook(hooks_clearmemory, 40, [] { rmap = {}; });
 #endif
 
 #if CAP_CONFIG
