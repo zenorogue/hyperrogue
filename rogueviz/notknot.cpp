@@ -520,6 +520,17 @@ struct hrmap_notknot : hrmap {
   transmatrix adj(heptagon *h, int i) override {
     return euc->adj(h, i);
     }
+    
+  ~hrmap_notknot() {
+    for(auto uc: all) {
+      if(uc && uc->result) {
+        tailored_delete(uc->result->c7);
+        tailored_delete(uc->result);
+        }
+      if(uc) delete uc;        
+      }
+    delete euc;
+    }
   
   };
 
@@ -549,15 +560,88 @@ void regenerate() {
     start_game();
     }
   }
+
+void show() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);
+  dialog::init(XLAT("notknot"), 0xFFFFFFFF, 150, 0);
+  
+  add_edit(loop);
+  add_edit(margin);
+  add_edit(knotsize);
+  add_edit(self_hiding);
+  
+  dialog::addBreak(100);
+
+  dialog::addItem(XLAT("configure raycasting"), 'A');
+  dialog::add_action_push(ray::configure);
+
+  #if CAP_VR
+  dialog::addBoolItem(XLAT("VR settings"), vrhr::active(), 'v');
+  dialog::add_action_push(vrhr::show_vr_settings);
+  #endif
+
+  dialog::addBack();
+  dialog::display();    
+  }
+
+void o_key(o_funcs& v) {
+  if(geometry == gNotKnot) v.push_back(named_dialog("notknot", show));
+  }
   
 auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
+  + addHook(hooks_welcome_message, 100, [] {
+    if(geometry == gNotKnot) {
+      addMessage("Welcome to Notknot! Press 'o' for options");
+      return true;
+      }
+    return false; 
+    })
+  + addHook(hooks_o_key, 80, o_key)
   + addHook(hooks_configfile, 100, [] {
-    param_i(loop, "nk_loop")->set_reaction(regenerate);
-    param_i(margin, "nk_margin")->set_reaction(regenerate);
-    param_i(knotsize, "nk_knotsize")->set_reaction(regenerate);
+    param_i(loop, "nk_loop")
+    ->editable(1, 5, 1, "notknot order", "How many times do we need to go around the knot to get back.", 'o')
+    ->set_sets([] { dialog::bound_low(1); dialog::bound_up(5); })
+    ->set_reaction(regenerate);
+    param_i(margin, "nk_margin")
+    ->editable(0, 10, 1, "notknot margins", "Empty space close to the walls.", 'm')
+    ->set_sets([] { dialog::bound_low(0); dialog::bound_up(10); })
+    ->set_reaction(regenerate);
+    param_i(knotsize, "nk_knotsize")
+    ->editable(0, 10, 1, "notknot size", "Size of the knot.", 's')
+    ->set_sets([] { dialog::bound_low(2); dialog::bound_up(5); })
+    ->set_reaction(regenerate);
     param_i(terminate_at, "nk_terminate")->set_reaction(regenerate);
-    param_b(self_hiding, "selfhide")->set_reaction(regenerate);
+    param_b(self_hiding, "selfhide")
+    ->editable("self-hiding knot", 'h')
+    ->set_reaction(regenerate);
     });
+
+#ifdef NOTKNOT
+auto hook1=
+    addHook(hooks_config, 100, [] {
+      if(arg::curphase == 1) 
+        conffile = "notknot.ini";         
+      if(arg::curphase == 2) {
+        margin = 4;
+        mapeditor::drawplayer = false;
+        stop_game();
+        firstland = specialland = laCanvas;
+        set_geometry(gNotKnot);
+        sightranges[geometry] = .5;
+        ray::max_cells = 600000;
+        smooth_scrolling = 1;
+        camera_speed = 10;
+        // panini_alpha = 1;
+        // fov = 150;
+        ray::exp_decay_poly = 30;
+        ray::fixed_map = true;
+        ray::max_iter_iso = 40;
+        showstartmenu = false;
+        // ray::reflect_val = 0.3;
+        }
+      });
+#endif
 
 }
 
