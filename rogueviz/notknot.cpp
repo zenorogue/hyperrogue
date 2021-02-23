@@ -541,13 +541,21 @@ void create_notknot() {
   gi.shortname = "notknot";
   gi.menu_displayed_name = "notknot";
   }
+
+void regenerate() {
+  if(geometry == gNotKnot && game_active) {
+    stop_game();
+    start_game();
+    }
+  }
   
 auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
   + addHook(hooks_configfile, 100, [] {
-    param_i(loop, "nk_loop");
-    param_i(margin, "nk_margin");
-    param_i(knotsize, "nk_knotsize");
-    param_i(terminate_at, "nk_terminate");
+    param_i(loop, "nk_loop")->set_reaction(regenerate);
+    param_i(margin, "nk_margin")->set_reaction(regenerate);
+    param_i(knotsize, "nk_knotsize")->set_reaction(regenerate);
+    param_i(terminate_at, "nk_terminate")->set_reaction(regenerate);
+    param_b(self_hiding, "selfhide")->set_reaction(regenerate);
     });
 
 }
