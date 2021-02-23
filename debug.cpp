@@ -863,6 +863,10 @@ int read_cheat_args() {
     fixseed = true; autocheat = true;
     shift(); startseed = argi();
     }
+  else if(argis("-reseed")) {
+    PHASEFROM(2);
+    shift(); shrand(argi());
+    }
   else if(argis("-steplimit")) {
     fixseed = true; autocheat = true;
     shift(); steplimit = argi();
