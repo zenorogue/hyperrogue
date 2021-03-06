@@ -165,6 +165,8 @@ bool rug_hyperbolic() { USING_NATIVE_GEOMETRY; return hyperbolic; }
 bool rug_sphere() { USING_NATIVE_GEOMETRY; return sphere; }
 bool rug_elliptic() { USING_NATIVE_GEOMETRY; return elliptic; }
 
+EX map<cell*, rugpoint*> rug_map;
+
 EX rugpoint *addRugpoint(shiftpoint h, double dist) {
   rugpoint *m = new rugpoint;
   m->h = h;
@@ -560,12 +562,10 @@ EX void buildRug() {
   
   celllister cl(centerover ? centerover : cwt.at, get_sightrange(), vertex_limit, NULL);
 
-  map<cell*, rugpoint *> vptr;
-  
   for(int i=0; i<isize(cl.lst); i++)
-    vptr[cl.lst[i]] = addRugpoint(ggmatrix(cl.lst[i])*C0, cl.dists[i]);
+    rug_map[cl.lst[i]] = addRugpoint(ggmatrix(cl.lst[i])*C0, cl.dists[i]);
 
-  for(auto& p: vptr) {
+  for(auto& p: rug_map) {
     cell *c = p.first;
     rugpoint *v = p.second;
     
@@ -584,11 +584,11 @@ EX void buildRug() {
     
     else for(int j=0; j<c->type; j++) try {
       cell *c2 = c->move(j);
-      rugpoint *w = vptr.at(c2);
+      rugpoint *w = rug_map.at(c2);
       // if(v<w) addEdge(v, w);
       
       cell *c3 = c->modmove(j+1);
-      rugpoint *w2 = vptr.at(c3);
+      rugpoint *w2 = rug_map.at(c3);
       
       cell *c4 = (cellwalker(c,j) + wstep - 1).cpeek();      
       
@@ -776,7 +776,8 @@ EX void optimize(rugpoint *m, bool do_preset) {
       force(*m, *m->edges[j].target, m->edges[j].len, false, 1, 0);
   }
 
-int divides = 0;
+EX int divides;
+EX int precision_increases;
 bool stop = false;
 
 EX bool subdivide_further() {
@@ -794,6 +795,7 @@ EX void subdivide() {
       stop = true; 
       }
     else {
+      precision_increases++;
       err_zero_current /= 2;
       println(hlog, "increasing precision to ", err_zero_current);
       for(auto p: points) enqueue(p);
@@ -1182,6 +1184,8 @@ EX void init_model() {
   
   qvalid = 0; dt = 0; queueiter = 0;
   err_zero_current = err_zero;
+  divides = 0;
+  precision_increases = 0;
   
   #if CAP_CRYSTAL
   if(cryst && surface::sh == surface::dsNone) {
@@ -1238,6 +1242,7 @@ EX void init() {
 EX void clear_model() {
   triangles.clear();
   for(int i=0; i<isize(points); i++) delete points[i];
+  rug_map.clear();
   points.clear();
   pqueue = queue<rugpoint*> ();
   }
@@ -1909,6 +1914,8 @@ int rugArgs() {
 auto rug_hook = 
   addHook(hooks_args, 100, rugArgs);
 #endif
+
+auto clear_rug_map = addHook(hooks_clearmemory, 40, [] () { rug_map.clear(); });
 
 EX }
 
