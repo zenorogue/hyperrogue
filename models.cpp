@@ -198,6 +198,7 @@ EX namespace models {
       return false;
     if(GDIM == 2 && pm == mdPerspective) return false;
     if(GDIM == 2 && pm == mdEquivolume) return false;
+    if(pm == mdThreePoint && !(GDIM == 3 && !nonisotropic && !prod)) return false;
     if(GDIM == 3 && among(pm, mdBall, mdHyperboloid, mdFormula, mdPolygonal, mdRotatedHyperboles, mdSpiral, mdHemisphere)) return false;
     if(pm == mdCentralInversion && !euclid) return false;
     if(pm == mdPoorMan) return hyperbolic;
@@ -211,7 +212,7 @@ EX namespace models {
     if((m == mdPerspective || m == mdGeodesic) && panini_alpha) return true;
     return
       among(m, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral, mdSimulatedPerspective, mdTwoHybrid, mdHorocyclic, mdAxial, mdAntiAxial, mdQuadrant,
-        mdWerner, mdAitoff, mdHammer, mdLoximuthal, mdWinkelTripel) || mdBandAny();
+        mdWerner, mdAitoff, mdHammer, mdLoximuthal, mdWinkelTripel, mdThreePoint) || mdBandAny();
     }
 
   /** @brief returns the broken coordinate, or zero */
@@ -236,7 +237,7 @@ EX namespace models {
   
   EX bool product_model(eModel m) {
     if(!prod) return false;
-    if(among(m, mdPerspective, mdHyperboloid, mdEquidistant)) return false;
+    if(among(m, mdPerspective, mdHyperboloid, mdEquidistant, mdThreePoint)) return false;
     return true;
     }
   
@@ -602,7 +603,7 @@ EX namespace models {
     if(vpmodel == mdHemisphere && euclid) 
       add_edit(vpconf.euclid_to_sphere);
       
-    if(among(vpmodel, mdTwoPoint, mdSimulatedPerspective, mdTwoHybrid)) 
+    if(among(vpmodel, mdTwoPoint, mdSimulatedPerspective, mdTwoHybrid, mdThreePoint)) 
       add_edit(vpconf.twopoint_param);
     
     if(vpmodel == mdFisheye) 

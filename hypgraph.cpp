@@ -432,6 +432,63 @@ void vr_disk(hyperpoint& ret, hyperpoint& H) {
     }
   }
 
+/** Compute the three-point projection. Currently only works in isotropic 3D spaces. */
+EX void threepoint_projection(const hyperpoint& H, hyperpoint& ret) {
+  find_zlev(H);
+
+  hyperpoint H1 = H;
+  if(true) {
+    models::apply_orientation_yz(H1[1], H1[2]);
+    models::apply_orientation(H1[0], H1[1]);
+    }
+
+  auto p = pconf.twopoint_param;
+
+  ld dist[3];
+  for(int i=0; i<3; i++) {
+    hyperpoint h1 = xspinpush0(2*M_PI*i/3, p);    
+    dist[i] = geo_dist(h1, H1);
+    }
+  
+  /* we are looking for the points (x,y,z) such that:
+     (x-xi)^2 + (y-yi)^2 + z^2 = di^2
+
+     which is equivalent to:
+     x^2+y^2+z^2 -2xxi -2yyi = di^2-xi^2-yi^2
+     
+     After setting s = x^2+y^2+z^2, we get a system of linear equations for (x,y,s)
+  */
+    
+  dynamicval<eGeometry> g(geometry, gEuclid);
+  
+  transmatrix T = Id;
+  hyperpoint v = C0;
+  for(int i=0; i<3; i++) {
+    hyperpoint pp = xspinpush0(2*M_PI*i/3, p);
+    v[i] = dist[i]*dist[i] - p*p;
+    T[i][0] = -2 * pp[0];
+    T[i][1] = -2 * pp[1];
+    T[i][2] = 1;
+    }
+  
+  transmatrix U = inverse3(T);
+  hyperpoint sxy = U * v;
+  
+  // compute the actual z based on s
+  sxy[2] = sxy[2] - sqhypot_d(2, sxy);
+  sxy[2] = sxy[2] > 0 ? sqrt(sxy[2]) : 0;
+
+  if(H1[2] < 0) sxy[2] *= -1;
+  
+  sxy[3] = 1;
+  
+  geometry = gCubeTiling;
+  
+  ret = sxy;
+  models::apply_orientation(ret[1], ret[0]);
+  models::apply_orientation_yz(ret[2], ret[1]);
+  }
+
 EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
 
   hyperpoint H = H_orig.h;
@@ -976,6 +1033,10 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       
     case mdTwoPoint: 
       makeband(H_orig, ret, make_twopoint);
+      break;
+    
+    case mdThreePoint: 
+      threepoint_projection(H, ret);
       break;
     
     case mdMollweide: 
@@ -2167,6 +2228,20 @@ EX void draw_model_elements() {
       ld a = -pconf.model_orientation * degree;
       queuestr(shiftless(xspinpush0(a, +pconf.twopoint_param)), vid.xres / 100, "X", ringcolor >> 8);
       queuestr(shiftless(xspinpush0(a, -pconf.twopoint_param)), vid.xres / 100, "X", ringcolor >> 8);
+      return;
+      }
+    
+    case mdThreePoint: {
+      vid.linewidth *= 5;
+      for(int i=0; i<=3; i++) {
+        hyperpoint h = xspinpush0(2*M_PI*i/3, pconf.twopoint_param);
+        models::apply_orientation(h[1], h[0]);
+        models::apply_orientation_yz(h[2], h[1]);
+        curvepoint(h);
+        }
+      
+      queuecurve(shiftless(Id), ringcolor, 0, PPR::SUPERLINE);
+      vid.linewidth /= 5;
       return;
       }
     

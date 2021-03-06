@@ -982,8 +982,8 @@ enum eModel : int {
   // 32..38
   mdWerner, mdAitoff, mdHammer, mdLoximuthal, mdMiller, mdGallStereographic, mdWinkelTripel,
   // 39..
-  mdPoorMan, mdPanini, mdRetroCraig, mdRetroLittrow, mdRetroHammer,
-  // 44..
+  mdPoorMan, mdPanini, mdRetroCraig, mdRetroLittrow, mdRetroHammer, mdThreePoint,
+  // 45..
   mdGUARD, mdPixel, mdHyperboloidFlat, mdPolynomial, mdManual
   };
 #endif
@@ -1040,6 +1040,7 @@ EX vector<modelinfo> mdinf = {
   {X3("Craig retroazimuthal"), mf::euc_boring | mf::broken, DEFAULTS}, // retroazimuthal cylindrical
   {X3("Littrow retroazimuthal"), mf::euc_boring | mf::broken, DEFAULTS}, // retroazimuthal conformal
   {X3("Hammer retroazimuthal"), mf::euc_boring, DEFAULTS}, // retroazimuthal equidistant
+  {X3("three-point equidistant"), mf::euc_boring, DEFAULTS},
   {X3("guard"), 0, DEFAULTS},
   {X3("polynomial"), mf::conformal, DEFAULTS},
   };
