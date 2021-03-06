@@ -203,6 +203,12 @@ int main(int argc, char **argv) {
       }
     else if(s.substr(0, 2) == "-I")
       opts += " " + s;
+    else if(s == "-vr") {
+      obj_dir += "/vr";
+      setdir += "../";
+      linker += " -lopenvr_api";
+      opts += " -DCAP_VR=1 -I/usr/include/openvr/";
+      }
     else if(s == "-rv") {
       
       if(standard == default_standard) {
