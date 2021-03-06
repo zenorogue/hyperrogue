@@ -628,6 +628,12 @@ template<class T> struct dynamicval {
   ~dynamicval() { where = backup; }
   };
 
+struct finalizer {
+  reaction_t f;
+  finalizer(reaction_t r) : f(r) {}
+  ~finalizer() { f(); }
+  };
+  
 static const int MAXPLAYER = 7;
 
 #define DEFAULTCONTROL (multi::players == 1 && !shmup::on && !multi::alwaysuse && !(rug::rugged && rug::renderonce))

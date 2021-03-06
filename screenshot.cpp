@@ -771,7 +771,14 @@ EX void take(string fname, const function<void()>& what IS(default_screenshot_co
   #else
   int multiplier = shot_aa;
   #endif
-
+  
+  vector<bool> chg;
+  for(auto ap: anims::aps) chg.push_back(*ap.value == ap.last);
+  finalizer f([&] { 
+    for(int i=0; i<isize(anims::aps); i++) 
+      if(chg[i]) *anims::aps[i].value = anims::aps[i].last;
+    });
+  
   dynamicval<videopar> v(vid, vid);
   dynamicval<bool> v2(inHighQual, true);
   dynamicval<bool> v6(auraNOGL, true);
