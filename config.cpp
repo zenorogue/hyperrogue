@@ -77,7 +77,7 @@ struct setting {
 #endif
 
 setting *setting::set_extra(const reaction_t& r) {
-  auto s = sets; set_sets([s, r] { s(); dialog::extra_options = r; }); return this;
+  auto s = sets; set_sets([s, r] { if(s) s(); dialog::extra_options = r; }); return this;
   }
 
 setting *setting::set_reaction(const reaction_t& r) {
