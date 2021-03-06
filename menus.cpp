@@ -651,45 +651,83 @@ EX void showChangeMode() {
 
 #if CAP_TOUR
   dialog::addBoolItem(XLAT("guided tour"), tour::on, 'T');
+  dialog::add_action_confirmed(tour::start);
 #endif
+
   dialog::addBoolItem(XLAT("creative mode"), (false), 'c');
   dialog::add_action_push(showCreative);
+
   dialog::addBoolItem(XLAT("experiment with geometry"), geometry || CHANGED_VARIATION || viewdists, 'e');
+  dialog::add_action(runGeometryExperiments);
 
   dialog::addBreak(100);
 
   dialog::addBoolItem(XLAT(SHMUPTITLE), shmup::on, 's');
+  dialog::add_action_confirmed(shmup::switch_shmup);
+
   dialog::addBoolItem(XLAT("multiplayer"), multi::players > 1, 'm');
   dialog::add_action_push(multi::showConfigureMultiplayer);
-  if(!shmup::on) dialog::addSelItem(XLAT("hardcore mode"),
+
+  if(!shmup::on) {
+    dialog::addSelItem(XLAT("hardcore mode"),
     hardcore && !pureHardcore() ? XLAT("PARTIAL") : ONOFF(hardcore), 'h');
+    dialog::add_action(switchHardcore);
+    }
   if(getcstat == 'h')
     mouseovers = XLAT("One wrong move and it is game over!");
   
   multi::cpid = 0;
   dialog::addBoolItem(XLAT("Chaos mode"), (chaosmode), 'C');
   dialog::add_action_push(show_chaos);
+
   dialog::addBoolItem(XLAT("puzzle/exploration mode"), peace::on, 'p');
+  dialog::add_action_push(peace::showMenu);
+
   dialog::addBoolItem(XLAT("Orb Strategy mode"), (inv::on), 'i');
+  dialog::add_action_confirmed([] { restart_game(rg::inv); });
+
   dialog::addBoolItem(XLAT("pure tactics mode"), (tactic::on), 't');
+  dialog::add_action_push_clear(tactic::showMenu);
+
   dialog::addBoolItem(XLAT("Yendor Challenge"), (yendor::on), 'y');
+  dialog::add_action([] {
+    clearMessages();
+    if(yendor::everwon || autocheat)
+      pushScreen(yendor::showMenu);
+    else gotoHelp(yendor::chelp);
+    });
+
   dialog::addBoolItem(XLAT("%1 Challenge", moPrincess), (princess::challenge), 'P');
+  dialog::add_action_confirmed([] {
+    if(!princess::everSaved)
+      addMessage(XLAT("Save %the1 first to unlock this challenge!", moPrincess));
+    else restart_game(rg::princess);
+    });  
+  
   dialog::addBoolItem(XLAT("random pattern mode"), (randomPatternsMode), 'r');
+  dialog::add_action_confirmed([] { 
+    stop_game();
+    firstland = laIce;
+    restart_game(rg::randpattern); 
+    });
+
 #if CAP_RACING
   dialog::addBoolItem(XLAT("racing mode"), racing::on, 'R');
+  dialog::add_action(racing::configure_race);
 #endif
 #if CAP_ARCM && !ISWEB
   if(multi::players == 1) {
     dialog::addBoolItem(XLAT("dual geometry mode"), dual::state, 'D');
-    dialog::add_action([] { dialog::do_if_confirmed([] { restart_game(rg::dualmode); }); });
+    dialog::add_action_confirmed([] { restart_game(rg::dualmode); });
     }
   if(dual::state) {
     dialog::addBoolItem(XLAT("dual geometry puzzle"), dpgen::in, 'G');
-    dialog::add_action([] { dialog::do_if_confirmed([] { pushScreen(dpgen::show_menu); }); });
+    dialog::add_action_confirmed([] { pushScreen(dpgen::show_menu); });
     }
 #endif
 #if CAP_DAILY
   dialog::addBoolItem(XLAT("Strange Challenge"), daily::on, 'z');
+  dialog::add_action_push(daily::showMenu);    
 #endif
 
   dialog::addBreak(50);
@@ -698,66 +736,7 @@ EX void showChangeMode() {
   dialog::add_action_push(mode_higlights);
   
   dialog::addBack();
-  dialog::display();
-  
-  keyhandler = [] (int sym, int uni) {
-    dialog::handleNavigation(sym, uni);    
-    char xuni = uni;
-
-    if(xuni == ' ' || sym == SDLK_ESCAPE) popScreen();
-    
-    #if CAP_DAILY
-    else if(uni == 'z')
-      pushScreen(daily::showMenu);
-    #endif
-    
-    else if(xuni == 'e') 
-      runGeometryExperiments();
-    else if(xuni == 't') {
-      clearMessages();
-      pushScreen(tactic::showMenu);
-    }
-    else if(xuni == 'y') {
-      clearMessages();
-      if(yendor::everwon || autocheat)
-        pushScreen(yendor::showMenu);
-      else gotoHelp(yendor::chelp);
-      }
-    else if(xuni == 'p')
-      pushScreen(peace::showMenu);
-    #if CAP_RACING
-    else if(xuni == 'R')
-      racing::configure_race();
-    #endif
-    else if(xuni == 'i') dialog::do_if_confirmed([] {
-      restart_game(rg::inv);
-      });
-  #if CAP_TOUR
-    else if(uni == 'T') dialog::do_if_confirmed([] {
-      tour::start();
-      });
-  #endif
-    else if(xuni == 'P') {
-      if(!princess::everSaved)
-        addMessage(XLAT("Save %the1 first to unlock this challenge!", moPrincess));
-      else
-        dialog::do_if_confirmed([] { restart_game(rg::princess); });
-      }
-    else if(xuni == 's') 
-      dialog::do_if_confirmed(shmup::switch_shmup);
-
-    else if(xuni == 'h' && !shmup::on) 
-      switchHardcore();
-    else if(xuni == 'r') {
-      dialog::do_if_confirmed([] { 
-        stop_game();
-        firstland = laIce;
-        restart_game(rg::randpattern); 
-        });
-      }
-    else if(doexiton(sym, uni))
-      popScreen();
-    };
+  dialog::display();  
   }
 
 EX bool showstartmenu;
