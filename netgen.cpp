@@ -208,7 +208,7 @@ EX namespace netgen {
   
   void blackline(vec v1, vec v2, color_t col = 0x000000FF) {
 #if CAP_SDLGFX
-    aalineColor(s, int(v1.x), int(v1.y), int(v2.x), int(v2.y), col);
+    aalineColor(srend, int(v1.x), int(v1.y), int(v2.x), int(v2.y), col);
 #elif CAP_SDL
     SDL_LockSurface(s);
     int len = abs(v1.x-v2.x) + abs(v1.y-v2.y);
@@ -226,7 +226,7 @@ EX namespace netgen {
     polyy[0] = int(v1.y);
     polyy[1] = int(v2.y);
     polyy[2] = int(v3.y);
-    filledPolygonColorI(s, polyx, polyy, 3, col);
+    filledPolygonColorI(srend, polyx, polyy, 3, col);
 #elif CAP_SDL
     SDL_LockSurface(s);
     int len = abs(v1.x-v2.x) + abs(v1.y-v2.y);
@@ -238,7 +238,7 @@ EX namespace netgen {
     
   void blackcircle(vec v, int r, color_t col = 0x000000FF) {
 #if CAP_SDLGFX
-    aacircleColor(s, int(v.x), int(v.y), r, col);
+    aacircleColor(srend, int(v.x), int(v.y), r, col);
 #endif
     }
   
@@ -338,9 +338,14 @@ EX namespace netgen {
         drawline(hvec(i,e), hvec(i,7), 0x80808080);
       } */
 
-    SDL_Surface *sav = s;    
+    dynamicval<SDL_Surface*> ds(s);
 
     s = net = SDL_CreateRGBSurface(SDL_SWSURFACE,SX*nscale,SY*nscale,32,0,0,0,0);
+    #if CAP_SDL2
+    dynamicval<SDL_Renderer*> dr(srend);
+    srend = SDL_CreateSoftwareRenderer(s);
+    #endif
+
     SDL_FillRect(net, NULL, 0xFFFFFF);
     
     int pateks = 0;
@@ -440,8 +445,9 @@ EX namespace netgen {
     
     SDL_FreeSurface(net);
     SDL_FreeSurface(quarter);
-    
-    s = sav; 
+    #if CAP_SDL2
+    SDL_DestroyRenderer(srend);
+    #endif
     }
   
   vec mousepos, rel;
@@ -554,7 +560,8 @@ EX namespace netgen {
       }
     
     SDL_UnlockSurface(s);
-    SDL_UpdateRect(s, 0, 0, 0, 0);  
+    
+    present_surface();    
     }
 
   double rs, rz;
@@ -609,9 +616,13 @@ EX namespace netgen {
           break;
           }
         
-        case SDL_KEYDOWN: {
+        case SDL_KEYDOWN: {          
           int key = event.key.keysym.sym;
+          #if CAP_SDL2
+          int uni = key;
+          #else
           int uni = event.key.keysym.unicode;
+          #endif
           
           if(uni == 'q' || key == SDLK_ESCAPE || key == SDLK_F10) 
             return;
@@ -636,7 +647,10 @@ EX namespace netgen {
     }
   
   void designNet() {
+    #if !CAP_SDL2
+    // fstx
     s = SDL_SetVideoMode(SX, SY, 32, 0);
+    #endif
     netgen_loop();
     saveData();
     setvideomode();

@@ -130,8 +130,21 @@ void fix_font_size(int& size) {
 #endif
 
 #if CAP_SDL
+
+#if !CAP_SDL2
+#if HDR
+typedef SDL_Surface SDL_Renderer
+#define srend s
+#endif
+#endif
+
 EX SDL_Surface *s;
 EX SDL_Surface *s_screen;
+#if CAP_SDL2
+EX SDL_Renderer *srend;
+EX SDL_Texture *s_texture;
+EX SDL_Window *s_window;
+#endif
 
 EX color_t qpixel_pixel_outside;
 
@@ -141,6 +154,31 @@ EX color_t& qpixel(SDL_Surface *surf, int x, int y) {
   p += y * surf->pitch;
   color_t *pi = (color_t*) (p);
   return pi[x];
+  }
+
+EX void present_surface() {
+  #if CAP_SDL2
+  SDL_UpdateTexture(s_texture, NULL, s, s->w * sizeof (Uint32));
+  SDL_RenderClear(srend);
+  SDL_RenderCopy(srend, s_texture, NULL, NULL);
+  SDL_RenderPresent(srend);
+  #else
+  SDL_UpdateRect(s, 0, 0, 0, 0);  
+  #endif
+  }
+
+EX void present_screen() {
+#if CAP_GL
+  if(vid.usingGL) {
+    #if CAP_SDL2
+    SDL_GL_SwapWindow(s_window);
+    #else
+    SDL_GL_SwapBuffers();
+    #endif
+    return;
+    }
+#endif
+  present_surface();
   }
 
 #endif
@@ -733,7 +771,11 @@ EX bool displaystr(int x, int y, int shift, int size, const char *str, color_t c
   bool clicked = (mousex >= rect.x && mousey >= rect.y && mousex <= rect.x+rect.w && mousey <= rect.y+rect.h);
   
   if(shift) {
+    #if CAP_SDL2
+    SDL_Surface* txt2 = SDL_ConvertSurfaceFormat(txt, SDL_PIXELFORMAT_RGBA8888, 0);
+    #else
     SDL_Surface* txt2 = SDL_DisplayFormat(txt);
+    #endif
     SDL_LockSurface(txt2);
     SDL_LockSurface(s);
     color_t c0 = qpixel(txt2, 0, 0);
@@ -993,12 +1035,12 @@ EX void drawCircle(int x, int y, int size, color_t color, color_t fillcolor IS(0
   gdpush(4); gdpush(color); gdpush(x); gdpush(y); gdpush(size);
 #elif CAP_SDLGFX
   if(pconf.stretch == 1) {
-    if(fillcolor) filledCircleColor(s, x, y, size, fillcolor);
-    if(color) ((vid.antialias && AA_NOGL)?aacircleColor:circleColor) (s, x, y, size, color);
+    if(fillcolor) filledCircleColor(srend, x, y, size, fillcolor);
+    if(color) ((vid.antialias && AA_NOGL)?aacircleColor:circleColor) (srend, x, y, size, color);
     }
   else {
-    if(fillcolor) filledEllipseColor(s, x, y, size, size * pconf.stretch, fillcolor);
-    if(color) ((vid.antialias && AA_NOGL)?aaellipseColor:ellipseColor) (s, x, y, size, size * pconf.stretch, color);
+    if(fillcolor) filledEllipseColor(srend, x, y, size, size * pconf.stretch, fillcolor);
+    if(color) ((vid.antialias && AA_NOGL)?aaellipseColor:ellipseColor) (srend, x, y, size, size * pconf.stretch, color);
     }
 #elif CAP_SDL
   int pts = size * 4;
@@ -1109,6 +1151,10 @@ EX pair<int, int> get_requested_resolution() {
     return { vid.window_x, vid.window_y };
   }
 
+#ifndef CUSTOM_CAPTION
+#define CUSTOM_CAPTION ("HyperRogue " VER)
+#endif
+
 #if CAP_SDL
 EX void setvideomode() {
 
@@ -1127,11 +1173,12 @@ EX void setvideomode() {
 #if CAP_GL
   vid.usingGL = vid.wantGL;
   if(vid.usingGL) {
-    flags = SDL_OPENGL | SDL_HWSURFACE;
+    flags = SDL12(SDL_OPENGL | SDL_HWSURFACE, SDL_WINDOW_OPENGL);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
+
     vid.current_vsync = want_vsync();
-    #if !ISMOBWEB
+    #if !ISMOBWEB && !CAP_SDL2
     if(vid.current_vsync) 
       SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 1 );
     else
@@ -1146,7 +1193,7 @@ EX void setvideomode() {
   vid.usingGL = false;
 #endif
 
-  int sizeflag = (vid.full ? SDL_FULLSCREEN : SDL_RESIZABLE);
+  int sizeflag = SDL12(vid.full ? SDL_FULLSCREEN : SDL_RESIZABLE, vid.full ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_RESIZABLE);
 
   #ifdef WINDOWS
   #ifndef OLD_MINGW
@@ -1167,23 +1214,49 @@ EX void setvideomode() {
   #endif
   #endif
   
-  s = s_screen = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | sizeflag);
+  auto create_win = [&] {
+    #if CAP_SDL2
+    if(s_window) SDL_DestroyWindow(s_window);
+    s_window = SDL_CreateWindow(CUSTOM_CAPTION, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+      vid.xres, vid.yres,
+      flags | sizeflag
+      );
+    #else
+    s = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | sizeflag);
+    #endif  
+    };
+  
+  create_win();
   
   if(vid.full && !s) {
     vid.xres = vid.xscr;
     vid.yres = vid.yscr;
     vid.fsize = 10;
-    s = s_screen = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | SDL_FULLSCREEN);
+    sizeflag = SDL12(SDL_FULLSCREEN, SDL_WINDOW_FULLSCREEN);
+    create_win();
     }
 
   if(!s) {
     addMessage("Failed to set the graphical mode: "+its(vid.xres)+"x"+its(vid.yres)+(vid.full ? " fullscreen" : " windowed"));
     vid.xres = 640;
     vid.yres = 480;
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);    
     vid.antialias &= ~AA_MULTI;
-    s = s_screen = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | SDL_RESIZABLE);
+    sizeflag = SDL12(SDL_RESIZABLE, SDL_WINDOW_RESIZABLE);
+    create_win();
     }
+  
+  #if CAP_SDL2
+  if(srend) SDL_DestroyRenderer(srend);
+  srend = SDL_CreateRenderer(s_window, -1, vid.current_vsync ? SDL_RENDERER_PRESENTVSYNC : 0);
+  
+  if(s_texture) SDL_DestroyTexture(s_texture);
+  s_texture = SDL_CreateTexture(srend, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, vid.xres, vid.yres);
+  
+  if(s) SDL_FreeSurface(s);
+  s = shot::empty_surface(vid.xres, vid.yres, false);
+  #endif
+  s_screen = s;
 
 #if CAP_GL
   if(vid.usingGL) {
@@ -1251,16 +1324,21 @@ EX void init_graph() {
   get_canvas_size();
 #else
   if(!vid.xscr) {
+    #if CAP_SDL2
+    SDL_DisplayMode dm;
+    SDL_GetCurrentDisplayMode(0, &dm);
+    vid.xscr = vid.xres = dm.w;
+    vid.yscr = vid.yres = dm.h;
+    #else
     const SDL_VideoInfo *inf = SDL_GetVideoInfo();
     vid.xscr = vid.xres = inf->current_w;
     vid.yscr = vid.yres = inf->current_h;
+    #endif
     }
 #endif
 
-#ifdef CUSTOM_CAPTION  
+#if !CAP_SDL2
   SDL_WM_SetCaption(CUSTOM_CAPTION, CUSTOM_CAPTION);
-#else
-  SDL_WM_SetCaption("HyperRogue " VER, "HyperRogue " VER);
 #endif
 #endif
   
@@ -1271,8 +1349,10 @@ EX void init_graph() {
     exit(2);
     }
     
+  #if !CAP_SDL2
   SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
   SDL_EnableUNICODE(1);
+  #endif
 #endif  
 
 #if ISANDROID

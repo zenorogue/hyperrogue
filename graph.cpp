@@ -4798,9 +4798,9 @@ EX void drawthemap() {
     }
 
   #if CAP_SDL
-  Uint8 *keystate = SDL_GetKeyState(NULL);
+  const Uint8 *keystate = SDL12_GetKeyState(NULL);
   lmouseover = mouseover;
-  bool useRangedOrb = (!(vid.shifttarget & 1) && haveRangedOrb() && lmouseover && lmouseover->cpdist > 1) || (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
+  bool useRangedOrb = (!(vid.shifttarget & 1) && haveRangedOrb() && lmouseover && lmouseover->cpdist > 1) || (keystate[SDL12(SDLK_RSHIFT, SDL_SCANCODE_RSHIFT)] | keystate[SDL12(SDLK_LSHIFT, SDL_SCANCODE_LSHIFT)]);
   if(!useRangedOrb && !(cmode & sm::MAP) && !(cmode & sm::DRAW) && DEFAULTCONTROL && !mouseout() && !dual::state) {
     dynamicval<eGravity> gs(gravity_state, gravity_state);
     void calcMousedest();
@@ -5291,13 +5291,8 @@ EX void drawscreen() {
   #if CAP_VR
   vrhr::submit();
   #endif
-
-#if CAP_SDL
-#if CAP_GL
-  if(vid.usingGL) SDL_GL_SwapBuffers(); else
-#endif
-  SDL_UpdateRect(s, 0, 0, vid.xres, vid.yres);
-#endif
+  
+  present_screen();
 
 #if CAP_VR
   vrhr::handoff();

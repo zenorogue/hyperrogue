@@ -34,12 +34,28 @@ string libs;
 int batch_size = thread::hardware_concurrency() + 1;
 bool mingw64 = false;
 
+int sdlver = 2;
+
+#if defined(MAC)
+string os = "mac";
+#elif defined(WINDOWS)
+string os = "mingw64";
+#else
+string os = "linux";
+#endif
+
 void set_linux() {
   preprocessor = "g++ -E";
   compiler = "g++ -Wall -Wextra -Wno-maybe-uninitialized -Wno-unused-parameter -Wno-implicit-fallthrough -rdynamic -fdiagnostics-color=always -c";
   linker = "g++ -rdynamic -o hyper";
-  opts = "-DFHS -DLINUX -I/usr/include/SDL";
-  libs = " savepng.o -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
+  if(sdlver == 2) {
+    opts = "-DFHS -DLINUX -I/usr/include/SDL2";
+    libs = " savepng.o -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSDL2_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
+    }
+  else {
+    opts = "-DFHS -DLINUX -I/usr/include/SDL";
+    libs = " savepng.o -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
+    }
   }
 
 void set_mac() {
@@ -73,6 +89,18 @@ void set_web() {
   libs = "";
   }
 
+void set_os(string o) {
+  os = o;
+  if(os == "linux") set_linux();
+  else if(os == "mac") set_mac();
+  else if(os == "mingw64") set_mingw64();
+  else if(os == "web") set_web();
+  else {
+    fprintf(stderr, "unknown OS");
+    exit(1);
+    }
+  }
+
 vector<string> modules;
 
 time_t get_file_time(const string s) {
@@ -97,13 +125,7 @@ bool file_exists(string fname) {
   }
   
 int main(int argc, char **argv) {
-#if defined(MAC)
-  set_mac();
-#elif defined(WINDOWS)
-  set_mingw64();
-#else
-  set_linux();
-#endif
+  set_os(os);
   int retval = 0; // for storing return values of some function calls
   for(string fname: {"Makefile.loc", "Makefile.simple", "Makefile"})
     if(file_exists(fname)) {
@@ -122,25 +144,39 @@ int main(int argc, char **argv) {
         else obj_dir += c;      
       }
     else if(s == "-mingw64") {
-      set_mingw64();
+      set_os("mingw64");
       obj_dir += "/mingw64";
       setdir += "../";
       }
     else if(s == "-mac") {
-      set_mac();
+      set_os("mac");
       obj_dir += "/mac";
       setdir += "../";
       }
     else if(s == "-linux") {
-      set_linux();
+      set_os("linux");
       obj_dir += "/linux";
       setdir += "../";
       }
     else if(s == "-web") {
-      set_web();
+      set_os("web");
       modules.push_back("hyperweb");
       obj_dir += "/web";
       setdir += "../";
+      }
+    else if(s == "-sdl1") {
+      sdlver = 1;
+      set_os(os);
+      obj_dir += "/sdl1";
+      setdir += "../";
+      opts += " -DCAP_SDL2=0";
+      }
+    else if(s == "-sdl2") {
+      sdlver = 2;
+      set_os(os);
+      obj_dir += "/sdl2";
+      setdir += "../";
+      opts += " -DCAP_SDL2=1";
       }
     else if(s.substr(0, 2) == "-f") {
       opts += " " + s;

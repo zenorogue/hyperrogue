@@ -1333,20 +1333,20 @@ EX void actDraw() {
   lastticks = ticks;
 
   #if CAP_HOLDKEYS
-  Uint8 *keystate = SDL_GetKeyState(NULL);
-  if(keystate[SDLK_LALT]) alpha /= 10;
+  const Uint8 *keystate = SDL12_GetKeyState(NULL);
+  if(keystate[SDL12(SDLK_LALT, SDL_SCANCODE_LALT)]) alpha /= 10;
   #endif
 
   #if CAP_HOLDKEYS
   auto perform_finger = [=] () {
-    if(keystate[SDLK_HOME]) finger_range /= exp(alpha);
-    if(keystate[SDLK_END]) finger_range *= exp(alpha);
-    if(keystate[SDLK_LEFT]) finger_on(0, -alpha);
-    if(keystate[SDLK_RIGHT]) finger_on(0, alpha);
-    if(keystate[SDLK_UP]) finger_on(1, alpha);
-    if(keystate[SDLK_DOWN]) finger_on(1, -alpha);
-    if(keystate[SDLK_PAGEDOWN]) finger_on(2, -alpha);
-    if(keystate[SDLK_PAGEUP]) finger_on(2, +alpha);
+    if(keystate[SDL12(SDLK_HOME, SDL_SCANCODE_HOME)]) finger_range /= exp(alpha);
+    if(keystate[SDL12(SDLK_END, SDL_SCANCODE_END)]) finger_range *= exp(alpha);
+    if(keystate[SDL12(SDLK_LEFT, SDL_SCANCODE_LEFT)]) finger_on(0, -alpha);
+    if(keystate[SDL12(SDLK_RIGHT, SDL_SCANCODE_RIGHT)]) finger_on(0, alpha);
+    if(keystate[SDL12(SDLK_UP, SDL_SCANCODE_UP)]) finger_on(1, alpha);
+    if(keystate[SDL12(SDLK_DOWN, SDL_SCANCODE_DOWN)]) finger_on(1, -alpha);
+    if(keystate[SDL12(SDLK_PAGEDOWN, SDL_SCANCODE_PAGEDOWN)]) finger_on(2, -alpha);
+    if(keystate[SDL12(SDLK_PAGEUP, SDL_SCANCODE_PAGEUP)]) finger_on(2, +alpha);
     };
 
   if(finger_center)

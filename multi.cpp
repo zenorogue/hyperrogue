@@ -167,7 +167,11 @@ string listkeys(int id) {
   string lk = "";
   for(int i=0; i<512; i++)
     if(scfg.keyaction[i] == id)
+      #if CAP_SDL2
+      lk = lk + " " + SDL_GetScancodeName(SDL_Scancode(i));
+      #else
       lk = lk + " " + SDL_GetKeyName(SDLKey(i));
+      #endif
 #if CAP_SDLJOY
   for(int i=0; i<numsticks; i++) for(int k=0; k<SDL_JoystickNumButtons(sticks[i]) && k<MAXBUTTON; k++)
     if(scfg.joyaction[i][k] == id) {
@@ -551,6 +555,43 @@ EX void initConfig() {
   
   char* t = scfg.keyaction;
   
+  #if CAP_SDL2
+
+  t[SDL_SCANCODE_W] = 16 + 4;
+  t[SDL_SCANCODE_D] = 16 + 5;
+  t[SDL_SCANCODE_S] = 16 + 6;
+  t[SDL_SCANCODE_A] = 16 + 7;
+
+  t[SDL_SCANCODE_KP_8] = 16 + 4;
+  t[SDL_SCANCODE_KP_6] = 16 + 5;
+  t[SDL_SCANCODE_KP_2] = 16 + 6;
+  t[SDL_SCANCODE_KP_4] = 16 + 7;
+
+  t[SDL_SCANCODE_F] = 16 + pcFire;
+  t[SDL_SCANCODE_G] = 16 + pcFace;
+  t[SDL_SCANCODE_H] = 16 + pcFaceFire;
+  t[SDL_SCANCODE_R] = 16 + pcDrop;
+  t[SDL_SCANCODE_T] = 16 + pcOrbPower;
+  t[SDL_SCANCODE_Y] = 16 + pcCenter;
+
+  t[SDL_SCANCODE_I] = 32 + 4;
+  t[SDL_SCANCODE_L] = 32 + 5;
+  t[SDL_SCANCODE_K] = 32 + 6;
+  t[SDL_SCANCODE_J] = 32 + 7;
+  t[SDL_SCANCODE_SEMICOLON] = 32 + 8;
+  t[SDL_SCANCODE_APOSTROPHE] = 32 + 9;
+  t[SDL_SCANCODE_P] = 32 + 10;
+  t[SDL_SCANCODE_LEFTBRACKET] = 32 + pcCenter;
+
+  t[SDL_SCANCODE_UP] = 48 ;
+  t[SDL_SCANCODE_RIGHT] = 48 + 1;
+  t[SDL_SCANCODE_DOWN] = 48 + 2;
+  t[SDL_SCANCODE_LEFT] = 48 + 3;
+  t[SDL_SCANCODE_PAGEUP] = 48 + 4;
+  t[SDL_SCANCODE_PAGEDOWN] = 48 + 5;
+  t[SDL_SCANCODE_HOME] = 48 + 6;
+  
+  #else  
   t[(int)'w'] = 16 + 4;
   t[(int)'d'] = 16 + 5;
   t[(int)'s'] = 16 + 6;
@@ -588,6 +629,7 @@ EX void initConfig() {
   t[SDLK_PAGEDOWN] = 48 + 5;
   t[SDLK_HOME] = 48 + 6;
 #endif
+  #endif
 
   scfg.joyaction[0][0] = 16 + pcFire;
   scfg.joyaction[0][1] = 16 + pcOrbPower;
@@ -671,7 +713,7 @@ EX void handleInput(int delta) {
 #if CAP_SDL
   double d = delta / 500.;
 
-  Uint8 *keystate = SDL_GetKeyState(NULL);
+  const Uint8 *keystate = SDL12_GetKeyState(NULL);
 
   for(int i=0; i<NUMACT; i++) 
     lactionpressed[i] = actionspressed[i],
@@ -679,7 +721,7 @@ EX void handleInput(int delta) {
 
   for(int i=0; i<SHMUPAXES; i++) axespressed[i] = 0;
   
-  for(int i=0; i<SDLK_LAST; i++) if(keystate[i]) 
+  for(int i=0; i<KEYSTATES; i++) if(keystate[i]) 
     pressaction(scfg.keyaction[i]);
 
 #if CAP_SDLJOY  

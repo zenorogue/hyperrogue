@@ -155,7 +155,7 @@ SDL_Surface *convertSurface(SDL_Surface* s) {
   fmt.Aloss = fmt.Rloss = fmt.Gloss = fmt.Bloss = 0;
   fmt.palette = NULL;
 
-#ifndef SDL2
+#if !CAP_SDL2
   fmt.alpha = 0;
   fmt.colorkey = 0x1ffffff;
 #endif

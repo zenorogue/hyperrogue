@@ -876,8 +876,12 @@ void movePlayer(monster *m, int delta) {
     }
 
 #if CAP_SDL
-  Uint8 *keystate = SDL_GetKeyState(NULL);
+  const Uint8 *keystate = SDL12_GetKeyState(NULL);
+  #if CAP_SDL2
+  bool forcetarget = (keystate[SDL_SCANCODE_RSHIFT] | keystate[SDL_SCANCODE_LSHIFT]);
+  #else
   bool forcetarget = (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
+  #endif
   if(((mousepressed && !forcetarget) || facemouse) && delta > 0 && !mouseout() && !stdracing && GDIM == 2) {
     // playermoved = true;
     hyperpoint h = inverse_shift(m->pat, mouseh);

@@ -251,7 +251,14 @@ EX void glflush() {
 #endif
 
 #if CAP_SDL && !ISMOBILE
+
 SDL_Surface *aux;
+#if CAP_SDL2
+SDL_Renderer *auxrend;
+#else
+#define auxrend aux
+#endif
+
 #endif
 
 #if CAP_POLY
@@ -552,17 +559,17 @@ void addpoly(const shiftmatrix& V, const vector<glvertex> &tab, int ofs, int cnt
   }
 
 #if CAP_SDLGFX
-void aapolylineColor(SDL_Surface *s, int*x, int *y, int polyi, color_t col) {
+void aapolylineColor(SDL_Renderer *s, int*x, int *y, int polyi, color_t col) {
   for(int i=1; i<polyi; i++)
     aalineColor(s, x[i-1], y[i-1], x[i], y[i], col);
   }
 
-void polylineColor(SDL_Surface *s, int *x, int *y, int polyi, color_t col) {
+void polylineColor(SDL_Renderer *s, int *x, int *y, int polyi, color_t col) {
   for(int i=1; i<polyi; i++)
     lineColor(s, x[i-1], y[i-1], x[i], y[i], col);
   }
 
-EX void filledPolygonColorI(SDL_Surface *s, int* px, int *py, int polyi, color_t col) {
+EX void filledPolygonColorI(SDL_Renderer *s, int* px, int *py, int polyi, color_t col) {
   std::vector<Sint16> spx(px, px + polyi);
   std::vector<Sint16> spy(py, py + polyi);
   filledPolygonColor(s, spx.data(), spy.data(), polyi, col);
@@ -1977,19 +1984,19 @@ void dqi_poly::draw() {
         polyx[i] = 0; polyy[i] = vid.yres; i++;
         polyx[i] = 0; polyy[i] = 0; i++;
         }
-      filledPolygonColorI(s, polyx, polyy, polyi+5, color);
+      filledPolygonColorI(srend, polyx, polyy, polyi+5, color);
       }
     else if(poly_flags & POLY_TRIANGLES) {
       for(int i=0; i<polyi; i+=3)
-      filledPolygonColorI(s, polyx+i, polyy+i, 3, color);
+      filledPolygonColorI(srend, polyx+i, polyy+i, 3, color);
       }
     else
-      filledPolygonColorI(s, polyx, polyy, polyi, color);
+      filledPolygonColorI(srend, polyx, polyy, polyi, color);
   
-    if(current_display->stereo_active()) filledPolygonColorI(aux, polyxr, polyy, polyi, color);
+    if(current_display->stereo_active()) filledPolygonColorI(auxrend, polyxr, polyy, polyi, color);
     
-    ((vid.antialias & AA_NOGL) ?aapolylineColor:polylineColor)(s, polyx, polyy, polyi, outline);
-    if(current_display->stereo_active()) aapolylineColor(aux, polyxr, polyy, polyi, outline);
+    ((vid.antialias & AA_NOGL) ?aapolylineColor:polylineColor)(srend, polyx, polyy, polyi, outline);
+    if(current_display->stereo_active()) aapolylineColor(auxrend, polyxr, polyy, polyi, outline);
     
     if(vid.xres >= 2000 || fatborder) {
       int xmi = 3000, xma = -3000;
@@ -1997,7 +2004,7 @@ void dqi_poly::draw() {
       
       if(xma > xmi + 20) for(int x=-1; x<2; x++) for(int y=-1; y<=2; y++) if(x*x+y*y == 1) {
         for(int t=0; t<polyi; t++) polyx[t] += x, polyy[t] += y;
-        aapolylineColor(s, polyx, polyy, polyi, outline);
+        aapolylineColor(srend, polyx, polyy, polyi, outline);
         for(int t=0; t<polyi; t++) polyx[t] -= x, polyy[t] -= y;
         }
       }
@@ -2425,11 +2432,18 @@ EX void drawqueue() {
 #if CAP_SDL
   if(current_display->stereo_active() && !vid.usingGL) {
 
-    if(aux && (aux->w != s->w || aux->h != s->h))
+    if(aux && (aux->w != s->w || aux->h != s->h)) {
       SDL_FreeSurface(aux);
+      #if CAP_SDL2
+      SDL_DestroyRenderer(auxrend);
+      #endif
+      }
   
     if(!aux) {
       aux = SDL_CreateRGBSurface(SDL_SWSURFACE,s->w,s->h,32,0,0,0,0);
+      #if CAP_SDL2
+      auxrend = SDL_CreateSoftwareRenderer(aux);
+      #endif
       }
 
     // SDL_LockSurface(aux);

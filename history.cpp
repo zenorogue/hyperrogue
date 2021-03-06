@@ -108,31 +108,41 @@ namespace spiral {
         displaystr(SX/2, vid.fsize*2, 0, vid.fsize, "arrows = navigate, ESC = return, h = hide help", forecolor, 8);
         displaystr(SX/2, SY - vid.fsize*2, 0, vid.fsize, XLAT("s = save to " IMAGEEXT, buf), forecolor, 8);
         }
-      SDL_UpdateRect(s, 0, 0, 0, 0);  
+      present_surface();
       shiftx += velx; shifty += vely;
 
       SDL_Event event;
       while(SDL_PollEvent(&event)) switch (event.type) {
 
+        #if !CAP_SDL2
         case SDL_VIDEORESIZE: {
           resize_screen_to(event.resize.w, event.resize.h);
           precompute();
           break;
           }
+        #endif
+        #if CAP_SDL2
+        case SDL_WINDOWEVENT: {
+          if(event.window.event == SDL_WINDOWEVENT_RESIZED)
+          resize_screen_to(event.window.data1, event.window.data2);
+          precompute();
+          break;
+          }
+        #endif
         case SDL_QUIT: case SDL_MOUSEBUTTONDOWN:
           goto breakloop;
 
         case SDL_KEYDOWN: {
           int sym = event.key.keysym.sym;
-          int uni = event.key.keysym.unicode;
+          int uni = 0;
           numlock_on = event.key.keysym.mod & KMOD_NUM;
           if(DKEY == SDLK_RIGHT) velx++;
           if(DKEY == SDLK_LEFT) velx--;
           if(DKEY == SDLK_UP) vely++;
           if(DKEY == SDLK_DOWN) vely--;
           if(sym == SDLK_ESCAPE) goto breakloop;
-          if(uni == 'h') displayhelp = !displayhelp;
-          if(uni == 's') dosave = true;
+          if(sym == 'h') displayhelp = !displayhelp;
+          if(sym == 's') dosave = true;
           }
         }
       }

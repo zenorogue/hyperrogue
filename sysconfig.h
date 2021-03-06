@@ -121,6 +121,10 @@
 #define CAP_SDL (!ISMOBILE)
 #endif
 
+#ifndef CAP_SDL2
+#define CAP_SDL2 1
+#endif
+
 #ifndef CAP_COMPASS
 #define CAP_COMPASS ISMOBILE
 #endif
@@ -340,22 +344,54 @@
 #include <stdio.h>
 
 #if CAP_SDL
+#if CAP_SDL2
+#include <SDL2/SDL.h>
+#define SDL12(x,y) y
+#define SDLK_KP1 SDLK_KP_1
+#define SDLK_KP2 SDLK_KP_2
+#define SDLK_KP3 SDLK_KP_3
+#define SDLK_KP4 SDLK_KP_4
+#define SDLK_KP5 SDLK_KP_5
+#define SDLK_KP6 SDLK_KP_6
+#define SDLK_KP7 SDLK_KP_7
+#define SDLK_KP8 SDLK_KP_8
+#define SDLK_KP9 SDLK_KP_9
+#define SDLK_KP0 SDLK_KP_0
+#define SDL12_GetKeyState SDL_GetKeyboardState
+#define KEYSTATES SDL_NUM_SCANCODES
+#else
 #include <SDL/SDL.h>
+#define SDL12(x,y) x
+#define SDL12_GetKeyState SDL_GetKeyState
+#define KEYSTATES SDLK_LAST
+#endif
 
 #if !ISMAC
 #undef main
 #endif
 
 #if CAP_SDLAUDIO
+#if CAP_SDL2
+#include <SDL2/SDL_mixer.h>
+#else
 #include <SDL/SDL_mixer.h>
+#endif
 #endif
 
 #if CAP_SDLTTF
+#if CAP_SDL2
+#include <SDL2/SDL_ttf.h>
+#else
 #include <SDL/SDL_ttf.h>
+#endif
 #endif
 
 #if CAP_SDLGFX
+#if CAP_SDL2
+#include <SDL2/SDL2_gfxPrimitives.h>
+#else
 #include <SDL/SDL_gfxPrimitives.h>
+#endif
 #endif
 
 #elif !ISFAKEMOBILE
