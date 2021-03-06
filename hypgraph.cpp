@@ -434,9 +434,9 @@ void vr_disk(hyperpoint& ret, hyperpoint& H) {
 
 /** Compute the three-point projection. Currently only works in isotropic 3D spaces. */
 EX void threepoint_projection(const hyperpoint& H, hyperpoint& ret) {
-  find_zlev(H);
 
   hyperpoint H1 = H;
+  find_zlev(H1);
   if(true) {
     models::apply_orientation_yz(H1[1], H1[2]);
     models::apply_orientation(H1[0], H1[1]);
