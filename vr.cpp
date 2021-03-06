@@ -1343,6 +1343,8 @@ int readArgs() {
   else if(argis("-vr-enabled")) {
     PHASEFROM(2);
     shift(); enabled = argi();
+    if(enabled && GDIM == 2 && among(hsm, eHeadset::holonomy, eHeadset::reference))
+      hsm = eHeadset::model_viewing;
     }
   else if(argis("-vr-absunit")) {
     PHASEFROM(2);
