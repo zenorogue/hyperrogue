@@ -1109,6 +1109,8 @@ EX void resetModes(char leave IS('c')) {
   if(inv::on != (leave == rg::inv)) stop_game_and_switch_mode(rg::inv);
   if(chaosmode != (leave == rg::chaos)) stop_game_and_switch_mode(rg::chaos);
 
+  if((!!dual::state) != (leave == rg::dualmode)) stop_game_and_switch_mode(rg::dualmode);
+
   if(peace::on != (leave == rg::peace)) stop_game_and_switch_mode(rg::peace);
 #if CAP_TOUR
   if(tour::on != (leave == rg::tour)) stop_game_and_switch_mode(rg::tour);
