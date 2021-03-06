@@ -29,8 +29,8 @@ EX bool chaosUnlocked = false;
 EX bool chaosAchieved = false;
 
 EX void doOvergenerate() {
-  for(int i=0; i<numplayers(); i++)
-    setdist(playerpos(i), 7 - getDistLimit() - genrange_bonus, NULL);
+  for(cell *pc: player_positions())
+    setdist(pc, 7 - getDistLimit() - genrange_bonus, NULL);
   }
 
 EX bool notDippingFor(eItem i) {

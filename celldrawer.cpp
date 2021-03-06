@@ -585,7 +585,9 @@ void celldrawer::setcolors() {
     bool inrange = c->mpdist <= GUNRANGE;
     if(inrange) {
       inrange = false;
-      for(int i=0; i<numplayers(); i++) for(cell *c1: gun_targets(playerpos(i))) if(c1 == c) inrange = true;
+      for(cell *pc: player_positions())
+        for(cell *c1: gun_targets(pc)) if(c1 == c) 
+          inrange = true;
       }
     if(!inrange)
       fcol = gradient(fcol, 0, 0, 25, 100),
@@ -1842,13 +1844,12 @@ void celldrawer::bookkeeping() {
     playerfound = true;
 
     if(multi::players > 1) {
-      for(int i=0; i<numplayers(); i++) 
-        if(playerpos(i) == c) {
-          playerV = V * ddspin(c, multi::player[i].spin, 0);
-          if(multi::player[i].mirrored) playerV = playerV * Mirror;
-          if(orig)
-            multi::whereis[i] = playerV;
-          }
+      for(int i: player_indices()) if(playerpos(i) == c) {
+        playerV = V * ddspin(c, multi::player[i].spin, 0);
+        if(multi::player[i].mirrored) playerV = playerV * Mirror;
+        if(orig)
+          multi::whereis[i] = playerV;
+        }
       }
     else {
       playerV = V * ddspin(c, cwt.spin, 0);

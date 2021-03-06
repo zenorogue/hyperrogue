@@ -1178,9 +1178,9 @@ EX void killThePlayer(eMonster m, int id, flagtype flags) {
   }
 
 EX void killThePlayerAt(eMonster m, cell *c, flagtype flags) {
-  for(int i=0; i<numplayers(); i++) 
-    if(playerpos(i) == c) 
-      killThePlayer(m, i, flags);
+  for(int i: player_indices())
+    if(playerpos(i) == c)
+     killThePlayer(m, i, flags);
   }
 
 #if HDR

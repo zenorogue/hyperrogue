@@ -797,7 +797,7 @@ EX void handleInput(int delta) {
     }
   
   EX void checklastmove() {
-    for(int i=0; i<numplayers(); i++) if(playerActive(i)) {
+    for(int i: player_indices()) {
       multi::cpid = i;
       cwt = multi::player[i]; break;
       }
@@ -824,7 +824,7 @@ EX void handleInput(int delta) {
       multi::player[0] = cwt;
       }
     
-    for(int i=0; i<numplayers(); i++) if(playerActive(i)) {
+    for(int i: player_indices()) {
     
       using namespace multi;
       
@@ -908,13 +908,13 @@ EX void handleInput(int delta) {
       // check for crashes
       needinput = true;
 
-      for(int i=0; i<numplayers(); i++) if(playerActive(i)) {
+      for(int i: player_indices()) {
         origpos[i] = player[i].at;
         origtarget[i] = multiPlayerTarget(i);
         }
   
-      for(int i=0; i<numplayers(); i++) if(playerActive(i))
-      for(int j=0; j<numplayers(); j++) if(playerActive(j)) if(i != j) {
+      for(int i: player_indices())
+      for(int j: player_indices()) if(i != j) {
         if(origtarget[i] == origtarget[j]) {
           addMessage("Two players cannot move/attack the same location!");
           return;

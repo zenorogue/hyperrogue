@@ -326,12 +326,11 @@ EX void initgame() {
 #endif
   
   if(multi::players > 1 && !shmup::on) {
-    for(int i=0; i<numplayers(); i++) 
-      makeEmpty(playerpos(i));
+    for(cell *pc: player_positions())
+      makeEmpty(pc);
     }
   else {
-    for(int i=0; i<numplayers(); i++) 
-      makeEmpty(cwt.at);
+    makeEmpty(cwt.at);
     }
   
   if(specialland == laMinefield && bounded) {
@@ -1258,9 +1257,8 @@ EX void stop_game() {
   for(int i=0; i<10; i++) for(int l=0; l<landtypes; l++)
     exploreland[i][l] = 0;
 
-  for(int i=0; i<numplayers(); i++)
-    if(multi::playerActive(i)) 
-      multi::deaths[i]++;
+  for(int i: player_indices()) 
+    multi::deaths[i]++;
 
 #if CAP_SAVE
   anticheat::tampered = false; 

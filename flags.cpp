@@ -140,7 +140,7 @@ EX int mirrorcolor(bool mirrored) {
 
 EX bool isMounted(cell *c) {
   if(c && c->monst && c->monst != moTentacleGhost && isMountable(c->monst)) {
-    for(int i=0; i<numplayers(); i++) {
+    for(int i: player_indices()) {
       if(playerpos(i)->monst && sameMonster(c, playerpos(i))) 
         return true;
       if(lastmountpos[i] && lastmountpos[i]->monst && sameMonster(c, lastmountpos[i]))

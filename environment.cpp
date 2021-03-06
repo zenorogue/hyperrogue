@@ -286,9 +286,7 @@ EX void bfs() {
 
   recalcTide = false;
   
-  for(int i=0; i<numplayers(); i++) {
-    cell *c = playerpos(i);
-    if(!c) continue;
+  for(cell *c: player_positions()) {
     if(c->cpdist == 0) continue;
     c->cpdist = 0;
     checkTide(c);
@@ -299,9 +297,7 @@ EX void bfs() {
   
   int distlimit = gamerange();
 
-  for(int i=0; i<numplayers(); i++) {
-    cell *c = playerpos(i);
-    if(!c) continue;
+  for(cell *c: player_positions()) {
     if(items[itOrbDomination])
     if(c->monst == moTentacle || c->monst == moTentaclewait || c->monst == moTentacleEscaping)
       worms.push_back(c);
@@ -799,8 +795,9 @@ EX void monstersTurn() {
   DEBB(DF_TURN, ("mmo"));
   int phase2 = (1 & items[itOrbSpeed]);
   if(!phase2) movemonsters();
-  for(int i=0; i<numplayers(); i++) if(playerpos(i)->item == itOrbSafety) {
-    collectItem(playerpos(i), true);
+
+  for(cell *pc: player_positions()) if(pc->item == itOrbSafety)  {
+    collectItem(pc, true);
     return;
     }
 
@@ -852,9 +849,8 @@ EX void monstersTurn() {
   #endif
   
   if(items[itOrbFreedom])
-    for(int i=0; i<numplayers(); i++)
-      if(multi::playerActive(i))
-        checkFreedom(playerpos(i));
+    for(cell *pc: player_positions())
+      checkFreedom(pc);
 
   DEBB(DF_TURN, ("check"));
   checkmove();
@@ -862,9 +858,8 @@ EX void monstersTurn() {
 
 
 #if CAP_HISTORY
-  for(int i=0; i<numplayers(); i++)
-    if(multi::playerActive(i))
-      history::movehistory.push_back(playerpos(i));
+  for(cell *pc: player_positions())
+    history::movehistory.push_back(pc);
 #endif
   }
 

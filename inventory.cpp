@@ -442,14 +442,12 @@ EX namespace inv {
   
   void evokeOrb(eItem it) {
     if(it == itOrbFreedom)
-      for(int i=0; i<numplayers(); i++)
-        if(multi::playerActive(i))
-          checkFreedom(playerpos(i));
+      for(cell *pc: player_positions())
+        checkFreedom(pc);
     
     if(it == itOrbBeauty) {
-      for(int i=0; i<numplayers(); i++)
-        if(multi::playerActive(i))
-          evokeBeautyAt(playerpos(i));
+      for(cell *pc: player_positions()) 
+          evokeBeautyAt(pc);
       if(items[itOrbEmpathy])
         for(cell *c: dcal) if(isFriendly(c->monst))
           evokeBeautyAt(c);
@@ -464,12 +462,11 @@ EX namespace inv {
       }
     
     if(it == itOrbSword || it == itOrbSword2) {
-      for(int i=0; i<numplayers(); i++)
-        if(multi::playerActive(i)) {
-          cwt.at = playerpos(i);
-          multi::cpid = i;
-          swordAttackStatic(it == itOrbSword2);
-          }
+      for(int i: player_indices()) {
+        cwt.at = playerpos(i);
+        multi::cpid = i;
+        swordAttackStatic(it == itOrbSword2);
+        }
       }
     }
   

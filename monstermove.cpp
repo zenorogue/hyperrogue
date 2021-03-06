@@ -555,7 +555,7 @@ EX int stayval(cell *c, flagtype mf) {
 EX int totalbulldistance(cell *c, int k) {
   shpos.resize(SHSIZE);
   int tbd = 0;
-  for(int p=0; p<numplayers(); p++) {
+  for(int p: player_indices()) {
     cell *c2  = shpos[p][(cshpos+SHSIZE-k-1)%SHSIZE];
     if(c2) tbd += bulldistance(c, c2);
     }
@@ -1172,11 +1172,9 @@ EX void groupmove(eMonster movtype, flagtype mf) {
   else {
     if(!peace::on) for(int i=0; i<isize(targets); i++) gendfs.push_back(targets[i]);
   
-    if(invisfish && (movtype == moSlime || movtype == moShark || movtype == moKrakenH)) for(int i=0; i<numplayers(); i++) {
-      cell *c = playerpos(i);
-      if(!c) continue;
-      gendfs.push_back(c);
-      }
+    if(invisfish && (movtype == moSlime || movtype == moShark || movtype == moKrakenH))
+      for(cell *pc: player_positions()) 
+        gendfs.push_back(pc);
     }
   
   targetcount = isize(gendfs);
@@ -1433,7 +1431,7 @@ EX void moveshadow() {
   cell *shfrom = NULL;
 
   shpos.resize(SHSIZE);
-  for(int p=0; p<numplayers(); p++) {
+  for(int p: player_indices()) {
     cell *c = shpos[p][cshpos];
     if(c && c->monst == moShadow) {
       for(int j=0; j<c->type; j++) 
@@ -1445,7 +1443,7 @@ EX void moveshadow() {
     shpos[p][cshpos] = playerpos(p);
     }
   cshpos = (cshpos+1) % SHSIZE;
-  for(int p=0; p<numplayers(); p++) {
+  for(int p: player_indices()) {
     cell* where = shpos[p][cshpos];
     if(where && where->monst == moNone && where->cpdist && where->land == laGraveyard &&
       !sword::at(where)) {
@@ -2038,7 +2036,9 @@ EX void movemonsters() {
   DEBB(DF_TURN, ("westwall"));
   if(havewhat & HF_WESTWALL) westwall::move();
   #endif
-  for(int i=0; i<numplayers(); i++) if(playerpos(i)->item == itOrbSafety) return;
+  for(cell *pc: player_positions())
+    if(pc->item == itOrbSafety) 
+      return;
   DEBB(DF_TURN, ("river"));
   if(havewhat & HF_RIVER) prairie::move();
   /* DEBB(DF_TURN, ("magnet"));

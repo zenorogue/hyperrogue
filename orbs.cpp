@@ -293,8 +293,8 @@ EX void checkFreedom(cell *cf) {
     }
   addMessage(XLAT("Your %1 activates!", itOrbFreedom));
   drainOrb(itOrbFreedom);
-  for(int i=0; i<numplayers(); i++)
-    drawBigFlash(playerpos(i));
+  for(cell *pc: player_positions()) 
+    drawBigFlash(pc);
   for(int i=0; i<isize(dcal); i++) {
     cell *c = dcal[i];
     if(c == cf && !shmup::on) continue;
@@ -306,8 +306,8 @@ EX void checkFreedom(cell *cf) {
 EX void activateFlash() {
   int tk = tkills();
 
-  for(int i=0; i<numplayers(); i++) 
-    drawFlash(playerpos(i));
+  for(cell *pc: player_positions()) 
+    drawFlash(pc);
 
   addMessage(XLAT("You activate the Flash spell!"));
   playSound(cwt.at, "storm");
@@ -513,8 +513,8 @@ EX void activateLightning() {
 
   drainOrb(itOrbLightning);
 
-  for(int i=0; i<numplayers(); i++) 
-    castLightningBoltFrom(playerpos(i));
+  for(cell *pc: player_positions()) 
+    castLightningBoltFrom(pc);
     
   elec::afterOrb = true;
   elec::act();

@@ -137,9 +137,7 @@ EX bool passable(cell *w, cell *from, flagtype flags) {
 
   if(from && from != w && nonAdjacent(from, w) && !F(P_IGNORE37 | P_BULLET)) return false;
   
-  for(int i=0; i<numplayers(); i++) {
-    cell *pp = playerpos(i);
-    if(!pp) continue;
+  for(cell *pp: player_positions()) {
     if(w == pp && F(P_ONPLAYER)) return true;
     if(from == pp && F(P_ONPLAYER) && F(P_REVDIR)) return true;
 

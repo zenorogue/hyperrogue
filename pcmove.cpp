@@ -324,8 +324,8 @@ bool pcmove::after_move() {
   invisfish = false;
   if(items[itOrbFish]) {
      invisfish = true;
-     for(int i=0; i<numplayers(); i++) 
-       if(multi::playerActive(i) && !isWatery(playerpos(i)))
+     for(cell *pc: player_positions()) 
+       if(!isWatery(pc))
          invisfish = false;
      if(d < 0) invisfish = false; // no invisibility if staying still
      if(invisfish) invismove = true, markOrb(itOrbFish);
@@ -1193,14 +1193,30 @@ EX bool warningprotection_hit(eMonster m) {
   }
 
 EX bool playerInWater() { 
-  for(int i=0; i<numplayers(); i++) 
-    if(multi::playerActive(i) && isWatery(playerpos(i)) && !playerInBoat(i)) 
+  for(int i: player_indices())
+    if(isWatery(playerpos(i)) && !playerInBoat(i)) 
       return true;
   return false;
   }
 
 EX int numplayers() {
   return multi::players;
+  }
+
+EX vector<cell*> player_positions() {
+  vector<cell*> res;
+  for(int i=0; i<numplayers(); i++)
+    if(multi::playerActive(i))
+      res.push_back(playerpos(i));
+  return res;
+  }
+
+EX vector<int> player_indices() {
+  vector<int> res;
+  for(int i=0; i<numplayers(); i++)
+    if(multi::playerActive(i))
+      res.push_back(i);
+  return res;
   }
 
 EX cell *playerpos(int i) {
@@ -1210,14 +1226,14 @@ EX cell *playerpos(int i) {
   }
 
 EX bool allPlayersInBoats() {
-  for(int i=0; i<numplayers(); i++) 
-    if(multi::playerActive(i) && playerpos(i)->wall != waBoat) return true;
+  for(cell *pc: player_positions())
+    if(pc->wall != waBoat) return true;
   return false;
   }
 
 EX int whichPlayerOn(cell *c) {
   if(singleused()) return c == singlepos() ? 0 : -1;
-  for(int i=0; i<numplayers(); i++) 
+  for(int i: player_indices())
     if(playerpos(i) == c) return i;
   return -1;
   }
@@ -1245,8 +1261,8 @@ EX bool isPlayerInBoatOn(cell *c) {
 EX bool playerInPower() {
   if(singleused()) 
     return singlepos()->land == laPower || singlepos()->land == laHalloween;
-  for(int i=0; i<numplayers(); i++) 
-    if(multi::playerActive(i) && (playerpos(i)->land == laPower || playerpos(i)->land == laHalloween))
+  for(cell *pc: player_positions())
+    if(pc->land == laPower || pc->land == laHalloween)
       return true;
   return false;
   }

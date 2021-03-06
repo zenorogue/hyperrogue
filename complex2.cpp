@@ -671,8 +671,8 @@ EX void check_around(cell *c) {
   }
 
 EX void check() {
-  for(int i=0; i<numplayers(); i++)
-    forCellEx(c, playerpos(i)) {
+  for(cell *pc: player_positions()) 
+    forCellEx(c, pc) {
       if(shmup::on) {
         forCellEx(c2, c)
           check(c2);
@@ -709,16 +709,16 @@ EX void check_state() {
       }
     if(items[itHunting] > 5 && items[itHunting] <= 22) {
       int q = 0;
-      for(int i=0; i<numplayers(); i++) 
-        forCellEx(c2, playerpos(i))
+      for(cell *pc: player_positions()) 
+        forCellEx(c2, pc)
           if(cl.listed(c2))
             q++;
       if(q == 1) havewhat |= HF_FAILED_AMBUSH;
       if(q == 2) {
-        for(int i=0; i<numplayers(); i++) 
-        forCellEx(c2, playerpos(i))
+        for(cell *pc: player_positions())
+        forCellEx(c2, pc)
           if(cl.listed(c2))
-            forCellEx(c3, playerpos(i)) 
+            forCellEx(c3, pc)
               if(c3 != c2 && isNeighbor(c2,c3))
               if(cl.listed(c3))
                 havewhat |= HF_FAILED_AMBUSH;

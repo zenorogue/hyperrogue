@@ -449,8 +449,8 @@ EX bool sameMonster(cell *c1, cell *c2) {
   }
 
 EX eMonster haveMount() {
-  for(int i=0; i<numplayers(); i++) if(multi::playerActive(i)) {
-    eMonster m = playerpos(i)->monst;
+  for(cell *pc: player_positions()) {
+    eMonster m = pc->monst;
     if(m) return m;
     }
   return moNone;

@@ -178,8 +178,8 @@ EX int flip_dark(int f, int a0, int a1) {
 color_t fc(int ph, color_t col, int z) {
   if(items[itOrbFire]) col = darkena(firecolor(ph), 0, 0xFF);
   if(items[itOrbAether]) col = (col &~0XFF) | (col&0xFF) / 2;
-  for(int i=0; i<numplayers(); i++) if(multi::playerActive(i))
-    if(items[itOrbFish] && isWatery(playerpos(i)) && z != 3) return watercolor(ph);
+  for(cell *pc: player_positions()) 
+    if(items[itOrbFish] && isWatery(pc) && z != 3) return watercolor(ph);
   if(invismove) 
     col = 
       shmup::on ?
@@ -4194,7 +4194,7 @@ EX void drawMarkers() {
   if(!(cmode & sm::NORMAL)) return;
 
   if(should_draw_mouse_cursor()) {
-    for(int i=0; i<numplayers(); i++) if(multi::playerActive(i)) {
+    for(int i: player_indices()) {
       queueline(ggmatrix(playerpos(i)) * (WDIM == 2 && GDIM == 3 ? zpush0(cgi.WALL) : C0), mouseh, 0xFF00FF, grid_prec() + 1);
       }
     }
@@ -5269,7 +5269,7 @@ EX void drawscreen() {
     
     if(tmines == 7) seenSevenMines = true;
     
-    for(int p=0; p<numplayers(); p++) if(multi::playerActive(p))
+    for(int p: player_indices()) 
       displayfr(vid.xres * (p+.5) / numplayers(),
         current_display->ycenter - current_display->radius * 3/4, 2,
         vid.fsize, 
