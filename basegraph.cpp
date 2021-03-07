@@ -436,7 +436,7 @@ void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
   int otheight = txt->h;
 #endif
   
-  if(otwidth+curx > FONTTEXTURESIZE) curx = 0, cury += theight, theight = 0;
+  if(otwidth+curx+1 > FONTTEXTURESIZE) curx = 0, cury += theight+1, theight = 0;
   
   theight = max(theight, otheight);
   
@@ -458,7 +458,7 @@ void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
   c.tx1 = (float) (curx+otwidth) / (float) FONTTEXTURESIZE;
   c.ty0 = (float) cury;
   c.ty1 = (float) (cury+otheight);
-  curx += otwidth;
+  curx += otwidth+1;
   }
   
 EX void init_glfont(int size) {
@@ -485,6 +485,10 @@ EX void init_glfont(int size) {
   SDL_Color white;
   white.r = white.g = white.b = 255;
 #endif
+
+  for(int y=0; y<FONTTEXTURESIZE; y++)
+  for(int x=0; x<FONTTEXTURESIZE; x++)
+    fontdata[y][x] = 0;
 
 #if CAP_TABFONT
   resetTabFont();
