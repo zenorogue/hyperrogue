@@ -2805,8 +2805,10 @@ EX void queuestr(const shiftmatrix& V, double size, const string& chr, color_t c
     shiftmatrix V1 ;
     if(GDIM == 3) 
       V1 = face_the_player(V);
-    else
+    else {
+      V1 = V;
       V1.T = rgpushxto0(tC0(V1.T));
+      }
     auto col1 = (col << 8) | 0xFF;
     write_in_space(V1, max_glfont_size, size, chr, col1, frame, align);
     return;
