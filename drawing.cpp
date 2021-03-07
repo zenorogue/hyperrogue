@@ -2135,6 +2135,7 @@ EX void quickqueue() {
   ptds.clear();
   if(!keep_curvedata) {
     curvedata.clear();
+    finf.tvertices.clear();
     curvestart = 0;
     }
   }
@@ -2742,8 +2743,74 @@ EX void queuestr(const shiftpoint& h, int size, const string& chr, color_t col, 
   if(getcoord0_checked(h, xc, yc, sc))
     queuestr(xc, yc, sc, size, chr, col, frame);
   }
+
+EX basic_textureinfo finf;
   
+EX void write_in_space(const shiftmatrix& V, int fsize, double size, const string& s, color_t col, int frame IS(0), int align IS(8)) {
+  init_glfont(fsize);
+  glfont_t& f(*(glfont[fsize]));
+  finf.texture_id = f.texture;
+  
+  int fstart = isize(finf.tvertices);
+  
+  vector<int> chars;
+  int i = 0;
+  while(i < isize(s)) { chars.push_back(getnext(s.c_str(), i)); }
+  
+  ld tw = 0;
+  for(int c: chars) tw += f.chars[c].w;
+  ld th = f.chars[32].h;
+  
+  ld xpos = -tw * align / 16;
+  
+  ld scale = cgi.scalefactor * size / fsize / 2;
+  
+  auto pt = [&] (ld tx, ld ty, ld ix, ld iy) {
+    finf.tvertices.push_back(glhr::makevertex(tx, ty, 0));
+    curvedata.push_back(glhr::pointtogl(xpush(ix * scale) * ypush(iy * scale) * C0));
+    };
+  
+  for(int ch: chars) { 
+    auto& c = f.chars[ch];
+  
+    pt(c.tx0, c.ty0, xpos, -th/2);
+    pt(c.tx0, c.ty1, xpos, +th/2);
+    pt(c.tx1, c.ty1, xpos+c.w, +th/2);
+    pt(c.tx1, c.ty1, xpos+c.w, +th/2);
+    pt(c.tx1, c.ty0, xpos+c.w, -th/2);
+    pt(c.tx0, c.ty0, xpos, -th/2);
+    
+    xpos += c.w;
+    }
+  
+  if(frame) for(int i=0; i<360; i+=45) {
+    auto &res = queuetable(V * xspinpush(i*degree, frame*scale), curvedata, isize(curvedata)-curvestart, col & 0xFF, col & 0xFF, PPR::TEXT);
+    res.offset = curvestart;
+    res.offset_texture = fstart;
+    res.tinf = &finf;
+    res.flags |= POLY_TRIANGLES;
+    }
+
+  auto &res = queuetable(V, curvedata, isize(curvedata)-curvestart, col, col, PPR::TEXT);
+  res.offset = curvestart;
+  res.offset_texture = fstart;
+  res.tinf = &finf;
+  res.flags |= POLY_TRIANGLES;
+
+  curvestart = isize(curvedata);
+  }
+
 EX void queuestr(const shiftmatrix& V, double size, const string& chr, color_t col, int frame IS(0), int align IS(8)) {
+  if(vrhr::active() || true) {
+    shiftmatrix V1 ;
+    if(GDIM == 3) 
+      V1 = face_the_player(V);
+    else
+      V1.T = rgpushxto0(tC0(V1.T));
+    auto col1 = (col << 8) | 0xFF;
+    write_in_space(V1, max_glfont_size, size, chr, col1, frame, align);
+    return;
+    }
   int xc, yc, sc; 
   if(getcoord0_checked(tC0(V), xc, yc, sc))
     queuestr(xc, yc, sc, scale_in_pixels(V) * size, chr, col, frame, align);
