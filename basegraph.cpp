@@ -1174,6 +1174,9 @@ EX pair<int, int> get_requested_resolution() {
 #endif
 
 #if CAP_SDL
+
+EX bool resizable = true;
+
 EX void setvideomode() {
 
   DEBBI(DF_INIT | DF_GRAPH, ("setvideomode"));
@@ -1211,7 +1214,7 @@ EX void setvideomode() {
   vid.usingGL = false;
 #endif
 
-  int sizeflag = SDL12(vid.full ? SDL_FULLSCREEN : SDL_RESIZABLE, vid.full ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_RESIZABLE);
+  int sizeflag = SDL12(vid.full ? SDL_FULLSCREEN : resizable ? SDL_RESIZABLE : 0, vid.full ? SDL_WINDOW_FULLSCREEN : resizable ? SDL_WINDOW_RESIZABLE : 0);
 
   #ifdef WINDOWS
   #ifndef OLD_MINGW
