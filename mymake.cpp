@@ -50,11 +50,11 @@ void set_linux() {
   linker = "g++ -rdynamic -o hyper";
   if(sdlver == 2) {
     opts = "-DFHS -DLINUX -I/usr/include/SDL2";
-    libs = " savepng.o -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSDL2_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
+    libs = " -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSDL2_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
     }
   else {
     opts = "-DFHS -DLINUX -I/usr/include/SDL";
-    libs = " savepng.o -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
+    libs = " -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
     }
   }
 
@@ -63,7 +63,7 @@ void set_mac() {
   compiler = "g++ -march=native -W -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-implicit-fallthrough -c";
   linker = "g++ -o hyper";
   opts = "-DMAC -I/usr/local/include";
-  libs = " savepng.o -L/usr/local/lib -framework AppKit -framework OpenGL -lSDL -lSDLMain -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpng -lpthread -lz";
+  libs = " -L/usr/local/lib -framework AppKit -framework OpenGL -lSDL -lSDLMain -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpng -lpthread -lz";
   }
 
 void set_mingw64() {
@@ -72,7 +72,7 @@ void set_mingw64() {
   compiler = "g++ -mwindows -march=native -W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
   linker = "g++ -o hyper";
   opts = "-DWINDOWS -DCAP_GLEW=1 -DCAP_PNG=1";
-  libs = " savepng.o hyper.res -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
+  libs = " hyper.res -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
   setvbuf(stdout, NULL, _IONBF, 0); // MinGW is quirky with output buffering
   }
 
@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
   int retval = 0; // for storing return values of some function calls
   for(string fname: {"Makefile.loc", "Makefile.simple", "Makefile"})
     if(file_exists(fname)) {
-      retval = system("make -f " + fname + " language-data.cpp autohdr.h savepng.o");
+      retval = system("make -f " + fname + " language-data.cpp autohdr.h");
       if (retval) { printf("error during preparation!\n"); exit(retval); }
       break;
       }
@@ -271,6 +271,8 @@ int main(int argc, char **argv) {
         }
       }
     }
+  
+  modules.push_back("savepng");
 
   if(get_file_time(obj_dir + "/hyper.o") < get_file_time("hyper.cpp")) {
     printf("compiling hyper...\n");

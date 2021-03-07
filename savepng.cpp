@@ -4,7 +4,18 @@
  * This code is free software, available under zlib/libpng license.
  * http://www.libpng.org/pub/png/src/libpng-LICENSE.txt
  */
+
+#ifdef CAP_SDL
+#if CAP_SDL
+#define USE_SDL2
+#endif
+#endif
+
+#ifdef USE_SDL2
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 #include <png.h>
 
 #define SUCCESS 0
