@@ -5,8 +5,8 @@
  * http://www.libpng.org/pub/png/src/libpng-LICENSE.txt
  */
 
-#ifdef CAP_SDL
-#if CAP_SDL
+#ifdef CAP_SDL2
+#if CAP_SDL2
 #define USE_SDL2
 #endif
 #endif
