@@ -141,7 +141,10 @@ typedef SDL_Surface SDL_Renderer;
 EX SDL_Surface *s;
 EX SDL_Surface *s_screen;
 #if CAP_SDL2
-EX SDL_Renderer *srend;
+EX SDL_Renderer *s_renderer, *s_software_renderer;
+#if HDR
+#define srend s_software_renderer
+#endif
 EX SDL_Texture *s_texture;
 EX SDL_Window *s_window;
 #endif
@@ -158,10 +161,10 @@ EX color_t& qpixel(SDL_Surface *surf, int x, int y) {
 
 EX void present_surface() {
   #if CAP_SDL2
-  SDL_UpdateTexture(s_texture, NULL, s, s->w * sizeof (Uint32));
-  SDL_RenderClear(srend);
-  SDL_RenderCopy(srend, s_texture, NULL, NULL);
-  SDL_RenderPresent(srend);
+  SDL_UpdateTexture(s_texture, nullptr, s->pixels, s->w * sizeof (Uint32));
+  SDL_RenderClear(s_renderer);
+  SDL_RenderCopy(s_renderer, s_texture, nullptr, nullptr);
+  SDL_RenderPresent(s_renderer);
   #else
   SDL_UpdateRect(s, 0, 0, 0, 0);  
   #endif
@@ -1214,9 +1217,11 @@ EX void setvideomode() {
   #endif
   #endif
   
+  if(s_renderer) SDL_DestroyRenderer(s_renderer), s_renderer = nullptr;
+
   auto create_win = [&] {
     #if CAP_SDL2
-    if(s_window) SDL_DestroyWindow(s_window);
+    if(s_window) SDL_DestroyWindow(s_window), s_window = nullptr;
     s_window = SDL_CreateWindow(CUSTOM_CAPTION, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
       vid.xres, vid.yres,
       flags | sizeflag
@@ -1228,7 +1233,9 @@ EX void setvideomode() {
   
   create_win();
   
-  if(vid.full && !s) {
+  auto& sw = SDL12(s, s_window);
+  
+  if(vid.full && !sw) {
     vid.xres = vid.xscr;
     vid.yres = vid.yscr;
     vid.fsize = 10;
@@ -1236,7 +1243,7 @@ EX void setvideomode() {
     create_win();
     }
 
-  if(!s) {
+  if(!sw) {
     addMessage("Failed to set the graphical mode: "+its(vid.xres)+"x"+its(vid.yres)+(vid.full ? " fullscreen" : " windowed"));
     vid.xres = 640;
     vid.yres = 480;
@@ -1247,14 +1254,16 @@ EX void setvideomode() {
     }
   
   #if CAP_SDL2
-  if(srend) SDL_DestroyRenderer(srend);
-  srend = SDL_CreateRenderer(s_window, -1, vid.current_vsync ? SDL_RENDERER_PRESENTVSYNC : 0);
+  s_renderer = SDL_CreateRenderer(s_window, -1, vid.current_vsync ? SDL_RENDERER_PRESENTVSYNC : 0);
   
-  if(s_texture) SDL_DestroyTexture(s_texture);
-  s_texture = SDL_CreateTexture(srend, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, vid.xres, vid.yres);
+  if(s_texture) SDL_DestroyTexture(s_texture), s_texture = nullptr;
+  s_texture = SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, vid.xres, vid.yres);
   
-  if(s) SDL_FreeSurface(s);
+  if(s) SDL_FreeSurface(s), s = nullptr;
   s = shot::empty_surface(vid.xres, vid.yres, false);
+  
+  if(s_software_renderer) SDL_DestroyRenderer(s_software_renderer), s_software_renderer = nullptr;
+  s_software_renderer = SDL_CreateSoftwareRenderer(s);
   #endif
   s_screen = s;
 
