@@ -395,7 +395,7 @@ void track_poses() {
           px[1] /= -ui_size * ui_size_unit;
           px[0] += (ui_xmin+ui_xmax) / 2;
           px[1] += (ui_ymin+ui_ymax) / 2;
-          targeting_menu = px[0] >= 0 && px[1] >= 0 && px[1] <= vid.xres && px[1] <= vid.xres;
+          targeting_menu = px[0] >= 0 && px[1] >= 0 && px[0] <= vid.xres && px[1] <= vid.yres;
           if(targeting_menu) {
             mousex = px[0];
             mousey = px[1];
