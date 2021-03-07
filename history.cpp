@@ -92,6 +92,7 @@ namespace spiral {
     bool saveGL = vid.wantGL;
     vid.wantGL = false;
     apply_screen_settings();
+    out = s;
 
     while(true) {
 
