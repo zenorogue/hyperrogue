@@ -1175,7 +1175,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           }
         if(windless) {
           c->wall = waIcewall;
-          if(hrand(500) < PT(100 + 2 * kills[moVoidBeast] + 2 * kills[moIceGolem], 200) && notDippingFor(itBlizzard))
+          if(safety) return;
+          else if(hrand(500) < PT(100 + 2 * kills[moVoidBeast] + 2 * kills[moIceGolem], 200) && notDippingFor(itBlizzard))
             c->item = itBlizzard;
           else placeLocalSpecial(c, 100);
           }
@@ -2646,9 +2647,15 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           eWall wetwalls[4] = { waNone, waShallow, waStone, waDeepWater };
           c->wall = wetwalls[a];
           }
-        if(among(c->wall, waDeepWater, waShallow) && hrand_monster(4000) < 2 * (items[itWet] + yendor::hardness() + 5))
+        bool border = false;
+        if(!chaosmode) forCellEx(c1, c) if(c1->land != laWet) border = true;
+        if(border) {
+          if(pseudohept(c)) c->wall = waDeepWater;
+          else c->wall = waShallow;
+          }
+        if(among(c->wall, waDeepWater, waShallow) && hrand_monster(4000) < 2 * (items[itWet] + yendor::hardness() + 5) && !safety)
           c->monst = hrand(100) >= 90 ? moRusalka : moPike;
-        if(c->wall == waShallow && hrand(2000) < min(PT(100 + kills[moPike] + kills[moRusalka], 150), 150) && notDippingFor(itWet))
+        if(c->wall == waShallow && hrand(2000) < min(PT(100 + kills[moPike] + kills[moRusalka], 150), 150) && notDippingFor(itWet) && !border && !safety)
           c->item = itWet;
         }
       break;
