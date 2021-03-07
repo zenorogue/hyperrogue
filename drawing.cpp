@@ -558,21 +558,30 @@ void addpoly(const shiftmatrix& V, const vector<glvertex> &tab, int ofs, int cnt
     }
   }
 
+EX color_t align(color_t col) {
+  #if CAP_SDL2
+  swap(part(col, 0), part(col, 3));
+  swap(part(col, 1), part(col, 2));
+  #endif
+  return col;
+  }
+
+
 #if CAP_SDLGFX
 void aapolylineColor(SDL_Renderer *s, int*x, int *y, int polyi, color_t col) {
   for(int i=1; i<polyi; i++)
-    aalineColor(s, x[i-1], y[i-1], x[i], y[i], col);
+    aalineColor(s, x[i-1], y[i-1], x[i], y[i], align(col));
   }
 
 void polylineColor(SDL_Renderer *s, int *x, int *y, int polyi, color_t col) {
   for(int i=1; i<polyi; i++)
-    lineColor(s, x[i-1], y[i-1], x[i], y[i], col);
+    lineColor(s, x[i-1], y[i-1], x[i], y[i], align(col));
   }
 
 EX void filledPolygonColorI(SDL_Renderer *s, int* px, int *py, int polyi, color_t col) {
   std::vector<Sint16> spx(px, px + polyi);
   std::vector<Sint16> spy(py, py + polyi);
-  filledPolygonColor(s, spx.data(), spy.data(), polyi, col);
+  filledPolygonColor(s, spx.data(), spy.data(), polyi, align(col));
   }
 #endif
 

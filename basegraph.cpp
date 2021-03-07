@@ -1039,11 +1039,11 @@ EX void drawCircle(int x, int y, int size, color_t color, color_t fillcolor IS(0
 #elif CAP_SDLGFX
   if(pconf.stretch == 1) {
     if(fillcolor) filledCircleColor(srend, x, y, size, fillcolor);
-    if(color) ((vid.antialias && AA_NOGL)?aacircleColor:circleColor) (srend, x, y, size, color);
+    if(color) ((vid.antialias && AA_NOGL)?aacircleColor:circleColor) (srend, x, y, size, align(color));
     }
   else {
     if(fillcolor) filledEllipseColor(srend, x, y, size, size * pconf.stretch, fillcolor);
-    if(color) ((vid.antialias && AA_NOGL)?aaellipseColor:ellipseColor) (srend, x, y, size, size * pconf.stretch, color);
+    if(color) ((vid.antialias && AA_NOGL)?aaellipseColor:ellipseColor) (srend, x, y, size, size * pconf.stretch, align(color));
     }
 #elif CAP_SDL
   int pts = size * 4;

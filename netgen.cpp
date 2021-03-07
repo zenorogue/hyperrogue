@@ -208,7 +208,7 @@ EX namespace netgen {
   
   void blackline(vec v1, vec v2, color_t col = 0x000000FF) {
 #if CAP_SDLGFX
-    aalineColor(srend, int(v1.x), int(v1.y), int(v2.x), int(v2.y), col);
+    aalineColor(srend, int(v1.x), int(v1.y), int(v2.x), int(v2.y), align(col));
 #elif CAP_SDL
     SDL_LockSurface(s);
     int len = abs(v1.x-v2.x) + abs(v1.y-v2.y);
