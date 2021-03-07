@@ -400,16 +400,22 @@ EX  int next_p2 (int a ) {
 
 #define CHARS (128+NUMEXTRA)
 
+#if HDR
+struct charinfo_t {
+  int w, h;
+  float tx0, ty0, tx1, ty1;
+  };
+
 struct glfont_t {
   GLuint texture;                                     // Holds The Texture Id
 //GLuint list_base;                                   // Holds The First Display List ID  
-  int widths[CHARS];
-  int heights[CHARS];
-  float tx0[CHARS], tx1[CHARS], ty0[CHARS], ty1[CHARS];
+  vector<charinfo_t> chars; 
   };
 
 const int max_glfont_size = 72;
-glfont_t *glfont[max_glfont_size+1];
+#endif
+
+EX glfont_t *glfont[max_glfont_size+1];
 
 typedef Uint16 texturepixel;
 
@@ -443,17 +449,19 @@ void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
 #endif
     }
   
-  f.widths[ch] = otwidth;
-  f.heights[ch] = otheight;
+  auto& c = f.chars[ch];
+  
+  c.w = otwidth;
+  c.h = otheight;
 
-  f.tx0[ch] = (float) curx / (float) FONTTEXTURESIZE;
-  f.tx1[ch] = (float) (curx+otwidth) / (float) FONTTEXTURESIZE;
-  f.ty0[ch] = (float) cury;
-  f.ty1[ch] = (float) (cury+otheight);
+  c.tx0 = (float) curx / (float) FONTTEXTURESIZE;
+  c.tx1 = (float) (curx+otwidth) / (float) FONTTEXTURESIZE;
+  c.ty0 = (float) cury;
+  c.ty1 = (float) (cury+otheight);
   curx += otwidth;
   }
   
-void init_glfont(int size) {
+EX void init_glfont(int size) {
   if(glfont[size]) return;
   DEBBI(DF_GRAPH, ("init GL font: ", size));
   
@@ -465,6 +473,8 @@ void init_glfont(int size) {
   glfont[size] = new glfont_t;
   
   glfont_t& f(*(glfont[size]));
+  
+  f.chars.resize(CHARS);
 
 //f.list_base = glGenLists(128);
   glGenTextures(1, &f.texture );
@@ -521,7 +531,7 @@ void init_glfont(int size) {
     GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 
     fontdata);
 
-  for(int ch=0; ch<CHARS; ch++) f.ty0[ch] /= theight, f.ty1[ch] /= theight;
+  for(int ch=0; ch<CHARS; ch++) f.chars[ch].ty0 /= theight, f.chars[ch].ty1 /= theight;
  
 #if CAP_CREATEFONT
   printf("#define NUMEXTRA %d\n", NUMEXTRA);
@@ -549,7 +559,7 @@ int gl_width(int size, const char *s) {
   int x = 0;
   for(int i=0; s[i];) {
     int tabid = getnext(s,i);    
-    x += f.widths[tabid] * size/gsiz;
+    x += f.chars[tabid].w * size/gsiz;
     }
   
   return x;
@@ -582,12 +592,12 @@ bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, i
   int tsize = 0;
   
   for(int i=0; s[i];) {
-    tsize += f.widths[getnext(s,i)] * size/gsiz;
+    tsize += f.chars[getnext(s,i)].w * size/gsiz;
     }
   x -= tsize * align / 16;
-  y += f.heights[32] * size / (gsiz*2);
+  y += f.chars[32].h * size / (gsiz*2);
   
-  int ysiz = f.heights[32] * size / gsiz;
+  int ysiz = f.chars[32].h * size / gsiz;
 
   bool clicked = (mousex >= x && mousey <= y && mousex <= x+tsize && mousey >= y-ysiz);
   
@@ -607,15 +617,16 @@ bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, i
   for(int i=0; s[i];) {
   
     int tabid = getnext(s,i);
-    int wi = f.widths[tabid] * size/gsiz;
-    int hi = f.heights[tabid] * size/gsiz;
+    auto& c = f.chars[tabid];
+    int wi = c.w * size/gsiz;
+    int hi = c.h * size/gsiz;
 
     GLERR("pre-print");
-  
-    glhr::textured_vertex t00 = charvertex(x,    y-hi, f.tx0[tabid], f.ty0[tabid]);
-    glhr::textured_vertex t01 = charvertex(x,    y,    f.tx0[tabid], f.ty1[tabid]);
-    glhr::textured_vertex t11 = charvertex(x+wi, y,    f.tx1[tabid], f.ty1[tabid]);
-    glhr::textured_vertex t10 = charvertex(x+wi, y-hi, f.tx1[tabid], f.ty0[tabid]);
+      
+    glhr::textured_vertex t00 = charvertex(x,    y-hi, c.tx0, c.ty0);
+    glhr::textured_vertex t01 = charvertex(x,    y,    c.tx0, c.ty1);
+    glhr::textured_vertex t11 = charvertex(x+wi, y,    c.tx1, c.ty1);
+    glhr::textured_vertex t10 = charvertex(x+wi, y-hi, c.tx1, c.ty0);
     
     tver.push_back(t00);
     tver.push_back(t01);
