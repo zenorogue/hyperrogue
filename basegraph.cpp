@@ -133,7 +133,7 @@ void fix_font_size(int& size) {
 
 #if !CAP_SDL2
 #if HDR
-typedef SDL_Surface SDL_Renderer
+typedef SDL_Surface SDL_Renderer;
 #define srend s
 #endif
 #endif
