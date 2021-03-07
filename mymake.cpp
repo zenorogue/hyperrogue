@@ -31,6 +31,8 @@ string compiler;
 string linker;
 string libs;
 
+bool verbose = false;
+
 int batch_size = thread::hardware_concurrency() + 1;
 bool mingw64 = false;
 
@@ -115,6 +117,9 @@ string obj_dir = "mymake_files";
 string setdir = "../";
 
 int system(string cmdline) {
+  if(verbose) {
+    printf("%s\n", cmdline.c_str());
+    }
   if (mingw64)
     cmdline = "sh -c '" + cmdline + "'"; // because system(arg) passes arg to cmd.exe on MinGW
   return system(cmdline.c_str());
@@ -142,6 +147,9 @@ int main(int argc, char **argv) {
       for(char c: s) 
         if(!isalnum(c)) obj_dir += "_"; 
         else obj_dir += c;      
+      }
+    else if(s == "-v") {
+      verbose = true;
       }
     else if(s == "-mingw64") {
       set_os("mingw64");
