@@ -647,13 +647,21 @@ EX namespace netgen {
     }
   
   void designNet() {
-    #if !CAP_SDL2
-    // fstx
-    s = SDL_SetVideoMode(SX, SY, 32, 0);
-    #endif
-    netgen_loop();
-    saveData();
-    setvideomode();
+    if(1) {
+      dynamicval<int> dwx(vid.window_x, SX);
+      dynamicval<int> dwy(vid.window_y, SY);
+      dynamicval<int> dfx(vid.fullscreen_x, SX);
+      dynamicval<int> dfy(vid.fullscreen_y, SY);
+      dynamicval<bool> dr(resizable, false);
+      dynamicval<bool> dws(vid.relative_window_size, false);
+      dynamicval<bool> dfs(vid.change_fullscr, true);
+      apply_screen_settings();
+
+      netgen_loop();
+      saveData();
+      setvideomode();
+      }
+    apply_screen_settings();
     }
 
   void show() {
