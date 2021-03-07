@@ -1140,6 +1140,16 @@ EX bool need_to_apply_screen_settings() {
   return false;
   }
 
+EX void close_renderer() {
+  #if CAP_SDL2
+  if(s_renderer) SDL_DestroyRenderer(s_renderer), s_renderer = nullptr;
+  if(s_window) SDL_DestroyWindow(s_window), s_window = nullptr;
+  if(s_texture) SDL_DestroyTexture(s_texture), s_texture = nullptr;
+  if(s) SDL_FreeSurface(s), s = nullptr;
+  if(s_software_renderer) SDL_DestroyRenderer(s_software_renderer), s_software_renderer = nullptr;
+  #endif
+  }
+
 EX void apply_screen_settings() {
   if(!need_to_apply_screen_settings()) return;
   if(!graphics_on) return;
@@ -1148,11 +1158,18 @@ EX void apply_screen_settings() {
   if(vid.full != vid.want_fullscreen)
     addMessage(XLAT("Reenter HyperRogue to apply this setting"));
 #endif
+
+  close_renderer();
+  close_font();
+  #if CAP_VR
+  if(vrhr::state) vrhr::shutdown_vr();
+  #endif
   
   SDL_QuitSubSystem(SDL_INIT_VIDEO);
   graphics_on = false;
   android_settings_changed();
   init_graph();
+  init_font();
   if(vid.usingGL) {
     glhr::be_textured(); glhr::be_nontextured();
     }
@@ -1235,7 +1252,9 @@ EX void setvideomode() {
   #endif
   #endif
   
+  #if CAP_SDL2
   if(s_renderer) SDL_DestroyRenderer(s_renderer), s_renderer = nullptr;
+  #endif
 
   auto create_win = [&] {
     #if CAP_SDL2
@@ -1330,11 +1349,17 @@ EX void init_font() {
 
 EX void close_font() {
 #if CAP_SDLTTF
-  for(int i=0; i<=max_font_size; i++) if(font[i]) TTF_CloseFont(font[i]);
+  for(int i=0; i<=max_font_size; i++) if(font[i]) {
+    TTF_CloseFont(font[i]);
+    font[i] = nullptr;
+    }
   TTF_Quit();
 #endif
 #if CAL_GLFONT
-  for(int i=0; i<=max_glfont_size; i++) if(glfont[i]) delete glfont[i];
+  for(int i=0; i<=max_glfont_size; i++) if(glfont[i]) {
+    delete glfont[i];
+    glfont[i] = nullptr;
+    }
 #endif
   }
 
@@ -1440,6 +1465,7 @@ EX void quit_all() {
   closeJoysticks();
 #endif
 #if CAP_SDL
+  close_renderer();
   SDL_Quit();
   sdl_on = false;
 #endif
