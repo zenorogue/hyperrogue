@@ -328,6 +328,7 @@ EX void wandering() {
   if(!gen_wandering) return;
   if(racing::on) return;
   if(dpgen::in) return;
+  if(items[itOrbSafety]) return;
   pathdata pd(moYeti);
   int seepcount = getSeepcount();
   int ghostcount = getGhostcount();
