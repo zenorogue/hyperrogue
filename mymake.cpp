@@ -34,7 +34,7 @@ string libs;
 int batch_size = thread::hardware_concurrency() + 1;
 bool mingw64 = false;
 
-int sdlver = 2;
+int sdlver = 1;
 
 #if defined(MAC)
 string os = "mac";

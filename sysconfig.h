@@ -122,7 +122,7 @@
 #endif
 
 #ifndef CAP_SDL2
-#define CAP_SDL2 1
+#define CAP_SDL2 0
 #endif
 
 #ifndef CAP_COMPASS
