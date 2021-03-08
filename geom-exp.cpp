@@ -46,6 +46,7 @@ void showQuotientConfig() {
   for(int i=0; i<isize(fgeomextras); i++) {
     auto& g = fgeomextras[i];
     dialog::addBoolItem(ginf[g.base].tiling_name, g.base == gxcur.base, 'a'+i);
+    dialog::add_action([i] { current_extra = i; });
     }
   
   dialog::addBreak(100);
@@ -64,6 +65,7 @@ void showQuotientConfig() {
     s += stars[gxcur.dualval[i]];
     
     dialog::addBoolItem(s, i == gxcur.current_prime_id, 'A'+i);
+    dialog::add_action([&gxcur, i] { gxcur.current_prime_id = i; });
     }
   
   if(isize(gxcur.primes) <= 6) {
@@ -79,34 +81,57 @@ void showQuotientConfig() {
     }
 
   dialog::addItem("find the next prime", 'p');
+  dialog::add_action([&gxcur] { nextPrime(gxcur); });
+  
   dialog::addItem("activate", 'x');
-  dialog::addItem("default", 'c');
+  dialog::add_action_confirmed([&gxcur] {
+    set_geometry(gxcur.base);
+    enableFieldChange();
+    set_geometry(gFieldQuotient);
+    start_game();
+    });  
+
+  dialog::addItem("find alternate manifolds", 'y');
+  dialog::add_action_confirmed([&gxcur] {
+    set_geometry(gxcur.base);
+    triplet_id = 0;
+    enableFieldChange();
+    set_geometry(gFieldQuotient);
+    start_game();
+
+    auto& cfp = currfp;
+    auto triplets = cfp.find_triplets();
+    pushScreen([triplets] {
+      gamescreen(2);
+      dialog::init(XLAT("alternate manifolds"));
+      int id = 0;
+      for(auto t: triplets) {
+        dialog::addItem(XLAT("generators (%1,%2), size %3", its(t.i), its(t.j), its(t.size/S7)), 'a'+id);
+        dialog::add_action([id] {
+          stop_game();
+          triplet_id = id;
+          fieldpattern::enableFieldChange();
+          start_game();
+          });
+        id++;
+        }
+      dialog::addBreak(100);
+      dialog::addHelp(XLAT(
+        "This option finds alternate solutions. For example, there are three {7,3} manifolds with 156 heptagons each (\"first Hurwitz triplet\").")
+        );
+      dialog::display();
+      });
+    });
+
+  dialog::addItem("default", 'z');
+  dialog::add_action_confirmed([] {
+    set_geometry(gEuclid);
+    fieldpattern::quotient_field_changed = false;
+    set_geometry(gFieldQuotient);
+    start_game();
+    });
   
   dialog::addBack();
-
-  keyhandler = [&gxcur] (int sym, int uni) {
-    if(uni >= 'a' && uni < 'a' + isize(fgeomextras))
-      current_extra = uni - 'a';
-    else if(uni >= 'A' && uni < 'A' + isize(gxcur.primes))
-      gxcur.current_prime_id = uni - 'A';
-    else if(uni == 'p')
-      nextPrime(gxcur);
-    else if(uni == 'x' || uni == '\n') dialog::do_if_confirmed([&gxcur] {
-      set_geometry(gxcur.base);
-      enableFieldChange();
-      set_geometry(gFieldQuotient);
-      start_game();
-      });
-    else if(uni == 'c') dialog::do_if_confirmed([] {
-      set_geometry(gEuclid);
-      fieldpattern::quotient_field_changed = false;
-      set_geometry(gFieldQuotient);
-      start_game();
-      });
-    else if(doexiton(sym, uni))
-      popScreen();
-    };
-  
   dialog::display();
   }
 #endif
@@ -1110,6 +1135,11 @@ int read_geom_args() {
     fgeomextras[current_extra].current_prime_id = b;
     enableFieldChange();
     set_geometry(gFieldQuotient);
+    }
+  else if(argis("-triplet")) {
+    stop_game();
+    shift(); fieldpattern::triplet_id = argi();
+    fieldpattern::enableFieldChange();
     }
   else if(argis("-to-fq")) {
     cgi.require_basics();

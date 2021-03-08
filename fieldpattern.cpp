@@ -75,6 +75,10 @@ EX int btspin(int id, int d) {
 
 static const int ERR = -99;
 
+struct triplet_info {
+  int i, j, size;
+  };
+
 struct fpattern {
 
   unsigned force_hash;
@@ -224,6 +228,13 @@ struct fpattern {
   
   int gmul(int a, int b) { return matcode[mmul(matrices[a], matrices[b])]; }
   int gpow(int a, int N) { return matcode[mpow(matrices[a], N)]; }
+  
+  int gorder(int a) {
+    int b = a;
+    int q = 1;
+    while(b) b = gmul(b, a), q++;
+    return q;
+    }
 
   pair<int,bool> gmul(pair<int, bool> a, int b) { 
     return make_pair(gmul(a.first,b), a.second); 
@@ -310,6 +321,8 @@ struct fpattern {
   vector<matrix> generate_isometries3();
   int solve3();
   bool generate_all3();
+  
+  vector<triplet_info> find_triplets();
 
   #if CAP_THREAD
   struct discovery *dis;
@@ -671,6 +684,84 @@ int fpattern::order(const matrix& M) {
   return cnt;
   }
 
+EX int triplet_id = 0;
+
+vector<triplet_info> fpattern::find_triplets() {
+  int N = isize(matrices);
+  auto compute_transcript = [&] (int i, int j) {
+
+    vector<int> indices(N, -1);
+    vector<int> transcript;
+    vector<int> q;
+    
+    int qty = 0;
+    
+    auto visit = [&] (int id) {
+      transcript.push_back(indices[id]);
+      if(indices[id] == -1) {
+        indices[id] = isize(q);
+        q.push_back(id);
+        qty++;
+        }
+      };
+    
+    visit(0);
+    for(int x=0; x<isize(q); x++) {
+      int at = q[x];
+      visit(gmul(at, i));
+      visit(gmul(at, j));
+      }
+    
+    transcript.push_back(qty);
+    
+    return transcript;
+    };
+  
+  DEBB(DF_FIELD, ("looking for alternate solutions"));
+  auto orig_transcript = compute_transcript(1, S7);
+  
+  set<vector<int>> transcripts_seen;
+  transcripts_seen.insert(orig_transcript);
+  
+  set<int> conjugacy_classes;
+  vector<int> cc;
+  
+  for(int i=0; i<N; i++) conjugacy_classes.insert(i);
+  for(int i=0; i<N; i++) {
+    if(!conjugacy_classes.count(i)) continue;
+    vector<int> removals;
+    for(int j=0; j<N; j++) {
+      int c = gmul(inverses[j], gmul(i, j));
+      if(c > i) removals.push_back(c);
+      }
+    for(auto r: removals) conjugacy_classes.erase(r);
+    cc.push_back(i);
+    }    
+  
+  DEBB(DF_FIELD, ("conjugacy_classes = ", cc));
+  
+  vector<triplet_info> tinf;
+  triplet_info ti;
+  ti.i = 1; ti.j = S7; ti.size = orig_transcript.back();
+  tinf.push_back(ti);
+  
+  for(int i: conjugacy_classes) if(gorder(i) == S7) {
+    DEBB(DF_FIELD, ("checking i=", i));
+    for(int j=1; j<N; j++) if(gorder(j) == 2 && gorder(gmul(i, j)) == S3) {
+      auto t = compute_transcript(i, j);    
+      if(!transcripts_seen.count(t)) {
+        transcripts_seen.insert(t);
+        triplet_info ti;
+        ti.i = i; ti.j = j; ti.size = t.back();
+        tinf.push_back(ti);
+        }
+      }
+    }
+  
+  DEBB(DF_FIELD, ("solutions found = ", isize(transcripts_seen)));
+  return tinf;
+  }
+
 void fpattern::build() {
 
   if(WDIM == 3) return;
@@ -732,6 +823,20 @@ void fpattern::build() {
   if(0) for(int i=0; i<isize(matrices); i++) {
     printf("%5d/%4d", connections[i], inverses[i]);
     if(i%S7 == S7-1) printf("\n");       
+    }
+  
+  DEBB(DF_FIELD, ("triplet_id = ", triplet_id, " N = ", N));
+  if(triplet_id) {  
+    auto triplets = find_triplets();
+    if(triplet_id >= 0 && triplet_id < isize(triplets)) {
+      auto ti = triplets[triplet_id];
+      R = matrices[ti.i];
+      P = matrices[ti.j];
+      dynamicval<int> t(triplet_id, 0);
+      build();
+      DEBB(DF_FIELD, ("triplet built successfully"));
+      return;
+      }
     }
   
   DEBB(DF_FIELD, ("Built.\n"));
@@ -1229,6 +1334,7 @@ EX int current_extra = 0;
 
 EX void nextPrime(fgeomextra& ex) {
   dynamicval<eGeometry> g(geometry, ex.base);
+  dynamicval<int> t(triplet_id, 0);
   int nextprime;
   if(isize(ex.primes))
     nextprime = ex.primes.back().p + 1;
