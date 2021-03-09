@@ -48,15 +48,17 @@ EX void prepare_sky() {
     }
   }
 
-void dqi_sky::draw() {
+vector<glhr::colored_vertex> skyvertices;
+cell *sky_centerover;
+shiftmatrix sky_cview;
 
-  if(!vid.usingGL || sky.empty()) return;
-  vector<glhr::colored_vertex> skyvertices;
+void compute_skyvertices(const vector<sky_item>& sky) {
+  skyvertices.clear();
 
   int sk = get_skybrightness();
   
-  map<cell*, pair<color_t, color_t>> colors;
-  for(sky_item& si: sky) colors[si.c] = 
+  std::map<cell*, pair<color_t, color_t>> colors;
+  for(const sky_item& si: sky) colors[si.c] = 
     make_pair(darkena(gradient(0, si.color, 0, sk, 255), 0, 0xFF),
         darkena(si.skycolor, 0, 0xFF)
         );
@@ -66,13 +68,7 @@ void dqi_sky::draw() {
   
   vector<glhr::colored_vertex> this_poly;
   
-  // I am not sure why, but extra projection martix introduced in stereo
-  // causes some vertices to not be drawn. Thus we apply separately
-  transmatrix Tsh = Id;
-  if(global_projection)
-    Tsh = xpush(vid.ipd * global_projection/2);
-
-  for(sky_item& si: sky) {
+  for(const sky_item& si: sky) {
     auto c = si.c;
     for(int i=0; i<c->type; i++) {
       
@@ -83,7 +79,6 @@ void dqi_sky::draw() {
         if(!colors.count(cw2.at)) {
           this_poly.clear();
           transmatrix T1 = unshift(si.T);
-          T1 = Tsh * T1;
           auto cw = cw0;
           while(colors.count(cw.at)) {
             color_t col = colors[cw.at].second;
@@ -106,7 +101,7 @@ void dqi_sky::draw() {
           }        
         }
 
-      if(1) {
+      if(true) {
         cellwalker cw0(c, i);
         cellwalker cw = cw0;
         do {
@@ -118,7 +113,6 @@ void dqi_sky::draw() {
         this_poly.clear();
   
         transmatrix T1 = unshift(si.T);
-        T1 = Tsh * T1;
         do {
           this_poly.emplace_back(T1 * skypoint, colors[cw.at].first);
           T1 = T1 * currentmap->adj(cw.at, cw.spin);
@@ -139,14 +133,28 @@ void dqi_sky::draw() {
     }
 
   for(auto& v: skyvertices) for(int i=0; i<3; i++) v.color[i] *= 2;
+  }
 
+void dqi_sky::draw() {
+  if(!vid.usingGL || sky.empty()) return;
+  
+  if(centerover != sky_centerover) {
+    sky_centerover = centerover;
+    sky_cview = cview();
+    compute_skyvertices(sky);
+    }
+  transmatrix s = cview().T * inverse(sky_cview.T);
+  
   for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
     if(global_projection && global_projection != ed) continue;
     current_display->next_shader_flags = GF_VARCOLOR;
     current_display->set_all(ed, 0);
-    if(global_projection)
+    if(global_projection) {
       glhr::projection_multiply(glhr::tmtogl(xpush(-vid.ipd * global_projection/2)));
-    glapplymatrix(Id);
+      glapplymatrix(xpush(vid.ipd * global_projection/2) * s);
+      }
+    else
+      glapplymatrix(s);
     glhr::prepare(skyvertices);
     glhr::set_fogbase(1.0 + 5 / sightranges[geometry]);
     glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
