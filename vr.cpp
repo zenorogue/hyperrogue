@@ -1005,12 +1005,12 @@ EX void gen_mv() {
     }
   }
 
+EX shiftmatrix master_cview;
+
 EX void render() {
   track_poses();  
   resetbuffer rb;
   state = 2;
-  
-  // eyes = lshiftclick ? eEyes::truesim : eEyes::equidistant;
   
   // cscr = lshiftclick ? eCompScreen::eyes : eCompScreen::single;
 
@@ -1018,10 +1018,11 @@ EX void render() {
 
     if(1) {
       make_actual_view();
-      shiftmatrix Tv = cview();
+      master_cview = cview();
       dynamicval<transmatrix> tN(NLP, NLP);
       dynamicval<transmatrix> tV(View, View);
       dynamicval<transmatrix> tC(current_display->which_copy, current_display->which_copy);
+      dynamicval<transmatrix> trt(radar_transform);
       
       if(hsm == eHeadset::rotation_only) {
         transmatrix T = hmd_at;
@@ -1038,10 +1039,8 @@ EX void render() {
         }
 
       make_actual_view();
-      hmd_pre = hmd_pre_for[i] = cview().T * inverse(Tv.T);
-      // inverse_shift(Tv, cview());
-      // View * inverse(Tv.T);
-      // inverse(inverse_shift(cview(), Tv));
+      hmd_pre = hmd_pre_for[i] = cview().T * inverse(master_cview.T);
+      radar_transform = trt.backup * inverse(hmd_pre);
       
       if(1) {
         gen_mv();

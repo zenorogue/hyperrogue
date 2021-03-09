@@ -132,6 +132,8 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   
   bool skip_t = false;
   
+  bool azi_hyperbolic = false;
+  
   if(vid.stereo_mode == sODS) {
     shader_flags |= SF_DIRECT | SF_ODSBOX;
     vmain += "// this is ODS shader\n";
@@ -304,6 +306,8 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     shader_flags |= SF_PERS3 | SF_DIRECT;
     #if CAP_VR
     if(vrhr::rendering() && hyperbolic && vrhr::eyes != vrhr::eEyes::truesim) {
+      azi_hyperbolic = true;
+      coordinator += "mediump vec4 orig_t = t;\n";
       coordinator += 
         "t = t * acosh(t[3]) / length(t.xyz);\n"
         "t[3] = 1.;\n";
@@ -312,7 +316,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     else 
     #endif
     if(hyperbolic)
-      distfun = "acosh(t[3])", treset = true;
+      distfun = "acosh(t[3])";
     else if(euclid || nonisotropic || stretch::in() || (sphere && ray::in_use))
       distfun = "length(t.xyz)", treset = true;
     else {
@@ -345,11 +349,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   if(!skip_t) {
     vmain += "mediump vec4 t = uMV * aPosition;\n";
     vmain += coordinator;
-    bool ok = true;
-    #if CAP_VR
-    if(vrhr::active()) ok = false;
-    #endif
-    if(GDIM == 3 && WDIM == 2 && hyperbolic && context_fog && ok && pmodel == mdPerspective) {
+    if(GDIM == 3 && WDIM == 2 && hyperbolic && context_fog && pmodel == mdPerspective) {
       vsh += 
         "uniform mediump mat4 uRadarTransform;\n"
         "uniform mediump sampler2D tAirMap;\n"
@@ -363,8 +363,13 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
         "    return texture2D(tAirMap, pt.xy);\n"
         "    }\n";
       
+      
+      if(azi_hyperbolic) vmain += 
+        "vec4 ending = uRadarTransform * orig_t;\n";
+      else vmain += 
+        "vec4 ending = uRadarTransform * t;\n";
+
       vmain += 
-        "vec4 ending = uRadarTransform * t;\n"
         "float len = acosh(ending.w);\n"
         "float eulen = length(ending.xyz);\n"
         "ending.xyz /= eulen;\n"

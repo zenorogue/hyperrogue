@@ -343,10 +343,6 @@ EX void setGLProjection(color_t col IS(backcolor)) {
   glClearColor(part(col, 2) / 255.0, part(col, 1) / 255.0, part(col, 0) / 255.0, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
-  #if CAP_VR
-  vrhr::clear();
-  #endif
-
   GLERR("setGLProjection #1");
 
   glEnable(GL_BLEND);

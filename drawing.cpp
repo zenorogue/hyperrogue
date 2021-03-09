@@ -2178,11 +2178,6 @@ void dqi_line::draw_back() {
   }
 
 EX void sort_drawqueue() {
-
-  #if MAXMDIM >= 4 && CAP_GL
-  if(WDIM == 2 && GDIM == 3 && hyperbolic) make_air();
-  #endif
-
   DEBBI(DF_GRAPH, ("sort_drawqueue"));
   
   for(int a=0; a<PMAX; a++) qp[a] = 0;
@@ -2386,6 +2381,10 @@ EX void drawqueue() {
   
   #if CAP_WRL
   if(wrl::in) { wrl::render(); return; }
+  #endif
+
+  #if MAXMDIM >= 4 && CAP_GL
+  if(WDIM == 2 && GDIM == 3 && hyperbolic && !vrhr::rendering()) make_air();
   #endif
   
   #if CAP_VR

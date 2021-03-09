@@ -138,13 +138,8 @@ void compute_skyvertices(const vector<sky_item>& sky) {
 void dqi_sky::draw() {
   if(!vid.usingGL || sky.empty()) return;
   
-  if(centerover != sky_centerover) {
-    sky_centerover = centerover;
-    sky_cview = cview();
-    compute_skyvertices(sky);
-    }
-  transmatrix s = cview().T * inverse(sky_cview.T);
-  
+  transmatrix s = (vrhr::rendering() ? vrhr::master_cview : cview()).T * inverse(sky_cview.T);
+    
   for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
     if(global_projection && global_projection != ed) continue;
     current_display->next_shader_flags = GF_VARCOLOR;
@@ -153,8 +148,9 @@ void dqi_sky::draw() {
       glhr::projection_multiply(glhr::tmtogl(xpush(-vid.ipd * global_projection/2)));
       glapplymatrix(xpush(vid.ipd * global_projection/2) * s);
       }
-    else
+    else {
       glapplymatrix(s);
+      }
     glhr::prepare(skyvertices);
     glhr::set_fogbase(1.0 + 5 / sightranges[geometry]);
     glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
@@ -382,7 +378,15 @@ EX struct renderbuffer *airbuf;
 
 EX void make_air() {
   if(!sky) return;
-  if(vrhr::active()) return;
+
+  if(centerover != sky_centerover) {
+    sky_centerover = centerover;
+    sky_cview = cview();
+    compute_skyvertices(sky->sky);
+    }
+  
+  if(!context_fog) return;
+
   const int AIR_TEXTURE = 512;
   if(!airbuf) {
     airbuf = new renderbuffer(AIR_TEXTURE, AIR_TEXTURE, true);
@@ -393,6 +397,10 @@ EX void make_air() {
       return;
       }
     }
+
+  #if CAP_VR
+  dynamicval<int> i(vrhr::state, 0);
+  #endif
 
   if(1) {
     //shot::take("airtest.png", drawqueue); 

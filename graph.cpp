@@ -5193,6 +5193,11 @@ EX void drawscreen() {
 #if CAP_GL
   if(vid.usingGL) setGLProjection();
 #endif
+
+#if CAP_VR
+  vrhr::clear();
+#endif
+
   
   #if CAP_SDL
   // SDL_LockSurface(s);
