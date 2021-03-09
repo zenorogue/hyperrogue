@@ -72,46 +72,6 @@ EX ld ilerp(ld a0, ld a1, ld x) {
   return (x-a0) / (a1-a0);
   }
 
-// debug utilities
-
-#if CAP_PROFILING
-
-#define FRAMES 64
-#define CATS 16
-
-long long proftable[16][FRAMES];
-int pframeid;
-
-void profile_frame() { 
-  pframeid++; pframeid %=  FRAMES;
-  for(int t=0; t<16; t++) proftable[t][pframeid] = 0;
-  }
-
-EX void profile_start(int t) { proftable[t][pframeid] -= getms(); }
-EX void profile_stop(int t) { proftable[t][pframeid] += getms(); }
-
-void profile_info() {
-  for(int t=0; t<16; t++) {
-    sort(proftable[t], proftable[t]+FRAMES);
-    if(proftable[t][FRAMES-1] == 0) continue;
-    long long sum = 0;
-    for(int f=0; f<FRAMES; f++) sum += proftable[t][f];
-    printf("Category %d: avg = %Ld, %Ld..%Ld..%Ld..%Ld..%Ld\n",
-      t, sum / FRAMES, proftable[t][0], proftable[t][16], proftable[t][32],
-      proftable[t][48], proftable[t][63]);
-    }
-  }
-#endif
-
-#if !CAP_PROFILING
-#if HDR
-#define profile_frame()
-#define profile_start(t)
-#define profile_stop(t)
-#define profile_info()
-#endif
-#endif
-
 EX purehookset hooks_tests;
 
 EX string simplify(const string& s) {

@@ -63,7 +63,6 @@ EX int hyper_main(int argc, char **argv) {
 #endif
   mainloop();
   finishAll();  
-  profile_info();
   return 0;
   }
 }

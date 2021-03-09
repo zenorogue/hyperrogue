@@ -4667,8 +4667,6 @@ EX void drawthemap() {
   if(sightrange_bonus > 0 && !allowIncreasedSight()) 
     sightrange_bonus = 0;
   
-  profile_frame();
-  profile_start(0);
   swap(gmatrix0, gmatrix);
   gmatrix.clear();
   current_display->all_drawn_copies.clear();
@@ -4742,7 +4740,6 @@ EX void drawthemap() {
   
   arrowtraps.clear();
 
-  profile_start(1);
   make_actual_view();
   currentmap->draw_all();
   drawWormSegments();
@@ -4757,10 +4754,7 @@ EX void drawthemap() {
   
   callhooks(hooks_frame);
   
-  profile_stop(1);
-  profile_start(4);
   drawMarkers();
-  profile_stop(4);
   drawFlashes();
   
   mapeditor::draw_dtshapes();
@@ -4818,7 +4812,6 @@ EX void drawthemap() {
     lmouseover = mousedest.d >= 0 ? cwt.at->modmove(cwt.spin + mousedest.d) : cwt.at;
     }
   #endif
-  profile_stop(0);
   }
 
 EX void drawmovestar(double dx, double dy) {
@@ -5006,14 +4999,11 @@ EX void drawfullmap() {
     if(cmode & sm::DRAW) mapeditor::drawGrid();
 #endif
     }
-  profile_start(2);
 
   drawaura();
   #if CAP_QUEUE
   drawqueue();
   #endif
-
-  profile_stop(2);
   }
 
 #if ISMOBILE

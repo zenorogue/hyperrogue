@@ -26,18 +26,6 @@ ld sqdist(shiftpoint a, shiftpoint b) {
   else return intval(a.h, unshift(b, a.shift));
   }
 
-/*
-const char *lastprofile = "";
-int lt = 0;
-
-void profile(const char *buf) {
-  int gt = SDL_GetTicks();
-  printf("%4d %s\n", gt - lt, lastprofile);
-  lt = gt;
-  lastprofile = buf;
-  }
-*/
-
 #if HDR
 #define SCALE cgi.scalefactor
 #define SCALE2 (SCALE*SCALE)

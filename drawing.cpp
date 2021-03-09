@@ -2405,8 +2405,6 @@ EX void drawqueue() {
     glClear(GL_STENCIL_BUFFER_BIT);
 #endif
   
-  profile_start(3);
-  
   sort_drawqueue();
 
   DEBB(DF_GRAPH, ("sort walls"));
@@ -2436,8 +2434,6 @@ EX void drawqueue() {
         return p1->subprio > p2->subprio;
         });
     }
-
-  profile_stop(3);
 
 #if CAP_SDL
   if(current_display->stereo_active() && !vid.usingGL) {
