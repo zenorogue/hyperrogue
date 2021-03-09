@@ -236,6 +236,17 @@ EX int ui_xmin, ui_ymin, ui_xmax, ui_ymax;
 
 EX reaction_t change_ui_bounds;
 
+#if HDR
+struct frustum_info {
+  transmatrix pre;
+  transmatrix nlp;
+  bool screen;
+  transmatrix proj;
+  };
+#endif
+
+EX vector<frustum_info> frusta;
+
 EX void set_ui_bounds() {
   ui_xmin = 0;
   ui_ymin = 0;
@@ -1011,6 +1022,7 @@ EX void render() {
   track_poses();  
   resetbuffer rb;
   state = 2;
+  vrhr::frusta.clear();
   
   // cscr = lshiftclick ? eCompScreen::eyes : eCompScreen::single;
 
@@ -1041,6 +1053,11 @@ EX void render() {
       make_actual_view();
       hmd_pre = hmd_pre_for[i] = cview().T * inverse(master_cview.T);
       radar_transform = trt.backup * inverse(hmd_pre);
+      
+      if(i < 2)
+        frusta.push_back(frustum_info{hmd_pre, NLP, false, vrdata.proj[i]});
+      else
+        frusta.push_back(frustum_info{hmd_pre, NLP, true, Id});
       
       if(1) {
         gen_mv();

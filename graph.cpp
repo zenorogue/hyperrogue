@@ -3730,64 +3730,108 @@ EX ld mousedist(shiftmatrix T) {
   return sqhypot_d(2, h1) + (point_behind(T1) ? 1e10 : 0);
   }
 
-vector<hyperpoint> clipping_planes;
+vector<vector<hyperpoint>> clipping_plane_sets;
 EX int noclipped;
 
 EX bool frustum_culling = true;
 
+EX ld threshold, xyz_threshold;
+
+EX bool clip_checked = false;
+
 void make_clipping_planes() {
 #if MAXMDIM >= 4
-  clipping_planes.clear();
+  clip_checked = false;
   if(!frustum_culling || PIU(sphere) || experimental || vid.stereo_mode == sODS || panini_alpha) return;
-  #if CAP_VR
-  if(vrhr::active()) return;
-  #endif
 
-  auto add_clipping_plane = [] (ld x1, ld y1, ld x2, ld y2) {
+  if(WDIM == 3 && pmodel == mdPerspective && !nonisotropic && !in_s2xe())
+    threshold = sin_auto(cgi.corner_bonus), xyz_threshold = 0, clip_checked = true;
+  else if(pmodel == mdGeodesic && sn::in())
+    threshold = .6, xyz_threshold = 3, clip_checked = true;
+  else if(pmodel == mdGeodesic && nil)
+    threshold = 2, xyz_threshold = 3, clip_checked = true;
+  else return;
+
+  clipping_plane_sets.clear();  
+    
+  auto add_clipping_plane_txy = [] (transmatrix T, const transmatrix& nlp, ld x1, ld y1, ld x2, ld y2) {
     ld z1 = 1, z2 = 1;
     hyperpoint sx = point3(y1 * z2 - y2 * z1, z1 * x2 - z2 * x1, x1 * y2 - x2 * y1);
     sx /= hypot_d(3, sx);
     sx[3] = 0;
-    if(nisot::local_perspective_used()) sx = ortho_inverse(NLP) * sx;
-    clipping_planes.push_back(sx);
+    sx = T * sx;
+    if(nisot::local_perspective_used()) sx = ortho_inverse(nlp) * sx;
+    clipping_plane_sets.back().push_back(sx);
     };
-  ld tx = current_display->tanfov;
-  ld ty = tx * current_display->ysize / current_display->xsize;
-  add_clipping_plane(+tx, +ty, -tx, +ty);
-  add_clipping_plane(-tx, +ty, -tx, -ty);
-  add_clipping_plane(-tx, -ty, +tx, -ty);
-  add_clipping_plane(+tx, -ty, +tx, +ty);
+
+  auto add_clipping_plane_proj = [&] (transmatrix T, const transmatrix& nlp, const transmatrix& iproj, ld x1, ld y1, ld x2, ld y2) {
+    hyperpoint h1 = iproj * point31(x1, y1, .5);
+    hyperpoint h2 = iproj * point31(x2, y2, .5);
+    h1 /= h1[2]; h2 /= h2[2];
+    add_clipping_plane_txy(T, nlp, h1[0], h1[1], h2[0], h2[1]);
+    };
+
+  auto clipping_planes_screen = [&] (const transmatrix& T, const transmatrix& nlp) {
+    ld tx = current_display->tanfov;
+    ld ty = tx * current_display->ysize / current_display->xsize;
+    clipping_plane_sets.push_back({});
+    add_clipping_plane_txy(T, nlp, +tx, +ty, -tx, +ty);
+    add_clipping_plane_txy(T, nlp, -tx, +ty, -tx, -ty);
+    add_clipping_plane_txy(T, nlp, -tx, -ty, +tx, -ty);
+    add_clipping_plane_txy(T, nlp, +tx, -ty, +tx, +ty);
+    };
+    
+  bool stdview = true;
+  
+  #if CAP_VR
+  if(vrhr::active()) {
+    for(auto p: vrhr::frusta) {
+      if(p.screen)
+        clipping_planes_screen(inverse(p.pre), p.nlp);
+      else {
+        auto iproj = inverse(p.proj);
+        auto ipre = inverse(p.pre);
+        clipping_plane_sets.push_back({});
+        add_clipping_plane_proj(ipre, p.nlp, iproj, 1, 1, 0, 1);
+        add_clipping_plane_proj(ipre, p.nlp, iproj, 0, 1, 0, 0);
+        add_clipping_plane_proj(ipre, p.nlp, iproj, 0, 0, 1, 0);
+        add_clipping_plane_proj(ipre, p.nlp, iproj, 1, 0, 1, 1);
+        }
+      stdview = false;
+      }
+    }    
+  #endif
+  if(stdview) clipping_planes_screen(Id, NLP);
 #endif
   }
 
+bool clipped_by(const hyperpoint& H, const vector<hyperpoint>& v) {
+  for(auto& cpoint: v) if((H|cpoint) < -threshold) return true;
+  return false;
+  }
+
+bool clipped_by(const hyperpoint& H, const vector<vector<hyperpoint>>& vv) {
+  for(auto& cps: vv) if(!clipped_by(H, cps)) return false;
+  return true;
+  }
+
 bool celldrawer::cell_clipped() {
-  if(WDIM == 3 && pmodel == mdPerspective && !nonisotropic && !in_s2xe()) {
-    hyperpoint H = unshift(tC0(V));
-    if(prod) H = product::inverse_exp(H);
-    for(hyperpoint& cpoint: clipping_planes) if((H|cpoint) < -sin_auto(cgi.corner_bonus)) {
-      drawcell_in_radar();
-      return true;
-      }
+
+  if(!clip_checked) return false;
+  
+  hyperpoint H = unshift(tC0(V));
+  
+  if(xyz_threshold && abs(H[0]) <= xyz_threshold && abs(H[1]) <= xyz_threshold && abs(H[2]) <= xyz_threshold) {
     noclipped++;
+    return false;
     }
-  if(pmodel == mdGeodesic && sn::in()) {
-    hyperpoint H = unshift(tC0(V));
-    if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
-    else {
-      hyperpoint H2 = inverse_exp(shiftless(H), pQUICK);
-      for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -.6) return true;
-      }
-    noclipped++;
+  
+  if(clipped_by(H, clipping_plane_sets)) {
+    drawcell_in_radar();    
+    return true;
     }
-  if(pmodel == mdGeodesic && nil) {
-    hyperpoint H = unshift(tC0(V));
-    if(abs(H[0]) <= 3 && abs(H[1]) <= 3 && abs(H[2]) <= 3 ) ;
-    else {
-      hyperpoint H2 = inverse_exp(shiftless(H), pQUICK);
-      for(hyperpoint& cpoint: clipping_planes) if((H2|cpoint) < -2) return true;
-      }
-    noclipped++;
-    }
+
+  noclipped++;
   return false;
   }
 
