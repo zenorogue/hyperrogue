@@ -1143,10 +1143,16 @@ EX bool need_to_apply_screen_settings() {
 EX void close_renderer() {
   #if CAP_SDL2
   if(s_renderer) SDL_DestroyRenderer(s_renderer), s_renderer = nullptr;
-  if(s_window) SDL_DestroyWindow(s_window), s_window = nullptr;
   if(s_texture) SDL_DestroyTexture(s_texture), s_texture = nullptr;
   if(s) SDL_FreeSurface(s), s = nullptr;
   if(s_software_renderer) SDL_DestroyRenderer(s_software_renderer), s_software_renderer = nullptr;
+  #endif
+  }
+
+EX void close_window() {
+  #if CAP_SDL2
+  close_renderer();
+  if(s_window) SDL_DestroyWindow(s_window), s_window = nullptr;
   #endif
   }
 
@@ -1160,7 +1166,6 @@ EX void apply_screen_settings() {
 #endif
 
   close_renderer();
-  close_font();
   #if CAP_VR
   if(vrhr::state) vrhr::shutdown_vr();
   #endif
@@ -1169,7 +1174,6 @@ EX void apply_screen_settings() {
   graphics_on = false;
   android_settings_changed();
   init_graph();
-  init_font();
   if(vid.usingGL) {
     glhr::be_textured(); glhr::be_nontextured();
     }
@@ -1193,6 +1197,8 @@ EX pair<int, int> get_requested_resolution() {
 #if CAP_SDL
 
 EX bool resizable = true;
+
+EX int current_window_flags = -1;
 
 EX void setvideomode() {
 
@@ -1258,11 +1264,16 @@ EX void setvideomode() {
 
   auto create_win = [&] {
     #if CAP_SDL2
-    if(s_window) SDL_DestroyWindow(s_window), s_window = nullptr;
-    s_window = SDL_CreateWindow(CUSTOM_CAPTION, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+    if(s_window && current_window_flags != (flags | sizeflag))
+      SDL_DestroyWindow(s_window), s_window = nullptr;
+    if(s_window)
+      SDL_SetWindowSize(s_window, vid.xres, vid.yres);
+    else
+      s_window = SDL_CreateWindow(CUSTOM_CAPTION, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
       vid.xres, vid.yres,
       flags | sizeflag
       );
+    current_window_flags = (flags | sizeflag);
     #else
     s = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | sizeflag);
     #endif  
@@ -1292,6 +1303,7 @@ EX void setvideomode() {
   
   #if CAP_SDL2
   s_renderer = SDL_CreateRenderer(s_window, -1, vid.current_vsync ? SDL_RENDERER_PRESENTVSYNC : 0);
+  SDL_GetRendererOutputSize(s_renderer, &vid.xres, &vid.yres);
   
   if(s_texture) SDL_DestroyTexture(s_texture), s_texture = nullptr;
   s_texture = SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, vid.xres, vid.yres);
@@ -1465,7 +1477,7 @@ EX void quit_all() {
   closeJoysticks();
 #endif
 #if CAP_SDL
-  close_renderer();
+  close_window();
   SDL_Quit();
   sdl_on = false;
 #endif
