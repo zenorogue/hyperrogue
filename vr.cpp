@@ -847,6 +847,11 @@ EX void shutdown_vr() {
     delete e;
     e = nullptr;
     }
+  for(auto& m: vrdata.models) {
+    if(m) delete m;
+    }
+  vrdata.models.clear();
+  for(auto& m: vrdata.device_models) m = nullptr;
   state = 0;
   }
 
