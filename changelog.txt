@@ -4248,3 +4248,32 @@ Bringris:
 - flashes option
 - fixed disabling the raycaster
 - adapted to VR
+
+2021-03-09 16:13 Update 11.4g:
+VR improvements:
+- 'frustum culling' optimization is now used in 3D geometries in VR
+- if 'holonomy' or 'reference' is used in 2D, assume 'model_viewing' instead
+- optimized raycasting (raycast_map called just once per frame)
+- cool fog and sky should now work correctly in 2.5D
+- fixed the formula checking whether we are pointing at something in the UI
+- characters displayed on map are now drawn correctly (e.g., when in ASCII mode or for the bubbles)
+- added border between font letters to avoid rendering artifacts
+
+Gameplay:
+- fixed a revert-related bug which could cause a non-collected key to be considered collected
+- fixed reverse condition: allies' plague spreading worked only if you had no empathy
+- fixed generating treasure (Wetlands, Blizzard) and enemies (Wetland) in Safety; also made Wetlands easier to exit
+- Orb of Safety now prevents wandering monsters (for 7 turns)
+- in multiplayer, there should be no more crashes when a player leaves the game 
+- fixed the highlight/hardcore key conflict
+
+Projections & geometries:
+- fixed animations breaking
+- fixed a reverse_direction crash in kite-and-darts (happened e.g. in Hunting Ground)
+- field quotient can generate more manifolds (for example all three in the first Hurwitz triplet)
+- threepoint equidistant projection
+- 'reset special modes' disables dual geometry
+
+General:
+- sky rendering is optimized 
+- fixed a crash when trying to set some options
