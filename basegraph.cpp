@@ -664,6 +664,10 @@ EX void resetGL() {
     floor_textures = NULL;
     }
 #endif
+  if(airbuf) {
+    delete airbuf;
+    airbuf = nullptr;
+    }
   check_cgi();
   if(currentmap) cgi.require_shapes();
   #if MAXMDIM >= 4
