@@ -500,7 +500,7 @@ EX void vr_shift() {
   rug::using_rugview urv;
   if(GDIM == 2) return;
        
-  if(hsm == eHeadset::holonomy) {    
+  if(GDIM == 3 && hsm == eHeadset::holonomy) {    
     apply_movement(IN_E4(hmd_at * inverse(hmd_ref_at)));
     hmd_ref_at = hmd_at;
     playermoved = false;
@@ -999,7 +999,7 @@ EX void gen_mv() {
     if(pconf.vr_angle) hmd_mv = cspin(1, 2, -pconf.vr_angle * degree) * hmd_mv;
     if(pconf.vr_zshift) hmd_mv = euclidean_translate(0, 0, -pconf.vr_zshift) * hmd_mv;
     hmd_mv = mu * hmd_mv;
-    if(hsm == eHeadset::model_viewing) {
+    if(GDIM == 2 || hsm == eHeadset::model_viewing) {
       hmd_mv = sm * hmd_at * inverse(hmd_ref_at) * sm * hmd_mv;
       }
     }
@@ -1030,7 +1030,7 @@ EX void render() {
         apply_movement(T);
         }
       
-      else if(hsm == eHeadset::reference) {
+      else if(GDIM == 3 && hsm == eHeadset::reference) {
         apply_movement(IN_E4(hmd_at * inverse(hmd_ref_at)));
         }
 
@@ -1260,8 +1260,6 @@ EX void show_vr_settings() {
   dialog::addBoolItem(XLAT("VR enabled"), enabled, 'o');
   dialog::add_action([] {
     enabled = !enabled;
-    if(enabled && GDIM == 2 && among(hsm, eHeadset::holonomy, eHeadset::reference))
-      hsm = eHeadset::model_viewing;
     });
   if(!enabled)
     dialog::addBreak(100);
@@ -1347,8 +1345,6 @@ int readArgs() {
   else if(argis("-vr-enabled")) {
     PHASEFROM(2);
     shift(); enabled = argi();
-    if(enabled && GDIM == 2 && among(hsm, eHeadset::holonomy, eHeadset::reference))
-      hsm = eHeadset::model_viewing;
     }
   else if(argis("-vr-absunit")) {
     PHASEFROM(2);
