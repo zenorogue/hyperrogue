@@ -1425,6 +1425,8 @@ transmatrix get_ms(cell *c, int a, bool mirror) {
 int nesting;
 
 struct raycast_map {
+
+  int saved_frameid;
   
   vector<cell*> lst;
   map<cell*, int> ids;
@@ -1636,6 +1638,7 @@ struct raycast_map {
     }
   
   void create_all(cell *cs) {
+    saved_frameid = frameid;
     generate_initial_ms(cs);
     generate_cell_listing(cs);
     apply_shape();
@@ -1643,7 +1646,7 @@ struct raycast_map {
     }
   
   bool need_to_create(cell *cs) {
-    if(!fixed_map) return true;
+    if(!fixed_map && frameid != saved_frameid) return true;
     return !ids.count(cs);
     }
   };
