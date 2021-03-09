@@ -138,7 +138,11 @@ void compute_skyvertices(const vector<sky_item>& sky) {
 void dqi_sky::draw() {
   if(!vid.usingGL || sky.empty()) return;
   
+  #if CAP_VR
   transmatrix s = (vrhr::rendering() ? vrhr::master_cview : cview()).T * inverse(sky_cview.T);
+  #else
+  transmatrix s = cview().T * inverse(sky_cview.T);
+  #endif
     
   for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
     if(global_projection && global_projection != ed) continue;
