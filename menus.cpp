@@ -1187,6 +1187,9 @@ int read_menu_args() {
   else if(argis("-d:mode")) {
     PHASEFROM(2); launch_dialog(showChangeMode);
     }
+  else if(argis("-d:history")) {
+    PHASEFROM(2); launch_dialog(history::history_menu);
+    }
   else if(argis("-d:shmup")) {
     PHASEFROM(2); launch_dialog(); multi::configure();
     }
