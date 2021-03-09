@@ -204,7 +204,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
   else if(c2->item == itKey) {
     playSound(c2, "pickup-key");
     for(int i=0; i<isize(yendor::yi); i++) if(yendor::yi[i].actual_key() == c2)
-      yendor::yi[i].found = true;
+      changes.value_set(yendor::yi[i].found, true);
     items[itKey]++;
     }
   else if(!telekinesis && cantGetGrimoire(c2)) {
