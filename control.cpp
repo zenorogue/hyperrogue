@@ -671,7 +671,7 @@ EX void resize_screen_to(int x, int y) {
       vid.window_y = y;
       }
     });
-  setvideomode();
+  apply_screen_settings();
   }
 
 int lastframe;

@@ -1169,8 +1169,11 @@ EX void apply_screen_settings() {
   #if CAP_VR
   if(vrhr::state) vrhr::shutdown_vr();
   #endif
-  
+
+  #if !CAP_SDL2
   SDL_QuitSubSystem(SDL_INIT_VIDEO);
+  #endif
+
   graphics_on = false;
   android_settings_changed();
   init_graph();
