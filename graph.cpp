@@ -3764,12 +3764,14 @@ void make_clipping_planes() {
     clipping_plane_sets.back().push_back(sx);
     };
 
+  #if CAP_VR
   auto add_clipping_plane_proj = [&] (transmatrix T, const transmatrix& nlp, const transmatrix& iproj, ld x1, ld y1, ld x2, ld y2) {
     hyperpoint h1 = iproj * point31(x1, y1, .5);
     hyperpoint h2 = iproj * point31(x2, y2, .5);
     h1 /= h1[2]; h2 /= h2[2];
     add_clipping_plane_txy(T, nlp, h1[0], h1[1], h2[0], h2[1]);
     };
+  #endif
 
   auto clipping_planes_screen = [&] (const transmatrix& T, const transmatrix& nlp) {
     ld tx = current_display->tanfov;
