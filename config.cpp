@@ -637,6 +637,9 @@ EX void initConfig() {
 
   param_i(vid.msglimit, "message limit", 5);
   param_i(vid.timeformat, "message log time format", 0);
+  
+  param_b(resizable, "resizable", true)
+  -> editable("resizable window", 'r');
 
   param_b(vid.relative_font, "relative_font", true)
   -> editable("set relative font size", 'r')
