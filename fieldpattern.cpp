@@ -322,12 +322,12 @@ struct fpattern {
   int solve3();
   bool generate_all3();
   
-  vector<triplet_info> find_triplets();
-
   #if CAP_THREAD
   struct discovery *dis;
   #endif
   #endif
+
+  vector<triplet_info> find_triplets();
   };
 
 #if CAP_THREAD && MAXMDIM >= 4
