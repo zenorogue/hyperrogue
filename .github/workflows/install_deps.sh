@@ -17,12 +17,6 @@ if [[ "$GH_HYP_PNG" == "png_1" ]]; then
   GH_DEPS_MINGW64+=" libpng:x"
 fi
 
-if [[ "$GH_BUILDSYS" == "autotools" ]]; then
-  GH_DEPS_UBUNTU+=" autoconf"
-  GH_DEPS_MACOS+=" automake"
-  GH_DEPS_MINGW64+=" automake-wrapper autoconf"
-fi
-
 if [[ "$GH_OS" == "ubuntu-latest" ]]; then
   sudo apt-get -y install $GH_DEPS_UBUNTU
 elif [[ "$GH_OS" == "macos-latest" ]]; then

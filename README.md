@@ -1,7 +1,6 @@
 # HyperRogue
 <p align="right">
 <a href="https://travis-ci.org/zenorogue/hyperrogue/builds">
-<img align="right" src="https://badges.herokuapp.com/travis/zenorogue/hyperrogue?branch=master&env=TRAVIS_BUILD_SYSTEM=autotools&label=autotools" alt="TravisCI badge">
 <img align="right" src="https://badges.herokuapp.com/travis/zenorogue/hyperrogue?branch=master&env=TRAVIS_BUILD_SYSTEM=Makefile&label=make" alt="TravisCI badge">
 <img align="right" src="https://badges.herokuapp.com/travis/zenorogue/hyperrogue?branch=master&env=TRAVIS_BUILD_SYSTEM=mymake&label=mymake" alt="TravisCI badge">
 <img align="right" src="https://badges.herokuapp.com/travis/zenorogue/hyperrogue?branch=master&env=TRAVIS_BUILD_SYSTEM=emscripten&label=web" alt="TravisCI badge">
@@ -54,26 +53,16 @@ and visualizations (see [RogueViz](http://roguetemple.com/z/hyper/rogueviz.php))
 
 ## Technical information ##
 
-You should be able to compile on Ubuntu (or similar) with something like this (you need SDL, SDL_ttf, and SDL_gfx):
+You should be able to compile on Linux, OSX, or MinGW with something like this (you need SDL, SDL_ttf, and SDL_gfx):
 
 ```
 sudo apt-get install gcc libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev
 git clone https://github.com/zenorogue/hyperrogue.git hyperrogue
 cd hyperrogue
-autoreconf -vi
-./configure
-make
-```
-
-There is also a standalone Makefile for Linux, OSX, and MinGW.
-
-```
-git clone https://github.com/zenorogue/hyperrogue.git
-cd hyperrogue
 make -f Makefile.simple
 ```
 
-The `mymake` program builds HyperRogue in parts. It takes longer than the methods listed above, but when you change something, `mymake` will only recompile the changed file.
+The `mymake` program builds HyperRogue in parts. It takes longer than the method shown above, but when you change something, `mymake` will only recompile the changed file.
 Additionally, it can be easily configured, e.g., to produce an optimized build, or to include addons (see `mymake.cpp` for some example invocations, and `devmods` for some example addons).
 
 ```

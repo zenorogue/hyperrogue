@@ -15,7 +15,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         compiler: [gcc, clang]
-        build_system: [makefile, autotools, mymake]
+        build_system: [makefile, mymake]
         hyper_use_rviz: [rviz_1, rviz_0]
         hyper_use_png: [png_1]
         hyper_use_glew: [glew_1]
@@ -42,7 +42,7 @@ jobs:
       fail-fast: false
       matrix:
         compiler: [gcc]
-        build_system: [makefile, autotools, mymake]
+        build_system: [makefile, mymake]
         hyper_use_rviz: [rviz_1, rviz_0]
         hyper_use_png: [png_1]
         hyper_use_glew: [glew_1]
