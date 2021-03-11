@@ -91,6 +91,18 @@ void set_mingw64() {
   setvbuf(stdout, NULL, _IONBF, 0); // MinGW is quirky with output buffering
   }
 
+/* cross-compile Linux to Windows (tested on Archlinux) */
+void set_mingw64_cross() {
+  preprocessor = "x86_64-w64-mingw32-g++ -E";
+  compiler = "x86_64-w64-mingw32-g++ -mwindows -march=native -W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
+  linker = "x86_64-w64-mingw32-g++ -o hyper.exe";
+  opts = "-DWINDOWS -DCAP_GLEW=1 -DCAP_PNG=1 -I /usr/x86_64-w64-mingw32/include/SDL/";
+  libs = " hyper64.res -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
+  setvbuf(stdout, NULL, _IONBF, 0); // MinGW is quirky with output buffering
+  if(!file_exists("hyper64.res"))
+    mysystem("x86_64-w64-mingw32-windres hyper.rc -O coff -o hyper64.res");
+  }
+
 void set_web() {
   preprocessor = "/usr/lib/emscripten/em++ -E";
   compiler = "/usr/lib/emscripten/em++ -c";
@@ -109,6 +121,7 @@ void set_os(string o) {
   if(os == "linux") set_linux();
   else if(os == "mac") set_mac();
   else if(os == "mingw64") set_mingw64();
+  else if(os == "mingw64-cross") set_mingw64_cross();
   else if(os == "web") set_web();
   else {
     fprintf(stderr, "unknown OS");
@@ -153,6 +166,11 @@ int main(int argc, char **argv) {
       }
     else if(s == "-mingw64") {
       set_os("mingw64");
+      obj_dir += "/mingw64";
+      setdir += "../";
+      }
+    else if(s == "-mingw64-cross") {
+      set_os("mingw64-cross");
       obj_dir += "/mingw64";
       setdir += "../";
       }
