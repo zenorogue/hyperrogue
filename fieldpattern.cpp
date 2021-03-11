@@ -1148,7 +1148,7 @@ void fpattern::findsubpath() {
       }
   }
 
-fpattern fp43(43);
+fpattern *fp43;
 
 EX void info() {
   fpattern fp(0);
@@ -1303,16 +1303,18 @@ EX struct fpattern& getcurrfp() {
     return fp;
     }
   if(sphere || euclid) return fp_invalid;
-  if(S7 == 7 && S3 == 3 && !bt::in())
-    return fp43;
+  if(S7 == 7 && S3 == 3 && !bt::in()) {
+    if(!fp43) fp43 = new fpattern(43);
+    return *fp43;
+    }
   return fp_invalid;
   }
 
 #undef STR
 
 // todo undefined behavior
-EX int subpathid = currfp.matcode[currfp.strtomatrix("RRRPRRRRRPRRRP")];
-EX int subpathorder = currfp.order(currfp.matrices[subpathid]);
+EX int subpathid = -1; 
+EX int subpathorder = -1; 
 
 // extra information for field quotient extra configuration
 

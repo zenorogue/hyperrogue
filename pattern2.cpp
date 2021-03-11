@@ -467,6 +467,12 @@ EX int fieldval_uniq_rand(cell *c, int randval) {
   }
 
 pair<int, int> subval(cell *c, int _subpathid = subpathid, int _subpathorder = subpathorder) {
+
+  if(_subpathid == -1)
+    _subpathid = currfp.matcode[currfp.strtomatrix("RRRPRRRRRPRRRP")];
+  if(_subpathorder == -1)
+    _subpathorder = currfp.order(currfp.matrices[subpathid]);
+
   if(!ctof(c)) {
     auto m = subval(createMov(c, 0));
     for(int u=2; u<S6; u+=2)
