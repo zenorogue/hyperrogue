@@ -1252,7 +1252,7 @@ EX void setvideomode() {
     HMODULE user32_dll = LoadLibraryA("User32.dll");
     if (user32_dll) {
       DPI_AWARENESS_CONTEXT (WINAPI * Loaded_SetProcessDpiAwarenessContext) (DPI_AWARENESS_CONTEXT) =
-        (DPI_AWARENESS_CONTEXT (WINAPI *) (DPI_AWARENESS_CONTEXT))
+        (DPI_AWARENESS_CONTEXT (WINAPI *) (DPI_AWARENESS_CONTEXT)) (void*)
         GetProcAddress(user32_dll, "SetProcessDpiAwarenessContext");
       if(Loaded_SetProcessDpiAwarenessContext) {
         Loaded_SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
