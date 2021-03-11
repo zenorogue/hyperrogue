@@ -38,6 +38,19 @@ bool mingw64 = false;
 
 int sdlver = 1;
 
+int mysystem(string cmdline) {
+  if(verbose) {
+    printf("%s\n", cmdline.c_str());
+    }
+  if (mingw64)
+    cmdline = "sh -c '" + cmdline + "'"; // because system(arg) passes arg to cmd.exe on MinGW
+  return system(cmdline.c_str());
+  }
+
+bool file_exists(string fname) {
+  return access(fname.c_str(), F_OK) != -1;
+  }
+
 #if defined(MAC)
 string os = "mac";
 #elif defined(WINDOWS)
@@ -116,25 +129,12 @@ int optimized = 0;
 string obj_dir = "mymake_files";
 string setdir = "../";
 
-int system(string cmdline) {
-  if(verbose) {
-    printf("%s\n", cmdline.c_str());
-    }
-  if (mingw64)
-    cmdline = "sh -c '" + cmdline + "'"; // because system(arg) passes arg to cmd.exe on MinGW
-  return system(cmdline.c_str());
-  }
-
-bool file_exists(string fname) {
-  return access(fname.c_str(), F_OK) != -1;
-  }
-  
 int main(int argc, char **argv) {
   set_os(os);
   int retval = 0; // for storing return values of some function calls
   for(string fname: {"Makefile.loc", "Makefile.simple", "Makefile"})
     if(file_exists(fname)) {
-      retval = system("make -f " + fname + " language-data.cpp autohdr.h");
+      retval = mysystem("make -f " + fname + " language-data.cpp autohdr.h");
       if (retval) { printf("error during preparation!\n"); exit(retval); }
       break;
       }
@@ -244,7 +244,7 @@ int main(int argc, char **argv) {
   compiler += " " + standard;
   ifstream fs("hyper.cpp");
 
-  retval = system("mkdir -p " + obj_dir);
+  retval = mysystem("mkdir -p " + obj_dir);
   if (retval) { printf("unable to create output directory!\n"); exit(retval); }
 
   ofstream fsm(obj_dir + "/hyper.cpp");
@@ -267,7 +267,7 @@ int main(int argc, char **argv) {
   fsm.close();
   
   printf("preprocessing...\n");
-  if(system(preprocessor + " " + opts + " "+obj_dir+"/hyper.cpp -o "+obj_dir+"/hyper.E")) { printf("preprocessing error\n"); exit(1); }
+  if(mysystem(preprocessor + " " + opts + " "+obj_dir+"/hyper.cpp -o "+obj_dir+"/hyper.E")) { printf("preprocessing error\n"); exit(1); }
   
   if(true) {
     ifstream fs2(obj_dir+"/hyper.E");
@@ -284,7 +284,7 @@ int main(int argc, char **argv) {
 
   if(get_file_time(obj_dir + "/hyper.o") < get_file_time("hyper.cpp")) {
     printf("compiling hyper...\n");
-    if(system(compiler + " -DREM " + opts + " " + obj_dir + "/hyper.cpp -c -o " + obj_dir + "/hyper.o")) { printf("error\n"); exit(1); }
+    if(mysystem(compiler + " -DREM " + opts + " " + obj_dir + "/hyper.cpp -c -o " + obj_dir + "/hyper.o")) { printf("error\n"); exit(1); }
     }
   
   string allobj = " " + obj_dir + "/hyper.o";
@@ -306,7 +306,7 @@ int main(int argc, char **argv) {
     time_t obj_time = get_file_time(obj);
     if(src_time > obj_time) {
       string cmdline = compiler + " " + opts + " " + src + " -o " + obj;
-      pair<int, function<int(void)>> task(id, [cmdline]() { return system(cmdline); });
+      pair<int, function<int(void)>> task(id, [cmdline]() { return mysystem(cmdline); });
       tasks.push_back(task);
       }
     else {
@@ -346,12 +346,12 @@ int main(int argc, char **argv) {
     } this_thread::sleep_for(quantum); }
 
   if (mingw64) {
-    retval = system("windres hyper.rc -O coff -o hyper.res");
+    retval = mysystem("windres hyper.rc -O coff -o hyper.res");
     if (retval) { printf("windres error!\n"); exit(retval); }
     }
 
   printf("linking...\n");
-  retval = system(linker + allobj + libs);
+  retval = mysystem(linker + allobj + libs);
   if (retval) { printf("linking error!\n"); exit(retval); }
   return 0;
   }
