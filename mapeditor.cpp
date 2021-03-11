@@ -1568,8 +1568,8 @@ EX namespace mapeditor {
     queuecircleat1(c, V, .78, 0x00FFFFFF);
     }
 
-  hyperpoint ccenter = C0;
-  hyperpoint coldcenter = C0;
+  hyperpoint ccenter = C02;
+  hyperpoint coldcenter = C02;
   
   unsigned gridcolor = 0xC0C0C040;
   
