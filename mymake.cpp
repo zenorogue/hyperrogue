@@ -96,8 +96,8 @@ void set_mingw64_cross() {
   preprocessor = "x86_64-w64-mingw32-g++ -E";
   compiler = "x86_64-w64-mingw32-g++ -mwindows -march=native -W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
   linker = "x86_64-w64-mingw32-g++ -o hyper.exe";
-  opts = "-DWINDOWS -DCAP_GLEW=1 -DCAP_PNG=1 -I /usr/x86_64-w64-mingw32/include/SDL/";
-  libs = " hyper64.res -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
+  opts = "-DWINDOWS -DGLEW_STATIC -DUSE_STDFUNCTION=1 -DCAP_PNG=1 -I /usr/x86_64-w64-mingw32/include/SDL/";
+  libs = " hyper64.res -static-libgcc -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
   setvbuf(stdout, NULL, _IONBF, 0); // MinGW is quirky with output buffering
   if(!file_exists("hyper64.res"))
     mysystem("x86_64-w64-mingw32-windres hyper.rc -O coff -o hyper64.res");
