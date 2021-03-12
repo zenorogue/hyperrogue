@@ -2221,10 +2221,10 @@ EX void draw_model_elements() {
         }
 
       queuereset(pmodel, PPR::CIRCLE);
-      /* fallthrough */
+      goto fallthrough;
       }
 
-    case mdTwoPoint: case mdSimulatedPerspective: {
+    case mdTwoPoint: case mdSimulatedPerspective: fallthrough: {
       ld a = -pconf.model_orientation * degree;
       queuestr(shiftless(xspinpush0(a, +pconf.twopoint_param)), vid.xres / 100, "X", ringcolor >> 8);
       queuestr(shiftless(xspinpush0(a, -pconf.twopoint_param)), vid.xres / 100, "X", ringcolor >> 8);

@@ -539,10 +539,10 @@ void celldrawer::setcolors() {
         fcol = wcol = gradient(wcol, 0x40FF40, 0, 0.2, 1);
       else if(mine::marked_mine(c))
         fcol = wcol = gradient(wcol, 0xFF4040, -1, sintick(100), 1);
-      // fallthrough
+      goto fallthrough;
       #endif
 
-    case waMineOpen:
+    case waMineOpen: fallthrough:
       if(wmblack || wmascii) {
         wcol &= 0xFEFEFE;
         wcol >>= 1;
