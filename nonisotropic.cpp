@@ -427,11 +427,11 @@ EX namespace sn {
           case 8:
             return xpush(bw*(4.5-j)) * zpush(-1) * ypush(bw*(i-7));
           default:
-            throw hr_wrong_dir;
+            throw hr_wrong_dir();
           }
         }
 
-      default: throw hr_wrong_geometry;
+      default: throw hr_wrong_geometry();
       }
       }
 
