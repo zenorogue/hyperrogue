@@ -1,4 +1,5 @@
 language: cpp
+dist: bionic
 services:
   - docker
 matrix:
@@ -12,6 +13,7 @@ matrix:
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=1
   - os: osx                             # OSX, autotools
+    osx_image: xcode12.2
     compiler: clang
     env: >-
       TRAVIS_OS_NAME=osx
@@ -36,7 +38,6 @@ matrix:
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=0
   - os: linux                           # Linux GCC, make, Rogueviz
-    dist: bionic
     compiler: gcc
     env: >-
       TRAVIS_OS_NAME=linux
@@ -63,6 +64,7 @@ matrix:
       HYPERROGUE_USE_PNG=1
       HYPERROGUE_USE_ROGUEVIZ=1
   - os: osx                             # OSX, make
+    osx_image: xcode12u
     compiler: clang
     env: >-
       TRAVIS_OS_NAME=osx
@@ -71,6 +73,7 @@ matrix:
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=1
   - os: osx                             # OSX, make, no libpng
+    osx_image: xcode11.6
     compiler: clang
     env: >-
       TRAVIS_OS_NAME=osx
@@ -79,6 +82,7 @@ matrix:
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=0
   - os: osx                             # OSX, make, Rogueviz
+    osx_image: xcode11.5
     compiler: clang
     env: >-
       TRAVIS_OS_NAME=osx
@@ -96,7 +100,6 @@ matrix:
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=1
   - os: linux                           # Linux GCC, mymake, Rogueviz
-    dist: bionic
     compiler: gcc
     env: >-
       TRAVIS_OS_NAME=linux
@@ -106,6 +109,7 @@ matrix:
       HYPERROGUE_USE_PNG=1
       HYPERROGUE_USE_ROGUEVIZ=1
   - os: osx                             # OSX, mymake
+    osx_image: xcode11.4
     compiler: clang
     env: >-
       TRAVIS_OS_NAME=osx
@@ -114,6 +118,7 @@ matrix:
       HYPERROGUE_USE_GLEW=1
       HYPERROGUE_USE_PNG=1
   - os: osx                             # OSX, mymake, Rogueviz
+    osx_image: xcode11.3
     compiler: clang
     env: >-
       TRAVIS_OS_NAME=osx
@@ -178,6 +183,12 @@ before_install:
 
 script:
 - |-
+  make -f Makefile.simple clean
+  if [[ "$(git status --porcelain)" ]]; then
+    git status
+    exit 'A build artifact was committed; git rm it and try again'
+  fi
+- |-
   # Build hyperrogue.
   if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then
     autoreconf -vi
@@ -192,6 +203,7 @@ script:
     else
       ./mymake
     fi
+    mv hyper hyperrogue
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "emscripten" ]]; then
     docker run --rm -v $(pwd):/src trzeci/emscripten make -f Makefile.simple emscripten
   else
@@ -201,10 +213,18 @@ script:
   # Test hyperrogue.
   if [[ "$TRAVIS_BUILD_SYSTEM" == "emscripten" ]]; then
     ls -lAF hyper.html hyper.js hyper.wasm
-  elif [[ "$TRAVIS_BUILD_SYSTEM" == "mymake" ]]; then
-    ./hyper --help
   else
     ./hyperrogue --help
+  fi
+- |-
+  if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then
+    make clean
+  else
+    make -f Makefile.simple clean
+  fi
+  if [[ "$(git status --porcelain)" ]]; then
+    git status
+    exit 'make clean did not return the repository to its pre-build state'
   fi
 - |-
   # Test "make dist". ("make distcheck" is expected to fail.)
