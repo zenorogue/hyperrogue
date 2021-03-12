@@ -101,6 +101,8 @@ using std::acosh;
 struct hr_exception: std::exception { hr_exception() {} };
 struct hr_shortest_path_exception: hr_exception { };
 
+struct hr_wrong_dir: hr_exception { };
+
 // genus (in grammar)
 #define GEN_M 0
 #define GEN_F 1

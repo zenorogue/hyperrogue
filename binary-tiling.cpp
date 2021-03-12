@@ -267,9 +267,7 @@ EX namespace bt {
                 return path(h, d, bd_up_left, {bd_right, bd_down});
                 }
               }
-          printf("error: case not handled in binary tiling\n");
-          breakhere();
-          return NULL;
+          throw hr_wrong_dir();
           }
         case gBinary4: {
           switch(d) {
@@ -287,6 +285,8 @@ EX namespace bt {
                 return path(h, 4, 2, {3, 0});
               else
                 return path(h, 4, 2, {3, 4, 1});
+            default:
+              throw hr_wrong_dir();
             }
           }
         case gTernary: {
@@ -305,6 +305,8 @@ EX namespace bt {
                 return path(h, 5, 3, {4, parent->zebraval - 1});
               else
                 return path(h, 5, 3, {4, 5, 2});
+            default:
+              throw hr_wrong_dir();
             }
           }
         #if MAXMDIM >= 4         
@@ -339,6 +341,8 @@ EX namespace bt {
                 return path(h, 7, 6, {8, parent->c.spin(8) ^ 2});
               else
                 return path(h, 7, 6, {8, 7, parent->c.spin(8) ^ 2});
+            default:
+              throw hr_wrong_dir();
             }
           }
         case gHoroRec: {
@@ -365,6 +369,8 @@ EX namespace bt {
             case 5:
               parent->cmove(6);
               return path(h, 5, 3, {6, 2, parent->c.spin(6)});
+            default:
+              throw hr_wrong_dir();
             }
           }
         case gHoroTris: {            
@@ -373,12 +379,15 @@ EX namespace bt {
               return build3(parent, d, 7, 1);
             case 7:
               return build3(parent, 7, nextdir(3), -1);
-            case 4: case 5: case 6: 
+            case 4: case 5: case 6: {
               parent->cmove(7);
               int s = parent->c.spin(7);
               if(s == 0) return path(h, d, d, {7, d-3});
               else if(s == d-3) return path(h, d, d, {7, 0});
               else return path(h, d, d, {7, d, 9-d-s});
+              }
+            default:
+              throw hr_wrong_dir();
             }
           }
         case gHoroHex: {
@@ -407,18 +416,19 @@ EX namespace bt {
               return pathc(h, 10, 6, {{13,6,2}, {13,7,0}, {13,8,1}});
             case 11:
               return pathc(h, 11, 7, {{13,1}, {13,2}, {13,0}});
-            case 12: 
+            case 12: {
               h->cmove(13);
               int z = h->c.spin(13);
               return path(h, 12, (z+1)%3+3, {13, z+6});
+              }
+            default:
+              throw hr_wrong_dir();
             }
           }
         #endif
-        default: ;
+        default: 
+          throw hr_wrong_dir();
         }
-      printf("error: case not handled in binary tiling\n");
-      breakhere();
-      return NULL;
       }
 
     int updir_at(heptagon *h) {
@@ -426,7 +436,7 @@ EX namespace bt {
       else if(type_of(h) == 6) return bd_down;
       else if(mapside(h) == 1) return bd_left;
       else if(mapside(h) == -1) return bd_right;
-      else throw "unknown updir";
+      else throw hr_wrong_dir();
       }
 
     transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
