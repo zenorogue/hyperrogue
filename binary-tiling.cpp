@@ -427,7 +427,7 @@ EX namespace bt {
           }
         #endif
         default: 
-          throw hr_wrong_dir();
+          throw hr_wrong_geometry();
         }
       }
 
@@ -484,6 +484,7 @@ EX namespace bt {
             add(-2 * t0 + shift1);
             }
           }
+          break;
         case gHoroRec: {
           ld r2 = sqrt(2);
           for(int y=-1; y<=1; y++) for(int x=-1; x<=1; x+=2) for(int z=-1; z<=1; z++)
