@@ -427,7 +427,7 @@ EX namespace mapstream {
     cellids[c] = numcells;
     }
   
-  int fixspin(int rspin, int dir, int t, int vernum) {
+  EX int fixspin(int rspin, int dir, int t, int vernum) {
     if(vernum < 11018 && dir == 14)
       return NODIR;
     else if(vernum < 11018 && dir == 15)
@@ -609,6 +609,10 @@ EX namespace mapstream {
     }
   
   EX hookset<void(fhstream&)> hooks_savemap, hooks_loadmap;
+  
+  EX cell *save_start() {
+    return (bounded || euclid || prod || arcm::in() || INVERSE) ? currentmap->gamestart() : cwt.at->master->c7;
+    }
 
 #if CAP_EDIT  
   void save_only_map(fhstream& f) {
@@ -637,7 +641,7 @@ EX namespace mapstream {
     for(int k=0; k<i; k++) f.write(kills[k]); 
     }
     
-    addToQueue((bounded || euclid || prod || arcm::in()) ? currentmap->gamestart() : cwt.at->master->c7);
+    addToQueue(save_start());
     for(int i=0; i<isize(cellbyid); i++) {
       cell *c = cellbyid[i];
       if(i) {
