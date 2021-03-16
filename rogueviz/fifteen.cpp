@@ -15,7 +15,9 @@ static const int Empty = 0;
 
 struct celldata {
   int target, targetdir;
+  bool targetmirror;
   int current, currentdir;
+  bool currentmirror;
   };
 
 map<cell*, celldata> fif;
@@ -24,14 +26,14 @@ eWall empty = waChasm;
 
 bool in = false;
 
-enum ePenMove { pmJump, pmRotate, pmAdd };
+enum ePenMove { pmJump, pmRotate, pmAdd, pmMirrorFlip };
 ePenMove pen;
 
-void init_fifteen() {  
+void init_fifteen(int q = 20) {  
   println(hlog, "init_fifteen");
   auto ac = currentmap->allcells();
-  for(int i=0; i<min(isize(ac), 20); i++) {
-    fif[ac[i]] = {i, 0, i, 0};
+  for(int i=0; i<min(isize(ac), q); i++) {
+    fif[ac[i]] = {i, 0, false, i, 0, false};
     }  
   cwt.at = ac[0];
   println(hlog, "ok");
@@ -40,7 +42,7 @@ void init_fifteen() {
 string dotted(int i) {
   string s = its(i);
   bool confusing = true;
-  for(char c: s) if(!among(c, '0', '6', '8', '9'))
+  for(char c: s) if(!among(c, '0', '6', '8', '9') && !(nonorientable && c == '3'))
     confusing = false;
   if(confusing) s += ".";
   return s;
@@ -49,10 +51,18 @@ string dotted(int i) {
 /** where = empty square */
 void make_move(cell *where, int dir) {
   auto nw = where->cmove(dir);
+  auto mir = where->c.mirror(dir);
   auto& f0 = fif[where];
   auto& f1 = fif[nw];
   f0.current = f1.current;
-  f0.currentdir = gmod(f1.currentdir + dir - where->c.spin(dir) + nw->type/2, nw->type);
+  f0.currentmirror = f1.currentmirror ^ mir;
+  int d = f1.currentdir;
+  d -= where->c.spin(dir);
+  println(hlog, "mir = ", mir);
+  if(mir) d *= -1;
+  d += dir;
+  if(!mir) d += nw->type/2;
+  f0.currentdir = gmod(d, nw->type);
   f1.current = Empty;
   }
 
@@ -85,6 +95,7 @@ bool draw_fifteen(cell *c, const shiftmatrix& V) {
   
   int cur = anyshiftclick ? cd.target : cd.current;
   int cdir = anyshiftclick ? cd.targetdir : cd.currentdir;
+  bool cmir = anyshiftclick ? cd.targetmirror : cd.currentmirror;
   
   if(cur == Empty) {
     c->land = laCanvas;
@@ -99,7 +110,7 @@ bool draw_fifteen(cell *c, const shiftmatrix& V) {
       println(hlog, "ERROR: invalid dir ", cdir);
       cdir = 0;
       }
-    write_in_space(V * ddspin(c,cdir,0), 72, 1, dotted(cur), 0xFF, 0, 8);
+    write_in_space(V * ddspin(c,cdir,0) * (cmir ? MirrorX: Id), 72, 1, dotted(cur), 0xFF, 0, 8);
     }
   
   return false;
@@ -129,14 +140,27 @@ void edit_fifteen() {
   dialog::addBoolItem("rotate", pen == pmRotate, 'r');
   dialog::add_action([] { pen = pmRotate; });
 
-  dialog::addBoolItem("add", pen == pmAdd, 'a');
+  dialog::addBoolItem("mirror flip", pen == pmMirrorFlip, 'f');
+  dialog::add_action([] { pen = pmMirrorFlip; });
+
+  dialog::addBoolItem("add tiles", pen == pmAdd, 'a');
   dialog::add_action([] { pen = pmAdd; });
 
   dialog::addBreak(100);
 
   dialog::addItem("this is the goal", 'g');
   dialog::add_action([] { 
-    for(auto& sd: fif) sd.second.target = sd.second.current, sd.second.targetdir = sd.second.currentdir;
+    for(auto& sd: fif) {
+      sd.second.target = sd.second.current;
+      sd.second.targetdir = sd.second.currentdir;
+      sd.second.targetmirror = sd.second.currentmirror;
+      }
+    });
+
+  dialog::addItem("remove all tiles", 'r');
+  dialog::add_action([] {
+    fif.clear();
+    init_fifteen(1);
     });
 
   dialog::addItem("scramble", 's');
@@ -201,6 +225,13 @@ void edit_fifteen() {
         f1.targetdir = gmod(1+f1.targetdir, c->type);        
         }
       
+      if(pen == pmMirrorFlip) {
+        if(fif.count(c) == 0) return;
+        auto& f1 = fif[c];
+        f1.currentmirror ^= true;
+        f1.targetmirror ^= true; 
+        }
+      
       if(pen == pmAdd) {
         if(fif.count(c) == 0) {
           auto& f = fif[c];
@@ -214,6 +245,8 @@ void edit_fifteen() {
           }
         }
       }
+
+    else if(doexiton(sym, uni)) popScreen();
     };
   }
 
@@ -264,8 +297,12 @@ auto fifteen_hook =
       println(hlog, cd.first, " has id ", mapstream::cellids[cd.first]);
       f.write(cd.second.target);
       f.write(cd.second.targetdir);
+      if(nonorientable) 
+        f.write(cd.second.targetmirror);      
       f.write(cd.second.current);
       f.write(cd.second.currentdir);
+      if(nonorientable) 
+        f.write(cd.second.currentmirror);
       }
     }) +
   addHook(hooks_clearmemory, 40, [] () {
@@ -285,8 +322,12 @@ auto fifteen_hook =
       f.read(cd.target);
       f.read(cd.targetdir);
       cd.targetdir = mapstream::fixspin(mapstream::relspin[at], cd.targetdir, c->type, f.vernum);
+      if(nonorientable) 
+        f.read(cd.targetmirror);
       f.read(cd.current);
       f.read(cd.currentdir);
+      if(nonorientable) 
+        f.read(cd.currentmirror);
       cd.currentdir = mapstream::fixspin(mapstream::relspin[at], cd.currentdir, c->type, f.vernum);
       println(hlog, "assigned ", cd.current, " to ", c);
       }
