@@ -1304,7 +1304,10 @@ EX void playerMoveEffects(movei mi) {
     drainOrb(itOrbAether, 2);
     }
     
-  if(cellUnstable(c2) && !markOrb(itOrbAether)) doesFallSound(c2);
+  if(cellUnstable(c2) && !markOrb(itOrbAether)) {
+    doesFallSound(c2);
+    if(c2->land == laMotion && c2->wall == waChasm) c2->mondir = mi.rev_dir_or(NODIR);
+    }
 
   if(c2->wall == waStrandedBoat && markOrb(itOrbWater))
     c2->wall = waBoat;

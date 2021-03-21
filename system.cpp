@@ -338,6 +338,10 @@ EX void initgame() {
     generate_mines();
     }
   
+  if(specialland == laMotion && bounded && !chaosmode && !daily::on) {
+    cwt.at->item = itOrbInvis;
+    }
+  
   princess::squeaked = false;
   clearing::current_root = NULL;
   
