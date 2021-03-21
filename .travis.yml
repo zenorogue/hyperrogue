@@ -155,7 +155,7 @@ before_install:
 
 script:
 - |-
-  make -f Makefile.simple clean
+  make clean
   if [[ "$(git status --porcelain)" ]]; then
     git status
     exit 'A build artifact was committed; git rm it and try again'
@@ -163,9 +163,9 @@ script:
 - |-
   # Build hyperrogue.
   if [[ "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
-    make -f Makefile.simple
+    make
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "mymake" ]]; then
-    make -f Makefile.simple mymake
+    make mymake
     if [[ "$HYPERROGUE_USE_ROGUEVIZ" == "1" ]]; then
       ./mymake -rv
     else
@@ -173,7 +173,7 @@ script:
     fi
     mv hyper hyperrogue
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "emscripten" ]]; then
-    docker run --rm -v $(pwd):/src trzeci/emscripten make -f Makefile.simple emscripten
+    docker run --rm -v $(pwd):/src trzeci/emscripten make emscripten
   else
     exit 'Unsupported build system'
   fi
@@ -185,7 +185,7 @@ script:
     ./hyperrogue --help
   fi
 - |-
-  make -f Makefile.simple clean
+  make clean
   if [[ "$(git status --porcelain)" ]]; then
     git status
     exit 'make clean did not return the repository to its pre-build state'

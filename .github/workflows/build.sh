@@ -19,9 +19,9 @@ export CC=$GH_COMPILER
 export CXX=${CC%cc}++
 
 if [[ "$GH_BUILDSYS" == "makefile" ]]; then
-  make -f Makefile.simple
+  make
 elif [[ "$GH_BUILDSYS" == "mymake" ]]; then
-  make -f Makefile.simple mymake
+  make mymake
   ./mymake $GH_MYMAKE_ARGS
   mv hyper hyperrogue
 else

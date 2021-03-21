@@ -59,7 +59,7 @@ You should be able to compile on Linux, OSX, or MinGW with something like this (
 sudo apt-get install gcc libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev
 git clone https://github.com/zenorogue/hyperrogue.git hyperrogue
 cd hyperrogue
-make -f Makefile.simple
+make
 ```
 
 The `mymake` program builds HyperRogue in parts. It takes longer than the method shown above, but when you change something, `mymake` will only recompile the changed file.

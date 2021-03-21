@@ -145,7 +145,7 @@ string setdir = "../";
 int main(int argc, char **argv) {
   set_os(os);
   int retval = 0; // for storing return values of some function calls
-  for(string fname: {"Makefile.loc", "Makefile.simple", "Makefile"})
+  for(string fname: {"Makefile.loc", "Makefile"})
     if(file_exists(fname)) {
       retval = mysystem("make -f " + fname + " language-data.cpp autohdr.h");
       if (retval) { printf("error during preparation!\n"); exit(retval); }

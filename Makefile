@@ -5,16 +5,16 @@
 #   Run "brew install sdl_gfx".
 #   Run "brew install sdl_mixer".
 #   Run "brew install sdl_ttf".
-#   Run "make -f Makefile.simple" to build HyperRogue as ./hyperrogue.
+#   Run "make" to build HyperRogue as ./hyperrogue.
 #
 # For MSYS2 and MinGW-w64:
 #   You might need to run commands such as "pacman -S mingw-w64-x86_64-SDL"
 #   to install SDL and other required libraries.
-#   Run "make -f Makefile.simple" to build HyperRogue as ./hyperrogue.exe.
+#   Run "make" to build HyperRogue as ./hyperrogue.exe.
 #
 # For Ubuntu Linux:
 #   Run "sudo apt-get install libsdl-dev" to install SDL in /usr/local.
-#   Run "make -f Makefile.simple" to build HyperRogue as ./hyperrogue.
+#   Run "make" to build HyperRogue as ./hyperrogue.
 
 
 ifeq ($(OS),Windows_NT)
