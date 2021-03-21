@@ -98,14 +98,12 @@ using std::asinh;
 using std::acosh;
 #endif
 
-struct hr_exception: std::exception { hr_exception() {} };
-struct hr_shortest_path_exception: hr_exception { };
+struct hr_exception : std::runtime_error {
+    explicit hr_exception() : std::runtime_error("hr_exception") {}
+    explicit hr_exception(const std::string& s) : std::runtime_error(s.c_str()) {}
+};
 
-struct hr_wrong_dir: hr_exception { };
-
-struct hr_wrong_geometry: hr_exception { };
-
-struct hr_exception_str: std::exception { string s; hr_exception_str(const string& s) : s(s) {} const char* what() { return s.c_str(); }};
+struct hr_shortest_path_exception { };
 
 // genus (in grammar)
 #define GEN_M 0

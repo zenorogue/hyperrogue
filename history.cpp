@@ -288,7 +288,7 @@ EX namespace history {
       auto p = build_shortest_path(start, target);
       path_for_lineanimation = p;
       }
-    catch(hr_shortest_path_exception&) {
+    catch(const hr_shortest_path_exception&) {
       addMessage("Could not build a path");
       return;
       }

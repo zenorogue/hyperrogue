@@ -267,7 +267,7 @@ EX namespace bt {
                 return path(h, d, bd_up_left, {bd_right, bd_down});
                 }
               }
-          throw hr_wrong_dir();
+          throw hr_exception("wrong dir");
           }
         case gBinary4: {
           switch(d) {
@@ -286,7 +286,7 @@ EX namespace bt {
               else
                 return path(h, 4, 2, {3, 4, 1});
             default:
-              throw hr_wrong_dir();
+              throw hr_exception("wrong dir");
             }
           }
         case gTernary: {
@@ -306,7 +306,7 @@ EX namespace bt {
               else
                 return path(h, 5, 3, {4, 5, 2});
             default:
-              throw hr_wrong_dir();
+              throw hr_exception("wrong dir");
             }
           }
         #if MAXMDIM >= 4         
@@ -342,7 +342,7 @@ EX namespace bt {
               else
                 return path(h, 7, 6, {8, 7, parent->c.spin(8) ^ 2});
             default:
-              throw hr_wrong_dir();
+              throw hr_exception("wrong dir");
             }
           }
         case gHoroRec: {
@@ -370,7 +370,7 @@ EX namespace bt {
               parent->cmove(6);
               return path(h, 5, 3, {6, 2, parent->c.spin(6)});
             default:
-              throw hr_wrong_dir();
+              throw hr_exception("wrong dir");
             }
           }
         case gHoroTris: {            
@@ -387,7 +387,7 @@ EX namespace bt {
               else return path(h, d, d, {7, d, 9-d-s});
               }
             default:
-              throw hr_wrong_dir();
+              throw hr_exception("wrong dir");
             }
           }
         case gHoroHex: {
@@ -422,12 +422,12 @@ EX namespace bt {
               return path(h, 12, (z+1)%3+3, {13, z+6});
               }
             default:
-              throw hr_wrong_dir();
+              throw hr_exception("wrong dir");
             }
           }
         #endif
         default: 
-          throw hr_wrong_geometry();
+          throw hr_exception("wrong geometry");
         }
       }
 
@@ -436,7 +436,7 @@ EX namespace bt {
       else if(type_of(h) == 6) return bd_down;
       else if(mapside(h) == 1) return bd_left;
       else if(mapside(h) == -1) return bd_right;
-      else throw hr_wrong_dir();
+      else throw hr_exception("wrong dir");
       }
 
     transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {

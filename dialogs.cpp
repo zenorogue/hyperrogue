@@ -786,7 +786,7 @@ EX namespace dialog {
       #endif
       if(reaction) reaction();
       }
-    catch(hr_parse_exception&) { 
+    catch(const hr_parse_exception&) { 
       }
     }
 

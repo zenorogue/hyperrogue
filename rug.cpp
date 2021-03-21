@@ -600,7 +600,7 @@ EX void buildRug() {
       else if(v > w && v > w2)
         addTriangle(v, w, w2);
       }
-    catch(out_of_range&) {}
+    catch(const std::out_of_range&) {}
     }
 
   println(hlog, "vertices = ", isize(points), " triangles= ", isize(triangles));
@@ -1218,7 +1218,7 @@ EX void init_model() {
         "Use a different projection to fix this."
         );
     }
-  catch(rug_exception) {
+  catch(const rug_exception&) {
     close();
     clear_model();
     }
@@ -1353,7 +1353,7 @@ EX void actDraw() {
     perform_finger();    
   #endif
     }
-  catch(rug_exception) {
+  catch(const rug_exception&) {
     rug::close();
     }
   }

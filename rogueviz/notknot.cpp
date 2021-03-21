@@ -402,7 +402,7 @@ struct hrmap_notknot : hrmap {
     auto d1 = u->where->c.spin(d);
     auto z = x->zebraval;
     if(z & 6) {
-      throw hr_exception_str("zebraval failure!");
+      throw hr_exception("zebraval failure!");
       exit(3);
       x->zebraval = 0;
       }
@@ -418,7 +418,7 @@ struct hrmap_notknot : hrmap {
   
   void add_to_unify(ucover *a, ucover *b) {
     if(a->where != b->where)
-      throw hr_exception_str("unification error");
+      throw hr_exception("unification error");
     unify.emplace_back(a, b);
     };
   
@@ -641,7 +641,7 @@ struct hrmap_notknot : hrmap {
     if(u->where == all[0]->where)
       for(auto& lo: to_unloop)        
         if(!make_loop(u, 1, lo))
-          throw hr_exception_str("given loop goes through a wall");
+          throw hr_exception("given loop goes through a wall");
     
     if(loop_any && u->where == all[0]->where) {
       auto us = all[0];
@@ -685,7 +685,7 @@ struct hrmap_notknot : hrmap {
     all[0]->parentdir = -1;
 
     if(all[0]->where->zebraval & 1) 
-      throw hr_exception_str("error: starting inside a wall");
+      throw hr_exception("error: starting inside a wall");
     
     remove_marked_walls = false;
     bool first = true;
@@ -712,7 +712,7 @@ struct hrmap_notknot : hrmap {
 
         uf->state |= 2; uf->merged_into = ut;
         if(uf->where != ut->where)
-          throw hr_exception_str("where confusion");
+          throw hr_exception("where confusion");
         for(int d=0; d<uf->where->type; d++) {
           cmov(uf->where, d);
           auto d1 = uf->where->c.spin(d);
@@ -881,9 +881,9 @@ struct hrmap_notknot : hrmap {
         cmov(u->where, d);
         auto d1 = u->where->c.spin(d);
         if(u->ptr[d] && u->ptr[d]->result == nullptr)
-          throw hr_exception_str(lalign(0, "connection to null in state ", u->ptr[d]->state, " from state ", u->state, " i=", i, " .. ", u->ptr[d]->index));
+          throw hr_exception(lalign(0, "connection to null in state ", u->ptr[d]->state, " from state ", u->state, " i=", i, " .. ", u->ptr[d]->index));
         if(u->ptr[d] && u->ptr[d]->ptr[d1] != u)
-          throw hr_exception_str("wrong connection");
+          throw hr_exception("wrong connection");
         if(u->ptr[d])
           u->result->c.connect(d, u->ptr[d]->result, d1, false);          
         else
@@ -973,8 +973,8 @@ struct hrmap_notknot : hrmap {
         ray::volumetric::vmap[c] = 0x00000001;
       }
     
-    } catch(hr_exception_str& s) {
-      println(hlog, "exception: ", s.s);
+    } catch(const hr_exception& s) {
+      println(hlog, "exception: ", s.what());
       throw;
       }
     }
