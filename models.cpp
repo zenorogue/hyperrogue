@@ -892,6 +892,10 @@ EX namespace models {
       PHASEFROM(2); 
       shift_arg_formula(panini_alpha, reset_all_shaders);
       }
+    else if(argis("-salpha")) { 
+      PHASEFROM(2); 
+      shift_arg_formula(stereo_alpha, reset_all_shaders);
+      }
     else if(argis("-zoom")) { 
       PHASEFROM(2); shift_arg_formula(vpconf.scale);
       }

@@ -1027,6 +1027,7 @@ EX void initConfig() {
   param_f(camera_rot_speed, "camrot", "camera-rot-speed", 1);
 
   param_f(panini_alpha, "panini_alpha", 0);
+  param_f(stereo_alpha, "stereo_alpha", 0);
 
   callhooks(hooks_configfile);
   
@@ -1863,14 +1864,15 @@ EX void explain_detail() {
   }
 
 EX ld max_fov_angle() {
-  if(panini_alpha >= 1 || panini_alpha <= -1) return 360;
-  return acos(-panini_alpha) * 2 / degree;
+  auto& p = panini_alpha ? panini_alpha : stereo_alpha;
+  if(p >= 1 || p <= -1) return 360;
+  return acos(-p) * 2 / degree;
   }
 
 EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
 
   string sfov = fts(vid.fov) + "°";
-  if(panini_alpha) {
+  if(panini_alpha || stereo_alpha) {
     sfov += " / " + fts(max_fov_angle()) + "°";
     }
   dialog::addSelItem(XLAT("field of view"), sfov, key);
@@ -1897,7 +1899,22 @@ EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
             "The Panini projection is an alternative perspective projection "
             "which allows very wide field-of-view values. HyperRogue uses "
             "a quick implementation, so parameter values too close to 1 may "
-            "be buggy; try e.g. 0.9 instead.")
+            "be buggy (outside of raycasting); try e.g. 0.9 instead.")
+            );
+        dialog::reaction = reset_all_shaders;
+        dialog::extra_options = [] {
+          add_edit_fov('F', true);
+          };
+        });
+      dialog::addSelItem(XLAT("spherical perspective projection"), fts(stereo_alpha), 'S');
+      dialog::add_action([] {
+        popScreen();
+        dialog::editNumber(stereo_alpha, 0, 1, 0.1, 0, "spherical perspective parameter", 
+          XLAT(
+            "Set to 1 to get stereographic projection, "
+            "which allows very wide field-of-view values. HyperRogue uses "
+            "a quick implementation, so parameter values too close to 1 may "
+            "be buggy (outside of raycasting); try e.g. 0.9 instead.")
             );
         dialog::reaction = reset_all_shaders;
         dialog::extra_options = [] {

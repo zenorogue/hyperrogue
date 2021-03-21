@@ -436,7 +436,23 @@ void enable_raycaster() {
           "at0.xyz *= hz+alpha;\n"
           "at0.z = hz;\n}"
           " else at0.z = 0.;\n"
-"\n"
+          "\n"
+          ;
+
+      else if(stereo_alpha) fmain += 
+          "mediump float hr = at0.x*at0.x+at0.y*at0.y;\n"
+          "mediump float alpha = " + to_glsl(stereo_alpha) + ";\n"
+          "mediump float A = 1. + hr;\n"
+          "mediump float B = -2.*hr*alpha;\n"
+          "mediump float C = 1. - hr*alpha*alpha;\n"
+          "B /= A; C /= A;\n"
+    
+          "mediump float hz = B / 2. + sqrt(C + B*B/4.);\n"
+          "if(abs(hz) > 1e-3) {"
+          "at0.xyz *= hz+alpha;\n"
+          "at0.z = hz;\n}"
+          " else at0.z = 0.;\n"
+          "\n"
           ;
 
       fmain +=
@@ -1240,6 +1256,9 @@ void enable_raycaster() {
     
     if(panini_alpha) 
       fmain += panini_shader();
+
+    else if(stereo_alpha) 
+      fmain += stereo_shader();
 
     #ifndef GLES_ONLY
     fmain +=    

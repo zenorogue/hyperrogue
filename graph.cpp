@@ -23,6 +23,7 @@ EX bool wmspatial, wmescher, wmplain, wmblack, wmascii, wmascii3;
 EX bool mmspatial, mmhigh, mmmon, mmitem;
 
 EX ld panini_alpha = 0;
+EX ld stereo_alpha = 0;
 
 EX int detaillevel = 0;
 
@@ -3742,7 +3743,7 @@ EX bool clip_checked = false;
 void make_clipping_planes() {
 #if MAXMDIM >= 4
   clip_checked = false;
-  if(!frustum_culling || PIU(sphere) || experimental || vid.stereo_mode == sODS || panini_alpha) return;
+  if(!frustum_culling || PIU(sphere) || experimental || vid.stereo_mode == sODS || panini_alpha || stereo_alpha) return;
 
   if(WDIM == 3 && pmodel == mdPerspective && !nonisotropic && !in_s2xe())
     threshold = sin_auto(cgi.corner_bonus), xyz_threshold = 0, clip_checked = true;
@@ -4980,7 +4981,7 @@ EX void calcparam() {
   cd->ycenter += cd->scrsize * pconf.yposition;
   
   ld fov = vid.fov * degree / 2;
-  cd->tanfov = sin(fov) / (cos(fov) + panini_alpha);
+  cd->tanfov = sin(fov) / (cos(fov) + (panini_alpha ? panini_alpha : stereo_alpha));
   
   callhooks(hooks_calcparam);
   reset_projection();
