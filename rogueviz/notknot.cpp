@@ -191,7 +191,7 @@ struct hrmap_notknot : hrmap {
     /* used for painting walls in a single color */
     ucover *wall_merge;
     color_t wallcolor, wallcolor2;
-    /* 0 = live, 1 = wall, 2 = merged, 4 = overflow */
+    /* 0 = live, 1 = wall, 2 = merged, 4 = overflow, 8 = to hide */
     char state;
     /* direction to the parent */
     char parentdir;
@@ -200,6 +200,9 @@ struct hrmap_notknot : hrmap {
     ucover(heptagon *w, int s) { where = w; for(int i=0; i<arrsize; i++) ptr[i] = nullptr; state = s; merged_into = nullptr; result = nullptr; wall_merge = this; }
     bool iswall() { return state & 1; }
     bool nowall() { return !iswall(); }
+    bool ismerged() { return state & 2; }
+    bool isover() { return state & 4; }
+    bool tohide() { return state & 8; }
     };
   
   /* find-union algorithm for wall_merge */
@@ -513,7 +516,7 @@ struct hrmap_notknot : hrmap {
     uloops[u->where] = {};
     for(int i=0; i<t; i++) {
       auto u1 = gen_adj(u, i);
-      if(!(u1->state & 1)) continue;
+      if(u1->nowall()) continue;
       if(u1->where->zebraval != 9) continue;
       transmatrix M = adj(u, i);
       
@@ -566,7 +569,7 @@ struct hrmap_notknot : hrmap {
         for(int j=0; j<at->where->type; j++) {
           if(j == camefrom[at->where]) continue;
           auto u2 = gen_adj(at, j);          
-          if(u2->state & 1) continue;
+          if(u2->iswall()) continue;
           transmatrix Tj = Ti * adj(at, j);
           bool adj = false;
           for(auto v: cgi.vertices_only) for(auto v1: cgi.vertices_only)
@@ -610,15 +613,15 @@ struct hrmap_notknot : hrmap {
       for(int j=0; j<i; j++) {
         auto u1 = u->ptr[i];
         auto u2 = u->ptr[j];
-        if(!(u1->state & 0)) continue;
-        if(!(u2->state & 0)) continue;
+        if(u1->nowall()) continue;
+        if(u2->nowall()) continue;
         auto ucur = u;
         auto ulast = (ucover*) nullptr;
         
         for(int step=0; step<5*loop; step++) {
           for(int i=0; i<t; i++) {
             auto ucand = ucur->ptr[i];
-            if(isNeighbor(ucand->where->c7, u1->where->c7) && isNeighbor(ucand->where->c7, u2->where->c7) && ucand != ulast) {
+            if(ucand && isNeighbor(ucand->where->c7, u1->where->c7) && isNeighbor(ucand->where->c7, u2->where->c7) && ucand != ulast) {
               ulast = ucur, ucur = ucand; 
               goto next_step;
               }
@@ -704,7 +707,7 @@ struct hrmap_notknot : hrmap {
         if(uf->index < ut->index) swap(uf, ut);
 
         /* if a knot is removed, remove the other copy */
-        if((uf->state & 1) && !(ut->state & 1))
+        if(uf->iswall() && ut->nowall())
           uf->state &=~ 1;
 
         uf->state |= 2; uf->merged_into = ut;
@@ -805,9 +808,9 @@ struct hrmap_notknot : hrmap {
         auto uk = gen_adj(u, k);
         if(uk->state != 0) continue;
         auto ul = gen_adj(u, l);
-        if(!(ul->state & 1)) continue;
+        if(ul->nowall()) continue;
         auto ukl = gen_adj(uk, l);
-        if(!(ukl->state & 1)) continue;
+        if(ukl->nowall()) continue;
         funion(ul, ukl);        
         }
 
@@ -816,9 +819,9 @@ struct hrmap_notknot : hrmap {
       for(int l=0; l<u->where->type; l++) 
       if(adjacent_face(u, k, l)) {
         auto uk = gen_adj(u, k);
-        if(!(uk->state & 1)) continue;
+        if(uk->nowall()) continue;
         auto ul = gen_adj(u, l);
-        if(!(ul->state & 1)) continue;
+        if(ul->nowall()) continue;
         funion(ul, uk);        
         }      
 
@@ -845,9 +848,9 @@ struct hrmap_notknot : hrmap {
     
     for(auto v: all) {
       if(v->state == 0) lives++;
-      if(v->state & 1) walls++;
-      if(v->state & 2) merged++;
-      if(v->state & 4) overflow++;
+      if(v->iswall()) walls++;
+      if(v->ismerged()) merged++;
+      if(v->isover()) overflow++;
       }
       
     set<heptagon*> wheres;
@@ -861,9 +864,9 @@ struct hrmap_notknot : hrmap {
     /* create the result map */
     for(int i=0; i<isize(all); i++) {
       auto u = all[i];
-      if(u->state & 2) continue;
+      if(u->ismerged()) continue;
       if(u->state == 0) wheres.insert(all[i]->where);
-      u->result = tailored_alloc<heptagon> (S7);
+      u->result = tailored_alloc<heptagon> (S7);      
       u->result->c7 = newCell(S7, u->result);
       indices[u->result] = i;
       }
@@ -872,17 +875,15 @@ struct hrmap_notknot : hrmap {
 
     for(int i=0; i<isize(all); i++) {
       auto u = all[i];
-      if(u->state & 2) continue;
+      if(u->ismerged()) continue;
 
       for(int d=0; d<S7; d++) {        
         cmov(u->where, d);
         auto d1 = u->where->c.spin(d);
-        if(u->ptr[d] && u->ptr[d]->result == nullptr) {
-          println(hlog, "connection to null in state ", u->ptr[d]->state, " from state ", u->state, " i=", i, " .. ", u->ptr[d]->index);
-          exit(1);
-          }
+        if(u->ptr[d] && u->ptr[d]->result == nullptr)
+          throw hr_exception_str(lalign(0, "connection to null in state ", u->ptr[d]->state, " from state ", u->state, " i=", i, " .. ", u->ptr[d]->index));
         if(u->ptr[d] && u->ptr[d]->ptr[d1] != u)
-          println(hlog, "wrong connection");
+          throw hr_exception_str("wrong connection");
         if(u->ptr[d])
           u->result->c.connect(d, u->ptr[d]->result, d1, false);          
         else
@@ -898,30 +899,29 @@ struct hrmap_notknot : hrmap {
       all[i]->wallcolor = 0;
 
     for(int i=0; i<isize(all); i++) 
-      if(all[i]->state & 1)
-      if(!(all[i]->state & 2))
+      if(all[i]->iswall() && !all[i]->ismerged())
         ufind(all[i])->wallcolor++;
         
     map<int, int> sizes;
 
     for(int i=0; i<isize(all); i++) 
-      if((all[i]->state & 1) && ufind(all[i]) == all[i] && all[i]->wallcolor)
+      if(all[i]->iswall() && ufind(all[i]) == all[i] && all[i]->wallcolor)
         colors_used++,
         sizes[all[i]->wallcolor]++;
-    
+
     for(auto p: sizes) 
       println(hlog, "size = ", p.first, " times ", p.second);
-
+    
     println(hlog, "colors_used = ", colors_used);
-
+    
     if(first && self_hiding) {
       ucover *what = nullptr;
       for(int i=0; i<isize(all); i++) 
-        if((all[i]->state & 1) && (all[i]->state & 8) && !(all[i]->state & 2))
+        if(all[i]->iswall() && all[i]->tohide() && !all[i]->ismerged())
           what = ufind(all[i]);
 
       for(int i=0; i<isize(all); i++) 
-        if((all[i]->state & 1) && ufind(all[i]) == what) 
+        if(all[i]->iswall() && ufind(all[i]) == what) 
           all[i]->state &=~ 9;
         
       println(hlog, "removed one knot!");
@@ -931,7 +931,7 @@ struct hrmap_notknot : hrmap {
       }
 
     for(int i=0; i<isize(all); i++) 
-      if((all[i]->state & 1) && ufind(all[i]) == all[i]) {
+      if(all[i]->iswall() && ufind(all[i]) == all[i]) {
         all[i]->wallcolor = hrand(0x1000000) | 0x404040,
         all[i]->wallcolor2 = hrand(0x1000000) | 0x404040;
         }
@@ -956,13 +956,13 @@ struct hrmap_notknot : hrmap {
       cell *c = u->result->c7;
       setdist(c, 7, c);
       c->land = laCanvas;
-      if(u->state & 1) {
+      if(u->iswall()) {
         c->wall = waWaxWall;
         c->landparam = hrand(100) < secondary_percentage ? ufind(u)->wallcolor2 : ufind(u)->wallcolor;
-        if(!(ufind(u)->state & 1)) println(hlog, "connected to state ", ufind(u)->state);
+        if(ufind(u)->nowall()) println(hlog, "connected to state ", ufind(u)->state);
         // if(!(c->landparam & 0x404040)) println(hlog, "color found ", c->landparam);
         }
-      else if(u->state & 4)
+      else if(u->isover())
         c->wall = waBigTree;
       else 
         c->wall = waNone;
