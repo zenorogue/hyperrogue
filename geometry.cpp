@@ -1014,6 +1014,8 @@ EX int last_texture_step;
 
 int ntimestamp;
 
+EX hookset<void(string&)> hooks_cgi_string;
+
 EX string cgi_string() {
   string s;
   auto V = [&] (string a, string b) { s += a; s += ": "; s += b; s += "; "; };
@@ -1079,6 +1081,8 @@ EX string cgi_string() {
   if(WDIM == 3) V("HTW", fts(vid.height_width));
 
   V("LQ", its(vid.linequality));
+
+  callhooks(hooks_cgi_string, s);
   
   return s;
   }
