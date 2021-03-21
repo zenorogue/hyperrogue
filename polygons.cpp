@@ -734,7 +734,7 @@ void geometry_information::compute_cornerbonus() { }
 // Make a wall
 
 hyperpoint ray_kleinize(hyperpoint h, int id, ld pz) {
-  if(geometry == gNil && among(id, 2, 5)) h[2] = 0;
+  if(nil && among(id, 2, 5)) h[2] = 0;
   #if CAP_BT
   if(hyperbolic && bt::in()) {
     // ld co = vid.binary_width / log(2) / 4;
@@ -807,7 +807,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       auto kv1 = ray_kleinize(v1, id, altitudes[a]);
       auto kv2 = ray_kleinize(v2, id, altitudes[b]);
       auto kvc = ray_kleinize(ocenter, id, center_altitude);
-      transmatrix T = build_matrix(kv1, kv2, kvc, point31(.11,.19,.3));
+      transmatrix T = build_matrix(kv1, kv2, kvc, point31(1e-4,2e-4,7e-4)); // 11,.19,.3));
       T = inverse(T);
       raywall.push_back(T);
       }
@@ -1074,7 +1074,7 @@ void geometry_information::create_wall3d() {
     make_wall(8, {pt(-3,+1,+1), pt(+3,+1,+1), pt(+3,+3,+1), pt(-3,+3,+1)});
     }
   
-  if(geometry == gNil) {
+  if(nil) {
     for(int i=0; i<S7; i++) {
       vector<hyperpoint> fvs = nilv::current_ns().facevertices[i];
       using nilv::nilwidth;
