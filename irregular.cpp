@@ -1061,15 +1061,15 @@ int readArgs() {
     showstartmenu = false;
     }
   else if(argis("-irrdens")) {
-    PHASE(2);
+    PHASEFROM(2);
     shift_arg_formula(density);
     }
   else if(argis("-irrb")) {
-    PHASE(2);
+    PHASEFROM(2);
     shift(); bitruncations_requested = argi();
     }
   else if(argis("-irrq")) {
-    PHASE(2);
+    PHASEFROM(2);
     shift_arg_formula(quality);
     }
   else if(argis("-irrload")) {
