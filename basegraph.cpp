@@ -1128,16 +1128,22 @@ EX bool want_vsync() {
   return vid.want_vsync;
   }
 
-EX bool need_to_apply_screen_settings() {
-  if(vid.want_fullscreen != vid.full)
-    return true;
-  if(make_pair(vid.xres, vid.yres) != get_requested_resolution())
-    return true;
+EX bool need_to_reopen_window() {
   if(vid.want_antialias != vid.antialias)
     return true;
   if(vid.wantGL != vid.usingGL)
     return true;
   if(want_vsync() != vid.current_vsync)
+    return true;
+  return false;
+  }
+
+EX bool need_to_apply_screen_settings() {
+  if(need_to_reopen_window())
+    return true;
+  if(vid.want_fullscreen != vid.full)
+    return true;
+  if(make_pair(vid.xres, vid.yres) != get_requested_resolution())
     return true;
   return false;
   }
@@ -1173,7 +1179,8 @@ EX void apply_screen_settings() {
   #endif
 
   #if !CAP_SDL2
-  SDL_QuitSubSystem(SDL_INIT_VIDEO);
+  if(need_to_reopen_window())
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
   #endif
 
   graphics_on = false;
