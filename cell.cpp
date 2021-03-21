@@ -1371,4 +1371,9 @@ EX int valence() {
   return S3;
   }
 
+/** portalspaces are not defined outside of a boundary */
+EX bool is_boundary(cell *c) {
+  return (cgflags & qPORTALSPACE) && isWall(c->wall);
+  }
+
 }

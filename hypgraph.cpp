@@ -1955,6 +1955,8 @@ EX void centerpc(ld aspd) {
   ors::rerotate(W); ors::rerotate(cwtV.T); ors::rerotate(View);
   }
 
+EX transmatrix oView;
+
 EX void optimizeview() {
 
   if(subscreens::split(optimizeview)) return;
@@ -1971,6 +1973,11 @@ EX void optimizeview() {
     
   View = iview_inverse(iView);
   fixmatrix(View);
+  
+  if(is_boundary(centerover))
+    centerover = c, View = oView;
+  else
+    oView = View;
 
   #if CAP_ANIMATIONS
   if(centerover && inmirror(centerover)) {
