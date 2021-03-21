@@ -805,6 +805,8 @@ static const flagtype qULTRA           = Flag(25);
 
 static const flagtype qPORTALSPACE     = Flag(26);
 
+static const flagtype qSTRETCHABLE     = Flag(27);
+
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
 static const int OINF = 100;
@@ -874,8 +876,8 @@ EX vector<geometryinfo> ginf = {
   {"{3,4}", "none",     "{3,4} (octahedron)",                         "4x3",      3, 4, qsSMALLB,  giSphere2, {{SEE_ALL, SEE_ALL}}, eVariation::bitruncated},
   {"bin{4,4}",  "none", "{4,4} on horospheres",                       "bin44",    9, 3, qBINARY,   giHyperb3, {{7, 3}}, eVariation::pure},
   {"{4,3,4}","none",    "{4,3,4} cube tiling",                        "434",      6, 4, qOPTQ,     giEuclid3, {{7, 5}}, eVariation::pure},
-  {"{5,3,3}","none",    "{5,3,3} 120-cell",                           "533",     12, 3, qsSMALLB,  giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
-  {"{5,3,3}", "elliptic","{5,3,3} 120-cell (elliptic space)",         "e533",    12, 3, qsSMALLBE, giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
+  {"{5,3,3}","none",    "{5,3,3} 120-cell",                           "533",     12, 3, qsSMALLB | qSTRETCHABLE,  giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
+  {"{5,3,3}", "elliptic","{5,3,3} 120-cell (elliptic space)",         "e533",    12, 3, qsSMALLBE | qSTRETCHABLE, giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"rh{4,3,4}","none",  "rhombic dodecahedral honeycomb",             "rh434",   12, 3, qOPTQ,     giEuclid3, {{7, 5}}, eVariation::pure},
   {"2t{4,3,4}","none",  "bitruncated cubic honeycomb",                "2t434",   14, 3, qOPTQ,     giEuclid3, {{7, 5}}, eVariation::pure},
   {"{5,3,4}","none",    "{5,3,4} hyperbolic honeycomb",               "534",     12, 4, 0,         giHyperb3, {{7, 2}}, eVariation::pure},
@@ -883,10 +885,10 @@ EX vector<geometryinfo> ginf = {
   {"{3,3,3}","none",    "{3,3,3} 5-cell",                             "333",      4, 3, qsSMALLB,  giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{3,3,4}","none",    "{3,3,4} 16-cell",                            "334",      4, 4, qsSMALLB,  giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{3,3,4}","elliptic","{3,3,4} 16-cell (elliptic space)",           "e334",     4, 4, qsSMALLBE, giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
-  {"{4,3,3}","none",    "{4,3,3} 8-cell",                             "433",      6, 4, qsSMALLB,  giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
-  {"{4,3,3}","elliptic","{4,3,3} 8-cell (elliptic space)",            "e433",     6, 4, qsSMALLBE, giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
-  {"{3,4,3}","none",    "{3,4,3} 24-cell",                            "343",      8, 3, qsSMALLB,  giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
-  {"{3,4,3}","elliptic","{3,4,3} 24-cell (elliptic space)",           "e343",     8, 3, qsSMALLBE, giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
+  {"{4,3,3}","none",    "{4,3,3} 8-cell",                             "433",      6, 4, qsSMALLB | qSTRETCHABLE,  giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
+  {"{4,3,3}","elliptic","{4,3,3} 8-cell (elliptic space)",            "e433",     6, 4, qsSMALLBE | qSTRETCHABLE, giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
+  {"{3,4,3}","none",    "{3,4,3} 24-cell",                            "343",      8, 3, qsSMALLB | qSTRETCHABLE,  giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
+  {"{3,4,3}","elliptic","{3,4,3} 24-cell (elliptic space)",           "e343",     8, 3, qsSMALLBE | qSTRETCHABLE, giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{3,3,5}","none",    "{3,3,5} 600-cell",                           "335",      4, 3, qsSMALLB,  giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"{3,3,5}","elliptic","{3,3,5} 600-cell (elliptic space)",          "e335",     4, 3, qsSMALLBE, giSphere3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"bin{3,6}", "none",  "{3,6} on horospheres",                       "bin36",    8, 3, qBINARY,   giHyperb3, {{7, 3}}, eVariation::pure},

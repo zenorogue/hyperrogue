@@ -2433,7 +2433,7 @@ EX namespace stretch {
     }
 
   EX bool applicable() {
-    return rotspace || among(geometry, gCell120, gECell120, gCell24, gECell24, gCell8, gECell8);
+    return rotspace || (cgflags & qSTRETCHABLE);
     }
 
   EX bool in() {
