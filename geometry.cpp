@@ -653,7 +653,10 @@ void geometry_information::prepare_basics() {
     hexf = rhexf = hexvdist = csc * .5;
     }
 
-  if(scale_used()) scalefactor *= vid.creature_scale;
+  if(scale_used()) {
+    scalefactor *= vid.creature_scale;
+    orbsize *= vid.creature_scale;
+    }
 
   zhexf = BITRUNCATED ? hexf : crossf* .55;
   if(scale_used()) zhexf *= vid.creature_scale;
