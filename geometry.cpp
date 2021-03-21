@@ -252,7 +252,7 @@ hpcshape
   shKnife, shTongue, shFlailMissile, shTrapArrow,
   shPirateHook, shPirateHood, shEyepatch, shPirateX,
   // shScratch, 
-  shHeptaMarker, shSnowball, shSun, shNightStar, shEuclideanSky,
+  shHeptaMarker, shSnowball, shHugeDisk, shSun, shNightStar, shEuclideanSky,
   shSkeletonBody, shSkull, shSkullEyes, shFatBody, shWaterElemental,
   shPalaceGate, shFishTail,
   shMouse, shMouseLegs, shMouseEyes,

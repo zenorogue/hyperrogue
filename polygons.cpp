@@ -503,6 +503,10 @@ void geometry_information::procedural_shapes() {
   for(int i=0; i<=S84; i+=SD3)
     hpcpush(ddi(i, orbsize * .2) * C0);
 
+  bshape(shHugeDisk, PPR::ITEM);
+  for(int i=0; i<=S84; i+=SD3)
+    hpcpush(ddi(i, orbsize * .4) * C0);
+
   bshape(shDiskT, PPR::ITEM);
   for(int i=0; i<=S84; i+=S28)
     hpcpush(ddi(i, orbsize * .2) * C0);
