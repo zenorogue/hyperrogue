@@ -673,6 +673,15 @@ EX void menuitem_binary_width(char key) {
     });
   }
 
+EX void menuitem_nilwidth(char key) {
+  dialog::addSelItem(XLAT("nil width"), fts(nilv::nilwidth), key);
+  dialog::add_action([] {
+    dialog::editNumber(nilv::nilwidth, 0.01, 2, 0.1, 1, XLAT("Nil width"), "");
+    dialog::reaction = ray::reset_raycaster;
+    dialog::bound_low(0.01);
+    });
+  }
+
 EX void showEuclideanMenu() {
   // for(int i=2; i<lt; i++) landvisited[i] = true;
 
@@ -932,6 +941,9 @@ EX void showEuclideanMenu() {
   else if(bt::in()) {
     menuitem_binary_width('v');
     add_edit_wall_quality('W');
+    }
+  else if(nil) {
+    menuitem_nilwidth('v');
     }
   else if(WDIM == 3 || kite::in() || arb::in()) dialog::addBreak(100);
   else 
