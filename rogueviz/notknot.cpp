@@ -1053,6 +1053,13 @@ auto h = addHook(hooks_newmap, 0, [] {
   });
 
 void create_notknot() {
+  if(true) {
+    dynamicval<eGeometry> b(geometry, base);
+    check_cgi();
+    cgi.require_basics();
+    cgi.require_shapes();
+    cgi.require_usershapes();
+    }
   if(gNotKnot == eGeometry(-1)) {
     ginf.push_back(ginf[base]);
     gNotKnot = eGeometry(isize(ginf) - 1);
@@ -1073,20 +1080,129 @@ void regenerate() {
     }
   }
 
+bool show_selfhiding = true;
+
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
   dialog::init(XLAT("notknot"), 0xFFFFFFFF, 150, 0);
   
-  add_edit(loop);
-  add_edit(margin);
-  add_edit(knotsize);
-  add_edit(self_hiding);
+  dialog::addItem("available scenes", 'a');
+  dialog::add_action_push([] {
+    cmode = sm::SIDE | sm::MAYDARK;
+    gamescreen(0);
+
+    dialog::init(XLAT("notknot scenes"), 0xFFFFFFFF, 150, 0);
+    
+    dialog::addItem("knot portal in Euclidean geometry", 'a');
+    dialog::add_action([] {
+      stop_game();
+      set_geometry(gCubeTiling);
+      base = gCubeTiling;
+      base_map = "";
+      to_unloop.clear();
+      create_notknot();
+      loop = 3;
+      secondary_percentage = 10;
+      show_selfhiding = true;
+      set_geometry(gNotKnot);
+      start_game();
+      ray::reset_raycaster();
+      ray::volumetric::on = false;
+      ray::exp_decay_poly = 30;
+      pmodel = mdPerspective;
+      });
+
+    dialog::addItem("Penrose staircase portal in Nil geometry", 'b');
+    dialog::add_action([] {
+      stop_game();
+      set_geometry(gNil);
+      base_map = "";
+      base = geometry;
+      to_unloop.clear();
+      secondary_percentage = 0;
+      nilv::nilwidth = .25;
+      nilv::nilperiod = make_array(8, 8, 8);
+      nilv::set_flags();
+      create_notknot();
+      show_selfhiding = false;
+      loop = 6;
+      set_geometry(gNotKnot);
+      start_game();
+      ray::reset_raycaster();
+      ray::volumetric::on = true;
+      ray::exp_decay_poly = 3;
+      pmodel = mdGeodesic;
+      });
+      
+    dialog::addItem("great circle portal in spherical geometry", 'c');
+    dialog::add_action([] {
+      stop_game();
+      set_geometry(gCell120);
+      base_map = "spherring.lev";
+      to_unloop.clear();
+      vector<int> v; for(int i=0; i<60; i++) v.push_back(7);
+      to_unloop.emplace_back(v);
+      show_selfhiding = true;
+      secondary_percentage = 0;
+      loop = 0;
+      set_geometry(gNotKnot);
+      start_game();
+      ray::reset_raycaster();
+      ray::volumetric::on = false;
+      ray::exp_decay_poly = 10;
+      mapeditor::drawplayer = false;
+      pmodel = mdPerspective;
+      ((hrmap_notknot*)currentmap)->add_fog();
+      });
+      
+    dialog::addItem("knotted portal in spherical geometry", 'd');
+    dialog::add_action([] {
+      stop_game();
+      set_geometry(gCell600);
+      base_map = "spherknot.lev";
+      to_unloop.clear();
+      secondary_percentage = 0;
+      show_selfhiding = true;
+      loop = 3;
+      set_geometry(gNotKnot);
+      start_game();
+      ray::reset_raycaster();
+      ray::volumetric::on = false;
+      ray::exp_decay_poly = 10;
+      mapeditor::drawplayer = false;
+      pmodel = mdPerspective;
+      ((hrmap_notknot*)currentmap)->add_fog();
+      });
+    
+    dialog::display();      
+    });
+  
+  if(loop) add_edit(loop);
+  if(base == gCubeTiling && base_map == "") {
+    add_edit(margin);
+    add_edit(knotsize);
+    }
+  if(show_selfhiding) add_edit(self_hiding);
+  
+  if(nil) menuitem_nilwidth('w');
+  
+  if(base != gCubeTiling) {
+    dialog::addBoolItem("fog enabled", ray::volumetric::on, 'f');
+    dialog::add_action([] {
+      ray::volumetric::on = !ray::volumetric::on;
+      ray::reset_raycaster();
+      if(sphere && ray::volumetric::on)
+        ((hrmap_notknot*)currentmap)->add_fog();
+      });
+    }
   
   dialog::addBreak(100);
 
   dialog::addItem(XLAT("configure raycasting"), 'A');
   dialog::add_action_push(ray::configure);
+
+  add_edit_fov('f');
 
   #if CAP_VR
   dialog::addBoolItem(XLAT("VR settings"), vrhr::active(), 'v');
@@ -1151,6 +1267,30 @@ void gen_knot() {
     }
   }
 
+void nk_launch() {
+  margin = 4;
+  mapeditor::drawplayer = false;
+  stop_game();
+  firstland = specialland = laCanvas;
+  set_geometry(gNotKnot);
+  sightranges[geometry] = .5;
+  ray::max_cells = 600000;
+  smooth_scrolling = 1;
+  camera_speed = 10;
+  // panini_alpha = 1;
+  // fov = 150;
+  ray::exp_decay_poly = 30;
+  ray::fixed_map = true;
+  ray::max_iter_iso = 80;
+  showstartmenu = false;
+  #if CAP_VR
+  vrhr::hsm = vrhr::eHeadset::holonomy;
+  vrhr::eyes = vrhr::eEyes::truesim;
+  vrhr::cscr = vrhr::eCompScreen::eyes;
+  vrhr::absolute_unit_in_meters = 0.2;
+  #endif
+  }
+
 auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
   + addHook(hooks_welcome_message, 100, [] {
     if(geometry == gNotKnot) {
@@ -1194,6 +1334,8 @@ auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
       to_unloop.push_back(v);
       println(hlog, "pushed to to_unloop: ", v);
       }
+    else if(argis("-nk-launch")) 
+      nk_launch();
     else return 1;
     return 0;
     })
@@ -1233,30 +1375,8 @@ auto hook1=
     addHook(hooks_config, 100, [] {
       if(arg::curphase == 1) 
         conffile = "notknot.ini";         
-      if(arg::curphase == 2) {
-        margin = 4;
-        mapeditor::drawplayer = false;
-        stop_game();
-        firstland = specialland = laCanvas;
-        set_geometry(gNotKnot);
-        sightranges[geometry] = .5;
-        ray::max_cells = 600000;
-        smooth_scrolling = 1;
-        camera_speed = 10;
-        // panini_alpha = 1;
-        // fov = 150;
-        ray::exp_decay_poly = 30;
-        ray::fixed_map = true;
-        ray::max_iter_iso = 80;
-        showstartmenu = false;
-        #if CAP_VR
-        vrhr::hsm = vrhr::eHeadset::holonomy;
-        vrhr::eyes = vrhr::eEyes::truesim;
-        vrhr::cscr = vrhr::eCompScreen::eyes;
-        vrhr::absolute_unit_in_meters = 0.2;
-        #endif
-        // ray::reflect_val = 0.3;
-        }
+      if(arg::curphase == 2) 
+        nk_launch();
       });
 #endif
 
