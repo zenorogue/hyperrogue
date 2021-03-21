@@ -1030,6 +1030,9 @@ void enable_raycaster() {
       
       fmain +=
         "if(next >= minstep) {\n";
+        
+      string hnilw = to_glsl(nilv::nilwidth / 2);
+      string hnilw2 = to_glsl(nilv::nilwidth * nilv::nilwidth / 2);
       
       if(reg) fmain += "if(which != -1) {\n";
       else if(asonov) fmain +=
@@ -1039,7 +1042,7 @@ void enable_raycaster() {
       else if(sol) fmain +=
           "if(abs(nposition.x) > uBinaryWidth || abs(nposition.y) > uBinaryWidth || abs(nposition.z) > log(2.)/2.) {\n";
       else fmain +=
-          "if(abs(nposition.x) > .5 || abs(nposition.y) > .5 || abs(rz) > .5) {\n";
+          "if(abs(nposition.x) > "+hnilw+" || abs(nposition.y) > "+hnilw+" || abs(rz) > "+hnilw2+") {\n";
       
       fmain +=
             "next = dist / 2.; continue;\n"
@@ -1089,12 +1092,12 @@ void enable_raycaster() {
           "if(nposition.z <-log(2.)/2.) which = nposition.y > 0. ? 7 : 6;\n";
         }
       else if(nil) fmain +=
-          "if(nposition.x > .5) which = 3;\n"
-          "if(nposition.x <-.5) which = 0;\n"
-          "if(nposition.y > .5) which = 4;\n"
-          "if(nposition.y <-.5) which = 1;\n"
-          "if(rz > .5) which = 5;\n"
-          "if(rz <-.5) which = 2;\n";
+          "if(nposition.x > "+hnilw+") which = 3;\n"
+          "if(nposition.x <-"+hnilw+") which = 0;\n"
+          "if(nposition.y > "+hnilw+") which = 4;\n"
+          "if(nposition.y <-"+hnilw+") which = 1;\n"
+          "if(rz > "+hnilw2+") which = 5;\n"
+          "if(rz <-"+hnilw2+") which = 2;\n";
       
       fmain += 
           "next = maxstep;\n"
