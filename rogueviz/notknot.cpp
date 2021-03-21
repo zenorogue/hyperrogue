@@ -1200,6 +1200,13 @@ auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
 
   + addHook(hooks_o_key, 80, o_key)
   + addHook(hooks_frame, 100, check_cycle)
+  + addHook(hooks_cgi_string, 100, [] (string& s) {
+    if(geometry == gNotKnot) {
+      s += " base: ";
+      dynamicval<eGeometry> b(geometry, base);
+      s += cgi_string();
+      }
+    })
   + addHook(hooks_configfile, 100, [] {
     param_i(loop, "nk_loop")
     ->editable(1, 5, 1, "notknot order", "How many times do we need to go around the knot to get back.", 'o')
