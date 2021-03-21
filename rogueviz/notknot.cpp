@@ -1101,10 +1101,12 @@ void o_key(o_funcs& v) {
   if(geometry == gNotKnot) v.push_back(named_dialog("notknot", show));
   }
 
+bool do_check_cycle;
 cell *startcell, *current;
 vector<int> dirs;
 
 void check_cycle() {
+  if(!do_check_cycle) return;
   if(!current) {
     auto s = currentmap->allcells()[0];
     println(hlog, "starting the cycle, ", cwt.at == s);
@@ -1117,6 +1119,13 @@ void check_cycle() {
         current = cwt.at;
         startcell->item = itGold;
         println(hlog, "dirs = ", dirs, " finished = ", startcell == current);
+        string dirstr;
+        for(int d: dirs)
+          if(d < 10)
+            dirstr += char('0' + d);
+          else
+            dirstr += char('a' + d-10);
+        addMessage("this loop can be identified with identity using: -nk-unloop 1 " + dirstr);
         }
     }
   }
@@ -1169,6 +1178,9 @@ auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
     else if(argis("-nk-genknot")) {
       start_game();
       gen_knot();
+      }
+    else if(argis("-nk-findloop")) {
+      do_check_cycle = true;
       }
     else if(argis("-nk-unloop")) {
       shift();
