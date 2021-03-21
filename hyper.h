@@ -105,6 +105,8 @@ struct hr_wrong_dir: hr_exception { };
 
 struct hr_wrong_geometry: hr_exception { };
 
+struct hr_exception_str: std::exception { string s; hr_exception_str(const string& s) : s(s) {} const char* what() { return s.c_str(); }};
+
 // genus (in grammar)
 #define GEN_M 0
 #define GEN_F 1
