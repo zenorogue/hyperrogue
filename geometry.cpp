@@ -1059,6 +1059,8 @@ EX string cgi_string() {
   if(nil) V("NIL", its(S7));
   
   if(bt::in()) V("BT", fts(vid.binary_width));
+
+  if(nil) V("NILW", fts(nilv::nilwidth));
   
   if(GDIM == 2) { 
     V("CAMERA", fts(vid.camera));
