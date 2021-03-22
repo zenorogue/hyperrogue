@@ -503,12 +503,12 @@ EX void generate_track() {
     }
   else find_track(s, 0, length);    
     }
-  catch(hr_track_failure&) {
+  catch(const hr_track_failure&) {
     race_try++;
     gamegen_failure = true;
     return;
     }
-  catch(hr_shortest_path_exception&) {
+  catch(const hr_shortest_path_exception&) {
     addMessage("error: could not build path");
     gamegen_failure = true;
     racing::on = false;

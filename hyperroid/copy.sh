@@ -12,7 +12,7 @@ mkdir -p app/src/main/res/raw/
 if [ ! -f ../autohdr.h ]; then
     echo "generating autohdr.h..."
     LAST_PWD=$(pwd); cd ..
-    make -f Makefile.simple autohdr.h
+    make autohdr.h
     cd $LAST_PWD
 fi
 

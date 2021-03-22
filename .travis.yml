@@ -4,23 +4,6 @@ services:
   - docker
 matrix:
   include:
-  - os: linux                           # Linux GCC, autotools
-    compiler: gcc
-    env: >-
-      TRAVIS_OS_NAME=linux
-      TRAVIS_COMPILER_NAME=gcc
-      TRAVIS_BUILD_SYSTEM=autotools
-      HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
-  - os: osx                             # OSX, autotools
-    osx_image: xcode12.2
-    compiler: clang
-    env: >-
-      TRAVIS_OS_NAME=osx
-      TRAVIS_COMPILER_NAME=clang
-      TRAVIS_BUILD_SYSTEM=autotools
-      HYPERROGUE_USE_GLEW=1
-      HYPERROGUE_USE_PNG=1
   - os: linux                           # Linux GCC, make
     compiler: gcc
     env: >-
@@ -169,35 +152,20 @@ before_install:
       exit 'Unsupported OS'
     fi
   fi
-- |-
-  # Install autotools if asked for
-  if [[ "$TRAVIS_USE_AUTOTOOLS" == "1" ]]; then
-    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      echo 'autotools is installed by default'
-    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      brew install automake
-    else
-      exit 'Unsupported OS'
-    fi
-  fi
 
 script:
 - |-
-  make -f Makefile.simple clean
+  make clean
   if [[ "$(git status --porcelain)" ]]; then
     git status
     exit 'A build artifact was committed; git rm it and try again'
   fi
 - |-
   # Build hyperrogue.
-  if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then
-    autoreconf -vi
-    ./configure CXXFLAGS="-W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-maybe-uninitialized -Wno-unknown-warning-option"
+  if [[ "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
     make
-  elif [[ "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
-    make -f Makefile.simple
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "mymake" ]]; then
-    make -f Makefile.simple mymake
+    make mymake
     if [[ "$HYPERROGUE_USE_ROGUEVIZ" == "1" ]]; then
       ./mymake -rv
     else
@@ -205,7 +173,7 @@ script:
     fi
     mv hyper hyperrogue
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "emscripten" ]]; then
-    docker run --rm -v $(pwd):/src trzeci/emscripten make -f Makefile.simple emscripten
+    docker run --rm -v $(pwd):/src trzeci/emscripten make emscripten
   else
     exit 'Unsupported build system'
   fi
@@ -217,18 +185,8 @@ script:
     ./hyperrogue --help
   fi
 - |-
-  if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then
-    make clean
-  else
-    make -f Makefile.simple clean
-  fi
+  make clean
   if [[ "$(git status --porcelain)" ]]; then
     git status
     exit 'make clean did not return the repository to its pre-build state'
   fi
-- |-
-  # Test "make dist". ("make distcheck" is expected to fail.)
-  if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then make dist; fi
-- |-
-  # Test "sudo make install".
-  if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then sudo make install; fi
