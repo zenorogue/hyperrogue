@@ -1207,7 +1207,7 @@ EX namespace gp {
           return cw.at;
           }
         }
-      throw "unimplemented";
+      throw hr_exception("unimplemented");
       }
 
     transmatrix adj(cell *c, int d) override {

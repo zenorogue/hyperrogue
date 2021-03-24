@@ -53,7 +53,7 @@ coord coord::addmove(int d) {
     case 9: return down().shift(1, 2);
     case 10: return shift(-1, 0);
     case 11: return shift(0, -1);
-    default: throw "error";
+    default: throw hr_exception("error");
     }
   }
 

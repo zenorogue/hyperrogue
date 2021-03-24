@@ -1197,7 +1197,7 @@ EX namespace reg3 {
         res = at;
         }
       
-      if(!res) throw "res missing";
+      if(!res) throw hr_exception("res missing");
       
       if(res->move(d2)) println(hlog, "res conflict");
 

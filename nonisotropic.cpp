@@ -373,7 +373,7 @@ EX namespace sn {
           return NULL;
         }
 
-        default: throw "not solnihv";
+        default: throw hr_exception("not solnihv");
         }
       }
 
@@ -452,7 +452,7 @@ EX namespace sn {
         case gSol: up = 2; down = 6; break;
         case gSolN: up = 4; down = 7; break;
         case gNIH: up = 4; down = 4; break;
-        default: throw "not nihsolv";
+        default: throw hr_exception("not nihsolv");
         }
       
       while(h1->distance > h2->distance) front = front * adj(h1, down), h1 = h1->cmove(down);
@@ -526,7 +526,7 @@ EX namespace sn {
            0
            );
       default:
-        throw "christoffel not in solnihv";
+        throw hr_exception("christoffel not in solnihv");
       }
     }
   
@@ -690,7 +690,7 @@ EX namespace sn {
       case gSol: return solt;
       case gNIH: return niht;
       case gSolN: return sont;
-      default: throw "not solnih";
+      default: throw hr_exception("not solnih");
       }
     }
 

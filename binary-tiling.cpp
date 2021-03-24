@@ -526,7 +526,7 @@ EX namespace bt {
         case bd_up_right:
           return xpush(-log(2)) * parabolic(1);
         default:
-          throw "unknown direction";
+          throw hr_exception("unknown direction");
         }
       else if(use_direct_for(dir))
         return cgi.direct_tmatrix[dir];
