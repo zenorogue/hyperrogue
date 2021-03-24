@@ -826,8 +826,6 @@ EX void generate_brm(cell *c1) {
   
   vector<int> cts;
   for(auto& p: res) cts.push_back(isize(p.second));
-  
-  println(hlog, "for ", c1, " : ", isize(cts));
   }
 
 /** this function exhaustively finds the best transmatrix from (c1,h1) to (c2,h2) */
