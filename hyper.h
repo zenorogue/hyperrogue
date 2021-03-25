@@ -752,8 +752,6 @@ enum orbAction { roMouse, roKeyboard, roCheck, roMouseForce, roMultiCheck, roMul
 #endif
 #define pmodel (pconf.model)
 
-color_t darkena(color_t c, int lev, int a);
-
 static const int DISTANCE_UNKNOWN = 127;
 
 template<class T, class U> int addHook(hookset<T>& m, int prio, U&& hook) {
@@ -775,13 +773,6 @@ template<class T, class V, class... U> V callhandlers(V zero, const hookset<T>& 
 string XLAT(string);
 
 #define GLERR(call) glError(call, __FILE__, __LINE__)
-
-struct colortable: vector<color_t> {
-  color_t& operator [] (int i) { i %= size(); if(i<0) i += size(); return ((vector<color_t>&)(*this)) [i]; }
-  const color_t& operator [] (int i) const { i %= size(); if(i<0) i += size(); return ((vector<color_t>&)(*this)) [i]; }
-  colortable(std::initializer_list<color_t> v) : vector(v) {}
-  colortable() : vector({0}) {}
-  };
 
 #define SHMUPTITLE "shoot'em up mode"
 
@@ -899,8 +890,6 @@ template<class T> ld binsearch(ld dmin, ld dmax, const T& f) {
     }
   return dmin;
   } 
-
-static const color_t NOCOLOR = 0;
 
   static const int max_vec = (1<<14);
   extern bool needConfirmationEvenIfSaved();
