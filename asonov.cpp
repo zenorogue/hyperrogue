@@ -19,7 +19,7 @@ int zgmod(int a, int b);
 
 EX namespace asonov {
 
-EX bool in() { return geometry == gArnoldCat; }
+EX bool in() { return cgflags & qCAT; }
 
 EX hyperpoint tx, ty, tz;
 EX transmatrix straighten;

@@ -3668,7 +3668,7 @@ EX int get_darkval(cell *c, int d) {
   if(geometry == gHoroHex) return darkval_hh[d];
   if(geometry == gHoroRec) return darkval_hrec[d];
   if(kite::in()) return darkval_kite[d];
-  if(geometry == gArnoldCat) return darkval_arnold[d];
+  if(asonov::in()) return darkval_arnold[d];
   if(sol) return darkval_sol[d];
   if(nih) return darkval_nih[d];
   if(bt::in()) return darkval_hbt[d];

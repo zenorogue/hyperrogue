@@ -807,6 +807,8 @@ static const flagtype qPORTALSPACE     = Flag(26);
 
 static const flagtype qSTRETCHABLE     = Flag(27);
 
+static const flagtype qCAT             = Flag(28);
+
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
 static const int OINF = 100;
@@ -910,7 +912,7 @@ EX vector<geometryinfo> ginf = {
   {"{3,3,6}","none",    "{3,3,6} hyperbolic honeycomb",               "336",      4, 6, qIDEAL,    giHyperb3, {{7, 2}}, eVariation::pure},
   {"{3,4,4}","none",    "{3,4,4} hyperbolic honeycomb",               "344",      8, 4, qIDEAL,    giHyperb3, {{7, 2}}, eVariation::pure},
   {"{3,4,4}","Crystal", "4D crystal in H3",                           "Cryst3" ,  8, 4, qIDEAL | qANYQ | qCRYSTAL, giHyperb3, {{7, 3}}, eVariation::pure},
-  {"cat",    "cat",     "Arnold's cat mapping torus",                 "cat",     12, 3, qBINARY | qSOL | qsBQ | qOPTQ, giSolNIH, {{6, 4}}, eVariation::pure},
+  {"cat",    "cat",     "Arnold's cat mapping torus",                 "cat",     12, 3, qBINARY | qSOL | qsBQ | qOPTQ | qCAT, giSolNIH, {{6, 4}}, eVariation::pure},
   {"file",   "none",    "load from file",                             "file",     7, 3, 0,  giEuclid2, {{7, 5}}, eVariation::pure},
   {"{4,oo}", "none",    "{4,∞} (infinite squares)",                   "oox4",     4, OINF, qIDEAL,  giHyperb2, {{5, 5}}, eVariation::pure},
   {"{5,3,4}","Crystal", "6D crystal in H3",                           "Cryst6" , 12, 4, qANYQ | qCRYSTAL, giHyperb3, {{7, 3}}, eVariation::pure},
