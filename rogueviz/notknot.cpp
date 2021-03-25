@@ -410,7 +410,9 @@ struct hrmap_notknot : hrmap {
     unify.emplace_back(a, b);
     };
   
-  bool make_loop(ucover* u, int loopcount, const vector<int>& looplist) {
+  map<heptagon*, vector<vector<int> > > uloops;
+
+  bool collapse_loop(ucover* u, int loopcount, const vector<int>& looplist) {
     auto ux = u;
     for(int iter=0; iter<loopcount; iter++)
       for(int w: looplist) {
@@ -420,9 +422,34 @@ struct hrmap_notknot : hrmap {
     add_to_unify(u, ux);
     return true;
     };
+
+  bool verify_loop(ucover* u, int loopcount, const vector<int>& looplist) {
+    auto ux = u;
+    for(int iter=0; iter<loopcount; iter++)
+      for(int w: looplist) {
+        ux = gen_adj(ux, w);
+        if(ux->iswall()) return false;
+        }
+    return true;
+    }
     
-  set<heptagon*> analyzed;
-  
+  void record_loop(ucover* u, int loopcount, const vector<int>& looplist) {
+    vector<int> repeated;
+    for(int l=0; l<loopcount; l++)
+      for(auto v: looplist) repeated.push_back(v);
+    uloops[u->where].push_back(repeated);
+    };
+
+  void record_loop_if_nowall(ucover* u, int loopcount, const vector<int>& looplist) {
+    if(verify_loop(u, loopcount, looplist))
+      record_loop(u, loopcount, looplist);
+    }
+
+  void record_loop_verify(ucover* u, int loopcount, const vector<int>& looplist, const hr_exception& ex) {
+    if(!verify_loop(u, loopcount, looplist)) throw ex;
+    record_loop(u, loopcount, looplist);
+    }
+
   transmatrix adj(ucover *u, int k) {
     dynamicval<eGeometry> g(geometry, base);
     dynamicval<hrmap*> m(currentmap, euc);
@@ -447,15 +474,15 @@ struct hrmap_notknot : hrmap {
   void unify_homotopies(ucover *u) {
     /* unify homotopies */
     if(base == gNil) {
-      make_loop(u, 1, {0, 2, 3, 5});
-      make_loop(u, 1, {1, 2, 4, 5});
-      make_loop(u, 1, {0, 1, 3, 4, 2});
+      collapse_loop(u, 1, {0, 2, 3, 5});
+      collapse_loop(u, 1, {1, 2, 4, 5});
+      collapse_loop(u, 1, {0, 1, 3, 4, 2});
       return;
       }
     if(base == gCubeTiling) {
-      make_loop(u, 1, {0, 1, 3, 4});
-      make_loop(u, 1, {0, 2, 3, 5});
-      make_loop(u, 1, {1, 2, 4, 5});
+      collapse_loop(u, 1, {0, 1, 3, 4});
+      collapse_loop(u, 1, {0, 2, 3, 5});
+      collapse_loop(u, 1, {1, 2, 4, 5});
       return;
       }
     
@@ -492,16 +519,8 @@ struct hrmap_notknot : hrmap {
       }
     }
   
-  map<heptagon*, vector<vector<int> > > uloops;
-
   void unify_loops_general(ucover *u) {
     int t = u->where->type;
-    if(uloops.count(u->where)) {
-      for(auto& ul: uloops[u->where])
-        make_loop(u, loop, ul);
-      return;
-      }
-    uloops[u->where] = {};
     for(int i=0; i<t; i++) {
       auto u1 = gen_adj(u, i);
       if(u1->nowall()) continue;
@@ -540,8 +559,7 @@ struct hrmap_notknot : hrmap {
             println(hlog, "path = ", path);
             }
           
-          uloops[u->where].push_back(path);
-          make_loop(u, loop, path);
+          record_loop_verify(u, loop, path, hr_exception("wall in loops_general"));
           }
         else {
           camefrom[at->where] = ldir;
@@ -575,33 +593,22 @@ struct hrmap_notknot : hrmap {
     
     if(base_map == "" && base == gNil) {
       special = true;
-      make_loop(u, loop, {0, 0, 2, 2, 2, 3, 3, 5, 5, 5});
-      if(u->where->zebraval & 16)
-      for(int dir: {0,1,2}) {
-        auto ux = u;
-        for(int iter=0; iter<nilv::nilperiod[dir]; iter++) {
-          ux = gen_adj(ux, dir);
-          if(ux->state != 0) goto next_dir;
-          }
-        println(hlog, "succeeded in direction ", dir);
-        add_to_unify(u, ux);
-        next_dir: ;
+      record_loop_if_nowall(u, loop, {0, 0, 2, 2, 2, 3, 3, 5, 5, 5});
+
+      if(u->where->zebraval & 16) {
+        for(int dir: {0,1,2})
+          record_loop_verify(u, nilv::nilperiod[dir], {dir}, hr_exception("16 failed"));
         }
       }
 
     if(base_map == "" && base == gArnoldCat) {
-      if(u->where->zebraval & 16)
-      for(int dir: {0,4,5}) {
-        auto ux = u;
-        int steps = dir ? asonov::period_xy : asonov::period_z;
-        if(dir) steps *= 2;
-        for(int iter=0; iter<steps; iter++) {
-          ux = gen_adj(ux, dir);
-          if(ux->state != 0) goto next_dir_cat;
+
+      if(u->where->zebraval & 16) {
+        for(int dir: {0,4,5}) {
+          int steps = dir ? asonov::period_xy : asonov::period_z;
+          if(dir) steps *= 2;
+          record_loop_verify(u, steps, {dir}, hr_exception("16 failed"));
           }
-        println(hlog, "succeeded in direction ", dir);
-        add_to_unify(u, ux);
-        next_dir_cat: ;
         }
 
       if(u->where->zebraval & 128) {
@@ -633,15 +640,14 @@ struct hrmap_notknot : hrmap {
           add_shift(2-p, 0, -1);
           myloop.push_back(0);
   
-          if(!make_loop(u, 1, myloop))
-            throw hr_exception("fail");
+          record_loop_verify(u, 1, myloop, hr_exception("128 failed"));
           }
         }
       }
     
     if(base == gCubeTiling) {
       special = true;
-      make_loop(u, loop, {0, 0, 1, 1, 3, 3, 4, 4});
+      record_loop_if_nowall(u, loop, {0, 0, 1, 1, 3, 3, 4, 4});
       }
     
     if(base == gCell120) {
@@ -656,10 +662,13 @@ struct hrmap_notknot : hrmap {
         auto ucur = u;
         auto ulast = (ucover*) nullptr;
         
-        for(int step=0; step<5*loop; step++) {
+        vector<int> myloop;
+        
+        for(int step=0; step<5; step++) {
           for(int i=0; i<t; i++) {
             auto ucand = ucur->ptr[i];
             if(ucand && isNeighbor(ucand->where->c7, u1->where->c7) && isNeighbor(ucand->where->c7, u2->where->c7) && ucand != ulast) {
+              myloop.push_back(i);
               ulast = ucur, ucur = ucand; 
               goto next_step;
               }
@@ -668,7 +677,7 @@ struct hrmap_notknot : hrmap {
           next_step: ;
           }
         
-        add_to_unify(u, ucur);
+        record_loop(u, loop, myloop);
         fail: ;
         }
       }
@@ -677,36 +686,9 @@ struct hrmap_notknot : hrmap {
       unify_loops_general(u);
     
     if(u->where == all[0]->where)
-      for(auto& lo: to_unloop)        
-        if(!make_loop(u, 1, lo))
-          throw hr_exception("given loop goes through a wall");
-    
-    if(loop_any && u->where == all[0]->where) {
-      auto us = all[0];
-      for(int it=1; it<loop_any; it++) {
-        vector<int> pathback;
-        auto uc = u;
-        while(uc->parentdir != -1) {
-          pathback.push_back(uc->parentdir);
-          us = gen_adj(us, uc->parentdir);
-          uc = uc->ptr[(int) uc->parentdir];
-          }
-        if(it == 1) println(hlog, "pathback = ", pathback);
+      for(auto& lo: to_unloop) {
+        record_loop_verify(u, 1, lo, hr_exception("loop-to-unloop goes through a wall"));
         }
-      add_to_unify(us, u);
-      }
-    
-    if(loop_any < 2 && u->where == all[0]->where) {
-      vector<int> pathback;
-      auto us = all[0];
-      auto uc = u;
-      while(uc->parentdir != -1) {
-        pathback.push_back(uc->parentdir);
-        us = gen_adj(us, uc->parentdir);
-        uc = uc->ptr[(int) uc->parentdir];
-        }
-      println(hlog, "pathback = ", pathback);
-      }
     }
   
   map<heptagon*, int> indices;
@@ -792,14 +774,40 @@ struct hrmap_notknot : hrmap {
       if(i > terminate_at) { u->state |= 4; continue; }
       
       for(int k=0; k<u->where->type; k++) gen_adj(u, k);
-      
-      if(!analyzed.count(u->where)) {
-        analyzed.insert(u->where);
-        unify_homotopies(u);
-        unify_loops(u);
-        }
+
       unify_homotopies(u);
-      unify_loops(u);
+
+      if(!uloops.count(u->where)) {
+        uloops[u->where] = {};
+        unify_loops(u);
+        println(hlog, "loops recorded for ", u->where, ": ", isize(uloops[u->where]));
+        }
+      
+      for(auto& myloop: uloops[u->where]) 
+        if(!collapse_loop(u, 1, myloop))
+          throw hr_exception("invalid loop recorded");
+      
+      if(u->where == all[0]->where) {
+        vector<int> pathback;
+        auto uc = u;
+        while(uc->parentdir != -1) {
+          pathback.push_back(uc->parentdir);
+          uc = uc->ptr[(int) uc->parentdir];
+          }
+        println(hlog, "pathback = ", pathback);
+
+        if(loop_any) {
+          auto us = all[0];
+          for(int it=1; it<loop_any; it++) {
+            uc = u;
+            while(uc->parentdir != -1) {
+              us = gen_adj(us, uc->parentdir);
+              uc = uc->ptr[(int) uc->parentdir];
+              }
+            }      
+          add_to_unify(us, u);
+          }
+        }            
       }
     
     /* make the walls single-colored */
