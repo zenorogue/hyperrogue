@@ -1248,6 +1248,31 @@ void show() {
       ((hrmap_notknot*)currentmap)->add_fog();
       });
     
+    dialog::addItem("a portal in Solv geometry", 'e');
+    dialog::add_action([] {
+      stop_game();
+      set_geometry(gArnoldCat);
+      base_map = "";
+      base = geometry;
+      to_unloop.clear();
+      secondary_percentage = 0;
+      vid.binary_width = .25;
+      margin = 3;
+      asonov::period_xy = 8;
+      asonov::period_z = 3;
+      loop = 6;
+      asonov::set_flags();
+      create_notknot();
+      show_selfhiding = false;
+      set_geometry(gNotKnot);
+      start_game();
+      ray::reset_raycaster();
+      ray::exp_decay_poly = 10;
+      camera_speed = 1;
+      pmodel = mdGeodesic;
+      ((hrmap_notknot*)currentmap)->add_fog();
+      });
+      
     dialog::display();      
     });
   
@@ -1259,6 +1284,7 @@ void show() {
   if(show_selfhiding) add_edit(self_hiding);
   
   if(nil) menuitem_nilwidth('w');
+  if(sol) menuitem_binary_width('w');
   
   if(base != gCubeTiling) {
     dialog::addBoolItem("fog enabled", ray::volumetric::on, 'f');
