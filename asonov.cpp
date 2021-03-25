@@ -104,6 +104,28 @@ EX void prepare() {
   straighten = inverse(build_matrix(asonov::tx/2, asonov::ty/2, asonov::tz/2, C0));
   }
 
+EX void prepare_walls() {
+
+  cgi.cellshape.clear();
+  
+  auto pt = [&] (int x, int y, int z) { return asonov::tx*x/2 + asonov::ty*y/2 + asonov::tz*z/2 + C0; };
+  
+  cgi.cellshape.push_back({pt(-1,-1,+1), pt(00,+1,+1), pt(+1,+1,+1)});
+  cgi.cellshape.push_back({pt(00,-1,+1), pt(+1,+1,+1), pt(+1,-1,+1)});
+  cgi.cellshape.push_back({pt(-1,+1,+1), pt(00,+1,+1), pt(-1,-1,+1)});
+  cgi.cellshape.push_back({pt(-1,-1,+1), pt(+1,+1,+1), pt(00,-1,+1)});
+  cgi.cellshape.push_back({pt(+1,-1,-1), pt(+1,00,-1), pt(+1,+1,-1), pt(+1,+1,+1), pt(+1,-1,+1)});
+  cgi.cellshape.push_back({pt(-1,+1,-1), pt(-1,+1,+1), pt(00,+1,+1), pt(+1,+1,+1), pt(+1,+1,-1)});
+  cgi.cellshape.push_back({pt(-1,-1,-1), pt(-1,00,-1), pt(+1,-1,-1)});
+  cgi.cellshape.push_back({pt(-1,00,-1), pt(-1,+1,-1), pt(+1,-1,-1)});
+  cgi.cellshape.push_back({pt(-1,+1,-1), pt(+1,00,-1), pt(+1,-1,-1)});
+  cgi.cellshape.push_back({pt(-1,+1,-1), pt(+1,+1,-1), pt(+1,00,-1)});
+  cgi.cellshape.push_back({pt(-1,+1,-1), pt(-1,00,-1), pt(-1,-1,-1), pt(-1,-1,+1), pt(-1,+1,+1)});
+  cgi.cellshape.push_back({pt(+1,-1,-1), pt(+1,-1,+1), pt(00,-1,+1), pt(-1,-1,+1), pt(-1,-1,-1)});
+  
+  reg3::make_vertices_only();
+  }
+
 transmatrix coord_to_matrix(coord c, coord zero) {
   transmatrix T = Id;
 
