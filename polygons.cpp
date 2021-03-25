@@ -999,15 +999,8 @@ void geometry_information::create_wall3d() {
     }
 
   if(euc::in() || reg3::in()) {
-    int facesize = isize(cgi.cellshape) / S7;
-    int next = 0;
-    for(int w=0; w<S7; w++) {
-      vector<hyperpoint> vertices;
-      if(S7 == 14) facesize = (w%7 < 3 ? 4 : 6);
-      for(int a=0; a<facesize; a++)
-        vertices.push_back(cgi.cellshape[next++]);
-      make_wall(w, vertices);
-      }
+    for(int w=0; w<isize(cgi.cellshape); w++)
+      make_wall(w, cgi.cellshape[w]);
     }
 
   if(geometry == gSol) {

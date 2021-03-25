@@ -125,7 +125,7 @@ struct geometry_information {
 
   int loop, face, schmid;
 
-  vector<hyperpoint> cellshape;
+  vector<vector<hyperpoint>> cellshape;
   vector<hyperpoint> vertices_only;
   
   transmatrix spins[32], adjmoves[32];

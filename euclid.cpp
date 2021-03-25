@@ -1304,6 +1304,9 @@ EX void generate() {
   cgi.loop = 4;
   cgi.schmid = 3;
 
+  cs.clear();
+  cs.resize(S7);
+
   if(S7 == 6) {
     cgi.adjcheck = 1;
     cgi.face = 4;
@@ -1316,7 +1319,7 @@ EX void generate() {
         int x = w%3;
         int y = (x+2)%3;
         int z = (y+2)%3;
-        cs.push_back(hpxy3(t[x]/2., t[y]/2., t[z]/2.));
+        cs[w].push_back(hpxy3(t[x]/2., t[y]/2., t[z]/2.));
         }
       }
     }
@@ -1331,10 +1334,10 @@ EX void generate() {
       int third = 3 - valid[1] - valid[0];
       hyperpoint v0 = cpush0(valid[0], co[valid[0]] > 0 ? 1 : -1);
       hyperpoint v1 = cpush0(valid[1], co[valid[1]] > 0 ? 1 : -1);
-      cs.push_back(v0);
-      cs.push_back(v0/2 + v1/2 + cpush0(third, .5) - C0);
-      cs.push_back(v1);
-      cs.push_back(v0/2 + v1/2 + cpush0(third, -.5) - C0);
+      cs[w].push_back(v0);
+      cs[w].push_back(v0/2 + v1/2 + cpush0(third, .5) - C0);
+      cs[w].push_back(v1);
+      cs[w].push_back(v0/2 + v1/2 + cpush0(third, -.5) - C0);
       }
     }
 
@@ -1345,10 +1348,10 @@ EX void generate() {
     for(int w=0; w<14; w++) {
       if(w%7 < 3) {
         int z = w>=7?-1:1;
-        cs.push_back(cpush0(w%7, z) + cpush0((w%7+1)%3, 1/2.) - C0);
-        cs.push_back(cpush0(w%7, z) + cpush0((w%7+2)%3, 1/2.) - C0);
-        cs.push_back(cpush0(w%7, z) + cpush0((w%7+1)%3,-1/2.) - C0);
-        cs.push_back(cpush0(w%7, z) + cpush0((w%7+2)%3,-1/2.) - C0);
+        cs[w].push_back(cpush0(w%7, z) + cpush0((w%7+1)%3, 1/2.) - C0);
+        cs[w].push_back(cpush0(w%7, z) + cpush0((w%7+2)%3, 1/2.) - C0);
+        cs[w].push_back(cpush0(w%7, z) + cpush0((w%7+1)%3,-1/2.) - C0);
+        cs[w].push_back(cpush0(w%7, z) + cpush0((w%7+2)%3,-1/2.) - C0);
         }
       else {
         auto t = v[w];
@@ -1356,7 +1359,7 @@ EX void generate() {
         for(hyperpoint h: {
           hpxy3(x, y/2, 0), hpxy3(x/2, y, 0), hpxy3(0, y, z/2),
           hpxy3(0, y/2, z), hpxy3(x/2, 0, z), hpxy3(x, 0, z/2)
-          }) cs.push_back(h);
+          }) cs[w].push_back(h);
         }
       }
     }

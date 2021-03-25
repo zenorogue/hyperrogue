@@ -44,8 +44,9 @@ EX namespace reg3 {
         hyperpoint nei;
       
         for(int i=0; i<isize(cgi.cellshape); i++)
-          if(sqhypot_d(WDIM, cgi.cellshape[i]-v) < 1e-6)
-            nei = cgi.cellshape[i % cgi.face ? i-1 : i+1]; 
+        for(int j=0; j<isize(cgi.cellshape[i]); j++)
+          if(sqhypot_d(WDIM, cgi.cellshape[i][j]-v) < 1e-6)
+            nei = cgi.cellshape[i][j?j-1:j+1]; 
             
         transmatrix T = spintox(v);
         hyperpoint a = T * v;
@@ -90,7 +91,8 @@ EX namespace reg3 {
   EX void make_vertices_only() {
     auto& vertices_only = cgi.vertices_only;
     vertices_only.clear();
-    for(hyperpoint h: cgi.cellshape) {
+    for(auto& v: cgi.cellshape)
+    for(hyperpoint h: v) {
       bool found = false;
       for(hyperpoint h2: vertices_only) if(hdist(h, h2) < 1e-6) found = true;
       if(!found) vertices_only.push_back(h);
@@ -226,9 +228,11 @@ EX namespace reg3 {
       }
     
     cellshape.clear();
-    for(int a=0; a<S7; a++)
-    for(int b=0; b<face; b++)
-      cellshape.push_back(spins[a] * cspin(1, 2, 2*M_PI*b/face) * v2);
+    cellshape.resize(S7);
+    for(int a=0; a<S7; a++) {
+      for(int b=0; b<face; b++)
+        cellshape[a].push_back(spins[a] * cspin(1, 2, 2*M_PI*b/face) * v2);
+      }
     
     cgi.adjmoves[0] = cpush(0, between_centers) * cspin(0, 2, M_PI);
     for(int i=1; i<S7; i++) cgi.adjmoves[i] = spins[i] * cgi.adjmoves[0];
@@ -254,7 +258,7 @@ EX namespace reg3 {
       transmatrix T = cspin(0, 2, 90 * degree);
       transmatrix iT = inverse(T);
       for(auto& v: cgi.adjmoves) v = T * v * iT;
-      for(auto& v: cellshape) v = T * v;
+      for(auto& vv: cellshape) for(auto& v: vv) v = T * v;
       }
 
     make_vertices_only();
@@ -1579,7 +1583,7 @@ EX void construct_relations() {
   formulas.push_back("");
 
   all.push_back(Id);
-  hyperpoint v = cgi.cellshape[0];
+  hyperpoint v = cgi.cellshape[0][0];
   auto add = [&] (transmatrix T) {
     for(int i=0; i<isize(all); i++) if(eqmatrix(all[i], T)) return i;
     int S = isize(all);
@@ -1592,10 +1596,12 @@ EX void construct_relations() {
   println(hlog, "cellshape = ", isize(cgi.cellshape));
   bool ok = true;
   int last_i = -1;
-  for(hyperpoint h: cgi.cellshape) {
+  for(auto& v: cgi.cellshape) for(hyperpoint h: v) {
     int i = 0, j = 0;
-    for(hyperpoint u: cgi.cellshape) if(hdist(h, cgi.full_X*u) < 5e-2) i++;
-    for(hyperpoint u: cgi.cellshape) if(hdist(h, cgi.full_R*u) < 5e-2) j++;
+    for(auto& uv: cgi.cellshape) for(hyperpoint u: uv) {
+      if(hdist(h, cgi.full_X*u) < 5e-2) i++;
+      if(hdist(h, cgi.full_R*u) < 5e-2) j++;
+      }
     if(last_i == -1) last_i = i;
     if(i != j || i != last_i) ok = false;
     }
@@ -1606,7 +1612,7 @@ EX void construct_relations() {
   
   auto work = [&] (transmatrix T, int p, char c) {
     if(hdist0(tC0(T)) > 5) return;
-    for(hyperpoint h: cgi.cellshape) if(hdist(T * h, v) < 1e-4) goto ok;
+    for(auto& hv: cgi.cellshape) for(hyperpoint h: hv) if(hdist(T * h, v) < 1e-4) goto ok;
     return;
     ok:
     int id = add(T);
