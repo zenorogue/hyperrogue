@@ -1098,10 +1098,32 @@ struct hrmap_notknot : hrmap {
         }
       };
     
+    int qty = 0;
     for(int i=0; i<isize(all); i++) 
       if(all[i]->result)
-      if(all[i]->where->c7->wall == waFloorA)
-        color(all[i]->result->c7, cols[(id++) % isize(cols)], 0);
+      if(all[i]->where->c7->wall == waFloorA) 
+        qty++;
+    
+    for(int i=0; i<isize(all); i++) 
+      if(all[i]->result)
+      if(all[i]->where->c7->wall == waFloorA) {
+        cell *c = all[i]->result->c7;
+        if(dist.count(c)) continue;
+        int idd = (id++) % isize(cols);
+        color_t col = rainbow_color(1, idd * 1. / qty);
+        col <<= 8; col |= 1;
+        
+        color(c, cols[idd], 0);
+        /*for(int i=0; i<8; i++)
+          c = c->move(4);
+        color(c, cols[idd], 0);
+        for(int i=0; i<8; i++)
+          c = c->move(5);
+        color(c, cols[idd], 0);
+        for(int i=0; i<8; i++)
+          c = c->move(4);
+        color(c, cols[idd], 0); */
+        }
     
     for(int i=0; i<isize(lst); i++) {
       auto c = lst[i];
