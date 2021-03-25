@@ -329,6 +329,40 @@ struct hrmap_notknot : hrmap {
     
     return ac[0]->master;
     }
+
+  heptagon *create_solv_knot() {
+    dynamicval<eGeometry> g(geometry, base);
+    dynamicval<hrmap*> m(currentmap, euc);
+    auto ac = currentmap->allcells();
+    for(cell *c: ac) c->master->zebraval = 0;
+
+    //ac[1]->master->zebraval = 1;
+    
+    auto hept = [&] (int x, int y, int z) {      
+      asonov::coord co(x, y, z);
+      return asonov::get_at(co);
+      };
+    
+    auto h = hept(0, 0, 0);
+    
+    h->zebraval |= 16;
+    
+    int top = asonov::period_xy;
+    top += 2 - margin;
+      
+    for(int x=1; x<top-1; x++)
+    for(int y=1; y<top-1; y++)
+      if(x==1 || y==1 || x==top-2 || y==top-2)
+        hept(x, y, 0)->zebraval |= 9;
+        
+    hept(0, 0, (asonov::period_z+1)/2)->c7->wall = waFloorA;
+    
+    hept(2, 2, 0)->zebraval |= 128;
+    
+    // if(top > 4) hept(3, 3, 1)->zebraval |= 9;
+    
+    return ac[0]->master;
+    }
   
   heptagon *interpret_basemap() {
     dynamicval<eGeometry> g(geometry, base);
@@ -390,6 +424,8 @@ struct hrmap_notknot : hrmap {
       return create_trifoil_knot();
     else if(base == gNil)
       return create_nil_knot();
+    else if(base == gArnoldCat)
+      return create_solv_knot();
     throw hr_exception();
     }
   
@@ -600,6 +636,56 @@ struct hrmap_notknot : hrmap {
         next_dir: ;
         }
       }
+
+    if(base_map == "" && base == gArnoldCat) {
+      if(u->where->zebraval & 16)
+      for(int dir: {0,4,5}) {
+        auto ux = u;
+        int steps = dir ? asonov::period_xy : asonov::period_z;
+        if(dir) steps *= 2;
+        for(int iter=0; iter<steps; iter++) {
+          ux = gen_adj(ux, dir);
+          if(ux->state != 0) goto next_dir_cat;
+          }
+        println(hlog, "succeeded in direction ", dir);
+        add_to_unify(u, ux);
+        next_dir_cat: ;
+        }
+
+      if(u->where->zebraval & 128) {
+        for(int a=0; a<2; a++) {
+          vector<int> myloop;
+          myloop.push_back(0);
+          
+          auto add_shift = [&] (int x, int y, int lev) {
+            if(a) swap(x, y);
+            while(lev>0) lev--, tie(x,y) = make_pair(x*2-y, y-x);
+            while(lev<0) lev++, tie(x,y) = make_pair(x+y, x+2*y);
+            while(x>0) x--, myloop.push_back(4);
+            while(y>0) y--, myloop.push_back(5);
+            while(x<0) x++, myloop.push_back(10);
+            while(y<0) y++, myloop.push_back(11);
+            };
+          
+          auto p = asonov::period_xy;
+
+          add_shift(p-2, 0, 1);
+          myloop.push_back(6);
+          myloop.push_back(6);
+          add_shift(2, 0, -1);
+          myloop.push_back(0);
+          myloop.push_back(0);
+          add_shift(-2, 0, 1);
+          myloop.push_back(6);
+          myloop.push_back(6);
+          add_shift(2-p, 0, -1);
+          myloop.push_back(0);
+  
+          if(!make_loop(u, 1, myloop))
+            throw hr_exception("fail");
+          }
+        }
+      }
     
     if(base == gCubeTiling) {
       special = true;
@@ -787,7 +873,9 @@ struct hrmap_notknot : hrmap {
           for(int l1=0; l1<u->where->type; l1++) {
             auto ukl = gen_adj(uk, l1);
             auto ulk = gen_adj(ul, k1);
-            if(ukl->where == ulk->where && ukl->state != 0)
+            if(ukl->where == ulk->where && ukl->state != 0 && 
+              eqmatrix(adj(u, k) * adj(uk, l1), adj(u, l) * adj(ul, k1))
+              )
               funion(ukl, ulk);
             if(base == gCell600 && isNeighbor(ukl->where->c7, ulk->where->c7) && ukl->state != 0 && ulk->state != 0)
               funion(ukl, ulk);
@@ -803,6 +891,7 @@ struct hrmap_notknot : hrmap {
         }
 
       /* flat areas */
+      if(!asonov::in())
       for(int k=0; k<u->where->type; k++)
       for(int l=0; l<u->where->type; l++) {
         auto uk = gen_adj(u, k);
