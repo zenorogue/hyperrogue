@@ -23,35 +23,6 @@ namespace qtm {
 
 int mode;
 
-color_t rcolor() {
-  color_t res;
-  part(res, 0) = hrand(0x80);
-  part(res, 1) = hrand(256);
-  part(res, 2) = hrand(0x80) + 128;
-  swap(part(res, 1), part(res, rand() % 2));
-  swap(part(res, 2), part(res, rand() % 3));
-  return res;
-  }
-
-color_t rainbow_color(ld sat, ld hue) {
-  hue = frac(hue);
-  
-  if(hue < 0) hue++;
-  
-  hue *= 6;
-  
-  color_t res = 0;
-  
-  if(hue<1) res = gradient(0xFF0000, 0xFFFF00, 0, hue, 1);
-  else if(hue<2) res = gradient(0x00FF00, 0xFFFF00, 2, hue, 1);
-  else if(hue<3) res = gradient(0x00FF00, 0x00FFFF, 2, hue, 3);
-  else if(hue<4) res = gradient(0x0000FF, 0x00FFFF, 4, hue, 3);
-  else if(hue<5) res = gradient(0x0000FF, 0xFF00FF, 4, hue, 5);
-  else if(hue<6) res = gradient(0xFF0000, 0xFF00FF, 6, hue, 5);
-  
-  return gradient(0xFFFFFF, res, 0, sat, 1);
-  }
-
 color_t rainbow_color(hyperpoint h) {
   ld sat = 1 - 1 / h[2];
   ld hue = atan2(h[0], h[1]) / (2 * M_PI);
