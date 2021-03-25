@@ -743,6 +743,18 @@ struct hrmap_notknot : hrmap {
         }
       add_to_unify(us, u);
       }
+    
+    if(loop_any < 2 && u->where == all[0]->where) {
+      vector<int> pathback;
+      auto us = all[0];
+      auto uc = u;
+      while(uc->parentdir != -1) {
+        pathback.push_back(uc->parentdir);
+        us = gen_adj(us, uc->parentdir);
+        uc = uc->ptr[(int) uc->parentdir];
+        }
+      println(hlog, "pathback = ", pathback);
+      }
     }
   
   map<heptagon*, int> indices;
