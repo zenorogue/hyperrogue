@@ -286,8 +286,6 @@ struct hrmap_notknot : hrmap {
     auto ac = currentmap->allcells();
     for(cell *c: ac) c->master->zebraval = 0;
 
-    //ac[1]->master->zebraval = 1;
-    
     auto hept = [&] (int x, int y, int z) {      
       x = zgmod(x, nilv::nilperiod[0]);
       y = zgmod(y, nilv::nilperiod[1]);
@@ -312,13 +310,7 @@ struct hrmap_notknot : hrmap {
           
     hept(0, 0, 2)->zebraval |= 1;
     hept(1, 0, 2)->zebraval |= 1;
-    // hept(2, 0, 2)->zebraval |= 1;
     hept(-1, 0, 2)->zebraval |= 1;
-    // hept(-2, 0, 2)->zebraval |= 1;
-    // hept(0, 1, 2)->zebraval |= 1;
-    // hept(0, 2, 2)->zebraval |= 1;
-    // hept(0, -1, 2)->zebraval |= 1;
-    // hept(0, -2, 2)->zebraval |= 1;
     
     for(int z=0; z<8; z++)
     for(int x=-3; x<4; x++)
@@ -336,8 +328,6 @@ struct hrmap_notknot : hrmap {
     auto ac = currentmap->allcells();
     for(cell *c: ac) c->master->zebraval = 0;
 
-    //ac[1]->master->zebraval = 1;
-    
     auto hept = [&] (int x, int y, int z) {      
       asonov::coord co(x, y, z);
       return asonov::get_at(co);
@@ -369,47 +359,9 @@ struct hrmap_notknot : hrmap {
     dynamicval<hrmap*> m(currentmap, euc);
     auto ac = currentmap->allcells();
     
-    /*
-    vector<cell*> wals;
-
-    for(cell *c: ac) if(c->wall == waPlatform) {
-      bool lone = true;
-      forCellEx(d, c) if(d->wall == waPlatform) lone = false;
-      if(!lone) wals.push_back(c);
-      }
-    cell *fst = nullptr;
-
-    for(cell *c: ac) if(c->wall != waPlatform) {
-      vector<int> dists;
-      for(cell *w: wals) dists.push_back(celldistance(w, c));
-      sort(dists.begin(), dists.end());
-      int su = 0; for(auto s: dists) su += s;
-      if(dists[0] >= 3 && !fst) fst = c;
-      c->wall = dists[0] >= 3 && (c != fst) ? waFloorA : waNone;
-      }
-
-    vector<cell*> tochg;
-    for(cell *c: ac) {
-      if(c->wall == waPlatform) continue;
-      if(c == fst || isNeighbor(c, fst)) continue;
-      bool adj = false;
-      forCellEx(d, c) if(d->wall == waFloorA) adj = true;
-      if(adj) tochg.push_back(c);
-      }
-    
-    for(cell *c: tochg) c->wall = waFloorA;
-    */
-
-/*
-     50 000152   (1,1,2,2,3,3,4,4,4,4) SUM 28
-     50 000152   (2,2,2,2,3,3,3,3,4,4) SUM 28
-     10 000152   (3,3,3,3,3,3,3,3,3,3) SUM 30
-*/    
     for(cell *c: ac) {
       auto& m = c->master->zebraval;
       m = 0;
-      /* if(among(c->wall, waFloorA, waFloorB))
-        m |= 32; */
       if(c->wall == waPlatform)
         m |= 9;
       }
@@ -1114,15 +1066,6 @@ struct hrmap_notknot : hrmap {
         col <<= 8; col |= 1;
         
         color(c, cols[idd], 0);
-        /*for(int i=0; i<8; i++)
-          c = c->move(4);
-        color(c, cols[idd], 0);
-        for(int i=0; i<8; i++)
-          c = c->move(5);
-        color(c, cols[idd], 0);
-        for(int i=0; i<8; i++)
-          c = c->move(4);
-        color(c, cols[idd], 0); */
         }
     
     for(int i=0; i<isize(lst); i++) {
@@ -1188,7 +1131,6 @@ void create_notknot() {
     gNotKnot = eGeometry(isize(ginf) - 1);
     }
   else ginf[gNotKnot] = ginf[base];
-  // variation = eVariation::pure;
   auto& gi = ginf.back();
   gi.flags |= qANYQ | qBOUNDED | qEXPERIMENTAL | qPORTALSPACE;
   gi.quotient_name = "notknot";
