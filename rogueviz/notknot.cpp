@@ -584,8 +584,8 @@ struct hrmap_notknot : hrmap {
             from = gen_adj(from, d);
             }
           
-          if(isize(path) == 8 && path[1] == path[2] && path[3] == path[4] && path[5] == path[6]) {
-            println(hlog, "path = ", path, " i=", i);
+          if(false) {
+            println(hlog, "path = ", path);
             }
           
           uloops[u->where].push_back(path);
