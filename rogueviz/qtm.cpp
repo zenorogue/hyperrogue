@@ -23,7 +23,7 @@ namespace qtm {
 
 int mode;
 
-color_t rainbow_color(hyperpoint h) {
+color_t rainbow_color_at(hyperpoint h) {
   ld sat = 1 - 1 / h[2];
   ld hue = atan2(h[0], h[1]) / (2 * M_PI);
   return rainbow_color(sat, hue);
@@ -52,7 +52,7 @@ void set_cell(cell *c) {
     color_t col;
     if(hyperbolic) {
       hyperpoint h = calc_relative_matrix(c, currentmap->gamestart(), C0) * C0;
-      col = rainbow_color(h);
+      col = rainbow_color_at(h);
       }
     else if(nil) {
       part(col, 0) = 128 + c->master->zebraval * 50;
