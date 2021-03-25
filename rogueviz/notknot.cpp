@@ -1205,6 +1205,7 @@ void show() {
       ray::reset_raycaster();
       ray::volumetric::on = true;
       ray::exp_decay_poly = 3;
+      camera_speed = 1;
       pmodel = mdGeodesic;
       });
       
@@ -1224,6 +1225,7 @@ void show() {
       ray::reset_raycaster();
       ray::volumetric::on = false;
       ray::exp_decay_poly = 10;
+      camera_speed = 1;
       mapeditor::drawplayer = false;
       pmodel = mdPerspective;
       ((hrmap_notknot*)currentmap)->add_fog();
@@ -1243,6 +1245,7 @@ void show() {
       ray::reset_raycaster();
       ray::volumetric::on = false;
       ray::exp_decay_poly = 10;
+      camera_speed = 1;
       mapeditor::drawplayer = false;
       pmodel = mdPerspective;
       ((hrmap_notknot*)currentmap)->add_fog();
