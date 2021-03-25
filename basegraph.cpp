@@ -235,39 +235,6 @@ int textwidth(int siz, const string &str) {
   }
 #endif
 
-EX int darkenedby(int c, int lev) {
-  for(int i=0; i<lev; i++)
-    c = ((c & 0xFEFEFE) >> 1);
-  return c;
-  }
-
-bool fading = false;
-
-ld fadeout = 1;
-
-EX color_t darkened(color_t c) {
-  if(inmirrorcount&1)
-    c = gradient(c, winf[waMirror].color, 0, 0.5, 1);
-  else if(inmirrorcount)
-    c = gradient(c, winf[waCloud].color, 0, 0.5, 1);
-  if(fading) c = gradient(backcolor, c, 0, fadeout, 1);
-  if(vid.desaturate) {
-    ld luminance = 0.2125 * part(c,2) + 0.7154 * part(c,1) + 0.0721 * part(c, 0);
-    c = gradient(c, int(luminance+.5) * 0x10101, 0, vid.desaturate, 100);
-    }
-  for(int i=0; i<darken; i++)
-    c = ((c & 0xFEFEFE) >> 1) + ((backcolor & 0xFEFEFE) >> 1);
-  return c;
-  }
-
-EX color_t darkena3(color_t c, int lev, int a) {
-  return (darkenedby(c, lev) << 8) + a;
-  }
-
-EX color_t darkena(color_t c, int lev, int a) {
-  return darkena3(c, lev, GDIM == 3 ? 255 : a);
-  }
-
 #if !CAP_GL
 EX void setcameraangle(bool b) { }
 #endif
@@ -1006,17 +973,6 @@ EX void drawmessages() {
       displayfr(x, y, 1, vid.fsize, fullmsg(msgs[j]), gradient(forecolor, backcolor, 0, age, 256*vid.flashtime), vid.msgleft ? 0 : 8);
       }
     }
-  }
-
-EX color_t gradient(color_t c0, color_t c1, ld v0, ld v, ld v1) {
-  int vv = int(256 * ((v-v0) / (v1-v0)));
-  color_t c = 0;
-  for(int a=0; a<4; a++) {
-    int p0 = part(c0, a);
-    int p1 = part(c1, a);
-    part(c, a) = (p0*(256-vv) + p1*vv + 127) >> 8;
-    }
-  return c;
   }
 
 EX void drawCircle(int x, int y, int size, color_t color, color_t fillcolor IS(0)) {

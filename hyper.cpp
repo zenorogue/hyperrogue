@@ -23,6 +23,7 @@
 #include "hyper.h"
 
 #include "classes.cpp"
+#include "colors.cpp"
 #include "glhr.cpp"
 #include "shaders.cpp"
 #include "raycaster.cpp"

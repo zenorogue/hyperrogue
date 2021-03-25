@@ -122,49 +122,6 @@ ld spina(cell *c, int dir) {
   return 2 * M_PI * dir / c->type;
   }
 
-// cloak color 
-EX int cloakcolor(int rtr) {
-  rtr -= 28;
-  rtr /= 2;
-  rtr %= 10;
-  if(rtr < 0) rtr += 10;
-  // rtr = time(NULL) % 10;
-  int cc[10] = {
-    0x8080FF, 0x80FFFF, 0x80FF80, 0xFF8080, 0xFF80FF, 0xFFFF80, 
-    0xFFFFC0, 0xFFD500, 0x421C52, 0
-    };
-  return cc[rtr];
-  }
-
-int firegradient(double p) {
-  return gradient(0xFFFF00, 0xFF0000, 0, p, 1);
-  }
-  
-EX int firecolor(int phase IS(0), int mul IS(1)) {
-  return gradient(0xFFFF00, 0xFF0000, -1, sintick(100*mul, phase/200./M_PI), 1);
-  }
-
-EX int watercolor(int phase) {
-  return 0x0080C0FF + 256 * int(63 * sintick(50, phase/100./M_PI));
-  }
-
-EX int aircolor(int phase) {
-  return 0x8080FF00 | int(32 + 32 * sintick(200, phase * 1. / cgi.S21));
-  }
-
-EX int fghostcolor(cell *c) {
-  int phase = int(fractick(650, (int)(size_t)c) * 4000);
-  if(phase < 1000)      return gradient(0xFFFF80, 0xA0C0FF,    0, phase, 1000);
-  else if(phase < 2000) return gradient(0xA0C0FF, 0xFF80FF, 1000, phase, 2000);
-  else if(phase < 3000) return gradient(0xFF80FF, 0xFF8080, 2000, phase, 3000);
-  else if(phase < 4000) return gradient(0xFF8080, 0xFFFF80, 3000, phase, 4000);
-  return 0xFFD500;
-  }
-
-EX int weakfirecolor(int phase) {
-  return gradient(0xFF8000, 0xFF0000, -1, sintick(500, phase/1000./M_PI), 1);
-  }
-
 /** @brief used to alternate colors depending on distance to something. In chessboard-patterned geometries, also use a third step */
 
 EX int flip_dark(int f, int a0, int a1) {

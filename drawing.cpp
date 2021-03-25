@@ -145,22 +145,6 @@ struct dqi_action : drawqueueitem {
   };
 #endif
 
-/** \brief Return a reference to i-th component of col. 
- *  \arg i For colors with alpha, A=0, R=1, G=2, B=3. For colors without alpha, R=0, G=1, B=2.
- */
-EX unsigned char& part(color_t& col, int i) {
-  unsigned char* c = (unsigned char*) &col;
-#if ISMOBILE
-  return c[i];
-#else
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-  return c[sizeof(col) - 1 - i];
-#else
-  return c[i];
-#endif
-#endif
-  }
-
 EX bool in_vr_sphere;
 hyperpoint vr_sphere_center;
 
@@ -557,15 +541,6 @@ void addpoly(const shiftmatrix& V, const vector<glvertex> &tab, int ofs, int cnt
     glcoords.push_back(make_array<GLfloat>(Hscr[0]*current_display->radius+10, Hscr[1]*current_display->radius*pconf.stretch, Hscr[2]*vid.radius));  */
     }
   }
-
-EX color_t align(color_t col) {
-  #if CAP_SDL2
-  swap(part(col, 0), part(col, 3));
-  swap(part(col, 1), part(col, 2));
-  #endif
-  return col;
-  }
-
 
 #if CAP_SDLGFX
 void aapolylineColor(SDL_Renderer *s, int*x, int *y, int polyi, color_t col) {
@@ -2516,55 +2491,7 @@ template<class T, class... U> T& queuea(PPR prio, U... u) {
   }
 #endif
 
-/** colorblind mode */
-EX bool cblind;
-
-#if HDR
-enum class eNeon { none, neon, no_boundary, neon2, illustration};
-#endif
-
-EX eNeon neon_mode;
-EX bool neon_nofill;
-
-EX void apply_neon(color_t& col, int& r) {
-  switch(neon_mode) {
-    case eNeon::none: 
-    case eNeon::illustration:
-      break;
-    case eNeon::neon: 
-      poly_outline = col << 8; col = 0; 
-      break;      
-    case eNeon::no_boundary: 
-      r = 0;
-      break;
-    case eNeon::neon2:
-      poly_outline = col << 8; col &= 0xFEFEFE; col >>= 1; 
-      break;
-    }
-  }
-
 #if CAP_SHAPES
-
-/** used when neon_mode is eNeon::illustration */
-EX color_t magentize(color_t x) {
-  if(neon_mode != eNeon::illustration) return x;
-  int green = part(x,2);
-  int magenta = (part(x, 1) + part(x, 3)) / 2;
-  int nm = max(magenta, green);
-  int gm = (magenta + green)/2;
-  nm = (nm + 255) / 2;
-  gm = gm / 2;
-  
-  return (nm * 0x1000100) | (gm * 0x10000) | (part(x, 0));
-  }
-
-EX color_t monochromatize(color_t x) {
-  int c = part(x,2) + part(x,1) + part(x, 3);
-  c ++;
-  c /= 3;
-  return c * 0x1010100 | (part(x, 0));
-  }
-
 EX dqi_poly& queuepolyat(const shiftmatrix& V, const hpcshape& h, color_t col, PPR prio) {
   if(prio == PPR::DEFAULT) prio = h.prio;
 
@@ -2574,58 +2501,7 @@ EX dqi_poly& queuepolyat(const shiftmatrix& V, const hpcshape& h, color_t col, P
   ptd.offset = h.s;
   ptd.cnt = h.e-h.s;
   ptd.tab = &cgi.ourshape;
-  if(cblind) {
-    // protanopia
-    /* int r = (56 * part(col,3) + 43 * part(col,2)) / 100;
-    int g = (58 * part(col,3) + 42 * part(col,2)) / 100;
-    int b = (24 * part(col,2) + 75 * part(col,1)) / 100; */
-    // deuteranopia
-    /* int r = (625 * part(col,3) + 375 * part(col,2)) / 1000;
-    int g = (700 * part(col,3) + 300 * part(col,2)) / 1000;
-    int b = (300 * part(col,2) + 700 * part(col,1)) / 1000; 
-    part(col,3) = r;
-    part(col,2) = g;
-    part(col,1) = b; */
-    part(col,2) = part(col,3) = (part(col,2) * 2 + part(col,3) + 1)/3;
-    }
-  if(neon_mode == eNeon::none) {
-    ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
-    ptd.outline = poly_outline;
-    if(h.flags & POLY_TRIANGLES) ptd.outline = 0;
-    }
-  else switch(neon_mode) {
-    case eNeon::neon:
-      ptd.color = (poly_outline & 0xFFFFFF00) | (col & 0xFF);
-      ptd.outline = (darkened(col >> 8) << 8) | (col & 0xFF);
-      if(col == 0xFF) ptd.outline = 0xFFFFFFFF;
-      if(neon_nofill && ptd.color == 0xFF) ptd.color = 0; 
-      break;
-    case eNeon::no_boundary:
-      ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF);
-      ptd.outline = 0;
-      break;
-    case eNeon::neon2:
-      ptd.color = (darkened(col >> 8) << 8) + (col & 0xFF) + ((col & 0xFF) >> 2);
-      ptd.outline = (darkened(col >> 8) << 8) + (col & 0xFF);
-      if(col == 0xFF) ptd.outline = 0xFFFFFFFF;
-      if(poly_outline != 0xFF) ptd.outline = poly_outline;
-      if(neon_nofill && ptd.color == 0xFF) ptd.color = 0; 
-      break;
-    case eNeon::illustration: {
-      if(poly_outline && (poly_outline>>8) != bordcolor) {
-        ptd.color = magentize(col);
-        ptd.outline = 0xFF;
-        }
-      else {
-        ptd.outline = poly_outline;
-        ptd.color = monochromatize(col);
-        }
-      if(ptd.color & 0xFF) ptd.color |= 0xFF;
-      if(ptd.outline & 0xFF) ptd.outline |= 0xFF;
-      break;
-      }
-    case eNeon::none: ;
-    }
+  apply_neon_color(col, ptd.color, ptd.outline, h.flags);
   ptd.linewidth = vid.linewidth;
   ptd.flags = h.flags;
   ptd.tinf = h.tinf;
