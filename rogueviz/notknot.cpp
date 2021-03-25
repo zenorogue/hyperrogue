@@ -874,7 +874,7 @@ struct hrmap_notknot : hrmap {
         if(uk->state != 0) continue;
         auto ul = gen_adj(u, l);
         if(ul->state != 0) continue;
-        if(geometry == gCubeTiling || geometry == gNil) {
+        if(base == gCubeTiling || base == gNil) {
           auto ukl = gen_adj(uk, l);
           auto ulk = gen_adj(ul, k);
           if(ukl->where == ulk->where && ukl->state != 0)
