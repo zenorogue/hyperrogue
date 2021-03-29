@@ -3116,9 +3116,39 @@ EX int read_config_args() {
     }
   else if(argis("-char")) {
     auto& cs = vid.cs;
-    shift(); cs.charid = argi();
-    cs.lefthanded = cs.charid >= 10;
-    cs.charid %= 10;
+    shift();
+    string s = args();
+    if(s == "dodek") {
+      cs.charid = 4;
+      cs.lefthanded = false;
+      cs.skincolor = 0x202020FF;
+      cs.eyecolor = 0x20C000FF;
+      cs.haircolor = 0x202020FF;
+      cs.dresscolor =0x424242FF;
+      cs.swordcolor = 0xF73333FF;      
+      }
+    else if(s == "rudy") {
+      cs.charid = 4;
+      cs.lefthanded = false;
+      cs.skincolor = 0xA44139FF;
+      cs.eyecolor = 0xD59533FF;
+      cs.haircolor = 0xC6634AFF;
+      cs.dresscolor =0xC6634AFF;
+      cs.swordcolor = 0x3CBB33FF;      
+      }
+    else if(s == "princess") {
+      cs.charid = 3;
+      cs.skincolor  = 0xEFD0C9FF;
+      cs.haircolor  = 0x301800FF;
+      cs.eyecolor   = 0xC000FF;
+      cs.dresscolor = 0x408040FF;
+      cs.swordcolor = 0xFFFFFFFF;
+      }
+    else {
+      cs.charid = argi();
+      cs.lefthanded = cs.charid >= 10;
+      cs.charid %= 10;
+      }
     }
   else return 1;
   return 0;
