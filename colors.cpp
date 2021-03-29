@@ -83,7 +83,7 @@ EX color_t gradient(color_t c0, color_t c1, ld v0, ld v, ld v1) {
   return c;
   }
 
-color_t rcolor() {
+EX color_t rcolor() {
   color_t res;
   part(res, 0) = hrand(0x80);
   part(res, 1) = hrand(256);
@@ -93,7 +93,7 @@ color_t rcolor() {
   return res;
   }
 
-color_t rainbow_color(ld sat, ld hue) {
+EX color_t rainbow_color(ld sat, ld hue) {
   hue = frac(hue);
   
   if(hue < 0) hue++;
