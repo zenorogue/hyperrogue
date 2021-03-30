@@ -494,6 +494,10 @@ void celldrawer::setcolors() {
       fcol = wcol;
       break;
     
+    case waCrateCrate: case waCrateTarget: case waCrateOnTarget:
+      fcol = c->landparam;
+      break;
+    
     case waDeadTroll2: case waPetrifiedBridge: case waPetrified: {
       eMonster m = eMonster((unsigned char)c->wparam);
       if(c->wall == waPetrified || c->wall == waPetrifiedBridge) 
@@ -1409,6 +1413,27 @@ void celldrawer::draw_features() {
       else {
         draw_floorshape(c, V2, cgi.shMFloor, darkena(winf[c->wall].color, 0, 0xFF));
         draw_floorshape(c, V2, cgi.shMFloor2, (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
+        }
+      break;
+      }
+    
+    case waCrateCrate: case waCrateTarget: case waCrateOnTarget: {
+      shiftmatrix V2 = V;
+      if(c->wall != waCrateCrate) {
+        draw_floorshape(c, V2, cgi.shMFloor, darkena(winf[waCrateTarget].color, 0, 0xFF));
+        draw_floorshape(c, V2, cgi.shMFloor2, c->wall == waCrateOnTarget ? darkena(0xFFFF00, 0, 0xFF) : (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
+        }
+      if(c->wall != waCrateTarget) {
+        if(wmspatial) {
+          const int layers = 2 << detaillevel;
+          for(int z=1; z<=layers; z++) {
+            double zg = zgrad0(0, geom3::actual_wall_height(), z, layers);
+            queuepolyat(xyzscale(V, zg, zg), cgi.shBarrel, darkena((z&1) ? 0xFF0000 : 0xC00000, 0, 0xFF), PPR(PPR::REDWALLm+z));
+            }
+          }
+        else {
+          queuepolyat(V, cgi.shBarrel, darkena(0xC00000, 0, 0xFF), PPR(PPR::REDWALLm));
+          }
         }
       break;
       }

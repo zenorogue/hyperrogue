@@ -361,7 +361,19 @@ EX void pushThumper(const movei& mi) {
     cto->wall = waNone;
     playSound(cto, "splash"+pick12());
     }
-  else 
+  else if(w == waCrateCrate && cto->wall == waCrateTarget) {
+    cto->wall = waCrateOnTarget;
+    th->wall = waNone;
+    }    
+  else if(w == waCrateOnTarget && cto->wall == waNone) {
+    cto->wall = waCrateCrate;
+    th->wall = waCrateTarget;
+    }    
+  else if(w == waCrateOnTarget && cto->wall == waCrateTarget) {
+    cto->wall = waCrateOnTarget;
+    th->wall = waCrateTarget;
+    }
+  else
     cto->wall = w;
   if(explode) cto->wall = waFireTrap, cto->wparam = explode;
   if(cto->wall == waThumperOn)

@@ -1633,6 +1633,18 @@ ITEM( 'o', 0x808080, "Orb of Chaos", itOrbChaos, IC_ORB, ZERO, RESERVED, osUtili
   REQ(ITEMS_TOTAL(LST, variant_unlock_value()*4/3))
   #undef LST
 
+WALL( '$', 0xFD692F, "Crate", waCrateCrate, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone, 
+    "These crates can be pushed."
+    )
+
+WALL( '.', 0x40FD40, "Target", waCrateTarget, 0, RESERVED, 0, sgNone, 
+    "Push all your crates on targets."
+    )
+
+WALL( '$', 0x40FD40, "Crate on Target", waCrateOnTarget, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone, 
+    "A crate already on a target."
+    )
+
 //shmupspecials
 MONSTER( '@', 0xC0C0C0, "Rogue", moPlayer, CF_FACE_UP | CF_PLAYER, RESERVED, moNone, "In the Shoot'em Up mode, you are armed with thrown Knives.")
 MONSTER( '*', 0xC0C0C0, "Knife", moBullet, ZERO | CF_BULLET, RESERVED, moNone, "A simple, but effective, missile, used by rogues.")
