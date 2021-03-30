@@ -1691,6 +1691,13 @@ int readArgs() {
     shift();
     random_edges(argi());
     }
+  else if(argis("-som-wtd")) {
+    for(int i=0; i<3; i++) {
+      shift();
+      whattodraw[i] = argi();
+      }
+    coloring();
+    }
   else if(argis("-som-load-n-edges")) {
     shift(); string edgename = args();
     shift(); int n = argi();
