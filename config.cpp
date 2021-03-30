@@ -3144,6 +3144,14 @@ EX int read_config_args() {
       cs.dresscolor = 0x408040FF;
       cs.swordcolor = 0xFFFFFFFF;
       }
+    else if(s == "worker") {
+      cs.charid = 2;
+      cs.skincolor = 0xC77A58FF;
+      cs.haircolor = 0x502810FF;
+      cs.dresscolor = 0xC0C000FF;
+      cs.eyecolor = 0x500040FF;
+      cs.swordcolor = 0x808080FF;
+      }
     else {
       cs.charid = argi();
       cs.lefthanded = cs.charid >= 10;
