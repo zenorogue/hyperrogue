@@ -38,6 +38,7 @@
 #include "balls.cpp"
 #include "pentaroll.cpp"
 #include "playing-with-impossibility.cpp"
+#include "highdim-demo.cpp"
 
 //#endif
 
