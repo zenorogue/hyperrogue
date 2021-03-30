@@ -98,6 +98,17 @@ namespace rogueviz {
   extern vector<vertexdata> vdata;
  
   void storeall(int from = 0);
+  
+  extern vector<reaction_t> cleanup;
+
+  template<class T, class U> void rv_hook(hookset<T>& m, int prio, U&& hook) {
+    int p = addHook(m, prio, hook);
+    auto del = [&m, p] { 
+      delHook(m, p); 
+      };
+    if(tour::on) tour::on_restore(del);
+    else cleanup.push_back(del);
+    }
 
   namespace anygraph {
     extern double R, alpha, T;
