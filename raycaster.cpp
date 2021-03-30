@@ -1808,6 +1808,7 @@ EX void cast() {
     glUniform1f(o->uLevelLines, levellines);
   if(o->uBinaryWidth != -1)
     glUniform1f(o->uBinaryWidth, vid.binary_width/2 * (nih?1:log(2)));
+  #if CAP_SOLV
   if(o->uStraighten != -1) {
     glUniformMatrix4fv(o->uStraighten, 1, 0, glhr::tmtogl_transpose(asonov::straighten).as_array());
     }
@@ -1817,6 +1818,7 @@ EX void cast() {
     h = glhr::pointtogl(tangent_length(spin(90*degree) * asonov::tx, 2));
     glUniform4fv(o->uReflectY, 1, &h[0]);
     }
+  #endif
   if(o->uPLevel != -1)
     glUniform1f(o->uPLevel, cgi.plevel / 2);
   
