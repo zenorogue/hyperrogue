@@ -558,10 +558,11 @@ int readArgs() {
 auto hook = addHook(hooks_args, 100, readArgs)
   + addHook(hooks_initgame, 100, bantar)
   + addHook(hooks_frame, 100, bantar_stats)
-  + addHook(pres::hooks_build_rvtour, 140, [] (vector<tour::slide>& v) {
+  + addHook(pres::hooks_build_rvtour, 140, [] (string s, vector<tour::slide>& v) {
+    if(s != "mixed") return;
     using namespace pres;
     v.push_back(
-      tour::slide{"unsorted/Banach-Tarski-like", 62, LEGAL::NONE,
+      tour::slide{"Banach-Tarski-like", 62, LEGAL::NONE,
      "Banach-Tarski-like decomposition. Break a hyperbolic plane into two hyperbolic planes.\n\n"
      "Press '5' to show the decomposition. Press any key to stop.\n\n"
      "You will see a map of the decomposition. Press '5' again to return.",

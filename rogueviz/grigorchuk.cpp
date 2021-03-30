@@ -496,10 +496,11 @@ auto hook = addHook(hooks_args, 100, readArgsG)
     })
    + addHook(hooks_initialize, 100, create_grigorchuk_geometry)
 
-  + addHook(rogueviz::pres::hooks_build_rvtour, 140, [] (vector<tour::slide>& v) {
+  + addHook(rogueviz::pres::hooks_build_rvtour, 140, [] (string s, vector<tour::slide>& v) {
+    if(s != "mixed") return;
     using namespace rogueviz::pres;
     v.push_back(tour::slide{
-      "unsorted/Grigorchuk group", 10, tour::LEGAL::NONE,
+      "Grigorchuk group", 10, tour::LEGAL::NONE,
 
       "This is a visualization of the Grigorchuk group. It is the first known group with "
       "intermediate growth (i.e., superpolynomial and subexponential).\n\n"

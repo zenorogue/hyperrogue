@@ -560,9 +560,10 @@ int ah = addHook(hooks_args, 100, readArgs)
     dialog::addSelItem(XLAT("SAG mode"), sag::sagmodes[sag::sagmode], 'm'); 
     dialog::add_action([] { sag::sagmode = sag::eSagmode( (1+sag::sagmode) % 3 ); });
     })
-  + addHook(pres::hooks_build_rvtour, 120, [] (vector<tour::slide>& v) {
+  + addHook(pres::hooks_build_rvtour, 120, [] (string s, vector<tour::slide>& v) {
+    if(s != "data") return;
     using namespace pres;
-    string sagf = "hyperbolic geometry and data/SAG/";
+    string sagf = "SAG/";
     v.push_back(
       slide{sagf+"Roguelikes", 63, LEGAL::UNLIMITED | QUICKGEO,
         "A visualization of roguelikes, based on discussion on /r/reddit. "

@@ -84,9 +84,10 @@ auto geoslide(eGeometry g, char canvas, int jhole, int jblock) {
     };
   }
 
-string cap = "non-isotropic geometries/honeycombs/";
+string cap = "honeycombs/";
 
-void honey(vector<tour::slide>& v) {
+void honey(string s, vector<tour::slide>& v) {
+  if(s != "noniso") return;
   using namespace tour;
 
   v.emplace_back(
@@ -146,11 +147,13 @@ void honey(vector<tour::slide>& v) {
 
   }
 
-void start_noniso(vector<tour::slide>& v) {
+vector<tour::slide> noniso_slides;
+tour::slide *gen_noniso_demo() {
+  noniso_slides.clear();
   using namespace tour;
-  v.emplace_back(
-    slide{"non-isotropic geometries/intro slide", 999, LEGAL::NONE | QUICKSKIP, 
-      "This is a collection of non-isotropic geometry demos.",
+  noniso_slides.emplace_back(
+    slide{"Non-isotropic geometry demo", 999, LEGAL::NONE | QUICKSKIP, 
+      "This is a presentation of non-isotropic geometries.",
       [] (presmode mode) {
         if(mode == pmStart) {
           stop_game();
@@ -159,9 +162,19 @@ void start_noniso(vector<tour::slide>& v) {
           }
         }
       });
+
+  callhooks(pres::hooks_build_rvtour, "noniso", noniso_slides);
+  pres::add_end(noniso_slides);
+  return &noniso_slides[0];
   }
 
 auto hooks  = addHook(pres::hooks_build_rvtour, 163, honey)
-            + addHook(pres::hooks_build_rvtour, 160, start_noniso);
+  + addHook(tour::ss::hooks_extra_slideshows, 120, [] (tour::ss::slideshow_callback cb) {
+  
+    if(noniso_slides.empty()) 
+      gen_noniso_demo();
+
+    cb(XLAT("non-isotropic geometries"), &noniso_slides[0], 'n');
+    });
 
 } }

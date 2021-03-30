@@ -313,10 +313,11 @@ int readArgs() {
   }
 
 int ah = addHook(hooks_args, 100, readArgs) +
-  addHook(pres::hooks_build_rvtour, 142, [] (vector<tour::slide>& v) {
+  addHook(pres::hooks_build_rvtour, 42, [] (string s, vector<tour::slide>& v) {
+    if(s != "data") return;
     using namespace tour;
     v.push_back(
-      tour::slide{"unsorted/Collatz conjecture", 51, LEGAL::UNLIMITED | QUICKGEO,
+      tour::slide{"Collatz conjecture", 51, LEGAL::UNLIMITED | QUICKGEO,
     "The following slide is a visualization of the Collatz conjecture. "
     "Press '5' for a spiral rendering of the Collatz conjecture visualization.\n\n"
     "Note that this, and many other RogueViz visualizations, have "

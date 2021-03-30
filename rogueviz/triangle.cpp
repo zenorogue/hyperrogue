@@ -523,10 +523,10 @@ void slide_itri(tour::presmode mode, int id) {
     start_game();
     playermoved = false;
     tour::on_restore(reset);
-    }
+    }     
   }
 
-string cap = "non-isotropic geometries/Impossible architecture in Nil/";
+string cap = "Impossible architecture in Nil/";
 
 auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
 
@@ -549,8 +549,9 @@ auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
   return 0;
   })
 
-+ addHook(pres::hooks_build_rvtour, 166, [] (vector<tour::slide>& v) {
++ addHook(pres::hooks_build_rvtour, 166, [] (string s, vector<tour::slide>& v) {
   using namespace tour;
+  if(s != "noniso") return;
 
   v.push_back(
     tour::slide{cap+"impossible triangle", 18, LEGAL::NONE | QUICKGEO, 

@@ -303,28 +303,48 @@ void compare_projections(presmode mode, eModel a, eModel b) {
 
 /* default RogueViz tour */
 
-vector<slide> rvslides;
+vector<slide> rvslides_mixed;
+vector<slide> rvslides_data;
 extern vector<slide> rvslides_default;
 
-slide *gen_rvtour() {
-  rvslides = rvslides_default;
-  callhooks(hooks_build_rvtour, rvslides);
-  rvslides.emplace_back(
+void add_end(vector<slide>& s) {
+  s.emplace_back(
     slide{"THE END", 99, LEGAL::ANY | FINALSLIDE,
     "Press '5' to leave the presentation.",
     [] (presmode mode) {
-      firstland = specialland = laIce;
+      if(mode == pmStart) firstland = specialland = laIce;
       if(mode == 4) restart_game(rg::tour);
       }
     });
-  return &rvslides[0];
+  }
+  
+slide *gen_rvtour_data() {
+  rvslides_data = rvslides_default;
+
+  callhooks(hooks_build_rvtour, "data", rvslides_data);
+  add_end(rvslides_data);
+
+  return &rvslides_data[0];
+  }
+
+slide *gen_rvtour_mixed() {
+
+  rvslides_mixed.emplace_back(slide{
+    "RogueViz", 999, LEGAL::ANY,
+    "This presentation is mostly composed from various unsorted demos, mostly posted on Twitter and YouTube. Press Enter to continue, ESC to look at other functions of this presentation.",
+    [] (presmode mode) {}
+    });
+  
+  callhooks(hooks_build_rvtour, "mixed", rvslides_mixed); 
+
+  add_end(rvslides_mixed);
+
+  return &rvslides_mixed[0];
   }
 
 vector<slide> rvslides_default = {
-    {"RogueViz", 999, LEGAL::ANY, 
-      "This is a presentation of RogueViz, which "
-      "is an adaptation of HyperRogue as a visualization tool "
-      "rather than a game. Hyperbolic space is great "
+    {"intro", 999, LEGAL::ANY, 
+      "Hyperbolic space is great "
       "for visualizing some kinds of data because of the vast amount "
       "of space.\n\n"
       "Press '5' to switch to the standard HyperRogue tutorial. "
@@ -346,7 +366,7 @@ vector<slide> rvslides_default = {
       [] (presmode mode) {
        using namespace linepatterns;
        slidecommand = "toggle the Palace lines";
-       if(mode == 4) patPalace.color = 0xFFD500FF;
+       if(mode == 4) patPalace.color = (patPalace.color == 0xFFD500FF ? 0 : 0xFFD500FF);
        if(mode == 3) patPalace.color = 0xFFD50000;
         }
       },
@@ -363,15 +383,18 @@ int pres_hooks =
           "common HyperRogue tutorial first is useful too, "
           "as an introduction to hyperbolic geometry.";         
       if(mode == 4) {
-        slides = gen_rvtour();
         while(tour::on) restart_game(rg::tour);
-        tour::start();
+        pushScreen(choose_presentation);
         }
       }
     }) +
   addHook(tour::ss::hooks_extra_slideshows, 100, [] (tour::ss::slideshow_callback cb) {
-    if(rogueviz::pres::rvslides.empty()) pres::gen_rvtour();
-    cb(XLAT("RogueViz mixed bag"), &pres::rvslides[0], 'r');
+    if(rogueviz::pres::rvslides_data.empty()) pres::gen_rvtour_data();
+    cb(XLAT("non-Euclidean geometry in data analysis"), &pres::rvslides_data[0], 'd');
+
+    if(rogueviz::pres::rvslides_mixed.empty()) pres::gen_rvtour_mixed();
+
+    cb(XLAT("unsorted RogueViz demos"), &pres::rvslides_mixed[0], 'u');
     }) +
   0;
 

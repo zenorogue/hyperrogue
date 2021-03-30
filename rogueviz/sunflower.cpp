@@ -269,10 +269,11 @@ auto hook = 0
 #endif
 + addHook(hooks_o_key, 80, o_key)
 + addHook(hooks_drawcell, 100, sunflower_cell)
-+ addHook(pres::hooks_build_rvtour, 144, [] (vector<tour::slide>& v) {
++ addHook(pres::hooks_build_rvtour, 144, [] (string s, vector<tour::slide>& v) {
+  if(s != "mixed") return;
   using namespace tour;
   v.push_back(
-    tour::slide{"unsorted/sunflower spirals", 18, LEGAL::ANY | QUICKGEO, 
+    tour::slide{"sunflower spirals", 18, LEGAL::ANY | QUICKGEO, 
       "A sunflower sends out its n-th seed at angle 180° (3-sqrt(5)). "
       "As new seeds are created, older seeds are pushed out. Therefore. "
       "the distance d(n) of the n-th seed from the center will be such that "

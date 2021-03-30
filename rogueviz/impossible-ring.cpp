@@ -290,10 +290,11 @@ auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
 
 + addHook(hooks_o_key, 80, o_key)
 
-+ addHook(pres::hooks_build_rvtour, 167, [] (vector<tour::slide>& v) {
++ addHook(pres::hooks_build_rvtour, 167, [] (string s, vector<tour::slide>& v) {
+  if(s != "noniso") return;
   using namespace tour;
   v.push_back(
-    tour::slide{"non-isotropic geometries/Impossible architecture in Nil/impossible ring", 18, LEGAL::NONE | QUICKGEO, 
+    tour::slide{"Impossible architecture in Nil/impossible ring", 18, LEGAL::NONE | QUICKGEO, 
       "Ring with a square cross-section. Cut it in half. Rotate one of the two halves by 90°, "
       "keeping one of the two ends connected to the other half. Do this in Nil geometry, so the other pair of ends remains connected too.\n\n"
       "Move with mouse/arrows/PgUpDn. Press '5' to enable animation, 'o' to change ring size.\n\n",

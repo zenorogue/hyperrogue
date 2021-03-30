@@ -353,10 +353,11 @@ int phooks = addHook(hooks_args, 100, readArgs)
      if(staircase::on) { staircase::showMenu(); return true; }
      return false;
      })
-  + addHook(pres::hooks_build_rvtour, 141, [] (vector<tour::slide>& v) {
+  + addHook(pres::hooks_build_rvtour, 141, [] (string s, vector<tour::slide>& v) {
+    if(s != "mixed") return;
     using namespace tour;
     v.push_back(
-      tour::slide{"unsorted/Spiral Staircase", 62, LEGAL::NONE | QUICKGEO,
+      tour::slide{"Spiral Staircase", 62, LEGAL::NONE | QUICKGEO,
      "Spiral Staircase Demo. Press '5' to change the curvature or other parameters.",
      
     [] (presmode mode) {
