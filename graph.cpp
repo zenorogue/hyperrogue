@@ -872,6 +872,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
       draw_shapevec(c, V2 * zpush(-h/20), qfi.fshape->levels[0], 0xFFD500FF, PPR::WALL);
       }
     else if(WDIM == 3 && c) {
+      ld h = cgi.human_height;
       shiftmatrix V2 = Vit * spin(ticks / 1500.);
       draw_floorshape(c, V2 * zpush(h/100), cgi.shMFloor3, 0xFFD500FF);
       draw_floorshape(c, V2 * zpush(h/50), cgi.shMFloor4, darkena(icol, 0, 0xFF));
