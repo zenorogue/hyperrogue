@@ -969,7 +969,7 @@ namespace levelline {
     if(levellines.size() == 0) create();
     on = false;
     for(auto& lv: levellines) {
-      if(!lv.qty) { lv.values.clear(); continue; }
+      if(!lv.qty || lv.qty < 0) { lv.values.clear(); continue; }
       on = true;
       if(!lv.modified) continue;
       lv.modified = false;
