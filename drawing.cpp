@@ -469,7 +469,9 @@ void addpoly(const shiftmatrix& V, const vector<glvertex> &tab, int ofs, int cnt
   if(pmodel == mdPixel) {
     for(int i=ofs; i<ofs+cnt; i++) {
       hyperpoint h = glhr::gltopoint(tab[i]);
+      #if MAXMDIM >= 4
       h[3] = 1;
+      #endif
       h = V.T * h;
       add1(h);
       }

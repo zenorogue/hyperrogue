@@ -1428,11 +1428,13 @@ discovery::~discovery() { schedule_destruction(); if(discoverer) discoverer->joi
 
 int hk = 
 #if CAP_THREAD
+#if MAXMDIM >= 4
   + addHook(hooks_on_geometry_change, 100, [] { for(auto& d:discoveries) if(!d.second.is_suspended) d.second.suspend(); })
   + addHook(hooks_final_cleanup, 100, [] { 
       for(auto& d:discoveries) { d.second.schedule_destruction(); if(d.second.is_suspended) d.second.activate(); }
       discoveries.clear();
       })
+#endif
 #endif
 #if CAP_COMMANDLINE
   + addHook(hooks_args, 0, [] {

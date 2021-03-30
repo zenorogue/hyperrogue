@@ -1031,7 +1031,9 @@ EX namespace hybrid {
         });
       return T;
       }
+    #if MAXMDIM >= 4
     if(rotspace) return rots::ray_iadj(c, i);
+    #endif
     return currentmap->iadj(c, i);
     }
   
@@ -1337,6 +1339,7 @@ EX namespace hybrid {
       return mscale(get_corner_position(c, i+next), exp(lev));
       }
     else {
+      #if MAXMDIM >= 4
       ld tf, he, alpha;
       in_underlying_geometry([&] {
         hyperpoint h1 = get_corner_position(c, i);
@@ -1347,6 +1350,9 @@ EX namespace hybrid {
         alpha = atan2(hm[1], hm[0]);
         });
       return spin(alpha) * rots::uxpush(tf) * rots::uypush(next?he:-he) * rots::uzpush(lev) * C0;
+      #else
+      throw hr_exception();
+      #endif
       }
     }
   
@@ -2043,7 +2049,9 @@ EX namespace slr {
 EX }
 
 EX namespace rots {
-
+  EX ld underlying_scale = 0;
+  
+#if MAXMDIM >= 4
   EX transmatrix uxpush(ld x) { 
     if(sl2) return xpush(x);
     return cspin(1, 3, x) * cspin(0, 2, x);
@@ -2187,8 +2195,6 @@ EX namespace rots {
     return M;
     }
   
-  EX ld underlying_scale = 0;
-  
   EX void draw_underlying(bool cornermode) {
     if(underlying_scale <= 0) return;
     ld d = hybrid::get_where(centerover).second;
@@ -2306,7 +2312,7 @@ EX namespace rots {
       }
     }
 
-
+#endif
 EX }
 
 /** stretched rotation space (S3 or SLR) */
@@ -2820,9 +2826,11 @@ EX namespace nisot {
     #if CAP_SOLV
     if(sn::in()) return new sn::hrmap_solnih;
     #endif
-    if(nil) return new nilv::hrmap_nil;
     if(prod) return new product::hrmap_product;
+    #if MAXMDIM >= 4
+    if(nil) return new nilv::hrmap_nil;
     if(hybri) return new rots::hrmap_rotation_space;
+    #endif
     return NULL;
     }
   
@@ -2911,6 +2919,7 @@ EX namespace nisot {
       ginf[gNil].sides = argi();
       return 0;
       }
+    #if CAP_SOLV
     else if(argis("-catperiod")) {
       PHASEFROM(2);
       if(sol) stop_game();
@@ -2919,6 +2928,7 @@ EX namespace nisot {
       asonov::set_flags();
       return 0;
       }
+    #endif
     else if(argis("-prodperiod")) {
       PHASEFROM(2);
       if(prod) stop_game();

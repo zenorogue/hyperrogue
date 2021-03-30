@@ -735,6 +735,7 @@ EX namespace euc {
         return;
         }
       }
+    #if MAXMDIM >= 4
     if(twisted & 16) {
       int period = T0[2][2];
       transmatrix RotYZX = Zero;
@@ -767,7 +768,9 @@ EX namespace euc {
         }
       return;
       }
+    #endif
     if(WDIM == 3) {
+      #if MAXMDIM >= 4
       auto& coo = x;
       while(coo[2] >= T0[2][2]) {
         coo[2] -= T0[2][2];
@@ -784,6 +787,7 @@ EX namespace euc {
       for(int i: {0,1})
         if(T0[i][i]) coo[i] = gmod(coo[i], T0[i][i]);
       return;
+      #endif
       }
     else {
       gp::loc coo = to_loc(x);

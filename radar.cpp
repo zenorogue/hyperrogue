@@ -20,6 +20,7 @@ EX vector<radarline> radarlines;
 
 EX transmatrix radar_transform;
 
+#if MAXMDIM >= 4
 pair<bool, hyperpoint> makeradar(shiftpoint h) {
   if(GDIM == 3 && WDIM == 2) h.h = radar_transform * h.h;
 
@@ -93,9 +94,10 @@ void celldrawer::radar_grid() {
     if(c->move(t) && (c->move(t) < c || fake::split()))
       addradar(V*get_corner_position(c, t%c->type), V*get_corner_position(c, (t+1)%c->type), gridcolor(c, c->move(t)));
   }
+#endif
 
 EX void draw_radar(bool cornermode) {
-
+#if MAXMDIM >= 4
   if(dual::split([] { dual::in_subscreen([] { calcparam(); draw_radar(false); }); })) return;
   bool d3 = WDIM == 3;
   bool hyp = hyperbolic;
@@ -185,6 +187,14 @@ EX void draw_radar(bool cornermode) {
       displaychr(int(h[0]), int(h[1]), 0, int(h[2]), r.glyph, r.color);
       }
     }
+#endif
   }
 
+#if MAXMDIM < 4
+EX void addradar(const shiftmatrix& V, char ch, color_t col, color_t outline) { }
+  void drawcell_in_radar();
+
+void celldrawer::drawcell_in_radar() {}
+void celldrawer::radar_grid() {}
+#endif
 }

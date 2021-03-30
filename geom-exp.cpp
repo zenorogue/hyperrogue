@@ -594,10 +594,12 @@ EX void select_quotient() {
     nilv::prepare_niltorus3(),  
     pushScreen(nilv::show_niltorus3);
     }
+  #if CAP_SOLV
   else if(asonov::in()) {
     asonov::prepare_config();
     pushScreen(asonov::show_config);
     }
+  #endif
   else if(prod)
     pushScreen(product::show_config);
   else if(rotspace)
@@ -668,7 +670,9 @@ EX void menuitem_binary_width(char key) {
       #if CAP_TEXTURE
       texture::config.remap();
       #endif
+      #if CAP_SOLV
       if(asonov::in()) asonov::prepare();
+      #endif
       };
     });
   }
@@ -963,6 +967,7 @@ EX void showEuclideanMenu() {
       });
     }
   
+  #if MAXMDIM >= 4
   if(hybri) {
     auto r = rots::underlying_scale;
     dialog::addSelItem(XLAT("view the underlying geometry"), r > 0 ? fts(r)+"x" : ONOFF(false), '6');
@@ -981,6 +986,7 @@ EX void showEuclideanMenu() {
       dialog::extra_options = [] () { rots::draw_underlying(true); };
       });
     }
+  #endif
   
   if(stretch::applicable()) {
     dialog::addSelItem(XLAT("stretched geometry"), fts(stretch::factor), 'S');

@@ -13,19 +13,23 @@
 
 namespace hr {
 
+EX namespace asonov {
+
+#if !CAP_SOLV
 #if HDR
-int zgmod(int a, int b);
+inline bool in() { return false; }
+#endif
 #endif
 
-EX namespace asonov {
+EX int period_xy = 8;
+EX int period_z = 8;
+
+#if CAP_SOLV
 
 EX bool in() { return cgflags & qCAT; }
 
 EX hyperpoint tx, ty, tz;
 EX transmatrix straighten;
-
-EX int period_xy = 8;
-EX int period_z = 8;
 
 #if HDR
 struct coord: public array<int,3> {
@@ -258,6 +262,8 @@ EX void show_config() {
   dialog::addBack();
   dialog::display();
   }
+
+#endif
 
 }
 }

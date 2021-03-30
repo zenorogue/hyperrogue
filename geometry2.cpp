@@ -217,11 +217,15 @@ struct horo_distance {
 #endif
 
 void horo_distance::become(hyperpoint h1) {
+  #if CAP_SOLV
   if(sn::in()) {
     a = abs(h1[2]);
     if(asonov::in()) h1 = asonov::straighten * h1;
     b = hypot_d(2, h1);
     }
+  #else
+  if(0) {}
+  #endif
   #if CAP_BT
   else if(bt::in()) {
     b = intval(h1, C0);

@@ -197,8 +197,12 @@ EX namespace yendor {
 
   EX bool exhaustive_distance_appropriate() {
     if(euclid && (kite::in() || arcm::in() || arb::in() || quotient)) return true;
+    #if MAXMDIM >= 4
     if(nil && quotient) return true;
+    #endif
+    #if CAP_SOLV
     if(asonov::in() && asonov::period_xy && asonov::period_xy <= 256) return true;
+    #endif
     
     if(bounded) return true;
     

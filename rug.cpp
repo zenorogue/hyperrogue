@@ -423,6 +423,7 @@ ld clifford_torus::compute_mx() {
   return mx;
   }
 
+#if MAXMDIM >= 4
 EX void buildTorusRug() {
 
   calcparam_rug();
@@ -523,6 +524,7 @@ EX void buildTorusRug() {
 
   return;
   }
+#endif
 
 EX void verify() {
   vector<ld> ratios;
@@ -554,11 +556,13 @@ EX void buildRug() {
 
   need_mouseh = true;
   good_shape = false;
+  #if MAXMDIM >= 4
   if(euclid && bounded) {
     good_shape = true;
     buildTorusRug();
     return;
     }
+  #endif
   
   celllister cl(centerover ? centerover : cwt.at, get_sightrange(), vertex_limit, NULL);
 
@@ -965,7 +969,7 @@ EX void addNewPoints() {
 
 EX void physics() {
 
-  #if CAP_CRYSTAL
+  #if CAP_CRYSTAL && MAXMDIM >= 4
   if(in_crystal()) {
     crystal::build_rugdata();
     return;

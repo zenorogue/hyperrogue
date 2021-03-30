@@ -474,10 +474,12 @@ EX namespace mapstream {
       f.write(S7);
       f.write(nilv::nilperiod);
       }
+    #if CAP_SOLV
     if(geometry == gArnoldCat) {
       f.write(asonov::period_xy);
       f.write(asonov::period_z);
       }
+    #endif
     if(prod) {
       f.write(hybrid::csteps);
       f.write(product::cspin);
@@ -573,11 +575,13 @@ EX namespace mapstream {
       f.read(nilv::nilperiod);
       nilv::set_flags();
       }
+    #if CAP_SOLV
     if(geometry == gArnoldCat && vernum >= 0xA80C) {
       f.read(asonov::period_xy);
       f.read(asonov::period_z);
       asonov::set_flags();
       }
+    #endif
     if(geometry == gProduct && vernum >= 0xA80C) {
       f.read(hybrid::csteps);
       if(vernum >= 0xA80D) f.read(product::cspin);

@@ -243,7 +243,9 @@ void move_y_to_z(hyperpoint& H, pair<ld, ld> coef) {
   if(GDIM == 3) {
     H[2] = H[1] * coef.second;
     H[1] = H[1] * coef.first;
+    #if MAXMDIM >= 4
     H[3] = 1;
+    #endif
     }
   }
 
@@ -432,6 +434,7 @@ void vr_disk(hyperpoint& ret, hyperpoint& H) {
     }
   }
 
+#if MAXMDIM >= 4
 /** Compute the three-point projection. Currently only works in isotropic 3D spaces. */
 EX void threepoint_projection(const hyperpoint& H, hyperpoint& ret) {
 
@@ -488,6 +491,7 @@ EX void threepoint_projection(const hyperpoint& H, hyperpoint& ret) {
   models::apply_orientation(ret[1], ret[0]);
   models::apply_orientation_yz(ret[2], ret[1]);
   }
+#endif
 
 EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
 
@@ -1036,7 +1040,11 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       break;
     
     case mdThreePoint: 
+    #if MAXMDIM >= 4
       threepoint_projection(H, ret);
+    #else
+      throw hr_exception();
+    #endif
       break;
     
     case mdMollweide: 
@@ -2737,6 +2745,7 @@ EX bool do_draw(cell *c, const shiftmatrix& T) {
 
     if(cells_drawn > vid.cells_drawn_limit) return false;
     if(cells_drawn < 50) { limited_generation(c); return true; }
+    #if MAXMDIM >= 4
     if(nil && pmodel == mdGeodesic) {
       ld dist = hypot_d(3, inverse_exp(tC0(T), pQUICK));
       if(dist > sightranges[geometry] + (vid.sloppy_3d ? 0 : 0.9)) return false;
@@ -2757,6 +2766,7 @@ EX bool do_draw(cell *c, const shiftmatrix& T) {
       if(abs(T.shift * stretch::not_squared()) > sightranges[geometry]) return false;
       if(!limited_generation(c)) return false;
       }
+    #endif
     else if(vid.use_smart_range) {
       if(cells_drawn >= 50 && !in_smart_range(T)) return false;
       if(!limited_generation(c)) return false;

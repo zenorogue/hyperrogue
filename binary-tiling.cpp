@@ -656,6 +656,7 @@ EX namespace bt {
     ld z3 = -log(3) / 2;
     ld bwhn = vid.binary_width / 2;
     ld bwh = vid.binary_width * z2;
+    ignore(bwh); ignore(bwhn);
     ld r2 = sqrt(2);
     const ld hs = hororec_scale;
     auto &x = h[0], &y = h[1], &z = h[2];
@@ -664,12 +665,14 @@ EX namespace bt {
         return bt::parabolic(y/2) * xpush(x*z2);
       case gTernary:
         return bt::parabolic(y/2) * xpush(x*z3);
+      #if CAP_SOLV
       case gSol:
         return xpush(bwh*x) * ypush(bwh*y) * zpush(z2*z);
       case gSolN: case gNIH:
         return xpush(bwhn*x) * ypush(bwhn*y) * zpush(-z*.5);
       case gArnoldCat:
         return rgpushxto0(asonov::tx*x/2 + asonov::ty*y/2 + asonov::tz*z/2);
+      #endif
       case gNil:
         return rgpushxto0(point31(x/2, y/2, z/2));
       case gEuclidSquare:

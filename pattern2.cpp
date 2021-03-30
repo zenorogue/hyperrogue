@@ -1662,7 +1662,9 @@ EX namespace patterns {
     ep.extra_params["x"] = h[0];
     ep.extra_params["y"] = h[1];
     ep.extra_params["z"] = h[2];
+    #if MAXMDIM >= 4
     ep.extra_params["w"] = h[3];
+    #endif
     ep.extra_params["z40"] = zebra40(c);
     ep.extra_params["z3"] = zebra3(c);
     ep.extra_params["ev"] = emeraldval(c);
@@ -1701,12 +1703,14 @@ EX namespace patterns {
         ep.extra_params["x"+its(i)] = co[i];
       }
     #endif
+    #if CAP_SOLV
     if(asonov::in()) {
       auto co = asonov::get_coord(c->master);
       ep.extra_params["ax"] = szgmod(co[0], asonov::period_xy);
       ep.extra_params["ay"] = szgmod(co[1], asonov::period_xy);
       ep.extra_params["az"] = szgmod(co[2], asonov::period_z);      
       }
+    #endif
     if(nil) {
       auto co = nilv::get_coord(c->master);
       ep.extra_params["nx"] = szgmod(co[0], nilv::nilperiod[0]);

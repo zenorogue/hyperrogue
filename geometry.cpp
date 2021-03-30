@@ -704,10 +704,12 @@ void geometry_information::prepare_basics() {
   if(hyperbolic && &currfp != &fieldpattern::fp_invalid)
     currfp.analyze(); 
   
+  #if CAP_SOLV  
   if(asonov::in()) {
     asonov::prepare();    
     asonov::prepare_walls();
     }
+  #endif
   }
 
 EX transmatrix xspinpush(ld dir, ld dist) {

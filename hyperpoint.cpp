@@ -1096,6 +1096,7 @@ EX ld hdist0(const hyperpoint& mh) {
       auto d1 = product_decompose(mh);
       return hypot(PIU(hdist0(d1.second)), d1.first);
       }
+    #if MAXMDIM >= 4
     case gcSL2: {
       auto cosh_r = hypot(mh[2], mh[3]);
       auto phi = atan2(mh[2], mh[3]);
@@ -1105,6 +1106,7 @@ EX ld hdist0(const hyperpoint& mh) {
       ld bz = mh[0] * mh[1] / 2;
       return hypot(mh[0], mh[1]) + abs(mh[2] - bz);
       }
+    #endif
     default:
       return hypot_d(GDIM, mh);
     }
@@ -1415,9 +1417,13 @@ EX hyperpoint tangent_length(hyperpoint dir, ld length) {
 
 /** exponential function: follow the geodesic given by v */
 EX hyperpoint direct_exp(hyperpoint v) {
+  #if CAP_SOLV
   if(sn::in()) return nisot::numerical_exp(v);
+  #endif
+  #if MAXMDIM >= 4
   if(nil) return nilv::formula_exp(v);
   if(sl2 || stretch::in()) return stretch::mstretch ? nisot::numerical_exp(v) : rots::formula_exp(v);
+  #endif
   if(prod) return product::direct_exp(v);
   ld d = hypot_d(GDIM, v);
   if(d > 0) for(int i=0; i<GDIM; i++) v[i] = v[i] * sin_auto(d) / d;
@@ -1510,6 +1516,7 @@ EX unsigned bucketer(hyperpoint h) {
   return dx;
   }  
 
+#if MAXMDIM >= 4
 /** @brief project the origin to the triangle [h1,h2,h3] */
 EX hyperpoint project_on_triangle(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
   h1 /= h1[3];
@@ -1526,6 +1533,7 @@ EX hyperpoint project_on_triangle(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
   result[3] = 1;
   return normalize(result);
   }
+#endif
 
 EX hyperpoint lerp(hyperpoint a0, hyperpoint a1, ld x) {
   return a0 + (a1-a0) * x;

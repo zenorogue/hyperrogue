@@ -301,6 +301,7 @@ void find_track(cell *start, int sign, int len) {
           case 4: id = start->master->emeraldval - c1->master->emeraldval; break;
           }
         }
+      #if CAP_SOLV
       else if(asonov::in() && asonov::period_z) {
         auto co = asonov::get_coord(c->master);
         ld x = szgmod(co[0], asonov::period_xy);
@@ -311,6 +312,7 @@ void find_track(cell *start, int sign, int len) {
         }
       else if(sn::in())
         id = (start->master->distance - c1->master->distance) * sign;
+      #endif
       else
         id = trackval(c1);
       cellbydist[id].push_back(c1);

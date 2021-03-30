@@ -296,7 +296,9 @@ EX void initcells() {
   
   hrmap* res = callhandlers((hrmap*)nullptr, hooks_newmap);
   if(res) currentmap = res;
+  #if CAP_SOLV
   else if(asonov::in()) currentmap = asonov::new_map();
+  #endif
   else if(nonisotropic || hybri) currentmap = nisot::new_map();
   else if(INVERSE) currentmap = gp::new_inverse();
   else if(fake::in()) currentmap = fake::new_map();
@@ -1086,11 +1088,13 @@ EX cell *random_in_distance(cell *c, int d) {
 
 EX int bounded_celldistance(cell *c1, cell *c2) {
   int limit = 6000;
+  #if CAP_SOLV
   if(asonov::in()) { 
     c2 = asonov::get_at(asonov::get_coord(c2->master) - asonov::get_coord(c1->master))->c7;
     c1 = currentmap->gamestart(); 
     limit = 100000000;
     }
+  #endif
 
   if(saved_distances.count(make_pair(c1,c2)))
     return saved_distances[make_pair(c1,c2)];

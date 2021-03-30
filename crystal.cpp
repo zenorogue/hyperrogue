@@ -1160,6 +1160,7 @@ EX void flip_z() {
   }
 
 #if CAP_RUG
+#if MAXMDIM >= 4
 hyperpoint coord_to_flat(ldcoord co, int dim = 3) {
   auto& cs = crystal_map()->cs;
   hyperpoint res = Hypc;
@@ -1169,6 +1170,7 @@ hyperpoint coord_to_flat(ldcoord co, int dim = 3) {
       res[b] += crug_rotation[b][a] * co[a] * rug::modelscale;
   return res;
   }
+#endif
 
 EX void switch_z_coordinate() {
   auto& cs = crystal_map()->cs;
@@ -1234,6 +1236,7 @@ void cut_triangle(const hyperpoint pa, const hyperpoint pb, const hyperpoint pc,
     cut_triangle2(pb, pc, pa, hb, hc, ha);
   }
 
+#if MAXMDIM >= 4
 EX void build_rugdata() {
   using namespace rug;
   rug::clear_model(); 
@@ -1292,6 +1295,7 @@ EX void build_rugdata() {
   
   println(hlog, "cut ", cut_level, "r ", crug_rotation);
   }
+#endif
 #endif
 
 EX void set_land(cell *c) {

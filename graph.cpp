@@ -856,9 +856,9 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     }
 
   else if(it == itPalace) {
-    ld h = cgi.human_height;
     #if MAXMDIM >= 4
     if(GDIM == 3 && WDIM == 2) {
+      ld h = cgi.human_height;
       dynamicval<qfloorinfo> qfi2(qfi, qfi);
       shiftmatrix V2 = V * spin(ticks / 1500.);
       /* divisors should be higher than in plate renderer */

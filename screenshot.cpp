@@ -307,7 +307,9 @@ EX always_false in;
       int j = i%3 ? i-1 : i+2;
       int k = j%3 ? j-1 : j+2;
       hyperpoint normal = (data[j] - data[i]) ^ (data[k] - data[i]);
+      #if MAXMDIM >= 4
       normal[3] = 0;
+      #endif
       if(sqhypot_d(3, normal) < 1e-6) {
         println(hlog, "bug ", tie(data[i], data[j], data[k]));
         }
