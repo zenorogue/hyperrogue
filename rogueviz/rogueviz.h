@@ -181,6 +181,55 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   colorpair perturb(colorpair cp);
   void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const string* info, int i);
 
+/* 3D models */
+
+namespace objmodels {
+
+  using tf_result = pair<int, hyperpoint>;
+
+  using transformer = std::function<tf_result(hyperpoint)>;
+  using subdivider = std::function<int(vector<hyperpoint>&)>;
+  
+  inline int prec = 10;
+  
+  struct object {
+    hpcshape sh;
+    basic_textureinfo tv;
+    color_t color;
+    };
+  
+  using model_type = vector<shared_ptr<object>>;  
+  
+  struct model {
+  
+    string path, fname;
+    transformer tf;
+    subdivider sd;
+  
+    model(string path = "", string fn = "", 
+      transformer tf = [] (hyperpoint h) { 
+        return tf_result{0, direct_exp(h)};
+        },
+      subdivider sd = [] (vector<hyperpoint>& hys) { 
+        if(euclid) return 1;
+        ld maxlen = prec * max(hypot_d(3, hys[1] - hys[0]), max(hypot_d(3, hys[2] - hys[0]), hypot_d(3, hys[2] - hys[1])));
+        return int(ceil(maxlen));
+        }
+      ) : path(path), fname(fn), tf(tf), sd(sd) {}
+  
+    map<string, texture::texture_data> materials;
+    map<string, color_t> colors;
+    
+    map<string, model_type> models;
+
+    /* private */
+    void load_obj(model_type& objects);
+    
+    void render(const shiftmatrix& V);
+    };
+  
+  }
+
   }
 
 #endif
