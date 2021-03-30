@@ -75,6 +75,16 @@ void normalize() {
     }
   }
 
+double vdot(const kohvec& a, const kohvec& b) {
+  double diff = 0;
+  for(int k=0; k<columns; k++) diff += a[k] * b[k] * weights[k];
+  return diff;
+  }
+
+void vshift(kohvec& a, const kohvec& b, ld i) {
+  for(int k=0; k<columns; k++) a[k] += b[k] * i;
+  }
+
 double vnorm(kohvec& a, kohvec& b) {
   double diff = 0;
   for(int k=0; k<columns; k++) diff += sqr((a[k]-b[k]) * weights[k]);
@@ -231,9 +241,91 @@ void coloring() {
       if(maxl-minl < 1e-3) maxl = minl+1e-3;
       
       for(int i=0; i<cells; i++) 
-        part(net[i].where->landparam_color, pid) = (255 * (listing[i] - minl)) / (maxl - minl);
+        part(net[i].where->landparam_color, pid) = 32 + (191 * (listing[i] - minl)) / (maxl - minl);
+
+      for(int i=0; i<cells; i++) 
+        net[i].where->wall = waNone;
+      
+      vid.wallmode = 2;
       }
     }
+  }
+
+ld precise_placement = 1.6;
+
+bool triangulate(kohvec d, neuron& w, map<cell*, neuron*>& find, transmatrix& res) {
+
+  if(precise_placement < 1) return false;
+
+  ld bdiff = HUGE_VAL;
+
+  /* find the second neuron */
+  neuron *second = nullptr;
+  int dir2 = -1;
+  forCellIdEx(c2, i, w.where) {
+    if(!find.count(c2)) continue;
+    auto w2 = find[c2];
+    double diff = vnorm(w2->net, d);
+    if(diff < bdiff) bdiff = diff, second = w2, dir2 = i;
+    }
+  
+  if(!second) return false;
+  
+  /* find the third neuron */
+  neuron *third = nullptr; bdiff = HUGE_VAL;
+  int dir3 = -1;
+  forCellIdEx(c3, i, w.where) {
+    if(!find.count(c3)) continue;
+    if(valence() == 3 && !isNeighbor(c3, second->where)) continue;
+    auto w3 = find[c3];
+    double diff = vnorm(w3->net, d);
+    if(diff < bdiff) bdiff = diff, third = w3, dir3 = i;
+    }
+  
+  if(!third) return false;
+  
+  const kohvec& a = w.net;
+  kohvec b = second->net;
+  kohvec c = third->net;
+  
+  /* center at a */
+  vshift(b, a, -1);
+  vshift(c, a, -1);
+  vshift(d, a, -1);
+  
+  /* orthonormalize */
+  kohvec c1 = c;
+  kohvec d1 = d;
+  ld bd = vdot(b, b);
+  if(bd < 1e-12) return false;
+  ld s = vdot(c1, b) / bd;
+  vshift(c1, b, -s);
+  
+  ld db = vdot(d1, b) / bd;
+  ld cd = vdot(c1, c1);
+  if(cd < 1e-12) return false;
+  ld dc = vdot(d1, c1) / cd;
+  
+  // b is: (1,0)
+  // c is: (s,1)
+
+  // d is: (db,dc) = dc * (s,1) + (db-dc*s) * (1,0)
+  
+  db -= dc * s;
+  
+  if(db < 0) dc = dc / (1-db), db = 0;
+  if(dc < 0) db = db / (1-dc), dc = 0;
+
+  ld overflow = db + dc - 1;
+  if(overflow > 0) tie(db,dc) = make_pair(db/(db+dc), dc/(db+dc));
+  
+  db /= precise_placement, dc /= precise_placement;
+
+  hyperpoint h = (1-dc-db) * C0 + db * tC0(currentmap->adj(w.where, dir2)) + dc * tC0(currentmap->adj(w.where, dir3));
+  h = normalize(h);
+  
+  res = rgpushxto0(h);  
+  return true;  
   }
 
 void distribute_neurons() {
@@ -247,7 +339,11 @@ void distribute_neurons() {
     whowon[s] = &w;
     w.drawn_samples++;
     }
-  
+    
+  map<cell*, neuron*> find;
+  if(precise_placement >= 1)
+    for(auto& w: net) find[w.where] = &w;
+
   ld rad = .25 * cgi.scalefactor;
   
   for(auto p: sample_vdata_id) {
@@ -255,9 +351,12 @@ void distribute_neurons() {
     int s = p.first;
     auto& w = *whowon[s];
     vdata[id].m->base = w.where;
-    vdata[id].m->at = 
-      spin(2*M_PI*w.csample / w.drawn_samples) * xpush(rad * (w.drawn_samples-1) / w.drawn_samples);
+    
+    if(!triangulate(data[s].val, w, find, vdata[id].m->at))
+      vdata[id].m->at = 
+        spin(2*M_PI*w.csample / w.drawn_samples) * xpush(rad * (w.drawn_samples-1) / w.drawn_samples);
     w.csample++;
+    for(auto& e: vdata[id].edges) e.second->orig = nullptr;
     }
   
   shmup::fixStorage();  
@@ -1287,6 +1386,8 @@ void showMenu() {
     
   dialog::addItem("level lines", '4');
   dialog::add_action_push(levelline::show);
+  
+  add_edit(precise_placement);
   }
 
 void save_compressed(string name) {
