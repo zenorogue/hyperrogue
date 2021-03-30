@@ -129,7 +129,7 @@ namespace rogueviz {
   
   namespace pres {
     using namespace hr::tour;
-    inline hookset<void(vector<slide>&)> hooks_build_rvtour;
+    inline hookset<void(string, vector<slide>&)> hooks_build_rvtour;
     slide *gen_rvtour();
 
 template<class T> function<void(presmode)> roguevizslide(char c, const T& t) {
