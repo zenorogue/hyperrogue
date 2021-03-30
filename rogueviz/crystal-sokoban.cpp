@@ -37,6 +37,8 @@ undo_state current_state() {
   return u;
   }
 
+void sb_hooks();
+
 void run_sb() {
   crystal::compass_probability = 0;
   stop_game();
@@ -46,7 +48,6 @@ void run_sb() {
   patterns::whichCanvas = 'g';
   patterns::canvasback = 0x101010;
   check_cgi();
-  vizid = &on;
   start_game();  
 
   for(int z=-8; z<8; z++)
@@ -114,8 +115,6 @@ void restore_undo() {
   }
 
 bool sokomap2() {
-  bool in = vizid == &on;
-  if(!in) return false;
 
   if(undos.back().where != cwt.at) save_undo();
 
@@ -157,14 +156,21 @@ bool sokomap2() {
   }
 
 bool soko_key(int sym, int uni) {
-  bool in = vizid == &on;
-  if((cmode & sm::NORMAL) && (uni == SDLK_BACKSPACE || uni == 'r') && in && isize(undos) != 1) {
+  if((cmode & sm::NORMAL) && (uni == SDLK_BACKSPACE || uni == 'r') && isize(undos) != 1) {
     restore_undo();
     return true;
     }
   return false;
   }
 
+void sb_hooks() {
+  rv_hook(hooks_prestats, 90, sokomap2);
+  rv_hook(hooks_welcome_message, 50, [] () {
+    addMessage(XLAT("Welcome to Crystal Sokoban!"));
+    return true;
+    });
+  rv_hook(hooks_handleKey, 50, soko_key);
+  }
 
 auto sbhook = addHook(hooks_args, 100, [] {
   using namespace arg;
@@ -177,12 +183,7 @@ auto sbhook = addHook(hooks_args, 100, [] {
     }
   else return 1;
   return 0;
-  }) + addHook(hooks_prestats, 90, sokomap2)
- +  addHook(hooks_welcome_message, 50, [] () {
-    if(vizid == &on) addMessage(XLAT("Welcome to Crystal Sokoban!"));
-    return bool(vizid);
-    }) +
-  + addHook(hooks_handleKey, 50, soko_key);
+  });
 
 
 }
