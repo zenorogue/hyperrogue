@@ -639,7 +639,7 @@ void step() {
   initialize_dispersion();
   initialize_neurons_initial();
   
-  double tt = (t-1.) / tmax;
+  double tt = (t-.5) / tmax;
   tt = pow(tt, ttpower);
 
   double sigma = maxdist * tt;
@@ -648,14 +648,13 @@ void step() {
   if(qpct) {
     int pct = (int) ((qpct * (t+.0)) / tmax);
     if(pct != lpct) {
-      printf("pct %d lpct %d\n", pct, lpct);
       lpct = pct;
       analyze();
       
       if(gaussian)
-        printf("t = %6d/%6d %3d%% sigma=%10.7lf maxudist=%10.7lf\n", t, tmax, pct, sigma, maxudist);
+        println(hlog, format("t = %6d/%6d %3d%% sigma=%10.7lf maxudist=%10.7lf\n", t, tmax, pct, sigma, maxudist));
       else
-        printf("t = %6d/%6d %3d%% dispid=%5d maxudist=%10.7lf\n", t, tmax, pct, dispid, maxudist);
+        println(hlog, format("t = %6d/%6d %3d%% dispid=%5d maxudist=%10.7lf\n", t, tmax, pct, dispid, maxudist));
       }
     }
   int id = hrand(samples);
@@ -686,13 +685,19 @@ void step() {
     if(!n2) continue;
     double nu = learning_factor;
     
-    if(gaussian)
+    if(gaussian) {
       nu *= exp(-sqr(sd.dist/sigma));
+      if(isnan(nu)) 
+        throw hr_exception(lalign(0, "obtained nan, ", sd.dist, " / ", sigma));
+      }
     else
       nu *= *(it++);
-
-    for(int k=0; k<columns; k++)
+    
+    for(int k=0; k<columns; k++) {
       n2->net[k] += nu * (data[id].val[k] - n2->net[k]);
+      if(isnan(n2->net[k])) 
+        throw hr_exception("obtained nan somehow, nu = " + lalign(0, nu));
+      }
     }
   
   t--;
