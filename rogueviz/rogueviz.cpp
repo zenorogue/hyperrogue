@@ -762,7 +762,6 @@ color_t chosen_legend_color = DEFAULT_COLOR;
 
 bool rogueviz_hud() {
   color_t legend_color = chosen_legend_color == DEFAULT_COLOR ? forecolor : chosen_legend_color;
-  if(!vizid) return false;
   if(cmode & sm::DRAW) return false;
 
   int qet = isize(edgetypes);
@@ -884,6 +883,8 @@ void readcolor(const string& cfname) {
     }
   }
 
+void graph_rv_hooks();
+
 void init(void *_vizid, flagtype _vizflags) {
 
   autocheat = true; 
@@ -909,6 +910,8 @@ void init(void *_vizid, flagtype _vizflags) {
 
   vizid = _vizid;
   vizflags = _vizflags;
+  
+  graph_rv_hooks();
   }
 
 int search_for = -1;
@@ -1152,7 +1155,6 @@ void showMenu() {
   }
 
 bool default_help() {
-  if(!vizid) return false;
 
   help = 
     "This is RogueViz, a visualization engine based on HyperRogue.\n\nUse WASD to move, v for menu.\n\n"
@@ -1163,7 +1165,7 @@ bool default_help() {
   }
 
 void o_key(o_funcs& v) {
-  if(vizid) v.push_back(named_dialog(XLAT("rogueviz menu"), rogueviz::showMenu));
+  v.push_back(named_dialog(XLAT("rogueviz menu"), rogueviz::showMenu));
   }
 
 auto hooks  = 
@@ -1171,11 +1173,6 @@ auto hooks  =
   addHook(hooks_args, 100, readArgs) +
 #endif
   addHook(hooks_clearmemory, 0, close) +
-  addHook(hooks_prestats, 100, rogueviz_hud) +
-  addHook(shmup::hooks_draw, 100, drawVertex) +
-  addHook(shmup::hooks_describe, 100, describe_monster) +
-  addHook(shmup::hooks_kill, 100, activate) +
-  addHook(hooks_o_key, 100, o_key) +
   
   addHook(dialog::hooks_display_dialog, 100, [] () {
     if(current_screen_cfunction() == showMainMenu) {
@@ -1183,12 +1180,20 @@ auto hooks  =
       dialog::add_action_push(rogueviz::showMenu);
       }
     }) +
-  addHook(hooks_welcome_message, 100, [] () {
-    if(vizid) addMessage(XLAT("Welcome to RogueViz!"));
-    return bool(vizid);
-    }) +
-  addHook(hooks_default_help, 100, default_help) +
   addHook(hooks_markers, 100, search_marker) +
  0;
 
+void graph_rv_hooks() {
+  rv_hook(hooks_default_help, 100, default_help);
+  rv_hook(hooks_o_key, 100, o_key);
+  rv_hook(hooks_prestats, 100, rogueviz_hud);
+  rv_hook(shmup::hooks_draw, 100, drawVertex);
+  rv_hook(shmup::hooks_describe, 100, describe_monster);
+  rv_hook(shmup::hooks_kill, 100, activate);
+  rv_hook(hooks_welcome_message, 100, [] () {
+    addMessage(XLAT("Welcome to RogueViz!"));
+    return true;
+    });
+  }
+  
 }
