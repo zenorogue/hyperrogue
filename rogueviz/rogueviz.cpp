@@ -263,8 +263,6 @@ namespace anygraph {
   
   edgetype *any;
   
-  int vzid;
-  
   int N;
                
   void fixedges() {
@@ -280,7 +278,7 @@ namespace anygraph {
   void tst() {}
 
   void read(string fn, bool subdiv, bool doRebase, bool doStore) {
-    init(&vzid, RV_GRAPH);
+    init(RV_GRAPH);
     any = add_edgetype("embedded edges");
     fname = fn;
     fhstream f(fn + "-coordinates.txt", "rt");
@@ -888,7 +886,7 @@ void readcolor(const string& cfname) {
 
 void graph_rv_hooks();
 
-void init(void *_vizid, flagtype _vizflags) {
+void init(flagtype _vizflags) {
 
   autocheat = true; 
   showstartmenu = false;
@@ -911,7 +909,6 @@ void init(void *_vizid, flagtype _vizflags) {
   drawthemap();
   gmatrix0 = gmatrix;
 
-  vizid = _vizid;
   vizflags = _vizflags;
   
   graph_rv_hooks();
@@ -937,7 +934,6 @@ void close() {
     cleanup.back()();
     cleanup.pop_back();
     }
-  vizid = nullptr;
   relmatrices.clear();
   }
 

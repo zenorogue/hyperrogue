@@ -17,8 +17,6 @@
 namespace rogueviz {
   using namespace hr;
   
-  inline void *vizid;
-  
   constexpr flagtype RV_GRAPH = 1;
   constexpr flagtype RV_WHICHWEIGHT = 2; // sag
   constexpr flagtype RV_AUTO_MAXWEIGHT = 4; // sag
@@ -34,7 +32,7 @@ namespace rogueviz {
   void drawExtra();
   void close();
 
-  void init(void *vizid, flagtype flags);
+  void init(flagtype flags);
   
   struct edgetype {
     double visible_from;

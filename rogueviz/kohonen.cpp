@@ -16,8 +16,6 @@ void clear();
 void create_neurons();
 
 
-int kohonen_id;
-
 int columns;
 
 typedef vector<double> kohvec;
@@ -1770,7 +1768,7 @@ bool mark(cell *c) {
 
 void initialize_rv() {
   if(state & KS_ROGUEVIZ) return;
-  init(&kohonen_id, RV_GRAPH | RV_HAVE_WEIGHT);
+  init(RV_GRAPH | RV_HAVE_WEIGHT);
   state |= KS_ROGUEVIZ;
 
   rv_hook(hooks_frame, 50, levelline::draw);

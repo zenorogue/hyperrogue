@@ -13,8 +13,6 @@ namespace sag {
 
   bool turn(int delta);
   
-  int sag_id;
-
   int sagpar = 0;
 
   enum eSagmode { sagOff, sagHC, sagSA };
@@ -422,7 +420,7 @@ namespace sag {
 
   void read(string fn) {
     fname = fn;
-    init(&sag_id, RV_GRAPH | RV_WHICHWEIGHT | RV_AUTO_MAXWEIGHT | RV_HAVE_WEIGHT);
+    init(RV_GRAPH | RV_WHICHWEIGHT | RV_AUTO_MAXWEIGHT | RV_HAVE_WEIGHT);
 
     rv_hook(rogueviz::hooks_close, 100, [] { sag::sagedges.clear(); });
     rv_hook(shmup::hooks_turn, 100, turn);

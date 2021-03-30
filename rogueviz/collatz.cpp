@@ -11,14 +11,12 @@ namespace collatz {
   
   edgetype *collatz1, *collatz2;
   
-  int collatz_id;
-  
   void act(vertexdata& vd, cell *c, shmup::monster *m, int i);
   void lookup(long long reached, int bits);
   void collatz_video(const string &fname);
 
   void start() {
-    init(&collatz_id, RV_GRAPH);
+    init(RV_GRAPH);
     collatz1 = add_edgetype("1");
     collatz2 = add_edgetype("2");
     vdata.resize(1);

@@ -9,8 +9,6 @@ namespace rogueviz {
 
 namespace fullnet {
 
-int fullnet_id;
-
 void drawExtra() {  
   for(map<cell*, shiftmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
     cell *c = it->first;
@@ -40,7 +38,7 @@ auto hooks =
     using namespace arg;
     if(argis("-net")) {
       PHASE(3);
-      init(&fullnet_id, 0);
+      init(0);
       rv_hook(hooks_frame, 0, drawExtra);
       linepatterns::patTriTree.color = 0x30;
       linepatterns::patTriOther.color = 0x10;

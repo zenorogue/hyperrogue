@@ -48,8 +48,6 @@ namespace flocking {
 
   void init();
 
-  int flock_id;
-
   int N;
   
   bool draw_lines = false;
@@ -464,7 +462,7 @@ namespace flocking {
       return;
       }
     stop_game();
-    rogueviz::init(&flock_id, RV_GRAPH);
+    rogueviz::init(RV_GRAPH);
     rv_hook(shmup::hooks_turn, 100, turn);
     rv_hook(hooks_frame, 100, flock_marker);
     rv_hook(hooks_o_key, 80, o_key);
