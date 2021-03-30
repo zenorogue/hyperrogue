@@ -1769,6 +1769,8 @@ auto hooks4 = addHook(hooks_clearmemory, 100, clear)
     -> set_reaction([] { if((state & KS_NEURONS) && (state & KS_SAMPLES)) distribute_neurons(); });
     param_b(show_rings, "som_show_rings");
     param_b(animate, "animate");
+    param_f(dispersion_precision, "som_dispersion")
+    -> set_reaction([] { state &=~ KS_DISPERSION; });
     });
 }}
 
