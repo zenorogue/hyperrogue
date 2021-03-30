@@ -1,7 +1,6 @@
 #include "rogueviz.h"
 
 /* a sample higher dimensional Sokoban puzzle */
-#include "magiccube.cpp"
 
 namespace rogueviz {
 
