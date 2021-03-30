@@ -1358,8 +1358,10 @@ void neurondisttable(const string &name) {
   fclose(f);
   }
 
+bool animate = true;
+
 void steps() {
-  if(!kohonen::finished()) {
+  if(kohonen::animate && !kohonen::finished()) {
     unsigned int t = SDL_GetTicks();
     while(SDL_GetTicks() < t+20) kohonen::step();
     setindex(false);
@@ -1749,6 +1751,7 @@ auto hooks4 = addHook(hooks_clearmemory, 100, clear)
     -> editable(0, 2, .2, "precise placement", "0 = make all visible, 1 = place ideally, n = place 1/n of the distance from center to ideal placement", 'p')
     -> set_reaction([] { if((state & KS_NEURONS) && (state & KS_SAMPLES)) distribute_neurons(); });
     param_b(show_rings, "som_show_rings");
+    param_b(animate, "animate");
     });
 }}
 
