@@ -9,79 +9,63 @@ namespace rogueviz {
 namespace pres {
 
 /* maks graphs in presentations */
-struct grapher {
-
-  ld minx, miny, maxx, maxy;
+grapher::grapher(ld _minx, ld _miny, ld _maxx, ld _maxy) : minx(_minx), miny(_miny), maxx(_maxx), maxy(_maxy) {
+  auto& cd = *current_display;
   
-  shiftmatrix T;
+  ld xpixels = 2 * min(cd.xcenter - cd.xmin, cd.xmax - cd.xcenter);
+  ld ypixels = 2 * min(cd.ycenter - cd.ymin, cd.ymax - cd.ycenter);
   
-  grapher(ld _minx, ld _miny, ld _maxx, ld _maxy) : minx(_minx), miny(_miny), maxx(_maxx), maxy(_maxy) {
-    auto& cd = *current_display;
-    
-    ld xpixels = 2 * min(cd.xcenter - cd.xmin, cd.xmax - cd.xcenter);
-    ld ypixels = 2 * min(cd.ycenter - cd.ymin, cd.ymax - cd.ycenter);
-    
-    ld sca = min(abs(xpixels / (maxx-minx)), abs(ypixels / (maxy-miny)));
-    
-    ld medx = (minx + maxx) / 2;
-    ld medy = (miny + maxy) / 2;
+  ld sca = min(abs(xpixels / (maxx-minx)), abs(ypixels / (maxy-miny)));
+  
+  ld medx = (minx + maxx) / 2;
+  ld medy = (miny + maxy) / 2;
 
-    hyperpoint zero = atscreenpos(cd.xcenter - sca * medx, cd.ycenter + sca * medy, 1) * C0;
+  hyperpoint zero = atscreenpos(cd.xcenter - sca * medx, cd.ycenter + sca * medy, 1) * C0;
 
-    hyperpoint zero10 = atscreenpos(cd.xcenter - sca * medx + sca, cd.ycenter + sca * medy, 1) * C0;
-    hyperpoint zero01 = atscreenpos(cd.xcenter - sca * medx, cd.ycenter + sca * medy - sca, 1) * C0;
-    
-    T = shiftless(Id);
-    T.T[LDIM] = zero;
-    T.T[0] = zero10 - zero;
-    T.T[1] = zero01 - zero;
-    
-    T.T = transpose(T.T);
-    }
+  hyperpoint zero10 = atscreenpos(cd.xcenter - sca * medx + sca, cd.ycenter + sca * medy, 1) * C0;
+  hyperpoint zero01 = atscreenpos(cd.xcenter - sca * medx, cd.ycenter + sca * medy - sca, 1) * C0;
+  
+  T = shiftless(Id);
+  T.T[LDIM] = zero;
+  T.T[0] = zero10 - zero;
+  T.T[1] = zero01 - zero;
+  
+  T.T = transpose(T.T);
+  }
 
-  void line(hyperpoint h1, hyperpoint h2, color_t col) {
+void grapher::line(hyperpoint h1, hyperpoint h2, color_t col) {
     curvepoint(h1);
     curvepoint(h2);
     queuecurve(T, col, 0, PPR::LINE).flags |= POLY_FORCEWIDE;
     }
   
-  void arrow(hyperpoint h1, hyperpoint h2, ld sca) {
-    line(h1, h2, 0xFF);
-    hyperpoint h = h2 - h1;
-    ld siz = hypot_d(2, h);
-    h *= sca / siz;
-    curvepoint(h2);
-    curvepoint(h2 - spin(15*degree) * h);
-    curvepoint(h2 - spin(-15*degree) * h);
-    curvepoint(h2);
-    queuecurve(T, 0xFF, 0xFF, PPR::LINE);
-    }
+void grapher::arrow(hyperpoint h1, hyperpoint h2, ld sca, color_t col) {
+  line(h1, h2, col);
+  if(!sca) return;
+  hyperpoint h = h2 - h1;
+  ld siz = hypot_d(2, h);
+  h *= sca / siz;
+  curvepoint(h2);
+  curvepoint(h2 - spin(15*degree) * h);
+  curvepoint(h2 - spin(-15*degree) * h);
+  curvepoint(h2);
+  queuecurve(T, col, col, PPR::LINE);
+  }
   
-  shiftmatrix pos(ld x, ld y, ld sca) {
-    transmatrix P = Id;
-    P[0][0] = sca;
-    P[1][1] = sca;
-    P[0][LDIM] = x;
-    P[1][LDIM] = y;
-    return T * P;
-    }
-  
-  };
+shiftmatrix grapher::pos(ld x, ld y, ld sca) {
+  transmatrix P = Id;
+  P[0][0] = sca;
+  P[1][1] = sca;
+  P[0][LDIM] = x;
+  P[1][LDIM] = y;
+  return T * P;
+  }
 
 hyperpoint p2(ld x, ld y) { return LDIM == 2 ? point3(x, y, 1) : point31(x, y, 0); }
 
 /* temporary hooks */
 
 using namespace hr::tour;
-
-template<class T, class U> void add_temporary_hook(int mode, hookset<T>& m, int prio, U&& hook) {
-  if(mode == pmStart) {
-    int p = addHook(m, prio, hook);
-    on_restore([&m, p] { 
-      delHook(m, p); 
-      });
-    }
-  }
 
 void add_stat(presmode mode, const bool_reaction_t& stat) {
   add_temporary_hook(mode, hooks_prestats, 200, stat);
@@ -92,7 +76,7 @@ void no_other_hud(presmode mode) {
   clearMessages();
   }
 
-void empty_screen(presmode mode, color_t col = 0xFFFFFFFF) {
+void empty_screen(presmode mode, color_t col) {
   if(mode == pmStart) {
     tour::slide_backup(nomap, true);
     tour::slide_backup(backcolor, col);
@@ -261,9 +245,6 @@ int phooks =
       dialog::addInfo(XLAT("presentation"));
       }
     });
-
-static ld angle = 0;
-static int dir = -1;
 
 void use_angledir(presmode mode, bool reset) {
   if(mode == pmStart && reset)

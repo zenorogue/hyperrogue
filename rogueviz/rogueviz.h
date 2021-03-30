@@ -169,7 +169,43 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
     };
   }
 
-    }
+
+    void add_end(vector<slide>& s);
+
+    template<class T, class U> void add_temporary_hook(int mode, hookset<T>& m, int prio, U&& hook) {
+      using namespace tour;
+      if(mode == pmStart) {
+        int p = addHook(m, prio, hook);
+        on_restore([&m, p] { 
+          delHook(m, p); 
+          });
+        }
+      }
+
+  /* maks graphs in presentations */
+  struct grapher {
+  
+    ld minx, miny, maxx, maxy;
+    
+    shiftmatrix T;
+    
+    grapher(ld _minx, ld _miny, ld _maxx, ld _maxy);
+    void line(hyperpoint h1, hyperpoint h2, color_t col);
+    void arrow(hyperpoint h1, hyperpoint h2, ld sca, color_t col = 0xFF);
+    shiftmatrix pos(ld x, ld y, ld sca);
+    };
+  
+  void add_stat(presmode mode, const bool_reaction_t& stat);  
+  void compare_projections(presmode mode, eModel a, eModel b);
+  void no_other_hud(presmode mode);
+  void empty_screen(presmode mode, color_t col = 0xFFFFFFFF);
+  void show_picture(presmode mode, string s);    
+  void use_angledir(presmode mode, bool reset);
+
+  inline ld angle = 0;
+  inline int dir = -1;
+  hyperpoint p2(ld x, ld y);
+  }
 
   void createViz(int id, cell *c, transmatrix at);
 
