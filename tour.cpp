@@ -401,7 +401,7 @@ EX namespace ss {
   EX hookset<void(slideshow_callback)> hooks_extra_slideshows;
   
   EX void for_all_slideshows(const slideshow_callback& cb) {
-    cb(XLAT("Guided Tour"), default_slides, 't');
+    cb(XLAT("HyperRogue Guided Tour"), default_slides, 't');
     callhooks(hooks_extra_slideshows, cb);
     }
   
