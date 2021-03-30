@@ -25,6 +25,8 @@ bool usecache = true;
 
 pair<int, hyperpoint> nilize(hyperpoint h) {
   
+  if(euclid) return {0, h - A + C0};
+
   hyperpoint hc = h;
   for(int i=0; i<4; i++) hc[i] = floor(h[i] * 1000 + .5);
   if(usecache && cache.count(hc)) return cache[hc];

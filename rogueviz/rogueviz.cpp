@@ -571,6 +571,8 @@ void queue_prec(const shiftmatrix& V, edgeinfo*& ei, color_t col) {
   #endif
   }
 
+int brm_limit = 1000;
+
 bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
   if(m->dead) return true;
   if(m->type != moRogueviz) return false;
@@ -587,7 +589,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
   
   bool multidraw = quotient;
   
-  bool use_brm = bounded && isize(currentmap->allcells()) <= 1000;
+  bool use_brm = bounded && isize(currentmap->allcells()) <= brm_limit;
         
   if(!lshiftclick) for(int j=0; j<isize(vd.edges); j++) {
     edgeinfo *ei = vd.edges[j].second;
