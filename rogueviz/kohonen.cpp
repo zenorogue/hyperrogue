@@ -393,8 +393,10 @@ void analyze() {
   coloring();
   }
 
+bool show_rings = true;
+
 bool coloring_3d(cell *c, const shiftmatrix& V) {
-  if(WDIM == 3 && vizid == &kohonen_id) 
+  if(WDIM == 3 && vizid == &kohonen_id && show_rings) 
     queuepoly(face_the_player(V), cgi.shRing, darkena(c->landparam_color, 0, 0xFF));
   return false;
   }
@@ -1746,6 +1748,7 @@ auto hooks4 = addHook(hooks_clearmemory, 100, clear)
     param_f(precise_placement, "koh_placement")
     -> editable(0, 2, .2, "precise placement", "0 = make all visible, 1 = place ideally, n = place 1/n of the distance from center to ideal placement", 'p')
     -> set_reaction([] { if((state & KS_NEURONS) && (state & KS_SAMPLES)) distribute_neurons(); });
+    param_b(show_rings, "som_show_rings");
     });
 }}
 
