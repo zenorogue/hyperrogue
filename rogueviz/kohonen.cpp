@@ -465,7 +465,7 @@ struct cellcrawler {
   vector<vector<ld>> dispersion;
   };
 
-double dispersion_end_at = 1.5;
+double dispersion_end_at = 1.6;
 
 double dispersion_precision = .0001;
 int dispersion_each = 1;
@@ -504,7 +504,7 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
     
     d.clear();
   
-    printf("Building dispersion...\n");
+    DEBBI(DF_LOG, ("Building dispersion, precision = ", dispersion_precision, " end_at = ", dispersion_end_at, "...\n"));
     
     for(iter=0; dispersion_count ? true : vmax > vmin * dispersion_end_at; iter++) {
       if(iter % dispersion_each == 0) {
@@ -530,7 +530,12 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
       }
   
     dispersion_count = isize(d);
-    printf("Dispersion count = %d\n", dispersion_count);
+    DEBB(DF_LOG, ("Dispersion count = ", dispersion_count));
+    /*
+    println(hlog, "dlast = ", d.back());
+    println(hlog, "dlast2 = ", d[d.size()-2]);
+    println(hlog, "vmin=", vmin, " vmax=",vmax, " end_at=", dispersion_end_at);
+    */
     }
   }
 
