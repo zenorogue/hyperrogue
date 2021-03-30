@@ -624,7 +624,7 @@ void verify_crawlers() {
   
 bool finished() { return t == 0; }
 
-int krad;
+int krad, kqty;
 
 double ttpower = 1;
 
