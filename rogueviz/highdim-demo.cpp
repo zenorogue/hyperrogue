@@ -6,8 +6,6 @@ namespace magic { void magic(int i); }
 
 namespace colorpicker {
 
-bool on;
-
 int current_step;
 color_t current_color;
 cell *current_center;
@@ -26,7 +24,6 @@ color_t get_color_at(cell *c) {
   }
 
 bool color_markers(cell *c, const shiftmatrix& V) {
-  if(vizid != &on) return false;
   if(!centerover) return false;
   if(centerover != current_center) {
     current_color = get_color_at(centerover);
@@ -37,20 +34,19 @@ bool color_markers(cell *c, const shiftmatrix& V) {
   }
 
 bool color_key(int sym, int uni) {
-  bool in = vizid == &on;
-  if((cmode & sm::NORMAL) && (uni >= '0' && uni <= '6') && in) {
+  if((cmode & sm::NORMAL) && (uni >= '0' && uni <= '6')) {
     current_step = (1 << (uni - '0'));
     return true;
     }
-  if((cmode & sm::NORMAL) && uni == '[' && in) {
+  if((cmode & sm::NORMAL) && uni == '[') {
     current_step = (1 + current_step) / 2;
     return true;
     }
-  if((cmode & sm::NORMAL) && uni == ']' && in) {
+  if((cmode & sm::NORMAL) && uni == ']') {
     current_step = 2 * current_step;
     return true;
     }
-  if((cmode & sm::NORMAL) && in && uni >= 1000 && uni < 1010) {
+  if((cmode & sm::NORMAL) && uni >= 1000 && uni < 1010) {
     current_step = 1 << (uni - 1000);
     return true;
     }
@@ -58,7 +54,6 @@ bool color_key(int sym, int uni) {
   }
 
 bool color_prestats() {
-  if(vizid != &on) return false;
   nohelp = true;
   for(int k= 0; k <= 6; k++) {
     int v = 1<< k;
@@ -80,7 +75,6 @@ void run_cpick() {
   patterns::whichCanvas = 'g';
   patterns::canvasback = 0;
   check_cgi();
-  vizid = &on;
   start_game();
   current_center = currentmap->gamestart();
   current_color = 0x808080;    
@@ -88,6 +82,9 @@ void run_cpick() {
   mapeditor::drawplayer = false;
   vid.smart_range_detail = 1;
   vid.use_smart_range = 2;
+  rv_hook(hooks_drawcell, 100, color_markers);
+  rv_hook(hooks_handleKey, 50, color_key);
+  rv_hook(hooks_prestats, 150, color_prestats);
   }
 
 auto cphook = addHook(hooks_args, 100, [] {
@@ -100,9 +97,7 @@ auto cphook = addHook(hooks_args, 100, [] {
     }
   else return 1;
   return 0;
-  }) + addHook(hooks_drawcell, 100, color_markers)
-  + addHook(hooks_handleKey, 50, color_key)
-  + addHook(hooks_prestats, 150, color_prestats);
+  });
   }
 
 namespace sokoban {
@@ -153,7 +148,6 @@ void create_sokowalls(cell *c) {
   }
 
 bool sokomap(cell *c, const shiftmatrix& V) {
-  if(vizid != &on) return false;
   if(!created) {
     created = true;
     create_sokowalls(c);
@@ -215,7 +209,7 @@ void run_sb() {
   patterns::whichCanvas = 'g';
   patterns::canvasback = 0;
   check_cgi();
-  vizid = &on;
+  rv_hook(hooks_drawcell, 100, sokomap);
   start_game();
   mapeditor::drawplayer = false;
   vid.smart_range_detail = 1;
@@ -232,7 +226,7 @@ auto sbhook = addHook(hooks_args, 100, [] {
     }
   else return 1;
   return 0;
-  }) + addHook(hooks_drawcell, 100, sokomap);
+  });
 
 
 }
@@ -267,8 +261,6 @@ int shapeid;
 
 int mycanvas(cell *c) {
 
-  if(vizid != &mycanvas) return -1;
-  
   int dim = crystal::get_dim();
 
   auto d = crystal::get_coord(c->master);
@@ -400,7 +392,9 @@ int mycanvas(cell *c) {
     }
   }
 
-auto hchook = addHook(patterns::hooks_generate_canvas, 100, mycanvas);
+void enable() {
+  rv_hook(patterns::hooks_generate_canvas, 100, mycanvas);
+  }
 
 auto explore_structure(int _shapeid) {
   using namespace tour;
@@ -414,7 +408,7 @@ auto explore_structure(int _shapeid) {
       firstland = specialland = laCanvas;
       patterns::whichCanvas = ' ';
       shapeid = _shapeid;
-      vizid = (void*) &mycanvas;
+      enable();
       crystal::crystal_period = 4;
       start_game();
       ray::max_cells = 4096;
@@ -422,7 +416,7 @@ auto explore_structure(int _shapeid) {
     if(mode == pmKey || mode == pmGeometrySpecial) {
       stop_game();
       set_geometry(geometry == gCrystal534 ? gCrystal344 : gCrystal534);
-      vizid = (void*) &mycanvas;
+      enable();
       start_game();
       }
     };
@@ -450,7 +444,7 @@ void house(int sides, int shape = 10) {
   patterns::whichCanvas = ' ';
   shapeid = shape;
   check_cgi();
-  vizid = (void*) &mycanvas;
+  enable();
   start_game();
   }
 
@@ -656,7 +650,6 @@ auto highdim_hooks  =
     addMessage(XLAT("Welcome to the %1-dimensional space!", its(crystal::get_dim())));
     return true;
     })
-  + addHook(hooks_clearmemory, 0, [] { vizid = nullptr; })
   + addHook(tour::ss::hooks_extra_slideshows, 120, [] (tour::ss::slideshow_callback cb) {
   
     if(high_slides.empty()) gen_high_demo();
