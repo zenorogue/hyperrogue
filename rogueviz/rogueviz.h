@@ -190,7 +190,7 @@ namespace objmodels {
   using transformer = std::function<tf_result(hyperpoint)>;
   using subdivider = std::function<int(vector<hyperpoint>&)>;
   
-  inline int prec = 10;
+  inline int prec = 1;
   
   struct object {
     hpcshape sh;
@@ -206,6 +206,8 @@ namespace objmodels {
     transformer tf;
     subdivider sd;
   
+    bool is_available, av_checked;
+
     model(string path = "", string fn = "", 
       transformer tf = [] (hyperpoint h) { 
         return tf_result{0, direct_exp(h)};
@@ -215,7 +217,7 @@ namespace objmodels {
         ld maxlen = prec * max(hypot_d(3, hys[1] - hys[0]), max(hypot_d(3, hys[2] - hys[0]), hypot_d(3, hys[2] - hys[1])));
         return int(ceil(maxlen));
         }
-      ) : path(path), fname(fn), tf(tf), sd(sd) {}
+      ) : path(path), fname(fn), tf(tf), sd(sd) { av_checked = false; }
   
     map<string, texture::texture_data> materials;
     map<string, color_t> colors;
@@ -226,6 +228,8 @@ namespace objmodels {
     void load_obj(model_type& objects);
     
     void render(const shiftmatrix& V);
+    
+    bool available();
     };
   
   }

@@ -14,6 +14,13 @@ char peek(fhstream& fs) {
   return g;
   }
 
+bool model::available() {
+  if(av_checked) return is_available;
+  av_checked = true;
+  is_available = false;
+  return false;
+  }
+
 void model::load_obj(model_type& objects) {
   fhstream fs(path+fname, "rt");
 
