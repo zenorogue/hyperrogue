@@ -552,8 +552,11 @@ map<pair<cell*, cell*>, transmatrix> relmatrices;
 
 transmatrix& memo_relative_matrix(cell *c1, cell *c2) {
   auto& p = relmatrices[make_pair(c1, c2)];
-  if(p[2][2] == 0)
+  if(p[2][2] == 0) {
+    forCellIdEx(c3, i, c2) if(c3 == c1)
+      return p = currentmap->adj(c2, i);
     p = calc_relative_matrix(c1, c2,  C0);
+    }
   return p;
   }
 
