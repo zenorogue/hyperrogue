@@ -396,7 +396,7 @@ void analyze() {
 bool show_rings = true;
 
 bool coloring_3d(cell *c, const shiftmatrix& V) {
-  if(WDIM == 3 && vizid == &kohonen_id && show_rings) 
+  if(WDIM == 3 && show_rings) 
     queuepoly(face_the_player(V), cgi.shRing, darkena(c->landparam_color, 0, 0xFF));
   return false;
   }
@@ -769,11 +769,7 @@ void showbestsamples() {
 
 int kohrestrict = 1000000;
 
-void initialize_rv() {
-  if(state & KS_ROGUEVIZ) return;
-  init(&kohonen_id, RV_GRAPH | RV_HAVE_WEIGHT);
-  state |= KS_ROGUEVIZ;
-  }
+void initialize_rv();
 
 void initialize_neurons() {
   if(state & KS_NEURONS) return;
@@ -919,7 +915,6 @@ void initialize_dispersion() {
   
 void describe_cell(cell *c) {
   if(cmode & sm::HELP) return;
-  if(vizid != &kohonen_id) return;
   neuron *n = getNeuronSlow(c);
   if(!n) return;
   string h;
@@ -1385,7 +1380,6 @@ void shift_color(int i) {
   }
 
 void showMenu() {
-  if(vizid != &kohonen_id) return;
   string parts[3] = {"red", "green", "blue"};
   for(int i=0; i<3; i++) {
     string c;
@@ -1724,7 +1718,7 @@ auto hooks = addHook(hooks_args, 100, readArgs);
 #endif
 
 bool turn(int delta) {
-  if(vizid == &kohonen_id) kohonen::steps(), timetowait = 0;
+  kohonen::steps(), timetowait = 0;
   return false;
   // shmup::pc[0]->rebase();
   }
@@ -1740,12 +1734,6 @@ bool kohonen_color(int& c2, string& lab, FILE *f) {
     }
   return false;
   }
-
-auto hooks2 = addHook(hooks_frame, 50, levelline::draw)
-  + addHook(hooks_mouseover, 100, describe_cell)
-  + addHook(shmup::hooks_turn, 100, turn)
-  + addHook(rogueviz::hooks_rvmenu, 100, showMenu)
-  + addHook(hooks_readcolor, 100, kohonen_color);
 
 void clear() {
   if(data.empty()) return;
@@ -1772,15 +1760,26 @@ auto hooks4 = addHook(hooks_clearmemory, 100, clear)
     param_f(dispersion_precision, "som_dispersion")
     -> set_reaction([] { state &=~ KS_DISPERSION; });
     });
-}}
 
-namespace rogueviz {
-  void mark(cell *c) {
-    using namespace kohonen;
-    if(vizid == &kohonen_id) {
-      initialize_neurons();
-      distfrom = getNeuronSlow(c);
-      coloring();
-      }
-    }}
+bool mark(cell *c) {
+  initialize_neurons();
+  distfrom = getNeuronSlow(c);
+  coloring();
+  return true;
+  }
 
+void initialize_rv() {
+  if(state & KS_ROGUEVIZ) return;
+  init(&kohonen_id, RV_GRAPH | RV_HAVE_WEIGHT);
+  state |= KS_ROGUEVIZ;
+
+  rv_hook(hooks_frame, 50, levelline::draw);
+  rv_hook(hooks_mouseover, 100, describe_cell);
+  rv_hook(shmup::hooks_turn, 100, turn);
+  rv_hook(rogueviz::hooks_rvmenu, 100, showMenu);
+  rv_hook(hooks_readcolor, 100, kohonen_color);
+  // rv_hook(mine::hooks_mark, 50, mark);
+  }
+
+}
+}
