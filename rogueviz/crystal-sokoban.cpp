@@ -171,10 +171,15 @@ auto sbhook = addHook(hooks_args, 100, [] {
   else if(argis("-crystal-sokoban")) {
     PHASEFROM(2);
     run_sb();
+    showstartmenu = false;
     }
   else return 1;
   return 0;
   }) + addHook(hooks_prestats, 100, sokomap2)
+ +  addHook(hooks_welcome_message, 50, [] () {
+    if(vizid == &on) addMessage(XLAT("Welcome to Crystal Sokoban!"));
+    return bool(vizid);
+    }) +
   + addHook(hooks_handleKey, 50, soko_key);
 
 
