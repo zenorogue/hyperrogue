@@ -913,6 +913,8 @@ void init(void *_vizid, flagtype _vizflags) {
 
 int search_for = -1;
 
+vector<reaction_t> cleanup;
+
 void close() { 
   search_for = -1;
   for(int i=0; i<isize(vdata); i++)
@@ -925,6 +927,10 @@ void close() {
   anygraph::coords.clear();
   callhooks(hooks_close);
   edgetypes.clear();
+  while(!cleanup.empty()) {
+    cleanup.back()();
+    cleanup.pop_back();
+    }
   vizid = nullptr;
   relmatrices.clear();
   }
