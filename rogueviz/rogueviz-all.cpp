@@ -1,6 +1,10 @@
 // include all RogueViz vizualizations
 
+/* basics */
 #include "rogueviz.cpp"
+#include "presentation.cpp"
+#include "objmodels.cpp"
+
 #include "kohonen.cpp"
 // #include "staircase.cpp" (currently does not work)
 #include "banachtarski.cpp"
@@ -26,6 +30,14 @@
 #include "sumotron.cpp"
 #include "noniso-honeycombs.cpp"
 #include "random-walk.cpp"
-#include "presentation.cpp"
 #include "fifteen.cpp"
 #include "crystal-sokoban.cpp"
+
+#include "simple-impossible.cpp"
+#include "ascending-descending.cpp"
+#include "balls.cpp"
+#include "pentaroll.cpp"
+#include "playing-with-impossibility.cpp"
+
+//#endif
+
