@@ -27,3 +27,5 @@
 #include "noniso-honeycombs.cpp"
 #include "random-walk.cpp"
 #include "presentation.cpp"
+#include "fifteen.cpp"
+#include "crystal-sokoban.cpp"
