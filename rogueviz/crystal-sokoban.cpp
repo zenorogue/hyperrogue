@@ -120,6 +120,7 @@ bool sokomap2() {
   if(undos.back().where != cwt.at) save_undo();
 
   if(1) {
+    glflush();
     dynamicval<eGeometry> g(geometry, gEuclidSquare);
     check_cgi();
     cgi.require_shapes();
@@ -147,6 +148,7 @@ bool sokomap2() {
       }
   
     quickqueue();
+    glflush();
     }
   
   check_cgi();
@@ -175,7 +177,7 @@ auto sbhook = addHook(hooks_args, 100, [] {
     }
   else return 1;
   return 0;
-  }) + addHook(hooks_prestats, 100, sokomap2)
+  }) + addHook(hooks_prestats, 90, sokomap2)
  +  addHook(hooks_welcome_message, 50, [] () {
     if(vizid == &on) addMessage(XLAT("Welcome to Crystal Sokoban!"));
     return bool(vizid);
