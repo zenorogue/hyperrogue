@@ -46,6 +46,8 @@ namespace rogueviz {
 
 namespace flocking {
 
+  void init();
+
   int flock_id;
 
   int N;
@@ -83,52 +85,6 @@ namespace flocking {
   //        m->at * (m->vel, 0, 0) is the current velocity vector (tangent to the Minkowski hyperboloid)
   // m->pat: like m->at but relative to the screen
 
-  void init() {
-    if(!bounded) {
-      addMessage("Flocking simulation needs a bounded space.");
-      return;
-      }
-    stop_game();
-    rogueviz::init(&flock_id, RV_GRAPH);
-    vdata.resize(N);
-    
-    const auto v = currentmap->allcells();
-    
-    printf("computing relmatrices...\n");
-    // relmatrices[c1][c2] is the matrix we have to multiply by to 
-    // change from c1-relative coordinates to c2-relative coordinates
-    for(cell* c1: v) {
-      manual_celllister cl;
-      cl.add(c1);
-      for(int i=0; i<isize(cl.lst); i++) {
-        cell *c2 = cl.lst[i];
-        transmatrix T = calc_relative_matrix(c2, c1, C0);
-        if(hypot_d(WDIM, inverse_exp(shiftless(tC0(T)))) <= check_range) {
-          relmatrices[c1][c2] = T;
-          forCellEx(c3, c2) cl.add(c3);
-          }
-        }
-      }
-
-    printf("setting up...\n");
-    for(int i=0; i<N; i++) {
-      vertexdata& vd = vdata[i];
-      // set initial base and at to random cell and random position there 
-      createViz(i, v[hrand(isize(v))], Id);
-      rotate_object(vd.m->pat.T, vd.m->ori, random_spin());
-      apply_parallel_transport(vd.m->pat.T, vd.m->ori, xtangent(hrand(100) / 200.));
-      
-      vd.name = its(i+1);
-      vd.cp = dftcolor;
-      vd.cp.color2 = ((hrand(0x1000000) << 8) + 0xFF) | 0x808080FF;
-      vd.cp.shade = shape;
-      vd.m->vel = ini_speed;
-      }
-  
-    storeall();
-    printf("done\n");
-    }
-  
   int precision = 10;
   
   void simulate(int delta) {
@@ -281,7 +237,6 @@ namespace flocking {
     }
 
   bool turn(int delta) {
-    if(vizid != &flock_id) return false;
     simulate(delta), timetowait = 0;
     
     if(follow) {
@@ -500,15 +455,60 @@ namespace flocking {
     }
     
   void o_key(o_funcs& v) {
-    if(vizid == &flock_id) v.push_back(named_dialog("flocking", show));
+    v.push_back(named_dialog("flocking", show));
     }
 
-  auto hooks  = 
-    addHook(hooks_args, 100, readArgs) +
-    addHook(shmup::hooks_turn, 100, turn) + 
-    addHook(hooks_frame, 100, flock_marker) +
-    addHook(hooks_o_key, 80, o_key) +
-    0;
+  void init() {
+    if(!bounded) {
+      addMessage("Flocking simulation needs a bounded space.");
+      return;
+      }
+    stop_game();
+    rogueviz::init(&flock_id, RV_GRAPH);
+    rv_hook(shmup::hooks_turn, 100, turn);
+    rv_hook(hooks_frame, 100, flock_marker);
+    rv_hook(hooks_o_key, 80, o_key);
+    
+    vdata.resize(N);
+    
+    const auto v = currentmap->allcells();
+    
+    printf("computing relmatrices...\n");
+    // relmatrices[c1][c2] is the matrix we have to multiply by to 
+    // change from c1-relative coordinates to c2-relative coordinates
+    for(cell* c1: v) {
+      manual_celllister cl;
+      cl.add(c1);
+      for(int i=0; i<isize(cl.lst); i++) {
+        cell *c2 = cl.lst[i];
+        transmatrix T = calc_relative_matrix(c2, c1, C0);
+        if(hypot_d(WDIM, inverse_exp(shiftless(tC0(T)))) <= check_range) {
+          relmatrices[c1][c2] = T;
+          forCellEx(c3, c2) cl.add(c3);
+          }
+        }
+      }
+
+    printf("setting up...\n");
+    for(int i=0; i<N; i++) {
+      vertexdata& vd = vdata[i];
+      // set initial base and at to random cell and random position there 
+      createViz(i, v[hrand(isize(v))], Id);
+      rotate_object(vd.m->pat.T, vd.m->ori, random_spin());
+      apply_parallel_transport(vd.m->pat.T, vd.m->ori, xtangent(hrand(100) / 200.));
+      
+      vd.name = its(i+1);
+      vd.cp = dftcolor;
+      vd.cp.color2 = ((hrand(0x1000000) << 8) + 0xFF) | 0x808080FF;
+      vd.cp.shade = shape;
+      vd.m->vel = ini_speed;
+      }
+  
+    storeall();
+    printf("done\n");
+    }  
+
+  auto hooks = addHook(hooks_args, 100, readArgs);
   #endif
 
   }
