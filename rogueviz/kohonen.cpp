@@ -197,6 +197,7 @@ void coloring() {
         besttofind = false;
         for(neuron& n: net) {
           double bdiff = 1e20;
+          n.bestsample = -1;
           for(auto p: sample_vdata_id) {
             double diff = vnorm(n.net, data[p.first].val);
             if(diff < bdiff) bdiff = diff, n.bestsample = p.second;
@@ -205,7 +206,10 @@ void coloring() {
         }
 
       for(int i=0; i<cells; i++) {
-        part(net[i].where->landparam_color, pid) = part(vdata[net[i].bestsample].cp.color1, pid+1);
+        if(net[i].bestsample >= 0)
+          part(net[i].where->landparam_color, pid) = part(vdata[net[i].bestsample].cp.color1, pid+1);
+        else
+          part(net[i].where->landparam_color, pid) = 128;
         }
       }
 
@@ -1192,6 +1196,7 @@ void do_classify() {
   if(bdiffn.empty()) {
     printf("Finding samples...\n");
     bdiffn.resize(cells, 1e20);
+    for(int i=0; i<cells; i++) net[i].bestsample = -1;
     for(int s=0; s<samples; s++) {
       int n = bids[s];
       double diff = bdiffs[s];
@@ -1322,7 +1327,8 @@ void klistsamples(const string& fname_samples, bool best, bool colorformat) {
       if(best)
         for(int n=0; n<cells; n++) {
           if(!net[n].allsamples && !net[n].drawn_samples) { if(!colorformat) fprintf(f, "\n"); continue; }
-          klistsample(net[n].bestsample, n);
+          if(net[n].bestsample >= 0)
+            klistsample(net[n].bestsample, n);
           }
       else
         for(auto p: sample_vdata_id) {
