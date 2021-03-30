@@ -1184,6 +1184,9 @@ auto hooks  =
       }
     }) +
   addHook(hooks_markers, 100, search_marker) +
+  addHook(hooks_configfile, 100, [] {
+    param_i(brm_limit, "brm_limit");
+    }) +
  0;
 
 void graph_rv_hooks() {
