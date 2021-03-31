@@ -992,7 +992,7 @@ struct hrmap_notknot : hrmap {
       }
 
     for(int i=0; i<isize(all); i++) 
-      if(all[i]->iswall() && ufind(all[i]) == all[i]) {
+      if(all[i]->iswall() && ufind(all[i]) == all[i] && all[i]->wallcolor) {
         all[i]->wallcolor = hrand(0x1000000) | 0x404040,
         all[i]->wallcolor2 = hrand(0x1000000) | 0x404040;
         }
