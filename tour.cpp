@@ -81,6 +81,8 @@ template<class T, class U> void slide_backup(T& what, U value) {
   restorers.push_back([&what, backup] { what = backup; });
   what = value;
   }
+
+template<class T> void slide_backup(T& what) { slide_backup(what, what); }
 #endif
 
 EX void on_restore(const reaction_t& t) {
