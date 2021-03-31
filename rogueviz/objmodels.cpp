@@ -27,6 +27,8 @@ void model::load_obj(model_data& md) {
 
   if(!fs.f) 
     throw hr_exception("failed to open model file: " + path + fname);
+  
+  preparer();
 
   vector<hyperpoint> vertices;
   vector<hyperpoint> normals;

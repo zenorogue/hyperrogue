@@ -19,13 +19,13 @@ namespace hypcity {
 
 using namespace rogueviz::objmodels;
 
-model city("rogueviz/models/", "emilejohansson_p2.obj");
+void prepare_tf();
+
+model city("rogueviz/models/", "emilejohansson_p2.obj", default_transformer, prepare_tf);
 
 hyperpoint low, high;
 
 void prepare_tf() {
-  if(!city.prepared) return;
-  city.prepared = true;
   
   prec = 40;
 
@@ -78,8 +78,6 @@ void prepare_tf() {
   }
 
 bool draw_city_at(cell *c, const shiftmatrix& V) {
-  prepare_tf();
-  
   if(nil) {
     auto co = nilv::get_coord(c->master);
     if(co[1]) return false;

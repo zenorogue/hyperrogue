@@ -243,36 +243,43 @@ namespace objmodels {
     color_t color;
     };
   
-  using model_type = vector<shared_ptr<object>>;  
+  struct model_data : gi_extension {
+    vector<shared_ptr<object>> objs;
+    void render(const shiftmatrix& V);
+    };
+  
+  inline tf_result default_transformer(hyperpoint h) { return {0, direct_exp(h) };};
+  
+  inline int default_subdivider(vector<hyperpoint>& hys) { 
+    if(euclid) return 1;
+    ld maxlen = prec * max(hypot_d(3, hys[1] - hys[0]), max(hypot_d(3, hys[2] - hys[0]), hypot_d(3, hys[2] - hys[1])));
+    return int(ceil(maxlen));
+    }
   
   struct model {
   
     string path, fname;
+    reaction_t preparer;
     transformer tf;
     subdivider sd;
   
     bool is_available, av_checked;
 
     model(string path = "", string fn = "", 
-      transformer tf = [] (hyperpoint h) { 
-        return tf_result{0, direct_exp(h)};
-        },
-      subdivider sd = [] (vector<hyperpoint>& hys) { 
-        if(euclid) return 1;
-        ld maxlen = prec * max(hypot_d(3, hys[1] - hys[0]), max(hypot_d(3, hys[2] - hys[0]), hypot_d(3, hys[2] - hys[1])));
-        return int(ceil(maxlen));
-        }
-      ) : path(path), fname(fn), tf(tf), sd(sd) { av_checked = false; }
+      transformer tf = default_transformer,
+      reaction_t prep = [] {},
+      subdivider sd = default_subdivider
+      ) : path(path), fname(fn), preparer(prep), tf(tf), sd(sd) { av_checked = false; }
   
     map<string, texture::texture_data> materials;
     map<string, color_t> colors;
     
-    map<string, model_type> models;
-
     /* private */
-    void load_obj(model_type& objects);
+    void load_obj(model_data& objects);
     
-    void render(const shiftmatrix& V);
+    model_data& get();
+
+    void render(const shiftmatrix& V) { get().render(V); }
     
     bool available();
     };
