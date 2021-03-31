@@ -27,8 +27,6 @@ namespace rogueviz {
 
 namespace sunflower {
 
-bool on;
-
 bool nodes;
 
 ld qty = 100;
@@ -60,7 +58,6 @@ vector<int> inext, inext2;
 vector<int> fibs = {1, 2};
   
 bool sunflower_cell(cell *c, shiftmatrix V) {
-  if(!on) return false;
   density = zdensity / 100;
   
   ld qd;
@@ -151,12 +148,19 @@ void insert_param() {
   param_f(distance_per_rug, "sunf");
   }
 
+void show();
+
+void enable() {
+  rv_hook(hooks_o_key, 80, [] (o_funcs& v) { v.push_back(named_dialog("sunflowers", show)); });
+  rv_hook(hooks_drawcell, 100, sunflower_cell);
+  }
+  
 int readArgs() {
   using namespace arg;
            
   if(0) ;
   else if(argis("-sunflower-qd")) {
-    on = true;
+    enable();
     infer = 'r';
     shift_arg_formula(qty);
     shift_arg_formula(zdensity);
@@ -165,7 +169,7 @@ int readArgs() {
     nohud = true;
     }
   else if(argis("-sunflower-qr")) {
-    on = true;
+    enable();
     infer = 'd';
     shift_arg_formula(qty);
     shift_arg_formula(range);
@@ -174,7 +178,7 @@ int readArgs() {
     nohud = true;
     }
   else if(argis("-sunflower-dr")) {
-    on = true;
+    enable();
     infer = 'q';
     shift_arg_formula(zdensity);
     shift_arg_formula(range);
@@ -259,16 +263,10 @@ void show() {
   dialog::display();
   }
 
-void o_key(o_funcs& v) {
-  if(on) v.push_back(named_dialog("sunflowers", show));
-  }
-
 auto hook = 0
 #if CAP_COMMANDLINE
 + addHook(hooks_args, 100, readArgs)
 #endif
-+ addHook(hooks_o_key, 80, o_key)
-+ addHook(hooks_drawcell, 100, sunflower_cell)
 + addHook(pres::hooks_build_rvtour, 144, [] (string s, vector<tour::slide>& v) {
   if(s != "mixed") return;
   using namespace tour;
@@ -302,7 +300,7 @@ auto hook = 0
     if(mode == pmStart) {
       stop_game();
       
-      tour::slide_backup(on, true);
+      enable();
       tour::slide_backup(range, sphere ? 2 : euclid ? 10 : 4.3);
       tour::slide_backup<ld>(zdensity, 1);
       tour::slide_backup(infer, 'q');
