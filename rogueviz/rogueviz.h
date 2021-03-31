@@ -98,6 +98,8 @@ namespace rogueviz {
   void storeall(int from = 0);
   
   extern vector<reaction_t> cleanup;
+  
+  void do_cleanup();
 
   template<class T, class U> void rv_hook(hookset<T>& m, int prio, U&& hook) {
     int p = addHook(m, prio, hook);

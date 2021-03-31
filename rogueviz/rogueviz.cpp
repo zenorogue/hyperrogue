@@ -918,6 +918,13 @@ int search_for = -1;
 
 vector<reaction_t> cleanup;
 
+void do_cleanup() {
+  while(!cleanup.empty()) {
+    cleanup.back()();
+    cleanup.pop_back();
+    }
+  }
+
 void close() { 
   search_for = -1;
   for(int i=0; i<isize(vdata); i++)
@@ -930,10 +937,7 @@ void close() {
   anygraph::coords.clear();
   callhooks(hooks_close);
   edgetypes.clear();
-  while(!cleanup.empty()) {
-    cleanup.back()();
-    cleanup.pop_back();
-    }
+  do_cleanup();
   relmatrices.clear();
   }
 
