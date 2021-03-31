@@ -866,16 +866,7 @@ EX namespace bt {
     return point3(log(2) + log(-h[0]), h[1] / co, h[2] / co);
     }
   
-#if CAP_COMMANDLINE
-auto bt_config = addHook(hooks_args, 0, [] () {
-  using namespace arg;
-  if(argis("-btwidth")) {
-    shift_arg_formula(vid.binary_width);
-    return 0;
-    }
-  return 1;
-  });
-#endif
+auto bt_config = arg::add2("-btwidth", [] {arg::shift_arg_formula(vid.binary_width); });
 
 EX bool pseudohept(cell *c) {
   if(WDIM == 2)

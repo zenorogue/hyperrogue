@@ -398,6 +398,7 @@ EX namespace arg {
     return 1;
     }
 
+  EX int add1(const string& s, const reaction_t& r) { return add_at(s, 1, r); }
   EX int add2(const string& s, const reaction_t& r) { return add_at(s, 2, r); }
   EX int add3(const string& s, const reaction_t& r) { return add_at(s, 3, r); }
 
@@ -419,4 +420,11 @@ EX namespace arg {
 EX }
 #endif
 
+#if !CAP_COMMANDLINE
+EX namespace arg {
+  EX int add1(const string& s, const reaction_t& r) { }
+  EX int add2(const string& s, const reaction_t& r) { }
+  EX int add3(const string& s, const reaction_t& r) { }
+EX }
+#endif
 }

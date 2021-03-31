@@ -702,20 +702,7 @@ EX namespace history {
 #endif
     }
 
-  #if CAP_COMMANDLINE
-  int readArgs() {
-    using namespace arg;
-             
-    if(0) ;
-    else if(argis("-playerpath")) {
-      history::create_playerpath();
-      }
-    else return 1;
-    return 0;
-    }
-
-  auto hookArg = addHook(hooks_args, 100, readArgs);
-  #endif  
+  auto hookArg = arg::add3("-playerpath", history::create_playerpath);
 
   auto hooks = addHook(hooks_clearmemory, 0, [] () {
     history::renderAutoband();
