@@ -125,7 +125,8 @@ auto hypcity_ah = arg::add3("-hypcity", enable)
                 }
               setCanvas(mode, '0');
               if(mode == pmStart) {
-                // slide_backup(canvas_default_wall, waInvisibleFloor);
+                slide_backup(canvas_default_wall, waInvisibleFloor);
+                slide_backup(smooth_scrolling, 1);
                 if(dim == 2) slide_backup(vid.camera, 0);
                 if(dim == 2) slide_backup(vid.depth, 0);
                 slide_backup(context_fog, false);
