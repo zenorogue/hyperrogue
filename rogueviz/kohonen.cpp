@@ -399,8 +399,6 @@ bool coloring_3d(cell *c, const shiftmatrix& V) {
   return false;
   }
 
-int khd = addHook(hooks_drawcell, 100, coloring_3d);
-
 // traditionally Gaussian blur is used in the Kohonen algoritm
 // but it does not seem to make much sense in hyperbolic geometry
 // especially wrapped one.
@@ -1776,7 +1774,7 @@ void initialize_rv() {
   rv_hook(shmup::hooks_turn, 100, turn);
   rv_hook(rogueviz::hooks_rvmenu, 100, showMenu);
   rv_hook(hooks_readcolor, 100, kohonen_color);
-  // rv_hook(mine::hooks_mark, 50, mark);
+  rv_hook(hooks_drawcell, 100, coloring_3d);
   }
 
 }
