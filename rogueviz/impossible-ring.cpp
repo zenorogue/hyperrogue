@@ -12,8 +12,6 @@ namespace rogueviz {
 
 namespace cylon {
 
-bool on;
-
 ld cscale = .2;
 
 ld cylball;
@@ -216,8 +214,6 @@ void reset() {
 
 bool draw_ptriangle(cell *c, const shiftmatrix& V) {
 
-  if(!on) return false;
-  
   if(ir && ir->icgi != &cgi) reset();
    
   if(!ir) { ir = new iring; ir->init(); 
@@ -249,46 +245,34 @@ bool draw_ptriangle(cell *c, const shiftmatrix& V) {
 bool cylanim = false;
 
 void o_key(o_funcs& v) {
-  if(on) v.push_back(named_functionality("ring size", [] { 
+  v.push_back(named_functionality("ring size", [] { 
     dialog::editNumber(cscale, 0, 1, .01, .1, "", "");
     dialog::reaction = reset;
     }));
   }
 
-auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
+void enable() {
+  rogueviz::rv_hook(hooks_drawcell, 100, draw_ptriangle);
+  rogueviz::rv_hook(anims::hooks_anim, 100, [] {
+    if(!ir || !cylanim) return;
+    centerover = currentmap->gamestart();
+    long long isp = isize(ir->path);
+    View = ir->path[isp-1 - (ticks * isp / int(anims::period)) % isp];
+    shift_view(point3(0, 0.3, 0));
+    anims::moved();
+    });
+  rogueviz::rv_hook(hooks_o_key, 80, o_key);
+  }
 
-#if CAP_COMMANDLINE
-+ addHook(hooks_args, 100, [] {
-  using namespace arg;
-           
-  if(0) ;
-  else if(argis("-cylon")) {
-    on = true;
-    }
-  else if(argis("-cyls")) {
-    shift_arg_formula(cscale);
-    }
-  else if(argis("-cylanim")) {
-    cylanim = !cylanim;
-    }
-  else if(argis("-cylball")) {
-    shift_arg_formula(cylball);
-    }
-  else return 1;
-  return 0;
-  })
-#endif
+auto hchook = 
 
-+ addHook(anims::hooks_anim, 100, [] {
-  if(!ir || !cylanim || !on) return;
-  centerover = currentmap->gamestart();
-  long long isp = isize(ir->path);
-  View = ir->path[isp-1 - (ticks * isp / int(anims::period)) % isp];
-  shift_view(point3(0, 0.3, 0));
-  anims::moved();
-  })
+  arg::add3("-cylon", enable)
 
-+ addHook(hooks_o_key, 80, o_key)
++ addHook(hooks_configfile, 100, [] {
+    param_f(cscale, "cyls");
+    param_b(cylanim, "cylanim");
+    param_f(cylball, "cylball");
+    })
 
 + addHook(pres::hooks_build_rvtour, 167, [] (string s, vector<tour::slide>& v) {
   if(s != "noniso") return;

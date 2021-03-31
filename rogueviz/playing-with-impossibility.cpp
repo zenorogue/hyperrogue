@@ -6,7 +6,7 @@
 
 namespace rogueviz {
 namespace cylon {
-  extern bool on;
+  extern void enable();
   extern bool cylanim;
   }
 
@@ -1040,7 +1040,7 @@ slide dmv_slides[] = {
       stop_game();
       set_geometry(gNil);
       tour::slide_backup(mapeditor::drawplayer, false);
-      tour::slide_backup(rogueviz::cylon::on, true);
+      rogueviz::cylon::enable();
       tour::slide_backup(smooth_scrolling, true);
       tour::on_restore(nilv::set_flags);
       tour::slide_backup(nilv::nilperiod, make_array(3, 3, 3));
