@@ -40,6 +40,7 @@ undo_state current_state() {
 void sb_hooks();
 
 void run_sb() {
+  showstartmenu = false;
   crystal::compass_probability = 0;
   stop_game();
   crystal::set_crystal(6);
@@ -172,18 +173,7 @@ void sb_hooks() {
   rv_hook(hooks_handleKey, 50, soko_key);
   }
 
-auto sbhook = addHook(hooks_args, 100, [] {
-  using namespace arg;
-           
-  if(0) ;
-  else if(argis("-crystal-sokoban")) {
-    PHASEFROM(2);
-    run_sb();
-    showstartmenu = false;
-    }
-  else return 1;
-  return 0;
-  });
+auto sbhook = arg::add2("-crystal-sokoban", run_sb);
 
 
 }
