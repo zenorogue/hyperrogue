@@ -646,11 +646,7 @@ tour::slide *gen_high_demo() {
   }
 
 auto highdim_hooks  = 
-  addHook(hooks_welcome_message, 100, [] () {
-    addMessage(XLAT("Welcome to the %1-dimensional space!", its(crystal::get_dim())));
-    return true;
-    })
-  + addHook(tour::ss::hooks_extra_slideshows, 120, [] (tour::ss::slideshow_callback cb) {
+    addHook(tour::ss::hooks_extra_slideshows, 120, [] (tour::ss::slideshow_callback cb) {
   
     if(high_slides.empty()) gen_high_demo();
 
