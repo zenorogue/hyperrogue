@@ -93,6 +93,11 @@ struct basic_textureinfo {
   vector<glvertex> colors; 
   };
 
+/** additional modules can add extra shapes etc. */
+struct gi_extension {
+  ~gi_extension() {}
+  };
+
 /** basic geometry parameters */
 struct geometry_information {
 
@@ -460,6 +465,8 @@ hpcshape
   int timestamp;
   
   hpcshape& generate_pipe(ld length, ld width);
+  
+  map<string, unique_ptr<gi_extension>> ext;
   };
 #endif
 
