@@ -354,13 +354,18 @@ auto fifteen_hook =
         fifteen_slides.emplace_back(
           tour::slide{s, 100, LEGAL::NONE | QUICKGEO, text,
             [=] (presmode mode) {
+              string fname = "fifteen/" + lev + ".lev";
+              if(!file_exists(fname)) {
+                slide_error(mode, "file " + fname + " not found");
+                return;
+                }
               setCanvas(mode, '0');
               if(mode == pmStart) {
                 slide_backup(mapeditor::drawplayer, mapeditor::drawplayer);
                 slide_backup(vid.wallmode, 2);
                 slide_backup(pconf.scale, .6);
                 stop_game();
-                mapstream::loadMap("fifteen/" + lev + ".lev");
+                mapstream::loadMap(fname);
                 fullcenter();
                 if(lev == "coiled" || lev == "mobiusband")
                   View = spin(90*degree) * View;

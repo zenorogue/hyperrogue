@@ -373,13 +373,7 @@ void brick_slide(int i, presmode mode, eGeometry geom, eModel md, int anim) {
 void ply_slide(tour::presmode mode, eGeometry geom, eModel md, bool anim) {
   using namespace tour;
   if(!ply::staircase.available())  {
-    empty_screen(mode, 0x400000);
-    add_stat(mode, [] {
-      dialog::init();
-      dialog::addTitle("(model not available)", 0xFF0000, 150);
-      dialog::display();
-      return true;
-      });
+    slide_error(mode, "(model not available)");
     return;
     }
   if(mode == pmStartAll) {
