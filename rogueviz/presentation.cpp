@@ -379,7 +379,7 @@ int pres_hooks =
         }
       }
     }) +
-  addHook(tour::ss::hooks_extra_slideshows, 100, [] (tour::ss::slideshow_callback cb) {
+  addHook(tour::ss::hooks_extra_slideshows, 300, [] (tour::ss::slideshow_callback cb) {
     if(rogueviz::pres::rvslides_data.empty()) pres::gen_rvtour_data();
     cb(XLAT("non-Euclidean geometry in data analysis"), &pres::rvslides_data[0], 'd');
 
