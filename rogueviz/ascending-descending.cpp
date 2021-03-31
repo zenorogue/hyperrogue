@@ -239,6 +239,8 @@ void show() {
 
   dialog::addBoolItem_action("animated", animated, 'a');
 
+  add_edit(prec);
+
   dialog::addBack();
   dialog::display();    
   }
