@@ -23,7 +23,8 @@ namespace balls {
 namespace hr { 
 
 namespace bricks {
-  extern bool animation, in;
+  extern bool animation;
+  void enable();
   extern void build(bool in_pair);
   extern void build_stair();
 
@@ -354,7 +355,7 @@ void brick_slide(int i, presmode mode, eGeometry geom, eModel md, int anim) {
       bricks::build(false);
     if(i == 2)
       bricks::build(true);
-    bricks::in = true;
+    bricks::enable();
     tour::slide_backup(pconf.clip_min, -100.);
     tour::slide_backup(pconf.clip_max, +10.);
     tour::slide_backup(pconf.scale, i ? .2 : 2.);

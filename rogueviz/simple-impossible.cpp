@@ -1,4 +1,4 @@
-#include "../hyper.h"
+#include "rogueviz.h"
 
 namespace hr {
 
@@ -140,15 +140,13 @@ void place_brick(int x, int y, int z, color_t col = 0xFFD500, int which = -1) {
 
 bool walls_created = false;
 
-bool in = false;
-
 const int darkval_e6[6] = {0,4,6,0,4,6};
   
 void draw_ro() {
 
   shiftmatrix Zero = ggmatrix(currentmap->gamestart());
 
-  if(in) {
+  if(true) {
 
     int bid = 0;
     for(auto& b: bricks) { bid++;
@@ -355,79 +353,6 @@ void build_stair() {
 
 int animation;
 
-int args() {
-  using namespace arg;
-           
-  if(0) ;
-
-  else if(argis("-bstair")) {
-    PHASEFROM(3);
-    cgi.require_shapes();
-    
-    build_stair();
-
-    in = true;
-
-    pconf.clip_min = -100;
-    pconf.clip_max = 10;
-    pconf.scale = .5;
-    
-    View = Id;
-    }
-
-  else if(argis("-brot")) {
-    PHASEFROM(3);
-    cgi.require_shapes();
-    
-    build(false);
-    
-    in = true;
-
-    pconf.clip_min = -100;
-    pconf.clip_max = 10;
-    pconf.scale = .5;
-    
-    View = Id;
-    }
-
-  else if(argis("-brot2")) {
-    PHASEFROM(3);
-    cgi.require_shapes();
-    
-    build(true);
-    
-    in = true;
-
-    pconf.clip_min = -100;
-    pconf.clip_max = 10;
-    pconf.scale = .5;
-    
-    View = Id;
-    }
-
-  else if(argis("-bnet")) {
-    PHASEFROM(3);
-    cgi.require_shapes();
-    
-    build_net();
-    
-    in = true;
-
-    pconf.clip_min = -100;
-    pconf.clip_max = 10;
-    pconf.scale = .1;
-    
-    View = Id;
-    }
-
-  else if(argis("-b-anim")) {
-    shift(); animation = argi();
-    }
-
-  else return 1;
-  return 0;
-  }
-
 hyperpoint interp(ld t) {
   int no = isize(path);
   int ti = t;
@@ -444,17 +369,15 @@ hyperpoint interp(ld t) {
   return eupush(prev) * to_heis(n);
   }
 
-auto hooks = 
-    addHook(hooks_args, 100, args)
-  + addHook(hooks_frame, 100, draw_ro)
-  + addHook(hooks_clearmemory, 40, [] () {
+void enable() {
+  rogueviz::rv_hook(hooks_frame, 100, draw_ro);
+  rogueviz::rv_hook(hooks_clearmemory, 40, [] () {
       bricks.clear();
       path.clear();
-      in = false;
-      })
-  + addHook(anims::hooks_anim, 100, [] { 
+      });
+  rogueviz::rv_hook(anims::hooks_anim, 100, [] { 
 
-    if(!in || !animation) return;
+    if(!animation) return;
     ld t = ticks * 1. / anims::period;
     t *= isize(path);
     
@@ -479,6 +402,82 @@ auto hooks =
     
     anims::moved();
     });
+  }
+
+int args() {
+  using namespace arg;
+           
+  if(0) ;
+
+  else if(argis("-bstair")) {
+    PHASEFROM(3);
+    cgi.require_shapes();
+    
+    build_stair();
+
+    enable();
+
+    pconf.clip_min = -100;
+    pconf.clip_max = 10;
+    pconf.scale = .5;
+    
+    View = Id;
+    }
+
+  else if(argis("-brot")) {
+    PHASEFROM(3);
+    cgi.require_shapes();
+    
+    build(false);
+    
+    enable();
+
+    pconf.clip_min = -100;
+    pconf.clip_max = 10;
+    pconf.scale = .5;
+    
+    View = Id;
+    }
+
+  else if(argis("-brot2")) {
+    PHASEFROM(3);
+    cgi.require_shapes();
+    
+    build(true);
+    
+    enable();
+
+    pconf.clip_min = -100;
+    pconf.clip_max = 10;
+    pconf.scale = .5;
+    
+    View = Id;
+    }
+
+  else if(argis("-bnet")) {
+    PHASEFROM(3);
+    cgi.require_shapes();
+    
+    build_net();
+    
+    enable();
+
+    pconf.clip_min = -100;
+    pconf.clip_max = 10;
+    pconf.scale = .1;
+    
+    View = Id;
+    }
+
+  else if(argis("-b-anim")) {
+    shift(); animation = argi();
+    }
+
+  else return 1;
+  return 0;
+  }
+
+auto hooks = addHook(hooks_args, 100, args);
 
 }
 
