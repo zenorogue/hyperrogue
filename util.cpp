@@ -699,4 +699,8 @@ EX string decompress_string(string s) {
   }
 #endif
 
+EX bool file_exists(string fname) {
+  return access(fname.c_str(), F_OK) != -1;
+  }
+
 }
