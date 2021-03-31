@@ -940,6 +940,8 @@ EX void initConfig() {
   
   param_b(dialog::onscreen_keyboard, "onscreen_keyboard")
   ->editable("onscreen keyboard", 'k');
+  
+  param_b(context_fog, "coolfog");
 
   addsaver(sightranges[gBinary3], "sight-binary3", 3.1 + bonus);
   addsaver(sightranges[gCubeTiling], "sight-cubes", 10);
