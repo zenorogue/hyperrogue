@@ -23,7 +23,7 @@ namespace balls {
 namespace hr { 
 
 namespace bricks {
-  extern bool animation;
+  extern int animation;
   void enable();
   extern void build(bool in_pair);
   extern void build_stair();
