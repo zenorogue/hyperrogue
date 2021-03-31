@@ -2,7 +2,7 @@
 #include "../hyper.cpp"
 #endif
 
-#include "../hyper.h"
+#include "rogueviz.h"
 
 /** 
 
@@ -1480,7 +1480,56 @@ auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
     ->editable("self-hiding knot", 'h')
     ->set_reaction(regenerate);
     param_i(loop_any, "nk_loopany");
-    });
+    })
+#ifndef NOTKNOT
+  + addHook(rogueviz::pres::hooks_build_rvtour, 180, [] (string s, vector<tour::slide>& v) {
+      if(s != "mixed") return;
+      v.push_back(tour::slide{
+        "weird portals", 10, tour::LEGAL::NONE | tour::QUICKSKIP,
+        "Some experiments with weird portals. Press '5' to change between available experiments.\n"
+        ,
+        [] (tour::presmode mode) {
+          setCanvas(mode, '0');
+          using namespace tour;
+          if(mode == pmStart) {
+            slide_backup(margin);
+            slide_backup(mapeditor::drawplayer);
+            slide_backup(firstland);
+            slide_backup(specialland);
+            slide_backup(ray::max_cells);
+            slide_backup(smooth_scrolling);
+            slide_backup(camera_speed);
+            slide_backup(ray::exp_decay_poly);
+            slide_backup(ray::fixed_map);
+            slide_backup(ray::max_iter_iso);
+            #if CAP_VR
+            slide_backup(vrhr::hsm);
+            slide_backup(vrhr::eyes);
+            slide_backup(vrhr::cscr);
+            slide_backup(vrhr::absolute_unit_in_meters);
+            #endif
+
+            on_restore([] { nilv::set_flags(); asonov::set_flags(); });
+
+            slide_backup(nilv::nilwidth);
+            slide_backup(nilv::nilperiod);
+
+            slide_backup(vid.binary_width);
+            slide_backup(asonov::period_xy);
+            slide_backup(asonov::period_z);
+
+            nk_launch();
+            start_game();
+            loop = 2;
+            }
+          if(mode == tour::pmKey) {
+            pushScreen(show);
+            }
+          }
+        });
+      })
+#endif
+      ;
 
 #ifdef NOTKNOT
 auto hook1=
