@@ -36,6 +36,8 @@
 #include "hypcity.cpp"
 #include "hypocycloid.cpp"
 
+#include "notknot.cpp"
+
 #include "inner-maps.cpp"
 
 #include "simple-impossible.cpp"
