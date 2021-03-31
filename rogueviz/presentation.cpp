@@ -88,6 +88,16 @@ void empty_screen(presmode mode, color_t col) {
     }
   }
 
+void slide_error(presmode mode, string s) {
+  empty_screen(mode, 0x400000);
+  add_stat(mode, [s] {
+    dialog::init();
+    dialog::addTitle(s, 0xFF0000, 150);
+    dialog::display();
+    return true;
+    });
+  }
+
 map<string, texture::texture_data> textures;
 
 void draw_texture(texture::texture_data& tex) {

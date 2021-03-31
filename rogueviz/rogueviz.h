@@ -210,6 +210,7 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   void empty_screen(presmode mode, color_t col = 0xFFFFFFFF);
   void show_picture(presmode mode, string s);    
   void use_angledir(presmode mode, bool reset);
+  void slide_error(presmode mode, string s);
 
   inline ld angle = 0;
   inline int dir = -1;
