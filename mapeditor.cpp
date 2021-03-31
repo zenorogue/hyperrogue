@@ -612,7 +612,8 @@ EX namespace mapstream {
       f.read(mine_adjacency_rule);
     }
   
-  EX hookset<void(fhstream&)> hooks_savemap, hooks_loadmap;
+  EX hookset<void(fhstream&)> hooks_savemap, hooks_loadmap_old;
+  EX hookset<void(fhstream&, int)> hooks_loadmap;
   
   EX cell *save_start() {
     return (bounded || euclid || prod || arcm::in() || INVERSE) ? currentmap->gamestart() : cwt.at->master->c7;
@@ -698,6 +699,7 @@ EX namespace mapstream {
         f.write(cellids[multi::player[i].at]);
       
     callhooks(hooks_savemap, f);
+    f.write<int>(0);
 
     cellids.clear();
     cellbyid.clear();
@@ -899,8 +901,17 @@ EX namespace mapstream {
           mp.mirrored = false;
           }
       }
-
-    callhooks(hooks_loadmap, f);
+    
+    if(f.vernum >= 0xA848) {
+      int i;
+      f.read(i);
+      while(i) {
+        callhooks(hooks_loadmap, f, i);
+        f.read(i);        
+        }
+      }
+    else
+      callhooks(hooks_loadmap_old, f);
 
     cellbyid.clear();
     restartGraph();
@@ -2895,6 +2906,7 @@ int read_editor_args() {
   if(argis("-lev")) { shift(); levelfile = args(); }
   else if(argis("-pic")) { shift(); picfile = args(); }
   else if(argis("-load")) { PHASE(3); shift(); mapstream::loadMap(args()); }
+  else if(argis("-save")) { PHASE(3); shift(); mapstream::saveMap(args().c_str()); }
   else if(argis("-d:draw")) { PHASE(3); 
     #if CAP_EDIT
     start_game();
