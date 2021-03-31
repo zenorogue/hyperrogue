@@ -375,9 +375,33 @@ EX purehookset hooks_config;
 
 EX hookset<int()> hooks_args;
 
-namespace arg {
+EX map<string, pair<int, reaction_t>> added_commands;
 
-  auto ah = addHook(hooks_args, 0, readCommon);
+EX namespace arg {
+
+  int read_added_commands() {
+    if(added_commands.count(args())) {
+      auto& ac = added_commands[args()];
+      if(ac.first == 2)
+        PHASEFROM(2);
+      if(ac.first == 3)
+        PHASE(3);
+      ac.second();
+      return 0;
+      }
+    return 1;
+    }
+  
+  EX int add_at(const string& s, int at, const reaction_t& r) {
+    if(added_commands.count(s)) throw hr_exception("arg::add conflict");
+    added_commands[s] = {at, r};
+    return 1;
+    }
+
+  EX int add2(const string& s, const reaction_t& r) { return add_at(s, 2, r); }
+  EX int add3(const string& s, const reaction_t& r) { return add_at(s, 3, r); }
+
+  auto ah = addHook(hooks_args, 0, readCommon) + addHook(hooks_args, 200, read_added_commands);
   
   void read(int phase) { 
     curphase = phase;
@@ -392,7 +416,7 @@ namespace arg {
         }
       }
     }
-  }
+EX }
 #endif
 
 }
