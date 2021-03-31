@@ -225,8 +225,8 @@ bool handleKeyTour(int sym, int uni) {
     if(inhelp) slidehelp();
     return true;
     }
-  if(NUMBERKEY == '1' || NUMBERKEY == '2') {
-    int legal = slides[currentslide].flags & 7;
+  int legal = slides[currentslide].flags & 7;
+  if((NUMBERKEY == '1' || NUMBERKEY == '2') && (legal != LEGAL::NONE)) {
     
     if(legal == LEGAL::SPECIAL) {
       presentation(pmGeometrySpecial);
