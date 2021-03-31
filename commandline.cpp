@@ -87,6 +87,10 @@ EX namespace arg {
   EX const string& args() { return argument[pos]; }
   EX const char* argcs() { return args().c_str(); }
   EX int argi() { return atoi(argcs()); }
+
+  EX int shift_argi() { shift(); return argi(); }
+  EX const string& shift_args() { shift(); return args(); }
+
   EX unsigned arghex() { return strtoll(argcs(), NULL, 16); }
   EX ld argf() { 
     try {
