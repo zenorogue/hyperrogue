@@ -39,8 +39,7 @@ namespace bricks {
   }
 
 namespace pentaroll {
-  extern bool animated;
-  extern void create_pentaroll();
+  extern void create_pentaroll(bool);
   }
 
 namespace ply {
@@ -656,8 +655,7 @@ slide dmv_slides[] = {
         set_geometry(gFieldQuotient);
         */
         start_game();
-        pentaroll::create_pentaroll();
-        pentaroll::animated = true;
+        pentaroll::create_pentaroll(true);
         tour::slide_backup(anims::period, 30000.);
         tour::slide_backup(sightranges[geometry], 4);
         start_game();

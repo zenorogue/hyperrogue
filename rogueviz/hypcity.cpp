@@ -6,15 +6,16 @@
 // see the results posted here:
 
 // https://twitter.com/ZenoRogue/status/1375750351391981570
-// -noplayer -geo 4x5 -gp 1 1 -unrectified -switch-fpp -canvas 303030 camera=0 depth=0 -sr 3 -PM 0 -alpha 1 -zoom .95
+// -hypcity -noplayer -geo 4x5 -gp 1 1 -unrectified -switch-fpp -canvas 303030 camera=0 depth=0 -sr 3 -PM 0 -alpha 1 -zoom .95
 
 // https://twitter.com/ZenoRogue/status/1375748835046215682
-// -noplayer -geo nil -canvas 303030 -back 44e4 -sight3 3
+// -hypcity -noplayer -geo nil -canvas 303030 -back 44e4 -sight3 3
 
 // https://twitter.com/ZenoRogue/status/1375754422752575488
-// add -PM 0 -alpha 1
+//  add -PM 0 -alpha 1
 
 namespace hr {
+namespace hypcity {
 
 using namespace rogueviz::objmodels;
 
@@ -89,6 +90,8 @@ bool draw_city_at(cell *c, const shiftmatrix& V) {
   return false;
   }
 
-auto hypcity_ah = addHook(hooks_drawcell, 100, draw_city_at);
+void enable() { rogueviz::rv_hook(hooks_drawcell, 100, draw_city_at); }
 
-}
+auto hypcity_ah = arg::add3("-hypcity", enable);
+
+}}

@@ -132,14 +132,8 @@ void create_janko() {
   gi.menu_displayed_name = "Janko group J1";
   }
   
-auto shot_hooks = addHook(hooks_args, 100, [] {
-  if(arg::argis("-janko1x")) {
-    build();
-    experiment();
-    }
-  else return true;
-  return false;
-  }) + addHook(hooks_initialize, 100, create_janko);
+auto shot_hooks = arg::add3("-janko1x", [] { build(); experiment(); })
+ + addHook(hooks_initialize, 100, create_janko);
 
 }
 

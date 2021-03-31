@@ -33,6 +33,9 @@
 #include "fifteen.cpp"
 #include "crystal-sokoban.cpp"
 
+#include "hypcity.cpp"
+#include "hypocycloid.cpp"
+
 #include "simple-impossible.cpp"
 #include "ascending-descending.cpp"
 #include "balls.cpp"

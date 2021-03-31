@@ -105,21 +105,7 @@ namespace tree {
     storeall();
     }
 
-#if CAP_COMMANDLINE
-int readArgs() {
-  using namespace arg;
-
-  if(0) ;
-
-  else if(argis("-tree")) {
-    PHASE(3); shift(); tree::read(args());
-    }
-  
-  else return 1;
-  return 0;
-  }
-
-int ah = addHook(hooks_args, 120, readArgs)
+int ah = arg::add3("-tree", [] { tree::read(arg::shift_args()); })
 + addHook(pres::hooks_build_rvtour, 120, [] (string s, vector<tour::slide>& v) {
     if(s != "data") return;
     using namespace pres;
@@ -142,7 +128,6 @@ int ah = addHook(hooks_args, 120, readArgs)
       })}
       );
     });
-#endif
   }
 
 }

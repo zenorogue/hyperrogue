@@ -1,21 +1,23 @@
 // compile with mymake rogueviz/hypocycloid
 
 // for https://twitter.com/ZenoRogue/status/1358464890978127875 :
-// hyper -shot-1000 -noscr -canvas i -noplayer -geo 1 circ1=1 circ2=2 show=.05 lw=20 -zoom .9 -animvideo 360 cycloid-2-euc.mp4
+// -hypocyc -shot-1000 -noscr -canvas i -noplayer -geo 1 circ1=1 circ2=2 show=.05 lw=20 -zoom .9 -animvideo 360 cycloid-2-euc.mp4
 // for https://twitter.com/ZenoRogue/status/1358464962088337410 :
-// hyper -shot-1000 -noscr -canvas i -noplayer -geo 0 "circ1=0../0..4../0..|4../0..0../0" "circ2=0../0..8../0..|8../0..0../0" show=.05 lw=3 loops=10 -zoom .9 -animvideo 3600 cycloid-2-hyp.mp4
+// -hypocyc -shot-1000 -noscr -canvas i -noplayer -geo 0 "circ1=0../0..4../0..|4../0..0../0" "circ2=0../0..8../0..|8../0..0../0" show=.05 lw=3 loops=10 -zoom .9 -animvideo 3600 cycloid-2-hyp.mp4
 // for https://twitter.com/ZenoRogue/status/1358465029876690948 :
-// hyper -shot-1000 -noscr -canvas i -noplayer -geo 0 "circ1=0../0..8../0..|8../0..0../0" "circ2=0../0..32../0..|32../0..0../0" prec=3600 show=.05 lw=3 loops=10 -zoom .9 -animvideo 3600 cycloid-4-hyp.mp4
+// -hypocyc -shot-1000 -noscr -canvas i -noplayer -geo 0 "circ1=0../0..8../0..|8../0..0../0" "circ2=0../0..32../0..|32../0..0../0" prec=3600 show=.05 lw=3 loops=10 -zoom .9 -animvideo 3600 cycloid-4-hyp.mp4
 
 // for https://twitter.com/ZenoRogue/status/1358506225990828033 :
-// hyper -shot-1000 -noscr -canvas i -noplayer -geo 2 "circ1=0../0...5../0..|.5../0..0../0" "circ2=0../0..1../0..|1../0..0../0" show=.05 lw=3 loops=10 -zoom .9 -animvideo 1200 cycloid-2-sph.mp4
+// -hypocyc -shot-1000 -noscr -canvas i -noplayer -geo 2 "circ1=0../0...5../0..|.5../0..0../0" "circ2=0../0..1../0..|1../0..0../0" show=.05 lw=3 loops=10 -zoom .9 -animvideo 1200 cycloid-2-sph.mp4
 
 // for https://twitter.com/ZenoRogue/status/1358505146553159682 :
-// hyper -shot-1000 -noscr -canvas i -noplayer -geo 0 circ1=1 circ2=2 show=.1 lw=5 -zoom .9 "ratio=2../0..8../0..|8../0..2../0" prec=3600 -animvideo 3600 half-radius.mp4
+// -hypocyc -shot-1000 -noscr -canvas i -noplayer -geo 0 circ1=1 circ2=2 show=.1 lw=5 -zoom .9 "ratio=2../0..8../0..|8../0..2../0" prec=3600 -animvideo 3600 half-radius.mp4
 
 #include "../hyper.h"
 
 namespace hr {
+
+namespace hypocyc {
 
 /* what to roll on: 0 = circle, 1 = horocycle, 2 = straight line, 3 = equidistant */
 int shape = 0;
@@ -143,7 +145,11 @@ void circ_frame() {
   vid.linewidth /= lw;
   }
 
-auto shot_hooks = addHook(hooks_frame, 100, circ_frame)
+void enable() {
+  addHook(hooks_frame, 100, circ_frame);
+  }
+
+auto shot_hooks = arg::add2("-hypocyc", enable)
   + addHook(hooks_configfile, 100, [] {
     param_f(circ1, "circ1");
     param_f(circ2, "circ2");
@@ -158,4 +164,5 @@ auto shot_hooks = addHook(hooks_frame, 100, circ_frame)
     param_f(draw_loops, "draw_loops");
     });
 
+}
 }

@@ -281,26 +281,6 @@ void create_model() {
   
   }
 
-#if CAP_COMMANDLINE  
-int readArgs() {
-  using namespace arg;
-           
-  if(0) ;
-  else if(argis("-snub")) {
-    PHASE(3);
-    shift();
-    run_snub(argi(), 3);
-    }
-  else if(argis("-snub4")) {
-    PHASE(3);
-    shift();
-    run_snub(argi(), 4);
-    }
-  else return 1;
-  return 0;
-  }
-#endif
-
 bool frame() { 
   if(snubon && rug::rugged) {
     create_model();
@@ -343,7 +323,9 @@ bool handleKey(int sym, int uni) {
   }
 
 
-auto xhook = addHook(hooks_args, 100, readArgs)
+auto xhook = 
+  arg::add3("-snub", [] { run_snub(arg::shift_argi(), 3); })
++ arg::add3("-snub4", [] { run_snub(arg::shift_argi(), 4); })
 + addHook(hooks_handleKey, 0, handleKey)
 + addHook(hooks_prestats, 0, frame)
 + addHook(hooks_clearmemory, 40, [] () { snubon = false; } )

@@ -1,4 +1,4 @@
-#include "../hyper.h"
+#include "rogueviz.h"
 
 // implementation of this demo: https://twitter.com/ZenoRogue/status/1304130700870901761
 
@@ -12,9 +12,9 @@ namespace hr {
 
 namespace pentaroll {
 
-bool animated;
+void animate();
 
-void create_pentaroll() {
+void create_pentaroll(bool animated) {
   start_game();
   /* get the list of all close cells */
   cell *c0 = currentmap->gamestart();
@@ -54,22 +54,8 @@ void create_pentaroll() {
       cw1.peek()->landparam = hrand(0x1000000) | 0x808080;
       }
     }
-  }
-
-int args() {
-  using namespace arg;
-           
-  if(0) ;
-
-  else if(argis("-pentaroll")) {
-    PHASEFROM(3);
-    
-    /* 1 = animated, 0 = not animated */
-    shift(); animated = argi();
-    }
-
-  else return 1;
-  return 0;
+  if(animated) 
+    rogueviz::rv_hook(anims::hooks_anim, 100, animate);
   }
 
 /* currently not configurable */
@@ -79,12 +65,8 @@ ld how_far = 1;
 ld orig_distance = 1;
 ld far_distance = 1;
 
-auto hooks = 
-    addHook(hooks_args, 100, args)
-  + addHook(hooks_clearmemory, 40, [] () { animated = false; })
-+ addHook(anims::hooks_anim, 100, [] { 
+void animate() {
 
-  if(!animated) return;
   centerover = currentmap->gamestart();
   
   ld t = ticks * 20. / anims::period;
@@ -141,7 +123,9 @@ auto hooks =
   View = spin((angle-M_PI) * int(t)) * View;
   
   anims::moved();
-  });
+  }
+
+auto hooks = arg::add3("-pentaroll", [] { create_pentaroll(arg::shift_argi()); });
 
 }
 

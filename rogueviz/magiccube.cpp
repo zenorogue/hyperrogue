@@ -156,23 +156,7 @@ void magic(int sides) {
   rv_hook(hooks_handleKey, 150, magic_rugkey);
   }
 
-int readArgs() {
-  using namespace arg;
-  
-  if(0) ;
-  else if(argis("-magic")) {
-    PHASEFROM(2);
-    shift(); magic(argi());
-    }
-  else if(argis("-magic3")) {
-    PHASEFROM(2);
-    magic(-1);
-    }
-  else return 1;
-  return 0;
-  }
-
-auto magichook = addHook(hooks_args, 100, readArgs);
+auto magichook = arg::add2("-magic3", [] { magic(-1); }) + arg::add2("-magic", [] { magic(arg::shift_argi()); });
  
 }
 #endif
