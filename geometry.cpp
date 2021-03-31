@@ -95,7 +95,7 @@ struct basic_textureinfo {
 
 /** additional modules can add extra shapes etc. */
 struct gi_extension {
-  ~gi_extension() {}
+  virtual ~gi_extension() {}
   };
 
 /** basic geometry parameters */
