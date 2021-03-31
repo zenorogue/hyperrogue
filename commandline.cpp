@@ -375,13 +375,14 @@ EX purehookset hooks_config;
 
 EX hookset<int()> hooks_args;
 
-EX map<string, pair<int, reaction_t>> added_commands;
+EX map<string, pair<int, reaction_t>> *added_commands;
 
 EX namespace arg {
 
   int read_added_commands() {
-    if(added_commands.count(args())) {
-      auto& ac = added_commands[args()];
+    if(!added_commands) return 1;
+    if(added_commands->count(args())) {
+      auto& ac = (*added_commands)[args()];
       if(ac.first == 2)
         PHASEFROM(2);
       if(ac.first == 3)
@@ -393,8 +394,9 @@ EX namespace arg {
     }
   
   EX int add_at(const string& s, int at, const reaction_t& r) {
-    if(added_commands.count(s)) throw hr_exception("arg::add conflict");
-    added_commands[s] = {at, r};
+    if(!added_commands) added_commands = new map<string, pair<int, reaction_t>> ();
+    if(added_commands->count(s)) throw hr_exception("arg::add conflict");
+    (*added_commands)[s] = {at, r};
     return 1;
     }
 
