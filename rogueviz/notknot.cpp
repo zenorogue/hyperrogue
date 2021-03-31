@@ -1155,6 +1155,110 @@ void regenerate() {
 
 bool show_selfhiding = true;
 
+void launch_euc() {
+  stop_game();
+  set_geometry(gCubeTiling);
+  base = gCubeTiling;
+  base_map = "";
+  to_unloop.clear();
+  create_notknot();
+  loop = 3;
+  secondary_percentage = 10;
+  show_selfhiding = true;
+  set_geometry(gNotKnot);
+  start_game();
+  ray::reset_raycaster();
+  ray::volumetric::on = false;
+  ray::exp_decay_poly = 30;
+  pmodel = mdPerspective;
+  }
+
+void launch_nil() {
+  stop_game();
+  set_geometry(gNil);
+  base_map = "";
+  base = geometry;
+  to_unloop.clear();
+  secondary_percentage = 0;
+  nilv::nilwidth = .25;
+  nilv::nilperiod = make_array(8, 8, 8);
+  nilv::set_flags();
+  create_notknot();
+  show_selfhiding = false;
+  loop = 6;
+  set_geometry(gNotKnot);
+  start_game();
+  ray::reset_raycaster();
+  ray::volumetric::on = true;
+  ray::exp_decay_poly = 3;
+  camera_speed = 1;
+  pmodel = mdGeodesic;
+  }
+
+void launch_sphere() {
+  stop_game();
+  set_geometry(gCell120);
+  base_map = "spherring.lev";
+  to_unloop.clear();
+  vector<int> v; for(int i=0; i<60; i++) v.push_back(7);
+  to_unloop.emplace_back(v);
+  show_selfhiding = true;
+  secondary_percentage = 0;
+  loop = 0;
+  set_geometry(gNotKnot);
+  start_game();
+  ray::reset_raycaster();
+  ray::volumetric::on = false;
+  ray::exp_decay_poly = 10;
+  camera_speed = 1;
+  mapeditor::drawplayer = false;
+  pmodel = mdPerspective;
+  ((hrmap_notknot*)currentmap)->add_fog();
+  }
+
+void launch_sphereknot() {
+  stop_game();
+  set_geometry(gCell600);
+  base_map = "spherknot.lev";
+  to_unloop.clear();
+  secondary_percentage = 0;
+  show_selfhiding = true;
+  loop = 3;
+  set_geometry(gNotKnot);
+  start_game();
+  ray::reset_raycaster();
+  ray::volumetric::on = false;
+  ray::exp_decay_poly = 10;
+  camera_speed = 1;
+  mapeditor::drawplayer = false;
+  pmodel = mdPerspective;
+  ((hrmap_notknot*)currentmap)->add_fog();
+  }
+
+void launch_solv() {
+  stop_game();
+  set_geometry(gArnoldCat);
+  base_map = "";
+  base = geometry;
+  to_unloop.clear();
+  secondary_percentage = 0;
+  vid.binary_width = .25;
+  margin = 3;
+  asonov::period_xy = 8;
+  asonov::period_z = 3;
+  loop = 6;
+  asonov::set_flags();
+  create_notknot();
+  show_selfhiding = false;
+  set_geometry(gNotKnot);
+  start_game();
+  ray::reset_raycaster();
+  ray::exp_decay_poly = 10;
+  camera_speed = 1;
+  pmodel = mdGeodesic;
+  ((hrmap_notknot*)currentmap)->add_fog();
+  }
+
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
@@ -1168,113 +1272,19 @@ void show() {
     dialog::init(XLAT("notknot scenes"), 0xFFFFFFFF, 150, 0);
     
     dialog::addItem("knot portal in Euclidean geometry", 'a');
-    dialog::add_action([] {
-      stop_game();
-      set_geometry(gCubeTiling);
-      base = gCubeTiling;
-      base_map = "";
-      to_unloop.clear();
-      create_notknot();
-      loop = 3;
-      secondary_percentage = 10;
-      show_selfhiding = true;
-      set_geometry(gNotKnot);
-      start_game();
-      ray::reset_raycaster();
-      ray::volumetric::on = false;
-      ray::exp_decay_poly = 30;
-      pmodel = mdPerspective;
-      });
+    dialog::add_action(launch_euc);
 
     dialog::addItem("Penrose staircase portal in Nil geometry", 'b');
-    dialog::add_action([] {
-      stop_game();
-      set_geometry(gNil);
-      base_map = "";
-      base = geometry;
-      to_unloop.clear();
-      secondary_percentage = 0;
-      nilv::nilwidth = .25;
-      nilv::nilperiod = make_array(8, 8, 8);
-      nilv::set_flags();
-      create_notknot();
-      show_selfhiding = false;
-      loop = 6;
-      set_geometry(gNotKnot);
-      start_game();
-      ray::reset_raycaster();
-      ray::volumetric::on = true;
-      ray::exp_decay_poly = 3;
-      camera_speed = 1;
-      pmodel = mdGeodesic;
-      });
+    dialog::add_action(launch_nil);
       
     dialog::addItem("great circle portal in spherical geometry", 'c');
-    dialog::add_action([] {
-      stop_game();
-      set_geometry(gCell120);
-      base_map = "spherring.lev";
-      to_unloop.clear();
-      vector<int> v; for(int i=0; i<60; i++) v.push_back(7);
-      to_unloop.emplace_back(v);
-      show_selfhiding = true;
-      secondary_percentage = 0;
-      loop = 0;
-      set_geometry(gNotKnot);
-      start_game();
-      ray::reset_raycaster();
-      ray::volumetric::on = false;
-      ray::exp_decay_poly = 10;
-      camera_speed = 1;
-      mapeditor::drawplayer = false;
-      pmodel = mdPerspective;
-      ((hrmap_notknot*)currentmap)->add_fog();
-      });
+    dialog::add_action(launch_sphere);
       
     dialog::addItem("knotted portal in spherical geometry", 'd');
-    dialog::add_action([] {
-      stop_game();
-      set_geometry(gCell600);
-      base_map = "spherknot.lev";
-      to_unloop.clear();
-      secondary_percentage = 0;
-      show_selfhiding = true;
-      loop = 3;
-      set_geometry(gNotKnot);
-      start_game();
-      ray::reset_raycaster();
-      ray::volumetric::on = false;
-      ray::exp_decay_poly = 10;
-      camera_speed = 1;
-      mapeditor::drawplayer = false;
-      pmodel = mdPerspective;
-      ((hrmap_notknot*)currentmap)->add_fog();
-      });
+    dialog::add_action(launch_sphereknot);
     
     dialog::addItem("a portal in Solv geometry", 'e');
-    dialog::add_action([] {
-      stop_game();
-      set_geometry(gArnoldCat);
-      base_map = "";
-      base = geometry;
-      to_unloop.clear();
-      secondary_percentage = 0;
-      vid.binary_width = .25;
-      margin = 3;
-      asonov::period_xy = 8;
-      asonov::period_z = 3;
-      loop = 6;
-      asonov::set_flags();
-      create_notknot();
-      show_selfhiding = false;
-      set_geometry(gNotKnot);
-      start_game();
-      ray::reset_raycaster();
-      ray::exp_decay_poly = 10;
-      camera_speed = 1;
-      pmodel = mdGeodesic;
-      ((hrmap_notknot*)currentmap)->add_fog();
-      });
+    dialog::add_action(launch_solv);
       
     dialog::display();      
     });
