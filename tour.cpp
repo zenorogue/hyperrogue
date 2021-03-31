@@ -104,6 +104,8 @@ EX void setCanvas(presmode mode, char canv) {
     start_game();
     resetview();
     }
+  if(mode == pmGeometryReset)
+    slide_restore_all();
   if(mode == pmStop) {
     gamestack::pop();
     slide_restore_all();
