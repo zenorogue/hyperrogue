@@ -300,7 +300,7 @@ extern vector<slide> rvslides_default;
 
 void add_end(vector<slide>& s) {
   s.emplace_back(
-    slide{"THE END", 99, LEGAL::ANY | FINALSLIDE,
+    slide{"THE END", 99, LEGAL::NONE | FINALSLIDE,
     "Press '5' to leave the presentation.",
     [] (presmode mode) {
       if(mode == pmStart) firstland = specialland = laIce;
