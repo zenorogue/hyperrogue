@@ -40,6 +40,7 @@
 
 #include "inner-maps.cpp"
 #include "planets.cpp"
+#include "hyperbolic-analogs.cpp"
 
 #include "simple-impossible.cpp"
 #include "ascending-descending.cpp"
