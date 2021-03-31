@@ -336,7 +336,53 @@ auto fifteen_hook =
   addHook(hooks_args, 100, rugArgs)
 + addHook(mapstream::hooks_loadmap, 100, [] (fhstream& f, int id) {
     if(id == 15) load_fifteen(f);
+    })
++ addHook(tour::ss::hooks_extra_slideshows, 120, [] (tour::ss::slideshow_callback cb) {
+
+    using namespace rogueviz::pres;
+    static vector<slide> fifteen_slides;
+
+    if(fifteen_slides.empty()) {
+      fifteen_slides.emplace_back(
+        slide{"Introduction", 999, LEGAL::NONE, 
+          "This is a collection of some geometric and topological variants of the Fifteen puzzle."
+          ,
+          [] (presmode mode) {}
+          });
+      
+      auto add = [&] (string s, string lev, string text) {
+        fifteen_slides.emplace_back(
+          tour::slide{s, 100, LEGAL::NONE | QUICKGEO, text,
+            [=] (presmode mode) {
+              setCanvas(mode, '0');
+              if(mode == pmStart) {
+                slide_backup(mapeditor::drawplayer, mapeditor::drawplayer);
+                slide_backup(vid.wallmode, 2);
+                slide_backup(pconf.scale, .6);
+                stop_game();
+                mapstream::loadMap("fifteen/" + lev + ".lev");
+                fullcenter();
+                if(lev == "coiled" || lev == "mobiusband")
+                  View = spin(90*degree) * View;
+                if(lev == "mobiusband")
+                  View = MirrorX * View;
+                }
+              }});
+        };
+      
+      add("15", "classic", "The original Fifteen puzzle.");
+      add("15+4", "fifteen", "The 15+4 puzzle by Henry Segerman.");
+      add("15-4", "sphere11", "The 15-4 puzzle.");
+      add("coiled", "coiled", "Coiled fifteen puzzle by Henry Segerman.");
+      add("Möbius band", "mobiusband", "Fifteen puzzle on a Möbius band.");
+      add("Kite-and-dart", "kitedart", "Kite-and-dart puzzle.");
+      
+      add_end(fifteen_slides);
+      }
+
+    cb(XLAT("variants of the fifteen puzzle"), &fifteen_slides[0], 'h');
     });
+  ;
 #endif
 
 EX }
