@@ -43,7 +43,8 @@ namespace pentaroll {
   }
 
 namespace ply {
-  extern bool animated, in;
+  extern bool animated;
+  void enable();
   extern rogueviz::objmodels::model staircase;
   }
 
@@ -392,7 +393,7 @@ void ply_slide(tour::presmode mode, eGeometry geom, eModel md, bool anim) {
   if(mode == pmStart) {
     set_geometry(geom);
     start_game();
-    tour::slide_backup(ply::in, true);
+    ply::enable();
     tour::slide_backup(anims::period, 40000.);
     tour::slide_backup(mapeditor::drawplayer, false);
     tour::slide_backup(pconf.rotational_nil, 0.);

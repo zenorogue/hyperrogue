@@ -4,9 +4,9 @@ namespace hr {
 
 namespace ply {
 
-bool in, animated;
-
 using namespace rogueviz::objmodels;
+
+bool animated;
 
 hyperpoint A = point31(9.7, -38.1, 10.116);
 hyperpoint B = point31(17.3, -38.1, 10.95);
@@ -207,8 +207,6 @@ model staircase("rogueviz/nil/", "aco.obj", nilize);
 
 bool draw_ply() {
 
-  if(!in) return false;
-  
   if(nil) prepare_nilform();
 
   staircase.render(ggmatrix(currentmap->gamestart()));
@@ -246,50 +244,35 @@ void show() {
   }
 
 void o_key(o_funcs& v) {
-  if(in) v.push_back(named_dialog("Ascending & Descending", show));
+  v.push_back(named_dialog("Ascending & Descending", show));
   }
 
-auto plyhook = addHook(hooks_frame, 100, draw_ply)
- 
-+ addHook(anims::hooks_anim, 100, [] { 
-  if(!in || !animated) return;
-  usecache = false;
-  ld t = ticks * 1. / anims::period;
-  t = t - floor(t);
-  t *= 1000;
-  
-  centerover = currentmap->gamestart();
-  set_view(
-    interpolate_at(route, t),
-    interpolate_at(forwards, t),
-    interpolate_at(overroute, t)
-    );
-  
-  anims::moved();
-  })
+void enable() {
+  rogueviz::rv_hook(hooks_frame, 100, draw_ply);
+  rogueviz::rv_hook(hooks_o_key, 80, o_key);
+  rogueviz::rv_hook(anims::hooks_anim, 100, [] { 
+    if(!animated) return;
+    usecache = false;
+    ld t = ticks * 1. / anims::period;
+    t = t - floor(t);
+    t *= 1000;
+    
+    centerover = currentmap->gamestart();
+    set_view(
+      interpolate_at(route, t),
+      interpolate_at(forwards, t),
+      interpolate_at(overroute, t)
+      );
+    
+    anims::moved();
+    });
+  }
 
-+ addHook(hooks_o_key, 80, o_key)
-
-#if CAP_COMMANDLINE
-+ addHook(hooks_args, 100, [] {
-  using namespace arg;
-           
-  if(0) ;
-  else if(argis("-asd")) {
-    in = true;
-    }
-  else if(argis("-asd-prec")) {
-    shift(); prec = argi();
-    }
-  else if(argis("-asd-anim")) {
-    in = true;
-    animated = true;
-    }
-  else return 1;
-  return 0;
-  })
-#endif
-  ; 
+auto plyhook = 
+  arg::add3("-asd", enable) + 
+  addHook(hooks_configfile, 100, [] {
+    param_b(animated, "ad_animated");
+    });
 
 }
 }
