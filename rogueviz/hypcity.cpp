@@ -24,7 +24,8 @@ model city("rogueviz/models/", "emilejohansson_p2.obj");
 hyperpoint low, high;
 
 void prepare_tf() {
-  if(!city.models.empty()) return;
+  if(!city.prepared) return;
+  city.prepared = true;
   
   prec = 40;
 

@@ -21,7 +21,8 @@ bool model::available() {
   return false;
   }
 
-void model::load_obj(model_type& objects) {
+void model::load_obj(model_data& md) {
+  auto& objects = md.objs;
   fhstream fs(path+fname, "rt");
 
   if(!fs.f) 
@@ -235,12 +236,19 @@ void model::load_obj(model_type& objects) {
   cgi.extra_vertices();  
   }
 
-void model::render(const shiftmatrix& V) {
+model_data& model::get() {
 
-  auto& objs = models[cgi_string()];
+  auto& md = (unique_ptr<model_data>&) cgi.ext[fname];
   
-  if(objs.empty()) load_obj(objs);
+  if(!md) {
+    md = std::make_unique<model_data>();
+    load_obj(*md);
+    }
 
+  return *md;
+  }
+
+void model_data::render(const shiftmatrix& V) {
   for(auto& obj: objs) {
     queuepoly(V, obj->sh, obj->color);  
     }
