@@ -22,6 +22,8 @@ bool model::available() {
   }
 
 void model::load_obj(model_data& md) {
+  md.prec_used = prec;
+
   auto& objects = md.objs;
   fhstream fs(path+fname, "rt");
 
@@ -246,6 +248,12 @@ model_data& model::get() {
     md = std::make_unique<model_data>();
     load_obj(*md);
     }
+  
+  if(md && md->prec_used < prec) {
+    println(hlog, "need prec=", prec, " used = ", md->prec_used);
+    md->objs.clear();
+    load_obj(*md);
+    }
 
   return *md;
   }
@@ -255,6 +263,29 @@ void model_data::render(const shiftmatrix& V) {
     queuepoly(V, obj->sh, obj->color);  
     }
   }
+
+void model_settings() {
+  emptyscreen();
+  dialog::init();
+  add_edit(prec);
+  dialog::addBack();
+  dialog::display();
+  }
+
+void o_key(o_funcs& v) {
+  v.push_back(named_dialog("set model settings", model_settings));
+  }
+
+void add_model_settings() {
+  rogueviz::rv_hook(hooks_o_key, 200, o_key);
+  }
+
+auto cf = addHook(hooks_configfile, 100, [] {
+  param_f(prec, "obj_prec")
+  ->editable(1, 100, 1, "3D model precision", "higher-precision models take more time to load and to render.", 'p')
+  ->set_sets([] { dialog::numberdark = dialog::DONT_SHOW; })
+  ; 
+  });
 
 }
 }

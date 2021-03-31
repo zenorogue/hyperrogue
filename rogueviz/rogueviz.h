@@ -238,7 +238,7 @@ namespace objmodels {
   using transformer = std::function<tf_result(hyperpoint)>;
   using subdivider = std::function<int(vector<hyperpoint>&)>;
   
-  inline int prec = 1;
+  inline ld prec = 1;
   
   struct object {
     hpcshape sh;
@@ -247,6 +247,7 @@ namespace objmodels {
     };
   
   struct model_data : gi_extension {
+    ld prec_used;
     vector<shared_ptr<object>> objs;
     void render(const shiftmatrix& V);
     };
@@ -286,6 +287,8 @@ namespace objmodels {
     
     bool available();
     };
+
+  void add_model_settings();
   
   }
 
