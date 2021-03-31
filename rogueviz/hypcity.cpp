@@ -27,8 +27,6 @@ hyperpoint low, high;
 
 void prepare_tf() {
   
-  prec = 40;
-
   for(int i=0; i<4; i++) low[i] = 100, high[i] = -100;
 
   cgi.require_basics();
@@ -96,7 +94,10 @@ bool draw_city_at(cell *c, const shiftmatrix& V) {
   return false;
   }
 
-void enable() { rogueviz::rv_hook(hooks_drawcell, 100, draw_city_at); }
+void enable() { 
+  rogueviz::rv_hook(hooks_drawcell, 100, draw_city_at); 
+  add_model_settings();
+  }
 
 auto hypcity_ah = arg::add3("-hypcity", enable);
 
