@@ -1,5 +1,6 @@
 // compile with:
 // ./mymake -O3 inner-maps
+// used in: https://twitter.com/zenorogue/status/1212408644941295619
 
 // run with:
 // ./hyper -innner-map -noscr -canvas r -canvas i -wsh 0 -smart 4 -shott 0 -alpha 1
