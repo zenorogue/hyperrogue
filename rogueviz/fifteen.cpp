@@ -5,7 +5,7 @@
  *  \brief fifteen+4 puzzle
  */
 
-#include "../hyper.h"
+#include "rogueviz.h"
 
 namespace hr {
 
@@ -23,8 +23,6 @@ struct celldata {
 map<cell*, celldata> fif;
 
 eWall empty = waChasm;
-
-bool in = false;
 
 enum ePenMove { pmJump, pmRotate, pmAdd, pmMirrorFlip };
 ePenMove pen;
@@ -87,7 +85,6 @@ void scramble() {
   }
 
 bool draw_fifteen(cell *c, const shiftmatrix& V) {
-  if(!in) return false;
   if(!fif.count(c)) { c->land = laNone; c->wall = waChasm; return false; }
   check_move();
     
@@ -258,39 +255,46 @@ void launch() {
   start_game();
   init_fifteen();
 
-  in = true;
-  
   showstartmenu = false;
   mapeditor::drawplayer = false;
   }
 
-#if CAP_COMMANDLINE
-int rugArgs() {
-  using namespace arg;
-           
-  if(0) ;
-  else if(argis("-fifteen")) {
-    PHASEFROM(3);
-    launch();
-    #if ISWEB
-    mapstream::loadMap("1");    
-    #endif
-    }
+void enable();
 
-  else return 1;
-  return 0;
+void load_fifteen(fhstream& f) {
+  int num;
+  f.read(num);
+  fif.clear();
+  println(hlog, "read num = ", num);
+  for(int i=0; i<num; i++) {
+    int32_t at = f.get<int>();
+    println(hlog, "at = ", at);
+    cell *c = mapstream::cellbyid[at];
+    auto& cd = fif[c];      
+    f.read(cd.target);
+    f.read(cd.targetdir);
+    cd.targetdir = mapstream::fixspin(mapstream::relspin[at], cd.targetdir, c->type, f.vernum);
+    if(nonorientable) 
+      f.read(cd.targetmirror);
+    f.read(cd.current);
+    f.read(cd.currentdir);
+    if(nonorientable) 
+      f.read(cd.currentmirror);
+    cd.currentdir = mapstream::fixspin(mapstream::relspin[at], cd.currentdir, c->type, f.vernum);
+    println(hlog, "assigned ", cd.current, " to ", c);
+    }
+  enable();
   }
 
 void o_key(o_funcs& v) {
-  if(in) v.push_back(named_dialog("edit the Fifteen puzzle", edit_fifteen));
+  v.push_back(named_dialog("edit the Fifteen puzzle", edit_fifteen));
   }
 
-auto fifteen_hook = 
-  addHook(hooks_args, 100, rugArgs) +
-  addHook(hooks_o_key, 80, o_key) +
-  addHook(hooks_drawcell, 100, draw_fifteen) +
-  addHook(mapstream::hooks_savemap, 100, [] (fhstream& f) {
-    if(!in) return;
+void enable() {
+  rogueviz::rv_hook(hooks_o_key, 80, o_key);
+  rogueviz::rv_hook(hooks_drawcell, 100, draw_fifteen);
+  rogueviz::rv_hook(mapstream::hooks_savemap, 100, [] (fhstream& f) {
+    f.write<int>(15);
     f.write<int>(isize(fif));
     for(auto cd: fif) {
       f.write(mapstream::cellids[cd.first]);
@@ -304,33 +308,34 @@ auto fifteen_hook =
       if(nonorientable) 
         f.write(cd.second.currentmirror);
       }
-    }) +
-  addHook(hooks_clearmemory, 40, [] () {
+    });
+  rogueviz::rv_hook(hooks_clearmemory, 40, [] () {
     fif.clear();
-    }) +
-  addHook(mapstream::hooks_loadmap, 100, [] (fhstream& f) {
-    int num;
-    if(!in) return;
-    f.read(num);
-    fif.clear();
-    println(hlog, "read num = ", num);
-    for(int i=0; i<num; i++) {
-      int32_t at = f.get<int>();
-      println(hlog, "at = ", at);
-      cell *c = mapstream::cellbyid[at];
-      auto& cd = fif[c];      
-      f.read(cd.target);
-      f.read(cd.targetdir);
-      cd.targetdir = mapstream::fixspin(mapstream::relspin[at], cd.targetdir, c->type, f.vernum);
-      if(nonorientable) 
-        f.read(cd.targetmirror);
-      f.read(cd.current);
-      f.read(cd.currentdir);
-      if(nonorientable) 
-        f.read(cd.currentmirror);
-      cd.currentdir = mapstream::fixspin(mapstream::relspin[at], cd.currentdir, c->type, f.vernum);
-      println(hlog, "assigned ", cd.current, " to ", c);
-      }
+    });
+  }
+
+#if CAP_COMMANDLINE
+int rugArgs() {
+  using namespace arg;
+           
+  if(0) ;
+  else if(argis("-fifteen")) {
+    PHASEFROM(3);
+    launch();
+    addHook(mapstream::hooks_loadmap_old, 100, load_fifteen);
+    #if ISWEB
+    mapstream::loadMap("1");    
+    #endif
+    }
+
+  else return 1;
+  return 0;
+  }
+
+auto fifteen_hook = 
+  addHook(hooks_args, 100, rugArgs)
++ addHook(mapstream::hooks_loadmap, 100, [] (fhstream& f, int id) {
+    if(id == 15) load_fifteen(f);
     });
 #endif
 
