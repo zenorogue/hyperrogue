@@ -50,23 +50,25 @@ void prepare_tf() {
       low[i] = min(low[i], h[i]),
       high[i] = max(high[i], h[i]);
       
-    if(hyperbolic) {
+    if(hyperbolic || sphere) {
     
       hyperpoint hx;
       hx[0] = h[0] * t * 2;
       hx[1] = h[1] * t * 2;
       hx[2] = 0;
       hx[3] = 1;
-      hx = spin(45 * degree) * hx;
+      if(hyperbolic) hx = spin(45 * degree) * hx;
       normalize(hx);
-      hx = zshift(hx, h[2]*(t*7));
+      hx = zshift(hx, h[2]*(t*(sphere ? 3 : 7)));
 
       return {0, hx}; 
       }
     
-    if(nil) {
-      swap(h[1], h[2]);
+    if(nil || sol) {
+      if(nil) swap(h[1], h[2]);
       h *= 0.5 / 0.378;
+      if(sol) h *= vid.binary_width;
+      if(nil) h *= nilv::nilwidth;
       h[3] = 1;
       return {0, h};
       }
@@ -81,6 +83,11 @@ bool draw_city_at(cell *c, const shiftmatrix& V) {
   if(nil) {
     auto co = nilv::get_coord(c->master);
     if(co[1]) return false;
+    }
+
+  if(sol) {
+    auto co = c->master->distance;
+    if(co) return false;
     }
   
   if(c == cwt.at || true) 
