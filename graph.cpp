@@ -3946,7 +3946,6 @@ EX int ceiling_category(cell *c) {
     case laEFire:
     case laEEarth:
     case laElementalWall:
-    case laCanvas:
     case laTrollheim:
     case laDungeon:
     case laBull:
@@ -3957,6 +3956,10 @@ EX int ceiling_category(cell *c) {
     case laMagnetic:
     case laSwitch:
     case laEclectic:
+      return 3;
+
+    case laCanvas:
+      if(canvas_default_wall == waInvisibleFloor) return 0;
       return 3;
     
     case laPalace:
