@@ -39,6 +39,7 @@
 #include "notknot.cpp"
 
 #include "inner-maps.cpp"
+#include "planets.cpp"
 
 #include "simple-impossible.cpp"
 #include "ascending-descending.cpp"
