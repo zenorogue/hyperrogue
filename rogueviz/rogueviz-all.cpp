@@ -36,6 +36,8 @@
 #include "hypcity.cpp"
 #include "hypocycloid.cpp"
 
+#include "heatx.cpp"
+
 #include "notknot.cpp"
 
 #include "inner-maps.cpp"

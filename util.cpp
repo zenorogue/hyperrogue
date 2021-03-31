@@ -703,4 +703,25 @@ EX bool file_exists(string fname) {
   return access(fname.c_str(), F_OK) != -1;
   }
 
+EX void open_url(string s) {
+  #if ISWEB
+  EM_ASM_({
+    window.open(UTF8ToString($0, 1000));
+    }, s.c_str());
+  #else
+
+#ifdef WINDOWS  
+  ShellExecute(0, 0, s.c_str(), 0, 0, SW_SHOW);
+#endif
+
+#ifdef LINUX
+  system(("xdg-open "+s).c_str());
+#endif
+
+#ifdef MAC
+  system(("open "+s).c_str());
+#endif
+#endif
+  }
+  
 }

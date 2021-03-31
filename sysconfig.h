@@ -79,6 +79,10 @@
 #define CAP_GMP 0
 #endif
 
+#ifndef CAP_URL
+#define CAP_URL 1
+#endif
+
 #define CAP_FRAMELIMIT (!ISMOBWEB)
 
 #if ISMOBILE
@@ -339,6 +343,8 @@
 #define hyper fake_hyper // avoid "hyper" typedef in <_mingw.h>
 #define WIN32_LEAN_AND_MEAN // avoid "rad1" macro in <windows.h>
 #define NOMINMAX // avoid "min" and "max" macros in <windows.h>
+#include <windows.h>
+#include <shellapi.h>
 #endif
 
 #include <stdio.h>
