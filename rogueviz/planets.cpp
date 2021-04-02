@@ -508,8 +508,8 @@ auto msc =
     ->editable(0, 7, 1, "longitude of the reference point", "", 'L');
     param_f(max_alpha, "moon_max_alpha")
     ->editable(0, 255, 15, "animation alpha max", "", 'm');
-    param_f(prec, "precision")
-    ->editable(0, 255, 15, "precision", "larger values are less precise", 'p');
+    param_f(prec, "moon_precision")
+    ->editable(0, 30, .5, "precision", "larger values are less precise", 'p');
     });
 
 }
