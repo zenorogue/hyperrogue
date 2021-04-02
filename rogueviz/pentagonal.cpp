@@ -16,18 +16,15 @@ vector<pair<ld, transmatrix>> sideangles;
 
 cell *p0, *t0, *t1, *t2, *cc;
 
-bool snubon;
-
 hyperpoint cor;
 
 void kframe() {
-  if(snubon) {
   queuestr(gmatrix[p0], 0.6, "P0", 0xFFFFFF, 1);
   queuestr(gmatrix[cc], 0.6, "C", 0xFFFFFF, 1);
   queuestr(gmatrix[t0], 0.6, "T0", 0xFFFFFF, 1);
   queuestr(gmatrix[t1], 0.6, "T1", 0xFFFFFF, 1);
   queuestr(gmatrix[t2], 0.6, "T2", 0xFFFFFF, 1);
-  }}
+  }
 
 hyperpoint xts0;
 array<hyperpoint, 3> mts;
@@ -35,6 +32,8 @@ array<hyperpoint, 3> mts;
 rug::rugpoint *pt(hyperpoint h, hyperpoint c, int id) {
   auto r = rug::addRugpoint(shiftless(C0), -1);
   r->native = h;
+  r->native[3] = 1;
+  if(hyperbolic) r->native[2] = -r->native[2];
   r->x1 = (1 + c[0]) / 16 + (id/8) / 8.;
   r->y1 = (1 + c[1]) / 16 + (id%8) / 8.;
   r->valid = true;
@@ -87,15 +86,15 @@ void make_texture() {
     }
   
   tdata.loadTextureGL();
-
-  rug::alternate_texture = tdata.textureid;
   #endif
+  rug::alternate_texture = tdata.textureid;
   }
 
 void create_model();
 
+void enable_hooks();
+
 void run_snub(int v, int w) {
-  snubon = false;
   global_v = v; global_w = w;
   printf("set geometry\n");
   stop_game(); autocheat = true; 
@@ -120,6 +119,7 @@ void run_snub(int v, int w) {
   printf("start game\n");
   printf("distlimit = %d\n", cgi.base_distlimit);
   start_game();
+  enable_hooks();
   printf("ok\n");
   printf("allcells = %d\n", isize(currentmap->allcells()));
   
@@ -182,6 +182,7 @@ void run_snub(int v, int w) {
   cor = rel * gmatrix[cc].T * C0;
 
   rug::reopen();
+  rug::reset_view();
   for(auto p: rug::points) p->valid = true;
   rug::good_shape = true;  
 
@@ -192,8 +193,6 @@ void run_snub(int v, int w) {
   rug::model_distance = euclid ? 4 : 2;
   vid.rug_config.model = hyperbolic ? mdPerspective : mdEquidistant;
   showstartmenu = false;
-  snubon = true;
-  rug::invert_depth = hyperbolic;
   }
 
 ld x, y;
@@ -255,7 +254,7 @@ void create_model() {
   
   // printf("idh = %d\n", idh);
   
-  printf("createmodel with ticks = %d\n", ticks);
+  // printf("createmodel with ticks = %d\n", ticks);
 
   transmatrix t = hyperbolic ? hr::cspin(0, 2, M_PI) * xpush(sin(ticks * M_PI * 2 / anims::period)) : hr::cspin(0, 2, ticks * M_PI * 2 / anims::period);
   
@@ -281,73 +280,66 @@ void create_model() {
   
   }
 
-bool frame() { 
-  if(snubon && rug::rugged) {
-    create_model();
-    nomenukey = true;
-    displaychr(current_display->xcenter, current_display->ycenter, 0, 10, 'X', 0xFFFFFF);
-    clearMessages();
-    nohelp = true;
-    playerfound = true;
-    return true;
-    }
-  return false;
+bool animated = true;
+
+void rugframe() { 
+  if(animated) create_model();
+  displaychr(current_display->xcenter, current_display->ycenter, 0, 10, 'X', 0xFFFFFF);
+  clearMessages();
   }
 
-bool handleKey(int sym, int uni) {
-  if(snubon) {
-    if(among(uni, '3', '4', '5', '6', '7', '8', '9') && (cmode & sm::NORMAL))  {
-      run_snub(uni - '0', 3);
-      return true;
-      }
-    if(among(uni, '#', '$', '%', '&', '^') && (cmode & sm::NORMAL))  {
-      if(uni == '^') uni = '&';
-      run_snub(uni - 32, 4);
-      return true;
-      }
-    if(uni == 'a' && (cmode & sm::NORMAL)) {
-      rug::close();
-      mapeditor::drawplayer = false;
-      return true;
-      }
-    if(uni == 's' && rug::rugged && (cmode & sm::NORMAL)) {
-      vid.fov += 30;
-      if(vid.fov >= 180) vid.fov = 60;
-      }
-    if(uni == 'i' && rug::rugged && (cmode & sm::NORMAL)) {
-      rug::invert_depth = !rug::invert_depth;
-      return true;
-      }
-    }
-  return false;
+void show() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);
+  dialog::init("Pentagonal Exploration");
+  auto add_key = [] (char c, int a, int b) {
+    dialog::addBoolItem(lalign(0, "based on {",a,",",b,"}"), global_v == a && global_w == b, c);
+    dialog::add_action([a,b] {
+      run_snub(a, b);
+      });
+    };
+  for(int i=3; i<10; i++)
+    add_key('0'+i, i, 3);
+  add_key('$', 4, 4);
+  add_key('%', 5, 4);
+  add_key('^', 6, 4);
+  dialog::addBoolItem_action("animation and mouse control", animated, 'a');
+  dialog::addSelItem(XLAT("projection"), models::get_model_name(vid.rug_config.model), 'p'); 
+  dialog::add_action([] { pushScreen(models::model_menu); });
+  dialog::addBoolItem(XLAT("set perspective (allows flying with Home/End)"), vid.rug_config.model == mdPerspective, 's'); 
+  dialog::add_action([] { auto& m = vid.rug_config.model; m = (m==mdPerspective) ? mdEquidistant : mdPerspective; });
+  dialog::display();
   }
 
+void enable_hooks() {
+  rv_hook(rug::hooks_rugframe, 100, rugframe);
+  rv_hook(hooks_o_key, 80, [] (o_funcs& v) { v.push_back(named_dialog("pentagonal exploration", show)); });
+  }
 
 auto xhook = 
   arg::add3("-snub", [] { run_snub(arg::shift_argi(), 3); })
 + arg::add3("-snub4", [] { run_snub(arg::shift_argi(), 4); })
-+ addHook(hooks_handleKey, 0, handleKey)
-+ addHook(hooks_prestats, 0, frame)
-+ addHook(hooks_clearmemory, 40, [] () { snubon = false; } )
-+ addHook(pres::hooks_build_rvtour, 142, [] (string s, vector<tour::slide>& v) {
++ addHook(pres::hooks_build_rvtour, 143, [] (string s, vector<tour::slide>& v) {
     if(s != "mixed") return;
     using namespace tour;
     v.push_back(
       tour::slide{"Pentagonal Exploration", 62, LEGAL::NONE | QUICKGEO,
      "Pentagonal Exploration explained at: http://www.roguetemple.com/z/sims/snub/\n\n"
-     "Move the mouse nearer and further away from the X.\n\n"
-     "Press 3 4 5 6 7 8 9 shift+4 shift+5 shift+6 to change the geometry.",
+     "Move the mouse nearer and further away from the X.",
      
     [] (presmode mode) {
-      if(mode == 1) {
+      setCanvas(mode, '0');
+      slide_url(mode, 'u', "open the URL", "http://www.roguetemple.com/z/sims/snub/");
+      slide_backup(rug::model_distance);
+      slide_backup(vid.rug_config.model);
+      slide_backup(rug::alternate_texture);
+      if(mode == pmStart) {
         pentagonal::run_snub(5, 3);
         }
+      if(mode == pmKey) pushScreen(show);
       if(mode == 3) {
         printf("stopping\n");
-        set_geometry(gNormal);
-        set_variation(eVariation::bitruncated);
         rug::close();
-        start_game();
         }
       }}
       );

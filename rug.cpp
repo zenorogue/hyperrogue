@@ -1112,8 +1112,10 @@ struct using_rugview {
 
 #endif
 
+EX purehookset hooks_rugframe;
 
 EX void drawRugScene() {
+  callhooks(hooks_rugframe);
   USING_NATIVE_GEOMETRY;
   tinf.texture_id = alternate_texture ? alternate_texture : glbuf->renderedTexture;
   tinf.tvertices.clear();

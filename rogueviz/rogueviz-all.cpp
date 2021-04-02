@@ -8,7 +8,7 @@
 #include "kohonen.cpp"
 #include "staircase.cpp"
 #include "banachtarski.cpp"
-// #include "pentagonal.cpp" (currently does not work)
+#include "pentagonal.cpp"
 #include "functions.cpp"
 #include "fundamental.cpp"
 #include "sunflower.cpp"
