@@ -1168,7 +1168,7 @@ bool default_help() {
   }
 
 void o_key(o_funcs& v) {
-  v.push_back(named_dialog(XLAT("rogueviz menu"), rogueviz::showMenu));
+  v.push_back(named_dialog(XLAT("RogueViz graph viz settings"), rogueviz::showMenu));
   }
 
 auto hooks  = 
@@ -1176,13 +1176,7 @@ auto hooks  =
   addHook(hooks_args, 100, readArgs) +
 #endif
   addHook(hooks_clearmemory, 0, close) +
-  
-  addHook(dialog::hooks_display_dialog, 100, [] () {
-    if(current_screen_cfunction() == showMainMenu) {
-      dialog::addItem(XLAT("rogueviz menu"), 'u'); 
-      dialog::add_action_push(rogueviz::showMenu);
-      }
-    }) +
+
   addHook(hooks_markers, 100, search_marker) +
   addHook(hooks_configfile, 100, [] {
     param_i(brm_limit, "brm_limit");

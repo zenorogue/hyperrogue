@@ -379,6 +379,12 @@ int pres_hooks =
         }
       }
     }) +
+  addHook(dialog::hooks_display_dialog, 100, [] () {
+    if(current_screen_cfunction() == showMainMenu) {
+      dialog::addItem(XLAT("RogueViz demos"), 'd'); 
+      dialog::add_action_push(choose_presentation);
+      }
+    }) +
   addHook(tour::ss::hooks_extra_slideshows, 300, [] (tour::ss::slideshow_callback cb) {
     if(rogueviz::pres::rvslides_data.empty()) pres::gen_rvtour_data();
     cb(XLAT("non-Euclidean geometry in data analysis"), &pres::rvslides_data[0], 'd');
