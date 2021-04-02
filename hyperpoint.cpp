@@ -213,6 +213,7 @@ constexpr transmatrix centralsym = diag(-1,-1,-1,-1);
 inline hyperpoint hpxyz(ld x, ld y, ld z) { return MDIM == 3 ? hyperpoint(x,y,z,0) : hyperpoint(x,y,0,z); }
 inline hyperpoint hpxyz3(ld x, ld y, ld z, ld w) { return MDIM == 3 ? hyperpoint(x,y,w,0) : hyperpoint(x,y,z,w); }
 constexpr hyperpoint point3(ld x, ld y, ld z) { return hyperpoint(x,y,z,0); }
+constexpr hyperpoint point30(ld x, ld y, ld z) { return hyperpoint(x,y,z,0); }
 constexpr hyperpoint point31(ld x, ld y, ld z) { return hyperpoint(x,y,z,1); }
 constexpr hyperpoint point2(ld x, ld y) { return hyperpoint(x,y,0,0); }
 
