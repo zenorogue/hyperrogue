@@ -1099,8 +1099,6 @@ EX ld hirug = 1e3;
 
 EX GLuint alternate_texture;
 
-EX bool invert_depth;
-
 EX bool rug_control() { return rug::rugged; }
 
 #if HDR
