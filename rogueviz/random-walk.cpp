@@ -215,7 +215,9 @@ auto msc =
     "Here we see random walk in various geometries.\n"
     "Press '5' to reset.\n"
     ,
-    [] (tour::presmode mode) {}
+    [] (tour::presmode mode) {
+      slide_url(mode, 'y', "YouTube link", "https://www.youtube.com/watch?v=sXNI_i6QZZY");
+      }
     });
   rw_slide(v, "Euclidean plane", "In Euclidean plane, the random walk always returns to the neighborhood of the starting point with probability 1.", [] {
     set_geometry(gEuclid);

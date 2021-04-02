@@ -350,7 +350,7 @@ int ah = addHook(hooks_args, 100, readArgs) +
       gmatrix0 = gmatrix;
 
       rogueviz::collatz::start();
-      })
+      }, [] (presmode m) { slide_url(m, 'y', "YouTube link", "https://www.youtube.com/watch?v=NqPUwA_A0_k"); })
     });
     });
   

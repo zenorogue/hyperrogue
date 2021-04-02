@@ -350,10 +350,12 @@ auto fifteen_hook =
           [] (presmode mode) {}
           });
       
-      auto add = [&] (string s, string lev, string text) {
+      auto add = [&] (string s, string lev, string text, string youtube = "") {
         fifteen_slides.emplace_back(
           tour::slide{s, 100, LEGAL::NONE | QUICKGEO, text,
             [=] (presmode mode) {
+              if(youtube != "")
+                slide_url(mode, 'y', "YouTube link", youtube);
               string fname = "fifteen/" + lev + ".lev";
               if(!file_exists(fname)) {
                 slide_error(mode, "file " + fname + " not found");
@@ -376,9 +378,9 @@ auto fifteen_hook =
         };
       
       add("15", "classic", "The original Fifteen puzzle.");
-      add("15+4", "fifteen", "The 15+4 puzzle by Henry Segerman.");
+      add("15+4", "fifteen", "The 15+4 puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=Hc3yfuXiWe0");
       add("15-4", "sphere11", "The 15-4 puzzle.");
-      add("coiled", "coiled", "Coiled fifteen puzzle by Henry Segerman.");
+      add("coiled", "coiled", "Coiled fifteen puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=rfAEgxNEOrQ");
       add("Möbius band", "mobiusband", "Fifteen puzzle on a Möbius band.");
       add("Kite-and-dart", "kitedart", "Kite-and-dart puzzle.");
       

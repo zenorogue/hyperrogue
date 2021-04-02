@@ -109,12 +109,12 @@ auto hypcity_ah = arg::add3("-hypcity", enable)
       hypcity_slides.emplace_back(
         slide{"Introduction", 999, LEGAL::NONE, 
           "Here we put a 3D model of a city into various geometries. Don't forget to try changing RogueViz projection and view range settings!\n\n"
-          "Model by Emile Johansson, downloaded from: https://sketchfab.com/3d-models/night-city-p2-82637933a7cb4fafadb0e2a79415c438\n\n"
-          "Thanks to Nico Belmonte for the idea of using this model.\n\n"
           "Remember to try different projections (press '1')!"
           ,
-          [] (presmode mode) {}
-          });
+          [] (presmode mode) {
+          slide_url(mode, 'm', "original model by Emile Johansson", "https://sketchfab.com/3d-models/night-city-p2-82637933a7cb4fafadb0e2a79415c438");
+          slide_url(mode, 't', "original Tweets by Nico Belmonte", "https://twitter.com/philogb/status/1375147728389476356");
+          }});
       
       auto add = [&] (string s, string text, int dim, reaction_t setter) {
         hypcity_slides.emplace_back(

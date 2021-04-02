@@ -569,6 +569,8 @@ auto hook = addHook(hooks_args, 100, readArgs)
      
     [] (presmode mode) {
       slidecommand = "Banach-Tarski switch";
+      slide_url(mode, 't', "Twitter link", "https://twitter.com/ZenoRogue/status/1001127253747658752");
+
       if(mode == 3) {
         while(gamestack::pushed()) stop_game(), gamestack::pop();
         banachtarski::bmap = false;

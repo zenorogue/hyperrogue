@@ -323,7 +323,10 @@ slide *gen_rvtour_mixed() {
   rvslides_mixed.emplace_back(slide{
     "RogueViz", 999, LEGAL::ANY,
     "This presentation is mostly composed from various unsorted demos, mostly posted on Twitter and YouTube. Press Enter to continue, ESC to look at other functions of this presentation.",
-    [] (presmode mode) {}
+    [] (presmode mode) {
+      slide_url(mode, 'y', "YouTube link", "https://www.youtube.com/user/ZenoTheRogue");
+      slide_url(mode, 't', "Twitter link", "https://twitter.com/zenorogue/");
+      }
     });
   
   callhooks(hooks_build_rvtour, "mixed", rvslides_mixed); 

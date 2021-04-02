@@ -250,6 +250,7 @@ int phooks = arg::add3("-stair", enable)
       if(mode == pmStart) staircase::make_staircase();
       slidecommand = "staircase menu";
       if(mode == pmKey) pushScreen(staircase::showMenu);
+      slide_url(mode, 'y', "YouTube link", "https://www.youtube.com/watch?v=HZNRo6mr5pk");
       }}
       );
     })

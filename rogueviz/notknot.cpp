@@ -1489,6 +1489,11 @@ auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
         "Some experiments with weird portals. Press '5' to change between available experiments.\n"
         ,
         [] (tour::presmode mode) {
+          slide_url(mode, 'k', "knotted portal (YouTube)", "https://www.youtube.com/watch?v=eb2DhCcGH7U");
+          slide_url(mode, 'h', "self-hiding knot portal (YouTube)", "https://www.youtube.com/watch?v=vFLZ2NGtuGw");
+          slide_url(mode, 'n', "non-Euclidean portal in Nil (YouTube)", "https://www.youtube.com/watch?v=2K-v8tK68AE");
+          slide_url(mode, 's', "spherical portal (YouTube)", "https://www.youtube.com/watch?v=PerPeQFu5gw");
+          slide_url(mode, 'c', "Cat Portal in Solv (YouTube)", "https://www.youtube.com/watch?v=CGiSxC9B6i0");
           setCanvas(mode, '0');
           using namespace tour;
           if(mode == pmStart) {

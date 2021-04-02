@@ -143,8 +143,9 @@ namespace rogueviz {
     inline hookset<void(string, vector<slide>&)> hooks_build_rvtour;
     slide *gen_rvtour();
 
-template<class T> function<void(presmode)> roguevizslide(char c, const T& t) {
-  return [c,t] (presmode mode) {
+template<class T, class U> function<void(presmode)> roguevizslide(char c, const T& t, const U& f = [] (presmode mode) {}) {
+  return [c,t,f] (presmode mode) {
+    f(mode);
     patterns::canvasback = 0x101010;
     setCanvas(mode, c);
     if(mode == 1 || mode == pmGeometryStart) t();

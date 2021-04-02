@@ -284,6 +284,7 @@ auto hchook =
       "Move with mouse/arrows/PgUpDn. Press '5' to enable animation, 'o' to change ring size.\n\n",
    
   [] (presmode mode) {
+    slide_url(mode, 'y', "YouTube link", "https://youtu.be/3WejR74o6II");
     setCanvas(mode, '0');
     
     slidecommand = "animation";

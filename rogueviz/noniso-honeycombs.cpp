@@ -155,6 +155,7 @@ tour::slide *gen_noniso_demo() {
     slide{"Non-isotropic geometry demo", 999, LEGAL::NONE | QUICKSKIP, 
       "This is a presentation of non-isotropic geometries.",
       [] (presmode mode) {
+        slide_url(mode, 'p', "paper about non-isotropic geometries", "https://arxiv.org/abs/2002.09533");
         if(mode == pmStart) {
           stop_game();
           set_geometry(gCubeTiling);          

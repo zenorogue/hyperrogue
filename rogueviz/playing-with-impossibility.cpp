@@ -686,6 +686,7 @@ slide dmv_slides[] = {
     "This is a 3D model of Ascending and Descending by Lucian B. It is based on an optical illusion."
     ,
     [] (presmode mode) {
+      slide_url(mode, 'm', "link to the original model", "https://3dwarehouse.sketchup.com/model/3e6df6c24a95f583cefabc2ae69d584c/MC-Escher-Ascending-and-Descending");
       ply_slide(mode, gCubeTiling, mdPerspective, false);
       if(!ply::staircase.available()) return;
       if(mode == pmStart) {
@@ -1004,6 +1005,7 @@ slide dmv_slides[] = {
     "(the animation is not included with RogueViz)"
     ,
     [] (presmode mode) {
+      slide_url(mode, 'i', "Instagram link", "https://www.instagram.com/p/B756GCynErw/");
       empty_screen(mode);
       // show_picture(mode, "rogueviz/nil/emty-ring.png");
       // show_animation(mode, "rogueviz/nil/emty-ring.mp4", 720, 900, 300, 30);
@@ -1050,6 +1052,7 @@ slide dmv_slides[] = {
     "We have used the trick mentioned before to move into the Nil space. Here are the results."
     ,
     [] (presmode mode) {
+      slide_url(mode, 'y', "YouTube link", "https://www.youtube.com/watch?v=DurXAhFrmkE");
       ply_slide(mode, gNil, mdGeodesic, true);
       }
     },
@@ -1082,6 +1085,7 @@ slide dmv_slides[] = {
     "A perpetuum mobile in Nil as the final slide. That's all for today!"
     ,
     [] (presmode mode) {
+      slide_url(mode, 'y', "YouTube link", "https://www.youtube.com/watch?v=mxvUAcgN3go");
       setCanvas(mode, '0');
       if(mode == pmStart) {
         stop_game();

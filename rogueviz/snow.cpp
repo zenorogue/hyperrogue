@@ -242,7 +242,10 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
     "\n\n"
     "You can use mouse to look in different directions. Press 5 to turn the automatic movement on or off. Press 'o' to change density and shape."
     ,
-    [] (tour::presmode mode) {}
+    [] (tour::presmode mode) {
+      slide_url(mode, 'y', "YouTube link", "https://www.youtube.com/watch?v=leuleS9SpiA");
+      slide_url(mode, 't', "Twitter link", "https://twitter.com/ZenoRogue/status/1245367263936512001");
+      }
     });
   snow_slide(v, "Euclidean geometry", "This is the Euclidean space. Looks a bit like space flight in some old video games.", [] {
     set_geometry(gCubeTiling);

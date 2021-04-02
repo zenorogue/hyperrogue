@@ -513,6 +513,7 @@ auto hook = addHook(hooks_args, 100, readArgsG)
       "See grigorchuk.cpp for more comments.",
 
       [] (tour::presmode mode) {
+        slide_url(mode, 'p', "a paper about Grigorchuk group", "https://arxiv.org/pdf/math/0607384.pdf");
         if(mode == pmStart) {
           grigorchuk::grig_limit = 10000;
           gamestack::push();
