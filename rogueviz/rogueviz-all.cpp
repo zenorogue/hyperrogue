@@ -6,7 +6,7 @@
 #include "objmodels.cpp"
 
 #include "kohonen.cpp"
-// #include "staircase.cpp" (currently does not work)
+#include "staircase.cpp"
 #include "banachtarski.cpp"
 // #include "pentagonal.cpp" (currently does not work)
 #include "functions.cpp"

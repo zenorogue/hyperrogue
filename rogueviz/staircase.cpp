@@ -1,5 +1,6 @@
 // Hyperbolic Rogue: staircase simulation in RogueViz
 // Copyright (C) 2011-2018 Zeno and Tehora Rogue, see 'hyper.cpp' for details
+// see: https://www.youtube.com/watch?v=HZNRo6mr5pk
 
 #include "rogueviz.h"
 
@@ -14,40 +15,55 @@ ld szoom = 5;
 
 ld progress = 0;
 
-ld strafex, strafey;
+basic_textureinfo tinf;
 
 hyperpoint spcoord(hyperpoint h) {
   ld phi = h[0], y = h[1], z = h[2], r = global_r;
-  dynamicval<eGeometry> gw(geometry, rug::gwhere == gElliptic ? gSphere : rug::gwhere);
-  hyperpoint inh = xpush(-acurvature*(y + r - frac(progress))/szoom) * xspinpush0(M_PI/2, acurvature*z);
-  hyperpoint i = inh * (hdist0(inh) / hypot_d(2, inh));
   ld aphi = (r+phi + floor(progress))*M_PI/6;
-  return hpxyz(i[1] * sin(aphi), i[1] * cos(aphi), i[0]);
+  return zpush(acurvature*(y + r - frac(progress))/szoom) * xspinpush0(aphi, acurvature * z);
   }
 
-rug::rugpoint *pt(hyperpoint h, hyperpoint c) {
-  auto r = rug::addRugpoint(shiftless(C0), -1);
-  r->native = spcoord(h);
-  r->x1 = c[0];
-  r->y1 = c[1];
-  r->valid = true;
-  return r;
+using tv = glhr::textured_vertex;
+
+tv pt(hyperpoint h, hyperpoint c) {
+  tv result;
+  h = spcoord(h);
+  result.coords[0] = h[0];
+  result.coords[1] = h[1];
+  result.coords[2] = h[2];
+  result.coords[3] = h[3];
+  result.texture[0] = c[0];
+  result.texture[1] = c[1];
+  result.texture[2] = c[2];
+  return result;
   }
+
+vector<glvertex> vertices;
+
+void add_pt(tv tv) {
+  vertices.push_back(tv.coords);
+  glvertex t;
+  for(int i=0; i<3; i++) t[i] = tv.texture[i];
+  tinf.tvertices.push_back(t);
+  }
+
+void tri(tv a, tv b, tv c) { add_pt(a); add_pt(b); add_pt(c); }
 
 void addRect(hyperpoint h, hyperpoint hx, hyperpoint hy, hyperpoint v, hyperpoint vx, hyperpoint vy, int ix, int iy) {
-  vector<vector<rug::rugpoint*> > rps(iy+1, vector<rug::rugpoint*> (ix+1));
+  vector<vector<tv> > rps(iy+1, vector<tv> (ix+1));
   for(int y=0; y<=iy; y++)
   for(int x=0; x<=ix; x++) {
     rps[y][x] = pt(h+hx*x/ix+hy*y/iy, v+vx*x/ix+vy*y/iy);
     }
   for(int y=0; y<iy; y++)
-  for(int x=0; x<ix; x++) 
-    rug::addTriangle(rps[y][x], rps[y+1][x], rps[y][x+1]),
-    rug::addTriangle(rps[y+1][x+1], rps[y][x+1], rps[y+1][x]);
+  for(int x=0; x<ix; x++) {
+    tri(rps[y][x], rps[y+1][x], rps[y][x+1]),
+    tri(rps[y+1][x+1], rps[y][x+1], rps[y+1][x]);
+    }
   }
 
 void addTri(hyperpoint h, hyperpoint hx, hyperpoint hy, hyperpoint v, hyperpoint vx, hyperpoint vy, int i) {
-  vector<vector<rug::rugpoint*> > rps(i+1, vector<rug::rugpoint*> (i+1));
+  vector<vector<tv> > rps(i+1, vector<tv> (i+1));
   for(int y=0; y<=i; y++)
   for(int x=0; x<=i; x++) {
     if(x+y <= i)
@@ -56,9 +72,9 @@ void addTri(hyperpoint h, hyperpoint hx, hyperpoint hy, hyperpoint v, hyperpoint
   for(int y=0; y<i; y++)
   for(int x=0; x<i; x++) {
     if(x+y < i)
-      rug::addTriangle(rps[y][x], rps[y+1][x], rps[y][x+1]);
+      tri(rps[y][x], rps[y+1][x], rps[y][x+1]);
     if(x+y+2 <= i)
-      rug::addTriangle(rps[y+1][x+1], rps[y][x+1], rps[y+1][x]);
+      tri(rps[y+1][x+1], rps[y][x+1], rps[y+1][x]);
     }
   }
 
@@ -70,6 +86,7 @@ texture::texture_data tdata; // = texture::config.data;
 
 void make_texture() {
 #if CAP_TEXTURE
+  if(!need_texture) return;
   printf("make texture\n");
   need_texture = false;
   tdata.whitetexture();
@@ -104,108 +121,86 @@ int prec = 1;
 int maxr = 100;
 #else
 int prec = 4;
-
 int maxr = 1000;
 #endif
 
 bool on;
 
+void enable_hooks();
+
+void reset_geom(eGeometry g) {
+  set_geometry(g);
+  start_game();
+  View = Id;
+  enable_hooks();
+  }
+
 void make_staircase() {
 
   // vid.stereo_mode = current_display->sODS;
-  rug::no_fog = true;
 
-  println(hlog, "scurvature = ", scurvature, " progress = ", progress, " strafe=", strafex, ",", strafey);
-  rug::renderonce = true;
-  vid.rug_config.model = mdPerspective;
+  println(hlog, "scurvature = ", scurvature, " progress = ", progress);
   if(scurvature > -1e-6 && scurvature < 1e-6) { 
-    rug::gwhere = rug::rgEuclid;
+    if(WDIM == 2 || !euclid) reset_geom(gCubeTiling);
     acurvature = 1;
     }
   else if(scurvature < 0) {
-    rug::gwhere = rug::rgHyperbolic;
+    if(WDIM == 2 || !hyperbolic) reset_geom(gSpace534);
     acurvature = -scurvature;
     }
   else {
-    rug::gwhere = rug::rgSphere;
+    if(WDIM == 2 || !sphere) reset_geom(gCell120);
     acurvature = scurvature;
     }
-  rug::ruggospeed = acurvature;
+
+  // rug::ruggospeed = acurvature;
   vid.ipd = 0.15 * acurvature;
-  if(!rug::rugged || !staircase::on) {
-    staircase::on = true;
-    rug::reopen();
-    }
+  staircase::on = true;
   if(need_texture) {
     make_texture();
-#if CAP_TEXTURE
-    rug::alternate_texture = tdata.textureid;
-#endif
     }
-  rug::clear_model(); 
+  vertices.clear();
+  tinf.tvertices.clear();
   printf("compute\n");
   for(int r=-maxr; r<maxr; r++) {
     if(scurvature < -1e-6 && abs(r * acurvature) > 7*12) continue;
     if(scurvature > 1e-6 && abs(acurvature*r/szoom) > M_PI) continue;
     global_r = r;
     // step
-    addRect(hpxyz(0,0,1), hpxyz(0,0,1), hpxyz(1,0,0), hpxy(0,0), hpxy(.25,0), hpxy(0,.25), prec, prec);
+    addRect(point31(0,0,1), point30(0,0,1), point30(1,0,0), hpxy(0,0), hpxy(.25,0), hpxy(0,.25), prec, prec);
     // step connection
-    addRect(hpxyz(1,0,1), hpxyz(0,0,1), hpxyz(0,1,0), hpxy(0.75,0.25), hpxy(.25,0), hpxy(0,.25), prec, prec);
+    addRect(point31(1,0,1), point30(0,0,1), point30(0,1,0), hpxy(0.75,0.25), hpxy(.25,0), hpxy(0,.25), prec, prec);
     // triangle inner side
-    addTri(hpxyz(1,0,1), hpxyz(0,1,0), hpxyz(-1,0,0), hpxy(.5,0), hpxy(.125,.125), hpxy(0,.125), prec);
+    addTri(point31(1,0,1), point30(0,1,0), point30(-1,0,0), hpxy(.5,0), hpxy(.125,.125), hpxy(0,.125), prec);
     // rectangle under triangle
-    addRect(hpxyz(0,0,1), hpxyz(1,1,0), hpxyz(0,1,0), hpxy(.5,.125), hpxy(.125,0), hpxy(0,.125), prec, prec);
+    addRect(point31(0,0,1), point30(1,1,0), point30(0,1,0), hpxy(.5,.125), hpxy(.125,0), hpxy(0,.125), prec, prec);
     // barrier post
-    addRect(hpxyz(.45,0,1.1), hpxyz(.1,.1,0), hpxyz(0,-3,0), hpxy(0,.5), hpxy(.25,0), hpxy(0,.25), 2, prec);
+    addRect(point31(.45,0,1.1), point30(.1,.1,0), point30(0,-3,0), hpxy(0,.5), hpxy(.25,0), hpxy(0,.25), 2, prec);
     // barrier
-    addRect(hpxyz(.45,-3,1), hpxyz(0,0,.2), hpxyz(1,1,0), hpxy(.5,.5), hpxy(.25,0), hpxy(0,.25), 1, prec);
+    addRect(point31(.45,-3,1), point30(0,0,.2), point30(1,1,0), hpxy(.5,.5), hpxy(.25,0), hpxy(0,.25), 1, prec);
     // outer wall
-    addRect(hpxyz(0,0,2), hpxyz(1,1,0), hpxyz(0,12,0), hpxy(.25,.25), hpxy(.25,0), hpxy(0,.25), prec, prec);
+    addRect(point31(0,0,2), point30(1,1,0), point30(0,12,0), hpxy(.25,.25), hpxy(.25,0), hpxy(0,.25), prec, prec);
     // lower wall
-    addRect(hpxyz(0,1,1), hpxyz(1,1,0), hpxyz(0,0,1), hpxy(.5,0), hpxy(.25,0), hpxy(0,.25), prec, prec);
+    addRect(point31(0,1,1), point30(1,1,0), point30(0,0,1), hpxy(.5,0), hpxy(.25,0), hpxy(0,.25), prec, prec);
     }    
   printf("push\n");
-  rug::push_all_points(0, strafex * acurvature);
-  rug::push_all_points(1, strafey * acurvature);
-  for(auto p: rug::points) p->valid = true;
-  rug::good_shape = true;  
-  printf("done (%d points)\n", isize(rug::points));
-  rug::lowrug = 1e-2 * acurvature;
-  rug::hirug = 1e3 * acurvature;
+  printf("done (%d points)\n", isize(tinf.tvertices));
   }
 
 // -0.50 .. 0.16
-
-int ctick;
-
-void check() {
-  if(ctick && ctick < ticks) {
-    calcparam();
-    make_staircase();
-    ctick = 0;
-    }
-  if(on && !rug::rugged) {
-    on = false;
-    rug::alternate_texture = 0;
-    rug::no_fog = false;
-    rug::ruggospeed = 1;
-    staircase::on = false;
-    }
-  }
 
 void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
   dialog::init(XLAT("Spiral Staircase"), iinf[itPalace].color, 150, 0);
-
-  dialog::addSelItem("     " + XLAT("X"), fts(strafex), 'x');
-  dialog::addSelItem("     " + XLAT("Y"), fts(strafey), 'y');
-  dialog::addSelItem("     " + XLAT("curvature"), fts(scurvature), 'c');
+  
+  add_edit(scurvature);
+  add_edit(prec);
+  add_edit(maxr);
 
   dialog::addBreak(100);
-  dialog::addItem(XLAT("disable menu"), SDLK_ESCAPE);
   dialog::addBoolItem(XLAT("low quality"), prec == 1, '1');
+  dialog::add_action([] { prec = 1; maxr = 100; make_staircase(); });
   dialog::addBoolItem(XLAT("medium quality"), prec == 2, '2');
 #if !ISWEB
   dialog::addBoolItem(XLAT("high quality"), prec == 4, '3');
@@ -213,157 +208,71 @@ void showMenu() {
   dialog::addItem(XLAT("take me back"), 'q');
 
   dialog::display();
-  keyhandler = [] (int sym, int uni) {
-    dialog::handleNavigation(sym, uni);
-    
-    if(uni == 'x') {
-      dialog::editNumber(strafex, -1, 1, .05, 1, XLAT("X"),
-        XLAT("Also changed with keys A/D")
-        );
-      dialog::reaction = [] () { ctick = ticks + 500; };
-      }
-    else if(uni == 'y') {
-      dialog::editNumber(strafey, -1, 1, .05, 1, XLAT("Y"),
-        XLAT("Also changed with keys W/S")
-        );
-      dialog::reaction = [] () { ctick = ticks + 500; };
-      }
-    else if(uni == 'c') {
-      dialog::editNumber(scurvature, -1, 1, .05, 1, XLAT("curvature"),
-        XLAT("Also changed with keys K/L. Press G for the golden spiral")
-        );
-      dialog::reaction = [] () { ctick = ticks + 500; };
-      }
-    else if(uni == 'w') {
-      strafey += .1;
-      ctick = ticks + 200;
-      }
-    else if(uni == 's') {
-      strafey -= .1;
-      ctick = ticks + 200;
-      }
-    else if(uni == 'd') {
-      strafex += .1;
-      ctick = ticks + 200;
-      }
-    else if(uni == 'a') {
-      strafex -= .1;
-      ctick = ticks + 200;
-      }
-    else if(uni == 'k') {
-      scurvature += .02;
-      ctick = ticks + 200;
-      }
-    else if(uni == 'l') {
-      scurvature -= .02;
-      ctick = ticks + 200;
-      }
-    else if(uni == 'p') {
-      progress += .1;
-      ctick = ticks + 200;
-      }
-    else if(uni == 'g') {
-      scurvature = -4 * log((sqrt(5)+1)/2) / 2.4;
-      ctick = ticks + 200;
-      }
-    else if(uni == '1') {
-      prec = 1, maxr = 100;
-      make_staircase();
-      }
-    else if(uni == '2') {
-      prec = 2, maxr = 300;
-      make_staircase();
-      }
-#if !ISWEB
-    else if(uni == '3') {
-      prec = 4, maxr = 1000;
-      make_staircase();
-      }
-#endif
-    else if(uni == 'q') {
-      ctick = 0;
-      rug::close();
-      popScreen();
-      }
-    else if(doexiton(sym, uni)) popScreen();
-    };
   }
 
-// see: https://www.youtube.com/watch?v=HZNRo6mr5pk
-
-void staircase_video(int from, int num, int step) {
-  int TSIZE = rug::texturesize; // recommended 4096
-  resetbuffer rb;
-  renderbuffer rbuf(TSIZE, TSIZE, true);
-  vid.stereo_mode = sODS;
-
-  for(int i=from; i<num; i+=step) { 
-    ld t = i * 1. / num;
-    t = pow(t, .3);
-    staircase::scurvature = t * t * (t-.95) * 4;
-    staircase::progress = i / 30.;
-    
-    staircase::strafex = (sin(i / 240.) - sin(i / 501.)) / 2.5;
-    staircase::strafey = (cos(i / 240.) - cos(i / 501.)) / 2.5;
-    
-    staircase::make_staircase();
-
-    rbuf.enable();
-    dynamicval<int> vx(vid.xres, TSIZE);
-    dynamicval<int> vy(vid.yres, TSIZE);
-    dynamicval<int> vxc(current_display->xcenter, TSIZE/2);
-    dynamicval<int> vyc(current_display->ycenter, TSIZE/2);
-    printf("draw scene\n");
-    rug::drawRugScene();
-    
-    IMAGESAVE(rbuf.render(), ("staircase/" + format("%05d", i) + IMAGEEXT).c_str());
-    printf("GL %5d/%5d\n", i, num);
-    }
-  
-  rb.reset();
+void draw_staircase() {
+  shiftmatrix Zero = ggmatrix(cwt.at);
+  auto &p = queuepoly(Zero, cgi.shGem[0], 0xFFFFFFFF);
+  p.tab = &vertices;
+  p.cnt = isize(vertices);
+  p.flags |= POLY_TRIANGLES;
+  p.offset = 0;
+  p.offset_texture = 0;
+  p.tinf = &tinf;
+  tinf.texture_id = tdata.textureid;
   }
 
-#if CAP_COMMANDLINE
-int readArgs() {
-  using namespace arg;
-
-  // #1: load the samples
-  
-  if(argis("-stair")) {
-    showstartmenu = false;
-    ctick = ticks + 2000;
-    pushScreen(showMenu);
-    }
-
-  else if(argis("-staircase_video")) {
-    staircase_video(0, 128*30, 1); // goal: 168*30
-    }
-
-  else return 1;
-  return 0;
+void enable_hooks() {
+  rv_hook(hooks_o_key, 80, [] (o_funcs& v) { v.push_back(named_dialog("staircase", showMenu)); });
+  rv_hook(hooks_frame, 100, draw_staircase);
   }
-#endif
 
-int phooks = addHook(hooks_args, 100, readArgs)
-  + addHook(hooks_fixticks, 100, check)
-  + addHook(hooks_rvmenu_replace, 100, [] {
-     if(staircase::on) { staircase::showMenu(); return true; }
-     return false;
-     })
+void enable() {
+  enable_hooks();
+  make_staircase();  
+  make_texture();
+  }
+
+int phooks = arg::add3("-stair", enable)
   + addHook(pres::hooks_build_rvtour, 141, [] (string s, vector<tour::slide>& v) {
     if(s != "mixed") return;
     using namespace tour;
     v.push_back(
       tour::slide{"Spiral Staircase", 62, LEGAL::NONE | QUICKGEO,
-     "Spiral Staircase Demo. Press '5' to change the curvature or other parameters.",
+     "Spiral Staircase Demo.\n\n"
+     "In Euclidean geometry, when we look at a spiral staircase from above, "
+     "we see a hyperbolic spiral -- not a logarithmic spiral, as some people claim. "
+     "However, in hyperbolic geometry, we would see a (roughly) logarithmic spiral.\n\n"
+     "Press '5' to change the curvature or other parameters.",
      
     [] (presmode mode) {
-      if(mode == 1) staircase::make_staircase();
-      if(mode == 3) rug::close();
+      setCanvas(mode, '0');
+      if(mode == pmStart) staircase::make_staircase();
       slidecommand = "staircase menu";
-      if(mode == 4) pushScreen(staircase::showMenu);
+      if(mode == pmKey) pushScreen(staircase::showMenu);
       }}
       );
+    })
+  + addHook(hooks_configfile, 100, [] {
+    param_f(scurvature, "stair_curvature")
+    ->editable(-1, 1, .05, XLAT("curvature of the space"), "", 'c')
+    ->set_reaction(make_staircase)
+    ->set_extra([] {
+      dialog::addItem("golden spiral", 'G');
+      dialog::add_action([] {
+        scurvature = -4 * log((sqrt(5)+1)/2) / 2.4;
+        make_staircase();
+        popScreen();
+        });
+      });
+    param_i(prec, "stair_precision")
+    ->editable(1, 8, 1, XLAT("higher value = better"), "staircase precision", 'p')
+    ->set_sets([] { dialog::bound_low(1); })
+    ->set_reaction(make_staircase);
+    param_i(maxr, "stair_maxr")
+    ->editable(1, 5000, 100, XLAT("higher value = more levels"), "staircase max", 'm')
+    ->set_sets([] { dialog::bound_low(1); })
+    ->set_reaction(make_staircase);
     });
 
 }}
