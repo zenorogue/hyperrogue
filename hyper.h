@@ -640,7 +640,7 @@ struct finalizer {
   
 static const int MAXPLAYER = 7;
 
-#define DEFAULTCONTROL (multi::players == 1 && !shmup::on && !multi::alwaysuse && !(rug::rugged && rug::renderonce))
+#define DEFAULTCONTROL (multi::players == 1 && !shmup::on && !multi::alwaysuse)
 #define DEFAULTNOR(sym) (DEFAULTCONTROL || multi::notremapped(sym))
 
 #define CAP_MENUSCALING (ISPANDORA || ISMOBILE)
