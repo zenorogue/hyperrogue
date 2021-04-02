@@ -35,7 +35,7 @@ EX int currentslide;
 enum presmode { 
   pmStartAll = 0,
   pmStart = 1, pmFrame = 2, pmStop = 3, pmKey = 4, pmRestart = 5,
-  pmAfterFrame = 6,
+  pmAfterFrame = 6, pmHelpEx = 7,
   pmGeometry = 11, pmGeometryReset = 13, pmGeometryStart = 15,
   pmGeometrySpecial = 16
   };
@@ -94,6 +94,13 @@ EX void slide_restore_all() {
     restorers.back()();
     restorers.pop_back();
     }
+  }
+
+EX void slide_url(presmode mode, char key, string text, string url) {
+  if(mode == pmHelpEx)
+    help_extensions.push_back(help_extension{key, text, [url] () { 
+      open_url(url);
+      }});
   }
 
 /** \brief an auxiliary function to enable a visualization in the Canvas land */
@@ -177,12 +184,14 @@ string get_subname(const string& s, const string& folder) {
 
 /** \brief display the help text for the current slide if texts enabled */
 EX void slidehelp() {
-  if(texts && slides[currentslide].help[0])
+  if(texts && slides[currentslide].help[0]) {
     gotoHelp(
       help = 
         helptitle(XLAT(get_slidename(slides[currentslide].name)), 0xFF8000) + 
         XLAT(slides[currentslide].help)
       );
+    presentation(pmHelpEx);
+    }
   }
 
 /** \brief return from a subgame launched while in presentation */
