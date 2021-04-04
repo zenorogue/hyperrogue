@@ -238,7 +238,24 @@ void show() {
     int id = 0;
     for(auto& f: anim.frames) {
       labels[f.where][inverse(f.sView) * C0] = f.title;
-      dialog::addSelItem(f.title + " [" + its(celldistance(f.where, centerover)) + "]", fts(f.interval), key++);
+      string dist;
+      
+      if(f.where != centerover)
+        dist = its(celldistance(f.where, centerover)) + " cells";
+      else {
+        hyperpoint h1 = tC0(iso_inverse(View));
+        hyperpoint h2 = tC0(iso_inverse(f.sView));
+        ld d = hdist(h1, h2);
+        if(d > 1e-3)
+          dist = fts(d) + "au";
+        else {
+          transmatrix T = f.sView * iso_inverse(View);
+          println(hlog, "T = ", T);
+          dist = fts(acos_clamp(T[2][2])) + "°/" + fts(acos_clamp(T[1][1])) + "°";
+          }
+        }
+        
+      dialog::addSelItem(f.title + " [" + dist + "]", fts(f.interval), key++);
       dialog::add_action_push([&anim, id] { edit_step(anim, id); });
       id++;
       }
