@@ -166,6 +166,7 @@ void edit_step(animation& anim, int id) {
 void show() {
   cmode = sm::SIDE;
   gamescreen(0);
+  draw_crosshair();
   dialog::init(XLAT("smooth camera"), 0xFFFFFFFF, 150, 0);
   char key = 'A';
   int aid = 0;
@@ -211,6 +212,9 @@ void show() {
     view_trace = !view_trace;
     if(view_trace) generate_trace();
     });
+
+  dialog::addBoolItem("view the crosshair", crosshair_size, 'x');
+  dialog::add_action([] { crosshair_size = crosshair_size ? 0 : 10; });
 
   dialog::addBoolItem("run the animation", animate_on, 'r');
   dialog::add_action([] {
