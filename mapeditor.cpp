@@ -650,13 +650,20 @@ EX namespace mapstream {
     for(int i=0; i<isize(cellbyid); i++) {
       cell *c = cellbyid[i];
       if(i) {
+        bool ok = false;
         for(int j=0; j<c->type; j++) if(c->move(j) && cellids.count(c->move(j)) && 
           cellids[c->move(j)] < i) {
           int32_t i = cellids[c->move(j)];
           f.write(i);
           f.write_char(c->c.spin(j));
           f.write_char(j);
+          ok = true;
           break;
+          }
+        if(!ok) {
+          println(hlog, "parent not found for ", c, "!");
+          for(int j=0; j<c->type; j++) println(hlog, j, ": ", c->move(j), "; ", int(cellids.count(c->move(j)) ? cellids[c->move(j)] : -1));
+          throw hr_exception("parent not found");
           }
         }
       f.write_char(c->land);
