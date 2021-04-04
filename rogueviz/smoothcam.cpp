@@ -50,6 +50,7 @@ struct animation {
   };
 
 map<cell*, map<hyperpoint, string> > labels;
+map<cell*, vector<vector<hyperpoint> > > traces;
 
 vector<animation> anims;
 
@@ -94,7 +95,7 @@ string gentitle() {
   }
 
 bool animate_on;
-bool view_labels;
+bool view_labels, view_trace;
 
 void edit_interval(ld& v) {
   dialog::add_action([&v] {
@@ -126,6 +127,8 @@ void edit_segment(int aid) {
   dialog::addBack();
   dialog::display();
   }
+
+void generate_trace();
 
 void edit_step(animation& anim, int id) {
   cmode = sm::SIDE;
@@ -198,6 +201,11 @@ void show() {
   dialog::add_action(join_segment);
 
   dialog::addBoolItem_action("view the labels", view_labels, 'l');
+  dialog::addBoolItem("view the trace", view_trace, 't');
+  dialog::add_action([] {
+    view_trace = !view_trace;
+    if(view_trace) generate_trace();
+    });
 
   dialog::addBoolItem("run the animation", animate_on, 'r');
   dialog::add_action([] {
@@ -218,8 +226,7 @@ void show() {
 
 int last_segment;
 
-void handle_animation() {
-  if(!animate_on) return;
+void handle_animation(ld t) {
   
   ld total_total;
   
@@ -234,11 +241,10 @@ void handle_animation() {
     
   if(total_total == 0) return;
 
-  ld t = ticks / anims::period;
   t = frac(t);
   t *= total_total;
   int segment = 0;
-  while(totals[segment] < t) t -= totals[segment++];
+  while(totals[segment] < t && segment < isize(totals)-1) t -= totals[segment++];
   
   auto& anim = anims[segment];
 
@@ -300,9 +306,48 @@ void handle_animation() {
   View = T * V;
   fixmatrix(View);
   
-  if(invalid_matrix(View)) exit(1);
-  anims::moved();
+  if(invalid_matrix(View)) {
+    println(hlog, "invalid_matrix ", View);
+    println(hlog, pts[0]);
+    println(hlog, pts[1]);
+    println(hlog, pts[2]);
+    println(hlog, "t = ", t);
+    exit(1);
+    }
   last_time = t;
+  }
+
+void handle_animation0() {
+  if(!animate_on) return;
+  handle_animation(ticks / anims::period);
+  anims::moved();
+  }
+
+void generate_trace() {
+  last_time = HUGE_VAL;
+  dynamicval<transmatrix> tN(NLP, NLP);
+  dynamicval<transmatrix> tV(View, View);
+  dynamicval<transmatrix> tC(current_display->which_copy, current_display->which_copy);
+  dynamicval<cell*> tc(centerover, centerover);
+  cell* cview = nullptr;
+  vector<hyperpoint> at;
+  traces.clear();
+  auto send = [&] {
+    if(cview && !at.empty()) traces[cview].push_back(at);
+    cview = centerover;
+    at.clear();
+    };
+  for(ld t=0; t<=1024; t ++) {
+    handle_animation(t / 1024);
+    if(cview != centerover) send();
+    at.push_back(inverse(View) * C0);
+    optimizeview();
+    if(cview != centerover) {
+      send();
+      at.push_back(inverse(View) * C0);
+      }
+    }
+  send();
   }
 
 void hwrite(hstream& hs, const animation& anim) {
@@ -324,6 +369,15 @@ void hread(hstream& hs, frame& frame) {
 bool draw_labels(cell *c, const shiftmatrix& V) {
   if(view_labels) for(auto& p: labels[c])
     queuestr(V * rgpushxto0(p.first), .1, p.second, 0xFFFFFFFF, 1);
+  if(view_trace) 
+    for(auto& v: traces[c]) {
+      for(auto p: v)
+        curvepoint(p);
+      queuecurve(V, 0xFFD500FF, 0, PPR::FLOOR);
+      for(auto p: v)
+        curvepoint(p);
+      queuecurve(V, 0x80000080, 0, PPR::SUPERLINE);
+      }
   return false;
   }
 
@@ -335,7 +389,7 @@ void enable() {
   rogueviz::cleanup.push_back([] { enabled = false; });
   rogueviz::rv_hook(hooks_preoptimize, 75, analyze_view_pre);
   rogueviz::rv_hook(hooks_postoptimize, 75, analyze_view_post);
-  rogueviz::rv_hook(anims::hooks_anim, 100, handle_animation);
+  rogueviz::rv_hook(anims::hooks_anim, 100, handle_animation0);
   rogueviz::rv_hook(hooks_drawcell, 100, draw_labels);
   rogueviz::rv_hook(mapstream::hooks_savemap, 100, [] (fhstream& f) {
     f.write<int>(17);
