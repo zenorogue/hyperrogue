@@ -78,14 +78,19 @@ void start_segment() {
   current_position = Id;
   }
 
+/** does not work correctly -- should adjust to the current cell */
 void join_segment() {
   int n = anims.back().frames.size();
   if(n < 2) return;
   auto s1 = anims.back().frames[n-2];
   auto s2 = anims.back().frames[n-1];
   start_segment();
-  anims.back().frames.push_back(s1);
-  anims.back().frames.push_back(s2);
+  auto& l = anims[anims.size()-2];
+  anims.back().frames.push_back(l.frames[n-2]);
+  anims.back().frames.push_back(l.frames[n-1]);
+  anims.back().start_cell = l.start_cell;
+  anims.back().start = l.start;
+  anims.back().start_interval = 0;
   }
 
 map<cell*, int> indices;
@@ -197,8 +202,8 @@ void show() {
       anims.back().start_interval+=1;
     });
 
-  dialog::addItem("join a new segment", 'j');
-  dialog::add_action(join_segment);
+  /* dialog::addItem("join a new segment", 'j');
+  dialog::add_action(join_segment); */
 
   dialog::addBoolItem_action("view the labels", view_labels, 'l');
   dialog::addBoolItem("view the trace", view_trace, 't');
