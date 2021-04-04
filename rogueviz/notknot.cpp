@@ -948,7 +948,7 @@ struct hrmap_notknot : hrmap {
         if(u->ptr[d])
           u->result->c.connect(d, u->ptr[d]->result, d1, false);          
         else
-          u->result->c.connect(d, u->result, gmod(d + u->result->type/2, u->result->type), false);
+          u->result->c.connect(d, u->result, d, false);
         }
       }
     
