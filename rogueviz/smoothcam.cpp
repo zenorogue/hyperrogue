@@ -233,7 +233,7 @@ void show() {
   labels.clear();
   
   for(auto& anim: anims) {
-    dialog::addSelItem("segment #" + its(aid) + (anim == &current_segment ? "*" : ""), fts(anim.start_interval), key++);
+    dialog::addSelItem("segment #" + its(aid) + (&anim == current_segment ? "*" : ""), fts(anim.start_interval), key++);
     dialog::add_action_push([aid] { edit_segment(aid); });
     int id = 0;
     for(auto& f: anim.frames) {
