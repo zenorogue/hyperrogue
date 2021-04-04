@@ -69,6 +69,8 @@ void analyze_view_post() {
   last_view = View;
   }
 
+animation *current_segment;
+
 void start_segment() {
   anims.emplace_back();
   auto& anim = anims.back();
@@ -76,6 +78,7 @@ void start_segment() {
   anim.start = Id;
   last_view = Id;
   current_position = Id;
+  current_segment = &anim;
   }
 
 /** does not work correctly -- should adjust to the current cell */
@@ -106,6 +109,27 @@ void edit_interval(ld& v) {
   dialog::add_action([&v] {
     dialog::editNumber(v, -10, 10, 1, 0, "interval", "");
     });
+  }
+
+transmatrix try_harder_relative_matrix(cell *at, cell *from) {
+  transmatrix U = Id;
+  int d = celldistance(at, from);
+  again:
+  while(d > 0) {
+    forCellIdEx(c1, i, at) {
+      int d1 = celldistance(c1, from);
+      if(d1 < d) {
+        U = currentmap->iadj(at, i) * U;
+        d = d1;
+        at = c1;
+        goto again;
+        }
+      }
+    println(hlog, "still failed");
+    return Id;
+    }
+  println(hlog, "got U = ", U);
+  return U;
   }
 
 void edit_segment(int aid) {
@@ -148,16 +172,51 @@ void edit_step(animation& anim, int id) {
     anim.frames.erase(anim.frames.begin()+id);
     popScreen();
     });
-  dialog::addItem("edit", 'e');
+  if(&anim == current_segment) {
+    dialog::addItem("change to current camera location", 'e');
+    dialog::add_action([&f] {
+      f.where = centerover;
+      f.sView = View;
+      f.V = current_position;
+      popScreen();
+      });
+    }
+  dialog::addItem("move the camera here", 'r');
   dialog::add_action([&f] {
-    f.where = centerover;
-    f.sView = View;
-    f.V = current_position;
-    });
-  dialog::addItem("recall", 'r');
-  dialog::add_action([&f] {
-    View = f.sView * calc_relative_matrix(centerover, f.where, inverse(View) * C0);
+    transmatrix Rel = calc_relative_matrix(centerover, f.where, inverse(View) * C0);
+    println(hlog, "Rel = ", Rel);
+    if(eqmatrix(Rel, Id) && centerover != f.where)
+      Rel = try_harder_relative_matrix(centerover, f.where);
+    View = f.sView * Rel;
     NLP = ortho_inverse(f.ori);
+    playermoved = false;
+    current_display->which_copy = 
+      nonisotropic ? gpushxto0(tC0(view_inverse(View))) :
+      View;
+    popScreen();
+    });
+  dialog::addItem("edit this segment and move the camera here", 'p');
+  dialog::add_action([&f] {
+    last_view = View = f.sView;
+    NLP = ortho_inverse(f.ori);
+    centerover = f.where;
+    current_position = f.V;    
+    playermoved = false;
+    current_display->which_copy = 
+      nonisotropic ? gpushxto0(tC0(view_inverse(View))) :
+      View;
+    });
+  dialog::addItem("start a new segment from here", 'n');
+  dialog::add_action([&f] {
+    View = f.sView;
+    centerover = f.where;
+    playermoved = false;
+    NLP = ortho_inverse(f.ori);
+    current_display->which_copy = 
+      nonisotropic ? gpushxto0(tC0(view_inverse(View))) :
+      View;
+    start_segment();
+    popScreen();
     });
   dialog::addBack();
   dialog::display();
@@ -174,7 +233,7 @@ void show() {
   labels.clear();
   
   for(auto& anim: anims) {
-    dialog::addSelItem("segment", fts(anim.start_interval), key++);
+    dialog::addSelItem("segment #" + its(aid) + (anim == &current_segment ? "*" : ""), fts(anim.start_interval), key++);
     dialog::add_action_push([aid] { edit_segment(aid); });
     int id = 0;
     for(auto& f: anim.frames) {
@@ -188,8 +247,7 @@ void show() {
 
   dialog::addItem("create a new position", 'a');
   dialog::add_action([] {
-    println(hlog, "current_position is ", current_position * C0);
-    anims.back().frames.push_back(frame{gentitle(), centerover, View, current_position, ortho_inverse(NLP), 1, 1, 0});
+    current_segment->frames.push_back(frame{gentitle(), centerover, View, current_position, ortho_inverse(NLP), 1, 1, 0});
     });
 
   dialog::addItem("create a new segment", 'b');
@@ -197,10 +255,10 @@ void show() {
 
   dialog::addItem("increase interval by 1", 's');
   dialog::add_key_action('s', [] {
-    if(!anims.back().frames.empty())
-      anims.back().frames.back().interval += 1;
+    if(!current_segment->frames.empty())
+      current_segment->frames.back().interval += 1;
     else
-      anims.back().start_interval+=1;
+      current_segment->start_interval+=1;
     });
 
   /* dialog::addItem("join a new segment", 'j');
@@ -426,6 +484,7 @@ auto hooks = arg::add3("-smoothcam", enable_and_show)
     if(id == 17) {
       enable();
       hread(f, anims);
+      current_segment = &anims.back();
       }
     });
 
