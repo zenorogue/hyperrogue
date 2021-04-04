@@ -292,7 +292,7 @@ void handle_animation(ld t) {
         for(int a=0; a<n-ss; a++) {
           // combining [a..a+(ss-1)] and [a+1..a+ss]
           if(times[a+ss] == times[a])
-            values[a] = (values[a+ss] - values[a]) * (t-times[a]);
+            values[a] = values[a] + (values[a+ss] - values[a]) * (t-times[a]);
           else
             values[a] = (values[a] * (times[a+ss] - t) + values[a+1] * (t - times[a])) / (times[a+ss] - times[a]);
           }
