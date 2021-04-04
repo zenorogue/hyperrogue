@@ -231,6 +231,8 @@ void handle_animation() {
     totals.push_back(total);
     total_total += total;
     }
+    
+  if(total_total == 0) return;
 
   ld t = ticks / anims::period;
   t = frac(t);
