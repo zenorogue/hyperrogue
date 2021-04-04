@@ -4,6 +4,7 @@
 #include "rogueviz.cpp"
 #include "presentation.cpp"
 #include "objmodels.cpp"
+#include "smoothcam.cpp"
 
 #include "kohonen.cpp"
 #include "staircase.cpp"
