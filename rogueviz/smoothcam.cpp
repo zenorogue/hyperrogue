@@ -297,7 +297,8 @@ void show() {
     last_time = HUGE_VAL;
     });
     
-  dialog::addHelp(smooth_camera_help);
+  dialog::addHelp();
+  dialog::add_action([] { gotoHelp(smooth_camera_help); });
   dialog::addBack();
   dialog::display();
   
