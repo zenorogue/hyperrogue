@@ -492,6 +492,7 @@ void enable_and_show() {
   }
 
 auto hooks = arg::add3("-smoothcam", enable_and_show)
+  + arg::add3("-smoothcam-on", [] { enable_and_show(); animate_on = true; })
   + addHook(dialog::hooks_display_dialog, 100, [] () {
     if(current_screen_cfunction() == anims::show) {
       dialog::addItem(XLAT("smooth camera"), 'C'); 
