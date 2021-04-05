@@ -29,7 +29,9 @@ ld frac_per_frame = .001;
 
 ld frac;
 
-ld scale = 0.05;
+ld scale = 0.04;
+
+int simulation_range = 20000;
 
 void advance_heat_wave() {
 
@@ -39,7 +41,7 @@ void advance_heat_wave() {
   int steps = mode == 2 ? (frac * qsteps) : (frac * frac * qsteps);
 
   if(steps != last_steps) {
-    celllister cl(cwt.at, 400, 20000, nullptr);
+    celllister cl(cwt.at, 999999, simulation_range, nullptr);
     if(steps < last_steps) {
       last_steps = 0;
       m1.clear();
@@ -109,6 +111,19 @@ void advance_heat_wave() {
   // return false;
   }
 
+void show() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);
+  dialog::init(XLAT("heat transfer simulation"), 0xFFFFFFFF, 150, 0);
+  add_edit(delta);
+  add_edit(qsteps);
+  add_edit(frac_per_frame);
+  add_edit(scale);
+  add_edit(simulation_range);
+  dialog::addBack();
+  dialog::display();
+  }
+
 void enable() {
   using rogueviz::rv_hook;
   rv_hook(hooks_frame, 100, advance_heat_wave);
@@ -129,17 +144,76 @@ void enable() {
       queuepoly(face_the_player(V), cgi.shRing, darkena(c->landparam_color, 0, 0xFF));
     return false;
     });
+  rv_hook(hooks_o_key, 80, [] (o_funcs& v) { v.push_back(named_dialog("heat", show)); });
+  rv_hook(hooks_post_initgame, 100, [] { last_steps = NOT_STARTED; frac = 0; });
   rogueviz::cleanup.push_back([] { m1.clear(); m2.clear(); m3.clear(); last_steps = OFF; });
   last_steps = NOT_STARTED; frac = 0;
   }
 
+string cap = "heat transfer/";
+
+void heat_slide(vector<tour::slide>& v, string title, string desc, reaction_t t) {
+  using namespace tour;
+  v.push_back(
+    tour::slide{cap + title, 18, LEGAL::NONE | QUICKGEO, desc, 
+   
+  [t] (presmode mode) {
+    setCanvas(mode, '0');
+    slide_backup(vid.use_smart_range, 2);
+    slide_backup(vid.smart_range_detail, 1);
+    slide_backup(vid.cells_drawn_limit, 100000);
+    slide_backup(vid.cells_generated_limit, 10000);
+    if(mode == pmStart) {      
+      t();
+      start_game();
+      enable();
+      }
+    }}
+    );
+  }
+
 auto heathook = arg::add3("-heatx", enable)
   + addHook(hooks_configfile, 100, [] {
-    param_f(delta, "heat_delta");
-    param_i(qsteps, "heat_qsteps");
-    param_f(frac_per_frame, "heat_pf");
-    param_f(scale, "heat_scale");
-    });
+    param_f(delta, "heat_delta")
+    ->editable(0, 1, 0.01, "delta", "how fast is the heat transfer", 't');
+    param_i(qsteps, "heat_qsteps")
+    ->editable(0, 10000, 100, "steps to simulate", "", 's');
+    param_f(frac_per_frame, "heat_pf")
+    ->editable(0, 0.01, 0.0001, "speed", "speed of simulation: fraction per frame", 'v');
+    param_f(scale, "heat_scale")
+    ->editable(0, 1, 0.001, "scale", "scaling factor", 'f');
+    param_i(simulation_range, "heat_range")
+    ->editable(0, 100000, 1000, "heat simulation range", "number of cells to consider", 'r');
+    })
+  + addHook(rogueviz::pres::hooks_build_rvtour, 180, [] (string s, vector<tour::slide>& v) {
+      if(s != "mixed") return;
+      heat_slide(v, "squares", 
+        "A simple heat simulation. In each turn, the temperature changes towards the average of temperatures of adjacent cells.\n\n"
+        "Here we do this simulation on a square grid. Note that, despite the natural taxicab metric, spread heats in perfect circles.",
+        [] {
+          set_geometry(gEuclidSquare); set_variation(eVariation::pure);
+          });
+      heat_slide(v, "Marjorie Rice tiling", "Heat simulation on a tiling discovered by Marjorie Rice. Despite the more complex tiling, the heat spreads in perfect circles!", [] {
+        arb::run("tessellations/sample/marjorie-rice.tes");
+        tour::slide_backup(scale, 0.02);
+        });
+      heat_slide(v, "elongated triangular", "It is not always perfect circles -- in a periodic tessellation, it could also be ellipses. Here the ellipses are very close to perfect circles.", [] {
+        set_variation(eVariation::pure);
+        set_geometry(gArchimedean);
+        arcm::current.parse("(4,4,3L,3L,3L) [3,4]");
+        });
+      heat_slide(v, "kite-and-dart tiling", "But even in the kite-and-dart tiling we seem to get perfect circles.", [] {
+        set_geometry(gKiteDart2);
+        });
+      heat_slide(v, "hyperbolic tiling", 
+          "We used Euclidean tessellations so far. In each Euclidean tessellation, the tessellations behaved in roughly the same, Euclidean way.\n\n"
+          "In hyperbolic geometry it is different -- not only it is less circular, but the radius of the hot area (at least 30% of the heat of the central tile) will not grow to infinity!", [] {
+        set_geometry(gNormal);
+        gp::param.first = 4;
+        gp::param.second = 0;
+        set_variation(eVariation::goldberg);
+        });
+      });
 
 }
 }
