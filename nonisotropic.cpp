@@ -1062,7 +1062,7 @@ EX namespace hybrid {
         if(qn == "none") qn = qplus;
         else qn = qn + "/" + qplus;
         }
-      if(elliptic) ginf[g].flags |= qELLIPTIC;
+      if(sph) ginf[g].flags |= qELLIPTIC;
       if(csteps && csteps != cgi.psl_steps && csteps != 2*cgi.psl_steps) 
         ginf[g].flags |= qANYQ;
       }
