@@ -159,36 +159,22 @@ struct hrmap_spherical : hrmap_standard {
     for(int i=0; i<spherecells(); i++) verifycells(dodecahedron[i]);
     }
   
+  map<cell*, transmatrix> where;
+  
+  transmatrix get_where(cell *c) {
+    if(where.count(c)) return where[c];
+    int d = celldist(c);
+    if(d == 0) return where[c] = Id;
+    else forCellIdCM(c1, i, c) 
+      if(celldist(c1) < d)
+        return get_where(c1) * iadj(c, i);
+    return Id;
+    }
+  
   transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
-    if(!gmatrix0.count(c2) || !gmatrix0.count(c1)) {
-      #if !ISWEB
-      printf("building gmatrix0 (size=%d)\n", isize(gmatrix0));
-      #endif
-      #if CAP_GP
-      auto bak = gp::draw_li;
-      #endif
-      swap(gmatrix, gmatrix0);
-      just_gmatrix = true;
-      dynamicval<cell*> cco(centerover, gamestart());
-      draw_all();
-      just_gmatrix = false;
-      swap(gmatrix, gmatrix0);
-      #if CAP_GP
-      gp::draw_li = bak;
-      #endif
-      }
-    if(gmatrix0.count(c2) && gmatrix0.count(c1)) {
-      transmatrix T = inverse_shift(gmatrix0[c1], gmatrix0[c2]);
-      if(elliptic && T[LDIM][LDIM] < 0)
-        T = centralsym * T;
-
-      fixmatrix(T);
-      return T;
-      }
-    else {
-      printf("error: gmatrix0 not known\n");
-      return Id;
-      }
+    transmatrix T = iso_inverse(get_where(c1)) * get_where(c2);
+    if(elliptic) fixelliptic(T);
+    return T;
     }
   };
 
