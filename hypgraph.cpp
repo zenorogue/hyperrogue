@@ -2902,6 +2902,12 @@ EX void shift_view_towards(shiftpoint H, ld l) {
   }
 
 EX void set_view(hyperpoint camera, hyperpoint forward, hyperpoint upward) {
+  if(WDIM == 2) {
+    View = gpushxto0(camera);
+    View = spin(90*degree) * spintox(View * upward) * View;
+    return;
+    }
+  
   transmatrix V = gpushxto0(camera);
   forward = V * forward;
   upward = V * upward;
