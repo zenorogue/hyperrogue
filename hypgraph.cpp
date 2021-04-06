@@ -1965,6 +1965,8 @@ EX void centerpc(ld aspd) {
 
 EX transmatrix oView;
 
+EX purehookset hooks_preoptimize, hooks_postoptimize;
+
 EX void optimizeview() {
 
   if(subscreens::split(optimizeview)) return;
@@ -1972,6 +1974,7 @@ EX void optimizeview() {
   
   cell *c = centerover;
   transmatrix iView = view_inverse(View);
+  callhooks(hooks_preoptimize);
   virtualRebase(centerover, iView);
   if(c != centerover && (sphere || sl2)) {
     transmatrix T = currentmap->relative_matrix(centerover, c, C0);
@@ -1981,6 +1984,7 @@ EX void optimizeview() {
     
   View = iview_inverse(iView);
   fixmatrix(View);
+  callhooks(hooks_postoptimize);
   
   if(is_boundary(centerover))
     centerover = c, View = oView;
