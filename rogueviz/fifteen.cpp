@@ -389,7 +389,6 @@ auto fifteen_hook =
 
     cb(XLAT("variants of the fifteen puzzle"), &fifteen_slides[0], 'h');
     });
-  ;
 #endif
 
 EX }

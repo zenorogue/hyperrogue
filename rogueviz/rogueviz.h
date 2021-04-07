@@ -257,7 +257,7 @@ namespace objmodels {
     void render(const shiftmatrix& V);
     };
   
-  inline tf_result default_transformer(hyperpoint h) { return {0, direct_exp(h) };};
+  inline tf_result default_transformer(hyperpoint h) { return {0, direct_exp(h) };}
   
   inline int default_subdivider(vector<hyperpoint>& hys) { 
     if(euclid) return 1;
