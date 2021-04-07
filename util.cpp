@@ -715,11 +715,11 @@ EX void open_url(string s) {
 #endif
 
 #ifdef LINUX
-  system(("xdg-open "+s).c_str());
+  ignore(system(("xdg-open "+s).c_str()));
 #endif
 
 #ifdef MAC
-  system(("open "+s).c_str());
+  ignore(system(("open "+s).c_str()));
 #endif
 #endif
   }
