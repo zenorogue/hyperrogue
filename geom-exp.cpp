@@ -1130,6 +1130,19 @@ EX eGeometry readGeo(const string& ss) {
   return gNormal;
   }
 
+EX void field_quotient_3d(int p, unsigned hash) {
+  check_cgi();
+  cgi.require_basics();
+  stop_game_and_switch_mode(rg::nothing);
+  fieldpattern::field_from_current();
+  set_geometry(gFieldQuotient);
+  for(;; p++) { 
+    println(hlog, "trying p = ", p);
+    currfp.Prime = p; currfp.force_hash = hash; if(!currfp.solve()) break; 
+    }
+  println(hlog, "set prime = ", currfp.Prime);
+  }
+
 int read_geom_args() {
   using namespace arg;
   if(0) ;
@@ -1162,7 +1175,6 @@ int read_geom_args() {
     fieldpattern::enableFieldChange();
     }
   else if(argis("-to-fq")) {
-    cgi.require_basics();
     int p = 2;
     shift();
     if(args() == "p") {
@@ -1170,11 +1182,7 @@ int read_geom_args() {
       shift(); 
       }
     unsigned hash = arghex();
-    stop_game_and_switch_mode(rg::nothing);
-    fieldpattern::field_from_current();
-    set_geometry(gFieldQuotient);
-    for(;; p++) { currfp.Prime = p; currfp.force_hash = hash; if(!currfp.solve()) break; }
-    println(hlog, "set prime = ", currfp.Prime);
+    field_quotient_3d(p, hash);
     }
   else if(argis("-cs")) {
     shift(); cheat();
