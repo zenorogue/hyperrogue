@@ -3701,7 +3701,7 @@ EX bool clip_checked = false;
 void make_clipping_planes() {
 #if MAXMDIM >= 4
   clip_checked = false;
-  if(!frustum_culling || PIU(sphere) || experimental || vid.stereo_mode == sODS || panini_alpha || stereo_alpha) return;
+  if(!frustum_culling || PIU(sphere) || experimental || vid.stereo_mode == sODS || panini_alpha || stereo_alpha || prod) return;
 
   if(WDIM == 3 && pmodel == mdPerspective && !nonisotropic && !in_s2xe())
     threshold = sin_auto(cgi.corner_bonus), xyz_threshold = 0, clip_checked = true;
