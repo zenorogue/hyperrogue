@@ -250,9 +250,8 @@ int phooks =
   + addHook(dialog::hooks_display_dialog, 100, [] () {
     if(current_screen_cfunction() == showStartMenu) { 
       dialog::addBreak(100);
-      dialog::addBigItem(XLAT("presentations"), 'p');
+      dialog::addBigItem(XLAT("RogueViz demos"), 'p');
       dialog::add_action([] () { pushScreen(choose_presentation); });
-      dialog::addInfo(XLAT("presentation"));
       }
     });
 
