@@ -167,8 +167,6 @@ struct puzzle {
   int el, hl;
   };
 
-#define A 4,2
-
 vector<puzzle> puzzles = {
   {"easy 1", 1, 3, 2},
   {"easy 2", 2, 3, 2},
