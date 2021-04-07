@@ -493,13 +493,15 @@ namespace flocking {
       // set initial base and at to random cell and random position there 
       createViz(i, v[hrand(isize(v))], Id);
       rotate_object(vd.m->pat.T, vd.m->ori, random_spin());
-      apply_parallel_transport(vd.m->pat.T, vd.m->ori, xtangent(hrand(100) / 200.));
+      apply_parallel_transport(vd.m->pat.T, vd.m->ori, xtangent(hrandf() / 2));
+      rotate_object(vd.m->pat.T, vd.m->ori, random_spin());
       
       vd.name = its(i+1);
       vd.cp = dftcolor;
       vd.cp.color2 = ((hrand(0x1000000) << 8) + 0xFF) | 0x808080FF;
       vd.cp.shade = shape;
       vd.m->vel = ini_speed;
+      vd.m->at = vd.m->pat.T;
       }
   
     storeall();
