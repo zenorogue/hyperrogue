@@ -686,6 +686,18 @@ EX void menuitem_nilwidth(char key) {
     });
   }
 
+EX void edit_stretch() {
+  stretch::mstretch = false;
+  ray::reset_raycaster();
+  dialog::editNumber(stretch::factor, -1, 9, 0.1, 0, XLAT("stretched geometry"),
+    XLAT(
+      "Stretch the metric along the fibers. This can currently be done in rotation spaces and in 8-cell, 24-cell and 120-cell. "
+      "Value of 0 means not stretched, -1 means S2xE or H2xE (works only in the limit). (Must be > -1)"
+      )
+    );
+  dialog::reaction = [] { if(abs(stretch::factor+1) < 1e-3) stretch::factor = -.9; ray::reset_raycaster(); };
+  }
+
 EX void showEuclideanMenu() {
   // for(int i=2; i<lt; i++) landvisited[i] = true;
 
@@ -990,17 +1002,7 @@ EX void showEuclideanMenu() {
   
   if(stretch::applicable()) {
     dialog::addSelItem(XLAT("stretched geometry"), fts(stretch::factor), 'S');
-    dialog::add_action([] {
-      stretch::mstretch = false;
-      ray::reset_raycaster();
-      dialog::editNumber(stretch::factor, -1, 9, 0.1, 0, XLAT("stretched geometry"),
-        XLAT(
-          "Stretch the metric along the fibers. This can currently be done in rotation spaces and in 8-cell, 24-cell and 120-cell. "
-          "Value of 0 means not stretched, -1 means S2xE or H2xE (works only in the limit). (Must be > -1)"
-          )
-        );
-      dialog::reaction = ray::reset_raycaster;
-      });
+    dialog::add_action(edit_stretch);
     }
   
   dialog::addBreak(100);
