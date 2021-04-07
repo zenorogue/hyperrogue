@@ -214,7 +214,7 @@ void edit_step(animation& anim, int id) {
     popScreen();
     });
   dialog::addItem("edit this segment and move the camera here", 'p');
-  dialog::add_action([&f] {
+  dialog::add_action([&anim, &f] {
     last_view = View = f.sView;
     NLP = ortho_inverse(f.ori);
     centerover = f.where;
@@ -223,6 +223,8 @@ void edit_step(animation& anim, int id) {
     current_display->which_copy = 
       nonisotropic ? gpushxto0(tC0(view_inverse(View))) :
       View;
+    current_segment = &anim;
+    popScreen();
     });
   dialog::addItem("start a new segment from here", 'n');
   dialog::add_action([&f] {
