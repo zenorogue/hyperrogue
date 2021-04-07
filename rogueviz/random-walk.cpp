@@ -167,6 +167,7 @@ void rw_slide(vector<tour::slide>& v, string title, string desc, reaction_t t) {
       stop_game();
       t();
       start_game();
+      enable();
       }
 
     if(mode == pmKey) {
