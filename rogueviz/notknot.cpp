@@ -780,7 +780,7 @@ struct hrmap_notknot : hrmap {
       if(!uloops.count(u->where)) {
         uloops[u->where] = {};
         unify_loops(u);
-        println(hlog, "loops recorded for ", u->where, ": ", isize(uloops[u->where]));
+        // println(hlog, "loops recorded for ", u->where, ": ", isize(uloops[u->where]));
         }
       
       for(auto& myloop: uloops[u->where]) 
@@ -794,7 +794,7 @@ struct hrmap_notknot : hrmap {
           pathback.push_back(uc->parentdir);
           uc = uc->ptr[(int) uc->parentdir];
           }
-        println(hlog, "pathback = ", pathback);
+        // println(hlog, "pathback = ", pathback);
 
         if(loop_any) {
           auto us = all[0];
