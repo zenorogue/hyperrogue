@@ -860,6 +860,12 @@ int png_read_args() {
     shot::shoty = 1000;
     shot::transparent = false;
     }
+  else if(argis("-shot-500")) {
+    shot::shotformat = -1;
+    shot::shotx = 500;
+    shot::shoty = 500;
+    shot::transparent = false;
+    }
   else if(argis("-shot-vertical")) {
     shot::shotformat = -1;
     shot::shotx = 720;
