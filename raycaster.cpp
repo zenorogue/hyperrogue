@@ -1675,7 +1675,10 @@ struct raycast_map {
 
 unique_ptr<raycast_map> rmap;
 
-EX void reset_raycaster() { our_raycaster = nullptr; rmap = nullptr; }
+EX void reset_raycaster() { 
+  our_raycaster = nullptr; rmap = nullptr; 
+  rots::saved_matrices_ray = {};
+  }
 
 EX void cast() {
   // may call itself recursively in case of bugs -- just in case...

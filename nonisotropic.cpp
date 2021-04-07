@@ -2083,7 +2083,7 @@ EX namespace rots {
     return spin(beta) * uxpush(distance/2) * spin(-beta+alpha);
     }
   
-  std::map<int, transmatrix> saved_matrices_ray;
+  EX std::map<int, transmatrix> saved_matrices_ray;
 
   EX transmatrix ray_iadj(cell *c1, int i) {
     if(i == c1->type-1) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
