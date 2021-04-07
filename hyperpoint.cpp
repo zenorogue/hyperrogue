@@ -305,6 +305,8 @@ EX ld wvolarea_auto(ld r) {
 
 EX ld asin_clamp(ld x) { return x>1 ? M_PI/2 : x<-1 ? -M_PI/2 : std::isnan(x) ? 0 : asin(x); }
 
+EX ld acos_clamp(ld x) { return x>1 ? 0 : x<-1 ? M_PI : std::isnan(x) ? 0 : acos(x); }
+
 EX ld asin_auto_clamp(ld x) {
   switch(cgclass) {
     case gcEuclid: return x;
@@ -319,7 +321,7 @@ EX ld acos_auto_clamp(ld x) {
   switch(cgclass) {
     case gcHyperbolic: return x < 1 ? 0 : acosh(x);
     case gcSL2: return x < 1 ? 0 : acosh(x);
-    case gcSphere: return x > 1 ? 0 : x < -1 ? M_PI : acos(x);
+    case gcSphere: return acos_clamp(x);
     case gcProduct: return PIU(acos_auto_clamp(x));
     default: return x;
     }
