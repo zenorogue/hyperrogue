@@ -502,6 +502,7 @@ namespace flocking {
       vertexdata& vd = vdata[i];
       // set initial base and at to random cell and random position there 
       createViz(i, v[hrand(isize(v))], Id);
+      vd.m->pat.T = Id;
       rotate_object(vd.m->pat.T, vd.m->ori, random_spin());
       apply_parallel_transport(vd.m->pat.T, vd.m->ori, xtangent(hrandf() / 2));
       rotate_object(vd.m->pat.T, vd.m->ori, random_spin());
