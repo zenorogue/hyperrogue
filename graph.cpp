@@ -4661,7 +4661,7 @@ EX void drawthemap() {
   last_firelimit = firelimit;
   firelimit = 0;
 
-  if(GDIM == 3) make_clipping_planes();
+  make_clipping_planes();
   radarpoints.clear();
   radarlines.clear();
   callhooks(hooks_drawmap);
