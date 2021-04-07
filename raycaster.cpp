@@ -242,14 +242,14 @@ tuple<
   #if CAP_VR
   int, vrhr::eEyes, 
   #endif
-  eGeometry
+  string
   > raycaster_state() {
   return make_tuple(
     #if CAP_VR
     vrhr::state, 
     vrhr::eyes,
     #endif
-    geometry
+    cgi_string()
     );
   }
 
