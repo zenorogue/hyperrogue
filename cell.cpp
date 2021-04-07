@@ -1089,7 +1089,7 @@ EX cell *random_in_distance(cell *c, int d) {
 EX int bounded_celldistance(cell *c1, cell *c2) {
   int limit = 6000;
   #if CAP_SOLV
-  if(asonov::in()) { 
+  if(geometry == gArnoldCat) { 
     c2 = asonov::get_at(asonov::get_coord(c2->master) - asonov::get_coord(c1->master))->c7;
     c1 = currentmap->gamestart(); 
     limit = 100000000;
