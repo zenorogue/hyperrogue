@@ -466,14 +466,25 @@ int neighborId(heptagon *h1, heptagon *h2) {
   }
 
 transmatrix hrmap_standard::adj(cell *c, int i) {
-  if(GOLDBERG && gp::do_adjm) {
+  if(GOLDBERG) {
     transmatrix T = master_relative(c, true);
     transmatrix U = master_relative(c->cmove(i), false);
-    if(gp::gp_adj.count(make_pair(c,i))) {
-      return T * gp::get_adj(c,i) * U;
+    heptagon *h = c->master, *h1 = c->cmove(i)->master;
+    static bool first = true;
+    if(h == h1)
+      return T * U;
+    else if(gp::do_adjm) {
+      if(gp::gp_adj.count(make_pair(c,i))) {
+        return T * gp::get_adj(c,i) * U;
+        }
+      if(first) { first = false; println(hlog, "no gp_adj"); }
       }
-    else
-      println(hlog, "gpadj not found");
+    else for(int i=0; i<h->type; i++) if(h->move(i) == h1)
+      return T * adj(h, i) * U;
+    if(first) {
+      first = false;
+      println(hlog, "not adjacent");
+      }
     }
   if(NONSTDVAR || WDIM == 3) {
     return calc_relative_matrix(c->cmove(i), c, C0);
