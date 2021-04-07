@@ -5,6 +5,8 @@
 #define RVPATH HYPERPATH "rogueviz/"
 
 namespace rogueviz {
+
+#ifndef RV_ALL
 namespace cylon {
   extern void enable();
   extern bool cylanim;
@@ -48,7 +50,7 @@ namespace ply {
   void enable();
   extern rogueviz::objmodels::model staircase;
   }
-
+#endif
 }
 
 namespace hr {

@@ -45,6 +45,7 @@
 #include "planets.cpp"
 #include "hyperbolic-analogs.cpp"
 
+#define RV_ALL
 #include "simple-impossible.cpp"
 #include "ascending-descending.cpp"
 #include "balls.cpp"
