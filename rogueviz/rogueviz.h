@@ -28,6 +28,8 @@ namespace rogueviz {
   inline flagtype vizflags;
   extern string weight_label;
   extern ld maxweight;
+  
+  extern int vertex_shape;
 
   void drawExtra();
   void close();
