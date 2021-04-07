@@ -37,8 +37,6 @@ bool draw_rwalk(cell *c, const shiftmatrix& V) {
   return false;
   }
 
-bool do_walkers;
-
 bool in_video;
 
 ld sim_speed = 5;
@@ -48,8 +46,6 @@ int branch_each = 50000;
 ld step_size = 0.02;
 
 bool advance_walkers(int delta) {
-  if(!do_walkers) return false;
-
   if(walkers.empty()) {
     walkers.emplace_back(rwalker{currentmap->gamestart(), Id, Id, 0xFFFFFFFF, 0});
     }
@@ -94,32 +90,23 @@ bool advance_walkers(int delta) {
   return false;
   }
 
+void enable();
+
 int args() {
   using namespace arg;
            
   if(0) ;
   else if(argis("-rwalk")) {
-    do_walkers = true;
+    enable();
     }
   else if(argis("-rwparam")) {
     shift_arg_formula(sim_speed);
     shift_arg_formula(step_size);
     shift(); branch_each = argi();
     }
-  else if(argis("-rwalk-off")) {
-    do_walkers = false;
-    }
 
   else return 1;
   return 0;
-  }
-
-bool pres_handleKey(int sym, int uni) {
-  if((cmode & sm::NORMAL))
-    if(sym == 'x') {
-      return true;
-      }
-  return false;
   }
 
 void show() {
@@ -162,7 +149,7 @@ void show() {
   }
 
 void o_key(o_funcs& v) {
-  if(do_walkers) v.push_back(named_dialog("random walk", show));
+  v.push_back(named_dialog("random walk", show));
   }
 
 string cap = "non-Euclidean random walk/";
@@ -180,11 +167,6 @@ void rw_slide(vector<tour::slide>& v, string title, string desc, reaction_t t) {
       stop_game();
       t();
       start_game();
-      do_walkers = true;
-      }
-
-    if(mode == pmStop) {
-      do_walkers = false;
       }
 
     if(mode == pmKey) {
@@ -196,18 +178,19 @@ void rw_slide(vector<tour::slide>& v, string title, string desc, reaction_t t) {
     );
   }
 
-
-auto msc = 
-  addHook(hooks_args, 100, args)
-+ addHook(hooks_drawcell, 100, draw_rwalk)
-+ addHook(shmup::hooks_turn, 100, advance_walkers)
-+ addHook(hooks_handleKey, 0, pres_handleKey)
-+ addHook(hooks_o_key, 80, o_key)
-+ addHook(hooks_clearmemory, 40, [] () {
+void enable() {
+  rv_hook(hooks_drawcell, 100, draw_rwalk);
+  rv_hook(shmup::hooks_turn, 100, advance_walkers);
+  rv_hook(hooks_o_key, 80, o_key);
+  rv_hook(hooks_clearmemory, 40, [] () {
     drawn.clear();
     walkers.clear();
     total_time = 0;
-    })
+    });
+  }
+
+auto msc = 
+  addHook(hooks_args, 100, args)
 + addHook(pres::hooks_build_rvtour, 180, [] (string s, vector<tour::slide>& v) {
   if(s != "mixed") return;
   v.push_back(tour::slide{
