@@ -333,7 +333,7 @@ EX namespace gp {
       set_heptspin(vc[2], hs + wstep - 1 + wstep + 1).mindir = -3;
       }
 
-    do_adjm = quotient;
+    do_adjm = quotient || sphere;
     if(do_adjm) {
       auto m = (hrmap_standard*)currentmap;
       get_mapping(vc[0]).adjm = Id;
