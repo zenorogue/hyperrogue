@@ -79,7 +79,7 @@ bool may_set_cell(cell *c, int d, cell *from) {
   }
 
 void enable() {
-  rv_hook(hooks_cellgen, 100, may_set_cell);
+  rogueviz::rv_hook(hooks_cellgen, 100, may_set_cell);
   }
 
 int args() {
