@@ -124,6 +124,7 @@ auto hypcity_ah = arg::add3("-hypcity", enable)
                 geom3::switch_fpp();
                 }
               setCanvas(mode, '0');
+              slide_backup(mapeditor::drawplayer, false);
               if(mode == pmStart) {
                 slide_backup(canvas_default_wall, waInvisibleFloor);
                 slide_backup(smooth_scrolling, 1);
