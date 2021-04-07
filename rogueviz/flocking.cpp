@@ -519,7 +519,109 @@ namespace flocking {
     printf("done\n");
     }  
 
-  auto hooks = addHook(hooks_args, 100, readArgs);
+  void set_follow() { 
+    follow = (1+follow) % 3;
+    addMessage("following: " + follow_names[follow]);
+    }
+  
+  void flock_slide(tour::presmode mode, int _N, reaction_t t) {
+    using namespace tour;
+    setCanvas(mode, '0');
+    if(mode == pmStart) {
+      t();
+      slide_backup(rogueviz::vertex_shape, 3);
+      N = _N; start_game(); init();
+      }
+    if(mode == pmKey) set_follow();
+    }
+
+  auto hooks = addHook(hooks_args, 100, readArgs)
+  + addHook(rogueviz::pres::hooks_build_rvtour, 187, [] (string s, vector<tour::slide>& v) {
+      if(s != "mixed") return;
+      using namespace tour;
+      string cap = "flocking simulation/";
+      string help = "\n\nPress '5' to make the camera follow boids, or 'o' to change more parameters.";
+
+      v.push_back(slide{
+        cap+"Euclidean flocking", 10, LEGAL::NONE | QUICKGEO,
+        "This is an Euclidean flocking simulation. Boids move according to the following rules:\n\n"
+        "- separation: they avoid running into other boids\n"
+        "- alignment: steer toward the average heading of local flockmates\n"
+        "- cohesion: steer toward the average position of local flockmates\n\n"
+        "In the Euclidean space, these rules will cause all the boids to align, and fly in the same direction in a nice flock."+help
+        ,
+        [] (presmode mode) {
+          flock_slide(mode, 50, [] {
+            set_geometry(gEuclid);
+            set_variation(eVariation::bitruncated);
+            auto& T0 = euc::eu_input.user_axes;
+            restorers.push_back([] { euc::build_torus3(); });
+            slide_backup(euc::eu_input);
+            T0[0][0] = T0[1][1] = 3;
+            T0[1][0] = T0[0][1] = 0;
+            euc::eu_input.twisted = 0;
+            euc::build_torus3();
+            });
+          }});
+
+      v.push_back(slide{
+        cap+"spherical flocking", 10, LEGAL::NONE | QUICKGEO,
+        "Same parameters, but in spherical geometry.\n\n"
+        "Since parallel lines work differently, the boids do not align that nicely. "
+        "However, the curvature helps them to maintain a coherent flock."
+        +help
+        ,
+        [] (presmode mode) {
+          flock_slide(mode, 50, [] {
+            set_geometry(gSphere);
+            set_variation(eVariation::bitruncated);
+            });
+          }});
+      v.push_back(slide{
+        cap+"Hyperbolic flocking", 10, LEGAL::NONE | QUICKGEO,
+        "Same parameters, but the geometry is hyperbolic. Our boids fly in the Klein quartic.\n"
+        "This time, negative curvature prevents our boids from maintaining a coherent flock."
+        +help
+        ,
+        [] (presmode mode) {
+          flock_slide(mode, 50, [] {
+            set_geometry(gKleinQuartic);
+            set_variation(eVariation::bitruncated);
+            });
+          }});
+      v.push_back(slide{
+        cap+"Hyperbolic flocking again", 10, LEGAL::NONE | QUICKGEO,
+        "Our boids still fly in the Klein quartic, but now the parameters are changed to "
+        "make the alignment and cohesion stronger."
+        ,
+        [] (presmode mode) {
+          slide_url(mode, 't', "Twitter link", "https://twitter.com/ZenoRogue/status/1064660283581505536");
+          flock_slide(mode, 50, [] {
+            set_geometry(gKleinQuartic);
+            set_variation(eVariation::bitruncated);
+            slide_backup(align_factor, 2);
+            slide_backup(align_range, 2);
+            slide_backup(coh_factor, 2);
+            });
+          }});
+      v.push_back(slide{
+        cap+"Hyperbolic flocking in 3D", 10, LEGAL::NONE | QUICKGEO,
+        "Let's try a three-dimensional hyperbolic manifold. Alignment and cohesion are strong again."
+        ,
+        [] (presmode mode) {
+          slide_url(mode, 'y', "YouTube link", "https://www.youtube.com/watch?v=kng_4lE0uzo");
+          flock_slide(mode, 50, [] {
+            set_geometry(gSpace534);
+            field_quotient_3d(5, 0x72414D0C);
+            slide_backup(align_factor, 2);
+            slide_backup(align_range, 2);
+            slide_backup(coh_factor, 2);
+            slide_backup(vid.grid, true);
+            slide_backup(follow_dist, 1);
+            });
+          }});
+
+      });
   #endif
 
   }
