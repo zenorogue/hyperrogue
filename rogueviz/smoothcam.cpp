@@ -8,11 +8,14 @@ namespace hr {
 
 using pcell = cell*;
 
-void hwrite(hstream& hs, const pcell& c) {
+inline void hread(hstream& hs, transmatrix& h) { for(int i=0; i<MDIM; i++) hread(hs, h[i]); }
+inline void hwrite(hstream& hs, transmatrix h) { for(int i=0; i<MDIM; i++) hwrite(hs, h[i]); }
+
+inline void hwrite(hstream& hs, const pcell& c) {
   hs.write<int>(mapstream::cellids[c]);
   }
 
-void hread(hstream& hs, pcell& c) {
+inline void hread(hstream& hs, pcell& c) {
   int32_t at = hs.get<int>();
   c = mapstream::cellbyid[at];
   }
