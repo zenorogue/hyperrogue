@@ -177,6 +177,14 @@ void edit_step(animation& anim, int id) {
   dialog::addSelItem("title", f.title, 't');
   dialog::addSelItem("interval", fts(f.interval), 'i');
   edit_interval(f.interval);
+  dialog::addSelItem("front distance", fts(f.front_distance), 'f');
+  dialog::add_action([&f] {
+    dialog::editNumber(f.front_distance, -5, 5, .1, 1, "front distance", "");
+    });
+  dialog::addSelItem("up distance", fts(f.up_distance), 'u');
+  dialog::add_action([&f] {
+    dialog::editNumber(f.up_distance, -5, 5, .1, 1, "up distance", "");
+    });
   dialog::addItem("delete", 'd');
   dialog::add_action([&anim, id] {
     anim.frames.erase(anim.frames.begin()+id);
