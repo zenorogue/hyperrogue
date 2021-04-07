@@ -82,7 +82,7 @@ transmatrix random_snow_matrix(cell *c) {
         h[a] = randd() * 2 - 1;
       else {
         ld r = randd();
-        h[co] = log(lerp(1, aer, r)) / log(aer) * 2 - 1;
+        h[co] = log(hr::lerp(1, aer, r)) / log(aer) * 2 - 1;
         }
       }
     return bt::normalized_at(h);
