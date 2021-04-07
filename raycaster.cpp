@@ -1760,7 +1760,6 @@ EX void cast() {
   back:
   for(int a=0; a<cs->type; a++)
     if(hdist0(hybrid::ray_iadj(cs, a) * tC0(T)) < hdist0(tC0(T))) {
-      println(hlog, "ray error");
       T = currentmap->iadj(cs, a) * T;
       if(o->uToOrig != -1) {
         transmatrix HT = currentmap->adj(cs, a);
@@ -1769,9 +1768,14 @@ EX void cast() {
         }
       cs = cs->move(a);
       ray_fixes++;
-      if(ray_fixes > 100) return;
+      if(ray_fixes > 100) {
+        println(hlog, "major ray error");
+        return;
+        }
       goto back;
       }
+  if(ray_fixes) println(hlog, "ray error x", ray_fixes);
+
   
   glUniformMatrix4fv(o->uStart, 1, 0, glhr::tmtogl_transpose3(T).as_array());
   if(o->uLP != -1) glUniformMatrix4fv(o->uLP, 1, 0, glhr::tmtogl_transpose3(inverse(NLP)).as_array());
