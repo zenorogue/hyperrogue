@@ -166,8 +166,12 @@ struct hrmap_spherical : hrmap_standard {
     int d = celldist(c);
     if(d == 0) return where[c] = Id;
     else forCellIdCM(c1, i, c) 
-      if(celldist(c1) < d)
-        return get_where(c1) * iadj(c, i);
+      if(celldist(c1) < d) {
+        transmatrix T = get_where(c1);
+        T = T * iadj(c, i);
+        where[c] = T;
+        return T;
+        }
     return Id;
     }
   
