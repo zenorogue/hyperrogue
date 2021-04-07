@@ -528,6 +528,7 @@ namespace flocking {
     using namespace tour;
     setCanvas(mode, '0');
     if(mode == pmStart) {
+      slide_backup(mapeditor::drawplayer);
       t();
       slide_backup(rogueviz::vertex_shape, 3);
       N = _N; start_game(); init();

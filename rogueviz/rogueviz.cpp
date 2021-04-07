@@ -890,6 +890,12 @@ void init(flagtype _vizflags) {
 
   autocheat = true; 
   showstartmenu = false;
+
+  if(tour::on) {
+    tour::slide_backup(mapeditor::drawplayer);
+    tour::slide_backup(timerghost);
+    }
+
 #if !ISWEB
   mapeditor::drawplayer = false;
   stop_game();
