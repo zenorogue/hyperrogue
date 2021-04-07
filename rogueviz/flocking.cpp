@@ -551,6 +551,7 @@ namespace flocking {
         "In the Euclidean space, these rules will cause all the boids to align, and fly in the same direction in a nice flock."+help
         ,
         [] (presmode mode) {
+          slide_url(mode, 'w', "Wikipedia link", "https://en.wikipedia.org/wiki/Boids");
           flock_slide(mode, 50, [] {
             set_geometry(gEuclid);
             set_variation(eVariation::bitruncated);
