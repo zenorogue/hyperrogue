@@ -151,6 +151,9 @@ EX void welcomeMessage() {
 /** \brief These hooks are called at the start of initgame. */
 EX hookset<void()> hooks_initgame;
 
+/** \brief These hooks are called at the end of initgame. */
+EX hookset<void()> hooks_post_initgame;
+
 /** \brief initialize the game */
 EX void initgame() {
   DEBBI(DF_INIT, ("initGame"));
@@ -403,6 +406,7 @@ EX void initgame() {
     if(vid.use_smart_range == 2) vid.use_smart_range = 1;
     }
   if(!allowIncreasedSight()) vid.use_smart_range = 0;
+  callhooks(hooks_post_initgame); 
   }
 
 bool havesave = true;
