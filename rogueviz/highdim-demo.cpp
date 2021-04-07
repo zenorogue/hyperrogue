@@ -370,7 +370,6 @@ int mycanvas(cell *c) {
         else if(v == 2) is2++;
         else if(v > 2) ismore++;
         }
-      println(hlog, d, " -> ", tie(is0, is1, is2, ismore));
       if(d[dim-1]) return 0x101010;
       else if(ismore) return 0x101010;
       else if(is2) return 0x1800000;
