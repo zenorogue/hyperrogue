@@ -79,7 +79,7 @@ bool may_set_cell(cell *c, int d, cell *from) {
   }
 
 void enable() {
-  addHook(hooks_cellgen, 100, may_set_cell);
+  rv_hook(hooks_cellgen, 100, may_set_cell);
   }
 
 int args() {
