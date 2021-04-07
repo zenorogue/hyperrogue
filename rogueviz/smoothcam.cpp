@@ -253,6 +253,7 @@ void show() {
   labels.clear();
   
   for(auto& anim: anims) {
+    if(key == 'Z'+1) key = 1;
     dialog::addSelItem("segment #" + its(aid) + (&anim == current_segment ? "*" : ""), fts(anim.start_interval), key++);
     dialog::add_action_push([aid] { edit_segment(aid); });
     int id = 0;
@@ -275,6 +276,7 @@ void show() {
           }
         }
         
+      if(key == 'Z'+1) key = 1;
       dialog::addSelItem(f.title + " [" + dist + "]", fts(f.interval), key++);
       dialog::add_action_push([&anim, id] { edit_step(anim, id); });
       id++;
