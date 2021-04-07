@@ -296,13 +296,13 @@ auto hchook =
       stop_game();
       set_geometry(gNil);
       tour::slide_backup(mapeditor::drawplayer, false);
-      tour::slide_backup(on, true);
       tour::slide_backup(smooth_scrolling, true);
       tour::on_restore(nilv::set_flags);
       tour::slide_backup(nilv::nilperiod, make_array(3, 3, 3));
       nilv::set_flags();
       start_game();
       playermoved = false;
+      enable();
       }
     }}
     );
