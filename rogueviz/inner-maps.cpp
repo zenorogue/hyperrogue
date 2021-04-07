@@ -243,13 +243,15 @@ void show() {
   dialog::display();
   }
 
-auto hook = arg::add3("-inner-map", [] {
+void enable() {
   using rogueviz::rv_hook;
   rv_hook(hooks_frame, 100, frame);
   rv_hook(hooks_drawcell, 100, render);
   rv_hook(anims::hooks_anim, 100, shift);
   rv_hook(hooks_o_key, 80, [] (o_funcs& v) { v.push_back(named_dialog("inner maps", show)); });
-  }) 
+  }
+
+auto hook = arg::add3("-inner-map", enable) 
   + addHook(hooks_configfile, 100, [] {
     param_f(texture_alpha, "inner_talpha")
     ->editable(0, 5, .1, "texture projection distance", "", 't');
@@ -271,7 +273,31 @@ auto hook = arg::add3("-inner-map", [] {
       "How many times per frame should we re-render the map", 
       'i')
     ->set_reaction(need_redo);
-    });
+    })
+  + addHook(rogueviz::pres::hooks_build_rvtour, 52, [] (string s, vector<tour::slide>& v) {
+      if(s != "projections") return;
+      using namespace tour;
+
+      v.push_back(slide{
+        "projections/hyperbolic to hyperbolic", 10, LEGAL::NONE | QUICKGEO,
+
+        "We can also project a hyperbolic plane to a hyperbolic plane of different curvature.\n\n"
+        "Creatures living in the hyperbolic world may use the native Poincaré model to get conformal, circular, and totally useless maps of their whole world.\n\n"
+        
+        "Press 'o' to change the settings."
+        ,
+        [] (presmode mode) {
+          slide_url(mode, 't', "Twitter link (with description)", "https://twitter.com/zenorogue/status/1212408644941295619");
+          setCanvas(mode, 'r');
+          
+          if(mode == pmStart) {
+            if(!shmup::on) restart_game(rg::shmup);
+            slide_backup(mapeditor::drawplayer, true);
+            enable();
+            start_game();
+            }
+          }});
+      });
 
 }
 }

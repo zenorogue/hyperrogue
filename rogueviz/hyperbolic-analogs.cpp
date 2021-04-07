@@ -417,7 +417,47 @@ auto msc = arg::add3("-analogs", enable)
     ->editable(0, 255, 15, "Earth transparency", "", 't');
     param_b(textured, "analogs_texture")
     ->editable("draw Earth", 'T');
-    });
+    })
+  + addHook(rogueviz::pres::hooks_build_rvtour, 131, [] (string s, vector<tour::slide>& v) {
+      if(s != "mixed") return;
+      using namespace tour;
+
+      v.push_back(slide{
+        "projections/Earth and the hyperbolic plane", 10, LEGAL::NONE | QUICKGEO,
+
+        "Cartographers need to project the surface of Earth to a flat paper. However, since the surface of Earth is curved, there is no perfect way to do this. "
+        "Some projections will be conformal (map angles and small shapes faithfully), equidistant (map distances along SOME lines faithfully), equal-area (map areas proportionally), etc., "
+        "but no map will be all at once. Cartographers use many projections.\n\n"
+        
+        "We need these projections because the Earth has positive curvature, while the paper has no curvature. Interestingly, "
+        "most of the popular projections can be generalized, as projections from surface of curvature any K1 to surfaces of any curvature K2!\n\n"
+        
+        "This slide focuses on the hyperbolic analogs of popular spherical projections (projecting H² to E²). "
+        "Press '5' to enable cycling between different projections, or 'o' for more options."
+        ,
+        [] (presmode mode) {
+          slide_url(mode, 'y', "YouTube link (with description)", "https://youtu.be/H7NKhKTjHVE");
+          slide_url(mode, 'm', "HyperRogue page about projections", "http://www.roguetemple.com/z/hyper/models.php");
+          setCanvas(mode, '0');
+          if(mode == pmStart) {
+            enable();
+            start_game();
+            slide_backup(cycle_models);
+            slide_backup(anims::period);
+            }
+          if(mode == pmStop) {
+            dual::disable();
+            start_game();
+            }
+          if(mode == pmKey) {
+            cycle_models = !cycle_models;
+            if(cycle_models) anims::period *= 12;
+            else anims::period /= 12;
+            }
+          }});
+      
+      callhooks(rogueviz::pres::hooks_build_rvtour, "projections", v);
+      });
 
 }
 }

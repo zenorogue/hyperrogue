@@ -510,7 +510,34 @@ auto msc =
     ->editable(0, 255, 15, "animation alpha max", "", 'm');
     param_f(prec, "moon_precision")
     ->editable(0, 30, .5, "precision", "larger values are less precise", 'p');
-    });
+    })
+  + addHook(rogueviz::pres::hooks_build_rvtour, 51, [] (string s, vector<tour::slide>& v) {
+      if(s != "projections") return;
+      using namespace tour;
+
+      v.push_back(slide{
+        "projections/sphere to sphere", 10, LEGAL::NONE | QUICKGEO,
+
+        "We can also project a sphere to a sphere of different curvature. For example, what about the azimuthal equidistant projection from Earth to Moon? "
+        "This projection correctly maps the angles and distances from a chosen point at Earth. "
+        "Press 'o' to use the place on Earth you are in as the chosen point, try other projections, or change the other settings!"
+        ,
+        [] (presmode mode) {
+          slide_url(mode, 't', "Twitter link (with description)", "https://twitter.com/ZenoRogue/status/1339946298460483589");
+          setCanvas(mode, '0');
+          
+          if(mode == pmStart) {
+            enable();
+            set_geometry(gSphere);
+            slide_backup(canvas_default_wall, waInvisibleFloor);
+            slide_backup(pmodel, mdDisk);
+            slide_backup(pconf.scale, 1000);
+            slide_backup(pconf.alpha, 1000);
+            start_game();
+            slide_backup(max_alpha, 192);
+            }
+          }});
+      });
 
 }
 }
