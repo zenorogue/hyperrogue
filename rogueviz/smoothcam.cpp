@@ -2,7 +2,11 @@
 
 // This module allows creating complex animations with smooth camera movement
 
-// to add: insert positions? split/merge segments? edit front_distance and up_distance?
+// enable with -smoothcam option, or the new "smooth camera" option in the Animations dialog
+
+// it still seems a bit buggy
+
+// to add: insert positions? split/merge segments? improved join?
 
 namespace hr {
 
