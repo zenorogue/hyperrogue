@@ -284,21 +284,25 @@ void show() {
     aid++;
     }
 
-  dialog::addItem("create a new position", 'a');
-  dialog::add_action([] {
-    current_segment->frames.push_back(frame{gentitle(), centerover, View, current_position, ortho_inverse(NLP), 1, 1, 0});
-    });
+  if(current_segment) {
+    dialog::addItem("create a new position", 'a');
+    dialog::add_action([] {
+      current_segment->frames.push_back(frame{gentitle(), centerover, View, current_position, ortho_inverse(NLP), 1, 1, 0});
+      });
+    }
 
   dialog::addItem("create a new segment", 'b');
   dialog::add_action(start_segment);
 
-  dialog::addItem("increase interval by 1", 's');
-  dialog::add_key_action('s', [] {
-    if(!current_segment->frames.empty())
-      current_segment->frames.back().interval += 1;
-    else
-      current_segment->start_interval+=1;
-    });
+  if(current_segment) {
+    dialog::addItem("increase interval by 1", 's');
+    dialog::add_key_action('s', [] {
+      if(!current_segment->frames.empty())
+        current_segment->frames.back().interval += 1;
+      else
+        current_segment->start_interval+=1;
+      });
+    }
 
   /* dialog::addItem("join a new segment", 'j');
   dialog::add_action(join_segment); */
