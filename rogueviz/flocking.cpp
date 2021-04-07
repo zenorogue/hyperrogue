@@ -55,6 +55,8 @@ namespace flocking {
   int follow = 0;
   string follow_names[3] = {"nothing", "specific boid", "center of mass"};
   
+  ld follow_dist = 0;
+  
   map<cell*, map<cell*, transmatrix>> relmatrices;
 
   ld ini_speed = .5;
@@ -258,6 +260,7 @@ namespace flocking {
           if(GDIM == 3) {
             View = hr::cspin(1, 2, 90 * degree) * View;
             }
+          shift_view(ztangent(follow_dist));
           }        
         }
 
@@ -285,6 +288,7 @@ namespace flocking {
           h = normalize_flat(h);
           if(prod) h = zshift(h, lev / cnt);
           View = inverse(actual_view_transform) * gpushxto0(h) * actual_view_transform * View;
+          shift_view(ztangent(follow_dist));
           }
         }
 
@@ -442,6 +446,12 @@ namespace flocking {
   
     dialog::addSelItem("follow", follow_names[follow], 'f');
     dialog::add_action([] () { follow++; follow %= 3; });
+
+    dialog::addSelItem("follow distance", fts(follow_dist), 'd');
+    dialog::add_action([] () { 
+      dialog::editNumber(follow_dist, -1, 1, 0.1, 0, "follow distance", "");
+      follow++; follow %= 3; 
+      });
   
     dialog::addBreak(100);
 
