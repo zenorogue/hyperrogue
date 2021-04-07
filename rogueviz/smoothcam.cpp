@@ -242,6 +242,12 @@ void edit_step(animation& anim, int id) {
   dialog::display();
   }
 
+int last_segment;
+
+ld test_t = 0;
+ld c_front_dist = 0, c_up_dist = 0;
+void handle_animation(ld t);
+
 void show() {
   cmode = sm::SIDE;
   gamescreen(0);
@@ -314,6 +320,23 @@ void show() {
     if(view_trace) generate_trace();
     });
 
+  dialog::addItem("test the animation", 't');
+  dialog::add_action([] {
+    animate_on = false;
+    last_time = HUGE_VAL;
+    last_segment = -1;
+    test_t = 0;
+    dialog::editNumber(test_t, 0, 100, 0.1, 0, "enter the percentage", "");
+    dialog::reaction = [] {
+      handle_animation(test_t / 100);
+      };
+    dialog::extra_options = [] {
+      dialog::addSelItem("current segment", its(last_segment), 'C');
+      dialog::addSelItem("current front", fts(c_front_dist), 'F');
+      dialog::addSelItem("current up", fts(c_up_dist), 'U');
+      };
+    });
+
   dialog::addBoolItem("view the crosshair", crosshair_size, 'x');
   dialog::add_action([] { crosshair_size = crosshair_size ? 0 : 10; });
 
@@ -335,9 +358,8 @@ void show() {
     };
   }
 
-int last_segment;
-
 void handle_animation(ld t) {
+  println(hlog, "handle_animation ", t);
   
   ld total_total;
   
@@ -356,15 +378,19 @@ void handle_animation(ld t) {
   t *= total_total;
   int segment = 0;
   while(totals[segment] < t && segment < isize(totals)-1) t -= totals[segment++];
-  
+
   auto& anim = anims[segment];
 
   if(t < last_time || segment != last_segment) {
     last_time = 0;
     last_segment = segment;
+    current_segment = &anim;
     View = anim.start;
     last_view_comp = View;
     centerover = anim.start_cell;
+    current_position = Id;
+    last_view = View;
+    last_centerover = centerover;
     }
 
   ld total = anim.start_interval;
@@ -410,6 +436,8 @@ void handle_animation(ld t) {
   
   transmatrix V = View;
   set_view(pts[0], pts[1], pts[2]);
+  c_front_dist = geo_dist(pts[0], pts[1]);
+  c_up_dist = geo_dist(pts[0], pts[2]);
 
   transmatrix T = View * inverse(last_view_comp);
   last_view_comp = View;
