@@ -156,6 +156,13 @@ void edit_segment(int aid) {
     anims.push_back(std::move(a));
     popScreen();
     });
+  dialog::addItem("copy before", 'c');
+  dialog::add_action([aid] {
+    auto a = anims[aid];
+    anims.insert(anims.begin() + aid, a);
+    current_segment = nullptr;
+    popScreen();
+    });
   dialog::addBack();
   dialog::display();
   }
