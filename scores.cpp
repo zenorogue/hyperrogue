@@ -50,7 +50,7 @@ int modediff(score *S) {
   if(variation != savevar) diff += 16;
   if(GOLDBERG && savevar == eVariation::goldberg && (S->box[342] != gp::param.first || S->box[343] != gp::param.second))
     diff += 16;
-  if(S->box[196] != chaosmode) diff += 32;
+  if(S->box[196] != (int) land_structure) diff += 32;
   if(S->box[119] != shmup::on) diff += 64;
   if(pureHardcore() && !isHardcore(S)) diff += 128;
   if(g != gNormal && S->box[120] != specialland) 

@@ -832,7 +832,7 @@ EX void initConfig() {
   addsaverenum(geometry, "mode-geometry");
   addsaver(shmup::on, "mode-shmup", false);
   addsaver(hardcore, "mode-hardcore", false);
-  addsaver(chaosmode, "mode-chaos");
+  addsaverenum(land_structure, "mode-chaos");
   #if CAP_INV
   addsaver(inv::on, "mode-Orb Strategy");
   #endif
@@ -1053,7 +1053,7 @@ EX void initConfig() {
   }
 
 EX bool inSpecialMode() {
-  return chaosmode || !BITRUNCATED || peace::on || 
+  return !ls::nice_walls() || ineligible_starting_land || !BITRUNCATED || peace::on || 
   #if CAP_TOUR
     tour::on ||
   #endif
@@ -1070,7 +1070,7 @@ EX bool have_current_settings() {
 #if CAP_TOUR
   if(tour::on) modecount += 10;
 #endif
-  if(chaosmode) modecount += 10;
+  if(!ls::nice_walls()) modecount += 10;
   if(!BITRUNCATED) modecount += 10;
   if(peace::on) modecount += 10;
   if(yendor::on) modecount += 10;
@@ -1113,7 +1113,9 @@ EX void resetModes(char leave IS('c')) {
     }
   if(shmup::on != (leave == rg::shmup)) stop_game_and_switch_mode(rg::shmup);
   if(inv::on != (leave == rg::inv)) stop_game_and_switch_mode(rg::inv);
-  if(chaosmode != (leave == rg::chaos)) stop_game_and_switch_mode(rg::chaos);
+
+  if(leave == rg::chaos && !ls::std_chaos()) stop_game_and_switch_mode(rg::chaos);
+  if(leave != rg::chaos && !ls::nice_walls()) stop_game_and_switch_mode(rg::chaos);
 
   if((!!dual::state) != (leave == rg::dualmode)) stop_game_and_switch_mode(rg::dualmode);
 
@@ -3189,7 +3191,6 @@ EX int read_gamemode_args() {
     stop_game_and_switch_mode(rg::nothing);
     multi::players = argi();
     }
-  TOGGLE('C', chaosmode, stop_game_and_switch_mode(rg::chaos))
   TOGGLE('S', shmup::on, stop_game_and_switch_mode(rg::shmup))
   TOGGLE('H', hardcore, switchHardcore())
   TOGGLE('R', randomPatternsMode, stop_game_and_switch_mode(rg::randpattern))

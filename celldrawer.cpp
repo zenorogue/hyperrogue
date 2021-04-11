@@ -100,11 +100,11 @@ void celldrawer::setcolors() {
     if(c->land == laOcean)
       fcol = 
         #if CAP_FIELD
-        (c->landparam > 25 && !chaosmode) ? ( 
+        (c->landparam > 25 && !ls::any_chaos()) ? ( 
           0x90 + 8 * sintick(1000, windmap::windcodes[windmap::getId(c)] / 256.)
           ) : 
         #endif
-        0x1010C0 + int(32 * sintick(500, (chaosmode ? c->CHAOSPARAM : c->landparam)*.75/M_PI));
+        0x1010C0 + int(32 * sintick(500, (ls::any_chaos() ? c->CHAOSPARAM : c->landparam)*.75/M_PI));
     else if(c->land == laOceanWall)
       fcol = 0x2020FF;
     else if(c->land == laVariant)
@@ -295,7 +295,7 @@ void celldrawer::setcolors() {
       break;
     case laTemple: {
       int d = (eubinary||c->master->alt) ? celldistAlt(c) : 99;
-      if(chaosmode)
+      if(ls::any_chaos())
         fcol = 0x405090;
       else if(d % temple_layer_size() == 0)
         fcol = gradient(0x304080, winf[waColumn].color, 0, 0.5, 1);
@@ -445,7 +445,7 @@ void celldrawer::setcolors() {
       break;
     
     case laOcean:
-      if(chaosmode)
+      if(ls::any_chaos())
         fcol = gradient(0xD0A090, 0xD0D020, 0, c->CHAOSPARAM, 30);
       else
         fcol = gradient(0xD0D090, 0xD0D020, -1, sin((double) c->landparam), 1);
@@ -1999,7 +1999,7 @@ void celldrawer::draw_wall_full() {
       
 #if CAP_SHAPES
     // floor
-    if(GDIM == 2 && (c->land != laRose || chaosmode)) {
+    if(GDIM == 2 && (c->land != laRose || ls::any_chaos())) {
       int rd = rosedist(c);
       if(rd == 1) 
         draw_floorshape(c, mmscale(V, cgi.SLEV[2]), cgi.shRoseFloor, 0x80406040, PPR::LIZEYE);

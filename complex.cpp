@@ -1986,11 +1986,11 @@ EX namespace hive {
     cellwalker bf(c, gdir);
     int radius = 9;
     if(getDistLimit() <= 6) radius = 6;
-    if(chaosmode) radius = 5;
-    if(chaosmode && getDistLimit() <= 5) radius = 4;
+    if(ls::any_chaos()) radius = 5;
+    if(ls::any_chaos() && getDistLimit() <= 5) radius = 4;
     if(getDistLimit() <= 3) radius = 3;
 
-    for(int i=(chaosmode?0:2); i<radius; i++) 
+    for(int i=(ls::any_chaos()?0:2); i<radius; i++) 
       bf += revstep;
     cell *citycenter = bf.at;
     buginfo.clear();
@@ -2370,7 +2370,7 @@ EX void livecaves() {
         else if(w == waDeadTroll2) hv -= 3;
         else if(w == waPetrified || w == waPetrifiedBridge) hv -= 2;
         else if(w == waVinePlant) hv--;
-        else if(chaosmode && c2->land != laCaves && c2->land != laEmerald) ;
+        else if(ls::any_chaos() && c2->land != laCaves && c2->land != laEmerald) ;
         else if(c2->land == laTrollheim) ; // trollheim floor does not count
         else if(w != waBarrier) hv += 5;
         
@@ -3107,9 +3107,9 @@ EX namespace prairie {
     c->LHU.fi.walldist = 8;
     c->LHU.fi.walldist2 = 8;
 
-     if(chaosmode) {
-       c->LHU.fi.rval = 0;
-       }    
+    if(ls::any_chaos()) {
+      c->LHU.fi.rval = 0;
+      }    
     else if(quotient) { // fix cylinder
       c->LHU.fi.rval = 0;
       }
@@ -3301,7 +3301,7 @@ EX namespace prairie {
     }
           
   EX void move() {
-    if(chaosmode) return;
+    if(ls::any_chaos()) return;
     manual_celllister cl;
     for(int i=0; i<isize(dcal); i++) {
       cell *c = dcal[i];
@@ -3613,7 +3613,7 @@ EX namespace windmap {
       }
     
     int tries = 0;
-    int maxtries = specialland == laVolcano || specialland == laBlizzard || chaosmode ? 20 : 1;
+    int maxtries = specialland == laVolcano || specialland == laBlizzard || ls::any_chaos() ? 20 : 1;
     tryagain:
 
     for(int i=0; i<N; i++) windcodes[i] = hrand(256);

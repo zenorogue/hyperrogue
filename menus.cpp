@@ -481,7 +481,7 @@ EX void showCreative() {
 
 EX void show_chaos() {
   gamescreen(3);
-  dialog::init(XLAT("Chaos mode"));
+  dialog::init(XLAT("land structure"));
   chaosUnlocked = chaosUnlocked || autocheat;
 
   dialog::addHelp(
@@ -493,26 +493,42 @@ EX void show_chaos() {
   
   dialog::addBreak(100);
   
-  dialog::addBoolItem(XLAT("Chaos mode") + " " + ONOFF(false), !chaosmode, 'A');
-  dialog::add_action([] { dialog::do_if_confirmed([] { if(chaosUnlocked) restart_game(rg::chaos); }); });
-  
-  if(chaosUnlocked) for(int a=1; a<5; a++) {
-    if(a > 1 && ISWEB) continue;
-    if(a == 1 && walls_not_implemented()) continue;
-    dialog::addBoolItem(
-      a == 1 ? XLATN("Crossroads IV") : 
-      a == 2 ? XLATN("Palace") : 
-      a == 3 ? XLAT("total chaos") :
-      XLAT("random walk"), 
-      chaosmode == a, 'A' + a);
-    dialog::add_action([a] { dialog::do_if_confirmed([a] { 
-      int cm = chaosmode;
-      stop_game_and_switch_mode(rg::chaos); 
-      if(!chaosmode && cm != a) switch_game_mode(rg::chaos); 
-      if(chaosmode) chaosmode = a; 
-      start_game(); 
-      }); });
+  char key = 'a';
+  for(int i=0; i<lsGUARD; i++) {
+    dynamicval<eLandStructure> dls(land_structure);
+    auto li = eLandStructure(i);
+    land_structure = li;
+    fix_land_structure_choice();
+    if(ls::any_chaos() && !chaosUnlocked) continue;
+    if(li == lsNoWalls && geometry == gNormal && !chaosUnlocked) continue;
+    if(land_structure == i) {
+      dialog::addBoolItem(land_structure_name(false), land_structure == dls.backup, key + i);
+      dialog::add_action(dual::mayboth([li] {
+        dialog::do_if_confirmed([li] {
+          stop_game();
+          land_structure = li;
+          start_game();
+          });
+        }));
+      }
     }
+  
+  dialog::addBreak(100);
+  dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), 'l');
+  dialog::add_action_push(ge_land_selection);
+
+  dialog::addBreak(100);
+  if(ineligible_starting_land)
+    dialog::addInfo("this starting land is not eligible for achievements");
+  else if(land_structure == lsNiceWalls)
+    dialog::addInfo("eligible for most achievements");
+  else if(land_structure == lsChaos)
+    dialog::addInfo("eligible for Chaos mode achievements");
+  else if(land_structure == lsSingle)
+    dialog::addInfo("eligible for special achievements");
+  else
+    dialog::addInfo("not eligible for achievements");
+  if(cheater) dialog::addInfo("(but the cheat mode is on)");
 
   dialog::addBreak(100);
   dialog::addBack();
@@ -643,6 +659,11 @@ EX void mode_higlights() {
   dialog::addBack();
   dialog::display();
   }  
+
+EX void menuitem_land_structure(char key) {
+  dialog::addSelItem(XLAT("land structure"), land_structure_name(true), key);
+  dialog::add_action_push(show_chaos);
+  }
   
 EX void showChangeMode() {
   gamescreen(3);
@@ -677,8 +698,7 @@ EX void showChangeMode() {
     mouseovers = XLAT("One wrong move and it is game over!");
   
   multi::cpid = 0;
-  dialog::addBoolItem(XLAT("Chaos mode"), (chaosmode), 'C');
-  dialog::add_action_push(show_chaos);
+  menuitem_land_structure('l');
 
   dialog::addBoolItem(XLAT("puzzle/exploration mode"), peace::on, 'p');
   dialog::add_action_push(peace::showMenu);

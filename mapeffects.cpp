@@ -637,7 +637,7 @@ EX void checkTide(cell *c) {
   if(c->land == laOcean) {
     int t = c->landparam;
     
-    if(chaosmode) {
+    if(ls::any_chaos()) {
       char& csd(c->SEADIST); if(csd == 0) csd = 7;
       char& cld(c->LANDDIST); if(cld == 0) cld = 7;
       int seadist=csd, landdist=cld;

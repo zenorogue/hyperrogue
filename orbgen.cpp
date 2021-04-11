@@ -490,7 +490,7 @@ EX void placePrizeOrb(cell *c) {
 
 // 10 not in chaos, less in chaos
 EX int treasureForLocal() {
-  return (chaosmode ? 1+hrand(10) : 10);
+  return (ls::any_chaos() ? 1+hrand(10) : 10);
   }
 
 EX bool extra_safety_for_memory(cell *c) {
@@ -521,7 +521,7 @@ EX void placeLocalOrbs(cell *c) {
       continue;
     if(!oi.lchance) continue;
     int ch = hrand(oi.lchance);
-    if(ch == 1 && chaosmode && hrand(2) == 0 && items[treasureType(oi.l)] * landMultiplier(oi.l) >= (11+hrand(15)))
+    if(ch == 1 && ls::any_chaos() && hrand(2) == 0 && items[treasureType(oi.l)] * landMultiplier(oi.l) >= (11+hrand(15)))
       ch = 0;
     int tc = items[treasureType(oi.l)] * landMultiplier(oi.l);
     int tcmin = treasureForLocal();

@@ -72,7 +72,7 @@ void loadOldConfig(FILE *f) {
 
   shmup::loadConfig(f);
 
-  aa = rug::renderonce; bb = rug::rendernogl; dd = chaosmode; 
+  aa = rug::renderonce; bb = rug::rendernogl; dd = ls::any_chaos();
   int ee = vid.steamscore;
   #if CAP_RUG
   double rs = 2/rug::model_distance;
@@ -81,7 +81,7 @@ void loadOldConfig(FILE *f) {
   #endif
   err=fscanf(f, "%d%d%d%d%lf%d%d", &aa, &bb, &rug::texturesize, &cc, &rs, &ee, &dd);
   rug::renderonce = aa; rug::rendernogl = bb; 
-  chaosmode = dd; vid.steamscore = ee;
+  land_structure = (eLandStructure) dd; vid.steamscore = ee;
   #if CAP_RUG
   rug::model_distance = 2/rs;
   #endif
@@ -204,7 +204,7 @@ int modecodetable[42][6] = {
 
 EX modecode_t legacy_modecode() {
   if(int(geometry) > 3 || int(variation) > 1) return UNKNOWN;
-  if(chaosmode > 1) return UNKNOWN;
+  if(!ls::nice_walls() && !ls::std_chaos()) return UNKNOWN;
   // compute the old code
   int xcode = 0;
 
@@ -219,7 +219,7 @@ EX modecode_t legacy_modecode() {
     if(elliptic) xcode += 6;
     }
   
-  if(chaosmode) xcode += 21;
+  if(ls::any_chaos()) xcode += 21;
   
   int np = numplayers()-1; if(np<0 || np>5) np=5;
 
@@ -237,6 +237,41 @@ EX modecode_t legacy_modecode() {
   
   return mct;
   }
+
+/* legacy options */
+int read_legacy_args() {
+  using namespace arg;
+  if(0);
+  else if(argis("-chaos-circle")) {
+    PHASEFROM(2);
+    stop_game();
+    land_structure = lsCircleChaos;
+    }
+  else if(argis("-chaos-total")) {
+    PHASEFROM(2);
+    stop_game();
+    land_structure = lsTotalChaos;
+    }
+  else if(argis("-chaos-random")) {
+    PHASEFROM(2);
+    stop_game();
+    land_structure = lsChaosRW;
+    }
+  else if(argis("-C") || argis("-C1")) {
+    PHASEFROM(2);
+    stop_game();
+    land_structure = lsChaos;
+    }
+  else if(argis("-C0")) {
+    PHASEFROM(2);
+    stop_game();
+    land_structure = lsNiceWalls;
+    }
+  else return 1;
+  return 0;
+  }
+
+auto ah_legacy = addHook(hooks_args, 0, read_legacy_args);
 
 
 }

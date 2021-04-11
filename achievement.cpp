@@ -125,7 +125,12 @@ EX bool wrongMode(char flags) {
 #if CAP_TOUR
   if(tour::on) return true;
 #endif
-  if((!!chaosmode) != (flags == rg::chaos)) return true;
+  if(flags == rg::special_geometry && !ls::single())
+    return true;
+  if(flags != rg::special_geometry && ineligible_starting_land)
+    return true;
+  if(flags == rg::chaos && !ls::std_chaos()) return true;
+  if(flags != rg::chaos && flags != rg::special_geometry && !ls::nice_walls()) return true;
   if((numplayers() > 1) != (flags == rg::multi)) return true;
   return false;
   }
@@ -610,7 +615,10 @@ EX void achievement_score(int cat, int number) {
     if(geometry != gSphere && geometry != gElliptic)
       return;
     }
-  else if(geometry) return;
+  else {
+    if(geometry) return;
+    if(ineligible_starting_land) return;
+    }
   if(CHANGED_VARIATION) return;
   if(randomPatternsMode) return;
   if(dual::state) return;
@@ -731,7 +739,8 @@ EX void achievement_final(bool really_final) {
   
   int specialcode = 0;
   if(shmup::on) specialcode++;
-  if(chaosmode) specialcode+=2;
+  if(ls::std_chaos()) specialcode+=2;
+  else if(!ls::nice_walls()) return;
   if(PURE) specialcode+=4;
   if(numplayers() > 1) specialcode+=8;
   if(inv::on) specialcode+=16;
@@ -742,6 +751,7 @@ EX void achievement_final(bool really_final) {
     return;
     }
 
+  if(ineligible_starting_land) return;
   if(geometry) return;
   if(NONSTDVAR) return;
   
@@ -828,7 +838,8 @@ EX void achievement_victory(bool hyper) {
   if(yendor::on) return;
   if(peace::on) return;
   if(tactic::on) return;
-  if(chaosmode) return;
+  if(!ls::nice_walls()) return;
+  if(!ineligible_starting_land) return;
   LATE( achievement_victory(hyper); )
   DEBB(DF_STEAM, ("after checks"))
 
@@ -904,7 +915,7 @@ EX string get_rich_presence_text() {
   if(geometry != gNormal || !BITRUNCATED) 
     res = res + full_geometry_name() + " ";
   
-  if(chaosmode) res += "chaos ";
+  if(ls::any_chaos()) res += land_structure_name(false) + " "; // TODO
   if(shmup::on) res += "shmup ";
   if(dual::state) res += "dual ";
   if(randomPatternsMode) res += "random ";

@@ -151,7 +151,7 @@ EX bool showquotients;
 
 string validclasses[4] = {" (X)", " (½)", "", " (!)"};
   
-void ge_land_selection() {
+EX void ge_land_selection() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);  
 
@@ -209,16 +209,6 @@ void ge_land_selection() {
         popScreen();
         }));
       });
-    }
-  dialog::addBreak(50);
-  if(chaosUnlocked && !quotient && !euclid && !sphere && !walls_not_implemented()) {
-    dialog::addItem(XLAT("Chaos mode"), '1');
-    dialog::add_action(dual::mayboth([] {
-      if(chaosUnlocked) dialog::do_if_confirmed([] {
-        stop_game_and_switch_mode(rg::chaos);
-        start_game();
-        });
-      }));
     }
   dialog::addItem(XLAT("next page"), '-');
 
@@ -1006,8 +996,7 @@ EX void showEuclideanMenu() {
     }
   
   dialog::addBreak(100);
-  dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), 'l');
-  dialog::add_action_push(ge_land_selection);
+  menuitem_land_structure('l');
   
   if(specialland == laMinefield && bounded) {
     dialog::addSelItem(XLAT("number of mines"), its(bounded_mine_quantity), 'm');

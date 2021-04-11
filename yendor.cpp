@@ -541,6 +541,14 @@ EX namespace yendor {
         }
       }
     }
+
+  EX eLandStructure get_land_structure() {
+    if(clev().flags & YF_CHAOS)
+      return lsChaos;
+    if(clev().l == laWhirlpool)
+      return lsSingle;
+    return lsNiceWalls;
+    }
   
   EX void init(int phase) {
     if(!on) return;
@@ -548,7 +556,7 @@ EX namespace yendor {
     if(phase == 1) {
       won = false;
       if(!easy) items[itOrbYendor] = bestscore[modecode()][challenge];
-      chaosmode = (clev().flags & YF_CHAOS) ? 1 : 0;
+      land_structure = get_land_structure();
       specialland = clev().l;
       if(clev().flags & YF_START_AL) {
         specialland = laAlchemist;
@@ -1064,7 +1072,7 @@ void save_mode_data(hstream& f) {
   if(yendor::on) 
     f.write<char>(0);
   else
-    f.write<char>(chaosmode);
+    f.write<char>(land_structure);
   f.write<char>(shmup::on);
   f.write<char>(inv::on);
   #if CAP_TOUR

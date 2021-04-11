@@ -35,7 +35,7 @@ EX void doOvergenerate() {
 
 EX bool notDippingFor(eItem i) {
   if(peace::on) return false;
-  if(chaosmode > 1) return true;
+  if(ls::chaoticity() >= 60) return true;
   int v = items[i] - currentLocalTreasure;
   if(v <= 10) return true;
   if(v >= 20) return false;
@@ -44,7 +44,7 @@ EX bool notDippingFor(eItem i) {
 
 EX bool notDippingForExtra(eItem i, eItem x) {
   if(peace::on) return false;
-  if(chaosmode > 1) return true;
+  if(ls::chaoticity() >= 60) return true;
   int v = items[i] - min(items[x], currentLocalTreasure);
   if(v <= 10) return true;
   if(v >= 20) return false;
@@ -273,7 +273,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
 
     case laPrairie: // -------------------------------------------------------------
     
-      if(d == 7 && chaosmode) {
+      if(d == 7 && ls::any_chaos()) {
         if(hrand_monster(9000) < items[itGreenGrass] - (prairie::isriver(cwt.at) ? 40 : 0) && !safety)
           c->monst = moGadfly;
         if(hrand_monster(100) < 5) c->monst = moSleepBull;
@@ -894,17 +894,17 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laTrollheim:
       if(fargen) {
-        if(hrand(50000) < (chaosmode==1?1000:chaosmode?50:5) && c->wall != waBarrier && celldist(c) >= 7 && !safety && !peace::on) {
+        if(hrand(50000) < (ls::tame_chaos() ? 1000: ls::any_chaos() ?50:5) && c->wall != waBarrier && celldist(c) >= 7 && !safety && !peace::on) {
           bool okay = true;
           forCellCM(c2, c) forCellCM(c3, c2) forCellCM(c4, c3) forCellCM(c5, c4) {
-            cell *cx = chaosmode ? c3 : c5;
+            cell *cx = ls::any_chaos() ? c3 : c5;
             if(cx->land != laTrollheim && cx->land != laNone)
               okay = false;
             if(cx->bardir != NODIR) okay = false;
             }
           if(okay) {
             forCellCM(c2, c) forCellCM(c3, c2) forCellCM(c4, c3) forCellCM(c5, c4) {
-              cell *cx = chaosmode ? c3 : c5;
+              cell *cx = ls::any_chaos() ? c3 : c5;
               cx->bardir = NOBARRIERS;
               setland(cx, laTrollheim);
               }
@@ -1575,10 +1575,10 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         // depth!
         int d = 
-          chaosmode ? -15 * items[itGrimoire]:
+          ls::any_chaos() ? -15 * items[itGrimoire]:
           (eubinary || c->master->alt) ? celldistAlt(c) : 10;
         // remember: d is negative
-        if(chaosmode ? hrand(100) < 25 : d % temple_layer_size() == 0) {
+        if(ls::any_chaos() ? hrand(100) < 25 : d % temple_layer_size() == 0) {
           if(hrand_monster(5000) < 20 - 2*d && !c->monst && !peace::on)
             c->monst = moTentacle, c->mondir = NODIR;
           }
@@ -1593,7 +1593,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             c->monst = moCultistLeader;
           else if(hrand(5000) < 250 && !peace::on)
             c->item = itGrimoire;
-          else if(hrand(5000) < 10 && (chaosmode ? items[itGrimoire] >= treasureForLocal() : -d > temple_layer_size() * 10) && !peace::on && !inv::on)
+          else if(hrand(5000) < 10 && (ls::any_chaos() ? items[itGrimoire] >= treasureForLocal() : -d > temple_layer_size() * 10) && !peace::on && !inv::on)
             c->item = itOrbDragon;
           }
         }
@@ -1615,9 +1615,9 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(6000) < PT(120 + (kills[moLesser]), 240) && notDippingFor(itHell))
           c->item = itHell;
-        if(hrand_monster(8000) < 40 + items[itHell] * (chaosmode?4:1) + yendor::hardness())
+        if(hrand_monster(8000) < 40 + items[itHell] * (ls::any_chaos()?4:1) + yendor::hardness())
           c->monst = moLesser;
-        else if(hrand_monster(24000) < 40 + items[itHell] * (chaosmode?4:1) + yendor::hardness())
+        else if(hrand_monster(24000) < 40 + items[itHell] * (ls::any_chaos()?4:1) + yendor::hardness())
           c->monst = moGreater;
         }
       break;
@@ -1653,7 +1653,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laHive:
       if(fargen) {
-        if(hrand(2000) < (chaosmode==1 ? 1000 : (PURE && !chaosmode) ?200: chaosmode ? 10 : 2) && !safety) 
+        if(hrand(2000) < (ls::tame_chaos() ? 1000 : (PURE && !ls::any_chaos()) ?200: ls::any_chaos() ? 10 : 2) && !safety) 
           hive::createBugArmy(c);
         if(hrand(2000) < 100 && !c->wall && !c->item && !c->monst) {
           int nww = 0;
@@ -1918,7 +1918,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           if(hrand(1000) < 150 && celldist(c) >= 3 && !pseudohept(c)) 
             c->wall = waSmallTree;
           int q = 0;
-          if(BITRUNCATED && !chaosmode && !weirdhyperbolic) for(int i=0; i<c->type; i++) 
+          if(BITRUNCATED && !ls::any_chaos() && !weirdhyperbolic) for(int i=0; i<c->type; i++) 
             if(c->move(i) && !isWarpedType(c->move(i)->land) && c->move(i)->land != laCrossroads4) 
               q++;
           if(q == 1) c->wall = waWarpGate;
@@ -1927,7 +1927,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         if(c->land == laWarpSea) {
           c->wall = waSea;
           int q = 0;
-          if(BITRUNCATED && !chaosmode) for(int i=0; i<c->type; i++) 
+          if(BITRUNCATED && !ls::any_chaos()) for(int i=0; i<c->type; i++) 
             if(c->move(i) && !isWarpedType(c->move(i)->land)) q++;
           if(q == 1) c->wall = waWarpGate;
           }      
@@ -1994,7 +1994,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         for(int i=0; i<c->type; i++) {
           cell *c2 = c->move(i);          
           if(c2 && c2->wall == waRose) nww++;
-          if(c2 && !chaosmode) for(int j=0; j<c2->type; j++) {
+          if(c2 && !ls::any_chaos()) for(int j=0; j<c2->type; j++) {
             cell *c3 = c2->move(j);
             // note: c3->land is required for Android --
             // not strictly equivalent since another land there might be not yet generated
@@ -2009,7 +2009,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         }
       ONEMPTY {
         if(hrand(2000) < PT(25 + min(kills[moFalsePrincess] + kills[moRoseBeauty] + kills[moRoseLady], 200), 100) && notDippingFor(itRose)) {
-          if(chaosmode == 3)
+          if(land_structure == lsTotalChaos)
             c->item = itRose;
           else for(int t=0; t<c->type; t++) if(c->move(t) && c->move(t)->wall == waRose)
             c->item = itRose;
@@ -2118,7 +2118,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
   
         if(placecolumn)
           c->wall = waColumn;
-        else if((c->landparam >= 1 && c->landparam <= 25) || chaosmode) {
+        else if((c->landparam >= 1 && c->landparam <= 25) || ls::any_chaos()) {
           if(hrand(1000) < 5)
             c->wall = waBoat;
           if(hrand(1000) < PT(50 + kills[moAlbatross]/2, 150) && !peace::on)
@@ -2292,8 +2292,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
            chasmify(c);
            c->wall = shmup::on ? waNone : waChasm;
            }
-         int cmf[5] = {0, 1, 3, 5, 10};
-         if(inv::on && chaosmode && items[itFeather] && hrand(1000) < cmf[chaosmode] && !c->item && !c->monst)
+         int cmf[10] = {0, 1, 3, 5, 10, 0, 0, 0, 0, 0};
+         if(inv::on && ls::any_chaos() && items[itFeather] && hrand(1000) < cmf[land_structure] && !c->item && !c->monst)
            c->item = itOrbSafety;
          }
        break;
@@ -2648,7 +2648,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = wetwalls[a];
           }
         bool border = false;
-        if(!chaosmode) forCellEx(c1, c) if(c1->land != laWet) border = true;
+        if(ls::any_order()) forCellEx(c1, c) if(c1->land != laWet) border = true;
         if(border) {
           if(pseudohept(c)) c->wall = waDeepWater;
           else c->wall = waShallow;
@@ -2756,8 +2756,29 @@ EX void setland_randomwalk(cell *c) {
   }
 
 EX void set_land_for_geometry(cell *c) {
-  if(0);
-  else if(chaosmode > 1) ;
+
+  if(!c->land && isize(currentlands)) {
+    if(land_structure == lsTotalChaos) {
+      setland(c, currentlands[hrand(isize(currentlands))]);
+      return;
+      }
+    if(ls::patched_chaos() && stdeuc) { /* note: Nil pached chaos done in setLandNil */
+      cell *c2 = c;
+      while(true) {
+        forCellCM(c3, c2) if(cdist50(c3) < cdist50(c2)) { c2 = c3; goto again; }
+        break;
+        again: ;
+        }
+      if(!c2->land) setland(c2, currentlands[hrand(isize(currentlands))]);
+      c->land = c2->land;
+      return;
+      }
+    if(land_structure == lsChaosRW) {
+      setland_randomwalk(c);
+      return;
+      }
+    }
+  else if(ls::chaoticity() >= 60) ;
   #if CAP_CRYSTAL
   else if(cryst) crystal::set_land(c);
   #endif
@@ -2828,35 +2849,19 @@ EX void setdist(cell *c, int d, cell *from) {
       }
     #endif
   
-    if(!c->land && from && (WDIM == 3 || !among(from->land, laBarrier, laElementalWall, laHauntedWall, laOceanWall)) && !quotient && !(chaosmode > 1)) {
+    if(!c->land && from && (WDIM == 3 || !among(from->land, laBarrier, laElementalWall, laHauntedWall, laOceanWall)) && !quotient && ls::chaoticity() < 60) {
       if(!hasbardir(c)) setland(c, from->land);
       }
-    if(c->land == laTemple && !tactic::on && !chaosmode) setland(c, laRlyeh);
-    if(c->land == laMountain && !tactic::on && !chaosmode) setland(c, laJungle);
-    if(c->land == laClearing && !tactic::on) setland(c, laOvergrown);
-    if(c->land == laWhirlpool && !tactic::on && !yendor::on) setland(c, laOcean);
-    if(c->land == laCamelot && !tactic::on) setland(c, laCrossroads);
-    if(c->land == laBrownian && !chaosmode) setland(c, laOcean);
-    
-    if(chaosmode && !c->land && isize(currentlands)) {
-      if(chaosmode == 3) setland(c, currentlands[hrand(isize(currentlands))]);
-      if(chaosmode == 2) {
-        if(stdeuc) {
-          cell *c2 = c;
-          while(true) {
-            forCellCM(c3, c2) if(cdist50(c3) < cdist50(c2)) { c2 = c3; goto again; }
-            break;
-            again: ;
-            }
-          if(!c2->land) setland(c2, currentlands[hrand(isize(currentlands))]);
-          c->land = c2->land;
-          }
-        else chaosmode = 4;
-        }
-      if(chaosmode == 4)
-        setland_randomwalk(c);
-      }
+    if(c->land == laTemple && ls::any_order()) setland(c, laRlyeh);
 
+    if(!ls::single()) {
+      if(c->land == laMountain) setland(c, laJungle);
+      if(c->land == laClearing) setland(c, laOvergrown);
+      if(c->land == laWhirlpool) setland(c, laOcean);
+      if(c->land == laCamelot) setland(c, laCrossroads);
+      if(c->land == laBrownian) setland(c, laOcean);
+      }
+    
 #if CAP_DAILY
     if(!daily::on) {
 #else
@@ -2864,8 +2869,6 @@ EX void setdist(cell *c, int d, cell *from) {
 #endif
       set_land_for_geometry(c);
       }
-    
-    // if(chaosmode) setland(c, getCLand(c));
     }
   
   if(d == BARLEV && c->land == laCanvas)  {
@@ -2876,11 +2879,11 @@ EX void setdist(cell *c, int d, cell *from) {
     }
 
   #if CAP_FIELD
-  if(d >= BARLEV-1 && c->land == laPrairie && !chaosmode)
+  if(d >= BARLEV-1 && c->land == laPrairie && !ls::any_chaos())
     prairie::spread(c, from);
   #endif
 
-  if(d < BARLEV && c->land == laPrairie && !c->landparam && !chaosmode) {
+  if(d < BARLEV && c->land == laPrairie && !c->landparam && !ls::any_chaos()) {
     printf("d=%d/%d\n", d, BARLEV);
     raiseBuggyGeneration(c, "No landparam set");
     return;

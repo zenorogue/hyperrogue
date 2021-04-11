@@ -397,7 +397,7 @@ EX void showMission() {
     dialog::addInfo(XLAT("Kill a Vizier in the Palace to access Emerald Mine"));
   else if(items[itEmerald] < U5)
     dialog::addInfo(XLAT("Collect 5 Emeralds to access Camelot"));
-  else if(landUnlocked(laHell) && !chaosmode) {
+  else if(landUnlocked(laHell) && ls::any_order()) {
     eLand l = nextHyperstone();
     if(l) 
         dialog::addInfo(

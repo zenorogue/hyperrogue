@@ -476,7 +476,7 @@ EX void gainItem(eItem it) {
   if(it == itHyperstone && items[itHyperstone] == 10)
     achievement_victory(true);
 
-  if(chaosmode && gold() >= 300)
+  if(ls::any_chaos() && gold() >= 300)
     achievement_gain_once("CHAOS", rg::chaos);
 
 #if ISMOBILE
@@ -533,7 +533,7 @@ EX void placeItems(int qty, eItem it) {
   }
 
 EX bool cantGetGrimoire(cell *c2, bool verbose IS(true)) {
-  if(chaosmode) return false;
+  if(ls::any_chaos()) return false;
   if(!eubinary && !c2->master->alt) return false;
   if(c2->item == itGrimoire && items[itGrimoire] > celldistAlt(c2)/-temple_layer_size()) {
     if(verbose)
@@ -624,13 +624,13 @@ EX void collectMessage(cell *c2, eItem which) {
   else if(which == itPalace && items[itPalace] == U5-1 && !specialmode && isLandIngame(laDungeon)) {
     addMessage(XLAT("The rug depicts a man in a deep dungeon, unable to leave."));
     }
-  else if(which == itFeather && items[itFeather] == 25-1 && !specialmode && inv::on && !chaosmode)
+  else if(which == itFeather && items[itFeather] == 25-1 && !specialmode && inv::on && !ls::any_chaos())
     addMessage(XLAT("You feel the presence of free saves on the Crossroads."));
-  else if(which == itHell && items[itHell] == 25-1 && !specialmode && inv::on && !chaosmode)
+  else if(which == itHell && items[itHell] == 25-1 && !specialmode && inv::on && !ls::any_chaos())
     addMessage(XLAT("You feel the Orbs of Yendor nearby..."));
-  else if(which == itHell && items[itHell] == 50-1 && !specialmode && inv::on && !chaosmode)
+  else if(which == itHell && items[itHell] == 50-1 && !specialmode && inv::on && !ls::any_chaos())
     addMessage(XLAT("You feel the Orbs of Yendor in the Crossroads..."));
-  else if(which == itHell && items[itHell] == 100-1 && !specialmode && inv::on && !chaosmode)
+  else if(which == itHell && items[itHell] == 100-1 && !specialmode && inv::on && !ls::any_chaos())
     addMessage(XLAT("You feel the Orbs of Yendor everywhere..."));
   else if(which == itBone && items[itBone] % 25 == 24 && !specialmode && inv::on)
     addMessage(XLAT("You have gained an offensive power!"));

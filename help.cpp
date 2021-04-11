@@ -836,7 +836,7 @@ EX void describeMouseover() {
       out += XLAT(" (level %1)", its(snakelevel(c)));
     if(c->land == laDryForest && c->landparam) 
       out += " (" + its(c->landparam)+"/10)";
-    if(c->land == laOcean && chaosmode)
+    if(c->land == laOcean && ls::any_chaos())
       out += " (" + its(c->CHAOSPARAM)+"S"+its(c->SEADIST)+"L"+its(c->LANDDIST)+")";
     else if(c->land == laOcean && c->landparam <= 25) {
       if(shmup::on)

@@ -68,13 +68,6 @@ EX bool verless(string v, string cmp) {
   return v < cmp;
   }
 
-/** \brief should we set the starting land to specialland */
-bool do_use_special_land() {
-  return
-    !safety &&
-    (peace::on || tactic::on || geometry || NONSTDVAR || randomPatternsMode || yendor::on || racing::on);
-  }
-
 /** \brief Hooks for welcomeMessage. Return true to capture. */
 EX hookset<bool()> hooks_welcome_message;
 
@@ -135,7 +128,7 @@ EX void welcomeMessage() {
   else
     addMessage(XLAT("Welcome to HyperRogue!"));
 
-  if(do_use_special_land() || firstland != laIce) if(!daily::on) {
+  if(!safety && !daily::on) {
     auto lv = land_validity(specialland);
     if(lv.flags & lv::display_error_message)
       addMessage(XLAT(lv.msg));
@@ -154,10 +147,14 @@ EX hookset<void()> hooks_initgame;
 /** \brief These hooks are called at the end of initgame. */
 EX hookset<void()> hooks_post_initgame;
 
+EX bool ineligible_starting_land;
+
 /** \brief initialize the game */
 EX void initgame() {
   DEBBI(DF_INIT, ("initGame"));
   callhooks(hooks_initgame); 
+  
+  if(!safety) fix_land_structure_choice();
 
   if(multi::players < 1 || multi::players > MAXPLAYER)
     multi::players = 1;
@@ -175,9 +172,10 @@ EX void initgame() {
   if(racing::on) racing::apply_seed();
   #endif
   
-  bool use_special_land = do_use_special_land();
-    
-  if(use_special_land) firstland = specialland;
+  if(!safety) {
+    firstland = specialland;
+    ineligible_starting_land = !landUnlocked(specialland);
+    }
   
   if(firstland == laNone || firstland == laBarrier)
     firstland = laCrossroads;
@@ -213,10 +211,6 @@ EX void initgame() {
   
   pregen();  
   setdist(cwt.at, BARLEV, NULL);
-
-  if(!use_special_land && !safety) {
-    if(firstland != (princess::challenge ? laPalace : laIce)) cheater++;
-    }
 
   if((tactic::on || yendor::on || peace::on) && isCyclic(firstland)) {
     #if CAP_COMPLEX2
@@ -341,7 +335,7 @@ EX void initgame() {
     generate_mines();
     }
   
-  if(specialland == laMotion && bounded && !chaosmode && !daily::on) {
+  if(specialland == laMotion && bounded && ls::any_order() && !daily::on) {
     cwt.at->item = itOrbInvis;
     }
   
@@ -379,9 +373,6 @@ EX void initgame() {
 #if CAP_COMPLEX2
     mine::auto_teleport_charges();
 #endif
-    if(!use_special_land) {
-      if(firstland != (princess::challenge ? laPalace : laIce)) cheater++;
-      }
     welcomeMessage();
     }
   else {
@@ -424,7 +415,7 @@ EX namespace scores {
 /** \brief the amount of boxes reserved for each hr::score item */
 #define MAXBOX 500
 /** \brief currently used boxes in hr::score */
-#define POSSCORE 388
+#define POSSCORE 389
 /** \brief a struct to keep local score from an earlier game */
 struct score {
   /** \brief version used */
@@ -739,7 +730,9 @@ EX void applyBoxes() {
   applyBoxM(moFalsePrincess);
   applyBoxM(moRoseLady);
   applyBoxM(moRoseBeauty);
-  applyBoxNum(chaosmode, "Chaos mode");
+  int ls = (int) land_structure;
+  applyBoxNum(ls, "land structure");
+  land_structure = (eLandStructure) ls;
   applyBoxNum(multi::players, "shmup players");
   if(multi::players < 1 || multi::players > MAXPLAYER)
     multi::players = 1;
@@ -895,6 +888,7 @@ EX void applyBoxes() {
   list_invorb();
 
   applyBoxNum(saved_modecode, "modecode");
+  applyBoxBool(ineligible_starting_land, "ineligible_starting_land");
 
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   if(isize(invorb)) { println(hlog, "ERROR: Orbs not taken into account"); exit(1); }
@@ -919,7 +913,7 @@ modecode_t fill_modecode() {
   if(among(geometry, gArchimedean, gProduct, gRotSpace, gArbitrary))
     return 6; /* these would not be saved nor loaded correctly */
   dynamicval<bool> sp3(shmup::on, save.box[119]);
-  dynamicval<int> sp4(chaosmode, save.box[196]);
+  dynamicval<eLandStructure> sp4(land_structure, (eLandStructure) save.box[196]);
   dynamicval<eVariation> sp5(variation, (eVariation) save.box[186]);
   dynamicval<int> sp7(gp::param.first, save.box[342]);
   dynamicval<int> sp8(gp::param.second, save.box[343]);
@@ -1077,7 +1071,10 @@ EX void saveStats(bool emergency IS(false)) {
   fprintf(f, "cells generated: %d\n", cellcount);
   if(pureHardcore()) fprintf(f, "Pure hardcore mode\n");
   if(geometry) fprintf(f, "Geometry: %s/%s/%s\n", gp::operation_name().c_str(), ginf[geometry].tiling_name.c_str(), ginf[geometry].quotient_name.c_str());
-  if(chaosmode) fprintf(f, "Chaos mode\n");
+
+  if(!ls::nice_walls())
+    fprintf(f, "land structure: %s\n", land_structure_name(true).c_str());
+  
   if(shmup::on) fprintf(f, "Shoot-em up mode\n");
   if(inv::on) fprintf(f, "Inventory mode\n");
   if(multi::players > 1) fprintf(f, "Multi-player (%d players)\n", multi::players);
@@ -1309,10 +1306,7 @@ EX void set_geometry(eGeometry target) {
       hybrid::configure(target);
       }
     geometry = target;
-  
-    if(chaosmode && bounded) chaosmode = 0;
-    if(chaosmode == 1 && walls_not_implemented()) chaosmode = 0;
-
+    
     #if CAP_IRR
     if(IRREGULAR) variation = eVariation::bitruncated;
     #endif
@@ -1395,7 +1389,7 @@ EX void switch_game_mode(char switchWhat) {
     case rg::chaos:
       if(tactic::on) firstland = laIce;
       yendor::on = tactic::on = princess::challenge = false;
-      chaosmode = !chaosmode;
+      land_structure = ls::any_chaos() ? lsNiceWalls : lsChaos;
       if(bounded) set_geometry(gNormal);
       racing::on = false;
       break;
@@ -1406,7 +1400,8 @@ EX void switch_game_mode(char switchWhat) {
       geometry = gNormal;
       yendor::on = tactic::on = princess::challenge = peace::on = inv::on = false;
       dual::disable();
-      chaosmode = randomPatternsMode = false;
+      land_structure = lsNiceWalls;
+      randomPatternsMode = false;
       variation = eVariation::bitruncated;
       #if CAP_GP
       gp::param = gp::loc(1, 1);
@@ -1424,7 +1419,7 @@ EX void switch_game_mode(char switchWhat) {
       inv::on = false;
       princess::challenge = false;
       randomPatternsMode = false;
-      chaosmode = false;
+      land_structure = lsNiceWalls;
       racing::on = false;
       if(!yendor::on) firstland = laIce;
       dual::disable();
@@ -1437,7 +1432,7 @@ EX void switch_game_mode(char switchWhat) {
       peace::on = false;
       tour::on = false;
       inv::on = false;
-      chaosmode = false;
+      land_structure = lsSingle;
       princess::challenge = false;
       dual::disable();
       break;
@@ -1451,7 +1446,7 @@ EX void switch_game_mode(char switchWhat) {
       randomPatternsMode = false;
       princess::challenge = false;
       racing::on = false;
-      chaosmode = false;
+      land_structure = tactic::on ? lsSingle : lsNiceWalls;
       if(!tactic::on) firstland = laIce;
       dual::disable();
       break;
@@ -1476,7 +1471,7 @@ EX void switch_game_mode(char switchWhat) {
       shmup::on = false;
       tactic::on = false;
       yendor::on = false;
-      chaosmode = false;
+      land_structure = princess::challenge ? lsSingle : lsNiceWalls;
       inv::on = false;
       racing::on = false;
       dual::disable();

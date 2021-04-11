@@ -3337,7 +3337,7 @@ EX void floorShadow(cell *c, const shiftmatrix& V, color_t col) {
 EX bool use_warp_graphics() {
   if(shmup::on) return false;
   if(geosupport_football() != 2) return false;
-  if(chaosmode == 3 || chaosmode == 4) return false;
+  if(ls::chaoticity() >= 75) return false;
   return true;
   }
 

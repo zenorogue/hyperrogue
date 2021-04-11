@@ -1554,7 +1554,7 @@ EX void movecost(cell* from, cell *to, int phase) {
   bool tortoiseOK = 
     to->land == from->land || to->land == laTortoise ||
     (to->land == laDragon && from->land != laTortoise) || 
-    chaosmode;
+    ls::any_chaos();
   
   if(tortoise::seek() && !from->item && !tortoiseOK && passable(from, NULL, 0) && (phase & 2)) {
     changes.ccell(from);

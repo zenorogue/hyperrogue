@@ -174,6 +174,11 @@ int fiftyval(cell *c) {
   }
 
 EX int cdist50(cell *c) {
+  if(euclid && S3 == 4) {
+    auto co = euc2_coordinates(c);
+    int x = co.first, y = co.second;
+    return abs(szgmod(x, 5)) + abs(zgmod(y, 5));
+    }
   if(sphere || S7>7 || S6>6) return 0;
   if(euclid) {
     if(c->land == laWildWest) 

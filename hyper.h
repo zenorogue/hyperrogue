@@ -429,7 +429,7 @@ extern videopar vid;
 
 #define BUGCOLORS 3
 
-#define big_unlock (inv::on && !chaosmode)
+#define big_unlock (inv::on && !ls::any_chaos())
 
 // land completion for shared unlocking
 #define U5 (big_unlock ? 10 : 5)

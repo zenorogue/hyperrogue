@@ -146,7 +146,7 @@ EX namespace inv {
       }
     else {
       bool nextfound = false;
-      int fst = (chaosmode ? 5 : 10);
+      int fst = (ls::any_chaos() ? 5 : 10);
       if(qty >= fst) remaining[o]++;
       else {
         if(whichorbinfo == o) {
@@ -162,7 +162,7 @@ EX namespace inv {
         }
       int last = fst;
       for(int k=0; k<30 || !nextfound; k++) {
-        int maxstep = chaosmode ? 10 + 2 * k : 15 + 5 * k;
+        int maxstep = ls::any_chaos() ? 10 + 2 * k : 15 + 5 * k;
         if(o == itOrbMirror)
           maxstep += 5 * (k-1) * (k-2);
         else
@@ -243,7 +243,7 @@ EX namespace inv {
     for(auto& oi: orbinfos) {
       if(oi.flags & orbgenflags::OSM_AT10) {
         eItem it = treasureType(oi.l);
-        int fst = chaosmode ? 5 : 10;
+        int fst = ls::any_chaos() ? 5 : 10;
         if(items[it] >= fst) {
           remaining[oi.orb]++;
           }

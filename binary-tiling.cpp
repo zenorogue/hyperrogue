@@ -108,13 +108,13 @@ EX namespace bt {
     if(!parent->emeraldval) parent->emeraldval = currentmap->gamestart()->land;
     eLand z = eLand(parent->emeraldval);
     int chance = 0;
-    if(specialland == laCrossroads4 || parent->emeraldval == laCrossroads4) {
+    if(ls::no_walls() || parent->emeraldval == laCrossroads4) {
       eLand x = parent->c7->land;
       parent->c7->land = z;
       chance = wallchance(parent->c7, deep_ocean_at(parent->c7, parent->c7));
       parent->c7->land = x;
       }
-    if(chaosmode) chance = 1000;
+    if(ls::std_chaos()) chance = 1000;
     if(chance && hrand(40000) < chance)
       h->emeraldval = getNewLand(z);
     else
