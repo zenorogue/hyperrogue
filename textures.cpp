@@ -39,12 +39,12 @@ struct texture_data {
   GLuint textureid;
 
   int twidth, theight;
-  bool stretched;
+  bool stretched, original;
   int tx, ty, origdim;
   
   int strx, stry, base_x, base_y;
   
-  texture_data() { textureid = 0; twidth = 2048; theight = 0; stretched = false; }
+  texture_data() { textureid = 0; twidth = 2048; theight = 0; stretched = false; original = false; }
 
   vector<color_t> texture_pixels;
 
@@ -304,7 +304,7 @@ bool texture_data::readtexture(string tn) {
 
   if(twidth == 0) 
     twidth = next_p2(tx);
-  if(theight == 0) theight = stretched ? next_p2(ty) : twidth;
+  if(theight == 0) theight = (stretched || original) ? next_p2(ty) : twidth;
 
   texture_pixels.resize(twidth * theight);
 
@@ -323,6 +323,15 @@ bool texture_data::readtexture(string tn) {
     for(int x=0; x<tx; x++)
       texture_pixels[i++] = pix(x, y);
     strx = twidth; stry = theight; base_x = base_y = 0;
+    }
+  
+  else if(original) {
+    base_x = 0;
+    base_y = 0;
+    strx = tx; stry = ty;
+    for(int y=0; y<ty; y++)
+    for(int x=0; x<tx; x++)
+      get_texture_pixel(x, y) = pix(x,y);
     }
    
   else {
