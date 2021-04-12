@@ -128,10 +128,12 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     vsh += "uniform mediump vec4 uColor;\n";
     }
   
+  bool have_vfogs = false, have_vfogcolor = false;
+
   if(shader_flags & GF_LIGHTFOG) {
-    vmain += "mediump float fogx = clamp(1.0 + aPosition.z * uFog, 0.0, 1.0); vColor = vColor * fogx + uFogColor * (1.0-fogx);\n";      
     vsh += "uniform mediump float uFog;\n";
-    vsh += "uniform mediump vec4 uFogColor;\n";
+    vmain += "vFogs = clamp(1.0 + aPosition.z * uFog, 0.0, 1.0);\n";
+    have_vfogs = true;
     }
 
   string coordinator;
@@ -379,6 +381,8 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
         "vec4 ending = uRadarTransform * orig_t;\n";
       else vmain += 
         "vec4 ending = uRadarTransform * t;\n";
+      
+      have_vfogs = true; have_vfogcolor = true;
 
       vmain += 
         "float len = acosh(ending.w);\n"
@@ -392,30 +396,16 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
         "  if(px.r < .9 || px.b < .9 || px.g > .1) last = px;\n"
         "  fog += last;\n"
         "  }\n"
-        "mediump float fogs = (uFogBase - len / uFog);\n"
+        "mediump float fogs = (uFogBase - len / uFog);\n"        
         "if(fogs < 0.) fogs = 0.;\n"
-        "fog.xyz /= fog.w;\n"
-        "vColor.xyz = vColor.xyz * fogs + fog.xyz * (1.0-fogs);\n";
-      
-      if(have_texture) {
-        varying += "varying mediump vec4 fog_color;\n";
-        vmain += "fog_color = fog;\n";
-        fmain += 
-          "if(vTexCoord.x == 0.) {\n"
-            "vec4 t = texture2D(tTexture, vTexCoord);\n"
-            "gl_FragColor = t * gl_FragColor + (1.-t) * fog_color;\n"
-            "}\n"
-          "else gl_FragColor *= texture2D(tTexture, vTexCoord);\n";
-        have_texture = false;
-        }
+        "vFogs = fogs; vFogColor = fog / fog.w;\n";
       }
     else if(distfun != "") {
-      vmain += "mediump float fogs = (uFogBase - " + distfun + " / uFog);\n";
-      vmain += "vColor.xyz = vColor.xyz * fogs + uFogColor.xyz * (1.0-fogs);\n";
+      have_vfogs = true;
+      vmain += "vFogs = (uFogBase - " + distfun + " / uFog);\n";
       vsh += 
         "uniform mediump float uFog;\n"
-        "uniform mediump float uFogBase;\n"
-        "uniform mediump vec4 uFogColor;\n";
+        "uniform mediump float uFogBase;\n";
       }
     if(shader_flags & GF_LEVELS) vmain += "vPos = t;\n";  
     if(treset) vmain += "t[3] = 1.0;\n";
@@ -434,21 +424,32 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     vmain += "gl_Position = uP * t;\n";
     }
 
+  if(shader_flags & SF_ZFOG) {
+    have_vfogs = true;
+    vmain += 
+      "vFogs = 0.5 - gl_Position.z / 2.0;\n";
+    }
+  
   if(have_texture)
     fmain += "gl_FragColor *= texture2D(tTexture, vTexCoord);\n";
+
+  if(have_vfogcolor) {
+    varying += 
+      "varying mediump vec4 vFogColor;\n"
+      "varying mediump float vFogs;\n";
+    fmain += "gl_FragColor.xyz = gl_FragColor.xyz * vFogs + vFogColor.xyz * (1.0-vFogs);\n";
+    }
+  else if(have_vfogs) {
+    varying += 
+      "uniform mediump vec4 uFogColor;\n"
+      "varying mediump float vFogs;\n";
+    fmain += "gl_FragColor.xyz = gl_FragColor.xyz * vFogs + uFogColor.xyz * (1.0-vFogs);\n";
+    }
 
   vsh += 
     "uniform mediump mat4 uMV;\n"
     "uniform mediump mat4 uP;\n";
 
-  if(shader_flags & SF_ZFOG) {
-    vmain += 
-      "mediump float pz = 0.5 + gl_Position.z / 2.0;\n"
-      "vColor.xyz = vColor.xyz * (1.-pz) + uFogColor.xyz * pz;\n";
-    vsh += 
-        "uniform mediump vec4 uFogColor;\n";
-    }
-  
   vmain += "}";
   fmain += "}";
   
