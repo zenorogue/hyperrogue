@@ -991,6 +991,7 @@ EX void switch_always3() {
       vid.depth = ms;
       if(pmodel == mdDisk) pmodel = mdPerspective;
       swapmatrix(View);
+      swapmatrix(current_display->which_copy);
       callhooks(hooks_swapdim);
       for(auto m: allmaps) m->on_dim_change();
       if(cgflags & qIDEAL && vid.texture_step < 32)
@@ -1008,6 +1009,7 @@ EX void switch_always3() {
       vid.depth = 1;
       if(pmodel == mdPerspective) pmodel = mdDisk;
       swapmatrix(View);
+      swapmatrix(current_display->which_copy);
       callhooks(hooks_swapdim);
       for(auto m: allmaps) m->on_dim_change();
       }
