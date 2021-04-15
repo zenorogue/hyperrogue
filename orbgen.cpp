@@ -410,7 +410,7 @@ EX ld orbprizefun(int tr) {
   }
 
 EX ld orbcrossfun(int tr) {
-  if(tactic::on) return 1;
+  if(tactic::on || (ls::single() && isCrossroads(specialland))) return 1;
   if(tr < 10) return 0;
   if(tr > 25) return 1;
   return (tr*2 + 50) / 100.;
@@ -571,7 +571,7 @@ EX void placeCrossroadOrbs(cell *c) {
       else continue;
       }
     
-    if(tactic::on && isCrossroads(specialland)) {
+    if(ls::single() && isCrossroads(specialland)) {
       if(oi.flags & orbgenflags::NO_TACTIC)
         continue;
       else mintreas = 0;

@@ -212,7 +212,7 @@ EX void initgame() {
   pregen();  
   setdist(cwt.at, BARLEV, NULL);
 
-  if((tactic::on || yendor::on || peace::on) && isCyclic(firstland)) {
+  if(isCyclic(specialland)) {
     #if CAP_COMPLEX2
     camelot::anthraxBonus = items[itHolyGrail];
     #endif
@@ -221,8 +221,12 @@ EX void initgame() {
     
     setdist(cwt.at->move(0), BARLEV-1, cwt.at);
     if(!sphere && !eubinary && !quotient) {
-      heptagon *h = createAlternateMap(cwt.at, 2, hsA);
-      if(!h) printf("FAIL\n");
+      if(specialland == laCamelot) 
+        start_camelot(cwt.at);
+      else {
+        heptagon *h = createAlternateMap(cwt.at, 2, hsA);
+        if(!h) printf("FAIL\n");
+        }
       }
     }
   

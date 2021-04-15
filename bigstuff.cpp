@@ -42,7 +42,7 @@ EX int getAnthraxData(cell *c, bool b) {
 EX int roundTableRadius(cell *c) {
   if(eubinary) return 28;
   #if CAP_COMPLEX2
-  if(tactic::on) return getAnthraxData(c, true);
+  if(ls::single()) return getAnthraxData(c, true);
   #endif
   if(!c->master->alt) return 28;
   return c->master->alt->alt->emeraldval & GRAIL_RADIUS_MASK;
@@ -60,7 +60,7 @@ EX int celldistAltRelative(cell *c) {
     return celldist(c) - 3;
     }
   #if CAP_COMPLEX2
-  if(tactic::on) return getAnthraxData(c, false);
+  if(ls::single()) return getAnthraxData(c, false);
   #endif
   return celldistAlt(c) - roundTableRadius(c);
   }
@@ -847,7 +847,7 @@ EX int edgeDepth(cell *c) {
   }
 
 EX int getHauntedDepth(cell *c) {
-  if((tactic::on || euclid) && c->land == laHaunted) return celldist(c);
+  if((ls::single() || euclid) && c->land == laHaunted) return celldist(c);
   if(c->land == laHaunted) return c->landparam;
   if(c->land == laHauntedWall) return 0;
   if(c->land == laHauntedBorder || c->land == laGraveyard) return -c->landparam;
@@ -1546,6 +1546,15 @@ EX void build_walls(cell *c, cell *from) {
     }
   }
 
+EX void start_camelot(cell *c) {
+  int rtr = newRoundTableRadius();
+  heptagon *alt = createAlternateMap(c, rtr+(hyperbolic && WDIM == 3 ? 11 : 14), hsOrigin);
+  if(alt) {
+    alt->emeraldval = rtr;
+    alt->fiftyval = c->land;
+    }
+  }
+
 EX void build_horocycles(cell *c, cell *from) {
 
   bool deepOcean = deep_ocean_at(c, from);
@@ -1562,14 +1571,8 @@ EX void build_horocycles(cell *c, cell *from) {
       !(hyperbolic && WDIM == 3 && !reg3::in_rule()) && 
       #endif
       (quickfind(laCamelot) || peace::on || (hrand(I2000) < (c->land == laCrossroads4 ? 800 : 200) && horo_ok() && 
-      items[itEmerald] >= U5 && !tactic::on && !racing::on))) {
-      int rtr = newRoundTableRadius();
-      heptagon *alt = createAlternateMap(c, rtr+(hyperbolic && WDIM == 3 ? 11 : 14), hsOrigin);
-      if(alt) {
-        alt->emeraldval = rtr;
-        alt->fiftyval = c->land;
-        }
-      }
+      items[itEmerald] >= U5 && !tactic::on && !racing::on))) 
+      start_camelot(c);
 
     if(c->land == laRlyeh && ctof(c) && horo_ok() && 
       (quickfind(laTemple) || peace::on || (hrand(I2000) < 100 && 
@@ -1687,7 +1690,7 @@ EX eMonster camelot_monster() {
 
 EX void buildCamelot(cell *c) {
   int d = celldistAltRelative(c);
-  if(tactic::on || (d <= 14 && roundTableRadius(c) > 20)) {
+  if(ls::single() || (d <= 14 && roundTableRadius(c) > 20)) {
     if(!eubinary) currentmap->generateAlts(c->master);
     preventbarriers(c);
     if(d == 10) {
@@ -1727,7 +1730,7 @@ EX void buildCamelot(cell *c) {
         }
       }
     if(d == 0) c->wall = waRoundTable;
-    if(celldistAlt(c) == 0 && !tactic::on) c->item = itHolyGrail;
+    if(celldistAlt(c) == 0 && !ls::single()) c->item = itHolyGrail;
     if(d < 0 && hrand(7000) <= 10 + items[itHolyGrail] * 5)
       c->monst = camelot_monster();
     if(d == 1) {
@@ -1739,12 +1742,12 @@ EX void buildCamelot(cell *c) {
         if(c->move(i) && celldistAltRelative(c->move(i)) < d)
           c->mondir = (i+3) % 6;
       }
-    if(tactic::on && d >= 2 && d <= 8 && hrand(1000) < 10)
+    if(ls::single() && d >= 2 && d <= 8 && hrand(1000) < 10)
       c->item = itOrbSafety;
-    if(d == 5 && tactic::on)
+    if(d == 5 && ls::single())
       c->item = itGreenStone;
     if(d <= 10) c->land = laCamelot;
-    if(d > 10 && !eubinary && !tactic::on) {
+    if(d > 10 && !eubinary && !ls::single()) {
       setland(c, eLand(c->master->alt->alt->fiftyval));
       if(c->land == laNone) printf("Camelot\n"); // NONEDEBUG
       }
@@ -1814,7 +1817,7 @@ EX void moreBigStuff(cell *c) {
     }
   
   else if((c->land == laRlyeh && !euclid) || c->land == laTemple) if(!(bt::in() && specialland != laTemple && c->land == laRlyeh)) {
-    if(eubinary || in_s2xe() || (c->master->alt && (tactic::on || masterAlt(c) <= horo_gen_distance()))) {
+    if(eubinary || in_s2xe() || (c->master->alt && (ls::single() || masterAlt(c) <= horo_gen_distance()))) {
       if(!eubinary && !ls::any_chaos()) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
@@ -1885,24 +1888,24 @@ EX void moreBigStuff(cell *c) {
     }
 
   if((c->land == laOvergrown && !euclid) || c->land == laClearing) if(!(bt::in() && specialland != laClearing)) {
-    if(eubinary || (c->master->alt && (tactic::on || masterAlt(c) <= horo_gen_distance()))) {
+    if(eubinary || (c->master->alt && (ls::single() || masterAlt(c) <= horo_gen_distance()))) {
       if(!eubinary) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
       if(d <= 0) {
         c->land = laClearing, c->wall = waNone; // , c->monst = moNone, c->item = itNone;
         }
-      else if(d == 1 && !tactic::on && !eubinary)
+      else if(d == 1 && !ls::single() && !eubinary)
         c->wall = waSmallTree, c->monst = moNone, c->item = itNone, c->landparam = 1;
       }
     }
 
   if((c->land == laJungle && !euclid) || c->land == laMountain) if(!(bt::in() && specialland != laMountain)) {
-    if(eubinary || (c->master->alt && (tactic::on || masterAlt(c) <= horo_gen_distance()))) {
+    if(eubinary || (c->master->alt && (ls::single() || masterAlt(c) <= horo_gen_distance()))) {
       if(!eubinary) currentmap->generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
-      if(d <= 0 || (firstland == laMountain && tactic::on)) {
+      if(d <= 0 || (specialland == laMountain && ls::single())) {
         c->land = laMountain, c->wall = waNone; // , c->monst = moNone, c->item = itNone;
         }
       }
@@ -1910,9 +1913,7 @@ EX void moreBigStuff(cell *c) {
 
   if(among(c->land, laOcean, laWhirlpool, laBrownian)) if(!(bt::in() && specialland != laWhirlpool)) {
     bool fullwhirlpool = false;
-    if(tactic::on && specialland == laWhirlpool)
-      fullwhirlpool = true;
-    if(yendor::on && yendor::clev().l == laWhirlpool)
+    if(ls::single() && specialland == laWhirlpool)
       fullwhirlpool = true;
     if(eubinary || (c->master->alt && (fullwhirlpool || masterAlt(c) <= 2))) {
       if(!eubinary) currentmap->generateAlts(c->master);
