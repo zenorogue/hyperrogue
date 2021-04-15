@@ -4277,3 +4277,23 @@ Projections & geometries:
 General:
 - sky rendering is optimized 
 - fixed a crash when trying to set some options
+
+2021-04-15 19:29 Update 11.4h:
+
+Improvements to the ASCII mode:
+- PC/monster movement is animated
+- ASCII items & monsters are now available in 3D graphical modes
+- ASCII displayed for terracotta warriors
+
+Improvements to 3D modes:
+- improved the fog effect in 3D modes (non-black fog did not interact correctly with black textures)
+- fixed the mirrors
+- fixed a possible black screen on firstperson mode change
+- fixed incorrect clipping in H2xE, and clipping planes affecting 2D geometries
+- stereographic projection added (as another way to obtain larger FOV)
+
+General:
+- you can now explicitly select the land structure (standard / chaos / single land / etc.) instead of having it determined by the land
+- knight names updated
+- new achievement Lovasz conjecture (see "highlights & achievements")
+- don't reopen the window needlessly
