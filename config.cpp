@@ -3142,6 +3142,7 @@ EX int read_config_args() {
       }
     else if(s == "princess") {
       cs.charid = 3;
+      cs.lefthanded = true;
       cs.skincolor  = 0xEFD0C9FF;
       cs.haircolor  = 0x301800FF;
       cs.eyecolor   = 0xC000FF;
