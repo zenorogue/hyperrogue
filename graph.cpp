@@ -2713,8 +2713,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
           }
         }
       }
-    
-    res = res && drawMonsterType(c->monst, c, Vb, col, footphase, asciicol);
+    else res = res && drawMonsterType(c->monst, c, Vb, col, footphase, asciicol);
     }
 
   else if(isMimic(c)) {
