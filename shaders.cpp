@@ -430,8 +430,10 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
       "vFogs = 0.5 - gl_Position.z / 2.0;\n";
     }
   
-  if(have_texture)
+  if(have_texture) {
     fmain += "gl_FragColor *= texture2D(tTexture, vTexCoord);\n";
+    fmain += "if(gl_FragColor.a == 0.) discard;\n";
+    }
 
   if(have_vfogcolor) {
     varying += 
