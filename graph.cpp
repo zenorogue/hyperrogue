@@ -5168,7 +5168,7 @@ EX void normalscreen() {
     displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(v) menu"), 'v', 16);
   keyhandler = handleKeyNormal;
 
-  if(!playerfound && !anims::any_on() && !sphere && !no_find_player)
+  if(!playerfound && !anims::any_on() && !sphere && !no_find_player && mapeditor::drawplayer)
     displayButton(current_display->xcenter, current_display->ycenter, XLAT(mousing ? "find the player" : "press SPACE to find the player"), ' ', 8);
 
   describeMouseover();
