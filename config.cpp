@@ -3140,6 +3140,15 @@ EX int read_config_args() {
       cs.dresscolor =0xC6634AFF;
       cs.swordcolor = 0x3CBB33FF;      
       }
+    else if(s == "running") {
+      cs.charid = 6;
+      cs.lefthanded = false;
+      cs.skincolor = 0xFFFFFFFF;
+      cs.eyecolor = 0xFF;
+      cs.haircolor = 0xFFFFFFFF;
+      cs.dresscolor =0xFFFFFFFF;
+      cs.swordcolor = 0xFF0000FF;
+      }
     else if(s == "princess") {
       cs.charid = 3;
       cs.lefthanded = true;
