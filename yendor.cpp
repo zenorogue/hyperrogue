@@ -1069,7 +1069,7 @@ char xcheat;
 void save_mode_data(hstream& f) {
   mapstream::save_geometry(f);
   
-  if(yendor::on) 
+  if(yendor::on || tactic::on) 
     f.write<char>(0);
   else
     f.write<char>(land_structure);

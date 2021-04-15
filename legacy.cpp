@@ -204,7 +204,7 @@ int modecodetable[42][6] = {
 
 EX modecode_t legacy_modecode() {
   if(int(geometry) > 3 || int(variation) > 1) return UNKNOWN;
-  if(!ls::nice_walls() && !ls::std_chaos()) return UNKNOWN;
+  if(!ls::nice_walls() && !ls::std_chaos() && !yendor::on && !tactic::on) return UNKNOWN;
   // compute the old code
   int xcode = 0;
 
