@@ -176,7 +176,7 @@ EX bool landUnlocked(eLand l) {
     }
   
   if(all_unlocked) {
-    if(hiitemsMax(treasureType(l)) >= 10) return true;
+    if(autocheat || hiitemsMax(treasureType(l)) >= 10) return true;
     }
   
   back:
