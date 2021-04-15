@@ -327,9 +327,9 @@ EX void showMission() {
   const bool sweeper = false;
   #endif
 
-  if(!peace::on && !racing::on && !sweeper)
+  if(!peace::on && !racing::on && !sweeper && !in_lovasz())
     dialog::addInfo(XLAT("Your score: %1", its(gold())));
-  if(!peace::on && !racing::on && !sweeper)
+  if(!peace::on && !racing::on && !sweeper && !in_lovasz())
     dialog::addInfo(XLAT("Enemies killed: %1", its(tkills())));
 
 #if CAP_TOUR
@@ -352,6 +352,18 @@ EX void showMission() {
       }
     }
   #endif
+  else if(in_lovasz()) {
+    int score = 0, all = 0;
+    for(cell *c: currentmap->allcells()) {
+      if(c->wall == waChasm || c->item == itOrbInvis)
+        score++;
+      all++;
+      }
+    dialog::addInfo(XLAT("Dropped floors: %1/%2", its(score), its(all)));
+    if(score == all) dialog::addInfo(XLAT("CONGRATULATIONS!"), iinf[itOrbYendor].color);
+    if(score == all && geometry == gKleinQuartic && variation == eVariation::untruncated && gp::param == gp::loc(1,1))
+      achievement_gain_once("LOVASZ", rg::special_geometry);      
+    }
   else {  
     if(0)
       ;

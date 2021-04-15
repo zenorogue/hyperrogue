@@ -599,7 +599,21 @@ EX void mode_higlights() {
     clearMessages();
     welcomeMessage();
     }));
-  
+
+  dialog::addItem(XLAT("Lovász Conjecture"), 'L');
+  dialog::add_action(dialog::add_confirmation([] {
+    popScreenAll();
+    resetModes();
+    set_geometry(gKleinQuartic);
+    gp::param = gp::loc(1, 1);
+    set_variation(eVariation::untruncated);
+    
+    firstland = specialland = laMotion;
+    start_game();
+    clearMessages();
+    welcomeMessage();
+    }));
+
   #if CAP_CRYSTAL
   if(hiitemsMax(itHolyGrail) || cheater || autocheat) {
     dialog::addItem(XLAT("Knight of the 16-Cell Table"), '1');

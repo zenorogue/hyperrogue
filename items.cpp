@@ -61,6 +61,10 @@ EX void pickupMovedItems(cell *c) {
         }
   }
 
+EX bool in_lovasz() {
+  return specialland == laMotion && bounded && ls::single() && !daily::on;
+  }
+
 EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
 
   bool dopickup = true;

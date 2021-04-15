@@ -335,7 +335,7 @@ EX void initgame() {
     generate_mines();
     }
   
-  if(specialland == laMotion && bounded && ls::any_order() && !daily::on) {
+  if(in_lovasz()) {
     cwt.at->item = itOrbInvis;
     }
   

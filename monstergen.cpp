@@ -377,7 +377,7 @@ EX void wandering() {
     
     if(smallbounded_generation && !c->item && hrand(5) == 0 && c->land != laHalloween) {
       if(passable(c, NULL, 0) || specialland == laKraken) {
-        if(c->land != laGraveyard && (c->land != laMotion || !ls::single() || daily::on) && !haveOrbPower() && specialland != laHell) for(int it=0; it<1000 && !c->item; it++)
+        if(c->land != laGraveyard && !in_lovasz() && !haveOrbPower() && specialland != laHell) for(int it=0; it<1000 && !c->item; it++)
           placeLocalOrbs(c);
         if(!c->item) c->item = wanderingTreasure(c);
         if(c->item == itShard) {
