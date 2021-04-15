@@ -335,18 +335,22 @@ EX int knighted = 0;
 EX int anthraxBonus = 0;
 
 vector<string> knight_names = {
-  "DivisionByZero", "tricosahedron", "BillSYZ0317", "rjdimo", "Person", "Strange Yeah", "godamnsteemsux", "Allalinor", "Spuddnik", "QETC Crimson", 
-  "cannobeens", "Dylgear", "Patashu", "hotdogPi", "vincent", "Chimera245", "BreedPineapple", "TaeK", "Aliased", "Vipul", "english5040", "marvincast", 
-  "Lord Ignus", "Darth Calculus", "*****-mail", "Wheat Wizard", "xiqnyl", "zelda0x181e", "ad-jones", "mtomato", "Fififionek", "jkvw3", "J Pystynen", 
-  "krstefan11", "green orange", "ZombieGirl1616", "z.chlebicki", "Lokki", "zeno", "Fulgur14", "uqblf", "santagonewrong", "CtrlAltDestroy", "Vee Nought", 
-  "archmageomega", "Wroclaw", "lunaduskjr", "loper", "Sharklilly", "Dasypus Daimon", "Mateusz", "guysige", "MrSprucetree", "Atia", "nerdyjoe", "florrat", 
-  "psychopanda121", "Sprite Guard", "Fluffiest Princess", "no stop", "Kieroshark", "juhdanad", "lllllllllwith10ls", "NattieGilgamesh", "chocokels", "oren", 
-  "sir289", "pringle", "Spicy", "Cheetahs", "xy2", "Heavpoot", "2jjy", "Hirgon", "martradams", "TravelDemon", "The Big Extent", "fones4jenke13", "ekisacik", 
-  "j0eymcgrath", "EatChangmyeong", "craus", "akei_arkay", "__________", "Ichigo Jam", "supernewton", "Westville", "Huja (chat off)", "Just A Witch", "Particles",
-  "The Horrendous Space Kablooie", "ddtizm", "amagikuser", "vkozulya", "gassa", "Factitious", "wonderfullizardofoz", "woofmao", "CandorVelexion", "Toricon", 
-  "Vectis99", "RobotNerd277", "jerrypoons", "MagmaMcFry", "unczane", "glass", "Wegener", "JeLomun", "kip", "Fooruman", "Prezombie", "ashley89", "bjobae", 
-  "MFErtre", "Roaringdragon2", "howilovepi", "Yulgash", "coper", "Tirear", "qoala _", "Tiegon", "Metroid26", "Sklorg", "Fumblestealth", "Toph", "jruderman",
-  "ray", "Deathroll", "Sinquetica", "mootmoot", "Noobinator", "Gunblob", "Snakebird Priestess", "brisingre", "Khashishi", "Berenthas", "Misery", "Altripp", "Aldrenean",
+  "DivisionByZero", "Phoenyx", "tricosahedron", "BillSYZ0317", "rjdimo", "Person", "Strange Yeah", "paradoxica", "godamnsteemsux", "Allalinor", "Spuddnik",
+  "QETC Crimson", "aca", "cannobeens", "Dylgear", "Patashu", "SirLight_XXVII", "Lord Ignus", "Lotho", "hotdogPi", "vincent", "pofoss", "Zekava", "Chimera245",
+  "BreedPineapple", "TaeK", "Aliased", "Vipul", "jkvw3", "english5040", "gregwar69", "marvincast", "Panacea108", "FEDPOL1", "Jenkar", "inakilbss", "*****-mail",
+  "Wheat Wizard", "xiqnyl", "zelda0x181e", "ad-jones", "mtomato", "Fififionek", "J Pystynen", "krstefan11", "green orange", "ZombieGirl1616", "z.chlebicki",
+  "9427", "Lokki", "gabbalis", "The Horrendous Space Kablooie", "zeno", "ETsc2", "Fulgur14", "Roger", "uqblf", "Grep", "Abigail", "Cyberfox VII", "ballom", "CtrlAltDestroy",
+  "RushSecond", "ozir", "Vee Nought", "archmageomega", "Wroclaw", "lunaduskjr", "LucLucLuc", "loper", "RedsToad", "Sharklilly", "Dasypus Daimon", "Mateusz", "joshua", "guysige",
+  "MrSprucetree", "Atia", "nerdyjoe", "florrat", "bderoo121", "Sprite Guard", "fischpferd", "Fluffiest Princess", "no stop", "Kieroshark", "elgan65536", "T-Jski",
+  "martinus de monte", "Inthar", "mj.titze", "thelast19digitsofpi", "abacussssss", "ann_dec", "juhdanad", "lllllllllwith10ls", "rsstein", "The Emerald Derp Leader",
+  "NattieGilgamesh", "chocokels", "oren", "y", "Nathanbananas", "juliuskwan", "wojtekor9", "CoderBro", "RidiculousPyro64", "pringle", "Spicy", "Cheetahs", "ShiningKatana",
+  "xy2", "starchewer", "2jjy", "Nibaw", "Goon in Chief", "the.goosh222", "Toras", "ooshoo", "TravelDemon", "The Big Extent", "droplet739", "AlliterativeAnchovies",
+  "fones4jenke13", "ekisacik", "j0eymcgrath", "EatChangmyeong", "Strichcoder", "jwhirpl", "craus", "akei_arkay", "lilypad", "Ichigo Jam", "supernewton", "Neapolitan Sixth",
+  "Nemo", "Westville", "Huja", "lapinozz", "Just A Witch", "Borador", "Particles", "dewhi100", "nat.mayer", "ddtizm", "Tism Jones", "amagikuser", "vkozulya", "gassa",
+  "Factitious", "wonderfullizardofoz", "woofmao", "CandorVelexion", "Toricon", "Vectis99", "RobotNerd277", "jerrypoons", "MagmaMcFry", "unczane", "glass", "Wegener",
+  "JeLomun", "kip", "Warmonger", "Fooruman", "Zyalin", "Prezombie", "ashley89", "bjobae", "MFErtre", "Roaringdragon2", "howilovepi", "Yulgash", "Sir Endipitous", "Roshlev",
+  "BTernaryTau", "HiGuy", "coper", "Tirear", "qoala _", "Tyzone", "Tiegon", "Airin", "Metroid26", "Sklorg", "Fumblestealth", "Toph", "Tzaphqiel", "jruderman", "ray",
+  "Deathroll", "Sinquetica", "mootmoot", "Noobinator", "freeofme", "Helyea", "Snakebird Priestess", "brisingre", "Khashishi", "Shiny", "kabado", "Berenthas", "Misery", "Altripp", "Aldrenean",
   };
 
 map<cell*, int> knight_id;
