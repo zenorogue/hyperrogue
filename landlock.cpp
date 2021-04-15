@@ -175,6 +175,10 @@ EX bool landUnlocked(eLand l) {
     return landUnlockedRPM(l);
     }
   
+  if(all_unlocked) {
+    if(hiitemsMax(treasureType(l)) >= 10) return true;
+    }
+  
   back:
   
   if(princess::challenge) return among(l, laPalace, laPrincessQuest);
@@ -277,6 +281,7 @@ EX int elementalKills() {
   }
 
 EX eLand randomElementalLandWeighted() {
+  if(all_unlocked) return pick(laEAir, laEWater, laEEarth, laEFire);
   int i = hrand(elementalKills());
   i -= kills[moAirElemental]; if(i<0) return laEAir;
   i -= kills[moWaterElemental]; if(i<0) return laEWater;
@@ -350,6 +355,8 @@ EX bool createOnSea(eLand old) {
   }
 
 EX hookset<eLand(eLand)> hooks_nextland;
+
+EX bool all_unlocked = false;
 
 EX eLand getNewLand(eLand old) {
 
@@ -481,33 +488,33 @@ EX eLand getNewLand(eLand old) {
       tab[cnt++] = l;
 
   // the intermediate lands
-  if(gold() >= R30) {
+  if(all_unlocked || gold() >= R30) {
     tab[cnt++] = laCrossroads;
     tab[cnt++] = geometry ? laMirrorOld : laMirror;
     tab[cnt++] = laOcean;
     tab[cnt++] = laLivefjord;
-    if(kills[moVizier]) tab[cnt++] = laEmerald;
+    if(all_unlocked || kills[moVizier]) tab[cnt++] = laEmerald;
     tab[cnt++] = laWarpCoast;
     if(euclid) tab[cnt++] = laWarpSea;
     tab[cnt++] = laDocks;
     }
 
   // the advanced lands
-  if(gold() >= R60) {
+  if(all_unlocked || gold() >= R60) {
     tab[cnt++] = laCrossroads;
     if(!generatingEquidistant) tab[cnt++] = laCrossroads2;
-    if(rlyehComplete()) tab[cnt++] = laRlyeh;
+    if(all_unlocked || rlyehComplete()) tab[cnt++] = laRlyeh;
     else if(ls::std_chaos() && (old == laWarpCoast || old == laLivefjord || old == laOcean)) 
       tab[cnt++] = laRlyeh;
-    if(items[itStatue] >= U5 && ls::std_chaos())
+    if((all_unlocked || items[itStatue] >= U5) && ls::std_chaos())
       tab[cnt++] = laTemple;
     if(old == laCrossroads || old == laCrossroads2) tab[cnt++] = laOcean;
     if(old == laOcean) tab[cnt++] = laCrossroads;
-    if(items[itGold] >= U5 && items[itFernFlower] >= U5 && !kills[moVizier])
+    if(items[itGold] >= U5 && items[itFernFlower] >= U5 && !kills[moVizier] && !all_unlocked)
       tab[cnt++] = laEmerald;
     }
 
-  if(gold() >= R90) {
+  if(all_unlocked || gold() >= R90) {
     if(!ls::std_chaos()) tab[cnt++] = laPrairie;
     if(old == laPrairie) LIKELY tab[cnt++] = laBull;
     if(old == laBull && !ls::any_chaos()) LIKELY tab[cnt++] = laPrairie;
