@@ -762,6 +762,9 @@ int read_cheat_args() {
     PHASE(3); start_game();
     viewall();
     }
+  else if(argis("-unlock-all")) {
+    cheat(); all_unlocked = true;
+    }
   else if(argis("-wef")) {
     PHASEFROM(2);
     shift(); int index = argi(); 
