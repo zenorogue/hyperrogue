@@ -1305,6 +1305,11 @@ EX bool gmodekeys(int sym, int uni) {
     }
   else {
     if(NUMBERKEY == '5') { vid.wallmode = vid.wallmode == 5 ? 4 : 5; }
+    else if(NUMBERKEY == '8') { 
+      if(vid.monmode == 0) vid.monmode = 1;
+      else if(vid.monmode == 1) vid.monmode = 3;
+      else vid.monmode = 0;
+      }
     else return false;
     return true;
     }

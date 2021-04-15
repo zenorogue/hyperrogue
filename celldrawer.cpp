@@ -2320,7 +2320,7 @@ void celldrawer::draw_item_full() {
       Vboat = Vboat * ddspin(c, i) * xpush(-.13);
       }
   
-    if(drawItemType(it, c, Vboat, icol, ticks, hidden)) error = true, onradar = false;
+    if(drawItemType(it, c, Vboat, icol, ticks, hidden)) onradar = false;
     }
   }
 
@@ -2375,9 +2375,8 @@ void celldrawer::draw_monster_full() {
   #if CAP_SHAPES
   int q = isize(ptds);
   #endif
-  bool m = drawMonster(V, c->type, c, moncol, asciicol);
-  if(m) error = true;
-  if(m || c->monst) onradar = false; 
+  bool dm = drawMonster(V, c->type, c, moncol, asciicol);
+  if(dm) onradar = false; 
   #if CAP_SHAPES
   if(isize(ptds) != q) {
     if(WDIM == 2 && GDIM == 3 && abs(cgi.SLEV[sl] - cgi.FLOOR) > 1e-6)
@@ -2693,7 +2692,7 @@ void celldrawer::draw() {
     #endif
     
     #if CAP_QUEUE
-    if(error) {
+    if(error && onradar) {
       int sl;
       string s = s0+asciichar;
       dynamicval<color_t> p(poly_outline, asciiborder << 8);

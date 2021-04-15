@@ -735,11 +735,37 @@ EX color_t orb_auxiliary_color(eItem it) {
   return iinf[it].color;
   }
 
+EX void draw_ascii(const shiftmatrix& V, char glyph, color_t col, ld size) {
+  string s = s0 + glyph;
+  int id = isize(ptds);
+  if(WDIM == 2 && GDIM == 3)
+    queuestrn(V * zpush(cgi.FLOOR - cgi.scalefactor * size / 4), size, s, darkenedby(col, darken), 0);
+  else 
+    queuestrn(V, 1, s, darkenedby(col, darken), GDIM == 3 ? 0 : 2);
+  while(id < isize(ptds)) ptds[id++]->prio = PPR::MONSTER_BODY;
+  }
+
 EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int pticks, bool hidden) {
-#if !CAP_SHAPES
-  return it;
-#else
+  if(!it) return false;
   char xch = iinf[it].glyph;
+
+#if MAXMDIM >= 4
+  if(c && GDIM == 3)
+    addradar(V, xch, icol, kind_outline(it));
+#endif
+
+  if(WDIM == 3 && c == centerover && in_perspective() && hdist0(tC0(V)) < cgi.orbsize * 0.25) return false;
+
+#if CAP_SHAPES
+  if(GDIM == 3 && mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) return true;
+#endif
+
+  if(!mmitem || !CAP_SHAPES) {
+    draw_ascii(V, iinf[it].glyph, icol, 1);
+    return true;
+    }  
+    
+#if CAP_SHAPES
   auto sinptick = [c, pticks] (int period) { return c ? sintick(period) : sin(animation_factor * pticks / period);};
   auto spinptick = [c, pticks] (int period, ld phase) { return c ? spintick(period, phase) : spin((animation_factor * pticks + phase) / period); };
   int ct6 = c ? ctof(c) : 1;
@@ -768,14 +794,6 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
   if(c && doHighlight()) 
     poly_outline = kind_outline(it);
 
-#if MAXMDIM >= 4
-  if(c && WDIM == 3) addradar(V, iinf[it].glyph, icol, kind_outline(it));
-#endif
-  
-  if(GDIM == 3 && mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) return false;
-    
-  if(WDIM == 3 && c == centerover && in_perspective() && hdist0(tC0(V)) < cgi.orbsize * 0.25) return false;
-
   shiftmatrix Vit = V;
   if(GDIM == 3 && WDIM == 2 && c && it != itBabyTortoise) Vit = mscale(V, cgi.STUFF);
   if(c && prod)
@@ -788,11 +806,9 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
 
   if(c && history::includeHistory && history::infindhistory.count(c)) poly_outline = OUTLINE_DEAD;
 
-  if(!mmitem && it) return true;
-  
   else if(it == itSavedPrincess) {
     drawMonsterType(moPrincess, c, V, icol, 0, icol);
-    return false;
+    return true;
     }
   
   else if(it == itStrongWind) {
@@ -893,8 +909,6 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     xsh = NULL;
     }
   
-  else if(mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) ;
-  
   else if(it == itRose) {
     for(int u=0; u<4; u++)
       queuepoly(Vit * spinptick(1500, 0) * spin(2*M_PI / 3 / 4 * u), cgi.shRoseItem, darkena(icol, 0, hidden ? 0x30 : 0xA0));
@@ -958,9 +972,11 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     queuepolyat(Vit * spinptick(1500, 0), orbshape(iinf[it].orbshape), col, prio);
     }
 
-  else if(it) return true;
+  else {
+    draw_ascii(V, xch, icol, 1);
+    }
 
-  return false;
+  return true;
 #endif
   }
 
@@ -997,6 +1013,10 @@ EX void drawPlayer(eMonster m, cell *where, const shiftmatrix& V, color_t col, d
   #else
   const bool knighted = false;
   #endif
+
+  if(GDIM == 3) {
+    addradar(V, '@', cs.uicolor >> 8, 0xFF00FF00);
+    }
 
   if(mapeditor::drawplayer && !mapeditor::drawUserShape(V, mapeditor::sgPlayer, cs.charid, cs.skincolor, where)) {
   
@@ -1266,14 +1286,12 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
     }
 #endif
 
-#if CAP_SHAPES
   char xch = minf[m].glyph;
   
   shiftmatrix V = V1;
   if(WDIM == 3 && (classflag(m) & CF_FACE_UP) && where && !hybri) V = V1 * cspin(0, 2, M_PI/2);
-
-  // if(GDIM == 3) V = V * cspin(0, 2, M_PI/2);
-
+  
+  #if CAP_SHAPES
   if(among(m, moTortoise, moWorldTurtle) && where && where->stuntime >= 3)
     drawStunStars(V, where->stuntime-2);
   else if (among(m, moTortoise, moWorldTurtle) || m == moPlayer || (where && !where->stuntime)) ;
@@ -1281,34 +1299,41 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
     drawStunStars(V, where->stuntime);
   
   if(mapeditor::drawUserShape(V, mapeditor::sgMonster, m, darkena(col, 0, 0xFF), where))
-    return false;
+    return true;
+  #endif
 
+  if(!mmmon || !CAP_SHAPES) {
+    draw_ascii(V1, xch, asciicol, 1.5);
+    return true;
+    }
+
+#if CAP_SHAPES
   switch(m) {
     case moTortoise: {
       int bits = where ? tortoise::getb(where) : tortoise::last;
       tortoise::draw(V, bits, 0, where ? where->stuntime : 0);
       if(tortoise::seek() && !tortoise::diff(bits) && where)
         queuepoly(V, cgi.shRing, darkena(0xFFFFFF, 0, 0x80 + 0x70 * sintick(200)));
-      return false;
+      return true;
       }
     
     case moWorldTurtle: {
       tortoise::draw(V, -1, 0, where ? where->stuntime : 0);
-      return false;
+      return true;
       }
     
     case moPlayer:
       drawPlayer(m, where, V, col, footphase);  
-      return false;
+      return true;
 
     case moMimic: case moShadow: case moIllusion:
       drawMimic(m, where, V, col, footphase);
-      return false;
+      return true;
     
     case moBullet:
       ShadowV(V, cgi.shKnife);
       queuepoly(VBODY * spin(-M_PI/4), cgi.shKnife, getcs().swordcolor);
-      return false;
+      return true;
     
     case moKnight: case moKnightMoved: {
       ShadowV(V, cgi.shPBody);
@@ -1326,7 +1351,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shPHead, darkena(0x703800, 1, 0XFF));
       queuepoly(VHEAD, cgi.shPFace, darkena(0xC0C0A0, 0, 0XFF));
       humanoid_eyes(V, 0x000000FF);
-      return false;
+      return true;
       }
     
     case moGolem: case moGolemMoved: {
@@ -1335,7 +1360,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VBODY * VBS, cgi.shPBody, darkena(col, 0, 0XC0));
       queuepoly(VHEAD, cgi.shGolemhead, darkena(col, 1, 0XFF));
       humanoid_eyes(V, 0xC0C000FF, darkena(col, 0, 0xFF));
-      return false;
+      return true;
       }
     
     case moEvilGolem: case moIceGolem: {
@@ -1344,7 +1369,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VBS, cgi.shPBody, darkena(col, 0, 0XC0));
       queuepoly(VHEAD, cgi.shGolemhead, darkena(col, 1, 0XFF));
       humanoid_eyes(V, 0xFF0000FF, darkena(col, 0, 0xFF));
-      return false;
+      return true;
       }
 
     case moFalsePrincess: case moRoseLady: case moRoseBeauty: {
@@ -1401,7 +1426,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
         }
       queuepoly(VHEAD, cgi.shPFace,  facecolor);
       humanoid_eyes(V, evil ? 0x0000C0FF : 0x00C000FF, facecolor);
-      return false;
+      return true;
       }
   
     case moWolf: case moRedFox: case moWolfMoved: case moLavaWolf: {
@@ -1421,7 +1446,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
         queuepoly(VAHEAD, cgi.shFamiliarEye, 0xFF);
         queuepoly(VAHEAD * Mirror, cgi.shFamiliarEye, 0xFF);
         }
-      return false;
+      return true;
       }
     
     case moReptile: {
@@ -1432,7 +1457,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VAHEAD, cgi.shReptileEye, darkena(col, 3, 0xFF));
       queuepoly(VAHEAD * Mirror, cgi.shReptileEye, darkena(col, 3, 0xFF));
       if(GDIM == 2) queuepoly(VABODY, cgi.shReptileTail, darkena(col, 2, 0xFF));
-      return false;
+      return true;
       }
     
     case moSalamander: {
@@ -1443,7 +1468,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VAHEAD, cgi.shReptileEye, darkena(0xD00000, 0, 0xFF));
       queuepoly(VAHEAD * Mirror, cgi.shReptileEye, darkena(0xD00000, 0, 0xFF));
       queuepoly(VABODY, cgi.shReptileTail, darkena(0xD08000, 0, 0xFF));
-      return false;
+      return true;
       }
     
     case moFrog: case moPhaser: case moVaulter: {
@@ -1473,7 +1498,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VABODY, cgi.shFrogEye, darkena(col, 3, alpha));
       queuepoly(VABODY * Mirror, cgi.shFrogEye, darkena(col, 3, alpha));
       queuepoly(VABODY, cgi.shFrogStripe, xcolor);
-      return false;
+      return true;
       }
     
     case moVineBeast: {
@@ -1485,14 +1510,14 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VABODY, cgi.shWolfBody, darkena(col, 1, 0xFF));
       queuepoly(VAHEAD, cgi.shWolfHead, darkena(col, 0, 0xFF));
       queuepoly(VAHEAD, cgi.shWolfEyes, 0xFF0000FF);
-      return false;
+      return true;
       }
     
     case moMouse: case moMouseMoved: {
       queuepoly(VALEGS, cgi.shMouse, darkena(col, 0, 0xFF));
       queuepoly(VALEGS, cgi.shMouseLegs, darkena(col, 1, 0xFF));
       queuepoly(VALEGS, cgi.shMouseEyes, 0xFF);
-      return false;
+      return true;
       }
     
     case moRunDog: case moHunterDog: case moHunterGuard: case moHunterChanging: case moFallingDog: {
@@ -1519,7 +1544,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VAHEAD, cgi.shWolf2, eyes).flags |= POLY_FORCEWIDE;
       }
       queuepoly(VAHEAD, cgi.shWolf3, darkena(m == moRunDog ? 0x202020 : 0x000000, 0, 0xFF));
-      return false;
+      return true;
       }
     
     case moOrangeDog: {
@@ -1535,18 +1560,18 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VAHEAD, cgi.shWolf1, darkena(0x202020, 0, 0xFF));
       queuepoly(VAHEAD, cgi.shWolf2, darkena(0x202020, 0, 0xFF));
       queuepoly(VAHEAD, cgi.shWolf3, darkena(0x202020, 0, 0xFF));
-      return false;
+      return true;
       }
     
     case moShark: case moGreaterShark: case moCShark: 
       queuepoly(VFISH, cgi.shShark, darkena(col, 0, 0xFF));
-      return false;
+      return true;
       
     case moPike:
       queuepoly(VFISH, cgi.shPikeBody, darkena(col, 0, 0xFF));
       queuepoly(VFISH, cgi.shPikeEye, darkena(col, 2, 0xFF));
       queuepoly(VFISH * Mirror, cgi.shPikeEye, darkena(col, 2, 0xFF));
-      return false;
+      return true;
 
     case moEagle: case moParrot: case moBomberbird: case moAlbatross:
     case moTameBomberbird: case moWindCrow: case moTameBomberbirdMoved:
@@ -1557,14 +1582,14 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
         queuepolyat(VBIRD, sh, darkena(col, 0, 0xFF), PPR::SUPERLINE);
       else
         queuepoly(VBIRD, sh, darkena(col, 0, 0xFF));
-      return false;
+      return true;
       }
     
     case moSparrowhawk: case moWestHawk: {
       ShadowV(V, cgi.shHawk);
       auto& sh = GDIM == 3 ? cgi.shAnimatedHawk[wingphase(200)] : cgi.shHawk;
       queuepoly(VBIRD, sh, darkena(col, 0, 0xFF));
-      return false;
+      return true;
       }
     
     case moButterfly: {
@@ -1575,7 +1600,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       else
         queuepoly(VBIRD, cgi.shAnimatedButterfly[wingphase(100)], darkena(col, 0, 0xFF));
       queuepoly(VBIRD, cgi.shButterflyBody, darkena(col, 2, 0xFF));
-      return false;
+      return true;
       }
     
     case moGadfly: {
@@ -1585,7 +1610,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VBIRD, cgi.shGadflyBody, darkena(col, 1, 0xFF));
       queuepoly(VBIRD, cgi.shGadflyEye, darkena(col, 2, 0xFF));
       queuepoly(VBIRD * Mirror, cgi.shGadflyEye, darkena(col, 2, 0xFF));
-      return false;
+      return true;
       }
     
     case moVampire: case moBat: {
@@ -1600,14 +1625,14 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(V*Mirror, cgi.shBatFang, darkena(0xFFC0C0, 0, 0xFF));
       queuepoly(V, cgi.shBatEye, darkena(00000000, 0, 0xFF));
       queuepoly(V*Mirror, cgi.shBatEye, darkena(00000000, 0, 0xFF)); */
-      return false;
+      return true;
       }
     
     case moGargoyle: {
       ShadowV(V, cgi.shGargoyleWings);
       queuepoly(VBIRD, GDIM == 2 ? cgi.shGargoyleWings : cgi.shAnimatedGargoyle[wingphase(300)], darkena(col, 0, 0xD0));
       queuepoly(VBIRD, GDIM == 2 ? cgi.shGargoyleBody : cgi.shAnimatedGargoyle2[wingphase(300)], darkena(col, 0, 0xFF));
-      return false;
+      return true;
       }
     
     case moZombie: {
@@ -1615,12 +1640,12 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       const transmatrix VBS = otherbodyparts(V, c, m, footphase);
       ShadowV(V, cgi.shPBody);
       queuepoly(VBODY * VBS, cgi.shPBody, c);
-      return false;
+      return true;
       }
     
     case moTerraWarrior: {
       drawTerraWarrior(V, 7, (where ? where->hitpoints : 7), footphase);
-      return false;
+      return true;
       }
     
     case moVariantWarrior: {
@@ -1630,7 +1655,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       if(!peace::on) queuepoly(VBS, cgi.shPSword, 0xFFFF00FF);
       queuepoly(VHEAD, cgi.shHood, 0x008000FF);
       humanoid_eyes(V, 0xFFFF00FF);
-      return false;
+      return true;
       }
     
     case moDesertman: {
@@ -1640,7 +1665,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       if(!peace::on) queuepoly(VBS, cgi.shPSword, 0xFFFF00FF);
       queuepoly(VHEAD, cgi.shHood, 0xD0D000C0 | UNTRANS);
       humanoid_eyes(V, 0x301800FF);
-      return false;
+      return true;
       }
     
     case moMonk: {
@@ -1654,7 +1679,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shRaiderHelmet, darkena(col, 0, 0XFF));
       queuepoly(VHEAD, cgi.shPFace, darkena(0xC0C0A0, 0, 0XFF));
       humanoid_eyes(V, 0x000000FF);
-      return false;
+      return true;
       }
     
     case moCrusher: {
@@ -1668,7 +1693,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shRaiderHelmet, darkena(col, 0, 0XFF));
       queuepoly(VHEAD, cgi.shPFace, darkena(0xC0C0A0, 0, 0XFF));
       humanoid_eyes(V, 0x000000FF);
-      return false;
+      return true;
       }
     
     case moPair: {
@@ -1681,7 +1706,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shRaiderHelmet, darkena(col, 0, 0XFF));
       queuepoly(VHEAD, cgi.shPFace, darkena(0xC0C0A0, 0, 0XFF));
       humanoid_eyes(V, 0x000000FF);
-      return false;
+      return true;
       }
     
     case moAltDemon: case moHexDemon: {
@@ -1694,7 +1719,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shRaiderHelmet, darkena(col, 0, 0XFF));
       queuepoly(VHEAD, cgi.shPFace, darkena(0xC0C0A0, 0, 0XFF));
       humanoid_eyes(V, 0x000000FF);
-      return false;
+      return true;
       }
     
     case moSkeleton: {
@@ -1705,7 +1730,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       humanoid_eyes(V, 0x000000FF, 0xFFFFFFFF);      
       ShadowV(V, cgi.shSkeletonBody);
       queuepoly(VBS, cgi.shSabre, 0xFFFFFFFF);
-      return false;
+      return true;
       }
     
     case moPalace: case moFatGuard: case moVizier: {
@@ -1730,7 +1755,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
         queuepoly(VHEAD2, cgi.shTurban2, darkena(col, 0, 0xFF));
       queuepoly(VBODY * VBS, cgi.shSabre, 0xFFFFFFFF);
       humanoid_eyes(V, 0x301800FF);
-      return false;
+      return true;
       }
     
     case moCrystalSage: {
@@ -1740,7 +1765,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shPHead, 0xFFFFFFFF);
       queuepoly(VHEAD, cgi.shPFace, 0xFFFFFFFF);
       humanoid_eyes(V, 0xFFFFFFFF, 0xC0C0C0FF);
-      return false;
+      return true;
       }
     
     case moHedge: {
@@ -1751,7 +1776,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shPHead, 0x804000FF);
       queuepoly(VHEAD, cgi.shPFace, 0xF09000FF);
       humanoid_eyes(V, 0x00D000FF);
-      return false;
+      return true;
       }
     
     case moYeti: case moMonkey: {
@@ -1760,7 +1785,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VBS, cgi.shYeti, darkena(col, 0, 0xC0));
       queuepoly(VHEAD1, cgi.shPHead, darkena(col, 0, 0xFF));
       humanoid_eyes(V, 0x000000FF, darkena(col, 0, 0xFF));
-      return false;
+      return true;
       }
     
     case moResearcher: {
@@ -1770,7 +1795,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD, cgi.shAztecHead, darkena(col, 0, 0xFF));
       queuepoly(VHEAD1, cgi.shAztecCap, darkena(0xC000C0, 0, 0xFF));
       humanoid_eyes(V, 0x000000FF);
-      return false;
+      return true;
       }
     
     case moFamiliar: {
@@ -1787,7 +1812,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
         queuepoly(VAHEAD, cgi.shFamiliarEye, darkena(0xFFFF000, 0, 0xFF));
         queuepoly(VAHEAD * Mirror, cgi.shFamiliarEye, darkena(0xFFFF000, 0, 0xFF));
         }
-      return false;
+      return true;
       }
     
     case moRanger: {
@@ -1797,7 +1822,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       if(!peace::on) queuepoly(VBS, cgi.shPSword, darkena(col, 0, 0xFF));
       queuepoly(VHEAD, cgi.shArmor, darkena(col, 1, 0xFF));
       humanoid_eyes(V, 0x000000FF);
-      return false;
+      return true;
       }
     
     case moNarciss: {
@@ -1809,7 +1834,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD, cgi.shPFace, 0xFFE080FF);
       queuepoly(VHEAD1, cgi.shPHead, 0x806A00FF);
       humanoid_eyes(V, 0x000000FF);
-      return false;
+      return true;
       }
 
     case moMirrorSpirit: {
@@ -1821,7 +1846,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD2, cgi.shPFace, darkena(col, 1, 0x90));
       queuepoly(VHEAD, cgi.shArmor, darkena(col, 0, 0xC0));
       humanoid_eyes(V, 0xFFFFFFFF, darkena(col, 0, 0xFF));
-      return false;
+      return true;
       }
     
     case moJiangshi: {
@@ -1837,20 +1862,20 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD2, cgi.shJiangShiCap1, darkena(0x800000, 0, 0xFF));
       queuepoly(VHEAD3, cgi.shJiangShiCap2, darkena(0x400000, 0, 0xFF));
       humanoid_eyes(V, 0x000000FF, darkena(col, 0, 0xFF));
-      return false;
+      return true;
       }
     
     case moGhost: case moSeep: case moFriendlyGhost: {
       if(m == moFriendlyGhost) col = fghostcolor(where);
       queuepolyat(VGHOST, cgi.shGhost, darkena(col, 0, m == moFriendlyGhost ? 0xC0 : 0x80), GDIM == 3 ? PPR::SUPERLINE : cgi.shGhost.prio);
       queuepolyat(VGHOST, cgi.shGhostEyes, 0xFF, GDIM == 3 ? PPR::SUPERLINE : cgi.shEyes.prio);
-      return false;
+      return true;
       }
     
     case moVineSpirit: {
       queuepoly(VGHOST, cgi.shGhost, 0xD0D0D0C0 | UNTRANS);
       queuepolyat(VGHOST, cgi.shGhostEyes, 0xFF0000FF, GDIM == 3 ? PPR::SUPERLINE : cgi.shGhostEyes.prio);
-      return false;
+      return true;
       }
     
     case moFireFairy: {
@@ -1861,7 +1886,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD, cgi.shWitchHair, darkena(col, 1, 0xFF));
       queuepoly(VHEAD1, cgi.shPFace, darkena(col, 0, 0XFF));
       humanoid_eyes(V, darkena(col, 1, 0xFF));
-      return false;
+      return true;
       }      
       
     case moRusalka: {
@@ -1890,13 +1915,13 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
         queuepoly(VHEAD1, cgi.shWightCloak, watercolor(50) & 0xFFFFFF80);
         humanoid_eyes(V, col | 0xFF);
         }
-      return false;
+      return true;
       }      
       
     case moSlime: {
       queuepoly(VFISH, cgi.shSlime, darkena(col, 0, 0x80));
       queuepoly(VSLIMEEYE, cgi.shSlimeEyes, 0xFF);
-      return false;
+      return true;
       }
 
     case moKrakenH: {
@@ -1905,12 +1930,12 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VFISH, cgi.shKrakenEye2, 0xC0);
       queuepoly(VFISH * Mirror, cgi.shKrakenEye, 0xFFFFFFC0 | UNTRANS);
       queuepoly(VFISH * Mirror, cgi.shKrakenEye2, 0xC0);
-      return false;
+      return true;
       }
 
     case moKrakenT: {
       queuepoly(VFISH, cgi.shSeaTentacle, darkena(col, 0, 0xD0));
-      return false;
+      return true;
       }
 
     case moCultist: case moPyroCultist: case moCultistLeader: {
@@ -1920,7 +1945,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       if(!peace::on) queuepoly(VBS, cgi.shPSword, darkena(col, 2, 0xFF));
       queuepoly(VHEAD, cgi.shHood, darkena(col, 1, 0xFF));
       humanoid_eyes(V, 0x00FF00FF);
-      return false;
+      return true;
       }
 
     case moPirate: {
@@ -1932,7 +1957,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shEyepatch, darkena(0, 0, 0xC0));
       queuepoly(VHEAD2, cgi.shPirateHood, darkena(col, 0, 0xFF));
       humanoid_eyes(V, 0x000000FF);
-      return false;
+      return true;
       }
 
     case moRatling: case moRatlingAvenger: {
@@ -1970,7 +1995,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       if(m == moRatlingAvenger) {
         queuepoly(VBODY1 * VBS, cgi.shRatCape2, 0x484848FF);
         }
-      return false;
+      return true;
       }
 
     case moViking: {
@@ -1982,7 +2007,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD, cgi.shVikingHelmet, darkena(0xC0C0C0, 0, 0XFF));
       queuepoly(VHEAD, cgi.shPFace, darkena(0xFFFF80, 0, 0xFF));
       humanoid_eyes(V, 0x000000FF);
-      return false;
+      return true;
       }
 
     case moOutlaw: {
@@ -1995,7 +2020,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD, cgi.shPFace, darkena(0xFFFF80, 0, 0xFF));
       queuepoly(VBODY * VBS, cgi.shGunInHand, darkena(col, 1, 0XFF));
       humanoid_eyes(V, 0x000000FF);
-      return false;
+      return true;
       }
 
     case moNecromancer: {
@@ -2004,7 +2029,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VBS, cgi.shPBody, 0xC00000C0 | UNTRANS);
       queuepoly(VHEAD, cgi.shHood, darkena(col, 1, 0xFF));
       humanoid_eyes(V, 0xFF0000FF);
-      return false;
+      return true;
       }
 
     case moDraugr: {
@@ -2021,7 +2046,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       if(b < 0) b = 0;
       if(b > 6) b = 6;
       queuepoly(VHEAD1, cgi.shWightCloak, (0x605040A0 | UNTRANS) + 0x10101000 * b);
-      return false;
+      return true;
       }
 
     case moVoidBeast: {
@@ -2030,7 +2055,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD, cgi.shPHead, 0x080808D0 | UNTRANS);
       queuepoly(VHEAD, cgi.shWightCloak, 0xFF0000A0 | UNTRANS);
       humanoid_eyes(V, 0xFF0000FF, 0x080808FF);
-      return false;
+      return true;
       }
 
     case moGoblin: {
@@ -2039,7 +2064,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VBS, cgi.shYeti, darkena(col, 0, 0xC0));
       queuepoly(VHEAD, cgi.shArmor, darkena(col, 1, 0XFF));
       humanoid_eyes(V, 0x800000FF, darkena(col, 0, 0xFF));
-      return false;
+      return true;
       }
 
     case moLancer: case moFlailer: case moMiner: {
@@ -2062,7 +2087,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
         queuepoly(Vb, cgi.shFlailTrunk, darkena(col, 0, 0XFF));
         }
       humanoid_eyes(V, 0x000000FF);
-      return false;
+      return true;
       }
 
     case moTroll: {
@@ -2072,7 +2097,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shPHead, darkena(col, 1, 0XFF));
       queuepoly(VHEAD, cgi.shPFace, darkena(col, 2, 0XFF));
       humanoid_eyes(V, 0x004000FF, darkena(col, 0, 0xFF));
-      return false;
+      return true;
       }        
 
     case moFjordTroll: case moForestTroll: case moStormTroll: {
@@ -2082,7 +2107,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shPHead, darkena(col, 1, 0XFF));
       queuepoly(VHEAD, cgi.shPFace, darkena(col, 2, 0XFF));
       humanoid_eyes(V, 0x004000FF, darkena(col, 0, 0xFF));
-      return false;
+      return true;
       }
 
     case moDarkTroll: {
@@ -2092,7 +2117,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shPHead, darkena(col, 1, 0XFF));
       queuepoly(VHEAD, cgi.shPFace, 0xFFFFFF80 | UNTRANS);
       humanoid_eyes(V, 0x000000FF, darkena(col, 0, 0xFF));
-      return false;
+      return true;
       }        
 
     case moRedTroll: {
@@ -2102,7 +2127,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shPHead, darkena(0xFF8000, 0, 0XFF));
       queuepoly(VHEAD, cgi.shPFace, 0xFFFFFF80 | UNTRANS);
       humanoid_eyes(V, 0x000000FF, darkena(col, 0, 0xFF));
-      return false;
+      return true;
       }        
 
     case moEarthElemental: {
@@ -2112,7 +2137,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shFemaleHair, darkena(col, 0, 0XFF));
       queuepoly(VHEAD, cgi.shPFace, 0xF0000080 | UNTRANS);
       humanoid_eyes(V, 0xD0D000FF, darkena(col, 1, 0xFF));
-      return false;
+      return true;
       }        
 
     case moWaterElemental: {
@@ -2122,7 +2147,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shFemaleHair, watercolor(100));
       queuepoly(VHEAD, cgi.shPFace, watercolor(200));
       humanoid_eyes(V, 0x0000FFFF, watercolor(150));
-      return false;
+      return true;
       }        
 
     case moFireElemental: {
@@ -2132,7 +2157,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shFemaleHair, darkena(firecolor(100), 0, 0xFF));
       queuepoly(VHEAD, cgi.shPFace, darkena(firecolor(200), 0, 0xFF));
       humanoid_eyes(V, darkena(firecolor(200), 0, 0xFF), darkena(firecolor(50), 0, 0xFF));
-      return false;
+      return true;
       }
 
     case moAirElemental: {
@@ -2142,13 +2167,13 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VHEAD1, cgi.shFemaleHair, darkena(col, 0, 0x80));
       queuepoly(VHEAD, cgi.shPFace, darkena(col, 0, 0x80));
       humanoid_eyes(V, 0xFFFFFFFF, darkena(col, 1, 0xFF));
-      return false;
+      return true;
       }        
 
     case moWorm: case moWormwait: case moHexSnake: {
       queuepoly(V, cgi.shWormHead, darkena(col, 0, 0xFF));
       queuepolyat(V, cgi.shWormEyes, 0xFF, PPR::ONTENTACLE_EYES);
-      return false;
+      return true;
       }
 
     case moDragonHead: {
@@ -2157,23 +2182,23 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       int noscolor = 0xFF0000FF;
       queuepoly(V, cgi.shDragonNostril, noscolor);
       queuepoly(V * Mirror, cgi.shDragonNostril, noscolor);
-      return false;
+      return true;
       }
 
     case moDragonTail: {
       queuepoly(V, cgi.shDragonSegment, darkena(col, 0, 0xFF));
-      return false;
+      return true;
       }
 
     case moTentacle: case moTentaclewait: case moTentacleEscaping: {
       queuepoly(V, cgi.shTentHead, darkena(col, 0, 0xFF));
       ShadowV(V, cgi.shTentHead, PPR::GIANTSHADOW);
-      return false;
+      return true;
       }
     
     case moAsteroid: {
       queuepoly(V, cgi.shAsteroid[1], darkena(col, 0, 0xFF));
-      return false;
+      return true;
       }
 
     default: ;    
@@ -2259,10 +2284,9 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
     queuepoly(V, cgi.shILeaf[0], darkena(col, 0, 0xFF));
     }
 
-  else return true;
+  else
+    draw_ascii(V1, minf[m].glyph, asciicol, 1.5);
   
-  return false;
-#else
   return true;
 #endif
   }
@@ -2456,6 +2480,8 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
   
   bool half_elliptic = elliptic && GDIM == 3 && WDIM == 2;
   bool mirrored = det(Vparam.T) > 0;
+  
+  bool res = m;
   
   if(!m) ;
   
@@ -2683,10 +2709,10 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
           }
         }
       }
-
-    if(!mmmon) return true;
+    
+    res = res && drawMonsterType(c->monst, c, Vb, col, footphase, asciicol);
     }
-  
+
   else if(isMimic(c)) {
     int xdir = 0, copies = 1;
     if(c->wall == waMirrorWall) {
@@ -2718,15 +2744,11 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
         queuestr(P2, 10, "x", 0xFF00);
         }     
       if(!nospins && flipplayer) Vs = Vs * pispin;
-      if(mmmon) {
-        drawMonsterType(moMimic, c, Vs, col, footphase, asciicol);
-        drawPlayerEffects(Vs, c, false);
-        }
+      
+      res = res && drawMonsterType(moMimic, c, Vs, col, footphase, asciicol);
+      drawPlayerEffects(Vs, c, false);
       }
-    return !mmmon;
     }
-  
-  else if(!mmmon) return true;
   
   // illusions face randomly
   
@@ -2773,7 +2795,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       
       // if(ctof(c) && !masterless) Vb = Vb * xpush(hexhexdist - hcrossf);
       // return (!BITRUNCATED) ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : cgi.crossf;
-    return drawMonsterTypeDH(m, c, Vb, col, darkhistory, footphase, asciicol);
+    res = res && drawMonsterTypeDH(m, c, Vb, col, darkhistory, footphase, asciicol);
     }
 
   // golems, knights, and hyperbugs don't face the player (mondir-controlled)
@@ -2785,7 +2807,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
     if(c->monst == moPair) Vs = Vs * xpush(-.12);
     if(c->monmirror) Vs = Vs * Mirror;
     if(isFriendly(c)) drawPlayerEffects(Vs, c, false);
-    return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase, asciicol);
+    res = res && drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase, asciicol);
     }
 
   else {
@@ -2820,7 +2842,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
     if(c->monst == moShadow) 
       multi::cpid = c->hitpoints;
     
-    return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase, asciicol);
+    res = res && drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase, asciicol);
     }
   
   for(int i=0; i<numplayers(); i++) if(c == playerpos(i) && !shmup::on && mapeditor::drawplayer && 
@@ -2836,8 +2858,9 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       }
     multi::cpid = i;
 
+    asciicol = getcs().uicolor >> 8;
+
     drawPlayerEffects(Vs, c, true);
-    if(!mmmon) return true;
     if(inmirrorcount && !mouseout() && !nospins && GDIM == 2) {
       hyperpoint h = inverse_shift(ocwtV, mouseh);
       if(flipplayer) h = pispin * h;
@@ -2847,24 +2870,24 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
     
     if(hide_player()) {
       first_cell_to_draw = false;
-      if(WDIM == 2 && GDIM == 3)
+      if(WDIM == 2 && GDIM == 3) {
         drawPlayer(moPlayer, c, Vs, col, footphase, true);
+        res = true;
+        }
       }
     
-    else if(isWorm(m)) {
+    else if(isWorm(c->monst)) {
       ld depth = geom3::factor_to_lev(wormhead(c) == c ? cgi.AHEAD : cgi.ABODY);
       footphase = 0;
       int q = isize(ptds);
-      drawMonsterType(moPlayer, c, Vs, col, footphase, asciicol);
+      res = res || drawMonsterType(moPlayer, c, Vs, col, footphase, asciicol);
       pushdown(c, q, Vs, -depth, true, false);
       }
     
-    else if(mmmon)
-      drawMonsterType(moPlayer, c, Vs, col, footphase, asciicol);
+    else res = res || drawMonsterType(moPlayer, c, Vs, col, footphase, asciicol);
     }
-
 #endif
-  return false;
+  return res;
   }
 
 #define AURA 180
