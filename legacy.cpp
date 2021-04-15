@@ -245,7 +245,7 @@ int read_legacy_args() {
   else if(argis("-chaos-circle")) {
     PHASEFROM(2);
     stop_game();
-    land_structure = lsCircleChaos;
+    land_structure = lsPatchedChaos;
     }
   else if(argis("-chaos-total")) {
     PHASEFROM(2);
