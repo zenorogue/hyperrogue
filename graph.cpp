@@ -991,6 +991,10 @@ void humanoid_eyes(const shiftmatrix& V, color_t ecol, color_t hcol = skincolor)
   }
 
 EX void drawTerraWarrior(const shiftmatrix& V, int t, int hp, double footphase) {
+  if(!mmmon) {
+    draw_ascii(V, 'T', gradient(0x202020, 0xFFFFFF, 0, t, 6), 1.5);
+    return;
+    }
   ShadowV(V, cgi.shPBody);
   color_t col = linf[laTerracotta].color;
   int bcol = darkena(false ? 0xC0B23E : col, 0, 0xFF);
