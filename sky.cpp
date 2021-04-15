@@ -70,6 +70,12 @@ void compute_skyvertices(const vector<sky_item>& sky) {
   
   for(const sky_item& si: sky) {
     auto c = si.c;
+    
+    if(c->land == laMirrorWall) continue;
+    bool inmir = false;
+    forCellEx(c1, c) if(c1->land == laMirrorWall) inmir = true;
+    if(inmir) continue;
+    
     for(int i=0; i<c->type; i++) {
       
       if(1) {
