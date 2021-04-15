@@ -1458,7 +1458,7 @@ EX void build_walls(cell *c, cell *from) {
   
     if(ctof(c) && c->land == laTerracotta && hrand(I10000) < 200) {
       int bd = 2 + hrand(2) * 3;    
-      buildBarrier(c, bd, laMirrored); 
+      buildBarrier(c, bd, laTerracotta); 
       return;
       }
     }
