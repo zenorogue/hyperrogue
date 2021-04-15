@@ -434,10 +434,10 @@ EX eLand getNewLand(eLand old) {
   if(old == laGraveyard && generatingEquidistant)
     return laHaunted;
   
-  if(old == laOcean && gold() >= R60 && hrand(100) < 75 && !rlyehComplete()) 
+  if(old == laOcean && gold() >= R60 && hrand(100) < 75 && !rlyehComplete() && !all_unlocked) 
     return laRlyeh;
     
-  if(old == laRlyeh && !rlyehComplete())
+  if(old == laRlyeh && !rlyehComplete() && !all_unlocked)
     return laOcean;
     
   eLand tab[16384];
