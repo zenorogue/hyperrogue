@@ -2883,11 +2883,11 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       ld depth = geom3::factor_to_lev(wormhead(c) == c ? cgi.AHEAD : cgi.ABODY);
       footphase = 0;
       int q = isize(ptds);
-      res = res || drawMonsterType(moPlayer, c, Vs, col, footphase, asciicol);
+      res = res | drawMonsterType(moPlayer, c, Vs, col, footphase, asciicol);
       pushdown(c, q, Vs, -depth, true, false);
       }
     
-    else res = res || drawMonsterType(moPlayer, c, Vs, col, footphase, asciicol);
+    else res = res | drawMonsterType(moPlayer, c, Vs, col, footphase, asciicol);
     }
 #endif
   return res;
