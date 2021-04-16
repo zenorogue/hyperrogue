@@ -282,7 +282,7 @@ auto hook = arg::add3("-inner-map", enable)
         "projections/hyperbolic to hyperbolic", 10, LEGAL::NONE | QUICKGEO,
 
         "We can also project a hyperbolic plane to a hyperbolic plane of different curvature.\n\n"
-        "Creatures living in the hyperbolic world may use the native Poincaré model to get conformal, circular, and totally useless maps of their whole world.\n\n"
+        "Creatures living in the hyperbolic world may use the native PoincarÃ© model to get conformal, circular, and totally useless maps of their whole world.\n\n"
         
         "Press 'o' to change the settings."
         ,
