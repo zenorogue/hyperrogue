@@ -363,9 +363,7 @@ void show() {
   }
 
 void handle_animation(ld t) {
-  println(hlog, "handle_animation ", t);
-  
-  ld total_total;
+  ld total_total = 0;
   
   vector<ld> totals;
   for(auto& anim: anims) {
