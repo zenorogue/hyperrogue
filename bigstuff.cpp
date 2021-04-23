@@ -1490,6 +1490,9 @@ EX void build_walls(cell *c, cell *from) {
   if(c->land == laCrossroads2 && BITRUNCATED)
     buildCrossroads2(c);
   
+  else if(good_for_wall(c) && isWarpedType(c->land) && hrand(10000) < 3000 && c->land && 
+    buildBarrierNowall(c, eLand(c->land ^ laWarpSea ^ laWarpCoast))) { }
+  
   else if(ls::single()) return;
     
   if(geometry == gNormal && celldist(c) < 3 && !GOLDBERG) {
@@ -1510,9 +1513,6 @@ EX void build_walls(cell *c, cell *from) {
     if(good_for_wall(c) && hrand(10000) < 9000 && c->land && !inmirror(c) && buildBarrierNowall(c, getNewLand(c->land))) 
       return;
     }
-  
-  else if(good_for_wall(c) && isWarpedType(c->land) && hrand(10000) < 3000 && c->land && 
-    buildBarrierNowall(c, eLand(c->land ^ laWarpSea ^ laWarpCoast))) ;
   
   else if(good_for_wall(c) && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && !c->master->alt && !tactic::on && !racing::on &&
     buildBarrierNowall(c, getNewLand(laCrossroads4))) ;
