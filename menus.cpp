@@ -547,6 +547,7 @@ EX void mode_higlights() {
     specialland = laAsteroids;
     set_geometry(gKleinQuartic);
     set_variation(eVariation::bitruncated);
+    land_structure = lsSingle;
     shmup::on = true;
     start_game();
     }));
@@ -569,6 +570,7 @@ EX void mode_higlights() {
   dialog::add_action(dialog::add_confirmation([] {
     popScreenAll();
     resetModes('7');
+    land_structure = lsNiceWalls;
     start_game();
     clearMessages();
     welcomeMessage();
@@ -584,6 +586,7 @@ EX void mode_higlights() {
     resetModes();
     set_geometry(gEuclid);
     firstland = specialland = laMirrorOld;
+    land_structure = lsSingle;
     start_game();
     clearMessages();
     welcomeMessage();
@@ -595,6 +598,7 @@ EX void mode_higlights() {
     resetModes();
     set_geometry(gZebraQuotient);
     firstland = specialland = laDesert;
+    land_structure = lsSingle;
     start_game();
     clearMessages();
     welcomeMessage();
@@ -609,6 +613,7 @@ EX void mode_higlights() {
     set_variation(eVariation::untruncated);
     
     firstland = specialland = laMotion;
+    land_structure = lsSingle;
     start_game();
     clearMessages();
     welcomeMessage();
@@ -622,6 +627,7 @@ EX void mode_higlights() {
       resetModes();
       crystal::set_crystal(8);
       firstland = specialland = laCamelot;
+      land_structure = lsSingle;
       start_game();
       clearMessages();
       welcomeMessage();
@@ -635,6 +641,7 @@ EX void mode_higlights() {
       crystal::set_crystal(8);
       set_variation(eVariation::bitruncated);
       set_variation(eVariation::bitruncated);
+      land_structure = lsSingle;
       firstland = specialland = laCamelot;
       start_game();
       clearMessages();
@@ -655,6 +662,7 @@ EX void mode_higlights() {
     popScreenAll();
     resetModes();
     specialland = laEmerald;
+    land_structure = lsSingle;
     set_geometry(gSpace534);
     check_cgi();
     cgi.require_basics();
