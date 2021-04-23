@@ -301,7 +301,7 @@ EX bool rlyehComplete() {
   }
 
 bool lchance(eLand l) { 
-  if(tactic::on || yendor::on || racing::on || ((geometry || GOLDBERG) && specialland == laElementalWall)) return true;
+  if(ls::single() || racing::on || ((geometry || GOLDBERG) && specialland == laElementalWall)) return true;
   if(ls::any_chaos()) return hrand(100) < 25;
   return hrand(100) >= 40 * kills[elementalOf(l)] / (elementalKills()+1); 
   }

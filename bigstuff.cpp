@@ -1486,7 +1486,15 @@ EX void build_walls(cell *c, cell *from) {
         build_barrier_good(c, specialland);
         return;
         }
+
+      if(specialland == laElementalWall && hrand(I10000) < 4000) {
+        build_barrier_good(c); 
+        return;
+        }
       }
+    }
+  else if(ctof(c) && ls::single() && specialland == laElementalWall && hrand(I10000) < 4000) {
+    buildBarrierNowall(c, getNewLand(c->land));
     }
   
   if(c->land == laCrossroads2 && BITRUNCATED)
