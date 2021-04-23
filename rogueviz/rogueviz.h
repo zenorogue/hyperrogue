@@ -146,6 +146,7 @@ namespace rogueviz {
     using namespace hr::tour;
     inline hookset<void(string, vector<slide>&)> hooks_build_rvtour;
     slide *gen_rvtour();
+    void draw_texture(texture::texture_data& tex);
 
 template<class T, class U> function<void(presmode)> roguevizslide(char c, const T& t, const U& f) {
   return [c,t,f] (presmode mode) {
