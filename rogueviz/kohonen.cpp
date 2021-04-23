@@ -40,7 +40,8 @@ struct neuron {
   int lpbak;
   color_t col;
   int allsamples, drawn_samples, csample, bestsample, max_group_here;
-  neuron() { drawn_samples = allsamples = bestsample = 0; max_group_here = max_group; }
+  int debug;
+  neuron() { drawn_samples = allsamples = bestsample = 0; max_group_here = max_group; debug = 0; }
   };
 
 vector<string> colnames;
@@ -538,7 +539,8 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
 map<int, cellcrawler> scc;
 
 pair<int, int> get_cellcrawler_id(cell *c) {
-  if(among(geometry, gZebraQuotient, gMinimal, gField435, gField534) || (euclid && quotient && !bounded) || IRREGULAR || (GDIM == 3 && sphere)) {
+  if(among(geometry, gZebraQuotient, gMinimal, gArnoldCat, gField435, gField534) || (euclid && quotient && !bounded) || IRREGULAR || (GDIM == 3 && sphere) || (hyperbolic && GDIM == 3 && quotient)
+    || (euclid && nonorientable)) {
     // Zebra Quotient does exhibit some symmetries,
     // but these are so small anyway that it is safer to just build
     // a crawler for every neuron
@@ -679,6 +681,7 @@ void step() {
   for(auto& sd: s.data) {
     neuron *n2 = getNeuron(sd.target.at);
     if(!n2) continue;
+    n2->debug++;
     double nu = learning_factor;
     
     if(gaussian) {
@@ -694,6 +697,11 @@ void step() {
       if(isnan(n2->net[k])) 
         throw hr_exception("obtained nan somehow, nu = " + lalign(0, nu));
       }
+    }
+
+  for(auto& n2: net) {
+    if(n2.debug > 1) throw hr_exception("sprawler error");
+    n2.debug = 0;
     }
   
   t--;
@@ -791,8 +799,13 @@ vector<cell*> gen_neuron_cells() {
     map<cell*, int> clindex;
     for(int i=0; i<isize(allcells); i++) clindex[allcells[i]] = i;
     sort(allcells.begin(), allcells.end(), [&clindex] (cell *c1, cell *c2) { 
-      return make_pair(hdist0(tC0(ggmatrix(c1))), clindex[c1]) < 
-             make_pair(hdist0(tC0(ggmatrix(c2))), clindex[c2]); 
+      ld d1 = hdist0(tC0(ggmatrix(c1)));
+      ld d2 = hdist0(tC0(ggmatrix(c2)));
+      if(d1 < d2 - 1e-6)
+        return true;
+      if(d2 < d1 - 1e-6)
+        return false;
+      return clindex[c1] < clindex[c2];
       });
     int at = kohrestrict;
     ld dist = hdist0(tC0(ggmatrix(allcells[at-1])));
