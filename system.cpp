@@ -180,7 +180,6 @@ EX void initgame() {
   if(firstland == laNone || firstland == laBarrier)
     firstland = laCrossroads;
 
-  if(firstland == laCrossroads5 && !tactic::on) firstland = laCrossroads2; // could not fit!
   if(firstland == laOceanWall) firstland = laOcean; 
   if(firstland == laHauntedWall) firstland = laGraveyard; 
   if(firstland == laMercuryRiver) firstland = laTerracotta;

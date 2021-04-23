@@ -326,6 +326,8 @@ EX void extendCR5(cell *c) {
       eLand nland = forbidden;
       for(int i=0; i<10 && (nland == forbidden || nland == forbidden2); i++)
         nland = getNewLand(laCrossroads5);
+      if(ls::single() && specialland == laCrossroads5)
+        nland = laCrossroads5;
       cw.at->barleft = forbidden2 = nland;
       landcount[nland]++;
       extendBarrier(cw.at);
@@ -731,7 +733,10 @@ EX void buildCrossroads2(cell *c) {
             oldleft = false;
             
         c->landparam = h;
-        buildBarrierStrong(c, i, oldleft);
+        if(ls::single())
+          buildBarrierStrong(c, i, oldleft, specialland);
+        else
+          buildBarrierStrong(c, i, oldleft);
         c->landparam = h;
         extendBarrier(c);
         }

@@ -2461,7 +2461,10 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         else {
           if(hyperstonesUnlocked() && hrand(25000) < min(PT(tkills(), 2000), 5000) && notDippingFor(itHyperstone))
             c->item = itHyperstone;
-          if(hrand_monster(4000) < items[itHyperstone] && !c->monst) {
+          int freq = 4000;
+          if(ls::single() && specialland == laCrossroads5)
+            freq = 250;
+          if(hrand_monster(freq) < items[itHyperstone] && !c->monst) {
             // only interesting monsters here!
             eMonster cm = crossroadsMonster();
             if(cm == moIvyRoot) buildIvy(c, 0, c->type);

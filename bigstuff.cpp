@@ -1461,9 +1461,36 @@ EX void build_walls(cell *c, cell *from) {
       buildBarrier(c, bd, laTerracotta); 
       return;
       }
+
+    if(ctof(c) && ls::single() && specialland == laCrossroads && hrand(I10000) < 5000) {
+      int bd = 2 + hrand(2) * 3;    
+      buildBarrier(c, bd, laCrossroads);
+      return;
+      }
+
+    if(ctof(c) && ls::single() && specialland == laCrossroads3) {
+      int bd = 2 + hrand(2) * 3;    
+      buildBarrier(c, bd, laCrossroads3);
+      return;
+      }
+
+    if(ctof(c) && ls::single() && specialland == laCrossroads5) {
+      int bd = 2 + hrand(2) * 3;    
+      buildBarrier(c, bd, laCrossroads5);
+      return;
+      }
+
+    if(ctof(c) && ls::single() && specialland == laCrossroads2 && false) {
+      int bd = 2 + hrand(2) * 3;
+      buildBarrier(c, bd, laCrossroads2);
+      return;
+      }
     }
   
-  if(ls::single()) return;
+  if(c->land == laCrossroads2 && BITRUNCATED)
+    buildCrossroads2(c);
+  
+  else if(ls::single()) return;
     
   if(geometry == gNormal && celldist(c) < 3 && !GOLDBERG) {
     if(top_land && c == cwt.at->master->move(3)->c7) {
@@ -1517,9 +1544,6 @@ EX void build_walls(cell *c, cell *from) {
     buildBarrierNowall(c, getNewLand(c->land));
   
   else if(!nice_walls_available()) ; // non-Nowall barriers not implemented yet in weird hyperbolic
-  
-  else if(c->land == laCrossroads2 && BITRUNCATED)
-    buildCrossroads2(c);
   
   #if CAP_FIELD
   else if(c->land == laPrairie && c->LHU.fi.walldist == 0 && !euclid && ls::nice_walls()) {

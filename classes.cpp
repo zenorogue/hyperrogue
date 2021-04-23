@@ -691,7 +691,7 @@ EX vector<landtacinfo> land_tac = {
   {laElementalWall, 10, 1}, {laTrollheim, 5, 2},
   {laPrairie, 5, 2}, {laBull, 5, 2}, {laTerracotta, 10, 1}, 
   
-  {laCrossroads, 10, 1}, {laCrossroads2, 10, 1}, {laCrossroads3, 10, 1}, {laCrossroads4, 10, 1}, 
+  {laCrossroads, 10, 1}, {laCrossroads2, 10, 1}, {laCrossroads3, 10, 1}, {laCrossroads4, 10, 1}, {laCrossroads5, 5, 2},
   
   {laCamelot, 1, 100},
   {laWildWest, 10, 1},

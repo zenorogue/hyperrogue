@@ -231,7 +231,7 @@ EX void countHyperstoneQuest(int& i1, int& i2) {
 
 EX bool hyperstonesUnlocked() {
   int i1, i2;
-  if(tactic::on && isCrossroads(specialland)) return true;
+  if(ls::single() && isCrossroads(specialland)) return true;
   countHyperstoneQuest(i1, i2);
   return i1 == i2;
   }
@@ -878,7 +878,7 @@ EX land_validity_t& land_validity(eLand l) {
     return not_in_chaos;
   
   // standard, non-PTM specific
-  if(l == laCrossroads5 && tactic::on)
+  if(l == laCrossroads5 && old_daily_id < 999 && tactic::on)
     return not_in_ptm;
     
   // standard non-PTM non-chaos specific
