@@ -50,7 +50,7 @@ namespace flocking {
 
   int N;
   
-  bool draw_lines = false;
+  bool draw_lines = false, draw_tails = false;
   
   int follow = 0;
   string follow_names[3] = {"nothing", "specific boid", "center of mass"};
@@ -73,6 +73,8 @@ namespace flocking {
   
   ld check_range = 2.5;
   
+  bool swarm;
+  
   char shape = 'b';
   
   vector<tuple<shiftpoint, shiftpoint, color_t> > lines;
@@ -89,7 +91,7 @@ namespace flocking {
   
   void simulate(int delta) {
     int iter = 0;
-    while(delta > precision && iter < 100) { 
+    while(delta > precision && iter < (swarm ? 10000 : 100)) { 
       simulate(precision); delta -= precision; 
       iter++;
       }      
@@ -109,8 +111,19 @@ namespace flocking {
       }
     
     lines.clear();
+    
+    if(swarm) for(int i=0; i<N; i++) {
+      vertexdata& vd = vdata[i];
+      auto m = vd.m;
+      
+      apply_parallel_transport(m->at, m->ori, xtangent(0.01)); // max_speed * d));
+      
+      fixmatrix(m->at);
 
-    parallelize(N, [&monsat, &d, &vels, &pats, &oris] (int a, int b) { for(int i=a; i<b; i++) {
+      virtualRebase(m);
+      }
+    
+    if(!swarm) parallelize(N, [&monsat, &d, &vels, &pats, &oris] (int a, int b) { for(int i=a; i<b; i++) {
       vertexdata& vd = vdata[i];
       auto m = vd.m;
       
@@ -223,7 +236,7 @@ namespace flocking {
       
       } return 0; });
       
-    for(int i=0; i<N; i++) {
+    if(!swarm) for(int i=0; i<N; i++) {
       vertexdata& vd = vdata[i];
       auto m = vd.m;
       // these two functions compute new base and at, based on pats[i]
@@ -310,7 +323,17 @@ namespace flocking {
     if(0) ;
     else if(argis("-flocking")) {
       PHASEFROM(2);
-      shift(); N = argi();
+      shift(); N = argi(); swarm = false;
+      init();
+      }
+    else if(argis("-swarming")) {
+      PHASEFROM(2);
+      shift(); N = argi(); swarm = true;
+      init();
+      }
+    else if(argis("-flocktails")) {
+      PHASEFROM(2);
+      draw_tails = true;
       init();
       }
     else if(argis("-cohf")) {
@@ -443,6 +466,8 @@ namespace flocking {
     dialog::add_action(runGeometryExperiments);
 
     dialog::addBoolItem_action("draw forces", draw_lines, 'l');
+
+    dialog::addBoolItem_action("draw tails", draw_tails, 't');
   
     dialog::addSelItem("follow", follow_names[follow], 'f');
     dialog::add_action([] () { follow++; follow %= 3; });
@@ -466,6 +491,17 @@ namespace flocking {
     v.push_back(named_dialog("flocking", show));
     }
 
+bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
+  if(draw_tails) {
+    int i = m->pid;
+    vertexdata& vd = vdata[i];
+    vid.linewidth *= 3;
+    queueline(V * m->at * C0, V * m->at * xpush0(-3), vd.cp.color2 & 0xFFFFFFF3F, 6);
+    vid.linewidth /= 3;
+    }
+  return false;
+  }
+  
   void init() {
     if(!bounded) {
       addMessage("Flocking simulation needs a bounded space.");
@@ -476,6 +512,7 @@ namespace flocking {
     rv_hook(shmup::hooks_turn, 100, turn);
     rv_hook(hooks_frame, 100, flock_marker);
     rv_hook(hooks_o_key, 80, o_key);
+    rv_hook(shmup::hooks_draw, 90, drawVertex);
     
     vdata.resize(N);
     
@@ -496,20 +533,39 @@ namespace flocking {
           }
         }
       }
+    
+    ld angle;
+    if(swarm) angle = hrand(1000);
 
     printf("setting up...\n");
     for(int i=0; i<N; i++) {
       vertexdata& vd = vdata[i];
       // set initial base and at to random cell and random position there 
-      createViz(i, v[hrand(isize(v))], Id);
+      
+      
+      createViz(i, v[swarm ? 0 : hrand(isize(v))], Id);
       vd.m->pat.T = Id;
-      rotate_object(vd.m->pat.T, vd.m->ori, random_spin());
-      apply_parallel_transport(vd.m->pat.T, vd.m->ori, xtangent(hrandf() / 2));
-      rotate_object(vd.m->pat.T, vd.m->ori, random_spin());
+      
+      if(swarm) {
+        rotate_object(vd.m->pat.T, vd.m->ori, spin(angle));
+        apply_parallel_transport(vd.m->pat.T, vd.m->ori, xtangent(i * -0.015));
+        }
+      else {
+        rotate_object(vd.m->pat.T, vd.m->ori, random_spin());
+        apply_parallel_transport(vd.m->pat.T, vd.m->ori, xtangent(hrandf() / 2));
+        rotate_object(vd.m->pat.T, vd.m->ori, random_spin());
+        }
       
       vd.name = its(i+1);
       vd.cp = dftcolor;
-      vd.cp.color2 = ((hrand(0x1000000) << 8) + 0xFF) | 0x808080FF;
+      
+      if(swarm)
+        vd.cp.color2 = 
+          (rainbow_color(0.5, i * 1. / N) << 8) | 0xFF;
+      else
+        vd.cp.color2 = 
+          ((hrand(0x1000000) << 8) + 0xFF) | 0x808080FF;
+
       vd.cp.shade = shape;
       vd.m->vel = ini_speed;
       vd.m->at = vd.m->pat.T;
