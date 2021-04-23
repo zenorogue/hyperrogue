@@ -1548,7 +1548,7 @@ EX void build_walls(cell *c, cell *from) {
 
 EX void start_camelot(cell *c) {
   int rtr = newRoundTableRadius();
-  heptagon *alt = createAlternateMap(c, rtr+(hyperbolic && WDIM == 3 ? 11 : 14), hsOrigin);
+  heptagon *alt = createAlternateMap(c, ls::single() ? 2 : rtr+(hyperbolic && WDIM == 3 ? 11 : 14), ls::single() ? hsA : hsOrigin);
   if(alt) {
     alt->emeraldval = rtr;
     alt->fiftyval = c->land;

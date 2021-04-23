@@ -2505,7 +2505,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laCamelot:
       // generated mostly in moreBigStuff
-      if(tactic::on && d == 0) {
+      if(ls::single() && d == 0) {
         int r = roundTableRadius(c);
         if(r > 28 + 3 * items[itHolyGrail])
           items[itHolyGrail]++;
