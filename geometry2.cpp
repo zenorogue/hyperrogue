@@ -799,7 +799,7 @@ vector<hyperpoint> hrmap::get_vertices(cell* c) {
   return res;
   }
 
-map<cell*, map<cell*, vector<transmatrix>>> brm_structure;
+EX map<cell*, map<cell*, vector<transmatrix>>> brm_structure;
 
 EX void generate_brm(cell *c1) {
   set<unsigned> visited_by_matrix;
