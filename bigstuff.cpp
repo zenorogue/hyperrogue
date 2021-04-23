@@ -1365,7 +1365,6 @@ EX int wallchance(cell *c, bool deepOcean) {
     l == laCaribbean ? 500 :
     (l == laWarpSea || l == laWarpCoast) ? 500 :
     l == laStorms ? 250 :
-    l == laCanvas ? 0 :
     l == laHaunted ? 0 :
     (l == laGraveyard && !deepOcean) ? 0 :
     // (l == laGraveyard && items[itBone] >= 10) ? 120 :
@@ -1637,7 +1636,7 @@ EX void build_horocycles(cell *c, cell *from) {
     if(c->land == laCaribbean && horo_ok() && ctof(c) && !c->master->alt)
       createAlternateMap(c, horo_gen_distance(), hsA);
 
-    if(c->land == laCanvas && horo_ok() && ctof(c) && !c->master->alt)
+    if(c->land == laCanvas && horo_ok() && ctof(c) && !c->master->alt && ls::any_order())
       createAlternateMap(c, horo_gen_distance(), hsA);
 
     if(c->land == laPalace && ctof(c) && !princess::generating && !shmup::on && multi::players == 1 && horo_ok() && !weirdhyperbolic &&
@@ -1814,7 +1813,7 @@ EX void moreBigStuff(cell *c) {
     if(d <= PRADIUS1) currentmap->generateAlts(c->master);
     }
 
-  if(c->land == laCanvas && !eubinary && c->master->alt && !quotient) 
+  if(c->land == laCanvas && !eubinary && c->master->alt && !quotient && (ls::single() || celldistAlt(c) <= 0))
     currentmap->generateAlts(c->master);
 
   if(c->land == laStorms)
