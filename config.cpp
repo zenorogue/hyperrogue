@@ -857,7 +857,7 @@ EX void initConfig() {
     #endif
     }, "stereo mode", 'm');
 
-  addsaver(vid.plevel_factor, "plevel_factor", 0.7);
+  param_f(vid.plevel_factor, "plevel_factor", 0.7);
 
   #if CAP_GP
   addsaver(gp::param.first, "goldberg-x", gp::param.first);
