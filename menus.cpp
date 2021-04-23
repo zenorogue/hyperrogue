@@ -675,7 +675,18 @@ EX void mode_higlights() {
   }  
 
 EX void menuitem_land_structure(char key) {
-  dialog::addSelItem(XLAT("land structure"), land_structure_name(true), key);
+  eLandStructure ls =
+    bounded ? lsSingle :
+    (tactic::on || princess::challenge) ? lsSingle :
+    yendor::on ? yendor::get_land_structure() :
+    specialland == laCanvas ? lsSingle :
+    nice_walls_available() ? lsNiceWalls :
+    lsNoWalls;
+
+  if(ls == land_structure)
+    dialog::addBoolItem(XLAT("land structure"), false, key);
+  else
+    dialog::addSelItem(XLAT("land structure"), land_structure_name(true), key);
   dialog::add_action_push(show_chaos);
   }
   
