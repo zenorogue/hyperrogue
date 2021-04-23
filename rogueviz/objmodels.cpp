@@ -159,24 +159,34 @@ void model::load_obj(model_data& md) {
         else if(s == "f") {
           struct vertexinfo { int f, t, n; };
           array<vertexinfo, 3> vis;
-          vector<hyperpoint> hys;
-          vector<hyperpoint> tot;
           char bar;
-          for(int i=0; i<3; i++) {
-            vis[i].f = vis[i].t = vis[i].n = 1;
-            scan(fs, vis[i].f);
+          
+          auto get_vi = [&] (vertexinfo& vi) {
+            vi.f = vi.t = vi.n = 1;
+            scan(fs, vi.f);
             if(peek(fs) == '/') {
               scan(fs, bar);
-              if(peek(fs) != '/') scan(fs, vis[i].t);
+              if(peek(fs) != '/') scan(fs, vi.t);
               }
             if(peek(fs) == '/') {
               scan(fs, bar);
-              scan(fs, vis[i].n);
+              scan(fs, vi.n);
               }
 
-            vis[i].f--; vis[i].t--; vis[i].n--;
-            if(vis[i].f < 0 || vis[i].f >= isize(vertices)) 
+            vi.f--; vi.t--; vi.n--;
+            if(vi.f < 0 || vi.f >= isize(vertices)) 
               throw hr_exception("illegal ID");
+            };
+          
+          get_vi(vis[0]);
+          get_vi(vis[1]);
+          next_triangle:
+          get_vi(vis[2]);
+
+          vector<hyperpoint> hys;
+          vector<hyperpoint> tot;
+
+          for(int i=0; i<3; i++) {            
             hys.push_back(vertices[vis[i].f]);
             tot.push_back(textured ? tvertices[vis[i].t] : point3(0,0,0));
             }
@@ -219,6 +229,10 @@ void model::load_obj(model_data& md) {
               tri(a+1, b+1);
               }
             }
+          
+          while(among(peek(fs), ' ', '\r', '\n')) scan(fs, bar);
+          if(isdigit(peek(fs))) { vis[1] = vis[2]; println(hlog, "next triangle"); goto next_triangle; }
+          println(hlog, "last triangle");
           }
         else if(s == "l") {
           int a, b;
