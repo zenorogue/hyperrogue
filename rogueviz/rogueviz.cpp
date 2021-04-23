@@ -602,8 +602,8 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
     bool hilite = false;
     if(vdata[oi].special && vdata[oj].special && specialmark) hilite = true;
     else if(svg::in || inHighQual) hilite = false;
-    else if(vd1.m == shmup::lmousetarget) hilite = true;
-    else if(vd2.m == shmup::lmousetarget) hilite = true;
+    else if(vd1.m == shmup::mousetarget) hilite = true;
+    else if(vd2.m == shmup::mousetarget) hilite = true;
     else if(oi == lid || oj == lid) hilite = true;
 
     if(ei->weight < (hilite ? ei->type->visible_from_hi : ei->type->visible_from)) continue;
