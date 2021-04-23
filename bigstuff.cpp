@@ -1436,6 +1436,12 @@ EX bool nice_walls_available() {
   return (geometry == gNormal && (PURE || BITRUNCATED)) || (geometry == gEuclid && !(INVERSE | IRREGULAR));
   }
 
+EX void build_barrier_good(cell *c, eLand l IS(laNone)) {
+  int bd = 2 + hrand(2) * 3;    
+  buildBarrier(c, bd, l); 
+  return;
+  }
+
 EX void build_walls(cell *c, cell *from) {
   bool deepOcean = deep_ocean_at(c, from);
   
@@ -1451,39 +1457,35 @@ EX void build_walls(cell *c, cell *from) {
   
   if(nice_walls_available()) {
     if(ctof(c) && c->land == laMirror && !yendor::generating && hrand(I10000) < 6000) {
-      int bd = 2 + hrand(2) * 3;    
-      buildBarrier(c, bd, laMirrored); 
+      build_barrier_good(c, laMirrored); 
       return;
       }
   
     if(ctof(c) && c->land == laTerracotta && hrand(I10000) < 200) {
-      int bd = 2 + hrand(2) * 3;    
-      buildBarrier(c, bd, laTerracotta); 
+      build_barrier_good(c, laTerracotta); 
       return;
       }
 
-    if(ctof(c) && ls::single() && specialland == laCrossroads && hrand(I10000) < 5000) {
-      int bd = 2 + hrand(2) * 3;    
-      buildBarrier(c, bd, laCrossroads);
-      return;
-      }
+    if(ctof(c) && ls::single()) {
+      if(specialland == laCrossroads && hrand(I10000) < 5000) {
+        build_barrier_good(c, laCrossroads);
+        return;
+        }
 
-    if(ctof(c) && ls::single() && specialland == laCrossroads3) {
-      int bd = 2 + hrand(2) * 3;    
-      buildBarrier(c, bd, laCrossroads3);
-      return;
-      }
+      if(specialland == laCrossroads3) {
+        build_barrier_good(c, laCrossroads3);
+        return;
+        }
 
-    if(ctof(c) && ls::single() && specialland == laCrossroads5) {
-      int bd = 2 + hrand(2) * 3;    
-      buildBarrier(c, bd, laCrossroads5);
-      return;
-      }
+      if(specialland == laCrossroads5) {
+        build_barrier_good(c, laCrossroads5);
+        return;
+        }
 
-    if(ctof(c) && ls::single() && specialland == laCrossroads2 && false) {
-      int bd = 2 + hrand(2) * 3;
-      buildBarrier(c, bd, laCrossroads2);
-      return;
+      if(c->land == laCrossroads && isEquidLand(specialland)) {
+        build_barrier_good(c, specialland);
+        return;
+        }
       }
     }
   
@@ -1503,8 +1505,7 @@ EX void build_walls(cell *c, cell *from) {
   
   else if(ls::wall_chaos()) {
     if(good_for_wall(c) && hrand(10000) < 9000 && c->land && !inmirror(c)) {
-      int bd = 2 + hrand(2) * 3;    
-      buildBarrier(c, bd); 
+      build_barrier_good(c); 
       return;
       }
     }
@@ -1559,15 +1560,7 @@ EX void build_walls(cell *c, cell *from) {
   #endif
 
   else if(ctof(c) && c->land && ls::nice_walls() && hrand(I10000) < wallchance(c, deepOcean))
-  {
-    
-    int bd = 2 + hrand(2) * 3;
-    
-    buildBarrier(c, bd); 
-
-    /* int bd = 2;      
-    buildBarrier4(c, bd, 0, getNewLand(c->land), c->land); */
-    }
+    build_barrier_good(c);
   }
 
 EX void start_camelot(cell *c) {
