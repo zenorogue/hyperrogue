@@ -75,6 +75,8 @@ namespace rogueviz {
     texture::texture_data tdata;
     vector<hyperpoint> vertices;
     };
+  
+  extern int brm_limit;
 
   struct colorpair {
     color_t color1, color2;
