@@ -1138,6 +1138,20 @@ EX void field_quotient_3d(int p, unsigned hash) {
   println(hlog, "set prime = ", currfp.Prime);
   }
 
+EX void field_quotient_2d(int group, int id, int triplet) {
+  using namespace fieldpattern;
+  current_extra = group;
+
+  auto& gxcur = fgeomextras[current_extra];
+  while(id >= isize(gxcur.primes)) nextPrime(gxcur);
+
+  fgeomextras[current_extra].current_prime_id = id;
+  if(triplet != -1)
+    triplet_id = triplet;
+  enableFieldChange();
+  set_geometry(gFieldQuotient);
+  }
+
 int read_geom_args() {
   using namespace arg;
   if(0) ;
@@ -1154,15 +1168,7 @@ int read_geom_args() {
     stop_game_and_switch_mode(rg::nothing);
     int a, b;
     shift(); sscanf(argcs(), "%d,%d", &a, &b);
-    using namespace fieldpattern;
-    current_extra = a;
-
-    auto& gxcur = fgeomextras[current_extra];
-    while(b >= isize(gxcur.primes)) nextPrime(gxcur);
-
-    fgeomextras[current_extra].current_prime_id = b;
-    enableFieldChange();
-    set_geometry(gFieldQuotient);
+    field_quotient_2d(a, b, -1);
     }
   else if(argis("-triplet")) {
     stop_game();

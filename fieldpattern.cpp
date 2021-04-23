@@ -1366,10 +1366,13 @@ EX void enableFieldChange() {
   fieldpattern::quotient_field_changed = true;
   nextPrimes(gxcur);
   dynamicval<eGeometry> g(geometry, gFieldQuotient);
+  ginf[geometry].g = ginf[gxcur.base].g;
   ginf[geometry].sides = ginf[gxcur.base].sides;
   ginf[geometry].vertex = ginf[gxcur.base].vertex;
   ginf[geometry].distlimit = ginf[gxcur.base].distlimit;
   ginf[geometry].tiling_name = ginf[gxcur.base].tiling_name;
+  ginf[geometry].default_variation = ginf[gxcur.base].default_variation;
+  ginf[geometry].flags = qFIELD | qANYQ | qBOUNDED;
   fieldpattern::current_quotient_field.init(gxcur.primes[gxcur.current_prime_id].p);
   }
 
