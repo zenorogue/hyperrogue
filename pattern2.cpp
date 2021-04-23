@@ -2611,10 +2611,18 @@ EX namespace linepatterns {
   
   #define ATCENTER(T) \
     [] (linepattern *lp) { auto& col = lp->color; shiftmatrix V = gmatrix[cwt.at]; T}
-      
+  
+  /** for functions drawing edges, ensure that the edge is drawn only in one direction */  
+  template<class T> bool way(T*c, int i) {
+    T* c2 = c->move(i);
+    if(c == c2)
+      return i <= c->c.spin(i);
+    return c2 > c;
+    }
+
   linepattern patDual("dual grid", 0xFFFFFF00, always_available,
     ALLCELLS(
-      forCellIdEx(c2, i, c) if(c2 > c) {
+      forCellIdEx(c2, i, c) if(way(c,i)) {
         gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
         }
       )
@@ -2622,14 +2630,14 @@ EX namespace linepatterns {
   
   linepattern patHepta("heptagonal grid", 0x0000C000, always_available,
     ALLCELLS(
-      forCellIdEx(c2, i, c) if(c2 > c) if(pseudohept(c) == pseudohept(c2)) 
+      forCellIdEx(c2, i, c) if(way(c,i)) if(pseudohept(c) == pseudohept(c2)) 
         gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
       )
     );
   
   linepattern patRhomb("rhombic tesselation", 0x0000C000, always_available,
     ALLCELLS(
-      forCellIdEx(c2, i, c) if(c2 > c) if(pseudohept(c) != pseudohept(c2)) 
+      forCellIdEx(c2, i, c) if(way(c,i)) if(pseudohept(c) != pseudohept(c2)) 
         gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
       )
     );
@@ -2646,7 +2654,7 @@ EX namespace linepatterns {
   linepattern patNormal("normal tesselation", 0x0000C000, always_available, 
     ALLCELLS(
       for(int t=0; t<c->type; t++)
-        if(c->move(t) && c->move(t) < c)
+        if(c->move(t) && way(c,t))
         gridline(V, get_corner_position(c, t),
                   get_corner_position(c, (t+1)%c->type),
                   col, 1 + vid.linequality);
@@ -2665,7 +2673,7 @@ EX namespace linepatterns {
   linepattern patBigRings("big triangles: rings", 0x00606000, cheating,
     ALLCELLS(
       if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
-        if(c->master->move(i) && c->master->move(i) < c->master && c->master->move(i)->dm4 == c->master->dm4)
+        if(c->master->move(i) && way(c->master, i) && c->master->move(i)->dm4 == c->master->dm4)
           gridlinef(V, C0, xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), cgi.tessf), col, 2 + vid.linequality);
       )
     );
@@ -2798,7 +2806,7 @@ EX namespace linepatterns {
     );
   linepattern patGoldbergSep("Goldberg", 0xFFFF0000, [] { return GOLDBERG || INVERSE; },
     ALLCELLS(
-      forCellIdEx(c2, i, c) if(c2->master != c->master)
+      forCellIdEx(c2, i, c) if(c2->master != c->master && way(c, i))
         gridlinef(V, C0, V*currentmap->adj(c, i), C0, 
           col,
           1 + vid.linequality);
@@ -2806,7 +2814,7 @@ EX namespace linepatterns {
     );
   linepattern patArcm("Archimedean", 0xFFFF0000, [] { return arcm::in(); },
     ALLCELLS(
-      if(!pseudohept(c)) forCellIdEx(c2, i, c) if(c < c2 && !pseudohept(c2)) 
+      if(!pseudohept(c)) forCellIdEx(c2, i, c) if(way(c, i) && !pseudohept(c2)) 
         gridlinef(V, C0, V*currentmap->adj(c, i), C0, 
           col,
           1 + vid.linequality);
