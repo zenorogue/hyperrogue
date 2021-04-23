@@ -849,7 +849,7 @@ EX bool buildBarrierNowall(cell *c, eLand l2, int forced_dir IS(NODIR)) {
   vector<int> ds = hrandom_permutation(c->type);
 
   for(int i=0; i<c->type; i++) {
-    int d = forced_dir != NODIR ? forced_dir : (valence()>3 && !INVERSE) ? (2+(i&1)) : ds[i];
+    int d = forced_dir != NODIR ? forced_dir : (valence()>3 && c->type > 3 && !INVERSE) ? (2+(i&1)) : ds[i];
 /*    if(warpv && GOLDBERG) {
       d = hrand(c->type); */
     if(warpv && c->move(d) && c->move(d)->mpdist < c->mpdist) continue;
