@@ -1312,10 +1312,12 @@ EX void apply() {
   #if CAP_RUG
   if(rug::rugged) {
     if(rug_rotation1) {
-      rug::rugView = cspin(1, 2, -rug_angle * degree) * cspin(0, 2, rug_rotation1 * 2 * M_PI * t / period) * cspin(1, 2, rug_angle * degree) * rug::rugView;
+      rug::using_rugview rv;
+      rotate_view(cspin(1, 2, -rug_angle * degree) * cspin(0, 2, rug_rotation1 * 2 * M_PI * t / period) * cspin(1, 2, rug_angle * degree));
       }
     if(rug_rotation2) {
-      rug::rugView = rug::rugView * cspin(0, 1, rug_rotation2 * 2 * M_PI * t / period);
+      rug::using_rugview rv;
+      View = View * cspin(0, 1, rug_rotation2 * 2 * M_PI * t / period);
       }
     if(rug_forward) 
       animate_rug_movement(rug_forward * t / period);
