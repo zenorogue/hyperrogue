@@ -160,6 +160,8 @@ EX namespace brownian {
   EX void build(cell *c, int d) {
   
     if(!hyperbolic) c->wall = waNone, c->landparam = 256;
+    
+    if(c->landparam == 0 && ls::single()) c->land = laOcean;
 
     ONEMPTY {
       if(hrand(10000) < min(250, 100 + 2 * PT(kills[moAcidBird] + kills[moBrownBug], 50)) * (25 + min(items[itBrownian], 100)) / 25 && c->landparam >= 4 && c->landparam < 24)
