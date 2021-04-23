@@ -167,6 +167,12 @@ void edit_segment(int aid) {
     current_segment = nullptr;
     popScreen();
     });
+  dialog::addItem("swap with the last segment", 'x');
+  dialog::add_action([aid] {
+    swap(anims.back(), anims[aid]);
+    current_segment = nullptr;
+    popScreen();
+    });
   dialog::addBack();
   dialog::display();
   }
@@ -242,6 +248,14 @@ void edit_step(animation& anim, int id) {
     start_segment();
     popScreen();
     });
+  if(&anim == current_segment) {
+    dialog::addItem("insert the current position before this", 'j');
+    dialog::add_action([&anim, id] {
+      anim.frames.insert(anim.frames.begin() + id, frame{gentitle(), centerover, View, current_position, ortho_inverse(NLP), 1, 1, 0});
+      popScreen();
+      });
+    }
+
   dialog::addBack();
   dialog::display();
   }
@@ -281,8 +295,7 @@ void show() {
           dist = fts(d) + "au";
         else {
           transmatrix T = f.sView * iso_inverse(View);
-          println(hlog, "T = ", T);
-          dist = fts(acos_clamp(T[2][2])) + "°/" + fts(acos_clamp(T[1][1])) + "°";
+          dist = fts(kz(acos_clamp(T[2][2]))) + "°/" + fts(kz(acos_clamp(T[1][1]))) + "°";
           }
         }
         
@@ -362,6 +375,27 @@ void show() {
     };
   }
 
+void prepare_for_interpolation(hyperpoint& h) {
+  if(prod) {
+    h[3] = zlevel(h);
+    ld t = exp(h[3]);
+    h[0] /= t;
+    h[1] /= t;
+    h[2] /= t;
+    }
+  }
+
+void after_interpolation(hyperpoint& h) {
+  if(prod) {
+    ld v = exp(h[3]) / sqrt(abs(intval(h, Hypc)));
+    h[0] *= v;
+    h[1] *= v;
+    h[2] *= v;
+    }
+  else
+    h = normalize(h);
+  }
+
 void handle_animation(ld t) {
   ld total_total = 0;
   
@@ -405,7 +439,7 @@ void handle_animation(ld t) {
   hyperpoint pts[3];
   
   for(int j=0; j<3; j++) {
-    for(int i=0; i<MDIM; i++) {
+    for(int i=0; i<4; i++) {
       vector<ld> values;
       for(auto& f: anim.frames) {
         hyperpoint h;
@@ -417,6 +451,7 @@ void handle_animation(ld t) {
         if(j == 2) {
           h = tC0(parallel_transport(f.V, f.ori, ctangent(1, -f.up_distance)));
           }
+        prepare_for_interpolation(h);
         values.push_back(h[i]);
         }
       
@@ -433,7 +468,7 @@ void handle_animation(ld t) {
       
       pts[j][i] = values[0];
       }
-    pts[j] = normalize(pts[j]);
+    after_interpolation(pts[j]);
     }
   
   transmatrix V = View;
