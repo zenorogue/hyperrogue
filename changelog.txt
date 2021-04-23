@@ -4297,3 +4297,18 @@ General:
 - knight names updated
 - new achievement Lovasz conjecture (see "highlights & achievements")
 - don't reopen the window needlessly
+
+2021-04-23 21:04 Update 11.4i:
+
+Fixed some issues with the "single land" mode (including PTM):
+- Camelot was not infinite
+- Crossroads (all types) generated correctly, also single-land Crossroads V is now available
+- fixed the Warped Coast
+- fixed the Elemental Planes
+- fixed the equidistant-based lands
+- fixed the Brown Islands
+- 'land structure' selector now displays OFF if the default structure is selected
+- fixed a crash trying to generate nowalls e.g. in {3,7}
+- fixed the Highlights & Achievements menu to set the correct land structure
+
+Also fixed the rug animation in the animations mode
