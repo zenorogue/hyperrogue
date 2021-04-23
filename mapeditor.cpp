@@ -2374,7 +2374,7 @@ EX namespace mapeditor {
       if(sym == SDLK_F5) {
         dialog::push_confirm_dialog([] {
           stop_game();
-          firstland = specialland = laCanvas;
+          enable_canvas();
           canvas_default_wall = waInvisibleFloor;
           patterns::whichCanvas = 'g';
           patterns::canvasback = 0xFFFFFF;

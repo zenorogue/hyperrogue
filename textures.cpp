@@ -1326,7 +1326,7 @@ EX void showMenu() {
         pushScreen(patterns::showPrePattern);
       else {
         stop_game();
-        firstland = specialland = laCanvas;
+        enable_canvas();
         patterns::whichCanvas = 'g';
         patterns::canvasback = 0xFFFFFF;
         start_game();

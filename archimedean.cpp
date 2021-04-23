@@ -1201,7 +1201,7 @@ EX void enable(archimedean_tiling& arct) {
 function<void()> setcanvas(char c) {
   return [c] () {
     stop_game();
-    firstland = specialland = laCanvas;
+    enable_canvas();
     patterns::whichCanvas = c;
     start_game();
     };

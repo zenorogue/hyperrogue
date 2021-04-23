@@ -17,6 +17,12 @@ enum cpatterntype {
   };
 #endif
 
+EX void enable_canvas() {
+  firstland = specialland = laCanvas;
+  randomPatternsMode = false;
+  land_structure = lsSingle;
+  }
+
 EX int ctof(cell *c) {
   #if CAP_IRR
   if(IRREGULAR) return irr::ctof(c);
@@ -2057,8 +2063,7 @@ EX namespace patterns {
             stop_game();
             whichCanvas = 'g';
             canvasback = c >> 8;
-            firstland = specialland = laCanvas;
-            randomPatternsMode = false;
+            enable_canvas();
             start_game();
             }
           else {
@@ -2079,8 +2084,7 @@ EX namespace patterns {
             break;
             }
         if(instant) {
-          firstland = specialland = laCanvas; 
-          randomPatternsMode = false;
+          enable_canvas();
           start_game();
           }
         }
@@ -2115,8 +2119,7 @@ EX namespace patterns {
           if(instant) stop_game();
           whichCanvas = 'f';
           if(instant) {
-            firstland = specialland = laCanvas; 
-            randomPatternsMode = false;
+            enable_canvas();
             start_game();
             }
           };
@@ -2128,8 +2131,7 @@ EX namespace patterns {
         whichCanvas = uni;
         subcanvas = rand();
         if(instant) {
-          firstland = specialland = laCanvas; 
-          randomPatternsMode = false;
+          enable_canvas();
           start_game();
           }
         if(uni == 'r') 
@@ -3107,7 +3109,7 @@ int read_pattern_args() {
   else if(argis("-canvas")) {
     PHASEFROM(2);
     stop_game();
-    firstland = specialland = laCanvas;
+    enable_canvas();
     shift();
     if(args() == "i") canvas_default_wall = waInvisibleFloor;
     else if(args().size() == 1) patterns::whichCanvas = args()[0];
@@ -3117,14 +3119,14 @@ int read_pattern_args() {
   else if(argis("-canvas-random")) {
     PHASEFROM(2);
     stop_game();
-    firstland = specialland = laCanvas;
+    enable_canvas();
     patterns::whichCanvas = 'r';
     shift(); patterns::rwalls = argi();
     }
   else if(argis("-cformula")) {
     PHASEFROM(2);
     stop_game();
-    firstland = specialland = laCanvas;
+    enable_canvas();
     patterns::whichCanvas = 'f';
     shift(); patterns::color_formula = args();
     }

@@ -64,11 +64,11 @@ void launch(int seed, int elimit, int hlimit) {
   dual::enable();
   stop_game();
   dual::switch_to(0);
-  specialland = firstland = laCanvas;
+  enable_canvas();
   canvas_default_wall = waSea;
   pconf.scale = .5;
   dual::switch_to(1);
-  specialland = firstland = laCanvas;
+  enable_canvas();
   shrand(seed);
   start_game();
   in = true;

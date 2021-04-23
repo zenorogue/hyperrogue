@@ -119,7 +119,7 @@ void ensure_geometry(eGeometryClass c) {
     canvas_default_wall = waInvisibleFloor;
     patterns::whichCanvas = 'g';
     patterns::canvasback = 0xFFFFFF;
-    firstland = specialland = laCanvas;
+    enable_canvas();
     }
   start_game();
   }

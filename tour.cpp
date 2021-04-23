@@ -110,6 +110,9 @@ EX void setCanvas(presmode mode, char canv) {
     slide_backup(patterns::whichCanvas, canv);
     slide_backup(firstland, laCanvas);
     slide_backup(specialland, laCanvas);
+    slide_backup(land_structure);
+    slide_backup(randomPatternsMode);
+    enable_canvas();
     start_game();
     resetview();
     }

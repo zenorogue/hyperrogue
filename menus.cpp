@@ -977,7 +977,7 @@ EX void showStartMenu() {
       pushScreen(texture::showMenu);
       resetModes('c');
       stop_game();
-      firstland = specialland = laCanvas;
+      enable_canvas();
       cheater = true;
       patterns::canvasback = 0xFFFFFF;
       mapeditor::drawplayer = false;

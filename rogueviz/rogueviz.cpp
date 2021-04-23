@@ -899,11 +899,11 @@ void init(flagtype _vizflags) {
 #if !ISWEB
   mapeditor::drawplayer = false;
   stop_game();
-  firstland = specialland = laCanvas;
+  enable_canvas();
   restart_game(shmup::on ? rg::shmup : rg::nothing);
 #else
   stop_game();
-  firstland = specialland = laCanvas;
+  enable_canvas();
   restart_game(rg::nothing);
 #endif
   autocheat = true;
