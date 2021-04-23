@@ -2952,7 +2952,11 @@ EX void set_view(hyperpoint camera, hyperpoint forward, hyperpoint upward) {
   
   if(det(rotator) < 0) rotator[0] = -rotator[0];
   
-  View = rotator * iso_inverse(rgpushxto0(camera));
+  View = iso_inverse(rgpushxto0(camera));
+  if(prod)
+    NLP = rotator;
+  else
+    View = rotator * View;
   }
 
 }
