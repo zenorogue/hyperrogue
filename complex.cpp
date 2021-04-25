@@ -835,35 +835,29 @@ EX namespace clearing {
     }
   
   int plantdir(cell *c) {
-    if(!quotient) {
-      currentmap->generateAlts(c->master);
-      for(int i=0; i<S7; i++)
-        currentmap->generateAlts(c->master->move(i));
-      }
+    if(have_alt(c))
+      gen_alt_around(c);
     int d = celldistAlt(c);
     
     if(PURE) {
-      for(int i=0; i<S7; i++) {
-        cell *c2 = createMov(c, i);
+      forCellIdCM(c2, i, c) {
         if(!pseudohept(c2) && celldistAlt(c2) == d-1)
           return i;
         }
-      for(int i=0; i<S7; i++) {
-        cell *c2 = createMov(c, i);
+      forCellIdCM(c2, i, c) {
         if(celldistAlt(c2) == d-1)
-          return (i+1) % S7;
+          return geometry == gBinary4 ? i : (i+1) % c->type;
         }
       }
 
-    for(int i=1; i<S6; i+=2) {
-      cell *c2 = createMov(c, i);
-      if(celldistAlt(c2) == d-1)
+    forCellIdCM(c2, i, c) {
+      if(!pseudohept(c2) && celldistAlt(c2) == d-1)
         return i;
       }
 
     int quseful = 0, tuseful = 0, tuseful2 = 0;
-    for(int i=1; i<S6; i+=2) {
-      cell *c2 = c->move(i);
+
+    forCellIdCM(c2, i, c) if(!pseudohept(c2)) {
       if(celldistAlt(c2) == d) {
         bool useful = false;
         for(int j=1; j<S6; j++) {
@@ -882,7 +876,7 @@ EX namespace clearing {
       if(tuseful == (1<<1)+(1<<3)) i = 1;
       if(tuseful == (1<<5)+(1<<7)) i = 5;
       if(tuseful == (1<<7)+(1<<1)) i = 7;
-      if((d & 7) < 4) i = (i+2) % S6;
+      if((d & 7) < 4) i = (i+2) % c->type;
       return i;
       }
     printf("error in plantdir\n");
@@ -894,10 +888,6 @@ EX namespace clearing {
   vector<cell*> rpath;
     
   EX void generate(cell *c) {
-    if(sphere) return;    
-    if(NONSTDVAR) return;
-    if(quotient) return;
-    
     if(euclid) {
       if(quotient) return; // fix cylinder
       if(pseudohept(c)) return;
@@ -917,10 +907,11 @@ EX namespace clearing {
       return;
       }
     
+    if(!eubinary && !horo_ok()) return;
     // cell *oc = c;
-    if(!euclid) currentmap->generateAlts(c->master);
+    gen_alt(c);
     if(pseudohept(c)) return;
-    heptagon *a = euclid ? NULL : c->master->alt->alt;
+    heptagon *a = eubinary ? NULL : c->master->alt->alt;
     clearingdata& bd(bpdata[a]);
     if(!bd.root) { bd.root = c; bd.dist = 8; bd.buggy = false; }
     if(bd.buggy) return;

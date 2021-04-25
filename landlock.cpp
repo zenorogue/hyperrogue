@@ -965,7 +965,7 @@ EX land_validity_t& land_validity(eLand l) {
     return not_in_chaos;
   
   if(l == laClearing)
-    if(!(stdeucx || a38 || (a45 && BITRUNCATED) || (a47 && BITRUNCATED)) || NONSTDVAR)
+    if(!(stdeucx || geometry == gBinaryTiling || a38 || (a45 && BITRUNCATED) || (a47 && BITRUNCATED)) || NONSTDVAR)
     if(!bounded)
       return not_implemented;
 
