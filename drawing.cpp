@@ -2674,7 +2674,7 @@ EX void write_in_space(const shiftmatrix& V, int fsize, double size, const strin
   }
 
 EX void queuestr(const shiftmatrix& V, double size, const string& chr, color_t col, int frame IS(0), int align IS(8)) {
-  if(vrhr::active() || true) {
+  if(vid.usingGL) {
     shiftmatrix V1 ;
     if(GDIM == 3) 
       V1 = face_the_player(V);
