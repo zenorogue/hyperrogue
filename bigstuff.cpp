@@ -1643,7 +1643,7 @@ EX void build_horocycles(cell *c, cell *from) {
 
   if(!ls::any_order() && !ls::single()) return;
   
-  if(ls::single() && !among(specialland, laTemple, laMountain, laClearing, laStorms, laWhirlpool, laCaribbean, laCanvas, laPrincessQuest, laCamelot))
+  if(ls::single() && !among(specialland, laTemple, laMountain, laClearing, laStorms, laWhirlpool, laCaribbean, laCanvas, laPalace, laPrincessQuest, laCamelot))
     return;
   
     // buildbigstuff
