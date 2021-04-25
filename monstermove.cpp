@@ -326,6 +326,10 @@ EX void moveMonster(const movei& mi) {
     attackMonster(ct, AF_SWORD_INTO | AF_MSG, moPlayer);
     achievement_gain_once("GOSWORD");
     }
+
+  if(ct->mpdist == 7 && cf->mpdist > 7) {
+    playSeenSound(ct);
+    }
   }
 
 EX bool cannotGo(eMonster m, cell *c) {
