@@ -691,7 +691,7 @@ EX void menuitem_land_structure(char key) {
     nice_walls_available() ? lsNiceWalls :
     lsNoWalls;
 
-  if(ls == land_structure)
+  if(ls == land_structure && !ineligible_starting_land)
     dialog::addBoolItem(XLAT("land structure"), false, key);
   else
     dialog::addSelItem(XLAT("land structure"), land_structure_name(true), key);
