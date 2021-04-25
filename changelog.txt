@@ -4311,4 +4311,9 @@ Fixed some issues with the "single land" mode (including PTM):
 - fixed a crash trying to generate nowalls e.g. in {3,7}
 - fixed the Highlights & Achievements menu to set the correct land structure
 
-Also fixed the rug animation in the animations mode
+2021-04-25 11:53 Update 11.4j:
+
+- in Irradiated Fields monsters and generated outside of the vision and they did not make spawn sounds when entering vision -- this is fixed
+- fixed the Princess Challenge and some horocycle generation
+- fixed Crossroads II
+- clearing in the binary tiling variant (rather easy)
