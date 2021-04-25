@@ -4317,3 +4317,4 @@ Fixed some issues with the "single land" mode (including PTM):
 - fixed the Princess Challenge and some horocycle generation
 - fixed Crossroads II
 - clearing in the binary tiling variant (rather easy)
+- fixed ASCII display outside of OpenGL
