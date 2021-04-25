@@ -1552,15 +1552,17 @@ EX void build_walls(cell *c, cell *from) {
     buildBarrierNowall(c, getNewLand(c->land));
     }
   
-  if(c->land == laCrossroads2 && BITRUNCATED)
+  if(c->land == laCrossroads2 && BITRUNCATED) {
     buildCrossroads2(c);
+    return;
+    }
   
   else if(good_for_wall(c) && isWarpedType(c->land) && hrand(10000) < 3000 && c->land && 
     buildBarrierNowall(c, eLand(c->land ^ laWarpSea ^ laWarpCoast))) { }
   
   else if(ls::single()) return;
     
-  if(geometry == gNormal && celldist(c) < 3 && !GOLDBERG) {
+  else if(geometry == gNormal && celldist(c) < 3 && !GOLDBERG) {
     if(top_land && c == cwt.at->master->move(3)->c7) {
       buildBarrierStrong(c, 6, true, top_land);
       }
