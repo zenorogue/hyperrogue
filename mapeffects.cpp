@@ -736,7 +736,7 @@ EX bool makeEmpty(cell *c) {
     c->wparam = reptilemax();
   else if(c->wall == waAncientGrave && bounded)
     ;
-  else
+  else if(c->wall != waRoundTable)
     c->wall = waNone;
   
   if(c->land == laBrownian && c->wall == waNone && c->landparam == 0)
