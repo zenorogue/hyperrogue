@@ -346,7 +346,7 @@ EX void beCIsland(cell *c) {
   }
 
 EX void generateTreasureIsland(cell *c) {
-  if(!eubinary) currentmap->generateAlts(c->master);
+  gen_alt(c);
   if(isOnCIsland(c)) return;
   
   bool src = hrand(100) < 10;
@@ -359,20 +359,20 @@ EX void generateTreasureIsland(cell *c) {
   for(int i=0; i<c->type; i++) {
     cell *c2 = createMov(c, i);
     if(!eubinary) currentmap->generateAlts(c2->master);
-    if((eubinary || (c->master->alt && c2->master->alt)) && celldistAlt(c2) < celldistAlt(c)) {
+    if(greater_alt(c, c2)) {
       ctab.push_back(c2);
       qlo = i; qhi = i;
       while(true && isize(ctab) < c->type) {
         qlo--;
         c2 = c->cmodmove(qlo);
-        if(!eubinary && !c2->master->alt) break;
+        if(!have_alt(c2)) break;
         if(celldistAlt(c2) >= celldistAlt(c)) break;
         ctab.push_back(c2);
         }
       while(true && isize(ctab) < c->type) {
         qhi++;
         c2 = c->cmodmove(qhi);
-        if(!eubinary && !c2->master->alt) break;
+        if(!have_alt(c2)) break;
         if(celldistAlt(c2) >= celldistAlt(c)) break;
         ctab.push_back(c2);
         }
@@ -392,7 +392,7 @@ EX void generateTreasureIsland(cell *c) {
     if(c->wall != waCTree && hrand(100) < 15)
       c->wall = (c->wall == waCIsland ? waCIsland2 : waCIsland);
     }
-  if(src && c2->wall == waCTree && (eubinary||c->master->alt) && celldistAlt(c) <= -10 && geometry != gRhombic3) {
+  if(src && c2->wall == waCTree && have_alt(c) && celldistAlt(c) <= -10 && geometry != gRhombic3) {
     bool end = true;
     for(cell *cc: ctab) {
       generateTreasureIsland(cc);
@@ -1373,10 +1373,66 @@ EX int wallchance(cell *c, bool deepOcean) {
     50;
   }
 
-/** should we generate the horocycles in the current geometry? */
+/** \brief should we generate the horocycles in the current geometry? */
 EX bool horo_ok() {  
   if(INVERSE) return false;
-  return hyperbolic && !bt::in() && !arcm::in() && !kite::in() && !experimental && !hybri && !arb::in();
+  return hyperbolic && !bt::in() && !arcm::in() && !kite::in() && !experimental && !hybri && !arb::in() && !quotient;
+  }
+
+/** \brief should we either generate the horocycles in the current geometry, or have them exist via eubinary? */
+EX bool horo_or_eubinary() {  
+  return horo_ok() || eubinary;
+  }
+
+/** \brief is celldistAlt defined for c? */
+EX bool have_alt(cell *c) {
+  return eubinary || c->master->alt;
+  }
+
+/** \brief generate alts around c if necessary */
+EX void gen_alt(cell *c) {
+  if(!eubinary) currentmap->generateAlts(c->master);
+  }
+
+/** \brief generate alts around c and further if necessary */
+EX void gen_alt_around(cell *c) {
+  if(!eubinary) {
+    currentmap->generateAlts(c->master);
+    for(int i=0; i<c->master->type; i++)
+      currentmap->generateAlts(c->master->move(i));
+    }
+  }
+
+/** \brief is celldistAlt defined for c and c2, and greater for c? */
+EX bool greater_alt(cell *c, cell *c2) {
+  return have_alt(c) && have_alt(c2) && celldistAlt(c) > celldistAlt(c2);
+  }
+
+EX int horo_gen_distance() {
+  return  (WDIM == 3 && hyperbolic) ? 1 : 2;
+  }
+
+EX bool single_horo(eLand horoland) {
+  return specialland == horoland && ls::single();
+  }
+
+EX bool in_single_horo(cell *c, eLand horoland) {
+  return single_horo(horoland) || celldistAlt(c) <= 0;
+  }
+
+EX bool extend_alt(cell *c, eLand horoland, eLand overland, bool extend_in_single IS(true), int dist IS(horo_gen_distance())) {
+  if(c->land != horoland && c->land != overland && !(c->land == laBrownian && overland == laOcean)) return false;
+  if(bt::in() && !single_horo(horoland)) return false;
+  if(have_alt(c) && ((ls::single() && extend_in_single) || masterAlt(c) <= dist)) {
+    gen_alt(c);
+    preventbarriers(c);
+    return true;
+    }
+  return false;
+  }
+
+EX bool can_start_horo(cell *c) {
+  return ctof(c) && !have_alt(c) && horo_ok() && !randomPatternsMode && !racing::on && !yendor::on;
   }
 
 EX bool gp_wall_test() {
@@ -1590,42 +1646,33 @@ EX void build_horocycles(cell *c, cell *from) {
   
     // buildbigstuff
 
-    if(ls::any_order() && bearsCamelot(c->land) && is_master(c) && !bt::in() && 
+    if(ls::any_order() && bearsCamelot(c->land) && can_start_horo(c) && !bt::in() && 
       #if MAXMDIM >= 4
       !(hyperbolic && WDIM == 3 && !reg3::in_rule()) && 
       #endif
       (quickfind(laCamelot) || peace::on || (hrand(I2000) < (c->land == laCrossroads4 ? 800 : 200) && horo_ok() && 
-      items[itEmerald] >= U5 && !tactic::on && !racing::on))) 
+      items[itEmerald] >= U5))) 
       start_camelot(c);
 
-    if(c->land == laRlyeh && ctof(c) && horo_ok() && 
-      (quickfind(laTemple) || peace::on || (hrand(I2000) < 100 && 
-      items[itStatue] >= U5 && !randomPatternsMode && 
-      !tactic::on && !yendor::on && !racing::on)))
+    if(c->land == laRlyeh && can_start_horo(c) && (quickfind(laTemple) || peace::on || (hrand(I2000) < 100 && items[itStatue] >= U5)))
       createAlternateMap(c, horo_gen_distance(), hsA);
 
-    if(c->land == laJungle && ctof(c) && 
-      (quickfind(laMountain) || (hrand(I2000) < 100 && horo_ok() && 
-      !randomPatternsMode && !tactic::on && !yendor::on && !racing::on && landUnlocked(laMountain))))
+    if(c->land == laJungle && can_start_horo(c) && (quickfind(laMountain) || (hrand(I2000) < 100 && landUnlocked(laMountain))))
       createAlternateMap(c, horo_gen_distance(), hsA);
 
-    if(c->land == laOvergrown && ctof(c) && horo_ok() &&
-      (quickfind(laClearing) || (hrand(I2000) < 25 && 
-      !randomPatternsMode && items[itMutant] >= U5 &&
-      isLandIngame(laClearing) &&
-      !tactic::on && !yendor::on && !racing::on))) {
+    if(c->land == laOvergrown && can_start_horo(c) && (quickfind(laClearing) || (hrand(I2000) < 25 && items[itMutant] >= U5 && isLandIngame(laClearing)))) {
       heptagon *h = createAlternateMap(c, horo_gen_distance(), hsA);
       if(h) clearing::bpdata[h].root = NULL;
       }
     
-    if(stdhyperbolic && c->land == laStorms && ctof(c) && hrand(2000) < 1000 && horo_ok() && !randomPatternsMode) {
+    if(stdhyperbolic && c->land == laStorms && can_start_horo(c) && hrand(2000) < 1000) {
       heptagon *h = createAlternateMap(c, horo_gen_distance(), hsA);
       if(h) h->alt->emeraldval = hrand(2);
       }
 
-    if(c->land == laOcean && ctof(c) && deepOcean && !generatingEquidistant && !peace::on && horo_ok() && 
+    if(c->land == laOcean && deepOcean && !generatingEquidistant && !peace::on && can_start_horo(c) && 
       (quickfind(laWhirlpool) || (
-        hrand(2000) < (PURE ? 500 : 1000) && !tactic::on && !racing::on && !yendor::on)))
+        hrand(2000) < (PURE ? 500 : 1000))))
       createAlternateMap(c, horo_gen_distance(), hsA);
     
     #if CAP_COMPLEX2
@@ -1633,17 +1680,16 @@ EX void build_horocycles(cell *c, cell *from) {
       brownian::init_further(c);
     #endif
 
-    if(c->land == laCaribbean && horo_ok() && ctof(c) && !c->master->alt)
+    if(c->land == laCaribbean && can_start_horo(c))
       createAlternateMap(c, horo_gen_distance(), hsA);
 
-    if(c->land == laCanvas && horo_ok() && ctof(c) && !c->master->alt && ls::any_order())
+    if(c->land == laCanvas && can_start_horo(c) && ls::any_order())
       createAlternateMap(c, horo_gen_distance(), hsA);
 
-    if(c->land == laPalace && ctof(c) && !princess::generating && !shmup::on && multi::players == 1 && horo_ok() && !weirdhyperbolic &&
+    if(c->land == laPalace && can_start_horo(c) && !princess::generating && !shmup::on && multi::players == 1 && !weirdhyperbolic &&
       (princess::forceMouse ? canReachPlayer(from, moMouse) :
         (hrand(2000) < (peace::on ? 100 : 20))) && 
-      !c->master->alt && 
-      (princess::challenge || kills[moVizier] || peace::on) && !tactic::on && !yendor::on && !racing::on) {
+      (princess::challenge || kills[moVizier] || peace::on)) {
       createAlternateMap(c, PRADIUS0, hsOrigin, waPalace);
       celllister cl(c, 5, 1000000, NULL);
       for(cell *c: cl.lst) if(c->master->alt) currentmap->generateAlts(c->master);
@@ -1691,7 +1737,7 @@ EX void buildCamelotWall(cell *c) {
   if(WDIM == 3 && hyperbolic) return;
   for(int i=0; i<c->type; i++) {
     cell *c2 = createMov(c, i);
-    if(c2->wall == waNone && (eubinary || (c2->master->alt && c->master->alt)) && celldistAlt(c2) > celldistAlt(c) && c2->monst == moNone)
+    if(c2->wall == waNone && greater_alt(c2, c) && c2->monst == moNone)
       c2->wall = waCamelotMoat;
     }
   }
@@ -1715,7 +1761,7 @@ EX eMonster camelot_monster() {
 EX void buildCamelot(cell *c) {
   int d = celldistAltRelative(c);
   if(ls::single() || (d <= 14 && roundTableRadius(c) > 20)) {
-    if(!eubinary) currentmap->generateAlts(c->master);
+    gen_alt(c);
     preventbarriers(c);
     if(d == 10) {
       if(weirdhyperbolic ? hrand(100) < 50 : pseudohept(c)) buildCamelotWall(c);
@@ -1782,6 +1828,7 @@ EX int masterAlt(cell *c) {
   #if MAXMDIM >= 4
   if(WDIM == 3 && hyperbolic && !reg3::in_rule()) return reg3::altdist(c->master);
   #endif
+  if(eubinary) return celldistAlt(c);
   return c->master->alt->distance;
   }
 
@@ -1796,43 +1843,106 @@ EX int temple_layer_size() {
   return 6;
   }
 
-EX int horo_gen_distance() {
-  return  (WDIM == 3 && hyperbolic) ? 1 : 2;
+/** generate the (non-chaotic) Temple of Cthulhu */
+EX void gen_temple(cell *c) {
+  int d = celldistAlt(c);
+  if(d <= 0) {
+    c->land = laTemple, c->wall = waNone, c->monst = moNone, c->item = itNone;
+    }
+  if(d % temple_layer_size()==0) {
+    c->landparam = 0;
+    if(geometry == gSpace534) {
+      int i = 0;
+      forCellCM(c2, c) if(greater_alt(c, c2)) i++;
+      if(i > 1) c->wall = waColumn;
+      }
+    else if(geometry == gSpace535) {
+      c->wall = (c->master->fieldval % 5) ? waRubble : waColumn;
+      }
+    else if(geometry == gSpace435) {
+      c->wall = waRubble;
+      if(c->master->fieldval == 0) c->wall = waColumn;
+      forCellCM(c1, c) if(c1->master->fieldval == 0) c->wall = waColumn;
+      }
+    else if(sol) {
+      if(c->master->emeraldval % 3 || c->master->zebraval % 3)
+        c->wall = waColumn;
+      }
+    else if(nih) {
+      if(c->master->emeraldval % 2)
+        c->wall = waColumn;
+      }
+    #if CAP_BT
+    else if(geometry == gHoroTris || geometry == gHoroRec) {
+      if(c->c.spin(bt::updir()) != 0) c->wall = waColumn;
+      }
+    else if(geometry == gKiteDart3) {
+      if(kite::getshape(c->master) == kite::pKite) c->wall = waColumn;
+      }
+    #endif
+    else if(in_s2xe()) {
+      auto d = hybrid::get_where(c);
+      if(!PIU(pseudohept(d.first))) c->wall = waColumn;
+      }
+    else if(hybri) {
+      auto d = hybrid::get_where(c);
+      if(d.first->wall == waColumn || (d.second&1)) c->wall = waColumn;
+      }
+    else if(WDIM == 3) {
+      c->wall = hrand(100) < 10 ? waColumn : waRubble;
+      }
+    else if(S3 >= OINF) { }
+    else if(weirdhyperbolic && !BITRUNCATED) {
+      if(hrand(100) < 50) c->wall = waColumn;
+      }
+    else if(pseudohept(c)) 
+      c->wall = waColumn;
+    else {
+      gen_alt_around(c);
+      int q = 0;
+      for(int t=0; t<c->type; t++) {
+        createMov(c, t);
+        if(have_alt(c->move(t)) && celldistAlt(c->move(t)) % temple_layer_size() == 0 && !ishept(c->move(t))) q++;
+        }
+      if(q == 2) c->wall = waColumn;
+      }
+    c->landparam = 1;
+    }
+  else c->landparam = 2;
   }
 
 EX void moreBigStuff(cell *c) {
 
   if((bearsCamelot(c->land) && !euclid && !quotient && !nil) || c->land == laCamelot) 
-  if(eubinary || bt::in() || c->master->alt) if(!(bt::in() && specialland != laCamelot)) 
+  if(have_alt(c)) if(!(bt::in() && specialland != laCamelot)) 
     buildCamelot(c);
   
   if(quotient) return;
-  
-  if(c->land == laPalace && !eubinary && c->master->alt) {
-    int d = celldistAlt(c);
-    if(d <= PRADIUS1) currentmap->generateAlts(c->master);
+
+  extend_alt(c, laCaribbean, laCaribbean, false);
+  if(c->land == laCaribbean) {
+    if(have_alt(c) && celldistAlt(c) <= 0)
+      generateTreasureIsland(c);
+    else
+      c->wall = waSea;
     }
+  
+  extend_alt(c, laPalace, laPalace, false, PRADIUS1);
 
-  if(c->land == laCanvas && !eubinary && c->master->alt && !quotient && (ls::single() || celldistAlt(c) <= 0))
-    currentmap->generateAlts(c->master);
+  extend_alt(c, laCanvas, laCanvas);
 
-  if(c->land == laStorms)
-    if(!eubinary && !quotient && !sphere) {
-      if(c->master->alt && masterAlt(c) <= horo_gen_distance()) {
-        currentmap->generateAlts(c->master);
-        preventbarriers(c);
-        int d = celldistAlt(c);
-        if(d <= -2) {
-          c->wall = (c->master->alt->alt->emeraldval & 1) ? waCharged : waGrounded;
-          c->item = itNone;
-          c->monst = moNone;
-          }
-        else if(d <= -1)
-          c->wall = (hrand(100) < 20) ? waSandstone : waNone;
-        else if(d <= 0)
-          c->wall = waNone;
-        }
-      }        
+  if(extend_alt(c, laStorms, laStorms, false)) {
+    int d = celldistAlt(c);
+    if(d <= -2) {
+      c->wall = eubinary ? waCharged : (c->master->alt->alt->emeraldval & 1) ? waCharged : waGrounded;
+      c->item = itNone;
+      c->monst = moNone;
+      }
+    else if(d <= -1)
+      c->wall = (hrand(100) < 20) ? waSandstone : waNone;
+    else if(d <= 0)
+      c->wall = waNone;
+    }
 
   if(ls::any_chaos() && c->land == laTemple) {
     for(int i=0; i<c->type; i++)
@@ -1840,114 +1950,23 @@ EX void moreBigStuff(cell *c) {
         c->wall = waColumn;
     }
   
-  else if((c->land == laRlyeh && !euclid) || c->land == laTemple) if(!(bt::in() && specialland != laTemple && c->land == laRlyeh)) {
-    if(eubinary || in_s2xe() || (c->master->alt && (ls::single() || masterAlt(c) <= horo_gen_distance()))) {
-      if(!eubinary && !ls::any_chaos()) currentmap->generateAlts(c->master);
-      preventbarriers(c);
-      int d = celldistAlt(c);
-      if(d <= 0) {
-        c->land = laTemple, c->wall = waNone, c->monst = moNone, c->item = itNone;
-        }
-      if(d % temple_layer_size()==0) {
-        c->landparam = 0;
-        if(geometry == gSpace534) {
-          int i = 0;
-          forCellCM(c2, c) if(celldistAlt(c2) < celldistAlt(c)) i++;
-          if(i > 1) c->wall = waColumn;
-          }
-        else if(geometry == gSpace535) {
-          c->wall = (c->master->fieldval % 5) ? waRubble : waColumn;
-          }
-        else if(geometry == gSpace435) {
-          c->wall = waRubble;
-          if(c->master->fieldval == 0) c->wall = waColumn;
-          forCellCM(c1, c) if(c1->master->fieldval == 0) c->wall = waColumn;
-          }
-        else if(sol) {
-          if(c->master->emeraldval % 3 || c->master->zebraval % 3)
-            c->wall = waColumn;
-          }
-        else if(nih) {
-          if(c->master->emeraldval % 2)
-            c->wall = waColumn;
-          }
-        #if CAP_BT
-        else if(geometry == gHoroTris || geometry == gHoroRec) {
-          if(c->c.spin(bt::updir()) != 0) c->wall = waColumn;
-          }
-        else if(geometry == gKiteDart3) {
-          if(kite::getshape(c->master) == kite::pKite) c->wall = waColumn;
-          }
-        #endif
-        else if(in_s2xe()) {
-          auto d = hybrid::get_where(c);
-          if(!PIU(pseudohept(d.first))) c->wall = waColumn;
-          }
-        else if(hybri) {
-          auto d = hybrid::get_where(c);
-          if(d.first->wall == waColumn || (d.second&1)) c->wall = waColumn;
-          }
-        else if(WDIM == 3) {
-          c->wall = hrand(100) < 10 ? waColumn : waRubble;
-          }
-        else if(S3 >= OINF) { }
-        else if(weirdhyperbolic && !BITRUNCATED) {
-          if(hrand(100) < 50) c->wall = waColumn;
-          }
-        else if(pseudohept(c)) 
-          c->wall = waColumn;
-        else {
-          if(!eubinary) for(int i=0; i<S7; i++) currentmap->generateAlts(c->master->move(i));
-          int q = 0;
-          for(int t=0; t<c->type; t++) {
-            createMov(c, t);
-            if(celldistAlt(c->move(t)) % temple_layer_size() == 0 && !ishept(c->move(t))) q++;
-            }
-          if(q == 2) c->wall = waColumn;
-          }
-        c->landparam = 1;
-        }
-      else c->landparam = 2;
+  else if(extend_alt(c, laTemple, laRlyeh)) 
+    gen_temple(c);
+
+  if(extend_alt(c, laClearing, laOvergrown)) {
+    if(in_single_horo(c, laClearing)) {
+      c->land = laClearing, c->wall = waNone;
       }
+    else if(celldistAlt(c) == 1)
+      c->wall = waSmallTree, c->monst = moNone, c->item = itNone, c->landparam = 1;
     }
 
-  if((c->land == laOvergrown && !euclid) || c->land == laClearing) if(!(bt::in() && specialland != laClearing)) {
-    if(eubinary || (c->master->alt && (ls::single() || masterAlt(c) <= horo_gen_distance()))) {
-      if(!eubinary) currentmap->generateAlts(c->master);
-      preventbarriers(c);
-      int d = celldistAlt(c);
-      if(d <= 0) {
-        c->land = laClearing, c->wall = waNone; // , c->monst = moNone, c->item = itNone;
-        }
-      else if(d == 1 && !ls::single() && !eubinary)
-        c->wall = waSmallTree, c->monst = moNone, c->item = itNone, c->landparam = 1;
-      }
+  if(extend_alt(c, laMountain, laJungle) && in_single_horo(c, laMountain)) {
+    c->land = laMountain, c->wall = waNone;
     }
 
-  if((c->land == laJungle && !euclid) || c->land == laMountain) if(!(bt::in() && specialland != laMountain)) {
-    if(eubinary || (c->master->alt && (ls::single() || masterAlt(c) <= horo_gen_distance()))) {
-      if(!eubinary) currentmap->generateAlts(c->master);
-      preventbarriers(c);
-      int d = celldistAlt(c);
-      if(d <= 0 || (specialland == laMountain && ls::single())) {
-        c->land = laMountain, c->wall = waNone; // , c->monst = moNone, c->item = itNone;
-        }
-      }
-    }
-
-  if(among(c->land, laOcean, laWhirlpool, laBrownian)) if(!(bt::in() && specialland != laWhirlpool)) {
-    bool fullwhirlpool = false;
-    if(ls::single() && specialland == laWhirlpool)
-      fullwhirlpool = true;
-    if(eubinary || (c->master->alt && (fullwhirlpool || masterAlt(c) <= 2))) {
-      if(!eubinary) currentmap->generateAlts(c->master);
-      preventbarriers(c);
-      int dd = celldistAlt(c);
-      if(dd <= 0 || fullwhirlpool) {
-        c->land = laWhirlpool, c->wall = waSea, c->monst = moNone, c->item = itNone;
-        }
-      }
-    }      
+  if(extend_alt(c, laWhirlpool, laOcean) && in_single_horo(c, laWhirlpool))
+    c->land = laWhirlpool, c->wall = waSea, c->monst = moNone, c->item = itNone;
   }
 
 EX void generate_mines() {

@@ -219,7 +219,8 @@ EX void initgame() {
     if(firstland == laWhirlpool) cwt.at->move(0)->wall = waSea;
     
     setdist(cwt.at->move(0), BARLEV-1, cwt.at);
-    if(!sphere && !eubinary && !quotient) {
+
+    if(horo_ok()) {
       if(specialland == laCamelot) 
         start_camelot(cwt.at);
       else {
