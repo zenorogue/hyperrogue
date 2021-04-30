@@ -158,6 +158,14 @@ EX bool isFriendly(cell *c) {
   return isMounted(c) || isFriendly(c->monst); 
   }
 
+EX eThreatLevel get_threat_level(cell *c) { 
+  if(!c->monst) return tlNoThreat;
+  if(isFriendly(c)) return tlNoThreat;
+  if(classflag(c->monst) & CF_HIGH_THREAT) return tlHighThreat;
+  if(classflag(c->monst) & CF_SPAM) return tlSpam;
+  return tlNormal;
+  }
+
 EX bool isFriendlyOrBug(cell *c) { // or killable discord!
   // do not attack the stunned Princess
   if(isPrincess(c->monst) && c->stuntime) return false;

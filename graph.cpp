@@ -2473,6 +2473,22 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       noHighlight(c->monst) ? OUTLINE_NONE :
       OUTLINE_ENEMY;
     
+  // highlight faraway enemies if that's needed
+  if (vid.faraway_highlight && c->cpdist >= 6 && vid.faraway_highlight <= get_threat_level(c)) {
+
+    // basic red-green oscillation
+    color_t r = ceil(255*abs(sintick(1000, 0.25)));
+    color_t g = ceil(255*abs(sintick(1000, 0.00)));
+    color_t hlc = (r<<16) + (g<<8);
+
+    hlc = gradient(col, hlc, 0, vid.faraway_highlight_color, 100);
+    
+    if(c->cpdist == 6) 
+      hlc = gradient(0, hlc, 0, 1, 1.5);
+    
+    addauraspecial(tC0(Vparam), hlc, 0);
+    }
+
   bool nospins = false, nospinb = false;
   double footphaseb = 0, footphase = 0;
   

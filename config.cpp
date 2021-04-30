@@ -682,7 +682,13 @@ EX void initConfig() {
   ->editable(0, 128, 10, "sound effects volume", "", 'e')
   ->set_sets(sets_sfx_volume);
   #endif
-  
+
+  param_enum(vid.faraway_highlight, "faraway_highlight", "highlight faraway monsters", tlNoThreat)
+    ->editable({{"off", ""}, {"spam", ""}, {"normal monsters", ""}, {"high-threat monsters only", ""}}, "highlight faraway monsters", 'h');
+
+  param_i(vid.faraway_highlight_color, "faraway_highlight_color", 50)
+  -> editable(0, 100, 10, "faraway highlight color", "0 = monster color, 100 = red-light oscillation", 'c');
+
   param_enum(glyphsortorder, "glyph_sort", "glyph sort order", glyphsortorder)
     ->editable({
       {"first on top", ""},
@@ -1708,6 +1714,9 @@ EX void configureOther() {
 
   menuitem_sightrange('r');
 
+  add_edit(vid.faraway_highlight);
+  add_edit(vid.faraway_highlight_color);
+  
 #ifdef WHATEVER
   dialog::addSelItem(XLAT("whatever"), fts(whatever[0]), 'j');
   dialog::add_action([] { edit_whatever('f', 0); });

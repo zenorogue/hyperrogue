@@ -289,6 +289,8 @@ struct projection_configuration {
     }
   };
 
+enum eThreatLevel { tlNoThreat, tlSpam, tlNormal, tlHighThreat };
+
 struct videopar {
   projection_configuration projection_config, rug_config;
   ld yshift;
@@ -406,6 +408,9 @@ struct videopar {
   ld plevel_factor;
   bool bubbles_special, bubbles_threshold, bubbles_all;
   int joysmooth;
+  
+  eThreatLevel faraway_highlight; // draw attention to monsters on the horizon
+  int faraway_highlight_color; // 0 = monster color, 100 = red-green oscillation
   };
 
 extern videopar vid;
