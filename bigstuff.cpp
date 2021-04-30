@@ -1875,6 +1875,9 @@ EX void gen_temple(cell *c) {
         c->wall = waColumn;
       }
     #if CAP_BT
+    else if(geometry == gBinary3) {
+      if(c->master->zebraval % 5 != 1) c->wall = waColumn;
+      }
     else if(geometry == gHoroTris || geometry == gHoroRec) {
       if(c->c.spin(bt::updir()) != 0) c->wall = waColumn;
       }
