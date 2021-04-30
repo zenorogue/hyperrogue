@@ -111,6 +111,9 @@ template<class T> struct enum_setting : list_setting {
   virtual bool affects(void* v) override { return v == value; }
   virtual void add_as_saver() override;
   virtual cld get_cld() override { return get_value(); }
+  virtual void load_from(const string& s) override {
+    *value = (T) parseint(s);
+    }
   };
 
 struct float_setting : public setting {
@@ -403,7 +406,7 @@ EX int_setting *param_i(int& val, const string s, int dft) {
     }
   u->add_as_saver();
   auto f = &*u;
-  params[s] = std::move(u);
+  params[u->parameter_name] = std::move(u);
   return f;
   }
 
@@ -445,7 +448,7 @@ template<class T> enum_setting<T> *param_enum(T& val, const string p, const stri
   u->last_value = u->get_cld();
   u->add_as_saver();
   auto f = &*u;
-  params[s] = std::move(u);
+  params[p] = std::move(u);
   return f;
   }
 #endif
