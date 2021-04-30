@@ -1612,6 +1612,8 @@ struct raycast_map {
         return;
         }
       transmatrix T = currentmap->iadj(c, i) * inverse(ms[wo + i]);
+      if(in_e2xe() && i >= c->type-2)
+        T = Id;
       for(int k=0; k<=isize(ms); k++) {
         if(k < isize(ms) && !eqmatrix(ms[k], T)) continue;
         if(k == isize(ms)) ms.push_back(T);
