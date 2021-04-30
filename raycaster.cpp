@@ -1682,6 +1682,10 @@ EX void reset_raycaster() {
   rots::saved_matrices_ray = {};
   }
 
+EX void reset_raycaster_map() { 
+  rmap = nullptr;
+  }
+
 EX void cast() {
   // may call itself recursively in case of bugs -- just in case...
   dynamicval<int> dn(nesting, nesting+1);
