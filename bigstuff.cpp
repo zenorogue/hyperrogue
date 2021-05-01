@@ -1488,6 +1488,8 @@ EX bool walls_not_implemented() {
   }
 
 EX bool nice_walls_available() {
+  if(hybri) return PIU(nice_walls_available());
+  if(fake::in()) return FPIU(nice_walls_available());
   return (geometry == gNormal && (PURE || BITRUNCATED)) || (geometry == gEuclid && !(INVERSE | IRREGULAR));
   }
 
