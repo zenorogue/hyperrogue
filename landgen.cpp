@@ -2031,7 +2031,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laHunting:
-      if(d == 7 && c->land == laHunting && !racing::on && !safety) {
+      if(d == 7 && c->land == laHunting && !racing::on && !safety && !reptilecheat) {
         if(hrand(1000) < 20) {
           if(openplains(c)) {
             if(hrand(2) == 0) {
