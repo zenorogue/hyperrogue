@@ -617,7 +617,7 @@ EX eLand getLandForList(cell *c) {
 EX bool isLandIngame(eLand l) {
   if(isElemental(l)) l = laElementalWall;
   if(dual::state == 2 && !dual::check_side(l)) return false;
-  if((euclid || sol) && isCyclic(l) && l != specialland) return false;
+  if((eubinary || sol) && isCyclic(l) && l != specialland) return false;
   if(l == laCamelot && hyperbolic && WDIM == 3) return false;
   return land_validity(l).flags & lv::appears_in_full;
   }
@@ -663,8 +663,7 @@ namespace lv {
   land_validity_t great_walls_missing = {1, q1 | one_and_half, "Mercury rivers not implemented (or could not work) in this geometry."};
   land_validity_t pattern_compatibility = {3, qm3, "Patterns compatible."}; 
   land_validity_t pattern_defined = {3, qm3, "Pattern defined."}; 
-  land_validity_t pattern_compatibility_sole = {3, qm3 &~ lv::appears_in_full, "Patterns compatible."}; 
-  land_validity_t pattern_compatibility_notrec = {2, qm2 &~ lv::appears_in_full, "Patterns compatible."}; 
+  land_validity_t pattern_compatibility_notrec = {2, qm2, "Patterns compatible."}; 
   land_validity_t specially_designed = {3, qm3, "This land is specially designed for this geometry."};   
   land_validity_t needs_threecolor = {0, q0, "Three-colorability required."};  
   land_validity_t land_not_implemented = {0, q0 &~ lv::appears_in_geom_exp, "Land not implemented."};  
@@ -782,7 +781,7 @@ EX land_validity_t& land_validity(eLand l) {
     }
   
   if(bt::in()) {
-    if(among(l, laMountain, laTemple)) return lv::pattern_compatibility_sole;
+    if(among(l, laMountain, laTemple)) return lv::pattern_compatibility;
     if(among(l, laDungeon, laIvoryTower, laOcean, laEndorian)) return lv::pattern_compatibility;
     if(among(l, laCaribbean, laCamelot)) return lv::pattern_compatibility_notrec;
     // Clearing -- does not generate
