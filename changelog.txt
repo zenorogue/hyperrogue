@@ -4318,3 +4318,21 @@ Fixed some issues with the "single land" mode (including PTM):
 - fixed Crossroads II
 - clearing in the binary tiling variant (rather easy)
 - fixed ASCII display outside of OpenGL
+
+2021-05-01 14:10 Update 11.4k:
+
+more fixes to "land structure"hanging:
+- Prairie is no longer a trap in no walls mode
+- Crossroads II and V are no longer generated in nowalls mode
+- fixed Camelot having inside lands in some land structure modes, and also made it more likely to appear in nowalls (although still unlikely)
+- fixed "reset special mode" to reset correctly
+- starting in horocyclic lands in multi-land binary-like geometries works (it is the only horocycle in the world though)
+- in multi-land hybrid geometries, fixed the starting land
+- standard walls work again in hybrid geometries
+
+other fixes:
+- fixed "draw underlying space" in E2xE and other product geometries
+- Orb of Earth no longer marked useless in the Warped Coast
+- fixed the E2xE raycaster
+- added faraway monster highlight as in @still-flow's pull request
+- fixed the Temple of Cthulhu in bin44 so that it works like in https://www.youtube.com/watch?v=625ZwpjtWZU again
