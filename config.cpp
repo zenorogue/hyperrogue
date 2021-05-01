@@ -1123,8 +1123,11 @@ EX void resetModes(char leave IS('c')) {
   if(shmup::on != (leave == rg::shmup)) stop_game_and_switch_mode(rg::shmup);
   if(inv::on != (leave == rg::inv)) stop_game_and_switch_mode(rg::inv);
 
-  if(leave == rg::chaos && !ls::std_chaos()) stop_game_and_switch_mode(rg::chaos);
-  if(leave != rg::chaos && !ls::nice_walls()) stop_game_and_switch_mode(rg::chaos);
+  /* we do this twice to make sure that stop_game_and_switch_mode switches to the correct land_structure */
+  for(int i=0; i<2; i++) {
+    if(leave == rg::chaos && !ls::std_chaos()) stop_game_and_switch_mode(rg::chaos);
+    if(leave != rg::chaos && !ls::nice_walls()) stop_game_and_switch_mode(rg::chaos);
+    }
 
   if((!!dual::state) != (leave == rg::dualmode)) stop_game_and_switch_mode(rg::dualmode);
 
