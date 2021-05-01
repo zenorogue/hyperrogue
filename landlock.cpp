@@ -881,7 +881,7 @@ EX land_validity_t& land_validity(eLand l) {
     return not_in_ptm;
     
   // standard non-PTM non-chaos specific
-  if((l == laCrossroads5 || l == laCrossroads2) && (geometry || ls::any_chaos()))
+  if((l == laCrossroads5 || l == laCrossroads2) && (geometry || ls::any_chaos() || ls::no_walls()))
     return some0;
     
   // special construction in the Chaos mode
