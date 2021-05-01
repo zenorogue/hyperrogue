@@ -1575,14 +1575,14 @@ EX void build_walls(cell *c, cell *from) {
     }
   
   else if(ls::wall_chaos()) {
-    if(good_for_wall(c) && hrand(10000) < 9000 && c->land && !inmirror(c)) {
+    if(good_for_wall(c) && hrand(10000) < 9000 && c->land && !inmirror(c) && c->bardir != NOBARRIERS && !c->master->alt) {
       build_barrier_good(c); 
       return;
       }
     }
 
   else if(ls::std_chaos()) {
-    if(good_for_wall(c) && hrand(10000) < 9000 && c->land && !inmirror(c) && buildBarrierNowall(c, getNewLand(c->land))) 
+    if(good_for_wall(c) && hrand(10000) < 9000 && c->land && !inmirror(c) && c->bardir != NOBARRIERS && !c->master->alt && buildBarrierNowall(c, getNewLand(c->land))) 
       return;
     }
   
@@ -1590,7 +1590,7 @@ EX void build_walls(cell *c, cell *from) {
     buildBarrierNowall(c, getNewLand(laCrossroads4))) ;
   
   else if(good_for_wall(c) && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !racing::on && !isCrossroads(c->land) && 
-    gold() >= R200 && !weirdhyperbolic && !c->master->alt &&
+    gold() >= R200 && !weirdhyperbolic && !c->master->alt && c->bardir != NOBARRIERS &&
     !inmirror(c) && !isSealand(c->land) && !isHaunted(c->land) && !isGravityLand(c->land) && 
     (c->land != laRlyeh || rlyehComplete()) &&
     c->land != laTortoise && c->land != laPrairie && c->land && 
@@ -1600,7 +1600,7 @@ EX void build_walls(cell *c, cell *from) {
     buildBarrierNowall(c, laCrossroads4) ;
     }
   
-  else if(ls::no_walls() && hrand(I10000 /4) < wallchance(c, deepOcean) && gp_wall_test()) {
+  else if(ls::no_walls() && hrand(I10000 /4) < wallchance(c, deepOcean) && gp_wall_test() && c->bardir != NOBARRIERS && !c->master->alt) {
     buildBarrierNowall(c, getNewLand(c->land));
     }
   
@@ -1658,7 +1658,7 @@ EX void build_horocycles(cell *c, cell *from) {
       #if MAXMDIM >= 4
       !(hyperbolic && WDIM == 3 && !reg3::in_rule()) && 
       #endif
-      (quickfind(laCamelot) || peace::on || (hrand(I2000) < (c->land == laCrossroads4 ? 800 : 200) && horo_ok() && 
+      (quickfind(laCamelot) || peace::on || (hrand(I2000) < (c->land == laCrossroads4 || ls::no_walls() ? 800 : 200) && horo_ok() &&
       items[itEmerald] >= U5))) 
       start_camelot(c);
 
