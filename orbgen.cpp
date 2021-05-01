@@ -316,9 +316,8 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
     return olrNoPrizes;
   
   if(it == itOrbDigging) {
-    if(l == laCaves || l == laOcean || l == laLivefjord || l == laEmerald ||
-      l == laDesert || l == laDeadCaves || l == laRedRock || l == laCaribbean || l == laGraveyard ||
-      l == laMountain || l == laHunting)
+    if(among(l, laCaves, laOcean, laLivefjord, laEmerald, laDesert, laDeadCaves, laRedRock, laCaribbean, laGraveyard,
+      laMountain, laHunting, laWarpSea, laWarpCoast))
         return olrPrize25;
     return olrUseless;
     }
