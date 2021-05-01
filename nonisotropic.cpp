@@ -2194,6 +2194,8 @@ EX namespace rots {
 
     return M;
     }
+    
+  EX bool drawing_underlying = false;
   
   EX void draw_underlying(bool cornermode) {
     if(underlying_scale <= 0) return;
@@ -2202,6 +2204,8 @@ EX namespace rots {
     transmatrix T = rots::uzpush(-d) * spin(-2*d);
   
     if(det(T) < 0) T = centralsym * T;
+    
+    if(prod) d = 0;
   
     hyperpoint h = inverse(View * spin(master_to_c7_angle()) * T) * C0;
     
@@ -2226,19 +2230,20 @@ EX namespace rots {
       dynamicval<bool> pf(playerfound, true);
       dynamicval<cell*> m5(centerover, co);
       dynamicval<transmatrix> m2(View, inprod ? pView : ypush(0) * qtm(h));
-      if(PURE) View = View * pispin;
+      if(PURE && !inprod) View = View * pispin;
       View = inverse(stretch::mstretch_matrix) * spin(2*d) * View;
       dynamicval<shiftmatrix> m3(playerV, shiftless(Id));
       dynamicval<transmatrix> m4(actual_view_transform, Id);
       dynamicval<shiftmatrix> m6(cwtV, shiftless(Id));
       dynamicval<eModel> pm(pmodel, mdDisk);
-      dynamicval<ld> pss(pconf.scale, (sphere ? 10 : 1) * underlying_scale);
+      dynamicval<ld> pss(pconf.scale, (sphere ? 10 : euclid ? .4 : 1) * underlying_scale);
       dynamicval<ld> psa(pconf.alpha, sphere ? 10 : 1);
       dynamicval<hrmap*> p(hybrid::pmap, NULL);
       dynamicval<int> psr(sightrange_bonus, 0);
 
       dynamicval<int> psx(vid.use_smart_range, 2);
       dynamicval<ld> psy(vid.smart_range_detail, 1);
+      dynamicval<bool> pdu(drawing_underlying, true);
 
       calcparam();
       reset_projection(); current_display->set_all(0, 0);
