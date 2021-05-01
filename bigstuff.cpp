@@ -1618,7 +1618,8 @@ EX void build_walls(cell *c, cell *from) {
   else if(!nice_walls_available()) ; // non-Nowall barriers not implemented yet in weird hyperbolic
   
   #if CAP_FIELD
-  else if(c->land == laPrairie && c->LHU.fi.walldist == 0 && !euclid && ls::nice_walls()) {
+  else if(c->land == laPrairie && c->LHU.fi.walldist == 0 && !euclid) {
+    if(ls::nice_walls())
     for(int bd=0; bd<7; bd++) {
       int fval2 = createStep(c->master, bd)->fieldval;
       int wd = currfp_gmul(fval2, currfp_inverses(c->fval-1));
@@ -1626,6 +1627,9 @@ EX void build_walls(cell *c, cell *from) {
         buildBarrier(c, bd); 
         break;
         }
+      }
+    if(ls::no_walls()) {
+      buildBarrierNowall(c, getNewLand(c->land));
       }
     }
   #endif
