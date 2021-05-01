@@ -1420,9 +1420,13 @@ EX bool in_single_horo(cell *c, eLand horoland) {
   return single_horo(horoland) || celldistAlt(c) <= 0;
   }
 
+EX bool inside_starting_horo(cell *c, eLand horoland) {
+  return specialland == horoland && celldistAlt(c) <= 0;
+  }
+
 EX bool extend_alt(cell *c, eLand horoland, eLand overland, bool extend_in_single IS(true), int dist IS(horo_gen_distance())) {
   if(c->land != horoland && c->land != overland && !(c->land == laBrownian && overland == laOcean)) return false;
-  if(bt::in() && !single_horo(horoland)) return false;
+  if(bt::in() && !single_horo(horoland) && !inside_starting_horo(c, horoland)) return false;
   if(have_alt(c) && ((ls::single() && extend_in_single) || masterAlt(c) <= dist)) {
     gen_alt(c);
     preventbarriers(c);
@@ -1829,10 +1833,10 @@ EX void buildCamelot(cell *c) {
   }
 
 EX int masterAlt(cell *c) {
+  if(eubinary) return celldistAlt(c);
   #if MAXMDIM >= 4
   if(WDIM == 3 && hyperbolic && !reg3::in_rule()) return reg3::altdist(c->master);
   #endif
-  if(eubinary) return celldistAlt(c);
   return c->master->alt->distance;
   }
 
