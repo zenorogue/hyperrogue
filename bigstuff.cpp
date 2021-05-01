@@ -959,9 +959,9 @@ EX eLand& get_euland(int c) {
 EX void clear_euland(eLand first) {
   euland.resize(max_vec);
   for(int i=0; i<max_vec; i++) euland[i] = laNone;
-  if(!nonisotropic && !hybri) euland[0] = euland[1] = euland[max_vec-1] = first;
+  if(!nonisotropic) euland[0] = euland[1] = euland[max_vec-1] = first;
   euland3.clear();
-  euland3[0] = laCrossroads;
+  euland3[0] = first;
   }
 
 bool valid_wall_at(int c) {
