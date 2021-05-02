@@ -474,15 +474,15 @@ ITEM( 'o', 0xFFFF00, "Orb of Storms", itOrbLightning, IC_ORB, ZERO, RESERVED, os
     "This orb can be used to invoke the lightning spell, which causes lightning bolts to shoot from you in all directions.")
 ITEM( 'o', 0xFFFFFF, "Orb of Flash", itOrbFlash, IC_ORB, ZERO, RESERVED, osOffensive,
     "This orb can be used to invoke a flash spell, which destroys almost everything in radius of 2.")
-ITEM( 'o', 0x8080FF, "Orb of Winter", itOrbWinter, IC_ORB, ZERO | IF_FIREPROOF | IF_PROTECTION | IF_EMPATHY, RESERVED, osNone,
+ITEM( 'o', 0x8080FF, "Orb of Winter", itOrbWinter, IC_ORB, ZERO | IF_FIREPROOF | IF_PROTECTION | IF_EMPATHY, RESERVED, osProtective,
     "This orb can be used to invoke a wall of ice. It also protects you from fires.")
-ITEM( 'o', 0xFF6060, "Orb of Speed", itOrbSpeed, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osUtility,
+ITEM( 'o', 0xFF6060, "Orb of Speed", itOrbSpeed, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osMovement,
     "This orb can be used to move faster for some time.")
 ITEM( 'o', 0x90B090, "Orb of Life", itOrbLife, IC_ORB, ZERO | IF_SHMUPLIFE | IF_REVIVAL, RESERVED, osFriend,
     "This orb can be used to summon friendly golems. It is used instantly when you pick it up.")
-ITEM( 'o', 0x60D760, "Orb of Shielding", itOrbShield, IC_ORB, ZERO | IF_PROTECTION | IF_EMPATHY, RESERVED, osNone,
+ITEM( 'o', 0x60D760, "Orb of Shielding", itOrbShield, IC_ORB, ZERO | IF_PROTECTION | IF_EMPATHY, RESERVED, osProtective,
     "This orb can protect you from damage.")
-ITEM( 'o', 0x606060, "Orb of Earth", itOrbDigging, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osUtility,
+ITEM( 'o', 0x606060, "Orb of Earth", itOrbDigging, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osTerraform,
     "This orb lets you go through living walls. It also has powers in some of the other lands.")
 ITEM( 'o', 0x20FFFF, "Orb of Teleport", itOrbTeleport, IC_ORB, ZERO | IF_RANGED, RESERVED, osRanged,
     "This orb lets you instantly move to another location on the map. Just click a location which "
@@ -503,7 +503,7 @@ ITEM( '%', 0x0000FF, "Fern Flower", itFernFlower, IC_TREASURE, ZERO, RESERVED, o
 ITEM( '!', 0x900000, "Wine", itWine, IC_TREASURE, ZERO, RESERVED, osNone,
     "Wine grown under hyperbolic sun would be extremely prized in your home location."
     )
-ITEM( 'o', 0x706070, "Orb of Aether", itOrbAether, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osUtility,
+ITEM( 'o', 0x706070, "Orb of Aether", itOrbAether, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osMovement,
     "This orb allows one to pass through all kinds of walls and chasms."
     )
 ITEM( '$', 0xFFFFC0, "Silver", itSilver, IC_TREASURE, ZERO, RESERVED, osNone,
@@ -519,7 +519,7 @@ ITEM( '!', 0xE2B227, "Royal Jelly", itRoyalJelly, IC_TREASURE, ZERO, RESERVED, o
 ITEM( '*', 0x60C060, "Emerald", itEmerald, IC_TREASURE, ZERO, RESERVED, osNone,
     "A precious green gem from the Emerald Mines." 
     )
-ITEM( 'o', 0x421C52, "Orb of Invisibility", itOrbInvis, IC_ORB, ZERO | IF_PROTECTION | IF_EMPATHY, RESERVED, osNone,
+ITEM( 'o', 0x421C52, "Orb of Invisibility", itOrbInvis, IC_ORB, ZERO | IF_PROTECTION | IF_EMPATHY, RESERVED, osProtective,
     "When you have this Orb, most monsters won't see you, unless "
     "you are standing still, attacking, or picking up items."
     )
@@ -527,7 +527,7 @@ ITEM( '*', 0xFFFF00, "Powerstone", itPower, IC_TREASURE, ZERO, RESERVED, osNone,
     "A Stone from the Land of Power. You are not sure what it is exactly, but "
     "as the Powerstones are kept in crystal cabinets, they are surely valuable."
     )
-ITEM( 'o', 0xFF4000, "Orb of Fire", itOrbFire, IC_ORB, ZERO | IF_FIREPROOF | IF_EMPATHY, RESERVED, osNone,
+ITEM( 'o', 0xFF4000, "Orb of Fire", itOrbFire, IC_ORB, ZERO | IF_FIREPROOF | IF_EMPATHY, RESERVED, osTerraform,
     "When you have this Orb, you will leave a trail of fire behind you."
     )
 ITEM( '!', 0xFFFF00, "Holy Grail", itHolyGrail, IC_OTHER, ZERO, RESERVED, osNone, camelothelp )
@@ -557,7 +557,7 @@ ITEM( '?', 0xFFFFFF, "Compass", itCompass, IC_OTHER, ZERO, RESERVED, osNone,
     "far towards the center as they can, and hide their treasure there."
     )
 ITEM( '*', 0xFF8080, "Red Gem", itRedGem, IC_TREASURE, ZERO, RESERVED, osNone, "A gem from the Red Rock Valley.")
-ITEM( 'o', 0x6060FF, "Orb of Time", itOrbTime, IC_ORB, ZERO, RESERVED, osUtility, 
+ITEM( 'o', 0x6060FF, "Orb of Time", itOrbTime, IC_ORB, ZERO, RESERVED, osPowerUtility, 
     "Normally, the power of most Orbs slowly fades away, even when "
     "you are not actively using them. This Orb prevents this.\n\n"
     
@@ -591,7 +591,7 @@ ITEM( '$', 0xFFFFFF, "Pearl", itWhirlpool, IC_TREASURE, ZERO, RESERVED, osNone,
 ITEM( 'o', 0x306000, "Orb of Friendship", itOrbFriend, IC_ORB, ZERO | IF_SHMUPLIFE | IF_REVIVAL, RESERVED, osFriend, 
     "This Orb summons a friendly Bomberbird."
     )
-ITEM( 'o', 0x000060, "Orb of Water", itOrbWater, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osNone, 
+ITEM( 'o', 0x000060, "Orb of Water", itOrbWater, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osTerraform, 
    "This Orb allows your boat to go against the current, "
    "and also to go into the land, creating water on the way."
     )
@@ -696,7 +696,7 @@ ITEM( '*', 0xFF40A0, "Coral", itCoral, IC_TREASURE, ZERO, RESERVED, osNone,
     "but natural corals from the Warped Sea have truly beautiful shapes. "
     "Ratlings know the value of corals, and thus keep them in boats for safety."
     )
-ITEM( 'o', 0x764e7c*2, "Orb of Beauty", itOrbBeauty, IC_ORB, ZERO, RESERVED, osNone, 
+ITEM( 'o', 0x764e7c*2, "Orb of Beauty", itOrbBeauty, IC_ORB, ZERO, RESERVED, osProtective, 
     "This Orb makes you stunningly beautiful. "
     "Monsters which come next to you will be stunned for one turn. "
     "Multi-tile monsters are not affected. Additionally, it makes you immune to "
@@ -706,7 +706,7 @@ ITEM( 'o', 0xFFFF80, "Orb of the Warp", itOrb37, IC_ORB, ZERO, RESERVED, osWarpi
     "This Orb creates a warped zone of radius 5 around you, "
     "and also allows you to move diagonally in warped zones."
     )
-ITEM( 'o', 0xFFFF80, "Orb of Energy", itOrbEnergy, IC_ORB, ZERO, RESERVED, osUtility, 
+ITEM( 'o', 0xFFFF80, "Orb of Energy", itOrbEnergy, IC_ORB, ZERO, RESERVED, osPowerUtility, 
     "This Orb halves the power usage of orbs which cost some "
     "charges with each activation. It even affects the "
     "one-shot orbs such as Flash or Teleport. If such an activation "
@@ -714,7 +714,7 @@ ITEM( 'o', 0xFFFF80, "Orb of Energy", itOrbEnergy, IC_ORB, ZERO, RESERVED, osUti
     "if you have an Orb of Energy."
     )
 ITEM( 't', 0x487830, "Baby Tortoise", itBabyTortoise, IC_TREASURE, ZERO, RESERVED, osNone, tortoisedesc)
-ITEM( 'o', 0x487830, "Orb of the Shell", itOrbShell, IC_ORB, ZERO | IF_PROTECTION, RESERVED, osNone, 
+ITEM( 'o', 0x487830, "Orb of the Shell", itOrbShell, IC_ORB, ZERO | IF_PROTECTION, RESERVED, osProtective, 
     "This Orb protects you from physical attacks. "
     "It lasts for more turns than the Orb of Shielding, but "
     "10 charges are lost whenever you are attacked. "
@@ -764,7 +764,7 @@ ITEM( '!', 0xFFD700, "Golden Egg", itTrollEgg, IC_TREASURE, ZERO, RESERVED, osNo
     )
 ITEM( '!', 0xFF0000, "Warning", itWarning, IC_NAI, ZERO, RESERVED, osNone, warningdesc
     )
-ITEM( 'o', 0x808080, "Orb of the Stone", itOrbStone, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osNone, 
+ITEM( 'o', 0x808080, "Orb of the Stone", itOrbStone, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osTerraform, 
     "Trolls turn into stone walls when they die. When you have this Orb, "
     "this happens to every monster you defeat. Statues created from this Orb "
     "have slightly different properties than Trolls who petrify naturally."
@@ -775,7 +775,7 @@ ITEM( '%', 0x30A030, "Slime Mold", itSlime, IC_TREASURE, ZERO, RESERVED, osNone,
     "A very interesting species of slime mold."
     )
 ITEM( '*', 0xFF00FF, "Amethyst", itAmethyst, IC_TREASURE, ZERO, RESERVED, osNone, "A beatiful purple gem from the Lost Mountain." )
-ITEM( 'o', 0xC00040, "Orb of Recall", itOrbRecall, IC_ORB, ZERO, RESERVED, osNone, 
+ITEM( 'o', 0xC00040, "Orb of Recall", itOrbRecall, IC_ORB, ZERO, RESERVED, osUtility, 
     "When the charges on this Orb expire, "
     "you will be automatically returned to the place where you have found it. "
     "Extra Orbs of Recall delay this without changing the recall location. "
@@ -823,7 +823,7 @@ ITEM( 'o', 0x30A080, "Orb of the Triangle", itOrbSide2, IC_ORB, ZERO | IF_EMPATH
     "you originally attacked.")
 ITEM( 'o', 0x30D080, "Orb of Ferocity", itOrbSide3, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osOffensive, 
     "Whenever you attack with this Orb, you also hit the monsters adjacent to you and opposite to the monster you originally attacked.")
-ITEM( 'o', 0xD08030, "Orb of Lava", itOrbLava, IC_ORB, ZERO | IF_FIREPROOF, RESERVED, osUtility, 
+ITEM( 'o', 0xD08030, "Orb of Lava", itOrbLava, IC_ORB, ZERO | IF_FIREPROOF, RESERVED, osTerraform, 
     "This Orb summons a minor volcanic activity around you. "
     "All the heptagonal cells adjacent to enemies in distance at most 5 to you "
     "will be set on fire. Does not affect the cell you are on, and enemies resistant to fire.")
@@ -838,7 +838,7 @@ ITEM( '*', 0x80FF80, "Monopole", itMagnet, IC_TREASURE, ZERO, RESERVED, osNone, 
 ITEM( '!', 0xFF00FF, "Tasty Jelly", itSwitch, IC_TREASURE, ZERO, RESERVED, osNone, "A tasty byproduct of the Jelly Revolution.")
 ITEM( 'o', 0xFFFF80, "Orb of Phasing", itOrbPhasing, IC_ORB, ZERO, RESERVED, osFrog, 
     "This orb lets you pass through walls (one cell wide), and also through monsters, as long as they will not attack you in transit.")
-ITEM( 'o', 0xFFFF80, "Orb of Magnetism", itOrbMagnetism, IC_ORB, ZERO, RESERVED, osNone, NODESCYET)
+ITEM( 'o', 0xFFFF80, "Orb of Magnetism", itOrbMagnetism, IC_ORB, ZERO, RESERVED, osUtility, NODESCYET)
 ITEM( 'o', 0x202020, "Orb of Slaying", itOrbSlaying, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osOffensive,
     "This Orb lets you defeat Raiders and other tough single-cell monsters in melee."
     )
@@ -849,7 +849,7 @@ ITEM( '$', 0xF0C0C0, "Meteorite", itWest, IC_TREASURE, ZERO, RESERVED, osNone,
     "These rocks falling from the sky have been captured to fall forever in the artificial gravity. Meteorite iron is believed to be a valuable material for magical weapons.")
 ITEM( '*', 0x30FF30, "Torbernite", itVarTreasure, IC_TREASURE, ZERO, RESERVED, osNone, 
     "Crystals emitting magical radiation.")
-ITEM( 'o', 0x703800, "Orb of Intensity", itOrbIntensity, IC_ORB, ZERO, RESERVED, osNone, 
+ITEM( 'o', 0x703800, "Orb of Intensity", itOrbIntensity, IC_ORB, ZERO, RESERVED, osPowerUtility, 
     "When you have this, initial and maximal charge amounts of all Orbs are increased by 20%."
     )
 ITEM( 'o', 0x80D080, "Orb of Gravity", itOrbGravity, IC_ORB, ZERO | IF_SHMUPLIFE, RESERVED, osWarping, 
@@ -1622,7 +1622,7 @@ MONSTER( 'W', 0xA04060, "Mutant2", moVariantWarrior2, CF_FACE_UP, RESERVED, moYe
     )
 ITEM( '/', 0x26619c, "Lazurite Figurine", itEclectic, IC_TREASURE, ZERO, RESERVED, osNone, 
     "A beautiful blue figurine. Every figurine is different.")
-ITEM( 'o', 0x808080, "Orb of Chaos", itOrbChaos, IC_ORB, ZERO, RESERVED, osUtility, 
+ITEM( 'o', 0x808080, "Orb of Chaos", itOrbChaos, IC_ORB, ZERO, RESERVED, osTerraform, 
    "When you move, the contents of the two cells adjacent to your both locations are swapped. "
    "If they contain creatures, these creatures will be stunned for some time, before they understand what happened.\n\n"
    "Does not work if one of the cells contains a "

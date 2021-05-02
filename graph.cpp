@@ -711,9 +711,13 @@ EX hpcshape& orbshape(eOrbshape s) {
      case osOffensive: return cgi.shSawRing;
      case osFriend: return cgi.shPeaceRing;
      case osUtility: return cgi.shGearRing;
+     case osPowerUtility: return cgi.shPowerGearRing;
      case osDirectional: return cgi.shSpearRing;
      case osWarping: return cgi.shHeptaRing;
      case osFrog: return cgi.shFrogRing;
+     case osProtective: return cgi.shProtectiveRing;
+     case osTerraform: return cgi.shTerraRing;
+     case osMovement: return cgi.shMoveRing;
      default: return cgi.shRing;
      }
   }

@@ -534,7 +534,7 @@ EX genderswitch_t genderswitch[NUM_GS] = {
 // --- items ---
 
 #if HDR
-enum eOrbshape { osNone, osLove, osRanged, osOffensive, osFriend, osUtility, osDirectional, osWarping, osFrog };
+enum eOrbshape { osNone, osLove, osRanged, osOffensive, osFriend, osUtility, osDirectional, osWarping, osFrog, osPowerUtility, osProtective, osMovement, osTerraform };
 
 static const flagtype ZERO = 0;
 

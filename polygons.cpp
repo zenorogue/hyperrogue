@@ -614,11 +614,45 @@ void geometry_information::procedural_shapes() {
     hpcpush(ddi(i, orbsize * (.3 + (int(i) & 3) * .02)) * C0);
   hpcpush(ddi(0, orbsize * .25) * C0);
 
+  bshape(shMoveRing, PPR::ITEM);
+  RING(i)
+    hpcpush(ddi(i, orbsize * .25) * C0);
+  REVPRING(i) {
+    int ii = i + 3;
+    if(int(ii) % 7 == 0) {
+      hpcpush(ddi(i-2, orbsize * (.3 - .02)) * C0);
+      hpcpush(ddi(i-1, orbsize * (.3 - .01)) * C0);
+      }
+    hpcpush(ddi(i, orbsize * (.3 + (int(ii) % 7) * .01)) * C0);
+    }
+  hpcpush(ddi(0, orbsize * .25) * C0);
+
   bshape(shGearRing, PPR::ITEM);
   RING(i)
     hpcpush(ddi(i, orbsize * .25) * C0);
   REVPRING(i)
     hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.3:.36)) * C0);
+  hpcpush(ddi(0, orbsize * .25) * C0);
+
+  bshape(shProtectiveRing, PPR::ITEM);
+  RING(i)
+    hpcpush(ddi(i, orbsize * .25) * C0);
+  REVPRING(i)
+    hpcpush(ddi(i, orbsize * ((dmod(i, 12)<3)?.3:.36)) * C0);
+  hpcpush(ddi(0, orbsize * .25) * C0);
+
+  bshape(shPowerGearRing, PPR::ITEM);
+  RING(i)
+    hpcpush(ddi(i, orbsize * .25) * C0);
+  REVPRING(i)
+    hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.3:(dmod(i,12) < 6) ? .36 : .42)) * C0);
+  hpcpush(ddi(0, orbsize * .25) * C0);
+
+  bshape(shTerraRing, PPR::ITEM);
+  RING(i)
+    hpcpush(ddi(i, orbsize * .25) * C0);
+  REVPRING(i)
+    hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.36:(dmod(i,12) < 6) ? .3 : .42)) * C0);
   hpcpush(ddi(0, orbsize * .25) * C0);
 
   bshape(shPeaceRing, PPR::ITEM);

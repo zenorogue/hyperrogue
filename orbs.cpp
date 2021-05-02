@@ -168,6 +168,15 @@ EX void reduceOrbPowers() {
   reduceOrbPower(itOrbSide3, 120);
   if(cwt.at->land != laWildWest)
     reduceOrbPower(itRevolver, 6);
+
+  reduceOrbPower(itOrbPurity, 30);
+  reduceOrbPower(itCurseWeakness, 999);
+  reduceOrbPower(itCurseDraining, 999);
+  reduceOrbPower(itCurseWater, 999);
+  reduceOrbPower(itCurseFatigue, 999);
+  reduceOrbPower(itCurseRepulsion, 999);
+  reduceOrbPower(itCurseGluttony, 999);
+
   whirlwind::calcdirs(cwt.at); 
   items[itStrongWind] = !items[itOrbAether] && whirlwind::qdirs == 1;
   items[itWarning] = 0;
@@ -1569,6 +1578,27 @@ EX int orbcharges(eItem it) {
       return 60;
        
     case itOrbPlague:
+      return 30;
+    
+    case itOrbPurity:
+      return 15;
+       
+    case itCurseWeakness:
+      return 20;
+       
+    case itCurseDraining:
+      return 60;
+       
+    case itCurseWater:
+      return 20;
+       
+    case itCurseFatigue:
+      return 30;
+       
+    case itCurseRepulsion:
+      return 30;
+       
+    case itCurseGluttony:
       return 30;
        
     default:
