@@ -545,6 +545,7 @@ static const flagtype IF_EMPATHY = Flag(3);
 static const flagtype IF_RANGED = Flag(4);
 static const flagtype IF_SHMUPLIFE = Flag(5);
 static const flagtype IF_REVIVAL = Flag(6);
+static const flagtype IF_CURSE = Flag(7);
 
 // 0 = basic treasure, 1 = other item, 2 = power orb, 3 = not an item
 #define IC_TREASURE 0

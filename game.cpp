@@ -296,6 +296,7 @@ EX void placeGolem(cell *on, cell *moveto, eMonster m) {
 EX bool multiRevival(cell *on, cell *moveto) {
   int fl = 0;
   if(items[itOrbAether]) fl |= P_AETHER;
+  if(items[itCurseWater]) fl |= P_WATERCURSE;
   if(items[itOrbFish]) fl |= P_FISH;
   if(items[itOrbWinter]) fl |= P_WINTER;
   if(passable(on, moveto, fl)) {

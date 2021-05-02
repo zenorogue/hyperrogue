@@ -89,7 +89,9 @@ EX bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) 
   if(!m2) return false;
   
   if(m2 == moPlayer && peace::on) return false;
-  
+
+  if((flags & AF_WEAK) && isIvy(c2)) return false;
+
   if((flags & AF_MUSTKILL) && attackJustStuns(c2, flags, m1))
     return false;
   
@@ -353,6 +355,7 @@ EX void stunMonster(cell *c2, eMonster killer, flagtype flags) {
     c2->monst == moFlailer ? 1 :
     c2->monst == moSalamander ? 6 :
     c2->monst == moBrownBug ? 3 :
+    ((flags & AF_WEAK) && !attackJustStuns(c2, flags &~ AF_WEAK, killer)) ? min(5+c2->stuntime, 15) :
     3);
   if(killer == moArrowTrap) newtime = min(newtime + 3, 7);
   if(!isMetalBeast(c2->monst) && !among(c2->monst, moSkeleton, moReptile, moSalamander, moTortoise, moWorldTurtle, moBrownBug)) {
@@ -366,6 +369,8 @@ EX void stunMonster(cell *c2, eMonster killer, flagtype flags) {
   }
 
 EX bool attackJustStuns(cell *c2, flagtype f, eMonster attacker) {
+  if(f & AF_WEAK)
+    return true;
   if(f & AF_HORNS)
     return hornStuns(c2);
   else if(attacker == moArrowTrap && arrow_stuns(c2->monst))
@@ -1040,6 +1045,8 @@ EX void killFriendlyIvy() {
   }
 
 EX bool monsterPushable(cell *c2) {
+  if(markOrb(itCurseWeakness) && attackJustStuns(c2, 0, moPlayer))
+    return false;
   return (c2->monst != moFatGuard && !(isMetalBeast(c2->monst) && c2->stuntime < 2) && c2->monst != moTortoise && c2->monst != moTerraWarrior && c2->monst != moVizier && c2->monst != moWorldTurtle);
   }  
 

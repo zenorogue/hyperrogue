@@ -1645,6 +1645,43 @@ WALL( '$', 0x40FD40, "Crate on Target", waCrateOnTarget, WF_WALL | WF_PUSHABLE, 
     "A crate already on a target."
     )
 
+ITEM( 'o', 0xF0F0FF, "Orb of Purity", itOrbPurity, IC_ORB, ZERO, RESERVED, osProtective, 
+  "Reverses all the curses."
+  )
+
+ITEM('c', 0x202020, "Curse of Weakness", itCurseWeakness, IC_ORB, IF_CURSE, RESERVED, osOffensive, 
+  "Makes you weak."
+  )
+
+ITEM('c', 0x6060FF, "Curse of Draining", itCurseDraining, IC_ORB, IF_CURSE, RESERVED, osPowerUtility, 
+  "Drains your power."
+  )
+
+ITEM('c', 0x000060, "Curse of Water", itCurseWater, IC_ORB, IF_CURSE, RESERVED, osTerraform, 
+  "Makes you fear water."
+  )
+
+ITEM('c', 0xFF6060, "Curse of Fatigue", itCurseFatigue, IC_ORB, IF_CURSE, RESERVED, osMovement, 
+  "Cannot move too quickly."
+  )
+
+ITEM('c', 0xFFFF80, "Curse of Repulsion", itCurseRepulsion, IC_ORB, IF_CURSE, RESERVED, osUtility, 
+  "All items are repelled."
+  )
+
+ITEM('c', 0xD08080, "Curse of Gluttony", itCurseGluttony, IC_ORB, IF_CURSE, RESERVED, osNone, 
+  "The first item you pick up is consumed."
+  )
+
+ITEM('>', 0xFF6060, "fatigue", itFatigue, IC_NAI, ZERO, RESERVED, osNone, 
+    "In the Windy Plains, you can let the wind carry you, "
+    "causing you to move two cells with the wind in a single turn. "
+    "This cannot be done if you are standing at distance at most 2 "
+    "from the Air Elemental, or if any of the three cells on the way "
+    "has two wind directions.\n\n"
+    "Press 't' or click the destination to activate."
+    )
+
 //shmupspecials
 MONSTER( '@', 0xC0C0C0, "Rogue", moPlayer, CF_FACE_UP | CF_PLAYER, RESERVED, moNone, "In the Shoot'em Up mode, you are armed with thrown Knives.")
 MONSTER( '*', 0xC0C0C0, "Knife", moBullet, ZERO | CF_BULLET, RESERVED, moNone, "A simple, but effective, missile, used by rogues.")

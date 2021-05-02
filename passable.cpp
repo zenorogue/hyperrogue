@@ -74,6 +74,7 @@ EX bool checkflags(flagtype flags, flagtype x) {
     if((x & P_FISH)      && markOrb(itOrbFish)) return true;
     if((x & P_MARKWATER) && markOrb(itOrbWater)) return true;
     if((x & P_AETHER)    && markOrb2(itOrbAether) && !(flags&P_NOAETHER)) return true;
+    if((x & P_WATERCURSE)&& markOrb2(itCurseWater)) return true;
     }
   if(flags & P_ISFRIEND) if(items[itOrbEmpathy]) 
     if(checkflags(flags ^ P_ISPLAYER ^ P_ISFRIEND, x) && markOrb(itOrbEmpathy))
@@ -129,6 +130,7 @@ EX bool anti_alchemy(cell *w, cell *from) {
 #define P_VOID       Flag(32) // void beast
 #define P_PHASE      Flag(33) // phasing movement
 #define P_PULLMAGNET Flag(34) // pull the other part of the magnet
+#define P_WATERCURSE Flag(35) // Curse of Water
 #endif
 
 EX bool passable(cell *w, cell *from, flagtype flags) {
@@ -136,6 +138,9 @@ EX bool passable(cell *w, cell *from, flagtype flags) {
   bool vrevdir = revdir ^ bool(flags&P_VOID);
 
   if(from && from != w && nonAdjacent(from, w) && !F(P_IGNORE37 | P_BULLET)) return false;
+  
+  if((isWateryOrBoat(w) || w->wall == waShallow) && F(P_WATERCURSE))
+    return false;
   
   for(cell *pp: player_positions()) {
     if(w == pp && F(P_ONPLAYER)) return true;

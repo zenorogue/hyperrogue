@@ -29,6 +29,21 @@ EX bool canPickupItemWithMagnetism(cell *c, cell *from) {
   }
 
 EX bool doPickupItemsWithMagnetism(cell *c) {
+  /* repulsion works first -- Magnetism will collect the item if not repulsed */
+  if(items[itCurseRepulsion])
+    forCellIdEx(c3, i, c) if(c3->item) {
+      cellwalker cw(c, i);
+      cw += wstep;
+      for(int j=1; j<c3->type; j++) {
+        cell *c4 = (cw+j).peek();
+        if(!isNeighbor(c, c4) && !c4->item && passable(c4, c3, ZERO)) {
+          changes.ccell(c3);
+          changes.ccell(c4);
+          c4->item = c3->item;
+          c3->item = itNone;
+          }
+        }
+      }
   cell *csaf = NULL;
   if(items[itOrbMagnetism])
     forCellEx(c3, c) if(canPickupItemWithMagnetism(c3, c)) {      
@@ -72,6 +87,14 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
   
   if(cannotPickupItem(c2, telekinesis))
     return false;
+
+  if(items[itCurseGluttony] && c2->item) {
+    addMessage(XLAT("%The1 is consumed!", c2->item));
+    playSound(c2, "apple");
+    items[itCurseGluttony] = 0;
+    c2->item = itNone;
+    return false;
+    }
   
   /* if(c2->item == itHolyGrail && telekinesis)
     return false; */

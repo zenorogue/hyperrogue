@@ -59,6 +59,11 @@ EX void empathyMove(const movei& mi) {
     if(makeflame(mi.s, 10, false)) markEmpathy(itOrbFire);
     }
 
+  if(items[itCurseWater]) {
+    invismove = false;
+    if(makeshallow(mi.s, 10, false)) markEmpathy(itCurseWater);
+    }
+
   if(items[itOrbDigging]) {           
    if(mi.proper() && earthMove(mi)) 
      markEmpathy(itOrbDigging), invismove = false;
@@ -76,6 +81,12 @@ EX int intensify(int val) {
   }
 
 EX bool reduceOrbPower(eItem it, int cap) {
+  if(items[it] && markOrb(itCurseDraining)) {
+    items[it] -= (markOrb(itOrbEnergy) ? 1 : 2) * multi::activePlayers();
+    if(items[it] < 0) items[it] = 0;
+    if(items[it] == 0 && it == itOrbLove) 
+      princess::bringBack();
+    }
   if(items[it] && (lastorbused[it] || (it == itOrbShield && items[it]>3) || !markOrb(itOrbTime))) {
     items[it] -= multi::activePlayers();
     if(isHaunted(cwt.at->land)) 
@@ -101,7 +112,22 @@ EX void reduceOrbPowerAlways(eItem it) {
     }
   }
 
+EX void reverse_curse(eItem curse, eItem orb) {
+  if(items[curse] && markOrb(itOrbPurity)) {
+    items[orb] += items[curse];
+    items[curse] = 0;
+    }
+  }
+
 EX void reduceOrbPowers() {
+
+  reverse_curse(itCurseWeakness, itOrbSlaying);
+  reverse_curse(itCurseFatigue, itOrbSpeed); // OK
+  reverse_curse(itCurseRepulsion, itOrbMagnetism); // OK
+  reverse_curse(itCurseWater, itOrbFire); // OK
+  reverse_curse(itCurseDraining, itOrbTime); // OK
+  reverse_curse(itCurseGluttony, itOrbChoice); // OK
+    
   if(haveMount()) markOrb(itOrbDomination);
   for(int i=0; i<ittypes; i++) 
     lastorbused[i] = orbused[i], orbused[i] = false;

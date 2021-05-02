@@ -503,6 +503,16 @@ void geometry_information::procedural_shapes() {
   for(int i=0; i<=S84; i+=SD3)
     hpcpush(ddi(i, orbsize * .2) * C0);
 
+  bshape(shMoonDisk, PPR::ITEM);
+  for(int i=0; i<=S84; i+=SD3)
+    if(i <= S84 * 2 / 3)
+      hpcpush(ddi(i, orbsize * .2) * C0);
+    else {
+      hyperpoint h1 = ddi(i, orbsize * .2) * C0;
+      hyperpoint h2 = ddi(S84-i*2, orbsize * .2) * C0;      
+      hpcpush(mid(mid(h1,h2), h2));
+      }
+
   bshape(shHugeDisk, PPR::ITEM);
   for(int i=0; i<=S84; i+=SD3)
     hpcpush(ddi(i, orbsize * .4) * C0);

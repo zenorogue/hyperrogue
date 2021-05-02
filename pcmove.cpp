@@ -778,7 +778,7 @@ bool pcmove::after_escape() {
   
   bool dont_attack = items[itOrbFlash] || items[itOrbLightning];
   
-  if(attackable && fmsAttack && !dont_attack) {
+  if(attackable && fmsAttack && !dont_attack && !items[itCurseWeakness]) {
     if(checkNeedMove(checkonly, true)) return false;
     nextmovetype = nm ? lmAttack : lmSkip;
     if(c2->wall == waSmallTree) {
@@ -829,6 +829,11 @@ bool pcmove::after_escape() {
     return attack();
   else if(!passable(c2, cwt.at, P_USEBOAT | P_ISPLAYER | P_MIRROR | P_MONSTER)) {
     if(vmsg()) tell_why_impassable();
+    return false;
+    }
+  else if(items[itFatigue] + fatigue_cost(mi) > 10) {
+    if(vmsg()) 
+      addMessage(XLAT("You are too fatigued!"));
     return false;
     }
   else if(fmsMove) 
@@ -898,6 +903,7 @@ bool pcmove::attack() {
   attackflags = AF_NORMAL;
   if(items[itOrbSpeed]&1) attackflags |= AF_FAST;
   if(items[itOrbSlaying]) attackflags |= AF_CRUSH;
+  if(items[itCurseWeakness]) attackflags |= AF_WEAK;
   
   bool ca =canAttack(cwt.at, moPlayer, c2, c2->monst, attackflags);
   
@@ -999,6 +1005,13 @@ EX bool chaos_forbidden(cell *c) {
   return do_not_touch_this_wall(c) || isMultitile(c->monst);
   }
 
+EX int fatigue_cost(const movei& mi) {
+  return
+    gravityLevelDiff(mi.t, mi.s) +
+    (snakelevel(mi.t) - snakelevel(mi.s)) +
+    (againstWind(mi.s, mi.t) ? 0 : 1);
+  }
+
 bool pcmove::perform_actual_move() {
   cell*& c2 = mi.t;
   changes.at_commit([&] {
@@ -1025,6 +1038,14 @@ bool pcmove::perform_actual_move() {
     invismove = false;
     if(makeflame(cwt.at, 10, false)) markOrb(itOrbFire);
     }
+
+  if(items[itCurseWater]) {
+    invismove = false;
+    if(makeshallow(mi.s, 10, false)) markOrb(itCurseWater);
+    }
+  
+  if(markOrb(itCurseFatigue) && !markOrb(itOrbAether))
+    items[itFatigue] += fatigue_cost(mi);
 
   handle_friendly_ivy();  
   
@@ -1144,6 +1165,10 @@ bool pcmove::stay() {
     playerMoveEffects(mi);
   if(d == -2) 
     dropGreenStone(cwt.at);
+
+  items[itFatigue] -= 5;
+  if(items[itFatigue] < 0)
+    items[itFatigue] = 0;
 
   if(monstersnear_add_pmi(mi)) {
     if(vmsg()) wouldkill("%The1 would get you!");

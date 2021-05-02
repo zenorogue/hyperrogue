@@ -141,7 +141,7 @@ int glyphflags(int gid) {
   int f = 0;
   if(gid < ittypes) {
     eItem i = eItem(gid);
-    if(itemclass(i) == IC_NAI) f |= GLYPH_NONUMBER;
+    if(itemclass(i) == IC_NAI && i != itFatigue) f |= GLYPH_NONUMBER;
     if(isElementalShard(i)) {
       f |= GLYPH_LOCAL | GLYPH_INSQUARE;
       if(i == localshardof(cwt.at->land)) f |= GLYPH_LOCAL2;

@@ -819,6 +819,10 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     queuepoly(Vit * spinptick(750, 0), cgi.shFan, darkena(icol, 0, 255));
     }
 
+  else if(it == itFatigue) {
+    queuepoly(Vit * spinptick(750, 0), cgi.shFan, darkena(icol, 0, 255));
+    }
+
   else if(it == itWarning) {
     queuepoly(Vit * spinptick(750, 0), cgi.shTriangle, darkena(icol, 0, 255));
     }
@@ -958,7 +962,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
       }
     }
   
-  else if(xch == 'o' || it == itInventory) {
+  else if(xch == 'o' || xch == 'c' || it == itInventory) {
     if(it == itOrbFire) icol = firecolor(100);
     PPR prio = PPR::ITEM;
     bool inice = c && c->wall == waIcewall;
@@ -970,8 +974,11 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     
     if(it == itOrbFish)
       queuepolyat(Vit * spinptick(1500, 0), cgi.shFishTail, col, PPR::ITEM_BELOW);
-
-    queuepolyat(Vit, cgi.shDisk, darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), prio);
+    
+    if(xch == 'c')
+      queuepolyat(Vit * spinptick(500, 0), cgi.shMoonDisk, darkena(0x801080, 0, hidden ? 0x20 : 0xC0), prio);
+    else
+      queuepolyat(Vit, cgi.shDisk, darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), prio);
 
     queuepolyat(Vit * spinptick(1500, 0), orbshape(iinf[it].orbshape), col, prio);
     }

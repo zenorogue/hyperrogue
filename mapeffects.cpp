@@ -420,6 +420,50 @@ EX bool makeflame(cell *c, int timeout, bool checkonly) {
   return true;
   }
 
+EX bool makeshallow(cell *c, int timeout, bool checkonly) {
+  changes.ccell(c);
+  if(!checkonly) destroyTrapsOn(c);
+  if(c->land == laBrownian) {
+    if(checkonly) return true;
+    brownian::dissolve(c, 1);
+    }
+  if(c->wall == waChasm || c->wall == waOpenGate || c->wall == waRed2 || c->wall == waRed3 ||
+    c->wall == waTower)
+    return false;
+  else if(c->wall == waNone && c->land == laCocytus) {
+    if(checkonly) return true;
+    c->wall = waLake;
+    }
+  else if(c->wall == waFireTrap) {
+    if(checkonly) return true;
+    c->wall = waShallow;
+    }
+  else if(c->wall == waFrozenLake) {
+    if(checkonly) return true;
+    drawParticles(c, MELTCOLOR, 8, 8);
+    c->wall = waLake;
+    }
+  else if(isFire(c)) {
+    if(checkonly) return true;
+    c->wall = waNone;
+    }
+  else if(c->wall == waMineMine) {
+    if(checkonly) return true;
+    c->wall = waShallow;
+    }
+  else if(among(c->wall, waNone, waRubble, waDeadfloor2, waCavefloor, waDeadfloor, waFloorA, waFloorB) && !cellUnstable(c) && !isGravityLand(c)) {
+    if(checkonly) return true;
+    c->wall = waShallow;
+    }
+  else if(c->wall == waDock) {
+    if(checkonly) return true;
+    c->wall = waSea;
+    c->wparam = 3;
+    return false;
+    }
+  return true;
+  }
+
 EX void explosion(cell *c, int power, int central) {
   changes.ccell(c);
   playSound(c, "explosion");
