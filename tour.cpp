@@ -824,7 +824,7 @@ EX slide default_slides[] = {
       QUICKFIND {
         return (l == laBurial && !items[itOrbSword]);
         };
-      SHOWLAND ( l == laCrossroads || l == laBurial );
+      SHOWLAND ( l == laRlyeh || l == laCrossroads || l == laBurial );
       }
     },
   {pcg+"Periodic patterns", 30, LEGAL::UNLIMITED | USE_SLIDE_NAME,
