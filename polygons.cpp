@@ -556,6 +556,7 @@ void geometry_information::procedural_shapes() {
     };
   
   make_ring(shRing, [this] {    
+    orb_inner_ring = isize(hpc) - shRing.s;
     REVPRING(i) {
       println(hlog, "called for i = ", i);
       hpcpush(ddi(i, orbsize * .30) * C0);

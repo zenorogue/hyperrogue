@@ -722,6 +722,19 @@ EX hpcshape& orbshape(eOrbshape s) {
      }
   }
 
+void queue_ring(const shiftmatrix& V, hpcshape& sh, color_t col, PPR p) {
+  queuepolyat(V, sh, col, p).outline = 0;
+
+  auto& p1 = queuepolyat(V, sh, col, p);
+  p1.cnt = cgi.orb_inner_ring;
+  p1.color = 0;
+
+  auto& p2 = queuepolyat(V, sh, col, p);
+  p2.color = 0;
+  p2.offset += cgi.orb_inner_ring;
+  p2.cnt -= cgi.orb_inner_ring + 1;
+  }
+
 EX color_t orb_auxiliary_color(eItem it) {
   if(it == itOrbFire) return firecolor(200);
   if(it == itOrbFriend || it == itOrbDiscord) return 0xC0C0C0;
@@ -862,7 +875,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
       else V2 = V;
       }
     if(GDIM == 3) {
-      queuepoly(Vit, cgi.shRing, 0xFFFFFFFF);
+      queue_ring(Vit, cgi.shRing, 0xFFFFFFFF, PPR::ITEM);
       if(WDIM == 2) V2 = mscale(V2, cgi.STUFF);
       V2 = V2 * cspin(1, 2, M_PI * sintick(100) / 39);
       queuepoly(V2, cgi.shCompass3, 0xFF0000FF);
@@ -980,7 +993,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     else
       queuepolyat(Vit, cgi.shDisk, darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), prio);
 
-    queuepolyat(Vit * spinptick(1500, 0), orbshape(iinf[it].orbshape), col, prio);
+    queue_ring(Vit * spinptick(1500, 0), orbshape(iinf[it].orbshape), col, prio);
     }
 
   else {
@@ -1328,7 +1341,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       int bits = where ? tortoise::getb(where) : tortoise::last;
       tortoise::draw(V, bits, 0, where ? where->stuntime : 0);
       if(tortoise::seek() && !tortoise::diff(bits) && where)
-        queuepoly(V, cgi.shRing, darkena(0xFFFFFF, 0, 0x80 + 0x70 * sintick(200)));
+        queue_ring(V, cgi.shRing, darkena(0xFFFFFF, 0, 0x80 + 0x70 * sintick(200)), PPR::ITEM);
       return true;
       }
     

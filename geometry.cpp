@@ -300,7 +300,12 @@ hpcshape
 
   hpcshape_animated 
     shAnimatedEagle, shAnimatedTinyEagle, shAnimatedGadfly, shAnimatedHawk, shAnimatedButterfly, 
-    shAnimatedGargoyle, shAnimatedGargoyle2, shAnimatedBat, shAnimatedBat2;  
+    shAnimatedGargoyle, shAnimatedGargoyle2, shAnimatedBat, shAnimatedBat2;
+  
+  hpcshape shReserved[16];
+  
+  int orb_inner_ring; //< for shDisk* shapes, the number of vertices in the inner ring
+  int res1, res2;
 
   map<int, hpcshape> shPipe;
 
