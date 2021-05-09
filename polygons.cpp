@@ -499,6 +499,10 @@ void geometry_information::procedural_shapes() {
     hpcpush(ddi(t*S28, zhexf*.5) * C0);
     }
 
+  bshape(shTinyArrow, PPR::ITEM);
+  for(ld d: {0, 90, -90, 0})
+    hpcpush(xspinpush0(d*degree, zhexf*.2));
+
   bshape(shDisk, PPR::ITEM);
   for(int i=0; i<=S84; i+=SD3)
     hpcpush(ddi(i, orbsize * .2) * C0);

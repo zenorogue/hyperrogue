@@ -302,6 +302,8 @@ hpcshape
     shAnimatedEagle, shAnimatedTinyEagle, shAnimatedGadfly, shAnimatedHawk, shAnimatedButterfly, 
     shAnimatedGargoyle, shAnimatedGargoyle2, shAnimatedBat, shAnimatedBat2;
   
+  hpcshape shTinyArrow;
+
   hpcshape shReserved[16];
   
   int orb_inner_ring; //< for shDisk* shapes, the number of vertices in the inner ring
