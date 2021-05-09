@@ -4993,7 +4993,9 @@ EX void calcparam() {
   realradius = min(realradius, cd->radius);
   
   ld aradius = sphere ? cd->radius / (pconf.alpha - 1) : cd->radius;
+  #if MAXMDIM >= 4
   if(euclid && rots::drawing_underlying) aradius *= 2.5;
+  #endif
   
   if(dronemode) { cd->ycenter -= cd->radius; cd->ycenter += vid.fsize/2; cd->ycenter += vid.fsize/2; cd->radius *= 2; }
   
