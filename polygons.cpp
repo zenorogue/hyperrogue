@@ -544,46 +544,48 @@ void geometry_information::procedural_shapes() {
   
   RING(i)
     hpcpush(hpxy(sin(i*2*M_PI/S84)*0.242 * orbsize, cos(i*2*M_PI/S84)*0.177*orbsize));
+  
+  auto make_ring = [this] (hpcshape& sh, reaction_t f) {
+    bshape(sh, PPR::ITEM);
+    RING(i)
+      hpcpush(ddi(i, orbsize * .25) * C0);
+    first = true;
+    f();
+    first = true;
+    hpcpush(ddi(0, orbsize * .25) * C0);
+    };
+  
+  make_ring(shRing, [this] {    
+    REVPRING(i) {
+      println(hlog, "called for i = ", i);
+      hpcpush(ddi(i, orbsize * .30) * C0);
+      }
+    });
 
-  bshape(shRing, PPR::ITEM);
-  RING(i)
-    hpcpush(ddi(i, orbsize * .25) * C0);
-  REVPRING(i)
-    hpcpush(ddi(i, orbsize * .30) * C0);
-  hpcpush(ddi(0, orbsize * .25) * C0);
+  make_ring(shSpikedRing, [this] {
+    REVPRING(i)
+      hpcpush(ddi(i, orbsize * (int(i)&1?.35:.30)) * C0);
+    });
 
-  bshape(shSpikedRing, PPR::ITEM);
-  RING(i)
-    hpcpush(ddi(i, orbsize * .25) * C0);
-  REVPRING(i)
-    hpcpush(ddi(i, orbsize * (int(i)&1?.35:.30)) * C0);
-  hpcpush(ddi(0, orbsize * .25) * C0);
+  make_ring(shTargetRing, [this] {
+    REVPRING(i)
+      hpcpush(ddi(i, orbsize * (i >= S42-6 && i <= S42+6 ?.36:.30)) * C0);
+    });
 
-  bshape(shTargetRing, PPR::ITEM);
-  RING(i)
-    hpcpush(ddi(i, orbsize * .25) * C0);
-  REVPRING(i)
-    hpcpush(ddi(i, orbsize * (i >= S42-6 && i <= S42+6 ?.36:.30)) * C0);
-  hpcpush(ddi(0, orbsize * .25) * C0);
+  make_ring(shFrogRing, [this] {
+    REVPRING(i)
+      hpcpush(ddi(i, orbsize * (((i >= S42-8 && i <= S42-2) || (i >= S42+2 && i <= S42+8)) ?.36:.30)) * C0);
+    });
 
-  bshape(shFrogRing, PPR::ITEM);
-  RING(i)
-    hpcpush(ddi(i, orbsize * .25) * C0);
-  REVPRING(i)
-    hpcpush(ddi(i, orbsize * (((i >= S42-8 && i <= S42-2) || (i >= S42+2 && i <= S42+8)) ?.36:.30)) * C0);
-  hpcpush(ddi(0, orbsize * .25) * C0);
-
-  bshape(shSpearRing, PPR::ITEM);
-  RING(i)
-    hpcpush(ddi(i, orbsize * .25) * C0);
-  REVPRING(i) {
-    double d = i - S42;
-    if(d<0) d = -d;
-    d = 8 - 2 * d;
-    if(d<0) d = 0;
-    hpcpush(ddi(i, orbsize * (.3 + .04 * d)) * C0);
-    }
-  hpcpush(ddi(0, orbsize * .25) * C0);
+  make_ring(shSpearRing, [this] {
+    REVPRING(i) {
+      double d = i - S42;
+      if(d<0) d = -d;
+      d = 8 - 2 * d;
+      if(d<0) d = 0;
+      hpcpush(ddi(i, orbsize * (.3 + .04 * d)) * C0);
+      }
+    });
 
   /* three nice spikes
   bshape(shLoveRing, PPR::ITEM);
@@ -600,84 +602,67 @@ void geometry_information::procedural_shapes() {
   hpcpush(ddi(0, orbsize * .25) * C0);
   */
 
-  bshape(shLoveRing, PPR::ITEM);
-  RING(i) hpcpush(ddi(i, orbsize * .25) * C0);
-  REVPRING(i) {
-    double j = i*3;
-    while(j >= S84) j -= S84;
-    double d = j - S42;
-    d = d / 9;
-    if(d<0) d = -d;
-    d = 8 - 2 * d;
-    if(d<0) d = 0;
-    if(d >= 6) d -= (d-6)/3;
-    hpcpush(ddi(i, orbsize * (.27 + .02 * d)) * C0);
-    }
-  hpcpush(ddi(0, orbsize * .25) * C0);
+  make_ring(shLoveRing, [this] {
+    REVPRING(i) {
+      double j = i*3;
+      while(j >= S84) j -= S84;
+      double d = j - S42;
+      d = d / 9;
+      if(d<0) d = -d;
+      d = 8 - 2 * d;
+      if(d<0) d = 0;
+      if(d >= 6) d -= (d-6)/3;
+      hpcpush(ddi(i, orbsize * (.27 + .02 * d)) * C0);
+      }
+    });
 
   auto dmod = [] (ld a, ld b) { return a - int(a/b)*b; };
 
-  bshape(shSawRing, PPR::ITEM);
-  RING(i)
-    hpcpush(ddi(i, orbsize * .25) * C0);
-  REVPRING(i)
-    hpcpush(ddi(i, orbsize * (.3 + (int(i) & 3) * .02)) * C0);
-  hpcpush(ddi(0, orbsize * .25) * C0);
+  make_ring(shSawRing, [this] {
+    REVPRING(i)
+      hpcpush(ddi(i, orbsize * (.3 + (int(i) & 3) * .02)) * C0);
+    });
 
-  bshape(shMoveRing, PPR::ITEM);
-  RING(i)
-    hpcpush(ddi(i, orbsize * .25) * C0);
-  REVPRING(i) {
-    int ii = i + 3;
-    if(int(ii) % 7 == 0) {
-      hpcpush(ddi(i-2, orbsize * (.3 - .02)) * C0);
-      hpcpush(ddi(i-1, orbsize * (.3 - .01)) * C0);
+  make_ring(shMoveRing, [this] {
+    REVPRING(i) {
+      int ii = i + 3;
+      if(int(ii) % 7 == 0) {
+        hpcpush(ddi(i-2, orbsize * (.3 - .02)) * C0);
+        hpcpush(ddi(i-1, orbsize * (.3 - .01)) * C0);
+        }
+      hpcpush(ddi(i, orbsize * (.3 + (int(ii) % 7) * .01)) * C0);
       }
-    hpcpush(ddi(i, orbsize * (.3 + (int(ii) % 7) * .01)) * C0);
-    }
-  hpcpush(ddi(0, orbsize * .25) * C0);
+    });
 
-  bshape(shGearRing, PPR::ITEM);
-  RING(i)
-    hpcpush(ddi(i, orbsize * .25) * C0);
-  REVPRING(i)
-    hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.3:.36)) * C0);
-  hpcpush(ddi(0, orbsize * .25) * C0);
+  make_ring(shGearRing, [dmod, this] {
+    REVPRING(i)
+      hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.3:.36)) * C0);
+    });
 
-  bshape(shProtectiveRing, PPR::ITEM);
-  RING(i)
-    hpcpush(ddi(i, orbsize * .25) * C0);
-  REVPRING(i)
-    hpcpush(ddi(i, orbsize * ((dmod(i, 12)<3)?.3:.36)) * C0);
-  hpcpush(ddi(0, orbsize * .25) * C0);
+  make_ring(shProtectiveRing, [dmod, this] {
+    REVPRING(i)
+      hpcpush(ddi(i, orbsize * ((dmod(i, 12)<3)?.3:.36)) * C0);
+    });
 
-  bshape(shPowerGearRing, PPR::ITEM);
-  RING(i)
-    hpcpush(ddi(i, orbsize * .25) * C0);
-  REVPRING(i)
-    hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.3:(dmod(i,12) < 6) ? .36 : .42)) * C0);
-  hpcpush(ddi(0, orbsize * .25) * C0);
+  make_ring(shPowerGearRing, [dmod, this] {
+    REVPRING(i)
+      hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.3:(dmod(i,12) < 6) ? .36 : .42)) * C0);
+    });
 
-  bshape(shTerraRing, PPR::ITEM);
-  RING(i)
-    hpcpush(ddi(i, orbsize * .25) * C0);
-  REVPRING(i)
-    hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.36:(dmod(i,12) < 6) ? .3 : .42)) * C0);
-  hpcpush(ddi(0, orbsize * .25) * C0);
+  make_ring(shTerraRing, [dmod, this] {
+    REVPRING(i)
+      hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.36:(dmod(i,12) < 6) ? .3 : .42)) * C0);
+    });
 
-  bshape(shPeaceRing, PPR::ITEM);
-  RING(i)
-    hpcpush(ddi(i, orbsize * .25) * C0);
-  REVPRING(i)
-    hpcpush(ddi(i, orbsize * (dmod(i, S28) < SD7?.36 : .3)) * C0);
-  hpcpush(ddi(0, orbsize * .25) * C0);
+  make_ring(shPeaceRing, [dmod, this] { 
+    REVPRING(i)
+      hpcpush(ddi(i, orbsize * (dmod(i, S28) < SD7?.36 : .3)) * C0);
+    });
 
-  bshape(shHeptaRing, PPR::ITEM);
-  RING(i)
-    hpcpush(ddi(i, orbsize * .25) * C0);
-  REVPRING(i)
-    hpcpush(ddi(i, orbsize * (dmod(i, S12) < SD3?.4 : .27)) * C0);
-  hpcpush(ddi(0, orbsize * .25) * C0);
+  make_ring(shHeptaRing, [dmod, this] {
+    REVPRING(i)
+      hpcpush(ddi(i, orbsize * (dmod(i, S12) < SD3?.4 : .27)) * C0);
+    });
 
   bshape(shCompass1, PPR::ITEM);
   RING(i)
