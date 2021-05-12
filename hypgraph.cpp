@@ -2783,7 +2783,9 @@ EX bool do_draw(cell *c, const shiftmatrix& T) {
     return true;
     }
 
+  #if MAXMDIM >= 4
   if(rots::drawing_underlying && euclid && hdist0(tC0(T)) > 6) return false;
+  #endif
   if(just_gmatrix && sphere) return true;
   if(!do_draw(c)) return false;
   if(euclid && pmodel == mdSpiral) {
