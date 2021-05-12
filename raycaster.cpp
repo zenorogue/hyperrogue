@@ -1676,9 +1676,11 @@ struct raycast_map {
   };
 
 unique_ptr<raycast_map> rmap;
+bool reset_rmap = false;
 
 EX void reset_raycaster() { 
-  our_raycaster = nullptr; rmap = nullptr; 
+  our_raycaster = nullptr; 
+  reset_rmap = true;
   rots::saved_matrices_ray = {};
   }
 
@@ -1850,6 +1852,8 @@ EX void cast() {
   auto cols = glhr::acolor(darkena(backcolor, 0, 0xFF));
   if(o->uFogColor != -1)
     glUniform4f(o->uFogColor, cols[0], cols[1], cols[2], cols[3]);
+
+  if(reset_rmap) rmap = nullptr, reset_rmap = false;
 
   if(!rmap) rmap = (unique_ptr<raycast_map>) new raycast_map;
   
