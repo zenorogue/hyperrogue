@@ -534,6 +534,9 @@ color_t distribute_color(int id) {
   return v; 
   }
 
+EX bool dist_label_colored = true;
+EX color_t dist_label_color = 0;
+
 void celldrawer::do_viewdist() {
   if(behindsphere(V)) return;
   
@@ -580,6 +583,8 @@ void celldrawer::do_viewdist() {
       }
     case ncNone: ;
     }
+  
+  if(!dist_label_colored) dc = dist_label_color;
 
   // string label = its(fieldpattern::getriverdistleft(c)) + its(fieldpattern::getriverdistright(c));
   /* queuepolyat(V, shFloor[ct6], darkena(gradient(0, distcolors[cd&7], 0, .25, 1), fd, 0xC0),
@@ -891,6 +896,11 @@ int expansion_readArgs() {
     shift(); number_coding = (eNumberCoding) argi();
     shift(); use_color_codes = argi() & 1; use_analyzer = argi() & 2; show_distance_lists = argi() & 4;
     not_only_descendants = argi() & 8;
+    }
+
+  else if(argis("-expansion-labelcolor")) {
+    dist_label_colored = false;
+    shift(); dist_label_color = arghex();
     }
 
   else if(argis("-expansion-off")) {
