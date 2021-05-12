@@ -1371,6 +1371,9 @@ EX namespace hybrid {
       id = arcm::id_of(c->master) + 20 * arcm::parent_index_of(c->master);
     else
     #endif
+    if(ugeometry == gArbitrary)
+      id = arb::id_of(c->master);
+    else
     if(PURE && !kite::in() && !bt::in())
       id = 0;
     else
