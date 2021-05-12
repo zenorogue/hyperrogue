@@ -1444,7 +1444,6 @@ EX namespace hybrid {
     });
   
   EX vector<pair<int, cell*>> gen_sample_list() {
-    if(!hybri && WDIM != 2) return {make_pair(0, centerover), make_pair(centerover->type, nullptr)};
     vector<pair<int, cell*>> result;
     for(auto& v: cgi.walloffsets) if(v.first >= 0) result.push_back(v);
     sort(result.begin(), result.end());
