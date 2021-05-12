@@ -1560,7 +1560,9 @@ EX hyperpoint linecross(hyperpoint a, hyperpoint b, hyperpoint c, hyperpoint d) 
   hyperpoint res;
   res[0] = (cay * dcx * bax + a[0] * bay * dcx - c[0] * dcy * bax) / (bay * dcx - dcy * bax);
   res[1] = (cax * dcy * bay + a[1] * bax * dcy - c[1] * dcx * bay) / (bax * dcy - dcx * bay);
-  res[2] = 1;
+  res[2] = 0;
+  res[3] = 0;
+  res[GDIM] = 1;
   return normalize(res);  
   }
 
