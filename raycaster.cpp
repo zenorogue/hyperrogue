@@ -1716,6 +1716,7 @@ struct raycast_map {
     }
 
   void assign_uniforms(raycaster* o) {
+    if(!o) return;
     glUniform1i(o->uLength, length);
     GLERR("uniform mediump length");
     
@@ -1972,6 +1973,8 @@ EX void cast() {
     rmap->assign_uniforms(&*o);
     }
   GLERR("uniform mediump start");
+  
+  if(!o) { cast(); return; }
   uniform2(o->uStartid, rmap->enc(rmap->ids[cs], 0));
   }
 
