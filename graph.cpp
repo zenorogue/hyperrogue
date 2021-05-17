@@ -2286,6 +2286,15 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
     int acol = col;
     queuepoly(VAHEAD, cgi.shTrylobiteHead, darkena(acol, 0, 0xFF));
     }
+  else if(m == moHexer) {
+    const shiftmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
+    ShadowV(V, cgi.shFemaleBody);
+    queuepoly(VBS, cgi.shFemaleBody, darkena(0x800080, 0, 0xFF));
+    queuepoly(VHEAD1, cgi.shWitchHair, darkena(0xFF00FF, 1, 0xFF));
+    queuepoly(VHEAD, cgi.shPFace, darkena(0xFFFFFF, 0, 0xFF));
+    queuepoly(VBS, cgi.shWitchDress, darkena(col, 1, 0XC0));
+    humanoid_eyes(V, 0xF000F0FF);
+    }
   else if(isWitch(m)) {
     const shiftmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
     int cc = 0xFF;

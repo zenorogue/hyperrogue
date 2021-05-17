@@ -1682,6 +1682,10 @@ ITEM('>', 0xFF6060, "fatigue", itFatigue, IC_NAI, ZERO, RESERVED, osNone,
     "Press 't' or click the destination to activate."
     )
 
+MONSTER('H', 0x181818, "Hag", moHexer, CF_FACE_UP, RESERVED, moYeti,
+  "Hags can curse you from afar!")
+
+
 //shmupspecials
 MONSTER( '@', 0xC0C0C0, "Rogue", moPlayer, CF_FACE_UP | CF_PLAYER, RESERVED, moNone, "In the Shoot'em Up mode, you are armed with thrown Knives.")
 MONSTER( '*', 0xC0C0C0, "Knife", moBullet, ZERO | CF_BULLET, RESERVED, moNone, "A simple, but effective, missile, used by rogues.")
