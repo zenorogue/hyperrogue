@@ -96,11 +96,15 @@ struct hyperpoint : array<ld, MAXMDIM> {
       );
     }
 
-  // inner product
-  inline friend ld operator | (hyperpoint h1, hyperpoint h2) {
+  friend ld dot_d(int c, hyperpoint h1, hyperpoint h2) {
     ld sum = 0;
-    for(int i=0; i<MXDIM; i++) sum += h1[i] * h2[i];
+    for(int i=0; i<c; i++) sum += h1[i] * h2[i];
     return sum;
+    }
+
+  // Euclidean inner product
+  inline friend ld operator | (hyperpoint h1, hyperpoint h2) {
+    return dot_d(MXDIM, h1, h2);
     }    
   };
 
