@@ -1097,7 +1097,7 @@ enum eMovementAnimation {
 
 EX eMovementAnimation ma;
 
-EX ld shift_angle, movement_angle;
+EX ld shift_angle, movement_angle, movement_angle_2;
 EX ld normal_angle = 90;
 EX ld period = 10000;
 EX int noframes = 30;
@@ -1254,9 +1254,11 @@ EX void apply() {
       if(GDIM == 3) {
         rotate_view(spin(-movement_angle * degree));
         rotate_view(cspin(1, 2, normal_angle * degree));
+        rotate_view(spin(-movement_angle_2 * degree));
         }
       rotate_view(spin(2 * M_PI * t / period));
       if(GDIM == 3) {
+        rotate_view(spin(movement_angle_2 * degree));
         rotate_view(cspin(2, 1, normal_angle * degree));
         rotate_view(spin(movement_angle * degree));
         }
@@ -1819,6 +1821,7 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
     addsaver(anims::rug_shift_angle, "rug forward shift angle", 0);
     addsaver(anims::a, "a", 0);
     addsaver(anims::b, "b", 0);
+    param_f(anims::movement_angle_2, "movement angle 2", 0);
     #endif
     });
 
