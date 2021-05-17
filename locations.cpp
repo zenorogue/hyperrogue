@@ -489,6 +489,7 @@ struct movei {
   int rev_dir_or(int x) const { return proper() ? s->c.spin(d) : x; }
   int rev_dir_mirror() const { return proper() ? s->c.spin(d) : d; }
   int rev_dir_force() const { hassert(proper()); return s->c.spin(d); }
+  int dir_force() const { hassert(proper()); return d; }
   bool mirror() { return s->c.mirror(d); }
   };
 #endif
