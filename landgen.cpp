@@ -2584,7 +2584,40 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
 
       break;
       }
-            
+    
+    case laCursed: {
+      if(fargen) {
+        c->wall = waStone;
+        for(int i=0; i<3; i++) {
+          auto ew = [i] (cell *c1) {
+            return getCdata(c1, i) & 64;
+            };
+          int val = ew(c);
+          forCellCM(c1, c) if(ew(c1) != val)
+            c->wall = waNone;
+          }
+        }
+      if(d == 7) {
+        if(c->wall == waNone) {
+          int wals = 0;
+          forCellCM(c1, c) if(c1->wall == waStone || c1->wall == waRubble || c1->land != laCursed)
+            wals++;
+          if(!wals) c->wall = waDeepWater;
+          }
+        if(c->wall == waStone && hrand(100) < 20)
+          c->wall = waRubble;
+        }
+      ONEMPTY {
+        if(hrand(5000) < 30 + kills[moHexer] && notDippingFor(itCursed))
+          c->item = itCursed;
+        else if(hrand(5000) < 30)
+          c->item = pick(itCurseWeakness, itCurseDraining, itCurseWater, itCurseFatigue, itCurseRepulsion, itCurseGluttony);
+        if(hrand_monster(4000) < 10 + items[itCursed] + yendor::hardness() && !safety) 
+          c->monst = moHexer;            
+        }
+      break;
+      }
+
     case laNone:
     case laBarrier:
     case laOceanWall:

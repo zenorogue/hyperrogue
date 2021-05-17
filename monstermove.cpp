@@ -1449,7 +1449,7 @@ EX void moveshadow() {
   cshpos = (cshpos+1) % SHSIZE;
   for(int p: player_indices()) {
     cell* where = shpos[p][cshpos];
-    if(where && where->monst == moNone && where->cpdist && where->land == laGraveyard &&
+    if(where && where->monst == moNone && where->cpdist && among(where->land, laGraveyard, laCursed) &&
       !sword::at(where)) {
       if(shfrom) animateMovement(match(shfrom, where), LAYER_SMALL);
       where->monst = moShadow;

@@ -1681,6 +1681,11 @@ ITEM('>', 0xFF6060, "fatigue", itFatigue, IC_NAI, ZERO, RESERVED, osNone,
 MONSTER('H', 0x181818, "Hag", moHexer, CF_FACE_UP, RESERVED, moYeti,
   "Hags can curse you from afar!")
 
+LAND(0xC0C0FF, "Cursed Land", laCursed, 0, itCursed, RESERVED,
+  "This land is full of curses!")
+  
+ITEM('/', 0x211F6F, "Cursed Gold", itCursed, IC_TREASURE, ZERO, RESERVED, osNone,
+  "A cursed gold.")
 
 //shmupspecials
 MONSTER( '@', 0xC0C0C0, "Rogue", moPlayer, CF_FACE_UP | CF_PLAYER, RESERVED, moNone, "In the Shoot'em Up mode, you are armed with thrown Knives.")
