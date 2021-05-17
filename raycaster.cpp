@@ -15,7 +15,7 @@ EX namespace ray {
 #if CAP_RAY
 
 /** texture IDs */
-GLuint txConnections = 0, txWallcolor = 0, txTextureMap = 0, txVolumetric = 0;
+GLuint txConnections = 0, txWallcolor = 0, txTextureMap = 0, txVolumetric = 0, txM = 0, txWall = 0;
 
 EX bool in_use;
 EX bool comparison_mode;
@@ -157,9 +157,15 @@ struct raycaster : glhr::GLprogram {
   GLint uProjection;
   GLint uEyeShift, uAbsUnit;
   
+  GLint tM, uInvLengthM;
+  GLint tWall, uInvLengthWall;
+  
   raycaster(string vsh, string fsh);
   };
 #endif
+
+bool m_via_texture = true;
+bool wall_via_texture = true;
 
 raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     println(hlog, "assigning");
@@ -191,6 +197,12 @@ raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     tWallcolor = glGetUniformLocation(_program, "tWallcolor");
     tTextureMap = glGetUniformLocation(_program, "tTextureMap");
     tVolumetric = glGetUniformLocation(_program, "tVolumetric");
+
+    tM = glGetUniformLocation(_program, "tM");
+    uInvLengthM = glGetUniformLocation(_program, "uInvLengthM");
+    
+    tWall = glGetUniformLocation(_program, "tWall");
+    uInvLengthWall = glGetUniformLocation(_program, "uInvLengthWall");
     
     uWallOffset = glGetUniformLocation(_program, "uWallOffset");
     uSides = glGetUniformLocation(_program, "uSides");
@@ -262,6 +274,27 @@ void enable_raycaster() {
     reset_raycaster();
     saved_state = state;
     }
+
+  auto getM = [] (string s) {
+    if(m_via_texture)
+      return "getM(" + s + ")";
+    else
+      return "uM[" + s + "]";
+    };
+
+  auto getWall = [] (string s, int coord) {
+    if(wall_via_texture)
+      return "getWall(" + s + "," + its(coord) + ")";
+    else
+      return "uWall" + string(coord?"Y" : "X") + "[" + s + "]";
+    };
+
+  auto getWallstart = [] (string s) {
+    if(wall_via_texture)
+      return "getWallstart(" + s + ")";
+    else
+      return "uWallstart[" + s + "]";
+    };
   
   wall_offset(centerover); /* so raywall is not empty and deg is not zero */
 
@@ -294,24 +327,57 @@ void enable_raycaster() {
     "uniform mediump int uLength;\n"
     "uniform mediump float uIPD;\n"
     "uniform mediump mat4 uStart;\n"
-    "uniform mediump mat4 uM[" + its(gms_limit) + "];\n"
     "uniform mediump vec2 uStartid;\n"
     "uniform mediump sampler2D tConnections;\n"
     "uniform mediump sampler2D tWallcolor;\n"
     "uniform mediump sampler2D tVolumetric;\n"
     "uniform mediump sampler2D tTexture;\n"
     "uniform mediump sampler2D tTextureMap;\n"
-    "uniform mediump vec4 uWallX["+rays+"];\n"
-    "uniform mediump vec4 uWallY["+rays+"];\n"
     "uniform mediump vec4 uFogColor;\n"
-    "uniform mediump int uWallstart["+its(isize(cgi.wallstart))+"];\n"
     "uniform mediump float uLinearSightRange, uExpStart, uExpDecay;\n";
+
+    if(wall_via_texture) {
+      fsh +=
+        "uniform mediump sampler2D tWall;\n"
+        "uniform mediump float uInvLengthWall;\n"
+        "mediump vec4 getWall(mediump int x, mediump int coord) {\n"
+        "  vec4 result;\n"
+        "  vec4 v = texture2D(tWall, vec2((float(x)+.5) * uInvLengthWall, (float(coord)+.5) / 4.));\n"
+        "  for(int j=0; j<4; j++) result[j] = (v[j] - .5) * 8.;\n"
+        "  return result;\n"
+        "  }\n"
+        "mediump int getWallstart(mediump int x) {\n"
+        "  vec4 v = texture2D(tWall, vec2((float(x)+.5) * uInvLengthWall, 0.625));\n"
+        "  return int(v[0] / uInvLengthWall);\n"
+        "  }\n";
+      }
+    else fsh +=
+      "uniform mediump vec4 uWallX["+rays+"];\n"
+      "uniform mediump vec4 uWallY["+rays+"];\n"
+      "uniform mediump int uWallstart["+its(isize(cgi.wallstart))+"];\n";
+
+    if(m_via_texture) {
+      fsh +=
+        "uniform mediump sampler2D tM;\n"
+        "uniform mediump float uInvLengthM;\n"
+        "mediump mat4 getM(mediump int x) {\n"
+        "  mat4 result;\n"
+        "  for(int i=0; i<4; i++) {\n"
+        "    vec4 v = texture2D(tM, vec2((float(x)+.5) * uInvLengthM, (float(i)+.5) / 4.));\n"
+        "    for(int j=0; j<4; j++) result[j][i] = (v[j] - .5) * 8.;\n"
+        "    }\n"
+        "  return result;\n"
+        "  }\n";
+      }
+    else fsh +=
+      "uniform mediump mat4 uM[" + its(gms_limit) + "];\n";
     
     #ifdef GLES_ONLY
     fsh += build_getter("mediump vec4", "uWallX", irays);
     fsh += build_getter("mediump vec4", "uWallY", irays);
     fsh += build_getter("mediump int", "uWallstart", deg+1);
-    fsh += build_getter("mediump mat4", "uM", gms_limit);
+    if(!m_via_texture)
+      fsh += build_getter("mediump mat4", "uM", gms_limit);
     #endif
     
     if(prod) fsh += 
@@ -387,11 +453,11 @@ void enable_raycaster() {
      "pos = vec4(pos.x/pos.z, pos.y/pos.z, pos.w, 0);\n";
    
    fsh += 
-       "int s = " GET("uWallstart", "which") ";\n"
-       "int e = " GET("uWallstart", "which+1") ";\n"
+       "int s = " + getWallstart("which") + ";\n"
+       "int e = " + getWallstart("which+1") + ";\n"
        "for(int ix=0; ix<16; ix++) {\n"
          "int i = s+ix; if(i >= e) break;\n"
-         "mediump vec2 v = vec2(dot(" GET("uWallX", "i") ", pos), dot(" GET("uWallY", "i") ", pos));\n"
+         "mediump vec2 v = vec2(dot(" + getWall("i", 0) + ", pos), dot(" + getWall("i", 1) + ", pos));\n"
          "if(v.x >= 0. && v.y >= 0. && v.x + v.y <= 1.) return vec2(v.x+v.y, v.x-v.y);\n"
          "}\n"
        "return vec2(1, 1);\n"
@@ -553,7 +619,7 @@ void enable_raycaster() {
       "  if(go == 0.) {\n"
       "    mediump float best = len(position);\n"
       "    for(int i=0; i<sides; i++) {\n"
-      "      mediump float cand = len(uM[i] * position);\n"
+      "      mediump float cand = len(" + getM("i") + " * position);\n"
       "      if(cand < best - .001) { dist = 0.; best = cand; which = i; }\n"
       "      }\n"
       "    }\n";
@@ -568,46 +634,47 @@ void enable_raycaster() {
       // fmain += "int woi = walloffset+i;\n";
       
       if(in_h2xe()) fmain +=
-          "    mediump float v = ((position - uM[woi] * position)[2] / (uM[woi] * tangent - tangent)[2]);\n"
+          "    mediump float v = ((position - " + getM("woi") + " * position)[2] / (" + getM("woi") + " * tangent - tangent)[2]);\n"
           "    if(v > 1. || v < -1.) continue;\n"
           "    mediump float d = atanh(v);\n"
           "    mediump vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
-          "    if(next_tangent[2] < (uM[woi] * next_tangent)[2]) continue;\n"
+          "    if(next_tangent[2] < (" + getM("woi") + " * next_tangent)[2]) continue;\n"
           "    d /= xspeed;\n";
       else if(in_s2xe()) fmain +=
-          "    mediump float v = ((position - uM[woi] * position)[2] / (uM[woi] * tangent - tangent)[2]);\n"
+          "    mediump float v = ((position - " + getM("woi") + " * position)[2] / (" + getM("woi") + " * tangent - tangent)[2]);\n"
           "    mediump float d = atan(v);\n"
           "    mediump vec4 next_tangent = tangent * cos(d) - position * sin(d);\n"
-          "    if(next_tangent[2] > (uM[woi] * next_tangent)[2]) continue;\n"
+          "    if(next_tangent[2] > (" + getM("woi") + " * next_tangent)[2]) continue;\n"
           "    d /= xspeed;\n";
       else if(in_e2xe()) fmain +=
-          "    mediump float deno = dot(position, tangent) - dot(uM[woi]*position, uM[woi]*tangent);\n"
+          "    mediump float deno = dot(position, tangent) - dot(" + getM("woi") + "*position, " + getM("woi") + "*tangent);\n"
           "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
-          "    mediump float d = (dot(uM[woi]*position, uM[woi]*position) - dot(position, position)) / 2. / deno;\n"
+          "    mediump float d = (dot(" + getM("woi") + "*position, " + getM("woi") + "*position) - dot(position, position)) / 2. / deno;\n"
           "    if(d < 0.) continue;\n"
           "    mediump vec4 next_position = position + d * tangent;\n"
-          "    if(dot(next_position, tangent) < dot(uM[woi]*next_position, uM[woi]*tangent)) continue;\n"
+          "    if(dot(next_position, tangent) < dot(" + getM("woi") + "*next_position, " + getM("woi") + "*tangent)) continue;\n"          
           "    d /= xspeed;\n";
       else if(hyperbolic) fmain +=
-          "    mediump float v = ((position - uM[woi] * position)[3] / (uM[woi] * tangent - tangent)[3]);\n"
+          "    mediump float v = ((position - " + getM("woi") + " * position)[3] / (" + getM("woi") + " * tangent - tangent)[3]);\n"
           "    if(v > 1. || v < -1.) continue;\n"
           "    mediump float d = atanh(v);\n"
           "    mediump vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
-          "    if(next_tangent[3] < (uM[woi] * next_tangent)[3]) continue;\n";
+          "    if(next_tangent[3] < (" + getM("woi") + " * next_tangent)[3]) continue;\n";
       else if(sphere) fmain +=
-          "    mediump float v = ((position - uM[woi] * position)[3] / (uM[woi] * tangent - tangent)[3]);\n"
+          "    mediump float v = ((position - " + getM("woi") + " * position)[3] / (" + getM("woi") + " * tangent - tangent)[3]);\n"
           "    mediump float d = atan(v);\n"
           "    mediump vec4 next_tangent = -position * sin(d) + tangent * cos(d);\n"
-          "    if(next_tangent[3] > (uM[woi] * next_tangent)[3]) continue;\n";
+          "    if(next_tangent[3] > (" + getM("woi") + " * next_tangent)[3]) continue;\n";
       else fmain += 
-          "    mediump float deno = dot(position, tangent) - dot(uM[woi]*position, uM[woi]*tangent);\n"
+          "    mediump float deno = dot(position, tangent) - dot(" + getM("woi") + "*position, " + getM("woi") + "*tangent);\n"
           "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
-          "    mediump float d = (dot(uM[woi]*position, uM[woi]*position) - dot(position, position)) / 2. / deno;\n"
+          "    mediump float d = (dot(" + getM("woi") + "*position, " + getM("woi") + "*position) - dot(position, position)) / 2. / deno;\n"
           "    if(d < 0.) continue;\n"
           "    mediump vec4 next_position = position + d * tangent;\n"
-          "    if(dot(next_position, tangent) < dot(uM[woi]*next_position, uM[woi]*tangent)) continue;\n";
+          "    if(dot(next_position, tangent) < dot(" + getM("woi") + "*next_position, " + getM("woi") + "*tangent)) continue;\n";
       
       replace_str(fmain, "[woi]", "[walloffset+i]");
+      replace_str(fmain, "(woi)", "(walloffset+i)");
   
       fmain += 
           "  if(d < dist) { dist = d; which = i; }\n"
@@ -615,12 +682,13 @@ void enable_raycaster() {
 
       if(hyperbolic && reg3::ultra_mirror_in()) {
         fmain += "for(int i="+its(S7*2)+"; i<"+its(S7*2+isize(cgi.vertices_only))+"; i++) {\n";
+        fmain += "mat4 uMi = " + getM("i") + ";";
         fmain +=
-          "    mediump float v = ((position - uM[i] * position)[3] / (uM[i] * tangent - tangent)[3]);\n"
+          "    mediump float v = ((position - uMi * position)[3] / (uMi * tangent - tangent)[3]);\n"
           "    if(v > 1. || v < -1.) continue;\n"
           "    mediump float d = atanh(v);\n"
           "    mediump vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
-          "    if(next_tangent[3] < (uM[i] * next_tangent)[3]) continue;\n"
+          "    if(next_tangent[3] < (uMi * next_tangent)[3]) continue;\n"
           "    if(d < dist) { dist = d; which = i; }\n"
             "}\n";
         }
@@ -1007,15 +1075,15 @@ void enable_raycaster() {
         fmain +=
       "    mediump float best = len(nposition);\n"
       "    for(int i=0; i<sides"+s+"; i++) {\n"
-      "      mediump float cand = len(uM[walloffset+i] * nposition);\n"
+      "      mediump float cand = len(" + getM("walloffset+i") + " * nposition);\n"
       "      if(cand < best) { best = cand; which = i; }\n"
       "      }\n";
         if(rotspace) fmain +=
       "   if(which == -1) {\n"
       "     best = len_h(nposition);\n"
-      "     mediump float cand1 = len_h(uM[walloffset+sides-2]*nposition);\n"
+      "     mediump float cand1 = len_h(" + getM("walloffset+sides-2") + "*nposition);\n"
       "     if(cand1 < best) { best = cand1; which = sides-2; }\n"
-      "     mediump float cand2 = len_h(uM[walloffset+sides-1]*nposition);\n"
+      "     mediump float cand2 = len_h(" + getM("walloffset+sides-1") + "*nposition);\n"
       "     if(cand2 < best) { best = cand2; which = sides-1; }\n"
       "     }\n";
         if(prod) {
@@ -1060,14 +1128,14 @@ void enable_raycaster() {
           "if(sp.z > 1.) {\n"
             "mediump float best = 999.;\n"
             "for(int i=0; i<4; i++) {\n"
-              "mediump float cand = len(uStraighten * uM[i] * position);\n"
+              "mediump float cand = len(uStraighten * " + getM("i") + " * position);\n"
               "if(cand < best) { best = cand; which = i;}\n"
               "}\n"
             "}\n"
           "if(sp.z < -1.) {\n"
             "mediump float best = 999.;\n"
             "for(int i=6; i<10; i++) {\n"
-              "mediump float cand = len(uStraighten * uM[i] * position);\n"
+              "mediump float cand = len(uStraighten * " + getM("i") + " * position);\n"
               "if(cand < best) { best = cand; which = i;}\n"
               "}\n"
             "}\n";
@@ -1151,14 +1219,14 @@ void enable_raycaster() {
         "if(which == 20) {\n"
         "  mediump float best = 999.;\n"
         "  for(int i="+its(flat2)+"; i<"+its(S7)+"; i++) {\n"
-          "  mediump float cand = len(uM[i] * position);\n"
+          "  mediump float cand = len(" + getM("i") + " * position);\n"
           "  if(cand < best) { best = cand; which = i; }\n"
           "  }\n"
           "}\n"
         "if(which == 21) {\n"
           "mediump float best = 999.;\n"
           "for(int i=0; i<"+its(flat1)+"; i++) {\n"
-          "  mediump float cand = len(uM[i] * position);\n"
+          "  mediump float cand = len(" + getM("i") + " * position);\n"
           "  if(cand < best) { best = cand; which = i; }\n"
           "  }\n"
 //          "gl_FragColor = vec4(.5 + .5 * sin((go+dist)*100.), 1, float(which)/3., 1); return;\n"
@@ -1184,7 +1252,7 @@ void enable_raycaster() {
     
     if(reg3::ultra_mirror_in()) fmain += 
       "if(which >= " + its(S7) + ") {"
-      "  tangent = uM[which] * tangent;\n"
+      "  tangent = " + getM("which") + " * tangent;\n"
       "  continue;\n"
       "  }\n";
       
@@ -1324,7 +1392,7 @@ void enable_raycaster() {
         "    }\n";
       else fmain += 
         "  if(reflect) {\n"
-        "    tangent = uM["+its(deg)+"+which] * tangent;\n"
+        "    tangent = " + getM(its(deg)+"+which") + " * tangent;\n"
         "    continue;\n"
         "    }\n";
       }
@@ -1340,7 +1408,7 @@ void enable_raycaster() {
     
     fmain +=
       "  int mid = int(connection.z * 1024.);\n"
-      "  mediump mat4 m = " GET("uM", "mid") " * " GET("uM", "walloffset+which") ";\n";
+      "  mediump mat4 m = " + getM("mid") + " * " + getM("walloffset+which") + ";\n";
     
     if(eyes) 
       fmain += "  vw = m * vw;\n";
@@ -1651,9 +1719,22 @@ struct raycast_map {
     glUniform1i(o->uLength, length);
     GLERR("uniform mediump length");
     
-    vector<glhr::glmatrix> gms;
-    for(auto& m: ms) gms.push_back(glhr::tmtogl_transpose3(m));
-    glUniformMatrix4fv(o->uM, isize(gms), 0, gms[0].as_array());
+    if(m_via_texture) {
+      int mlength = next_p2(isize(ms));
+      vector<array<float, 4>> m_map;
+      m_map.resize(4 * mlength);
+      for(int i=0; i<isize(ms); i++)
+        for(int a=0; a<4; a++)
+        for(int b=0; b<4; b++)
+          m_map[i+a*mlength][b] = ms[i][a][b]/8 + .5;
+      bind_array(m_map, o->tM, txM, 7, mlength);
+      glUniform1f(o->uInvLengthM, 1. / mlength);
+      }
+    else {
+      vector<glhr::glmatrix> gms;
+      for(auto& m: ms) gms.push_back(glhr::tmtogl_transpose3(m));
+      glUniformMatrix4fv(o->uM, isize(gms), 0, gms[0].as_array());
+      }
     
     bind_array(wallcolor, o->tWallcolor, txWallcolor, 4, length);
     bind_array(connections, o->tConnections, txConnections, 3, length);
@@ -1806,18 +1887,40 @@ EX void cast() {
     glUniform1i(o->uSides, cs->type + (WDIM == 2 ? 2 : 0));
     }
 
-  vector<GLint> wallstart;
-  for(auto i: cgi.wallstart) wallstart.push_back(i);
-  glUniform1iv(o->uWallstart, isize(wallstart), &wallstart[0]);  
-  
   vector<glvertex> wallx, wally;
   for(auto& m: cgi.raywall) {
     wallx.push_back(glhr::pointtogl(m[0]));
     wally.push_back(glhr::pointtogl(m[1]));
     }
   
-  glUniform4fv(o->uWallX, isize(wallx), &wallx[0][0]);
-  glUniform4fv(o->uWallY, isize(wally), &wally[0][0]);
+  if(wall_via_texture) {
+    int wlength = next_p2(isize(wallx));
+    vector<array<float, 4>> w_map;
+    w_map.resize(4 * wlength);
+    ld minval = 9, maxval = -9;
+    for(int i=0; i<isize(wallx); i++) {
+      for(int a=0; a<4; a++) {
+        w_map[i][a] = wallx[i][a]/8 + .5;
+        w_map[i+wlength][a] = wally[i][a]/8 + .5;
+        minval = min<ld>(minval, w_map[i][a]);
+        minval = min<ld>(minval, w_map[i+wlength][a]);
+        maxval = max<ld>(maxval, w_map[i][a]);
+        maxval = max<ld>(maxval, w_map[i+wlength][a]);
+        }
+      }
+    // println(hlog, "wallrange = ", tie(minval, maxval), " wallx = ", isize(wallx), " wallstart = ", isize(cgi.wallstart));
+    for(int i=0; i<isize(cgi.wallstart); i++)
+      w_map[i+2*wlength][0] = (cgi.wallstart[i]+.5) / wlength;
+    bind_array(w_map, o->tWall, txWall, 8, wlength);
+    glUniform1f(o->uInvLengthWall, 1. / wlength);
+    }
+  else {
+    vector<GLint> wallstart;
+    for(auto i: cgi.wallstart) wallstart.push_back(i);  
+    glUniform1iv(o->uWallstart, isize(wallstart), &wallstart[0]);  
+    glUniform4fv(o->uWallX, isize(wallx), &wallx[0][0]);
+    glUniform4fv(o->uWallY, isize(wally), &wally[0][0]);
+    }
 
   if(o->uLevelLines != -1)
     glUniform1f(o->uLevelLines, levellines);
