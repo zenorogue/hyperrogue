@@ -838,7 +838,8 @@ ITEM( '*', 0x80FF80, "Monopole", itMagnet, IC_TREASURE, ZERO, RESERVED, osNone, 
 ITEM( '!', 0xFF00FF, "Tasty Jelly", itSwitch, IC_TREASURE, ZERO, RESERVED, osNone, "A tasty byproduct of the Jelly Revolution.")
 ITEM( 'o', 0xFFFF80, "Orb of Phasing", itOrbPhasing, IC_ORB, ZERO, RESERVED, osFrog, 
     "This orb lets you pass through walls (one cell wide), and also through monsters, as long as they will not attack you in transit.")
-ITEM( 'o', 0xFFFF80, "Orb of Magnetism", itOrbMagnetism, IC_ORB, ZERO, RESERVED, osUtility, NODESCYET)
+ITEM( 'o', 0xFFFF80, "Orb of Magnetism", itOrbMagnetism, IC_ORB, ZERO, RESERVED, osUtility, 
+    "This orb makes you immediately pickup all the items on adjacent cells.")
 ITEM( 'o', 0x202020, "Orb of Slaying", itOrbSlaying, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osOffensive,
     "This Orb lets you defeat Raiders and other tough single-cell monsters in melee."
     )
@@ -1650,36 +1651,31 @@ ITEM( 'o', 0xF0F0FF, "Orb of Purity", itOrbPurity, IC_ORB, ZERO, RESERVED, osPro
   )
 
 ITEM('c', 0x202020, "Curse of Weakness", itCurseWeakness, IC_ORB, IF_CURSE, RESERVED, osOffensive, 
-  "Makes you weak."
+  "This orb weakens your normal attack, which will only stun monsters. For monsters which were only stunned anyway, they don't push the victim away. You are also unable to cut trees or fight Ivy."
   )
 
 ITEM('c', 0x6060FF, "Curse of Draining", itCurseDraining, IC_ORB, IF_CURSE, RESERVED, osPowerUtility, 
-  "Drains your power."
+  "Drains your power of all your orbs (and curses) by 2 charges per turn."
   )
 
 ITEM('c', 0x000060, "Curse of Water", itCurseWater, IC_ORB, IF_CURSE, RESERVED, osTerraform, 
-  "Makes you fear water."
+  "Makes you leave a trail of shallow water, and also afraid of water. You are unable to step into water, including shallow water and boats on water."
   )
 
 ITEM('c', 0xFF6060, "Curse of Fatigue", itCurseFatigue, IC_ORB, IF_CURSE, RESERVED, osMovement, 
-  "Cannot move too quickly."
+  "With this Orb you cannot move too quickly. Every move increases your fatigue by 1; fatigue cannot go over 10. "
+  "Resting reduces your fatigue by 5."
   )
 
 ITEM('c', 0xFFFF80, "Curse of Repulsion", itCurseRepulsion, IC_ORB, IF_CURSE, RESERVED, osUtility, 
-  "All items are repelled."
-  )
+  "If you have this Orb, all the items on adjacent cells will escape from you.")
 
 ITEM('c', 0xD08080, "Curse of Gluttony", itCurseGluttony, IC_ORB, IF_CURSE, RESERVED, osNone, 
-  "The first item you pick up is consumed."
+  "The first item you pick up is consumed without any effect."
   )
 
 ITEM('>', 0xFF6060, "fatigue", itFatigue, IC_NAI, ZERO, RESERVED, osNone, 
-    "In the Windy Plains, you can let the wind carry you, "
-    "causing you to move two cells with the wind in a single turn. "
-    "This cannot be done if you are standing at distance at most 2 "
-    "from the Air Elemental, or if any of the three cells on the way "
-    "has two wind directions.\n\n"
-    "Press 't' or click the destination to activate."
+    "See the Curse of Fatigue."
     )
 
 MONSTER('H', 0x181818, "Hag", moHexer, CF_FACE_UP, RESERVED, moYeti,
