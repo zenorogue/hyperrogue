@@ -272,6 +272,9 @@ int number_states = 0;
 /** \brief for state s, child_rules[s][i] is -1 if i-th neighbor not a child; otherwise, the state index of that neighbor */
 vector<array<int, XS7> > child_rules;
 
+/** parent direction for every state */
+vector<int> parent_list;
+
 /** \brief if child_rules[s][i] is -1, the rules to get to that neighbor */
 vector<array<string, XS7> > side_rules;
 
@@ -329,6 +332,8 @@ void test_canonical(string fname) {
   
   child_rules.resize(number_states, empty);
   
+  parent_list.resize(number_states);
+  
   println(hlog, "found ", its(number_states), " states");
   
   /** generate child_rules */
@@ -343,6 +348,7 @@ void test_canonical(string fname) {
 
     for(int a=0; a<S7; a++) {
       cell *c1 = c->move(a);
+      if(c1->FV < c->FV) parent_list[i] = a;
       if(c1->FV <= c->FV) continue;
       for(int b=0; b<S7; b++) {
         cell *c2 = c1->move(b);
@@ -372,12 +378,13 @@ void test_canonical(string fname) {
     int lqids = 0;
     
     for(int a=0; a<100; a++) {
-      set<array<int, XS7>> found;
-      vector<array<int, XS7>> v(number_states);
-      map<array<int, XS7>, int> ids;
+      set<array<int, XS7+1>> found;
+      vector<array<int, XS7+1>> v(number_states);
+      map<array<int, XS7+1>, int> ids;
       for(int i=0; i<number_states; i++) {
-        array<int, XS7> res;
+        array<int, XS7+1> res;
         for(int d=0; d<XS7; d++) res[d] = (child_rules[i][d] != -1) ? ih[child_rules[i][d]] : -1;
+        res[XS7] = parent_list[i];
         v[i] = res;
         found.insert(res);
         }
