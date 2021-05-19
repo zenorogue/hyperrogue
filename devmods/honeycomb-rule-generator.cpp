@@ -35,6 +35,8 @@ This algorithm works as follows:
 
 namespace hr {
 
+int exh;
+
 map<string, map<string,int> > rules;
 
 /** \brief S7 -- for efficiency this is a fixed constant */
@@ -139,8 +141,8 @@ struct ext_nei_rules_t {
 /** ext_nei_rules_t need to be created only once for each get_id */
 map<int, ext_nei_rules_t> ext_nei_rules;
 
-/** aux recursive function of construct_rules */
-void listnear(cell *c, ext_nei_rules_t& e, const transmatrix& T, int id, set<cell*>& visi) {
+/** aux recursive function of construct_rules: the compact variant */
+void listnear_compact(cell *c, ext_nei_rules_t& e, const transmatrix& T, int id, set<cell*>& visi) {
   visi.insert(c);
   int a = 0, b = 0;
   for(int i=0; i<S7; i++) {
@@ -157,7 +159,39 @@ void listnear(cell *c, ext_nei_rules_t& e, const transmatrix& T, int id, set<cel
     e.original.push_back(!visi.count(c1));
     if(e.original.back()) {
       b++;
-      listnear(c1, e, U, id1, visi);
+      listnear_compact(c1, e, U, id1, visi);
+      }
+    }
+  }
+
+/** aux recursive function of construct_rules: the maxdist variant */
+void listnear_exh(cell *c, ext_nei_rules_t& e, int maxdist) {
+  map<cell*, int> dist;
+  map<cell*, int> origdir;
+  vector<cell*> lst;
+
+  println(hlog, "called listnear_exh for: ", c);
+  
+  auto enqueue = [&] (cell *c, int d, int od) {
+    if(dist.count(c)) return;
+    dist[c] = d;
+    origdir[c] = od;
+    lst.push_back(c);
+    };
+  
+  enqueue(c, 0, -1);
+  for(int k=0; k<isize(lst); k++) {
+    cell *ca = lst[k];
+    int di = dist[ca] + 1;
+    int odi = origdir[ca];
+    for(int i=0; i<S7; i++) {
+      if(odi >= 0 && !cgi.dirs_adjacent[i][odi]) continue;
+      cell *c1 = ca->cmove(i);
+      e.from.push_back(k);
+      e.dir.push_back(i);
+      e.original.push_back(!dist.count(c1));
+      if(e.original.back() && di < maxdist) 
+        enqueue(c1, di, ca->c.spin(i));
       }
     }
   }
@@ -167,8 +201,13 @@ void construct_rules(cell *c, ext_nei_rules_t& e) {
   e.from = {-1};
   e.dir = {-1};
   e.original = {1};
-  set<cell*> visi;
-  listnear(c, e, Id, 0, visi);
+  if(!exh) {
+    set<cell*> visi;
+    listnear_compact(c, e, Id, 0, visi);
+    }
+  else {
+    listnear_exh(c, e, exh);
+    }
   int orgc = 0;
   for(auto i: e.original) orgc += i;
   println(hlog, "id ", get_id(c), " list length = ", isize(e.original), " original = ", orgc);
@@ -479,6 +518,9 @@ auto fqhook =
   if(0) ;
   else if(argis("-extra-verification")) {
     reg3::extra_verification++;
+    }
+  else if(argis("-exh")) {
+    shift(); exh = argi();
     }
   else if(argis("-no-rule")) {
     reg3::reg3_rule_available = false;
