@@ -48,12 +48,25 @@ map<string, map<string,int> > rules;
 /** \brief change i into a string containing a displayable character */
 auto dis = [] (int i, char init='a') { return s0 + char(init + i); };
 
+bool optimize_344 = false;
+
 /** \brief we use a regular pattern to make sure that the directions are identified consistently.
     In {5,3,5} we can just use the Seifert-Weber space for this identification; otherwise,
     we use the field pattern. */
     
 int get_id(cell *c) { 
   if(geometry == gSpace535) return 0;
+  if(optimize_344 && geometry == gSpace344) {
+    /* we use the 'pattern from crystal' */
+    /* but it is mod 4, mod 2 is enough for us */
+    int res = 0;
+    int fv = c->master->fieldval;
+    for(int i=0; i<4; i++) {
+      res = 2 * res + (fv&1);
+      fv >>= 2;
+      }
+    return res;
+    }
   return c->master->fieldval;
   }
 
@@ -278,6 +291,8 @@ void test_canonical(string fname) {
   int qc = reg3::quotient_count();
   
   vector<cell*> c0;
+  
+  if(optimize_344 && geometry == gSpace344) qc = 16;
   
   /* we start from a 'center' in every get_id-type */
   if(geometry == gSpace535) {
