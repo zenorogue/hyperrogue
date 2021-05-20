@@ -1032,11 +1032,8 @@ EX namespace reg3 {
       }
 
     hrmap_reg3_rule() : fp(0) {
-
-      if(S7 == 6) load_ruleset("honeycomb-rules-435.dat");
-      else if(S7 == 20) load_ruleset("honeycomb-rules-353.dat");
-      else if(ginf[geometry].vertex == 5) load_ruleset("honeycomb-rules-535.dat");
-      else load_ruleset("honeycomb-rules-534.dat");
+    
+      load_ruleset(get_rule_filename());
       
       origin = tailored_alloc<heptagon> (S7);
       heptagon& h = *origin;
@@ -1065,11 +1062,15 @@ EX namespace reg3 {
       
       if(geometry == gSpace535)
         quotient_map = new seifert_weber::hrmap_seifert_cover();
+      else if(geometry == gSpace344) 
+        quotient_map = new hrmap_from_crystal;
       else
-        quotient_map = new hrmap_field3(&fp);
+        quotient_map = new hrmap_field3(&fp);        
       
       if(geometry == gSpace535)
         emerald_map = new seifert_weber::hrmap_seifert_cover();
+      else if(geometry == gSpace344) 
+        emerald_map = new hrmap_from_crystal;
       else
         emerald_map = new hrmap_field3(&currfp);
       h.emeraldval = 0;
@@ -1264,9 +1265,29 @@ EX void link_structures(heptagon *h, heptagon *alt, hstate firststate) {
   }
 
 EX bool reg3_rule_available = true;
+EX string other_rule = "";
+
+EX string get_rule_filename() {
+  if(other_rule != "") return other_rule;
+  switch(geometry) {
+    case gSpace336: return "honeycomb-rules-336.dat";
+    case gSpace344: return "honeycomb-rules-344.dat";
+//  case gSpace345: return "honeycomb-rules-345.dat";
+    case gSpace353: return "honeycomb-rules-353.dat";
+    case gSpace354: return "honeycomb-rules-354.dat";
+//  case gSpace355: return "honeycomb-rules-355.dat";
+    case gSpace435: return "honeycomb-rules-435.dat";
+    case gSpace436: return "honeycomb-rules-436.dat";
+    case gSpace534: return "honeycomb-rules-534.dat";
+    case gSpace535: return "honeycomb-rules-535.dat";
+    case gSpace536: return "honeycomb-rules-536.dat";
+    
+    default: return "";
+    }
+  }
 
 EX bool in_rule() {
-  return reg3_rule_available && among(geometry, gSpace534, gSpace435, gSpace535, gSpace353);
+  return reg3_rule_available && get_rule_filename() != "";
   }
 
 EX int rule_get_root(int i) {
