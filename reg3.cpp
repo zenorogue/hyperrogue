@@ -949,6 +949,7 @@ EX namespace reg3 {
       buf.resize(qty);
 
       shstream ins(decompress_string(buf));
+      dynamicval<bool> q(fieldpattern::use_quotient_fp, true);      
       hread_fpattern(ins, fp);
       
       hread(ins, root);

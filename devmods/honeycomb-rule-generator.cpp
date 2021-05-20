@@ -272,6 +272,8 @@ void add_candidate(cell *c) {
 void test_canonical(string fname) {
   stop_game();
   reg3::reg3_rule_available = false;
+  fieldpattern::use_rule_fp = true;
+  fieldpattern::use_quotient_fp = true;
   start_game();
 
   int qc = reg3::quotient_count();
@@ -530,6 +532,12 @@ auto fqhook =
     }
   else if(argis("-no-rule")) {
     reg3::reg3_rule_available = false;
+    }
+  else if(argis("-urf")) {
+    cheat(); fieldpattern::use_rule_fp = true;
+    }
+  else if(argis("-uqf")) {
+    cheat(); fieldpattern::use_quotient_fp = true;
     }
   else if(argis("-gen-rule")) {
     shift(); test_canonical(args());
