@@ -1,17 +1,6 @@
 /**
 
-Honeycomb data generator.
-
-Usage: 
-
-./hyper -geo 534h -gen-rule honeycomb-rules-534.dat -quit
-./hyper -geo 535h -gen-rule honeycomb-rules-535.dat -quit
-./hyper -geo 435h -gen-rule honeycomb-rules-435.dat -quit
-./hyper -geo 353h -gen-rule honeycomb-rules-353.dat -quit
-
-You need to change the value of XS7 to 6 (for 435) or 12 (for others)
-
-You also need to select 'fp used for rules' 
+Honeycomb data generator. See rulegen.sh
 
 This algorithm works as follows:
 
