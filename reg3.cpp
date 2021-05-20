@@ -386,7 +386,7 @@ EX namespace reg3 {
         tmatrices[a].resize(S7);
         for(int b=0; b<S7; b++) {
           int k = lgr*a;
-          k = f->gmul(f->gmul(k, moveid[b]), lgr);
+          k = f->matcode[ f->mmul(f->mmul(f->matrices[k], f->matrices[moveid[b]]), f->P) ];
           for(int l=0; l<lgr; l++) if(f->gmul(k, l) % lgr == 0) {
             tmatrices[a][b] = cgi.adjmoves[b] * f->fullv[l];
             allh[a]->c.connect(b, allh[k/lgr], movedir[l], false);
