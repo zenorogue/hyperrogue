@@ -39,9 +39,6 @@ int exh;
 
 map<string, map<string,int> > rules;
 
-/** \brief S7 -- for efficiency this is a fixed constant */
-#define XS7 20
-
 /** \brief distance from the center */
 #define FV master->fiftyval
 
@@ -143,8 +140,6 @@ string find_path(cell *x, cell *y) {
     if(f != "?") return f;
     }
   }
-
-vector<array<string, XS7>> rule_list;
 
 /** a map of all the cells vertex-adjacent to c */
 struct ext_nei_rules_t {
@@ -270,13 +265,13 @@ vector<cell*> rep_of;
 int number_states = 0;
 
 /** \brief for state s, child_rules[s][i] is -1 if i-th neighbor not a child; otherwise, the state index of that neighbor */
-vector<array<int, XS7> > child_rules;
+vector<vector<int> > child_rules;
 
 /** parent direction for every state */
 vector<int> parent_list;
 
 /** \brief if child_rules[s][i] is -1, the rules to get to that neighbor */
-vector<array<string, XS7> > side_rules;
+vector<vector<string> > side_rules;
 
 void add_candidate(cell *c) {
   if(candidates.count(c)) return;
@@ -286,7 +281,6 @@ void add_candidate(cell *c) {
 
 /** the main function */
 void test_canonical(string fname) {
-  if(S7 != XS7) { println(hlog, "fix XS7=", S7); exit(4); }
   stop_game();
   reg3::reg3_rule_available = false;
   start_game();
@@ -313,7 +307,7 @@ void test_canonical(string fname) {
 
   for(cell* c: c0) add_candidate(c);
 
-  array<int, XS7> empty;
+  vector<int> empty(S7);
   for(auto& e: empty) e = -1;
   println(hlog, "empty = ", empty);
   
@@ -378,13 +372,13 @@ void test_canonical(string fname) {
     int lqids = 0;
     
     for(int a=0; a<100; a++) {
-      set<array<int, XS7+1>> found;
-      vector<array<int, XS7+1>> v(number_states);
-      map<array<int, XS7+1>, int> ids;
+      set<vector<int>> found;
+      vector<vector<int>> v(number_states);
+      map<vector<int>, int> ids;
       for(int i=0; i<number_states; i++) {
-        array<int, XS7+1> res;
-        for(int d=0; d<XS7; d++) res[d] = (child_rules[i][d] != -1) ? ih[child_rules[i][d]] : -1;
-        res[XS7] = parent_list[i];
+        vector<int> res(S7+1);
+        for(int d=0; d<S7; d++) res[d] = (child_rules[i][d] != -1) ? ih[child_rules[i][d]] : -1;
+        res[S7] = parent_list[i];
         v[i] = res;
         found.insert(res);
         }
@@ -398,11 +392,11 @@ void test_canonical(string fname) {
       }
     
     println(hlog, "reduced states to = ", lqids);
-    vector<array<int, XS7> > new_child_rules;
+    vector<vector<int> > new_child_rules;
     new_child_rules.resize(lqids, empty);  
     for(int i=0; i<number_states; i++) {
       int j = ih[i];
-      for(int d=0; d<XS7; d++) {
+      for(int d=0; d<S7; d++) {
         int cid = child_rules[i][d];
         new_child_rules[j][d] = cid == -1 ? -1 : ih[cid];
         }
@@ -419,6 +413,7 @@ void test_canonical(string fname) {
   
   /* generate side rules */
   side_rules.resize(number_states);
+  for(auto& s: side_rules) s.resize(S7);
 
   for(int i=0; i<isize(candidates_list); i++) {
     cell *c = candidates_list[i];
