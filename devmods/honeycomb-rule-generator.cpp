@@ -533,6 +533,10 @@ auto fqhook =
   else if(argis("-no-rule")) {
     reg3::reg3_rule_available = false;
     }
+  else if(argis("-other-rule")) {
+    reg3::reg3_rule_available = true;
+    shift(); reg3::other_rule = args();    
+    }
   else if(argis("-urf")) {
     cheat(); fieldpattern::use_rule_fp = true;
     }
