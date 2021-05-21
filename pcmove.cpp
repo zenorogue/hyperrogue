@@ -737,9 +737,14 @@ void pcmove::tell_why_cannot_attack() {
 
 bool pcmove::after_escape() {
   cell*& c2 = mi.t;
-
-  if(c2->wall == waBigStatue && !c2->monst && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
-    if(!canPushStatueOn(cwt.at, P_ISPLAYER)) {
+  
+  bool push_behind = c2->wall == waBigStatue || (among(c2->wall, waCTree, waSmallTree, waBigTree, waShrub, waVinePlant) && markOrb(itOrbWoods));
+  
+  if(thruVine(c2, cwt.at)) push_behind = true;
+  
+  if(push_behind && !c2->monst && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
+    eWall what = c2->wall;
+    if(!thruVine(c2, cwt.at) && !canPushStatueOn(cwt.at, P_ISPLAYER)) {
       if(vmsg()) { 
         if(isFire(cwt.at))
           addMessage(XLAT("You have to escape first!"));
@@ -753,11 +758,14 @@ bool pcmove::after_escape() {
     changes.ccell(cwt.at);
     
     c2->wall = cwt.at->wall;
-    if(doesnotFall(cwt.at))
-      cwt.at->wall = waBigStatue;
+    if(doesnotFall(cwt.at)) {
+      cwt.at->wall = what;
+      if(cellHalfvine(what)) 
+        c2->wall = waNone, cwt.at->wall = waVinePlant;
+      }
       
     nextmovetype = lmMove;
-    addMessage(XLAT("You push %the1 behind you!", waBigStatue));
+    addMessage(XLAT("You push %the1 behind you!", what));
     animateMovement(mi.rev(), LAYER_BOAT);
     changes.push_push(cwt.at);
     return perform_actual_move();

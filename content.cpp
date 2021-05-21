@@ -1687,6 +1687,10 @@ LAND(0xC0C0FF, "Cursed Land", laCursed, 0, itCursed, RESERVED,
 ITEM('/', 0x211F6F, "Cursed Gold", itCursed, IC_TREASURE, ZERO, RESERVED, osNone,
   "A cursed gold.")
 
+ITEM('o', 0x208020, "Orb of the Woods", itOrbWoods, IC_ORB, ZERO, RESERVED, osTerraform,
+  "Lets you swap positions with the trees.")
+
+
 //shmupspecials
 MONSTER( '@', 0xC0C0C0, "Rogue", moPlayer, CF_FACE_UP | CF_PLAYER, RESERVED, moNone, "In the Shoot'em Up mode, you are armed with thrown Knives.")
 MONSTER( '*', 0xC0C0C0, "Knife", moBullet, ZERO | CF_BULLET, RESERVED, moNone, "A simple, but effective, missile, used by rogues.")

@@ -146,6 +146,7 @@ EX void reduceOrbPowers() {
   reduceOrbPower(itOrbPsi, 111);
   reduceOrbPower(itOrbInvis, 77);
   reduceOrbPower(itOrbAether, 77);
+  reduceOrbPower(itOrbWoods, 100);
   reduceOrbPower(itOrbDigging, 100);
   reduceOrbPower(itOrbTeleport, 200);
   reduceOrbPower(itOrbSpace, 150);
@@ -1541,6 +1542,7 @@ EX int orbcharges(eItem it) {
     case itOrbFrog: 
     case itOrbDash:
     case itOrbPhasing:
+    case itOrbWoods:
       return 45;
     case itOrb37:
     case itOrbEnergy:
