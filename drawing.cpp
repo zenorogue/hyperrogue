@@ -86,7 +86,9 @@ struct dqi_poly : drawqueueitem {
   /** \brief temporarily cached data */
   float cache;
   void draw();
+  #if CAP_GL
   void gldraw();
+  #endif
   void draw_back();
   virtual color_t outline_group() { return outline; }
   };
@@ -606,9 +608,13 @@ void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, glvertex *tv, color_
   }
 #endif
 
-#if CAP_GL
-
 EX int global_projection;
+
+#if !CAP_GL
+flagtype get_shader_flags() { return 0; }
+#endif
+
+#if CAP_GL
 
 int min_slr, max_slr = 0;
 
@@ -1368,6 +1374,7 @@ void draw_stretch(dqi_poly *p) {
     return sqhypot_d(3, a-b) < 2;
     };
  
+  #if CAP_GL
   if(p->flags & POLY_TRIANGLES) {
     for(int i=0; i<p->cnt; i+=3) {
       auto &la = results[i];
@@ -1411,7 +1418,8 @@ void draw_stretch(dqi_poly *p) {
       npoly.cnt = isize(glcoords);  
       npoly.gldraw();      
       }
-    }  
+    }
+  #endif
   }
 
 EX namespace ods {
@@ -1767,10 +1775,12 @@ void dqi_poly::draw() {
     return;
     } */
 
+  #if CAP_GL
   if(vid.usingGL && (current_display->set_all(global_projection, V.shift), get_shader_flags() & SF_DIRECT) && sphere && (stretch::factor || ray::in_use)) {
     draw_stretch(this);  
     return;
     }
+  #endif
     
 #if CAP_GL
   if(vid.usingGL && (current_display->set_all(global_projection, V.shift), get_shader_flags() & SF_DIRECT)) {
@@ -2482,7 +2492,9 @@ EX void drawqueue() {
     curvedata.clear(); curvestart = 0;
     }
   
+  #if CAP_GL
   GLERR("drawqueue");
+  #endif
   }
 
 #if HDR
@@ -2619,6 +2631,7 @@ EX void queuestr(const shiftpoint& h, int size, const string& chr, color_t col, 
 
 EX basic_textureinfo finf;
   
+#if CAP_GL
 EX void write_in_space(const shiftmatrix& V, int fsize, double size, const string& s, color_t col, int frame IS(0), int align IS(8)) {
   init_glfont(fsize);
   glfont_t& f(*(glfont[fsize]));
@@ -2672,8 +2685,10 @@ EX void write_in_space(const shiftmatrix& V, int fsize, double size, const strin
 
   curvestart = isize(curvedata);
   }
+#endif
 
 EX void queuestr(const shiftmatrix& V, double size, const string& chr, color_t col, int frame IS(0), int align IS(8)) {
+  #if CAP_GL
   if(vid.usingGL) {
     shiftmatrix V1 ;
     if(GDIM == 3) 
@@ -2686,6 +2701,7 @@ EX void queuestr(const shiftmatrix& V, double size, const string& chr, color_t c
     write_in_space(V1, max_glfont_size, size, chr, col1, frame, align);
     return;
     }
+  #endif
   int xc, yc, sc; 
   if(getcoord0_checked(tC0(V), xc, yc, sc))
     queuestr(xc, yc, sc, scale_in_pixels(V) * size, chr, col, frame, align);

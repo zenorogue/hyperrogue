@@ -1920,7 +1920,9 @@ EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
             "a quick implementation, so parameter values too close to 1 may "
             "be buggy (outside of raycasting); try e.g. 0.9 instead.")
             );
+        #if CAP_GL
         dialog::reaction = reset_all_shaders;
+        #endif
         dialog::extra_options = [] {
           add_edit_fov('F', true);
           };
@@ -1935,7 +1937,9 @@ EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
             "a quick implementation, so parameter values too close to 1 may "
             "be buggy (outside of raycasting); try e.g. 0.9 instead.")
             );
+        #if CAP_GL
         dialog::reaction = reset_all_shaders;
+        #endif
         dialog::extra_options = [] {
           add_edit_fov('F', true);
           };

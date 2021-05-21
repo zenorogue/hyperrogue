@@ -399,9 +399,11 @@ EX namespace history {
   
   void restore();
   void restoreBack();
-  
+
+#if CAP_SHOT && CAP_SDL
   string band_format_now = "bandmodel-$DATE-$ID" IMAGEEXT;
   string band_format_auto = "bandmodel-$DATE-$ID" IMAGEEXT;
+#endif
 
 #if CAP_SDL
   EX void createImage(const string& name_format, bool dospiral) {
@@ -609,8 +611,10 @@ EX namespace history {
       }
     else if(uni == 'o') {
       autoband = !autoband;
+      #if CAP_SHOT && CAP_SDL
       if(autoband)
         dialog::openFileDialog(band_format_auto, XLAT("filename format to use ($ID=segment, $DATE=date)"), ".png", [] () { return true; });
+      #endif
       }
     else if(uni == 'm') 
       pushScreen(models::model_menu);
@@ -725,8 +729,10 @@ EX namespace history {
     addsaver(autobandhistory, "automatic band history");
     addsaver(dospiral, "do spiral");      
 
+    #if CAP_SHOT && CAP_SDL
     addsaver(band_format_auto, "band_format_auto");
     addsaver(band_format_now, "band_format_now");
+    #endif
     });
 
   }

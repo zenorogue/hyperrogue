@@ -5269,7 +5269,9 @@ EX int cmode;
 EX void drawscreen() {
 
   DEBBI(DF_GRAPH, ("drawscreen"));
+  #if CAP_GL
   GLWRAP;
+  #endif
 
   if(vid.xres == 0 || vid.yres == 0) return;
 
@@ -5373,7 +5375,9 @@ EX void drawscreen() {
   vrhr::submit();
   #endif
   
+  #if CAP_SDL
   present_screen();
+  #endif
 
 #if CAP_VR
   vrhr::handoff();

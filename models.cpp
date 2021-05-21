@@ -890,11 +890,19 @@ EX namespace models {
       }
     else if(argis("-palpha")) { 
       PHASEFROM(2); 
+      #if CAP_GL
       shift_arg_formula(panini_alpha, reset_all_shaders);
+      #else
+      shift_arg_formula(panini_alpha);
+      #endif
       }
     else if(argis("-salpha")) { 
       PHASEFROM(2); 
+      #if CAP_GL
       shift_arg_formula(stereo_alpha, reset_all_shaders);
+      #else
+      shift_arg_formula(stereo_alpha);
+      #endif
       }
     else if(argis("-zoom")) { 
       PHASEFROM(2); shift_arg_formula(vpconf.scale);

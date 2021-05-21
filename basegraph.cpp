@@ -243,7 +243,7 @@ EX void setcameraangle(bool b) { }
 EX void reset_projection() { }
 EX void glflush() { }
 EX bool model_needs_depth() { return false; }
-void display_data::set_all(int ed) {}
+void display_data::set_all(int ed, ld lshift) {}
 #endif
 
 #if CAP_GL
@@ -1134,17 +1134,21 @@ EX void apply_screen_settings() {
   if(vrhr::state) vrhr::shutdown_vr();
   #endif
 
+  #if CAP_SDL
   #if !CAP_SDL2
   if(need_to_reopen_window())
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
+  #endif
   #endif
 
   graphics_on = false;
   android_settings_changed();
   init_graph();
+  #if CAP_GL
   if(vid.usingGL) {
     glhr::be_textured(); glhr::be_nontextured();
     }
+  #endif
   }
 
 EX pair<int, int> get_requested_resolution() {
@@ -1162,9 +1166,9 @@ EX pair<int, int> get_requested_resolution() {
 #define CUSTOM_CAPTION ("HyperRogue " VER)
 #endif
 
-#if CAP_SDL
-
 EX bool resizable = true;
+
+#if CAP_SDL
 
 EX int current_window_flags = -1;
 
