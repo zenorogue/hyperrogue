@@ -1885,7 +1885,7 @@ EX void specialMoves() {
         cell *t = targets[i];
         
         if(isPlayerOn(t) && celldistance(c,t) <= firerange) {
-          addMessage(XLAT("%The1 curses you!", m));
+          addMessage(XLAT("%The1 curses you with %the2!", m, c->item));
           items[c->item] += orbcharges(c->item);
           c->item = itNone;
           c->stuntime = 1;
