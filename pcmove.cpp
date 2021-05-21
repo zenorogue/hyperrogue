@@ -926,7 +926,7 @@ bool pcmove::attack() {
 
   mip = movei(c2, nullptr, NO_SPACE);
   
-  if(isStunnable(c2->monst) && c2->hitpoints > 1) {
+  if(items[itCurseWeakness] || (isStunnable(c2->monst) && c2->hitpoints > 1)) {
     if(monsterPushable(c2))
       mip = determinePush(cwt, subdir, [c2] (cell *c) { return passable(c, c2, P_BLOW); });
     else
