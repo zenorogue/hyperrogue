@@ -112,21 +112,27 @@ EX void reduceOrbPowerAlways(eItem it) {
     }
   }
 
-EX void reverse_curse(eItem curse, eItem orb) {
+EX void reverse_curse(eItem curse, eItem orb, bool cancel) {
   if(items[curse] && markOrb(itOrbPurity)) {
     items[orb] += items[curse];
+    if(curse == itCurseWeakness) items[itOrbWinter] += items[curse];
     items[curse] = 0;
+    }
+  if(cancel && items[curse] && items[orb]) {
+    int m = min(items[curse], items[orb]);
+    items[curse] -= m;
+    items[orb] -= m;
     }
   }
 
 EX void reduceOrbPowers() {
 
-  reverse_curse(itCurseWeakness, itOrbSlaying);
-  reverse_curse(itCurseFatigue, itOrbSpeed); // OK
-  reverse_curse(itCurseRepulsion, itOrbMagnetism); // OK
-  reverse_curse(itCurseWater, itOrbFire); // OK
-  reverse_curse(itCurseDraining, itOrbTime); // OK
-  reverse_curse(itCurseGluttony, itOrbChoice); // OK
+  reverse_curse(itCurseWeakness, itOrbSlaying, true);
+  reverse_curse(itCurseFatigue, itOrbSpeed, false); // OK
+  reverse_curse(itCurseRepulsion, itOrbMagnetism, true); // OK
+  reverse_curse(itCurseWater, itOrbFire, true); // OK
+  reverse_curse(itCurseDraining, itOrbTime, false); // OK
+  reverse_curse(itCurseGluttony, itOrbChoice, true); // OK
     
   if(haveMount()) markOrb(itOrbDomination);
   for(int i=0; i<ittypes; i++) 
