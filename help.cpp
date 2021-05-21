@@ -458,6 +458,19 @@ EX string generateHelpForItem(eItem it) {
         "and sub-lands."
         );
 
+    if(it == itOrbLuck) {
+      help += XLAT("\n\nAdditionally, the probabilities of generating terrain features are subtly changed in the following lands:");
+      
+      int cnt = 0;
+      for(int i=0; i<landtypes; i++) {
+        eLand land = eLand(i);
+        if(isLuckyLand(land)) {
+          help += XLAT(cnt ? ", %1" : " %1", land);
+          cnt++;
+          }
+        }
+      }
+
     if(it == itBone)
       help += XLAT(
         "\n\nIn the Orb Strategy Mode, each 25 Necromancer's Totems "

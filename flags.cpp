@@ -292,6 +292,10 @@ EX bool isPermanentFlying(eMonster m) {
   return m == moAirElemental || isGhostAether(m);
   }
 
+EX bool isLuckyLand(eLand l) {
+  return among(l, laIce, laDesert, laDeadCaves, laOvergrown);
+  }
+
 EX bool survivesFire(eMonster m) {
   return
     isGhostAether(m) || m == moWitchWinter || m == moWitchGhost ||

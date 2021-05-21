@@ -947,7 +947,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
               }
             }
           }
-        if(c->wall == waIcewall && items[itDiamond] >= 5 && hrand(200) == 1)
+        if(c->wall == waIcewall && items[itDiamond] >= 5 && hrand(items[itOrbLuck] ? 50 : 200) == 1)
           c->wall = waBonfireOff;
         }
       if(d == 8 && BARLEV == 8) {
@@ -1104,7 +1104,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     case laDeadCaves:
       if(fargen) {
         int die = (randomPatternsMode ? (RANDPAT?100:0) : hrand(100));
-        if(die<50) c->wall = waDeadwall;
+        if(die<(items[itOrbLuck] ? 48 : 50)) c->wall = waDeadwall;
         else if(die<55) c->wall = waDeadfloor2;
         else c->wall = waDeadfloor;
         }
@@ -1233,7 +1233,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = RANDPAT ? waNone : RANDPATV(laWineyard) ? waBigTree : waSmallTree;
         else
           c->wall = 
-            (hrand(50+items[itMutant]/2+yendor::hardness()) < 30) ? (hrand(100) < 50 ? waBigTree : waSmallTree) : waNone;
+            (hrand(50+items[itMutant]/2+yendor::hardness()-(items[itOrbLuck]?10:0)) < 30) ? (hrand(100) < 50 ? waBigTree : waSmallTree) : waNone;
         }
       if(d == 8) {
         bool ok = c->landparam == 0;
@@ -1835,7 +1835,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             }
           }
   
-        if(hrand(300) == 1 && items[itSpice] >= 5) c->wall = waThumperOff;
+        if(hrand(items[itOrbLuck] ? 100 : 300) == 1 && items[itSpice] >= 5) c->wall = waThumperOff;
         }
       ONEMPTY {
         if(hrand(5000) < PT(100 + 2 * (kills[moWorm] + kills[moDesertman]), 200) && notDippingFor(itSpice))
