@@ -1028,7 +1028,14 @@ EX namespace reg3 {
       
       DEBB(DF_GEOM, ("removed cases = ", isize(bfs)));
       
-      possible_states.resize(qstate);
+      // just the number of FV's
+      int pstable = 0;
+      for(auto& p: nonlooping_earlier_states)
+        pstable = max(pstable, p.first.first+1);
+      
+      println(hlog, "pstable size = ", pstable, " (states: ", qstate, ")");
+      
+      possible_states.resize(pstable);
       for(auto& p: nonlooping_earlier_states)
         possible_states[p.first.first].push_back(p.first.second);
       }
