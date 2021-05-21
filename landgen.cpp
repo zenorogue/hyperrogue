@@ -2597,7 +2597,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waNone;
           }
         }
-      if(d == 7) {
+      if(d == 8) {
         if(c->wall == waNone) {
           int wals = 0;
           forCellCM(c1, c) if(c1->wall == waStone || c1->wall == waRubble || c1->land != laCursed)
@@ -2608,12 +2608,38 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = waRubble;
         }
       ONEMPTY {
-        if(hrand(5000) < 30 + kills[moHexer] && notDippingFor(itCursed))
+        /* turrets */
+        if(c->wall == waRubble) {
+          bool turret = true;
+          forCellEx(c1, c) if(c1->wall != waStone) turret = false;
+          if(turret) {
+            c->monst = moHexer;
+            c->item = pick(itCurseWeakness, itCurseDraining, itCurseWater, itCurseFatigue, itCurseRepulsion, itCurseGluttony);
+            }
+          }
+        
+        /* place curses on chokepoints */
+        if(c->wall == waNone && !c->item) {
+          bool last_wall = true;
+          int switches = 0;
+          bool border = false;
+          for(int a=0; a<3; a++) forCellEx(c1, c) {
+            if(c1->land != laCursed) border = true;
+            bool wa = among(c1->wall, waStone, waRubble, waDeepWater);
+            if(wa != last_wall) switches++;
+            last_wall = wa;
+            }
+          switches = (switches + 1) / 3;
+          
+          if((border || switches > 2) && hrand(100) < 50)
+            c->item = pick(itCurseWeakness, itCurseDraining, itCurseWater, itCurseFatigue, itCurseRepulsion, itCurseGluttony);
+          }
+
+        if(!c->item && c->wall == waNone && hrand(2000) < 100 + PT(kills[moHexer], 50) && notDippingFor(itCursed))
           c->item = itCursed;
-        else if(hrand(5000) < 30)
-          c->item = pick(itCurseWeakness, itCurseDraining, itCurseWater, itCurseFatigue, itCurseRepulsion, itCurseGluttony);
-        if(hrand_monster(4000) < 10 + items[itCursed] + yendor::hardness() && !safety) 
-          c->monst = moHexer;            
+
+        if(hrand_monster(2500) < 25 + items[itCursed] + yendor::hardness() && !safety) 
+          c->monst = moHexer;
         }
       break;
       }
