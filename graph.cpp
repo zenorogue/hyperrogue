@@ -269,10 +269,10 @@ void drawLove(const shiftmatrix& V, int hdir) {
 #endif
   }
 
-void drawWinter(const shiftmatrix& V, ld hdir) {
+void drawWinter(const shiftmatrix& V, ld hdir, color_t col) {
 #if CAP_QUEUE
   float ds = ptick(300);
-  color_t col = darkena(iinf[itOrbWinter].color, 0, 0xFF);
+  col = darkena(col, 0, 0xFF);
   for(int u=0; u<20; u++) {
     ld rad = sin(ds+u * 2 * M_PI / 20) * M_PI / S7;
     shiftmatrix V1 = chei(V, u, 20);
@@ -293,6 +293,18 @@ void drawLightning(const shiftmatrix& V) {
 #endif
   }
 
+void drawCurse(const shiftmatrix& V, color_t col) {
+#if CAP_QUEUE
+  col = darkena(col, 0, 0xFF);
+  for(int u=0; u<20; u++) {
+    ld leng = 0.6 + 0.3 * randd();
+    ld rad = rand() % 1000;
+    shiftmatrix V1 = chei(V, u, 20);
+    queueline(V1*xspinpush0(rad, cgi.hexf*0.3), V1*xspinpush0(rad, cgi.hexf*leng), col, 2 + vid.linequality);
+    }
+#endif
+  }
+
 #define UNTRANS (GDIM == 3 ? 0x000000FF : 0)
 
 EX void drawPlayerEffects(const shiftmatrix& V, cell *c, bool onplayer) {
@@ -301,6 +313,8 @@ EX void drawPlayerEffects(const shiftmatrix& V, cell *c, bool onplayer) {
   if(items[itOrbShell] > (shmup::on ? 0 : ORBBASE)) drawShield(V, itOrbShell);
 
   if(items[itOrbSpeed]) drawSpeed(V); 
+  if(items[itCurseGluttony]) drawCurse(V, iinf[itCurseGluttony].color); 
+  if(items[itCurseRepulsion]) drawCurse(V, iinf[itCurseRepulsion].color); 
 
   if(onplayer && (items[itOrbSword] || items[itOrbSword2])) {
     using namespace sword;
@@ -376,7 +390,13 @@ EX void drawPlayerEffects(const shiftmatrix& V, cell *c, bool onplayer) {
   if(onplayer && items[itOrbLove]) drawLove(V, 0); // displaydir(c, cwt.spin)); 
 
   if(items[itOrbWinter]) 
-    drawWinter(V, 0); // displaydir(c, cwt.spin));
+    drawWinter(V, 0, iinf[itOrbWinter].color); // displaydir(c, cwt.spin));
+
+  if(items[itOrbFire]) 
+    drawWinter(V, 0, iinf[itOrbFire].color); // displaydir(c, cwt.spin));
+
+  if(items[itCurseWater]) 
+    drawWinter(V, 0, iinf[itCurseWater].color); // displaydir(c, cwt.spin));
   
   if(onplayer && items[itOrbLightning]) drawLightning(V);
   
@@ -1175,6 +1195,9 @@ EX void drawPlayer(eMonster m, cell *where, const shiftmatrix& V, color_t col, d
       else if(items[itOrbSlaying]) {
         queuepoly(VWPN, cgi.shFlailTrunk, fc(314, cs.swordcolor, 3));
         queuepoly(VWPN, cgi.shHammerHead, fc(314, cs.swordcolor, 3));
+        }
+      else if(items[itCurseWeakness]) {
+        /* no weapon shown */
         }
       else if(!shmup::on)
         queuepoly(VWPN, cs.charid >= 2 ? cgi.shSabre : cgi.shPSword, fc(314, cs.swordcolor, 3)); // 3 not colored
@@ -2299,7 +2322,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
     const shiftmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
     int cc = 0xFF;
     if(m == moWitchGhost) cc = 0x85 + 120 * sintick(160);
-    if(m == moWitchWinter && where) drawWinter(V, 0);
+    if(m == moWitchWinter && where) drawWinter(V, 0, iinf[itOrbWinter].color);
     if(m == moWitchFlash && where) drawFlash(V);
     if(m == moWitchSpeed && where) drawSpeed(V);
     if(m == moWitchFire) col = firecolor(0);
