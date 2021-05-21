@@ -988,6 +988,7 @@ EX namespace reg3 {
         int fv = last.first;
         for(int d=0; d<S7; d++) {
           int nstate = children[state*S7+d];
+          if(nstate < -1) nstate += (1<<16);
           if(nstate >= 0) {
             address next = {mov(fv, d), nstate};
             if(!nles.count(next)) bfs.push_back(next);
@@ -1011,6 +1012,7 @@ EX namespace reg3 {
         int fv = last.first;
         for(int d=0; d<S7; d++) {
           int nstate = children[state*S7+d];
+          if(nstate < -1) nstate += (1<<16);
           if(nstate >= 0) {
             address next = {mov(fv, d), nstate};
             if(!nles.count(next)) continue;
@@ -1049,6 +1051,7 @@ EX namespace reg3 {
       
       int opos = 0;
       for(int c: children) {
+        if(c < -1) c += (1<<16);
         if(c >= 0)
           otherpos.push_back(-1);
         else {
@@ -1143,6 +1146,7 @@ EX namespace reg3 {
 
     heptagon *create_step(heptagon *parent, int d) override {
       int id = parent->fiftyval;
+      if(id < 0) id += (1<<16);
 
       auto cp = counterpart(parent);
       int d2 = cp->c.spin(d);
@@ -1154,6 +1158,7 @@ EX namespace reg3 {
       
       int id1 = children[S7*id+d];
       int pos = otherpos[S7*id+d];
+      if(id1 < -1) id1 += (1<<16);
       
       if(id1 == -1 && false) {
         int kk = pos;

@@ -112,8 +112,10 @@ void expansion_analyzer::preliminary_grouping() {
     children.resize(N);
     int k = 0;
     for(int i=0; i<N; i++) for(int j=0; j<S7; j++) {
-      if(chi[k] >= 0)
-        children[i].push_back(chi[k]);
+      int ck = chi[k];
+      if(ck < -1) ck += (1<<16);
+      if(ck >= 0)
+        children[i].push_back(ck);
       k++;
       }
 #endif
