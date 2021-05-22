@@ -2607,6 +2607,11 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         if(c->wall == waStone && hrand(100) < 20)
           c->wall = waRubble;
         }
+      if(d == 7 && c->wall == waDeepWater) {
+        bool lone = true;
+        forCellEx(c1, c) if(c1->wall == waDeepWater) lone = false;
+        if(lone) c->wall = waEternalFire;
+        }
       ONEMPTY {
         /* turrets */
         if(c->wall == waRubble) {
@@ -2625,7 +2630,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           bool border = false;
           for(int a=0; a<3; a++) forCellEx(c1, c) {
             if(c1->land != laCursed) border = true;
-            bool wa = among(c1->wall, waStone, waRubble, waDeepWater);
+            bool wa = among(c1->wall, waStone, waRubble, waDeepWater, waEternalFire);
             if(wa != last_wall) switches++;
             last_wall = wa;
             }
