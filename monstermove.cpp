@@ -453,7 +453,7 @@ EX int moveval(cell *c1, cell *c2, int d, flagtype mf) {
   
   if(wantsToStay(m)) return 750;
   
-  if((m == moRatling || m == moRatlingAvenger) && lastmovetype == lmSkip) return 650;
+  if((m == moRatling || m == moRatlingAvenger) && lastmovetype == lmSkip && !items[itFatigue]) return 650;
 
   if(m == moLancer) { 
     bool lancerok = true;
