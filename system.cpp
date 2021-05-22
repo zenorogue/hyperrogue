@@ -1657,6 +1657,6 @@ addHook(hooks_removecells, 0, [] () {
   eliminate_if(buggycells, is_cell_removed);
   eliminate_if(butterflies, [] (pair<cell*,int>& p) { return is_cell_removed(p.first); });
   for(int i=0; i<SHSIZE; i++) for(int p=0; p<MAXPLAYER; p++)
-    set_if_removed(shpos[p][i], NULL);
+    set_if_removed(shpos[i][p], NULL);
   });
 }

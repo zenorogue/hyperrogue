@@ -1436,7 +1436,7 @@ EX void moveshadow() {
 
   shpos.resize(SHSIZE);
   for(int p: player_indices()) {
-    cell *c = shpos[p][cshpos];
+    cell *c = shpos[cshpos][p];
     if(c && c->monst == moShadow) {
       for(int j=0; j<c->type; j++) 
         if(c->move(j) && canAttack(c, moShadow, c->move(j), c->move(j)->monst, AF_ONLY_FBUG | AF_GETPLAYER))
@@ -1444,11 +1444,11 @@ EX void moveshadow() {
       c->monst = moNone;
       shfrom = c;
       }
-    shpos[p][cshpos] = playerpos(p);
+    shpos[cshpos][p] = playerpos(p);
     }
   cshpos = (cshpos+1) % SHSIZE;
   for(int p: player_indices()) {
-    cell* where = shpos[p][cshpos];
+    cell* where = shpos[cshpos][p];
     if(where && where->monst == moNone && where->cpdist && among(where->land, laGraveyard, laCursed) &&
       !sword::at(where)) {
       if(shfrom) animateMovement(match(shfrom, where), LAYER_SMALL);
