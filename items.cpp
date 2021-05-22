@@ -36,10 +36,11 @@ EX bool doPickupItemsWithMagnetism(cell *c) {
       cw += wstep;
       for(int j=1; j<c3->type; j++) {
         cell *c4 = (cw+j).peek();
-        if(!isNeighbor(c, c4) && !c4->item && passable(c4, c3, ZERO)) {
+        if(!isNeighbor(c, c4) && c3->item && !c4->item && passable(c4, c3, ZERO)) {
           changes.ccell(c3);
           changes.ccell(c4);
           c4->item = c3->item;
+          moveEffect(movei(c3, c4, (cw+j).spin), moDeadBird);
           c3->item = itNone;
           }
         }
