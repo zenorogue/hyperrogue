@@ -165,6 +165,7 @@ EX vector<orbinfo> orbinfos = {
   {orbgenflags::S_GUEST, laWet, 1200, 0, itOrbFish},
   {orbgenflags::S_GUEST, laWet, 1200, 0, itOrbAether},
   {orbgenflags::S_GUEST, laWet, 1200, 0, itOrbFrog},
+  {orbgenflags::S_NATIVE, laCursed, 400, 1500, itOrbPurity},
   {orbgenflags::S_NATIVE, laWhirlpool, 0, 2000, itOrbWater}, // needs to be last
   };
 
