@@ -1455,8 +1455,8 @@ EX void moveshadow() {
       where->monst = moShadow;
       where->hitpoints = p;
       where->stuntime = 0;
-      // the Shadow sets off the mines
-      mayExplodeMine(where, moShadow);
+      // the Shadow sets off the mines and stuff
+      moveEffect(movei(where, where, NODIR), moShadow);
       }
     }
   }
