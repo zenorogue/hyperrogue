@@ -883,6 +883,26 @@ EX void describeMouseover() {
 
     if(c->land == laTortoise && tortoise::seek()) out += " " + tortoise::measure(getBits(c));
 
+    // describe the shadow path
+    if(among(c->land, laGraveyard, laCursed) && shpos.size()) {
+      string shadowtimes;
+      vector<cell*> route;
+      for(int s=1; s<SHSIZE; s++) {
+        bool shadow = false;
+        for(int p: player_indices())
+          if(shpos[(cshpos+s)%SHSIZE][p] == c) 
+            shadow = true;
+        if(shadow) {
+          if(shadowtimes == "")
+            shadowtimes = its(s);
+          else
+            shadowtimes += " " + its(s);
+          }
+        }
+      if(shadowtimes != "")
+        out += XLAT(" (shadow in %1)", shadowtimes);
+      }
+
     if(buggyGeneration) {
       char buf[80]; sprintf(buf, " %p H=%d M=%d", hr::voidp(c), c->landparam, c->mpdist); out += buf;
       }
