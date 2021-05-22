@@ -150,11 +150,11 @@ bool pcmove::checkNeedMove(bool checkonly, bool attacking) {
     if(markOrb2(itOrbAether)) return false;
     if(vmsg()) addMessage(XLAT("The gate is closing right on you! RUN!"));
     }
-  else if(isFire(cwt.at) && !markOrb(itOrbWinter) && !markOrb2(itOrbShield)) {
+  else if(isFire(cwt.at) && !markOrb(itOrbWinter) && !markOrb(itCurseWater) && !markOrb2(itOrbShield)) {
     if(markOrb2(itOrbAether)) return false;
     if(vmsg()) addMessage(XLAT("This spot will be burning soon! RUN!"));
     }
-  else if(cwt.at->wall == waMagma && !markOrb(itOrbWinter) && !markOrb2(itOrbShield)) {
+  else if(cwt.at->wall == waMagma && !markOrb(itOrbWinter) && !markOrb(itCurseWater) && !markOrb2(itOrbShield)) {
     if(markOrb2(itOrbAether)) return false;
     if(in_gravity_zone(cwt.at) && passable(cwt.at, cwt.at, P_ISPLAYER)) return false;
     if(vmsg()) addMessage(XLAT("Run away from the magma!"));
