@@ -1875,22 +1875,24 @@ EX void specialMoves() {
       }
 
     else if(m == moHexer && c->item && (classflag(c->item) & IF_CURSE) && !peace::on) {
-      bool shot = false;
       // bool dont_approach = false;
       // smaller range on the sphere
       int firerange = (sphere || getDistLimit() < 5) ? 2 : 4;
       
-      bool dont_approach;
+      bool dont_approach = false;
       for(int i=0; i<isize(targets); i++) {
         cell *t = targets[i];
         
-        if(isPlayerOn(t) && celldistance(c,t) <= firerange) {
-          addMessage(XLAT("%The1 curses you with %the2!", m, c->item));
-          items[c->item] += orbcharges(c->item);
-          c->item = itNone;
-          c->stuntime = 1;
+        if(isPlayerOn(t)) {
+          int d = celldistance(c,t);
+          if(d <= firerange) {
+            addMessage(XLAT("%The1 curses you with %the2!", m, c->item));
+            items[c->item] += orbcharges(c->item);
+            c->item = itNone;
+            c->stuntime = 1;
+            }
+          if(d == firerange+1) dont_approach = true;
           }
-        if(celldistance(c,t) == firerange+1) dont_approach = true;
         }
       
       if(dont_approach) c->stuntime = 1;
