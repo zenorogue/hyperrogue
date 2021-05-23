@@ -3372,8 +3372,9 @@ EX void init_floorcolors() {
   floorcolors[laOvergrown] = 0x00C020;
   floorcolors[laClearing] = 0x60E080;
   floorcolors[laHaunted] = 0x609F60;
+  floorcolors[laCursed] = 0x481848;
 
-  floorcolors[laMirror] = floorcolors[laMirrorWall] = floorcolors[laMirrorOld] = 0x808080;
+  floorcolors[laMirror] = floorcolors[laMirrorWall] = floorcolors[laMirrorOld] = 0x808080;  
   }
 
 EX color_t magma_color(int id) {

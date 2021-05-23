@@ -146,7 +146,7 @@ void celldrawer::setcolors() {
     case laDesert: case laKraken: case laDocks: 
     case laMotion: case laGraveyard: case laWineyard: case laLivefjord: 
     case laRlyeh: case laHell: case laCrossroads: case laJungle:
-    case laAlchemist: case laFrog:
+    case laAlchemist: case laFrog: case laCursed:
       fcol = floorcolors[c->land]; break;
     
     case laCA:
