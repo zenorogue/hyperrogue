@@ -1121,11 +1121,11 @@ EX void show_vr_demos() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
   dialog::init(XLAT("VR demos"));
-  dialog::addInfo("warning: these will restart your game!");
+  dialog::addInfo(XLAT("warning: these will restart your game!"));
   
   dialog::addBreak(100);
 
-  dialog::addItem("standard HyperRogue but in VR", 'a');
+  dialog::addItem(XLAT("standard HyperRogue but in VR"), 'a');
   dialog::add_action([] {
     if(rug::rugged) rug::close();
     hmd_ref_at = hmd_at;
@@ -1145,7 +1145,7 @@ EX void show_vr_demos() {
     popScreenAll();
     });
 
-  dialog::addItem("HyperRogue FPP", 'b');
+  dialog::addItem(XLAT("HyperRogue FPP"), 'b');
   dialog::add_action([] {
     if(rug::rugged) rug::close();
     hmd_ref_at = hmd_at;
@@ -1166,7 +1166,7 @@ EX void show_vr_demos() {
     });
 
   #if CAP_RUG
-  dialog::addItem("Hypersian Rug", 'c');
+  dialog::addItem(XLAT("Hypersian Rug"), 'c');
   dialog::add_action([] {
     if(rug::rugged) rug::close();
     hmd_ref_at = hmd_at;
@@ -1189,7 +1189,7 @@ EX void show_vr_demos() {
     });
   #endif
 
-  dialog::addItem("sphere from the inside", 'd');
+  dialog::addItem(XLAT("sphere from the inside"), 'd');
   dialog::add_action([] {
     if(rug::rugged) rug::close();
     hmd_ref_at = hmd_at;
@@ -1209,7 +1209,7 @@ EX void show_vr_demos() {
     popScreenAll();
     });
 
-  dialog::addItem("sphere from the outside", 'e');
+  dialog::addItem(XLAT("sphere from the outside"), 'e');
   dialog::add_action([] {
     if(rug::rugged) rug::close();
     hmd_ref_at = hmd_at;
@@ -1229,7 +1229,7 @@ EX void show_vr_demos() {
     popScreenAll();
     });
 
-  dialog::addItem("Thurston racing", 'f');
+  dialog::addItem(XLAT("Thurston racing"), 'f');
   dialog::add_action([] {
     if(rug::rugged) rug::close();
     hmd_ref_at = hmd_at;
@@ -1239,7 +1239,7 @@ EX void show_vr_demos() {
     popScreenAll();
     });
 
-  dialog::addItem("raytracing in H3", 'g');
+  dialog::addItem(XLAT("raytracing in H3"), 'g');
   dialog::add_action([] {
     if(rug::rugged) rug::close();
     hmd_ref_at = hmd_at;
@@ -1289,7 +1289,7 @@ EX void show_vr_settings() {
 
   add_edit(hsm);   
   if(enabled && GDIM == 2 && among(hsm, eHeadset::holonomy, eHeadset::reference))
-    dialog::addInfo("(this setting is for 3D geometries only, use 'model viewing' instead)");
+    dialog::addInfo(XLAT("(this setting is for 3D geometries only, use 'model viewing' instead)"));
   add_edit(eyes);
   add_edit(cscr);
   
