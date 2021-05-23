@@ -1683,6 +1683,10 @@ MONSTER('H', 0x181818, "Hag", moHexer, CF_FACE_UP, RESERVED, moYeti,
 
 LAND(0xC0C0FF, "Cursed Land", laCursed, 0, itCursed, RESERVED,
   "This land is full of curses!")
+NATIVE(m == moHexer ? 2 : 0)  
+#define LST {itElixir, itPirate, itRuins, itBrownian, itPower}
+REQ(ITEMS_TOTAL(LST, variant_unlock_value()*6/5))
+#undef LST
 
 ITEM('/', 0x211F6F, "Cursed Gold", itCursed, IC_TREASURE, ZERO, RESERVED, osNone,
   "A cursed gold.")
