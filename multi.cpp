@@ -211,14 +211,14 @@ bool configdead;
 void handleConfig(int sym, int uni);
 
 EX string player_count_name(int p) {
-  return XLAT(
-    p == 2 ? "two players" : 
-    p == 3 ? "three players" : 
-    p == 4 ? "four players" : 
-    p == 5 ? "five players" : 
-    p == 6 ? "six players" : 
-    p == 7 ? "seven players" : 
-    "one player");
+  return 
+    p == 2 ? XLAT("two players") : 
+    p == 3 ? XLAT("three players") : 
+    p == 4 ? XLAT("four players") : 
+    p == 5 ? XLAT("five players") : 
+    p == 6 ? XLAT("six players") : 
+    p == 7 ? XLAT("seven players") : 
+    XLAT("one player");
   }
 
 struct key_configurer {
@@ -304,15 +304,15 @@ EX reaction_t get_key_configurer(int sc, vector<string>& sct, string caption) {
   }
 
 EX reaction_t get_key_configurer(int sc, vector<string>& sct) { 
-  return key_configurer(sc, sct, XLAT(sc == 1 ? "configure player 1" :
-    sc == 2 ? "configure player 2" :
-    sc == 3 ? "configure panning" :
-    sc == 4 ? "configure player 3" :
-    sc == 5 ? "configure player 4" :
-    sc == 6 ? "configure player 5" :
-    sc == 7 ? "configure player 6" :
-    sc == 8 ? "configure player 7" : ""
-    )); 
+  return key_configurer(sc, sct, sc == 1 ? XLAT("configure player 1") :
+    sc == 2 ? XLAT("configure player 2") :
+    sc == 3 ? XLAT("configure panning") :
+    sc == 4 ? XLAT("configure player 3") :
+    sc == 5 ? XLAT("configure player 4") :
+    sc == 6 ? XLAT("configure player 5") :
+    sc == 7 ? XLAT("configure player 6") :
+    sc == 8 ? XLAT("configure player 7") : ""
+    ); 
   }
 
 #if CAP_SDLJOY
@@ -395,7 +395,7 @@ struct shmup_configurer {
     if(players > 1)
       dialog::addItem(XLAT("configure player 2"), '2');
     else if(players == 1 && !shmup::on)
-      dialog::addSelItem(XLAT("input"), XLAT(multi::alwaysuse ? "config" : "default"), 'a');
+      dialog::addSelItem(XLAT("input"), multi::alwaysuse ? XLAT("config") : XLAT("default"), 'a');
     else
       dialog::addBreak(100);
     if(players > 2)

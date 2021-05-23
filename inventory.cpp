@@ -505,7 +505,7 @@ EX namespace inv {
     orbmap.clear();
     which = itNone;
         
-    if(plain) dialog::init(XLAT(mirroring ? "mirror what?" : "inventory"), forecolor, 150, 100);
+    if(plain) dialog::init(mirroring ? XLAT("mirror what?") : XLAT("inventory"), forecolor, 150, 100);
     
     int j = 0, oc = 6;
 

@@ -346,7 +346,7 @@ struct debugScreen {
     gamescreen(0);
     getcstat = '-';
 
-    dialog::init(XLAT(show_debug_data ? "debug values" : "internal details"));
+    dialog::init(show_debug_data ? XLAT("debug values") : XLAT("internal details"));
     
     for(auto& p: drawbugs)
       drawBug(p.first, p.second);

@@ -760,10 +760,10 @@ EX namespace gp {
         });
       }
 
-    dialog::lastItem().value = S3 == 3 ? "GP(1,1)" : XLAT(BITRUNCATED ? "ON" : "OFF");
+    dialog::lastItem().value = S3 == 3 ? "GP(1,1)" : ONOFF(BITRUNCATED);
 
     if(min_quality == 0 || min_quality_chess) {
-      dialog::addBoolItem(XLAT(S3 == 3 ? "chamfered" : "expanded"), univ_param() == loc(2,0) && GOLDBERG, 'c');
+      dialog::addBoolItem(S3 == 3 ? XLAT("chamfered") : XLAT("expanded"), univ_param() == loc(2,0) && GOLDBERG, 'c');
       dialog::lastItem().value = "GP(2,0)";
       dialog::add_action_confirmed([] { 
         whirl_set(loc(2, 0));

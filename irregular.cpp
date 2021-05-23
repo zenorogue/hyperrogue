@@ -957,7 +957,7 @@ void show_gridmaker() {
   for(int i=0; i<5; i++)
     dialog::addInfo(status[i]);
   dialog::addBreak(100);
-  dialog::addSelItem(XLAT("activate"), XLAT(runlevel == 10 ? "ready" : "wait..."), 'f');
+  dialog::addSelItem(XLAT("activate"), runlevel == 10 ? XLAT("ready") : XLAT("wait..."), 'f');
   if(runlevel == 10) dialog::add_action(start_game_on_created_map);
   dialog::addItem(XLAT("cancel"), 'c');
   dialog::add_action(cancel_map_creation);

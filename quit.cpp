@@ -291,7 +291,7 @@ EX hint hints[] = {
 EX int hinttoshow;
 
 string contstr() {
-  return XLAT(canmove ? "continue" : "see how it ended");
+  return canmove ? XLAT("continue") : XLAT("see how it ended");
   }
 
 eLand nextHyperstone() {
@@ -412,11 +412,10 @@ EX void showMission() {
   else if(landUnlocked(laHell) && ls::any_order()) {
     eLand l = nextHyperstone();
     if(l) 
-        dialog::addInfo(
-          XLAT(
-            l ? "Hyperstone Quest: collect at least %3 points in %the2" :
-            "Hyperstone Quest: collect at least %3 %1 in %the2", 
-            treasureType(l), l, its(R10)));
+        dialog::addInfo(          
+            l ? XLAT("Hyperstone Quest: collect at least %3 points in %the2", treasureType(l), l, its(R10))
+              : XLAT("Hyperstone Quest: collect at least %3 %1 in %the2", treasureType(l), l, its(R10))
+            );
     else
       dialog::addInfo(XLAT("Hyperstone Quest completed!"), iinf[itHyperstone].color);
     }
@@ -448,7 +447,7 @@ EX void showMission() {
     if(canmove) {
       if(sphere) {
         dialog::addItem(XLAT("return to your game"), '1');
-        dialog::addItem(XLAT(pconf.alpha < 2 ? "orthogonal projection" : "stereographic projection"), '3');
+        dialog::addItem(pconf.alpha < 2 ? XLAT("orthogonal projection") : XLAT("stereographic projection"), '3');
         }
       else if(euclid) {
         dialog::addItem(XLAT("return to your game"), '2');

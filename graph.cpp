@@ -5190,8 +5190,8 @@ EX void gamescreen(int _darken) {
       drawCircle(xfire, yb, rad/2, 0xFF0000FF);
       }
     else {
-      if(!haveMobileCompass()) displayabutton(-1, +1, XLAT(andmode == 0 && useRangedOrb ? "FIRE" : andmode == 0 && WDIM == 3 && wclick ? "WAIT" : "MOVE"),  andmode == 0 ? BTON : BTOFF);
-      displayabutton(+1, +1, rug::rugged ? "RUG" : XLAT(andmode == 1 ? "BACK" : GDIM == 3 ? "CAM" : "DRAG"),  andmode == 1 ? BTON : BTOFF);
+      if(!haveMobileCompass()) displayabutton(-1, +1, andmode == 0 && useRangedOrb ? XLAT("FIRE") : andmode == 0 && WDIM == 3 && wclick ? XLAT("WAIT") : XLAT("MOVE"),  andmode == 0 ? BTON : BTOFF);
+      displayabutton(+1, +1, rug::rugged ? XLAT("RUG") :andmode == 1 ?  XLAT("BACK") : GDIM == 3 ? XLAT("CAM") : XLAT("DRAG"),  andmode == 1 ? BTON : BTOFF);
       }
     displayabutton(-1, -1, XLAT("INFO"),  andmode == 12 ? BTON : BTOFF);
     displayabutton(+1, -1, XLAT("MENU"), andmode == 3 ? BTON : BTOFF);
@@ -5244,7 +5244,7 @@ EX void normalscreen() {
   keyhandler = handleKeyNormal;
 
   if(!playerfound && !anims::any_on() && !sphere && !no_find_player && mapeditor::drawplayer)
-    displayButton(current_display->xcenter, current_display->ycenter, XLAT(mousing ? "find the player" : "press SPACE to find the player"), ' ', 8);
+    displayButton(current_display->xcenter, current_display->ycenter, mousing ? XLAT("find the player") : XLAT("press SPACE to find the player"), ' ', 8);
 
   describeMouseover();
   }

@@ -693,11 +693,11 @@ EX namespace models {
     dialog::init("models & projections");
     
     if(GDIM == 2 && !euclid) {
-      dialog::addItem(XLAT(hyperbolic ? "Gans model" : "orthographic projection"), '1');
+      dialog::addItem(hyperbolic ? XLAT("Gans model") : XLAT("orthographic projection"), '1');
       dialog::add_action([] { if(rug::rugged) rug::close(); pconf.alpha = 999; pconf.scale = 998; pconf.xposition = pconf.yposition = 0; popScreen(); });
-      dialog::addItem(XLAT(hyperbolic ? "Poincaré model" : "stereographic projection"), '2');
+      dialog::addItem(hyperbolic ? XLAT("Poincaré model") : XLAT("stereographic projection"), '2');
       dialog::add_action([] { if(rug::rugged) rug::close(); pconf.alpha = 1; pconf.scale = 1; pconf.xposition = pconf.yposition = 0; popScreen(); });
-      dialog::addItem(XLAT(hyperbolic ? "Beltrami-Klein model" : "gnomonic projection"), '3');
+      dialog::addItem(hyperbolic ? XLAT("Beltrami-Klein model") : XLAT("gnomonic projection"), '3');
       dialog::add_action([] { if(rug::rugged) rug::close(); pconf.alpha = 0; pconf.scale = 1; pconf.xposition = pconf.yposition = 0; popScreen(); });
       if(sphere) {
         dialog::addItem(XLAT("stereographic projection") + " " + XLAT("(zoomed out)"), '4');

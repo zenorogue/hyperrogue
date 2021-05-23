@@ -302,11 +302,11 @@ void set_or_configure_geometry(eGeometry g) {
   else {
     if(among(g, gProduct, gRotSpace)) {
       if(WDIM == 3 || (g == gRotSpace && euclid)) {
-        addMessage(XLAT(          
+        addMessage(
           g == gRotSpace ?
-            "Only works with 2D non-Euclidean geometries"
-          : "Only works with 2D geometries"
-            ));
+            XLAT("Only works with 2D non-Euclidean geometries")
+          : XLAT("Only works with 2D geometries")
+            );
         return;
         }
       if(g == gRotSpace) {
@@ -980,10 +980,10 @@ EX void showEuclideanMenu() {
     auto r = rots::underlying_scale;
     dialog::addSelItem(XLAT("view the underlying geometry"), r > 0 ? fts(r)+"x" : ONOFF(false), '6');
     dialog::add_action([] {
-      dialog::editNumber(rots::underlying_scale, 0, 1, 0.05, 0.25, XLAT("view the underlying geometry"),
-        XLAT(
-          geometry == gRotSpace ? "The space you are currently in is the space of rotations of the underlying hyperbolic or spherical geometry. "
-            : "You are currently in a product space.") +
+      dialog::editNumber(rots::underlying_scale, 0, 1, 0.05, 0.25, XLAT("view the underlying geometry"),        
+        geometry == gRotSpace ? 
+          XLAT("The space you are currently in is the space of rotations of the underlying hyperbolic or spherical geometry. ")
+        : XLAT("You are currently in a product space.") +
         XLAT(
           "This option lets you see the underlying space. Lands and some walls (e.g. in the Graveyard) are based on "
           "the respective features in the underlying world, but details such as monsters or items are ignored."
@@ -1022,7 +1022,7 @@ EX void showEuclideanMenu() {
     }
 
   if(geometry_has_alt_mine_rule()) {
-    dialog::addSelItem(XLAT("adjacency rule"), XLAT(mine_adjacency_rule ? "vertex" : WDIM == 3 ? "face" : "edge"), 'M');
+    dialog::addSelItem(XLAT("adjacency rule"), mine_adjacency_rule ? XLAT("vertex") : WDIM == 3 ? XLAT("face") : XLAT("edge"), 'M');
     dialog::add_action([] {
       stop_game();
       mine_adjacency_rule = !mine_adjacency_rule;

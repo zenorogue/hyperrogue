@@ -737,9 +737,9 @@ EX namespace yendor {
     dialog::addBreak(60);
     if (yendor::on)
       dialog::addItem(XLAT("Return to the normal game"), '0');
-    dialog::addSelItem(XLAT(
-      easy ? "Challenges do not get harder" : "Each challenge gets harder after each victory"),
-      " " + XLAT(easy ? "easy" : "challenge"), '1');
+    dialog::addSelItem(
+      easy ? XLAT("Challenges do not get harder") : XLAT("Each challenge gets harder after each victory"),
+      " " + easy ? XLAT("easy") : XLAT("challenge"), '1');
     
     dialog::addBack();
     dialog::addHelp();

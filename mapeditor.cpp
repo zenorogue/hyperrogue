@@ -1845,14 +1845,14 @@ EX namespace mapeditor {
         displayButton(8, 8+fs*2, line2 + XLAT(" (r = complex tesselations)"), 'r', 0);
       else
         displayfr(8, 8+fs*2, 2, vid.fsize, line2, 0xC0C0C0, 0);
-      displayButton(8, 8+fs*3, XLAT(GDIM == 3 ? "l = color group: %1" : "l = layers: %1", its(dslayer)), 'l', 0);
+      displayButton(8, 8+fs*3, GDIM == 3 ? XLAT("l = color group: %1", its(dslayer)) : XLAT("l = layers: %1", its(dslayer)), 'l', 0);
       }
 
     if(us && isize(us->d[dslayer].list)) {
       usershapelayer& ds(us->d[dslayer]);
       if(!EDITING_TRIANGLES) {
         displayButton(8, 8+fs*4, XLAT("1-9 = rotations: %1", its(ds.rots)), '1' + (ds.rots % 9), 0);
-        displayButton(8, 8+fs*5, XLAT(ds.sym ? "0 = symmetry" : "0 = asymmetry"), '0', 0);
+        displayButton(8, 8+fs*5, ds.sym ? XLAT("0 = symmetry") : XLAT("0 = asymmetry"), '0', 0);
         }
 
       displayfr(8, 8+fs*7, 2, vid.fsize, XLAT("%1 vertices", its(isize(ds.list))), 0xC0C0C0, 0);
@@ -1866,7 +1866,7 @@ EX namespace mapeditor {
           displayButton(8, 8+fs*9, XLAT("m = move v"), 'm', 0);
           displayButton(8, 8+fs*10, XLAT("d = delete v"), 'd', 0);
           }
-        displaymm('c', 8, 8+fs*11, 2, vid.fsize, XLAT(autochoose ? "autochoose" : "c = choose"), 0);
+        displaymm('c', 8, 8+fs*11, 2, vid.fsize, autochoose ? XLAT("autochoose") : XLAT("c = choose"), 0);
         displayButton(8, 8+fs*12, XLAT("b = switch auto"), 'b', 0);
         }
       else {
@@ -1888,7 +1888,7 @@ EX namespace mapeditor {
       }
 #if CAP_TEXTURE
     else if(freedraw) {
-      displayButton(8, 8+fs*2, XLAT(texture::texturesym ? "0 = symmetry" : "0 = asymmetry"), '0', 0);
+      displayButton(8, 8+fs*2, texture::texturesym ? XLAT("0 = symmetry") : XLAT("0 = asymmetry"), '0', 0);
       if(mousekey == 'g')
         displayButton(8, 8+fs*16, XLAT("p = grid color"), 'p', 0);
       else
@@ -1916,11 +1916,11 @@ EX namespace mapeditor {
       }
     
     if(GDIM == 3)
-      displayfr(8, 8+fs*19, 2, vid.fsize, XLAT(front_config == eFront::sphere_camera ? "z = camera" : front_config == eFront::sphere_center ? "z = spheres" : 
-        nonisotropic && front_config == eFront::equidistants ? "Z =" :
-        nonisotropic && front_config == eFront::const_x ? "X =" :
-        nonisotropic && front_config == eFront::const_y ? "Y =" :
-        "z = equi") + " " + fts(front_edit), 0xC0C0C0, 0);
+      displayfr(8, 8+fs*19, 2, vid.fsize, (front_config == eFront::sphere_camera ? XLAT("z = camera") : front_config == eFront::sphere_center ? XLAT("z = spheres") : 
+        nonisotropic && front_config == eFront::equidistants ? XLAT("Z =") :
+        nonisotropic && front_config == eFront::const_x ? XLAT("X =") :
+        nonisotropic && front_config == eFront::const_y ? XLAT("Y =") :
+        XLAT("z = equi")) + " " + fts(front_edit), 0xC0C0C0, 0);
 
     displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
 
@@ -2399,7 +2399,7 @@ EX namespace mapeditor {
         dialog::add_action([] { front_config = eFront::sphere_camera; });
         dialog::addBoolItem(XLAT("place points at fixed radius"), front_config == eFront::sphere_center, 'B');
         dialog::add_action([] { front_config = eFront::sphere_center; });
-        dialog::addBoolItem(XLAT(nonisotropic ? "place points on surfaces of const Z" : "place points on equidistant surfaces"), front_config == eFront::equidistants, 'C');
+        dialog::addBoolItem(nonisotropic ? XLAT("place points on surfaces of const Z") : XLAT("place points on equidistant surfaces"), front_config == eFront::equidistants, 'C');
         dialog::add_action([] { front_config = eFront::equidistants; });
         if(nonisotropic) {
           dialog::addBoolItem(XLAT("place points on surfaces of const X"), front_config == eFront::const_x, 'D');

@@ -1391,9 +1391,9 @@ EX void edit_sightrange() {
 
 EX void menuitem_sightrange_style(char c IS('c')) {
   dialog::addSelItem(XLAT("draw range based on"), 
-    XLAT(vid.use_smart_range == 0 ? "distance" :
-    vid.use_smart_range == 1 ? "size (no gen)" :
-    "size"),
+    vid.use_smart_range == 0 ? XLAT("distance") :
+    vid.use_smart_range == 1 ? XLAT("size (no gen)") :
+    XLAT("size"),
     c
     );
   dialog::add_action_push([] {
@@ -1791,7 +1791,7 @@ EX void showJoyConfig() {
   dialog::addSelItem(XLAT("first joystick position (movement)"), its(joyx)+","+its(joyy), 0);
   dialog::addSelItem(XLAT("second joystick position (panning)"), its(panjoyx)+","+its(panjoyy), 0);
   
-  dialog::addSelItem(XLAT("joystick mode"), XLAT(autojoy ? "automatic" : "manual"), 'p');
+  dialog::addSelItem(XLAT("joystick mode"), autojoy ? XLAT("automatic") : XLAT("manual"), 'p');
   if(getcstat == 'p') {
     if(autojoy) 
       mouseovers = XLAT("joystick mode: automatic (release the joystick to move)");

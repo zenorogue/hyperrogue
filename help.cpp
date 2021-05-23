@@ -408,7 +408,7 @@ EX string generateHelpForItem(eItem it) {
     for(int i=0; i<ittypes; i++) {
       eItem it2 = eItem(i);
       if(isEmpathyOrb(it2)) {
-        help += XLAT(cnt ? ", %1" : " %1", it2);
+        help += cnt ? XLAT(", %1", it2) : XLAT(" %1", it2);
         cnt++;
         }
       }
@@ -465,7 +465,7 @@ EX string generateHelpForItem(eItem it) {
       for(int i=0; i<landtypes; i++) {
         eLand land = eLand(i);
         if(isLuckyLand(land)) {
-          help += XLAT(cnt ? ", %1" : " %1", land);
+          help += cnt ? XLAT(", %1", land) : XLAT(" %1", land);
           cnt++;
           }
         }

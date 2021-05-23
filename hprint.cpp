@@ -56,7 +56,7 @@ EX string index_pointer(void *v) {
   }
 
 #if HDR
-inline string ONOFF(bool b) { return XLAT(b ? "ON" : "OFF"); }
+inline string ONOFF(bool b) { return b ? XLAT("ON") : XLAT("OFF"); }
 
 struct hstream {
   virtual void write_char(char c) = 0;

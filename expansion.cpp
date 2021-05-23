@@ -640,7 +640,7 @@ EX void viewdist_configure_dialog() {
   dialog::addItem(XLAT("move the player"), 'm');
   dialog::add_action([] () { show_distance_lists = false; popScreenAll(); });
   
-  dialog::addItem(XLAT(distance_from ? "show number of descendants by distance" : "show number of cells by distance"), 'l');
+  dialog::addItem(distance_from ? XLAT("show number of descendants by distance") : XLAT("show number of cells by distance"), 'l');
   dialog::add_action([] () { show_distance_lists = true; popScreenAll(); });
 
   dialog::display();

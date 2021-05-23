@@ -1024,7 +1024,7 @@ void race_projection() {
     });
   
   if(true) {    
-    dialog::addSelItem(XLAT("point of view"), XLAT(player_relative ? "player" : "track"), 'p');
+    dialog::addSelItem(XLAT("point of view"), player_relative ? XLAT("player") : XLAT("track"), 'p');
     if(racing::use_standard_centering())
       dialog::lastItem().value = XLAT("N/A");
     dialog::add_action([] () { 

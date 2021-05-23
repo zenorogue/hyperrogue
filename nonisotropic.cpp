@@ -1536,9 +1536,9 @@ EX namespace hybrid {
       if(rotspace) {
         int e_steps = cgi.psl_steps / gcd(cgi.single_step, cgi.psl_steps); 
         bool ubounded = PIU(bounded);
-        dialog::addSelItem( XLAT(sphere ? "elliptic" : "PSL(2,R)"), its(e_steps), 'P');
+        dialog::addSelItem( sphere ? XLAT("elliptic") : XLAT("PSL(2,R)"), its(e_steps), 'P');
         dialog::add_action(set_s(e_steps, true));
-        dialog::addSelItem( XLAT(sphere ? "sphere" : "SL(2,R)"), its(2*e_steps), 'P');
+        dialog::addSelItem( sphere ? XLAT("sphere") : XLAT("SL(2,R)"), its(2*e_steps), 'P');
         dialog::add_action(set_s(2*e_steps, true));
         if(sl2 && !ubounded) {
           dialog::addSelItem( XLAT("universal cover"), its(0), 'P');
