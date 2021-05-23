@@ -2944,9 +2944,6 @@ EX void set_view(hyperpoint camera, hyperpoint forward, hyperpoint upward) {
   upward /= hypot_d(3, upward);
 
   hyperpoint rightward = (forward ^ upward);
-  rightward -= (forward|rightward) * forward;
-  rightward -= (upward|rightward) * upward;
-  rightward /= hypot_d(3, rightward);
   
   transmatrix rotator = Id;
   rotator[2] = forward;
