@@ -1194,6 +1194,7 @@ int read_geom_args() {
   else if(argis("-fwrite")) {
     shstream hs;
     hwrite_fpattern(hs, currfp);
+    println(hlog, "current fieldpattern hash: ", currfp.hashv);
     println(hlog, "current fieldpattern: ", as_cstring(hs.s));
     }
   else if(argis("-csp")) {
