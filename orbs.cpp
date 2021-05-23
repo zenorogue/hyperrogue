@@ -203,12 +203,12 @@ EX void reduceOrbPowers() {
     reduceOrbPower(itRevolver, 6);
 
   reduceOrbPower(itOrbPurity, 30);
-  reduceOrbPower(itCurseWeakness, 999);
-  reduceOrbPower(itCurseDraining, 999);
-  reduceOrbPower(itCurseWater, 999);
-  reduceOrbPower(itCurseFatigue, 999);
-  reduceOrbPower(itCurseRepulsion, 999);
-  reduceOrbPower(itCurseGluttony, 999);
+  reduceOrbPower(itCurseWeakness, 199);
+  reduceOrbPower(itCurseDraining, 199);
+  reduceOrbPower(itCurseWater, 199);
+  reduceOrbPower(itCurseFatigue, 199);
+  reduceOrbPower(itCurseRepulsion, 199);
+  reduceOrbPower(itCurseGluttony, 199);
 
   whirlwind::calcdirs(cwt.at); 
   items[itStrongWind] = !items[itOrbAether] && whirlwind::qdirs == 1;
@@ -1621,7 +1621,7 @@ EX int orbcharges(eItem it) {
       return 20;
        
     case itCurseDraining:
-      return 60;
+      return 30;
        
     case itCurseWater:
       return 20;
