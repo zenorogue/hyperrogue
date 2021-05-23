@@ -189,7 +189,7 @@ const orbinfo& getNativityOrbInfo(eItem orb) {
   return oi;
   }
 
-EX string olrDescriptions[] = {
+EX string olrDescriptions[18] = {
   "forbidden to find in %the1",
   "too dangerous to use in %the1",
   "useless in %the1",

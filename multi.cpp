@@ -115,7 +115,7 @@ EX namespace multi {
 #define SHMUPAXES_CUR ((SHMUPAXES_BASE) + 4 * playercfg)
 #endif
 
-const char* axemodes[SHMUPAXES] = {
+EX const char* axemodes[SHMUPAXES] = {
   "do nothing", 
   "rotate view",
   "panning X",
@@ -150,7 +150,7 @@ const char* axemodes[SHMUPAXES] = {
   "player 7 spin"
   };
 
-const char* axemodes3[4] = {
+EX const char* axemodes3[4] = {
   "do nothing",
   "camera forward",
   "camera rotate X",
@@ -378,6 +378,8 @@ struct joy_configurer {
   };
 #endif
 
+EX const char *axmodes[7] = {"OFF", "auto", "light", "heavy", "arrows", "WASD keys", "VI keys"};
+
 struct shmup_configurer {
 
   void operator()() {
@@ -418,7 +420,6 @@ struct shmup_configurer {
       dialog::addItem(XLAT("configure player 5"), '5');
     else if(!shmup::on && !multi::alwaysuse) {
       if(GDIM == 2) {
-        const char *axmodes[7] = {"OFF", "auto", "light", "heavy", "arrows", "WASD keys", "VI keys"};
         dialog::addSelItem(XLAT("help for keyboard users"), XLAT(axmodes[vid.axes]), 'h');
         dialog::add_action([] {vid.axes += 70 + (shiftmul > 0 ? 1 : -1); vid.axes %= 7; } );
         }

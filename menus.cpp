@@ -235,16 +235,15 @@ EX void showMainMenu() {
   #if ISMOBILE
   dialog::addItem(XLAT("visit the website"), 'q');
   #else
-  q = quitsaves() ? "save" : "quit"; 
-  q = q + " the game";
-  dialog::addItem(XLAT(q), 'q');
+  q = quitsaves() ? XLAT("save the game") : XLAT("quit the game"); 
+  dialog::addItem(q, 'q');
   #endif
 
-  if(canmove)                                     
-    q = "review your quest";
+  if(canmove)
+    q = XLAT("review your quest");
   else
-    q = "game over screen";
-  dialog::addItem(XLAT(q), SDLK_ESCAPE);
+    q = XLAT("game over screen");
+  dialog::addItem(q, SDLK_ESCAPE);
   dialog::addItem(get_o_key().first, 'o');    
 
   if(inv::on)
@@ -260,11 +259,11 @@ EX void showMainMenu() {
   dialog::addItem("SHARE", 's'-96);
 #endif
 
-  if(!canmove) q = "review the scene";
-  else if(turncount > 0) q = "continue game";
-  else q = "play the game!";
+  if(!canmove) q = XLAT("review the scene");
+  else if(turncount > 0) q = XLAT("continue game");
+  else q = XLAT("play the game!");
   
-  dialog::addItem(XLAT(q), ' ');
+  dialog::addItem(q, ' ');
   dialog::display();
   
   keyhandler = [] (int sym, int uni) {
@@ -330,6 +329,10 @@ EX void editScale() {
   dialog::scaleSinh();
   }
 
+EX const char *wdmodes[7] = {"ASCII", "black", "plain", "Escher", "plain/3D", "Escher/3D", "ASCII/3D"};
+EX const char *mdmodes[6] = {"ASCII", "items only", "items and monsters", "3D", "?", "?"};
+EX const char *hlmodes[3] = {"press Alt", "highlight", "super-highlight"};
+
 EX void showGraphQuickKeys() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
@@ -338,13 +341,10 @@ EX void showGraphQuickKeys() {
   
   dialog::addItem("quick projection", '1');
 
-  const char *wdmodes[7] = {"ASCII", "black", "plain", "Escher", "plain/3D", "Escher/3D", "ASCII/3D"};
   dialog::addSelItem(XLAT("wall display mode"), XLAT(wdmodes[vid.wallmode]), '5');
 
-  const char *mdmodes[6] = {"ASCII", "items only", "items and monsters", "3D", "?", "?"};
   dialog::addSelItem(XLAT("monster display mode"), XLAT(mdmodes[vid.monmode]), '8');
 
-  const char *hlmodes[3] = {"press Alt", "highlight", "super-highlight"};
   dialog::addSelItem(XLAT("highlight stuff"), XLAT(hlmodes[vid.highlightmode]), 508);
 
   dialog::addBoolItem(XLAT("draw the grid"), (vid.grid), '6');

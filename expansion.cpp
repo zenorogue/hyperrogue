@@ -409,12 +409,12 @@ string expansion_analyzer::approximate_descendants(int d, int max_length) {
   }
 
 enum eDistanceFrom { dfPlayer, dfStart, dfWorld };
-string dfnames[3] = { "player", "start", "land" };
+EX string dfnames[3] = { "player", "start", "land" };
 
 eDistanceFrom distance_from = dfPlayer;
 
 enum eNumberCoding { ncNone, ncDistance, ncType, ncDebug };
-string ncnames[4] = { "NO", "distance", "type", "debug" };
+EX string ncnames[4] = { "NO", "distance", "type", "debug" };
 eNumberCoding number_coding = ncDistance;
 
 bool mod_allowed() {

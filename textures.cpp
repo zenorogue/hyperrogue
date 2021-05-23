@@ -729,7 +729,7 @@ enum eMagicParameter {
   mpMAX
   };
 
-vector<string> mpnames = {
+EX vector<string> mpnames = {
   "affect model scale",
   "affect model projection",
   "affect model central point",

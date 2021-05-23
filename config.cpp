@@ -1841,8 +1841,6 @@ EX void projectionDialog() {
     XLAT("HyperRogue uses the Minkowski hyperboloid model internally. "
     "Klein and Poincaré models can be obtained by perspective, "
     "and the Gans model is obtained by orthogonal projection. "
-//  "This parameter specifies the distance from the hyperboloid center "
-//  "to the eye. "
     "See also the conformal mode (in the special modes menu) "
     "for more models."));
   dialog::extra_options = [] () {
@@ -2222,7 +2220,7 @@ EX void show3D() {
   else if(GDIM == 2 && !spatial_graphics)
     dialog::addInfo(XLAT("set 3D monsters or walls in basic config first"));
   else if(geom3::invalid != "")
-    dialog::addInfo(XLAT("error: "+geom3::invalid), 0xC00000);
+    dialog::addInfo(XLAT("error: ")+geom3::invalid, 0xC00000);
   else
     dialog::addInfo(XLAT("parameters set correctly"));
   dialog::addBreak(50);

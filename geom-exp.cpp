@@ -261,7 +261,7 @@ EX geometry_filter gf_quotient = {"interesting quotient spaces", [] {
   return forced_quotient() && !elliptic;
   }};
   
-vector<geometry_filter*> available_filters = { &gf_hyperbolic, &gf_spherical, &gf_euclidean, &gf_other, &gf_regular_2d, &gf_regular_3d, &gf_quotient };
+EX vector<geometry_filter*> available_filters = { &gf_hyperbolic, &gf_spherical, &gf_euclidean, &gf_other, &gf_regular_2d, &gf_regular_3d, &gf_quotient };
 
 void ge_select_filter() {
   cmode = sm::SIDE | sm::MAYDARK;
@@ -674,7 +674,7 @@ EX void menuitem_binary_width(char key) {
   }
 
 EX void menuitem_nilwidth(char key) {
-  dialog::addSelItem(XLAT("nil width"), fts(nilv::nilwidth), key);
+  dialog::addSelItem(XLAT("Nil width"), fts(nilv::nilwidth), key);
   dialog::add_action([] {
     dialog::editNumber(nilv::nilwidth, 0.01, 2, 0.1, 1, XLAT("Nil width"), "");
     dialog::reaction = ray::reset_raycaster;

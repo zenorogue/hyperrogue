@@ -3215,7 +3215,7 @@ EX colortable distcolors = {
   0xA0A000, 0xA000A0, 0x00A0A0, 0xFFD500
   };
 
-const char* minetexts[8] = {
+EX const char* minetexts[8] = {
   "No mines next to you.",
   "A mine is next to you!",
   "Two mines next to you!",

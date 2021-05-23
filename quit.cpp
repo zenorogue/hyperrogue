@@ -121,13 +121,13 @@ EX hint hints[] = {
     0,
     []() { return in_full_game(); },
     []() { 
-      dialog::addInfo(XLAT(
+      dialog::addInfo(
 #if ISMOBILE
-        "The 'world overview' shows all the lands in HyperRogue."
+        XLAT("The 'world overview' shows all the lands in HyperRogue.")
 #else
-        "Press 'o' to see all the lands in HyperRogue."
+        XLAT("Press 'o' to see all the lands in HyperRogue.")
 #endif
-        ));
+        );
       dialog::addBreak(50);
       dialog::addItem(XLAT("world overview"), 'z');
       },
