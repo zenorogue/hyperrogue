@@ -149,6 +149,19 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     if(markOrb(itOrbIntensity)) oc = intensify(oc);
     if(!items[it]) items[it]++;
     items[it] += oc;
+    
+    if(it == itOrbPurity) {
+      bool no_curses = true;
+      for(cell *c: dcal) if(c->land == laCursed) no_curses = false;
+      if(no_curses) {
+        items[itOrbSpeed] += 5;
+        items[itOrbWinter] += 5;
+        items[itOrbSlaying] += 5;
+        items[itOrbTime] += 5;
+        items[itOrbMagnetism] += 5;
+        items[itOrbChoice] += 5;
+        }
+      }
     }
   else if(c2->item == itOrbLife) {
     playSound(c2, "pickup-orb"); // TODO summon
