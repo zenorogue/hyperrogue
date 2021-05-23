@@ -1683,12 +1683,23 @@ MONSTER('H', 0x181818, "Hag", moHexer, CF_FACE_UP, RESERVED, moYeti,
 
 LAND(0xC0C0FF, "Cursed Land", laCursed, 0, itCursed, RESERVED,
   "This land is full of curses!")
-  
+
 ITEM('/', 0x211F6F, "Cursed Gold", itCursed, IC_TREASURE, ZERO, RESERVED, osNone,
   "A cursed gold.")
 
 ITEM('o', 0x208020, "Orb of the Woods", itOrbWoods, IC_ORB, ZERO, RESERVED, osTerraform,
   "Lets you swap positions with the trees.")
+
+LAND(0xC0C0FF, "Land of Dice", laDice, 0, itCursed, RESERVED,
+  "This land is full of dice!")
+
+ITEM('/', 0xD0D0D8, "Crystal Die", itDice, IC_TREASURE, ZERO, RESERVED, osNone,
+  "A nice souvenir from the Land of Dice. Make sure to collect the whole set!")
+
+WALL('d', 0x181818, "Rollable Die", waDie, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone,        NODESC)
+
+WALL('d', 0x181818, "Rollable Die", waDie1, ZERO, RESERVED, 0, sgNone,        NODESC)
+WALL('d', 0x181818, "Rollable Die", waDie2, ZERO, RESERVED, 0, sgNone,        NODESC)
 
 
 //shmupspecials

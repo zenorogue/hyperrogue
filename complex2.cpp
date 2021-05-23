@@ -899,6 +899,186 @@ EX void ambush(cell *c, int dogs) {
   if(result)
     addMessage(XLAT("You are ambushed!"));
   }
+
+EX }
+
+EX namespace dice {
+
+  /* vector<vector<int>> sides = {
+    {1, 3, 5}, {0, 4, 2}, {3, 1, 7}, {2, 6, 0}, {5, 7, 1}, {4, 0, 6}, {7, 5, 3}, {6, 2, 4}
+    }; */
+
+  vector<vector<int>> sides = {
+    {13-1, 7-1, 19-1}, {20-1, 12-1, 18-1}, {19-1, 17-1, 16-1}, {14-1, 18-1, 11-1}, {13-1, 18-1, 15-1}, 
+    {14-1, 9-1, 16-1}, { 1-1, 15-1, 17-1}, {20-1, 16-1, 10-1}, {19-1,  6-1, 11-1}, { 8-1, 17-1, 12-1},
+    {13-1, 9-1,  4-1}, { 2-1, 10-1, 15-1}, { 1-1, 11-1,  5-1}, {20-1,  4-1,  6-1}, { 7-1,  5-1, 12-1},
+    { 8-1, 6-1,  3-1}, { 7-1, 10-1,  3-1}, { 2-1,  5-1,  4-1}, { 1-1,  3-1,  9-1}, { 8-1,  2-1, 14-1}
+    };
+
+  vector<vector<int>> spins;
+  int order;
+
+  int faces() { return isize(sides); }
+  
+  EX void generate_on(cell *c) {
+    c->wparam = hrand(faces()) + faces() * (1 + hrand(3) * 2);
+    }
+  
+  bool prepared;
+  
+  void prepare() {
+    if(prepared) return;
+    prepared = true;
+    spins = sides;
+    order = faces() == 8 ? 4 : 5;
+    for(int i=0; i<faces(); i++)
+      for(int j=0; j<isize(sides[i]); j++) {
+        int i1 = sides[i][j];
+        spins[i][j] = -1;
+        for(int k=0; k<isize(sides[i1]); k++)
+          if(sides[i1][k] == i)
+            spins[i][j] = k;
+        if(spins[i][j] == -1)
+          println(hlog, "asymmetric");
+        }
+    }
+  
+  EX void roll(movei mi) {
+    prepare();
+    auto &cto = mi.t;
+    auto &th = mi.s;
+    
+    int rdir = mi.dir_force();
+    int t = th->type;
+
+    int val = th->wparam % faces();
+    int dir = th->wparam / faces();
+    
+    int si = isize(sides[val]);
+    
+    if(t % si) { println(hlog, "error: bad roll\n"); return; }
+    
+    int sideid = (rdir - dir) * si / t;
+    if(sideid < 0) sideid += si;
+    
+    int val1 = sides[val][sideid];
+    
+    int si1 = isize(sides[val1]);
+    
+    println(hlog, tie(val, si, rdir), " to ", tie(val1, si1));
+
+    int sideid1 = spins[val][sideid];
+    
+    int t1 = cto->type;
+    if(t1 % si1) { println(hlog, "error: bad roll target\n"); return; }
+    
+    int rdir1 = mi.rev_dir_force();
+    
+    int dir1 = rdir1 - sideid1 * t1 / si1;
+    
+    dir1 = gmod(dir1, t1);
+    
+    th->wall = waNone;
+    cto->wall = waDie;
+    cto->wparam = val1 + faces() * dir1;
+    }
+
+  EX void draw_die(cell *c, const shiftmatrix& V) {
+    prepare();
+    int val = c->wparam % faces();
+    int dir = c->wparam / faces();
+    queuestr(V, .5, its(val+1), 0xFFFFFFFF);
+    auto& side = sides[val];    
+    int si = isize(side);
+    
+    for(int i=0; i<si; i++) {
+      int d = dir + c->type * i / isize(side);
+      d = gmod(d, c->type);
+      hyperpoint nxt = tC0(currentmap->adj(c, d));
+      hyperpoint mid = normalize(C0 * 1.3 + nxt * -.3);
+      queuestr(V * rgpushxto0(mid), .25, its(side[i]+1), 0xFFFFFFFF);
+      }
+    
+    shiftmatrix V1 = V * iddspin(c, dir) * spin(M_PI);
+    
+    vector<bool> face_drawn(faces(), false);
+    
+    vector<pair<transmatrix, int> > facequeue;
+    
+    auto add_to_queue = [&] (const transmatrix& T, int d) {
+      if(face_drawn[d]) return;
+      face_drawn[d] = true;
+      facequeue.emplace_back(T, d);
+      };
+    
+    add_to_queue(Id, val);
+
+    ld outradius, inradius;
+    
+    if(1) {
+      dynamicval<eGeometry> g(geometry, gSphere);
+      ld alpha = 360 * degree / order;
+      inradius  = edge_of_triangle_with_angles(alpha, 60*degree, 60*degree);
+      outradius = edge_of_triangle_with_angles(60*degree, alpha, 60*degree);
+      }
+
+    ld dieradius = 0.5;
+    
+    ld base_to_base;
+    
+    if(1) {
+      dynamicval<eGeometry> g(geometry, gSpace534);
+      hyperpoint h = cspin(2, 0, outradius) * zpush0(-dieradius);
+      base_to_base = binsearch(-5, 5, [h] (ld d) {
+        return (zpush(d) * h)[2] >= sin_auto(vid.depth);
+        });
+      // ld base_to_base = cspin(2, 0, outradius) * zpush0(-dieradius);
+      }
+    
+    vector<pair<ld, int> > ordering;
+    
+    for(int i=0; i<faces(); i++) {
+    
+      transmatrix T = facequeue[i].first;
+      int ws = facequeue[i].second;
+      
+      for(int d=0; d<si; d++) {
+        dynamicval<eGeometry> g(geometry, gSpace534);
+        add_to_queue(T * cspin(0, 1, 2*M_PI*d/si) * cspin(2, 0, inradius) * cspin(0, 1, M_PI-2*M_PI*spins[ws][d]/si), sides[ws][d]);
+        }
+      
+      if(1) {
+        dynamicval<eGeometry> g(geometry, gSpace534);
+        hyperpoint h = zpush(base_to_base) * T * zpush0(dieradius);
+        ld z = asin_auto(h[2]);
+        ordering.emplace_back(-z, i);
+        }
+      }
+    
+    sort(ordering.begin(), ordering.end());
+    
+    for(auto o: ordering) {
+      int i = o.second;
+      transmatrix T = facequeue[i].first;
+
+      for(int d=0; d<=si; d++) {
+        hyperpoint h;
+        ld z = 0;
+        if(1) {
+          dynamicval<eGeometry> g(geometry, gSpace534);
+          h = zpush(base_to_base) * T * cspin(0, 1, 2*M_PI*(d+.5)/si) * cspin(2, 0, outradius) * zpush0(dieradius);
+          z = asin_auto(h[2]);
+          h /= cos_auto(z);
+          }
+        h[2] = h[3]; h[3] = 0;
+        h = zshift(h, geom3::scale_at_lev(z));
+        curvepoint(h);
+        }
+      queuecurve(V1, 0xFFFFFFFF, 0x40A040FF, PPR::WALL);
+      }
+
+    }
+
 EX }
 
 }

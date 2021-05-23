@@ -745,7 +745,7 @@ EX namespace geom3 {
   // projection: projection parameter
   // factor: zoom factor
   
-  ld abslev_to_projection(ld abslev) {
+  EX ld abslev_to_projection(ld abslev) {
     if(sphere || euclid) return vid.camera+abslev;
     return tanh(abslev) / tanh(vid.camera);
     }

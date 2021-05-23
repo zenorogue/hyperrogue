@@ -374,6 +374,8 @@ EX void pushThumper(const movei& mi) {
     cto->wall = waCrateOnTarget;
     th->wall = waCrateTarget;
     }
+  else if(w == waDie) 
+    dice::roll(mi);  
   else
     cto->wall = w;
   if(explode) cto->wall = waFireTrap, cto->wparam = explode;
@@ -382,7 +384,9 @@ EX void pushThumper(const movei& mi) {
   }
 
 EX bool canPushThumperOn(cell *tgt, cell *thumper, cell *player) {
-  if(tgt->wall == waBoat || tgt->wall == waStrandedBoat) return false;
+  if(thumper->wall == waDie && tgt->type == 7)
+    return false;
+  if(tgt->wall == waBoat || tgt->wall == waStrandedBoat) return false;  
   if(isReptile(tgt->wall)) return false;
   if(isWatery(tgt) && !tgt->monst)
     return true;

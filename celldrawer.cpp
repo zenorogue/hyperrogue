@@ -146,7 +146,7 @@ void celldrawer::setcolors() {
     case laDesert: case laKraken: case laDocks: 
     case laMotion: case laGraveyard: case laWineyard: case laLivefjord: 
     case laRlyeh: case laHell: case laCrossroads: case laJungle:
-    case laAlchemist: case laFrog: case laCursed:
+    case laAlchemist: case laFrog: case laCursed: case laDice:
       fcol = floorcolors[c->land]; break;
     
     case laCA:
@@ -1599,6 +1599,10 @@ void celldrawer::draw_features() {
           queuepoly(V, cgi.shMirror, darkena(wcol, 0, 0xC0));
           }
         poly_outline = OUTLINE_DEFAULT;
+        }
+
+      else if(c->wall == waDie) {
+        dice::draw_die(c, V);
         }
       
       else if(c->wall == waExplosiveBarrel) {
