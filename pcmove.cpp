@@ -666,12 +666,22 @@ bool pcmove::actual_move() {
   return after_escape();
   }
 
+void blowaway_message(cell *c2) {
+  addMessage(airdist(c2) < 3 ? XLAT("The Air Elemental blows you away!") : XLAT("You cannot go against the wind!"));
+  }
+
+EX void tortoise_hero_message(cell *c2) {
+  bool fem = playergender() == GEN_F;      
+  playSound(c2, fem ? "heal-princess" : "heal-prince");
+  addMessage(fem ? XLAT("You are now a tortoise heroine!") : XLAT("You are now a tortoise hero!"));
+  }
+
 bool pcmove::boat_move() {
 
   cell *& c2 = mi.t;
 
   if(againstWind(c2, cwt.at)) {
-    if(vmsg()) addMessage(XLAT(airdist(c2) < 3 ? "The Air Elemental blows you away!" : "You cannot go against the wind!"));
+    if(vmsg()) blowaway_message(c2);
     return false;
     }
 
@@ -875,14 +885,13 @@ bool pcmove::move_if_okay() {
 
 void pcmove::tell_why_impassable() {
   cell*& c2 = mi.t;
-  if(nonAdjacent(cwt.at,c2))
-    addMessage(XLAT(
-      geosupport_football() < 2 ? 
-      "You cannot move between the cells without dots here!" :
-      "You cannot move between the triangular cells here!"
-      ));
-  else if(againstWind(c2, cwt.at))
-    addMessage(XLAT(airdist(c2) < 3 ? "The Air Elemental blows you away!" : "You cannot go against the wind!"));
+  if(nonAdjacent(cwt.at,c2)) {
+    addMessage(geosupport_football() < 2 ?
+      XLAT("You cannot move between the cells without dots here!") :
+      XLAT("You cannot move between the triangular cells here!")
+      );
+    }
+  else if(againstWind(c2, cwt.at)) blowaway_message(c2);
   else if(isAlch(c2))
     addMessage(XLAT("Wrong color!"));
   else if(c2->wall == waRoundTable)
@@ -963,8 +972,7 @@ bool pcmove::attack() {
       updateHi(itBabyTortoise, items[itBabyTortoise]);
       c2->item = itBabyTortoise;
       tortoise::babymap[c2] = tortoise::seekbits;
-      playSound(c2, playergender() ? "heal-princess" : "heal-prince");
-      addMessage(XLAT(playergender() == GEN_F ? "You are now a tortoise heroine!" : "You are now a tortoise hero!"));
+      tortoise_hero_message(c2);
       achievement_collection(itBabyTortoise);
       });
     }

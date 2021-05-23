@@ -491,7 +491,7 @@ EX void showMission() {
     if(racing::on)
       dialog::addItem(XLAT("racing menu"), 'o');
 #if !ISMOBILE
-    dialog::addItem(XLAT(quitsaves() ? "save" : "quit"), SDLK_F10);
+    dialog::addItem(quitsaves() ? XLAT("save") : XLAT("quit"), SDLK_F10);
 #endif
 #if CAP_ANDROIDSHARE
     dialog::addItem(XLAT("SHARE"), 's'-96);

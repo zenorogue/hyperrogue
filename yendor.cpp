@@ -1269,7 +1269,10 @@ EX namespace peace {
     }    
   
   EX void showMenu() {
-    string title = XLAT(otherpuzzles ? (explore_other ? "exploration" : "puzzles") : "memory game");
+    string title = 
+      !otherpuzzles ? XLAT("memory game") :
+      explore_other ? XLAT("exploration") : 
+      XLAT("puzzles");
     dialog::init(title, 0x40A040, 150, 100);
 
     int kind = 0;

@@ -2417,7 +2417,7 @@ void moveMonster(monster *m, int delta) {
       if(m->type == moTortoise && tortoise::seek() && !tortoise::diff(getBits(m->torigin)) && sqdist(m->pat*C0, pc[i]->pat*C0) < SCALE2) {
         items[itBabyTortoise] += 4;
         m->dead = true;
-        addMessage(XLAT(playergender() == GEN_F ? "You are now a tortoise heroine!" : "You are now a tortoise hero!"));
+        tortoise_hero_message(m->base);
         }
     for(int i=0; i<players; i++) if(!pc[i]->isVirtual)
     if(m->type == moFlailer && curtime >= m->nextshot && 

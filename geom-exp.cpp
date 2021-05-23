@@ -178,9 +178,6 @@ EX void ge_land_selection() {
 
   dialog::init(XLAT("experiment with geometry"));
   
-  // dialog::addSelItem(XLAT("geometry"), XLAT(bitruncnames[int(variation)]), '5');
-  // dialog::addBreak(50);
-    
   generateLandList([] (eLand l) { return land_validity(l).flags & lv::appears_in_geom_exp; });
   stable_sort(landlist.begin(), landlist.end(), [] (eLand l1, eLand l2) { return land_validity(l1).quality_level > land_validity(l2).quality_level; });
   
@@ -391,10 +388,13 @@ void ge_select_tiling() {
         if(ginf[j].tiling_name == ginf[i].tiling_name)
           geometry = g = eGeometry(j);
       }
-    dialog::addBoolItem(XLAT(
-      (geometry == gProduct && in_2d) ? XLAT("current geometry x E") : 
-      (geometry == gRotSpace && in_2d) ? XLAT("space of rotations in current geometry") : 
-      ginf[g].menu_displayed_name), on, letter++);
+    
+    bool is_product = (geometry == gProduct && in_2d);
+    bool is_rotspace = (geometry == gRotSpace && in_2d);
+    dialog::addBoolItem(
+      is_product ? XLAT("current geometry x E") : 
+      is_rotspace ? XLAT("space of rotations in current geometry") : 
+      XLAT(ginf[g].menu_displayed_name), on, letter++);
     dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
     dialog::add_action([g] { set_or_configure_geometry(g); });
     }

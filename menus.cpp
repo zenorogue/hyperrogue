@@ -124,9 +124,10 @@ EX void showOverview() {
       if(items[it] >= 10) col = winf[waMirror].color; else col = BLACKISH;
       if(displayfrZH(xr*46, i0, 1, vf-4, XLAT1(winf[waMirror].name), col, 0))
         getcstat = 3000+waMirror;
-      if(getcstat == 3000+waMirror)
-        mouseovers = XLAT(
-          olrDescriptions[getOLR(io, cwt.at->land)], cwt.at->land, it, treasureTypeUnlock(curland, io));
+      if(getcstat == 3000+waMirror) {
+        string olrdesc = olrDescriptions[getOLR(io, cwt.at->land)];
+        mouseovers = XLAT(olrdesc, cwt.at->land, it, treasureTypeUnlock(curland, io));
+        }
       }
     else if(io) {
       if(lv >= 25) col = 0xFFD500;
@@ -139,9 +140,10 @@ EX void showOverview() {
         getcstat = 2000+io;
       if(displayfrZH(xr*46, i0, 1, vf-4, XLAT1(iinf[io].name), col, 0))
         getcstat = 2000+io;
-      if(getcstat == 2000+io)
-        mouseovers = XLAT(
-          olrDescriptions[getOLR(io, curland)], curland, it, treasureTypeUnlock(curland, io));
+      if(getcstat == 2000+io) {
+        string olrdesc = olrDescriptions[getOLR(io, curland)];
+        mouseovers = XLAT(olrdesc, curland, it, treasureTypeUnlock(curland, io));
+        }
       }
     }
 
@@ -227,7 +229,7 @@ EX void showMainMenu() {
   else dialog::addBreak(100);
   dialog::addItem(XLAT("restart game"), 'r');
 
-  dialog::addItem(XLAT(inSpecialMode() ? "reset special modes" : "back to the start menu"), 'R');
+  dialog::addItem(inSpecialMode() ? XLAT("reset special modes") : XLAT("back to the start menu"), 'R');
   
   string q;
   #if ISMOBILE

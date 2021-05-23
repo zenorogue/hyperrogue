@@ -188,9 +188,10 @@ string get_subname(const string& s, const string& folder) {
 /** \brief display the help text for the current slide if texts enabled */
 EX void slidehelp() {
   if(texts && slides[currentslide].help[0]) {
+    string slidename = get_slidename(slides[currentslide].name);
     gotoHelp(
       help = 
-        helptitle(XLAT(get_slidename(slides[currentslide].name)), 0xFF8000) + 
+        helptitle(XLAT(slidename), 0xFF8000) + 
         XLAT(slides[currentslide].help)
       );
     presentation(pmHelpEx);
@@ -339,11 +340,14 @@ bool handleKeyTour(int sym, int uni) {
         canmove = true;
         }
       }
-    else addMessage(XLAT(
-      (vid.shifttarget&1) ? 
-        "Shift-click a location to teleport there."
-      : "Click a location to teleport there."
-      ));
+    else {
+      bool shift = vid.shifttarget & 1;
+      addMessage(
+        shift ? 
+          XLAT("Shift-click a location to teleport there.")
+        : XLAT("Click a location to teleport there.")
+        );
+      }
     return true;
     }
   if(NUMBERKEY == '5') {
@@ -451,8 +455,11 @@ EX namespace ss {
       if(sf == last) continue;
       last = sf;
       string sfd;
-
-      if(sf.back() == '/') sfd = XLAT(sf.substr(0, isize(sf)-1)) + "/  ";
+      
+      if(sf.back() == '/') {
+        sfd = sf.substr(0, isize(sf)-1);
+        sfd = XLAT(sfd) + "/  ";
+        }
       else sfd = XLAT(sf);
 
       dialog::addBoolItem(XLAT(sf), wts == slides && in_folder(slides[currentslide].name, current_folder+sf), slidechars[key++]);

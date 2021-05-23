@@ -1824,15 +1824,11 @@ EX namespace mapeditor {
         case sgFloor:
           line1 = GDIM == 3 ? XLAT("pick something") : XLAT("floor");
           line2 = "#" + its(drawcellShapeID());
-          /* line2 = XLAT(ishept(drawcell) ? "heptagonal" : 
-            ishex1(drawcell) ? "hexagonal #1" : "hexagonal"); */
           break;        
 
         case sgWall:
           line1 = XLAT("statue");
           line2 = "#" + its(drawcellShapeID());
-          /* line2 = XLAT(ishept(drawcell) ? "heptagonal" : 
-            ishex1(drawcell) ? "hexagonal #1" : "hexagonal"); */
           break;        
         }
       

@@ -2835,7 +2835,8 @@ EX void edit_all_settings() {
   }
 
 void list_setting::show_edit_option(char key) {
-  dialog::addSelItem(XLAT(menu_item_name), XLAT(options[get_value()].first), key);
+  string opt = options[get_value()].first;
+  dialog::addSelItem(XLAT(menu_item_name), XLAT(opt), key);
   dialog::add_action_push([this] {
     add_to_changed(this);
     gamescreen(2);
