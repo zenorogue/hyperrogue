@@ -2618,8 +2618,12 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           bool turret = true;
           forCellEx(c1, c) if(c1->wall != waStone) turret = false;
           if(turret) {
-            c->monst = moHexer;
-            c->item = pick(itCurseWeakness, itCurseDraining, itCurseWater, itCurseFatigue, itCurseRepulsion, itCurseGluttony);
+            if(hrand(100) < 80)
+              c->wall = waStone;
+            else {
+              c->monst = moHexer;
+              c->item = pick(itCurseWeakness, itCurseDraining, itCurseWater, itCurseFatigue, itCurseRepulsion, itCurseGluttony);
+              }
             }
           }
         
