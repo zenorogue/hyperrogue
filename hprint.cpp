@@ -436,6 +436,19 @@ EX string as_cstring(string o) {
   return s;
   }
 
+EX string as_nice_cstring(string o) {
+  string s = "\"";
+  for(char c: o)
+    if(c >= 32 && c < 126)
+      s += c;
+    else if(c == 10)
+      s += "\\n";
+    else
+      s += format("\\x%02x", (unsigned char) c);
+  s += "\"";
+  return s;
+  }
+
 #if HDR
 #if ISANDROID
 #define DEBB(r,x)
