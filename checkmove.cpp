@@ -30,6 +30,26 @@ EX int lastkills;
 
 EX vector<bool> legalmoves;
 
+/* why is a move illegal */
+EX vector<int> move_issues;
+
+#if HDR
+static const int miVALID = 10000;
+static const int miENTITY = 11000;
+static const int miRESTRICTED = 10100;
+static const int miTHREAT = 10010;
+static const int miWALL = 10001;
+#endif
+
+EX int checked_move_issue;
+EX int yasc_code;
+
+EX void check_if_monster() {
+  eMonster m = cwt.peek()->monst;
+  if(m && m != passive_switch && !isFriendly(m))
+    checked_move_issue = miENTITY;
+  }
+  
 EX bool hasSafeOrb(cell *c) {
   return 
     c->item == itOrbSafety ||
@@ -272,20 +292,34 @@ EX void checkmove() {
   for(int i=0; i<ittypes; i++) orbusedbak[i] = orbused[i];
 
   legalmoves.clear(); legalmoves.resize(cwt.at->type+1, false);
+  move_issues.clear(); move_issues.resize(cwt.at->type, 0);
 
   canmove = haveRangedTarget();
   items[itWarning]+=2;
-  if(movepcto(-1, 0, true)) canmove = legalmoves[cwt.at->type] = true;
+  if(movepcto(-1, 0, true))
+    canmove = legalmoves[cwt.at->type] = true;
   
-  if(vid.mobilecompasssize || !canmove)
-    for(int i=0; i<cwt.at->type; i++) 
-      if(movepcto(1, -1, true)) 
+  if(true) {
+    for(int i=0; i<cwt.at->type; i++) {
+      if(movepcto(1, -1, true)) {
         canmove = legalmoves[cwt.spin] = true;
-  if(vid.mobilecompasssize || !canmove)
-    for(int i=0; i<cwt.at->type; i++) 
-      if(movepcto(1, 1, true)) 
-        canmove = legalmoves[cwt.spin] = true;
+        }
+      check_if_monster();
+      move_issues[cwt.spin] = checked_move_issue;
+      if(!legalmoves[cwt.spin]) {
+        if(movepcto(1, 1, true)) {
+          canmove = legalmoves[cwt.spin] = true;
+          }
+        check_if_monster();
+        move_issues[cwt.spin] = checked_move_issue;
+        }
+      }
+    }
   if(kills[moPlayer]) canmove = false;
+  
+  yasc_code = 0;
+  for(int i=0; i<cwt.at->type; i++)
+    yasc_code += move_issues[i];
 
 #if CAP_INV  
   if(inv::on && !canmove && !inv::incheck) {

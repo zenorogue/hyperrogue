@@ -28,12 +28,18 @@ EX string getgametime_s(int timespent IS(getgametime())) {
   return buf;
   }
 
+EX bool display_yasc_codes;
+
 string timeline() {
-  return 
-    shmup::on ? 
-      XLAT("%1 knives (%2)", its(turncount), getgametime_s())
-    :
-      XLAT("%1 turns (%2)", its(turncount), getgametime_s());
+  string s;
+  if(shmup::on)
+    s = XLAT("%1 knives (%2)", its(turncount), getgametime_s());
+  else {
+    s = XLAT("%1 turns (%2)", its(turncount), getgametime_s());
+    if(display_yasc_codes)
+      s+= " YASC code: " + its(yasc_code);
+    }
+  return s;
   }
 
 EX void noaction() {}

@@ -644,6 +644,12 @@ EX void initConfig() {
   param_b(resizable, "resizable", true)
   -> editable("resizable window", 'r');
 
+  param_b(display_yasc_codes, "yasc", false)
+  -> editable("YASC codes", 'Y')
+  -> set_reaction([] { 
+    addMessage("YASC codes: Sides-Entity-Restrict-Threat-Wall");  
+    });
+
   param_b(vid.relative_font, "relative_font", true)
   -> editable("set relative font size", 'r')
   -> set_reaction(compute_fsize);
@@ -1762,6 +1768,8 @@ EX void configureInterface() {
   
   add_edit(glyphsortorder);
   add_edit(vid.graphglyph);
+
+  add_edit(display_yasc_codes);
 
   dialog::addSelItem(XLAT("draw crosshair"), crosshair_size > 0 ? fts(crosshair_size) : ONOFF(false), 'x');
   dialog::add_action([] () { 
