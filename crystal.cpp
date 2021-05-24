@@ -1429,7 +1429,7 @@ EX string compass_help() {
 
 string make_help() {
   return XLAT(
-    "This geometry essentially lets you play in a d-dimensional grid. Pick three "
+    "This space essentially lets you play in a d-dimensional grid. Pick three "
     "dimensions and '3D display' to see how it works -- we are essentially playing on a periodic surface in "
     "three dimensions, made of hexagons; each hexagon connects to six other hexagons, in each of the 6 "
     "possible directions. Normally, the game visualizes this from the point of view of a creature living inside "
@@ -1439,7 +1439,7 @@ string make_help() {
     "the d-dimensional grid is a quotient of the hyperbolic plane). The same construction works in other dimensions. "
     "Half dimensions are interpreted in the following way: the extra dimension only has two 'levels', for example 2.5D "
     "has a top plane and a bottom plane.\n\n"
-    "You may also bitruncate this geometry -- which makes it work better with the rules of HyperRogue, but a bit harder to understand."
+    "You may also bitruncate this tessellation -- which makes it work better with the rules of HyperRogue, but a bit harder to understand."
     );
   }
 

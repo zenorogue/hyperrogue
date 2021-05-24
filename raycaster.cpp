@@ -2148,7 +2148,7 @@ EX void configure() {
       });
     }
 
-  dialog::addBoolItem(XLAT("volumetric raytracing"), volumetric::on, 'v');
+  dialog::addBoolItem(XLAT("volumetric raycasting"), volumetric::on, 'v');
   dialog::add_action_push(volumetric::menu);
 
   dialog::addSelItem(XLAT("iterations"), its(max_iter_current()), 's');

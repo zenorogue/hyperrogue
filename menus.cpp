@@ -541,7 +541,7 @@ EX void mode_higlights() {
   gamescreen(3);
   dialog::init(XLAT("highlights & achievements"));
   
-  dialog::addBigItem(XLAT("Space Rocks"), 'r');
+  dialog::addBigItem(XLATN("Space Rocks"), 'r');
   dialog::add_action(dialog::add_confirmation([] {
     popScreenAll();
     stop_game();
@@ -1130,7 +1130,7 @@ EX named_functionality get_o_key() {
     res.push_back(named_functionality(XLAT("experiment with geometry"), runGeometryExperiments));
 
   if(tactic::on)
-    res.push_back(named_dialog(XLAT("Pure Tactics mode"), tactic::showMenu));
+    res.push_back(named_dialog(XLAT("pure tactics mode"), tactic::showMenu));
     
   if(yendor::on)
     res.push_back(named_dialog(XLAT("Yendor Challenge"), yendor::showMenu));

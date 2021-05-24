@@ -1737,7 +1737,7 @@ EX void select() {
 EX void rug_save(string fname) {
   fhstream f(fname, "wb");
   if(!f.f) {
-    addMessage(XLAT("Failed to save rug to %1", fname));
+    addMessage(XLAT("Failed to save embedding to %1", fname));
     return;
     }
   f.write(f.vernum);
@@ -1778,7 +1778,7 @@ EX void rug_load(string fname) {
   clear_model();
   fhstream f(fname, "rb");
   if(!f.f) {
-    addMessage(XLAT("Failed to load rug from %1", fname));
+    addMessage(XLAT("Failed to load embedding from %1", fname));
     return;
     }
   f.read(f.vernum);

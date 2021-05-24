@@ -860,7 +860,7 @@ EX void initConfig() {
   addsaver(vid.desaturate, "desaturate", 0);
   
   param_enum(vid.stereo_mode, "stereo_mode", "stereo-mode", vid.stereo_mode)
-    ->editable({{"OFF", "no"}, {"anaglyph", ""}, {"side-by-side", ""}
+    ->editable({{"OFF", ""}, {"anaglyph", ""}, {"side-by-side", ""}
     #if CAP_ODS
     , {"ODS", ""}
     #endif
@@ -1333,8 +1333,8 @@ EX void edit_sightrange() {
       dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("3D sight range"),
         XLAT(
           "Sight range for 3D geometries is specified in the absolute units. This value also affects the fog effect.\n\n"
-          "In spherical geometries, the sight range of 2? will let you see things behind you as if they were in front of you, "
-          "and the sight range of ? (or more) will let you see things on the antipodal point just as if they were close to you.\n\n"
+          "In spherical geometries, the sight range of 2π will let you see things behind you as if they were in front of you, "
+          "and the sight range of π (or more) will let you see things on the antipodal point just as if they were close to you.\n\n"
           "In hyperbolic geometries, the number of cells to render depends exponentially on the sight range. More cells to drawn "
           "reduces the performance.\n\n"
           "Sight range affects the gameplay, and monsters act iff they are visible. Monster generation takes this into account."
@@ -1907,16 +1907,20 @@ EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
         );
     dialog::bound_low(1e-8);
     dialog::bound_up(max_fov_angle() - 0.01);
-    dialog::extra_options = [] {
+    string quick = 
+      XLAT(
+        "HyperRogue uses "
+        "a quick implementation, so parameter values too close to 1 may "
+        "be buggy (outside of raycasting); try e.g. 0.9 instead."
+        );
+    dialog::extra_options = [quick] {
       dialog::addSelItem(XLAT("Panini projection"), fts(panini_alpha), 'P');
-      dialog::add_action([] {
+      dialog::add_action([quick] {
         popScreen();
         dialog::editNumber(panini_alpha, 0, 1, 0.1, 0, "Panini parameter", 
           XLAT(
             "The Panini projection is an alternative perspective projection "
-            "which allows very wide field-of-view values. HyperRogue uses "
-            "a quick implementation, so parameter values too close to 1 may "
-            "be buggy (outside of raycasting); try e.g. 0.9 instead.")
+            "which allows very wide field-of-view values.\n\n") + quick
             );
         #if CAP_GL
         dialog::reaction = reset_all_shaders;
@@ -1926,14 +1930,12 @@ EX void add_edit_fov(char key IS('f'), bool pop IS(false)) {
           };
         });
       dialog::addSelItem(XLAT("spherical perspective projection"), fts(stereo_alpha), 'S');
-      dialog::add_action([] {
+      dialog::add_action([quick] {
         popScreen();
         dialog::editNumber(stereo_alpha, 0, 1, 0.1, 0, "spherical perspective parameter", 
           XLAT(
             "Set to 1 to get stereographic projection, "
-            "which allows very wide field-of-view values. HyperRogue uses "
-            "a quick implementation, so parameter values too close to 1 may "
-            "be buggy (outside of raycasting); try e.g. 0.9 instead.")
+            "which allows very wide field-of-view values.\n\n") + quick
             );
         #if CAP_GL
         dialog::reaction = reset_all_shaders;
@@ -2112,7 +2114,7 @@ EX void show3D() {
       dialog::add_action(projectionDialog);
       }
     else if(!in_perspective())
-      dialog::addSelItem(XLAT("Projection distance"), fts(pconf.alpha), 'p');
+      dialog::addSelItem(XLAT("projection distance"), fts(pconf.alpha), 'p');
     
     dialog::addBreak(50);
     add_edit(vid.wall_height);
@@ -2783,7 +2785,7 @@ template<class T> void add_edit(T& val) {
 EX void find_setting() {
   gamescreen(1); 
 
-  dialog::init(XLAT("find setting"));
+  dialog::init(XLAT("find a setting"));
   if(dialog::infix != "") mouseovers = dialog::infix;
   
   vector<setting*> found;

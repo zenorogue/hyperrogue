@@ -707,7 +707,7 @@ EX namespace models {
         dialog::addItem(XLAT("Gans model") + " " + XLAT("(zoomed out)"), '4');
         dialog::add_action([] { if(rug::rugged) rug::close(); pconf.alpha = 999; pconf.scale = 499; pconf.xposition = pconf.yposition = 0; popScreen(); });
         #if CAP_RUG
-        dialog::addItem(XLAT("Hypersian rug"), 'u');
+        dialog::addItem(XLAT("Hypersian Rug"), 'u');
         dialog::add_action([] {  
           if(rug::rugged) pushScreen(rug::show);
           else {
@@ -998,7 +998,7 @@ EX namespace models {
   
       param_f(p.aitoff_parameter, sp+"aitoff")
       -> editable(-1, 1, .1, "Aitoff parameter", 
-          "The Aitoff projection is obtained by multiplying the longitude by 1/2, using azimuthal equidistant projection, and then multiplying X by 1/2. "
+          "The Aitoff projection is obtained by multiplying the longitude by 1/2, using azimuthal equidistant projection, and then dividing X by 1/2. "
           "Hammer projection is similar but equi-area projection is used instead. "
           "Here you can change this parameter.", 'b');
       param_f(p.miller_parameter, sp+"miller");
