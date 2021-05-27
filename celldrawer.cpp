@@ -1601,8 +1601,19 @@ void celldrawer::draw_features() {
         poly_outline = OUTLINE_DEFAULT;
         }
 
-      else if(c->wall == waDie) {
-        dice::draw_die(c, V);
+      else if(among(c->wall, waRichDie, waBlandDie)) {
+        color_t col = darkena(winf[c->wall].color, 0, 0xFF);
+        
+        ld footphase;
+        Vboat = V;
+        bool animated = applyAnimation(c, Vboat, footphase, LAYER_BOAT);
+        if(animated) {
+          transmatrix U = inverse_shift(V, Vboat);
+          U = rgpushxto0(tC0(U));
+          Vboat = V * U; 
+          }
+        die_target = V;
+        dice::draw_die(c, Vboat, 1, col);
         }
       
       else if(c->wall == waExplosiveBarrel) {

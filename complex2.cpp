@@ -904,73 +904,148 @@ EX }
 
 EX namespace dice {
 
-  /* vector<vector<int>> sides = {
-    {1, 3, 5}, {0, 4, 2}, {3, 1, 7}, {2, 6, 0}, {5, 7, 1}, {4, 0, 6}, {7, 5, 3}, {6, 2, 4}
-    }; */
-
-  vector<vector<int>> sides = {
+  struct die_structure {
+    vector<vector<int>> sides;
+    vector<vector<int>> spins;
+    vector<int> hardness;
+    int faces;
+    int order;
+    die_structure(int ord, const vector<vector<int>>& v) {
+      sides = v;
+      spins = sides;
+      faces = isize(sides);
+      order = ord;
+      for(int i=0; i<faces; i++)
+        for(int j=0; j<isize(sides[i]); j++) {
+          int i1 = sides[i][j];
+          spins[i][j] = -1;
+          for(int k=0; k<isize(sides[i1]); k++)
+            if(sides[i1][k] == i)
+              spins[i][j] = k;
+          if(spins[i][j] == -1)
+            println(hlog, "asymmetric");
+          }
+      hardness.resize(faces, 99);
+      hardness.back() = 0;
+      for(int it=0; it<faces; it++)
+      for(int i=0; i<faces; i++)
+        for(int j: sides[i])
+          hardness[i] = min(hardness[i], hardness[j]+1);
+      }
+    };
+  
+  die_structure d20(5, {
     {13-1, 7-1, 19-1}, {20-1, 12-1, 18-1}, {19-1, 17-1, 16-1}, {14-1, 18-1, 11-1}, {13-1, 18-1, 15-1}, 
     {14-1, 9-1, 16-1}, { 1-1, 15-1, 17-1}, {20-1, 16-1, 10-1}, {19-1,  6-1, 11-1}, { 8-1, 17-1, 12-1},
     {13-1, 9-1,  4-1}, { 2-1, 10-1, 15-1}, { 1-1, 11-1,  5-1}, {20-1,  4-1,  6-1}, { 7-1,  5-1, 12-1},
     { 8-1, 6-1,  3-1}, { 7-1, 10-1,  3-1}, { 2-1,  5-1,  4-1}, { 1-1,  3-1,  9-1}, { 8-1,  2-1, 14-1}
+    });
+  
+  die_structure d8(4, {
+    {1, 3, 5}, {0, 4, 2}, {3, 1, 7}, {2, 6, 0}, {5, 7, 1}, {4, 0, 6}, {7, 5, 3}, {6, 2, 4}
+    });
+
+  die_structure d4(3, {{3,2,1}, {3,0,2}, {1,0,3}, {0,1,2}});
+  
+  #if HDR
+  struct die_data {
+    struct die_structure *which;
+    int val;
+    int dir;
+    int happy();
     };
+  #endif
 
-  vector<vector<int>> spins;
-  int order;
-
-  int faces() { return isize(sides); }
-  
-  EX void generate_on(cell *c) {
-    c->wparam = hrand(faces()) + faces() * (1 + hrand(3) * 2);
+  int die_data::happy() {
+    if(val == which->faces-1) return 1;
+    if(val == 0) return -1;
+    return 0;
     }
   
-  bool prepared;
-  
-  void prepare() {
-    if(prepared) return;
-    prepared = true;
-    spins = sides;
-    order = faces() == 8 ? 4 : 5;
-    for(int i=0; i<faces(); i++)
-      for(int j=0; j<isize(sides[i]); j++) {
-        int i1 = sides[i][j];
-        spins[i][j] = -1;
-        for(int k=0; k<isize(sides[i1]); k++)
-          if(sides[i1][k] == i)
-            spins[i][j] = k;
-        if(spins[i][j] == -1)
-          println(hlog, "asymmetric");
-        }
+  EX map<cell*, die_data> data;
+        
+  EX void generate_random(cell *c) {
+    auto& dd = data[c];
+    dd.which = pick(&d4, &d8, &d20);
+    dd.val = hrand(dd.which->faces);
+    dd.dir = 1 + hrand(3) * 2;
+    }
+
+  EX void generate_specific(cell *c, die_structure *ds, int min_hardness, int max_hardness) {
+    auto& dd = data[c];
+    dd.which = ds;
+    dd.dir = 1 + hrand(3) * 2;
+    vector<int> sides;
+    for(int i=0; i<ds->faces; i++) 
+      if(ds->hardness[i] >= min_hardness && ds->hardness[i] <= max_hardness)
+        sides.push_back(i);
+    dd.val = sides[hrand(isize(sides))];
     }
   
-  EX void roll(movei mi) {
-    prepare();
+  EX void generate_full(cell *c, int hard) {  
+    int pct = hrand(100);
+    int pct2 = hrand(4000);
+    if(pct < 1) {
+      c->wall = waBlandDie;
+      generate_specific(c, &d4, 0, 99);
+      }
+    else if(pct < 3) {
+      c->wall = waBlandDie;
+      generate_specific(c, &d8, 0, 1);
+      }
+    else if(pct < 5) {
+      c->wall = waBlandDie;
+      generate_specific(c, &d20, 0, 1);
+      }
+    else if(pct < 9) {
+      c->wall = waRichDie;
+      generate_specific(c, &d20, 4, 5);
+      }
+    else if(pct < 10) {
+      c->wall = waRichDie;
+      generate_specific(c, &d8, 2, 3);
+      }
+    else if(pct2 < 1) {
+      c->monst = moAnimatedDie;
+      generate_specific(c, &d4, 0, 99);
+      }
+    else if(pct2 < 40) {
+      c->monst = moAnimatedDie;
+      generate_specific(c, &d8, 0, 99);
+      }
+    else if(pct2 < 40 + hard) {
+      c->monst = moAnimatedDie;
+      generate_specific(c, &d20, 0, 99);
+      }    
+    }
+
+  EX die_data roll_effect(movei mi, die_data dd) {
     auto &cto = mi.t;
     auto &th = mi.s;
     
     int rdir = mi.dir_force();
     int t = th->type;
 
-    int val = th->wparam % faces();
-    int dir = th->wparam / faces();
+    int val = dd.val;
+    int dir = dd.dir;
     
-    int si = isize(sides[val]);
+    auto& dw = dd.which;
     
-    if(t % si) { println(hlog, "error: bad roll\n"); return; }
+    int si = isize(dw->sides[val]);
+    
+    if(t % si) { println(hlog, "error: bad roll\n"); return dd; }
     
     int sideid = (rdir - dir) * si / t;
     if(sideid < 0) sideid += si;
     
-    int val1 = sides[val][sideid];
+    int val1 = dw->sides[val][sideid];
     
-    int si1 = isize(sides[val1]);
+    int si1 = isize(dw->sides[val1]);
     
-    println(hlog, tie(val, si, rdir), " to ", tie(val1, si1));
-
-    int sideid1 = spins[val][sideid];
+    int sideid1 = dw->spins[val][sideid];
     
     int t1 = cto->type;
-    if(t1 % si1) { println(hlog, "error: bad roll target\n"); return; }
+    if(t1 % si1) { println(hlog, "error: bad roll target\n"); return dd; }
     
     int rdir1 = mi.rev_dir_force();
     
@@ -978,30 +1053,70 @@ EX namespace dice {
     
     dir1 = gmod(dir1, t1);
     
-    th->wall = waNone;
-    cto->wall = waDie;
-    cto->wparam = val1 + faces() * dir1;
+    dd.val = val1;
+    dd.dir = dir1;
+    return dd;
+    }
+      
+  EX void roll(movei mi) {
+    auto &cto = mi.t;
+    auto &th = mi.s;
+    
+    changes.map_value(data, cto);
+    changes.map_value(data, th);
+    data[cto] = roll_effect(mi, data[th]);
+    data.erase(th);
     }
 
-  EX void draw_die(cell *c, const shiftmatrix& V) {
-    prepare();
-    int val = c->wparam % faces();
-    int dir = c->wparam / faces();
-    queuestr(V, .5, its(val+1), 0xFFFFFFFF);
-    auto& side = sides[val];    
-    int si = isize(side);
+  EX void draw_die(cell *c, const shiftmatrix& V, ld scale, color_t color) {
+    if(!data.count(c)) {
+      queuepoly(V, cgi.shAsymmetric, 0xFF0000FF);
+      return;
+      }
+
+    eGeometry orig = geometry;
+    bool fpp = GDIM == 3;
+
+    auto& dd = data[c];
+    int val = dd.val;
+    int dir = dd.dir;
+    auto& dw = dd.which;
     
-    for(int i=0; i<si; i++) {
-      int d = dir + c->type * i / isize(side);
-      d = gmod(d, c->type);
-      hyperpoint nxt = tC0(currentmap->adj(c, d));
-      hyperpoint mid = normalize(C0 * 1.3 + nxt * -.3);
-      queuestr(V * rgpushxto0(mid), .25, its(side[i]+1), 0xFFFFFFFF);
+    auto& side = dw->sides[val];
+    int si = isize(side);
+
+    if(c == lmouseover_distant) {
+      set<cell*> visited;
+      struct celldata_t {
+        cell* c;
+        die_data dd;
+        shiftmatrix V;
+        };      
+      vector<celldata_t> data;
+      auto visit = [&] (cell *c, die_data dd, shiftmatrix V) {
+        if(visited.count(c)) return;
+        visited.insert(c);
+        data.emplace_back(celldata_t{c, dd, V});
+        };
+      visit(c, dd, V);
+      for(int i=0; i<isize(data); i++) {
+        auto dat = data[i];
+        queuestr(fpp ? dat.V * zpush(cgi.FLOOR) : dat.V, .5, its(dat.dd.val+1), 0xFF8000FF);
+        if(i <= 22)
+        forCellIdEx(c2, id, dat.c) if(!ctof(c2) && !visited.count(c2)) {
+          auto re = roll_effect(movei(dat.c, id), dat.dd);
+          shiftmatrix V2 = dat.V * currentmap->adj(dat.c, id);
+          gridline(dat.V, C0, V2, C0, 0xFF800080, 0);
+          visit(c2, re, V2);
+          }
+        }
       }
     
-    shiftmatrix V1 = V * iddspin(c, dir) * spin(M_PI);
+    shiftmatrix V1 = V * ddspin(c, dir) * spin(M_PI);
     
-    vector<bool> face_drawn(faces(), false);
+    // loop:
+
+    vector<bool> face_drawn(dd.which->faces, false);
     
     vector<pair<transmatrix, int> > facequeue;
     
@@ -1011,46 +1126,64 @@ EX namespace dice {
       facequeue.emplace_back(T, d);
       };
     
-    add_to_queue(Id, val);
-
+    transmatrix S = Id;
+    
     ld outradius, inradius;
     
     if(1) {
       dynamicval<eGeometry> g(geometry, gSphere);
-      ld alpha = 360 * degree / order;
+      ld alpha = 360 * degree / dw->order;
       inradius  = edge_of_triangle_with_angles(alpha, 60*degree, 60*degree);
       outradius = edge_of_triangle_with_angles(60*degree, alpha, 60*degree);
       }
 
-    ld dieradius = 0.5;
+    hyperpoint shift = inverse_shift(V1, tC0(die_target));
+    hyperpoint log_shift = inverse_exp(shiftless(shift)) * (inradius / cgi.hexhexdist);
+    
+    if(1) {
+      dynamicval<eGeometry> g(geometry, gSphere);
+      hyperpoint de = direct_exp(log_shift);
+      S = rgpushxto0(de);
+      if(GDIM == 3) {
+        for(int i=0; i<4; i++) swap(S[i][2], S[i][3]);
+        for(int i=0; i<4; i++) swap(S[2][i], S[3][i]);
+        }
+      for(int i=0; i<4; i++) S[i][1] *= -1;
+      }
+    
+    add_to_queue(S, val);
+
+    ld dieradius = scale / 2;
+    
+    if(dw->faces == 20) dieradius /= 1.3;
+    if(dw->faces == 8) dieradius /= 1.15;
     
     ld base_to_base;
     
     if(1) {
       dynamicval<eGeometry> g(geometry, gSpace534);
-      hyperpoint h = cspin(2, 0, outradius) * zpush0(-dieradius);
+      hyperpoint h = cspin(2, 0, M_PI-outradius) * zpush0(-dieradius);
       base_to_base = binsearch(-5, 5, [h] (ld d) {
         return (zpush(d) * h)[2] >= sin_auto(vid.depth);
         });
-      // ld base_to_base = cspin(2, 0, outradius) * zpush0(-dieradius);
       }
     
     vector<pair<ld, int> > ordering;
     
-    for(int i=0; i<faces(); i++) {
+    for(int i=0; i<dw->faces; i++) {
     
       transmatrix T = facequeue[i].first;
       int ws = facequeue[i].second;
       
       for(int d=0; d<si; d++) {
         dynamicval<eGeometry> g(geometry, gSpace534);
-        add_to_queue(T * cspin(0, 1, 2*M_PI*d/si) * cspin(2, 0, inradius) * cspin(0, 1, M_PI-2*M_PI*spins[ws][d]/si), sides[ws][d]);
+        add_to_queue(T * cspin(0, 1, 2*M_PI*d/si) * cspin(2, 0, inradius) * cspin(0, 1, M_PI-2*M_PI*dw->spins[ws][d]/si), dw->sides[ws][d]);
         }
       
       if(1) {
         dynamicval<eGeometry> g(geometry, gSpace534);
         hyperpoint h = zpush(base_to_base) * T * zpush0(dieradius);
-        ld z = asin_auto(h[2]);
+        ld z = fpp ? hdist0(h) : asin_auto(h[2]);
         ordering.emplace_back(-z, i);
         }
       }
@@ -1061,22 +1194,49 @@ EX namespace dice {
       int i = o.second;
       transmatrix T = facequeue[i].first;
 
+      transmatrix face;
+      
+      hyperpoint sum = zpush(base_to_base) * C0 * -3;
+      
+      auto sphere_to_space = [&] (hyperpoint h) {
+        if(fpp) return h;
+        ld z = asin_auto(h[2]);
+        h /= cos_auto(z);
+        h[2] = h[3]; h[3] = 0;
+        dynamicval<eGeometry> g(geometry, orig);
+        return zshift(h, geom3::scale_at_lev(z));
+        };
+
       for(int d=0; d<=si; d++) {
-        hyperpoint h;
-        ld z = 0;
+        hyperpoint h, hs;
         if(1) {
           dynamicval<eGeometry> g(geometry, gSpace534);
           h = zpush(base_to_base) * T * cspin(0, 1, 2*M_PI*(d+.5)/si) * cspin(2, 0, outradius) * zpush0(dieradius);
-          z = asin_auto(h[2]);
-          h /= cos_auto(z);
+          set_column(face, d, h);
+          sum += h;
+          hs = sphere_to_space(h);
           }
-        h[2] = h[3]; h[3] = 0;
-        h = zshift(h, geom3::scale_at_lev(z));
-        curvepoint(h);
+        curvepoint(hs);
         }
-      queuecurve(V1, 0xFFFFFFFF, 0x40A040FF, PPR::WALL);
-      }
+      
+      set_column(face, 3, sum);
+      
+      queuecurve(V1, 0xFFFFFFFF, color & 0xFFFFFF9F, PPR::WALL);
+      
+      pointfunction pf = [&] (ld x, ld y) {
+        hyperpoint hs;
+        dynamicval<eGeometry> g(geometry, gSpace534);
+        return sphere_to_space(normalize(face * hyperpoint(1/3. -y/2 -x, 1/3. + y, 1/3. -y/2 +x, 1e-2)));
+        };
 
+      int fid = dw->faces - facequeue[i].second;
+      if(dw->faces == 4) fid = facequeue[i].second + 1;
+      string s;
+      if(fid == 6) s = "6.";
+      else if(fid == 9) s = "9.";
+      else s = its(fid);
+      write_in_space(V1, max_glfont_size, dw->faces < 10 ? -1.2 : -.75, s, 0xFFFFFFFF, 0, 8, PPR::WALL, pf);
+      }
     }
 
 EX }

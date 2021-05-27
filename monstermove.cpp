@@ -102,6 +102,9 @@ EX void moveEffect(const movei& mi, eMonster m) {
     animateMovement(mi.rev(), LAYER_BOAT);
     tortoise::move_baby(cf, ct);
     }
+  
+  if(m == moAnimatedDie && mi.proper())
+    dice::roll(mi);
   }
 
 EX void moveMonster(const movei& mi) {
@@ -1086,6 +1089,11 @@ EX void groupmove2(const movei& mi, eMonster movtype, flagtype mf) {
         }
     }
   else return;
+  
+  if(c->monst == moAnimatedDie) {
+    forCellEx(c3, from) if(c3 != c && c3->monst == moAnimatedDie)
+      return;
+    }
 
   if(from->monst) {
     if(mf & MF_MOUNT) {

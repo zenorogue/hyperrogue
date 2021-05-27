@@ -2586,16 +2586,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       }
     
     case laDice: {
-      if(fargen) {
-        int pct = hrand(100);
-        if(pct < 10)
-          c->wall = waDie;
-        // c->wall = pick(waNone, waNone, waStone, waNone, waNone, waStone, waNone, waNone, waStone, waBigStatue, waCrateCrate, waDie);
-        if(c->wall == waDie) {        
-          if(ctof(c)) c->wall = waNone;
-          else dice::generate_on(c);
-          }
-        }
+      if(fargen && !ctof(c))
+        dice::generate_full(c, items[itDice] + yendor::hardness());
       break;
       }
 

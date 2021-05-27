@@ -808,6 +808,8 @@ EX eMonster summonedAt(cell *dest) {
     return moMiner;
   if(dest->wall == waMineOpen || dest->wall == waMineMine || dest->wall == waMineUnknown)
     return moBomberbird;
+  if(dest->wall == waRichDie)
+    return moAnimatedDie;
   if(dest->wall == waTrapdoor)
     return dest->land == laPalace ? moFatGuard : moOrangeDog;
   if(dest->land == laFrog && dest->wall == waNone) {
@@ -906,6 +908,8 @@ void summonAt(cell *dest) {
   dest->stuntime = 3;
   if(dest->monst == moPirate || dest->monst == moViking || (dest->monst == moRatling && dest->wall == waSea))
     dest->wall = waBoat, dest->item = itNone;
+  if(dest->monst == moAnimatedDie)
+    dest->wall = waNone;
   if(dest->monst == moViking && dest->land == laKraken)
     dest->item = itOrbFish;
   if(dest->wall == waStrandedBoat)

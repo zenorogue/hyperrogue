@@ -481,6 +481,7 @@ EX void bfs() {
           else if(isMagneticPole(c2->monst)) havewhat |= HF_MAGNET;
           else if(c2->monst == moAltDemon) havewhat |= HF_ALT;
           else if(c2->monst == moHexDemon) havewhat |= HF_HEXD;
+          else if(c2->monst == moAnimatedDie) havewhat |= HF_HEXD;
           else if(c2->monst == moMonk) havewhat |= HF_MONK;
           else if(c2->monst == moShark || c2->monst == moCShark || among(c2->monst, moRusalka, moPike)) havewhat |= HF_SHARK;
           else if(c2->monst == moAirElemental) 

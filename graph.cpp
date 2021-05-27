@@ -814,7 +814,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     (it == itBombEgg || it == itTrollEgg) ? &cgi.shEgg :
     it == itFrog ? &cgi.shDisk :
     it == itHunting ? &cgi.shTriangle :
-    it == itDodeca ? &cgi.shDodeca :
+    (it == itDodeca || it == itDice) ? &cgi.shDodeca :
     xch == '*' ? &cgi.shGem[ct6] : 
     xch == '(' ? &cgi.shKnife : 
     it == itShard ? &cgi.shMFloor.b[0] :
@@ -2251,7 +2251,15 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(V, cgi.shAsteroid[1], darkena(col, 0, 0xFF));
       return true;
       }
-
+    
+    case moAnimatedDie: {
+      if(where)
+        dice::draw_die(where, V, 1, darkena(col, 0, 0xFF));
+      else
+        queuepoly(V, cgi.shDodeca, darkena(col, 0, 0xFF));
+      return true;
+      }
+      
     default: ;    
     }
 
@@ -2517,6 +2525,8 @@ void drawWormSegments() {
   }
 
 EX bool dont_face_pc = false;
+
+EX shiftmatrix die_target;
 
 EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, color_t asciicol) {
   #if CAP_SHAPES
@@ -2876,6 +2886,13 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
   // golems, knights, and hyperbugs don't face the player (mondir-controlled)
   // also whatever in the lineview mode, and whatever in the quotient geometry
 
+  else if(c->monst == moAnimatedDie) {
+    transmatrix U = inverse_shift(Vparam, Vs);
+    U = rgpushxto0(tC0(U));
+    die_target = Vparam;
+    res = res && drawMonsterTypeDH(m, c, Vparam * U, col, darkhistory, footphase, asciicol);
+    }
+    
   else if((hasFacing(c) && c->mondir != NODIR) || history::on || quotient || dont_face_pc) {
     if(c->monst == moKrakenH) Vs = Vb, nospins = nospinb;
     if(!nospins && c->mondir < c->type) Vs = Vs * ddspin(c, c->mondir, M_PI);

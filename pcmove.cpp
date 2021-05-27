@@ -628,6 +628,18 @@ bool pcmove::actual_move() {
     activateActiv(c2, true);
     return after_instant(false);
     }
+  
+  if(c2->monst == moAnimatedDie) {
+    mip = determinePush(cwt, subdir, [c2] (cell *c) { return canPushThumperOn(c, c2, cwt.at); });
+    if(mip.proper()) {
+      auto tgt = roll_effect(mip, dice::data[c2]);
+      if(tgt.happy() > 0) {
+        changes.ccell(c2);
+        c2->monst = moNone;
+        c2->wall = waRichDie;
+        }
+      }
+    }
 
   if(isPushable(c2->wall) && !c2->monst && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
     mip = determinePush(cwt, subdir, [c2] (cell *c) { return canPushThumperOn(c, c2, cwt.at); });
@@ -745,6 +757,8 @@ void pcmove::tell_why_cannot_attack() {
     addMessage(XLAT("You cannot attack Raiders directly!"));
   else if(isSwitch(c2->monst))
     addMessage(XLAT("You cannot attack Jellies in their wall form!"));
+  else if(c2->monst == moAnimatedDie)
+    addMessage(XLAT("You can only push this die if the highest number would be on the top!"));
   else
     addMessage(XLAT("For some reason... cannot attack!"));
   }

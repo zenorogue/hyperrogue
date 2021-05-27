@@ -1700,11 +1700,20 @@ LAND(0xC0C0FF, "Land of Dice", laDice, 0, itCursed, RESERVED,
 ITEM('/', 0xD0D0D8, "Crystal Die", itDice, IC_TREASURE, ZERO, RESERVED, osNone,
   "A nice souvenir from the Land of Dice. Make sure to collect the whole set!")
 
-WALL('d', 0x181818, "Rollable Die", waDie, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone,        NODESC)
+WALL('d', 0x7F6A10, "Unhappy Die", waRichDie, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone, 
+  "Sentent dice like to be in a position such that their highest number is on top, or somewhere close. "
+  "Unfortunately, someone has rolled this one into a wrong position, and did not fix this. "
+  "It will reward you if you roll it so that the highest number is on top again!")
+WALL('d', 0x106010, "Happy Die", waBlandDie, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone, 
+  "A happy sentent die. You can roll it.")
 
-WALL('d', 0x181818, "Rollable Die", waDie1, ZERO, RESERVED, 0, sgNone,        NODESC)
-WALL('d', 0x181818, "Rollable Die", waDie2, ZERO, RESERVED, 0, sgNone,        NODESC)
-
+MONSTER('d', 0x603010, "Animated Die", moAnimatedDie, ZERO, RESERVED, moHexDemon, 
+  "When sentient dice are too long in an incorrect position, they start to move on their own, "
+  "and attack everyone. You can still convince Animated Dice of your good intentions by "
+  "rolling them into a position such that the highest number is on top. "
+  "If you do, the die will stop moving and (if it happens in the Land of Dice) you will be rewarded. "
+  "Other rolls and attacks are not allowed."
+  )
 
 //shmupspecials
 MONSTER( '@', 0xC0C0C0, "Rogue", moPlayer, CF_FACE_UP | CF_PLAYER, RESERVED, moNone, "In the Shoot'em Up mode, you are armed with thrown Knives.")
