@@ -4901,6 +4901,7 @@ EX void drawthemap() {
   #if CAP_SDL
   const Uint8 *keystate = SDL12_GetKeyState(NULL);
   lmouseover = mouseover;
+  lmouseover_distant = lmouseover;
   bool useRangedOrb = (!(vid.shifttarget & 1) && haveRangedOrb() && lmouseover && lmouseover->cpdist > 1) || (keystate[SDL12(SDLK_RSHIFT, SDL_SCANCODE_RSHIFT)] | keystate[SDL12(SDLK_LSHIFT, SDL_SCANCODE_LSHIFT)]);
   if(!useRangedOrb && !(cmode & sm::MAP) && !(cmode & sm::DRAW) && DEFAULTCONTROL && !mouseout() && !dual::state) {
     dynamicval<eGravity> gs(gravity_state, gravity_state);

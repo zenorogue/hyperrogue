@@ -64,7 +64,7 @@ EX movedir joydir;
 EX movedir mousedest;
 EX ld shiftmul = 1;
 
-EX cell *mouseover, *mouseover2, *lmouseover;
+EX cell *mouseover, *mouseover2, *lmouseover, *lmouseover_distant;
 EX ld modist, modist2;
 
 EX int lastt;
