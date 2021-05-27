@@ -2630,9 +2630,17 @@ EX void queuestr(const shiftpoint& h, int size, const string& chr, color_t col, 
   }
 
 EX basic_textureinfo finf;
-  
+
 #if CAP_GL
-EX void write_in_space(const shiftmatrix& V, int fsize, double size, const string& s, color_t col, int frame IS(0), int align IS(8)) {
+#if HDR
+using pointfunction = function<hyperpoint(ld, ld)>;
+#endif
+
+EX hyperpoint default_pointfunction(ld x, ld y) {
+  return xpush(x) * ypush(y) * C0;
+  }
+
+EX void write_in_space(const shiftmatrix& V, int fsize, double size, const string& s, color_t col, int frame IS(0), int align IS(8), PPR prio IS(PPR::TEXT), pointfunction pf IS(default_pointfunction)) {
   init_glfont(fsize);
   glfont_t& f(*(glfont[fsize]));
   finf.texture_id = f.texture;
@@ -2653,7 +2661,7 @@ EX void write_in_space(const shiftmatrix& V, int fsize, double size, const strin
   
   auto pt = [&] (ld tx, ld ty, ld ix, ld iy) {
     finf.tvertices.push_back(glhr::makevertex(tx, ty, 0));
-    curvedata.push_back(glhr::pointtogl(xpush(ix * scale) * ypush(iy * scale) * C0));
+    curvedata.push_back(glhr::pointtogl(pf(ix*scale, iy*scale)));
     };
   
   for(int ch: chars) { 
@@ -2670,14 +2678,14 @@ EX void write_in_space(const shiftmatrix& V, int fsize, double size, const strin
     }
   
   if(frame) for(int i=0; i<360; i+=45) {
-    auto &res = queuetable(V * xspinpush(i*degree, frame*scale), curvedata, isize(curvedata)-curvestart, col & 0xFF, col & 0xFF, PPR::TEXT);
+    auto &res = queuetable(V * xspinpush(i*degree, frame*scale), curvedata, isize(curvedata)-curvestart, col & 0xFF, col & 0xFF, prio);
     res.offset = curvestart;
     res.offset_texture = fstart;
     res.tinf = &finf;
     res.flags |= POLY_TRIANGLES;
     }
 
-  auto &res = queuetable(V, curvedata, isize(curvedata)-curvestart, col, col, PPR::TEXT);
+  auto &res = queuetable(V, curvedata, isize(curvedata)-curvestart, col, col, prio);
   res.offset = curvestart;
   res.offset_texture = fstart;
   res.tinf = &finf;
