@@ -17,6 +17,8 @@ namespace hr {
 EX bool hardcore = false;
 /** when did we switch to the hardcore mode */
 EX int hardcoreAt;
+/** are we in the casual mode */
+EX bool casual = false;
 
 EX bool pureHardcore() { return hardcore && hardcoreAt < PUREHARDCORE_LEVEL; }
 

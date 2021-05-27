@@ -8,14 +8,18 @@
 #include "hyper.h"
 namespace hr {
 
-EX bool quitsaves() { return (items[itOrbSafety] && CAP_SAVE && !arcm::in()); }
+EX bool quitsaves() { 
+  if(casual) return false;
+  return (items[itOrbSafety] && CAP_SAVE && !arcm::in()); 
+  }
 
 EX bool needConfirmationEvenIfSaved() {
   return canmove && (gold() >= 30 || tkills() >= 50) && !cheater;
   }
 
 EX bool needConfirmation() {
-  return needConfirmationEvenIfSaved() && !quitsaves();
+  if(casual) return needConfirmationEvenIfSaved() && turncount > save_turns + 10;
+  else return needConfirmationEvenIfSaved() && quitsaves();
   }
 
 EX int getgametime() {
@@ -498,6 +502,8 @@ EX void showMission() {
 #if !ISMOBILE
     dialog::addItem(quitsaves() ? XLAT("save") : XLAT("quit"), SDLK_F10);
 #endif
+    if(casual && savecount)
+      dialog::addItem(XLAT("load (%1 turns passed)", its(turncount - save_turns)), SDLK_F9);
 #if CAP_ANDROIDSHARE
     dialog::addItem(XLAT("SHARE"), 's'-96);
 #endif
@@ -534,6 +540,11 @@ EX void handleKeyQuit(int sym, int uni) {
   else if(uni == 'v') popScreenAll(), pushScreen(showMainMenu);
   else if(uni == 'l') popScreenAll(), pushScreen(showMessageLog), messagelogpos = isize(gamelog);
   else if(uni == 'z') hints[hinttoshow].action();
+  else if(sym == SDLK_F9 && casual && savecount) {
+    stop_game();
+    load_last_save();
+    start_game();
+    }
   else if(sym == SDLK_F3 || (sym == ' ' || sym == SDLK_HOME)) 
     fullcenter();
   else if(uni == 'o') get_o_key().second();

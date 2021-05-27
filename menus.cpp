@@ -404,6 +404,23 @@ EX void switchHardcore() {
   if(pureHardcore()) popScreenAll();
   }
 
+EX void switch_casual() {
+  if(savecount > 0) {
+    dialog::push_confirm_dialog([] {
+      restart_game();
+      casual = !casual;
+      }, XLAT("Switching casual allowed only before saving the game. Do you want to restart?"));
+    return;
+    }
+  else
+    casual = !casual;
+  if(casual) {
+    addMessage(XLAT("You are in the Casual mode! Achievements are disabled.")); 
+    addMessage(XLAT("Collect an Orb of Safety to save a checkpoint."));
+    }
+  popScreenAll();
+  }
+
 EX void showCreative() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(3);
@@ -531,6 +548,7 @@ EX void show_chaos() {
   else
     dialog::addInfo("not eligible for achievements");
   if(cheater) dialog::addInfo("(but the cheat mode is on)");
+  if(casual) dialog::addInfo("(but the casual mode is on)");
 
   dialog::addBreak(100);
   dialog::addBack();
@@ -724,6 +742,9 @@ EX void showChangeMode() {
   dialog::addBoolItem(XLAT("multiplayer"), multi::players > 1, 'm');
   dialog::add_action_push(multi::showConfigureMultiplayer);
 
+  dialog::addSelItem(XLAT("casual mode"), ONOFF(casual), 'C');
+  dialog::add_action(switch_casual);
+  
   if(!shmup::on) {
     dialog::addSelItem(XLAT("hardcore mode"),
     hardcore && !pureHardcore() ? XLAT("PARTIAL") : ONOFF(hardcore), 'h');

@@ -53,6 +53,7 @@ EX int asteroids_generated, asteroid_orbs_generated;
 EX time_t timerstart, savetime;
 EX bool timerstopped;
 EX int savecount;
+EX int save_turns;
 EX bool doCross = false;
 
 EX bool gamegen_failure;
@@ -419,7 +420,7 @@ EX namespace scores {
 /** \brief the amount of boxes reserved for each hr::score item */
 #define MAXBOX 500
 /** \brief currently used boxes in hr::score */
-#define POSSCORE 389
+#define POSSCORE 391
 /** \brief a struct to keep local score from an earlier game */
 struct score {
   /** \brief version used */
@@ -893,6 +894,9 @@ EX void applyBoxes() {
 
   applyBoxNum(saved_modecode, "modecode");
   applyBoxBool(ineligible_starting_land, "ineligible_starting_land");
+  
+  applyBoxNum(yasc_code, "YASC code");
+  applyBoxBool(casual, "casual mode");
 
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   if(isize(invorb)) { println(hlog, "ERROR: Orbs not taken into account"); exit(1); }
@@ -981,6 +985,8 @@ EX void remove_emergency_save() {
 #endif
   }
 
+scores::score scorebox;
+
 EX void saveStats(bool emergency IS(false)) {
   DEBBI(DF_INIT, ("saveStats [", scorefile, "]"));
 
@@ -1064,6 +1070,7 @@ EX void saveStats(bool emergency IS(false)) {
     scores::saveBox();
     
     for(int i=0; i<scores::boxid; i++) fprintf(f, " %d", scores::save.box[i]);
+    scorebox = scores::save;
     anticheat::save(f);
 
     fprintf(f, "\n");
@@ -1106,6 +1113,8 @@ EX void saveStats(bool emergency IS(false)) {
   fclose(f);
   }
 
+bool tamper = false;
+
 // load the save
 EX void loadsave() {
   if(autocheat) return;
@@ -1117,10 +1126,9 @@ EX void loadsave() {
   FILE *f = fopen(scorefile, "rt");
   havesave = f;
   if(!f) return;
-  scores::score sc;
   bool ok = false;
-  bool tamper = false;
   int coh = counthints();
+  auto& sc = scorebox;
   while(!feof(f)) {
     char buf[12000];
     if(fgets(buf, 12000, f) == NULL) break;
@@ -1215,40 +1223,45 @@ EX void loadsave() {
 
     }
   fclose(f);
-  if(ok && sc.box[65 + 4 + itOrbSafety - itOrbLightning]) {
-    anticheat::tampered = tamper;
+  if(ok && sc.box[65 + 4 + itOrbSafety - itOrbLightning]) 
+    load_last_save();
+  }
+
+EX void load_last_save() {
+  auto& sc = scorebox;
+  anticheat::tampered = tamper;
 //  printf("box = %d (%d)\n", sc.box[65 + 4 + itOrbSafety - itOrbLightning], boxid);
 //  printf("boxid = %d\n", boxid);
-    using namespace scores;
-    for(int i=0; i<boxid; i++) save.box[i] = sc.box[i];
-    for(int i=boxid; i<MAXBOX; i++) save.box[i] = 0;
+  using namespace scores;
+  for(int i=0; i<boxid; i++) save.box[i] = sc.box[i];
+  for(int i=boxid; i<MAXBOX; i++) save.box[i] = 0;
 //  for(int i=160; i<200; i++) printf("%d: %d ", i, save.box[i]);
 
-    if(meaning.count(sc.box[MODECODE_BOX])) {
-      shstream ss;
-      ss.s = meaning[sc.box[MODECODE_BOX]];
-      ss.read(ss.vernum);
-      mapstream::load_geometry(ss);
-      }
-
-    loadBox();
-//  printf("boxid = %d\n", boxid);
-    if(items[itHolyGrail]) {
-      items[itHolyGrail]--;
-      camelot::knighted = newRoundTableRadius();
-      items[itHolyGrail]++;
-      }
-    else camelot::knighted = 0;
-    safety = true;
-    if(items[itSavedPrincess] < 0) items[itSavedPrincess] = 0;
-    addMessage(XLAT("Game loaded."));
-    showstartmenu = false;
-    // reset unsavable special modes just in case
-    peace::on = false;
-    randomPatternsMode = false;
-    yendor::on = false;
-    tour::on = false;
+  if(meaning.count(sc.box[MODECODE_BOX])) {
+    shstream ss;
+    ss.s = meaning[sc.box[MODECODE_BOX]];
+    ss.read(ss.vernum);
+    mapstream::load_geometry(ss);
     }
+
+  loadBox();
+//  printf("boxid = %d\n", boxid);
+  if(items[itHolyGrail]) {
+    items[itHolyGrail]--;
+    camelot::knighted = newRoundTableRadius();
+    items[itHolyGrail]++;
+    }
+  else camelot::knighted = 0;
+  safety = true;
+  if(items[itSavedPrincess] < 0) items[itSavedPrincess] = 0;
+  addMessage(XLAT("Game loaded."));
+  showstartmenu = false;
+  // reset unsavable special modes just in case
+  peace::on = false;
+  randomPatternsMode = false;
+  yendor::on = false;
+  tour::on = false;
+  save_turns = turncount;
   }
 #endif
 
@@ -1258,7 +1271,8 @@ EX void stop_game() {
   DEBBI(DF_INIT, ("stop_game"));
   achievement_final(true);
 #if CAP_SAVE
-  saveStats();
+  if(!casual)
+    saveStats();
 #endif
   for(int i=0; i<ittypes; i++) items[i] = 0;
   lastkills = 0; for(int i=0; i<motypes; i++) kills[i] = 0;
@@ -1604,7 +1618,8 @@ EX void finishAll() {
   achievement_final(!items[itOrbSafety]);
   
 #if CAP_SAVE
-  saveStats();
+  if(!casual)
+    saveStats();
 #endif
   clearMemory();
 #if !ISMOBILE

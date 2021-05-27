@@ -259,6 +259,11 @@ EX void teleportToLand(eLand l, bool make_it_safe) {
 
 EX void activateSafety(eLand l) {
   teleportToLand(l, true);
+  if(casual) {
+    saveStats();
+    savecount++;
+    save_turns = turncount;
+    }
   }
 
 EX void placeGolem(cell *on, cell *moveto, eMonster m) {

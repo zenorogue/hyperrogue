@@ -1085,6 +1085,9 @@ void save_mode_data(hstream& f) {
   f.write<char>(peace::explore_other);
   f.write<char>(multi::players);
   f.write<char>(xcheat);
+  if(casual) {
+    f.write<char>(1);
+    }
   }
 
 EX modecode_t modecode(int mode) {

@@ -104,6 +104,7 @@ EX vector<string> achievementsReceived;
  */
 EX bool wrongMode(char flags) {
   if(cheater) return true;
+  if(casual) return true;
   if(flags == rg::global) return false;
 
   if(flags != rg::special_geometry) {
@@ -214,6 +215,7 @@ EX void achievement_collection(eItem it) {
 
 EX void achievement_collection2(eItem it, int q) {
   if(cheater && !test_achievements) return;
+  if(casual && !test_achievements) return;
   if(randomPatternsMode) return;
   LATE( achievement_collection2(it, q); )
 
@@ -544,6 +546,7 @@ EX void achievement_collection2(eItem it, int q) {
 
 EX void achievement_count(const string& s, int current, int prev) {
   if(cheater && !test_achievements) return;
+  if(casual && !test_achievements) return;
   if(shmup::on) return;
   if(randomPatternsMode) return;
   LATE( achievement_count(s, current, prev); )
@@ -610,6 +613,7 @@ EX void achievement_score(int cat, int number) {
   if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
+  if(casual) return;
   LATE( achievement_score(cat, number); )
   if(cat == LB_HALLOWEEN) {
     if(geometry != gSphere && geometry != gElliptic)
@@ -713,6 +717,7 @@ EX void achievement_final(bool really_final) {
     next_stat_tick = ticks + 600000;
     }
   if(cheater) return;
+  if(casual) return;
 
 #if CAP_TOUR
   if(tour::on) return;
@@ -831,6 +836,7 @@ EX void achievement_victory(bool hyper) {
   if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
+  if(casual) return;
   if(geometry) return;
   if(CHANGED_VARIATION) return;
   if(randomPatternsMode) return;
@@ -921,6 +927,7 @@ EX string get_rich_presence_text() {
   if(randomPatternsMode) res += "random ";
   if(inv::on) res += "OSM ";
   if(multi::players > 1) res += "multi ";
+  if(casual) res += "casual ";
 
   if(cheater || among(cwt.at->land, laCanvas, laCA)) 
     return res + "(?)";
