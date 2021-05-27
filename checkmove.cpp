@@ -309,7 +309,7 @@ EX void checkmove() {
       check_if_monster();
       move_issues[cwt.spin] = checked_move_issue;
       if(!legalmoves[cwt.spin]) {
-        if(movepcto(1, 1, true)) {
+        if(movepcto(0, 1, true)) {
           canmove = legalmoves[cwt.spin] = true;
           }
         check_if_monster();
