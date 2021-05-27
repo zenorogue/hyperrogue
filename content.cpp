@@ -1694,7 +1694,7 @@ ITEM('/', 0x211F6F, "Cursed Gold", itCursed, IC_TREASURE, ZERO, RESERVED, osNone
 ITEM('o', 0x208020, "Orb of the Woods", itOrbWoods, IC_ORB, ZERO, RESERVED, osTerraform,
   "Lets you swap positions with the trees.")
 
-LAND(0xC0C0FF, "Land of Dice", laDice, 0, itCursed, RESERVED,
+LAND(0xC0C0FF, "Land of Dice", laDice, 0, itDice, RESERVED,
   "This land is full of dice!")
 
 ITEM('/', 0xD0D0D8, "Crystal Die", itDice, IC_TREASURE, ZERO, RESERVED, osNone,
