@@ -458,19 +458,6 @@ EX string generateHelpForItem(eItem it) {
         "and sub-lands."
         );
 
-    if(it == itOrbLuck) {
-      help += XLAT("\n\nAdditionally, the probabilities of generating terrain features are subtly changed in the following lands:");
-      
-      int cnt = 0;
-      for(int i=0; i<landtypes; i++) {
-        eLand land = eLand(i);
-        if(isLuckyLand(land)) {
-          help += cnt ? XLAT(", %1", land) : XLAT(" %1", land);
-          cnt++;
-          }
-        }
-      }
-
     if(it == itBone)
       help += XLAT(
         "\n\nIn the Orb Strategy Mode, each 25 Necromancer's Totems "
@@ -485,6 +472,19 @@ EX string generateHelpForItem(eItem it) {
     }
 #endif
   
+  if(it == itOrbLuck) {
+    help += XLAT("\n\nAdditionally, the probabilities of generating terrain features are subtly changed in the following lands:");
+    
+    int cnt = 0;
+    for(int i=0; i<landtypes; i++) {
+      eLand land = eLand(i);
+      if(isLuckyLand(land)) {
+        help += cnt ? XLAT(", %1", land) : XLAT(" %1", land);
+        cnt++;
+        }
+      }
+    }
+
   if(itemclass(it) == IC_ORB || it == itGreenStone || it == itOrbYendor) {
     for(auto& oi: orbinfos) {
       if(oi.orb == it && oi.is_native()) describeOrb(help, oi);
