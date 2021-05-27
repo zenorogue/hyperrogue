@@ -398,9 +398,9 @@ EX void switchHardcore() {
   else if(hardcore && canmove) { hardcore = false; }
   else { hardcore = true; canmove = true; hardcoreAt = turncount; }
   if(hardcore)
-      addMessage("One wrong move, and it is game over!");
+      addMessage(XLAT("One wrong move, and it is game over!"));
   else
-      addMessage("Not so hardcore?");
+      addMessage(XLAT("Not so hardcore?"));
   if(pureHardcore()) popScreenAll();
   }
 
