@@ -1078,6 +1078,7 @@ void placeIllusion(cell *c) {
 void blowoff(const movei& mi) {
   auto& cf = mi.s;
   auto& ct = mi.t;
+  bool die = cf->wall == waRichDie;
   playSound(ct, "orb-ranged");
   if(cf->monst)
   addMessage(XLAT("You blow %the1 away!", cf->monst));
@@ -1098,6 +1099,19 @@ void blowoff(const movei& mi) {
   if(cf->item == itBabyTortoise) {
     if(ct->item) ct->item = itNone;
     moveItem(cf, ct, true);
+    }
+  if(ct->monst == moAnimatedDie && dice::data[ct].happy() > 0) {
+    ct->monst = moNone;
+    ct->wall = waBlandDie;
+    if(ct->land == laDice && cf->land == laDice) {    
+      cf->item = itDice;
+      addMessage(XLAT("The die is now happy, and you are rewarded!"));
+      }
+    }
+  if(die && ct->wall == waBlandDie) {
+    /* pushMonster already awarded us -- place the reward on cf instead */
+    cf->item = itDice;
+    items[itDice]--;
     }
   items[itOrbAir]--;
   createNoise(2);
@@ -1133,6 +1147,7 @@ EX movei blowoff_destination(cell *c, int& di) {
   if(d<c->type) for(int e=d; e<d+c->type; e++) {
     int di = e % c->type;
     cell *c2 = c->move(di);
+    if((c->monst == moAnimatedDie || c->wall == waBlandDie || c->wall == waRichDie) && ctof(c2)) continue;
     if(c2 && c2->cpdist > c->cpdist && passable(c2, c, P_BLOW)) return movei(c, c2, di);
     }
   return movei(c, c, NO_SPACE);
