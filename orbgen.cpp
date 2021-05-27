@@ -115,7 +115,8 @@ EX vector<orbinfo> orbinfos = {
   {orbgenflags::S_NATIVE, laIvoryTower, 500, 4000, itOrbMatter},
   {orbgenflags::S_NAT_NT, laElementalWall, 1500, 4000, itOrbSummon},
   {orbgenflags::S_NATIVE, laStorms, 1000, 2500, itOrbStunning},
-  {orbgenflags::S_NAT_NT, laOvergrown, 1000, 800, itOrbLuck},
+  {orbgenflags::S_NATIVE, laOvergrown, 1000, 800, itOrbWoods},
+  {orbgenflags::S_GUEST,  laOvergrown, 1000, 800, itOrbLuck},
   {orbgenflags::S_NATIVE, laWhirlwind, 1250, 3000, itOrbAir},
   {orbgenflags::S_NATIVE, laHaunted, 1000, 5000, itOrbUndeath},
   {orbgenflags::S_NATIVE, laClearing, 5000, 5000, itOrbFreedom},
@@ -166,6 +167,8 @@ EX vector<orbinfo> orbinfos = {
   {orbgenflags::S_GUEST, laWet, 1200, 0, itOrbAether},
   {orbgenflags::S_GUEST, laWet, 1200, 0, itOrbFrog},
   {orbgenflags::S_NATIVE, laCursed, 400, 1500, itOrbPurity},
+  {orbgenflags::S_NAT_NT, laDice, 1000, 800, itOrbLuck},
+  {orbgenflags::S_GUEST, laDice, 750, 0, itOrbLuck},
   {orbgenflags::S_NATIVE, laWhirlpool, 0, 2000, itOrbWater}, // needs to be last
   };
 
