@@ -328,7 +328,7 @@ EX namespace inv {
     gainOrbs(itZebra, itOrbFrog);
     gainOrbs(itElemental, itOrbSummon);
     gainOrbs(itFulgurite, itOrbStunning);
-    gainOrbs(itMutant, itOrbLuck);
+    gainOrbs(itMutant, itOrbWoods);
     gainOrbs(itMutant2, itOrbFreedom);
     gainOrbs(itLotus, itOrbUndeath);
     gainOrbs(itWindstone, itOrbAir);
@@ -371,6 +371,9 @@ EX namespace inv {
     gainOrbs(itFrog, itOrbImpact);
     gainOrbs(itWet, itOrbPlague);
     gainOrbs(itEclectic, itOrbChaos);
+    
+    gainOrbs(itCursed, itOrbPurity);
+    gainOrbs(itDice, itOrbLuck);
 
 #if CAP_DAILY    
     daily::gifts();
