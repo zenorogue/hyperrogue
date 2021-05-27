@@ -1090,11 +1090,6 @@ EX void groupmove2(const movei& mi, eMonster movtype, flagtype mf) {
     }
   else return;
   
-  if(c->monst == moAnimatedDie) {
-    forCellEx(c3, from) if(c3 != c && c3->monst == moAnimatedDie)
-      return;
-    }
-
   if(from->monst) {
     if(mf & MF_MOUNT) {
       // don't go through friends
@@ -1158,6 +1153,13 @@ EX void groupmove2(const movei& mi, eMonster movtype, flagtype mf) {
     
     moveMonster(mi);
     onpath(from, 0);
+
+    if(mi.t->monst == moAnimatedDie) {
+      /* other dice will not pathfind through the original cell */
+      /* this makes it easier for the player to roll dice correctly */
+      onpath(c, 0);
+      return;
+      }
     }
   onpath(c, 0);
   // MAXGCELL
