@@ -379,13 +379,13 @@ EX void pushThumper(const movei& mi) {
     cto->wall = waCrateOnTarget;
     th->wall = waCrateTarget;
     }
-  else if(among(w, waRichDie, waBlandDie)) {
+  else if(among(w, waRichDie, waHappyDie)) {
     th->wall = waNone;
     cto->wall = w;    
     animateMovement(mi, LAYER_BOAT);
     dice::roll(mi);
     if(w == waRichDie && dice::data[cto].happy() > 0) {
-      cto->wall = waBlandDie;
+      cto->wall = waHappyDie;
       if(cto->land == laDice && th->land == laDice) {
         items[itDice]++;
         addMessage(XLAT("The die is now happy, and you are rewarded!"));
@@ -403,7 +403,7 @@ EX void pushThumper(const movei& mi) {
   }
 
 EX bool canPushThumperOn(cell *tgt, cell *thumper, cell *player) {
-  if(among(thumper->wall, waRichDie, waBlandDie) && ctof(tgt))
+  if(among(thumper->wall, waRichDie, waHappyDie) && ctof(tgt))
     return false;
   if(tgt->wall == waBoat || tgt->wall == waStrandedBoat) return false;  
   if(isReptile(tgt->wall)) return false;

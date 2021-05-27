@@ -1102,13 +1102,13 @@ void blowoff(const movei& mi) {
     }
   if(ct->monst == moAnimatedDie && dice::data[ct].happy() > 0) {
     ct->monst = moNone;
-    ct->wall = waBlandDie;
+    ct->wall = waHappyDie;
     if(ct->land == laDice && cf->land == laDice) {    
       cf->item = itDice;
       addMessage(XLAT("The die is now happy, and you are rewarded!"));
       }
     }
-  if(die && ct->wall == waBlandDie) {
+  if(die && ct->wall == waHappyDie) {
     /* pushMonster already awarded us -- place the reward on cf instead */
     cf->item = itDice;
     items[itDice]--;
@@ -1147,7 +1147,7 @@ EX movei blowoff_destination(cell *c, int& di) {
   if(d<c->type) for(int e=d; e<d+c->type; e++) {
     int di = e % c->type;
     cell *c2 = c->move(di);
-    if((c->monst == moAnimatedDie || c->wall == waBlandDie || c->wall == waRichDie) && ctof(c2)) continue;
+    if((c->monst == moAnimatedDie || c->wall == waHappyDie || c->wall == waRichDie) && ctof(c2)) continue;
     if(c2 && c2->cpdist > c->cpdist && passable(c2, c, P_BLOW)) return movei(c, c2, di);
     }
   return movei(c, c, NO_SPACE);

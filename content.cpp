@@ -1704,7 +1704,7 @@ WALL('d', 0x7F6A10, "Unhappy Die", waRichDie, WF_WALL | WF_PUSHABLE, RESERVED, 0
   "Sentent dice like to be in a position such that their highest number is on top, or somewhere close. "
   "Unfortunately, someone has rolled this one into a wrong position, and did not fix this. "
   "It will reward you if you roll it so that the highest number is on top again!")
-WALL('d', 0x106010, "Happy Die", waBlandDie, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone, 
+WALL('d', 0x106010, "Happy Die", waHappyDie, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone, 
   "A happy sentent die. You can roll it.")
 
 MONSTER('d', 0x603010, "Animated Die", moAnimatedDie, ZERO, RESERVED, moHexDemon, 

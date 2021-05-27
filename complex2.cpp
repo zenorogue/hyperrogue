@@ -986,15 +986,15 @@ EX namespace dice {
     int pct = hrand(100);
     int pct2 = hrand(6000);
     if(pct < 3) {
-      c->wall = waBlandDie;
+      c->wall = waHappyDie;
       generate_specific(c, &d4, 0, 99);
       }
     else if(pct < 6) {
-      c->wall = waBlandDie;
+      c->wall = waHappyDie;
       generate_specific(c, &d8, 0, 1);
       }
     else if(pct < (items[itOrbLuck] ? 8 : 9)) {
-      c->wall = waBlandDie;
+      c->wall = waHappyDie;
       generate_specific(c, &d20, 0, 1);
       }
     else if(pct < 14) {
