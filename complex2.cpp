@@ -984,24 +984,24 @@ EX namespace dice {
   
   EX void generate_full(cell *c, int hard) {  
     int pct = hrand(100);
-    int pct2 = hrand(4000);
-    if(pct < 1) {
+    int pct2 = hrand(6000);
+    if(pct < 3) {
       c->wall = waBlandDie;
       generate_specific(c, &d4, 0, 99);
       }
-    else if(pct < 3) {
+    else if(pct < 6) {
       c->wall = waBlandDie;
       generate_specific(c, &d8, 0, 1);
       }
-    else if(pct < 5) {
+    else if(pct < 9) {
       c->wall = waBlandDie;
       generate_specific(c, &d20, 0, 1);
       }
-    else if(pct < 9) {
+    else if(pct < 14) {
       c->wall = waRichDie;
       generate_specific(c, &d20, 4, 5);
       }
-    else if(pct < 10) {
+    else if(pct < 15) {
       c->wall = waRichDie;
       generate_specific(c, &d8, 2, 3);
       }
