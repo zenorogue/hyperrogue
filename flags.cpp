@@ -293,7 +293,7 @@ EX bool isPermanentFlying(eMonster m) {
   }
 
 EX bool isLuckyLand(eLand l) {
-  return among(l, laIce, laDesert, laDeadCaves, laOvergrown);
+  return among(l, laIce, laDesert, laDeadCaves, laOvergrown, laDice);
   }
 
 EX bool survivesFire(eMonster m) {

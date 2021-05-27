@@ -993,19 +993,25 @@ EX namespace dice {
       c->wall = waBlandDie;
       generate_specific(c, &d8, 0, 1);
       }
-    else if(pct < 9) {
+    else if(pct < (items[itOrbLuck] ? 8 : 9)) {
       c->wall = waBlandDie;
       generate_specific(c, &d20, 0, 1);
       }
     else if(pct < 14) {
       c->wall = waRichDie;
-      generate_specific(c, &d20, 4, 5);
+      if(items[itOrbLuck])
+        generate_specific(c, &d20, 2, 3);
+      else
+        generate_specific(c, &d20, 4, 5);
       }
     else if(pct < 15) {
       c->wall = waRichDie;
-      generate_specific(c, &d8, 2, 3);
+      if(items[itOrbLuck])
+        generate_specific(c, &d8, 1, 2);
+      else
+        generate_specific(c, &d8, 2, 3);
       }
-    else if(pct2 < 1) {
+    else if(pct2 < (items[itOrbLuck] ? 5 : 1)) {
       c->monst = moAnimatedDie;
       generate_specific(c, &d4, 0, 99);
       }
