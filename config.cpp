@@ -2813,8 +2813,8 @@ EX void find_setting() {
     }
 
   dialog::addBreak(100);
-  dialog::addInfo("press letters to search");
-  dialog::addSelItem("matching items", its(isize(found)), 0);
+  dialog::addInfo(XLAT("press letters to search"));
+  dialog::addSelItem(XLAT("matching items"), its(isize(found)), 0);
   dialog::display();
   
   keyhandler = [] (int sym, int uni) {
