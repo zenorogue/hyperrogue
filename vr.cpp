@@ -39,6 +39,8 @@ EX eHeadset hsm = eHeadset::reference;
 EX eEyes eyes = eEyes::equidistant;
 EX eCompScreen cscr = eCompScreen::eyes;
 
+EX bool controllers_on_desktop = true;
+
 EX cell *forward_cell;
 
 EX ld vraim_x, vraim_y, vrgo_x, vrgo_y;
@@ -1107,12 +1109,16 @@ EX void render() {
     
     }
 
-  if(cscr == eCompScreen::eyes) draw_eyes();
-  
   if(cscr == eCompScreen::reference) {
     state = 3;
     drawqueue();
     }
+
+  if(cscr == eCompScreen::eyes && !controllers_on_desktop) draw_eyes();
+  
+  render_controllers();
+
+  if(cscr == eCompScreen::eyes && controllers_on_desktop) draw_eyes();
 
   state = 1;  
   }
@@ -1430,24 +1436,47 @@ void addconfig() {
 auto hookc = addHook(hooks_configfile, 100, addconfig);
 #endif
 
-EX void submit() {
+EX bool rec;
 
+EX void render_controllers() {
   if(!state) return;
+  dynamicval<bool> rc(rec, true);
   for(int i=0; i<(int)vr::k_unMaxTrackedDeviceCount; i++) 
     if(vrdata.device_models[i]) {
       resetbuffer rb;
-      if(!state) return;
     
       state = 2;
       dynamicval<eModel> m(pmodel, mdPerspective);
       dynamicval<ld> ms(sightranges[geometry], 100);
+      
+      for(int e=0; e<3; e++) {
+      
+        if(e < 2) {
+          vr_eye_settings ey;
+          ey.use(e);
+          }
+        
+        else {
+          state = 1;
+          
+          rb.reset();
+          calcparam();
+          current_display->set_viewport(0);
+          calcparam();
+          reset_projection();
+          current_display->set_all(0, 0);
 
-      for(int e=0; e<2; e++) {
-        vr_eye_settings ey;
-        ey.use(e);
+          if(cscr != eCompScreen::single || !controllers_on_desktop) goto next_model;
+          state = 4;
+          }
+
         E4;
 
-        hmd_mvp = vrdata.proj[e] * inverse(vrdata.eyepos[e]) * sm * hmd_at * vrdata.pose_matrix[i] * sm * Id;
+        hmd_mvp = sm * hmd_at * vrdata.pose_matrix[i] * sm * Id;
+        if(e < 2) 
+          hmd_mvp = vrdata.proj[e] * inverse(vrdata.eyepos[e]) * hmd_mvp;
+        else
+          hmd_mv = hmd_mvp;
         hmd_pre = Id;
         
         reset_projection();        
@@ -1479,17 +1508,15 @@ EX void submit() {
           }
 
         }
-
-      state = 1;
       
-      rb.reset();
-      calcparam();
-      current_display->set_viewport(0);
-      calcparam();
-      reset_projection();
-      current_display->set_all(0, 0);
-      }    
-    
+      next_model: ;
+      }
+  }
+
+EX void submit() {
+
+  if(!state) return;
+      
   for(int i=0; i<2; i++) {
     auto eye = vr::EVREye(i);
     auto& ey = vrdata.eyes[i];
