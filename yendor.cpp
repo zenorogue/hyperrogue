@@ -943,25 +943,36 @@ EX namespace tactic {
     if(xc == 4) set_priority_board(LB_PURE_TACTICS_COOP);
 
     cmode = sm::ZOOMABLE;
-    mouseovers = XLAT("pure tactics mode") + " - " + mouseovers;
+    if(mouseovers == "" || mouseovers == " ")
+      mouseovers = XLAT("pure tactics mode");
+    else
+      mouseovers = XLAT("pure tactics mode") + " - " + mouseovers;
+    
+    if(dialog::infix != "") mouseovers = mouseovers + " - " + dialog::infix;
+    else mouseovers = mouseovers + " - " + XLAT("press letters to search");
     
     { 
     dynamicval<bool> t(tactic::on, true);
-    generateLandList([] (eLand l) { return land_validity(l).flags & lv::appears_in_ptm; });
+    generateLandList([] (eLand l) { 
+      if(dialog::infix != "" && !dialog::hasInfix(linf[l].name)) return false;
+      return !!(land_validity(l).flags & lv::appears_in_ptm);
+      });
     }
     
     int nl = isize(landlist);
 
-    int nlm;
-    int ofs = dialog::handlePage(nl, nlm, (nl+1)/2);
-        
-    int vf = min((vid.yres-64-vid.fsize) / nlm, vid.xres/40);
+    int nlm = nl;
+    int ofs = dialog::infix != "" ? 0 : dialog::handlePage(nl, nlm, (nl+1)/2);
+            
+    int vf = nlm ? min((vid.yres-64-vid.fsize) / nlm, vid.xres/40) : vid.xres/40;
     
     int xr = vid.xres / 64;
     
     if(on) record(specialland, items[treasureType(specialland)]);
     
     getcstat = SDLK_ESCAPE;
+    
+    map<int, int> land_for;
 
     for(int i=0; i<nl; i++) {
       int i1 = i + ofs;
@@ -978,18 +989,27 @@ EX namespace tactic {
       
       if(unlocked) col = linf[l].color; else col = 0x202020;
       
-      if(displayfrZH(xr*1, i0, 1, vf-4, XLAT1(linf[l].name), col, 0) && unlocked) {
-        getcstat = 1000 + i1;
+      int keyhere;
+      if(nlm <= 9) {
+        keyhere = '1' + i;
+        if(displayfrZH(xr*1, i0, 1, vf-4, s0+char(keyhere), 0xFFFFFF, 0))
+          getcstat = keyhere;
         }
+      else
+        keyhere = 1000 + i1;
+      land_for[keyhere] = i1;
+      
+      if(displayfrZH(xr*(nlm <= 9 ? 2.5 : 1), i0, 1, vf-4, XLAT1(linf[l].name), col, 0) && unlocked) 
+        getcstat = keyhere;
         
       if(unlocked || autocheat) {
         for(int ii=0; ii<ch; ii++)
           if(displayfrZH(xr*(24+2*ii), i0, 1, (vf-4)*4/5, lsc[xc][l][ii] > 0 ? its(lsc[xc][l][ii]) : "-", col, 16)) 
-            getcstat = 1000 + i1;
+            getcstat = keyhere;
 
         if(displayfrZH(xr*(24+2*10), i0, 1, (vf-4)*4/5, 
           its(recordsum[xc][l]) + " x" + its(tacmultiplier(l)), col, 0)) 
-            getcstat = 1000 + i1;
+            getcstat = keyhere;
         }
       else {
         int m = landMultiplier(l);
@@ -999,13 +1019,13 @@ EX namespace tactic {
         }
       }
     
-    dialog::displayPageButtons(3, true);
+    dialog::displayPageButtons(3, dialog::infix == "");
 
     uploadScore();
     if(on) unrecord(specialland);
     
-    if(getcstat >= 1000 && getcstat < 1000 + isize(landlist)) {
-      int ld = landlist[getcstat-1000];
+    if(land_for.count(getcstat)) {
+      int ld = landlist[land_for.at(getcstat)];
       subscoreboard scorehere;
       for(int i=0; i<isize(scoreboard[xc]); i++) {
         int sc = scoreboard[xc][i].scores[ld];
@@ -1016,12 +1036,15 @@ EX namespace tactic {
       displayScore(scorehere, xr * 50);
       }
      
-    keyhandler = [] (int sym, int uni) {
-      if(uni >= 1000 && uni < 1000 + isize(landlist)) dialog::do_if_confirmed([uni] {
-        stop_game();
-        specialland = landlist[uni - 1000];
-        restart_game(tactic::on ? rg::nothing : rg::tactic);
-        });
+    keyhandler = [land_for] (int sym, int uni) {
+      if(land_for.count(uni)) {
+        eLand ll = landlist[land_for.at(uni)];
+        dialog::do_if_confirmed([ll] {
+          stop_game();
+          specialland = ll;
+          restart_game(tactic::on ? rg::nothing : rg::tactic);
+          });
+        }
       else if(uni == '0') {
         if(tactic::on) {
           stop_game();          
@@ -1054,11 +1077,17 @@ EX namespace tactic {
         
         "Good luck, and have fun!"
         );
-      else if(dialog::handlePageButtons(uni)) ;
+      else if(dialog::infix == "" && dialog::handlePageButtons(uni)) ;
+      else if(dialog::editInfix(uni)) ;
       else if(doexiton(sym, uni)) popScreen();
       };
     }
 
+  EX void start() {
+    dialog::infix = "";
+    popScreenAll();
+    pushScreen(tactic::showMenu);
+    }
 EX }
 
 map<string, modecode_t> code_for;

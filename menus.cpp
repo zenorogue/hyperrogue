@@ -763,7 +763,7 @@ EX void showChangeMode() {
   dialog::add_action_confirmed([] { restart_game(rg::inv); });
 
   dialog::addBoolItem(XLAT("pure tactics mode"), (tactic::on), 't');
-  dialog::add_action_push_clear(tactic::showMenu);
+  dialog::add_action(tactic::start);
 
   dialog::addBoolItem(XLAT("Yendor Challenge"), (yendor::on), 'y');
   dialog::add_action([] {
