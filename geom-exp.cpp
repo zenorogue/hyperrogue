@@ -11,7 +11,7 @@
 namespace hr {
 
 int eupage = 0;
-int euperpage = 21;
+int euperpage = 9;
 
 string euchelp =
   "If you want to know how much the gameplay is affected by the "
@@ -176,17 +176,19 @@ EX void ge_land_selection() {
   landvisited[laCA] = true;
   landvisited[laAsteroids] = true;
 
-  dialog::init(XLAT("experiment with geometry"));
+  dialog::init(XLAT("select the starting land"));
+  if(dialog::infix != "") mouseovers = dialog::infix;
   
-  generateLandList([] (eLand l) { return land_validity(l).flags & lv::appears_in_geom_exp; });
+  generateLandList([] (eLand l) { 
+    if(dialog::infix != "" && !dialog::hasInfix(linf[l].name)) return false;
+    return !!(land_validity(l).flags & lv::appears_in_geom_exp); 
+    });
   stable_sort(landlist.begin(), landlist.end(), [] (eLand l1, eLand l2) { return land_validity(l1).quality_level > land_validity(l2).quality_level; });
   
   for(int i=0; i<euperpage; i++) {
     if(euperpage * eupage + i >= isize(landlist)) { dialog::addBreak(100); break; }
     eLand l = landlist[euperpage * eupage + i];
-    char ch;
-    if(i < 26) ch = 'a' + i;
-    else ch = 'A' + (i-26);
+    char ch = '1'+i;
     string s = XLAT1(linf[l].name);
 
     if(landvisited[l]) {
@@ -214,6 +216,7 @@ EX void ge_land_selection() {
       });
     }
   dialog::addItem(XLAT("next page"), '-');
+  dialog::addInfo(XLAT("press letters to search"));
 
   dialog::addBreak(25);
   validity_info();    
@@ -230,8 +233,15 @@ EX void ge_land_selection() {
       eupage++;
       if(eupage * euperpage >= isize(landlist)) eupage = 0;
       }
+    else if(dialog::editInfix(uni)) eupage = 0;
     else if(doexiton(sym, uni)) popScreen();
     };
+  }
+
+EX void activate_ge_land_selection() {
+  dialog::infix = "";
+  eupage = 0;
+  pushScreen(ge_land_selection);
   }
 
 #if HDR

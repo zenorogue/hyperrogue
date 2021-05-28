@@ -534,7 +534,7 @@ EX void show_chaos() {
   
   dialog::addBreak(100);
   dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), 'l');
-  dialog::add_action_push(ge_land_selection);
+  dialog::add_action(activate_ge_land_selection);
 
   dialog::addBreak(100);
   if(ineligible_starting_land)
