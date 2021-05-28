@@ -905,6 +905,7 @@ EX ld realradius() {
   }
 
 EX void drawmessage(const string& s, int& y, color_t col) {
+  if(nomsg) return;
   int rrad = (int) realradius();
   int space;
   if(dual::state)

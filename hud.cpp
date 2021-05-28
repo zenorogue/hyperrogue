@@ -328,7 +328,7 @@ void displayglyph2(int cx, int cy, int buttonsize, int i) {
     }
   }
 
-EX bool nohud, nomenukey;
+EX bool nohud, nomenukey, nomsg;
 
 EX hookset<bool()> hooks_prestats;
 

@@ -3000,6 +3000,10 @@ EX int read_config_args() {
     PHASEFROM(2);
     nomenukey = true;
     }
+  else if(argis("-nomsg")) {
+    PHASEFROM(2);
+    nomsg = true;
+    }
 #if MAXMDIM >= 4
   else if(argis("-switch-fpp")) {
     PHASEFROM(2);
