@@ -410,13 +410,13 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     if(shader_flags & GF_LEVELS) vmain += "vPos = t;\n";  
     if(treset) vmain += "t[3] = 1.0;\n";
     
-    if((shader_flags & SF_PERS3) && panini_alpha) {
+    if((shader_flags & SF_PERS3) && panini_alpha && !vrhr::rendering_eye()) {
       vmain += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
       /* panini */
       vmain += panini_shader();
       shader_flags |= SF_ORIENT;
       }
-    else if((shader_flags & SF_PERS3) && stereo_alpha) {
+    else if((shader_flags & SF_PERS3) && stereo_alpha && !vrhr::rendering_eye()) {
       vmain += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
       vmain += stereo_shader();
       }
@@ -584,8 +584,10 @@ void display_data::set_projection(int ed, ld shift) {
     };
 
   bool u_alpha = false;
+
+  glhr::glmatrix pp0 = glhr::id;
   
-  auto use_mv = [] {
+  auto use_mv = [&] {
     #if CAP_VR
     auto cd = current_display;
     if(vrhr::rendering_eye()) {
@@ -594,7 +596,14 @@ void display_data::set_projection(int ed, ld shift) {
       }
     else {
       glhr::projection_multiply(glhr::frustum(cd->tanfov, cd->tanfov * cd->ysize / cd->xsize));
-      glhr::projection_multiply(glhr::tmtogl_transpose(vrhr::hmd_mv));
+      if(selected->uPP != -1) {
+        transmatrix swapz = Id;
+        swapz[2][2] = -1;
+        pp0 = glhr::tmtogl_transpose(swapz * vrhr::hmd_mv);
+        glhr::projection_multiply(glhr::tmtogl(swapz));
+        }
+      else
+        glhr::projection_multiply(glhr::tmtogl_transpose(vrhr::hmd_mv));
       }
     #endif
     };
@@ -653,9 +662,12 @@ void display_data::set_projection(int ed, ld shift) {
     }
 
   if(selected->uPP != -1) {
+
     glhr::glmatrix pp = glhr::id;
     if(get_shader_flags() & SF_USE_ALPHA)
       pp[3][2] = GLfloat(pconf.alpha);
+
+    pp = pp * pp0;    
 
     if(nisot::local_perspective_used()) 
       pp = glhr::tmtogl_transpose(NLP) * pp;
