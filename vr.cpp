@@ -1241,8 +1241,8 @@ EX void show_vr_demos() {
     hmd_ref_at = hmd_at;
     hsm = eHeadset::reference;
     eyes = eEyes::equidistant;
-    pushScreen(racing::thurston_racing);
     popScreenAll();
+    pushScreen(racing::thurston_racing);
     });
 
   dialog::addItem(XLAT("raytracing in H3"), 'g');
