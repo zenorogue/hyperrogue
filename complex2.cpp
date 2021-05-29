@@ -1311,14 +1311,30 @@ EX namespace dice {
         dynamicval<eGeometry> g(geometry, gSpace534);
         return sphere_to_space(normalize(ctr + cx * x + cy * y));
         };
-
-      int fid = dw->faces - facequeue[i].second;
-      if(dw->faces == 4) fid = facequeue[i].second + 1;
-      string s;
-      if(fid == 6) s = "6.";
-      else if(fid == 9) s = "9.";
-      else s = its(fid);
-      write_in_space(V1, max_glfont_size, dw->faces < 10 ? -1.2 : -.75, s, 0xFFFFFFFF, 0, 8, PPR::WALL, pf);
+      
+      if(dw == &d4) {
+        int q = facequeue[i].second;
+        for(int j=0; j<3; j++) {
+          int j1 = (j+1)%3;
+          int j2 = (j+2)%3;
+          if(1) {
+            dynamicval<eGeometry> g(geometry, gSpace534);
+            ctr = (face[0] + face[1] + face[2] + face[j1] * 3) / 6;
+            ctr = ctr * 1.01 - dctr * 0.01;
+            cx = (face[j2] - face[j]) / 2;
+            cy = face[j1] - (face[j] + face[j2]) / 4;
+            }
+          write_in_space(V1, max_glfont_size, -1.2, its(1+dw->sides[q][j]), 0xFFFFFFFF, 0, 8, PPR::WALL, pf);
+          }
+        }
+      else {
+        int fid = dw->faces - facequeue[i].second;
+        string s;
+        if(fid == 6) s = "6.";
+        else if(fid == 9) s = "9.";
+        else s = its(fid);
+        write_in_space(V1, max_glfont_size, dw->faces < 10 ? -1.2 : -.75, s, 0xFFFFFFFF, 0, 8, PPR::WALL, pf);
+        }
       #endif
       }
     }
