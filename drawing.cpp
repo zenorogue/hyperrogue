@@ -2640,6 +2640,7 @@ EX hyperpoint default_pointfunction(ld x, ld y) {
   return xpush(x) * ypush(y) * C0;
   }
 
+#if !CAP_EXTFONT
 EX void write_in_space(const shiftmatrix& V, int fsize, double size, const string& s, color_t col, int frame IS(0), int align IS(8), PPR prio IS(PPR::TEXT), pointfunction pf IS(default_pointfunction)) {
   init_glfont(fsize);
   glfont_t& f(*(glfont[fsize]));
@@ -2694,9 +2695,10 @@ EX void write_in_space(const shiftmatrix& V, int fsize, double size, const strin
   curvestart = isize(curvedata);
   }
 #endif
+#endif
 
 EX void queuestr(const shiftmatrix& V, double size, const string& chr, color_t col, int frame IS(0), int align IS(8)) {
-  #if CAP_GL
+  #if CAP_GL && !CAP_EXTFONT
   if(vid.usingGL) {
     shiftmatrix V1 ;
     if(GDIM == 3) 

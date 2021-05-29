@@ -1229,6 +1229,7 @@ EX namespace dice {
       
       queuecurve(V1, 0xFFFFFFFF, color & 0xFFFFFF9F, PPR::WALL);
       
+      #if !CAP_EXTFONT
       pointfunction pf = [&] (ld x, ld y) {
         hyperpoint hs;
         dynamicval<eGeometry> g(geometry, gSpace534);
@@ -1242,6 +1243,7 @@ EX namespace dice {
       else if(fid == 9) s = "9.";
       else s = its(fid);
       write_in_space(V1, max_glfont_size, dw->faces < 10 ? -1.2 : -.75, s, 0xFFFFFFFF, 0, 8, PPR::WALL, pf);
+      #endif
       }
     }
 
