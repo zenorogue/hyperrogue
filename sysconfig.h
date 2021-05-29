@@ -133,6 +133,10 @@
 #define CAP_SDL2 0
 #endif
 
+#ifndef CAP_TIMEOFDAY
+#define CAP_TIMEOFDAY (!CAP_SDL)
+#endif
+
 #ifndef CAP_COMPASS
 #define CAP_COMPASS ISMOBILE
 #endif
