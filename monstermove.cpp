@@ -103,7 +103,7 @@ EX void moveEffect(const movei& mi, eMonster m) {
     tortoise::move_baby(cf, ct);
     }
   
-  if(m == moAnimatedDie && mi.proper())
+  if(among(m, moAnimatedDie, moAngryDie) && mi.proper())
     dice::roll(mi);
   }
 
@@ -1152,9 +1152,10 @@ EX void groupmove2(const movei& mi, eMonster movtype, flagtype mf) {
       }
     
     moveMonster(mi);
+    
     onpath(from, 0);
 
-    if(mi.t->monst == moAnimatedDie) {
+    if(among(mi.t->monst, moAnimatedDie, moAngryDie)) {
       /* other dice will not pathfind through the original cell */
       /* this makes it easier for the player to roll dice correctly */
       onpath(c, 0);

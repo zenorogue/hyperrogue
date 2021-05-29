@@ -2252,7 +2252,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       return true;
       }
     
-    case moAnimatedDie: {
+    case moAnimatedDie: case moAngryDie: {
       if(where)
         dice::draw_die(where, V, 1, darkena(col, 0, 0xFF));
       else
@@ -2886,7 +2886,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
   // golems, knights, and hyperbugs don't face the player (mondir-controlled)
   // also whatever in the lineview mode, and whatever in the quotient geometry
 
-  else if(c->monst == moAnimatedDie) {
+  else if(among(c->monst, moAnimatedDie, moAngryDie)) {
     transmatrix U = inverse_shift(Vparam, Vs);
     U = rgpushxto0(tC0(U));
     die_target = Vparam;

@@ -810,6 +810,8 @@ EX eMonster summonedAt(cell *dest) {
     return moBomberbird;
   if(dest->wall == waRichDie)
     return moAnimatedDie;
+  if(dest->wall == waHappyDie)
+    return moAngryDie;
   if(dest->wall == waTrapdoor)
     return dest->land == laPalace ? moFatGuard : moOrangeDog;
   if(dest->land == laFrog && dest->wall == waNone) {
@@ -909,6 +911,8 @@ void summonAt(cell *dest) {
   if(dest->monst == moPirate || dest->monst == moViking || (dest->monst == moRatling && dest->wall == waSea))
     dest->wall = waBoat, dest->item = itNone;
   if(dest->monst == moAnimatedDie)
+    dest->wall = waNone;
+  if(dest->monst == moAngryDie)
     dest->wall = waNone;
   if(dest->monst == moViking && dest->land == laKraken)
     dest->item = itOrbFish;
@@ -1113,6 +1117,12 @@ void blowoff(const movei& mi) {
     cf->item = itDice;
     items[itDice]--;
     }
+  if(ct->wall == waHappyDie && dice::data[ct].happy() <= 0) {
+    ct->monst = moAngryDie;
+    ct->wall = waNone;
+    ct->stuntime = 5;
+    addMessage(XLAT("You have made a Happy Die angry!"));
+    }
   items[itOrbAir]--;
   createNoise(2);
   bfs();
@@ -1147,7 +1157,8 @@ EX movei blowoff_destination(cell *c, int& di) {
   if(d<c->type) for(int e=d; e<d+c->type; e++) {
     int di = e % c->type;
     cell *c2 = c->move(di);
-    if((c->monst == moAnimatedDie || c->wall == waHappyDie || c->wall == waRichDie) && ctof(c2)) continue;
+    if((c->monst == moAnimatedDie || c->monst == moAngryDie || c->wall == waHappyDie || c->wall == waRichDie) && ctof(c2))
+      continue;
     if(c2 && c2->cpdist > c->cpdist && passable(c2, c, P_BLOW)) return movei(c, c2, di);
     }
   return movei(c, c, NO_SPACE);

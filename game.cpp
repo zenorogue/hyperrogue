@@ -394,6 +394,12 @@ EX void pushThumper(const movei& mi) {
         addMessage(XLAT("The die is now happy, but won't reward you outside of the Land of Dice!"));
         }
       }          
+    if(w == waHappyDie && dice::data[cto].happy() <= 0) {
+      cto->monst = moAngryDie;
+      cto->wall = waNone;
+      cto->stuntime = 5;
+      addMessage(XLAT("You have made a Happy Die angry!"));
+      }          
     }
   else
     cto->wall = w;

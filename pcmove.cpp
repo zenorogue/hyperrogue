@@ -759,6 +759,8 @@ void pcmove::tell_why_cannot_attack() {
     addMessage(XLAT("You cannot attack Jellies in their wall form!"));
   else if(c2->monst == moAnimatedDie)
     addMessage(XLAT("You can only push this die if the highest number would be on the top!"));
+  else if(c2->monst == moAngryDie)
+    addMessage(XLAT("This die is really angry at you!"));
   else
     addMessage(XLAT("For some reason... cannot attack!"));
   }

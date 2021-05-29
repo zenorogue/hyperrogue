@@ -1715,6 +1715,10 @@ MONSTER('d', 0x603010, "Animated Die", moAnimatedDie, ZERO, RESERVED, moHexDemon
   "Other rolls and attacks are not allowed."
   )
 
+MONSTER('d', 0x901010, "Angry Die", moAngryDie, ZERO, RESERVED, moHexDemon, 
+  "You have made a die unhappy, and it remembers that! This one won't forgive you, no matter what you do."
+  )
+
 //shmupspecials
 MONSTER( '@', 0xC0C0C0, "Rogue", moPlayer, CF_FACE_UP | CF_PLAYER, RESERVED, moNone, "In the Shoot'em Up mode, you are armed with thrown Knives.")
 MONSTER( '*', 0xC0C0C0, "Knife", moBullet, ZERO | CF_BULLET, RESERVED, moNone, "A simple, but effective, missile, used by rogues.")
