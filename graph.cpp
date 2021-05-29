@@ -718,7 +718,7 @@ EX shiftmatrix face_the_player(const shiftmatrix V) {
   if(vrhr::enabled) {
     shiftpoint h = tC0(V);    
     hyperpoint uh = unshift(h);
-    return shiftless(rspintox(uh) * xpush(hdist0(uh)) * cspin(0, 2, 90*degree));
+    return shiftless(cspin(1, 2, 90*degree) * rspintox(cspin(2, 1, 90*degree) * uh) * xpush(hdist0(uh)) * cspin(0, 2, 90*degree) * cspin(1, 0, 90*degree));
     }
   #endif
   return rgpushxto0(tC0(V));
