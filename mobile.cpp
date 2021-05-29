@@ -219,7 +219,7 @@ EX void mobile_draw(MOBPAR_FORMAL) {
     shmup::turn(tdiff);
     
   safety = false;
-  vid.fsize = (min(vid.xres, vid.yres) * fontscale + 50) / 3200;
+  vid.fsize = (min(vid.xres, vid.yres) * vid.fontscale + 50) / 3200;
   
   mouseoh = mouseh;
   gtouched = mousepressed = clicked;

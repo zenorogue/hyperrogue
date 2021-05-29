@@ -350,7 +350,7 @@ extern "C" void Java_com_roguetemple_hyperroid_HyperRogue_update
     
   vid.xres = xres;
   vid.yres = yres;
-  vid.fsize = (min(vid.xres, vid.yres) * fontscale + 50) / 3200;
+  vid.fsize = (min(vid.xres, vid.yres) * vid.fontscale + 50) / 3200;
 
   mousex = _mousex;
   mousey = _mousey;
