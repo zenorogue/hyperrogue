@@ -935,17 +935,19 @@ movei determinePush(cellwalker who, int subdir, const T& valid) {
     auto rd = reverse_directions(push.at, push.spin);
     for(int i: rd) {
       push.spin = i;
-      if(valid(push.cpeek())) return movei(push.at, push.spin);
+      movei mi = movei(push.at, i);
+      if(valid(mi)) return mi;
       }
     return movei(c2, NO_SPACE);
     }
   int pd = push.at->type/2;
   push += pd * -subdir;
+  movei mi(push.at, push.spin);
   push += wstep;
-  if(valid(push.at)) return movei(c2, (push+wstep).spin);
+  if(valid(mi)) return mi;
   if(c2->type&1) {
     push = push + wstep - subdir + wstep;
-    if(valid(push.at)) return movei(c2, (push+wstep).spin);
+    if(valid(mi)) return mi;
     }
   if(gravityLevelDiff(push.at, c2) < 0) {
     push = push + wstep + 1 + wstep;
@@ -955,7 +957,8 @@ movei determinePush(cellwalker who, int subdir, const T& valid) {
     if(gravityLevelDiff(push.at, c2) < 0) {
       push = push + wstep + 1 + wstep;
       }
-    if(valid(push.at)) return movei(c2, (push+wstep).spin);
+    movei mi = movei(c2, (push+wstep).spin);
+    if(valid(mi)) return mi;
     }
   return movei(c2, NO_SPACE);
   }

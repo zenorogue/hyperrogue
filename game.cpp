@@ -402,7 +402,9 @@ EX void pushThumper(const movei& mi) {
     cto->wparam = th->wparam;
   }
 
-EX bool canPushThumperOn(cell *tgt, cell *thumper, cell *player) {
+EX bool canPushThumperOn(movei mi, cell *player) {
+  cell *thumper = mi.s;
+  cell *tgt = mi.t;
   if(among(thumper->wall, waRichDie, waHappyDie) && ctof(tgt))
     return false;
   if(tgt->wall == waBoat || tgt->wall == waStrandedBoat) return false;  
