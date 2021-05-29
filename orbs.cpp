@@ -1157,7 +1157,7 @@ EX movei blowoff_destination(cell *c, int& di) {
   if(d<c->type) for(int e=d; e<d+c->type; e++) {
     int di = e % c->type;
     cell *c2 = c->move(di);
-    if((c->monst == moAnimatedDie || c->monst == moAngryDie || c->wall == waHappyDie || c->wall == waRichDie) && ctof(c2))
+    if((c->monst == moAnimatedDie || c->monst == moAngryDie || c->wall == waHappyDie || c->wall == waRichDie) && !dice::can_roll(movei(c, di)))
       continue;
     if(c2 && c2->cpdist > c->cpdist && passable(c2, c, P_BLOW)) return movei(c, c2, di);
     }

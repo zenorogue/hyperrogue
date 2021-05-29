@@ -909,11 +909,13 @@ EX namespace dice {
     vector<vector<int>> spins;
     vector<int> hardness;
     int faces;
+    int facesides;
     int order;
     die_structure(int ord, const vector<vector<int>>& v) {
       sides = v;
       spins = sides;
       faces = isize(sides);
+      facesides = isize(sides[0]);
       order = ord;
       for(int i=0; i<faces; i++)
         for(int j=0; j<isize(sides[i]); j++) {
@@ -946,7 +948,14 @@ EX namespace dice {
     });
 
   die_structure d4(3, {{3,2,1}, {3,0,2}, {1,0,3}, {0,1,2}});
-  
+
+  die_structure d6(3, {{1,2,4,3}, {5,2,0,3}, {5,4,0,1}, {5,1,0,4}, {0,2,5,3}, {4,2,1,3}});
+
+  die_structure d12(3, {
+    {3,5,4,9,1}, {0,9,6,7,3}, {11,10,5,3,7}, {0,1,7,2,5}, {0,5,10,8,9}, {0,3,2,10,4},
+    {11,7,1,9,8}, {11,2,3,1,6}, {11,6,9,4,10}, {0,4,8,6,1}, {11,8,4,5,2}, {8,10,2,7,6}
+    });
+    
   #if HDR
   struct die_data {
     struct die_structure *which;
@@ -974,17 +983,60 @@ EX namespace dice {
   EX void generate_specific(cell *c, die_structure *ds, int min_hardness, int max_hardness) {
     auto& dd = data[c];
     dd.which = ds;
-    dd.dir = 1 + hrand(3) * 2;
+    vector<int> dirs;
+    for(int i=0; i<c->type; i++) createMov(c, i);
+    for(int i=0; i<c->type; i++) 
+    for(int j=0; j<c->type; j++) if(can_roll(ds->facesides, i, movei(c, j)))
+      dirs.push_back(i);
+    dd.dir = hrand_elt(dirs);
     vector<int> sides;
     for(int i=0; i<ds->faces; i++) 
       if(ds->hardness[i] >= min_hardness && ds->hardness[i] <= max_hardness)
         sides.push_back(i);
-    dd.val = sides[hrand(isize(sides))];
+    dd.val = hrand_elt(sides);
+    }
+  
+  EX int die_possible(cell *c) {
+    if(c->type == 6)
+      return 3;
+    if(c->type == 4 || c->type == 8)
+      return 4;
+    if(c->type == 5)
+      return 5;
+    return 0;
+    }
+
+  EX bool can_roll(int sides, int cur, movei mi) {
+    if(mi.t->type % sides) return false;
+    if((cur - mi.d) % (mi.s->type / sides)) return false;
+    return true;
+    }
+  
+  EX bool can_roll(movei mi) {
+    auto& dd = data[mi.s];
+    auto& dw = dd.which;
+    return can_roll(dw->facesides, dd.dir, mi);
     }
   
   EX void generate_full(cell *c, int hard) {  
+    int dp = die_possible(c);
+    if(!dp) return;
     int pct = hrand(100);
     int pct2 = hrand(6000);
+    if(dp == 4) {
+      if(pct < 10) {
+        c->wall = waRichDie;
+        generate_specific(c, &d6, 1, 2);
+        }
+      return;
+      }
+    if(dp == 5) {
+      if(pct < 10) {
+        c->wall = waRichDie;
+        generate_specific(c, &d12, 2, 3);
+        }
+      return;
+      }
     if(pct < 3) {
       c->wall = waHappyDie;
       generate_specific(c, &d4, 0, 99);
@@ -1088,8 +1140,7 @@ EX namespace dice {
     int dir = dd.dir;
     auto& dw = dd.which;
     
-    auto& side = dw->sides[val];
-    int si = isize(side);
+    int si = dw->facesides;
 
     if(c == lmouseover_distant) {
       set<cell*> visited;
@@ -1109,7 +1160,7 @@ EX namespace dice {
         auto dat = data[i];
         queuestr(fpp ? dat.V * zpush(cgi.FLOOR) : dat.V, .5, its(dat.dd.val+1), 0xFF8000FF);
         if(i <= 22)
-        forCellIdEx(c2, id, dat.c) if(!ctof(c2) && !visited.count(c2)) {
+        forCellIdEx(c2, id, dat.c) if(can_roll(si, dat.dd.dir, movei(dat.c, id)) && !visited.count(c2)) {
           auto re = roll_effect(movei(dat.c, id), dat.dd);
           shiftmatrix V2 = dat.V * currentmap->adj(dat.c, id);
           gridline(dat.V, C0, V2, C0, 0xFF800080, 0);
@@ -1139,8 +1190,9 @@ EX namespace dice {
     if(1) {
       dynamicval<eGeometry> g(geometry, gSphere);
       ld alpha = 360 * degree / dw->order;
-      inradius  = edge_of_triangle_with_angles(alpha, 60*degree, 60*degree);
-      outradius = edge_of_triangle_with_angles(60*degree, alpha, 60*degree);
+      ld beta = 180 * degree / dw->facesides;
+      inradius  = edge_of_triangle_with_angles(alpha, beta, beta);
+      outradius = edge_of_triangle_with_angles(beta, alpha, beta);
       }
 
     hyperpoint shift = inverse_shift(V1, tC0(die_target));
@@ -1200,9 +1252,9 @@ EX namespace dice {
       int i = o.second;
       transmatrix T = facequeue[i].first;
 
-      transmatrix face;
+      array<hyperpoint, 5> face;
       
-      hyperpoint sum = zpush(base_to_base) * C0 * -3;
+      hyperpoint dctr = zpush(base_to_base) * C0;
       
       auto sphere_to_space = [&] (hyperpoint h) {
         if(fpp) return h;
@@ -1218,14 +1270,34 @@ EX namespace dice {
         if(1) {
           dynamicval<eGeometry> g(geometry, gSpace534);
           h = zpush(base_to_base) * T * cspin(0, 1, 2*M_PI*(d+.5)/si) * cspin(2, 0, outradius) * zpush0(dieradius);
-          set_column(face, d, h);
-          sum += h;
+          if(d < si) face[d] = h;
           hs = sphere_to_space(h);
           }
         curvepoint(hs);
         }
       
-      set_column(face, 3, sum);
+      hyperpoint ctr, cx, cy;
+      if(dw->facesides == 3) {
+        dynamicval<eGeometry> g(geometry, gSpace534);
+        ctr = (face[0] + face[1] + face[2]) / 3;
+        ctr = ctr * 1.01 - dctr * 0.01;
+        cx = face[2] - face[0];
+        cy = face[1] - (face[0] + face[2]) / 2;
+        }
+      if(dw->facesides == 4) {
+        dynamicval<eGeometry> g(geometry, gSpace534);
+        ctr = (face[0] + face[1] + face[2] + face[3]) / 4;
+        ctr = ctr * 1.01 - dctr * 0.01;
+        cx = face[1] - face[2];
+        cy = face[0] - face[1];
+        }
+      if(dw->facesides == 5) {
+        dynamicval<eGeometry> g(geometry, gSpace534);
+        ctr = (face[0] + face[1] + face[2] + face[3] + face[4]) / 5;
+        ctr = ctr * 1.01 - dctr * 0.01;
+        cx = (face[2] - face[0]) * .75;
+        cy = face[1] - (face[3] + face[4]) * .4;
+        }
       
       queuecurve(V1, 0xFFFFFFFF, color & 0xFFFFFF9F, PPR::WALL);
       
@@ -1233,7 +1305,7 @@ EX namespace dice {
       pointfunction pf = [&] (ld x, ld y) {
         hyperpoint hs;
         dynamicval<eGeometry> g(geometry, gSpace534);
-        return sphere_to_space(normalize(face * hyperpoint(1/3. -y/2 -x, 1/3. + y, 1/3. -y/2 +x, 1e-2)));
+        return sphere_to_space(normalize(ctr + cx * x + cy * y));
         };
 
       int fid = dw->faces - facequeue[i].second;

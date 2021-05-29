@@ -804,6 +804,13 @@ EX void set_column(transmatrix& T, int i, const hyperpoint& H) {
     T[j][i] = H[j];
   }
 
+EX hyperpoint get_column(transmatrix& T, int i) {
+  hyperpoint h;
+  for(int j=0; j<MXDIM; j++)
+    h[j] = T[j][i];
+  return h;
+  }
+
 /** build a matrix using the given vectors as columns */
 EX transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3, hyperpoint h4) {
   transmatrix T;
