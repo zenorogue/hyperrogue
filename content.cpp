@@ -1712,7 +1712,7 @@ WALL('d', 0x106010, "Happy Die", waHappyDie, WF_WALL | WF_PUSHABLE, RESERVED, 0,
   "weak spots. You can roll Happy Dice, but it may become angry!"
   )
 
-MONSTER('d', 0x603010, "Animated Die", moAnimatedDie, ZERO, RESERVED, moHexDemon, 
+MONSTER('d', 0x603010, "Animated Die", moAnimatedDie, ZERO, RESERVED, moAnimatedDie, 
   "When sentient dice are too long in an incorrect position, they start to move on their own, "
   "and attack everyone. You can still convince Animated Dice of your good intentions by "
   "rolling them into a position such that the highest number is on top. "
@@ -1720,7 +1720,7 @@ MONSTER('d', 0x603010, "Animated Die", moAnimatedDie, ZERO, RESERVED, moHexDemon
   "Other rolls and attacks are not allowed."
   )
 
-MONSTER('d', 0x901010, "Angry Die", moAngryDie, ZERO, RESERVED, moHexDemon, 
+MONSTER('d', 0x901010, "Angry Die", moAngryDie, ZERO, RESERVED, moAnimatedDie, 
   "You have made a die unhappy, and it remembers that! This one won't forgive you, no matter what you do."
   )
 

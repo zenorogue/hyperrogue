@@ -539,6 +539,25 @@ EX bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
       }
     return !pseudohept(w) && passable(w, from, extra);
     }
+  if(m == moAnimatedDie) {
+    if(extra & P_ONPLAYER) {
+      if(isPlayerOn(w)) return true;
+      }
+    if(from && among(from->monst, moAnimatedDie, moAngryDie)) {
+      bool ok = false;
+      for(int i=0; i<from->type; i++) {
+        if(from->move(i) != w) continue;
+        if(dice::can_roll(movei(from, i))) ok = true;
+        }
+      if(!ok) return false;
+      }
+    if(from && !dice::die_possible(from)) 
+      return false;
+    else if(!dice::die_possible(w))
+      return false;
+    else
+      return passable(w, from, extra);
+    }
   if(m == moFrog) {
     return isNeighbor1(from, w) ? passable(w, from, extra) : check_jump(from, w, extra, dummy) == 3;
     }

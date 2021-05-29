@@ -43,6 +43,7 @@ namespace hr {
 #define HF_MONK       Flag(30)
 #define HF_WESTWALL   Flag(31)
 #define HF_JUMP       Flag(32)
+#define HF_DICE       Flag(33)
 #endif
 
 EX flagtype havewhat, hadwhat;
@@ -481,7 +482,7 @@ EX void bfs() {
           else if(isMagneticPole(c2->monst)) havewhat |= HF_MAGNET;
           else if(c2->monst == moAltDemon) havewhat |= HF_ALT;
           else if(c2->monst == moHexDemon) havewhat |= HF_HEXD;
-          else if(among(c2->monst, moAnimatedDie, moAngryDie)) havewhat |= HF_HEXD;
+          else if(among(c2->monst, moAnimatedDie, moAngryDie)) havewhat |= HF_DICE;
           else if(c2->monst == moMonk) havewhat |= HF_MONK;
           else if(c2->monst == moShark || c2->monst == moCShark || among(c2->monst, moRusalka, moPike)) havewhat |= HF_SHARK;
           else if(c2->monst == moAirElemental) 

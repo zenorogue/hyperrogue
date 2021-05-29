@@ -2086,6 +2086,7 @@ EX void movemonsters() {
     groupmove(moNorthPole, 0); */
   DEBB(DF_TURN, ("bugs"));
   if(havewhat & HF_HEXD) groupmove(moHexDemon, 0);
+  if(havewhat & HF_DICE) groupmove(moAnimatedDie, 0);    
   if(havewhat & HF_ALT) groupmove(moAltDemon, 0);
   if(havewhat & HF_MONK) groupmove(moMonk, 0);
 
