@@ -1094,7 +1094,7 @@ EX namespace dice {
     
     int si = isize(dw->sides[val]);
     
-    if(t % si) { println(hlog, "error: bad roll\n"); return dd; }
+    if(t % si) { println(hlog, "error: bad roll"); return dd; }
     
     int sideid = (rdir - dir) * si / t;
     if(sideid < 0) sideid += si;
@@ -1106,7 +1106,7 @@ EX namespace dice {
     int sideid1 = dw->spins[val][sideid];
     
     int t1 = cto->type;
-    if(t1 % si1) { println(hlog, "error: bad roll target\n"); return dd; }
+    if(t1 % si1) { println(hlog, "error: bad roll target"); return dd; }
     
     int rdir1 = mi.rev_dir_force();
     
