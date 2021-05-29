@@ -1693,7 +1693,7 @@ S("Hell has these lakes everywhere... They are shaped like evil stars, and fille
 
 S("hardcore mode", "tryb hardcore")
 
-S("One wrong move and it is game over!", "Jeden fałszywy ruch i koniec gry!")
+S("One wrong move, and it is game over!", "Jeden fałszywy ruch i koniec gry!")
 S("Not so hardcore?", "Hardkor to nie to?")
 
 // Shoot'em up Mode
@@ -8528,7 +8528,6 @@ S(
   "Kiedy się ruszasz, zawartość dwóch pól sąsiedujących z obiema Twoimi polami jest zamieniana. "
   "Jeśli były tam stworzenia, zostają one ogłuszone przez pewien czas, aż zrozumieją, co się właściwie stało.\n\n"
   "Nie działa, gdy któreś z pól zawiera istotę wielopolową lub bariero-podobną ścianę.")
-#undef Orb
 
 S("digon", "dwukąt")
 S("triangle", "trójkąt")
@@ -8538,7 +8537,7 @@ S("hexagon", "sześciokąt")
 S("heptagon", "siedmiokąt")
 S("octagon", "ośmiokąt")
 
-// 11.5
+// 12.0
 //======
 
 // missing Android buttons
@@ -8668,7 +8667,7 @@ S(
   "If the pointer length is 0.5m, the object pointed to is 0.5 meter from the controller. "
   "This is used in situations where the controller is used as a 3D mouse, e.g., "
   "the drawing tool in three-dimensional geometries. When pointing at two-dimensional surfaces, "
-  "this is not relevant (the pointer is as long as needed to hit the surface.)",
+  "this is not relevant (the pointer is as long as needed to hit the surface.).",
   
   "Jeśli długość wskaźnika to 0.5m, wskazywany punkt jest 0.5 metra od kontrolera. "
   "Ma to znaczenie, gdy kontroler jest używany jako mysz 3D, np. narzędzie do rysowania w "
@@ -8771,17 +8770,20 @@ S(
           "x, y, z (hyperboloid/sphere/plane coordinates in non-crystal geometries)\n"
           "ex, ey, ez (in Euclidean geometries)\n"
           "x0, x1, x2... (crystal geometry only)\n"
-          "0 is black, 1 is white, rgb(1,0,0) is red, ifp(p-2,1,0) is blue (p=1 for red, 2 for green, 3 for blue)."
-
-          "w (fourth coordinate)\n"
-          "wallif(condition, color)\n"
-          , 
+          "0 is black, 1 is white, rgb(1,0,0) is red, ifp(p-2,1,0) is blue (p=1 for red, 2 for green, 3 for blue).",
 
           "Tu możesz określić wzór jako funkcję komórki. Dostępne parametry:\n\n"
           "x, y, z (współrzędne hiperboloidy/sfery/powierczni, poza kryształami)\n"
           "ex, ey, ez (w geometriach euklidesowych)\n"
           "x0, x1, x2... (w kryształach)\n"
           "0 to czarny, 1 to biały, rgb(1,0,0) to czerwony, ifp(p-2,1,0) to niebieski (p=1 to czerwony, 2 to zielony, 3 to niebieski)."
+          )
+          
+S(
+          "w (fourth coordinate)\n"
+          "wallif(condition, color)\n"
+          , 
+
           "w (czwarta współrzędna)\n"
           "wallif(warunek, kolor)\n"
           )
@@ -9242,3 +9244,150 @@ S("screen size percentage to use (Y)", "procent rozmiaru ekranu (Y)")
 S("specify relative window size", "względny rozmiar okna")
 S("window resolution to use (X)", "rozmiar okna (X)")
 S("window resolution to use (Y)", "rozmiar okna (Y)")
+
+// ...
+
+// fixed text
+
+S("select the starting land", "wybierz startową krainę")
+
+// missing text in animation
+
+S("cells to go", "ile pól się ruszyć")
+
+// missing translations for Hardcore, and the new Casual mode
+
+S("casual mode", "tryb niezobowiązujący")
+S("Switching casual allowed only before saving the game. Do you want to restart?", 
+  "Przestawić tryb niezobowiązujący można jedynie przed zapisem gry. Chcesz zacząć od początku?")
+S("You are in the casual mode! Achievements are disabled.", 
+  "Jesteś w trybie niezobowiązującym! Osiągnięcia są wyłączone.")
+S("Collect an Orb of Safety to save a checkpoint.", 
+  "Zbierz Sferę Bezpieczeństwa, by zapisać stan gry.")
+S("load (%1 turns passed)", "ładuj (minęło kolejek: %1)")
+
+// missing texts in searching
+
+S("press letters to search", "wciskaj litery, by szukać")
+S("matching items", "pasujących elementów: ")
+
+// YASC codes
+
+S("YASC codes", "kody YASC")
+S(" YASC code: ", " kod YASC: ")
+S("YASC codes: Sides-Entity-Restrict-Threat-Wall", "kody YASC: Sides-Entity-Restrict-Threat-Wall")
+
+// Dice Reserve
+
+N("Dice Reserve", GEN_O, "Rezerwat Kostek", "Rezerwaty Kostek", "Rezerwat Kostek", "w Rezerwacie Kostek")
+S("This land is full of sentient dice. Do not disturb them!",
+  "Ta kraina jest pełna rozumnych kostek. Nie zakłócaj ich spokoju!")
+
+N("Crystal Die", GEN_F, "Kryształowa Kostka", "Kryształowe Kostki", "Kryształową Kostkę", "Kryształową Kostką")
+S("A nice souvenir from the Dice Reserve. Make sure to collect the whole set!",
+  "Miła pamiątka z Rezerwatu Kostek. Zbierz cały zestaw!")
+
+N("Unhappy Die", GEN_F, "Smutna Kostka", "Smutne Kostki", "Smutną Kostkę", "Smutną Kostką")
+S("Sentent dice like to be in a position such that their highest number is on top. "
+  "Unfortunately, someone has rolled this one into a wrong position, and did not fix this. "
+  "It will reward you if you roll it so that the highest number is on top again!",
+
+  "Kostki lubię być w takiej pozycji, że największa liczba jest na wierzchu. "
+  "Niestety, ktoś tutaj przekręcił kostkę i tego nie naprawił. "
+  "Przekręć ją tak, by najwyższa liczba znów była na wierzchu, a dostaniesz nagrodę!")
+
+N("Happy Die", GEN_F, "Wesoła Kostka", "Wesołe Kostki", "Wesołą Kostkę", "Wesołą Kostką")
+
+S(
+  "A happy sentent die. Dice are happy when they are in their correct position "
+  "(the highest number on the top); happy dice with one roll from their best position are sometimes found too."
+  "Other positions are much less convenient for them and expose their "
+  "weak spots. You can roll Happy Dice, but it may become angry!",
+
+  "Szczęśliwa kostka! Kostki są szczęśliwe, gdy największa liczba jest na wierzchu. "
+  "Czasami też można znaleźć szczęśliwe kostki położone o 1 obrót od najlepszej pozycji. "
+  "Pozostałe pozycji są dużo mniej wygodne i odsłaniają ich słabe punkty. "
+  "Możesz przetoczyć Szczęśliwą Kostkę, ale może się ona rozzłościć!")
+
+N("Animated Die", GEN_F, "Ruchoma Kostka", "Ruchome Kostki", "Ruchomą Kostkę", "Ruchomą Kostką")
+
+S("When sentient dice are too long in an incorrect position, they start to move on their own, "
+  "and attack everyone. You can still convince Animated Dice of your good intentions by "
+  "rolling them into a position such that the highest number is on top. "
+  "If you do, the die will stop moving and (if it happens in the Dice Reserve) you will be rewarded. "
+  "Other rolls and attacks are not allowed.",
+  
+  "Gdy rozumne kostki są za długo w złej pozycji, ruszają się same z siebie i atakują wszystkich. "
+  "Możesz przekonać Ruchomą Kostkę o swoich dobrych intencjach, przekręcając ją w dobrą pozycję, "
+  "czyli taką, że największa liczba jest na wierzchu. "
+  "Wówczas kostka przestaje się ruszać, a Ty dostajesz nagrodę (o ile stanie się to w Rezerwacie Kostek). "
+  "Pozostałe przekręcenia i ataki nie są dozwolone."
+  )
+
+N("Angry Die", GEN_F, "Wściekła Kostka", "Wściekłe Kostki", "Wściekłą Kostkę", "Wściekłą Kostką")
+
+S("You have made a die unhappy. Taste the revenge! This one won't forgive you, no matter what you do.",
+  "Przez Ciebie ta kostka jest nieszczęśliwa. Poczuj smak jej zemsty! Nie wybaczy Ci tego, co byś nie zrobi%ł0.")
+
+S("The die is now happy, and you are rewarded!", "Kostka jest szczęśliwa. Zostajesz nagrodzon%y0!")
+S("You have made a Happy Die angry!", "Rozzłości%łeś0 Szczęśliwą Kostkę!")
+S("You can only push this die if the highest number would be on the top!", 
+  "Możesz pchać tylko, jeżeli najwyższa liczba znalazłaby się na wierzchu!")
+S("This die is really angry at you!", "Ta kostka jest bardzo, bardzo zła!")
+S("The die is now happy, but won't reward you outside of the Dice Reserve!", "Kostka jest szczęśliwa. Bez nagrody poza Rezerwatem Kostek!")
+
+// Cursed Canyon
+//===============
+
+N("Cursed Canyon", GEN_O, "Przeklęty Kanion", "Przeklęte Kaniony", "Przeklęty Kanion", "w Przeklętym Kanionie")
+S("This canyon is full of curses! Curses are like Orbs, but grant negative effects.",
+  "Ten kanion jest pełen klątw! Klątwy są jak Sfery, ale ich skutki są negatywne.")
+  
+N("Canyon Hag", GEN_F, "Wiedźma z Kanionu", "Wiedźmy z Kanionu", "Wiedźmę z Kanionu", "Wiedźmą z Kanionu")
+S("A Canyon Hag can curse you from afar, if standing on top of a Curse and close enough.",
+  "Wiedźma z Kanionu może Cię przekląć z daleka, gdy stoi na Klątwie dostatecznie blisko.")
+S("%The1 curses you with %the2!", "%1 zaklina Cię! Dostajesz %a2!")
+
+N("Capon Stone", GEN_O, "Kapłuni Kamień", "Kapłunie Kamienie", "Kapłuni Kamień", "Kapłunim Kamieniem")
+S("A lapis alectorius, alectoria or capon stone is a non-precious stone found in the gizzard of capons (young, castrated roosters). In magic it is believed to be an effective amulet, granting the wearer a heightened sense of courage and boldness. These properties are unproven. [Wikipedia]",
+  "Gdy kogut po trzech leciech bywa okapłuniony, albo oprawiony, a po okapłonieniu przez siedm lat żyje, tedy w nim rodzi się kapłuni kamień. [Słownik języka polskiego, Samuel Bogumił Linde]")
+
+#define Curse(E, P) N("Curse of " E, GEN_F, "Klątwa " P, "Klątwy " P, "Klątwę " P, "Klątwą " P)
+Curse("Weakness", "Słabości")
+S("This Curse weakens your normal attack, which will only stun monsters. For monsters which are normally only stunned anyway, they don't push the victim away. You are also unable to cut trees or fight Ivy.",
+  "Ta klątwa osłabia Twój zwykły atak. Będzie on jedynie ogłuszał przeciwników. Te, które i tak były jedynie ogłoszane, nie są odpychane. Nie możesz również ścinać drzew ani walczyć z Bluszczem.")
+
+Curse("Draining", "Wysysania")
+S("Drains your power of all your orbs (and curses) by 2 charges per turn.",
+  "Wysysa moc Twoich wszystkich sfer (i klątw), 2 ładunki na kolejkę.")
+
+Curse("Water", "Wody")
+S("Makes you leave a trail of shallow water. You also become afraid of water. You are unable to step into water, including shallow water and boats on water. "
+  "On the good side, you are protected from fire.",
+  
+  "Powoduje, że pozostawiasz za sobą strugę płytkiej wody. Powoduje także, że boisz się wody. Nie możesz wejść do wody, w tym płytkiej wody i łódek na wodzie. "
+  "Ma to dobrą stronę: jesteś chronion%y0 przed ogniem.")
+  
+Curse("Fatigue", "Zmęczenia")
+S("With this Curse you cannot move too quickly. Every move increases your fatigue by 1; fatigue cannot go over 10. "
+  "Resting reduces your fatigue by 5.",
+  "Ta klątwa powoduje, że nie możesz chodzić zbyt szybko. Każdy ruch zwiększa zmęczenie o 1; zmęczenie nie może przekroczyć 10. "
+  "Odpoczynek zmniejsza zmęczenie o 5.")
+N("fatigue", GEN_N, "zmęczenie", "zmęczenia", "zmęczenie", "zmęczeniem")
+S("See the Curse of Fatigue.", "Patrz Klątwa Zmęczenia.")
+S("You are too fatigued!", "Jesteś zbyt zmęczon%y0!")
+
+Curse("Repulsion", "Odpychania")
+S("If you have this Orb, all the items on adjacent cells will try to escape from you.",
+  "Gdy masz Klątwę Odpychania, przedmioty na sąsiednich polach próbują od Ciebie uciec.")
+
+Curse("Gluttony", "Obżarstwa")
+S("The first item you pick up is consumed without any effect.",
+  "Pierwszy podniesiony przedmiot jest pożerany bez efektu.")
+S("%The1 is consumed!", "Pożarto %a1!")
+
+Orb("Purity", "Czystości")
+S("Reverses all the curses. When found far away from the Cursed Canyon, you gain low amounts of various reversed curse powers.",
+  "Odwraca efekty wszystkich klątw. W przypadku znaleziona daleko od Przeklętego Kanionu zdobywasz małe ilości odwróconych mocy klątw.")
+#undef Curse
+#undef Orb
