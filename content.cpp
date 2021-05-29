@@ -1678,34 +1678,39 @@ ITEM('>', 0xFF6060, "fatigue", itFatigue, IC_NAI, ZERO, RESERVED, osNone,
     "See the Curse of Fatigue."
     )
 
-MONSTER('H', 0x181818, "Hag", moHexer, CF_FACE_UP, RESERVED, moYeti,
+MONSTER('H', 0x181818, "Canyon Hag", moHexer, CF_FACE_UP, RESERVED, moYeti,
   "Hags can curse you from afar!")
 
-LAND(0xC0C0FF, "Cursed Land", laCursed, 0, itCursed, RESERVED,
+LAND(0xC0C0FF, "Cursed Canyon", laCursed, 0, itCursed, RESERVED,
   "This land is full of curses!")
 NATIVE(m == moHexer ? 2 : 0)  
 #define LST {itElixir, itPirate, itRuins, itBrownian, itPower}
 REQ(ITEMS_TOTAL(LST, variant_unlock_value()*6/5))
 #undef LST
 
-ITEM('/', 0x211F6F, "Cursed Gold", itCursed, IC_TREASURE, ZERO, RESERVED, osNone,
-  "A cursed gold.")
+ITEM('$', 0xda5e29, "Capon Stone", itCursed, IC_TREASURE, ZERO, RESERVED, osNone,
+  "A lapis alectorius, alectoria or capon stone is a non-precious stone found in the gizzard of capons (young, castrated roosters). In magic it is believed to be an effective amulet, granting the wearer a heightened sense of courage and boldness. These properties are unproven. [Wikipedia]")
 
 ITEM('o', 0x208020, "Orb of the Woods", itOrbWoods, IC_ORB, ZERO, RESERVED, osTerraform,
   "Lets you swap positions with the trees.")
 
-LAND(0xC0C0FF, "Land of Dice", laDice, 0, itDice, RESERVED,
+LAND(0xC0C0FF, "Dice Heaven", laDice, 0, itDice, RESERVED,
   "This land is full of dice!")
 
 ITEM('/', 0xD0D0D8, "Crystal Die", itDice, IC_TREASURE, ZERO, RESERVED, osNone,
   "A nice souvenir from the Land of Dice. Make sure to collect the whole set!")
 
 WALL('d', 0x7F6A10, "Unhappy Die", waRichDie, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone, 
-  "Sentent dice like to be in a position such that their highest number is on top, or somewhere close. "
+  "Sentent dice like to be in a position such that their highest number is on top. "
   "Unfortunately, someone has rolled this one into a wrong position, and did not fix this. "
   "It will reward you if you roll it so that the highest number is on top again!")
+
 WALL('d', 0x106010, "Happy Die", waHappyDie, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone, 
-  "A happy sentent die. You can roll it.")
+  "A happy sentent die. Dice are happy when they are in their correct position "
+  "(the highest number on the top); happy dice with one roll from their best position are sometimes found too."
+  "Other positions are much less convenient and expose their "
+  "weak spots. You can roll Happy Dice, but it may become angry!"
+  )
 
 MONSTER('d', 0x603010, "Animated Die", moAnimatedDie, ZERO, RESERVED, moHexDemon, 
   "When sentient dice are too long in an incorrect position, they start to move on their own, "

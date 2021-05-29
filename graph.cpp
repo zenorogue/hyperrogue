@@ -811,7 +811,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     (it == itBuggy || it == itBuggy2) ? &cgi.shPirateX :
     it == itHolyGrail ? &cgi.shGrail :
     isElementalShard(it) ? &cgi.shElementalShard :
-    (it == itBombEgg || it == itTrollEgg) ? &cgi.shEgg :
+    (it == itBombEgg || it == itTrollEgg || it == itCursed) ? &cgi.shEgg :
     it == itFrog ? &cgi.shDisk :
     it == itHunting ? &cgi.shTriangle :
     (it == itDodeca || it == itDice) ? &cgi.shDodeca :
