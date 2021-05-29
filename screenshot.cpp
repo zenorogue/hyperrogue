@@ -1807,7 +1807,7 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
   #if CAP_COMMANDLINE
   + addHook(hooks_args, 100, readArgs)
   #endif
-  + addHook(hooks_config, 100, [] {
+  + addHook(hooks_configfile, 100, [] {
     #if CAP_CONFIG
     param_f(anims::period, "aperiod", "animation period");
     addsaver(anims::noframes, "animation frames");

@@ -238,6 +238,7 @@ EX modecode_t legacy_modecode() {
   return mct;
   }
 
+#if CAP_COMMANDLINE
 /* legacy options */
 int read_legacy_args() {
   using namespace arg;
@@ -272,6 +273,7 @@ int read_legacy_args() {
   }
 
 auto ah_legacy = addHook(hooks_args, 0, read_legacy_args);
+#endif
 
 
 }

@@ -428,9 +428,9 @@ EX }
 
 #if !CAP_COMMANDLINE
 EX namespace arg {
-  EX int add1(const string& s, const reaction_t& r) { }
-  EX int add2(const string& s, const reaction_t& r) { }
-  EX int add3(const string& s, const reaction_t& r) { }
+  EX int add1(const string& s, const reaction_t& r) { return 0; }
+  EX int add2(const string& s, const reaction_t& r) { return 0; }
+  EX int add3(const string& s, const reaction_t& r) { return 0; }
 EX }
 #endif
 }
