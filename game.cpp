@@ -382,7 +382,6 @@ EX void pushThumper(const movei& mi) {
   else if(among(w, waRichDie, waHappyDie)) {
     th->wall = waNone;
     cto->wall = w;    
-    animateMovement(mi, LAYER_BOAT);
     dice::roll(mi);
     if(w == waRichDie && dice::data[cto].happy() > 0) {
       cto->wall = waHappyDie;
@@ -399,7 +398,10 @@ EX void pushThumper(const movei& mi) {
       cto->wall = waNone;
       cto->stuntime = 5;
       addMessage(XLAT("You have made a Happy Die angry!"));
+      animateMovement(mi, LAYER_SMALL);
       }          
+    else
+      animateMovement(mi, LAYER_BOAT);
     }
   else
     cto->wall = w;
