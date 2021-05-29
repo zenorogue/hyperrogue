@@ -1042,7 +1042,7 @@ EX namespace dice {
       }
     if(pct < 3) {
       c->wall = waHappyDie;
-      generate_specific(c, &d4, 0, 99);
+      generate_specific(c, &d4, 0, 0);
       }
     else if(pct < 6) {
       c->wall = waHappyDie;
