@@ -41,7 +41,7 @@ string timeline() {
   else {
     s = XLAT("%1 turns (%2)", its(turncount), getgametime_s());
     if(display_yasc_codes)
-      s+= " YASC code: " + its(yasc_code);
+      s+= XLAT(" YASC code: ") + its(yasc_code);
     }
   return s;
   }

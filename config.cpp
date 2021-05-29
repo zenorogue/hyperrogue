@@ -647,7 +647,7 @@ EX void initConfig() {
   param_b(display_yasc_codes, "yasc", false)
   -> editable("YASC codes", 'Y')
   -> set_reaction([] { 
-    addMessage("YASC codes: Sides-Entity-Restrict-Threat-Wall");  
+    addMessage(XLAT("YASC codes: Sides-Entity-Restrict-Threat-Wall"));  
     });
 
   param_b(vid.relative_font, "relative_font", true)

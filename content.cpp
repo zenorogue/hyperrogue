@@ -1647,11 +1647,11 @@ WALL( '$', 0x40FD40, "Crate on Target", waCrateOnTarget, WF_WALL | WF_PUSHABLE, 
     )
 
 ITEM( 'o', 0xF0F0FF, "Orb of Purity", itOrbPurity, IC_ORB, ZERO, RESERVED, osProtective, 
-  "Reverses all the curses."
+  "Reverses all the curses. When found far away from the Cursed Canyon, you gain low amounts of various reversed curse powers."
   )
 
 ITEM('c', 0x202020, "Curse of Weakness", itCurseWeakness, IC_ORB, IF_CURSE, RESERVED, osOffensive, 
-  "This orb weakens your normal attack, which will only stun monsters. For monsters which were only stunned anyway, they don't push the victim away. You are also unable to cut trees or fight Ivy."
+  "This Curse weakens your normal attack, which will only stun monsters. For monsters which are normally only stunned anyway, they don't push the victim away. You are also unable to cut trees or fight Ivy."
   )
 
 ITEM('c', 0x6060FF, "Curse of Draining", itCurseDraining, IC_ORB, IF_CURSE, RESERVED, osPowerUtility, 
@@ -1659,16 +1659,17 @@ ITEM('c', 0x6060FF, "Curse of Draining", itCurseDraining, IC_ORB, IF_CURSE, RESE
   )
 
 ITEM('c', 0x000060, "Curse of Water", itCurseWater, IC_ORB, IF_CURSE, RESERVED, osTerraform, 
-  "Makes you leave a trail of shallow water, and also afraid of water. You are unable to step into water, including shallow water and boats on water."
+  "Makes you leave a trail of shallow water. You also become afraid of water. You are unable to step into water, including shallow water and boats on water. "
+  "On the good side, you are protected from fire."
   )
 
 ITEM('c', 0xFF6060, "Curse of Fatigue", itCurseFatigue, IC_ORB, IF_CURSE, RESERVED, osMovement, 
-  "With this Orb you cannot move too quickly. Every move increases your fatigue by 1; fatigue cannot go over 10. "
+  "With this Curse you cannot move too quickly. Every move increases your fatigue by 1; fatigue cannot go over 10. "
   "Resting reduces your fatigue by 5."
   )
 
 ITEM('c', 0xFFFF80, "Curse of Repulsion", itCurseRepulsion, IC_ORB, IF_CURSE, RESERVED, osUtility, 
-  "If you have this Orb, all the items on adjacent cells will escape from you.")
+  "If you have this Curse, all the items on adjacent cells will try to escape from you.")
 
 ITEM('c', 0xD08080, "Curse of Gluttony", itCurseGluttony, IC_ORB, IF_CURSE, RESERVED, osNone, 
   "The first item you pick up is consumed without any effect."
@@ -1679,10 +1680,12 @@ ITEM('>', 0xFF6060, "fatigue", itFatigue, IC_NAI, ZERO, RESERVED, osNone,
     )
 
 MONSTER('H', 0x181818, "Canyon Hag", moHexer, CF_FACE_UP, RESERVED, moYeti,
-  "Hags can curse you from afar!")
+  "A Canyon Hag can curse you from afar, if standing on top of a Curse and close enough.")
 
-LAND(0xC0C0FF, "Cursed Canyon", laCursed, 0, itCursed, RESERVED,
-  "This land is full of curses!")
+LAND(0x500050, "Cursed Canyon", laCursed, 0, itCursed, RESERVED,
+  "This canyon is full of curses! Curses are like Orbs, but grant negative effects."
+  )
+  
 NATIVE(m == moHexer ? 2 : 0)  
 #define LST {itElixir, itPirate, itRuins, itBrownian, itPower}
 REQ(ITEMS_TOTAL(LST, variant_unlock_value()*6/5))
@@ -1694,21 +1697,23 @@ ITEM('$', 0xda5e29, "Capon Stone", itCursed, IC_TREASURE, ZERO, RESERVED, osNone
 ITEM('o', 0x208020, "Orb of the Woods", itOrbWoods, IC_ORB, ZERO, RESERVED, osTerraform,
   "Lets you swap positions with the trees.")
 
-LAND(0xC0C0FF, "Dice Heaven", laDice, 0, itDice, RESERVED,
-  "This land is full of dice!")
+LAND(0xC0FFC0, "Dice Reserve", laDice, 0, itDice, RESERVED,
+  "This land is full of sentient dice. Do not disturb them!")
+  NATIVE((m == moAnimatedDie || m == moAngryDie) ? 1 : 0)
+  REQ(GOLD(R90))
 
 ITEM('/', 0xD0D0D8, "Crystal Die", itDice, IC_TREASURE, ZERO, RESERVED, osNone,
-  "A nice souvenir from the Land of Dice. Make sure to collect the whole set!")
+  "A nice souvenir from the Dice Reserve. Make sure to collect the whole set!")
 
-WALL('d', 0x7F6A10, "Unhappy Die", waRichDie, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone, 
+WALL('d', 0x7F6A30, "Unhappy Die", waRichDie, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone, 
   "Sentent dice like to be in a position such that their highest number is on top. "
   "Unfortunately, someone has rolled this one into a wrong position, and did not fix this. "
   "It will reward you if you roll it so that the highest number is on top again!")
 
-WALL('d', 0x106010, "Happy Die", waHappyDie, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone, 
+WALL('d', 0x106040, "Happy Die", waHappyDie, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone, 
   "A happy sentent die. Dice are happy when they are in their correct position "
   "(the highest number on the top); happy dice with one roll from their best position are sometimes found too."
-  "Other positions are much less convenient and expose their "
+  "Other positions are much less convenient for them and expose their "
   "weak spots. You can roll Happy Dice, but it may become angry!"
   )
 
@@ -1716,12 +1721,12 @@ MONSTER('d', 0x603010, "Animated Die", moAnimatedDie, ZERO, RESERVED, moAnimated
   "When sentient dice are too long in an incorrect position, they start to move on their own, "
   "and attack everyone. You can still convince Animated Dice of your good intentions by "
   "rolling them into a position such that the highest number is on top. "
-  "If you do, the die will stop moving and (if it happens in the Land of Dice) you will be rewarded. "
+  "If you do, the die will stop moving and (if it happens in the Dice Reserve) you will be rewarded. "
   "Other rolls and attacks are not allowed."
   )
 
-MONSTER('d', 0x901010, "Angry Die", moAngryDie, ZERO, RESERVED, moAnimatedDie, 
-  "You have made a die unhappy, and it remembers that! This one won't forgive you, no matter what you do."
+MONSTER('d', 0x901020, "Angry Die", moAngryDie, ZERO, RESERVED, moAnimatedDie, 
+  "You have made a die unhappy. Taste the revenge! This one won't forgive you, no matter what you do."
   )
 
 //shmupspecials

@@ -391,7 +391,7 @@ EX void pushThumper(const movei& mi) {
         addMessage(XLAT("The die is now happy, and you are rewarded!"));
         }
       else {
-        addMessage(XLAT("The die is now happy, but won't reward you outside of the Land of Dice!"));
+        addMessage(XLAT("The die is now happy, but won't reward you outside of the Dice Reserve!"));
         }
       }          
     if(w == waHappyDie && dice::data[cto].happy() <= 0) {

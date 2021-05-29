@@ -415,7 +415,7 @@ EX void switch_casual() {
   else
     casual = !casual;
   if(casual) {
-    addMessage(XLAT("You are in the Casual mode! Achievements are disabled.")); 
+    addMessage(XLAT("You are in the casual mode! Achievements are disabled.")); 
     addMessage(XLAT("Collect an Orb of Safety to save a checkpoint."));
     }
   popScreenAll();
