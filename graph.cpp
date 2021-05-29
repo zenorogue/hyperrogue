@@ -3390,6 +3390,7 @@ EX void init_floorcolors() {
   floorcolors[laClearing] = 0x60E080;
   floorcolors[laHaunted] = 0x609F60;
   floorcolors[laCursed] = 0x481848;
+  floorcolors[laDice] = 0xC0C0FF;
 
   floorcolors[laMirror] = floorcolors[laMirrorWall] = floorcolors[laMirrorOld] = 0x808080;  
   }
