@@ -973,13 +973,6 @@ EX namespace dice {
   
   EX map<cell*, die_data> data;
         
-  EX void generate_random(cell *c) {
-    auto& dd = data[c];
-    dd.which = pick(&d4, &d8, &d20);
-    dd.val = hrand(dd.which->faces);
-    dd.dir = 1 + hrand(3) * 2;
-    }
-
   EX void generate_specific(cell *c, die_structure *ds, int min_hardness, int max_hardness) {
     auto& dd = data[c];
     dd.which = ds;
@@ -988,7 +981,10 @@ EX namespace dice {
     for(int i=0; i<c->type; i++) 
     for(int j=0; j<c->type; j++) if(can_roll(ds->facesides, i, movei(c, j)))
       dirs.push_back(i);
-    dd.dir = hrand_elt(dirs);
+    if(dirs.empty())
+      dd.dir = hrand(c->type);
+    else
+      dd.dir = hrand_elt(dirs);
     vector<int> sides;
     for(int i=0; i<ds->faces; i++) 
       if(ds->hardness[i] >= min_hardness && ds->hardness[i] <= max_hardness)
@@ -997,13 +993,12 @@ EX namespace dice {
     }
   
   EX int die_possible(cell *c) {
-    if(c->type == 6)
-      return 3;
-    if(c->type == 4 || c->type == 8)
-      return 4;
-    if(c->type == 5)
-      return 5;
-    return 0;
+    vector<int> res;
+    for(int i: {3, 4, 5})
+      if((c->type % i) == 0)
+        res.push_back(i);
+    if(res.empty()) return 0;
+    return hrand_elt(res);
     }
 
   EX bool can_roll(int sides, int cur, movei mi) {
@@ -1024,16 +1019,24 @@ EX namespace dice {
     int pct = hrand(100);
     int pct2 = hrand(6000);
     if(dp == 4) {
-      if(pct < 10) {
-        c->wall = waRichDie;
+      if(pct < 20) {
+        c->wall = (pct < (items[itOrbLuck] ? 9 : 11)) ? waRichDie : waHappyDie;
         generate_specific(c, &d6, 1, 2);
+        }
+      if(pct2 < 40 + hard) {
+        c->monst = moAnimatedDie;
+        generate_specific(c, &d6, 0, 99);
         }
       return;
       }
     if(dp == 5) {
-      if(pct < 10) {
-        c->wall = waRichDie;
+      if(pct < 20) {
+        c->wall = (pct < (items[itOrbLuck] ? 9 : 11)) ? waRichDie : waHappyDie;
         generate_specific(c, &d12, 2, 3);
+        }
+      if(pct2 < 40 + hard) {
+        c->monst = moAnimatedDie;
+        generate_specific(c, &d12, 0, 99);
         }
       return;
       }
@@ -1211,10 +1214,11 @@ EX namespace dice {
     
     add_to_queue(S, val);
 
-    ld dieradius = scale / 2;
+    ld dieradius = cgi.scalefactor * scale / 2;
     
     if(dw->faces == 20) dieradius /= 1.3;
     if(dw->faces == 8) dieradius /= 1.15;
+    if(dw->faces == 12) dieradius /= 1.15;
     
     ld base_to_base;
     
