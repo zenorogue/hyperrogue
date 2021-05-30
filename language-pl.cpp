@@ -735,7 +735,7 @@ S("This being radiates an aura of wisdom. "
  "It is made of a beautiful crystal, you would love to take it home. "
  "But how is it going to defend itself? Better not to think of it, "
  "thinking causes your brain to go hot...\n\n"
- "Crystal Sages melt at -30 °C, and they can rise the temperature around you from afar.",
+ "Crystal Sages melt at -30 °C, and they can raise the temperature around you from afar.",
  "Ta istota promieniuje mądrością. Jest zrobiona z pięknego kryształu, na pewno "
  "bardzo cennego. Ciekawe, jak zamierza się przed Tobą bronić? Lepiej o tym nie myśleć, "
  "myślenie za bardzo Cię rozgrzewa...\n\n"
