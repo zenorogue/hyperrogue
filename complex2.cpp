@@ -1226,12 +1226,23 @@ EX namespace dice {
     
     ld base_to_base;
     
+    bool osphere = sphere && GDIM == 2;
+    bool oeuclid = euclid && GDIM == 2;
+    eGeometry highdim = 
+      (GDIM == 3) ? geometry :
+      hyperbolic ? gSpace534 : gCubeTiling;
+    
     if(1) {
-      dynamicval<eGeometry> g(geometry, gSpace534);
+      dynamicval<eGeometry> g(geometry, highdim);
       hyperpoint h = cspin(2, 0, M_PI-outradius) * zpush0(-dieradius);
-      base_to_base = binsearch(-5, 5, [h] (ld d) {
-        return (zpush(d) * h)[2] >= sin_auto(vid.depth);
-        });
+      if(osphere || oeuclid)
+        base_to_base = -h[2];
+      else {
+        ld lim = sphere ? 1 : 5;
+        base_to_base = binsearch(-lim, lim, [h, osphere] (ld d) {
+          return (zpush(d) * h)[2] >= sin_auto(vid.depth);
+          });
+        }
       }
     
     vector<pair<ld, int> > ordering;
@@ -1242,12 +1253,12 @@ EX namespace dice {
       int ws = facequeue[i].second;
       
       for(int d=0; d<si; d++) {
-        dynamicval<eGeometry> g(geometry, gSpace534);
+        dynamicval<eGeometry> g(geometry, highdim);
         add_to_queue(T * cspin(0, 1, 2*M_PI*d/si) * cspin(2, 0, inradius) * cspin(0, 1, M_PI-2*M_PI*dw->spins[ws][d]/si), dw->sides[ws][d]);
         }
       
       if(1) {
-        dynamicval<eGeometry> g(geometry, gSpace534);
+        dynamicval<eGeometry> g(geometry, highdim);
         hyperpoint h = zpush(base_to_base) * T * zpush0(dieradius);
         ld z = fpp ? hdist0(h) : asin_auto(h[2]);
         ordering.emplace_back(-z, i);
@@ -1266,8 +1277,13 @@ EX namespace dice {
       
       auto sphere_to_space = [&] (hyperpoint h) {
         if(fpp) return h;
+        if(osphere) {
+          h[2] = 1 - h[2]; h[3] = 0;
+          return h;
+          }
+        if(oeuclid) { h[2] = 1-h[2]; return h; }
         ld z = asin_auto(h[2]);
-        h /= cos_auto(z);
+        h = zpush(-z) * h;
         h[2] = h[3]; h[3] = 0;
         dynamicval<eGeometry> g(geometry, orig);
         return zshift(h, geom3::scale_at_lev(z));
@@ -1276,7 +1292,7 @@ EX namespace dice {
       for(int d=0; d<=si; d++) {
         hyperpoint h, hs;
         if(1) {
-          dynamicval<eGeometry> g(geometry, gSpace534);
+          dynamicval<eGeometry> g(geometry, highdim);
           h = zpush(base_to_base) * T * cspin(0, 1, 2*M_PI*(d+.5)/si) * cspin(2, 0, outradius) * zpush0(dieradius);
           if(d < si) face[d] = h;
           hs = sphere_to_space(h);
@@ -1286,21 +1302,21 @@ EX namespace dice {
       
       hyperpoint ctr, cx, cy;
       if(dw->facesides == 3) {
-        dynamicval<eGeometry> g(geometry, gSpace534);
+        dynamicval<eGeometry> g(geometry, highdim);
         ctr = (face[0] + face[1] + face[2]) / 3;
         ctr = ctr * 1.01 - dctr * 0.01;
         cx = face[2] - face[0];
         cy = face[1] - (face[0] + face[2]) / 2;
         }
       if(dw->facesides == 4) {
-        dynamicval<eGeometry> g(geometry, gSpace534);
+        dynamicval<eGeometry> g(geometry, highdim);
         ctr = (face[0] + face[1] + face[2] + face[3]) / 4;
         ctr = ctr * 1.01 - dctr * 0.01;
         cx = face[1] - face[2];
         cy = face[0] - face[1];
         }
       if(dw->facesides == 5) {
-        dynamicval<eGeometry> g(geometry, gSpace534);
+        dynamicval<eGeometry> g(geometry, highdim);
         ctr = (face[0] + face[1] + face[2] + face[3] + face[4]) / 5;
         ctr = ctr * 1.01 - dctr * 0.01;
         cx = (face[2] - face[0]) * .75;
@@ -1312,7 +1328,7 @@ EX namespace dice {
       #if !CAP_EXTFONT
       pointfunction pf = [&] (ld x, ld y) {
         hyperpoint hs;
-        dynamicval<eGeometry> g(geometry, gSpace534);
+        dynamicval<eGeometry> g(geometry, highdim);
         return sphere_to_space(normalize(ctr + cx * x + cy * y));
         };
       
@@ -1322,7 +1338,7 @@ EX namespace dice {
           int j1 = (j+1)%3;
           int j2 = (j+2)%3;
           if(1) {
-            dynamicval<eGeometry> g(geometry, gSpace534);
+            dynamicval<eGeometry> g(geometry, highdim);
             ctr = (face[0] + face[1] + face[2] + face[j1] * 3) / 6;
             ctr = ctr * 1.01 - dctr * 0.01;
             cx = (face[j2] - face[j]) / 2;
