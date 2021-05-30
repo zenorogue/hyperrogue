@@ -438,8 +438,17 @@ EX namespace ss {
 
     dialog::init(XLAT("slides"), forecolor, 150, 100);
     
+    string cftrans, cftransbuild;
+    for(char c: current_folder)
+      if(c == '/') {
+        cftrans += XLAT(cftransbuild);
+        cftrans += "/";
+        cftransbuild = "";
+        }
+      else cftransbuild += c;    
+    
     if(current_folder != "") {
-      dialog::addTitle(current_folder, 0xFFFFFFFF, 120);
+      dialog::addTitle(cftrans, 0xFFFFFFFF, 120);
       dialog::addItem(XLAT("go up"), 'u');
       dialog::add_action([] { current_folder = parent_folder(current_folder); });
       dialog::addBreak(100);
@@ -462,7 +471,7 @@ EX namespace ss {
         }
       else sfd = XLAT(sf);
 
-      dialog::addBoolItem(XLAT(sf), wts == slides && in_folder(slides[currentslide].name, current_folder+sf), slidechars[key++]);
+      dialog::addBoolItem(sfd, wts == slides && in_folder(slides[currentslide].name, current_folder+sf), slidechars[key++]);
       dialog::add_action([i, sf] {
         if(sf.back() == '/') {
           current_folder += sf;
@@ -542,10 +551,10 @@ EX void start() {
     }
   }
 
-string bog = "Basics of Gameplay/";
-string shapes = "Hyperbolic Shapes/";
-string models = "Projections of Hyperbolic Space/";
-string pcg = "Procedural Generation/";
+string bog = "Basics of gameplay/";
+string shapes = "Hyperbolic shapes/";
+string models = "Projections of hyperbolic space/";
+string pcg = "Procedural generation/";
 
 /** \brief the default presentation (the Guided Tour) */
 EX slide default_slides[] = {
