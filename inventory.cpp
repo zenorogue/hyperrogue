@@ -409,7 +409,7 @@ EX namespace inv {
     }
   
   map<char, eItem> orbmap;
-  string orbkeys = "zfwplSetsTaMIYgCcPOWAFydLGRUkouE.,bVNxDjJZnrvhBm!23456789@#$%";
+  string orbkeys = "zfwplSetsTaMIYgCcPOWAFydLGRUkouE.,bVNxDjJZnrvhBm!23456789@#$%()";
   
   typedef pair<int, int> pxy;
   vector<pxy> orbcoord;
@@ -496,7 +496,7 @@ EX namespace inv {
     cmode = sm::CENTER;
 
     orbcoord.clear();
-    for(int y=-3; y<=3; y++) for(int x=-5; x<=5; x++) if(x+y<=5 && x+y >= -5 && (x||y))
+    for(int y=-3; y<=3; y++) for(int x=-5; x<=5; x++) if(x+y<=6 && x+y >= -6 && (x||y))
       orbcoord.emplace_back(x,y);
     sort(orbcoord.begin(), orbcoord.end(), [](pxy p1, pxy p2) {
       return sq(p1) < sq(p2); });
@@ -517,7 +517,7 @@ EX namespace inv {
 
     for(int i=0; i<ittypes; i++) {
       eItem o = eItem(i);
-      if(itemclass(o) == IC_ORB) {
+      if(itemclass(o) == IC_ORB && !(classflag(o) & IF_CURSE)) {
         char c = orbkeys[j++];
         if(c == 0) println(hlog, "missing char for ", dnameof(o));
         if(remaining[i] || usedup[i]) {
@@ -525,6 +525,10 @@ EX namespace inv {
           if(plain) 
             dialog::addSelItem(XLAT1(iinf[o].name), its(remaining[i]), c);
           else {
+            if(oc >= isize(orbcoord)) {
+              println(hlog, "error: oc=", oc, " with only ", isize(orbcoord), " positions");
+              continue;
+              }
             auto pos = orbcoord[oc++];
             ld px = current_display->xcenter + 2*rad*pos.first + rad*pos.second;
             ld py = current_display->ycenter + pos.second * rad3;
