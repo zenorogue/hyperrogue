@@ -196,7 +196,7 @@ void monster::rebasePat(const shiftmatrix& new_pat, cell *c2) {
     fix_to_2(at);
     pat = shiftless(at);
     if(multi::players == 1 && this == shmup::pc[0])
-      current_display->which_copy = unshift(ggmatrix(base));
+      current_display->which_copy = back_to_view(ggmatrix(base));
     return;
     }
   if(quotient || fake::split()) {

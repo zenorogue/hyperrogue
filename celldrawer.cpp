@@ -1894,8 +1894,9 @@ void celldrawer::bookkeeping() {
     else {
       playerV = V * ddspin(c, cwt.spin, 0);
       if(cwt.mirrored) playerV = playerV * Mirror;
-      if((!confusingGeometry() && !fake::split() && !inmirrorcount) || eqmatrix(unshift(V), current_display->which_copy, 1e-2))
-        current_display->which_copy = unshift(V);
+      transmatrix F = back_to_view(V);
+      if((!confusingGeometry() && !fake::split() && !inmirrorcount) || eqmatrix(F, current_display->which_copy, 1e-2))
+        current_display->which_copy = F;
       if(orig) cwtV = playerV;
       }
     }

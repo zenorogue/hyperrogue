@@ -1868,8 +1868,29 @@ EX void spinEdge(ld aspd) {
   rotate_view(spin(downspin));
   }
 
-EX void centerpc(ld aspd) { 
-  
+/** \brief convert a shiftmatrix to the coordinate system of View 
+ *  usually used to set which_copy
+ */
+EX transmatrix back_to_view(const shiftmatrix& V) {
+  // ortho_inverse does not work in 2.5D, iso_inverse does not work in Nil. 
+  // just use inverse
+  return inverse(actual_view_transform) * unshift(V);
+  }
+
+EX void fix_whichcopy(cell *c) {
+  if(!gmatrix.count(cwt.at)) return;
+  current_display->which_copy = back_to_view(gmatrix[c]);
+  }    
+
+void fix_whichcopy_if_near() {
+  if(!gmatrix.count(cwt.at)) return;
+  transmatrix T = back_to_view(gmatrix[cwt.at]);
+  if(!eqmatrix(T, current_display->which_copy)) return;
+  current_display->which_copy = T;
+  }
+
+EX void centerpc(ld aspd) {
+
   if(subscreens::split([=] () {centerpc(aspd);})) return;
   if(dual::split([=] () { centerpc(aspd); })) return;
 
@@ -1928,9 +1949,8 @@ EX void centerpc(ld aspd) {
     if(sl || vid.eye) T = T * zpush(cgi.SLEV[sl] - cgi.FLOOR + vid.eye);
     }
   #endif
-  // ortho_inverse does not work in 2.5D, iso_inverse does not work in Nil. 
-  // just use inverse
-  hyperpoint H = inverse(actual_view_transform) * tC0(T);
+  
+  hyperpoint H = tC0(T);
   ld R = (zero_d(GDIM, H) && !prod) ? 0 : hdist0(H);
   if(R < 1e-9) {
     // either already centered or direction unknown
@@ -1939,16 +1959,14 @@ EX void centerpc(ld aspd) {
       } */
     spinEdge(aspd);
     fixmatrix(View);
-    if(gmatrix.count(cwt.at))
-      current_display->which_copy = unshift(gmatrix[cwt.at]);
+    fix_whichcopy(cwt.at);
+    fixmatrix(current_display->which_copy);
     }
   
   else {
     aspd *= euclid ? (2+3*R*R) : (1+R+(shmup::on?1:0));
 
-    if(R < aspd && gmatrix.count(cwt.at) && eqmatrix(unshift(gmatrix[cwt.at]), current_display->which_copy)) {
-      current_display->which_copy = unshift(gmatrix[cwt.at]);
-      }
+    if(R < aspd) fix_whichcopy_if_near();
     
     if(R < aspd) 
       shift_view_to(shiftless(H));
