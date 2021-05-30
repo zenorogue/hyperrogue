@@ -19,7 +19,7 @@ EX bool needConfirmationEvenIfSaved() {
 
 EX bool needConfirmation() {
   if(casual) return needConfirmationEvenIfSaved() && turncount > save_turns + 10;
-  else return needConfirmationEvenIfSaved() && quitsaves();
+  else return needConfirmationEvenIfSaved() && !quitsaves();
   }
 
 EX int getgametime() {
