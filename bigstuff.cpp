@@ -1436,7 +1436,9 @@ EX bool extend_alt(cell *c, eLand horoland, eLand overland, bool extend_in_singl
   }
 
 EX bool can_start_horo(cell *c) {
-  return ctof(c) && !have_alt(c) && horo_ok() && !randomPatternsMode && !racing::on && !yendor::on;
+  if(yendor::on && !among(c->land, laCaribbean, laStorms))
+    return false;
+  return ctof(c) && !have_alt(c) && horo_ok() && !randomPatternsMode && !racing::on;
   }
 
 EX bool gp_wall_test() {
