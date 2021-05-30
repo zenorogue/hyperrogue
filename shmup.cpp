@@ -2457,6 +2457,14 @@ void moveMonster(monster *m, int delta) {
       additional.push_back(bullet);
       break;
       }
+    for(int i=0; i<players; i++) if(!pc[i]->isVirtual)
+    if(m->type == moHexer && m->base->item && (classflag(m->base->item) & IF_CURSE) && sqdist(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
+      addMessage(XLAT("%The1 curses you with %the2!", m->type, m->base->item));
+      items[m->base->item] += orbcharges(m->base->item);
+      m->base->item = itNone;
+      m->stunoff = curtime + 250;
+      break;
+      }
     }
   }
 
