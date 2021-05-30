@@ -1156,6 +1156,7 @@ void celldrawer::set_land_floor(const shiftmatrix& Vf) {
     case laCaves:
     case laLivefjord:
     case laDeadCaves:
+    case laCursed:
       set_floor(cgi.shCaveFloor);
       break;
     
