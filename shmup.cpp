@@ -951,6 +951,7 @@ void movePlayer(monster *m, int delta) {
     }
   
   if(playergo[cpid] && markOrb(itOrbDash)) playergo[cpid] *= 1.5;
+  if(playergo[cpid] && markOrb(itCurseFatigue)) playergo[cpid] *= 0.75;
 
   bool go = false; 
   
@@ -1176,12 +1177,19 @@ void movePlayer(monster *m, int delta) {
       }
 
     if(c2 != m->base) {
+      doPickupItemsWithMagnetism(c2);
+
       if(cellUnstable(m->base) && !markOrb(itOrbAether))
         doesFallSound(m->base);
     
       if(items[itOrbFire]) {
         visibleFor(800);
         if(makeflame(m->base, 10, false)) markOrb(itOrbFire);
+        }
+
+      if(items[itCurseWater]) {
+        visibleFor(800);
+        if(makeshallow(m->base, 10, false)) markOrb(itCurseWater);
         }
 
       if(isIcyLand(m->base) && m->base->wall == waNone && markOrb(itOrbWinter)) {
@@ -1688,10 +1696,12 @@ void moveBullet(monster *m, int delta) {
   eMonster ptype = parentOrSelf(m)->type;
   bool slayer = m->type == moCrushball ||
     (markOrb(itOrbSlaying) && (markOrb(itOrbEmpathy) ? isPlayerOrImage(ptype) : ptype == moPlayer));
-    
+  bool weak = m->type == moAirball || 
+    (markOrb(itCurseWeakness) && (markOrb(itOrbEmpathy) ? isPlayerOrImage(ptype) : ptype == moPlayer));
+      
   if(m->type != moTongue && !(godragon || (c2==m->base && m->type == moArrowTrap) || passable(c2, m->base, P_BULLET | P_MIRRORWALL))) {
     m->dead = true;
-    if(m->type != moAirball && (!isDie(c2->monst) || slayer))
+    if(!weak && (!isDie(c2->monst) || slayer))
       killMonster(c2, m->get_parenttype());
     // cell *c = m->base;
     if(m->parent && isPlayer(m->parent)) {
@@ -1744,7 +1754,7 @@ void moveBullet(monster *m, int delta) {
 
       if(m2->type == passive_switch) { m->dead = true; continue; }
       
-      if(m->type == moAirball && isBlowableMonster(m2->type)) {
+      if(weak && isBlowableMonster(m2->type)) {
 
         if(m2->blowoff < curtime) {
           hyperpoint h = inverse_shift(m2->pat, nat0 * C0);
