@@ -546,7 +546,7 @@ EX void moverefresh(bool turn IS(true)) {
       }
     
     if(c->stuntime && !isMutantIvy(c)) {
-      c->stuntime--;
+      if(turn) c->stuntime--;
       int breathrange = sphere ? 2 : 3;
       if(c->stuntime == 0 && c->monst == moDragonHead)  {
         // if moDragonHead is renamed to "Dragon Head", we might need to change this
