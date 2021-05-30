@@ -1685,9 +1685,13 @@ void moveBullet(monster *m, int delta) {
   
   bool godragon = m->type == moFireball && isDragon(c2->monst);
   
+  eMonster ptype = parentOrSelf(m)->type;
+  bool slayer = m->type == moCrushball ||
+    (markOrb(itOrbSlaying) && (markOrb(itOrbEmpathy) ? isPlayerOrImage(ptype) : ptype == moPlayer));
+    
   if(m->type != moTongue && !(godragon || (c2==m->base && m->type == moArrowTrap) || passable(c2, m->base, P_BULLET | P_MIRRORWALL))) {
     m->dead = true;
-    if(m->type != moAirball)
+    if(m->type != moAirball && (!isDie(c2->monst) || slayer))
       killMonster(c2, m->get_parenttype());
     // cell *c = m->base;
     if(m->parent && isPlayer(m->parent)) {
@@ -1725,10 +1729,6 @@ void moveBullet(monster *m, int delta) {
     
     if(m2->dead) continue;
 
-    eMonster ptype = parentOrSelf(m)->type;
-    bool slayer = m->type == moCrushball ||
-      (markOrb(itOrbSlaying) && (markOrb(itOrbEmpathy) ? isPlayerOrImage(ptype) : ptype == moPlayer));
-    
     // Flailers only killable by themselves
     if(m2->type == moFlailer && m2 != m->parent) continue;
     // be nice to your images! would be too hard otherwise...
