@@ -318,6 +318,8 @@ EX void moveMonster(const movei& mi) {
   else if(inc == -3 && !survivesFall(ct->monst) && !passable(cf, ct, P_MONSTER)) {
     addMessage(XLAT("%The1 falls!", ct->monst));
     fallMonster(ct, AF_FALL);
+    if(isBull(m) && cf->wall == waRed3)
+      ct->wall = waRed1;
     }
   if(isThorny(ct->wall) && !survivesThorns(ct->monst)) {
     addMessage(XLAT("%The1 is killed by thorns!", ct->monst));
@@ -2159,6 +2161,12 @@ EX void beastcrash(cell *c, cell *beast) {
   else if(c->wall == waExplosiveBarrel) {
     addMessage(XLAT("%The1 crashes into %the2!", beast->monst, c->wall));
     explodeBarrel(c);
+    }
+  else if(realred(c)) {
+    addMessage(XLAT("%The1 crashes into %the2!", beast->monst, c->wall));
+    if(c->wall == waRed1) c->wall = waNone;
+    else if(c->wall == waRed2) c->wall = waRed1;
+    else if(c->wall == waRed3) c->wall = waRed2;
     }
   else if(isBull(c->monst) || isSwitch(c->monst)) {
     addMessage(XLAT("%The1 crashes into %the2!", beast->monst, c->monst));
