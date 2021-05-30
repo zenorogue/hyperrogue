@@ -1118,6 +1118,10 @@ EX namespace dice {
     dd.dir = dir1;
     return dd;
     }
+  
+  EX bool on(cell *c) {
+    return among(c->wall, waRichDie, waHappyDie) || among(c->monst, moAnimatedDie, moAngryDie);
+    }
       
   EX void roll(movei mi) {
     auto &cto = mi.t;

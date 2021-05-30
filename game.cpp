@@ -413,7 +413,7 @@ EX void pushThumper(const movei& mi) {
 EX bool canPushThumperOn(movei mi, cell *player) {
   cell *thumper = mi.s;
   cell *tgt = mi.t;
-  if(among(thumper->wall, waRichDie, waHappyDie) && !dice::can_roll(mi))
+  if(dice::on(thumper) && !dice::can_roll(mi))
     return false;
   if(tgt->wall == waBoat || tgt->wall == waStrandedBoat) return false;  
   if(isReptile(tgt->wall)) return false;
