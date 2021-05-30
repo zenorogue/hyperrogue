@@ -384,4 +384,12 @@ EX bool is_paired(eMonster m) {
   return among(m, moPair, moNorthPole, moSouthPole);
   }
 
+EX bool isDie(eMonster m) {
+  return among(m, moAnimatedDie, moAngryDie);
+  }
+
+EX bool isDie(eWall w) {
+  return among(w, waRichDie, waHappyDie);
+  }
+
 }
