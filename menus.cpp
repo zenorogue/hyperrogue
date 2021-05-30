@@ -1136,7 +1136,7 @@ EX named_functionality get_o_key() {
   vector<named_functionality> res;
   callhooks(hooks_o_key, res);
 
-  if(in_full_game())
+  if(in_full_game() && !yendor::on)
     res.push_back(named_dialog(XLAT("world overview"), showOverview));
   
 #if CAP_DAILY
