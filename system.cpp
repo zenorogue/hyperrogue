@@ -203,6 +203,7 @@ EX void initgame() {
 
   clearing::direct = 0;
   clearing::imputed = 0;
+  rosephase = 0;
 
   if(firstland == laElementalWall) cwt.at->land = randomElementalLand();
   
