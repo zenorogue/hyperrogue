@@ -1601,7 +1601,7 @@ void celldrawer::draw_features() {
         poly_outline = OUTLINE_DEFAULT;
         }
 
-      else if(among(c->wall, waRichDie, waHappyDie)) {
+      else if(isDie(c->wall)) {
         color_t col = darkena(winf[c->wall].color, 0, 0xFF);
         
         ld footphase;

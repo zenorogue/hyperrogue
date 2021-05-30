@@ -379,7 +379,7 @@ EX void pushThumper(const movei& mi) {
     cto->wall = waCrateOnTarget;
     th->wall = waCrateTarget;
     }
-  else if(among(w, waRichDie, waHappyDie)) {
+  else if(isDie(w)) {
     th->wall = waNone;
     cto->wall = w;    
     dice::roll(mi);

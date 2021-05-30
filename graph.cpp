@@ -2886,7 +2886,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
   // golems, knights, and hyperbugs don't face the player (mondir-controlled)
   // also whatever in the lineview mode, and whatever in the quotient geometry
 
-  else if(among(c->monst, moAnimatedDie, moAngryDie)) {
+  else if(isDie(c->monst)) {
     transmatrix U = inverse_shift(Vparam, Vs);
     U = rgpushxto0(tC0(U));
     die_target = Vparam;

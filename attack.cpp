@@ -105,7 +105,7 @@ EX bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) 
   
   if(m1 == moArrowTrap && arrow_stuns(m2)) return true;
   
-  if(among(m2, moAnimatedDie, moAngryDie) && !(flags & (AF_MAGIC | AF_CRUSH))) return false;
+  if(isDie(m2) && !(flags & (AF_MAGIC | AF_CRUSH))) return false;
   
   if(among(m2, moAltDemon, moHexDemon, moPair, moCrusher, moNorthPole, moSouthPole, moMonk) && !(flags & (AF_EAT | AF_MAGIC | AF_BULL | AF_CRUSH)))
     return false;

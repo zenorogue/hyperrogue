@@ -1120,7 +1120,7 @@ EX namespace dice {
     }
   
   EX bool on(cell *c) {
-    return among(c->wall, waRichDie, waHappyDie) || among(c->monst, moAnimatedDie, moAngryDie);
+    return isDie(c->wall) || isDie(c->monst);
     }
       
   EX void roll(movei mi) {

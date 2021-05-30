@@ -544,7 +544,7 @@ EX bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
     if(extra & P_ONPLAYER) {
       if(isPlayerOn(w)) return true;
       }
-    if(from && among(from->monst, moAnimatedDie, moAngryDie)) {
+    if(from && isDie(from->monst)) {
       bool ok = false;
       for(int i=0; i<from->type; i++) {
         if(from->move(i) != w) continue;

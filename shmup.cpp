@@ -2462,7 +2462,7 @@ void activateMonstersAt(cell *c) {
     }
   if(c->monst && isMimic(c->monst)) c->monst = moNone;
   // mimics are awakened by awakenMimics
-  if(c->monst && !isIvy(c) && !isWorm(c) && !isMutantIvy(c) && !isKraken(c->monst) && c->monst != moPrincess && c->monst != moHunterGuard && !among(c->monst, moAnimatedDie, moAngryDie)) {
+  if(c->monst && !isIvy(c) && !isWorm(c) && !isMutantIvy(c) && !isKraken(c->monst) && c->monst != moPrincess && c->monst != moHunterGuard && !isDie(c->monst)) {
     // awaken as a monster
     monster *enemy = new monster;
     enemy->at = Id;
