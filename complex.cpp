@@ -3272,6 +3272,11 @@ EX namespace prairie {
       if(!shmup::on) for(int q=qty-2; q>=0; q--) {
         cell *cp = whirlline[q];
         cell *cn = whirlline[q+1];
+        /* just pretend the roadblocks disappear */
+        if(cn->monst == moRagingBull && cn->cpdist == INFD && cn->stuntime) {
+          cn->stuntime--;
+          if(cn->stuntime == 0) cn->monst = moNone;
+          }
         if(cp->monst == moHerdBull && !cp->stuntime) {
           cp->mondir = neighborId(cp, cn);
           beastAttack(cp, true, true);
