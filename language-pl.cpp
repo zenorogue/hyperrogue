@@ -9391,3 +9391,8 @@ S("Reverses all the curses. When found far away from the Cursed Canyon, you gain
   "Odwraca efekty wszystkich klątw. W przypadku znaleziona daleko od Przeklętego Kanionu zdobywasz małe ilości odwróconych mocy klątw.")
 #undef Curse
 #undef Orb
+
+// chapter names of the Guided Tour
+S("Hyperbolic shapes", "Hiperboliczne kształty")
+S("Projections of hyperbolic space", "Rzuty płaszczyzny hiperbolicznej")
+S("Procedural generation", "Proceduralna generacja")
