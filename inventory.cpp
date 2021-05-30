@@ -613,7 +613,7 @@ EX namespace inv {
   
         }
       }
-    dialog::displayPageButtons(3, 0);
+    dialog::displayPageButtons(7, 0);
     mouseovers = "";
     keyhandler = [] (int sym, int uni) {
       if(plain) dialog::handleNavigation(sym, uni);

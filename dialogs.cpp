@@ -1011,6 +1011,8 @@ EX namespace dialog {
       getcstat = '0';
     if(i&2) if(displayfrZH(xr*72, i0, 1, vid.fsize, IFM("F1 - ") + XLAT("help"), dialogcolor, 8))
       getcstat = SDLK_F1;
+    if(i&4) if(displayfrZH(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("plain"), dialogcolor, 8))
+      getcstat = '1';
     }
   
   EX bool handlePageButtons(int uni) {
