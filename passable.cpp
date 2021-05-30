@@ -163,6 +163,7 @@ EX bool passable(cell *w, cell *from, flagtype flags) {
   if(F(P_ROSE)) {
     if(airdist(w) < 3) return false;
     if(againstWind(w,from)) return false;
+    if(isGravityLand(w)) return false;
     }
 
   if(from && strictlyAgainstGravity(w, from, vrevdir, flags)
