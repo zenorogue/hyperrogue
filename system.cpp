@@ -421,7 +421,7 @@ EX namespace scores {
 /** \brief the amount of boxes reserved for each hr::score item */
 #define MAXBOX 500
 /** \brief currently used boxes in hr::score */
-#define POSSCORE 391
+#define POSSCORE 406
 /** \brief a struct to keep local score from an earlier game */
 struct score {
   /** \brief version used */
@@ -898,6 +898,21 @@ EX void applyBoxes() {
   
   applyBoxNum(yasc_code, "YASC code");
   applyBoxBool(casual, "casual mode");
+  
+  applyBoxI(itCursed);
+  applyBoxI(itDice);
+  applyBoxOrb(itOrbPurity);
+  applyBoxOrb(itOrbWoods);
+  applyBoxM(moHexer);
+  applyBoxM(moAngryDie);
+  applyBoxM(moAnimatedDie);
+  applyBoxI(itCurseWeakness, true);
+  applyBoxI(itCurseFatigue, true);
+  applyBoxI(itCurseDraining, true);
+  applyBoxI(itCurseRepulsion, true);
+  applyBoxI(itCurseGluttony, true);
+  applyBoxI(itCurseWater, true);
+  list_invorb();
 
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   if(isize(invorb)) { println(hlog, "ERROR: Orbs not taken into account"); exit(1); }
