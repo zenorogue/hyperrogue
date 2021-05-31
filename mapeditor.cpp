@@ -672,6 +672,12 @@ EX namespace mapstream {
       if(c->monst == moTortoise)
         f.write(tortoise::emap[c] = tortoise::getb(c));
       f.write_char(c->wall);
+      if(dice::on(c)) {
+        auto& dat = dice::data[c];
+        f.write_char(dice::get_die_id(dat.which));
+        f.write_char(dat.val);
+        f.write_char(dat.dir);
+        }
       // f.write_char(c->barleft);
       // f.write_char(c->barright);
       f.write_char(c->item);
@@ -822,6 +828,12 @@ EX namespace mapstream {
       if(c->monst == moTortoise && f.vernum >= 11001)
         f.read(tortoise::emap[c]);
       c->wall = (eWall) f.read_char();
+      if(dice::on(c)) {
+        auto& dat = dice::data[c];        
+        dat.which = dice::get_by_id(f.read_char());
+        dat.val = f.read_char();
+        dat.dir = fixspin(rspin, f.read_char(), c->type, f.vernum);
+        }
       // c->barleft = (eLand) f.read_char();
       // c->barright = (eLand) f.read_char();
       c->item = (eItem) f.read_char();
@@ -1217,6 +1229,10 @@ EX namespace mapeditor {
           for(int i=0; i<100; i++) c1 = c1->cmove(hrand(c1->type));
           tortoise::emap[c] = tortoise::getRandomBits();
           }
+        
+        if(isDie(c->monst)) {
+          if(!dice::generate_random(c)) c->monst = moNone;
+          }
         break;
         }
       case 1: {
@@ -1258,6 +1274,11 @@ EX namespace mapeditor {
           c->wparam = paintstatueid;
           c->mondir = cdir;
           }
+
+        if(isDie(c->wall)) {
+          if(!dice::generate_random(c)) c->wall = waNone;
+          }
+
         break;
         }
       case 5:
@@ -1283,6 +1304,7 @@ EX namespace mapeditor {
         c->wparam = copywhat->wparam;
         c->hitpoints = copywhat->hitpoints;
         c->stuntime = copywhat->stuntime; 
+        if(dice::on(c)) dice::data[c] = dice::data[copywhat];
         if(copywhat->mondir == NODIR) c->mondir = NODIR;
         else c->mondir = gmod((where.first.mirrored == where.second.mirrored ? 1 : -1) * (copywhat->mondir - where.second.spin) + cdir, c->type);
         break;

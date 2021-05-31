@@ -955,6 +955,8 @@ EX namespace dice {
     {3,5,4,9,1}, {0,9,6,7,3}, {11,10,5,3,7}, {0,1,7,2,5}, {0,5,10,8,9}, {0,3,2,10,4},
     {11,7,1,9,8}, {11,2,3,1,6}, {11,6,9,4,10}, {0,4,8,6,1}, {11,8,4,5,2}, {8,10,2,7,6}
     });
+  
+  vector<die_structure*> die_list = {&d4, &d6, &d8, &d12, &d20};
     
   #if HDR
   struct die_data {
@@ -969,6 +971,14 @@ EX namespace dice {
     if(val == which->faces-1) return 1;
     if(val == 0) return -1;
     return 0;
+    }
+  
+  EX die_structure *get_by_id(unsigned i) { return die_list[i % isize(die_list)]; }
+  EX int get_die_id(die_structure *ds) { 
+    for(int i=0; i<isize(die_list); i++)
+      if(die_list[i] == ds)
+        return i;
+    return -1;
     }
   
   EX map<cell*, die_data> data;
@@ -1011,6 +1021,16 @@ EX namespace dice {
     auto& dd = data[mi.s];
     auto& dw = dd.which;
     return can_roll(dw->facesides, dd.dir, mi);
+    }
+
+  EX bool generate_random(cell *c) {
+    vector<die_structure*> ds;
+    for(die_structure* pds: {&d4, &d6, &d8, &d12, &d20})
+      if(c->type % pds->facesides == 0)
+        ds.push_back(pds);
+    if(ds.empty()) return false;
+    generate_specific(c, hrand_elt(ds), 0, 99);
+    return true;
     }
   
   EX void generate_full(cell *c, int hard) {  
