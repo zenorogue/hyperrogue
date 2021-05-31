@@ -8582,8 +8582,8 @@ S("Animations:", "Animacje:")
 S("a..b -- animate linearly from a to b", "a..b -- animuj liniowo od a do b")
 S("a..b..|c..d -- animate from a to b, then from c to d", "a..b..|c..d -- animuj od a do b, potem od c do d")
 S("a../x..b../y -- change smoothly, x and y are derivatives", "a../x..b../y -- gładka zmiana, x i y to pochodne")
-S("Parameter names, e.g. '%1'", "nazwy parametrów, np. '%1'")
-S("Parameter names", "nazwy parametrów")
+S("Parameter names, e.g. '%1'", "Nazwy parametrów, np. '%1'")
+S("Parameter names", "Nazwy parametrów")
 S("These can be combined, e.g. %1", "Można łączyć, np. %1")
 
 // manifolds
@@ -8641,7 +8641,7 @@ S("(this setting is for 3D geometries only, use 'model viewing' instead)",
 S("absolute unit in meters", "jednostka absolutna w metrach")
 
 S(
-  "The size of the absolute unit of the non-Euclidean geometry correspond in meters. "
+  "The size of the absolute unit of the non-Euclidean geometry in meters. "
   "This affects the headset movement and binocular vision.\n\n"
   "In spherical geometry, the absolute unit is the radius of the sphere. "
   "The smaller the absolute unit, the stronger the non-Euclidean effects.\n\n"
@@ -8707,9 +8707,9 @@ S("wait...", "czekaj...")
 S("bitruncation const", "stała przycinania")
 S("too small period -- irregular tiling generation fails", "za mały okres -- tworzenie parkietażu nieudane")
 S("To create Euclidean irregular tesselations, first enable a torus", 
-  "by stworzyć nieregularny parkietaż euklidesowy, zacznij od torusa")
+  "By stworzyć nieregularny parkietaż euklidesowy, zacznij od torusa")
 
-S("Error: period mismatch", "bład: niespójność okresu")
+S("Error: period mismatch", "Błąd: niespójność okresu")
 S("Hantzsche-Wendt space", "przestrzeń Hantzsche-Wendt")
 S("HyperRogue classic torus", "klasyczny torus HyperRogue")
 
@@ -8743,7 +8743,7 @@ S("load a saved embedding", "załaduj zanurzenie")
 S("save embedding to:", "zapisz zanurzenie do:")
 S("load embedding from:", "załaduj zanurzenie z:")
 S("Failed to save embedding to %1", "Nie udało się zapisać zanurzenia do %1")
-S("Failed to load embedding from %1", "Nie udał9o się wczytać zanurzenia z %1")
+S("Failed to load embedding from %1", "Nie udało się wczytać zanurzenia z %1")
 
 S("Failed to enable", "Nie udało się uruchomić")
 S("protractor", "kątomierz")
@@ -8788,7 +8788,7 @@ S(
           "wallif(warunek, kolor)\n"
           )
 
-S("see compute_map_function in pattern2.cpp for more\n", "obejrzyj funkcję compute_map w pattern2.cpp")
+S("see compute_map_function in pattern2.cpp for more\n", "obejrzyj funkcję compute_map_function w pattern2.cpp")
 
 S("broken Emerald Pattern", "rozbity Szmaragdowy Wzór")
 S("single cells", "pojedyncze pola")
@@ -8807,7 +8807,7 @@ S("select a puzzle", "wybierz zagadkę")
 
 // texture mode
 
-S("Failed to load %1", "nie udało się wczytać %1")
+S("Failed to load %1", "Nie udało się wczytać %1")
 S("scale/rotate the texture", "skaluj/obracaj teksturę")
 S("scale/rotate the model", "skaluj/obracaj model")
 S("Unexpected missing cell #%1/%1", "Niespodziewane brakujące pole #%1/%1")
@@ -9001,7 +9001,7 @@ S(
   "the current implementation in HyperRogue is not perfect).\n\n"
   "We won't stop you from trying illegal numbers, but they won't work correctly.", 
         
-  "Gdy rozmaitość 2D pod spodem jest domknięta, okres powinien być dzielnikiem wartości 'przestrzeń obrotów'"
+  "Gdy rozmaitość 2D pod spodem jest domknięta, okres powinien być dzielnikiem wartości 'przestrzeń obrotów' "
   "(PSL(2,R)) pomnożonej przez charakterystykę Eulera. Dla niedomkniętych rozmaitości teoretycznie każda wartość "
   "powinna działać (implementacja w HR nie jest doskonała).\n\n"
   "Możesz użyć wartości nielegalnych, ale nie będą działać prawidłowo."
@@ -9182,7 +9182,7 @@ S("c = reuse", "c = ponownie")
 S("d = delete", "d = kasuj")
 S("p = grid color", "p = kolor siatki")
 S("f = fill", "f = wypełnij")
-S("T = text", "t = tekst")
+S("T = text", "T = tekst")
 S("e = erase", "e = kasuj")
 S("z = spheres", "z = sfery")
 S("z-level", "poziom z")
@@ -9299,7 +9299,7 @@ S("Sentent dice like to be in a position such that their highest number is on to
 N("Happy Die", GEN_F, "Wesoła Kostka", "Wesołe Kostki", "Wesołą Kostkę", "Wesołą Kostką")
 
 S(
-  "A happy sentent die. Dice are happy when they are in their correct position "
+  "A happy sentient die. Dice are happy when they are in their correct position "
   "(the highest number on the top); happy dice with one roll from their best position are sometimes found too."
   "Other positions are much less convenient for them and expose their "
   "weak spots. You can roll Happy Dice, but it may become angry!",
@@ -9358,7 +9358,7 @@ S("This Curse weakens your normal attack, which will only stun monsters. For mon
   "Ta klątwa osłabia Twój zwykły atak. Będzie on jedynie ogłuszał przeciwników. Te, które i tak były jedynie ogłoszane, nie są odpychane. Nie możesz również ścinać drzew ani walczyć z Bluszczem.")
 
 Curse("Draining", "Wysysania")
-S("Drains your power of all your orbs (and curses) by 2 charges per turn.",
+S("Drains the powers of all your orbs (and curses) by 2 charges per turn.",
   "Wysysa moc Twoich wszystkich sfer (i klątw), 2 ładunki na kolejkę.")
 
 Curse("Water", "Wody")
@@ -9378,7 +9378,7 @@ S("See the Curse of Fatigue.", "Patrz Klątwa Zmęczenia.")
 S("You are too fatigued!", "Jesteś zbyt zmęczon%y0!")
 
 Curse("Repulsion", "Odpychania")
-S("If you have this Orb, all the items on adjacent cells will try to escape from you.",
+S("If you have this Curse, all the items on adjacent cells will try to escape from you.",
   "Gdy masz Klątwę Odpychania, przedmioty na sąsiednich polach próbują od Ciebie uciec.")
 
 Curse("Gluttony", "Obżarstwa")
