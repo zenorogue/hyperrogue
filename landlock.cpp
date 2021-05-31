@@ -702,6 +702,8 @@ const int landscapes_when = 177;
 
 EX const int frog_when = 205;
 
+EX const int cursed_when = 9999; /* don't do Dice and Curse for now in daily */
+
 // check if the given land should appear in lists
 EX land_validity_t& land_validity(eLand l) {
 
@@ -717,6 +719,9 @@ EX land_validity_t& land_validity(eLand l) {
     return dont_work;
   
   if(old_daily_id < frog_when && among(l, laFrog, laEclectic, laWet))
+    return not_implemented;
+
+  if(old_daily_id < cursed_when && among(l, laCursed, laDice))
     return not_implemented;
   
   if(arb::in() && among(l, laWarpCoast, laDual, laEclectic, laReptile, laKraken))
