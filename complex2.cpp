@@ -1016,6 +1016,7 @@ EX namespace dice {
   EX void generate_full(cell *c, int hard) {  
     int dp = die_possible(c);
     if(!dp) return;
+    if(safety) return;
     int pct = hrand(100);
     int pct2 = hrand(6000);
     if(dp == 4) {
