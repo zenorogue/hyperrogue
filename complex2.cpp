@@ -1225,6 +1225,8 @@ EX namespace dice {
     if(dw->faces == 8) dieradius /= 1.15;
     if(dw->faces == 12) dieradius /= 1.15;
     
+    if(hyperbolic) dieradius /= 1.3;
+    
     ld base_to_base;
     
     bool osphere = sphere && GDIM == 2;
