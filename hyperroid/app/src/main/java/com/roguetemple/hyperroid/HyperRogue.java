@@ -525,42 +525,42 @@ public class HyperRogue extends Activity implements SensorEventListener {
   if(curland == 17) id = R.raw.caves; // Dead Cave
   if(curland == 18) id = R.raw.motion; // Hive
   if(curland == 19) id = R.raw.mirror; // Land of Power
-  if(curland == 20) id = R.raw.avino-palace; // Camelot
+  if(curland == 20) id = R.raw.palace; // Camelot
   if(curland == 21) id = R.raw.rlyeh; // Temple of Cthulhu
   if(curland == 22) id = R.raw.crossroads; // Crossroads II
-  if(curland == 23) id = R.raw.avino-caribbean; // Caribbean
+  if(curland == 23) id = R.raw.caribbean; // Caribbean
   if(curland == 24) id = R.raw.desert; // Red Rock Valley
   if(curland == 25) id = R.raw.hell; // Minefield
-  if(curland == 26) id = R.raw.avino-ocean; // Ocean
+  if(curland == 26) id = R.raw.ocean; // Ocean
   if(curland == 27) id = R.raw.rlyeh; // Whirlpool
-  if(curland == 28) id = R.raw.avino-palace; // Palace
-  if(curland == 29) id = R.raw.avino-ocean; // Living Fjord
-  if(curland == 30) id = R.raw.avino-ivory; // Ivory Tower
+  if(curland == 28) id = R.raw.palace; // Palace
+  if(curland == 29) id = R.raw.ocean; // Living Fjord
+  if(curland == 30) id = R.raw.ivory; // Ivory Tower
   if(curland == 31) id = R.raw.motion; // Zebra
   if(curland == 32) id = R.raw.hell; // Plane of Fire
   if(curland == 33) id = R.raw.motion; // Plane of Air
   if(curland == 34) id = R.raw.caves; // Plane of Earth
-  if(curland == 35) id = R.raw.avino-caribbean; // Plane of Water
+  if(curland == 35) id = R.raw.caribbean; // Plane of Water
   if(curland == 36) id = R.raw.crossroads; // Crossroads III
   if(curland == 39) id = R.raw.laboratory; // Canvas
-  if(curland == 41) id = R.raw.avino-caribbean; // Wild West
+  if(curland == 41) id = R.raw.caribbean; // Wild West
   if(curland == 42) id = R.raw.laboratory; // Land of Storms
   if(curland == 43) id = R.raw.jungle; // Overgrown Woods
   if(curland == 44) id = R.raw.jungle; // Clearing
   if(curland == 45) id = R.raw.graveyard; // Haunted Woods
-  if(curland == 48) id = R.raw.avino-ivory; // Windy Plains
+  if(curland == 48) id = R.raw.ivory; // Windy Plains
   if(curland == 49) id = R.raw.hell; // Rose Garden
-  if(curland == 50) id = R.raw.avino-ocean; // Warped Coast
+  if(curland == 50) id = R.raw.ocean; // Warped Coast
   if(curland == 52) id = R.raw.crossroads; // Crossroads IV
-  if(curland == 53) id = R.raw.avino-ivory; // Yendorian Forest
+  if(curland == 53) id = R.raw.ivory; // Yendorian Forest
   if(curland == 54) id = R.raw.crossroads; // Galápagos
   if(curland == 55) id = R.raw.caves; // Dragon Chasms
-  if(curland == 56) id = R.raw.avino-ocean; // Kraken Depths
+  if(curland == 56) id = R.raw.ocean; // Kraken Depths
   if(curland == 57) id = R.raw.graveyard; // Burial Grounds
   if(curland == 58) id = R.raw.desert; // Trollheim
   if(curland == 59) id = R.raw.graveyard; // Halloween
-  if(curland == 60) id = R.raw.avino-palace; // Dungeon
-  if(curland == 61) id = R.raw.omina-mountain; // Lost Mountain
+  if(curland == 60) id = R.raw.palace; // Dungeon
+  if(curland == 61) id = R.raw.mountain; // Lost Mountain
   if(curland == 62) id = R.raw.mirror; // Reptiles
   if(curland == 63) id = R.raw.desert; // Prairie
   if(curland == 64) id = R.raw.mirror; // Bull Dash
@@ -573,22 +573,22 @@ public class HyperRogue extends Activity implements SensorEventListener {
   if(curland == 71) id = R.raw.mirror; // Mirror Land
   if(curland == 72) id = R.raw.hell; // Volcanic Wasteland
   if(curland == 73) id = R.raw.icyland; // Blizzard
-  if(curland == 74) id = R.raw.omina-hunting; // Hunting Ground
-  if(curland == 75) id = R.raw.omina-hunting; // Terracotta Army
-  if(curland == 76) id = R.raw.omina-hunting; // Terracotta Army
-  if(curland == 77) id = R.raw.avino-palace; // Crystal World
+  if(curland == 74) id = R.raw.hunting; // Hunting Ground
+  if(curland == 75) id = R.raw.hunting; // Terracotta Army
+  if(curland == 76) id = R.raw.hunting; // Terracotta Army
+  if(curland == 77) id = R.raw.palace; // Crystal World
   if(curland == 78) id = R.raw.desert; // Snake Nest
-  if(curland == 79) id = R.raw.avino-caribbean; // Docks
-  if(curland == 80) id = R.raw.omina-mountain; // Ruined City
+  if(curland == 79) id = R.raw.caribbean; // Docks
+  if(curland == 80) id = R.raw.mountain; // Ruined City
   if(curland == 81) id = R.raw.caves; // Magnetosphere
   if(curland == 82) id = R.raw.laboratory; // Jelly Kingdom
-  if(curland == 84) id = R.raw.avino-caribbean; // Brown Island
-  if(curland == 85) id = R.raw.avino-ivory; // Free Fall
-  if(curland == 86) id = R.raw.avino-palace; // Irradiated Field
+  if(curland == 84) id = R.raw.caribbean; // Brown Island
+  if(curland == 85) id = R.raw.ivory; // Free Fall
+  if(curland == 86) id = R.raw.palace; // Irradiated Field
   if(curland == 87) id = R.raw.crossroads; // Space Rocks
-  if(curland == 88) id = R.raw.omina-hunting; // Wetland
+  if(curland == 88) id = R.raw.hunting; // Wetland
   if(curland == 89) id = R.raw.laboratory; // Frog Park
-  if(curland == 90) id = R.raw.omina-mountain; // Eclectic City
+  if(curland == 90) id = R.raw.mountain; // Eclectic City
   if(curland == 91) id = R.raw.graveyard; // Cursed Canyon
   if(curland == 92) id = R.raw.laboratory; // Dice Reserve
 
