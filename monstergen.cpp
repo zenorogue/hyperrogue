@@ -617,6 +617,9 @@ EX void wandering() {
     else if(c->land == laJungle && wchance(items[itRuby], 40))
       c->monst = hrand(10) ? moMonkey : moEagle;
 
+    else if(c->land == laCursed && wchance(items[itCursed], 40))
+      c->monst = moHexer;
+
     else if(c->land == laMirrorOld && wchance(items[itShard], 15))
       c->monst = hrand(10) ? moRanger : moEagle;
 
