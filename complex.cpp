@@ -2108,6 +2108,7 @@ EX namespace heat {
 
         if(c->monst == moRanger) hmod += 3 * xrate;
         if(c->monst == moDesertman) hmod += 4 * xrate;
+        if(c->monst == moAngryDie) hmod += 4 * xrate;
         if(c->monst == moMonkey) hmod += xrate;
         if(c->wall == waDeadTroll) hmod -= 2 * xrate;
         if(c->wall == waDeadTroll2) hmod -= 1.5 * xrate;
@@ -2385,6 +2386,7 @@ EX void livecaves() {
         if(c2->monst == moNecromancer) hv += 10;
         if(c2->monst == moWormtail) hv++;
         if(c2->monst == moTentacletail) hv-=2;
+        if(c2->monst == moAngryDie) hv++;
         if(isIvy(c2)) hv--;
         if(isDemon(c2)) hv-=3;
         // if(c2->monst) c->tmp++;
