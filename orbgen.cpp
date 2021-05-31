@@ -305,7 +305,7 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
   if(it == itOrbSafety)
     if(l == laCaves || l == laLivefjord || l == laRedRock || l == laCocytus || l == laHell ||
       l == laDesert || l == laAlchemist || l == laDeadCaves || l == laMinefield || isHaunted(l) ||
-      l == laDragon || l == laWet) 
+      l == laDragon || l == laWet || l == laCursed)
       return olrDangerous;
     
   if(it == itOrbMatter)
@@ -345,7 +345,7 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
   if(it == itOrbWinter && l == laMinefield)
     return olrForbidden;
   
-  if(it == itOrbWinter && !among(l, laRlyeh, laTemple, laVolcano)) 
+  if(it == itOrbWinter && !among(l, laRlyeh, laTemple, laVolcano, laCursed)) 
     return olrUseless;
   
   if(it == itOrbLife && l == laMotion)
