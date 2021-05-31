@@ -4336,3 +4336,36 @@ other fixes:
 - fixed the E2xE raycaster
 - added faraway monster highlight as in @still-flow's pull request
 - fixed the Temple of Cthulhu in bin44 so that it works like in https://www.youtube.com/watch?v=625ZwpjtWZU again
+
+2021-05-31 15:54 Update 12.0:
+
+Gameplay:
+- new lands: Cursed Canyon, Dice Reserve
+- casual mode
+- fixed the Caribbean Yendor Chalenge
+- Raging Bulls generated from Herd Bulls crashing into walls offscreen no longer permanently block the way when offscreen
+- Bulls crashing into rock formations now reduce their height, and ones falling from Rock III increase the height when they fall
+- rosescent no longer spreads into gravity lands, and rosephase is now reset to 0 on safety
+- no longer push statues through halfvines
+
+UI:
+- two new music tracks by Lincoln Domina
+- PL/CZ translations updated
+- 'plain' button shown in the inventory screen
+- no more world overview in Yendor Challenge
+- newbie-friendliness: explain how to get Safety
+- land selection (PTM, land structure) is now searchable
+- YASC codes
+- corner HUD now displays the active special modes
+
+Geometries:
+- fixed weird rotation of the orthographic view in shmup
+- fixed GP on Crystal
+- improved tree rules for more honeycombs
+- improved the raytracer so that it works with many tile shapes
+
+VR: 
+- fixed ASCII orientation
+- Panini/stereo projection now works in the 'single' VR screen (didn't work correctly) but not on the eyes (did work)
+- fixed the 'thurston racing' option
+- controllers are now shown on the desktop screen
