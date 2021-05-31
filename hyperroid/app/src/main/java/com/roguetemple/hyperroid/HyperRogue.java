@@ -553,7 +553,7 @@ public class HyperRogue extends Activity implements SensorEventListener {
   if(curland == 50) id = R.raw.avino-ocean; // Warped Coast
   if(curland == 52) id = R.raw.crossroads; // Crossroads IV
   if(curland == 53) id = R.raw.avino-ivory; // Yendorian Forest
-  if(curland == 54) id = R.raw.crossroads; // Gal·pagos
+  if(curland == 54) id = R.raw.crossroads; // Gal√°pagos
   if(curland == 55) id = R.raw.caves; // Dragon Chasms
   if(curland == 56) id = R.raw.avino-ocean; // Kraken Depths
   if(curland == 57) id = R.raw.graveyard; // Burial Grounds
