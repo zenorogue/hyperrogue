@@ -38,7 +38,7 @@ EX void showOverview() {
       mouseovers += XLAT(" Hyperstone: %1/%2", its(i1), its(i2));
       }
     else
-      mouseovers += XLAT(" Hell: %1/9", its(orbsUnlocked()));
+      mouseovers += XLAT(" Hell: %1/%2", its(orbsUnlocked()), its(lands_for_hell()));
     }
   
   bool pages;

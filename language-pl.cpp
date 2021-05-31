@@ -340,7 +340,7 @@ S("Your score: %1", "Twój wynik: %1")
 S("Enemies killed: %1", "Potwory pokonane: %1")
 S("Orbs of Yendor found: %1", "Znalezione Sfery Yendoru: %1")
 S("Collect %1 $$$ to access more worlds", "Znajdź %1 $$$, by iść do nowych krain")
-S("Collect at least %1 treasures in each of 9 types to access Hell", "Znajdź po %1 skarbów w 9 typach, by się dostać do Piekła")
+S("Collect at least %1 treasures in each of 9 types to access Hell", "Znajdź po %1 skarbów w %2 typach, by się dostać do Piekła")
 S("Collect at least %1 Demon Daisies to find the Orbs of Yendor", "Znajdź %1 Czarciego Ziela, by znaleźć Sfery Yendoru")
 S("Hyperstone Quest: collect at least %3 %1 in %the2", "Misja alternatywna: znajdź co najmniej %3 skarbów %abl2")
 S("Hyperstone Quest completed!", "Misja alternatywna zakończona!")
@@ -2519,7 +2519,7 @@ S("Variants of %the1 are available in the Random Pattern Mode after "
 S(" kills: %1", " zabicia: %1")
 S(" $$$: %1", " $$$: %1")
 S(" Hyperstone: %1/%2", " Hiperkamienie: %1/%2")
-S(" Hell: %1/9", " Piekło: %1/9")
+S(" Hell: %1/%2", " Piekło: %1/%2")
 
 // improved editor
 

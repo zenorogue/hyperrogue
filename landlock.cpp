@@ -166,6 +166,10 @@ EX bool landUnlockedRPM(eLand n) {
   return false;
   }
 
+EX int lands_for_hell() {
+  return casual ? 40 : 9;
+  }
+
 EX int variant_unlock_value() {
   return inv::on ? 75 : 30;
   }

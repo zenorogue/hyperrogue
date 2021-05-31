@@ -390,7 +390,7 @@ EX void showMission() {
     else if(gold() < R60)
       dialog::addInfo(XLAT("Collect %1 $$$ to access even more lands", its(R60)));
     else if(!landUnlocked(laHell))
-      dialog::addInfo(XLAT("Collect at least %1 treasures in each of 9 types to access Hell", its(R10)));
+      dialog::addInfo(XLAT("Collect at least %1 treasures in each of %2 types to access Hell", its(R10), its(lands_for_hell())));
     else if(items[itHell] < R10)
       dialog::addInfo(XLAT("Collect at least %1 Demon Daisies to find the Orbs of Yendor", its(R10)));
     else if(isize(yendor::yi) == 0)

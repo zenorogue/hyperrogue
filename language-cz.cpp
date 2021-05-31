@@ -369,7 +369,7 @@ S("Enemies killed: %1", "Zabitých netvorů: %1")
 S("Orbs of Yendor found: %1", "Nalezených Yendorských sfér: %1")
 S("Collect %1 $$$ to access more worlds", "Další kraje zpřístupníš sesbíráním %1 $$$")
 // S("Collect %1 $$$ to access R'Lyeh and Dry Forest", "R'Lyeh a Suchý hvozd zpřístupníš sesbíráním %1 $$$")
-S("Collect at least %1 treasures in each of 9 types to access Hell", "Peklo zpřístupníš sesbíráním %1 pokladů od každého z 9 typů")
+S("Collect at least %1 treasures in each of %2 types to access Hell", "Peklo zpřístupníš sesbíráním %1 pokladů od každého z %2 typů")
 S("Collect at least %1 Demon Daisies to find the Orbs of Yendor", "Yendorské sféry zpřístupníš sesbíráním nejméně %1 Čertových kvítek")
 S("Hyperstone Quest: collect at least %3 %1 in %the2", "Hyperkamový úkol: sesbírej nejméně %3 pokladů %abl2")
 S("Hyperstone Quest completed!", "Hyperkamový úkol splněn!")
@@ -2548,7 +2548,7 @@ S("Variants of %the1 are available in the Random Pattern Mode after "
 S(" kills: %1", " zabito nepřátel: %1")
 S(" $$$: %1", " $$$: %1")
 S(" Hyperstone: %1/%2", " Hyperkamy: %1/%2")
-S(" Hell: %1/9", " Peklo: %1/9")
+S(" Hell: %1/%2", " Peklo: %1/%2")
 
 // improved editor
 // ---------------

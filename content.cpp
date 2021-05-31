@@ -1131,7 +1131,7 @@ LAND( 0xC00000, "Hell", laHell, ZERO, itHell, RESERVED,
     "A land filled with demons and molten sulphur. Abandon all hope ye who enter here!"
     )
   NATIVE((m == moLesser || m == moGreater) ? 2 : 0)
-  REQ(NUMBER(orbsUnlocked(), 9, XLAT("Finished lands required: %1 (collect %2 treasure)\n", "9", its(R10))))
+  REQ(NUMBER(orbsUnlocked(), lands_for_hell(), XLAT("Finished lands required: %1 (collect %2 treasure)\n", "9", its(R10))))
 
 LAND( 0x00FF00, "Cocytus", laCocytus, ZERO | LF_ICY, itSapphire, RESERVED,
     cocytushelp

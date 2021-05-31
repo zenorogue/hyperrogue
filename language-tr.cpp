@@ -322,7 +322,7 @@ S("Enemies killed: %1", "Öldürülen Düşmanlar: %1")
 S("Orbs of Yendor found: %1", "Bulunan Yendor Küresi sayısı: %1")
 S("Collect %1 $$$ to access more worlds", "%1 $$$ toplayarak başka dünyalara eriş")
 // S("Collect %1 $$$ to access R'Lyeh and Dry Forest", "60 $$$ toplayarak R'Lyeh ve Kara Ormana eriş.")
-S("Collect at least %1 treasures in each of 9 types to access Hell", "9 hazine çeşidinin hepsinden %1'ar tane toplayarak Cehenneme erişebilirsin.")
+S("Collect at least %1 treasures in each of 9 types to access Hell", "%2 hazine çeşidinin hepsinden %1'ar tane toplayarak Cehenneme erişebilirsin.")
 S("Collect at least %1 Demon Daisies to find the Orbs of Yendor", "%1 Şeytan Papatyası toplayarak Yendorun Kürelerini bulabilirsin.")
 S("Hyperstone Quest: collect at least %3 %1 in %the2", "Aşkıntaş Görevi: %2'de en az %3 hazine topla.")
 S("Hyperstone Quest completed!", "Aşkıntaş görevi tamamlandı.")
@@ -2401,7 +2401,7 @@ S("Variants of %the1 are available in the Random Pattern Mode after "
 S(" kills: %1", " leşler: %1")
 S(" $$$: %1", " $$$: %1")
 S(" Hyperstone: %1/%2", " Aşkıntaş: %1/%2")
-S(" Hell: %1/9", " Cehennem: %1/9")
+S(" Hell: %1/%2", " Cehennem: %1/%2")
 
 // improved editor
 // ---------------

@@ -342,7 +342,7 @@ S("Your score: %1", "Ваш счёт: %1")
 S("Enemies killed: %1", "Врагов убито: %1")
 S("Orbs of Yendor found: %1", "Собрано сфер Йендора: %1")
 S("Collect %1 $$$ to access more worlds", "Соберите %1 $$$, чтобы открыть новые земли")
-S("Collect at least %1 treasures in each of 9 types to access Hell", "Соберите хотя бы по %1 сокровищ 9 разных типов, чтобы попасть в Ад")
+S("Collect at least %1 treasures in each of 9 types to access Hell", "Соберите хотя бы по %1 сокровищ %2 разных типов, чтобы попасть в Ад")
 S("Collect at least %1 Demon Daisies to find the Orbs of Yendor", "Соберите %1 адских ромашек, чтобы найти сферу Йендора")
 S("Hyperstone Quest: collect at least %3 %1 in %the2", "Миссия Гиперкамня: соберите %3 драгоценностей в %abl2")
 S("Hyperstone Quest completed!", "Миссия Гиперкамня закончена!")
@@ -2527,7 +2527,7 @@ S("Variants of %the1 are available in the Random Pattern Mode after "
 S(" kills: %1", " убийств: %1")
 S(" $$$: %1", " $$$: %1")
 S(" Hyperstone: %1/%2", " Гиперкамней: %1/%2")
-S(" Hell: %1/9", " Ад: %1/9")
+S(" Hell: %1/%2", " Ад: %1/%2")
  
 // improved editor
 // ---------------
