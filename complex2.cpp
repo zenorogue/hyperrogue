@@ -1196,6 +1196,19 @@ EX namespace dice {
           }
         }
       }
+    #if CAP_EXTFONT
+    else if(!lmouseover_distant || !on(lmouseover_distant)) {
+      queuestr(V, .5, its(val+1), 0xFFFFFFFF);
+      auto& side = dw->sides[val];
+      for(int i=0; i<si; i++) {
+        int d = dir + c->type * i / isize(side);
+        d = gmod(d, c->type);
+        hyperpoint nxt = tC0(currentmap->adj(c, d));
+        hyperpoint mid = normalize(C0 * 1.3 + nxt * -.3);
+        queuestr(V * rgpushxto0(mid), .25, its(side[i]+1), 0xFFFFFFFF);
+        }
+      }
+    #endif
     
     shiftmatrix V1 = V * ddspin(c, dir) * spin(M_PI);
     
