@@ -9396,3 +9396,25 @@ S("Reverses all the curses. When found far away from the Cursed Canyon, you gain
 S("Hyperbolic shapes", "Hiperboliczne kształty")
 S("Projections of hyperbolic space", "Rzuty płaszczyzny hiperbolicznej")
 S("Procedural generation", "Proceduralna generacja")
+
+// newbie-friendly Safety
+
+S("Find an Orb of Safety to save your game",
+  "Znajdź Sferę Bezpieczeństwa by zapisać grę")
+
+S("how to find an Orb of Safety?", "jak znaleźć Sferę Bezpieczeństwa?")
+
+S(
+  "To save the game you need an Orb of Safety.\n\n"
+  "Orbs of Safety appear:\n\n"
+  "* in the Crossroads and the Land of Eternal Motion, after you collect %1 Phoenix Feathers in the Land of Eternal Motion.\n\n"
+  "* in the Ocean after you unlock it (%2 treasures)\n\n"
+  "* in the Prairie after you unlock it (%3 treasures)\n\n",
+  
+  "By zapisać grę potrzebujesz Sferę Bezpieczeństwa.\n\n"
+  "Możesz je znaleźć:\n\n"
+  "* na Skrzyżowaniu i w Krainie Wiecznego Ruchu, po znalezieniu %1 Piór Feniksa w Krainie Wiecznego Ruchu\n\n"
+  "* na Oceanie po jego odblokowaniu (%2 skarbów)\n\n"
+  "* na Prerii po jej odblokowaniu (%3 skarbów)\n\n"
+  )
+

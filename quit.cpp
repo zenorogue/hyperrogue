@@ -385,6 +385,9 @@ EX void showMission() {
     else if(princess::challenge) 
       dialog::addInfo(XLAT("Follow the Mouse and escape with %the1!", moPrincess));
     else if(!in_full_game()) ;
+    else if(casual && savecount == 0) {
+      dialog::addInfo(XLAT("Find an Orb of Safety to save your game"));
+      }
     else if(gold() < R30)
       dialog::addInfo(XLAT("Collect %1 $$$ to access more worlds", its(R30)));
     else if(gold() < R60)
@@ -502,8 +505,12 @@ EX void showMission() {
 #if !ISMOBILE
     dialog::addItem(quitsaves() ? XLAT("save") : XLAT("quit"), SDLK_F10);
 #endif
-    if(casual && savecount)
-      dialog::addItem(XLAT("load (%1 turns passed)", its(turncount - save_turns)), SDLK_F9);
+    if(casual || ISMOBILE) {
+      if(savecount)
+        dialog::addItem(XLAT("load (%1 turns passed)", its(turncount - save_turns)), SDLK_F9);
+      else
+        dialog::addItem(XLAT("how to find an Orb of Safety?"), SDLK_F9);
+      }
 #if CAP_ANDROIDSHARE
     dialog::addItem(XLAT("SHARE"), 's'-96);
 #endif
@@ -512,6 +519,19 @@ EX void showMission() {
   
   dialog::display();
   }
+
+EX string safety_help() {
+  return XLAT(
+    "To save the game you need an Orb of Safety.\n\n"
+    "Orbs of Safety appear:\n\n"
+    "* in the Crossroads and the Land of Eternal Motion, after you collect %1 Phoenix Feathers in the Land of Eternal Motion.\n\n"
+    "* in the Ocean after you unlock it (%2 treasures)\n\n"
+    "* in the Prairie after you unlock it (%3 treasures)\n\n",
+    its(inv::on ? 25 : 10),
+    its(R30), its(R90)
+    );
+  }
+   
 
 EX void handleKeyQuit(int sym, int uni) {
   dialog::handleNavigation(sym, uni);
@@ -526,7 +546,8 @@ EX void handleKeyQuit(int sym, int uni) {
   if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == SDLK_F10) {
     if(needConfirmation()) pushScreen([] { 
       dialog::confirm_dialog(
-        XLAT("This will exit HyperRogue without saving your current game. Are you sure?"),
+        XLAT("This will exit HyperRogue without saving your current game. Are you sure?") + "\n\n" +
+        safety_help(),
         [] { 
         quitmainloop = true; 
         });
@@ -540,10 +561,14 @@ EX void handleKeyQuit(int sym, int uni) {
   else if(uni == 'v') popScreenAll(), pushScreen(showMainMenu);
   else if(uni == 'l') popScreenAll(), pushScreen(showMessageLog), messagelogpos = isize(gamelog);
   else if(uni == 'z') hints[hinttoshow].action();
-  else if(sym == SDLK_F9 && casual && savecount) {
-    stop_game();
-    load_last_save();
-    start_game();
+  else if(sym == SDLK_F9) {
+    if(casual && savecount) {
+      stop_game();
+      load_last_save();
+      start_game();
+      }
+    else
+      gotoHelp(safety_help());
     }
   else if(sym == SDLK_F3 || (sym == ' ' || sym == SDLK_HOME)) 
     fullcenter();
