@@ -1303,7 +1303,7 @@ EX void show_vr_settings() {
   dialog::add_action([] {
     dialog::editNumber(absolute_unit_in_meters, .01, 100, 0.1, 1, XLAT("absolute unit in meters"), 
       XLAT(
-        "The size of the absolute unit of the non-Euclidean geometry correspond in meters. "
+        "The size of the absolute unit of the non-Euclidean geometry in meters. "
         "This affects the headset movement and binocular vision.\n\n"
         "In spherical geometry, the absolute unit is the radius of the sphere. "
         "The smaller the absolute unit, the stronger the non-Euclidean effects.\n\n"

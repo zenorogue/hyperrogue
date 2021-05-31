@@ -1655,7 +1655,7 @@ ITEM('c', 0x202020, "Curse of Weakness", itCurseWeakness, IC_ORB, IF_CURSE, RESE
   )
 
 ITEM('c', 0x6060FF, "Curse of Draining", itCurseDraining, IC_ORB, IF_CURSE, RESERVED, osPowerUtility, 
-  "Drains your power of all your orbs (and curses) by 2 charges per turn."
+  "Drains the powers of all your orbs (and curses) by 2 charges per turn."
   )
 
 ITEM('c', 0x000060, "Curse of Water", itCurseWater, IC_ORB, IF_CURSE, RESERVED, osTerraform, 
@@ -1711,7 +1711,7 @@ WALL('d', 0x7F6A30, "Unhappy Die", waRichDie, WF_WALL | WF_PUSHABLE, RESERVED, 0
   "It will reward you if you roll it so that the highest number is on top again!")
 
 WALL('d', 0x106040, "Happy Die", waHappyDie, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone, 
-  "A happy sentent die. Dice are happy when they are in their correct position "
+  "A happy sentient die. Dice are happy when they are in their correct position "
   "(the highest number on the top); happy dice with one roll from their best position are sometimes found too."
   "Other positions are much less convenient for them and expose their "
   "weak spots. You can roll Happy Dice, but it may become angry!"
