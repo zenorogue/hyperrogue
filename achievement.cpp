@@ -10,7 +10,7 @@
 #include "hyper.h"
 namespace hr {
 
-#define NUMLEADER 85
+#define NUMLEADER 87
 
 EX bool test_achievements = false;
 
@@ -20,7 +20,7 @@ EX const char* leadernames[NUMLEADER] = {
   "Score", "Diamonds", "Gold", "Spice", "Rubies", "Elixirs",
   "Shards100", "Totems", "Daisies", "Statues", "Feathers", "Sapphires",
   "Hyperstones", "Time to Win-71", "Turns to Win-71",
-  "Time to 10 Hyperstones-113", "Turns to 10 Hyperstones-113", "Orbs of Yendor",
+  "Time to 10 Hyperstones-120", "Turns to 10 Hyperstones-120", "Orbs of Yendor",
   "Fern Flowers", 
   "Royal Jellies", "Powerstones", "Silver", "Wine", "Emeralds", "Grimoires",
   "Holy Grails", "Red Gems", "Pirate Treasures",
@@ -79,6 +79,8 @@ EX const char* leadernames[NUMLEADER] = {
   "Gold Balls", // 82
   "Lazurite Figurines", // 83
   "Water Lilies", // 84
+  "Capon Stones", // 85
+  "Crystal Dice" // 86
   };
 
 #define LB_STATISTICS 62
@@ -295,6 +297,9 @@ EX void achievement_collection2(eItem it, int q) {
     if(it == itFrog) achievement_gain("FROG1");
     if(it == itEclectic) achievement_gain("ECLEC1");
     if(it == itWet) achievement_gain("WET1");
+
+    if(it == itCursed) achievement_gain("CURSED1");
+    if(it == itDice) achievement_gain("DICE1");
     }
 
   // 32
@@ -382,6 +387,9 @@ EX void achievement_collection2(eItem it, int q) {
     if(it == itFrog) achievement_gain("FROG2");
     if(it == itEclectic) achievement_gain("ECLEC2");
     if(it == itWet) achievement_gain("WET2");
+
+    if(it == itCursed) achievement_gain("CURSED2");
+    if(it == itDice) achievement_gain("DICE2");
     }
 
   if(q == (inv::on ? 50 : 25)) {
@@ -457,6 +465,9 @@ EX void achievement_collection2(eItem it, int q) {
     if(it == itFrog) achievement_gain("FROG3");
     if(it == itEclectic) achievement_gain("ECLEC3");
     if(it == itWet) achievement_gain("WET3");
+
+    if(it == itCursed) achievement_gain("CURSED3");
+    if(it == itDice) achievement_gain("DICE3");
     }
 
   if(q == 50 && !inv::on) {
@@ -529,6 +540,9 @@ EX void achievement_collection2(eItem it, int q) {
     if(it == itFrog) achievement_gain("FROG4");
     if(it == itEclectic) achievement_gain("ECLEC4");
     if(it == itWet) achievement_gain("WET4");
+
+    if(it == itCursed) achievement_gain("CURSED4");
+    if(it == itDice) achievement_gain("DICE4");
     }
   
   if(it == itOrbYendor) {
