@@ -1541,10 +1541,11 @@ EX void showGraphConfig() {
   gamescreen(0);
 
   dialog::init(XLAT("graphics configuration"));
-
+  
 #if !ISIOS && !ISWEB
   add_edit(vid.want_fullscreen);
   
+  #if !ISANDROID && !ISFAKEMOBILE
   if(vid.want_fullscreen) {
     add_edit(vid.change_fullscr);
     if(vid.change_fullscr)
@@ -1558,13 +1559,15 @@ EX void showGraphConfig() {
       add_edit(vid.window_rel_x), add_edit(vid.window_rel_y);
     else
       add_edit(vid.window_x), add_edit(vid.window_y);
-    }        
+    }
+  #endif
 #endif
 
   #if CAP_GLORNOT
   add_edit(vid.wantGL);  
   #endif
 
+  #if !ISIOS && !ISANDROID && !ISFAKEMOBILE
   if(!vid.usingGL) {
     dialog::addBoolItem(XLAT("anti-aliasing"), vid.want_antialias & AA_NOGL, 'O');
     dialog::add_action([] {
@@ -1589,7 +1592,9 @@ EX void showGraphConfig() {
         vid.want_antialias |= AA_LINES;
       });
     }
+  #endif
 
+  #if !ISIOS && !ISANDROID && !ISFAKEMOBILE
   if(vid.usingGL) {
     if(vrhr::active())
       dialog::addInfo(XLAT("(vsync disabled in VR)"));
@@ -1598,6 +1603,7 @@ EX void showGraphConfig() {
     }
   else
     dialog::addBreak(100);
+  #endif
 
   if(need_to_apply_screen_settings()) {
     dialog::addItem(XLAT("apply changes"), 'A');

@@ -1169,6 +1169,12 @@ EX pair<int, int> get_requested_resolution() {
 
 EX bool resizable = true;
 
+EX void setvideomode_android() {
+  vid.usingGL = vid.wantGL;
+  vid.full = vid.want_fullscreen;
+  vid.antialias = vid.want_antialias;
+  }
+
 #if CAP_SDL
 
 EX int current_window_flags = -1;
@@ -1355,7 +1361,6 @@ EX void init_graph() {
     printf("Failed to initialize video.\n");
     exit(2);
   }
-  graphics_on = true;
 
 #if ISWEB
   get_canvas_size();
@@ -1378,7 +1383,13 @@ EX void init_graph() {
   SDL_WM_SetCaption(CUSTOM_CAPTION, CUSTOM_CAPTION);
 #endif
 #endif
-  
+
+  graphics_on = true;
+
+#if ISANDROID
+  setvideomode_android();
+#endif
+
 #if CAP_SDL
   setvideomode();
   if(!s) {
