@@ -373,9 +373,11 @@ void enable_raycaster() {
       "uniform mediump mat4 uM[" + its(gms_limit) + "];\n";
     
     #ifdef GLES_ONLY
-    fsh += build_getter("mediump vec4", "uWallX", irays);
-    fsh += build_getter("mediump vec4", "uWallY", irays);
-    fsh += build_getter("mediump int", "uWallstart", deg+1);
+    if(!wall_via_texture) {
+      fsh += build_getter("mediump vec4", "uWallX", irays);
+      fsh += build_getter("mediump vec4", "uWallY", irays);
+      fsh += build_getter("mediump int", "uWallstart", deg+1);
+      }
     if(!m_via_texture)
       fsh += build_getter("mediump mat4", "uM", gms_limit);
     #endif
