@@ -742,8 +742,10 @@ EX void showChangeMode() {
   dialog::addBoolItem(XLAT("multiplayer"), multi::players > 1, 'm');
   dialog::add_action_push(multi::showConfigureMultiplayer);
 
+  #if CAP_SAVE
   dialog::addSelItem(XLAT("casual mode"), ONOFF(casual), 'C');
   dialog::add_action(switch_casual);
+  #endif
   
   if(!shmup::on) {
     dialog::addSelItem(XLAT("hardcore mode"),

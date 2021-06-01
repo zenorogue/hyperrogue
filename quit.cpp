@@ -561,6 +561,7 @@ EX void handleKeyQuit(int sym, int uni) {
   else if(uni == 'v') popScreenAll(), pushScreen(showMainMenu);
   else if(uni == 'l') popScreenAll(), pushScreen(showMessageLog), messagelogpos = isize(gamelog);
   else if(uni == 'z') hints[hinttoshow].action();
+  #if CAP_SAVE
   else if(sym == SDLK_F9) {
     if(casual && savecount) {
       stop_game();
@@ -570,6 +571,7 @@ EX void handleKeyQuit(int sym, int uni) {
     else
       gotoHelp(safety_help());
     }
+  #endif
   else if(sym == SDLK_F3 || (sym == ' ' || sym == SDLK_HOME)) 
     fullcenter();
   else if(uni == 'o') get_o_key().second();
