@@ -338,9 +338,13 @@ EX int compileShader(int type, const string& s) {
   if (logLength > 0) {
     std::vector<char> log(logLength);
     glGetShaderInfoLog(shader, logLength, &logLength, log.data());
+    string s = log.data();
     if(logLength > 0)
-      printf("compiler log (%d): '%s'\n", logLength, log.data());
-    if(debug_gl) exit(1);
+      println(hlog, "compiler log (", logLength, "): \n", s);
+    if(debug_gl) {
+      println(hlog, "failed to compile shader -- exit called");
+      exit(1);
+      }
     }
   
   glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
