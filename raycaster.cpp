@@ -164,8 +164,16 @@ struct raycaster : glhr::GLprogram {
   };
 #endif
 
+#ifdef GLES_ONLY
+bool m_via_texture = false;
+bool wall_via_texture = false;
+static const bool can_via_texture = false; /* textures are not precise enough ): */
+#else
 bool m_via_texture = true;
 bool wall_via_texture = true;
+static const bool can_via_texture = true;
+#endif
+
 
 raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     println(hlog, "assigning");
