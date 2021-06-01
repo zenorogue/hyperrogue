@@ -9680,4 +9680,22 @@ S("Hyperbolic shapes", "Hyperbolické tvary")
 S("Projections of hyperbolic space", "Projekce hyperbolického prostoru")
 S("Procedural generation", "Procedurální generace")
 
+S("Find an Orb of Safety to save your game",
+  "Pro uložení hry najdi Sféru Bezpečnosti")
+
+S("how to find an Orb of Safety?", "jak najít Sféru Bezpečnosti?")
+
+S(
+  "To save the game you need an Orb of Safety.\n\n"
+  "Orbs of Safety appear:\n\n"
+  "* in the Crossroads and the Land of Eternal Motion, after you collect %1 Phoenix Feathers in the Land of Eternal Motion\n\n"
+  "* in the Ocean after you unlock it (%2 treasures)\n\n"
+  "* in the Prairie after you unlock it (%3 treasures)\n\n",
+
+  "Pro uložení hry potřebuješ Sféru Bezpečnosti.\n\n"
+  "Sféry Bezpečnosti se objevují:\n\n"
+  "* na Křižovatce a v Kraji Věčného pohybu poté, co získáš %1 Fénixových pírek v Kraji Věčného pohybu\n\n"
+  "* v Oceánu poté, co ho odemkneš (%2 pokladů)\n\n"
+  "* na Prérii poté, co ji odemkneš (%3 pokladů)\n\n"
+  )
 
