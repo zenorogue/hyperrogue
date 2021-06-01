@@ -1131,7 +1131,7 @@ void draw_shape_for_texture(floorshape* sh) {
     queuecurve(shiftless(Id), 0x40404000 + sh->fstrength * 192/10, 0, PPR::LINE);
     }
   
-  for(int i=0; i<1000; i++) {
+  for(int i=0; i<(ISMOBILE ? 10 : 1000); i++) {
     hyperpoint h1 = hpxy(sd * (6*randd()-3), sd * (6*randd()-3));
     hyperpoint h2 = hpxy(sd * (6*randd()-3), sd * (6*randd()-3));
     ld d = hdist(h1, h2);
