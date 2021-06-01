@@ -45,6 +45,7 @@ void special_log(char c);
 #include <string>
 
 namespace hr {
+std::string get_asset(const std::string &str);
 void gdpush(int t);
 
 void shareScore(MOBPAR_FORMAL);
@@ -241,6 +242,20 @@ Java_com_roguetemple_hyperroid_HyperRogue_initGame(MOBPAR_FORMAL) {
   }
 
 JNIEnv *tw_env; jobject tw_thiz;
+
+string get_asset(const string &str) {
+  jclass cls = tw_env->GetObjectClass(tw_thiz);
+  jmethodID mid = tw_env->GetMethodID(cls, "getAsset", "(Ljava/lang/String;)[B");
+  jobject jstr = tw_env->NewStringUTF(str.c_str());
+  jbyteArray arr = (jbyteArray) tw_env->CallObjectMethod(tw_thiz, mid, jstr);
+  tw_env->DeleteLocalRef(jstr);
+  tw_env->DeleteLocalRef(cls);
+  jsize len = tw_env->GetArrayLength(arr);
+  jbyte* data = tw_env->GetByteArrayElements(arr, NULL);
+  string s((char*) & (data[0]), len);
+  tw_env->DeleteLocalRef(arr);
+  return s;
+  }
 
 int textwidth(int siz, const string &str) {
   jclass cls = tw_env->GetObjectClass(tw_thiz);

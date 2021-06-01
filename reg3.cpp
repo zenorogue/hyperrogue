@@ -941,12 +941,17 @@ EX namespace reg3 {
     vector<int> otherpos;
     
     void load_ruleset(string fname) {
+      string buf;
+      #if ISANDROID
+      buf = get_asset(fname);
+      #else
       FILE *f = fopen(fname.c_str(), "rb");
       if(!f) f = fopen((rsrcdir + fname).c_str(), "rb");
-      string buf;
       buf.resize(1000000);
       int qty = fread(&buf[0], 1, 1000000, f);
       buf.resize(qty);
+      fclose(f);
+      #endif
 
       shstream ins(decompress_string(buf));
       dynamicval<bool> q(fieldpattern::use_quotient_fp, true);      
@@ -955,7 +960,6 @@ EX namespace reg3 {
       hread(ins, root);
       hread(ins, children);
       hread(ins, other);
-      fclose(f);
       }
     
     /** \brief address = (fieldvalue, state) */

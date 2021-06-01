@@ -1,6 +1,7 @@
 #!/bin/sh
 mkdir -p app/src/main/assets/sounds
 cp ../sounds/* app/src/main/assets/sounds/
+cp ../honeycomb-rules-*.txt app/src/main/assets/
 mkdir -p app/src/main/res/raw/
 
 #for x in caves crossroads desert graveyard hell icyland jungle laboratory mirror rlyeh

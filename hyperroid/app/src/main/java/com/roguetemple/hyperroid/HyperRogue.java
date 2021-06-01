@@ -48,6 +48,8 @@ import android.widget.FrameLayout.LayoutParams;
 import android.widget.Toast;
 import android.util.Log;
 
+import java.io.InputStream;
+
 public class HyperRogue extends Activity implements SensorEventListener {
 
     private static final int RESULT_SETTINGS = 1;
@@ -625,6 +627,18 @@ public class HyperRogue extends Activity implements SensorEventListener {
        pon.setTypeface(Typeface.DEFAULT_BOLD);
        pon.getTextBounds(s,0,s.length(),bounds);
        return bounds.width();
+       }
+ 
+     public byte[] getAsset(String s) {
+        try {
+            InputStream is = getAssets().open(s);
+            int length = is.available();
+            byte[] data = new byte[length];
+            is.read(data);
+            return data;
+        } catch (IOException e) {
+            return null;
+        }
        }
 
   private SensorManager mSensorManager;
