@@ -744,7 +744,9 @@ EX land_validity_t& land_validity(eLand l) {
       return lv::bad_graphics;
     if((hybrid::actual_geometry == gRotSpace || geometry == gRotSpace) && l == laDryForest)
       return lv::hedgehogs;
-    if(hybri) return *PIU(&land_validity(l));
+    if(hybri && hybrid::underlying && hybrid::underlying_cgip) {
+      return *PIU(&land_validity(l));
+      }
     }
   
   #if !CAP_FIELD
