@@ -924,6 +924,9 @@ EX namespace models {
     return 0;    
     }
   
+  auto hookArg = addHook(hooks_args, 100, readArgs); 
+  #endif  
+
   void add_model_config() {
     addsaver(polygonal::SI, "polygon sides");
     param_f(polygonal::STAR, "star", "polygon star factor");
@@ -1078,8 +1081,7 @@ EX namespace models {
     add_all(vid.rug_config, "rug_", "rug-");
     }
 
-  auto hookArg = addHook(hooks_args, 100, readArgs) + addHook(hooks_configfile, 100, add_model_config);
-  #endif  
+  auto hookSet = addHook(hooks_configfile, 100, add_model_config);
   }
 
 }
