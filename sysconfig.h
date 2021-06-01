@@ -634,7 +634,7 @@ union SDL_Event;
 #endif
 
 #ifndef CAP_SOLV
-#define CAP_SOLV (MAXMDIM >= 4 && !ISWEB)
+#define CAP_SOLV (MAXMDIM >= 4 && !ISWEB && !ISMOBILE)
 #endif
 
 #ifndef CAP_FIELD
@@ -642,7 +642,7 @@ union SDL_Event;
 #endif
 
 #ifndef CAP_RAY
-#define CAP_RAY (MAXMDIM >= 4 && CAP_GL)
+#define CAP_RAY (MAXMDIM >= 4 && CAP_GL && !ISMOBILE && !ISWEB)
 #endif
 
 #ifndef CAP_MEMORY_RESERVE
