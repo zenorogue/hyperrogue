@@ -45,7 +45,7 @@
 #endif
 
 #ifndef CAP_EXTFONT
-#define CAP_EXTFONT (ISIOS || ISANDROID)
+#define CAP_EXTFONT (ISIOS || ISANDROID || ISFAKEMOBILE)
 #endif
 
 #ifndef ISSTEAM
