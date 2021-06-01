@@ -204,9 +204,15 @@ int main(int argc, char **argv) {
 
         case 4: {
           int col = gdpop();
+          int out = gdpop();
           int x = gdpop(), y = gdpop(), rad = gdpop();
           
           aacircleColor(s, x, y, rad, (col << 8) + 0xFF);
+          }
+
+        case 5: {
+          int out = gdpop();
+          /* not implemented */
           }
 
         }

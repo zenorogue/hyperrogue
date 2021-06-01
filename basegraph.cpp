@@ -1009,7 +1009,7 @@ EX void drawCircle(int x, int y, int size, color_t color, color_t fillcolor IS(0
   #endif
 
 #if CAP_XGD
-  gdpush(4); gdpush(color); gdpush(x); gdpush(y); gdpush(size);
+  gdpush(4); gdpush(color); gdpush(fillcolor); gdpush(x); gdpush(y); gdpush(size);
 #elif CAP_SDLGFX
   if(pconf.stretch == 1) {
     if(fillcolor) filledCircleColor(srend, x, y, size, fillcolor);

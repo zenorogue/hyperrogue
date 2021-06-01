@@ -5325,6 +5325,12 @@ EX void drawscreen() {
   if(vid.usingGL) setGLProjection();
 #endif
 
+#if CAP_XGD
+  if(!vid.usingGL) {
+    gdpush(5); gdpush(backcolor);
+    }
+#endif
+
 #if CAP_VR
   vrhr::clear();
 #endif

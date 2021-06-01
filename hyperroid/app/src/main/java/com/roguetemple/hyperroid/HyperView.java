@@ -150,14 +150,26 @@ public class HyperView extends View {
             break;
             }
 
+        case 5: {
+             int col = gdpop();
+             col = realpha(col);
+             col |= 0xFF000000;
+             dc.drawColor(col);
+             break;
+             }
+  
         case 4: {
-      	  int col = gdpop();
+            int col = gdpop();
+            int fil = gdpop();
             int x = gdpop();
             int y = gdpop();
             int rad = gdpop();
             
-            col += 0xFF000000;
-            pon.setColor(col);
+            pon.setColor(realpha(fil));
+            pon.setStyle(Paint.Style.FILL);
+            dc.drawCircle(x, y, rad, pon);
+
+            pon.setColor(realpha(col));
             pon.setStyle(Paint.Style.STROKE);
             
             dc.drawCircle(x, y, rad, pon);
