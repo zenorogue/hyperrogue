@@ -185,14 +185,14 @@ void apply_orientation() {
     main_last_orientation = T;
   else {
     transmatrix next_orientation = T;
-    View = main_last_orientation * View;
+    rotate_view(main_last_orientation);
     if(WDIM == 2 && vid.fixed_yz) {
      if(View[0][2] || View[1][2] || View[2][2]) {
         View = cspin(0, 2, -atan2(View[0][2], View[2][2])) * View;
         View = cspin(1, 2, -atan2(View[1][2], View[2][2])) * View;
         }
       }
-    View = inverse(next_orientation) * View;
+    rotate_view(inverse(next_orientation));
     main_last_orientation = next_orientation;
     }        
   }
@@ -211,6 +211,11 @@ EX void mobile_draw(MOBPAR_FORMAL) {
 
   if(GDIM == 3 && !shmup::on && !rug::rugged) 
     apply_orientation();
+
+  if(rug::rugged) {
+    rug::using_rugview urv;
+    apply_orientation();
+    }
 
   if(playermoved && vid.sspeed > -4.99)
     centerpc(tdiff / 1000.0 * exp(vid.sspeed));
