@@ -245,6 +245,7 @@ EX void mobile_draw(MOBPAR_FORMAL) {
     }
   
   if(cmode & sm::NORMAL) {
+    lmouseover_distant = mouseover;
     lmouseover = (gtouched && lclicked) ? mouseover : NULL;
     if(!shmup::on && !useRangedOrb && vid.mobilecompasssize) {
       using namespace shmupballs;
