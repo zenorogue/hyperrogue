@@ -1153,6 +1153,9 @@ EX void apply_screen_settings() {
   }
 
 EX pair<int, int> get_requested_resolution() {
+  #if ISMOBILE || ISFAKEMOBILE
+  return { vid.xres, vid.yres };
+  #endif
   if(vid.want_fullscreen && vid.change_fullscr)
     return { vid.fullscreen_x, vid.fullscreen_y };
   else if(vid.want_fullscreen)
