@@ -111,6 +111,7 @@ EX bool available() {
   if(WDIM == 2 && (kite::in() || bt::in())) return false;
   #ifdef GLES_ONLY
   if(need_many_cell_types()) return false;
+  if(!euclid && !prod && !nil) return false;
   #endif
   if(hyperbolic && pmodel == mdPerspective && !kite::in())
     return true;
