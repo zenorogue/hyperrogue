@@ -1714,6 +1714,7 @@ struct raycast_map {
     }
   
   bool gms_exceeded() {
+    if(m_via_texture) return false;
     return isize(ms) > gms_array_size;
     }
 
@@ -1966,10 +1967,19 @@ EX void cast() {
   if(rmap->need_to_create(cs)) {
     rmap->create_all(cs);  
     if(rmap->gms_exceeded()) {
-      gms_array_size = isize(rmap->ms);
-      println(hlog, "changing gms_array_size to ", gms_array_size);
-      reset_raycaster();
-      cast();
+      if(isize(rmap->ms) > gms_limit || can_via_texture) {
+        m_via_texture = true;
+        wall_via_texture = true;
+        println(hlog, "enabling m_via_texture");
+        reset_raycaster();
+        cast();        
+        }
+      else {
+        gms_array_size = isize(rmap->ms);
+        println(hlog, "changing gms_array_size to ", gms_array_size);
+        reset_raycaster();
+        cast();
+        }
       return;
       }
     rmap->assign_uniforms(&*o);
