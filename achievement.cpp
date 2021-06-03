@@ -713,6 +713,9 @@ EX void improveItemScores() {
   improve_score(82, itFrog);
   improve_score(83, itEclectic);
   improve_score(84, itWet);
+
+  improve_score(85, itCursed);
+  improve_score(86, itDice);
   }
 
 int next_stat_tick;
