@@ -1389,6 +1389,10 @@ EX void init_graph() {
 
   graphics_on = true;
 
+#if ISIOS
+  vid.usingGL = true;
+#endif
+
 #if ISANDROID
   setvideomode_android();
 #endif
