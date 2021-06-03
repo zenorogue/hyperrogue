@@ -456,7 +456,7 @@ EX eLand getNewLand(eLand old) {
     laStorms, laWhirlwind, laOvergrown, laBlizzard, laDryForest, laWineyard, laVolcano,
     laDeadCaves, laRedRock, laVariant, laHell, laCocytus, laPower,
     laBull, laTerracotta, laRose, laGraveyard, laHive, laDragon, laTrollheim,
-    laWet, laFrog, laEclectic,
+    laWet, laFrog, laEclectic, laCursed, laDice,
     laCrossroads5,
     })
     if(landUnlocked(l)) tab[cnt++] = l;    
