@@ -674,7 +674,7 @@ EX void beastAttack(cell *c, bool player, bool targetdir) {
     if(c2->wall == waThumperOn) {
       cellwalker bull (c, d);
       int subdir = determinizeBullPush(bull);
-      auto mi = determinePush(bull, subdir, [c, c2] (movei mi) { return canPushThumperOn(mi, c); });
+      auto mi = determinePush(bull, subdir, [c] (movei mi) { return canPushThumperOn(mi, c); });
       if(mi.proper())
         pushThumper(mi);
       }

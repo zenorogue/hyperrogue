@@ -1275,7 +1275,7 @@ EX namespace dice {
         base_to_base = -h[2];
       else {
         ld lim = sphere ? 1 : 5;
-        base_to_base = binsearch(-lim, lim, [h, osphere] (ld d) {
+        base_to_base = binsearch(-lim, lim, [h] (ld d) {
           return (zpush(d) * h)[2] >= sin_auto(vid.depth);
           });
         }

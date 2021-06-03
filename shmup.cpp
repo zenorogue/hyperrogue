@@ -1124,7 +1124,7 @@ void movePlayer(monster *m, int delta) {
           if(d<bestd) bestd=d, subdir = di;
           }
         pushmonsters();
-        auto mip = determinePush(cellwalker(c2, sd1)+wstep, subdir, [m, c2] (movei mi) { return canPushThumperOn(mi, m->base); });
+        auto mip = determinePush(cellwalker(c2, sd1)+wstep, subdir, [m] (movei mi) { return canPushThumperOn(mi, m->base); });
         visibleFor(300);
         if(!mip.proper()) go = false;
         else pushThumper(mip);

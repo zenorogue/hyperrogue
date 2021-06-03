@@ -630,7 +630,7 @@ bool pcmove::actual_move() {
     }
   
   if(c2->monst == moAnimatedDie) {
-    mip = determinePush(cwt, subdir, [c2] (movei mi) { return canPushThumperOn(mi, cwt.at); });
+    mip = determinePush(cwt, subdir, [] (movei mi) { return canPushThumperOn(mi, cwt.at); });
     if(mip.proper()) {
       auto tgt = roll_effect(mip, dice::data[c2]);
       if(tgt.happy() > 0) {
@@ -642,7 +642,7 @@ bool pcmove::actual_move() {
     }
 
   if(isPushable(c2->wall) && !c2->monst && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
-    mip = determinePush(cwt, subdir, [c2] (movei mi) { return canPushThumperOn(mi, cwt.at); });
+    mip = determinePush(cwt, subdir, [] (movei mi) { return canPushThumperOn(mi, cwt.at); });
     if(mip.t) changes.ccell(mip.t);
     if(mip.d == NO_SPACE) {
       if(vmsg(miWALL)) addMessage(XLAT("No room to push %the1.", c2->wall));
@@ -980,7 +980,7 @@ bool pcmove::attack() {
   
   if(items[itCurseWeakness] || (isStunnable(c2->monst) && c2->hitpoints > 1)) {
     if(monsterPushable(c2))
-      mip = determinePush(cwt, subdir, [c2] (movei mi) { return passable(mi.t, mi.s, P_BLOW); });
+      mip = determinePush(cwt, subdir, [] (movei mi) { return passable(mi.t, mi.s, P_BLOW); });
     else
       mip.t = c2;
     if(mip.t) changes.ccell(mip.t);
