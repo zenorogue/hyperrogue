@@ -942,7 +942,7 @@ EX namespace reg3 {
     
     void load_ruleset(string fname) {
       string buf;
-      #if ISANDROID
+      #if ISANDROID || ISIOS
       buf = get_asset(fname);
       #else
       FILE *f = fopen(fname.c_str(), "rb");
