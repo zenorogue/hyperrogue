@@ -388,7 +388,7 @@ EX void pushThumper(const movei& mi) {
     if(w == waRichDie && dice::data[cto].happy() > 0) {
       cto->wall = waHappyDie;
       if(cto->land == laDice && th->land == laDice) {
-        items[itDice]++;
+        gainItem(itDice);
         addMessage(XLAT("The die is now happy, and you are rewarded!"));
         }
       else {
