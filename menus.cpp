@@ -702,14 +702,13 @@ EX void mode_higlights() {
   dialog::display();
   }  
 
-EX bool default_land_structure() {
-  return
-    bounded ? lsSingle :
-    (tactic::on || princess::challenge) ? lsSingle :
-    yendor::on ? yendor::get_land_structure() :
-    specialland == laCanvas ? lsSingle :
-    nice_walls_available() ? lsNiceWalls :
-    lsNoWalls;
+EX eLandStructure default_land_structure() {
+  if(bounded) return lsSingle;
+  if(tactic::on || princess::challenge) return lsSingle;
+  if(yendor::on) return yendor::get_land_structure();
+  if(specialland == laCanvas) return lsSingle;
+  if(nice_walls_available()) return lsNiceWalls;
+  return lsNoWalls;
   }
 
 EX void menuitem_land_structure(char key) {
