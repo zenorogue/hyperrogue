@@ -1395,6 +1395,7 @@ EX namespace dice {
       }
     }
 
+  int hook = addHook(hooks_clearmemory, 0, [] () { data.clear(); });
 EX }
 
 }
