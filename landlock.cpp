@@ -260,6 +260,7 @@ EX bool incompatible1(eLand l1, eLand l2) {
   if(l1 == laEFire && l2 == laWineyard) return true;
   if(l1 == laEFire && l2 == laDryForest) return true;
   if(l1 == laGraveyard && l2 == laDryForest) return true;
+  if(l1 == laGraveyard && l2 == laDice) return true;
   if(l1 == laGraveyard && l2 == laRuins) return true;
   if(l1 == laGraveyard && l2 == laRedRock) return true;
   if(l1 == laGraveyard && l2 == laEmerald) return true;
