@@ -643,6 +643,31 @@ EX void drawStats() {
       }
     }
   string vers = VER;
+  if(true) {
+    if(casual) vers += " casual";
+    if(autocheat) vers += " god";
+    else if(cheater) vers += " cheat";
+    if(yendor::on) vers += " Yendor";
+    if(tactic::on) vers += " PTM";
+    if(inv::on) vers += " inv";
+    if(tour::on) vers += " tour";
+    if(shmup::on) vers += " shmup";
+    if(multi::players > 1) vers += " P" + its(multi::players);
+    if(pureHardcore()) vers += " hardcore";
+    else if(hardcore) vers += " partial hardcore";
+    if(peace::on) vers += " peace";
+    if(racing::on) vers += " racing";
+    if(daily::on) vers += " strange";
+    if(land_structure != default_land_structure())
+      vers += land_structure_name(true);
+    if(princess::challenge) vers += " Princess";
+    if(randomPatternsMode) vers += " RPM";
+    
+    if(land_structure) vers += " inv";
+
+    if(geometry != gNormal || !BITRUNCATED) 
+      vers = vers + " " + full_geometry_name();
+    }
   if(!nofps) vers += XLAT(" fps: ") + its(calcfps());
   
   #if CAP_MEMORY_RESERVE
