@@ -935,7 +935,7 @@ EX string get_rich_presence_text() {
   if(geometry != gNormal || !BITRUNCATED) 
     res = res + full_geometry_name() + " ";
   
-  if(ls::any_chaos()) res += land_structure_name(false) + " "; // TODO
+  if(land_structure != default_land_structure()) res += land_structure_name(false) + " ";
   if(shmup::on) res += "shmup ";
   if(dual::state) res += "dual ";
   if(randomPatternsMode) res += "random ";
