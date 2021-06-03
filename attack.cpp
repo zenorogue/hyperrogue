@@ -153,7 +153,7 @@ EX bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) 
     if(c1 && c2 && againstRose(c1, c2) && !ignoresSmell(m1))
       return false;
   
-  if(m2 == moShadow && !(flags & AF_SWORD)) return false;
+  if(m2 == moShadow && !(flags & (AF_SWORD | AF_SWORD_INTO | AF_CRUSH))) return false;
   if(isWorm(m2) && m2 != moTentacleGhost && !isDragon(m2)) return false;
   
   // dragon can't attack itself, or player who mounted it
@@ -457,7 +457,8 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   bool fallanim = (deathflags & AF_FALL) &&  m != moMimic;
 
   int pcount = fallanim ? 0 : 16; 
-  if(m == moShadow) return;
+  if(m == moShadow)
+    kill_shadow_at(c);
 
 #if CAP_HISTORY
   if(!isBug(m) && !isAnyIvy(m)) {

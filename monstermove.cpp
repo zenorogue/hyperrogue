@@ -1443,6 +1443,14 @@ EX void clearshadow() {
     shpos[i][p] = NULL;
   }
 
+/** \brief kill the shadow by clearing its history -- c is provided for multiplayer */
+EX void kill_shadow_at(cell *c) {
+  for(int p=0; p<MAXPLAYER; p++)
+    if(shpos[cshpos][p] == c)
+      for(int i=0; i<SHSIZE; i++)
+        changes.value_set(shpos[i][p], (cell*) nullptr);
+  }
+
 EX void moveshadow() {
 
   cell *shfrom = NULL;
@@ -1462,8 +1470,12 @@ EX void moveshadow() {
   cshpos = (cshpos+1) % SHSIZE;
   for(int p: player_indices()) {
     cell* where = shpos[cshpos][p];
-    if(where && where->monst == moNone && where->cpdist && among(where->land, laGraveyard, laCursed) &&
-      !sword::at(where)) {
+    if(sword::at(where)) {
+      kill_shadow_at(where);
+      fightmessage(moShadow, moPlayer, false, AF_SWORD_INTO);
+      continue;
+      }
+    if(where && where->monst == moNone && where->cpdist && among(where->land, laGraveyard, laCursed)) {
       if(shfrom) animateMovement(match(shfrom, where), LAYER_SMALL);
       where->monst = moShadow;
       where->hitpoints = p;
