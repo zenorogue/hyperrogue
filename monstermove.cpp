@@ -1470,7 +1470,7 @@ EX void moveshadow() {
   cshpos = (cshpos+1) % SHSIZE;
   for(int p: player_indices()) {
     cell* where = shpos[cshpos][p];
-    if(sword::at(where)) {
+    if(where && sword::at(where)) {
       kill_shadow_at(where);
       fightmessage(moShadow, moPlayer, false, AF_SWORD_INTO);
       continue;
