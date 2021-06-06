@@ -9571,7 +9571,7 @@ S("A nice souvenir from the Dice Reserve. Make sure to collect the whole set!",
   "Pěkný suvenýr z Rezervace Kostek. Rozhodně nasbírej celou sadu!")
 
 N("Unhappy Die", GEN_F, "Smutná kostka", "Smutné kostky", "Smutnou kostku", "Smutnou kostkou")
-S("Sentent dice like to be in a position such that their highest number is on top. "
+S("Sentient dice like to be in a position such that their highest number is on top. "
   "Unfortunately, someone has rolled this one into a wrong position, and did not fix this. "
   "It will reward you if you roll it so that the highest number is on top again!",
 

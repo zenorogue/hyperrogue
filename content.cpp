@@ -1706,7 +1706,7 @@ ITEM('/', 0xD0D0D8, "Crystal Die", itDice, IC_TREASURE, ZERO, RESERVED, osNone,
   "A nice souvenir from the Dice Reserve. Make sure to collect the whole set!")
 
 WALL('d', 0x7F6A30, "Unhappy Die", waRichDie, WF_WALL | WF_PUSHABLE, RESERVED, 0, sgNone, 
-  "Sentent dice like to be in a position such that their highest number is on top. "
+  "Sentient dice like to be in a position such that their highest number is on top. "
   "Unfortunately, someone has rolled this one into a wrong position, and did not fix this. "
   "It will reward you if you roll it so that the highest number is on top again!")
 
