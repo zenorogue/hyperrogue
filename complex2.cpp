@@ -1367,7 +1367,6 @@ EX namespace dice {
       
       #if !CAP_EXTFONT
       pointfunction pf = [&] (ld x, ld y) {
-        hyperpoint hs;
         dynamicval<eGeometry> g(geometry, highdim);
         return sphere_to_space(normalize(ctr + cx * x + cy * y));
         };
