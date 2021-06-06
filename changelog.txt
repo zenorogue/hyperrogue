@@ -4369,3 +4369,11 @@ VR:
 - Panini/stereo projection now works in the 'single' VR screen (didn't work correctly) but not on the eyes (did work)
 - fixed the 'thurston racing' option
 - controllers are now shown on the desktop screen
+
+2021-06-06 10:54 Update 12.0a:
+
+- fixed a bug which caused the dice numbers not to be drawn sometimes
+- Orb of Earth no longer marked useless in Cursed Canyon (also it works in a more interesting way there)
+- Canyon Hag's attack now has a sound effect and an animation
+- the bug with android crashes should be fixed
+- fixed spurious messages about slashing the Shadow with the energy sword
