@@ -198,6 +198,10 @@ EX bool earthFloor(cell *c) {
     c->wall = waNone;
     return true;
     }
+  if(c->land == laCursed && among(c->wall, waDeepWater, waShallow)) {
+    c->wall = waNone;
+    return true;
+    }
   return false;
   }
 
@@ -262,6 +266,10 @@ EX bool earthWall(cell *c) {
   if(c->wall == waArrowTrap && c->land == laTerracotta) {
     destroyTrapsOn(c);
     c->wall = waMercury;
+    return true;
+    }
+  if(c->land == laCursed && among(c->wall, waNone, waShallow)) {
+    c->wall = waSea;
     return true;
     }
   if(c->wall == waCIsland || c->wall == waCIsland2 || (c->wall == waNone && c->land == laOcean)) {
