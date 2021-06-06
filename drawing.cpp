@@ -1651,8 +1651,8 @@ void dqi_poly::draw() {
   if(flags & POLY_DEBUG) debug_this();
 
   if(debugflags & DF_VERTEX) {
-    println(hlog, tie(V, offset, cnt, offset_texture, outline, linewidth, flags, intester, cache), (cell*) tinf);
-    for(int i=0; i<cnt; i++) print(hlog, (*tab)[i]);
+    println(hlog, int(prio), ": V=", V, " o=", offset, " c=", cnt, " ot=", offset_texture, " ol=", outline, " lw=", linewidth, " f=", flags, " i=", intester, " c=", cache, " ti=", (cell*) tinf);
+    for(int i=0; i<cnt; i++) print(hlog, (*tab)[offset+i]);
     println(hlog);
     }
 
