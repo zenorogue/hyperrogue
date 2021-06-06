@@ -2698,7 +2698,15 @@ void celldrawer::draw() {
 
     draw_item_full();
     draw_monster_full();
-      
+    
+    if(animations[LAYER_THROW].count(c)) {
+      shiftmatrix Vthrow = V;
+      ld footphase;
+      applyAnimation(c, Vthrow, footphase, LAYER_THROW);
+      eItem it = animations[LAYER_THROW][c].thrown_item;
+      drawItemType(it, c, Vthrow, iinf[it].color, 0, false);
+      }
+    
 #if CAP_TEXTURE    
     if(!texture::using_aura()) 
 #endif 

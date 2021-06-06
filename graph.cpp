@@ -5477,14 +5477,16 @@ struct animation {
   int attacking; /** 0 = no attack animation, 1 = first phase, 2 = second phase, 3 = hugging */
   transmatrix attackat;
   bool mirrored;
+  eItem thrown_item; /** for thrown items */
   };
 
 // we need separate animation layers for Orb of Domination and Tentacle+Ghost,
 // and also to mark Boats
-#define ANIMLAYERS 3
+#define ANIMLAYERS 4
 #define LAYER_BIG   0 // for worms and krakens
 #define LAYER_SMALL 1 // for others
 #define LAYER_BOAT  2 // mark that a boat has moved
+#define LAYER_THROW 3 // for thrown items
 #endif
 
 EX array<map<cell*, animation>, ANIMLAYERS> animations;
@@ -5525,6 +5527,25 @@ EX void animateMovement(const movei& m, int layer) {
     }
   if(m.proper() && m.s->c.mirror(m.d))
     a.mirrored = !a.mirrored;
+  }
+
+EX void animate_item_throw(cell *from, cell *to, eItem it) {
+
+  bool steps = false;
+  again:
+  if(from != to) {
+    forCellIdEx(c1, i, from) if(celldistance(c1, to) < celldistance(from, to)) {
+      animateMovement(movei(from, i), LAYER_THROW);
+      from = c1;
+      steps = true;
+      goto again;
+      }    
+    }
+  
+  if(steps) {
+    animation& a = animations[LAYER_THROW][to];
+    a.thrown_item = it;
+    }
   }
 
 EX void animateAttackOrHug(const movei& m, int layer, int phase, ld ratio, ld delta) {

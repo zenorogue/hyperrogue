@@ -1912,6 +1912,7 @@ EX void specialMoves() {
           int d = celldistance(c,t);
           if(d <= firerange) {
             addMessage(XLAT("%The1 curses you with %the2!", m, c->item));
+            animate_item_throw(c, t, c->item);
             items[c->item] += orbcharges(c->item);
             c->item = itNone;
             c->stuntime = 1;
