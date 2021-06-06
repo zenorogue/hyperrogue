@@ -441,7 +441,9 @@ EX void make_air() {
     
     eGeometry orig = geometry;
 
+    #if !ISIOS
     glDisable(GL_LINE_SMOOTH);
+    #endif
     
     for(auto& g: sky->sky) {
       transmatrix S;
@@ -470,8 +472,10 @@ EX void make_air() {
       p.draw();
       }
 
+    #if !ISIOS
     if(vid.antialias & AA_LINES)
       glEnable(GL_LINE_SMOOTH);
+    #endif
 
 #if CAP_SDL
     if(anyshiftclick) IMAGESAVE(airbuf->render(), "air.png");
