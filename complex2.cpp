@@ -1309,7 +1309,11 @@ EX namespace dice {
 
       array<hyperpoint, 5> face;
       
-      hyperpoint dctr = zpush(base_to_base) * C0;
+      hyperpoint dctr;
+      if(1) {
+        dynamicval<eGeometry> g(geometry, highdim);
+        dctr = zpush(base_to_base) * C0;
+        }
       
       auto sphere_to_space = [&] (hyperpoint h) {
         if(fpp) return h;
