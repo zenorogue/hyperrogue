@@ -103,8 +103,10 @@ EX void moveEffect(const movei& mi, eMonster m) {
     tortoise::move_baby(cf, ct);
     }
   
+  #if CAP_COMPLEX2
   if(isDie(m) && mi.proper())
     dice::roll(mi);
+  #endif
   }
 
 EX void moveMonster(const movei& mi) {

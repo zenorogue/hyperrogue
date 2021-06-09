@@ -381,6 +381,7 @@ EX void pushThumper(const movei& mi) {
     cto->wall = waCrateOnTarget;
     th->wall = waCrateTarget;
     }
+  #if CAP_COMPLEX2
   else if(isDie(w)) {
     th->wall = waNone;
     cto->wall = w;    
@@ -405,6 +406,7 @@ EX void pushThumper(const movei& mi) {
     else
       animateMovement(mi, LAYER_BOAT);
     }
+  #endif
   else
     cto->wall = w;
   if(explode) cto->wall = waFireTrap, cto->wparam = explode;
@@ -415,8 +417,10 @@ EX void pushThumper(const movei& mi) {
 EX bool canPushThumperOn(movei mi, cell *player) {
   cell *thumper = mi.s;
   cell *tgt = mi.t;
+  #if CAP_COMPLEX2
   if(dice::on(thumper) && !dice::can_roll(mi))
     return false;
+  #endif
   if(tgt->wall == waBoat || tgt->wall == waStrandedBoat) return false;  
   if(isReptile(tgt->wall)) return false;
   if(isWatery(tgt) && !tgt->monst)

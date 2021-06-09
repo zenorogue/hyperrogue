@@ -2252,6 +2252,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       return true;
       }
     
+    #if CAP_COMPLEX2
     case moAnimatedDie: case moAngryDie: {
       if(where)
         dice::draw_die(where, V, 1, darkena(col, 0, 0xFF));
@@ -2259,6 +2260,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
         queuepoly(V, cgi.shDodeca, darkena(col, 0, 0xFF));
       return true;
       }
+    #endif
       
     default: ;    
     }

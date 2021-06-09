@@ -431,10 +431,12 @@ EX bool makeflame(cell *c, int timeout, bool checkonly) {
 EX bool makeshallow(cell *c, int timeout, bool checkonly) {
   changes.ccell(c);
   if(!checkonly) destroyTrapsOn(c);
+  #if CAP_COMPLEX2
   if(c->land == laBrownian) {
     if(checkonly) return true;
     brownian::dissolve(c, 1);
     }
+  #endif
   if(c->wall == waChasm || c->wall == waOpenGate || c->wall == waRed2 || c->wall == waRed3 ||
     c->wall == waTower)
     return false;

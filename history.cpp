@@ -527,10 +527,12 @@ EX namespace history {
     }
 
   EX void open_filedialog_to_create_image(bool ds) {
+    #if CAP_SHOT && CAP_SDL
     dialog::openFileDialog(band_format_now, XLAT("rendered band ($ID=segment, $DATE=date)"), ".png", [ds] () {
       createImage(band_format_now, ds);
       return true;
       });
+    #endif
     }
 #endif
 
@@ -691,7 +693,7 @@ EX namespace history {
     }
   
   EX void renderAutoband() {
-#if CAP_SDL
+#if CAP_SDL && CAP_SHOT
     if(!cwt.at || celldist(cwt.at) <= 7) return;
     if(!autoband) return;
     eModel spm = pmodel;

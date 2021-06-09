@@ -1602,6 +1602,7 @@ void celldrawer::draw_features() {
         poly_outline = OUTLINE_DEFAULT;
         }
 
+      #if CAP_COMPLEX2
       else if(isDie(c->wall)) {
         color_t col = darkena(winf[c->wall].color, 0, 0xFF);
         
@@ -1616,6 +1617,7 @@ void celldrawer::draw_features() {
         die_target = V;
         dice::draw_die(c, Vboat, 1, col);
         }
+      #endif
       
       else if(c->wall == waExplosiveBarrel) {
         if(GDIM == 3 && qfi.fshape) {

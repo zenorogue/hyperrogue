@@ -540,6 +540,7 @@ EX bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
       }
     return !pseudohept(w) && passable(w, from, extra);
     }
+  #if CAP_COMPLEX2
   if(m == moAnimatedDie) {
     if(extra & P_ONPLAYER) {
       if(isPlayerOn(w)) return true;
@@ -559,6 +560,7 @@ EX bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
     else
       return passable(w, from, extra);
     }
+  #endif
   if(m == moFrog) {
     return isNeighbor1(from, w) ? passable(w, from, extra) : check_jump(from, w, extra, dummy) == 3;
     }

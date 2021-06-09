@@ -629,6 +629,7 @@ bool pcmove::actual_move() {
     return after_instant(false);
     }
   
+  #if CAP_COMPLEX2
   if(c2->monst == moAnimatedDie) {
     mip = determinePush(cwt, subdir, [] (movei mi) { return canPushThumperOn(mi, cwt.at); });
     if(mip.proper()) {
@@ -640,6 +641,7 @@ bool pcmove::actual_move() {
         }
       }
     }
+  #endif
 
   if(isPushable(c2->wall) && !c2->monst && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
     mip = determinePush(cwt, subdir, [] (movei mi) { return canPushThumperOn(mi, cwt.at); });

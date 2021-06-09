@@ -1076,15 +1076,19 @@ EX namespace reg3 {
       
       if(geometry == gSpace535)
         quotient_map = new seifert_weber::hrmap_seifert_cover();
+      #if CAP_CRYSTAL
       else if(geometry == gSpace344) 
         quotient_map = new hrmap_from_crystal;
+      #endif
       else
         quotient_map = new hrmap_field3(&fp);        
       
       if(geometry == gSpace535)
         emerald_map = new seifert_weber::hrmap_seifert_cover();
+      #if CAP_CRYSTAL
       else if(geometry == gSpace344) 
         emerald_map = new hrmap_from_crystal;
+      #endif
       else
         emerald_map = new hrmap_field3(&currfp);
       h.emeraldval = 0;

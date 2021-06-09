@@ -1104,6 +1104,7 @@ void blowoff(const movei& mi) {
     if(ct->item) ct->item = itNone;
     moveItem(cf, ct, true);
     }
+  #if CAP_COMPLEX2
   if(ct->monst == moAnimatedDie && dice::data[ct].happy() > 0) {
     ct->monst = moNone;
     ct->wall = waHappyDie;
@@ -1123,6 +1124,7 @@ void blowoff(const movei& mi) {
     ct->stuntime = 5;
     addMessage(XLAT("You have made a Happy Die angry!"));
     }
+  #endif
   items[itOrbAir]--;
   createNoise(2);
   bfs();
@@ -1157,8 +1159,10 @@ EX movei blowoff_destination(cell *c, int& di) {
   if(d<c->type) for(int e=d; e<d+c->type; e++) {
     int di = e % c->type;
     cell *c2 = c->move(di);
+    #if CAP_COMPLEX2    
     if(dice::on(c) && !dice::can_roll(movei(c, di)))
       continue;
+    #endif
     if(c2 && c2->cpdist > c->cpdist && passable(c2, c, P_BLOW)) return movei(c, c2, di);
     }
   return movei(c, c, NO_SPACE);
