@@ -177,7 +177,10 @@ static const bool can_via_texture = true;
 
 
 raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
-    println(hlog, "assigning");
+
+    /* need to set shader_flags to 0 so that attributes are not enabled */
+    shader_flags = 0;
+
     uStart = glGetUniformLocation(_program, "uStart");
     uStartid = glGetUniformLocation(_program, "uStartid");
     uM = glGetUniformLocation(_program, "uM");
