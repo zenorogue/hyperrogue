@@ -1,169 +1,169 @@
 # Crossroads [02]
-[02] */hr3-crossroads.ogg
+[02] */music/hr3-crossroads.ogg
 # Desert [03]
-[03] */hr3-desert.ogg
+[03] */music/hr3-desert.ogg
 # Icy Lands [04]
-[04] */hr3-icyland.ogg
+[04] */music/hr3-icyland.ogg
 # Living Caves [05]
-[05] */hr3-caves.ogg
+[05] */music/hr3-caves.ogg
 # Jungle [06]
-[06] */hr3-jungle.ogg
+[06] */music/hr3-jungle.ogg
 # Alchemist's Lab [07]
-[07] */hr3-laboratory.ogg
+[07] */music/hr3-laboratory.ogg
 # Mirror [08]
-[08] */hr3-mirror.ogg
+[08] */music/hr3-mirror.ogg
 # Graveyard [09]
-[09] */hr3-graveyard.ogg
+[09] */music/hr3-graveyard.ogg
 # R'Lyeh [10]
-[10] */hr3-rlyeh.ogg
+[10] */music/hr3-rlyeh.ogg
 # Hell [11]
-[11] */hr3-hell.ogg
+[11] */music/hr3-hell.ogg
 # Cocytus [12]
-[12] */hr3-icyland.ogg
+[12] */music/hr3-icyland.ogg
 # Motion [13]
-[13] */hr3-motion.ogg
+[13] */music/hr3-motion.ogg
 # Dry Forest [14]
-[14] */hr3-jungle.ogg
+[14] */music/hr3-jungle.ogg
 # Emerald Mines [15]
-[15] */hr3-caves.ogg
+[15] */music/hr3-caves.ogg
 # Vineyard [16]
-[16] */hr3-laboratory.ogg
+[16] */music/hr3-laboratory.ogg
 # Dead Caves [17]
-[17] */hr3-caves.ogg
+[17] */music/hr3-caves.ogg
 # Hive [18]
-[18] */hr3-motion.ogg
+[18] */music/hr3-motion.ogg
 # Land of Power [19]
-[19] */hr3-mirror.ogg
+[19] */music/hr3-mirror.ogg
 # Camelot [20]
-[20] */hr-savino-palace.ogg
+[20] */music/hr-savino-palace.ogg
 # Temple [21]
-[21] */hr3-rlyeh.ogg
+[21] */music/hr3-rlyeh.ogg
 # CR2 [22]
-[22] */hr3-crossroads.ogg
+[22] */music/hr3-crossroads.ogg
 # Caribbean [23]
-[23] */hr-savino-caribbean.ogg
+[23] */music/hr-savino-caribbean.ogg
 # Red Rock Valley [24]
-[24] */hr3-desert.ogg
+[24] */music/hr3-desert.ogg
 # Minefield [25]
-[25] */hr3-hell.ogg
+[25] */music/hr3-hell.ogg
 # Ocean [26]
-[26] */hr-savino-ocean.ogg
+[26] */music/hr-savino-ocean.ogg
 # Whirlpool [27]
-[27] */hr3-rlyeh.ogg
+[27] */music/hr3-rlyeh.ogg
 # Palace [28]
-[28] */hr-savino-palace.ogg
+[28] */music/hr-savino-palace.ogg
 # Living Fjord [39]
-[29] */hr-savino-ocean.ogg
+[29] */music/hr-savino-ocean.ogg
 # Ivory Tower [30]
-[30] */hr-savino-ivory.ogg
+[30] */music/hr-savino-ivory.ogg
 # Zebra [31]
-[31] */hr3-motion.ogg
+[31] */music/hr3-motion.ogg
 # Elemental Fire [32]
-[32] */hr3-hell.ogg
+[32] */music/hr3-hell.ogg
 # Elemental Air [33]
-[33] */hr3-motion.ogg
+[33] */music/hr3-motion.ogg
 # Elemental Earth [34]
-[34] */hr3-caves.ogg
+[34] */music/hr3-caves.ogg
 # Elemental Water [35]
-[35] */hr-savino-caribbean.ogg
+[35] */music/hr-savino-caribbean.ogg
 # Crossroads III [36]
-[36] */hr3-crossroads.ogg
+[36] */music/hr3-crossroads.ogg
 # Seawall [37] (useless)
 # Elemental Wall [38] (useless)
 # Canvas [39]
-[39] */hr3-laboratory.ogg
+[39] */music/hr3-laboratory.ogg
 # Wild West [41]
-[41] */hr-savino-caribbean.ogg
+[41] */music/hr-savino-caribbean.ogg
 # Storms [42]
-[42] */hr3-laboratory.ogg
+[42] */music/hr3-laboratory.ogg
 # Overgrown [43]
-[43] */hr3-jungle.ogg
+[43] */music/hr3-jungle.ogg
 # Clearing [44]
-[44] */hr3-jungle.ogg
+[44] */music/hr3-jungle.ogg
 # Haunted [45]
-[45] */hr3-graveyard.ogg
+[45] */music/hr3-graveyard.ogg
 # Windy Plains [48]
-[48] */hr-savino-ivory.ogg
+[48] */music/hr-savino-ivory.ogg
 # Rose Garden [49]
-[49] */hr3-hell.ogg
+[49] */music/hr3-hell.ogg
 # Warped Coast/Sea [50, 51 -> 50]
-[50] */hr-savino-ocean.ogg
+[50] */music/hr-savino-ocean.ogg
 # Crossroads IV [52]
-[52] */hr3-crossroads.ogg
+[52] */music/hr3-crossroads.ogg
 # Yendorian [53]
-[53] */hr-savino-ivory.ogg
+[53] */music/hr-savino-ivory.ogg
 # Galapagos [54]
-[54] */hr3-crossroads.ogg
+[54] */music/hr3-crossroads.ogg
 # Dragon Chasms [55]
-[55] */hr3-caves.ogg
+[55] */music/hr3-caves.ogg
 # Kraken [56]
-[56] */hr-savino-ocean.ogg
+[56] */music/hr-savino-ocean.ogg
 # Burial Grounds [57]
-[57] */hr3-graveyard.ogg
+[57] */music/hr3-graveyard.ogg
 # Trollheim [58]
-[58] */hr3-desert.ogg
+[58] */music/hr3-desert.ogg
 # Halloween [59]
-[59] */hr3-graveyard.ogg
+[59] */music/hr3-graveyard.ogg
 # Dungeon [60]
-[60] */hr-savino-palace.ogg
+[60] */music/hr-savino-palace.ogg
 # Lost Mountain [61]
-[61] */hr-domina-mountain.ogg
+[61] */music/hr-domina-mountain.ogg
 # Reptiles [62]
-[62] */hr3-mirror.ogg
+[62] */music/hr3-mirror.ogg
 # Prairie [63]
-[63] */hr3-desert.ogg
+[63] */music/hr3-desert.ogg
 # Bull Dash [64]
-[64] */hr3-mirror.ogg
+[64] */music/hr3-mirror.ogg
 # Crossroads V [65]
-[65] */hr3-crossroads.ogg
+[65] */music/hr3-crossroads.ogg
 # Cellular Automata [66]
-[66] */hr3-laboratory.ogg
+[66] */music/hr3-laboratory.ogg
 # old mirror is at 71, and 67-70 are Reflection lands
-[67] */hr3-mirror.ogg
-[68] */hr3-mirror.ogg
-[69] */hr3-mirror.ogg
-[70] */hr3-mirror.ogg
-[71] */hr3-mirror.ogg
+[67] */music/hr3-mirror.ogg
+[68] */music/hr3-mirror.ogg
+[69] */music/hr3-mirror.ogg
+[70] */music/hr3-mirror.ogg
+[71] */music/hr3-mirror.ogg
 # Volcanic Wasteland
-[72] */hr3-hell.ogg
+[72] */music/hr3-hell.ogg
 # Blizzard
-[73] */hr3-icyland.ogg
+[73] */music/hr3-icyland.ogg
 # Hunting Ground [74]
-[74] */hr-domina-hunting.ogg
+[74] */music/hr-domina-hunting.ogg
 # Terracotta (and Mercury River) [75-76]
-[75] */hr-domina-hunting.ogg
-[76] */hr-domina-hunting.ogg
+[75] */music/hr-domina-hunting.ogg
+[76] */music/hr-domina-hunting.ogg
 # Crystal Land (alternate geometry special)
-[77] */hr-savino-palace.ogg
+[77] */music/hr-savino-palace.ogg
 # Snake Nest (three-colorable geometry special)
-[78] */hr3-desert.ogg
+[78] */music/hr3-desert.ogg
 # Docks (octagonal geometry special)
-[79] */hr-savino-caribbean.ogg
+[79] */music/hr-savino-caribbean.ogg
 # Ruined City
-[80] */hr-domina-mountain.ogg
+[80] */music/hr-domina-mountain.ogg
 # Magnetic (unused)
-[81] */hr3-caves.ogg
+[81] */music/hr3-caves.ogg
 # Jelly Kingdom
-[82] */hr3-laboratory.ogg
+[82] */music/hr3-laboratory.ogg
 # Lost Memory needs no music
 # Brown Islands
-[84] */hr-savino-caribbean.ogg
+[84] */music/hr-savino-caribbean.ogg
 # Free Fall
-[85] */hr-savino-ivory.ogg
+[85] */music/hr-savino-ivory.ogg
 # Irradiated Fields
-[86] */hr-savino-palace.ogg
+[86] */music/hr-savino-palace.ogg
 # Space Rocks
-[87] */hr3-crossroads.ogg
+[87] */music/hr3-crossroads.ogg
 # Wetland
-[88] */hr-domina-hunting.ogg
+[88] */music/hr-domina-hunting.ogg
 # Frog Park
-[89] */hr3-laboratory.ogg
+[89] */music/hr3-laboratory.ogg
 # Eclectic City
-[90] */hr-domina-mountain.ogg
+[90] */music/hr-domina-mountain.ogg
 # Cursed Canyon
-[91] */hr3-graveyard.ogg
+[91] */music/hr3-graveyard.ogg
 # Dice Reserve
-[92] */hr3-laboratory.ogg
+[92] */music/hr3-laboratory.ogg
 
 # None [00] (used when the window is out of focus)
 
