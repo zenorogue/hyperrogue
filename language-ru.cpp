@@ -1355,7 +1355,7 @@ S("The Grimoires contain many secrets of the Great Old Ones. "
   "You hope to read them when you return home, and to learn many things. "
   "The knowledge is valuable to you, but it is rather pointless to try to get "
   "several copies of the same Grimoire...",
-  "Гримуары содержат много секретов Великих предков Каждый новый круг Храма Ктулху содержит "
+  "Гримуары содержат много секретов Великих предков. Каждый новый круг Храма Ктулху содержит "
   "новые тома с новыми секретами. Вы можете принести их домой, прочитать и узнать много вещей."
   "Знание ценно для Вас, но Вам не нужны копии одного Гримуара... "
   )
