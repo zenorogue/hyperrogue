@@ -1263,7 +1263,7 @@ S("You trick %the1.", "Вы победили %a1.")
 S(  "A Witch with a Flash spell. Very dangerous!\n\nLuckily, she never uses the spell if it "
     "would kill her friends. She could destroy an Evil Golem, though.",
     "Ведьма с заклинанием вспышки. Очень опасна!\n\nК счастью, она никогда не использует "
-    "заклинание, ели оно убьёт других ведьм. Но големов она может и уничтожить.")
+    "заклинание, если оно убьёт других ведьм. Но големов она может и уничтожить.")
        
 S("Your Aether powers are drained by %the1!", "Твоя эфирная сила была уменьшена %abl1!")
 S("As you leave, your powers are drained!", "Покидая землю силы, Вы теряете магию сфер!")
