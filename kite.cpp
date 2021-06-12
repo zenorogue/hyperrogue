@@ -148,6 +148,10 @@ struct hrmap_kite : hrmap {
   
   heptagon *getOrigin() override { return origin; }
 
+  void find_cell_connection(cell *c, int d) override { 
+    kite::find_cell_connection(c, d); 
+    }
+
   heptagon *newtile(pshape s, int dist) {
     heptagon *h = tailored_alloc<heptagon> (8);
     h->s = hstate(s);

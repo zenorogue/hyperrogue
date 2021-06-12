@@ -63,6 +63,10 @@ EX namespace fake {
       if(currentmap == u) currentmap = this;
       }
 
+    void find_cell_connection(cell *c, int d) override { 
+      FPIU(createMov(c, d));
+      }
+  
     hrmap_fake() {
       in_underlying([this] { initcells(); underlying_map = currentmap; });
       for(hrmap*& m: allmaps) if(m == underlying_map) m = NULL;

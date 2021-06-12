@@ -758,6 +758,28 @@ struct hrmap_archimedean : hrmap {
       return -t1.first;
       }
     }
+
+  void find_cell_connection(cell *c, int d) override {
+    if(PURE) {
+      if(arcm::id_of(c->master) < arcm::current.N * 2) {
+        heptspin hs = heptspin(c->master, d) + wstep + 2 + wstep + 1;
+        c->c.connect(d, hs.at->c7, hs.spin, hs.mirrored);
+        }
+      else c->c.connect(d, c, d, false);
+      }
+    else if(DUAL) {
+      if(arcm::id_of(c->master) >= arcm::current.N * 2) {
+        heptagon *h2 = createStep(c->master, d*2);
+        int d1 = c->master->c.spin(d*2);
+        c->c.connect(d, h2->c7, d1/2, false);
+        }
+      else {
+        printf("bad connection\n");
+        c->c.connect(d,c,d,false);
+        }
+      }
+    else hrmap::find_cell_connection(c, d);
+    }
   };
 
 EX hrmap *new_map() { return new hrmap_archimedean; }

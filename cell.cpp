@@ -59,6 +59,8 @@ struct hrmap {
   virtual transmatrix spin_from(cell *c, int d, ld bonus=0);
   
   virtual double spacedist(cell *c, int i) { return hdist0(tC0(adj(c, i))); }
+
+  virtual void find_cell_connection(cell *c, int d);
   };
 
 /** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient  
@@ -75,6 +77,7 @@ struct hrmap_standard : hrmap {
   transmatrix adj(heptagon *h, int d) override;
   ld spin_angle(cell *c, int d) override;
   double spacedist(cell *c, int i) override;
+  void find_cell_connection(cell *c, int d) override;
   };
 
 void clearfrom(heptagon*);
@@ -192,24 +195,15 @@ hrmap_hyperbolic::hrmap_hyperbolic(heptagon *o) { origin = o; }
 
 hrmap_hyperbolic::hrmap_hyperbolic() { origin = hyperbolic_origin(); }
 
-/** very similar to createMove in heptagon.cpp */
-EX cell *createMov(cell *c, int d) {
-  if(d<0 || d>= c->type) {
-    printf("ERROR createmov\n");
-    }
+void hrmap::find_cell_connection(cell *c, int d) {
+  heptagon *h2 = createStep(c->master, d);
+  c->c.connect(d, h2->c7,c->master->c.spin(d), c->master->c.mirror(d));
+  hybrid::link();
+  }
 
-  if(c->move(d)) return c->move(d);
-  else if(hybri)
-    hybrid::find_cell_connection(c, d);
-  #if CAP_BT
-  else if(kite::in())
-    kite::find_cell_connection(c, d);
-  #endif
-  else if(fake::in()) {
-    return FPIU(createMov(c, d));
-    }
+void hrmap_standard::find_cell_connection(cell *c, int d) {
   #if CAP_IRR
-  else if(IRREGULAR) {
+  if(IRREGULAR) {
     irr::link_cell(c, d);
     }
   #endif
@@ -223,33 +217,11 @@ EX cell *createMov(cell *c, int d) {
     hybrid::link();
     }
   else if(INVERSE) {
-    return gp::inverse_move(c, d);
+    gp::inverse_move(c, d);
     }
   #endif
-  #if CAP_ARCM
-  else if(arcm::in() && PURE) {
-    if(arcm::id_of(c->master) < arcm::current.N * 2) {
-      heptspin hs = heptspin(c->master, d) + wstep + 2 + wstep + 1;
-      c->c.connect(d, hs.at->c7, hs.spin, hs.mirrored);
-      }
-    else c->c.connect(d, c, d, false);
-    }
-  else if(arcm::in() && DUAL) {
-    if(arcm::id_of(c->master) >= arcm::current.N * 2) {
-      heptagon *h2 = createStep(c->master, d*2);
-      int d1 = c->master->c.spin(d*2);
-      c->c.connect(d, h2->c7, d1/2, false);
-      }
-    else {
-      printf("bad connection\n");
-      c->c.connect(d,c,d,false);
-      }
-    }
-  #endif
-  else if(arcm::in() || PURE) {
-    heptagon *h2 = createStep(c->master, d);
-    c->c.connect(d, h2->c7,c->master->c.spin(d), c->master->c.mirror(d));
-    hybrid::link();
+  else if(PURE) {
+    hrmap::find_cell_connection(c, d);
     }
   else if(c == c->master->c7) {
     
@@ -276,7 +248,16 @@ EX cell *createMov(cell *c, int d) {
     cellwalker cw2 = cw - 1 + wstep - 1 + wstep - 1;
     c->c.connect(d, cw2);
     hybrid::link();
-    }
+    }    
+  }
+
+/** very similar to createMove in heptagon.cpp */
+EX cell *createMov(cell *c, int d) {
+  if(d<0 || d>= c->type) {
+    printf("ERROR createmov\n");
+    }  
+  if(c->move(d)) return c->move(d);  
+  currentmap->find_cell_connection(c, d);  
   return c->move(d);
   }
 
