@@ -1275,6 +1275,11 @@ EX namespace hybrid {
     void find_cell_connection(cell *c, int d) override { 
       hybrid::find_cell_connection(c, d); 
       }
+
+    int shvid(cell *c) override {
+      cell *c1 = hybrid::get_where(c).first; 
+      return PIU( shvid(c1) );      
+      }
   
     virtual transmatrix spin_to(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return in_underlying([&] { return currentmap->spin_to(c, d, bonus); }); }
     virtual transmatrix spin_from(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return in_underlying([&] { return currentmap->spin_from(c, d, bonus); }); }

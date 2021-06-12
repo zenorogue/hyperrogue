@@ -61,6 +61,7 @@ struct hrmap {
   virtual double spacedist(cell *c, int i) { return hdist0(tC0(adj(c, i))); }
 
   virtual void find_cell_connection(cell *c, int d);
+  virtual int shvid(cell *c) { return 0; }
   };
 
 /** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient  
@@ -78,6 +79,7 @@ struct hrmap_standard : hrmap {
   ld spin_angle(cell *c, int d) override;
   double spacedist(cell *c, int i) override;
   void find_cell_connection(cell *c, int d) override;
+  virtual int shvid(cell *c);
   };
 
 void clearfrom(heptagon*);
@@ -215,9 +217,6 @@ void hrmap_standard::find_cell_connection(cell *c, int d) {
       exit(1);
       }
     hybrid::link();
-    }
-  else if(INVERSE) {
-    gp::inverse_move(c, d);
     }
   #endif
   else if(PURE) {

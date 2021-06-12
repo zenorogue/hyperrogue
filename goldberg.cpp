@@ -1273,6 +1273,13 @@ EX namespace gp {
         }
       }
 
+    void find_cell_connection(cell *c, int d) override {
+      inverse_move(c, d);
+      }
+
+    int shvid(cell *c) override {
+      return gp::get_plainshape_id(c);
+      }   
     };
   
   EX hrmap* new_inverse() { return new hrmap_inverse; }

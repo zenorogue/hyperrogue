@@ -431,6 +431,15 @@ EX namespace bt {
         }
       }
 
+    int shvid(cell *c) override {
+      if(geometry == gBinaryTiling)  
+        return c->type-6;
+      else if(geometry == gBinary4 || geometry == gTernary)
+        return c->master->zebraval;
+      else
+        return 0;
+      }
+
     int updir_at(heptagon *h) {
       if(geometry != gBinaryTiling) return updir();
       else if(type_of(h) == 6) return bd_down;

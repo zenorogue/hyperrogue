@@ -780,6 +780,13 @@ struct hrmap_archimedean : hrmap {
       }
     else hrmap::find_cell_connection(c, d);
     }
+
+  int shvid(cell *c) override {
+    auto& ac = arcm::current;
+    int id = arcm::id_of(c->master);
+    if(ac.regular && id>=2 && id < 2*ac.N) id &= 1;    
+    return id;    
+    }  
   };
 
 EX hrmap *new_map() { return new hrmap_archimedean; }

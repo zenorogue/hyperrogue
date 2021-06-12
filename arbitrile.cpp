@@ -801,6 +801,10 @@ struct hrmap_arbi : hrmap {
   transmatrix adj(cell *c, int dir) override { return adj(c->master, dir); }
   
   ld spin_angle(cell *c, int d) override { return SPIN_NOT_AVAILABLE; }
+
+  int shvid(cell *c) override {
+    return id_of(c->master);
+    }
   };
 
 EX hrmap *new_map() { return new hrmap_arbi; }
