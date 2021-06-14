@@ -805,6 +805,12 @@ struct hrmap_arbi : hrmap {
   int shvid(cell *c) override {
     return id_of(c->master);
     }
+
+  hyperpoint get_corner(cell *c, int cid, ld cf) override {
+    auto& sh = arb::current_or_slided().shapes[arb::id_of(c->master)];
+    return normalize(C0 + (sh.vertices[gmod(cid, c->type)] - C0) * 3 / cf);
+    }
+
   };
 
 EX hrmap *new_map() { return new hrmap_arbi; }

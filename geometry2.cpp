@@ -520,39 +520,12 @@ EX hyperpoint randomPointIn(int t) {
  */  
 
 EX hyperpoint get_corner_position(cell *c, int cid, ld cf IS(3)) {
+  return currentmap->get_corner(c, cid, cf);
+  } 
+
+hyperpoint hrmap_standard::get_corner(cell *c, int cid, ld cf) {
   #if CAP_GP
   if(GOLDBERG) return gp::get_corner_position(c, cid, cf);
-  if(UNTRUNCATED) {
-    cell *c1 = gp::get_mapped(c);
-    cellwalker cw(c1, cid*2);
-    if(!gp::untruncated_shift(c)) cw--;
-    hyperpoint h = UIU(nearcorner(c1, cw.spin));
-    return mid_at_actual(h, 3/cf);
-    }
-  if(UNRECTIFIED) {
-    cell *c1 = gp::get_mapped(c);
-    hyperpoint h = UIU(nearcorner(c1, cid));
-    return mid_at_actual(h, 3/cf);
-    }
-  if(WARPED) {
-    int sh = gp::untruncated_shift(c);
-    cell *c1 = gp::get_mapped(c);
-    if(sh == 2) {
-      cellwalker cw(c, cid);
-      hyperpoint h1 = UIU(tC0(currentmap->adj(c1, cid)));
-      cw--;
-      hyperpoint h2 = UIU(tC0(currentmap->adj(c1, cw.spin)));
-      hyperpoint h = mid(h1, h2);
-      return mid_at_actual(h, 3/cf);
-      }
-    else {
-      cellwalker cw(c1, cid*2);
-      if(!gp::untruncated_shift(c)) cw--;
-      hyperpoint h = UIU(nearcorner(c1, cw.spin));
-      h = mid(h, C0);
-      return mid_at_actual(h, 3/cf);
-      }
-    }
   #endif
   #if CAP_IRR
   if(IRREGULAR) {
@@ -560,41 +533,6 @@ EX hyperpoint get_corner_position(cell *c, int cid, ld cf IS(3)) {
     return mid_at_actual(vs.vertices[cid], 3/cf);
     }
   #endif
-  #if CAP_BT
-  if(kite::in()) return kite::get_corner(c, cid, cf);
-  if(bt::in()) {
-    if(WDIM == 3) {
-      println(hlog, "get_corner_position called");
-      return C0;
-      }
-    return mid_at_actual(bt::get_horopoint(bt::get_corner_horo_coordinates(c, cid)), 3/cf);
-    }
-  #endif
-  #if CAP_ARCM
-  if(arcm::in()) {
-    auto &ac = arcm::current_or_fake();
-    if(PURE) {
-      if(arcm::id_of(c->master) >= ac.N*2) return C0;
-      auto& t = ac.get_triangle(c->master, cid-1);
-      return xspinpush0(-t.first, t.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
-      }
-    if(BITRUNCATED) {
-      auto& t0 = ac.get_triangle(c->master, cid-1);
-      auto& t1 = ac.get_triangle(c->master, cid);
-      hyperpoint h0 = xspinpush0(-t0.first, t0.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
-      hyperpoint h1 = xspinpush0(-t1.first, t1.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
-      return mid3(C0, h0, h1);
-      }
-    if(DUAL) {
-      auto& t0 = ac.get_triangle(c->master, 2*cid-1);
-      return xspinpush0(-t0.first, t0.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
-      }
-    }
-  #endif
-  if(arb::in()) {
-    auto& sh = arb::current_or_slided().shapes[arb::id_of(c->master)];
-    return normalize(C0 + (sh.vertices[gmod(cid, c->type)] - C0) * 3 / cf);
-    }
   if(PURE) {
     return ddspin(c,cid,M_PI/S7) * xpush0(cgi.hcrossf * 3 / cf);
     }
@@ -674,7 +612,7 @@ EX hyperpoint nearcorner(cell *c, int i) {
     }
   if(kite::in()) {
     if(approx_nearcorner)
-      return kite::get_corner(c, i, 3) + kite::get_corner(c, i+1, 3) - C0;
+      return currentmap->get_corner(c, i, 3) + currentmap->get_corner(c, i+1, 3) - C0;
     else
       return calc_relative_matrix(c->cmove(i), c, C0) * C0;
     }

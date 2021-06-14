@@ -62,6 +62,7 @@ struct hrmap {
 
   virtual void find_cell_connection(cell *c, int d);
   virtual int shvid(cell *c) { return 0; }
+  virtual hyperpoint get_corner(cell *c, int cid, ld cf=3) { return C0; }
   };
 
 /** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient  
@@ -80,6 +81,7 @@ struct hrmap_standard : hrmap {
   double spacedist(cell *c, int i) override;
   void find_cell_connection(cell *c, int d) override;
   virtual int shvid(cell *c);
+  virtual hyperpoint get_corner(cell *c, int cid, ld cf) override;
   };
 
 void clearfrom(heptagon*);

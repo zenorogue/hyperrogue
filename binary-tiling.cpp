@@ -440,6 +440,14 @@ EX namespace bt {
         return 0;
       }
 
+    hyperpoint get_corner(cell *c, int cid, ld cf) override {
+      if(WDIM == 3) {
+        println(hlog, "get_corner_position called");
+        return C0;
+        }
+      return mid_at_actual(bt::get_horopoint(bt::get_corner_horo_coordinates(c, cid)), 3/cf);
+      }
+
     int updir_at(heptagon *h) {
       if(geometry != gBinaryTiling) return updir();
       else if(type_of(h) == 6) return bd_down;

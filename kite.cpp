@@ -61,23 +61,6 @@ const ld kite_center = up;
 
 EX pshape getshape(heptagon *h) { return pshape(h->s); }
 
-EX hyperpoint get_corner(cell *c, int d, ld cf) {
-  bool kite = getshape(c->master) == pKite;
-  int t = kite ? 1 : -1;
-  ld shf = kite ? kite_center : dart_center;
-  
-  ld mul = 3/cf;
-  
-  switch(d & 3) {
-    case 0: return mhpxy(-mul, (shf)*mul);
-    case 1: return mhpxy(0, (shf-down)*mul);
-    case 2: return mhpxy(+mul, shf*mul);
-    case 3: return mhpxy(0, (shf + t*up)*mul);
-    }
-  
-  return C0; /* unreachable! */
-  }
-
 EX pair<vector<vector<hyperpoint>>, vector<vector<ld>>> make_walls() {
   
   vector<vector<hyperpoint>> kv;
@@ -150,6 +133,23 @@ struct hrmap_kite : hrmap {
 
   void find_cell_connection(cell *c, int d) override { 
     kite::find_cell_connection(c, d); 
+    }
+
+  hyperpoint get_corner(cell *c, int cid, ld cf) override {
+    bool kite = getshape(c->master) == pKite;
+    int t = kite ? 1 : -1;
+    ld shf = kite ? kite_center : dart_center;
+    
+    ld mul = 3/cf;
+    
+    switch(cid & 3) {
+      case 0: return mhpxy(-mul, (shf)*mul);
+      case 1: return mhpxy(0, (shf-down)*mul);
+      case 2: return mhpxy(+mul, shf*mul);
+      case 3: return mhpxy(0, (shf + t*up)*mul);
+      }
+    
+    return C0; /* unreachable! */
     }
 
   int shvid(cell *c) override {

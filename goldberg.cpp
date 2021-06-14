@@ -1280,6 +1280,41 @@ EX namespace gp {
     int shvid(cell *c) override {
       return gp::get_plainshape_id(c);
       }   
+
+    hyperpoint get_corner(cell *c, int cid, ld cf) override {
+      if(UNTRUNCATED) {
+        cell *c1 = gp::get_mapped(c);
+        cellwalker cw(c1, cid*2);
+        if(!gp::untruncated_shift(c)) cw--;
+        hyperpoint h = UIU(nearcorner(c1, cw.spin));
+        return mid_at_actual(h, 3/cf);
+        }
+      if(UNRECTIFIED) {
+        cell *c1 = gp::get_mapped(c);
+        hyperpoint h = UIU(nearcorner(c1, cid));
+        return mid_at_actual(h, 3/cf);
+        }
+      if(WARPED) {
+        int sh = gp::untruncated_shift(c);
+        cell *c1 = gp::get_mapped(c);
+        if(sh == 2) {
+          cellwalker cw(c, cid);
+          hyperpoint h1 = UIU(tC0(currentmap->adj(c1, cid)));
+          cw--;
+          hyperpoint h2 = UIU(tC0(currentmap->adj(c1, cw.spin)));
+          hyperpoint h = mid(h1, h2);
+          return mid_at_actual(h, 3/cf);
+          }
+        else {
+          cellwalker cw(c1, cid*2);
+          if(!gp::untruncated_shift(c)) cw--;
+          hyperpoint h = UIU(nearcorner(c1, cw.spin));
+          h = mid(h, C0);
+          return mid_at_actual(h, 3/cf);
+          }
+        }
+      return C0;
+      }
     };
   
   EX hrmap* new_inverse() { return new hrmap_inverse; }

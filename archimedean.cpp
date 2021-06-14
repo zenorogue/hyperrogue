@@ -787,6 +787,28 @@ struct hrmap_archimedean : hrmap {
     if(ac.regular && id>=2 && id < 2*ac.N) id &= 1;    
     return id;    
     }  
+
+  hyperpoint get_corner(cell *c, int cid, ld cf) override {
+    auto &ac = arcm::current_or_fake();
+    if(PURE) {
+      if(arcm::id_of(c->master) >= ac.N*2) return C0;
+      auto& t = ac.get_triangle(c->master, cid-1);
+      return xspinpush0(-t.first, t.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
+      }
+    if(BITRUNCATED) {
+      auto& t0 = ac.get_triangle(c->master, cid-1);
+      auto& t1 = ac.get_triangle(c->master, cid);
+      hyperpoint h0 = xspinpush0(-t0.first, t0.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
+      hyperpoint h1 = xspinpush0(-t1.first, t1.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
+      return mid3(C0, h0, h1);
+      }
+    if(DUAL) {
+      auto& t0 = ac.get_triangle(c->master, 2*cid-1);
+      return xspinpush0(-t0.first, t0.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
+      }
+    return C0;
+    }
+
   };
 
 EX hrmap *new_map() { return new hrmap_archimedean; }
