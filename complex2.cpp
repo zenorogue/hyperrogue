@@ -959,6 +959,8 @@ EX namespace dice {
   vector<die_structure*> die_list = {&d4, &d6, &d8, &d12, &d20};
     
   #if HDR
+  extern vector<struct die_structure*> die_list;
+
   struct die_data {
     struct die_structure *which;
     int val; /* the current face value */
@@ -967,6 +969,10 @@ EX namespace dice {
     int happy();
     };
   #endif
+  
+  EX int shape_faces(die_structure *w) { return w->faces; }
+  
+  EX string die_name(die_structure *w) { return its(w->faces); }
 
   int die_data::happy() {
     if(val == which->faces-1) return 1;

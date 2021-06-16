@@ -403,6 +403,38 @@ struct debugScreen {
           dialog::use_hexeditor();
           });
         }
+      if(dice::on(what)) {
+        dialog::addSelItem(XLAT("die shape"), dice::die_name(dice::data[what].which), 'A');
+        dialog::add_action_push([what] {
+          dialog::init("die shape");
+          char key = 'a';
+          for(auto shape: dice::die_list) {
+            dialog::addItem(dice::die_name(shape), key++);
+            dialog::add_action([what, shape] {
+              dice::data[what].which = shape;
+              dice::data[what].val = 0;
+              popScreen();
+              });
+            }
+          dialog::display();
+          });
+        dialog::addSelItem(XLAT("die face"), its(dice::data[what].val), 'B');
+        dialog::add_action([what] {
+          auto& dd = dice::data[what];
+          int maxv = shape_faces(dd.which)-1;
+          dialog::editNumber(dd.val, 0, maxv, 1, 0, XLAT("die face"), "");
+          dialog::bound_low(0);
+          dialog::bound_up(maxv);
+          });
+        dialog::addSelItem(XLAT("die direction"), its(dice::data[what].dir), 'C');
+        dialog::add_action([what] {
+          auto& dd = dice::data[what];
+          dialog::editNumber(dd.dir, 0, what->type-1, 1, dd.dir, XLAT("die direction"), "");
+          dialog::bound_low(0);
+          dialog::bound_up(what->type-1);
+          });
+        dialog::addBoolItem_action(XLAT("die mirror status"), dice::data[what].mirrored, 'D');
+        }
       dialog::addBreak(50);
       
       if(show_debug_data) {
