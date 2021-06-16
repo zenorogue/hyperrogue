@@ -132,6 +132,11 @@ EX hyperpoint kleinize(hyperpoint h) {
   else return point31(h[0]/h[3], h[1]/h[3], h[2]/h[3]);
   }
 
+EX hyperpoint may_kleinize(hyperpoint h) { 
+  if(do_kleinize()) return kleinize(h);
+  else return h;
+  }
+
 void addmatrix(matrixlist& matrices, hyperpoint o0, hyperpoint o1, hyperpoint o2, hyperpoint n0, hyperpoint n1, hyperpoint n2, int d, int osym, int nsym) {
   if(do_kleinize()) o0 = kleinize(o0), o1 = kleinize(o1), o2 = kleinize(o2), n0 = kleinize(n0), n1 = kleinize(n1), n2 = kleinize(n2);
   matrices.v.push_back(genitem(inverse(spin(2*M_PI*d/osym)*build_matrix(o0, o1, o2,C02)), spin(2*M_PI*d/nsym)*build_matrix(n0, n1, n2,C02), nsym));
@@ -231,8 +236,7 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
 
   for(int r=0; r<nsym; r+=osym/rots) {
     for(hyperpoint h: lst) {
-      hyperpoint nh = h;
-      if(do_kleinize()) nh = kleinize(nh);
+      hyperpoint nh = may_kleinize(h);
       int mapped = 0;
       for(auto& m: matrices) {        
         hyperpoint z = m.first * h;
@@ -599,9 +603,15 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
           int s = fsh.b[id].s;
           int e = fsh.b[id].e-1;        
           for(int t=0; t<e-s; t++) {
-            hyperpoint v1 = hpc[s+t] - C0;
-            hyperpoint v2 = hpc[s+t+1] - C0;
-            texture_order([&] (ld x, ld y) { hpcpush(orthogonal_move(normalize(C0 + v1 * x + v2 * y), dfloor_table[k])); });
+            hyperpoint v1 = may_kleinize(hpc[s+t]) - C0;
+            hyperpoint v2 = may_kleinize(hpc[s+t+1]) - C0;
+            texture_order([&] (ld x, ld y) { 
+              hpcpush(
+                orthogonal_move(
+                  normalize(C0 + v1 * x + v2 * y)
+                  , dfloor_table[k])
+                ); 
+              });
             }
           }
 
@@ -631,8 +641,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
           int s = fsh.b[id].s;
           int e = fsh.b[id].e-1;        
           for(int t=0; t<e-s; t++) {
-            hyperpoint v1 = hpc[s+t] - C0;
-            hyperpoint v2 = hpc[s+t+1] - C0;
+            hyperpoint v1 = may_kleinize(hpc[s+t]) - C0;
+            hyperpoint v2 = may_kleinize(hpc[s+t+1]) - C0;
             texture_order([&] (ld x, ld y) { hpcpush(orthogonal_move(normalize(C0 + v1 * x + v2 * y), top + h * (x+y))); });
             }
           }
