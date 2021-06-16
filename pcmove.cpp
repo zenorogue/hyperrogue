@@ -541,6 +541,19 @@ EX int chaos_mirror_dir(int dir, cellwalker src, cellwalker dst) {
   return (dst-src.to_spin(dir)).spin;
   }
 
+#if HDR
+template<class T> void swap_data(T& data, cell *c1, cell *c2) {
+  changes.map_value(data, c1);
+  changes.map_value(data, c2);
+  if(data.count(c1) && data.count(c2))
+    swap(data[c1], data[c2]);
+  else if(data.count(c1))
+    data[c2] = data[c1], data.erase(c1);
+  else if(data.count(c2))
+    data[c1] = data[c2], data.erase(c2);
+  }
+#endif
+
 /** \brief Apply the Orb of Chaos.
  *
  * We assume that the player moves from cwt.peek, in
