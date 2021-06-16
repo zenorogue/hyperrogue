@@ -1472,12 +1472,12 @@ EX void moveshadow() {
   cshpos = (cshpos+1) % SHSIZE;
   for(int p: player_indices()) {
     cell* where = shpos[cshpos][p];
-    if(where && sword::at(where)) {
-      kill_shadow_at(where);
-      fightmessage(moShadow, moPlayer, false, AF_SWORD_INTO);
-      continue;
-      }
     if(where && where->monst == moNone && where->cpdist && among(where->land, laGraveyard, laCursed)) {
+      if(sword::at(where)) {
+        kill_shadow_at(where);
+        fightmessage(moShadow, moPlayer, false, AF_SWORD_INTO);
+        continue;
+        }
       if(shfrom) animateMovement(match(shfrom, where), LAYER_SMALL);
       where->monst = moShadow;
       where->hitpoints = p;
