@@ -1402,6 +1402,25 @@ EX namespace dice {
       }
     }
 
+  EX bool swap_forbidden(cell *ca, cell *cb) {
+    if(!on(ca)) return false;
+    return cb->type % data[ca].which->facesides;
+    }
+
+  EX void chaos_swap(cellwalker wa, cellwalker wb) {
+    swap_data(data, wa.at, wb.at);
+    if(on(wa.at)) {
+      auto& d = data[wa.at];
+      d.dir = chaos_mirror_dir(d.dir, wb, wa);
+      d.mirrored = !d.mirrored;
+      }
+    if(on(wb.at)) {
+      auto& d = data[wb.at];
+      d.dir = chaos_mirror_dir(d.dir, wa, wb);
+      d.mirrored = !d.mirrored;
+      }
+    }
+
   int hook = addHook(hooks_clearmemory, 0, [] () { data.clear(); });
 EX }
 

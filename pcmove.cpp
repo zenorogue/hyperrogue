@@ -564,6 +564,8 @@ void apply_chaos() {
   auto wb = cwt-1+wstep;
   cell *ca = wa.at;
   cell *cb = wb.at;
+  if(dice::swap_forbidden(ca, cb)) return;
+  if(dice::swap_forbidden(cb, ca)) return;
   if(!items[itOrbChaos] || chaos_forbidden(ca) || chaos_forbidden(cb)) return;
   if(ca && is_paired(ca->monst)) killMonster(ca, moPlayer);
   if(cb && is_paired(cb->monst)) killMonster(cb, moPlayer);
@@ -595,6 +597,9 @@ void apply_chaos() {
     princess::move(movei{ca, cb, JUMP});
   if(ca->monst == moTortoise || cb->monst == moTortoise) {
     tortoise::move_adult(ca, cb);
+    }
+  if(dice::on(ca) || dice::on(cb)) {
+    dice::chaos_swap(wa, wb);
     }
   if(ca->item == itBabyTortoise || cb->item == itBabyTortoise) {
     tortoise::move_baby(ca, cb);
