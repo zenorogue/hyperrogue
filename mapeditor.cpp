@@ -2916,6 +2916,9 @@ EX namespace mapeditor {
 
     dialog::addItem(XLAT("configure WFC"), 'W');
     dialog::add_action_push(wfc::wfc_menu);
+
+    dialog::addItem(XLAT("edit cell values"), 'G');
+    dialog::add_action(push_debug_screen);
     
     dialog::addBack();
     dialog::display();
