@@ -1199,8 +1199,7 @@ EX namespace dice {
           }
         }
       }
-    #if CAP_EXTFONT
-    else if(!lmouseover_distant || !on(lmouseover_distant)) {
+    else if(!lmouseover_distant || !on(lmouseover_distant)) if(CAP_EXTFONT || vid.usingGL == false) {
       queuestr(V, .5, its(val+1), 0xFFFFFFFF);
       auto& side = dw->sides[val];
       for(int i=0; i<si; i++) {
@@ -1211,7 +1210,6 @@ EX namespace dice {
         queuestr(V * rgpushxto0(mid), .25, its(side[i]+1), 0xFFFFFFFF);
         }
       }
-    #endif
     
     shiftmatrix V1 = V * ddspin(c, dir) * spin(M_PI);
     if(dd.mirrored) V1 = V1 * MirrorY;
@@ -1370,6 +1368,7 @@ EX namespace dice {
       queuecurve(V1, 0xFFFFFFFF, color & 0xFFFFFF9F, PPR::WALL);
       
       #if !CAP_EXTFONT
+      if(!vid.usingGL) continue;
       pointfunction pf = [&] (ld x, ld y) {
         dynamicval<eGeometry> g(geometry, highdim);
         return sphere_to_space(normalize(ctr + cx * x + cy * y));
