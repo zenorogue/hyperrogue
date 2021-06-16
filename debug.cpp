@@ -469,6 +469,9 @@ struct debugScreen {
         dialog::add_action([what] () {
           bitfield_editor(what->mondir, [what] (int i) { what->mondir = i; },
           "monster direction");
+          dialog::extra_options = [what] () { 
+            dialog::addBoolItem(XLAT("mirrored"), what->monmirror, 'M');
+            };
           });
         dialog::addSelItem("stuntime", its(what->stuntime), 's');
         dialog::add_action([what] () {
