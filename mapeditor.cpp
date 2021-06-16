@@ -677,6 +677,7 @@ EX namespace mapstream {
         f.write_char(dice::get_die_id(dat.which));
         f.write_char(dat.val);
         f.write_char(dat.dir);
+        f.write_char(dat.mirrored);
         }
       // f.write_char(c->barleft);
       // f.write_char(c->barright);
@@ -833,6 +834,8 @@ EX namespace mapstream {
         dat.which = dice::get_by_id(f.read_char());
         dat.val = f.read_char();
         dat.dir = fixspin(rspin, f.read_char(), c->type, f.vernum);
+        if(f.vernum >= 0xA902)
+          dat.mirrored = f.read_char();
         }
       // c->barleft = (eLand) f.read_char();
       // c->barright = (eLand) f.read_char();

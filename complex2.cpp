@@ -963,6 +963,7 @@ EX namespace dice {
     struct die_structure *which;
     int val;
     int dir;
+    bool mirrored;
     int happy();
     };
   #endif
@@ -1113,12 +1114,11 @@ EX namespace dice {
     
     auto& dw = dd.which;
     
-    int si = isize(dw->sides[val]);
+    int si = dw->facesides;
     
     if(t % si) { println(hlog, "error: bad roll"); return dd; }
     
-    int sideid = (rdir - dir) * si / t;
-    if(sideid < 0) sideid += si;
+    int sideid = gmod((rdir - dir) * (dd.mirrored?-1:1) * si / t, si);
     
     int val1 = dw->sides[val][sideid];
     
@@ -1131,10 +1131,13 @@ EX namespace dice {
     
     int rdir1 = mi.rev_dir_force();
     
-    int dir1 = rdir1 - sideid1 * t1 / si1;
+    bool mirror1 = dd.mirrored ^ mi.mirror();
+    
+    int dir1 = rdir1 - (mirror1?-1:1) * sideid1 * t1 / si1;
     
     dir1 = gmod(dir1, t1);
     
+    dd.mirrored = mirror1;
     dd.val = val1;
     dd.dir = dir1;
     return dd;
@@ -1211,6 +1214,7 @@ EX namespace dice {
     #endif
     
     shiftmatrix V1 = V * ddspin(c, dir) * spin(M_PI);
+    if(dd.mirrored) V1 = V1 * MirrorY;
     
     // loop:
 
