@@ -43,7 +43,7 @@ EX void prepare_sky() {
     queuepoly(T, cgi.shEuclideanSky, 0x0044e4FF);
     queuepolyat(T * zpush(cgi.SKY+0.5) * xpush(cgi.SKY+0.5), cgi.shSun, 0xFFFF00FF, PPR::SKY);
     }
-  else if(!(cgflags & qIDEAL)) {
+  else {
     sky = &queuea<dqi_sky> (PPR::MISSILE);
     }
   }
@@ -75,6 +75,65 @@ void compute_skyvertices(const vector<sky_item>& sky) {
     bool inmir = false;
     forCellEx(c1, c) if(c1->land == laMirrorWall) inmir = true;
     if(inmir) continue;
+
+    if(cgflags & qIDEAL) {
+      for(int i=0; i<c->type; i++) {
+        int j = (i+1) % c->type;
+        transmatrix T1 = unshift(si.T);
+        hyperpoint ci = kleinize(get_corner_position(c, i, 3));
+        hyperpoint cj = kleinize(get_corner_position(c, j, 3));
+        static const int prec = 8;
+        ci = (ci - C0)/prec;
+        cj = (cj - C0)/prec;
+        glhr::colored_vertex vs[prec+1][prec+1], vh[prec+1][prec+1];
+        
+        auto& co = colors[c];
+        
+        for(int x=0; x<=prec; x++)
+        for(int y=0; y<=prec-x; y++) {
+          transmatrix h = T1 * rgpushxto0(normalize(C0+ci*min<ld>(x, prec - .01)+cj*min<ld>(y, prec-.01)));
+          vs[y][x] = glhr::colored_vertex(h * skypoint, co.first);
+          vh[y][x] = glhr::colored_vertex(h * hellpoint, co.second);
+          }
+                
+        for(int x=0; x<prec; x++)
+        for(int y=0; y<prec; y++) {
+          if(x+y < prec) {
+            skyvertices.emplace_back(vs[y][x]);
+            skyvertices.emplace_back(vs[y+1][x]);
+            skyvertices.emplace_back(vs[y][x+1]);
+            if(x < prec-1 && y < prec-1) {
+              skyvertices.emplace_back(vh[y][x]);
+              skyvertices.emplace_back(vh[y+1][x]);
+              skyvertices.emplace_back(vh[y][x+1]);
+              }
+            }
+          if(x && y && x+y <= prec) {
+            skyvertices.emplace_back(vs[y][x]);
+            skyvertices.emplace_back(vs[y][x-1]);
+            skyvertices.emplace_back(vs[y-1][x]);
+            if(x < prec-1 && y < prec-1) {
+              skyvertices.emplace_back(vh[y][x]);
+              skyvertices.emplace_back(vh[y][x-1]);
+              skyvertices.emplace_back(vh[y-1][x]);
+              }
+            }
+          }
+        
+        if(!colors.count(c->move(i))) {
+          for(int i=0; i<prec; i++) {
+            int j = i+1;
+            skyvertices.emplace_back(vs[i][prec-i]);
+            skyvertices.emplace_back(vs[j][prec-j]);
+            skyvertices.emplace_back(vh[i][prec-i]);
+            skyvertices.emplace_back(vh[i][prec-i]);
+            skyvertices.emplace_back(vs[j][prec-j]);
+            skyvertices.emplace_back(vh[j][prec-j]);
+            }
+          }
+        }
+      continue;
+      }
     
     for(int i=0; i<c->type; i++) {
       
@@ -87,9 +146,9 @@ void compute_skyvertices(const vector<sky_item>& sky) {
           transmatrix T1 = unshift(si.T);
           auto cw = cw0;
           while(colors.count(cw.at)) {
-            color_t col = colors[cw.at].second;
-            this_poly.emplace_back(T1 * skypoint, colors[cw.at].first);
-            this_poly.emplace_back(T1 * hellpoint, col);
+            auto& co = colors[cw.at];
+            this_poly.emplace_back(T1 * skypoint, co.first);
+            this_poly.emplace_back(T1 * hellpoint, co.second);
             T1 = T1 * currentmap->adj(cw.at, cw.spin);
             cw += wstep; cw++;
             }
@@ -181,9 +240,7 @@ void celldrawer::draw_ceiling() {
   if(pmodel != mdPerspective || sphere) return;
   
   auto add_to_sky = [this] (color_t col, color_t col2) {
-    if(cgflags & qIDEAL)
-      draw_shapevec(c, V, qfi.fshape->levels[SIDE_HIGH], darkena(col, 0, 0xFF), PPR::WALL);
-    else if(sky) sky->sky.emplace_back(c, V, col, col2);
+    if(sky) sky->sky.emplace_back(c, V, col, col2);
     };
   
   switch(ceiling_category(c)) {

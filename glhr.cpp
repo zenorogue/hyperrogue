@@ -113,6 +113,7 @@ struct glmatrix {
   struct colored_vertex {
     glvertex coords;
     glvec4 color;
+    colored_vertex() {}
     colored_vertex(GLfloat x, GLfloat y, GLfloat r, GLfloat g, GLfloat b) {
       coords[0] = x;
       coords[1] = y;
