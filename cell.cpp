@@ -1364,4 +1364,6 @@ EX bool is_boundary(cell *c) {
   return (cgflags & qPORTALSPACE) && isWall(c->wall);
   }
 
+EX cell out_of_bounds;
+
 }

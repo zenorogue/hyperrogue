@@ -2877,6 +2877,7 @@ EX hookset<bool(cell *c, int d, cell *from)> hooks_cellgen;
 
 EX void setdist(cell *c, int d, cell *from) {
 
+  if(c == &out_of_bounds) return;
   if(fake::in()) return FPIU(setdist(c, d, from));
   
   if(c->mpdist <= d) return;

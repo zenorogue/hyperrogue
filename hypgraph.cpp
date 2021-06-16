@@ -1720,6 +1720,7 @@ void hrmap::draw_at(cell *at, const shiftmatrix& where) {
     for(int i=0; i<c->type; i++) {
       // note: need do cmove before c.spin
       cell *c1 = c->cmove(i);      
+      if(c1 == &out_of_bounds) continue;
       enq(c1, optimized_shift(V * adj(c, i)));
       }
     }
