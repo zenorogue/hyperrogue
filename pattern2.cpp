@@ -895,7 +895,7 @@ EX namespace patterns {
     }
 
   void val_all(cell *c, patterninfo &si, int sub, int pat) {
-    if(IRREGULAR || arcm::in() || bt::in() || arb::in() || WDIM == 3) si.symmetries = c->type;
+    if(IRREGULAR || arcm::in() || bt::in() || arb::in() || WDIM == 3 || currentmap->strict_tree_rules()) si.symmetries = c->type;
     else if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
     else if(S7 < 6 && S3 == 3 && !INVERSE && !kite::in()) valSibling(c, si, sub, pat);
@@ -1088,6 +1088,8 @@ EX namespace patterns {
       if(sub & SPF_EXTRASYM) si.reflect = true;
       return si;
       }
+    
+    if(currentmap->strict_tree_rules()) return si;
 
     if(arb::in()) {
       si.id = arb::id_of(c->master);
@@ -2680,6 +2682,12 @@ EX namespace linepatterns {
 
   linepattern patTree("underlying tree", 0x00d0d000, cheating, 
     ALLCELLS(
+
+      if(currentmap->strict_tree_rules()) {
+        gridlinef(V, C0, V * currentmap->adj(c, 0), C0, col, 2 + vid.linequality); continue;
+        return;
+        }
+
       if(is_master(c)) {
         int dir = updir(c->master);
         if(dir == -1) continue;

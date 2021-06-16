@@ -974,6 +974,8 @@ EX struct dqi_poly *draw_shapevec(cell *c, const shiftmatrix& V, const vector<hp
   if(no_wall_rendering) return NULL;
   if(!c) return &queuepolyat(V, shv[0], col, prio);
   else if(WDIM == 3) return NULL;
+  else if(currentmap->strict_tree_rules()) return &queuepolyat(V, shv[shvid(c)], col, prio);
+
   #if CAP_GP
   else if(GOLDBERG) {
     int id = gp::get_plainshape_id(c);

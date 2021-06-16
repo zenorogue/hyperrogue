@@ -59,6 +59,8 @@ struct hrmap {
   virtual transmatrix spin_from(cell *c, int d, ld bonus=0);
   
   virtual double spacedist(cell *c, int i) { return hdist0(tC0(adj(c, i))); }
+  
+  virtual bool strict_tree_rules() { return false; }
 
   virtual void find_cell_connection(cell *c, int d);
   virtual int shvid(cell *c) { return 0; }

@@ -1376,6 +1376,7 @@ EX int wallchance(cell *c, bool deepOcean) {
 /** \brief should we generate the horocycles in the current geometry? */
 EX bool horo_ok() {  
   if(INVERSE) return false;
+  if(currentmap->strict_tree_rules()) return false;
   return hyperbolic && !bt::in() && !arcm::in() && !kite::in() && !experimental && !hybri && !arb::in() && !quotient;
   }
 
@@ -1929,6 +1930,7 @@ EX void gen_temple(cell *c) {
   }
 
 EX void moreBigStuff(cell *c) {
+  if(currentmap->strict_tree_rules()) return;
 
   if((bearsCamelot(c->land) && !euclid && !quotient && !nil) || c->land == laCamelot) 
   if(have_alt(c)) if(!(bt::in() && specialland != laCamelot)) 
