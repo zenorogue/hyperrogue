@@ -1038,8 +1038,8 @@ void poly_attack(cell *dest) {
   playSound(dest, "orb-ranged");
   eMonster orig = dest->monst;
   auto polymonsters = {
-    moYeti, moRunDog, moHunterDog, moRanger,
-    moDesertman, moMonkey, moZombie, moCultist,
+    moYeti, moRunDog, moRanger,
+    moDesertman, moMonkey, moCultist,
     moFallingDog, moVariantWarrior, moFamiliar, moOrangeDog,
     moRedFox, moFalsePrincess, moResearcher,
     moNarciss, moJiangshi, 
