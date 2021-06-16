@@ -663,8 +663,6 @@ EX void drawStats() {
     if(princess::challenge) vers += " Princess";
     if(randomPatternsMode) vers += " RPM";
     
-    if(land_structure) vers += " inv";
-
     if(geometry != gNormal || !BITRUNCATED) 
       vers = vers + " " + full_geometry_name();
     }
