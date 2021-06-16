@@ -961,8 +961,8 @@ EX namespace dice {
   #if HDR
   struct die_data {
     struct die_structure *which;
-    int val;
-    int dir;
+    int val; /* the current face value */
+    int dir; /* which direction is the first side (which->sides[val][0]) of the current face */
     bool mirrored;
     int happy();
     };
