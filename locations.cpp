@@ -259,6 +259,11 @@ template<class T> struct walker {
   bool operator < (const walker<T>& cw2) const {
     return tie(at, spin, mirrored) < tie(cw2.at, cw2.spin, cw2.mirrored);
     }
+  
+  /** how much should we spin to face direction dir */
+  int to_spin(int dir) {
+    return gmod(dir - spin, at->type) * (mirrored ? -1 : 1);
+    }
 
   walker<T>& operator ++ (int) { return (*this) += 1; }
   walker<T>& operator -- (int) { return (*this) -= 1; }

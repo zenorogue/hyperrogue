@@ -535,14 +535,22 @@ bool switch_lhu_in(eLand l) {
   return among(l, laBrownian, laMinefield, laTerracotta, laHive);
   }
 
+/** \brief how should be the direction from 'src' be mirrored to 'dst' */
+EX int chaos_mirror_dir(int dir, cellwalker src, cellwalker dst) {
+  if(dir >= dst.at->type) return dir;
+  return (dst-src.to_spin(dir)).spin;
+  }
+
 /** \brief Apply the Orb of Chaos.
  *
  * We assume that the player moves from cwt.peek, in
  * in the direction given by cwt.spin.
  */
 void apply_chaos() {
-  cell *ca = (cwt+1).cpeek();
-  cell *cb = (cwt-1).cpeek();
+  auto wa = cwt+1+wstep;
+  auto wb = cwt-1+wstep;
+  cell *ca = wa.at;
+  cell *cb = wb.at;
   if(!items[itOrbChaos] || chaos_forbidden(ca) || chaos_forbidden(cb)) return;
   if(ca && is_paired(ca->monst)) killMonster(ca, moPlayer);
   if(cb && is_paired(cb->monst)) killMonster(cb, moPlayer);
@@ -560,18 +568,14 @@ void apply_chaos() {
   copy_metadata(cb, &coa);
   if(!switch_lhu_in(ca->land)) ca->LHU = coa.LHU;
   if(!switch_lhu_in(cb->land)) cb->LHU = cob.LHU;
-  int sa = ca->mondir - ((cwt+1)+wstep).spin;
-  int sb = cb->mondir - ((cwt-1)+wstep).spin;
   if(ca->monst && !(isFriendly(ca) && markOrb(itOrbEmpathy)))
     ca->stuntime = min(ca->stuntime + 3, 15), markOrb(itOrbChaos);
   if(cb->monst && !(isFriendly(cb) && markOrb(itOrbEmpathy)))
     cb->stuntime = min(cb->stuntime + 3, 15), markOrb(itOrbChaos);
   ca->monmirror = !ca->monmirror;
   cb->monmirror = !cb->monmirror;
-  if(ca->mondir < ca->type)
-    ca->mondir = ((cwt+1)+wstep-sb).spin;
-  if(cb->mondir < cb->type)
-    cb->mondir = ((cwt+1)+wstep-sa).spin;
+  ca->mondir = chaos_mirror_dir(ca->mondir, wb, wa);
+  cb->mondir = chaos_mirror_dir(cb->mondir, wa, wb);
   if(isPrincess(ca) && !isPrincess(cb))
     princess::move(movei{cb, ca, JUMP});
   if(isPrincess(cb) && !isPrincess(ca))
