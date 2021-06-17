@@ -82,7 +82,7 @@ struct hrmap_standard : hrmap {
   ld spin_angle(cell *c, int d) override;
   double spacedist(cell *c, int i) override;
   void find_cell_connection(cell *c, int d) override;
-  virtual int shvid(cell *c);
+  virtual int shvid(cell *c) override;
   virtual hyperpoint get_corner(cell *c, int cid, ld cf) override;
   };
 
