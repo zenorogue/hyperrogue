@@ -794,7 +794,7 @@ bool pcmove::after_escape() {
   
   bool push_behind = c2->wall == waBigStatue || (among(c2->wall, waCTree, waSmallTree, waBigTree, waShrub, waVinePlant) && markOrb(itOrbWoods));
   
-  if(thruVine(c2, cwt.at)) push_behind = true;
+  if(thruVine(c2, cwt.at) && markOrb(itOrbWoods)) push_behind = true;
   
   if(push_behind && !c2->monst && !nonAdjacentPlayer(c2, cwt.at) && fmsMove) {
     eWall what = c2->wall;
