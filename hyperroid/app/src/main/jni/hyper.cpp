@@ -118,7 +118,7 @@ void uploadAll(MOBPAR_FORMAL);
 extern "C" bool
 Java_com_roguetemple_hyperroid_HyperRogue_keepinmemory
   ( MOBPAR_FORMAL) {
-  saveStats(true);
+  if(!casual) saveStats(true);
   uploadAll(MOBPAR_ACTUAL);
   if(!canmove) return false;
   if(items[itOrbSafety]) return false;
