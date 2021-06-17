@@ -1659,56 +1659,56 @@ EX void build_horocycles(cell *c, cell *from) {
   if(ls::single() && !among(specialland, laTemple, laMountain, laClearing, laStorms, laWhirlpool, laCaribbean, laCanvas, laPalace, laPrincessQuest, laCamelot))
     return;
   
-    // buildbigstuff
+  // buildbigstuff
 
-    if(ls::any_order() && bearsCamelot(c->land) && can_start_horo(c) && !bt::in() && 
-      #if MAXMDIM >= 4
-      !(hyperbolic && WDIM == 3 && !reg3::in_rule()) && 
-      #endif
-      (quickfind(laCamelot) || peace::on || (hrand(I2000) < (c->land == laCrossroads4 || ls::no_walls() ? 800 : 200) && horo_ok() &&
-      items[itEmerald] >= U5))) 
-      start_camelot(c);
-
-    if(c->land == laRlyeh && can_start_horo(c) && (quickfind(laTemple) || peace::on || (hrand(I2000) < 100 && items[itStatue] >= U5)))
-      createAlternateMap(c, horo_gen_distance(), hsA);
-
-    if(c->land == laJungle && can_start_horo(c) && (quickfind(laMountain) || (hrand(I2000) < 100 && landUnlocked(laMountain))))
-      createAlternateMap(c, horo_gen_distance(), hsA);
-
-    if(c->land == laOvergrown && can_start_horo(c) && (quickfind(laClearing) || (hrand(I2000) < 25 && items[itMutant] >= U5 && isLandIngame(laClearing)))) {
-      heptagon *h = createAlternateMap(c, horo_gen_distance(), hsA);
-      if(h) clearing::bpdata[h].root = NULL;
-      }
-    
-    if(stdhyperbolic && c->land == laStorms && can_start_horo(c) && hrand(2000) < 1000) {
-      heptagon *h = createAlternateMap(c, horo_gen_distance(), hsA);
-      if(h) h->alt->emeraldval = hrand(2);
-      }
-
-    if(c->land == laOcean && deepOcean && !generatingEquidistant && !peace::on && can_start_horo(c) && 
-      (quickfind(laWhirlpool) || (
-        hrand(2000) < (PURE ? 500 : 1000))))
-      createAlternateMap(c, horo_gen_distance(), hsA);
-    
-    #if CAP_COMPLEX2
-    if(c->land == laOcean && deepOcean && !generatingEquidistant && hrand(10000) < 20 && no_barriers_in_radius(c, 2) && hyperbolic && !quotient && !tactic::on && !safety) 
-      brownian::init_further(c);
+  if(ls::any_order() && bearsCamelot(c->land) && can_start_horo(c) && !bt::in() && 
+    #if MAXMDIM >= 4
+    !(hyperbolic && WDIM == 3 && !reg3::in_rule()) && 
     #endif
+    (quickfind(laCamelot) || peace::on || (hrand(I2000) < (c->land == laCrossroads4 || ls::no_walls() ? 800 : 200) && horo_ok() &&
+    items[itEmerald] >= U5))) 
+    start_camelot(c);
 
-    if(c->land == laCaribbean && can_start_horo(c))
-      createAlternateMap(c, horo_gen_distance(), hsA);
+  if(c->land == laRlyeh && can_start_horo(c) && (quickfind(laTemple) || peace::on || (hrand(I2000) < 100 && items[itStatue] >= U5)))
+    createAlternateMap(c, horo_gen_distance(), hsA);
 
-    if(c->land == laCanvas && can_start_horo(c) && ls::any_order())
-      createAlternateMap(c, horo_gen_distance(), hsA);
+  if(c->land == laJungle && can_start_horo(c) && (quickfind(laMountain) || (hrand(I2000) < 100 && landUnlocked(laMountain))))
+    createAlternateMap(c, horo_gen_distance(), hsA);
 
-    if(c->land == laPalace && can_start_horo(c) && !princess::generating && !shmup::on && multi::players == 1 && !weirdhyperbolic &&
-      (princess::forceMouse ? canReachPlayer(from, moMouse) :
-        (hrand(2000) < (peace::on ? 100 : 20))) && 
-      (princess::challenge || kills[moVizier] || peace::on)) {
-      createAlternateMap(c, PRADIUS0, hsOrigin, waPalace);
-      celllister cl(c, 5, 1000000, NULL);
-      for(cell *c: cl.lst) if(c->master->alt) currentmap->generateAlts(c->master);
-      }
+  if(c->land == laOvergrown && can_start_horo(c) && (quickfind(laClearing) || (hrand(I2000) < 25 && items[itMutant] >= U5 && isLandIngame(laClearing)))) {
+    heptagon *h = createAlternateMap(c, horo_gen_distance(), hsA);
+    if(h) clearing::bpdata[h].root = NULL;
+    }
+    
+  if(stdhyperbolic && c->land == laStorms && can_start_horo(c) && hrand(2000) < 1000) {
+    heptagon *h = createAlternateMap(c, horo_gen_distance(), hsA);
+    if(h) h->alt->emeraldval = hrand(2);
+    }
+
+  if(c->land == laOcean && deepOcean && !generatingEquidistant && !peace::on && can_start_horo(c) && 
+    (quickfind(laWhirlpool) || (
+      hrand(2000) < (PURE ? 500 : 1000))))
+    createAlternateMap(c, horo_gen_distance(), hsA);
+    
+  #if CAP_COMPLEX2
+  if(c->land == laOcean && deepOcean && !generatingEquidistant && hrand(10000) < 20 && no_barriers_in_radius(c, 2) && hyperbolic && !quotient && !tactic::on && !safety) 
+    brownian::init_further(c);
+  #endif
+
+  if(c->land == laCaribbean && can_start_horo(c))
+    createAlternateMap(c, horo_gen_distance(), hsA);
+
+  if(c->land == laCanvas && can_start_horo(c) && ls::any_order())
+    createAlternateMap(c, horo_gen_distance(), hsA);
+
+  if(c->land == laPalace && can_start_horo(c) && !princess::generating && !shmup::on && multi::players == 1 && !weirdhyperbolic &&
+    (princess::forceMouse ? canReachPlayer(from, moMouse) :
+      (hrand(2000) < (peace::on ? 100 : 20))) && 
+    (princess::challenge || kills[moVizier] || peace::on)) {
+    createAlternateMap(c, PRADIUS0, hsOrigin, waPalace);
+    celllister cl(c, 5, 1000000, NULL);
+    for(cell *c: cl.lst) if(c->master->alt) currentmap->generateAlts(c->master);
+    }
   }
   
 EX void buildBigStuff(cell *c, cell *from) {
