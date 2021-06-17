@@ -1198,6 +1198,9 @@ EX namespace dialog {
 
   EX string infix;
   
+  string foreign_letters = "ÁÄÇÈÉÍÎÖÚÜßàáâãäçèéêìíîïòóôõöøùúüýąćČčĎďĘęĚěğİıŁłńňŘřŚśŞşŠšŤťůŹźŻżŽž";
+  string latin_letters   = "AACEEIIOUUsAAAAACEEEIIIIOOOOOOUUUYACCCDDEEEEGIILLNNRRSSSSSSTTUZZZZZZ";
+
   EX bool hasInfix(const string &s) {
     if(infix == "") return true;
     string t = "";
@@ -1207,6 +1210,14 @@ EX namespace dialog {
       if(c >= 'a' && c <= 'z') tt += c - 32;
       else if(c >= 'A' && c <= 'Z') tt += c;
       else if(c == '@') tt += c;
+      
+      if(tt == 0) for(int k=0; k<isize(latin_letters); k++) {
+        if(s[i] == foreign_letters[2*k] && s[i+1] == foreign_letters[2*k+1]) {
+          if(latin_letters[k] == 's') t += "SS";
+          else tt += latin_letters[k];
+          }
+        }
+
       if(tt) t += tt;
       }
     return t.find(infix) != string::npos;
