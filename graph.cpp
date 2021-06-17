@@ -793,10 +793,6 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
 
   if(WDIM == 3 && c == centerover && in_perspective() && hdist0(tC0(V)) < cgi.orbsize * 0.25) return false;
 
-#if CAP_SHAPES
-  if(GDIM == 3 && mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) return true;
-#endif
-
   if(!mmitem || !CAP_SHAPES) {
     draw_ascii(V, iinf[it].glyph, icol, 1);
     return true;
@@ -840,6 +836,10 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
   else
     if(GDIM == 3 && c && it != itBabyTortoise) Vit = face_the_player(Vit);
   // V * cspin(0, 2, ptick(618, 0));
+
+#if CAP_SHAPES
+  if(mapeditor::drawUserShape(Vit, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) return true;
+#endif
 
   if(c && history::includeHistory && history::infindhistory.count(c)) poly_outline = OUTLINE_DEAD;
 
