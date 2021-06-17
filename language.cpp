@@ -112,9 +112,11 @@ string choose4(int g, string a, string b, string c, string d) {
 
 set<string> warnshown;
 
+#if CAP_TRANS
 EX bool translation_exists(const string& x) {
   return findInHashTable(x, all_sentences);
   }
+#endif
 
 void basicrep(string& x) {
 
