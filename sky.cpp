@@ -535,7 +535,7 @@ EX void make_air() {
     #endif
 
 #if CAP_SDL
-    if(anyshiftclick) IMAGESAVE(airbuf->render(), "air.png");
+    // if(anyshiftclick) IMAGESAVE(airbuf->render(), "air.png");
 #endif
     rb.reset();
     }
