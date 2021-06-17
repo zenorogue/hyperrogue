@@ -4377,3 +4377,20 @@ VR:
 - Canyon Hag's attack now has a sound effect and an animation
 - the bug with android crashes should be fixed
 - fixed spurious messages about slashing the Shadow with the energy sword
+
+2021-06-17 09:52 Update 12.0b:
+
+Mostly Bugfixes:
+- fixed going thru vines
+- item graphics were not editable
+- fixed the first-person perspective for ideal 2D tessellations (also implemented previously missing sky)
+- 'edit cell values' option now visible in the map editor
+- Orb of Change no longer can produce Hunter Dogs and Zombies (who have special properties)
+- fixed 'inv' displayed incorrectly in the HUD mode line
+- full_geometry_name now displays the Archimedean symbol
+- dice:: numbers now shown outside of the OpenGL mode
+- dice:: Orb of Chaos works correctly now
+- dice:: now work correctly in non-orientable spaces
+- dice values are now editable in Shift+G
+- fixed the direction setup by Orb of Chaos
+- fixed the remaining spurious shadow messages
