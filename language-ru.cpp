@@ -2097,7 +2097,7 @@ S("Wherever this powerful being goes, the living fjord "
  
 N("Garnet", GEN_O, "Гранат", "Гранаты", "Гранат", "Гранатом")
 S("Vikings believe that garnets improve their strength.",
-  "Викинги верятЮ что гранаты дают им силу.")
+  "Викинги верят, что гранаты дают им силу.")
  
 Orb("the Fish", "Рыбы")
 S("This Orb lets you dive into the water. While diving, you are able to see and collect underwater treasures, "
