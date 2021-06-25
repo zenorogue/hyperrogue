@@ -324,7 +324,7 @@ int readArgs() {
   }
 
 int ah = addHook(hooks_args, 100, readArgs) +
-  addHook(pres::hooks_build_rvtour, 42, [] (string s, vector<tour::slide>& v) {
+  addHook_rvslides(42, [] (string s, vector<tour::slide>& v) {
     if(s != "data") return;
     using namespace tour;
     v.push_back(

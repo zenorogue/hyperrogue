@@ -274,7 +274,7 @@ auto hchook =
     param_f(cylball, "cylball");
     })
 
-+ addHook(pres::hooks_build_rvtour, 167, [] (string s, vector<tour::slide>& v) {
++ addHook_rvslides(167, [] (string s, vector<tour::slide>& v) {
   if(s != "noniso") return;
   using namespace tour;
   v.push_back(

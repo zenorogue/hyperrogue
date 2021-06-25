@@ -593,7 +593,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
     }
 
   auto hooks = addHook(hooks_args, 100, readArgs)
-  + addHook(rogueviz::pres::hooks_build_rvtour, 187, [] (string s, vector<tour::slide>& v) {
+  + addHook_rvslides(187, [] (string s, vector<tour::slide>& v) {
       if(s != "mixed") return;
       using namespace tour;
       string cap = "flocking simulation/";

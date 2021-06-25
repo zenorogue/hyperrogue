@@ -192,7 +192,7 @@ int args() {
 
 auto hooks = 
     addHook(hooks_args, 100, args)
-  + addHook(rogueviz::pres::hooks_build_rvtour, 180, [] (string s, vector<tour::slide>& v) {
+  + addHook_rvslides(180, [] (string s, vector<tour::slide>& v) {
       if(s != "mixed") return;
       using namespace tour;
       for(int m: {1,2}) {

@@ -274,7 +274,7 @@ auto hook = arg::add3("-inner-map", enable)
       'i')
     ->set_reaction(need_redo);
     })
-  + addHook(rogueviz::pres::hooks_build_rvtour, 52, [] (string s, vector<tour::slide>& v) {
+  + addHook_rvslides(52, [] (string s, vector<tour::slide>& v) {
       if(s != "projections") return;
       using namespace tour;
 

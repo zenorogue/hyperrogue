@@ -50,7 +50,9 @@
 #include "ascending-descending.cpp"
 #include "balls.cpp"
 #include "pentaroll.cpp"
+#if CAP_RVSLIDES
 #include "playing-with-impossibility.cpp"
+#endif
 #include "highdim-demo.cpp"
 
 //#endif

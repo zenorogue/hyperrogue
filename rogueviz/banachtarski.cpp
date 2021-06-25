@@ -558,7 +558,7 @@ int readArgs() {
 auto hook = addHook(hooks_args, 100, readArgs)
   + addHook(hooks_initgame, 100, bantar)
   + addHook(hooks_frame, 100, bantar_stats)
-  + addHook(pres::hooks_build_rvtour, 140, [] (string s, vector<tour::slide>& v) {
+  + addHook_rvslides(140, [] (string s, vector<tour::slide>& v) {
     if(s != "mixed") return;
     using namespace pres;
     v.push_back(

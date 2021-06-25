@@ -444,7 +444,7 @@ auto fifteen_hook =
     param_b(show_dots, "fifteen_dots");
     param_b(show_triangles, "fifteen_tris");
     })
-+ addHook(tour::ss::hooks_extra_slideshows, 120, [] (tour::ss::slideshow_callback cb) {
++ addHook_slideshows(120, [] (tour::ss::slideshow_callback cb) {
 
     using namespace rogueviz::pres;
     static vector<slide> fifteen_slides;

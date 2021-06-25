@@ -511,7 +511,7 @@ auto msc =
     param_f(prec, "moon_precision")
     ->editable(0, 30, .5, "precision", "larger values are less precise", 'p');
     })
-  + addHook(rogueviz::pres::hooks_build_rvtour, 51, [] (string s, vector<tour::slide>& v) {
+  + addHook_rvslides(51, [] (string s, vector<tour::slide>& v) {
       if(s != "projections") return;
       using namespace tour;
 

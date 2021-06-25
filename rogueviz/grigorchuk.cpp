@@ -494,9 +494,8 @@ auto hook = addHook(hooks_args, 100, readArgsG)
       dialog::addBoolItem_action(XLAT("Grigorchuk labels"), grigorchuk::view_labels, 'M'); 
       }
     })
-   + addHook(hooks_initialize, 100, create_grigorchuk_geometry)
-
-  + addHook(rogueviz::pres::hooks_build_rvtour, 140, [] (string s, vector<tour::slide>& v) {
+  + addHook(hooks_initialize, 100, create_grigorchuk_geometry)
+  + addHook_rvslides(140, [] (string s, vector<tour::slide>& v) {
     if(s != "mixed") return;
     using namespace rogueviz::pres;
     v.push_back(tour::slide{

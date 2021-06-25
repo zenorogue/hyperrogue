@@ -1482,7 +1482,7 @@ auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
     param_i(loop_any, "nk_loopany");
     })
 #ifndef NOTKNOT
-  + addHook(rogueviz::pres::hooks_build_rvtour, 180, [] (string s, vector<tour::slide>& v) {
+  + addHook_rvslides(180, [] (string s, vector<tour::slide>& v) {
       if(s != "mixed") return;
       v.push_back(tour::slide{
         "weird portals", 10, tour::LEGAL::NONE | tour::QUICKSKIP,

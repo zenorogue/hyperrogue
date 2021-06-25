@@ -267,7 +267,7 @@ auto hook = 0
 #if CAP_COMMANDLINE
 + addHook(hooks_args, 100, readArgs)
 #endif
-+ addHook(pres::hooks_build_rvtour, 144, [] (string s, vector<tour::slide>& v) {
++ addHook_rvslides(144, [] (string s, vector<tour::slide>& v) {
   if(s != "mixed") return;
   using namespace tour;
   v.push_back(

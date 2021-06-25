@@ -418,7 +418,7 @@ auto msc = arg::add3("-analogs", enable)
     param_b(textured, "analogs_texture")
     ->editable("draw Earth", 'T');
     })
-  + addHook(rogueviz::pres::hooks_build_rvtour, 131, [] (string s, vector<tour::slide>& v) {
+  + addHook_rvslides(131, [] (string s, vector<tour::slide>& v) {
       if(s != "mixed") return;
       using namespace tour;
 

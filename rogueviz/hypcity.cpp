@@ -100,7 +100,7 @@ void enable() {
   }
 
 auto hypcity_ah = arg::add3("-hypcity", enable)
-+ addHook(tour::ss::hooks_extra_slideshows, 120, [] (tour::ss::slideshow_callback cb) {
++ addHook_slideshows(120, [] (tour::ss::slideshow_callback cb) {
 
     using namespace rogueviz::pres;
     static vector<slide> hypcity_slides;

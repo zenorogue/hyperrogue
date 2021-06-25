@@ -234,7 +234,7 @@ void enable() {
   }
 
 int phooks = arg::add3("-stair", enable)
-  + addHook(pres::hooks_build_rvtour, 141, [] (string s, vector<tour::slide>& v) {
+  + addHook_rvslides(141, [] (string s, vector<tour::slide>& v) {
     if(s != "mixed") return;
     using namespace tour;
     v.push_back(

@@ -617,7 +617,7 @@ string cname() {
   }
 
 int ah = addHook(hooks_args, 100, readArgs)
-  + addHook(pres::hooks_build_rvtour, 120, [] (string s, vector<tour::slide>& v) {
+  + addHook_rvslides(120, [] (string s, vector<tour::slide>& v) {
     if(s != "data") return;
     using namespace pres;
     string sagf = "SAG/";

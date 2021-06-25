@@ -147,6 +147,7 @@ void honey(string s, vector<tour::slide>& v) {
 
   }
 
+#if CAP_RVSLIDES
 vector<tour::slide> noniso_slides;
 tour::slide *gen_noniso_demo() {
   noniso_slides.clear();
@@ -168,9 +169,10 @@ tour::slide *gen_noniso_demo() {
   pres::add_end(noniso_slides);
   return &noniso_slides[0];
   }
+#endif
 
-auto hooks  = addHook(pres::hooks_build_rvtour, 163, honey)
-  + addHook(tour::ss::hooks_extra_slideshows, 120, [] (tour::ss::slideshow_callback cb) {
+auto hooks  = addHook_rvslides(163, honey)
+  + addHook_slideshows(120, [] (tour::ss::slideshow_callback cb) {
   
     if(noniso_slides.empty()) 
       gen_noniso_demo();

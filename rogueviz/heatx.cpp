@@ -185,7 +185,7 @@ auto heathook = arg::add3("-heatx", enable)
     param_i(simulation_range, "heat_range")
     ->editable(0, 100000, 1000, "heat simulation range", "number of cells to consider", 'r');
     })
-  + addHook(rogueviz::pres::hooks_build_rvtour, 180, [] (string s, vector<tour::slide>& v) {
+  + addHook_rvslides(180, [] (string s, vector<tour::slide>& v) {
       if(s != "mixed") return;
       heat_slide(v, "squares", 
         "A simple heat simulation. In each turn, the temperature changes towards the average of temperatures of adjacent cells.\n\n"

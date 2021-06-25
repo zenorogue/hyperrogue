@@ -106,7 +106,7 @@ namespace tree {
     }
 
 int ah = arg::add3("-tree", [] { tree::read(arg::shift_args()); })
-+ addHook(pres::hooks_build_rvtour, 120, [] (string s, vector<tour::slide>& v) {
++ addHook_rvslides(120, [] (string s, vector<tour::slide>& v) {
     if(s != "data") return;
     using namespace pres;
     v.push_back(

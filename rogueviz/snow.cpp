@@ -234,7 +234,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
   })
 #endif
 
-+ addHook(pres::hooks_build_rvtour, 161, [] (string s, vector<tour::slide>& v) {
++ addHook_rvslides(161, [] (string s, vector<tour::slide>& v) {
   if(s != "noniso") return;
   v.push_back(tour::slide{
     cap+"snowball visualization", 10, tour::LEGAL::NONE | tour::QUICKSKIP,

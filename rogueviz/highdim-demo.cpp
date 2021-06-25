@@ -447,6 +447,7 @@ void house(int sides, int shape = 10) {
   start_game();
   }
 
+#if CAP_RVSLIDES
 tour::slide *gen_high_demo() {
   high_slides.clear();
   using namespace tour;
@@ -643,9 +644,10 @@ tour::slide *gen_high_demo() {
   pres::add_end(v);
   return &high_slides[0];
   }
+#endif
 
 auto highdim_hooks  = 
-    addHook(tour::ss::hooks_extra_slideshows, 120, [] (tour::ss::slideshow_callback cb) {
+    addHook_slideshows(120, [] (tour::ss::slideshow_callback cb) {
   
     if(high_slides.empty()) gen_high_demo();
 

@@ -319,7 +319,7 @@ void enable_hooks() {
 auto xhook = 
   arg::add3("-snub", [] { run_snub(arg::shift_argi(), 3); })
 + arg::add3("-snub4", [] { run_snub(arg::shift_argi(), 4); })
-+ addHook(pres::hooks_build_rvtour, 143, [] (string s, vector<tour::slide>& v) {
++ addHook_rvslides(143, [] (string s, vector<tour::slide>& v) {
     if(s != "mixed") return;
     using namespace tour;
     v.push_back(
