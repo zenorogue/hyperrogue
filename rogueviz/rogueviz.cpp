@@ -809,6 +809,14 @@ bool rogueviz_hud() {
   return true;
   }
 
+bool rv_ignore_spaces = true;
+
+bool rv_ignore(char c) {
+  if(c == 32 && !rv_ignore_spaces) return true;
+  if(c == 10 || c == 13 || c == 32 || c == 9) return true;
+  return false;
+  }
+
 void readcolor(const string& cfname) {
   FILE *f = fopen(cfname.c_str(), "rt");
   if(!f) { printf("color file missing\n"); exit(1); }
@@ -817,8 +825,8 @@ void readcolor(const string& cfname) {
     while(true) {
       int c = fgetc(f);
       if(c == EOF) { fclose(f); return; }
-      else if(c == 10 || c == 13 || c == 32 || c == 9) ;
       else if(c == ',' || c == ';') break;
+      else if(rv_ignore(c)) ;
       else lab += c;
       }
     
@@ -836,7 +844,7 @@ void readcolor(const string& cfname) {
       string lab2 = "";
       while(true) {
         int c = fgetc(f);
-        if(c == 10 || c == 13 || c == 32 || c == 9 || c == ',' || c == ';' || c == EOF) break;
+        if(rv_ignore(ch) || c == ',' || c == ';' || c == EOF) break;
         else lab2 += c;
         }
       x = vdata[getid(lab2)].cp;
@@ -978,6 +986,9 @@ int readArgs() {
     }
   else if(argis("-lab-off")) {
     showlabels = false;
+    }
+  else if(argis("-rvspaces")) {
+    rv_ignore_spaces = false;
     }
   else if(argis("-rog3")) {
     rog3 = true;

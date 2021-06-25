@@ -267,8 +267,8 @@ namespace sag {
       while(true) {
         int c = fgetc(sf);
         if(c == EOF) goto afterload;
-        else if(c == 10 || c == 13 || c == 32 || c == 9) ;
         else if(c == ',' || c == ';') break;
+        else if(rv_ignore(c)) ;
         else lab += c;
         }
       int sid = -1;
@@ -412,14 +412,14 @@ namespace sag {
         int c = fgetc(f.f);
         if(c == EOF) goto finish;
         else if(c == ';') break;
-        else if(c == 10 || c == 13 || c == 9) ;
+        else if(rv_ignore(c)) ;
         else l1 += c;
         }
       while(true) {
         int c = fgetc(f.f);
         if(c == EOF) goto finish;
         else if(c == ';') goto finish;
-        else if(c == 10 || c == 13 || c == 9) break;
+        else if(rv_ignore(c)) break;
         else l2 += c;
         }
       printf("%s -> %s\n", l1.c_str(), l2.c_str());
@@ -445,14 +445,14 @@ namespace sag {
         int c = fgetc(f.f);
         if(c == EOF) return;
         else if(c == ';') break;
-        else if(c == 10 || c == 13 || c == 32 || c == 9) ;
+        else if(rv_ignore(c)) ;
         else l1 += c;
         }
       while(true) {
         int c = fgetc(f.f);
         if(c == EOF) return;
         else if(c == ';') break;
-        else if(c == 10 || c == 13 || c == 32 || c == 9) ;
+        else if(rv_ignore(c)) ;
         else l2 += c;
         }
       ld wei;

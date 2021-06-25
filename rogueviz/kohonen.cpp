@@ -120,7 +120,7 @@ void loadsamples(const string& fname) {
       int c = fgetc(f.f);
       if(c == -1 || c == 10 || c == 13) break;
       if(c == '!' && s.name == "") shown = true;
-      else if(c != 32 && c != 9) s.name += c;
+      else if(!rv_ignore(c)) s.name += c;
       }
     data.push_back(move(s));
     if(shown) 
@@ -1146,6 +1146,7 @@ void kloadw(const string& fname) {
         goto nexti;
         }
       else if(c == '=' || c == '/' || c == '*') kind = c;
+      else if(rv_ignore(c)) ;
       else (kind?s2:s1) += c;
       }
     nexti: ;
