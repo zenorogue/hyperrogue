@@ -238,6 +238,7 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   void createViz(int id, cell *c, transmatrix at);
 
   extern map<string, int> labeler;
+  bool id_known(const string& s);
   int getid(const string& s);
   int getnewid(string s);
   extern string fname;

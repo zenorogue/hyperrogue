@@ -161,6 +161,10 @@ vector<vertexdata> vdata;
 
 map<string, int> labeler;
 
+bool id_known(const string& s) {
+  return labeler.count(s);
+  }
+
 int getid(const string& s) {
   if(labeler.count(s)) return labeler[s];
   else {
