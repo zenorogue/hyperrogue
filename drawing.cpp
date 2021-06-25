@@ -2489,7 +2489,9 @@ EX void drawqueue() {
 #endif
 
   if(!keep_curvedata) {
-    curvedata.clear(); curvestart = 0;
+    curvedata.clear();
+    finf.tvertices.clear();
+    curvestart = 0;
     }
   
   #if CAP_GL
