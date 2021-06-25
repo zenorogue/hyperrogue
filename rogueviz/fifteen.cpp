@@ -366,6 +366,8 @@ int rugArgs() {
     addHook(mapstream::hooks_loadmap_old, 100, load_fifteen);
     #if ISWEB
     mapstream::loadMap("1");    
+    #else
+    enable();
     #endif
     }
   else if(argis("-fifteen-center")) {
