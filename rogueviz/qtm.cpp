@@ -214,8 +214,10 @@ auto hooks =
               set_geometry(gRotSpace);
               slide_backup(rots::underlying_scale, .25);
               slide_backup(qmode, m);
+              #if CAP_RAY
               slide_backup(ray::max_cells, 32768);
               slide_backup(ray::fixed_map, true);
+              #endif
               slide_backup(smooth_scrolling, true);
               slide_backup(camera_speed, .1);
               enable();
@@ -238,9 +240,11 @@ auto hooks =
               set_geometry(gRotSpace);
               slide_backup(rots::underlying_scale, .25);
               slide_backup(qmode, m);
+              #if CAP_RAY
               slide_backup(ray::max_cells, 32768);
               slide_backup(ray::fixed_map, true);
               slide_backup(ray::want_use, 2);
+              #endif
               slide_backup(smooth_scrolling, true);
               slide_backup(camera_speed, .1);
               enable();

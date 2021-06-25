@@ -4,6 +4,8 @@
 
 #include "rogueviz.h"
 
+#if CAP_RAY
+
 /** 
 
 * mg 2 in old video
@@ -322,6 +324,7 @@ struct hrmap_notknot : hrmap {
     return ac[0]->master;
     }
 
+  #if CAP_SOLV
   heptagon *create_solv_knot() {
     dynamicval<eGeometry> g(geometry, base);
     dynamicval<hrmap*> m(currentmap, euc);
@@ -353,6 +356,7 @@ struct hrmap_notknot : hrmap {
     
     return ac[0]->master;
     }
+  #endif
   
   heptagon *interpret_basemap() {
     dynamicval<eGeometry> g(geometry, base);
@@ -376,8 +380,10 @@ struct hrmap_notknot : hrmap {
       return create_trifoil_knot();
     else if(base == gNil)
       return create_nil_knot();
+    #if CAP_SOLV
     else if(base == gArnoldCat)
       return create_solv_knot();
+    #endif
     throw hr_exception();
     }
   
@@ -601,6 +607,7 @@ struct hrmap_notknot : hrmap {
         }
       }
 
+    #if CAP_SOLV
     if(base_map == "" && base == gArnoldCat) {
 
       if(u->where->zebraval & 16) {
@@ -644,6 +651,7 @@ struct hrmap_notknot : hrmap {
           }
         }
       }
+    #endif
     
     if(base == gCubeTiling) {
       special = true;
@@ -863,7 +871,9 @@ struct hrmap_notknot : hrmap {
         }
 
       /* flat areas */
+      #if CAP_SOLV
       if(!asonov::in())
+      #endif
       for(int k=0; k<u->where->type; k++)
       for(int l=0; l<u->where->type; l++) {
         auto uk = gen_adj(u, k);
@@ -1234,7 +1244,8 @@ void launch_sphereknot() {
   pmodel = mdPerspective;
   ((hrmap_notknot*)currentmap)->add_fog();
   }
-
+ 
+ #if CAP_SOLV
 void launch_solv() {
   stop_game();
   set_geometry(gArnoldCat);
@@ -1258,6 +1269,7 @@ void launch_solv() {
   pmodel = mdGeodesic;
   ((hrmap_notknot*)currentmap)->add_fog();
   }
+  #endif
 
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
@@ -1283,8 +1295,10 @@ void show() {
     dialog::addItem("knotted portal in spherical geometry", 'd');
     dialog::add_action(launch_sphereknot);
     
+    #if CAP_SOLV
     dialog::addItem("a portal in Solv geometry", 'e');
     dialog::add_action(launch_solv);
+    #endif
       
     dialog::display();      
     });
@@ -1549,3 +1563,4 @@ auto hook1=
 }
 
 }
+#endif

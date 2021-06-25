@@ -71,13 +71,17 @@ auto geoslide(eGeometry g, char canvas, int jhole, int jblock) {
       if(sl2) {
         addMessage("Raycaster not implemented here.");
         }
+      #if CAP_RAY
       else if(ray::want_use != 2) {
         ray::want_use = 2;
         ray::max_cells = 4096;
         addMessage("Using a raycaster.");
         }
+      #endif
       else {
+        #if CAP_RAY
         ray::want_use = 0;
+        #endif
         addMessage("Using primitives.");
         }
       }

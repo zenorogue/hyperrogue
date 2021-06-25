@@ -410,7 +410,9 @@ auto explore_structure(int _shapeid) {
       enable();
       crystal::crystal_period = 4;
       start_game();
+      #if CAP_RAY
       ray::max_cells = 4096;
+      #endif
       }
     if(mode == pmKey || mode == pmGeometrySpecial) {
       stop_game();
