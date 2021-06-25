@@ -22,10 +22,17 @@ struct celldata {
 
 map<cell*, celldata> fif;
 
+vector<int> triangle_markers;
+vector<cell*> seq;
+vector<ld> turns;
+
 eWall empty = waChasm;
 
 enum ePenMove { pmJump, pmRotate, pmAdd, pmMirrorFlip };
 ePenMove pen;
+
+bool show_triangles = false;
+bool show_dots = true;
 
 void init_fifteen(int q = 20) {  
   println(hlog, "init_fifteen");
@@ -37,8 +44,33 @@ void init_fifteen(int q = 20) {
   println(hlog, "ok");
   }
 
+void compute_triangle_markers() {
+  triangle_markers.resize(isize(fif));
+  seq.resize(isize(fif));
+  for(auto& p: fif) {
+    cell *c = p.first;
+    
+    forCellIdEx(c1, i, c) if(fif.count(c1) && fif[c1].target == p.second.target + 1) {
+      triangle_markers[p.second.target] = (i - p.second.targetdir) * (p.second.targetmirror ? -1 : 1);
+      }
+    
+    if(p.second.current == 0)
+      seq.back() = c;
+    else {
+      seq[p.second.current-1] = c;
+      }
+    }
+
+  println(hlog, triangle_markers);
+
+  for(int i=0; i<isize(fif); i++) {
+    turns.push_back(triangle_markers[i+1] == 0 ? 90*degree : 0);
+    }
+  }
+
 string dotted(int i) {
   string s = its(i);
+  if(!show_dots) return s;
   bool confusing = true;
   for(char c: s) if(!among(c, '0', '6', '8', '9') && !(nonorientable && c == '3'))
     confusing = false;
@@ -108,6 +140,12 @@ bool draw_fifteen(cell *c, const shiftmatrix& V) {
       cdir = 0;
       }
     write_in_space(V * ddspin(c,cdir,0) * (cmir ? MirrorX: Id), 72, 1, dotted(cur), 0xFF, 0, 8);
+    if(show_triangles) {
+      cellwalker cw(c, cdir);
+      cw += triangle_markers[cur] - 1;
+      poly_outline = 0xFF;
+      queuepoly(V * ddspin(c, cw.spin, 0) * xpush(hdist0(tC0(currentmap->adj(c, cw.spin))) * .45 - cgi.zhexf * .3), cgi.shTinyArrow, 0xFF);
+      }
     }
   
   return false;
@@ -241,6 +279,8 @@ void edit_fifteen() {
             fif.erase(c);
           }
         }
+
+      compute_triangle_markers();
       }
 
     else if(doexiton(sym, uni)) popScreen();
@@ -250,7 +290,7 @@ void edit_fifteen() {
 void launch() {  
   /* setup */
   stop_game();
-  specialland = firstland = laCanvas;
+  enable_canvas();
   canvas_default_wall = waChasm;
   start_game();
   init_fifteen();
@@ -283,6 +323,7 @@ void load_fifteen(fhstream& f) {
     cd.currentdir = mapstream::fixspin(mapstream::relspin[at], cd.currentdir, c->type, f.vernum);
     println(hlog, "assigned ", cd.current, " to ", c);
     }
+  compute_triangle_markers();
   enable();
   }
 
@@ -334,8 +375,46 @@ int rugArgs() {
 
 auto fifteen_hook = 
   addHook(hooks_args, 100, rugArgs)
+#if CAP_SHOT
++ arg::add3("-fifteen-animate", [] { 
+    rogueviz::rv_hook(anims::hooks_record_anim, 100, [] (int i, int nof) {
+    double at = (i * (isize(seq)-1) * 1.) / nof;
+    int ati = at;
+    double atf = at - ati;
+    hyperpoint h0 = unshift(ggmatrix(seq[ati]) * C0);
+    hyperpoint h1 = unshift(ggmatrix(seq[ati+1]) * C0);
+    atf = atf*atf*(3-2*atf);
+    hyperpoint h2 = lerp(h0, h1, atf);
+    println(hlog, "h0=", h0, " h1=", h1, " h2=", h2);
+    if(invalid_point(h2) || h2[2] < .5) return;
+    h2 = normalize(h2);
+    static ld last_angle = 0;
+    static int last_i = 0;
+
+    View = gpushxto0(h2) * View;
+
+    if(ati != last_i && last_angle) {
+      View = spin(-(turns[last_i] - last_angle)) * View;
+      last_angle = 0;
+      }
+    
+    if(true) {
+      ld angle = lerp(0, turns[ati], atf);
+      ld x = -(angle - last_angle);
+      View = spin(x) * View;
+      last_angle = angle;
+      last_i = ati;
+      }
+
+    anims::moved();
+    }); })
+#endif
 + addHook(mapstream::hooks_loadmap, 100, [] (fhstream& f, int id) {
     if(id == 15) load_fifteen(f);
+    })
++ addHook(hooks_configfile, 100, [] {
+    param_b(show_dots, "fifteen_dots");
+    param_b(show_triangles, "fifteen_tris");
     })
 + addHook(tour::ss::hooks_extra_slideshows, 120, [] (tour::ss::slideshow_callback cb) {
 
