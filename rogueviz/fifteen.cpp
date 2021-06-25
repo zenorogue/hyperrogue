@@ -368,6 +368,32 @@ int rugArgs() {
     mapstream::loadMap("1");    
     #endif
     }
+  else if(argis("-fifteen-center")) {
+    // format: -fifteen-center 5 V 0
+    // to center at 0'th vertex of 5
+    shift(); int i = argi();
+    dynamicval<eCentering> ctr(centering);
+    dynamicval<cellwalker> lctr(cwt);
+    for(auto& p: fif) {
+      auto& c = p.first;
+      auto& data = p.second;
+      if(data.target == i) {
+        int dir = 0;
+        while(true) {
+          shift(); string s = args();
+          if(s == "F") { centering = eCentering::face; continue; }
+          if(s == "E") { centering = eCentering::edge; continue; }
+          if(s == "V") { centering = eCentering::vertex; continue; }
+          dir = argi();
+          break;
+          }
+        cwt = cellwalker(c, dir);
+        fullcenter();
+        }
+      }
+    playermoved = false;
+    vid.sspeed = -5;
+    }
 
   else return 1;
   return 0;
