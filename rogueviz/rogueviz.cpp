@@ -848,7 +848,7 @@ void readcolor(const string& cfname) {
       string lab2 = "";
       while(true) {
         int c = fgetc(f);
-        if(rv_ignore(ch) || c == ',' || c == ';' || c == EOF) break;
+        if(rv_ignore(c) || c == ',' || c == ';' || c == EOF) break;
         else lab2 += c;
         }
       x = vdata[getid(lab2)].cp;

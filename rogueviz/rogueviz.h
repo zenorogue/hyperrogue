@@ -243,6 +243,8 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   int getnewid(string s);
   extern string fname;
 
+  bool rv_ignore(char c);
+
   colorpair perturb(colorpair cp);
   void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const string* info, int i);
 
