@@ -116,6 +116,10 @@ namespace sag {
     snake_enabled = true;
     }
   
+  ld hub_penalty;
+  string hub_filename;
+  vector<int> hubval;
+  
   double costat(int vid, int sid) {
     if(vid < 0) return 0;
     double cost = 0;
@@ -125,6 +129,19 @@ namespace sag {
       int t2 = vd.edges[j].first;
       if(snakeid[t2] != -1) cost += snakedist(sid, snakeid[t2]) * ei->weight2;
       }
+    
+    if(!hubval.empty()) {
+      cell *c = snakecells[sid];
+      for(int i=0; i<c->type; i++) {
+        cell *c2 = c->move(i);
+        if(c2 && c2->wparam == INSNAKE) {
+          int vid2 = snakenode[c2->landparam];
+          if(vid2 >= 0 && (hubval[vid] & hubval[snakenode[c2->landparam]]) == 0)
+            cost += hub_penalty;
+          }
+        }
+      }
+    
     /* cell *c = snakecells[id];
     for(int i=0; i<c->type; i++) {
       cell *c2 = c->move(i);
@@ -383,6 +400,38 @@ namespace sag {
     
     println(hlog, "loglikelihood = ", fts(loglik));
     }
+
+  void read_hubs(const string& fname) {
+    hubval.resize(isize(vdata), -1);
+    fhstream f(fname, "rt");
+    if(!f.f) { printf("Failed to open hub file: %s\n", fname.c_str()); exit(1); }
+    println(hlog, "loading hubs: ", fname);
+    while(!feof(f.f)) {
+      string l1, l2;
+      while(true) {
+        int c = fgetc(f.f);
+        if(c == EOF) goto finish;
+        else if(c == ';') break;
+        else if(c == 10 || c == 13 || c == 9) ;
+        else l1 += c;
+        }
+      while(true) {
+        int c = fgetc(f.f);
+        if(c == EOF) goto finish;
+        else if(c == ';') goto finish;
+        else if(c == 10 || c == 13 || c == 9) break;
+        else l2 += c;
+        }
+      printf("%s -> %s\n", l1.c_str(), l2.c_str());
+      if(!id_known(l1)) {
+        printf("label unknown: %s\n", l1.c_str());
+        exit(1);
+        }
+      hubval[getid(l1)] = atoi(l2.c_str());
+      }
+    finish:
+    println(hlog, "hubval = ", hubval);
+    }
   
   void readsag(const char *fname) {
     maxweight = 0;
@@ -436,6 +485,8 @@ namespace sag {
     weight_label = "min weight";
     temperature = 0; sagmode = sagOff;
     readsag(fname.c_str());
+    if(hub_filename != "")
+      read_hubs(hub_filename);
     
     N = isize(vdata);
     // totwei.resize(N);
@@ -526,6 +577,12 @@ int readArgs() {
   else if(argis("-sag")) {
     PHASE(3); 
     shift(); sag::read(args());
+    }
+  else if(argis("-saghubs")) {
+    println(hlog, "HUBS");
+    PHASE(3); 
+    shift_arg_formula(sag::hub_penalty);
+    shift(); hub_filename = args();
     }
 // (3) load the initial positioning
   else if(argis("-gload")) {
