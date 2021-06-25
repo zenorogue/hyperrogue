@@ -70,18 +70,22 @@ namespace rogueviz {
   extern vector<int> legend;
   extern vector<cell*> named;
   
+  #if CAP_TEXTURE
   struct rvimage {
     basic_textureinfo tinf;
     texture::texture_data tdata;
     vector<hyperpoint> vertices;
     };
+  #endif
   
   extern int brm_limit;
 
   struct colorpair {
     color_t color1, color2;
     char shade;
+    #if CAP_TEXTURE
     shared_ptr<rvimage> img;
+    #endif
     colorpair(color_t col = 0xC0C0C0FF) { shade = 0; color1 = color2 = col; }
     };
   
@@ -141,12 +145,15 @@ namespace rogueviz {
 
   void close();
   extern bool showlabels;
-  
+
   namespace pres {
     using namespace hr::tour;
+#if CAP_RVSLIDES
     inline hookset<void(string, vector<slide>&)> hooks_build_rvtour;
     slide *gen_rvtour();
+    #if CAP_TEXTURE
     void draw_texture(texture::texture_data& tex);
+    #endif
 
 template<class T, class U> function<void(presmode)> roguevizslide(char c, const T& t, const U& f) {
   return [c,t,f] (presmode mode) {
@@ -225,6 +232,7 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   inline ld angle = 0;
   inline int dir = -1;
   hyperpoint p2(ld x, ld y);
+#endif
   }
 
   void createViz(int id, cell *c, transmatrix at);
@@ -268,6 +276,7 @@ namespace objmodels {
     return int(ceil(maxlen));
     }
   
+  #if CAP_TEXTURE
   struct model {
   
     string path, fname;
@@ -297,9 +306,19 @@ namespace objmodels {
     };
 
   void add_model_settings();
+  #endif
   
   }
 
+#if CAP_RVSLIDES
+#define addHook_rvslides(x, y) addHook(rogueviz::pres::hooks_build_rvtour, x, y)
+#define addHook_slideshows(x, y) addHook(tour::ss::hooks_extra_slideshows, x, y)
+#define addHook_rvtour(x, y) addHook(pres::hooks_build_rvtour, x, y)
+#else
+#define addHook_rvslides(x, y) 0
+#define addHook_slideshows(x, y) 0
+#define addHook_rvtour(x, y) 0
+#endif
   }
 
 #endif
