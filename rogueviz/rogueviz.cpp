@@ -578,6 +578,8 @@ void queue_prec(const shiftmatrix& V, edgeinfo*& ei, color_t col) {
 
 int brm_limit = 1000;
 
+ld labelshift = .2;
+
 bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
   if(m->dead) return true;
   if(m->type != moRogueviz) return false;
@@ -745,7 +747,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
       }
     
     shiftpoint h = tC0(V * m->at);
-    shiftmatrix V2 = GDIM == 3 ? V * m->at : rgpushxto0(h) * ypush(PURE ? .3 : .2); // todo-variation
+    shiftmatrix V2 = GDIM == 3 ? V * m->at : rgpushxto0(h) * ypush(cgi.scalefactor * labelshift); // todo-variation
     if(doshow && !behindsphere(V2)) {
       auto info = vd.info;
       if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
@@ -993,6 +995,9 @@ int readArgs() {
     }
   else if(argis("-rvspaces")) {
     rv_ignore_spaces = false;
+    }
+  else if(argis("-rvlabelshift")) {
+    shift_arg_formula(labelshift);
     }
   else if(argis("-rog3")) {
     rog3 = true;
