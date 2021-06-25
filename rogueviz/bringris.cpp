@@ -1,9 +1,9 @@
 // non-Euclidean falling block game, implemented using the HyperRogue engine
-// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2021 Zeno Rogue, see 'hyper.cpp' for details
 
 #ifdef BRINGRIS
 
-#define CUSTOM_CAPTION "Bringris 1.4"
+#define CUSTOM_CAPTION "Bringris 1.6"
 
 #define MAXMDIM 4
 
@@ -516,10 +516,14 @@ int penalty(const vector<cellwalker>& shape, const code_t& code) {
       if(get_z(s.at) > get_z(shape[0].at))
         p += 10000;
   if(bflags() & HDUAL) {
-    if(!dists.count(shape[0].at->move(2)))
+
+    for(auto s: shape) 
+      if(get_z(s.at) > get_z(shape[0].at))
+        p += 20000;
+    /* if(!dists.count(shape[0].at->move(2)))
       p += 40000;
     if(!dists.count(shape[0].at->move(3)))
-      p += 20000;
+      p += 20000; */
     }
   return p;
   }
@@ -632,6 +636,7 @@ void draw_shape() {
     int y = -get_z(c.at);
     c.at->wall = waWaxWall, c.at->landparam = get_hipso(y);
     }
+  ray::reset_raycaster_map();
   }
 
 bool shape_drawn() {
@@ -645,6 +650,7 @@ void remove_shape() {
   auto shape = build_from(piecelist[shape_id].code, at);
   for(auto c: shape)
     c.at->wall = waNone;
+  ray::reset_raycaster_map();
   }
 
 bool shape_conflict(cellwalker cw) {  
@@ -810,6 +816,7 @@ void disappear_lines() {
     }
   to_disappear.clear();
   state = tsBetween;
+  ray::reset_raycaster_map();
   }
 
 void state_loop() {
@@ -1836,6 +1843,7 @@ void start_new_game() {
   state = tsBetween;
   
   reset_view();
+  ray::reset_raycaster_map();
 
   // reset_view();
 
@@ -1950,6 +1958,7 @@ void create_game() {
   ray::want_use = 2;
   ray::exp_decay_poly = 200;
   ray::max_iter_current() = solnil ? 600 : 200;
+  ray::fixed_map = true;
   mapeditor::drawplayer = false;
   // sightranges[geometry] = 1;
   
