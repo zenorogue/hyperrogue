@@ -410,27 +410,24 @@ namespace sag {
       string l1, l2;
       while(true) {
         int c = fgetc(f.f);
-        if(c == EOF) goto finish;
+        if(c == EOF) return;
         else if(c == ';') break;
         else if(rv_ignore(c)) ;
         else l1 += c;
         }
       while(true) {
         int c = fgetc(f.f);
-        if(c == EOF) goto finish;
-        else if(c == ';') goto finish;
+        if(c == EOF) return;
+        else if(c == ';') return;
         else if(rv_ignore(c)) break;
         else l2 += c;
         }
-      printf("%s -> %s\n", l1.c_str(), l2.c_str());
       if(!id_known(l1)) {
         printf("label unknown: %s\n", l1.c_str());
         exit(1);
         }
       hubval[getid(l1)] = atoi(l2.c_str());
       }
-    finish:
-    println(hlog, "hubval = ", hubval);
     }
   
   void readsag(const char *fname) {
