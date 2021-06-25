@@ -113,8 +113,18 @@ EX int getnext(const char* s, int& i) {
     if(eqs(s+i, natchars[k])) {
       i += siz; return 128+k;
       }
+
+#ifdef REPLACE_LETTERS
+  for(int i=0; i<isize(dialog::latin_letters); i++)
+    if(s[i] == dialog::foreign_letters[2*i] && s[i+1] == dialog::foreign_letters[2*i+1]) {
+      i += 2;
+      return int(dialog::latin_letters[i]);
+      break;
+      }
+#endif
+
   printf("Unknown character in: '%s' at position %d\n", s, i);
-  i ++; return '?';
+  i += siz; return '?';
   }
 
 #if CAP_SDLTTF
