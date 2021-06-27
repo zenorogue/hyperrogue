@@ -276,6 +276,8 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
     return olrUseless;
   if(it == itOrbLuck && l == laMountain)
     return olrUseless;
+  if(it == itOrbLuck && l == laWestWall)
+    return olrUseless;
    if(it == itOrbLuck && l == laCamelot)
     return olrUseless;
    if(it == itOrbLuck && l == laHaunted)
