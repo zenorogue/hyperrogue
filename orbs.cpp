@@ -1246,7 +1246,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   if(rosedist(cwt.at) == 1) {
     int r = rosemap[cwt.at];
     int r2 = rosemap[c];
-    if(r2 <= r) {
+    if(r2 <= r && !markOrb(itOrbBeauty)) {
       if(a == roKeyboard || a == roMouseForce ) 
         addMessage(XLAT("Those roses smell too nicely. You can only target cells closer to them!"));
       return itNone;
