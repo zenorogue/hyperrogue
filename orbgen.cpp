@@ -394,6 +394,9 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
       it == itOrbAether || it == itOrbSummon || it == itOrbStone) 
       return olrForbidden;
     }
+
+  if(l == laTerracotta && it == itOrbFriend)
+    return olrDangerous;
   
   return olrPrize25;
   }
