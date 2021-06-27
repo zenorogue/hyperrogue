@@ -1039,10 +1039,10 @@ void poly_attack(cell *dest) {
   eMonster orig = dest->monst;
   auto polymonsters = {
     moYeti, moRunDog, moRanger,
-    moDesertman, moMonkey, moCultist,
+    moMonkey, moCultist,
     moFallingDog, moVariantWarrior, moFamiliar, moOrangeDog,
     moRedFox, moFalsePrincess, moResearcher,
-    moNarciss, moJiangshi, 
+    moNarciss,
     };
   int ssf = 0;
   eMonster target = *(polymonsters.begin() + hrand(isize(polymonsters)));
