@@ -1263,7 +1263,7 @@ S("You trick %the1.", "Вы победили %a1.")
 S(  "A Witch with a Flash spell. Very dangerous!\n\nLuckily, she never uses the spell if it "
     "would kill her friends. She could destroy an Evil Golem, though.",
     "Ведьма с заклинанием вспышки. Очень опасна!\n\nК счастью, она никогда не использует "
-    "заклинание, ели оно убьёт других ведьм. Но големов она может и уничтожить.")
+    "заклинание, если оно убьёт других ведьм. Но големов она может и уничтожить.")
        
 S("Your Aether powers are drained by %the1!", "Твоя эфирная сила была уменьшена %abl1!")
 S("As you leave, your powers are drained!", "Покидая землю силы, Вы теряете магию сфер!")
@@ -1355,7 +1355,7 @@ S("The Grimoires contain many secrets of the Great Old Ones. "
   "You hope to read them when you return home, and to learn many things. "
   "The knowledge is valuable to you, but it is rather pointless to try to get "
   "several copies of the same Grimoire...",
-  "Гримуары содержат много секретов Великих предков Каждый новый круг Храма Ктулху содержит "
+  "Гримуары содержат много секретов Великих предков. Каждый новый круг Храма Ктулху содержит "
   "новые тома с новыми секретами. Вы можете принести их домой, прочитать и узнать много вещей."
   "Знание ценно для Вас, но Вам не нужны копии одного Гримуара... "
   )
@@ -2097,7 +2097,7 @@ S("Wherever this powerful being goes, the living fjord "
  
 N("Garnet", GEN_O, "Гранат", "Гранаты", "Гранат", "Гранатом")
 S("Vikings believe that garnets improve their strength.",
-  "Викинги верятЮ что гранаты дают им силу.")
+  "Викинги верят, что гранаты дают им силу.")
  
 Orb("the Fish", "Рыбы")
 S("This Orb lets you dive into the water. While diving, you are able to see and collect underwater treasures, "
@@ -3481,7 +3481,7 @@ S(
   "волну манящего аромата. Все монстры на пути двигаются к кусту, даже если "
   "им приходится атаковать союзника или прекрасное существо, пойти в воду, огонь, пропасть "
   "или в шипы куста. Это не действует на призраков, плющи, каменных змей и "
-  "и монстров, ограниченных своей землёй.")
+  "монстров, ограниченных своей землёй.")
  
 S(
   "This land is filled with beautiful, but dangerous, creatures and plants.",
