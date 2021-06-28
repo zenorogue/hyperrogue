@@ -106,7 +106,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     string s0 = "";
     
     if(c2->item == itPalace && items[c2->item] == 12)
-      princess::forceVizier = true;
+      changes.value_set(princess::forceVizier, true);
     
     if(!cantGetGrimoire(c2, false)) collectMessage(c2, c2->item);
     if(c2->item == itDodeca && peace::on) peace::simon::extend();
