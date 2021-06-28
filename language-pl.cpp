@@ -6566,7 +6566,7 @@ N("Jelly Kingdom", GEN_N, "Królestwo Galarety", "Królestwa Galarety", "Króles
 
 S("Some of the Slime Beasts have decided to revolt against the color rules in the "
   "Alchemist Lab. They have changed their shape and consistency, declared independence, and established their own Kingdom.\n\n"
-  "Jellies switch between being a wall and being a monster after every treasure you pick.",
+  "Jellies switch between being a wall and being a monster after every treasure you collect.",
   
   "Część Mazistych Stworów z Laboratorium postanowiło zbuntować się przeciwko regułom koloru w "
   "Laboratorium. Zmieniły kształt i konsystencję, ogłosiły niepodległość i stworzyły własne Królestwo.\n\n"

@@ -6727,7 +6727,7 @@ N("Jelly Kingdom", GEN_N, "Království rosolu", "Království rosolu", "Králov
 
 S("Some of the Slime Beasts have decided to revolt against the color rules in the "
   "Alchemist Lab. They have changed their shape and consistency, declared independence, and established their own Kingdom.\n\n"
-  "Jellies switch between being a wall and being a monster after every treasure you pick.",
+  "Jellies switch between being a wall and being a monster after every treasure you collect.",
   
   "Nìkteøí Slizoví netvoøi se rozhodli vzbouøit proti barevným pravidlùm v Alchymistické laboratoøi. Zmìnili svùj tvar a konzistencim vyhlásili nezávislost a založili si své vlastní Království.\n\n"
   "Kdykoli sebereš nìjaký poklad, rosoly se zmìní ze zdí na netvory a opaènì."
