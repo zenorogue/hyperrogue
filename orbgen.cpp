@@ -116,7 +116,7 @@ EX vector<orbinfo> orbinfos = {
   {orbgenflags::S_NAT_NT, laElementalWall, 1500, 4000, itOrbSummon},
   {orbgenflags::S_NATIVE, laStorms, 1000, 2500, itOrbStunning},
   {orbgenflags::S_NATIVE, laOvergrown, 1000, 800, itOrbWoods},
-  {orbgenflags::S_GUEST,  laOvergrown, 1000, 800, itOrbLuck},
+  {orbgenflags::S_GUEST,  laOvergrown, 1000, 0, itOrbLuck},
   {orbgenflags::S_NATIVE, laWhirlwind, 1250, 3000, itOrbAir},
   {orbgenflags::S_NATIVE, laHaunted, 1000, 5000, itOrbUndeath},
   {orbgenflags::S_NATIVE, laClearing, 5000, 5000, itOrbFreedom},
