@@ -240,11 +240,6 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
   if(it == itOrbDigging && l == laKraken) return olrUseless;
   if(it == itOrbIllusion && l == laKraken) return olrUseless;
   
-  if(it == itOrbSlaying && !among(l, 
-    laMirror, laHell, laEmerald, laDryForest, laCamelot, laPalace, laStorms, laRose, laTortoise, laBurial, laDungeon, laReptile, 
-    laPrairie, laBull, laVolcano, laTerracotta, laRuins, laVariant, laEclectic, laBrownian))
-    return olrUseless;
-  
   if(it == itOrbYendor && among(l, laWhirlwind, laWestWall)) return olrUseless;
   
   if(it == itOrbLife && (l == laKraken)) return olrUseless;
@@ -299,6 +294,11 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
     return olrMonster;
   if(isCrossroads(l) || l == laOcean)
     return olrHub;
+
+  if(it == itOrbSlaying && !among(l, 
+    laMirror, laHell, laEmerald, laDryForest, laCamelot, laPalace, laStorms, laRose, laTortoise, laBurial, laDungeon, laReptile, 
+    laPrairie, laBull, laVolcano, laTerracotta, laRuins, laVariant, laEclectic, laBrownian))
+    return olrUseless;
   
   if(l == laCocytus)
     if(it == itOrbDragon || it == itOrbFire || it == itOrbFlash || it == itOrbLightning)
