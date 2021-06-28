@@ -327,6 +327,14 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
         return olrPrize25;
     return olrUseless;
     }
+
+  if(it == itOrbWoods && (l == laWarpSea || l == laWarpCoast))
+    return olrDangerous;
+
+  if(it == itOrbWoods && !among(l,
+    laDryForest, laWineyard, laCaribbean, laOvergrown, laHaunted, laHauntedWall, laHauntedBorder, laTortoise, laFrog, laEclectic,
+    laVariant))
+    return olrUseless;
   
   if(it == itShard) {
     if(l == laDesert || l == laIce || l == laJungle || l == laGraveyard ||
