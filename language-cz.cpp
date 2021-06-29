@@ -7692,7 +7692,7 @@ S("Did you know that it is possible to break a magical sphere into finitely many
     
 N("Free Fall", GEN_O, "Volný pád", "Volné pády", "Volný pád", "ve Volném pádu")
 
-S("What on one side looks to be a normal (well, infinite) horizontal wall, on to the other side turns out to be the vertical wall"
+S("What on one side looks to be a normal (well, infinite) horizontal wall, on the other side turns out to be the vertical wall"
   " of an infinitely high tower. Jump from the window, and let the magical gravity carry you...",
 
   "To, co na jedné straně vypadá jako normální (no, nekonečná) vodorovná "

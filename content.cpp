@@ -1523,7 +1523,7 @@ LAND( 0x804000, "Brown Island", laBrownian, ZERO | LF_PURESEA, itBrownian, RESER
   REQAS(laOcean,)
 
 LAND( 0x211F6F, "Free Fall", laWestWall, ZERO | LF_GRAVITY | LF_EQUI, itWest, RESERVED, 
-    "What on one side looks to be a normal (well, infinite) horizontal wall, on to the other side turns out to be the vertical wall"
+    "What on one side looks to be a normal (well, infinite) horizontal wall, on the other side turns out to be the vertical wall"
     " of an infinitely high tower. Jump from the window, and let the magical gravity carry you..."
     )
   NATIVE(among(m, moWestHawk, moFallingDog) ? 2 : 0)
