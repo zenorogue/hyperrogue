@@ -1574,7 +1574,6 @@ EX int orbcharges(eItem it) {
       return inv::on ? 150 : 50;
     case itOrbWinter: // "pickup-winter"
        return inv::on ? 45 : 30;
-       break;
     case itOrbBeauty:
     case itOrbEmpathy:
     case itOrbFreedom:
