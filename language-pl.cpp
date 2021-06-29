@@ -340,7 +340,7 @@ S("Your score: %1", "Twój wynik: %1")
 S("Enemies killed: %1", "Potwory pokonane: %1")
 S("Orbs of Yendor found: %1", "Znalezione Sfery Yendoru: %1")
 S("Collect %1 $$$ to access more worlds", "Znajdź %1 $$$, by iść do nowych krain")
-S("Collect at least %1 treasures in each of 9 types to access Hell", "Znajdź po %1 skarbów w %2 typach, by się dostać do Piekła")
+S("Collect at least %1 treasures in each of %2 types to access Hell", "Znajdź po %1 skarbów w %2 typach, by się dostać do Piekła")
 S("Collect at least %1 Demon Daisies to find the Orbs of Yendor", "Znajdź %1 Czarciego Ziela, by znaleźć Sfery Yendoru")
 S("Hyperstone Quest: collect at least %3 %1 in %the2", "Misja alternatywna: znajdź co najmniej %3 skarbów %abl2")
 S("Hyperstone Quest completed!", "Misja alternatywna zakończona!")
@@ -1693,7 +1693,7 @@ S("Hell has these lakes everywhere... They are shaped like evil stars, and fille
 
 S("hardcore mode", "tryb hardcore")
 
-S("One wrong move, and it is game over!", "Jeden fałszywy ruch i koniec gry!")
+S("One wrong move and it is game over!", "Jeden fałszywy ruch i koniec gry!")
 S("Not so hardcore?", "Hardkor to nie to?")
 
 // Shoot'em up Mode
@@ -8667,7 +8667,7 @@ S(
   "If the pointer length is 0.5m, the object pointed to is 0.5 meter from the controller. "
   "This is used in situations where the controller is used as a 3D mouse, e.g., "
   "the drawing tool in three-dimensional geometries. When pointing at two-dimensional surfaces, "
-  "this is not relevant (the pointer is as long as needed to hit the surface.).",
+  "this is not relevant (the pointer is as long as needed to hit the surface).",
   
   "Jeśli długość wskaźnika to 0.5m, wskazywany punkt jest 0.5 metra od kontrolera. "
   "Ma to znaczenie, gdy kontroler jest używany jako mysz 3D, np. narzędzie do rysowania w "
@@ -8781,8 +8781,7 @@ S(
           
 S(
           "w (fourth coordinate)\n"
-          "wallif(condition, color)\n"
-          , 
+          "wallif(condition, color)\n", 
 
           "w (czwarta współrzędna)\n"
           "wallif(warunek, kolor)\n"
