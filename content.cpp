@@ -107,7 +107,7 @@ MONSTER( 'N', 0x404040, "Necromancer", moNecromancer, CF_FACE_UP | CF_HIGH_THREA
     "Necromancers can raise ghosts and zombies from fresh graves."
     )
 MONSTER( 'S', 0x404040, "Shadow", moShadow, CF_FACE_UP | CF_NOBLOW | CF_NONLIVING | CF_SPAM, RESERVED, moNone,
-    "A creepy monster who follows you everywhere in the Graveyard."
+    "A creepy monster who follows you everywhere in the Graveyard and the Cursed Canyon."
     )
 MONSTER( 'T', 0x40E040, "Tentacle", moTentacle, ZERO | CF_NOGHOST | CF_NOBLOW | CF_MOUNTABLE | CF_MULTITILE | CF_WORM, RESERVED, moNone, tentdes )
 MONSTER( 't', 0x008000, "Tentacle Tail", moTentacletail, ZERO | CF_NOGHOST | CF_NOBLOW | CF_MOUNTABLE | CF_MULTITILE | CF_WORM | CF_INACTIVE | CF_SPAM, RESERVED, moNone, tentdes )

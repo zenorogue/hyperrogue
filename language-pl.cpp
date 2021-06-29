@@ -693,8 +693,8 @@ S("A typical monster from the Graveyard, who moves through walls.\n\n"
 S("Necromancers can raise ghosts and zombies from fresh graves.",
   "Nekromanci wzbudzają duchy i zombie ze świeżych grobów.")
 
-S("A creepy monster who follows you everywhere in the Graveyard.",
-  "Ten odrażający potwór chodzi za Tobą po cmentarzu!")
+S("A creepy monster who follows you everywhere in the Graveyard and the Cursed Canyon.",
+  "Ten odrażający potwór chodzi za Tobą po cmentarzu!") //TODO UPDATE
 
 S("People worshipping Cthulhu. They are very dangerous.",
   "Wyznawcy Cthulhu, bardzo niebiezpieczni.")

@@ -715,8 +715,8 @@ S("A typical monster from the Graveyard, who moves through walls.\n\n"
 S("Necromancers can raise ghosts and zombies from fresh graves.",
   "Nekromanceři dokážou probouzet duchy a zombie z čerstvých hrobů.")
 
-S("A creepy monster who follows you everywhere in the Graveyard.",
-  "Děsivý netvor, který tě sleduje po celém Hřbitově.")
+S("A creepy monster who follows you everywhere in the Graveyard and the Cursed Canyon.",
+  "Děsivý netvor, který tě sleduje po celém Hřbitově.") //TODO UPDATE
 
 S("People worshipping Cthulhu. They are very dangerous.",
   "Lidé uctívající Cthulhua. Jsou velmi nebezpeční.")
