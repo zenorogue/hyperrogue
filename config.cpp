@@ -27,7 +27,7 @@ struct supersaver {
   virtual void load(const string& s) = 0;
   virtual bool dosave() = 0;
   virtual void reset() = 0;
-  virtual ~supersaver() {};
+  virtual ~supersaver() {}
   virtual bool affects(void* v) { return false; }
   virtual void set_default() = 0;
   };
