@@ -6788,7 +6788,7 @@ N("Jelly Kingdom", GEN_N, "Желейное Королевство", "Желей
  
 S("Some of the Slime Beasts have decided to revolt against the color rules in the "
   "Alchemist Lab. They have changed their shape and consistency, declared independence, and established their own Kingdom.\n\n"
-  "Jellies switch between being a wall and being a monster after every treasure you pick.",
+  "Jellies switch between being a wall and being a monster after every treasure you collect.",
  
   "Часть Живой Слизи выступила против правил цветов в Лаборатории. "
   "Они изменили свою форму и густоту, провозгласили независимость и образовали свое Королевство.\n\n"
