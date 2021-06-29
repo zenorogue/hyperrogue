@@ -721,8 +721,8 @@ S(
  "Nekromanci wzbudzają duchy i zombie ze świeżych grobów.")
 
 S(
- "A creepy monster who follows you everywhere in the Graveyard.",
- "Ten odrażający potwór chodzi za Tobą po cmentarzu!")
+ "A creepy monster who follows you everywhere in the Graveyard and the Cursed Canyon.",
+ "Ten odrażający potwór chodzi za Tobą po cmentarzu!") //TODO UPDATE
 
 S(
  "People worshipping Cthulhu. They are very dangerous.",

@@ -645,8 +645,8 @@ S("A typical monster from the Graveyard, who moves through walls.\n\n"
 S("Necromancers can raise ghosts and zombies from fresh graves.",
   "Ölüçağıranlar mezarlardan hayaletler ve hortlaklar çağırabilirler.")
 
-S("A creepy monster who follows you everywhere in the Graveyard.",
-  "Seni Mezarlık boyunca takip eden ürpertici bir canavar.")
+S("A creepy monster who follows you everywhere in the Graveyard and the Cursed Canyon.",
+  "Seni Mezarlık boyunca takip eden ürpertici bir canavar.") //TODO UPDATE
 
 S("People worshipping Cthulhu. They are very dangerous.",
   "Cthulhu'ya tapan insanlar. Çok tehlikeliler.")
