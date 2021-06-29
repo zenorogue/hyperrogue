@@ -3465,10 +3465,6 @@ S(  "This Orb makes you stunningly beautiful. "
  
 S(  "A big, beautiful, magical flower.", "Большой прекрасный магический цветок.")
  
-S("Don't be fooled by beauty, or you will be stabbed if you come too close!",
-  "Не будьте обмануты красотой, если не хотите получить удар в спину!")
- 
- 
 S(
   "Each eight turns, each rosebush at distance at most 5 from you will "
   "release a wave of alluring scent. Creatures on the frontwave "
@@ -5844,9 +5840,8 @@ S(" (%1 more digits)", " (ещё цифр: %1)")
 S("see how it ended", "смотри, как всё закончилось")
  
 // other missing/new things
-S("\n\nOrb unlocked: %1", "\n\nОткрыта сфера: %1")
 S("Orb unlocked: %1", "Открыта сфера: %1")
-S("\n\nSecondary orb: %1", "\n\nДополнительная сфера: %1")
+S("Secondary orb: %1", "Дополнительная сфера: %1")
 S(" to submerge", " на погружение")
 S(" to surface", " на поверхность")
 S("%The1 says, \"not this place, it looks even worse...\"",

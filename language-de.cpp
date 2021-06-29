@@ -2407,7 +2407,7 @@ S("Variants of %the1 are available in the Random Pattern Mode after "
 S(" kills: %1", " Kills: %1")
 S(" $$$: %1", " $$$: %1")
 S(" Hyperstone: %1/%2", " Hypersteine: %1/%2")
-S(" Hell: %1/9", " Hölle: %1/9")
+S(" Hell: %1/%2", " Hölle: %1/%2")
 
 // improved editor
 // ---------------
@@ -3227,9 +3227,6 @@ S("This Orb makes you stunningly beautiful. "
   "Außerdem macht er dich immun gegenüber 'Schönheit'.")
 
 S("A big, beautiful, magical flower.", "Eine große, schöne, magische Blume.")
-
-S("Don't be fooled by beauty, or you will be stabbed if you come too close!",
-  "Lass dich von Schönheit nicht täuschen - oder du wirst erstochen, wenn du zu nah kommst!")
 
 S("Each eight turns, each rosebush at distance at most 5 from you will "
   "release a wave of alluring scent. Creatures on the frontwave "

@@ -3376,10 +3376,6 @@ S(  "This Orb makes you stunningly beautiful. "
 
 S(  "A big, beautiful, magical flower.", "Duży, piękny, magiczny kwiat.")
 
-S("Don't be fooled by beauty, or you will be stabbed if you come too close!",
-  "Nie daj się zwieść urodzie, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%y0 nożem!")
-
-
 S(
   "Each eight turns, each rosebush at distance at most 5 from you will "
   "release a wave of alluring scent. Creatures on the frontwave "
@@ -5694,9 +5690,8 @@ S(" (%1 more digits)", " (jeszcze cyfr: %1)")
 S("see how it ended", "jak się skończyło")
 
 // other missing/new things
-S("\n\nOrb unlocked: %1", "\n\nOdblokowana Sfera: %1")
 S("Orb unlocked: %1", "Odblokowana Sfera: %1")
-S("\n\nSecondary orb: %1", "\n\nDodatkowa Sfera: %1")
+S("Secondary orb: %1", "Dodatkowa Sfera: %1")
 S(" to submerge", " do zanurzenia")
 S(" to surface", " do wynurzenia")
 S("%The1 says, \"not this place, it looks even worse...\"", 
@@ -7237,15 +7232,11 @@ S("animate parameters", "animacja parametrów")
 S(
   "Most parameters can be animated simply by using '..' in their editing dialog. "
   "For example, the value of a parameter set to 0..1 will grow linearly from 0 to 1. "
-  "You can also use functions (e.g. cos(0..2*pi)) and refer to other parameters; "
-  "parameters 'a' and 'b' exist for this purpose. "
-  "See the list below for parameters which are currently animated (or changed).",
+  "You can also use functions (e.g. cos(0..2*pi)) and refer to other parameters.",
   
   "Większość parametrów może być animowana w prosty sposób, przez wpisanie '..' w ich pole edycji. "
   "Przykładowo, wartość parametru ustawiona na 0..1 będzie rosła liniowa od 0 do 1. "
-  "Możesz też używać funkcji (np. cos(0..2*pi)) lub odnosić się do innych parametrów; "
-  "parametry 'a' i 'b' istnieją w tym celu. Poniżej lista parametrów obecnie "
-  "animowanych (lub zmienionych).")
+  "Możesz też używać funkcji (np. cos(0..2*pi)) lub odnosić się do innych parametrów.")
 
 // color edit dialog
 
@@ -7878,7 +7869,6 @@ S(
 S("use the full 3D models", "użyj pełnych modeli 3D")
 
 S("Z shift", "przesunięcie Z")
-S("Eye level", "poziom oka")
 S("fixed Y/Z rotation", "ustalona rotacja Y/Z")
 
 S("configure FPP automatically", "automatycznie skonfiguruj FPP")
