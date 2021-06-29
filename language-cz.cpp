@@ -3440,9 +3440,6 @@ S(  "This Orb makes you stunningly beautiful. "
 
 S(  "A big, beautiful, magical flower.", "Velká, krásná, magická květina.")
 
-S("Don't be fooled by beauty, or you will be stabbed if you come too close!",
-  "Nenech se oklamat krásou -- když se moc přiblížíš, můžeš dostat ránu nožem!")
-
 S("You just cannot stand in place, those roses smell too nicely.",
   "Nemůžeš zůstat na místě, ty růže příliš krásně voní.")
 S("Those roses smell too nicely. You have to come towards them.",
@@ -5758,9 +5755,8 @@ S("see how it ended", "podívej se, jak to skonèilo")
 // other missing/new things
 // ------------------------
 
-S("\n\nOrb unlocked: %1", "\n\nByla odemèena Sféra: %1")
 S("Orb unlocked: %1", "Byla odemèena Sféra: %1")
-S("\n\nSecondary orb: %1", "\n\nSekundární Sféra: %1")
+S("Secondary orb: %1", "Sekundární Sféra: %1")
 S(" to submerge", " do ponoøení")
 S(" to surface", " do vynoøení")
 S("%The1 says, \"not this place, it looks even worse...\"", 
@@ -7488,15 +7484,11 @@ S("animate parameters", "animace parametrù")
 S(
   "Most parameters can be animated simply by using '..' in their editing dialog. "
   "For example, the value of a parameter set to 0..1 will grow linearly from 0 to 1. "
-  "You can also use functions (e.g. cos(0..2*pi)) and refer to other parameters; "
-  "parameters 'a' and 'b' exist for this purpose. "
-  "See the list below for parameters which are currently animated (or changed).",
+  "You can also use functions (e.g. cos(0..2*pi)) and refer to other parameters.",
   
   "Vìtšinu parametrù lze animovat jen tím, že v jejich editaèním dialogu napíšeš '..'. "
   "Tak napøíklad hodnota parametru nastaveného na 0..1 poroste lineárnì od 0 do 1. "
-  "Lze také použít funkce (napø. cos(0..2*pi) a odkazovat na jiné parametry; "
-  "za tímto úèelem existují parametry 'a' a 'b'. "
-  "Viz níže uvedený seznam parametrù, které jsou v souèasné dobì animovány (nebo zmìnìny).")
+  "Lze také použít funkce (napø. cos(0..2*pi) a odkazovat na jiné parametry.")
 
 // color edit dialog
 
@@ -8160,7 +8152,6 @@ S(
 S("use the full 3D models", "používej úplné 3D modely")
 
 S("Z shift", "Z-posuv")
-S("Eye level", "úroveň očí")
 S("fixed Y/Z rotation", "stálá Y/Z rotace")
 
 S("configure FPP automatically", "automatická konfigurace FPP")
@@ -8948,7 +8939,7 @@ S(
   "If the pointer length is 0.5m, the object pointed to is 0.5 meter from the controller. "
   "This is used in situations where the controller is used as a 3D mouse, e.g., "
   "the drawing tool in three-dimensional geometries. When pointing at two-dimensional surfaces, "
-  "this is not relevant (the pointer is as long as needed to hit the surface.)",
+  "this is not relevant (the pointer is as long as needed to hit the surface).",
   
   "Pokud je délka ukazatele 0,5 m, je objekt, na který ukazuje, 0,5 metru od ovladače. "
   "To se používá v situacích, kdy se ovladač používá jako 3D myš, např. "
@@ -9050,11 +9041,7 @@ S(
           "x, y, z (hyperboloid/sphere/plane coordinates in non-crystal geometries)\n"
           "ex, ey, ez (in Euclidean geometries)\n"
           "x0, x1, x2... (crystal geometry only)\n"
-          "0 is black, 1 is white, rgb(1,0,0) is red, ifp(p-2,1,0) is blue (p=1 for red, 2 for green, 3 for blue)."
-
-          "w (fourth coordinate)\n"
-          "wallif(condition, color)\n"
-          , 
+          "0 is black, 1 is white, rgb(1,0,0) is red, ifp(p-2,1,0) is blue (p=1 for red, 2 for green, 3 for blue).",
 
           "Zde můžeš specifikovat barevný vzor jako funkci políčka. "
           "Dostupné parametry:\n\n"
@@ -9062,6 +9049,12 @@ S(
           "ex, ey, ez (v eukleidovských geometriích)\n"
           "x0, x1, x2... (pouze v krystalové geometrii)\n"
           "0 je černá, 1 bílá, rbg(1,0,0) červená, ifp(p-2,1,0) modrá (p=1 pro červenou, 2 pro zelenou, 3 pro modrou)."
+          )
+
+S(
+          "w (fourth coordinate)\n"
+          "wallif(condition, color)\n",
+
           "w (čtvrtá souřadnice)\n"
           "wallif(podmínka, barva)\n"
           )

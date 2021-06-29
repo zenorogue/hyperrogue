@@ -495,11 +495,13 @@ EX string generateHelpForItem(eItem it) {
     for(auto& oi: orbinfos) {
       if(treasureType(oi.l) == it) {
         if(oi.gchance > 0) {
+          help += "\n\n";
           help += XLAT("\n\nOrb unlocked: %1", oi.orb);
           describeOrb(help, oi);
           }
         else if(oi.l == cwt.at->land || inv::on) {
-          help += XLAT("\n\nSecondary orb: %1", oi.orb);
+          help += "\n\n";
+          help += XLAT("Secondary orb: %1", oi.orb);
           describeOrb(help, oi);
           }
         }

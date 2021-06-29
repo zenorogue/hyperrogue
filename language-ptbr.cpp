@@ -343,8 +343,8 @@ S("Your score: %1", "Sua pontuação: %1")
 S("Enemies killed: %1", "Inimigos mortos: %1")
 S("Orbs of Yendor found: %1", "Orbes de Yendor encontrados: %1")
 S("Collect %1 $$$ to access more worlds", "Colete %1 $$$, para acessar novos mundos")
-S("Collect at least %1 treasures in each of 9 types to access Hell", "Colete pelo menos %1 tesouros de cada um dos 9 tipos para acessar o Inferno")
-S("Collect at least 10 Demon Daisies to find the Orbs of Yendor", "Colete pelo menos 10 Margaridas Demônio para encontrar os Orbes de Yendor")
+S("Collect at least %1 treasures in each of %2 types to access Hell", "Colete pelo menos %1 tesouros de cada um dos %2 tipos para acessar o Inferno")
+S("Collect at least %1 Demon Daisies to find the Orbs of Yendor", "Colete pelo menos %1 Margaridas Demônio para encontrar os Orbes de Yendor")
 S("Hyperstone Quest: collect at least %3 %1 in %the2", "Missão da Pedra do Ímpeto: colete pelo menos %3 %1 no-a %abl1")
 S("Hyperstone Quest completed!", "Missão da Pedra do Ímpeto completa!")
 S("Look for the Orbs of Yendor in Hell or in the Crossroads!", "Procure pelos Orbes de Yendor no Inferno e nas Encruzilhadas!")
@@ -483,10 +483,10 @@ S(
  "números mostrados para saber seus significados.\n")
 
 S(
- "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. "
+ "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Space. "
  "To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n",
  
- "Mova-se com o mouse, teclado numérico, qweadzxc, ou hjklyubn. Espere apertando 's' ou '.'. Gire o mundo com as setas, PageUp/Down, ou Home/Espaço."
+ "Mova-se com o mouse, teclado numérico, qweadzxc, ou hjklyubn. Espere apertando 's' ou '.'. Gire o mundo com as setas, PageUp/Down, ou Espaço."
  "Para salvar o jogo você precisa de um Orbe da Segurança. Pressione 'v' para ir ao menu principal (configurações, modos especiais, etc.), ESC para o estado da missão.\n\n")
 
 S("See more on the website: ", "Veja mais no site: ")
@@ -2610,7 +2610,7 @@ S("Variants of %the1 are available in the Random Pattern Mode after "
 S(" kills: %1", " zabicia: %1")
 S(" $$$: %1", " $$$: %1")
 S(" Hyperstone: %1/%2", " Hiperkamienie: %1/%2")
-S(" Hell: %1/9", " Piekło: %1/9")
+S(" Hell: %1/%2", " Piekło: %1/%2")
 
 // improved editor
 
@@ -3464,10 +3464,6 @@ S(  "This Orb makes you stunningly beautiful. "
     "niewrażliw%y0 na piękno.")
 
 S(  "A big, beautiful, magical flower.", "Duży, piękny, magiczny kwiat.")
-
-S("Don't be fooled by beauty, or you will be stabbed if you come too close!",
-  "Nie daj się zwieść urodzie, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%y0 nożem!")
-
 
 S(
   "Each eight turns, each rosebush at distance at most 5 from you will "
@@ -5779,9 +5775,8 @@ S(" (%1 more digits)", " (jeszcze cyfr: %1)")
 S("see how it ended", "jak się skończyło")
 
 // other missing/new things
-S("\n\nOrb unlocked: %1", "\n\nOdblokowana Sfera: %1")
 S("Orb unlocked: %1", "Odblokowana Sfera: %1")
-S("\n\nSecondary orb: %1", "\n\nDodatkowa Sfera: %1")
+S("Secondary orb: %1", "Dodatkowa Sfera: %1")
 S(" to submerge", " do zanurzenia")
 S(" to surface", " do wynurzenia")
 S("%The1 says, \"not this place, it looks even worse...\"", 
