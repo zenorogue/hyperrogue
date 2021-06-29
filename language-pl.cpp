@@ -7443,7 +7443,7 @@ S("Did you know that it is possible to break a magical sphere into finitely many
     
 N("Free Fall", GEN_O, "Swobodny Spadek", "Swobodne Spadki", "Swobodny Spadek", "w Swobodnym Spadku")
 
-S("What on one side looks to be a normal (well, infinite) horizontal wall, on to the other side turns out to be the vertical wall"
+S("What on one side looks to be a normal (well, infinite) horizontal wall, on the other side turns out to be the vertical wall"
   " of an infinitely high tower. Jump from the window, and let the magical gravity carry you...",
 
   "Co wygląda z jednej strony na zwykłą (nieskończoną) poziomą ścianę, z drugiej strony okazuje się być pionową ścianą nieskończenie "
