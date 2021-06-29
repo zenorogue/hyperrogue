@@ -1744,7 +1744,7 @@ EX namespace patterns {
     try {
       return ep.parse();
       }
-    catch(hr_parse_exception& ex) {
+    catch(hr_parse_exception&) {
       return 0;
       }
     }
