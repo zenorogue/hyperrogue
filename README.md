@@ -51,12 +51,22 @@ OK, now lots of the above can be changed. You can change the geometry and topolo
 various in-game quests, and even try some other game genres in non-Euclidean spaces (roguelite aka shmup, racing, peaceful puzzles). Or use the engine for non-Euclidean computations
 and visualizations (see [RogueViz](http://roguetemple.com/z/hyper/rogueviz.php)). Have fun!
 
-## Technical information ##
+## Development ##
 
-You should be able to compile on Linux, OSX, or MinGW with something like this (you need SDL, SDL_ttf, and SDL_gfx):
+### Build prerequisites ###
 
+On Linux with apt-get:
+
+```sudo apt-get install make g++ libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev libsdl-mixer1.2-dev libglew-dev```
+
+On macOS with Homebrew:
+
+```brew install sdl sdl_ttf sdl_gfx sdl_mixer glew```
+
+macOS users might also have to edit /usr/local/include/SDL/SDL_gfxPrimitives.h at line 38 to use quote include.
+
+### Building HyperRogue from source ###
 ```
-sudo apt-get install make g++ libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev libsdl-mixer1.2-dev libglew-dev
 git clone https://github.com/zenorogue/hyperrogue.git hyperrogue
 cd hyperrogue
 make
