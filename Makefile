@@ -146,7 +146,7 @@ hyper$(OBJ_EXTENSION): *.cpp language-data.cpp autohdr.h
 hyper.res: hyper.rc hr-icon.ico
 	windres hyper.rc -O coff -o hyper.res
 
-langen$(EXE_EXTENSION): langen.cpp language-??.cpp language-ptbr.cpp
+langen$(EXE_EXTENSION): langen.cpp language-??.cpp language-ptbr.cpp all-string-literals.ipp
 	$(CXX) -O0 $(CXXFLAGS) $(langen_CXXFLAGS) langen.cpp $(LDFLAGS) -o $@
 
 makeh$(EXE_EXTENSION): makeh.cpp
@@ -154,6 +154,9 @@ makeh$(EXE_EXTENSION): makeh.cpp
 
 autohdr.h: makeh$(EXE_EXTENSION) language-data.cpp *.cpp
 	./makeh classes.cpp locations.cpp colors.cpp hyperpoint.cpp geometry.cpp goldberg.cpp init.cpp floorshapes.cpp cell.cpp multi.cpp shmup.cpp pattern2.cpp mapeditor.cpp graph.cpp textures.cpp hprint.cpp language.cpp util.cpp complex.cpp *.cpp > autohdr.h
+
+all-string-literals.ipp: lanlint.py *.cpp
+	python lanlint.py > all-string-literals.ipp
 
 language-data.cpp: langen$(EXE_EXTENSION)
 	./langen > language-data.cpp
@@ -179,3 +182,4 @@ clean:
 	rm -rf mymake$(EXE_EXTENSION) mymake_files/
 	rm -f hyperrogue$(EXE_EXTENSION) hyper$(OBJ_EXTENSION) $(hyper_RES) savepng$(OBJ_EXTENSION)
 	rm -f hyper.html hyper.js hyper.wasm
+	rm -f all-string-literals.ipp
