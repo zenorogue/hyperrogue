@@ -3737,7 +3737,7 @@ S("Branches here could bear your weight easily.",
 N("weak branch", GEN_F, "тонкая ветка", "тонкие ветки", "тонкую ветку", "тонкой веткой")
  
 S("Branches here will bear you weight, but if you use them to move (not fall) to an unstable place, they will break.",
-  "Эти ветви выдерживают ваш вес, но если из использовать, чтобы пойти (не упасть) на что-то неустойчивое, они сломаются.")
+  "Эти ветви выдерживают ваш вес, но если их использовать, чтобы пойти (не упасть) на что-то неустойчивое, они сломаются.")
 
 N("canopy", GEN_F, "листва", "листва", "листву", "листвой")
  
