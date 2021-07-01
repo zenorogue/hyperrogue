@@ -3602,7 +3602,7 @@ S("key Orb power", "клавиша для силы сферы")
 
 S("Orb power (target: mouse)", "активировать сферу")
 S("Orb power (target: facing)", "клавиша для силы сферы")
-S("You cannot go against the wind!", "Nie możesz iść pod wiatr!")
+S("You cannot go against the wind!", "Нельзя ходить против ветра!")
 
 N("warp gate", GEN_F, "врата искривления", "врата искривления", "врата искривления", "вратами искривления")
 
