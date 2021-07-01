@@ -2396,7 +2396,7 @@ S("This is the biggest Hypersian Rug you have ever seen! "
 N("Prince", GEN_M, "Принц", "Принцы", "Принца", "Принцем")
 N("Princess", GEN_F, "Принцесса", "Принцессы", "Принцессу", "Принцессой")
  
-S("%1 takes %his1 revenge on %the2!", "%1 будет мстить!")
+S("%The1 takes %his1 revenge on %the2!", "%1 будет мстить!")
 S("\"That should teach you to take me seriously!\"",
   "\"Относись ко мне серьёзно! Будет тебе наука!\"")
  
