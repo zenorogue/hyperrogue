@@ -1820,7 +1820,7 @@ Orb("Air", "Воздуха")
  
 S("This Orb allows you to blow your enemies away.\n\n"
   "Click a monster to blow it one cell away. It cannot be used against mimics, ghosts, sharks and other monsters restricted to a specific terrain, and multi-tile monsters.",
-  "Эта сфера позволяет Вам сдуват врагов вдаль.\n\n"
+  "Эта сфера позволяет Вам сдувать врагов вдаль.\n\n"
   "Нажми на монстра, чтобы сдуть его на 1 клетку. Невозможно сдуть мимиков, духов, акул и других монстров, живущих на определённой территории, и монстров из нескольких частей."  
   )
 
