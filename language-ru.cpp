@@ -3551,7 +3551,7 @@ S("\n\nA Ghost never moves to a cell which is adjacent to another Ghost of the s
  
 S("You cannot attack diagonally!", "Вы не можете атаковать по-диагонали!")
  
-Orb("Energy", "Energii")
+Orb("Energy", "Энергии")
  
 S(  "This Orb halves the power usage of orbs which cost some "
     "charges with each activation. It even affects the "
