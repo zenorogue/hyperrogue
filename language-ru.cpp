@@ -1542,7 +1542,7 @@ S(
     "The forests of Caribbean are too dense to be traversed by humans, "
     "and they are hard to burn. Many colorful parrots can be found there.",
     "Карибские леса слишком плотны, чтобы сквозь них мог пройти человек, "
-    "и их трудно поджечь. Много разноуветных попугаев живёт здесь.")
+    "и их трудно поджечь. Много разноцветных попугаев живёт здесь.")
  
 S("Ye wonder where did th' Pirates find all these riches...",
     "Интересно, где Пираты нашли эти богатства...")
