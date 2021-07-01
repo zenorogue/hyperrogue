@@ -1420,12 +1420,6 @@ S("Cannot teleport on a monster!", "Нельзя телепортировать�
 S("Cannot teleport on an item!", "Нельзя телепортироваться на предмет!")
 S("Cannot teleport here!", "Нельзя телепортироваться сюда!")
 //S("You cannot teleport that far away!", "Вы не можететелепортироваться так далеко!")
-S("You cannot target that far away!", "Nie możesz celować tak daleko!")
-S("You cannot target that close!", "Nie możesz celować tak blisko!")
-S("Cannot cast illusion on an item!", "Nie możesz rzucić iluzji na przedmiot!")
-S("Cannot cast illusion here!", "Nie możesz rzucić ilzuji tutaj!")
-S("Cannot cast illusion on a monster!", "Nie możesz rzucić ilzuji na potwora!")
-S("Cannot throw fire there!", "Nie możesz tego podpalić!")
 
 Orb("the Dragon", "Дракона")
  
