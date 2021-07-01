@@ -2103,7 +2103,7 @@ Orb("the Fish", "Рыбы")
 S("This Orb lets you dive into the water. While diving, you are able to see and collect underwater treasures, "
   "while being invisible to monsters yourself. You are afraid of jumping into the water straight from a boat, so usually you won't do it.",
   "Эта сфера позволяет нырять. Когда Вы ныряете, Вы видите и можете собирать подводные ценности, "
-  "а враги Вас не видят. Но Вы боитесь прягать из лодки прямо в воду.")
+  "а враги Вас не видят. Но Вы боитесь прыгать из лодки прямо в воду.")
  
 S("%The1 is washed away!", "%a1 смыло водой!")
 S("%The1 is extinguished!", "%1 гаснет!")
