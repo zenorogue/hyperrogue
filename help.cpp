@@ -1179,7 +1179,7 @@ EX void gotoHelpFor(eLand l) {
   else listbeasts();  
   
   if(l == laTortoise)
-    help_extensions.push_back(help_extension{'t', XLAT("Galápagos shading"), [] () {
+    help_extensions.push_back(help_extension{'s', XLAT("Galápagos shading"), [] () {
       tortoise::shading_enabled = !tortoise::shading_enabled;
       }});
   }
