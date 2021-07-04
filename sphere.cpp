@@ -27,14 +27,11 @@ struct hrmap_spherical : hrmap_standard {
 
   hrmap_spherical() {
     for(int i=0; i<spherecells(); i++) {
-      heptagon& h = *(dodecahedron[i] = tailored_alloc<heptagon> (S7));
+      heptagon& h = *(dodecahedron[i] = init_heptagon(S7));
       h.s = hsOrigin;
       h.emeraldval = i;
       h.zebraval = i;
       h.fiftyval = i;
-      h.rval0 = h.rval1 = 0;
-      h.alt = NULL;
-      h.cdata = NULL;
       h.c.fullclear();
       h.fieldval = i;
       if(!IRREGULAR) h.c7 = newCell(S7, &h);

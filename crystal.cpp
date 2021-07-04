@@ -506,9 +506,7 @@ struct hrmap_crystal : hrmap_standard {
   heptagon *get_heptagon_at(coord c, int deg) {
     if(heptagon_at.count(c)) return heptagon_at[c];
     heptagon*& h = heptagon_at[c];
-    h = tailored_alloc<heptagon> (deg);
-    h->alt = NULL;
-    h->cdata = NULL;
+    h = init_heptagon(deg);
     h->c7 = newCell(deg, h);
     
     /* in {6,4} we need emeraldval for some patterns, including (bitruncated) football and (bitruncated) three-color */
@@ -519,7 +517,6 @@ struct hrmap_crystal : hrmap_standard {
     h->emeraldval ^= ((c[2] & 2) << 1);    
     if(c[0] & 2) h->emeraldval ^= 1;
 
-    h->distance = 0;
     if(ginf[gCrystal].vertex == 3) 
       h->fiftyval = fiftyrule(c);    
     for(int i=0; i<cs.dim; i++) h->distance += abs(c[i]);

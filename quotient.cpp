@@ -353,25 +353,16 @@ struct hrmap_quotient : hrmap_standard {
     // printf("all cells = %d\n", TOT*(S7+S3)/S3);
     if(!TOT) exit(1);
     allh.resize(TOT);
-    for(int i=0; i<TOT; i++) allh[i] = tailored_alloc<heptagon> (S7);
+    for(int i=0; i<TOT; i++) allh[i] = init_heptagon(S7);
     // heptagon *oldorigin = origin;
     allh[0]->alt = base.origin;
   
     for(int i=0; i<TOT; i++) {
       heptagon *h = allh[i];
-      if(i) {
-        h->alt = NULL;
-        }
       if(true) {
         h->s = hsOrigin;
-        h->emeraldval = 0;
-        h->zebraval = 0;
-        h->fiftyval = 0;
         h->fieldval = S7*i;
-        h->rval0 = h->rval1 = 0; h->cdata = NULL;
-        h->distance = 0;
         if(!IRREGULAR) h->c7 = newCell(S7, h);
-        else h->c7 = NULL;
         }
       for(int j=0; j<S7; j++) {
         int co = connections[i*S7+j];

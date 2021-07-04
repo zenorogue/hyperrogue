@@ -157,18 +157,11 @@ struct hrmap_kite : hrmap {
     }
 
   heptagon *newtile(pshape s, int dist) {
-    heptagon *h = tailored_alloc<heptagon> (8);
+    heptagon *h = init_heptagon(8);
     h->s = hstate(s);
     h->dm4 = h->distance = dist;
     if(bt::in() || dist == 0)
       h->c7 = newCell(euclid ? 4 : s == pKite ? 12 : 10, h);
-    else
-      h->c7 = NULL;
-    h->zebraval = 0;
-    h->emeraldval = 0;
-    h->fieldval = 0;
-    h->cdata = NULL;
-    h->alt = NULL;
     return h;
     }
   

@@ -76,6 +76,21 @@ EX heptagon *buildHeptagon1(heptagon *h, heptagon *parent, int d, hstate s, int 
   h->cdata = NULL;
   return h;
   }
+
+heptagon *init_heptagon(int type) {
+  heptagon *h = tailored_alloc<heptagon> (d);
+  h->emeraldval = 0;
+  h->zebraval = 0;
+  h->fiftyval = 0;
+  h->fieldval = 0;
+  h->rval0 = origin->rval1 = 0;
+  h->cdata = NULL;
+  h->alt = NULL;
+  h->c7 = NULL;
+  h->distance = 0;
+  h->dm4 = 0;
+  return h;
+  }
   
 heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fixdistance = COMPUTE) {
   heptagon *h = buildHeptagon1(tailored_alloc<heptagon> (S7), parent, d, s, pard);

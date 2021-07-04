@@ -303,11 +303,9 @@ EX namespace reg3 {
     acells.clear();
     tmatrices.resize(cell_count);
     for(int a=0; a<cell_count; a++) {
-      allh[a] = tailored_alloc<heptagon> (S7);
+      allh[a] = init_heptagon(S7);
       allh[a]->c7 = newCell(S7, allh[a]);
       allh[a]->fieldval = a;
-      allh[a]->zebraval = 0;
-      allh[a]->alt = NULL;
       acells.push_back(allh[a]->c7);
       }
     }
@@ -616,15 +614,9 @@ EX namespace reg3 {
       }
 
     hrmap_reg3() {
-      origin = tailored_alloc<heptagon> (S7);
+      origin = init_heptagon(S7);
       heptagon& h = *origin;
       h.s = hsOrigin;
-      h.cdata = NULL;
-      h.alt = NULL;
-      h.distance = 0;
-      h.fiftyval = 0;
-      h.fieldval = 0;
-      h.emeraldval = 0;
       h.c7 = newCell(S7, origin);
       if(sphere) spherecells.push_back(h.c7);
       worst_error1 = 0, worst_error2 = 0;
@@ -657,14 +649,9 @@ EX namespace reg3 {
       if(hyperbolic) {
         dynamicval<eGeometry> g(geometry, gBinary3); 
         bt::build_tmatrix();
-        alt = tailored_alloc<heptagon> (S7);
+        alt = init_heptagon(S7);
         alt->s = hsOrigin;
-        alt->emeraldval = 0;
-        alt->zebraval = 0;
-        alt->distance = 0;
         alt->alt = alt;
-        alt->cdata = NULL;
-        alt->c7 = NULL;
         binary_map = bt::new_alt_map(alt);
         T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * cspin(0, 2, 1.1249) * xpush(0.07) * Id;
         }
@@ -834,11 +821,9 @@ EX namespace reg3 {
           }
         println(hlog, "found d2 = ", d2);
         }
-      heptagon *created = tailored_alloc<heptagon> (S7);
+      heptagon *created = init_heptagon(S7);
       created->c7 = newCell(S7, created);
       if(sphere) spherecells.push_back(created->c7);
-      created->alt = NULL;
-      created->cdata = NULL;
       #if CAP_FIELD
       if(quotient_map) {
         created->emeraldval = fv;
@@ -1048,16 +1033,10 @@ EX namespace reg3 {
     
       load_ruleset(get_rule_filename());
       
-      origin = tailored_alloc<heptagon> (S7);
+      origin = init_heptagon(S7);
       heptagon& h = *origin;
       h.s = hsOrigin;
-      h.cdata = NULL;
-      h.alt = NULL;
-      h.distance = 0;
-      h.zebraval = 0;
-      h.fieldval = 0;
       h.fiftyval = root[0];
-      h.c7 = NULL;
       h.c7 = newCell(S7, origin);
       
       int opos = 0;
@@ -1183,13 +1162,9 @@ EX namespace reg3 {
         }
         
       if(id1 != -1) {
-        res = tailored_alloc<heptagon> (S7);
+        res = init_heptagon(S7);
         if(parent->c7)
           res->c7 = newCell(S7, res);
-        else
-          res->c7 = nullptr;
-        res->alt = nullptr;
-        res->cdata = nullptr;
         res->fieldval = fv;
         res->distance = parent->distance + 1;
         res->fiftyval = id1;
@@ -1198,10 +1173,8 @@ EX namespace reg3 {
         }
       
       else if(other[pos] == ('A' + d) && other[pos+1] == ',') {
-        res = tailored_alloc<heptagon> (S7);
-        res->c7 = nullptr;
+        res = init_heptagon(S7);
         res->alt = parent->alt;
-        res->cdata = nullptr;
         res->fieldval = fv;
         res->distance = parent->distance - 1;
         vector<int> possible;

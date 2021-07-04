@@ -180,7 +180,7 @@ EX namespace euc {
       if(spacemap.count(at)) 
         return spacemap[at];
       else {
-        auto h = tailored_alloc<heptagon> (S7);
+        auto h = init_heptagon(S7);
         if(!IRREGULAR) 
           h->c7 = newCell(S7, h);
         #if CAP_IRR
@@ -197,9 +197,6 @@ EX namespace euc {
             }
           }
         #endif
-        h->distance = 0;
-        h->cdata = NULL;
-        h->alt = NULL;
         if(S7 != 14)
           h->zebraval = gmod(at[0] + at[1] * 2 + at[2] * 4, 5);
         else 

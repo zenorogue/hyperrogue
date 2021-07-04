@@ -291,16 +291,11 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
     if(!polarb50(c)) return NULL;
     }
   
-  heptagon *alt = tailored_alloc<heptagon> (h->type);
+  heptagon *alt = init_heptagon(h->type);
   allmaps.push_back(newAltMap(alt));
 //printf("new alt {%p}\n", hr::voidp(alt));
   alt->s = firststate;
-  alt->emeraldval = 0;
-  alt->zebraval = 0;
-  alt->distance = 0;
-  alt->fieldval = 0;
   if(hybri) alt->fieldval = hybrid::get_where(centerover).second;
-  alt->c7 = NULL;
   alt->alt = alt;
   #if MAXMDIM >= 4
   if(reg3::in_rule()) {

@@ -529,17 +529,8 @@ struct hrmap_archimedean : hrmap {
     dynamicval<hrmap*> curmap(currentmap, this);
     int id = DUAL ? current.N * 2 : 0;;
     int N0 = isize(current.adjacent[id]);
-    origin = tailored_alloc<heptagon> (N0);
+    origin = init_heptagon(N0);
     origin->s = hsOrigin;
-    origin->emeraldval = 0;
-    origin->zebraval = 0;
-    origin->fiftyval = 0;
-    origin->fieldval = 0;
-    origin->rval0 = origin->rval1 = 0;
-    origin->cdata = NULL;
-    origin->alt = NULL;
-    origin->c7 = NULL;
-    origin->distance = 0;
 
     parent_index_of(origin) = DUAL ? 1 : 0;
     id_of(origin) = id;
@@ -549,14 +540,9 @@ struct hrmap_archimedean : hrmap {
     
     if(hyperbolic) {
       dynamicval<eGeometry> g(geometry, gNormal); 
-      alt = tailored_alloc<heptagon> (S7);
+      alt = init_heptagon(S7);
       alt->s = hsOrigin;
-      alt->emeraldval = 0;
-      alt->zebraval = 0;
-      alt->distance = 0;
-      alt->c7 = NULL;
       alt->alt = alt;
-      alt->cdata = NULL;
       current_altmap = newAltMap(alt); 
       }
   

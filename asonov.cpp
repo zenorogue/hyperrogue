@@ -176,15 +176,12 @@ struct hrmap_asonov : hrmap {
   heptagon *get_at(coord c) {
     auto& h = at[c];
     if(h) return h;
-    h = tailored_alloc<heptagon> (S7);
+    h = init_heptagon(S7);
     h->c7 = newCell(S7, h);
     coords[h] = c;
-    h->dm4 = 0;
     h->distance = c[2];
     h->zebraval = c[0];
     h->emeraldval = c[1];
-    h->cdata = NULL;
-    h->alt = NULL;
     return h;      
     }
   

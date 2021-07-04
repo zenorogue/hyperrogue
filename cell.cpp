@@ -178,17 +178,11 @@ EX hrmap *newAltMap(heptagon *o) {
 
 EX heptagon* hyperbolic_origin() {
   int odegree = geometry == gBinaryTiling ? 6 : S7;
-  heptagon *origin = tailored_alloc<heptagon> (odegree);
+  heptagon *origin = init_heptagon(odegree);
   heptagon& h = *origin;
   h.s = hsOrigin;
   h.emeraldval = a46 ? 0 : 98;
   h.zebraval = 40;
-  h.fiftyval = 0;
-  h.fieldval = 0;
-  h.rval0 = h.rval1 = 0;
-  h.cdata = NULL;
-  h.alt = NULL;
-  h.distance = 0;
   #if CAP_IRR
   if(IRREGULAR) irr::link_start(origin);
   else 

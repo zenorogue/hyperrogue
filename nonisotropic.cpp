@@ -246,16 +246,12 @@ EX namespace sn {
     heptagon *get_at(heptagon *x, heptagon *y) {
       auto& h = at[make_pair(x, y)];
       if(h) return h;
-      h = tailored_alloc<heptagon> (S7);
+      h = init_heptagon(S7);
       h->c7 = newCell(S7, h);
       coords[h] = make_pair(x, y);
       h->distance = x->distance;
-      h->dm4 = 0;
       h->zebraval = x->emeraldval;
       h->emeraldval = y->emeraldval;
-      h->fieldval = 0;
-      h->cdata = NULL;
-      h->alt = NULL;
       return h;      
       }
 
@@ -266,27 +262,17 @@ EX namespace sn {
     
       if(true) {
         dynamicval<eGeometry> g(geometry, gBinary4); 
-        alt = tailored_alloc<heptagon> (S7);
+        alt = init_heptagon(S7);
         alt->s = hsOrigin;
         alt->alt = alt;
-        alt->cdata = NULL;
-        alt->c7 = NULL;
-        alt->zebraval = 0;
-        alt->distance = 0;
-        alt->emeraldval = 0;
         binary_map = bt::new_alt_map(alt);
         }
       
       if(nih) {
         dynamicval<eGeometry> g(geometry, gTernary); 
-        alt3 = tailored_alloc<heptagon> (S7);
+        alt3 = init_heptagon(S7);
         alt3->s = hsOrigin;
         alt3->alt = alt3;
-        alt3->cdata = NULL;
-        alt3->c7 = NULL;
-        alt3->zebraval = 0;
-        alt3->distance = 0;
-        alt3->emeraldval = 0;
         ternary_map = bt::new_alt_map(alt3);
         }
       else {
@@ -886,15 +872,12 @@ EX namespace nilv {
     heptagon *get_at(mvec c) {
       auto& h = at[c];
       if(h) return h;
-      h = tailored_alloc<heptagon> (S7);
+      h = init_heptagon(S7);
       h->c7 = newCell(S7, h);
       coords[h] = c;
-      h->dm4 = 0;
       h->zebraval = c[0];
       h->emeraldval = c[1];
       h->fieldval = c[2];
-      h->cdata = NULL;
-      h->alt = NULL;
       return h;      
       }
 
