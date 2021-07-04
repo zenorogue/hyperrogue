@@ -534,7 +534,7 @@ EX namespace inv {
             ld py = current_display->ycenter + pos.second * rad3;
             int icol = iinf[o].color;
             if(!remaining[i]) icol = gradient(icol, 0, 0, .5, 1);
-            bool gg = graphglyph();
+            bool gg = graphglyph(false);
             
             if(!hiliteclick) {
               if(gg) {

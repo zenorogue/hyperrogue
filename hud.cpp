@@ -173,10 +173,10 @@ int glyphflags(int gid) {
   return f;
   }
 
-EX bool graphglyph() {
+EX bool graphglyph(bool isMonster) {
   // if(GDIM == 3) return false;
   if(vrhr::active()) return false;
-  return vid.graphglyph == 2 || (vid.graphglyph == 1 && vid.monmode);
+  return vid.graphglyph == 2 || (vid.graphglyph == 1 && (isMonster ? mmmon : mmitem));
   }
 
 bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int qty, int flags, int id) {
@@ -190,10 +190,11 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
   int d = ticks - glasttime[id];
   double zoom = (d <= 250 && d >= 0) ? 1.25 - .001 * d : 1;
   glsize = int(glsize * zoom);
+  bool isMonster = (id >= ittypes);
   
-  if(graphglyph()) {
+  if(graphglyph(isMonster)) {
     initquickqueue();
-    if(id >= ittypes) {
+    if(isMonster) {
       eMonster m = eMonster(id - ittypes);
       double bsize = buttonsize * 2/3;
       if(m == moKrakenH) bsize /= 3;
