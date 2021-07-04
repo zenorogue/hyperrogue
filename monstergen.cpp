@@ -593,8 +593,12 @@ EX void wandering() {
     else if(c->land == laDragon && (items[itDragon] >= 8 || items[itOrbYendor]) && wchance(items[itDragon], 20))
       c->monst = moFireElemental;
 
-    else if(c->land == laRedRock && wchance(items[itRedGem], 10))
-      c->monst = (hrand(10) || peace::on) ? moRedTroll : moHexSnake;
+    else if(c->land == laRedRock && wchance(items[itRedGem], 10)) {
+      if (hrand(10) || peace::on)
+        c->monst = moRedTroll;
+      else if (!pseudohept(c))
+        c->monst = moHexSnake;
+      }
 
     else if(c->land == laCaves && wchance(items[itGold], 5))
       c->monst = hrand(3) ? moTroll : moGoblin;
