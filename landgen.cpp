@@ -2192,11 +2192,11 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laMountain:
       if(d == 7) {
-        if(hrand_monster(50000) < 100)
+        if(hrand_monster(50000) < 100 && !safety)
           buildIvy(c, 0, 3);
-        else if(hrand_monster(125000) < 100 - celldistAlt(c))
+        else if(hrand_monster(125000) < 100 - celldistAlt(c) && !safety)
           c->monst = moMonkey;
-        else if(hrand_monster(200000) < min(100, -10*celldistAlt(c)) - celldistAlt(c))
+        else if(hrand_monster(200000) < min(100, -10*celldistAlt(c)) - celldistAlt(c) && !safety)
           c->monst = moEagle;
         else if(hrand(100) < 5) 
           c->wall = waPlatform;
@@ -2333,7 +2333,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
               c->wall = waRuinWall, c->landparam = 1;
             }
           }
-        if(hrand_monster(40000) < kf && !c->monst && !c->wall && !shmup::on) {
+        if(hrand_monster(40000) < kf && !c->monst && !c->wall && !shmup::on && !safety) {
           cell *c1 = c;
           cell *c2 = createMov(c1, hrand(c1->type));
           if(c2->monst || c2->wall) return;
@@ -2758,7 +2758,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           }
         }
         
-      if(d == 7) {
+      if(d == 7 && !safety) {
         if(c->wall == waNone) {
           if(hrand_monster(2000) < ((cwt.at->land == laFrog || items[itFrog]) ? 20 : 0) + (items[itFrog] + yendor::hardness()))
             c->monst = pick(moFrog, moPhaser, moVaulter);
