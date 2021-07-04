@@ -178,7 +178,7 @@ template<class T> struct connection_table {
  */
 
 template<class T> T* tailored_alloc(int degree) {
-  const T* sample = (T*) &degree;
+  const T* sample = nullptr;
   T* result;
 #ifndef NO_TAILORED_ALLOC
   int b = (char*)&sample->c.move_table[degree] + degree - (char*) sample;
