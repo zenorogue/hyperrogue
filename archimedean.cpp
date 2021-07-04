@@ -585,10 +585,6 @@ struct hrmap_archimedean : hrmap {
     }
 
   ~hrmap_archimedean() {
-    if(hyperbolic) for(auto& p: archimedean_gmatrix) if(p.second.first->cdata) {
-      delete p.second.first->cdata;
-      p.second.first->cdata = NULL;
-      }
     clearfrom(origin);
     altmap.clear();
     archimedean_gmatrix.clear();

@@ -694,12 +694,6 @@ struct hrmap_arbi : hrmap {
     }
 
   ~hrmap_arbi() {
-    /*
-    if(hyperbolic) for(auto& p: arbi_matrix) if(p.second.first->cdata) {
-      delete p.second.first->cdata;
-      p.second.first->cdata = NULL;
-      }
-    */
     clearfrom(origin);
     altmap.clear();
     arbi_matrix.clear();

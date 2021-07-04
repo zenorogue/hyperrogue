@@ -287,7 +287,9 @@ enum hstate { hsOrigin, hsA, hsB, hsError, hsA0, hsA1, hsB0, hsB1, hsC };
 struct cell *createMov(struct cell *c, int d);
 struct heptagon *createStep(struct heptagon *c, int d);
 
-struct cdata {
+struct cdata_or_heptagon { virtual ~cdata_or_heptagon() {} };
+
+struct cdata : cdata_or_heptagon {
   int val[4];
   int bits;
   };
@@ -313,7 +315,7 @@ constexpr int iteration_limit = 10000000;
  *  heptagons are unused
  */
 
-struct heptagon {
+struct heptagon : cdata_or_heptagon {
   /** \brief Automata are used to generate the standard maps. s is the state of this automaton */
   hstate s : 6;
   /** \brief distance modulo 4, in heptagons */

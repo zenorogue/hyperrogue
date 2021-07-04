@@ -378,9 +378,9 @@ EX void clearfrom(heptagon *at) {
     q.pop();
     DEBB(DF_MEMORY, ("from %p", at));
     if(!at->c7) {
-      heptagon *h = (heptagon*) at->cdata;
+      heptagon *h = dynamic_cast<heptagon*> ((cdata_or_heptagon*) at->cdata);
       if(h) {
-        if(h->alt != at) { DEBB(DF_MEMORY | DF_ERROR, ("alt error :: h->alt = ", h->alt)); }
+        if(h->alt != at) { DEBB(DF_MEMORY | DF_ERROR, ("alt error :: h->alt = ", h->alt, " expected ", at)); }
         cell *c = h->c7;
         subcell(c, destroycellcontents);
         h->alt = NULL;
