@@ -115,11 +115,10 @@ EX int getnext(const char* s, int& i) {
       }
 
 #ifdef REPLACE_LETTERS
-  for(int i=0; i<isize(dialog::latin_letters); i++)
-    if(s[i] == dialog::foreign_letters[2*i] && s[i+1] == dialog::foreign_letters[2*i+1]) {
+  for(int j=0; j<isize(dialog::latin_letters_l); j++)
+    if(s[i] == dialog::foreign_letters[2*j] && s[i+1] == dialog::foreign_letters[2*j+1]) {
       i += 2;
-      return int(dialog::latin_letters[i]);
-      break;
+      return int(dialog::latin_letters_l[j]);
       }
 #endif
 
