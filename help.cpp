@@ -1182,5 +1182,9 @@ EX void gotoHelpFor(eLand l) {
     help_extensions.push_back(help_extension{'t', XLAT("Galápagos shading"), [] () {
       tortoise::shading_enabled = !tortoise::shading_enabled;
       }});
+
+  help_extensions.push_back(help_extension{'w', XLAT("wiki"), [l] () {
+    open_wiki(linf[l].name);
+    }});
   }
 }
