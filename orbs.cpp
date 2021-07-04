@@ -1189,7 +1189,7 @@ EX int check_phase(cell *cf, cell *ct, flagtype flags, cell*& jumpthru) {
   forCellCM(c2, cf) {
     if(isNeighbor(c2, ct) && !nonAdjacent(cf, c2) && !nonAdjacent(c2, ct)) {
       jumpthru = c2;
-      if(passable(ct, cf, P_ISPLAYER | P_PHASE)) {
+      if(passable(ct, cf, flags | P_PHASE)) {
         partial = 2;
         if(c2->monst || (isWall(c2) && c2->wall != waShrub)) {
           return 3;
