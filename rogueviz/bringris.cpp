@@ -1488,6 +1488,8 @@ EX void display_next(int xstart) {
     }
   }
 
+purehookset bringris_extensions;
+
 void run() {
 
   clearMessages();
@@ -1523,7 +1525,8 @@ void run() {
   cmode = sm::NORMAL | sm::CENTER;
   if(!explore) cmode |= sm::VR_MENU;
 
-  int xstart = vid.xres - vid.fsize * 10;
+  int xstart = vid.xres;
+  if(!nohud) xstart -= vid.fsize * 10;
   
   getcstat = '-';
   
@@ -1541,6 +1544,13 @@ void run() {
   draw_screen(xstart, show_next);
   
   calcparam();
+  
+  bool in_menu = !show_next && !explore;
+  
+  if(nohud) {
+    describeMouseover();
+    }
+  else {
   for(int i=0; i<isize(by_level); i++) {
     displaystr(xstart + vid.fsize, vid.yres - vid.fsize * (i+2), 0, vid.fsize, its(by_level[i]), get_hipso(i+1), 0);
     }
@@ -1566,8 +1576,6 @@ void run() {
       display_next(xstart);
     }
       
-  bool in_menu = !show_next && !explore;
-  
   if(explore) {
     int xx = (xstart + vid.xres) / 2;
     if(displayButtonS(xx, vid.fsize * 2, "backspace", 0xFFFFFFFF, 8, vid.fsize)) getcstat = SDLK_BACKSPACE;
@@ -1597,6 +1605,7 @@ void run() {
     if(vrhr::active())
       if(displayButtonS(xx, vid.fsize * 14, "RESET VR", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 'V';
     }
+  }
   
   keyhandler = [xstart, in_menu] (int sym, int uni) {
     if(explore) handlePanning(sym, uni);
@@ -1794,6 +1803,8 @@ void run() {
       }
     #endif
     };
+
+  callhooks(bringris_extensions);
   }
 
 cell *get_center() {
