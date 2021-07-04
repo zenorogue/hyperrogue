@@ -3099,8 +3099,8 @@ EX int read_config_args() {
   else if(argis("-msens")) {
     PHASEFROM(2); shift_arg_formula(mouseaim_sensitivity);
     }
-  TOGGLE('o', vid.usingGL, apply_screen_settings())
-  TOGGLE('f', vid.want_fullscreen, apply_screen_settings())
+  TOGGLE('o', vid.wantGL, { vid.wantGL = !vid.wantGL; apply_screen_settings();})
+  TOGGLE('f', vid.want_fullscreen, { vid.want_fullscreen = !vid.want_fullscreen; apply_screen_settings(); })
   else if(argis("-noshaders")) {
     PHASE(1);
     glhr::noshaders = true; 
