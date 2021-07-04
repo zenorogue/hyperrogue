@@ -51,7 +51,7 @@ void compute_triangle_markers() {
     cell *c = p.first;
     
     forCellIdEx(c1, i, c) if(fif.count(c1) && fif[c1].target == p.second.target + 1) {
-      triangle_markers[p.second.target] = (i - p.second.targetdir) * (p.second.targetmirror ? -1 : 1);
+      triangle_markers[p.second.target] = gmod((1 + i - p.second.targetdir) * (p.second.targetmirror ? -1 : 1), c->type);
       }
     
     if(p.second.current == 0)
