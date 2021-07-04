@@ -222,6 +222,41 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
   cc.stretch_shear.resize(cc.size(), make_pair(1, 0));
   }
 
+EX bool do_unmirror = true;
+
+/** \brief for tessellations which contain mirror rules, remove them by taking the orientable double cover */
+EX void unmirror() {
+  int mirror_rules = 0;
+  for(auto s: arb::current.shapes)
+    for(auto t: s.connections)
+      if(get<2>(t))
+        mirror_rules++;
+  if(!mirror_rules) return;
+  auto& sh = current.shapes;
+  int s = isize(sh);
+  for(int i=0; i<s; i++)
+    sh.push_back(sh[i]);
+  for(int i=s; i<s+s; i++) {
+    for(auto& v: sh[i].vertices) 
+      v[1] = -v[1];
+    reverse(sh[i].edges.begin(), sh[i].edges.end());
+    reverse(sh[i].vertices.begin()+1, sh[i].vertices.end());
+    reverse(sh[i].angles.begin(), sh[i].angles.end()-1);
+    reverse(sh[i].connections.begin(), sh[i].connections.end());
+    }
+
+  if(true) for(int i=0; i<s+s; i++) {
+    for(auto& co: sh[i].connections) {
+      bool mirr = get<2>(co) ^ (i >= s);
+      get<2>(co) = false;
+      if(mirr) {
+        get<0>(co) += s;
+        get<1>(co) = isize(sh[get<0>(co)].angles) - 1 - get<1>(co);
+        }
+      }
+    }
+  }
+
 EX void load(const string& fname, bool after_sliding IS(false)) {
   fhstream f(fname, "rt");
   if(!f.f) throw hr_parse_exception("file " + fname + " does not exist");
@@ -472,6 +507,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
         }
       }
     }
+  if(do_unmirror) unmirror();
   if(!after_sliding) slided = current;
   }
 
