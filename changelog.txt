@@ -4394,3 +4394,30 @@ Mostly Bugfixes:
 - dice values are now editable in Shift+G
 - fixed the direction setup by Orb of Chaos
 - fixed the remaining spurious shadow messages
+
+2021-07-04 11:23 Update 12.0c:
+
+Mostly bugfixes:
+- Archimedean: fixed the possible crash on deleting arcms with large cells, because of the confusion of cdata
+- items in water no longer can burn
+- Overview cheats: arrow keys no longer make treasure/orb counts negative
+- Orb of Time now preserves Orb of Plague properly
+- Orb of Safety excludes more monsters
+- More fixes for Russian translation
+- Flash Witches no longer avoid killing the player's allies
+- Yellow Frogs no longer phase into the player's sword
+- Resolve conflict between 'Galápagos shading' and 'teleport'
+- Fix HUD kill list in 'items only' mode
+- Wandering rocksnakes no longer appear on hepts
+- Add wiki links to land help
+- Mention the Cursed Canyon in the Shadow's description
+- cheat Teleporting to Haunted Woods no longer puts you infinitely deep
+- Orb of Change no longer produces Jiangshi or Desert Man
+- Fix extra Viziers when walking around the Palace with 12 treasures
+- Help for Mutant Sapling no longer claims that it unlocks Orb of Luck globally
+- Orb of Slaying can now appear in hub lands
+- Orb of the Woods now only appears in lands where it is potentially useful (and in hubs)
+- Orb of Luck no longer appears in Free Fall
+- Orb of Friendship no longer appears in Terracotta Army
+- The Orb of Beauty now lifts rose-scent restrictions on targeting of ranged orbs
+- fixed a memory leak when drawing text
