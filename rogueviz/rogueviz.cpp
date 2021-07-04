@@ -579,6 +579,7 @@ void queue_prec(const shiftmatrix& V, edgeinfo*& ei, color_t col) {
 int brm_limit = 1000;
 
 ld labelshift = .2;
+ld labelscale = .2; // .28 in SVG
 
 bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
   if(m->dead) return true;
@@ -751,7 +752,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
     if(doshow && !behindsphere(V2)) {
       auto info = vd.info;
       if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
-      queuestr(V2, (svg::in ? .28 : .2) * cgi.crossf / cgi.hcrossf, vd.name, forecolor, (svg::in || ISWEB) ? 0 : 1);
+      queuestr(V2, labelscale, vd.name, forecolor, (svg::in || ISWEB) ? 0 : 1);
       if(info) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
       }
     }
@@ -998,6 +999,9 @@ int readArgs() {
     }
   else if(argis("-rvlabelshift")) {
     shift_arg_formula(labelshift);
+    }
+  else if(argis("-rvlabelscale")) {
+    shift_arg_formula(labelscale);
     }
   else if(argis("-rog3")) {
     rog3 = true;
