@@ -457,7 +457,7 @@ void handle_animation(ld t) {
       
       int n = isize(values);
       
-      for(int ss=1; ss<=n-1; ss++)
+      for(int ss=1; ss<=n-1; ss++) {
         for(int a=0; a<n-ss; a++) {
           // combining [a..a+(ss-1)] and [a+1..a+ss]
           if(times[a+ss] == times[a])
@@ -465,6 +465,8 @@ void handle_animation(ld t) {
           else
             values[a] = (values[a] * (times[a+ss] - t) + values[a+1] * (t - times[a])) / (times[a+ss] - times[a]);
           }
+        values.pop_back();
+        }
       
       pts[j][i] = values[0];
       }
@@ -497,6 +499,7 @@ void handle_animation0() {
   if(!animate_on) return;
   handle_animation(ticks / anims::period);
   anims::moved();
+  println(hlog, "at ", cview());
   }
 
 void generate_trace() {
