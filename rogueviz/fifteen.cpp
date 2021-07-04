@@ -88,7 +88,6 @@ void make_move(cell *where, int dir) {
   f0.currentmirror = f1.currentmirror ^ mir;
   int d = f1.currentdir;
   d -= where->c.spin(dir);
-  println(hlog, "mir = ", mir);
   if(mir) d *= -1;
   d += dir;
   if(!mir) d += nw->type/2;
