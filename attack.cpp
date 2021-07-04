@@ -1099,6 +1099,7 @@ EX bool flashWouldKill(cell *c, flagtype extra) {
     for(int u=0; u<c2->type; u++) {
       cell *c3 = c2->move(u);
       if(isWorm(c3)) continue; // immune to Flash
+      if(isFriendly(c3)) continue; // player's allies and mounts don't count
       if(c3->monst == moEvilGolem) continue; // evil golems don't count
       if(c3 != c && (c3->monst || isPlayerOn(c3))) {
         bool b = canAttack(NULL, moWitchFlash, c3, c3->monst, AF_MAGIC | extra);

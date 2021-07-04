@@ -26,8 +26,8 @@ namespace hr {
 
 /** \brief A helper structure that acts as a boolean which is always false. Helpful when disabling stuff with compiler flags. */
 struct always_false {
-  operator bool() const { return false; };
-  bool operator = (bool b) const { return b; };
+  operator bool() const { return false; }
+  bool operator = (bool b) const { return b; }
   };
 
 /** \brief placate GCC's overzealous -Wunused-result */

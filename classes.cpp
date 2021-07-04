@@ -411,7 +411,7 @@ const char *twdesc = "This structure will disappear after some time.";
 const char *jellydesc = 
   "Some of the Slime Beasts have decided to revolt against the color rules in the "
   "Alchemist Lab. They have changed their shape and consistency, declared independence, and established their own Kingdom.\n\n"
-  "Jellies switch between being a wall and being a monster after every treasure you pick.";
+  "Jellies switch between being a wall and being a monster after every treasure you collect.";
 
 const char *ruindesc = 
   "Once a beautiful city... but now overrun by the mighty Raiders of unknown origin.\n\n"

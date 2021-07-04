@@ -16,7 +16,7 @@ extern int default_levs();
 struct hrmap {
   virtual heptagon *getOrigin() { return NULL; }
   virtual cell *gamestart() { return getOrigin()->c7; }
-  virtual ~hrmap() { };
+  virtual ~hrmap() { }
   virtual vector<cell*>& allcells();
   virtual void verify() { }
   virtual void on_dim_change() { }

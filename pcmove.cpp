@@ -1497,7 +1497,8 @@ EX void swordAttackStatic() {
 EX int plague_kills;
 
 EX void spread_plague(cell *mf, cell *mt, int dir, eMonster who) {
-  if(!(who == moPlayer ? markOrb(itOrbPlague) : markEmpathy(itOrbPlague))) return;
+  if(!items[itOrbPlague]) return;
+  if(who != moPlayer && !items[itOrbEmpathy]) return;
   forCellEx(mx, mt) if(celldistance(mx, mf) > celldistance(mx, mf->modmove(dir)) && celldistance(mx, mf) <= 4) {
     sideAttackAt(mf, dir, mx, who, itOrbPlague, mt);
     }

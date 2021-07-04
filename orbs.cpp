@@ -1039,10 +1039,10 @@ void poly_attack(cell *dest) {
   eMonster orig = dest->monst;
   auto polymonsters = {
     moYeti, moRunDog, moRanger,
-    moDesertman, moMonkey, moCultist,
+    moMonkey, moCultist,
     moFallingDog, moVariantWarrior, moFamiliar, moOrangeDog,
     moRedFox, moFalsePrincess, moResearcher,
-    moNarciss, moJiangshi, 
+    moNarciss,
     };
   int ssf = 0;
   eMonster target = *(polymonsters.begin() + hrand(isize(polymonsters)));
@@ -1189,7 +1189,7 @@ EX int check_phase(cell *cf, cell *ct, flagtype flags, cell*& jumpthru) {
   forCellCM(c2, cf) {
     if(isNeighbor(c2, ct) && !nonAdjacent(cf, c2) && !nonAdjacent(c2, ct)) {
       jumpthru = c2;
-      if(passable(ct, cf, P_ISPLAYER | P_PHASE)) {
+      if(passable(ct, cf, flags | P_PHASE)) {
         partial = 2;
         if(c2->monst || (isWall(c2) && c2->wall != waShrub)) {
           return 3;
@@ -1246,7 +1246,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   if(rosedist(cwt.at) == 1) {
     int r = rosemap[cwt.at];
     int r2 = rosemap[c];
-    if(r2 <= r) {
+    if(r2 <= r && !markOrb(itOrbBeauty)) {
       if(a == roKeyboard || a == roMouseForce ) 
         addMessage(XLAT("Those roses smell too nicely. You can only target cells closer to them!"));
       return itNone;
@@ -1574,7 +1574,6 @@ EX int orbcharges(eItem it) {
       return inv::on ? 150 : 50;
     case itOrbWinter: // "pickup-winter"
        return inv::on ? 45 : 30;
-       break;
     case itOrbBeauty:
     case itOrbEmpathy:
     case itOrbFreedom:

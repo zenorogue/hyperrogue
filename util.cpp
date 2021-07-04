@@ -724,4 +724,19 @@ EX void open_url(string s) {
 #endif
   }
   
+const char *urlhex = "0123456789ABCDEF";
+EX void open_wiki(const char *title) {
+  string url = "https://hyperrogue.miraheze.org/wiki/";
+  unsigned char c;
+  for (size_t i = 0; (c = title[i]); ++i) {
+    if (('0' <= c && c <= '9') || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_' || c == '-')
+      url += c;
+    else if (c == ' ')
+      url += "_";
+    else
+      url += string("%") + urlhex[c/16] + urlhex[c%16];
+    }
+  open_url(url);
+}
+
 }

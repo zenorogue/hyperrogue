@@ -1336,7 +1336,7 @@ EX void show_vr_settings() {
         "If the pointer length is 0.5m, the object pointed to is 0.5 meter from the controller. "
         "This is used in situations where the controller is used as a 3D mouse, e.g., "
         "the drawing tool in three-dimensional geometries. When pointing at two-dimensional surfaces, "
-        "this is not relevant (the pointer is as long as needed to hit the surface.)."
+        "this is not relevant (the pointer is as long as needed to hit the surface)."
         ));
       });
 

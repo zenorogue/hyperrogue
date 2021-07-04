@@ -495,11 +495,13 @@ EX string generateHelpForItem(eItem it) {
     for(auto& oi: orbinfos) {
       if(treasureType(oi.l) == it) {
         if(oi.gchance > 0) {
+          help += "\n\n";
           help += XLAT("\n\nOrb unlocked: %1", oi.orb);
           describeOrb(help, oi);
           }
         else if(oi.l == cwt.at->land || inv::on) {
-          help += XLAT("\n\nSecondary orb: %1", oi.orb);
+          help += "\n\n";
+          help += XLAT("Secondary orb: %1", oi.orb);
           describeOrb(help, oi);
           }
         }
@@ -1177,8 +1179,12 @@ EX void gotoHelpFor(eLand l) {
   else listbeasts();  
   
   if(l == laTortoise)
-    help_extensions.push_back(help_extension{'t', XLAT("Galápagos shading"), [] () {
+    help_extensions.push_back(help_extension{'s', XLAT("Galápagos shading"), [] () {
       tortoise::shading_enabled = !tortoise::shading_enabled;
       }});
+
+  help_extensions.push_back(help_extension{'w', XLAT("wiki"), [l] () {
+    open_wiki(linf[l].name);
+    }});
   }
 }

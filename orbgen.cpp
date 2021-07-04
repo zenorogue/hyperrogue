@@ -116,7 +116,7 @@ EX vector<orbinfo> orbinfos = {
   {orbgenflags::S_NAT_NT, laElementalWall, 1500, 4000, itOrbSummon},
   {orbgenflags::S_NATIVE, laStorms, 1000, 2500, itOrbStunning},
   {orbgenflags::S_NATIVE, laOvergrown, 1000, 800, itOrbWoods},
-  {orbgenflags::S_GUEST,  laOvergrown, 1000, 800, itOrbLuck},
+  {orbgenflags::S_GUEST,  laOvergrown, 1000, 0, itOrbLuck},
   {orbgenflags::S_NATIVE, laWhirlwind, 1250, 3000, itOrbAir},
   {orbgenflags::S_NATIVE, laHaunted, 1000, 5000, itOrbUndeath},
   {orbgenflags::S_NATIVE, laClearing, 5000, 5000, itOrbFreedom},
@@ -240,11 +240,6 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
   if(it == itOrbDigging && l == laKraken) return olrUseless;
   if(it == itOrbIllusion && l == laKraken) return olrUseless;
   
-  if(it == itOrbSlaying && !among(l, 
-    laMirror, laHell, laEmerald, laDryForest, laCamelot, laPalace, laStorms, laRose, laTortoise, laBurial, laDungeon, laReptile, 
-    laPrairie, laBull, laVolcano, laTerracotta, laRuins, laVariant, laEclectic, laBrownian))
-    return olrUseless;
-  
   if(it == itOrbYendor && among(l, laWhirlwind, laWestWall)) return olrUseless;
   
   if(it == itOrbLife && (l == laKraken)) return olrUseless;
@@ -276,6 +271,8 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
     return olrUseless;
   if(it == itOrbLuck && l == laMountain)
     return olrUseless;
+  if(it == itOrbLuck && l == laWestWall)
+    return olrUseless;
    if(it == itOrbLuck && l == laCamelot)
     return olrUseless;
    if(it == itOrbLuck && l == laHaunted)
@@ -297,6 +294,11 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
     return olrMonster;
   if(isCrossroads(l) || l == laOcean)
     return olrHub;
+
+  if(it == itOrbSlaying && !among(l, 
+    laMirror, laHell, laEmerald, laDryForest, laCamelot, laPalace, laStorms, laRose, laTortoise, laBurial, laDungeon, laReptile, 
+    laPrairie, laBull, laVolcano, laTerracotta, laRuins, laVariant, laEclectic, laBrownian))
+    return olrUseless;
   
   if(l == laCocytus)
     if(it == itOrbDragon || it == itOrbFire || it == itOrbFlash || it == itOrbLightning)
@@ -325,6 +327,14 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
         return olrPrize25;
     return olrUseless;
     }
+
+  if(it == itOrbWoods && (l == laWarpSea || l == laWarpCoast))
+    return olrDangerous;
+
+  if(it == itOrbWoods && !among(l,
+    laDryForest, laWineyard, laCaribbean, laOvergrown, laHaunted, laHauntedWall, laHauntedBorder, laTortoise, laFrog, laEclectic,
+    laVariant))
+    return olrUseless;
   
   if(it == itShard) {
     if(l == laDesert || l == laIce || l == laJungle || l == laGraveyard ||
@@ -394,6 +404,9 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
       it == itOrbAether || it == itOrbSummon || it == itOrbStone) 
       return olrForbidden;
     }
+
+  if(l == laTerracotta && it == itOrbFriend)
+    return olrDangerous;
   
   return olrPrize25;
   }

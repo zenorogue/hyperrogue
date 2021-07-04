@@ -51,18 +51,28 @@ OK, now lots of the above can be changed. You can change the geometry and topolo
 various in-game quests, and even try some other game genres in non-Euclidean spaces (roguelite aka shmup, racing, peaceful puzzles). Or use the engine for non-Euclidean computations
 and visualizations (see [RogueViz](http://roguetemple.com/z/hyper/rogueviz.php)). Have fun!
 
-## Technical information ##
+## Development ##
 
-You should be able to compile on Linux, OSX, or MinGW with something like this (you need SDL, SDL_ttf, and SDL_gfx):
+### Build prerequisites ###
 
+On Linux with apt-get:
+
+```sudo apt-get install make g++ libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev libsdl-mixer1.2-dev libglew-dev```
+
+On macOS with Homebrew:
+
+```brew install sdl sdl_ttf sdl_gfx sdl_mixer glew```
+
+macOS users might also have to edit /usr/local/include/SDL/SDL_gfxPrimitives.h at line 38 to use quote include.
+
+### Building HyperRogue from source ###
 ```
-sudo apt-get install gcc libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev
 git clone https://github.com/zenorogue/hyperrogue.git hyperrogue
 cd hyperrogue
 make
 ```
 
-The `mymake` program builds HyperRogue in parts. It takes longer than the method shown above, but when you change something, `mymake` will only recompile the changed file.
+The `mymake` program builds HyperRogue in parts. It takes longer than the method shown above, but it uses significantly less memory during compilation, and when you change something, `mymake` will only recompile the changed file.
 Additionally, it can be easily configured, e.g., to produce an optimized build, or to include addons (see `mymake.cpp` for some example invocations, and `devmods` for some example addons).
 
 ```

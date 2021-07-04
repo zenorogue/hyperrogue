@@ -340,7 +340,7 @@ S("Your score: %1", "Twój wynik: %1")
 S("Enemies killed: %1", "Potwory pokonane: %1")
 S("Orbs of Yendor found: %1", "Znalezione Sfery Yendoru: %1")
 S("Collect %1 $$$ to access more worlds", "Znajdź %1 $$$, by iść do nowych krain")
-S("Collect at least %1 treasures in each of 9 types to access Hell", "Znajdź po %1 skarbów w %2 typach, by się dostać do Piekła")
+S("Collect at least %1 treasures in each of %2 types to access Hell", "Znajdź po %1 skarbów w %2 typach, by się dostać do Piekła")
 S("Collect at least %1 Demon Daisies to find the Orbs of Yendor", "Znajdź %1 Czarciego Ziela, by znaleźć Sfery Yendoru")
 S("Hyperstone Quest: collect at least %3 %1 in %the2", "Misja alternatywna: znajdź co najmniej %3 skarbów %abl2")
 S("Hyperstone Quest completed!", "Misja alternatywna zakończona!")
@@ -693,8 +693,8 @@ S("A typical monster from the Graveyard, who moves through walls.\n\n"
 S("Necromancers can raise ghosts and zombies from fresh graves.",
   "Nekromanci wzbudzają duchy i zombie ze świeżych grobów.")
 
-S("A creepy monster who follows you everywhere in the Graveyard.",
-  "Ten odrażający potwór chodzi za Tobą po cmentarzu!")
+S("A creepy monster who follows you everywhere in the Graveyard and the Cursed Canyon.",
+  "Ten odrażający potwór chodzi za Tobą po cmentarzu!") //TODO UPDATE
 
 S("People worshipping Cthulhu. They are very dangerous.",
   "Wyznawcy Cthulhu, bardzo niebiezpieczni.")
@@ -1693,7 +1693,7 @@ S("Hell has these lakes everywhere... They are shaped like evil stars, and fille
 
 S("hardcore mode", "tryb hardcore")
 
-S("One wrong move, and it is game over!", "Jeden fałszywy ruch i koniec gry!")
+S("One wrong move and it is game over!", "Jeden fałszywy ruch i koniec gry!")
 S("Not so hardcore?", "Hardkor to nie to?")
 
 // Shoot'em up Mode
@@ -3375,10 +3375,6 @@ S(  "This Orb makes you stunningly beautiful. "
     "niewrażliw%y0 na piękno.")
 
 S(  "A big, beautiful, magical flower.", "Duży, piękny, magiczny kwiat.")
-
-S("Don't be fooled by beauty, or you will be stabbed if you come too close!",
-  "Nie daj się zwieść urodzie, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%y0 nożem!")
-
 
 S(
   "Each eight turns, each rosebush at distance at most 5 from you will "
@@ -5694,9 +5690,8 @@ S(" (%1 more digits)", " (jeszcze cyfr: %1)")
 S("see how it ended", "jak się skończyło")
 
 // other missing/new things
-S("\n\nOrb unlocked: %1", "\n\nOdblokowana Sfera: %1")
 S("Orb unlocked: %1", "Odblokowana Sfera: %1")
-S("\n\nSecondary orb: %1", "\n\nDodatkowa Sfera: %1")
+S("Secondary orb: %1", "Dodatkowa Sfera: %1")
 S(" to submerge", " do zanurzenia")
 S(" to surface", " do wynurzenia")
 S("%The1 says, \"not this place, it looks even worse...\"", 
@@ -6566,7 +6561,7 @@ N("Jelly Kingdom", GEN_N, "Królestwo Galarety", "Królestwa Galarety", "Króles
 
 S("Some of the Slime Beasts have decided to revolt against the color rules in the "
   "Alchemist Lab. They have changed their shape and consistency, declared independence, and established their own Kingdom.\n\n"
-  "Jellies switch between being a wall and being a monster after every treasure you pick.",
+  "Jellies switch between being a wall and being a monster after every treasure you collect.",
   
   "Część Mazistych Stworów z Laboratorium postanowiło zbuntować się przeciwko regułom koloru w "
   "Laboratorium. Zmieniły kształt i konsystencję, ogłosiły niepodległość i stworzyły własne Królestwo.\n\n"
@@ -7237,15 +7232,11 @@ S("animate parameters", "animacja parametrów")
 S(
   "Most parameters can be animated simply by using '..' in their editing dialog. "
   "For example, the value of a parameter set to 0..1 will grow linearly from 0 to 1. "
-  "You can also use functions (e.g. cos(0..2*pi)) and refer to other parameters; "
-  "parameters 'a' and 'b' exist for this purpose. "
-  "See the list below for parameters which are currently animated (or changed).",
+  "You can also use functions (e.g. cos(0..2*pi)) and refer to other parameters.",
   
   "Większość parametrów może być animowana w prosty sposób, przez wpisanie '..' w ich pole edycji. "
   "Przykładowo, wartość parametru ustawiona na 0..1 będzie rosła liniowa od 0 do 1. "
-  "Możesz też używać funkcji (np. cos(0..2*pi)) lub odnosić się do innych parametrów; "
-  "parametry 'a' i 'b' istnieją w tym celu. Poniżej lista parametrów obecnie "
-  "animowanych (lub zmienionych).")
+  "Możesz też używać funkcji (np. cos(0..2*pi)) lub odnosić się do innych parametrów.")
 
 // color edit dialog
 
@@ -7443,7 +7434,7 @@ S("Did you know that it is possible to break a magical sphere into finitely many
     
 N("Free Fall", GEN_O, "Swobodny Spadek", "Swobodne Spadki", "Swobodny Spadek", "w Swobodnym Spadku")
 
-S("What on one side looks to be a normal (well, infinite) horizontal wall, on to the other side turns out to be the vertical wall"
+S("What on one side looks to be a normal (well, infinite) horizontal wall, on the other side turns out to be the vertical wall"
   " of an infinitely high tower. Jump from the window, and let the magical gravity carry you...",
 
   "Co wygląda z jednej strony na zwykłą (nieskończoną) poziomą ścianę, z drugiej strony okazuje się być pionową ścianą nieskończenie "
@@ -7878,7 +7869,6 @@ S(
 S("use the full 3D models", "użyj pełnych modeli 3D")
 
 S("Z shift", "przesunięcie Z")
-S("Eye level", "poziom oka")
 S("fixed Y/Z rotation", "ustalona rotacja Y/Z")
 
 S("configure FPP automatically", "automatycznie skonfiguruj FPP")
@@ -8667,7 +8657,7 @@ S(
   "If the pointer length is 0.5m, the object pointed to is 0.5 meter from the controller. "
   "This is used in situations where the controller is used as a 3D mouse, e.g., "
   "the drawing tool in three-dimensional geometries. When pointing at two-dimensional surfaces, "
-  "this is not relevant (the pointer is as long as needed to hit the surface.).",
+  "this is not relevant (the pointer is as long as needed to hit the surface).",
   
   "Jeśli długość wskaźnika to 0.5m, wskazywany punkt jest 0.5 metra od kontrolera. "
   "Ma to znaczenie, gdy kontroler jest używany jako mysz 3D, np. narzędzie do rysowania w "
@@ -8781,8 +8771,7 @@ S(
           
 S(
           "w (fourth coordinate)\n"
-          "wallif(condition, color)\n"
-          , 
+          "wallif(condition, color)\n", 
 
           "w (czwarta współrzędna)\n"
           "wallif(warunek, kolor)\n"

@@ -680,8 +680,8 @@ S("A typical monster from the Graveyard, who moves through walls.\n\n"
 S("Necromancers can raise ghosts and zombies from fresh graves.",
   "Totenbeschwörer können Geister und Zombies aus frischen Gräbern auferwecken.")
 
-S("A creepy monster who follows you everywhere in the Graveyard.",
-  "Ein gruseliges Monster das dir über den ganzen Friedhof folgt!")
+S("A creepy monster who follows you everywhere in the Graveyard and the Cursed Canyon.",
+  "Ein gruseliges Monster das dir über den ganzen Friedhof folgt!") //TODO UPDATE
 
 S("People worshipping Cthulhu. They are very dangerous.",
   "Verehrer Cthulhus. Sie sind sehr gefährlich.")
@@ -2407,7 +2407,7 @@ S("Variants of %the1 are available in the Random Pattern Mode after "
 S(" kills: %1", " Kills: %1")
 S(" $$$: %1", " $$$: %1")
 S(" Hyperstone: %1/%2", " Hypersteine: %1/%2")
-S(" Hell: %1/9", " Hölle: %1/9")
+S(" Hell: %1/%2", " Hölle: %1/%2")
 
 // improved editor
 // ---------------
@@ -3227,9 +3227,6 @@ S("This Orb makes you stunningly beautiful. "
   "Außerdem macht er dich immun gegenüber 'Schönheit'.")
 
 S("A big, beautiful, magical flower.", "Eine große, schöne, magische Blume.")
-
-S("Don't be fooled by beauty, or you will be stabbed if you come too close!",
-  "Lass dich von Schönheit nicht täuschen - oder du wirst erstochen, wenn du zu nah kommst!")
 
 S("Each eight turns, each rosebush at distance at most 5 from you will "
   "release a wave of alluring scent. Creatures on the frontwave "

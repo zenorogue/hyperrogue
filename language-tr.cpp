@@ -322,7 +322,7 @@ S("Enemies killed: %1", "Öldürülen Düşmanlar: %1")
 S("Orbs of Yendor found: %1", "Bulunan Yendor Küresi sayısı: %1")
 S("Collect %1 $$$ to access more worlds", "%1 $$$ toplayarak başka dünyalara eriş")
 // S("Collect %1 $$$ to access R'Lyeh and Dry Forest", "60 $$$ toplayarak R'Lyeh ve Kara Ormana eriş.")
-S("Collect at least %1 treasures in each of 9 types to access Hell", "%2 hazine çeşidinin hepsinden %1'ar tane toplayarak Cehenneme erişebilirsin.")
+S("Collect at least %1 treasures in each of %2 types to access Hell", "%2 hazine çeşidinin hepsinden %1'ar tane toplayarak Cehenneme erişebilirsin.")
 S("Collect at least %1 Demon Daisies to find the Orbs of Yendor", "%1 Şeytan Papatyası toplayarak Yendorun Kürelerini bulabilirsin.")
 S("Hyperstone Quest: collect at least %3 %1 in %the2", "Aşkıntaş Görevi: %2'de en az %3 hazine topla.")
 S("Hyperstone Quest completed!", "Aşkıntaş görevi tamamlandı.")
@@ -645,8 +645,8 @@ S("A typical monster from the Graveyard, who moves through walls.\n\n"
 S("Necromancers can raise ghosts and zombies from fresh graves.",
   "Ölüçağıranlar mezarlardan hayaletler ve hortlaklar çağırabilirler.")
 
-S("A creepy monster who follows you everywhere in the Graveyard.",
-  "Seni Mezarlık boyunca takip eden ürpertici bir canavar.")
+S("A creepy monster who follows you everywhere in the Graveyard and the Cursed Canyon.",
+  "Seni Mezarlık boyunca takip eden ürpertici bir canavar.") //TODO UPDATE
 
 S("People worshipping Cthulhu. They are very dangerous.",
   "Cthulhu'ya tapan insanlar. Çok tehlikeliler.")

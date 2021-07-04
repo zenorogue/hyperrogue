@@ -186,6 +186,7 @@ EX void showOverview() {
           else checkmove();
           cheater++;
           };
+        dialog::bound_low(0);
         }
       }
     else if(udiv == 3 && umod < walltypes) gotoHelp(generateHelpForWall(eWall(umod)));
@@ -398,7 +399,7 @@ EX void switchHardcore() {
   else if(hardcore && canmove) { hardcore = false; }
   else { hardcore = true; canmove = true; hardcoreAt = turncount; }
   if(hardcore)
-      addMessage(XLAT("One wrong move, and it is game over!"));
+      addMessage(XLAT("One wrong move and it is game over!"));
   else
       addMessage(XLAT("Not so hardcore?"));
   if(pureHardcore()) popScreenAll();
