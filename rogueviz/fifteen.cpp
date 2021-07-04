@@ -117,6 +117,7 @@ void scramble() {
   }
 
 bool draw_fifteen(cell *c, const shiftmatrix& V) {
+  lastexplore = turncount;
   if(!fif.count(c)) { c->land = laNone; c->wall = waChasm; return false; }
   check_move();
     
