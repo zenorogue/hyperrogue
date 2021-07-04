@@ -77,13 +77,13 @@ EX heptagon *buildHeptagon1(heptagon *h, heptagon *parent, int d, hstate s, int 
   return h;
   }
 
-heptagon *init_heptagon(int type) {
-  heptagon *h = tailored_alloc<heptagon> (d);
+EX heptagon *init_heptagon(int type) {
+  heptagon *h = tailored_alloc<heptagon> (type);
   h->emeraldval = 0;
   h->zebraval = 0;
   h->fiftyval = 0;
   h->fieldval = 0;
-  h->rval0 = origin->rval1 = 0;
+  h->rval0 = h->rval1 = 0;
   h->cdata = NULL;
   h->alt = NULL;
   h->c7 = NULL;
