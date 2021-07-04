@@ -15,6 +15,10 @@ EX namespace arcm {
 EX bool in() { return cgflags & qARCHI; }
 
 #if HDR
+struct hr_archimedean_error : hr_exception {
+  hr_archimedean_error(string _s) : hr_exception(_s) {}
+  };
+
 struct archimedean_tiling {
 
   int coloring;
@@ -873,11 +877,11 @@ void connectHeptagons(heptspin hi, heptspin hs) {
     }
   if(hi.peek()) {
     DEBB(DF_GEOM, (format("ERROR: already connected left\n")));
-    exit(1);
+    throw hr_archimedean_error("Archimedean error: already connected left");
     }
   if(hs.peek()) {
     DEBB(DF_GEOM, (format("ERROR: already connected right\n")));
-    exit(1);
+    throw hr_archimedean_error("Archimedean error: already connected right");
     }
   hi.at->c.connect(hi.spin, hs);
 
