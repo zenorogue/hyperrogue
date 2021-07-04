@@ -186,6 +186,7 @@ EX void showOverview() {
           else checkmove();
           cheater++;
           };
+        dialog::bound_low(0);
         }
       }
     else if(udiv == 3 && umod < walltypes) gotoHelp(generateHelpForWall(eWall(umod)));
