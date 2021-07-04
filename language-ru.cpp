@@ -7248,3 +7248,24 @@ S("When the 'mark heptagons' option (hotkey '7') is on, moves between unmarked c
 
   "Когда опция 'отметить семиугольники' (клавиша '7') включена, ходы между неотмеченными клетками запрещены.")
 
+// restructured menus
+
+S("colors & aura", "цветы и ауры")
+S("colors of some game objects can be edited by clicking them.", "можно изменить цветы нескольских объектов, кликая на них.")
+S("standard grid color", "стандартный цвет сетки")
+S("mouse & touchscreen", "мышь и сенсорный экран")
+S("settings", "настройки")
+S("interface", "интерфейс")
+S("general graphics", "общие графики")
+S("quick options", "быстрые опцы")
+S("models & projections", "модели и проекции")
+S("keyboard & joysticks", "клавиатура и джойстик")
+S("other settings", "другие настройки")
+S("special modes", "специальные режимы")
+S("creative mode", "творческий режим")
+S("multiplayer", "режим нескольких игроков")
+S("recently changed settings", "недавно изменённые настройки")
+
+S("quick projection", "быстрая проекция")
+S("highlight stuff", "подсветить вещи")
+S("Hint: these keys usually work during the game", "Подсказка: можно использовать эти клавиши во время игры")
