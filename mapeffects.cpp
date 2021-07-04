@@ -355,7 +355,7 @@ EX bool snakepile(cell *c, eMonster m) {
 EX bool makeflame(cell *c, int timeout, bool checkonly) {
   changes.ccell(c);
   if(!checkonly) destroyTrapsOn(c);
-  if(itemBurns(c->item)) {
+  if(itemBurns(c->item) && !isWatery(c) && c->wall != waShallow) {
     if(checkonly) return true;
     if(c->cpdist <= 7)
       addMessage(XLAT("%The1 burns!", c->item));
