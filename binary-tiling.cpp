@@ -122,15 +122,12 @@ EX namespace bt {
     }
   
   EX heptagon *build(heptagon *parent, int d, int d1, int t, int side, int delta) {
-    auto h = buildHeptagon1(tailored_alloc<heptagon> (t), parent, d, hsA, d1);
+    auto h = buildHeptagon1(init_heptagon(t), parent, d, hsA, d1);
     h->distance = parent->distance + delta;
     h->dm4 = parent->dm4 + delta;
     h->c7 = NULL;
     if(parent->c7) h->c7 = newCell(t, h);
-    h->cdata = NULL;
     h->zebraval = side;
-    h->emeraldval = 0;
-    h->fieldval = 0;
     switch(geometry) {
       case gBinary4:
         if(d < 2)

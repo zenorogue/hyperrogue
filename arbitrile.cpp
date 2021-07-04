@@ -669,30 +669,17 @@ struct hrmap_arbi : hrmap {
 
   hrmap_arbi() {
     dynamicval<hrmap*> curmap(currentmap, this);
-    origin = tailored_alloc<heptagon> (current.shapes[0].size());
+    origin = init_heptagon(current.shapes[0].size());
     origin->s = hsOrigin;
-    origin->emeraldval = 0;
-    origin->zebraval = 0;
-    origin->fiftyval = 0;
-    origin->fieldval = 0;
-    origin->rval0 = origin->rval1 = 0;
-    origin->cdata = NULL;
-    origin->alt = NULL;
     origin->c7 = newCell(origin->type, origin);
-    origin->distance = 0;
 
     heptagon *alt = NULL;
     
     if(hyperbolic) {
       dynamicval<eGeometry> g(geometry, gNormal); 
-      alt = tailored_alloc<heptagon> (S7);
+      alt = init_heptagon(S7);
       alt->s = hsOrigin;
-      alt->emeraldval = 0;
-      alt->zebraval = 0;
-      alt->distance = 0;
-      alt->c7 = NULL;
       alt->alt = alt;
-      alt->cdata = NULL;
       current_altmap = newAltMap(alt); 
       }
     
@@ -768,12 +755,10 @@ struct hrmap_arbi : hrmap {
           }
         }
       
-      auto h1 = tailored_alloc<heptagon> (current.shapes[xt].size());
+      auto h1 = init_heptagon(current.shapes[xt].size());
       h1->distance = h->distance + 1;
       h1->zebraval = xt;
       h1->c7 = newCell(h1->type, h1);
-      h1->alt = nullptr;
-      h1->cdata = nullptr;
       h1->emeraldval = h->emeraldval ^ m;
       h->c.connect(d, h1, e, m);
       
@@ -816,12 +801,10 @@ struct hrmap_arbi : hrmap {
         }
       }
 
-    auto h1 = tailored_alloc<heptagon> (current.shapes[xt].size());
+    auto h1 = init_heptagon(current.shapes[xt].size());
     h1->distance = h->distance + 1;
     h1->zebraval = xt;
     h1->c7 = newCell(h1->type, h1);
-    h1->alt = nullptr;
-    h1->cdata = nullptr;
     h1->emeraldval = h->emeraldval ^ m;
     h->c.connect(d, h1, e, m);
     
