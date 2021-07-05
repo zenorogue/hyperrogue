@@ -5713,7 +5713,7 @@ S("aura smoothening factor", "сглаживание ауры")
 S("graphics configuration", "настройка графики")
 S("special display modes", "специальные режимы отображения")
 S("openGL mode", "режим OpenGL")
-S("anti-aliasing", "anti-aliasing")
+S("anti-aliasing", "сглаживание")
 S("line width", "широта линии")
 S("configure panning and general keys", "настроить панораму и общие клавиши")
  
