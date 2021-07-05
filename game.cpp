@@ -430,7 +430,7 @@ EX bool canPushThumperOn(movei mi, cell *player) {
   return
     passable(tgt, thumper, P_MIRROR) &&
     passable(tgt, player, P_MIRROR) &&
-    !tgt->item;
+    (!tgt->item || dice::on(thumper));
   }
 
 EX void activateActiv(cell *c, bool msg) {
