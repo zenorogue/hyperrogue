@@ -1078,6 +1078,8 @@ EX namespace gp {
       return S3 == 3 ? XLAT("chamfered") : XLAT("expanded");
     else if(GOLDBERG && param == loc(3, 0) && S3 == 3)
       return XLAT("2x bitruncated");
+    else if(variation == eVariation::subcubes)
+      return XLAT("subcube") + "(" + its(reg3::subcube_count) + ")";
     else {
       auto p = human_representation(param);
       string s = "GP(" + its(p.first) + "," + its(p.second) + ")";

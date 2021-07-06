@@ -1377,6 +1377,11 @@ EX void set_geometry(eGeometry target) {
 EX void set_variation(eVariation target) {
   if(variation != target) {
     stop_game();
+    if(target == eVariation::subcubes) {
+      if(!reg3::in()) geometry = hyperbolic ? gSpace435 : gCell8;
+      variation = target;
+      return;
+      }
     if(bt::in() || sol || kite::in() || WDIM == 3) if(!prod) geometry = gNormal;
     auto& cd = ginf[gCrystal];
     if(target == eVariation::bitruncated && cryst && cd.sides == 8 && cd.vertex == 4) {

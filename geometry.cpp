@@ -98,6 +98,18 @@ struct gi_extension {
   virtual ~gi_extension() {}
   };
 
+/** for subdivided 3D cells */
+struct subcellshape {
+  vector<vector<hyperpoint>> faces;
+  vector<vector<hyperpoint>> faces_local;
+  vector<hyperpoint> vertices_only;
+  vector<hyperpoint> vertices_only_local;
+  vector<hyperpoint> face_centers;
+  hyperpoint cellcenter;
+  transmatrix to_cellcenter;
+  transmatrix from_cellcenter;
+  };
+
 /** basic geometry parameters */
 struct geometry_information {
 
@@ -134,6 +146,8 @@ struct geometry_information {
   vector<hyperpoint> vertices_only;
   
   transmatrix spins[32], adjmoves[32];
+  
+  vector<struct subcellshape> subshapes;
 
   ld adjcheck;
   ld strafedist;
@@ -667,6 +681,11 @@ void geometry_information::prepare_basics() {
     hcrossf = crossf = orbsize = hcrossf7 * csc;
     hexf = rhexf = hexvdist = csc * .5;
     }
+  
+  if(variation == eVariation::subcubes) {
+    scalefactor /= reg3::subcube_count;
+    orbsize /= reg3::subcube_count;
+    }
 
   if(scale_used()) {
     scalefactor *= vid.creature_scale;
@@ -1061,6 +1080,7 @@ EX string cgi_string() {
   
   if(GOLDBERG_INV) V("GP", its(gp::param.first) + "," + its(gp::param.second));
   if(IRREGULAR) V("IRR", its(irr::irrid));
+  if(variation == eVariation::subcubes) V("SC", its(reg3::subcube_count));
 
   #if CAP_ARCM
   if(arcm::in()) V("ARCM", arcm::current.symbol);

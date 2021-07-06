@@ -2887,7 +2887,7 @@ EX namespace sword {
         d.angle = ((s2*sword_angles/t2 - s1*sword_angles/t1) + sword_angles/2 + d.angle) % sword_angles;
       }
     else {
-      transmatrix T = currentmap->relative_matrix(c1->master, c2->master, C0);
+      transmatrix T = currentmap->relative_matrix(c1, c2, C0);
       T = gpushxto0(tC0(T)) * T;
       d.T = T * d.T;
       fixmatrix(d.T);

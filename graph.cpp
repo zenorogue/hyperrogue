@@ -3964,6 +3964,8 @@ EX int wall_offset(cell *c) {
   #if CAP_BT
   if(kite::in() && kite::getshape(c->master) == kite::pKite) return 10;
   #endif
+  if(reg3::in() && !PURE)
+    return reg3::get_wall_offset(c);
   return 0;
   }
 

@@ -16,6 +16,8 @@ namespace hr {
 /** \brief regular three-dimensional tessellations */
 EX namespace reg3 {
 
+  EX int subcube_count = 1;
+
   #if HDR
   inline short& altdist(heptagon *h) { return h->emeraldval; }
   #endif
@@ -272,6 +274,60 @@ EX namespace reg3 {
             transmatrix t = build_matrix(tC0(cgi.adjmoves[a]), tC0(cgi.adjmoves[b]), tC0(cgi.adjmoves[c]), C0);
             if(det(t) > 1e-3) cgi.next_dir[a][b] = c;
             }  
+    
+    generate_subcells();
+    }
+
+  EX void generate_subcells() {
+    auto& ssh = cgi.subshapes;
+    if(variation == eVariation::subcubes) {
+      auto vx = abs(cgi.cellshape[0][0][0]);
+      auto vz = abs(cgi.cellshape[0][0][3]);
+      const int sub = subcube_count;
+      for(int x=1-sub; x<sub; x+=2)
+      for(int y=1-sub; y<sub; y+=2)
+      for(int z=1-sub; z<sub; z+=2) {
+        cgi.subshapes.emplace_back();
+        auto &ss = cgi.subshapes.back();
+        ss.faces = cgi.cellshape;
+        for(auto& face: ss.faces) for(auto& v: face) {
+          v[0] += vx * x;
+          v[1] += vx * y;
+          v[2] += vx * z;
+          v[3] += vz * (sub-1);
+          v = normalize(v);
+          }
+        ss.vertices_only = cgi.vertices_only;
+        for(auto& v: ss.vertices_only) {
+          v[0] += vx * x;
+          v[1] += vx * y;
+          v[2] += vx * z;
+          v[3] += vz * (sub-1);
+          v = normalize(v);
+          }
+        }
+      }
+    else {
+      cgi.subshapes.emplace_back();
+      cgi.subshapes[0].faces = cgi.cellshape;
+      cgi.subshapes[0].vertices_only = cgi.vertices_only;
+      }
+    for(auto& ss: ssh) {
+      hyperpoint gres = Hypc;
+      for(auto& face: ss.faces) {
+        hyperpoint res = Hypc;
+        for(auto& vertex: face) 
+          res += vertex;
+        ss.face_centers.push_back(res);
+        gres += res;
+        }
+      ss.cellcenter = normalize(gres);
+      ss.to_cellcenter = rgpushxto0(ss.cellcenter);
+      ss.from_cellcenter = gpushxto0(ss.cellcenter);
+      ss.faces_local = ss.faces;
+      for(auto& face: ss.faces_local) for(auto& v: face) v = ss.from_cellcenter * v;
+      for(auto& v: ss.vertices_only_local) v = ss.from_cellcenter * v;
+      }
     }
 
   void binary_rebase(heptagon *h, const transmatrix& V) {
@@ -280,44 +336,112 @@ EX namespace reg3 {
   void test();
 
   #if HDR
-  struct hrmap_quotient3 : hrmap {
+  struct hrmap_closed3 : hrmap {
     vector<heptagon*> allh;
     vector<vector<transmatrix>> tmatrices;    
+    vector<vector<transmatrix>> tmatrices_cell;
     vector<cell*> acells;
+    map<cell*, pair<int, int> > local_id;
+    vector<vector<cell*>> acells_by_master;
 
     transmatrix adj(heptagon *h, int d) override { return tmatrices[h->fieldval][d]; }
+    transmatrix adj(cell *c, int d) override { return tmatrices_cell[local_id[c].first][d]; }
 
     heptagon *getOrigin() override { return allh[0]; }
 
-    transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override;
+    transmatrix relative_matrix(cell *h2, cell *h1, const hyperpoint& hint) override;
     
     void initialize(int cell_count);
+    void initialize_subcells();
     vector<cell*>& allcells() override { return acells; }
 
-    vector<hyperpoint> get_vertices(cell* c) override { return cgi.vertices_only; }
+    vector<hyperpoint> get_vertices(cell* c) override { 
+      if(PURE) return cgi.vertices_only; 
+      int id = local_id[c].second;
+      return cgi.subshapes[id].vertices_only_local;
+      }
+    
+    void make_subconnections();
     };
+
+  struct hrmap_quotient3 : hrmap_closed3 { };
   #endif
   
-  void hrmap_quotient3::initialize(int cell_count) {
-    allh.resize(cell_count);
-    acells.clear();
-    tmatrices.resize(cell_count);
-    for(int a=0; a<cell_count; a++) {
-      allh[a] = init_heptagon(S7);
-      allh[a]->c7 = newCell(S7, allh[a]);
-      allh[a]->fieldval = a;
-      acells.push_back(allh[a]->c7);
+  EX int get_wall_offset(cell *c) {
+    auto m = (hrmap_quotient3*) currentmap;
+    auto& wo = cgi.walloffsets[ m->local_id[c].second ];
+    if(wo.second == nullptr)
+      wo.second = c;
+    return wo.first;
+    }
+
+  void hrmap_closed3::initialize_subcells() {
+    auto& ss = cgi.subshapes;
+    int big_cell_count = isize(allh);
+    acells_by_master.resize(big_cell_count);
+    for(int a=0; a<big_cell_count; a++) {
+      for(int i=0; i<isize(ss); i++) {
+        cell *c = newCell(isize(ss[i].faces), allh[a]);
+        if(!allh[a]->c7)
+          allh[a]->c7 = c;
+        local_id[c] = {isize(acells), i};
+        acells.push_back(c);
+        acells_by_master[a].push_back(c);
+        }
       }
     }
 
-  transmatrix hrmap_quotient3::relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) {
-    if(h1 == h2) return Id;
-    int d = hr::celldistance(h2->c7, h1->c7);
+  void hrmap_closed3::initialize(int big_cell_count) {
+    allh.resize(big_cell_count);
+    tmatrices.resize(big_cell_count);
+    acells.clear();
+    for(int a=0; a<big_cell_count; a++) {
+      allh[a] = init_heptagon(S7);
+      allh[a]->fieldval = a;
+      }
+    initialize_subcells();
+    }
 
-    for(int a=0; a<S7; a++) if(hr::celldistance(h1->move(a)->c7, h2->c7) < d)
-      return adj(h1, a) * relative_matrix(h2, h1->move(a), hint);
+  void hrmap_closed3::make_subconnections() {
+    auto& ss = cgi.subshapes;
+    tmatrices_cell.resize(isize(acells));
+    int failures = 0;
+    for(cell *c: acells) {
+      int id = local_id[c].second;      
+      auto& tmcell = tmatrices_cell[local_id[c].first];
+      for(int i=0; i<c->type; i++) {
+        int found = 0;
+        hyperpoint ctr = ss[id].face_centers[i];
+        for(int d=-1; d<S7; d++) {
+          auto h_id = d == -1 ? c->master->fieldval : c->master->move(d)->fieldval;
+          transmatrix T = d == -1 ? Id : adj(c->master, d);
+          for(auto c1: acells_by_master[h_id]) if(d >= 0 || c != c1) {
+            int id1 = local_id[c1].second;
+            for(int j=0; j<c1->type; j++) {
+              if(hdist(normalize(ctr), normalize(T * ss[id1].face_centers[j])) < 1e-6) {
+                c->c.connect(i, c1, j, false);
+                // println(hlog, "found: ", tie(h_id, id1, j), " d=", d, " distance = ", hdist(normalize(ctr), normalize(T * ss[id1].face_centers[j])));
+                tmcell.push_back(ss[id].from_cellcenter * T * ss[id1].to_cellcenter);
+                found++;
+                }
+              }
+            }
+          }
+        println(hlog, make_tuple(int(c->master->fieldval), id, i), " : ", found, " :: ", kz(tmcell.back()));
+        if(found != 1) failures++;
+        }
+      }
+    println(hlog, "total failures = ", failures);
+    }
+
+  transmatrix hrmap_closed3::relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
+    if(c1 == c2) return Id;
+    int d = hr::celldistance(c2, c1);
+
+    for(int a=0; a<S7; a++) if(hr::celldistance(c1->move(a), c2) < d)
+      return adj(c1, a) * relative_matrix(c2, c1->move(a), hint);
       
-    for(int a=0; a<S7; a++) println(hlog, "d=", d, " vs ", hr::celldistance(h1->move(a)->c7, h2->c7));
+    for(int a=0; a<S7; a++) println(hlog, "d=", d, " vs ", hr::celldistance(c1->move(a), c2));
     
     println(hlog, "error in hrmap_quotient3:::relative_matrix");
     return Id;
@@ -391,6 +515,7 @@ EX namespace reg3 {
             }
           }
         }      
+      make_subconnections();
       create_patterns();
       }
     
@@ -407,6 +532,11 @@ EX namespace reg3 {
     
     void create_patterns() {
       DEBB(DF_GEOM, ("creating pattern = ", isize(allh)));
+      
+      if(!PURE) {
+         println(hlog, "create_patterns not implemented");
+         return;
+         }
 
       // also, strafe needs currentmap
       dynamicval<hrmap*> c(currentmap, this);
@@ -597,7 +727,7 @@ EX namespace reg3 {
     
     }
 
-  struct hrmap_reg3 : hrmap {
+  struct hrmap_h3 : hrmap {
   
     heptagon *origin;
     hrmap *binary_map;
@@ -606,19 +736,15 @@ EX namespace reg3 {
     map<heptagon*, pair<heptagon*, transmatrix>> reg_gmatrix;
     map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;
 
-    vector<cell*> spherecells;  
-
     vector<cell*>& allcells() override { 
-      if(sphere) return spherecells;
       return hrmap::allcells();
       }
 
-    hrmap_reg3() {
+    hrmap_h3() {
       origin = init_heptagon(S7);
       heptagon& h = *origin;
       h.s = hsOrigin;
       h.c7 = newCell(S7, origin);
-      if(sphere) spherecells.push_back(h.c7);
       worst_error1 = 0, worst_error2 = 0;
       
       dynamicval<hrmap*> cr(currentmap, this);
@@ -738,7 +864,6 @@ EX namespace reg3 {
       #else
       transmatrix T = p1.second * cgi.adjmoves[d];
       #endif
-      transmatrix T1 = T;
       #if CAP_BT
       if(hyperbolic) {
         dynamicval<eGeometry> g(geometry, gBinary3);
@@ -749,11 +874,6 @@ EX namespace reg3 {
 
       fixmatrix(T);
       auto hT = tC0(T);
-      
-      bool hopf = stretch::applicable();
-
-      if(hopf)
-        T = stretch::translate(hT);      
       
       if(DEB) println(hlog, "searching at ", alt, ":", hT);
 
@@ -767,7 +887,6 @@ EX namespace reg3 {
         if(DEB) println(hlog, "-> found ", p2.first);
         int fb = 0;
         hyperpoint old = tC0(p1.second);;
-        if(!hopf) T * (inverse(T1) * old);
         #if CAP_FIELD
         if(quotient_map) {
           p2.first->c.connect(counterpart(parent)->c.spin(d), parent, d, false);
@@ -808,22 +927,8 @@ EX namespace reg3 {
         fv = cp->c.move(d)->fieldval;
         }
       #endif
-      if(hopf) {
-        hyperpoint old = tC0(p1.second);
-        for(d2=0; d2<S7; d2++) {
-          hyperpoint back = T * tC0(cgi.adjmoves[d2]);
-          if((err = intval(back, old)) < 1e-3) 
-            break;
-          }
-        if(d2 == S7) { 
-          d2 = 0; 
-          println(hlog, "Hopf connection failed"); 
-          }
-        println(hlog, "found d2 = ", d2);
-        }
       heptagon *created = init_heptagon(S7);
       created->c7 = newCell(S7, created);
-      if(sphere) spherecells.push_back(created->c7);
       #if CAP_FIELD
       if(quotient_map) {
         created->emeraldval = fv;
@@ -842,7 +947,7 @@ EX namespace reg3 {
       return created;
       }
 
-    ~hrmap_reg3() {
+    ~hrmap_h3() {
       #if CAP_BT
       if(binary_map) {        
         dynamicval<eGeometry> g(geometry, gBinary3);
@@ -911,7 +1016,90 @@ EX namespace reg3 {
       }
     };
 
-  struct hrmap_reg3_rule : hrmap {
+  struct hrmap_sphere3 : hrmap_closed3 {
+  
+    vector<transmatrix> locations;
+  
+    hrmap_sphere3() {    
+      heptagon *h = init_heptagon(S7);
+      h->s = hsOrigin;
+      
+      locations.push_back(Id);
+      allh.push_back(h);
+      
+      for(int i=0; i<isize(allh); i++) {
+        tmatrices.emplace_back();
+        auto& tmi = tmatrices.back();
+        transmatrix T1 = locations[i];
+        hyperpoint old = tC0(T1);
+        for(int d=0; d<S7; d++) {
+          transmatrix T = T1 * cgi.adjmoves[d];
+          fixmatrix(T);
+          auto hT = tC0(T);
+          
+          bool hopf = stretch::applicable();
+    
+          if(hopf)
+            T = stretch::translate(hT);          
+          
+          for(int i1=0; i1<isize(allh); i1++)
+            if(intval(tC0(locations[i1]), hT) < 1e-3) {
+              int fb = 0;
+              for(int d2=0; d2<S7; d2++) {
+                hyperpoint back = locations[i1] * tC0(cgi.adjmoves[d2]);
+                if(intval(back, old) < 1e-3) {
+                  allh[i]->c.connect(d, allh[i1], d2, false);
+                  fb++;
+                  tmi.push_back(inverse(T1) * locations[i1]);
+                  }
+                }
+              if(fb != 1) throw hr_exception("friend not found");
+              goto next_d;
+              }
+
+          if(1) {
+            int d2 = 0;
+
+            if(hopf) {
+              for(d2=0; d2<S7; d2++) {
+                hyperpoint back = T * tC0(cgi.adjmoves[d2]);
+                if(intval(back, old) < 1e-3) 
+                  break;
+                }
+              if(d2 == S7)
+                throw hr_exception("Hopf connection failed"); 
+              }
+  
+            heptagon *h = init_heptagon(S7);
+            h->zebraval = hrand(10);
+            h->fieldval = isize(allh);
+            h->fiftyval = 9999;
+            allh.push_back(h);
+            locations.push_back(T);
+            if(isnan(T[0][0])) exit(1);
+            
+            allh[i]->c.connect(d, h, d2, false);
+            tmi.push_back(inverse(T1) * T);
+            }
+          next_d: ;
+          }
+        }
+      
+      initialize_subcells();
+      make_subconnections();
+      }
+    
+    ~hrmap_sphere3() {
+      clearfrom(allh[0]);
+      }    
+
+    virtual struct transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+      return iso_inverse(locations[h1->fieldval]) * locations[h2->fieldval];
+      }
+
+    };
+
+  struct hrmap_h3_rule : hrmap {
   
     heptagon *origin;
     reg3::hrmap_quotient3 *quotient_map;
@@ -1029,7 +1217,7 @@ EX namespace reg3 {
         possible_states[p.first.first].push_back(p.first.second);
       }
 
-    hrmap_reg3_rule() : fp(0) {
+    hrmap_h3_rule() : fp(0) {
     
       load_ruleset(get_rule_filename());
       
@@ -1204,7 +1392,7 @@ EX namespace reg3 {
       return res;
       }
 
-    ~hrmap_reg3_rule() {
+    ~hrmap_h3_rule() {
       if(quotient_map) delete quotient_map;
       clearfrom(origin);
       }
@@ -1222,22 +1410,22 @@ EX namespace reg3 {
       }
     };
 
-  struct hrmap_reg3_rule_alt : hrmap {
+  struct hrmap_h3_rule_alt : hrmap {
     
     heptagon *origin;
     
-    hrmap_reg3_rule_alt(heptagon *o) {
+    hrmap_h3_rule_alt(heptagon *o) {
       origin = o;
       }
 
     };
 
 EX hrmap *new_alt_map(heptagon *o) {
-  return new hrmap_reg3_rule_alt(o);
+  return new hrmap_h3_rule_alt(o);
   }
 
 EX void link_structures(heptagon *h, heptagon *alt, hstate firststate) {
-  auto cm = (hrmap_reg3_rule*) currentmap;
+  auto cm = (hrmap_h3_rule*) currentmap;
   alt->fieldval = h->fieldval;
   if(geometry == gSpace535) alt->fieldval = 0;
   if(firststate == hsOrigin) {
@@ -1284,11 +1472,11 @@ EX bool in_rule() {
   }
 
 EX int rule_get_root(int i) {
-  return ((hrmap_reg3_rule*)currentmap)->root[i];
+  return ((hrmap_h3_rule*)currentmap)->root[i];
   }
 
 EX const vector<short>& rule_get_children() {
-  return ((hrmap_reg3_rule*)currentmap)->children;
+  return ((hrmap_h3_rule*)currentmap)->children;
   }
 
 EX hrmap* new_map() {
@@ -1296,16 +1484,17 @@ EX hrmap* new_map() {
   if(geometry == gSeifertWeber) return new seifert_weber::hrmap_singlecell(108*degree);
   if(geometry == gHomologySphere) return new seifert_weber::hrmap_singlecell(36*degree);
   if(quotient && !sphere) return new hrmap_field3(&currfp);
-  if(in_rule()) return new hrmap_reg3_rule;
-  return new hrmap_reg3;
+  if(in_rule()) return new hrmap_h3_rule;
+  if(sphere) return new hrmap_sphere3;
+  return new hrmap_h3;
   }
 
-hrmap_reg3* regmap() {
-  return ((hrmap_reg3*) currentmap);
+hrmap_h3* hypmap() {
+  return ((hrmap_h3*) currentmap);
   }
 
 EX int quotient_count() {
-  return isize(regmap()->quotient_map->allh);
+  return isize(hypmap()->quotient_map->allh);
   }
 
 /** This is a generalization of hyperbolic_celldistance in expansion.cpp to three dimensions.
@@ -1358,7 +1547,7 @@ EX int celldistance(cell *c1, cell *c2) {
   
   if(geometry == gSpace534) return celldistance_534(c1, c2);
 
-  auto r = regmap();
+  auto r = hypmap();
 
   hyperpoint h = tC0(r->relative_matrix(c1->master, c2->master, C0));
   int b = bucketer(h);
@@ -1376,11 +1565,9 @@ EX int celldistance(cell *c1, cell *c2) {
   }
 
 EX bool pseudohept(cell *c) {
-  auto m = regmap();
-  if(cgflags & qSINGLE) return true;
-  if(fake::in()) return FPIU(reg3::pseudohept(c));
   if(sphere) {
-    hyperpoint h = tC0(m->relative_matrix(c->master, regmap()->origin, C0));
+    auto m = currentmap;
+    hyperpoint h = tC0(m->relative_matrix(c->master, m->getOrigin(), C0));
     if(S7 == 12) {
       hyperpoint h1 = cspin(0, 1, atan2(16, 69) + M_PI/4) * h;
       for(int i=0; i<4; i++) if(abs(abs(h1[i]) - .5) > .01) return false;
@@ -1397,13 +1584,16 @@ EX bool pseudohept(cell *c) {
     if(cgi.loop == 5 && cgi.face == 3)
       return abs(h[3]) > .99 || abs(h[0]) > .99 || abs(h[1]) > .99 || abs(h[2]) > .99;
     }
+  auto m = hypmap();
+  if(cgflags & qSINGLE) return true;
+  if(fake::in()) return FPIU(reg3::pseudohept(c));
   // chessboard pattern in 534
   if(geometry == gField534) 
     return hr::celldistance(c, currentmap->gamestart()) & 1;
   if(geometry == gCrystal344 || geometry == gCrystal534 || geometry == gSeifertCover)
     return false;
   if(quotient) return false; /* added */
-  auto mr = dynamic_cast<hrmap_reg3_rule*> (currentmap);
+  auto mr = dynamic_cast<hrmap_h3_rule*> (currentmap);
   if(mr) {
     if(geometry == gSpace535) 
       return c->master->fieldval % 31 == 0;
@@ -1552,8 +1742,7 @@ EX cellwalker strafe(cellwalker cw, int j) {
   for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
     if(hdist(hfront, T * tC0(cgi.adjmoves[i])) < cgi.strafedist + .01)
       return cellwalker(cw.at->cmove(j), i);
-  println(hlog, "incorrect strafe");
-  exit(1);
+  throw hr_exception("incorrect strafe");
   }
 
 EX int matrix_order(const transmatrix A) {

@@ -741,7 +741,7 @@ enum eGeometry {
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSolNIH, gcNil, gcProduct, gcSL2 };
 
-enum class eVariation { bitruncated, pure, goldberg, irregular, dual, untruncated, warped, unrectified };
+enum class eVariation { bitruncated, pure, goldberg, irregular, dual, untruncated, warped, unrectified, subcubes, coxeter, dual_subcubes, bch };
 
 typedef int modecode_t;
 

@@ -1241,6 +1241,11 @@ int read_geom_args() {
     PHASEFROM(2);
     set_variation(eVariation::warped);
     }
+  else if(argis("-subcubes")) {
+    PHASEFROM(2);
+    set_variation(eVariation::subcubes);
+    shift(); reg3::subcube_count = argi();
+    }
   #endif
   #if CAP_FIELD
   else if(argis("-fi")) {

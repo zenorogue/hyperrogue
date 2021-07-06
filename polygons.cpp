@@ -1031,6 +1031,23 @@ void geometry_information::create_wall3d() {
     walloffsets.clear();
     }
 
+  if(reg3::in() && !PURE) {
+    int tot = 0;
+    for(auto& ss: cgi.subshapes) tot += isize(ss.faces);
+    reserve_wall3d(tot);
+    int id = 0;
+    for(auto& ss: cgi.subshapes) {
+      walloffsets.emplace_back(id, nullptr);
+      for(auto& face: ss.faces_local)
+        make_wall(id++, face);
+      }
+    hassert(id == tot);
+    println(hlog, walloffsets);
+    println(hlog, wallstart);
+    compute_cornerbonus();
+    return;
+    }
+
   if(euc::in() || reg3::in() || asonov::in()) {
     for(int w=0; w<isize(cgi.cellshape); w++)
       make_wall(w, cgi.cellshape[w]);
