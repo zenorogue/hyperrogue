@@ -3782,7 +3782,7 @@ EX int get_darkval(cell *c, int d) {
   const int darkval_nil[8] = {6,6,0,3,6,6,0,3};
   const int darkval_nih[11] = {0,2,0,2,4,6,6,6,6,6,6};
   if(among(variation, eVariation::dual_subcubes, eVariation::bch)) {
-    int v = reg3::get_face_vertices(c, d);
+    int v = reg3::get_face_vertex_count(c, d);
     return v-3;
     }
   if(sphere) return darkval_s12[d];

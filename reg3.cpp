@@ -542,9 +542,13 @@ EX namespace reg3 {
     return wo.first;
     }
 
-  EX int get_face_vertices(cell *c, int d) {
+  EX const vector<hyperpoint>& get_face_vertices(cell *c, int d) {
     auto m = (hrmap_closed3*) currentmap;
-    return isize(cgi.subshapes[m->local_id[c].second].faces[d]);
+    return cgi.subshapes[m->local_id[c].second].faces_local[d];
+    }
+
+  EX int get_face_vertex_count(cell *c, int d) {
+    return isize(get_face_vertices(c, d));
     }
 
   void hrmap_closed3::initialize(int big_cell_count) {
