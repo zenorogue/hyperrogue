@@ -3833,7 +3833,7 @@ void make_clipping_planes() {
   else if(pmodel == mdGeodesic && nil)
     threshold = 2, xyz_threshold = 3, clip_checked = true;
   else return;
-
+  
   clipping_plane_sets.clear();  
     
   auto add_clipping_plane_txy = [] (transmatrix T, const transmatrix& nlp, ld x1, ld y1, ld x2, ld y2) {
