@@ -1042,8 +1042,6 @@ void geometry_information::create_wall3d() {
         make_wall(id++, face);
       }
     hassert(id == tot);
-    println(hlog, walloffsets);
-    println(hlog, wallstart);
     compute_cornerbonus();
     return;
     }
