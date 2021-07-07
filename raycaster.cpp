@@ -647,7 +647,7 @@ void enable_raycaster() {
       fmain +=
         "  if(which == -1) {\n";
       
-      fmain += "for(int i="+its(flat1)+"; i<"+(prod ? "sides-2" : WDIM == 2 ? "sides" : its(flat2))+"; i++) {\n";
+      fmain += "for(int i="+its(flat1)+"; i<"+(prod ? "sides-2" : (WDIM == 2 || is_subcube_based(variation)) ? "sides" : its(flat2))+"; i++) {\n";
       
       // fmain += "int woi = walloffset+i;\n";
       

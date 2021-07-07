@@ -1017,6 +1017,13 @@ EX namespace hybrid {
     #if MAXMDIM >= 4
     if(rotspace) return rots::ray_iadj(c, i);
     #endif
+    if(is_subcube_based(variation)) {
+      auto& v = reg3::get_face_vertices(c, i); 
+      hyperpoint h = 
+        project_on_triangle(v[0], v[1], v[2]);
+      transmatrix T = rspintox(h);
+      return T * xpush(-2*hdist0(h)) * spintox(h);
+      }
     return currentmap->iadj(c, i);
     }
   
