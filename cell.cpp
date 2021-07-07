@@ -250,9 +250,8 @@ void hrmap_standard::find_cell_connection(cell *c, int d) {
 
 /** very similar to createMove in heptagon.cpp */
 EX cell *createMov(cell *c, int d) {
-  if(d<0 || d>= c->type) {
-    printf("ERROR createmov\n");
-    }  
+  if(d<0 || d>= c->type)
+    throw hr_exception("ERROR createmov\n");
   if(c->move(d)) return c->move(d);  
   currentmap->find_cell_connection(c, d);  
   return c->move(d);
