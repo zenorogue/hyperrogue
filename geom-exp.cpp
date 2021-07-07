@@ -1246,6 +1246,16 @@ int read_geom_args() {
     set_variation(eVariation::subcubes);
     shift(); reg3::subcube_count = argi();
     }
+  else if(argis("-dual-subcubes")) {
+    PHASEFROM(2);
+    set_variation(eVariation::dual_subcubes);
+    shift(); reg3::subcube_count = argi();
+    }
+  else if(argis("-bch-subcubes")) {
+    PHASEFROM(2);
+    set_variation(eVariation::bch);
+    shift(); reg3::subcube_count = argi();
+    }
   #endif
   #if CAP_FIELD
   else if(argis("-fi")) {

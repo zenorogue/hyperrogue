@@ -1377,7 +1377,7 @@ EX void set_geometry(eGeometry target) {
 EX void set_variation(eVariation target) {
   if(variation != target) {
     stop_game();
-    if(target == eVariation::subcubes) {
+    if(is_subcube_based(target)) {
       if(!reg3::in()) geometry = hyperbolic ? gSpace435 : gCell8;
       variation = target;
       return;

@@ -90,15 +90,18 @@ EX namespace reg3 {
       }    
     }
 
-  EX void make_vertices_only() {
-    auto& vertices_only = cgi.vertices_only;
-    vertices_only.clear();
-    for(auto& v: cgi.cellshape)
+  EX void make_vertices_only(vector<hyperpoint>& vo, const vector<vector<hyperpoint>>& csh) {
+    vo.clear();
+    for(auto& v: csh)
     for(hyperpoint h: v) {
       bool found = false;
-      for(hyperpoint h2: vertices_only) if(hdist(h, h2) < 1e-6) found = true;
-      if(!found) vertices_only.push_back(h);
+      for(hyperpoint h2: vo) if(hdist(h, h2) < 1e-6) found = true;
+      if(!found) vo.push_back(h);
       }
+    }
+
+  EX void make_vertices_only() {
+    make_vertices_only(cgi.vertices_only, cgi.cellshape);
     }
 
   EX void generate() {
@@ -280,10 +283,10 @@ EX namespace reg3 {
 
   EX void generate_subcells() {
     auto& ssh = cgi.subshapes;
+    const int sub = subcube_count;
     if(variation == eVariation::subcubes) {
       auto vx = abs(cgi.cellshape[0][0][0]);
       auto vz = abs(cgi.cellshape[0][0][3]);
-      const int sub = subcube_count;
       for(int x=1-sub; x<sub; x+=2)
       for(int y=1-sub; y<sub; y+=2)
       for(int z=1-sub; z<sub; z+=2) {
@@ -303,9 +306,161 @@ EX namespace reg3 {
           v[1] += vx * y;
           v[2] += vx * z;
           v[3] += vz * (sub-1);
-          v = normalize(v);
           }
         }
+      }
+    else if(among(variation, eVariation::dual_subcubes, eVariation::bch)) {
+      bool bch = variation == eVariation::bch;
+      auto vx = abs(cgi.cellshape[0][0][0]);
+      auto vz = abs(cgi.cellshape[0][0][3]);
+      auto step = hdist0(tC0(cgi.adjmoves[0]));
+      array<int, 3> co;
+      int s = bch ? 1 : 2;
+      for(co[0]=-sub; co[0]<=sub; co[0]+=s)
+      for(co[1]=-sub; co[1]<=sub; co[1]+=s)
+      for(co[2]=-sub; co[2]<=sub; co[2]+=s) 
+      if(((co[0]^co[1]^1)&1) && ((co[0]^co[2]^1)&1)) {
+        vector<hyperpoint> dirs;
+        vector<int> good_dir_index;
+        vector<transmatrix> mirrors;
+        hyperpoint ctr = Hypc;
+        ctr[3] = vz * sub;
+        for(int i=0; i<3; i++)
+          if(co[i] == -sub)
+            mirrors.push_back(cpush(i, -step/2) * cmirror(i) * cpush(i, step/2));
+          else if(co[i] == +sub)
+            mirrors.push_back(cpush(i, +step/2) * cmirror(i) * cpush(i, -step/2));
+          else {
+            dirs.push_back(ctangent(i, vx));
+            good_dir_index.push_back(i);
+            }
+        for(int i=0; i<3; i++) {
+          ctr[i] += co[i] * vx;
+          if(co[i] == sub) {
+            dirs.push_back(ctangent(i, vx));
+            }
+          else if(co[i] == -sub) {
+            dirs.push_back(ctangent(i, -vx));
+            }
+          }
+        
+        cgi.subshapes.emplace_back();
+        auto &ss = cgi.subshapes.back();
+        
+        int mi = isize(mirrors);
+        
+        auto pt = [&] (ld x, ld y, ld z) {
+          if(z>0 && mi) throw hr_exception("bad third coordinate");
+          if(y>0 && mi>=2) throw hr_exception("bad second coordinate");
+          if(x>0 && mi>=3) throw hr_exception("bad first coordinate");
+          return normalize(ctr + dirs[0] * x + dirs[1] * y + dirs[2] * z);
+          };
+        
+        auto add_face = [&] (std::initializer_list<hyperpoint> vh) {
+          ss.faces.push_back(vh);
+          };
+        
+        const ld h = .5;
+        
+        if(mi == 0) {
+          for(int s: {-1, 1}) {
+            for(int i=0; i<3; i++) {
+              if(bch)
+                add_face({pt(0,.5,s), pt(.5,0,s), pt(0,-.5,s), pt(-.5,0,s)});
+              else
+                add_face({pt(-1,-1,s), pt(-1,+1,s), pt(+1,+1,s), pt(+1,-1,s)});
+              tie(dirs[0], dirs[1], dirs[2]) = make_tuple(dirs[1], dirs[2], dirs[0]);
+              }
+            }
+          if(bch) for(int u=0; u<8; u++) {
+            for(int j=0; j<3; j++) if((u>>j)&1) dirs[j] = -dirs[j];
+            add_face({pt(0,.5,1), pt(0,1,.5), pt(.5,1,0), pt(1,.5,0), pt(1,0,.5), pt(.5,0,1)});
+            for(int j=0; j<3; j++) if((u>>j)&1) dirs[j] = -dirs[j];
+            }
+          }
+        else if(mi == 1) {
+          auto& M = mirrors[0];
+          for(int s: {-1, 1}) {
+            transmatrix TM = s == 1 ? M : Id;
+            if(bch)
+              add_face({TM*pt(0,h,-1), TM*pt(h,0,-1), TM*pt(0,-h,-1), TM*pt(-h,0,-1)}); // good
+            else
+              add_face({TM*pt(-1,-1,-1), TM*pt(-1,+1,-1), TM*pt(+1,+1,-1), TM*pt(+1,-1,-1)});
+            for(int i=0; i<2; i++) {
+              if(bch)
+                add_face({pt(1,0,-.5), pt(1,-.5,0), M*pt(1,0,-.5), pt(1,.5,0)}); // bad
+              else
+                add_face({pt(-1,-1,-1), pt(-1,+1,-1), M*pt(-1,+1,-1), M*pt(-1,-1,-1)});
+              tie(dirs[0], dirs[1]) = make_tuple(dirs[1], -dirs[0]);
+              }
+            }
+          if(bch) for(int s: {-1, 1}) for(int i=0; i<4; i++) {
+            transmatrix TM = s == 1 ? M : Id;
+            add_face({TM*pt(0,.5,-1), TM*pt(0,1,-.5), TM*pt(.5,1,0), TM*pt(1,.5,0), TM*pt(1,0,-.5), TM*pt(.5,0,-1)});
+            tie(dirs[0], dirs[1]) = make_tuple(dirs[1], -dirs[0]);
+            }
+          }
+        else {
+          transmatrix spi = mirrors[0] * mirrors[1];
+          if(cgi.loop == 5) spi = spi * spi;
+          vector<transmatrix> spi_power = {Id};
+          for(int i=1; i<cgi.loop; i++) spi_power.push_back(spi_power.back() * spi);
+          if(mi == 2) {
+            for(auto P: spi_power) {
+              if(bch)
+                add_face({P*pt(.5,0,-1), P*pt(0,-.5,-1), P*pt(-.5,0,-1), P*mirrors[0]*pt(0,-.5,-1)});
+              else
+                add_face({P*pt(-1,-1,-1), P*pt(1,-1,-1), P*spi*pt(1,-1,-1), P*spi*pt(-1,-1,-1)});
+              }
+            vector<hyperpoint> f0, f1;
+            for(auto P: spi_power) f0.push_back(bch ? P*pt(-1,-.5,0) : P*pt(-1,-1,-1));
+            for(auto P: spi_power) f1.push_back(bch ? P*pt(+1,-.5,0) : P*pt(+1,-1,-1));
+            ss.faces.push_back(f0);
+            ss.faces.push_back(f1);
+            
+            if(bch) for(auto P: spi_power) for(int s: {-1,1})
+              add_face({P*pt(-.5*s,0,-1), P*pt(0,-.5,-1), P*pt(0,-1,-.5), P*pt(-.5*s,-1,0), P*pt(-1*s,-.5,0), P*pt(-1*s,0,-.5)});
+            }
+          else {
+            vector<transmatrix> face_dirs = {Id};
+            for(int i=0; i<isize(face_dirs); i++)
+            for(int j=0; j<2; j++) 
+            for(auto P1: spi_power) {
+              auto T = face_dirs[i];
+              if(j == 0) T = T * P1 * mirrors[1] * mirrors[2];
+              if(j == 1) T = T * P1 * mirrors[2] * mirrors[0];
+              bool fnd = false;
+              for(auto& F: face_dirs) 
+              for(auto P: spi_power)
+                if(eqmatrix(T, F*P)) fnd = true;
+              if(!fnd) face_dirs.push_back(T);
+              }
+            // tetrahedron in {4,3,3}; dodecahedron in {4,3,5}
+            if(cgi.loop == 3) hassert(isize(face_dirs) == 4);
+            if(cgi.loop == 5) hassert(isize(face_dirs) == 12);
+            for(auto F: face_dirs) {
+              vector<hyperpoint> f0;
+              for(auto P: spi_power) f0.push_back(bch ? F*P*pt(-.5,0,-1) : F*P*pt(-1,-1,-1));
+              ss.faces.push_back(f0);
+              }
+
+            vector<transmatrix> vertex_dirs;
+            hyperpoint pter = normalize(pt(-.5,-.5,-.5));
+            for(auto& F: face_dirs) for(auto& P: spi_power) {
+              transmatrix T = F * P;
+              bool fnd = false;
+              for(auto T1: vertex_dirs) if(hdist(T * pter, T1*pter) < 1e-3) fnd = true;
+              if(!fnd) vertex_dirs.push_back(T);
+              }
+            if(cgi.loop == 3) hassert(isize(vertex_dirs) == 4);
+            if(cgi.loop == 5) hassert(isize(vertex_dirs) == 20);
+            if(bch) for(auto& V: vertex_dirs)
+              add_face({V*pt(-1,-.5,0), V*pt(-1,0,-.5), V*pt(-.5,0,-1), V*pt(0,-.5,-1), V*pt(0,-1,-.5), V*pt(-.5,-1,0)});
+            }
+          }
+        make_vertices_only(ss.vertices_only, ss.faces);
+        }
+      println(hlog, "subcells generated = ", isize(ssh));
       }
     else {
       cgi.subshapes.emplace_back();
@@ -318,7 +473,7 @@ EX namespace reg3 {
         hyperpoint res = Hypc;
         for(auto& vertex: face) 
           res += vertex;
-        ss.face_centers.push_back(res);
+        ss.face_centers.push_back(normalize(res));
         gres += res;
         }
       ss.cellcenter = normalize(gres);
@@ -336,6 +491,18 @@ EX namespace reg3 {
   void test();
 
   #if HDR
+  /** \brief vertex_adjacencies[heptagon id] is a list of other heptagons which are vertex adjacent 
+   *  note: in case of ideal vertices this is just the face adjacency
+   **/
+  struct vertex_adjacency_info {
+    /** id of the adjacent heptagon */
+    int h_id;
+    /** transition matrix to that heptagon */
+    transmatrix T;
+    /** the sequence of moves we need to make to get there */;
+    vector<int> move_sequence;
+    };
+  
   struct hrmap_closed3 : hrmap {
     vector<heptagon*> allh;
     vector<vector<transmatrix>> tmatrices;    
@@ -343,6 +510,7 @@ EX namespace reg3 {
     vector<cell*> acells;
     map<cell*, pair<int, int> > local_id;
     vector<vector<cell*>> acells_by_master;
+    vector<vector<vertex_adjacency_info> > vertex_adjacencies;
 
     transmatrix adj(heptagon *h, int d) override { return tmatrices[h->fieldval][d]; }
     transmatrix adj(cell *c, int d) override { return tmatrices_cell[local_id[c].first][d]; }
@@ -352,7 +520,6 @@ EX namespace reg3 {
     transmatrix relative_matrix(cell *h2, cell *h1, const hyperpoint& hint) override;
     
     void initialize(int cell_count);
-    void initialize_subcells();
     vector<cell*>& allcells() override { return acells; }
 
     vector<hyperpoint> get_vertices(cell* c) override { 
@@ -368,27 +535,16 @@ EX namespace reg3 {
   #endif
   
   EX int get_wall_offset(cell *c) {
-    auto m = (hrmap_quotient3*) currentmap;
+    auto m = (hrmap_closed3*) currentmap;
     auto& wo = cgi.walloffsets[ m->local_id[c].second ];
     if(wo.second == nullptr)
       wo.second = c;
     return wo.first;
     }
 
-  void hrmap_closed3::initialize_subcells() {
-    auto& ss = cgi.subshapes;
-    int big_cell_count = isize(allh);
-    acells_by_master.resize(big_cell_count);
-    for(int a=0; a<big_cell_count; a++) {
-      for(int i=0; i<isize(ss); i++) {
-        cell *c = newCell(isize(ss[i].faces), allh[a]);
-        if(!allh[a]->c7)
-          allh[a]->c7 = c;
-        local_id[c] = {isize(acells), i};
-        acells.push_back(c);
-        acells_by_master[a].push_back(c);
-        }
-      }
+  EX int get_face_vertices(cell *c, int d) {
+    auto m = (hrmap_closed3*) currentmap;
+    return isize(cgi.subshapes[m->local_id[c].second].faces[d]);
     }
 
   void hrmap_closed3::initialize(int big_cell_count) {
@@ -399,39 +555,98 @@ EX namespace reg3 {
       allh[a] = init_heptagon(S7);
       allh[a]->fieldval = a;
       }
-    initialize_subcells();
     }
 
   void hrmap_closed3::make_subconnections() {
     auto& ss = cgi.subshapes;
+
+    auto& vas = vertex_adjacencies;
+    vas.resize(isize(allh));
+    for(int a=0; a<isize(allh); a++) {
+      auto& va = vas[a];
+      va.emplace_back(vertex_adjacency_info{a, Id, {}});
+      if(cgflags & qIDEAL) {
+        for(int d=0; d<S7; d++) {
+          transmatrix T = adj(allh[a], d);
+          va.emplace_back(vertex_adjacency_info{allh[a]->move(d)->fieldval, T, {d}});
+          }
+        }
+      else
+      for(int i=0; i<isize(va); i++) {
+        for(int d=0; d<S7; d++) {
+          transmatrix T = va[i].T * adj(allh[va[i].h_id], d);
+          bool found = false;
+          for(auto& va2: va) if(eqmatrix(va2.T, T)) found = true;
+          if(found) continue;
+
+          bool found_va = false;
+          for(auto& v: cgi.vertices_only) for(auto& w: cgi.vertices_only)
+            if(hdist(normalize(v), normalize(T*w)) < 1e-3)
+              found_va = true;
+          if(sphere) found_va = true;
+          if(!found_va) continue;
+          va.emplace_back(vertex_adjacency_info{allh[va[i].h_id]->move(d)->fieldval, T, va[i].move_sequence});
+          va.back().move_sequence.push_back(d);
+          }
+        }
+      println(hlog, "vas found = ", isize(va));
+      }
+    
+    map<int, int> by_sides;
+    
+    acells_by_master.resize(isize(allh));
+    for(int a=0; a<isize(allh); a++) {
+      for(int id=0; id<isize(ss); id++) {
+        bool exists = false;
+        for(auto& va: vertex_adjacencies[a]) {
+          for(auto c1: acells_by_master[va.h_id]) {
+            int id1 = local_id[c1].second;
+            if(hdist(ss[id].cellcenter, va.T * ss[id1].cellcenter) < 1e-6)
+              exists = true;
+            }
+          }
+        if(exists) continue;
+        cell *c = newCell(isize(ss[id].faces), allh[a]);
+        by_sides[isize(ss[id].faces)]++;
+        if(!allh[a]->c7)
+          allh[a]->c7 = c;
+        local_id[c] = {isize(acells), id};
+        acells.push_back(c);
+        acells_by_master[a].push_back(c);
+        }
+      }
+    
+    println(hlog, "found ", isize(acells), " cells, ", by_sides);
+
     tmatrices_cell.resize(isize(acells));
     int failures = 0;
     for(cell *c: acells) {
       int id = local_id[c].second;      
       auto& tmcell = tmatrices_cell[local_id[c].first];
+      vector<int> foundtab;
+      vector<tuple<int, int, int>> foundtab_ids;
       for(int i=0; i<c->type; i++) {
         int found = 0;
         hyperpoint ctr = ss[id].face_centers[i];
-        for(int d=-1; d<S7; d++) {
-          auto h_id = d == -1 ? c->master->fieldval : c->master->move(d)->fieldval;
-          transmatrix T = d == -1 ? Id : adj(c->master, d);
-          for(auto c1: acells_by_master[h_id]) if(d >= 0 || c != c1) {
+        for(auto& va: vertex_adjacencies[c->master->fieldval]) {
+          for(auto c1: acells_by_master[va.h_id]) if(va.move_sequence.size() || c != c1) {
             int id1 = local_id[c1].second;
             for(int j=0; j<c1->type; j++) {
-              if(hdist(normalize(ctr), normalize(T * ss[id1].face_centers[j])) < 1e-6) {
+              if(hdist(ctr, va.T * ss[id1].face_centers[j]) < 1e-6) {
                 c->c.connect(i, c1, j, false);
-                // println(hlog, "found: ", tie(h_id, id1, j), " d=", d, " distance = ", hdist(normalize(ctr), normalize(T * ss[id1].face_centers[j])));
-                tmcell.push_back(ss[id].from_cellcenter * T * ss[id1].to_cellcenter);
+                if(!found) tmcell.push_back(ss[id].from_cellcenter * va.T * ss[id1].to_cellcenter);
+                foundtab_ids.emplace_back(va.h_id, id1, j);
                 found++;
                 }
               }
             }
           }
-        println(hlog, make_tuple(int(c->master->fieldval), id, i), " : ", found, " :: ", kz(tmcell.back()));
+        foundtab.push_back(found);
         if(found != 1) failures++;
         }
       }
     println(hlog, "total failures = ", failures);
+    if(failures) throw hr_exception("hrmap_closed3 failures");
     }
 
   transmatrix hrmap_closed3::relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
@@ -1085,7 +1300,6 @@ EX namespace reg3 {
           }
         }
       
-      initialize_subcells();
       make_subconnections();
       }
     

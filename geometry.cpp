@@ -503,6 +503,10 @@ static const ld hcrossf7 = 0.620672, hexf7 = 0.378077, tessf7 = 1.090550, hexhex
 
 EX bool scale_used() { return (shmup::on && geometry == gNormal && BITRUNCATED) ? (cheater || autocheat) : true; }
 
+EX bool is_subcube_based(eVariation var) {
+  return among(var, eVariation::subcubes, eVariation::dual_subcubes, eVariation::bch);
+  }
+
 void geometry_information::prepare_basics() {
 
   DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("prepare_basics"));
@@ -682,7 +686,7 @@ void geometry_information::prepare_basics() {
     hexf = rhexf = hexvdist = csc * .5;
     }
   
-  if(variation == eVariation::subcubes) {
+  if(is_subcube_based(variation)) {
     scalefactor /= reg3::subcube_count;
     orbsize /= reg3::subcube_count;
     }
@@ -1080,7 +1084,7 @@ EX string cgi_string() {
   
   if(GOLDBERG_INV) V("GP", its(gp::param.first) + "," + its(gp::param.second));
   if(IRREGULAR) V("IRR", its(irr::irrid));
-  if(variation == eVariation::subcubes) V("SC", its(reg3::subcube_count));
+  if(is_subcube_based(variation)) V("SC", its(reg3::subcube_count));
 
   #if CAP_ARCM
   if(arcm::in()) V("ARCM", arcm::current.symbol);
