@@ -1284,6 +1284,8 @@ int read_geom_args() {
   #endif
   else if(argis("-d:quotient")) 
     launch_dialog(showQuotientConfig);
+  else if(argis("-uqf")) 
+    fieldpattern::use_quotient_fp = true;
   #endif
   else if(argis("-d:geom")) 
     launch_dialog(showEuclideanMenu);
