@@ -639,6 +639,12 @@ EX transmatrix cpush(int cid, ld alpha) {
   return T;
   }
 
+EX transmatrix cmirror(int cid) {
+  transmatrix T = Id;
+  T[cid][cid] = -1;
+  return T;
+  }
+
 // push alpha units to the right
 EX transmatrix xpush(ld alpha) { return cpush(0, alpha); }
 
