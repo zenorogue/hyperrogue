@@ -279,6 +279,10 @@ tuple<
 
 decltype(raycaster_state()) saved_state;
 
+ld ray_scale = 8;
+int max_wall_offset = 512;
+int max_celltype = 64;
+
 void enable_raycaster() {
   using glhr::to_glsl;
   auto state = raycaster_state();
@@ -355,7 +359,7 @@ void enable_raycaster() {
         "mediump vec4 getWall(mediump int x, mediump int coord) {\n"
         "  mediump vec4 result;\n"
         "  mediump vec4 v = texture2D(tWall, vec2((float(x)+.5) * uInvLengthWall, (float(coord)+.5) / 4.));\n"
-        "  for(int j=0; j<4; j++) result[j] = (v[j] - .5) * 8.;\n"
+        "  for(int j=0; j<4; j++) result[j] = (v[j] - .5) * " + to_glsl(ray_scale) + ";\n"
         "  return result;\n"
         "  }\n"
         "mediump int getWallstart(mediump int x) {\n"
@@ -376,7 +380,7 @@ void enable_raycaster() {
         "  mediump mat4 result;\n"
         "  for(int i=0; i<4; i++) {\n"
         "    mediump vec4 v = texture2D(tM, vec2((float(x)+.5) * uInvLengthM, (float(i)+.5) / 4.));\n"
-        "    for(int j=0; j<4; j++) result[j][i] = (v[j] - .5) * 8.;\n"
+        "    for(int j=0; j<4; j++) result[j][i] = (v[j] - .5) * " + to_glsl(ray_scale) + ";\n"
         "    }\n"
         "  return result;\n"
         "  }\n";
@@ -1439,8 +1443,8 @@ void enable_raycaster() {
     
     if(many_cell_types) {
       fmain += 
-        "walloffset = int(connection.w * 256.);\n"
-        "sides = int(connection.w * 4096.) - 16 * walloffset;\n";
+        "walloffset = int(connection.w * " + to_glsl(max_wall_offset) + ");\n"
+        "sides = int(connection.w * " + to_glsl(max_wall_offset * max_celltype) + ") - " + its(max_celltype) + " * walloffset;\n";
       
       // fmain += "if(sides != 8) { gl_FragColor = vec4(.5,float(sides)/8.,.5,1); return; }";
       }
@@ -1702,7 +1706,11 @@ struct raycast_map {
         connections[u][2] = (k+.5) / 1024.;
         break;
         }
-      connections[u][3] = (wall_offset(c1) / 256.) + (c1->type + (WDIM == 2 ? 2 : 0) + .5) / 4096.;
+      if(wall_offset(c1) >= max_wall_offset)
+        println(hlog, "error: wall_offset exceeds ", max_wall_offset);
+      if(c1->type >= max_celltype)
+        println(hlog, "error: type " + its(c1->type) + " exceeds ", max_celltype);
+      connections[u][3] = (wall_offset(c1) * 1. / max_wall_offset) + (c1->type + (WDIM == 2 ? 2 : 0) + .5) * 1. / max_wall_offset / max_celltype;
       }
     if(WDIM == 2) for(int a: {0, 1}) {
       celldrawer dd;
@@ -1742,7 +1750,7 @@ struct raycast_map {
       for(int i=0; i<isize(ms); i++)
         for(int a=0; a<4; a++)
         for(int b=0; b<4; b++)
-          m_map[i+a*mlength][b] = ms[i][a][b]/8 + .5;
+          m_map[i+a*mlength][b] = ms[i][a][b]/ray_scale + .5;
       bind_array(m_map, o->tM, txM, 7, mlength);
       glUniform1f(o->uInvLengthM, 1. / mlength);
       }
@@ -1916,8 +1924,8 @@ EX void cast() {
     ld minval = 9, maxval = -9;
     for(int i=0; i<isize(wallx); i++) {
       for(int a=0; a<4; a++) {
-        w_map[i][a] = wallx[i][a]/8 + .5;
-        w_map[i+wlength][a] = wally[i][a]/8 + .5;
+        w_map[i][a] = wallx[i][a]/ray_scale + .5;
+        w_map[i+wlength][a] = wally[i][a]/ray_scale + .5;
         minval = min<ld>(minval, w_map[i][a]);
         minval = min<ld>(minval, w_map[i+wlength][a]);
         maxval = max<ld>(maxval, w_map[i][a]);
