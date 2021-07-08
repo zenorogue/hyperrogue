@@ -321,39 +321,44 @@ EX namespace reg3 {
       for(co[2]=-sub; co[2]<=sub; co[2]+=s) 
       if(((co[0]^co[1]^1)&1) && ((co[0]^co[2]^1)&1)) {
         vector<hyperpoint> dirs;
-        vector<int> good_dir_index;
+        vector<int> dirlimits;
         vector<transmatrix> mirrors;
         hyperpoint ctr = Hypc;
         ctr[3] = vz * sub;
+
+        int mi = 0;
+        
         for(int i=0; i<3; i++)
-          if(co[i] == -sub)
-            mirrors.push_back(cpush(i, -step/2) * cmirror(i) * cpush(i, step/2));
-          else if(co[i] == +sub)
-            mirrors.push_back(cpush(i, +step/2) * cmirror(i) * cpush(i, -step/2));
-          else {
+          if(co[i] != -sub && co[i] != +sub) {
             dirs.push_back(ctangent(i, vx));
-            good_dir_index.push_back(i);
+            dirlimits.push_back(999);
+            mirrors.push_back(cpush(i, -step/2) * cmirror(i) * cpush(i, step/2));
             }
         for(int i=0; i<3; i++) {
           ctr[i] += co[i] * vx;
           if(co[i] == sub) {
+            mi++;
             dirs.push_back(ctangent(i, vx));
+            dirlimits.push_back(0);
+            mirrors.push_back(cpush(i, +step/2) * cmirror(i) * cpush(i, -step/2));
             }
           else if(co[i] == -sub) {
+            mi++;
             dirs.push_back(ctangent(i, -vx));
+            dirlimits.push_back(0);
+            mirrors.push_back(cpush(i, -step/2) * cmirror(i) * cpush(i, +step/2));
             }
           }
         
         cgi.subshapes.emplace_back();
         auto &ss = cgi.subshapes.back();
-        
-        int mi = isize(mirrors);
-        
+
         auto pt = [&] (ld x, ld y, ld z) {
-          if(z>0 && mi) throw hr_exception("bad third coordinate");
-          if(y>0 && mi>=2) throw hr_exception("bad second coordinate");
-          if(x>0 && mi>=3) throw hr_exception("bad first coordinate");
-          return normalize(ctr + dirs[0] * x + dirs[1] * y + dirs[2] * z);
+          transmatrix M = Id;
+          if(x > dirlimits[0]) x = -x, M = mirrors[0] * M;
+          if(y > dirlimits[1]) y = -y, M = mirrors[1] * M;
+          if(z > dirlimits[2]) z = -z, M = mirrors[2] * M;
+          return normalize(M * (ctr + dirs[0] * x + dirs[1] * y + dirs[2] * z));
           };
         
         auto add_face = [&] (std::initializer_list<hyperpoint> vh) {
@@ -379,36 +384,34 @@ EX namespace reg3 {
             }
           }
         else if(mi == 1) {
-          auto& M = mirrors[0];
+          auto& M = mirrors[2];
           for(int s: {-1, 1}) {
-            transmatrix TM = s == 1 ? M : Id;
             if(bch)
-              add_face({TM*pt(0,h,-1), TM*pt(h,0,-1), TM*pt(0,-h,-1), TM*pt(-h,0,-1)}); // good
+              add_face({pt(0,h,s), pt(h,0,s), pt(0,-h,s), pt(-h,0,s)});
             else
-              add_face({TM*pt(-1,-1,-1), TM*pt(-1,+1,-1), TM*pt(+1,+1,-1), TM*pt(+1,-1,-1)});
+              add_face({pt(-1,-1,s), pt(-1,+1,s), pt(+1,+1,s), pt(+1,-1,s)});
             for(int i=0; i<2; i++) {
               if(bch)
-                add_face({pt(1,0,-.5), pt(1,-.5,0), M*pt(1,0,-.5), pt(1,.5,0)}); // bad
+                add_face({pt(1,0,-.5), pt(1,-.5,0), M*pt(1,0,-.5), pt(1,.5,0)});
               else
-                add_face({pt(-1,-1,-1), pt(-1,+1,-1), M*pt(-1,+1,-1), M*pt(-1,-1,-1)});
+                add_face({pt(-1,-1,-1), pt(-1,+1,-1), pt(-1,+1,+1), pt(-1,-1,+1)});
               tie(dirs[0], dirs[1]) = make_tuple(dirs[1], -dirs[0]);
               }
             }
-          if(bch) for(int s: {-1, 1}) for(int i=0; i<4; i++) {
-            transmatrix TM = s == 1 ? M : Id;
-            add_face({TM*pt(0,.5,-1), TM*pt(0,1,-.5), TM*pt(.5,1,0), TM*pt(1,.5,0), TM*pt(1,0,-.5), TM*pt(.5,0,-1)});
+          if(bch) for(ld s: {-1, 1}) for(int i=0; i<4; i++) {
+            add_face({pt(0,.5,s), pt(0,1,s/2), pt(.5,1,0), pt(1,.5,0), pt(1,0,s/2), pt(.5,0,s)});
             tie(dirs[0], dirs[1]) = make_tuple(dirs[1], -dirs[0]);
             }
           }
         else {
-          transmatrix spi = mirrors[0] * mirrors[1];
+          transmatrix spi = mi == 2 ? mirrors[1] * mirrors[2] : mirrors[0] * mirrors[1];
           if(cgi.loop == 5) spi = spi * spi;
           vector<transmatrix> spi_power = {Id};
           for(int i=1; i<cgi.loop; i++) spi_power.push_back(spi_power.back() * spi);
           if(mi == 2) {
             for(auto P: spi_power) {
               if(bch)
-                add_face({P*pt(.5,0,-1), P*pt(0,-.5,-1), P*pt(-.5,0,-1), P*mirrors[0]*pt(0,-.5,-1)});
+                add_face({P*pt(.5,0,-1), P*pt(0,-.5,-1), P*pt(-.5,0,-1), P*mirrors[1]*pt(0,-.5,-1)});
               else
                 add_face({P*pt(-1,-1,-1), P*pt(1,-1,-1), P*spi*pt(1,-1,-1), P*spi*pt(-1,-1,-1)});
               }
