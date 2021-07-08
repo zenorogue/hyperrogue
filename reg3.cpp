@@ -355,12 +355,48 @@ EX namespace reg3 {
         cgi.subshapes.emplace_back();
         auto &ss = cgi.subshapes.back();
 
-        auto pt = [&] (ld x, ld y, ld z) {
+        auto pt0 = [&] (const array<ld, 3>& x) {
           transmatrix M = Id;
-          if(x > di[0].limit) x = -x, M = di[0].mirror * M;
-          if(y > di[1].limit) y = -y, M = di[1].mirror * M;
-          if(z > di[2].limit) z = -z, M = di[2].mirror * M;
-          return normalize(M * (ctr + di[0].dir * x + di[1].dir * y + di[2].dir * z));
+          hyperpoint res = ctr;
+          for(int i=0; i<3; i++) {
+            ld xx = x[i];
+            if(xx > di[i].limit) xx = 2*di[i].limit-xx, M = di[i].mirror * M;
+            res += di[i].dir * xx;
+            }
+          return normalize(M * res);
+          };
+
+        auto pt = [&] (ld x, ld y, ld z) { 
+          if(sub == 1 || !bch || sphere) return pt0(make_array(x,y,z));
+          
+          // Unfortunately using the rule above for bch (with sub > 1) generates faces which are not flat.
+          // Therefore, we replace the vertices by the centers of their Voronoi cells
+          // we do this only in the hyperbolic case -- it does not work correctly in the spherical case because of Voronoi not working as expected
+          
+          // the arguments for pt1 are the Voronoi centers for: (x,y,z) = (1,.5,0)
+          // pt1 rearranges them to whatever (x,y,z) actually is
+
+          array<ld, 3> arg1 = {x, y, z};
+
+          auto pt1 = [&] (ld x1, ld y1, ld z1) {
+            array<ld, 3> arg0;
+            for(int i=0; i<3; i++) {
+              println(hlog, "value is ", arg1[i]);
+              if(arg1[i] == 1) arg0[i] = x1;
+              else if(arg1[i] == -1) arg0[i] = -x1;
+              else if(arg1[i] == .5) arg0[i] = y1;
+              else if(arg1[i] == -.5) arg0[i] = -y1;
+              else if(arg1[i] == 0) arg0[i] = z1;
+              else throw hr_exception("unknown number in pt1");
+              }
+            return normalize(pt0(arg0));
+            };
+          hyperpoint a = pt1(0,0,0);
+          hyperpoint b = pt1(2,0,0);
+          hyperpoint c = pt1(1,1,1);
+          hyperpoint d = pt1(1,1,-1);
+          hyperpoint res = circumscribe(a, b, c, d);
+          return res;
           };
         
         auto add_face = [&] (std::initializer_list<hyperpoint> vh) {
@@ -450,7 +486,7 @@ EX namespace reg3 {
               }
 
             vector<transmatrix> vertex_dirs;
-            hyperpoint pter = normalize(pt(-.5,-.5,-.5));
+            hyperpoint pter = normalize(pt0(make_array(-.5,-.5,-.5)));
             for(auto& F: face_dirs) for(auto& P: spi_power) {
               transmatrix T = F * P;
               bool fnd = false;
