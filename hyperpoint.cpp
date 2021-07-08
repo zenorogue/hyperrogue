@@ -1639,6 +1639,42 @@ EX hyperpoint circumscribe(hyperpoint a, hyperpoint b, hyperpoint c) {
   return h;
   }
 
+EX ld inner3(hyperpoint h1, hyperpoint h2) {
+  return 
+    hyperbolic ? h1[LDIM] * h2[LDIM] - h1[0] * h2[0] - h1[1] * h2[1]  - h1[2]*h2[2]:
+    sphere ? h1[LDIM] * h2[LDIM] + h1[0] * h2[0] + h1[1] * h2[1] + h1[2]*h2[2]:
+    h1[0] * h2[0] + h1[1] * h2[1];
+  }
+
+/** circumscribe for H3 and S3 (not for E3 yet!) */
+EX hyperpoint circumscribe(hyperpoint a, hyperpoint b, hyperpoint c, hyperpoint d) {
+  
+  array<hyperpoint, 4> ds = { b-a, c-a, d-a, C0 };
+  
+  for(int i=0; i<3; i++) {
+  
+    if(inner3(ds[i],ds[i]) < 0) {
+      ds[i] = ds[i] / sqrt(-inner3(ds[i], ds[i]));
+      for(int j=i+1; j<4; j++)
+        ds[j] = ds[j] + ds[i] * inner3(ds[i], ds[j]);
+      }
+    else {
+      ds[i] = ds[i] / sqrt(inner3(ds[i], ds[i]));
+      for(int j=i+1; j<4; j++)
+        ds[j] = ds[j] - ds[i] * inner3(ds[i], ds[j]);          
+      }
+    }
+  
+  hyperpoint& h = ds[3];
+  
+  if(h[3] < 0) h = -h;
+
+  ld i = inner3(h, h);
+  if(i > 0) h /= sqrt(i);
+  else h /= -sqrt(-i);
+
+  return h;
+  }
 
 EX bool clockwise(hyperpoint h1, hyperpoint h2) {
   return h1[0] * h2[1] > h1[1] * h2[0];
