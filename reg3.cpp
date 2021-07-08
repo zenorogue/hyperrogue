@@ -381,7 +381,6 @@ EX namespace reg3 {
           auto pt1 = [&] (ld x1, ld y1, ld z1) {
             array<ld, 3> arg0;
             for(int i=0; i<3; i++) {
-              println(hlog, "value is ", arg1[i]);
               if(arg1[i] == 1) arg0[i] = x1;
               else if(arg1[i] == -1) arg0[i] = -x1;
               else if(arg1[i] == .5) arg0[i] = y1;
