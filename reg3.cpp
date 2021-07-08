@@ -722,10 +722,10 @@ EX namespace reg3 {
     if(c1 == c2) return Id;
     int d = hr::celldistance(c2, c1);
 
-    for(int a=0; a<S7; a++) if(hr::celldistance(c1->move(a), c2) < d)
+    for(int a=0; a<c1->type; a++) if(hr::celldistance(c2, c1->move(a)) < d)
       return adj(c1, a) * relative_matrix(c2, c1->move(a), hint);
       
-    for(int a=0; a<S7; a++) println(hlog, "d=", d, " vs ", hr::celldistance(c1->move(a), c2));
+    for(int a=0; a<c1->type; a++) println(hlog, "d=", d, " vs ", hr::celldistance(c2, c1->move(a)));
     
     println(hlog, "error in hrmap_quotient3:::relative_matrix");
     return Id;
