@@ -664,6 +664,16 @@ EX namespace reg3 {
 
     tmatrices_cell.resize(isize(acells));
     int failures = 0;
+    
+    vector<map<unsigned, vector<pair<cell*, int> > > > which_cell;
+    which_cell.resize(isize(allh));
+
+    for(cell *c: acells) {
+      int id = local_id[c].second;
+      for(int i=0; i<c->type; i++)
+        which_cell[c->master->fieldval][bucketer(ss[id].face_centers[i])].emplace_back(c, i);
+      }
+    
     for(cell *c: acells) {
       int id = local_id[c].second;      
       auto& tmcell = tmatrices_cell[local_id[c].first];
@@ -673,15 +683,18 @@ EX namespace reg3 {
         int found = 0;
         hyperpoint ctr = ss[id].face_centers[i];
         for(auto& va: vertex_adjacencies[c->master->fieldval]) {
-          for(auto c1: acells_by_master[va.h_id]) if(va.move_sequence.size() || c != c1) {
+          hyperpoint ctr1 = iso_inverse(va.T) * ctr;
+          auto bucket = bucketer(ctr1);
+          for(auto p: which_cell[va.h_id][bucket]) {
+            cell *c1 = p.first;
+            int j = p.second;
+            if(c == c1 && va.move_sequence.empty()) continue;
             int id1 = local_id[c1].second;
-            for(int j=0; j<c1->type; j++) {
-              if(hdist(ctr, va.T * ss[id1].face_centers[j]) < 1e-6) {
-                c->c.connect(i, c1, j, false);
-                if(!found) tmcell.push_back(ss[id].from_cellcenter * va.T * ss[id1].to_cellcenter);
-                foundtab_ids.emplace_back(va.h_id, id1, j);
-                found++;
-                }
+            if(hdist(ctr1, ss[id1].face_centers[j]) < 1e-6) {
+              c->c.connect(i, c1, j, false);
+              if(!found) tmcell.push_back(ss[id].from_cellcenter * va.T * ss[id1].to_cellcenter);
+              foundtab_ids.emplace_back(va.h_id, id1, j);
+              found++;
               }
             }
           }
