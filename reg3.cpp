@@ -601,6 +601,8 @@ EX namespace reg3 {
       }
     }
 
+  const static bool testing_subconnections = false;
+  
   void hrmap_closed3::make_subconnections() {
     auto& ss = cgi.subshapes;
 
@@ -701,13 +703,19 @@ EX namespace reg3 {
               found++;
               }
             }
+          if(found && !testing_subconnections) break;
+          }
+        if(testing_subconnections && !found) {
+          c->c.connect(i, c, i, false);
+          tmcell.push_back(Id);
           }
         foundtab.push_back(found);
         if(found != 1) failures++;
         }
+      if(testing_subconnections) println(hlog, "foundtab = ", foundtab);
       }
     println(hlog, "total failures = ", failures);
-    if(failures) throw hr_exception("hrmap_closed3 failures");
+    if(failures && !testing_subconnections) throw hr_exception("hrmap_closed3 failures");
     }
 
   transmatrix hrmap_closed3::relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
