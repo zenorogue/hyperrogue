@@ -637,17 +637,20 @@ EX namespace reg3 {
       }
     
     map<int, int> by_sides;
+
+    vector<map<unsigned, vector<hyperpoint> > > which_cell_0;
+    which_cell_0.resize(isize(allh));
     
     acells_by_master.resize(isize(allh));
     for(int a=0; a<isize(allh); a++) {
       for(int id=0; id<isize(ss); id++) {
         bool exists = false;
+        auto& cc = ss[id].cellcenter;
         for(auto& va: vertex_adjacencies[a]) {
-          for(auto c1: acells_by_master[va.h_id]) {
-            int id1 = local_id[c1].second;
-            if(hdist(ss[id].cellcenter, va.T * ss[id1].cellcenter) < 1e-6)
+          hyperpoint h = iso_inverse(va.T) * cc;
+          for(auto h1: which_cell_0[va.h_id][bucketer(h)])
+            if(hdist(h1, h) < 1e-6)
               exists = true;
-            }
           }
         if(exists) continue;
         cell *c = newCell(isize(ss[id].faces), allh[a]);
@@ -657,6 +660,7 @@ EX namespace reg3 {
         local_id[c] = {isize(acells), id};
         acells.push_back(c);
         acells_by_master[a].push_back(c);
+        which_cell_0[a][bucketer(cc)].push_back(cc);
         }
       }
     
