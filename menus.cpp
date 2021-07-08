@@ -41,7 +41,7 @@ EX void showOverview() {
       mouseovers += XLAT(" Hell: %1/%2", its(orbsUnlocked()), its(lands_for_hell()));
     }
   
-  bool pages;
+  bool pages = false;
   
   {
   dynamicval<int> ds(dual::state, dual::state ? 2 : 0);
