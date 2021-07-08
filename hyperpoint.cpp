@@ -1583,4 +1583,66 @@ EX hyperpoint linecross(hyperpoint a, hyperpoint b, hyperpoint c, hyperpoint d) 
   return normalize(res);  
   }
 
+EX ld inner2(hyperpoint h1, hyperpoint h2) {
+  return 
+    hyperbolic ? h1[LDIM] * h2[LDIM] - h1[0] * h2[0] - h1[1] * h2[1] :
+    sphere ? h1[LDIM] * h2[LDIM] + h1[0] * h2[0] + h1[1] * h2[1] :
+    h1[0] * h2[0] + h1[1] * h2[1];
+  }
+
+EX hyperpoint circumscribe(hyperpoint a, hyperpoint b, hyperpoint c) {
+  hyperpoint h = C0;
+
+  b = b - a;
+  c = c - a;
+  
+  if(euclid) {
+    ld b2 = inner2(b, b)/2;
+    ld c2 = inner2(c, c)/2;
+    
+    ld det = c[1]*b[0] - b[1]*c[0];
+    
+    h = a;
+    
+    h[1] += (c2*b[0] - b2 * c[0]) / det;
+    h[0] += (c2*b[1] - b2 * c[1]) / -det;
+    
+    return h;
+    }
+
+  if(inner2(b,b) < 0) {
+    b = b / sqrt(-inner2(b, b));
+    c = c + b * inner2(c, b);
+    h = h + b * inner2(h, b);
+    }
+  else {
+    b = b / sqrt(inner2(b, b));
+    c = c - b * inner2(c, b);
+    h = h - b * inner2(h, b);
+    }
+  
+  if(inner2(c,c) < 0) {
+    c = c / sqrt(-inner2(c, c));
+    h = h + c * inner2(h, c);
+    }
+  else {
+    c = c / sqrt(inner2(c, c));
+    h = h - c * inner2(h, c);
+    }
+  
+  if(h[LDIM] < 0) h[0] = -h[0], h[1] = -h[1], h[LDIM] = -h[LDIM];
+
+  ld i = inner2(h, h);
+  if(i > 0) h /= sqrt(i);
+  else h /= -sqrt(-i);
+
+  return h;
+  }
+
+
+EX bool clockwise(hyperpoint h1, hyperpoint h2) {
+  return h1[0] * h2[1] > h1[1] * h2[0];
+  }
+
+
 }
