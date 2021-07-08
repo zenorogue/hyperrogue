@@ -1382,6 +1382,11 @@ EX void set_variation(eVariation target) {
       variation = target;
       return;
       }
+    if(is_reg3_variation(target)) {
+      if(!reg3::in()) geometry = hyperbolic ? gSpace435 : gCell8;
+      variation = target;
+      return;
+      }
     if(bt::in() || sol || kite::in() || WDIM == 3) if(!prod) geometry = gNormal;
     auto& cd = ginf[gCrystal];
     if(target == eVariation::bitruncated && cryst && cd.sides == 8 && cd.vertex == 4) {

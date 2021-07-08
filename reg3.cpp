@@ -17,6 +17,12 @@ namespace hr {
 EX namespace reg3 {
 
   EX int subcube_count = 1;
+  
+  EX flagtype coxeter_param = 0;
+
+  const flagtype cox_othercell = 1;
+  const flagtype cox_midedges = 2;
+  const flagtype cox_vertices = 4;
 
   #if HDR
   inline short& altdist(heptagon *h) { return h->emeraldval; }
@@ -301,6 +307,70 @@ EX namespace reg3 {
       }
     }
   
+  EX void generate_coxeter(flagtype f) {
+    auto& ssh = cgi.subshapes;
+    for(auto& fac: cgi.cellshape) {
+      hyperpoint facectr = Hypc;
+      vector<hyperpoint> ring;
+      hyperpoint last = fac.back();
+      ring.push_back(last);
+      for(hyperpoint h: fac) {
+        if(f & cox_midedges)
+          ring.push_back(mid(last, h));
+        ring.push_back(last = h);
+        facectr += h;
+        }
+      facectr = normalize(facectr);
+
+      hyperpoint fc2 = rspintox(facectr) * xpush0(2*hdist0(facectr));
+      
+      if(f & cox_vertices) {
+        for(int i=1; i<isize(ring); i++) {
+          ssh.emplace_back();
+          auto &ss = ssh.back();
+          auto h = (f & cox_othercell) ? facectr : fc2;
+          ss.faces.push_back({C0, h, ring[i-1]});
+          ss.faces.push_back({C0, h, ring[i]});
+          ss.faces.push_back({C0, ring[i-1], ring[i]});
+          ss.faces.push_back({h, ring[i-1], ring[i]});
+          }
+        }
+      else if(f & cox_midedges) {
+        ring.push_back(ring[1]);
+        for(int i=3; i<isize(ring); i+=2) {
+          ssh.emplace_back();
+          auto &ss = ssh.back();
+          auto h = (f & cox_othercell) ? facectr : fc2;
+          ss.faces.push_back({C0, ring[i-2], ring[i-1]});
+          ss.faces.push_back({C0, ring[i-1], ring[i-0]});
+          ss.faces.push_back({C0, h, ring[i-2]});
+          ss.faces.push_back({C0, h, ring[i-0]});
+          if(f & cox_othercell) {
+            ss.faces.push_back({facectr, ring[i-2], ring[i-1], ring[i-0]});
+            }
+          else {
+            ss.faces.push_back({fc2, ring[i-1], ring[i-0]});
+            ss.faces.push_back({fc2, ring[i-2], ring[i-1]});
+            }
+          }
+        }
+      else {
+        ssh.emplace_back();
+        auto &ss = ssh.back();
+        for(int i=1; i<isize(ring); i++)
+          ss.faces.push_back({C0, ring[i-1], ring[i]});
+        if(f & cox_othercell) {
+          ring.pop_back();
+          ss.faces.push_back(ring);
+          }
+        else {
+          for(int i=1; i<isize(ring); i++)
+            ss.faces.push_back({fc2, ring[i-1], ring[i]});
+          }
+        }
+      }
+    }
+  
   EX void generate_special_subcubes(bool bch) {
     const int sub = subcube_count;
     if(1) {
@@ -510,6 +580,10 @@ EX namespace reg3 {
         generate_special_subcubes(true);
         break;
       
+      case eVariation::coxeter:
+        generate_coxeter(coxeter_param);
+        break;
+    
       case eVariation::pure: {
         cgi.subshapes.emplace_back();
         cgi.subshapes[0].faces = cgi.cellshape;

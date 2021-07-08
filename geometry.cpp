@@ -507,6 +507,10 @@ EX bool is_subcube_based(eVariation var) {
   return among(var, eVariation::subcubes, eVariation::dual_subcubes, eVariation::bch);
   }
 
+EX bool is_reg3_variation(eVariation var) {
+  return var == eVariation::coxeter;
+  }
+
 void geometry_information::prepare_basics() {
 
   DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("prepare_basics"));
