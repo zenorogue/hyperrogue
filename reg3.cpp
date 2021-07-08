@@ -281,36 +281,29 @@ EX namespace reg3 {
     generate_subcells();
     }
 
-  EX void generate_subcells() {
+  EX void generate_plain_subcubes() {
     auto& ssh = cgi.subshapes;
     const int sub = subcube_count;
-    if(variation == eVariation::subcubes) {
-      auto vx = abs(cgi.cellshape[0][0][0]);
-      auto vz = abs(cgi.cellshape[0][0][3]);
-      for(int x=1-sub; x<sub; x+=2)
-      for(int y=1-sub; y<sub; y+=2)
-      for(int z=1-sub; z<sub; z+=2) {
-        cgi.subshapes.emplace_back();
-        auto &ss = cgi.subshapes.back();
-        ss.faces = cgi.cellshape;
-        for(auto& face: ss.faces) for(auto& v: face) {
-          v[0] += vx * x;
-          v[1] += vx * y;
-          v[2] += vx * z;
-          v[3] += vz * (sub-1);
-          v = normalize(v);
-          }
-        ss.vertices_only = cgi.vertices_only;
-        for(auto& v: ss.vertices_only) {
-          v[0] += vx * x;
-          v[1] += vx * y;
-          v[2] += vx * z;
-          v[3] += vz * (sub-1);
-          }
+    auto vx = abs(cgi.cellshape[0][0][0]);
+    auto vz = abs(cgi.cellshape[0][0][3]);
+    for(int x=1-sub; x<sub; x+=2)
+    for(int y=1-sub; y<sub; y+=2)
+    for(int z=1-sub; z<sub; z+=2) {
+      ssh.emplace_back();
+      auto &ss = ssh.back();
+      ss.faces = cgi.cellshape;
+      for(auto& face: ss.faces) for(auto& v: face) {
+        v[0] += vx * x;
+        v[1] += vx * y;
+        v[2] += vx * z;
+        v[3] += vz * (sub-1);
         }
       }
-    else if(among(variation, eVariation::dual_subcubes, eVariation::bch)) {
-      bool bch = variation == eVariation::bch;
+    }
+  
+  EX void generate_special_subcubes(bool bch) {
+    const int sub = subcube_count;
+    if(1) {
       auto vx = abs(cgi.cellshape[0][0][0]);
       auto vz = abs(cgi.cellshape[0][0][3]);
       auto step = hdist0(tC0(cgi.adjmoves[0]));
@@ -498,16 +491,37 @@ EX namespace reg3 {
               add_face({V*pt(-1,-.5,0), V*pt(-1,0,-.5), V*pt(-.5,0,-1), V*pt(0,-.5,-1), V*pt(0,-1,-.5), V*pt(-.5,-1,0)});
             }
           }
-        make_vertices_only(ss.vertices_only, ss.faces);
         }
-      println(hlog, "subcells generated = ", isize(ssh));
       }
-    else {
-      cgi.subshapes.emplace_back();
-      cgi.subshapes[0].faces = cgi.cellshape;
-      cgi.subshapes[0].vertices_only = cgi.vertices_only;
+    }
+
+  EX void generate_subcells() {
+    
+    switch(variation) {
+      case eVariation::subcubes:
+        generate_plain_subcubes();
+        break;
+      
+      case eVariation::dual_subcubes:
+        generate_special_subcubes(false);
+        break;
+      
+      case eVariation::bch:
+        generate_special_subcubes(true);
+        break;
+      
+      case eVariation::pure: {
+        cgi.subshapes.emplace_back();
+        cgi.subshapes[0].faces = cgi.cellshape;
+        break;
+        }
+    
+      default:
+        throw hr_exception("unknown variation in generate_subcells");
       }
-    for(auto& ss: ssh) {
+
+    for(auto& ss: cgi.subshapes) {
+      make_vertices_only(ss.vertices_only, ss.faces);
       hyperpoint gres = Hypc;
       for(auto& face: ss.faces) {
         hyperpoint res = Hypc;
@@ -523,6 +537,8 @@ EX namespace reg3 {
       for(auto& face: ss.faces_local) for(auto& v: face) v = ss.from_cellcenter * v;
       for(auto& v: ss.vertices_only_local) v = ss.from_cellcenter * v;
       }
+
+    println(hlog, "subcells generated = ", isize(cgi.subshapes));
     }
 
   void binary_rebase(heptagon *h, const transmatrix& V) {
