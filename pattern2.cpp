@@ -371,6 +371,7 @@ EX int zebra40(cell *c) {
   else if(S3 == 4 && S7 == 6) {
     return 8 + ((c->master->zebraval / 10 + c->c.spin(0))%2) * 2;
     }
+  else if(reg3::in()) return 0;
   else {
     int ii[3], z;
     auto ar = gp::get_masters(c);
