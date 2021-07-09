@@ -1764,8 +1764,11 @@ struct raycast_map {
       m_map.resize(4 * mlength);
       for(int i=0; i<isize(ms); i++)
         for(int a=0; a<4; a++)
-        for(int b=0; b<4; b++)
-          m_map[i+a*mlength][b] = ms[i][a][b]/ray_scale + .5;
+        for(int b=0; b<4; b++) {
+          if(MDIM == 3 && (a==3 || b==3)) m_map[i+a*mlength][b] = .5;
+          else m_map[i+a*mlength][b] = ms[i][a][b]/ray_scale + .5;
+          }
+
       bind_array(m_map, o->tM, txM, 7, mlength);
       glUniform1f(o->uInvLengthM, 1. / mlength);
       }
