@@ -734,13 +734,11 @@ EX namespace reg3 {
           for(auto& w: cgi.vertices_only)
             if(buckets.count(bucketer(T*w)))
               found_va = true;
-          if(sphere) found_va = true;
           if(!found_va) continue;
           va.emplace_back(vertex_adjacency_info{allh[va[i].h_id]->move(d)->fieldval, T, va[i].move_sequence});
           va.back().move_sequence.push_back(d);
           }
         }
-      println(hlog, "vas found = ", isize(va));
       }
     
     map<int, int> by_sides;
@@ -794,19 +792,40 @@ EX namespace reg3 {
       for(int i=0; i<c->type; i++) {
         int found = 0;
         hyperpoint ctr = ss[id].face_centers[i];
-        for(auto& va: vertex_adjacencies[c->master->fieldval]) {
+        transmatrix T1 = Id;
+        int h_id = c->master->fieldval;
+        vector<int> path;        
+        while(true) {
+          int d = -1;
+          ld dist = hdist0(ctr);
+          for(int d1=0; d1<S7; d1++) {
+            auto ctr1 = iso_inverse(tmatrices[h_id][d1]) * ctr;
+            ld dist1 = hdist0(ctr1);
+            if(dist1 < dist - 1e-6) d = d1, dist = dist1;
+            }
+          if(d == -1) break;
+          path.push_back(d);
+          T1 = T1 * tmatrices[h_id][d];
+          ctr = iso_inverse(tmatrices[h_id][d]) * ctr;
+          h_id = allh[h_id]->move(d)->fieldval;
+          }
+        
+        for(auto& va: vertex_adjacencies[h_id]) {
           hyperpoint ctr1 = iso_inverse(va.T) * ctr;
           auto bucket = bucketer(ctr1);
           for(auto p: which_cell[va.h_id][bucket]) {
             cell *c1 = p.first;
             int j = p.second;
-            if(c == c1 && va.move_sequence.empty()) continue;
             int id1 = local_id[c1].second;
             if(hdist(ctr1, ss[id1].face_centers[j]) < 1e-6) {
+              transmatrix T2 = T1 * va.T;
+              if(id == id1 && eqmatrix(T2, Id)) continue;
               c->c.connect(i, c1, j, false);
-              if(!found) {
-                tmcell.push_back(ss[id].from_cellcenter * va.T * ss[id1].to_cellcenter);
-                move_sequences[local_id[c].first].push_back(va.move_sequence);
+              if(!found) {                
+                tmcell.push_back(ss[id].from_cellcenter * T2 * ss[id1].to_cellcenter);
+                auto& ms = move_sequences[local_id[c].first];
+                ms.push_back(path);
+                for(auto dir: va.move_sequence) ms.back().push_back(dir);
                 }
               foundtab_ids.emplace_back(va.h_id, id1, j);
               found++;
