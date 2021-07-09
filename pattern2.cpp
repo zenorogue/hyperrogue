@@ -1608,12 +1608,12 @@ EX namespace patterns {
 
     cell *sc = currentmap->gamestart();
     auto ac = currentmap->allcells();
-    vector<int> bydist(20, 0);
-    vector<int> bynei(S7+1, 0);
+    vector<int> bydist(100, 0);
+    vector<int> bynei(FULL_EDGE+1, 0);
     int maxd = 0;
     for(cell *d: ac) {
       int di = celldistance(sc, d);
-      bydist[di]++;
+      if(di<100) bydist[di]++;
       maxd = max(maxd, di);
       }
     
@@ -1649,12 +1649,12 @@ EX namespace patterns {
 
     cell *sc = currentmap->gamestart();
     auto ac = currentmap->allcells();
-    vector<int> bydist(20, 0);
-    vector<int> bynei(S7+1, 0);
+    vector<int> bydist(100, 0);
+    vector<int> bynei(FULL_EDGE+1, 0);
     int maxd = 0;
     for(cell *d: ac) {
       int di = celldistance(sc, d);
-      bydist[di]++;
+      if(di<100) bydist[di]++;
       maxd = max(maxd, di);
       }
     
@@ -1840,6 +1840,11 @@ EX namespace patterns {
         color_t r = hrand(0xFFFFFF + 1);
         if(hrand(100) < rwalls) r |= 0x1000000;
         if(c == cwt.at && rwalls <= 100) r &= 0xFFFFFF;
+        return r;
+        }
+      case 'I': {
+        color_t r = 0xFFD500;
+        if(c->type != (variation == eVariation::dual_subcubes ? 6 : 14)) r |= 0x1000000;
         return r;
         }
       case '^': {
