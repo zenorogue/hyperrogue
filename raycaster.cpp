@@ -157,6 +157,7 @@ struct raycaster : glhr::GLprogram {
   GLint uToOrig, uFromOrig;
   GLint uProjection;
   GLint uEyeShift, uAbsUnit;
+  GLint uMirrorShift;
   
   GLint tM, uInvLengthM;
   GLint tWall, uInvLengthWall;
@@ -198,6 +199,7 @@ raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     uLP = glGetUniformLocation(_program, "uLP");
     uReflectX = glGetUniformLocation(_program, "uReflectX");
     uReflectY = glGetUniformLocation(_program, "uReflectY");
+    uMirrorShift = glGetUniformLocation(_program, "uMirrorShift");
 
     uLinearSightRange = glGetUniformLocation(_program, "uLinearSightRange");
     uExpDecay = glGetUniformLocation(_program, "uExpDecay");
@@ -1408,11 +1410,14 @@ void enable_raycaster() {
         "    else tangent.z = -tangent.z;\n"
         "    continue;\n"
         "    }\n";
-      else fmain += 
+      else {
+        fmain += 
         "  if(reflect) {\n"
-        "    tangent = " + getM(its(deg)+"+which") + " * tangent;\n"
+        "    tangent = " + getM("uMirrorShift+walloffset+which") + " * tangent;\n"
         "    continue;\n"
         "    }\n";
+        fsh += "uniform int uMirrorShift;\n";
+        }
       }
     
     // next cell
@@ -1532,6 +1537,13 @@ transmatrix get_ms(cell *c, int a, bool mirror) {
 
 int nesting;
 
+transmatrix mirrorize(transmatrix T) {
+  T = inverse(T);
+  hyperpoint h = tC0(T);
+  ld d = hdist0(h);
+  return rspintox(h) * xpush(d/2) * MirrorX * xpush(-d/2) * spintox(h);
+  }
+
 struct raycast_map {
 
   int saved_frameid;
@@ -1541,7 +1553,7 @@ struct raycast_map {
 
   vector<transmatrix> ms;
 
-  int length, per_row, rows;
+  int length, per_row, rows, mirror_shift;
 
   vector<array<float, 4>> connections, wallcolor, texturemap, volumetric;
   
@@ -1555,7 +1567,7 @@ struct raycast_map {
     texturemap.resize(q);
     volumetric.resize(q);
     }
-  
+
   void generate_initial_ms(cell *cs) {
     auto sa = hybrid::gen_sample_list();
     
@@ -1575,21 +1587,23 @@ struct raycast_map {
     
     // println(hlog, ms);
     
+    mirror_shift = isize(ms);
+    
     if(!sol && !nil && (reflect_val || reg3::ultra_mirror_in())) {
-      if(BITRUNCATED) exit(1);
-      for(int j=0; j<cs->type; j++) {
-        transmatrix T = inverse(ms[j]);
-        hyperpoint h = tC0(T);
-        ld d = hdist0(h);
-        transmatrix U = rspintox(h) * xpush(d/2) * MirrorX * xpush(-d/2) * spintox(h);
-        ms.push_back(U);
-        }
+    
+      ms.resize(mirror_shift * 2);
       
-      if(WDIM == 2) 
-        for(int a: {0, 1}) {
-          ms.push_back(get_ms(cs, a, true));
+      for(auto& p: sa) {
+        int id = p.first;
+        cell *c = p.second;
+        if(!c) continue;
+        for(int j=0; j<c->type; j++)
+          ms[mirror_shift+id+j] = mirrorize(ms[id+j]);
+        if(WDIM == 2) for(int a: {0, 1}) {
+          ms[mirror_shift+id+c->type+a] = get_ms(c, a, true);
           }
-      
+        }      
+
       if(reg3::ultra_mirror_in()) {
         for(auto v: cgi.ultra_mirrors) 
           ms.push_back(v);
@@ -1765,6 +1779,10 @@ struct raycast_map {
     bind_array(connections, o->tConnections, txConnections, 3, length);
     bind_array(texturemap, o->tTextureMap, txTextureMap, 5, length);
     if(volumetric::on) bind_array(volumetric, o->tVolumetric, txVolumetric, 6, length);
+
+    if(o->uMirrorShift != -1) {
+      glUniform1i(o->uMirrorShift, mirror_shift);
+      }
     }
   
   void create_all(cell *cs) {
