@@ -52,7 +52,7 @@ EX transmatrix relative_matrix_recursive(heptagon *h2, heptagon *h1) {
   return gm * where;
   }
 
-EX transmatrix master_relative(cell *c, bool get_inverse IS(false)) {
+transmatrix hrmap_standard::master_relative(cell *c, bool get_inverse) {
   if(0) ;
   #if CAP_IRR  
   else if(IRREGULAR) {
@@ -109,16 +109,19 @@ transmatrix hrmap_standard::adj(heptagon *h, int d) {
   return T;
   }
 
-transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
-
+EX transmatrix relative_matrix_via_masters(cell *c2, cell *c1, const hyperpoint& hint) {
   heptagon *h1 = c1->master;
-  transmatrix gm = master_relative(c1, true);
+  transmatrix gm = currentmap->master_relative(c1, true);
   heptagon *h2 = c2->master;
-  transmatrix where = master_relative(c2);
+  transmatrix where = currentmap->master_relative(c2);
   
-  transmatrix U = relative_matrix(h2, h1, hint);
+  transmatrix U = currentmap->relative_matrix(h2, h1, hint);
   
   return gm * U * where;
+  }
+
+transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
+  return relative_matrix_via_masters(c2, c1, hint);
   }
 
 transmatrix hrmap_standard::relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) {

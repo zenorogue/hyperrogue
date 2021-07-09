@@ -66,7 +66,7 @@ struct hrmap {
   virtual int shvid(cell *c) { return 0; }
   virtual int full_shvid(cell *c) { return shvid(c); }
   virtual hyperpoint get_corner(cell *c, int cid, ld cf=3) { return C0; }
-
+  virtual transmatrix master_relative(cell *c, bool get_inverse = false) { return Id; }
   virtual int wall_offset(cell *c);
   };
 
@@ -87,6 +87,7 @@ struct hrmap_standard : hrmap {
   void find_cell_connection(cell *c, int d) override;
   virtual int shvid(cell *c) override;
   virtual hyperpoint get_corner(cell *c, int cid, ld cf) override;
+  virtual transmatrix master_relative(cell *c, bool get_inverse) override;
   };
 
 void clearfrom(heptagon*);

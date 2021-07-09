@@ -657,6 +657,12 @@ EX namespace reg3 {
       int id = local_id[c].second;
       return cgi.subshapes[id].vertices_only_local;
       }
+
+    transmatrix master_relative(cell *c, bool get_inverse) {
+      int id = local_id[c].second;
+      auto& ss = cgi.subshapes[id];
+      return get_inverse ? ss.from_cellcenter : ss.to_cellcenter;
+      }
     
     void make_subconnections();
     
