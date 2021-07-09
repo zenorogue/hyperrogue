@@ -288,6 +288,7 @@ EX namespace reg3 {
     }
 
   EX void generate_plain_subcubes() {
+    if(S7 != 6) throw hr_exception("generate_plain_subcubes but no cubes");
     auto& ssh = cgi.subshapes;
     const int sub = subcube_count;
     auto vx = abs(cgi.cellshape[0][0][0]);
@@ -372,6 +373,7 @@ EX namespace reg3 {
     }
   
   EX void generate_special_subcubes(bool bch) {
+    if(S7 != 6) throw hr_exception("generate_plain_subcubes but no cubes");
     const int sub = subcube_count;
     if(1) {
       auto vx = abs(cgi.cellshape[0][0][0]);
