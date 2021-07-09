@@ -712,6 +712,10 @@ EX namespace reg3 {
     for(int a=0; a<isize(allh); a++) {
       auto& va = vas[a];
       va.emplace_back(vertex_adjacency_info{a, Id, {}});
+      
+      set<unsigned> buckets;
+      for(auto& v: cgi.vertices_only) buckets.insert(bucketer(v));
+
       if(cgflags & qIDEAL) {
         for(int d=0; d<S7; d++) {
           transmatrix T = adj(allh[a], d);
@@ -727,8 +731,8 @@ EX namespace reg3 {
           if(found) continue;
 
           bool found_va = false;
-          for(auto& v: cgi.vertices_only) for(auto& w: cgi.vertices_only)
-            if(hdist(normalize(v), normalize(T*w)) < 1e-3)
+          for(auto& w: cgi.vertices_only)
+            if(buckets.count(bucketer(T*w)))
               found_va = true;
           if(sphere) found_va = true;
           if(!found_va) continue;
