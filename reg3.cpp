@@ -646,7 +646,7 @@ EX namespace reg3 {
     vector<vector<vector<int>>> move_sequences;
 
     transmatrix adj(heptagon *h, int d) override { return tmatrices[h->fieldval][d]; }
-    transmatrix adj(cell *c, int d) override { return tmatrices_cell[local_id[c].first][d]; }
+    transmatrix adj(cell *c, int d) override { return tmatrices_cell[local_id.at(c).first][d]; }
 
     heptagon *getOrigin() override { return allh[0]; }
 
@@ -657,12 +657,12 @@ EX namespace reg3 {
 
     vector<hyperpoint> get_vertices(cell* c) override { 
       if(PURE) return cgi.vertices_only; 
-      int id = local_id[c].second;
+      int id = local_id.at(c).second;
       return cgi.subshapes[id].vertices_only_local;
       }
 
     transmatrix master_relative(cell *c, bool get_inverse) {
-      int id = local_id[c].second;
+      int id = local_id.at(c).second;
       auto& ss = cgi.subshapes[id];
       return get_inverse ? ss.from_cellcenter : ss.to_cellcenter;
       }
@@ -670,7 +670,7 @@ EX namespace reg3 {
     void make_subconnections();
     
     int wall_offset(cell *c) override;
-    int shvid(cell *c) { return local_id[c].second; }
+    int shvid(cell *c) { return local_id.at(c).second; }
     };
 
   struct hrmap_quotient3 : hrmap_closed3 { };
@@ -1825,31 +1825,32 @@ EX namespace reg3 {
     
     transmatrix master_relative(cell *c, bool get_inverse) {
       if(PURE) return Id;
-      int aid = cell_id[c];
+      int aid = cell_id.at(c);
       return quotient_map->master_relative(quotient_map->acells[aid], get_inverse);
       }
 
     int shvid(cell *c) {
       if(PURE) return 0;
-      int aid = cell_id[c];
+      if(!cell_id.count(c)) return quotient_map->shvid(c);
+      int aid = cell_id.at(c);
       return quotient_map->shvid(quotient_map->acells[aid]);
       }    
 
     int wall_offset(cell *c) override {
       if(PURE) return 0;
-      int aid = cell_id[c];
+      int aid = cell_id.at(c);
       return quotient_map->wall_offset(quotient_map->acells[aid]);
       }
 
     transmatrix adj(cell *c, int d) override {
       if(PURE) return adj(c->master, d);
-      int aid = cell_id[c];
+      int aid = cell_id.at(c);
       return quotient_map->tmatrices_cell[aid][d];
       }     
     
     vector<hyperpoint> get_vertices(cell* c) override {
       if(PURE) return cgi.vertices_only;
-      int aid = cell_id[c];
+      int aid = cell_id.at(c);
       return quotient_map->get_vertices(quotient_map->acells[aid]);
       }
     
@@ -1873,7 +1874,7 @@ EX namespace reg3 {
         c->c.connect(d, h->c7, c->master->c.spin(d), false);
         return;
         }
-      int id = cell_id[c];
+      int id = cell_id.at(c);
       heptagon *h = c->master;
       for(int dir: quotient_map->move_sequences[id][d])
         h = h->cmove(dir);
