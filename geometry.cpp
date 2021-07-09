@@ -1089,6 +1089,7 @@ EX string cgi_string() {
   if(GOLDBERG_INV) V("GP", its(gp::param.first) + "," + its(gp::param.second));
   if(IRREGULAR) V("IRR", its(irr::irrid));
   if(is_subcube_based(variation)) V("SC", its(reg3::subcube_count));
+  if(variation == eVariation::coxeter) V("COX", its(reg3::coxeter_param));
 
   #if CAP_ARCM
   if(arcm::in()) V("ARCM", arcm::current.symbol);
