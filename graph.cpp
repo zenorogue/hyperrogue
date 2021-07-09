@@ -3966,6 +3966,8 @@ EX void gridline(const shiftmatrix& V, const hyperpoint h1, const hyperpoint h2,
 int hrmap::wall_offset(cell *c) {
   int id = currentmap->full_shvid(c);
 
+  if(WDIM == 3 && !hybri && !reg3::in()) return 0;
+
   if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, {-1, nullptr});
   auto &wop = cgi.walloffsets[id];
   int &wo = wop.first;
