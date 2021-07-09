@@ -659,22 +659,23 @@ EX namespace reg3 {
       }
     
     void make_subconnections();
+    
+    int wall_offset(cell *c) override;
+    int shvid(cell *c) { return local_id[c].second; }
     };
 
   struct hrmap_quotient3 : hrmap_closed3 { };
   #endif
   
-  EX int get_wall_offset(cell *c) {
-    auto m = (hrmap_closed3*) currentmap;
-    auto& wo = cgi.walloffsets[ m->local_id[c].second ];
+  int hrmap_closed3::wall_offset(cell *c) {
+    auto& wo = cgi.walloffsets[ local_id[c].second ];
     if(wo.second == nullptr)
       wo.second = c;
     return wo.first;
     }
 
   EX const vector<hyperpoint>& get_face_vertices(cell *c, int d) {
-    auto m = (hrmap_closed3*) currentmap;
-    return cgi.subshapes[m->local_id[c].second].faces_local[d];
+    return cgi.subshapes[currentmap->shvid(c)].faces_local[d];
     }
 
   EX int get_face_vertex_count(cell *c, int d) {

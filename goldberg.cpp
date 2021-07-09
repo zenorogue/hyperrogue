@@ -1283,6 +1283,11 @@ EX namespace gp {
       return gp::get_plainshape_id(c);
       }   
 
+    int full_shvid(cell *c) override {
+      gp::draw_li = gp::get_local_info(c);
+      return shvid(c);
+      }
+
     hyperpoint get_corner(cell *c, int cid, ld cf) override {
       if(UNTRUNCATED) {
         cell *c1 = gp::get_mapped(c);

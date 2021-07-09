@@ -312,7 +312,7 @@ void enable_raycaster() {
       return "uWallstart[" + s + "]";
     };
   
-  wall_offset(centerover); /* so raywall is not empty and deg is not zero */
+  currentmap->wall_offset(centerover); /* so raywall is not empty and deg is not zero */
 
   deg = 0;
 
@@ -1691,7 +1691,7 @@ struct raycast_map {
           }
         }
       
-      int wo = wall_offset(c);
+      int wo = currentmap->wall_offset(c);
       if(wo >= irays) {
         println(hlog, "wo=", wo, " irays = ", irays);
         reset_raycaster();
@@ -1706,11 +1706,12 @@ struct raycast_map {
         connections[u][2] = (k+.5) / 1024.;
         break;
         }
-      if(wall_offset(c1) >= max_wall_offset)
-        println(hlog, "error: wall_offset exceeds ", max_wall_offset);
+      auto wo1 = currentmap->wall_offset(c1);
+      if(wo1 >= max_wall_offset)
+        println(hlog, "error: wall_offset ", wo1, " exceeds ", max_wall_offset);
       if(c1->type >= max_celltype)
         println(hlog, "error: type " + its(c1->type) + " exceeds ", max_celltype);
-      connections[u][3] = (wall_offset(c1) * 1. / max_wall_offset) + (c1->type + (WDIM == 2 ? 2 : 0) + .5) * 1. / max_wall_offset / max_celltype;
+      connections[u][3] = (wo1 * 1. / max_wall_offset) + (c1->type + (WDIM == 2 ? 2 : 0) + .5) * 1. / max_wall_offset / max_celltype;
       }
     if(WDIM == 2) for(int a: {0, 1}) {
       celldrawer dd;
@@ -1907,7 +1908,7 @@ EX void cast() {
     }
   
   if(o->uWallOffset != -1) {
-    glUniform1i(o->uWallOffset, wall_offset(cs));
+    glUniform1i(o->uWallOffset, currentmap->wall_offset(cs));
     glUniform1i(o->uSides, cs->type + (WDIM == 2 ? 2 : 0));
     }
 

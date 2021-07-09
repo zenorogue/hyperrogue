@@ -857,7 +857,7 @@ void celldrawer::draw_grid() {
   if(0);
   #if MAXMDIM == 4
   else if(WDIM == 3) {
-    int ofs = wall_offset(c);
+    int ofs = currentmap->wall_offset(c);
     for(int t=0; t<c->type; t++) {
       if(!c->move(t)) continue;
       if(bt::in() && !sn::in() && !among(t, 5, 6, 8)) continue;
@@ -1666,7 +1666,7 @@ void celldrawer::draw_features() {
 void celldrawer::draw_features_and_walls_3d() {
 #if MAXMDIM >= 4
   color_t dummy;
-  int ofs = wall_offset(c);
+  int ofs = currentmap->wall_offset(c);
   if(isWall3(c, wcol)) {
     if(!no_wall_rendering) {
     color_t wcol2 = wcol;

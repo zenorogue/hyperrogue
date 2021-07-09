@@ -2698,7 +2698,7 @@ EX namespace linepatterns {
           if(S3 >= OINF)
             gridlinef(V, C0, V, mid(C0, tC0(currentmap->adj(c, dir))), col, 2 + vid.linequality);
           else 
-             gridlinef(V, C0, V * master_relative(c, true) * currentmap->adj(c->master, dir), C0, col, 2 + vid.linequality);
+             gridlinef(V, C0, V * currentmap->master_relative(c, true) * currentmap->adj(c->master, dir), C0, col, 2 + vid.linequality);
            }
          }
       )
@@ -2716,7 +2716,7 @@ EX namespace linepatterns {
                 gridlinef(V, C0, V, mid(C0, tC0(inverse_shift(V, gmatrix[c2]))), col, 2 + vid.linequality);
                 }
               else 
-                gridlinef(V, C0, V*master_relative(c, true) * currentmap->adj(c->master,i), C0, col, 2 + vid.linequality);
+                gridlinef(V, C0, V*currentmap->master_relative(c, true) * currentmap->adj(c->master,i), C0, col, 2 + vid.linequality);
               }
             }
         }
@@ -2777,7 +2777,7 @@ EX namespace linepatterns {
   linepattern patIrregularMaster("irregular master", 0x8438A400, [] { return IRREGULAR; }, 
     ALLCELLS(
       if(c->master->c7 != c) if(gmatrix.count(c->master->c7))
-        gridlinef(V, C0, V*master_relative(c, true), C0, 
+        gridlinef(V, C0, V*currentmap->master_relative(c, true), C0, 
           darkena(backcolor ^ 0xFFFFFF, 0, col),
           2 + vid.linequality);
       )

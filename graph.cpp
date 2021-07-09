@@ -3963,14 +3963,64 @@ EX void gridline(const shiftmatrix& V, const hyperpoint h1, const hyperpoint h2,
   gridline(V, h1, V, h2, col, prec);
   }
 
-EX int wall_offset(cell *c) {
-  if(hybri || WDIM == 2) return hybrid::wall_offset(c);
-  #if CAP_BT
-  if(kite::in() && kite::getshape(c->master) == kite::pKite) return 10;
-  #endif
-  if(reg3::in() && !PURE)
-    return reg3::get_wall_offset(c);
-  return 0;
+int hrmap::wall_offset(cell *c) {
+  int id = currentmap->full_shvid(c);
+
+  if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, {-1, nullptr});
+  auto &wop = cgi.walloffsets[id];
+  int &wo = wop.first;
+  if(!wop.second) wop.second = c;
+  if(wo == -1) {
+    cell *c1 = hybri ? hybrid::get_where(c).first : c;
+    wo = isize(cgi.shWall3D);
+    int won = wo + c->type + (WDIM == 2 ? 2 : 0);
+    if(!cgi.wallstart.empty()) cgi.wallstart.pop_back();
+    cgi.reserve_wall3d(won);
+    
+    if(prod || WDIM == 2) for(int i=0; i<c1->type; i++) {
+      hyperpoint w;
+      auto f = [&] { 
+        /* mirror image of C0 in the axis h1-h2 */
+        hyperpoint h1 = get_corner_position(c1, i);
+        hyperpoint h2 = get_corner_position(c1, i+1);
+        transmatrix T = gpushxto0(h1);
+        T = spintox(T * h2) * T;
+        w = T * C0;
+        w[1] = -w[1];
+        w = iso_inverse(T) * w;
+        };
+      if(prod) PIU(f());
+      else f();
+      cgi.walltester[wo + i] = w;
+      } 
+
+    for(int i=0; i<c1->type; i++)
+     cgi.make_wall(wo + i, {hybrid::get_corner(c1, i, 0, -1), hybrid::get_corner(c1, i, 0, +1), hybrid::get_corner(c1, i, 1, +1), hybrid::get_corner(c1, i, 1, -1)});
+
+    for(int a: {0,1}) {
+      vector<hyperpoint> l;
+      int z = a ? 1 : -1;
+      hyperpoint ctr = zpush0(z * cgi.plevel/2);
+      for(int i=0; i<c1->type; i++)
+        if(prod || WDIM == 2)
+          l.push_back(hybrid::get_corner(c1, i, 0, z));
+        else {
+          l.push_back(ctr);
+          l.push_back(hybrid::get_corner(c1, i, 0, z));
+          l.push_back(hybrid::get_corner(c1, i+1, 1, z));
+          l.push_back(ctr);
+          l.push_back(hybrid::get_corner(c1, i, 1, z));
+          l.push_back(hybrid::get_corner(c1, i, 0, z));
+          }
+      if(a == 0) std::reverse(l.begin()+1, l.end());
+      cgi.make_wall(won-2+a, l);
+      }
+
+    cgi.wallstart.push_back(isize(cgi.raywall));
+    cgi.compute_cornerbonus();
+    cgi.extra_vertices();
+    }
+  return wo;
   }
 
 EX void queue_transparent_wall(const shiftmatrix& V, hpcshape& sh, color_t color) {
@@ -4253,8 +4303,7 @@ void celldrawer::draw_fallanims() {
 EX void queuecircleat1(cell *c, const shiftmatrix& V, double rad, color_t col) {
   if(WDIM == 3) {
     dynamicval<color_t> p(poly_outline, col);
-    // we must do hybrid::wall_offset in hybrid because the cached value is likely incorrect
-    int ofs = hybri ? hybrid::wall_offset(c) : wall_offset(c);
+    int ofs = currentmap->wall_offset(c);
     for(int i=0; i<c->type; i++) {
       queuepolyat(V, cgi.shWireframe3D[ofs + i], 0, PPR::SUPERLINE);
       }

@@ -173,7 +173,7 @@ EX namespace models {
       spiral_multiplier = cld(cos_spiral, sin_spiral) * cld(spiral_cone_rad * mul / 2., 0);
       }
     if(euclid) {
-      euclidean_spin = pispin * iso_inverse(cview().T * master_relative(centerover, true));
+      euclidean_spin = pispin * iso_inverse(cview().T * currentmap->master_relative(centerover, true));
       euclidean_spin = gpushxto0(euclidean_spin * C0) * euclidean_spin;
       hyperpoint h = inverse(euclidean_spin) * (C0 + (euc::eumove(gp::loc{1,0})*C0 - C0) * vpconf.spiral_x + (euc::eumove(gp::loc{0,1})*C0 - C0) * vpconf.spiral_y);
       spiral_multiplier = cld(0, 2 * M_PI) / cld(h[0], h[1]);

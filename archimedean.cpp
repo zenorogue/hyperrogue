@@ -774,6 +774,10 @@ struct hrmap_archimedean : hrmap {
     return id;    
     }  
 
+  int full_shvid(cell *c) override {
+    return id_of(c->master) + 20 * parent_index_of(c->master);
+    }
+
   hyperpoint get_corner(cell *c, int cid, ld cf) override {
     auto &ac = arcm::current_or_fake();
     if(PURE) {
