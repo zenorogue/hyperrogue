@@ -105,6 +105,7 @@ Orb("Shielding", "Щита")
 Orb("Teleport", "Телепорта")
 Orb("Safety", "Безопасности")
 Orb("Thorns", "Шипов")
+Orb("Choice", "Выбора")
 
 // TERRAIN FEATURES
 // ================
@@ -7269,5 +7270,14 @@ S("recently changed settings", "недавно изменённые настро
 S("quick projection", "быстрая проекция")
 S("highlight stuff", "подсветить вещи")
 S("Hint: these keys usually work during the game", "Подсказка: можно использовать эти клавиши во время игры")
+
+// Brown Island
+N("Brown Island", GEN_O, "Коричневый остров", "Коричневые острова", "Коричневый остров", "в Коричневом острове")
+N("Bronze Beast", GEN_M, "Бронзовый зверь", "Бронзовые звери", "Бронзового зверя", "Бронзовым зверем")
+N("Acid Gull", GEN_F, "Кислотная чайка", "Кислотные чайки", "Кислотную чайку", "Кислотной чайкой")
+S("Where did this strange bird come from?...\n\nAcid Gulls dissolve the land on which they fall when they die. ",
+  "Откуда эта странная птица?...\n\nКислотные чайки растворяют землю, на которую они падают при гибели.")
+N("Tiger's Eye", GEN_N, "Тигровый глаз", "Тигровые глаза", "Тигровый глаз", "Тигровым глазом")
+S("A brown gem.", "Коричневый камень.")
 
 // Note: the translation should be complete until the marked line
