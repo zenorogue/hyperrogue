@@ -2286,6 +2286,76 @@ EX void construct_relations() {
     }  
   }
 
+eVariation target_variation;
+flagtype target_coxeter;
+int target_subcube_count;
+
+EX void edit_variation() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);  
+  dialog::init(XLAT("variations"));
+
+  dialog::addBoolItem(XLAT("pure"), target_variation == eVariation::pure, 'p');
+  dialog::add_action([] { target_variation = eVariation::pure; });
+
+  dialog::addBoolItem(XLAT("symmetric subdivision"), target_variation == eVariation::coxeter, 't');
+  dialog::add_action([] { target_variation = eVariation::coxeter; });
+
+  if(S7 == 6) {
+    dialog::addBoolItem(XLAT("sub-cubes"), target_variation == eVariation::subcubes, 'c');
+    dialog::add_action([] { target_variation = eVariation::subcubes; });
+
+    if(!(cgflags & qIDEAL)) {
+      dialog::addBoolItem(XLAT("dual sub-cubes"), target_variation == eVariation::dual_subcubes, 'd');
+      dialog::add_action([] { target_variation = eVariation::dual_subcubes; });
+
+      dialog::addBoolItem(XLAT("bitruncated sub-cubes"), target_variation == eVariation::bch, 'b');
+      dialog::add_action([] { target_variation = eVariation::bch; });
+      }
+    }
+  
+  else 
+    dialog::addInfo(XLAT("note: more choices in cubic honeycombs"));
+  
+  if(is_subcube_based(target_variation)) {
+    dialog::addBreak(100);
+    dialog::addSelItem(XLAT("subdivision"), its(target_subcube_count), 'z');
+    dialog::add_action([] {
+      dialog::editNumber(target_subcube_count, 1, 8, 1, 2, XLAT("subdivision"), "");
+      dialog::bound_low(1);
+      });
+    }
+  
+  if(target_variation == eVariation::coxeter) {
+    dialog::addBreak(100);
+    dialog::addBoolItem(XLAT("split by original faces"), target_coxeter & cox_othercell, 'f');
+    dialog::add_action([] { target_coxeter ^= cox_othercell; });
+    dialog::addBoolItem(XLAT("split by vertex axes"), target_coxeter & cox_vertices, 'v');
+    dialog::add_action([] { target_coxeter ^= cox_vertices; });
+    dialog::addBoolItem(XLAT("split by midedges"), target_coxeter & cox_midedges, 'm');
+    dialog::add_action([] { target_coxeter ^= cox_midedges; });
+    }
+    
+  dialog::addBreak(100);
+  dialog::addItem(XLAT("activate"), 'x');
+  dialog::add_action([] {
+    stop_game();
+    set_variation(target_variation);
+    subcube_count = target_subcube_count;
+    coxeter_param = target_coxeter;
+    start_game();
+    });
+  dialog::addBack();
+  dialog::display();
+  }
+
+EX void configure_variation() {
+  target_variation = variation;
+  target_subcube_count = subcube_count;
+  target_coxeter = coxeter_param;
+  pushScreen(edit_variation);
+  }
+
 EX }
 #endif
 

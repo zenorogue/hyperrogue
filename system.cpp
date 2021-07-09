@@ -1387,7 +1387,9 @@ EX void set_variation(eVariation target) {
       variation = target;
       return;
       }
-    if(bt::in() || sol || kite::in() || WDIM == 3) if(!prod) geometry = gNormal;
+    if(target != eVariation::pure) {
+      if(bt::in() || sol || kite::in() || WDIM == 3) if(!prod) geometry = gNormal;
+      }
     auto& cd = ginf[gCrystal];
     if(target == eVariation::bitruncated && cryst && cd.sides == 8 && cd.vertex == 4) {
       cd.vertex = 3;

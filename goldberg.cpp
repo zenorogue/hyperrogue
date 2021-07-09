@@ -1079,7 +1079,13 @@ EX namespace gp {
     else if(GOLDBERG && param == loc(3, 0) && S3 == 3)
       return XLAT("2x bitruncated");
     else if(variation == eVariation::subcubes)
-      return XLAT("subcube") + "(" + its(reg3::subcube_count) + ")";
+      return XLAT("subcubed") + "(" + its(reg3::subcube_count) + ")";
+    else if(variation == eVariation::dual_subcubes)
+      return XLAT("dual-subcubed") + "(" + its(reg3::subcube_count) + ")";
+    else if(variation == eVariation::bch)
+      return XLAT("bitruncated-subcubed") + "(" + its(reg3::subcube_count) + ")";
+    else if(variation == eVariation::coxeter)
+      return XLAT("subdivided") + "(" + its(reg3::coxeter_param) + ")";
     else {
       auto p = human_representation(param);
       string s = "GP(" + its(p.first) + "," + its(p.second) + ")";
