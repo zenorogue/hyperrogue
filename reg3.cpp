@@ -640,9 +640,10 @@ EX namespace reg3 {
     vector<vector<transmatrix>> tmatrices;    
     vector<vector<transmatrix>> tmatrices_cell;
     vector<cell*> acells;
-    map<cell*, pair<int, int> > local_id;
+    map<cell*, pair<int, int> > local_id; /* acells index, subshape index */
     vector<vector<cell*>> acells_by_master;
     vector<vector<vertex_adjacency_info> > vertex_adjacencies;
+    vector<vector<vector<int>>> move_sequences;
 
     transmatrix adj(heptagon *h, int d) override { return tmatrices[h->fieldval][d]; }
     transmatrix adj(cell *c, int d) override { return tmatrices_cell[local_id[c].first][d]; }
@@ -676,6 +677,7 @@ EX namespace reg3 {
   #endif
   
   int hrmap_closed3::wall_offset(cell *c) {
+    if(PURE) return 0;
     auto& wo = cgi.walloffsets[ local_id[c].second ];
     if(wo.second == nullptr)
       wo.second = c;
@@ -768,6 +770,7 @@ EX namespace reg3 {
     println(hlog, "found ", isize(acells), " cells, ", by_sides);
 
     tmatrices_cell.resize(isize(acells));
+    move_sequences.resize(isize(acells));
     int failures = 0;
     
     vector<map<unsigned, vector<pair<cell*, int> > > > which_cell;
@@ -797,7 +800,10 @@ EX namespace reg3 {
             int id1 = local_id[c1].second;
             if(hdist(ctr1, ss[id1].face_centers[j]) < 1e-6) {
               c->c.connect(i, c1, j, false);
-              if(!found) tmcell.push_back(ss[id].from_cellcenter * va.T * ss[id1].to_cellcenter);
+              if(!found) {
+                tmcell.push_back(ss[id].from_cellcenter * va.T * ss[id1].to_cellcenter);
+                move_sequences[local_id[c].first].push_back(va.move_sequence);
+                }
               foundtab_ids.emplace_back(va.h_id, id1, j);
               found++;
               }
@@ -1607,7 +1613,7 @@ EX namespace reg3 {
       heptagon& h = *origin;
       h.s = hsOrigin;
       h.fiftyval = root[0];
-      h.c7 = newCell(S7, origin);
+      if(PURE) h.c7 = newCell(S7, origin);
       
       int opos = 0;
       for(int c: children) {
@@ -1643,6 +1649,8 @@ EX namespace reg3 {
       h.emeraldval = 0;
       
       find_mappings();
+      
+      if(!PURE) get_cell_at(origin, 0);
       }
     
     heptagon *getOrigin() override {
@@ -1733,7 +1741,7 @@ EX namespace reg3 {
         
       if(id1 != -1) {
         res = init_heptagon(S7);
-        if(parent->c7)
+        if(PURE && parent->c7)
           res->c7 = newCell(S7, res);
         res->fieldval = fv;
         res->distance = parent->distance + 1;
@@ -1787,8 +1795,68 @@ EX namespace reg3 {
       return relative_matrix_recursive(h2, h1);
       }
     
+    transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override {
+      if(PURE) return relative_matrix(c2->master, c1->master, hint);
+      return relative_matrix_via_masters(c2, c1, hint);
+      }
+    
+    transmatrix master_relative(cell *c, bool get_inverse) {
+      if(PURE) return Id;
+      int aid = cell_id[c];
+      return quotient_map->master_relative(quotient_map->acells[aid], get_inverse);
+      }
+
+    int shvid(cell *c) {
+      if(PURE) return 0;
+      int aid = cell_id[c];
+      return quotient_map->shvid(quotient_map->acells[aid]);
+      }    
+
+    int wall_offset(cell *c) override {
+      if(PURE) return 0;
+      int aid = cell_id[c];
+      return quotient_map->wall_offset(quotient_map->acells[aid]);
+      }
+
+    transmatrix adj(cell *c, int d) override {
+      if(PURE) return adj(c->master, d);
+      int aid = cell_id[c];
+      return quotient_map->tmatrices_cell[aid][d];
+      }     
+    
     vector<hyperpoint> get_vertices(cell* c) override {
-      return cgi.vertices_only;
+      if(PURE) return cgi.vertices_only;
+      int aid = cell_id[c];
+      return quotient_map->get_vertices(quotient_map->acells[aid]);
+      }
+    
+    map<cell*, int> cell_id;
+    map<pair<heptagon*, int>, cell*> cell_at;
+    
+    cell *get_cell_at(heptagon *h, int acell_id) {
+      pair<heptagon*, int> p(h, acell_id);
+      auto& ca = cell_at[p];
+      if(!ca) {
+        ca = newCell(quotient_map->acells[acell_id]->type, h);
+        cell_id[ca] = acell_id;
+        if(!h->c7) h->c7 = ca;
+        }
+      return ca;
+      }
+    
+    void find_cell_connection(cell *c, int d) override {
+      if(PURE) {
+        auto h = c->master->cmove(d);
+        c->c.connect(d, h->c7, c->master->c.spin(d), false);
+        return;
+        }
+      int id = cell_id[c];
+      heptagon *h = c->master;
+      for(int dir: quotient_map->move_sequences[id][d])
+        h = h->cmove(dir);
+      auto ac = quotient_map->acells[id];
+      cell *c1 = get_cell_at(h, quotient_map->local_id[ac->move(d)].first);
+      c->c.connect(d, c1, ac->c.spin(d), false);
       }
     };
 
@@ -1927,7 +1995,7 @@ EX int celldistance(cell *c1, cell *c2) {
   if(c1 == currentmap->gamestart()) return c2->master->distance;
   if(c2 == currentmap->gamestart()) return c1->master->distance;
   
-  if(geometry == gSpace534) return celldistance_534(c1, c2);
+  if(geometry == gSpace534 && PURE) return celldistance_534(c1, c2);
 
   auto r = hypmap();
 
