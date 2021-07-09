@@ -68,6 +68,13 @@ struct hrmap {
   virtual hyperpoint get_corner(cell *c, int cid, ld cf=3) { return C0; }
   virtual transmatrix master_relative(cell *c, bool get_inverse = false) { return Id; }
   virtual int wall_offset(cell *c);
+
+  virtual transmatrix ray_iadj(cell *c, int i) {
+    if(WDIM == 2) {
+      return to_other_side(get_corner(c, i), get_corner(c, (i+1)));
+      }
+    return currentmap->iadj(c, i);
+    }
   };
 
 /** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient  

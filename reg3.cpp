@@ -671,14 +671,25 @@ EX namespace reg3 {
     
     int wall_offset(cell *c) override;
     int shvid(cell *c) { return local_id.at(c).second; }
+    
+    virtual transmatrix ray_iadj(cell *c, int i) override;
     };
 
   struct hrmap_quotient3 : hrmap_closed3 { };
   #endif
+
+  transmatrix hrmap_closed3::ray_iadj(cell *c, int i) {
+    if(PURE) return iadj(c, i);
+    auto& v = get_face_vertices(c, i); 
+    hyperpoint h = 
+      project_on_triangle(v[0], v[1], v[2]);
+    transmatrix T = rspintox(h);
+    return T * xpush(-2*hdist0(h)) * spintox(h);
+    }
   
   int hrmap_closed3::wall_offset(cell *c) {
     if(PURE) return 0;
-    auto& wo = cgi.walloffsets[ local_id[c].second ];
+    auto& wo = cgi.walloffsets[ local_id.at(c).second ];
     if(wo.second == nullptr)
       wo.second = c;
     return wo.first;
@@ -1838,12 +1849,14 @@ EX namespace reg3 {
 
     int wall_offset(cell *c) override {
       if(PURE) return 0;
+      if(!cell_id.count(c)) return quotient_map->wall_offset(c); /* necessary because ray samples are from quotient_map */
       int aid = cell_id.at(c);
       return quotient_map->wall_offset(quotient_map->acells[aid]);
       }
 
     transmatrix adj(cell *c, int d) override {
       if(PURE) return adj(c->master, d);
+      if(!cell_id.count(c)) return quotient_map->adj(c, d); /* necessary because ray samples are from quotient_map */
       int aid = cell_id.at(c);
       return quotient_map->tmatrices_cell[aid][d];
       }     
@@ -1881,6 +1894,13 @@ EX namespace reg3 {
       auto ac = quotient_map->acells[id];
       cell *c1 = get_cell_at(h, quotient_map->local_id[ac->move(d)].first);
       c->c.connect(d, c1, ac->c.spin(d), false);
+      }
+
+    virtual transmatrix ray_iadj(cell *c, int i) {
+      if(PURE) return iadj(c, i);
+      if(!cell_id.count(c)) return quotient_map->ray_iadj(c, i); /* necessary because ray samples are from quotient_map */
+      int aid = cell_id.at(c);
+      return quotient_map->ray_iadj(quotient_map->acells[aid], i);
       }
     };
 

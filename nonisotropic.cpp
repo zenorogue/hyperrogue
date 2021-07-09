@@ -1000,33 +1000,6 @@ EX namespace hybrid {
   
   EX int disc_quotient = 0;
   
-  EX transmatrix ray_iadj(cell *c, int i) {
-    if(prod && i == c->type-2) return (mscale(Id, +cgi.plevel));
-    if(prod && i == c->type-1) return (mscale(Id, -cgi.plevel));
-    if(WDIM == 2) {
-      return to_other_side(get_corner_position(c, i), get_corner_position(c, (i+1)));
-      }
-    if(prod) {
-      transmatrix T;
-      cell *cw = hybrid::get_where(c).first;
-      hybrid::in_underlying_geometry([&] {
-        T = to_other_side(get_corner_position(cw, i), get_corner_position(cw, (i+1)));
-        });
-      return T;
-      }
-    #if MAXMDIM >= 4
-    if(rotspace) return rots::ray_iadj(c, i);
-    #endif
-    if(is_subcube_based(variation)) {
-      auto& v = reg3::get_face_vertices(c, i); 
-      hyperpoint h = 
-        project_on_triangle(v[0], v[1], v[2]);
-      transmatrix T = rspintox(h);
-      return T * xpush(-2*hdist0(h)) * spintox(h);
-      }
-    return currentmap->iadj(c, i);
-    }
-  
   EX void configure(eGeometry g) {
     if(WDIM == 3) return;
     ray::reset_raycaster();
@@ -1528,6 +1501,17 @@ EX namespace product {
           });
         }
       }
+
+    virtual transmatrix ray_iadj(cell *c, int i) override {
+      if(i == c->type-2) return (mscale(Id, +cgi.plevel));
+      if(i == c->type-1) return (mscale(Id, -cgi.plevel));
+      transmatrix T;
+      cell *cw = hybrid::get_where(c).first;
+      hybrid::in_underlying_geometry([&] {
+        T = currentmap->ray_iadj(cw, i);
+        });
+      return T;
+      }
     };
 
   EX bool current_spin_invalid, cmirror;
@@ -2006,34 +1990,6 @@ EX namespace rots {
   
   EX std::map<int, transmatrix> saved_matrices_ray;
 
-  EX transmatrix ray_iadj(cell *c1, int i) {
-    if(i == c1->type-1) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
-    if(i == c1->type-2) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
-    cell *c2 = c1->cmove(i);
-    #if CAP_ARCM
-    int id1 = hybrid::underlying == gArchimedean ? arcm::id_of(c1->master) + 20 * arcm::parent_index_of(c1->master) : shvid(c1);
-    int id2 = hybrid::underlying == gArchimedean ? arcm::id_of(c2->master) + 20 * arcm::parent_index_of(c2->master) : shvid(c2);
-    #else
-    int id1 = shvid(c1);
-    int id2 = shvid(c2);
-    #endif
-    int j = c1->c.spin(i);
-    int id = id1 + (id2 << 10) + (i << 20) + (j << 26);
-    auto &M = saved_matrices_ray[id];
-    if(M[3][3]) return M;
-    
-    cell *cw = hybrid::get_where(c1).first;
-    
-    transmatrix T;
-    hybrid::in_underlying_geometry([&] {
-      hyperpoint h0 = get_corner_position(cw, i);
-      hyperpoint h1 = get_corner_position(cw, (i+1));
-      T = to_other_side(h0, h1);
-      });
-
-    return M = lift_matrix(T);
-    }
-
   struct hrmap_rotation_space : hybrid::hrmap_hybrid {
 
     std::map<int, transmatrix> saved_matrices;
@@ -2066,6 +2022,33 @@ EX namespace rots {
       return Id; // not implemented yet
       }
 
+    virtual transmatrix ray_iadj(cell *c1, int i) override {
+      if(i == c1->type-1) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
+      if(i == c1->type-2) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
+      cell *c2 = c1->cmove(i);
+      #if CAP_ARCM
+      int id1 = hybrid::underlying == gArchimedean ? arcm::id_of(c1->master) + 20 * arcm::parent_index_of(c1->master) : shvid(c1);
+      int id2 = hybrid::underlying == gArchimedean ? arcm::id_of(c2->master) + 20 * arcm::parent_index_of(c2->master) : shvid(c2);
+      #else
+      int id1 = shvid(c1);
+      int id2 = shvid(c2);
+      #endif
+      int j = c1->c.spin(i);
+      int id = id1 + (id2 << 10) + (i << 20) + (j << 26);
+      auto &M = saved_matrices_ray[id];
+      if(M[3][3]) return M;
+      
+      cell *cw = hybrid::get_where(c1).first;
+      
+      transmatrix T;
+      hybrid::in_underlying_geometry([&] {
+        hyperpoint h0 = get_corner_position(cw, i);
+        hyperpoint h1 = get_corner_position(cw, (i+1));
+        T = to_other_side(h0, h1);
+        });
+  
+      return M = lift_matrix(T);
+      }
     };
 
   /** reinterpret the given point of rotspace as a rotation matrix in the underlying geometry (note: this is the inverse) */

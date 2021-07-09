@@ -1567,7 +1567,7 @@ struct raycast_map {
       cell *c = p.second;
       if(!c) continue;
       for(int j=0; j<c->type; j++)
-        ms[id+j] = hybrid::ray_iadj(c, j);
+        ms[id+j] = currentmap->ray_iadj(c, j);
       if(WDIM == 2) for(int a: {0, 1}) {
         ms[id+c->type+a] = get_ms(c, a, false);
         }
@@ -1873,7 +1873,7 @@ EX void cast() {
 
   back:
   for(int a=0; a<cs->type; a++)
-    if(hdist0(hybrid::ray_iadj(cs, a) * tC0(T)) < hdist0(tC0(T))) {
+    if(hdist0(currentmap->ray_iadj(cs, a) * tC0(T)) < hdist0(tC0(T))) {
       T = currentmap->iadj(cs, a) * T;
       if(o->uToOrig != -1) {
         transmatrix HT = currentmap->adj(cs, a);
