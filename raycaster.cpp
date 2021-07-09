@@ -1368,7 +1368,7 @@ void enable_raycaster() {
       "    }\n";
 
     if(use_reflect) {
-      if(prod) fmain += "if(reflect && which >= "+its(deg-2)+") { zspeed = -zspeed; continue; }\n";
+      if(prod) fmain += "if(reflect && which >= sides-2) { zspeed = -zspeed; continue; }\n";
       if(hyperbolic && bt::in()) fmain +=
         "if(reflect && (which < "+its(flat1)+" || which >= "+its(flat2)+")) {\n"
         "  mediump float x = -log(position.w - position.x);\n"
