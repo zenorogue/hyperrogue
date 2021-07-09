@@ -106,6 +106,7 @@ Orb("Teleport", "Телепорта")
 Orb("Safety", "Безопасности")
 Orb("Thorns", "Шипов")
 Orb("Choice", "Выбора")
+Orb("Gravity", "Гравитации")
 
 // TERRAIN FEATURES
 // ================
@@ -7279,5 +7280,12 @@ S("Where did this strange bird come from?...\n\nAcid Gulls dissolve the land on 
   "Откуда эта странная птица?...\n\nКислотные чайки растворяют землю, на которую они падают при гибели.")
 N("Tiger's Eye", GEN_N, "Тигровый глаз", "Тигровые глаза", "Тигровый глаз", "Тигровым глазом")
 S("A brown gem.", "Коричневый камень.")
+
+// Free Fall
+N("Free Fall", GEN_O, "Свободное падение", "Свободные падения", "Свободное падение", "в Свободном падении")
+N("Falling Dog", GEN_F, "Падающая собака", "Падающие собаки", "Падающую собаку", "Падающей собакой")
+S("Distant relatives of the Running Dogs.", "Дальние родственники Бегущих собак.")
+N("Western Hawk", GEN_M, "Западный ястреб", "Западные ястреба", "Западного ястреба", "Западным ястребом")
+N("Meteorite", GEN_O, "Метеорит", "Метеориты", "Метеорит", "Метеоритом")
 
 // Note: the translation should be complete until the marked line
