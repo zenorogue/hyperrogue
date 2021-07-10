@@ -567,7 +567,8 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     forCellEx(c1, c) {
       changes.ccell(c1);
       c1->item = itNone;
-      if(c1->wall == waDeadwall || c1->wall == waDeadfloor2) c1->wall = waCavewall;
+      if(c1->wall == waDeadwall) c1->wall = waCavewall;
+      if(c1->wall == waDeadfloor2 && !c1->monst && !isPlayerOn(c1)) c1->wall = waCavewall;
       if(c1->wall == waDeadfloor) c1->wall = waCavefloor;
       }
     }
@@ -1050,6 +1051,7 @@ EX void killFriendlyIvy() {
 
 EX bool monsterPushable(cell *c2) {
   if(markOrb(itCurseWeakness) && (c2->stuntime < 2 || attackJustStuns(c2, 0, moPlayer))) return false;
+  if(isMultitile(c2->monst)) return false;
   return (c2->monst != moFatGuard && !(isMetalBeast(c2->monst) && c2->stuntime < 2) && c2->monst != moTortoise && c2->monst != moTerraWarrior && c2->monst != moVizier && c2->monst != moWorldTurtle);
   }  
 

@@ -751,7 +751,7 @@ void pcmove::tell_why_cannot_attack() {
     addMessage(XLAT("You cannot attack Sandworms directly!"));
   else if(c2->monst == moHexSnake || c2->monst == moHexSnakeTail)
     addMessage(XLAT("You cannot attack Rock Snakes directly!"));
-  else if(nonAdjacent(c2, cwt.at))
+  else if(nonAdjacentPlayer(c2, cwt.at))
     addMessage(XLAT("You cannot attack diagonally!"));
   else if(thruVine(c2, cwt.at))
     addMessage(XLAT("You cannot attack through the Vine!"));
@@ -785,6 +785,12 @@ void pcmove::tell_why_cannot_attack() {
     addMessage(XLAT("You can only push this die if the highest number would be on the top!"));
   else if(c2->monst == moAngryDie)
     addMessage(XLAT("This die is really angry at you!"));
+  else if((attackflags & AF_WEAK) && isIvy(c2))
+    addMessage(XLAT("You are too weakened to attack %the1!", c2->monst));
+  else if(isWorm(cwt.at->monst) && isWorm(c2->monst) && wormhead(cwt.at) == wormhead(c2) && cwt.at->monst != moTentacleGhost && c2->monst != moTentacleGhost)
+    addMessage(XLAT("You cannot attack your own mount!"));
+  else if(checkOrb(c2->monst, itOrbShield))
+    addMessage(XLAT("A magical shield protects %the1!", c2->monst));
   else
     addMessage(XLAT("For some reason... cannot attack!"));
   }
@@ -929,7 +935,7 @@ bool pcmove::move_if_okay() {
 
 void pcmove::tell_why_impassable() {
   cell*& c2 = mi.t;
-  if(nonAdjacent(cwt.at,c2)) {
+  if(nonAdjacentPlayer(cwt.at,c2)) {
     if(vmsg(miRESTRICTED)) addMessage(geosupport_football() < 2 ?
       XLAT("You cannot move between the cells without dots here!") :
       XLAT("You cannot move between the triangular cells here!")

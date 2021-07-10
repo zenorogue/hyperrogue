@@ -115,7 +115,7 @@ EX void reduceOrbPowerAlways(eItem it) {
 EX void reverse_curse(eItem curse, eItem orb, bool cancel) {
   if(items[curse] && markOrb(itOrbPurity)) {
     items[orb] += items[curse];
-    if(curse == itCurseWeakness) items[itOrbWinter] += items[curse];
+    if(curse == itCurseWater) items[itOrbWinter] += items[curse];
     items[curse] = 0;
     }
   if(cancel && items[curse] && items[orb]) {
@@ -1211,6 +1211,7 @@ EX void apply_impact(cell *c) {
   if(markOrb(itOrbImpact))
     forCellEx(c1, c) {
       if(!c1->monst) continue;
+      if(c1->monst == moMimic) continue;
       if(isMultitile(c1->monst)) continue;
       addMessage(XLAT("You stun %the1!", c1->monst));
       changes.ccell(c1);
@@ -1462,7 +1463,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     }
 
   // (5c) stun
-  if(items[itOrbStunning] && c->monst && !isMultitile(c->monst) && c->stuntime < 3 && !shmup::on) {
+  if(items[itOrbStunning] && c->monst && !isMultitile(c->monst) && c->monst != moMimic && c->stuntime < 3 && !shmup::on) {
     if(!isCheck(a)) stun_attack(c), apply_impact(c);
     return itOrbStunning;
     }
@@ -1481,9 +1482,12 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   
   if(isWeakCheck(a)) return itNone;
   
-  if(nowhereToBlow) {
+  if(nowhereToBlow && isBlowableMonster(c->monst)) {
     addMessage(XLAT("Nowhere to blow %the1!", c->monst));
     }  
+  else if(nowhereToBlow) {
+    addMessage(XLAT("Nowhere to blow %the1!", c->wall));
+    }
   else if(jumpstate == 1 && jumpthru && jumpthru->monst) {
     addMessage(XLAT("Cannot jump through %the1!", jumpthru->monst));
     }

@@ -2349,7 +2349,7 @@ EX void livecaves() {
       for(cell *c2: adj_minefield_cells(c)) {
         eWall w = c2->wall;
         if(w == waDeadfloor) hv++, bringlife.push_back(c2);
-        else if(w == waDeadwall || (w == waDeadfloor2 && !c2->monst))
+        else if(w == waDeadwall || (w == waDeadfloor2 && !c2->monst && !isPlayerOn(c2)))
           hv--, bringlife.push_back(c2);
         else if(w == waCavefloor) hv++;
         else if(w == waCavewall) hv--;
@@ -2597,7 +2597,7 @@ EX }
 EX namespace dragon {
  
   EX int whichturn; // which turn has the target been set on
-  EX cell *target; // actually for all Orb of Control
+  EX cell *target; // actually for all Orb of Domination
 
   void pullback(cell *c) {
     int maxlen = iteration_limit;
@@ -2977,6 +2977,7 @@ EX namespace kraken {
     for(int i=0; i<isize(dcal); i++) {
       cell *c = dcal[i];
       if(c->monst == moKrakenT && !c->stuntime) forCellEx(c2, c) {
+        if (!logical_adjacent(c2,moKrakenT,c)) continue;
         bool dboat = false;
         if(c2->monst && canAttack(c, moKrakenT, c2, c2->monst, AF_ONLY_FBUG)) {
           attackMonster(c2, AF_NORMAL | AF_MSG, c->monst);
@@ -3467,6 +3468,7 @@ auto ccm = addHook(hooks_clearmemory, 0, [] () {
   clearing::score.clear();
   tortoise::emap.clear();
   tortoise::babymap.clear();
+  dragon::target = NULL;
   #if CAP_FIELD
   prairie::lasttreasure = NULL;
   prairie::enter = NULL;
@@ -3510,6 +3512,7 @@ auto ccm = addHook(hooks_clearmemory, 0, [] () {
         }
       return false; 
       });
+    set_if_removed(dragon::target, NULL);
     #if CAP_FIELD
     set_if_removed(prairie::lasttreasure, NULL);
     set_if_removed(prairie::enter, NULL);

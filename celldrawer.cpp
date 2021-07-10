@@ -2300,7 +2300,7 @@ void celldrawer::draw_item_full() {
 
   color_t icol = 0;
   
-  if(specialland == laMotion && items[itOrbInvis] && c->wall == waChasm) {
+  if(ls::single() && specialland == laMotion && items[itOrbInvis] && c->wall == waChasm) {
     if(c->mondir < c->type) {
       vid.linewidth *= 3;
       queueline(V*C0, V*currentmap->adj(c, c->mondir) * C0, 0xFFD500FF, 4);

@@ -125,7 +125,7 @@ MONSTER( 'D', 0xFF0000, "Greater Demon", moGreater, CF_FACE_UP | CF_DEMON | CF_S
 MONSTER( 'D', 0x800000, "Greater Demon", moGreaterM, CF_FACE_UP | CF_DEMON | CF_INACTIVE | CF_SPAM, RESERVED, moLesser, gdemonhelp)
 MONSTER( 'd', 0xFF2020, "Lesser Demon", moLesser, CF_FACE_UP | CF_DEMON | CF_SLOWMOVER | CF_SPAM, RESERVED, moYeti, ldemonhelp)
 MONSTER( 'd', 0x802020, "Lesser Demon", moLesserM, CF_FACE_UP | CF_DEMON | CF_INACTIVE | CF_SPAM, RESERVED, moLesser, ldemonhelp)
-MONSTER( 'S', 0x2070C0, "Ice Shark", moShark, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, 
+MONSTER( 'S', 0x2070C0, "Ice Shark", moShark, CF_FACE_SIDE | CF_NOBLOW | CF_SHARK, RESERVED, moShark, 
     "This dangerous predator has killed many people, and has been sent to Cocytus."
     )
 MONSTER( 'W', 0xFFFFFF, "Running Dog", moRunDog, CF_FACE_SIDE, RESERVED, moYeti, 
@@ -221,7 +221,7 @@ MONSTER( '@', 0x8B4513, "Illusion", moIllusion, CF_FACE_SIDE | CF_NOGHOST | CF_N
     )
 MONSTER( 'P', 0xD00000, "Pirate", moPirate, CF_FACE_UP | CF_LEADER, RESERVED, moPirate, 
     "Just a typical hyperbolic pirate." )
-MONSTER( 'S', 0x8080C0, "Shark", moCShark, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, "Just a nasty shark.")
+MONSTER( 'S', 0x8080C0, "Shark", moCShark, CF_FACE_SIDE | CF_NOBLOW | CF_SHARK, RESERVED, moShark, "Just a nasty shark.")
 MONSTER( 'P', 0x0000FF, "Parrot", moParrot, CF_FACE_SIDE | CF_NOBLOW | CF_SLIME | CF_IGNORE_SMELL, RESERVED, moSlime, "Parrots feel safe in the forests of Caribbean, so they "
     "never leave them. But they will help the Pirates by attacking the intruders.")
 MONSTER( 'S', 0xE09000, "Rock Snake", moHexSnake, ZERO | CF_NOGHOST | CF_NOBLOW | CF_MOUNTABLE | CF_IGNORE_SMELL | CF_MULTITILE | CF_WORM | CF_HIGH_THREAT, RESERVED, moNone, redsnakedes )
@@ -329,7 +329,7 @@ MONSTER( 'D', 0xF09090, "Draugr", moDraugr, CF_FACE_UP | CF_NONLIVING | CF_SLOWM
     "Animated corpses of ancient Viking warriors. They are immune to mundane weapons, "
     "but they can be destroyed by your Orb of the Sword."
     )
-MONSTER( 'C', 0xC08000, "Friendly Ivy", moFriendlyIvy, ZERO | CF_NOGHOST | CF_NOBLOW | CF_FRIENDLY | CF_FACING | CF_ANYIVY, RESERVED, moNone, naturedesc )
+MONSTER( 'C', 0xC08000, "Friendly Ivy", moFriendlyIvy, ZERO | CF_NOGHOST | CF_NOBLOW | CF_MULTITILE | CF_FRIENDLY | CF_FACING | CF_ANYIVY, RESERVED, moNone, naturedesc )
 MONSTER( 'V', 0xC000C0, "Vampire Bat", moVampire, CF_FACE_SIDE | CF_BIRD | CF_FLYING | CF_UNARMED | CF_IGNORE_PLATE, RESERVED, moEagle, 
     "Vampire Bats don't attack normally, but they drain your magical powers if "
     "they are at distance at most 2 from you."
@@ -1562,7 +1562,7 @@ WALL( '=', 0x00C0C0, "shallow water", waShallow, ZERO, RESERVED, 0, sgWater,
   )
 WALL( '=', 0x0000A0, "deep water", waDeepWater, WF_WATER, RESERVED, 0, sgWater, 
   "This body of water is calm and beautiful, but too deep to pass.")
-MONSTER( 'P', 0xC08080, "Pike", moPike, CF_FACE_SIDE | CF_SHARK, RESERVED, moShark, 
+MONSTER( 'P', 0xC08080, "Pike", moPike, CF_FACE_SIDE | CF_NOBLOW | CF_SHARK, RESERVED, moShark, 
   "You remember anglers from your hometown showing the impressive pikes they have caught. This one is much larger."
   )
 MONSTER( 'T', 0xFF00FF, "World Turtle", moWorldTurtle, CF_FACE_SIDE | CF_STUNNABLE | CF_SLOWMOVER | CF_SPAM, RESERVED, moYeti, 
