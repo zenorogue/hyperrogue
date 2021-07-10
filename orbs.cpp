@@ -115,7 +115,7 @@ EX void reduceOrbPowerAlways(eItem it) {
 EX void reverse_curse(eItem curse, eItem orb, bool cancel) {
   if(items[curse] && markOrb(itOrbPurity)) {
     items[orb] += items[curse];
-    if(curse == itCurseWeakness) items[itOrbWinter] += items[curse];
+    if(curse == itCurseWater) items[itOrbWinter] += items[curse];
     items[curse] = 0;
     }
   if(cancel && items[curse] && items[orb]) {
