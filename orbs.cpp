@@ -1482,9 +1482,12 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   
   if(isWeakCheck(a)) return itNone;
   
-  if(nowhereToBlow) {
+  if(nowhereToBlow && isBlowableMonster(c->monst)) {
     addMessage(XLAT("Nowhere to blow %the1!", c->monst));
     }  
+  else if(nowhereToBlow) {
+    addMessage(XLAT("Nowhere to blow %the1!", c->wall));
+    }
   else if(jumpstate == 1 && jumpthru && jumpthru->monst) {
     addMessage(XLAT("Cannot jump through %the1!", jumpthru->monst));
     }
