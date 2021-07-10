@@ -659,7 +659,7 @@ EX void beastAttack(cell *c, bool player, bool targetdir) {
       if(c2->monst && c2->stuntime) {
         cellwalker bull (c, d);
         int subdir = determinizeBullPush(bull);
-        auto mi = determinePush(bull, subdir, [c2] (movei mi) { return passable(mi.t, c2, P_BLOW); });
+        auto mi = determinePush(bull, subdir, [c2] (movei mi) { return passable(mi.t, c2, P_BLOW) && !isPlayerOn(mi.t); });
         if(mi.proper())
           pushMonster(mi);
         }
