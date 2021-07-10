@@ -320,7 +320,7 @@ array<feature, 21> features {{
       if(buildIvy(c, 0, c->type) && !peace::on) c->item = itVarTreasure;
     }},
   {0x000A08, 0, moNone, VF { if(c->wall == waNone && !c->monst && hrand(5000) < 100) c->wall = waSmallTree; }},
-  {0x100A10, 1, moRagingBull, VF { if(c->wall == waNone && hrand(10000) < 10 + items[itVarTreasure]) c->monst = moSleepBull, c->hitpoints = 3; }},
+  {0x100A10, 1, moRagingBull, VF { if(c->wall == waNone && !c->monst && hrand(10000) < 10 + items[itVarTreasure]) c->monst = moSleepBull, c->hitpoints = 3; }},
   {0x00110C, 0, moNone, VF { if(c->wall == waNone && !c->monst && hrand(5000) < 100) c->wall = waBigTree; }},
   {0x000A28, 1, moNone, VF { if(hrand(500) < 10) build_pool(c, false); } },
   {0x100A00, 2, moVariantWarrior, VF { if(c->wall == waNone && !c->monst && hrand_var(40000)) c->monst = moVariantWarrior; }},
