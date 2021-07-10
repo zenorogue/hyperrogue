@@ -250,6 +250,7 @@ EX int isRandland(eLand l) {
 
 EX bool incompatible1(eLand l1, eLand l2) {
   if(isCrossroads(l1) && isCrossroads(l2)) return true;
+  if(isElemental(l1) && isElemental(l2)) return true;
   if(l1 == laJungle && l2 == laMotion) return true;
   if(l1 == laMirrorOld && l2 == laMotion) return true;
   if(l1 == laPower && l2 == laWineyard) return true;
@@ -271,7 +272,6 @@ EX bool incompatible1(eLand l1, eLand l2) {
   if(l1 == laPrairie && l2 == laCrossroads4) return true;
   if(l1 == laWet && l2 == laDesert) return true;
   if(l1 == laFrog && l2 == laMotion) return true;
-  if(isElemental(l1) && isElemental(l2)) return true;
   return false;
   }
 
