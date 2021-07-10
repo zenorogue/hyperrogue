@@ -1211,6 +1211,7 @@ EX void apply_impact(cell *c) {
   if(markOrb(itOrbImpact))
     forCellEx(c1, c) {
       if(!c1->monst) continue;
+      if(c1->monst == moMimic) continue;
       if(isMultitile(c1->monst)) continue;
       addMessage(XLAT("You stun %the1!", c1->monst));
       changes.ccell(c1);
@@ -1462,7 +1463,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     }
 
   // (5c) stun
-  if(items[itOrbStunning] && c->monst && !isMultitile(c->monst) && c->stuntime < 3 && !shmup::on) {
+  if(items[itOrbStunning] && c->monst && !isMultitile(c->monst) && c->monst != moMimic && c->stuntime < 3 && !shmup::on) {
     if(!isCheck(a)) stun_attack(c), apply_impact(c);
     return itOrbStunning;
     }
