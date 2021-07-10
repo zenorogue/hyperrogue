@@ -19,6 +19,36 @@ bool sameland(eLand ll, eLand ln) {
   return false;
   }
 
+cell *cellToTarget() {
+  if (isCrossroads(cwt.at->land)) {
+    for (cell *c: dcal) {
+      if (c->land == laCamelot && c->wall == waNone) {
+        printf("Trying to teleport into Camelot\n");
+        items[itOrbTeleport] += 1;
+        return c;
+      }
+    }
+  }
+
+  if(cwt.at->land == laCamelot) {
+    int oldDist = celldistAltRelative(cwt.at);
+    if (oldDist > 3) {
+      for (cell *c: dcal) {
+        if (c->land == laCamelot) {
+          int dist = celldistAltRelative(c);
+          if (-1 <= dist && dist <= 1 && hrand(10) == 0) {
+            printf("Trying to teleport near the round table (%d to %d)\n", oldDist, dist);
+            items[itOrbTeleport] += 1;
+            return c;
+          }
+        }
+      }
+    }
+  }
+
+  return dcal[hrand(isize(dcal))];
+}
+
 /* auto a3 = addHook(hooks_nextland, 100, [] (eLand l) { 
   eLand l2;
   do { l2 = pick(laRuins, laTerracotta, laPrairie); } while(l2 == l);
@@ -76,33 +106,108 @@ void autoplay(int num_moves = 1000000000) {
 #endif
       //mainloop();
       }
-    int i = hrand(cwt.at->type);
-    cell *c2 = cwt.at->move(i);
+
     /* if(gcount < 500) for(int i=1; i<isize(dcal); i++) {
       c2 = dcal[i];
       if(lcount >= 50 && !sameland(lland, c2->land) && !sameland(lland2, c2->land)) break;
       else if(lcount < 50 && c2->item && c2->item != itOrbSafety) break;
       } */
-    items[hrand(ittypes)] = 1 << hrand(11);
-    kills[hrand(motypes)] = 1 << hrand(11);
-    items[itOrbYendor] &= 15;
-    again:
-    if(c2->cpdist > 1) {
-      for(int j=0; j<c2->type; j++)
-        if(c2->move(j) && c2->move(j)->cpdist < c2->cpdist) {
-          c2 = c2->move(j);
-          goto again;
-          }
+
+    // Use a random cheat
+    int croll = hrand(50);
+    if (croll < 25) {
+      eItem b = (eItem) hrand(ittypes);
+      printf("Gain item: %s\n", iinf[b].name);
+      items[b] = (1 << hrand(11)) - 1;
+      items[itOrbYendor] &= 15;
+      reduceOrbPowers(); // in particlar, cancel out slaying+weakness, since the combination may confuse shadow
+    } else if (croll == 25) {
+      printf("Gain kills\n");
+      kills[hrand(motypes)] = (1 << hrand(11)) - 1;
+    } else if (croll == 26) {
+      printf("Princess soon\n");
+      princess::saved = true;
+      princess::everSaved = true;
+      items[itSavedPrincess]++;
+      items[itOrbLove] = 1;
+      items[itOrbTime] = 0;
+    } else if (croll == 27) {
+      printf("Gain allies\n");
+      forCellEx(cz, cwt.at)
+        if (!cz->monst)
+          cz->monst = pick(moMouse, moFriendlyGhost, moGolem, moTameBomberbird, moKnight);
+    } else if (croll == 28) {
+      printf("Place orbs with pickup effects\n");
+      forCellEx(cz, cwt.at)
+        if (!cz->item)
+          cz->item = pick(itOrbLife, itOrbFriend, itOrbSpeed, itOrbShield, itOrbChaos, itOrbPurity);
+    } else if (croll == 29) {
+      printf("Place fun walls\n");
+      forCellEx(cz, cwt.at)
+        if (!cz->wall)
+          cz->wall = pick(waExplosiveBarrel, waBigStatue, waThumperOff, waBonfireOff, waCloud, waMirror);
+    } else if (croll == 30) {
+      cell *ct = dcal[hrand(isize(dcal))];
+      if (!isPlayerOn(ct) && !ct->monst && !ct->wall) {
+        eWall hazard = pick(waRose, waFireTrap, waMineMine, waTrapdoor, waChasm, waCavewall);
+        printf("Spam a hazard: %s\n", winf[hazard].name);
+        ct->wall = hazard;
       }
-    cwt.spin = 0;
-    int d = neighborId(cwt.at, c2);
-    if(d >= 0 && movepcto(d, 1, false))
-      println(hlog, "OK");
-    else {    
-      println(hlog, "NOK");
-      killMonster(c2, moNone);
-      jumpTo(roKeyboard, c2, itNone, 0, moNone);
+    } else if (croll == 31 && !memory_saving_mode) {
+      //printf("Saving memory\n");
+      //memory_saving_mode = true;
+      //save_memory();
+      //memory_saving_mode = false;
+    } else if (croll == 33) {
+      cell *ct = dcal[hrand(isize(dcal))];
+      if (!isPlayerOn(ct) && !ct->monst && !ct->wall) {
+        printf("Spam some slime\n");
+        ct->item = itNone;
+        ct->wall = hrand(2) ? waFloorA : waFloorB;
+        ct->monst = hrand(2) ? moSlime : moNone;
       }
+    }
+
+    // don't show warning dialogs
+    items[itWarning] = 1;
+
+    // Make a random move
+    int roll = hrand(50);
+    if (roll == 0) {
+      // drop dead orb
+      bool res = movepcto(MD_DROP, 1);
+      printf("DROP: %d\n", res);
+    } else if (roll < 5) {
+      // skip turn
+      bool res = movepcto(MD_WAIT, 1);
+      printf("WAIT: %d\n", res);
+    } else if (roll < 42) {
+      // move to or attack a neighbor cell
+      int i = hrand(cwt.at->type);
+      cell *c2 = cwt.at->move(i);
+      cwt.spin = 0;
+      int d = neighborId(cwt.at, c2);
+      if (d >= 0) {
+        int subdir = (roll%2==0)?1:-1;
+        string c2info = dnameof(c2->wall) + "; " + dnameof(c2->monst) + "; " + dnameof(c2->item);
+        bool res = movepcto(d, subdir, false);
+        printf("MOVE %d [%s] sub %d: %d\n", d, c2info.c_str(), subdir, res);
+        if (!res && c2->monst) {
+          printf("clearing the monster (%s)\n", minf[c2->monst].name);
+          killMonster(c2, moNone);
+        }
+      } else {
+        printf("MOVE CONFUSED %d\n", d);
+        return;
+      }
+    } else {
+      // try to use a ranged orb
+      cell *ct = cellToTarget();
+      eItem ti = targetRangedOrb(ct, roMouseForce);
+      const char *tm = (ti == eItem(-1)) ? "orb cannot be used (see message log)" : iinf[ti].name;
+      printf("TARGET %p: %s\n", (void*)ct, tm);
+    }
+
     if(false) if(turncount % 5000 == 0) {
       printf("cells travelled: %d\n", celldist(cwt.at));
       
@@ -125,6 +230,10 @@ void autoplay(int num_moves = 1000000000) {
       cellcount = 0;
       activateSafety(laCrossroads);
       // landlist[hrand(isize(landlist))]);
+      if (cellcount < 0) {
+        //printf("How did cellcount become negative?\n");
+        cellcount = 1;
+        }
       }
 
     if(cwt.at->land == laWestWall && cwt.at->landparam >= 30) {
@@ -132,6 +241,32 @@ void autoplay(int num_moves = 1000000000) {
       forCellEx(c2, cwt.at) c2->item = itOrbSafety;
       }
     
+    if(isIcyLand(cwt.at)) {
+      float heat = HEAT(cwt.at);
+      // Checking for extreme values as well as NaNs and infinities
+      if (!(-1e10 < heat && heat < 1e10)) {
+        printf("Heat is out of expected range\n");
+        canmove = true;
+        doAutoplay = false;
+        }
+      }
+
+    if (cwt.at->land == laCamelot) {
+      for(int i=0; i<isize(dcal); i++) {
+        cell *c = dcal[i];
+        if(c->land == laCamelot && celldistAltRelative(c) == 0 && c->wall != waRoundTable) {
+          printf("The round table of camelot has been breached!\n");
+          kills[moPlayer] = 0;
+          canmove = true;
+          doAutoplay = false;
+          }
+        }
+      }
+
+    if(cwt.at->monst && !isMultitile(cwt.at->monst)) {
+      printf("on a non-multitile monster: %s\n", minf[cwt.at->monst].name);
+      }
+
     for(int i=0; i<isize(dcal); i++) {
       cell *c = dcal[i];
       if(isChild(c, NULL)) {
@@ -142,6 +277,12 @@ void autoplay(int num_moves = 1000000000) {
         kills[moPlayer] = 0;
         canmove = true;
         doAutoplay = false; 
+        }
+      if(c->item == itBuggy || c->item == itBuggy2) {
+        printf("buggy item found\n");
+        kills[moPlayer] = 0;
+        canmove = true;
+        doAutoplay = false;
         }
       }
     
