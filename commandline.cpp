@@ -367,8 +367,8 @@ int arg::readCommon() {
     printf("  -offline       - don't connect to Steam (for Steam versions)\n");
     printf("  -I ITEM n      - start with n of ITEM (activates cheat and disables ghosts)\n");
     printf("  -fix           - fix the seed\n");
-    printf("Toggles: -o0 disables, -o1 enables, -o switches");
-    printf("Not all options are documented, see hyper.cpp");
+    printf("Toggles: -o0 disables, -o1 enables, -o switches\n");
+    printf("Not all options are documented, see hyper.cpp\n");
     exit(0);
     }
   else return 1;
