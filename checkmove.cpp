@@ -105,6 +105,7 @@ EX bool monstersnear(cell *c, eMonster who) {
 
   int res = 0;
   bool fast = false;
+  bool kraken_will_destroy_boat = false;
 
   elec::builder b;
   if(elec::affected(c)) { who_kills_me = moLightningBolt; res++; }
@@ -167,10 +168,9 @@ EX bool monstersnear(cell *c, eMonster who) {
       if(elec::affected(c2)) continue;
       if(fast && c2->monst != moWitchSpeed) continue;
       // Krakens just destroy boats
-      if(c2->monst == moKrakenT && c->wall == waBoat) {
-        if(krakensafe(c)) continue;
-        else if(warningprotection(XLAT("This move appears dangerous -- are you sure?")) && res == 0) m = moWarning;
-        else continue;
+      if(who == moPlayer && c2->monst == moKrakenT && c->wall == waBoat) {
+        kraken_will_destroy_boat = true;
+        continue;
         }
       // they cannot attack through vines
       if(!canAttack(c2, c2->monst, c, who, AF_NEXTTURN)) continue;
@@ -183,11 +183,15 @@ EX bool monstersnear(cell *c, eMonster who) {
       }
     }
 
-  if(who == moPlayer && res && (markOrb2(itOrbShield) || markOrb2(itOrbShell)) && !eaten)
-    res = 0;
-
-  if(who == moPlayer && res && markOrb2(itOrbDomination) && c->monst)
-    res = 0;
+  if(kraken_will_destroy_boat && !krakensafe(c) && warningprotection(XLAT("This move appears dangerous -- are you sure?"))) {
+    if (res == 0) who_kills_me = moWarning;
+    res++;
+  } else {
+    if(who == moPlayer && res && (markOrb2(itOrbShield) || markOrb2(itOrbShell)) && !eaten)
+      res = 0;
+    if(who == moPlayer && res && markOrb2(itOrbDomination) && c->monst)
+      res = 0;
+  }
 
   return !!res;
   }
