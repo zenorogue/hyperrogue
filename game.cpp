@@ -503,7 +503,7 @@ EX bool sameMonster(cell *c1, cell *c2) {
 EX eMonster haveMount() {
   for(cell *pc: player_positions()) {
     eMonster m = pc->monst;
-    if(m) return m;
+    if(isWorm(m)) return m;
     }
   return moNone;
   }
