@@ -4591,9 +4591,7 @@ S("extra graphical effects", "дополнительные графически�
 // VERSION 9.3
 // ===========
  
-S("SORT", "СОРТИРУЙ")
-S("PICK", "ВЫБИРАЙ")
-S("PLAY", "ИГРАЙ")
+S("PICK", "ВЫБИРАТЬ")
  
 // 3D configuration
 // ----------------
@@ -5177,7 +5175,7 @@ S("Try the Guided Tour to help with understanding the "
   "geometry of HyperRogue (menu -> special modes).\n\n",
   "Попробуйте Руководство, чтобы понять геометрию HyperRogue (меню -> специальные режимы.\n\n")
  
-S("guided tour", "Руководство")
+S("guided tour", "руководство")
 S("spherical geometry", "сферическая геометрия")
 S("Euclidean geometry", "евклидова геометрия")
 S("more curved hyperbolic geometry", "более искривлённая геометрия")
@@ -5417,7 +5415,7 @@ S("The game is normally displayed in the so called Poincaré disk model, "
   "прямыми линиями.")
  
 S("Curvature", "Кривизна")
-S("gain Orb of the Sword", "получи Сферу меча")
+S("gain Orb of the Sword", "дать сферу Меча")
 S(
   "Now, go to the Burial Grounds and find an Orb of the Sword. The Sword appears to "
   "always be facing in the same direction whatever you do, and it appears that "
@@ -5707,7 +5705,6 @@ S("four triangles", "четыре треугольника")
 S("big triangles: rings", "большие треугольники: кольца")
  
 // missing for the Tutorial
-S("guided tour", "руководство")
 S("This Orb is not compatible with the Tutorial.", "Эта сфера не совместима с Руководством.")
  
 // local scores
@@ -5944,7 +5941,6 @@ S("puzzles and exploration", "головоломки и изучение")
 
 S("Zebra quotient", "фактор Зебры")
 S("field quotient", "фактор поля")
-S("mark heptagons", "пометить семиугольники")
 S("projection", "проекция")
 S("compass size", "размер компаса")
  
@@ -6013,7 +6009,7 @@ S(
  
 S("skip the start menu", "пропустить начальное меню")
 S("quick mouse", "быстрая мышь")
-S("This combination is known to be buggy at the moment.", "Эта комбинация пока что работает с ошибками.")
+S("This combination is known to be buggy at the moment.", "Эта комбинация сейчас может работать с ошибками.")
  
 // extra Princess texts
 // --------------------
@@ -6620,7 +6616,6 @@ S("reactivate the texture", "восстановить текстуру")
 S("open PNG as texture", "открыть PNG как текстуру")
 S("load texture config", "загрузить настройки текстур")
 S("warning: unable to find the center", "осторожно: не найден центр")
-S("texture size", "размер текстура")
 S("paint a new texture", "нарисовать новую текстуру")
 S("precision", "точность")
  
@@ -7172,7 +7167,6 @@ S("This land does not work in the current settings. Reason not available.",
   "Эта земля не работает при данных настройках. Причина недоступна.")
 S("This land does not work well in the current settings. Reason not available.",
   "Эта земля плохо работает при данных настройках. Причина недоступна.")
-S("This combination is known to be buggy at the moment.", "Эта комбинация сейчас может работать с ошибками.")
 S("Somewhat sloppy pattern.", "Небрежный узор.")
 S("Fractal landscapes not implemented in this geometry.", "Фракталы не реализованы в этой геометрии.")
 S("Only simplified walls implemented.", "Реализованы только упрощенные стены.")
@@ -7194,21 +7188,10 @@ S("Goldberg", "Гольдберг")
 S("fisheye", "рыбий глаз")
 S("extend the ends", "расширить концы") // for the line animation
  
-S(
-  "This model maps the world so that the distances from two points "
-  "are kept. This parameter gives the distance from the two points to "
-  "the center.",
- 
-  "Эта модель отображает мир так, что расстояния от двух точек сохраняются. "
-  "Этот параметр задает расстояние от этих двух точек до центра. ")
- 
 // missing texts from the Tutorial
  
 S("enable the Camelot cheat", "включить читы в Камелоте")
 S("disable the Camelot cheat", "выключить читы в Камелоте")
-S("gain Orb of the Sword", "дать сферу Меча")
-S("Static mode enabled.", "Статический режим включен.")
-S("Static mode disabled.", "Статический режим выключен.")
  
 S("Returned to your game.", "Вернуться в игру.")
 S("Spherical version of %the1. ", "%1 в сферической версии. ")
