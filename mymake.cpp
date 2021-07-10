@@ -322,6 +322,9 @@ int main(int argc, char **argv) {
       exit(1);
       }
     time_t obj_time = get_file_time(obj);
+    if(src == "language.cpp") {
+      src_time = max(src_time, get_file_time("language-data.cpp"));
+      }
     if(src_time > obj_time) {
       string cmdline = compiler + " " + opts + " " + src + " -o " + obj;
       pair<int, function<int(void)>> task(id, [cmdline]() { return mysystem(cmdline); });
