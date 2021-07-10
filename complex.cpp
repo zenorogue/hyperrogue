@@ -2977,6 +2977,7 @@ EX namespace kraken {
     for(int i=0; i<isize(dcal); i++) {
       cell *c = dcal[i];
       if(c->monst == moKrakenT && !c->stuntime) forCellEx(c2, c) {
+        if (!logical_adjacent(c2,moKrakenT,c)) continue;
         bool dboat = false;
         if(c2->monst && canAttack(c, moKrakenT, c2, c2->monst, AF_ONLY_FBUG)) {
           attackMonster(c2, AF_NORMAL | AF_MSG, c->monst);
