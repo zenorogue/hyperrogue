@@ -2597,7 +2597,7 @@ EX }
 EX namespace dragon {
  
   EX int whichturn; // which turn has the target been set on
-  EX cell *target; // actually for all Orb of Control
+  EX cell *target; // actually for all Orb of Domination
 
   void pullback(cell *c) {
     int maxlen = iteration_limit;
@@ -3468,6 +3468,7 @@ auto ccm = addHook(hooks_clearmemory, 0, [] () {
   clearing::score.clear();
   tortoise::emap.clear();
   tortoise::babymap.clear();
+  dragon::target = NULL;
   #if CAP_FIELD
   prairie::lasttreasure = NULL;
   prairie::enter = NULL;
@@ -3511,6 +3512,7 @@ auto ccm = addHook(hooks_clearmemory, 0, [] () {
         }
       return false; 
       });
+    set_if_removed(dragon::target, NULL);
     #if CAP_FIELD
     set_if_removed(prairie::lasttreasure, NULL);
     set_if_removed(prairie::enter, NULL);
