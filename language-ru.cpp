@@ -525,7 +525,7 @@ S("(Menu button) and select the ASCII mode, which runs much faster. "
 
 S("(in the MENU). You can reduce the sight range, this should make "
  "the animations smoother.",
- "(в MENU). Вы можете уменьшить радиус обзора, что сделает анимацию более гладкой. ")
+ "(в МЕНЮ). Вы можете уменьшить радиус обзора, чтобы сделать анимацию более гладкой.")
 
 S("(press v) and change the wall/monster mode to ASCII, or change "
  "the resolution.",
@@ -2900,7 +2900,7 @@ S(
  
 S("Yendor Challenge", "Миссия Йендора")
 S("Collect 10 treasures in various lands to unlock the challenges there",
-  "Собирайте 10 сокровищ в разных землях, чтобы разблокировать миссии здесь")
+  "Собирайте 10 сокровищ в разных землях, чтобы открыть миссии здесь")
  
 S("easy", "легко")
 S("challenge", "испытание")
@@ -2955,9 +2955,6 @@ S(
  
 S("Unlock this challenge by getting the Orb of Yendor!",
   "Откройте этот режим, собрав сферу Йендора!")
- 
-S("Collect 10 treasures in various lands to unlock the challenges there",
-  "Собирайте 10 сокровищ в разных землях, чтобы открыть миссии здесь")
  
 // Wild West
 // ----------
@@ -3986,9 +3983,6 @@ S("\n\nOnce you collect 10 Bomberbird Eggs, "
 S("This might be very useful for devices with limited memory.",
   "Это может быть полезно для устройств с ограниченной памятью.")
   
-S("(in the MENU). You can reduce the sight range, this should make the animations smoother.",
-  "(в МЕНЮ). Вы можете уменьшить радиус обзора, чтобы сделать анимацию более гладкой.")
-
 S("Unavailable in the shmup mode.\n", "Недоступно в режиме стрельбы.\n")
 S("Unavailable in the multiplayer mode.\n", "Недоступно в режиме нескольких игроков.\n")
 S("Unavailable in the Chaos mode.\n", "Недоступно в режиме Хаоса.\n")
@@ -4575,27 +4569,6 @@ S("You gain your protective Shell back!", "Вы вернули свою рако
 
 S("rainbow landscape", "радужный пейзаж")
 S("Cannot use %the1 here!", "Нельзя использовать %a1 здесь!")
-S("draw the grid", "нарисовать сетку")
-S("Escher/3D", "Эшер/3D")
-S("plain/3D", "простой/3D")
-S("3D", "3D")
-S("Welcome to Halloween!", "Добро пожаловать на Хэллоуин!")
-
-S("How long should the messages stay on the screen.",
-  "Как долго сообщения остаются на экране")
-S("select this color", "выбери этот цвет")
-S("sound effects volume", "громкость звуковых эффектов")
-
-S("\n\nSee sounds/credits.txt for credits for sound effects", 
-  "\n\nБлагодарности за звуковые эффекты: sounds/credits.txt")
-
-S("scrolling speed", "скорость проматывания")
-S("movement animation speed", "скорость анимации движения")
-S("+5 = move instantly", "+5 = мгновенное движение")
-S("extra graphical effects", "дополнительные графические эффекты")
-
-S("rainbow landscape", "радужный пейзаж")
-S("Cannot use %the1 here!", "Невозможно использовать %a1 here!")
 S("draw the grid", "рисовать сетку")
 S("Escher/3D", "Эшер/3D")
 S("plain/3D", "простой/3D")
@@ -4612,7 +4585,7 @@ S("\n\nSee sounds/credits.txt for credits for sound effects",
 
 S("scrolling speed", "скорость прокрутки")
 S("movement animation speed", "скорость анимации движения")
-S("+5 = move instantly", "+5 = мгновенный ход")
+S("+5 = move instantly", "+5 = мгновенное движение")
 S("extra graphical effects", "дополнительные графические эффекты")
 
 // VERSION 9.3
