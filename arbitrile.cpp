@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- Arbitrary Tilings
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-/** \file arbitrile.cpp 
+/** \file arbitrile.cpp
  *  \brief Arbitrary tilings
  *
  *  Arbitrary tilings, defined in .tes files.
@@ -48,9 +48,9 @@ struct arbi_tiling {
   vector<shape> shapes;
   string name;
   string comment;
-  
+
   vector<slider> sliders;
-  
+
   ld cscale;
   string filename;
 
@@ -93,9 +93,9 @@ struct hr_polygon_error : hr_exception {
 string hr_polygon_error::generate_error() {
   cld dist = (hdist0(tC0(end)) / params["distunit"]);
   bool angle = abs(dist) < 1e-9;
-  if(angle) dist = (atan2(end * xpush0(1)) / params["angleunit"]);     
+  if(angle) dist = (atan2(end * xpush0(1)) / params["angleunit"]);
   return
-    XLAT("Polygon number %1 did not close correctly (%2 %3). Here is the picture to help you understand the issue.\n\n", its(id), 
+    XLAT("Polygon number %1 did not close correctly (%2 %3). Here is the picture to help you understand the issue.\n\n", its(id),
       angle ? "angle" : "distance",
       lalign(0, dist)
       );
@@ -115,7 +115,7 @@ void ensure_geometry(eGeometryClass c) {
     if(c == gcSphere) set_geometry(gSphere);
     }
 
-  if(specialland != laCanvas) {   
+  if(specialland != laCanvas) {
     canvas_default_wall = waInvisibleFloor;
     patterns::whichCanvas = 'g';
     patterns::canvasback = 0xFFFFFF;
@@ -133,14 +133,14 @@ void start_poly_debugger(hr_polygon_error& err) {
   mapeditor::drawing_tool = true;
   pushScreen(mapeditor::showDrawEditor);
   mapeditor::initdraw(cwt.at);
-  
+
   int n = isize(err.v);
-  
+
   mapeditor::dtcolor = 0xFF0000FF;
   mapeditor::dtwidth = 0.02;
   for(int i=0; i<n-1; i++)
     mapeditor::dt_add_line(shiftless(tC0(err.v[i])), shiftless(tC0(err.v[i+1])), 0);
-  
+
   mapeditor::dtcolor = 0xFFFFFFFF;
   for(int i=0; i<n; i++)
     mapeditor::dt_add_text(shiftless(tC0(err.v[i])), 0.5, its(i));
@@ -237,7 +237,7 @@ EX void unmirror() {
   for(int i=0; i<s; i++)
     sh.push_back(sh[i]);
   for(int i=s; i<s+s; i++) {
-    for(auto& v: sh[i].vertices) 
+    for(auto& v: sh[i].vertices)
       v[1] = -v[1];
     reverse(sh[i].edges.begin(), sh[i].edges.end());
     reverse(sh[i].vertices.begin()+1, sh[i].vertices.end());
@@ -281,7 +281,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
     int ai;
     if(ep.next() == ')') ai = isize(c.shapes)-1;
     else ai = ep.iparse();
-    verify_index(ai, c.shapes, ep); 
+    verify_index(ai, c.shapes, ep);
     c.shapes[ai].flags |= f;
     ep.force_eat(")");
     };
@@ -301,7 +301,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       if(doubled) {
         if(c.name == unnamed) c.name = s;
         else {
-          c.comment += s; 
+          c.comment += s;
           c.comment += "\n";
           }
         }
@@ -404,7 +404,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
           bs = ep.iparse();
           while(ep.eat("'")) bi++;
           if(ep.eat("@")) bi = ep.iparse();
-          }          
+          }
         if(ep.eat(")") || ep.eat("]")) {}
         verify_index(ai, c.shapes, ep);
         verify_index(as, c.shapes[ai], ep);
@@ -431,7 +431,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       c.shapes[ai].sublines.emplace_back(as, bs);
       }
     else if(ep.eat("sublines(")) {
-      ld d = ep.rparse() * distunit; 
+      ld d = ep.rparse() * distunit;
       ld eps = 1e-4;
       if(ep.eat(",")) eps = ep.rparse() * distunit;
       ep.force_eat(")");
@@ -455,10 +455,10 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       ep.force_eat(")");
       auto& sh = c.shapes[i];
       int N = isize(sh.angles);
-      if(N % rep) 
+      if(N % rep)
         throw hr_parse_exception("repeat value should be a factor of the number of vertices, " + ep.where());
       sh.repeat_value = rep;
-      
+
       int d = N / rep;
       for(int i=d; i<N; i++)
         sh.connections[i] = sh.connections[i-d];
@@ -523,25 +523,25 @@ string primes(int i) {
 void connection_debugger() {
   cmode = sm::SIDE | sm::DIALOG_STRICT_X;
   gamescreen(0);
-  
+
   auto& last = debug_polys.back();
-  
+
   initquickqueue();
   for(auto& p: debug_polys) {
     int id = p.second;
-    
+
     shiftmatrix V = gmatrix[cwt.at] * p.first;
-    
+
     auto& sh = debugged.shapes[id].vertices;
-    
+
     for(auto& v: sh)
       curvepoint(v);
 
     curvepoint(sh[0]);
-    
+
     color_t col = colortables['A'][id];
     col = darkena(col, 0, 0xFF);
-    
+
     if(&p == &last) {
       vid.linewidth *= 2;
       queuecurve(V, 0xFFFF00FF, col, PPR::LINE);
@@ -555,37 +555,37 @@ void connection_debugger() {
   quickqueue();
 
   dialog::init(XLAT("connection debugger"));
-  
+
   dialog::addInfo(debugged.name);
   dialog::addHelp(debugged.comment);
-  
+
   dialog::addBreak(50);
 
   dialog::addInfo("face index " + its(last.second));
 
-  dialog::addBreak(50);  
-  
+  dialog::addBreak(50);
+
   auto& sh = debugged.shapes[last.second];
   int N = isize(sh.edges);
   for(int k=0; k<N; k++) {
     auto con = sh.connections[k];
     string cap = its(k) + primes(last.second) + " -> " + its(get<1>(con)) + primes(get<0>(con)) + (get<2>(con) ? " (m) " : "");
     dialog::addSelItem(cap, "go", '0' + k);
-    
+
     dialog::add_action([k, last, con] {
       if(euclid) cgflags |= qAFFINE;
       debug_polys.emplace_back(last.first * get_adj(debugged, last.second, k, -1), get<0>(con));
       if(euclid) cgflags &= ~qAFFINE;
       });
-    
-    }    
+
+    }
 
   dialog::addItem("undo", 'u');
   dialog::add_action([] {
     if(isize(debug_polys) > 1)
       debug_polys.pop_back();
     });
-  
+
   dialog::addBack();
   dialog::display();
 
@@ -609,9 +609,9 @@ EX hrmap *current_altmap;
 heptagon *build_child(heptspin p, pair<int, int> adj);
 
 EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int xdl) {
-  
+
   auto& sh = c.shapes[t];
-  
+
   int dr = gmod(dl+1, sh.size());
 
   auto& co = sh.connections[dl];
@@ -625,17 +625,17 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int xdl) {
   hyperpoint vl = sh.vertices[dl];
   hyperpoint vr = sh.vertices[dr];
   hyperpoint vm = mid(vl, vr);
-      
+
   transmatrix rm = gpushxto0(vm);
-  
+
   hyperpoint xvl = xsh.vertices[xdl];
   hyperpoint xvr = xsh.vertices[xdr];
   hyperpoint xvm = mid(xvl, xvr);
-  
+
   transmatrix xrm = gpushxto0(xvm);
-  
+
   transmatrix Res = rgpushxto0(vm) * rspintox(rm*vr);
-    
+
   if(cgflags & qAFFINE) {
     ld sca = hdist(vl, vr) / hdist(xvl, xvr);
     transmatrix Tsca = Id;
@@ -644,22 +644,22 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int xdl) {
     auto& ss = sh.stretch_shear[dl];
     Tsca[0][1] = ss.first * ss.second * sca;
     Tsca[1][1] *= ss.first;
-    
+
     Res = Res * Tsca;
     }
 
   if(m) Res = Res * MirrorX;
   Res = Res * spintox(xrm*xvl) * xrm;
-  
+
   if(m) swap(vl, vr);
-  
+
   if(hdist(vl, Res*xvr) + hdist(vr, Res*xvl) > .1) {
-    println(hlog, "s1 = ", kz(spintox(rm*vr)), " s2 = ", kz(rspintox(xrm*xvr)));    
-    println(hlog, tie(t, dl), " = ", kz(Res));    
+    println(hlog, "s1 = ", kz(spintox(rm*vr)), " s2 = ", kz(rspintox(xrm*xvr)));
+    println(hlog, tie(t, dl), " = ", kz(Res));
     println(hlog, hdist(vl, Res * xvr), " # ", hdist(vr, Res * xvl));
     exit(3);
     }
-        
+
   return Res;
   }
 
@@ -674,19 +674,19 @@ struct hrmap_arbi : hrmap {
     origin->c7 = newCell(origin->type, origin);
 
     heptagon *alt = NULL;
-    
+
     if(hyperbolic) {
-      dynamicval<eGeometry> g(geometry, gNormal); 
+      dynamicval<eGeometry> g(geometry, gNormal);
       alt = init_heptagon(S7);
       alt->s = hsOrigin;
       alt->alt = alt;
-      current_altmap = newAltMap(alt); 
+      current_altmap = newAltMap(alt);
       }
-    
+
     transmatrix T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * Id;
     arbi_matrix[origin] = make_pair(alt, T);
     altmap[alt].emplace_back(origin, T);
-  
+
     cgi.base_distlimit = 0;
     celllister cl(origin->c7, 1000, 200, NULL);
     ginf[geometry].distlimit[0] = cgi.base_distlimit = cl.dists.back();
@@ -698,41 +698,41 @@ struct hrmap_arbi : hrmap {
     altmap.clear();
     arbi_matrix.clear();
     if(current_altmap) {
-      dynamicval<eGeometry> g(geometry, gNormal);       
+      dynamicval<eGeometry> g(geometry, gNormal);
       delete current_altmap;
       current_altmap = NULL;
       }
     }
   void verify() override { }
 
-  transmatrix adj(heptagon *h, int dl) override { 
+  transmatrix adj(heptagon *h, int dl) override {
     return get_adj(current_or_slided(), id_of(h), dl, h->c.move(dl) ? h->c.spin(dl) : -1);
     }
 
   heptagon *create_step(heptagon *h, int d) override {
-  
+
     dynamicval<bool> sl(using_slided, false);
     int t = id_of(h);
-  
+
     auto& sh = current.shapes[t];
-    
+
     auto& co = sh.connections[d];
-    
+
     int xt = get<0>(co);
     int e = get<1>(co);
     int m = get<2>(co);
     auto& xsh = current.shapes[xt];
-    
+
     if(cgflags & qAFFINE) {
       set<heptagon*> visited;
-      
+
       vector<pair<heptagon*, transmatrix> > v;
-      
+
       visited.insert(h);
       v.emplace_back(h, Id);
-      
+
       transmatrix goal = adj(h, d);
-      
+
       for(int i=0; i<affine_limit && i < isize(v); i++) {
         transmatrix T = v[i].second;
         heptagon *h2 = v[i].first;
@@ -748,32 +748,32 @@ struct hrmap_arbi : hrmap {
           v.emplace_back(h3, T * adj(h2, i));
           }
         }
-      
+
       auto h1 = init_heptagon(current.shapes[xt].size());
       h1->distance = h->distance + 1;
       h1->zebraval = xt;
       h1->c7 = newCell(h1->type, h1);
       h1->emeraldval = h->emeraldval ^ m;
       h->c.connect(d, h1, e, m);
-      
+
       return h1;
       }
 
     const auto& p = arbi_matrix[h];
-    
+
     heptagon *alt = p.first;
-    
+
     transmatrix T = p.second * adj(h, d);
-    
+
     if(hyperbolic) {
-      dynamicval<eGeometry> g(geometry, gNormal); 
+      dynamicval<eGeometry> g(geometry, gNormal);
       dynamicval<hrmap*> cm(currentmap, current_altmap);
       // transmatrix U = T;
       current_altmap->virtualRebase(alt, T);
       // U = U * inverse(T);
       }
     fixmatrix(T);
-    
+
     if(euclid) {
       /* hash the rough coordinates as heptagon* alt */
       size_t s = size_t(T[0][LDIM]+.261) * 124101 + size_t(T[1][LDIM]+.261) * 82143;
@@ -801,18 +801,18 @@ struct hrmap_arbi : hrmap {
     h1->c7 = newCell(h1->type, h1);
     h1->emeraldval = h->emeraldval ^ m;
     h->c.connect(d, h1, e, m);
-    
+
     arbi_matrix[h1] = make_pair(alt, T);
-    altmap[alt].emplace_back(h1, T);    
+    altmap[alt].emplace_back(h1, T);
     return h1;
     }
-  
+
   transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
     return relative_matrix_recursive(h2, h1);
     }
 
   transmatrix adj(cell *c, int dir) override { return adj(c->master, dir); }
-  
+
   ld spin_angle(cell *c, int d) override { return SPIN_NOT_AVAILABLE; }
 
   int shvid(cell *c) override {
@@ -842,7 +842,7 @@ EX void run(string fname) {
      set_geometry(g);
      set_variation(v);
      current = t;
-     start_poly_debugger(poly);     
+     start_poly_debugger(poly);
      string help = poly.generate_error();
      showstartmenu = false;
      for(auto& p: poly.params)
@@ -857,7 +857,7 @@ EX void run(string fname) {
      addMessage("failed: " + ex.s);
      }
   catch(connection_debug_request& cr) {
-    set_geometry(g);     
+    set_geometry(g);
     debugged = current;
     current = t;
     ensure_geometry(cr.c);
@@ -906,14 +906,14 @@ EX void set_sliders() {
   dialog::display();
   }
 
-#if CAP_COMMANDLINE  
+#if CAP_COMMANDLINE
 int readArgs() {
   using namespace arg;
-           
+
   if(0) ;
   else if(argis("-tes") || argis("-arbi")) {
     PHASEFROM(2);
-    shift(); 
+    shift();
     run(args());
     }
   else if(argis("-arb-legacy")) {
@@ -954,7 +954,7 @@ EX bool pseudohept(cell *c) {
   }
 
 EX void choose() {
-  dialog::openFileDialog(tes, XLAT("open a tiling"), ".tes", 
+  dialog::openFileDialog(tes, XLAT("open a tiling"), ".tes",
   [] () {
     run(tes);
     return true;
@@ -963,7 +963,7 @@ EX void choose() {
 
 #if MAXMDIM >= 4
 auto hooksw = addHook(hooks_swapdim, 100, [] {
-  for(auto& p: {&current, &slided}) 
+  for(auto& p: {&current, &slided})
     for(auto& s: p->shapes)
       for(auto& v: s.vertices)
         swapmatrix(v);

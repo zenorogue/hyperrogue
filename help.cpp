@@ -89,14 +89,14 @@ void buildHelpText() {
   DEBBI(DF_GRAPH, ("buildHelpText"));
 
   help = XLAT("Welcome to HyperRogue");
-#if ISANDROID  
+#if ISANDROID
   help += XLAT(" for Android");
 #endif
 #if ISIOS
   help += XLAT(" for iOS");
 #endif
   help += XLAT("! (version %1)\n\n", VER);
-  
+
   help += XLAT(
     "You have been trapped in a strange, non-Euclidean world. Collect as much treasure as possible "
     "before being caught by monsters. The more treasure you collect, the more "
@@ -105,30 +105,30 @@ void buildHelpText() {
     );
   help += XLAT(" (press ESC for some hints about it).");
   help += "\n\n";
-  
+
   if(!shmup::on && !hardcore)
     help += XLAT(
       "You can fight most monsters by moving into their location. "
       "The monster could also kill you by moving into your location, but the game "
       "automatically cancels all moves which result in that.\n\n"
       );
-      
+
   if(shmup::on) {
     help += XLAT(
       "Shmup (shoot'em up) mode: You can play a hyperbolic shoot'em up game. The game is based "
       "on the usual turn-based grid-based HyperRogue, but there are some changes. You fight by "
       "throwing knives, and you have three extra lives. There are no allies, so all Orbs "
       "related to allies give you extra lives instead (up to 5). Some other rules have been "
-      "adapted too.\n\n");  
+      "adapted too.\n\n");
     }
-  
+
   if(shmup::on && multi::players > 1) {
     help += XLAT(
       "Multiplayer: Play cooperatively (locally); treasures, kills, and deaths are calculated "
       "for each player too, for more competitive play. Orbs and treasures are shared, orbs drain "
       "faster, knives recharge slower, and player characters are not allowed to separate.\n\n");
     }
-  
+
   if(multi::players > 1 && !shmup::on) {
     help += XLAT(
       "Turn-based multiplayer: Turns are executed in parallel. A player can leave the game "
@@ -139,10 +139,10 @@ void buildHelpText() {
     help += XLATN(iinf[itOrbFriend].name); help += ", ";
     help += XLATN(iinf[itOrbUndeath].name); help += ", ";
     help += XLATN(iinf[itOrbTeleport].name); help += ", ";
-    help += XLATN(iinf[itOrbSafety].name); help += "\n\n";      
+    help += XLATN(iinf[itOrbSafety].name); help += "\n\n";
     }
 
-#if CAP_INV    
+#if CAP_INV
   if(inv::on)
   help += XLAT(
     inv::helptext
@@ -157,7 +157,7 @@ void buildHelpText() {
     "this type of Orbs starts appearing in other lands as well. Press 'o' to "
     "get the details of all the Lands.\n\n");
   help += "\n\n";
-    
+
 #if ISMOBILE
   help += XLAT(
     "Usually, you move by touching somewhere on the map; you can also touch one "
@@ -178,21 +178,21 @@ void buildHelpText() {
   help += XLAT("(You can also use right Shift)\n\n");
 #endif
 #endif
-  help += XLAT("See more on the website: ") 
+  help += XLAT("See more on the website: ")
     + "http//roguetemple.com/z/hyper/\n\n";
-  
+
 #if CAP_TOUR
   help += XLAT("Try the Guided Tour to help with understanding the "
     "geometry of HyperRogue (menu -> special modes).\n\n");
 #endif
-  
+
   help += XLAT("Still confused? Read the FAQ on the HyperRogue website!\n\n");
-  
+
   help_extensions.clear();
-  
+
   help_extensions.push_back(help_extension{'c', XLAT("credits"), [] () { buildCredits(); }});
 #if ISMOBILE == 0
-  help_extensions.push_back(help_extension{'k', XLAT("advanced keyboard shortcuts"), [] () { 
+  help_extensions.push_back(help_extension{'k', XLAT("advanced keyboard shortcuts"), [] () {
     help = "";
     for(string s: normal_keys) help += s, help += "\n";
     for(string s: extra_keys) help += s, help += "\n";
@@ -282,7 +282,7 @@ void describeOrb(string& help, const orbinfo& oi) {
   eItem tr = treasureType(oi.l);
   eItem tt = treasureTypeUnlock(cwt.at->land, oi.orb);
   if(olr == olrGuest) {
-    for(auto& oi1: orbinfos) 
+    for(auto& oi1: orbinfos)
       if((oi1.flags & orbgenflags::NATIVE) && oi1.orb == oi.orb)
         tr = treasureType(oi1.l);
     }
@@ -290,16 +290,16 @@ void describeOrb(string& help, const orbinfo& oi) {
   int t = items[tr] * landMultiplier(oi.l);
   if(t >= 25)
   if(olr == olrPrize25 || olr == olrPrize3 || olr == olrGuest || olr == olrMonster || olr == olrAlways) {
-    for(auto& oi1: orbinfos) 
+    for(auto& oi1: orbinfos)
       if((oi1.flags & orbgenflags::NATIVE) && oi1.orb == oi.orb) {
-        help += XLAT("\nSpawn rate (as prize Orb): %1%/%2\n", 
+        help += XLAT("\nSpawn rate (as prize Orb): %1%/%2\n",
           its(int(.5 + 100 * orbprizefun(t))),
           its(oi1.gchance));
         }
     }
   if(t >= 10)
   if(olr == olrHub) {
-    help += XLAT("\nSpawn rate (in Hubs): %1%/%2\n", 
+    help += XLAT("\nSpawn rate (in Hubs): %1%/%2\n",
       its(int(.5 + 100 * orbcrossfun(t))),
       its(oi.gchance));
     }
@@ -328,7 +328,7 @@ string forbidden_unmarked() {
 
 string hyperstone_optional = "Completing the quest in this land is not necessary for the Hyperstone Quest.";
 
-string power_help = 
+string power_help =
   "The amount of Orbs obtained by using Orbs of Mirroring is "
   "multiplied by sqrt(1+p/20), where p is the number of Powerstones "
   "collected. This also affects the mirrorings which happened before "
@@ -337,27 +337,27 @@ string power_help =
 EX string generateHelpForItem(eItem it) {
 
    string help = helptitle(XLATN(iinf[it].name), iinf[it].color);
-   
+
    #if CAP_CRYSTAL
    if(it == itCompass && cryst)
      help += crystal::compass_help();
    else
    #endif
      help += XLAT(iinf[it].help);
-   
+
    if(it == itSavedPrincess || it == itOrbLove) if(!inv::on)
      help += princessReviveHelp();
-     
+
    if(it == itTrollEgg)
      help += XLAT("\n\nAfter the Trolls leave, you have 750 turns to collect %the1, or it gets stolen.", it);
-   
+
    if(it == itIvory || it == itAmethyst || it == itLotus || it == itMutant) {
      help += XLAT(
        "\n\nEasy %1 might disappear when you collect more of its kind.", it);
      if(it != itMutant) help += XLAT(
        " You need to go deep to collect lots of them.");
      }
-     
+
 #if ISMOBILE
    if(it == itOrbSafety)
      help += XLAT("This might be very useful for devices with limited memory.");
@@ -368,7 +368,7 @@ EX string generateHelpForItem(eItem it) {
 
    if(isRangedOrb(it)) {
      help += XLAT("\nThis is a ranged Orb. ");
-#if ISMOBILE   
+#if ISMOBILE
      if(vid.shifttarget&2)
        help += XLAT("\nRanged Orbs can be targeted by long touching the desired location.");
      else
@@ -397,9 +397,9 @@ EX string generateHelpForItem(eItem it) {
        "from electricity. It does not let you go through deadly terrain, but "
        "if you are attacked with fire, it lets you stay in place in it.");
 
-  if(it == itOrbWinter) 
+  if(it == itOrbWinter)
     help += XLAT("\n\nThis orb also allows you to collect items encased in ice.");
-  
+
   if(it == itOrbIntensity && inv::on)
     help += XLAT("\n\nIn the Orb Strategy Mode, the effect is increased to +100%.");
 
@@ -415,22 +415,22 @@ EX string generateHelpForItem(eItem it) {
     help += XLAT("\n\nAdditionally, your allies are protected from your indirect attacks.");
     }
 
-#if CAP_INV  
+#if CAP_INV
   if(inv::on) {
     if(it == itOrbYendor || it == itHell) {
       help += XLAT(
         "\n\nIn the Orb Strategy Mode, Orbs of Yendor appear in Hell after "
         "you collect 25 Demon Daisies in Hell, in Crossroads/Ocean after you collect 50, "
-        "and everywhere after you collect 100.");  
+        "and everywhere after you collect 100.");
       }
-    
+
 /*    if(it == itBone || it == itGreenStone) {
       help += XLAT(
         "\n\nIn the Orb Strategy Mode, dead orbs are available once you collect "
         "10 Necromancer Totems in the Graveyard."
         );
       } */
-    
+
     if(it == itFeather || it == itOrbSafety) {
       help += XLAT(
         "\n\nIn the Orb Strategy Mode, Orbs of Safety can be gained by "
@@ -440,17 +440,17 @@ EX string generateHelpForItem(eItem it) {
         "and in the Prairie."
         );
       }
-  
+
     if(it == itOrbYendor || it == itHolyGrail)
       help += XLAT(
         "\n\nCollect %the1 to gain an extra Orb of the Mirror. "
         "You can gain further Orbs of the Mirror by collecting 2, 4, 8...",
         it
-        );  
-    
+        );
+
     if(it == itPower)
       help += "\n\n" + XLAT(power_help);
-    
+
     if(it == itOrbLuck)
       help += XLAT(
         "\n\nIn the Orb Strategy Mode, the Orb of Luck also "
@@ -463,18 +463,18 @@ EX string generateHelpForItem(eItem it) {
         "\n\nIn the Orb Strategy Mode, each 25 Necromancer's Totems "
         "you are given a random offensive Orb."
         );
-    
+
     if(inv::remaining[it] || inv::usedup[it]) help += "\n\n" + inv::osminfo(it);
-    inv::whichorbinfo = it;  
+    inv::whichorbinfo = it;
     inv::compute();
     if(inv::orbinfoline != "") help += "\n\n" + inv::orbinfoline;
     if(inv::extra != "") help += "\n\nExtras:" + inv::extra;
     }
 #endif
-  
+
   if(it == itOrbLuck) {
     help += XLAT("\n\nAdditionally, the probabilities of generating terrain features are subtly changed in the following lands:");
-    
+
     int cnt = 0;
     for(int i=0; i<landtypes; i++) {
       eLand land = eLand(i);
@@ -490,7 +490,7 @@ EX string generateHelpForItem(eItem it) {
       if(oi.orb == it && oi.is_native()) describeOrb(help, oi);
       }
     }
-  
+
   if(itemclass(it) == IC_TREASURE) {
     for(auto& oi: orbinfos) {
       if(treasureType(oi.l) == it) {
@@ -507,13 +507,13 @@ EX string generateHelpForItem(eItem it) {
         }
       }
     }
-  
+
   if(it == itOrb37 && (S7 != 7 || !BITRUNCATED))
     help += "\n\n" + other_geometry() + forbidden_unmarked();
 
   if(it == itOrbLava && (S7 != 7 || !BITRUNCATED))
     help += "\n\n" + other_geometry() + forbidden_unmarked();
-  
+
   if(among(it, itOrbSide2, itOrbSide3) && !among(S7, 6, 7))
     help += "\n\n" + other_geometry() + XLAT("This orb lets you attack adjacent cells %1 steps from the primary target.", its(it - itOrbSide1 + 1));
 
@@ -524,7 +524,7 @@ EX string generateHelpForItem(eItem it) {
 
   if(in_full_game() && !required_for_hyperstones(it) && it != itHyperstone)
     help += "\n\n" + XLAT(hyperstone_optional);
-    
+
 #if CAP_DAILY
   if(daily::on && it == itOrbLove)
     help += "\n\n" + XLAT("The Orb of Love gives no bonus score in the Strange Challenge.");
@@ -552,12 +552,12 @@ void addMinefieldExplanation(string& s) {
 EX string generateHelpForWall(eWall w) {
 
   string s = helptitle(XLATN(winf[w].name), winf[w].color);
-   
+
   s += XLAT(winf[w].help);
   if(w == waMineMine || w == waMineUnknown || w == waMineOpen)
     addMinefieldExplanation(s);
   if(isThumper(w)) s += pushtext(w);
-  if((w == waClosePlate || w == waOpenPlate) && PURE) 
+  if((w == waClosePlate || w == waOpenPlate) && PURE)
     s += "\n\n(For the heptagonal mode, the radius has been reduced to 2 for closing plates.)";
   return s;
   }
@@ -571,7 +571,7 @@ void buteol(string& s, int current, int req) {
 
 EX string generateHelpForMonster(eMonster m) {
   string s = helptitle(XLATN(minf[m].name), minf[m].color);
-  
+
   if(m == moPlayer) {
 #if CAP_TOUR
     if(tour::on || peace::on)
@@ -588,10 +588,10 @@ EX string generateHelpForMonster(eMonster m) {
         "and not as huge as the Mutant Ivy from the Clearing; however, "
         "they are very dangerous because of their intelligence, "
         "and access to magical powers.\n\n");
-    
+
     if(cheater)
       s += XLAT("Actually, their powers appear god-like...\n\n");
-    
+
     else if(!hardcore)
       s += XLAT(
        "Rogues will never make moves which result in their immediate death. "
@@ -599,24 +599,24 @@ EX string generateHelpForMonster(eMonster m) {
        "home world at any moment, taking the treasures forever... but "
        "at least they will not steal anything further!\n\n"
        );
-    
+
     if(!euclid)
       s += XLAT(
         "Despite this intelligence, Rogues appear extremely surprised "
         "by the most basic facts about geometry. They must come from "
         "some really strange world.\n\n"
         );
-    
+
     if(shmup::on)
       s += XLAT("In the Shoot'em Up mode, you are armed with thrown Knives.");
-    
+
     return s;
     }
 
-  s += XLAT(minf[m].help);      
+  s += XLAT(minf[m].help);
   if(m == moPalace || m == moSkeleton)
-    s += pushtext(m);  
-  if(m == moTroll) s += XLAT(trollhelp2);  
+    s += pushtext(m);
+  if(m == moTroll) s += XLAT(trollhelp2);
 
   if(isMonsterPart(m))
     s += XLAT("\n\nThis is a part of a monster. It does not count for your total kills.", m);
@@ -626,10 +626,10 @@ EX string generateHelpForMonster(eMonster m) {
 
   if(m == moTortoise)
     s += XLAT("\n\nTortoises are not monsters! They are just annoyed. They do not count for your total kills.", m);
-  
+
   if(isGhost(m))
     s += XLAT("\n\nA Ghost never moves to a cell which is adjacent to another Ghost of the same kind.", m);
-    
+
   if(m == moMutant) {
     using namespace clearing;
     if(direct)
@@ -639,14 +639,14 @@ EX string generateHelpForMonster(eMonster m) {
     if(imputed.nonzero())
       s += XLAT("\n\nLeaves cut offscreen (approximately): %1", imputed.get_str(10000));
     }
-  
+
   eItem it = frog_power(m);
   if(it)
     s += XLAT("\n\nThis Frog uses the power of %the1. You get 5 charges yourself for killing it.", it);
-    
+
   if(m == moBat || m == moEagle)
     s += XLAT("\n\nFast flying creatures may attack or go against gravity only in their first move.", m);
-  
+
   if(m == moAltDemon)
     s += "\n\n" + other_geometry_land() + forbidden_unmarked();
 
@@ -661,7 +661,7 @@ EX string generateHelpForMonster(eMonster m) {
 
 void add_reqs(eLand l, string& s) {
   back:
-  
+
   switch(l) {
     #define LAND(a,b,c,d,e,f,g) case c:
     #define REQ(x) x return;
@@ -692,7 +692,7 @@ void add_reqs(eLand l, string& s) {
 
 EX string generateHelpForLand(eLand l) {
   string s = helptitle(XLATN(linf[l].name), linf[l].color);
-  
+
   if(l == laPalace) s += princedesc();
 
   s += XLAT(linf[l].help);
@@ -700,18 +700,18 @@ EX string generateHelpForLand(eLand l) {
   if(l == laMinefield) addMinefieldExplanation(s);
 
   s += "\n\n";
-  
+
   add_reqs(l, s);
 
   if(l == laPower && inv::on)
     help += XLAT(power_help) + "\n\n";
-  
-  if(isCoastal(l)) 
+
+  if(isCoastal(l))
     s += XLAT("Coastal region -- connects inland and aquatic regions.\n");
-    
-  if(isPureSealand(l)) 
+
+  if(isPureSealand(l))
     s += XLAT("Aquatic region -- accessible only from coastal regions and other aquatic regions.\n");
-    
+
   if(in_full_game() && !required_for_hyperstones(treasureType(l)) && !isCrossroads(l))
     s += XLAT(hyperstone_optional);
 
@@ -727,23 +727,23 @@ EX string generateHelpForLand(eLand l) {
     s += XLAT("Unavailable in the shmup mode.\n");
     s += XLAT("Unavailable in the multiplayer mode.\n");
     }
-  
+
   /* if(noChaos(l))
     s += XLAT("Unavailable in the Chaos mode.\n"); */
-  
+
   if(l == laWildWest)
     s += XLAT("Bonus land, available only in some special modes.\n");
-  
+
   if(l == laWhirlpool)
     s += XLAT("Orbs of Safety always appear here, and may be used to escape.\n");
 
   /* if(isHaunted(l) || l == laDungeon)
     s += XLAT("You may be unable to leave %the1 if you are not careful!\n", l); */
-    
+
   if(l == laStorms) {
     if(elec::lightningfast == 0) s += XLAT("\nSpecial conduct (still valid)\n");
     else s += XLAT("\nSpecial conduct failed:\n");
-    
+
     s += XLAT(
       "Avoid escaping from a discharge (\"That was close\").");
     }
@@ -761,7 +761,7 @@ EX string generateHelpForLand(eLand l) {
   if(l == laCamelot && cryst) {
     if(!crystal::used_compass_inside) s += XLAT("\nSpecial conduct (still valid)\n");
     else s += XLAT("\nSpecial conduct failed:\n");
-    
+
     s += XLAT(
       "Do not use compases.\n\n");
 
@@ -773,12 +773,12 @@ EX string generateHelpForLand(eLand l) {
   auto lv = land_validity(l);
   if(lv.flags & lv::display_in_help)
     s += "\n\n" + XLAT(lv.msg);
-  
+
 #if !ISMOBILE
   if(l == laCA) {
     s += XLAT("\n\nOption -mineadj 1 can be added for Moore neighborhoods.");
     s += XLAT("\n\nHint: use 'm' to toggle cells quickly");
-    }  
+    }
 #endif
 
   return s;
@@ -813,7 +813,7 @@ void gotoHelpFor(eMonster m) {
 
 EX void appendHelp(string s) {
   auto h = helpgenerator;
-  if(help == "HELPGEN") 
+  if(help == "HELPGEN")
     bygen([h,s] { h(); help += s; });
   else
     help += s;
@@ -824,7 +824,7 @@ int windtotal;
 
 EX hookset<void(cell*)> hooks_mouseover;
 
-template<class T> void set_help_to(T t) { 
+template<class T> void set_help_to(T t) {
   help = bygen([t] { gotoHelpFor(t); });
   }
 
@@ -837,19 +837,19 @@ EX void describeMouseover() {
   else if(c->wall != waInvisibleFloor) {
     out = XLAT1(linf[c->land].name);
     set_help_to(c->land);
-    
+
     if(WDIM == 3 && isGravityLand(c->land)) out += " [" + its(gravityLevel(c)) + "]";
-    
+
     if(c->land == laTemple && c->master->alt) {
       int lev = -celldistAlt(c);
       int ts = temple_layer_size();
       out += " (" + its(lev/ts+1) + ":" + its(lev%ts) + ")";
       }
-    if(isIcyLand(c)) 
+    if(isIcyLand(c))
       out += " (" + fts(heat::celsius(c)) + " °C)";
     if(c->land == laBrownian && c->wall == waNone)
       out += XLAT(" (level %1)", its(snakelevel(c)));
-    if(c->land == laDryForest && c->landparam) 
+    if(c->land == laDryForest && c->landparam)
       out += " (" + its(c->landparam)+"/10)";
     if(c->land == laOcean && ls::any_chaos())
       out += " (" + its(c->CHAOSPARAM)+"S"+its(c->SEADIST)+"L"+its(c->LANDDIST)+")";
@@ -862,7 +862,7 @@ EX void describeMouseover() {
         for(; t < 1000 && b == (c->landparam >= tide[(turncount+t-1) % tidalsize]); t++) ;
         if(b)
           out += " (" + turnstring(t) + XLAT(" to surface") + ")";
-        else 
+        else
           out += " (" + turnstring(t) + XLAT(" to submerge") + ")";
         }
       }
@@ -892,7 +892,7 @@ EX void describeMouseover() {
       for(int s=1; s<SHSIZE; s++) {
         bool shadow = false;
         for(int p: player_indices())
-          if(shpos[(cshpos+s)%SHSIZE][p] == c) 
+          if(shpos[(cshpos+s)%SHSIZE][p] == c)
             shadow = true;
         if(shadow) {
           if(shadowtimes == "")
@@ -908,10 +908,10 @@ EX void describeMouseover() {
     if(buggyGeneration) {
       char buf[80]; sprintf(buf, " %p H=%d M=%d", hr::voidp(c), c->landparam, c->mpdist); out += buf;
       }
-    
+
     if(randomPatternsMode)
       out += " " + describeRPM(c->land);
-      
+
     if(cheater && euc::in(2)) {
       auto co = euc2_coordinates(c);
       out += " (" + its(co.first);
@@ -925,7 +925,7 @@ EX void describeMouseover() {
       for(int i=1; i<WDIM; i++) out += "," + its(co[i]);
       out += ")";
       }
-    
+
     #if CAP_CRYSTAL
     if(geometry == gCrystal344 && cheater && crystal::view_coordinates) {
       out += " (";
@@ -937,41 +937,41 @@ EX void describeMouseover() {
       out += ")";
       }
     #endif
-      
+
     if(c->wall && !(c->wall == waChasm && c->land == laDual && ctof(c)) &&
       !(c->land == laMemory) &&
-      !((c->wall == waFloorA || c->wall == waFloorB) && c->item)) { 
-      out += ", "; out += XLAT1(winf[c->wall].name); 
-      
+      !((c->wall == waFloorA || c->wall == waFloorB) && c->item)) {
+      out += ", "; out += XLAT1(winf[c->wall].name);
+
       if(c->wall == waRose) out += " (" + its(7-rosephase) + ")";
       if(c->wall == waTerraWarrior) out += " (" + its(c->landparam) + ")";
-      
+
       if((c->wall == waBigTree || c->wall == waSmallTree) && c->land != laDryForest)
-        help = 
+        help =
           "Trees in this forest can be chopped down. Big trees take two turns to chop down.";
-      else 
+      else
         if(c->wall != waSea && c->wall != waPalace && c->wall != waDeadfloor)
         if(!((c->wall == waCavefloor || c->wall == waCavewall) && (c->land == laEmerald || c->land == laCaves)))
         if(!((isAlch(c->wall) && c->land == laAlchemist)))
           set_help_to(c->wall);
       }
-    
+
     if(isActivable(c)) out += XLAT(" (touch to activate)");
-    
+
     if(hasTimeout(c)) out += " [" + turnstring(c->wparam) + "]";
-    
+
     if(isReptile(c->wall))
       out += " [" + turnstring((unsigned char) c->wparam) + "]";
-      
+
     #if CAP_COMPLEX2
     if(c->monst == moKnight)
       out += XLAT(", %1 the Knight", camelot::knight_name(c));
     #else
     if(0) ;
     #endif
-  
+
     else if(c->monst) {
-      out += ", "; out += XLAT1(minf[c->monst].name); 
+      out += ", "; out += XLAT1(minf[c->monst].name);
       if(hasHitpoints(c->monst))
         out += " (" + its(c->hitpoints)+" HP)";
       if(isMutantIvy(c))
@@ -979,27 +979,27 @@ EX void describeMouseover() {
       else if(c->stuntime)
         out += " (" + its(c->stuntime) + "*)";
 
-      if(c->monst == moTortoise && tortoise::seek()) 
+      if(c->monst == moTortoise && tortoise::seek())
         out += " " + tortoise::measure(tortoise::getb(c));
-        
+
       set_help_to(c->monst);
       }
-  
+
     if(c->item && !itemHiddenFromSight(c)) {
-      out += ", "; 
-      out += XLAT1(iinf[c->item].name); 
+      out += ", ";
+      out += XLAT1(iinf[c->item].name);
       if(c->item == itBarrow) out += " (x" + its(c->landparam) + ")";
       #if CAP_COMPLEX2
-      if(c->land == laHunting) {      
+      if(c->land == laHunting) {
         int i = ambush::size(c, c->item);
         if(i) out += " (" + XLAT("ambush:") + " " + its(i) + ")";
         }
       #endif
-      if(c->item == itBabyTortoise && tortoise::seek()) 
+      if(c->item == itBabyTortoise && tortoise::seek())
         out += " " + tortoise::measure(tortoise::babymap[c]);
       if(!c->monst) set_help_to(c->item);
       }
-    
+
     if(isPlayerOn(c) && !shmup::on) out += XLAT(", you"), help = generateHelpForMonster(moPlayer);
 
     shmup::addShmupHelp(out);
@@ -1009,12 +1009,12 @@ EX void describeMouseover() {
 
     if(rosedist(c) == 2)
       out += ", wave of scent (back)";
-    
+
     if(sword::at(c)) out += ", Energy Sword";
-    
+
     if(rosedist(c) || c->land == laRose || c->wall == waRose)
       appendHelp(string("\n\n") + rosedesc);
-    
+
     if(isWarped(c) && !isWarpedType(c->land))
       out += ", warped";
 
@@ -1024,7 +1024,7 @@ EX void describeMouseover() {
       if(S7 != 7 || !BITRUNCATED) if(c->item != itOrb37)
         appendHelp("\n\n" + other_geometry() + forbidden_unmarked());
       }
-    
+
     if(isElectricLand(c) || isElectricLand(cwt.at->land)) {
       using namespace elec;
       eCharge ch = getCharge(c);
@@ -1037,9 +1037,9 @@ EX void describeMouseover() {
   else {
     shmup::addShmupHelp(out);
     }
-    
+
   callhooks(hooks_mouseover, c);
-  
+
   if(mousey < vid.fsize * 3/2 && getcstat == '-' && !instat) getcstat = SDLK_F1;
   #if CAP_TOUR
   if(tour::on && !tour::texts) {
@@ -1071,7 +1071,7 @@ EX void showHelp() {
     dialog::init("help", forecolor, 120, 100);
     dialog::addHelp(help);
     }
-  
+
   for(auto& he: help_extensions) {
     if(he.subtext != "")
       dialog::addSelItem(he.text, he.subtext, he.key);
@@ -1079,12 +1079,12 @@ EX void showHelp() {
       dialog::addItem(he.text, he.key);
     dialog::lastItem().color = he.color;
     }
-  
+
   dialog::display();
-  
+
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
-    
+
     for(auto& he: help_extensions)
       if(uni == he.key) {
         // we need to copy he.action
@@ -1113,23 +1113,23 @@ EX void gotoHelp(const string& h) {
   if(help == "@") {
 
     if(callhandlers(false, hooks_default_help)) return;
-    
+
 #if CAP_RUG
     if(rug::rugged) {
       help = rug::makehelp();
-      
+
       help += "\n\n";
 
       for(string s: extra_keys_3d) help += s, help += "\n";
 
       help += "\n\n";
 
-      help_extensions.push_back(help_extension{'m', XLAT("Hypersian Rug menu"), [] () { popScreen(); rug::select(); }});    
-      help_extensions.push_back(help_extension{'h', XLAT("HyperRogue help"), [] () { buildHelpText(); }});    
+      help_extensions.push_back(help_extension{'m', XLAT("Hypersian Rug menu"), [] () { popScreen(); rug::select(); }});
+      help_extensions.push_back(help_extension{'h', XLAT("HyperRogue help"), [] () { buildHelpText(); }});
       return;
       }
 #endif
-  
+
     buildHelpText();
     }
   if(help == "HELPGEN") helpgenerator();
@@ -1150,11 +1150,11 @@ EX void subhelp(const string& h) {
 
 EX void gotoHelpFor(eLand l) {
   help = generateHelpForLand(l);
-  
+
   int beastcount = 0;
   for(int m0=0; m0<motypes; m0++)
     if(isNative(l, eMonster(m0)) && !nodisplay(eMonster(m0))) beastcount++;
-  
+
   auto listbeasts = [l] () {
     char nextmonster = 'a';
     for(int m0=0; m0<motypes; m0++) {
@@ -1170,14 +1170,14 @@ EX void gotoHelpFor(eLand l) {
         }
       }
     };
-  
-  if(beastcount > 3)       
-  help_extensions.push_back(help_extension{'b', XLAT("bestiary of %the1", l), [l, listbeasts] () { 
+
+  if(beastcount > 3)
+  help_extensions.push_back(help_extension{'b', XLAT("bestiary of %the1", l), [l, listbeasts] () {
     subhelp(helptitle(XLAT("bestiary of %the1", l), 0xC00000));
     listbeasts();
      }});
-  else listbeasts();  
-  
+  else listbeasts();
+
   if(l == laTortoise)
     help_extensions.push_back(help_extension{'s', XLAT("Galápagos shading"), [] () {
       tortoise::shading_enabled = !tortoise::shading_enabled;

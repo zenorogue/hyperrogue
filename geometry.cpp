@@ -89,8 +89,8 @@ struct escher_floorshape : floorshape {
 
 struct basic_textureinfo {
   int texture_id;
-  vector<glvertex> tvertices; 
-  vector<glvertex> colors; 
+  vector<glvertex> tvertices;
+  vector<glvertex> colors;
   };
 
 /** additional modules can add extra shapes etc. */
@@ -118,19 +118,19 @@ struct geometry_information {
 
   /** distance from heptagon center to adjacent cell center (either hcrossf or tessf) */
   ld crossf;
-  
+
   /** distance from heptagon center to small heptagon vertex */
   ld hexf;
-  
+
   /** distance from heptagon center to big heptagon vertex */
   ld hcrossf;
-  
+
   /** distance between adjacent hexagon vertices */
   ld hexhexdist;
-  
+
   /** distance between hexagon vertex and hexagon center */
   ld hexvdist;
-  
+
   /** distance between heptagon vertex and hexagon center (either hcrossf or something else) */
   ld hepvdist;
 
@@ -144,9 +144,9 @@ struct geometry_information {
 
   vector<vector<hyperpoint>> cellshape;
   vector<hyperpoint> vertices_only;
-  
+
   transmatrix spins[32], adjmoves[32];
-  
+
   vector<struct subcellshape> subshapes;
 
   ld adjcheck;
@@ -154,8 +154,8 @@ struct geometry_information {
   bool dirs_adjacent[32][32];
 
   ld ultra_mirror_dist, ultra_material_part, ultra_mirror_part;
-  
-  vector<transmatrix> ultra_mirrors;  
+
+  vector<transmatrix> ultra_mirrors;
 
   /** \brief for adjacent directions a,b, next_dir[a][b] is the next direction adjacent to a, in (counter?)clockwise order from b */
   int next_dir[32][32];
@@ -164,7 +164,7 @@ struct geometry_information {
   int xp_order, r_order, rx_order;
 
   transmatrix full_X, full_R, full_P;
-  
+
   /** for 2D geometries */
   vector<transmatrix> heptmove, hexmove, invhexmove;
 
@@ -191,9 +191,9 @@ struct geometry_information {
   transmatrix direct_tmatrix[14];
   transmatrix inverse_tmatrix[14];
 
-  /** a bitmask for hr::bt::use_direct_for */  
+  /** a bitmask for hr::bt::use_direct_for */
   int use_direct;
-  
+
   /** various parameters related to the 3D view */
   ld INFDEEP, BOTTOM, HELLSPIKE, LAKE, WALL, FLOOR, STUFF,
     SLEV[4], FLATEYE,
@@ -207,10 +207,10 @@ struct geometry_information {
   ld eyelevel_familiar, eyelevel_human, eyelevel_dog;
 
 #if CAP_SHAPES
-hpcshape 
+hpcshape
   shSemiFloorSide[SIDEPARS],
   shBFloor[2],
-  shWave[8][2],  
+  shWave[8][2],
   shCircleFloor,
   shBarrel,
   shWall[2], shMineMark[2], shBigMineMark[2], shFan,
@@ -218,25 +218,25 @@ hpcshape
   shSwitchDisk,
   shTower[11],
   shEmeraldFloor[6],
-  shSemiFeatherFloor[2], 
+  shSemiFeatherFloor[2],
   shSemiFloor[2], shSemiBFloor[2], shSemiFloorShadow,
   shMercuryBridge[2],
-  shTriheptaSpecial[14], 
+  shTriheptaSpecial[14],
   shCross, shGiantStar[2], shLake, shMirror,
   shHalfFloor[6], shHalfMirror[3],
-  shGem[2], shStar, shDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shRing,   
+  shGem[2], shStar, shDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shRing,
   shTinyBird, shTinyShark,
   shEgg,
   shSpikedRing, shTargetRing, shSawRing, shGearRing, shPeaceRing, shHeptaRing,
   shSpearRing, shLoveRing,
-  shFrogRing, 
+  shFrogRing,
   shPowerGearRing, shProtectiveRing, shTerraRing, shMoveRing, shReserved4, shMoonDisk,
   shDaisy, shTriangle, shNecro, shStatue, shKey, shWindArrow,
   shGun,
   shFigurine, shTreat,
   shElementalShard,
-  // shBranch, 
-  shIBranch, shTentacle, shTentacleX, shILeaf[3], 
+  // shBranch,
+  shIBranch, shTentacle, shTentacleX, shILeaf[3],
   shMovestar,
   shWolf, shYeti, shDemon, shGDemon, shEagle, shGargoyleWings, shGargoyleBody,
   shFoxTail1, shFoxTail2,
@@ -248,11 +248,11 @@ hpcshape
   shRatEye1, shRatEye2, shRatEye3,
   shDogStripes,
   shPBody, shPSword, shPKnife,
-  shFerocityM, shFerocityF, 
+  shFerocityM, shFerocityF,
   shHumanFoot, shHumanLeg, shHumanGroin, shHumanNeck, shSkeletalFoot, shYetiFoot,
   shMagicSword, shMagicShovel, shSeaTentacle, shKrakenHead, shKrakenEye, shKrakenEye2,
   shArrow,
-  shPHead, shPFace, shGolemhead, shHood, shArmor, 
+  shPHead, shPFace, shGolemhead, shHood, shArmor,
   shAztecHead, shAztecCap,
   shSabre, shTurban1, shTurban2, shVikingHelmet, shRaiderHelmet, shRaiderArmor, shRaiderBody, shRaiderShirt,
   shWestHat1, shWestHat2, shGunInHand,
@@ -271,7 +271,7 @@ hpcshape
   shBoatOuter, shBoatInner, shCompass1, shCompass2, shCompass3,
   shKnife, shTongue, shFlailMissile, shTrapArrow,
   shPirateHook, shPirateHood, shEyepatch, shPirateX,
-  // shScratch, 
+  // shScratch,
   shHeptaMarker, shSnowball, shHugeDisk, shSun, shNightStar, shEuclideanSky,
   shSkeletonBody, shSkull, shSkullEyes, shFatBody, shWaterElemental,
   shPalaceGate, shFishTail,
@@ -283,8 +283,8 @@ hpcshape
   shRatHead, shRatTail, shRatEyes, shRatCape1, shRatCape2,
   shWizardHat1, shWizardHat2,
   shTortoise[13][6],
-  shDragonLegs, shDragonTail, shDragonHead, shDragonSegment, shDragonNostril, 
-  shDragonWings, 
+  shDragonLegs, shDragonTail, shDragonHead, shDragonSegment, shDragonNostril,
+  shDragonWings,
   shSolidBranch, shWeakBranch, shBead0, shBead1,
   shBatWings, shBatBody, shBatMouth, shBatFang, shBatEye,
   shParticle[16], shAsteroid[8],
@@ -294,32 +294,32 @@ hpcshape
 
   shTrylobite, shTrylobiteHead, shTrylobiteBody,
   shTrylobiteFrontLeg, shTrylobiteRearLeg, shTrylobiteFrontClaw, shTrylobiteRearClaw,
-  
+
   shBullBody, shBullHead, shBullHorn, shBullRearHoof, shBullFrontHoof,
-  
+
   shButterflyBody, shButterflyWing, shGadflyBody, shGadflyWing, shGadflyEye,
 
-  shTerraArmor1, shTerraArmor2, shTerraArmor3, shTerraHead, shTerraFace, 
+  shTerraArmor1, shTerraArmor2, shTerraArmor3, shTerraHead, shTerraFace,
   shJiangShi, shJiangShiDress, shJiangShiCap1, shJiangShiCap2,
-  
+
   shPikeBody, shPikeEye,
-  
+
   shAsymmetric,
-  
+
   shPBodyOnly, shPBodyArm, shPBodyHand, shPHeadOnly,
-  
+
   shDodeca;
-  
+
   hpcshape shFrogRearFoot, shFrogFrontFoot, shFrogRearLeg, shFrogFrontLeg, shFrogRearLeg2, shFrogBody, shFrogEye, shFrogStripe, shFrogJumpFoot, shFrogJumpLeg;
 
-  hpcshape_animated 
-    shAnimatedEagle, shAnimatedTinyEagle, shAnimatedGadfly, shAnimatedHawk, shAnimatedButterfly, 
+  hpcshape_animated
+    shAnimatedEagle, shAnimatedTinyEagle, shAnimatedGadfly, shAnimatedHawk, shAnimatedButterfly,
     shAnimatedGargoyle, shAnimatedGargoyle2, shAnimatedBat, shAnimatedBat2;
-  
+
   hpcshape shTinyArrow;
 
   hpcshape shReserved[16];
-  
+
   int orb_inner_ring; //< for shDisk* shapes, the number of vertices in the inner ring
   int res1, res2;
 
@@ -327,7 +327,7 @@ hpcshape
 
   vector<hpcshape> shPlainWall3D, shWireframe3D, shWall3D, shMiniWall3D;
   vector<hyperpoint> walltester;
-  
+
   vector<int> wallstart;
   vector<transmatrix> raywall;
 
@@ -335,11 +335,11 @@ hpcshape
   vector<struct escher_floorshape*> all_escher_floorshapes;
 
   plain_floorshape
-    shFloor, 
+    shFloor,
     shMFloor, shMFloor2, shMFloor3, shMFloor4, shFullFloor,
     shBigTriangle, shTriheptaFloor, shBigHepta;
-  
-  escher_floorshape    
+
+  escher_floorshape
     shStarFloor, shCloudFloor, shCrossFloor, shChargedFloor,
     shSStarFloor, shOverFloor, shTriFloor, shFeatherFloor,
     shBarrowFloor, shNewFloor, shTrollFloor, shButterflyFloor,
@@ -363,30 +363,30 @@ hpcshape
   hpcshape *last;
 
   int SD3, SD6, SD7, S12, S14, S21, S28, S42, S36, S84;
-  
+
   vector<pair<int, cell*>> walloffsets;
-  
+
   vector<array<int, 3>> symmetriesAt;
-  
+
   struct cellrotation_t {
     transmatrix M;
     vector<int> mapping;
     int inverse_id;
     };
-  
-  vector<cellrotation_t> cellrotations;  
-  
+
+  vector<cellrotation_t> cellrotations;
+
   #ifndef SCALETUNER
   static constexpr
   #endif
   double bscale7 = 1, brot7 = 0, bscale6 = 1, brot6 = 0;
-  
+
   vector<hpcshape*> allshapes;
-  
+
   transmatrix shadowmulmatrix;
-  
+
   map<usershapelayer*, hpcshape> ushr;
-  
+
   void prepare_basics();
   void prepare_compute3();
   void prepare_shapes();
@@ -402,23 +402,23 @@ hpcshape
   void drawTentacle(hpcshape &h, ld rad, ld var, ld divby);
   hyperpoint hpxyzsc(double x, double y, double z);
   hyperpoint turtlevertex(int u, double x, double y, double z);
-  
+
   void bshape(hpcshape& sh, PPR prio);
   void finishshape();
   void bshape(hpcshape& sh, PPR prio, double shzoom, int shapeid, double bonus = 0, flagtype flags = 0);
-  
+
   void copyshape(hpcshape& sh, hpcshape& orig, PPR prio);
   void zoomShape(hpcshape& old, hpcshape& newsh, double factor, PPR prio);
   void pushShape(usershapelayer& ds);
   void make_sidewalls();
   void procedural_shapes();
   void make_wall(int id, const vector<hyperpoint> vertices, vector<ld> weights = equal_weights);
-  
+
   void reserve_wall3d(int i);
   void compute_cornerbonus();
   void create_wall3d();
   void configure_floorshapes();
-  
+
   void init_floorshapes();
   void bshape2(hpcshape& sh, PPR prio, int shapeid, struct matrixlist& m);
   void bshape_regular(floorshape &fsh, int id, int sides, ld shift, ld size, cell *model);
@@ -437,7 +437,7 @@ hpcshape
   void make_ha_3d(hpcshape& sh, bool isarmor, ld scale);
   void make_humanoid_3d(hpcshape& sh);
   void addtri(array<hyperpoint, 3> hs, int kind);
-  void make_armor_3d(hpcshape& sh, int kind = 1); 
+  void make_armor_3d(hpcshape& sh, int kind = 1);
   void make_foot_3d(hpcshape& sh);
   void make_head_only();
   void make_head_3d(hpcshape& sh);
@@ -459,7 +459,7 @@ hpcshape
   void queueball(const transmatrix& V, ld rad, color_t col, eItem what);
   void make_shadow(hpcshape& sh);
   void make_3d_models();
-  
+
   /* Goldberg parameters */
   #if CAP_GP
   struct gpdata_t {
@@ -472,27 +472,27 @@ hpcshape
     };
   shared_ptr<gpdata_t> gpdata = nullptr;
   #endif
-  
+
   int state = 0;
   int usershape_state = 0;
 
   /** contains the texture point coordinates for 3D models */
   basic_textureinfo models_texture;
-  
+
   geometry_information() { last = NULL; }
-  
+
   void require_basics() { if(state & 1) return; state |= 1; prepare_basics(); }
   void require_shapes() { if(state & 2) return; state |= 2; prepare_shapes(); }
   void require_usershapes() { if(usershape_state == usershape_changes) return; usershape_state = usershape_changes; prepare_usershapes(); }
   int timestamp;
-  
+
   hpcshape& generate_pipe(ld length, ld width);
-  
+
   map<string, unique_ptr<gi_extension>> ext;
   };
 #endif
 
-/** values of hcrossf and hexf for the standard geometry. Since polygons are 
+/** values of hcrossf and hexf for the standard geometry. Since polygons are
  *  usually drawn in this geometry, the scale in other geometries is usually
  *  based on comparing these values to the values in the other geometry.
  */
@@ -514,18 +514,18 @@ EX bool is_reg3_variation(eVariation var) {
 void geometry_information::prepare_basics() {
 
   DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("prepare_basics"));
-  
+
   hexshift = 0;
 
   ld ALPHA = 2 * M_PI / S7;
-  
-  ld fmin, fmax;  
-  
+
+  ld fmin, fmax;
+
   ld s3, beta;
 
-  if(arcm::in() && !prod) 
+  if(arcm::in() && !prod)
     ginf[gArchimedean].cclass = gcHyperbolic;
-  
+
   dynamicval<eVariation> gv(variation, variation);
   bool inv = INVERSE;
   if(INVERSE) {
@@ -556,22 +556,22 @@ void geometry_information::prepare_basics() {
     hexhexdist = 0.566256;
     goto finish;
     }
-  
+
   s3 = S3;
   if(fake::in() && !arcm::in()) s3 = fake::around;
-  
+
   beta = (S3 >= OINF && !fake::in()) ? 0 : 2*M_PI/s3;
 
   tessf = euclid ? 1 : edge_of_triangle_with_angles(beta, M_PI/S7, M_PI/S7);
-  
+
   if(elliptic && S7 == 4 && !fake::in()) tessf = M_PI/2;
-  
+
   hcrossf = euclid ? tessf / 2 / sin(M_PI/s3) : edge_of_triangle_with_angles(M_PI/2, M_PI/S7, beta/2);
-  
+
   if(S3 >= OINF) hcrossf = 10;
 
   crossf = BITRUNCATED ? hcrossf : tessf;
-  
+
   fmin = 0, fmax = tessf;
   for(int p=0; p<100; p++) {
     ld f =  (fmin+fmax) / 2;
@@ -586,7 +586,7 @@ void geometry_information::prepare_basics() {
         spin(M_PI/2/S3) * xpush0(hexvdist),
         spin(-M_PI/2/S3) * xpush0(hexvdist)
         );
-      
+
       v1 = hdist(
         spin(M_PI/S7) * xpush0(f),
         spin(-M_PI/S7) * xpush0(f)
@@ -596,23 +596,23 @@ void geometry_information::prepare_basics() {
     if(v1 < v2) fmin = f; else fmax = f;
     }
   hexf = fmin;
-  
+
   rhexf = BITRUNCATED ? hexf : hcrossf;
-  
+
   if(BITRUNCATED && !(S7&1))
     hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
-  
+
   finish:
-  
+
   heptmove.resize(S7);
   hexmove.resize(S7);
   invhexmove.resize(S7);
-  
+
   for(int d=0; d<S7; d++)
     heptmove[d] = spin(-d * ALPHA) * xpush(tessf) * spin(M_PI);
-    
-  for(int d=0; d<S7; d++) 
-    hexmove[d] = spin(hexshift-d * ALPHA) * xpush(-crossf)* spin(M_PI);  
+
+  for(int d=0; d<S7; d++)
+    hexmove[d] = spin(hexshift-d * ALPHA) * xpush(-crossf)* spin(M_PI);
 
   for(int d=0; d<S7; d++) invhexmove[d] = iso_inverse(hexmove[d]);
 
@@ -621,15 +621,15 @@ void geometry_information::prepare_basics() {
   hexhexdist = fake::in() ?
     2 * hdist0(mid(xspinpush0(M_PI/S6, hexvdist), xspinpush0(-M_PI/S6, hexvdist)))
     : hdist(xpush0(crossf), xspinpush0(M_PI*2/S7, crossf));
-  
+
   DEBB(DF_GEOM | DF_POLY,
-    (format("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
-    hexhexdist, hexvdist)));  
-  
+    (format("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift,
+    hexhexdist, hexvdist)));
+
   base_distlimit = ginf[geometry].distlimit[!BITRUNCATED];
 
   #if CAP_GP
-  gp::compute_geometry(inv);  
+  gp::compute_geometry(inv);
   #endif
   #if CAP_IRR
   irr::compute_geometry();
@@ -656,9 +656,9 @@ void geometry_information::prepare_basics() {
   if(reg3::in()) reg3::generate();
   if(euc::in(3)) euc::generate();
   #endif
-  
+
   hybrid_finish:
-  
+
   scalefactor = crossf / hcrossf7;
   orbsize = crossf;
 
@@ -669,7 +669,7 @@ void geometry_information::prepare_basics() {
     geometry = gFake;
     ld our = xpush0(hcrossf)[0] / xpush0(hcrossf)[GDIM];
     fake::scale = our / orig;
-    // if(debugflags & DF_GEOM) 
+    // if(debugflags & DF_GEOM)
     }
 
   if(fake::in() && WDIM == 3) {
@@ -682,14 +682,14 @@ void geometry_information::prepare_basics() {
     hexvdist = u->hexvdist * fake::scale;
     hcrossf = u->hcrossf * fake::scale;
     }
-  
+
   if(arb::in()) {
     auto csc = arb::current_or_slided().cscale;
     scalefactor = csc;
     hcrossf = crossf = orbsize = hcrossf7 * csc;
     hexf = rhexf = hexvdist = csc * .5;
     }
-  
+
   if(is_subcube_based(variation)) {
     scalefactor /= reg3::subcube_count;
     orbsize /= reg3::subcube_count;
@@ -706,7 +706,7 @@ void geometry_information::prepare_basics() {
 
   floorrad0 = hexvdist* (GDIM == 3 ? 1 : 0.92);
   floorrad1 = rhexf * (GDIM == 3 ? 1 : 0.94);
-  
+
   if(euc::in(2,4)) {
     if(!BITRUNCATED)
       floorrad0 = floorrad1 = rhexf * (GDIM == 3 ? 1 : .94);
@@ -714,19 +714,19 @@ void geometry_information::prepare_basics() {
       floorrad0 = hexvdist * (GDIM == 3 ? 1 : .9),
       floorrad1 = rhexf * (GDIM == 3 ? 1 : .8);
     }
-  
+
   plevel = vid.plevel_factor * scalefactor;
   single_step = 1;
   if(hybri && !prod) {
     #if CAP_ARCM
-    if(hybrid::underlying == gArchimedean) 
+    if(hybrid::underlying == gArchimedean)
       arcm::current.get_step_values(psl_steps, single_step);
     #else
     if(0) ;
     #endif
     else {
       single_step = S3 * S7 - 2 * S7 - 2 * S3;
-      psl_steps = 2 * S7;    
+      psl_steps = 2 * S7;
       if(BITRUNCATED) psl_steps *= S3;
       if(inv) psl_steps = 2 * S3;
       if(single_step < 0) single_step = -single_step;
@@ -734,21 +734,21 @@ void geometry_information::prepare_basics() {
     DEBB(DF_GEOM | DF_POLY, ("steps = ", psl_steps, " / ", single_step));
     plevel = M_PI * single_step / psl_steps;
     }
-  
+
   if(hybri) {
     /* we do not want too short creatures, better make the scale factor smaller */
     scalefactor = min(scalefactor, cgi.plevel * 1.8 / vid.height_width);
     }
-  
+
   set_sibling_limit();
-  
+
   prepare_compute3();
   if(hyperbolic && &currfp != &fieldpattern::fp_invalid)
-    currfp.analyze(); 
-  
-  #if CAP_SOLV  
+    currfp.analyze();
+
+  #if CAP_SOLV
   if(asonov::in()) {
-    asonov::prepare();    
+    asonov::prepare();
     asonov::prepare_walls();
     }
   #endif
@@ -764,49 +764,49 @@ EX transmatrix xspinpush(ld dir, ld dist) {
 EX purehookset hooks_swapdim;
 
 EX namespace geom3 {
-  
+
   // Here we convert between the following parameters:
-  
+
   // abslev: level below the plane
   // lev: level above the world (abslev = depth-lev)
   // projection: projection parameter
   // factor: zoom factor
-  
+
   EX ld abslev_to_projection(ld abslev) {
     if(sphere || euclid) return vid.camera+abslev;
     return tanh(abslev) / tanh(vid.camera);
     }
-  
+
   ld projection_to_abslev(ld proj) {
     if(sphere || euclid) return proj-vid.camera;
     // tanh(abslev) / tanh(camera) = proj
     return atanh(proj * tanh(vid.camera));
     }
-  
+
   ld lev_to_projection(ld lev) {
     return abslev_to_projection(vid.depth - lev);
     }
-  
+
   ld projection_to_factor(ld proj) {
     return lev_to_projection(0) / proj;
     }
-  
+
   EX ld factor_to_projection(ld fac) {
     return lev_to_projection(0) / fac;
     }
-  
-  EX ld lev_to_factor(ld lev) { 
+
+  EX ld lev_to_factor(ld lev) {
     if(prod) return -lev;
     if(WDIM == 3) return lev;
     if(GDIM == 3) return vid.depth - lev;
-    return projection_to_factor(lev_to_projection(lev)); 
+    return projection_to_factor(lev_to_projection(lev));
     }
-  EX ld factor_to_lev(ld fac) { 
+  EX ld factor_to_lev(ld fac) {
     if(prod) return -fac;
     if(GDIM == 3) return fac;
-    return vid.depth - projection_to_abslev(factor_to_projection(fac)); 
+    return vid.depth - projection_to_abslev(factor_to_projection(fac));
     }
-  
+
   EX void do_auto_eye() {
     if(!vid.auto_eye) return;
     auto& cs = getcs();
@@ -817,31 +817,31 @@ EX namespace geom3 {
     else if(cs.charid == 8)
       vid.eye = cgi.eyelevel_familiar;
     }
-  
+
   // how should we scale at level lev
-  EX ld scale_at_lev(ld lev) { 
+  EX ld scale_at_lev(ld lev) {
     if(sphere || euclid) return 1;
-    return cosh(vid.depth - lev); 
+    return cosh(vid.depth - lev);
     }
-  
+
   EX string invalid;
-  
+
   EX ld actual_wall_height() {
       if(hybri) return cgi.plevel;
       #if CAP_GP
-      if(GOLDBERG && vid.gp_autoscale_heights) 
+      if(GOLDBERG && vid.gp_autoscale_heights)
         return vid.wall_height * min<ld>(4 / hypot_d(2, gp::next), 1);
       #endif
       return vid.wall_height;
       }
   EX }
-  
+
   void geometry_information::prepare_compute3() {
     using namespace geom3;
     DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("geom3::compute"));
     // tanh(depth) / tanh(camera) == pconf.alpha
     invalid = "";
-    
+
     if(GDIM == 3) ;
     else if(vid.tc_alpha < vid.tc_depth && vid.tc_alpha < vid.tc_camera)
       pconf.alpha = tan_auto(vid.depth) / tan_auto(vid.camera);
@@ -855,9 +855,9 @@ EX namespace geom3 {
       if(hyperbolic && (v<1e-12-1 || v>1-1e-12)) invalid = XLAT("cannot adjust camera"), vid.camera = vid.depth;
       else vid.camera = atan_auto(v);
       }
-    
+
     if(fabs(pconf.alpha) < 1e-6) invalid = XLAT("does not work with perfect Klein");
-  
+
     if(invalid != "") {
       INFDEEP = .7;
       BOTTOM = .8;
@@ -896,13 +896,13 @@ EX namespace geom3 {
       ld wh = actual_wall_height();
       WALL = lev_to_factor(wh);
       FLOOR = lev_to_factor(0);
-      
+
       human_height = vid.human_wall_ratio * wh;
       if(WDIM == 3) human_height = scalefactor * vid.height_width / 2;
       if(hybri) human_height = min(human_height, cgi.plevel * .9);
-      
+
       ld reduce = (WDIM == 3 ? human_height / 2 : 0);
-      
+
       LEG0  = lev_to_factor(human_height * .0 - reduce);
       LEG1  = lev_to_factor(human_height * .1 - reduce);
       LEG   = lev_to_factor(human_height * .2 - reduce);
@@ -920,11 +920,11 @@ EX namespace geom3 {
       HEAD1 = lev_to_factor(human_height * .98 - reduce);
       HEAD2 = lev_to_factor(human_height * .99 - reduce);
       HEAD3 = lev_to_factor(human_height - reduce);
-      
+
       reduce = (GDIM == 3 ? human_height * .3 : 0);
-      
+
       STUFF = lev_to_factor(0) - max(orbsize * 0.3, zhexf * .6);
-      
+
       ABODY = lev_to_factor(human_height * .4 - reduce);
       ALEG0 = lev_to_factor(human_height * .0 - reduce);
       ALEG  = lev_to_factor(human_height * .2 - reduce);
@@ -932,7 +932,7 @@ EX namespace geom3 {
       BIRD = lev_to_factor(WDIM == 3 ? 0 : (vid.human_wall_ratio+1)/2 * wh * .8);
       GHOST = lev_to_factor(WDIM == 3 ? 0 : human_height * .5);
       FLATEYE = lev_to_factor(human_height * .15);
-      
+
       slev = vid.rock_wall_ratio * wh / 3;
       for(int s=0; s<=3; s++)
         SLEV[s] = lev_to_factor(vid.rock_wall_ratio * wh * s/3);
@@ -945,10 +945,10 @@ EX namespace geom3 {
       HIGH2 = lev_to_factor(3 * wh);
       SKY = LOWSKY - 5;
       }
-    }    
+    }
 
 EX namespace geom3 {
-  
+
 EX void apply_always3() {
     for(geometryinfo& gi: ginf) {
       auto &g = gi.g;
@@ -966,7 +966,7 @@ EX void apply_always3() {
         }
       }
     }
-    
+
   #if MAXMDIM >= 4
 EX void switch_always3() {
     if(dual::split(switch_always3)) return;
@@ -987,7 +987,7 @@ EX void switch_always3() {
       pconf.camera_angle = 0;
       pconf.xposition = 0;
       pconf.yposition = 0;
-      pconf.scale = 1;      
+      pconf.scale = 1;
       vid.fixed_facing = false;
       }
     else {
@@ -1000,7 +1000,7 @@ EX void switch_always3() {
       vid.fixed_facing_dir = 90;
       }
     }
-    
+
   EX void switch_fpp() {
 #if MAXMDIM >= 4
     #if CAP_GL && CAP_RUG
@@ -1072,12 +1072,12 @@ EX string cgi_string() {
   auto V = [&] (string a, string b) { s += a; s += ": "; s += b; s += "; "; };
   V("GEO", its(int(geometry)));
   V("VAR", its(int(variation)));
-  
+
   if(arb::in() && arb::using_slided) {
     for(auto& sl: arb::current.sliders)
       V("AS", fts(sl.current));
     }
-  
+
   if(fake::in()) {
     if(hyperbolic) V("H", fts(fake::around));
     if(euclid) V("E", fts(fake::around));
@@ -1085,7 +1085,7 @@ EX string cgi_string() {
     V("G", FPIU(cgi_string()));
     return s;
     }
-  
+
   if(GOLDBERG_INV) V("GP", its(gp::param.first) + "," + its(gp::param.second));
   if(IRREGULAR) V("IRR", its(irr::irrid));
   if(is_subcube_based(variation)) V("SC", its(reg3::subcube_count));
@@ -1096,29 +1096,29 @@ EX string cgi_string() {
   #endif
 
   if(arb::in()) V("ARB", its(arb::current.order));
-  
+
   if(cryst) V("CRYSTAL", its(ginf[gCrystal].sides) + its(ginf[gCrystal].vertex));
-  
+
   if(bt::in() || GDIM == 3) V("WQ", its(vid.texture_step));
-  
+
   if(hybri) {
     V("U", PIU(cgi_string()));
     // its(int(hybrid::underlying)));
     }
-  
+
   if(prod) V("PL", fts(vid.plevel_factor));
 
   if(geometry == gFieldQuotient) { V("S3=", its(S3)); V("S7=", its(S7)); }
   if(nil) V("NIL", its(S7));
-  
+
   if(bt::in()) V("BT", fts(vid.binary_width));
 
   if(nil) V("NILW", fts(nilv::nilwidth));
-  
-  if(GDIM == 2) { 
+
+  if(GDIM == 2) {
     V("CAMERA", fts(vid.camera));
     }
-  
+
   if(WDIM == 2) {
     V("WH", fts(vid.wall_height));
     V("HW", fts(vid.human_wall_ratio));
@@ -1130,26 +1130,26 @@ EX string cgi_string() {
     }
 
   V("3D", ONOFF(vid.always3));
-  
+
   if(scale_used()) V("CS", fts(vid.creature_scale));
-  
+
   if(WDIM == 3) V("HTW", fts(vid.height_width));
 
   V("LQ", its(vid.linequality));
 
   callhooks(hooks_cgi_string, s);
-  
+
   return s;
   }
 
 EX void check_cgi() {
   string s = cgi_string();
-  
+
   cgip = &cgis[s];
   cgi.timestamp = ++ntimestamp;
   if(hybri) hybrid::underlying_cgip->timestamp = ntimestamp;
   if(fake::in()) fake::underlying_cgip->timestamp = ntimestamp;
-  
+
   if(isize(cgis) > 4) {
     vector<pair<int, string>> timestamps;
     for(auto& t: cgis) timestamps.emplace_back(-t.second.timestamp, t.first);
@@ -1160,15 +1160,15 @@ EX void check_cgi() {
       timestamps.pop_back();
       }
     }
-  
+
   if(floor_textures && last_texture_step != vid.texture_step) {
     println(hlog, "changed ", last_texture_step, " to ", vid.texture_step);
     delete floor_textures;
     floor_textures = NULL;
     }
-  
+
   #if MAXMDIM >= 4 && CAP_GL
-  if(!floor_textures && GDIM == 3 && (cgi.state & 2)) 
+  if(!floor_textures && GDIM == 3 && (cgi.state & 2))
     make_floor_textures();
   #endif
 

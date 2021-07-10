@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- cells
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-/** \file cell.cpp 
+/** \file cell.cpp
  *  \brief General cells and maps
  *
  *  Start with locations.cpp
@@ -31,7 +31,7 @@ struct hrmap {
     return NULL;
     }
   virtual struct transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) {
-    printf("relative_matrix called unexpectedly\n"); 
+    printf("relative_matrix called unexpectedly\n");
     return Id;
     }
   virtual struct transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
@@ -40,7 +40,7 @@ struct hrmap {
   virtual struct transmatrix adj(cell *c, int i) { return adj(c->master, i); }
   virtual struct transmatrix adj(heptagon *h, int i);
   struct transmatrix iadj(cell *c, int i) { cell *c1 = c->cmove(i); return adj(c1, c->c.spin(i)); }
-  transmatrix iadj(heptagon *h, int d) { 
+  transmatrix iadj(heptagon *h, int d) {
     heptagon *h1 = h->cmove(d); return adj(h1, h->c.spin(d));
     }
   virtual void draw_all();
@@ -48,18 +48,18 @@ struct hrmap {
   virtual vector<hyperpoint> get_vertices(cell*);
 
   virtual void virtualRebase(heptagon*& base, transmatrix& at) {
-    printf("virtualRebase called unexpectedly\n"); 
+    printf("virtualRebase called unexpectedly\n");
     return;
     }
 
   static constexpr ld SPIN_NOT_AVAILABLE = 1e5;
   virtual ld spin_angle(cell *c, int d) { return SPIN_NOT_AVAILABLE; }
-  
+
   virtual transmatrix spin_to(cell *c, int d, ld bonus=0);
   virtual transmatrix spin_from(cell *c, int d, ld bonus=0);
-  
+
   virtual double spacedist(cell *c, int i) { return hdist0(tC0(adj(c, i))); }
-  
+
   virtual bool strict_tree_rules() { return false; }
 
   virtual void find_cell_connection(cell *c, int d);
@@ -77,8 +77,8 @@ struct hrmap {
     }
   };
 
-/** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient  
- *  Operators can be applied to these maps. 
+/** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient
+ *  Operators can be applied to these maps.
  *  Liskov substitution warning: maps which produce both tiling like above and 3D tilings
  *  (e.g. Euclidean and Crystal) also inherit from hrmap_standard
  **/
@@ -133,7 +133,7 @@ transmatrix hrmap::spin_from(cell *c, int d, ld bonus) {
 
 transmatrix hrmap::adj(heptagon *h, int i) { return relative_matrix(h->cmove(i), h, C0); }
 
-vector<cell*>& hrmap::allcells() { 
+vector<cell*>& hrmap::allcells() {
   static vector<cell*> default_allcells;
   if(bounded && !(cgflags & qHUGE_BOUNDED) && !(hybri && hybrid::csteps == 0)) {
     celllister cl(gamestart(), 1000000, 1000000, NULL);
@@ -146,7 +146,7 @@ vector<cell*>& hrmap::allcells() {
     default_allcells = cl.lst;
     return default_allcells;
     }
-  return dcal; 
+  return dcal;
   }
 
 EX int dirdiff(int dd, int t) {
@@ -178,12 +178,12 @@ EX cell *newCell(int type, heptagon *master) {
 EX hrmap *currentmap;
 EX vector<hrmap*> allmaps;
 
-EX hrmap *newAltMap(heptagon *o) { 
+EX hrmap *newAltMap(heptagon *o) {
   #if MAXMDIM >= 4
   if(reg3::in_rule())
     return reg3::new_alt_map(o);
   #endif
-  return new hrmap_hyperbolic(o); 
+  return new hrmap_hyperbolic(o);
   }
 // --- hyperbolic geometry ---
 
@@ -196,7 +196,7 @@ EX heptagon* hyperbolic_origin() {
   h.zebraval = 40;
   #if CAP_IRR
   if(IRREGULAR) irr::link_start(origin);
-  else 
+  else
   #endif
   h.c7 = newCell(odegree, origin);
   return origin;
@@ -232,14 +232,14 @@ void hrmap_standard::find_cell_connection(cell *c, int d) {
     hrmap::find_cell_connection(c, d);
     }
   else if(c == c->master->c7) {
-    
+
     cell *n = newCell(S6, c->master);
-    
+
     heptspin hs(c->master, d, false);
-    
+
     int alt3 = c->type/2;
     int alt4 = alt3+1;
-        
+
     for(int u=0; u<S6; u+=2) {
       if(hs.mirrored && (S7%2 == 0)) hs++;
       hs.at->c7->c.connect(hs.spin, n, u, hs.mirrored);
@@ -256,15 +256,15 @@ void hrmap_standard::find_cell_connection(cell *c, int d) {
     cellwalker cw2 = cw - 1 + wstep - 1 + wstep - 1;
     c->c.connect(d, cw2);
     hybrid::link();
-    }    
+    }
   }
 
 /** very similar to createMove in heptagon.cpp */
 EX cell *createMov(cell *c, int d) {
   if(d<0 || d>= c->type)
     throw hr_exception("ERROR createmov\n");
-  if(c->move(d)) return c->move(d);  
-  currentmap->find_cell_connection(c, d);  
+  if(c->move(d)) return c->move(d);
+  currentmap->find_cell_connection(c, d);
   return c->move(d);
   }
 
@@ -281,7 +281,7 @@ EX hookset<hrmap*()> hooks_newmap;
 /** create a map in the current geometry */
 EX void initcells() {
   DEBB(DF_INIT, ("initcells"));
-  
+
   hrmap* res = callhandlers((hrmap*)nullptr, hooks_newmap);
   if(res) currentmap = res;
   #if CAP_SOLV
@@ -311,14 +311,14 @@ EX void initcells() {
   #endif
   else if(S3 >= OINF) currentmap = inforder::new_map();
   else currentmap = new hrmap_hyperbolic;
-  
+
   allmaps.push_back(currentmap);
 
   #if CAP_FIELD
-  windmap::create();  
+  windmap::create();
   #endif
-  
-  // origin->emeraldval = 
+
+  // origin->emeraldval =
   }
 
 EX void clearcell(cell *c) {
@@ -383,7 +383,7 @@ EX void clearfrom(heptagon *at) {
   at->alt = &deletion_marker;
 //int maxq = 0;
   while(!q.empty()) {
-    at = q.front(); 
+    at = q.front();
 //  if(q.size() > maxq) maxq = q.size();
     q.pop();
     DEBB(DF_MEMORY, ("from %p", at));
@@ -401,7 +401,7 @@ EX void clearfrom(heptagon *at) {
     if(bt::in() && WDIM == 2) edges = at->c7->type;
     for(int i=0; i<edges; i++) if(at->move(i) && at->move(i) != at) {
       if(at->move(i)->alt != &deletion_marker)
-        q.push(at->move(i));    
+        q.push(at->move(i));
       unlink_cdata(at->move(i));
       at->move(i)->alt = &deletion_marker;
       DEBB(DF_MEMORY, ("!mov ", at->move(i), " [", at->move(i)->move(at->c.spin(i)), "]"));
@@ -438,7 +438,7 @@ EX void verifycells(heptagon *at) {
   for(int i=0; i<at->type; i++) if(at->move(i) && at->move(i)->move(at->c.spin(i)) && at->move(i)->move(at->c.spin(i)) != at) {
     printf("hexmix error %p [%d s=%d] %p %p\n", hr::voidp(at), i, at->c.spin(i), hr::voidp(at->move(i)), hr::voidp(at->move(i)->move(at->c.spin(i))));
     }
-  if(!sphere && !quotient) 
+  if(!sphere && !quotient)
     for(int i=0; i<S7; i++) if(at->move(i) && at->c.spin(i) == 0 && at->s != hsOrigin)
       verifycells(at->move(i));
   verifycell(at->c7);
@@ -447,14 +447,14 @@ EX void verifycells(heptagon *at) {
 EX int compdist(int dx[]) {
   int mi = dx[0];
   for(int u=0; u<S3; u++) mi = min(mi, dx[u]);
-  for(int u=0; u<S3; u++) 
+  for(int u=0; u<S3; u++)
     if(dx[u] > mi+2)
       return -1; // { printf("cycle error!\n"); exit(1); }
-  for(int u=0; u<S3; u++) 
+  for(int u=0; u<S3; u++)
     if(dx[u] == mi+2)
       return mi+1;
   int cnt = 0;
-  for(int u=0; u<S3; u++) 
+  for(int u=0; u<S3; u++)
     if(dx[u] == mi) cnt++;
   if(cnt < 2)
     return mi+1;
@@ -463,7 +463,7 @@ EX int compdist(int dx[]) {
 
 EX int celldist(cell *c) {
   if(experimental) return 0;
-  if(hybri) 
+  if(hybri)
     return hybrid::celldistance(c, currentmap->gamestart());
   if(nil && !quotient) return DISTANCE_UNKNOWN;
   if(euc::in()) return celldistance(currentmap->gamestart(), c);
@@ -494,9 +494,9 @@ static const int ALTDIST_ERROR = 90000;
 
 EX int celldistAlt(cell *c) {
   if(experimental) return 0;
-  if(hybri) { 
+  if(hybri) {
     if(in_s2xe()) return hybrid::get_where(c).second;
-    auto w = hybrid::get_where(c); 
+    auto w = hybrid::get_where(c);
     int d = c->master->alt && c->master->alt->alt ? c->master->alt->alt->fieldval : 0;
     d = sl2 ? 0 : abs(w.second - d);
     PIU ( d += celldistAlt(w.first) );
@@ -507,7 +507,7 @@ EX int celldistAlt(cell *c) {
   #endif
   if(nil) return c->master->zebraval + abs(c->master->emeraldval) + (specialland == laCamelot && !ls::single() ? 30 : 0);;
   #if CAP_CRYSTAL
-  if(cryst) 
+  if(cryst)
     return crystal::dist_alt(c);
   #endif
   if(sphere || quotient) {
@@ -553,7 +553,7 @@ EX int updir(heptagon *h) {
   #endif
   #if MAXMDIM >= 4
   if(WDIM == 3 && reg3::in_rule()) {
-    for(int i=0; i<S7; i++) if(h->move(i) && h->move(i)->distance < h->distance) 
+    for(int i=0; i<S7; i++) if(h->move(i) && h->move(i)->distance < h->distance)
       return i;
     return -1;
     }
@@ -567,13 +567,13 @@ EX int updir_alt(heptagon *h) {
   if(euclid || !h->alt) return -1;
   #if MAXMDIM >= 4
   if(WDIM == 3 && reg3::in_rule()) {
-    for(int i=0; i<S7; i++) if(h->move(i) && h->move(i)->alt && h->move(i)->alt->distance < h->alt->distance) 
+    for(int i=0; i<S7; i++) if(h->move(i) && h->move(i)->alt && h->move(i)->alt->distance < h->alt->distance)
       return i;
     return -1;
     }
   #endif
   for(int i=0; i<S7; i++)
-    if(h->move(i) && h->move(i)->alt == h->alt->move(0)) 
+    if(h->move(i) && h->move(i)->alt == h->alt->move(0))
       return i;
   return -1;
   }
@@ -668,7 +668,7 @@ EX int randpatternCode(cell *c, int rval) {
     case 4:
       return towerval(c, celldist) * 6 + celldist(c) % 6;
     }
-  return 0;  
+  return 0;
   }
 
 #if HDR
@@ -720,7 +720,7 @@ void affect(cdata& d, short rv, signed char signum) {
   if(rv&4) d.val[2]+=signum; else d.val[2]-=signum;
   if(rv&8) d.val[3]+=signum; else d.val[3]-=signum;
   int id = (rv>>4) & 63;
-  if(id < 32) 
+  if(id < 32)
     d.bits ^= (1 << id);
   }
 
@@ -746,7 +746,7 @@ cdata *getHeptagonCdata_legacy(heptagon *h) {
     if(yendor::on && specialland == laVariant) h->cdata->bits |= (1 << 8) | (1 << 9) | (1 << 12);
     return h->cdata;
     }
-  
+
   cdata mydata = *getHeptagonCdata_legacy(h->move(0));
 
   for(int di=3; di<5; di++) {
@@ -755,7 +755,7 @@ cdata *getHeptagonCdata_legacy(heptagon *h) {
     while(true) {
       heptspin hstab[15];
       hstab[7] = hs;
-      
+
       for(int i=8; i<12; i++) {
         hstab[i] = hstab[i-1];
         hstab[i] += ((i&1) ? 4 : 3);
@@ -769,7 +769,7 @@ cdata *getHeptagonCdata_legacy(heptagon *h) {
         hstab[i] += wstep;
         hstab[i] += ((i&1) ? 4 : 3);
         }
-      
+
       if(hstab[3].at->distance < hstab[7].at->distance) {
         hs = hstab[3]; continue;
         }
@@ -777,25 +777,25 @@ cdata *getHeptagonCdata_legacy(heptagon *h) {
       if(hstab[11].at->distance < hstab[7].at->distance) {
         hs = hstab[11]; continue;
         }
-      
+
       int jj = 7;
       for(int k=3; k<12; k++) if(hstab[k].at->distance < hstab[jj].at->distance) jj = k;
-      
+
       int ties = 0, tiespos = 0;
-      for(int k=3; k<12; k++) if(hstab[k].at->distance == hstab[jj].at->distance) 
+      for(int k=3; k<12; k++) if(hstab[k].at->distance == hstab[jj].at->distance)
         ties++, tiespos += (k-jj);
-        
+
       // printf("ties=%d tiespos=%d jj=%d\n", ties, tiespos, jj);
       if(ties == 2) jj += tiespos/2;
-      
+
       if(jj&1) signum = -1;
       hs = hstab[jj];
-      
+
       break;
       }
     hs = hs + 3 + wstep;
     setHeptagonRval(hs.at);
-    
+
     affect(mydata, hs.spin ? hs.at->rval0 : hs.at->rval1, signum);
     }
 
@@ -809,7 +809,7 @@ cdata *getHeptagonCdata(heptagon *h) {
   if(h->cdata) return h->cdata;
 
   if(sphere || quotient) h = currentmap->gamestart()->master;
-  
+
   bool starting = h->s == hsOrigin;
   #if CAP_BT
   if(bt::in()) {
@@ -825,21 +825,21 @@ cdata *getHeptagonCdata(heptagon *h) {
     if(yendor::on && specialland == laVariant) h->cdata->bits |= (1 << 8) | (1 << 9) | (1 << 12);
     return h->cdata;
     }
-  
+
   int dir = bt::in() ? 5 : 0;
-  
+
   cdata mydata = *getHeptagonCdata(h->cmove(dir));
 
   if(S3 >= OINF) {
     setHeptagonRval(h);
-    affect(mydata, h->rval0, 1); 
+    affect(mydata, h->rval0, 1);
     }
   else if(S3 == 4) {
     heptspin hs(h, 0);
     while(dmeq((hs+1).cpeek()->dm4, (hs.at->dm4 - 1))) hs = hs + 1 + wstep + 1;
     while(dmeq((hs-1).cpeek()->dm4, (hs.at->dm4 - 1))) hs = hs - 1 + wstep - 1;
     setHeptagonRval(hs.at);
-    affect(mydata, hs.at->rval0, 1); 
+    affect(mydata, hs.at->rval0, 1);
     }
   else for(int di: {0,1}) {
     heptspin hs(h, dir, false);
@@ -864,16 +864,16 @@ cdata *getHeptagonCdata(heptagon *h) {
 cdata *getEuclidCdata(gp::loc h) {
 
   int x = h.first, y = h.second;
-  
+
   #if CAP_ARCM
   auto& data = arcm::in() ? arcm::get_cdata() : euc::get_cdata();
   #else
   auto& data = euc::get_cdata();
   #endif
-    
+
   // hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
   if(data.count(h)) return &(data[h]);
-  
+
   if(x == 0 && y == 0) {
     cdata xx;
     for(int i=0; i<4; i++) xx.val[i] = 0;
@@ -882,7 +882,7 @@ cdata *getEuclidCdata(gp::loc h) {
     }
   int ord = 1, bid = 0;
   while(!((x|y)&ord)) ord <<= 1, bid++;
-  
+
   for(int k=0; k<3; k++) {
     int x1 = x + (k<2 ? ord : 0);
     int y1 = y - (k>0 ? ord : 0);
@@ -894,7 +894,7 @@ cdata *getEuclidCdata(gp::loc h) {
     cdata *d2 = getEuclidCdata({x2,y2});
     cdata xx;
     double disp = pow(2, bid/2.) * 6;
-    
+
     for(int i=0; i<4; i++) {
       double dv = (d1->val[i] + d2->val[i])/2 + (hrand(1000) - hrand(1000))/1000. * disp;
       xx.val[i] = floor(dv);
@@ -909,10 +909,10 @@ cdata *getEuclidCdata(gp::loc h) {
       if(hrand(1024) < flipchance) gbit = !gbit;
       if(gbit) xx.bits |= (1<<b);
       }
-    
+
     return &(data[h] = xx);
     }
-  
+
   // impossible!
   return NULL;
   }
@@ -935,8 +935,8 @@ EX cdata *arcmCdata(cell *c) {
     return &dummy;
     }
   heptagon *h2 = agm[c->master].first;
-  dynamicval<eGeometry> g(geometry, gNormal); 
-  dynamicval<hrmap*> cm(currentmap, arcm::current_altmap);  
+  dynamicval<eGeometry> g(geometry, gNormal);
+  dynamicval<hrmap*> cm(currentmap, arcm::current_altmap);
   return getHeptagonCdata(h2);
   }
 #endif
@@ -953,7 +953,7 @@ EX int getCdata(cell *c, int j) {
 #if CAP_ARCM
   else if(arcm::in() && euclid)
     return getEuclidCdata(pseudocoords(c))->val[j];
-  else if(arcm::in() && hyperbolic) 
+  else if(arcm::in() && hyperbolic)
     return arcmCdata(c)->val[j]*3;
 #endif
   else if(!geometry_supports_cdata()) return 0;
@@ -977,9 +977,9 @@ EX int getBits(cell *c) {
     }
   else if(euc::in()) return getEuclidCdata(euc2_coordinates(c))->bits;
   #if CAP_ARCM
-  else if(arcm::in() && euclid)  
+  else if(arcm::in() && euclid)
     return getEuclidCdata(pseudocoords(c))->bits;
-  else if(arcm::in() && (hyperbolic || sl2)) 
+  else if(arcm::in() && (hyperbolic || sl2))
     return arcmCdata(c)->bits;
   #endif
   else if(!geometry_supports_cdata()) return 0;
@@ -1038,7 +1038,7 @@ set<cell*> dists_computed;
 int perma_distances;
 
 EX void compute_saved_distances(cell *c1, int max_range, int climit) {
-    
+
   celllister cl(c1, max_range, climit, NULL);
 
   for(int i=0; i<isize(cl.lst); i++)
@@ -1055,7 +1055,7 @@ EX void permanent_long_distances(cell *c1) {
 
 EX void erase_saved_distances() {
   saved_distances.clear(); dists_computed.clear();
-  
+
   for(auto c: keep_distances_from) compute_saved_distances(c, 120, 200000);
   perma_distances = isize(saved_distances);
   }
@@ -1077,9 +1077,9 @@ EX cell *random_in_distance(cell *c, int d) {
 EX int bounded_celldistance(cell *c1, cell *c2) {
   int limit = 6000;
   #if CAP_SOLV
-  if(geometry == gArnoldCat) { 
+  if(geometry == gArnoldCat) {
     c2 = asonov::get_at(asonov::get_coord(c2->master) - asonov::get_coord(c1->master))->c7;
-    c1 = currentmap->gamestart(); 
+    c1 = currentmap->gamestart();
     limit = 100000000;
     }
   #endif
@@ -1100,17 +1100,17 @@ EX int bounded_celldistance(cell *c1, cell *c2) {
 EX int clueless_celldistance(cell *c1, cell *c2) {
   if(saved_distances.count(make_pair(c1,c2)))
     return saved_distances[make_pair(c1,c2)];
-  
+
   if(dists_computed.count(c1)) return DISTANCE_UNKNOWN;
-    
+
   if(isize(saved_distances) > perma_distances + 1000000) erase_saved_distances();
   compute_saved_distances(c1, 64, 1000);
-  
+
  dists_computed.insert(c1);
 
   if(saved_distances.count(make_pair(c1,c2)))
     return saved_distances[make_pair(c1,c2)];
-    
+
   return DISTANCE_UNKNOWN;
   }
 
@@ -1119,38 +1119,38 @@ EX int celldistance(cell *c1, cell *c2) {
   if(fake::in()) return FPIU(celldistance(c1, c2));
 
   if(hybri) return hybrid::celldistance(c1, c2);
-  
+
   #if CAP_FIELD
   if(geometry == gFieldQuotient && (PURE || BITRUNCATED)) {
     int d = fieldpattern::field_celldistance(c1, c2);
     if(d != DISTANCE_UNKNOWN) return d;
     }
   #endif
-  
+
   if(bounded) return bounded_celldistance(c1, c2);
-  
+
   #if CAP_CRYSTAL
   if(cryst) return crystal::precise_distance(c1, c2);
   #endif
-  
+
   if(euc::in() && WDIM == 2) {
     return euc::cyldist(euc2_coordinates(c1), euc2_coordinates(c2));
     }
 
-  if(arcm::in() || quotient || sn::in() || (kite::in() && euclid) || experimental || sl2 || nil || arb::in()) 
+  if(arcm::in() || quotient || sn::in() || (kite::in() && euclid) || experimental || sl2 || nil || arb::in())
     return clueless_celldistance(c1, c2);
-   
+
    if(S3 >= OINF) return inforder::celldistance(c1, c2);
 
   #if CAP_BT && MAXMDIM >= 4
-  if(bt::in() && WDIM == 3) 
+  if(bt::in() && WDIM == 3)
     return bt::celldistance3(c1, c2);
   #endif
-  
+
   #if MAXMDIM >= 4
-  if(euc::in()) 
+  if(euc::in())
     return euc::celldistance(c1, c2);
-  
+
   if(hyperbolic && WDIM == 3) return reg3::celldistance(c1, c2);
   #endif
 
@@ -1182,7 +1182,7 @@ EX vector<cell*> build_shortest_path(cell *c1, cell *c2) {
       virtualRebase(x, T1);
       println(hlog, "x = ", x, "p length = ", isize(p), " dist = ", hdist0(tC0(T1)), " dist from end = ", hdist(tC0(T1), tC0(calc_relative_matrix(c2, x, C0))));
       while(x != p.back()) {
-        forCellCM(c, p.back()) 
+        forCellCM(c, p.back())
           if(celldistance(x, c) < celldistance(x, p.back())) {
             p.push_back(c);
             break;
@@ -1218,7 +1218,7 @@ EX vector<cell*> build_shortest_path(cell *c1, cell *c2) {
   }
 
 EX void clearCellMemory() {
-  for(int i=0; i<isize(allmaps); i++) 
+  for(int i=0; i<isize(allmaps); i++)
     if(allmaps[i])
       delete allmaps[i];
   allmaps.clear();
@@ -1307,26 +1307,26 @@ EX vector<int> reverse_directions(cell *c, int dir) {
     return { gmod(dir + c->type/2, c->type) };
   }
 
-EX vector<int> reverse_directions(heptagon *c, int dir) { 
+EX vector<int> reverse_directions(heptagon *c, int dir) {
   int d = c->degree();
   switch(geometry) {
     case gBinary3:
       if(dir < 4) return {8};
       else if(dir >= 8) return {0, 1, 2, 3};
       else return {dir ^ 1};
-    
+
     case gHoroTris:
       if(dir < 4) return {7};
       else if(dir == 4) return {5, 6};
       else if(dir == 5) return {6, 4};
       else if(dir == 6) return {4, 5};
       else return {0, 1, 2, 3};
-    
+
     case gHoroRec:
       if(dir < 2) return {6};
       else if(dir == 6) return {0, 1};
       else return {dir^1};
-      
+
     case gKiteDart3: {
       if(dir < 4) return {dir ^ 2};
       if(dir >= 6) return {4, 5};
@@ -1334,14 +1334,14 @@ EX vector<int> reverse_directions(heptagon *c, int dir) {
       for(int i=6; i<c->type; i++) res.push_back(i);
       return res;
       }
-    
+
     case gHoroHex: {
       if(dir < 6) return {12, 13};
       if(dir >= 12) return {0, 1, 2, 3, 4, 5};
       const int dt[] = {0,0,0,0,0,0,10,11,9,8,6,7,0,0};
       return {dt[dir]};
       }
-    
+
     default:
       if(d & 1)
         return { gmod(dir + c->type/2, c->type), gmod(dir + (c->type+1)/2, c->type) };

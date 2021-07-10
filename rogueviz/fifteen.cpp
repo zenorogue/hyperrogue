@@ -34,12 +34,12 @@ ePenMove pen;
 bool show_triangles = false;
 bool show_dots = true;
 
-void init_fifteen(int q = 20) {  
+void init_fifteen(int q = 20) {
   println(hlog, "init_fifteen");
   auto ac = currentmap->allcells();
   for(int i=0; i<min(isize(ac), q); i++) {
     fif[ac[i]] = {i, 0, false, i, 0, false};
-    }  
+    }
   cwt.at = ac[0];
   println(hlog, "ok");
   }
@@ -49,11 +49,11 @@ void compute_triangle_markers() {
   seq.resize(isize(fif));
   for(auto& p: fif) {
     cell *c = p.first;
-    
+
     forCellIdEx(c1, i, c) if(fif.count(c1) && fif[c1].target == p.second.target + 1) {
       triangle_markers[p.second.target] = gmod((1 + i - p.second.targetdir) * (p.second.targetmirror ? -1 : 1), c->type);
       }
-    
+
     if(p.second.current == 0)
       seq.back() = c;
     else {
@@ -112,20 +112,20 @@ void scramble() {
       make_move(cwt.at, d);
       cwt.at = c1;
       }
-    }     
+    }
   }
 
 bool draw_fifteen(cell *c, const shiftmatrix& V) {
   lastexplore = turncount;
   if(!fif.count(c)) { c->land = laNone; c->wall = waChasm; return false; }
   check_move();
-    
+
   auto& cd = fif[c];
-  
+
   int cur = anyshiftclick ? cd.target : cd.current;
   int cdir = anyshiftclick ? cd.targetdir : cd.currentdir;
   bool cmir = anyshiftclick ? cd.targetmirror : cd.currentmirror;
-  
+
   if(cur == Empty) {
     c->land = laCanvas;
     c->wall = waNone;
@@ -147,13 +147,13 @@ bool draw_fifteen(cell *c, const shiftmatrix& V) {
       queuepoly(V * ddspin(c, cw.spin, 0) * xpush(hdist0(tC0(currentmap->adj(c, cw.spin))) * .45 - cgi.zhexf * .3), cgi.shTinyArrow, 0xFF);
       }
     }
-  
+
   return false;
   }
 
 void edit_fifteen() {
 
-  if(!fif.count(cwt.at)) 
+  if(!fif.count(cwt.at))
     init_fifteen();
 
   clearMessages();
@@ -166,7 +166,7 @@ void edit_fifteen() {
   ss->item = itGold;
   gamescreen(0);
   ss->item = itNone;
-  
+
   dialog::init("Fifteen Puzzle", iinf[itPalace].color, 150, 100);
 
   dialog::addBoolItem("jump", pen == pmJump, 'j');
@@ -184,7 +184,7 @@ void edit_fifteen() {
   dialog::addBreak(100);
 
   dialog::addItem("this is the goal", 'g');
-  dialog::add_action([] { 
+  dialog::add_action([] {
     for(auto& sd: fif) {
       sd.second.target = sd.second.current;
       sd.second.targetdir = sd.second.currentdir;
@@ -200,9 +200,9 @@ void edit_fifteen() {
 
   dialog::addItem("scramble", 's');
   dialog::add_action(scramble);
-  
+
   dialog::addItem("save this puzzle", 'S');
-  dialog::add_action([] { 
+  dialog::add_action([] {
     mapstream::saveMap("fifteen.lev");
     #if ISWEB
     offer_download("fifteen.lev", "mime/type");
@@ -213,12 +213,12 @@ void edit_fifteen() {
   dialog::add_action_push(showSettings);
 
   mine_adjacency_rule = true;
-  
+
   dialog::addItem("new geometry", 'G');
   dialog::add_action(runGeometryExperiments);
 
   dialog::addItem("load a puzzle", 'L');
-  dialog::add_action([] { 
+  dialog::add_action([] {
     #if ISWEB
     offer_choose_file([] {
       mapstream::loadMap("data.txt");
@@ -230,15 +230,15 @@ void edit_fifteen() {
     });
 
   dialog::addBack();
-  
+
   dialog::display();
-  
+
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
-    
+
     if(sym == '-' && mouseover && !holdmouse) {
       cell *c = mouseover;
-      
+
       if(pen == pmJump) {
         if(fif.count(c)) {
           auto& f0 = fif[cwt.at];
@@ -252,21 +252,21 @@ void edit_fifteen() {
           cwt.at = c;
           }
         }
-      
+
       if(pen == pmRotate) {
         if(fif.count(c) == 0) return;
         auto& f1 = fif[c];
-        f1.currentdir = gmod(1+f1.currentdir, c->type);        
-        f1.targetdir = gmod(1+f1.targetdir, c->type);        
+        f1.currentdir = gmod(1+f1.currentdir, c->type);
+        f1.targetdir = gmod(1+f1.targetdir, c->type);
         }
-      
+
       if(pen == pmMirrorFlip) {
         if(fif.count(c) == 0) return;
         auto& f1 = fif[c];
         f1.currentmirror ^= true;
-        f1.targetmirror ^= true; 
+        f1.targetmirror ^= true;
         }
-      
+
       if(pen == pmAdd) {
         if(fif.count(c) == 0) {
           auto& f = fif[c];
@@ -287,7 +287,7 @@ void edit_fifteen() {
     };
   }
 
-void launch() {  
+void launch() {
   /* setup */
   stop_game();
   enable_canvas();
@@ -310,15 +310,15 @@ void load_fifteen(fhstream& f) {
     int32_t at = f.get<int>();
     println(hlog, "at = ", at);
     cell *c = mapstream::cellbyid[at];
-    auto& cd = fif[c];      
+    auto& cd = fif[c];
     f.read(cd.target);
     f.read(cd.targetdir);
     cd.targetdir = mapstream::fixspin(mapstream::relspin[at], cd.targetdir, c->type, f.vernum);
-    if(nonorientable) 
+    if(nonorientable)
       f.read(cd.targetmirror);
     f.read(cd.current);
     f.read(cd.currentdir);
-    if(nonorientable) 
+    if(nonorientable)
       f.read(cd.currentmirror);
     cd.currentdir = mapstream::fixspin(mapstream::relspin[at], cd.currentdir, c->type, f.vernum);
     println(hlog, "assigned ", cd.current, " to ", c);
@@ -342,11 +342,11 @@ void enable() {
       println(hlog, cd.first, " has id ", mapstream::cellids[cd.first]);
       f.write(cd.second.target);
       f.write(cd.second.targetdir);
-      if(nonorientable) 
-        f.write(cd.second.targetmirror);      
+      if(nonorientable)
+        f.write(cd.second.targetmirror);
       f.write(cd.second.current);
       f.write(cd.second.currentdir);
-      if(nonorientable) 
+      if(nonorientable)
         f.write(cd.second.currentmirror);
       }
     });
@@ -358,14 +358,14 @@ void enable() {
 #if CAP_COMMANDLINE
 int rugArgs() {
   using namespace arg;
-           
+
   if(0) ;
   else if(argis("-fifteen")) {
     PHASEFROM(3);
     launch();
     addHook(mapstream::hooks_loadmap_old, 100, load_fifteen);
     #if ISWEB
-    mapstream::loadMap("1");    
+    mapstream::loadMap("1");
     #else
     enable();
     #endif
@@ -401,10 +401,10 @@ int rugArgs() {
   return 0;
   }
 
-auto fifteen_hook = 
+auto fifteen_hook =
   addHook(hooks_args, 100, rugArgs)
 #if CAP_SHOT
-+ arg::add3("-fifteen-animate", [] { 
++ arg::add3("-fifteen-animate", [] {
     rogueviz::rv_hook(anims::hooks_record_anim, 100, [] (int i, int nof) {
     double at = (i * (isize(seq)-1) * 1.) / nof;
     int ati = at;
@@ -425,7 +425,7 @@ auto fifteen_hook =
       View = spin(-(turns[last_i] - last_angle)) * View;
       last_angle = 0;
       }
-    
+
     if(true) {
       ld angle = lerp(0, turns[ati], atf);
       ld x = -(angle - last_angle);
@@ -451,12 +451,12 @@ auto fifteen_hook =
 
     if(fifteen_slides.empty()) {
       fifteen_slides.emplace_back(
-        slide{"Introduction", 999, LEGAL::NONE, 
+        slide{"Introduction", 999, LEGAL::NONE,
           "This is a collection of some geometric and topological variants of the Fifteen puzzle."
           ,
           [] (presmode mode) {}
           });
-      
+
       auto add = [&] (string s, string lev, string text, string youtube = "") {
         fifteen_slides.emplace_back(
           tour::slide{s, 100, LEGAL::NONE | QUICKGEO, text,
@@ -483,14 +483,14 @@ auto fifteen_hook =
                 }
               }});
         };
-      
+
       add("15", "classic", "The original Fifteen puzzle.");
       add("15+4", "fifteen", "The 15+4 puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=Hc3yfuXiWe0");
       add("15-4", "sphere11", "The 15-4 puzzle.");
       add("coiled", "coiled", "Coiled fifteen puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=rfAEgxNEOrQ");
       add("Möbius band", "mobiusband", "Fifteen puzzle on a Möbius band.");
       add("Kite-and-dart", "kitedart", "Kite-and-dart puzzle.");
-      
+
       add_end(fifteen_slides);
       }
 

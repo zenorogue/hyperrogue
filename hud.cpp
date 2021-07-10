@@ -19,18 +19,18 @@ EX int monsterclass(eMonster m) {
 EX int glyphclass(int i) {
   if(i < ittypes) {
     eItem it = eItem(i);
-    return itemclass(it) == IC_TREASURE ? 0 : 1; 
+    return itemclass(it) == IC_TREASURE ? 0 : 1;
     }
   else {
     eMonster m = eMonster(i-ittypes);
-    return monsterclass(m) == 0 ? 2 : 3; 
+    return monsterclass(m) == 0 ? 2 : 3;
     }
   }
 
 EX int subclass(int i) {
-  if(i < ittypes) 
-    return itemclass(eItem(i)); 
-  else 
+  if(i < ittypes)
+    return itemclass(eItem(i));
+  else
     return monsterclass(eMonster(i-ittypes));
   }
 
@@ -56,7 +56,7 @@ enum eGlyphsortorder {
 #endif
 
 EX eGlyphsortorder glyphsortorder;
-  
+
 int zero = 0;
 
 int& ikmerge(int i) {
@@ -87,7 +87,7 @@ void updatesort() {
     int& gp = glyphphase[i];
     if(ticks <= glasttime[i]+500)
       gp += (ticks - glyph_lastticks);
-    else if((gp % 500) && ((i >= ittypes) || i == itTerra)) {    
+    else if((gp % 500) && ((i >= ittypes) || i == itTerra)) {
       int a = gp;
       gp += (ticks - glyph_lastticks);
       if(a/500 != gp/500)
@@ -102,7 +102,7 @@ EX void preparesort() {
   for(int i=0; i<isize(land_over); i++) {
     eLand l = land_over[i];
     ikland[treasureType(l)] = i+1;
-    for(int mi=0; mi<motypes; mi++) 
+    for(int mi=0; mi<motypes; mi++)
       if(isNative(l, eMonster(mi)))
         ikland[mi+ittypes] = i+1;
     }
@@ -146,7 +146,7 @@ int glyphflags(int gid) {
       f |= GLYPH_LOCAL | GLYPH_INSQUARE;
       if(i == localshardof(cwt.at->land)) f |= GLYPH_LOCAL2;
       }
-    if(i == treasureType(cwt.at->land) || daily::on) 
+    if(i == treasureType(cwt.at->land) || daily::on)
       f |= GLYPH_LOCAL | GLYPH_LOCAL2 | GLYPH_IMPORTANT | GLYPH_INSQUARE;
     if(i == itHolyGrail) {
       if(items[i] >= 3 && !inv::on) f |= GLYPH_MARKOVER;
@@ -180,18 +180,18 @@ EX bool graphglyph(bool isMonster) {
   }
 
 bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int qty, int flags, int id) {
-    
+
   bool b =
     mousex >= cx && mousex < cx+buttonsize && mousey >= cy-buttonsize/2 && mousey <= cy-buttonsize/2+buttonsize;
 
   int glsize = buttonsize;
   if(glyph == '%' || glyph == 'M' || glyph == 'W') glsize = glsize*4/5;
-  
+
   int d = ticks - glasttime[id];
   double zoom = (d <= 250 && d >= 0) ? 1.25 - .001 * d : 1;
   glsize = int(glsize * zoom);
   bool isMonster = (id >= ittypes);
-  
+
   if(graphglyph(isMonster)) {
     initquickqueue();
     if(isMonster) {
@@ -201,7 +201,7 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
       if(m == moKrakenT || m == moDragonTail) bsize /= 2;
       if(m == moSlime) bsize = (2*bsize+1)/3;
       transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize*zoom);
-      if(isWorm(m) && cgi.wormscale != 1) 
+      if(isWorm(m) && cgi.wormscale != 1)
         for(int i=0; i<GDIM; i++)
           V[i][i] /= cgi.wormscale;
       int mcol = color;
@@ -224,8 +224,8 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
       bsize = bsize * zoom;
       transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize);
       double t =
-        (ic == IC_ORB || ic == IC_NAI) ? ticks*2 : 
-        ((glyph == 't' && qty%5) || it == itOrbYendor) ? ticks/2 : 
+        (ic == IC_ORB || ic == IC_NAI) ? ticks*2 :
+        ((glyph == 't' && qty%5) || it == itOrbYendor) ? ticks/2 :
         it == itTerra ? glyphphase[id] * 3 * M_PI + 900 * M_PI:
         glyphphase[id] * 2;
       drawItemType(it, NULL, shiftless(V), icol, t, false);
@@ -237,7 +237,7 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
     displaychr(cx + buttonsize/2, cy+buttonsize/4, 0, glsize*3/2, glyph, darkenedby(color, b?0:1));
   else
     displaychr(cx + buttonsize/2, cy, 0, glsize, glyph, darkenedby(color, b?0:1));
-  
+
   string fl = "";
   string str = its(qty);
 
@@ -247,12 +247,12 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
   if(flags & GLYPH_DEMON) fl += "X";
   if(flags & GLYPH_MARKOVER) str += "!";
 
-  if(fl != "") 
+  if(fl != "")
     displaystr(cx + buttonsize, cy-buttonsize/2 + buttonsize/4, 0, buttonsize/2, fl, darkenedby(color, 0), 16);
 
   if(flags & GLYPH_NONUMBER) str = "";
-  
-  int bsize = 
+
+  int bsize =
     (qty < 10 && (flags & (GLYPH_MARKTODO | GLYPH_RUNOUT))) ? buttonsize*3/4 :
     qty < 100 ? buttonsize / 2 :
     buttonsize / 3;
@@ -274,7 +274,7 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
   }
 
 void displayglyph2(int cx, int cy, int buttonsize, int i) {
-      
+
   char glyph = i < ittypes ? iinf[i].glyph : minf[i-ittypes].glyph;
   color_t color = i < ittypes ? iinf[i].color : minf[i-ittypes].color;
   int imp = glyphflags(i);
@@ -320,7 +320,7 @@ void displayglyph2(int cx, int cy, int buttonsize, int i) {
         mouseovers = s0 + XLAT("monsters destroyed: %1", m);
       else if(m == moTortoise)
         mouseovers = s0 + XLAT("animals killed: %1", m);
-      else 
+      else
         mouseovers = s0 + XLAT("monsters killed: %1", m);
       if(imp & GLYPH_LOCAL2) mouseovers += XLAT(" (killing increases treasure spawn)");
       else if(imp & GLYPH_LOCAL) mouseovers += XLAT(" (appears here)");
@@ -344,15 +344,15 @@ void drawMobileArrow(int i) {
 
   // color_t col = getcs().uicolor;
   // col -= (col & 0xFF) >> 1;
-  
+
   bool invalid = !legalmoves[dir];
-  
+
   color_t col = cellcolor(c);
   if(col == OUTLINE_NONE) col = 0xC0C0C0FF;
   col -= (col & 0xFF) >> 1;
   if(invalid) col -= (col & 0xFF) >> 1;
   if(invalid) col -= (col & 0xFF) >> 1;
-  
+
   poly_outline = OUTLINE_DEFAULT;
   // transmatrix m2 = Id;
   ld scale = vid.mobilecompasssize * (sphere ? 7 : euclid ? 6 : 5);
@@ -366,10 +366,10 @@ void drawMobileArrow(int i) {
   double alpha = atan2(P[1], P[0]);
 
   using namespace shmupballs;
-  
+
   double dx = xmove + rad*(1+SKIPFAC-.2)/2 * cos(alpha);
   double dy = yb + rad*(1+SKIPFAC-.2)/2 * sin(alpha);
-  
+
   queuepolyat(shiftless(atscreenpos(dx, dy, scale) * spin(-alpha)), cgi.shArrow, col, PPR::MOBILE_ARROW);
   }
 #endif
@@ -393,7 +393,7 @@ EX void draw_crosshair() {
   auto& cd = current_display;
   auto xc = cd->xcenter;
   auto yc = cd->ycenter;
-  
+
   flat_model_enabler fme;
 
   if(crosshair_color && crosshair_size > 0) {
@@ -405,27 +405,27 @@ EX void draw_crosshair() {
     }
   return;
   }
-  
+
 EX void drawStats() {
   if(vid.stereo_mode == sLR) return;
   draw_crosshair();
   if(nohud) return;
   if(callhandlers(false, hooks_prestats)) return;
-  if(viewdists && show_distance_lists) 
+  if(viewdists && show_distance_lists)
     expansion.view_distances_dialog();
   if(current_display->sidescreen) return;
-  
+
   first_cell_to_draw = true;
   bool h = hide_player();
 
   bool cornermode = (vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100);
-  
+
   #if MAXMDIM >= 4
   if(geometry == gRotSpace || geometry == gProduct) rots::draw_underlying(!cornermode);
   #endif
-  
+
   {
-  
+
   if(vid.radarsize > 0 && h)
   #if CAP_RACING
     if(!racing::on)
@@ -442,7 +442,7 @@ EX void drawStats() {
     calc();
     #if CAP_QUEUE
     queuecircle(xmove, yb, rad, 0xFF0000FF);
-    queuecircle(xmove, yb, rad*SKIPFAC, 
+    queuecircle(xmove, yb, rad*SKIPFAC,
       legalmoves[cwt.at->type] ? 0xFF0000FF : 0xFF000080
       );
     #endif
@@ -452,8 +452,8 @@ EX void drawStats() {
     if(hypot(mousex-xmove, mousey-yb) <= rad) getcstat = '-';
     quickqueue();
     }
-  
-  if(racing::on) 
+
+  if(racing::on)
 #if CAP_RACING
     racing::drawStats();
 #else
@@ -493,7 +493,7 @@ EX void drawStats() {
               int cy = v + s/2;
               if(cor&1) cx = vid.xres-1-s-cx;
               if(cor&2) cy = vid.yres-1-cy;
-    
+
               displayglyph2(cx, cy, s, glyphstoshow[next++]);
               }
           break;
@@ -501,9 +501,9 @@ EX void drawStats() {
         }
       }
     }
-  
+
   else {
-  
+
     instat = false;
     bool portrait = vid.xres < vid.yres;
     int colspace = portrait ? (vid.yres - vid.xres - vid.fsize*3) : (vid.xres - vid.yres - 16) / 2;
@@ -517,7 +517,7 @@ EX void drawStats() {
     int buttonsize;
     int columns, rows;
     bool imponly = false;
-    int minsize = vid.fsize * (portrait ? 4 : 2);  
+    int minsize = vid.fsize * (portrait ? 4 : 2);
     rows = 0;
     while((buttonsize = minsize - vid.killreduction)) {
       columns = colspace / buttonsize;
@@ -534,34 +534,34 @@ EX void drawStats() {
       if(coltaken > columns) { vid.killreduction++; continue; }
       break;
       }
-  
+
     if(buttonsize <= vid.fsize*3/4) {
       imponly = true; buttonsize = minsize;
       rows = rowspace / buttonsize; if(!rows) return;
       colid[0] = 0; colid[2] = portrait ? 1 : 0;
-      }  
-    
+      }
+
     updatesort();
     stable_sort(glyphorder, glyphorder+glyphs, glyphsort);
-    
+
     for(int i0=0; i0<glyphs; i0++) {
       int i = glyphorder[i0];
       if(!ikappear(i)) continue;
       int z = glyphclass(i);
       int imp = glyphflags(i);
       if(imponly) { z &=~1; if(!(imp & GLYPH_IMPORTANT)) continue; }
-  
+
       int cx, cy;
       if(portrait)
         cx = 8 + buttonsize * rowid[z], cy = vid.fsize*2 + buttonsize * (colid[z]) + buttonsize/2 + hud_margin(0);
       else
         cx = 8 + buttonsize * (colid[z]), cy = vid.fsize * 3 + buttonsize * rowid[z] + hud_margin(0);
-      
+
       if(!portrait && z < 2) cx = vid.xres - cx - buttonsize;
-  
+
       rowid[z]++; if(rowid[z] >= rows) rowid[z] = 0, colid[z]++;
-      
-      displayglyph2(cx, cy, buttonsize, i);    
+
+      displayglyph2(cx, cy, buttonsize, i);
       }
     }
   }
@@ -569,7 +569,7 @@ EX void drawStats() {
   calcparam();
 
   int top_y = vid.fsize + hud_margin(0);
-  
+
   string s0;
   if(racing::on) {
     #if CAP_RACING
@@ -583,7 +583,7 @@ EX void drawStats() {
       col = 0xFF0000;
     for(int i=0; i<multi::players; i++) if(race_finish_tick[i])
       col = 0xFFFFFF;
-    
+
     dynamicval<int> x(vid.fsize, vid.fsize*2);
     if(displayButtonS(vid.xres - 8, top_y, racetimeformat(ticks - race_start_tick), col, 16, vid.fsize)) getcstat = 'o';
 
@@ -609,7 +609,7 @@ EX void drawStats() {
       mouseovers = XLAT("Your total wealth"),
       instat = true,
       getcstat = SDLK_F1,
-      help = helptitle(XLAT("Your total wealth"), 0xFFD500) + 
+      help = helptitle(XLAT("Your total wealth"), 0xFFD500) +
       XLAT(
         "The total value of the treasure you have collected.\n\n"
         "Every world type contains a specific type of treasure, worth 1 $$$; "
@@ -627,14 +627,14 @@ EX void drawStats() {
       if(mouseovers == standard_help()) mouseovers = " ";
       while(siz > 4 && textwidth(siz, s) > vid.xres - textwidth(vid.fsize, scoreline)) siz--;
       }
-    
+
     if(displayButtonS(8, top_y, s, forecolor, 0, siz)) {
       instat = true;
       getcstat = SDLK_F1;
       if(long_kills) { mouseovers = " "; help = generateHelpForMonster(moMutant); }
       else {
         mouseovers = XLAT("Your total kills")+": " + its(tkills()),
-        help = helptitle(XLAT("Your total kills") + ": " + its(tkills()), 0x404040) + 
+        help = helptitle(XLAT("Your total kills") + ": " + its(tkills()), 0x404040) +
           XLAT(
           "In most lands, more treasures are generated with each enemy native to this land you kill. "
           "Moreover, 100 kills is a requirement to enter the Graveyard and the Hive.\n\n"
@@ -663,25 +663,25 @@ EX void drawStats() {
       vers += land_structure_name(true);
     if(princess::challenge) vers += " Princess";
     if(randomPatternsMode) vers += " RPM";
-    
-    if(geometry != gNormal || !BITRUNCATED) 
+
+    if(geometry != gNormal || !BITRUNCATED)
       vers = vers + " " + full_geometry_name();
     }
   if(!nofps) vers += XLAT(" fps: ") + its(calcfps());
-  
+
   #if CAP_MEMORY_RESERVE
   if(reserve_limit && reserve_count < reserve_limit) {
     vers += " " + its(reserve_count) + "/" + its(reserve_limit) + " MB";
-    if(displayButtonS(4, vid.yres - 4 - vid.fsize/2 - hud_margin(1), vers, 0xFF2020, 0, vid.fsize/2)) 
+    if(displayButtonS(4, vid.yres - 4 - vid.fsize/2 - hud_margin(1), vers, 0xFF2020, 0, vid.fsize/2))
       getcstat = PSEUDOKEY_MEMORY, instat = true;
     }
-  else 
+  else
   #endif
   if(displayButtonS(4, vid.yres - 4 - vid.fsize/2 - hud_margin(1), vers, 0x202020, 0, vid.fsize/2)) {
     mouseovers = XLAT("frames per second"),
     getcstat = SDLK_F1,
     instat = true,
-    help = 
+    help =
       helptitle(XLAT("frames per second"), 0xFF4040) +
       XLAT(
       "The higher the number, the smoother the animations in the game. "

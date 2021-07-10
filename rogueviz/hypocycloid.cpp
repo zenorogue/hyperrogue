@@ -43,7 +43,7 @@ ld draw_loops = 1; /* how many loops to draw */
 
 void circ_frame() {
   ld t = (frac((1. * ticks) / anims::period) - cshift) * prec * loops;
-  
+
   if(ratio) {
     ld min = 0;
     ld max = 10;
@@ -56,22 +56,22 @@ void circ_frame() {
     circ1 = sin_auto(min);
     circ2 = sin_auto(2*min);
     }
-  
-  
+
+
   ld rad1 = asin_auto(circ1);
   ld rad2 = asin_auto(circ2);
-  
-  dynamicval<ld> d(circ2);  
+
+  dynamicval<ld> d(circ2);
   if(circ2 > 1) {
     /* circumference between 1 and 2 means the other hemisphere */
     circ2 = 2 - circ2;
     rad2 = M_PI - asin_auto(circ2);
     }
-  
+
   vid.linewidth *= lw;
-  
+
   shiftmatrix at = ggmatrix(cwt.at) * xpush(xdist);
-  
+
   ld kdegree = 2 * M_PI / prec;
 
   ld cs = 2*M_PI*cshift;
@@ -86,7 +86,7 @@ void circ_frame() {
         return xpush(-rad2) * ypush(x / cosh(rad2)) * xpush(rad2);
       return Id;
       };
-    
+
     for(int i=0; i<=prec*draw_loops; i++) {
       ld t = i*kdegree-cs*draw_loops;
       curvepoint(shapefun(circ1*t) * C0);
@@ -101,42 +101,42 @@ void circ_frame() {
       at * shapefun(circ1*t*kdegree) * xpush(rad1) * C0,
       at * shapefun(circ1*t*kdegree) * xpush(rad1) * spin(q*degree-t*kdegree) * xpush(rad1) * C0,
       0xFFD500FF, 4);
-    
+
     for(int i=0; i<=prec; i++)
       curvepoint(shapefun(circ1*t*kdegree) * xpush(rad1) * spin(M_PI-t*kdegree) * xpush(rad1) * spin(i*kdegree) * xpush(show) * C0);
     queuecurve(at, 0xFFFFFFFF, 0xFFFF, PPR::LINE);
 
     for(int i=0; i<=prec*draw_loops; i++) {
       ld t = i*kdegree-cs*draw_loops;
-      curvepoint(shapefun(circ1*t) * xpush(rad1) * spin(M_PI-t) * xpush(rad1) * C0);  
+      curvepoint(shapefun(circ1*t) * xpush(rad1) * spin(M_PI-t) * xpush(rad1) * C0);
       }
     queuecurve(at, 0xFFFFFFFF, 0, PPR::LINE);
     }
-  
+
   else {
-  
+
     if(1) {
       for(int i=0; i<=prec; i++)
-        curvepoint(spin(i*kdegree) * xpush(rad2) * C0);      
+        curvepoint(spin(i*kdegree) * xpush(rad2) * C0);
       queuecurve(at, 0xFF0000FF, 0x200000FF, PPR::LINE);
       }
-  
+
     for(int i=0; i<=prec; i++)
       curvepoint(spin(t*kdegree) * xpush(rad2-rad1) * spin(i*kdegree) * xpush(rad1) * C0);
     queuecurve(at, 0x00FF00FF, 0x002000FF, PPR::LINE);
-    
+
     for(int q=0; q<360; q+=36) queueline(
-      at * spin(t*kdegree) * xpush(rad2-rad1) * C0, 
+      at * spin(t*kdegree) * xpush(rad2-rad1) * C0,
       at * spin(t*kdegree) * xpush(rad2-rad1) * spin(q*degree-t*kdegree*circ2/circ1) * xpush(rad1) * C0,
       0xFFD500FF, 4);
-    
+
     for(int i=0; i<=prec*draw_loops; i++) {
       ld t = i*kdegree-cs*draw_loops;
       curvepoint(spin(t) * xpush(rad2-rad1) * spin(-t*circ2/circ1) * xpush(rad1) * C0);
       }
-  
+
     queuecurve(at, 0xFFFFFFFF, 0, PPR::LINE);
-  
+
     for(int i=0; i<=prec; i++)
       curvepoint(spin(t*kdegree) * xpush(rad2-rad1) * spin(-t*kdegree*circ2/circ1) * xpush(rad1) * spin(i*kdegree) * xpush(show) * C0);
     queuecurve(at, 0xFFFFFFFF, 0xFFFF, PPR::LINE);

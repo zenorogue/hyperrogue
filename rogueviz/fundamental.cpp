@@ -21,7 +21,7 @@ void be_connected(cellwalker cw) {
   same[cw.at] |= (1<<cw.spin);
   cw += wstep;
   same[cw.at] |= (1<<cw.spin);
-  /* printf("%s", display(T * C0)); 
+  /* printf("%s", display(T * C0));
   printf(" %s\n", display(gm[cw.at] * C0)); */
   // queueline(T * C0, gm[cw.at] * C0, 0xFF0000FF, 3);
   }
@@ -31,10 +31,10 @@ int funmode = 0;
 shiftpoint corner(cellwalker cw) {
   shiftmatrix T = gm[cw.at];
   if(funmode == 2) {
-    while(cw.at->type != S7) { 
-      cw++; 
+    while(cw.at->type != S7) {
+      cw++;
       T = T * currentmap->adj(cw.at, cw.spin);
-      cw += wstep; 
+      cw += wstep;
       }
     return T * C0;
     }
@@ -54,7 +54,7 @@ shiftmatrix labelpos(shiftpoint h1, shiftpoint h2) {
   ld alpha = atan2(-hx[1], hx[0]);
   return T * xspinpush(alpha + M_PI/2, label_dist);
   }
- 
+
 ld widthfactor = 5;
 ld label_scale = 1;
 
@@ -62,16 +62,16 @@ void fundamental_marker() {
   if(!funmode || !quotient) return;
   same.clear();
   gm.clear();
-  
+
   same[cwt.at] = 0;
   gm[cwt.at] = ggmatrix(cwt.at);
-  
+
   vector<cell*> cells;
   cells.push_back(cwt.at);
-  
+
   int tree_edges = 0;
   int face_edges = 0;
-  
+
   for(int k=0; k<isize(cells); k++) {
     cell *c = cells[k];
     for(int i=0; i<c->type; i++) {
@@ -85,7 +85,7 @@ void fundamental_marker() {
       cells.push_back(c2);
       }
     }
-  
+
   while(true) {
     int f = face_edges;
     for(int k=0; k<isize(cells); k++) {
@@ -100,9 +100,9 @@ void fundamental_marker() {
       }
     if(f == face_edges) break;
     }
-  
+
   cellwalker cw;
-  
+
   int corners = 0;
 
   for(int k=0; k<isize(cells); k++) {
@@ -113,15 +113,15 @@ void fundamental_marker() {
         corners++, cw = cw0;
       }
     }
-  
+
   // printf("tree edges = %d, face edges = %d, corners = %d\n", tree_edges, face_edges, corners);
-  
+
   map<cellwalker, cellwalker> next_corner;
   map<cellwalker, cellwalker> prev_corner;
-  
+
   for(int ci=0; ci<corners; ci++) {
     cellwalker cw0 = cw;
-        
+
     while(true) {
       cw++;
       if(is_connected(cw)) {
@@ -131,7 +131,7 @@ void fundamental_marker() {
       if(!is_connected(cw+1) && !is_connected(cw+wstep-1))
         break;
       }
-    
+
     next_corner[cw0] = cw;
     prev_corner[cw] = cw0;
     }
@@ -151,7 +151,7 @@ void fundamental_marker() {
       }
     cw = next_corner[cw];
     }
-  
+
   vid.linewidth *= widthfactor;
 
   for(int ci=0; ci<corners; ci++) {
@@ -159,19 +159,19 @@ void fundamental_marker() {
     shiftpoint h = corner(cw);
     cw = next_corner[cw];
     shiftpoint h2 = corner(cw);
-    
+
     for(auto& n: nearm) queueline(n.first * inverse_shift(n.second, h), n.first * inverse_shift(n.second, h2), color1, 3);
     }
-    
+
   for(int ci=0; ci<corners; ci++) {
 
     shiftpoint h = corner(cw);
     cw = next_corner[cw];
     shiftpoint h2 = corner(cw);
-    
+
     queueline(h, h2, color2, 3);
     }
-  
+
   if(0) for(int k=0; k<isize(cells); k++) {
     cell *c = cells[k];
     for(int i=0; i<c->type; i++) {
@@ -187,11 +187,11 @@ void fundamental_marker() {
     }
 
   set<cellwalker> visited;
-  
+
   int id = 0;
-  
+
   for(int ci=0; ci<corners; ci++) {
-    
+
     cellwalker cw1 = (cw+1+wstep);
     bool mirrored = false;
     if(!next_corner.count(cw1)) cw1 = cw1 + wmirror - 1, mirrored = true;
@@ -199,7 +199,7 @@ void fundamental_marker() {
     // visited.insert(next_corner[cw]);
     // cellwalker cw2 = next_corner[cw];
     if(next_corner[cw] < (mirrored ? next_corner[cw1] : cw1)) {
-    
+
       int mc = (mirrored ? color1 : color2) >> 8;
       if(hdist(corner(cw), corner(next_corner[cw])) > 1e-3) {
         queuestr(labelpos(corner(cw), corner(next_corner[cw])), label_scale/cgi.scalefactor, its(id), mc);
@@ -208,7 +208,7 @@ void fundamental_marker() {
         else
           queuestr(labelpos(corner(prev_corner[cw1]), corner(cw1)), label_scale/cgi.scalefactor, its(id), mc);
         id++;
-        }      
+        }
       }
     cw = next_corner[cw];
     }
@@ -218,7 +218,7 @@ void fundamental_marker() {
 
 int readArgs() {
   using namespace arg;
-           
+
   if(0) ;
   else if(argis("-fundamental")) {
     shift(); funmode = argi();

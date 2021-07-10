@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- Achievements
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-/** \file achievements.cpp 
+/** \file achievements.cpp
  *  \brief This file implements routines related to achievements and leaderboards
  *
  *  This routines are general, i.e., not necessarily Steam-specific.
@@ -21,7 +21,7 @@ EX const char* leadernames[NUMLEADER] = {
   "Shards100", "Totems", "Daisies", "Statues", "Feathers", "Sapphires",
   "Hyperstones", "Time to Win-71", "Turns to Win-71",
   "Time to 10 Hyperstones-120", "Turns to 10 Hyperstones-120", "Orbs of Yendor",
-  "Fern Flowers", 
+  "Fern Flowers",
   "Royal Jellies", "Powerstones", "Silver", "Wine", "Emeralds", "Grimoires",
   "Holy Grails", "Red Gems", "Pirate Treasures",
   "Shmup Score", "Shmup Time to Win", "Shmup Knife to Win",
@@ -102,7 +102,7 @@ int achievementTimer;
 EX vector<string> achievementsReceived;
 
 /** Returns true if the given achievement cannot be obtained in the current mode.
- *  @param flags Mode requested by the achievement. 
+ *  @param flags Mode requested by the achievement.
  */
 EX bool wrongMode(char flags) {
   if(cheater) return true;
@@ -162,17 +162,17 @@ EX void achievement_log(const char* s, char flags) {
     println(hlog, "got achievement:", s);
     return;
     }
-  
+
   for(int i=0; i<isize(achievementsReceived); i++)
     if(achievementsReceived[i] == s) return;
   achievementsReceived.push_back(s);
-  
+
 #if CAP_SAVE
   remove_emergency_save();
 
   FILE *f = fopen(scorefile, "at");
   if(!f) return;
-  
+
   int t = (int) (time(NULL) - timerstart);
 
   time_t timer = time(NULL);
@@ -221,10 +221,10 @@ EX void achievement_collection2(eItem it, int q) {
   if(randomPatternsMode) return;
   LATE( achievement_collection2(it, q); )
 
-  if(it == itTreat && q == 50 && (geometry == gSphere || geometry == gElliptic) && BITRUNCATED) 
+  if(it == itTreat && q == 50 && (geometry == gSphere || geometry == gElliptic) && BITRUNCATED)
     achievement_gain("HALLOWEEN1", rg::special_geometry);
 
-  if(it == itTreat && q == 100 && (geometry == gSphere || geometry == gElliptic) && BITRUNCATED) 
+  if(it == itTreat && q == 100 && (geometry == gSphere || geometry == gElliptic) && BITRUNCATED)
     achievement_gain("HALLOWEEN2", rg::special_geometry);
 
   if(q == 1) {
@@ -266,7 +266,7 @@ EX void achievement_collection2(eItem it, int q) {
     if(it == itWindstone) achievement_gain("DOVE1");
     if(it == itCoral) achievement_gain("CORAL1");
     if(it == itRose) achievement_gain("ROSE1");
-    
+
     if(it == itBabyTortoise) achievement_gain("TORTOISE1");
     if(it == itDragon) achievement_gain("DRAGON1");
     if(it == itApple) achievement_gain("APPLE1");
@@ -281,19 +281,19 @@ EX void achievement_collection2(eItem it, int q) {
 
     if(it == itGreenGrass) achievement_gain("PRAIR1");
     if(it == itBull) achievement_gain("BULL1");
-    
+
     if(it == itHunting) achievement_gain("TURQ1");
     if(it == itBlizzard) achievement_gain("BLIZZ1");
     if(it == itLavaLily) achievement_gain("LILY1");
     if(it == itTerra) achievement_gain("TERRAC1");
-    
+
     if(it == itRuins) achievement_gain("RUIN1");
     if(it == itSwitch) achievement_gain("JELLZ1");
-    
+
     if(it == itBrownian) achievement_gain("BROWN1");
     if(it == itVarTreasure) achievement_gain("RADIO1");
     if(it == itWest) achievement_gain("FREEFALL1");
-    
+
     if(it == itFrog) achievement_gain("FROG1");
     if(it == itEclectic) achievement_gain("ECLEC1");
     if(it == itWet) achievement_gain("WET1");
@@ -316,7 +316,7 @@ EX void achievement_collection2(eItem it, int q) {
     if(q == 3) achievement_gain("GRAIL3");
     if(q == 8) achievement_gain("GRAIL4");
     }
-  
+
   if(q == (inv::on ? 25 : 10)) {
     if(it == itDiamond) achievement_gain("DIAMOND2");
     if(it == itRuby) achievement_gain("RUBY2");
@@ -371,7 +371,7 @@ EX void achievement_collection2(eItem it, int q) {
 
     if(it == itGreenGrass) achievement_gain("PRAIR2");
     if(it == itBull) achievement_gain("BULL2");
-    
+
     if(it == itHunting) achievement_gain("TURQ2");
     if(it == itBlizzard) achievement_gain("BLIZZ2");
     if(it == itLavaLily) achievement_gain("LILY2");
@@ -383,7 +383,7 @@ EX void achievement_collection2(eItem it, int q) {
     if(it == itBrownian) achievement_gain("BROWN2");
     if(it == itVarTreasure) achievement_gain("RADIO2");
     if(it == itWest) achievement_gain("FREEFALL2");
-    
+
     if(it == itFrog) achievement_gain("FROG2");
     if(it == itEclectic) achievement_gain("ECLEC2");
     if(it == itWet) achievement_gain("WET2");
@@ -426,7 +426,7 @@ EX void achievement_collection2(eItem it, int q) {
 
     if(it == itMutant) achievement_gain("MUTANT3");
     if(it == itFulgurite) achievement_gain("FULGUR3");
-    
+
     if(it == itMutant2) achievement_gain("FRUIT3");
     if(it == itWindstone) achievement_gain("DOVE3");
     if(it == itCoral) achievement_gain("CORAL3");
@@ -449,7 +449,7 @@ EX void achievement_collection2(eItem it, int q) {
 
     if(it == itGreenGrass) achievement_gain("PRAIR3");
     if(it == itBull) achievement_gain("BULL3");
-    
+
     if(it == itHunting) achievement_gain("TURQ3");
     if(it == itBlizzard) achievement_gain("BLIZZ3");
     if(it == itLavaLily) achievement_gain("LILY3");
@@ -461,7 +461,7 @@ EX void achievement_collection2(eItem it, int q) {
     if(it == itBrownian) achievement_gain("BROWN3");
     if(it == itVarTreasure) achievement_gain("RADIO3");
     if(it == itWest) achievement_gain("FREEFALL3");
-    
+
     if(it == itFrog) achievement_gain("FROG3");
     if(it == itEclectic) achievement_gain("ECLEC3");
     if(it == itWet) achievement_gain("WET3");
@@ -524,7 +524,7 @@ EX void achievement_collection2(eItem it, int q) {
 
     if(it == itGreenGrass) achievement_gain("PRAIR4");
     if(it == itBull) achievement_gain("BULL4");
-    
+
     if(it == itHunting) achievement_gain("TURQ4");
     if(it == itBlizzard) achievement_gain("BLIZZ4");
     if(it == itLavaLily) achievement_gain("LILY4");
@@ -536,7 +536,7 @@ EX void achievement_collection2(eItem it, int q) {
     if(it == itBrownian) achievement_gain("BROWN4");
     if(it == itVarTreasure) achievement_gain("RADIO4");
     if(it == itWest) achievement_gain("FREEFALL4");
-    
+
     if(it == itFrog) achievement_gain("FROG4");
     if(it == itEclectic) achievement_gain("ECLEC4");
     if(it == itWet) achievement_gain("WET4");
@@ -544,7 +544,7 @@ EX void achievement_collection2(eItem it, int q) {
     if(it == itCursed) achievement_gain("CURSED4");
     if(it == itDice) achievement_gain("DICE4");
     }
-  
+
   if(it == itOrbYendor) {
     achievement_gain("YENDOR2");
     if(pureHardcore()) achievement_gain("HARDCORE");
@@ -642,7 +642,7 @@ EX void achievement_score(int cat, int number) {
   if(dual::state) return;
   if(shmup::on && cat != LB_PURE_TACTICS_SHMUP && cat != LB_PURE_TACTICS_COOP && cat != LB_RACING) return;
   if(yendor::on && cat != LB_YENDOR_CHALLENGE) return;
-  if(tactic::on && cat != LB_PURE_TACTICS && cat != LB_PURE_TACTICS_SHMUP && cat != LB_PURE_TACTICS_COOP) 
+  if(tactic::on && cat != LB_PURE_TACTICS && cat != LB_PURE_TACTICS_SHMUP && cat != LB_PURE_TACTICS_COOP)
     return;
   if(racing::on && cat != LB_RACING) return;
   upload_score(cat, number);
@@ -668,7 +668,7 @@ EX void improveItemScores() {
   improve_score(33, itWhirlpool);
   improve_score(34, itPalace);
   improve_score(35, itFjord);
-  
+
   improve_score(37, itIvory);
   improve_score(38, itElemental);
   improve_score(39, itZebra);
@@ -679,7 +679,7 @@ EX void improveItemScores() {
   if(!isHaunted(cwt.at->land)) improve_score(46, itLotus);
   improve_score(47, itMutant2);
   improve_score(48, itWindstone);
-  
+
   improve_score(51, itCoral);
   improve_score(52, itRose);
 
@@ -690,7 +690,7 @@ EX void improveItemScores() {
   improve_score(58, itKraken);
   improve_score(59, itBarrow);
   improve_score(60, itTrollEgg);
-  
+
   improve_score(64, itAmethyst);
   improve_score(65, itSlime);
   improve_score(66, itDodeca);
@@ -702,14 +702,14 @@ EX void improveItemScores() {
   improve_score(73, itBlizzard);
   improve_score(74, itLavaLily);
   improve_score(75, itHunting);
-  
+
   improve_score(76, itRuins);
   improve_score(77, itSwitch);
-  
+
   improve_score(78, itBrownian);
   improve_score(79, itVarTreasure);
   improve_score(80, itWest);
-  
+
   improve_score(82, itFrog);
   improve_score(83, itEclectic);
   improve_score(84, itWet);
@@ -720,7 +720,7 @@ EX void improveItemScores() {
 
 int next_stat_tick;
 
-/** gain the final achievements. 
+/** gain the final achievements.
  *  @param really false: the user is simply looking at the score; true: the game really ended.
  */
 EX void achievement_final(bool really_final) {
@@ -739,7 +739,7 @@ EX void achievement_final(bool really_final) {
 #if CAP_TOUR
   if(tour::on) return;
 #endif
-  
+
   if(randomPatternsMode) return;
   if(peace::on) return;
   if(yendor::on) return;
@@ -756,9 +756,9 @@ EX void achievement_final(bool really_final) {
   if(daily::on) {
     daily::uploadscore(really_final);
     return;
-    }  
+    }
 #endif
-  
+
   int specialcode = 0;
   if(shmup::on) specialcode++;
   if(ls::std_chaos()) specialcode+=2;
@@ -766,7 +766,7 @@ EX void achievement_final(bool really_final) {
   if(PURE) specialcode+=4;
   if(numplayers() > 1) specialcode+=8;
   if(inv::on) specialcode+=16;
-  
+
   if(sphere && specialland == laHalloween) {
     if(specialcode) return;
     achievement_score(LB_HALLOWEEN, items[itTreat]);
@@ -776,7 +776,7 @@ EX void achievement_final(bool really_final) {
   if(ineligible_starting_land) return;
   if(geometry) return;
   if(NONSTDVAR) return;
-  
+
   // determine the correct leaderboard ID for 'total score'
   // or return if no leaderboard for the current mode
   int sid;
@@ -790,13 +790,13 @@ EX void achievement_final(bool really_final) {
     case 16: sid = 69; break;
     default: return;
     }
-      
+
   int total_improved = 0;
   specific_improved = 0;
   specific_what = 0;
-  
-  if(specialcode == 0) improveItemScores(); 
-  
+
+  if(specialcode == 0) improveItemScores();
+
   int tg = gold();
   if(tg && haveLeaderboard(sid)) {
     if(tg > get_currentscore(sid) && score_loaded(sid)) {
@@ -807,7 +807,7 @@ EX void achievement_final(bool really_final) {
     }
 
   if(total_improved >= 2) {
-#if !ISANDROID  
+#if !ISANDROID
     addMessage(XLAT("Your total treasure has been recorded in the " LEADERFULL "."));
     addMessage(XLAT("Congratulations!"));
 #endif
@@ -817,14 +817,14 @@ EX void achievement_final(bool really_final) {
   else if(total_improved && specific_improved)
     addMessage(XLAT("You have improved your total and '%1' high score!", iinf[specific_what].name));
   else if(total_improved) {
-#if !ISANDROID  
+#if !ISANDROID
     addMessage(XLAT("You have improved your total high score on " LEADER ". Congratulations!"));
 #endif
     }
   else if(specific_improved >= 2)
     addMessage(XLAT("You have improved %1 of your specific high scores!", its(specific_improved)));
   else if(specific_improved) {
-#if !ISANDROID  
+#if !ISANDROID
     addMessage(XLAT("You have improved your '%1' high score on " LEADER "!", iinf[specific_what].name));
 #endif
     }
@@ -844,8 +844,8 @@ EX void check_total_victory() {
   hadtotalvictory = true;
   achievement_gain("TOTALVICTORY");
   }
-  
-/** gain the victory achievements. 
+
+/** gain the victory achievements.
  *  @param hyper true for the Hyperstone victory, and false for the Orb of Yendor victory.
  */
 EX void achievement_victory(bool hyper) {
@@ -867,22 +867,22 @@ EX void achievement_victory(bool hyper) {
   DEBB(DF_STEAM, ("after checks"))
 
   int t = getgametime();
-  
+
   if(hyper && shmup::on) return;
   if(hyper && inv::on) return;
-  
+
   int ih1 = hyper ? 15 : inv::on ? 70 : shmup::on ? (numplayers() > 1 ? 45 : 29) : 13;
   int ih2 = hyper ? 16 : inv::on ? 71 : shmup::on ? 30 : 14;
-  
+
   int improved = 0;
   if(score_loaded(ih1) && score_loaded(ih2)) {
     if(get_currentscore(ih1) == score_default(ih1) || get_currentscore(ih2) == score_default(ih2))
       improved += 4;
-    
+
     if(get_currentscore(ih1) > t) {
       improved++;
       }
-  
+
     if(get_currentscore(ih2) > turncount) {
       improved+=2;
       }
@@ -902,7 +902,7 @@ EX void achievement_victory(bool hyper) {
     else if(improved >= 3) {
       if(shmup::on)
         addMessage(XLAT("You have improved both your real time and knife count. Congratulations!"));
-      else 
+      else
         addMessage(XLAT("You have improved both your real time and turn count. Congratulations!"));
       }
     else if(improved == 1)
@@ -914,7 +914,7 @@ EX void achievement_victory(bool hyper) {
         addMessage(XLAT("You have used less turns than ever before. Congratulations!"));
       }
     }
-  
+
   DEBB(DF_STEAM, ("uploading scores"))
   upload_score(ih1, t);
   upload_score(ih2, turncount);
@@ -930,14 +930,14 @@ EX string get_rich_presence_text() {
   if(daily::on)
     return "Strange Challenge #" + its(daily::daily_id) + ", score " + its(gold());
   #endif
-  
+
   if(tour::on)
     return "Guided Tour";
 
   string res;
-  if(geometry != gNormal || !BITRUNCATED) 
+  if(geometry != gNormal || !BITRUNCATED)
     res = res + full_geometry_name() + " ";
-  
+
   if(land_structure != default_land_structure()) res += land_structure_name(false) + " ";
   if(shmup::on) res += "shmup ";
   if(dual::state) res += "dual ";
@@ -946,15 +946,15 @@ EX string get_rich_presence_text() {
   if(multi::players > 1) res += "multi ";
   if(casual) res += "casual ";
 
-  if(cheater || among(cwt.at->land, laCanvas, laCA)) 
+  if(cheater || among(cwt.at->land, laCanvas, laCA))
     return res + "(?)";
-  
+
   if(yendor::on) {
     res += "Yendor Challenge: " + yendor::name(yendor::challenge);
     if(items[itOrbYendor]) res += " (level " + its(items[itOrbYendor]) + ")";
     return res;
     }
-  
+
   if(peace::on) return res + "peaceful";
 
   if(tactic::on)
@@ -966,19 +966,19 @@ EX string get_rich_presence_text() {
   if(racing::on) {
     using namespace racing;
     res = res + "racing in " + linf[specialland].name;
-    
+
     for(int i=0; i<multi::players; i++) {
-      if(race_finish_tick[i]) 
+      if(race_finish_tick[i])
         res += racetimeformat(race_finish_tick[i] - race_start_tick);
       }
-    
+
     return res;
     }
   #endif
-  
+
   res += linf[cwt.at->land].name;
   res += ", " + its(gold()) + " $$$";
-  
+
   return res;
   }
 
@@ -1009,7 +1009,7 @@ EX void achievement_display() {
   #endif
   }
 
-EX bool isAscending(int i) { 
+EX bool isAscending(int i) {
   return i == 13 || i == 14 || i == 15 || i == 16 || i == 29 || i == 30 || i == 45;
   }
 

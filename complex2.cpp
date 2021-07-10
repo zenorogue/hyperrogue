@@ -1,7 +1,7 @@
 // Hyperbolic Rogue - Complex features part II
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-/** \file complex2.cpp 
+/** \file complex2.cpp
  *  \brief Continuation of complex.cpp
  *
  *  Includes: Brownian, Irradiated, Free Fall
@@ -22,14 +22,14 @@ EX namespace brownian {
   map<cell*, vector<pair<cell*, int >> > futures;
   int centersteps = 0;
   int totalsteps = 0;
-  
+
   void rise(cell *c, int val) {
     if(c->wall == waSea) c->wall = waNone;
     if(c->land == laOcean || c->land == laNone) {
       c->land = laBrownian;
       c->landparam = 0;
       }
-    c->bardir = NOBARRIERS; 
+    c->bardir = NOBARRIERS;
     forCellCM(c1, c) {
       c1->bardir = NOBARRIERS;
       if(c1->mpdist > BARLEV) {
@@ -43,7 +43,7 @@ EX namespace brownian {
       }
     c->landparam += val;
     }
-  
+
   static const int FAT = (-100); // less than 0
 
   void recurse(cell *c, int fatten_from) {
@@ -93,7 +93,7 @@ EX namespace brownian {
 
   EX void dissolve(cell *c, int x) {
     destroyTrapsAround(c);
-    if(c->land == laBrownian) 
+    if(c->land == laBrownian)
       dissolve_brownian(c, x);
     else if(c->wall == waRed2) c->wall = waRed1;
     else if(c->wall == waRed3) c->wall = waRed2;
@@ -105,7 +105,7 @@ EX namespace brownian {
       c->wall = waSea;
     else if(cellHalfvine(c)) destroyHalfvine(c, waNone, 4);
     }
-  
+
   EX void init(cell *c) {
     if(!hyperbolic) return;
     recurse(c, FAT);
@@ -121,8 +121,8 @@ EX namespace brownian {
       if(c->move(i) && c->move(i)->mpdist < c->mpdist) gdir = i;
       }
     if(gdir < 0) return;
-    
-    cellwalker cw(c, gdir); 
+
+    cellwalker cw(c, gdir);
     for(int i=0; i<4; i++) {
       cw += revstep;
       setdist(cw.at, BARLEV, cw.peek());
@@ -138,14 +138,14 @@ EX namespace brownian {
     recurse(cw.at, celldist(c) + dl * 3);
 
     cell *c2 = c;
-    while(c2->mpdist > 7) {      
+    while(c2->mpdist > 7) {
       forCellEx(c3, c2) if(c3->mpdist < c2->mpdist) { c2 = c3; goto next; }
       break;
       next: ;
       }
     if(!c2->monst && c2->wall != waBoat) c2->monst = moAcidBird;
     }
-  
+
   EX void apply_futures(cell *c) {
     if(futures.count(c)) {
       auto m = move(futures[c]);
@@ -158,9 +158,9 @@ EX namespace brownian {
     }
 
   EX void build(cell *c, int d) {
-  
+
     if(!hyperbolic) c->wall = waNone, c->landparam = 256;
-    
+
     if(c->landparam == 0 && ls::single()) c->land = laOcean;
 
     ONEMPTY {
@@ -195,7 +195,7 @@ EX namespace brownian {
         y < 3 * level ? colors[3] :
         colors[4];
      }
-  
+
   int hrc = addHook(hooks_removecells, 0, [] () {
     vector<cell*> to_remove;
     for(auto p: futures) if(is_cell_removed(p.first)) to_remove.push_back(p.first);
@@ -220,18 +220,18 @@ EX namespace westwall {
     if(c->land == laWestWall && !c->landparam) buildEquidistant(c);
     return coastvalEdge(c);
     }
-  
+
   void build(vector<cell*>& whirlline, int d) {
-    again: 
+    again:
     cell *at = whirlline[isize(whirlline)-1];
     cell *prev = whirlline[isize(whirlline)-2];
-    for(int i=0; i<at->type; i++) 
+    for(int i=0; i<at->type; i++)
       if(at->move(i) && coastvalEdge1(at->move(i)) == d && at->move(i) != prev) {
         whirlline.push_back(at->move(i));
         goto again;
         }
     }
-  
+
   void moveAt(cell *c, manual_celllister& cl) {
     if(cl.listed(c)) return;
     if(c->land != laWestWall) return;
@@ -253,10 +253,10 @@ EX namespace westwall {
       if(whirlline[i]->item)
         animateMovement(match(whirlline[i+1], whirlline[i]), LAYER_BOAT);
       }
-    for(int i=0; i<z; i++) 
+    for(int i=0; i<z; i++)
       pickupMovedItems(whirlline[i]);
     }
-  
+
   EX void move() {
     manual_celllister cl;
     if(gravity_state == gsLevitation) return;
@@ -310,13 +310,13 @@ array<feature, 21> features {{
   {0x000c18,-1, moNone, VF { if(hrand(1500) < 30) build_pool(c, true); } },
   {0x040A00,-1, moNone, VF { if(c->wall == waNone && !c->monst && !c->monst && hrand(1500) < 10) c->wall = waThumperOff; } },
   {0x080A00,-1, moNone, VF { if(hrand(1500) < 20 && !c->monst && !c->wall) c->wall = waFireTrap; } },
-  {0x0C0A00, 0, moNone, VF { 
+  {0x0C0A00, 0, moNone, VF {
     bool inyendor = yendor::on && specialland == laVariant && celldist(c) < 7;
     int chance = inyendor ? 800 : 100;
-    if(c->wall == waNone && !c->monst && hrand(5000) < chance) c->wall = waExplosiveBarrel; 
+    if(c->wall == waNone && !c->monst && hrand(5000) < chance) c->wall = waExplosiveBarrel;
     } },
-  {0x060D04, 0, moNone, VF { 
-    if(c->wall == waNone && !c->monst && pseudohept(c) && hrand(30000) < 25 + items[itVarTreasure]) 
+  {0x060D04, 0, moNone, VF {
+    if(c->wall == waNone && !c->monst && pseudohept(c) && hrand(30000) < 25 + items[itVarTreasure])
       if(buildIvy(c, 0, c->type) && !peace::on) c->item = itVarTreasure;
     }},
   {0x000A08, 0, moNone, VF { if(c->wall == waNone && !c->monst && hrand(5000) < 100) c->wall = waSmallTree; }},
@@ -376,7 +376,7 @@ EX void roundTableMessage(cell *c2) {
   int dd = celldistAltRelative(c2) - celldistAltRelative(cwt.at);
 
   bool tooeasy = (roundTableRadius(c2) < newRoundTableRadius());
-            
+
   if(dd>0) {
     if(grailWasFound(cwt.at)) {
       addMessage(XLAT("The Knights congratulate you on your success!"));
@@ -417,8 +417,8 @@ EX void knightFlavorMessage(cell *c2) {
   changes.value_keep(msgid);
 
   retry:
-  if(msgid >= 32) msgid = 0;  
-  
+  if(msgid >= 32) msgid = 0;
+
   if(msgid == 0 && grailfound) {
     addMessage(XLAT("\"I would like to congratulate you again!\""));
     }
@@ -501,7 +501,7 @@ EX void knightFlavorMessage(cell *c2) {
   else if(msgid == 17) {
     addMessage(XLAT("\"We live in a beautiful and orderly world, "));
     addMessage(XLAT("and not in a chaos without norms.\""));
-    }                                                          
+    }
   else if(msgid == 25) {
     addMessage(XLAT("\"Thank you very much for talking, and have a great rest of your day!\""));
     }
@@ -545,11 +545,11 @@ EX bool uncoverMines(cell *c, int lev, int dist, bool just_checking) {
       b = true;
       }
     }
-  
+
   bool minesNearby = false;
   bool nominesNearby = false;
   bool mineopens = false;
-  
+
   auto adj = adj_minefield_cells(c);
 
   for(cell *c2: adj) {
@@ -570,7 +570,7 @@ EX bool uncoverMines(cell *c, int lev, int dist, bool just_checking) {
         changes.ccell(c2),
         c2->landparam |= 1;
     }
-  
+
   return b;
   }
 
@@ -588,7 +588,7 @@ EX void performMarkCommand(cell *c) {
     ca::list_adj(c);
     }
   else if(c->land == laCA && c->wall == ca::wlive) {
-    c->wall = waNone; 
+    c->wall = waNone;
     ca::list_adj(c);
     }
   if(c->land != laMinefield) return;
@@ -618,21 +618,21 @@ EX bool safe() {
   }
 
 EX void uncover_full(cell *c2) {
-  int mineradius = 
+  int mineradius =
     bounded ? 3 :
     (items[itBombEgg] < 1 && !tactic::on) ? 0 :
     items[itBombEgg] < 20 ? 1 :
     items[itBombEgg] < 30 ? 2 :
     3;
-  
+
   bool nomine = !normal_gravity_at(c2);
   if(!nomine && uncoverMines(c2, mineradius, 0, true) && markOrb(itOrbAether))
     nomine = true;
-  
+
   if(!nomine) {
     uncoverMines(c2, mineradius, 0, false);
     mayExplodeMine(c2, moPlayer);
-    }  
+    }
   }
 
 EX void auto_teleport_charges() {
@@ -656,7 +656,7 @@ EX void check(cell *c) {
     if(randterra) {
       c->landparam++;
       if((c->landparam == 3 && hrand(3) == 0) ||
-        (c->landparam == 4 && hrand(2) == 0) || 
+        (c->landparam == 4 && hrand(2) == 0) ||
         c->landparam == 5)
           live = true;
       }
@@ -677,7 +677,7 @@ EX void check_around(cell *c) {
   }
 
 EX void check() {
-  for(cell *pc: player_positions()) 
+  for(cell *pc: player_positions())
     forCellEx(c, pc) {
       if(shmup::on) {
         forCellEx(c2, c)
@@ -693,8 +693,8 @@ EX namespace ambush {
 
 EX void mark(cell *c, manual_celllister& cl) {
   if(!cl.add(c)) return;
-  forCellEx(c2, c) 
-    if(c2->cpdist < c->cpdist) 
+  forCellEx(c2, c)
+    if(c2->cpdist < c->cpdist)
       mark(c2, cl);
   }
 
@@ -710,12 +710,12 @@ EX void check_state() {
           distance = c->cpdist;
         mark(c, cl);
         }
-      if(c->monst == moHunterGuard && c->cpdist <= 4) 
+      if(c->monst == moHunterGuard && c->cpdist <= 4)
         mark(c, cl);
       }
     if(items[itHunting] > 5 && items[itHunting] <= 22) {
       int q = 0;
-      for(cell *pc: player_positions()) 
+      for(cell *pc: player_positions())
         forCellEx(c2, pc)
           if(cl.listed(c2))
             q++;
@@ -732,10 +732,10 @@ EX void check_state() {
       if(havewhat & HF_FAILED_AMBUSH && ambushed) {
         addMessage(XLAT("The Hunting Dogs give up."));
         ambushed = false;
-        }        
+        }
       }
     }
-  
+
   }
 
 EX int fixed_size;
@@ -753,31 +753,31 @@ EX int size(cell *c, eItem what) {
   switch(what) {
     case itCompass:
       return 0;
-    
+
     case itHunting:
       return min(min(qty, max(33-qty, 6)), 15);
-    
+
     case itOrbSide3:
       return restricted ? 10 : 20;
-    
+
     case itOrbFreedom:
       return restricted ? 10 : 60;
-    
+
     case itOrbImpact:
     case itOrbPlague:
       return 10;
-    
+
     case itOrbThorns:
     case itOrb37:
     case itOrbChaos:
       return 20;
-    
+
     case itOrbLava:
       return 20;
-    
+
     case itOrbBeauty:
       return 35;
-    
+
     case itOrbShell:
       return 35;
 
@@ -788,7 +788,7 @@ EX int size(cell *c, eItem what) {
     case itOrbDash:
     case itOrbFrog:
       return 40;
-    
+
     case itOrbAir:
     case itOrbDragon:
       return 50;
@@ -796,7 +796,7 @@ EX int size(cell *c, eItem what) {
     case itOrbStunning:
       // return restricted ? 50 : 60; -> no benefits
       return 30;
-    
+
     case itOrbBull:
     case itOrbSpeed:
     case itOrbShield:
@@ -807,25 +807,25 @@ EX int size(cell *c, eItem what) {
 
     case itOrbTeleport:
       return 300;
-    
+
     case itGreenStone:
     case itOrbSafety:
     case itOrbYendor:
       return 0;
-    
+
     case itKey:
       return 16;
 
     case itWarning:
       return qty;
-    
+
     default:
       return restricted ? 6 : 10;
-      break;    
-    
+      break;
+
     // Flash can survive about 70, but this gives no benefits
     }
-  
+
   }
 
 EX void ambush(cell *c, int dogs) {
@@ -842,7 +842,7 @@ EX void ambush(cell *c, int dogs) {
     if(dh > d) c0 = cx, d = dh;
     }
   if(sphere) {
-    for(int i = cl.lst.size()-1; i>0 && dogs; i--) 
+    for(int i = cl.lst.size()-1; i>0 && dogs; i--)
       if(!isPlayerOn(cl.lst[i]) && !cl.lst[i]->monst)
         cl.lst[i]->monst = moHunterDog, dogs--;
     }
@@ -867,7 +867,7 @@ EX void ambush(cell *c, int dogs) {
           cell *c1 = (cellwalker(ccur, i) + wstep + 1).peek();
           if(!c1) continue;
           if(c1 != clast && cl.listed(c1) && cl.getdist(c1) == d)
-            c2 = c1;        
+            c2 = c1;
           }
         }
       if(!c2) break;
@@ -878,7 +878,7 @@ EX void ambush(cell *c, int dogs) {
       }
     }
   int N = isize(around);
-  
+
   int gaps = dogs;
   int result = dogs0;
   if(N) {
@@ -935,14 +935,14 @@ EX namespace dice {
           hardness[i] = min(hardness[i], hardness[j]+1);
       }
     };
-  
+
   die_structure d20(5, {
-    {13-1, 7-1, 19-1}, {20-1, 12-1, 18-1}, {19-1, 17-1, 16-1}, {14-1, 18-1, 11-1}, {13-1, 18-1, 15-1}, 
+    {13-1, 7-1, 19-1}, {20-1, 12-1, 18-1}, {19-1, 17-1, 16-1}, {14-1, 18-1, 11-1}, {13-1, 18-1, 15-1},
     {14-1, 9-1, 16-1}, { 1-1, 15-1, 17-1}, {20-1, 16-1, 10-1}, {19-1,  6-1, 11-1}, { 8-1, 17-1, 12-1},
     {13-1, 9-1,  4-1}, { 2-1, 10-1, 15-1}, { 1-1, 11-1,  5-1}, {20-1,  4-1,  6-1}, { 7-1,  5-1, 12-1},
     { 8-1, 6-1,  3-1}, { 7-1, 10-1,  3-1}, { 2-1,  5-1,  4-1}, { 1-1,  3-1,  9-1}, { 8-1,  2-1, 14-1}
     });
-  
+
   die_structure d8(4, {
     {1, 3, 5}, {0, 4, 2}, {3, 1, 7}, {2, 6, 0}, {5, 7, 1}, {4, 0, 6}, {7, 5, 3}, {6, 2, 4}
     });
@@ -955,9 +955,9 @@ EX namespace dice {
     {3,5,4,9,1}, {0,9,6,7,3}, {11,10,5,3,7}, {0,1,7,2,5}, {0,5,10,8,9}, {0,3,2,10,4},
     {11,7,1,9,8}, {11,2,3,1,6}, {11,6,9,4,10}, {0,4,8,6,1}, {11,8,4,5,2}, {8,10,2,7,6}
     });
-  
+
   vector<die_structure*> die_list = {&d4, &d6, &d8, &d12, &d20};
-    
+
   #if HDR
   extern vector<struct die_structure*> die_list;
 
@@ -969,9 +969,9 @@ EX namespace dice {
     int happy();
     };
   #endif
-  
+
   EX int shape_faces(die_structure *w) { return w->faces; }
-  
+
   EX string die_name(die_structure *w) { return its(w->faces); }
 
   int die_data::happy() {
@@ -979,23 +979,23 @@ EX namespace dice {
     if(val == 0) return -1;
     return 0;
     }
-  
+
   EX die_structure *get_by_id(unsigned i) { return die_list[i % isize(die_list)]; }
-  EX int get_die_id(die_structure *ds) { 
+  EX int get_die_id(die_structure *ds) {
     for(int i=0; i<isize(die_list); i++)
       if(die_list[i] == ds)
         return i;
     return -1;
     }
-  
+
   EX map<cell*, die_data> data;
-        
+
   EX void generate_specific(cell *c, die_structure *ds, int min_hardness, int max_hardness) {
     auto& dd = data[c];
     dd.which = ds;
     vector<int> dirs;
     for(int i=0; i<c->type; i++) createMov(c, i);
-    for(int i=0; i<c->type; i++) 
+    for(int i=0; i<c->type; i++)
     for(int j=0; j<c->type; j++) if(can_roll(ds->facesides, i, movei(c, j)))
       dirs.push_back(i);
     if(dirs.empty())
@@ -1003,12 +1003,12 @@ EX namespace dice {
     else
       dd.dir = hrand_elt(dirs);
     vector<int> sides;
-    for(int i=0; i<ds->faces; i++) 
+    for(int i=0; i<ds->faces; i++)
       if(ds->hardness[i] >= min_hardness && ds->hardness[i] <= max_hardness)
         sides.push_back(i);
     dd.val = hrand_elt(sides);
     }
-  
+
   EX int die_possible(cell *c) {
     vector<int> res;
     for(int i: {3, 4, 5})
@@ -1023,7 +1023,7 @@ EX namespace dice {
     if((cur - mi.d) % (mi.s->type / sides)) return false;
     return true;
     }
-  
+
   EX bool can_roll(movei mi) {
     auto& dd = data[mi.s];
     auto& dw = dd.which;
@@ -1039,8 +1039,8 @@ EX namespace dice {
     generate_specific(c, hrand_elt(ds), 0, 99);
     return true;
     }
-  
-  EX void generate_full(cell *c, int hard) {  
+
+  EX void generate_full(cell *c, int hard) {
     int dp = die_possible(c);
     if(!dp) return;
     if(safety) return;
@@ -1105,58 +1105,58 @@ EX namespace dice {
     else if(pct2 < 40 + hard) {
       c->monst = moAnimatedDie;
       generate_specific(c, &d20, 0, 99);
-      }    
+      }
     }
 
   EX die_data roll_effect(movei mi, die_data dd) {
     auto &cto = mi.t;
     auto &th = mi.s;
-    
+
     int rdir = mi.dir_force();
     int t = th->type;
 
     int val = dd.val;
     int dir = dd.dir;
-    
+
     auto& dw = dd.which;
-    
+
     int si = dw->facesides;
-    
+
     if(t % si) { println(hlog, "error: bad roll"); return dd; }
-    
+
     int sideid = gmod((rdir - dir) * (dd.mirrored?-1:1) * si / t, si);
-    
+
     int val1 = dw->sides[val][sideid];
-    
+
     int si1 = isize(dw->sides[val1]);
-    
+
     int sideid1 = dw->spins[val][sideid];
-    
+
     int t1 = cto->type;
     if(t1 % si1) { println(hlog, "error: bad roll target"); return dd; }
-    
+
     int rdir1 = mi.rev_dir_force();
-    
+
     bool mirror1 = dd.mirrored ^ mi.mirror();
-    
+
     int dir1 = rdir1 - (mirror1?-1:1) * sideid1 * t1 / si1;
-    
+
     dir1 = gmod(dir1, t1);
-    
+
     dd.mirrored = mirror1;
     dd.val = val1;
     dd.dir = dir1;
     return dd;
     }
-  
+
   EX bool on(cell *c) {
     return isDie(c->wall) || isDie(c->monst);
     }
-      
+
   EX void roll(movei mi) {
     auto &cto = mi.t;
     auto &th = mi.s;
-    
+
     changes.map_value(data, cto);
     changes.map_value(data, th);
     data[cto] = roll_effect(mi, data[th]);
@@ -1176,7 +1176,7 @@ EX namespace dice {
     int val = dd.val;
     int dir = dd.dir;
     auto& dw = dd.which;
-    
+
     int si = dw->facesides;
 
     if(c == lmouseover_distant) {
@@ -1185,7 +1185,7 @@ EX namespace dice {
         cell* c;
         die_data dd;
         shiftmatrix V;
-        };      
+        };
       vector<celldata_t> data;
       auto visit = [&] (cell *c, die_data dd, shiftmatrix V) {
         if(visited.count(c)) return;
@@ -1216,26 +1216,26 @@ EX namespace dice {
         queuestr(V * rgpushxto0(mid), .25, its(side[i]+1), 0xFFFFFFFF);
         }
       }
-    
+
     shiftmatrix V1 = V * ddspin(c, dir) * spin(M_PI);
     if(dd.mirrored) V1 = V1 * MirrorY;
-    
+
     // loop:
 
     vector<bool> face_drawn(dd.which->faces, false);
-    
+
     vector<pair<transmatrix, int> > facequeue;
-    
+
     auto add_to_queue = [&] (const transmatrix& T, int d) {
       if(face_drawn[d]) return;
       face_drawn[d] = true;
       facequeue.emplace_back(T, d);
       };
-    
+
     transmatrix S = Id;
-    
+
     ld outradius, inradius;
-    
+
     if(1) {
       dynamicval<eGeometry> g(geometry, gSphere);
       ld alpha = 360 * degree / dw->order;
@@ -1246,7 +1246,7 @@ EX namespace dice {
 
     hyperpoint shift = inverse_shift(V1, tC0(die_target));
     hyperpoint log_shift = inverse_exp(shiftless(shift)) * (inradius / cgi.hexhexdist);
-    
+
     if(1) {
       dynamicval<eGeometry> g(geometry, gSphere);
       hyperpoint de = direct_exp(log_shift);
@@ -1257,25 +1257,25 @@ EX namespace dice {
         }
       for(int i=0; i<4; i++) S[i][1] *= -1;
       }
-    
+
     add_to_queue(S, val);
 
     ld dieradius = cgi.scalefactor * scale / 2;
-    
+
     if(dw->faces == 20) dieradius /= 1.3;
     if(dw->faces == 8) dieradius /= 1.15;
     if(dw->faces == 12) dieradius /= 1.15;
-    
+
     if(hyperbolic) dieradius /= 1.3;
-    
+
     ld base_to_base;
-    
+
     bool osphere = sphere && GDIM == 2;
     bool oeuclid = euclid && GDIM == 2;
-    eGeometry highdim = 
+    eGeometry highdim =
       (GDIM == 3) ? geometry :
       hyperbolic ? gSpace534 : gCubeTiling;
-    
+
     if(1) {
       dynamicval<eGeometry> g(geometry, highdim);
       hyperpoint h = cspin(2, 0, M_PI-outradius) * zpush0(-dieradius);
@@ -1288,19 +1288,19 @@ EX namespace dice {
           });
         }
       }
-    
+
     vector<pair<ld, int> > ordering;
-    
+
     for(int i=0; i<dw->faces; i++) {
-    
+
       transmatrix T = facequeue[i].first;
       int ws = facequeue[i].second;
-      
+
       for(int d=0; d<si; d++) {
         dynamicval<eGeometry> g(geometry, highdim);
         add_to_queue(T * cspin(0, 1, 2*M_PI*d/si) * cspin(2, 0, inradius) * cspin(0, 1, M_PI-2*M_PI*dw->spins[ws][d]/si), dw->sides[ws][d]);
         }
-      
+
       if(1) {
         dynamicval<eGeometry> g(geometry, highdim);
         hyperpoint h = zpush(base_to_base) * T * zpush0(dieradius);
@@ -1308,21 +1308,21 @@ EX namespace dice {
         ordering.emplace_back(-z, i);
         }
       }
-    
+
     sort(ordering.begin(), ordering.end());
-    
+
     for(auto o: ordering) {
       int i = o.second;
       transmatrix T = facequeue[i].first;
 
       array<hyperpoint, 5> face;
-      
+
       hyperpoint dctr;
       if(1) {
         dynamicval<eGeometry> g(geometry, highdim);
         dctr = zpush(base_to_base) * C0;
         }
-      
+
       auto sphere_to_space = [&] (hyperpoint h) {
         if(fpp) return h;
         if(osphere) {
@@ -1347,7 +1347,7 @@ EX namespace dice {
           }
         curvepoint(hs);
         }
-      
+
       hyperpoint ctr, cx, cy;
       if(dw->facesides == 3) {
         dynamicval<eGeometry> g(geometry, highdim);
@@ -1370,16 +1370,16 @@ EX namespace dice {
         cx = (face[2] - face[0]) * .75;
         cy = face[1] - (face[3] + face[4]) * .4;
         }
-      
+
       queuecurve(V1, 0xFFFFFFFF, color & 0xFFFFFF9F, PPR::WALL);
-      
+
       #if !CAP_EXTFONT
       if(!vid.usingGL) continue;
       pointfunction pf = [&] (ld x, ld y) {
         dynamicval<eGeometry> g(geometry, highdim);
         return sphere_to_space(normalize(ctr + cx * x + cy * y));
         };
-      
+
       if(dw == &d4) {
         int q = facequeue[i].second;
         for(int j=0; j<3; j++) {

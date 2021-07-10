@@ -16,7 +16,7 @@ EX namespace inforder {
   EX bool in() { return S3 >= OINF; }
 
   EX bool mixed() { return cgflags & qINFMIXED; }
-  
+
   EX int alt_degree;
 
   struct hrmap_inforder : hrmap_hyperbolic {
@@ -36,9 +36,9 @@ EX namespace inforder {
       }
 
     };
-  
-  EX hrmap* new_map() { return new hrmap_inforder; }  
-  
+
+  EX hrmap* new_map() { return new hrmap_inforder; }
+
   EX int celldistance(cell *c1, cell *c2) {
     int d = 0;
     while(true) {
@@ -47,7 +47,7 @@ EX namespace inforder {
       else c2 = c2->move(0), d++;
       }
     }
-  
+
   EX }
 
 

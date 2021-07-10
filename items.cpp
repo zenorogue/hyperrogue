@@ -23,7 +23,7 @@ EX bool cannotPickupItem(cell *c, bool telekinesis) {
 EX bool canPickupItemWithMagnetism(cell *c, cell *from) {
   if(!c->item || c->item == itOrbYendor || isWall(c) || cannotPickupItem(c, false))
     return false;
-  if(c->item == itCompass && from->item) 
+  if(c->item == itCompass && from->item)
     return false;
   return true;
   }
@@ -47,7 +47,7 @@ EX bool doPickupItemsWithMagnetism(cell *c) {
       }
   cell *csaf = NULL;
   if(items[itOrbMagnetism])
-    forCellEx(c3, c) if(canPickupItemWithMagnetism(c3, c)) {      
+    forCellEx(c3, c) if(canPickupItemWithMagnetism(c3, c)) {
       changes.ccell(c3);
       changes.ccell(c);
       if(c3->item == itCompass) {
@@ -67,7 +67,7 @@ EX bool doPickupItemsWithMagnetism(cell *c) {
 EX void pickupMovedItems(cell *c) {
   if(!c->item) return;
   if(c->item == itOrbSafety) return;
-  if(isPlayerOn(c)) collectItem(c, true);  
+  if(isPlayerOn(c)) collectItem(c, true);
   if(items[itOrbMagnetism])
     forCellEx(c2, c)
       if(isPlayerOn(c2) && canPickupItemWithMagnetism(c, c2)) {
@@ -85,7 +85,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
 
   bool dopickup = true;
   bool had_choice = false;
-  
+
   if(cannotPickupItem(c2, telekinesis))
     return false;
 
@@ -96,7 +96,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     c2->item = itNone;
     return false;
     }
-  
+
   /* if(c2->item == itHolyGrail && telekinesis)
     return false; */
 
@@ -104,10 +104,10 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     invismove = false;
     if(shmup::on) shmup::visibleFor(2000);
     string s0 = "";
-    
+
     if(c2->item == itPalace && items[c2->item] == 12)
       changes.value_set(princess::forceVizier, true);
-    
+
     if(!cantGetGrimoire(c2, false)) collectMessage(c2, c2->item);
     if(c2->item == itDodeca && peace::on) peace::simon::extend();
     }
@@ -117,7 +117,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     ambush::ambush(c2, ambush::size(c2, c2->item));
     }
   #endif
-  
+
   if(isRevivalOrb(c2->item) && multi::revive_queue.size()) {
     multiRevival(cwt.at, c2);
     }
@@ -149,7 +149,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     if(markOrb(itOrbIntensity)) oc = intensify(oc);
     if(!items[it]) items[it]++;
     items[it] += oc;
-    
+
     if(it == itOrbPurity) {
       bool no_curses = true;
       for(cell *c: dcal) if(c->land == laCursed) no_curses = false;
@@ -194,7 +194,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
       shmup::delayed_safety = true;
       shmup::delayed_safety_land = c2->land;
       }
-    else 
+    else
       activateSafety(c2->land);
     return true;
     }
@@ -229,8 +229,8 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
   else if(c2->item == itOrbYendor && yendor::state(c2) != yendor::ysUnlocked) {
     dopickup = false;
     }
-  else if(c2->item == itOrbYendor) 
-    yendor::collected(c2);    
+  else if(c2->item == itOrbYendor)
+    yendor::collected(c2);
   else if(c2->item == itHolyGrail) {
     playSound(c2, "tada");
     int v = newRoundTableRadius() + 12;
@@ -277,16 +277,16 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
   else if(c2->item == itTreat) {
     playSound(c2, "pickup-scroll");
     halloween::getTreat(c2);
-    }   
+    }
   else {
-    if(c2->item == itBarrow) 
+    if(c2->item == itBarrow)
       for(int i=0; i<c2->landparam; i++) gainItem(c2->item);
     else if(c2->item) gainItem(c2->item);
 
     if(c2->item && (vid.bubbles_all || (among(items[c2->item], 5, 10, 25, 50, 100, 250, 500) && vid.bubbles_threshold))) {
       drawBubble(c2, iinf[c2->item].color, its(items[c2->item]), 0.5);
       }
-    
+
     if(c2->item) {
       char ch = iinf[c2->item].glyph;
       if(ch == '*') playSound(c2, "pickup-gem");
@@ -296,7 +296,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
       else playSound(c2, "pickup-scroll");
       }
     }
-  
+
   if(dopickup && c2->item) {
 #if CAP_HISTORY
     // temporary variable to avoid the "cannot bind bitfield" problem in C++11
@@ -365,7 +365,7 @@ EX void dropGreenStone(cell *c) {
     else {
       c->item = itGreenStone;
       addMessage(XLAT("You drop %the1.", itGreenStone));
-      if(isHaunted(cwt.at->land)) 
+      if(isHaunted(cwt.at->land))
         fail_survivalist();
       }
     }
@@ -385,11 +385,11 @@ EX void dropGreenStone(cell *c) {
 EX void moveItem1(cell *from, cell *to, bool activateYendor) {
   if(from->item == itOrbYendor) {
     bool xnew = true;
-    for(int i=0; i<isize(yendor::yi); i++) 
+    for(int i=0; i<isize(yendor::yi); i++)
       if(yendor::yi[i].path[0] == from) xnew = false;
     if(xnew && activateYendor) yendor::check(from);
-    for(int i=0; i<isize(yendor::yi); i++) 
-      if(yendor::yi[i].path[0] == from) 
+    for(int i=0; i<isize(yendor::yi); i++)
+      if(yendor::yi[i].path[0] == from)
         yendor::yi[i].path[0] = to;
     }
 
@@ -399,10 +399,10 @@ EX void moveItem1(cell *from, cell *to, bool activateYendor) {
     for(int i=0; i<isize(yendor::yi); i++) if(yendor::yi[i].actualKey == from)
       yendor::yi[i].actualKey = to;
     }
-  
+
   if(from->item == itBabyTortoise || to->item == itBabyTortoise) {
     tortoise::move_baby(from, to);
-    }  
+    }
 
   eItem i = to->item;
   to->item = from->item;
@@ -460,9 +460,9 @@ EX int gold(int no IS(0)) {
 #endif
     if(love) i += 30;
     }
-  
-  if(!(no & NO_TREASURE)) 
-    for(int t=0; t<ittypes; t++) 
+
+  if(!(no & NO_TREASURE))
+    for(int t=0; t<ittypes; t++)
       if(itemclass(eItem(t)) == IC_TREASURE)
         i += items[t];
   return i;
@@ -470,15 +470,15 @@ EX int gold(int no IS(0)) {
 
 EX int maxgold() {
   int mg = 0;
-  for(int i=0; i<ittypes; i++) 
-    if(itemclass(eItem(i)) == IC_TREASURE && items[i] > mg) 
+  for(int i=0; i<ittypes; i++)
+    if(itemclass(eItem(i)) == IC_TREASURE && items[i] > mg)
       mg = items[i];
   return mg;
   }
 
 EX void updateHi_for_code(eItem it, int v, modecode_t xcode) {
   if(!yendor::on)
-    if(v > hiitems[xcode][it]) 
+    if(v > hiitems[xcode][it])
       changes.value_set(hiitems[xcode][it], v);
   }
 
@@ -509,11 +509,11 @@ EX void gainItem(eItem it) {
     gainItem(itElemental);
     addMessage(XLAT("You construct some Elemental Gems!", it) + itemcounter(items[itElemental]));
     playSound(cwt.at, "elementalgem");
-    }          
+    }
 
-  if(it == itBounty) 
+  if(it == itBounty)
     items[itRevolver] = 6;
-      
+
   if(it == itHyperstone && items[itHyperstone] == 10)
     achievement_victory(true);
 
@@ -524,11 +524,11 @@ EX void gainItem(eItem it) {
   if(g < lastsafety + R30*3/2 && g2 >= lastsafety + R30*3/2)
     addMessage(XLAT("The Orb of Safety from the Land of Eternal Motion might save you."));
 #endif
-  
+
 #define IF(x) if(g < (x) && g2 >= x && !peace::on)
 
   if(in_full_game()) {
-    IF(R60/4) 
+    IF(R60/4)
       addMessage(XLAT("Collect treasure to access more different lands..."));
     IF(R30)
       addMessage(XLAT("You feel that you have enough treasure to access new lands!"));
@@ -538,7 +538,7 @@ EX void gainItem(eItem it) {
       addMessage(XLAT("You feel that the stars are right, and you can access R'Lyeh!"));
     IF(R30*5/2)
       addMessage(XLAT("Kill monsters and collect treasures, and you may get access to Hell..."));
-    IF(R10 * 9) 
+    IF(R10 * 9)
       addMessage(XLAT("To access Hell, collect %1 treasures each of 9 kinds...", its(R10)));
     if(landUnlocked(laHell) && !lhu) {
       addMessage(XLAT("Abandon all hope, the gates of Hell are opened!"));
@@ -591,11 +591,11 @@ EX void gainLife() {
 
 EX void collectMessage(cell *c2, eItem which) {
   bool specialmode = yendor::on || princess::challenge || cheater || !in_full_game();
-  
-  if(which == itDodeca && peace::on) return;  
-  if(which == itTreat) ;    
+
+  if(which == itDodeca && peace::on) return;
+  if(which == itTreat) ;
   else if(isElementalShard(which)) {
-    int tsh = 
+    int tsh =
       items[itFireShard] + items[itAirShard] + items[itWaterShard] + items[itEarthShard] +
       items[itElemental];
     if(tsh == 0) {
@@ -637,7 +637,7 @@ EX void collectMessage(cell *c2, eItem which) {
   else if(items[which] == 9 && maxgold() == 9 && !specialmode) {
     if(inv::on) {
       addMessage(XLAT("The treasure gives your magical powers!", c2->land));
-      if(!ISMOBILE) 
+      if(!ISMOBILE)
         addMessage(XLAT("Press 'i' to access your magical powers.", c2->land));
       }
     else

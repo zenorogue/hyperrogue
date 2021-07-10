@@ -34,22 +34,22 @@ void solve(cpos at) {
   enqueue(at, 0, -1);
   for(int i=0; i<isize(all); i++) {
     auto next = all[i];
-    
+
     auto c0 = get<0>(next);
     auto c1 = get<1>(next);
     auto d  = get<2>(next);
-    
+
     int dist = visited[next];
-    
+
     for(int k=0; k<4; k++) {
       cell *ca0 = c0->move(k);
       if(!ca0) continue;
       if(ca0->wall != waNone) continue;
-      
+
       cell *ca1 = c1->modmove(d+k);
       if(!ca1) continue;
       if(ca1->wall != waNone) continue;
-      
+
       int s = (c1->c.spin((d+k)%4) - c0->c.spin(k)) & 3;
       enqueue(make_tuple(ca0, ca1, s), dist+1, i);
       }
@@ -72,7 +72,7 @@ void launch(int seed, int elimit, int hlimit) {
   shrand(seed);
   start_game();
   in = true;
-  
+
   cell *c0, *c1;
   dual::switch_to(0);
   vector<cell*> cl0, cl1;
@@ -104,7 +104,7 @@ void launch(int seed, int elimit, int hlimit) {
   cpos start = make_tuple(c0, c1, 0);
   solve(start);
   println(hlog, "queue size = ", isize(all));
-  
+
   vector<cell*> clboth;
 
   pair<cell*, cell*> worst;
@@ -112,8 +112,8 @@ void launch(int seed, int elimit, int hlimit) {
     int wdist = -1, wdcount;
     for(cell* x0: cl0) for(cell *x1: cl1) {
       int x = 9999;
-      for(int d=0; d<4; d++) 
-        if(visited.count(make_tuple(x0, x1, d))) 
+      for(int d=0; d<4; d++)
+        if(visited.count(make_tuple(x0, x1, d)))
           x = min(x, visited[make_tuple(x0, x1, d)]);
       if(x == 9999) continue;
       if(x > wdist) wdist = x, wdcount = 0;
@@ -121,9 +121,9 @@ void launch(int seed, int elimit, int hlimit) {
       }
     // println(hlog, "wdist = ", wdist, " x ", wdcount);
     }
-  
+
   clboth = cl0; for(cell *c: cl1) clboth.push_back(c);
-  
+
   while(true) {
     int wdist = -1, wdcount = 0;
     cell *worst_block;
@@ -132,8 +132,8 @@ void launch(int seed, int elimit, int hlimit) {
       solve(start);
       c->wall = waNone;
       int x = 9999;
-      for(int d=0; d<4; d++) 
-        if(visited.count(make_tuple(worst.first, worst.second, d))) 
+      for(int d=0; d<4; d++)
+        if(visited.count(make_tuple(worst.first, worst.second, d)))
           x = min(x, visited[make_tuple(worst.first, worst.second, d)]);
       if(x == 9999) continue;
       if(x > wdist) wdist = x, wdcount = 0;
@@ -143,9 +143,9 @@ void launch(int seed, int elimit, int hlimit) {
     if(wdist == -1) break;
     worst_block->wall = waSea;
     }
-  
+
   solve(start);
-  
+
   println(hlog, "worst = ", worst);
   for(int i=0; i<isize(all); i++) if(get<0>(all[i]) == worst.first && get<1>(all[i]) == worst.second) {
     int at = i;
@@ -191,7 +191,7 @@ EX void check() {
 
 bool hide_random = false;
 int last_seed = 0;
-  
+
 EX void show_menu() {
   gamescreen(1);
   dialog::init(XLAT("dual geometry puzzles"));
@@ -200,25 +200,25 @@ EX void show_menu() {
   char ch = 'a';
   for(auto& p: puzzles) {
     dialog::addItem(p.name, ch++);
-    dialog::add_action([p] { 
-      launch(last_seed = p.seed, last_elimit = p.el, last_hlimit = p.hl); 
-      popScreenAll(); 
+    dialog::add_action([p] {
+      launch(last_seed = p.seed, last_elimit = p.el, last_hlimit = p.hl);
+      popScreenAll();
       });
     }
   dialog::addBreak(50);
   if(last_elimit && !hide_random) {
     dialog::addItem(XLAT("randomize"), 'r');
-    dialog::add_action([] { 
+    dialog::add_action([] {
       last_seed = rand() % 1000000;
-      launch(last_seed, last_elimit, last_hlimit); 
+      launch(last_seed, last_elimit, last_hlimit);
       popScreenAll();
       });
 
     dialog::addItem(XLAT("enter seed"), 's');
-    dialog::add_action([] { 
+    dialog::add_action([] {
       dialog::editNumber(last_seed, 0, 1000000, 1, last_seed, XLAT("seed"), "");
       dialog::reaction_final = [] {
-        launch(last_seed, last_elimit, last_hlimit); 
+        launch(last_seed, last_elimit, last_hlimit);
         popScreenAll();
         };
       dialog::extra_options = [] {
@@ -237,7 +237,7 @@ EX void show_menu() {
 #if CAP_COMMANDLINE
 auto sbhook = addHook(hooks_args, 100, [] {
   using namespace arg;
-           
+
   if(0) ;
   else if(argis("-dpgen")) {
     shift(); last_seed = argi();

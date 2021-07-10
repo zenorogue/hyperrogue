@@ -82,50 +82,50 @@ EX bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) 
 
   // cannot eat worms
   if((flags & AF_EAT) && isWorm(m2)) return false;
-  
+
   if(m1 == passive_switch || m2 == passive_switch) return false;
-  
+
   if((flags & AF_GETPLAYER) && isPlayerOn(c2)) m2 = moPlayer;
-  
+
   if(!m2) return false;
-  
+
   if(m2 == moPlayer && peace::on) return false;
 
   if((flags & AF_WEAK) && isIvy(c2)) return false;
 
   if((flags & AF_MUSTKILL) && attackJustStuns(c2, flags, m1))
     return false;
-  
+
   if((flags & AF_ONLY_FRIEND) && m2 != moPlayer && !isFriendly(c2)) return false;
   if((flags & AF_ONLY_FBUG)   && m2 != moPlayer && !isFriendlyOrBug(c2)) return false;
   if((flags & AF_ONLY_ENEMY) && (m2 == moPlayer || isFriendlyOrBug(c2))) return false;
-  
+
   if(isFriendly(c2) && markOrb(itOrbEmpathy) && (flags & (AF_STAB | AF_MAGIC | AF_HORNS | AF_SWORD | AF_SWORD_INTO | AF_SIDE | AF_PLAGUE)))
     return false;
-  
+
   if(m1 == moArrowTrap && arrow_stuns(m2)) return true;
-  
+
   if(isDie(m2) && !(flags & (AF_MAGIC | AF_CRUSH))) return false;
-  
+
   if(among(m2, moAltDemon, moHexDemon, moPair, moCrusher, moNorthPole, moSouthPole, moMonk) && !(flags & (AF_EAT | AF_MAGIC | AF_BULL | AF_CRUSH)))
     return false;
-  
+
   if(m2 == moHedge && !(flags & (AF_STAB | AF_TOUGH | AF_EAT | AF_MAGIC | AF_LANCE | AF_SWORD_INTO | AF_HORNS | AF_BULL | AF_CRUSH)))
     if(!checkOrb(m1, itOrbThorns)) return false;
-  
+
   // krakens do not try to fight even with Discord
-  if((m1 == moKrakenT || m1 == moKrakenH) && 
+  if((m1 == moKrakenT || m1 == moKrakenH) &&
      (m2 == moKrakenT || m2 == moKrakenH))
     return false;
-  
+
   if(m2 == moDraugr && !(flags & (AF_SWORD | AF_MAGIC | AF_SWORD_INTO | AF_HORNS | AF_CRUSH))) return false;
 
   // if(m2 == moHerdBull && !(flags & AF_MAGIC)) return false;
   if(isBull(m2) && !(flags & (AF_MAGIC | AF_HORNS | AF_SWORD_INTO | AF_CRUSH))) return false;
   if(m2 == moButterfly && !(flags & (AF_MAGIC | AF_BULL | AF_HORNS | AF_SWORD_INTO | AF_CRUSH))) return false;
-  
+
   if(!(flags & AF_NOSHIELD) && ((flags & AF_NEXTTURN) ? checkOrb2 : checkOrb)(m2, itOrbShield)) return false;
-  
+
   if((flags & AF_STAB) && m2 != moHedge)
     if(!checkOrb(m1, itOrbThorns)) return false;
 
@@ -140,42 +140,42 @@ EX bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) 
     else if((flags & AF_HORNS) && checkOrb(m1, itOrbHorns)) ;
     else return false;
     }
-  
+
   if(!(flags & AF_IGNORE_UNARMED) && isUnarmed(m1)) return false;
-  
+
   if(m2 == moGreater || m2 == moGreaterM)
     if(!(flags & (AF_MAGIC | AF_SWORD_INTO | AF_HORNS | AF_CRUSH))) return false;
-    
+
   if(!(flags & (AF_GUN | AF_SWORD | AF_SWORD_INTO | AF_MAGIC | AF_PLAGUE)))
     if(c1 != c2 && !logical_adjacent(c1, m1, c2)) return false;
 
   if(!(flags & (AF_LANCE | AF_STAB | AF_BACK | AF_APPROACH | AF_GUN | AF_MAGIC | AF_PLAGUE | AF_SIDE)))
     if(c1 && c2 && againstRose(c1, c2) && !ignoresSmell(m1))
       return false;
-  
+
   if(m2 == moShadow && !(flags & (AF_SWORD | AF_SWORD_INTO | AF_CRUSH))) return false;
   if(isWorm(m2) && m2 != moTentacleGhost && !isDragon(m2)) return false;
-  
+
   // dragon can't attack itself, or player who mounted it
   if(c1 && c2 && isWorm(c1->monst) && isWorm(c2->monst) && wormhead(c1) == wormhead(c2)
     && m1 != moTentacleGhost && m2 != moTentacleGhost)
     return false;
-    
+
   // if(m2 == moTortoise && !(flags & AF_MAGIC)) return false;
-  
+
   if(m2 == moRoseBeauty)
-    if(!(flags & (AF_MAGIC | AF_LANCE | AF_GUN | AF_SWORD_INTO | AF_BULL | AF_CRUSH))) 
+    if(!(flags & (AF_MAGIC | AF_LANCE | AF_GUN | AF_SWORD_INTO | AF_BULL | AF_CRUSH)))
     if(!isMimic(m1))
     if(!checkOrb(m1, itOrbBeauty) && !checkOrb(m1, itOrbAether) && !checkOrb(m1, itOrbShield))
     if(!c1 || !c2 || !withRose(c1,c2))
       return false;
-  
+
   if(m2 == moFlailer && !c2->stuntime)
     if(!(flags & (AF_MAGIC | AF_TOUGH | AF_EAT | AF_HORNS | AF_LANCE | AF_BACK | AF_SWORD_INTO | AF_BULL | AF_CRUSH))) return false;
 
   if(m2 == moVizier && c2->hitpoints > 1 && !c2->stuntime)
     if(!(flags & (AF_MAGIC | AF_TOUGH | AF_EAT | AF_HORNS | AF_LANCE | AF_BACK | AF_FAST | AF_BULL | AF_CRUSH))) return false;
-                       
+
   return true;
   }
 
@@ -183,22 +183,22 @@ EX bool petrify(cell *c, eWall walltype, eMonster m) {
   destroyHalfvine(c);
   destroyTrapsOn(c);
   playSound(c, "die-troll");
-  
+
   if(walltype == waIcewall && !isIcyLand(c->land))
     return false;
-  
+
   if(c->land == laWestWall) return false;
-  
+
   if(isWateryOrBoat(c) && c->land == laWhirlpool) {
     c->wall = waSea;
     return false;
     }
-  
+
   if(c->wall == waRoundTable) return false;
-  
-  if(walltype == waGargoyle && cellUnstableOrChasm(c)) 
+
+  if(walltype == waGargoyle && cellUnstableOrChasm(c))
     walltype = waGargoyleFloor;
-  else if(walltype == waGargoyle && isWatery(c)) 
+  else if(walltype == waGargoyle && isWatery(c))
     walltype = waGargoyleBridge;
   else if(walltype == waPetrified && isWatery(c))
     walltype = waPetrifiedBridge;
@@ -218,7 +218,7 @@ EX bool petrify(cell *c, eWall walltype, eMonster m) {
   c->item = itNone;
   return true;
   }
-        
+
 EX void killIvy(cell *c, eMonster who) {
   if(c->monst == moIvyDead) return;
   changes.ccell(c);
@@ -253,16 +253,16 @@ EX void prespill(cell* c, eWall t, int rad, cell *from) {
   if(c->land == laWhirlpool) return;
   // these walls block spilling completely
   if(c->wall == waIcewall || c->wall == waBarrier ||  c->wall == waWarpGate ||
-    c->wall == waDeadTroll || c->wall == waDeadTroll2 || 
-    c->wall == waDune || c->wall == waAncientGrave || 
+    c->wall == waDeadTroll || c->wall == waDeadTroll2 ||
+    c->wall == waDune || c->wall == waAncientGrave ||
     c->wall == waThumperOff || c->wall == waThumperOn ||
     c->wall == waFreshGrave || c->wall == waColumn || c->wall == waPartialFire ||
     c->wall == waDeadwall || c->wall == waWaxWall || c->wall == waCamelot || c->wall == waRoundTable ||
     c->wall == waBigStatue || c->wall == waRed1 || c->wall == waRed2 || c->wall == waRed3 ||
     c->wall == waTower ||
-    c->wall == waPalace || 
+    c->wall == waPalace ||
     c->wall == waPlatform || c->wall == waStone || c->wall == waTempWall ||
-    c->wall == waTempFloor || c->wall == waTempBridge || c->wall == waPetrifiedBridge || c->wall == waTempBridgeBlocked || 
+    c->wall == waTempFloor || c->wall == waTempBridge || c->wall == waPetrifiedBridge || c->wall == waTempBridgeBlocked ||
     c->wall == waSandstone || c->wall == waCharged || c->wall == waGrounded ||
     c->wall == waMetal || c->wall == waSaloon || c->wall == waFan ||
     c->wall == waBarrowDig || c->wall == waBarrowWall ||
@@ -272,7 +272,7 @@ EX void prespill(cell* c, eWall t, int rad, cell *from) {
     if(c->wparam == 0) c->wparam = 1;
     return;
     }
-  if(c->wall == waExplosiveBarrel) 
+  if(c->wall == waExplosiveBarrel)
     explodeBarrel(c);
   destroyTrapsOn(c);
   // these walls block further spilling
@@ -291,12 +291,12 @@ EX void prespill(cell* c, eWall t, int rad, cell *from) {
     for(int i=0; i<c->type; i++) if(c->move(i) && c->move(i)->wall == waSulphurC)
       c->move(i)->wall = waSulphur;
     }
-    
+
   if(isReptile(c->wall)) {
     if(c->monst || isPlayerOn(c)) kills[moReptile]++;
     else c->monst = moReptile, c->stuntime = 3, c->hitpoints = 3;
     }
-    
+
   destroyHalfvine(c);
   if(c->wall == waTerraWarrior) kills[waTerraWarrior]++;
   c->wall = t;
@@ -324,7 +324,7 @@ EX void spill(cell* c, eWall t, int rad) {
 
 EX void degradeDemons() {
   addMessage(XLAT("You feel more experienced in demon fighting!"));
-  playSound(cwt.at, "levelup");  
+  playSound(cwt.at, "levelup");
   int dcs = isize(dcal);
   for(int i=0; i<dcs; i++) {
     cell *c = dcal[i];
@@ -334,13 +334,13 @@ EX void degradeDemons() {
       if(c->monst == moGreaterM) c->monst = moLesserM;
       if(c->monst == moGreater) c->monst = moLesser;
       }
-    }  
+    }
   shmup::degradeDemons();
   }
 
 EX void stunMonster(cell *c2, eMonster killer, flagtype flags) {
   int newtime = (
-    c2->monst == moFatGuard ? 2 : 
+    c2->monst == moFatGuard ? 2 :
     c2->monst == moSkeleton && c2->land != laPalace && c2->land != laHalloween ? 7 :
     c2->monst == moTerraWarrior ? min(int(c2->stuntime + 8 - c2->hitpoints), 7) :
     isMetalBeast(c2->monst) ? 7 :
@@ -365,7 +365,7 @@ EX void stunMonster(cell *c2, eMonster killer, flagtype flags) {
     c2->hitpoints--;
     if(c2->monst == moPrincess)
       playSound(c2, princessgender() ? "hit-princess" : "hit-prince");
-    } 
+    }
   if(c2->stuntime < newtime) c2->stuntime = newtime;
   if(isBull(c2->monst)) c2->mondir = NODIR;
   checkStunKill(c2);
@@ -385,13 +385,13 @@ EX bool attackJustStuns(cell *c2, flagtype f, eMonster attacker) {
   else
     return isStunnable(c2->monst) && c2->hitpoints > 1;
   }
-  
+
 EX void minerEffect(cell *c) {
   changes.ccell(c);
   eWall ow = c->wall;
   if(c->wall == waOpenGate || c->wall == waFrozenLake || c->wall == waBoat ||
     c->wall == waStrandedBoat ||
-    c->wall == waCIsland || c->wall == waCIsland2 || c->wall == waTrapdoor || 
+    c->wall == waCIsland || c->wall == waCIsland2 || c->wall == waTrapdoor ||
     c->wall == waGiantRug) ;
   else if(c->wall == waMineUnknown || c->wall == waMineMine || c->wall == waMineOpen)
     c->wall = waMineOpen;
@@ -400,14 +400,14 @@ EX void minerEffect(cell *c) {
   else if(isReptile(c->wall))
     c->wparam = 1; // wake up next turn
   else if(c->wall == waTempFloor) c->wall = waChasm;
-  else if(c->wall == waTempBridge || c->wall == waPetrifiedBridge || c->wall == waTempBridgeBlocked) 
+  else if(c->wall == waTempBridge || c->wall == waPetrifiedBridge || c->wall == waTempBridgeBlocked)
     placeWater(c, NULL);
   else if(doesFall(c))
     ow = waNone;
   else
     c->wall = waNone;
   if(c->wall != ow && ow) drawParticles(c, winf[ow].color, 16);
-  } 
+  }
 
 EX void killMutantIvy(cell *c, eMonster who) {
   if(checkOrb(who, itOrbStone)) petrify(c, waPetrified, moMutant);
@@ -428,9 +428,9 @@ EX bignum ivy_total() {
 EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   eMonster m = c->monst;
   DEBBI(DF_TURN, ("killmonster ", dnameof(m)));
-  
+
   if(!m) return;
-  
+
   if(m == moKrakenH) return;
   if(m == moKrakenT) {
     if(c->hitpoints && m == moKrakenT) kills[moKrakenT]++;
@@ -443,7 +443,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
       }
     return;
     }
-  
+
   if(isDragon(m)) {
     if(c->hitpoints && m != moDragonHead) kills[moDragonTail]++;
     c->hitpoints = 0;
@@ -453,10 +453,10 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     return;
     }
   if(isWorm(c) && m != moTentacleGhost) return;
-  
+
   bool fallanim = (deathflags & AF_FALL) &&  m != moMimic;
 
-  int pcount = fallanim ? 0 : 16; 
+  int pcount = fallanim ? 0 : 16;
   if(m == moShadow)
     kill_shadow_at(c);
 
@@ -465,7 +465,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     history::killhistory.push_back(make_pair(c,m));
     }
 #endif
-  
+
   if(m == moGolemMoved) m = moGolem;
   if(m == moKnightMoved) m = moKnight;
   if(m == moSlimeNextTurn) m = moSlime;
@@ -483,7 +483,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
 
   if(!c->item) if(m == moButterfly && (deathflags & AF_BULL))
     c->item = itBull;
-  
+
   if(isRatling(m) && c->wall == waBoat) {
     bool avenge = false;
     for(int i=0; i<c->type; i++) if(!isWarpedType(c->move(i)->land))
@@ -491,12 +491,12 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     if(avenge)
       changes.value_add(avengers, 2);
     }
-  
+
   if(m == moMirrorSpirit && who != moMimic && !(deathflags & (AF_MAGIC | AF_CRUSH))) {
     kills[m]--;
     changes.value_inc(mirrorspirits);
     }
-  
+
   if(isMutantIvy(m) || m == moFriendlyIvy) {
     pcount = 0;
     if(isMutantIvy(m)) changes.at_commit([] { clearing::direct++; });
@@ -507,9 +507,9 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     if(vid.bubbles_special && s > bignum(1))
       drawBubble(c, 0xFFFF00, s.get_str(100), .5);
     if(isize(clearing::imputed.digits) > 11)
-      achievement_gain_once("KILLMUTANT");      
+      achievement_gain_once("KILLMUTANT");
     }
-  
+
   if(m == moPrincess) {
     princess::info *i = princess::getPrincessInfo(c);
     changes.value_keep(*i);
@@ -533,7 +533,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
 
   if(m == moGargoyle && c->wall != waMineMine) {
     bool connected = false;
-    
+
     if(isGravityLand(c->land)) {
       for(int i=0; i<c->type; i++) {
         cell *c2 = c->move(i);
@@ -549,19 +549,19 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
         if(!cellUnstableOrChasm(c2) && !isWatery(c2)) connected = true;
         }
       }
-    
+
     if(connected) petrify(c, waGargoyle, m), pcount = 0;
     }
-  
+
   if(m == moIceGolem) {
     if(petrify(c, waIcewall, m)) pcount = 0;
     heat::affect(c, -1);
     forCellEx(c2, c) {
-      changes.ccell(c2);      
+      changes.ccell(c2);
       heat::affect(c2, -.5);
       }
     }
-    
+
   if(m == moTroll) {
     petrify(c, waDeadTroll, m); pcount = 0;
     forCellEx(c1, c) {
@@ -620,7 +620,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   if(m == moPrincess) {
     playSound(c, princessgender() ? "die-princess" : "die-prince");
     }
-  if(m == moVineBeast) 
+  if(m == moVineBeast)
     petrify(c, waVinePlant, m), pcount = 0;
   if(isBird(m)) moveEffect(movei(c, FALL), moDeadBird);
   if(m == moAcidBird) {
@@ -635,8 +635,8 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     playSound(c, "die-bomberbird");
     if(c->wall == waNone || c->wall == waMineUnknown || c->wall == waMineOpen ||
       c->wall == waCavefloor || c->wall == waDeadfloor || c->wall == waDeadfloor2 ||
-      c->wall == waRubble || c->wall == waGargoyleFloor || 
-      c->wall == waCIsland || c->wall == waCIsland2 || 
+      c->wall == waRubble || c->wall == waGargoyleFloor ||
+      c->wall == waCIsland || c->wall == waCIsland2 ||
       c->wall == waStrandedBoat || c->wall == waRed1 || c->wall == waGiantRug) {
       c->wall = waMineMine;
       if(c->item) explodeMine(c);
@@ -657,9 +657,9 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
       c->wall = waMineMine;
       explodeMine(c);
       if(isReptile(w)) kills[moReptile]++;
-      if(w == waReptile) c->wall = waChasm; 
-      if(w == waReptileBridge) placeWater(c, NULL); 
-      }      
+      if(w == waReptile) c->wall = waChasm;
+      if(w == waReptileBridge) placeWater(c, NULL);
+      }
     }
   if(m == moVineSpirit) {
     pcount = 32;
@@ -732,12 +732,12 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
       }
     if(!toomany) c->item = itCompass;
     }
-  if(m == moSlime) { 
+  if(m == moSlime) {
     pcount = 0;
     drawParticles(c, winf[c->wall].color, 80, 200);
     playSound(c, "splash" + pick12());
-    c->monst = moNone; 
-    spill(c, c->wall, 2); 
+    c->monst = moNone;
+    spill(c, c->wall, 2);
     }
   // if(c->monst == moShark) c->heat += 1;
   // if(c->monst == moGreaterShark) c->heat += 10;
@@ -759,7 +759,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
       degradeDemons();
       }
     }
-  if(isIvy(c)) {    
+  if(isIvy(c)) {
     pcount = 0;
     eMonster m = c->monst;
     bignum s = ivy_total() - 1;
@@ -802,11 +802,11 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     changes.ccell(c->move(c->mondir));
     killMonster(c->move(c->mondir), who, deathflags);
     }
-  
+
   if(m == moEarthElemental) earthWall(c);
-  if(m == moAlbatross && items[itOrbLuck]) 
+  if(m == moAlbatross && items[itOrbLuck])
     useupOrb(itOrbLuck, items[itOrbLuck] / 2);
-  
+
   if(m == moAirElemental) {
     changes.value_keep(airmap);
     airmap.clear();
@@ -859,12 +859,12 @@ EX void fightmessage(eMonster victim, eMonster attacker, bool stun, flagtype fla
     playSound(NULL, "hit-crush"+pick123());
     addMessage(XLAT("%The1 punches %the2!", attacker, victim));
     }
-  
+
   else if(attacker == moPlayer) {
     if(flags & (AF_SWORD | AF_SWORD_INTO)) {
       playSound(NULL, "hit-axe"+pick123());
-      addMessage(XLAT("You slash %the1.", victim)); 
-      if(victim == moGoblin) 
+      addMessage(XLAT("You slash %the1.", victim));
+      if(victim == moGoblin)
         achievement_gain_once("GOBLINSWORD");
       }
     else if(victim == moKrakenT || victim == moDragonTail || victim == moDragonHead) {
@@ -933,7 +933,7 @@ EX void fightmessage(eMonster victim, eMonster attacker, bool stun, flagtype fla
   }
 
 EX bool notthateasy(eMonster m) {
-  return 
+  return
     isMultitile(m) || isStunnable(m) || m == moDraugr;
   }
 
@@ -946,35 +946,35 @@ EX bool attackMonster(cell *c, flagtype flags, eMonster killer) {
 
   eMonster m = c->monst;
   int tk = tkills();
-  
+
   int tkt = killtypes();
-  
+
   bool dostun = attackJustStuns(c, flags, killer);
-  
+
   if((flags & AF_BULL) && c->monst == moVizier && c->hitpoints > 1) {
     dostun = true;
     c->stuntime = 2;
     }
-  
+
   bool eu = landUnlocked(laElementalWall);
   bool tu = landUnlocked(laTrollheim);
-  
+
   if(flags & AF_MSG) fightmessage(m, killer, dostun, flags);
-  if(dostun) 
+  if(dostun)
     stunMonster(c, killer, flags);
-  else 
+  else
     killMonster(c, killer, flags);
 
   if(peace::on) return false;
-  
+
   int ntk = tkills();
   int ntkt = killtypes();
-    
+
   if(tkt < R20 && ntkt >= R20 && in_full_game()) {
     addMessage(XLAT("You hear a distant roar!"));
     playSound(NULL, "message-roar");
     }
-  
+
   if(tk == 0 && ntk > 0 && in_full_game() && !cheater) {
     if(notthateasy(m))
       addMessage(XLAT("Quite tough, for your first fight."));
@@ -986,7 +986,7 @@ EX bool attackMonster(cell *c, flagtype flags, eMonster killer) {
         addMessage(XLAT("That was easy, but groups could be dangerous."));
       }
     }
-    
+
   if(tk < 10 && ntk >= 10 && in_full_game() && !big_unlock)
     addMessage(XLAT("Good to know that your fighting skills serve you well in this strange world."));
 
@@ -995,7 +995,7 @@ EX bool attackMonster(cell *c, flagtype flags, eMonster killer) {
 
   if(tk < R100 && ntk >= R100 && in_full_game())
     addMessage(XLAT("You feel that the souls of slain enemies pull you to the Graveyard..."));
-  
+
   if(!tu && landUnlocked(laTrollheim) && in_full_game()) {
     playSound(c, "message-troll");
     addMessage(XLAT("%The1 says, \"I die, but my clan in Trollheim will avenge me!\"", m));
@@ -1003,15 +1003,15 @@ EX bool attackMonster(cell *c, flagtype flags, eMonster killer) {
 
   if(!eu && landUnlocked(laElementalWall) && in_full_game())
     addMessage(XLAT("After killing %the1, you feel able to reach the Elemental Planes!", m));
-  
+
   if(m == moVizier && c->monst != moVizier && kills[moVizier] == 1 && in_full_game()) {
     addMessage(XLAT("Hmm, he has been training in the Emerald Mine. Interesting..."));
     princess::forceMouse = true;
     }
-  
+
   if(m == moIvyRoot && ntk>tk)
     achievement_gain_once("IVYSLAYER");
-    
+
   return ntk > tk;
   }
 
@@ -1032,7 +1032,7 @@ EX void pushMonster(const movei& mi) {
         }
       }
     }
-  else 
+  else
     moveMonster(mi);
   auto& cf = mi.s;
   auto& ct = mi.t;
@@ -1045,7 +1045,7 @@ EX void pushMonster(const movei& mi) {
   }
 
 EX void killFriendlyIvy() {
-  forCellEx(c2, cwt.at) if(c2->monst == moFriendlyIvy) 
+  forCellEx(c2, cwt.at) if(c2->monst == moFriendlyIvy)
     killMonster(c2, moPlayer, 0);
   }
 
@@ -1053,12 +1053,12 @@ EX bool monsterPushable(cell *c2) {
   if(markOrb(itCurseWeakness) && (c2->stuntime < 2 || attackJustStuns(c2, 0, moPlayer))) return false;
   if(isMultitile(c2->monst)) return false;
   return (c2->monst != moFatGuard && !(isMetalBeast(c2->monst) && c2->stuntime < 2) && c2->monst != moTortoise && c2->monst != moTerraWarrior && c2->monst != moVizier && c2->monst != moWorldTurtle);
-  }  
+  }
 
 EX bool should_switchplace(cell *c1, cell *c2) {
   if(isPrincess(c2->monst) || among(c2->monst, moGolem, moIllusion, moMouse, moFriendlyGhost))
     return true;
-  
+
   if(peace::on) return c2->monst && !isMultitile(c2->monst);
   return false;
   }
@@ -1083,7 +1083,7 @@ EX void handle_switchplaces(cell *c1, cell *c2, bool& switchplaces) {
       princess::line(c2);
       princess::move(match(c2, c1));
       }
-    else  
+    else
       pswitch = true;
     c1->hitpoints = c2->hitpoints;
     c1->stuntime = c2->stuntime;
@@ -1093,7 +1093,7 @@ EX void handle_switchplaces(cell *c1, cell *c2, bool& switchplaces) {
     c2->monst = moNone;
     switchplaces = true;
     }
-  }  
+  }
 
 EX bool flashWouldKill(cell *c, flagtype extra) {
   for(int t=0; t<c->type; t++) {
@@ -1144,11 +1144,11 @@ EX void killHardcorePlayer(int id, flagtype flags) {
       drawParticle(c, cs.skincolor >> 8, 150);
     if(cs.charid == 3)
       drawParticle(c, cs.dresscolor2 >> 8, 175);
-    else 
+    else
       drawParticle(c, cs.skincolor >> 8, 150);
     drawParticle(c, cs.swordcolor >> 8, 200);
     }
-  
+
   if(multi::players > 1 && multi::activePlayers() > 1) {
     multi::leaveGame(id);
     }
@@ -1220,32 +1220,32 @@ int lastdouble = -3;
 
 EX void stabbingAttack(movei mi, eMonster who, int bonuskill IS(0)) {
   int numsh = 0, numflail = 0, numlance = 0, numslash = 0, numbb[2];
-  
+
   numbb[0] = numbb[1] = 0;
 
   cell *mf = mi.s;
   cell *mt = mi.t;
   int backdir = mi.rev_dir_mirror();
-  
+
   do_swords(mi, who, [&] (cell *c, int bb) { if(swordAttack(mt, who, c, bb)) numbb[bb]++, numslash++; });
-  
+
   for(int bb=0; bb<2; bb++) achievement_count("SLASH", numbb[bb], 0);
 
   if(peace::on) return;
-  
+
   for(int t=0; t<mf->type; t++) {
     cell *c = mf->move(t);
     if(!c) continue;
-    
+
     bool stabthere = false, away = true;
     if(logical_adjacent(mt, who, c)) stabthere = true, away = false;
-  
+
     if(stabthere && c->wall == waExplosiveBarrel && markOrb(itOrbThorns))
       explodeBarrel(c);
-    
+
     if(stabthere && canAttack(mt,who,c,c->monst,AF_STAB)) {
       changes.ccell(c);
-      if(c->monst != moHedge) { 
+      if(c->monst != moHedge) {
         markOrb(itOrbThorns); if(who != moPlayer) markOrb(itOrbEmpathy);
         }
       eMonster m = c->monst;
@@ -1304,11 +1304,11 @@ EX void stabbingAttack(movei mi, eMonster who, int bonuskill IS(0)) {
 
   if(who == moPlayer) {
     if(numsh) achievement_count("STAB", numsh, 0);
-    
+
     if(numlance && numflail && numsh) achievement_gain_once("MELEE3");
-  
+
     if(numlance + numflail + numsh + numslash + bonuskill >= 5) achievement_gain_once("MELEE5");
-  
+
     if(numsh == 2) {
       if(lastdouble == turncount-1) achievement_count("STAB", 4, 0);
       changes.value_set(lastdouble, turncount);

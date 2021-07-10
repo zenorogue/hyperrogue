@@ -25,7 +25,7 @@ struct stringpar {
   stringpar(eMonster m) { v= minf[m].name; }
   stringpar(eLand l) { v= linf[l].name; }
   stringpar(eWall w) { v= winf[w].name; }
-  stringpar(eItem i) { v= iinf[i].name; }  
+  stringpar(eItem i) { v= iinf[i].name; }
   };
 #endif
 
@@ -132,7 +132,7 @@ void basicrep(string& x) {
     const sentence *s = findInHashTable(x, all_sentences);
     if(s) x = s->xlat[l-1];
     }
-  
+
   if(l == 1) {
     rep(x, "%łeś0", choose3(playergender(), "łeś", "łaś", "łoś"));
     rep(x, "%ąłeś0", choose3(playergender(), "ąłeś", "ęłaś", "ęłoś"));
@@ -140,7 +140,7 @@ void basicrep(string& x) {
     rep(x, "%ł0", choose3(playergender(), "ł", "ła", "ło"));
     rep(x, "%y0", choose3(playergender(), "y", "a", "e"));
     }
-  
+
   if(l == 3) {
     rep(x, "%l0", choose3(playergender(), "l", "la", "lo"));
     rep(x, "%d0", choose3(playergender(), "", "a", "o"));
@@ -315,7 +315,7 @@ void parrep(string& x, string w, stringpar p) {
     // plural names (Crossroads)
     if(flags & 2)
       rep(x,"%s"+w, "");
-    else 
+    else
       rep(x,"%s"+w, "s");
     }
   return;
@@ -325,25 +325,25 @@ void postrep(string& s) {
   }
 
 /** translate the string @x */
-EX string XLAT(string x) { 
+EX string XLAT(string x) {
   basicrep(x);
   postrep(x);
   return x;
   }
-EX string XLAT(string x, stringpar p1) { 
+EX string XLAT(string x, stringpar p1) {
   basicrep(x);
   parrep(x,"1",p1.v);
   postrep(x);
   return x;
   }
-EX string XLAT(string x, stringpar p1, stringpar p2) { 
+EX string XLAT(string x, stringpar p1, stringpar p2) {
   basicrep(x);
   parrep(x,"1",p1.v);
   parrep(x,"2",p2.v);
   postrep(x);
   return x;
   }
-EX string XLAT(string x, stringpar p1, stringpar p2, stringpar p3) { 
+EX string XLAT(string x, stringpar p1, stringpar p2, stringpar p3) {
   basicrep(x);
   parrep(x,"1",p1.v);
   parrep(x,"2",p2.v);
@@ -351,7 +351,7 @@ EX string XLAT(string x, stringpar p1, stringpar p2, stringpar p3) {
   postrep(x);
   return x;
   }
-EX string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4) { 
+EX string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4) {
   basicrep(x);
   parrep(x,"1",p1.v);
   parrep(x,"2",p2.v);
@@ -360,7 +360,7 @@ EX string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4)
   postrep(x);
   return x;
   }
-EX string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4, stringpar p5) { 
+EX string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4, stringpar p5) {
   basicrep(x);
   parrep(x,"1",p1.v);
   parrep(x,"2",p2.v);
@@ -372,7 +372,7 @@ EX string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4,
   }
 
 
-EX string XLATN(string x) { 
+EX string XLATN(string x) {
 #if CAP_TRANS
   if(lang()) {
     const fullnoun *N = findInHashTable(x, all_nouns);

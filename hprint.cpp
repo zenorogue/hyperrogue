@@ -82,18 +82,18 @@ inline void hwrite(hstream& hs, const string& s) {
     hs.write_char((char)255);
     hs.write<int>(isize(s));
     }
-  else 
-    hs.write_char(isize(s));    
+  else
+    hs.write_char(isize(s));
   for(char c: s) hs.write_char(c);
   }
 inline void hread(hstream& hs, string& s) {
-  s = ""; int l = (unsigned char) hs.read_char(); 
+  s = ""; int l = (unsigned char) hs.read_char();
   if(l == 255) l = hs.get<int>();
   for(int i=0; i<l; i++) s += hs.read_char();
   }
 inline void hwrite(hstream& hs, const ld& h) { double d = h; hs.write_chars((char*) &d, sizeof(double)); }
 inline void hread(hstream& hs, ld& h) { double d; hs.read_chars((char*) &d, sizeof(double)); h = d; }
-  
+
 template<class T, size_t X> void hwrite(hstream& hs, const array<T, X>& a) { for(auto &ae: a) hwrite(hs, ae); }
 template<class T, size_t X> void hread(hstream& hs, array<T, X>& a) { for(auto &ae: a) hread(hs, ae); }
 
@@ -103,10 +103,10 @@ inline void hwrite(hstream& hs, hyperpoint h) { for(int i=0; i<MDIM; i++) hwrite
 template<class T> void hwrite(hstream& hs, const vector<T>& a) { hwrite<int>(hs, isize(a)); for(auto &ae: a) hwrite(hs, ae); }
 template<class T> void hread(hstream& hs, vector<T>& a) { a.resize(hs.get<int>()); for(auto &ae: a) hread(hs, ae); }
 
-template<class T, class U> void hwrite(hstream& hs, const map<T,U>& a) { 
+template<class T, class U> void hwrite(hstream& hs, const map<T,U>& a) {
   hwrite<int>(hs, isize(a)); for(auto &ae: a) hwrite(hs, ae.first, ae.second);
   }
-template<class T, class U> void hread(hstream& hs, map<T,U>& a) { 
+template<class T, class U> void hread(hstream& hs, map<T,U>& a) {
   a.clear();
   int N = hs.get<int>();
   for(int i=0; i<N; i++) {
@@ -133,7 +133,7 @@ struct fhstream : hstream {
   ~fhstream() { if(f) fclose(f); }
   };
 
-struct shstream : hstream { 
+struct shstream : hstream {
   color_t vernum;
   virtual color_t get_vernum() override { return vernum; }
   string s;
@@ -214,7 +214,7 @@ template<class T> void print(hstream& hs, const vector<T>& a) { print(hs, "("); 
 template<class T, class U> void print(hstream& hs, const map<T,U>& a) { print(hs, "("); comma_printer c(hs); for(auto& t: a) c(t); print(hs, ")"); }
 
 inline void print(hstream& hs, const hyperpoint h) { print(hs, (const array<ld, MAXMDIM>&)h); }
-inline void print(hstream& hs, const transmatrix T) { 
+inline void print(hstream& hs, const transmatrix T) {
   print(hs, "("); comma_printer c(hs);
   for(int i=0; i<MDIM; i++)
   for(int j=0; j<MDIM; j++) c(T[i][j]);
@@ -225,7 +225,7 @@ inline void print(hstream& hs, const shiftmatrix T) { print(hs, T.T, "@", T.shif
 
 template<class T, class U> void print(hstream& hs, const pair<T, U> & t) { print(hs, "(", t.first, ",", t.second, ")"); }
 
-template<class... T> void print(hstream& hs, const tuple<T...> & t) { 
+template<class... T> void print(hstream& hs, const tuple<T...> & t) {
   print(hs, "(");
   comma_printer p(hs);
   for_each_in_tuple(t, p);
@@ -244,7 +244,7 @@ struct logger : hstream {
   int indentation;
   bool doindent;
   logger() { doindent = false; }
-  virtual void write_char(char c) { if(doindent) { doindent = false; 
+  virtual void write_char(char c) { if(doindent) { doindent = false;
     if(debugflags & DF_TIME) { int t = SDL_GetTicks(); if(t < 0) t = 999999; t %= 1000000; string s = its(t); while(isize(s) < 6) s = "0" + s; for(char c: s) special_log(c); special_log(' '); }
     for(int i=0; i<indentation; i++) special_log(' '); } special_log(c); if(c == 10) doindent = true; if(c == 10 && debugfile) fflush(debugfile); }
   virtual char read_char() { throw hstream_exception(); }
@@ -270,14 +270,14 @@ inline void print(hstream& hs, heptagon* h) { print(hs, "H", index_pointer(h)); 
 inline void print(hstream& hs, cell* h) { print(hs, "C", index_pointer(h)); }
 inline void print(hstream& hs, hrmap* h) { print(hs, "M", index_pointer(h)); }
 
-inline void print(hstream& hs, cellwalker cw) { 
+inline void print(hstream& hs, cellwalker cw) {
   if(cw.at) print(hs, "[", cw.at, "/", cw.at->type, ":", cw.spin, ":", cw.mirrored, "]");
   else print(hs, "[NULL]");
   }
 
 struct indenter {
   dynamicval<int> ind;
-  
+
   indenter(int i = 2) : ind(hlog.indentation, hlog.indentation + (i)) {}
   };
 
@@ -288,19 +288,19 @@ struct indenter_finish : indenter {
 
 #endif
 
-EX void print(hstream& hs, cld x) { 
+EX void print(hstream& hs, cld x) {
   int parts = 0;
   if(kz(real(x))) {
-    print(hs, real(x)); 
+    print(hs, real(x));
     parts++;
     }
-  
+
   if(kz(imag(x))) {
     if(parts && imag(x) > 0) print(hs, "+");
     parts++;
-    print(hs, imag(x), "i"); 
+    print(hs, imag(x), "i");
     }
-  
+
   if(!parts) print(hs, 0);
   }
 
@@ -374,7 +374,7 @@ EX hyperpoint kz(hyperpoint h) {
   }
 
 EX transmatrix kz(transmatrix h) {
-  for(int d=0; d<MAXMDIM; d++) 
+  for(int d=0; d<MAXMDIM; d++)
   for(int e=0; e<MAXMDIM; e++)
     h[d][e] = kz(h[d][e]);
   return h;
@@ -466,7 +466,7 @@ EX string as_nice_cstring(string o) {
 #if CAP_GMP
 EX string its(mpq_class x) { std::stringstream ss; ss << x; return ss.str(); }
 EX void print(hstream& hs, const mpq_class& x) {
-  std::stringstream ss; ss << x; print(hs, ss.str()); 
+  std::stringstream ss; ss << x; print(hs, ss.str());
   }
 #endif
 

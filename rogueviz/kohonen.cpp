@@ -1,7 +1,7 @@
 // Hyperbolic Rogue
 // Copyright (C) 2011-2018 Zeno and Tehora Rogue, see 'hyper.cpp' for details
 
-// Kohonen's self-organizing maps. 
+// Kohonen's self-organizing maps.
 // This is a part of RogueViz, not a part of HyperRogue.
 
 #include "rogueviz.h"
@@ -103,9 +103,9 @@ void loadsamples(const string& fname) {
     fprintf(stderr, "Could not load samples: %s\n", fname.c_str());
     return;
     }
-  if(!scan(f, columns)) { 
+  if(!scan(f, columns)) {
     printf("Bad format: %s\n", fname.c_str());
-    return; 
+    return;
     }
   printf("Loading samples: %s\n", fname.c_str());
   while(true) {
@@ -123,7 +123,7 @@ void loadsamples(const string& fname) {
       else if(!rv_ignore(c)) s.name += c;
       }
     data.push_back(move(s));
-    if(shown) 
+    if(shown)
       samples_to_show.push_back(isize(data)-1);
     }
   bigbreak:
@@ -132,7 +132,7 @@ void loadsamples(const string& fname) {
   colnames.resize(columns);
   for(int i=0; i<columns; i++) colnames[i] = "Column " + its(i);
   }
-                  
+
 int tmax = 30000;
 double distmul = 1;
 double learning_factor = .1;
@@ -185,12 +185,12 @@ neuron *distfrom;
 void coloring() {
   if(noshow) return;
   setindex(false);
-  
+
   bool besttofind = true;
 
   for(int pid=0; pid<3; pid++) {
     int c = whattodraw[pid];
-    
+
     if(c == -5) {
       if(besttofind) {
         besttofind = false;
@@ -218,37 +218,37 @@ void coloring() {
         case -4:
           listing.push_back(log(5+n.allsamples));
           break;
-          
+
         case -3:
-          if(distfrom) 
+          if(distfrom)
             listing.push_back(vnorm(n.net, distfrom->net));
           else
             listing.push_back(0);
           break;
-        
+
         case -2:
           listing.push_back(n.udist);
           break;
-        
-        case -1: 
+
+        case -1:
           listing.push_back(-n.udist);
           break;
-        
+
         default:
           listing.push_back(n.net[c]);
           break;
         }
-      
+
       double minl = listing[0], maxl = listing[0];
       for(double& d: listing) minl = min(minl, d), maxl = max(maxl, d);
       if(maxl-minl < 1e-3) maxl = minl+1e-3;
-      
-      for(int i=0; i<cells; i++) 
+
+      for(int i=0; i<cells; i++)
         part(net[i].where->landparam_color, pid) = 32 + (191 * (listing[i] - minl)) / (maxl - minl);
 
-      for(int i=0; i<cells; i++) 
+      for(int i=0; i<cells; i++)
         net[i].where->wall = waNone;
-      
+
       vid.wallmode = 2;
       }
     }
@@ -271,9 +271,9 @@ bool triangulate(kohvec d, neuron& w, map<cell*, neuron*>& find, transmatrix& re
     double diff = vnorm(w2->net, d);
     if(diff < bdiff) bdiff = diff, second = w2, dir2 = i;
     }
-  
+
   if(!second) return false;
-  
+
   /* find the third neuron */
   neuron *third = nullptr; bdiff = HUGE_VAL;
   int dir3 = -1;
@@ -284,18 +284,18 @@ bool triangulate(kohvec d, neuron& w, map<cell*, neuron*>& find, transmatrix& re
     double diff = vnorm(w3->net, d);
     if(diff < bdiff) bdiff = diff, third = w3, dir3 = i;
     }
-  
+
   if(!third) return false;
-  
+
   const kohvec& a = w.net;
   kohvec b = second->net;
   kohvec c = third->net;
-  
+
   /* center at a */
   vshift(b, a, -1);
   vshift(c, a, -1);
   vshift(d, a, -1);
-  
+
   /* orthonormalize */
   kohvec c1 = c;
   kohvec d1 = d;
@@ -303,66 +303,66 @@ bool triangulate(kohvec d, neuron& w, map<cell*, neuron*>& find, transmatrix& re
   if(bd < 1e-12) return false;
   ld s = vdot(c1, b) / bd;
   vshift(c1, b, -s);
-  
+
   ld db = vdot(d1, b) / bd;
   ld cd = vdot(c1, c1);
   if(cd < 1e-12) return false;
   ld dc = vdot(d1, c1) / cd;
-  
+
   // b is: (1,0)
   // c is: (s,1)
 
   // d is: (db,dc) = dc * (s,1) + (db-dc*s) * (1,0)
-  
+
   db -= dc * s;
-  
+
   if(db < 0) dc = dc / (1-db), db = 0;
   if(dc < 0) db = db / (1-dc), dc = 0;
 
   ld overflow = db + dc - 1;
   if(overflow > 0) tie(db,dc) = make_pair(db/(db+dc), dc/(db+dc));
-  
+
   db /= precise_placement, dc /= precise_placement;
 
   hyperpoint h = (1-dc-db) * C0 + db * tC0(currentmap->adj(w.where, dir2)) + dc * tC0(currentmap->adj(w.where, dir3));
   h = normalize(h);
-  
-  res = rgpushxto0(h);  
-  return true;  
+
+  res = rgpushxto0(h);
+  return true;
   }
 
 void distribute_neurons() {
   whowon.resize(samples);
-  
+
   for(neuron& n: net) n.drawn_samples = 0, n.csample = 0;
-  
+
   for(auto p: sample_vdata_id) {
     int s = p.first;
     auto& w = winner(s);
     whowon[s] = &w;
     w.drawn_samples++;
     }
-    
+
   map<cell*, neuron*> find;
   if(precise_placement >= 1)
     for(auto& w: net) find[w.where] = &w;
 
   ld rad = .25 * cgi.scalefactor;
-  
+
   for(auto p: sample_vdata_id) {
     int id = p.second;
     int s = p.first;
     auto& w = *whowon[s];
     vdata[id].m->base = w.where;
-    
+
     if(!triangulate(data[s].val, w, find, vdata[id].m->at))
-      vdata[id].m->at = 
+      vdata[id].m->at =
         spin(2*M_PI*w.csample / w.drawn_samples) * xpush(rad * (w.drawn_samples-1) / w.drawn_samples);
     w.csample++;
     for(auto& e: vdata[id].edges) e.second->orig = nullptr;
     }
-  
-  shmup::fixStorage();  
+
+  shmup::fixStorage();
   setindex(false);
   }
 
@@ -372,7 +372,7 @@ void analyze() {
   initialize_samples_to_show();
 
   setindex(true);
-  
+
   maxudist = 0;
   for(neuron& n: net) {
     int qty = 0;
@@ -386,16 +386,16 @@ void analyze() {
     n.udist = total / qty;
     maxudist = max(maxudist, n.udist);
     }
-    
+
   if(!noshow) distribute_neurons();
-  
+
   coloring();
   }
 
 bool show_rings = true;
 
 bool coloring_3d(cell *c, const shiftmatrix& V) {
-  if(WDIM == 3 && show_rings) 
+  if(WDIM == 3 && show_rings)
     queuepoly(face_the_player(V), cgi.shRing, darkena(c->landparam_color, 0, 0xFF));
   return false;
   }
@@ -422,14 +422,14 @@ struct cellcrawler {
     cellwalker target;
     cellcrawlerdata(const cellwalker& o, int fr, int sp) : orig(o), from(fr), spin(sp) {}
     };
-  
+
   vector<cellcrawlerdata> data;
-  
+
   void store(const cellwalker& o, int from, int spin, manual_celllister& cl) {
     if(!cl.add(o.at)) return;
     data.emplace_back(o, from, spin);
     }
-  
+
   void build(const cellwalker& start) {
     data.clear();
     manual_celllister cl;
@@ -445,10 +445,10 @@ struct cellcrawler {
     if(gaussian) for(cellcrawlerdata& s: data)
       s.dist = mydistance(s.orig.at, start.at);
     }
-  
+
   void sprawl(const cellwalker& start) {
     data[0].target = start;
-    
+
     for(int i=1; i<isize(data); i++) {
       cellcrawlerdata& s = data[i];
       s.target = data[s.from].target;
@@ -478,12 +478,12 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
     vector<int> qty;
     vector<pair<ld*, ld*> > pairs;
     int N = isize(net);
-    
+
     curtemp.resize(N, 0);
     newtemp.resize(N, 0);
     qty.resize(N, 0);
-  
-    for(int i=0; i<N; i++) 
+
+    for(int i=0; i<N; i++)
     forCellEx(c2, net[i].where) {
       neuron *nj = getNeuron(c2);
       if(nj) {
@@ -491,18 +491,18 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
         qty[i]++;
         }
       }
-    
+
     curtemp[neuronId(*getNeuron(c))] = 1;
-  
+
     ld vmin = 0, vmax = 1;
     int iter;
-    
+
     auto &d = cr.dispersion;
-    
+
     d.clear();
-  
+
     DEBBI(DF_LOG, ("Building dispersion, precision = ", dispersion_precision, " end_at = ", dispersion_end_at, "...\n"));
-    
+
     for(iter=0; dispersion_count ? true : vmax > vmin * dispersion_end_at; iter++) {
       if(iter % dispersion_each == 0) {
         d.emplace_back(N);
@@ -513,7 +513,7 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
       double df = dispersion_precision * (iter+1);
       double df0 = df / ceil(df);
       for(int i=0; i<df; i++) {
-        for(auto& p: pairs) 
+        for(auto& p: pairs)
           *p.second += *p.first;
         for(int i=0; i<N; i++) {
           curtemp[i] += (newtemp[i] / qty[i] - curtemp[i]) * df0;
@@ -521,11 +521,11 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
           }
         }
       vmin = vmax = curtemp[0];
-      for(int i=0; i<N; i++) 
+      for(int i=0; i<N; i++)
         if(curtemp[i] < vmin) vmin = curtemp[i];
         else if(curtemp[i] > vmax) vmax = curtemp[i];
       }
-  
+
     dispersion_count = isize(d);
     DEBB(DF_LOG, ("Dispersion count = ", dispersion_count));
     /*
@@ -575,7 +575,7 @@ pair<int, int> get_cellcrawler_id(cell *c) {
 
 bool verify_crawler(cellcrawler& cc, cellwalker cw) {
   cc.sprawl(cw);
-  for(auto& d: cc.data) if(celldistance(cw.at, d.target.at) != d.dist) 
+  for(auto& d: cc.data) if(celldistance(cw.at, d.target.at) != d.dist)
     return false;
   vector<int> cellcounter(cells, 0);
   for(auto& d: cc.data) cellcounter[d.target.at->landparam]++;
@@ -593,10 +593,10 @@ void verify_crawlers() {
   for(int i=0; i<cells; i++) net[i].where = allcells[i];
   setindex(true);
   map<int, cellcrawler> allcrawlers;
-  
+
   int uniq = 0, failures = 0;
-  
-  printf("Verifying crawlers...\n");  
+
+  printf("Verifying crawlers...\n");
   for(cell *c: allcells) {
     auto id = get_cellcrawler_id(c);
     if(allcrawlers.count(id.first)) {
@@ -624,7 +624,7 @@ void verify_crawlers() {
   setindex(false);
   if(failures) exit(1);
   }
-  
+
 bool finished() { return t == 0; }
 
 int krad, kqty;
@@ -636,7 +636,7 @@ void step() {
   if(t == 0) return;
   initialize_dispersion();
   initialize_neurons_initial();
-  
+
   double tt = (t-.5) / tmax;
   tt = pow(tt, ttpower);
 
@@ -648,7 +648,7 @@ void step() {
     if(pct != lpct) {
       lpct = pct;
       analyze();
-      
+
       if(gaussian)
         println(hlog, format("t = %6d/%6d %3d%% sigma=%10.7lf maxudist=%10.7lf\n", t, tmax, pct, sigma, maxudist));
       else
@@ -659,18 +659,18 @@ void step() {
   neuron& n = winner(id);
   whowon.resize(samples);
   whowon[id] = &n;
-    
-  /* 
+
+  /*
   for(neuron& n2: net) {
     int d = celldistance(n.where, n2.where);
-    double nu = learning_factor; 
+    double nu = learning_factor;
 //  nu *= exp(-t*(double)maxdist/perdist);
 //  nu *= exp(-t/t2);
     nu *= exp(-sqr(d/sigma));
     for(int k=0; k<columns; k++)
       n2.net[k] += nu * (irisdata[id][k] - n2.net[k]);
     } */
-    
+
   auto cid = get_cellcrawler_id(n.where);
   cellcrawler& s = scc[cid.first];
   s.sprawl(cellwalker(n.where, cid.second));
@@ -683,18 +683,18 @@ void step() {
     if(!n2) continue;
     n2->debug++;
     double nu = learning_factor;
-    
+
     if(gaussian) {
       nu *= exp(-sqr(sd.dist/sigma));
-      if(isnan(nu)) 
+      if(isnan(nu))
         throw hr_exception(lalign(0, "obtained nan, ", sd.dist, " / ", sigma));
       }
     else
       nu *= *(it++);
-    
+
     for(int k=0; k<columns; k++) {
       n2->net[k] += nu * (data[id].val[k] - n2->net[k]);
-      if(isnan(n2->net[k])) 
+      if(isnan(n2->net[k]))
         throw hr_exception("obtained nan somehow, nu = " + lalign(0, nu));
       }
     }
@@ -703,7 +703,7 @@ void step() {
     if(n2.debug > 1) throw hr_exception("sprawler error");
     n2.debug = 0;
     }
-  
+
   t--;
   if(t == 0) analyze();
   }
@@ -765,7 +765,7 @@ int showsample(string s) {
 
 void showbestsamples() {
   vector<int> samplesbak;
-  for(auto& n: net) 
+  for(auto& n: net)
     if(n.allsamples)
       showsample(n.bestsample);
   analyze();
@@ -783,7 +783,7 @@ void initialize_neurons() {
 
 vector<cell*> gen_neuron_cells() {
   vector<cell*> allcells;
-  
+
   if(krad) {
     celllister cl(cwt.at, krad, 1000000, NULL);
     allcells = cl.lst;
@@ -794,11 +794,11 @@ vector<cell*> gen_neuron_cells() {
     allcells.resize(kqty);
     }
   else allcells = currentmap->allcells();
-  
+
   if(isize(allcells) > kohrestrict) {
     map<cell*, int> clindex;
     for(int i=0; i<isize(allcells); i++) clindex[allcells[i]] = i;
-    sort(allcells.begin(), allcells.end(), [&clindex] (cell *c1, cell *c2) { 
+    sort(allcells.begin(), allcells.end(), [&clindex] (cell *c1, cell *c2) {
       ld d1 = hdist0(tC0(ggmatrix(c1)));
       ld d2 = hdist0(tC0(ggmatrix(c2)));
       if(d1 < d2 - 1e-6)
@@ -819,22 +819,22 @@ vector<cell*> gen_neuron_cells() {
       allcells[i]->wall = waInvisibleFloor;
       }
     }
-  
+
   return allcells;
   }
 
 void create_neurons() {
   initialize_rv();
-  
+
   if(!samples) {
     fprintf(stderr, "Error: SOM without samples\n");
     exit(1);
     }
-  
+
   weight_label = "quantity";
-  
+
   DEBBI(DF_LOG, ("Creating neurons"));
-  
+
   auto allcells = gen_neuron_cells();
 
 
@@ -845,7 +845,7 @@ void create_neurons() {
     allcells[i]->landparam = i;
     net[i].where->land = laCanvas;
     }
-    
+
   for(neuron& n: net) for(int d=BARLEV; d>=7; d--) setdist(n.where, d, NULL);
   DEBB(DF_LOG, ("number of neurons = ", cells));
   }
@@ -884,14 +884,14 @@ void initialize_samples_to_show() {
     createViz(vdid, cwt.at, Id);
     storeall(vdid);
     }
-  
+
   samples_to_show.clear();
   state |= KS_SAMPLES;
   }
-  
+
 void initialize_dispersion() {
   if(state & KS_DISPERSION) return;
-  
+
   initialize_neurons();
 
   DEBBI(DF_LOG, ("Initializing dispersion"));
@@ -905,9 +905,9 @@ void initialize_dispersion() {
     maxdist = mapdist[isize(mapdist)*5/6] * distmul;
     DEBB(DF_LOG, ("maxdist = ", fts(maxdist)));
     }
-    
-  dispersion_count = 0;  
-  
+
+  dispersion_count = 0;
+
   scc.clear();
   for(int i=0; i<cells; i++) {
     cell *c = net[i].where;
@@ -921,25 +921,25 @@ void initialize_dispersion() {
   lpct = -46130;
   state |= KS_DISPERSION;
   }
-  
+
 void describe_cell(cell *c) {
   if(cmode & sm::HELP) return;
   neuron *n = getNeuronSlow(c);
   if(!n) return;
   string h;
   h += "cell number: " + its(neuronId(*n)) + " (" + its(n->allsamples) + ")\n";
-  h += "parameters:"; for(int k=0; k<columns; k++) h += " " + fts(n->net[k]); 
+  h += "parameters:"; for(int k=0; k<columns; k++) h += " " + fts(n->net[k]);
   h += ", u-matrix = " + fts(n->udist);
   h += "\n";
   vector<pair<double, int>> v;
   for(int s=0; s<samples; s++) if(whowon[s] == n) v.emplace_back(vnorm(n->net, data[s].val), s);
   for(int i=1; i<isize(v); i++) swap(v[i], v[rand() % (i+1)]);
   sort(v.begin(), v.end(), [] (pair<double,int> a, pair<double,int> b) { return a.first < b.first; });
-  
+
   for(int i=0; i<isize(v) && i<20; i++) {
     int s = v[i].second;
-    h += "sample "+its(s)+":"; 
-    for(int k=0; k<columns; k++) h += " " + fts(data[s].val[k]); 
+    h += "sample "+its(s)+":";
+    for(int k=0; k<columns; k++) h += " " + fts(data[s].val[k]);
     h += " "; h += data[s].name; h += "\n";
     }
   appendHelp(h);
@@ -953,22 +953,22 @@ namespace levelline {
     vector<double> values;
     bool modified;
     };
-  
+
   vector<levelline> levellines;
-  
+
   bool on;
-  
+
   void create() {
     int xlalpha = part(default_edgetype.color, 0);
     for(int i=0; i<columns; i++) {
       levellines.emplace_back();
       levelline& lv = levellines.back();
-      lv.column = i;    
+      lv.column = i;
       lv.color = ((hrandpos() & 0xFFFFFF) << 8) | xlalpha;
       lv.qty = 0;
       }
     }
-  
+
   void build() {
     if(levellines.size() == 0) create();
     on = false;
@@ -986,7 +986,7 @@ namespace levelline {
       lv.values.push_back(1e10);
       }
     }
-  
+
   void draw() {
     if(!on) return;
     for(auto& g: gmatrix) {
@@ -999,17 +999,17 @@ namespace levelline {
         if(!c2) continue;
         cell *c3 = c1->modmove(i-1);
         if(!c3) continue;
-  
+
         if(!gmatrix.count(c2)) continue;
         if(!gmatrix.count(c3)) continue;
         double d2 = hdist(tC0(T), tC0(gmatrix[c2]));
         double d3 = hdist(tC0(T), tC0(gmatrix[c3]));
-        
+
         neuron *n2 = getNeuron(c2);
         if(!n2) continue;
         neuron *n3 = getNeuron(c3);
         if(!n3) continue;
-              
+
         for(auto& l: levellines) {
           auto val1 = n1->net[l.column];
           auto val2 = n2->net[l.column];
@@ -1020,8 +1020,8 @@ namespace levelline {
           auto draw = [&] () {
             auto vmid = *v1;
             queueline(
-              (T * ddspin(c1,i) * xpush0(d2 * (vmid-val1) / (val2-val1))), 
-              (T * ddspin(c1,i-1) * xpush0(d3 * (vmid-val1) / (val3-val1))), 
+              (T * ddspin(c1,i) * xpush0(d2 * (vmid-val1) / (val2-val1))),
+              (T * ddspin(c1,i-1) * xpush0(d3 * (vmid-val1) / (val3-val1))),
               l.color, vid.linequality);
             };
           while(v1 < v2 && v1 < v3) {
@@ -1033,7 +1033,7 @@ namespace levelline {
             draw();
             }
           }
-        }      
+        }
       }
     setindex(false);
     }
@@ -1055,7 +1055,7 @@ namespace levelline {
       dialog::handleNavigation(sym, uni);
       if(uni >= 'a' && uni - 'a' + isize(levellines)) {
         auto& l = levellines[uni - 'a'];
-        dialog::editNumber(l.qty, 0, 10, 1, 0, colnames[l.column], 
+        dialog::editNumber(l.qty, 0, 10, 1, 0, colnames[l.column],
           XLAT("Controls the number of level lines."));
         dialog::reaction = [&l] () {
           l.modified = true;
@@ -1071,7 +1071,7 @@ namespace levelline {
       };
     }
 
-  
+
   }
 
 void ksave(const string& fname) {
@@ -1167,7 +1167,7 @@ void progress(string s) {
       mainloopiter();
       }
     lastprogress = SDL_GetTicks();
-    } 
+    }
   }
 
 template<class T> void save_raw(string fname, const vector<T>& v) {
@@ -1207,7 +1207,7 @@ void do_classify() {
   if(bdiffs.empty()) {
     printf("Computing distances...\n");
     bdiffs.resize(samples, 1e20);
-    for(int s=0; s<samples; s++) 
+    for(int s=0; s<samples; s++)
       bdiffs[s] = vnorm(net[bids[s]].net, data[s].val);
     }
   if(bdiffn.empty()) {
@@ -1218,16 +1218,16 @@ void do_classify() {
       int n = bids[s];
       double diff = bdiffs[s];
       if(diff < bdiffn[n]) bdiffn[n] = diff, net[n].bestsample = s;
-      }  
+      }
     }
-  whowon.resize(samples);  
+  whowon.resize(samples);
   for(int i=0; i<samples; i++) whowon[i] = &net[bids[i]];
   for(neuron& n: net) n.allsamples = 0;
   for(int sn: bids) net[sn].allsamples++;
-  
+
   if(!groupsizes_known) {
     groupsizes_known = true;
-    
+
     vector<int> neurons_to_sort;
     for(int i=0; i<cells; i++) neurons_to_sort.push_back(i);
     sort(neurons_to_sort.begin(), neurons_to_sort.end(), [] (int i, int j) { return net[i].allsamples < net[j].allsamples; });
@@ -1236,7 +1236,7 @@ void do_classify() {
     for(int i=0; i<cells; i++) {
       int ngroup = min_group + ((max_group - min_group) * i + (cells/2)) / (cells-1);
       int as = net[neurons_to_sort[i]].allsamples;
-      if(ngroup != last) {  
+      if(ngroup != last) {
         if(last) printf("%d: %d - %d\n", last, lastfirst, lastlast);
         last = ngroup; lastfirst = as;
         }
@@ -1245,7 +1245,7 @@ void do_classify() {
       }
     if(last) printf("%d: %d - %d\n", last, lastfirst, lastlast);
     }
-  
+
   coloring();
   }
 
@@ -1263,9 +1263,9 @@ void kclassify(const string& fname_classify) {
 
   do_classify();
 
-  if(fname_classify != "") {  
+  if(fname_classify != "") {
     printf("Listing classification to %s...\n", fname_classify.c_str());
-    FILE *f = fopen(fname_classify.c_str(), "wt");  
+    FILE *f = fopen(fname_classify.c_str(), "wt");
     if(!f) {
       printf("Failed to open file\n");
       }
@@ -1297,7 +1297,7 @@ void load_edges(const string& fname_edges, string edgename, int pick = 0) {
   int N = isize(edgedata);
   if(pick > 0 && pick < N) {
     for(int i=1; i<N; i++) swap(edgedata[i], edgedata[hrand(i+1)]);
-    edgedata.resize(N = pick);    
+    edgedata.resize(N = pick);
     }
   t->visible_from = 1. / N;
   vector<pair<int, int>> edgedata2;
@@ -1323,9 +1323,9 @@ void random_edges(int q) {
   }
 
 void klistsamples(const string& fname_samples, bool best, bool colorformat) {
-  if(fname_samples != "") { 
+  if(fname_samples != "") {
     printf("Listing samples...\n");
-    FILE *f = fopen(fname_samples.c_str(), "wt");  
+    FILE *f = fopen(fname_samples.c_str(), "wt");
     if(!f) {
       printf("Failed to open file\n");
       }
@@ -1407,10 +1407,10 @@ void showMenu() {
   dialog::add_action([] {
     shift_color(0); shift_color(1); shift_color(2);
     });
-    
+
   dialog::addItem("level lines", '4');
   dialog::add_action_push(levelline::show);
-  
+
   add_edit(precise_placement);
   }
 
@@ -1477,7 +1477,7 @@ void load_compressed(string name) {
   for(int i=0; i<columns; i++) f.read(colnames[i]);
   alloc(weights);
   for(int i=0; i<columns; i++) weights[i] = f.get_raw<float>();
-  samples = 0; 
+  samples = 0;
   initialize_neurons_initial();
   // load neurons
   int N = f.get<int>();
@@ -1486,7 +1486,7 @@ void load_compressed(string name) {
     exit(1);
     }
   for(neuron& n: net)
-    for(int k=0; k<columns; k++) 
+    for(int k=0; k<columns; k++)
       n.net[k] = f.get_raw<float>();
   // load data
   samples = f.get<int>();
@@ -1535,7 +1535,7 @@ int readArgs() {
   using namespace arg;
 
   // #1: load the samples
-  
+
   if(argis("-som")) {
     PHASE(3);
     shift(); kohonen::loadsamples(args());
@@ -1552,7 +1552,7 @@ int readArgs() {
     state &=~ (KS_NEURONS | KS_NEURONS_INI | KS_DISPERSION);
     }
   else if(argis("-somsim")) {
-    gaussian = 0; 
+    gaussian = 0;
     state &=~ KS_DISPERSION;
     }
   else if(argis("-somcgauss")) {
@@ -1560,7 +1560,7 @@ int readArgs() {
     state &=~ KS_DISPERSION;
     }
   else if(argis("-somggauss")) {
-    gaussian = 2; 
+    gaussian = 2;
     state &=~ KS_DISPERSION;
     }
   else if(argis("-sompct")) {
@@ -1591,7 +1591,7 @@ int readArgs() {
     }
 
   else if(argis("-somrun")) {
-    initialize_rv(); 
+    initialize_rv();
     set_neuron_initial();
     t = tmax;
     }
@@ -1712,11 +1712,11 @@ int readArgs() {
     for(auto t: edgetypes) t->visible_from *= d;
     }
   else if(argis("-som-save-compressed")) {
-    shift(); 
+    shift();
     save_compressed(args());
     }
   else if(argis("-som-load-compressed")) {
-    shift(); 
+    shift();
     load_compressed(args());
     }
 

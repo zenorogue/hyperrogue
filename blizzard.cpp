@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- Blizzard
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-/** \file blizzard.cpp 
+/** \file blizzard.cpp
  *  \brief special graphical effects, such as the Blizzard and arrow traps
  */
 
@@ -15,7 +15,7 @@ struct snowball {
   snowball *next;
   double phase;
   snowball(int t) { T = rgpushxto0(randomPointIn(t)); phase = randd(); }
-  };                                                                
+  };
 
 #if HDR
 struct blizzardcell;
@@ -56,7 +56,7 @@ EX void drawBlizzards() {
   poly_outline = OUTLINE_NONE;
   auto it = blizzardcells.begin();
   bcells.clear();
-  while(it != blizzardcells.end()) 
+  while(it != blizzardcells.end())
     if(it->second.frame != frameid || !gmatrix.count(it->first))
       it = blizzardcells.erase(it);
       else {
@@ -101,7 +101,7 @@ EX void drawBlizzards() {
     for(auto& sb: bc.inorder) sb->prev = sb->next = NULL;
     bc.inid = 0;
     }
-  
+
   double at = fractick(40);
 
   for(int i=0; i<blizzard_N; i++) {
@@ -113,21 +113,21 @@ EX void drawBlizzards() {
   for(int i=0; i<blizzard_N; i++) {
     auto& bc = *bcells[i];
     cell *c = bc.c;
-    
+
     bc.outid = 0;
-    
+
     for(int d=0; d<c->type; d++) for(int k=0; k<bc.qty[d]; k++) {
       auto& bc2 = *getbcell(c->move(d));
       auto& sball = *bc.outorder[bc.outid++];
       auto& sball2 = *bc2.inorder[bc2.inid++];
       sball.next = &sball2;
       sball2.prev = &sball;
-      
+
       hyperpoint t = inverse_shift(sball.global, tC0(sball2.global));
       double at0 = at + sball.phase;
       if(at0>1) at0 -= 1;
       shiftmatrix tpartial = sball.global * rspintox(t) * xpush(hdist0(t) * at0);
-      
+
       if(wmascii || wmblack)
         queuestr(tpartial, .2, ".", 0xFFFFFF);
       else
@@ -162,11 +162,11 @@ EX void drawBlizzards() {
     int i = rand() % B;
     int j = rand() % (B-1);
     if(i==j) j++;
-    
+
     if(1) {
       auto& sb1 = *bc.outorder[i];
       auto& sb2 = *bc.outorder[j];
-      
+
       double swapcost = 0;
       if(sb1.next) swapcost -= hdist(tC0(sb1.global), tC0(sb1.next->global));
       if(sb2.next) swapcost -= hdist(tC0(sb2.global), tC0(sb2.next->global));
@@ -179,11 +179,11 @@ EX void drawBlizzards() {
         if(sb2.next) sb2.next->prev = &sb2;
         }
       }
-    
+
     if(1) {
       auto& sb1 = *bc.inorder[i];
       auto& sb2 = *bc.inorder[j];
-      
+
       double swapcost = 0;
       if(sb1.prev) swapcost -= hdist(tC0(sb1.global), tC0(sb1.prev->global));
       if(sb2.prev) swapcost -= hdist(tC0(sb2.global), tC0(sb2.prev->global));
@@ -196,7 +196,7 @@ EX void drawBlizzards() {
         if(sb2.prev) sb2.prev->next = &sb2;
         }
       }
-    
+
     auto& sbp = *bc.inorder[i];
     if(sbp.next && sbp.prev) {
       double p1 = sbp.next->phase;
@@ -214,13 +214,13 @@ EX void drawBlizzards() {
     bc->c->listindex = bc->tmp;
   #endif
   }
-       
+
 EX vector<cell*> arrowtraps;
 
 EX void drawArrowTraps() {
   for(cell *c: arrowtraps) {
     auto r = traplimits(c);
-    
+
     try {
       shiftmatrix& t0 = gmatrix.at(r[0]);
       shiftmatrix& t1 = gmatrix.at(r[4]);
@@ -234,7 +234,7 @@ EX void drawArrowTraps() {
       if((c->wparam & 7) == 3 && !shmup::on) {
 //        queueline(t0 * randomPointIn(r[0]->type), t1 * randomPointIn(r[1]->type), 0xFFFFFFFF, 4, PPR::ITEM);
         int tt = int(fractick(64) * 401);
-        
+
         for(int u=0; u<2; u++) {
           shiftmatrix& tu = u ? t0 : t1;
           shiftmatrix& tv = u ? t1 : t0;
@@ -255,7 +255,7 @@ auto ccm_blizzard = addHook(hooks_clearmemory, 0, [] () {
   arrowtraps.clear();
   blizzardcells.clear();
   bcells.clear();
-  }) + 
+  }) +
 + addHook(hooks_gamedata, 0, [] (gamedata* gd) {
   gd->store(arrowtraps);
   gd->store(blizzardcells);

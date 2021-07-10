@@ -54,7 +54,7 @@ EX transmatrix relative_matrix_recursive(heptagon *h2, heptagon *h1) {
 
 transmatrix hrmap_standard::master_relative(cell *c, bool get_inverse) {
   if(0) ;
-  #if CAP_IRR  
+  #if CAP_IRR
   else if(IRREGULAR) {
     int id = irr::cellindex[c];
     ld alpha = 2 * M_PI / S7 * irr::periodmap[c->master].base.spin;
@@ -114,9 +114,9 @@ EX transmatrix relative_matrix_via_masters(cell *c2, cell *c1, const hyperpoint&
   transmatrix gm = currentmap->master_relative(c1, true);
   heptagon *h2 = c2->master;
   transmatrix where = currentmap->master_relative(c2);
-  
+
   transmatrix U = currentmap->relative_matrix(h2, h1, hint);
-  
+
   return gm * U * where;
   }
 
@@ -137,7 +137,7 @@ transmatrix hrmap_standard::relative_matrix(heptagon *h2, heptagon *h1, const hy
   int steps = 0;
   while(h1 != h2) {
     steps++; if(steps > 10000) {
-      println(hlog, "not found"); return Id; 
+      println(hlog, "not found"); return Id;
       }
     if(bounded) {
       transmatrix T;
@@ -210,7 +210,7 @@ EX shiftmatrix &ggmatrix(cell *c) {
 #if HDR
 struct horo_distance {
   ld a, b;
-  
+
   void become(hyperpoint h1);
   horo_distance(hyperpoint h) { become(h); }
   horo_distance(shiftpoint h1, const shiftmatrix& T);
@@ -261,7 +261,7 @@ bool horo_distance::operator < (const horo_distance z) const {
   return b < z.b - 1e-4;
   }
 
-template<class T, class U> 
+template<class T, class U>
 void virtualRebase_cell(cell*& base, T& at, const U& check) {
   horo_distance currz(check(at));
   T best_at = at;
@@ -307,19 +307,19 @@ void virtualRebase_cell(cell*& base, T& at, const U& check) {
   #endif
   }
 
-template<class T, class U> 
+template<class T, class U>
 void virtualRebase(cell*& base, T& at, const U& check) {
 
   if(nil) {
     hyperpoint h = check(at);
     auto step = [&] (int i) {
-      at = currentmap->iadj(base, i) * at; 
+      at = currentmap->iadj(base, i) * at;
       base = base->cmove(i);
       h = check(at);
       };
-    
+
     auto& nw = nilv::nilwidth;
-    
+
     bool ss = S7 == 6;
 
     while(h[1] < -0.5 * nw) step(ss ? 1 : 2);
@@ -333,12 +333,12 @@ void virtualRebase(cell*& base, T& at, const U& check) {
 
   if(prod) {
     auto d = product_decompose(check(at)).first;
-    while(d > cgi.plevel / 2)  { 
-      at = currentmap->iadj(base, base->type-1) * at; 
+    while(d > cgi.plevel / 2)  {
+      at = currentmap->iadj(base, base->type-1) * at;
       base = base->cmove(base->type-1); d -= cgi.plevel;
       }
-    while(d < -cgi.plevel / 2) { 
-      at = currentmap->iadj(base, base->type-2) * at; 
+    while(d < -cgi.plevel / 2) {
+      at = currentmap->iadj(base, base->type-2) * at;
       base = base->cmove(base->type-2); d += cgi.plevel;
       }
     auto w = hybrid::get_where(base);
@@ -358,25 +358,25 @@ EX void virtualRebase(cell*& base, transmatrix& at) {
 
 EX void virtualRebase(cell*& base, hyperpoint& h) {
   // we perform fixing in check, so that it works with larger range
-  virtualRebase(base, h, [] (const hyperpoint& h) { 
+  virtualRebase(base, h, [] (const hyperpoint& h) {
     if(hyperbolic && GDIM == 2) return hpxy(h[0], h[1]);
     if(hyperbolic && GDIM == 3) return hpxy3(h[0], h[1], h[2]);
-    return h; 
+    return h;
     });
   }
 
 void hrmap_hyperbolic::virtualRebase(heptagon*& base, transmatrix& at) {
 
   while(true) {
-  
+
     double currz = at[LDIM][LDIM];
-    
+
     heptagon *h = base;
-    
+
     heptagon *newbase = NULL;
-    
+
     transmatrix bestV {};
-    
+
     for(int d=0; d<S7; d++) {
       heptspin hs(h, d, false);
       heptspin hs2 = hs + wstep;
@@ -424,14 +424,14 @@ EX transmatrix ddspin(cell *c, int d, ld bonus IS(0)) { return currentmap->spin_
 EX transmatrix iddspin(cell *c, int d, ld bonus IS(0)) { return currentmap->spin_from(c, d, bonus); }
 EX ld cellgfxdist(cell *c, int d) { return currentmap->spacedist(c, d); }
 
-EX transmatrix ddspin_side(cell *c, int d, ld bonus IS(0)) { 
+EX transmatrix ddspin_side(cell *c, int d, ld bonus IS(0)) {
   if(kite::in()) {
     hyperpoint h1 = get_corner_position(c, gmod(d, c->type), 3);
     hyperpoint h2 = get_corner_position(c, gmod(d+1, c->type) , 3);
     hyperpoint hm = mid(h1, h2);
     return rspintox(hm) * spin(bonus);
     }
-  return currentmap->spin_to(c, d, bonus); 
+  return currentmap->spin_to(c, d, bonus);
   }
 
 EX transmatrix iddspin_side(cell *c, int d, ld bonus IS(0)) {
@@ -443,7 +443,7 @@ EX transmatrix iddspin_side(cell *c, int d, ld bonus IS(0)) {
     }
   return currentmap->spin_from(c, d, bonus);
   }
-    
+
 double hrmap_standard::spacedist(cell *c, int i) {
   if(NONSTDVAR || WDIM == 3) return hrmap::spacedist(c, i);
   if(inforder::mixed()) {
@@ -457,7 +457,7 @@ double hrmap_standard::spacedist(cell *c, int i) {
     ld tessf0 = halfmove(t0);
     ld tessf1 = halfmove(t1);
     return (tessf0 + tessf1) / 2;
-    }  
+    }
   if(!BITRUNCATED) return cgi.tessf;
   if(c->type == S6 && (i&1)) return cgi.hexhexdist;
   return cgi.crossf;
@@ -520,11 +520,11 @@ EX hyperpoint randomPointIn(int t) {
 /** /brief get the coordinates of the vertex of cell c indexed with cid
  *  the two vertices c and c->move(cid) share are indexed cid and gmod(cid+1, c->type)
  *  cf=3 is the vertex itself; larger values are closer to the center
- */  
+ */
 
 EX hyperpoint get_corner_position(cell *c, int cid, ld cf IS(3)) {
   return currentmap->get_corner(c, cid, cf);
-  } 
+  }
 
 hyperpoint hrmap_standard::get_corner(cell *c, int cid, ld cf) {
   #if CAP_GP
@@ -570,7 +570,7 @@ EX hyperpoint nearcorner(cell *c, int i) {
   #endif
   #if CAP_ARCM
   if(arcm::in()) {
-    if(PURE) { 
+    if(PURE) {
       auto &ac = arcm::current;
       auto& t = ac.get_triangle(c->master, i-1);
       int id = arcm::id_of(c->master);
@@ -702,14 +702,14 @@ EX hyperpoint farcorner(cell *c, int i, int which) {
       arcm::parent_index_of(&h) = adj.second;
 
       auto& t1 = arcm::current.get_triangle(c->master, i);
-    
+
       auto& t2 = arcm::current.get_triangle(adj);
-      
+
       return spin(-t1.first) * xpush(t1.second) * spin(M_PI + t2.first) * get_corner_position(&cx, which ? -mul : 2*mul);
       }
     }
   #endif
-  
+
   cellwalker cw(c, i);
   cw += wstep;
   if(!cw.mirrored) cw.spin += (which?-1:2);
@@ -747,21 +747,21 @@ EX void generate_brm(cell *c1) {
   queue<pair<cell*, transmatrix>> q;
   map<cell*, ld> cutoff;
   auto& res = brm_structure[c1];
-  
+
   auto enqueue = [&] (cell *c, const transmatrix& T) {
     auto b = bucketer(tC0(T));
     if(visited_by_matrix.count(b)) return;
     visited_by_matrix.insert(b);
     q.emplace(c, T);
     };
-  
+
   enqueue(c1, Id);
   while(!q.empty()) {
     cell *c2;
     transmatrix T;
     tie(c2,T) = q.front();
     q.pop();
-    
+
     ld mindist = HUGE_VAL, maxdist = 0;
     for(int i=0; i<c1->type; i++)
     for(int j=0; j<c2->type; j++) {
@@ -769,17 +769,17 @@ EX void generate_brm(cell *c1) {
       if(d < mindist) mindist = d;
       if(d > maxdist) maxdist = d;
       }
-    
+
     auto& cu = cutoff[c2];
-    if(cu == 0 || cu > maxdist) 
+    if(cu == 0 || cu > maxdist)
       cu = maxdist;
-    
+
     if(mindist >= cu) continue;
     res[c2].push_back(T);
-    
+
     forCellIdCM(c3, i, c2) enqueue(c3, T * currentmap->adj(c2, i));
     }
-  
+
   vector<int> cts;
   for(auto& p: res) cts.push_back(isize(p.second));
   }

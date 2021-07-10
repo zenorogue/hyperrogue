@@ -35,7 +35,7 @@ template<class A, class B, class C> void emscripten_set_main_loop(A a, B b, C c)
 
 #include <string>
 
-namespace hr { 
+namespace hr {
   void initweb();
   void emscripten_get_commandline();
 
@@ -80,7 +80,7 @@ EX void offer_download(string sfilename, string smimetype) {
 
     let content = Module.FS.readFile(name);
     console.log(`Offering download of "${name}", with ${content.length} bytes...`);
-  
+
     var a = document.createElement('a');
     a.download = name;
     a.href = URL.createObjectURL(new Blob([content], {type: mime}));
@@ -100,7 +100,7 @@ EX void offer_download(string sfilename, string smimetype) {
 reaction_t on_use_file = [] {};
 
 extern "C" {
-  void use_file() { 
+  void use_file() {
     on_use_file();
     }
   }
@@ -139,13 +139,13 @@ void showDemo() {
   gamescreen(2);
 
   getcstat = ' ';
-  
+
   dialog::init(XLAT("HyperRogue %1: online demo", VER), 0xC00000, 200, 100);
   dialog::addBreak(50);
 
   dialog::addItem(XLAT("play the game"), 'f');
   dialog::addItem(XLAT("learn about hyperbolic geometry"), 'T');
-  dialog::addHelp(); 
+  dialog::addHelp();
   // dialog::addItem(XLAT("toggle high detail"), 'a');
   dialog::addBreak(100);
 
@@ -155,7 +155,7 @@ void showDemo() {
   dialog::addItem(XLAT("Burial Grounds"), 'b');
 
   dialog::display();
-  
+
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
     if(sym == SDLK_F1 || uni == 'h') gotoHelp(help);
@@ -228,11 +228,11 @@ EX void get_canvas_size() {
       return window.innerHeight;
       }) - 32;
     vid.yscr = vid.yres = min(vid.yscr, vid.xscr * 9 / 16);
-    vid.xscr = vid.xres = min(vid.xscr, vid.yscr * 16 / 9);    
+    vid.xscr = vid.xres = min(vid.xscr, vid.yscr * 16 / 9);
     }
   println(hlog, "X = ", vid.xscr, " Y = ", vid.yscr);
   }
-  
+
 EM_BOOL resize_callback(int eventType, const EmscriptenUiEvent *resizeEvent, void *userData) {
   if(vid.full) return true;
   get_canvas_size();
@@ -254,7 +254,7 @@ transmatrix getOrientation() {
   alpha = EM_ASM_DOUBLE({ return rotation_alpha; });
   beta = EM_ASM_DOUBLE({ return rotation_beta; });
   gamma = EM_ASM_DOUBLE({ return rotation_gamma; });
-  return 
+  return
     cspin(0, 1, alpha * degree) *
     cspin(1, 2, beta * degree) *
     cspin(0, 2, gamma * degree);
@@ -295,8 +295,8 @@ EX void emscripten_get_commandline() {
         i += 2;
         next += strtol(s2.c_str(), NULL, 16);
         }
-      else if(s[i] == '&') { 
-        arg::argument.push_back(next); break; 
+      else if(s[i] == '&') {
+        arg::argument.push_back(next); break;
         }
       else next += s[i];
       }

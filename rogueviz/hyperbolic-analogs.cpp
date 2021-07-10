@@ -46,14 +46,14 @@ vector<reaction_t> models_to_use = {
     pconf.scale = .9;
     spherename = "stereographic projection";
     if(sphere) pconf.scale *= .75;
-    hypername = "Poincaré disk model";    
+    hypername = "Poincaré disk model";
     },
   [] {
     pmodel = mdDisk;
     pconf.alpha = 0;
     pconf.scale = sphere ? 0.25 : .9;
     spherename = "gnomonic projection";
-    hypername = "Beltrami-Klein disk model";    
+    hypername = "Beltrami-Klein disk model";
     },
   [] {
     pmodel = mdDisk;
@@ -70,7 +70,7 @@ vector<reaction_t> models_to_use = {
   [] {
     pmodel = mdEquiarea;
     spherename = "azimuthal equi-area";
-    }, 
+    },
   [] {
     pmodel = mdBandEquidistant;
     pconf.scale = .5;
@@ -181,44 +181,44 @@ void draw_earth() {
 
   auto tform = [] (hyperpoint euc) {
     return xpush(euc[0] * degree) * ypush(euc[1] * degree) * C0;
-    };  
-  
+    };
+
   if(sphere && textured) {
-  
+
   shiftmatrix S = ggmatrix(currentmap->gamestart());
   tv.tvertices.clear();
-  
+
   if(prec < .5) prec = 1;
-  
+
   for(ld x=-180; x<180; x+=prec)
   for(ld y=-90; y<90; y+=prec) {
-  
+
     vector<hyperpoint> bases = {
-      point31(x, y, 0), 
-      point31(x+prec, y, 0), 
-      point31(x, y+prec, 0), 
-      point31(x+prec, y, 0), 
-      point31(x, y+prec, 0), 
+      point31(x, y, 0),
+      point31(x+prec, y, 0),
+      point31(x, y+prec, 0),
+      point31(x+prec, y, 0),
+      point31(x, y+prec, 0),
       point31(x+prec, y+prec, 0)
       };
-    
+
     bool ok = true;
 
     if(pmodel == mdSimulatedPerspective) for(hyperpoint base: bases) {
       hyperpoint h = S.T * tform(base);
       if(h[2] <= 0.1) ok = false;
       }
-      
+
     if(among(pmodel, mdEquidistant, mdEquiarea)) for(hyperpoint base: bases) {
       hyperpoint h = S.T * tform(base);
       if(h[2] <= -0.999) ok = false;
       }
-      
+
     if(ok) for(auto base: bases) {
       hyperpoint h = base;
       hyperpoint h1 = tform(h);
       curvepoint(h1);
-      
+
       hyperpoint vi = point31((h[0] + 180) / 360., (h[1] + 90) / 180., 0);
       tv.tvertices.push_back(glhr::pointtogl(vi));
 
@@ -227,11 +227,11 @@ void draw_earth() {
       addaura(S*h1, col, 0);
       }
     }
-    
+
   if(isize(tv.tvertices)) {
     color_t full = 0xFFFFFFFF;
     part(full, 0) = earthpart;
-      
+
     auto& poly = queuecurve(ggmatrix(currentmap->gamestart()), 0, full, PPR::LINE);
     poly.flags |= POLY_TRIANGLES;
     poly.tinf = &tv;
@@ -251,8 +251,8 @@ EX void compare() {
   spherename = "";
   hypername = "";
   ld t = ticks * 1. / anims::period;
-  t = frac(t);  
-  
+  t = frac(t);
+
   if(cycle_models) {
     int mtu = isize(models_to_use);
     t *= mtu;
@@ -295,7 +295,7 @@ EX void compare() {
   else
     neon_mode = eNeon::none;
   vid.smart_area_based = (pmodel != mdHyperboloid);
-  
+
   if(!inHighQual) {
     vid.cells_drawn_limit = 1000;
     }
@@ -307,13 +307,13 @@ EX bool ourStats() {
   displayfr(10, 10 + 2 * vid.fsize, 2, vid.fsize * 2, spherename, 0xFFFFFF, 0);
 
   displayfr(vid.xres - 10, vid.yres - (10 + 2 * vid.fsize), 2, vid.fsize * 2, hypername, 0xFFFFFF, 16);
-  
+
   nohelp = true;
   nomenukey = true;
   clearMessages();
 
   glflush();
-  
+
   hide_hud = false;
 
   return true;
@@ -341,7 +341,7 @@ void choose_projection() {
       models_to_use[i]();
       }
     dialog::addBoolItem(hypername == "" ? spherename : spherename + " / " + hypername, i == current_index, 'a'+i);
-    dialog::add_action([i] { 
+    dialog::add_action([i] {
       current_index = i;
       dual::switch_to(0);
       models_to_use[i]();
@@ -364,14 +364,14 @@ void show() {
   add_edit(textured);
   add_edit(animate);
   add_edit(cycle_models);
-  
+
   dialog::addBack();
   dialog::display();
   }
 
 void enable() {
   using rogueviz::rv_hook;
-  
+
   vid.linequality = 4;
   firstland = specialland = laCanvas;
   patterns::whichCanvas = 'F';
@@ -379,13 +379,13 @@ void enable() {
   colortables['F'][0] = 0x80C080;
   colortables['F'][1] = 0x80A080;
   pconf.scale = .3;
-  
+
   vid.use_smart_range = 2;
   vid.smart_range_detail = 2;
-  
+
   mapeditor::drawplayer = false;
   showstartmenu = false;
-  
+
   dual::enable();
 
   dual::switch_to(0);
@@ -428,10 +428,10 @@ auto msc = arg::add3("-analogs", enable)
         "Cartographers need to project the surface of Earth to a flat paper. However, since the surface of Earth is curved, there is no perfect way to do this. "
         "Some projections will be conformal (map angles and small shapes faithfully), equidistant (map distances along SOME lines faithfully), equal-area (map areas proportionally), etc., "
         "but no map will be all at once. Cartographers use many projections.\n\n"
-        
+
         "We need these projections because the Earth has positive curvature, while the paper has no curvature. Interestingly, "
         "most of the popular projections can be generalized, as projections from surface of curvature any K1 to surfaces of any curvature K2!\n\n"
-        
+
         "This slide focuses on the hyperbolic analogs of popular spherical projections (projecting H² to E²). "
         "Press '5' to enable cycling between different projections, or 'o' for more options."
         ,
@@ -455,7 +455,7 @@ auto msc = arg::add3("-analogs", enable)
             else anims::period /= 12;
             }
           }});
-      
+
       callhooks(rogueviz::pres::hooks_build_rvtour, "projections", v);
       });
 

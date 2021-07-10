@@ -6,11 +6,11 @@
 
 #if CAP_RAY
 
-/** 
+/**
 
 * mg 2 in old video
 
-Blocky Knot Portal: 
+Blocky Knot Portal:
 
 compile with: mymake rogueviz/notknot
 
@@ -19,7 +19,7 @@ the video has been created with the following options:
 older Euclidean
 
 https://youtu.be/1TMY2U4_9Qg
-nk_margin=2 -noplayer -canvas-random 20 -geo notknot -sight3 0.5 -ray-cells 600000 smooth_scrolling=1 camspd=10 panini_alpha=1 fov=150 -shot-hd ray_exp_decay_poly=30 ray_fixed_map=1 
+nk_margin=2 -noplayer -canvas-random 20 -geo notknot -sight3 0.5 -ray-cells 600000 smooth_scrolling=1 camspd=10 panini_alpha=1 fov=150 -shot-hd ray_exp_decay_poly=30 ray_fixed_map=1
 
 better Euclidean
 
@@ -106,7 +106,7 @@ void gen_trifoil() {
     println(hlog, "trying len = ", len);
     int pos = 1;
     for(int l=0; l<len; l++) pos *= 6;
-    
+
     for(int p=0; p<pos; p++) {
 
       vector<int> lst;
@@ -118,17 +118,17 @@ void gen_trifoil() {
         a /= 6;
         }
       if(bal) continue;
-      
+
       array<int, 3> start = {0, 0, 0};
-  
+
       array<int, 3> where = start;
-  
+
       set<array<int, 3> > ful;
       map<array<int, 2>, int> proj;
-      
+
       int steps = 0;
       vector<pair<int, int> > crosses;
-      
+
       for(int i=0; i<3; i++) {
         for(auto d: lst) {
           if(ful.count(where)) goto next;
@@ -140,14 +140,14 @@ void gen_trifoil() {
           steps++;
           }
         }
-      
+
       if(where != start) { println(hlog, "bad loop"); continue; }
       if(isize(ful) != 3*len) continue;
 
       if(isize(proj) != 3*len-3) continue;
-      
+
       println(hlog, "len=", len, " ful=", isize(ful), " proj=", isize(proj), " for ", lst);
-      
+
       println(hlog, "crosses = ", crosses);
 
       if(1) {
@@ -159,18 +159,18 @@ void gen_trifoil() {
         bool wrong = false;
         for(auto c: crosses) if(c.first == cvs[0] && c.second == cvs[1]) wrong = true;
         for(auto c: crosses) if(c.first == cvs[1] && c.second == cvs[2]) wrong = true;
-      
+
         if(wrong) continue;
         }
-      
+
       println(hlog, "result: ", lst);
-      
+
       exit(3);
 
       next: ;
       }
     }
-  
+
   exit(2);
   }
 
@@ -179,7 +179,7 @@ eGeometry base = gCubeTiling;
 const int arrsize = 12;
 
 struct hrmap_notknot : hrmap {
-  
+
   /* represents a path (may be partially identified) */
   struct ucover {
     /* the heptagon of the underlying map */
@@ -206,7 +206,7 @@ struct hrmap_notknot : hrmap {
     bool isover() { return state & 4; }
     bool tohide() { return state & 8; }
     };
-  
+
   /* find-union algorithm for wall_merge */
   ucover *ufind(ucover *at) {
     if(at->wall_merge == at) return at;
@@ -216,29 +216,29 @@ struct hrmap_notknot : hrmap {
   void funion(ucover *a, ucover *b) {
     ufind(b)->wall_merge = ufind(a);
     }
-  
+
   /* the vector of all paths */
   vector<ucover*> all;
-  
+
   /* the stack of known unifications */
   vector<pair<ucover*, ucover*>> unify;
-  
+
   /* the underlying map */
   hrmap *euc;
 
   heptagon *getOrigin() override {
     // return hepts[0];
     return all[0]->result;
-    }  
-  
-  heptagon* at(int x, int y, int z) { 
+    }
+
+  heptagon* at(int x, int y, int z) {
     dynamicval<eGeometry> g(geometry, base);
     dynamicval<hrmap*> m(currentmap, euc);
     euc::coord co = euc::basic_canonicalize({x, y, z});
-    
+
     return euc::get_at(co);
     }
-  
+
   /* make sure that where->move(d) and where->c.spin(d) are known */
   void cmov(heptagon *where, int d) {
     if(where->move(d)) return;
@@ -246,13 +246,13 @@ struct hrmap_notknot : hrmap {
     dynamicval<hrmap*> m(currentmap, euc);
     createStep(where, d);
     }
-  
+
   heptagon *create_trifoil_knot() {
     euc::coord cmin{99,99,99}, cmax{-99,-99,-99}, cat{0,0,0};
     heptagon *h = at(0, 0, 0);
-    
+
     vector<heptagon*> trifoil;
-    
+
     int step = knotsize;
 
     for(int i=0; i<3; i++) {
@@ -265,7 +265,7 @@ struct hrmap_notknot : hrmap {
         for(int k=0; k<3; k++) cmin[k] = min(cmin[k], cat[k]), cmax[k] = max(cmax[k], cat[k]);
         }
       }
-    
+
     int& mg = margin;
 
     for(int i=cmin[0]-mg; i<=cmax[0]+mg; i++)
@@ -275,31 +275,31 @@ struct hrmap_notknot : hrmap {
         at(i,j,k)->zebraval = 1;
       else
         at(i,j,k)->zebraval = 0;
-      
+
     for(auto h: trifoil)
         h->zebraval = 9;
-    
+
     return at(cmax[0], cmax[1], cmax[2]);
     }
-  
+
   heptagon *create_nil_knot() {
     dynamicval<eGeometry> g(geometry, base);
     dynamicval<hrmap*> m(currentmap, euc);
     auto ac = currentmap->allcells();
     for(cell *c: ac) c->master->zebraval = 0;
 
-    auto hept = [&] (int x, int y, int z) {      
+    auto hept = [&] (int x, int y, int z) {
       x = zgmod(x, nilv::nilperiod[0]);
       y = zgmod(y, nilv::nilperiod[1]);
       z = zgmod(z, nilv::nilperiod[2]);
       return nilv::get_heptagon_at(nilv::mvec(x,y,z));
       };
-    
+
     hept(-3, -3, -4)->zebraval |= 16;
-      
+
     heptagon* h0 = hept(-2, -2, 0);
     auto h = h0;
-    
+
     for(int d: {4, 3, 1, 0})
       for(int i=0; i<4; i++) {
         h->zebraval |= 1;
@@ -309,18 +309,18 @@ struct hrmap_notknot : hrmap {
         }
 
     if(h != h0) { println(hlog, "not looped"); exit(1); }
-          
+
     hept(0, 0, 2)->zebraval |= 1;
     hept(1, 0, 2)->zebraval |= 1;
     hept(-1, 0, 2)->zebraval |= 1;
-    
+
     for(int z=0; z<8; z++)
     for(int x=-3; x<4; x++)
     for(int y=-3; y<4; y++)
       if(!(x>=-1 && x<=1 && y>=-1 && y<=1))
         if(!(hept(x,y,z)->zebraval & 1))
         hept(x, y, z)->zebraval |= 32;
-    
+
     return ac[0]->master;
     }
 
@@ -331,38 +331,38 @@ struct hrmap_notknot : hrmap {
     auto ac = currentmap->allcells();
     for(cell *c: ac) c->master->zebraval = 0;
 
-    auto hept = [&] (int x, int y, int z) {      
+    auto hept = [&] (int x, int y, int z) {
       asonov::coord co(x, y, z);
       return asonov::get_at(co);
       };
-    
+
     auto h = hept(0, 0, 0);
-    
+
     h->zebraval |= 16;
-    
+
     int top = asonov::period_xy;
     top += 2 - margin;
-      
+
     for(int x=1; x<top-1; x++)
     for(int y=1; y<top-1; y++)
       if(x==1 || y==1 || x==top-2 || y==top-2)
         hept(x, y, 0)->zebraval |= 9;
-        
+
     hept(0, 0, (asonov::period_z+1)/2)->c7->wall = waFloorA;
-    
+
     hept(2, 2, 0)->zebraval |= 128;
-    
+
     // if(top > 4) hept(3, 3, 1)->zebraval |= 9;
-    
+
     return ac[0]->master;
     }
   #endif
-  
+
   heptagon *interpret_basemap() {
     dynamicval<eGeometry> g(geometry, base);
     dynamicval<hrmap*> m(currentmap, euc);
     auto ac = currentmap->allcells();
-    
+
     for(cell *c: ac) {
       auto& m = c->master->zebraval;
       m = 0;
@@ -372,7 +372,7 @@ struct hrmap_notknot : hrmap {
 
     return ac[0]->master;
     }
-  
+
   heptagon *create_under() {
     if(base_map != "")
       return interpret_basemap();
@@ -386,7 +386,7 @@ struct hrmap_notknot : hrmap {
     #endif
     throw hr_exception();
     }
-  
+
   bool remove_marked_walls;
 
   ucover *gen_adj(ucover *u, int d) {
@@ -409,13 +409,13 @@ struct hrmap_notknot : hrmap {
     all.push_back(u->ptr[d]);
     return u->ptr[d];
     };
-  
+
   void add_to_unify(ucover *a, ucover *b) {
     if(a->where != b->where)
       throw hr_exception("unification error");
     unify.emplace_back(a, b);
     };
-  
+
   map<heptagon*, vector<vector<int> > > uloops;
 
   bool collapse_loop(ucover* u, int loopcount, const vector<int>& looplist) {
@@ -438,7 +438,7 @@ struct hrmap_notknot : hrmap {
         }
     return true;
     }
-    
+
   void record_loop(ucover* u, int loopcount, const vector<int>& looplist) {
     vector<int> repeated;
     for(int l=0; l<loopcount; l++)
@@ -467,7 +467,7 @@ struct hrmap_notknot : hrmap {
     for(auto vl: cgi.vertices_only)
       if(hdist(Tk * vk, Tl * vl) < .01)
         return true;
-    
+
     return false;
     }
 
@@ -491,11 +491,11 @@ struct hrmap_notknot : hrmap {
       collapse_loop(u, 1, {1, 2, 4, 5});
       return;
       }
-    
+
     for(auto& v: cgi.vertices_only) {
       map<heptagon*, ucover*> visited;
       vector<pair<ucover *, transmatrix>> q;
-      
+
       auto visit = [&] (ucover *u, const transmatrix& T) {
         if(visited.count(u->where)) {
           add_to_unify(u, visited[u->where]);
@@ -504,7 +504,7 @@ struct hrmap_notknot : hrmap {
         visited[u->where] = u;
         q.emplace_back(u, T);
         };
-      
+
       hyperpoint h = v;
       visit(u, Id);
       for(int i=0; i<isize(q); i++) {
@@ -524,7 +524,7 @@ struct hrmap_notknot : hrmap {
         }
       }
     }
-  
+
   void unify_loops_general(ucover *u) {
     int t = u->where->type;
     for(int i=0; i<t; i++) {
@@ -532,10 +532,10 @@ struct hrmap_notknot : hrmap {
       if(u1->nowall()) continue;
       if(u1->where->zebraval != 9) continue;
       transmatrix M = adj(u, i);
-      
+
       map<heptagon*, int> camefrom;
       vector<pair<ucover*, transmatrix>> visited;
-      
+
       auto visit = [&] (ucover *from, ucover *at, int ldir, const transmatrix& T) {
         // println(hlog, from ? from->where : (heptagon*)nullptr, " -> ", at->where, " (", i, ")", " (reverse ", at->where->c.spin(i), ")");
         if(camefrom.count(at->where)) {
@@ -550,7 +550,7 @@ struct hrmap_notknot : hrmap {
             }
           while(!rpath.empty()) { path.push_back(rpath.back()); rpath.pop_back(); }
           path.push_back(ldir);
-          
+
           int st = 0;
 
           while(from->where != u->where) {
@@ -560,11 +560,11 @@ struct hrmap_notknot : hrmap {
             path.push_back(d);
             from = gen_adj(from, d);
             }
-          
+
           if(false) {
             println(hlog, "path = ", path);
             }
-          
+
           record_loop_verify(u, loop, path, hr_exception("wall in loops_general"));
           }
         else {
@@ -572,7 +572,7 @@ struct hrmap_notknot : hrmap {
           visited.emplace_back(at, T);
           }
         };
-      
+
       visit(nullptr, u, -1, Id);
       for(int vi=0; vi<isize(visited); vi++) {
         auto at = visited[vi].first;
@@ -580,23 +580,23 @@ struct hrmap_notknot : hrmap {
 
         for(int j=0; j<at->where->type; j++) {
           if(j == camefrom[at->where]) continue;
-          auto u2 = gen_adj(at, j);          
+          auto u2 = gen_adj(at, j);
           if(u2->iswall()) continue;
           transmatrix Tj = Ti * adj(at, j);
           bool adj = false;
           for(auto v: cgi.vertices_only) for(auto v1: cgi.vertices_only)
             if(hdist(M * v1, Tj * v) < 1e-3) adj = true;
-          
+
           if(adj) visit(at, u2, at->where->c.spin(j), Tj);
           }
         }
       }
     }
-  
+
   void unify_loops(ucover *u) {
     /* try to make it finite */
     bool special = false;
-    
+
     if(base_map == "" && base == gNil) {
       special = true;
       record_loop_if_nowall(u, loop, {0, 0, 2, 2, 2, 3, 3, 5, 5, 5});
@@ -622,7 +622,7 @@ struct hrmap_notknot : hrmap {
         for(int a=0; a<2; a++) {
           vector<int> myloop;
           myloop.push_back(0);
-          
+
           auto add_shift = [&] (int x, int y, int lev) {
             if(a) swap(x, y);
             while(lev>0) lev--, tie(x,y) = make_pair(x*2-y, y-x);
@@ -632,7 +632,7 @@ struct hrmap_notknot : hrmap {
             while(x<0) x++, myloop.push_back(10);
             while(y<0) y++, myloop.push_back(11);
             };
-          
+
           auto p = asonov::period_xy;
 
           add_shift(p-2, 0, 1);
@@ -646,22 +646,22 @@ struct hrmap_notknot : hrmap {
           myloop.push_back(6);
           add_shift(2-p, 0, -1);
           myloop.push_back(0);
-  
+
           record_loop_verify(u, 1, myloop, hr_exception("128 failed"));
           }
         }
       }
     #endif
-    
+
     if(base == gCubeTiling) {
       special = true;
       record_loop_if_nowall(u, loop, {0, 0, 1, 1, 3, 3, 4, 4});
       }
-    
+
     if(base == gCell120) {
       special = true;
       int t = u->where->type;
-      for(int i=0; i<t; i++) 
+      for(int i=0; i<t; i++)
       for(int j=0; j<i; j++) {
         auto u1 = u->ptr[i];
         auto u2 = u->ptr[j];
@@ -669,22 +669,22 @@ struct hrmap_notknot : hrmap {
         if(u2->nowall()) continue;
         auto ucur = u;
         auto ulast = (ucover*) nullptr;
-        
+
         vector<int> myloop;
-        
+
         for(int step=0; step<5; step++) {
           for(int i=0; i<t; i++) {
             auto ucand = ucur->ptr[i];
             if(ucand && isNeighbor(ucand->where->c7, u1->where->c7) && isNeighbor(ucand->where->c7, u2->where->c7) && ucand != ulast) {
               myloop.push_back(i);
-              ulast = ucur, ucur = ucand; 
+              ulast = ucur, ucur = ucand;
               goto next_step;
               }
             }
           goto fail;
           next_step: ;
           }
-        
+
         record_loop(u, loop, myloop);
         fail: ;
         }
@@ -692,22 +692,22 @@ struct hrmap_notknot : hrmap {
 
     if(loop && !special)
       unify_loops_general(u);
-    
+
     if(u->where == all[0]->where)
       for(auto& lo: to_unloop) {
         record_loop_verify(u, 1, lo, hr_exception("loop-to-unloop goes through a wall"));
         }
     }
-  
+
   map<heptagon*, int> indices;
-  
+
   hrmap_notknot() {
 
     try {
     if(base_map != "") {
       dynamicval<eGeometry> dg(geometry, geometry);
       mapstream::loadMap(base_map);
-      base = geometry;    
+      base = geometry;
       create_notknot();
       euc = currentmap;
       for(hrmap*& m: allmaps) if(m == euc) m = NULL;
@@ -717,23 +717,23 @@ struct hrmap_notknot : hrmap {
       initcells(); euc = currentmap;
       for(hrmap*& m: allmaps) if(m == euc) m = NULL;
       }
-    
+
     int i = 0;
 
     all.emplace_back(new ucover(create_under(), 0));
     all[0]->index = 0;
     all[0]->parentdir = -1;
 
-    if(all[0]->where->zebraval & 1) 
+    if(all[0]->where->zebraval & 1)
       throw hr_exception("error: starting inside a wall");
-    
+
     remove_marked_walls = false;
     bool first = true;
 
     back:
-    
+
     while(true) {
-    
+
       /* handle all known unifications */
       if(!unify.empty()) {
         ucover *uf, *ut;
@@ -773,14 +773,14 @@ struct hrmap_notknot : hrmap {
           }
         continue;
         }
-    
+
       /* handle creation and loops */
 
       if(i >= isize(all)) break;
       auto u = all[i++];
       if(u->state != 0) continue;
       if(i > terminate_at) { u->state |= 4; continue; }
-      
+
       for(int k=0; k<u->where->type; k++) gen_adj(u, k);
 
       unify_homotopies(u);
@@ -790,11 +790,11 @@ struct hrmap_notknot : hrmap {
         unify_loops(u);
         // println(hlog, "loops recorded for ", u->where, ": ", isize(uloops[u->where]));
         }
-      
-      for(auto& myloop: uloops[u->where]) 
+
+      for(auto& myloop: uloops[u->where])
         if(!collapse_loop(u, 1, myloop))
           throw hr_exception("invalid loop recorded");
-      
+
       if(u->where == all[0]->where) {
         vector<int> pathback;
         auto uc = u;
@@ -812,20 +812,20 @@ struct hrmap_notknot : hrmap {
               us = gen_adj(us, uc->parentdir);
               uc = uc->ptr[(int) uc->parentdir];
               }
-            }      
+            }
           add_to_unify(us, u);
           }
-        }            
+        }
       }
-    
+
     /* make the walls single-colored */
-    
+
     println(hlog, "single-colored");
 
     for(int i=0; i<isize(all); i++) {
       auto u = all[i];
       if(u->state != 0) continue;
-      
+
       if(u->where->zebraval & 32) {
         for(int k=0; k<u->where->type; k++) {
           auto uk = gen_adj(u, k);
@@ -853,7 +853,7 @@ struct hrmap_notknot : hrmap {
           for(int l1=0; l1<u->where->type; l1++) {
             auto ukl = gen_adj(uk, l1);
             auto ulk = gen_adj(ul, k1);
-            if(ukl->where == ulk->where && ukl->state != 0 && 
+            if(ukl->where == ulk->where && ukl->state != 0 &&
               eqmatrix(adj(u, k) * adj(uk, l1), adj(u, l) * adj(ul, k1))
               )
               funion(ukl, ulk);
@@ -882,23 +882,23 @@ struct hrmap_notknot : hrmap {
         if(ul->nowall()) continue;
         auto ukl = gen_adj(uk, l);
         if(ukl->nowall()) continue;
-        funion(ul, ukl);        
+        funion(ul, ukl);
         }
 
       /* concave corners */
       for(int k=0; k<u->where->type; k++)
-      for(int l=0; l<u->where->type; l++) 
+      for(int l=0; l<u->where->type; l++)
       if(adjacent_face(u, k, l)) {
         auto uk = gen_adj(u, k);
         if(uk->nowall()) continue;
         auto ul = gen_adj(u, l);
         if(ul->nowall()) continue;
-        funion(ul, uk);        
-        }      
+        funion(ul, uk);
+        }
 
-      if(base == gCell600) 
+      if(base == gCell600)
       for(int k=0; k<u->where->type; k++)
-      for(int l=0; l<u->where->type; l++) 
+      for(int l=0; l<u->where->type; l++)
       if(adjacent_face(u, k, l)) {
         auto uk = gen_adj(u, k);
         if(uk->nowall()) continue;
@@ -913,19 +913,19 @@ struct hrmap_notknot : hrmap {
           }
         }
       }
-    
+
     /* statistics */
     int lives = 0, walls = 0, overflow = 0, merged = 0;
-    
+
     for(auto v: all) {
       if(v->state == 0) lives++;
       if(v->iswall()) walls++;
       if(v->ismerged()) merged++;
       if(v->isover()) overflow++;
       }
-      
+
     set<heptagon*> wheres;
-    
+
     println(hlog, "lives = ", lives);
     println(hlog, "walls = ", walls);
     println(hlog, "merged = ", merged);
@@ -937,7 +937,7 @@ struct hrmap_notknot : hrmap {
       auto u = all[i];
       if(u->ismerged()) continue;
       if(u->state == 0) wheres.insert(all[i]->where);
-      u->result = tailored_alloc<heptagon> (S7);      
+      u->result = tailored_alloc<heptagon> (S7);
       u->result->c7 = newCell(S7, u->result);
       indices[u->result] = i;
       }
@@ -948,7 +948,7 @@ struct hrmap_notknot : hrmap {
       auto u = all[i];
       if(u->ismerged()) continue;
 
-      for(int d=0; d<S7; d++) {        
+      for(int d=0; d<S7; d++) {
         cmov(u->where, d);
         auto d1 = u->where->c.spin(d);
         if(u->ptr[d] && u->ptr[d]->result == nullptr)
@@ -956,58 +956,58 @@ struct hrmap_notknot : hrmap {
         if(u->ptr[d] && u->ptr[d]->ptr[d1] != u)
           throw hr_exception("wrong connection");
         if(u->ptr[d])
-          u->result->c.connect(d, u->ptr[d]->result, d1, false);          
+          u->result->c.connect(d, u->ptr[d]->result, d1, false);
         else
           u->result->c.connect(d, u->result, d, false);
         }
       }
-    
+
     for(int k=0; k<23; k++) hrand(5);
 
     int colors_used = 0;
 
-    for(int i=0; i<isize(all); i++) 
+    for(int i=0; i<isize(all); i++)
       all[i]->wallcolor = 0;
 
-    for(int i=0; i<isize(all); i++) 
+    for(int i=0; i<isize(all); i++)
       if(all[i]->iswall() && !all[i]->ismerged())
         ufind(all[i])->wallcolor++;
-        
+
     map<int, int> sizes;
 
-    for(int i=0; i<isize(all); i++) 
+    for(int i=0; i<isize(all); i++)
       if(all[i]->iswall() && ufind(all[i]) == all[i] && all[i]->wallcolor)
         colors_used++,
         sizes[all[i]->wallcolor]++;
 
-    for(auto p: sizes) 
+    for(auto p: sizes)
       println(hlog, "size = ", p.first, " times ", p.second);
-    
+
     println(hlog, "colors_used = ", colors_used);
-    
+
     if(first && self_hiding) {
       ucover *what = nullptr;
-      for(int i=0; i<isize(all); i++) 
+      for(int i=0; i<isize(all); i++)
         if(all[i]->iswall() && all[i]->tohide() && !all[i]->ismerged())
           what = ufind(all[i]);
 
-      for(int i=0; i<isize(all); i++) 
-        if(all[i]->iswall() && ufind(all[i]) == what) 
+      for(int i=0; i<isize(all); i++)
+        if(all[i]->iswall() && ufind(all[i]) == what)
           all[i]->state &=~ 9;
-        
+
       println(hlog, "removed one knot!");
-        
+
       first = false; i = 0; remove_marked_walls = true;
       goto back;
       }
 
-    for(int i=0; i<isize(all); i++) 
+    for(int i=0; i<isize(all); i++)
       if(all[i]->iswall() && ufind(all[i]) == all[i] && all[i]->wallcolor) {
         all[i]->wallcolor = hrand(0x1000000) | 0x404040,
         all[i]->wallcolor2 = hrand(0x1000000) | 0x404040;
         }
 
-    for(int i=0; i<isize(all); i++) 
+    for(int i=0; i<isize(all); i++)
       if((all[i]->where->zebraval & 32) && ufind(all[i]) == all[i]) {
         auto& w = all[i]->wallcolor;
         all[i]->wallcolor = (hrand(0x1000000) << 8) | 0x01;
@@ -1035,15 +1035,15 @@ struct hrmap_notknot : hrmap {
         }
       else if(u->isover())
         c->wall = waBigTree;
-      else 
+      else
         c->wall = waNone;
 
-      if(all[i]->where->zebraval & 32)       
+      if(all[i]->where->zebraval & 32)
         ray::volumetric::vmap[c] = ufind(u)->wallcolor ^ ((hrand(0x1000000) & 0x3F3F3F) << 8);
       else
         ray::volumetric::vmap[c] = 0x00000001;
       }
-    
+
     } catch(const hr_exception& s) {
       println(hlog, "exception: ", s.what());
       throw;
@@ -1055,7 +1055,7 @@ struct hrmap_notknot : hrmap {
     int id = 0;
     map<cell*, pair<int, int> > dist;
     vector<cell*> lst;
-    
+
     auto color = [&] (cell *c, color_t col, int d) {
       if(!dist.count(c)) dist[c] = {d, 0};
       auto& p = dist[c];
@@ -1067,14 +1067,14 @@ struct hrmap_notknot : hrmap {
         else vm = gradient(vm, col, 0, 1, p.second);
         }
       };
-    
+
     int qty = 0;
-    for(int i=0; i<isize(all); i++) 
+    for(int i=0; i<isize(all); i++)
       if(all[i]->result)
-      if(all[i]->where->c7->wall == waFloorA) 
+      if(all[i]->where->c7->wall == waFloorA)
         qty++;
-    
-    for(int i=0; i<isize(all); i++) 
+
+    for(int i=0; i<isize(all); i++)
       if(all[i]->result)
       if(all[i]->where->c7->wall == waFloorA) {
         cell *c = all[i]->result->c7;
@@ -1082,10 +1082,10 @@ struct hrmap_notknot : hrmap {
         int idd = (id++) % isize(cols);
         color_t col = rainbow_color(1, idd * 1. / qty);
         col <<= 8; col |= 1;
-        
+
         color(c, cols[idd], 0);
         }
-    
+
     for(int i=0; i<isize(lst); i++) {
       auto c = lst[i];
       auto col = ray::volumetric::vmap[c];
@@ -1099,10 +1099,10 @@ struct hrmap_notknot : hrmap {
       auto c = lst[i];
       ray::volumetric::vmap[c] ^= ((hrand(0x1000000) & 0x3F3F3F) << 8);
       }
-    
+
     ray::volumetric::enable();
     }
-  
+
   transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
     return Id;
     }
@@ -1114,18 +1114,18 @@ struct hrmap_notknot : hrmap {
   transmatrix adj(cell *c, int i) override {
     return adj(c->master, i);
     }
-    
+
   ~hrmap_notknot() {
     for(auto uc: all) {
       if(uc && uc->result) {
         tailored_delete(uc->result->c7);
         tailored_delete(uc->result);
         }
-      if(uc) delete uc;        
+      if(uc) delete uc;
       }
     delete euc;
     }
-  
+
   };
 
 auto h = addHook(hooks_newmap, 0, [] {
@@ -1244,7 +1244,7 @@ void launch_sphereknot() {
   pmodel = mdPerspective;
   ((hrmap_notknot*)currentmap)->add_fog();
   }
- 
+
  #if CAP_SOLV
 void launch_solv() {
   stop_game();
@@ -1275,44 +1275,44 @@ void show() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
   dialog::init(XLAT("notknot"), 0xFFFFFFFF, 150, 0);
-  
+
   dialog::addItem("available scenes", 'a');
   dialog::add_action_push([] {
     cmode = sm::SIDE | sm::MAYDARK;
     gamescreen(0);
 
     dialog::init(XLAT("notknot scenes"), 0xFFFFFFFF, 150, 0);
-    
+
     dialog::addItem("knot portal in Euclidean geometry", 'a');
     dialog::add_action(launch_euc);
 
     dialog::addItem("Penrose staircase portal in Nil geometry", 'b');
     dialog::add_action(launch_nil);
-      
+
     dialog::addItem("great circle portal in spherical geometry", 'c');
     dialog::add_action(launch_sphere);
-      
+
     dialog::addItem("knotted portal in spherical geometry", 'd');
     dialog::add_action(launch_sphereknot);
-    
+
     #if CAP_SOLV
     dialog::addItem("a portal in Solv geometry", 'e');
     dialog::add_action(launch_solv);
     #endif
-      
-    dialog::display();      
+
+    dialog::display();
     });
-  
+
   if(loop) add_edit(loop);
   if(base == gCubeTiling && base_map == "") {
     add_edit(margin);
     add_edit(knotsize);
     }
   if(show_selfhiding) add_edit(self_hiding);
-  
+
   if(nil) menuitem_nilwidth('w');
   if(sol) menuitem_binary_width('w');
-  
+
   if(base != gCubeTiling) {
     dialog::addBoolItem("fog enabled", ray::volumetric::on, 'f');
     dialog::add_action([] {
@@ -1322,7 +1322,7 @@ void show() {
         ((hrmap_notknot*)currentmap)->add_fog();
       });
     }
-  
+
   dialog::addBreak(100);
 
   dialog::addItem(XLAT("configure raycasting"), 'A');
@@ -1336,7 +1336,7 @@ void show() {
   #endif
 
   dialog::addBack();
-  dialog::display();    
+  dialog::display();
   }
 
 void o_key(o_funcs& v) {
@@ -1375,9 +1375,9 @@ void check_cycle() {
 void gen_knot() {
   for(cell *c: currentmap->allcells())
     c->wall = waNone;
-  
+
   cell *last = nullptr;
-  
+
   for(int i=0; i<3600; i++) {
     ld alpha = i * degree / 10;
     ld q = sqrt(2)/2;
@@ -1423,11 +1423,11 @@ auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
       addMessage("Welcome to Notknot! Press 'o' for options");
       return true;
       }
-    return false; 
+    return false;
     })
   + addHook(hooks_args, 100, [] {
     using namespace arg;
-             
+
     if(0) ;
     else if(argis("-nkbase")) {
       base = geometry;
@@ -1454,13 +1454,13 @@ auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
       shift();
       vector<int> v;
       for(int i=0; i<copies; i++)
-      for(char c: args()) 
+      for(char c: args())
         if(c >= '0' && c <= '9') v.push_back(c - '0');
         else v.push_back(c - 'a' + 10);
       to_unloop.push_back(v);
       println(hlog, "pushed to to_unloop: ", v);
       }
-    else if(argis("-nk-launch")) 
+    else if(argis("-nk-launch"))
       nk_launch();
     else return 1;
     return 0;
@@ -1553,9 +1553,9 @@ auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
 #ifdef NOTKNOT
 auto hook1=
     addHook(hooks_config, 100, [] {
-      if(arg::curphase == 1) 
-        conffile = "notknot.ini";         
-      if(arg::curphase == 2) 
+      if(arg::curphase == 1)
+        conffile = "notknot.ini";
+      if(arg::curphase == 2)
         nk_launch();
       });
 #endif

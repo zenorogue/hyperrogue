@@ -9,7 +9,7 @@ namespace rogueviz {
 
 namespace fullnet {
 
-void drawExtra() {  
+void drawExtra() {
   for(map<cell*, shiftmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
     cell *c = it->first;
     c->wall = waChasm;
@@ -24,12 +24,12 @@ void drawExtra() {
       queuedisk(it->second, dftcolor, false, NULL, index++);
       // queuepolyat(it->second, shDisk, dftcolor., PPR::LINE);
     }
-  
+
   for(int i=0; i<isize(named); i++) if(gmatrix.count(named[i])) {
     string s = ""; s += 'A'+i;
     queuestr(gmatrix[named[i]], 1, s, forecolor, 1);
     }
-  
+
   canmove = true; items[itOrbAether] = true;
   }
 

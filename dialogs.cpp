@@ -30,7 +30,7 @@ EX namespace dialog {
     int p1, p2, p3;
     int position;
     };
-  
+
   struct scaler {
     ld (*direct) (ld);
     ld (*inverse) (ld);
@@ -38,12 +38,12 @@ EX namespace dialog {
     };
 
   static inline ld identity_f(ld x) { return x; }
-  
+
   const static scaler identity = {identity_f, identity_f, false};
   const static scaler logarithmic = {log, exp, true};
   const static scaler asinhic = {asinh, sinh, false};
   const static scaler asinhic100 = {[] (ld x) { return asinh(x*100); }, [] (ld x) { return sinh(x)/100; }, false};
- 
+
   struct numberEditor {
     ld *editwhat;
     string s;
@@ -58,13 +58,13 @@ EX namespace dialog {
 
   inline void scaleLog() { ne.sc = logarithmic; }
   inline void scaleSinh() { ne.sc = asinhic; }
-  inline void scaleSinh100() { ne.sc = asinhic100; }  
+  inline void scaleSinh100() { ne.sc = asinhic100; }
 #endif
 
   EX color_t dialogcolor = 0xC0C0C0;
 
   EX void addBack() {
-    addItem(XLAT("go back"), 
+    addItem(XLAT("go back"),
       (cmode & sm::NUMBER) ? SDLK_RETURN :
       ISWEB ? SDLK_BACKSPACE :
       SDLK_ESCAPE);
@@ -81,7 +81,7 @@ EX namespace dialog {
     void nozoom() {
       zoomf = 1; shiftx = 0; shifty = 0; zoomoff = false;
       }
-    
+
     void initzoom() {
       zoomf = 3;
       shiftx = -2*mousex;
@@ -91,13 +91,13 @@ EX namespace dialog {
       if(mousey < vid.yres / 6) shifty = 0;
       if(mousey > vid.yres * 5 / 6) shifty = -2 * vid.yres;
       }
-    
+
     void stopzoom() { zoomoff = true; }
 
     EX bool displayfr(int x, int y, int b, int size, const string &s, color_t color, int align) {
       return hr::displayfr(x * zoomf + shiftx, y * zoomf + shifty, b, size * zoomf, s, color, align);
       }
-  
+
     EX bool displayfr_highlight(int x, int y, int b, int size, const string &s, color_t color, int align, int hicolor IS(0xFFFF00)) {
       bool clicked = hr::displayfr(x * zoomf + shiftx, y * zoomf + shifty, b, size * zoomf, s, color, align);
       if(clicked) hr::displayfr(x * zoomf + shiftx, y * zoomf + shifty, b, size * zoomf, s, hicolor, align);
@@ -108,8 +108,8 @@ EX namespace dialog {
 #if CAP_MENUSCALING && CAP_SDL
   EX void handleZooming(SDL_Event &ev) {
     using namespace zoom;
-    if(zoomoff || !(cmode & sm::ZOOMABLE)) { 
-      nozoom(); return; 
+    if(zoomoff || !(cmode & sm::ZOOMABLE)) {
+      nozoom(); return;
       }
     if(ev.type == SDL_MOUSEBUTTONDOWN) initzoom();
     if(ev.type == SDL_MOUSEBUTTONUP && zoomf > 1) stopzoom();
@@ -118,32 +118,32 @@ EX namespace dialog {
 #if !(CAP_MENUSCALING && CAP_SDL)
   EX void handleZooming(SDL_Event &ev) {}
 #endif
-  
+
   EX vector<item> items;
-  
+
   EX item& lastItem() { return items[items.size() - 1]; }
 
   EX item& titleItem() { return items[0]; }
-  
+
   EX map<int, reaction_t> key_actions;
-  
+
   EX void add_key_action(int key, const reaction_t& action) {
     key_actions[key] = action;
     }
-  
+
   EX void add_key_action_adjust(int& key, const reaction_t& action) {
     while(key_actions.count(key)) key++;
     add_key_action(key, action);
     }
-  
+
   EX void extend() {
     items.back().key = items[isize(items)-2].key;
     }
-  
+
   EX void add_action(const reaction_t& action) {
     add_key_action_adjust(lastItem().key, action);
     }
-  
+
   EX void add_action_push(const reaction_t& action) { add_action([action] { pushScreen(action); }); }
 
   EX void add_action_push_clear(const reaction_t& action) { add_action([action] { clearMessages(); pushScreen(action); }); }
@@ -155,10 +155,10 @@ EX namespace dialog {
 
   EX void init() {
     items.clear();
-    key_actions.clear(); 
+    key_actions.clear();
     keyhandler = dialog::handler;
     }
-  
+
   EX string keyname(int k) {
     if(k == 0) return "";
     if(k == SDLK_ESCAPE) return "Esc";
@@ -185,7 +185,7 @@ EX namespace dialog {
     it.param = (d2-d1) / (d3-d1);
     items.push_back(it);
     }
-  
+
   EX void addIntSlider(int d1, int d2, int d3, int key) {
     item it;
     it.type = diIntSlider;
@@ -196,7 +196,7 @@ EX namespace dialog {
     it.p2 = (d3-d1);
     items.push_back(it);
     }
-  
+
   EX void addSelItem(string body, string value, int key) {
     item it;
     it.type = diItem;
@@ -217,7 +217,7 @@ EX namespace dialog {
   EX void addBoolItem(string body, bool value, int key) {
     addSelItem(body, ONOFF(value), key);
     }
-  
+
   EX int displaycolor(color_t col) {
     int c = col >> 8;
     if(!c) return 0x181818;
@@ -300,7 +300,7 @@ EX namespace dialog {
     items.push_back(it);
     return items.size()-1;
     }
-  
+
   EX void addTitle(string body, color_t color, int scale) {
     item it;
     it.type = diTitle;
@@ -310,7 +310,7 @@ EX namespace dialog {
     items.push_back(it);
     }
 
-  EX void init(string title, color_t color IS(0xE8E8E8), int scale IS(150), int brk IS(60)) { 
+  EX void init(string title, color_t color IS(0xE8E8E8), int scale IS(150), int brk IS(60)) {
     init();
     addTitle(title, color, scale);
     addBreak(brk);
@@ -324,13 +324,13 @@ EX namespace dialog {
 
     int last = 0;
     int lastspace = 0;
-    
+
     int xs, xo;
     if(current_display->sidescreen)
       xs = dwidth - vid.fsize*2, xo = vid.yres + vid.fsize;
     else
       xs = vid.xres * 618/1000, xo = vid.xres * 186/1000;
-    
+
     for(int i=0; i<=isize(str); i++) {
       int ls = 0;
       int prev = last;
@@ -346,17 +346,17 @@ EX namespace dialog {
         else y += siz;
         lastspace = last;
         }
-      
+
       }
-    
+
     y += siz/2;
     return y;
     }
 
   EX int tothei, dialogwidth, dfsize, dfspace, leftwidth, rightwidth, innerwidth, itemx, keyx, valuex;
-  
+
   EX string highlight_text;
-  
+
   EX void measure() {
     tothei = 0;
     dialogwidth = 0;
@@ -367,16 +367,16 @@ EX namespace dialog {
         tothei += displayLong(items[i].body, dfsize * items[i].scale / 100, 0, true);
       else {
         tothei += dfspace * items[i].scale / 100;
-        if(items[i].type == diItem) 
+        if(items[i].type == diItem)
           innerwidth = max(innerwidth, textwidth(dfsize * items[i].scale / 100, items[i].body));
         if(items[i].type == diTitle || items[i].type == diInfo || items[i].type == diBigItem)
           dialogwidth = max(dialogwidth, textwidth(dfsize * items[i].scale / 100, items[i].body) * 10/9);
         }
       }
-    
+
     leftwidth = ISMOBILE ? 0 : textwidth(dfsize, "MMMMM") + dfsize/2;
     rightwidth = textwidth(dfsize, "MMMMMMMM") + dfsize/2;
-    
+
     int fwidth = innerwidth + leftwidth + rightwidth;
     dialogwidth = max(dialogwidth, fwidth);
     itemx  = dcenter - fwidth / 2 + leftwidth;
@@ -385,11 +385,11 @@ EX namespace dialog {
     }
 
   EX purehookset hooks_display_dialog;
-  
+
   EX vector<int> key_queue;
-  
+
   EX void queue_key(int key) { key_queue.push_back(key); }
-  
+
   EX void display() {
 
     callhooks(hooks_display_dialog);
@@ -399,7 +399,7 @@ EX namespace dialog {
     dfsize *= 3;
     #endif
     dfspace = dfsize * 5/4;
-    
+
     dcenter = vid.xres/2;
     dwidth = vid.xres;
 
@@ -407,9 +407,9 @@ EX namespace dialog {
       dwidth = vid.xres - vid.yres;
       dcenter = vid.xres - dwidth / 2;
       }
-    
+
     measure();
-    
+
     while(tothei > vid.yres - 5 * vid.fsize) {
       int adfsize = int(dfsize * sqrt((vid.yres - 5. * vid.fsize) / tothei));
       if(adfsize < dfsize-1) dfsize = adfsize + 1;
@@ -423,9 +423,9 @@ EX namespace dialog {
       else dfsize--; // keep dfspace
       measure();
       }
-    
+
     tothei = (vid.yres - tothei) / 2;
-    
+
     for(int i=0; i<N; i++) {
       item& I = items[i];
 
@@ -433,7 +433,7 @@ EX namespace dialog {
         tothei = displayLong(items[i].body, dfsize * items[i].scale / 100, tothei, false);
         continue;
         }
-        
+
       int top = tothei;
       tothei += dfspace * I.scale / 100;
       int mid = (top + tothei) / 2;
@@ -450,7 +450,7 @@ EX namespace dialog {
         if(cmode & sm::DIALOG_STRICT_X)
           xthis = xthis && (mousex >= dcenter - dialogwidth/2 && mousex <= dcenter + dialogwidth/2);
 #if ISMOBILE
-        if(xthis && mousepressed) 
+        if(xthis && mousepressed)
           I.color = I.colorc;
 #else
         if(xthis && mousemoved) {
@@ -460,7 +460,7 @@ EX namespace dialog {
         if(highlight_text == I.body) {
           I.color = (xthis&&mousepressed&&actonrelease) ? I.colorc : I.colors;
           }
-#endif        
+#endif
 
         if(I.type == diBigItem) {
           displayfr(dcenter, mid, 2, dfsize * I.scale/100, I.body, I.color, 8);
@@ -474,7 +474,7 @@ EX namespace dialog {
           displayfr(valuex, mid, 2, siz, I.value, I.colorv, 0);
           }
         if(xthis) getcstat = I.key;
-        }      
+        }
       else if(among(I.type, diSlider, diIntSlider)) {
         bool xthis = (mousey >= top && mousey < tothei);
         int sl, sr;
@@ -499,7 +499,7 @@ EX namespace dialog {
         }
       else if(I.type == diKeyboard) {
         int len = 0;
-        for(char c: I.body) 
+        for(char c: I.body)
           if(c == ' ' || c == '\t') len += 3;
           else len++;
         int sl, sr;
@@ -551,10 +551,10 @@ EX namespace dialog {
       return;
       }
     }
-  
+
   EX void handleNavigation(int &sym, int &uni) {
     if(uni == '\n' || uni == '\r' || DIRECTIONKEY == SDLK_KP5) {
-      for(int i=0; i<isize(items); i++) 
+      for(int i=0; i<isize(items); i++)
         if(isitem(items[i]))
           if(items[i].body == highlight_text) {
             uni = sym = items[i].key;
@@ -570,16 +570,16 @@ EX namespace dialog {
       }
     if(DKEY == SDLK_PAGEUP) {
       uni = sym = 0;
-      for(int i=0; i<isize(items); i++) 
+      for(int i=0; i<isize(items); i++)
         if(isitem(items[i])) {
           highlight_text = items[i].body;
           break;
           }
-      }    
+      }
     if(DKEY == SDLK_UP) {
       uni = sym = 0;
       string last = "";
-      for(int i=0; i<isize(items); i++) 
+      for(int i=0; i<isize(items); i++)
         if(isitem(items[i]))
           last = items[i].body;
       for(int i=0; i<isize(items); i++)
@@ -609,17 +609,17 @@ EX namespace dialog {
     }
 
   color_t colorhistory[10] = {
-    0x202020FF, 0x800000FF, 0x008000FF, 0x000080FF, 
+    0x202020FF, 0x800000FF, 0x008000FF, 0x000080FF,
     0x404040FF, 0xC0C0C0FF, 0x804000FF, 0xC0C000FF,
     0x408040FF, 0xFFD500FF
     }, lch;
-  
+
   EX color_t *palette;
-  
+
   int colorp = 0;
-  
+
   color_t *colorPointer;
-  
+
   EX void handleKeyColor(int sym, int uni) {
     unsigned& color = *colorPointer;
     int shift = colorAlpha ? 0 : 8;
@@ -664,9 +664,9 @@ EX namespace dialog {
       if(reaction_final) reaction_final();
       }
     }
-  
+
   EX bool colorAlpha;
-  
+
   EX void drawColorDialog() {
     cmode = sm::NUMBER | dialogflags;
     if(cmode & sm::SIDE) gamescreen(0);
@@ -681,22 +681,22 @@ EX namespace dialog {
       }
 
     color_t color = *colorPointer;
-    
+
     int ash = 8;
-    
+
     for(int j=0; j<10; j++) {
       int x = dcenter + vid.fsize * 2 * (j-5);
       int y = vid.yres / 2- 5 * vid.fsize;
-      
+
       string s0 = ""; s0 += ('0'+j);
 
       vid.fsize *= 2;
       displayColorButton(x, y, s0, '0'+j, 0, 0, colorhistory[j] >> ash);
       vid.fsize /= 2;
       }
-    
+
     if(palette) {
-      int q = palette[0]; 
+      int q = palette[0];
       for(int i=0; i<q; i++) {
         int x = dcenter + vid.fsize * (2 * i-q);
         int y = vid.yres / 2- 7 * vid.fsize;
@@ -710,25 +710,25 @@ EX namespace dialog {
     for(int i=0; i<4; i++) {
       int y = vid.yres / 2 + (2-i) * vid.fsize * 2;
       if(i == 3 && !colorAlpha) continue;
-      
+
       color_t col = ((i==colorp) && !mousing) ? 0xFFD500 : dialogcolor;
 
       displayColorButton(dcenter - dwidth/4, y, "(", 0, 16, 0, col);
       string rgt = ") "; rgt += "ABGR" [i+(colorAlpha?0:1)];
       displayColorButton(dcenter + dwidth/4, y, rgt, 0, 0, 0, col);
       displayColorButton(dcenter - dwidth/4 + dwidth * part(color, i) / 510, y, "#", 0, 8, 0, col);
-      
+
       if(mousey >= y - vid.fsize && mousey < y + vid.fsize)
         getcstat = 'A' + i, inslider = true, slider_x = mousex;
       }
-    
+
     displayColorButton(dcenter, vid.yres/2+vid.fsize * 6, XLAT("select this color") + " : " + format(colorAlpha ? "%08X" : "%06X", color), ' ', 8, 0, color >> (colorAlpha ? ash : 0));
 
     if(extra_options) extra_options();
-    
+
     keyhandler = handleKeyColor;
     }
-  
+
   EX void openColorDialog(unsigned int& col, unsigned int *pal IS(palette)) {
     colorPointer = &col; palette = pal;
     colorAlpha = true;
@@ -737,28 +737,28 @@ EX namespace dialog {
     reaction = reaction_t();
     extra_options = reaction_t();
     }
-  
+
   EX numberEditor ne;
-  
+
   EX bool editingDetail() {
     return ne.editwhat == &vid.highdetail || ne.editwhat == &vid.middetail;
     }
-  
+
   int ldtoint(ld x) {
     if(x > 0) return int(x+.5);
     else return int(x-.5);
     }
-  
-  EX string disp(ld x) { 
+
+  EX string disp(ld x) {
     if(dialogflags & sm::HEXEDIT) return "0x" + itsh((unsigned long long)(x));
-    else if(ne.intval) return its(ldtoint(x)); 
+    else if(ne.intval) return its(ldtoint(x));
     else return fts(x); }
 
   EX reaction_t reaction;
   EX reaction_t reaction_final;
-  
+
   EX reaction_t extra_options;
-  
+
   EX void apply_slider() {
     if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
     if(reaction) reaction();
@@ -768,26 +768,26 @@ EX namespace dialog {
     anims::deanimate(*ne.editwhat);
     #endif
     }
-  
+
   EX void use_hexeditor() {
     dialogflags |= sm::HEXEDIT;
     ne.s = disp(*ne.editwhat);
     }
-  
+
   EX void apply_edit() {
     try {
       exp_parser ep;
-      ep.s = ne.s;    
+      ep.s = ne.s;
       ld x = ep.rparse();
       if(ne.sc.positive && x <= 0) return;
       *ne.editwhat = x;
       if(ne.intval) *ne.intval = ldtoint(*ne.editwhat);
       #if CAP_ANIMATIONS
-      if(ne.animatable) anims::animate_parameter(*ne.editwhat, ne.s, reaction ? reaction : reaction_final);    
+      if(ne.animatable) anims::animate_parameter(*ne.editwhat, ne.s, reaction ? reaction : reaction_final);
       #endif
       if(reaction) reaction();
       }
-    catch(const hr_parse_exception&) { 
+    catch(const hr_parse_exception&) {
       }
     }
 
@@ -823,10 +823,10 @@ EX namespace dialog {
     addKeyboardItem("zxcvbnm,.\b");
     addKeyboardItem(lr ? " \t\x1\x2" : " \t");
     }
-  
+
   EX bool onscreen_keyboard = ISMOBILE;
 
-  EX void number_dialog_help() {    
+  EX void number_dialog_help() {
     init("number dialog help");
     dialog::addBreak(100);
     dialog::addHelp(XLAT("You can enter formulas in this dialog."));
@@ -843,12 +843,12 @@ EX namespace dialog {
       dialog::addHelp(XLAT("a..b..|c..d -- animate from a to b, then from c to d"));
       dialog::addHelp(XLAT("a../x..b../y -- change smoothly, x and y are derivatives"));
       }
-    
+
     /* "Most parameters can be animated simply by using '..' in their editing dialog. "
       "For example, the value of a parameter set to 0..1 will grow linearly from 0 to 1. "
       "You can also use functions (e.g. cos(0..2*pi)) and refer to other parameters."
       )); */
-    
+
     #if CAP_ANIMATIONS
     dialog::addBreak(50);
     auto f = find_edit(ne.intval ? (void*) ne.intval : (void*) ne.editwhat);
@@ -874,7 +874,7 @@ EX namespace dialog {
     addItem("help", SDLK_F1);
     add_action_push(number_dialog_help);
     }
-  
+
   EX void drawNumberDialog() {
     cmode = sm::NUMBER | dialogflags;
     if(numberdark < DONT_SHOW)
@@ -891,7 +891,7 @@ EX namespace dialog {
     addHelp(XLAT("You can scroll with arrow keys -- Ctrl to fine-tune"));
     addBreak(100);
 #endif
-    
+
     dialog::addBack();
     addSelItem(XLAT("default value"), disp(ne.dft), SDLK_HOME);
     add_edit(onscreen_keyboard);
@@ -899,7 +899,7 @@ EX namespace dialog {
     add_action_push(number_dialog_help);
 
     addBreak(100);
-    
+
     if(ne.help != "") {
       addHelp(ne.help);
       // bool scal = !ISMOBILE && !ISPANDORA && isize(ne.help) > 160;
@@ -907,14 +907,14 @@ EX namespace dialog {
       }
 
     if(extra_options) extra_options();
-    
+
     if(onscreen_keyboard) {
       addBreak(100);
       formula_keyboard(false);
       }
-    
+
     display();
-    
+
     keyhandler = [] (int sym, int uni) {
       handleNavigation(sym, uni);
       if((uni >= '0' && uni <= '9') || among(uni, '.', '+', '-', '*', '/', '^', '(', ')', ',', '|', 3) || (uni >= 'a' && uni <= 'z')) {
@@ -967,22 +967,22 @@ EX namespace dialog {
           val /= mul;
           }
         *ne.editwhat = val;
-          
+
         apply_slider();
         }
       else if(doexiton(sym, uni)) { popScreen(); if(reaction_final) reaction_final(); }
       };
-    }  
+    }
 
   int nlpage = 1;
   int wheelshift = 0;
-  
+
   EX int handlePage(int& nl, int& nlm, int perpage) {
     nlm = nl;
     int onl = nl;
     int ret = 0;
     if(nlpage) {
-      nl = nlm = perpage; 
+      nl = nlm = perpage;
       if(nlpage == 2) ret = nlm;
       int w = wheelshift;
       int realw = 0;
@@ -997,7 +997,7 @@ EX namespace dialog {
       }
     return ret;
     }
-  
+
   EX void displayPageButtons(int i, bool pages) {
     int i0 = vid.yres - vid.fsize;
     int xr = vid.xres / 80;
@@ -1014,7 +1014,7 @@ EX namespace dialog {
     if(i&4) if(displayfrZH(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("plain"), dialogcolor, 8))
       getcstat = '1';
     }
-  
+
   EX bool handlePageButtons(int uni) {
     if(uni == '1') nlpage = 1, wheelshift = 0;
     else if(uni == '2') nlpage = 2, wheelshift = 0;
@@ -1024,7 +1024,7 @@ EX namespace dialog {
     else return false;
     return true;
     }
-  
+
   EX void editNumber(ld& x, ld vmin, ld vmax, ld step, ld dft, string title, string help) {
     ne.editwhat = &x;
     ne.s = disp(x);
@@ -1055,7 +1055,7 @@ EX namespace dialog {
     ne.intbuf = x; ne.intval = &x; ne.s = its(x);
     ne.animatable = false;
     }
-  
+
   EX void helpToEdit(int& x, int vmin, int vmax, int step, int dft) {
     popScreen();
     string title = "help";
@@ -1067,12 +1067,12 @@ EX namespace dialog {
       }
     editNumber(x, vmin, vmax, step, dft, title, help);
     }
-  
+
   //-- choose file dialog--
 
   #define CDIR dialogcolor
   #define CFILE forecolor
-  
+
   bool filecmp(const pair<string,color_t> &f1, const pair<string,color_t> &f2) {
     if(f1.first == "../") return true;
     if(f2.first == "../") return false;
@@ -1080,41 +1080,41 @@ EX namespace dialog {
       return f1.second == CDIR;
     return f1.first < f2.first;
     }
-  
+
   string filecaption, cfileext;
   string *cfileptr;
   bool editext = false;
-  
+
   bool_reaction_t file_action;
-  
+
   void handleKeyFile(int sym, int uni);
 
   EX void drawFileDialog() {
-    displayfr(vid.xres/2, 30 + vid.fsize, 2, vid.fsize, 
+    displayfr(vid.xres/2, 30 + vid.fsize, 2, vid.fsize,
       filecaption, forecolor, 8);
-      
+
     string& cfile = *cfileptr;
 
-    displayfr(vid.xres/2, 34 + vid.fsize * 2, 2, vid.fsize, 
+    displayfr(vid.xres/2, 34 + vid.fsize * 2, 2, vid.fsize,
       cfile, 0xFFFF00, 8);
-    
-    displayColorButton(vid.xres*1/4, 38+vid.fsize * 3, 
+
+    displayColorButton(vid.xres*1/4, 38+vid.fsize * 3,
       XLAT("F4 = extension"), SDLK_F4, 8, 0, editext ? 0xFF00FF : 0xFFFF00, editext ? 0x800080 : 0x808000);
-    displayButton(vid.xres*2/4, 38+vid.fsize * 3, 
+    displayButton(vid.xres*2/4, 38+vid.fsize * 3,
       XLAT("Enter = choose"), SDLK_RETURN, 8);
-    displayButton(vid.xres*3/4, 38+vid.fsize * 3, 
+    displayButton(vid.xres*3/4, 38+vid.fsize * 3,
       XLAT("Esc = cancel"), SDLK_ESCAPE, 8);
 
     v.clear();
-    
+
     DIR           *d;
     struct dirent *dir;
-    
+
     string where = ".";
     for(int i=0; i<isize(cfile); i++)
       if(cfile[i] == '/' || cfile[i] == '\\')
         where = cfile.substr(0, i+1);
-    
+
     d = opendir(where.c_str());
     if (d) {
       while ((dir = readdir(d)) != NULL) {
@@ -1132,21 +1132,21 @@ EX namespace dialog {
     int q = v.size();
     int percolumn = (vid.yres-38) / (vid.fsize+5) - 4;
     int columns = 1 + (q-1) / percolumn;
-      
+
     for(int i=0; i<q; i++) {
       int x = 16 + (vid.xres * (i/percolumn)) / columns;
       int y = 42 + vid.fsize * 4 + (vid.fsize+5) * (i % percolumn);
-        
+
       displayColorButton(x, y, v[i].first, 1000 + i, 0, 0, v[i].second, 0xFFFF00);
       }
 
     keyhandler = handleKeyFile;
     }
-  
+
   EX void handleKeyFile(int sym, int uni) {
     string& s(*cfileptr);
     int i = isize(s) - (editext?0:4);
-    
+
     if(sym == SDLK_ESCAPE) {
       popScreen();
       }
@@ -1193,11 +1193,11 @@ EX namespace dialog {
     file_action = action;
     pushScreen(dialog::drawFileDialog);
     }
-  
+
   // infix/v/vpush
 
   EX string infix;
-  
+
   string foreign_letters = "ÁÄÇÈÉÍÎÖÚÜßàáâãäçèéêìíîïòóôõöøùúüýąćČčĎďĘęĚěğİıŁłńňŘřŚśŞşŠšŤťůŹźŻżŽž";
   string latin_letters   = "AACEEIIOUUsAAAAACEEEIIIIOOOOOOUUUYACCCDDEEEEGIILLNNRRSSSSSSTTUZZZZZZ";
 
@@ -1210,7 +1210,7 @@ EX namespace dialog {
       if(c >= 'a' && c <= 'z') tt += c - 32;
       else if(c >= 'A' && c <= 'Z') tt += c;
       else if(c == '@') tt += c;
-      
+
       if(tt == 0) for(int k=0; k<isize(latin_letters); k++) {
         if(s[i] == foreign_letters[2*k] && s[i+1] == foreign_letters[2*k+1]) {
           if(latin_letters[k] == 's') t += "SS";
@@ -1222,7 +1222,7 @@ EX namespace dialog {
       }
     return t.find(infix) != string::npos;
     }
-  
+
   EX bool editInfix(int uni) {
     if(uni >= 'A' && uni <= 'Z') infix += uni;
     else if(uni >= 'a' && uni <= 'z') infix += uni-32;
@@ -1231,15 +1231,15 @@ EX namespace dialog {
     else return false;
     return true;
     }
-    
-  EX vector<pair<string, color_t> > v;  
+
+  EX vector<pair<string, color_t> > v;
 
   EX void vpush(color_t color, const char *name) {
     string s = XLATN(name);
     if(!hasInfix(s)) return;
     dialog::v.push_back(make_pair(s, color));
     }
-  
+
   int editpos = 0;
   EX string *edited_string;
 
@@ -1249,13 +1249,13 @@ EX namespace dialog {
     if(editpos > isize(cs)) editpos = isize(cs);
     cs.insert(editpos, "°");
     return cs;
-    }    
-  
+    }
+
   EX void start_editing(string& s) {
     edited_string = &s;
     editpos = isize(s);
     }
-  
+
   EX string editchecker(int sym, int uni) {
     if(uni >= 32 && uni < 127) return string("") + char(uni);
     return "";
@@ -1280,7 +1280,7 @@ EX namespace dialog {
     else return false;
     return true;
     }
-  
+
   EX void string_edit_dialog() {
     cmode = sm::NUMBER | dialogflags;
     if(numberdark < DONT_SHOW)
@@ -1293,15 +1293,15 @@ EX namespace dialog {
     addBreak(100);
     dialog::addBack();
     addBreak(100);
-    
+
     if(ne.help != "") {
       addHelp(ne.help);
       }
 
     if(extra_options) extra_options();
-    
+
     display();
-    
+
     keyhandler = [] (int sym, int uni) {
       handleNavigation(sym, uni);
       if(handle_edit_string(sym, uni)) ;
@@ -1310,7 +1310,7 @@ EX namespace dialog {
         if(reaction_final) reaction_final();
         }
       };
-    }  
+    }
 
   EX void edit_string(string& s, string title, string help) {
     start_editing(s);
@@ -1339,12 +1339,12 @@ EX namespace dialog {
     dialog::display();
     }
 
-  EX void addBoolItem_action(const string& s, bool& b, char c) { 
+  EX void addBoolItem_action(const string& s, bool& b, char c) {
     dialog::addBoolItem(s, b, c);
     dialog::add_action([&b] { b = !b; });
     }
 
-  EX void addBoolItem_action_neg(const string& s, bool& b, char c) { 
+  EX void addBoolItem_action_neg(const string& s, bool& b, char c) {
     dialog::addBoolItem(s, !b, c);
     dialog::add_action([&b] { b = !b; });
     }
@@ -1360,7 +1360,7 @@ EX namespace dialog {
       }
     return false;
     }
-  
+
   EX void add_action_confirmed(const reaction_t& act) {
     dialog::add_action(dialog::add_confirmation(act));
     }

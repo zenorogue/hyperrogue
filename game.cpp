@@ -9,7 +9,7 @@
 namespace hr {
 
 /** \brief the main random number generator for the game.
- *  
+ *
  * All the random calls related to the game mechanics (land generation, AI...) should use hrngen.
  *
  * Random calls not related to the game mechanics (graphical effects) should not use hrngen.
@@ -32,7 +32,7 @@ EX int hrandpos() { return hrngen() & HRANDMAX; }
  *  to make sure that they return the same values on different compilers.
  **/
 
-EX int hrand(int i) { 
+EX int hrand(int i) {
   unsigned d = hrngen() - hrngen.min();
   long long m = (long long) (hrngen.max() - hrngen.min()) + 1;
   m /= i;
@@ -46,9 +46,9 @@ template<class T, class... U> T pick(T x, U... u) { std::initializer_list<T> i =
 template<class T> void hrandom_shuffle(T* x, int n) { for(int k=1; k<n; k++) swap(x[k], x[hrand(k+1)]); }
 template<class T> void hrandom_shuffle(T& container) { hrandom_shuffle(&container[0], isize(container)); }
 template<class U> auto hrand_elt(U& container) -> decltype(container[0]) { return container[hrand(isize(container))]; }
-template<class T, class U> T hrand_elt(U& container, T default_value) { 
-  if(container.empty()) return default_value; 
-  return container[hrand(isize(container))]; 
+template<class T, class U> T hrand_elt(U& container, T default_value) {
+  if(container.empty()) return default_value;
+  return container[hrand(isize(container))];
   }
 #endif
 
@@ -62,7 +62,7 @@ EX vector<int> hrandom_permutation(int qty) {
 /** Use \link hrngen \endlink to generate a floating point number between 0 and 1.
  */
 
-EX ld hrandf() { 
+EX ld hrandf() {
   return (hrngen() - hrngen.min()) / (hrngen.max() + 1.0 - hrngen.min());
   }
 
@@ -90,15 +90,15 @@ EX bool isChild(cell *w, cell *killed) {
       lim++; if(lim == 100000) {
         childbug = true;
         printf("childbug!\n");
-        w->item = itBuggy; break; 
+        w->item = itBuggy; break;
         }
-      if(!isAnyIvy(w->monst)) { 
+      if(!isAnyIvy(w->monst)) {
         return false;
         }
       w = w->move(w->mondir);
       // printf("w = %p mondir = %d\n", w, w->mondir);
       }
-    
+
     }
   return w == killed;
   }
@@ -108,13 +108,13 @@ EX eMonster active_switch() {
   }
 
 EX vector<cell*> crush_now, crush_next;
-  
+
 EX int getDistLimit() { return cgi.base_distlimit; }
 
 EX void activateFlashFrom(cell *cf, eMonster who, flagtype flags);
 
 EX bool saved_tortoise_on(cell *c) {
-  return 
+  return
     (c->monst == moTortoise && c->item == itBabyTortoise &&
     !((tortoise::getb(c) ^ tortoise::babymap[c]) & tortoise::mask));
   }
@@ -154,8 +154,8 @@ EX void restoreGolems(int qty, eMonster m, int hp IS(0)) {
   int dcs = isize(dcal);
   for(int i=1; qty && i<dcs; i++) {
     cell *c = dcal[i];
-    if(m == moTameBomberbird ? 
-        (c->mpdist >= 3 && passable(c, NULL, P_FLYING)) : 
+    if(m == moTameBomberbird ?
+        (c->mpdist >= 3 && passable(c, NULL, P_FLYING)) :
         passable(c, NULL, 0)) {
       c->hitpoints = hp / qty;
       c->monst = m, qty--, hp -= c->hitpoints;
@@ -184,7 +184,7 @@ EX bool activateRecall() {
   movecost(cwt.at, recallCell.at, 3);
   playerMoveEffects(movei(cwt.at, recallCell.at, TELEPORT));
   mirror::destroyAll();
-  
+
   sword::reset();
 
   cwt = recallCell;
@@ -199,8 +199,8 @@ EX bool activateRecall() {
   current_display->which_copy = recallDisplay.which_copy;
 
   makeEmpty(cwt.at);
-  forCellEx(c2, cwt.at) 
-    if(c2->monst != moMutant) 
+  forCellEx(c2, cwt.at)
+    if(c2->monst != moMutant)
       c2->stuntime = 4;
   if(shmup::on) shmup::recall();
   if(multi::players > 1) multi::recall();
@@ -211,7 +211,7 @@ EX bool activateRecall() {
   return true;
   }
 
-EX void saveRecall(cellwalker cw2) {  
+EX void saveRecall(cellwalker cw2) {
   if(!recallCell.at) {
     changes.value_set(recallCell, cw2);
     changes.value_keep(recallDisplay);
@@ -220,7 +220,7 @@ EX void saveRecall(cellwalker cw2) {
   }
 
 EX void teleportToLand(eLand l, bool make_it_safe) {
-  if(recallCell.at && activateRecall()) 
+  if(recallCell.at && activateRecall())
     return;
   savePrincesses();
   int gg = countMyGolems(moGolem);
@@ -231,7 +231,7 @@ EX void teleportToLand(eLand l, bool make_it_safe) {
   int gph2 = countMyGolemsHP(moPrincessArmed);
   drawSafety();
   addMessage(XLAT("You fall into a wormhole!"));
-  
+
   eLand f = firstland;
   if(l == laTemple) l = laRlyeh;
   if(l == laClearing) l = laOvergrown;
@@ -249,11 +249,11 @@ EX void teleportToLand(eLand l, bool make_it_safe) {
   initgame();
   firstland = f;
   safety = false;
-  restoreGolems(gg, moGolem); 
-  restoreGolems(gb, moTameBomberbird); 
-  restoreGolems(gp1, moPrincess, gph1); 
-  restoreGolems(gp2, moPrincessArmed, gph2); 
-  restartGraph();  
+  restoreGolems(gg, moGolem);
+  restoreGolems(gb, moTameBomberbird);
+  restoreGolems(gp1, moPrincess, gph1);
+  restoreGolems(gp2, moPrincessArmed, gph2);
+  restartGraph();
   }
 
 
@@ -292,12 +292,12 @@ EX void placeGolem(cell *on, cell *moveto, eMonster m) {
       addMessage(XLAT("%The1 is crushed!", m));
     else if(m == moTameBomberbird && cwt.at->wall == waBoat)
       return;
-    else 
+    else
       addMessage(XLAT("%The1 is destroyed!", m));
-    
+
     printf("mondir = %d\n", on->mondir);
     fallMonster(cwt.at, f);
-    }                 
+    }
   }
 
 EX bool multiRevival(cell *on, cell *moveto) {
@@ -372,11 +372,11 @@ EX void pushThumper(const movei& mi) {
   else if(w == waCrateCrate && cto->wall == waCrateTarget) {
     cto->wall = waCrateOnTarget;
     th->wall = waNone;
-    }    
+    }
   else if(w == waCrateOnTarget && cto->wall == waNone) {
     cto->wall = waCrateCrate;
     th->wall = waCrateTarget;
-    }    
+    }
   else if(w == waCrateOnTarget && cto->wall == waCrateTarget) {
     cto->wall = waCrateOnTarget;
     th->wall = waCrateTarget;
@@ -384,7 +384,7 @@ EX void pushThumper(const movei& mi) {
   #if CAP_COMPLEX2
   else if(isDie(w)) {
     th->wall = waNone;
-    cto->wall = w;    
+    cto->wall = w;
     dice::roll(mi);
     if(w == waRichDie && dice::data[cto].happy() > 0) {
       cto->wall = waHappyDie;
@@ -395,14 +395,14 @@ EX void pushThumper(const movei& mi) {
       else {
         addMessage(XLAT("The die is now happy, but won't reward you outside of the Dice Reserve!"));
         }
-      }          
+      }
     if(w == waHappyDie && dice::data[cto].happy() <= 0) {
       cto->monst = moAngryDie;
       cto->wall = waNone;
       cto->stuntime = 5;
       addMessage(XLAT("You have made a Happy Die angry!"));
       animateMovement(mi, LAYER_SMALL);
-      }          
+      }
     else
       animateMovement(mi, LAYER_BOAT);
     }
@@ -421,7 +421,7 @@ EX bool canPushThumperOn(movei mi, cell *player) {
   if(dice::on(thumper) && !dice::can_roll(mi))
     return false;
   #endif
-  if(tgt->wall == waBoat || tgt->wall == waStrandedBoat) return false;  
+  if(tgt->wall == waBoat || tgt->wall == waStrandedBoat) return false;
   if(isReptile(tgt->wall)) return false;
   if(isWatery(tgt) && !tgt->monst)
     return true;
@@ -447,11 +447,11 @@ EX void activateActiv(cell *c, bool msg) {
   }
 
 /* bool isPsiTarget(cell *dst) {
-  return 
+  return
     dst->cpdist > 1 &&
-    dst->monst && 
+    dst->monst &&
     !(isWorm(dst) || dst->monst == moShadow);
-  } */                                                      
+  } */
 
 EX void fixWormBug(cell *c) {
   if(history::includeHistory) return;
@@ -462,9 +462,9 @@ EX void fixWormBug(cell *c) {
   }
 
 EX bool isWormhead(eMonster m) {
-  return among(m, 
+  return among(m,
     moTentacle, moWorm, moHexSnake, moWormwait, moTentacleEscaping,
-    moTentaclewait, moDragonHead);   
+    moTentaclewait, moDragonHead);
   }
 
 EX cell *worm_tohead(cell *c) {
@@ -487,8 +487,8 @@ EX cell *wormhead(cell *c) {
     }
   fixWormBug(c);
   return c;
-  }  
-  
+  }
+
 /** \brief currently works for worms only */
 EX bool sameMonster(cell *c1, cell *c2) {
   if(!c1 || !c2) return false;
@@ -511,6 +511,6 @@ EX eMonster haveMount() {
 EX eMonster otherpole(eMonster m) {
   return eMonster(m ^ moNorthPole ^ moSouthPole);
   }
-  
+
 
 }
