@@ -751,7 +751,7 @@ void pcmove::tell_why_cannot_attack() {
     addMessage(XLAT("You cannot attack Sandworms directly!"));
   else if(c2->monst == moHexSnake || c2->monst == moHexSnakeTail)
     addMessage(XLAT("You cannot attack Rock Snakes directly!"));
-  else if(nonAdjacent(c2, cwt.at))
+  else if(nonAdjacentPlayer(c2, cwt.at))
     addMessage(XLAT("You cannot attack diagonally!"));
   else if(thruVine(c2, cwt.at))
     addMessage(XLAT("You cannot attack through the Vine!"));
@@ -935,7 +935,7 @@ bool pcmove::move_if_okay() {
 
 void pcmove::tell_why_impassable() {
   cell*& c2 = mi.t;
-  if(nonAdjacent(cwt.at,c2)) {
+  if(nonAdjacentPlayer(cwt.at,c2)) {
     if(vmsg(miRESTRICTED)) addMessage(geosupport_football() < 2 ?
       XLAT("You cannot move between the cells without dots here!") :
       XLAT("You cannot move between the triangular cells here!")
