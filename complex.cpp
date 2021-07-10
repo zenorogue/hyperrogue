@@ -2349,7 +2349,7 @@ EX void livecaves() {
       for(cell *c2: adj_minefield_cells(c)) {
         eWall w = c2->wall;
         if(w == waDeadfloor) hv++, bringlife.push_back(c2);
-        else if(w == waDeadwall || (w == waDeadfloor2 && !c2->monst))
+        else if(w == waDeadwall || (w == waDeadfloor2 && !c2->monst && !isPlayerOn(c2)))
           hv--, bringlife.push_back(c2);
         else if(w == waCavefloor) hv++;
         else if(w == waCavewall) hv--;
