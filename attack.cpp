@@ -1050,6 +1050,7 @@ EX void killFriendlyIvy() {
 
 EX bool monsterPushable(cell *c2) {
   if(markOrb(itCurseWeakness) && (c2->stuntime < 2 || attackJustStuns(c2, 0, moPlayer))) return false;
+  if(isMultitile(c2->monst)) return false;
   return (c2->monst != moFatGuard && !(isMetalBeast(c2->monst) && c2->stuntime < 2) && c2->monst != moTortoise && c2->monst != moTerraWarrior && c2->monst != moVizier && c2->monst != moWorldTurtle);
   }  
 
