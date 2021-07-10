@@ -119,7 +119,7 @@ EX bool monstersnear(cell *c, eMonster who) {
 
   if(who == moPlayer || items[itOrbEmpathy]) {
     fast = (items[itOrbSpeed] && (items[itOrbSpeed] & 1));
-    if(who == moPlayer && c->item == itOrbSpeed && !items[itOrbSpeed]) fast = true;
+    if(who == moPlayer && !isPlayerOn(c) && c->item == itOrbSpeed && !items[itOrbSpeed]) fast = true;
     }
   
   if(havewhat&HF_OUTLAW) {
