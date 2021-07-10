@@ -567,7 +567,8 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
     forCellEx(c1, c) {
       changes.ccell(c1);
       c1->item = itNone;
-      if(c1->wall == waDeadwall || c1->wall == waDeadfloor2) c1->wall = waCavewall;
+      if(c1->wall == waDeadwall) c1->wall = waCavewall;
+      if(c1->wall == waDeadfloor2 && !c1->monst && !isPlayerOn(c1)) c1->wall = waCavewall;
       if(c1->wall == waDeadfloor) c1->wall = waCavefloor;
       }
     }
