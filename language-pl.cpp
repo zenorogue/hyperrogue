@@ -9407,3 +9407,4 @@ S(
   "* na Prerii po jej odblokowaniu (%3 skarbów)\n\n"
   )
 
+N("Palace Quest", GEN_O, "Misja w Pałacu", "Misje w Pałacu", "Misję w Pałacu", "na Misji w Pałacu")
