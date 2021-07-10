@@ -248,17 +248,19 @@ EX int isRandland(eLand l) {
   return 0;
   }
 
+EX bool landStartsFires(eLand l) {
+  return (l == laPower || l == laVolcano || l == laDragon || l == laEFire || l == laRlyeh);
+  }
+
+EX bool landCatchesFire(eLand l) {
+  return (l == laWineyard || l == laDryForest || l == laEndorian || l == laRose);
+  }
+
 EX bool incompatible1(eLand l1, eLand l2) {
   if(isCrossroads(l1) && isCrossroads(l2)) return true;
+  if(landStartsFires(l1) && landCatchesFire(l2)) return true;
   if(l1 == laJungle && l2 == laMotion) return true;
   if(l1 == laMirrorOld && l2 == laMotion) return true;
-  if(l1 == laPower && l2 == laWineyard) return true;
-  if(l1 == laPower && l2 == laDryForest) return true;
-  if(l1 == laVolcano && l2 == laDryForest) return true;
-  if(l1 == laVolcano && l2 == laWineyard) return true;
-  if(l1 == laDragon && l2 == laDryForest) return true;
-  if(l1 == laEFire && l2 == laWineyard) return true;
-  if(l1 == laEFire && l2 == laDryForest) return true;
   if(l1 == laGraveyard && l2 == laDryForest) return true;
   if(l1 == laGraveyard && l2 == laDice) return true;
   if(l1 == laGraveyard && l2 == laRuins) return true;
