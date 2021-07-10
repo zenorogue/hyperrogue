@@ -458,7 +458,7 @@ EX void knightFlavorMessage(cell *c2) {
     else if(cryst)
       s = crystal::get_table_boundary();
     #endif
-    else if(!quotient)
+    else if(!quotient && rad)
       s = expansion.get_descendants(rad).get_str(100);
     if(s == "") { msgid++; goto retry; }
     addMessage(XLAT("\"Our Table seats %1 Knights!\"", s));
@@ -470,7 +470,7 @@ EX void knightFlavorMessage(cell *c2) {
     else if(cryst)
       s = crystal::get_table_volume();
     #endif
-    else if(!quotient)
+    else if(!quotient && rad)
       s = expansion.get_descendants(rad-1, expansion.diskid).get_str(100);
     if(s == "") { msgid++; goto retry; }
     addMessage(XLAT("\"There are %1 floor tiles inside our Table!\"", s));
