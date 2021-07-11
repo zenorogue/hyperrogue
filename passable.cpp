@@ -409,7 +409,7 @@ bool sharkpassable(cell *w, cell *c) {
 EX bool canPushStatueOn(cell *c, flagtype flags) {
   return passable(c, NULL, P_MONSTER | flags) && !snakelevel(c) &&
     !isWorm(c->monst) && !isReptile(c->wall) && !peace::on && 
-    !cellHalfvine(c) &&
+    !cellHalfvine(c) && !isDie(c->wall) &&
     !among(c->wall, waBoat, waFireTrap, waArrowTrap);
   }
 
