@@ -978,7 +978,8 @@ EX void removeIvy(cell *c) {
   // note that semi-vines don't count
     if(c->move(i)->wall == waVinePlant) {
       destroyHalfvine(c);
-      c->wall = waVinePlant;
+      if (!do_not_touch_this_wall(c))
+        c->wall = waVinePlant;
       }
   if(c->wall != waVinePlant) {
     if(m == moIvyDead)

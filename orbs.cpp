@@ -99,9 +99,6 @@ EX bool reduceOrbPower(eItem it, int cap) {
     return true;
     }
   if(items[it] > cap && timerghost) items[it] = cap;
-  #if CAP_COMPLEX2
-  mine::auto_teleport_charges();
-  #endif
   return false;
   }
 
@@ -209,6 +206,10 @@ EX void reduceOrbPowers() {
   reduceOrbPower(itCurseFatigue, 199);
   reduceOrbPower(itCurseRepulsion, 199);
   reduceOrbPower(itCurseGluttony, 199);
+
+  #if CAP_COMPLEX2
+  mine::auto_teleport_charges();
+  #endif
 
   whirlwind::calcdirs(cwt.at); 
   items[itStrongWind] = !items[itOrbAether] && whirlwind::qdirs == 1;
