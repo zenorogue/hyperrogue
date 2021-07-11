@@ -531,6 +531,7 @@ EX int celldistAlt(cell *c) {
   if(IRREGULAR) return irr::celldist(c, true);
   #endif
   if(ctof(c)) return c->master->alt->distance;
+  if(reg3::in()) return c->master->alt->distance;
   #if CAP_GP
   if(GOLDBERG) return gp::compute_dist(c, celldistAlt);
   if(INVERSE) {

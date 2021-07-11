@@ -207,9 +207,9 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
 
 #if MAXMDIM >= 4
 EX int hrandom_adjacent(cellwalker cw) {
-  auto& da = currentmap->adjacent_dirs(cw);  
+  auto& da = currentmap->dirdist(cw);
   vector<int> choices = {cw.spin};
-  for(int a=0; a<S7; a++) if(da[a]) choices.push_back(a);
+  for(int a=0; a<cw.at->type; a++) if(da[a] == 1) choices.push_back(a);
   return hrand_elt(choices, cw.spin);
   }
 #endif
@@ -696,15 +696,15 @@ EX void buildEquidistant(cell *c) {
           if(!cw.at->landflags) continue;
           if(S7 == 6) c->landflags = 1;
           else {
-            auto& da = currentmap->adjacent_dirs(cw);
-            for(int j=0; j<S7; j++) if(cw.at->move(j) && cw.at->move(j)->landparam == c->landparam - 2 && !da[j])
+            auto& da = currentmap->dirdist(cw);
+            for(int j=0; j<S7; j++) if(cw.at->move(j) && cw.at->move(j)->landparam == c->landparam - 2 && da[j] != 1)
               if(c->landparam == 2 ? cw.at->move(j)->land != laEndorian : cw.at->move(j)->landparam)
                 c->landflags = 1;
             }
           }
         }
       else if(c->landparam == 2) {
-        for(int i=0; i<S7; i++) {
+        for(int i=0; i<c->type; i++) {
           cellwalker cw(c, i);
           if(!cw.peek()) continue;
           cw += wstep;
@@ -715,7 +715,7 @@ EX void buildEquidistant(cell *c) {
           }
         }
       else if(c->landparam % 2 == 1) {
-        for(int i=0; i<S7; i++) {
+        for(int i=0; i<c->type; i++) {
           cellwalker cw(c, i);
           if(!cw.peek()) continue;
           cw += wstep;
@@ -723,14 +723,14 @@ EX void buildEquidistant(cell *c) {
           if(!cw.at->landflags) continue;
           if(S7 == 6) c->landflags = 1;
           else {
-            auto& da = currentmap->adjacent_dirs(cw);
-            for(int j=0; j<S7; j++) if(cw.at->move(j) && cw.at->move(j)->landparam == c->landparam - 2 && !da[j] && cw.at->move(j)->landflags)
+            auto& da = currentmap->dirdist(cw);
+            for(int j=0; j<S7; j++) if(cw.at->move(j) && cw.at->move(j)->landparam == c->landparam - 2 && da[j] != 1 && cw.at->move(j)->landflags)
               c->landflags = 1;
             }
           }
         }
       else {
-        for(int i=0; i<S7; i++) {
+        for(int i=0; i<c->type; i++) {
           cellwalker cw(c, i);
           if(!cw.peek()) continue;
           cw += wstep;

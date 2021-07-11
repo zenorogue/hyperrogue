@@ -199,7 +199,7 @@ EX bool is_zebra_trapdoor(cell *c) {
       return false;
       }
     case gSpace435: {
-      for(int i=0; i<S7; i++) {
+      for(int i=0; i<c->type; i++) {
         cellwalker cw(c, i);
         for(int a=0; a<3; a++) {
           if(cw.at->master->fieldval == 0) return true;
