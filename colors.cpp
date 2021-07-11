@@ -1,14 +1,14 @@
 // Hyperbolic Rogue -- color routines
 // Copyright (C) 2011-2020 Zeno Rogue, see 'hyper.cpp' for details
 
-/** \file colors.cpp 
+/** \file colors.cpp
  *  \brief This file implements routines related to colors
  */
 
 #include "hyper.h"
 namespace hr {
 
-/** \brief Return a reference to i-th component of col. 
+/** \brief Return a reference to i-th component of col.
  *  \arg i For colors with alpha, A=0, R=1, G=2, B=3. For colors without alpha, R=0, G=1, B=2.
  */
 EX unsigned char& part(color_t& col, int i) {
@@ -95,20 +95,20 @@ EX color_t rcolor() {
 
 EX color_t rainbow_color(ld sat, ld hue) {
   hue = frac(hue);
-  
+
   if(hue < 0) hue++;
-  
+
   hue *= 6;
-  
+
   color_t res = 0;
-  
+
   if(hue<1) res = gradient(0xFF0000, 0xFFFF00, 0, hue, 1);
   else if(hue<2) res = gradient(0x00FF00, 0xFFFF00, 2, hue, 1);
   else if(hue<3) res = gradient(0x00FF00, 0x00FFFF, 2, hue, 3);
   else if(hue<4) res = gradient(0x0000FF, 0x00FFFF, 4, hue, 3);
   else if(hue<5) res = gradient(0x0000FF, 0xFF00FF, 4, hue, 5);
   else if(hue<6) res = gradient(0xFF0000, 0xFF00FF, 6, hue, 5);
-  
+
   return gradient(0xFFFFFF, res, 0, sat, 1);
   }
 
@@ -130,17 +130,17 @@ EX bool neon_nofill;
 
 EX void apply_neon(color_t& col, int& r) {
   switch(neon_mode) {
-    case eNeon::none: 
+    case eNeon::none:
     case eNeon::illustration:
       break;
-    case eNeon::neon: 
-      poly_outline = col << 8; col = 0; 
-      break;      
-    case eNeon::no_boundary: 
+    case eNeon::neon:
+      poly_outline = col << 8; col = 0;
+      break;
+    case eNeon::no_boundary:
       r = 0;
       break;
     case eNeon::neon2:
-      poly_outline = col << 8; col &= 0xFEFEFE; col >>= 1; 
+      poly_outline = col << 8; col &= 0xFEFEFE; col >>= 1;
       break;
     }
   }
@@ -154,7 +154,7 @@ EX color_t magentize(color_t x) {
   int gm = (magenta + green)/2;
   nm = (nm + 255) / 2;
   gm = gm / 2;
-  
+
   return (nm * 0x1000100) | (gm * 0x10000) | (part(x, 0));
   }
 
@@ -178,7 +178,7 @@ EX void apply_neon_color(color_t col, color_t& pcolor, color_t& poutline, flagty
     // deuteranopia
     /* int r = (625 * part(col,3) + 375 * part(col,2)) / 1000;
     int g = (700 * part(col,3) + 300 * part(col,2)) / 1000;
-    int b = (300 * part(col,2) + 700 * part(col,1)) / 1000; 
+    int b = (300 * part(col,2) + 700 * part(col,1)) / 1000;
     part(col,3) = r;
     part(col,2) = g;
     part(col,1) = b; */
@@ -194,7 +194,7 @@ EX void apply_neon_color(color_t col, color_t& pcolor, color_t& poutline, flagty
       pcolor = (poly_outline & 0xFFFFFF00) | (col & 0xFF);
       poutline = (darkened(col >> 8) << 8) | (col & 0xFF);
       if(col == 0xFF) poutline = 0xFFFFFFFF;
-      if(neon_nofill && pcolor == 0xFF) pcolor = 0; 
+      if(neon_nofill && pcolor == 0xFF) pcolor = 0;
       break;
     case eNeon::no_boundary:
       pcolor = (darkened(col >> 8) << 8) + (col & 0xFF);
@@ -205,7 +205,7 @@ EX void apply_neon_color(color_t col, color_t& pcolor, color_t& poutline, flagty
       poutline = (darkened(col >> 8) << 8) + (col & 0xFF);
       if(col == 0xFF) poutline = 0xFFFFFFFF;
       if(poly_outline != 0xFF) poutline = poly_outline;
-      if(neon_nofill && pcolor == 0xFF) pcolor = 0; 
+      if(neon_nofill && pcolor == 0xFF) pcolor = 0;
       break;
     case eNeon::illustration: {
       if(poly_outline && (poly_outline>>8) != bordcolor) {
@@ -234,7 +234,7 @@ EX int cloakcolor(int rtr) {
   if(rtr < 0) rtr += 10;
   // rtr = time(NULL) % 10;
   int cc[10] = {
-    0x8080FF, 0x80FFFF, 0x80FF80, 0xFF8080, 0xFF80FF, 0xFFFF80, 
+    0x8080FF, 0x80FFFF, 0x80FF80, 0xFF8080, 0xFF80FF, 0xFFFF80,
     0xFFFFC0, 0xFFD500, 0x421C52, 0
     };
   return cc[rtr];
@@ -243,7 +243,7 @@ EX int cloakcolor(int rtr) {
 EX int firegradient(double p) {
   return gradient(0xFFFF00, 0xFF0000, 0, p, 1);
   }
-  
+
 EX int firecolor(int phase IS(0), int mul IS(1)) {
   return gradient(0xFFFF00, 0xFF0000, -1, sintick(100*mul, phase/200./M_PI), 1);
   }

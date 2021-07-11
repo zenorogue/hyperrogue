@@ -21,10 +21,10 @@ void build(crystal::coord co, int at) {
   for(int a=0; a<crystal::get_dim(); a++)
     if(co[a] == 4) twos++, index = 2*a;
     else if(co[a] == -4) twos++, index = 2*a+1;
-  
+
   auto c = crystal::get_heptagon_at(co)->c7;
   setdist(c, 7, NULL);
-  if(twos == 0) 
+  if(twos == 0)
     c->landparam = back;
   else if(twos == 1) {
     c->landparam = magiccolors[index];
@@ -32,7 +32,7 @@ void build(crystal::coord co, int at) {
     }
 
   println(hlog, co, " twos = ", twos, " index = ", index, " set = ", format("%06X", c->landparam));
-  
+
   }
 
 void curveline(hyperpoint a, hyperpoint b, int lev) {
@@ -128,7 +128,7 @@ bool magic_rugkey(int sym, int uni) {
     }
   if((cmode & sm::NORMAL) && uni == 'R') {
     build(crystal::c0, 0);
-    }  
+    }
   if((cmode & sm::NORMAL) && uni == 'k') {
     crystal::view_coordinates = !crystal::view_coordinates;
     return true;
@@ -148,16 +148,16 @@ void magic(int sides) {
   patterns::canvasback = back;
   check_cgi();
   start_game();
-  
+
   build(crystal::c0, 0);
- 
+
   rv_hook(hooks_drawcell, 100, magic_markers);
   rv_hook(mine::hooks_mark, 150, magic_rotate);
   rv_hook(hooks_handleKey, 150, magic_rugkey);
   }
 
 auto magichook = arg::add2("-magic3", [] { magic(-1); }) + arg::add2("-magic", [] { magic(arg::shift_argi()); });
- 
+
 }
 #endif
 }

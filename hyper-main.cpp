@@ -32,7 +32,7 @@ namespace hr {
 EX hookset<bool(int argc, char** argv)> hooks_main;
 
 EX int hyper_main(int argc, char **argv) {
-  using namespace hr; 
+  using namespace hr;
 #if ISWEB
   emscripten_get_commandline();
 #elif ISMOBILE
@@ -62,7 +62,7 @@ EX int hyper_main(int argc, char **argv) {
     }
 #endif
   mainloop();
-  finishAll();  
+  finishAll();
   return 0;
   }
 }
@@ -71,4 +71,4 @@ EX int hyper_main(int argc, char **argv) {
 int main(int argc, char **argv) {
   return hr::hyper_main(argc, argv);
   }
-#endif 
+#endif

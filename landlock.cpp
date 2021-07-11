@@ -14,13 +14,13 @@ EX bool in_full_game() {
   }
 
 EX bool nodisplay(eMonster m) {
-  return 
+  return
     m == moIvyDead ||
     m == moDragonTail ||
     m == moWolfMoved ||
     m == moIvyNext ||
     m == moIvyDead;
-  }    
+  }
 
 /** returns: 2 = treasure increaser, 1 = just appears, 0 = does not appear */
 EX int isNative(eLand l, eMonster m) {
@@ -28,7 +28,7 @@ EX int isNative(eLand l, eMonster m) {
     #define LAND(a,b,c,d,e,f,g) case c:
     #define NATIVE(x) return x;
     #include "content.cpp"
-    
+
     case landtypes: return 0;
     }
   return false;
@@ -109,7 +109,7 @@ EX int chaoticity() {
   if(land_structure == lsChaos) return 40;
   if(land_structure == lsWallChaos) return 30;
   if(land_structure == lsSingle) return 0;
-  return 10;  
+  return 10;
   }
 
 EX bool tame_chaos() { return any_chaos() && chaoticity() < 35; }
@@ -138,7 +138,7 @@ EX string land_structure_name(bool which) {
     }
   }
 
-EX void fix_land_structure_choice() {  
+EX void fix_land_structure_choice() {
   if(bounded) {
     if(land_structure != lsTotalChaos && land_structure != lsChaosRW)
       land_structure = lsSingle;
@@ -178,15 +178,15 @@ EX bool landUnlocked(eLand l) {
   if(randomPatternsMode) {
     return landUnlockedRPM(l);
     }
-  
+
   if(all_unlocked) {
     if(autocheat || hiitemsMax(treasureType(l)) >= 10) return true;
     }
-  
+
   back:
-  
+
   if(princess::challenge) return among(l, laPalace, laPrincessQuest);
-  
+
   switch(l) {
     #define LAND(a,b,c,d,e,f,g) case c:
     #define REQ(x) x return true;
@@ -306,10 +306,10 @@ EX bool rlyehComplete() {
   return items[itStatue] >= 10 || items[itGrimoire] >= 10;
   }
 
-bool lchance(eLand l) { 
+bool lchance(eLand l) {
   if(ls::single() || racing::on || ((geometry || GOLDBERG) && specialland == laElementalWall)) return true;
   if(ls::any_chaos()) return hrand(100) < 25;
-  return hrand(100) >= 40 * kills[elementalOf(l)] / (elementalKills()+1); 
+  return hrand(100) >= 40 * kills[elementalOf(l)] / (elementalKills()+1);
   }
 
 EX eLand pickLandRPM(eLand old) {
@@ -334,8 +334,8 @@ EX eLand pickluck(eLand l1, eLand l2) {
 
 /* bool noChaos(eLand l) {
   if(l == laOcean || l == laTemple) return false;
-  return 
-    isCrossroads(l) || isCyclic(l) || isHaunted(l) || 
+  return
+    isCrossroads(l) || isCyclic(l) || isHaunted(l) ||
     l == laCaribbean || isGravityLand(l) || l == laPrincessQuest ||
     l == laPrairie || l == laHalloween;
   } */
@@ -355,7 +355,7 @@ EX eLand getNewSealand(eLand old) {
 EX bool createOnSea(eLand old) {
   return
     old == laWarpSea || old == laCaribbean || old == laKraken ||
-    (old == laLivefjord && hrand(2)) || 
+    (old == laLivefjord && hrand(2)) ||
     (old == laDocks && hrand(2)) ||
     (old == laOcean && (ls::any_chaos() ? hrand(2) : !generatingEquidistant));
   }
@@ -368,9 +368,9 @@ EX eLand getNewLand(eLand old) {
 
   eLand l = callhandlers(laNone, hooks_nextland, old);
   if(l) return l;
-  
+
   if(cheatdest != old) if(!isCyclic(cheatdest) && !isTechnicalLand(cheatdest)) return cheatdest;
-  
+
   if(old == laTortoise) return laDragon;
 
   if(yendor::on && ls::any_chaos()) {
@@ -397,13 +397,13 @@ EX eLand getNewLand(eLand old) {
     }
 
   if(randomPatternsMode) return pickLandRPM(old);
-  
+
   if(old == laEEarth && lchance(old)) return hrand(2) ? laEWater : laEFire;
   if(old == laEAir   && lchance(old)) return hrand(2) ? laEWater : laEFire;
   if(old == laEWater && lchance(old)) return hrand(2) ? laEEarth : laEAir;
   if(old == laEFire  && lchance(old)) return hrand(2) ? laEEarth : laEAir;
 
-  #if CAP_RACING  
+  #if CAP_RACING
   if(racing::on && old != laElementalWall) {
     eLand l = old;
     using racing::race_lands;
@@ -424,33 +424,33 @@ EX eLand getNewLand(eLand old) {
 
   if(yendor::on && yendor::nexttostart) {
     eLand l = yendor::nexttostart;
-    if(!(yendor::clev().flags & YF_REPEAT)) 
+    if(!(yendor::clev().flags & YF_REPEAT))
       yendor::nexttostart = laNone;
     return l;
     }
-  
+
   if(old == laDragon && tortoise::seek() && hrand(100) < 50)
     return laTortoise;
-  
+
   if(isWarpedType(old) && (hrand(100) < 25) && ls::std_chaos()) return eLand(old ^ laWarpCoast ^ laWarpSea);
 
-  if(createOnSea(old)) 
+  if(createOnSea(old))
       return getNewSealand(old);
 
   if(old == laGraveyard && generatingEquidistant)
     return laHaunted;
-  
-  if(old == laOcean && gold() >= R60 && hrand(100) < 75 && !rlyehComplete() && !all_unlocked) 
+
+  if(old == laOcean && gold() >= R60 && hrand(100) < 75 && !rlyehComplete() && !all_unlocked)
     return laRlyeh;
-    
+
   if(old == laRlyeh && !rlyehComplete() && !all_unlocked)
     return laOcean;
-    
+
   eLand tab[16384];
   int cnt = 0;
-  
+
   // return (hrand(2)) ? laMotion : laJungle;
-  
+
   for(eLand l: {
     laCrossroads, laIce, laDesert, laJungle, laMotion, laHunting, laAlchemist, laCaves,
     laMinefield, laPalace, laReptile, laSwitch, laBurial, laDungeon, laRuins, laZebra,
@@ -460,7 +460,7 @@ EX eLand getNewLand(eLand old) {
     laWet, laFrog, laEclectic, laCursed, laDice,
     laCrossroads5,
     })
-    if(landUnlocked(l)) tab[cnt++] = l;    
+    if(landUnlocked(l)) tab[cnt++] = l;
 
   struct clos {
     eLand l1;
@@ -468,8 +468,8 @@ EX eLand getNewLand(eLand old) {
     int f1;
     int f2;
     };
-  
-  for(clos c: { 
+
+  for(clos c: {
     clos{laZebra, laMotion, 2, 2}, {laZebra, laHunting, 2, 2},
     {laDragon, laReptile, 5, 5},
     {laVariant, laRuins, 5, 5}, {laVariant, laEmerald, 5, 5}, {laVariant, laGraveyard, 5, 5},
@@ -481,13 +481,13 @@ EX eLand getNewLand(eLand old) {
     {laDesert, laRedRock, 5, 5},
     {laFrog, laReptile, 2, 2}, {laFrog, laSwitch, 2, 2}, {laFrog, laZebra, 2, 2},
     {laEclectic, laStorms, 3, 3}, {laEclectic, laIce, 3, 3}, {laEclectic, laPalace, 3, 3}, {laEclectic, laDeadCaves, 3, 3},
-    
+
     {laEFire, laDragon, 5, 5}, {laEWater, laLivefjord, 5, 5}, {laEEarth, laDeadCaves, 5, 5}, {laEAir, laWhirlwind, 5, 5},
     }) {
     if(old == c.l1 && landUnlocked(c.l2)) for(int i=0; i<c.f1; i++) tab[cnt++] = c.l2;
     if(old == c.l2 && landUnlocked(c.l1)) for(int i=0; i<c.f2; i++) tab[cnt++] = c.l1;
     }
-  
+
   // these lands tend to crash while generating equidistant
   for(eLand l: {laIvoryTower, laEndorian, laWestWall})
     if(landUnlocked(l) && !generatingEquidistant)
@@ -510,7 +510,7 @@ EX eLand getNewLand(eLand old) {
     tab[cnt++] = laCrossroads;
     if(!generatingEquidistant) tab[cnt++] = laCrossroads2;
     if(all_unlocked || rlyehComplete()) tab[cnt++] = laRlyeh;
-    else if(ls::std_chaos() && (old == laWarpCoast || old == laLivefjord || old == laOcean)) 
+    else if(ls::std_chaos() && (old == laWarpCoast || old == laLivefjord || old == laOcean))
       tab[cnt++] = laRlyeh;
     if((all_unlocked || items[itStatue] >= U5) && ls::std_chaos())
       tab[cnt++] = laTemple;
@@ -527,7 +527,7 @@ EX eLand getNewLand(eLand old) {
     if(ls::std_chaos() && geometry) tab[cnt++] = laDual;
     if(ls::std_chaos() && geosupport_threecolor()) tab[cnt++] = laSnakeNest;
     }
-  
+
   if(landUnlocked(laTrollheim)) {
     if(isTrollLand(old)) LIKELY tab[cnt++] = laTrollheim;
     if(old == laTrollheim) for(int i=0; i<landtypes; i++) {
@@ -537,42 +537,42 @@ EX eLand getNewLand(eLand old) {
     }
 
   if(landUnlocked(laElementalWall)) {
-    tab[cnt++] = randomElementalLandWeighted();    
+    tab[cnt++] = randomElementalLandWeighted();
     }
-  
+
   if(landUnlocked(laHell)) {
     if(!generatingEquidistant && old != laPrairie) tab[cnt++] = laCrossroads3;
     }
-  
+
   if(items[itHell] >= U10) {
     if(old == laCrossroads || old == laCrossroads2) tab[cnt++] = laOcean;
     if(old == laOcean) tab[cnt++] = laCrossroads2;
     }
-  
+
   eLand n = old;
   while(incompatible(n, old) || !isLandIngame(n)) {
     n = tab[hrand(cnt)];
     if(weirdhyperbolic && specialland == laCrossroads4 && isCrossroads(n))
       n = laCrossroads4;
     }
-  
-  return n;  
+
+  return n;
   }
 
 EX vector<eLand> land_over = {
-  laIce, laCaves, laDesert, laHunting, laMotion, laJungle, laAlchemist, 
-  laCrossroads, 
+  laIce, laCaves, laDesert, laHunting, laMotion, laJungle, laAlchemist,
+  laCrossroads,
   laMirror, laMirrorOld, laMinefield, laPalace, laPrincessQuest, laZebra, laSwitch, laReptile, laWet,
   laOcean, laDocks, laWarpCoast, laLivefjord, laKraken, laCaribbean, laBrownian, laWhirlpool, laRlyeh, laTemple,
-  laIvoryTower, laEndorian, laWestWall, laDungeon, laMountain, 
-  laCrossroads2, 
-  laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive, 
+  laIvoryTower, laEndorian, laWestWall, laDungeon, laMountain,
+  laCrossroads2,
+  laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive,
   laRedRock, laVolcano,
   laDragon, laTortoise, laDice,
-  laOvergrown, laClearing, laStorms, laBurial, laWhirlwind, 
+  laOvergrown, laClearing, laStorms, laBurial, laWhirlwind,
   laBlizzard,
   laFrog, laEclectic, laCursed,
-  laRuins, laEmerald, laVariant, laCamelot, 
+  laRuins, laEmerald, laVariant, laCamelot,
   laPrairie, laBull, laTerracotta, laRose,
   laElementalWall, laTrollheim,
   laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
@@ -586,7 +586,7 @@ EX vector<eLand> landlist;
 #if HDR
 template<class T> void generateLandList(T t) {
   landlist.clear();
-  for(auto l: land_over) if(t(l)) landlist.push_back(l);    
+  for(auto l: land_over) if(t(l)) landlist.push_back(l);
   }
 #endif
 
@@ -636,43 +636,43 @@ namespace lv {
   flagtype q3 = lv::appears_in_geom_exp | lv::appears_in_full | lv::display_in_help | lv::appears_in_ptm;
   flagtype qm2= q2 | lv::display_error_message;
   flagtype qm3= q3 | lv::display_error_message;
-  
+
   land_validity_t hedgehogs = { 1, qm2 &~ lv::appears_in_full, "Cannot kill Hedgehog Warriors in this geometry."};
 
-  land_validity_t no_randpattern_version = { 0, q0, "No random pattern version."};  
-  land_validity_t no_great_walls = { 0, q0, "Great Walls not implemented."};  
-  land_validity_t pattern_incompatibility = { 0, q0, "Pattern incompatible."};  
+  land_validity_t no_randpattern_version = { 0, q0, "No random pattern version."};
+  land_validity_t no_great_walls = { 0, q0, "Great Walls not implemented."};
+  land_validity_t pattern_incompatibility = { 0, q0, "Pattern incompatible."};
   land_validity_t pattern_not_implemented_random = { 1, q1 | one_and_half, "Pattern not implemented -- using random."};
   land_validity_t pattern_not_implemented_weird = { 1, q1, "Pattern not implemented."};
   land_validity_t pattern_not_implemented_exclude = { 1, q1 & ~ lv::appears_in_full, "Pattern not implemented."};
-  land_validity_t not_enough_space = { 0, q0, "Not enough space."};  
+  land_validity_t not_enough_space = { 0, q0, "Not enough space."};
   land_validity_t dont_work = { 0, q0, "Does not work in this geometry."};
   land_validity_t bounded_only = { 0, q0, "This land is designed for bounded worlds."};
-  land_validity_t unbounded_only = { 0, q0, "This land is designed for infinite worlds."};                                   
+  land_validity_t unbounded_only = { 0, q0, "This land is designed for infinite worlds."};
   land_validity_t unbounded_only_except_bigsphere = { 0, q0, "This land is designed for infinite worlds or big spheres."};
   land_validity_t out_of_theme = { 3, qm2 &~ lv::appears_in_full, "Out of theme for the full game."};
-  land_validity_t no_game = { 2, q2 &~ lv::appears_in_full, "No game here."};  
-  land_validity_t not_in_chaos = { 0, q0, "Does not work in chaos mode."};  
+  land_validity_t no_game = { 2, q2 &~ lv::appears_in_full, "No game here."};
+  land_validity_t not_in_chaos = { 0, q0, "Does not work in chaos mode."};
   land_validity_t not_in_full_game = {2, qm2 &~ lv::appears_in_full, "Not in the full game."};
   land_validity_t not_in_full_game3 = {3, qm2 &~ lv::appears_in_full, "Not in the full game."};
   land_validity_t special_chaos = { 2, qm2, "Special construction in the Chaos mode." };
-  land_validity_t special_euclidean = { 2, qm2, "Special construction in the Euclidean mode." };  
+  land_validity_t special_euclidean = { 2, qm2, "Special construction in the Euclidean mode." };
   land_validity_t special_geo = { 2, qm2, "Special construction in this geometry." };
   land_validity_t special_geo3 = { 3, qm2, "Special construction in this geometry." };
-  land_validity_t not_implemented = {0, q0, "Not implemented."};  
-  land_validity_t partially_implemented = {1, q1 | one_and_half, "Partially implemented."};  
-  land_validity_t ok = {2, q2 &~ lv::display_in_help, "No comments."};  
-  land_validity_t not_in_ptm = {0, q0, "Does not work in pure tactics mode."};  
-  land_validity_t technical = {0, q0 &~ lv::appears_in_geom_exp, "Technical."};  
+  land_validity_t not_implemented = {0, q0, "Not implemented."};
+  land_validity_t partially_implemented = {1, q1 | one_and_half, "Partially implemented."};
+  land_validity_t ok = {2, q2 &~ lv::display_in_help, "No comments."};
+  land_validity_t not_in_ptm = {0, q0, "Does not work in pure tactics mode."};
+  land_validity_t technical = {0, q0 &~ lv::appears_in_geom_exp, "Technical."};
   land_validity_t full_game = {3, q3 &~ lv::display_in_help, "Full game."};
   land_validity_t inaccurate = {1, q1, "Somewhat inaccurate."};
   land_validity_t great_walls_missing = {1, q1 | one_and_half, "Mercury rivers not implemented (or could not work) in this geometry."};
-  land_validity_t pattern_compatibility = {3, qm3, "Patterns compatible."}; 
-  land_validity_t pattern_defined = {3, qm3, "Pattern defined."}; 
-  land_validity_t pattern_compatibility_notrec = {2, qm2, "Patterns compatible."}; 
-  land_validity_t specially_designed = {3, qm3, "This land is specially designed for this geometry."};   
-  land_validity_t needs_threecolor = {0, q0, "Three-colorability required."};  
-  land_validity_t land_not_implemented = {0, q0 &~ lv::appears_in_geom_exp, "Land not implemented."};  
+  land_validity_t pattern_compatibility = {3, qm3, "Patterns compatible."};
+  land_validity_t pattern_defined = {3, qm3, "Pattern defined."};
+  land_validity_t pattern_compatibility_notrec = {2, qm2, "Patterns compatible."};
+  land_validity_t specially_designed = {3, qm3, "This land is specially designed for this geometry."};
+  land_validity_t needs_threecolor = {0, q0, "Three-colorability required."};
+  land_validity_t land_not_implemented = {0, q0 &~ lv::appears_in_geom_exp, "Land not implemented."};
   land_validity_t interesting = {3, q3, "Special interest."};
   land_validity_t better_version_exists = {0, q0, "Better version exists."};
   land_validity_t dont_work_but_ingame = {1, q0 | lv::appears_in_full, "Does not work in this geometry."};
@@ -684,15 +684,15 @@ namespace lv {
   land_validity_t known_buggy = {1, q1, "This combination is known to be buggy at the moment."};
   land_validity_t sloppy_pattern = {1, q1 | one_and_half, "Somewhat sloppy pattern."};
   land_validity_t no_fractal_landscapes = {1, q1 | one_and_half, "Fractal landscapes not implemented in this geometry."};
-  land_validity_t simplified_walls = { 1, q1, "Only simplified walls implemented."};  
-  land_validity_t no_walls = { 0, q0, "No walls implemented."};  
+  land_validity_t simplified_walls = { 1, q1, "Only simplified walls implemented."};
+  land_validity_t no_walls = { 0, q0, "No walls implemented."};
   land_validity_t disabled = {0, q0, "This land has been disabled with compilation flags."};
-  land_validity_t pattern_special = {3, qm3, "Special pattern implemented for this geometry."}; 
-  land_validity_t not_3d = {0, q0, "This land does not make much sense in 3D."}; 
-  land_validity_t not_binary = {0, q0, "This land does not make much sense in binary tiling."}; 
-  land_validity_t shmup_only = {0, q0, "This land works only in the shmup mode."}; 
-  land_validity_t not_in_shmup = {0, q0, "This land is not available in the shmup mode."}; 
-  land_validity_t not_in_multi = {0, q0, "This land is not available in multiplayer."}; 
+  land_validity_t pattern_special = {3, qm3, "Special pattern implemented for this geometry."};
+  land_validity_t not_3d = {0, q0, "This land does not make much sense in 3D."};
+  land_validity_t not_binary = {0, q0, "This land does not make much sense in binary tiling."};
+  land_validity_t shmup_only = {0, q0, "This land works only in the shmup mode."};
+  land_validity_t not_in_shmup = {0, q0, "This land is not available in the shmup mode."};
+  land_validity_t not_in_multi = {0, q0, "This land is not available in multiplayer."};
   }
 
 // old Daily Challenges should keep their validity forever
@@ -713,31 +713,31 @@ EX land_validity_t& land_validity(eLand l) {
   if(euclid && quotient) stdeucx = false;
 
   using namespace lv;
-  
+
   if(l == laDice && geometry == gNormal && PURE)
     return dont_work;
 
   if(l == laDice && WDIM == 3)
     return dont_work;
-  
+
   if(old_daily_id < frog_when && among(l, laFrog, laEclectic, laWet))
     return not_implemented;
 
   if(old_daily_id < cursed_when && among(l, laCursed, laDice))
     return not_implemented;
-  
+
   if(arb::in() && among(l, laWarpCoast, laDual, laEclectic, laReptile, laKraken))
     return not_implemented;
-  
+
   if(l == laEclectic && !(geometry == gNormal && BITRUNCATED))
     return pattern_not_implemented_weird;
-  
+
   if(l == laFrog && shmup::on)
     return not_in_shmup;
 
   if(walls_not_implemented() && isCrossroads(l))
     return no_walls;
-  
+
   if(hybri || hybrid::pmap) {
     if(among(l, laPrincessQuest, laPrairie, laMirrorOld, laMirror, laDual, laWarpCoast, laKraken, laBrownian, laWhirlpool, laWestWall, laHive, laClearing, laWhirlwind, laBlizzard, laBull, laTerracotta, laCrossroads5,
       laEndorian, laDungeon, laMountain))
@@ -750,7 +750,7 @@ EX land_validity_t& land_validity(eLand l) {
       return *PIU(&land_validity(l));
       }
     }
-  
+
   #if !CAP_FIELD
   if(among(l, laPrairie, laBlizzard, laVolcano))
     return disabled;
@@ -763,13 +763,13 @@ EX land_validity_t& land_validity(eLand l) {
 
   if(l == laMinefield && bounded)
     return special_geo3;
-  
+
   if(l == laAsteroids) {
     if(!shmup::on) return shmup_only;
     if(!bounded) return bounded_only;
     return specially_designed;
     }
-  
+
   if(nil) {
     if(among(l, laCrossroads, laCrossroads2, laCrossroads3, laCrossroads4))
       return lv::full_game;
@@ -794,11 +794,11 @@ EX land_validity_t& land_validity(eLand l) {
     if(l == laBurial && !shmup::on) return not_implemented;
     if(l == laMirrorOld && !shmup::on) return not_implemented;
     }
-  
+
   if(l == laBrownian) {
     if(quotient || !hyperbolic || cryst) return dont_work;
     }
-  
+
   if(bt::in()) {
     if(among(l, laMountain, laTemple)) return lv::pattern_compatibility;
     if(among(l, laDungeon, laIvoryTower, laOcean, laEndorian)) return lv::pattern_compatibility;
@@ -806,7 +806,7 @@ EX land_validity_t& land_validity(eLand l) {
     // Clearing -- does not generate
     /* laCamelot, laCaribbean -> they are OK but not recommended */
     }
-  
+
   #if CAP_ARCM
   if(arcm::in()) {
     if(among(l, laPower, laZebra, laFrog, laWineyard) && arcm::current.have_line) return lv::pattern_defined;
@@ -840,25 +840,25 @@ EX land_validity_t& land_validity(eLand l) {
     if(sphere && S3 != 3 && GOLDBERG)
       return special_geo3;
     }
-  
+
   // not enough space
-  if(l == laStorms && (old_daily_id < 35 ? !BITRUNCATED : PURE) && elliptic) 
+  if(l == laStorms && (old_daily_id < 35 ? !BITRUNCATED : PURE) && elliptic)
     return not_enough_space;
-  
+
   if(l == laStorms && WDIM == 3)
     return not_in_full_game; /* uses too much memory */
 
-  if(l == laStorms && S7 == 3) 
+  if(l == laStorms && S7 == 3)
     return not_enough_space;
-  
+
   // does not agree with the pattern
-  if(l == laStorms && quotient && geometry != gZebraQuotient) 
+  if(l == laStorms && quotient && geometry != gZebraQuotient)
     return pattern_not_implemented_random;
-  
+
   // pattern not implemented
-  if(l == laStorms && S7 == 8) 
+  if(l == laStorms && S7 == 8)
     return pattern_not_implemented_random;
-  
+
   // mirrors do not work in gp
   if(among(l, laMirror, laMirrorOld) && (GOLDBERG && old_daily_id < 33))
     return dont_work;
@@ -866,7 +866,7 @@ EX land_validity_t& land_validity(eLand l) {
   // mirrors do not work in kite and sol
   if(among(l, laMirror, laMirrorOld) && (kite::in() || sol))
     return dont_work;
-  
+
   if(isCrossroads(l) && geometry == gBinary4)
     return not_implemented;
 
@@ -879,48 +879,48 @@ EX land_validity_t& land_validity(eLand l) {
   // available only in non-standard geometries
   if(l == laMirrorOld && !geometry && STDVAR)
     return better_version_exists;
-  
+
   // available only in standard geometry
   if(l == laMirror && (geometry || NONSTDVAR))
-    return not_implemented; 
-  
+    return not_implemented;
+
   // Halloween needs bounded world (can be big bounded)
   if(l == laHalloween && !bounded)
     return bounded_only;
-  
+
   // Crystal World is designed for nice_dual geometries
   if(l == laDual && (!has_nice_dual() || nonisotropic))
     return dont_work;
-  
+
   if(l == laHaunted && ls::std_chaos())
     return not_in_chaos;
-  
+
   // standard, non-PTM specific
   if(l == laCrossroads5 && old_daily_id < 999 && tactic::on)
     return not_in_ptm;
-    
+
   // standard non-PTM non-chaos specific
   if((l == laCrossroads5 || l == laCrossroads2) && (geometry || ls::any_chaos() || ls::no_walls()))
     return some0;
-    
+
   // special construction in the Chaos mode
   if(ls::any_chaos() && (l == laTemple || l == laHive || l == laOcean || l == laHaunted))
     return special_chaos;
-  
+
   if(l == laWhirlpool && a4)
     return dont_work;
 
   if(isWarpedType(l) && a4 && GOLDBERG)
     return dont_work;
-  
+
   #if CAP_IRR
   if((isWarpedType(l) || l == laDual) && IRREGULAR && !irr::bitruncations_performed)
     return dont_work;
-  
+
   if(IRREGULAR && among(l, laPrairie, laMirror, laMirrorOld))
     return dont_work;
   #endif
-    
+
   if(arcm::in() && l == laPrairie) return dont_work;
 
   if((IRREGULAR || arcm::in()) && among(l, laBlizzard, laVolcano) && !sphere)
@@ -928,14 +928,14 @@ EX land_validity_t& land_validity(eLand l) {
 
   if(arcm::in() && DUAL && l == laCrossroads4)
     return not_implemented;
-  
+
   if(geometry == gKiteDart3 && l == laGraveyard)
     return lv::pattern_special;
-  
+
   // equidistant-based lands
   if(isEquidLand(l)) {
     // no equidistants supported in chaos mode
-    if(ls::any_chaos()) 
+    if(ls::any_chaos())
       return not_in_chaos;
     // the algorithm fails in Archimedean DUAL
     if(arcm::in() && DUAL)
@@ -950,22 +950,22 @@ EX land_validity_t& land_validity(eLand l) {
     if(l == laEndorian && geometry)
       return not_implemented;
     // special Euclidean implementations
-    if(euclid && (l == laIvoryTower || l == laMountain || l == laOcean || l == laMountain)) 
+    if(euclid && (l == laIvoryTower || l == laMountain || l == laOcean || l == laMountain))
       return special_geo;
     // in other geometries, it works
     if(geometry)
       return ok;
     }
-  
+
   if(l == laPrincessQuest && ls::any_chaos())
     return not_in_chaos;
-   
+
   if(l == laPrincessQuest && tactic::on)
     return not_in_ptm;
-    
+
   if(l == laPrincessQuest && (!stdeucx || NONSTDVAR))
     return not_implemented;
-  
+
   if(l == laPrincessQuest && shmup::on)
     return not_in_shmup;
 
@@ -974,14 +974,14 @@ EX land_validity_t& land_validity(eLand l) {
 
   if(l == laMountain && ls::any_chaos())
     return not_in_chaos;
-  
+
   if(l == laBrownian && ls::any_chaos())
     return not_in_chaos;
-  
+
   // works correctly only in some geometries
   if(l == laClearing && ls::any_chaos())
     return not_in_chaos;
-  
+
   if(l == laClearing)
     if(!(stdeucx || geometry == gBinaryTiling || a38 || (a45 && BITRUNCATED) || (a47 && BITRUNCATED)) || NONSTDVAR)
     if(!bounded)
@@ -994,11 +994,11 @@ EX land_validity_t& land_validity(eLand l) {
   // does not work in bounded either
   if(l == laOvergrown && bounded)
     return some0;
-  
+
   // horocycle-based lands, not available in bounded geometries nor in Chaos mode
   if(l == laWhirlpool || l == laCamelot || l == laCaribbean || l == laTemple || l == laHive) {
     if(ls::any_chaos()) {
-      if(l == laTemple || l == laHive) 
+      if(l == laTemple || l == laHive)
         return special_chaos;
       return not_in_chaos;
       }
@@ -1006,14 +1006,14 @@ EX land_validity_t& land_validity(eLand l) {
     if(bounded) return unbounded_only;
     if(INVERSE) return not_implemented;
     }
-  
+
   if(ls::any_chaos() && isCrossroads(l))
     return not_in_chaos;
-  
+
   // this pattern does not work on elliptic and small spheres
   if((l == laBlizzard || l == laVolcano) && elliptic && S7 < 5 && !arcm::in())
     return not_enough_space;
-  
+
   // ... and it works in gp only partially
   if((l == laBlizzard || l == laVolcano) && GOLDBERG && (old_daily_id < 33 || !sphere))
     return partially_implemented;
@@ -1024,7 +1024,7 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laKraken && (S7&1) && !has_nice_dual()) {
     return dont_work_but_ingame;
     }
-  
+
   // works in most spheres, Zebra quotient, and stdeucx
   if(l == laWhirlwind) {
     if(geometry == gZebraQuotient)
@@ -1034,15 +1034,15 @@ EX land_validity_t& land_validity(eLand l) {
     else if(bigsphere && !BITRUNCATED && !elliptic) return special_geo;
     else return dont_work;
     }
-    
+
   // needs standard/Euclidean (needs fractal landscape)
   if(among(l, laTortoise, laVariant) && !(old_daily_id < landscapes_when ? stdeucx : geometry_supports_cdata()))
     return not_implemented;
-  
+
   // technical lands do not count
   if(l != laCA && isTechnicalLand(l))
     return technical;
-  
+
   // only in bounded geometry, and not in PTM
   if(l == laCA && !bounded)
     return bounded_only;
@@ -1052,11 +1052,11 @@ EX land_validity_t& land_validity(eLand l) {
 
   if(l == laCA)
     return no_game;
-  
+
   // Dragon Chasm requires unbounded space [partial]
   if(l == laDragon && smallbounded)
     return unbounded_only;
-  
+
   // Graveyard pattern does not work on non-bitrunc weird geometries
   if((l == laGraveyard && !randomPatternsMode) || l == laRuins || l == laRedRock) switch(geosupport_football()) {
     case 0:
@@ -1065,17 +1065,17 @@ EX land_validity_t& land_validity(eLand l) {
       return sloppy_pattern;
     default: ;
     }
-  
+
   // Warped Coast does not work on non-bitrunc S3s (except standard heptagonal where we have to keep it)
   if(l == laWarpCoast && (S3==3) && geosupport_football() != 2 && !(old_daily_id >= 33 && geosupport_chessboard())) {
     return ugly_version_infull;
     }
 
-  if(l == laWarpCoast && quotient && geometry != gZebraQuotient && !randomPatternsMode) 
+  if(l == laWarpCoast && quotient && geometry != gZebraQuotient && !randomPatternsMode)
     return pattern_incompatibility;
-  
+
   if(among(l, laEmerald, laCamelot, laDryForest) && valence() != 3 && old_daily_id >= 65)
-    return hedgehogs;  
+    return hedgehogs;
 
   // laPower and laEmerald and laPalace -> [partial] in quotients and hyperbolic_non37
   if((l == laPower || l == laEmerald || l == laPalace || l == laWildWest) && !randomPatternsMode) {
@@ -1086,21 +1086,21 @@ EX land_validity_t& land_validity(eLand l) {
     }
 
   if(among(l, laEmerald, laCamelot, laDryForest) && valence() != 3)
-    return hedgehogs;  
+    return hedgehogs;
 
   if(l == laWineyard && sol)
     return lv::pattern_special;
-  
+
   // ... wineyard pattern is GOOD only in the standard geometry or Euclidean
   if(l == laWineyard && (NONSTDVAR || sphere) && !randomPatternsMode)
     return pattern_not_implemented_random;
 
   if(l == laTrollheim && quotient == qFIELD)
     return not_enough_space;
-      
+
   if(l == laStorms && hyperbolic_not37)
     return pattern_not_implemented_random;
-  
+
   if(l == laTrollheim && !stdeucx && !bounded)
     return some1;
 
@@ -1111,7 +1111,7 @@ EX land_validity_t& land_validity(eLand l) {
       if(l == laReptile && (a38 || a4 || sphere || !BITRUNCATED || (quotient && !euclid && geometry != gZebraQuotient)))
         return bad_graphics;
       }
-    else {  
+    else {
       bool reptile_good = false;
       if(hyperbolic_37 && BITRUNCATED) reptile_good = true;
       if(euc::in(2,6)) reptile_good = true;
@@ -1124,10 +1124,10 @@ EX land_validity_t& land_validity(eLand l) {
 
   if((l == laDragon || l == laReptile) && !stdeucx && !smallbounded && !randomPatternsMode)
     return no_fractal_landscapes;
-  
-  if(l == laCrossroads && smallsphere) 
+
+  if(l == laCrossroads && smallsphere)
     return not_enough_space;
-  
+
   if(l == laCrossroads3 && !stdeucx && !bigsphere)
     return not_enough_space;
 
@@ -1138,16 +1138,16 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laCrossroads4 && weirdhyperbolic && !quotient)
     return full_game;
 
-  // OK in small bounded worlds, and in Euclidean  
+  // OK in small bounded worlds, and in Euclidean
   if(l == laCrossroads4 && quotient)
     return some0;
 
   if(among(l, laZebra, laFrog) && quotient && geometry != gZebraQuotient && !randomPatternsMode)
     return pattern_incompatibility;
-  
+
   if(among(l, laZebra, laFrog) && !(stdeucx || (a4 && !BITRUNCATED) || a46 || (geometry == gZebraQuotient && old_daily_id > 106)) && !randomPatternsMode)
     return pattern_not_implemented_weird;
-  
+
   if(l == laCrossroads3 && euclid)
     return inaccurate; // because it is not accurate
 
@@ -1157,48 +1157,48 @@ EX land_validity_t& land_validity(eLand l) {
     else if(!bounded) return not_implemented;
     else return unbounded_only;
     }
-  
+
   if(l == laTerracotta && !stdeucx && !(bigsphere))
     return great_walls_missing;
 
   // highlight Crossroads on Euclidean
   if(euclid && !quotient && (l == laCrossroads || l == laCrossroads4) && !kite::in())
-    return full_game; 
+    return full_game;
 
   if(sol && among(l, laCrossroads, laCrossroads4))
-    return full_game; 
-  
+    return full_game;
+
   if(sol && l == laCamelot)
     return not_implemented;
 
   if(euclid && quotient && !bounded && l == laCrossroads && euc::sdxy().second == -2 * euc::sdxy().first)
     return full_game;
-  
+
   if(euclid && quotient && !bounded && l == laCrossroads4 && euc::sdxy().second == 0)
     return full_game;
-  
+
   // highlight Zebra-based lands on Zebra Quotient!
   if(among(l, laZebra, laWhirlwind, laStorms, laWarpCoast, laWarpSea, laFrog) && geometry == gZebraQuotient)
     return pattern_compatibility;
-  
+
   // highlight FP-based lands on Field Quotient!
   if((l == laPrairie || l == laVolcano || l == laBlizzard) && geometry == gFieldQuotient)
-    return pattern_compatibility; 
+    return pattern_compatibility;
 
   // highlight Docks-based lands on Bolza and Bolza x2!
   if(l == laDocks && among(geometry, gBolza, gBolza2))
-    return pattern_compatibility; 
-  
+    return pattern_compatibility;
+
   // these are highlighted whenever allowed
   if(l == laHalloween)
     return specially_designed;
 
   if(l == laDual && geosupport_threecolor() == 2)
     return specially_designed;
-  
+
   if(l == laDual && !geometry && !GOLDBERG)
     return hyperbolic_37 ? not_in_full_game3 : not_in_full_game;
-  
+
   if(l == laSnakeNest && WDIM == 2) {
     if(geosupport_threecolor() < 2)
       return needs_threecolor;
@@ -1210,10 +1210,10 @@ EX land_validity_t& land_validity(eLand l) {
     if(a38 && !nonisotropic) return pattern_not_implemented_weird;
     return pattern_not_implemented_exclude;
     }
-  
-  if(l == laStorms && euclid && bounded) 
+
+  if(l == laStorms && euclid && bounded)
     return interesting;
-  
+
   if(l == laMagnetic)
     return land_not_implemented;
 
@@ -1223,7 +1223,7 @@ EX land_validity_t& land_validity(eLand l) {
   // these don't appear in normal game, but do appear in special modes
   if(l == laWildWest && !randomPatternsMode)
     return out_of_theme;
-  
+
   if(l == laIce && STDVAR && hyperbolic_37 && !quotient && !arcm::in() && !bt::in())
     return full_game;
 
@@ -1245,7 +1245,7 @@ int checkLands() {
     for(int i=0; i<LAND_OCT; i++) if(land_oct[i] == l) inoct = 'Y';
     char intac = 'N';
     for(auto ti: land_tac) if(l == ti.l) intac = 'Y';
-    printf("%c %c %c %c %c %c %c :: %s\n", 
+    printf("%c %c %c %c %c %c %c :: %s\n",
       isTechnicalLand(l) ? 'T' : 'R',
       inover, ineuc, insph, inoct, intac, noChaos(l) ? 'N' : 'Y', linf[i].name);
     }

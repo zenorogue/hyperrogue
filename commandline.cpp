@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- commandline options
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-/** \file commandline.cpp 
+/** \file commandline.cpp
  *  \brief Commandline options support
  */
 
@@ -81,9 +81,9 @@ EX namespace arg {
   EX void shift() {
     lshift(); if(pos >= isize(argument)) { printf("Missing parameter\n"); exit(1); }
     }
-  
+
   EX bool nomore() { return pos >= isize(argument); }
-  
+
   EX const string& args() { return argument[pos]; }
   EX const char* argcs() { return args().c_str(); }
   EX int argi() { return atoi(argcs()); }
@@ -92,7 +92,7 @@ EX namespace arg {
   EX const string& shift_args() { shift(); return args(); }
 
   EX unsigned arghex() { return strtoll(argcs(), NULL, 16); }
-  EX ld argf() { 
+  EX ld argf() {
     try {
       return parseld(args());
       }
@@ -102,15 +102,15 @@ EX namespace arg {
       }
     }
   EX bool argis(const string& s) { if(args()[0] == '-' && args()[1] == '-') return args().substr(1) == s; return args() == s; }
-  
+
   EX void shift_arg_formula(ld& x, const reaction_t& r IS(reaction_t())) {
-    shift(); ld old = x; x = argf(); 
+    shift(); ld old = x; x = argf();
     #if CAP_ANIMATIONS
-    anims::animate_parameter(x, args(), r); 
+    anims::animate_parameter(x, args(), r);
     #endif
     if(old != x && r) r();
     }
-  
+
   #if HDR
 
   // an useful macro
@@ -125,16 +125,16 @@ EX namespace arg {
   #endif
 
   EX void cheat() { autocheat = true; cheater++; timerghost = false; }
-  
+
   EX void init(int argc, char **argv) { for(int i=0; i<argc; i++) argument.push_back(argv[i]); lshift(); }
- 
+
   EX void phaseerror(int x) {
     printf("Command line error: cannot read command '%s' from phase %d in phase %d\n", args().c_str(), x, curphase);
     exit(1);
     }
 
   bool dialog_launched = false;
-  
+
   EX void launch_dialog(const reaction_t& r IS(reaction_t())) {
     if(!dialog_launched) {
       popScreenAll();
@@ -145,7 +145,7 @@ EX namespace arg {
     }
 
   EX int readCommon();
-  EX int readLocal();  
+  EX int readLocal();
   EX void read(int phase);
 EX }
 
@@ -163,10 +163,10 @@ int arg::readCommon() {
 #endif
 #endif
 
-  else if(argis("-test-ach")) 
+  else if(argis("-test-ach"))
     test_achievements = true;
 
-  else if(argis("-test")) 
+  else if(argis("-test"))
     callhooks(hooks_tests);
   else if(argis("-offline")) {
     PHASE(1);
@@ -176,7 +176,7 @@ int arg::readCommon() {
     debugflags &=~ DF_TIME;
     }
   else if(argis("-debf")) {
-    shift(); 
+    shift();
     string s = args();
     for(char c: s) {
       for(int i=0; i<int(strlen(DF_KEYS)); i++) {
@@ -196,20 +196,20 @@ int arg::readCommon() {
         }
       else if(c == '+') {
         if(debugfile) fclose(debugfile);
-        shift(); 
+        shift();
         println(hlog, "writing to ", argcs());
-        debugfile = fopen(argcs(), "at");  
+        debugfile = fopen(argcs(), "at");
         }
       else if(c == '@') {
         if(debugfile) fclose(debugfile);
-        shift(); 
+        shift();
         println(hlog, "writing to ", argcs());
-        debugfile = fopen(argcs(), "wt");  
+        debugfile = fopen(argcs(), "wt");
         }
       }
     }
   else if(argis("-run")) {
-    PHASE(3); 
+    PHASE(3);
     start_game();
     mainloop(); quitmainloop = false;
     }
@@ -298,30 +298,30 @@ int arg::readCommon() {
     }
   else if(argis("-L")) {
     printf("Treasures:\n");
-    for(int i=1; i<ittypes; i++) 
+    for(int i=1; i<ittypes; i++)
       if(itemclass(eItem(i)) == IC_TREASURE)
         printf("    %s\n", iinf[i].name);
     printf("\n");
     printf("Orbs:\n");
-    for(int i=1; i<ittypes; i++) 
+    for(int i=1; i<ittypes; i++)
       if(itemclass(eItem(i)) == IC_ORB)
         printf("    %s\n", iinf[i].name);
     printf("\n");
     printf("Other items:\n");
-    for(int i=1; i<ittypes; i++) 
+    for(int i=1; i<ittypes; i++)
       if(itemclass(eItem(i)) == IC_OTHER)
         printf("    %s\n", iinf[i].name);
     printf("\n");
     printf("Monsters:\n");
-    for(int i=1; i<motypes; i++) 
+    for(int i=1; i<motypes; i++)
       printf("    %s\n", minf[i].name);
     printf("\n");
     printf("Lands:\n");
-    for(int i=1; i<landtypes; i++) 
+    for(int i=1; i<landtypes; i++)
       printf("    %s\n", linf[i].name);
     printf("\n");
     printf("Walls:\n");
-    for(int i=0; i<walltypes; i++) 
+    for(int i=0; i<walltypes; i++)
       printf("    %s\n", winf[i].name);
     printf("\n");
     exit(0);
@@ -396,7 +396,7 @@ EX namespace arg {
       }
     return 1;
     }
-  
+
   EX int add_at(const string& s, int at, const reaction_t& r) {
     if(!added_commands) added_commands = new map<string, pair<int, reaction_t>> ();
     if(added_commands->count(s)) throw hr_exception("arg::add conflict");
@@ -409,8 +409,8 @@ EX namespace arg {
   EX int add3(const string& s, const reaction_t& r) { return add_at(s, 3, r); }
 
   auto ah = addHook(hooks_args, 0, readCommon) + addHook(hooks_args, 200, read_added_commands);
-  
-  void read(int phase) { 
+
+  void read(int phase) {
     curphase = phase;
     callhooks(hooks_config);
     while(pos < isize(argument)) {

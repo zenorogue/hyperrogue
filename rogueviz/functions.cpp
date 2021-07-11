@@ -17,7 +17,7 @@ hyperpoint xy_to_point(ld x, ld y) {
     return err;
   return hpxy(x, y);
   }
-  
+
 hyperpoint find_point(ld t) {
   exp_parser ep;
   auto &dict = ep.extra_params;
@@ -87,7 +87,7 @@ int editwhich = -1;
 
 void show_graph() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);  
+  gamescreen(0);
   dialog::init(XLAT("graph"));
   for(int i=0; i<isize(formula); i++) {
     if(editwhich == i) {
@@ -116,7 +116,7 @@ void show_graph() {
     };
   }
 
-void frame() { 
+void frame() {
   if(graphcolor) {
     hyperpoint h0 = find_point(0);
     hyperpoint h1 = find_point(1);
@@ -126,13 +126,13 @@ void frame() {
     }
   }
 
-#if CAP_COMMANDLINE  
+#if CAP_COMMANDLINE
 int readArgs() {
   using namespace arg;
-           
+
   if(0) ;
   else if(argis("-dgraph")) {
-    PHASE(3);    
+    PHASE(3);
     showstartmenu = false;
     pushScreen(show_graph);
     shift();
@@ -156,6 +156,6 @@ int readArgs() {
 
 auto xhook = addHook(hooks_args, 100, readArgs)
   + addHook(hooks_frame, 0, frame);
- 
+
 }
 }

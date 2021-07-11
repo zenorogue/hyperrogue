@@ -1,5 +1,5 @@
 // Copyright (C) 2018 Zeno and Tehora Rogue, see 'hyper.cpp' for details
-// this is a plugin which generates branched tilings for newconformist 
+// this is a plugin which generates branched tilings for newconformist
 // https://github.com/zenorogue/newconformist (see the option '-cvl')
 
 #include "../hyper.h"
@@ -46,22 +46,22 @@ void cvl_marker() {
 
 int readArgs() {
   using namespace arg;
-           
+
   if(0) ;
   else if(argis("-cvlbuild")) {
     PHASEFROM(3);
     start_game();
-    shift(); 
+    shift();
     fhstream f(argcs(), "rt");
     if(!f.f) { shift(); printf("failed to open file\n"); return 0; }
     int id;
-    lineinfo l0;    
+    lineinfo l0;
     scan(f, id, l0.plus_matrices, l0.minus_matrices);
     l0.locs.push_back(location{View, centerover});
     for(int i=1; i<l0.plus_matrices; i++)
       l0.locs.push_back(loc_multiply(l0.locs.back(), xpush(1)));
     lines[id] = std::move(l0);
-    
+
     while(true) {
       scan(f, id);
       println(hlog, "id=", id, ".");
@@ -108,5 +108,5 @@ int readArgs() {
 auto magichook = addHook(hooks_args, 100, readArgs) + addHook(hooks_frame, 100, cvl_marker);
 #endif
 
- 
+
 }

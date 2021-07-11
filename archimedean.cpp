@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- Archimedean Tilings
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-/** \file archimedean.cpp 
+/** \file archimedean.cpp
  *  \brief Archimedean tilings
  *
  *  These are tilings available in the 'Archimedean' option in Geometry Experiments; simpler Archimedean tilings are defined in other files.
@@ -24,7 +24,7 @@ struct archimedean_tiling {
   int coloring;
 
   string symbol;
-  
+
   vector<int> faces;
   vector<int> adj;
   vector<bool> invert;
@@ -36,7 +36,7 @@ struct archimedean_tiling {
 
   int repetition;
   int N;
-  
+
   bool regular;
 
   ld euclidean_angle_sum;
@@ -45,19 +45,19 @@ struct archimedean_tiling {
 
   vector<vector<pair<int, int>>> adjacent;
   vector<vector<pair<ld, ld>>> triangles;
-  
+
   void make_match(int a, int i, int b, int j);
   void prepare();
   void compute_sum();
   void compute_geometry();
-  
+
   void parse();
   void parse(string s) { symbol = s; parse(); }
 
   ld edgelength;
-  
+
   vector<ld> inradius, circumradius, alphas;
-  
+
   vector<vector<int>> matches;
   vector<int> periods;
   vector<int> tilegroup;
@@ -81,14 +81,14 @@ struct archimedean_tiling {
   void regroup();
   string world_size();
   void get_nom_denom(int& anom, int& adenom);
-  
+
   geometryinfo1& get_geometry(ld mul = 1);
   eGeometryClass get_class() { return get_geometry().kind; }
 
   bool get_step_values(int& steps, int& single_step);
 
   transmatrix adjcell_matrix(heptagon *h, int d);
-  
+
   ld scale();
   };
 #endif
@@ -189,13 +189,13 @@ void archimedean_tiling::prepare() {
     errors++;
     return;
     }
-    
+
   if(isize(nondigonal) == 2 && faces[0] != faces[1]) {
     errormsg = XLAT("invalid dihedron");
     errors++;
     return;
     }
-  
+
   for(int i=0; i<N; i++) {
     bool forward = false;
     int f = faces[i];
@@ -242,8 +242,8 @@ void archimedean_tiling::prepare() {
   adjacent.resize(M);
 
   have_symmetry = false;
-  for(int i=0; i<N; i++) if(invert[i]) have_symmetry = true;  
-  
+  for(int i=0; i<N; i++) if(invert[i]) have_symmetry = true;
+
   matches.resize(M);
   for(int i=0; i<M; i++) {
     matches[i].resize(M);
@@ -252,7 +252,7 @@ void archimedean_tiling::prepare() {
 
   periods.resize(M);
   for(int i=0; i<M; i++) periods[i] = i<2*N ? faces[i/2] : N;
-  
+
   for(int i=0; i<N; i++) {
     for(int oi=0; oi<1; oi++) {
       int at = (i+oi)%N;
@@ -275,7 +275,7 @@ void archimedean_tiling::prepare() {
     int ai = (i+1) % N;
     adjacent[2*N].emplace_back(2*N+int(invert[ai]), (2*adj[ai]+2*N-1) % (2*N));
     }
-  
+
   for(int d=0; d<=2*N; d+=2) {
     int s = isize(adjacent[d]);
     for(int i=0; i<s; i++) {
@@ -290,7 +290,7 @@ void archimedean_tiling::prepare() {
       if(orig.first & 1) orig.second = isize(adjacent[orig.first]) - 1 - orig.second;
       }
     }
-  
+
   if(debugflags & DF_GEOM) {
     for(int i=0; i<M; i++) {
       DEBB0(DF_GEOM, ("adjacent ", i, ":"));
@@ -309,7 +309,7 @@ void archimedean_tiling::prepare() {
       make_match(i, j, q.first, q.second);
       }
     }
-    
+
   /* verify all the triangles */
   for(int i=0; i<M; i++) {
     for(int j=0; j<isize(adjacent[i]); j++) {
@@ -335,7 +335,7 @@ void archimedean_tiling::prepare() {
       make_match(i, j, aa.first, aa.second);
       }
     }
-  
+
   regroup();
   }
 
@@ -367,11 +367,11 @@ void archimedean_tiling::regroup() {
         flags[i] |= sfLINE;
       }
     }
-  
+
   if(!have_ph) {
     for(int i=0; i<M; i++) if(tilegroup[i] == 0) flags[i] |= sfPH;
     }
-  
+
   if(debugflags & DF_GEOM) {
     for(int i=0; i<M; i+=(have_symmetry?1:2)) {
       DEBB(DF_GEOM, (format("tiling group of %2d: [%2d]%2d+Z%2d\n", i, tilegroup[i], groupoffset[i], periods[i])));
@@ -388,19 +388,19 @@ geometryinfo1& archimedean_tiling::get_geometry(ld mul) {
 void archimedean_tiling::compute_geometry() {
   ginf[gArchimedean].g = get_geometry();
   set_flag(ginf[gArchimedean].flags, qBOUNDED, get_class() == gcSphere);
-  
+
   DEBB(DF_GEOM, (format("euclidean_angle_sum = %f\n", float(euclidean_angle_sum))));
-  
+
   bool infake = fake::in();
-  
+
   dynamicval<eGeometry> dv(geometry, gArchimedean);
-  
+
   /* compute the geometry */
   inradius.resize(N+1); inradius[N] = 0;
   circumradius.resize(N+1); circumradius[N] = 0;
   alphas.resize(N);
   ld elmin = 0, elmax = hyperbolic ? 10 : sphere ? M_PI : 1;
-  
+
   ld total = M_PI;
 
   dynamicval<geometryinfo1> dgi(ginf[geometry].g, ginf[geometry].g);
@@ -409,9 +409,9 @@ void archimedean_tiling::compute_geometry() {
     total *= N / fake::around;
     ginf[geometry].g = get_geometry(fake::around / N);
     }
-  
+
   /* inradius[N] is used in farcorner and nearcorner. Probably a bug */
-  
+
   if(real_faces == 2) {
     /* standard methods fail for dihedra, but the answer is easy */
     edgelength = 2 * M_PI / faces[0];
@@ -434,18 +434,18 @@ void archimedean_tiling::compute_geometry() {
     }
   else for(int p=0; p<100; p++) {
     edgelength = (elmin + elmax) / 2;
-    
+
     ld alpha_total = 0;
 
     for(int i=0; i<N; i++) {
 
       ld gamma = M_PI / faces[i];
-      
+
       auto& c = circumradius[i];
 
       c = asin_auto(sin_auto(edgelength/2) / sin(gamma));
       inradius[i] = hdist0(mid(xpush0(circumradius[i]), xspinpush0(2*gamma, circumradius[i])));
-      
+
       hyperpoint h = xpush(c) * spin(M_PI - 2*gamma) * xpush0(c);
       ld a = atan2(h);
       cyclefix(a, 0);
@@ -453,31 +453,31 @@ void archimedean_tiling::compute_geometry() {
       alphas[i] = a;
       alpha_total += alphas[i];
       }
-    
+
     if(debugflags & DF_GEOM)
       println(hlog, "edgelength = ", edgelength, " angles = ", alphas, " inradius = ", inradius, " circumradius = ", circumradius);
-    
+
     if(isnan(alpha_total)) elmax = edgelength;
     else if(sphere ^ (alpha_total > total)) elmin = edgelength;
     else elmax = edgelength;
     if(euclid) break;
     }
-  
+
   DEBB(DF_GEOM, (format("computed edgelength = %f\n", float(edgelength))));
-  
+
   triangles.clear();
   triangles.resize(2*N+2);
-  for(int i=0; i<N; i++) for(int j=0; j<2; j++) 
-    for(int k=0; k<faces[i]; k++) 
+  for(int i=0; i<N; i++) for(int j=0; j<2; j++)
+    for(int k=0; k<faces[i]; k++)
       triangles[2*i+j].emplace_back(2*M_PI/faces[i], circumradius[i]);
-  
+
   for(int k=0; k<N; k++) {
     triangles[2*N].emplace_back(alphas[k], circumradius[k]);
     triangles[2*N].emplace_back(alphas[(k+1)%N], edgelength);
     triangles[2*N+1].emplace_back(alphas[N-1-k], edgelength);
     triangles[2*N+1].emplace_back(alphas[N-1-k], circumradius[N-1-k]);
     }
-  
+
   for(auto& ts: triangles) {
     ld total = 0;
     for(auto& t: ts) tie(t.first, total) = make_pair(total, total + t.first);
@@ -490,7 +490,7 @@ void archimedean_tiling::compute_geometry() {
     }
 
   regular = true;
-  for(int i: faces) if(i != faces[0]) regular = false;  
+  for(int i: faces) if(i != faces[0]) regular = false;
   }
 
 ld archimedean_tiling::scale() {
@@ -516,7 +516,7 @@ void connectHeptagons(heptspin hi, heptspin hs);
 /** @brief should we use gmatrix to compute relative_matrix faster? (not while in fake Archimedean) */
 EX bool use_gmatrix = true;
 
-/** @brief like adj, but in pure 
+/** @brief like adj, but in pure
  *  not used by arcm itself, but used in fake arcm
  */
 
@@ -535,21 +535,21 @@ struct hrmap_archimedean : hrmap {
     parent_index_of(origin) = DUAL ? 1 : 0;
     id_of(origin) = id;
     origin->c7 = newCell(N0/DUALMUL, origin);
-    
+
     heptagon *alt = NULL;
-    
+
     if(hyperbolic) {
-      dynamicval<eGeometry> g(geometry, gNormal); 
+      dynamicval<eGeometry> g(geometry, gNormal);
       alt = init_heptagon(S7);
       alt->s = hsOrigin;
       alt->alt = alt;
-      current_altmap = newAltMap(alt); 
+      current_altmap = newAltMap(alt);
       }
-  
+
     transmatrix T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * Id;
     archimedean_gmatrix[origin] = make_pair(alt, T);
     altmap[alt].emplace_back(origin, T);
-  
+
     if(current.real_faces == 0 && DUAL) {
       heptspin hs(origin, 0);
       heptagon *hnew = build_child(hs, current.get_adj(hs));
@@ -557,7 +557,7 @@ struct hrmap_archimedean : hrmap {
         origin->c.connect(s, hnew, s, false);
       }
     else if(current.real_faces == 0) {
-      may_create_step(origin, 0); 
+      may_create_step(origin, 0);
       heptagon *o0 = origin->move(0);
       may_create_step(origin, 1);
       heptagon *o1 = origin->move(1);
@@ -577,7 +577,7 @@ struct hrmap_archimedean : hrmap {
       origin->move(0)->c.connect(1, origin->move(1), 2*current.N-1, false);
       origin->move(1)->c.connect(1, origin->move(0), 2*current.N-1, false);
       }
-    
+
     cgi.base_distlimit = 0;
     celllister cl(origin->c7, 1000, 200, NULL);
     ginf[geometry].distlimit[!BITRUNCATED] = cgi.base_distlimit = cl.dists.back();
@@ -589,7 +589,7 @@ struct hrmap_archimedean : hrmap {
     altmap.clear();
     archimedean_gmatrix.clear();
     if(current_altmap) {
-      dynamicval<eGeometry> g(geometry, gNormal);       
+      dynamicval<eGeometry> g(geometry, gNormal);
       delete current_altmap;
       current_altmap = NULL;
       }
@@ -597,42 +597,42 @@ struct hrmap_archimedean : hrmap {
   void verify() override { }
 
   heptagon *create_step(heptagon *h, int d) override {
-  
+
     DEBB(DF_GEOM, (format("%p.%d ~ ?\n", hr::voidp(h), d)));
 
     dynamicval<geometryinfo1> gi(ginf[geometry].g, ginf[gArchimedean].g);
-    
+
     heptspin hi(h, d);
-    
+
     while(skip_digons(hi, 1)) hi++;
-    
+
     auto& t1 = current.get_triangle(hi);
-  
+
     // * spin(-tri[id][pi+i].first) * xpush(t.second) * pispin * spin(tri[id'][p'+d'].first)
-    
+
     auto& p1 = archimedean_gmatrix[h];
-    
+
     heptagon *alt = p1.first;
-  
+
     transmatrix T = p1.second * spin(-t1.first) * xpush(t1.second);
     transmatrix U = Id;
-    
+
     if(hyperbolic) {
-      dynamicval<eGeometry> g(geometry, gNormal); 
+      dynamicval<eGeometry> g(geometry, gNormal);
       dynamicval<hrmap*> cm(currentmap, current_altmap);
       U = T;
       current_altmap->virtualRebase(alt, T);
       U = U * iso_inverse(T);
       }
-    
+
     if(euclid) {
       /* hash the rough coordinates as heptagon* alt */
       size_t s = size_t(T[0][LDIM]+.261) * 124101 + size_t(T[1][LDIM]+.261) * 82143;
       alt = (heptagon*) s;
       }
-      
+
     DEBB(DF_GEOM, ("look for: ", alt, " / ", T * C0));
-  
+
     for(auto& p2: altmap[alt]) if(intval(p2.second * C0, T * C0) < 1e-4) {
       DEBB(DF_GEOM, ("cell found: ", p2.first));
       for(int d2=0; d2<p2.first->degree(); d2++) {
@@ -641,17 +641,17 @@ struct hrmap_archimedean : hrmap {
         transmatrix T1 = T * spin(M_PI + t2.first);
         DEBB(DF_GEOM, ("compare: ", T1 * xpush0(1), ":: ", p2.second * xpush0(1)));
         if(intval(T1 * xpush0(1), p2.second * xpush0(1)) < 1e-4) {
-        
+
           // T1 = p2.second
           // T * spin(pi+t2.first) == p2.second
           // p1.second * spinm(-t1.first) * xpush(t1.second) * spin(pi+t2.first) == p2.second
-          
+
           // bring p1 and p2 closer, to prevent floating point errors
           if(hyperbolic) {
             fixup_matrix(p1.second, U * p2.second * spin(-M_PI - t2.first) * xpush(-t1.second) * spin(t1.first), 0.25);
             fixup_matrix(p2.second, T1, 0.25);
             }
-  
+
           while(skip_digons(hs, -1)) hs--;
           connectHeptagons(hi, hs);
           connect_digons_too(hi, hs);
@@ -660,37 +660,37 @@ struct hrmap_archimedean : hrmap {
         }
       DEBB(DF_GEOM, ("but rotation not found"));
       }
-    
+
     auto& t2 = current.get_triangle(current.get_adj(hi));
     transmatrix T1 = T * spin(M_PI + t2.first);
     fixmatrix(T1);
-  
+
     heptagon *hnew = build_child(hi, current.get_adj(hi));
     altmap[alt].emplace_back(hnew, T1);
     archimedean_gmatrix[hnew] = make_pair(alt, T1);
     connect_digons_too(hi, heptspin(hnew, 0));
-    
+
     return hnew;
     }
-  
+
   void draw_at(cell *at, const shiftmatrix& where) override {
     dq::clear_all();
     dq::enqueue(at->master, where);
-    
+
     while(!dq::drawqueue.empty()) {
       auto& p = dq::drawqueue.front();
       heptagon *h = p.first;
       shiftmatrix V = p.second;
       dq::drawqueue.pop();
-  
+
       int id = id_of(h);
       int S = isize(current.triangles[id]);
-  
+
       if(id < 2*current.N ? !DUAL : !PURE) {
         if(!do_draw(h->c7, V)) continue;
         drawcell(h->c7, V);
         }
-  
+
       for(int i=0; i<S; i++) {
         if(DUAL && (i&1)) continue;
         h->cmove(i);
@@ -705,7 +705,7 @@ struct hrmap_archimedean : hrmap {
   transmatrix adj(cell *c, int dir) override {
     return calc_relative_matrix(c->cmove(dir), c, C0);
     }
-  
+
   transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
     if(use_gmatrix && gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
       return inverse_shift(gmatrix0[h1->c7], gmatrix0[h2->c7]);
@@ -728,7 +728,7 @@ struct hrmap_archimedean : hrmap {
       }
     return gm * where;
     }
-      
+
   ld spin_angle(cell *c, int d) override {
     auto &cof = current_or_fake();
     if(PURE) {
@@ -770,9 +770,9 @@ struct hrmap_archimedean : hrmap {
   int shvid(cell *c) override {
     auto& ac = arcm::current;
     int id = arcm::id_of(c->master);
-    if(ac.regular && id>=2 && id < 2*ac.N) id &= 1;    
-    return id;    
-    }  
+    if(ac.regular && id>=2 && id < 2*ac.N) id &= 1;
+    return id;
+    }
 
   int full_shvid(cell *c) override {
     return id_of(c->master) + 20 * parent_index_of(c->master);
@@ -917,7 +917,7 @@ transmatrix archimedean_tiling::adjcell_matrix(heptagon *h, int d) {
 
   int d2 = h->c.spin(d);
   auto& t2 = get_triangle(h2, d2);
-  
+
   return spin(-t1.first) * xpush(t1.second) * spin(M_PI + t2.first);
   }
 
@@ -930,11 +930,11 @@ EX int fix(heptagon *h, int spin) {
 
 void archimedean_tiling::parse() {
   int at = 0;
-  
+
   auto peek = [&] () { if(at == isize(symbol)) return char(0); else return symbol[at]; };
   auto is_number = [&] () { char p = peek(); return p >= '0' && p <= '9'; };
   auto read_number = [&] () { int result = 0; while(is_number()) result = 10 * result + peek() - '0', at++; return result; };
-  
+
   faces.clear(); nflags.clear();
   have_line = false;
   have_ph = false;
@@ -970,12 +970,12 @@ void archimedean_tiling::parse() {
   adj.clear(); adj.resize(N, 0); for(int i=0; i<N; i++) adj[i] = i;
   while(peek() != 0) {
     if(peek() == '^') at++, repetition = read_number();
-    else if(peek() == '(') { 
+    else if(peek() == '(') {
       at++; int a = read_number(); while(!is_number() && !among(peek(), '(', '[', ')',']', 0)) at++;
       if(is_number()) { int b = read_number(); adj[a] = b; adj[b] = a; invert[a] = invert[b] = false; }
       else { invert[a] = false; }
       }
-    else if(peek() == '[') { 
+    else if(peek() == '[') {
       at++; int a = read_number(); while(!is_number() && !among(peek(), '(', '[', ')',']', 0)) at++;
       if(is_number()) { int b = read_number(); adj[a] = b; adj[b] = a; invert[a] = invert[b] = true; }
       else { invert[a] = true; }
@@ -988,13 +988,13 @@ void archimedean_tiling::parse() {
     invert.push_back(invert[i]),
     adj.push_back(adj[i] + N);
   N *= repetition;
-  prepare();  
+  prepare();
   }
 
-#if CAP_COMMANDLINE  
+#if CAP_COMMANDLINE
 int readArgs() {
   using namespace arg;
-           
+
   if(0) ;
   else if(argis("-symbol")) {
     PHASEFROM(2);
@@ -1010,7 +1010,7 @@ int readArgs() {
       }
     }
   else if(argis("-dual")) { PHASEFROM(2); set_variation(eVariation::dual); }
-  else if(argis("-d:arcm")) 
+  else if(argis("-d:arcm"))
     launch_dialog(show);
   else return 1;
   return 0;
@@ -1018,7 +1018,7 @@ int readArgs() {
 #endif
 
 #if CAP_COMMANDLINE
-auto hook = 
+auto hook =
   addHook(hooks_args, 100, readArgs)
 + addHook(hooks_gamedata, 0, [] (gamedata* gd) { gd->store(altmap); gd->store(archimedean_gmatrix); gd->store(current_altmap); });
 
@@ -1044,7 +1044,7 @@ int archimedean_tiling::support_threecolor_bitruncated() {
   }
 
 int archimedean_tiling::support_football() {
-  return 
+  return
     have_ph ? 1 :
     (isize(faces) == 3 && invert[0] && invert[1] && invert[2] && faces[1] % 2 == 0 && faces[2] % 2 == 0) ? 2 :
     0;
@@ -1058,7 +1058,7 @@ EX bool pseudohept(cell *c) {
   if(DUAL)
     return !(c->master->rval0 & 3);
   int id = id_of(c->master);
-  if(PURE) 
+  if(PURE)
     return current.flags[id] & arcm::sfPH;
   if(BITRUNCATED)
     return id < current.N * 2;
@@ -1105,27 +1105,27 @@ EX vector<pair<string, int> > samples = {
   {"(6,6,6)", cEucRegular},
   {"(8,8,4)", cEucSemiregular},
   {"(4,6,12)", cEucSemiregular},
-  {"(6,4,3,4)", cEucSemiregular}, 
-  {"(3,6,3,6)", cEucSemiregular}, 
-  {"(3,12,12)", cEucSemiregular}, 
+  {"(6,4,3,4)", cEucSemiregular},
+  {"(3,6,3,6)", cEucSemiregular},
+  {"(3,12,12)", cEucSemiregular},
   {"(4,4,3L,3L,3L) [3,4]", cEucSemiregular},
   {"(3,3,3,3,6) (1,2)(0,4)(3)", cEucSemiregular},
   {"(3,3,4,3,4) (0,4)(1)(2,3)", cEucSemiregular},
-  
+
   /* Platonic */
   {"(3,3,3)", cPlatonic},
   {"(3,3,3,3)", cPlatonic},
   {"(3,3,3,3,3)", cPlatonic},
   {"(4,4,4)", cPlatonic},
   {"(5,5,5)", cPlatonic},
-  
+
   /* Archimedean solids */
   {"(3,6,6)", cArchimedean},
   {"(3,4,3,4)", cArchimedean},
   {"(3,8,8)", cArchimedean},
   {"(4,6,6)", cArchimedean},
   {"(3,4,4,4)", cArchimedean},
-  {"(4,6,8)", cArchimedean}, 
+  {"(4,6,8)", cArchimedean},
   {"(3,3,3,3,4) (1,2)(0,4)(3)", cArchimedean},
   {"(3,5,3,5)", cArchimedean},
   {"(3,10,10)", cArchimedean},
@@ -1133,23 +1133,23 @@ EX vector<pair<string, int> > samples = {
   {"(3,4,5,4)", cArchimedean},
   {"(4,6,10)", cArchimedean},
   {"(3,3,3,3,5) (1,2)(0,4)(3)", cArchimedean},
-  
+
   /* prisms */
   {"(3,4,4)", cPrism},
   {"(5,4,4)", cPrism},
   {"(6,4,4)", cPrism},
   {"(7,4,4)", cPrism},
-  
+
   /* sample antiprisms */
   {"(3,3,3,4)(1)(2)", cAntiPrism},
   {"(3,3,3,5)(1)(2)", cAntiPrism},
   {"(3,3,3,6)(1)(2)", cAntiPrism},
-  {"(3,3,3,7)(1)(2)", cAntiPrism}, 
-  
+  {"(3,3,3,7)(1)(2)", cAntiPrism},
+
   /* hyperbolic ones */
   {"(3)^7", cHyperRegular},
-  {"(4)^5", cHyperRegular}, 
-  {"(4)^6", cHyperRegular}, 
+  {"(4)^5", cHyperRegular},
+  {"(4)^6", cHyperRegular},
   {"(5,5,5,5)", cHyperRegular},
   {"(7,7,7)", cHyperRegular},
   {"(8,8,8)", cHyperRegular},
@@ -1158,7 +1158,7 @@ EX vector<pair<string, int> > samples = {
   {"(3,4,7,4)", cHyperSemi},
   {"(6,6,4L,4L)", cHyperSemi},
   {"(8,8,4L,4L)", cHyperSemi},
-  {"(3,3,3,3,7) (1,2)(0,4)(3)", cHyperSemi}, 
+  {"(3,3,3,3,7) (1,2)(0,4)(3)", cHyperSemi},
   {"(3H,6,6,6) (1,0)[2](3)", cHyperSemi},
   {"(3,6,6,6) (0 1)(2)(3)", cHyperSemi},
   {"(3,4,4L,4L,4)", cHyperSemi}, // buggy
@@ -1166,17 +1166,17 @@ EX vector<pair<string, int> > samples = {
   {"(3,4,4,4,4) (0 1)(2)(3)(4)", cHyperSemi},
   {"(3,4,4L,4L,4L,4)", cHyperSemi},
   {"(6,6,3L,3L,3L) (0 2)(1)(3)(4)", cHyperSemi},
-  {"(5,3,5,3,3) (0 1)(2 3)(4)", cHyperSemi}, 
+  {"(5,3,5,3,3) (0 1)(2 3)(4)", cHyperSemi},
   {"(4,3,3,3,3,3) (0 1)(2 3)(4 5)", cHyperSemi},
   {"(3l,5l,5,5,5,5) (0 1)[2 3](4)(5)", cHyperSemi},
-  {"(3,5,5,5,5,5) (0 1)(2 4)(3 5)", cHyperSemi}, 
+  {"(3,5,5,5,5,5) (0 1)(2 4)(3 5)", cHyperSemi},
   {"(3l,5l,5,5,5,5) (0 1)(2 4)[3 5]", cHyperSemi},
-  {"(3l,5l,5,5,5,5) (0 1)[2 4](3)(5)", cHyperSemi}, 
-  {"(3,5,5,5,5,5) (0 1)(2)(3)(4)(5)", cHyperSemi}, 
+  {"(3l,5l,5,5,5,5) (0 1)[2 4](3)(5)", cHyperSemi},
+  {"(3,5,5,5,5,5) (0 1)(2)(3)(4)(5)", cHyperSemi},
   {"(3,3,4,3,5)(0,4)(1)(2,3)", cHyperSemi},
   {"(3,14,14)", cHyperSemi},
   {"(3,3,3,3,3,4)[0](1,2)(3,4)[5]", cHyperSemi},
-  
+
   /* interesting symmetry variants */
   {"(3,3,3,3,3,3) (0,1)(2,3)(4,5)", cEucRegular},
   {"(3,3H,3,3,3L,3L,3L) (0 4)(1 2)(3)(5)(6)", cHyperRegular},
@@ -1205,7 +1205,7 @@ bool symbol_editing;
 EX void next_variation() {
   set_variation(
     PURE ? eVariation::dual :
-    DUAL ? eVariation::bitruncated : 
+    DUAL ? eVariation::bitruncated :
     eVariation::pure);
   start_game();
   }
@@ -1269,12 +1269,12 @@ EX void show() {
       }
     }
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);  
+  gamescreen(0);
   dialog::init(XLAT("Archimedean tilings"));
-  
+
   if(symbol_editing) {
     dialog::addSelItem("edit", dialog::view_edited_string(), '/');
-    dialog::add_action([] () { 
+    dialog::add_action([] () {
       symbol_editing = false;
       if(!edited.errors) enable(edited);
       });
@@ -1283,7 +1283,7 @@ EX void show() {
       dialog::addInfo(edited.errormsg, 0xFF0000);
     else
       dialog::addInfo(XLAT("OK"), 0x00FF00);
-    
+
     dialog::addBreak(100);
     dialog::addSelItem(XLAT("full angle"), fts(edited.euclidean_angle_sum * 180) + "°", 0);
     dialog::addSelItem(XLAT("size of the world"), edited.world_size(), 0);
@@ -1300,8 +1300,8 @@ EX void show() {
     }
   else {
     string cs = in() ? current.symbol : XLAT("OFF");
-    dialog::addSelItem("edit", cs, '/');  
-    dialog::add_action([] () { 
+    dialog::addSelItem("edit", cs, '/');
+    dialog::add_action([] () {
       symbol_editing = true;
       edited = current;
       dialog::start_editing(edited.symbol);
@@ -1358,7 +1358,7 @@ EX void show() {
       spos -= 10;
       if(spos < 0) spos = 0;
       });
-    
+
     if(in()) {
       dialog::addSelItem(XLAT("size of the world"), current.world_size(), 0);
       dialog::addSelItem(XLAT("edge length"), current.get_class() == gcEuclid ? (fts(current.edgelength) + XLAT(" (arbitrary)")) : fts(current.edgelength), 0);
@@ -1376,7 +1376,7 @@ EX void show() {
       dialog::addItem(XLAT("color by sides"), 'u');
       dialog::add_action(setcanvas('B'));
       }
-    
+
     if(geosupport_threecolor() == 2) {
       dialog::addItem(XLAT("three colors"), 'w');
       dialog::add_action(setcanvas('T'));
@@ -1437,14 +1437,14 @@ void archimedean_tiling::get_nom_denom(int& anom, int& adenom) {
 
 string archimedean_tiling::world_size() {
   if(get_class() == gcEuclid) return "∞";
-  
+
   int anom, adenom;
   get_nom_denom(anom, adenom);
 
   string s;
   bool hyp = (anom < 0);
   if(hyp) anom = -anom;
-  if(adenom != 1) 
+  if(adenom != 1)
     s += its(anom) + "/" + its(adenom);
   else
     s += its(anom);
@@ -1464,18 +1464,18 @@ bool archimedean_tiling::get_step_values(int& steps, int& single_step) {
 
   int nom = -2;
   int denom = 1;
-  
+
   for(int f: arcm::current.faces) {
     if(int(denom*f)/f != denom) { steps = 0; single_step = 0; return false; }
     int g = gcd(denom, f);
     nom = nom * (f/g) + (f-2) * (denom/g);
     denom = denom/g * f;
     }
-    
+
   steps = 2 * abs(denom);
   single_step = abs(nom);
   if(steps/2 != abs(denom)) return false;
-  return (2 * denom) % nom == 0;  
+  return (2 * denom) % nom == 0;
   }
 
 EX int valence() {
@@ -1490,7 +1490,7 @@ EX int valence() {
     }
   return total / isize(current.faces);
   }
- 
+
 EX map<gp::loc, cdata>& get_cdata() { return ((arcm::hrmap_archimedean*) (currentmap))->eucdata; }
 
 #endif

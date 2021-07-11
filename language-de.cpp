@@ -146,7 +146,7 @@ N("tree", GEN_M, "Baum", "Bäume", "Baum")
 
 // LANDS
 // =====
-    
+
 N("Great Wall", GEN_F, "Große Mauer", "Großen Mauern", "auf der Großen Mauer")
 N("Crossroads", GEN_F, "Kreuzungen", "Kreuzungen", "auf den Kreuzungen") // FIXME: what sex to use here (it's plural...?)
 N("Desert", GEN_F, "Wüste", "Wüsten", "in der Wüste")
@@ -3162,7 +3162,7 @@ S("This requires some OpenGL extensions and may crash or not work correctly -- e
   "-- das Einschalten der Option 'Rendere Textur ohne OpenGL' kann hilfreich sein. "
   "Auch die Option 'Rendere die Textur nur einmal' beschleunigt das Rendern, aber die Oberfläche "
   "wird nur einmal gerendert und du kannst darauf nicht spielen.\n\n")
-  
+
 S("Use arrow keys to rotate, Page Up/Down to zoom.",
   "Verwende die Pfeiltasten zum Rotieren, Bild auf/ab zum Zoomen.")
 
@@ -3513,7 +3513,7 @@ S("This Orb lets you ride Dragons and other worm-like creatures. "
   "but you cannot collect items.\n\n"
 //  "When only one charge is left, "
 //  "you have to dismount this turn -- be very careful to make this possible, "
-//  "as your mount could attack you immediately!\n\n" 
+//  "as your mount could attack you immediately!\n\n"
   "While riding, "
   "click on a location to order your mount to move or attack there.",
 

@@ -51,9 +51,9 @@ EX void check_if_monster() {
   if(m && m != passive_switch && !isFriendly(m))
     checked_move_issue = miENTITY;
   }
-  
+
 EX bool hasSafeOrb(cell *c) {
-  return 
+  return
     c->item == itOrbSafety ||
     c->item == itOrbShield ||
     c->item == itOrbShell  ||
@@ -75,7 +75,7 @@ player_move_info::player_move_info(movei _mi) : mi(_mi) {
   for(int b=0; b<2; b++) swordlast[b] = sword::pos(multi::cpid, b);
 
   dynamicval<sword::sworddir> x7(sword::dir[multi::cpid], sword::shift(mi, sword::dir[multi::cpid]));
-  
+
   for(int b=0; b<2; b++) {
     swordnext[b] = sword::pos(multi::cpid, b);
     swordtransit[b] = NULL;
@@ -92,8 +92,8 @@ player_move_info::player_move_info(movei _mi) : mi(_mi) {
   }
 
 EX bool krakensafe(cell *c) {
-  return items[itOrbFish] || items[itOrbAether] || 
-    (c->item == itOrbFish && c->wall == waBoat) || 
+  return items[itOrbFish] || items[itOrbAether] ||
+    (c->item == itOrbFish && c->wall == waBoat) ||
     (c->item == itOrbAether && c->wall == waBoat);
   }
 
@@ -109,11 +109,11 @@ EX bool monstersnear(cell *c, eMonster who) {
 
   elec::builder b;
   if(elec::affected(c)) { who_kills_me = moLightningBolt; res++; }
-  
+
   if(c->wall == waArrowTrap && c->wparam == 2) {
     who_kills_me = moArrowTrap; res++;
     }
-  
+
   for(auto c1: crush_now) if(c == c1) {
     who_kills_me = moCrusher; res++;
     }
@@ -122,9 +122,9 @@ EX bool monstersnear(cell *c, eMonster who) {
     fast = (items[itOrbSpeed] && (items[itOrbSpeed] & 1));
     if(who == moPlayer && !isPlayerOn(c) && c->item == itOrbSpeed && !items[itOrbSpeed]) fast = true;
     }
-  
+
   if(havewhat&HF_OUTLAW) {
-    for(cell *c1: gun_targets(c)) 
+    for(cell *c1: gun_targets(c))
       if(c1->monst == moOutlaw && !c1->stuntime) {
         res++; who_kills_me = moOutlaw;
         }
@@ -136,7 +136,7 @@ EX bool monstersnear(cell *c, eMonster who) {
     // consider monsters who attack from distance 2
     if(c2) forCellEx(c3, c2) if(c3 != c) {
       // only these monsters can attack from two spots...
-      if(!among(c3->monst, moLancer, moWitchSpeed, moWitchFlash)) 
+      if(!among(c3->monst, moLancer, moWitchSpeed, moWitchFlash))
         continue;
       if(c3->monst == moWitchSpeed && cwt.at->land != laPower)
         continue;
@@ -158,11 +158,11 @@ EX bool monstersnear(cell *c, eMonster who) {
       // flashwitches cannot attack if it would kill another enemy
       if(c3->monst == moWitchFlash && flashWouldKill(c3, 0)) continue;
       res++, who_kills_me = c3->monst;
-      } 
+      }
 
     // consider normal monsters
-    if(c2 && 
-      isArmedEnemy(c2, who) && 
+    if(c2 &&
+      isArmedEnemy(c2, who) &&
       (c2->monst != moLancer || isUnarmed(who) || !logical_adjacent(c, who, c2))) {
       eMonster m = c2->monst;
       if(elec::affected(c2)) continue;
@@ -205,16 +205,16 @@ EX bool monstersnear_aux() {
   if(multi::cpid == multi::players || multi::players == 1 || multi::checkonly) {
 
     if(shmup::delayed_safety) return false;
-    
+
     for(int i=0; i<isize(pmi); i++)
     for(int j=0; j<isize(pmi); j++) if(i != j) {
       if(swordConflict(pmi[i], pmi[j])) {
           b = true;
           who_kills_me = moEnergySword;
           }
-      if(pmi[i].mi.t == pmi[j].mi.t) 
+      if(pmi[i].mi.t == pmi[j].mi.t)
         { b = true; who_kills_me = moFireball; }
-      if(celldistance(pmi[i].mi.t, pmi[j].mi.t) > 8) 
+      if(celldistance(pmi[i].mi.t, pmi[j].mi.t) > 8)
         { b = true; who_kills_me = moAirball; }
       }
 
@@ -223,13 +223,13 @@ EX bool monstersnear_aux() {
       if(pushto == mi.mi.t) {
         b = true; who_kills_me = moTongue;
         }
-        
+
     for(int i=0; i<isize(pushes); i++)
       for(int j=0; j<i; j++)
         if(pushes[i] == pushes[j]) {
           b = true; who_kills_me = moCrushball;
           }
-          
+
     for(int i=0; !b && i<isize(pmi); i++)
       b = monstersnear(pmi[i].mi.t, moPlayer);
     }
@@ -265,7 +265,7 @@ EX bool multimove() {
   return b;
   }
 
-EX namespace multi { 
+EX namespace multi {
   EX bool checkonly = false;
   EX bool aftermove;
   EX }
@@ -293,7 +293,7 @@ EX void checkmove() {
   if(multi::players > 1 && !multi::checkonly) return;
   if(hardcore) return;
   bool orbusedbak[ittypes];
-  
+
   // do not activate orbs!
   for(int i=0; i<ittypes; i++) orbusedbak[i] = orbused[i];
 
@@ -304,7 +304,7 @@ EX void checkmove() {
   items[itWarning]+=2;
   if(movepcto(-1, 0, true))
     canmove = legalmoves[cwt.at->type] = true;
-  
+
   if(true) {
     for(int i=0; i<cwt.at->type; i++) {
       if(movepcto(1, -1, true)) {
@@ -322,12 +322,12 @@ EX void checkmove() {
       }
     }
   if(kills[moPlayer]) canmove = false;
-  
+
   yasc_code = 0;
   for(int i=0; i<cwt.at->type; i++)
     yasc_code += move_issues[i];
 
-#if CAP_INV  
+#if CAP_INV
   if(inv::on && !canmove && !inv::incheck) {
     if(inv::remaining[itOrbSafety] || inv::remaining[itOrbFreedom])
       canmove = true;
@@ -353,7 +353,7 @@ EX void checkmove() {
   items[itWarning]-=2;
 
   for(int i=0; i<ittypes; i++) orbused[i] = orbusedbak[i];
-  if(recallCell.at && !markOrb(itOrbRecall)) activateRecall();  
+  if(recallCell.at && !markOrb(itOrbRecall)) activateRecall();
   }
 
 

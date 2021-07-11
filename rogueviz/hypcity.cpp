@@ -26,12 +26,12 @@ model city("rogueviz/models/", "emilejohansson_p2.obj", default_transformer, pre
 hyperpoint low, high;
 
 void prepare_tf() {
-  
+
   for(int i=0; i<4; i++) low[i] = 100, high[i] = -100;
 
   cgi.require_basics();
   hyperpoint corner = get_corner_position(cwt.at, 0);
-  
+
   ld t = abs(corner[0] / corner[3]);
 
   city.tf = [=] (hyperpoint h) -> pair<int, hyperpoint> {
@@ -47,9 +47,9 @@ void prepare_tf() {
     for(int i=0; i<4; i++)
       low[i] = min(low[i], h[i]),
       high[i] = max(high[i], h[i]);
-      
+
     if(hyperbolic || sphere) {
-    
+
       hyperpoint hx;
       hx[0] = h[0] * t * 2;
       hx[1] = h[1] * t * 2;
@@ -59,9 +59,9 @@ void prepare_tf() {
       hx = normalize(hx);
       hx = zshift(hx, h[2]*(t*(sphere ? 3 : 7)));
 
-      return {0, hx}; 
+      return {0, hx};
       }
-    
+
     if(nil || sol) {
       if(nil) swap(h[1], h[2]);
       h *= 0.5 / 0.378;
@@ -70,7 +70,7 @@ void prepare_tf() {
       h[3] = 1;
       return {0, h};
       }
-    
+
     return {0, h};
     };
   println(hlog, "low = ", low);
@@ -87,15 +87,15 @@ bool draw_city_at(cell *c, const shiftmatrix& V) {
     auto co = c->master->distance;
     if(co) return false;
     }
-  
-  if(c == cwt.at || true) 
+
+  if(c == cwt.at || true)
     city.render(V);
 
   return false;
   }
 
-void enable() { 
-  rogueviz::rv_hook(hooks_drawcell, 100, draw_city_at); 
+void enable() {
+  rogueviz::rv_hook(hooks_drawcell, 100, draw_city_at);
   add_model_settings();
   }
 
@@ -107,7 +107,7 @@ auto hypcity_ah = arg::add3("-hypcity", enable)
 
     if(hypcity_slides.empty()) {
       hypcity_slides.emplace_back(
-        slide{"Introduction", 999, LEGAL::NONE, 
+        slide{"Introduction", 999, LEGAL::NONE,
           "Here we put a 3D model of a city into various geometries. Don't forget to try changing RogueViz projection and view range settings!\n\n"
           "Remember to try different projections (press '1')!"
           ,
@@ -115,7 +115,7 @@ auto hypcity_ah = arg::add3("-hypcity", enable)
           slide_url(mode, 'm', "original model by Emile Johansson", "https://sketchfab.com/3d-models/night-city-p2-82637933a7cb4fafadb0e2a79415c438");
           slide_url(mode, 't', "original Tweets by Nico Belmonte", "https://twitter.com/philogb/status/1375147728389476356");
           }});
-      
+
       auto add = [&] (string s, string text, int dim, reaction_t setter) {
         hypcity_slides.emplace_back(
           tour::slide{s, 100, LEGAL::NONE | QUICKGEO, text,
@@ -137,7 +137,7 @@ auto hypcity_ah = arg::add3("-hypcity", enable)
                 }
               }});
         };
-      
+
       add("hyperbolic", "Hyperbolic geometry.", 2, [] {
         set_geometry(g45);
         gp::param = {1, 1};

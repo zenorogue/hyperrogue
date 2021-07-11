@@ -84,7 +84,7 @@ string reduce(const string& x) {
 
 #define Split(x) auto sw = split(x); auto swapped = get<0>(sw); auto s0 = get<1>(sw); auto s1 = get<2>(sw)
 
-bool empt(const string& x) { 
+bool empt(const string& x) {
   Split(x); // auto [swapped, s0, s1] = split(x);
   if(x == "") return true;
   if(x == "d") return false;
@@ -92,7 +92,7 @@ bool empt(const string& x) {
   return empt(s0) && empt(s1);
   }
 
-bool empt_slow(const string& x) { 
+bool empt_slow(const string& x) {
   Split(x); // auto [swapped, s0, s1] = split_slow(x);
   printf("%s -> %d %s %s\n", x.c_str(), swapped, s0.c_str(), s1.c_str());
   if(x == "") return true;
@@ -129,7 +129,7 @@ rep grig_b = rep{false, &grig_a, &grig_c, 'b', false};
 rep grig_c = rep{false, &grig_a, &grig_d, 'c', false};
 rep grig_d = rep{false, &grig_I, &grig_b, 'd', false};
 
-// (ab) c = a (a,c) (a,d) = a(a,c) (a,d) = 
+// (ab) c = a (a,c) (a,d) = a(a,c) (a,d) =
 map<rep, char> all_reps; //  = {grigid, &grigid};
 
 prep lookup(rep x) {
@@ -142,10 +142,10 @@ prep lookup(rep x) {
   else return &(all_reps.emplace(x, 0).first->first);
   }
 
-/*prep add_a(prep x) { 
-  return lookup({!x->swapped, x->a0, x->a1, 'a'}); 
+/*prep add_a(prep x) {
+  return lookup({!x->swapped, x->a0, x->a1, 'a'});
   }
-prep add_d(prep x) { 
+prep add_d(prep x) {
   if(x == &grig_I) return &grig_d;
   if(x == &grig_d) return &grig_I;
   return lookup({x->swapped, x->swapped?add_d(x->a0):x->a0, x->swapped?x->a1:add_d(x->a1), 'd'});
@@ -202,9 +202,9 @@ void addmore(const string& s, int more) {
     for(string q: seen) {
       string qo = q;
       for(char cr: sr) add(q, cr);
-      if(empt(q)) { 
-        // printf("%s = %s /%s\n", s.c_str(), qo.c_str(), sr.c_str()); 
-        return; 
+      if(empt(q)) {
+        // printf("%s = %s /%s\n", s.c_str(), qo.c_str(), sr.c_str());
+        return;
         }
       }
     seen.insert(s);
@@ -246,7 +246,7 @@ int length = 0;
 
 vector<prep> all;
 
-void visit(prep x, char l, int d) { 
+void visit(prep x, char l, int d) {
   if(!x->visited) x->visited = true, x->last = l, all.push_back(x), x->len = d;
   }
 
@@ -274,17 +274,17 @@ void prepare_to_next(bool verbose) {
 
 void prepare() {
   prepared = true;
-  
+
   // rep* grigid = lookup(rep { false, NULL, NULL });
-  
+
   ac = mul(&grig_a, &grig_c);
   ca = mul(&grig_c, &grig_a);
   // prep where = &grig_I;
-  
+
   string s = "";
   all.clear();
 
-  
+
   /*
   for(int a=0; a<=32; a++) {
     // printf("%p -> %d %p %p\n", where, where->swapped, where->a0, where->a1);
@@ -292,7 +292,7 @@ void prepare() {
     where = ((a&1) ? add_a : add_b) (where);
     s += (a&1) ? 'a' : 'b';
     }
-  
+
   string test = "ba";
   string pw = "";
   for(int i=0; i<=16; i++) {
@@ -300,17 +300,17 @@ void prepare() {
     pw += test;
     }
   */
-  
+
   // printf("TEST %s\n", encode("bcd").c_str());
 
   visit(&grig_I, 0, 0);
   length = 0;
   next = all.size();
-  
+
   prepared_dists = 0;
 
   while(prepared_dists < grig_limit) prepare_to_next(false);
-  
+
   prep test = &grig_b;
   test = mul(test, &grig_a);
   test = mul(test, &grig_d);
@@ -329,10 +329,10 @@ struct hrmap_grigorchuk : hrmap_standard {
 
   heptagon *origin;
   heptagon *getOrigin() override { return origin; }
-  
+
   map<heptagon*, grigorchuk::prep> dec;
   map<grigorchuk::prep, heptagon*> enc;
-  
+
   void gtie(heptagon* h, grigorchuk::prep p) {
     dec[h] = p;
     enc[p] = h;
@@ -365,7 +365,7 @@ struct hrmap_grigorchuk : hrmap_standard {
       case 1: pr = mul(mul(pr, &grig_c), &grig_a); break;
       case 2: pr = mul(pr, &grig_b); break;
       }
-    
+
     heptagon *h;
 
     if(enc.count(pr)) {
@@ -388,39 +388,39 @@ struct hrmap_grigorchuk : hrmap_standard {
       h->distance = p->distance + 1;
       gtie(h, pr);
       }
-    
+
     h->c.connect(d == 2 ? 2 : 1-d, p, d, false);;
     return h;
     }
-  
+
   void draw_at(cell *at, const shiftmatrix& where) override {
-  
+
     dq::clear_all();
     dq::enqueue_by_matrix(at->master, where * master_relative(centerover, true));
-    
-    while(!dq::drawqueue.empty()) {      
+
+    while(!dq::drawqueue.empty()) {
       auto& p = dq::drawqueue.front();
       heptagon *h = get<0>(p);
       shiftmatrix V = get<1>(p);
       dq::drawqueue.pop();
-            
+
       cell *c = h->c7;
       if(!do_draw(c, V)) continue;
-      
+
       if(grigorchuk::view_lines) queueline(V * ddspin(c, 2) * xpush0(cgi.tessf/2), V * ddspin(c, 2) * xpush0(-cgi.tessf), 0xFF00FFFF, 2);
 
       if(grigorchuk::view_labels) queuestr(V, 0.3, grigorchuk::deform(dec[c->master]), 0xFFFFFF);
 
       if(patterns::whichCanvas == 'G' && c->landparam == 0)
         c->landparam = 0x102008 * (1 + ((hrmap_grigorchuk*)currentmap)->dec[c->master]->len);
-      
+
       drawcell(c, V * master_relative(c, false));
-      
+
       for(int i=0; i<3; i++) if(c->move(i))
         dq::enqueue_by_matrix(h->cmove(i), optimized_shift(V * adj(h, i)));
       }
     }
-  
+
   transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
     if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
       return inverse_shift(gmatrix0[h1->c7], gmatrix0[h2->c7]);
@@ -453,7 +453,7 @@ void create_grigorchuk_geometry() {
 
 int readArgsG() {
   using namespace arg;
-           
+
   if(0) ;
   else if(argis("-grig-limit")) {
     shift(); grigorchuk::grig_limit = argi();
@@ -462,13 +462,13 @@ int readArgsG() {
   else if(argis("-grigorchuk")) {
 
     PHASEFROM(3);
-    
+
     stop_game();
-    create_grigorchuk_geometry();    
+    create_grigorchuk_geometry();
     set_geometry(gGrigorchuk);
     set_variation(eVariation::pure);
     }
-  
+
   else if(argis("-grig-nolines")) {
     grigorchuk::view_lines = false;
     }
@@ -484,14 +484,14 @@ int readArgsG() {
 auto hook = addHook(hooks_args, 100, readArgsG)
   + addHook(hooks_newmap, 100, [] { return geometry == gGrigorchuk ? new hrmap_grigorchuk : nullptr; })
   + addHook(patterns::hooks_generate_canvas, 100, [] (cell* c) {
-    if(patterns::whichCanvas == 'G' && geometry == gGrigorchuk) 
+    if(patterns::whichCanvas == 'G' && geometry == gGrigorchuk)
       return 0x102008 * (1 + ((hrmap_grigorchuk*)currentmap)->dec[c->master]->len);
     return -1;
     })
   + addHook(dialog::hooks_display_dialog, 100, [] () {
     if(current_screen_cfunction() == showEuclideanMenu && geometry == gGrigorchuk) {
-      dialog::addBoolItem_action(XLAT("Grigorchuk lines"), grigorchuk::view_lines, 'L'); 
-      dialog::addBoolItem_action(XLAT("Grigorchuk labels"), grigorchuk::view_labels, 'M'); 
+      dialog::addBoolItem_action(XLAT("Grigorchuk lines"), grigorchuk::view_lines, 'L');
+      dialog::addBoolItem_action(XLAT("Grigorchuk labels"), grigorchuk::view_labels, 'M');
       }
     })
   + addHook(hooks_initialize, 100, create_grigorchuk_geometry)
@@ -518,7 +518,7 @@ auto hook = addHook(hooks_args, 100, readArgsG)
           gamestack::push();
           slide_backup(patterns::whichCanvas, 'G');
           slide_backup(firstland, laCanvas);
-          slide_backup(specialland, laCanvas);          
+          slide_backup(specialland, laCanvas);
           set_geometry(gGrigorchuk);
           start_game();
           resetview();

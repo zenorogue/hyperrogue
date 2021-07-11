@@ -10,10 +10,10 @@ vector<string> sokomap = {
   "########|########|########|########|########|########|########|########",
   "########|########|## #####|## #####|########|########|########|########",
   "########|##. ####|# $  ###|##.$####|##. ####|########|########|########",
-  "########|##.#####|# $$@###|##  ####|## #####|########|########|########", 
+  "########|##.#####|# $$@###|##  ####|## #####|########|########|########",
   "########|########|## #####|## #####|########|########|########|########",
   "########|########|########|########|########|########|########|########",
-  "########|########|########|########|########|########|########|########", 
+  "########|########|########|########|########|########|########|########",
   "########|########|########|########|########|########|########|########"
   };
 
@@ -49,7 +49,7 @@ void run_sb() {
   patterns::whichCanvas = 'g';
   patterns::canvasback = 0x101010;
   check_cgi();
-  start_game();  
+  start_game();
 
   for(int z=-8; z<8; z++)
   for(int y=-8; y<8; y++)
@@ -58,7 +58,7 @@ void run_sb() {
     cell *c = crystal::get_heptagon_at(co)->c7;
     setdist(c, 7, c);
     }
-  
+
   for(int z=-8; z<8; z++)
   for(int y=-8; y<8; y++)
   for(int x=-8; x<8; x++) {
@@ -67,16 +67,16 @@ void run_sb() {
       what = '#';
     else
       what = sokomap[y][x*9+z];
-    
+
     crystal::coord co = crystal::c0; co[0] = 2*x; co[1] = 2*y; co[2] = 2*z;
     cell *c = crystal::get_heptagon_at(co)->c7;
-    
+
     color_t col;
     for(int i=0; i<3; i++)
       part(col, i) = 0x80 + 0x20 * (co[i] - 5);
-    
+
     c->landparam = col;
-    
+
     if(what == '#')
       c->wall = waStone;
     else if(what == '$')
@@ -125,7 +125,7 @@ bool sokomap2() {
     check_cgi();
     cgi.require_shapes();
     initquickqueue();
-    
+
     if(1) {
       auto gm = gmatrix;
       dynamicval<bool> ww(wmspatial, false);
@@ -135,7 +135,7 @@ bool sokomap2() {
       dynamicval<shiftmatrix> s3(cwtV, cwtV);
       dynamicval<array<map<cell*, animation>, ANIMLAYERS>> an(animations);
       animations[LAYER_SMALL] = {};
-      
+
       for(int x=0; x<4; x++)
       for(int y=0; y<4; y++)
       for(int z=0; z<4; z++) {
@@ -143,16 +143,16 @@ bool sokomap2() {
         cell *c = crystal::get_heptagon_at(co)->c7;
         drawcell(c, shiftless(euscale(.12,.12) * eupush(3+(vid.xres*1./vid.yres-1)*12, -16) * eupush(z*4.2+x, y) * Id));
         }
-    
+
       gmatrix = gm;
       }
-  
+
     quickqueue();
     glflush();
     }
-  
+
   check_cgi();
-  
+
   return true;
   }
 

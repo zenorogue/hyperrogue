@@ -59,16 +59,16 @@ void gentexture() {
 
     draw_boundary(0);
     draw_boundary(1);
-  
+
     draw_model_elements();
     drawthemap();
     drawqueue();
     calcparam();
 
     rb.reset();
-    
+
     swap(buf1, buf2);
-    
+
     rendercenter = centerover;
     rendercenterV = gmatrix[centerover];
 
@@ -77,7 +77,7 @@ void gentexture() {
 
 void frame() {
   gentexture();
-  if(auto_move) { 
+  if(auto_move) {
     color_t col = minf[moReptile].color;
     drawMonsterType(moReptile, NULL, shiftless(spin(alpha)), col, mdist, col);
     mapeditor::drawplayer = false;
@@ -115,7 +115,7 @@ void make_shape() {
       cgi.hpcpush(xspinpush0(a, ra));
       cgi.hpcpush(xspinpush0(a, rb));
       cgi.hpcpush(xspinpush0(b, rb));
-      
+
       if(z) {
         cgi.hpcpush(xspinpush0(a, ra));
         cgi.hpcpush(xspinpush0(b, ra));
@@ -136,7 +136,7 @@ void make_shape() {
     cgi.hpcpush(xspinpush0(a, crad + ceps));
     }
   cgi.finishshape();
-  
+
   cgi.extra_vertices();
 
   hyperpoint ph = xspinpush0(0, crad);
@@ -191,11 +191,11 @@ bool render(cell *c, const shiftmatrix& V) {
       h /= crad_p;
       h *= .99999999;
       // Poincare to hyperboloid
-      
+
       h = perspective_to_space(h, inner_alpha, cgclass);
 
       /*
-      ld hr = sqhypot_d(2, h);  
+      ld hr = sqhypot_d(2, h);
       ld hz = (1 + hr) / (1 - hr);
       h[0] *= (hz+1);
       h[1] *= (hz+1);
@@ -251,7 +251,7 @@ void enable() {
   rv_hook(hooks_o_key, 80, [] (o_funcs& v) { v.push_back(named_dialog("inner maps", show)); });
   }
 
-auto hook = arg::add3("-inner-map", enable) 
+auto hook = arg::add3("-inner-map", enable)
   + addHook(hooks_configfile, 100, [] {
     param_f(texture_alpha, "inner_talpha")
     ->editable(0, 5, .1, "texture projection distance", "", 't');
@@ -269,8 +269,8 @@ auto hook = arg::add3("-inner-map", enable)
     param_b(auto_move, "auto_move")
     ->editable("animate", 'a');
     param_f(iterations, "inner_iterations")
-    ->editable(0, 30, 0.2, "iterations per frame", 
-      "How many times per frame should we re-render the map", 
+    ->editable(0, 30, 0.2, "iterations per frame",
+      "How many times per frame should we re-render the map",
       'i')
     ->set_reaction(need_redo);
     })
@@ -283,13 +283,13 @@ auto hook = arg::add3("-inner-map", enable)
 
         "We can also project a hyperbolic plane to a hyperbolic plane of different curvature.\n\n"
         "Creatures living in the hyperbolic world may use the native Poincaré model to get conformal, circular, and totally useless maps of their whole world.\n\n"
-        
+
         "Press 'o' to change the settings."
         ,
         [] (presmode mode) {
           slide_url(mode, 't', "Twitter link (with description)", "https://twitter.com/zenorogue/status/1212408644941295619");
           setCanvas(mode, 'r');
-          
+
           if(mode == pmStart) {
             if(!shmup::on) restart_game(rg::shmup);
             slide_backup(mapeditor::drawplayer, true);

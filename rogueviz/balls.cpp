@@ -1,7 +1,7 @@
 #include "rogueviz.h"
 
 /** A physics visualization of balls in a shell.
- *  
+ *
  *  Compile with HyperRogue, enable a 3D geometry (e.g. Nil), and watch.
  *  This is not configurable yet... you may need to manually change the gravity direction, or the number of balls
  *  (it is not optimized, and it does not work in real time with the default number of balls).
@@ -27,10 +27,10 @@ hpcshape shSmallBall, shBigBall, shShell;
 
 void initialize(int max_ball) {
   on = true;
-  
+
   cgi.make_ball(shSmallBall, r_small_ball, 2);
   cgi.make_ball(shBigBall, r_big_ball, 4);
-  
+
   cgi.bshape(shShell, PPR::WALL);
   shShell.flags |= POLY_TRIANGLES;
 
@@ -49,31 +49,31 @@ void initialize(int max_ball) {
     }
   cgi.finishshape();
   cgi.extra_vertices();
-  
-  for(int a=-max_ball; a<=max_ball; a++) 
-  for(int b=-max_ball; b<=max_ball; b++) 
+
+  for(int a=-max_ball; a<=max_ball; a++)
+  for(int b=-max_ball; b<=max_ball; b++)
   for(int c=-max_ball; c<=max_ball; c++)
   {
     hyperpoint h = point3(0.21*a + 1e-2, 0.21*b, 0.21*c);
-    
+
     if(hypot_d(3, h) > r_big_ball - r_small_ball) continue;
-    
+
     transmatrix T = rgpushxto0(direct_exp(h));
-        
+
     balls.emplace_back(ball{T*C0, T*ztangent(1e-3)});
     }
-    
+
   }
 
 bool draw_balls(cell *c, const shiftmatrix& V) {
   if(!on) return false;
-  
+
   if(c == currentmap->gamestart()) {
     for(auto& b: balls)
       queuepoly(V * rgpushxto0(b.at), shSmallBall, 0xFFFFFFFF);
     queuepoly(V, shShell, 0x0000F0FF);
     }
-  
+
   return false;
   }
 
@@ -113,14 +113,14 @@ bool turn(int delta) {
       b.vel += ctangent(2, 1e-6) * gravity;
 
       geodesic_steps(b.at, b.vel, 1);
-      
+
       if(!nonisotropic && !euclid) {
         ld e = sqrt(abs(inner(b.at, b.at)));
         b.at /= e;
         ld e2 = inner(b.at, b.vel) * sig(3);
         b.vel -= b.at * e2;
         }
-      
+
       hyperpoint v = inverse_exp(shiftless(b.at));
       ld d = hypot_d(3, v);
       ld rbs = r_big_ball - r_small_ball;
@@ -130,19 +130,19 @@ bool turn(int delta) {
         hyperpoint ort = ve / d;
         transmatrix T = gpushxto0(b.at);
         b.vel -= inner(T*b.vel, T*ort) * ort * (1 + elastic_out);
-        
+
         b.at = c;
         if(!nonisotropic && !euclid) {
-          ld e2 = inner(b.at, b.vel) * sig(3);          
+          ld e2 = inner(b.at, b.vel) * sig(3);
           b.vel -= b.at * e2;
           }
         }
       }
 
-    /* This is not optimized. It should use a partition of the space, 
+    /* This is not optimized. It should use a partition of the space,
      * to tell which balls have a chance to touch each other. */
 
-    for(auto& b1: balls) 
+    for(auto& b1: balls)
     for(auto& b2: balls) {
       if(&b2 == &b1) break;
       hyperpoint dif = inverse_exp(shiftless(gpushxto0(b1.at) * b2.at));
@@ -154,9 +154,9 @@ bool turn(int delta) {
         ld vel2 = +inner(gpushxto0(b2.at) * b2.vel, ort2);
         ld vels = vel1 + vel2;
         if(vels < 0) continue;
-        
+
         vels *= (1 + elastic_in) / 2;
-        
+
         b1.vel -= rgpushxto0(b1.at) * (vels * ort1);
         b2.vel -= rgpushxto0(b2.at) * (vels * ort2);
         }
@@ -167,7 +167,7 @@ bool turn(int delta) {
 
 int args() {
   using namespace arg;
-           
+
   if(0) ;
 
   else if(argis("-ball-physics")) {
@@ -189,7 +189,7 @@ auto celldemo = addHook(hooks_drawcell, 100, draw_balls) +
     addHook(hooks_args, 100, args) +
     addHook(hooks_clearmemory, 40, [] () {
       balls.clear();
-      on = false;      
+      on = false;
       });
 
 }

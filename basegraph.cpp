@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- basic graphics
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-/** \file basegraph.cpp 
+/** \file basegraph.cpp
  *  \brief This file implements the basic graphical routines
  */
 
@@ -30,7 +30,7 @@ struct display_data {
   /** Center of the current map view, in pixels. */
   int xcenter, ycenter;
   ld radius;
-  int scrsize;  
+  int scrsize;
   bool sidescreen;
 
   ld tanfov;
@@ -78,9 +78,9 @@ int utfsize(char c) {
 
 EX int get_sightrange() { return getDistLimit() + sightrange_bonus; }
 
-EX int get_sightrange_ambush() { 
+EX int get_sightrange_ambush() {
   #if CAP_COMPLEX2
-  return max(get_sightrange(), ambush::distance); 
+  return max(get_sightrange(), ambush::distance);
   #else
   return get_sightrange();
   #endif
@@ -89,7 +89,7 @@ EX int get_sightrange_ambush() {
 bool display_data::in_anaglyph() { return vid.stereo_mode == sAnaglyph; }
 bool display_data::stereo_active() { return vid.stereo_mode != sOFF; }
 
-ld display_data::eyewidth() { 
+ld display_data::eyewidth() {
   switch(vid.stereo_mode) {
     case sAnaglyph:
       return vid.anaglyph_eyewidth;
@@ -175,7 +175,7 @@ EX void present_surface() {
   SDL_RenderCopy(s_renderer, s_texture, nullptr, nullptr);
   SDL_RenderPresent(s_renderer);
   #else
-  SDL_UpdateRect(s, 0, 0, 0, 0);  
+  SDL_UpdateRect(s, 0, 0, 0, 0);
   #endif
   }
 
@@ -224,7 +224,7 @@ int textwidth(int siz, const string &str) {
 #if CAP_SDLTTF
   fix_font_size(siz);
   loadfont(siz);
-  
+
   int w, h;
   TTF_SizeUTF8(font[siz], str.c_str(), &w, &h);
   // printf("width = %d [%d]\n", w, isize(str));
@@ -281,9 +281,9 @@ void display_data::set_all(int ed, ld shift) {
     set_viewport(ed);
     new_projection_needed = false;
     }
-  }  
+  }
 
-void display_data::set_mask(int ed) { 
+void display_data::set_mask(int ed) {
   if(ed == 0 || vid.stereo_mode != sAnaglyph) {
     glColorMask( GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE );
     }
@@ -295,16 +295,16 @@ void display_data::set_mask(int ed) {
     }
   }
 
-void display_data::set_viewport(int ed) {  
+void display_data::set_viewport(int ed) {
   ld xtop = current_display->xtop;
   ld ytop = current_display->ytop;
   ld xsize = current_display->xsize;
   ld ysize = current_display->ysize;
-  
+
   if(ed == 0 || vid.stereo_mode != sLR) ;
   else if(ed == 1) xsize /= 2;
   else if(ed == -1) xsize /= 2, xtop += xsize;
-    
+
   glViewport(xtop, ytop, xsize, ysize);
   }
 
@@ -318,11 +318,11 @@ EX void setGLProjection(color_t col IS(backcolor)) {
 
   glClearColor(part(col, 2) / 255.0, part(col, 1) / 255.0, part(col, 0) / 255.0, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  
+
   GLERR("setGLProjection #1");
 
   glEnable(GL_BLEND);
-#ifndef GLES_ONLY  
+#ifndef GLES_ONLY
   if(vid.antialias & AA_LINES) {
     glEnable(GL_LINE_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -346,17 +346,17 @@ EX void setGLProjection(color_t col IS(backcolor)) {
 
   //glLineWidth(1.0f);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  
+
 #ifdef GL_ES
   glClearDepthf(1.0f);
 #else
   glClearDepth(1.0f);
 #endif
   glDepthFunc(GL_LEQUAL);
-  
+
   GLERR("setGLProjection");
   reset_projection();
-  
+
   glhr::set_depthwrite(true);
   glClear(GL_DEPTH_BUFFER_BIT);
   }
@@ -380,8 +380,8 @@ struct charinfo_t {
 
 struct glfont_t {
   GLuint texture;                                     // Holds The Texture Id
-//GLuint list_base;                                   // Holds The First Display List ID  
-  vector<charinfo_t> chars; 
+//GLuint list_base;                                   // Holds The First Display List ID
+  vector<charinfo_t> chars;
   };
 
 const int max_glfont_size = 72;
@@ -407,22 +407,22 @@ void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
   int otwidth = txt->w;
   int otheight = txt->h;
 #endif
-  
+
   if(otwidth+curx+1 > FONTTEXTURESIZE) curx = 0, cury += theight+1, theight = 0;
-  
+
   theight = max(theight, otheight);
-  
+
   for(int j=0; j<otheight;j++) for(int i=0; i<otwidth; i++) {
-    fontdata[j+cury][i+curx] = 
+    fontdata[j+cury][i+curx] =
 #if CAP_TABFONT
     (i>=otwidth || j>=otheight) ? 0 : (tpix[tpixindex++] * 0x100) | 0xFF;
 #else
     ((i>=txt->w || j>=txt->h) ? 0 : ((qpixel(txt, i, j)>>24)&0xFF) * 0x100) | 0x00FF;
 #endif
     }
-  
+
   auto& c = f.chars[ch];
-  
+
   c.w = otwidth;
   c.h = otheight;
 
@@ -432,20 +432,20 @@ void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
   c.ty1 = (float) (cury+otheight);
   curx += otwidth+1;
   }
-  
+
 EX void init_glfont(int size) {
   if(glfont[size]) return;
   DEBBI(DF_GRAPH, ("init GL font: ", size));
-  
+
 #if !CAP_TABFONT
   loadfont(size);
   if(!font[size]) return;
 #endif
-  
+
   glfont[size] = new glfont_t;
-  
+
   glfont_t& f(*(glfont[size]));
-  
+
   f.chars.resize(CHARS);
 
 //f.list_base = glGenLists(128);
@@ -453,7 +453,7 @@ EX void init_glfont(int size) {
 
 #if !CAP_TABFONT
   char str[2]; str[1] = 0;
-  
+
   SDL_Color white;
   white.r = white.g = white.b = 255;
 #endif
@@ -465,13 +465,13 @@ EX void init_glfont(int size) {
 #if CAP_TABFONT
   resetTabFont();
 #endif
-  
+
 //  glListBase(0);
 
   curx = 0, cury = 0, theight = 0;
-  
+
   for(int ch=1;ch<CHARS;ch++) {
-  
+
     if(ch<32) continue;
 
 #if CAP_TABFONT
@@ -493,22 +493,22 @@ EX void init_glfont(int size) {
     generateFont(ch, txt);
 #endif
     sdltogl(txt, f, ch);
-    SDL_FreeSurface(txt);    
+    SDL_FreeSurface(txt);
 #endif
     }
 
   glBindTexture( GL_TEXTURE_2D, f.texture);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-  
+
   theight = next_p2(cury + theight);
-  
+
   glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, FONTTEXTURESIZE, theight, 0,
-    GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 
+    GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE,
     fontdata);
 
   for(int ch=0; ch<CHARS; ch++) f.chars[ch].ty0 /= theight, f.chars[ch].ty1 /= theight;
- 
+
 #if CAP_CREATEFONT
   printf("#define NUMEXTRA %d\n", NUMEXTRA);
 #define DEMACRO(x) #x
@@ -534,10 +534,10 @@ int gl_width(int size, const char *s) {
 
   int x = 0;
   for(int i=0; s[i];) {
-    int tabid = getnext(s,i);    
+    int tabid = getnext(s,i);
     x += f.chars[tabid].w * size/gsiz;
     }
-  
+
   return x;
   }
 
@@ -559,24 +559,24 @@ bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, i
 #if CAP_FIXEDSIZE
   gsiz = CAP_FIXEDSIZE;
 #endif
-  
+
   init_glfont(gsiz);
   if(!glfont[gsiz]) return false;
 
   glfont_t& f(*glfont[gsiz]);
-  
+
   int tsize = 0;
-  
+
   for(int i=0; s[i];) {
     tsize += f.chars[getnext(s,i)].w * size/gsiz;
     }
   x -= tsize * align / 16;
   y += f.chars[32].h * size / (gsiz*2);
-  
+
   int ysiz = f.chars[32].h * size / gsiz;
 
   bool clicked = (mousex >= x && mousey <= y && mousex <= x+tsize && mousey >= y-ysiz);
-  
+
   color_t icolor = (color << 8) | 0xFF;
   if(icolor != text_color || f.texture != text_texture || shift != text_shift || shapes_merged) {
     glflush();
@@ -585,35 +585,35 @@ bool gl_print(int x, int y, int shift, int size, const char *s, color_t color, i
     text_shift = shift;
     }
   texts_merged++;
-  
+
   auto& tver = text_vertices;
 
   glBindTexture(GL_TEXTURE_2D, f.texture);
 
   for(int i=0; s[i];) {
-  
+
     int tabid = getnext(s,i);
     auto& c = f.chars[tabid];
     int wi = c.w * size/gsiz;
     int hi = c.h * size/gsiz;
 
     GLERR("pre-print");
-      
+
     glhr::textured_vertex t00 = charvertex(x,    y-hi, c.tx0, c.ty0);
     glhr::textured_vertex t01 = charvertex(x,    y,    c.tx0, c.ty1);
     glhr::textured_vertex t11 = charvertex(x+wi, y,    c.tx1, c.ty1);
     glhr::textured_vertex t10 = charvertex(x+wi, y-hi, c.tx1, c.ty0);
-    
+
     tver.push_back(t00);
     tver.push_back(t01);
     tver.push_back(t10);
     tver.push_back(t10);
     tver.push_back(t01);
     tver.push_back(t11);
-      
+
     x += wi;
     }
-  
+
   return clicked;
   }
 
@@ -670,7 +670,7 @@ EX void gdpush(int t) {
 EX bool displaychr(int x, int y, int shift, int size, char chr, color_t col) {
   gdpush(2); gdpush(x); gdpush(y); gdpush(8);
   gdpush(col); gdpush(size); gdpush(0);
-  gdpush(1); gdpush(chr); 
+  gdpush(1); gdpush(chr);
   return false;
   }
 
@@ -709,8 +709,8 @@ EX bool displayfr(int x, int y, int b, int size, const string &s, color_t color,
   int mx = mousex - x;
   int my = mousey - y;
   int len = textwidth(size, s);
-  return 
-    mx >= -len*align/32   && mx <= +len*(16-align)/32 && 
+  return
+    mx >= -len*align/32   && mx <= +len*(16-align)/32 &&
     my >= -size*3/4 && my <= +size*3/4;
   }
 
@@ -731,7 +731,7 @@ EX bool displaystr(int x, int y, int shift, int size, const char *str, color_t c
   if(size < 4 || size > 2000) {
     return false;
     }
-  
+
 #if CAP_GLFONT
   if(vid.usingGL) return gl_print(x, y, shift, size, str, color, align);
 #endif
@@ -741,19 +741,19 @@ EX bool displaystr(int x, int y, int shift, int size, const char *str, color_t c
   if(towarn) towarn = false, printf("WARNING: NOTTF works only with OpenGL!\n");
   return false;
 #else
-  
+
   SDL_Color col;
   col.r = (color >> 16) & 255;
   col.g = (color >> 8 ) & 255;
   col.b = (color >> 0 ) & 255;
-  
+
   col.r >>= darken; col.g >>= darken; col.b >>= darken;
 
   fix_font_size(size);
   loadfont(size);
 
   SDL_Surface *txt = ((vid.antialias & AA_FONT)?TTF_RenderUTF8_Blended:TTF_RenderUTF8_Solid)(font[size], str, col);
-  
+
   if(txt == NULL) return false;
 
   SDL_Rect rect;
@@ -763,9 +763,9 @@ EX bool displaystr(int x, int y, int shift, int size, const char *str, color_t c
 
   rect.x = x - rect.w * align / 16;
   rect.y = y - rect.h/2;
-  
+
   bool clicked = (mousex >= rect.x && mousey >= rect.y && mousex <= rect.x+rect.w && mousey <= rect.y+rect.h);
-  
+
   if(shift) {
     #if CAP_SDL2
     SDL_Surface* txt2 = SDL_ConvertSurfaceFormat(txt, SDL_PIXELFORMAT_RGBA8888, 0);
@@ -784,14 +784,14 @@ EX bool displaystr(int x, int y, int shift, int size, const char *str, color_t c
     SDL_FreeSurface(txt2);
     }
   else {
-    SDL_BlitSurface(txt, NULL, s,&rect); 
+    SDL_BlitSurface(txt, NULL, s,&rect);
     }
   SDL_FreeSurface(txt);
-  
+
   return clicked;
 #endif
   }
-                  
+
 EX bool displaystr(int x, int y, int shift, int size, const string &s, color_t color, int align) {
   return displaystr(x, y, shift, size, s.c_str(), color, align);
   }
@@ -843,7 +843,7 @@ EX vector<msginfo> msgs;
 EX vector<msginfo> gamelog;
 
 EX void flashMessages() {
-  for(int i=0; i<isize(msgs); i++) 
+  for(int i=0; i<isize(msgs); i++)
     if(msgs[i].stamp < ticks - 1000 && !msgs[i].flashout) {
       msgs[i].flashout = true;
       msgs[i].stamp = ticks;
@@ -886,7 +886,7 @@ EX void addMessage(string s, char spamtype) {
   m.gtstamp = getgametime();
   m.turnstamp = turncount;
   m.quantity = 1;
-  
+
   addMessageToLog(m, gamelog);
   addMessageToLog(m, msgs);
   }
@@ -902,7 +902,7 @@ EX int rhypot(int a, int b) { return (int) sqrt(a*a - b*b); }
 EX ld realradius() {
   ld vradius = current_display->radius;
   if(sphere) {
-    if(sphereflipped()) 
+    if(sphereflipped())
       vradius /= sqrt(pconf.alpha*pconf.alpha - 1);
     else
       vradius = 1e12; // use the following
@@ -937,12 +937,12 @@ EX void drawmessage(const string& s, int& y, color_t col) {
     }
 
   for(int i=1; i<isize(s); i++)
-    if(s[i-1] == ' ' && textwidth(vid.fsize, "..."+s.substr(i)) <= space) {    
+    if(s[i-1] == ' ' && textwidth(vid.fsize, "..."+s.substr(i)) <= space) {
       displayfr(0, y, 1, vid.fsize, "..."+s.substr(i), col, 0);
       y -= vid.fsize;
       drawmessage(s.substr(0, i-1), y, col);
       return;
-      }  
+      }
 
   // no chance
   displayfr(0, y, 1, vid.fsize, s, col, 0);
@@ -1009,7 +1009,7 @@ EX void drawCircle(int x, int y, int size, color_t color, color_t fillcolor IS(0
       glhr::color2(fillcolor);
       glDrawArrays(GL_TRIANGLE_FAN, 0, pts);
       }
-    if(color) { 
+    if(color) {
       glhr::color2(color);
       glDrawArrays(GL_LINE_LOOP, 0, pts);
       }
@@ -1055,7 +1055,7 @@ EX void displaymm(char c, int x, int y, int rad, int size, const string& title, 
     displayfr(x, y, rad, size, title, 0xFFFF00, align);
     getcstat = SETMOUSEKEY, newmousekey = c;
     }
-  }  
+  }
 
 EX bool displayButtonS(int x, int y, const string& name, color_t col, int align, int size) {
   if(displaystr(x, y, 0, size, name, col, align)) {
@@ -1072,7 +1072,7 @@ EX void displayColorButton(int x, int y, const string& name, int key, int align,
     }
   }
 
-ld textscale() { 
+ld textscale() {
   return vid.fsize / (current_display->radius * cgi.crossf) * (1+pconf.alpha) * 2;
   }
 
@@ -1133,7 +1133,7 @@ EX void close_window() {
 EX void apply_screen_settings() {
   if(!need_to_apply_screen_settings()) return;
   if(!graphics_on) return;
- 
+
 #if ISANDROID
   if(vid.full != vid.want_fullscreen)
     addMessage(XLAT("Reenter HyperRogue to apply this setting"));
@@ -1194,17 +1194,17 @@ EX int current_window_flags = -1;
 EX void setvideomode() {
 
   DEBBI(DF_INIT | DF_GRAPH, ("setvideomode"));
-  
+
   vid.full = vid.want_fullscreen;
-  
+
   tie(vid.xres, vid.yres) = get_requested_resolution();
-    
+
   compute_fsize();
 
   int flags = 0;
-  
+
   vid.antialias = vid.want_antialias;
-    
+
 #if CAP_GL
   vid.usingGL = vid.wantGL;
   if(vid.usingGL) {
@@ -1214,10 +1214,10 @@ EX void setvideomode() {
 
     vid.current_vsync = want_vsync();
     #if !ISMOBWEB && !CAP_SDL2
-    if(vid.current_vsync) 
+    if(vid.current_vsync)
       SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 1 );
     else
-      SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 0 ); 
+      SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 0 );
     #endif
     if(vid.antialias & AA_MULTI) {
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
@@ -1248,7 +1248,7 @@ EX void setvideomode() {
     }
   #endif
   #endif
-  
+
   #if CAP_SDL2
   if(s_renderer) SDL_DestroyRenderer(s_renderer), s_renderer = nullptr;
   #endif
@@ -1260,20 +1260,20 @@ EX void setvideomode() {
     if(s_window)
       SDL_SetWindowSize(s_window, vid.xres, vid.yres);
     else
-      s_window = SDL_CreateWindow(CUSTOM_CAPTION, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+      s_window = SDL_CreateWindow(CUSTOM_CAPTION, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
       vid.xres, vid.yres,
       flags | sizeflag
       );
     current_window_flags = (flags | sizeflag);
     #else
     s = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | sizeflag);
-    #endif  
+    #endif
     };
-  
+
   create_win();
-  
+
   auto& sw = SDL12(s, s_window);
-  
+
   if(vid.full && !sw) {
     vid.xres = vid.xscr;
     vid.yres = vid.yscr;
@@ -1286,22 +1286,22 @@ EX void setvideomode() {
     addMessage("Failed to set the graphical mode: "+its(vid.xres)+"x"+its(vid.yres)+(vid.full ? " fullscreen" : " windowed"));
     vid.xres = 640;
     vid.yres = 480;
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);    
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
     vid.antialias &= ~AA_MULTI;
     sizeflag = SDL12(SDL_RESIZABLE, SDL_WINDOW_RESIZABLE);
     create_win();
     }
-  
+
   #if CAP_SDL2
   s_renderer = SDL_CreateRenderer(s_window, -1, vid.current_vsync ? SDL_RENDERER_PRESENTVSYNC : 0);
   SDL_GetRendererOutputSize(s_renderer, &vid.xres, &vid.yres);
-  
+
   if(s_texture) SDL_DestroyTexture(s_texture), s_texture = nullptr;
   s_texture = SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, vid.xres, vid.yres);
-  
+
   if(s) SDL_FreeSurface(s), s = nullptr;
   s = shot::empty_surface(vid.xres, vid.yres, false);
-  
+
   if(s_software_renderer) SDL_DestroyRenderer(s_software_renderer), s_software_renderer = nullptr;
   s_software_renderer = SDL_CreateSoftwareRenderer(s);
   #endif
@@ -1318,7 +1318,7 @@ EX void setvideomode() {
       glDisable(GL_MULTISAMPLE);
       glDisable(GL_MULTISAMPLE_ARB);
       }
-  
+
     glViewport(0, 0, vid.xres, vid.yres);
     glhr::init();
     resetGL();
@@ -1336,7 +1336,7 @@ EX int SDL_Init1(Uint32 flags) {
     sdl_on = true;
     return SDL_Init(flags);
     }
-  else  
+  else
     return SDL_InitSubSystem(flags);
   }
 #endif
@@ -1412,12 +1412,12 @@ EX void init_graph() {
     printf("Failed to initialize graphics.\n");
     exit(2);
     }
-    
+
   #if !CAP_SDL2
   SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
   SDL_EnableUNICODE(1);
   #endif
-#endif  
+#endif
 
 #if ISANDROID
   vid.full = vid.want_fullscreen;
@@ -1427,15 +1427,15 @@ EX void init_graph() {
 EX void initialize_all() {
 
   DEBBI(DF_INIT | DF_GRAPH, ("initgraph"));
-  
+
   initConfig();
 
 #if CAP_SDLJOY
   joyx = joyy = 0; joydir.d = -1;
 #endif
-  
+
   restartGraph();
-  
+
   if(noGUI) {
 #if CAP_COMMANDLINE
     arg::read(2);
@@ -1459,10 +1459,10 @@ EX void initialize_all() {
   init_graph();
   check_cgi();
   cgi.require_basics();
-  
+
   init_font();
 
-#if CAP_SDLJOY  
+#if CAP_SDLJOY
   initJoysticks();
 #endif
 
@@ -1499,7 +1499,7 @@ EX namespace subscreens {
   EX vector<display_data> player_displays;
   EX bool in;
   EX int current_player;
-  
+
   EX bool is_current_player(int id) {
     if(!in) return true;
     return id == current_player;

@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- binary tilings
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-/** \file binary-tiling.cpp 
+/** \file binary-tiling.cpp
  *  \brief Binary tilings in 2D and 3D
  */
 
@@ -22,7 +22,7 @@ EX namespace bt {
 #if !CAP_BT
   EX int updir() { return 0; }
 #endif
-  
+
 #if CAP_BT
   #if HDR
   enum bindir {
@@ -36,7 +36,7 @@ EX namespace bt {
     bd_down_right = 6 /* for cells of degree 7 */
     };
   #endif
-  
+
   EX int type_of(heptagon *h) {
     return h->c7->type;
     }
@@ -45,7 +45,7 @@ EX namespace bt {
   EX int mapside(heptagon *h) {
     return h->zebraval;
     }
-  
+
   #if DEBUG_BINARY_TILING
   map<heptagon*, long long> xcode;
   map<long long, heptagon*> rxcode;
@@ -63,7 +63,7 @@ EX namespace bt {
     breakhere();
     }
   #endif
-  
+
   EX heptagon *path(heptagon *h, int d, int d1, std::initializer_list<int> p) {
     static int rec = 0;
     rec++; if(rec>100) exit(1);
@@ -75,7 +75,7 @@ EX namespace bt {
       // printf(" %p", h1);
       }
 
-    #if DEBUG_BINARY_TILING    
+    #if DEBUG_BINARY_TILING
     if(xcode[h1] != expected_xcode(h, d)) {
       printf("expected_xcode mismatch\n");
       breakhere();
@@ -100,10 +100,10 @@ EX namespace bt {
     int z = h->c.spin(S7-1);
     return path(h, d, d1, p[z]);
     }
-    
+
   EX ld hororec_scale = 0.25;
   EX ld horohex_scale = 0.6;
-  
+
   EX void make_binary_lands(heptagon *parent, heptagon *h) {
     if(!parent->emeraldval) parent->emeraldval = currentmap->gamestart()->land;
     eLand z = eLand(parent->emeraldval);
@@ -120,7 +120,7 @@ EX namespace bt {
     else
       h->emeraldval = z;
     }
-  
+
   EX heptagon *build(heptagon *parent, int d, int d1, int t, int side, int delta) {
     auto h = buildHeptagon1(init_heptagon(t), parent, d, hsA, d1);
     h->distance = parent->distance + delta;
@@ -186,21 +186,21 @@ EX namespace bt {
     return build(parent, d, d1, S7, side, delta);
     }
   #endif
-  
+
   struct hrmap_binary : hrmap {
-  
+
     heptagon *origin;
     std::mt19937 directions_generator;
-  
+
     hrmap_binary(heptagon *o) : origin(o) { set_seed(); }
-    
+
     void set_seed() { directions_generator.seed(137137137); }
-    
+
     int nextdir(int choices) { return directions_generator() % choices; }
 
     heptagon *getOrigin() override { return origin; }
 
-    hrmap_binary() { 
+    hrmap_binary() {
       set_seed();
       origin = hyperbolic_origin();
       #if DEBUG_BINARY_TILING
@@ -219,9 +219,9 @@ EX namespace bt {
         case gBinaryTiling: {
           switch(d) {
             case bd_right: {
-              if(mapside(h) > 0 && type_of(h) == 7) 
+              if(mapside(h) > 0 && type_of(h) == 7)
                 return path(h, d, bd_left, {bd_left, bd_down, bd_right, bd_up});
-              else if(mapside(h) >= 0) 
+              else if(mapside(h) >= 0)
                 return build(parent, bd_right, bd_left, type_of(parent) ^ 1, 1, 0);
               else if(type_of(h) == 6)
                 return path(h, d, bd_left, {bd_down, bd_right, bd_up, bd_left});
@@ -229,9 +229,9 @@ EX namespace bt {
                 return path(h, d, bd_left, {bd_down_right, bd_up});
               }
             case bd_left: {
-              if(mapside(h) < 0 && type_of(h) == 7) 
+              if(mapside(h) < 0 && type_of(h) == 7)
                 return path(h, d, bd_right, {bd_right, bd_down, bd_left, bd_up});
-              else if(mapside(h) <= 0) 
+              else if(mapside(h) <= 0)
                 return build(parent, bd_left, bd_right, type_of(parent) ^ 1, -1, 0);
               else if(type_of(h) == 6)
                 return path(h, d, bd_right, {bd_down, bd_left, bd_up, bd_right});
@@ -244,7 +244,7 @@ EX namespace bt {
             case bd_up_left: {
               return path(h, d, bd_down_right, {bd_up, bd_left});
               }
-            case bd_up: 
+            case bd_up:
               return build(parent, bd_up, bd_down, 6, mapside(parent), 1);
             default:
               /* bd_down */
@@ -306,7 +306,7 @@ EX namespace bt {
               throw hr_exception("wrong dir");
             }
           }
-        #if MAXMDIM >= 4         
+        #if MAXMDIM >= 4
         case gBinary3: {
           switch(d) {
             case 0: case 1:
@@ -370,7 +370,7 @@ EX namespace bt {
               throw hr_exception("wrong dir");
             }
           }
-        case gHoroTris: {            
+        case gHoroTris: {
           switch(d) {
             case 0: case 1: case 2: case 3:
               return build3(parent, d, 7, 1);
@@ -389,7 +389,7 @@ EX namespace bt {
           }
         case gHoroHex: {
           // the comment is a picture...
-          // generated with the help of hexb.cpp          
+          // generated with the help of hexb.cpp
           switch(d) {
             case 0: case 1: case 2:
               return build3(parent, d, 13, 1);
@@ -423,13 +423,13 @@ EX namespace bt {
             }
           }
         #endif
-        default: 
+        default:
           throw hr_exception("wrong geometry");
         }
       }
 
     int shvid(cell *c) override {
-      if(geometry == gBinaryTiling)  
+      if(geometry == gBinaryTiling)
         return c->type-6;
       else if(geometry == gBinary4 || geometry == gTernary)
         return c->master->zebraval;
@@ -475,11 +475,11 @@ EX namespace bt {
     vector<hyperpoint> get_vertices(cell* c) override {
       vector<hyperpoint> res;
       ld yy = log(2) / 2;
-      auto add = [&] (hyperpoint h) { 
+      auto add = [&] (hyperpoint h) {
         res.push_back(bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]));
         };
       switch(geometry) {
-        case gBinary3: 
+        case gBinary3:
           for(int x=-1; x<2; x++) for(int y=-1; y<2; y++) for(int z=-1; z<=1; z+=2)
             if(z == -1 || x != 0 || y != 0)
               add(point3(x,y,z));
@@ -487,12 +487,12 @@ EX namespace bt {
         case gHoroTris: {
           ld r = sqrt(3)/6;
           ld r2 = r * 2;
-          
+
           hyperpoint shift3 = point3(0,0,-3);
           hyperpoint shift1 = point3(0,0,-1);
-          
+
           for(int i=0; i<3; i++) {
-            hyperpoint t0 = spin(120 * degree * i) * point3(0,-r2,-1);          
+            hyperpoint t0 = spin(120 * degree * i) * point3(0,-r2,-1);
             add(t0);
             add(-2 * t0 + shift3);
             add(-2 * t0 + shift1);
@@ -514,7 +514,7 @@ EX namespace bt {
         }
       return res;
       }
-    
+
     ld spin_angle(cell *c, int d) override {
       if(WDIM == 3 || geometry == gBinary4 || geometry == gTernary) {
         return hrmap::spin_angle(c, d);
@@ -529,11 +529,11 @@ EX namespace bt {
         case bd_up: return xpush(-log(2));
         case bd_left: return parabolic(-1);
         case bd_right: return parabolic(+1);
-        case bd_down: 
+        case bd_down:
           if(h->type == 6) return xpush(log(2));
           /* case bd_down_left: */
           return parabolic(-1) * xpush(log(2));
-        case bd_down_right: 
+        case bd_down_right:
           return parabolic(+1) * xpush(log(2));
         case bd_up_left:
           return xpush(-log(2)) * parabolic(-1);
@@ -551,19 +551,19 @@ EX namespace bt {
       }
 
     const transmatrix iadj(heptagon *h, int dir) { heptagon *h1 = h->cmove(dir); return adj(h1, h->c.spin(dir)); }
-  
+
     void virtualRebase(heptagon*& base, transmatrix& at) override {
-    
+
       while(true) {
-      
+
         double currz = at[LDIM][LDIM];
-        
+
         heptagon *h = base;
-        
+
         heptagon *newbase = NULL;
-        
+
         transmatrix bestV;
-        
+
         for(int d=0; d<S7; d++) {
           transmatrix V2 = iadj(h, d) * at;
           double newz = V2[LDIM][LDIM];
@@ -573,13 +573,13 @@ EX namespace bt {
             newbase = h->cmove(d);
             }
           }
-    
+
         if(newbase) {
           base = newbase;
           at = bestV;
           continue;
           }
-    
+
         return;
         }
       }
@@ -588,7 +588,7 @@ EX namespace bt {
     };
 
   EX hrmap *new_map() { return new hrmap_binary; }
-  
+
   struct hrmap_alternate_binary : hrmap_binary {
     heptagon *origin;
     hrmap_alternate_binary(heptagon *o) { origin = o; }
@@ -598,7 +598,7 @@ EX namespace bt {
   EX hrmap *new_alt_map(heptagon *o) { return new hrmap_binary(o); }
 
   /** \brief return if ew should use direct_tmatrix[dir] to get the adjacent cell the given direction
-   *  
+   *
    *  Otherwise, this is the 'up' direction and thus we should use inverse_tmatrix for the inverse direction
    */
   EX bool use_direct_for(int dir) {
@@ -610,7 +610,7 @@ EX namespace bt {
     if(WDIM == 2) return 0;
     return 2;
     }
-  
+
   /** \brief by what factor does the area expand after moving one level in hr::bt::expansion_coordinate() */
   EX ld area_expansion_rate() {
     switch(geometry) {
@@ -638,23 +638,23 @@ EX namespace bt {
         return 3/2.;
       case gArnoldCat:
         return 1;
-      
+
       default:
         return 0;
       }
     }
-  
+
   /** \brief by what factor do the lengths expand after moving one level in hr::bt::expansion_coordinate() */
   EX ld expansion() {
     if(WDIM == 2) return area_expansion_rate();
     else return sqrt(area_expansion_rate());
     }
-  
+
   /** \brief Get a point in the current cell, normalized to [-1,1]^WDIM
    *
    *  This function returns the matrix moving point (0,0,0) to the given point in a parallelogram-like box
    *  Dimensions of the box are normalized to [-1,1], and directions are the same as usual (i.e., expansion_coordinate() is the correct one)
-   *  
+   *
    *  This should works for all geometries which actually have boxes.
    *
    *  For binary-based tessellations which are not based on square sections (e.g. gKiteDart3), 'x' and 'y' coordinates are not given in [-1,1], but take binary_width into account
@@ -695,9 +695,9 @@ EX namespace bt {
         return parabolic3(x,y) * xpush(z*z2);
       case gHoroRec:
         return parabolic3(r2*hs*x, 2*hs*y) * xpush(z*z2/2);
-      case gHoroTris: 
+      case gHoroTris:
         return parabolic3(x,y) * xpush(z*z2);
-      case gHoroHex: 
+      case gHoroHex:
         return parabolic3(x,y) * xpush(z*z3/2);
       case gKiteDart3:
         return parabolic3(x,y) * xpush(-z*log_golden_phi/2);
@@ -705,11 +705,11 @@ EX namespace bt {
         return rgpushxto0(h);
       }
     }
-  
+
   EX transmatrix normalized_at(ld x, ld y, ld z IS(0)) {
     return normalized_at(point3(x, y, z));
     }
-  
+
   EX int updir() {
     if(geometry == gBinary4) return 3;
     if(geometry == gTernary) return 4;
@@ -718,7 +718,7 @@ EX namespace bt {
     if(!bt::in()) return 0;
     return S7-1;
     }
-  
+
   EX int dirs_outer() {
     switch(geometry) {
       case gBinary3: return 4;
@@ -733,13 +733,13 @@ EX namespace bt {
     if(among(geometry, gBinaryTiling, gHoroHex)) return 2;
     return 1;
     }
-  
+
   EX void build_tmatrix() {
     if(among(geometry, gBinaryTiling, gSol, gArnoldCat)) return; // unused
     auto& direct_tmatrix = cgi.direct_tmatrix;
     auto& inverse_tmatrix = cgi.inverse_tmatrix;
     auto& use_direct = cgi.use_direct;
-    use_direct = (1 << (S7-1)) - 1;    
+    use_direct = (1 << (S7-1)) - 1;
     if(geometry == gBinary4) {
       use_direct = 3;
       direct_tmatrix[0] = xpush(-log(2)) * parabolic(-0.5);
@@ -808,7 +808,7 @@ EX namespace bt {
       t[11] = it * t[1];
 
       if(debugflags & DF_GEOM)
-        for(int a=0; a<12; a++) 
+        for(int a=0; a<12; a++)
           println(hlog, t[a]);
 
       use_direct >>= 1;
@@ -816,7 +816,7 @@ EX namespace bt {
     for(int i=0; i<S7; i++) if(use_direct_for(i))
       inverse_tmatrix[i] = iso_inverse(direct_tmatrix[i]);
     }
-  
+
   #if MAXMDIM == 4
 
   EX void queuecube(const shiftmatrix& V, ld size, color_t linecolor, color_t facecolor) {
@@ -869,7 +869,7 @@ EX namespace bt {
     h[0] += .5;
     return log(2) + log(-h[0]);
     }
-  
+
   EX hyperpoint deparabolic3(hyperpoint h) {
     h /= (1 + h[3]);
     hyperpoint one = point3(1,0,0);
@@ -880,7 +880,7 @@ EX namespace bt {
     return point3(log(2) + log(-h[0]), h[1] / co, h[2] / co);
     }
 
-#if CAP_COMMANDLINE  
+#if CAP_COMMANDLINE
 auto bt_config = arg::add2("-btwidth", [] {arg::shift_arg_formula(vid.binary_width); });
 #endif
 
@@ -918,7 +918,7 @@ EX int equalize(heptagon*& c1, heptagon*& c2) {
   while(d1 > d2) c1 = c1->cmove(S7-1), steps++, d1--;
   while(d2 > d1) c2 = c2->cmove(S7-1), steps++, d2--;
   return steps;
-  }  
+  }
 
 EX int celldistance3_tri(heptagon *c1, heptagon *c2) {
   using namespace gp;
@@ -1010,13 +1010,13 @@ EX int celldistance3_hex(heptagon *c1, heptagon *c2) {
     xsteps -= 2;
 
     T = euscalezoom(hpxy(0,sqrt(3))) * eupush(1,0) * spin(-d2.back() * 2 * M_PI/3) * T * spin(d1.back() * 2 * M_PI/3) * eupush(-1,0) * euscalezoom(hpxy(0,-1/sqrt(3)));
-    
+
     d1.pop_back(); d2.pop_back();
-    
+
     hyperpoint h = tC0(T);
     int sx = int(floor(h[0] - h[1] / sqrt(3) + .5)) / 3;
     int sy = int(floor(h[1] * 2 / sqrt(3) + .5)) / 3;
-    
+
     int ysteps = xsteps + euc::dist(sx, sy);
     if(ysteps < steps) steps = ysteps;
     if(sx >= 8 || sx <= -8 || sy >= 8 || sy <= -8) break;
@@ -1047,7 +1047,7 @@ EX int celldistance3(heptagon *c1, heptagon *c2) {
     case gHoroTris: return celldistance3_tri(c1, c2);
     case gHoroRec: return celldistance3_rec(c1, c2);
     case gHoroHex: return celldistance3_hex(c1, c2);
-    default: 
+    default:
       if(sol || !bt::in()) {
         println(hlog, "called celldistance3 for wrong geometry"); return 0;
         }
@@ -1070,7 +1070,7 @@ EX hyperpoint get_corner_horo_coordinates(cell *c, int i) {
   ld yy = yx;
   ld xx = 1 / sqrt(2)/2;
   switch(geometry) {
-    case gBinaryTiling:    
+    case gBinaryTiling:
       switch(gmod(i, c->type)) {
         case 0: return point2(-yy, xx);
         case 1: return point2(yy, 2*xx);
@@ -1078,10 +1078,10 @@ EX hyperpoint get_corner_horo_coordinates(cell *c, int i) {
         case 3: return point2(yy, -xx);
         case 4: return point2(yy, -2*xx);
         case 5: return point2(-yy, -xx);
-        case 6: return point2(-yy, 0);    
+        case 6: return point2(-yy, 0);
         default: return point2(0, 0);
         }
-    
+
     case gBinary4:
       switch(gmod(i, c->type)) {
         case 0: return point2(yy, -2*xx);
@@ -1091,7 +1091,7 @@ EX hyperpoint get_corner_horo_coordinates(cell *c, int i) {
         case 4: return point2(-yy, -xx);
         default: return point2(0, 0);
         }
-    
+
     case gTernary:
       yy = log(3) / 2;
       xx = 1 / sqrt(3) / 2;
@@ -1104,7 +1104,7 @@ EX hyperpoint get_corner_horo_coordinates(cell *c, int i) {
         case 5: return point2(-yy, -xx);
         default: return point2(0, 0);
         }
-    
+
     default:
       return point2(0, 0);
     }

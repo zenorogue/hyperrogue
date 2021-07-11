@@ -49,15 +49,15 @@ void build_group(const jmatrix& m) {
 void build() {
   for(int a=0; a<7; a++)
   for(int b=0; b<7; b++) J[a][b] = ((a+1-b)%7 == 0) ? 1 : 0;
-  
+
   int v[49] = {
-    0,  4,  0,  3,  9,  2,  1, 
-    4,  0,  4,  3,  7,  1,  3, 
-    0,  4, 10,  6,  9,  8,  1, 
-    3,  3,  6,  1,  7,  6,  9, 
-    9,  7,  9,  7,  0,  9, 10, 
-    2,  1,  8,  6,  9,  2,  3, 
-    1,  3,  1,  9, 10,  3,  8, 
+    0,  4,  0,  3,  9,  2,  1,
+    4,  0,  4,  3,  7,  1,  3,
+    0,  4, 10,  6,  9,  8,  1,
+    3,  3,  6,  1,  7,  6,  9,
+    9,  7,  9,  7,  0,  9, 10,
+    2,  1,  8,  6,  9,  2,  3,
+    1,  3,  1,  9, 10,  3,  8,
 /*    -3,+2,-1,-1,-3,-1,-3,
     -2,+1,+1,+3,+1,+3,+3,
     -1,-1,-3,-1,-3,-3,+2,
@@ -66,18 +66,18 @@ void build() {
     +1,+3,+3,-2,+1,+1,+3,
     +3,+3,-2,+1,+1,+3,+1*/
     };
-  
+
   int a = 0;
 
   for(auto& row: Z) for(auto& i: row) { i = v[a++]; if(i < 0) i += 11; }
-  
+
   for(int a=0; a<7; a++) for(int b=0; b<7; b++) id[a][b] = a==b ? 1 : 0;
-  
+
   build_group(id);
   for(int k=0; k<isize(jms); k++) {
     build_group(jms[k] * Z);
     }
-  
+
   /*
   B = Z
   J = A * B
@@ -131,7 +131,7 @@ void create_janko() {
   gi.shortname = "Janko";
   gi.menu_displayed_name = "Janko group J1";
   }
-  
+
 auto shot_hooks = arg::add3("-janko1x", [] { build(); experiment(); })
  + addHook(hooks_initialize, 100, create_janko);
 

@@ -12,7 +12,7 @@ namespace hr {
 
 // --- help ---
 
-const char *wormdes = 
+const char *wormdes =
   "These huge monsters normally live below the sand, but your movements have "
   "disturbed them. They are too big to be slain with your "
   "weapons, but you can defeat them by making them unable to move. "
@@ -21,11 +21,11 @@ const char *wormdes =
 const char *cocytushelp =
    "This frozen lake is a hellish version of the Icy Land. Now, your body heat melts the floor, not the walls.";
 
-const char *tentdes = 
+const char *tentdes =
   "The tentacles of Cthulhu are like sandworms, but longer. "
   "They also withdraw one cell at a time, instead of exploding instantly.";
 
-const char *gameboardhelp = 
+const char *gameboardhelp =
   "Ever wondered how some boardgame would look on the hyperbolic plane? "
   "I wondered about Go, so I have created this feature. Now you can try yourself!\n"
   "Enter = pick up an item (and score), space = clear an item\n"
@@ -33,7 +33,7 @@ const char *gameboardhelp =
   "In the periodic editor, press 0-4 to switch walls in different ways\n"
   ;
 
-const char *ivydes = 
+const char *ivydes =
   "A huge plant growing in the Jungle. Each Ivy has many branches, "
   "and one branch grows per each of your moves. Branches grow in a clockwise "
   "order. The root itself is vulnerable.";
@@ -52,7 +52,7 @@ const char *gdemonhelp =
     "You need some more experience in demon fighting before you will be able to defeat them. "
     "Even then, you will be able to slay this one, but more powerful demons will come...\n\n"
     "Each 10 lesser demons you kill, you become powerful enough to kill all the greater "
-    "demons on the screen, effectively turning them into lesser demons.";    
+    "demons on the screen, effectively turning them into lesser demons.";
 
 const char *ldemonhelp =
     "These creatures are slow, but they often appear in large numbers.";
@@ -68,7 +68,7 @@ const char *trollhelpX =
   "There are several species of trolls living in the hyperbolic world. "
   "Some of them leave this wall behind them when they die.";
 
-const char *camelothelp = 
+const char *camelothelp =
   "The Knights of the Round Table are the greatest warriors of these lands. "
   "They are not very inventive with names though, as they call each of their "
   "castles Camelot. "
@@ -78,7 +78,7 @@ const char *camelothelp =
   "The radius of the Round Table is usually 28, but after you find a Holy Grail "
   "successfully, each new castle (and each Round Table) you find will be bigger.";
 
-const char *templehelp = 
+const char *templehelp =
   "The temple of Cthulhu consists of many concentric circles of columns. "
   "You will surely encounter many Cultists there, who believe that a pilgrimage "
   "to the inner circles will bring them closer to Cthulhu himself, and Grimoires "
@@ -86,7 +86,7 @@ const char *templehelp =
   "The circles in the temple of Cthulhu are actually horocycles. They are "
   "infinite, and there is an infinite number of them.";
 
-const char *barrierhelp = 
+const char *barrierhelp =
   "Huge, impassable walls which separate various lands.";
 
 const char *cavehelp =
@@ -96,17 +96,17 @@ const char *cavehelp =
   "Items count as three floor cells, and dead Trolls count as five wall cells. "
   "Some foreign monsters also count as floor or wall cells.\n";
 
-const char *vinehelp = 
-  "The Vineyard is filled with vines. A very dense pattern of straight lines here...\n\n" 
+const char *vinehelp =
+  "The Vineyard is filled with vines. A very dense pattern of straight lines here...\n\n"
   "Vine Beasts and Vine Spirits change vine cells to grass, and vice versa.";
 
-const char *hvinehelp = 
+const char *hvinehelp =
   "A vine is growing here... but only on a half of the cell. How is that even possible?!"
   "Most monsters cannot move from this cell to the cell containing the other half. "
   "Vine spirits can move only to the adjacent cells which are also adjacent to the "
   "other half.";
 
-const char *deadcavehelp = 
+const char *deadcavehelp =
   "Somehow, this cave has not received the spark of Life yet.";
 
 const char *foresthelp =
@@ -123,24 +123,24 @@ const char *hivehelp =
   "including you and enemy Hyperbugs. Will you manage to get to the "
   "heart of such a nest, and get the precious Royal Jelly?";
 
-const char *redrockhelp = 
+const char *redrockhelp =
   "This land contains high rock formations. Most of the valley is at level 0, "
   "while items are found at level 3. It is impossible to gain two or more levels, "
   "or to lose three levels, in a single move, (attacks are possible at any "
   "difference, though). Kill Red Trolls and Rock Snakes to make a cell higher.";
 
-const char *caribbeanhelp = 
+const char *caribbeanhelp =
   "This dangerous sea contains nasty sharks and pirates. ";
 
 const char *cislandhelp =
   "The islands of Caribbean are infinite and circular, and "
   "the pirates probably have hidden their treasures somewhere far from the coast.";
 
-const char *redsnakedes = 
+const char *redsnakedes =
   "Rock snakes are similar to Sandworms, but they move each turn. However, they "
   "only move on the hexagonal cells. They are also somewhat longer than the Sandworms.";
 
-const char *minedesc = 
+const char *minedesc =
   "This minefield has been created by the Bomberbirds to protect their valuable eggs. "
   "Mines explode when they are stepped on, creating fire all around them "
   "(this fire never expires in the Minefield). If you don't step on a mine, you "
@@ -167,34 +167,34 @@ const char *princessdesc =
   "However, even with the normal distribution, it appears that it should be "
   "always possible to reach your goal. If you want this challenge, "
   "select it from the special game modes menu.";
-  
-const char *elemdesc = 
+
+const char *elemdesc =
   "The Elemental Planes are divided into four subzones: Planes of Fire, Water, Air, and Earth. "
   "You need to collect a Shard from each Plane to construct an Elemental Gem. "
   "It is dangerous to collect too many Shards of the same type without constructing a Gem.";
 
-const char *wildwestdesc = 
+const char *wildwestdesc =
   "Take a revolver, kill outlaws, collect bounties.\n\n"
   "Note: since this land is anachronistic, it is not available in normal game. "
   "It is only available in special modes.";
 
-const char *elecdesc = 
+const char *elecdesc =
   "Whenever after your move there is a connection between a charged and a "
   "grounded cell, there is a short circuit. All cells on any "
   "path connecting a charged and a grounded cell (without repeated cells, "
   "or two consecutive grounded/charged cells) become damaged.\n\n"
-  
+
   "Sandstone walls and most creatures are conductive. Great Walls are "
   "isolators, but lands beyond them count as grounded.\n\n"
-  
+
   "Fulgurite, the treasure, is created when you manage to short circuit "
   "a sandstone wall, or a Rich Metal Beast.\n\n"
-  
+
   "Trolls leave conductive rocks when killed, and Metal Beasts can only "
   "be killed by electricity -- your attacks only stun them, or push "
   "them away if already stunned.";
 
-const char *overdesc = 
+const char *overdesc =
   "The Overgrown Woods are filled with mutant ivies! These plants "
   "grow very fast. Each leaf, after being grown, can grow itself "
   "on the next turn. However, each part is only able to grow "
@@ -203,12 +203,12 @@ const char *overdesc =
   "Maybe such fast growing plants could help you solve the problem "
   "of hunger in your world? Kill the Mutant Ivies to collect Mutant Saplings.";
 
-const char *cleardesc = 
+const char *cleardesc =
   "A clearing in the Overgrown Woods. Obviously, this gives "
   "the Mutant Ivies an infinite space to grow...\n\n"
   "Mutant Fruits rot if they are not adjacent to a Mutant Ivy.";
 
-const char *winddesc = 
+const char *winddesc =
   "Someone has put air fans in these plains, causing strong winds everywhere. "
   "You think that the purpose is to harness the magical power of Air Elementals, but "
   "you are not sure.\n\n"
@@ -220,35 +220,35 @@ const char *winddesc =
   "outcoming wind. However, you can move two cells with the wind in a single turn, "
   "and so can the birds.";
 
-const char *warningdesc = 
+const char *warningdesc =
   "Warnings are issued when you try to do something that appears dangerous, "
   "like stepping on a known mine, or getting your boat destroyed by "
   "a Kraken without having Orb of the Fish. In some cases the action "
   "might actually be safe -- so you can ignore the warning and do it anyway, "
   "simply by repeating the action.";
 
-const char *hauntdesc = 
+const char *hauntdesc =
   "A dark forest filled with ghosts and graves. But there is also treasure hidden "
   "deep within... But don't let greed make you stray from your path, as "
   "you can get lost!\n\n"
   "The Haunted Woods are bounded by a single equidistant curve. It is not a circle or horocycle.\n\n";
 
-const char *bulldashdesc = 
+const char *bulldashdesc =
   "Butterflies don't pursue you -- unless you get next to them, they just spin around the obstacles. "
   "They cannot be killed conventionally, but you get treasure when a Raging Bull crashes into a Butterfly. ";
 
-const char *prairiedesc = 
+const char *prairiedesc =
   "You can find safety in some places in the Prairie, but if you want treasures, "
   "they can be found only on the other side of a giant herd of bulls.";
-  
-const char *cadesc = 
+
+const char *cadesc =
   "A land for people wanting to experiment with cellular automata in the HyperRogue grid. "
   "Rules can be given on the command line; the default rules are:\n"
   "-c07 00100000 -c06 0010000 -c17 00011000 -c16 0001100 -caprob 0.3\n"
   "(-c0 or -c1 can be given if the same rule is to be used for hexagonal "
   "and heptagonal cells).";
 
-const char *huntingdesc = 
+const char *huntingdesc =
   "The Happy Hunting Ground is the place where hunting is easy; "
   "the spirits of hunters go here after their death, if their life was deemed worthy. "
   "You did not qualify though, so you will not ever be able to find your way to the places "
@@ -257,11 +257,11 @@ const char *huntingdesc =
   "You hope to use this to learn some "
   "skills in fighting in open hyperbolic space, though.";
 
-const char *terradesc = 
+const char *terradesc =
   "Spending 3-5 turns next to the Terracotta Warriors will cause them to awaken. "
   "They have 7 HP, and get stunned for longer and longer time with each attack.";
 
-const char *terraldesc = 
+const char *terraldesc =
   "The Emperor's mausoleum. The army "
   "of Terracotta Warriors is supposed to protect him in his "
   "afterlife, while the traps are to protect the treasures "
@@ -276,14 +276,14 @@ const char *lavadesc =
   "Lava is too hot to walk on. It cools quickly, but another "
   "flow will come soon...";
 
-const char *blizzarddesc = 
+const char *blizzarddesc =
   "Once in the past there lived a tribe whose prophets warned about the great blizzard that was to come and freeze the world. "
   "They thought it was the wrath of the gods, so they put some altars, so that the gods could hear their pleas. "
   "The mighty golems guarded those altars, making sure nobody steals the jewels, because a robbed god is a angry god. "
   "Unfortunately winter has come (maybe because only the monks knew how to stop the golems, and they were said to had escaped earlier with some of the jewels). "
-  "The tribe has frozen to death, altars got covered with snow and ice. Only ice golems still guard them waiting for the spring.";  
+  "The tribe has frozen to death, altars got covered with snow and ice. Only ice golems still guard them waiting for the spring.";
 
-const char *crystaldesc = 
+const char *crystaldesc =
   "Yes, this is definitely a crystal. A very regular crystalline structure.\n\n"
   "This land has been designed as a tool to play with various geometries, and it does not appear during a normal gameplay.";
 
@@ -313,7 +313,7 @@ const char *warplanddesc =
 const char *roselanddesc =
   "This land is filled with beautiful, but dangerous, creatures and plants.";
 
-const char *dragondesc = 
+const char *dragondesc =
   "Dragons are powerful monsters. They are slow, but evil, "
   "and love to pick on creatures who are even slower than "
   "them. They must be stopped!\n\n"
@@ -328,7 +328,7 @@ const char *dragondesc =
   "fire (at range 3), losing the hitpoint. Killing the Dragon "
   "while still in the Dragon Chasms gives you treasure.";
 
-const char *tortoisedesc = 
+const char *tortoisedesc =
   "Galápagos is the land of Tortoises. "
   "They are very slow, which allows the Dragons to pick on them by "
   "stealing and eating their young. Bring the Baby Tortoises back, "
@@ -339,7 +339,7 @@ const char *tortoisedesc =
   "Tortoise which matches the baby exactly!\n\n"
   "Tortoises move each 3 turns, and attacks only stun them.\n\n"
   "Bringing back a Baby Tortoise counts as 5 $$$. The more factors agree in "
-  "the given location of Galápagos, the brighter it is shown on your screen."; 
+  "the given location of Galápagos, the brighter it is shown on your screen.";
 
 const char *krakendesc =
   "There are Krakens in your homeland, too... huge sea monsters which "
@@ -348,13 +348,13 @@ const char *krakendesc =
   "so there are no large ships, only small boats, and "
   "hyperbolic Krakens are relatively small too. Still, you suppose they might be "
   "the widest creatures which could still move at considerable speed...\n\n"
-  
+
   "Kraken heads can move only on hexagons. You need to attack all the tentacles to "
   "kill the Kraken. A tentacle cannot attack if it has been attacked on the "
   "same turn. When a Kraken attacks you while you are in a boat, it "
   "destroys the boat, but does not kill you.";
 
-const char *halloweendesc = 
+const char *halloweendesc =
   "Halloween is a special land, that is available only in the spherical "
   "or elliptic geometry (press 'o' to switch). You play on the surface of "
   "a jack-o'-lantern, "
@@ -373,7 +373,7 @@ const char *reptiledesc =
   "Your attacks do not kill the Reptiles, but "
   "you can push and stun them.";
 
-const char *naturedesc = 
+const char *naturedesc =
   "This Orb allows you to grow like an Ivy. "
   "The Ivy is always rooted in your current location; "
   "moving among the Ivy cells will move the root. "
@@ -394,30 +394,30 @@ const char *mirroreddesc =
   "Mirror walls reflect Mimics, lightning bolts, and "
   "missiles perfectly.";
 
-const char* tamebomberdesc = 
+const char* tamebomberdesc =
   "This bomberbird will follow you at some distance, and attack your enemies. "
   "You can kill it to place a mine.";
 
-const char *gargdesc = 
+const char *gargdesc =
     "A being made of stone, who likes high buildings. It becomes normal stone when "
     "killed, but only if next to something stable -- otherwise it falls.";
-  
+
 const char *lakeDesc = "Hell has these lakes everywhere... They are shaped like evil stars, and filled with burning sulphur.";
 
 const char *thumpdesc = "A device that attracts sandworms and other enemies. You need to activate it.";
 
 const char *twdesc = "This structure will disappear after some time.";
 
-const char *jellydesc = 
+const char *jellydesc =
   "Some of the Slime Beasts have decided to revolt against the color rules in the "
   "Alchemist Lab. They have changed their shape and consistency, declared independence, and established their own Kingdom.\n\n"
   "Jellies switch between being a wall and being a monster after every treasure you collect.";
 
-const char *ruindesc = 
+const char *ruindesc =
   "Once a beautiful city... but now overrun by the mighty Raiders of unknown origin.\n\n"
   "Raiders cannot be harmed with mundane weapons, but each color has its movement restrictions.";
 
-const char *rock_description = 
+const char *rock_description =
   "Shoot the Space Rocks for score. Large Rocks will split into two smaller rocks.";
 
 #if HDR
@@ -512,9 +512,9 @@ struct genderswitch_t {
 #endif
 
 EX genderswitch_t genderswitch[NUM_GS] = {
-  { GEN_F, moFalsePrincess, "False Princess", 
+  { GEN_F, moFalsePrincess, "False Princess",
      "Don't be fooled by this red-haired girl, or you will be stabbed if you come too close!"},
-  { GEN_M, moFalsePrincess, "False Prince",   
+  { GEN_M, moFalsePrincess, "False Prince",
     "Don't be fooled by this red-haired boy, or you will be stabbed if you come too close!"},
   { GEN_F, moRoseLady,      "Rose Lady",
     "This false princess is immune to the alluring scent of roses."},
@@ -563,7 +563,7 @@ struct itemtype {
   const char *help;
   };
 
-enum eItem { 
+enum eItem {
   #define ITEM(a,b,c,d,e,f,g,h,i) d,
   #include "content.cpp"
   ittypes
@@ -611,7 +611,7 @@ struct walltype {
   const char *help;
   };
 
-enum eWall { 
+enum eWall {
   #define WALL(a,b,c,d,e,f,g,h,i) d,
   #include "content.cpp"
   walltypes
@@ -671,38 +671,38 @@ struct landtacinfo { eLand l; int tries, multiplier; };
 #endif
 
 EX vector<landtacinfo> land_tac = {
-  {laIce, 10, 1}, {laDesert, 10, 1}, 
+  {laIce, 10, 1}, {laDesert, 10, 1},
   {laHunting, 5, 2},
   {laMotion, 10, 1}, {laCaves, 10, 1}, {laAlchemist, 10, 1},
-  {laJungle, 10, 1}, {laMirror, 10, 1}, {laZebra, 10, 1}, {laPalace, 10, 1}, 
-  {laOcean, 10, 1}, {laLivefjord, 10, 1}, {laWarpCoast, 10, 1}, {laRlyeh, 10, 1}, {laHell, 10, 1}, 
+  {laJungle, 10, 1}, {laMirror, 10, 1}, {laZebra, 10, 1}, {laPalace, 10, 1},
+  {laOcean, 10, 1}, {laLivefjord, 10, 1}, {laWarpCoast, 10, 1}, {laRlyeh, 10, 1}, {laHell, 10, 1},
   {laDryForest, 10, 1}, {laWineyard, 10, 1}, {laSwitch, 10, 1}, {laReptile, 10, 1},
-  {laDeadCaves, 10, 1}, {laGraveyard, 10, 1}, 
-  {laHaunted, 10, 1}, 
+  {laDeadCaves, 10, 1}, {laGraveyard, 10, 1},
+  {laHaunted, 10, 1},
   {laIvoryTower, 10, 1}, {laEndorian, 10, 1}, {laMountain, 5, 2}, {laDungeon, 5, 2},
-  {laRuins, 10, 1}, {laEmerald, 10, 1}, 
-  {laCocytus, 10, 1}, 
-  
-  {laCaribbean, 5, 2}, {laWhirlpool, 5, 2}, {laKraken, 5, 2}, 
+  {laRuins, 10, 1}, {laEmerald, 10, 1},
+  {laCocytus, 10, 1},
+
+  {laCaribbean, 5, 2}, {laWhirlpool, 5, 2}, {laKraken, 5, 2},
   {laTemple, 5, 2}, {laMinefield, 5, 2},
   {laPower, 5, 2}, {laHive, 5, 2}, {laRedRock, 5, 2}, {laStorms, 5, 2}, {laOvergrown, 5, 2},
   {laClearing, 5, 2},
-  {laWhirlwind, 5, 2}, 
+  {laWhirlwind, 5, 2},
   {laBlizzard, 10, 1},
   {laRose, 5, 2}, {laVolcano, 10, 1}, {laDragon, 2, 5}, {laTortoise, 1, 10},
-  {laBurial, 5, 2}, 
+  {laBurial, 5, 2},
   {laElementalWall, 10, 1}, {laTrollheim, 5, 2},
-  {laPrairie, 5, 2}, {laBull, 5, 2}, {laTerracotta, 10, 1}, 
+  {laPrairie, 5, 2}, {laBull, 5, 2}, {laTerracotta, 10, 1},
   {laDice, 5, 2}, {laCursed, 5, 2},
-  
+
   {laCrossroads, 10, 1}, {laCrossroads2, 10, 1}, {laCrossroads3, 10, 1}, {laCrossroads4, 10, 1}, {laCrossroads5, 5, 2},
-  
+
   {laCamelot, 1, 100},
   {laWildWest, 10, 1},
   {laDual, 10, 1},
   {laSnakeNest, 10, 1},
   {laDocks, 10, 1},
-  
+
   {laBrownian, 10, 1},
   {laVariant, 10, 1},
   {laWestWall, 10, 1},
@@ -718,12 +718,12 @@ EX vector<eLand> randlands = {
 
 #if HDR
 enum eGeometry {
-  gNormal, gEuclid, gSphere, gElliptic, gZebraQuotient, gFieldQuotient, gTorus, gOctagon, g45, g46, g47, gSmallSphere, gTinySphere, gEuclidSquare, gSmallElliptic, 
-  gKleinQuartic, gBolza, gBolza2, gMinimal, gBinaryTiling, gArchimedean, 
-  gMacbeath, gBring, gSchmutzM2, gSchmutzM3, gCrystal, gOctahedron, 
-  gBinary3, gCubeTiling, gCell120, gECell120, gRhombic3, gBitrunc3, 
-  gSpace534, gSpace435, 
-  gCell5, 
+  gNormal, gEuclid, gSphere, gElliptic, gZebraQuotient, gFieldQuotient, gTorus, gOctagon, g45, g46, g47, gSmallSphere, gTinySphere, gEuclidSquare, gSmallElliptic,
+  gKleinQuartic, gBolza, gBolza2, gMinimal, gBinaryTiling, gArchimedean,
+  gMacbeath, gBring, gSchmutzM2, gSchmutzM3, gCrystal, gOctahedron,
+  gBinary3, gCubeTiling, gCell120, gECell120, gRhombic3, gBitrunc3,
+  gSpace534, gSpace435,
+  gCell5,
   gCell16, gECell16,
   gCell8, gECell8,
   gCell24, gECell24,
@@ -951,16 +951,16 @@ namespace mf {
   static const flagtype twopoint = 2048;
   static const flagtype uses_bandshift = 4096;
   static const flagtype broken = 8192; /* in spherical case, these are broken along the meridian 180 deg */
-  
+
   static const flagtype band = (cylindrical | pseudocylindrical | uses_bandshift);
   static const flagtype pseudoband = (pseudocylindrical | uses_bandshift);
   }
-  
+
 struct modelinfo {
   const char *name_hyperbolic;
   const char *name_euclidean;
-  const char *name_spherical;  
-  
+  const char *name_spherical;
+
   flagtype flags;
 
   int is_azimuthal;
@@ -974,9 +974,9 @@ struct modelinfo {
 enum eModel : int {
   mdDisk, mdHalfplane, mdBand, mdPolygonal, mdFormula,
   // 5..8.
-  mdEquidistant, mdEquiarea, mdBall, mdHyperboloid, 
+  mdEquidistant, mdEquiarea, mdBall, mdHyperboloid,
   // 9..13
-  mdHemisphere, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdTwoPoint, 
+  mdHemisphere, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdTwoPoint,
   // 14..16
   mdFisheye, mdJoukowsky, mdJoukowskyInverted,
   // 17..19
@@ -984,8 +984,8 @@ enum eModel : int {
   // 20..24
   mdEquivolume, mdCentralInversion, mdSimulatedPerspective, mdTwoHybrid, mdGeodesic,
   // 25..27
-  mdMollweide, mdCentralCyl, mdCollignon, 
-  // 28..31 
+  mdMollweide, mdCentralCyl, mdCollignon,
+  // 28..31
   mdHorocyclic, mdQuadrant, mdAxial, mdAntiAxial,
   // 32..38
   mdWerner, mdAitoff, mdHammer, mdLoximuthal, mdMiller, mdGallStereographic, mdWinkelTripel,
@@ -1043,8 +1043,8 @@ EX vector<modelinfo> mdinf = {
   {X3("Miller projection"), mf::euc_boring | mf::band, DEFAULTS}, // scale latitude 4/5 -> Mercator -> 5/4
   {X3("Gall stereographic"), mf::euc_boring | mf::band, DEFAULTS}, // like central cylindrical but stereographic
   {X3("Winkel tripel"), mf::euc_boring | mf::broken, DEFAULTS}, // mean of equirec and Aitoff
-  {X3("Poor man's square"), mf::euc_boring, DEFAULTS}, // 
-  {X3("Panini projection"), mf::euc_boring, DEFAULTS}, // 
+  {X3("Poor man's square"), mf::euc_boring, DEFAULTS}, //
+  {X3("Panini projection"), mf::euc_boring, DEFAULTS}, //
   {X3("Craig retroazimuthal"), mf::euc_boring | mf::broken, DEFAULTS}, // retroazimuthal cylindrical
   {X3("Littrow retroazimuthal"), mf::euc_boring | mf::broken, DEFAULTS}, // retroazimuthal conformal
   {X3("Hammer retroazimuthal"), mf::euc_boring, DEFAULTS}, // retroazimuthal equidistant

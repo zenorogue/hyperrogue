@@ -24,32 +24,32 @@ bool debugnil = false;
 bool usecache = true;
 
 pair<int, hyperpoint> nilize(hyperpoint h) {
-  
+
   if(euclid) return {0, h - A + C0};
 
   hyperpoint hc = h;
   for(int i=0; i<4; i++) hc[i] = floor(h[i] * 1000 + .5);
   if(usecache && cache.count(hc)) return cache[hc];
-  
+
   hyperpoint at = A;
-  
+
   hyperpoint result = C0;
-  
+
   auto move_coord_full = [&] (hyperpoint tgt) {
     for(int i=0; i<100; i++) {
       result = nisot::translate(result) * nilform * ((tgt - at) / 100 + C0);
       }
     at = tgt;
     };
-  
+
   auto move_coord = [&] (int c, hyperpoint upto) {
     ld part = (h[c] - at[c]) / (upto[c] - at[c]);
     if(part > 1) part = 1;
     move_coord_full(at + part * (upto-at));
     };
-  
+
   int cat = 0;
-  
+
   if(h[1] > -39) {
     move_coord(0, B);
     cat = 1;
@@ -59,7 +59,7 @@ pair<int, hyperpoint> nilize(hyperpoint h) {
   if(h[0] > 17.2) {
     move_coord(1, C);
     cat = 2;
-    goto finish;    
+    goto finish;
     }
   move_coord_full(C);
   if(h[1] < -45.5) {
@@ -71,7 +71,7 @@ pair<int, hyperpoint> nilize(hyperpoint h) {
   move_coord_full(D);
   move_coord(1, E);
   finish:
-  
+
   move_coord_full(h);
   return cache[hc] = {cat, result};
   }
@@ -81,12 +81,12 @@ ld vperiod;
 pair<hyperpoint, hyperpoint> trace_path(ld v) {
 
   ld vorig = v;
-  
+
   hyperpoint lctr = A;
   ld angle = 0;
-  
+
   ld arclen = radius * M_PI/2;
-  
+
   auto change_angle = [&] (ld x) {
     if(v == 0) return;
     else if(v >= arclen) v -= arclen, angle += 1;
@@ -99,7 +99,7 @@ pair<hyperpoint, hyperpoint> trace_path(ld v) {
     else if(v >= seglen && !last) v -= seglen, lctr = h;
     else lctr = lerp(lctr, h, v / seglen), v = 0;
     };
-  
+
   change_angle(1);
   shift_to(B);
   change_angle(2);
@@ -108,12 +108,12 @@ pair<hyperpoint, hyperpoint> trace_path(ld v) {
   shift_to(D);
   change_angle(4);
   shift_to(E, true);
-  
+
   angle *= M_PI/2;
-  
+
   if(v > 0) vperiod = vorig - v;
-  
-  return { lctr + point3(radius * -cos(angle), radius * sin(angle), 0), point3(-sin(angle), -cos(angle), 0) };  
+
+  return { lctr + point3(radius * -cos(angle), radius * sin(angle), 0), point3(-sin(angle), -cos(angle), 0) };
   }
 
 transmatrix scaleby(ld x) {
@@ -143,7 +143,7 @@ void make_routes() {
     forwards[i] = nilize(trace_path(vb).first).second;
     overroute[i] = nilize(trace_path(v).first + point3(0,0,over+over2)).second;
     }
-  
+
   auto smoothen = [&] (vector<hyperpoint>& v) {
     for(int it=0; it<100; it++) {
       vector<hyperpoint> smoother;
@@ -156,7 +156,7 @@ void make_routes() {
       v = smoother;
       }
     };
-  
+
   smoothen(route);
   smoothen(forwards);
   smoothen(overroute);
@@ -179,13 +179,13 @@ void prepare_nilform() {
   rotator[0] /= sqrt(rotator[0] | rotator[0]);
   println(hlog, "rotator = ", kz(rotator));
   rotator = inverse(transpose(rotator));
-  println(hlog, "rotator = ", kz(rotator));    
-  
+  println(hlog, "rotator = ", kz(rotator));
+
   ld minscale = 0.5; // positive
   ld maxscale = 1.5; // negative
   ld scale;
-  
-  for(int it=0; it<100; it++) {  
+
+  for(int it=0; it<100; it++) {
     scale = (minscale + maxscale) / 2;
     nilform = rotator * scaleby(scale);
     cache.clear();
@@ -193,13 +193,13 @@ void prepare_nilform() {
     if(nE[2] < 0) maxscale = scale;
     else minscale = scale;
     }
-  
+
   println(hlog, "scale = ", scale);
-  println(hlog, nilize(E).second);  
-  
+  println(hlog, nilize(E).second);
+
   vperiod = radius * 2 * M_PI + hypot_d(3, B-A) + hypot_d(3, C-B) + hypot_d(3, D-C) + hypot_d(3, E-D);
   println(hlog, "vperiod = ", vperiod);
-  
+
   make_routes();
   }
 
@@ -210,7 +210,7 @@ bool draw_ply() {
   if(nil) prepare_nilform();
 
   staircase.render(ggmatrix(currentmap->gamestart()));
-  
+
   return false;
   }
 
@@ -242,7 +242,7 @@ void show() {
   add_edit(prec);
 
   dialog::addBack();
-  dialog::display();    
+  dialog::display();
   }
 
 void o_key(o_funcs& v) {
@@ -252,26 +252,26 @@ void o_key(o_funcs& v) {
 void enable() {
   rogueviz::rv_hook(hooks_frame, 100, draw_ply);
   rogueviz::rv_hook(hooks_o_key, 80, o_key);
-  rogueviz::rv_hook(anims::hooks_anim, 100, [] { 
+  rogueviz::rv_hook(anims::hooks_anim, 100, [] {
     if(!animated) return;
     usecache = false;
     ld t = ticks * 1. / anims::period;
     t = t - floor(t);
     t *= 1000;
-    
+
     centerover = currentmap->gamestart();
     set_view(
       interpolate_at(route, t),
       interpolate_at(forwards, t),
       interpolate_at(overroute, t)
       );
-    
+
     anims::moved();
     });
   }
 
-auto plyhook = 
-  arg::add3("-asd", enable) + 
+auto plyhook =
+  arg::add3("-asd", enable) +
   addHook(hooks_configfile, 100, [] {
     param_b(animated, "ad_animated");
     });

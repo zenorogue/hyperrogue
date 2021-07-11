@@ -107,7 +107,7 @@ void advance_heat_wave() {
         }
       }
     }
-  
+
   // return false;
   }
 
@@ -136,11 +136,11 @@ void enable() {
        if(frac > 1) frac--;
        }
      });
-  rv_hook(shot::hooks_take, 100, [] { 
-     advance_heat_wave(); calcparam(); models::configure(); 
+  rv_hook(shot::hooks_take, 100, [] {
+     advance_heat_wave(); calcparam(); models::configure();
      });
   rv_hook(hooks_drawcell, 100, [] (cell *c, const shiftmatrix& V) {
-    if(WDIM == 3) 
+    if(WDIM == 3)
       queuepoly(face_the_player(V), cgi.shRing, darkena(c->landparam_color, 0, 0xFF));
     return false;
     });
@@ -155,15 +155,15 @@ string cap = "heat transfer/";
 void heat_slide(vector<tour::slide>& v, string title, string desc, reaction_t t) {
   using namespace tour;
   v.push_back(
-    tour::slide{cap + title, 18, LEGAL::NONE | QUICKGEO, desc, 
-   
+    tour::slide{cap + title, 18, LEGAL::NONE | QUICKGEO, desc,
+
   [t] (presmode mode) {
     setCanvas(mode, '0');
     slide_backup(vid.use_smart_range, 2);
     slide_backup(vid.smart_range_detail, 1);
     slide_backup(vid.cells_drawn_limit, 100000);
     slide_backup(vid.cells_generated_limit, 10000);
-    if(mode == pmStart) {      
+    if(mode == pmStart) {
       t();
       start_game();
       enable();
@@ -187,7 +187,7 @@ auto heathook = arg::add3("-heatx", enable)
     })
   + addHook_rvslides(180, [] (string s, vector<tour::slide>& v) {
       if(s != "mixed") return;
-      heat_slide(v, "squares", 
+      heat_slide(v, "squares",
         "A simple heat simulation. In each turn, the temperature changes towards the average of temperatures of adjacent cells.\n\n"
         "Here we do this simulation on a square grid. Note that, despite the natural taxicab metric, spread heats in perfect circles.",
         [] {
@@ -205,7 +205,7 @@ auto heathook = arg::add3("-heatx", enable)
       heat_slide(v, "kite-and-dart tiling", "But even in the kite-and-dart tiling we seem to get perfect circles.", [] {
         set_geometry(gKiteDart2);
         });
-      heat_slide(v, "hyperbolic tiling", 
+      heat_slide(v, "hyperbolic tiling",
           "We used Euclidean tessellations so far. In each Euclidean tessellation, the tessellations behaved in roughly the same, Euclidean way.\n\n"
           "In hyperbolic geometry it is different -- not only it is less circular, but the radius of the hot area (at least 30% of the heat of the central tile) will not grow to infinity!", [] {
         set_geometry(gNormal);

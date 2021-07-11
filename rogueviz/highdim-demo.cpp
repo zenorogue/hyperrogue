@@ -57,11 +57,11 @@ bool color_prestats() {
   nohelp = true;
   for(int k= 0; k <= 6; k++) {
     int v = 1<< k;
-    if(displayButtonS(10 + k * vid.fsize * 2, 10 + vid.fsize, its(k), v == current_step ? 0xFF2020 : 0xC0C0C0, 0, vid.fsize)) 
+    if(displayButtonS(10 + k * vid.fsize * 2, 10 + vid.fsize, its(k), v == current_step ? 0xFF2020 : 0xC0C0C0, 0, vid.fsize))
       getcstat = 1000 + k;
     }
   if(mouseover) {
-    displayButtonS(10 + 7 * vid.fsize * 2, 10 + vid.fsize, itsh(mouseover->landparam & 0xFFFFFF), mouseover->landparam, 0, vid.fsize); 
+    displayButtonS(10 + 7 * vid.fsize * 2, 10 + vid.fsize, itsh(mouseover->landparam & 0xFFFFFF), mouseover->landparam, 0, vid.fsize);
     }
   return true;
   }
@@ -77,7 +77,7 @@ void run_cpick() {
   check_cgi();
   start_game();
   current_center = currentmap->gamestart();
-  current_color = 0x808080;    
+  current_color = 0x808080;
   current_step = 32;
   mapeditor::drawplayer = false;
   vid.smart_range_detail = 1;
@@ -89,7 +89,7 @@ void run_cpick() {
 
 auto cphook = addHook(hooks_args, 100, [] {
   using namespace arg;
-           
+
   if(0) ;
   else if(argis("-cpick")) {
     PHASEFROM(2);
@@ -124,8 +124,8 @@ void create_sokowalls(cell *c) {
     hyperpoint h2 = normalize(h0 * (qfr-fr) + h1 * fr);
     return mscale(h2, 1 / (1 - a / 6.1));
     };
-  
-  for(int a=0; a<9; a++) 
+
+  for(int a=0; a<9; a++)
   for(int b=0; b<6; b++) {
     cgi.bshape(sokowall[a][b], PPR::FLOOR + 2 * a + 1);
     for(int f=0; f<=qfr; f++)
@@ -142,7 +142,7 @@ void create_sokowalls(cell *c) {
         push3(v(a, b, f));
     push3(v(a, 0, 0));
     }
-  
+
   cgi.finishshape();
   cgi.extra_vertices();
   }
@@ -155,35 +155,35 @@ bool sokomap(cell *c, const shiftmatrix& V) {
 
   crystal::coord v = crystal::get_coord(c->master);
   bool high = (v[0] ^ v[1] ^ v[2]) & 2;
-  
+
 
   color_t col = 0x00C000FF;
-  
+
   poly_outline = 0xFF;
-  
+
   int lev = 0;
-  
+
   int phase = ((v[0] ^ v[2] ^ v[4]) & 2) >> 1;
-  
+
   // high = v[0] >= 0 && v[0] <= 8 && v[1] >= 0 && v[1] <= 8 && v[2] == 0 && !(v[0] > 0 && v[0] < 8 && v[1] > 0 && v[1] < 8);
   // if(high) col = 0xFFFF00FF, lev = 3;
-  
+
   high = true;
   lev = ((v[0] + v[1] + v[2])/2+1) & 3;
   if(lev == 0) col = 0x008000FF;
   if(lev == 1) col = 0x00C000FF;
   if(lev == 2) col = 0x40C000FF;
   if(lev == 3) col = 0x80FF00FF;
-  
+
   // if(v[0] == 4 && v[1] == 4 && v[2] == 0) col = 0xFFFFFFFF;
-  
+
   c->landparam = lev;
 
   if(high) {
     ld d = hdist0(tC0(V));
     color_t dark1 = col - ((col & 0xFCFCFC00) >> 1);
     color_t dark2 = col - ((col & 0xFCFCFC00) >> 2);
-    for(int b=0; b<6; b++) 
+    for(int b=0; b<6; b++)
       for(int a=c->move(b)->landparam; a<lev; a++) if(hdist0(V * tpoint[b]) < d) {
         /* auto& p = */
         queuepoly(V, sokowall[a][b], (((b+phase)&1) ? dark1 : dark2));
@@ -215,10 +215,10 @@ void run_sb() {
   vid.smart_range_detail = 1;
   vid.use_smart_range = 2;
   }
-  
+
 auto sbhook = addHook(hooks_args, 100, [] {
   using namespace arg;
-           
+
   if(0) ;
   else if(argis("-sb")) {
     PHASEFROM(2);
@@ -250,7 +250,7 @@ void sync(int mode, flagtype flags) {
   if(mode == pmKey && !(flags & NO_VC))
     crystal::view_coordinates = !crystal::view_coordinates;
   if(cwt.at != centerover && !playermoved && !(flags & PLAYER)) {
-    cwt.at = centerover; 
+    cwt.at = centerover;
     current_display->which_copy = gmatrix[cwt.at].T;
     }
   }
@@ -265,21 +265,21 @@ int mycanvas(cell *c) {
 
   auto d = crystal::get_coord(c->master);
   for(int i=0; i<dim; i++) d[i] >>= 1;
-  
+
   color_t col = 0;
-  
+
   d[0] ++;
-  
+
   int ones = 0;
   for(int i=0; i<dim; i++) if((d[i] & 1) == 1) ones++;
-  
+
   switch(shapeid) {
-  
+
     case 0: {
       auto dx = d; dx[0] -= 2;
       bool grid = false;
       for(int i=1; i<dim; i++) if((dx[i] & 3) == 2) grid = true;
-  
+
       for(int i=0; i<3; i++) part(col, i) = 0xFF + 0x30 * (d[i]-2);
       if(grid) col |= 0x1000000;
       if(dx == crystal::c0) col = 0x1FFD500;
@@ -287,14 +287,14 @@ int mycanvas(cell *c) {
       if(dx[0] == 6 && dx[1] == 0 && dx[2] == 0 && dx[3] == 0 && dx[4] == 0 && dx[5] == 0) col = 0;
       return col;
       }
-    
+
     case 1: {
       if(d[1] == 0 && d[2] == 0 && d[3] == 0 && d[4] == 0 && d[5] == 0) ;
       else col = gradient(0x1FF0000, 0x1FFFF00, 9, d[0], 16);
       part(col, 0) = 0x80 + d[1] * 0x70;
       return col;
       }
-    
+
     case 2: {
       col = gradient(0xFFFF00, 0x00FF00, 17, d[0], 24);
       for(int i=0; i<1; i++) part(col, i) = 0xFF + 0x30 * (d[i+1]-2);
@@ -302,7 +302,7 @@ int mycanvas(cell *c) {
       if(ones == dim-1) col |= 0x1000000;
       return col;
       }
-      
+
     case 3: {
       if(d[3] == 1) col = (ones & 1) ? 0x1C0FFC0 : 0x180FF80;
       if(d[3] == -1) col = (ones & 1) ? 0x18080FF : 0x14040FF;
@@ -315,7 +315,7 @@ int mycanvas(cell *c) {
       if(d[5] == -1) col = 0x1FFFFFF;
       return col;
       }
-    
+
     case 4: {
       if(d[3] == 1) col = (ones & 1) ? 0x1C0FFC0 : 0x180FF80;
       if(d[3] == -1) col = (ones & 1) ? 0x18080FF : 0x14040FF;
@@ -324,7 +324,7 @@ int mycanvas(cell *c) {
       if(d[4] == -1) col = 0x1FFFFFF;
       return col;
       }
-      
+
     case 5: {
       if(d[3] == 1) col = (ones & 1) ? 0x1C0FFC0 : 0x180FF80;
       if(d[3] == -2) col = (ones & 1) ? 0x180FFFF : 0x140FFFF;
@@ -336,7 +336,7 @@ int mycanvas(cell *c) {
       if(d[2] == -1) col = (ones & 1) ? 0x1FFFF70 : 0x1E0E060;
       return col;
       }
-    
+
     case 7: {
       if(d[1] == 0 || d[2] == 0) ;
       else if(d[1] > 0 && d[2] > 0) col = 0x1FF0000;
@@ -345,21 +345,21 @@ int mycanvas(cell *c) {
       else if(d[1] < 0 && d[2] > 0) col = 0x10000FF;
       return col;
       }
-    
+
     case 8: {
       int s = d[1] + d[2] + d[3] + d[4] + d[5];
       if(s > 0) col = 0x1FFD500;
       else if (s < -1) col = 0x17851a9;
       return col;
       }
-    
+
     case 9: {
       int s = d[1] + d[2] + d[3] + d[4] + d[5] + d[0];
       if(s > 0) col = 0x1FF20FF;
       else if (s < -1) col = 0x1C0C0C0;
       return col;
       }
-    
+
     case 10: /* house */ {
       d[0]--;
       int is0 = 0, is1 = 0, is2 = 0, ismore = 0;
@@ -385,7 +385,7 @@ int mycanvas(cell *c) {
       // else if(s == 13) return 0x1FF8000;
       else return 0x202020;
       }
-    
+
     default:
       return -1;
     }
@@ -426,7 +426,7 @@ auto explore_structure(int _shapeid) {
 void add_explore_structure(vector<tour::slide>& v, int id, string nshort, string nlong) {
   string hds = "high-dimensional shapes/";
   v.emplace_back(
-    tour::slide{hds+nshort, 999, tour::LEGAL::SPECIAL, 
+    tour::slide{hds+nshort, 999, tour::LEGAL::SPECIAL,
       nlong + "\n\n"
       "In these slides, press 5 to switch between 4-dimensional and 6-dimensional space."
       "Press End/Home to move forward/backward.",
@@ -455,14 +455,14 @@ tour::slide *gen_high_demo() {
   using namespace tour;
   auto& v = high_slides;
   v.emplace_back(
-    slide{"Introduction/Three-dimensional space", 999, LEGAL::NONE, 
+    slide{"Introduction/Three-dimensional space", 999, LEGAL::NONE,
       "This is our 2D visualization of 3-dimensional space.\n\n"
       "In most slides you can press '5' to enable or disable the coordinate display. "
       "You can move the focus with numpad, arrowkeys, or clicking cells with mouse."
       ,
-      [] (presmode mode) {        
+      [] (presmode mode) {
         sync(mode, VC);
-        if(mode == pmStart) {        
+        if(mode == pmStart) {
           crystal::set_crystal(6);
           patterns::whichCanvas = 'K';
           start_game();
@@ -471,7 +471,7 @@ tour::slide *gen_high_demo() {
       });
 
   v.emplace_back(
-    slide{"Introduction/Four-dimensional space", 999, LEGAL::NONE, 
+    slide{"Introduction/Four-dimensional space", 999, LEGAL::NONE,
       "This is our 2D visualization of 4-dimensional space.",
       [] (presmode mode) {
         sync(mode, VC);
@@ -484,7 +484,7 @@ tour::slide *gen_high_demo() {
       });
 
   v.emplace_back(
-    slide{"Introduction/Color picker", 999, LEGAL::NONE, 
+    slide{"Introduction/Color picker", 999, LEGAL::NONE,
       "Color picker. You can press '0' to '6' to adjust how fast the colors change.",
       [] (presmode mode) {
         sync(mode, 0);
@@ -494,7 +494,7 @@ tour::slide *gen_high_demo() {
       });
 
   v.emplace_back(
-    slide{"games and puzzles/house 3D", 999, LEGAL::NONE, 
+    slide{"games and puzzles/house 3D", 999, LEGAL::NONE,
       "A house in three dimensions. This is a 5x5 square, its center is white, rest of its interior is yellow, and its perimeter is red. "
       "By using the third dimension, you can leave the square, or enter it back.",
       [] (presmode mode) {
@@ -506,7 +506,7 @@ tour::slide *gen_high_demo() {
       });
 
   v.emplace_back(
-    slide{"games and puzzles/house 4D", 999, LEGAL::NONE, 
+    slide{"games and puzzles/house 4D", 999, LEGAL::NONE,
       "A house in four dimensions. This is a 5x5x5 cube."
       ,
       [] (presmode mode) {
@@ -518,7 +518,7 @@ tour::slide *gen_high_demo() {
       });
 
   v.emplace_back(
-    slide{"games and puzzles/house, 3D visualization", 999, LEGAL::NONE, 
+    slide{"games and puzzles/house, 3D visualization", 999, LEGAL::NONE,
       "A house in four dimensions, using the 3D version of our visualization. This visualization is harder to understand. Press End/Home to move forward/backward.",
       [] (presmode mode) {
         sync(mode, 0);
@@ -529,7 +529,7 @@ tour::slide *gen_high_demo() {
       });
 
   v.emplace_back(
-    slide{"games and puzzles/4D orthoplex using 2D", 999, LEGAL::NONE, 
+    slide{"games and puzzles/4D orthoplex using 2D", 999, LEGAL::NONE,
       "Try to find the center of the orthoplex in four dimensions. This is a 4D analog of the octahedron.\n\n"
       "The faces of the orthoplex are bright red, the outside is dark gray, and the center is white."
       ,
@@ -542,7 +542,7 @@ tour::slide *gen_high_demo() {
       });
 
   v.emplace_back(
-    slide{"games and puzzles/4D orthoplex using 3D", 999, LEGAL::NONE, 
+    slide{"games and puzzles/4D orthoplex using 3D", 999, LEGAL::NONE,
       "The same visualization in 3D.",
       [] (presmode mode) {
         sync(mode, 0);
@@ -553,7 +553,7 @@ tour::slide *gen_high_demo() {
       });
 
   v.emplace_back(
-    slide{"games and puzzles/basic roguelike", 999, LEGAL::NONE, 
+    slide{"games and puzzles/basic roguelike", 999, LEGAL::NONE,
       "This is a basic roguelike in three dimensions. Even though it appears that it should be possible to move in such a way that "
       "one of the enemies is no longer adjacent to us, it turns out that one of its other 'copies' will always manage "
       "to chase us. This is clear when we imagine the actual higher-dimensional space.",
@@ -585,7 +585,7 @@ tour::slide *gen_high_demo() {
       });
 
   v.emplace_back(
-    slide{"games and puzzles/gravity mockup", 999, LEGAL::NONE, 
+    slide{"games and puzzles/gravity mockup", 999, LEGAL::NONE,
       "A mockup of a 4D game with gravity. We use the 3D version of our visualization, while the gravity dimension is shown using perspective.",
       [] (presmode mode) {
         sync(mode, 0);
@@ -594,7 +594,7 @@ tour::slide *gen_high_demo() {
           }
        }
       });
-    
+
   add_explore_structure(v, 0, "Cage", "In this series of slides we show various structures in four-dimensional space, using the three-dimensional variant of our visualization.\n\nWe start with a 4x4x4x4 cage with a golden point in the center.");
   add_explore_structure(v, 1, "Tunnel", "One-dimensional tunnel");
   add_explore_structure(v, 2, "Skeleton", "The 1-skeleton of the tessellation of Z^4 with cubes of edge 2");
@@ -607,7 +607,7 @@ tour::slide *gen_high_demo() {
   add_explore_structure(v, 9, "Diagonal", "Diagonal tunnel in all coordinates.");
 
   v.emplace_back(
-    slide{"Magic cube/Standard magic cube", 999, LEGAL::NONE, 
+    slide{"Magic cube/Standard magic cube", 999, LEGAL::NONE,
       "Magic Cube (aka Rubik's Cube) using two dimensions. This is an example of a visualization which is difficult for our method, because we are moving complex objects in the 3D space."
       "Press 'r' to rotate the face (while the mouse pointer is on its center -- two coodinates must be 0 and one must be non-zero), Shift+R to reset.",
       [] (presmode mode) {
@@ -619,7 +619,7 @@ tour::slide *gen_high_demo() {
       });
 
   v.emplace_back(
-    slide{"Magic cube/Four-dimensional magic cube", 999, LEGAL::NONE, 
+    slide{"Magic cube/Four-dimensional magic cube", 999, LEGAL::NONE,
       "Magic Cube (4D) using two dimensions. Keys are the same as in the previous slide.\n\n"
       "Use 'r' to rotate the 2D face under the mouse pointer (two coodinates must be 0 and two must be non-zero)."
       ,
@@ -632,7 +632,7 @@ tour::slide *gen_high_demo() {
       });
 
   v.emplace_back(
-    slide{"Magic cube/Four-dimensional magic cube, 3D visualization", 999, LEGAL::NONE, 
+    slide{"Magic cube/Four-dimensional magic cube, 3D visualization", 999, LEGAL::NONE,
       "Magic Cube (4D) using three dimensions.",
       [] (presmode mode) {
         sync(mode, 0);
@@ -648,9 +648,9 @@ tour::slide *gen_high_demo() {
   }
 #endif
 
-auto highdim_hooks  = 
+auto highdim_hooks  =
     addHook_slideshows(120, [] (tour::ss::slideshow_callback cb) {
-  
+
     if(high_slides.empty()) gen_high_demo();
 
     cb(XLAT("visualizing higher-dimensional spaces"), &high_slides[0], 'h');

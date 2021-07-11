@@ -116,11 +116,11 @@ EX bool applyCheat(char u, cell *c IS(NULL)) {
     return true;
     }
   if(u == 'C') {
-    cheater++; 
+    cheater++;
     cheatMoveTo(laCrossroads);
     addMessage(XLAT("Activated the Hyperstone Quest!"));
 
-    for(int t=1; t<ittypes; t++) 
+    for(int t=1; t<ittypes; t++)
       if(t != itHyperstone && t != itBounty && itemclass(eItem(t)) == IC_TREASURE) {
         items[t] = inv::on ? 50 : 10;
         }
@@ -135,15 +135,15 @@ EX bool applyCheat(char u, cell *c IS(NULL)) {
     return true;
     }
   if(u == 'M') {
-    for(int i=0; i<ittypes; i++) 
-      if(itemclass(eItem(i)) == IC_ORB) 
+    for(int i=0; i<ittypes; i++)
+      if(itemclass(eItem(i)) == IC_ORB)
         items[i] = 0;
     cheater++; addMessage(XLAT("Orb power depleted!"));
     return true;
     }
   if(u == 'O') {
     cheater++; addMessage(XLAT("Orbs summoned!"));
-    for(int i=0; i<cwt.at->type; i++) 
+    for(int i=0; i<cwt.at->type; i++)
       if(passable(cwt.at->move(i), NULL, 0)) {
         eItem it = nextOrb();
         cwt.at->move(i)->item = it;
@@ -151,8 +151,8 @@ EX bool applyCheat(char u, cell *c IS(NULL)) {
     return true;
     }
   if(u == 'F') {
-    if(hardcore && !canmove) { 
-      canmove = true; 
+    if(hardcore && !canmove) {
+      canmove = true;
       addMessage(XLAT("Revived!"));
       }
     else {
@@ -226,8 +226,8 @@ EX bool applyCheat(char u, cell *c IS(NULL)) {
   if(u == 'J') {
     if(items[localTreasureType()] > 0)
       items[localTreasureType()] = 0;
-    else for(int i=1; i<ittypes; i++) 
-      if(itemclass(eItem(i)) == IC_TREASURE) 
+    else for(int i=1; i<ittypes; i++)
+      if(itemclass(eItem(i)) == IC_TREASURE)
         items[i] = 0;
     cheater++; addMessage(XLAT("Treasure lost!"));
     return true;
@@ -278,7 +278,7 @@ EX bool applyCheat(char u, cell *c IS(NULL)) {
     }
   if(u == 'G'-64) {
     timerghost = !timerghost;
-    cheater++; 
+    cheater++;
     addMessage(XLAT("turn count = %1 last exploration = %2 ghost timer = %3",
       its(turncount), its(lastexplore), ONOFF(timerghost)));
     return true;
@@ -299,7 +299,7 @@ EX bool applyCheat(char u, cell *c IS(NULL)) {
     push_debug_screen();
     return true;
     }
-  if(u == 'P'-64) 
+  if(u == 'P'-64)
     peace::on = !peace::on;
 #ifdef CHEAT_DISABLE_ALLOWED
   if(u == 'D'-64) {
@@ -336,24 +336,24 @@ template<class T> void bitfield_editor(int val, T setter, string help = "") {
 struct debugScreen {
 
   cell *debugged_cell;
-  
+
   bool show_debug_data;
-  
+
   debugScreen() { debugged_cell = NULL; show_debug_data = false; }
-  
+
   void operator () () {
     cmode = sm::SIDE | sm::DIALOG_STRICT_X;
     gamescreen(0);
     getcstat = '-';
 
     dialog::init(show_debug_data ? XLAT("debug values") : XLAT("internal details"));
-    
+
     for(auto& p: drawbugs)
       drawBug(p.first, p.second);
-    
+
     cell *what = debugged_cell;
     if(!what && current_display->sidescreen) what = mouseover;
-    
+
     if(what) {
       #if CAP_SHAPES
       queuepoly(gmatrix[what], cgi.shAsymmetric, 0x80808080);
@@ -361,8 +361,8 @@ struct debugScreen {
       char buf[200];
       sprintf(buf, "%p", hr::voidp(what));
       dialog::addSelItem("mpdist", its(what->mpdist), 'd');
-      dialog::add_action([what] () { 
-        bitfield_editor(what->mpdist, [what] (int i) { what->mpdist = 0; }, "generation level");        
+      dialog::add_action([what] () {
+        bitfield_editor(what->mpdist, [what] (int i) { what->mpdist = 0; }, "generation level");
         });
       dialog::addSelItem("land", dnameof2(what->land), 0);
       dialog::addSelItem("land param (int)", its(what->landparam), 'p');
@@ -370,16 +370,16 @@ struct debugScreen {
         "Extra value that is important in some lands. The specific meaning depends on the land."); });
       dialog::addSelItem("land param (hex)", itsh8(what->landparam), 0);
       dialog::addSelItem("land param (heat)", fts(HEAT(what)), 't');
-      dialog::addSelItem("cdata", 
+      dialog::addSelItem("cdata",
         its(getCdata(what, 0))+"/"+its(getCdata(what,1))+"/"+its(getCdata(what,2))+"/"+its(getCdata(what,3))+"/"+itsh(getBits(what)), 't');
-      dialog::add_action([what] () { 
+      dialog::add_action([what] () {
         static ld d = HEAT(what);
         dialog::editNumber(d, -2, 2, 0.1, d, "landparam",
-          "Extra value that is important in some lands. The specific meaning depends on the land."); 
+          "Extra value that is important in some lands. The specific meaning depends on the land.");
         dialog::reaction = [what] () { HEAT(what) = d; };
         });
       dialog::addSelItem("land flags", its(what->landflags)+"/"+itsh2(what->landflags), 'f');
-      dialog::add_action([what] () { 
+      dialog::add_action([what] () {
         bitfield_editor(what->landflags, [what] (int i) { what->landflags = i; }, "Rarely used.");
         });
       dialog::addSelItem("barrier dir", its(what->bardir), 'b');
@@ -436,7 +436,7 @@ struct debugScreen {
         dialog::addBoolItem_action(XLAT("die mirror status"), dice::data[what].mirrored, 'D');
         }
       dialog::addBreak(50);
-      
+
       if(show_debug_data) {
         dialog::addSelItem("pointer", s0+buf+"/"+index_pointer(what), 0);
         dialog::addSelItem("cpdist", its(what->cpdist), 0);
@@ -462,14 +462,14 @@ struct debugScreen {
         dialog::addSelItem("item", dnameof(what->item), 0);
         #if CAP_ARCM
         if(arcm::in())
-          dialog::addSelItem("ID", its(arcm::id_of(what->master)), 0);    
+          dialog::addSelItem("ID", its(arcm::id_of(what->master)), 0);
         #endif
         dialog::addBreak(50);
         dialog::addSelItem("monster", dnameof2(what->monst, what->mondir), 'm');
         dialog::add_action([what] () {
           bitfield_editor(what->mondir, [what] (int i) { what->mondir = i; },
           "monster direction");
-          dialog::extra_options = [what] () { 
+          dialog::extra_options = [what] () {
             dialog::addBoolItem(XLAT("mirrored"), what->monmirror, 'M');
             };
           });
@@ -505,7 +505,7 @@ struct debugScreen {
         popScreen();
         if(debugmode) quitmainloop = true;
         }
-      };  
+      };
     }
   };
 
@@ -551,7 +551,7 @@ EX void showCheatMenu() {
         uni == 'M' || uni == 'Y'-64 || uni == 'G'-64 ||
         uni == ' ' || uni == 8 || uni == 13 ||
         uni == SDLK_ESCAPE || uni == 'q' || uni == 'v' || sym == SDLK_ESCAPE ||
-        sym == SDLK_F10) 
+        sym == SDLK_F10)
         popScreen();
       }
     };
@@ -560,13 +560,13 @@ EX void showCheatMenu() {
 /** view all the monsters and items */
 EX void viewall() {
   celllister cl(cwt.at, 20, 2000, NULL);
-  
+
   vector<eMonster> all_monsters;
   for(int i=0; i<motypes; i++) {
     eMonster m = eMonster(i);
     if(!isMultitile(m)) all_monsters.push_back(m);
     }
-  
+
   for(cell *c: cl.lst) {
     if(isPlayerOn(c)) continue;
     bool can_put_monster = true;
@@ -604,7 +604,7 @@ void cheat_move(char c) {
   else if(c >= '0' && c <= '9') cheat(), cwt += (c - '0');
   else if(c == 's') {
     cheat();
-    cwt += wstep; 
+    cwt += wstep;
     playermoved = false;
     setdist(cwt.at, cheat_move_gen, cwt.peek());
     if(geometry_supports_cdata()) getCdata(cwt.at, 0);
@@ -648,7 +648,7 @@ void test_distances(int max) {
 EX void raiseBuggyGeneration(cell *c, const char *s) {
 
   printf("procgen error (%p): %s\n", hr::voidp(c), s);
-  
+
   if(!errorReported) {
     addMessage(string("something strange happened in: ") + s);
     errorReported = true;
@@ -666,7 +666,7 @@ EX void raiseBuggyGeneration(cell *c, const char *s) {
 #endif
 
   // return;
-  
+
   if(cheater || autocheat) {
     drawbugs.emplace_back(cellwalker(c,0), 0xFF000080);
     modalDebug(c);
@@ -681,7 +681,7 @@ EX void raiseBuggyGeneration(cell *c, const char *s) {
 int read_cheat_args() {
   using namespace arg;
   if(argis("-ch")) { cheat(); }
-  else if(argis("-rch")) {    
+  else if(argis("-rch")) {
     PHASEFROM(2); cheat(); reptilecheat = true;
     }
 // cheats
@@ -693,7 +693,7 @@ int read_cheat_args() {
       /* set seed for reproducible results */
       if(!fixseed) {
         fixseed = true; autocheat = true;
-        startseed = 1;      
+        startseed = 1;
         }
       }
     PHASE(2);
@@ -705,13 +705,13 @@ int read_cheat_args() {
     }
   else if(argis("-WS")) {
     PHASE(3);
-    shift(); 
+    shift();
     activateSafety(readland(args()));
     cheat();
     }
   else if(argis("-WT")) {
     PHASE(3);
-    shift(); 
+    shift();
     teleportToLand(readland(args()), false);
     cheat();
     }
@@ -722,7 +722,7 @@ int read_cheat_args() {
   else if(argis("-I")) {
     PHASE(3) cheat();
     shift(); eItem i = readItem(args());
-    shift(); items[i] = argi(); 
+    shift(); items[i] = argi();
     }
   else if(argis("-IP")) {
     PHASE(3) cheat();
@@ -802,10 +802,10 @@ int read_cheat_args() {
     }
   else if(argis("-wef")) {
     PHASEFROM(2);
-    shift(); int index = argi(); 
+    shift(); int index = argi();
     shift_arg_formula(whatever[index]);
     }
-  else if(argis("-wei")) {    
+  else if(argis("-wei")) {
     PHASEFROM(2);
     shift(); int index = argi();
     shift(); whateveri[index] = argi();
@@ -825,11 +825,11 @@ int read_cheat_args() {
     for(int i=0; i<isize(cl.lst); i++)
       setdist(cl.lst[i], 7, NULL);
     }
-  else if(argis("-sr")) {    
+  else if(argis("-sr")) {
     PHASEFROM(2);
     shift(); sightrange_bonus = argi(); vid.use_smart_range = 0;
     }
-  else if(argis("-srx")) {    
+  else if(argis("-srx")) {
     PHASEFROM(2); cheat();
     shift(); sightrange_bonus = genrange_bonus = gamerange_bonus = argi(); vid.use_smart_range = 0;
     }
@@ -848,23 +848,23 @@ int read_cheat_args() {
     shift_arg_formula(vid.smart_range_detail);
     }
   else if(argis("-smartlimit")) {
-    PHASEFROM(2); 
+    PHASEFROM(2);
     shift(); vid.cells_drawn_limit = argi();
     }
   else if(argis("-genlimit")) {
-    PHASEFROM(2); 
+    PHASEFROM(2);
     shift(); vid.cells_generated_limit = argi();
     }
   else if(argis("-sight3")) {
-    PHASEFROM(2); 
+    PHASEFROM(2);
     shift_arg_formula(sightranges[geometry]);
     }
   else if(argis("-sloppy")) {
-    PHASEFROM(2); 
+    PHASEFROM(2);
     vid.sloppy_3d = true;
     }
   else if(argis("-gen3")) {
-    PHASEFROM(2); 
+    PHASEFROM(2);
     shift_arg_formula(extra_generation_distance);
     }
   else if(argis("-quantum")) {
@@ -914,7 +914,7 @@ int read_cheat_args() {
     }
   else if(argis("-W")) {
     PHASEFROM(2);
-    shift(); 
+    shift();
     firstland0 = firstland = specialland = readland(args());
     stop_game_and_switch_mode(rg::nothing);
     showstartmenu = false;

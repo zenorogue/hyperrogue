@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- control
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-/** \file control.cpp 
+/** \file control.cpp
  *  \brief Routines related to controlling the game
  */
 
@@ -57,7 +57,7 @@ EX ld mouseaim_sensitivity = 0.01;
 EX int timetowait;
 
 #if CAP_SDLJOY
-EX int joyx, joyy, panjoyx, panjoyy; 
+EX int joyx, joyy, panjoyx, panjoyy;
 EX movedir joydir;
 #endif
 
@@ -90,7 +90,7 @@ EX movedir vectodir(hyperpoint P) {
   transmatrix Centered = sphereflip * rgpushxto0(H);
 
   ld binv = 99;
-  
+
   vector<ld> dirdist(cwt.at->type);
 
   for(int i=0; i<cwt.at->type; i++) {
@@ -100,10 +100,10 @@ EX movedir vectodir(hyperpoint P) {
     dirdist[i] = d1 - d2;
     //xspinpush0(-i * 2 * M_PI /cwt.at->type, .5), P);
     }
-    
+
   movedir res;
   res.d = -1;
-  
+
   for(int i=0; i<cwt.at->type; i++) {
     if(dirdist[i] < binv) {
       binv = dirdist[i];
@@ -131,16 +131,16 @@ EX hyperpoint move_destination_vec(int d) {
 EX void movepckeydir(int d) {
   DEBB(DF_GRAPH, ("movepckeydir\n"));
   // EUCLIDEAN
-  
+
   if(protect_memory()) return;
-  
+
   movedir md = vectodir(move_destination_vec(d));
-    
+
   if(!canmove) movepcto(md), remission(); else movepcto(md);
   }
 
 EX void movevrdir(hyperpoint vec) {
-  movedir md = vectodir(vec);    
+  movedir md = vectodir(vec);
   if(!canmove) movepcto(md), remission(); else movepcto(md);
   }
 
@@ -149,30 +149,30 @@ EX void calcMousedest() {
   if(vid.revcontrol == true) { mouseh[0] = -mouseh[0]; mouseh[1] = -mouseh[1]; }
   ld mousedist = hdist(mouseh, tC0(ggmatrix(cwt.at)));
   mousedest.d = -1;
-  
+
   cellwalker bcwt = cwt;
-  
+
   vector<ld> dists(cwt.at->type);
-  
+
   shiftmatrix U = ggmatrix(cwt.at);
-  
+
   for(int i=0; i<cwt.at->type; i++) {
     transmatrix T = currentmap->adj(cwt.at, i);
     dists[i] = hdist(mouseh, U * T * C0);
     }
-  
+
   for(int i=0; i<cwt.at->type; i++) if(dists[i] < mousedist) {
     mousedist = dists[i];
     mousedest.d = cwt.at->c.fix(i - cwt.spin);
-    
+
     mousedest.subdir =
        dists[cwt.at->c.fix(i+1)] < dists[cwt.at->c.fix(i-1)] ? 1 : -1;
 
-    if(cwt.mirrored) 
-      mousedest.d = cwt.at->c.fix(-mousedest.d), 
+    if(cwt.mirrored)
+      mousedest.d = cwt.at->c.fix(-mousedest.d),
       mousedest.subdir = -mousedest.subdir;
     }
-  
+
   if(vid.revcontrol == true) { mouseh[0] = -mouseh[0]; mouseh[1] = -mouseh[1]; }
   cwt = bcwt;
   }
@@ -188,9 +188,9 @@ EX void mousemovement() {
 
   if(GDIM == 3 && !which_pointer) {
     if(WDIM == 2) {
-      if(View[2][2] < -0.75) 
+      if(View[2][2] < -0.75)
         movepcto(MD_DROP, 1);
-      else if(View[2][2] > 0.75) 
+      else if(View[2][2] > 0.75)
         movepcto(-1, 1);
       else
         movepckeydir(6);
@@ -250,7 +250,7 @@ EX void checkjoy() {
   if(!DEFAULTCONTROL) return;
   ld joyvalue1 = sqr(vid.joyvalue);
   ld joyvalue2 = sqr(vid.joyvalue2);
-  
+
   ld jx = joyx;
   ld jy = joyy;
   ld sq = jx*jx+jy*jy;
@@ -258,11 +258,11 @@ EX void checkjoy() {
   static int laststate = 0;
   int curstate = sq < joyvalue1 ? 0 : sq < joyvalue2 ? 1 : 2;
   if(curstate != laststate) flashMessages(), laststate = curstate;
-  
+
   static int lt = ticks;
   int delta = ticks - lt;
   lt = ticks;
-  
+
   if(autojoy) {
     if(sq < joyvalue1) { if(joydir.d >= 0 && !joy_ignore_next) movepcto(joydir); joydir.d = -1; joytime = 0; joy_ignore_next = false; return; }
     if(sq < joyvalue2 && joydir.d == -1) return;
@@ -270,8 +270,8 @@ EX void checkjoy() {
   else {
     if(sq < joyvalue1) { joydir.d = -1; return; }
     }
-  
-  auto new_joydir = vectodir(tangent_length(point2(jx, jy), 0.01)); 
+
+  auto new_joydir = vectodir(tangent_length(point2(jx, jy), 0.01));
   if(new_joydir.d == joydir.d && new_joydir.subdir == joydir.subdir) {
     joytime += delta;
     if(joytime > vid.joysmooth) joytime = vid.joysmooth;
@@ -284,15 +284,15 @@ EX void checkjoy() {
 
 EX void checkpanjoy(double t) {
   if(shmup::on) return;
-  
+
   if(vid.joypanspeed < 1e-7) return;
-  
+
   if(sqr(panjoyx) + sqr(panjoyy) < sqr(vid.joypanthreshold))
     return;
-  
+
   ld jx = panjoyx * t * vid.joypanspeed;
   ld jy = panjoyy * t * vid.joypanspeed;
-  
+
   playermoved = false;
   View = gpushxto0(hpxy(jx, jy)) * View;
   }
@@ -347,7 +347,7 @@ EX ld camera_speed = 1;
 EX ld camera_rot_speed = 1;
 
 EX void full_forward_camera(ld t) {
-  if(anyshiftclick) 
+  if(anyshiftclick)
     zoom_or_fov(exp(-t/10.));
   else if(GDIM == 3) {
     shift_view(ctangent(2, t * camera_speed));
@@ -370,14 +370,14 @@ EX void full_rotate_camera(int dir, ld val) {
     hyperpoint h;
     if(nonisotropic) {
       transmatrix T2 = eupush( tC0(view_inverse(View)) );
-      transmatrix nlp = View * T2;  
+      transmatrix nlp = View * T2;
       auto rV = ortho_inverse(nlp) * View;
       h = nlp * inverse_exp(shiftless(tC0(rV)));
       }
     else h = inverse_exp(shiftless(tC0(View)));
     shift_view(-h);
     rotate_view(cspin(dir, 2, val));
-    shift_view(h);    
+    shift_view(h);
     }
   else if(history::on)
     history::lvspeed += (dir?1:-1) * val / 2;
@@ -406,7 +406,7 @@ EX void full_rotate_camera(int dir, ld val) {
     if(!rug::rug_control()) didsomething = true;
     }
   else
-    shift_view(ctangent(dir, val * camera_speed)), playermoved = false, didsomething = true;      
+    shift_view(ctangent(dir, val * camera_speed)), playermoved = false, didsomething = true;
   }
 
 EX void full_rotate_view(ld h, ld v) {
@@ -430,7 +430,7 @@ EX void handlePanning(int sym, int uni) {
   #if CAP_RUG
   rug::using_rugview urv;
   #endif
-    
+
 #if !ISPANDORA
   if(!smooth_scrolling) {
     if(sym == SDLK_END) full_forward_camera(-0.2*shiftmul);
@@ -444,7 +444,7 @@ EX void handlePanning(int sym, int uni) {
   if(!smooth_scrolling) {
     if(sym == SDLK_PAGEUP) full_rotate_view(1, M_PI/cgi.S21/2*shiftmul);
     if(sym == SDLK_PAGEDOWN) full_rotate_view(-1, -M_PI/cgi.S21/2*shiftmul);
-    if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
+    if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN)
       if(isGravityLand(cwt.at->land) && !rug::rug_control()) playermoved = false;
     }
 
@@ -484,7 +484,7 @@ EX purehookset hooks_fixticks;
 EX array<int, 8> keys_vi = {{'l', 'n', 'j', 'b', 'h', 'y', 'k', 'u'}};
 EX array<int, 8> keys_wasd = {{'d', 'c', 'x', 'z', 'a', 'q', 'w', 'e'}};
 EX array<int, 8> keys_numpad = {{SDLK_KP6, SDLK_KP3, SDLK_KP2, SDLK_KP1, SDLK_KP4, SDLK_KP7, SDLK_KP8, SDLK_KP9}};
-  
+
 EX void handleKeyNormal(int sym, int uni) {
 
   if(cheater && sym < 256 && sym > 0) {
@@ -497,7 +497,7 @@ EX void handleKeyNormal(int sym, int uni) {
   #endif
 
   if(DEFAULTNOR(sym)) handlePanning(sym, uni);
-  
+
 #ifdef SCALETUNER
   if(handleTune(sym, uni)) return;
 #endif
@@ -524,14 +524,14 @@ EX void handleKeyNormal(int sym, int uni) {
       mine::performMarkCommand(mouseover);
     }
   #endif
-  
+
   if(DEFAULTCONTROL) {
     if(sym == '.' || sym == 's') movepcto(-1, 1);
-    if((sym == SDLK_DELETE || sym == SDLK_KP_PERIOD || sym == 'g') && uni != 'G' && uni != 'G'-64) 
+    if((sym == SDLK_DELETE || sym == SDLK_KP_PERIOD || sym == 'g') && uni != 'G' && uni != 'G'-64)
       movepcto(MD_DROP, 1);
     if(sym == 't' && uni != 'T' && uni != 'T'-64 && canmove) {
       cell *target = GDIM == 3 ? mouseover : centerover;
-      if(playermoved && items[itStrongWind]) { 
+      if(playermoved && items[itStrongWind]) {
         cell *c = whirlwind::jumpDestination(cwt.at);
         if(c) target = c;
         }
@@ -547,7 +547,7 @@ EX void handleKeyNormal(int sym, int uni) {
     if(daily::on) daily::handleQuit(1);
     else
     #endif
-    if(needConfirmation()) 
+    if(needConfirmation())
       pushScreen(showMission);
     else restart_game();
     }
@@ -567,31 +567,31 @@ EX void handleKeyNormal(int sym, int uni) {
     if(needConfirmation()) pushScreen(showMission);
     else quitmainloop = true;
     }
-  
+
   if(uni == 'o' && DEFAULTNOR(sym)) get_o_key().second();
 #if CAP_INV
-  if(uni == 'i' && DEFAULTNOR(sym) && inv::on) 
+  if(uni == 'i' && DEFAULTNOR(sym) && inv::on)
     pushScreen(inv::show);
 #endif
-  
+
   if((sym == SDLK_F3 || sym == ' ') && DEFAULTNOR(sym)) {
     if(rug::rug_control())
       rug::reset_view();
     else
       fullcenter();
     }
-  
-  if(sym == 'v' && DEFAULTNOR(sym)) 
+
+  if(sym == 'v' && DEFAULTNOR(sym))
     pushScreen(showMainMenu);
 
-  if(sym == PSEUDOKEY_MENU) 
+  if(sym == PSEUDOKEY_MENU)
     pushScreen(showMainMenu);
-  
+
   if(sym == '-' || sym == PSEUDOKEY_WHEELDOWN) {
     actonrelease = false;
-    
+
     multi::cpid = 0;
-    if(mouseover && 
+    if(mouseover &&
       targetclick && (shmup::on ? numplayers() == 1 && !shmup::pc[0]->dead : true) && targetRangedOrb(mouseover, forcetarget ? roMouseForce : roMouse)) {
       }
     else if(forcetarget)
@@ -687,32 +687,32 @@ EX void mainloopiter() {
   GLWRAP;
   DEBB(DF_GRAPH, ("main loop\n"));
 
-  #if !CAP_SDLGFX && !CAP_GL 
+  #if !CAP_SDLGFX && !CAP_GL
   vid.wallmode = 0;
   vid.monmode = 0;
   #endif
 
   #if CAP_VR
   vrhr::vr_shift();
-  #endif  
+  #endif
 
   optimizeview();
-  
+
   models::configure();
 
   lastt = ticks;
   ticks = SDL_GetTicks();
   callhooks(hooks_fixticks);
-    
+
   timetowait = lastframe + 1000 / cframelimit - ticks;
 
   cframelimit = vid.framelimit;
-  if(outoffocus && cframelimit > 10) cframelimit = 10;  
-  
+  if(outoffocus && cframelimit > 10) cframelimit = 10;
+
   bool normal = cmode & sm::NORMAL;
-  
+
   shmup::turn(ticks - lastt);
-    
+
   if(!shmup::on && (multi::alwaysuse || multi::players > 1) && normal)
     timetowait = 0, multi::handleMulti(ticks - lastt);
 
@@ -720,14 +720,14 @@ EX void mainloopiter() {
     cwtV = gmatrix[cwt.at] * ddspin(cwt.at, cwt.spin);
     if(cwt.mirrored) playerV = playerV * Mirror;
     }
-  
+
   mousepan = cmode & sm::NORMAL;
   if((cmode & (sm::DRAW | sm::MAP)) && !hiliteclick) mousepan = true;
   mousepan = mousepan && mouseaiming(false) && mouseaim_sensitivity;
   if(mousepan != oldmousepan) {
     oldmousepan = mousepan;
     #if CAP_MOUSEGRAB
-    if(mousepan) {    
+    if(mousepan) {
       #if CAP_SDL2
       SDL_SetRelativeMouseMode(SDL_TRUE);
       #else
@@ -744,7 +744,7 @@ EX void mainloopiter() {
       SDL_ShowCursor(SDL_ENABLE);
       SDL_WarpMouse(vid.xres/2, vid.yres/2);
       #endif
-      mouseaim_x = mouseaim_y = 0;      
+      mouseaim_x = mouseaim_y = 0;
       }
     #endif
     }
@@ -764,7 +764,7 @@ EX void mainloopiter() {
       else if(GDIM == 3)
         spinEdge(aspd);
 #if CAP_SDLJOY
-      if(panjoyx || panjoyy) 
+      if(panjoyx || panjoyy)
         checkpanjoy((ticks - lastt) / 1000.0);
 #endif
       }
@@ -775,14 +775,14 @@ EX void mainloopiter() {
       need_refresh = false;
       }
     lastframe = ticks;
-    }      
+    }
 
   wheelclick = false;
 
   getcshift = 1;
-  
+
   #if CAP_SDL2
-  
+
   const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 
   pandora_rightclick = keystate[SDL_SCANCODE_RCTRL];
@@ -816,16 +816,16 @@ EX void mainloopiter() {
   if(keystate[SDLK_LSHIFT] || keystate[SDLK_RSHIFT]) getcshift = -1;
   if(keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL]) getcshift /= 10;
   if(keystate[SDLK_LALT] || keystate[SDLK_RALT]) getcshift *= 10;
-  
+
   #endif
 
   anyshiftclick = lshiftclick | rshiftclick;
   anyctrlclick = lctrlclick | rctrlclick;
-  
+
   forcetarget = anyshiftclick;
-  
+
   didsomething = false;
-  
+
   if(vid.shifttarget&1) {
     #if ISPANDORA
     targetclick = pandora_leftclick | pandora_rightclick;
@@ -837,14 +837,14 @@ EX void mainloopiter() {
   else {
     targetclick = true;
     }
-  
+
 #if CAP_SDLAUDIO
   if(audio) handlemusic();
 #endif
   apply_memory_reserve();
   SDL_Event ev;
   DEBB(DF_GRAPH, ("polling for events\n"));
-  
+
   #if CAP_VR
   if(vrhr::active() && !shmup::on) {
     static int lastticks = ticks;
@@ -858,13 +858,13 @@ EX void mainloopiter() {
       E4;
       transmatrix T = hmd_at * inverse(hmd_ref_at);
 
-      T = 
-        cspin(0, 2, -vraim_x * camera_speed * t) * 
+      T =
+        cspin(0, 2, -vraim_x * camera_speed * t) *
         cspin(1, 2, vraim_y * camera_speed * t) *
         cpush(0, -vrgo_x * camera_speed * t) *
         cpush(2, -vrgo_y * camera_speed * t) *
         T;
-      
+
       hmd_ref_at = inverse(T) * hmd_at;
       }
     else if(in_perspective_v()) {
@@ -875,7 +875,7 @@ EX void mainloopiter() {
       }
     }
   #endif
-  
+
   if(mouseaiming(shmup::on)) {
     #if CAP_MOUSEGRAB
     rug::using_rugview urv;
@@ -885,13 +885,13 @@ EX void mainloopiter() {
     mouseaim_x = mouseaim_y = 0;
     #endif
     }
-  
+
   if(smooth_scrolling && !shmup::on && (cmode & sm::NORMAL)) {
     rug::using_rugview urv;
     auto& lastticks = sc_ticks;
     ld t = (ticks - lastticks) * shiftmul / 1000.;
     lastticks = ticks;
-    
+
     #if CAP_SDL2
     const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 
@@ -922,14 +922,14 @@ EX void mainloopiter() {
   #if CAP_VR
   vrhr::vr_control();
   #endif
-  achievement_pump();  
+  achievement_pump();
 
   for(auto d: dialog::key_queue) {
     println(hlog, "handling key ", d);
     handlekey(d, d);
     }
   dialog::key_queue.clear();
-      
+
   while(SDL_PollEvent(&ev)) handle_event(ev);
   fix_mouseh();
   #if CAP_SDLJOY
@@ -945,7 +945,7 @@ EX void handle_event(SDL_Event& ev) {
     int sym = 0;
     int uni = 0;
     shiftmul = 1;
-    
+
 /*    if(ev.type == SDL_JOYDEVICEADDED || ev.type == SDL_JOYDEVICEREMOVED) {
       joyx = joyy = 0;
       panjoyx = panjoyy = 0;
@@ -965,7 +965,7 @@ EX void handle_event(SDL_Event& ev) {
       if(w == SDL_WINDOWEVENT_RESIZED)
         resize_screen_to(ev.window.data1, ev.window.data2);
       }
-    
+
     #else
     if(ev.type == SDL_ACTIVEEVENT) {
       if(ev.active.state & SDL_APPINPUTFOCUS) {
@@ -977,16 +977,16 @@ EX void handle_event(SDL_Event& ev) {
           }
         }
       }
-    
-    if(ev.type == SDL_VIDEORESIZE) 
-      resize_screen_to(ev.resize.w, ev.resize.h);    
-    
+
+    if(ev.type == SDL_VIDEORESIZE)
+      resize_screen_to(ev.resize.w, ev.resize.h);
+
     if(ev.type == SDL_VIDEOEXPOSE) {
       drawscreen();
       }
     #endif
 
-#if CAP_SDLJOY    
+#if CAP_SDLJOY
     if(ev.type == SDL_JOYAXISMOTION && normal && DEFAULTCONTROL) {
       if(ev.jaxis.which == 0) {
         if(ev.jaxis.axis == 0)
@@ -1003,11 +1003,11 @@ EX void handle_event(SDL_Event& ev) {
       else {
         if(ev.jaxis.axis == 0)
           panjoyx = ev.jaxis.value;
-        else 
+        else
           panjoyy = ev.jaxis.value;
         }
       }
-    
+
     if(joyhandler && joyhandler(ev)) ;
 
     else if(ev.type == SDL_JOYHATMOTION && !normal) {
@@ -1037,8 +1037,8 @@ EX void handle_event(SDL_Event& ev) {
       uni = ev.key.keysym.sym;
       if(uni >= 'a' && uni <= 'z') {
         if(ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) uni -= 32;
-        else if(ev.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)) uni -= 96;        
-        }      
+        else if(ev.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)) uni -= 96;
+        }
       #else
       uni = ev.key.keysym.unicode;
       if(ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) shiftmul = -1;
@@ -1051,12 +1051,12 @@ EX void handle_event(SDL_Event& ev) {
         apply_screen_settings();
         }
       }
-    
+
     dialog::handleZooming(ev);
-    
+
     if(sym == SDLK_F1 && normal && playermoved)
       help = "@";
-    
+
     bool rollchange = (cmode & sm::OVERVIEW) && getcstat >= 2000 && cheater;
 
     if(ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP SDL12(, || ev.type == SDL_MOUSEWHEEL)) {
@@ -1066,25 +1066,25 @@ EX void handle_event(SDL_Event& ev) {
       which_pointer = 0;
       bool was_holdmouse = holdmouse;
       holdmouse = false;
-      
+
       bool down = ev.type == SDL_MOUSEBUTTONDOWN SDL12(, || ev.type == SDL_MOUSEWHEEL);
       bool up = ev.type == SDL_MOUSEBUTTONUP;
-      
+
       bool act = false;
-      
+
       if(vid.quickmouse) {
         act = down;
         }
       else {
         act = actonrelease && up;
         actonrelease = down;
-        }      
-      
+        }
+
       fix_mouseh();
-      
+
       if(was_holdmouse && up)
         sym = uni = PSEUDOKEY_RELEASE;
-      
+
       /* simulate RMB and MMB for Mac users etc. */
       if(ev.button.button == SDL_BUTTON_LEFT) {
         if(ISPANDORA ? pandora_rightclick : lctrlclick)
@@ -1092,7 +1092,7 @@ EX void handle_event(SDL_Event& ev) {
         else if((ISPANDORA ? pandora_leftclick : lshiftclick) && !(vid.shifttarget&1))
           ev.button.button = SDL_BUTTON_RIGHT;
         }
-      
+
       if(!act) ;
 
       else if(ev.button.button==SDL_BUTTON_RIGHT)
@@ -1102,7 +1102,7 @@ EX void handle_event(SDL_Event& ev) {
       else if(ev.button.button == SDL_BUTTON_LEFT) {
         sym = getcstat, uni = getcstat, shiftmul = getcshift;
         }
-      
+
       else if(SDL12(ev.button.button==SDL_BUTTON_WHEELDOWN || ev.button.button == SDL_BUTTON_WHEELUP, ev.type == SDL_MOUSEWHEEL)) {
         #if CAP_SDL2
         ld dir = ev.wheel.y * 0.25;
@@ -1136,22 +1136,22 @@ EX void handle_event(SDL_Event& ev) {
 
     if(ev.type == SDL_MOUSEMOTION) {
       mouseoh = mouseh;
-      
+
       int lmousex = mousex, lmousey = mousey;
-      
+
       mousing = true;
       which_pointer = 0;
       mousemoved = true;
       mousex = ev.motion.x;
       mousey = ev.motion.y;
-      
+
       if(mousepan) {
         mousex = vid.xres/2;
-        mousey = vid.yres/2;      
+        mousey = vid.yres/2;
         mouseaim_x += ev.motion.xrel * mouseaim_sensitivity;
         mouseaim_y += ev.motion.yrel * mouseaim_sensitivity;
         }
-      
+
       need_mouseh = true;
 
       if(holdmouse && getcstat == '-') sym = uni = getcstat, fix_mouseh();
@@ -1188,22 +1188,22 @@ EX void handle_event(SDL_Event& ev) {
       if(needConfirmation() && !(cmode & sm::MISSION)) showMissionScreen();
       else quitmainloop = true;
       }
-    
+
     if(sym == SDLK_F4 && anyshiftclick) {
       nomap = !nomap;
       sym = 0;
       }
-      
+
     if(sym == SDLK_F2 && anyshiftclick) {
       nohud = !nohud;
       sym = 0;
       }
-      
+
     if(sym == SDLK_F3 && anyshiftclick) {
       nofps = !nofps;
       sym = 0;
       }
-    
+
     if(sym || uni) {
       if(need_refresh) {
         just_refreshing = true;
@@ -1212,7 +1212,7 @@ EX void handle_event(SDL_Event& ev) {
         }
       need_refresh = true;
       }
-      
+
     handlekey(sym, uni);
     }
 #endif
@@ -1284,19 +1284,19 @@ EX bool gmodekeys(int sym, int uni) {
   if(NUMBERKEY == '6') { vid.grid = !vid.grid; return true; }
   if(NUMBERKEY == '7') { vid.darkhepta = !vid.darkhepta; return true; }
 
-  if(NUMBERKEY == '1') 
+  if(NUMBERKEY == '1')
     pushScreen(models::quick_model);
-  
+
   if(GDIM == 2) {
     if(NUMBERKEY == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 7; }
-    else if((NUMBERKEY == '8' && hiliteclick) || NUMBERKEY == 508) { 
-      vid.highlightmode += 60 + (shiftmul > 0 ? 1 : -1); vid.highlightmode %= 3; 
+    else if((NUMBERKEY == '8' && hiliteclick) || NUMBERKEY == 508) {
+      vid.highlightmode += 60 + (shiftmul > 0 ? 1 : -1); vid.highlightmode %= 3;
       }
-    else if(NUMBERKEY == '8') { 
-      vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 4; 
+    else if(NUMBERKEY == '8') {
+      vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 4;
       }
-       
-    else if(uni == '%') { 
+
+    else if(uni == '%') {
       if(vid.wallmode == 0) vid.wallmode = 6;
       vid.wallmode--;
       }
@@ -1305,7 +1305,7 @@ EX bool gmodekeys(int sym, int uni) {
     }
   else {
     if(NUMBERKEY == '5') { vid.wallmode = vid.wallmode == 5 ? 4 : 5; }
-    else if(NUMBERKEY == '8') { 
+    else if(NUMBERKEY == '8') {
       if(vid.monmode == 0) vid.monmode = 1;
       else if(vid.monmode == 1) vid.monmode = 3;
       else vid.monmode = 0;
@@ -1324,10 +1324,10 @@ EX bool haveMobileCompass() {
   if(GDIM == 3) return false;
   return canmove && !shmup::on && vid.mobilecompasssize > 0 && isize(screens) == 1;
   }
-  
+
 EX bool handleCompass() {
   if(!haveMobileCompass()) return false;
-  
+
   using namespace shmupballs;
 
   int dx = mousex - xmove;
@@ -1339,7 +1339,7 @@ EX bool handleCompass() {
       hyperpoint param = tangent_length(point2(dx, dy), .01);
 
       movedir md = vectodir(param);
-    
+
       if(!canmove) movepcto(md), remission(); else movepcto(md);
       }
     getcstat = 0;
@@ -1390,20 +1390,20 @@ EX void show() {
   gamescreen(0);
 
   dialog::init(XLAT("scrolling by device rotation"));
-  
+
   dialog::addHelp(XLAT(
     "This lets you scroll the map by rotating your device. It can be e.g. used to "
     "play the spherical mode of HyperRogue in mobile VR goggles -- the \"spherical VR\" "
     "button configures this; this VR mode can be disabled by touching the screen for 1 second."));
-  
+
   dialog::addSelItem(XLAT("mode"), choices[mode], 'm');
   dialog::add_action([] () { int m = (mode + 1) % 3; mode = 0; fullcenter(); mode = m; delayed_reset(); });
   dialog::addSelItem(XLAT("sensitivity"), fts(sensitivity), 's');
-  dialog::add_action([] () { 
-    dialog::editNumber(sensitivity, -10, 10, 1, 1, XLAT("sensitivity"), 
+  dialog::add_action([] () {
+    dialog::editNumber(sensitivity, -10, 10, 1, 1, XLAT("sensitivity"),
         XLAT("1 means that rotating the device by 1 radian corresponds to scrolling by 1 unit. In spherical geometry, 1 unit = 1 radian."));
     });
-  
+
   dialog::addBreak(100);
 
   dialog::addItem(XLAT("stereo vision config"), 'e');
@@ -1419,7 +1419,7 @@ EX void show() {
   dialog::add_action([] () { editScale(); });
 
   dialog::addItem(XLAT("spherical VR"), 'v');
-  dialog::add_action([] () { 
+  dialog::add_action([] () {
     if(!sphere) set_geometry(gSphere), start_game();
     mode = 0; fullcenter();
     mode = 2; sensitivity = 1;
@@ -1446,7 +1446,7 @@ void relative_unapply() {
 transmatrix change_geometry(const transmatrix& T) {
   if(sphere && sensitivity == 1) return T;
   ld alpha, beta, push;
-  
+
   {
   dynamicval<eGeometry> g(geometry, gSphere);
   hyperpoint h = T * C0;
@@ -1456,12 +1456,12 @@ transmatrix change_geometry(const transmatrix& T) {
   hyperpoint spinpoint = gpushxto0(h) * T * xpush0(1);
   beta = atan2(spinpoint[1], spinpoint[0]);
   }
-  
+
   // gpushxto0(h) * T * xpush(1) * C0 == spin(beta) * xpush(1) * C0
   // gpushxto0(h) * T == spin(beta)
   // T = rgpushxto0(h) * spin(beta)
 
-  
+
   transmatrix U = spin(-alpha) * xpush(push * sensitivity) * spin(-beta+alpha);
 
   return U;

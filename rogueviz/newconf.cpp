@@ -35,7 +35,7 @@ void add_border(vector<string>& v, int cy) {
   for(int x=0; x<X; x++)
     if(v[y][x] != '1')
     if((y && v[y-1][x] == '1') || (y<Y-1 && v[y+1][x] == '1') || (x && v[y][x-1] == '1') || (x<X-1 && v[y][x+1] == '1'))
-      v[y][x] = y < cy ? '4' : y > cy ? '5' : (nx++);  
+      v[y][x] = y < cy ? '4' : y > cy ? '5' : (nx++);
   }
 
 vector<string> gensquare(int X, int Y) {
@@ -105,9 +105,9 @@ vector<string> snake = {
   "00555555555555555555555555555555500",
   "00000000000000000000000000000000000"
   };
-  
-struct coord { 
-  int x, y; 
+
+struct coord {
+  int x, y;
   coord operator + (int d) {
     coord res = *this;
     d &= 3;
@@ -134,7 +134,7 @@ bool pretty = true;
 void iterate() {
   int Y = isize(fmap);
   int X = isize(fmap[0]);
-  for(int y=0; y<Y; y++) 
+  for(int y=0; y<Y; y++)
   for(int x=0; x<X; x++) {
     if(fmap[y][x] == '6')
       vy[y][x] = 0, vx[y][x] = -1;
@@ -160,31 +160,31 @@ void iterate() {
 
   vector<ld> xes;
 
-  for(int y=0; y<Y-1; y++) for(int x=0; x<X-1; x++) 
+  for(int y=0; y<Y-1; y++) for(int x=0; x<X-1; x++)
     if(fmap[y][x] == '1' && fmap[y+1][x] == '1' && fmap[y][x+1] == '1') {
-    
+
     hyperpoint here = point2(vx[y][x], vy[y][x]);
     hyperpoint v0   = point2(vx[y][x+1], vy[y][x+1]) - here;
     hyperpoint v1   = point2(vx[y+1][x], vy[y+1][x]) - here;
-    
+
     ld det = (v0 ^ v1)[2];
     if(det == 0) continue;
 
     hyperpoint ba2 = point2(v1[1], -v0[1]) / det;
     hyperpoint ca2 = point2(-v1[0], v0[0]) / det;
-    
+
     ld d = (ba2|ba2);
     if(d == 0) continue;
-  
+
     ld good = (ca2^ba2)[2] / d;
 
     xes.push_back(good);
     }
-  
+
   sort(xes.begin(), xes.end());
   if(isize(xes))
     cscale = -xes[isize(xes) / 2];
-  
+
   // println(hlog, "cscale = ", cscale);
   }
 
@@ -193,7 +193,7 @@ void nconf_solve() {
   nconf::SY = isize(fmap);
   nconf::SX = isize(fmap[0]);
   nconf::resize_pt();
-  for(int y=0; y<nconf::SY; y++) 
+  for(int y=0; y<nconf::SY; y++)
   for(int x=0; x<nconf::SX; x++) {
     auto& p = nconf::pts[y][x];
     p.type = (nconf::ptype)(fmap[y][x] - '0');
@@ -203,8 +203,8 @@ void nconf_solve() {
   nconf::draw_progress = false;
   nconf::text_progress = false;
   nconf::computemap(nconf::pts);
-  for(int y=0; y<nconf::SY; y++) 
-  for(int x=0; x<nconf::SX; x++) { 
+  for(int y=0; y<nconf::SY; y++)
+  for(int x=0; x<nconf::SX; x++) {
     if(fmap[y][x] == '1')
     vx[y][x] = nconf::pts[y][x].x[0] * 2 - 1,
     vy[y][x] = nconf::pts[y][x].x[1] * 2 - 1;
@@ -228,13 +228,13 @@ void fix_border() {
 
   coord cc;
   for(int y=0; y<Y; y++) for(int x=0; x<X; x++) if(fmap[y][x] == '6') cc = coord{x,y};
-  
+
   int dir = 0;
   while(fmap_at(cc+dir) != '1') dir++;
-  
+
   cc = cc + dir;
   dir += 2;
-  
+
   while(true) {
     if(fmap_at(cc+dir) == '1') cc = cc + dir, dir++;
     else {
@@ -256,7 +256,7 @@ void doublemap() {
 
   int Y = isize(fmap);
   int X = isize(fmap[0]);
-  
+
   for(int y=Y-1; y>=0; y--) for(int x=X-1; x>=0; x--)
     vx[y][x] = vx[y/2][x/2], vy[y][x] = vy[y/2][x/2];
 
@@ -269,7 +269,7 @@ void doublemap() {
       if(!live) us = '0';
       }
     }
-  
+
   bool found6 = false, found7 = false;
   for(int y=0; y<Y; y++) for(int x=0; x<X; x++) {
     if(fmap[y][x] == '6') {
@@ -279,7 +279,7 @@ void doublemap() {
       if(found7) fmap[y][x] = '5'; else found7 = true;
       }
     fix_border();
-    }  
+    }
   }
 
 int pointmode;
@@ -325,7 +325,7 @@ void changepoint(int x, int y, bool can_add) {
   auto& us = fmap[y][x];
   if(fmap[y][x] >= '4') {
     if(fmap[y][x] > '5') {
-      int q = 0;        
+      int q = 0;
       for(int k=0; k<4; k++) if(fmap_at(cc+k) == '0') q++;
       if(q != 1) return;
       }
@@ -335,19 +335,19 @@ void changepoint(int x, int y, bool can_add) {
       for(int k=0; k<4; k++) if(fmap_at(cc+k) >= '4') q++;
       if(q > 2) return;
       }
-    for(int k=0; k<4; k++) 
-      if(fmap_at(cc+k) != '1') 
-      if(fmap_at(cc+k+(k+1)) == '1') 
-      if(fmap_at(cc+(k+1)) != '1') 
+    for(int k=0; k<4; k++)
+      if(fmap_at(cc+k) != '1')
+      if(fmap_at(cc+k+(k+1)) == '1')
+      if(fmap_at(cc+(k+1)) != '1')
         return;
 
-    for(int k=0; k<4; k++) 
-      if(fmap_at(cc+k) != '1') 
-      if(fmap_at(cc+k+k) == '1') 
-      if(fmap_at(cc+k+(k+1)) != '1') 
-      if(fmap_at(cc+k+(k-1)) != '1') 
+    for(int k=0; k<4; k++)
+      if(fmap_at(cc+k) != '1')
+      if(fmap_at(cc+k+k) == '1')
+      if(fmap_at(cc+k+(k+1)) != '1')
+      if(fmap_at(cc+k+(k-1)) != '1')
         return;
-    
+
     if(fmap[y-1][x] == '0') fmap[y-1][x] = us;
     if(fmap[y][x-1] == '0') fmap[y][x-1] = us;
     if(fmap[y+1][x] == '0') fmap[y+1][x] = us;
@@ -389,14 +389,14 @@ void changepoint(int x, int y, bool can_add) {
         case '7': if(!live[k]) kill7 = true; break;
         };
       }
-    
+
     if(kill6 && kill7) return;
-    
+
     if(kill6) us = '6';
     else if(kill7) us = '7';
     else if(have4) us = '4';
     else us = '5';
-    
+
     for(int k=0; k<4; k++) if(!live[k]) fmap_at(cc+k) = '0';
     }
   }
@@ -517,7 +517,7 @@ void pick_pattern() {
   dialog::init(XLAT("patterns"));
 
   dialog::addItem("green football", 'g');
-  dialog::add_action([] { 
+  dialog::add_action([] {
     chg_pattern([] {
       firstland = specialland = laCanvas;
       patterns::whichCanvas = 'B';
@@ -525,7 +525,7 @@ void pick_pattern() {
     });
 
   dialog::addItem("Goldberg football", 'G');
-  dialog::add_action([] { 
+  dialog::add_action([] {
     chg_pattern([] {
       gp::param.first = 9;
       gp::param.second = 0;
@@ -536,7 +536,7 @@ void pick_pattern() {
     });
 
   dialog::addItem("octagons", 'o');
-  dialog::add_action([] { 
+  dialog::add_action([] {
     chg_pattern([] {
       set_geometry(gOctagon);
       firstland = specialland = laCanvas;
@@ -545,29 +545,29 @@ void pick_pattern() {
     });
 
   dialog::addItem("windy plains", 'w');
-  dialog::add_action([] { 
+  dialog::add_action([] {
     chg_pattern([] {
       firstland = specialland = laWhirlwind;
       });
     vid.smart_range_detail = 2.5;
     });
-  
+
   dialog::addItem("reptiles", 'r');
-  dialog::add_action([] { 
+  dialog::add_action([] {
     chg_pattern([] {
       firstland = specialland = laReptile;
       });
     });
-  
+
   dialog::addItem("zebra", 'z');
-  dialog::add_action([] { 
+  dialog::add_action([] {
     chg_pattern([] {
       firstland = specialland = laZebra;
       });
     });
-  
+
   dialog::addItem("colored squares", 's');
-  dialog::add_action([] { 
+  dialog::add_action([] {
     chg_pattern([] {
       set_variation(eVariation::pure);
       arcm::current.parse("4^5");
@@ -576,7 +576,7 @@ void pick_pattern() {
       patterns::whichCanvas = 'A';
       });
     });
-    
+
   if(specialland == laWhirlwind) {
     dialog::addBoolItem_action("animated", animated_pattern, 'a');
     }
@@ -594,25 +594,25 @@ namespace ncee_scr {
 void draw_ncee() {
   using namespace ncee_scr;
   auto cd = current_display;
-  
+
   Y = isize(fmap);
   X = isize(fmap[0]);
   siz = min((cd->ysize / (show_mapping ? 2 : 1) - 5) / Y, showmenu ? (cd->xcenter -5 )*2/X : (cd->xsize - 5) / X);
-  
+
   xc = 0;
   yc = vid.yres * (show_mapping ? mapping_split : 1) / 2 - cd->ycenter;
-  
+
   x0 = - int(siz * X / 2);
   y0 = - int(siz * Y / 2);
-  
+
   ld period;
-  
+
   if(geometry == gNormal) {
 
     auto cw = heptspin(cwt.at->master, 0);
     cw = cw + wstep + 3 + wstep + 5 + wstep;
     period = hdist0(tC0(currentmap->relative_matrix(cwt.at, cw.at->c7, C0)));
-  
+
     if(specialland == laWhirlwind)
       period *= 9;
     if(specialland == laZebra)
@@ -630,14 +630,14 @@ void draw_ncee() {
     }
 
   period *= 2 / M_PI;
-  
+
   dynamicval<eModel> pm(pmodel, mdPixel);
   dynamicval<eGeometry> pg(geometry, gEuclid);
-  
+
   initquickqueue();
   nctinf2.texture_id = rug::glbuf->renderedTexture;
   nctinf2.tvertices.clear();
-  
+
   ld map_ypos = vid.yres * (mapping_split + 1) / 2 - cd->ycenter;
   ld sca2 = (vid.yres * (1-mapping_split) / 2 - 10)  / pconf.scale;
 
@@ -664,10 +664,10 @@ void draw_ncee() {
     q.flags |= POLY_TRIANGLES;
     q.offset_texture = 0;
     }
-    
+
   auto h = [&] (int x, int y) { return hpxy(x0 + x * siz + xc, y0 + y * siz + yc); };
   auto hc = [&] (int x, int y) { return hpxy(x0 + x * siz + siz/2 + xc, y0 + y * siz + siz/2 + yc); };
-  
+
   color_t typecols[8] = {
     0x101010FF, 0xD0D0D0FF, 0, 0, 0xF04040FF, 0x4040F0FF, 0xF0F040FF, 0x40F0F0FF
     };
@@ -678,23 +678,23 @@ void draw_ncee() {
     curvepoint(h(x+1,y+1));
     curvepoint(h(x,y+1));
     #if CAP_NCONF
-    bool ineq = 
+    bool ineq =
       in_visualization && fmap[y][x] == '1';
     #endif
-    queuecurve(shiftless(Id), 0, 
+    queuecurve(shiftless(Id), 0,
     #if CAP_NCONF
       (ineq && nconf::pts[y][x].state == 1) ? 0xFF8000FF :
       (ineq && nconf::pts[y][x].state == 2) ? 0x00FF00FF :
     #endif
       (fmap[y][x] == '1' && show_mgrid && show_mapping) ? 0x404040FF : typecols[fmap[y][x] - '0'], PPR::LINE);
     }
-  
+
   if(inHighQual) for(int x=0; x<X; x++) for(int y=0; y<Y; y++) {
     curvepoint(h(x,y));
     curvepoint(h(x,y+1));
     curvepoint(h(x+1,y+1));
     curvepoint(h(x+1,y));
-    queuecurve(shiftless(Id), 0, 
+    queuecurve(shiftless(Id), 0,
       typecols[fmap[y][x] - '0'], PPR::LINE);
     }
 
@@ -703,22 +703,22 @@ void draw_ncee() {
 
   nctinf.texture_id = rug::glbuf->renderedTexture;
   nctinf.tvertices.clear();
-  
+
   static int z = 0;
 
   auto tri = [&] (const array<coord,3>& c)  {
-    
+
     int id = -1;
     for(int i=0; i<3; i++) if(fmap_at(c[i])) id = i;
     if(id == -1) return;
     ld delta = (int((vx[c[id].y][c[id].x]) / cscale / period + 1000.5) - 1000) * period;
     z = !z;
     for(int s=0; s<3; s++) {
-      curvepoint(hc(c[s].x, c[s].y)); 
+      curvepoint(hc(c[s].x, c[s].y));
       nctinf.tvertices.push_back(glhr::makevertex((vx[c[s].y][c[s].x]/cscale-delta)*pconf.scale/2+.5, vy[c[s].y][c[s].x]*pconf.scale/2+.5, 0));
       }
     };
-    
+
   if(viewmap && !in_visualization) for(int x=0; x<X-1; x++) for(int y=0; y<Y-1; y++) {
     if(fmap[y][x+1] > '0' && fmap[y+1][x] > '0') {
       if(fmap[y][x] > '0') tri(make_array(coord{x,y}, coord{x+1,y}, coord{x,y+1}));
@@ -729,22 +729,22 @@ void draw_ncee() {
       if(fmap[y+1][x] > '0') tri(make_array(coord{x,y}, coord{x,y+1}, coord{x+1,y+1}));
       }
     }
-  
+
   auto& q = queuecurve(shiftless(Id), 0, (show_mgrid && show_mapping) ? 0x404040FF : 0xFFFFFFFF, PPR::LINE);
   q.tinf = &nctinf;
   q.flags |= POLY_TRIANGLES;
   q.offset_texture = 0;
-  
+
   hyperpoint vmap[256][256];
 
   pair<int, int> mpt = {(mousex - xc - cd->xcenter - x0) / siz, (mousey - yc - cd->ycenter - y0) / siz};
 
   queueline1(h(0,0), h(0,-1), 0x1010101);
-  
+
   const color_t gridcol = 0xFFFFFFFF;
   if(inHighQual) ;
   else if(show_mapping && show_mgrid && !in_visualization) {
-    for(int x=0; x<X-1; x++) for(int y=0; y<Y-1; y++) 
+    for(int x=0; x<X-1; x++) for(int y=0; y<Y-1; y++)
       if(fmap[y][x] > '0')
         vmap[y][x] = hpxy(vx[y][x]/cscale * sca2 / 2, vy[y][x] * sca2 / 2+ map_ypos);
     for(int x=0; x<X-1; x++) for(int y=0; y<Y-1; y++) {
@@ -768,7 +768,7 @@ void draw_ncee() {
     vid.linewidth *= 3;
     color_t col = 0;
     if(x >= 0 && y >= 0 && x < X && y < Y) {
-      if(pointmode != 0) 
+      if(pointmode != 0)
         col = 0x00FF00FF;
       else if(mousepressed)
         col = paintmode == '1' ? 0xFF0000FF : 0xFFFF00FF;
@@ -783,10 +783,10 @@ void draw_ncee() {
     queueline1(h(x,y+1), h(x+1,y+1), col);
     vid.linewidth /= 3;
     }
-  
+
   for(int x=0; x<=X; x++) queueline1(h(x,0), h(x,Y), 0x80808080);
   for(int y=0; y<=Y; y++) queueline1(h(0,y), h(X,y), 0x80808080);
-  
+
   queueline1(h(0,0), h(0,-1), 0x1010101);
 
   quickqueue();
@@ -806,16 +806,16 @@ void prepare_ncee_map() {
   rug::prepareTexture();
   rug::rugged = false;
   }
-  
+
 void ncee_work() {
 
   if(specialland != laWhirlwind)
     animated_pattern = false;
 
-  if(redraws > 0) { 
-    redraws--; 
+  if(redraws > 0) {
+    redraws--;
     vid.consider_shader_projection = false;
-    redraw_texture(); 
+    redraw_texture();
     }
   if(animated_pattern) {
     vid.consider_shader_projection = true;
@@ -823,16 +823,16 @@ void ncee_work() {
     }
 
   calcparam();
-  
+
   if(ncee_map_prepared < 5) { cmode = sm::NORMAL; ncee_map_prepared++; if(ncee_map_prepared == 5) prepare_ncee_map(); gamescreen(2); return; }
 
   #if CAP_NCONF
-  if(in_visualization) 
+  if(in_visualization)
     nconf_run();
-  else 
+  else
   #endif
     iterate();
-  
+
   draw_ncee();
   }
 
@@ -843,14 +843,14 @@ void ncee() {
   auto cd = current_display;
 
   getcstat = '-';
-  
+
   if(paintmode && mousepressed) {
     int x = (mousex - cd->xcenter - xc - x0) / siz;
     int y = (mousey - cd->ycenter - yc - y0) / siz;
     if(fmap[y][x] == paintmode)
       changepoint(x, y, false);
     }
-  
+
   if(showmenu) {
     dialog::init(XLAT("newconformist"));
     dialog::addBoolItem("edit shape", pointmode == 0, 'e');
@@ -883,12 +883,12 @@ void ncee() {
 
   if(algo_ticks)
     displaystr(8, 8 + vid.fsize, 0, vid.fsize * 2, format("%d.%03d", algo_ticks/1000, algo_ticks%1000), 0xFFFFFF, 0);
-  
+
   keyhandler = [=] (int sym, int uni) {
     // dialog::handleNavigation(sym, uni);
     if(uni == 'z')
       prepare_ncee_map();
-    
+
     if(uni == 'x') {
       popScreen();
       // rug::rugged = true;
@@ -918,17 +918,17 @@ void ncee() {
     if(uni == 'v') showmenu = !showmenu;
     if(uni == 'X') {
       int D = 100;
-  
+
       fmap = genellipse(D, -10 * degree), reset_vxy();
       #if CAP_NCONF
-      nconf_solve(); 
+      nconf_solve();
       #endif
       iterate();
-      iterate();      
       iterate();
-      
+      iterate();
+
       int slow = 2;
-  
+
       for(int i=-100; i<180*slow; i++) {
         ticks = anims::period * i / 180 / slow;
         redraw_texture();
@@ -943,7 +943,7 @@ void ncee() {
 
 extern "C" {
   void nconf_view(int i) {
-    if(i == 1) 
+    if(i == 1)
       show_mapping = false, viewmap = false;
     else if(i == 2)
       show_mapping = false, viewmap = true;
@@ -977,10 +977,10 @@ extern "C" {
       pushScreen(pick_pattern);
     }
   }
-  
+
 int niceArgs() {
   using namespace arg;
-           
+
   if(0) ;
   else if(argis("-ncee")) {
     PHASE(3);
@@ -996,12 +996,12 @@ int niceArgs() {
   else if(argis("-ncvid")) {
     shift(); rfname = args();
     }
-    
+
   else return 1;
   return 0;
   }
 
-auto nhook = 
+auto nhook =
   addHook(hooks_args, 100, niceArgs)
 + 0;
 

@@ -141,7 +141,7 @@ EX int mirrorcolor(bool mirrored) {
 EX bool isMounted(cell *c) {
   if(c && c->monst && c->monst != moTentacleGhost && isMountable(c->monst)) {
     for(int i: player_indices()) {
-      if(playerpos(i)->monst && sameMonster(c, playerpos(i))) 
+      if(playerpos(i)->monst && sameMonster(c, playerpos(i)))
         return true;
       if(lastmountpos[i] && lastmountpos[i]->monst && sameMonster(c, lastmountpos[i]))
         return true;
@@ -154,11 +154,11 @@ EX int itemclass(eItem it) { return iinf[it].itemclass; }
 
 EX bool isFriendly(eMonster m) { return isFriendlyType(m); }
 
-EX bool isFriendly(cell *c) { 
-  return isMounted(c) || isFriendly(c->monst); 
+EX bool isFriendly(cell *c) {
+  return isMounted(c) || isFriendly(c->monst);
   }
 
-EX eThreatLevel get_threat_level(cell *c) { 
+EX eThreatLevel get_threat_level(cell *c) {
   if(!c->monst) return tlNoThreat;
   if(isFriendly(c)) return tlNoThreat;
   if(classflag(c->monst) & CF_HIGH_THREAT) return tlHighThreat;
@@ -177,8 +177,8 @@ EX bool cellUnstable(cell *c) {
   }
 
 EX bool cellUnstableOrChasm(cell *c) {
-  return 
-    (c->land == laMotion && c->wall == waNone) || 
+  return
+    (c->land == laMotion && c->wall == waNone) ||
     c->wall == waChasm || c->wall == waTrapdoor;
   }
 
@@ -194,7 +194,7 @@ EX eItem localshardof(eLand l) {
   return eItem(itFireShard + (l - laEFire));
   }
 
-EX int snakelevel(cell *c) { 
+EX int snakelevel(cell *c) {
 #if CAP_COMPLEX2
   if(c->land == laBrownian && among(c->wall, waNone, waMineMine, waFire)) return min(c->landparam / brownian::level, 3);
 #endif
@@ -249,9 +249,9 @@ EX bool eternalFire(cell *c) {
   return c->land == laDryForest || (c->land == laPower && !smallbounded) || c->land == laMinefield ||
     c->land == laEFire || c->land == laElementalWall;
   }
-  
+
 EX bool haveRangedOrb() {
-  return 
+  return
     items[itOrbPsi] || items[itOrbDragon] || items[itOrbTeleport] ||
     items[itOrbIllusion] || items[itOrbSpace] || items[itOrbAir] ||
     items[itOrbFrog] || items[itOrbSummon] || items[itOrbMatter] ||
@@ -269,12 +269,12 @@ EX bool isGhostAether(eMonster m) {
   }
 
 EX bool survivesWater(eMonster m) {
-  return 
-    m == moShark || m == moGreaterShark || m == moCShark || 
+  return
+    m == moShark || m == moGreaterShark || m == moCShark ||
     isGhostAether(m) || m == moWitchGhost || m == moShadow ||
     isBird(m) || m == moWaterElemental || m == moAirElemental ||
     isWorm(m) || isIvy(m) || isDragon(m) || isKraken(m) ||
-    m == moMutant || m == moFriendlyIvy || 
+    m == moMutant || m == moFriendlyIvy ||
     checkOrb(m, itOrbFish) ||
     among(m, moPike, moRusalka) ||
     m == moTortoise; // Tortoises and Ivies survive, but don't go through water
@@ -367,10 +367,10 @@ EX eItem frog_power(eMonster m) {
 
 EX bool hornStuns(cell *c) {
   eMonster m = c->monst;
-  return 
+  return
     m == moRagingBull || m == moSleepBull || m == moHerdBull ||
     m == moButterfly || m == moGreater || m == moGreaterM || m == moDraugr ||
-    m == moHedge || m == moFlailer || m == moVizier || m == moReptile || m == moSalamander || 
+    m == moHedge || m == moFlailer || m == moVizier || m == moReptile || m == moSalamander ||
     m == moPair || m == moAltDemon || m == moHexDemon || m == moMonk || m == moCrusher ||
     attackJustStuns(c, AF_NORMAL, moNone);
   }

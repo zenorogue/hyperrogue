@@ -95,7 +95,7 @@ void honey(string s, vector<tour::slide>& v) {
   using namespace tour;
 
   v.emplace_back(
-    slide{cap+"Tessellations in 3D geometries", 999, LEGAL::NONE | QUICKSKIP, 
+    slide{cap+"Tessellations in 3D geometries", 999, LEGAL::NONE | QUICKSKIP,
       "This series of slides presents the honeycombs we use. "
       "You can compare the output of primitive-based and raycaster-based rendering by pressing '5'.",
       [] (presmode mode) {}
@@ -134,7 +134,7 @@ void honey(string s, vector<tour::slide>& v) {
   v.emplace_back(
     slide{cap+"Solv: difficult region", 999, LEGAL::NONE,
       "This slide focuses on the area in Solv geometry which is difficult to render using primitives. "
-      "Press '5' to enable the raycaster.",      
+      "Press '5' to enable the raycaster.",
       geoslide(gSol, 'J', 0, 10)
       });
   v.emplace_back(
@@ -157,13 +157,13 @@ tour::slide *gen_noniso_demo() {
   noniso_slides.clear();
   using namespace tour;
   noniso_slides.emplace_back(
-    slide{"Non-isotropic geometry demo", 999, LEGAL::NONE | QUICKSKIP, 
+    slide{"Non-isotropic geometry demo", 999, LEGAL::NONE | QUICKSKIP,
       "This is a presentation of non-isotropic geometries.",
       [] (presmode mode) {
         slide_url(mode, 'p', "paper about non-isotropic geometries", "https://arxiv.org/abs/2002.09533");
         if(mode == pmStart) {
           stop_game();
-          set_geometry(gCubeTiling);          
+          set_geometry(gCubeTiling);
           start_game();
           }
         }
@@ -177,8 +177,8 @@ tour::slide *gen_noniso_demo() {
 
 auto hooks  = addHook_rvslides(163, honey)
   + addHook_slideshows(120, [] (tour::ss::slideshow_callback cb) {
-  
-    if(noniso_slides.empty()) 
+
+    if(noniso_slides.empty())
       gen_noniso_demo();
 
     cb(XLAT("non-isotropic geometries"), &noniso_slides[0], 'n');

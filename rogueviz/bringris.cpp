@@ -157,7 +157,7 @@ vector<bgeometry> bgeoms = {
     fgeomextras[current_extra].current_prime_id = 0;
     enableFieldChange();
     set_geometry(gFieldQuotient);
-    
+
     gp::param = gp::loc(1, 1);
     set_variation(eVariation::unrectified);
 
@@ -224,7 +224,7 @@ vector<bgeometry> bgeoms = {
     fgeomextras[current_extra].current_prime_id = 0;
     enableFieldChange();
     set_geometry(gFieldQuotient);
-    
+
     gp::param = gp::loc(1, 1);
     set_variation(eVariation::unrectified);
 
@@ -241,7 +241,7 @@ vector<bgeometry> bgeoms = {
     fgeomextras[current_extra].current_prime_id = 2;
     enableFieldChange();
     set_geometry(gFieldQuotient);
-    
+
     gp::param = gp::loc(1, 1);
     set_variation(eVariation::unrectified);
 
@@ -258,7 +258,7 @@ vector<bgeometry> bgeoms = {
     fgeomextras[current_extra].current_prime_id = 0;
     enableFieldChange();
     set_geometry(gFieldQuotient);
-    
+
     gp::param = gp::loc(1, 1);
     set_variation(eVariation::unrectified);
 
@@ -296,7 +296,7 @@ vector<bgeometry> bgeoms = {
     fgeomextras[current_extra].current_prime_id = 1;
     enableFieldChange();
     set_geometry(gFieldQuotient);
-    
+
     gp::param = gp::loc(1, 1);
     set_variation(eVariation::unrectified);
     subquotient::create_subquotient(2);
@@ -315,7 +315,7 @@ vector<bgeometry> bgeoms = {
     fgeomextras[current_extra].current_prime_id = 1;
     enableFieldChange();
     set_geometry(gFieldQuotient);
-    
+
     gp::param = gp::loc(1, 1);
     set_variation(eVariation::unrectified);
     subquotient::create_subquotient(10);
@@ -362,7 +362,7 @@ void enable_bgeom(int b) {
   }
 
 flagtype bflags() { return bgeoms[bgeom].flags; }
-  
+
 using code_t = vector<pair<int, int>>;
 
 struct piecedata {
@@ -400,7 +400,7 @@ cell *get_at(cell *lev, int z) {
   }
 
 int get_z(cell* c) {
-  if(prod) 
+  if(prod)
     return hybrid::get_where(c).second;
   else if(nil)
     return nilv::get_coord(c->master)[1];
@@ -512,12 +512,12 @@ int penalty(const vector<cellwalker>& shape, const code_t& code) {
   for(auto d: dists) p += d.second * 10;
   for(auto c: code) if(c.second == 0 || c.second == 2) p++;
   if(solnil)
-    for(auto s: shape) 
+    for(auto s: shape)
       if(get_z(s.at) > get_z(shape[0].at))
         p += 10000;
   if(bflags() & HDUAL) {
 
-    for(auto s: shape) 
+    for(auto s: shape)
       if(get_z(s.at) > get_z(shape[0].at))
         p += 20000;
     /* if(!dists.count(shape[0].at->move(2)))
@@ -534,7 +534,7 @@ bool builds(const vector<cellwalker>& shape, const code_t& code, int sym = 0, in
   for(auto sh: shape) for(int i=0; i<ori; i++) {
     vector<cellwalker> shape2 = build_from(code, cellwalker(sh.at, i), sym);
     if(eliminate != -1) seen_blocks.emplace(as_set(shape2), eliminate);
-    if(same(shape, shape2)) 
+    if(same(shape, shape2))
       return true;
     }
   return false;
@@ -544,7 +544,7 @@ void generate_shapes_rec(vector<cellwalker>& sofar, code_t& code, int cnt) {
   if(isize(sofar) == cnt) {
     int p = penalty(sofar, code);
     auto ass = as_set(sofar);
-    
+
     if(seen_blocks.count(ass)) {
       auto& pc = piecelist[seen_blocks[ass]];
       if(p < pc.penalty) pc.penalty = p, pc.code = code;
@@ -563,8 +563,8 @@ void generate_shapes_rec(vector<cellwalker>& sofar, code_t& code, int cnt) {
       }
     int syms = 0;
     bool invalid = false;
-    for(int i: {0,1,2,3}) if(builds(sofar, code, i)) { 
-      syms++; 
+    for(int i: {0,1,2,3}) if(builds(sofar, code, i)) {
+      syms++;
       if((bflags() & ASYMMETRIC_ONLY) && i == 1 && cnt >= 4)
         invalid = true;
       }
@@ -578,7 +578,7 @@ void generate_shapes_rec(vector<cellwalker>& sofar, code_t& code, int cnt) {
     }
   for(int i=0; i<isize(sofar); i++)
   for(int t=0; t<sofar[i].at->type; t++) {
-    if(sol && !among(t, 4, 5, 10, 11)) continue; 
+    if(sol && !among(t, 4, 5, 10, 11)) continue;
     cellwalker ncw = add(sofar[i], t);
     if(listed(sofar, ncw.at)) continue;
     code.emplace_back(i, t);
@@ -603,13 +603,13 @@ void list_all() {
 void water_shape() {
   auto shape = build_from(piecelist[shape_id].code, at);
   for(auto c: shape)
-    c.at->wall = waSea; 
+    c.at->wall = waSea;
   }
 
 set<cell*> to_disappear;
 
 color_t hipso[] = {
-  0x3030C0, 
+  0x3030C0,
   0x6060FF,
   0x9090FF,
   0xFFFFFF,
@@ -645,7 +645,7 @@ bool shape_drawn() {
     return c.at->wall == waWaxWall;
   return false;
   }
-  
+
 void remove_shape() {
   auto shape = build_from(piecelist[shape_id].code, at);
   for(auto c: shape)
@@ -653,7 +653,7 @@ void remove_shape() {
   ray::reset_raycaster_map();
   }
 
-bool shape_conflict(cellwalker cw) {  
+bool shape_conflict(cellwalker cw) {
   auto shape = build_from(piecelist[shape_id].code, cw);
 
   /* self-conflict possible in the orbifold */
@@ -678,20 +678,20 @@ int choose_piece() {
   ld total = 0;
   int sel = 0;
   ld lowest = 100000;
-  for(auto &p: piecelist) 
+  for(auto &p: piecelist)
     lowest = min(lowest, p.count * 1. / p.symmetries);
-    
+
   vector<tuple<int,int,ld>> probs;
-    
+
   for(int i=0; i<isize(piecelist); i++) {
     auto& p = piecelist[i];
     double cnt = p.symmetries * exp(log(.5) * (p.count * 1. / p.symmetries - lowest));
     probs.emplace_back(p.symmetries, p.count, cnt);
     total += cnt;
-    if(randd() < cnt / total) 
+    if(randd() < cnt / total)
       sel = i;
     }
-  
+
   // println(hlog, "probs = ", probs);
   piecelist[sel].count++;
   return sel;
@@ -704,7 +704,7 @@ void new_piece() {
   if(well_center && true) {
     again:
     if(get_where(at.at).first != well_center) {
-      at.at = get_at(get_where(at.at).first, -well_size - 1);  
+      at.at = get_at(get_where(at.at).first, -well_size - 1);
       int d = center_distance[get_where(at.at).first];
       for(int i=0; i<4; i++) {
         auto mov = get_where(shift_block_target(i)).first;
@@ -716,8 +716,8 @@ void new_piece() {
       println(hlog, "failed to recenter");
       }
     while(at.spin) rotate_block(1, true);
-    }  
-  at.at = get_at(get_where(at.at).first, -well_size - 1);  
+    }
+  at.at = get_at(get_where(at.at).first, -well_size - 1);
   shape_id = next_shape_id;
   next_shape_id = choose_piece();
   if(shape_conflict(at)) {
@@ -729,7 +729,7 @@ void new_piece() {
     state = tsFalling;
     move_started = ticks;
     move_at = ticks + current_move_time_limit();
-    }    
+    }
   }
 
 vector<int> by_level;
@@ -739,7 +739,7 @@ bool expert = true;
 void find_lines() {
   by_level.clear();
   // println(hlog, "Removing levels");
-  
+
   for(int z=1; z<=well_size; z++) {
     int ct = 0;
     for(auto lev: level) {
@@ -749,9 +749,9 @@ void find_lines() {
     by_level.push_back(ct);
     }
   // println(hlog, by_level, " / ", isize(level));
-  
+
   int points = 0;
-  
+
   if(expert) {
     for(int z=1; z<=well_size; z++) if(by_level[z-1] >= isize(level)) {
       points++;
@@ -823,7 +823,7 @@ void state_loop() {
   find_lines();
   if(to_disappear.empty()) new_piece();
   }
-    
+
 void fallen() {
   draw_shape();
   bricks++;
@@ -883,14 +883,14 @@ ld move_dist;
 
 void set_view() {
   move_dist = hdist0(currentmap->adj(cwt.at, 0) * C0);
-  
+
   if(in_h2xe() && PURE && S3 == 4) {
     ld dist = PIU(hdist0(get_corner_position(currentmap->gamestart(), 0)));
     dist -= 1e-4;
     move_dist = PIU(hdist(get_corner_position(currentmap->gamestart(), 0), get_corner_position(currentmap->gamestart(), 1)));
     tView = xpush(-dist) * tView;
     tView = spin(135*degree) * tView;
-    }  
+    }
   if(in_h2xe() && UNRECTIFIED)
     tView = spin(135*degree) * tView;
   if(in_h2xe() && S7 == 4)
@@ -919,7 +919,7 @@ void set_tview(transmatrix T) {
   if(at.mirrored)
     tView = MirrorY * tView;
   // tView = spin(90*degree*at.spin);
-  set_view();  
+  set_view();
 
   pView = rel * tView;
   when_t = ticks + turn_animation;
@@ -938,7 +938,7 @@ void rotate_block(int d, bool camera_only) {
     }
   else playSound(cwt.at, "hit-crush3");
   if(!camera_only) draw_shape();
-  }    
+  }
 
 int nilmap(int dir) {
   if(nil) {
@@ -961,9 +961,9 @@ void shift_block(int dir, bool camera_only) {
   if(prod) t -= 2;
 
   if(!camera_only) remove_shape();
-  
+
   cellwalker at1;
-  
+
   if(solnil) {
     at1.at = at.at->cmove(nilmap(dir));
     }
@@ -978,13 +978,13 @@ void shift_block(int dir, bool camera_only) {
       at1 = flatspin(flatspin(at, 1) + wstep, 2);
     }
   else {
-    int kspin = (t/2) - dir;     
-    at1 = flatspin(at, dir);  
+    int kspin = (t/2) - dir;
+    at1 = flatspin(at, dir);
     at1 = flatspin(at1 + wstep, kspin);
     }
 
   ld angle = dir * 90 * degree;
-  
+
   if(camera_only || !shape_conflict(at1)) {
     // playSound(cwt.at, "hit-crush1");
     at = at1;
@@ -1023,7 +1023,7 @@ void create_matrices() {
     if(id < draw_per_level) {
       auto go = [&] (int i) {
         cell *c1 = c->cmove(i);
-        dq::enqueue_by_matrix_c(c1, optimized_shift(V * currentmap->adj(c, i)));       
+        dq::enqueue_by_matrix_c(c1, optimized_shift(V * currentmap->adj(c, i)));
         };
       if(prod) {
         for(int i=0; i<c->type-2; i++) go(i);
@@ -1034,10 +1034,10 @@ void create_matrices() {
       else if(nil) {
         go(0); go(2); go(3); go(5);
         }
-      }      
+      }
     dq::drawqueue_c.pop();
     id++;
-    }  
+    }
   }
 
 transmatrix smooth;
@@ -1057,7 +1057,7 @@ void draw_wirecube_at(cell *c, const transmatrix& rel, int zlev, color_t col) {
 
   auto where_c = get_where(c);
   auto c_camera = get_at(where_c.first, zlev);
-  
+
   for(shiftmatrix V: current_display->all_drawn_copies[c_camera]) {
     change_depth(V, where_c.second, zlev);
     for(int i=0; i<c->type; i++)
@@ -1070,17 +1070,17 @@ void draw_piece(int zlev, int id) {
   auto matrices = build_shape_matrices(piecelist[id].code, at);
 
   auto where_at = get_where(at.at);
-  
+
   vid.linewidth *= 3;
 
   int mid = 0;
 
-  for(auto c: shape) {    
+  for(auto c: shape) {
     auto where_c = get_where(c.at);
     color_t levels[5] = {color_t(0xFFFFFFFFF), color_t(0xFFFF00FF), color_t(0xFF8000FF), color_t(0xFF0000FF), color_t(0xC000C0FF) };
     draw_wirecube_at(at.at, smooth * matrices[mid++], zlev, levels[where_at.second-where_c.second]);
-    }  
-  
+    }
+
   vid.linewidth /= 3;
   }
 
@@ -1106,14 +1106,14 @@ void draw_all_noray(int zlev) {
   for(auto lev: level) {
     for(int z=0; z<=camera_level+1; z++) {
       cell *c1 = get_at(lev, -z);
-      
+
       if(c1->wall) {
-      
+
         auto c_camera = get_at(lev, zlev);
-        
+
         for(shiftmatrix V: current_display->all_drawn_copies[c_camera]) {
           change_depth(V, -z, zlev);
-          
+
           color_t wcol = c1->landparam;
           if(c1->wall == waBarrier) wcol = winf[waBarrier].color;
 
@@ -1143,20 +1143,20 @@ void bringris_frame() {
   vrhr::hsm = explore ? vrhr::eHeadset::holonomy : vrhr::eHeadset::reference;
   vrhr::eyes = use_equidistant ? vrhr::eEyes::equidistant : vrhr::eEyes::truesim;
   #endif
-  
+
   int zlev = get_z(centerover);
 
   if(state == tsCollect) for(cell *c: to_disappear) c->landparam = flashes ? rand() & 0xFFFFFF : 0x101010;
-  
+
   // just_gmatrix = true;
 
   create_matrices();
 
-  if(!use_raycaster) 
+  if(!use_raycaster)
     draw_all_noray(zlev);
 
   if(anyshiftclick) draw_holes(zlev);
-  
+
   if(state == tsFalling && !explore && !cur_ang) draw_piece(zlev, shape_id);
   }
 
@@ -1172,19 +1172,19 @@ void draw_screen(int xstart, bool show_next) {
     vrhr::hmd_at_ui = vrhr::hmd_ref_at * cspin(0, 2, 30*degree);
     }
   #endif
-    
-  
+
+
   dynamicval<display_data> ccd(*current_display);
   current_display->xmax = xstart * 1. / vid.xres;
   ray::max_cells = (isize(level) + isize(out_level)) * (camera_level+2);
-  
+
   if(explore) {
     gamescreen(0);
     mouseaim_sensitivity = 0.01;
     camera_speed = 2;
     smooth_scrolling = true;
     }
-  else {  
+  else {
     mouseaim_sensitivity = 0;
     NLP = Id;
     View = pView;
@@ -1213,9 +1213,9 @@ void draw_screen(int xstart, bool show_next) {
 
     // make_actual_view();
     // anims::moved();
-    
+
     sightranges[geometry] *= 100;
-    if(state == tsFalling && !explore && !cur_ang && !lctrlclick) remove_shape();    
+    if(state == tsFalling && !explore && !cur_ang && !lctrlclick) remove_shape();
     gamescreen(0);
     if(state == tsFalling && !explore && !cur_ang) draw_shape();
 
@@ -1225,16 +1225,16 @@ void draw_screen(int xstart, bool show_next) {
     sightranges[geometry] /= 100;
 
     if(state == tsBetween) state_loop();
-    
-    if(state == tsCollect && ticks >= move_at) 
+
+    if(state == tsCollect && ticks >= move_at)
       disappear_lines();
-    
+
     if(ticks >= move_at && state == tsFalling && pro_game) {
       drop();
       }
 
     View = pView;
-    centerover = ncenter;      
+    centerover = ncenter;
     NLP = Id;
     }
   }
@@ -1248,7 +1248,7 @@ void geometry_menu() {
   for(int i=0; i<isize(bgeoms); i++) {
     dialog::addTitle(bgeoms[i].name, i == bgeom ? 0xFF00 : 0xFF0000, 150);
     dialog::items.back().key = 'a' + i;
-    dialog::add_action([i] {      
+    dialog::add_action([i] {
       enable_bgeom(i);
       });
     dialog::addInfo(bgeoms[i].cap);
@@ -1305,14 +1305,14 @@ void visual_menu() {
   dialog::addSelItem(XLAT("cells to draw per level"), its(draw_per_level), 'R');
   dialog::add_action([&] {
     dialog::numberdark = dialog::DONT_SHOW;
-    dialog::editNumber(draw_per_level, 0, 1000, 500, 50, XLAT("cells to draw"), 
+    dialog::editNumber(draw_per_level, 0, 1000, 500, 50, XLAT("cells to draw"),
       "If the level size is 30, 600 cells to draw means that every cell is drawn 20 times on average. "
       "Used when raycasting is off, and to draw the wireframes");
     });
-  
+
   dialog::addBreak(200);
-  
-  #if CAP_VR  
+
+  #if CAP_VR
   dialog::addBoolItem_action(XLAT("VR enabled"), vrhr::enabled, 'o');
   if(!vrhr::enabled)
     dialog::addBreak(100);
@@ -1320,7 +1320,7 @@ void visual_menu() {
     dialog::addInfo(XLAT("error: ") + vrhr::error_msg, 0xC00000);
   else
     dialog::addInfo(XLAT("VR initialized correctly"), 0x00C000);
-  
+
   if(vrhr::active()) {
     dialog::addBoolItem_action(XLAT("equidistant VR"), use_equidistant, 'e');
     if(use_equidistant)
@@ -1332,13 +1332,13 @@ void visual_menu() {
   else
     dialog::addBreak(300);
   #endif
-    
+
   dialog::addBreak(100);
-  dialog::addBack();  
+  dialog::addBack();
 
   dialog::display();
   }
-  
+
 void settings_menu() {
   emptyscreen();
   dialog::init("Bringris settings");
@@ -1363,7 +1363,7 @@ void settings_menu() {
     saveConfig();
     });
   #endif
-  
+
   dialog::addBack();
   dialog::display();
   }
@@ -1405,10 +1405,10 @@ void render_next(int xstart) {
       }
     else println(hlog, "valid next_buffer created");
     }
-  
-  nxmin = (xstart + vid.fsize);  
+
+  nxmin = (xstart + vid.fsize);
   nxmax = (vid.xres - vid.fsize);
-  nymin = vid.yres - (vid.fsize * (18+8));  
+  nymin = vid.yres - (vid.fsize * (18+8));
   nymax = vid.yres - (vid.fsize * 18);
 
   int zlev = get_z(centerover);
@@ -1429,7 +1429,7 @@ void render_next(int xstart) {
     calcparam();
     return;
     }
-  
+
   if(1) {
     resetbuffer rb;
     next_buffer->enable();
@@ -1445,7 +1445,7 @@ void render_next(int xstart) {
     calcparam();
     current_display->set_viewport(0);
     setGLProjection();
-    
+
     // gamescreen(1);
     initquickqueue();
     draw_piece(zlev, next_shape_id);
@@ -1484,7 +1484,7 @@ EX void display_next(int xstart) {
       tvx.push_back(tx);
       }
     glhr::prepare(tvx);
-    glDrawArrays(GL_TRIANGLES, 0, 6);    
+    glDrawArrays(GL_TRIANGLES, 0, 6);
     }
   }
 
@@ -1499,24 +1499,24 @@ void run() {
     cur_ang -= (ticks - lti) / 1000.;
     if(cur_ang < ang) cur_ang = ang;
     }
-  
+
   if(ang > cur_ang) {
     cur_ang += (ticks - lti) / 1000.;
     if(cur_ang > ang) cur_ang = ang;
     }
-  
+
   lti = ticks;
-  
+
   if(explore) ;
   else if(ticks > when_t) {
-    pView = tView; 
+    pView = tView;
     View = pView;
     smooth = Id;
     }
   else adjust_animation((ticks - last_adjust) * 1. / (when_t - last_adjust));
 
   last_adjust = ticks;
-  
+
   ray::want_use = use_raycaster ? 2 : 0;
   sightranges[geometry] = 50;
   if(!solnil) vid.cells_drawn_limit = 1;
@@ -1527,12 +1527,12 @@ void run() {
 
   int xstart = vid.xres;
   if(!nohud) xstart -= vid.fsize * 10;
-  
+
   getcstat = '-';
-  
+
   bool show_next = state != tsGameover && state != tsPreGame && !paused;
 
-  #if CAP_VR  
+  #if CAP_VR
   dynamicval<reaction_t> d(vrhr::change_ui_bounds, [show_next, xstart] {
     vrhr::ui_xmin = xstart;
     vrhr::ui_xmax = vid.xres;
@@ -1542,11 +1542,11 @@ void run() {
   #endif
 
   draw_screen(xstart, show_next);
-  
+
   calcparam();
-  
+
   bool in_menu = !show_next && !explore;
-  
+
   if(nohud) {
     describeMouseover();
     }
@@ -1563,7 +1563,7 @@ void run() {
     if(pro_game)
       displaystr(xstart + vid.fsize, vid.yres - vid.fsize * 13, 0, vid.fsize, "SCORE " + fts(int(score)), winf[waBarrier].color, 0);
     }
-  
+
   if(show_next) {
     displaystr(xstart + vid.fsize, vid.yres - vid.fsize * 27, 0, vid.fsize, "NEXT:", winf[waBarrier].color, 0);
     #if CAP_VR
@@ -1575,14 +1575,14 @@ void run() {
     #endif
       display_next(xstart);
     }
-      
+
   if(explore) {
     int xx = (xstart + vid.xres) / 2;
     if(displayButtonS(xx, vid.fsize * 2, "backspace", 0xFFFFFFFF, 8, vid.fsize)) getcstat = SDLK_BACKSPACE;
     if(displayButtonS(xx, vid.fsize * 3, "to stop", 0xFFFFFFFF, 8, vid.fsize)) getcstat = SDLK_BACKSPACE;
     if(displayButtonS(xx, vid.fsize * 4, "exploring", 0xFFFFFFFF, 8, vid.fsize)) getcstat = SDLK_BACKSPACE;
     }
-  
+
   if(in_menu) {
     int xx = (xstart + vid.xres) / 2;
     if(paused) {
@@ -1601,15 +1601,15 @@ void run() {
       }
     else if(state == tsGameover)
       if(displayButtonS(xx, vid.fsize * 12, "TWEET", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 't';
-    
+
     if(vrhr::active())
       if(displayButtonS(xx, vid.fsize * 14, "RESET VR", 0xFFFFFFFF, 8, vid.fsize)) getcstat = 'V';
     }
   }
-  
+
   keyhandler = [xstart, in_menu] (int sym, int uni) {
     if(explore) handlePanning(sym, uni);
-    if(explore && sym == SDLK_BACKSPACE) 
+    if(explore && sym == SDLK_BACKSPACE)
       explore = false;
 
     if(state == tsFalling && !paused) {
@@ -1638,7 +1638,7 @@ void run() {
           bmNothing, bmDown, bmNothing, bmFullDrop
           };
         eBringrisMove mov = moves[id];
-        if((state == tsFalling && !paused) || mov == bmPause)  
+        if((state == tsFalling && !paused) || mov == bmPause)
           bringris_action(mov);
         }
 #if CAP_VR
@@ -1646,12 +1646,12 @@ void run() {
         if(explore)
           explore = !explore;
         else if(
-          mousex >= vrhr::ui_xmin && mousex <= vrhr::ui_xmax && 
+          mousex >= vrhr::ui_xmin && mousex <= vrhr::ui_xmax &&
           mousey >= vrhr::ui_ymin && mousey <= vrhr::ui_ymax)
             paused = !paused;
         else {
           vrhr::compute_vr_direction(which_pointer);
-          ld r = 1 / sqrt(2);        
+          ld r = 1 / sqrt(2);
           auto& dir = vrhr::vr_direction;
           vector<pair<eBringrisMove, hyperpoint> > choices = {
             {bmLeft, hyperpoint(-1, 0, 0, 0)},
@@ -1663,25 +1663,25 @@ void run() {
             {bmDrop, hyperpoint(-r, r, 0, 0)},
             {bmFullDrop, hyperpoint(r, r, 0, 0)}
             };
-          
+
           eBringrisMove mov = bmNothing;
           ld best = 0;
-                    
+
           for(auto& b: choices) {
             ld dot = (dir | b.second);
             if(dot > best) best = dot, mov = b.first;
             }
 
-          bringris_action(mov);          
+          bringris_action(mov);
           }
         println(hlog, vrhr::vr_direction);
         }
 #endif
       return;
       }
-    
+
     // if(sym == 'k') ang = 0;
-    // if(sym == 'l') ang = 45 * degree;    
+    // if(sym == 'l') ang = 45 * degree;
     if(sym == 'p' || sym == 'c' || (sym == SDLK_ESCAPE && !ISWEB)) {
       if(!paused) move_at = move_at - ticks;
       paused = !paused;
@@ -1709,7 +1709,7 @@ void run() {
       invr.seed(hash);
       out += " ";
       for(int i=0; i<4; i++)
-        out += emoji[invr() % isize(emoji)];            
+        out += emoji[invr() % isize(emoji)];
       // println(hlog, out);
       #if ISWEB
       EM_ASM({
@@ -1782,7 +1782,7 @@ void run() {
         lt = t;
         println(hlog, "t = ", t);
         if(t % fpm == 0) {
-          pView = tView; 
+          pView = tView;
           View = pView;
           smooth = Id;
           shift_block(dir);
@@ -1798,7 +1798,7 @@ void run() {
           adjust_animation(1. / (fpm - t % fpm));
         });
       anims::record_video("bringris.mp4", [] { return anims::record_animation_of( [] { println(hlog, "called"); draw_screen(vid.xres, false); } ); });
-      delHook(anims::hooks_anim, p); 
+      delHook(anims::hooks_anim, p);
       vid.linewidth /= 5;
       }
     #endif
@@ -1815,16 +1815,16 @@ void reset_view() {
   centerover = get_at(get_center(), -camera_level);
   cwt.at = centerover;
   ncenter = get_at(get_center(), -camera_level);
-  
+
   NLP = Id;
   tView = Id;
-  
+
   set_view();
   pView = tView;
   }
-  
+
 void start_new_game() {
-  
+
   for(auto& p: piecelist) p.count = 0;
 
   for(auto lev: level) for(int z=0; z<=camera_level+1; z++) {
@@ -1836,7 +1836,7 @@ void start_new_game() {
       c->wall = waBarrier, c->land = laBarrier;
     else if(z <= camera_level)
       c->wall = waNone;
-    else 
+    else
       c->wall = waWaxWall, c->land = laCanvas, c->landparam = 0xC000C0;
     }
 
@@ -1847,12 +1847,12 @@ void start_new_game() {
     c->wall = waWaxWall;
     c->landparam = (get_hipso(z) & 0xFCFCFC) >> 2;
     }
-  
+
   at = get_at(get_center(), -well_size - 1);
   next_shape_id = choose_piece();
-  
+
   state = tsBetween;
-  
+
   reset_view();
   ray::reset_raycaster_map();
 
@@ -1893,11 +1893,11 @@ void get_level() {
       forCellCM(d, c)
         if(!all.count(d))
           all_ext.insert(d);
-          
+
     level.clear();
-    for(auto c: all) 
+    for(auto c: all)
       level.push_back(c);
-    for(auto c: all_ext) 
+    for(auto c: all_ext)
       out_level.push_back(c);
     }
   else {
@@ -1905,7 +1905,7 @@ void get_level() {
     if(bflags() & ORBIFOLD) {
       vector<cell*> clist;
       set<cell*> visited;
-      auto visit = [&] (cell *c) { 
+      auto visit = [&] (cell *c) {
         if(!visited.count(c))
           visited.insert(c),
           clist.push_back(c);
@@ -1921,7 +1921,7 @@ void get_level() {
     vector<cell*> visited;
     set<cell*> all;
     for(auto l: level) all.insert(l);
-    auto visit = [&] (cell *c, int d) { 
+    auto visit = [&] (cell *c, int d) {
       if(all.count(c) && !center_distance.count(c))
         center_distance[c] = d,
         visited.push_back(c);
@@ -1932,7 +1932,7 @@ void get_level() {
         visit(visited[i]->move(j), center_distance[visited[i]] + 1);
     }
   }
-  
+
 void create_game() {
   level.clear();
   out_level.clear();
@@ -1953,18 +1953,18 @@ void create_game() {
     for(int y=0; y<5; y++)
      level.push_back(asonov::get_at(asonov::coord(x, y, 0))->c7);
     }
-  else 
-    PIU(get_level());  
+  else
+    PIU(get_level());
   piecelist.clear();
   piecelist.reserve(2000);
   seen_blocks.clear();
-  for(int ps=1; ps<=max_piece; ps++)  
+  for(int ps=1; ps<=max_piece; ps++)
     generate_shapes(ps);
   list_all();
   // println(hlog, "level size = ", isize(level));
-  
+
   camera_level = well_size + max_piece + camera;
-  
+
   playermoved = false;
   ray::want_use = 2;
   ray::exp_decay_poly = 200;
@@ -1972,14 +1972,14 @@ void create_game() {
   ray::fixed_map = true;
   mapeditor::drawplayer = false;
   // sightranges[geometry] = 1;
-  
-    
+
+
   vid.fov = 90;
   vid.plevel_factor = 0.5;
   // vid.grid = true;
 
-  mouseaim_sensitivity = 0;  
-  
+  mouseaim_sensitivity = 0;
+
   start_new_game();
   state = tsPreGame;
 
@@ -1990,13 +1990,13 @@ void init_all() {
   enable_bgeom();
   vid.texture_step = 8;
   showstartmenu = false;
-  pushScreen(run);  
+  pushScreen(run);
   in_bringris = true;
   }
 
 int args() {
   using namespace arg;
-           
+
   if(0) ;
 
   else if(argis("-list")) {
@@ -2018,7 +2018,7 @@ int args() {
     shift();
     enable_bgeom(argi());
     }
-    
+
   else if(argis("-bringris")) {
     PHASEFROM(2);
     init_all();
@@ -2048,7 +2048,7 @@ void default_config() {
   for(int i=0; i<512; i++)
     if(multi::scfg.keyaction[i] >= 16 && multi::scfg.keyaction[i] < 32)
       change_default_key(i, 0);
-  
+
   change_default_key('s', 16 + 0);
   change_default_key('a', 16 + 1);
   change_default_key('w', 16 + 2);
@@ -2066,7 +2066,7 @@ void default_config() {
   addsaver(flashes, "bringris-flashes");
   }
 
-auto hooks = 
+auto hooks =
     addHook(hooks_args, 100, args)
   + addHook(hooks_frame, 100, bringris_frame)
   + addHook(hooks_configfile, 100, default_config)
@@ -2078,14 +2078,14 @@ auto hooks =
         dialog::addHelp("press SHIFT to highlight the holes");
         dialog::addHelp("mouse control by pressing parts of the game screen");
         }
-      }); 
+      });
 
 #ifdef BRINGRIS
 auto hook1=
     addHook(hooks_config, 100, [] {
-      if(arg::curphase == 1) 
+      if(arg::curphase == 1)
         conffile = "bringris.ini";
-      if(arg::curphase == 2) init_all();      
+      if(arg::curphase == 2) init_all();
       });
 #endif
 

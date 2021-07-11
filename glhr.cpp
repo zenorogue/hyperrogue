@@ -16,14 +16,14 @@ EX bool detailed_shader = false;
 EX namespace glhr {
 EX glvertex pointtogl(const hyperpoint& t) {
   glvertex h;
-  h[0] = t[0]; h[1] = t[1]; h[2] = t[2]; 
+  h[0] = t[0]; h[1] = t[1]; h[2] = t[2];
   if(SHDIM == 4) h[3] = (MDIM == 4) ? t[3] : 1;
   return h;
   }
 
 EX hyperpoint gltopoint(const glvertex& t) {
   hyperpoint h;
-  h[0] = t[0]; h[1] = t[1]; h[2] = t[2]; 
+  h[0] = t[0]; h[1] = t[1]; h[2] = t[2];
   if(SHDIM == 4 && MAXMDIM == 4) h[3] = t[3];
   return h;
   }
@@ -130,13 +130,13 @@ struct glmatrix {
         color[i] = part(col, 3-i) / 255.0;
       }
     };
-  
+
   struct textured_vertex {
     glvertex coords;
     /* texture uses the 'z' for shading with POLY_SHADE_TEXTURE */
     glvec3 texture;
     };
-  
+
   struct ct_vertex {
     glvertex coords;
     glvec4 color;
@@ -149,7 +149,7 @@ struct glmatrix {
       color[0] = color[1] = color[2] = col;
       color[3] = 1;
       }
-    };  
+    };
 
 #endif
 
@@ -282,7 +282,7 @@ EX void new_projection() {
 
 EX void projection_multiply(const glmatrix& m) {
   WITHSHADER({
-    projection = m * projection;  
+    projection = m * projection;
     }, {
     glMatrixMode(GL_PROJECTION);
     glMultMatrixf(m.as_array());
@@ -300,11 +300,11 @@ struct GLprogram {
   GLint uPRECX, uPRECY, uPRECZ, uIndexSL, uIterations, uLevelLines, uSV, uRadarTransform;
   GLint uRotSin, uRotCos, uRotNil;
   GLint uDepthScaling, uCamera, uDepth;
-  
+
   flagtype shader_flags;
-  
+
   string _vsh, _fsh;
-  
+
   GLprogram(string vsh, string fsh);
 
   ~GLprogram();
@@ -328,12 +328,12 @@ EX int compileShader(int type, const string& s) {
       }
     println(hlog, "===");
     }
-  
+
   GLint shader = glCreateShader(type);
   const char *ss = s.c_str();
   glShaderSource(shader, 1, &ss, NULL);
   glCompileShader(shader);
-  
+
   GLint logLength;
   glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
   if (logLength > 0) {
@@ -347,7 +347,7 @@ EX int compileShader(int type, const string& s) {
       exit(1);
       }
     }
-  
+
   glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
   if (status == 0) {
     glDeleteShader(shader);
@@ -355,7 +355,7 @@ EX int compileShader(int type, const string& s) {
     println(hlog, s);
     shader = 0;
     }
-  
+
   return shader;
   }
 
@@ -371,7 +371,7 @@ GLprogram::GLprogram(string vsh, string fsh) {
     uLevelLines = -1;
     uFogColor = -1;
     uDepthScaling = uCamera = uDepth = -1;
-    
+
     uColor = tTexture = tInvExpTable = tAirMap = -1;
     uFogBase = -1;
     uPRECX = uPRECY = uPRECZ = uIndexSL = -1;
@@ -380,32 +380,32 @@ GLprogram::GLprogram(string vsh, string fsh) {
     uRotCos = -1;
     uRotSin = -1;
     uRotNil = -1;
-    return;    
+    return;
     }
-  
+
   _vsh = vsh; _fsh = fsh;
   _program = glCreateProgram();
-  
+
   add_fixed_functions(vsh);
   add_fixed_functions(fsh);
-  
+
   // printf("creating program %d\n", _program);
   vertShader = compileShader(GL_VERTEX_SHADER, vsh.c_str());
   fragShader = compileShader(GL_FRAGMENT_SHADER, fsh.c_str());
 
   // Attach vertex shader to program.
   glAttachShader(_program, vertShader);
-  
+
   // Attach fragment shader to program.
   glAttachShader(_program, fragShader);
-  
+
   glBindAttribLocation(_program, aPosition, "aPosition");
   glBindAttribLocation(_program, aTexture, "aTexture");
   glBindAttribLocation(_program, aColor, "aColor");
 
   GLint status;
   glLinkProgram(_program);
-    
+
   GLint logLength;
   glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &logLength);
   if (logLength > 0) {
@@ -414,13 +414,13 @@ GLprogram::GLprogram(string vsh, string fsh) {
     if(logLength > 0)
       printf("linking log (%d): %s\n", logLength, log.data());
     }
-   
+
   glGetProgramiv(_program, GL_LINK_STATUS, &status);
   if (status == 0) {
     printf("failed to link shader\n");
     exit(1);
     }
-  
+
   uMV = glGetUniformLocation(_program, "uMV");
   uProjection = glGetUniformLocation(_program, "uP");
   uPP = glGetUniformLocation(_program, "uPP");
@@ -442,7 +442,7 @@ GLprogram::GLprogram(string vsh, string fsh) {
   uPRECZ = glGetUniformLocation(_program, "PRECZ");
   uIndexSL = glGetUniformLocation(_program, "uIndexSL");
   uSV = glGetUniformLocation(_program, "uSV");
-  uIterations = glGetUniformLocation(_program, "uIterations");  
+  uIterations = glGetUniformLocation(_program, "uIterations");
   uLevelLines = glGetUniformLocation(_program, "uLevelLines");
   uRadarTransform = glGetUniformLocation(_program, "uRadarTransform");
 
@@ -479,7 +479,7 @@ EX void set_solv_prec(int x, int y, int z) {
 EX glmatrix current_matrix, current_modelview, current_projection;
 
 bool operator == (const glmatrix& m1, const glmatrix& m2) {
-  for(int i=0; i<4; i++) 
+  for(int i=0; i<4; i++)
     for(int j=0; j<4; j++)
       if(m1[i][j] != m2[i][j]) return false;
   return true;
@@ -545,7 +545,7 @@ EX array<GLfloat, 4> acolor(color_t color, ld scale IS(1)) {
 
 EX void color2(color_t color, ld scale IS(1)) {
   auto cols = acolor(color, scale);
-    
+
   WITHSHADER({
     if(!current_glprogram) return;
     glUniform4f(current_glprogram->uColor, cols[0], cols[1], cols[2], cols[3]);
@@ -625,17 +625,17 @@ EX void full_enable(shared_ptr<GLprogram> p) {
     /*GLfloat light_ambient[] = { 3.5, 3.5, 3.5, 1.0 };
     GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light_position[] = { 0.0, 0.0, 0.0, 1.0 };
-  
+
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-  
+
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
     GLERR("lighting");
-  
+
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0); */
- 
+
     glEnable(GL_FOG);
     glFogi(GL_FOG_MODE, GL_LINEAR);
     glFogf(GL_FOG_START, 0);
@@ -666,7 +666,7 @@ EX void fog_max(ld fogmax, color_t fogcolor) {
   WITHSHADER({
     if(current_glprogram->uFog != -1)
       glUniform1f(current_glprogram->uFog, 1 / fogmax);
-  
+
     if(current_glprogram->uFogColor != -1) {
       GLfloat cols[4];
       for(int i=0; i<4; i++) cols[i] = part(fogcolor, 3-i) / 255.0;
@@ -695,8 +695,8 @@ EX void set_ualpha(ld alpha) {
 void init() {
 
   #if CAP_GLEW
-    if(!glew) { 
-      glew = true; 
+    if(!glew) {
+      glew = true;
       printf("Initializing GLEW\n");
       GLenum err = glewInit();
       if (GLEW_OK != err) {
@@ -708,13 +708,13 @@ void init() {
       if(!__glewCreateProgram) noshaders = true;
       }
   #endif
-  
+
   projection = id;
 
   WITHSHADER(glEnableVertexAttribArray(aPosition);, glEnableClientState(GL_VERTEX_ARRAY);)
   GLERR("aPosition");
   // #endif
-  
+
   glDisableVertexAttribArray(aTexture);
   glDisableVertexAttribArray(aColor);
 
@@ -733,7 +733,7 @@ template<class T> void bindbuffer(T& v) {
     glBindBuffer(GL_ARRAY_BUFFER, buf_current);
     }
   current_vertices = &v[0];
-  glBufferData(GL_ARRAY_BUFFER, isize(v) * sizeof(v[0]), &v[0], GL_DYNAMIC_DRAW);    
+  glBufferData(GL_ARRAY_BUFFER, isize(v) * sizeof(v[0]), &v[0], GL_DYNAMIC_DRAW);
   }
 
 #define PTR(attrib, q, field) \
@@ -840,7 +840,7 @@ EX void prepare(vector<textured_vertex>& v) {
   WITHSHADER({
     glVertexAttribPointer(aPosition, SHDIM, GL_FLOAT, GL_FALSE, sizeof(textured_vertex), &v[0].coords);
     glVertexAttribPointer(aTexture, SHDIM, GL_FLOAT, GL_FALSE, sizeof(textured_vertex), &v[0].texture);
-    }, {    
+    }, {
     glVertexPointer(SHDIM, GL_FLOAT, sizeof(textured_vertex), &v[0].coords);
     glTexCoordPointer(3, GL_FLOAT, sizeof(textured_vertex), &v[0].texture);
     })
@@ -928,7 +928,7 @@ EX void texture_vertices(GLfloat *f, int qty, int stride IS(2)) {
     glVertexAttribPointer(aTexture, stride, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), f);,
     glTexCoordPointer(stride, GL_FLOAT, 0, f);
     )
-  } 
+  }
 
 EX void oldvertices(GLfloat *f, int qty) {
   WITHSHADER(

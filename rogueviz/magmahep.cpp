@@ -23,27 +23,27 @@ int magmalong = 10;
 
 bool magmadebug = false;
 
-/* transformation from the original to the next heptagon; 
+/* transformation from the original to the next heptagon;
    edge a of the original heptagon matches edge b of the next heptagon */
 
 EX transmatrix get_adj(int a, int b) {
-  
+
   hyperpoint vl = vertices[a];
   hyperpoint vr = vertices[a+1];
   hyperpoint vm = mid(vl, vr);
-      
+
   transmatrix rm = gpushxto0(vm);
-  
+
   hyperpoint xvl = vertices[b];
   hyperpoint xvr = vertices[b+1];
   hyperpoint xvm = mid(xvl, xvr);
-  
+
   transmatrix xrm = gpushxto0(xvm);
-  
+
   transmatrix Res = rgpushxto0(vm) * rspintox(rm*vr);
-    
+
   Res = Res * spintox(xrm*xvl) * xrm;
-  
+
   return Res;
   }
 
@@ -54,30 +54,30 @@ pair<int, int> hash(hyperpoint h) {
 void make() {
 
   int& v = magmav;
-  
+
   /* compute the vertices */
   vertices.resize(magmav+1);
   for(int i=0; i<=magmav; i++)
     vertices[i] = spin(2*M_PI*(i+(v-7)/4.)/v) * xpush0(1);
   ld xx = vertices[2][0];
-  
+
   int down = v/2 + 2;
-  
+
   for(int k=3; k<down; k++)
     vertices[k][0] = 2 * xx - vertices[k][0];
-  
+
   hcenter = Hypc;
   for(int i=0; i<magmav; i++) hcenter += vertices[i];
   hcenter = normalize(hcenter);
-  
+
   vertices.resize(magmav);
   for(int i=0; i<magmav; i++) vertices.push_back(vertices[i]);
   for(int i=0; i<magmav; i++) vertices.push_back(vertices[i]);
-  
+
   map<pair<int, int>, int> counts;
-  
+
   int big = v - 2;
-  
+
   auto rehash = [&] (const transmatrix& T) {
     for(int a=0; a<v; a++) {
       auto hashval = hash(T * vertices[a]);
@@ -85,26 +85,26 @@ void make() {
         counts[hashval]++;
       else if(a > 2 && a < down)
         counts[hashval] += 2*v - big;
-      else 
+      else
         counts[hashval] += big;
       }
     };
 
   heps.emplace_back(Id, 0xFFFFFFFF);
-  
+
   auto advance = [&] (int i, int j, bool mirror = false) {
     transmatrix T = heps.back().first * get_adj(i, j);
-    if(mirror) T = T * MirrorY;   
+    if(mirror) T = T * MirrorY;
     heps.emplace_back(T, heps.back().second ^ 0xFFFF00);
     };
-  
+
   /* create the core */
-  
+
   int last = v-1;
   int t = 3;
 
   switch(magmashape) {
-  
+
     case 1:
       for(int i=1; i<2*v; i++)
         advance(0, t);
@@ -114,7 +114,7 @@ void make() {
       for(int i=0; i<t+1; i++)
         advance(t, 0);
       break;
-    
+
     case 3:
       for(int a=0; a<2; a++) {
         advance(t-1, 0);
@@ -122,8 +122,8 @@ void make() {
           advance(t, 0);
         }
       break;
-    
-    case 4: {     
+
+    case 4: {
       advance(t, 1);
       for(int a=0; a<v-3; a++)
         advance(t, 0);
@@ -132,7 +132,7 @@ void make() {
         advance(t, 0);
       break;
       }
-    
+
     case 5:
       for(int a=0; a<v-1; a++) {
         advance(t, 0);
@@ -141,40 +141,40 @@ void make() {
         advance(t, last);
         advance(t, 0);
         }
-  
+
       for(int a=0; a<v; a++) {
         advance(t, 0);
         }
-  
+
       for(int b=0; b<magmalong; b++) {
         advance(t, last);
         advance(t, 0);
         }
       break;
     }
-  
+
   /* center the core */
 
   hyperpoint center = Hypc;
   for(auto& h: heps) for(int i=0; i<v; i++)
     center += h.first * vertices[i];
-  
+
   center = normalize(center);
-  
+
   for(auto& h: heps) h.first = gpushxto0(center) * h.first;
-  
+
   counts.clear();
   for(auto& h: heps) rehash(h.first);
-  
+
   /* grow */
 
   for(int a=0; a<magmacount; a++) {
     hyperpoint p = heps.back().first * vertices[2];
-    
+
     int total = counts[hash(p)];
-    
+
       println(hlog, "total ", total);
-    if(total == 2*v) 
+    if(total == 2*v)
       advance(down, down, true);
 
     else if(total == 2 * v - big)
@@ -190,7 +190,7 @@ void make() {
   }
 
 void draw_at(transmatrix T, color_t col, int id) {
-  for(int i=0; i<=magmav; i++) 
+  for(int i=0; i<=magmav; i++)
     curvepoint(T * vertices[i]);
   queuecurve(0xFF, col, PPR::LINE);
   if(magmadebug) {
@@ -214,21 +214,21 @@ void draw_magma() {
 
 int readArgs() {
   using namespace arg;
-           
+
   if(0) ;
-  else if(argis("-magmashape")) {    
+  else if(argis("-magmashape")) {
     shift(); magmashape = argi();
     }
 
-  else if(argis("-magmav")) {    
+  else if(argis("-magmav")) {
     shift(); magmav = argi();
     }
 
-  else if(argis("-magmacount")) {    
+  else if(argis("-magmacount")) {
     shift(); magmacount = argi();
     }
 
-  else if(argis("-magmalong")) {    
+  else if(argis("-magmalong")) {
     shift(); magmalong = argi();
     }
 

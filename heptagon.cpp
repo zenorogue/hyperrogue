@@ -91,7 +91,7 @@ EX heptagon *init_heptagon(int type) {
   h->dm4 = 0;
   return h;
   }
-  
+
 heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fixdistance = COMPUTE) {
   heptagon *h = buildHeptagon1(tailored_alloc<heptagon> (S7), parent, d, s, pard);
   if(bt::in() || arcm::in()) return h;
@@ -109,8 +109,8 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
     if(&currfp != &fieldpattern::fp_invalid)
       h->fieldval = currfp.connections[fieldpattern::btspin(parent->fieldval, d)];
     #endif
-    if(a38) 
-      h->fiftyval = fifty_38(parent->fiftyval, d);  
+    if(a38)
+      h->fiftyval = fifty_38(parent->fiftyval, d);
     else if(parent->s == hsOrigin)
       h->fiftyval = firstfiftyval(d);
     else
@@ -136,8 +136,8 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
         int d1 = (d+S7-1)%S7;
         bool missing0 = !h->move(0)->move(d1);
         if(missing0) {
-          if(s == 1) 
-            h->distance = h->move(0)->distance + 1; 
+          if(s == 1)
+            h->distance = h->move(0)->distance + 1;
           }
         else {
           heptagon* h1 = createStep(h->move(0), d1);
@@ -266,9 +266,9 @@ heptagon *createStep(heptagon *h, int d) {
 
 heptagon *hrmap_standard::create_step(heptagon *h, int d) {
   if(!h->move(0) && h->s != hsOrigin && !bt::in() && !cryst) {
-    // cheating: 
+    // cheating:
     int pard=0;
-    if(S3 == 3) 
+    if(S3 == 3)
       pard = 3 + hrand(2);
     else if(S3 == 4 && S7 == 5)
       pard = 3; // to do: randomize
@@ -291,7 +291,7 @@ heptagon *hrmap_standard::create_step(heptagon *h, int d) {
       hs = hs + wstep + 1 + wstep + 1 + wstep + 1;
       h->c.connect(d, hs);
       }
-    else 
+    else
       buildHeptagon(h, d, transition(h->s, d));
     }
   else if(S3 > 4 && quotient) {

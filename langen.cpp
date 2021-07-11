@@ -271,10 +271,10 @@ template<class T>
 void compute_completeness(const T& dict)
 {
   std::set<std::string> s;
-  for(int i=1; i<NUMLAN; i++) 
+  for(int i=1; i<NUMLAN; i++)
     for(auto&& elt : dict[i].m)
       s.insert(elt.first);
-  
+
   for(auto&& elt : s) {
     std::string mis = "", mis1 = "", exist_in = "";
     bool in_important = false;
@@ -287,7 +287,7 @@ void compute_completeness(const T& dict)
       }
     else {
       std::string which = d[i]["EN"];
-      if(which != "PT-BR" && which != "TR" && which != "DE") 
+      if(which != "PT-BR" && which != "TR" && which != "DE")
         in_important = true;
       exist_in += which + " ";
       }
@@ -301,7 +301,7 @@ void compute_completeness(const T& dict)
     for(int i=1; i<NUMLAN; i++) if(dict[i].count(elt)) completeness[i]++;
     }
   }
-  
+
 int main() {
 
   printf("// DO NOT EDIT -- this file is generated automatically with langen\n\n");
@@ -358,7 +358,7 @@ int main() {
   printf("#endif\n");
   printf("const char* natchars[NUMEXTRA] = NATCHARS;\n");
   printf("//javastring = \"%s\";\n", javastring.c_str());
-  
+
   printf("\nEX int transcompleteness[NUMLAN] = {");
   for(int i=0; i<NUMLAN; i++) printf("%d, ", completeness[i]);
   printf("};\n");
@@ -391,7 +391,7 @@ int main() {
     printf("// %s: %5dB nouns, %5dB sentences\n",
       d[i]["EN"].c_str(), int(bnouns), int(bdict));
     }
-  
+
   std::set<std::string> allsent;
   for(auto&& elt : d[1].m)
     allsent.insert(elt.first);
@@ -399,9 +399,9 @@ int main() {
   std::set<std::string> allnouns;
   for(auto&& elt : nouns[1].m)
     allnouns.insert(elt.first);
-  
+
   std::map<hashcode, std::string> ms, mn;
-  
+
   do {
     hashval = rand();
     printf("// check hash: %x\n", hashval);
@@ -409,11 +409,11 @@ int main() {
     mn = buildHashTable(allnouns);
     }
   while(ms.size() != allsent.size() || mn.size() != allnouns.size());
-  
+
   printf("hashcode hashval = 0x%x;\n\n", hashval);
-  
+
   printf("sentence all_sentences[] = {\n");
-  
+
   for(auto&& elt : ms) {
     const std::string& s = elt.second;
     printf("  {0x%x, { // %s\n", elt.first, escape(s, s));
@@ -423,13 +423,13 @@ int main() {
   printf("  };\n\n");
 
   printf("fullnoun all_nouns[] = {\n");
-  
+
   for(auto&& elt : mn) {
     const std::string& s = elt.second;
     printf("  {0x%x, %d, { // \"%s\"\n", elt.first,
       (nothe.count(s) ? 1:0) + (plural.count(s) ? 2:0),
       escape(s, s));
-    
+
     for(int i=1; i<NUMLAN; i++) {
       printf("    {%d", nouns[i][s].genus);
       printf(", %s", escape(nouns[i][s].nom, s));
@@ -437,7 +437,7 @@ int main() {
       printf(", %s", escape(nouns[i][s].acc, s));
       printf(", %s},\n", escape(nouns[i][s].abl, s));
       }
-    
+
     printf("    }},\n");
     }
 

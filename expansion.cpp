@@ -25,9 +25,9 @@ void canonicize(vector<int>& t) {
 struct expansion_analyzer {
   vector<int> gettype(cell *c);
   int N;
-  vector<cell*> samples;  
-  map<vector<int>, int> codeid;  
-  vector<vector<int> > children;  
+  vector<cell*> samples;
+  map<vector<int>, int> codeid;
+  vector<vector<int> > children;
   int rootid, diskid;
   int coefficients_known;
   #if CAP_GMP
@@ -37,7 +37,7 @@ struct expansion_analyzer {
   #endif
   int valid_from, tested_to;
   ld growth;
-  
+
   int sample_id(cell *c);
   void preliminary_grouping();
   void reduce_grouping();
@@ -46,7 +46,7 @@ struct expansion_analyzer {
   bignum& get_descendants(int level, int type);
   void find_coefficients();
   void reset();
-  
+
   expansion_analyzer() { reset(); }
 
   string approximate_descendants(int d, int max_length);
@@ -99,16 +99,16 @@ template<class T, class U> vector<int> get_children_codes(cell *c, const T& dist
     }
   return res;
   }
-  
+
 void expansion_analyzer::preliminary_grouping() {
   samples.clear();
   codeid.clear();
-  children.clear();  
+  children.clear();
   if(reg3::in_rule()) {
 #if MAXMDIM >= 4
     rootid = reg3::rule_get_root(0);
     auto& chi = reg3::rule_get_children();
-    N = isize(chi) / S7;    
+    N = isize(chi) / S7;
     children.resize(N);
     int k = 0;
     for(int i=0; i<N; i++) for(int j=0; j<S7; j++) {
@@ -123,7 +123,7 @@ void expansion_analyzer::preliminary_grouping() {
   else {
     sample_id(currentmap->gamestart());
     // queue for, do not change to range-based for
-    for(int i=0; i<isize(samples); i++) 
+    for(int i=0; i<isize(samples); i++)
       children.push_back(get_children_codes(samples[i], celldist, [this] (cell *c) { return sample_id(c); }));
     N = isize(samples);
     rootid = 0;
@@ -158,13 +158,13 @@ void expansion_analyzer::reduce_grouping() {
     if(nogroups == newgroups) break;
     nogroups = newgroups;
     }
-  
+
   vector<int> groupsample(nogroups, -1);
   for(int i=0; i<N; i++) {
     int& g = groupsample[grouping[i]];
     if(g == -1) g = i;
     }
-  
+
   vector<int> reorder(nogroups);
   for(int i=0; i<nogroups; i++) reorder[i] = i;
   sort(reorder.begin(), reorder.end(), [&] (int i, int j) { return groupsample[i] < groupsample[j]; });
@@ -175,9 +175,9 @@ void expansion_analyzer::reduce_grouping() {
   for(int i=0; i<N; i++) grouping[i] = inv_reorder[grouping[i]];
 
   for(int i=0; i<N; i++) groupsample[grouping[i]] = i;
-  
+
   vector<vector<int>> newchildren(nogroups);
-  for(int i=0; i<nogroups; i++) 
+  for(int i=0; i<nogroups; i++)
     for(int j: children[groupsample[i]])
       newchildren[i].push_back(grouping[j]);
   children = move(newchildren);
@@ -205,7 +205,7 @@ bignum& expansion_analyzer::get_descendants(int level, int type) {
   for(int d=0; d<=level; d++)
   for(int i=size_upto(pd[d], N); i<N; i++)
     if(d == 0) pd[d][i].be(1);
-    else for(int j: children[i]) 
+    else for(int j: children[i])
       pd[d][i] += pd[d-1][j];
   return pd[level][type];
   }
@@ -271,18 +271,18 @@ int expansion_analyzer::valid(int v, int step) {
     // printf("zeros below %d\n", k);
     // display();
     }
-  
+
   for(int k=v-1; k>=0; k--)
   for(int l=k-1; l>=0; l--)
     if(matrix[l][k]) matrix[l][v] -= matrix[l][k] * matrix[k][v];
-  
+
   coef.resize(v);
   #if CAP_GMP
   for(int i=0; i<v; i++) coef[i] = matrix[v-1-i][v];
   #else
   for(int i=0; i<v; i++) coef[i] = int(floor(matrix[v-1-i][v] + .5));
   #endif
-    
+
   for(int t=step+v; t<step+v+v+more; t++) if(!verify(t)) return 2;
   tested_to = step+v+v+more;
   while(tested_to < step+v+v+100) {
@@ -292,7 +292,7 @@ int expansion_analyzer::valid(int v, int step) {
     if(!verify(tested_to)) return 2;
     tested_to++;
     }
-  
+
   valid_from = step+v;
   return 3;
   }
@@ -300,8 +300,8 @@ int expansion_analyzer::valid(int v, int step) {
 void expansion_analyzer::find_coefficients() {
   if(coefficients_known) return;
   if(!N) preliminary_grouping(), reduce_grouping();
-  for(int v=1; v<25; v++) 
-  for(int step=0; step<3 * v; step++) { 
+  for(int v=1; v<25; v++)
+  for(int step=0; step<3 * v; step++) {
     int val = valid(v, step);
     if(val == 0) break;
     if(val == 3) { coefficients_known = 2; return; }
@@ -351,12 +351,12 @@ EX int type_in(expansion_analyzer& ea, cell *c, const cellfunction& f) {
     if(bt::in()) bonus += 16 * (celldistAlt(c1) - celldistAlt(c));
     res.push_back(bonus + subtype(c1) * 4 + f(c1) - d);
     }
-  
+
   canonicize(res);
   if(ea.codeid.count(res)) return ea.codeid[res];
   int ret = ea.N++;
   ea.codeid[res] = ret;
-  
+
   ea.children.emplace_back();
   ea.children[ret] = get_children_codes(c, f, [&ea, &f] (cell *c1) { return type_in(ea, c1, f); });
 
@@ -373,7 +373,7 @@ int type_in_quick(expansion_analyzer& ea, cell *c, const cellfunction& f) {
     if(dd < -1 || dd > 1) return -1;
     res.push_back(subtype(c1) * 4 + dd);
     }
-  
+
   canonicize(res);
   if(ea.codeid.count(res)) return ea.codeid[res];
   return -1;
@@ -387,7 +387,7 @@ EX bool sizes_known() {
   // not implemented
   if(arcm::in()) return false;
   if(kite::in()) return false;
-  return true;  
+  return true;
   }
 
 EX bool trees_known() {
@@ -398,7 +398,7 @@ string expansion_analyzer::approximate_descendants(int d, int max_length) {
   auto t = SDL_GetTicks();
   while(isize(descendants) <= d && SDL_GetTicks() < t + 100)
     get_descendants(isize(descendants));
-  if(isize(descendants) > d) 
+  if(isize(descendants) > d)
     return get_descendants(d).get_str(max_length);
   int v = isize(descendants) - 1;
   bignum& b = get_descendants(v);
@@ -433,7 +433,7 @@ EX int curr_dist(cell *c) {
       if((isCyclic(c->land) || c->land == laCanvas) && (eubinary || c->master->alt)) return celldistAlt(c);
       return inmirror(c) ? (c->landparam & 255) : c->landparam;
     }
-  return 0;    
+  return 0;
   }
 
 int position;
@@ -453,7 +453,7 @@ EX int type_in_reduced(expansion_analyzer& ea, cell *c, const cellfunction& f) {
 EX int parent_id(cell *c, int which, const cellfunction& cf) {
   int d = cf(c)-1;
   for(int i=0; i<c->type; i++) {
-    
+
     if(cf(c->cmove(i)) == d) {
       int steps = 0;
       again:
@@ -465,7 +465,7 @@ EX int parent_id(cell *c, int which, const cellfunction& cf) {
       else return i;
       }
     }
-  
+
   return -1;
   }
 
@@ -474,7 +474,7 @@ EX int parent_id(cell *c, int which, const cellfunction& cf) {
 EX void generate_around(cell *c) {
   forCellCM(c2, c) if(c2->mpdist > BARLEV) setdist(c2, BARLEV, c);
   }
-  
+
 EX namespace ts {
   EX cell *verified_add(cell *c, int which, int bonus, const cellfunction& cf) {
     int id = parent_id(c, which, cf);
@@ -485,13 +485,13 @@ EX namespace ts {
   EX cell *verified_add_gen(cell *c, int which, int bonus, const cellfunction& cf) {
     return verified_add(c, which, bonus, cf);
     }
-  
+
   EX cell *add(cell *c, int which, int bonus, const cellfunction& cf) {
     int pid = parent_id(c, which, cf);
     if(pid == -1) pid = 0;
     return c->cmodmove(pid + bonus);
     }
-  
+
   EX cell *left_of(cell *c, const cellfunction& cf) {
     int pid = parent_id(c, 1, cf);
     if(pid == -1) return c;
@@ -506,7 +506,7 @@ EX namespace ts {
     else return (cellwalker(c, pid) + wstep + 1).cpeek();
     }
 
-  EX cell *child_number(cell *c, int id, const cellfunction& cf) { 
+  EX cell *child_number(cell *c, int id, const cellfunction& cf) {
     int pid = parent_id(c, 1, cf);
     if(pid == -1) return c->cmove(id);
     return c->cmodmove(pid + (valence() == 3 ? 2 : 1) + id);
@@ -533,7 +533,7 @@ color_t distribute_color(int id) {
   if(expcolors.count(id)) return expcolors[id];
   color_t v = forecolor; // 0xFFFFFF;
   for(int z=0; z<24; z++) if(id & (1<<z)) part(v, (z%3)) ^= (1<<(7-(z/3)));
-  return v; 
+  return v;
   }
 
 EX bool dist_label_colored = true;
@@ -541,20 +541,20 @@ EX color_t dist_label_color = 0;
 
 void celldrawer::do_viewdist() {
   if(behindsphere(V)) return;
-  
+
   int cd = (use_color_codes || number_coding == ncDistance || number_coding == ncDebug) ? curr_dist(c) : 0;
-  
+
   if(use_color_codes) {
     int dc = distcolors[cd];
     wcol = gradient(wcol, dc, 0, .4, 1);
     fcol = gradient(fcol, dc, 0, .4, 1);
     }
-  
+
   string label = "";
   int dc = 0xFFD500;
- 
+
   switch(number_coding) {
-    case ncDistance: { 
+    case ncDistance: {
       label = its(cd);
       dc = distcolors[cd];
       break;
@@ -562,7 +562,7 @@ void celldrawer::do_viewdist() {
     case ncType: {
       int t = -1;
       if(reg3::in_rule()) switch(distance_from) {
-        case dfPlayer: 
+        case dfPlayer:
           t = -1;
           break;
         case dfStart:
@@ -577,15 +577,15 @@ void celldrawer::do_viewdist() {
       break;
       }
     case ncDebug: {
-      int d = 
-        distance_from == dfStart && cwt.at == currentmap->gamestart() && c->cpdist < INFD ? c->cpdist : 
+      int d =
+        distance_from == dfStart && cwt.at == currentmap->gamestart() && c->cpdist < INFD ? c->cpdist :
         celldistance(c, distance_from == dfPlayer ? cwt.at : currentmap->gamestart());
       dc = (d != cd) ? 0xFF0000 : 0x00FF00;
       label = its(d);
       }
     case ncNone: ;
     }
-  
+
   if(!dist_label_colored) dc = dist_label_color;
 
   // string label = its(fieldpattern::getriverdistleft(c)) + its(fieldpattern::getriverdistright(c));
@@ -599,17 +599,17 @@ EX void viewdist_configure_dialog() {
   dialog::init("");
   cmode |= sm::SIDE | sm::MAYDARK | sm::EXPANSION;
   gamescreen(0);
-  
+
   dialog::addSelItem(XLAT("which distance"), XLAT(dfnames[distance_from]), 'c');
   dialog::add_action([] () { distance_from = mod_allowed() ? eDistanceFrom((distance_from + 1) % 3) : eDistanceFrom(2 - distance_from); });
-             
+
   dialog::addSelItem(XLAT("number codes"), XLAT(ncnames[number_coding]), 'n');
   dialog::add_action([] () { number_coding = eNumberCoding((number_coding + 1) % (mod_allowed() ? 4 : 2)); });
 
   dialog::addBoolItem_action(XLAT("color codes"), use_color_codes, 'u');
 
   dialog::addSelItem(XLAT("display distances from"), its(first_distance), 'd');
-  dialog::add_action([] () { 
+  dialog::add_action([] () {
     scrolling_distances = false;
     dialog::editNumber(first_distance, 0, 3000, 1, 0, XLAT("display distances from"), "");
     dialog::bound_low(0);
@@ -624,22 +624,22 @@ EX void viewdist_configure_dialog() {
       dialog::dialogflags |= sm::MAYDARK | sm::SIDE | sm::EXPANSION;
       });
     }
-  
+
   if(!mod_allowed()) {
     dialog::addItem(XLAT("enable the cheat mode for additional options"), 'C');
     dialog::add_action(enable_cheat);
     }
-  else 
+  else
     dialog::addBreak(100);
 
   dialog::addBreak(100);
 
   dialog::addItem(XLAT("disable"), 'x');
   dialog::add_action([] () { viewdists = false; popScreen(); });
-  
+
   dialog::addItem(XLAT("move the player"), 'm');
   dialog::add_action([] () { show_distance_lists = false; popScreenAll(); });
-  
+
   dialog::addItem(distance_from ? XLAT("show number of descendants by distance") : XLAT("show number of cells by distance"), 'l');
   dialog::add_action([] () { show_distance_lists = true; popScreenAll(); });
 
@@ -688,23 +688,23 @@ void expansion_analyzer::view_distances_dialog() {
     }
   lastticks = SDL_GetTicks();
   if(first_distance < 0) first_distance = 0;
-  
+
   dynamicval<color_t> dv(distcolors[0], forecolor);
   dialog::init("");
   cmode |= sm::DIALOG_STRICT_X | sm::EXPANSION;
-  
+
   int maxlen = bounded ? 128 : 16 + first_distance;
   vector<bignum> qty(maxlen);
-  
+
   bool really_use_analyzer = use_analyzer && sizes_known();
-  
+
   if(really_use_analyzer) {
     int t;
     if(reg3::in_rule()) {
-      if(!N) preliminary_grouping();      
+      if(!N) preliminary_grouping();
       t = rootid;
       }
-    else 
+    else
       t = type_in_reduced(expansion, cwt.at, curr_dist);
     for(int r=0; r<maxlen; r++)
       qty[r] = expansion.get_descendants(r, t);
@@ -731,12 +731,12 @@ void expansion_analyzer::view_distances_dialog() {
       }
     #endif
     }
-  
+
   dialog::addBreak(100 - 100 * scrolltime / scrollspeed);
 
   for(int i=first_distance; i<maxlen; i++) if(!qty[i].digits.empty())
     dialog::addInfo(its(i) + ": " + qty[i].get_str(100), distcolors[i]);
-  
+
   dialog::addBreak(100 * scrolltime / scrollspeed);
 
   if(sizes_known() || bt::in()) {
@@ -746,7 +746,7 @@ void expansion_analyzer::view_distances_dialog() {
       }
     else {
       dialog::addBreak(100);
-      
+
       find_coefficients();
       if(coefficients_known == 2) {
         string fmt = produce_coef_formula(coef);
@@ -754,11 +754,11 @@ void expansion_analyzer::view_distances_dialog() {
         dialog::addHelp(fmt);
         }
       else dialog::addBreak(100);
-      
+
       dialog::addInfo("Θ(" + fts(get_growth(), 8) + "...ᵈ)", forecolor);
       }
     }
-  
+
   dialog::addItem(XLAT("scroll"), 'S');
   dialog::addItem(XLAT("configure"), 'C');
   dialog::display();
@@ -793,15 +793,15 @@ int expansion_hook = addHook(hooks_handleKey, 0, expansion_handleKey);
 void compute_coefficients() {
   println(hlog, gp::operation_name(), " ", ginf[geometry].tiling_name);
   start_game();
-  
+
     printf("  sizes:");
     for(int i=0; i<expansion.valid_from+10; i++) printf(" %d", expansion.get_descendants(i).approx_int());
-    
+
     printf("  N = %d\n", expansion.N);
 
-  expansion.find_coefficients();      
+  expansion.find_coefficients();
   if(expansion.coefficients_known == 2) {
-    println(hlog, "  coefficients:"); 
+    println(hlog, "  coefficients:");
     for(auto& x: expansion.coef) println(hlog, " ", x);
     println(hlog, " (tested on %d to %d)\n", expansion.valid_from, expansion.tested_to);
     }
@@ -810,10 +810,10 @@ void compute_coefficients() {
 #if CAP_COMMANDLINE
 int expansion_readArgs() {
   using namespace arg;
-           
+
   if(0) ;
-  else if(argis("-vap")) { 
-    PHASEFROM(2); 
+  else if(argis("-vap")) {
+    PHASEFROM(2);
     start_game();
     shift(); int radius = argi();
     while(true) {
@@ -822,15 +822,15 @@ int expansion_readArgs() {
       if(isize(expansion.descendants) >= radius) break;
       }
     }
-  else if(argis("-csizes")) { 
-    PHASEFROM(2); 
+  else if(argis("-csizes")) {
+    PHASEFROM(2);
     start_game();
     expansion.get_growth();
     shift(); for(int i=0; i<argi(); i++)
-      printf("%s / %s\n", expansion.get_descendants(i).get_str(1000).c_str(), expansion.get_descendants(i, expansion.diskid).get_str(1000).c_str());  
+      printf("%s / %s\n", expansion.get_descendants(i).get_str(1000).c_str(), expansion.get_descendants(i, expansion.diskid).get_str(1000).c_str());
     }
-  else if(argis("-csolve")) { 
-    PHASEFROM(2); 
+  else if(argis("-csolve")) {
+    PHASEFROM(2);
     start_game();
     printf("preliminary_grouping...\n");
     expansion.preliminary_grouping();
@@ -849,24 +849,24 @@ int expansion_readArgs() {
       printf("\n");
       }
     println(hlog, "growth = ", expansion.get_growth());
-    expansion.find_coefficients();      
+    expansion.find_coefficients();
     if(expansion.coefficients_known == 2) {
 
       println(hlog, "  sizes:");
-      for(int i=0; i<expansion.valid_from+10; i++) 
+      for(int i=0; i<expansion.valid_from+10; i++)
         println(hlog, "[", i, "] = ", expansion.get_descendants(i).get_str(10000));
 
       println(hlog, "  disks:");
-      for(int i=0; i<expansion.valid_from+10; i++) 
+      for(int i=0; i<expansion.valid_from+10; i++)
         println(hlog, "[", i, "] = ", expansion.get_descendants(i, expansion.diskid).get_str(10000));
-      
+
       vector<string> disks;
-      for(int i=0; i<expansion.valid_from+10; i++) 
-        disks.push_back(expansion.get_descendants(i, expansion.diskid).get_str(10000));      
+      for(int i=0; i<expansion.valid_from+10; i++)
+        disks.push_back(expansion.get_descendants(i, expansion.diskid).get_str(10000));
       println(hlog, "disks = ", disks);
 
-      println(hlog, "coefficients: ", expansion.coef); 
-      println(hlog, "i.e. ", produce_coef_formula(expansion.coef)); 
+      println(hlog, "coefficients: ", expansion.coef);
+      println(hlog, "i.e. ", produce_coef_formula(expansion.coef));
       println(hlog, "coefficients tested from ", expansion.valid_from, " to ", expansion.tested_to);
       }
     }
@@ -972,12 +972,12 @@ int sibling_distance(cell *a, cell *b, int limit) {
     */
 EX int hyperbolic_celldistance(cell *c1, cell *c2) {
   int found_distance = INF;
-  
+
   int d = 0, d1 = celldist0(c1), d2 = celldist0(c2), sl_used = 0;
 
   cell *cl1=c1, *cr1=c1, *cl2=c2, *cr2=c2;
   while(true) {
-  
+
     if(a45 && BITRUNCATED) {
       // some cells in this tiling have three parents,
       // making the usual algorithm fail
@@ -989,15 +989,15 @@ EX int hyperbolic_celldistance(cell *c1, cell *c2) {
         if(cl.listed(cl1)) found_distance = min(found_distance, d + cl.getdist(cl1));
         if(cl.listed(cr1)) found_distance = min(found_distance, d + cl.getdist(cr1));
         };
-      
+
       if(d1 <= d2+1) {
         short_distances(cl2);
         if(cl2 != cr2) short_distances(cr2);
         }
       }
-    
+
     if(d >= found_distance) {
-      if(sl_used == sibling_limit && IRREGULAR) { 
+      if(sl_used == sibling_limit && IRREGULAR) {
         printf("sibling_limit used: %d\n", sibling_limit); sibling_limit++;
         }
       return found_distance;
@@ -1016,11 +1016,11 @@ EX int hyperbolic_celldistance(cell *c1, cell *c2) {
       else {
         if(cl1 == cr2 || cr1 == cl2) found_distance = d;
         }
-      }    
-    
+      }
+
     if(d >= found_distance) {
-      if(sl_used == sibling_limit && IRREGULAR) { 
-        printf("sibling_limit used: %d\n", sibling_limit); sibling_limit++; 
+      if(sl_used == sibling_limit && IRREGULAR) {
+        printf("sibling_limit used: %d\n", sibling_limit); sibling_limit++;
         }
       return found_distance;
       }
