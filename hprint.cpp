@@ -122,25 +122,25 @@ struct hstream_exception : hr_exception { hstream_exception() {} };
 
 struct fhstream : hstream {
   color_t vernum;
-  virtual color_t get_vernum() override { return vernum; }
   FILE *f;
-  virtual void write_char(char c) override { write_chars(&c, 1); }
-  virtual void write_chars(const char* c, size_t i) override { if(fwrite(c, i, 1, f) != 1) throw hstream_exception(); }
-  virtual void read_chars(char* c, size_t i) override { if(fread(c, i, 1, f) != 1) throw hstream_exception(); }
-  virtual char read_char() override { char c; read_chars(&c, 1); return c; }
-  fhstream() { f = NULL; vernum = VERNUM_HEX; }
-  fhstream(const string pathname, const char *mode) { f = fopen(pathname.c_str(), mode); vernum = VERNUM_HEX; }
+  explicit fhstream() { f = NULL; vernum = VERNUM_HEX; }
+  explicit fhstream(const string pathname, const char *mode) { f = fopen(pathname.c_str(), mode); vernum = VERNUM_HEX; }
   ~fhstream() { if(f) fclose(f); }
+  color_t get_vernum() override { return vernum; }
+  void write_char(char c) override { write_chars(&c, 1); }
+  void write_chars(const char* c, size_t i) override { if(fwrite(c, i, 1, f) != 1) throw hstream_exception(); }
+  void read_chars(char* c, size_t i) override { if(fread(c, i, 1, f) != 1) throw hstream_exception(); }
+  char read_char() override { char c; read_chars(&c, 1); return c; }
   };
 
 struct shstream : hstream { 
   color_t vernum;
-  virtual color_t get_vernum() override { return vernum; }
   string s;
   int pos;
-  shstream(const string& t = "") : s(t) { pos = 0; vernum = VERNUM_HEX; }
-  virtual void write_char(char c) override { s += c; }
-  virtual char read_char() override { if(pos == isize(s)) throw hstream_exception(); return s[pos++]; }
+  explicit shstream(const string& t = "") : s(t) { pos = 0; vernum = VERNUM_HEX; }
+  color_t get_vernum() override { return vernum; }
+  void write_char(char c) override { s += c; }
+  char read_char() override { if(pos == isize(s)) throw hstream_exception(); return s[pos++]; }
   };
 
 inline void print(hstream& hs) {}
@@ -243,11 +243,11 @@ int SDL_GetTicks();
 struct logger : hstream {
   int indentation;
   bool doindent;
-  logger() { doindent = false; }
-  virtual void write_char(char c) { if(doindent) { doindent = false; 
+  explicit logger() { doindent = false; }
+  void write_char(char c) override { if(doindent) { doindent = false; 
     if(debugflags & DF_TIME) { int t = SDL_GetTicks(); if(t < 0) t = 999999; t %= 1000000; string s = its(t); while(isize(s) < 6) s = "0" + s; for(char c: s) special_log(c); special_log(' '); }
     for(int i=0; i<indentation; i++) special_log(' '); } special_log(c); if(c == 10) doindent = true; if(c == 10 && debugfile) fflush(debugfile); }
-  virtual char read_char() { throw hstream_exception(); }
+  char read_char() override { throw hstream_exception(); }
   };
 
 extern logger hlog;
@@ -278,11 +278,11 @@ inline void print(hstream& hs, cellwalker cw) {
 struct indenter {
   dynamicval<int> ind;
   
-  indenter(int i = 2) : ind(hlog.indentation, hlog.indentation + (i)) {}
+  explicit indenter(int i = 2) : ind(hlog.indentation, hlog.indentation + (i)) {}
   };
 
 struct indenter_finish : indenter {
-  indenter_finish(bool b = true): indenter(b ? 2:0) {}
+  explicit indenter_finish(bool b = true): indenter(b ? 2:0) {}
   ~indenter_finish() { if(hlog.indentation != ind.backup) println(hlog, "(done)"); }
   };
 

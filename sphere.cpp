@@ -139,14 +139,14 @@ struct hrmap_spherical : hrmap_standard {
     #endif
     }
 
-  heptagon *getOrigin() { return dodecahedron[0]; }
+  heptagon *getOrigin() override { return dodecahedron[0]; }
 
   ~hrmap_spherical() {
     for(int i=0; i<spherecells(); i++) clearHexes(dodecahedron[i]);
     for(int i=0; i<spherecells(); i++) tailored_delete(dodecahedron[i]);
     }    
 
-  void verify() {
+  void verify() override {
     for(int i=0; i<spherecells(); i++) for(int k=0; k<S7; k++) {
       heptspin hs(dodecahedron[i], k, false);
       heptspin hs2 = hs + wstep + (S7-1) + wstep + (S7-1) + wstep + (S7-1);
@@ -172,7 +172,7 @@ struct hrmap_spherical : hrmap_standard {
     return Id;
     }
   
-  transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
+  transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override {
     transmatrix T = iso_inverse(get_where(c1)) * get_where(c2);
     if(elliptic) fixelliptic(T);
     return T;

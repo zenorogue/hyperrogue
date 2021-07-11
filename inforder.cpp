@@ -21,7 +21,7 @@ EX namespace inforder {
 
   struct hrmap_inforder : hrmap_hyperbolic {
 
-    heptagon *create_step(heptagon *h, int direction) {
+    heptagon *create_step(heptagon *h, int direction) override {
       int deg = h->type;
       if(mixed()) deg = 7 - deg;
       auto h1 = init_heptagon(deg);

@@ -24,11 +24,11 @@ struct sky_item {
 
 struct dqi_sky : drawqueueitem {
   vector<sky_item> sky;
-  void draw();
-  virtual color_t outline_group() { return 3; }
+  void draw() override;
+  color_t outline_group() override { return 3; }
   // singleton
-  dqi_sky() { hr::sky = this; }
-  ~dqi_sky() { hr::sky = NULL; }
+  explicit dqi_sky() { hr::sky = this; }
+  ~dqi_sky() override { hr::sky = NULL; }
   };
   
 EX struct dqi_sky *sky;
