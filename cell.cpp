@@ -75,6 +75,14 @@ struct hrmap {
       }
     return currentmap->iadj(c, i);
     }
+
+  /** \brief in 3D honeycombs, returns a vector<bool> v, where v[j] iff faces i and j are adjacent */
+  virtual const vector<bool>& adjacent_dirs(cell *c, int i) { throw hr_exception("adjacent_dirs called unexpectedly"); }
+
+  /** \brief in 3D honeycombs, returns a cellwalker res at cw->move(j) such that the face pointed at by cw and res share an edge */
+  virtual cellwalker strafe(cellwalker cw, int j) { throw hr_exception("strafe called unexpectedly"); }
+
+  const vector<bool>& adjacent_dirs(cellwalker cw) { return adjacent_dirs(cw.at, cw.spin); }
   };
 
 /** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient  

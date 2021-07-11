@@ -105,6 +105,7 @@ struct subcellshape {
   vector<hyperpoint> vertices_only;
   vector<hyperpoint> vertices_only_local;
   vector<hyperpoint> face_centers;
+  vector<vector<bool>> dirs_adjacent;
   hyperpoint cellcenter;
   transmatrix to_cellcenter;
   transmatrix from_cellcenter;
@@ -151,7 +152,7 @@ struct geometry_information {
 
   ld adjcheck;
   ld strafedist;
-  bool dirs_adjacent[32][32];
+  vector<vector<bool>> dirs_adjacent;
 
   ld ultra_mirror_dist, ultra_material_part, ultra_mirror_part;
   
