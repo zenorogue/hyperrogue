@@ -612,6 +612,20 @@ EX namespace reg3 {
       ss.faces_local = ss.faces;
       for(auto& face: ss.faces_local) for(auto& v: face) v = ss.from_cellcenter * v;
       for(auto& v: ss.vertices_only_local) v = ss.from_cellcenter * v;
+      
+      int N = isize(ss.faces);
+      ss.dirs_adjacent.resize(N);
+      for(int i=0; i<N; i++) {
+        auto& da = ss.dirs_adjacent[i];
+        da.resize(N, false);
+        set<unsigned> cface;
+        for(auto& v: ss.faces[i]) cface.insert(bucketer(v));
+        for(int j=0; j<N; j++) {
+          int mutual = 0;
+          for(auto& w: ss.faces[j]) if(cface.count(bucketer(w))) mutual++;
+          da[j] = mutual == 2;
+          }
+        }
       }
 
     println(hlog, "subcells generated = ", isize(cgi.subshapes));
@@ -637,6 +651,7 @@ EX namespace reg3 {
   
   struct hrmap_closed3 : hrmap {
     vector<heptagon*> allh;
+    vector<vector<vector<int>>> strafe_data;
     vector<vector<transmatrix>> tmatrices;    
     vector<vector<transmatrix>> tmatrices_cell;
     vector<cell*> acells;
@@ -795,11 +810,15 @@ EX namespace reg3 {
         which_cell[c->master->fieldval][bucketer(ss[id].face_centers[i])].emplace_back(c, i);
       }
     
+    strafe_data.resize(isize(acells));
+    
     for(cell *c: acells) {
       int id = local_id[c].second;      
-      auto& tmcell = tmatrices_cell[local_id[c].first];
+      int cid = local_id[c].first;
+      auto& tmcell = tmatrices_cell[cid];
       vector<int> foundtab;
       vector<tuple<int, int, int>> foundtab_ids;
+      strafe_data[cid].resize(c->type);
       for(int i=0; i<c->type; i++) {
         int found = 0;
         hyperpoint ctr = ss[id].face_centers[i];
@@ -837,6 +856,25 @@ EX namespace reg3 {
                 auto& ms = move_sequences[local_id[c].first];
                 ms.push_back(path);
                 for(auto dir: va.move_sequence) ms.back().push_back(dir);
+
+                auto& sd = strafe_data[cid][i];                
+                sd.resize(c->type, -1);
+                
+                for(int i1=0; i1<c->type; i1++) {
+                  set<unsigned> facevertices;
+                  for(auto v: ss[id].faces[i1]) facevertices.insert(bucketer(v));
+                  if(ss[id].dirs_adjacent[i][i1]) {
+                    int found_strafe = 0;
+                    for(int j1=0; j1<c1->type; j1++) if(j1 != j) {
+                      int num = 0;
+                      for(auto v: ss[id1].faces[j1])
+                        if(facevertices.count(bucketer(T2*v)))
+                          num++;
+                      if(num == 2) sd[i1] = j1, found_strafe++;
+                      }
+                    if(found_strafe != 1) println(hlog, "found_strafe = ", found_strafe);
+                    }
+                  }
                 }
               foundtab_ids.emplace_back(va.h_id, id1, j);
               found++;
