@@ -75,7 +75,7 @@ void set_linux() {
 
 void set_mac() {
   preprocessor = "g++ -E";
-  compiler = "g++ -march=native -W -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-implicit-fallthrough -c";
+  compiler = "g++ -march=native -W -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-invalid-offsetof -c";
   linker = "g++ -o hyper";
   opts = "-DMAC -I/usr/local/include";
   libs = " -L/usr/local/lib -framework AppKit -framework OpenGL -lSDL -lSDLMain -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpng -lpthread -lz";

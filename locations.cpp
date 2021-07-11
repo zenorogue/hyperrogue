@@ -134,7 +134,7 @@ template<class T> struct connection_table {
   unsigned char *spintable() { return (unsigned char*) (&move_table[full()->degree()]); }
 
   /** \brief get the full T from the pointer to this connection table */
-  T* full() { T* x = (T*) this; return (T*)((char*)this - ((char*)(&(x->c)) - (char*)x)); }
+  T* full() { return (T*)((char*)this - offsetof(T, c)); }
   /** \brief for the edge d, set the `spin` and `mirror` attributes */
   void setspin(int d, int spin, bool mirror) { 
     unsigned char& c = spintable() [d];
@@ -178,10 +178,9 @@ template<class T> struct connection_table {
  */
 
 template<class T> T* tailored_alloc(int degree) {
-  const T* sample = nullptr;
   T* result;
 #ifndef NO_TAILORED_ALLOC
-  int b = (char*)&sample->c.move_table[degree] + degree - (char*) sample;
+  int b = offsetof(T, c) + offsetof(connection_table<T>, move_table) + sizeof(T*) * degree + degree;
   result = (T*) new char[b];
   new (result) T();
 #else
