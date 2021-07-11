@@ -745,7 +745,8 @@ EX void buildCrossroads2(cell *c) {
   }
 
 #if MAXMDIM >= 4
-EX bool bufferzone() { return false; }
+EX bool bufferzone() { return PURE && S7 == 6; }
+EX int basic_tests() { return 50; }
 
 EX void extend3D(cell *c) {
   eLand l1 = c->land;
@@ -768,7 +769,7 @@ EX void extend3D(cell *c) {
     }
 
   auto& ad = currentmap->adjacent_dirs(cw);
-  for(int j=0; j<S7; j++) if(ad[j]) {
+  for(int j=0; j<cw.at->type; j++) if(ad[j]) {
     cellwalker bb2 = currentmap->strafe(cw, j);
     if(bufferzone()) { bb2 += rev; bb2 += wstep; }
 
@@ -793,7 +794,8 @@ EX bool buildBarrier3D(cell *c, eLand l2, int forced_dir) {
   cellwalker cw(c, forced_dir);
   if(bufferzone()) { cw += wstep; cw += rev; }
   set<cell*> listed_cells = { cw.at };
-  vector<cellwalker> to_test { cw };  
+  vector<cellwalker> to_test { cw };
+  int tc = basic_tests();
   for(int i=0; i<isize(to_test); i++) {
     auto bb = to_test[i];
     if(bb.at->mpdist < BARLEV) return false;
@@ -803,8 +805,8 @@ EX bool buildBarrier3D(cell *c, eLand l2, int forced_dir) {
     if(bufferzone() && (bb+rev).cpeek()->bardir != NODIR) return false;
     if(bb.at->bardir != NODIR) return false;
     auto& ad = currentmap->adjacent_dirs(bb);
-    for(int j=0; j<S7; j++) {
-      if(bufferzone() && i <= 5) bb.at->cmove(j);
+    for(int j=0; j<bb.at->type; j++) {
+      if(i < tc) bb.at->cmove(j);
       if(ad[j] && bb.at->move(j)) {
         cellwalker bb2 = currentmap->strafe(bb, j);
         if(listed_cells.count(bb2.at)) continue;
