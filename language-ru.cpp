@@ -7248,7 +7248,7 @@ S("When the 'mark heptagons' option (hotkey '7') is on, moves between unmarked c
 
   "Когда опция 'отметить семиугольники' (клавиша '7') включена, ходы между неотмеченными клетками запрещены.")
 
-// restructured menus
+// this is the marked line
 
 S("colors & aura", "цветы и ауры")
 S("colors of some game objects can be edited by clicking them.", "можно изменить цветы нескольских объектов, кликая на них.")
@@ -7269,3 +7269,5 @@ S("recently changed settings", "недавно изменённые настро
 S("quick projection", "быстрая проекция")
 S("highlight stuff", "подсветить вещи")
 S("Hint: these keys usually work during the game", "Подсказка: можно использовать эти клавиши во время игры")
+
+// Note: the translation should be complete until the marked line
