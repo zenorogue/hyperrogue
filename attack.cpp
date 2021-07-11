@@ -512,8 +512,8 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
   
   if(m == moPrincess) {
     princess::info *i = princess::getPrincessInfo(c);
-    changes.value_keep(*i);
     if(i) {
+      changes.value_keep(*i);
       i->princess = NULL;
       if(i->bestdist == OUT_OF_PALACE) {
         items[itSavedPrincess]--;
