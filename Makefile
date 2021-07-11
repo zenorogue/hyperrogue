@@ -83,7 +83,7 @@ ifeq (${TOOLCHAIN},clang)
   CXXFLAGS_STD = -std=c++11
   CXXFLAGS_EARLY += -march=native -fPIC
   CXXFLAGS_EARLY += -W -Wall -Wextra -Werror -pedantic
-  CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized -Wno-unknown-warning-option
+  CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized -Wno-unknown-warning-option -Wno-overloaded-virtual
 endif
 
 ifeq (${TOOLCHAIN},gcc)
