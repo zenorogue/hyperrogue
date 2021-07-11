@@ -122,7 +122,7 @@ EX namespace reg3 {
     auto& spins = cgi.spins;
     auto& cellshape = cgi.cellshape;
     auto& adjcheck = cgi.adjcheck;
-    auto& dirs_adjacent = cgi.dirs_adjacent;
+    auto& dirdist = cgi.dirdist;
   
     int& mid = cgi.schmid;
     mid = 3;
@@ -256,14 +256,18 @@ EX namespace reg3 {
     adjcheck = hdist(tC0(cgi.adjmoves[0]), tC0(cgi.adjmoves[1])) * 1.0001;
 
     int numedges = 0;
-    dirs_adjacent.resize(S7);
+    dirdist.resize(S7);
     for(int a=0; a<S7; a++) {
-      dirs_adjacent[a].resize(S7);
+      dirdist[a].resize(S7);
       for(int b=0; b<S7; b++) {
-        dirs_adjacent[a][b] = a != b && hdist(tC0(cgi.adjmoves[a]), tC0(cgi.adjmoves[b])) < adjcheck;
-        if(dirs_adjacent[a][b]) numedges++;
+        dirdist[a][b] =
+          a == b ? 0 :
+          hdist(tC0(cgi.adjmoves[a]), tC0(cgi.adjmoves[b])) < adjcheck ? 1 :
+          INFD;
+        if(dirdist[a][b] == 1) numedges++;
         }
       }
+    floyd_warshall(dirdist);
     DEBB(DF_GEOM, ("numedges = ", numedges));
     
     if(loop == 4) cgi.strafedist = adjcheck;
@@ -281,9 +285,9 @@ EX namespace reg3 {
     
     for(int a=0; a<S7; a++)
     for(int b=0; b<S7; b++)
-      if(cgi.dirs_adjacent[a][b]) 
+      if(cgi.dirdist[a][b] == 1) 
         for(int c=0; c<S7; c++)
-          if(cgi.dirs_adjacent[a][c] && cgi.dirs_adjacent[b][c]) {
+          if(cgi.dirdist[a][c] == 1 && cgi.dirdist[b][c] == 1) {
             transmatrix t = build_matrix(tC0(cgi.adjmoves[a]), tC0(cgi.adjmoves[b]), tC0(cgi.adjmoves[c]), C0);
             if(det(t) > 1e-3) cgi.next_dir[a][b] = c;
             }  
@@ -618,18 +622,19 @@ EX namespace reg3 {
       for(auto& v: ss.vertices_only_local) v = ss.from_cellcenter * v;
       
       int N = isize(ss.faces);
-      ss.dirs_adjacent.resize(N);
+      ss.dirdist.resize(N);
       for(int i=0; i<N; i++) {
-        auto& da = ss.dirs_adjacent[i];
+        auto& da = ss.dirdist[i];
         da.resize(N, false);
         set<unsigned> cface;
         for(auto& v: ss.faces[i]) cface.insert(bucketer(v));
         for(int j=0; j<N; j++) {
           int mutual = 0;
           for(auto& w: ss.faces[j]) if(cface.count(bucketer(w))) mutual++;
-          da[j] = mutual == 2;
+          da[j] = i == j ? 0 : mutual == 2 ? 1 : INFD;
           }
         }
+      floyd_warshall(ss.dirdist);
       }
 
     println(hlog, "subcells generated = ", isize(cgi.subshapes));
@@ -693,9 +698,9 @@ EX namespace reg3 {
     
     virtual transmatrix ray_iadj(cell *c, int i) override;
 
-    const vector<bool>& adjacent_dirs(cell *c, int i) { 
+    const vector<char>& dirdist(cell *c, int i) { 
       int id = local_id.at(c).second;
-      return cgi.subshapes[id].dirs_adjacent[i];
+      return cgi.subshapes[id].dirdist[i];
       }
 
     cellwalker strafe(cellwalker cw, int j) override {
@@ -877,7 +882,7 @@ EX namespace reg3 {
                 for(int i1=0; i1<c->type; i1++) {
                   set<unsigned> facevertices;
                   for(auto v: ss[id].faces[i1]) facevertices.insert(bucketer(v));
-                  if(ss[id].dirs_adjacent[i][i1]) {
+                  if(ss[id].dirdist[i][i1] == 1) {
                     int found_strafe = 0;
                     for(int j1=0; j1<c1->type; j1++) if(j1 != j) {
                       int num = 0;
@@ -888,6 +893,32 @@ EX namespace reg3 {
                       }
                     if(found_strafe != 1) println(hlog, "found_strafe = ", found_strafe);
                     }
+                  }
+                
+                /* for bch, also provide second-order strafe */
+                if(variation == eVariation::bch) for(int i1=0; i1<c->type; i1++) {
+                  if(ss[id].dirdist[i][i1] != 2) continue;
+                  if(isize(ss[id].faces[i]) == 6) continue;
+                  if(isize(ss[id].faces[i1]) == 6) continue;
+                  vector<int> fac;
+                  for(int i2=0; i2<c->type; i2++) if(ss[id].dirdist[i][i2] == 1 && ss[id].dirdist[i2][i1] == 1)
+                    fac.push_back(sd[i2]);
+                  if(isize(fac) != 2) {
+                    println(hlog, "fac= ", fac);
+                    exit(1);
+                    }
+                  int found_strafe = 0;
+                  for(int j1=0; j1<c1->type; j1++) if(j1 != j)
+                    if(ss[id1].dirdist[j1][fac[0]] == 1)
+                    if(ss[id1].dirdist[j1][fac[1]] == 1) {
+                      sd[i1] = j1;
+                      if(isize(ss[id1].faces[j1]) == 6) {
+                        println(hlog, "id1 is 6");
+                        exit(1);
+                        }
+                      found_strafe++;
+                      }
+                  if(found_strafe != 1) println(hlog, "found_strafe = ", found_strafe, " (second order)");
                   }
                 }
               foundtab_ids.emplace_back(va.h_id, id1, j);
@@ -1000,7 +1031,7 @@ EX namespace reg3 {
       if(plane.count(cw)) return;
       plane.insert(cw);
       for(int i=0; i<S7; i++)
-        if(cgi.dirs_adjacent[i][cw.spin])
+        if(cgi.dirdist[i][cw.spin] == 1)
           make_plane(strafe(cw, i));
       }
     
@@ -1101,9 +1132,9 @@ EX namespace reg3 {
       // start_game();
       for(int a=0; a<12; a++)
       for(int b=0; b<12; b++)
-        if(cgi.dirs_adjacent[a][b]) 
+        if(cgi.dirdist[a][b] == 1) 
           for(int c=0; c<12; c++)
-            if(cgi.dirs_adjacent[a][c] && cgi.dirs_adjacent[b][c]) {
+            if(cgi.dirdist[a][c] == 1 && cgi.dirdist[b][c] == 1) {
               transmatrix t = build_matrix(tC0(cgi.adjmoves[a]), tC0(cgi.adjmoves[b]), tC0(cgi.adjmoves[c]), C0);
               if(det(t) > 0) cgi.next_dir[a][b] = c;
               }  
@@ -1111,7 +1142,7 @@ EX namespace reg3 {
       set<coord> boundaries;
       
       for(int a=0; a<12; a++)
-      for(int b=0; b<12; b++) if(cgi.dirs_adjacent[a][b]) {
+      for(int b=0; b<12; b++) if(cgi.dirdist[a][b] == 1) {
         coord res = crystal::c0;
         int sa = a, sb = b;
         do {
@@ -1490,8 +1521,8 @@ EX namespace reg3 {
       return cgi.vertices_only;
       }
 
-    const vector<bool>& adjacent_dirs(cell *c, int i) { 
-      return cgi.dirs_adjacent[i];
+    const vector<char>& dirdist(cell *c, int i) { 
+      return cgi.dirdist[i];
       }
 
     cellwalker strafe(cellwalker cw, int j) override {
@@ -1970,10 +2001,10 @@ EX namespace reg3 {
       return quotient_map->ray_iadj(quotient_map->acells[aid], i);
       }
 
-    const vector<bool>& adjacent_dirs(cell *c, int i) { 
-      if(PURE) return cgi.dirs_adjacent[i];
+    const vector<char>& dirdist(cell *c, int i) { 
+      if(PURE) return cgi.dirdist[i];
       int aid = cell_id.at(c);
-      return quotient_map->adjacent_dirs(quotient_map->acells[aid], i);
+      return quotient_map->dirdist(quotient_map->acells[aid], i);
       }
 
     cellwalker strafe(cellwalker cw, int j) override {

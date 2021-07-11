@@ -739,4 +739,11 @@ EX void open_wiki(const char *title) {
   open_url(url);
 }
 
+EX void floyd_warshall(vector<vector<char>>& v) {
+  int N = isize(v);
+  for(int k=0; k<N; k++)
+  for(int i=0; i<N; i++)
+  for(int j=0; j<N; j++)
+    v[i][j] = min<int>(v[i][j], v[i][k] + v[k][j]);
+  }
 }
