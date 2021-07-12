@@ -1860,8 +1860,8 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       queuepoly(VAHEAD, cgi.shFamiliarHead, darkena(0xC04000, 0, 0xFF));
       // queuepoly(V, cgi.shCatLegs, darkena(0x902000, 0, 0xFF));
       if(true) {
-        queuepoly(VAHEAD, cgi.shFamiliarEye, darkena(0xFFFF000, 0, 0xFF));
-        queuepoly(VAHEAD * Mirror, cgi.shFamiliarEye, darkena(0xFFFF000, 0, 0xFF));
+        queuepoly(VAHEAD, cgi.shFamiliarEye, darkena(0xFFFF00, 0, 0xFF));
+        queuepoly(VAHEAD * Mirror, cgi.shFamiliarEye, darkena(0xFFFF00, 0, 0xFF));
         }
       return true;
       }
