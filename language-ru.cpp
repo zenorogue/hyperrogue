@@ -6885,8 +6885,6 @@ S("level to save:", "карты для сохранения:")
 S("pics to load:", "картинки для загрузки:")
 S("level to load:", "карты для загрузки:")
 
-#undef Orb
-
 // === 10.3j extra texts ===
 // =========================
  
@@ -7248,3 +7246,83 @@ S("When the 'mark heptagons' option (hotkey '7') is on, moves between unmarked c
 
   "Когда опция 'отметить семиугольники' (клавиша '7') включена, ходы между неотмеченными клетками запрещены.")
 
+// this is the marked line
+
+// [PL:7392] new lands
+
+N("Brown Island", GEN_O, "Коричневый остров", "Коричневые острова", "Коричневый остров", "в Коричневом острове")
+
+N("Bronze Beast", GEN_M, "Бронзовый зверь", "Бронзовые звери", "Бронзового зверя", "Бронзовым зверем")
+S("A large bug native to the Brown Islands. Cannot be killed easily due to their tough armor; still, they can be killed by pushing them into water or from great heights. "
+"Bronze Beasts are very bad at descending slopes -- it takes them extra time to get down, and they are stunned for a longer time if you push them down.",
+
+  "Большие жуки родом из Коричневых островов. Их жёсткий щиток защищает их от обычных ударов, но их можно убивать, толкая их в воду или от большой высоты. "
+  "Бронзовые звери требуют больше время, чтобы спускаться от высоты, и застывают на более долгое время, если Вы толкаете их вниз. ")
+
+N("Acid Gull", GEN_F, "Кислотная чайка", "Кислотные чайки", "Кислотную чайку", "Кислотной чайкой")
+
+S("Where did this strange bird come from?...\n\nAcid Gulls dissolve the land on which they fall when they die. ",
+  "Откуда эта странная птица?...\n\nКислотные чайки растворяют землю, на которую они падают при гибели.")
+
+N("Tiger's Eye", GEN_N, "Тигровый глаз", "Тигровые глаза", "Тигровый глаз", "Тигровым глазом")
+S("A brown gem.", "Коричневый камень.")
+
+Orb("Choice", "Выбора")
+
+N("Free Fall", GEN_O, "Свободное падение", "Свободные падения", "Свободное падение", "в Свободном падении")
+N("Falling Dog", GEN_F, "Падающая собака", "Падающие собаки", "Падающую собаку", "Падающей собакой")
+S("Distant relatives of the Running Dogs.", "Дальние родственники Бегущих собак.")
+N("Western Hawk", GEN_M, "Западный ястреб", "Западные ястреба", "Западного ястреба", "Западным ястребом")
+N("Meteorite", GEN_O, "Метеорит", "Метеориты", "Метеорит", "Метеоритом")
+Orb("Gravity", "Гравитации")
+
+N("Irradiated Field", GEN_N, "Облучённое поле", "Облучённые поля", "Облучённое поле", "в Облучённом поле")
+
+N("Mutant", GEN_M, "Мутант", "Мутанты", "Мутанта", "Мутантом")
+
+S("These guys look a bit strange, but they have no special properties.",
+  "Мутанты выглядят чуть странно, но не имеют особенных свойств.")
+
+N("fire trap", GEN_F, "огненная ловушка", "огненные ловушки", "огненную ловушку", "огненной ловушкой")
+
+N("Explosive Barrel", GEN_F, "нeфтяная бочка", "нефтяные бочки", "нефтяную бочку", "нефтяной бочкой")
+
+Orb("Intensity", "Интенсивности")
+
+// [PL:7559]
+N("Torbernite", GEN_O, "Торбенит", "Торбениты", "Торбенит", "Торбенитом")
+S("Crystals emitting magical radiation.", "Излучающий магическое облучение кристалл.")
+
+// [PL:7773] restructured menus
+S("colors & aura", "цветы и ауры")
+S("colors of some game objects can be edited by clicking them.", "можно изменить цветы нескольских объектов, кликая на них.")
+S("standard grid color", "стандартный цвет сетки")
+S("mouse & touchscreen", "мышь и сенсорный экран")
+S("settings", "настройки")
+S("interface", "интерфейс")
+S("general graphics", "общие графики")
+S("quick options", "быстрые опцы")
+S("models & projections", "модели и проекции")
+S("keyboard & joysticks", "клавиатура и джойстик")
+S("other settings", "другие настройки")
+S("special modes", "специальные режимы")
+S("creative mode", "творческий режим")
+S("multiplayer", "режим нескольких игроков")
+
+// [PL:7811]
+S("Hint: these keys usually work during the game", "Подсказка: можно использовать эти клавиши во время игры")
+
+// [PL:8980]
+S("recently changed settings", "недавно изменённые настройки")
+
+// [PL:9012]
+S("highlight stuff", "подсветить вещи")
+
+// [PL:9382]
+#undef Orb
+
+N("Palace Quest", GEN_O, "Дворцовый квест", "Дворцовые квесты", "Дворцовый квест", "в Дворцовом квесте")
+
+// Note: the translation should be complete until the marked line.
+// The following are missing from the Polish translation:
+S("quick projection", "быстрая проекция")
