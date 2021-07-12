@@ -127,9 +127,11 @@ template<class T> struct walker;
 int gmod(int i, int j);
 
 template<class CRTP, class T>
-class trailing_connection_table {
-
-  CRTP *crtp() { return static_cast<CRTP*>(this); }
+class connection_table_details {
+  CRTP *crtp() {
+    static_assert(std::is_base_of<connection_table_details, CRTP>::value, "");
+    return static_cast<CRTP*>(this);
+    }
   T **move_table() {
     static_assert(alignof(CRTP) >= alignof(T*), "");
     return (T **)(crtp() + 1);
@@ -139,13 +141,6 @@ class trailing_connection_table {
     }
 
 public:
-  static size_t tailored_alloc_size(int degree) {
-    return sizeof(CRTP) + (degree * sizeof(T*)) + degree;
-    }
-
-  trailing_connection_table& c() { return *this; }
-  const trailing_connection_table& c() const { return *this; }
-
   /** \brief for the edge d, set the `spin` and `mirror` attributes */
   void setspin(int d, int spin, bool mirror) { 
     unsigned char& c = spin_table()[d];
@@ -180,6 +175,18 @@ public:
   /* like the other connect, but take the parameters of the other cell from a walker */
   void connect(int d0, walker<T> hs) {
     connect(d0, hs.at, hs.spin, hs.mirrored);
+    }
+  };
+
+template<class CRTP, class T>
+class trailing_connection_table : private connection_table_details<CRTP, T> {
+public:
+  friend class connection_table_details<CRTP, T>;
+
+  connection_table_details<CRTP, T>& c() { return *this; }
+
+  static size_t tailored_alloc_size(int degree) {
+    return sizeof(CRTP) + (degree * sizeof(T*)) + degree;
     }
   };
 
