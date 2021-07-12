@@ -13,6 +13,65 @@
 namespace hr {
 #if MAXMDIM >= 4
 
+void subcellshape::compute_common() {
+  reg3::make_vertices_only(vertices_only, faces);
+
+  faces_local = faces;
+  for(auto& face: faces_local) for(auto& v: face) v = from_cellcenter * v;
+
+  vertices_only_local = vertices_only;
+  for(auto& v: vertices_only_local) v = from_cellcenter * v;
+
+  int N = isize(faces);
+
+  dirdist.resize(N);
+  for(int i=0; i<N; i++) {
+    auto& da = dirdist[i];
+    da.resize(N, false);
+    set<unsigned> cface;
+    for(auto& v: faces[i]) cface.insert(bucketer(v));
+    for(int j=0; j<N; j++) {
+      int mutual = 0;
+      for(auto& w: faces[j]) if(cface.count(bucketer(w))) mutual++;
+      da[j] = i == j ? 0 : mutual == 2 ? 1 : INFD;
+      }
+    }
+  floyd_warshall(dirdist);
+
+  next_dir.resize(N);
+  for(int a=0; a<N; a++) next_dir[a].resize(N);
+  
+  for(int a=0; a<N; a++)
+  for(int b=0; b<N; b++)
+    if(dirdist[a][b] == 1) 
+      for(int c=0; c<N; c++)
+        if(dirdist[a][c] == 1 && dirdist[b][c] == 1) {
+          transmatrix t = build_matrix(tC0(cgi.adjmoves[a]), tC0(cgi.adjmoves[b]), tC0(cgi.adjmoves[c]), C0);
+          if(det(t) > 0) next_dir[a][b] = c;
+          }  
+  }
+
+void subcellshape::compute_hept() {
+  cellcenter = C0;
+  to_cellcenter = Id;
+  from_cellcenter = Id;
+  compute_common();
+  }
+
+void subcellshape::compute_sub() {
+  hyperpoint gres = Hypc;
+  for(auto& face: faces) {
+    hyperpoint res = Hypc;
+    for(auto& vertex: face) 
+      res += vertex;
+    face_centers.push_back(normalize(res));
+    gres += res;
+    }
+  cellcenter = normalize(gres);
+  to_cellcenter = rgpushxto0(cellcenter);
+  from_cellcenter = gpushxto0(cellcenter);
+  }
+
 /** \brief regular three-dimensional tessellations */
 EX namespace reg3 {
 
@@ -47,14 +106,15 @@ EX namespace reg3 {
 
     if(cgflags & qULTRA) {
     
-      for(auto& v: cgi.vertices_only) {
+      for(auto& v: cgi.heptshape->vertices_only) {
       
         hyperpoint nei;
+        auto& faces = cgi.heptshape->faces;
       
-        for(int i=0; i<isize(cgi.cellshape); i++)
-        for(int j=0; j<isize(cgi.cellshape[i]); j++)
-          if(sqhypot_d(WDIM, cgi.cellshape[i][j]-v) < 1e-6)
-            nei = cgi.cellshape[i][j?j-1:j+1]; 
+        for(int i=0; i<isize(faces); i++)
+        for(int j=0; j<isize(faces[i]); j++)
+          if(sqhypot_d(WDIM, faces[i][j]-v) < 1e-6)
+            nei = faces[i][j?j-1:j+1]; 
             
         transmatrix T = spintox(v);
         hyperpoint a = T * v;
@@ -106,10 +166,6 @@ EX namespace reg3 {
       }
     }
 
-  EX void make_vertices_only() {
-    make_vertices_only(cgi.vertices_only, cgi.cellshape);
-    }
-
   EX void generate() {
 
     if(fake::in()) {
@@ -117,12 +173,14 @@ EX namespace reg3 {
       return;
       }
   
+    auto& hsh = cgi.heptshape;
+    hsh = unique_ptr<subcellshape>(new subcellshape);
+    
     int& loop = cgi.loop;
     int& face = cgi.face;
     auto& spins = cgi.spins;
-    auto& cellshape = cgi.cellshape;
+    auto& cellshape = hsh->faces;
     auto& adjcheck = cgi.adjcheck;
-    auto& dirdist = cgi.dirdist;
   
     int& mid = cgi.schmid;
     mid = 3;
@@ -255,21 +313,6 @@ EX namespace reg3 {
 
     adjcheck = hdist(tC0(cgi.adjmoves[0]), tC0(cgi.adjmoves[1])) * 1.0001;
 
-    int numedges = 0;
-    dirdist.resize(S7);
-    for(int a=0; a<S7; a++) {
-      dirdist[a].resize(S7);
-      for(int b=0; b<S7; b++) {
-        dirdist[a][b] =
-          a == b ? 0 :
-          hdist(tC0(cgi.adjmoves[a]), tC0(cgi.adjmoves[b])) < adjcheck ? 1 :
-          INFD;
-        if(dirdist[a][b] == 1) numedges++;
-        }
-      }
-    floyd_warshall(dirdist);
-    DEBB(DF_GEOM, ("numedges = ", numedges));
-    
     if(loop == 4) cgi.strafedist = adjcheck;
     else cgi.strafedist = hdist(cgi.adjmoves[0] * C0, cgi.adjmoves[1] * C0);
     
@@ -280,17 +323,8 @@ EX namespace reg3 {
       for(auto& vv: cellshape) for(auto& v: vv) v = T * v;
       }
 
-    make_vertices_only();
+    hsh->compute_hept();
     compute_ultra();
-    
-    for(int a=0; a<S7; a++)
-    for(int b=0; b<S7; b++)
-      if(cgi.dirdist[a][b] == 1) 
-        for(int c=0; c<S7; c++)
-          if(cgi.dirdist[a][c] == 1 && cgi.dirdist[b][c] == 1) {
-            transmatrix t = build_matrix(tC0(cgi.adjmoves[a]), tC0(cgi.adjmoves[b]), tC0(cgi.adjmoves[c]), C0);
-            if(det(t) > 1e-3) cgi.next_dir[a][b] = c;
-            }  
     
     generate_subcells();
     }
@@ -299,14 +333,14 @@ EX namespace reg3 {
     if(S7 != 6) throw hr_exception("generate_plain_subcubes but no cubes");
     auto& ssh = cgi.subshapes;
     const int sub = subcube_count;
-    auto vx = abs(cgi.cellshape[0][0][0]);
-    auto vz = abs(cgi.cellshape[0][0][3]);
+    auto vx = abs(cgi.heptshape->faces[0][0][0]);
+    auto vz = abs(cgi.heptshape->faces[0][0][3]);
     for(int x=1-sub; x<sub; x+=2)
     for(int y=1-sub; y<sub; y+=2)
     for(int z=1-sub; z<sub; z+=2) {
       ssh.emplace_back();
       auto &ss = ssh.back();
-      ss.faces = cgi.cellshape;
+      ss.faces = cgi.heptshape->faces;
       for(auto& face: ss.faces) for(auto& v: face) {
         v[0] += vx * x;
         v[1] += vx * y;
@@ -318,7 +352,7 @@ EX namespace reg3 {
   
   EX void generate_coxeter(flagtype f) {
     auto& ssh = cgi.subshapes;
-    for(auto& fac: cgi.cellshape) {
+    for(auto& fac: cgi.heptshape->faces) {
       hyperpoint facectr = Hypc;
       vector<hyperpoint> ring;
       hyperpoint last = fac.back();
@@ -384,8 +418,8 @@ EX namespace reg3 {
     if(S7 != 6) throw hr_exception("generate_plain_subcubes but no cubes");
     const int sub = subcube_count;
     if(1) {
-      auto vx = abs(cgi.cellshape[0][0][0]);
-      auto vz = abs(cgi.cellshape[0][0][3]);
+      auto vx = abs(cgi.heptshape->faces[0][0][0]);
+      auto vz = abs(cgi.heptshape->faces[0][0][3]);
       auto step = hdist0(tC0(cgi.adjmoves[0]));
       array<int, 3> co;
       int s = bch ? 1 : 2;
@@ -596,7 +630,7 @@ EX namespace reg3 {
     
       case eVariation::pure: {
         cgi.subshapes.emplace_back();
-        cgi.subshapes[0].faces = cgi.cellshape;
+        cgi.subshapes[0].faces = cgi.heptshape->faces;
         break;
         }
     
@@ -604,39 +638,7 @@ EX namespace reg3 {
         throw hr_exception("unknown variation in generate_subcells");
       }
 
-    for(auto& ss: cgi.subshapes) {
-      make_vertices_only(ss.vertices_only, ss.faces);
-      hyperpoint gres = Hypc;
-      for(auto& face: ss.faces) {
-        hyperpoint res = Hypc;
-        for(auto& vertex: face) 
-          res += vertex;
-        ss.face_centers.push_back(normalize(res));
-        gres += res;
-        }
-      ss.cellcenter = normalize(gres);
-      ss.to_cellcenter = rgpushxto0(ss.cellcenter);
-      ss.from_cellcenter = gpushxto0(ss.cellcenter);
-      ss.faces_local = ss.faces;
-      for(auto& face: ss.faces_local) for(auto& v: face) v = ss.from_cellcenter * v;
-      ss.vertices_only_local = ss.vertices_only;
-      for(auto& v: ss.vertices_only_local) v = ss.from_cellcenter * v;
-      
-      int N = isize(ss.faces);
-      ss.dirdist.resize(N);
-      for(int i=0; i<N; i++) {
-        auto& da = ss.dirdist[i];
-        da.resize(N, false);
-        set<unsigned> cface;
-        for(auto& v: ss.faces[i]) cface.insert(bucketer(v));
-        for(int j=0; j<N; j++) {
-          int mutual = 0;
-          for(auto& w: ss.faces[j]) if(cface.count(bucketer(w))) mutual++;
-          da[j] = i == j ? 0 : mutual == 2 ? 1 : INFD;
-          }
-        }
-      floyd_warshall(ss.dirdist);
-      }
+    for(auto& ss: cgi.subshapes) ss.compute_sub();
 
     println(hlog, "subcells generated = ", isize(cgi.subshapes));
     }
@@ -680,10 +682,10 @@ EX namespace reg3 {
     void initialize(int cell_count);
     vector<cell*>& allcells() override { return acells; }
 
-    vector<hyperpoint> get_vertices(cell* c) override { 
-      if(PURE) return cgi.vertices_only; 
+    subcellshape& get_cellshape(cell *c) override {
+      if(PURE) return *cgi.heptshape ;
       int id = local_id.at(c).second;
-      return cgi.subshapes[id].vertices_only_local;
+      return cgi.subshapes[id];
       }
 
     transmatrix master_relative(cell *c, bool get_inverse) override {
@@ -698,11 +700,6 @@ EX namespace reg3 {
     int shvid(cell *c) override { return local_id.at(c).second; }
     
     transmatrix ray_iadj(cell *c, int i) override;
-
-    const vector<char>& dirdist(cell *c, int i) override { 
-      int id = local_id.at(c).second;
-      return cgi.subshapes[id].dirdist[i];
-      }
 
     cellwalker strafe(cellwalker cw, int j) override {
       int id = local_id.at(cw.at).first;
@@ -760,7 +757,7 @@ EX namespace reg3 {
       va.emplace_back(vertex_adjacency_info{a, Id, {}});
       
       set<unsigned> buckets;
-      for(auto& v: cgi.vertices_only) buckets.insert(bucketer(v));
+      for(auto& v: cgi.heptshape->vertices_only) buckets.insert(bucketer(v));
 
       if(cgflags & qIDEAL) {
         for(int d=0; d<S7; d++) {
@@ -777,7 +774,7 @@ EX namespace reg3 {
           if(found) continue;
 
           bool found_va = false;
-          for(auto& w: cgi.vertices_only)
+          for(auto& w: cgi.heptshape->vertices_only)
             if(buckets.count(bucketer(T*w)))
               found_va = true;
           if(!found_va) continue;
@@ -1031,8 +1028,9 @@ EX namespace reg3 {
     void make_plane(cellwalker cw) {
       if(plane.count(cw)) return;
       plane.insert(cw);
-      for(int i=0; i<S7; i++)
-        if(cgi.dirdist[i][cw.spin] == 1)
+      auto& ss = get_cellshape(cw.at);
+      for(int i=0; i<cw.at->type; i++)
+        if(ss.dirdist[i][cw.spin] == 1)
           make_plane(strafe(cw, i));
       }
     
@@ -1131,19 +1129,12 @@ EX namespace reg3 {
   
     void build_reps() {
       // start_game();
-      for(int a=0; a<12; a++)
-      for(int b=0; b<12; b++)
-        if(cgi.dirdist[a][b] == 1) 
-          for(int c=0; c<12; c++)
-            if(cgi.dirdist[a][c] == 1 && cgi.dirdist[b][c] == 1) {
-              transmatrix t = build_matrix(tC0(cgi.adjmoves[a]), tC0(cgi.adjmoves[b]), tC0(cgi.adjmoves[c]), C0);
-              if(det(t) > 0) cgi.next_dir[a][b] = c;
-              }  
+      auto& hsh = cgi.heptshape;
       
       set<coord> boundaries;
       
       for(int a=0; a<12; a++)
-      for(int b=0; b<12; b++) if(cgi.dirdist[a][b] == 1) {
+      for(int b=0; b<12; b++) if(hsh->dirdist[a][b] == 1) {
         coord res = crystal::c0;
         int sa = a, sb = b;
         do {
@@ -1152,7 +1143,7 @@ EX namespace reg3 {
           sa = flip(sa);
           sb = flip(sb);
           swap(sa, sb);
-          sb = cgi.next_dir[sa][sb];
+          sb = hsh->next_dir[sa][sb];
           // sb = next_dirsa][sb];
           }
         while(a != sa || b != sb);
@@ -1518,12 +1509,8 @@ EX namespace reg3 {
       return T;
       }
     
-    vector<hyperpoint> get_vertices(cell* c) override {
-      return cgi.vertices_only;
-      }
-
-    const vector<char>& dirdist(cell *c, int i) override { 
-      return cgi.dirdist[i];
+    subcellshape& get_cellshape(cell *c) override {
+      return *cgi.heptshape;
       }
 
     cellwalker strafe(cellwalker cw, int j) override {
@@ -1964,10 +1951,10 @@ EX namespace reg3 {
       return quotient_map->tmatrices_cell[aid][d];
       }     
     
-    vector<hyperpoint> get_vertices(cell* c) override {
-      if(PURE) return cgi.vertices_only;
+    subcellshape& get_cellshape(cell *c) override {
+      if(PURE) return *cgi.heptshape;
       int aid = cell_id.at(c);
-      return quotient_map->get_vertices(quotient_map->acells[aid]);
+      return quotient_map->get_cellshape(quotient_map->acells[aid]);
       }
     
     map<cell*, int> cell_id;
@@ -2004,12 +1991,6 @@ EX namespace reg3 {
       if(!cell_id.count(c)) return quotient_map->ray_iadj(c, i); /* necessary because ray samples are from quotient_map */
       int aid = cell_id.at(c);
       return quotient_map->ray_iadj(quotient_map->acells[aid], i);
-      }
-
-    const vector<char>& dirdist(cell *c, int i) override { 
-      if(PURE) return cgi.dirdist[i];
-      int aid = cell_id.at(c);
-      return quotient_map->dirdist(quotient_map->acells[aid], i);
       }
 
     cellwalker strafe(cellwalker cw, int j) override {
@@ -2398,7 +2379,8 @@ EX void construct_relations() {
   formulas.push_back("");
 
   all.push_back(Id);
-  hyperpoint v = cgi.cellshape[0][0];
+  auto& faces = cgi.heptshape->faces;
+  hyperpoint v = faces[0][0];
   auto add = [&] (transmatrix T) {
     for(int i=0; i<isize(all); i++) if(eqmatrix(all[i], T)) return i;
     int S = isize(all);
@@ -2406,14 +2388,14 @@ EX void construct_relations() {
     return S;
     };
   
-  println(hlog, cgi.cellshape);
+  println(hlog, faces);
 
-  println(hlog, "cellshape = ", isize(cgi.cellshape));
+  println(hlog, "cellshape = ", isize(faces));
   bool ok = true;
   int last_i = -1;
-  for(auto& v: cgi.cellshape) for(hyperpoint h: v) {
+  for(auto& v: faces) for(hyperpoint h: v) {
     int i = 0, j = 0;
-    for(auto& uv: cgi.cellshape) for(hyperpoint u: uv) {
+    for(auto& uv: faces) for(hyperpoint u: uv) {
       if(hdist(h, cgi.full_X*u) < 5e-2) i++;
       if(hdist(h, cgi.full_R*u) < 5e-2) j++;
       }
@@ -2427,7 +2409,7 @@ EX void construct_relations() {
   
   auto work = [&] (transmatrix T, int p, char c) {
     if(hdist0(tC0(T)) > 5) return;
-    for(auto& hv: cgi.cellshape) for(hyperpoint h: hv) if(hdist(T * h, v) < 1e-4) goto ok;
+    for(auto& hv: faces) for(hyperpoint h: hv) if(hdist(T * h, v) < 1e-4) goto ok;
     return;
     ok:
     int id = add(T);

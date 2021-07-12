@@ -332,11 +332,11 @@ EX vector<vector<hyperpoint>> befake(const vector<vector<hyperpoint>>& v) {
 EX ld compute_around(bool setup) {
   auto &ucgi = *underlying_cgip;
   
-  auto fcs = befake(ucgi.cellshape);
+  auto fcs = befake(ucgi.heptshape->faces);
   
   if(setup) {
-    cgi.cellshape = fcs;
-    cgi.vertices_only = befake(ucgi.vertices_only);
+    cgi.heptshape->faces = fcs;
+    cgi.heptshape->compute_hept();
     }
   
   hyperpoint h = Hypc;
@@ -394,11 +394,10 @@ EX void generate() {
   cgi.face = ucgi.face;
   cgi.schmid = ucgi.schmid;
 
-  for(int a=0; a<16; a++)
-  for(int b=0; b<16; b++) {
-    cgi.dirs_adjacent[a][b] = ucgi.dirs_adjacent[a][b];
-    cgi.next_dir[a][b] = ucgi.next_dir[a][b];
-    }
+  auto& hsh = cgi.heptshape;
+  hsh = unique_ptr<subcellshape>(new subcellshape);
+  
+  *hsh = *ucgi.heptshape;
 
   for(int b=0; b<12; b++)
     cgi.spins[b] = ucgi.spins[b];
@@ -487,7 +486,7 @@ EX void compute_scale() {
     }
   else if(euclid) scale = 1;
   else if(have_ideal) {
-    hyperpoint h0 = underlying_cgip->cellshape[0][0];
+    hyperpoint h0 = underlying_cgip->heptshape->faces[0][0];
     auto s = kleinize(h0);
     ld d = hypot_d(LDIM, s);
     scale = 1/d;
@@ -517,7 +516,7 @@ EX void compute_scale() {
     
     /* ultra a bit earlier */    
     if(underlying == gRhombic3 || underlying == gBitrunc3) {
-      auto fcs = befake(underlying_cgip->cellshape[0][0]);
+      auto fcs = befake(underlying_cgip->heptshape->faces[0][0]);
       set_flag(ginf[gFake].flags, qULTRA, material(fcs) < 0);
       }
     }

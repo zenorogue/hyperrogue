@@ -701,7 +701,7 @@ void enable_raycaster() {
             "}\n";
 
       if(hyperbolic && reg3::ultra_mirror_in()) {
-        fmain += "for(int i="+its(S7*2)+"; i<"+its(S7*2+isize(cgi.vertices_only))+"; i++) {\n";
+        fmain += "for(int i="+its(S7*2)+"; i<"+its(S7*2+isize(cgi.heptshape->vertices_only))+"; i++) {\n";
         fmain += "mat4 uMi = " + getM("i") + ";";
         fmain +=
           "    mediump float v = ((position - uMi * position)[3] / (uMi * tangent - tangent)[3]);\n"

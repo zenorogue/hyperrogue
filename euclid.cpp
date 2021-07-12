@@ -292,28 +292,8 @@ EX namespace euc {
       return eumove(d);
       }
     
-    vector<hyperpoint> get_vertices(cell* c) override {
-      vector<hyperpoint> res;
-      if(S7 < 14)
-        for(ld a: {-.5,.5}) for(ld b: {-.5,.5}) for(ld c: {-.5, .5}) res.push_back(hpxy3(a,b,c));
-      if(S7 == 12) {
-        res.push_back(hpxy3(1,0,0));
-        res.push_back(hpxy3(-1,0,0));
-        res.push_back(hpxy3(0,1,0));
-        res.push_back(hpxy3(0,-1,0));
-        res.push_back(hpxy3(0,0,1));
-        res.push_back(hpxy3(0,0,-1));
-        }
-      if(S7 == 14) {
-        for(ld a: {-1.,-.5,0.,.5,1.})
-        for(ld b: {-1.,-.5,0.,.5,1.})
-        for(ld c: {-1.,-.5,0.,.5,1.})
-          if(a == 0 || b == 0 || c == 0)
-          if(a == .5 || a == -.5 || b == .5 || b == -.5 || c == .5 || c == -.5)
-          if(a == 1 || a == -1 || b == 1 || b == -1 || c == 1 || c == -1)
-            res.push_back(hpxy3(a,b,c));
-        }
-      return res;
+    subcellshape& get_cellshape(cell* c) override {
+      return *cgi.heptshape;
       }
     };
   
@@ -1300,7 +1280,10 @@ EX void generate() {
 
   auto v = euc::get_shifttable();
   
-  auto& cs = cgi.cellshape;
+  auto& hsh = cgi.heptshape;
+  hsh = unique_ptr<subcellshape>(new subcellshape);
+
+  auto& cs = hsh->faces;
 
   cgi.loop = 4;
   cgi.schmid = 3;
@@ -1365,9 +1348,8 @@ EX void generate() {
       }
     }
   
-  reg3::make_vertices_only();
+  hsh->compute_hept();
   #endif
-
   }
 
 /** @brief returns true if the current geometry is based on this module 

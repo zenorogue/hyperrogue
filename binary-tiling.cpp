@@ -472,8 +472,12 @@ EX namespace bt {
       return gm * where;
       }
 
-    vector<hyperpoint> get_vertices(cell* c) override {
-      vector<hyperpoint> res;
+    subcellshape& get_cellshape(cell *c) override {
+      if(cgi.heptshape) 
+        return *cgi.heptshape;
+
+      cgi.heptshape = (std::unique_ptr<subcellshape>) (new subcellshape);
+      vector<hyperpoint>& res = cgi.heptshape->vertices_only;
       ld yy = log(2) / 2;
       auto add = [&] (hyperpoint h) { 
         res.push_back(bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]));
@@ -512,7 +516,8 @@ EX namespace bt {
           }
         default: ;
         }
-      return res;
+      cgi.heptshape->vertices_only_local = res;
+      return *cgi.heptshape;
       }
     
     ld spin_angle(cell *c, int d) override {

@@ -864,12 +864,14 @@ void celldrawer::draw_grid() {
       if(!bt::in() && c->move(t) < c) continue;
       dynamicval<color_t> g(poly_outline, gridcolor(c, c->move(t)));          
       if(fat_edges && reg3::in()) {
-        for(int i=0; i<S7; i++) if(c < c->move(i) || fake::split()) {
-          for(int j=0; j<cgi.face; j++) {
-            int jj = j == cgi.face-1 ? 0 : j+1;
-            int jjj = jj == cgi.face-1 ? 0 : jj+1;
-            hyperpoint a = cgi.cellshape[i][j];
-            hyperpoint b = cgi.cellshape[i][jj];
+        auto& ss = currentmap->get_cellshape(c);
+        for(int i=0; i<c->type; i++) if(c < c->move(i) || fake::split()) {
+          int face = isize(ss.faces[i]);
+          for(int j=0; j<face; j++) {
+            int jj = j == face-1 ? 0 : j+1;
+            int jjj = jj == face-1 ? 0 : jj+1;
+            hyperpoint a = ss.faces[i][j];
+            hyperpoint b = ss.faces[i][jj];
             if(cgflags & qIDEAL) {
               ld mm = cgi.ultra_mirror_part;
               if((cgflags & qULTRA) && !reg3::ultra_mirror_in())
@@ -879,9 +881,9 @@ void celldrawer::draw_grid() {
             gridline(V, a, b, gridcolor(c, c->move(t)), prec);            
 
             if(reg3::ultra_mirror_in()) {
-              hyperpoint a = cgi.cellshape[i][j];
-              hyperpoint b = cgi.cellshape[i][jj];
-              hyperpoint d = cgi.cellshape[i][jjj];
+              hyperpoint a = ss.faces[i][j];
+              hyperpoint b = ss.faces[i][jj];
+              hyperpoint d = ss.faces[i][jjj];
               auto& mm = cgi.ultra_mirror_part;
               tie(a, d) = make_pair(normalize(lerp(a, b, mm)), normalize(lerp(d, b, mm)));
               gridline(V, a, d, stdgridcolor, prec);

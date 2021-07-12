@@ -98,7 +98,7 @@ struct gi_extension {
   virtual ~gi_extension() {}
   };
 
-/** for subdivided 3D cells */
+/** both for 'heptagon' 3D cells and subdivided 3D cells */
 struct subcellshape {
   vector<vector<hyperpoint>> faces;
   vector<vector<hyperpoint>> faces_local;
@@ -109,6 +109,17 @@ struct subcellshape {
   hyperpoint cellcenter;
   transmatrix to_cellcenter;
   transmatrix from_cellcenter;
+  /** \brief for adjacent directions a,b, next_dir[a][b] is the next direction adjacent to a, in (counter?)clockwise order from b */
+  vector<vector<char>> next_dir;  
+
+  /** compute all the properties based on `faces`, for the main heptagon cellshape */
+  void compute_hept();
+
+  /** compute all the properties based on `faces`, for subcells */
+  void compute_sub();
+
+  /** common part of compute_hept and compute_sub */
+  void compute_common();
   };
 
 /** basic geometry parameters */
@@ -143,23 +154,17 @@ struct geometry_information {
 
   int loop, face, schmid;
 
-  vector<vector<hyperpoint>> cellshape;
-  vector<hyperpoint> vertices_only;
-  
   transmatrix spins[32], adjmoves[32];
   
+  unique_ptr<struct subcellshape> heptshape;  
   vector<struct subcellshape> subshapes;
 
   ld adjcheck;
   ld strafedist;
-  vector<vector<char>> dirdist;
 
   ld ultra_mirror_dist, ultra_material_part, ultra_mirror_part;
   
   vector<transmatrix> ultra_mirrors;  
-
-  /** \brief for adjacent directions a,b, next_dir[a][b] is the next direction adjacent to a, in (counter?)clockwise order from b */
-  int next_dir[32][32];
 
   vector<pair<string, string> > rels;
   int xp_order, r_order, rx_order;

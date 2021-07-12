@@ -45,7 +45,6 @@ struct hrmap {
     }
   virtual void draw_all();
   virtual void draw_at(cell *at, const shiftmatrix& where);
-  virtual vector<hyperpoint> get_vertices(cell*);
 
   virtual void virtualRebase(heptagon*& base, transmatrix& at) {
     printf("virtualRebase called unexpectedly\n"); 
@@ -76,13 +75,13 @@ struct hrmap {
     return currentmap->iadj(c, i);
     }
 
-  /** \brief in 3D honeycombs, returns a vector<bool> v, where v[j] iff faces i and j are adjacent */
-  virtual const vector<char>& dirdist(cell *c, int i) { throw hr_exception("dirdist called unexpectedly"); }
+  virtual subcellshape& get_cellshape(cell *c) { throw hr_exception("get_cellshape called unexpectedly"); }
 
   /** \brief in 3D honeycombs, returns a cellwalker res at cw->move(j) such that the face pointed at by cw and res share an edge */
   virtual cellwalker strafe(cellwalker cw, int j) { throw hr_exception("strafe called unexpectedly"); }
 
-  const vector<char>& dirdist(cellwalker cw) { return dirdist(cw.at, cw.spin); }
+  /** \brief in 3D honeycombs, returns a vector<bool> v, where v[j] iff faces i and j are adjacent */
+  const vector<char>& dirdist(cellwalker cw) { return get_cellshape(cw.at).dirdist[cw.spin]; }
   };
 
 /** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient  
@@ -1287,7 +1286,8 @@ EX vector<cell*> adj_minefield_cells(cell *c) {
     }
   else if(adj_memo.count(c)) return adj_memo[c];
   else {
-    const vector<hyperpoint> vertices = currentmap->get_vertices(c);
+    auto& ss = currentmap->get_cellshape(c);
+    const vector<hyperpoint>& vertices = ss.vertices_only_local;
     manual_celllister cl;
     cl.add(c);
     for(int i=0; i<isize(cl.lst); i++) {
@@ -1295,7 +1295,9 @@ EX vector<cell*> adj_minefield_cells(cell *c) {
       bool shares = false;
       if(c != c1) {
         transmatrix T = currentmap->relative_matrix(c1->master, c->master, C0);
-        for(hyperpoint h: vertices) for(hyperpoint h2: vertices)
+        auto& ss1 = currentmap->get_cellshape(c1);
+        auto& vertices1 = ss1.vertices_only_local;
+        for(hyperpoint h: vertices) for(hyperpoint h2: vertices1)
           if(hdist(h, T * h2) < 1e-6) shares = true;
         if(shares) res.push_back(c1);
         }

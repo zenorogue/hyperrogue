@@ -734,12 +734,6 @@ EX hyperpoint get_warp_corner(cell *c, int cid) {
   return ddspin(c,cid,M_PI/S7) * xpush0(cgi.tessf/2);
   }
 
-vector<hyperpoint> hrmap::get_vertices(cell* c) {
-  vector<hyperpoint> res;
-  for(int i=0; i<c->type; i++) res.push_back(get_corner_position(c, i, 3));
-  return res;
-  }
-
 EX map<cell*, map<cell*, vector<transmatrix>>> brm_structure;
 
 EX void generate_brm(cell *c1) {

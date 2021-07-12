@@ -647,7 +647,7 @@ struct hrmap_crystal : hrmap_standard {
       if(go > 1e-2) continue;
 
       for(int s=0; s<S7; s++) 
-        if(cgi.dirs_adjacent[d][s])
+        if(cgi.heptshape->dirdist[d][s] == 1)
           for(int t=0; t<S7; t++) 
             if(st1[t] == st[s]) {
               if(hdist(U * tC0(cgi.adjmoves[t]), tC0(cgi.adjmoves[s])) > gdist + .1)

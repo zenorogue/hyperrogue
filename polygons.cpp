@@ -1047,8 +1047,9 @@ void geometry_information::create_wall3d() {
     }
 
   if(euc::in() || reg3::in() || asonov::in()) {
-    for(int w=0; w<isize(cgi.cellshape); w++)
-      make_wall(w, cgi.cellshape[w]);
+    auto& faces = cgi.heptshape->faces;
+    for(int w=0; w<isize(faces); w++)
+      make_wall(w, faces[w]);
     }
 
   if(geometry == gSol) {
