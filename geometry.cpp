@@ -117,7 +117,9 @@ struct subcellshape {
   transmatrix to_cellcenter;
   transmatrix from_cellcenter;
   /** \brief for adjacent directions a,b, next_dir[a][b] is the next direction adjacent to a, in (counter?)clockwise order from b */
-  vector<vector<char>> next_dir;  
+  vector<vector<char>> next_dir;
+  /** useful in product geometries */
+  vector<hyperpoint> walltester;
 
   /** compute all the properties based on `faces`, for the main heptagon cellshape */
   void compute_hept();

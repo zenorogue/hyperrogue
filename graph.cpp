@@ -3963,6 +3963,57 @@ EX void gridline(const shiftmatrix& V, const hyperpoint h1, const hyperpoint h2,
   gridline(V, h1, V, h2, col, prec);
   }
 
+EX subcellshape& generate_subcellshape_if_needed(cell *c, int id) {
+  if(isize(cgi.subshapes) <= id) cgi.subshapes.resize(id+1);
+  
+  auto& ss = cgi.subshapes[id];
+  if(!ss.faces.empty()) return ss;
+  
+  cell *c1 = hybri ? hybrid::get_where(c).first : c;
+  
+  if(prod || WDIM == 2) for(int i=0; i<c1->type; i++) {
+    hyperpoint w;
+    auto f = [&] { 
+      /* mirror image of C0 in the axis h1-h2 */
+      hyperpoint h1 = get_corner_position(c1, i);
+      hyperpoint h2 = get_corner_position(c1, i+1);
+      transmatrix T = gpushxto0(h1);
+      T = spintox(T * h2) * T;
+      w = T * C0;
+      w[1] = -w[1];
+      w = iso_inverse(T) * w;
+      };
+    if(prod) PIU(f());
+    else f();
+    ss.walltester.push_back(w);
+    }
+
+  for(int i=0; i<c1->type; i++)
+    ss.faces.push_back({hybrid::get_corner(c1, i, 0, -1), hybrid::get_corner(c1, i, 0, +1), hybrid::get_corner(c1, i, 1, +1), hybrid::get_corner(c1, i, 1, -1)});
+
+  for(int a: {0,1}) {
+    vector<hyperpoint> l;
+    int z = a ? 1 : -1;
+    hyperpoint ctr = zpush0(z * cgi.plevel/2);
+    for(int i=0; i<c1->type; i++)
+      if(prod || WDIM == 2)
+        l.push_back(hybrid::get_corner(c1, i, 0, z));
+      else {
+        l.push_back(ctr);
+        l.push_back(hybrid::get_corner(c1, i, 0, z));
+        l.push_back(hybrid::get_corner(c1, i+1, 1, z));
+        l.push_back(ctr);
+        l.push_back(hybrid::get_corner(c1, i, 1, z));
+        l.push_back(hybrid::get_corner(c1, i, 0, z));
+        }
+    if(a == 0) std::reverse(l.begin()+1, l.end());
+    ss.faces.push_back(l);
+    }
+  
+  ss.compute_hept();
+  return ss;
+  }
+
 int hrmap::wall_offset(cell *c) {
   int id = currentmap->full_shvid(c);
 
@@ -3973,51 +4024,18 @@ int hrmap::wall_offset(cell *c) {
   int &wo = wop.first;
   if(!wop.second) wop.second = c;
   if(wo == -1) {
-    cell *c1 = hybri ? hybrid::get_where(c).first : c;
+    auto& ss = generate_subcellshape_if_needed(c, id);
     wo = isize(cgi.shWall3D);
-    int won = wo + c->type + (WDIM == 2 ? 2 : 0);
+
     if(!cgi.wallstart.empty()) cgi.wallstart.pop_back();
-    cgi.reserve_wall3d(won);
+    cgi.reserve_wall3d(wo + isize(ss.faces));
+
     
-    if(prod || WDIM == 2) for(int i=0; i<c1->type; i++) {
-      hyperpoint w;
-      auto f = [&] { 
-        /* mirror image of C0 in the axis h1-h2 */
-        hyperpoint h1 = get_corner_position(c1, i);
-        hyperpoint h2 = get_corner_position(c1, i+1);
-        transmatrix T = gpushxto0(h1);
-        T = spintox(T * h2) * T;
-        w = T * C0;
-        w[1] = -w[1];
-        w = iso_inverse(T) * w;
-        };
-      if(prod) PIU(f());
-      else f();
-      cgi.walltester[wo + i] = w;
-      } 
-
-    for(int i=0; i<c1->type; i++)
-     cgi.make_wall(wo + i, {hybrid::get_corner(c1, i, 0, -1), hybrid::get_corner(c1, i, 0, +1), hybrid::get_corner(c1, i, 1, +1), hybrid::get_corner(c1, i, 1, -1)});
-
-    for(int a: {0,1}) {
-      vector<hyperpoint> l;
-      int z = a ? 1 : -1;
-      hyperpoint ctr = zpush0(z * cgi.plevel/2);
-      for(int i=0; i<c1->type; i++)
-        if(prod || WDIM == 2)
-          l.push_back(hybrid::get_corner(c1, i, 0, z));
-        else {
-          l.push_back(ctr);
-          l.push_back(hybrid::get_corner(c1, i, 0, z));
-          l.push_back(hybrid::get_corner(c1, i+1, 1, z));
-          l.push_back(ctr);
-          l.push_back(hybrid::get_corner(c1, i, 1, z));
-          l.push_back(hybrid::get_corner(c1, i, 0, z));
-          }
-      if(a == 0) std::reverse(l.begin()+1, l.end());
-      cgi.make_wall(won-2+a, l);
+    for(int i=0; i<isize(ss.faces); i++) {
+      cgi.make_wall(wo + i, ss.faces[i]);
+      cgi.walltester[wo + i] = ss.walltester[i];
       }
-
+    
     cgi.wallstart.push_back(isize(cgi.raywall));
     cgi.compute_cornerbonus();
     cgi.extra_vertices();

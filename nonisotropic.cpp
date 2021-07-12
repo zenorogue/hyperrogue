@@ -1306,6 +1306,11 @@ EX namespace hybrid {
   
     virtual transmatrix spin_to(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return in_underlying([&] { return currentmap->spin_to(c, d, bonus); }); }
     virtual transmatrix spin_from(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return in_underlying([&] { return currentmap->spin_from(c, d, bonus); }); }
+
+    subcellshape& get_cellshape(cell *c) override {      
+      int id = full_shvid(c);
+      return generate_subcellshape_if_needed(c, id);      
+      }
     };
   
   hrmap_hybrid* hmap() { return (hrmap_hybrid*) currentmap; }
