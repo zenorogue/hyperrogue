@@ -178,23 +178,26 @@ template<class T> struct connection_table {
  */
 
 template<class T> T* tailored_alloc(int degree) {
-  T* result;
-#ifndef NO_TAILORED_ALLOC
-  int b = offsetof(T, c) + offsetof(connection_table<T>, move_table) + sizeof(T*) * degree + degree;
-  result = (T*) new char[b];
-  new (result) T();
+#ifdef NO_TAILORED_ALLOC
+  T* result = new T;
 #else
-  result = new T;
+  size_t num_bytes = offsetof(T, c.move_table[0]) + (degree * sizeof(c.move_table[0])) + degree;
+  T* result = ::new (::operator new(num_bytes)) T;
+  static_assert(std::is_trivially_default_constructible<decltype(result->c.move_table)>::value, "");
 #endif
   result->type = degree;
-  for(int i=0; i<degree; i++) result->c.move_table[i] = NULL;
+  for(int i=0; i<degree; i++) result->c.move_table[i] = nullptr;
   return result;
   }
 
 /** \brief Counterpart to hr::tailored_alloc(). */
 template<class T> void tailored_delete(T* x) {
+#ifdef NO_TAILORED_ALLOC
+  delete x;
+#else
   x->~T();  
-  delete[] ((char*) (x));
+  ::operator delete((void*)x);
+#endif
   }
 
 static const struct wstep_t { wstep_t() {} } wstep;
