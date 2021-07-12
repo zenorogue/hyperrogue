@@ -922,6 +922,8 @@ void geometry_information::create_wall3d() {
     }
 
   else {
+    walloffsets.clear();
+    walloffsets.emplace_back(0, nullptr);
     auto& faces = cgi.heptshape->faces;
     auto& we = cgi.heptshape->weights;
     if(we.empty()) {
