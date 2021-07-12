@@ -331,7 +331,7 @@ void find_track(cell *start, int sign, int len) {
   }
 
 EX void block_cells(vector<cell*> to_block, function<bool(cell*)> blockbound) {
-  hrandom_shuffle(&to_block[0], isize(to_block));
+  hrandom_shuffle(to_block);
   
   for(cell *c: to_block) switch(specialland) {
     case laIce:
