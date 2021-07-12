@@ -3070,7 +3070,7 @@ S("Someone has put air fans in these plains, causing strong winds everywhere. "
   "Cells which are blocked by walls, or at distance at most 2 from an Air Elemental, "
   "do not count for this.\n\n"
   "It is illegal to move in a direction which is closer to incoming wind than to "
-  "outcoming wind. However, you can move two cells with the wind in a single turn, "
+  "outgoing wind. However, you can move two cells with the wind in a single turn, "
   "and so can the birds.",
 
   "Jemand hat Ventilatoren in diese Ebenen gebracht, die überall starke Winde hervorrufen. "

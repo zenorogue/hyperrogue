@@ -3211,7 +3211,7 @@ S(
   "Cells which are blocked by walls, or at distance at most 2 from an Air Elemental, "
   "do not count for this.\n\n"
   "It is illegal to move in a direction which is closer to incoming wind than to "
-  "outcoming wind. However, you can move two cells with the wind in a single turn, "
+  "outgoing wind. However, you can move two cells with the wind in a single turn, "
   "and so can the birds.",
 
   "Ktoś porozstawiał wentylatory na tych równinach, powodując wszędzie silne wiatry. "
