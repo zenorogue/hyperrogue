@@ -216,7 +216,7 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
           if(param == moTortoise && nogoSlow(c, c2)) continue;
           if(param == moIvyRoot  && strictlyAgainstGravity(c, c2, false, MF_IVY)) continue;
           if(param == moWorm && (cellUnstable(c) || cellEdgeUnstable(c) || prairie::no_worms(c))) continue;
-          if(items[itOrbLava] && c2->cpdist <= 5 && pseudohept(c) && makeflame(c2, 1, true))
+          if(!isFriendly(param) && items[itOrbLava] && c2->cpdist <= 5 && pseudohept(c) && makeflame(c2, 1, true))
             continue;
           }
 
