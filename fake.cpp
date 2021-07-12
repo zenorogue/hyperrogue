@@ -79,7 +79,7 @@ EX namespace fake {
       }
     
     heptagon *create_step(heptagon *parent, int d) override {
-      parent->c.connect(d, parent, d, false);
+      parent->c().connect(d, parent, d, false);
       return parent;
       }
 

@@ -561,7 +561,7 @@ pair<int, int> get_cellcrawler_id(cell *c) {
 #endif
   else {
     id = c->type == S7;
-    // if(id == 0) ld = c->c.spin(0);
+    // if(id == 0) ld = c->c().spin(0);
     }
   /* if(geometry == gZebraQuotient) {
     id = 8*id + ld;

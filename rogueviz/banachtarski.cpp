@@ -53,7 +53,7 @@ bool test_uniq(cellwalker cw, int z, int lev, cell *par) {
 template<class T> void recursively(cell *c, cell *c1, const T& t) {
   t(c);
   for(int i=0; i<c->type; i++) 
-    if(c->move(i) && c->c.spin(i) == 0 && c->move(i) != c1)
+    if(c->move(i) && c->c().spin(i) == 0 && c->move(i) != c1)
       recursively(c->move(i), c, t);
   }
 

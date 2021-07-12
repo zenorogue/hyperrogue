@@ -26,7 +26,7 @@ EX namespace inforder {
       if(mixed()) deg = 7 - deg;
       auto h1 = init_heptagon(deg);
       bool par = h->s == hsA && direction == 0;
-      h->c.connect(direction, h1, par ? 1 + hrand(2) : 0, false);
+      h->c().connect(direction, h1, par ? 1 + hrand(2) : 0, false);
 
       h1->s = hsA;
       h1->distance = h->distance + (par ? -1 : 1);

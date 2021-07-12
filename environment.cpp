@@ -220,7 +220,7 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
             continue;
           }
 
-        onpath(c2, d+1, c->c.spin(i));
+        onpath(c2, d+1, c->c().spin(i));
         }
       
       else if(c2 && c2->wall == waClosedGate && princess)
@@ -389,7 +389,7 @@ EX void bfs() {
         
         if(!keepLightning) c2->ligon = 0;
         dcal.push_back(c2);
-        reachedfrom.push_back(c->c.spin(i));
+        reachedfrom.push_back(c->c().spin(i));
         
         checkTide(c2);
                 

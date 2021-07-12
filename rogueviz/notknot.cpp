@@ -239,7 +239,7 @@ struct hrmap_notknot : hrmap {
     return euc::get_at(co);
     }
   
-  /* make sure that where->move(d) and where->c.spin(d) are known */
+  /* make sure that where->move(d) and where->c().spin(d) are known */
   void cmov(heptagon *where, int d) {
     if(where->move(d)) return;
     dynamicval<eGeometry> g(geometry, base);
@@ -393,7 +393,7 @@ struct hrmap_notknot : hrmap {
     if(u->ptr[d]) return u->ptr[d];
     cmov(u->where, d);
     auto x = u->where->move(d);
-    auto d1 = u->where->c.spin(d);
+    auto d1 = u->where->c().spin(d);
     auto z = x->zebraval;
     if(z & 6) {
       throw hr_exception("zebraval failure!");
@@ -537,7 +537,7 @@ struct hrmap_notknot : hrmap {
       vector<pair<ucover*, transmatrix>> visited;
       
       auto visit = [&] (ucover *from, ucover *at, int ldir, const transmatrix& T) {
-        // println(hlog, from ? from->where : (heptagon*)nullptr, " -> ", at->where, " (", i, ")", " (reverse ", at->where->c.spin(i), ")");
+        // println(hlog, from ? from->where : (heptagon*)nullptr, " -> ", at->where, " (", i, ")", " (reverse ", at->where->c().spin(i), ")");
         if(camefrom.count(at->where)) {
           vector<int> path;
           vector<int> rpath;
@@ -545,7 +545,7 @@ struct hrmap_notknot : hrmap {
           while(at->where != u->where) {
             int d = camefrom[at->where];
             // println(hlog, "from ", at->where, " going back ", d);
-            rpath.push_back(at->where->c.spin(d));
+            rpath.push_back(at->where->c().spin(d));
             at = gen_adj(at, d);
             }
           while(!rpath.empty()) { path.push_back(rpath.back()); rpath.pop_back(); }
@@ -587,7 +587,7 @@ struct hrmap_notknot : hrmap {
           for(auto v: cgi.vertices_only) for(auto v1: cgi.vertices_only)
             if(hdist(M * v1, Tj * v) < 1e-3) adj = true;
           
-          if(adj) visit(at, u2, at->where->c.spin(j), Tj);
+          if(adj) visit(at, u2, at->where->c().spin(j), Tj);
           }
         }
       }
@@ -755,7 +755,7 @@ struct hrmap_notknot : hrmap {
           throw hr_exception("where confusion");
         for(int d=0; d<uf->where->type; d++) {
           cmov(uf->where, d);
-          auto d1 = uf->where->c.spin(d);
+          auto d1 = uf->where->c().spin(d);
           if(uf->ptr[d]) {
             if(!ut->ptr[d]) {
               /* was a known connection in uf, but not in ut -- reconnect it to ut */
@@ -950,15 +950,15 @@ struct hrmap_notknot : hrmap {
 
       for(int d=0; d<S7; d++) {        
         cmov(u->where, d);
-        auto d1 = u->where->c.spin(d);
+        auto d1 = u->where->c().spin(d);
         if(u->ptr[d] && u->ptr[d]->result == nullptr)
           throw hr_exception(lalign(0, "connection to null in state ", u->ptr[d]->state, " from state ", u->state, " i=", i, " .. ", u->ptr[d]->index));
         if(u->ptr[d] && u->ptr[d]->ptr[d1] != u)
           throw hr_exception("wrong connection");
         if(u->ptr[d])
-          u->result->c.connect(d, u->ptr[d]->result, d1, false);          
+          u->result->c().connect(d, u->ptr[d]->result, d1, false);          
         else
-          u->result->c.connect(d, u->result, d, false);
+          u->result->c().connect(d, u->result, d, false);
         }
       }
     

@@ -537,7 +537,7 @@ EX void link_to_base(heptagon *h, heptspin base) {
 EX void clear_links(heptagon *h) {
   auto& hi = periodmap[h];
   for(cell *c: hi.subcells) {
-    for(int i=0; i<c->type; i++) if(c->move(i)) c->move(i)->move(c->c.spin(i)) = NULL;
+    for(int i=0; i<c->type; i++) if(c->move(i)) c->move(i)->move(c->c().spin(i)) = NULL;
     cellindex.erase(c);
     delete c;
     }
@@ -552,9 +552,9 @@ EX void link_start(heptagon *h) {
 EX void link_next(heptagon *parent, int d) {
   if(!periodmap.count(parent))
     link_to_base(parent, heptspin(cells[0].owner->master, 0));
-  // printf("linking next: %p direction %d [s%d]\n", hr::voidp(parent), d, parent->c.spin(d));
+  // printf("linking next: %p direction %d [s%d]\n", hr::voidp(parent), d, parent->c().spin(d));
   auto *h = parent->move(d);
-  heptspin hs = periodmap[parent].base + d + wstep - parent->c.spin(d);
+  heptspin hs = periodmap[parent].base + d + wstep - parent->c().spin(d);
   link_to_base(h, hs);
   }
 
@@ -591,7 +591,7 @@ EX void link_cell(cell *c, int d) {
     }
   
   cell *c2 = periodmap[master2].subcells[sc2.localindex];
-  c->c.connect(d, c2, sc.spin[d], false);
+  c->c().connect(d, c2, sc.spin[d], false);
   }
 
 int hdist(heptagon *h1, heptagon *h2) {

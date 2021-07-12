@@ -81,13 +81,13 @@ string dotted(int i) {
 /** where = empty square */
 void make_move(cell *where, int dir) {
   auto nw = where->cmove(dir);
-  auto mir = where->c.mirror(dir);
+  auto mir = where->c().mirror(dir);
   auto& f0 = fif[where];
   auto& f1 = fif[nw];
   f0.current = f1.current;
   f0.currentmirror = f1.currentmirror ^ mir;
   int d = f1.currentdir;
-  d -= where->c.spin(dir);
+  d -= where->c().spin(dir);
   if(mir) d *= -1;
   d += dir;
   if(!mir) d += nw->type/2;
@@ -99,7 +99,7 @@ void check_move() {
   for(int i=0; i<cwt.at->type; i++) {
     cell *c1 = cwt.at->cmove(i);
     if(fif.count(c1) && fif[c1].current == Empty) {
-      make_move(c1, cwt.at->c.spin(i));
+      make_move(c1, cwt.at->c().spin(i));
       }
     }
   }

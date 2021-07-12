@@ -127,12 +127,9 @@ template<class T> struct walker;
 int gmod(int i, int j);
 
 template<class CRTP, class T>
-struct trailing_connection_table {
-  CRTP *crtp() { return static_cast<CRTP*>(this); }
+class trailing_connection_table {
 
-  static size_t tailored_alloc_size(int degree) {
-    return sizeof(CRTP) + (degree * sizeof(T*)) + degree;
-    }
+  CRTP *crtp() { return static_cast<CRTP*>(this); }
   T **move_table() {
     static_assert(alignof(CRTP) >= alignof(T*), "");
     return (T **)(crtp() + 1);
@@ -142,7 +139,12 @@ struct trailing_connection_table {
     }
 
 public:
-  trailing_connection_table& c = *this;  // ugly hack to let us say 'foo->c.spin(d)' instead of 'foo->spin(d)'
+  static size_t tailored_alloc_size(int degree) {
+    return sizeof(CRTP) + (degree * sizeof(T*)) + degree;
+    }
+
+  trailing_connection_table& c() { return *this; }
+  const trailing_connection_table& c() const { return *this; }
 
   /** \brief for the edge d, set the `spin` and `mirror` attributes */
   void setspin(int d, int spin, bool mirror) { 
@@ -163,7 +165,10 @@ public:
   unsigned char modspin(int i) { return spin(fix(i)); }
   /** \brief initialize the table */
   void fullclear() {
-    for(int i=0; i < crtp()->degree(); i++) move_table()[i] = nullptr;
+    for(int i=0; i < crtp()->degree(); i++) {
+      move_table()[i] = nullptr;
+      spin_table()[i] = 0;
+      }
     }
   /** \brief connect this in direction d0 to c1 in direction d1, possibly mirrored */
   void connect(int d0, T* c1, int d1, bool m) {
@@ -190,8 +195,7 @@ template<class T> T* tailored_alloc(int degree) {
   size_t num_bytes = T::tailored_alloc_size(degree);
   T* result = ::new (::operator new(num_bytes)) T;
   result->type = degree;
-  for(int i=0; i<degree; i++) result->move_table()[i] = nullptr;
-  for(int i=0; i<degree; i++) result->spin_table()[i] = 0;
+  result->c().fullclear();
   return result;
   }
 
@@ -216,15 +220,15 @@ template<class T> struct walker {
   int spin;
   /** \brief are we mirrored */
   bool mirrored;
-  walker<T> (T *at = NULL, int s = 0, bool m = false) : at(at), spin(s), mirrored(m) { if(at) s = at->c.fix(s); }
+  walker<T> (T *at = NULL, int s = 0, bool m = false) : at(at), spin(s), mirrored(m) { if(at) s = at->c().fix(s); }
   /** \brief spin by i to the left (or right, when mirrored */
   walker<T>& operator += (int i) {
-    spin = at->c.fix(spin+(mirrored?-i:i));
+    spin = at->c().fix(spin+(mirrored?-i:i));
     return (*this);
     }
   /** \brief spin by i to the right (or left, when mirrored */
   walker<T>& operator -= (int i) {
-    spin = at->c.fix(spin-(mirrored?-i:i));
+    spin = at->c().fix(spin-(mirrored?-i:i));
     return (*this);
     }
   /** \brief add wmirror to mirror this walker */
@@ -235,8 +239,8 @@ template<class T> struct walker {
   /** \brief add wstep to make a single step, after which we are facing the T we were originally on */
   walker<T>& operator += (wstep_t) {
     at->cmove(spin);
-    int nspin = at->c.spin(spin);
-    if(at->c.mirror(spin)) mirrored = !mirrored;
+    int nspin = at->c().spin(spin);
+    if(at->c().mirror(spin)) mirrored = !mirrored;
     at = at->move(spin);
     spin = nspin;
     return (*this);
@@ -279,7 +283,7 @@ template<class T> struct walker {
   /** \brief would we create a new T if we stepped forwards? */
   bool creates() { return !peek(); }
   /** \brief mirror this walker with respect to the d-th edge */
-  walker<T> mirrorat(int d) { return walker<T> (at, at->c.fix(d+d - spin), !mirrored); }
+  walker<T> mirrorat(int d) { return walker<T> (at, at->c().fix(d+d - spin), !mirrored); }
   };
 
 struct cell;
@@ -350,13 +354,13 @@ struct heptagon : cdata_or_heptagon, trailing_connection_table<heptagon, heptago
   /** \brief associated generator of alternate structure, for Camelot and horocycles */
   heptagon *alt;
 
-  heptagon*& move(int d) { return c.move(d); }
-  heptagon*& modmove(int d) { return c.modmove(d); }
+  heptagon*& move(int d) { return c().move(d); }
+  heptagon*& modmove(int d) { return c().modmove(d); }
   // functions
   heptagon () { heptacount++; }
   ~heptagon () { heptacount--; }
   heptagon *cmove(int d) { return createStep(this, d); }
-  heptagon *cmodmove(int d) { return createStep(this, c.fix(d)); }
+  heptagon *cmodmove(int d) { return createStep(this, c().fix(d)); }
   inline int degree() { return type; }
 
   // prevent accidental copying
@@ -371,10 +375,10 @@ struct cell : gcell, trailing_connection_table<cell, cell> {
   int listindex;    ///< used by celllister  
   heptagon *master; ///< heptagon who owns us; for 'masterless' tilings it contains coordinates instead
 
-  cell*& move(int d) { return c.move(d); }
-  cell*& modmove(int d) { return c.modmove(d); }
+  cell*& move(int d) { return c().move(d); }
+  cell*& modmove(int d) { return c().modmove(d); }
   cell* cmove(int d) { return createMov(this, d); }
-  cell* cmodmove(int d) { return createMov(this, c.fix(d)); }
+  cell* cmodmove(int d) { return createMov(this, c().fix(d)); }
   cell() {}
 
   // prevent accidental copying
@@ -491,11 +495,11 @@ struct movei {
   movei(cellwalker cw) : s(cw.at), t(cw.cpeek()), d(cw.spin) {}
   movei rev() const { return movei(t, s, rev_dir_or(d)); }
   int dir_or(int x) const { return proper() ? d : x; }
-  int rev_dir_or(int x) const { return proper() ? s->c.spin(d) : x; }
-  int rev_dir_mirror() const { return proper() ? s->c.spin(d) : d; }
-  int rev_dir_force() const { hassert(proper()); return s->c.spin(d); }
+  int rev_dir_or(int x) const { return proper() ? s->c().spin(d) : x; }
+  int rev_dir_mirror() const { return proper() ? s->c().spin(d) : d; }
+  int rev_dir_force() const { hassert(proper()); return s->c().spin(d); }
   int dir_force() const { hassert(proper()); return d; }
-  bool mirror() { return s->c.mirror(d); }
+  bool mirror() { return s->c().mirror(d); }
   };
 #endif
 

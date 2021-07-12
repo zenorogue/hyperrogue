@@ -90,14 +90,14 @@ EX namespace bt {
       printf("already connected to something else (2)\n");
       breakhere();
       }
-    h->c.connect(d, h1, d1, false);
+    h->c().connect(d, h1, d1, false);
     rec--;
     return h1;
     }
 
   EX heptagon *pathc(heptagon *h, int d, int d1, std::vector<std::initializer_list<int>> p) {
     h->cmove(S7-1);
-    int z = h->c.spin(S7-1);
+    int z = h->c().spin(S7-1);
     return path(h, d, d1, p[z]);
     }
     
@@ -316,28 +316,28 @@ EX namespace bt {
               return build3(parent, 8, nextdir(4), -1);
             case 4:
               parent->cmove(8);
-              if(parent->c.spin(8) & 1)
-                return path(h, 4, 5, {8, parent->c.spin(8) ^ 1});
+              if(parent->c().spin(8) & 1)
+                return path(h, 4, 5, {8, parent->c().spin(8) ^ 1});
               else
-                return path(h, 4, 5, {8, 4, parent->c.spin(8) ^ 1});
+                return path(h, 4, 5, {8, 4, parent->c().spin(8) ^ 1});
             case 5:
               parent->cmove(8);
-              if(!(parent->c.spin(8) & 1))
-                return path(h, 5, 4, {8, parent->c.spin(8) ^ 1});
+              if(!(parent->c().spin(8) & 1))
+                return path(h, 5, 4, {8, parent->c().spin(8) ^ 1});
               else
-                return path(h, 5, 4, {8, 5, parent->c.spin(8) ^ 1});
+                return path(h, 5, 4, {8, 5, parent->c().spin(8) ^ 1});
             case 6:
               parent->cmove(8);
-              if(parent->c.spin(8) & 2)
-                return path(h, 6, 7, {8, parent->c.spin(8) ^ 2});
+              if(parent->c().spin(8) & 2)
+                return path(h, 6, 7, {8, parent->c().spin(8) ^ 2});
               else
-                return path(h, 6, 7, {8, 6, parent->c.spin(8) ^ 2});
+                return path(h, 6, 7, {8, 6, parent->c().spin(8) ^ 2});
             case 7:
               parent->cmove(8);
-              if(!(parent->c.spin(8) & 2))
-                return path(h, 7, 6, {8, parent->c.spin(8) ^ 2});
+              if(!(parent->c().spin(8) & 2))
+                return path(h, 7, 6, {8, parent->c().spin(8) ^ 2});
               else
-                return path(h, 7, 6, {8, 7, parent->c.spin(8) ^ 2});
+                return path(h, 7, 6, {8, 7, parent->c().spin(8) ^ 2});
             default:
               throw hr_exception("wrong dir");
             }
@@ -350,22 +350,22 @@ EX namespace bt {
               return build3(parent, 6, nextdir(2), -1);
             case 2:
               parent->cmove(6);
-              if(parent->c.spin(6) == 0)
+              if(parent->c().spin(6) == 0)
                 return path(h, 2, 4, {6, 1});
               else
                 return path(h, 2, 4, {6, 3, 0});
             case 4:
               parent->cmove(6);
-              if(parent->c.spin(6) == 0)
+              if(parent->c().spin(6) == 0)
                 return path(h, 4, 2, {6, 5, 1});
               else
                 return path(h, 4, 2, {6, 0});
             case 3:
               parent->cmove(6);
-              return path(h, 3, 5, {6, 4, parent->c.spin(6)});
+              return path(h, 3, 5, {6, 4, parent->c().spin(6)});
             case 5:
               parent->cmove(6);
-              return path(h, 5, 3, {6, 2, parent->c.spin(6)});
+              return path(h, 5, 3, {6, 2, parent->c().spin(6)});
             default:
               throw hr_exception("wrong dir");
             }
@@ -378,7 +378,7 @@ EX namespace bt {
               return build3(parent, 7, nextdir(3), -1);
             case 4: case 5: case 6: {
               parent->cmove(7);
-              int s = parent->c.spin(7);
+              int s = parent->c().spin(7);
               if(s == 0) return path(h, d, d, {7, d-3});
               else if(s == d-3) return path(h, d, d, {7, 0});
               else return path(h, d, d, {7, d, 9-d-s});
@@ -415,7 +415,7 @@ EX namespace bt {
               return pathc(h, 11, 7, {{13,1}, {13,2}, {13,0}});
             case 12: {
               h->cmove(13);
-              int z = h->c.spin(13);
+              int z = h->c().spin(13);
               return path(h, 12, (z+1)%3+3, {13, z+6});
               }
             default:
@@ -503,11 +503,11 @@ EX namespace bt {
         return cgi.direct_tmatrix[dir];
       else {
         h->cmove(dir);
-        return cgi.inverse_tmatrix[h->c.spin(dir)];
+        return cgi.inverse_tmatrix[h->c().spin(dir)];
         }
       }
 
-    const transmatrix iadj(heptagon *h, int dir) { heptagon *h1 = h->cmove(dir); return adj(h1, h->c.spin(dir)); }
+    const transmatrix iadj(heptagon *h, int dir) { heptagon *h1 = h->cmove(dir); return adj(h1, h->c().spin(dir)); }
   
     void virtualRebase(heptagon*& base, transmatrix& at) override {
     
@@ -845,15 +845,15 @@ EX bool pseudohept(cell *c) {
   if(WDIM == 2)
     return c->type & c->master->distance & 1;
   else if(geometry == gHoroRec)
-    return c->c.spin(S7-1) == 0 && (c->master->distance & 1) && c->cmove(S7-1)->c.spin(S7-1) == 0;
+    return c->c().spin(S7-1) == 0 && (c->master->distance & 1) && c->cmove(S7-1)->c().spin(S7-1) == 0;
   else if(geometry == gHoroTris)
-    return c->c.spin(S7-1) == 0 && (c->master->distance & 1);
+    return c->c().spin(S7-1) == 0 && (c->master->distance & 1);
   else
     return (c->master->zebraval == 1) && (c->master->distance & 1);
   }
 
 EX pair<gp::loc, gp::loc> gpvalue(heptagon *h) {
-  int d = h->c.spin(S7-1);
+  int d = h->c().spin(S7-1);
   if(d == 0) return make_pair(gp::loc(0,0), gp::loc(-1,0));
   else return make_pair(gp::eudir((d-1)*2), gp::loc(1,0));
   }
@@ -908,7 +908,7 @@ EX int celldistance3_rec(heptagon *c1, heptagon *c2) {
   int steps = equalize(c1, c2);
   vector<int> dx;
   while(c1 != c2) {
-    dx.push_back(c1->c.spin(S7-1) - c2->c.spin(S7-1));
+    dx.push_back(c1->c().spin(S7-1) - c2->c().spin(S7-1));
     c1 = c1->cmove(S7-1);
     c2 = c2->cmove(S7-1);
     steps += 2;
@@ -929,8 +929,8 @@ EX int celldistance3_square(heptagon *c1, heptagon *c2) {
   int steps = equalize(c1, c2);
   vector<int> dx, dy;
   while(c1 != c2) {
-    dx.push_back((c1->c.spin(S7-1) & 1) - (c2->c.spin(S7-1) & 1));
-    dy.push_back((c1->c.spin(S7-1) >> 1) - (c2->c.spin(S7-1) >> 1));
+    dx.push_back((c1->c().spin(S7-1) & 1) - (c2->c().spin(S7-1) & 1));
+    dy.push_back((c1->c().spin(S7-1) >> 1) - (c2->c().spin(S7-1) >> 1));
     c1 = c1->cmove(S7-1);
     c2 = c2->cmove(S7-1);
     steps += 2;
@@ -954,8 +954,8 @@ EX int celldistance3_hex(heptagon *c1, heptagon *c2) {
   int steps = equalize(c1, c2);
   vector<int> d1, d2;
   while(c1 != c2) {
-    d1.push_back(c1->c.spin(S7-1));
-    d2.push_back(c2->c.spin(S7-1));
+    d1.push_back(c1->c().spin(S7-1));
+    d2.push_back(c2->c().spin(S7-1));
     c1 = c1->cmove(S7-1);
     c2 = c2->cmove(S7-1);
     steps += 2;

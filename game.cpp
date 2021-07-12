@@ -469,7 +469,7 @@ EX bool isWormhead(eMonster m) {
 
 EX cell *worm_tohead(cell *c) {
  for(int i=0; i<c->type; i++)
-   if(c->move(i) && isWorm(c->move(i)->monst) && c->move(i)->mondir == c->c.spin(i))
+   if(c->move(i) && isWorm(c->move(i)->monst) && c->move(i)->mondir == c->c().spin(i))
      return c->move(i);
   return nullptr;
   }
