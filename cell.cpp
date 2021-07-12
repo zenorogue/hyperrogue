@@ -1293,20 +1293,25 @@ EX vector<cell*> adj_minefield_cells(cell *c) {
     const vector<hyperpoint>& vertices = ss.vertices_only_local;
     manual_celllister cl;
     cl.add(c);
+    vector<transmatrix> M = {Id};
     for(int i=0; i<isize(cl.lst); i++) {
       cell *c1 = cl.lst[i];
       bool shares = false;
+      transmatrix T = M[i];
       if(c != c1) {
-        transmatrix T = currentmap->relative_matrix(c1->master, c->master, C0);
         auto& ss1 = currentmap->get_cellshape(c1);
         auto& vertices1 = ss1.vertices_only_local;
         for(hyperpoint h: vertices) for(hyperpoint h2: vertices1)
           if(hdist(h, T * h2) < 1e-6) shares = true;
         if(shares) res.push_back(c1);
         }
-      if(shares || c == c1) forCellEx(c2, c1) cl.add(c2);
+      if(shares || c == c1) forCellIdEx(c2, i, c1) {
+        if(cl.listed(c2)) continue;
+        cl.add(c2);
+        M.push_back(T * currentmap->adj(c1, i));
+        }
       }
-    println(hlog, "adjacent to ", c, " = ", isize(res));
+    // println(hlog, "adjacent to ", c, " = ", isize(res), " of ", isize(M));
     adj_memo[c] = res;
     }
   return res;
