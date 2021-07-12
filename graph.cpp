@@ -2096,7 +2096,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       b--;
       if(b < 0) b = 0;
       if(b > 6) b = 6;
-      queuepoly(VHEAD1, cgi.shWightCloak, (0x605040A0 | UNTRANS) + 0x10101000 * b);
+      queuepoly(VHEAD1, cgi.shWightCloak, color_t(0x605040A0 | UNTRANS) + color_t(0x10101000 * b));
       return true;
       }
 
