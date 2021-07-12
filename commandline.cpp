@@ -250,7 +250,7 @@ int arg::readCommon() {
     }
   else if(argis("-face-vertex")) {
     PHASE(3);  start_game();
-    auto &ss = cgi.get_cellshape(cwt.at);
+    auto &ss = currentmap->get_cellshape(cwt.at);
     View = cspin(0, 2, M_PI/2) * spintox(ss.vertices_only_local[0]);
     }
   else if(argis("-face-face")) {
