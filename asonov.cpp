@@ -110,9 +110,8 @@ EX void prepare() {
 
 EX void prepare_walls() {
 
-  auto& hsh = cgi.heptshape;
-  hsh = unique_ptr<subcellshape>(new subcellshape);
-  auto& cs = hsh->faces;
+  auto& hsh = get_hsh();
+  auto& cs = hsh.faces;
   cs.clear();
   
   auto pt = [&] (int x, int y, int z) { return asonov::tx*x/2 + asonov::ty*y/2 + asonov::tz*z/2 + C0; };
@@ -130,7 +129,7 @@ EX void prepare_walls() {
   cs.push_back({pt(-1,+1,-1), pt(-1,00,-1), pt(-1,-1,-1), pt(-1,-1,+1), pt(-1,+1,+1)});
   cs.push_back({pt(+1,-1,-1), pt(+1,-1,+1), pt(00,-1,+1), pt(-1,-1,+1), pt(-1,-1,-1)});
   
-  hsh->compute_hept();
+  hsh.compute_hept();
   }
 
 transmatrix coord_to_matrix(coord c, coord zero) {

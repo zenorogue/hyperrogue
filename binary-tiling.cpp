@@ -472,54 +472,6 @@ EX namespace bt {
       return gm * where;
       }
 
-    subcellshape& get_cellshape(cell *c) override {
-      if(cgi.heptshape) 
-        return *cgi.heptshape;
-
-      cgi.heptshape = (std::unique_ptr<subcellshape>) (new subcellshape);
-      vector<hyperpoint>& res = cgi.heptshape->vertices_only;
-      ld yy = log(2) / 2;
-      auto add = [&] (hyperpoint h) { 
-        res.push_back(bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]));
-        };
-      switch(geometry) {
-        case gBinary3: 
-          for(int x=-1; x<2; x++) for(int y=-1; y<2; y++) for(int z=-1; z<=1; z+=2)
-            if(z == -1 || x != 0 || y != 0)
-              add(point3(x,y,z));
-          break;
-        case gHoroTris: {
-          ld r = sqrt(3)/6;
-          ld r2 = r * 2;
-          
-          hyperpoint shift3 = point3(0,0,-3);
-          hyperpoint shift1 = point3(0,0,-1);
-          
-          for(int i=0; i<3; i++) {
-            hyperpoint t0 = spin(120 * degree * i) * point3(0,-r2,-1);          
-            add(t0);
-            add(-2 * t0 + shift3);
-            add(-2 * t0 + shift1);
-            }
-          }
-          break;
-        case gHoroRec: {
-          ld r2 = sqrt(2);
-          for(int y=-1; y<=1; y++) for(int x=-1; x<=1; x+=2) for(int z=-1; z<=1; z++)
-            if(z == -1 || y != 0)
-              add(point3(-r2*x*hororec_scale, -2*y*hororec_scale, z*.5));
-          break;
-          }
-        case gHoroHex: {
-          // complicated and unused for now -- todo
-          break;
-          }
-        default: ;
-        }
-      cgi.heptshape->vertices_only_local = res;
-      return *cgi.heptshape;
-      }
-    
     ld spin_angle(cell *c, int d) override {
       if(WDIM == 3 || geometry == gBinary4 || geometry == gTernary) {
         return hrmap::spin_angle(c, d);
@@ -1116,6 +1068,126 @@ EX hyperpoint get_corner_horo_coordinates(cell *c, int i) {
   return point2(0, 0);
   }
 
+vector<hyperpoint> make4(hyperpoint a, hyperpoint b, hyperpoint c) {
+  return {a, b, b+c-a, c};
+  }
+
+vector<hyperpoint> make5(hyperpoint a, hyperpoint b, hyperpoint c) {
+  return {a, (a+b)/2, b, b+c-a, c};
+  }
+
+EX void create_faces() {
+  
+  if(geometry == gBinary3) {
+    hyperpoint h00 = point3(-1,-1,-1);
+    hyperpoint h01 = point3(-1,0,-1);
+    hyperpoint h02 = point3(-1,+1,-1);
+    hyperpoint h10 = point3(0,-1,-1);
+    hyperpoint h11 = point3(0,0,-1);
+    hyperpoint h12 = point3(0,+1,-1);
+    hyperpoint h20 = point3(+1,-1,-1);
+    hyperpoint h21 = point3(+1,0,-1);
+    hyperpoint h22 = point3(+1,+1,-1);
+    hyperpoint down = point3(0,0,2);
+
+    add_wall(0, make4(h11, h01, h10));
+    add_wall(1, make4(h11, h21, h10));
+    add_wall(2, make4(h11, h01, h12));
+    add_wall(3, make4(h11, h21, h12));
+    add_wall(4, make5(h00, h02, h00+down));
+    add_wall(5, make5(h20, h22, h20+down));
+    add_wall(6, make5(h00, h20, h00+down));
+    add_wall(7, make5(h02, h22, h02+down));
+    add_wall(8, make4(h22+down, h02+down, h20+down));
+    }
+
+  if(GDIM == 3 && bt::in() && geometry == gHoroTris) {
+    ld r = sqrt(3)/6;
+    ld r1 = r;
+    ld r2 = r * 2;
+
+    hyperpoint t0 = point3(0,-r2,-1);
+    hyperpoint t1 = point3(+.5,r1,-1);
+    hyperpoint t2 = point3(-.5,r1,-1);
+    hyperpoint shift = point3(0,0,-3);
+    hyperpoint down = point3(0,0,2);
+    hyperpoint d0 = -2 * t0 + shift;
+    hyperpoint d1 = -2 * t1 + shift;
+    hyperpoint d2 = -2 * t2 + shift;
+
+    add_wall(0, {t0, t1, t2});
+    add_wall(1, {d0, t1, t2});
+    add_wall(2, {t0, d1, t2});
+    add_wall(3, {t0, t1, d2});
+    add_wall(4, make5(d2, d1, d2 + down));
+    add_wall(5, make5(d0, d2, d0 + down));
+    add_wall(6, make5(d1, d0, d1 + down));
+    add_wall(7, {d0+down, d1+down, d2+down});
+    }
+
+  if(geometry == gHoroRec) {
+    ld r2 = sqrt(2);
+    ld z = bt::hororec_scale;
+
+    hyperpoint a00 = point3(-r2*z,-2*z,-.5);
+    hyperpoint a01 = point3(+r2*z,-2*z,-.5);
+    hyperpoint a10 = point3(-r2*z, 0*z,-.5);
+    hyperpoint a11 = point3(+r2*z, 0*z,-.5);
+    hyperpoint a20 = point3(-r2*z,+2*z,-.5);
+    hyperpoint a21 = point3(+r2*z,+2*z,-.5);
+
+    hyperpoint down = point3(0,0,1);
+
+    add_wall(0, make4(a00, a01, a10));
+    add_wall(1, make4(a10, a11, a20));
+    add_wall(2, make5(a01, a21, a01+down));
+    add_wall(3, make4(a21, a20, a21+down));
+    add_wall(4, make5(a20, a00, a20+down));
+    add_wall(5, make4(a00, a01, a00+down));
+    add_wall(6, make4(a00+down, a01+down, a20+down));
+    }
+
+  if(geometry == gHoroHex) {
+    ld z = log(3) / log(2) / 2;
+    ld r3 = sqrt(3) / 2 * bt::horohex_scale;
+    ld h = bt::horohex_scale / 2;
+    hyperpoint down = point3(0,0,2*z);
+
+    for(int j=0; j<4; j++) for(int i=0; i<3; i++) {
+      transmatrix T = cspin(0, 1, 2*M_PI*i/3);
+
+      hyperpoint hcenter = point3(0,0,-z);
+      hyperpoint hu0 = T*point3(+h,  +r3,-z);
+      hyperpoint hu1 = T*point3(+h*3,+r3,-z);
+      hyperpoint hd0 = T*point3(+h,  -r3,-z);
+      hyperpoint hd1 = T*point3(+h*3,-r3,-z);
+      hyperpoint hcn = T*point3(-h*2,0,  -z);
+      hyperpoint hun = T*point3(-h*3,+r3,-z);
+      hyperpoint hdn = T*point3(-h*3,-r3,-z);
+      if(j == 0) add_wall(i, {hcenter, hu0, hu1, hd1, hd0});
+      if(j == 1) add_wall(i+3, {hcn, hun, hdn});
+      if(j == 2) add_wall(i+6, make4(hd1, hu1, hd1+down));
+      if(j == 3) add_wall(i+9, make4(hun, hdn, hun+down));
+      }
+
+    add_wall(12, {point3(3*h,r3,z), point3(0,2*r3,z), point3(-3*h,r3,z)});
+    add_wall(13, {point3(3*h,r3,z), point3(3*h,-r3,z), point3(0,-2*r3,z), point3(-3*h,-r3,z), point3(-3*h,r3,z)});
+    }
+
+  if(kite::in()) {
+    auto kv = kite::make_walls();
+    for(auto& v: kv.first) for(auto& h: v) {
+      h = bt::deparabolic3(h);
+      h = point3(h[1], h[2], h[0] / (log(2)/2));
+      }
+    for(int i=0; i<isize(kv.first); i++) {
+      add_wall(i, kv.first[i]);
+      }
+    get_hsh().weights = kv.second;
+    }
+
+  get_hsh().compute_hept();
+  }
 
 auto hooksw = addHook(hooks_swapdim, 100, [] {
   if(bt::in()) build_tmatrix();

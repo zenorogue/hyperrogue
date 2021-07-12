@@ -687,7 +687,58 @@ EX namespace sn {
     int d1 = bt::celldistance3_approx(m->coords[h1].first, m->coords[h2].first);
     int d2 = bt::celldistance3_approx(m->coords[h1].second, m->coords[h2].second);
     return d1 + d2 - abs(h1->distance - h2->distance);
-    }    
+    }
+  
+  EX void create_faces() {
+    if(geometry == gSol) {
+      ld zstep = -log(2) / 2;
+      ld bwh = vid.binary_width * zstep;
+      auto pt = [&] (int x, int y, int z) { return xpush(bwh*x) * ypush(bwh*y) * zpush(zstep*z) * C0; };
+      add_wall(0, {pt(-1,-1,-1), pt(-1,-1,+1), pt(-1,00,+1), pt(-1,+1,+1), pt(-1,+1,-1)});
+      add_wall(1, {pt(-1,-1,-1), pt(00,-1,-1), pt(+1,-1,-1), pt(+1,-1,+1), pt(-1,-1,+1)});
+      add_wall(2, {pt(+1,+1,-1), pt(+1,-1,-1), pt(00,-1,-1), pt(00,+1,-1)});
+      add_wall(3, {pt(00,+1,-1), pt(00,-1,-1), pt(-1,-1,-1), pt(-1,+1,-1)});
+      add_wall(4, {pt(+1,-1,-1), pt(+1,-1,+1), pt(+1,00,+1), pt(+1,+1,+1), pt(+1,+1,-1)});
+      add_wall(5, {pt(-1,+1,-1), pt(00,+1,-1), pt(+1,+1,-1), pt(+1,+1,+1), pt(-1,+1,+1)});
+      add_wall(6, {pt(-1,+1,+1), pt(+1,+1,+1), pt(+1,00,+1), pt(-1,00,+1)});
+      add_wall(7, {pt(-1,00,+1), pt(+1,00,+1), pt(+1,-1,+1), pt(-1,-1,+1)});
+      }
+  
+    if(geometry == gNIH) {
+      ld zstep = .5;
+      ld bwh = vid.binary_width / 6;
+      auto pt = [&] (int x, int y, int z) { return xpush(bwh*x) * ypush(bwh*y) * zpush(zstep*z) * C0; };
+      add_wall(0, {pt(+3,-3,-1), pt(+3,-3,+1), pt(+3,+3,+1), pt(+3,+3,-1), pt(+3,+1,-1), pt(+3,-1,-1) });
+      add_wall(1, {pt(-3,+3,-1), pt(-3,+3,+1), pt(+3,+3,+1), pt(+3,+3,-1), pt(+0,+3,-1) });
+      add_wall(2, {pt(-3,-3,-1), pt(-3,-3,+1), pt(-3,+3,+1), pt(-3,+3,-1), pt(-3,+1,-1), pt(-3,-1,-1) });
+      add_wall(3, {pt(-3,-3,-1), pt(-3,-3,+1), pt(+3,-3,+1), pt(+3,-3,-1), pt(+0,-3,-1)});
+      
+      add_wall(4, {pt(-3,-3,+1), pt(-3,+3,+1), pt(+3,+3,+1), pt(+3,-3,+1)});
+      
+      for(int i=0; i<6; i++) {
+        int x = -3 + (i%2) * 3;
+        int y = -3 + (i/2) * 2;
+        add_wall(5+i, {pt(x,y,-1), pt(x+3,y,-1), pt(x+3,y+2,-1), pt(x,y+2,-1)});
+        }
+      }
+    
+    if(geometry == gSolN) {
+      ld zstep = -.5;
+      ld bwh = vid.binary_width / 6;
+      auto pt = [&] (int x, int y, int z) { return xpush(bwh*x) * ypush(bwh*y) * zpush(zstep*z) * C0; };
+      add_wall(0, {pt(+3,-3,-1), pt(+3,-3,+1), pt(+3,-1,+1), pt(+3,+1,+1), pt(+3,+3,+1), pt(+3,+3,-1)});
+      add_wall(1, {pt(-3,+3,-1), pt(00,+3,-1), pt(+3,+3,-1), pt(+3,+3,+1), pt(-3,+3,+1)});
+      add_wall(2, {pt(-3,-3,-1), pt(-3,-3,+1), pt(-3,-1,+1), pt(-3,+1,+1), pt(-3,+3,+1), pt(-3,+3,-1)});
+      add_wall(3, {pt(-3,-3,-1), pt(00,-3,-1), pt(+3,-3,-1), pt(+3,-3,+1), pt(-3,-3,+1)});
+      add_wall(4, {pt(-3,+3,-1), pt(-3,-3,-1), pt(00,-3,-1), pt(00,+3,-1)});
+      add_wall(5, {pt(00,+3,-1), pt(00,-3,-1), pt(+3,-3,-1), pt(+3,+3,-1)});
+      add_wall(6, {pt(-3,-3,+1), pt(+3,-3,+1), pt(+3,-1,+1), pt(-3,-1,+1)});
+      add_wall(7, {pt(-3,-1,+1), pt(+3,-1,+1), pt(+3,+1,+1), pt(-3,+1,+1)});
+      add_wall(8, {pt(-3,+1,+1), pt(+3,+1,+1), pt(+3,+3,+1), pt(-3,+3,+1)});
+      }
+    
+    get_hsh().compute_hept();
+    }
 EX }
 #endif
 
@@ -981,6 +1032,15 @@ EX void show_niltorus3() {
   dialog::addBreak(50);
   dialog::addBack();
   dialog::display();
+  }
+
+EX void create_faces() {
+  for(int i=0; i<S7; i++) {
+    vector<hyperpoint> fvs = nilv::current_ns().facevertices[i];
+    using nilv::nilwidth;
+    for(auto& h: fvs) h[0] *= nilwidth, h[1] *= nilwidth, h[2] *= nilwidth * nilwidth;
+    add_wall(i, fvs);
+    }
   }
   
 EX }

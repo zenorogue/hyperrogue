@@ -394,15 +394,15 @@ EX void generate() {
   cgi.face = ucgi.face;
   cgi.schmid = ucgi.schmid;
 
-  auto& hsh = cgi.heptshape;
-  hsh = unique_ptr<subcellshape>(new subcellshape);
+  auto& hsh = get_hsh();
   
-  *hsh = *ucgi.heptshape;
+  hsh = *ucgi.heptshape;
 
   for(int b=0; b<12; b++)
     cgi.spins[b] = ucgi.spins[b];
   
   compute_around(true);
+  hsh.compute_hept();
   reg3::compute_ultra();  
   #endif
   }

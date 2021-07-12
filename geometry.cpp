@@ -100,10 +100,17 @@ struct gi_extension {
 
 /** both for 'heptagon' 3D cells and subdivided 3D cells */
 struct subcellshape {
+  /** \brief raw coordinates of vertices of all faces */
   vector<vector<hyperpoint>> faces;
-  vector<vector<hyperpoint>> faces_local;
+  /** \brief raw coordinates of all vertices in one vector */
   vector<hyperpoint> vertices_only;
+  /** \brief cooked coordinates of vertices of all faces, computed from faces as: from_cellcenter * final_coords(v) */
+  vector<vector<hyperpoint>> faces_local;
+  /** \brief cooked coordinates of all vertices in one vector */
   vector<hyperpoint> vertices_only_local;
+  /** \brief weights -- used to generate wall shapes in some geometries, empty otherwise */
+  vector<vector<double>> weights;
+  /** the center of every raw face */
   vector<hyperpoint> face_centers;
   vector<vector<char>> dirdist;
   hyperpoint cellcenter;
@@ -498,6 +505,17 @@ hpcshape
   };
 #endif
 
+EX subcellshape& get_hsh() {
+  if(!cgi.heptshape) cgi.heptshape = (unique_ptr<subcellshape>) (new subcellshape);
+  return *cgi.heptshape;
+  }
+
+EX void add_wall(int i, const vector<hyperpoint>& h) {
+  auto& f = get_hsh().faces;
+  if(isize(f) <= i) f.resize(i+1);
+  f[i] = h;
+  }
+
 /** values of hcrossf and hexf for the standard geometry. Since polygons are 
  *  usually drawn in this geometry, the scale in other geometries is usually
  *  based on comparing these values to the values in the other geometry.
@@ -528,6 +546,8 @@ void geometry_information::prepare_basics() {
   ld fmin, fmax;  
   
   ld s3, beta;
+  
+  heptshape = nullptr;
 
   if(arcm::in() && !prod) 
     ginf[gArchimedean].cclass = gcHyperbolic;
@@ -661,6 +681,13 @@ void geometry_information::prepare_basics() {
   #if MAXMDIM >= 4
   if(reg3::in()) reg3::generate();
   if(euc::in(3)) euc::generate();
+  #if CAP_SOLV
+  else if(sn::in()) sn::create_faces();
+  #endif
+  #if CAP_BT
+  else if(bt::in()) bt::create_faces();
+  #endif
+  else if(nil) nilv::create_faces();
   #endif
   
   hybrid_finish:

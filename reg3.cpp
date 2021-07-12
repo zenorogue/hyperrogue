@@ -13,14 +13,26 @@
 namespace hr {
 #if MAXMDIM >= 4
 
+EX hyperpoint final_coords(hyperpoint h) {
+  if(sn::in() || !bt::in()) 
+    return ultra_normalize(h);
+  #if CAP_BT
+  if(bt::in()) {
+    ld yy = log(2) / 2;
+    return bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
+    }
+  #endif
+  return h;
+  }
+
 void subcellshape::compute_common() {
   reg3::make_vertices_only(vertices_only, faces);
 
   faces_local = faces;
-  for(auto& face: faces_local) for(auto& v: face) v = from_cellcenter * v;
+  for(auto& face: faces_local) for(auto& v: face) v = from_cellcenter * final_coords(v);
 
   vertices_only_local = vertices_only;
-  for(auto& v: vertices_only_local) v = from_cellcenter * v;
+  for(auto& v: vertices_only_local) v = from_cellcenter * final_coords(v);
 
   int N = isize(faces);
 
@@ -174,13 +186,12 @@ EX namespace reg3 {
       return;
       }
   
-    auto& hsh = cgi.heptshape;
-    hsh = unique_ptr<subcellshape>(new subcellshape);
+    auto& hsh = get_hsh();
     
     int& loop = cgi.loop;
     int& face = cgi.face;
     auto& spins = cgi.spins;
-    auto& cellshape = hsh->faces;
+    auto& cellshape = hsh.faces;
     auto& adjcheck = cgi.adjcheck;
   
     int& mid = cgi.schmid;
@@ -324,7 +335,7 @@ EX namespace reg3 {
       for(auto& vv: cellshape) for(auto& v: vv) v = T * v;
       }
 
-    hsh->compute_hept();
+    hsh.compute_hept();
     compute_ultra();
     
     generate_subcells();
@@ -1130,12 +1141,12 @@ EX namespace reg3 {
   
     void build_reps() {
       // start_game();
-      auto& hsh = cgi.heptshape;
+      auto& hsh = get_hsh();
       
       set<coord> boundaries;
       
       for(int a=0; a<12; a++)
-      for(int b=0; b<12; b++) if(hsh->dirdist[a][b] == 1) {
+      for(int b=0; b<12; b++) if(hsh.dirdist[a][b] == 1) {
         coord res = crystal::c0;
         int sa = a, sb = b;
         do {
@@ -1144,7 +1155,7 @@ EX namespace reg3 {
           sa = flip(sa);
           sb = flip(sb);
           swap(sa, sb);
-          sb = hsh->next_dir[sa][sb];
+          sb = hsh.next_dir[sa][sb];
           // sb = next_dirsa][sb];
           }
         while(a != sa || b != sb);

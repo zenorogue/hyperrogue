@@ -1280,10 +1280,9 @@ EX void generate() {
 
   auto v = euc::get_shifttable();
   
-  auto& hsh = cgi.heptshape;
-  hsh = unique_ptr<subcellshape>(new subcellshape);
+  auto& hsh = get_hsh();
 
-  auto& cs = hsh->faces;
+  auto& cs = hsh.faces;
 
   cgi.loop = 4;
   cgi.schmid = 3;
@@ -1348,7 +1347,7 @@ EX void generate() {
       }
     }
   
-  hsh->compute_hept();
+  hsh.compute_hept();
   #endif
   }
 

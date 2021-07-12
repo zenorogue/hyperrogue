@@ -795,10 +795,6 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
     reverse(vertices.begin(), vertices.end()),
     reverse(weights.begin(), weights.end());
 
-  #if CAP_BT
-  ld yy = log(2) / 2;
-  #endif
-
   bshape(shWall3D[id], PPR::WALL);
   last->flags |= POLY_TRIANGLES | POLY_PRINTABLE;
   
@@ -855,15 +851,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
         h = zshift(normalize_flat(h), center_altitude * (1-x-y) + altitudes[a] * x + altitudes[b] * y);
         hpcpush(h); return; 
         }
-      if(sn::in() || !bt::in()) { hpcpush(ultra_normalize(h)); return; }
-      #if CAP_BT
-      if(bt::in()) {
-        hyperpoint res = bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
-        hpcpush(res);
-        return;
-        }
-      #endif
-      hpcpush(h);
+      hpcpush(final_coords(h));
       });
     }
 
@@ -875,19 +863,12 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       hyperpoint h = (vertices[a] * (STEP-y) + vertices[(a+1)%n] * y)/STEP;
       if(prod) { 
         h = zshift(normalize_flat(h), (altitudes[a] * (STEP-y) + altitudes[(a+1)%n] * y) / STEP);
-        hpcpush(h); continue; 
+        hpcpush(h);
         }
-      if(nil)
-        h = nilv::on_geodesic(vertices[a], vertices[(a+1)%n], y * 1. / STEP);
-      if(sn::in() || !bt::in()) { hpcpush(ultra_normalize(h)); continue; }
-      #if CAP_BT
-      if(bt::in()) {
-        hyperpoint res = bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
-        hpcpush(res);
-        continue;
-        }
-      #endif
-      hpcpush(h);
+      else if(nil)
+        hpcpush(nilv::on_geodesic(vertices[a], vertices[(a+1)%n], y * 1. / STEP));
+      else
+        hpcpush(final_coords(h));
       }
     hpcpush(hpc[last->s]);
     }
@@ -909,14 +890,6 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
   shPlainWall3D[id] = shWall3D[id]; // force_triangles ? shWall3D[id] : shWireframe3D[id];
   }
 
-vector<hyperpoint> make4(hyperpoint a, hyperpoint b, hyperpoint c) {
-  return {a, b, b+c-a, c};
-  }
-
-vector<hyperpoint> make5(hyperpoint a, hyperpoint b, hyperpoint c) {
-  return {a, (a+b)/2, b, b+c-a, c};
-  }
-
 void geometry_information::reserve_wall3d(int i) {
   shWall3D.resize(i);
   shPlainWall3D.resize(i);
@@ -929,109 +902,11 @@ void geometry_information::create_wall3d() {
   if(WDIM == 2) return;
   reserve_wall3d(kite::in() ? 22 : hybri ? 0 : S7);
   
-  #if CAP_BT
-  if(GDIM == 3 && bt::in() && geometry == gBinary3) {
-    hyperpoint h00 = point3(-1,-1,-1);
-    hyperpoint h01 = point3(-1,0,-1);
-    hyperpoint h02 = point3(-1,+1,-1);
-    hyperpoint h10 = point3(0,-1,-1);
-    hyperpoint h11 = point3(0,0,-1);
-    hyperpoint h12 = point3(0,+1,-1);
-    hyperpoint h20 = point3(+1,-1,-1);
-    hyperpoint h21 = point3(+1,0,-1);
-    hyperpoint h22 = point3(+1,+1,-1);
-    hyperpoint down = point3(0,0,2);
-
-    make_wall(0, make4(h11, h01, h10));
-    make_wall(1, make4(h11, h21, h10));
-    make_wall(2, make4(h11, h01, h12));
-    make_wall(3, make4(h11, h21, h12));
-    make_wall(4, make5(h00, h02, h00+down));
-    make_wall(5, make5(h20, h22, h20+down));
-    make_wall(6, make5(h00, h20, h00+down));
-    make_wall(7, make5(h02, h22, h02+down));
-    make_wall(8, make4(h22+down, h02+down, h20+down));
-    }
-
-  if(GDIM == 3 && bt::in() && geometry == gHoroTris) {
-    ld r = sqrt(3)/6;
-    ld r1 = r;
-    ld r2 = r * 2;
-
-    hyperpoint t0 = point3(0,-r2,-1);
-    hyperpoint t1 = point3(+.5,r1,-1);
-    hyperpoint t2 = point3(-.5,r1,-1);
-    hyperpoint shift = point3(0,0,-3);
-    hyperpoint down = point3(0,0,2);
-    hyperpoint d0 = -2 * t0 + shift;
-    hyperpoint d1 = -2 * t1 + shift;
-    hyperpoint d2 = -2 * t2 + shift;
-
-    make_wall(0, {t0, t1, t2});
-    make_wall(1, {d0, t1, t2});
-    make_wall(2, {t0, d1, t2});
-    make_wall(3, {t0, t1, d2});
-    make_wall(4, make5(d2, d1, d2 + down));
-    make_wall(5, make5(d0, d2, d0 + down));
-    make_wall(6, make5(d1, d0, d1 + down));
-    make_wall(7, {d0+down, d1+down, d2+down});
-    }
-
-  if(geometry == gHoroRec) {
-    ld r2 = sqrt(2);
-    ld z = bt::hororec_scale;
-
-    hyperpoint a00 = point3(-r2*z,-2*z,-.5);
-    hyperpoint a01 = point3(+r2*z,-2*z,-.5);
-    hyperpoint a10 = point3(-r2*z, 0*z,-.5);
-    hyperpoint a11 = point3(+r2*z, 0*z,-.5);
-    hyperpoint a20 = point3(-r2*z,+2*z,-.5);
-    hyperpoint a21 = point3(+r2*z,+2*z,-.5);
-
-    hyperpoint down = point3(0,0,1);
-
-    make_wall(0, make4(a00, a01, a10));
-    make_wall(1, make4(a10, a11, a20));
-    make_wall(2, make5(a01, a21, a01+down));
-    make_wall(3, make4(a21, a20, a21+down));
-    make_wall(4, make5(a20, a00, a20+down));
-    make_wall(5, make4(a00, a01, a00+down));
-    make_wall(6, make4(a00+down, a01+down, a20+down));
-    }
-
-  if(geometry == gHoroHex) {
-    ld z = log(3) / log(2) / 2;
-    ld r3 = sqrt(3) / 2 * bt::horohex_scale;
-    ld h = bt::horohex_scale / 2;
-    hyperpoint down = point3(0,0,2*z);
-
-    for(int j=0; j<4; j++) for(int i=0; i<3; i++) {
-      transmatrix T = cspin(0, 1, 2*M_PI*i/3);
-
-      hyperpoint hcenter = point3(0,0,-z);
-      hyperpoint hu0 = T*point3(+h,  +r3,-z);
-      hyperpoint hu1 = T*point3(+h*3,+r3,-z);
-      hyperpoint hd0 = T*point3(+h,  -r3,-z);
-      hyperpoint hd1 = T*point3(+h*3,-r3,-z);
-      hyperpoint hcn = T*point3(-h*2,0,  -z);
-      hyperpoint hun = T*point3(-h*3,+r3,-z);
-      hyperpoint hdn = T*point3(-h*3,-r3,-z);
-      if(j == 0) make_wall(i, {hcenter, hu0, hu1, hd1, hd0});
-      if(j == 1) make_wall(i+3, {hcn, hun, hdn});
-      if(j == 2) make_wall(i+6, make4(hd1, hu1, hd1+down));
-      if(j == 3) make_wall(i+9, make4(hun, hdn, hun+down));
-      }
-
-    make_wall(12, {point3(3*h,r3,z), point3(0,2*r3,z), point3(-3*h,r3,z)});
-    make_wall(13, {point3(3*h,r3,z), point3(3*h,-r3,z), point3(0,-2*r3,z), point3(-3*h,-r3,z), point3(-3*h,r3,z)});
-    }
-  #endif
-  
-  if(prod) {
+  if(hybri) {
     walloffsets.clear();
     }
 
-  if(reg3::in() && !PURE) {
+  else if(reg3::in() && !PURE) {
     int tot = 0;
     for(auto& ss: cgi.subshapes) tot += isize(ss.faces);
     reserve_wall3d(tot);
@@ -1046,78 +921,18 @@ void geometry_information::create_wall3d() {
     return;
     }
 
-  if(euc::in() || reg3::in() || asonov::in()) {
+  else {
     auto& faces = cgi.heptshape->faces;
-    for(int w=0; w<isize(faces); w++)
-      make_wall(w, faces[w]);
-    }
-
-  if(geometry == gSol) {
-    ld zstep = -log(2) / 2;
-    ld bwh = vid.binary_width * zstep;
-    auto pt = [&] (int x, int y, int z) { return xpush(bwh*x) * ypush(bwh*y) * zpush(zstep*z) * C0; };
-    make_wall(0, {pt(-1,-1,-1), pt(-1,-1,+1), pt(-1,00,+1), pt(-1,+1,+1), pt(-1,+1,-1)});
-    make_wall(1, {pt(-1,-1,-1), pt(00,-1,-1), pt(+1,-1,-1), pt(+1,-1,+1), pt(-1,-1,+1)});
-    make_wall(2, {pt(+1,+1,-1), pt(+1,-1,-1), pt(00,-1,-1), pt(00,+1,-1)});
-    make_wall(3, {pt(00,+1,-1), pt(00,-1,-1), pt(-1,-1,-1), pt(-1,+1,-1)});
-    make_wall(4, {pt(+1,-1,-1), pt(+1,-1,+1), pt(+1,00,+1), pt(+1,+1,+1), pt(+1,+1,-1)});
-    make_wall(5, {pt(-1,+1,-1), pt(00,+1,-1), pt(+1,+1,-1), pt(+1,+1,+1), pt(-1,+1,+1)});
-    make_wall(6, {pt(-1,+1,+1), pt(+1,+1,+1), pt(+1,00,+1), pt(-1,00,+1)});
-    make_wall(7, {pt(-1,00,+1), pt(+1,00,+1), pt(+1,-1,+1), pt(-1,-1,+1)});
-    }
-
-  if(geometry == gNIH) {
-    ld zstep = .5;
-    ld bwh = vid.binary_width / 6;
-    auto pt = [&] (int x, int y, int z) { return xpush(bwh*x) * ypush(bwh*y) * zpush(zstep*z) * C0; };
-    make_wall(0, {pt(+3,-3,-1), pt(+3,-3,+1), pt(+3,+3,+1), pt(+3,+3,-1), pt(+3,+1,-1), pt(+3,-1,-1) });
-    make_wall(1, {pt(-3,+3,-1), pt(-3,+3,+1), pt(+3,+3,+1), pt(+3,+3,-1), pt(+0,+3,-1) });
-    make_wall(2, {pt(-3,-3,-1), pt(-3,-3,+1), pt(-3,+3,+1), pt(-3,+3,-1), pt(-3,+1,-1), pt(-3,-1,-1) });
-    make_wall(3, {pt(-3,-3,-1), pt(-3,-3,+1), pt(+3,-3,+1), pt(+3,-3,-1), pt(+0,-3,-1)});
-    
-    make_wall(4, {pt(-3,-3,+1), pt(-3,+3,+1), pt(+3,+3,+1), pt(+3,-3,+1)});
-    
-    for(int i=0; i<6; i++) {
-      int x = -3 + (i%2) * 3;
-      int y = -3 + (i/2) * 2;
-      make_wall(5+i, {pt(x,y,-1), pt(x+3,y,-1), pt(x+3,y+2,-1), pt(x,y+2,-1)});
+    auto& we = cgi.heptshape->weights;
+    if(we.empty()) {
+      for(int w=0; w<isize(faces); w++)
+        make_wall(w, faces[w]);
+      }
+    else {
+      for(int w=0; w<isize(faces); w++)
+        make_wall(w, faces[w], we[w]);
       }
     }
-  
-  if(geometry == gSolN) {
-    ld zstep = -.5;
-    ld bwh = vid.binary_width / 6;
-    auto pt = [&] (int x, int y, int z) { return xpush(bwh*x) * ypush(bwh*y) * zpush(zstep*z) * C0; };
-    make_wall(0, {pt(+3,-3,-1), pt(+3,-3,+1), pt(+3,-1,+1), pt(+3,+1,+1), pt(+3,+3,+1), pt(+3,+3,-1)});
-    make_wall(1, {pt(-3,+3,-1), pt(00,+3,-1), pt(+3,+3,-1), pt(+3,+3,+1), pt(-3,+3,+1)});
-    make_wall(2, {pt(-3,-3,-1), pt(-3,-3,+1), pt(-3,-1,+1), pt(-3,+1,+1), pt(-3,+3,+1), pt(-3,+3,-1)});
-    make_wall(3, {pt(-3,-3,-1), pt(00,-3,-1), pt(+3,-3,-1), pt(+3,-3,+1), pt(-3,-3,+1)});
-    make_wall(4, {pt(-3,+3,-1), pt(-3,-3,-1), pt(00,-3,-1), pt(00,+3,-1)});
-    make_wall(5, {pt(00,+3,-1), pt(00,-3,-1), pt(+3,-3,-1), pt(+3,+3,-1)});
-    make_wall(6, {pt(-3,-3,+1), pt(+3,-3,+1), pt(+3,-1,+1), pt(-3,-1,+1)});
-    make_wall(7, {pt(-3,-1,+1), pt(+3,-1,+1), pt(+3,+1,+1), pt(-3,+1,+1)});
-    make_wall(8, {pt(-3,+1,+1), pt(+3,+1,+1), pt(+3,+3,+1), pt(-3,+3,+1)});
-    }
-  
-  if(nil) {
-    for(int i=0; i<S7; i++) {
-      vector<hyperpoint> fvs = nilv::current_ns().facevertices[i];
-      using nilv::nilwidth;
-      for(auto& h: fvs) h[0] *= nilwidth, h[1] *= nilwidth, h[2] *= nilwidth * nilwidth;
-      make_wall(i, fvs);
-      }
-    }
-  
-  #if CAP_BT
-  if(kite::in()) {
-    auto kv = kite::make_walls();
-    for(auto& v: kv.first) for(auto& h: v) {
-      h = bt::deparabolic3(h);
-      h = point3(h[1], h[2], h[0] / (log(2)/2));
-      }
-    for(int i=0; i<isize(kv.first); i++) make_wall(i, kv.first[i], kv.second[i]);
-    }
-  #endif
 
   wallstart.push_back(isize(raywall));
   compute_cornerbonus();

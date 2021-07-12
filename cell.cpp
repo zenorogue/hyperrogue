@@ -75,7 +75,10 @@ struct hrmap {
     return currentmap->iadj(c, i);
     }
 
-  virtual subcellshape& get_cellshape(cell *c) { throw hr_exception("get_cellshape called unexpectedly"); }
+  virtual subcellshape& get_cellshape(cell *c) { 
+    if(cgi.heptshape) return *cgi.heptshape;
+    throw hr_exception("get_cellshape called unexpectedly"); 
+    }
 
   /** \brief in 3D honeycombs, returns a cellwalker res at cw->move(j) such that the face pointed at by cw and res share an edge */
   virtual cellwalker strafe(cellwalker cw, int j) { throw hr_exception("strafe called unexpectedly"); }
