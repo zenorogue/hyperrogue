@@ -1093,16 +1093,20 @@ EX int fatigue_cost(const movei& mi) {
     (againstWind(mi.s, mi.t) ? 0 : 1);
   }
 
+bool alchMayDuplicate(eWall w) {
+  return !isDie(w) && w != waBoat && w != waArrowTrap;
+}
+
 bool pcmove::perform_actual_move() {
   cell*& c2 = mi.t;
   changes.at_commit([&] {
     flipplayer = true; if(multi::players > 1) multi::flipped[multi::cpid] = true;
     });
   if(c2->item && isAlch(c2)) {
-    if(cwt.at->wall == waBoat)
-      c2->wall = waNone;
-    else
+    if(alchMayDuplicate(cwt.at->wall))
       c2->wall = cwt.at->wall;
+    else
+      c2->wall = waNone;
     }
   #if CAP_COMPLEX2
   if(c2->wall == waRoundTable) {
