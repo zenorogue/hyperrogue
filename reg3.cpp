@@ -70,6 +70,7 @@ void subcellshape::compute_sub() {
   cellcenter = normalize(gres);
   to_cellcenter = rgpushxto0(cellcenter);
   from_cellcenter = gpushxto0(cellcenter);
+  compute_common();
   }
 
 /** \brief regular three-dimensional tessellations */
