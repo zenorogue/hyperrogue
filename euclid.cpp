@@ -260,7 +260,7 @@ EX namespace euc {
         }
       }
     
-    transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+    transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
       if(eu.twisted) {
         if(h1 == h2) return Id;
         for(int s=0; s<S7; s++) if(h2 == h1->move(s)) return adj(h1, s);

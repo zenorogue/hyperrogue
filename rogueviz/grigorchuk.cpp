@@ -421,13 +421,13 @@ struct hrmap_grigorchuk : hrmap_standard {
       }
     }
   
-  transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+  transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
     if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
       return inverse_shift(gmatrix0[h1->c7], gmatrix0[h2->c7]);
     return Id;
     }
 
-  transmatrix relative_matrix(cell *c2, cell *c1, const struct hyperpoint& hint) override {
+  transmatrix relative_matrixc(cell *c2, cell *c1, const struct hyperpoint& hint) override {
     if(gmatrix0.count(c2) && gmatrix0.count(c1))
       return inverse_shift(gmatrix0[c1], gmatrix0[c2]);
     return Id;

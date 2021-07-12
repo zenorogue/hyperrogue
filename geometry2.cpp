@@ -120,11 +120,11 @@ EX transmatrix relative_matrix_via_masters(cell *c2, cell *c1, const hyperpoint&
   return gm * U * where;
   }
 
-transmatrix hrmap_standard::relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
+transmatrix hrmap_standard::relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) {
   return relative_matrix_via_masters(c2, c1, hint);
   }
 
-transmatrix hrmap_standard::relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) {
+transmatrix hrmap_standard::relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) {
 
   transmatrix gm = Id, where = Id;
   // always add to last!

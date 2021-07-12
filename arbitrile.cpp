@@ -807,7 +807,7 @@ struct hrmap_arbi : hrmap {
     return h1;
     }
   
-  transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+  transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
     return relative_matrix_recursive(h2, h1);
     }
 

@@ -689,7 +689,7 @@ EX namespace reg3 {
 
     heptagon *getOrigin() override { return allh[0]; }
 
-    transmatrix relative_matrix(cell *h2, cell *h1, const hyperpoint& hint) override;
+    transmatrix relative_matrixc(cell *h2, cell *h1, const hyperpoint& hint) override;
     
     void initialize(int cell_count);
     vector<cell*>& allcells() override { return acells; }
@@ -950,7 +950,7 @@ EX namespace reg3 {
     if(failures && !testing_subconnections) throw hr_exception("hrmap_closed3 failures");
     }
 
-  transmatrix hrmap_closed3::relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
+  transmatrix hrmap_closed3::relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) {
     if(c1 == c2) return Id;
     int d = hr::celldistance(c2, c1);
 
@@ -1505,7 +1505,7 @@ EX namespace reg3 {
       return relative_matrix(h->cmove(d), h, C0);
       }
      
-    transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+    transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
       auto p1 = reg_gmatrix[h1];
       auto p2 = reg_gmatrix[h2];
       transmatrix T = Id;
@@ -1613,7 +1613,7 @@ EX namespace reg3 {
       clearfrom(allh[0]);
       }    
 
-    struct transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+    transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
       return iso_inverse(locations[h1->fieldval]) * locations[h2->fieldval];
       }
 
@@ -1927,11 +1927,11 @@ EX namespace reg3 {
       return quotient_map->adj(h, d);
       }
      
-    transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+    transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
       return relative_matrix_recursive(h2, h1);
       }
     
-    transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override {
+    transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) override {
       if(PURE) return relative_matrix(c2->master, c1->master, hint);
       return relative_matrix_via_masters(c2, c1, hint);
       }

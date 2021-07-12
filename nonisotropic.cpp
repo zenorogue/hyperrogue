@@ -425,7 +425,7 @@ EX namespace sn {
       h->cmove(d); return adjmatrix(d, h->c.spin(d));
       }
     
-    virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override { 
+    transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override { 
       for(int i=0; i<h1->type; i++) if(h1->move(i) == h2) return adjmatrix(i, h1->c.spin(i));
       if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
         return inverse_shift(gmatrix0[h1->c7], gmatrix0[h2->c7]);
@@ -943,7 +943,7 @@ EX namespace nilv {
 
     transmatrix adj(heptagon *h, int i) override { return adjmatrix(i); }
   
-    virtual transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override { 
+    transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override { 
       for(int a=0; a<S7; a++) if(h2 == h1->move(a)) return adjmatrix(a);
       auto p = coords[h1].inverse() * coords[h2];
       for(int a=0; a<3; a++) p[a] = szgmod(p[a], nilperiod[a]);     
@@ -1518,7 +1518,7 @@ EX namespace product {
   int z0;
   
   struct hrmap_product : hybrid::hrmap_hybrid {
-    transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override {
+    transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) override {
       return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, hint); }) * mscale(Id, cgi.plevel * szgmod(where[c2].second - where[c1].second, hybrid::csteps));
       }
 
@@ -2079,7 +2079,7 @@ EX namespace rots {
       return M = lift_matrix(PIU(currentmap->adj(cw, i)));      
       }
     
-    virtual transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override { 
+    transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) override { 
       if(c1 == c2) return Id;
       if(gmatrix0.count(c2) && gmatrix0.count(c1))
         return inverse_shift(gmatrix0[c1], gmatrix0[c2]);
@@ -2087,7 +2087,7 @@ EX namespace rots {
       return Id; // not implemented yet
       }
 
-    virtual transmatrix ray_iadj(cell *c1, int i) override {
+    transmatrix ray_iadj(cell *c1, int i) override {
       if(i == c1->type-1) return uzpush(-cgi.plevel) * spin(-2*cgi.plevel);
       if(i == c1->type-2) return uzpush(+cgi.plevel) * spin(+2*cgi.plevel);
       cell *c2 = c1->cmove(i);
