@@ -56,7 +56,7 @@ struct drawqueueitem {
   virtual void draw() = 0;
   /** \brief Draw the object as background. */
   virtual void draw_back() {}
-  virtual ~drawqueueitem() {}
+  virtual ~drawqueueitem() = default;
   /** \brief When minimizing OpenGL calls, we need to group items of the same color, etc. together. This value is used as an extra sorting key. */
   virtual color_t outline_group() = 0;
   };
@@ -85,12 +85,12 @@ struct dqi_poly : drawqueueitem {
   hyperpoint intester;
   /** \brief temporarily cached data */
   float cache;
-  void draw();
+  void draw() override;
   #if CAP_GL
   void gldraw();
   #endif
-  void draw_back();
-  virtual color_t outline_group() { return outline; }
+  void draw_back() override;
+  color_t outline_group() override { return outline; }
   };
 
 /** \brief Drawqueueitem used to draw lines */
@@ -101,9 +101,9 @@ struct dqi_line : drawqueueitem {
   int prf;
   /** \brief width of this line */
   double width;
-  void draw();
-  void draw_back();
-  virtual color_t outline_group() { return color; }
+  void draw() override;
+  void draw_back() override;
+  color_t outline_group() override { return color; }
   };
 
 /** \brief Drawqueueitem used to draw strings, using sccreen coodinates */      
@@ -120,8 +120,8 @@ struct dqi_string : drawqueueitem {
   int frame;
   /** alignment (0-8-16) */
   int align;
-  void draw();
-  virtual color_t outline_group() { return 1; }
+  void draw() override;
+  color_t outline_group() override { return 1; }
   };
 
 /** Drawqueueitem used to draw circles, using screen coordinates */
@@ -134,16 +134,16 @@ struct dqi_circle : drawqueueitem {
   color_t fillcolor;
   /** \brief width of the circle */
   double linewidth;
-  void draw();
-  virtual color_t outline_group() { return 2; }
+  void draw() override;
+  color_t outline_group() override { return 2; }
   };
 
 /** \brief Perform an arbitrary action. May temporarily change the model, etc. */
 struct dqi_action : drawqueueitem {
   reaction_t action;
-  dqi_action(const reaction_t& a) : action(a) {}
-  void draw() { action(); }
-  virtual color_t outline_group() { return 2; }
+  explicit dqi_action(const reaction_t& a) : action(a) {}
+  void draw() override { action(); }
+  color_t outline_group() override { return 2; }
   };
 #endif
 

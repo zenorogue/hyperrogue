@@ -27,9 +27,9 @@ struct supersaver {
   virtual void load(const string& s) = 0;
   virtual bool dosave() = 0;
   virtual void reset() = 0;
-  virtual ~supersaver() {}
   virtual bool affects(void* v) { return false; }
   virtual void set_default() = 0;
+  virtual ~supersaver() = default;
   };
 
 typedef vector<shared_ptr<supersaver>> saverlist;
@@ -56,7 +56,7 @@ struct setting {
     return parameter_name + "|" + config_name + "|" + menu_item_name + "|" + help_text;
     }
   virtual cld get_cld() = 0;
-  setting() { restrict = auto_restrict; is_editable = false; }
+  explicit setting() { restrict = auto_restrict; is_editable = false; }
   virtual void check_change() {
     cld val = get_cld();
     if(val != last_value) {
@@ -68,7 +68,7 @@ struct setting {
   setting *set_sets(const reaction_t& s) { sets = s; return this; }
   setting *set_extra(const reaction_t& r);
   setting *set_reaction(const reaction_t& r);
-  virtual ~setting() {}
+  virtual ~setting() = default;
   virtual void load_from(const string& s) {
     println(hlog, "cannot load this parameter");
     exit(1);
@@ -100,7 +100,7 @@ struct list_setting : setting {
     default_key = key;
     return this;
     }
-  virtual void show_edit_option(char key) override;
+  void show_edit_option(char key) override;
   };
 
 template<class T> struct enum_setting : list_setting {
@@ -108,10 +108,10 @@ template<class T> struct enum_setting : list_setting {
   T dft;
   int get_value() override { return (int) *value; }
   void set_value(int i) override { *value = (T) i; }
-  virtual bool affects(void* v) override { return v == value; }
-  virtual void add_as_saver() override;
-  virtual cld get_cld() override { return get_value(); }
-  virtual void load_from(const string& s) override {
+  bool affects(void* v) override { return v == value; }
+  void add_as_saver() override;
+  cld get_cld() override { return get_value(); }
+  void load_from(const string& s) override {
     *value = (T) parseint(s);
     }
   };
@@ -134,11 +134,10 @@ struct float_setting : public setting {
   function<void(float_setting*)> modify_me;
   float_setting *modif(const function<void(float_setting*)>& r) { modify_me = r; return this; }
   void add_as_saver() override;
-  virtual bool affects(void *v) override { return v == value; }
-  virtual void show_edit_option(char key) override;
-  virtual cld get_cld() override { return *value; }
-
-  virtual void load_from(const string& s) override;
+  bool affects(void *v) override { return v == value; }
+  void show_edit_option(char key) override;
+  cld get_cld() override { return *value; }
+  void load_from(const string& s) override;
   };
 
 struct int_setting : public setting {
@@ -149,9 +148,9 @@ struct int_setting : public setting {
   void add_as_saver() override;
   function<void(int_setting*)> modify_me;
   int_setting *modif(const function<void(int_setting*)>& r) { modify_me = r; return this; }
-  virtual bool affects(void *v) override { return v == value; }
-  virtual void show_edit_option(char key) override;
-  virtual cld get_cld() override { return *value; }
+  bool affects(void *v) override { return v == value; }
+  void show_edit_option(char key) override;
+  cld get_cld() override { return *value; }
   int_setting *editable(int min_value, int max_value, ld step, string menu_item_name, string help_text, char key) {
     this->min_value = min_value;
     this->max_value = max_value;
@@ -162,7 +161,7 @@ struct int_setting : public setting {
     return this;
     }
 
-  virtual void load_from(const string& s) override {
+  void load_from(const string& s) override {
     *value = parseint(s);
     }
   };
@@ -176,10 +175,10 @@ struct bool_setting : public setting {
     is_editable = true;
     menu_item_name = cap; default_key = key; return this; 
     } 
-  virtual bool affects(void *v) override { return v == value; }
-  virtual void show_edit_option(char key) override;
-  virtual cld get_cld() override { return *value ? 1 : 0; }
-  virtual void load_from(const string& s) override {
+  bool affects(void *v) override { return v == value; }
+  void show_edit_option(char key) override;
+  cld get_cld() override { return *value ? 1 : 0; }
+  void load_from(const string& s) override {
     *value = parseint(s);
     }
   };
@@ -188,9 +187,9 @@ struct custom_setting : public setting {
   function<void(char)> custom_viewer;
   function<cld()> custom_value;
   function<bool(void*)> custom_affect;
-  virtual void show_edit_option(char key) override { custom_viewer(key); }
-  virtual cld get_cld() override { return custom_value(); }
-  virtual bool affects(void *v) override { return custom_affect(v); }
+  void show_edit_option(char key) override { custom_viewer(key); }
+  cld get_cld() override { return custom_value(); }
+  bool affects(void *v) override { return custom_affect(v); }
   };
   
 #if CAP_CONFIG
@@ -198,11 +197,11 @@ struct custom_setting : public setting {
 template<class T> struct dsaver : supersaver {
   T& val;
   T dft;
-  bool dosave() { return val != dft; }
-  void reset() { val = dft; }
-  dsaver(T& val) : val(val) { }
-  bool affects(void* v) { return v == &val; }
-  void set_default() { dft = val; }
+  bool dosave() override { return val != dft; }
+  void reset() override { val = dft; }
+  explicit dsaver(T& val) : val(val) { }
+  bool affects(void* v) override { return v == &val; }
+  void set_default() override { dft = val; }
   };
 
 template<class T> struct saver : dsaver<T> {};
@@ -233,13 +232,13 @@ template<class T> void set_saver_default(T& val) {
 template<class T> struct saverenum : supersaver {
   T& val;
   T dft;
-  bool dosave() { return val != dft; }
-  void reset() { val = dft; }
-  saverenum<T>(T& v) : val(v) { }
-  string save() { return its(int(val)); }
-  void load(const string& s) { val = (T) atoi(s.c_str()); }
-  virtual bool affects(void* v) { return v == &val; }
-  virtual void set_default() { dft = val; }
+  explicit saverenum(T& v) : val(v) { }
+  bool dosave() override { return val != dft; }
+  void reset() override { val = dft; }
+  string save() override { return its(int(val)); }
+  void load(const string& s) override { val = (T) atoi(s.c_str()); }
+  bool affects(void* v) override { return v == &val; }
+  void set_default() override { dft = val; }
   };
 
 template<class T, class U> void addsaverenum(T& i, U name, T dft) {
@@ -254,39 +253,39 @@ template<class T, class U> void addsaverenum(T& i, U name) {
   }
 
 template<> struct saver<int> : dsaver<int> {
-  saver<int>(int& val) : dsaver<int>(val) { }
-  string save() { return its(val); }
-  void load(const string& s) { val = atoi(s.c_str()); }
+  explicit saver(int& val) : dsaver<int>(val) { }
+  string save() override { return its(val); }
+  void load(const string& s) override { val = atoi(s.c_str()); }
   };
 
 template<> struct saver<char> : dsaver<char> {
-  saver<char>(char& val) : dsaver<char>(val) { }
-  string save() { return its(val); }
-  void load(const string& s) { val = atoi(s.c_str()); }
+  explicit saver(char& val) : dsaver<char>(val) { }
+  string save() override { return its(val); }
+  void load(const string& s) override { val = atoi(s.c_str()); }
   };
 
 template<> struct saver<bool> : dsaver<bool> {
-  saver<bool>(bool& val) : dsaver<bool>(val) { }
-  string save() { return val ? "yes" : "no"; }
-  void load(const string& s) { val = isize(s) && s[0] == 'y'; }
+  explicit saver(bool& val) : dsaver<bool>(val) { }
+  string save() override { return val ? "yes" : "no"; }
+  void load(const string& s) override { val = isize(s) && s[0] == 'y'; }
   };
 
 template<> struct saver<unsigned> : dsaver<unsigned> {
-  saver<unsigned>(unsigned& val) : dsaver<unsigned>(val) { }
-  string save() { return itsh(val); }
-  void load(const string& s) { val = (unsigned) strtoll(s.c_str(), NULL, 16); }
+  explicit saver(unsigned& val) : dsaver<unsigned>(val) { }
+  string save() override { return itsh(val); }
+  void load(const string& s) override { val = (unsigned) strtoll(s.c_str(), NULL, 16); }
   };
 
 template<> struct saver<string> : dsaver<string> {
-  saver<string>(string& val) : dsaver<string>(val) { }
-  string save() { return val; }
-  void load(const string& s) { val = s; }
+  explicit saver(string& val) : dsaver<string>(val) { }
+  string save() override { return val; }
+  void load(const string& s) override { val = s; }
   };
 
 template<> struct saver<ld> : dsaver<ld> {
-  saver<ld>(ld& val) : dsaver<ld>(val) { }
-  string save() { return fts(val, 10); }
-  void load(const string& s) { 
+  explicit saver(ld& val) : dsaver<ld>(val) { }
+  string save() override { return fts(val, 10); }
+  void load(const string& s) override {
     if(s == "0.0000000000e+000") ; // ignore!
     else val = atof(s.c_str()); 
     }

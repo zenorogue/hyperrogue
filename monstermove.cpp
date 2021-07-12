@@ -567,7 +567,7 @@ EX int totalbulldistance(cell *c, int k) {
   shpos.resize(SHSIZE);
   int tbd = 0;
   for(int p: player_indices()) {
-    cell *c2  = shpos[p][(cshpos+SHSIZE-k-1)%SHSIZE];
+    cell *c2  = shpos[(cshpos+SHSIZE-k-1)%SHSIZE][p];
     if(c2) tbd += bulldistance(c, c2);
     }
   return tbd;

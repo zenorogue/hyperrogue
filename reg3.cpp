@@ -654,7 +654,7 @@ EX namespace reg3 {
     int h_id;
     /** transition matrix to that heptagon */
     transmatrix T;
-    /** the sequence of moves we need to make to get there */;
+    /** the sequence of moves we need to make to get there */
     vector<int> move_sequence;
     };
   
@@ -685,7 +685,7 @@ EX namespace reg3 {
       return cgi.subshapes[id].vertices_only_local;
       }
 
-    transmatrix master_relative(cell *c, bool get_inverse) {
+    transmatrix master_relative(cell *c, bool get_inverse) override {
       int id = local_id.at(c).second;
       auto& ss = cgi.subshapes[id];
       return get_inverse ? ss.from_cellcenter : ss.to_cellcenter;
@@ -694,11 +694,11 @@ EX namespace reg3 {
     void make_subconnections();
     
     int wall_offset(cell *c) override;
-    int shvid(cell *c) { return local_id.at(c).second; }
+    int shvid(cell *c) override { return local_id.at(c).second; }
     
-    virtual transmatrix ray_iadj(cell *c, int i) override;
+    transmatrix ray_iadj(cell *c, int i) override;
 
-    const vector<char>& dirdist(cell *c, int i) { 
+    const vector<char>& dirdist(cell *c, int i) override { 
       int id = local_id.at(c).second;
       return cgi.subshapes[id].dirdist[i];
       }
@@ -1521,7 +1521,7 @@ EX namespace reg3 {
       return cgi.vertices_only;
       }
 
-    const vector<char>& dirdist(cell *c, int i) { 
+    const vector<char>& dirdist(cell *c, int i) override { 
       return cgi.dirdist[i];
       }
 
@@ -1613,7 +1613,7 @@ EX namespace reg3 {
       clearfrom(allh[0]);
       }    
 
-    virtual struct transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+    struct transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
       return iso_inverse(locations[h1->fieldval]) * locations[h2->fieldval];
       }
 
@@ -1932,13 +1932,13 @@ EX namespace reg3 {
       return relative_matrix_via_masters(c2, c1, hint);
       }
     
-    transmatrix master_relative(cell *c, bool get_inverse) {
+    transmatrix master_relative(cell *c, bool get_inverse) override {
       if(PURE) return Id;
       int aid = cell_id.at(c);
       return quotient_map->master_relative(quotient_map->acells[aid], get_inverse);
       }
 
-    int shvid(cell *c) {
+    int shvid(cell *c) override {
       if(PURE) return 0;
       if(!cell_id.count(c)) return quotient_map->shvid(c);
       int aid = cell_id.at(c);
@@ -1994,14 +1994,14 @@ EX namespace reg3 {
       c->c.connect(d, c1, ac->c.spin(d), false);
       }
 
-    virtual transmatrix ray_iadj(cell *c, int i) {
+    transmatrix ray_iadj(cell *c, int i) override {
       if(PURE) return iadj(c, i);
       if(!cell_id.count(c)) return quotient_map->ray_iadj(c, i); /* necessary because ray samples are from quotient_map */
       int aid = cell_id.at(c);
       return quotient_map->ray_iadj(quotient_map->acells[aid], i);
       }
 
-    const vector<char>& dirdist(cell *c, int i) { 
+    const vector<char>& dirdist(cell *c, int i) override { 
       if(PURE) return cgi.dirdist[i];
       int aid = cell_id.at(c);
       return quotient_map->dirdist(quotient_map->acells[aid], i);

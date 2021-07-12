@@ -64,16 +64,16 @@ struct hrmap_quotient : hrmap_standard {
   
   void build();
   
-  hrmap_quotient() {
+  explicit hrmap_quotient() {
     generate_connections();    
     build();
     }
 
-  hrmap_quotient(const vector<int>& con) : connections(con) {
+  explicit hrmap_quotient(const vector<int>& con) : connections(con) {
     build();
     }
 
-  heptagon *getOrigin() { return allh[0]; }
+  heptagon *getOrigin() override { return allh[0]; }
 
   ~hrmap_quotient() {
     for(int i=0; i<isize(allh); i++) {
@@ -82,7 +82,7 @@ struct hrmap_quotient : hrmap_standard {
       }
     }
   
-  vector<cell*>& allcells() { return celllist; }
+  vector<cell*>& allcells() override { return celllist; }
   };
 #endif
   
