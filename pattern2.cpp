@@ -664,10 +664,10 @@ EX namespace patterns {
       si.reflect = false;
       }
     else {
-      int ids = 0, tids = 0, td = 0;
+      int ids = 0, td = 0;
       for(int i=0; i<S3; i++) {
         int d = c->move(2*i)->master->fieldval;
-        ids |= (1<<d); tids += d;
+        ids |= (1<<d);
         }
       for(int i=0; i<S3; i++) {
         int d = c->move(2*i)->master->fieldval;

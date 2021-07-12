@@ -2510,9 +2510,9 @@ void celldrawer::add_map_effects() {
   }
 
 void celldrawer::draw_gravity_particles() {
-  int u = (int)(size_t)(c);
+  unsigned int u = (unsigned int)(size_t)(c);
   u = ((u * 137) + (u % 1000) * 51) % 1000;
-  int tt = ticks + u; fractick(ticks, 900);
+  int tt = ticks + u;
   ld r0 = (tt % 900) / 1100.;
   ld r1 = (tt % 900 + 200) / 1100.;
   

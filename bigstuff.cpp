@@ -206,10 +206,11 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
   }
 
 #if MAXMDIM >= 4
-EX int hrandom_adjacent(int d) {
-  vector<int> choices = {d};
-  for(int a=0; a<S7; a++) if(cgi.dirs_adjacent[d][a]) choices.push_back(a);
-  return hrand_elt(choices, d);
+EX int hrandom_adjacent(cellwalker cw) {
+  auto& da = currentmap->adjacent_dirs(cw);  
+  vector<int> choices = {cw.spin};
+  for(int a=0; a<S7; a++) if(da[a]) choices.push_back(a);
+  return hrand_elt(choices, cw.spin);
   }
 #endif
 
@@ -271,7 +272,7 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
     #if MAXMDIM >= 4
     // in 3D honeycombs we vary the direction, but never for three successive i's
     if(WDIM == 3 && firststate == hsOrigin && (i%3))
-      bf.spin = hrandom_adjacent(bf.spin);
+      bf.spin = hrandom_adjacent(bf);
     #endif
     }
   cx[rad] = bf.at;
@@ -694,9 +695,12 @@ EX void buildEquidistant(cell *c) {
           if(cw.at->landparam != c->landparam-1) continue;
           if(!cw.at->landflags) continue;
           if(S7 == 6) c->landflags = 1;
-          else for(int j=0; j<S7; j++) if(cw.at->move(j) && cw.at->move(j)->landparam == c->landparam - 2 && !cgi.dirs_adjacent[j][cw.spin])
-            if(c->landparam == 2 ? cw.at->move(j)->land != laEndorian : cw.at->move(j)->landparam)
-              c->landflags = 1;
+          else {
+            auto& da = currentmap->adjacent_dirs(cw);
+            for(int j=0; j<S7; j++) if(cw.at->move(j) && cw.at->move(j)->landparam == c->landparam - 2 && !da[j])
+              if(c->landparam == 2 ? cw.at->move(j)->land != laEndorian : cw.at->move(j)->landparam)
+                c->landflags = 1;
+            }
           }
         }
       else if(c->landparam == 2) {
@@ -718,8 +722,11 @@ EX void buildEquidistant(cell *c) {
           if(cw.at->landparam != c->landparam-1) continue;
           if(!cw.at->landflags) continue;
           if(S7 == 6) c->landflags = 1;
-          else for(int j=0; j<S7; j++) if(cw.at->move(j) && cw.at->move(j)->landparam == c->landparam - 2 && !cgi.dirs_adjacent[j][cw.spin] && cw.at->move(j)->landflags)
-            c->landflags = 1;
+          else {
+            auto& da = currentmap->adjacent_dirs(cw);
+            for(int j=0; j<S7; j++) if(cw.at->move(j) && cw.at->move(j)->landparam == c->landparam - 2 && !da[j] && cw.at->move(j)->landflags)
+              c->landflags = 1;
+            }
           }
         }
       else {
@@ -1485,7 +1492,7 @@ EX bool good_for_wall(cell *c) {
   }
 
 EX bool walls_not_implemented() {
-  if(WDIM == 3 && !PURE) return true;
+  // if(WDIM == 3 && !PURE) return true;
   if(sphere || quotient || nonisotropic || (kite::in() && !bt::in()) || experimental) return true;
   return WDIM == 3 && (cgflags & qIDEAL);
   }
@@ -1994,8 +2001,8 @@ EX void generate_mines() {
   for(cell *c: currentmap->allcells())
     if(c->wall == waMineUnknown) 
       candidates.push_back(c);
+  hrandom_shuffle(candidates);
   bounded_mine_max = isize(candidates);
-  hrandom_shuffle(&candidates[0], bounded_mine_max);
   bounded_mine_quantity = int(bounded_mine_max * bounded_mine_percentage + 0.5);
   for(int i=0; i<bounded_mine_quantity; i++) candidates[i]->wall = waMineMine;
   }

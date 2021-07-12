@@ -1847,7 +1847,7 @@ EX namespace hive {
         }
       }
     
-    hrandom_shuffle(&bugtomove[0], isize(bugtomove));
+    hrandom_shuffle(bugtomove);
     sort(bugtomove.begin(), bugtomove.end());
     
     int battlecount = 0;
@@ -3611,7 +3611,7 @@ EX namespace windmap {
     vector<bool> inqueue(N, true);
     vector<int> tocheck;
     for(int i=0; i<N; i++) tocheck.push_back(i);
-    hrandom_shuffle(&tocheck[0], isize(tocheck));
+    hrandom_shuffle(tocheck);
     
     for(int a=0; a<isize(tocheck); a++) {
       if(a >= 200*N) { printf("does not converge\n"); break; }

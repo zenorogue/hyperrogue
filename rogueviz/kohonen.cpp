@@ -1253,7 +1253,7 @@ void fillgroups() {
   do_classify();
   vector<int> samples_to_sort;
   for(int i=0; i<samples; i++) samples_to_sort.push_back(i);
-  hrandom_shuffle(&samples_to_sort[0], samples);
+  hrandom_shuffle(samples_to_sort);
   for(int i=0; i<samples; i++) if(net[bids[i]].drawn_samples < net[bids[i]].max_group_here)
     showsample(i);
   distribute_neurons();

@@ -852,7 +852,7 @@ EX void ambush(cell *c, int dogs) {
   int v = valence();
   if(v > 4) {
     for(cell *c: cl.lst) if(cl.getdist(c) == d) around.push_back(c);
-    hrandom_shuffle(&around[0], isize(around));
+    hrandom_shuffle(around);
     }
   else {
     for(int tries=0; tries<10000; tries++) {

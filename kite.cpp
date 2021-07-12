@@ -339,7 +339,7 @@ struct hrmap_kite : hrmap {
     return gm * where;
     }
 
-  virtual int wall_offset(cell *c) {
+  int wall_offset(cell *c) override {
     if(WDIM == 3)
       return kite::getshape(c->master) == kite::pKite ? 10 : 0;
     else

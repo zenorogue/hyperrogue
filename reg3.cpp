@@ -256,9 +256,13 @@ EX namespace reg3 {
     adjcheck = hdist(tC0(cgi.adjmoves[0]), tC0(cgi.adjmoves[1])) * 1.0001;
 
     int numedges = 0;
-    for(int a=0; a<S7; a++) for(int b=0; b<S7; b++) {
-      dirs_adjacent[a][b] = a != b && hdist(tC0(cgi.adjmoves[a]), tC0(cgi.adjmoves[b])) < adjcheck;
-      if(dirs_adjacent[a][b]) numedges++;
+    dirs_adjacent.resize(S7);
+    for(int a=0; a<S7; a++) {
+      dirs_adjacent[a].resize(S7);
+      for(int b=0; b<S7; b++) {
+        dirs_adjacent[a][b] = a != b && hdist(tC0(cgi.adjmoves[a]), tC0(cgi.adjmoves[b])) < adjcheck;
+        if(dirs_adjacent[a][b]) numedges++;
+        }
       }
     DEBB(DF_GEOM, ("numedges = ", numedges));
     
@@ -612,6 +616,20 @@ EX namespace reg3 {
       ss.faces_local = ss.faces;
       for(auto& face: ss.faces_local) for(auto& v: face) v = ss.from_cellcenter * v;
       for(auto& v: ss.vertices_only_local) v = ss.from_cellcenter * v;
+      
+      int N = isize(ss.faces);
+      ss.dirs_adjacent.resize(N);
+      for(int i=0; i<N; i++) {
+        auto& da = ss.dirs_adjacent[i];
+        da.resize(N, false);
+        set<unsigned> cface;
+        for(auto& v: ss.faces[i]) cface.insert(bucketer(v));
+        for(int j=0; j<N; j++) {
+          int mutual = 0;
+          for(auto& w: ss.faces[j]) if(cface.count(bucketer(w))) mutual++;
+          da[j] = mutual == 2;
+          }
+        }
       }
 
     println(hlog, "subcells generated = ", isize(cgi.subshapes));
@@ -631,12 +649,13 @@ EX namespace reg3 {
     int h_id;
     /** transition matrix to that heptagon */
     transmatrix T;
-    /** the sequence of moves we need to make to get there */;
+    /** the sequence of moves we need to make to get there */
     vector<int> move_sequence;
     };
   
   struct hrmap_closed3 : hrmap {
     vector<heptagon*> allh;
+    vector<vector<vector<int>>> strafe_data;
     vector<vector<transmatrix>> tmatrices;    
     vector<vector<transmatrix>> tmatrices_cell;
     vector<cell*> acells;
@@ -661,7 +680,7 @@ EX namespace reg3 {
       return cgi.subshapes[id].vertices_only_local;
       }
 
-    transmatrix master_relative(cell *c, bool get_inverse) {
+    transmatrix master_relative(cell *c, bool get_inverse) override {
       int id = local_id.at(c).second;
       auto& ss = cgi.subshapes[id];
       return get_inverse ? ss.from_cellcenter : ss.to_cellcenter;
@@ -670,9 +689,19 @@ EX namespace reg3 {
     void make_subconnections();
     
     int wall_offset(cell *c) override;
-    int shvid(cell *c) { return local_id.at(c).second; }
+    int shvid(cell *c) override { return local_id.at(c).second; }
     
-    virtual transmatrix ray_iadj(cell *c, int i) override;
+    transmatrix ray_iadj(cell *c, int i) override;
+
+    const vector<bool>& adjacent_dirs(cell *c, int i) override {
+      int id = local_id.at(c).second;
+      return cgi.subshapes[id].dirs_adjacent[i];
+      }
+
+    cellwalker strafe(cellwalker cw, int j) override {
+      int id = local_id.at(cw.at).first;
+      return cellwalker(cw.at->cmove(j), strafe_data[id][j][cw.spin]);
+      }
     };
 
   struct hrmap_quotient3 : hrmap_closed3 { };
@@ -795,11 +824,15 @@ EX namespace reg3 {
         which_cell[c->master->fieldval][bucketer(ss[id].face_centers[i])].emplace_back(c, i);
       }
     
+    strafe_data.resize(isize(acells));
+    
     for(cell *c: acells) {
       int id = local_id[c].second;      
-      auto& tmcell = tmatrices_cell[local_id[c].first];
+      int cid = local_id[c].first;
+      auto& tmcell = tmatrices_cell[cid];
       vector<int> foundtab;
       vector<tuple<int, int, int>> foundtab_ids;
+      strafe_data[cid].resize(c->type);
       for(int i=0; i<c->type; i++) {
         int found = 0;
         hyperpoint ctr = ss[id].face_centers[i];
@@ -837,6 +870,25 @@ EX namespace reg3 {
                 auto& ms = move_sequences[local_id[c].first];
                 ms.push_back(path);
                 for(auto dir: va.move_sequence) ms.back().push_back(dir);
+
+                auto& sd = strafe_data[cid][i];                
+                sd.resize(c->type, -1);
+                
+                for(int i1=0; i1<c->type; i1++) {
+                  set<unsigned> facevertices;
+                  for(auto v: ss[id].faces[i1]) facevertices.insert(bucketer(v));
+                  if(ss[id].dirs_adjacent[i][i1]) {
+                    int found_strafe = 0;
+                    for(int j1=0; j1<c1->type; j1++) if(j1 != j) {
+                      int num = 0;
+                      for(auto v: ss[id1].faces[j1])
+                        if(facevertices.count(bucketer(T2*v)))
+                          num++;
+                      if(num == 2) sd[i1] = j1, found_strafe++;
+                      }
+                    if(found_strafe != 1) println(hlog, "found_strafe = ", found_strafe);
+                    }
+                  }
                 }
               foundtab_ids.emplace_back(va.h_id, id1, j);
               found++;
@@ -949,7 +1001,7 @@ EX namespace reg3 {
       plane.insert(cw);
       for(int i=0; i<S7; i++)
         if(cgi.dirs_adjacent[i][cw.spin])
-          make_plane(reg3::strafe(cw, i));
+          make_plane(strafe(cw, i));
       }
     
     
@@ -1437,6 +1489,21 @@ EX namespace reg3 {
     vector<hyperpoint> get_vertices(cell* c) override {
       return cgi.vertices_only;
       }
+
+    const vector<bool>& adjacent_dirs(cell *c, int i) override {
+      return cgi.dirs_adjacent[i];
+      }
+
+    cellwalker strafe(cellwalker cw, int j) override {
+      hyperpoint hfront = tC0(cgi.adjmoves[cw.spin]);
+      cw.at->cmove(j);
+      transmatrix T = currentmap->adj(cw.at, j);
+      for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
+        if(hdist(hfront, T * tC0(cgi.adjmoves[i])) < cgi.strafedist + .01)
+          return cellwalker(cw.at->cmove(j), i);
+      throw hr_exception("incorrect strafe");
+      }
+
     };
 
   struct hrmap_sphere3 : hrmap_closed3 {
@@ -1515,7 +1582,7 @@ EX namespace reg3 {
       clearfrom(allh[0]);
       }    
 
-    virtual struct transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+    struct transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
       return iso_inverse(locations[h1->fieldval]) * locations[h2->fieldval];
       }
 
@@ -1834,13 +1901,13 @@ EX namespace reg3 {
       return relative_matrix_via_masters(c2, c1, hint);
       }
     
-    transmatrix master_relative(cell *c, bool get_inverse) {
+    transmatrix master_relative(cell *c, bool get_inverse) override {
       if(PURE) return Id;
       int aid = cell_id.at(c);
       return quotient_map->master_relative(quotient_map->acells[aid], get_inverse);
       }
 
-    int shvid(cell *c) {
+    int shvid(cell *c) override {
       if(PURE) return 0;
       if(!cell_id.count(c)) return quotient_map->shvid(c);
       int aid = cell_id.at(c);
@@ -1896,11 +1963,35 @@ EX namespace reg3 {
       c->c.connect(d, c1, ac->c.spin(d), false);
       }
 
-    virtual transmatrix ray_iadj(cell *c, int i) {
+    transmatrix ray_iadj(cell *c, int i) override {
       if(PURE) return iadj(c, i);
       if(!cell_id.count(c)) return quotient_map->ray_iadj(c, i); /* necessary because ray samples are from quotient_map */
       int aid = cell_id.at(c);
       return quotient_map->ray_iadj(quotient_map->acells[aid], i);
+      }
+
+    const vector<bool>& adjacent_dirs(cell *c, int i) override { 
+      if(PURE) return cgi.dirs_adjacent[i];
+      int aid = cell_id.at(c);
+      return quotient_map->adjacent_dirs(quotient_map->acells[aid], i);
+      }
+
+    cellwalker strafe(cellwalker cw, int j) override {
+
+      hyperpoint hfront = tC0(cgi.adjmoves[cw.spin]);
+      cw.at->cmove(j);
+      transmatrix T = currentmap->adj(cw.at, j);
+      cellwalker res1;
+      for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
+        if(hdist(hfront, T * tC0(cgi.adjmoves[i])) < cgi.strafedist + .01)
+          res1 = cellwalker(cw.at->cmove(j), i);
+
+      int aid = PURE ? cw.at->master->fieldval : cell_id.at(cw.at);
+      auto res = quotient_map->strafe(cellwalker(quotient_map->acells[aid], cw.spin), j);
+      cellwalker res2 = cellwalker(cw.at->cmove(j), res.spin);
+      
+      if(PURE && res1 != res2) println(hlog, "h3: ", res1, " vs ", res2);
+      return res2;
       }
     };
 
@@ -2229,16 +2320,6 @@ int dist_alt(cell *c) {
 // as possible to cw.spin. Assume that j and cw.spin are adjacent
 
 #if MAXMDIM >= 4
-EX cellwalker strafe(cellwalker cw, int j) {
-  hyperpoint hfront = tC0(cgi.adjmoves[cw.spin]);
-  cw.at->cmove(j);
-  transmatrix T = currentmap->adj(cw.at, j);
-  for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
-    if(hdist(hfront, T * tC0(cgi.adjmoves[i])) < cgi.strafedist + .01)
-      return cellwalker(cw.at->cmove(j), i);
-  throw hr_exception("incorrect strafe");
-  }
-
 EX int matrix_order(const transmatrix A) {
   transmatrix T = A;
   int res = 1;

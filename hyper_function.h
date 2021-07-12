@@ -19,10 +19,10 @@ template<class T, class R, class... Args>
 struct function_state : function_state_base<R, Args...> {
     T t_;
     explicit function_state(T t) : t_(std::move(t)) {}
-    R call(Args... args) const /*override*/ {
+    R call(Args... args) const override {
         return const_cast<T&>(t_)(static_cast<Args&&>(args)...);
     }
-    function_state_base<R, Args...> *clone() const /*override*/ {
+    function_state_base<R, Args...> *clone() const override {
         return new function_state(*this);
     }
 };
