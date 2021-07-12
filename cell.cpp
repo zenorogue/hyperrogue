@@ -30,16 +30,21 @@ struct hrmap {
     printf("create_step called unexpectedly\n"); exit(1);
     return NULL;
     }
-  virtual struct transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) {
-    printf("relative_matrix called unexpectedly\n"); 
+private:
+  virtual transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) {
+    printf("relative_matrixh called unexpectedly\n"); 
     return Id;
     }
-  virtual struct transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) {
-    return relative_matrix(c2->master, c1->master, hint);
+  virtual transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) {
+    return relative_matrixh(c2->master, c1->master, hint);
     }
-  virtual struct transmatrix adj(cell *c, int i) { return adj(c->master, i); }
-  virtual struct transmatrix adj(heptagon *h, int i);
-  struct transmatrix iadj(cell *c, int i) { cell *c1 = c->cmove(i); return adj(c1, c->c.spin(i)); }
+public:
+  transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) { return relative_matrixh(h2, h1, hint); }
+  transmatrix relative_matrix(cell *h2, cell *h1, const hyperpoint& hint) { return relative_matrixc(h2, h1, hint); }
+  
+  virtual transmatrix adj(cell *c, int i) { return adj(c->master, i); }
+  virtual transmatrix adj(heptagon *h, int i);
+  transmatrix iadj(cell *c, int i) { cell *c1 = c->cmove(i); return adj(c1, c->c.spin(i)); }
   transmatrix iadj(heptagon *h, int d) { 
     heptagon *h1 = h->cmove(d); return adj(h1, h->c.spin(d));
     }
@@ -94,8 +99,8 @@ struct hrmap {
  **/
 struct hrmap_standard : hrmap {
   void draw_at(cell *at, const shiftmatrix& where) override;
-  transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override;
-  transmatrix relative_matrix(cell *c2, cell *c1, const hyperpoint& hint) override;
+  transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override;
+  transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) override;
   heptagon *create_step(heptagon *h, int direction) override;
   transmatrix adj(cell *c, int d) override;
   transmatrix adj(heptagon *h, int d) override;
