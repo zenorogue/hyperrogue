@@ -126,42 +126,51 @@ template<class T> struct walker;
 
 int gmod(int i, int j);
 
-template<class T> struct connection_table {
+template<class CRTP, class T>
+struct trailing_connection_table {
+  CRTP *crtp() { return static_cast<CRTP*>(this); }
 
-  /** \brief Table of moves. This is the maximum size, but tailored_alloc allocates less. */
-  T* move_table[FULL_EDGE + (FULL_EDGE + sizeof(char*) - 1) / sizeof(char*)];
-  
-  unsigned char *spintable() { return (unsigned char*) (&move_table[full()->degree()]); }
+  static size_t tailored_alloc_size(int degree) {
+    return sizeof(CRTP) + (degree * sizeof(T*)) + degree;
+    }
+  T **move_table() {
+    static_assert(alignof(CRTP) >= alignof(T*), "");
+    return (T **)(crtp() + 1);
+    }
+  unsigned char *spin_table() {
+    return (unsigned char *)(move_table() + crtp()->degree());
+    }
 
-  /** \brief get the full T from the pointer to this connection table */
-  T* full() { return (T*)((char*)this - offsetof(T, c)); }
+public:
+  trailing_connection_table& c = *this;  // ugly hack to let us say 'foo->c.spin(d)' instead of 'foo->spin(d)'
+
   /** \brief for the edge d, set the `spin` and `mirror` attributes */
   void setspin(int d, int spin, bool mirror) { 
-    unsigned char& c = spintable() [d];
+    unsigned char& c = spin_table()[d];
     c = spin;
     if(mirror) c |= 128;
     }
   /** \brief we are spin(i)-th neighbor of move[i] */
-  int spin(int d) { return spintable() [d] & 127; }
+  int spin(int d) { return spin_table()[d] & 127; }
   /** \brief on non-orientable surfaces, the d-th edge may be mirrored */
-  bool mirror(int d) { return spintable() [d] & 128; }  
+  bool mirror(int d) { return spin_table()[d] & 128; }  
   /** \brief 'fix' the edge number d to get the actual index in [0, degree()) */
-  int fix(int d) { return gmod(d, full()->degree()); }
+  int fix(int d) { return gmod(d, crtp()->degree()); }
   /** \brief T in the direction i */
-  T*& move(int i) { return move_table[i]; }
+  T*& move(int i) { return move_table()[i]; }
   /** \brief T in the direction i, modulo degree() */
   T*& modmove(int i) { return move(fix(i)); }
   unsigned char modspin(int i) { return spin(fix(i)); }
   /** \brief initialize the table */
-  void fullclear() { 
-    for(int i=0; i<full()->degree(); i++) move_table[i] = NULL;
+  void fullclear() {
+    for(int i=0; i < crtp()->degree(); i++) move_table()[i] = nullptr;
     }
   /** \brief connect this in direction d0 to c1 in direction d1, possibly mirrored */
   void connect(int d0, T* c1, int d1, bool m) {
     move(d0) = c1;
-    c1->move(d1) = full();
+    c1->move(d1) = crtp();
     setspin(d0, d1, m);
-    c1->c.setspin(d1, d0, m);    
+    c1->setspin(d1, d0, m);    
     }
   /* like the other connect, but take the parameters of the other cell from a walker */
   void connect(int d0, walker<T> hs) {
@@ -178,26 +187,18 @@ template<class T> struct connection_table {
  */
 
 template<class T> T* tailored_alloc(int degree) {
-#ifdef NO_TAILORED_ALLOC
-  T* result = new T;
-#else
-  size_t num_bytes = offsetof(T, c.move_table[0]) + (degree * sizeof(c.move_table[0])) + degree;
+  size_t num_bytes = T::tailored_alloc_size(degree);
   T* result = ::new (::operator new(num_bytes)) T;
-  static_assert(std::is_trivially_default_constructible<decltype(result->c.move_table)>::value, "");
-#endif
   result->type = degree;
-  for(int i=0; i<degree; i++) result->c.move_table[i] = nullptr;
+  for(int i=0; i<degree; i++) result->move_table()[i] = nullptr;
+  for(int i=0; i<degree; i++) result->spin_table()[i] = 0;
   return result;
   }
 
 /** \brief Counterpart to hr::tailored_alloc(). */
 template<class T> void tailored_delete(T* x) {
-#ifdef NO_TAILORED_ALLOC
-  delete x;
-#else
   x->~T();  
   ::operator delete((void*)x);
-#endif
   }
 
 static const struct wstep_t { wstep_t() {} } wstep;
@@ -317,7 +318,7 @@ constexpr int iteration_limit = 10000000;
  *  heptagons are unused
  */
 
-struct heptagon : cdata_or_heptagon {
+struct heptagon : cdata_or_heptagon, trailing_connection_table<heptagon, heptagon> {
   /** \brief Automata are used to generate the standard maps. s is the state of this automaton */
   hstate s : 6;
   /** \brief distance modulo 4, in heptagons */
@@ -348,9 +349,7 @@ struct heptagon : cdata_or_heptagon {
   cell *c7;
   /** \brief associated generator of alternate structure, for Camelot and horocycles */
   heptagon *alt;
-  /** \brief connection table */
-  connection_table<heptagon> c;
-  // DO NOT add any fields after connection_table! (see tailored_alloc)
+
   heptagon*& move(int d) { return c.move(d); }
   heptagon*& modmove(int d) { return c.modmove(d); }
   // functions
@@ -365,15 +364,12 @@ struct heptagon : cdata_or_heptagon {
   heptagon& operator=(const heptagon&) = delete;
   };
 
-struct cell : gcell {
+struct cell : gcell, trailing_connection_table<cell, cell> {
   char type;        ///< our degree
   int degree() { return type; }
 
   int listindex;    ///< used by celllister  
   heptagon *master; ///< heptagon who owns us; for 'masterless' tilings it contains coordinates instead
-
-  connection_table<cell> c;
-  // DO NOT add any fields after connection_table! (see tailored_alloc)
 
   cell*& move(int d) { return c.move(d); }
   cell*& modmove(int d) { return c.modmove(d); }

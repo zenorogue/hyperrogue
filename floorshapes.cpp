@@ -777,8 +777,8 @@ void geometry_information::generate_floorshapes() {
     for(int i=0; i<n; i++) {
       auto &ms = models[i];
       auto &mh = modelh[i];
-      for(auto& t: ms.c.move_table) t = nullptr;
-      for(auto& t: mh.c.move_table) t = nullptr;
+      ms.c.fullclear();
+      mh.c.fullclear();
       }
     for(int i=0; i<n; i++) {
       auto &ms = models[i];
