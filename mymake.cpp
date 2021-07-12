@@ -61,7 +61,7 @@ string os = "linux";
 
 void set_linux() {
   preprocessor = "g++ -E";
-  compiler = "g++ -Wall -Wextra -Wno-maybe-uninitialized -Wno-unused-parameter -Wno-implicit-fallthrough -rdynamic -fdiagnostics-color=always -c";
+  compiler = "g++ -Wall -Wextra -Wno-maybe-uninitialized -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-invalid-offsetof -rdynamic -fdiagnostics-color=always -c";
   linker = "g++ -rdynamic -o hyper";
   if(sdlver == 2) {
     opts = "-DFHS -DLINUX -I/usr/include/SDL2";
@@ -84,7 +84,7 @@ void set_mac() {
 void set_mingw64() {
   mingw64 = true;
   preprocessor = "g++ -E";
-  compiler = "g++ -mwindows -march=native -W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
+  compiler = "g++ -mwindows -march=native -W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-invalid-offsetof -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
   linker = "g++ -o hyper";
   opts = "-DWINDOWS -DCAP_GLEW=1 -DCAP_PNG=1";
   libs = " hyper.res -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
@@ -94,7 +94,7 @@ void set_mingw64() {
 /* cross-compile Linux to Windows (tested on Archlinux) */
 void set_mingw64_cross() {
   preprocessor = "x86_64-w64-mingw32-g++ -E";
-  compiler = "x86_64-w64-mingw32-g++ -mwindows -march=native -W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
+  compiler = "x86_64-w64-mingw32-g++ -mwindows -march=native -W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-invalid-offsetof -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
   linker = "x86_64-w64-mingw32-g++ -o hyper.exe";
   opts = "-DWINDOWS -DGLEW_STATIC -DUSE_STDFUNCTION=1 -DCAP_PNG=1 -I /usr/x86_64-w64-mingw32/include/SDL/";
   libs = " hyper64.res -static-libgcc -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
