@@ -1620,6 +1620,10 @@ EX namespace reg3 {
 
     };
 
+  EX const transmatrix& get_sphere_loc(int v) {
+    return ((hrmap_sphere3*)currentmap)->locations[v];
+    }
+
   struct hrmap_h3_rule : hrmap {
   
     heptagon *origin;
