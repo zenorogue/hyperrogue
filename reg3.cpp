@@ -619,6 +619,7 @@ EX namespace reg3 {
       ss.from_cellcenter = gpushxto0(ss.cellcenter);
       ss.faces_local = ss.faces;
       for(auto& face: ss.faces_local) for(auto& v: face) v = ss.from_cellcenter * v;
+      ss.vertices_only_local = ss.vertices_only;
       for(auto& v: ss.vertices_only_local) v = ss.from_cellcenter * v;
       
       int N = isize(ss.faces);
