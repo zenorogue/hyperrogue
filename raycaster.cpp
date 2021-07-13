@@ -1715,7 +1715,7 @@ struct raycast_map {
       if(in_e2xe() && i >= c->type-2)
         T = Id;
       for(int k=0; k<=isize(ms); k++) {
-        if(k < isize(ms) && !eqmatrix(ms[k], T)) continue;
+        if(k < isize(ms) && !eqmatrix(ms[k], T, 1e-5)) continue;
         if(k == isize(ms)) ms.push_back(T);
         connections[u][2] = (k+.5) / 1024.;
         break;
