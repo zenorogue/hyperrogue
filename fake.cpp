@@ -34,7 +34,7 @@ EX namespace fake {
     if(arcm::in() && PURE) return true;
     if(WDIM == 2) return false;
     if(among(geometry, gBitrunc3)) return false;
-    if(reg3::in() && !among(variation, eVariation::pure, eVariation::subcubes, eVariation::coxeter)) return false;
+    if(reg3::in() && !among(variation, eVariation::pure, eVariation::subcubes, eVariation::coxeter, eVariation::bch_oct)) return false;
     return euc::in() || reg3::in();
     }
   

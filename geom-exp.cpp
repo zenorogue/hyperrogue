@@ -1259,6 +1259,11 @@ int read_geom_args() {
     set_variation(eVariation::bch);
     shift(); reg3::subcube_count = argi();
     }
+  else if(argis("-bch-oct")) {
+    PHASEFROM(2);
+    set_variation(eVariation::bch_oct);
+    shift(); reg3::subcube_count = argi();
+    }
   else if(argis("-coxeter")) {
     PHASEFROM(2);
     set_variation(eVariation::coxeter);

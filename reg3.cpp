@@ -621,6 +621,49 @@ EX namespace reg3 {
       }
     }
 
+  EX void generate_bch_oct() {
+    if(S7 != 6) throw hr_exception("generate_bch_oct but no cubes");
+    const int sub = subcube_count;
+    if(1) {
+      auto vx = abs(cgi.heptshape->faces[0][0][0]);
+      auto vz = abs(cgi.heptshape->faces[0][0][3]);
+      array<int, 3> co;
+      // vx = 1; vz = 0;
+      for(co[0]=-sub; co[0]<sub; co[0]++)
+      for(co[1]=-sub; co[1]<sub; co[1]++)
+      for(co[2]=-sub; co[2]<sub; co[2]++) {
+        auto co1 = co;
+        array<ld, 3> sgn = {1,1,1};
+        if((co[1] ^ co[0]) & 1) co1[1]++, sgn[1] = -1;
+        if((co[2] ^ co[0]) & 1) co1[2]++, sgn[2] = -1;
+
+        hyperpoint ctr = Hypc;
+        ctr[3] = vz * sub;
+        
+        auto pt = [&] (int m, ld x0, ld x1, ld x2) {
+          hyperpoint res = ctr;
+          auto x = make_array(x0, x1, x2);
+          for(int i=0; i<3; i++)
+            res[i] = vx * (co1[i] + x[(m+i)%3] * sgn[i]);
+          return res;
+          };
+
+        for(int it=0; it<2; it++) {        
+          cgi.subshapes.emplace_back();
+          auto &ss = cgi.subshapes.back();
+          for(int m=0; m<3; m++) {
+            ss.faces.push_back({pt(m,0,0,0), pt(m,1,0,0), pt(m,1,0,.5), pt(m,.5,0,1), pt(m,0,0,1)});
+            ss.faces.push_back({pt(m,1,0,0), pt(m,1,0,.5), pt(m,1,.5,0) });
+            }
+          ss.faces.push_back({pt(0,1,0,.5), pt(0,1,.5,0), pt(0,.5,1,0), pt(0,0,1,.5), pt(0,0,.5,1), pt(0,.5,0,1)});
+          for(int d=0; d<3; d++)
+            co1[d] += sgn[d], sgn[d] *= -1;
+          println(hlog, ss.faces);
+          }
+        }
+      }
+    }
+
   EX void generate_subcells() {
     
     switch(variation) {
@@ -634,6 +677,10 @@ EX namespace reg3 {
       
       case eVariation::bch:
         generate_special_subcubes(true);
+        break;
+      
+      case eVariation::bch_oct:
+        generate_bch_oct();
         break;
       
       case eVariation::coxeter:

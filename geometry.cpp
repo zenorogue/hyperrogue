@@ -530,7 +530,7 @@ static const ld hcrossf7 = 0.620672, hexf7 = 0.378077, tessf7 = 1.090550, hexhex
 EX bool scale_used() { return (shmup::on && geometry == gNormal && BITRUNCATED) ? (cheater || autocheat) : true; }
 
 EX bool is_subcube_based(eVariation var) {
-  return among(var, eVariation::subcubes, eVariation::dual_subcubes, eVariation::bch);
+  return among(var, eVariation::subcubes, eVariation::dual_subcubes, eVariation::bch, eVariation::bch_oct);
   }
 
 EX bool is_reg3_variation(eVariation var) {
