@@ -396,7 +396,7 @@ struct hrmap_grigorchuk : hrmap_standard {
   void draw_at(cell *at, const shiftmatrix& where) override {
   
     dq::clear_all();
-    dq::enqueue_by_matrix(at->master, where * master_relative(centerover, true));
+    dq::enqueue_by_matrix(at->master, where * currentmap->master_relative(centerover, true));
     
     while(!dq::drawqueue.empty()) {      
       auto& p = dq::drawqueue.front();
@@ -414,7 +414,7 @@ struct hrmap_grigorchuk : hrmap_standard {
       if(patterns::whichCanvas == 'G' && c->landparam == 0)
         c->landparam = 0x102008 * (1 + ((hrmap_grigorchuk*)currentmap)->dec[c->master]->len);
       
-      drawcell(c, V * master_relative(c, false));
+      drawcell(c, V * currentmap->master_relative(c, false));
       
       for(int i=0; i<3; i++) if(c->move(i))
         dq::enqueue_by_matrix(h->cmove(i), optimized_shift(V * adj(h, i)));

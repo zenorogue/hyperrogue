@@ -31,8 +31,8 @@ void create_pentaroll(bool animated) {
   /* the construction */
   for(cell *c: cl.lst) {
     int common = 0;
-    for(auto& v: cgi.vertices_only)
-    for(auto& w: cgi.vertices_only)
+    for(auto& v: currentmap->get_cellshape(c).vertices_only_local)
+    for(auto& w: currentmap->get_cellshape(c).vertices_only_local)
       if(hdist(v, rel[c] * w) < 1e-6)
         common++;
       
@@ -49,7 +49,7 @@ void create_pentaroll(bool animated) {
     cellwalker cw(c0, i0);
     cw.peek()->wall = waPlatform;      
     if(cgi.face == 5)  {
-      cellwalker cw1 = reg3::strafe(cw, (i==1?cgi.face:i-1));
+      cellwalker cw1 = currentmap->strafe(cw, (i==1?cgi.face:i-1));
       cw1.peek()->wall = waWaxWall;
       cw1.peek()->landparam = hrand(0x1000000) | 0x808080;
       }
@@ -74,16 +74,16 @@ void animate() {
   int tb = int(t) % cgi.face;
   
   hyperpoint m;
-  for(int i=0; i<cgi.face; i++) m += cgi.vertices_only[i];
+  for(int i=0; i<cgi.face; i++) m += cgi.heptshape->vertices_only[i];
   m /= cgi.face;
   
   auto normm = [&] (hyperpoint h) {
     return normalize(lerp(m, h, how_far));
     };
   
-  hyperpoint h1 = normm(cgi.vertices_only[tb]);
-  hyperpoint h2 = normm(cgi.vertices_only[(tb+1) % cgi.face]);
-  hyperpoint h3 = normm(cgi.vertices_only[(tb+2) % cgi.face]);
+  hyperpoint h1 = normm(cgi.heptshape->vertices_only[tb]);
+  hyperpoint h2 = normm(cgi.heptshape->vertices_only[(tb+1) % cgi.face]);
+  hyperpoint h3 = normm(cgi.heptshape->vertices_only[(tb+2) % cgi.face]);
   
   hyperpoint a = gpushxto0(h2) * h1;
   hyperpoint b = gpushxto0(h2) * h3;

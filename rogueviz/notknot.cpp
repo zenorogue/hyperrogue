@@ -463,8 +463,8 @@ struct hrmap_notknot : hrmap {
     }
 
   bool adjacent_matrix(const transmatrix& Tk, const transmatrix& Tl) {
-    for(auto vk: cgi.vertices_only)
-    for(auto vl: cgi.vertices_only)
+    for(auto vk: cgi.heptshape->vertices_only)
+    for(auto vl: cgi.heptshape->vertices_only)
       if(hdist(Tk * vk, Tl * vl) < .01)
         return true;
     
@@ -492,7 +492,7 @@ struct hrmap_notknot : hrmap {
       return;
       }
     
-    for(auto& v: cgi.vertices_only) {
+    for(auto& v: cgi.heptshape->vertices_only) {
       map<heptagon*, ucover*> visited;
       vector<pair<ucover *, transmatrix>> q;
       
@@ -515,7 +515,7 @@ struct hrmap_notknot : hrmap {
           if(u2->state != 0) continue;
           auto T1 = T0 * adj(u1, i);
           bool adjacent = false;
-          for(auto& v2: cgi.vertices_only)
+          for(auto& v2: cgi.heptshape->vertices_only)
             if(hdist(T1 * v2, h) < 1e-5)
               adjacent = true;
           if(adjacent)
@@ -584,7 +584,7 @@ struct hrmap_notknot : hrmap {
           if(u2->iswall()) continue;
           transmatrix Tj = Ti * adj(at, j);
           bool adj = false;
-          for(auto v: cgi.vertices_only) for(auto v1: cgi.vertices_only)
+          for(auto v: cgi.heptshape->vertices_only) for(auto v1: cgi.heptshape->vertices_only)
             if(hdist(M * v1, Tj * v) < 1e-3) adj = true;
           
           if(adj) visit(at, u2, at->where->c.spin(j), Tj);
