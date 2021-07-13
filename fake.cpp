@@ -34,6 +34,7 @@ EX namespace fake {
     if(arcm::in() && PURE) return true;
     if(WDIM == 2) return false;
     if(among(geometry, gBitrunc3)) return false;
+    if(reg3::in() && !among(variation, eVariation::pure, eVariation::subcubes)) return false;
     return euc::in() || reg3::in();
     }
   
@@ -86,17 +87,35 @@ EX namespace fake {
     transmatrix adj(cell *c, int d) override {
       transmatrix S1, S2;
       ld dist;
+      if(variation == eVariation::subcubes && c->master == c->cmove(d)->master) {
+        auto& s1 = get_cellshape(c);
+        auto& s2 = get_cellshape(c->move(d));
+        return s1.from_cellcenter * s2.to_cellcenter;
+        }
       in_underlying([c, d, &S1, &S2, &dist] {
         #if CAP_ARCM
         dynamicval<bool> u(arcm::use_gmatrix, false);
         #endif
-        transmatrix T = currentmap->adj(c, d);
+        transmatrix T;
+        if(variation == eVariation::subcubes) {
+          T = currentmap->adj(c->master, d);
+          }
+        else {
+          T = currentmap->adj(c, d);
+          }
         S1 = rspintox(tC0(T));
         transmatrix T1 = spintox(tC0(T)) * T;
         dist = hdist0(tC0(T1));
         S2 = xpush(-dist) * T1;
         });
       
+      if(variation == eVariation::subcubes) {
+        auto& s1 = get_cellshape(c);
+        auto& s2 = get_cellshape(c->move(d));
+        S1 = s1.from_cellcenter * S1;
+        S2 = S2 * s2.to_cellcenter;
+        }
+
       #if CAP_ARCM
       if(arcm::in()) {
         int t = arcm::id_of(c->master);
@@ -289,6 +308,15 @@ EX namespace fake {
     ld spin_angle(cell *c, int d) override {
       return underlying_map->spin_angle(c,d);
       }
+
+    int shvid(cell *c) override {
+      return FPIU( currentmap->shvid(c) );
+      }
+
+    subcellshape& get_cellshape(cell *c) override {
+      return *FPIU( (cgip = pcgip, &(currentmap->get_cellshape(c))) );
+      }
+
     };
   
   EX hrmap* new_map() { return new hrmap_fake; }
@@ -298,6 +326,7 @@ EX namespace fake {
   #if HDR
   template<class T> auto in_underlying_geometry(const T& f) -> decltype(f()) {
     if(!fake::in()) return f();
+    pcgip = cgip; 
     dynamicval<eGeometry> g(geometry, underlying);
     dynamicval<eGeometry> gag(actual_geometry, geometry);
     dynamicval<geometry_information*> gc(cgip, underlying_cgip);
@@ -403,7 +432,9 @@ EX void generate() {
   
   compute_around(true);
   hsh.compute_hept();
-  reg3::compute_ultra();  
+  reg3::compute_ultra();
+  
+  reg3::generate_subcells();
   #endif
   }
 
