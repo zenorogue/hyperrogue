@@ -427,7 +427,7 @@ EX void generate() {
   
   hsh = *ucgi.heptshape;
 
-  for(int b=0; b<12; b++)
+  for(int b=0; b<32; b++)
     cgi.spins[b] = ucgi.spins[b];
   
   compute_around(true);
