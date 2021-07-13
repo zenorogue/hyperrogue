@@ -4421,3 +4421,35 @@ Mostly bugfixes:
 - Orb of Friendship no longer appears in Terracotta Army
 - The Orb of Beauty now lifts rose-scent restrictions on targeting of ranged orbs
 - fixed a memory leak when drawing text
+
+2021-07-13 22:24 Update 12.0d:
+
+New features:
+- variations are now supported for regular honeycombs
+- better handling of 3D honeycombs (e.g. minesweeper with vertex adjacency now should work correctly everywhere, reflective raytracers works in more cases, etc.)
+
+Bugfixes:
+- Copy wparam when copying wall
+- prevent slime from duplicating dice
+- Orb of Lava no longer intimidates allies
+- Fix typo in Windy Plains description
+- some fixes to the Russian translation
+- Fix array indexing in totalbulldistance
+- Fix crash by disallowing statue-dice swaps
+- Ivy to Vine no longer overwrites Round Table
+- Reversing the Curse of Water now gives bonus Orb of Winter (as intended)
+- Fix some messages when using Orb of the Warp
+- Cave transformation is fairer to players
+- Prairie no longer appears on Crossroads IV
+- Raging Bull can no longer push Princess onto player's cell
+- Only show chasm trails in special modes
+- Orb of Air can no longer push sharks
+- Dice can now be pushed onto items
+- Fix crash after using Orb of Domination
+- Fix 'nowhere to blow' message for happy dice
+- Curse of Weakness no longer allows pushing parts of multitile monsters
+- Orb of shield/shell no longer bypasses 'kraken will destroy boat' warning
+- Fix checkmate check when standing on an Orb of Speed
+- Irradiated Field: bull generation no longer breaks ivy
+- Fix several Friendly Ivy interactions
+
