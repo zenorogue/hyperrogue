@@ -818,6 +818,7 @@ bool pcmove::after_escape() {
     changes.ccell(cwt.at);
     
     c2->wall = cwt.at->wall;
+    c2->wparam = cwt.at->wparam;
     if(doesnotFall(cwt.at)) {
       cwt.at->wall = what;
       if(cellHalfvine(what)) 
@@ -1103,8 +1104,10 @@ bool pcmove::perform_actual_move() {
     flipplayer = true; if(multi::players > 1) multi::flipped[multi::cpid] = true;
     });
   if(c2->item && isAlch(c2)) {
-    if(alchMayDuplicate(cwt.at->wall))
+    if(alchMayDuplicate(cwt.at->wall)) {
       c2->wall = cwt.at->wall;
+      c2->wparam = cwt.at->wparam;
+      }
     else
       c2->wall = waNone;
     }
