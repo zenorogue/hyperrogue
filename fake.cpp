@@ -677,6 +677,11 @@ int readArgs() {
   using namespace arg;
            
   if(0) ;
+  else if(argis("-gfake-euc")) {
+    start_game();
+    around = compute_euclidean();
+    change_around();
+    }
   else if(argis("-gfake")) {
     start_game();
     shift_arg_formula(around, change_around);
