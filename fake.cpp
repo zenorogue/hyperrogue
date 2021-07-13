@@ -324,6 +324,14 @@ EX namespace fake {
       return *FPIU( (cgip = pcgip, &(currentmap->get_cellshape(c))) );
       }
 
+    transmatrix ray_iadj(cell *c, int i) override {
+      if(PURE) return iadj(c, i);      
+      auto& v = get_cellshape(c).faces_local[i];
+      hyperpoint h = 
+        project_on_triangle(v[0], v[1], v[2]);
+      transmatrix T = rspintox(h);
+      return T * xpush(-2*hdist0(h)) * spintox(h);
+      }
     };
   
   EX hrmap* new_map() { return new hrmap_fake; }
