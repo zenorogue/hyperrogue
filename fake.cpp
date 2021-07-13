@@ -241,7 +241,7 @@ EX namespace fake {
         }
       }
 
-    transmatrix relative_matrix(cell *h2, cell *h1, const hyperpoint& hint) override {
+    transmatrix relative_matrixc(cell *h2, cell *h1, const hyperpoint& hint) override {
       if(arcm::in()) return underlying_map->relative_matrix(h2, h1, hint);
       if(h1 == h2) return Id;
   
@@ -251,7 +251,7 @@ EX namespace fake {
       return Id;
       }
 
-    transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+    transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
       if(arcm::in()) return underlying_map->relative_matrix(h2, h1, hint);
       return relative_matrix(h2->c7, h1->c7, hint);
       }

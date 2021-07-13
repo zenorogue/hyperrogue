@@ -1103,7 +1103,7 @@ struct hrmap_notknot : hrmap {
     ray::volumetric::enable();
     }
   
-  transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+  transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
     return Id;
     }
 

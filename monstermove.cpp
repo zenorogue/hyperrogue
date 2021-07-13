@@ -182,6 +182,7 @@ EX void moveMonster(const movei& mi) {
   if(isLeader(m)) {
     if(ct->wall == waBigStatue) {
       ct->wall = cf->wall;
+      ct->wparam = cf->wparam;
       cf->wall = waBigStatue;
       animateMovement(mi.rev(), LAYER_BOAT);
       }

@@ -706,7 +706,7 @@ struct hrmap_archimedean : hrmap {
     return calc_relative_matrix(c->cmove(dir), c, C0);
     }
   
-  transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+  transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
     if(use_gmatrix && gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
       return inverse_shift(gmatrix0[h1->c7], gmatrix0[h2->c7]);
     transmatrix gm = Id, where = Id;
