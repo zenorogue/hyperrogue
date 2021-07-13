@@ -85,6 +85,11 @@ struct hrmap {
 
   /** \brief in 3D honeycombs, returns a vector<bool> v, where v[j] iff faces i and j are adjacent */
   const vector<char>& dirdist(cellwalker cw) { return get_cellshape(cw.at).dirdist[cw.spin]; }
+
+  /** \brief the sequence of heptagon movement direction to get from c->master to c->move(i)->master; implemented only for reg3 */
+  virtual const vector<int>& get_move_seq(cell *c, int i) {
+    throw hr_exception("get_move_seq not implemented for this map class");
+    }
   };
 
 /** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient  

@@ -34,7 +34,7 @@ EX namespace fake {
     if(arcm::in() && PURE) return true;
     if(WDIM == 2) return false;
     if(among(geometry, gBitrunc3)) return false;
-    if(reg3::in() && !among(variation, eVariation::pure, eVariation::subcubes)) return false;
+    if(reg3::in() && !among(variation, eVariation::pure, eVariation::subcubes, eVariation::coxeter)) return false;
     return euc::in() || reg3::in();
     }
   
@@ -87,18 +87,25 @@ EX namespace fake {
     transmatrix adj(cell *c, int d) override {
       transmatrix S1, S2;
       ld dist;
-      if(variation == eVariation::subcubes && c->master == c->cmove(d)->master) {
-        auto& s1 = get_cellshape(c);
-        auto& s2 = get_cellshape(c->move(d));
-        return s1.from_cellcenter * s2.to_cellcenter;
+      bool impure = reg3::in() && !PURE;
+      vector<int> mseq;
+      if(impure) {
+        mseq = FPIU ( currentmap->get_move_seq(c, d) );
+        if(mseq.empty()) {
+          auto& s1 = get_cellshape(c);
+          auto& s2 = get_cellshape(c->move(d));
+          return s1.from_cellcenter * s2.to_cellcenter;
+          }
+        if(isize(mseq) > 1)
+          throw hr_exception("fake adj not implemented for isize(mseq) > 1");
         }
-      in_underlying([c, d, &S1, &S2, &dist] {
+      in_underlying([c, d, &S1, &S2, &dist, &impure, &mseq] {
         #if CAP_ARCM
         dynamicval<bool> u(arcm::use_gmatrix, false);
         #endif
         transmatrix T;
-        if(variation == eVariation::subcubes) {
-          T = currentmap->adj(c->master, d);
+        if(impure) {
+          T = currentmap->adj(c->master, mseq[0]);
           }
         else {
           T = currentmap->adj(c, d);
@@ -109,7 +116,7 @@ EX namespace fake {
         S2 = xpush(-dist) * T1;
         });
       
-      if(variation == eVariation::subcubes) {
+      if(impure) {
         auto& s1 = get_cellshape(c);
         auto& s2 = get_cellshape(c->move(d));
         S1 = s1.from_cellcenter * S1;

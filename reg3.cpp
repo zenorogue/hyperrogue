@@ -717,6 +717,11 @@ EX namespace reg3 {
       int id = local_id.at(cw.at).first;
       return cellwalker(cw.at->cmove(j), strafe_data[id][j][cw.spin]);
       }
+
+    const vector<int>& get_move_seq(cell *c, int i) override {
+      int id = local_id.at(c).first;
+      return move_sequences[id][i];
+      }
     };
 
   struct hrmap_quotient3 : hrmap_closed3 { };
@@ -2021,6 +2026,11 @@ EX namespace reg3 {
       
       if(PURE && res1 != res2) println(hlog, "h3: ", res1, " vs ", res2);
       return res2;
+      }
+
+    const vector<int>& get_move_seq(cell *c, int i) override {
+      int aid = cell_id.at(c);
+      return quotient_map->get_move_seq(quotient_map->acells[aid], i);
       }
     };
 
