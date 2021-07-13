@@ -85,6 +85,42 @@ EX namespace fake {
       }
 
     transmatrix adj(cell *c, int d) override {
+      if(variation == eVariation::coxeter) {
+        array<int, 3> which;
+        in_underlying([&which, c, d] {
+          auto T = currentmap->adj(c, d);
+          auto& f1 = currentmap->get_cellshape(c).faces_local[d];
+          auto& f2 = currentmap->get_cellshape(c->move(d)).faces_local[c->c.spin(d)];
+          for(int i=0; i<3; i++) {
+            which[i] = -1;
+            for(int j=0; j<isize(f2); j++)
+              if(hdist(T * f2[j], f1[i]) < 1e-6)
+                which[i] = j;
+            }
+          });
+        auto& f1 = get_cellshape(c).faces_local[d];
+        auto& f2 = get_cellshape(c->move(d)).faces_local[c->c.spin(d)];
+        vector<ld> d1;
+        for(auto& v: f1) d1.push_back(hdist0(normalize(v)));
+        vector<hyperpoint> cf2(3);
+        for(int i=0; i<3; i++)
+          cf2[i] = f2[which[i]];
+        transmatrix F2, F1;
+        for(int i=0; i<3; i++) set_column(F2, i, cf2[i]);
+        for(int i=0; i<3; i++) set_column(F1, i, f1[i]);
+
+        auto dtang = [] (vector<hyperpoint> v) {
+          if(euclid) return (v[1] - v[0]) ^ (v[2] - v[0]);
+          transmatrix T = gpushxto0(normalize(v[0]));
+          hyperpoint h = iso_inverse(T) * ((T*v[1]) ^ (T*v[2]));
+          return h;
+          };
+
+        set_column(F2, 3, dtang(cf2));
+        set_column(F1, 3, dtang(f1));
+        transmatrix T = F1 * inverse(F2);
+        return T;
+        }
       transmatrix S1, S2;
       ld dist;
       bool impure = reg3::in() && !PURE;
@@ -450,6 +486,17 @@ EX void generate() {
   reg3::compute_ultra();
   
   reg3::generate_subcells();
+  if(variation == eVariation::coxeter) {
+    for(int i=0; i<isize(cgi.subshapes); i++) {
+      auto& s = cgi.subshapes[i];
+      s.faces_local = ucgi.subshapes[i].faces_local;
+      for(auto &face: s.faces_local) for(auto& v: face) {
+        v = kleinize(v);
+        for(int i=0; i<3; i++) v[i] *= scale;
+        }
+      reg3::make_vertices_only(s.vertices_only, s.faces_local);
+      }
+    }
   #endif
   }
 
