@@ -471,6 +471,8 @@ EX ld compute_euclidean() {
   if(underlying == gRhombic3) return 3;
   if(underlying == gBitrunc3) return 2.55208;
   int middle = get_middle();
+
+  if(!fake::in()) underlying_cgip = cgip;
     
   return M_PI / asin(cos(M_PI/middle) / sin(M_PI/underlying_cgip->face));
   }
