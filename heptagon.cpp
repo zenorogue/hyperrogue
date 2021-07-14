@@ -72,7 +72,7 @@ EX hstate transition(hstate s, int dir) {
 EX heptagon *buildHeptagon1(heptagon *h, heptagon *parent, int d, hstate s, int pard IS(0)) {
   h->alt = NULL;
   h->s = s;
-  h->c.connect(pard, parent, d, false);
+  h->c().connect(pard, parent, d, false);
   h->cdata = NULL;
   return h;
   }
@@ -129,10 +129,10 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
     if(fixdistance != COMPUTE) h->distance = fixdistance;
     else if(S3 == 4 && BITRUNCATED) {
       h->distance = parent->distance + 2;
-      if(h->c.spin(0) == 2 || (h->c.spin(0) == 3 && S7 <= 5))
+      if(h->c().spin(0) == 2 || (h->c().spin(0) == 3 && S7 <= 5))
         h->distance = min<short>(h->distance, createStep(h->move(0), 0)->distance + 3);
-      if(h->c.spin(0) == 2 && h->move(0)) {
-        int d = h->c.spin(0);
+      if(h->c().spin(0) == 2 && h->move(0)) {
+        int d = h->c().spin(0);
         int d1 = (d+S7-1)%S7;
         bool missing0 = !h->move(0)->move(d1);
         if(missing0) {
@@ -146,19 +146,19 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
           }
         }
       if((h->s == hsB && h->move(0)->s == hsB) || h->move(0)->s == hsA) {
-        int d = h->c.spin(0);
+        int d = h->c().spin(0);
         heptagon* h1 = createStep(h->move(0), (d+1)%S7);
         if(h1->distance <= h->move(0)->distance)
           h->distance = h->move(0)->distance+1;
         }
-      if(h->c.spin(0) == S7-1 && (h->move(0)->s != hsOrigin) && BITRUNCATED) {
+      if(h->c().spin(0) == S7-1 && (h->move(0)->s != hsOrigin) && BITRUNCATED) {
         bool missing = !h->move(S7-1);
         if(missing) {
           h->distance = parent->distance;
           if(
             parent->distance - h->move(0)->move(0)->distance == 1 &&
-            h->c.spin(0) == S7 - 1 &&
-            h->move(0)->c.spin(0) == 2)
+            h->c().spin(0) == S7 - 1 &&
+            h->move(0)->c().spin(0) == 2)
             h->distance++;
           }
         else {
@@ -171,7 +171,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
       }
     else if(parent->s == hsOrigin) h->distance = parent->distance + gp::dist_2();
     #if CAP_GP
-    else if(S3 == 4 && GOLDBERG && h->c.spin(0) == S7-2 && h->move(0)->c.spin(0) >= S7-2 && h->move(0)->move(0)->s != hsOrigin) {
+    else if(S3 == 4 && GOLDBERG && h->c().spin(0) == S7-2 && h->move(0)->c().spin(0) >= S7-2 && h->move(0)->move(0)->s != hsOrigin) {
       heptspin hs(h, 0);
       hs += wstep;
       int d1 = hs.at->distance;
@@ -181,7 +181,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
       int d0 = hs.at->distance;
       h->distance = gp::solve_triangle(dm, d0, d1, gp::param * gp::loc(-1,1));
       }
-    else if(S3 == 4 && GOLDBERG && h->c.spin(0) == S7-1 && among(h->move(0)->c.spin(0), S7-2, S7-3) && h->move(0)->move(0)->s != hsOrigin) {
+    else if(S3 == 4 && GOLDBERG && h->c().spin(0) == S7-1 && among(h->move(0)->c().spin(0), S7-2, S7-3) && h->move(0)->move(0)->s != hsOrigin) {
       heptspin hs(h, 0);
       hs += wstep;
       int d0 = hs.at->distance;
@@ -191,11 +191,11 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
       int d1 = hs.at->distance;
       h->distance = gp::solve_triangle(dm, d0, d1, gp::param * gp::loc(1,1));
       }
-    else if(S3 == 4 && GOLDBERG && h->c.spin(0) >= 2 && h->c.spin(0) <= S7-2) {
+    else if(S3 == 4 && GOLDBERG && h->c().spin(0) >= 2 && h->c().spin(0) <= S7-2) {
       h->distance = parent->distance + gp::dist_2();
       }
     #endif
-    else if(h->c.spin(0) == S7-2) {
+    else if(h->c().spin(0) == S7-2) {
       #if CAP_GP
       if(GOLDBERG) {
         int d0 = parent->distance;
@@ -206,7 +206,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
       #endif
       h->distance = parent->distance + gp::dist_1();
       }
-    else if(h->c.spin(0) == S7-3 && h->move(0)->s == hsB) {
+    else if(h->c().spin(0) == S7-3 && h->move(0)->s == hsB) {
       #if CAP_GP
       if(GOLDBERG) {
         int d0 = parent->distance;
@@ -215,9 +215,9 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
         h->distance = gp::solve_triangle(dm, d0, d1, gp::param * gp::loc(1,1));
         } else
       #endif
-      h->distance = createStep(h->move(0), (h->c.spin(0)+2)%S7)->distance + gp::dist_3();
+      h->distance = createStep(h->move(0), (h->c().spin(0)+2)%S7)->distance + gp::dist_3();
       }
-    else if(h->c.spin(0) == S7-1 && S3 == 4 && GOLDBERG) {
+    else if(h->c().spin(0) == S7-1 && S3 == 4 && GOLDBERG) {
       h->distance = parent->distance + gp::dist_1();
       }
     else h->distance = parent->distance + gp::dist_2();
@@ -246,10 +246,10 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
 int recsteps;
 
 void addSpin(heptagon *h, int d, heptagon *from, int rot, int spin) {
-  rot = h->c.fix(rot);
+  rot = h->c().fix(rot);
   auto h1 = createStep(from, rot);
-  int fr = h1->c.fix(from->c.spin(rot) + spin);
-  h->c.connect(d, from->move(rot), fr, false);
+  int fr = h1->c().fix(from->c().spin(rot) + spin);
+  h->c().connect(d, from->move(rot), fr, false);
   }
 
 extern int hrand(int);
@@ -258,7 +258,7 @@ EX hookset<void(heptagon*, int)> hooks_createStep;
 
 // create h->move(d) if not created yet
 heptagon *createStep(heptagon *h, int d) {
-  d = h->c.fix(d);
+  d = h->c().fix(d);
   if(h->move(d)) return h->move(d);
   callhooks(hooks_createStep, h, d);
   return currentmap->create_step(h, d);
@@ -284,12 +284,12 @@ heptagon *hrmap_standard::create_step(heptagon *h, int d) {
     if(d == 1) {
       heptspin hs(h, 0, false);
       hs = hs + wstep - 1 + wstep - 1 + wstep - 1;
-      h->c.connect(d, hs);
+      h->c().connect(d, hs);
       }
     else if(h->s == hsB && d == S7-1) {
       heptspin hs(h, 0, false);
       hs = hs + wstep + 1 + wstep + 1 + wstep + 1;
-      h->c.connect(d, hs);
+      h->c().connect(d, hs);
       }
     else 
       buildHeptagon(h, d, transition(h->s, d));
@@ -301,18 +301,18 @@ heptagon *hrmap_standard::create_step(heptagon *h, int d) {
     // buildHeptagon(h, d, transition(h->s, d));
     }
   else if(d == 1) {
-    addSpin(h, d, h->move(0), h->c.spin(0)-1, -1);
+    addSpin(h, d, h->move(0), h->c().spin(0)-1, -1);
     }
   else if(d == S7-1) {
-    addSpin(h, d, h->move(0), h->c.spin(0)+1, +1);
+    addSpin(h, d, h->move(0), h->c().spin(0)+1, +1);
     }
   else if(d == 2) {
-    createStep(h->move(0), h->c.spin(0)-1);
-    addSpin(h, d, h->move(0)->modmove(h->c.spin(0)-1), S7-2 + h->move(0)->c.modspin(h->c.spin(0)-1), -1);
+    createStep(h->move(0), h->c().spin(0)-1);
+    addSpin(h, d, h->move(0)->modmove(h->c().spin(0)-1), S7-2 + h->move(0)->c().modspin(h->c().spin(0)-1), -1);
     }
   else if(d == S7-2 && h->s == hsB) {
-    createStep(h->move(0), h->c.spin(0)+1);
-    addSpin(h, d, h->move(0)->modmove(h->c.spin(0)+1), 2 + h->move(0)->c.modspin(h->c.spin(0)+1), +1);
+    createStep(h->move(0), h->c().spin(0)+1);
+    addSpin(h, d, h->move(0)->modmove(h->c().spin(0)+1), 2 + h->move(0)->c().modspin(h->c().spin(0)+1), +1);
     }
   else
     buildHeptagon(h, d, (d == S7-2 || (h->s == hsB && d == S7-3)) ? hsB : hsA);
@@ -323,7 +323,7 @@ heptagon *hrmap_standard::create_step(heptagon *h, int d) {
 void backtrace(heptagon *pos) {
   if(pos->s == hsOrigin) return;
   backtrace(pos->move(0));
-  printf(" %d", pos->c.spin(0));
+  printf(" %d", pos->c().spin(0));
   }
 
 void hsshow(const heptspin& t) {

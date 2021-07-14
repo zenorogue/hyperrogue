@@ -219,7 +219,7 @@ EX namespace euc {
         for(int i=0; i<S7; i++) if(shifttable[i] == st) d1 = i;
 
       heptagon *h = get_at(v);
-      h->c.connect(d1, parent, d, mirr);
+      h->c().connect(d1, parent, d, mirr);
       return h;
       }  
 
@@ -1153,7 +1153,7 @@ EX gp::loc full_coords2(cell *c) {
       }
     }
   if(BITRUNCATED)
-    return to_loc(ans) * gp::loc(1,1) + (c == c->master->c7 ? gp::loc(0,0) : gp::eudir((c->c.spin(0)+4)%6));
+    return to_loc(ans) * gp::loc(1,1) + (c == c->master->c7 ? gp::loc(0,0) : gp::eudir((c->c().spin(0)+4)%6));
   if(GOLDBERG) {
     auto li = gp::get_local_info(c);
     gp::loc shift(0,0);

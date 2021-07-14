@@ -300,7 +300,7 @@ EX namespace sn {
       auto pf = p.first, ps = p.second;
       auto rule = [&] (heptagon *c1, heptagon *c2, int d1) {
         auto g = get_at(c1, c2);
-        parent->c.connect(d, g, d1, false);
+        parent->c().connect(d, g, d1, false);
         return g;
         };
       
@@ -422,11 +422,11 @@ EX namespace sn {
       }
 
     transmatrix adj(heptagon *h, int d) override {
-      h->cmove(d); return adjmatrix(d, h->c.spin(d));
+      h->cmove(d); return adjmatrix(d, h->c().spin(d));
       }
     
     transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override { 
-      for(int i=0; i<h1->type; i++) if(h1->move(i) == h2) return adjmatrix(i, h1->c.spin(i));
+      for(int i=0; i<h1->type; i++) if(h1->move(i) == h2) return adjmatrix(i, h1->c().spin(i));
       if(gmatrix0.count(h2->c7) && gmatrix0.count(h1->c7))
         return inverse_shift(gmatrix0[h1->c7], gmatrix0[h2->c7]);
       
@@ -937,7 +937,7 @@ EX namespace nilv {
       auto q = p * current_ns().movevectors[d];
       for(int a=0; a<3; a++) q[a] = zgmod(q[a], nilperiod[a]);
       auto child = get_at(q);
-      parent->c.connect(d, child, (d + S7/2) % S7, false);
+      parent->c().connect(d, child, (d + S7/2) % S7, false);
       return child;
       }
 
@@ -1327,12 +1327,12 @@ EX namespace hybrid {
       int s = cgi.single_step;
       int lev = m->where[c].second + (d == c->type-1 ? s : -s);
       cell *c1 = get_at(m->where[c].first, lev);
-      c->c.connect(d, c1, c1->type - 3 + c->type - d, false);
+      c->c().connect(d, c1, c1->type - 3 + c->type - d, false);
       }
     else {
       auto cu = m->where[c].first;
       auto cu1 = m->in_underlying([&] { return cu->cmove(d); });
-      int d1 = cu->c.spin(d);
+      int d1 = cu->c().spin(d);
       int s = 0;
       if(geometry == gRotSpace) {
         auto cm = (hrmap_hybrid*)currentmap;
@@ -1340,7 +1340,7 @@ EX namespace hybrid {
         s = ((hrmap_hybrid*)currentmap)->get_shift(cellwalker(cu, d));
         }
       cell *c1 = get_at(cu1, m->where[c].second + s);
-      c->c.connect(d, c1, d1, cu->c.mirror(d));
+      c->c().connect(d, c1, d1, cu->c().mirror(d));
       }
     }  
 
@@ -1427,8 +1427,8 @@ EX namespace hybrid {
       for(cell *c: xlink) {
         bool success_here = ss.count(c);
         if(!success_here) forCellIdEx(c2, i, c) if(ss.count(c2)) {
-          ss[c].first = ss[c2].first + c->c.spin(i) + wstep - i;
-          ss[c].second = ss[c2].second + c->c.spin(i) + wstep - i;
+          ss[c].first = ss[c2].first + c->c().spin(i) + wstep - i;
+          ss[c].second = ss[c2].second + c->c().spin(i) + wstep - i;
           success++;
           success_here = true;
           break;
@@ -1628,7 +1628,7 @@ EX namespace product {
       cell *c = cl.lst[i];
       cellwalker cwc = cws.at(c);
       forCellIdEx(c2, j, c) {
-        cellwalker cwc2 = cwc + j + wstep - c->c.spin(j);
+        cellwalker cwc2 = cwc + j + wstep - c->c().spin(j);
         if(!cws.count(c2)) cws[c2] = cwc2;
         else if(cws[c2] != cwc2) return false;
         cl.add(c2);
@@ -2070,7 +2070,7 @@ EX namespace rots {
       int id1 = shvid(c1);
       int id2 = shvid(c2);
       #endif
-      int j = c1->c.spin(i);
+      int j = c1->c().spin(i);
       int id = id1 + (id2 << 10) + (i << 20) + (j << 26);
       auto &M = saved_matrices[id];
       if(M[3][3]) return M;
@@ -2098,7 +2098,7 @@ EX namespace rots {
       int id1 = shvid(c1);
       int id2 = shvid(c2);
       #endif
-      int j = c1->c.spin(i);
+      int j = c1->c().spin(i);
       int id = id1 + (id2 << 10) + (i << 20) + (j << 26);
       auto &M = saved_matrices_ray[id];
       if(M[3][3]) return M;

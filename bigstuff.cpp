@@ -622,7 +622,7 @@ EX void buildEquidistant(cell *c) {
     else {
       // if(qcv != 1) { printf("qcv = %d\n", qcv);  exit(1); }
       cell *c2 = c->move(sid);
-      int bsid = c->c.spin(sid);
+      int bsid = c->c().spin(sid);
       for(int j=0; j<c2->type; j++) {
         int q = gmod(bsid+j, c2->type);
         cell *c3 = c2->move(q);
@@ -677,7 +677,7 @@ EX void buildEquidistant(cell *c) {
         }
       else if(WDIM == 3 && c->landparam % skip != 1 && c->move(up) && c->move(up)->landflags)
         c->landflags = 1;
-      else if(WDIM == 3 && c->landparam % skip == 1 && c->move(up) && c->move(up)->c.spin(up) == (c->c.spin(up)) && c->move(up)->move(up)->landflags)
+      else if(WDIM == 3 && c->landparam % skip == 1 && c->move(up) && c->move(up)->c().spin(up) == (c->c().spin(up)) && c->move(up)->move(up)->landflags)
         c->landflags = 1;
       if(c->landflags) c->wall = (WDIM == 3 ? waTrunk3 : waTrunk);
       }
@@ -792,7 +792,7 @@ EX void buildEquidistant(cell *c) {
           else for(int j=0; j<c2->type; j++) {
             cell *c3 = c2->move(j);
             if(c3 && c3->landparam < c2->landparam && c3->landflags)
-              if(c->c.spin(i) == (j+3)%c2->type || c->c.spin(i) == (j+c2->type-3)%c2->type)
+              if(c->c().spin(i) == (j+3)%c2->type || c->c().spin(i) == (j+c2->type-3)%c2->type)
                 ok = true;
             }
           if(ok) {
@@ -1895,7 +1895,7 @@ EX void gen_temple(cell *c) {
       if(c->master->zebraval % 5 != 1) c->wall = waColumn;
       }
     else if(geometry == gHoroTris || geometry == gHoroRec) {
-      if(c->c.spin(bt::updir()) != 0) c->wall = waColumn;
+      if(c->c().spin(bt::updir()) != 0) c->wall = waColumn;
       }
     else if(geometry == gKiteDart3) {
       if(kite::getshape(c->master) == kite::pKite) c->wall = waColumn;

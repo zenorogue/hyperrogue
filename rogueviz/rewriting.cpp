@@ -51,7 +51,7 @@ struct hrmap_rewrite : hrmap_hyperbolic {
     int next = h->zebraval;
     
     if(matches.empty() && next == 0) { 
-      h->c.connect(0, h, 0, false);
+      h->c().connect(0, h, 0, false);
       return h;
       }
     
@@ -76,12 +76,12 @@ struct hrmap_rewrite : hrmap_hyperbolic {
           }
         int next1 = 0;
         for(auto& match2: matches1) { if(match2.first == s) break; next1++; }
-        h->c.connect(next, h1, next1, false);
+        h->c().connect(next, h1, next1, false);
         }
       else {
         int deg = 1 + isize(find_matches(m));
         auto h1 = tailored_alloc<heptagon> (deg);
-        h->c.connect(next, h1, 0, false);
+        h->c().connect(next, h1, 0, false);
   
         h1->alt = NULL;
         h1->s = hsA;

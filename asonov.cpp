@@ -191,7 +191,7 @@ struct hrmap_asonov : hrmap {
     auto p = coords[parent];
     auto q = p.addmove(d);
     auto child = get_at(q);
-    parent->c.connect(d, child, (d + 6) % 12, false);
+    parent->c().connect(d, child, (d + 6) % 12, false);
     return child;
     }
   

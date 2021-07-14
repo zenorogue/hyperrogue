@@ -1662,7 +1662,7 @@ EX bool drawcell_subs(cell *c, const shiftmatrix& V) {
     }
 
   if(BITRUNCATED) forCellIdEx(c1, d, c) {
-    if(c->c.spin(d) == 0) {
+    if(c->c().spin(d) == 0) {
       shiftmatrix V2 = V * currentmap->adj(c, d);
       if(do_draw(c1, V2))
         draw = true,

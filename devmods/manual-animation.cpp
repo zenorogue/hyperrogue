@@ -125,7 +125,7 @@ namespace sn {   pair<heptagon*,heptagon*> getcoord(heptagon *h); }
 bignum bdiff(heptagon *h1, heptagon *h2) {
   if(h1 == h2) return 0;
   auto p = bdiff(h1->move(3), h2->move(3));
-  int d = h1->c.spin(3) - h2->c.spin(3);
+  int d = h1->c().spin(3) - h2->c().spin(3);
   println(hlog, "d=", d, " p = ", p.get_str(10000));
   return p + p + bignum(d);
   }

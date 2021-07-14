@@ -389,7 +389,7 @@ struct hrmap_grigorchuk : hrmap_standard {
       gtie(h, pr);
       }
     
-    h->c.connect(d == 2 ? 2 : 1-d, p, d, false);;
+    h->c().connect(d == 2 ? 2 : 1-d, p, d, false);;
     return h;
     }
   

@@ -1682,7 +1682,7 @@ struct raycast_map {
         shiftmatrix Vf;
         dd.set_land_floor(Vf);
         color_t wcol = darkena(dd.wcol, 0, 0xFF);
-        int dv = get_darkval(c1, c->c.spin(i));
+        int dv = get_darkval(c1, c->c().spin(i));
         float p = 1 - dv / 16.;
         wallcolor[u] = glhr::acolor(wcol);
         for(int a: {0,1,2}) wallcolor[u][a] *= p;
@@ -1697,7 +1697,7 @@ struct raycast_map {
         if(col == 0)
           wallcolor[u] = glhr::acolor(0);
         else {
-          int dv = get_darkval(c1, c->c.spin(i));
+          int dv = get_darkval(c1, c->c().spin(i));
           float p = 1 - dv / 16.;
           wallcolor[u] = glhr::acolor(col);
           for(int a: {0,1,2}) wallcolor[u][a] *= p;

@@ -225,7 +225,7 @@ EX void killIvy(cell *c, eMonster who) {
   if(checkOrb(who, itOrbStone)) petrify(c, waPetrified, c->monst);
   c->monst = moIvyDead; // NEWYEARFIX
   for(int i=0; i<c->type; i++) if(c->move(i))
-    if(isIvy(c->move(i)) && c->move(i)->mondir == c->c.spin(i))
+    if(isIvy(c->move(i)) && c->move(i)->mondir == c->c().spin(i))
       killIvy(c->move(i), who), kills[moIvyDead]++;
   }
 
@@ -414,7 +414,7 @@ EX void killMutantIvy(cell *c, eMonster who) {
   changes.ccell(c);
   removeIvy(c);
   for(int i=0; i<c->type; i++)
-    if(c->move(i)->mondir == c->c.spin(i) && (isMutantIvy(c->move(i)) || c->move(i)->monst == moFriendlyIvy))
+    if(c->move(i)->mondir == c->c().spin(i) && (isMutantIvy(c->move(i)) || c->move(i)->monst == moFriendlyIvy))
       kills[c->move(i)->monst]++, killMutantIvy(c->move(i), who);
   if(c->land == laClearing) clearing::imput(c);
   }
@@ -774,7 +774,7 @@ EX void killMonster(cell *c, eMonster who, flagtype deathflags IS(0)) {
       cell *c2 = proper(c, c->mondir) ? c->move(c->mondir) : nullptr;
       if(!c2) c2 = c; /* should not happen */
       for(int i=0; i<c2->type; i++)
-        if(c2->move(i)->monst == moIvyWait && c2->move(i)->mondir == c2->c.spin(i))
+        if(c2->move(i)->monst == moIvyWait && c2->move(i)->mondir == c2->c().spin(i))
           qty++;
       if(c2->monst == moIvyRoot || qty) {
         c->monst = moIvyNext;
@@ -1028,7 +1028,7 @@ EX void pushMonster(const movei& mi) {
       moveMonster(mi);
       if(mi.t->monst) {
         mi.t->mondir = id;
-        other->mondir = mi.t->c.spin(id);
+        other->mondir = mi.t->c().spin(id);
         }
       }
     }

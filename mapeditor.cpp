@@ -655,7 +655,7 @@ EX namespace mapstream {
           cellids[c->move(j)] < i) {
           int32_t i = cellids[c->move(j)];
           f.write(i);
-          f.write_char(c->c.spin(j));
+          f.write_char(c->c().spin(j));
           f.write_char(j);
           ok = true;
           break;
@@ -814,7 +814,7 @@ EX namespace mapstream {
         // printf("%p:%d,%d -> %p\n", c2, relspin[parent], dir, c);
         
         // spinval becomes xspinval
-        rspin = gmod(c2->c.spin(dir) - f.read_char(), c->type - sub);
+        rspin = gmod(c2->c().spin(dir) - f.read_char(), c->type - sub);
         if(GDIM == 3 && rspin && !hybri) {
           println(hlog, "rspin in 3D");
           throw hstream_exception();

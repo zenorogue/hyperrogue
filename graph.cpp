@@ -2581,7 +2581,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       int d = c->mondir;
       if(d == NODIR)
         forCellIdEx(c2, i, c)
-          if(among(c2->monst, moHexSnakeTail, moHexSnake) && c2->mondir == c->c.spin(i))
+          if(among(c2->monst, moHexSnakeTail, moHexSnake) && c2->mondir == c->c().spin(i))
             d = i;
       if(d == NODIR) { d = hrand(c->type); createMov(c, d); }
       int c1 = nestcolors[pattern_threecolor(c)];
@@ -2726,7 +2726,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       else if(m == moDragonTail) {
         cell *c2 = NULL;
         for(int i=0; i<c->type; i++)
-          if(c->move(i) && isDragon(c->move(i)->monst) && c->move(i)->mondir == c->c.spin(i))
+          if(c->move(i) && isDragon(c->move(i)->monst) && c->move(i)->mondir == c->c().spin(i))
             c2 = c->move(i);
         int nd = neighborId(c, c2);
         char part = dragon::bodypart(c, dragon::findhead(c));
@@ -2778,7 +2778,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
           bool hexsnake = c->monst == moHexSnake || c->monst == moHexSnakeTail;
           cell *c2 = NULL;
           for(int i=0; i<c->type; i++)
-            if(c->move(i) && isWorm(c->move(i)->monst) && c->move(i)->mondir == c->c.spin(i))
+            if(c->move(i) && isWorm(c->move(i)->monst) && c->move(i)->mondir == c->c().spin(i))
               c2 = c->move(i);
           int nd = neighborId(c, c2);
           if(nospinb) {
@@ -5569,7 +5569,7 @@ struct animation {
 EX array<map<cell*, animation>, ANIMLAYERS> animations;
 
 EX int revhint(cell *c, int hint) {
-  if(hint >= 0 && hint < c->type) return c->c.spin(hint);
+  if(hint >= 0 && hint < c->type) return c->c().spin(hint);
   else return hint;
   }
 
@@ -5602,7 +5602,7 @@ EX void animateMovement(const movei& m, int layer) {
     a.footphase = 0;
     a.mirrored = false;
     }
-  if(m.proper() && m.s->c.mirror(m.d))
+  if(m.proper() && m.s->c().mirror(m.d))
     a.mirrored = !a.mirrored;
   }
 

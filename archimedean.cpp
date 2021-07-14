@@ -554,7 +554,7 @@ struct hrmap_archimedean : hrmap {
       heptspin hs(origin, 0);
       heptagon *hnew = build_child(hs, current.get_adj(hs));
       for(int s=1; s<2*current.N; s++)
-        origin->c.connect(s, hnew, s, false);
+        origin->c().connect(s, hnew, s, false);
       }
     else if(current.real_faces == 0) {
       may_create_step(origin, 0); 
@@ -562,20 +562,20 @@ struct hrmap_archimedean : hrmap {
       may_create_step(origin, 1);
       heptagon *o1 = origin->move(1);
       for(int s=1; s<2*current.N; s+=2)
-        o0->c.connect(s, o1, 2*current.N-s, false);
+        o0->c().connect(s, o1, 2*current.N-s, false);
       for(int s=2; s<2*current.N; s+=2) {
         heptspin hs(o0, s);
         heptagon *hnew = build_child(hs, current.get_adj(hs));
         // no need to specify archimedean_gmatrix and altmap
-        hnew->c.connect(1, heptspin(o1, 2*current.N-s));
+        hnew->c().connect(1, heptspin(o1, 2*current.N-s));
         }
-      o1->c.connect(1, o0, 2*current.N-1, false);
+      o1->c().connect(1, o0, 2*current.N-1, false);
       }
     else if(origin->degree() == 2) {
       may_create_step(origin, 0);
       may_create_step(origin, 1);
-      origin->move(0)->c.connect(1, origin->move(1), 2*current.N-1, false);
-      origin->move(1)->c.connect(1, origin->move(0), 2*current.N-1, false);
+      origin->move(0)->c().connect(1, origin->move(1), 2*current.N-1, false);
+      origin->move(1)->c().connect(1, origin->move(0), 2*current.N-1, false);
       }
     
     cgi.base_distlimit = 0;
@@ -749,19 +749,19 @@ struct hrmap_archimedean : hrmap {
     if(PURE) {
       if(arcm::id_of(c->master) < arcm::current.N * 2) {
         heptspin hs = heptspin(c->master, d) + wstep + 2 + wstep + 1;
-        c->c.connect(d, hs.at->c7, hs.spin, hs.mirrored);
+        c->c().connect(d, hs.at->c7, hs.spin, hs.mirrored);
         }
-      else c->c.connect(d, c, d, false);
+      else c->c().connect(d, c, d, false);
       }
     else if(DUAL) {
       if(arcm::id_of(c->master) >= arcm::current.N * 2) {
         heptagon *h2 = createStep(c->master, d*2);
-        int d1 = c->master->c.spin(d*2);
-        c->c.connect(d, h2->c7, d1/2, false);
+        int d1 = c->master->c().spin(d*2);
+        c->c().connect(d, h2->c7, d1/2, false);
         }
       else {
         printf("bad connection\n");
-        c->c.connect(d,c,d,false);
+        c->c().connect(d,c,d,false);
         }
       }
     else hrmap::find_cell_connection(c, d);
@@ -848,16 +848,16 @@ void connect_digons_too(heptspin h1, heptspin h2) {
     h1--, h2++;
     heptagon *hnew = build_child(h1, current.get_adj(h1));
     // no need to specify archimedean_gmatrix and altmap
-    hnew->c.connect(1, h2);
+    hnew->c().connect(1, h2);
     h1--, h2++;
     DEBB(DF_GEOM, (format("OL2 %p.%d ~ %p.%d\n", hr::voidp(h1.at), h1.spin, hr::voidp(h2.at), h2.spin)));
-    h1.at->c.connect(h1.spin, h2);
+    h1.at->c().connect(h1.spin, h2);
     }
   }
 
 void connectHeptagons(heptspin hi, heptspin hs) {
   DEBB(DF_GEOM, (format("OLD %p.%d ~ %p.%d\n", hr::voidp(hi.at), hi.spin, hr::voidp(hs.at), hs.spin)));
-  if(hi.at->move(hi.spin) == hs.at && hi.at->c.spin(hi.spin) == hs.spin) {
+  if(hi.at->move(hi.spin) == hs.at && hi.at->c().spin(hi.spin) == hs.spin) {
     DEBB(DF_GEOM, (format("WARNING: already connected\n")));
     return;
     }
@@ -869,7 +869,7 @@ void connectHeptagons(heptspin hi, heptspin hs) {
     DEBB(DF_GEOM, (format("ERROR: already connected right\n")));
     throw hr_archimedean_error("Archimedean error: already connected right");
     }
-  hi.at->c.connect(hi.spin, hs);
+  hi.at->c().connect(hi.spin, hs);
 
   auto p = current.get_adj(hi);
   if(current.tilegroup[p.first] != current.tilegroup[id_of(hs.at)]) {
@@ -915,7 +915,7 @@ transmatrix archimedean_tiling::adjcell_matrix(heptagon *h, int d) {
 
   heptagon *h2 = h->move(d);
 
-  int d2 = h->c.spin(d);
+  int d2 = h->c().spin(d);
   auto& t2 = get_triangle(h2, d2);
   
   return spin(-t1.first) * xpush(t1.second) * spin(M_PI + t2.first);

@@ -30,7 +30,7 @@ EX int buildIvy(cell *c, int children, int minleaf) {
         child = c->move(i), leafchild = buildIvy(c->move(i), children-1, 5);
       else 
         c->move(i)->monst = (leaf++ || peace::on) ? moIvyWait : moIvyHead,
-        c->move(i)->mondir = c->c.spin(i),
+        c->move(i)->mondir = c->c().spin(i),
         c->move(i)->monmirror = c->monmirror;
       }
     }
@@ -78,7 +78,7 @@ EX void chasmifyEarth(cell *c) {
       cell *c4 = createMov(c3, i);
       earthFloor(c4);
       }
-    c3->mondir = c->c.spin(d);
+    c3->mondir = c->c().spin(d);
     }
   earthWall(c); c->item = itNone;
   }
@@ -101,7 +101,7 @@ EX void chasmifyElemental(cell *c) {
         cell *c4 = createMov(c3, i);
         if(c4->wall != waBarrier) c4->wall = waNone;
         }
-      c3->mondir = c->c.spin(d);
+      c3->mondir = c->c().spin(d);
       }
     }
   c->wall = getElementalWall(c->land);
@@ -531,7 +531,7 @@ EX void wandering() {
           for(int i=0; i<c2->type; i++) {
             c2->move(i)->monst = moKrakenT;
             c2->move(i)->hitpoints = 1;
-            c2->move(i)->mondir = c2->c.spin(i);
+            c2->move(i)->mondir = c2->c().spin(i);
             }
           goto found;
           }
@@ -785,7 +785,7 @@ EX void generateSnake(cell *c, int i, int snakecolor) {
     preventbarriers(c2);
     c2->mondir = i;
     createMov(c2, i);
-    int j = c2->c.spin(i);
+    int j = c2->c().spin(i);
     cell *c3 = c2->move(i);
     if(c3->monst || c3->bardir != NODIR || c3->wall) break;
     c2 = c3;

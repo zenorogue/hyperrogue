@@ -681,7 +681,7 @@ EX void buildCrossroads2(cell *c) {
             
             for(int d=0; d<c2->type; d++)
               if(emeraldtable[h2][d] == h3) {
-                int nh = emeraldtable[h2][(42+d + c->c.spin(i) - j) % c2->type];
+                int nh = emeraldtable[h2][(42+d + c->c().spin(i) - j) % c2->type];
                 if(c->landparam>0 && c->landparam != nh) { 
                   printf("CONFLICT\n"); 
                   raiseBuggyGeneration(c, "CONFLICT"); 

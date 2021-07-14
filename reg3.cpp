@@ -931,7 +931,7 @@ EX namespace reg3 {
             if(hdist(ctr1, ss[id1].face_centers[j]) < 1e-6) {
               transmatrix T2 = T1 * va.T;
               if(id == id1 && eqmatrix(T2, Id)) continue;
-              c->c.connect(i, c1, j, false);
+              c->c().connect(i, c1, j, false);
               if(!found) {                
                 tmcell.push_back(ss[id].from_cellcenter * T2 * ss[id1].to_cellcenter);
                 auto& ms = move_sequences[local_id[c].first];
@@ -990,7 +990,7 @@ EX namespace reg3 {
           if(found && !testing_subconnections) break;
           }
         if(testing_subconnections && !found) {
-          c->c.connect(i, c, i, false);
+          c->c().connect(i, c, i, false);
           tmcell.push_back(Id);
           }
         foundtab.push_back(found);
@@ -1040,7 +1040,7 @@ EX namespace reg3 {
           heptagon *h1 = get_heptagon_at(co);
           for(int d=0; d<8; d++) {
             int b = encode_coord(crystal::get_coord(h1->cmove(d)));
-            allh[a]->c.connect(d, allh[b], h1->c.spin(d), false);
+            allh[a]->c().connect(d, allh[b], h1->c().spin(d), false);
             tmatrices[a].push_back(crystal::get_adj(h1, d));
             }
           }
@@ -1079,7 +1079,7 @@ EX namespace reg3 {
           k = f->matcode[ f->mmul(f->mmul(f->matrices[k], f->matrices[moveid[b]]), f->P) ];
           for(int l=0; l<lgr; l++) if(f->gmul(k, l) % lgr == 0) {
             tmatrices[a][b] = cgi.adjmoves[b] * f->fullv[l];
-            allh[a]->c.connect(b, allh[k/lgr], movedir[l], false);
+            allh[a]->c().connect(b, allh[k/lgr], movedir[l], false);
             }
           }
         }      
@@ -1258,7 +1258,7 @@ EX namespace reg3 {
         initialize(1);
         tmatrices[0].resize(S7);
         for(int b=0; b<S7; b++) {
-          allh[0]->c.connect(b, allh[0], (b+S7/2) % S7, false);
+          allh[0]->c().connect(b, allh[0], (b+S7/2) % S7, false);
           transmatrix T = cgi.adjmoves[b];
           hyperpoint p = tC0(T);
           tmatrices[0][b] = rspintox(p) * xpush(hdist0(p)) * cspin(2, 1, angle) * spintox(p);
@@ -1278,7 +1278,7 @@ EX namespace reg3 {
             if(b < 6) x[b]++;
             else x[b-6]--;
             int a1 = get_rep(x);
-            allh[a]->c.connect(b, allh[a1], flip(b), false);
+            allh[a]->c().connect(b, allh[a1], flip(b), false);
             transmatrix T = cgi.adjmoves[b];
             hyperpoint p = tC0(T);
             tmatrices[a][b] = rspintox(p) * xpush(hdist0(p)) * cspin(2, 1, 108 * degree) * spintox(p);
@@ -1451,7 +1451,7 @@ EX namespace reg3 {
         hyperpoint old = tC0(p1.second);;
         #if CAP_FIELD
         if(quotient_map) {
-          p2.first->c.connect(counterpart(parent)->c.spin(d), parent, d, false);
+          p2.first->c().connect(counterpart(parent)->c().spin(d), parent, d, false);
           fix_distances(p2.first, parent);
           return p2.first;
           }
@@ -1461,7 +1461,7 @@ EX namespace reg3 {
           if((err = intval(back, old)) < 1e-3) {
             if(err > worst_error2) println(hlog, format("worst_error2 = %lg", double(worst_error2 = err)));
             if(p2.first->move(d2)) println(hlog, "error: repeated edge");
-            p2.first->c.connect(d2, parent, d, false);
+            p2.first->c().connect(d2, parent, d, false);
             fix_distances(p2.first, parent);
             fb++;
             }
@@ -1472,7 +1472,7 @@ EX namespace reg3 {
           for(int d2=0; d2<S7; d2++) {
             println(hlog, p2.second * tC0(cgi.adjmoves[d2]), " in distance ", intval(p2.second * tC0(cgi.adjmoves[d2]), old));
             }
-          parent->c.connect(d, parent, d, false);
+          parent->c().connect(d, parent, d, false);
           return parent;
           }
         return p2.first;
@@ -1485,8 +1485,8 @@ EX namespace reg3 {
       #if CAP_FIELD
       if(quotient_map) {
         auto cp = counterpart(parent);
-        d2 = cp->c.spin(d);
-        fv = cp->c.move(d)->fieldval;
+        d2 = cp->c().spin(d);
+        fv = cp->c().move(d)->fieldval;
         }
       #endif
       heptagon *created = init_heptagon(S7);
@@ -1505,7 +1505,7 @@ EX namespace reg3 {
       fixmatrix(T);
       reg_gmatrix[created] = make_pair(alt, T);
       altmap[alt].emplace_back(created, T);
-      created->c.connect(d2, parent, d, false);
+      created->c().connect(d2, parent, d, false);
       return created;
       }
 
@@ -1581,7 +1581,7 @@ EX namespace reg3 {
       hyperpoint hfront = tC0(cgi.adjmoves[cw.spin]);
       cw.at->cmove(j);
       transmatrix T = currentmap->adj(cw.at, j);
-      for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
+      for(int i=0; i<S7; i++) if(i != cw.at->c().spin(j))
         if(hdist(hfront, T * tC0(cgi.adjmoves[i])) < cgi.strafedist + .01)
           return cellwalker(cw.at->cmove(j), i);
       throw hr_exception("incorrect strafe");
@@ -1621,7 +1621,7 @@ EX namespace reg3 {
               for(int d2=0; d2<S7; d2++) {
                 hyperpoint back = locations[i1] * tC0(cgi.adjmoves[d2]);
                 if(intval(back, old) < 1e-3) {
-                  allh[i]->c.connect(d, allh[i1], d2, false);
+                  allh[i]->c().connect(d, allh[i1], d2, false);
                   fb++;
                   tmi.push_back(inverse(T1) * locations[i1]);
                   }
@@ -1651,7 +1651,7 @@ EX namespace reg3 {
             locations.push_back(T);
             if(isnan(T[0][0])) exit(1);
             
-            allh[i]->c.connect(d, h, d2, false);
+            allh[i]->c().connect(d, h, d2, false);
             tmi.push_back(inverse(T1) * T);
             }
           next_d: ;
@@ -1909,8 +1909,8 @@ EX namespace reg3 {
       if(id < 0) id += (1<<16);
 
       auto cp = counterpart(parent);
-      int d2 = cp->c.spin(d);
-      int fv = cp->c.move(d)->fieldval;
+      int d2 = cp->c().spin(d);
+      int fv = cp->c().move(d)->fieldval;
       
       // indenter ind(2);
       
@@ -1935,7 +1935,7 @@ EX namespace reg3 {
         res->distance = parent->distance + 1;
         res->fiftyval = id1;
         find_emeraldval(res, parent, d);
-        // res->c.connect(d2, parent, d, false);
+        // res->c().connect(d2, parent, d, false);
         }
       
       else if(other[pos] == ('A' + d) && other[pos+1] == ',') {
@@ -1966,7 +1966,7 @@ EX namespace reg3 {
       
       if(res->move(d2)) println(hlog, "res conflict");
 
-      res->c.connect(d2, parent, d, false);
+      res->c().connect(d2, parent, d, false);
       return res;
       }
 
@@ -2038,7 +2038,7 @@ EX namespace reg3 {
     void find_cell_connection(cell *c, int d) override {
       if(PURE) {
         auto h = c->master->cmove(d);
-        c->c.connect(d, h->c7, c->master->c.spin(d), false);
+        c->c().connect(d, h->c7, c->master->c().spin(d), false);
         return;
         }
       int id = cell_id.at(c);
@@ -2047,7 +2047,7 @@ EX namespace reg3 {
         h = h->cmove(dir);
       auto ac = quotient_map->acells[id];
       cell *c1 = get_cell_at(h, quotient_map->local_id[ac->move(d)].first);
-      c->c.connect(d, c1, ac->c.spin(d), false);
+      c->c().connect(d, c1, ac->c().spin(d), false);
       }
 
     transmatrix ray_iadj(cell *c, int i) override {
@@ -2063,7 +2063,7 @@ EX namespace reg3 {
       cw.at->cmove(j);
       transmatrix T = currentmap->adj(cw.at, j);
       cellwalker res1;
-      for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
+      for(int i=0; i<S7; i++) if(i != cw.at->c().spin(j))
         if(hdist(hfront, T * tC0(cgi.adjmoves[i])) < cgi.strafedist + .01)
           res1 = cellwalker(cw.at->cmove(j), i);
 

@@ -581,7 +581,7 @@ struct hrmap_crystal : hrmap_standard {
       auto st1 = get_canonical(co1);
     
       for(int d1=0; d1<S7; d1++) if(st1[d1] == st[d])
-        h->c.connect(d, h1, (d1+S7/2) % S7, false);
+        h->c().connect(d, h1, (d1+S7/2) % S7, false);
       
       return h1;
       }
@@ -600,16 +600,16 @@ struct hrmap_crystal : hrmap_standard {
       auto lw1 = lw+wstep;
       apply_period(c1);
       
-      h->c.connect(d, heptspin(get_heptagon_at(c1, S7), lw1.spin));
+      h->c().connect(d, heptspin(get_heptagon_at(c1, S7), lw1.spin));
       }
     else {
       auto coc = add(add(co, lw, HALFSTEP), lw+1, HALFSTEP);
       auto hc = get_heptagon_at(coc, 8);
       apply_period(coc);
       for(int a=0; a<8; a+=2) {
-        hc->c.connect(a, heptspin(h, lw.spin));
+        hc->c().connect(a, heptspin(h, lw.spin));
         if(h->modmove(lw.spin-1)) {
-          hc->c.connect(a+1, heptspin(h, lw.spin) - 1 + wstep - 1);
+          hc->c().connect(a+1, heptspin(h, lw.spin) - 1 + wstep - 1);
           }
         co = add(co, lw, FULLSTEP);
         apply_period(co);
@@ -643,7 +643,7 @@ struct hrmap_crystal : hrmap_standard {
 
       transmatrix U = T * cr.M;
       
-      ld go = hdist0(U * tC0(cgi.adjmoves[h->c.spin(d)]));
+      ld go = hdist0(U * tC0(cgi.adjmoves[h->c().spin(d)]));
       if(go > 1e-2) continue;
 
       for(int s=0; s<S7; s++) 
@@ -1714,9 +1714,9 @@ void transform_crystal_to_euclid () {
     for(int i=0; i<S7; i++) 
       if(spacemap.count(co + shifttable[i]))
         h->move(i) = spacemap[co + shifttable[i]],
-        h->c.setspin(i, (i + 3) % 6, false),
+        h->c().setspin(i, (i + 3) % 6, false),
         h->c7->move(i) = h->move(i)->c7,
-        h->c7->c.setspin(i, (i + 3) % 6, false);
+        h->c7->c().setspin(i, (i + 3) % 6, false);
     }
   
   clearAnimations();
@@ -1785,9 +1785,9 @@ void transform_euclid_to_crystal () {
       if(m->heptagon_at.count(co1)) {
         auto lw1 = lw+wstep;
         h->move(i) = m->heptagon_at[co1],
-        h->c.setspin(i, lw1.spin, false),
+        h->c().setspin(i, lw1.spin, false),
         h->c7->move(i) = h->move(i)->c7;
-        h->c7->c.setspin(i, h->c.spin(i), false);
+        h->c7->c().setspin(i, h->c().spin(i), false);
         }
       }
     }

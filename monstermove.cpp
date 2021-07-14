@@ -148,7 +148,7 @@ EX void moveMonster(const movei& mi) {
     if(ct->monst != moTentacleGhost)
       ct->mondir = d;
     if(d >= 0)
-      ct->monmirror = cf->monmirror ^ ct->c.mirror(d);
+      ct->monmirror = cf->monmirror ^ ct->c().mirror(d);
     }
   ct->hitpoints = cf->hitpoints;
   ct->stuntime = cf->stuntime;
@@ -900,7 +900,7 @@ EX void moveWorm(cell *c) {
     animateMovement(mi, LAYER_BIG);
     c->monst = eMonster(moWormtail + id);
     goal->mondir = mi.rev_dir_or(NODIR);
-    goal->monmirror = c->monmirror ^ c->c.mirror(dir);
+    goal->monmirror = c->monmirror ^ c->c().mirror(dir);
     setdist(goal, 6, nullptr);
   
     mountmove(mi, true);
@@ -946,7 +946,7 @@ EX void ivynext(cell *c) {
     if(!proper(c2, c2->mondir))
       return; /* incorrect data */
     if(!isIvy(c2->monst)) break;
-    if(c2->c.mirror(c2->mondir)) cw.mirrored = !cw.mirrored;
+    if(c2->c().mirror(c2->mondir)) cw.mirrored = !cw.mirrored;
     c2 = c2->move(c2->mondir);
     }
   
@@ -1365,7 +1365,7 @@ EX void movehex_rest(bool mounted) {
       for(int u=0; u<c->type; u++) {
         createMov(c, dirtable[u]);
         if(inpair(c->move(dirtable[u]), colorpair))
-          hexvisit(c, c->move(dirtable[u]), c->c.spin(dirtable[u]), mounted, colorpair);
+          hexvisit(c, c->move(dirtable[u]), c->c().spin(dirtable[u]), mounted, colorpair);
         }
       }
     if(c->monst == moHexSnake) {
@@ -1424,7 +1424,7 @@ EX void movemutant() {
       if((c2->land == laOvergrown || !pseudohept(c2)) && passable(c2, c, 0)) {
         if(c2->land == laClearing && !bounded && c2->mpdist > 7) continue;
         c2->monst = moMutant;
-        c2->mondir = c->c.spin(j);
+        c2->mondir = c->c().spin(j);
         c2->stuntime = mutantphase;
         animateMovement(mi, LAYER_BIG);
         }

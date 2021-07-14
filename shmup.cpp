@@ -1113,7 +1113,7 @@ void movePlayer(monster *m, int delta) {
         }
       else if(isPushable(c2->wall) && !nonAdjacent(c2, m->base)) {
         int sd1 = neighborId(c2, m->base);
-        int sd = m->base->c.spin(sd1);
+        int sd = m->base->c().spin(sd1);
         int subdir = 1;
         double bestd = 9999;
         for(int di=-1; di<2; di+=2) {
