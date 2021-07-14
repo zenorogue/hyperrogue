@@ -7312,6 +7312,64 @@ S("multiplayer", "режим нескольких игроков")
 // [PL:7811]
 S("Hint: these keys usually work during the game", "Подсказка: можно использовать эти клавиши во время игры")
 
+// [PL:8443]
+N("Frog Park", GEN_O, "Жабный парк", "Жабные парки", "Жабный парк", "в Жабном парке")
+
+S("This park is a perfect place for frogs to hide from predators. "
+  "So perfect that the frogs have grown in size, gained magical abilities, "
+  "and become very dangerous themselves.",
+  "Этот парк - идеальное место, где жабы могут прятаться от хищников. "
+  "Такое идеальное, что они увеличились по размеру, приобрели магические способности, "
+  "и сами стали очень опасными."
+  )
+
+N("Gold Ball", GEN_O, "Золотой мячик", "Золотые мячики", "Золотые мячик", "Золотом мячиком")
+S("A toy lost in the Frog Park by a spoiled child.", "Игрушка, потерянная в Жабном парке баловным ребёнком.")
+
+Orb("Impact", "Сотрясения")
+
+S("Whenever you use a ranged Orb to achieve an effect, all the single-tile monsters adjacent to the target "
+  "location are stunned.",
+  "Каждый раз, когда Вы используете силу какую-либо Сферу на расстоянии, "
+  "все стоящие рядом с целью монстры из 1 клетка оглушаются.")
+
+N("shrub", GEN_O, "куст", "кусты", "куст", "кустом")
+S("A strange small tree that cannot be attacked with mundane weapons nor phased though. "
+  "It can be vaulted over, though.",
+  "Странное маленькое растение, которое нельзя атаковать обычными орудиями и сквозь которого нельзя фазировать. "
+  "Но можно прыгать через него рывком.")
+
+N("Giant Frog", GEN_F, "Гигантская жаба", "Гигантские жабы", "Гигантскую жабу", "Гигантской жабой")
+
+S(
+  "At first, you are shocked by the agility of this frog. Such a large creature "
+  "should not be able to jump that quickly!\n\n"
+  "Then, you notice the green glow around its legs. This frog must be magical... "
+  "it has sacrificed its swimming abilities for superfrog jumping powers.",
+  
+  "В начале Вы были удивлены ловкостью этой жабы. Не может быть, что такой большой зверь "
+  "прыгает с такой скоростью!\n\n"
+  "Потом Вы заметили зелёное свечениe вокруг её задних ног. Должно быть, она волшебная... "
+  "она поменяла свой способность плавать на суперсилу прыгать.")
+
+N("Yellow Frog", GEN_F, "Жёлтая жаба", "Жёлтые жабы", "Жёлтую жабу", "Жёлтой жабой")
+
+S("A slightly transparent yellow frog. It has mastered the magical power of phasing through solid "
+  "obstacles such as rock.",
+  "Слегка прозрачная жаба. Она усвоила магическую силу фазировать сквозь твёрдые "
+  "препятствия, как например скалу.")
+
+N("Blue Frog", GEN_F, "Синяя жаба", "Синие жабы", "Синюю жабу", "Синей жабой")
+
+S(
+  "This frog is able to vault over the shrubs in the Frog Park, destroying the shrub in the process. "
+  "While it can also vault over monsters, it will never hurt the other frogs!",
+
+  "Эта жаба способна совершать рывок через кусты в Жабном парке, уничтожая их. "
+  "Хотя она может делать это и через монстров, она никогда не причиняет вред другим жабам!")
+
+S("\n\nThis Frog uses the power of %the1. You get 5 charges yourself for killing it.", "\n\nЭта жаба использует силу %P1. Вы получите 5 зарядов этой сферы, когда её убьёте. ")
+
 // [PL:8980]
 S("recently changed settings", "недавно изменённые настройки")
 
