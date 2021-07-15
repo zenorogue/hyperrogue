@@ -916,6 +916,8 @@ int read_cheat_args() {
     PHASEFROM(2);
     shift(); 
     firstland0 = firstland = specialland = readland(args());
+    if (!landUnlocked(firstland))
+      cheat();
     stop_game_and_switch_mode(rg::nothing);
     showstartmenu = false;
     }
