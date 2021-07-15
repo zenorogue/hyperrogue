@@ -7,6 +7,7 @@
 namespace hr {
 
 bool doAutoplay;
+eLand autoplayLand;
 
 namespace prairie { extern long long enter; }
 
@@ -144,7 +145,7 @@ void autoplay(int num_moves = 1000000000) {
     } else if (croll == 29) {
       printf("Place fun walls\n");
       forCellEx(cz, cwt.at)
-        if (!cz->wall)
+        if (!cz->wall && !cz->monst)
           cz->wall = pick(waExplosiveBarrel, waBigStatue, waThumperOff, waBonfireOff, waCloud, waMirror);
     } else if (croll == 30) {
       cell *ct = dcal[hrand(isize(dcal))];
@@ -164,8 +165,57 @@ void autoplay(int num_moves = 1000000000) {
         printf("Spam some slime\n");
         ct->item = itNone;
         ct->wall = hrand(2) ? waFloorA : waFloorB;
-        ct->monst = hrand(2) ? moSlime : moNone;
+        switch(hrand(4)) {
+          case 0: ct->monst = moSlime; break;
+          case 1: ct->item = itGreenStone; break;
+          default: ;
+        }
       }
+    } else if (croll == 37) {
+      cell *ct = dcal[hrand(isize(dcal))];
+      if (!isPlayerOn(ct) && !ct->monst && !ct->wall) {
+        ct->monst = pick(moRagingBull, moTroll, moAcidBird, moMiner, moReptile, moVineBeast, moBug0, moBug1);
+        printf("Spam a monster: %s\n", minf[ct->monst].name);
+      }
+      // todo: dice
+    } else if (croll == 38) {
+      forCellEx(cz, cwt.at) {
+        if (cz->monst == moPrincessArmed) {
+          printf("Disarming a princess\n");
+          cz->monst = moPrincess;
+        }
+      }
+    } else if (croll == 39) {
+      //forCellEx(cz, cwt.at) {
+      //  if (!cz->monst) {
+      //    printf("Summoning an unarmed princess incorrectly\n");
+      //    cz->monst = moPrincess;
+      //    break;
+      //  }
+      //}
+    } else if (croll == 40) {
+      //forCellEx(cz, cwt.at) {
+      //  if (!cz->monst) {
+      //    printf("Summoning an armed princess incorrectly\n");
+      //    cz->monst = moPrincessArmed;
+      //    break;
+      //  }
+      //}
+    } else if (croll == 41) {
+      cell *ct = dcal[hrand(isize(dcal))];
+      if (among(ct->wall, waNone, waVinePlant, waFloorA, waFloorB, waTrapdoor, waChasm, waBigStatue)) {
+        // Set wparam on a cell where it shouldn't matter, so that if this wall is later converted
+        // to a walltype that does care by some code that assumes wparam was 0,
+        // we can find out if that causes bugs.
+        printf("Randomizing wparam on %s at %p\n", winf[ct->wall].name, (void *)ct);
+        ct->wparam = (unsigned char) hrand(256);
+      }
+    } else if (croll == 42) {
+      vid.wallmode = hrand(7);
+      printf("Set vid.wallmode to %d: %s\n", vid.wallmode, wdmodes[vid.wallmode]);
+    } else if (croll == 43) {
+      vid.monmode = hrand(4);
+      printf("Set vid.monmode to %d: %s\n", vid.monmode, mdmodes[vid.monmode]);
     }
 
     // don't show warning dialogs
@@ -228,8 +278,7 @@ void autoplay(int num_moves = 1000000000) {
       printf("RESET\n");
       gcount = 0;
       cellcount = 0;
-      activateSafety(laCrossroads);
-      // landlist[hrand(isize(landlist))]);
+      activateSafety(autoplayLand ? autoplayLand : landlist[hrand(isize(landlist))]);
       if (cellcount < 0) {
         //printf("How did cellcount become negative?\n");
         cellcount = 1;
@@ -255,7 +304,7 @@ void autoplay(int num_moves = 1000000000) {
       for(int i=0; i<isize(dcal); i++) {
         cell *c = dcal[i];
         if(c->land == laCamelot && celldistAltRelative(c) == 0 && c->wall != waRoundTable) {
-          printf("The round table of camelot has been breached!\n");
+          printf("The round table of camelot is interrupted by a cell of %s\n", winf[c->wall].name);
           kills[moPlayer] = 0;
           canmove = true;
           doAutoplay = false;
@@ -265,6 +314,9 @@ void autoplay(int num_moves = 1000000000) {
 
     if(cwt.at->monst && !isMultitile(cwt.at->monst)) {
       printf("on a non-multitile monster: %s\n", minf[cwt.at->monst].name);
+      }
+    else if(isDie(cwt.at->wall)) {
+      printf("on a wall-type die: %s\n", winf[cwt.at->wall].name);
       }
 
     for(int i=0; i<isize(dcal); i++) {
@@ -283,6 +335,29 @@ void autoplay(int num_moves = 1000000000) {
         kills[moPlayer] = 0;
         canmove = true;
         doAutoplay = false;
+        }
+      if(isPrincess(c->monst) && princess::getPrincessInfo(c) == nullptr) {
+        printf("missing princess info\n");
+        kills[moPlayer] = 0;
+        canmove = true;
+        doAutoplay = false;
+        }
+      if(dice::on(c)) {
+        if(dice::data.count(c) == 0) {
+          c->item = itBuggy;
+          printf("missing dice::data[%p]\n", (void *)c);
+          kills[moPlayer] = 0;
+          canmove = true;
+          doAutoplay = false;
+          }
+        else if(!dice::data[c].which) {
+          // we might get here instead if someone already tried to do data[c], which creates a new element out of nothing
+          c->item = itBuggy;
+          printf("missing dice::data[%p].which\n", (void *)c);
+          kills[moPlayer] = 0;
+          canmove = true;
+          doAutoplay = false;
+          }
         }
       }
     
@@ -303,6 +378,13 @@ int readArgs() {
   using namespace arg;
            
   if(0) ;
+  else if(argis("-autoplayW")) {
+    // Start in this land and reset to this land
+    PHASE(3);
+    shift();
+    autoplayLand = readland(args());
+    activateSafety(autoplayLand);
+    }
   else if(argis("-autoplay")) {
     PHASE(3); 
     autoplay();
