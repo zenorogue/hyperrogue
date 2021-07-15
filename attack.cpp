@@ -1059,7 +1059,7 @@ EX bool should_switchplace(cell *c1, cell *c2) {
   if(isPrincess(c2->monst) || among(c2->monst, moGolem, moIllusion, moMouse, moFriendlyGhost))
     return true;
   
-  if(peace::on) return c2->monst && !isMultitile(c2->monst);
+  if(peace::on) return c2->monst && !isMultitile(c2->monst) && !isDie(c2->monst);
   return false;
   }
 
