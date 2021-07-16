@@ -1596,8 +1596,8 @@ EX int movevalue(eMonster m, cell *c, int dir, flagtype flags) {
     if(b) val = 50;
     else if(tk2 > tk) val += 1000 + 200 * (tk2 - tk);
     }
-  else if(passable_for(m, c2, c, P_DEADLY)) val = -1100;
-  else val = -1750;
+  else if(passable_for(m, c2, c, P_DEADLY)) return -1100;
+  else return -1750;
 
   if(c->monst == moGolem ) {
     val -= c2->pathdist;
