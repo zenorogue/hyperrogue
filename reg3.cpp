@@ -974,10 +974,6 @@ EX namespace reg3 {
                     if(ss[id1].dirdist[j1][fac[0]] == 1)
                     if(ss[id1].dirdist[j1][fac[1]] == 1) {
                       sd[i1] = j1;
-                      if(isize(ss[id1].faces[j1]) == 6) {
-                        println(hlog, "id1 is 6");
-                        exit(1);
-                        }
                       found_strafe++;
                       }
                   if(found_strafe != 1) println(hlog, "found_strafe = ", found_strafe, " (second order)");
