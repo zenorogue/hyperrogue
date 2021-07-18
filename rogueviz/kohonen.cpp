@@ -228,75 +228,106 @@ void coloring() {
 
 ld precise_placement = 1.6;
 
+bool neighbor_dir(cell *c, int a, int b) {
+  if(a == b) return false;
+  if(WDIM == 2)
+    return (a+1 == b) || (a-1 == b) || (a == 0 && b == c->type-1) || (b == 0 && a == c->type-1);
+  return currentmap->get_cellshape(c).dirdist[a][b] == 1;
+  }
+
 bool triangulate(kohvec d, neuron& w, map<cell*, neuron*>& find, transmatrix& res) {
 
   if(precise_placement < 1) return false;
+  
+  vector<int> dirs;
+  vector<neuron*> other;
+  vector<kohvec> kv;
+  
+  for(int i=0; i<WDIM; i++) {
 
-  ld bdiff = HUGE_VAL;
+    ld bdiff = HUGE_VAL;
 
-  /* find the second neuron */
-  neuron *second = nullptr;
-  int dir2 = -1;
-  forCellIdEx(c2, i, w.where) {
-    if(!find.count(c2)) continue;
-    auto w2 = find[c2];
-    double diff = vnorm(w2->net, d);
-    if(diff < bdiff) bdiff = diff, second = w2, dir2 = i;
+    /* find the second neuron */
+    neuron *candidate = nullptr;
+    int cdir = -1;
+
+    forCellIdEx(c2, i, w.where) {
+      if(!find.count(c2)) continue;
+      auto w2 = find[c2];
+      double diff = vnorm(w2->net, d);
+      if(1) {
+        bool valid = true;
+        for(int d: dirs)
+          if(!neighbor_dir(w.where, d, i))
+            valid = false;
+        if(!valid) continue;
+        }
+      if(diff < bdiff) bdiff = diff, candidate = w2, cdir = i;      
+      }
+    if(cdir == -1) {
+      println(hlog, "not enough directions");
+      return false;
+      }
+    dirs.push_back(cdir);
+    other.push_back(candidate);
+    kv.push_back(candidate->net);
     }
   
-  if(!second) return false;
-  
-  /* find the third neuron */
-  neuron *third = nullptr; bdiff = HUGE_VAL;
-  int dir3 = -1;
-  forCellIdEx(c3, i, w.where) {
-    if(!find.count(c3)) continue;
-    if(valence() == 3 && !isNeighbor(c3, second->where)) continue;
-    auto w3 = find[c3];
-    double diff = vnorm(w3->net, d);
-    if(diff < bdiff) bdiff = diff, third = w3, dir3 = i;
-    }
-  
-  if(!third) return false;
-  
+  int q = isize(dirs);
   const kohvec& a = w.net;
-  kohvec b = second->net;
-  kohvec c = third->net;
   
-  /* center at a */
-  vshift(b, a, -1);
-  vshift(c, a, -1);
-  vshift(d, a, -1);
+  auto orig_d = d;
+  
+  /* center at a */  
+  for(int i=0; i<q; i++)
+    vshift(kv[i], a, -1);
+  vshift(d, a, -1);  
+  
+  transmatrix R;
+  
+  hyperpoint coeff;
   
   /* orthonormalize */
-  kohvec c1 = c;
-  kohvec d1 = d;
-  ld bd = vdot(b, b);
-  if(bd < 1e-12) return false;
-  ld s = vdot(c1, b) / bd;
-  vshift(c1, b, -s);
+  for(int i=0; i<q; i++) {
+    R[i][i] = vdot(kv[i], kv[i]);
+    if(R[i][i] < 1e-12) {
+      auto head = [] (const vector<ld>& v) { vector<ld> res; for(int i=0; i<10; i++) res.push_back(v[i]); return res; };
+      println(hlog, "dot too small, i=", i,", dirs=", dirs);
+      println(hlog, "a = ", head(a));
+      println(hlog, "orig d = ", head(d));
+      for(auto z: other)
+        println(hlog, "orig kv: ", head(z->net), " @ ", z->where);
+      for(auto z: kv)
+        println(hlog, "curr kv: ", head(z));
+      return false;
+      }
+    for(int j=i+1; j<q; j++) {
+      R[i][j] = vdot(kv[i], kv[j]) / R[i][i];
+      vshift(kv[j], kv[i], -R[i][j]);
+      }
+    coeff[i] = vdot(d, kv[i]) / R[i][i];
+    }
   
-  ld db = vdot(d1, b) / bd;
-  ld cd = vdot(c1, c1);
-  if(cd < 1e-12) return false;
-  ld dc = vdot(d1, c1) / cd;
-  
-  // b is: (1,0)
-  // c is: (s,1)
+  for(int i=q-1; i>=0; i--) {
+    for(int j=0; j<i; j++)
+      coeff[j] -= coeff[i] * R[j][i];
+    }
 
-  // d is: (db,dc) = dc * (s,1) + (db-dc*s) * (1,0)
+  /* rescale if out of the simplex */
+  for(int i=0; i<q; i++)
+    if(coeff[i] < 0) {
+      coeff /= (1-coeff[i]);
+      coeff[i] = 0;
+      }
+      
+  ld total = 0;
+  for(int i=0; i<q; i++) total += coeff[i];
+  if(total > 1) coeff /= total, total = 1;
   
-  db -= dc * s;
-  
-  if(db < 0) dc = dc / (1-db), db = 0;
-  if(dc < 0) db = db / (1-dc), dc = 0;
+  coeff /= precise_placement;
 
-  ld overflow = db + dc - 1;
-  if(overflow > 0) tie(db,dc) = make_pair(db/(db+dc), dc/(db+dc));
-  
-  db /= precise_placement, dc /= precise_placement;
-
-  hyperpoint h = (1-dc-db) * C0 + db * tC0(currentmap->adj(w.where, dir2)) + dc * tC0(currentmap->adj(w.where, dir3));
+  hyperpoint h = (1-total) * C0;
+  for(int i=0; i<q; i++) h += coeff[i] * tC0(currentmap->adj(w.where, dirs[i]));
   h = normalize(h);
   
   res = rgpushxto0(h);  
