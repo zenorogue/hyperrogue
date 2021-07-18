@@ -6,7 +6,6 @@
 #include "objmodels.cpp"
 #include "smoothcam.cpp"
 
-#include "kohonen.cpp"
 #include "staircase.cpp"
 #include "banachtarski.cpp"
 #include "pentagonal.cpp"
@@ -55,5 +54,7 @@
 #endif
 #include "highdim-demo.cpp"
 
+#include "kohonen.cpp"
+#include "embeddings.cpp"
 //#endif
 

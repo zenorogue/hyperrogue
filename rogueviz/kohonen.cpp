@@ -4,26 +4,11 @@
 // Kohonen's self-organizing maps. 
 // This is a part of RogueViz, not a part of HyperRogue.
 
-#include "rogueviz.h"
+#include "kohonen.h"
 
 namespace rogueviz { namespace kohonen {
 
-void initialize_neurons();
-void initialize_neurons_initial();
-void initialize_dispersion();
-void initialize_samples_to_show();
-void clear();
-void create_neurons();
-
-
 int columns;
-
-typedef vector<double> kohvec;
-
-struct sample {
-  kohvec val;
-  string name;
-  };
 
 vector<sample> data;
 
@@ -33,17 +18,6 @@ int whattodraw[3] = {-2,-2,-2};
 
 int min_group = 10, max_group = 10;
 
-struct neuron {
-  kohvec net;
-  cell *where;
-  double udist;
-  int lpbak;
-  color_t col;
-  int allsamples, drawn_samples, csample, bestsample, max_group_here;
-  int debug;
-  neuron() { drawn_samples = allsamples = bestsample = 0; max_group_here = max_group; debug = 0; }
-  };
-
 vector<string> colnames;
 
 kohvec weights;
@@ -51,8 +25,6 @@ kohvec weights;
 vector<neuron> net;
 
 int neuronId(neuron& n) { return &n - &(net[0]); }
-
-void alloc(kohvec& k) { k.resize(columns); }
 
 bool neurons_indexed = false;
 
@@ -709,12 +681,6 @@ void step() {
   }
 
 int initdiv = 1;
-
-flagtype KS_ROGUEVIZ = 1;
-flagtype KS_NEURONS = 2;
-flagtype KS_DISPERSION = 4;
-flagtype KS_SAMPLES = 8;
-flagtype KS_NEURONS_INI = 16;
 
 flagtype state = 0;
 
