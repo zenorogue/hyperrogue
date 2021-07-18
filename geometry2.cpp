@@ -757,13 +757,26 @@ EX void generate_brm(cell *c1) {
     q.pop();
     
     ld mindist = HUGE_VAL, maxdist = 0;
-    for(int i=0; i<c1->type; i++)
-    for(int j=0; j<c2->type; j++) {
-      ld d = hdist(get_corner_position(c1, i), T * get_corner_position(c2, j));
-      if(d < mindist) mindist = d;
-      if(d > maxdist) maxdist = d;
-      }
     
+    if(WDIM == 2) {
+      for(int i=0; i<c1->type; i++)
+      for(int j=0; j<c2->type; j++) {
+        ld d = hdist(get_corner_position(c1, i), T * get_corner_position(c2, j));
+        if(d < mindist) mindist = d;
+        if(d > maxdist) maxdist = d;
+        }
+      }
+    else {
+      auto& ss1 = currentmap->get_cellshape(c1);
+      auto& ss2 = currentmap->get_cellshape(c2);
+      for(auto v: ss1.vertices_only)
+      for(auto w: ss2.vertices_only) {
+        ld d = hdist(v, T*w);
+        if(d < mindist) mindist = d;
+        if(d > maxdist) maxdist = d;
+        }
+      }
+      
     auto& cu = cutoff[c2];
     if(cu == 0 || cu > maxdist) 
       cu = maxdist;
