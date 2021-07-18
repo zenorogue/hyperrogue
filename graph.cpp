@@ -45,7 +45,24 @@ EX bool hide_player() {
      ;
   }
 
-#define ADC(V,c) if (auto *it = hr::find_or_null(current_display->all_drawn_copies, c)) for(const shiftmatrix& V: it->second)
+template<class T>
+class span {
+  T *begin_ = nullptr;
+  T *end_ = nullptr;
+
+  public:
+  explicit span() = default;
+  explicit span(T *p, int n) : begin_(p), end_(p + n) {}
+  T *begin() const { return begin_; }
+  T *end() const { return end_; }
+  };
+
+template<class Map, class Key>
+hr::span<const shiftmatrix> span_at(const Map& map, const Key& key) {
+  auto it = map.find(key);
+  return (it == map.end()) ? hr::span<const shiftmatrix>() : hr::span<const shiftmatrix>(it->second.data(), it->second.size());
+  }
+#define ADC(V,c) for (const shiftmatrix& V : hr::span_at(current_display->all_drawn_copies, c))
 
 EX hookset<bool(int sym, int uni)> hooks_handleKey;
 EX hookset<bool(cell *c, const shiftmatrix& V)> hooks_drawcell;
