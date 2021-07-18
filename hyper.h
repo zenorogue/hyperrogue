@@ -848,9 +848,9 @@ template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x; x[0] = a; x[1
 
 // Find in a std::map or std::unordered_map, or return null.
 template<class Map, class Key>
-const typename Map::value_type *find_or_null(const Map& map, const Key& key) {
+const typename Map::mapped_type *at_or_null(const Map& map, const Key& key) {
   auto it = map.find(key);
-  return (it == map.end()) ? nullptr : &*it;
+  return (it == map.end()) ? nullptr : &it->second;
   }
 
 namespace daily {
