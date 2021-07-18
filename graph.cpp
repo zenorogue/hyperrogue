@@ -1345,7 +1345,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
   #if CAP_SHAPES
   if(among(m, moTortoise, moWorldTurtle) && where && where->stuntime >= 3)
     drawStunStars(V, where->stuntime-2);
-  else if (among(m, moTortoise, moWorldTurtle) || m == moPlayer || (where && !where->stuntime)) ;
+  else if (among(m, moTortoise, moWorldTurtle, moMutant) || m == moPlayer || (where && !where->stuntime)) ;
   else if(where && !(isMetalBeast(m) && where->stuntime == 1))
     drawStunStars(V, where->stuntime);
   
