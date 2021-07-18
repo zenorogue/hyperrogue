@@ -967,7 +967,7 @@ EX namespace reg3 {
                     fac.push_back(sd[i2]);
                   if(isize(fac) != 2) {
                     println(hlog, "fac= ", fac);
-                    exit(1);
+                    throw hr_exception("fac error");
                     }
                   int found_strafe = 0;
                   for(int j1=0; j1<c1->type; j1++) if(j1 != j)
