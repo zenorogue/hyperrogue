@@ -45,7 +45,7 @@ EX bool hide_player() {
      ;
   }
 
-#define ADC(V,c) IF_MAP_CONTAINS_KEY(it, current_display->all_drawn_copies, c) for(const shiftmatrix& V: it->second)
+#define ADC(V,c) IF_KEY_EXISTS(it, current_display->all_drawn_copies, c) for(const shiftmatrix& V: it->second)
 
 EX hookset<bool(int sym, int uni)> hooks_handleKey;
 EX hookset<bool(cell *c, const shiftmatrix& V)> hooks_drawcell;

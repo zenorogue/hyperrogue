@@ -577,8 +577,8 @@ typedef function<int(struct cell*)> cellfunction;
 
 /* conditions */
 
-/** `IF_MAP_CONTAINS_KEY(it, map, key) statement` checks whether the map 'map' contain key 'key', and if so, executes statement with it set to the relevant iterator */
-#define IF_MAP_CONTAINS_KEY(it, map, key) for(auto it = map.find(key); it != map.end(); it = map.end())
+/** `IF_KEY_EXISTS(it, map, key) statement` checks whether the map 'map' contain key 'key', and if so, executes statement with it set to the relevant iterator */
+#define IF_KEY_EXISTS(it, map, key) for(auto it: {map.find(key)}) if(it != map.end())
 
 // canAttack/moveval flags
 
