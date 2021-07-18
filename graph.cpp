@@ -62,7 +62,6 @@ hr::span<const shiftmatrix> span_at(const Map& map, const Key& key) {
   auto it = map.find(key);
   return (it == map.end()) ? hr::span<const shiftmatrix>() : hr::span<const shiftmatrix>(it->second.data(), it->second.size());
   }
-#define ADC(V,c) for (const shiftmatrix& V : hr::span_at(current_display->all_drawn_copies, c))
 
 EX hookset<bool(int sym, int uni)> hooks_handleKey;
 EX hookset<bool(cell *c, const shiftmatrix& V)> hooks_drawcell;
@@ -4378,7 +4377,8 @@ EX void queuecircleat1(cell *c, const shiftmatrix& V, double rad, color_t col) {
 
 EX void queuecircleat(cell *c, double rad, color_t col) {
   if(!c) return;
-  ADC(V, c) queuecircleat1(c, V, rad, col);
+  for (const shiftmatrix& V : hr::span_at(current_display->all_drawn_copies, c))
+    queuecircleat1(c, V, rad, col);
   }
 #endif
 
@@ -4435,10 +4435,11 @@ EX void drawMarkers() {
     ignore(ok);
      
     #if CAP_QUEUE
-    if(haveMount()) ADC(V, dragon::target) {
-      queuestr(V, 1, "X",
-        gradient(0, iinf[itOrbDomination].color, -1, sintick(dragon::whichturn == turncount ? 75 : 150), 1));
-      }
+    if(haveMount())
+      for (const shiftmatrix& V : hr::span_at(current_display->all_drawn_copies, dragon::target)) {
+        queuestr(V, 1, "X",
+          gradient(0, iinf[itOrbDomination].color, -1, sintick(dragon::whichturn == turncount ? 75 : 150), 1));
+        }
     #endif
 
     /* for(int i=0; i<12; i++) if(c->type == 5 && c->master == &dodecahedron[i])
@@ -4553,16 +4554,20 @@ EX void drawMarkers() {
 
       int adj = 1 - ((sword_angles/cwt.at->type)&1);
       
-      if(items[itOrbSword]) ADC(V, cwt.at)
-        queuestr(V * spin(M_PI+(-adj-2*ang)*M_PI/sword_angles) * xpush0(cgi.sword_size), vid.fsize*2, "+", iinf[itOrbSword].color);
-      if(items[itOrbSword2]) ADC(V, cwt.at)
-        queuestr(V * spin((-adj-2*ang)*M_PI/sword_angles) * xpush0(-cgi.sword_size), vid.fsize*2, "+", iinf[itOrbSword2].color);
+      if(items[itOrbSword])
+        for (const shiftmatrix& V : hr::span_at(current_display->all_drawn_copies, cwt.at))
+          queuestr(V * spin(M_PI+(-adj-2*ang)*M_PI/sword_angles) * xpush0(cgi.sword_size), vid.fsize*2, "+", iinf[itOrbSword].color);
+      if(items[itOrbSword2])
+        for (const shiftmatrix& V : hr::span_at(current_display->all_drawn_copies, cwt.at))
+          queuestr(V * spin((-adj-2*ang)*M_PI/sword_angles) * xpush0(-cgi.sword_size), vid.fsize*2, "+", iinf[itOrbSword2].color);
       }
     if(SWORDDIM == 3 && !shmup::on) {
-      if(items[itOrbSword]) ADC(V, cwt.at)
-        queuestr(V * sword::dir[multi::cpid].T * xpush0(cgi.sword_size), vid.fsize*2, "+", iinf[itOrbSword].color);
-      if(items[itOrbSword2]) ADC(V, cwt.at)
-        queuestr(V * sword::dir[multi::cpid].T * xpush0(-cgi.sword_size), vid.fsize*2, "+", iinf[itOrbSword2].color);
+      if(items[itOrbSword])
+        for (const shiftmatrix& V : hr::span_at(current_display->all_drawn_copies, cwt.at))
+          queuestr(V * sword::dir[multi::cpid].T * xpush0(cgi.sword_size), vid.fsize*2, "+", iinf[itOrbSword].color);
+      if(items[itOrbSword2])
+        for (const shiftmatrix& V : hr::span_at(current_display->all_drawn_copies, cwt.at))
+          queuestr(V * sword::dir[multi::cpid].T * xpush0(-cgi.sword_size), vid.fsize*2, "+", iinf[itOrbSword2].color);
       }
     }
 
@@ -4620,10 +4625,17 @@ void drawFlashes() {
     bool kill = true;
     flashdata& f = flashes[k];
     bool copies = false;
-    ADC(V, f.where) copies = true, draw_flash(f, V, kill);
-    forCellIdEx(c2, id, f.where) if(!copies) ADC(V, c2) {
-      draw_flash(f, V * currentmap->iadj(f.where, id), kill);
+    for (const shiftmatrix& V : hr::span_at(current_display->all_drawn_copies, f.where)) {
       copies = true;
+      draw_flash(f, V, kill);
+      }
+    forCellIdEx(c2, id, f.where) {
+      if(!copies) {
+        for (const shiftmatrix& V : hr::span_at(current_display->all_drawn_copies, c2)) {
+          draw_flash(f, V * currentmap->iadj(f.where, id), kill);
+          copies = true;
+          }
+        }
       }
     if(f.t > ticks - 800 && !copies) {
       kill = false;
