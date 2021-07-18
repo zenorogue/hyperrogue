@@ -1246,26 +1246,31 @@ int read_geom_args() {
     }
   else if(argis("-subcubes")) {
     PHASEFROM(2);
+    stop_game();
     set_variation(eVariation::subcubes);
     shift(); reg3::subcube_count = argi();
     }
   else if(argis("-dual-subcubes")) {
     PHASEFROM(2);
+    stop_game();
     set_variation(eVariation::dual_subcubes);
     shift(); reg3::subcube_count = argi();
     }
   else if(argis("-bch-subcubes")) {
     PHASEFROM(2);
+    stop_game();
     set_variation(eVariation::bch);
     shift(); reg3::subcube_count = argi();
     }
   else if(argis("-bch-oct")) {
     PHASEFROM(2);
+    stop_game();
     set_variation(eVariation::bch_oct);
     shift(); reg3::subcube_count = argi();
     }
   else if(argis("-coxeter")) {
     PHASEFROM(2);
+    stop_game();
     set_variation(eVariation::coxeter);
     shift(); reg3::coxeter_param = argi();
     }
