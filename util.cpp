@@ -207,7 +207,7 @@ cld exp_parser::parse(int prio) {
     cld c = rparse(0);
     force_eat(")");
 
-    IF_KEY_EXISTS(it, extra_params, "angleunit") {
+    if (auto *it = hr::find_or_null(extra_params, "angleunit")) {
       a *= it->second;
       b *= it->second;
       c *= it->second;
@@ -237,13 +237,13 @@ cld exp_parser::parse(int prio) {
     test.compute_sum();
     test.compute_geometry();
     res = test.edgelength;
-    IF_KEY_EXISTS(it, extra_params, "distunit")
+    if (auto *it = hr::find_or_null(extra_params, "distunit"))
       res /= it->second;
     }
   #endif
   else if(eat("regangle(")) {
     cld edgelen = parse(0);
-    IF_KEY_EXISTS(it, extra_params, "distunit") {
+    if (auto *it = hr::find_or_null(extra_params, "distunit")) {
       edgelen = edgelen * it->second;
       }
     
@@ -260,13 +260,13 @@ cld exp_parser::parse(int prio) {
     
     if(arb::legacy) {
       res = M_PI - result;
-      IF_KEY_EXISTS(it, extra_params, "angleofs")
+      if (auto *it = hr::find_or_null(extra_params, "angleofs"))
         res -= it->second;
       }
     else
       res = result;
 
-    IF_KEY_EXISTS(it, extra_params, "angleunit")
+    if (auto *it = hr::find_or_null(extra_params, "angleunit"))
       res /= it->second;
     }
   else if(eat("test(")) {
@@ -318,8 +318,8 @@ cld exp_parser::parse(int prio) {
   else if(next() == '(') at++, res = parsepar(); 
   else {
     string number = next_token();
-    IF_KEY_EXISTS(it, extra_params, number) res = it->second;
-    else IF_KEY_EXISTS(it, params, number) res = it->second->get_cld();
+    if (auto *it = hr::find_or_null(extra_params, number)) res = it->second;
+    else if (auto *it = hr::find_or_null(params, number)) res = it->second->get_cld();
     else if(number == "e") res = exp(1);
     else if(number == "i") res = cld(0, 1);
     else if(number == "p" || number == "pi") res = M_PI;
