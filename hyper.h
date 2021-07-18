@@ -575,6 +575,11 @@ typedef function<int(struct cell*)> cellfunction;
 #define forCellCM(ct, cf) forCellIdCM(ct,forCellCM ## __LINE__,cf)
 #define forCellAll(ct, cf) forCellIdCM(ct,forCellAll ## __LINE__,cf)
 
+/* conditions */
+
+/** `IF_MAP_CONTAINS_KEY(it, map, key) statement` checks whether the map 'map' contain key 'key', and if so, executes statement with it set to the relevant iterator */
+#define IF_MAP_CONTAINS_KEY(it, map, key) for(auto it = map.find(key); it != map.end(); it = map.end())
+
 // canAttack/moveval flags
 
 #define AF_NORMAL            0          // nothing special about this attack
