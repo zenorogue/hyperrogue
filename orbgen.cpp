@@ -333,7 +333,7 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
 
   if(it == itOrbWoods && !among(l,
     laDryForest, laWineyard, laCaribbean, laOvergrown, laHaunted, laHauntedWall, laHauntedBorder, laTortoise, laFrog, laEclectic,
-    laVariant))
+    laVariant, laBull))
     return olrUseless;
   
   if(it == itShard) {
