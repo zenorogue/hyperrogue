@@ -101,12 +101,15 @@ EX namespace gp {
 
   EX int fixg6(int x) { return gmod(x, SG6); }
   
+  const int GOLDBERG_LIMIT_HALF = GOLDBERG_LIMIT/2;
+  const int GOLDBERG_MASK_HALF = GOLDBERG_MASK/2;
+  
   EX int get_code(const local_info& li) {
     return 
-      ((li.relative.first & 15) << 0) +
-      ((li.relative.second & 15) << 4) +
-      ((fixg6(li.total_dir)) << 8) +
-      ((li.last_dir & 15) << 12);
+      ((li.relative.first & GOLDBERG_MASK_HALF) << 0) +
+      ((li.relative.second & GOLDBERG_MASK_HALF) << (GOLDBERG_BITS-1)) +
+      ((fixg6(li.total_dir)) << (2*GOLDBERG_BITS-2)) +
+      ((li.last_dir & 15) << (2*GOLDBERG_BITS+2));
     }
   
   EX local_info get_local_info(cell *c) {
@@ -162,9 +165,9 @@ EX namespace gp {
   // goldberg_map[y][x].cw is the cellwalker in this triangle at position (x,y)
   // facing local direction 0  
   
-  goldberg_mapping_t goldberg_map[32][32];
+  goldberg_mapping_t goldberg_map[GOLDBERG_LIMIT][GOLDBERG_LIMIT];
   void clear_mapping() {
-    for(int y=0; y<32; y++) for(int x=0; x<32; x++) {
+    for(int y=0; y<GOLDBERG_LIMIT; y++) for(int x=0; x<GOLDBERG_LIMIT; x++) {
       goldberg_map[y][x].cw.at = NULL;
       goldberg_map[y][x].rdir = -1;
       goldberg_map[y][x].mindir = 0;
@@ -172,7 +175,7 @@ EX namespace gp {
     }
   
   goldberg_mapping_t& get_mapping(loc c) {
-    return goldberg_map[c.second&31][c.first&31];
+    return goldberg_map[c.second&GOLDBERG_MASK][c.first&GOLDBERG_MASK];
     }
 
   int spawn;
@@ -599,14 +602,14 @@ EX namespace gp {
     cgi.gpdata->Tf.resize(S7);
     for(int i=0; i<S7; i++) {
       transmatrix T = dir_matrix(i);
-      for(int x=-16; x<16; x++)
-      for(int y=-16; y<16; y++)
+      for(int x=-GOLDBERG_LIMIT_HALF; x<GOLDBERG_LIMIT_HALF; x++)
+      for(int y=-GOLDBERG_LIMIT_HALF; y<GOLDBERG_LIMIT_HALF; y++)
       for(int d=0; d<(S3==3?6:4); d++) {
         loc at = loc(x, y);
         
         hyperpoint h = atz(T, cgi.gpdata->corners, at, 6);
         hyperpoint hl = atz(T, cgi.gpdata->corners, at + eudir(d), 6);
-        cgi.gpdata->Tf[i][x&31][y&31][d] = rgpushxto0(h) * rspintox(gpushxto0(h) * hl) * spin(M_PI);
+        cgi.gpdata->Tf[i][x&GOLDBERG_MASK][y&GOLDBERG_MASK][d] = rgpushxto0(h) * rspintox(gpushxto0(h) * hl) * spin(M_PI);
         }
       }       
     }
@@ -616,7 +619,7 @@ EX namespace gp {
     if(i == -1) 
       return atz(dir_matrix(cid), cgi.gpdata->corners, li.relative, 0, cf);
     else {
-      auto& cellmatrix = cgi.gpdata->Tf[i][li.relative.first&31][li.relative.second&31][fixg6(li.total_dir)];
+      auto& cellmatrix = cgi.gpdata->Tf[i][li.relative.first&GOLDBERG_MASK][li.relative.second&GOLDBERG_MASK][fixg6(li.total_dir)];
       return inverse(cellmatrix) * atz(dir_matrix(i), cgi.gpdata->corners, li.relative, fixg6(cid + li.total_dir), cf);
       }
     }

@@ -837,8 +837,8 @@ EX namespace gp {
   EX void clear_plainshapes() {
     for(int m=0; m<3; m++)
     for(int sd=0; sd<8; sd++)
-    for(int i=0; i<32; i++)
-    for(int j=0; j<32; j++)
+    for(int i=0; i<GOLDBERG_LIMIT; i++)
+    for(int j=0; j<GOLDBERG_LIMIT; j++)
     for(int k=0; k<8; k++)
       cgi.gpdata->pshid[m][sd][i][j][k] = -1;
     cgi.gpdata->nextid = 0;
@@ -892,7 +892,7 @@ EX namespace gp {
       sidir = 0;
       }
     else f();
-    auto& id = cgi.gpdata->pshid[siid][sidir][draw_li.relative.first&31][draw_li.relative.second&31][gmod(draw_li.total_dir, S6)];
+    auto& id = cgi.gpdata->pshid[siid][sidir][draw_li.relative.first&GOLDBERG_MASK][draw_li.relative.second&GOLDBERG_MASK][gmod(draw_li.total_dir, S6)];
     if(id == -1 && sphere && isize(cgi.shFloor.b) > 0) {
       forCellEx(c1, c) if(!gmatrix0.count(c1)) return 0;
       }

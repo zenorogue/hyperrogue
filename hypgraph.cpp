@@ -1588,7 +1588,7 @@ void drawrec(cell *c, const transmatrix& V) {
   
   bool drawrec(cell *c, const shiftmatrix& V, gp::loc at, int dir, int maindir) { 
     bool res = false;
-    shiftmatrix V1 = V * cgi.gpdata->Tf[draw_li.last_dir][at.first&31][at.second&31][fixg6(dir)];
+    shiftmatrix V1 = V * cgi.gpdata->Tf[draw_li.last_dir][at.first&GOLDBERG_MASK][at.second&GOLDBERG_MASK][fixg6(dir)];
     if(do_draw(c, V1)) {
       /* auto li = get_local_info(c);
       if((dir - li.total_dir) % S6) printf("totaldir %d/%d\n", dir, li.total_dir);

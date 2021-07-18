@@ -68,7 +68,7 @@ transmatrix hrmap_standard::master_relative(cell *c, bool get_inverse) {
       }
     else {
       auto li = gp::get_local_info(c);
-      transmatrix T = spin(master_to_c7_angle()) * cgi.gpdata->Tf[li.last_dir][li.relative.first&31][li.relative.second&31][gp::fixg6(li.total_dir)];
+      transmatrix T = spin(master_to_c7_angle()) * cgi.gpdata->Tf[li.last_dir][li.relative.first&GOLDBERG_MASK][li.relative.second&GOLDBERG_MASK][gp::fixg6(li.total_dir)];
       if(get_inverse) T = iso_inverse(T);
       return T;
       }

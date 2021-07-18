@@ -50,6 +50,15 @@ struct hpcshape {
 #define SIDE_BSHA 12
 #define SIDEPARS  13
 
+/** GOLDBERG_BITS controls the size of tables for Goldberg: 2*(x+y) should be below (1<<GOLDBERG_BITS) */
+
+#ifndef GOLDBERG_BITS
+#define GOLDBERG_BITS 5
+#endif
+
+static const int GOLDBERG_LIMIT = (1<<GOLDBERG_BITS);
+static const int GOLDBERG_MASK = (GOLDBERG_LIMIT-1);
+
 #ifndef BADMODEL
 #define BADMODEL 0
 #endif
@@ -478,11 +487,11 @@ hpcshape
   /* Goldberg parameters */
   #if CAP_GP
   struct gpdata_t {
-    vector<array<array<array<transmatrix, 6>, 32>, 32>> Tf;
+    vector<array<array<array<transmatrix, 6>, GOLDBERG_LIMIT>, GOLDBERG_LIMIT>> Tf;
     transmatrix corners;
     ld alpha;
     int area;
-    int pshid[3][8][32][32][8];
+    int pshid[3][8][GOLDBERG_LIMIT][GOLDBERG_LIMIT][8];
     int nextid;
     };
   shared_ptr<gpdata_t> gpdata = nullptr;
