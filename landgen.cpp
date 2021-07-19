@@ -537,8 +537,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           c->item = hrand(100) < 80 ? itOrbFrog : itOrbDiscord;
         if(hrand(5000) < 20*PRIZEMUL && c->wall != waOpenGate)
           placePrizeOrb(c);
-        if(c->wall == waNone) buildPrizeMirror(c, 250);
-        if(c->land == laPalace && (eubinary || c->master->alt) && celldistAlt(c) <= 150 && !(havewhat&HF_MOUSE) && !princess::generating &&
+        if(c->wall == waNone && buildPrizeMirror(c, 250)) {}
+        else if(c->land == laPalace && (eubinary || c->master->alt) && celldistAlt(c) <= 150 && !(havewhat&HF_MOUSE) && !princess::generating &&
           princess::getPrisonInfo(c) &&
           (eubinary || (princess::getPrisonInfo(c)->bestdist < 6 && princess::getPrisonInfo(c)->princess))) {
           c->monst = moMouse;
