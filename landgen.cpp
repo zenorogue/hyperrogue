@@ -2345,7 +2345,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         }
       if(d == 7 && c->landparam == 2) forCellEx(c2, c) if(c2->land == laRuins && out_ruin(c2)) c->landparam = 1;
       ONEMPTY {
-        if(hrand(1500) < PT(30 + kills[moHexDemon] + kills[moSkeleton] + kills[moMonk] + kills[moPair], 100) && notDippingFor(itRuins)) {
+        if(hrand(1500) < PT(30 + kills[moHexDemon] + kills[moAltDemon] + kills[moMonk] + kills[moPair] + kills[moCrusher], 100) && notDippingFor(itRuins)) {
           c->item = itRuins;
           forCellEx(c2, c) if(c2->monst == moMonk)
             c->item = itNone;
