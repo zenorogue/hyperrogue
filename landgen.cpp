@@ -2632,6 +2632,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
               c->monst = moHexer;
               c->item = pick(itCurseWeakness, itCurseDraining, itCurseWater, itCurseFatigue, itCurseRepulsion, itCurseGluttony);
               }
+            break;
             }
           }
         
