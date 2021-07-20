@@ -2587,8 +2587,9 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laDice: {
       #if CAP_COMPLEX2
-      if(fargen)
+      if(fargen && !c->monst && !c->wall) {
         dice::generate_full(c, items[itDice] + yendor::hardness());
+      }
       #endif
       break;
       }
