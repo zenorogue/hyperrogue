@@ -7270,10 +7270,23 @@ S("A brown gem.", "Коричневый камень.")
 Orb("Choice", "Выбора")
 
 N("Free Fall", GEN_O, "Свободное падение", "Свободные падения", "Свободное падение", "в Свободном падении")
+
+S("What on one side looks to be a normal (well, infinite) horizontal wall, on the other side turns out to be the vertical wall"
+  " of an infinitely high tower. Jump from the window, and let the magical gravity carry you...",
+
+  "То, что на одной стороне похоже на обычную (хотя и бесконечную) горизонтальную стену, "
+  "на другой стороне оказывается вертикальной стеной бесконечно высокой башни. "
+  "Выпрыгайте через окно, и пусть сила волшебной тяжести везёт Вас...")
+
 N("Falling Dog", GEN_F, "Падающая собака", "Падающие собаки", "Падающую собаку", "Падающей собакой")
 S("Distant relatives of the Running Dogs.", "Дальние родственники Бегущих собак.")
 N("Western Hawk", GEN_M, "Западный ястреб", "Западные ястреба", "Западного ястреба", "Западным ястребом")
 N("Meteorite", GEN_O, "Метеорит", "Метеориты", "Метеорит", "Метеоритом")
+
+S("These rocks falling from the sky have been captured to fall forever in the artificial gravity. Meteorite iron is believed to be a valuable material for magical weapons.",
+  "Эти падающие с неба камни захвачены, чтобы вечно падать под силой исскуственной тяжести. "
+  "Верят, что метеоритное железо - ценный материал для ковки волшебных орудий.")
+
 Orb("Gravity", "Гравитации")
 
 N("Irradiated Field", GEN_N, "Облучённое поле", "Облучённые поля", "Облучённое поле", "в Облучённом поле")
