@@ -575,11 +575,6 @@ typedef function<int(struct cell*)> cellfunction;
 #define forCellCM(ct, cf) forCellIdCM(ct,forCellCM ## __LINE__,cf)
 #define forCellAll(ct, cf) forCellIdCM(ct,forCellAll ## __LINE__,cf)
 
-/* conditions */
-
-/** `IF_KEY_EXISTS(it, map, key) statement` checks whether the map 'map' contain key 'key', and if so, executes statement with it set to the relevant iterator */
-#define IF_KEY_EXISTS(it, map, key) for(auto it: {map.find(key)}) if(it != map.end())
-
 // canAttack/moveval flags
 
 #define AF_NORMAL            0          // nothing special about this attack
@@ -850,6 +845,13 @@ template<class T, class U> void eliminate_if(vector<T>& data, U pred) {
 template<class T> array<T, 4> make_array(T a, T b, T c, T d) { array<T,4> x; x[0] = a; x[1] = b; x[2] = c; x[3] = d; return x; }
 template<class T> array<T, 3> make_array(T a, T b, T c) { array<T,3> x; x[0] = a; x[1] = b; x[2] = c; return x; }
 template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x; x[0] = a; x[1] = b; return x; }
+
+// Find in a std::map or std::unordered_map, or return null.
+template<class Map, class Key>
+const typename Map::mapped_type *at_or_null(const Map& map, const Key& key) {
+  auto it = map.find(key);
+  return (it == map.end()) ? nullptr : &it->second;
+  }
 
 namespace daily {
   extern bool on;

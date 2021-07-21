@@ -1051,7 +1051,7 @@ EX namespace dice {
         c->wall = (pct < (items[itOrbLuck] ? 9 : 11)) ? waRichDie : waHappyDie;
         generate_specific(c, &d6, 1, 2);
         }
-      if(pct2 < 40 + hard) {
+      else if(pct2 < 40 + hard) {
         c->monst = moAnimatedDie;
         generate_specific(c, &d6, 0, 99);
         }
@@ -1062,7 +1062,7 @@ EX namespace dice {
         c->wall = (pct < (items[itOrbLuck] ? 9 : 11)) ? waRichDie : waHappyDie;
         generate_specific(c, &d12, 2, 3);
         }
-      if(pct2 < 40 + hard) {
+      else if(pct2 < 40 + hard) {
         c->monst = moAnimatedDie;
         generate_specific(c, &d12, 0, 99);
         }
@@ -1153,6 +1153,12 @@ EX namespace dice {
     return isDie(c->wall) || isDie(c->monst);
     }
       
+  EX string describe(cell *c) {
+    if (!data.count(c)) return "BUG: die data missing";
+    else if (!data[c].which) return "BUG: die data default-initialized";
+    else return XLAT("d%1 rolled %2", its(data[c].which->faces), its(data[c].val + 1));
+  }
+
   EX void roll(movei mi) {
     auto &cto = mi.t;
     auto &th = mi.s;

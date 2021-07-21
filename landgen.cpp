@@ -537,8 +537,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           c->item = hrand(100) < 80 ? itOrbFrog : itOrbDiscord;
         if(hrand(5000) < 20*PRIZEMUL && c->wall != waOpenGate)
           placePrizeOrb(c);
-        if(c->wall == waNone) buildPrizeMirror(c, 250);
-        if(c->land == laPalace && (eubinary || c->master->alt) && celldistAlt(c) <= 150 && !(havewhat&HF_MOUSE) && !princess::generating &&
+        if(c->wall == waNone && buildPrizeMirror(c, 250)) {}
+        else if(c->land == laPalace && (eubinary || c->master->alt) && celldistAlt(c) <= 150 && !(havewhat&HF_MOUSE) && !princess::generating &&
           princess::getPrisonInfo(c) &&
           (eubinary || (princess::getPrisonInfo(c)->bestdist < 6 && princess::getPrisonInfo(c)->princess))) {
           c->monst = moMouse;
@@ -2345,7 +2345,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         }
       if(d == 7 && c->landparam == 2) forCellEx(c2, c) if(c2->land == laRuins && out_ruin(c2)) c->landparam = 1;
       ONEMPTY {
-        if(hrand(1500) < PT(30 + kills[moHexDemon] + kills[moSkeleton] + kills[moMonk] + kills[moPair], 100) && notDippingFor(itRuins)) {
+        if(hrand(1500) < PT(30 + kills[moHexDemon] + kills[moAltDemon] + kills[moMonk] + kills[moPair] + kills[moCrusher], 100) && notDippingFor(itRuins)) {
           c->item = itRuins;
           forCellEx(c2, c) if(c2->monst == moMonk)
             c->item = itNone;
@@ -2587,8 +2587,9 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laDice: {
       #if CAP_COMPLEX2
-      if(fargen)
+      if(fargen && !c->monst && !c->wall) {
         dice::generate_full(c, items[itDice] + yendor::hardness());
+      }
       #endif
       break;
       }
@@ -2632,6 +2633,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
               c->monst = moHexer;
               c->item = pick(itCurseWeakness, itCurseDraining, itCurseWater, itCurseFatigue, itCurseRepulsion, itCurseGluttony);
               }
+            break;
             }
           }
         

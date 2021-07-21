@@ -297,7 +297,7 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
 
   if(it == itOrbSlaying && !among(l, 
     laMirror, laHell, laEmerald, laDryForest, laCamelot, laPalace, laStorms, laRose, laTortoise, laBurial, laDungeon, laReptile, 
-    laPrairie, laBull, laVolcano, laTerracotta, laRuins, laVariant, laEclectic, laBrownian))
+    laPrairie, laBull, laVolcano, laTerracotta, laRuins, laVariant, laEclectic, laBrownian, laCursed))
     return olrUseless;
   
   if(l == laCocytus)
