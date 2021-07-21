@@ -47,6 +47,11 @@ EX namespace gp {
     loc operator /(int i) {
       return loc(first/i, second/i);
       }
+      
+    loc conj() {
+      if(S3 == 4) return loc(first, -second);
+      return loc(first+second, -second);
+      }
 
     };
 
