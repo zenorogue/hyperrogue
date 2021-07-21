@@ -608,7 +608,7 @@ S("Rangers take care of the magic mirrors in the Land of Mirrors. "
  "they will attack you!",
  "Seyyahların aynalarını kıracağını bildiklerinden sana saldıracaklar!")
 
-S("A nasty creature native to the Living Caves. They don't like you "
+S("A nasty creature that lives in caves. They don't like you "
  "for some reason.",
  "Yaşayan Mağaralarda yaşayan iğrenç bir yaratık. Nedense seni hiç sevmiyor.")
 

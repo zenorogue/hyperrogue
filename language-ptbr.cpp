@@ -670,7 +670,7 @@ S(
  "rozbijać lustra... także spodziewaj się ataku!")
 
 S(
- "A nasty creature native to the Living Caves. They don't like you "
+ "A nasty creature that lives in caves. They don't like you "
  "for some reason.",
  
  "Brzydki stwór z Żywych Jaskiń."

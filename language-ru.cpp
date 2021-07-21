@@ -651,7 +651,7 @@ S("Rangers take care of the magic mirrors in the Land of Mirrors. "
  "Странники охраняют магические зеркала. Они знают, что эти "
  "разбойники хотят разбить их зеркала и тут же нападают на Вас!")
 
-S("A nasty creature native to the Living Caves. They don't like you "
+S("A nasty creature that lives in caves. They don't like you "
  "for some reason.",
  "Противное существо из Живых пещер. По каким-то причинам не любит людей.")
 
