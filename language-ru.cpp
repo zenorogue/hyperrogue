@@ -651,8 +651,8 @@ S("Rangers take care of the magic mirrors in the Land of Mirrors. "
  "Странники охраняют магические зеркала. Они знают, что эти "
  "разбойники хотят разбить их зеркала и тут же нападают на Вас!")
 
-S("A nasty creature that lives in caves. They don't like you "
- "for some reason.",
+// TODO update translation
+S("A nasty creature that lives in caves. They don't like you for some reason.",
  "Противное существо из Живых пещер. По каким-то причинам не любит людей.")
 
 S("A tribe of men native to the Desert. They have even tamed the huge Sandworms, who won't attack them.",

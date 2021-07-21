@@ -678,8 +678,8 @@ S("Rangers take care of the magic mirrors in the Land of Mirrors. "
  "Strážci se starají o kouzelná zrcadla v Kraji zrcadel. Vědí, že lupiči "
  "jako ty rádi tato zrcadla rozbíjejí... a proto na tebe útočí!")
 
-S("A nasty creature that lives in caves. They don't like you "
- "for some reason.",
+// TODO update translation
+S("A nasty creature that lives in caves. They don't like you for some reason.",
  "Hnusná potvora žijící v Živoucích jeskyních. Z nějakého důvodu "
  "tě nemají rády.")
 
