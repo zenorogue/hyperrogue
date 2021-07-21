@@ -232,7 +232,7 @@ void parrep(string& x, string w, stringpar p) {
       rep(x, "%a"+w, N->n[3].acc);
       rep(x, "%abl"+w, N->n[3].abl);
       rep(x, "%E"+w, choose3(N->n[3].genus, "", "а", "о"));
-      rep(x, "%A"+w, choose3(N->n[3].genus, "ый", "ая", "ое"));
+      rep(x, "%A"+w, choose3(N->n[3].genus, "ый", "ую", "ое"));
       rep(x, "%c"+w, choose3(N->n[3].genus, "ся", "ась", ""));
       rep(x, "%y"+w, choose3(N->n[3].genus, "ый", "ая", "ое"));
       }
