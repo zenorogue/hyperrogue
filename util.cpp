@@ -207,10 +207,10 @@ cld exp_parser::parse(int prio) {
     cld c = rparse(0);
     force_eat(")");
 
-    IF_KEY_EXISTS(it, extra_params, "angleunit") {
-      a *= it->second;
-      b *= it->second;
-      c *= it->second;
+    if (auto *angleunit = hr::at_or_null(extra_params, "angleunit")) {
+      a *= *angleunit;
+      b *= *angleunit;
+      c *= *angleunit;
       }
 
     return edge_of_triangle_with_angles(real(a), real(b), real(c));
@@ -237,14 +237,14 @@ cld exp_parser::parse(int prio) {
     test.compute_sum();
     test.compute_geometry();
     res = test.edgelength;
-    IF_KEY_EXISTS(it, extra_params, "distunit")
-      res /= it->second;
+    if (auto *distunit = hr::at_or_null(extra_params, "distunit"))
+      res /= *distunit;
     }
   #endif
   else if(eat("regangle(")) {
     cld edgelen = parse(0);
-    IF_KEY_EXISTS(it, extra_params, "distunit") {
-      edgelen = edgelen * it->second;
+    if (auto *distunit = hr::at_or_null(extra_params, "distunit")) {
+      edgelen *= *distunit;
       }
     
     force_eat(",");
@@ -260,14 +260,14 @@ cld exp_parser::parse(int prio) {
     
     if(arb::legacy) {
       res = M_PI - result;
-      IF_KEY_EXISTS(it, extra_params, "angleofs")
-        res -= it->second;
+      if (auto *angleofs = hr::at_or_null(extra_params, "angleofs"))
+        res -= *angleofs;
       }
     else
       res = result;
 
-    IF_KEY_EXISTS(it, extra_params, "angleunit")
-      res /= it->second;
+    if (auto *angleunit = hr::at_or_null(extra_params, "angleunit"))
+      res /= *angleunit;
     }
   else if(eat("test(")) {
     res = parsepar();
@@ -318,8 +318,8 @@ cld exp_parser::parse(int prio) {
   else if(next() == '(') at++, res = parsepar(); 
   else {
     string number = next_token();
-    IF_KEY_EXISTS(it, extra_params, number) res = it->second;
-    else IF_KEY_EXISTS(it, params, number) res = it->second->get_cld();
+    if (auto *p = hr::at_or_null(extra_params, number)) res = *p;
+    else if (auto *p = hr::at_or_null(params, number)) res = (*p)->get_cld();
     else if(number == "e") res = exp(1);
     else if(number == "i") res = cld(0, 1);
     else if(number == "p" || number == "pi") res = M_PI;
