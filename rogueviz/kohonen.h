@@ -70,6 +70,10 @@ bool finished();
 
 vector<cell*> gen_neuron_cells();
 neuron& winner(int id);
+
+double vdot(const kohvec& a, const kohvec& b);
+void vshift(kohvec& a, const kohvec& b, ld i);
+double vnorm(kohvec& a, kohvec& b);
 }
 
 namespace embeddings {
@@ -81,11 +85,14 @@ using kohonen::alloc;
 enum embedding_type { eProjection, eNatural, eLandscape, eSignpost, eHypersian };
 extern embedding_type etype;
 void mark_signposts(bool full, const vector<cell*>& ac);
+void mark_signposts_subg(int a, int b, const vector<cell*>& ac);
 void generate_rug(int i, bool close);
 void init_landscape(int dimensions);
 
 extern map<cell*, hyperpoint> rug_coordinates;
 extern void get_coordinates(kohvec& v, cell *c, cell *c0);
+
+extern vector<cell*> signposts;
 
 }
 

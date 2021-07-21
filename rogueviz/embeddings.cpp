@@ -113,6 +113,25 @@ void mark_signposts(bool full, const vector<cell*>& ac) {
       signposts.push_back(c);
   }
 
+/** special signposts */
+
+void mark_signposts_subg(int a, int b, const vector<cell*>& ac) {
+  etype = eSignpost;
+  println(hlog, "marking bitrunc signposts");
+  signposts.clear();
+  int maxd = 0;
+  if(!bounded)
+    for(cell *c: ac) maxd = max(celldist(c), maxd);
+  for(cell *c: ac) {
+    auto li = gp::get_local_info(c);
+    auto rel = li.relative * gp::loc(a, b);
+    auto rel2 = rel * gp::param.conj();
+    rel2 = rel2 / (gp::param * gp::param.conj()).first;
+    if(rel2 * gp::param == rel) 
+      signposts.push_back(c);
+    }
+  }
+
 /** rug embedding */
 
 map<cell*, hyperpoint> rug_coordinates;
