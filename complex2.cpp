@@ -1051,7 +1051,7 @@ EX namespace dice {
         c->wall = (pct < (items[itOrbLuck] ? 9 : 11)) ? waRichDie : waHappyDie;
         generate_specific(c, &d6, 1, 2);
         }
-      if(pct2 < 40 + hard) {
+      else if(pct2 < 40 + hard) {
         c->monst = moAnimatedDie;
         generate_specific(c, &d6, 0, 99);
         }
@@ -1062,7 +1062,7 @@ EX namespace dice {
         c->wall = (pct < (items[itOrbLuck] ? 9 : 11)) ? waRichDie : waHappyDie;
         generate_specific(c, &d12, 2, 3);
         }
-      if(pct2 < 40 + hard) {
+      else if(pct2 < 40 + hard) {
         c->monst = moAnimatedDie;
         generate_specific(c, &d12, 0, 99);
         }
