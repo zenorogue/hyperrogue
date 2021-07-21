@@ -1041,6 +1041,7 @@ EX void create_faces() {
     for(auto& h: fvs) h[0] *= nilwidth, h[1] *= nilwidth, h[2] *= nilwidth * nilwidth;
     add_wall(i, fvs);
     }
+  get_hsh().compute_hept();
   }
   
 EX }
