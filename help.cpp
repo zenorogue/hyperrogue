@@ -945,6 +945,9 @@ EX void describeMouseover() {
       
       if(c->wall == waRose) out += " (" + its(7-rosephase) + ")";
       if(c->wall == waTerraWarrior) out += " (" + its(c->landparam) + ")";
+      #if CAP_COMPLEX2
+      if(isDie(c->wall)) out += " (" + dice::describe(c) + ")";
+      #endif
       
       if((c->wall == waBigTree || c->wall == waSmallTree) && c->land != laDryForest)
         help = 
@@ -972,6 +975,10 @@ EX void describeMouseover() {
   
     else if(c->monst) {
       out += ", "; out += XLAT1(minf[c->monst].name); 
+      #if CAP_COMPLEX2
+      if(isDie(c->monst))
+        out += " (" + dice::describe(c) + ")";
+      #endif
       if(hasHitpoints(c->monst))
         out += " (" + its(c->hitpoints)+" HP)";
       if(isMutantIvy(c))
