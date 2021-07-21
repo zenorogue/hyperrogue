@@ -1796,8 +1796,13 @@ EX void specialMoves() {
     if(m == moHunterGuard && items[itHunting] >= 10)
       c->monst = moHunterChanging;
     
-    if(m == moHunterDog && (havewhat & HF_FAILED_AMBUSH) && hyperbolic && !quotient)
-      c->monst = moHunterChanging;
+    if ((havewhat & HF_FAILED_AMBUSH) && hyperbolic && !quotient) {
+      if(m == moHunterDog)
+        c->monst = moHunterChanging;
+      forCellEx(c2, c)
+        if(c2->monst == moHunterDog)
+          c2->monst = moHunterChanging;
+      }
     
     if(m == moSleepBull && !peace::on) {
       bool wakeup = false;
