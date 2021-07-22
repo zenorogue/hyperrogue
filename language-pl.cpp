@@ -9408,3 +9408,5 @@ S(
   )
 
 N("Palace Quest", GEN_O, "Misja w Pałacu", "Misje w Pałacu", "Misję w Pałacu", "na Misji w Pałacu")
+
+N("Pike", GEN_F, "Szczupak", "Szczupaki", "Szczupaka", "Szczupakiem")
