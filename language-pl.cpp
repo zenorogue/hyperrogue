@@ -8399,7 +8399,7 @@ N("shallow water", GEN_F, "płytka woda", "płytkie wody", "płytką wodę", "p�
 S("Shallow water is passable both for land creatures and for water creatures.",
   "Przez płytką wodę mogą przejść i stworzenia lądowe, i wodne.")
 
-N("shallow water", GEN_F, "głęboka woda", "głębokie wody", "głęboką wodę", "głęboką wodą")
+N("deep water", GEN_F, "głęboka woda", "głębokie wody", "głęboką wodę", "głęboką wodą")
 
 S("This body of water is calm and beautiful, but too deep to pass.",
   "Ta woda jest spokojna i piękna, ale zbyt głęboka, by przez nią przejść.")
