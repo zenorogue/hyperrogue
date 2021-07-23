@@ -795,8 +795,8 @@ void geometry_information::generate_floorshapes() {
       auto& sh = c.shapes[i];
       for(int j=0; j<sh.size(); j++) {
         auto& co = sh.connections[j];
-        mh.c.connect(j, &modelh[get<0>(co)], get<1>(co), get<2>(co));
-        ms.c.connect(j, &models[get<0>(co)], get<1>(co), get<2>(co));
+        mh.c.connect(j, &modelh[co.sid], co.eid, co.mirror);
+        ms.c.connect(j, &models[co.sid], co.eid, co.mirror);
         }
       }
     for(int i=0; i<n; i++) generate_floorshapes_for(i, &models[i], 0, 0);

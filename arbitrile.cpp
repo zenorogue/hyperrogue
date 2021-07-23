@@ -18,13 +18,25 @@ EX bool legacy; /* angleofs command */
 
 #if HDR
 
+/** a type used to specify the connections between shapes */
+struct connection_t {
+  /** the index of the connected shape in the 'shapes' table */
+  int sid;
+  /** the index of the edge in the 'shapes' table */
+  int eid;
+  /** 1 if this connection mirrored, 0 otherwise. do_unmirror() removes all mirrors by doubling shapes */
+  int mirror;
+  };
+
+inline void print(hstream& hs, const connection_t& conn) { print(hs, tie(conn.sid, conn.eid, conn.mirror)); }
+
 struct shape {
   int id;
   int flags;
   vector<hyperpoint> vertices;
   vector<ld> angles;
   vector<ld> edges;
-  vector<tuple<int, int, int>> connections;
+  vector<connection_t> connections;
   int size() const { return isize(vertices); }
   void build_from_angles_edges();
   vector<pair<int, int> > sublines;
@@ -218,7 +230,7 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
     }
   cc.connections.resize(cc.size());
   for(int i=0; i<isize(cc.connections); i++)
-    cc.connections[i] = make_tuple(cc.id, i, false);
+    cc.connections[i] = connection_t{cc.id, i, false};
   cc.stretch_shear.resize(cc.size(), make_pair(1, 0));
   }
 
@@ -227,9 +239,9 @@ EX bool do_unmirror = true;
 /** \brief for tessellations which contain mirror rules, remove them by taking the orientable double cover */
 EX void unmirror() {
   int mirror_rules = 0;
-  for(auto s: arb::current.shapes)
-    for(auto t: s.connections)
-      if(get<2>(t))
+  for(auto& s: arb::current.shapes)
+    for(auto& t: s.connections)
+      if(t.mirror)
         mirror_rules++;
   if(!mirror_rules) return;
   auto& sh = current.shapes;
@@ -247,11 +259,11 @@ EX void unmirror() {
 
   if(true) for(int i=0; i<s+s; i++) {
     for(auto& co: sh[i].connections) {
-      bool mirr = get<2>(co) ^ (i >= s);
-      get<2>(co) = false;
+      bool mirr = co.mirror ^ (i >= s);
+      co.mirror = false;
       if(mirr) {
-        get<0>(co) += s;
-        get<1>(co) = isize(sh[get<0>(co)].angles) - 1 - get<1>(co);
+        co.sid += s;
+        co.eid = isize(sh[co.sid].angles) - 1 - co.eid;
         }
       }
     }
@@ -410,8 +422,8 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
         verify_index(as, c.shapes[ai], ep);
         verify_index(bi, c.shapes, ep);
         verify_index(bs, c.shapes[bi], ep);
-        c.shapes[ai].connections[as] = make_tuple(bi, bs, m);
-        c.shapes[bi].connections[bs] = make_tuple(ai, as, m);
+        c.shapes[ai].connections[as] = connection_t{bi, bs, m};
+        c.shapes[bi].connections[bs] = connection_t{ai, as, m};
         }
       ep.force_eat(")");
       }
@@ -421,8 +433,8 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       int bi = ep.iparse(); verify_index(bi, c.shapes, ep); ep.force_eat(",");
       int bs = ep.iparse(); verify_index(bs, c.shapes[bi], ep); ep.force_eat(",");
       int m = ep.iparse(); ep.force_eat(")");
-      c.shapes[ai].connections[as] = make_tuple(bi, bs, m);
-      c.shapes[bi].connections[bs] = make_tuple(ai, as, m);
+      c.shapes[ai].connections[as] = connection_t{bi, bs, m};
+      c.shapes[bi].connections[bs] = connection_t{ai, as, m};
       }
     else if(ep.eat("subline(")) {
       int ai = ep.iparse(); verify_index(ai, c.shapes, ep); ep.force_eat(",");
@@ -483,12 +495,10 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       auto& sh = c.shapes[i];
       sh.stretch_shear[j] = {stretch, shear};
       auto& co = sh.connections[j];
-      int i2 = get<0>(co);
-      int j2 = get<1>(co);
-      auto& xsh = c.shapes[i2];
-      ld scale = sh.edges[j] / xsh.edges[j2];
+      auto& xsh = c.shapes[co.sid];
+      ld scale = sh.edges[j] / xsh.edges[co.eid];
       println(hlog, "scale = ", scale);
-      xsh.stretch_shear[j2] = {1/stretch, shear * (get<2>(co) ? 1 : -1) * stretch };
+      xsh.stretch_shear[co.eid] = {1/stretch, shear * (co.mirror ? 1 : -1) * stretch };
       }
     else throw hr_parse_exception("expecting command, " + ep.where());
     }
@@ -498,12 +508,10 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       for(int j=0; j<isize(sh.edges); j++) {
         ld d1 = sh.edges[j];
         auto con = sh.connections[j];
-        int i2 = get<0>(con);
-        int j2 = get<1>(con);
-        auto& xsh = c.shapes[get<0>(con)];
-        ld d2 = xsh.edges[j2];
+        auto& xsh = c.shapes[con.sid];
+        ld d2 = xsh.edges[con.eid];
         if(abs(d1 - d2) > 1e-6)
-          throw hr_parse_exception(lalign(0, "connecting ", make_pair(i,j), " to ", make_pair(i2,j2), " of different lengths only possible in a2"));
+          throw hr_parse_exception(lalign(0, "connecting ", make_pair(i,j), " to ", con, " of different lengths only possible in a2"));
         }
       }
     }
@@ -569,12 +577,12 @@ void connection_debugger() {
   int N = isize(sh.edges);
   for(int k=0; k<N; k++) {
     auto con = sh.connections[k];
-    string cap = its(k) + primes(last.second) + " -> " + its(get<1>(con)) + primes(get<0>(con)) + (get<2>(con) ? " (m) " : "");
+    string cap = its(k) + primes(last.second) + " -> " + its(con.eid) + primes(con.sid) + (con.mirror ? " (m) " : "");
     dialog::addSelItem(cap, "go", '0' + k);
     
     dialog::add_action([k, last, con] {
       if(euclid) cgflags |= qAFFINE;
-      debug_polys.emplace_back(last.first * get_adj(debugged, last.second, k, -1), get<0>(con));
+      debug_polys.emplace_back(last.first * get_adj(debugged, last.second, k, -1), con.sid);
       if(euclid) cgflags &= ~qAFFINE;
       });
     
@@ -615,11 +623,9 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int xdl) {
   int dr = gmod(dl+1, sh.size());
 
   auto& co = sh.connections[dl];
-  int xt = get<0>(co);
-  if(xdl == -1) xdl = get<1>(co);
-  int m = get<2>(co);
+  if(xdl == -1) xdl = co.eid;
 
-  auto& xsh = c.shapes[xt];
+  auto& xsh = c.shapes[co.sid];
   int xdr = gmod(xdl+1, xsh.size());
 
   hyperpoint vl = sh.vertices[dl];
@@ -648,10 +654,10 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int xdl) {
     Res = Res * Tsca;
     }
 
-  if(m) Res = Res * MirrorX;
+  if(co.mirror) Res = Res * MirrorX;
   Res = Res * spintox(xrm*xvl) * xrm;
   
-  if(m) swap(vl, vr);
+  if(co.mirror) swap(vl, vr);
   
   if(hdist(vl, Res*xvr) + hdist(vr, Res*xvl) > .1) {
     println(hlog, "s1 = ", kz(spintox(rm*vr)), " s2 = ", kz(rspintox(xrm*xvr)));    
@@ -718,10 +724,7 @@ struct hrmap_arbi : hrmap {
     
     auto& co = sh.connections[d];
     
-    int xt = get<0>(co);
-    int e = get<1>(co);
-    int m = get<2>(co);
-    auto& xsh = current.shapes[xt];
+    auto& xsh = current.shapes[co.sid];
     
     if(cgflags & qAFFINE) {
       set<heptagon*> visited;
@@ -737,7 +740,7 @@ struct hrmap_arbi : hrmap {
         transmatrix T = v[i].second;
         heptagon *h2 = v[i].first;
         if(eqmatrix(T, goal)) {
-          h->c.connect(d, h2, e, m);
+          h->c.connect(d, h2, co.eid, co.mirror);
           return h2;
           }
         for(int i=0; i<h2->type; i++) {
@@ -749,12 +752,12 @@ struct hrmap_arbi : hrmap {
           }
         }
       
-      auto h1 = init_heptagon(current.shapes[xt].size());
+      auto h1 = init_heptagon(current.shapes[co.sid].size());
       h1->distance = h->distance + 1;
-      h1->zebraval = xt;
+      h1->zebraval = co.sid;
       h1->c7 = newCell(h1->type, h1);
-      h1->emeraldval = h->emeraldval ^ m;
-      h->c.connect(d, h1, e, m);
+      h1->emeraldval = h->emeraldval ^ co.mirror;
+      h->c.connect(d, h1, co.eid, co.mirror);
       
       return h1;
       }
@@ -780,27 +783,27 @@ struct hrmap_arbi : hrmap {
       alt = (heptagon*) s;
       }
 
-    for(auto& p2: altmap[alt]) if(id_of(p2.first) == xt && hdist(tC0(p2.second), tC0(T)) < 1e-2) {
+    for(auto& p2: altmap[alt]) if(id_of(p2.first) == co.sid && hdist(tC0(p2.second), tC0(T)) < 1e-2) {
       for(int oth=0; oth < p2.first->type; oth++) {
-        ld err = hdist(p2.second * xsh.vertices[oth], T * xsh.vertices[e]);
+        ld err = hdist(p2.second * xsh.vertices[oth], T * xsh.vertices[co.eid]);
         if(err < 1e-2) {
           static ld max_err = 0;
           if(err > max_err) {
             println(hlog, "err = ", err);
             max_err = err;
             }
-          h->c.connect(d, p2.first, oth%p2.first->type, m);
+          h->c.connect(d, p2.first, oth%p2.first->type, co.mirror);
           return p2.first;
           }
         }
       }
 
-    auto h1 = init_heptagon(current.shapes[xt].size());
+    auto h1 = init_heptagon(current.shapes[co.sid].size());
     h1->distance = h->distance + 1;
-    h1->zebraval = xt;
+    h1->zebraval = co.sid;
     h1->c7 = newCell(h1->type, h1);
-    h1->emeraldval = h->emeraldval ^ m;
-    h->c.connect(d, h1, e, m);
+    h1->emeraldval = h->emeraldval ^ co.mirror;
+    h->c.connect(d, h1, co.eid, co.mirror);
     
     arbi_matrix[h1] = make_pair(alt, T);
     altmap[alt].emplace_back(h1, T);    
