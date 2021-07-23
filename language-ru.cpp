@@ -7325,6 +7325,43 @@ S("multiplayer", "режим нескольких игроков")
 // [PL:7811]
 S("Hint: these keys usually work during the game", "Подсказка: можно использовать эти клавиши во время игры")
 
+// [PL:8390]
+N("Wetland", GEN_N, "Водно-болотное угодье", "Водно-болотные угодья", "Водно-болотное угодье", "в Водно-болотном угодье")
+
+S("Some people have definitely drowned in this treacherous area. Better be careful!",
+  "Некоторые люди несомненно утонули в этом опасном месте. Берегитесь!")
+
+N("Water Lily", GEN_F, "Кувшинка", "Кувшинки", "Кувшинку", "Кувшинкой")
+S("A beautiful plant from the Wetland.", "Красивое растение из Водно-болотного угодья.")
+
+N("shallow water", GEN_F, "неглубокая вода", "неглубокая вода", "неглубокую воду", "в неглубокой воде")
+S("Shallow water is passable both for land creatures and for water creatures.",
+  "Эта вода проходима и для наземных существ, и для водных существ.")
+
+N("deep water", GEN_F, "глубокая вода", "глубокая вода", "глубокую воду", "в глубокой воде")
+S("This body of water is calm and beautiful, but too deep to pass.",
+  "Эта вода тиха и красива, но слишком глубока, чтобы через неё проходить.")
+
+S("You remember anglers from your hometown showing the impressive pikes they have caught. This one is much larger.",
+  "Вы помните, как рыбаки из Вашей родины показывали щук впечатляющих размеров, которых они ловили. "
+  "А эта щука гораздо больше.")
+
+N("Rusałka", GEN_F, "Русалка", "Русалки", "Русалку", "Русалкой")
+S("A malicious water being. When you kill her, she changes the tile you are standing on, from land to shallow water, or from shallow water to deep water.",
+  "Злобное водное существо. Когда её убьёте, она превратит клетку на котором Вы стоите из суши в неглубокую воду, или из неглубокой воды в глубокую.")
+
+N("Topielec", GEN_M, "Утопец", "Утопцы", "Утопца", "Утопцем")
+S("A malicious water being. When you kill him, he changes the tile you are standing on, from land to shallow water, or from shallow water to deep water.",
+  "Злобное водное существо. Когда его убьёте, он превратит клетку на котором Вы стоите из суши в неглубокую воду, или из неглубокой воды в глубокую.")
+
+Orb("Plague", "Заражения")
+S(
+  "When you kill an enemy, adjacent enemies are also attacked, as long as they are further away from you than from the originally attacked enemy. "
+  "These enemies may in turn infect further enemies, up to distance of at most 4 from you.",
+  "Когда Вы убьёте врага, стоящие рядом враги тоже будут атакованы, если они находятся дальше от Вас, "
+  "чем изначально атакованный. "
+  "Эти враги, в своём очереди, заразят стоящих рядом них врагов, вплоть до 4 клетки от Вас.")
+
 // [PL:8443]
 N("Frog Park", GEN_O, "Жабный парк", "Жабные парки", "Жабный парк", "в Жабном парке")
 
@@ -7393,6 +7430,8 @@ S("highlight stuff", "подсветить вещи")
 #undef Orb
 
 N("Palace Quest", GEN_O, "Дворцовый квест", "Дворцовые квесты", "Дворцовый квест", "в Дворцовом квесте")
+
+N("Pike", GEN_F, "Щука", "Щуки", "Щуку", "Щукой")
 
 // Note: the translation should be complete until the marked line.
 // The following are missing from the Polish translation:
