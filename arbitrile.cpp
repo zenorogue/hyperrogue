@@ -42,6 +42,8 @@ struct shape {
   vector<pair<int, int> > sublines;
   vector<pair<ld, ld>> stretch_shear;
   int repeat_value;
+  int cycle_length;
+  vector<int> vertex_valence;
   };
 
 struct slider {
@@ -266,6 +268,51 @@ EX void unmirror() {
         co.eid = isize(sh[co.sid].angles) - 1 - co.eid;
         }
       }
+    }
+  }
+
+EX void compute_vertex_valence() {
+  auto& shs = arb::current.shapes;
+
+  for(int i=0; i<isize(shs); i++) {
+    auto& sh = shs[i];
+    int n = isize(sh.vertices);
+    sh.cycle_length = n;
+    for(int k=0; k<n; k++) {
+      auto co = sh.connections[k];
+      co = shs[co.sid].connections[co.eid];
+      if(co.sid != i) throw hr_parse_exception("connection error in compute_stats");
+      sh.cycle_length = gcd(sh.cycle_length, k-co.eid);
+      }
+    if(debugflags & DF_GEOM) 
+      println(hlog, "tile ", i, " cycle_length = ", sh.cycle_length, " / ", n);
+    }
+  
+  if(cgflags & qAFFINE) return;
+  for(int i=0; i<isize(shs); i++) {
+    int n = isize(shs[i].vertices);
+    shs[i].vertex_valence.resize(n);
+    for(int k=0; k<n; k++) {
+      ld total = 0;
+      int qty = 0;
+      connection_t at = {i, k, false};
+      do {
+        total += shs[at.sid].angles[at.eid];
+        qty++;
+
+        at.eid++;
+        if(at.eid == isize(shs[at.sid].angles)) at.eid = 0;
+
+        at = shs[at.sid].connections[at.eid];
+        }
+      while(total < 360*degree - 1e-6);
+      if(total > 360*degree + 1e-6) throw hr_parse_exception("improper total in compute_stats");
+      if(at.sid != i) throw hr_parse_exception("ended at wrong type determining vertex_valence");
+      if((at.eid - k) % shs[i].cycle_length) throw hr_parse_exception("ended at wrong edge determining vertex_valence");
+      shs[i].vertex_valence[k] = qty;
+      }
+    if(debugflags & DF_GEOM) 
+      println(hlog, "computed vertex_valence of ", i, " as ", shs[i].vertex_valence);
     }
   }
 
@@ -515,7 +562,12 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
         }
       }
     }
-  if(do_unmirror) unmirror();
+
+  if(do_unmirror) {
+    unmirror();
+    compute_vertex_valence();
+    }
+  
   if(!after_sliding) slided = current;
   }
 
