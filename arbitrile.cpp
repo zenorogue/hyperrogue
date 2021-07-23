@@ -30,19 +30,32 @@ struct connection_t {
 
 inline void print(hstream& hs, const connection_t& conn) { print(hs, tie(conn.sid, conn.eid, conn.mirror)); }
 
+/** \brief each shape of the arb tessellation
+ *  note: the usual HyperRogue convention is: vertex 0, edge 0, vertex 1, edge 1, ... 
+ *  note: the tesfile convention is: edge 0, vertex 0, edge 1, vertex 1, ...
+ */
+
 struct shape {
+  /** index in the arbi_tiling::shapes */
   int id;
+  /** flags such as sfLINE and sfPH */
   int flags;
+  /** list of vertices in the usual convention */
   vector<hyperpoint> vertices;
+  /** list of vertices in the tesfile convention */
   vector<ld> angles;
+  /** list of edge lengths */
   vector<ld> edges;
+  /** list of edge connections */
   vector<connection_t> connections;
   int size() const { return isize(vertices); }
   void build_from_angles_edges();
   vector<pair<int, int> > sublines;
   vector<pair<ld, ld>> stretch_shear;
   int repeat_value;
+  /** if a tile/edge combination may be connected to edges j1 and j2 of this, j1-j2 must be divisible by cycle_length */
   int cycle_length;
+  /** list of valences of vertices in the tesfile convention */
   vector<int> vertex_valence;
   };
 
