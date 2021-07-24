@@ -458,7 +458,7 @@ EX int parent_id(cell *c, int which, const cellfunction& cf) {
       int steps = 0;
       again:
       if(!which || steps == c->type) return i;
-      int i2 = c->c.fix(i+which);
+      int i2 = c->c().fix(i+which);
       if(cf(c->cmove(i2)) == d) {
         i = i2; steps++; goto again;
         }

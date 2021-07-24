@@ -369,7 +369,7 @@ struct hrmap_quotient : hrmap_standard {
         bool swapped = co & symmask;
         co &= ~symmask;
         h->move(rv(j)) = allh[co/S7];
-        h->c.setspin(rv(j), rv(co%S7), swapped);
+        h->c().setspin(rv(j), rv(co%S7), swapped);
         }
       }
 

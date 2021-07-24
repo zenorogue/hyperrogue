@@ -44,9 +44,9 @@ public:
   
   virtual transmatrix adj(cell *c, int i) { return adj(c->master, i); }
   virtual transmatrix adj(heptagon *h, int i);
-  transmatrix iadj(cell *c, int i) { cell *c1 = c->cmove(i); return adj(c1, c->c.spin(i)); }
+  transmatrix iadj(cell *c, int i) { cell *c1 = c->cmove(i); return adj(c1, c->c().spin(i)); }
   transmatrix iadj(heptagon *h, int d) { 
-    heptagon *h1 = h->cmove(d); return adj(h1, h->c.spin(d));
+    heptagon *h1 = h->cmove(d); return adj(h1, h->c().spin(d));
     }
   virtual void draw_all();
   virtual void draw_at(cell *at, const shiftmatrix& where);
@@ -228,7 +228,7 @@ hrmap_hyperbolic::hrmap_hyperbolic() { origin = hyperbolic_origin(); }
 
 void hrmap::find_cell_connection(cell *c, int d) {
   heptagon *h2 = createStep(c->master, d);
-  c->c.connect(d, h2->c7,c->master->c.spin(d), c->master->c.mirror(d));
+  c->c().connect(d, h2->c7,c->master->c().spin(d), c->master->c().mirror(d));
   hybrid::link();
   }
 
@@ -262,7 +262,7 @@ void hrmap_standard::find_cell_connection(cell *c, int d) {
         
     for(int u=0; u<S6; u+=2) {
       if(hs.mirrored && (S7%2 == 0)) hs++;
-      hs.at->c7->c.connect(hs.spin, n, u, hs.mirrored);
+      hs.at->c7->c().connect(hs.spin, n, u, hs.mirrored);
       if(hs.mirrored && (S7%2 == 0)) hs--;
       hs = hs + alt3 + wstep - alt4;
       }
@@ -274,7 +274,7 @@ void hrmap_standard::find_cell_connection(cell *c, int d) {
   else {
     cellwalker cw(c, d, false);
     cellwalker cw2 = cw - 1 + wstep - 1 + wstep - 1;
-    c->c.connect(d, cw2);
+    c->c().connect(d, cw2);
     hybrid::link();
     }    
   }
@@ -290,8 +290,8 @@ EX cell *createMov(cell *c, int d) {
 
 EX void eumerge(cell* c1, int s1, cell *c2, int s2, bool mirror) {
   if(!c2) return;
-  c1->move(s1) = c2; c1->c.setspin(s1, s2, mirror);
-  c2->move(s2) = c1; c2->c.setspin(s2, s1, mirror);
+  c1->move(s1) = c2; c1->c().setspin(s1, s2, mirror);
+  c2->move(s2) = c1; c2->c().setspin(s2, s1, mirror);
   }
 
 //  map<pair<eucoord, eucoord>, cell*> euclidean;
@@ -345,13 +345,13 @@ EX void clearcell(cell *c) {
   if(!c) return;
   DEBB(DF_MEMORY, (format("c%d %p\n", c->type, hr::voidp(c))));
   for(int t=0; t<c->type; t++) if(c->move(t)) {
-    DEBB(DF_MEMORY, (format("mov %p [%p] S%d\n", hr::voidp(c->move(t)), hr::voidp(c->move(t)->move(c->c.spin(t))), c->c.spin(t))));
-    if(c->move(t)->move(c->c.spin(t)) != NULL &&
-      c->move(t)->move(c->c.spin(t)) != c) {
-        DEBB(DF_MEMORY | DF_ERROR, (format("cell error: type = %d %d -> %d\n", c->type, t, c->c.spin(t))));
+    DEBB(DF_MEMORY, (format("mov %p [%p] S%d\n", hr::voidp(c->move(t)), hr::voidp(c->move(t)->move(c->c().spin(t))), c->c().spin(t))));
+    if(c->move(t)->move(c->c().spin(t)) != NULL &&
+      c->move(t)->move(c->c().spin(t)) != c) {
+        DEBB(DF_MEMORY | DF_ERROR, (format("cell error: type = %d %d -> %d\n", c->type, t, c->c().spin(t))));
         exit(1);
         }
-    c->move(t)->move(c->c.spin(t)) = NULL;
+    c->move(t)->move(c->c().spin(t)) = NULL;
     }
   DEBB(DF_MEMORY, (format("DEL %p\n", hr::voidp(c))));
   destroy_cell(c);
@@ -424,13 +424,13 @@ EX void clearfrom(heptagon *at) {
         q.push(at->move(i));    
       unlink_cdata(at->move(i));
       at->move(i)->alt = &deletion_marker;
-      DEBB(DF_MEMORY, ("!mov ", at->move(i), " [", at->move(i)->move(at->c.spin(i)), "]"));
-      if(at->move(i)->move(at->c.spin(i)) != NULL &&
-        at->move(i)->move(at->c.spin(i)) != at) {
+      DEBB(DF_MEMORY, ("!mov ", at->move(i), " [", at->move(i)->move(at->c().spin(i)), "]"));
+      if(at->move(i)->move(at->c().spin(i)) != NULL &&
+        at->move(i)->move(at->c().spin(i)) != at) {
           DEBB(DF_MEMORY | DF_ERROR, ("hept error"));
           exit(1);
           }
-      at->move(i)->move(at->c.spin(i)) = NULL;
+      at->move(i)->move(at->c().spin(i)) = NULL;
       at->move(i) = NULL;
       }
     clearHexes(at);
@@ -445,8 +445,8 @@ EX void verifycell(cell *c) {
     cell *c2 = c->move(i);
     if(c2) {
       if(BITRUNCATED && c == c->master->c7) verifycell(c2);
-      if(c2->move(c->c.spin(i)) && c2->move(c->c.spin(i)) != c) {
-        printf("cell error %p:%d [%d] %p:%d [%d]\n", hr::voidp(c), i, c->type, hr::voidp(c2), c->c.spin(i), c2->type);
+      if(c2->move(c->c().spin(i)) && c2->move(c->c().spin(i)) != c) {
+        printf("cell error %p:%d [%d] %p:%d [%d]\n", hr::voidp(c), i, c->type, hr::voidp(c2), c->c().spin(i), c2->type);
         exit(1);
         }
       }
@@ -455,11 +455,11 @@ EX void verifycell(cell *c) {
 
 EX void verifycells(heptagon *at) {
   if(GOLDBERG || IRREGULAR || arcm::in()) return;
-  for(int i=0; i<at->type; i++) if(at->move(i) && at->move(i)->move(at->c.spin(i)) && at->move(i)->move(at->c.spin(i)) != at) {
-    printf("hexmix error %p [%d s=%d] %p %p\n", hr::voidp(at), i, at->c.spin(i), hr::voidp(at->move(i)), hr::voidp(at->move(i)->move(at->c.spin(i))));
+  for(int i=0; i<at->type; i++) if(at->move(i) && at->move(i)->move(at->c().spin(i)) && at->move(i)->move(at->c().spin(i)) != at) {
+    printf("hexmix error %p [%d s=%d] %p %p\n", hr::voidp(at), i, at->c().spin(i), hr::voidp(at->move(i)), hr::voidp(at->move(i)->move(at->c().spin(i))));
     }
   if(!sphere && !quotient) 
-    for(int i=0; i<S7; i++) if(at->move(i) && at->c.spin(i) == 0 && at->s != hsOrigin)
+    for(int i=0; i<S7; i++) if(at->move(i) && at->c().spin(i) == 0 && at->s != hsOrigin)
       verifycells(at->move(i));
   verifycell(at->c7);
   }
@@ -1017,7 +1017,7 @@ EX int getBits(cell *c) {
 EX cell *heptatdir(cell *c, int d) {
   if(d&1) {
     cell *c2 = createMov(c, d);
-    int s = c->c.spin(d);
+    int s = c->c().spin(d);
     s += 3; s %= 6;
     return createMov(c2, s);
     }

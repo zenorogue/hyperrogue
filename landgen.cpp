@@ -720,7 +720,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         if(!onwall) for(int i=0; i<c->type; i++) {
           cell *c2 = c->move(i);
           if(!c2) continue;
-          cell *c3 = c2->modmove(c->c.spin(i) + 3);
+          cell *c3 = c2->modmove(c->c().spin(i) + 3);
           if(!c3) continue;
           if(c3->land != laPower && c3->land != laBarrier)
           if(c2->wall != waFire && c2->wall != waGlass) {
@@ -1018,7 +1018,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
               preventbarriers(c2);
               c2->mondir = i;
               createMov(c2, i);
-              int j = c2->c.spin(i);
+              int j = c2->c().spin(i);
               cell *c3 = c2->move(i);
               if(c3->monst || c3->bardir != NODIR || c3->wall || c3->mpdist <= 7) break;
               c2 = c3;
@@ -1696,7 +1696,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           forCellIdEx(c2, i, c) {
             c2->monst = moKrakenT;
             c2->hitpoints = 1;
-            c2->mondir = c->c.spin(i);
+            c2->mondir = c->c().spin(i);
             }
           if(!peace::on) playSound(c, "seen-kraken");
           }

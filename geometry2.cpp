@@ -77,7 +77,7 @@ transmatrix hrmap_standard::master_relative(cell *c, bool get_inverse) {
   else if(BITRUNCATED) {
     if(c == c->master->c7)
       return Id;
-    return (get_inverse?cgi.invhexmove:cgi.hexmove)[c->c.spin(0)];
+    return (get_inverse?cgi.invhexmove:cgi.hexmove)[c->c().spin(0)];
     }
   else if(WDIM == 3)
     return Id;
@@ -99,12 +99,12 @@ transmatrix hrmap_standard::adj(heptagon *h, int d) {
   if(inforder::mixed()) {
     int t0 = h->type;
     int t1 = h->cmove(d)->type;
-    int sp = h->c.spin(d);
+    int sp = h->c().spin(d);
     return spin(-d * 2 * M_PI / t0) * xpush(spacedist(h->c7, d)) * spin(M_PI + 2*M_PI*sp/t1);
     }
   transmatrix T = cgi.heptmove[d];
-  if(h->c.mirror(d)) T = T * Mirror;
-  int sp = h->c.spin(d);
+  if(h->c().mirror(d)) T = T * Mirror;
+  int sp = h->c().spin(d);
   if(sp) T = T * spin(2*M_PI*sp/S7);
   return T;
   }
@@ -494,9 +494,9 @@ transmatrix hrmap_standard::adj(cell *c, int i) {
     }
   double d = cellgfxdist(c, i);
   transmatrix T = ddspin(c, i) * xpush(d);
-  if(c->c.mirror(i)) T = T * Mirror;
+  if(c->c().mirror(i)) T = T * Mirror;
   cell *c1 = c->cmove(i);
-  T = T * iddspin(c1, c->c.spin(i), M_PI);
+  T = T * iddspin(c1, c->c().spin(i), M_PI);
   return T;
   }
 

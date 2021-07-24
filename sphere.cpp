@@ -32,7 +32,7 @@ struct hrmap_spherical : hrmap_standard {
       h.emeraldval = i;
       h.zebraval = i;
       h.fiftyval = i;
-      h.c.fullclear();
+      h.c().fullclear();
       h.fieldval = i;
       if(!IRREGULAR) h.c7 = newCell(S7, &h);
       }
@@ -44,27 +44,27 @@ struct hrmap_spherical : hrmap_standard {
     if(S7 == 3 && S3 == 4) {
       for(int i=0; i<8; i++) {
         dodecahedron[i]->move(0) = dodecahedron[i^1];
-        dodecahedron[i]->c.setspin(0, 0, false);
+        dodecahedron[i]->c().setspin(0, 0, false);
         dodecahedron[i]->move(1) = dodecahedron[i^2];
-        dodecahedron[i]->c.setspin(1, 1, false);
+        dodecahedron[i]->c().setspin(1, 1, false);
         dodecahedron[i]->move(2) = dodecahedron[i^4];
-        dodecahedron[i]->c.setspin(2, 2, false);
+        dodecahedron[i]->c().setspin(2, 2, false);
         }
       for(int i=0; i<8; i++) {
         int s = (i&1)+((i&2)>>1)+((i&4)>>2);
         if((s&1) == 1) {
           swap(dodecahedron[i]->move(1), dodecahedron[i]->move(2));
-          int a = dodecahedron[i]->c.spin(1);
-          int b = dodecahedron[i]->c.spin(2);
-          dodecahedron[i]->c.setspin(1, b, false);
-          dodecahedron[i]->c.setspin(2, a, false);
-          dodecahedron[i]->move(1)->c.setspin(b, 1, false);
-          dodecahedron[i]->move(2)->c.setspin(a, 2, false);
+          int a = dodecahedron[i]->c().spin(1);
+          int b = dodecahedron[i]->c().spin(2);
+          dodecahedron[i]->c().setspin(1, b, false);
+          dodecahedron[i]->c().setspin(2, a, false);
+          dodecahedron[i]->move(1)->c().setspin(b, 1, false);
+          dodecahedron[i]->move(2)->c().setspin(a, 2, false);
           }
         }
       for(int i=0; i<8; i++)
       for(int j=0; j<3; j++)
-        if(dodecahedron[i]->move(j)->move(dodecahedron[i]->c.spin(j)) != dodecahedron[i])
+        if(dodecahedron[i]->move(j)->move(dodecahedron[i]->c().spin(j)) != dodecahedron[i])
           println(hlog, "8");
       }
       
@@ -73,59 +73,59 @@ struct hrmap_spherical : hrmap_standard {
         int i1 = (i+1)%3;
         int i2 = (i+2)%3;
         dodecahedron[i]->move(0) = dodecahedron[i1];
-        dodecahedron[i]->c.setspin(0, 1, false);
+        dodecahedron[i]->c().setspin(0, 1, false);
         dodecahedron[i]->move(1) = dodecahedron[i2];
-        dodecahedron[i]->c.setspin(1, 0, false);
+        dodecahedron[i]->c().setspin(1, 0, false);
         dodecahedron[i]->move(2) = dodecahedron[i1];
-        dodecahedron[i]->c.setspin(2, 3, true);
+        dodecahedron[i]->c().setspin(2, 3, true);
         dodecahedron[i]->move(3) = dodecahedron[i2];
-        dodecahedron[i]->c.setspin(3, 2, true);
+        dodecahedron[i]->c().setspin(3, 2, true);
         }
       }
     else for(int i=0; i<S7; i++) {
       dodecahedron[0]->move(i) = dodecahedron[i+1];
-      dodecahedron[0]->c.setspin(i, 0, false);
+      dodecahedron[0]->c().setspin(i, 0, false);
       dodecahedron[i+1]->move(0) = dodecahedron[0];
-      dodecahedron[i+1]->c.setspin(0, i, false);
+      dodecahedron[i+1]->c().setspin(0, i, false);
       
       dodecahedron[i+1]->move(1) = dodecahedron[(i+S7-1)%S7+1];
-      dodecahedron[i+1]->c.setspin(1, S7-1, false);
+      dodecahedron[i+1]->c().setspin(1, S7-1, false);
       dodecahedron[i+1]->move(S7-1) = dodecahedron[(i+1)%S7+1];
-      dodecahedron[i+1]->c.setspin(S7-1, 1, false);
+      dodecahedron[i+1]->c().setspin(S7-1, 1, false);
       
       if(S7 == 5 && elliptic) {
         dodecahedron[i+1]->move(2) = dodecahedron[(i+2)%S7+1];
-        dodecahedron[i+1]->c.setspin(2, 3, true);
+        dodecahedron[i+1]->c().setspin(2, 3, true);
         dodecahedron[i+1]->move(3) = dodecahedron[(i+3)%S7+1];
-        dodecahedron[i+1]->c.setspin(3, 2, true);
+        dodecahedron[i+1]->c().setspin(3, 2, true);
         }
 
       else if(S7 == 5) {
         dodecahedron[6]->move(i) = dodecahedron[7+i];
-        dodecahedron[6]->c.setspin(i, 0, false);
+        dodecahedron[6]->c().setspin(i, 0, false);
         dodecahedron[7+i]->move(0) = dodecahedron[6];
-        dodecahedron[7+i]->c.setspin(0, i, false);
+        dodecahedron[7+i]->c().setspin(0, i, false);
   
         dodecahedron[i+7]->move(1) = dodecahedron[(i+4)%5+7];
-        dodecahedron[i+7]->c.setspin(1, 4, false);
+        dodecahedron[i+7]->c().setspin(1, 4, false);
         dodecahedron[i+7]->move(4) = dodecahedron[(i+1)%5+7];
-        dodecahedron[i+7]->c.setspin(4, 1, false);
+        dodecahedron[i+7]->c().setspin(4, 1, false);
         
         dodecahedron[i+1]->move(2) = dodecahedron[7+(10-i)%5];
-        dodecahedron[i+1]->c.setspin(2, 2, false);
+        dodecahedron[i+1]->c().setspin(2, 2, false);
         dodecahedron[7+(10-i)%5]->move(2) = dodecahedron[1+i];
-        dodecahedron[7+(10-i)%5]->c.setspin(2, 2, false);
+        dodecahedron[7+(10-i)%5]->c().setspin(2, 2, false);
   
         dodecahedron[i+1]->move(3) = dodecahedron[7+(9-i)%5];
-        dodecahedron[i+1]->c.setspin(3, 3, false);
+        dodecahedron[i+1]->c().setspin(3, 3, false);
         dodecahedron[7+(9-i)%5]->move(3) = dodecahedron[i+1];
-        dodecahedron[7+(9-i)%5]->c.setspin(3, 3, false);
+        dodecahedron[7+(9-i)%5]->c().setspin(3, 3, false);
         }
       if(S7 == 4) {
         dodecahedron[5]->move(3-i) = dodecahedron[i+1];
-        dodecahedron[5]->c.setspin(3-i, 2, false);
+        dodecahedron[5]->c().setspin(3-i, 2, false);
         dodecahedron[i+1]->move(2) = dodecahedron[5];
-        dodecahedron[i+1]->c.setspin(2, 3-i, false);
+        dodecahedron[i+1]->c().setspin(2, 3-i, false);
         }
       }
 

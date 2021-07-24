@@ -44,7 +44,7 @@ void slow_delete_cell(cell *c) {
     degrade(c);
   for(int i=0; i<c->type; i++)
     if(c->move(i))
-      c->move(i)->move(c->c.spin(i)) = NULL;
+      c->move(i)->move(c->c().spin(i)) = NULL;
   removed_cells.push_back(c);
   delete c;
   }
@@ -59,7 +59,7 @@ void delete_heptagon(heptagon *h2) {
   slow_delete_cell(c);
   for(int i=0; i<S7; i++)
     if(h2->move(i))
-      h2->move(i)->move(h2->c.spin(i)) = NULL;
+      h2->move(i)->move(h2->c().spin(i)) = NULL;
   delete h2;
   }
 

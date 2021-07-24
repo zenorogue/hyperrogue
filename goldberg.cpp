@@ -132,7 +132,7 @@ EX namespace gp {
     else {
       vector<int> dirs;
       while(c != c->master->c7) {
-        dirs.push_back(c->c.spin(0));
+        dirs.push_back(c->c().spin(0));
         c = c->move(0);
         }
       li.first_dir = dirs[0];
@@ -244,7 +244,7 @@ EX namespace gp {
         }
       else {
         peek(wcw) = newCell(SG6, wc.cw.at->master);
-        wcw.at->c.setspin(wcw.spin, 0, false);
+        wcw.at->c().setspin(wcw.spin, 0, false);
         set_localwalk(wc1, dir1, wcw + wstep);
         if(do_adjm) wc1.adjm = wc.adjm;
         spawn++;
@@ -264,7 +264,7 @@ EX namespace gp {
     else {
       DEBB(DF_GP, ("ok"));
       peek(wcw) = wcw1.at;
-      wcw.at->c.setspin(wcw.spin, wcw1.spin, wcw.mirrored != wcw1.mirrored);
+      wcw.at->c().setspin(wcw.spin, wcw1.spin, wcw.mirrored != wcw1.mirrored);
       if(wcw+wstep != wcw1) {
         DEBB(DF_GP | DF_ERROR, ("assertion failed"));
         exit(1);
@@ -297,14 +297,14 @@ EX namespace gp {
     DEBB(DF_GP, ("EXTEND ",c, " ", d));
     if(c->master->c7 != c) {
       while(c->master->c7 != c) {
-        DEBB(DF_GP, (c, " direction 0 corresponds to ", c->move(0), " direction ", c->c.spin(0)); )
-        d = c->c.spin(0);
+        DEBB(DF_GP, (c, " direction 0 corresponds to ", c->move(0), " direction ", c->c().spin(0)); )
+        d = c->c().spin(0);
         c = c->move(0);
         }
       // c move 0 equals c' move spin(0)
       extend_map(c, d);
-      extend_map(c, c->c.fix(d-1));
-      extend_map(c, c->c.fix(d+1));
+      extend_map(c, c->c().fix(d-1));
+      extend_map(c, c->c().fix(d+1));
       if(S3 == 4 && !c->move(d))
         for(int i=0; i<S7; i++)
         for(int j=0; j<S7; j++)
@@ -1007,7 +1007,7 @@ EX namespace gp {
 
     auto dmain = master_function(cm);
     auto d0 = master_function(createStep(cm->master, i)->c7);
-    auto d1 = master_function(createStep(cm->master, cm->c.fix(i+1))->c7);
+    auto d1 = master_function(createStep(cm->master, cm->c().fix(i+1))->c7);
     
     if(S3 == 4) {
       heptspin hs(cm->master, i);
@@ -1192,7 +1192,7 @@ EX namespace gp {
           cw --;
           });
         cw.at = get_mapped(cw.at, 0);
-        parent->c.connect(d, cw.at, cw.spin, cw.mirrored);
+        parent->c().connect(d, cw.at, cw.spin, cw.mirrored);
         return cw.at;
         }
       if(UNTRUNCATED) {
@@ -1201,7 +1201,7 @@ EX namespace gp {
           cw += wstep;
           });
         cw.at = get_mapped(cw.at, cw.spin & 1);
-        parent->c.connect(d, cw.at, cw.spin / 2, cw.mirrored);
+        parent->c().connect(d, cw.at, cw.spin / 2, cw.mirrored);
         return cw.at;
         }
       if(WARPED) {
@@ -1210,7 +1210,7 @@ EX namespace gp {
           cellwalker cw(mapping[parent], d);
           in_underlying([&] { cw += wstep; });
           cw.at = get_mapped(cw.at, cw.spin & 1);
-          parent->c.connect(d, cw.at, cw.spin / 2, cw.mirrored);
+          parent->c().connect(d, cw.at, cw.spin / 2, cw.mirrored);
           return cw.at;
           }
         else {
@@ -1219,7 +1219,7 @@ EX namespace gp {
             cw += wstep;
             });
           cw.at = get_mapped(cw.at, 2);
-          parent->c.connect(d, cw.at, cw.spin, cw.mirrored);
+          parent->c().connect(d, cw.at, cw.spin, cw.mirrored);
           return cw.at;
           }
         }

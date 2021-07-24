@@ -1524,7 +1524,7 @@ EX namespace mirror {
 
    int icount = 0, isum = 0;
    for(int i=0; i<6; i+=2) {
-     if(createMov(c, i)->bardir == c->c.spin(i))
+     if(createMov(c, i)->bardir == c->c().spin(i))
        icount++, isum+=i;
      }
    if(icount != 1) return -1;
@@ -1597,7 +1597,7 @@ EX namespace mirror {
           }
         int icount = 0;
         for(int i=0; i<3; i++) {
-          if((cw+wstep).at->bardir == cw.at->c.spin(cw.spin))
+          if((cw+wstep).at->bardir == cw.at->c().spin(cw.spin))
             icount++;
           cw += 2;
           }
@@ -1613,7 +1613,7 @@ EX namespace mirror {
           printf("icount >= 2 but failed\n");
           return cw;
           }
-        while((cw+wstep).at->bardir != cw.at->c.spin(cw.spin)) {
+        while((cw+wstep).at->bardir != cw.at->c().spin(cw.spin)) {
           stepcount++; if(stepcount > 10000) { printf("fail2\n"); return cw; }
           cw += 2;
           v.push_back(1);
@@ -2622,7 +2622,7 @@ EX namespace dragon {
     if(maxlen--<0) return c;
     if(c->monst == moDragonHead) return c;
     for(int i=0; i<c->type; i++)
-      if(c->move(i) && isDragon(c->move(i)->monst) && c->move(i)->mondir == c->c.spin(i)) {
+      if(c->move(i) && isDragon(c->move(i)->monst) && c->move(i)->mondir == c->c().spin(i)) {
         c = c->move(i); goto findhead;
         }
     if(cmode & sm::MAP) return c;
@@ -2881,7 +2881,7 @@ EX namespace sword {
       int sub = (hybri) ? 2 : 0;
       int t2 = c2->type - sub;
       int t1 = c1->type - sub;
-      if(c1->c.mirror(s1))
+      if(c1->c().mirror(s1))
         d.angle = ((s2*sword_angles/t2 - d.angle + s1*sword_angles/t1) + sword_angles/2) % sword_angles;
       else
         d.angle = ((s2*sword_angles/t2 - s1*sword_angles/t1) + sword_angles/2 + d.angle) % sword_angles;
@@ -3031,8 +3031,8 @@ EX namespace kraken {
     vector<pair<cell*, cell*> > acells;
     acells.push_back(make_pair(c2, c));
     forCellIdEx(c3, i, c) {
-      c3->monst = moKrakenT, c3->mondir = c->c.spin(i), c3->monmirror = c->monmirror ^ c->c.mirror(i), onpath(c3, 0);
-      int i0 = (i+c->c.spin(c->mondir)-c->mondir+96+c->type/2) % c2->type;
+      c3->monst = moKrakenT, c3->mondir = c->c().spin(i), c3->monmirror = c->monmirror ^ c->c().mirror(i), onpath(c3, 0);
+      int i0 = (i+c->c().spin(c->mondir)-c->mondir+96+c->type/2) % c2->type;
       c3->hitpoints = hpcount[i0];
       acells.push_back(make_pair(c2->move(i0), c3));
       if(c3->wall == waBoat) {

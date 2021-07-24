@@ -369,7 +369,7 @@ EX int zebra40(cell *c) {
     }
   else if(sphere) return 0;
   else if(S3 == 4 && S7 == 6) {
-    return 8 + ((c->master->zebraval / 10 + c->c.spin(0))%2) * 2;
+    return 8 + ((c->master->zebraval / 10 + c->c().spin(0))%2) * 2;
     }
   else if(reg3::in()) return 0;
   else {
@@ -416,7 +416,7 @@ EX namespace fieldpattern {
 EX pair<int, bool> fieldval(cell *c) {
   if(WDIM == 3) return make_pair(currfp.inverses[int(c->master->fieldval) * currfp.local_group], false);
   else if(ctof(c)) return make_pair(int(c->master->fieldval), false);
-  else return make_pair(btspin(c->master->fieldval, c->c.spin(0)), true);
+  else return make_pair(btspin(c->master->fieldval, c->c().spin(0)), true);
   }
 
 EX int fieldval_uniq(cell *c) {
@@ -457,7 +457,7 @@ EX int fieldval_uniq(cell *c) {
   else {
     int z = 0;
     for(int u=0; u<S6; u+=2) 
-      z = max(z, btspin(createMov(c, u)->master->fieldval, c->c.spin(u)));
+      z = max(z, btspin(createMov(c, u)->master->fieldval, c->c().spin(u)));
     return -1-z;
     }
   }
@@ -474,7 +474,7 @@ EX int fieldval_uniq_rand(cell *c, int randval) {
   else {
     int z = 0;
     for(int u=0; u<6; u+=2) 
-      z = max(z, btspin(currfp.gmul(createMov(c, u)->master->fieldval, randval), c->c.spin(u)));
+      z = max(z, btspin(currfp.gmul(createMov(c, u)->master->fieldval, randval), c->c().spin(u)));
     return -1-z;
     }
   }
@@ -604,7 +604,7 @@ EX int getHemisphere(cell *c, int which) {
     #endif
     else {
       for(int i=0; i<6; i+=2) 
-        score += getHemisphere(c->move(i), which) * (c->c.mirror(i) ? -1 : 1);
+        score += getHemisphere(c->move(i), which) * (c->c().mirror(i) ? -1 : 1);
       return score/3;
       }
     }
@@ -690,7 +690,7 @@ EX namespace patterns {
         si.dir = 0; // whatever 
         patterninfo si2;
         valSibling(c->move(0), si2, sub, pat);
-        int di = si2.dir - c->c.spin(0);
+        int di = si2.dir - c->c().spin(0);
         di %= S7; 
         if(di<0) di += S7;
         if(pat == PAT_SIBLING) si.reflect = di > S7/2;
@@ -742,8 +742,8 @@ EX namespace patterns {
       printf("\n"); */
       }
     else {
-      si.id = ((c->master->emeraldval & 1) ^ ((c->master->emeraldval & 2)>>1) ^ (c->c.spin(0)&1)) ? 8 : 4;
-      si.dir = ((c->move(0)->master->emeraldval + c->c.spin(0)) & 1) ? 2 : 0;
+      si.id = ((c->master->emeraldval & 1) ^ ((c->master->emeraldval & 2)>>1) ^ (c->c().spin(0)&1)) ? 8 : 4;
+      si.dir = ((c->move(0)->master->emeraldval + c->c().spin(0)) & 1) ? 2 : 0;
       if(createMov(c, si.dir)->master->emeraldval & 4)
         si.dir += 4;
 
@@ -803,7 +803,7 @@ EX namespace patterns {
         si.id += 16, si.symmetries = 4;
       }
     else {
-      int sp = c->c.spin(0);
+      int sp = c->c().spin(0);
       #if CAP_GP
       if(GOLDBERG) {
         sp = gp::last_dir(c);
@@ -853,7 +853,7 @@ EX namespace patterns {
           cell *c2 = createMov(c, i);
           int id2 = 4;
           if(!pseudohept(c2)) {
-            int sp2 = c2->c.spin(0);
+            int sp2 = c2->c().spin(0);
             if(GOLDBERG) {
               sp2 = gp::last_dir(c2);
               sp2 ^= int(ishex2(c2));
@@ -1038,7 +1038,7 @@ EX namespace patterns {
       else if(c == c->master->c7)
         si.dir = (zebra40(c)*4) % 6;
       else 
-        si.dir = (zebra40(c)*4 + 9 - c->c.spin(0)) % 6;
+        si.dir = (zebra40(c)*4 + 9 - c->c().spin(0)) % 6;
       }
     if(sub & SPF_ROT) si.id = 1;
     if(euc::in(2,6) && !(sub & SPF_EXTRASYM)) {
@@ -1064,8 +1064,8 @@ EX namespace patterns {
       #endif
       #if CAP_GP
       else if(GOLDBERG) {
-        if(c == c->master->c7) si.id += (c->c.fix(si.dir) << 8);
-        else si.id += (get_code(gp::get_local_info(c)) << 16) | (c->c.fix(si.dir) << 8);
+        if(c == c->master->c7) si.id += (c->c().fix(si.dir) << 8);
+        else si.id += (get_code(gp::get_local_info(c)) << 16) | (c->c().fix(si.dir) << 8);
         }
       #endif
       return si;
@@ -1406,7 +1406,7 @@ EX int pattern_threecolor(cell *c) {
   if(euclid) {
     if(a4 && PURE) return eupattern4(c);
     if(euc::in(2,6) && !BITRUNCATED) return eupattern(c) % 3;
-    return c == c->master->c7 ? 0 : (c->c.spin(0)&1) ? 1 : 2;
+    return c == c->master->c7 ? 0 : (c->c().spin(0)&1) ? 1 : 2;
     }
   if(S3 >= OINF) return c->master->distance % 3;
   if(S7 == 4 && S3 == 3) {
@@ -1431,9 +1431,9 @@ EX int pattern_threecolor(cell *c) {
     else for(int i=0; i<3; i++) {
       cell *c2 = c->move(i);
       if(c2->master->fiftyval == 0)
-        return 1 + (c->c.spin(i)&1);
+        return 1 + (c->c().spin(i)&1);
       if(c2->master->fiftyval == 5)
-        return 2 - (c->c.spin(i)&1);
+        return 2 - (c->c().spin(i)&1);
       }
     }
   if(stdhyperbolic && PURE) {
@@ -1852,7 +1852,7 @@ EX namespace patterns {
         int y = (c->master->fieldval >> 12) & 4095;
         ignore(x);
         if(c->master->distance % 3) return 0;
-        if(c->c.spin(bt::updir()) != 1) return 0;
+        if(c->c().spin(bt::updir()) != 1) return 0;
         // if(c->master->distance % 2 == 0) return 0;
         if(hrand(100) == 0) return 0;
         return 0x1000000 | (0xFFFFFF & (0x671349 + y * 0x512369));
@@ -2625,7 +2625,7 @@ EX namespace linepatterns {
   template<class T> bool way(T*c, int i) {
     T* c2 = c->move(i);
     if(c == c2)
-      return i <= c->c.spin(i);
+      return i <= c->c().spin(i);
     return c2 > c;
     }
 

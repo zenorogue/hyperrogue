@@ -706,7 +706,7 @@ struct hrmap_arbi : hrmap {
   void verify() override { }
 
   transmatrix adj(heptagon *h, int dl) override { 
-    return get_adj(current_or_slided(), id_of(h), dl, h->c.move(dl) ? h->c.spin(dl) : -1);
+    return get_adj(current_or_slided(), id_of(h), dl, h->c().move(dl) ? h->c().spin(dl) : -1);
     }
 
   heptagon *create_step(heptagon *h, int d) override {
@@ -737,7 +737,7 @@ struct hrmap_arbi : hrmap {
         transmatrix T = v[i].second;
         heptagon *h2 = v[i].first;
         if(eqmatrix(T, goal)) {
-          h->c.connect(d, h2, e, m);
+          h->c().connect(d, h2, e, m);
           return h2;
           }
         for(int i=0; i<h2->type; i++) {
@@ -754,7 +754,7 @@ struct hrmap_arbi : hrmap {
       h1->zebraval = xt;
       h1->c7 = newCell(h1->type, h1);
       h1->emeraldval = h->emeraldval ^ m;
-      h->c.connect(d, h1, e, m);
+      h->c().connect(d, h1, e, m);
       
       return h1;
       }
@@ -789,7 +789,7 @@ struct hrmap_arbi : hrmap {
             println(hlog, "err = ", err);
             max_err = err;
             }
-          h->c.connect(d, p2.first, oth%p2.first->type, m);
+          h->c().connect(d, p2.first, oth%p2.first->type, m);
           return p2.first;
           }
         }
@@ -800,7 +800,7 @@ struct hrmap_arbi : hrmap {
     h1->zebraval = xt;
     h1->c7 = newCell(h1->type, h1);
     h1->emeraldval = h->emeraldval ^ m;
-    h->c.connect(d, h1, e, m);
+    h->c().connect(d, h1, e, m);
     
     arbi_matrix[h1] = make_pair(alt, T);
     altmap[alt].emplace_back(h1, T);    

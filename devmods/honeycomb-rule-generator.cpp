@@ -73,7 +73,7 @@ string find_path(cell *x, cell *y, int steps) {
         if(y->move(j) && y->move(j)->FV < y->FV) {
           string ch = find_path(x->move(i), y->move(j), steps-1);
           if(ch == "?") continue;
-          return dis(i) + ch + dis(y->c.spin(j));
+          return dis(i) + ch + dis(y->c().spin(j));
           }
   return "?";
   }
@@ -188,7 +188,7 @@ void listnear_exh(cell *c, ext_nei_rules_t& e, int maxdist) {
       e.dir.push_back(i);
       e.original.push_back(!dist.count(c1));
       if(e.original.back() && di < maxdist) 
-        enqueue(c1, di, ca->c.spin(i));
+        enqueue(c1, di, ca->c().spin(i));
       }
     }
   }
@@ -433,7 +433,7 @@ void test_canonical(string fname) {
           c2 = c1->move(b);
           if(!c2) continue;
           if(c2->FV >= c1->FV) continue;
-          dir = c1->c.spin(b);
+          dir = c1->c().spin(b);
           break;
           }
         }
@@ -449,7 +449,7 @@ void test_canonical(string fname) {
         println(hlog, "c1 fv = ", c1->FV, " [", a, "]");
         if(c2 == nullptr) { println(hlog, "c2 missing"); }
         else
-          println(hlog, "c2 fv = ", c2->FV, " [", c2->c.spin(dir), "]");
+          println(hlog, "c2 fv = ", c2->FV, " [", c2->c().spin(dir), "]");
         println(hlog, c, "->", c1, "->", c2);
         fflush(stdout);
         

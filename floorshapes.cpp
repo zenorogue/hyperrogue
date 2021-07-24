@@ -389,8 +389,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         for(int i=0; i<cor; i++) {
           int ri = i;
           if((i&1) == ((sidir+siid)&1)) ri--;
-          ri = c->c.fix(ri);
-          cornerlist.push_back(mid(get_corner_position(c, ri, 3.1), get_corner_position(c, c->c.fix(ri+1), 3.1)));
+          ri = c->c().fix(ri);
+          cornerlist.push_back(mid(get_corner_position(c, ri, 3.1), get_corner_position(c, c->c().fix(ri+1), 3.1)));
           }
         }
       }
@@ -409,7 +409,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         for(int i=0; i<cor; i++) {
           int ri = i;
           if((i&1) != ((sidir+siid)&1)) ri--;
-          ri = c->c.fix(ri);
+          ri = c->c().fix(ri);
           hyperpoint nc = nearcorner(c, ri);
           cornerlist.push_back(mid_at(hpxy(0,0), nc, .94));
           }
@@ -701,14 +701,14 @@ void geometry_information::generate_floorshapes() {
   modelh.c7 = &model;
   model.type = modelh.type = S7;
   
-  auto mmerge1 = [&] (int i, int j) { model.c.setspin(i, j, false); modelh.c.setspin(i, j, false); };  
+  auto mmerge1 = [&] (int i, int j) { model.c().setspin(i, j, false); modelh.c().setspin(i, j, false); };  
   auto mmerge = [&] (int i, int j) { mmerge1(i, j); mmerge1(j, i); };  
 
   for(int i=0; i<S7; i++) {
     model.move(i) = &model;
     modelh.move(i) = &modelh;
-    model.c.setspin(i, i, false);
-    modelh.c.setspin(i, i, false);
+    model.c().setspin(i, i, false);
+    modelh.c().setspin(i, i, false);
     }
 
   if(WDIM == 3) ;
@@ -777,8 +777,8 @@ void geometry_information::generate_floorshapes() {
     for(int i=0; i<n; i++) {
       auto &ms = models[i];
       auto &mh = modelh[i];
-      for(auto& t: ms.c.move_table) t = nullptr;
-      for(auto& t: mh.c.move_table) t = nullptr;
+      ms.c().fullclear();
+      mh.c().fullclear();
       }
     for(int i=0; i<n; i++) {
       auto &ms = models[i];
@@ -795,8 +795,8 @@ void geometry_information::generate_floorshapes() {
       auto& sh = c.shapes[i];
       for(int j=0; j<sh.size(); j++) {
         auto& co = sh.connections[j];
-        mh.c.connect(j, &modelh[get<0>(co)], get<1>(co), get<2>(co));
-        ms.c.connect(j, &models[get<0>(co)], get<1>(co), get<2>(co));
+        mh.c().connect(j, &modelh[get<0>(co)], get<1>(co), get<2>(co));
+        ms.c().connect(j, &models[get<0>(co)], get<1>(co), get<2>(co));
         }
       }
     for(int i=0; i<n; i++) generate_floorshapes_for(i, &models[i], 0, 0);
@@ -868,7 +868,7 @@ EX namespace gp {
         // if(siid == 2) si.dir++;
         // if(siid != pattern_threecolor(c)) printf("threecolor mismatch\n");
         // if(pattern_threecolor(createMov(c, c->fixd(si.dir))) != (siid+1)%3) printf("threecolor mismatch direction\n");
-        sidir = c1->c.fix(si.dir);
+        sidir = c1->c().fix(si.dir);
         }
       else if(geosupport_football() == 2) {
         siid = !pseudohept(c1);
@@ -960,8 +960,8 @@ int hrmap_standard::shvid(cell *c) {
       for(int i=0; i<S7; i++) {
         model.move(i) = &model;
         modelh.move(i) = &modelh;
-        model.c.setspin(i, i, false);
-        modelh.c.setspin(i, i, false);
+        model.c().setspin(i, i, false);
+        modelh.c().setspin(i, i, false);
         }
 
       cgi.tessf = edge_of_triangle_with_angles(0, M_PI/t, M_PI/t);

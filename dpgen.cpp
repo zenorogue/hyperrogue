@@ -50,7 +50,7 @@ void solve(cpos at) {
       if(!ca1) continue;
       if(ca1->wall != waNone) continue;
       
-      int s = (c1->c.spin((d+k)%4) - c0->c.spin(k)) & 3;
+      int s = (c1->c().spin((d+k)%4) - c0->c().spin(k)) & 3;
       enqueue(make_tuple(ca0, ca1, s), dist+1, i);
       }
     }
