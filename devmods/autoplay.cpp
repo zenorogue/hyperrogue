@@ -9,7 +9,7 @@ namespace hr {
 bool doAutoplay;
 eLand autoplayLand;
 
-namespace prairie { extern long long enter; }
+namespace prairie { extern cell *enter; }
 
 bool sameland(eLand ll, eLand ln) {
   if(ln == laBarrier || ln == laOceanWall)
@@ -210,7 +210,7 @@ void noteUnusualSituations()
 
 bool isAnythingWrong()
 {
-  long long ienter = (long long) prairie::enter;
+  uintptr_t ienter = (uintptr_t) prairie::enter;
   if(ienter && ienter < 100000) {
     printf("ERROR: prairie::enter has incorrect value\n");
     return true;
