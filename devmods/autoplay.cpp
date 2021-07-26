@@ -252,7 +252,7 @@ bool isAnythingWrong()
       printf("ERROR: buggy item found\n");
       return true;
       }
-    if(isPrincess(c->monst) && princess::getPrincessInfo(c) == nullptr) {
+    if(!euclid && isPrincess(c->monst) && princess::getPrincessInfo(c) == nullptr) {
       printf("ERROR: missing princess info\n");
       return true;
       }
