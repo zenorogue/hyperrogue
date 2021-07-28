@@ -911,6 +911,7 @@ EX namespace dice {
     int faces;
     int facesides;
     int order;
+    int highest_hardness;
     die_structure(int ord, const vector<vector<int>>& v) {
       sides = v;
       spins = sides;
@@ -933,6 +934,9 @@ EX namespace dice {
       for(int i=0; i<faces; i++)
         for(int j: sides[i])
           hardness[i] = min(hardness[i], hardness[j]+1);
+      highest_hardness = 0;
+      for(int i=0; i<faces; i++)
+        highest_hardness = max(highest_hardness, hardness[i]);
       }
     };
   
@@ -1201,7 +1205,11 @@ EX namespace dice {
       visit(c, dd, V);
       for(int i=0; i<isize(data); i++) {
         auto dat = data[i];
-        queuestr(fpp ? dat.V * zpush(cgi.FLOOR) : dat.V, .5, its(dat.dd.val+1), 0xFF8000FF);
+        int wa = dw->hardness[dat.dd.val];
+        int wb = dw->highest_hardness;
+        unsigned int red = ((wa * 0x00) + ((wb-wa) * 0xff)) / wb;
+        color_t col = 0xFF0000FF + (red << 16);
+        queuestr(fpp ? dat.V * zpush(cgi.FLOOR) : dat.V, .5, its(dat.dd.val+1), col);
         if(i <= 22)
         forCellIdEx(c2, id, dat.c) if(can_roll(si, dat.dd.dir, movei(dat.c, id)) && !visited.count(c2)) {
           auto re = roll_effect(movei(dat.c, id), dat.dd);
