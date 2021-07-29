@@ -1518,10 +1518,10 @@ EX namespace reg3 {
     
     map<heptagon*, int> reducers;
 
-    void link_alt(const cellwalker& hs) override {
-      auto h = hs.at->master;
+    bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override {
       altdist(h) = 0;
-      if(h->alt->s != hsOrigin) reducers[h] = hs.spin;
+      if(firststate != hsOrigin) reducers[h] = dir;
+      return true;
       }
     
     void generateAlts(heptagon* h, int levs, bool link_cdata) override {
@@ -2075,6 +2075,8 @@ EX namespace reg3 {
       int aid = cell_id.at(c);
       return quotient_map->get_move_seq(quotient_map->acells[aid], i);
       }
+
+    virtual bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override;
     };
 
   struct hrmap_h3_rule_alt : hrmap {
@@ -2091,25 +2093,25 @@ EX hrmap *new_alt_map(heptagon *o) {
   return new hrmap_h3_rule_alt(o);
   }
 
-EX void link_structures(heptagon *h, heptagon *alt, hstate firststate) {
-  auto cm = (hrmap_h3_rule*) currentmap;
+bool hrmap_h3_rule::link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) {
   alt->fieldval = h->fieldval;
   if(geometry == gSpace535) alt->fieldval = 0;
   if(firststate == hsOrigin) {
-    alt->fiftyval = cm->root[alt->fieldval];
-    return;
+    alt->fiftyval = root[alt->fieldval];
+    return true;
     }
-  vector<int>& choices = cm->possible_states[alt->fieldval];
+  vector<int>& choices = possible_states[alt->fieldval];
   vector<int> choices2;
   for(auto c: choices) {
     bool ok = true;
     for(int d=0; d<12; d++) 
       if(h->cmove(d)->distance < h->distance)
-        if(cm->children[S7*c+d] == -1)
+        if(children[S7*c+d] == -1)
           ok = false;
     if(ok) choices2.push_back(c);
     }
   alt->fiftyval = hrand_elt(choices2, -1);
+  return alt->fiftyval != -1;
   }
 
 EX bool reg3_rule_available = true;

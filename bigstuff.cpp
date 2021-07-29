@@ -292,21 +292,19 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
     if(!polarb50(c)) return NULL;
     }
   
+  bf += rev;
+
   heptagon *alt = init_heptagon(h->type);
   allmaps.push_back(newAltMap(alt));
 //printf("new alt {%p}\n", hr::voidp(alt));
   alt->s = firststate;
   if(hybri) alt->fieldval = hybrid::get_where(centerover).second;
   alt->alt = alt;
-  #if MAXMDIM >= 4
-  if(reg3::in_rule()) {
-    reg3::link_structures(h, alt, firststate);
-    if(alt->fiftyval == -1) return nullptr; /* unlinked */
+  if(!currentmap->link_alt(h, alt, firststate, bf.spin)) {
+    return nullptr;
     }
-  #endif
   h->alt = alt;
   alt->cdata = (cdata*) h;
-  currentmap->link_alt(bf);
 
   for(int d=rad; d>=0; d--) {
     currentmap->generateAlts(cx[d]->master);  
