@@ -1421,6 +1421,9 @@ struct hrmap_rulegen : hrmap {
     }
   
   transmatrix adj(heptagon *h, int dir) override {
+    if(h->fieldval == -1)
+      return arb::get_adj(arb::current_or_slided(), h->zebraval, dir, -1);
+
     int s = h->fieldval;
     int dir0 = get_arb_dir(s, dir);
     
