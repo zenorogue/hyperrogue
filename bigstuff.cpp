@@ -45,7 +45,7 @@ EX int roundTableRadius(cell *c) {
   if(ls::single()) return getAnthraxData(c, true);
   #endif
   if(!c->master->alt) return 28;
-  return c->master->alt->alt->emeraldval & GRAIL_RADIUS_MASK;
+  return altmap::radius(c->master->alt->alt) & GRAIL_RADIUS_MASK;
   }
 
 EX int celldistAltRelative(cell *c) {
@@ -136,7 +136,7 @@ EX cell *findcompass(cell *c) {
 
 EX bool grailWasFound(cell *c) {
   if(eubinary || quotient || sphere) return items[itHolyGrail];
-  return c->master->alt->alt->emeraldval & GRAIL_FOUND;
+  return altmap::radius(c->master->alt->alt) & GRAIL_FOUND;
   }
 
 EX int default_levs() {
@@ -156,18 +156,17 @@ namespace altmap {
   inline short& relspin(heptagon *alt) { return alt->zebraval; }
 
   /** in product geometries: the height of the center; call on alt->alt */
-  int hybrid_height(heptagon *alt) { return alt->fieldval; }
-  void set_hybrid_height(heptagon *alt, int z) { alt->fieldval = z; }
+  inline int hybrid_height(heptagon *alt) { return alt->fieldval; }
+  inline void set_hybrid_height(heptagon *alt, int z) { alt->fieldval = z; }
 
   /** for Camelot, the radius */
-  short& radius(heptagon *alt) { return alt->emeraldval; }
+  inline short& radius(heptagon *alt) { return alt->emeraldval; }
 
   /** type of the horocycle -- currently used in Land of Storms which has two types */
-  short& which(heptagon *alt) { return alt->emeraldval; }
+  inline short& which(heptagon *alt) { return alt->emeraldval; }
 
   /** the original land, for altmaps which may appear in multiple lands (Camelot) */
-  short& orig_land(heptagon *alt) { return alt->fiftyval; }
->>>>>>> f8161a9a (altmap::relspin for C++11)
+  inline short& orig_land(heptagon *alt) { return alt->fiftyval; }
   }
 #endif
 
@@ -301,7 +300,7 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   allmaps.push_back(newAltMap(alt));
 //printf("new alt {%p}\n", hr::voidp(alt));
   alt->s = firststate;
-  if(hybri) alt->fieldval = hybrid::get_where(centerover).second;
+  if(hybri) altmap::set_hybrid_height(alt, hybrid::get_where(centerover).second);
   alt->alt = alt;
   if(!currentmap->link_alt(h, alt, firststate, bf.spin)) {
     return nullptr;
@@ -1649,8 +1648,8 @@ EX void start_camelot(cell *c) {
   int rtr = newRoundTableRadius();
   heptagon *alt = createAlternateMap(c, ls::single() ? 2 : rtr+(hyperbolic && WDIM == 3 ? 11 : 14), ls::single() ? hsA : hsOrigin);
   if(alt) {
-    alt->emeraldval = rtr;
-    alt->fiftyval = c->land;
+    altmap::radius(alt) = rtr;
+    altmap::orig_land(alt) = c->land;
     }
   }
 
@@ -1686,7 +1685,7 @@ EX void build_horocycles(cell *c, cell *from) {
     
   if(stdhyperbolic && c->land == laStorms && can_start_horo(c) && hrand(2000) < 1000) {
     heptagon *h = createAlternateMap(c, horo_gen_distance(), hsA);
-    if(h) h->alt->emeraldval = hrand(2);
+    if(h) altmap::which(h->alt) = hrand(2);
     }
 
   if(c->land == laOcean && deepOcean && !generatingEquidistant && !peace::on && can_start_horo(c) && 
@@ -1837,7 +1836,7 @@ EX void buildCamelot(cell *c) {
       c->item = itGreenStone;
     if(d <= 10) c->land = laCamelot;
     if(d > 10 && !eubinary && !ls::single()) {
-      setland(c, eLand(c->master->alt->alt->fiftyval));
+      setland(c, eLand(altmap::orig_land(c->master->alt->alt)));
       if(c->land == laNone) printf("Camelot\n"); // NONEDEBUG
       }
     }
@@ -1957,7 +1956,7 @@ EX void moreBigStuff(cell *c) {
   if(extend_alt(c, laStorms, laStorms, false)) {
     int d = celldistAlt(c);
     if(d <= -2) {
-      c->wall = eubinary ? waCharged : (c->master->alt->alt->emeraldval & 1) ? waCharged : waGrounded;
+      c->wall = eubinary ? waCharged : (altmap::which(c->master->alt->alt) & 1) ? waCharged : waGrounded;
       c->item = itNone;
       c->monst = moNone;
       }
