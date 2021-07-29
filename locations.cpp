@@ -321,7 +321,7 @@ struct heptagon : cdata_or_heptagon {
   unsigned int dm4: 2;
   /** \brief distance from the origin; based on the final geometry of cells, not heptagons themselves */
   short distance;
-  /** \brief Wmerald/wineyard generator. May have different meaning in other geometries. */
+  /** \brief Emerald/wineyard generator. May have different meaning in other geometries. */
   short emeraldval;
   /** \brief Palace pattern generator. May have different meaning in other geometries. */
   short fiftyval;
