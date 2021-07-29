@@ -2881,6 +2881,7 @@ EX namespace sword {
       int sub = (hybri) ? 2 : 0;
       int t2 = c2->type - sub;
       int t1 = c1->type - sub;
+      if(t1 == 0 || t2 == 0) return d;
       if(c1->c.mirror(s1))
         d.angle = ((s2*sword_angles/t2 - d.angle + s1*sword_angles/t1) + sword_angles/2) % sword_angles;
       else
