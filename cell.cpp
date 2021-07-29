@@ -609,7 +609,7 @@ EX int updir(heptagon *h) {
     return -1;
     }
   #endif
-  if(h->distance == 0) return -1;
+  if(h->s == hsOrigin) return -1;
   return 0;
   }
 
@@ -623,10 +623,7 @@ EX int updir_alt(heptagon *h) {
     return -1;
     }
   #endif
-  for(int i=0; i<S7; i++)
-    if(h->move(i) && h->move(i)->alt == h->alt->move(0)) 
-      return i;
-  return -1;
+  return gmod(updir(h->alt) + altmap::relspin(h->alt), h->type);
   }
 
 
