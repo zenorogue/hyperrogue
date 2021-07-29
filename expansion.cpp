@@ -99,12 +99,20 @@ template<class T, class U> vector<int> get_children_codes(cell *c, const T& dist
     }
   return res;
   }
-  
+
 void expansion_analyzer::preliminary_grouping() {
   samples.clear();
   codeid.clear();
-  children.clear();  
-  if(reg3::in_rule()) {
+  children.clear();
+  if(currentmap->strict_tree_rules()) {
+    N = isize(rulegen::treestates);
+    children.resize(N);
+    rootid = rulegen::rule_root;
+    for(int i=0; i<N; i++)
+      for(int v: rulegen::treestates[i].rules)
+        if(v >= 0) children[i].push_back(v);
+    }
+  else if(reg3::in_rule()) {
 #if MAXMDIM >= 4
     rootid = reg3::rule_get_root(0);
     auto& chi = reg3::rule_get_children();
@@ -387,6 +395,8 @@ EX bool sizes_known() {
   // not implemented
   if(arcm::in()) return false;
   if(kite::in()) return false;
+  if(currentmap->strict_tree_rules()) return true;
+  if(arb::in()) return false;
   return true;  
   }
 
@@ -442,6 +452,8 @@ EX int curr_dist(cell *c) {
 int position;
 
 EX int type_in_reduced(expansion_analyzer& ea, cell *c, const cellfunction& f) {
+  if(currentmap->strict_tree_rules())
+    return rulegen::get_state(c);
   int a = ea.N;
   int t = type_in(ea, c, f);
   if(expansion.N != a) {
@@ -703,7 +715,7 @@ void expansion_analyzer::view_distances_dialog() {
   
   if(really_use_analyzer) {
     int t;
-    if(reg3::in_rule()) {
+    if(reg3::in_rule() || currentmap->strict_tree_rules()) {
       if(!N) preliminary_grouping();      
       t = rootid;
       }
@@ -743,7 +755,7 @@ void expansion_analyzer::view_distances_dialog() {
   dialog::addBreak(100 * scrolltime / scrollspeed);
 
   if(sizes_known() || bt::in()) {
-    if(euclid) {
+    if(euclid && !arb::in()) {
       dialog::addBreak(200);
       dialog::addInfo("a(d) = " + its(get_descendants(10).approx_int() - get_descendants(9).approx_int()) + "d", forecolor);
       }

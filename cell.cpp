@@ -231,6 +231,8 @@ EX hrmap *newAltMap(heptagon *o) {
   if(reg3::in_rule())
     return reg3::new_alt_map(o);
   #endif
+  if(currentmap->strict_tree_rules())
+    return rulegen::new_hrmap_rulegen_alt(o);
   return new hrmap_hyperbolic(o); 
   }
 // --- hyperbolic geometry ---

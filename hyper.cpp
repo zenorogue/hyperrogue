@@ -39,6 +39,7 @@
 #include "kite.cpp"
 #include "archimedean.cpp"
 #include "arbitrile.cpp"
+#include "rulegen.cpp"
 #include "euclid.cpp"
 #include "sphere.cpp"
 #include "fake.cpp"

@@ -3535,6 +3535,9 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const shiftmatrix& V, color_t
     if(arcm::in() && !PURE)
       i = gmod(i + arcm::parent_index_of(c->master)/DUALMUL, c->type);
     #endif
+    if(currentmap->strict_tree_rules()) {
+      i = rulegen::get_arb_dir(c, i);
+      }
     draw_shapevec(c, V2, qfi.fshape->gpside[sidepar][i], col, prio);
     return false;
     }
