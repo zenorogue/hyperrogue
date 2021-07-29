@@ -452,8 +452,6 @@ EX int curr_dist(cell *c) {
 int position;
 
 EX int type_in_reduced(expansion_analyzer& ea, cell *c, const cellfunction& f) {
-  if(currentmap->strict_tree_rules())
-    return rulegen::get_state(c);
   int a = ea.N;
   int t = type_in(ea, c, f);
   if(expansion.N != a) {
@@ -585,6 +583,17 @@ void celldrawer::do_viewdist() {
           break;
         case dfWorld:
           if(c->master->alt) t = c->master->alt->fiftyval;
+          break;
+        }
+      else if(currentmap->strict_tree_rules()) switch(distance_from) {
+        case dfPlayer: 
+          t = -1;
+          break;
+        case dfStart:
+          t = c->master->fieldval;
+          break;
+        case dfWorld:
+          if(c->master->alt) t = c->master->alt->fieldval;
           break;
         }
       else t = type_in_reduced(expansion, c, curr_dist);
