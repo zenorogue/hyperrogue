@@ -1524,7 +1524,7 @@ EX namespace reg3 {
       return true;
       }
     
-    void generateAlts(heptagon* h, int levs, bool link_cdata) override {
+    void extend_altmap(heptagon* h, int levs, bool link_cdata) override {
       if(reducers.count(h)) {
         heptspin hs(h, reducers[h]);
         reducers.erase(h);

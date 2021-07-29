@@ -21,7 +21,7 @@ struct hrmap {
   virtual void verify() { }
   virtual void on_dim_change() { }
   virtual bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir);
-  virtual void generateAlts(heptagon *h, int levs = default_levs(), bool link_cdata = true);
+  virtual void extend_altmap(heptagon *h, int levs = default_levs(), bool link_cdata = true);
   heptagon *may_create_step(heptagon *h, int direction) {
     if(h->move(direction)) return h->move(direction);
     return create_step(h, direction);

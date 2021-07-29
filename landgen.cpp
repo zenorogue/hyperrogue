@@ -1718,7 +1718,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       if(fargen) {
         if(!eubinary) {
           if(c->master->alt && masterAlt(c) <= 2) {
-            if(!eubinary) currentmap->generateAlts(c->master);
+            if(!eubinary) currentmap->extend_altmap(c->master);
             preventbarriers(c);
             int d = celldistAlt(c);
             if(d <= 0) 

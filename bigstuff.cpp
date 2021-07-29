@@ -121,7 +121,7 @@ EX cell *findcompass(cell *c) {
   
   while(inscreenrange(c)) {
     if(!eubinary && !sphere && !quotient)
-      currentmap->generateAlts(c->master);
+      currentmap->extend_altmap(c->master);
     forCellEx(c2, c) if(compassDist(c2) < d) {
       c = c2;
       d = compassDist(c2);
@@ -171,8 +171,8 @@ namespace altmap {
   }
 #endif
 
-void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
-  if(hybri) { PIU ( generateAlts(h, levs, link_cdata) ); }
+void hrmap::extend_altmap(heptagon *h, int levs, bool link_cdata) {
+  if(hybri) { PIU ( extend_altmap(h, levs, link_cdata) ); }
   if(!h->alt) return;
   preventbarriers(h->c7);
   if(h->c7) forCellEx(c2, h->c7) preventbarriers(c2);
@@ -201,7 +201,7 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
     ho->alt = hm;
     altmap::relspin(hm) = gmod(h->c.spin(i) - h->alt->c.spin(ir), hm->type);
     if(link_cdata) hm->cdata = (cdata*) ho;
-    if(levs) currentmap->generateAlts(ho, levs-1, link_cdata);
+    if(levs) currentmap->extend_altmap(ho, levs-1, link_cdata);
     if(S3 >= OINF) preventbarriers(ho->c7);
     }
   }
@@ -215,12 +215,12 @@ EX int hrandom_adjacent(cellwalker cw) {
   }
 #endif
 
-EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special IS(0)) {
+EX heptagon *create_altmap(cell *c, int rad, hstate firststate, int special IS(0)) {
 
   if(hybri) {
     if(hybrid::under_class() == gcSphere) return NULL;
     c = hybrid::get_where(c).first;
-    return PIU ( createAlternateMap(c, rad, firststate, special) );
+    return PIU ( create_altmap(c, rad, firststate, special) );
     }
 
   // check for direction
@@ -311,7 +311,7 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
   alt->cdata = (cdata*) h;
 
   for(int d=rad; d>=0; d--) {
-    currentmap->generateAlts(cx[d]->master);  
+    currentmap->extend_altmap(cx[d]->master);  
     preventbarriers(cx[d]);
     }
 
@@ -356,7 +356,7 @@ EX void generateTreasureIsland(cell *c) {
   int qlo, qhi;
   for(int i=0; i<c->type; i++) {
     cell *c2 = createMov(c, i);
-    if(!eubinary) currentmap->generateAlts(c2->master);
+    if(!eubinary) currentmap->extend_altmap(c2->master);
     if(greater_alt(c, c2)) {
       ctab.push_back(c2);
       qlo = i; qhi = i;
@@ -1396,15 +1396,15 @@ EX bool have_alt(cell *c) {
 
 /** \brief generate alts around c if necessary */
 EX void gen_alt(cell *c) {
-  if(!eubinary) currentmap->generateAlts(c->master);
+  if(!eubinary) currentmap->extend_altmap(c->master);
   }
 
 /** \brief generate alts around c and further if necessary */
 EX void gen_alt_around(cell *c) {
   if(!eubinary) {
-    currentmap->generateAlts(c->master);
+    currentmap->extend_altmap(c->master);
     for(int i=0; i<c->master->type; i++)
-      currentmap->generateAlts(c->master->move(i));
+      currentmap->extend_altmap(c->master->move(i));
     }
   }
 
@@ -1648,7 +1648,7 @@ EX void build_walls(cell *c, cell *from) {
 
 EX void start_camelot(cell *c) {
   int rtr = newRoundTableRadius();
-  heptagon *alt = createAlternateMap(c, ls::single() ? 2 : rtr+(hyperbolic && WDIM == 3 ? 11 : 14), ls::single() ? hsA : hsOrigin);
+  heptagon *alt = create_altmap(c, ls::single() ? 2 : rtr+(hyperbolic && WDIM == 3 ? 11 : 14), ls::single() ? hsA : hsOrigin);
   if(alt) {
     altmap::radius(alt) = rtr;
     altmap::orig_land(alt) = c->land;
@@ -1675,25 +1675,25 @@ EX void build_horocycles(cell *c, cell *from) {
     start_camelot(c);
 
   if(c->land == laRlyeh && can_start_horo(c) && (quickfind(laTemple) || peace::on || (hrand(I2000) < 100 && items[itStatue] >= U5)))
-    createAlternateMap(c, horo_gen_distance(), hsA);
+    create_altmap(c, horo_gen_distance(), hsA);
 
   if(c->land == laJungle && can_start_horo(c) && (quickfind(laMountain) || (hrand(I2000) < 100 && landUnlocked(laMountain))))
-    createAlternateMap(c, horo_gen_distance(), hsA);
+    create_altmap(c, horo_gen_distance(), hsA);
 
   if(c->land == laOvergrown && can_start_horo(c) && (quickfind(laClearing) || (hrand(I2000) < 25 && items[itMutant] >= U5 && isLandIngame(laClearing)))) {
-    heptagon *h = createAlternateMap(c, horo_gen_distance(), hsA);
+    heptagon *h = create_altmap(c, horo_gen_distance(), hsA);
     if(h) clearing::bpdata[h].root = NULL;
     }
     
   if(stdhyperbolic && c->land == laStorms && can_start_horo(c) && hrand(2000) < 1000) {
-    heptagon *h = createAlternateMap(c, horo_gen_distance(), hsA);
+    heptagon *h = create_altmap(c, horo_gen_distance(), hsA);
     if(h) altmap::which(h->alt) = hrand(2);
     }
 
   if(c->land == laOcean && deepOcean && !generatingEquidistant && !peace::on && can_start_horo(c) && 
     (quickfind(laWhirlpool) || (
       hrand(2000) < (PURE ? 500 : 1000))))
-    createAlternateMap(c, horo_gen_distance(), hsA);
+    create_altmap(c, horo_gen_distance(), hsA);
     
   #if CAP_COMPLEX2
   if(c->land == laOcean && deepOcean && !generatingEquidistant && hrand(10000) < 20 && no_barriers_in_radius(c, 2) && hyperbolic && !quotient && !tactic::on && !safety) 
@@ -1701,18 +1701,18 @@ EX void build_horocycles(cell *c, cell *from) {
   #endif
 
   if(c->land == laCaribbean && can_start_horo(c))
-    createAlternateMap(c, horo_gen_distance(), hsA);
+    create_altmap(c, horo_gen_distance(), hsA);
 
   if(c->land == laCanvas && can_start_horo(c) && ls::any_order())
-    createAlternateMap(c, horo_gen_distance(), hsA);
+    create_altmap(c, horo_gen_distance(), hsA);
 
   if(c->land == laPalace && can_start_horo(c) && !princess::generating && !shmup::on && multi::players == 1 && !weirdhyperbolic &&
     (princess::forceMouse ? canReachPlayer(from, moMouse) :
       (hrand(2000) < (peace::on ? 100 : 20))) && 
     (princess::challenge || kills[moVizier] || peace::on)) {
-    createAlternateMap(c, PRADIUS0, hsOrigin, waPalace);
+    create_altmap(c, PRADIUS0, hsOrigin, waPalace);
     celllister cl(c, 5, 1000000, NULL);
-    for(cell *c: cl.lst) if(c->master->alt) currentmap->generateAlts(c->master);
+    for(cell *c: cl.lst) if(c->master->alt) currentmap->extend_altmap(c->master);
     }
   }
   
@@ -1786,7 +1786,7 @@ EX void buildCamelot(cell *c) {
     if(d == 10) {
       if(weirdhyperbolic ? hrand(100) < 50 : pseudohept(c)) buildCamelotWall(c);
       else {
-        if(!eubinary) for(int i=0; i<S7; i++) currentmap->generateAlts(c->master->move(i));
+        if(!eubinary) for(int i=0; i<S7; i++) currentmap->extend_altmap(c->master->move(i));
         int q = 0;
         if(weirdhyperbolic) {
           for(int t=0; t<c->type; t++) createMov(c, t);
@@ -1827,7 +1827,7 @@ EX void buildCamelot(cell *c) {
       // roughly as many knights as table cells
       if(hrand(1000000) < 1000000 / expansion.get_growth() && !reptilecheat)
         c->monst = moKnight;
-      if(!eubinary) for(int i=0; i<S7; i++) currentmap->generateAlts(c->master->move(i));
+      if(!eubinary) for(int i=0; i<S7; i++) currentmap->extend_altmap(c->master->move(i));
       for(int i=0; i<c->type; i++) 
         if(c->move(i) && celldistAltRelative(c->move(i)) < d)
           c->mondir = (i+3) % 6;

@@ -378,7 +378,7 @@ struct hrmap_quotient : hrmap_standard {
     for(int i=0; i<TOT; i++) {
       if(i >= isize(by_dist)) { printf("too fast\n"); exit(1); }
       for(int a=0; a<S7; a++) if(by_dist[i]->move(a)->alt == NULL) by_dist.push_back(by_dist[i]->move(a));
-      currentmap->generateAlts(by_dist[i], 0, false);
+      currentmap->extend_altmap(by_dist[i], 0, false);
       }
   
     for(int i=0; i<TOT; i++) {

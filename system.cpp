@@ -227,7 +227,7 @@ EX void initgame() {
       if(specialland == laCamelot) 
         start_camelot(cwt.at);
       else {
-        heptagon *h = createAlternateMap(cwt.at, 2, hsA);
+        heptagon *h = create_altmap(cwt.at, 2, hsA);
         if(!h) printf("FAIL\n");
         }
       }
