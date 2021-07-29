@@ -20,24 +20,16 @@ struct hrmap {
   virtual vector<cell*>& allcells();
   virtual void verify() { }
   virtual void on_dim_change() { }
-  virtual bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) { return true; }
+  virtual bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir);
   virtual void generateAlts(heptagon *h, int levs = default_levs(), bool link_cdata = true);
   heptagon *may_create_step(heptagon *h, int direction) {
     if(h->move(direction)) return h->move(direction);
     return create_step(h, direction);
     }
-  virtual heptagon *create_step(heptagon *h, int direction) {
-    printf("create_step called unexpectedly\n"); exit(1);
-    return NULL;
-    }
+  virtual heptagon *create_step(heptagon *h, int direction);
 private:
-  virtual transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) {
-    printf("relative_matrixh called unexpectedly\n"); 
-    return Id;
-    }
-  virtual transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) {
-    return relative_matrixh(c2->master, c1->master, hint);
-    }
+  virtual transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint);
+  virtual transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint);
 public:
   transmatrix relative_matrix(heptagon *h2, heptagon *h1, const hyperpoint& hint) { return relative_matrixh(h2, h1, hint); }
   transmatrix relative_matrix(cell *h2, cell *h1, const hyperpoint& hint) { return relative_matrixc(h2, h1, hint); }
@@ -51,10 +43,7 @@ public:
   virtual void draw_all();
   virtual void draw_at(cell *at, const shiftmatrix& where);
 
-  virtual void virtualRebase(heptagon*& base, transmatrix& at) {
-    printf("virtualRebase called unexpectedly\n"); 
-    return;
-    }
+  virtual void virtualRebase(heptagon*& base, transmatrix& at);
 
   static constexpr ld SPIN_NOT_AVAILABLE = 1e5;
   virtual ld spin_angle(cell *c, int d) { return SPIN_NOT_AVAILABLE; }
@@ -73,28 +62,18 @@ public:
   virtual transmatrix master_relative(cell *c, bool get_inverse = false) { return Id; }
   virtual int wall_offset(cell *c);
 
-  virtual transmatrix ray_iadj(cell *c, int i) {
-    if(WDIM == 2) {
-      return to_other_side(get_corner(c, i), get_corner(c, (i+1)));
-      }
-    return currentmap->iadj(c, i);
-    }
+  virtual transmatrix ray_iadj(cell *c, int i);
 
-  virtual subcellshape& get_cellshape(cell *c) { 
-    if(cgi.heptshape) return *cgi.heptshape;
-    throw hr_exception("get_cellshape called unexpectedly"); 
-    }
+  virtual subcellshape& get_cellshape(cell *c);
 
   /** \brief in 3D honeycombs, returns a cellwalker res at cw->move(j) such that the face pointed at by cw and res share an edge */
-  virtual cellwalker strafe(cellwalker cw, int j) { throw hr_exception("strafe called unexpectedly"); }
+  virtual cellwalker strafe(cellwalker cw, int j);
 
   /** \brief in 3D honeycombs, returns a vector<bool> v, where v[j] iff faces i and j are adjacent */
   const vector<char>& dirdist(cellwalker cw) { return get_cellshape(cw.at).dirdist[cw.spin]; }
 
   /** \brief the sequence of heptagon movement direction to get from c->master to c->move(i)->master; implemented only for reg3 */
-  virtual const vector<int>& get_move_seq(cell *c, int i) {
-    throw hr_exception("get_move_seq not implemented for this map class");
-    }
+  virtual const vector<int>& get_move_seq(cell *c, int i);
   };
 
 /** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient  
@@ -134,6 +113,49 @@ struct hrmap_hyperbolic : hrmap_standard {
   void virtualRebase(heptagon*& base, transmatrix& at) override;
   };
 #endif
+
+heptagon *hrmap::create_step(heptagon *h, int direction) {
+  throw hr_exception("create_step called unexpectedly");
+  return NULL;
+  }
+
+transmatrix hrmap::relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) {
+  println(hlog, "relative_matrixh called unexpectedly\n"); 
+  return Id;
+  }
+
+transmatrix hrmap::relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) {
+  return relative_matrixh(c2->master, c1->master, hint);
+  }
+
+bool hrmap::link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) {
+  return true; 
+  }
+
+void hrmap::virtualRebase(heptagon*& base, transmatrix& at) {
+  printf("virtualRebase called unexpectedly\n"); 
+  return;
+  }
+
+transmatrix hrmap::ray_iadj(cell *c, int i) {
+  if(WDIM == 2) {
+    return to_other_side(get_corner(c, i), get_corner(c, (i+1)));
+    }
+  return currentmap->iadj(c, i);
+  }
+
+subcellshape& hrmap::get_cellshape(cell *c) { 
+  if(cgi.heptshape) return *cgi.heptshape;
+  throw hr_exception("get_cellshape called unexpectedly"); 
+  }
+
+cellwalker hrmap::strafe(cellwalker cw, int j) {
+  throw hr_exception("strafe called unexpectedly");
+  }
+
+const vector<int>& hrmap::get_move_seq(cell *c, int i) {
+  throw hr_exception("get_move_seq not implemented for this map class");
+  }
 
 transmatrix hrmap::spin_to(cell *c, int d, ld bonus) {
   ld sa = spin_angle(c, d);
