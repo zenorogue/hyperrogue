@@ -1064,6 +1064,8 @@ EX void initConfig() {
   ->help_text = "variation|dual|bitruncated";
   param_custom(geometry, "geometry", menuitem_change_geometry, 0)
   ->help_text = "hyperbolic|spherical|Euclidean";
+  
+  param_i(stamplen, "stamplen");
   }
 
 EX bool inSpecialMode() {

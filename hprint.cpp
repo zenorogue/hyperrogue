@@ -55,6 +55,20 @@ EX string index_pointer(void *v) {
   return res;
   }
 
+EX int stamplen = 6;
+
+EX string get_stamp() {
+  if(stamplen == 0) return "";
+  int t = SDL_GetTicks();
+  int pow10 = 1;
+  for(int i=0; i<stamplen; i++) pow10 *= 10;
+  if(t < 0) t = pow10 - 1;
+  t %= pow10;
+  string s = its(t);
+  while(isize(s) < stamplen) s = "0" + s;
+  return s;
+  }
+
 #if HDR
 inline string ONOFF(bool b) { return b ? XLAT("ON") : XLAT("OFF"); }
 
@@ -244,9 +258,7 @@ struct logger : hstream {
   int indentation;
   bool doindent;
   explicit logger() { doindent = false; }
-  void write_char(char c) override { if(doindent) { doindent = false; 
-    if(debugflags & DF_TIME) { int t = SDL_GetTicks(); if(t < 0) t = 999999; t %= 1000000; string s = its(t); while(isize(s) < 6) s = "0" + s; for(char c: s) special_log(c); special_log(' '); }
-    for(int i=0; i<indentation; i++) special_log(' '); } special_log(c); if(c == 10) doindent = true; if(c == 10 && debugfile) fflush(debugfile); }
+  void write_char(char c) override;  
   char read_char() override { throw hstream_exception(); }
   };
 
@@ -287,6 +299,22 @@ struct indenter_finish : indenter {
   };
 
 #endif
+
+void logger::write_char(char c) { 
+  if(doindent) { 
+    doindent = false; 
+    if(debugflags & DF_TIME) { 
+      string s = get_stamp(); 
+      if(s != "") { for(char c: s) special_log(c); special_log(' '); }
+      }
+    for(int i=0; i<indentation; i++) special_log(' ');
+    }
+  special_log(c); 
+  if(c == 10) {
+    doindent = true;
+    if(debugfile) fflush(debugfile); 
+    }
+  }
 
 EX void print(hstream& hs, cld x) { 
   int parts = 0;
