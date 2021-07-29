@@ -1398,5 +1398,6 @@ EX bool is_boundary(cell *c) {
   }
 
 EX cell out_of_bounds;
+EX heptagon oob;
 
 }
