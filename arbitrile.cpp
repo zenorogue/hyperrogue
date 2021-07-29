@@ -1255,6 +1255,7 @@ EX bool linespattern(cell *c) {
   }
 
 EX bool pseudohept(cell *c) {
+  if(!current.have_ph) return true;
   return current.shapes[id_of(c->master)].flags & arcm::sfPH;
   }
 
