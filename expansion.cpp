@@ -430,7 +430,10 @@ EX int curr_dist(cell *c) {
     case dfWorld:
       if(!mod_allowed() && !among(c->land, laOcean, laIvoryTower, laEndorian, laDungeon, laTemple, laWhirlpool, laCanvas))
         return 0;
-      if((isCyclic(c->land) || c->land == laCanvas) && (eubinary || c->master->alt)) return celldistAlt(c);
+      if((isCyclic(c->land) || among(c->land, laCanvas, laCaribbean, laStorms, laRlyeh))) {
+        if(eubinary || c->master->alt) return celldistAlt(c);
+        return UNKNOWN;
+        }
       return inmirror(c) ? (c->landparam & 255) : c->landparam;
     }
   return 0;    
@@ -555,7 +558,7 @@ void celldrawer::do_viewdist() {
  
   switch(number_coding) {
     case ncDistance: { 
-      label = its(cd);
+      label = cd == UNKNOWN ? "?" : its(cd);
       dc = distcolors[cd];
       break;
       }
