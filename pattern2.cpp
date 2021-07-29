@@ -2689,23 +2689,13 @@ EX namespace linepatterns {
 
   linepattern patTree("underlying tree", 0x00d0d000, cheating, 
     ALLCELLS(
-
-      if(currentmap->strict_tree_rules()) {
-        gridlinef(V, C0, V * currentmap->adj(c, 0), C0, col, 2 + vid.linequality); continue;
-        return;
-        }
-
       if(is_master(c)) {
         int dir = updir(c->master);
         if(dir == -1) continue;
-        cell *c2 = c->master->cmove(dir)->c7;
-        if(gmatrix.count(c2)) {
-          if(S3 >= OINF)
-            gridlinef(V, C0, V, mid(C0, tC0(currentmap->adj(c, dir))), col, 2 + vid.linequality);
-          else 
-             gridlinef(V, C0, V * currentmap->master_relative(c, true) * currentmap->adj(c->master, dir), C0, col, 2 + vid.linequality);
-           }
-         }
+        hyperpoint end = currentmap->master_relative(c, true) * currentmap->adj(c->master, dir) * C0;
+        hyperpoint start = mid(C0, mid(C0, mid(C0, end)));
+        gridlinef(V, start, V, end, col, 2 + vid.linequality);
+        }
       )
     );
   linepattern patAltTree("circle/horocycle tree", 0xd000d000, cheating, 
@@ -2713,17 +2703,9 @@ EX namespace linepatterns {
       if(is_master(c)) {
         int dir = updir_alt(c->master);
         if(dir == -1) continue;
-        for(int i=0; i<S7; i++)
-          if(c->master->move(i) && c->master->move(i)->alt == c->master->alt->move(0)) {
-            cell *c2 = c->master->move(i)->c7;
-            if(gmatrix.count(c2)) {
-              if(S3 >= OINF) {
-                gridlinef(V, C0, V, mid(C0, tC0(inverse_shift(V, gmatrix[c2]))), col, 2 + vid.linequality);
-                }
-              else 
-                gridlinef(V, C0, V*currentmap->master_relative(c, true) * currentmap->adj(c->master,i), C0, col, 2 + vid.linequality);
-              }
-            }
+        hyperpoint end = currentmap->master_relative(c, true) * currentmap->adj(c->master, dir) * C0;
+        hyperpoint start = mid(C0, mid(C0, mid(C0, end)));
+        gridlinef(V, start, V, end, col, 2 + vid.linequality);
         }
       )
     );
