@@ -2104,7 +2104,7 @@ bool hrmap_h3_rule::link_alt(heptagon *h, heptagon *alt, hstate firststate, int 
   vector<int> choices2;
   for(auto c: choices) {
     bool ok = true;
-    for(int d=0; d<12; d++) 
+    for(int d=0; d<S7; d++) 
       if(h->cmove(d)->distance < h->distance)
         if(children[S7*c+d] == -1)
           ok = false;
