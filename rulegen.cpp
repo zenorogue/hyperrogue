@@ -1302,6 +1302,7 @@ struct hrmap_rulegen : hrmap {
     h->distance = d;
     h->fieldval = s;
     h->zebraval = treestates[s].sid;
+    h->s = hsA;
     return h;
     }
   
@@ -1311,6 +1312,7 @@ struct hrmap_rulegen : hrmap {
 
   hrmap_rulegen() {
     origin = gen(rule_root, 0, true);
+    origin->s = hsOrigin;
     }
 
   hrmap_rulegen(heptagon *h) {
@@ -1467,6 +1469,7 @@ struct hrmap_rulegen : hrmap {
     
     if(firststate == hsOrigin) {
       alt->fiftyval = rule_root;
+      alt->s = hsOrigin;
       // fix this
       return psid == 0;
       }
@@ -1481,6 +1484,7 @@ struct hrmap_rulegen : hrmap {
         if(gmod(ts.parent_dir - odir, cl) == 0)
           choices.push_back(ts.id);
     alt->fieldval = hrand_elt(choices, -1);
+    alt->s = hsA;
     if(alt->fieldval == -1) return false;
     altmap::relspin(alt) = dir;
     return true;
