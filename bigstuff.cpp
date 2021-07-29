@@ -150,6 +150,27 @@ EX int default_levs() {
   return S3-3;
   }
 
+#if HDR
+namespace altmap {
+  /** h->move(relspin(h->alt)) corresponds to h->alt->move(0) */
+  inline short& relspin(heptagon *alt) { return alt->zebraval; }
+
+  /** in product geometries: the height of the center; call on alt->alt */
+  int hybrid_height(heptagon *alt) { return alt->fieldval; }
+  void set_hybrid_height(heptagon *alt, int z) { alt->fieldval = z; }
+
+  /** for Camelot, the radius */
+  short& radius(heptagon *alt) { return alt->emeraldval; }
+
+  /** type of the horocycle -- currently used in Land of Storms which has two types */
+  short& which(heptagon *alt) { return alt->emeraldval; }
+
+  /** the original land, for altmaps which may appear in multiple lands (Camelot) */
+  short& orig_land(heptagon *alt) { return alt->fiftyval; }
+>>>>>>> f8161a9a (altmap::relspin for C++11)
+  }
+#endif
+
 void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
   if(hybri) { PIU ( generateAlts(h, levs, link_cdata) ); }
   if(!h->alt) return;
@@ -159,28 +180,9 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
     for(int i=0; i<S7; i++) preventbarriers(createStep(h, i)->c7);
   for(int i=0; i<h->type; i++) 
     createStep(h->alt, i)->alt = h->alt->alt;
-  int relspin = -4; // for horocycles it must go the other way
-  if(quotient) relspin = 0;
-  #if MAXMDIM >= 4
-  else if(reg3::in_rule()) relspin = 0;
-  #endif
-  else {
-  for(int j=0; j<h->type; j++) for(int i=0; i<h->type; i++) {
-    createStep(h, i);
-    if(h->move(i)->alt == h->alt->move(j)) {
-      relspin = (i-j+S7) % S7;
-      break;
-      }
-    }
-  if(relspin == -4 && geometry != gFieldQuotient) {
-    if(h->alt != h->alt->alt) {
-      printf("relspin {%p:%p}\n", hr::voidp(h->alt), hr::voidp(h->alt->alt));
-      {for(int i=0; i<S7; i++) printf("%p ", hr::voidp(h->alt->move(i)));} printf(" ALT\n");
-      {for(int i=0; i<S7; i++) printf("%p ", hr::voidp(h->move(i)));} printf(" REAL\n");
-      {for(int i=0; i<S7; i++) printf("%p ", hr::voidp(h->move(i)->alt));} printf(" REAL ALT\n");
-      }
-    relspin = 3;
-    } }
+    
+  auto relspin = altmap::relspin(h->alt);
+
   // h[relspin] matches alt[0]
 //printf("{%d~%d}\n", h->distance, h->alt->distance);
   if(h->type != h->alt->type) return;
@@ -199,6 +201,7 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
       continue;
       }
     ho->alt = hm;
+    altmap::relspin(hm) = gmod(h->c.spin(i) - h->alt->c.spin(ir), hm->type);
     if(link_cdata) hm->cdata = (cdata*) ho;
     if(levs) currentmap->generateAlts(ho, levs-1, link_cdata);
     if(S3 >= OINF) preventbarriers(ho->c7);

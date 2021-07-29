@@ -94,6 +94,7 @@ struct hrmap_standard : hrmap {
   virtual int shvid(cell *c) override;
   virtual hyperpoint get_corner(cell *c, int cid, ld cf) override;
   virtual transmatrix master_relative(cell *c, bool get_inverse) override;
+  virtual bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override;
   };
 
 void clearfrom(heptagon*);
@@ -130,6 +131,11 @@ transmatrix hrmap::relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) 
 
 bool hrmap::link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) {
   return true; 
+  }
+
+bool hrmap_standard::link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) {
+  altmap::relspin(alt) = 3;
+  return true;
   }
 
 void hrmap::virtualRebase(heptagon*& base, transmatrix& at) {
