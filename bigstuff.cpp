@@ -1786,7 +1786,7 @@ EX void buildCamelot(cell *c) {
     if(d == 10) {
       if(weirdhyperbolic ? hrand(100) < 50 : pseudohept(c)) buildCamelotWall(c);
       else {
-        if(!eubinary) for(int i=0; i<S7; i++) currentmap->extend_altmap(c->master->move(i));
+        if(!eubinary) for(int i=0; i<c->master->type; i++) currentmap->extend_altmap(c->master->move(i));
         int q = 0;
         if(weirdhyperbolic) {
           for(int t=0; t<c->type; t++) createMov(c, t);
@@ -1827,7 +1827,7 @@ EX void buildCamelot(cell *c) {
       // roughly as many knights as table cells
       if(hrand(1000000) < 1000000 / expansion.get_growth() && !reptilecheat)
         c->monst = moKnight;
-      if(!eubinary) for(int i=0; i<S7; i++) currentmap->extend_altmap(c->master->move(i));
+      if(!eubinary) for(int i=0; i<c->master->type; i++) currentmap->extend_altmap(c->master->move(i));
       for(int i=0; i<c->type; i++) 
         if(c->move(i) && celldistAltRelative(c->move(i)) < d)
           c->mondir = (i+3) % 6;
