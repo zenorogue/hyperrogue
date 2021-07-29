@@ -1240,8 +1240,12 @@ EX void generate_rules() {
 
   delete_tmap();
 
-  if(!arb::in())
-    throw rulegen_surrender("rulegen algorithm works only on arb tessellations");
+  if(!arb::in()) try {
+    arb::convert::convert();
+    }
+  catch(hr_exception& e) {
+    throw rulegen_surrender("conversion failure");
+    }
   
   prepare_around_radius = 1;
   
@@ -1504,21 +1508,16 @@ EX int get_state(cell *c) {
   return c->master->fieldval;
   }
 
-EX void restart_game_on(hrmap *m) {
-  stop_game();
-  int a = addHook(hooks_newmap, 0, [m] { return m;});
-  start_game();
-  delHook(hooks_newmap, a);
-  }
-
-string rules_known_for;
+string rules_known_for = "unknown";
 string rule_status;
 
+EX bool known() {
+  return rules_known_for == arb::current.name;
+  }
+
 bool prepare_rules() {
-  if(rules_known_for == arb::current.name) return true;
+  if(known()) return true;
   try {
-    if(!arb::in()) 
-      throw rulegen_failure("rulegen in wrong tessellation");
     generate_rules();
     rules_known_for = arb::current.name;
     rule_status = XLAT("rules generated successfully");
@@ -1549,8 +1548,11 @@ int args() {
     cleanup();
   else if(argis("-rulegen-play")) {
     PHASEFROM(3);
-    if(prepare_rules())
-      restart_game_on(new hrmap_rulegen);
+    if(prepare_rules()) {
+      stop_game();
+      set_geometry(gArbitrary);
+      start_game();
+      }
     }
   else return 1;
   return 0;

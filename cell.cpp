@@ -343,6 +343,7 @@ EX void initcells() {
   #if CAP_CRYSTAL
   else if(cryst) currentmap = crystal::new_map();
   #endif
+  else if(arb::in() && rulegen::known()) currentmap = rulegen::new_hrmap_rulegen();
   else if(arb::in()) currentmap = arb::new_map();
   #if CAP_ARCM
   else if(arcm::in()) currentmap = arcm::new_map();
