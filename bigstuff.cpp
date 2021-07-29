@@ -183,15 +183,13 @@ void hrmap::generateAlts(heptagon *h, int levs, bool link_cdata) {
   auto relspin = altmap::relspin(h->alt);
 
   // h[relspin] matches alt[0]
-//printf("{%d~%d}\n", h->distance, h->alt->distance);
+  // int relspin = h->alt->fieldval;
+
   if(h->type != h->alt->type) return;
   for(int i=0; i<h->type; i++) {
     int ir = gmod(i-relspin, h->type);
     heptagon *hm = h->alt->move(ir);
     heptagon *ho = createStep(h, i);
-//  printf("[%p:%d ~ %p:%d] %p ~ %p\n", 
-//    hr::voidp(h), i, hr::voidp(h->alt), ir, 
-//    hr::voidp(ho), hr::voidp(hm));
     if(ho->alt && ho->alt != hm) {
       if(ho->alt->alt == hm->alt && !quotient) {
         printf("ERROR: alt cross! [%d -> %d]\n", ho->alt->distance, hm->distance);
