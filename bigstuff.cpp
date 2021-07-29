@@ -238,6 +238,9 @@ EX heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special
       if(c->move(i) && c->move(i)->master->distance < c->master->distance) gdir = i;
       }
     }
+  #if MAXMDIM >= 4
+  if(reg3::in_rule() && c->master->distance == 0) gdir = 0;
+  #endif
   if(gdir < 0) return NULL;
   
   // non-crossing in weird hyperbolic
