@@ -340,7 +340,10 @@ EX void compute_vertex_valence() {
       int qty = 0;
       connection_t at = {i, k, false};
       do {
-        total += shs[at.sid].angles[at.eid];
+        ld a = shs[at.sid].angles[at.eid];
+        while(a < 0) a += 360 * degree;
+        while(a > 360 * degree) a -= 360 * degree;
+        total += a;
         qty++;
 
         at.eid++;
