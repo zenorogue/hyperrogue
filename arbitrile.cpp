@@ -1007,6 +1007,201 @@ EX void set_sliders() {
   dialog::display();
   }
 
+/** convert a tessellation (e.g. Archimedean, regular, etc.) to the arb::current internal representation */
+EX namespace convert {
+
+struct id_record {
+  int target;   /* master of this id type */
+  int shift;    /* sample direction 0 == our direction shift */
+  int modval;   /* this master type is the same as itself rotated by modval */
+  cell *sample; /* sample of the master type */
+  };
+
+inline void print(hstream& hs, const id_record& i) { print(hs, "[", i.target, " shift=", i.shift, " mod=", i.modval, "]"); }
+
+map<int, id_record> identification;
+
+id_record& get_identification(int s, cell *c) {  
+  if(!identification.count(s)) {
+    auto &id = identification[s];
+    id.target = s;
+    id.shift = 0;
+    id.modval = c->type;
+    id.sample = c;
+    }
+  return identification[s];
+  }
+
+id_record& get_identification(cell *c) {  
+  auto id = currentmap->full_shvid(c);
+  return get_identification(id, c);
+  }
+
+int changes;
+
+void be_identified(cellwalker cw1, cellwalker cw2) {
+  auto& id1 = get_identification(cw1.at);
+  auto& id2 = get_identification(cw2.at);
+  
+  indenter ind(2);
+  
+  int t = cw2.at->type;
+
+  if(cw1.at->type != t) {
+    println(hlog, cw1.at->type, " vs ", t);
+    throw hr_exception("numbers disagree");
+    }
+    
+  int d2 = gmod(-cw2.to_spin(id2.shift), id2.modval);
+  int d1 = gmod(-cw1.to_spin(id1.shift), id1.modval);
+
+  indenter ind1(2);
+
+  if(id2.target != id1.target) {
+    auto oid2 = id2;
+    id1.modval = gcd(id1.modval, id2.modval);
+    if(id1.modval < 6 && t == 6) throw hr_exception("reducing hex");
+    for(auto& p: identification) {
+      auto& idr = p.second;
+      if(idr.target == oid2.target) {
+        idr.target = id1.target;
+        idr.modval = id1.modval;
+        idr.shift = gmod(idr.shift + (d2-d1), idr.modval);        
+        idr.sample = id1.sample;
+        }
+      }
+    changes++;
+    println(hlog, identification);
+    return;
+    }
+  if(d2 != d1) {
+    auto oid2 = id2;
+    id2.modval = gcd(id2.modval, abs(d2-d1));
+    if(id1.modval == 1 && t == 6) throw hr_exception("reducing hex");
+    for(auto& p: identification) 
+      if(p.second.target == oid2.target) p.second.modval = id2.modval;
+    changes++;
+    println(hlog, identification);
+    return;
+    }
+  }
+
+EX void convert() {
+  start_game();
+
+  manual_celllister cl;
+  cl.add(currentmap->gamestart());
+  
+  int chg = -1;
+  while(changes > chg) {
+    changes = chg;
+    
+    set<int> masters_analyzed;
+
+    for(int i=0; i<isize(cl.lst); i++) {
+      auto c = cl.lst[i];
+      auto& id = get_identification(c);
+      
+      if(masters_analyzed.count(id.target)) continue;
+      masters_analyzed.insert(id.target);
+      
+      cellwalker cw0(c, id.shift);
+      cellwalker cws(id.sample, 0);
+      
+      for(int i=0; i<c->type; i++) {
+        if(1) {
+          indenter ind(2);
+          be_identified(cw0 + i + wstep, cws + i + wstep);
+          be_identified(cw0 + i + wstep, cw0 + i + id.modval + wstep);
+          }
+        
+        if(1) {
+          indenter ind(2);
+          auto cwx = cw0 + i + wstep;
+          
+          auto idx = get_identification(cwx.at);
+          cellwalker xsample(idx.sample, cwx.spin);
+          xsample -= idx.shift;
+          
+          be_identified(cwx + wstep, xsample + wstep);
+          
+          cl.add((cw0 + i).cpeek());
+          }
+        }
+      }
+    }
+  
+  vector<int> old_shvids;
+  map<int, int> old_to_new;
+  for(auto id: identification)
+    if(id.first == id.second.target) {
+      old_to_new[id.first] = isize(old_shvids);
+      old_shvids.push_back(id.first);
+      }
+  
+  auto& ac = arb::current;
+  ac.order++; 
+  ac.comment = ac.filename = "converted from: " + full_geometry_name();
+  ac.cscale = cgi.scalefactor;
+  int N = isize(old_shvids);
+  ac.shapes.resize(N);
+
+  ginf[gArbitrary].g = cginf.g;
+  ginf[gArbitrary].flags = cgflags & qBOUNDED;
+  
+  for(int i=0; i<N; i++) {
+    auto id = identification[old_shvids[i]];
+    cell *s = id.sample;
+    auto& sh = ac.shapes[i];
+    sh.id = i;
+    int t = s->type;
+    sh.vertices.clear();
+    sh.connections.clear();
+    sh.repeat_value = id.modval;
+    for(int j=0; j<t; j++) {
+      auto co = currentmap->get_corner(s, j);
+      sh.vertices.push_back(co);
+      cellwalker cw(s, j);
+      cw += wstep;
+      auto idx = get_identification(cw.at);
+      cellwalker xsample(idx.sample, cw.spin);
+      xsample -= idx.shift;
+      sh.connections.emplace_back(arb::connection_t{old_to_new.at(idx.target), xsample.spin, false});
+      }
+    sh.stretch_shear.resize(t, make_pair(1, 0));    
+    sh.edges.clear();
+    for(int j=0; j<t-1; j++)
+      sh.edges.push_back(hdist(sh.vertices[j], sh.vertices[j+1]));
+    sh.edges.push_back(hdist(sh.vertices[t-1], sh.vertices[0]));
+
+    sh.angles.clear();
+    for(int j=0; j<t; j++) {
+      hyperpoint v0 = sh.vertices[j];
+      hyperpoint v1 = sh.vertices[(j+1) % t];
+      hyperpoint v2 = sh.vertices[(j+2) % t];
+      transmatrix T = gpushxto0(v1);
+      v0 = T * v0;
+      v2 = T * v2;
+      ld alpha = atan2(v0) - atan2(v2);
+      while(alpha > M_PI) alpha -= 360*degree;
+      while(alpha < -M_PI) alpha += 360*degree;
+      sh.angles.push_back(alpha);
+      }
+    if(debugflags & DF_GEOM) {
+      println(hlog, "shape ", i, ":");
+      indenter indp(2);
+      println(hlog, "vertices=", sh.vertices);
+      println(hlog, "connections=", sh.connections);
+      println(hlog, "edges=", sh.edges);
+      println(hlog, "angles=", sh.angles);
+      }
+    }
+  
+  arb::compute_vertex_valence();
+  }
+
+EX }
+
 #if CAP_COMMANDLINE  
 int readArgs() {
   using namespace arg;
@@ -1019,6 +1214,15 @@ int readArgs() {
     }
   else if(argis("-arb-legacy")) {
     legacy = true;
+    }
+  else if(argis("-arb-convert")) {
+    try {
+      convert::convert();
+      set_geometry(gArbitrary);      
+      }
+    catch(hr_exception& e) {
+      println(hlog, "failed to convert: ", e.what());
+      }
     }
   else if(argis("-arb-slider")) {
     PHASEFROM(2);
