@@ -859,6 +859,10 @@ EX namespace gp {
     }
   
   EX int get_plainshape_id(cell *c) {
+    if(li_for != c) {
+      li_for = c;
+      current_li = get_local_info(c);
+      }
     int siid, sidir;
     cell *c1 = c;
     auto f = [&] {
@@ -892,11 +896,11 @@ EX namespace gp {
       sidir = 0;
       }
     else f();
-    auto& id = cgi.gpdata->pshid[siid][sidir][draw_li.relative.first&GOLDBERG_MASK][draw_li.relative.second&GOLDBERG_MASK][gmod(draw_li.total_dir, S6)];
+    auto& id = cgi.gpdata->pshid[siid][sidir][current_li.relative.first&GOLDBERG_MASK][current_li.relative.second&GOLDBERG_MASK][gmod(current_li.total_dir, S6)];
     if(id == -1 && sphere && isize(cgi.shFloor.b) > 0) {
       forCellEx(c1, c) if(!gmatrix0.count(c1)) return 0;
       }
-    if(id == -1) build_plainshape(id, draw_li, c, siid, sidir);
+    if(id == -1) build_plainshape(id, current_li, c, siid, sidir);
     return id;
     }
   EX }

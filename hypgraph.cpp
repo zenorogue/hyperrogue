@@ -1586,16 +1586,18 @@ void drawrec(cell *c, const transmatrix& V) {
     }
   } */
   
-  bool drawrec(cell *c, const shiftmatrix& V, gp::loc at, int dir, int maindir) { 
+  bool drawrec(cell *c, const shiftmatrix& V, gp::loc at, int dir, int maindir, local_info li) { 
     bool res = false;
-    shiftmatrix V1 = V * cgi.gpdata->Tf[draw_li.last_dir][at.first&GOLDBERG_MASK][at.second&GOLDBERG_MASK][fixg6(dir)];
+    shiftmatrix V1 = V * cgi.gpdata->Tf[li.last_dir][at.first&GOLDBERG_MASK][at.second&GOLDBERG_MASK][fixg6(dir)];
     if(do_draw(c, V1)) {
       /* auto li = get_local_info(c);
       if((dir - li.total_dir) % S6) printf("totaldir %d/%d\n", dir, li.total_dir);
       if(at != li.relative) printf("at %s/%s\n", disp(at), disp(li.relative));
       if(maindir != li.last_dir) printf("ld %d/%d\n", maindir, li.last_dir); */
-      draw_li.relative = at;
-      draw_li.total_dir = fixg6(dir);
+      li.relative = at;
+      li.total_dir = fixg6(dir);
+      current_li = li;
+      li_for = c;
       drawcell(c, V1);
       res = true;
       }
@@ -1604,15 +1606,19 @@ void drawrec(cell *c, const transmatrix& V) {
       if(!c2) continue;
       if(c2->move(0) != c) continue;
       if(c2 == c2->master->c7) continue;
-      res |= drawrec(c2, V, at + eudir(dir+i), dir + i + SG3, maindir);
+      res |= drawrec(c2, V, at + eudir(dir+i), dir + i + SG3, maindir, li);
       }
     return res;
     }
   
   bool drawrec(cell *c, const shiftmatrix& V) {
-    draw_li.relative = loc(0,0);
-    draw_li.total_dir = 0;
-    draw_li.last_dir = -1;
+    local_info li;    
+    li.relative = loc(0,0);
+    li.total_dir = 0;
+    li.last_dir = -1;
+    li.first_dir = -1;
+    li_for = c;
+    current_li = li;
     bool res = false;
     if(do_draw(c, V))
       drawcell(c, V), res = true;
@@ -1621,8 +1627,8 @@ void drawrec(cell *c, const transmatrix& V) {
       if(!c2) continue;
       if(c2->move(0) != c) continue;
       if(c2 == c2->master->c7) continue;
-      draw_li.last_dir = i;
-      res |= drawrec(c2, V, gp::loc(1,0), SG3, i);
+      li.last_dir = i;
+      res |= drawrec(c2, V, gp::loc(1,0), SG3, i, li);
       }
     return res;
     }

@@ -63,7 +63,8 @@ EX namespace gp {
     };
   #endif
 
-  EX local_info draw_li;
+  EX local_info current_li;
+  EX cell *li_for;
   
   EX loc eudir(int d) {
     if(S3 == 3) {
@@ -1270,11 +1271,11 @@ EX namespace gp {
         
         in_underlying([&] {
           if(GOLDBERG) {
-            gp::draw_li = gp::get_local_info(c1);
+            gp::current_li = gp::get_local_info(c1);
             }
           else {
-            gp::draw_li.relative.first = shvid(c1);
-            gp::draw_li.relative.second = shift[c];
+            gp::current_li.relative.first = shvid(c1);
+            gp::current_li.relative.second = shift[c];
             }
           });
       
@@ -1296,11 +1297,6 @@ EX namespace gp {
     int shvid(cell *c) override {
       return gp::get_plainshape_id(c);
       }   
-
-    int full_shvid(cell *c) override {
-      gp::draw_li = gp::get_local_info(c);
-      return shvid(c);
-      }
 
     hyperpoint get_corner(cell *c, int cid, ld cf) override {
       if(UNTRUNCATED) {
