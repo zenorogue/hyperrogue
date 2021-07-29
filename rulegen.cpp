@@ -1217,10 +1217,6 @@ void clear_all() {
   cleanup();
   }
 
-EX string current_geometry_name() {
-  return arb::in() ? arb::current.filename : full_geometry_name();
-  }
-
 bool double_edges_check(cell *c, set<int>& visited) {
   int i = shvid(c);
   if(visited.count(i)) return false;
