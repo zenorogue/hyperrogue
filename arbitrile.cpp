@@ -287,18 +287,48 @@ EX void unmirror() {
 EX void compute_vertex_valence() {
   auto& shs = arb::current.shapes;
 
+  int tcl = -1;
+
   for(int i=0; i<isize(shs); i++) {
     auto& sh = shs[i];
-    int n = isize(sh.vertices);
-    sh.cycle_length = n;
-    for(int k=0; k<n; k++) {
-      auto co = sh.connections[k];
-      co = shs[co.sid].connections[co.eid];
-      if(co.sid != i) throw hr_parse_exception("connection error in compute_stats");
-      sh.cycle_length = gcd(sh.cycle_length, k-co.eid);
+    sh.cycle_length = isize(sh.vertices);
+    }
+  
+  while(true) {
+
+    for(int i=0; i<isize(shs); i++) {
+      auto& sh = shs[i];
+      int n = isize(sh.vertices);
+      
+      for(int k=sh.cycle_length; k<n; k++) {
+        auto co = sh.connections[k];
+        auto co1 = sh.connections[k-sh.cycle_length];
+        if(co.sid != co1.sid) {
+          println(hlog, "ik = ", tie(i,k), " co=", co, "co1=", co1, " cl=", sh.cycle_length);
+          throw hr_parse_exception("connection error #2 in compute_vertex_valence");
+          }
+        shs[co.sid].cycle_length = abs(gcd(shs[co.sid].cycle_length, co.eid - co1.eid));
+        }
+
+      for(int k=0; k<n; k++) {
+        auto co = sh.connections[k];
+        co = shs[co.sid].connections[co.eid];
+        if(co.sid != i) throw hr_parse_exception("connection error in compute_vertex_valence");
+        sh.cycle_length = abs(gcd(sh.cycle_length, k-co.eid));
+        }
+      if(debugflags & DF_GEOM) 
+        println(hlog, "tile ", i, " cycle_length = ", sh.cycle_length, " / ", n);
       }
-    if(debugflags & DF_GEOM) 
-      println(hlog, "tile ", i, " cycle_length = ", sh.cycle_length, " / ", n);
+    
+    int new_tcl = 0;
+    for(int i=0; i<isize(shs); i++) {
+      auto& len = shs[i].cycle_length;
+      if(len < 0) len = -len;
+      new_tcl += len;
+      }
+
+    if(new_tcl == tcl) break;
+    tcl = new_tcl;
     }
   
   if(cgflags & qAFFINE) return;
