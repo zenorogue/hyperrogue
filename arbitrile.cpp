@@ -290,19 +290,17 @@ EX void unmirror() {
   }
 
 EX void compute_vertex_valence() {
-  auto& shs = arb::current.shapes;
+  auto& ac = arb::current;
 
   int tcl = -1;
 
-  for(int i=0; i<isize(shs); i++) {
-    auto& sh = shs[i];
+  for(auto& sh: ac.shapes)
     sh.cycle_length = isize(sh.vertices);
-    }
   
   while(true) {
 
-    for(int i=0; i<isize(shs); i++) {
-      auto& sh = shs[i];
+    for(auto& sh: ac.shapes) {
+      int i = sh.id;
       int n = isize(sh.vertices);
       
       for(int k=sh.cycle_length; k<n; k++) {
@@ -312,12 +310,12 @@ EX void compute_vertex_valence() {
           println(hlog, "ik = ", tie(i,k), " co=", co, "co1=", co1, " cl=", sh.cycle_length);
           throw hr_parse_exception("connection error #2 in compute_vertex_valence");
           }
-        shs[co.sid].cycle_length = abs(gcd(shs[co.sid].cycle_length, co.eid - co1.eid));
+        ac.shapes[co.sid].cycle_length = abs(gcd(ac.shapes[co.sid].cycle_length, co.eid - co1.eid));
         }
 
       for(int k=0; k<n; k++) {
         auto co = sh.connections[k];
-        co = shs[co.sid].connections[co.eid];
+        co = ac.shapes[co.sid].connections[co.eid];
         if(co.sid != i) throw hr_parse_exception("connection error in compute_vertex_valence");
         sh.cycle_length = abs(gcd(sh.cycle_length, k-co.eid));
         }
@@ -326,8 +324,8 @@ EX void compute_vertex_valence() {
       }
     
     int new_tcl = 0;
-    for(int i=0; i<isize(shs); i++) {
-      auto& len = shs[i].cycle_length;
+    for(auto& sh: ac.shapes) {
+      auto& len = sh.cycle_length;
       if(len < 0) len = -len;
       new_tcl += len;
       }
@@ -337,33 +335,34 @@ EX void compute_vertex_valence() {
     }
   
   if(cgflags & qAFFINE) return;
-  for(int i=0; i<isize(shs); i++) {
-    int n = isize(shs[i].vertices);
-    shs[i].vertex_valence.resize(n);
+  for(auto& sh: ac.shapes) {
+    int n = sh.size();
+    int i = sh.id;
+    sh.vertex_valence.resize(n);
     for(int k=0; k<n; k++) {
       ld total = 0;
       int qty = 0;
       connection_t at = {i, k, false};
       do {
-        ld a = shs[at.sid].angles[at.eid];
+        ld a = ac.shapes[at.sid].angles[at.eid];
         while(a < 0) a += 360 * degree;
         while(a > 360 * degree) a -= 360 * degree;
         total += a;
         qty++;
 
         at.eid++;
-        if(at.eid == isize(shs[at.sid].angles)) at.eid = 0;
+        if(at.eid == isize(ac.shapes[at.sid].angles)) at.eid = 0;
 
-        at = shs[at.sid].connections[at.eid];
+        at = ac.shapes[at.sid].connections[at.eid];
         }
       while(total < 360*degree - 1e-6);
       if(total > 360*degree + 1e-6) throw hr_parse_exception("improper total in compute_stats");
       if(at.sid != i) throw hr_parse_exception("ended at wrong type determining vertex_valence");
-      if((at.eid - k) % shs[i].cycle_length) throw hr_parse_exception("ended at wrong edge determining vertex_valence");
-      shs[i].vertex_valence[k] = qty;
+      if((at.eid - k) % ac.shapes[i].cycle_length) throw hr_parse_exception("ended at wrong edge determining vertex_valence");
+      sh.vertex_valence[k] = qty;
       }
     if(debugflags & DF_GEOM) 
-      println(hlog, "computed vertex_valence of ", i, " as ", shs[i].vertex_valence);
+      println(hlog, "computed vertex_valence of ", i, " as ", ac.shapes[i].vertex_valence);
     }
   }
 
