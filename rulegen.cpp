@@ -1445,6 +1445,10 @@ struct hrmap_rulegen : hrmap {
     return c->master->zebraval;
     }
 
+  transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+    return relative_matrix_recursive(h2, h1);
+    }
+  
   hyperpoint get_corner(cell *c, int cid, ld cf) {
     if(c->master->fieldval == -1) {
       auto& sh = arb::current_or_slided().shapes[c->master->zebraval];
