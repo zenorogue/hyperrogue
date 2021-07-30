@@ -266,6 +266,8 @@ EX void unmirror() {
   int s = isize(sh);
   for(int i=0; i<s; i++)
     sh.push_back(sh[i]);
+  for(int i=0; i<2*s; i++)
+    sh[i].id = i;
   for(int i=s; i<s+s; i++) {
     for(auto& v: sh[i].vertices) 
       v[1] = -v[1];
