@@ -812,6 +812,7 @@ void minimize_rules() {
     for(int i=0; i<next_id; i++) if(old_id[new_id[i]] == -1) old_id[new_id[i]] = i;
     
     for(int i=0; i<new_ids; i++) treestates[i] = treestates[old_id[i]];
+    for(int i=0; i<new_ids; i++) treestates[i].id = i;
     treestates.resize(new_ids);
     for(auto& ts: treestates) {
       for(auto& r: ts.rules)
