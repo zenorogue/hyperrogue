@@ -1417,6 +1417,7 @@ EX int valence() {
   #if CAP_ARCM
   if(arcm::in()) return arcm::valence();
   #endif
+  if(arb::in()) return arb::current.min_valence;
   return S3;
   }
 

@@ -83,6 +83,8 @@ struct arbi_tiling {
   ld floor_scale;
   ld boundary_ratio;
   string filename;
+  
+  int min_valence, max_valence;
 
   geometryinfo1& get_geometry();
   eGeometryClass get_class() { return get_geometry().kind; }
@@ -364,6 +366,13 @@ EX void compute_vertex_valence() {
     if(debugflags & DF_GEOM) 
       println(hlog, "computed vertex_valence of ", i, " as ", ac.shapes[i].vertex_valence);
     }
+  
+  ac.min_valence = UNKNOWN; ac.max_valence = 0;
+  for(auto& sh: ac.shapes) 
+    for(auto& val: sh.vertex_valence) {
+      if(val < ac.min_valence) ac.min_valence = val;
+      if(val > ac.max_valence) ac.max_valence = val;
+      }      
   }
 
 EX void load(const string& fname, bool after_sliding IS(false)) {
