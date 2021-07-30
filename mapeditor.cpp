@@ -469,7 +469,17 @@ EX namespace mapstream {
     #if CAP_ARCM
     if(geometry == gArchimedean) f.write(arcm::current.symbol);
     #endif
-    if(geometry == gArbitrary) f.write(arb::current.filename);
+    if(geometry == gArbitrary) {
+      f.write<bool>(rulegen::known());
+      f.write<bool>(arb::convert::in());
+      if(arb::convert::in()) {
+        dynamicval<eGeometry> dg(geometry, arb::convert::base_geometry);
+        dynamicval<eVariation> dv(variation, arb::convert::base_variation);
+        save_geometry(f);
+        }
+      else
+        f.write(arb::current.filename);
+      }
     if(geometry == gNil) {
       f.write(S7);
       f.write(nilv::nilperiod);
@@ -554,11 +564,21 @@ EX namespace mapstream {
         }
       }
     #endif
-    if(geometry == gArbitrary) {
-      string s;
-      f.read(s);
-      arb::run(s);
-      stop_game();
+    if(geometry == gArbitrary) {    
+      bool rk = vernum >= 0xA905 && f.get<bool>();
+      bool ac = vernum >= 0xA905 && f.get<bool>();
+      if(ac) {
+        load_geometry(f);
+        arb::convert::convert();
+        arb::convert::activate();
+        }
+      else {
+        string s;
+        f.read(s);
+        arb::run(s);
+        stop_game();
+        }
+      if(rk) rulegen::prepare_rules();
       }
     #if CAP_ARCM
     if(geometry == gArchimedean) {

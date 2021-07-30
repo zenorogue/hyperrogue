@@ -1026,6 +1026,9 @@ EX void set_sliders() {
 /** convert a tessellation (e.g. Archimedean, regular, etc.) to the arb::current internal representation */
 EX namespace convert {
 
+EX eGeometry base_geometry;
+EX eVariation base_variation;
+
 struct id_record {
   int target;   /* master of this id type */
   int shift;    /* sample direction 0 == our direction shift */
@@ -1217,6 +1220,21 @@ EX void convert() {
     }
   
   arb::compute_vertex_valence();
+  }
+
+EX bool in() {
+  return arb::in() && base_geometry != gArbitrary;
+  }
+
+/** activate the converted tessellation */
+EX void activate() {
+  if(geometry != gArbitrary) {
+    base_geometry = geometry;
+    base_variation = variation;
+    stop_game();
+    geometry = gArbitrary;
+    variation = eVariation::pure;
+    }
   }
 
 EX }

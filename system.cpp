@@ -1366,6 +1366,11 @@ EX void set_geometry(eGeometry target) {
     if(was_default) pmodel = default_model();
     if(WDIM == 2 && (cgflags & qIDEAL) && vid.always3 && vid.texture_step < 32) vid.texture_step = 32;
     if(sl2) nisot::geodesic_movement = true;
+    
+    if(geometry == gArbitrary) {
+      arb::convert::base_geometry = geometry;
+      arb::convert::base_variation = variation;
+      }
 
     if(rotspace) {
       check_cgi(); cgi.require_basics();            

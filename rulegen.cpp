@@ -1520,7 +1520,7 @@ EX bool known() {
   return rules_known_for == arb::current.name;
   }
 
-bool prepare_rules() {
+EX bool prepare_rules() {
   if(known()) return true;
   try {
     generate_rules();
@@ -1555,7 +1555,7 @@ int args() {
     PHASEFROM(3);
     if(prepare_rules()) {
       stop_game();
-      set_geometry(gArbitrary);
+      arb::convert::activate();
       start_game();
       }
     }
