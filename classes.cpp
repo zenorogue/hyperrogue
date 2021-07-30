@@ -1061,6 +1061,7 @@ static inline bool orbProtection(eItem it) { return false; } // not implemented
 
 const eLand NOWALLSEP = laNone;
 const eLand NOWALLSEP_SWAP = laMountain;
+const eLand NOWALLSEP_WALL = laHauntedWall;
 const eLand NOWALLSEP_USED = laWhirlpool;
 #endif
 

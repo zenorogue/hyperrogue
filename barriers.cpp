@@ -71,41 +71,151 @@ EX bool warped_version(eLand l1, eLand l2) {
   return (has_nice_dual() && (l1 == laWarpCoast || l1 == laWarpSea || l2 == laWarpSea || l2 == laWarpCoast));
   }
 
+EX int get_valence(cellwalker bb, int dir, bool& ok) {
+  int steps = 0;
+  cellwalker bb1 = bb;
+  while(bb1 != bb || !steps) {
+    bb1 += dir;
+    bb1 += wstep;
+    steps++;
+    }
+  return steps;
+  }
+
+EX void set_and_wall(cell *c, eLand l) {
+  setland(c, l);
+  if(c->bardir == NODIR) {
+    c->barleft = NOWALLSEP_USED;
+    c->bardir = NOBARRIERS;
+    }
+  }
+
+EX void surround_by(bool setit, cellwalker bb, int dir, int a, int b, eLand which, bool swapped, bool& ok) {
+  for(int i=0; i<a; i++) {
+    bb += dir;
+    bb += wstep;
+    }
+  for(int i=a; i<b; i++) {
+    if(setit) set_and_wall(bb.at, which);
+    else {
+      if(bb.at->bardir != NODIR) ok = false;
+      if(swapped && bb.at->mpdist < BARLEV) ok = false;
+      }
+    bb += dir;
+    bb += wstep;
+    }
+  }
+
+EX void spin_around_by(cellwalker& bb, int dir, int q) {
+  for(int i=0; i<q; i++) {
+    bb += dir;
+    bb += wstep;
+    }
+  }
+
 EX bool advance_nowall(cellwalker& bb, int& dir, eLand& l1, eLand& l2, eLand& ws, bool setit) {
   bool ok = true;
-  if(warped_version(l1, l2)) {
+  if(ws == NOWALLSEP_WALL) {
+  
+
+    /*
+    if(setit) bb.at->monst = moBug0;
+    if(setit) bb.cpeek()->monst = moBug2;
+    */
+
+    int steps = get_valence(bb, dir, ok);
+    if(steps % 2 == 0) goto again;
+
+    int s = (steps - 1) / 2;
+    surround_by(setit, bb, dir, 1, s, l1, false, ok);
+    surround_by(setit, bb, dir, s+1, steps-1, l2, true, ok);
+    spin_around_by(bb, dir, s);
+
+    bool at_corner = true;
+    
+    int qty = 0;
+    tile:
+    qty++; if(qty == 100) return true;
+
+    if(bb.at->bardir != NODIR) ok = false;
+    if(bb.at->mpdist < BARLEV) ok = false;
+
+    if(setit) {
+      setland(bb.at, laBarrier);
+      bb.at->barleft = NOWALLSEP_USED;
+      bb.at->wall = waBarrier;
+      }
+    
+    // if at_corner: bb is facing the tile 1 before the first inside
+    int t = bb.at->type;
+
+    int q = at_corner ? t/2 : (t-1) / 2;
+    
+    if(1) {
+      auto bb1 = bb;
+      if(at_corner) bb1 += dir;
+      bb1 -= dir;
+      for(int i=1; i<q; i++) {
+        int d = get_valence(bb1, -dir, ok);
+        surround_by(setit, bb1, -dir, 2, d, l1, false, ok);
+        bb1-=dir;
+        }
+      }
+    
+    bb += dir;
+    for(int i=1; i<q; i++) {
+      int d = get_valence(bb, dir, ok);
+      surround_by(setit, bb, dir, 2, d, l2, true, ok);
+      bb+=dir;
+      }
+
+    // bb is now facing the last neighbor inside 
+
+    if(t % 2 == (at_corner ? 1 : 0)) {
+      int d = get_valence(bb, dir, ok);
+      surround_by(setit, bb, dir, 2, d, l2, true, ok);
+
+      bb += dir;
+      bb += wstep;
+
+      d = get_valence(bb, -dir, ok);
+      surround_by(setit, bb, -dir, 2, d-1, l1, false, ok);
+
+      at_corner = false;
+      goto tile;
+      }
+    
+    int steps1 = get_valence(bb, dir, ok);
+    if(steps1 % 2 == 0) {
+      int s1 = steps1 / 2;
+      surround_by(setit, bb, dir, 1, s1, l1, false, ok);
+      surround_by(setit, bb, dir, s1+1, steps1-1, l2, true, ok);
+      spin_around_by(bb, dir, s1);
+      at_corner = true;
+      goto tile;
+      }
+    int s1 = (steps - 1) / 2;
+    surround_by(setit, bb, dir, 1, s1, l1, false, ok);
+    surround_by(setit, bb, dir, s1+2, steps1-1, l2, true, ok);
+    spin_around_by(bb, dir, s1);
+    bb += dir;    
+    }
+  else if(warped_version(l1, l2)) {
     bb = bb + wstep + (2*dir) + wstep + dir;
     dir = -dir;
     swap(l1, l2);
     }
   else {    
     again:
-    int steps = 0;
     cellwalker bb1 = bb;
-    while(bb1 != bb || !steps) {
-      bb1 += dir;
-      bb1 += wstep;
-      if(bb1.at->bardir != NODIR) ok = false;
-      if(bb1.at->mpdist < BARLEV) ok = false;
-      steps++;
-      }    
+    int steps = get_valence(bb, dir, ok);
     int s = 2;
     if(ws == NOWALLSEP_SWAP) s = 5 - s;
     if(dir == -1) s = 5 - s;
     s = (1 + steps - s) / 2;
-    if(setit) for(int k=0; k<steps; k++) {
-      if(k > 0 && k != s) {
-        setland(bb.at, k < s ? l1 : l2);
-        if(bb.at->barleft == NODIR)
-          bb.at->barleft = NOWALLSEP_USED;
-        }
-      bb += dir;
-      bb += wstep;
-      }
-    for(int i=0; i<s; i++) {
-      bb += dir;
-      bb += wstep;
-      }
+    surround_by(setit, bb, dir, 1, s, l1, false, ok);
+    surround_by(setit, bb, dir, s+2, steps-1, l2, true, ok);
+    spin_around_by(bb, dir, s);
     bb += dir;
     if(steps & 1) ws = (ws == NOWALLSEP ? NOWALLSEP_SWAP : NOWALLSEP);
     if(bb.at == bb1.at) goto again;
@@ -281,6 +391,10 @@ EX void extendNowall(cell *c) {
 
   eLand ws = c->barleft;
   c->barleft = NOWALLSEP_USED;
+  if(c->bardir == NODIR) {
+    println(hlog, "error: NODIR barrier at ", c);
+    return;
+    }
   cellwalker cw(c, c->bardir);
   
   eLand l1 = c->land;
@@ -366,7 +480,7 @@ EX void extendBarrier(cell *c) {
     return; // == INFD) return;
     }
 
-  if(c->barleft == NOWALLSEP || c->barleft == NOWALLSEP_SWAP) {
+  if(c->barleft == NOWALLSEP || c->barleft == NOWALLSEP_SWAP || c->barleft == NOWALLSEP_WALL) {
     #if MAXMDIM >= 4
     if(WDIM == 3) extend3D(c);
     else 
@@ -452,6 +566,12 @@ EX void buildBarrierForce(cell *c, int d, eLand l) {
   }
 
 EX void buildBarrier(cell *c, int d, eLand l IS(laNone)) {
+  
+  if(!old_nice_walls()) {
+    buildBarrierX(NOWALLSEP_WALL, c, l ? l : getNewLand(l), NODIR);
+    return;
+    }
+
   d %= 7;
   cellwalker bb(c, d);
   
@@ -877,6 +997,10 @@ EX bool buildBarrier3D(cell *c, eLand l2, int forced_dir) {
 #endif
 
 EX bool buildBarrierNowall(cell *c, eLand l2, int forced_dir IS(NODIR)) {
+  return buildBarrierX(NOWALLSEP, c, l2, forced_dir);
+  }
+
+EX bool buildBarrierX(eLand ws, cell *c, eLand l2, int forced_dir IS(NODIR)) {
 
   if(S3 >= OINF) { c->land = l2; return true; }
 
@@ -899,7 +1023,6 @@ EX bool buildBarrierNowall(cell *c, eLand l2, int forced_dir IS(NODIR)) {
   
   vector<int> ds = hrandom_permutation(c->type);
   
-  eLand ws = NOWALLSEP;
   eLand wsx = warpv ? laWarpCoast : laNone;
   eLand l1 = c->land;
   

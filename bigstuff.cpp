@@ -462,7 +462,6 @@ EX cell *buildAnotherEquidistant(cell *c, int radius) {
   
   //printf("building barrier\n");
   cell *c2 = coastpath[coastpath.size() - 1];
-  int bd = 2 + (hrand(2)) * 3;
   
   bool nowall = false;
   
@@ -486,7 +485,7 @@ EX cell *buildAnotherEquidistant(cell *c, int radius) {
     // raiseBuggyGeneration(c2, "check");
     // return;
     }
-  else if(ls::nice_walls()) buildBarrier(c2, bd);
+  else if(ls::nice_walls()) build_barrier_good(c2);
   //printf("building barrier II\n");
   if(hasbardir(c2)) extendBarrier(c2);
 
@@ -1362,7 +1361,7 @@ EX int wallchance(cell *c, bool deepOcean) {
     l == laCrossroads ? 5000 : 
     l == laCrossroads2 ? 10000 : 
     l == laCrossroads5 ? 10000 : 
-    l == laCrossroads4 ? (weirdhyperbolic ? 5000 : 0) :
+    l == laCrossroads4 ? 5000 :
     (l == laMirror && !yendor::generating) ? 2500 :
     tactic::on ? 0 :
     racing::on ? 0 :
@@ -1490,6 +1489,7 @@ EX bool good_for_wall(cell *c) {
   if(arcm::in()) return true;
   if(WDIM == 3) return true;
   if(INVERSE) return true;
+  if(!old_nice_walls()) return true;
   return pseudohept(c);
   }
 
@@ -1499,16 +1499,26 @@ EX bool walls_not_implemented() {
   return WDIM == 3 && (cgflags & qIDEAL);
   }
 
-EX bool nice_walls_available() {
-  if(hybri) return PIU(nice_walls_available());
-  if(fake::in()) return FPIU(nice_walls_available());
+EX bool old_nice_walls() {
   return (geometry == gNormal && (PURE || BITRUNCATED)) || (geometry == gEuclid && !(INVERSE | IRREGULAR));
   }
 
+EX bool nice_walls_available() {
+  if(hybri) return PIU(nice_walls_available());
+  if(fake::in()) return FPIU(nice_walls_available());
+  return WDIM == 2;
+  }
+
 EX void build_barrier_good(cell *c, eLand l IS(laNone)) {
-  int bd = 2 + hrand(2) * 3;    
-  buildBarrier(c, bd, l); 
-  return;
+
+  if(!old_nice_walls()) {
+    buildBarrierX(NOWALLSEP_WALL, c, l ? l : getNewLand(l), NODIR);
+    }
+  
+  else {
+    int bd = 2 + hrand(2) * 3;    
+    buildBarrier(c, bd, l); 
+    }
   }
 
 EX void build_walls(cell *c, cell *from) {
@@ -1562,7 +1572,7 @@ EX void build_walls(cell *c, cell *from) {
         }
       }
     }
-  else if(ctof(c) && ls::single() && specialland == laElementalWall && hrand(I10000) < 4000) {
+  else if(good_for_wall(c) && ls::single() && specialland == laElementalWall && hrand(I10000) < 4000) {
     buildBarrierNowall(c, getNewLand(c->land));
     }
   
@@ -1628,7 +1638,7 @@ EX void build_walls(cell *c, cell *from) {
   #if CAP_FIELD
   else if(c->land == laPrairie && c->LHU.fi.walldist == 0 && !euclid) {
     if(ls::nice_walls())
-    for(int bd=0; bd<7; bd++) {
+    for(int bd=0; bd<c->master->type; bd++) {
       int fval2 = createStep(c->master, bd)->fieldval;
       int wd = currfp_gmul(fval2, currfp_inverses(c->fval-1));
       if(currfp_distwall(wd) == 0) {
@@ -1642,7 +1652,7 @@ EX void build_walls(cell *c, cell *from) {
     }
   #endif
 
-  else if(ctof(c) && c->land && ls::nice_walls() && hrand(I10000) < wallchance(c, deepOcean))
+  else if(good_for_wall(c) && c->land && ls::nice_walls() && c->land != laCrossroads4 && hrand(I10000) < wallchance(c, deepOcean))
     build_barrier_good(c);
   }
 
