@@ -113,6 +113,10 @@ EX void spin_around_by(cellwalker& bb, int dir, int q) {
     }
   }
 
+EX bool on_wall(eLand ws) {
+  return among(ws, NOWALLSEP_WALL_CPOS, NOWALLSEP_WALL_CNEG, NOWALLSEP_WALL_EPOS, NOWALLSEP_WALL_ENEG);
+  }
+
 EX bool advance_nowall(cellwalker& bb, int& dir, eLand& l1, eLand& l2, eLand& ws, bool setit) {
   bool ok = true;
   if(ws == NOWALLSEP_WALL) {
@@ -131,11 +135,14 @@ EX bool advance_nowall(cellwalker& bb, int& dir, eLand& l1, eLand& l2, eLand& ws
     surround_by(setit, bb, dir, s+1, steps-1, l2, true, ok);
     spin_around_by(bb, dir, s);
 
-    bool at_corner = true;
-    
-    int qty = 0;
-    tile:
-    qty++; if(qty == 10000) return true;
+    ws = dir > 0 ? NOWALLSEP_WALL_CPOS : NOWALLSEP_WALL_CNEG;
+    // goto tile;
+    return ok;
+    }
+
+  if(on_wall(ws)) {
+
+    bool at_corner = among(ws, NOWALLSEP_WALL_CPOS, NOWALLSEP_WALL_CNEG);
 
     cell *current = bb.at;
     if(current->bardir != NODIR) ok = false;
@@ -168,7 +175,7 @@ EX bool advance_nowall(cellwalker& bb, int& dir, eLand& l1, eLand& l2, eLand& ws
     // bb is now facing the last neighbor inside 
 
     if(t % 2 == (at_corner ? 1 : 0)) {
-      if(setit) setbarrier(current, l1, l2, qty == 1);
+      if(setit) setbarrier(current, l1, l2, at_corner);
       int d = get_valence(bb, dir, ok);
       surround_by(setit, bb, dir, 2, d, l2, true, ok);
 
@@ -178,27 +185,29 @@ EX bool advance_nowall(cellwalker& bb, int& dir, eLand& l1, eLand& l2, eLand& ws
       d = get_valence(bb, -dir, ok);
       surround_by(setit, bb, -dir, 2, d-1, l1, false, ok);
 
-      at_corner = false;
-      goto tile;
+      ws = dir > 0 ? NOWALLSEP_WALL_EPOS : NOWALLSEP_WALL_ENEG;
+      return ok;
       }
     
     int steps1 = get_valence(bb, dir, ok);
-    bool finish = steps1 % 2;
-    if(setit) setbarrier(current, l1, l2, qty == 1 || finish);
+    if(setit) setbarrier(current, l1, l2, true);
 
-    if(!finish) {
+    if(steps1 % 2 == 0) {
       int s1 = steps1 / 2;
       surround_by(setit, bb, dir, 1, s1, l1, false, ok);
       surround_by(setit, bb, dir, s1+1, steps1-1, l2, true, ok);
       spin_around_by(bb, dir, s1);
       at_corner = true;
-      goto tile;
+      ws = dir > 0 ? NOWALLSEP_WALL_CPOS : NOWALLSEP_WALL_CNEG;
+      return ok;
       }
-    int s1 = (steps - 1) / 2;
+
+    int s1 = (steps1 - 1) / 2;
     surround_by(setit, bb, dir, 1, s1, l1, false, ok);
     surround_by(setit, bb, dir, s1+2, steps1-1, l2, true, ok);
     spin_around_by(bb, dir, s1);
-    bb += dir;    
+    bb += dir;
+    ws = NOWALLSEP_WALL;
     }
   else if(warped_version(l1, l2)) {
     bb = bb + wstep + (2*dir) + wstep + dir;
@@ -235,7 +244,7 @@ EX bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand ws, eLand l1 IS
       }
     }
   
-  if(l1 != l2 && bb.at->barleft != NOWALLSEP_USED) { 
+  if(l1 != l2 && bb.at->barleft != NOWALLSEP_USED && !on_wall(ws)) {
     bb.at->bardir = bb.spin; bb.at->barright = l2; bb.at->barleft = ws; 
     setland(bb.at, l1);
     }
@@ -393,23 +402,27 @@ EX void extendBarrierBack(cell *c) {
 EX void extendNowall(cell *c) {
 
   eLand ws = c->barleft;
-  c->barleft = NOWALLSEP_USED;
-  if(c->bardir == NODIR) {
-    println(hlog, "error: NODIR barrier at ", c);
-    return;
-    }
   cellwalker cw(c, c->bardir);
-  
+
+  c->barleft = NOWALLSEP_USED;
   eLand l1 = c->land;
   eLand l2 = c->barright;
 
-  setland(cw.cpeek(), l2);
-  cw.cpeek()->barleft = NOWALLSEP_USED;
-  
-  checkBarriersNowall(cw, 0, 1, ws, l1, l2);
-  checkBarriersNowall(cw, 0, -1, ws, l1, l2);
-  
+  if(!on_wall(ws)) {
+    if(c->bardir == NODIR) {
+      println(hlog, "error: NODIR barrier at ", c);
+      return;
+      }
+    setland(cw.cpeek(), l2);
+    cw.cpeek()->barleft = NOWALLSEP_USED;
+    }
+
   for(int i: {-1, 1}) {  
+
+    if(i == -1 && among(ws, NOWALLSEP_WALL_CPOS, NOWALLSEP_WALL_EPOS)) continue;
+    if(i == +1 && among(ws, NOWALLSEP_WALL_CNEG, NOWALLSEP_WALL_ENEG)) continue;
+
+    checkBarriersNowall(cw, 10, i, ws, l1, l2);
 
     cellwalker cw0 = cw;
     eLand xl1 = l1, xl2 = l2;
