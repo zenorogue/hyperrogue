@@ -423,8 +423,8 @@ EX string dfnames[3] = { "player", "start", "land" };
 
 eDistanceFrom distance_from = dfPlayer;
 
-enum eNumberCoding { ncNone, ncDistance, ncType, ncDebug };
-EX string ncnames[4] = { "NO", "distance", "type", "debug" };
+enum eNumberCoding { ncNone, ncDistance, ncType, ncDebug, ncError };
+EX string ncnames[5] = { "NO", "distance", "type", "debug", "error" };
 eNumberCoding number_coding = ncDistance;
 
 bool mod_allowed() {
@@ -606,6 +606,9 @@ void celldrawer::do_viewdist() {
         celldistance(c, distance_from == dfPlayer ? cwt.at : currentmap->gamestart());
       dc = (d != cd) ? 0xFF0000 : 0x00FF00;
       label = its(d);
+      }
+    case ncError: {
+      if(pointer_indices.count(c)) label = index_pointer(c);
       }
     case ncNone: ;
     }
