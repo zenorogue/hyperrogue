@@ -1510,7 +1510,7 @@ EX bool nice_walls_available() {
 EX void build_barrier_good(cell *c, eLand l IS(laNone)) {
 
   if(!old_nice_walls()) {
-    buildBarrierX(NOWALLSEP_WALL, c, l ? l : getNewLand(l), NODIR);
+    buildBarrierX(NOWALLSEP_WALL, c, l ? l : getNewLand(c->land), NODIR);
     }
   
   else {
