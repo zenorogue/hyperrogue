@@ -135,17 +135,13 @@ EX bool advance_nowall(cellwalker& bb, int& dir, eLand& l1, eLand& l2, eLand& ws
     
     int qty = 0;
     tile:
-    qty++; if(qty == 100) return true;
+    qty++; if(qty == 10000) return true;
 
-    if(bb.at->bardir != NODIR) ok = false;
-    if(bb.at->mpdist < BARLEV) ok = false;
+    cell *current = bb.at;
+    if(current->bardir != NODIR) ok = false;
+    if(current->mpdist < BARLEV) ok = false;
+    if(setit && current->bardir == NODIR) current->barleft = NOWALLSEP_USED;
 
-    if(setit) {
-      setland(bb.at, laBarrier);
-      bb.at->barleft = NOWALLSEP_USED;
-      bb.at->wall = waBarrier;
-      }
-    
     // if at_corner: bb is facing the tile 1 before the first inside
     int t = bb.at->type;
 
@@ -172,6 +168,7 @@ EX bool advance_nowall(cellwalker& bb, int& dir, eLand& l1, eLand& l2, eLand& ws
     // bb is now facing the last neighbor inside 
 
     if(t % 2 == (at_corner ? 1 : 0)) {
+      if(setit) setbarrier(current, l1, l2, qty == 1);
       int d = get_valence(bb, dir, ok);
       surround_by(setit, bb, dir, 2, d, l2, true, ok);
 
@@ -186,7 +183,10 @@ EX bool advance_nowall(cellwalker& bb, int& dir, eLand& l1, eLand& l2, eLand& ws
       }
     
     int steps1 = get_valence(bb, dir, ok);
-    if(steps1 % 2 == 0) {
+    bool finish = steps1 % 2;
+    if(setit) setbarrier(current, l1, l2, qty == 1 || finish);
+
+    if(!finish) {
       int s1 = steps1 / 2;
       surround_by(setit, bb, dir, 1, s1, l1, false, ok);
       surround_by(setit, bb, dir, s1+1, steps1-1, l2, true, ok);
@@ -254,27 +254,26 @@ EX eWall getElementalWall(eLand l) {
   return waNone;
   }
 
-EX void setbarrier(cell *c) {
-  if(isSealand(c->barleft) && isSealand(c->barright)) {
-    bool setbar = ctof(c);
-    if(c->barleft == laKraken || c->barright == laKraken)
-    if(c->barleft != laWarpSea && c->barright != laWarpSea)
+EX void setbarrier(cell *c, eLand l1, eLand l2, bool setbar) {
+  if(isSealand(l1) && isSealand(l2)) {
+    if(l1 == laKraken || l2 == laKraken)
+    if(l1 != laWarpSea && l2 != laWarpSea)
       setbar = !setbar;
     c->wall = setbar ? waBarrier : waSea;
     c->land = laOceanWall;
     }
-  else if(isElemental(c->barleft) && isElemental(c->barright)) {
+  else if(isElemental(l1) && isElemental(l2)) {
     c->land = laElementalWall;
-    c->wall = getElementalWall(c->barleft);
+    c->wall = getElementalWall(l1);
     }
-  else if(c->barleft == laHaunted || c->barright == laHaunted) {
+  else if(l1 == laHaunted || l2 == laHaunted) {
     c->land = laHauntedWall;
     }
-  else if(c->barleft == laMirrored2 || c->barright == laMirrored2)
+  else if(l1 == laMirrored2 || l2 == laMirrored2)
     c->land = laMirrorWall2;
-  else if(c->barleft == laMirrored || c->barright == laMirrored)
+  else if(l1 == laMirrored || l2 == laMirrored)
     c->land = laMirrorWall;
-  else if(c->barleft == laTerracotta && c->barright == laTerracotta) {
+  else if(l1 == laTerracotta && l2 == laTerracotta) {
     c->land = laMercuryRiver;
     c->wall = waMercury;
     }
@@ -282,6 +281,10 @@ EX void setbarrier(cell *c) {
     c->wall = waBarrier;
     c->land = laBarrier;
     }
+  }
+
+EX void setbarrier(cell *c) {
+  setbarrier(c, c->barleft, c->barright, ctof(c));
   }
 
 EX void setland(cell *c, eLand l) {
@@ -568,7 +571,7 @@ EX void buildBarrierForce(cell *c, int d, eLand l) {
 EX void buildBarrier(cell *c, int d, eLand l IS(laNone)) {
   
   if(!old_nice_walls()) {
-    buildBarrierX(NOWALLSEP_WALL, c, l ? l : getNewLand(l), NODIR);
+    buildBarrierX(NOWALLSEP_WALL, c, l ? l : getNewLand(c->land), NODIR);
     return;
     }
 
