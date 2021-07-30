@@ -1431,7 +1431,7 @@ EX bool inside_starting_horo(cell *c, eLand horoland) {
 EX bool extend_alt(cell *c, eLand horoland, eLand overland, bool extend_in_single IS(true), int dist IS(horo_gen_distance())) {
   if(c->land != horoland && c->land != overland && !(c->land == laBrownian && overland == laOcean)) return false;
   if(bt::in() && !single_horo(horoland) && !inside_starting_horo(c, horoland)) return false;
-  if(have_alt(c) && ((ls::single() && extend_in_single) || masterAlt(c) <= dist)) {
+  if(have_alt(c) && ((ls::single() && extend_in_single) || masterAlt(c) <= dist) && !(euclid && !ls::single())) {
     gen_alt(c);
     preventbarriers(c);
     return true;
