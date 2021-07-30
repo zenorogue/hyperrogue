@@ -284,6 +284,8 @@ color_t skycolor(cell *c) {
   return gradient(0x4040FF, 0xFFFFFF, 0, z, 63);
   }
 
+EX const ld star_val = 2;
+
 void celldrawer::draw_ceiling() {
 
   if(pmodel != mdPerspective || sphere) return;
@@ -297,12 +299,12 @@ void celldrawer::draw_ceiling() {
     case 1: {
       if(euclid) return;
       if(fieldpattern::fieldval_uniq(c) % 3 == 0) {
-        queuepolyat(V * zpush(cgi.SKY+1), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
+        queuepolyat(V * zpush(cgi.SKY+star_val), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         }
       add_to_sky(0x00000F, 0x00000F);
       if(c->land == laAsteroids) {
         if(fieldpattern::fieldval_uniq(c) % 9 < 3) {
-          queuepolyat(V * zpush(-1-cgi.SKY), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
+          queuepolyat(V * zpush(-star_val-cgi.SKY), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
           }
         int sk = get_skybrightness(-1);
         auto sky = draw_shapevec(c, V * MirrorZ, cgi.shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
@@ -321,7 +323,7 @@ void celldrawer::draw_ceiling() {
           col = 0x4040FF;
           skycol = 0x8080FF;
           if(emeraldval(c) / 4 == 11) {
-            queuepolyat(V * zpush(cgi.SKY+1), cgi.shSun, 0xFFFF00FF, PPR::SKY);
+            queuepolyat(V * zpush(cgi.SKY+star_val), cgi.shSun, 0xFFFF00FF, PPR::SKY);
             }
           break;
 
@@ -329,7 +331,7 @@ void celldrawer::draw_ceiling() {
           col = 0x2020C0;
           skycol = 0x8080FF;
           if(emeraldval(c) / 4 == 11) {
-            queuepolyat(V * zpush(cgi.SKY+1), cgi.shSun, 0xFFFF00FF, PPR::SKY);
+            queuepolyat(V * zpush(cgi.SKY+star_val), cgi.shSun, 0xFFFF00FF, PPR::SKY);
             }
           break;
 
@@ -337,7 +339,7 @@ void celldrawer::draw_ceiling() {
           col = 0x4040FF;
           skycol = 0x8080FF;
           if(zebra40(c) / 4 == 1) {
-            queuepolyat(V * zpush(cgi.SKY+1), cgi.shSun, 0xFFFF00FF, PPR::SKY);
+            queuepolyat(V * zpush(cgi.SKY+star_val), cgi.shSun, 0xFFFF00FF, PPR::SKY);
             }
           break;
 
@@ -429,7 +431,7 @@ void celldrawer::draw_ceiling() {
       if(euclid) return;
 
       if(true) {
-        queuepolyat(V * zpush(cgi.SKY+0.5), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
+        queuepolyat(V * zpush(cgi.SKY+star_val), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         }
       break;
       }
@@ -454,7 +456,7 @@ void celldrawer::draw_ceiling() {
     case 7: {
       add_to_sky(0x00000F, 0x00000F);
       if(fieldpattern::fieldval_uniq(c) % 5 < 2) {
-        queuepolyat(V * zpush(cgi.SKY+1), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
+        queuepolyat(V * zpush(cgi.SKY+star_val), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         }
       if(camera_level <= cgi.HIGH2) return;
       color_t wcol2 = winf[waColumn].color;
@@ -484,7 +486,7 @@ void celldrawer::draw_ceiling() {
 
       if(euclid) return;
       if(true) {
-        queuepolyat(V * zpush(cgi.SKY+0.5), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
+        queuepolyat(V * zpush(cgi.SKY+star_val), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
         }
       }
     }
