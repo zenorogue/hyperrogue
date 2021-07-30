@@ -137,20 +137,34 @@ void compute_skyvertices(const vector<sky_item>& sky) {
     
     for(int i=0; i<c->type; i++) {
       
+      static const int prec = 2; 
+
       if(1) {
         cellwalker cw0(c, i);
         cellwalker cw2 = cw0;
         cw2--; cw2 += wstep;
         if(!colors.count(cw2.at)) {
           this_poly.clear();
-          transmatrix T1 = unshift(si.T);
+          transmatrix T1 = Id;
+          transmatrix T2 = unshift(si.T);
           auto cw = cw0;
-          while(colors.count(cw.at)) {
-            auto& co = colors[cw.at];
-            this_poly.emplace_back(T1 * skypoint, co.first);
-            this_poly.emplace_back(T1 * hellpoint, co.second);
-            T1 = T1 * currentmap->adj(cw.at, cw.spin);
+          auto co = at_or_null(colors, cw.at);
+          while(co) {
+            this_poly.emplace_back(T2 * T1 * skypoint, co->first);
+            this_poly.emplace_back(T2 * T1 * hellpoint, co->second);
+            auto cw1 = cw;
             cw += wstep; cw++;
+            auto co1 = at_or_null(colors, cw.at);
+            if(!co1) break;
+            transmatrix A = currentmap->adj(cw1.at, cw1.spin);
+            hyperpoint a = tC0(A);
+            for(int i=1; i<prec; i++) {
+              hyperpoint h = T1 * normalize(C0 * (prec-i) + a * i);
+              this_poly.emplace_back(T2 * orthogonal_move(h, cgi.SKY), gradient(co->first, co1->first, 0, i, prec));
+              this_poly.emplace_back(T2 * orthogonal_move(h, -cgi.SKY), gradient(co->second, co1->second, 0, i, prec));
+              }
+            T1 = T1 * A;
+            co = co1;
             }
 
           int k = isize(this_poly);
@@ -175,21 +189,56 @@ void compute_skyvertices(const vector<sky_item>& sky) {
           }
         while(cw != cw0);
           
-        this_poly.clear();
+        vector<hyperpoint> vertices;
+        vector<color_t> vcolors;
   
-        transmatrix T1 = unshift(si.T);
+        transmatrix T1 = Id;
         do {
-          this_poly.emplace_back(T1 * skypoint, colors[cw.at].first);
+          vertices.push_back(tC0(T1));
+          vcolors.push_back(colors[cw.at].first);
           T1 = T1 * currentmap->adj(cw.at, cw.spin);
           cw += wstep; cw++;
           }
         while(cw != cw0);
+        
+        int k = isize(vertices);
   
-        int k = isize(this_poly);
-        for(int j=2; j<k; j++) {
-          skyvertices.push_back(this_poly[0]);
-          skyvertices.push_back(this_poly[j-1]);
-          skyvertices.push_back(this_poly[j]);
+        println(hlog, "bb ", k);
+          
+        color_t ccolor;
+        for(int i=0; i<k; i++) ccolor = gradient(ccolor, vcolors[i], 0, 1, i+1);
+        
+        println(hlog, "vertices = ", vertices);
+        println(hlog, "ccolor = ", ccolor);
+  
+        hyperpoint ctr = Hypc;
+        for(auto& p: vertices) ctr = ctr + p;
+        normalize(ctr);
+  
+        for(int j=0; j<k; j++) {
+          int j1 = (j+1) % k;
+          glhr::colored_vertex cv[prec+1][prec+1];
+          for(int x=0; x<=prec; x++) for(int y=0; y<=prec; y++) if(x+y <= prec) {
+            hyperpoint h = ctr * (prec-x-y) + vertices[j] * x + vertices[j1] * y;
+            h = normalize(h);
+            color_t co = gradient(ccolor, gradient(vcolors[j], vcolors[j1], 0, y, x+y), prec, x+y, 0);
+            // co = (hrand(0x1000000)  << 8) | 0xFF;
+            // co = minecolors[(x+2*y) % 7] << 8 | 0xFF;
+            h = unshift(si.T) * orthogonal_move(h, cgi.SKY);
+            cv[y][x] = {h, co};
+            }
+  
+          for(int x=0; x<=prec; x++)
+          for(int y=0; y<=prec; y++) if(x+y < prec) {
+            skyvertices.emplace_back(cv[y][x]);
+            skyvertices.emplace_back(cv[y+1][x]);
+            skyvertices.emplace_back(cv[y][x+1]);
+            if(true) if(x+y < prec-1) {
+              skyvertices.emplace_back(cv[y+1][x+1]);
+              skyvertices.emplace_back(cv[y][x+1]);
+              skyvertices.emplace_back(cv[y+1][x]);
+              }
+            }
           }
         }
 
