@@ -1,0 +1,49 @@
+## square-triangle horocycles
+## From: https://superliminal.com/geometry/tyler/gallery/hyperbolic/horocycle.html
+h2.
+
+# this part is just like in hr-standard-tiling.tes
+distunit(arcmedge(3,3,4,4,4))
+
+let(u3 = regangle(1, 3))
+let(u4 = regangle(1, 4))
+
+unittile(u3,u3,u3)
+unittile(u4,u4,u4,u4)
+
+# now we provide the rules to build the tessellation tree.
+
+# treestate 0: the first square in a subtree, with two triangle siblings and their subtrees
+treestate(1, PARENT, 2, 1, 3)
+
+# treestate 1: square with a single branch
+treestate(1, PARENT, LEFT, 1, RIGHT)
+
+# treestate 2: left triangle with full left tree
+treestate(0, PARENT, LEFT, 0)
+
+# treestate 3: right triangle with full right tree
+treestate(0, PARENT, 0, RIGHT)
+
+# the first number is shape (treestates 0 and 1 are shape #0 (squares), treestates 2 and 3 are shape #1 (triangles))
+# treestate 0 has its PARENT at edge 0, and children in treestates 2, 1, 3
+# PARENT always connects to the parent (if a treestate appears as a child of another treestate, it should have 1 PARENT, otherwise it should have 0)
+# LEFT connects to the left subtree, RIGHT connects to the rigth subtree
+
+# you can see the resulting tree structure by:
+# * loading this tes file
+# * experiment with geometry -> size of the world
+# * set 'which distance' to 'start'
+# * set 'number codes' to 'type'
+# * enable 'triangle grid: tree edges'
+
+# (or with commandline: '-tes tessellations/sample/horotiling.tes -canvas A -expansion 2 1 0 -palrgba "g tree" ffffffff')
+
+# Set the default sight range to 7. May be useful for debugging
+range(7)
+
+# Make the boundaries narrower. The default is boundary_ratio(1)
+boundary_ratio(.2)
+
+# this makes the 'floor stars' appear smaller (while 'cscale' makes everything smaller)
+floor_scale(.25)
