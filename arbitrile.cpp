@@ -80,6 +80,8 @@ struct arbi_tiling {
   
   ld cscale;
   int range;
+  ld floor_scale;
+  ld boundary_ratio;
   string filename;
 
   geometryinfo1& get_geometry();
@@ -381,6 +383,8 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
   c.filename = fname;
   c.cscale = 1;
   c.range = 0;
+  c.boundary_ratio = 1;
+  c.floor_scale = .5;
   exp_parser ep;
   ep.s = s;
   ld angleunit = 1, distunit = 1, angleofs = 0;
@@ -494,6 +498,14 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       }
     else if(ep.eat("range(")) {
       c.range = ep.iparse();
+      ep.force_eat(")");
+      }
+    else if(ep.eat("floor_scale(")) {
+      c.floor_scale = ep.rparse();
+      ep.force_eat(")");
+      }
+    else if(ep.eat("boundary_ratio(")) {
+      c.boundary_ratio = ep.rparse();
       ep.force_eat(")");
       }
     else if(ep.eat("conway(\"")) {
@@ -1147,6 +1159,8 @@ EX void convert() {
   ac.order++; 
   ac.comment = ac.filename = "converted from: " + full_geometry_name();
   ac.cscale = cgi.scalefactor;
+  ac.boundary_ratio = 1;
+  ac.floor_scale = cgi.hexvdist / cgi.scalefactor;
   ac.range = cgi.base_distlimit;
   int N = isize(old_shvids);
   ac.shapes.resize(N);

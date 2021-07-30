@@ -731,7 +731,7 @@ void geometry_information::prepare_basics() {
     auto csc = arb::current_or_slided().cscale;
     scalefactor = csc;
     hcrossf = crossf = orbsize = hcrossf7 * csc;
-    hexf = rhexf = hexvdist = csc * .5;
+    hexf = rhexf = hexvdist = csc * arb::current_or_slided().floor_scale;
     base_distlimit = arb::current.range;
     }
   

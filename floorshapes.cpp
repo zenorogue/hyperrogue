@@ -441,7 +441,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
           min_dist = dist;
         }
       
-      ld dist = min_dist * (1 - 3 / sca);
+      ld dist = min_dist * (1 - 3 / sca) * arb::current_or_slided().boundary_ratio;
       
       ld area = 0;
       for(int j=0; j<cor; j++) {
