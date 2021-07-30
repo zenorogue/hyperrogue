@@ -117,7 +117,7 @@ EX bool on_wall(eLand ws) {
   return among(ws, NOWALLSEP_WALL_CPOS, NOWALLSEP_WALL_CNEG, NOWALLSEP_WALL_EPOS, NOWALLSEP_WALL_ENEG);
   }
 
-EX bool advance_nowall(cellwalker& bb, int& dir, eLand& l1, eLand& l2, eLand& ws, bool setit) {
+EX bool general_barrier_advance(cellwalker& bb, int& dir, eLand& l1, eLand& l2, eLand& ws, bool setit) {
   bool ok = true;
   if(ws == NOWALLSEP_WALL) {
   
@@ -250,7 +250,7 @@ EX bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand ws, eLand l1 IS
     }
   if(q > 20) return true;
   
-  bool b = advance_nowall(bb, dir, l1, l2, ws, l1 != l2);
+  bool b = general_barrier_advance(bb, dir, l1, l2, ws, l1 != l2);
   if(l1 == l2 && !b) return false;
   return checkBarriersNowall(bb, q+1, dir, ws, l1, l2);
   }
@@ -399,7 +399,7 @@ EX void extendBarrierBack(cell *c) {
   extendBarrier(bb.at);
   }
 
-EX void extendNowall(cell *c) {
+EX void general_barrier_extend(cell *c) {
 
   eLand ws = c->barleft;
   cellwalker cw(c, c->bardir);
@@ -428,7 +428,8 @@ EX void extendNowall(cell *c) {
     eLand xl1 = l1, xl2 = l2;
     eLand ws1 = ws;
     int i1 = i;
-    advance_nowall(cw0, i1, xl1, xl2, ws1, true);
+    general_barrier_advance(cw0, i1, xl1, xl2, ws1, true);
+
     if(cw0.at->barleft != NOWALLSEP_USED) {
       setland(cw0.at, xl1);
       cw0.at->barleft = ws1;
@@ -501,7 +502,7 @@ EX void extendBarrier(cell *c) {
     if(WDIM == 3) extend3D(c);
     else 
     #endif
-    extendNowall(c);
+    general_barrier_extend(c);
     return;
     }
   
@@ -584,7 +585,7 @@ EX void buildBarrierForce(cell *c, int d, eLand l) {
 EX void buildBarrier(cell *c, int d, eLand l IS(laNone)) {
   
   if(!old_nice_walls()) {
-    buildBarrierX(NOWALLSEP_WALL, c, l ? l : getNewLand(c->land), NODIR);
+    general_barrier_build(NOWALLSEP_WALL, c, l ? l : getNewLand(c->land), NODIR);
     return;
     }
 
@@ -1013,10 +1014,10 @@ EX bool buildBarrier3D(cell *c, eLand l2, int forced_dir) {
 #endif
 
 EX bool buildBarrierNowall(cell *c, eLand l2, int forced_dir IS(NODIR)) {
-  return buildBarrierX(NOWALLSEP, c, l2, forced_dir);
+  return general_barrier_build(NOWALLSEP, c, l2, forced_dir);
   }
 
-EX bool buildBarrierX(eLand ws, cell *c, eLand l2, int forced_dir IS(NODIR)) {
+EX bool general_barrier_build(eLand ws, cell *c, eLand l2, int forced_dir IS(NODIR)) {
 
   if(S3 >= OINF) { c->land = l2; return true; }
 
