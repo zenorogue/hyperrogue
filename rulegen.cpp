@@ -232,7 +232,7 @@ void unify(twalker pw1, twalker pw2) {
   unify_distances(pw1.at, pw2.at);
   }
 
-EX tcell *t_origin;
+EX vector<tcell*> t_origin;
 
 void delete_tmap() {
   while(first_tcell) {
@@ -242,7 +242,7 @@ void delete_tmap() {
     }
   tcellcount = 0;
   tunified = 0;
-  t_origin = nullptr;
+  t_origin.clear();
   }
 
 /* used in the debugger */
@@ -491,6 +491,7 @@ struct treestate {
   code_t code;
   bool is_live;
   bool is_possible_parent;
+  bool is_root;
   vector<pair<int, int>> possible_parents;
   };
 
@@ -709,6 +710,7 @@ void rules_iteration_for(tcell *c) {
     ts.giver = cwmain;
     ts.sid = cwmain.at->id;
     ts.parent_dir = cwmain.spin;
+    ts.is_root = c->dist == 0;
     for(int d=0; d<c->type; d++)
       cq.push_back(c->cmove(d));
     }
@@ -1098,7 +1100,7 @@ void rules_iteration() {
 
   if(debugflags & DF_GEOM)
     println(hlog, "number of treestates = ", isize(treestates));
-  rule_root = get_code(t_origin).second;
+  rule_root = get_code(t_origin[0]).second;
   if(debugflags & DF_GEOM)
     println(hlog, "rule_root = ", rule_root);
 
@@ -1202,7 +1204,7 @@ void clear_tcell_data() {
     c->distance_fixed = false;
     c = c->next;
     }
-  if(t_origin) t_origin->dist = 0;
+  for(auto& c: t_origin) c->dist = 0;
   }
 
 void cleanup() {
@@ -1255,8 +1257,12 @@ EX void generate_rules() {
   analyzers.clear();
   split.clear();
 
-  t_origin = gen_tcell(0);
-  t_origin->dist = 0;
+  t_origin.clear();
+  for(auto& ts: arb::current.shapes) {
+    tcell *c = gen_tcell(ts.id);
+    c->dist = 0;
+    t_origin.push_back(c);
+    }
   
   set<int> visited;
   if(double_edges_check(currentmap->gamestart(), visited))
@@ -1264,7 +1270,7 @@ EX void generate_rules() {
    
   try_count = 0;
   
-  important = { t_origin };
+  important = t_origin;
   
   retry:  
   try {
@@ -1476,10 +1482,13 @@ struct hrmap_rulegen : hrmap {
     int psid = hts.sid;
     
     if(firststate == hsOrigin) {
-      alt->fiftyval = rule_root;
+      altmap::relspin(alt) = -hts.parent_dir;
       alt->s = hsOrigin;
-      // fix this
-      return psid == 0;
+      for(auto& ts: treestates) if(ts.sid == psid && ts.is_root) {
+        alt->fieldval = rule_root;
+        return true;
+        }
+      return false;
       }
 
     int odir = hts.parent_dir + dir;
