@@ -578,10 +578,7 @@ struct hrmap_archimedean : hrmap {
       origin->move(1)->c.connect(1, origin->move(0), 2*current.N-1, false);
       }
     
-    cgi.base_distlimit = 0;
-    celllister cl(origin->c7, 1000, 200, NULL);
-    ginf[geometry].distlimit[!BITRUNCATED] = cgi.base_distlimit = cl.dists.back();
-    if(sphere) cgi.base_distlimit = SEE_ALL;
+    auto_compute_range(origin->c7);
     }
 
   ~hrmap_archimedean() {

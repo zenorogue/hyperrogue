@@ -79,6 +79,7 @@ struct arbi_tiling {
   vector<slider> sliders;
   
   ld cscale;
+  int range;
   string filename;
 
   geometryinfo1& get_geometry();
@@ -379,6 +380,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
   c.comment = "";
   c.filename = fname;
   c.cscale = 1;
+  c.range = 0;
   exp_parser ep;
   ep.s = s;
   ld angleunit = 1, distunit = 1, angleofs = 0;
@@ -488,6 +490,10 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       }
     else if(ep.eat("cscale(")) {
       c.cscale = ep.rparse();
+      ep.force_eat(")");
+      }
+    else if(ep.eat("range(")) {
+      c.range = ep.iparse();
       ep.force_eat(")");
       }
     else if(ep.eat("conway(\"")) {
@@ -790,11 +796,9 @@ struct hrmap_arbi : hrmap {
     transmatrix T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * Id;
     arbi_matrix[origin] = make_pair(alt, T);
     altmap[alt].emplace_back(origin, T);
-  
-    cgi.base_distlimit = 0;
-    celllister cl(origin->c7, 1000, 200, NULL);
-    ginf[geometry].distlimit[0] = cgi.base_distlimit = cl.dists.back();
-    if(sphere) cgi.base_distlimit = SEE_ALL;
+    
+    if(!current.range)
+      current.range = auto_compute_range(origin->c7);
     }
 
   ~hrmap_arbi() {
@@ -1143,6 +1147,7 @@ EX void convert() {
   ac.order++; 
   ac.comment = ac.filename = "converted from: " + full_geometry_name();
   ac.cscale = cgi.scalefactor;
+  ac.range = cgi.base_distlimit;
   int N = isize(old_shvids);
   ac.shapes.resize(N);
 

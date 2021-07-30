@@ -732,6 +732,7 @@ void geometry_information::prepare_basics() {
     scalefactor = csc;
     hcrossf = crossf = orbsize = hcrossf7 * csc;
     hexf = rhexf = hexvdist = csc * .5;
+    base_distlimit = arb::current.range;
     }
   
   if(is_subcube_based(variation)) {

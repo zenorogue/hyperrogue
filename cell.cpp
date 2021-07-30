@@ -1425,6 +1425,27 @@ EX bool is_boundary(cell *c) {
   return (cgflags & qPORTALSPACE) && isWall(c->wall);
   }
 
+/** compute the distlimit for a tessellation automatically */
+EX int auto_compute_range(cell *c) {  
+  if(sphere) {
+    cgi.base_distlimit = SEE_ALL;
+    return SEE_ALL;
+    }
+  cgi.base_distlimit = 0;
+  const int expected_count = 400;
+  celllister cl(c, 1000, expected_count, NULL);
+  int z = isize(cl.dists);
+  int d = cl.dists.back();
+  while(cl.dists[z-1] == d) z--;
+  if(true) { // if(cgflags & DF_GEOM) {
+    println(hlog, "last distance = ", cl.dists.back());
+    println(hlog, "ball size = ", isize(cl.dists));
+    println(hlog, "previous ball size = ", z);
+    }
+  if(isize(cl.dists) * z > expected_count * expected_count) d--;
+  return ginf[geometry].distlimit[0] = cgi.base_distlimit = d;
+  }
+
 EX cell out_of_bounds;
 EX heptagon oob;
 
