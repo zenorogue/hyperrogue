@@ -548,7 +548,7 @@ EX int celldistAlt(cell *c) {
   if(hybri) { 
     if(in_s2xe()) return hybrid::get_where(c).second;
     auto w = hybrid::get_where(c); 
-    int d = c->master->alt && c->master->alt->alt ? altmap::hybrid_height(c->master->alt->alt) : 0;
+    int d = c->master->alt && c->master->alt->alt ? hybrid::altmap_heights[c->master->alt->alt] : 0;
     d = sl2 ? 0 : abs(w.second - d);
     PIU ( d += celldistAlt(w.first) );
     return d;

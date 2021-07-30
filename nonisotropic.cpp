@@ -1061,6 +1061,8 @@ EX namespace hybrid {
   
   EX int disc_quotient = 0;
   
+  EX map<heptagon*, short> altmap_heights;
+
   EX void configure(eGeometry g) {
     if(WDIM == 3) return;
     ray::reset_raycaster();
@@ -1397,6 +1399,7 @@ EX namespace hybrid {
   auto clear_samples = addHook(hooks_clearmemory, 40, [] () {
     for(auto& c: cgis) for(auto& v: c.second.walloffsets)
       v.second = nullptr;
+    altmap_heights.clear();
     });
   
   EX vector<pair<int, cell*>> gen_sample_list() {

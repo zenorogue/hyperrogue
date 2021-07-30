@@ -156,10 +156,6 @@ namespace altmap {
   /** h->move(relspin(h->alt)) corresponds to h->alt->move(0) */
   inline short& relspin(heptagon *alt) { return alt->zebraval; }
 
-  /** in product geometries: the height of the center; call on alt->alt */
-  inline int hybrid_height(heptagon *alt) { return alt->fieldval; }
-  inline void set_hybrid_height(heptagon *alt, int z) { alt->fieldval = z; }
-
   /** for Camelot, the radius */
   inline short& radius(heptagon *alt) { return alt->emeraldval; }
 
@@ -168,6 +164,8 @@ namespace altmap {
 
   /** the original land, for altmaps which may appear in multiple lands (Camelot) */
   inline short& orig_land(heptagon *alt) { return alt->fiftyval; }
+  
+  /** NOTE: do not use fieldval, because it would conflict with the map generation for hrmap_h3_rule and hrmap_rulegen */
   }
 #endif
 
@@ -302,7 +300,7 @@ EX heptagon *create_altmap(cell *c, int rad, hstate firststate, int special IS(0
   allmaps.push_back(newAltMap(alt));
 //printf("new alt {%p}\n", hr::voidp(alt));
   alt->s = firststate;
-  if(hybri) altmap::set_hybrid_height(alt, hybrid::get_where(centerover).second);
+  if(hybri) hybrid::altmap_heights[alt] = hybrid::get_where(centerover).second;
   alt->alt = alt;
   if(!currentmap->link_alt(h, alt, firststate, bf.spin)) {
     return nullptr;
