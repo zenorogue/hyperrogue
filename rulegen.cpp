@@ -299,6 +299,7 @@ void calc_distances(tcell *c) {
 
 void prepare_around(tcell *c) {
   vector<tcell*> q;
+
   set<tcell*> visited;
   auto visit = [&] (tcell *x) {
     if(visited.count(x)) return;
@@ -1433,19 +1434,21 @@ struct hrmap_rulegen : hrmap {
   
   transmatrix adj(heptagon *h, int dir) override {
     if(h->fieldval == -1)
-      return arb::get_adj(arb::current_or_slided(), h->zebraval, dir, -1);
+      return arb::get_adj(arb::current_or_slided(), h->zebraval, dir, -1, -1);
 
     int s = h->fieldval;
     int dir0 = get_arb_dir(s, dir);
     
     int dir1 = -1;
+    int sid1 = -1;
     
     if(h->c.move(dir)) {
-      int s1 = h->c.move(dir)->fieldval;
+      auto s1 = h->c.move(dir)->fieldval;
       dir1 = get_arb_dir(s1, h->c.spin(dir));
+      sid1 = treestates[s1].sid;
       }
 
-    return arb::get_adj(arb::current_or_slided(), treestates[s].sid, dir0, dir1);
+    return arb::get_adj(arb::current_or_slided(), treestates[s].sid, dir0, sid1, dir1);
     }
 
   int shvid(cell *c) override {
@@ -1526,7 +1529,7 @@ string rules_known_for = "unknown";
 string rule_status;
 
 EX bool known() {
-  return rules_known_for == arb::current.name;
+  return arb::current.have_tree || rules_known_for == arb::current.name;
   }
 
 EX bool prepare_rules() {
@@ -1582,6 +1585,47 @@ auto hooks =
       param_i(max_bdata, "max_bdata");
       param_i(dlbonus, "dlbonus");
     });
+
+EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {
+  if(!c.have_tree) {
+    c.have_tree = true;
+    treestates.clear();
+    rule_root = 0;
+    }
+  treestates.emplace_back();
+  auto& ts = treestates.back();
+  ts.id = isize(treestates) - 1;
+
+  ts.sid = ep.iparse();
+  ts.parent_dir = 0;
+  if(!arb::correct_index(ts.sid, isize(c.shapes)))
+    throw hr_parse_exception("incorrect treestate index at " + ep.where());
+
+  int N = c.shapes[ts.sid].size();
+  for(int i=0; i<N; i++) {
+    ep.force_eat(","); ep.skip_white();
+    if(ep.eat("PARENT")) ts.rules.push_back(DIR_PARENT);
+    else if(ep.eat("LEFT")) ts.rules.push_back(DIR_LEFT);
+    else if(ep.eat("RIGHT")) ts.rules.push_back(DIR_RIGHT);
+    else { int i = ep.iparse(); ts.rules.push_back(i); }
+    }
+  ep.force_eat(")");
+  }
+
+EX void verify_parsed_treestates() {
+  println(hlog, arb::current.shapes[0].connections);
+  println(hlog, arb::current.shapes[1].connections);
+  println(hlog, arb::current.shapes[0].stretch_shear);
+  for(auto& ts: treestates) println(hlog, ts.rules);
+  for(auto& ts: treestates) for(auto& r: ts.rules) {
+    if(r < 0 && !among(r, DIR_PARENT, DIR_LEFT, DIR_RIGHT))
+      throw hr_parse_exception("negative number in treestates");
+    if(r > isize(treestates))
+      throw hr_parse_exception("undefined treestate");
+    }
+  for(auto& sh: arb::current.shapes) sh.cycle_length = sh.size();
+  find_possible_parents();
+  }
 
 EX }
 }

@@ -68,7 +68,7 @@ struct hrmap_testproto : hrmap {
     }
 
   transmatrix adj(heptagon *h, int dir) override {
-    return arb::get_adj(arb::current_or_slided(), shvid(h->c7), dir, h->c.move(dir) ? h->c.spin(dir) : -1);
+    return arb::get_adj(arb::current_or_slided(), shvid(h->c7), dir, -1, h->c.move(dir) ? h->c.spin(dir) : -1);
     }
 
   int shvid(cell *c) override {

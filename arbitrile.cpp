@@ -70,7 +70,7 @@ struct slider {
 struct arbi_tiling {
 
   int order;
-  bool have_line, have_ph;
+  bool have_line, have_ph, have_tree;
 
   vector<shape> shapes;
   string name;
@@ -212,7 +212,7 @@ void shape::build_from_angles_edges() {
   for(auto& v: vertices) v = gpushxto0(ctr) * v;
   }
 
-bool correct_index(int index, int size) { return index >= 0 && index < size; }
+EX bool correct_index(int index, int size) { return index >= 0 && index < size; }
 template<class T> bool correct_index(int index, const T& v) { return correct_index(index, isize(v)); }
 
 template<class T> void verify_index(int index, const T& v, exp_parser& ep) { if(!correct_index(index, v)) throw hr_parse_exception("bad index: " + its(index) + " at " + ep.where()); }
@@ -395,6 +395,8 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
   c.range = 0;
   c.boundary_ratio = 1;
   c.floor_scale = .5;
+  c.have_ph = c.have_line = false;
+  c.have_tree = false;
   exp_parser ep;
   ep.s = s;
   ld angleunit = 1, distunit = 1, angleofs = 0;
@@ -505,6 +507,9 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
     else if(ep.eat("cscale(")) {
       c.cscale = ep.rparse();
       ep.force_eat(")");
+      }
+    else if(ep.eat("treestate(")) {
+      rulegen::parse_treestate(c, ep);
       }
     else if(ep.eat("range(")) {
       c.range = ep.iparse();
@@ -639,8 +644,10 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
 
   if(do_unmirror) {
     unmirror();
-    compute_vertex_valence();
     }
+  if(!c.have_tree) compute_vertex_valence();
+
+  if(c.have_tree) rulegen::verify_parsed_treestates();
   
   if(!after_sliding) slided = current;
   }
@@ -708,7 +715,7 @@ void connection_debugger() {
     
     dialog::add_action([k, last, con] {
       if(euclid) cgflags |= qAFFINE;
-      debug_polys.emplace_back(last.first * get_adj(debugged, last.second, k, -1), con.sid);
+      debug_polys.emplace_back(last.first * get_adj(debugged, last.second, k, -1, -1), con.sid);
       if(euclid) cgflags &= ~qAFFINE;
       });
     
@@ -742,7 +749,7 @@ EX hrmap *current_altmap;
 
 heptagon *build_child(heptspin p, pair<int, int> adj);
 
-EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int xdl) {
+EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int t1, int xdl) {
   
   auto& sh = c.shapes[t];
   
@@ -751,7 +758,9 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int xdl) {
   auto& co = sh.connections[dl];
   if(xdl == -1) xdl = co.eid;
 
-  auto& xsh = c.shapes[co.sid];
+  if(t1 == -1) t1 = co.sid;
+
+  auto& xsh = c.shapes[t1];
   int xdr = gmod(xdl+1, xsh.size());
 
   hyperpoint vl = sh.vertices[dl];
@@ -836,7 +845,7 @@ struct hrmap_arbi : hrmap {
   void verify() override { }
 
   transmatrix adj(heptagon *h, int dl) override { 
-    return get_adj(current_or_slided(), id_of(h), dl, h->c.move(dl) ? h->c.spin(dl) : -1);
+    return get_adj(current_or_slided(), id_of(h), dl, -1, h->c.move(dl) ? h->c.spin(dl) : -1);
     }
 
   heptagon *create_step(heptagon *h, int d) override {
