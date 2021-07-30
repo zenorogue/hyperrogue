@@ -38,7 +38,7 @@ struct hrmap_testproto : hrmap {
     }
 
   heptagon *getOrigin() override { 
-    return clone(t_origin);
+    return clone(t_origin[0]);
     }
   
   heptagon *create_step(heptagon *h, int d) override {
@@ -321,7 +321,7 @@ void test_current() {
     status = s0 + "ERR;\"" + e.what() + "\"";
     }
 
-  if(t_origin && (draw_which & 2)) {
+  if(t_origin.size() && (draw_which & 2)) {
     restart_game_on(new hrmap_testproto);
     view_debug();
     View = Id; shot::take(t+"-orig.png");
