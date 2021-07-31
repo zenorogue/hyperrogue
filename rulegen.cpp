@@ -1539,7 +1539,8 @@ EX bool prepare_rules() {
   try {
     generate_rules();
     rules_known_for = arb::current.name;
-    rule_status = XLAT("rules generated successfully");
+    rule_status = XLAT("rules generated successfully: %1 states using %2-%3 cells", 
+      its(isize(treestates)), its(tcellcount), its(tunified));
     return true;
     }
   catch(rulegen_retry& e) {
@@ -1660,6 +1661,8 @@ EX void show() {
       arb::convert::convert();
       arb::convert::activate();
       start_game();
+      rule_status = XLAT("converted successfully -- %1 cell types", its(isize(arb::current.shapes)));
+      rules_known_for = "unknown";
       }
     else if(arb::convert::in()) {
       stop_game();
@@ -1698,10 +1701,8 @@ EX void show() {
 
   dialog::addBreak(100);
 
-  if(known())
-    dialog::addInfo(rule_status, 0x00FF00);
-  else
-    dialog::addInfo(rule_status, 0xFF0000);
+  dialog::addHelp(rule_status);
+  dialog::items.back().color = known() ? 0x00FF00 : rules_known_for == "unknown" ? 0xFFFF00 : 0xFF0000;
 
   dialog::addBreak(100);
   dialog::addBack();
