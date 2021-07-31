@@ -299,7 +299,7 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, ld
         hyperpoint h1 = bt::get_corner_horo_coordinates(c, i+1) * size;
         hyperpoint hd = (h1 - h0) / STEP;
         for(int j=0; j<=STEP; j++)
-          hpcpush(iddspin(c, i) * bt::get_horopoint(h0 + hd * j));
+          hpcpush(iddspin_side(c, i) * bt::get_horopoint(h0 + hd * j));
         chasmifyPoly(dlow_table[k], dhi_table[k], k);
         }
       }
@@ -823,12 +823,19 @@ void geometry_information::generate_floorshapes() {
     generate_floorshapes_for(0, &model, 1, 0);
     }
 
+  else if(bt::in()) {
+    dynamicval<hrmap*> c(currentmap, bt::new_alt_map(nullptr));
+    model.type = S6; generate_floorshapes_for(0, &model, 0, 0);
+    model.type = S7; generate_floorshapes_for(1, &model, 1, 0);
+    delete currentmap;
+    }
+
   else {
     static hrmap_standard stdmap;
     dynamicval<hrmap*> c(currentmap, &stdmap);
     // cell model;
     model.type = S6; generate_floorshapes_for(0, &model, 0, 0);
-    model.type = S7; generate_floorshapes_for(1, &model, bt::in() ? 0 : 1, 0);
+    model.type = S7; generate_floorshapes_for(1, &model, 0, 0);
     }
   }
 
