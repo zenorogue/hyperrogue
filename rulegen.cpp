@@ -1638,9 +1638,9 @@ EX void show() {
   dialog::init(XLAT("strict tree maps"));
 
   dialog::addHelp(XLAT(
-    "Strict tree maps are generated using a more powerful algorithm. This algorithms supports horocycles and knows the expansion rates of various "
-    "tessellations (contrary to the basic implementation of Archimedean, tes, and unrectified/warped/untruncated tessellations). You can convert mostly any "
-    "non-spherical periodic 2D tessellation to strict tree based. Switching the map format erases your map."));
+    "Strict tree maps are generated using a more powerful algorithm.\n\nThis algorithms supports horocycles and knows the expansion rates of various "
+    "tessellations (contrary to the basic implementation of Archimedean, tes, and unrectified/warped/untruncated tessellations).\n\nYou can convert mostly any "
+    "non-spherical periodic 2D tessellation to strict tree based.\n\nSwitching the map format erases your map."));
 
   if(kite::in()) {
     dialog::addInfo("not available in aperiodic tessellations");
