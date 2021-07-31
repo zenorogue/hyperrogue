@@ -13,7 +13,7 @@ EX namespace rulegen {
 
 /* limits */
 EX int max_retries = 999;
-EX int max_tcellcount = 8000000;
+EX int max_tcellcount = 1000000;
 EX int max_adv_steps = 100;
 EX int max_examine_branch = 5040;
 EX int max_bdata = 1000;
