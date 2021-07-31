@@ -513,6 +513,10 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
     else if(ep.eat("treestate(")) {
       rulegen::parse_treestate(c, ep);
       }
+    else if(ep.eat("first_treestate(")) {
+      rulegen::rule_root = ep.iparse();
+      ep.force_eat(")");
+      }
     else if(ep.eat("yendor_backsteps(")) {
       c.yendor_backsteps = ep.iparse();
       ep.force_eat(")");

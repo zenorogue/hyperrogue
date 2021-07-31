@@ -1620,10 +1620,8 @@ EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {
   }
 
 EX void verify_parsed_treestates() {
-  println(hlog, arb::current.shapes[0].connections);
-  println(hlog, arb::current.shapes[1].connections);
-  println(hlog, arb::current.shapes[0].stretch_shear);
-  for(auto& ts: treestates) println(hlog, ts.rules);
+  if(rule_root < 0 || rule_root >= isize(treestates))
+    throw hr_parse_exception("undefined treestate as root");
   for(auto& ts: treestates) for(auto& r: ts.rules) {
     if(r < 0 && !among(r, DIR_PARENT, DIR_LEFT, DIR_RIGHT))
       throw hr_parse_exception("negative number in treestates");
