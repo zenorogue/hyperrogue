@@ -1132,6 +1132,7 @@ void be_identified(cellwalker cw1, cellwalker cw2) {
 
 EX void convert() {
   start_game();
+  identification.clear(); changes = 0;
 
   manual_celllister cl;
   cl.add(currentmap->gamestart());
@@ -1191,6 +1192,7 @@ EX void convert() {
   ac.floor_scale = cgi.hexvdist / cgi.scalefactor;
   ac.range = cgi.base_distlimit;
   int N = isize(old_shvids);
+  ac.shapes.clear();
   ac.shapes.resize(N);
 
   ginf[gArbitrary].g = cginf.g;
