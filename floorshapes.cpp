@@ -846,6 +846,7 @@ EX namespace gp {
     }
 
   void build_plainshape(int& id, gp::local_info& li, cell *c0, int siid, int sidir) {
+    cgi.require_shapes();
     id = cgi.gpdata->nextid++;
   
     bool master = !(li.relative.first||li.relative.second);
@@ -972,6 +973,7 @@ int hrmap_standard::shvid(cell *c) {
       cgi.tessf = edge_of_triangle_with_angles(0, M_PI/t, M_PI/t);
       cgi.crossf = cgi.tessf;
       
+      cgi.require_shapes();
       println(hlog, "generating floorshapes for ", t);
       cgi.generate_floorshapes_for(t, &model, 0, 0);
       cgi.finishshape();
