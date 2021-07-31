@@ -191,7 +191,8 @@ void hrmap::extend_altmap(heptagon *h, int levs, bool link_cdata) {
     heptagon *ho = createStep(h, i);
     if(ho->alt && ho->alt != hm) {
       if(ho->alt->alt == hm->alt && !quotient) {
-        printf("ERROR: alt cross! [%d -> %d]\n", ho->alt->distance, hm->distance);
+        // printf("ERROR: alt cross! [%d -> %d]\n", ho->alt->distance, hm->distance);
+        println(hlog, "alt error from ", h->c7, " to ", ho->c7);
         // exit(1);
         }
       continue;
