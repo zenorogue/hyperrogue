@@ -1462,6 +1462,7 @@ struct hrmap_rulegen : hrmap {
   hyperpoint get_corner(cell *c, int cid, ld cf) {
     if(c->master->fieldval == -1) {
       auto& sh = arb::current_or_slided().shapes[c->master->zebraval];
+      cid = gmod(cid, sh.size());
       return normalize(C0 + (sh.vertices[cid] - C0) * 3 / cf);
       }
     int s = c->master->fieldval;
