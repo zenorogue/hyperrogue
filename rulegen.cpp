@@ -1486,10 +1486,11 @@ struct hrmap_rulegen : hrmap {
     int psid = hts.sid;
     
     if(firststate == hsOrigin) {
-      altmap::relspin(alt) = -hts.parent_dir;
       alt->s = hsOrigin;
       for(auto& ts: treestates) if(ts.sid == psid && ts.is_root) {
-        alt->fieldval = rule_root;
+        alt->fieldval = ts.id;
+        // ts.parent_dir should be 0, but anyway
+        altmap::relspin(alt) = gmod(ts.parent_dir-hts.parent_dir, isize(hts.rules));
         return true;
         }
       return false;
