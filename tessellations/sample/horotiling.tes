@@ -39,6 +39,11 @@ treestate(0, PARENT, 0, RIGHT)
 
 # (or with commandline: '-tes tessellations/sample/horotiling.tes -canvas A -expansion 2 1 0 -palrgba "g tree" ffffffff')
 
+# you can change the initial treestate -- the default is 0
+# first_treestate(3)
+
+# note: Camelot can only be created on cell types which have root treestates (those with no PARENT) assigned to them -- here we have no root treestates, so no Camelot
+
 # Set the default sight range to 7. May be useful for debugging
 range(7)
 
@@ -47,3 +52,6 @@ boundary_ratio(.2)
 
 # this makes the 'floor stars' appear smaller (while 'cscale' makes everything smaller)
 floor_scale(.25)
+
+# make the Yendor challenge more interesting by first doing 50 steps down the tree
+yendor_backsteps(50)
