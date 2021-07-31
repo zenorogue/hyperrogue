@@ -541,7 +541,7 @@ EX namespace bt {
         }
       }
 
-    ~hrmap_binary() { clearfrom(origin); }
+    ~hrmap_binary() { if(origin) clearfrom(origin); }
     };
 
   EX hrmap *new_map() { return new hrmap_binary; }
