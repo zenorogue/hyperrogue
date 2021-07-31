@@ -1573,6 +1573,9 @@ int args() {
       start_game();
       }
     }
+  else if(argis("-d:rulegen")) {
+    launch_dialog(show);
+    }
   else return 1;
   return 0;
   }
@@ -1581,7 +1584,8 @@ auto hooks =
     addHook(hooks_args, 100, args)
   + addHook(hooks_configfile, 100, [] {
       param_i(max_retries, "max_retries");
-      param_i(max_tcellcount, "max_tcellcount");
+      param_i(max_tcellcount, "max_tcellcount")
+      ->editable(0, 16000000, 100000, "maximum cellcount", "controls the max memory usage of conversion algorithm -- the algorithm fails if exceeded", 'c');
       param_i(max_adv_steps, "max_adv_steps");
       param_i(max_examine_branch, "max_examine_branch");
       param_i(max_bdata, "max_bdata");
@@ -1627,6 +1631,81 @@ EX void verify_parsed_treestates() {
     }
   for(auto& sh: arb::current.shapes) sh.cycle_length = sh.size();
   find_possible_parents();
+  }
+
+EX void show() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(1);
+  dialog::init(XLAT("strict tree maps"));
+
+  dialog::addHelp(XLAT(
+    "Strict tree maps are generated using a more powerful algorithm. This algorithms supports horocycles and knows the expansion rates of various "
+    "tessellations (contrary to the basic implementation of Archimedean, tes, and unrectified/warped/untruncated tessellations). You can convert mostly any "
+    "non-spherical periodic 2D tessellation to strict tree based. Switching the map format erases your map."));
+
+  if(kite::in()) {
+    dialog::addInfo("not available in aperiodic tessellations");
+    dialog::addBack();
+    dialog::display();
+    }
+  else if(WDIM == 3) {
+    dialog::addInfo("not available in 3D tessellations");
+    dialog::addBack();
+    dialog::display();
+    }
+
+  dialog::addBoolItem(XLAT("in tes internal format"), arb::in(), 't');
+  dialog::add_action([] {
+    if(!arb::in()) {
+      arb::convert::convert();
+      arb::convert::activate();
+      start_game();
+      }
+    else if(arb::convert::in()) {
+      stop_game();
+      geometry = arb::convert::base_geometry;
+      variation = arb::convert::base_variation;
+      start_game();
+      }
+    else {
+      addMessage(XLAT("cannot be disabled for this tiling"));
+      }
+    });
+
+  dialog::addBoolItem(XLAT("strict tree based"), currentmap->strict_tree_rules(), 's');
+  dialog::add_action([] {
+    if(!currentmap->strict_tree_rules()) {
+      if(prepare_rules()) {
+        println(hlog, "prepare_rules returned true");
+        stop_game();
+        arb::convert::activate();
+        start_game();
+        delete_tmap();
+        }
+      }
+    else if(arb::current.have_tree) {
+      addMessage(XLAT("cannot be disabled for this tiling"));
+      }
+    else {
+      rules_known_for = "unknown";
+      rule_status = "manually disabled";
+      stop_game();
+      start_game();
+      }
+    });
+
+  add_edit(max_tcellcount);
+
+  dialog::addBreak(100);
+
+  if(known())
+    dialog::addInfo(rule_status, 0x00FF00);
+  else
+    dialog::addInfo(rule_status, 0xFF0000);
+
+  dialog::addBreak(100);
+  dialog::addBack();
+  dialog::display();
   }
 
 EX }
