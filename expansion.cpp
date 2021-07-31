@@ -644,6 +644,9 @@ EX void viewdist_configure_dialog() {
     dialog::bound_low(0);
     });
 
+  dialog::addBoolItem(XLAT("strict tree maps"), currentmap->strict_tree_rules(), 's');
+  dialog::add_action_push(rulegen::show);
+
   int id = 0;
   using namespace linepatterns;
   for(auto& lp: {&patTriTree, &patTriRings, &patTriOther}) {
