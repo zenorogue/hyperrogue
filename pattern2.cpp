@@ -1818,7 +1818,7 @@ EX namespace patterns {
         }
       case 'P': {
         cell *s = currentmap->gamestart()->move(0);
-        if(yendor::exhaustive_distance_appropriate() && !keep_distances_from.count(s))
+        if(exhaustive_distance_appropriate() && !keep_distances_from.count(s))
           permanent_long_distances(s);
         int d = celldistance(s, c);
         color_t res = distcolors[d];

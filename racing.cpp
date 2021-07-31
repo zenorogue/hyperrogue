@@ -458,7 +458,7 @@ EX void generate_track() {
   makeEmpty(s);
   cview(); // needed for some virtualRebases
   
-  use_exhaustive_distance = yendor::exhaustive_distance_appropriate();
+  use_exhaustive_distance = exhaustive_distance_appropriate();
     
   if(use_exhaustive_distance) 
     permanent_long_distances(s);

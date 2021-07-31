@@ -140,7 +140,7 @@ EX namespace yendor {
     
   EX yendorlevel& clev() { return levels[challenge]; }
   
-  eLand changeland(int i, eLand l) {
+  EX eLand changeland(int i, eLand l) {
     if(l == laIvoryTower) return laNone;
     if((clev().flags & YF_START_ANY) && i < 20 && l != clev().l) return clev().l;
     if((clev().flags & YF_END) && i > 80 && l == clev().l) return laIce;
@@ -195,20 +195,46 @@ EX namespace yendor {
     return ysUntouched;
     }
 
-  EX bool exhaustive_distance_appropriate() {
-    if(euclid && (kite::in() || arcm::in() || arb::in() || quotient)) return true;
-    #if MAXMDIM >= 4
-    if(nil && quotient) return true;
-    #endif
-    #if CAP_SOLV
-    if(asonov::in() && asonov::period_xy && asonov::period_xy <= 256) return true;
-    #endif
-    
-    if(bounded) return true;
-    
+  EX bool control(pathgen& p, int i, cellwalker& ycw) {
+
+    // change lands in the Challenge
+    if(i > BARLEV-6) {
+      p.last_id = i+7-BARLEV;
+      setdist(p.path[p.last_id], 7, p.path[i+6-BARLEV]);
+      if(yendor::challenge && !euclid && ycw.at->land != laIvoryTower) {
+        eLand ycl = yendor::changeland(i, ycw.at->land);
+        if(ycl) {
+          if(weirdhyperbolic) {
+            buildBarrierNowall(ycw.at, ycl);
+            }
+          else if(hyperbolic && ishept(ycw.at)) {
+            int bd = 2 + hrand(2) * 3;
+            buildBarrier(ycw.at, bd, ycl);
+            if(ycw.at->bardir != NODIR && ycw.at->bardir != NOBARRIERS)
+              extendBarrier(ycw.at);
+            }
+          }
+        }
+      }
+
+    // follow the branch in Yendorian
+    if(ycw.at->land == laEndorian) {
+      int bestval = -2000;
+      int best = 0, qbest = 0;
+      for(int d=0; d<ycw.at->type; d++) {
+        setdist(ycw.at, 7, ycw.peek());
+        cell *c1 = (ycw+d).cpeek();
+        int val = d * (ycw.at->type - d);
+        if(c1->wall == waTrunk) val += (i < YDIST-20 ? 1000 : -1000);
+        if(val > bestval) qbest = 0, bestval = val;
+        if(val == bestval) if(hrand(++qbest) == 0) best = d;
+        }
+      ycw += best;
+      return true;
+      }
     return false;
     }
-  
+
   EX bool check(cell *yendor) {
     int byi = isize(yi);
     for(int i=0; i<isize(yi); i++) if(yi[i].path[0] == yendor) byi = i;
@@ -217,180 +243,13 @@ EX namespace yendor {
       retry:
       int creation_attempt = 0;
       yendorinfo nyi;
-      nyi.path[0] = yendor;
       nyi.howfar = 0;
       
       generating = true;
-      
-      int turns = 0;
 
-      bignum full_id_0;
-      
-      int odir = 0;
+      auto p = generate_random_path_randomdir(yendor, YDIST-1, true);
+      for(int i=0; i<YDIST; i++) nyi.path[i] = p.path[i];
 
-      if(exhaustive_distance_appropriate()) {
-        permanent_long_distances(yendor);
-        int dist = max_saved_distance(yendor);
-        dist = min(dist, YDIST-1);
-        auto at = random_in_distance(yendor, dist);
-        permanent_long_distances(at);
-        for(int a=YDIST-2; a>=0; a--) {
-          nyi.path[a+1] = at;
-          vector<cell*> prev;
-          forCellCM(c2, at) if(celldistance(yendor, c2) == a) prev.push_back(c2);
-          if(isize(prev))  at = prev[hrand(isize(prev))];
-          }
-        nyi.path[0] = yendor;
-        }
-      
-      else if(hybri) {
-        /* I am lazy */
-        for(int i=1; i<=YDIST-1; i++) nyi.path[i] = nyi.path[i-1]->cmove(nyi.path[i-1]->type-1);
-        }
-      
-      else {
-        int t = -1;
-        bignum full_id;
-        bool onlychild = true;
-
-        cellwalker ycw(yendor, odir = hrand(yendor->type));
-        ycw--; if(S3 == 3) ycw--;
-        setdist(nyi.path[0], 7, NULL);
-        
-        int last_id = 0;
-
-        for(int i=0; i<YDIST-1; i++) {
-                  
-          if(i > BARLEV-6) {
-            last_id = i+7-BARLEV;
-            setdist(nyi.path[last_id], 7, nyi.path[i+6-BARLEV]);
-            if(challenge && !euclid && ycw.at->land != laIvoryTower) {
-              eLand ycl = changeland(i, ycw.at->land);
-              if(ycl) {
-                if(weirdhyperbolic) {
-                  buildBarrierNowall(ycw.at, ycl);
-                  }
-                else if(hyperbolic && ishept(ycw.at)) {
-                  int bd = 2 + hrand(2) * 3;
-                  buildBarrier(ycw.at, bd, ycl);
-                  if(ycw.at->bardir != NODIR && ycw.at->bardir != NOBARRIERS) 
-                    extendBarrier(ycw.at);
-                  }
-                }
-              }  
-            }
-
-          if(ycw.at->land == laEndorian) {
-            // follow the branch in Yendorian
-            int bestval = -2000;
-            int best = 0, qbest = 0;
-            for(int d=0; d<ycw.at->type; d++) {
-              setdist(ycw.at, 7, ycw.peek());
-              cell *c1 = (ycw+d).cpeek();
-              int val = d * (ycw.at->type - d);
-              if(c1->wall == waTrunk) val += (i < YDIST-20 ? 1000 : -1000);
-              if(val > bestval) qbest = 0, bestval = val;
-              if(val == bestval) if(hrand(++qbest) == 0) best = d;
-              }
-            ycw += best;
-            }
-          
-          else if(bt::in()) {
-            // make it challenging
-            vector<int> ds;
-            for(int d=0; d<ycw.at->type; d++) {
-              bool increase;
-              if(sol)
-                increase = i < YDIST / 4 || i > 3 * YDIST / 4;
-              else
-                increase = i < YDIST/2;
-              if(increase) {
-                if(celldistAlt((ycw+d).cpeek()) < celldistAlt(ycw.at))
-                  ds.push_back(d);
-                }
-              else {
-                if(celldistAlt((ycw+d).cpeek()) > celldistAlt(ycw.at) && (ycw+d).cpeek() != nyi.path[i-1])
-                  ds.push_back(d);
-                }
-              }
-            if(isize(ds)) ycw += ds[hrand(isize(ds))];
-            }
-          
-          else if(trees_known()) { 
-            if(i == 0) {
-              t = type_in(expansion, yendor, [yendor] (cell *c) { return celldistance(yendor, c); });
-              bignum b = expansion.get_descendants(YDIST-1, t);
-              full_id_0 = full_id = hrand(b);
-              }
-            
-            #if DEBUG_YENDORGEN
-            printf("#%3d t%d %s / %s\n", i, t, full_id.get_str(100).c_str(), expansion.get_descendants(YDIST-1-i, t).get_str(100).c_str());
-            for(int tch: expansion.children[t]) {
-              printf("     t%d %s\n", tch, expansion.get_descendants(YDIST-2-i, t).get_str(100).c_str());
-              }
-            #endif
-
-            if(i == 1) 
-              onlychild = true;
-            if(!onlychild) ycw++;
-            if(valence() == 3) ycw++;
-
-            onlychild = false;
-            
-            for(int tch: expansion.children[t]) {
-              ycw++;
-              if(i == 1)
-                tch = type_in(expansion, ycw.cpeek(), [yendor] (cell *c) { return celldistance(yendor, c); });
-              auto& sub_id = expansion.get_descendants(YDIST-i-2, tch);
-              if(full_id < sub_id) { t = tch; break; }
-              
-              full_id.addmul(sub_id, -1);
-              onlychild = true;
-              }
-            }
-          
-          else if(WDIM == 3) {
-            int d = celldistance(nyi.path[0], ycw.at);
-            vector<cell*> next;
-            forCellCM(c, ycw.at) if(celldistance(nyi.path[0], c) > d) next.push_back(c);
-            if(!isize(next)) {
-              printf("error: no more cells"); 
-              ycw.at = ycw.at->move(hrand(ycw.at->type)); 
-              }
-            else {
-              ycw.at = next[hrand(isize(next))];
-              }
-            nyi.path[i+1] = ycw.at;
-            }
-          
-          else {
-            // stupid
-            ycw += rev;
-            // well, make it a bit more clever on bitruncated a4 grids
-            if(a4 && BITRUNCATED && S7 <= 5) {
-              if(ycw.at->type == 8 && ycw.cpeek()->type != 8)
-                ycw++;
-              if(hrand(100) < 10) {
-                if(euclid ? (turns&1) : (hrand(100) < 50)) 
-                  ycw+=2;
-                else
-                  ycw-=2;
-                turns++;
-                }
-              }
-            }
-          
-          while(last_id < i && (nyi.path[last_id]->land == laMirror || inmirror(nyi.path[last_id]))) {
-            last_id++;
-            setdist(nyi.path[last_id], 7, nullptr);
-            }
-
-          if(inmirror(ycw.at)) ycw = mirror::reflect(ycw);
-          ycw += wstep;
-          nyi.path[i+1] = ycw.at;
-          }
-        }
-      
       nyi.found = false;
       nyi.foundOrb = false;
   
@@ -405,7 +264,7 @@ EX namespace yendor {
       setdist(nyi.path[YDIST-1], 7, nyi.path[YDIST-2]);
       cell *key = nyi.path[YDIST-1];
 
-      generating = false;
+      yendor::generating = false;
               
       for(int b=10; b>=5; b--) setdist(key, b, nyi.path[YDIST-2]);
 
@@ -464,10 +323,10 @@ EX namespace yendor {
           maxage *= 10;
         
         nyi.age = maxage - hrand(maxage/2);
-        bignum full_id = full_id_0 - nyi.age;
+        bignum full_id = p.full_id_0 - nyi.age;
         bool onlychild = true;
 
-        cellwalker ycw(yendor, odir);
+        cellwalker ycw = p.start;
         ycw--; if(S3 == 3) ycw--;
 
         for(int i=0; i<YDIST-1; i++) {          
@@ -484,7 +343,7 @@ EX namespace yendor {
               tch = type_in(expansion, ycw.cpeek(), [yendor] (cell *c) { return celldistance(yendor, c); });
             auto& sub_id = expansion.get_descendants(YDIST-i-2, tch);
             if(full_id < sub_id) { 
-              if(!split_found && !(full_id_0 < sub_id)) {
+              if(!split_found && !(p.full_id_0 < sub_id)) {
                 // ycw.at->item = itRuby;
                 split_found = true;
                 setdist(ycw.at, 6, NULL);
@@ -501,7 +360,7 @@ EX namespace yendor {
               }
             
             full_id.addmul(sub_id, -1);
-            if(!split_found) full_id_0.addmul(sub_id, -1);
+            if(!split_found) p.full_id_0.addmul(sub_id, -1);
             onlychild = true;
             }
           

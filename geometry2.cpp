@@ -808,5 +808,172 @@ int brm_hook = addHook(hooks_clearmemory, 0, []() {
   brm_structure.clear();
   });
 
+EX bool exhaustive_distance_appropriate() {
+  if(euclid && (kite::in() || arcm::in() || arb::in() || quotient)) return true;
+  #if MAXMDIM >= 4
+  if(nil && quotient) return true;
+  #endif
+  #if CAP_SOLV
+  if(asonov::in() && asonov::period_xy && asonov::period_xy <= 256) return true;
+  #endif
+
+  if(bounded) return true;
+
+  return false;
+  }
+
+#if HDR
+struct pathgen {
+  cellwalker start;
+  vector<cell*> path;
+  bignum full_id_0;
+  int last_id;
+  };
+#endif
+
+EX pathgen generate_random_path_randomdir(cellwalker start, int length, bool for_yendor) {
+  start.spin = hrand(start.at->type);
+  return generate_random_path(start, length, for_yendor);
+  }
+
+EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor) {
+  pathgen p;
+  p.start = start;
+  p.path.resize(length+1);
+  p.path[0] = start.at;
+  p.last_id = 0;
+
+  int turns = 0;
+
+  if(exhaustive_distance_appropriate()) {
+    permanent_long_distances(start.at);
+    int dist = max_saved_distance(start.at);
+    dist = min(dist, length);
+    auto at = random_in_distance(start.at, dist);
+    permanent_long_distances(at);
+    for(int a=length-1; a>=0; a--) {
+      p.path[a+1] = at;
+      vector<cell*> prev;
+      forCellCM(c2, at) if(celldistance(start.at, c2) == a) prev.push_back(c2);
+      if(isize(prev))  at = prev[hrand(isize(prev))];
+      }
+    p.path[0] = start.at;
+    }
+
+  else if(hybri) {
+    /* I am lazy */
+    for(int i=1; i<=length; i++) p.path[i] = p.path[i-1]->cmove(p.path[i-1]->type-1);
+    }
+
+  else {
+    int t = -1;
+    bignum full_id;
+    bool onlychild = true;
+
+    cellwalker ycw = start;
+    ycw--; if(S3 == 3) ycw--;
+    if(for_yendor) setdist(p.path[0], 7, NULL);
+
+    for(int i=0; i<length; i++) {
+
+      if(for_yendor && yendor::control(p, i, ycw)) { }
+
+      else if(bt::in()) {
+        // make it challenging
+        vector<int> ds;
+        for(int d=0; d<ycw.at->type; d++) {
+          bool increase;
+          if(sol)
+            increase = i < YDIST / 4 || i > 3 * YDIST / 4;
+          else
+            increase = i < YDIST/2;
+          if(increase) {
+            if(celldistAlt((ycw+d).cpeek()) < celldistAlt(ycw.at))
+              ds.push_back(d);
+            }
+          else {
+            if(celldistAlt((ycw+d).cpeek()) > celldistAlt(ycw.at) && (ycw+d).cpeek() != p.path[i-1])
+              ds.push_back(d);
+            }
+          }
+        if(isize(ds)) ycw += ds[hrand(isize(ds))];
+        }
+
+      else if(trees_known()) {
+        if(i == 0) {
+          t = type_in(expansion, start.at, [start] (cell *c) { return celldistance(start.at, c); });
+          bignum b = expansion.get_descendants(length, t);
+          p.full_id_0 = full_id = hrand(b);
+          }
+
+        #if DEBUG_YENDORGEN
+        printf("#%3d t%d %s / %s\n", i, t, full_id.get_str(100).c_str(), expansion.get_descendants(length-i, t).get_str(100).c_str());
+        for(int tch: expansion.children[t]) {
+          printf("     t%d %s\n", tch, expansion.get_descendants(length-i-1, t).get_str(100).c_str());
+          }
+        #endif
+
+        if(i == 1)
+          onlychild = true;
+        if(!onlychild) ycw++;
+        if(valence() == 3) ycw++;
+
+        onlychild = false;
+
+        for(int tch: expansion.children[t]) {
+          ycw++;
+          if(i == 1)
+            tch = type_in(expansion, ycw.cpeek(), [start] (cell *c) { return celldistance(start.at, c); });
+          auto& sub_id = expansion.get_descendants(length-1-i, tch);
+          if(full_id < sub_id) { t = tch; break; }
+
+          full_id.addmul(sub_id, -1);
+          onlychild = true;
+          }
+        }
+
+      else if(WDIM == 3) {
+        int d = celldistance(p.path[0], ycw.at);
+        vector<cell*> next;
+        forCellCM(c, ycw.at) if(celldistance(p.path[0], c) > d) next.push_back(c);
+        if(!isize(next)) {
+          printf("error: no more cells");
+          ycw.at = ycw.at->move(hrand(ycw.at->type));
+          }
+        else {
+          ycw.at = next[hrand(isize(next))];
+          }
+        p.path[i+1] = ycw.at;
+        }
+
+      else {
+        // stupid
+        ycw += rev;
+        // well, make it a bit more clever on bitruncated a4 grids
+        if(a4 && BITRUNCATED && S7 <= 5) {
+          if(ycw.at->type == 8 && ycw.cpeek()->type != 8)
+            ycw++;
+          if(hrand(100) < 10) {
+            if(euclid ? (turns&1) : (hrand(100) < 50))
+              ycw+=2;
+            else
+              ycw-=2;
+            turns++;
+            }
+          }
+        }
+
+      if(for_yendor) while(p.last_id < i && (p.path[p.last_id]->land == laMirror || inmirror(p.path[p.last_id]))) {
+        p.last_id++;
+        setdist(p.path[p.last_id], 7, nullptr);
+        }
+
+      if(for_yendor && inmirror(ycw.at)) ycw = mirror::reflect(ycw);
+      ycw += wstep;
+      p.path[i+1] = ycw.at;
+      }
+    }
+  return p;
+  }
 
   }
