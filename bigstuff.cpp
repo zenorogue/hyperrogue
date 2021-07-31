@@ -257,65 +257,41 @@ EX heptagon *create_altmap(cell *c, int rad, hstate firststate, int special IS(0
   if(!weirdhyperbolic && !(checkBarriersFront(bb) && checkBarriersBack(bb))) {
     return NULL;
     }
+
+  cellwalker bf(c, gdir); bf += rev;
+  auto p = generate_random_path(bf, rad, false, false);
   
-  // if we always go to the opposite tile on a {even,x} tiling,
-  // it will be too easy
-  int flip = 0;
-  if(WDIM == 2 && S7 % 2 == 0) flip = hrand(2) ? 1 : -1;
-
-  // okay, let's go then!
-  cellwalker bf(c, gdir);
-  std::vector<cell *> cx(rad+1);
-  for(int i=0; i<rad; i++) {
-    cx[i] = bf.at;
-    bf += revstep;
-    if(flip && hrand(2) == 0) { bf += flip; flip *= -1; }
-
-    #if MAXMDIM >= 4
-    // in 3D honeycombs we vary the direction, but never for three successive i's
-    if(WDIM == 3 && firststate == hsOrigin && (i%3))
-      bf.spin = hrandom_adjacent(bf);
-    #endif
-    }
-  cx[rad] = bf.at;
-  heptagon *h = bf.at->master;
+  heptagon *h = p.last.at->master;
 
   if(h->alt) {
     printf("Error: creatingAlternateMap while one already exists\n");
     return NULL;
     }
   
-  if(special == waPalace) {  
-  
-    // type 7 is ensured
-    cell *c = bf.at;
-    
-    if(cdist50(c) != 0) return NULL;
-    if(!polarb50(c)) return NULL;
+  if(special == waPalace) {    
+    cell *c = p.last.at;
+    if(!ctof(c) || cdist50(c) != 0 || !polarb50(c)) return nullptr;
     }
   
-  bf += rev;
-
   heptagon *alt = init_heptagon(h->type);
   allmaps.push_back(newAltMap(alt));
-//printf("new alt {%p}\n", hr::voidp(alt));
   alt->s = firststate;
-  if(hybri) hybrid::altmap_heights[alt] = hybrid::get_where(centerover).second;
-  alt->alt = alt;
-  if(!currentmap->link_alt(h, alt, firststate, bf.spin)) {
+  if(!currentmap->link_alt(h, alt, firststate, p.last.spin)) {
     return nullptr;
     }
+  if(hybri) hybrid::altmap_heights[alt] = hybrid::get_where(centerover).second;
+  alt->alt = alt;
   h->alt = alt;
   alt->cdata = (cdata*) h;
 
   for(int d=rad; d>=0; d--) {
-    currentmap->extend_altmap(cx[d]->master);  
-    preventbarriers(cx[d]);
+    currentmap->extend_altmap(p.path[d]->master);  
+    preventbarriers(p.path[d]);
     }
 
   if(special == waPalace) {
 
-    cell *c = bf.at;
+    cell *c = p.last.at;
 
     princess::generating = true;
     c->land = laPalace;
