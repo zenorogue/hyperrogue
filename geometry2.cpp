@@ -825,6 +825,7 @@ EX bool exhaustive_distance_appropriate() {
 #if HDR
 struct pathgen {
   cellwalker start;
+  cellwalker last;
   vector<cell*> path;
   bignum full_id_0;
   int last_id;
@@ -833,10 +834,10 @@ struct pathgen {
 
 EX pathgen generate_random_path_randomdir(cellwalker start, int length, bool for_yendor) {
   start.spin = hrand(start.at->type);
-  return generate_random_path(start, length, for_yendor);
+  return generate_random_path(start, length, for_yendor, false);
   }
 
-EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor) {
+EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor, bool randomdir) {
   pathgen p;
   p.start = start;
   p.path.resize(length+1);
@@ -858,11 +859,13 @@ EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor) {
       if(isize(prev))  at = prev[hrand(isize(prev))];
       }
     p.path[0] = start.at;
+    p.last = p.path.back();
     }
 
   else if(hybri) {
     /* I am lazy */
     for(int i=1; i<=length; i++) p.path[i] = p.path[i-1]->cmove(p.path[i-1]->type-1);
+    p.last = p.path.back();
     }
 
   else {
@@ -871,7 +874,6 @@ EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor) {
     bool onlychild = true;
 
     cellwalker ycw = start;
-    ycw--; if(S3 == 3) ycw--;
     if(for_yendor) setdist(p.path[0], 7, NULL);
 
     for(int i=0; i<length; i++) {
@@ -900,9 +902,12 @@ EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor) {
         }
 
       else if(trees_known()) {
+        auto sdist = [start] (cell *c) { return celldistance(start.at, c); };
         if(i == 0) {
-          t = type_in(expansion, start.at, [start] (cell *c) { return celldistance(start.at, c); });
-          bignum b = expansion.get_descendants(length, t);
+          t = type_in(expansion, randomdir ? start.at : start.cpeek(), sdist);
+          ycw--;
+          if(valence() == 3) ycw--;
+          bignum b = expansion.get_descendants(randomdir ? length : length-1, t);
           p.full_id_0 = full_id = hrand(b);
           }
 
@@ -922,8 +927,7 @@ EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor) {
 
         for(int tch: expansion.children[t]) {
           ycw++;
-          if(i == 1)
-            tch = type_in(expansion, ycw.cpeek(), [start] (cell *c) { return celldistance(start.at, c); });
+          if(i < 2) tch = type_in(expansion, ycw.cpeek(), sdist);
           auto& sub_id = expansion.get_descendants(length-1-i, tch);
           if(full_id < sub_id) { t = tch; break; }
 
@@ -972,6 +976,7 @@ EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor) {
       ycw += wstep;
       p.path[i+1] = ycw.at;
       }
+    p.last = ycw + rev;
     }
   return p;
   }
