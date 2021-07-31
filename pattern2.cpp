@@ -1779,8 +1779,8 @@ EX namespace patterns {
         #if CAP_ARCM
         if(arcm::in()) return colortables['A'][arcm::current.tilegroup[arcm::id_of(c->master)]];
         #endif
-        if(arb::in()) return colortables['A'][c->master->zebraval + c->master->emeraldval * isize(arb::current.shapes)];
-        return colortables['B'][c->type & 15];
+        if(arb::in()) return colortables['A'][shvid(c) + c->master->emeraldval * isize(arb::current.shapes)];
+        return colortables['A'][shvid(c)];
       case 'B':
         return colortables['B'][c->type & 15];
       #if CAP_FIELD
@@ -2028,9 +2028,7 @@ EX namespace patterns {
       dialog::addSelItem(XLAT("furthest from start"), "bounded", 'Y');
       }
 
-    if(arb::in() || arcm::in())
-      dialog::addSelItem(XLAT("types"), "types", 'A');
-
+    dialog::addSelItem(XLAT("types"), "types", 'A');
     dialog::addSelItem(XLAT("sides"), "sides", 'B');
 
     if(!ISMOBILE)
