@@ -71,6 +71,7 @@ struct arbi_tiling {
 
   int order;
   bool have_line, have_ph, have_tree;
+  int yendor_backsteps;
 
   vector<shape> shapes;
   string name;
@@ -397,6 +398,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
   c.floor_scale = .5;
   c.have_ph = c.have_line = false;
   c.have_tree = false;
+  c.yendor_backsteps = 0;
   exp_parser ep;
   ep.s = s;
   ld angleunit = 1, distunit = 1, angleofs = 0;
@@ -510,6 +512,10 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       }
     else if(ep.eat("treestate(")) {
       rulegen::parse_treestate(c, ep);
+      }
+    else if(ep.eat("yendor_backsteps(")) {
+      c.yendor_backsteps = ep.iparse();
+      ep.force_eat(")");
       }
     else if(ep.eat("range(")) {
       c.range = ep.iparse();

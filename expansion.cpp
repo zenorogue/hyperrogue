@@ -144,6 +144,7 @@ void expansion_analyzer::preliminary_grouping() {
 
 void expansion_analyzer::reduce_grouping() {
   if(reg3::in_rule()) return;
+  if(currentmap->strict_tree_rules()) return;
   int old_N = N;
   vector<int> grouping;
   grouping.resize(N);
@@ -208,6 +209,7 @@ bignum& expansion_analyzer::get_descendants(int level) {
   }
 
 bignum& expansion_analyzer::get_descendants(int level, int type) {
+  if(!N) preliminary_grouping(), reduce_grouping();
   auto& pd = descendants;
   size_upto(pd, level+1);
   for(int d=0; d<=level; d++)

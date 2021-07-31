@@ -872,6 +872,7 @@ EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor, b
     int t = -1;
     bignum full_id;
     bool onlychild = true;
+    bool launched = false;
 
     cellwalker ycw = start;
     if(for_yendor) setdist(p.path[0], 7, NULL);
@@ -899,6 +900,37 @@ EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor, b
             }
           }
         if(isize(ds)) ycw += ds[hrand(isize(ds))];
+        }
+
+      else if(currentmap->strict_tree_rules()) {
+        if(for_yendor && i < arb::current.yendor_backsteps) {
+          println(hlog, i, " < ", arb::current.yendor_backsteps);
+          ycw.spin = 0;
+          }
+
+        else {
+          if(!launched) {
+            t = ycw.at->master->fieldval;
+            bignum b = expansion.get_descendants(length-i, t);
+            p.full_id_0 = full_id = hrand(b);
+            /* it may happen that the subtree dies out */
+            if(!full_id.approx_int()) goto stupid;
+            launched = true;
+            }
+
+          ycw.spin = 0;
+
+          auto& r = rulegen::treestates[t];
+          for(int ri=0; ri<isize(r.rules); ri++) {
+            int tch = r.rules[ri];
+            if(tch < 0) continue;
+            auto& sub_id = expansion.get_descendants(length-1-i, tch);
+            if(full_id < sub_id) {
+              t = tch; ycw += ri; break;
+              }
+            full_id.addmul(sub_id, -1);
+            }
+          }
         }
 
       else if(trees_known()) {
@@ -951,6 +983,7 @@ EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor, b
         }
 
       else {
+        stupid:
         // stupid
         ycw += rev;
         // well, make it a bit more clever on bitruncated a4 grids
