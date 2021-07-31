@@ -912,9 +912,9 @@ EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor, b
           if(!launched) {
             t = ycw.at->master->fieldval;
             bignum b = expansion.get_descendants(length-i, t);
+            if(!full_id.approx_int()) goto stupid;
             p.full_id_0 = full_id = hrand(b);
             /* it may happen that the subtree dies out */
-            if(!full_id.approx_int()) goto stupid;
             launched = true;
             }
 
