@@ -261,6 +261,8 @@ EX heptagon *create_altmap(cell *c, int rad, hstate firststate, int special IS(0
 
   cellwalker bf(c, gdir); bf += rev;
   auto p = generate_random_path(bf, rad, false, false);
+
+  for(auto c: p.path) if(c->bardir != NODIR) return nullptr;
   
   heptagon *h = p.last.at->master;
 
