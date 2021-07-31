@@ -933,7 +933,7 @@ EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor, b
           }
         }
 
-      else if(trees_known()) {
+      else if(trees_known() && WDIM == 2) {
         auto sdist = [start] (cell *c) { return celldistance(start.at, c); };
         if(i == 0) {
           t = type_in(expansion, randomdir ? start.at : start.cpeek(), sdist);
@@ -969,17 +969,17 @@ EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor, b
         }
 
       else if(WDIM == 3) {
-        int d = celldistance(p.path[0], ycw.at);
-        vector<cell*> next;
-        forCellCM(c, ycw.at) if(celldistance(p.path[0], c) > d) next.push_back(c);
+        cell *prev = p.path[max(i-3, 0)];
+        int d = celldistance(prev, ycw.at);
+        vector<int> next;
+        forCellIdCM(c, i, ycw.at) if(celldistance(prev, c) > d) next.push_back(i);
         if(!isize(next)) {
-          printf("error: no more cells");
-          ycw.at = ycw.at->move(hrand(ycw.at->type));
+          println(hlog, "error: no more cells for i=", i);
+          ycw.spin = hrand(ycw.at->type);
           }
         else {
-          ycw.at = next[hrand(isize(next))];
+          ycw.spin = hrand_elt(next);
           }
-        p.path[i+1] = ycw.at;
         }
 
       else {
