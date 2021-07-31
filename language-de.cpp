@@ -641,8 +641,8 @@ S("Rangers take care of the magic mirrors in the Land of Mirrors. "
   "Ranger beschützen die Zauberspiegel im Spiegelland. Sie wissen, dass Schurken wie du "
   "die Spiegel gerne zerbrechen - also greifen sie dich an!")
 
-S("A nasty creature native to the Living Caves. They don't like you "
-  "for some reason.",
+// TODO update translation
+S("A nasty creature that lives in caves. They don't like you for some reason.",
   "Ein grässliches Geschöpf, das in den Lebenden Höhlen haust. Irgendwie können diese Kreaturen dich nicht leiden.")
 
 S("A tribe of men native to the Desert. They have even tamed the huge Sandworms, who won't attack them.",

@@ -191,7 +191,7 @@ EX void initgame() {
   if((isGravityLand(firstland) && !isCyclic(firstland)) || (firstland == laOcean && !safety && !yendor::on)) 
     firstland = weirdhyperbolic ? laCrossroads4 : laCrossroads;
   
-  clear_euland(specialland);
+  clear_euland(firstland);
 
   cwt.at = currentmap->gamestart(); cwt.spin = 0; cwt.mirrored = false;
   cwt.at->land = firstland;

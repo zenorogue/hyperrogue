@@ -654,8 +654,8 @@ S("Rangers take care of the magic mirrors in the Land of Mirrors. "
  "Strażnicy chronią lustra w Krainie Luster. Wiedzą, że złodzieje lubią "
  "rozbijać lustra... także spodziewaj się ataku!")
 
-S("A nasty creature native to the Living Caves. They don't like you "
- "for some reason.",
+// TODO update translation
+S("A nasty creature that lives in caves. They don't like you for some reason.",
  "Brzydki stwór z Żywych Jaskiń. Jakoś Cię nie lubi.")
 
 S("A tribe of men native to the Desert. They have even tamed the huge Sandworms, who won't attack them.",
@@ -8399,7 +8399,7 @@ N("shallow water", GEN_F, "płytka woda", "płytkie wody", "płytką wodę", "p�
 S("Shallow water is passable both for land creatures and for water creatures.",
   "Przez płytką wodę mogą przejść i stworzenia lądowe, i wodne.")
 
-N("shallow water", GEN_F, "głęboka woda", "głębokie wody", "głęboką wodę", "głęboką wodą")
+N("deep water", GEN_F, "głęboka woda", "głębokie wody", "głęboką wodę", "głęboką wodą")
 
 S("This body of water is calm and beautiful, but too deep to pass.",
   "Ta woda jest spokojna i piękna, ale zbyt głęboka, by przez nią przejść.")
@@ -9408,3 +9408,5 @@ S(
   )
 
 N("Palace Quest", GEN_O, "Misja w Pałacu", "Misje w Pałacu", "Misję w Pałacu", "na Misji w Pałacu")
+
+N("Pike", GEN_F, "Szczupak", "Szczupaki", "Szczupaka", "Szczupakiem")

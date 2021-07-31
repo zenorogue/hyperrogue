@@ -665,14 +665,14 @@ S(
  "Rangers take care of the magic mirrors in the Land of Mirrors. "
  "They know that rogues like to break these mirrors... so "
  "they will attack you!",
- 
+
  "Strażnicy chronią lustra w Krainie Luster. Wiedzą, że złodzieje lubią "
  "rozbijać lustra... także spodziewaj się ataku!")
 
+// TODO update translation
 S(
- "A nasty creature native to the Living Caves. They don't like you "
- "for some reason.",
- 
+ "A nasty creature that lives in caves. They don't like you for some reason.",
+
  "Brzydki stwór z Żywych Jaskiń."
  "Jakoś Cię nie lubi.")
 
