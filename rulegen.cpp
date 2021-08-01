@@ -1459,7 +1459,7 @@ struct hrmap_rulegen : hrmap {
     return relative_matrix_recursive(h2, h1);
     }
   
-  hyperpoint get_corner(cell *c, int cid, ld cf) {
+  hyperpoint get_corner(cell *c, int cid, ld cf) override {
     if(c->master->fieldval == -1) {
       auto& sh = arb::current_or_slided().shapes[c->master->zebraval];
       cid = gmod(cid, sh.size());
@@ -1479,7 +1479,7 @@ struct hrmap_rulegen : hrmap {
     else hrmap::find_cell_connection(c, d); 
     }
   
-  bool strict_tree_rules() { return true; }
+  bool strict_tree_rules() override { return true; }
 
   virtual bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override {
     auto& hts = treestates[h->fieldval];
