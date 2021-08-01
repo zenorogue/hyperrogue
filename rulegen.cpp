@@ -1609,12 +1609,24 @@ EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {
     throw hr_parse_exception("incorrect treestate index at " + ep.where());
 
   int N = c.shapes[ts.sid].size();
+  int qparent = 0, sumparent = 0;
   for(int i=0; i<N; i++) {
     ep.force_eat(","); ep.skip_white();
     if(ep.eat("PARENT")) ts.rules.push_back(DIR_PARENT);
     else if(ep.eat("LEFT")) ts.rules.push_back(DIR_LEFT);
     else if(ep.eat("RIGHT")) ts.rules.push_back(DIR_RIGHT);
     else { int i = ep.iparse(); ts.rules.push_back(i); }
+    }
+  for(int i=0; i<N; i++) {
+    if(ts.rules[i] == DIR_PARENT) qparent++, sumparent += i;
+    }
+  ts.is_root = qparent == 0;
+  if(qparent > 1) throw hr_parse_exception("multiple parent at " + ep.where());
+  if(qparent == 1) {
+    ts.parent_dir = sumparent;
+    println(hlog, "before: ", ts.rules);
+    std::rotate(ts.rules.begin(), ts.rules.begin() + sumparent, ts.rules.end());
+    println(hlog, "after : ", ts.rules);
     }
   ep.force_eat(")");
   }
