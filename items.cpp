@@ -390,14 +390,15 @@ EX void moveItem1(cell *from, cell *to, bool activateYendor) {
     if(xnew && activateYendor) yendor::check(from);
     for(int i=0; i<isize(yendor::yi); i++) 
       if(yendor::yi[i].path[0] == from) 
-        yendor::yi[i].path[0] = to;
+        changes.value_set(yendor::yi[i].path[0], to);
     }
 
   if(from->item == itKey) {
-    for(int i=0; i<isize(yendor::yi); i++) if(yendor::yi[i].path[YDIST-1] == from)
-      yendor::yi[i].path[YDIST-1] = to;
+    for(int i=0; i<isize(yendor::yi); i++) if(yendor::yi[i].path[YDIST-1] == from) {
+      changes.value_set(yendor::yi[i].path[YDIST-1], to);
+      }
     for(int i=0; i<isize(yendor::yi); i++) if(yendor::yi[i].actualKey == from)
-      yendor::yi[i].actualKey = to;
+      changes.value_set(yendor::yi[i].actualKey, to);
     }
   
   if(from->item == itBabyTortoise || to->item == itBabyTortoise) {
