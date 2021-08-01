@@ -1615,6 +1615,8 @@ EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {
     if(ep.eat("PARENT")) ts.rules.push_back(DIR_PARENT);
     else if(ep.eat("LEFT")) ts.rules.push_back(DIR_LEFT);
     else if(ep.eat("RIGHT")) ts.rules.push_back(DIR_RIGHT);
+    else if(ep.eat("MLEFT")) ts.rules.push_back(DIR_MULTI_GO_LEFT);
+    else if(ep.eat("MRIGHT")) ts.rules.push_back(DIR_MULTI_GO_RIGHT);
     else { int i = ep.iparse(); ts.rules.push_back(i); }
     }
   for(int i=0; i<N; i++) {
@@ -1635,7 +1637,7 @@ EX void verify_parsed_treestates() {
   if(rule_root < 0 || rule_root >= isize(treestates))
     throw hr_parse_exception("undefined treestate as root");
   for(auto& ts: treestates) for(auto& r: ts.rules) {
-    if(r < 0 && !among(r, DIR_PARENT, DIR_LEFT, DIR_RIGHT))
+    if(r < 0 && !among(r, DIR_PARENT, DIR_LEFT, DIR_RIGHT, DIR_MULTI_GO_LEFT, DIR_MULTI_GO_RIGHT))
       throw hr_parse_exception("negative number in treestates");
     if(r > isize(treestates))
       throw hr_parse_exception("undefined treestate");
