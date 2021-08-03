@@ -1,1 +1,8 @@
 .deps/
+autohdr.h
+hyper
+langen
+language-data.cpp
+makeh
+mymake
+mymake_files/
