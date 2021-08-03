@@ -569,6 +569,10 @@ void apply_chaos() {
   if(!items[itOrbChaos] || chaos_forbidden(ca) || chaos_forbidden(cb)) return;
   if(ca && is_paired(ca->monst)) killMonster(ca, moPlayer);
   if(cb && is_paired(cb->monst)) killMonster(cb, moPlayer);
+  destroyTrapsOn(ca);
+  destroyTrapsOn(cb);
+  if (ca->wall == waStone) destroyTrapsAround(ca);
+  if (cb->wall == waStone) destroyTrapsAround(cb);
   changes.ccell(ca);
   changes.ccell(cb);
   gcell coa = *ca;
