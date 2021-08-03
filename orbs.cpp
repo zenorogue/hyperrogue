@@ -602,6 +602,7 @@ EX void teleportTo(cell *dest) {
   playSound(dest, "other-teleport");
   if(dest->monst) {
     cwt.at->monst = dest->monst;
+    cwt.at->stuntime = dest->stuntime;
     dest->monst = moNone;
     }
     
@@ -1074,6 +1075,7 @@ void poly_attack(cell *dest) {
 
 void placeIllusion(cell *c) {
   c->monst = moIllusion;
+  c->stuntime = 0;
   useupOrb(itOrbIllusion, 5);
   addMessage(XLAT("You create an Illusion!"));
   bfs();

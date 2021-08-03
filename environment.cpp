@@ -346,7 +346,7 @@ EX void bfs() {
           c2->item = itNone;
           c2->landparam |= 2;
           c2->landparam &= ~1;
-          if(!c2->monst) c2->monst = moBomberbird;
+          if(!c2->monst) c2->monst = moBomberbird, c2->stuntime = 0;
           }
         
         if(c2->item == itBarrow && c2->cpdist == distlimit && c2->wall != waBarrowDig) {

@@ -253,6 +253,8 @@ EX void gen_eclectic_monster(cell *c) {
     cell *c1 = c;
     c1->monst = moPair;
     c2->monst = moPair;
+    c1->stuntime = 0;
+    c2->stuntime = 0;
     c1->mondir = neighborId(c1, c2);
     c2->mondir = neighborId(c2, c1);
     }
@@ -911,6 +913,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             c->item = itTrollEgg;
             forCellCM(c2, c) forCellCM(c3, c2) {
               c3->monst = pickTroll(c);
+              c3->stuntime = 0;
               c2->item = itTrollEgg;
               }
             }
@@ -1696,6 +1699,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           forCellIdEx(c2, i, c) {
             c2->monst = moKrakenT;
             c2->hitpoints = 1;
+            c2->stuntime = 0;
             c2->mondir = c->c.spin(i);
             }
           if(!peace::on) playSound(c, "seen-kraken");
@@ -2050,7 +2054,9 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
                   c->item = itHunting;
                   auto& p = next[hrand(isize(next))];
                   p.first->monst = moHunterGuard;
+                  p.first->stuntime = 0;
                   p.second->monst = moHunterGuard;
+                  p.second->stuntime = 0;
                   }
                 }
               else if(items[itHunting] < 10) {
@@ -2069,8 +2075,10 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
                       cell *dog2 = dogcells[hrand(isize(dogcells))];
                       if(valence() != 3 || isNeighbor(dog1, dog2)) {
                         dog1->monst = moHunterGuard;
+                        dog1->stuntime = 0;
                         dog1->landparam = 0;
                         dog2->monst = moHunterGuard;
+                        dog2->stuntime = 0;
                         dog2->landparam = 1;
                         break;
                         }
@@ -2078,7 +2086,9 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
                     }
                   else if(isize(dogcells)) {
                     c->item = itHunting;
-                    dogcells[hrand(isize(dogcells))]->monst = moHunterGuard;
+                    cell *dog = dogcells[hrand(isize(dogcells))];
+                    dog->monst = moHunterGuard;
+                    dog->stuntime = 0;
                     }
                   }
                 }
@@ -2339,6 +2349,8 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           if(c2->monst || c2->wall) return;
           c1->monst = moPair;
           c2->monst = moPair;
+          c1->stuntime = 0;
+          c2->stuntime = 0;
           c1->mondir = neighborId(c1, c2);
           c2->mondir = neighborId(c2, c1);
           }
@@ -3015,6 +3027,8 @@ EX void setdist(cell *c, int d, cell *from) {
   #if CAP_COMPLEX2
   if(d < BARLEV) brownian::apply_futures(c);
   #endif
+
+  if(!c->monst) c->stuntime = 0;
 
   giantLandSwitch(c, d, from);
   
