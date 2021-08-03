@@ -48,7 +48,7 @@ EX bool notDippingForExtra(eItem i, eItem x) {
   int v = items[i] - min(items[x], currentLocalTreasure);
   if(v <= 10) return true;
   if(v >= 20) return false;
-  return v >= hrand(10) + 10;
+  return v < hrand(10) + 10;
   }
 
 void buildRedWall(cell *c, int gemchance) {
