@@ -450,8 +450,6 @@ EX void look_for_shortcuts(tcell *c) {
       ufind(tw);
       ufind(tw0);
 
-      int old = c->dist;
-
       vector<tcell*> opath;
 
       for(auto& v: sh.pre) {
