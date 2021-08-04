@@ -117,6 +117,18 @@ EX bool on_wall(eLand ws) {
   return among(ws, NOWALLSEP_WALL_CPOS, NOWALLSEP_WALL_CNEG, NOWALLSEP_WALL_EPOS, NOWALLSEP_WALL_ENEG);
   }
 
+string wsname(eLand ws) {
+  if(ws == NOWALLSEP) return "NO";
+  if(ws == NOWALLSEP_SWAP) return "SWAP";
+  if(ws == NOWALLSEP_USED) return "USED";
+  if(ws == NOWALLSEP_WALL) return "WALL";
+  if(ws == NOWALLSEP_WALL_CPOS) return "CPOS";
+  if(ws == NOWALLSEP_WALL_CNEG) return "CNEG";
+  if(ws == NOWALLSEP_WALL_EPOS) return "EPOS";
+  if(ws == NOWALLSEP_WALL_ENEG) return "ENEG";
+  return dnameof(ws);
+  }
+
 EX bool general_barrier_advance(cellwalker& bb, int& dir, eLand& l1, eLand& l2, eLand& ws, bool setit) {
   bool ok = true;
   if(ws == NOWALLSEP_WALL) {
