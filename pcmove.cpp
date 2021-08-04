@@ -950,7 +950,7 @@ void pcmove::tell_why_impassable() {
     if(vmsg(miRESTRICTED))
       blowaway_message(c2);
     }
-  else if(isAlch(c2)) {
+  else if(anti_alchemy(c2, cwt.at)) {
     if(vmsg(miRESTRICTED))
       addMessage(XLAT("Wrong color!"));
     }
