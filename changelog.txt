@@ -4453,3 +4453,22 @@ Bugfixes:
 - Irradiated Field: bull generation no longer breaks ivy
 - Fix several Friendly Ivy interactions
 
+2021-08-01 11:19 Update 12.0e:
+
+New features:
+* better land boundaries in all (hyperbolic) 2D geometries, including Great Walls-like ones
+* improved CR4 and Camelot generation
+* tes files now support aperiodic (tree-based) tessellations and some other features, see "horotiling.tes" in samples
+* HyperRogue is now able to generate strict tree-based rules to generate periodic tessellations 
+  (including tes files and Archimedean, which previously were generated using other methods).
+  This way of generation avoids numerical precision errors and lets us understand the growth patterns
+  (experiment with geometry -> size of the world) and generate horocycles and Camelot. This
+  is currently disabled by default, but can be enabled in experiment with geometry -> size of the world -> strict.
+* Dice hover map now indicates hardness with color (thanks to @jruderman)
+* minor Russian translation updates (thanks to blargdag)
+
+Bugfixes:
+* fixed some issues with sky rendering in FPP (better stars and Palace ceiling)
+* fixed incorrect graphics in binary tilings
+* fixed bugs with moving the key with boats
+* Princess Quest no longer shows fail screen merely due to the princess being in peril
