@@ -169,7 +169,7 @@ EX bool general_barrier_advance(cellwalker& bb, int& dir, eLand& l1, eLand& l2, 
       bb1 -= dir;
       for(int i=1; i<q; i++) {
         int d = get_valence(bb1, -dir, ok);
-        surround_by(setit, bb1, -dir, 2, d, l1, false, ok);
+        surround_by(setit, bb1, -dir, 1, d, l1, false, ok);
         bb1-=dir;
         }
       }
@@ -177,7 +177,7 @@ EX bool general_barrier_advance(cellwalker& bb, int& dir, eLand& l1, eLand& l2, 
     bb += dir;
     for(int i=1; i<q; i++) {
       int d = get_valence(bb, dir, ok);
-      surround_by(setit, bb, dir, 2, d, l2, true, ok);
+      surround_by(setit, bb, dir, 1, d, l2, true, ok);
       bb+=dir;
       }
 
