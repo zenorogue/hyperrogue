@@ -934,6 +934,8 @@ EX namespace reg3 {
               c->c.connect(i, c1, j, false);
               if(!found) {                
                 tmcell.push_back(ss[id].from_cellcenter * T2 * ss[id1].to_cellcenter);
+                if(elliptic) fixelliptic(tmcell.back());
+
                 auto& ms = move_sequences[local_id[c].first];
                 ms.push_back(path);
                 for(auto dir: va.move_sequence) ms.back().push_back(dir);
@@ -1649,6 +1651,7 @@ EX namespace reg3 {
             
             allh[i]->c.connect(d, h, d2, false);
             tmi.push_back(inverse(T1) * T);
+            if(elliptic) fixelliptic(tmi.back());
             }
           next_d: ;
           }
