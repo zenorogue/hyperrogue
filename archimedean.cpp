@@ -455,6 +455,7 @@ void archimedean_tiling::compute_geometry() {
       }
     
     if(debugflags & DF_GEOM)
+    if(p < 10 || p == 99)
       println(hlog, "edgelength = ", edgelength, " angles = ", alphas, " inradius = ", inradius, " circumradius = ", circumradius);
     
     if(isnan(alpha_total)) elmax = edgelength;
