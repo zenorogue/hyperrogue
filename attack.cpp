@@ -1059,14 +1059,18 @@ EX bool should_switchplace(cell *c1, cell *c2) {
   if(isPrincess(c2->monst) || among(c2->monst, moGolem, moIllusion, moMouse, moFriendlyGhost))
     return true;
   
-  if(peace::on) return c2->monst && !isMultitile(c2->monst);
+  if(peace::on) return c2->monst;
   return false;
   }
 
-EX bool switchplace_prevent(cell *c1, cell *c2, bool checkonly) {
+EX bool switchplace_prevent(cell *c1, cell *c2, struct pcmove& m) {
   if(!should_switchplace(c1, c2)) return false;
+  if(peace::on && (isMultitile(c2->monst) || saved_tortoise_on(c2) || isDie(c2->monst))) {
+    if(m.vmsg(miRESTRICTED)) addMessage(XLAT("Cannot switch places with %the1!", c2->monst));
+    return true;
+    }
   if(c1->monst && c1->monst != moFriendlyIvy) {
-    if(!checkonly) addMessage(XLAT("There is no room for %the1!", c2->monst));
+    if(m.vmsg(miRESTRICTED)) addMessage(XLAT("There is no room for %the1!", c2->monst));
     return true;
     }
   if(passable(c1, c2, P_ISFRIEND | (c2->monst == moTameBomberbird ? P_FLYING : 0))) return false;

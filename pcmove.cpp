@@ -893,8 +893,7 @@ bool pcmove::after_escape() {
     #endif
     return false;
     }
-  else if(c2->monst && (!isFriendly(c2) || c2->monst == moTameBomberbird || isMountable(c2->monst))
-    && !(peace::on && !isMultitile(c2->monst) && !good_tortoise)) 
+  else if(c2->monst && (!isFriendly(c2) || c2->monst == moTameBomberbird || isMountable(c2->monst)) && !(peace::on && !good_tortoise))
     return attack();
   else if(!passable(c2, cwt.at, P_USEBOAT | P_ISPLAYER | P_MIRROR | P_MONSTER)) {
     tell_why_impassable();
@@ -925,7 +924,7 @@ bool pcmove::move_if_okay() {
       return false;
     }
 
-  if(switchplace_prevent(cwt.at, c2, checkonly))
+  if(switchplace_prevent(cwt.at, c2, *this))
     return false;
   if(!checkonly && warningprotection_hit(do_we_stab_a_friend(mi, moPlayer)))
     return false;
