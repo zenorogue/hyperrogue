@@ -2133,6 +2133,7 @@ transmatrix screenpos(ld x, ld y) {
 
 EX int flat_on;
 eGeometry backup_geometry;
+eVariation backup_variation;
 videopar backup_vid;
 
 /** \brief enable the 'flat' model for drawing HUD. See hr::flat_model_enabler */
@@ -2142,8 +2143,10 @@ EX void enable_flat_model(int val) {
     glClear(GL_DEPTH_BUFFER_BIT);
     #endif
     backup_geometry = geometry;
+    backup_variation = variation;
     backup_vid = vid;
     geometry = gNormal;
+    variation = eVariation::bitruncated;
     pmodel = mdDisk;
     pconf.alpha = 1;
     pconf.scale = 1;
@@ -2162,6 +2165,7 @@ EX void enable_flat_model(int val) {
     }
   if(flat_on >= 1 && flat_on + val < 1) {
     geometry = backup_geometry;
+    variation = backup_variation;
     vid = backup_vid;
     geom3::apply_always3();
     calcparam();
