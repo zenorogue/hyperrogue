@@ -157,9 +157,6 @@ EX bool general_barrier_advance(cellwalker& bb, int& dir, eLand& l1, eLand& l2, 
     bool at_corner = among(ws, NOWALLSEP_WALL_CPOS, NOWALLSEP_WALL_CNEG);
 
     cell *current = bb.at;
-    if(current->bardir != NODIR) ok = false;
-    if(current->mpdist < BARLEV) ok = false;
-    if(setit && current->bardir == NODIR) current->barleft = NOWALLSEP_USED;
 
     // if at_corner: bb is facing the tile 1 before the first inside
     int t = bb.at->type;
@@ -256,7 +253,7 @@ EX bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand ws, eLand l1 IS
       }
     }
   
-  if(l1 != l2 && bb.at->barleft != NOWALLSEP_USED && !on_wall(ws)) {
+  if(l1 != l2 && bb.at->barleft != NOWALLSEP_USED) {
     bb.at->bardir = bb.spin; bb.at->barright = l2; bb.at->barleft = ws; 
     setland(bb.at, l1);
     }
@@ -509,7 +506,7 @@ EX void extendBarrier(cell *c) {
     return; // == INFD) return;
     }
 
-  if(c->barleft == NOWALLSEP || c->barleft == NOWALLSEP_SWAP || c->barleft == NOWALLSEP_WALL) {
+  if(c->barleft == NOWALLSEP || c->barleft == NOWALLSEP_SWAP || c->barleft == NOWALLSEP_WALL || on_wall(c->barleft)) {
     #if MAXMDIM >= 4
     if(WDIM == 3) extend3D(c);
     else 
