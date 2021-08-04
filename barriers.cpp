@@ -206,7 +206,6 @@ EX bool general_barrier_advance(cellwalker& bb, int& dir, eLand& l1, eLand& l2, 
       surround_by(setit, bb, dir, 1, s1, l1, false, ok);
       surround_by(setit, bb, dir, s1+1, steps1-1, l2, true, ok);
       spin_around_by(bb, dir, s1);
-      at_corner = true;
       ws = dir > 0 ? NOWALLSEP_WALL_CPOS : NOWALLSEP_WALL_CNEG;
       return ok;
       }
