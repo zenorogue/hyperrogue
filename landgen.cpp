@@ -1198,11 +1198,11 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           createArrowTrapAt(c, laTerracotta);
         if(pseudohept(c) && hrand(100) < 40 && c->wall == waNone && !racing::on) {
           c->wall = waTerraWarrior;
-          c->landparam = terracotta::randterra ? 0 : 3 + hrand(3);
+          c->wparam = terracotta::randterra ? 0 : 3 + hrand(3);
           if(hrand(100) < items[itTerra]-10)
-            c->landparam--;
+            c->wparam--;
           if(hrand(100) < items[itTerra]-10)
-            c->landparam--;
+            c->wparam--;
           }
         }
       if(d == 7) {
