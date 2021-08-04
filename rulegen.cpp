@@ -99,7 +99,6 @@ void process_fix_queue() {
     fix_queue.pop();
     }
   in_fixing = false;
-  handle_distance_errors();
   }
 
 void ufind(twalker& p) {
@@ -108,6 +107,10 @@ void ufind(twalker& p) {
   ufind(p1);
   p.at->unified_to = p1;
   p = p1 + p.spin;
+  }
+
+void ufindc(tcell*& c) {
+  twalker cw = c; ufind(cw); c = cw.at;
   }
 
 EX tcell *first_tcell = nullptr;
@@ -258,7 +261,117 @@ struct hr_solid_error : rulegen_retry {
 
 int solid_errors;
 
-void fix_distances_rec(tcell *c) {
+int get_parent_dir(tcell *c);
+
+struct shortcut {
+  vector<int> pre;
+  vector<int> post;
+  tcell *sample;
+  int delta;
+  };
+
+map<int, vector<shortcut> > shortcuts;
+
+vector<int> root_path(twalker cw) {
+  cw += wstep;
+  vector<int> res;
+  while(true) {
+    int i = cw.at->dist == 0 ? 0 : get_parent_dir(cw.at);
+    int j = cw.to_spin(i);
+    res.push_back(j);
+    if(cw.at->dist == 0) return res;
+    cw += j;
+    cw += wstep;
+    }
+  }
+
+void check_solid(tcell *c, int d) {
+  ufindc(c);
+  if(debugflags & DF_GEOM)
+    println(hlog, "solid ", c, " changes ", c->dist, " to ", d);
+  if(c->dist == MYSTERY_DIST) exit(2);
+  set<tcell*> seen;
+  vector<twalker> walkers;
+  vector<int> walkerdir = {-1};
+  seen.insert(c);
+  walkers.push_back(c);
+
+  for(int j=0; j<isize(walkers); j++) {
+    auto w = walkers[j];
+    for(int s=0; s<w.at->type; s++) {
+      twalker w1 = w + s;
+      if(w1.peek() && w1.peek()->dist == w.at->dist - 1 && !seen.count(w1.peek())) {
+        seen.insert(w1.peek());
+        walkers.push_back(w1 + wstep);
+        walkerdir.push_back(s);
+        }
+      }
+    }
+
+  c->dist = d;
+  set<tcell*> seen2;
+  vector<twalker> walkers2;
+  vector<int> walkerdir2 = {-1};
+  walkers2.push_back(c);
+  for(int j=0; j<isize(walkers2); j++) {
+    auto w = walkers2[j];
+    for(int s=0; s<w.at->type; s++) {
+      twalker w1 = w + s;
+      if(!w1.peek()) continue;
+      if(w1.peek()->dist == w.at->dist - 1 && !seen2.count(w1.peek())) {
+        seen2.insert(w1.peek());
+        walkers2.push_back(w1 + wstep);
+        walkerdir2.push_back(s);
+        if(seen.count(w1.peek()))  goto found;
+        }
+      }
+    }
+
+  return;
+
+  found:
+
+  auto at0 = walkers2.back().at;
+
+  tcell* at = at0;
+
+  twalker at1;
+  for(int i=isize(walkers)-1; i>=1; i--) if(at == walkers[i].at) at1 = walkers[i];
+
+  vector<int> pre;
+  for(int i=isize(walkers)-1; i>=1; i--) if(at == walkers[i].at) {
+    pre.push_back(walkerdir[i]); at = walkers[i].peek();
+    }
+  if(at != c) return;
+
+  at = at0;
+  vector<int> post;
+  for(int i=isize(walkers2)-1; i>=1; i--) if(at == walkers2[i].at) {
+    post.push_back(walkerdir2[i]); at = walkers2[i].peek();
+    }
+  if(at != c) return;
+  reverse(pre.begin(), pre.end());
+  reverse(post.begin(), post.end());
+
+  int delta = at1.to_spin(walkers2.back().spin);
+
+  for(auto s: shortcuts[c->id]) if(s.pre == pre && s.post == post) return;
+
+  if(debugflags & DF_GEOM)
+    println(hlog, "new shortcut found, pre =  ", pre, " post = ", post, " pre reaches ", at1, " post reaches ", walkers2.back(), " of type ", at1.at->id, " sample = ", c);
+
+  shortcuts[c->id].emplace_back(shortcut{pre, post, c, delta});
+
+  if(debugflags & DF_GEOM) println(hlog, "exhaustive search:");
+  indenter ind(2);
+  tcell* c1 = first_tcell;
+  while(c1) {
+    if(c1->id == c->id) look_for_shortcuts(c1);
+    c1 = c1->next;
+    }
+  }
+
+void fix_distances(tcell *c) {
   c->distance_fixed = true;
   vector<tcell*> q = {c};
   
@@ -268,13 +381,14 @@ void fix_distances_rec(tcell *c) {
     restart:
     for(int i=0; i<c->type; i++) {
       tcell *c1 = c->cmove(i);
+      ufindc(c);
+      c1 = c->cmove(i);
       if(c1->dist == MYSTERY) continue;
       auto& d1 = c1->dist;
       if(d > d1+1) { d = d1+1; goto restart; }
       if(d1 > d+1) {
         if(c1->is_solid) {
-          if(debugflags & DF_GEOM)
-            println(hlog, "solid ", c1, "changes ", d1, " to ", d+1);
+          check_solid(c1, d+1);
           solid_errors++;
           }
         d1 = d+1; 
@@ -284,37 +398,10 @@ void fix_distances_rec(tcell *c) {
     }
   }
 
-EX int prepare_around_radius;
-
-void fix_distances(tcell *c) {
-  fix_distances_rec(c);
-  handle_distance_errors();
-  }
-
 void calc_distances(tcell *c) {
   if(c->dist != MYSTERY) return;
   c->dist = MYSTERY_DIST;
   fix_distances(c);
-  }
-
-void prepare_around(tcell *c) {
-  vector<tcell*> q;
-
-  set<tcell*> visited;
-  auto visit = [&] (tcell *x) {
-    if(visited.count(x)) return;
-    visited.insert(x);
-    q.push_back(x);
-    };
-  visit(c);
-  int next_lev = 1;
-  int cdist = 0;
-  for(int i=0; i<isize(q); i++) {
-    if(i == next_lev) { cdist++; if(cdist == prepare_around_radius) break; next_lev = isize(q); }
-    tcell *cx = q[i];
-    for(int d=0; d<cx->type; d++) visit(cx->cmove(d));
-    }
-  for(auto cx: q) calc_distances(cx);
   }
 
 void unify_distances(tcell *c1, tcell *c2) {
@@ -328,18 +415,13 @@ void unify_distances(tcell *c1, tcell *c2) {
   c1->distance_fixed = c1->distance_fixed || c2->distance_fixed;
   c1->is_solid = c1->is_solid || c2->is_solid;
   if(c1->dist < MYSTERY) 
-    fix_distances_rec(c1);
+    fix_distances(c1);
   }
 
 void handle_distance_errors() {
   bool b = solid_errors;
   solid_errors = 0;
-  if(b && !no_errors) {
-    prepare_around_radius++;
-    if(debugflags & DF_GEOM)
-      println(hlog, "increased prepare_around_radius to ", prepare_around_radius);
-    throw hr_solid_error();
-    }
+  if(b && !no_errors) throw hr_solid_error();
   }
 
 /** make sure that we know c->dist */
@@ -347,8 +429,65 @@ void be_solid(tcell *c) {
   if(c->is_solid) return;
   if(tcellcount >= max_tcellcount) 
     throw rulegen_surrender("max_tcellcount exceeded");
-  prepare_around(c);  
+  ufindc(c);
+  calc_distances(c);
+  ufindc(c);
+  look_for_shortcuts(c);
+  ufindc(c);
+  if(c->dist == MYSTERY_DIST) {
+    println(hlog, "set solid but no dist ", c);
+    exit(3);
+    }
   c->is_solid = true;
+  }
+
+EX void look_for_shortcuts(tcell *c) {
+  if(c->dist > 0) for(int i=0; i<isize(shortcuts[c->id]); i++) {
+    auto sh = shortcuts[c->id][i];
+    if(1) {
+      twalker tw0(c, 0);
+      twalker tw(c, 0);
+      ufind(tw);
+      ufind(tw0);
+
+      int old = c->dist;
+
+      vector<tcell*> opath;
+
+      for(auto& v: sh.pre) {
+        opath.push_back(tw.at);
+        tw += v;
+        if(!tw.peek()) goto next_shortcut;
+        if(tw.peek()->dist != tw.at->dist-1) goto next_shortcut;
+        ufind(tw);
+        tw += wstep;
+        }
+      opath.push_back(tw.at);
+
+      ufind(tw0);
+      vector<tcell*> npath;
+      for(auto& v: sh.post) {
+        npath.push_back(tw0.at);
+        tw0 += v;
+        ufind(tw0);
+        tw0 += wstep;
+        calc_distances(tw0.at);
+        }
+      npath.push_back(tw0.at);
+      int d = sh.delta;
+      auto tw1 = tw + d;
+      fix_queue.push([=] { unify(tw1, tw0); });
+      process_fix_queue();
+      for(auto t: npath) {
+        ufindc(t);
+        fix_distances(t);
+        }
+
+      ufindc(c);
+      }
+
+    next_shortcut: ;
+    }
   }
 
 /** which neighbor will become the parent of c */
@@ -358,6 +497,7 @@ int get_parent_dir(tcell *c) {
   int bestd = -1;
   vector<int> bestrootpath;
   
+  look_for_shortcuts(c);
   be_solid(c);
 
   if(c->dist > 0) {
@@ -402,15 +542,20 @@ struct analyzer {
   vector<twalker> spread;
   vector<int> parent_id;
   vector<int> spin;
-  void add_step(int pid, int s) {
-    twalker cw = spread[pid];
-    cw = cw + s + wstep;
-    spread.push_back(cw);
-    parent_id.push_back(pid);
-    spin.push_back(s);
-    }
+  void add_step(int pid, int s);
   };
 #endif
+
+void analyzer::add_step(int pid, int s) {
+  twalker cw = spread[pid];
+  cw = cw + s;
+  cw.peek();
+  ufind(cw);
+  cw = cw + wstep;
+  spread.push_back(cw);
+  parent_id.push_back(pid);
+  spin.push_back(s);
+  }
 
 map<aid_t, analyzer> analyzers;
 
@@ -438,8 +583,13 @@ EX vector<twalker> spread(analyzer& a, twalker cw) {
   int N = isize(a.spread);
   res.reserve(N);  
   res.push_back(cw);
-  for(int i=1; i<N; i++)
-    res.push_back(res[a.parent_id[i]] + a.spin[i] + wstep);
+  for(int i=1; i<N; i++) {
+    auto& r = res[a.parent_id[i]];
+    ufind(r);
+    auto r1 = r + a.spin[i];
+    r1.peek(); ufind(r1);
+    res.push_back(r1 + wstep);
+    }
   return res;
   }
 
@@ -541,7 +691,7 @@ int get_side(tcell *what, tcell *to_what) {
   twalker wr = wl;
   auto go = [&] (twalker& cw, int delta) {
     int d = get_parent_dir(cw.at);
-    if(cw.spin == d || get_parent_dir(cw.peek()) == (cw+wstep).spin)
+    if(cw.spin == d || get_parent_dir(cw.cpeek()) == (cw+wstep).spin)
       cw += wstep;
     cw+=delta;
     };
@@ -575,11 +725,14 @@ code_t id_at_spin(twalker cw) {
       if(p >= 0 && get_parent_dir(cs.at) == cs.spin)
         x = C_CHILD;
       else {
+        auto cs2 = cs + wstep;
+        ufind(cs); ufind(cs2); be_solid(cs2.at);
+        fix_distances(cs.at);
         int y = cs.at->dist - cs.peek()->dist;
         if(y == 1) x = C_NEPHEW;
         else if(y == 0) x = C_EQUAL;
         else if(y == -1) x = C_UNCLE;
-        else throw rulegen_failure("distance problem");
+        else throw rulegen_failure("distance problem y=" + its(y) + lalign(0, " cs=", cs, " cs2=", cs2, " peek=", cs.peek(), " dist=", cs.at->dist, " dist2=", cs2.at->dist));
         auto gs = get_side(cs.at, cs.peek());
         if(gs == 0 && x == C_UNCLE) x = C_PARENT;
         if(gs > 0) x++;
@@ -601,22 +754,6 @@ EX pair<int, int> get_code(tcell *c) {
     }
 
   be_solid(c);
-
-  for(int i=0; i<c->type; i++) {
-    twalker cw0(c, i);
-    twalker cw(c, i);
-    cw+=wstep;
-    int val = 0;
-    while(cw.at != cw0.at) {
-      ufind(cw0); ufind(cw);
-      be_solid(cw.at);
-      cw++;
-      cw+=wstep;
-      val++;
-      if(val > 1000)
-        throw rulegen_failure("excessive valence problem");
-      }
-    }    
 
   int bestd = get_parent_dir(c);
   if(bestd == -1) bestd = 0;
@@ -716,6 +853,7 @@ void rules_iteration_for(tcell *c) {
       cq.push_back(c->cmove(d));
     }
   else if(ts.rules != cids) {
+    handle_distance_errors();
     auto& r = ts.rules;
     if(debugflags & DF_GEOM) {
       println(hlog, "merging ", ts.rules, " vs ", cids);
@@ -1099,6 +1237,7 @@ void rules_iteration() {
     rules_iteration_for(cq[i]);
     }
 
+  handle_distance_errors();
   if(debugflags & DF_GEOM)
     println(hlog, "number of treestates = ", isize(treestates));
   rule_root = get_code(t_origin[0]).second;
@@ -1159,6 +1298,7 @@ void rules_iteration() {
 
   // print_rules();
   
+  handle_distance_errors();
   branch_hashes.clear();
 
   for(int id=0; id<isize(treestates); id++) if(treestates[id].is_live) {
@@ -1179,6 +1319,7 @@ void rules_iteration() {
       if(r[a] == DIR_UNKNOWN) r[a] = DIR_RIGHT;
     }
   
+  handle_distance_errors();
   if(isize(important) != N) 
     throw mismatch_error();
 
@@ -1193,13 +1334,14 @@ void rules_iteration() {
 
   if(isize(important) != N) 
     throw mismatch_error();
+  handle_distance_errors();
   }
 
 void clear_tcell_data() {
   auto c = first_tcell;
   while(c) {
     c->is_solid = false;
-    c->dist = MYSTERY;
+    // c->dist = MYSTERY;
     c->parent_dir = MYSTERY;
     c->code = MYSTERY;
     c->distance_fixed = false;
@@ -1214,6 +1356,7 @@ void cleanup() {
   code_to_id.clear();
   split.clear();
   important.clear();
+  shortcuts.clear();
   }
 
 void clear_all() {  
@@ -1250,8 +1393,6 @@ EX void generate_rules() {
   catch(hr_exception& e) {
     throw rulegen_surrender("conversion failure");
     }
-  
-  prepare_around_radius = 1;
   
   clear_all();
 
