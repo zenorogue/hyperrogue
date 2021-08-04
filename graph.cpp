@@ -2550,12 +2550,15 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
   #if CAP_SHAPES
 
   bool darkhistory = history::includeHistory && history::inkillhistory.count(c);
-  
-  if(doHighlight())
-    poly_outline = 
+  color_t outline = OUTLINE_NONE;
+
+  if(doHighlight()) {
+    outline =
       (isPlayerOn(c) || isFriendly(c)) ? OUTLINE_FRIEND : 
       noHighlight(c->monst) ? OUTLINE_NONE :
       OUTLINE_ENEMY;
+    poly_outline = outline;
+    }
     
   // highlight faraway enemies if that's needed
   if (vid.faraway_highlight && c->cpdist >= 6 && vid.faraway_highlight <= get_threat_level(c)) {
@@ -2677,6 +2680,8 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
           add_segment(taildist(c), [=] () {
             for(int i=11; i>=0; i--) {
               if(i < 3 && (c->monst == moTentacle || c->monst == moTentaclewait)) continue;
+              if(doHighlight())
+                poly_outline = outline;
               shiftmatrix Vbx = Vb;
               if(WDIM == 2) Vbx = Vbx * spin(sin(M_PI * i / 6.) * wav / (i+.1));
               Vbx = Vbx * xpush(length * (i) / 12.0);
@@ -3362,7 +3367,9 @@ ld wavefun(ld x) {
   else return 0; */
   }
 
-EX colortable nestcolors = { 0x800000, 0x008000, 0x000080, 0x404040, 0x700070, 0x007070, 0x707000, 0x606060 };
+// Color components in nestcolors must be less than 0x80 (for addition in drawMonster for Rock Snakes)
+// and must be divisible by 4 (for brightening of raised cells in celldrawer::setcolors)
+EX colortable nestcolors = { 0x7C0000, 0x007C00, 0x00007C, 0x404040, 0x700070, 0x007070, 0x707000, 0x606060 };
 
 color_t floorcolors[landtypes];
 

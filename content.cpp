@@ -779,7 +779,7 @@ ITEM( 'o', 0xC00040, "Orb of Recall", itOrbRecall, IC_ORB, ZERO, RESERVED, osUti
     "When the charges on this Orb expire, "
     "you will be automatically returned to the place where you have found it. "
     "Extra Orbs of Recall delay this without changing the recall location. "
-    "Pick up an Orb of Safety causes an immediate recall.")
+    "Picking up an Orb of Safety causes an immediate recall.")
 ITEM( ']', 0x8080FF, "Dodecahedron", itDodeca, IC_TREASURE, ZERO, RESERVED, osNone, 
     "These dodecahedra made of a mysterious material are the Reptiles' favorite toy."
     )

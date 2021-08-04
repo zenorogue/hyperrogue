@@ -4593,7 +4593,7 @@ Orb("Recall", "Powrotu")
 S("When the charges on this Orb expire, "
   "you will be automatically returned to the place where you have found it. "
   "Extra Orbs of Recall delay this without changing the recall location. "
-  "Pick up an Orb of Safety causes an immediate recall.",
+  "Picking up an Orb of Safety causes an immediate recall.",
   
   "Kiedy skończą się ładunki tej Sfery, automatycznie wracasz do "
   "miejsca, w którym ją znalazłeś. Dodatkowe Sfery Powrotu "

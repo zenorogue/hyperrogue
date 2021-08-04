@@ -166,10 +166,12 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
   else if(c2->item == itOrbLife) {
     playSound(c2, "pickup-orb"); // TODO summon
     placeGolem(cwt.at, c2, moGolem);
+    if(cwt.at->monst == moGolem) cwt.at->stuntime = 0;
     }
   else if(c2->item == itOrbFriend) {
     playSound(c2, "pickup-orb"); // TODO summon
     placeGolem(cwt.at, c2, moTameBomberbird);
+    if(cwt.at->monst == moTameBomberbird) cwt.at->stuntime = 0;
     }
 #if CAP_TOUR
   else if(tour::on && (c2->item == itOrbSafety || c2->item == itOrbRecall)) {

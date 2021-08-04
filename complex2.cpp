@@ -654,15 +654,15 @@ EX void check(cell *c) {
   if(c->wall == waTerraWarrior && !c->monst && !racing::on) {
     bool live = false;
     if(randterra) {
-      c->landparam++;
-      if((c->landparam == 3 && hrand(3) == 0) ||
-        (c->landparam == 4 && hrand(2) == 0) || 
-        c->landparam == 5)
+      c->wparam++;
+      if((c->wparam == 3 && hrand(3) == 0) ||
+        (c->wparam == 4 && hrand(2) == 0) ||
+        c->wparam == 5)
           live = true;
       }
     else {
-      c->landparam--;
-      live = !c->landparam;
+      c->wparam--;
+      live = !c->wparam;
       }
     if(live)
       c->monst = moTerraWarrior,
