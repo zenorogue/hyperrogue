@@ -1369,7 +1369,7 @@ void celldrawer::draw_features() {
     
     case waTerraWarrior:
       #if CAP_COMPLEX2
-      drawTerraWarrior(V, terracotta::randterra ? (c->landparam & 7) : (5 - (c->landparam & 7)), 7, 0);
+      drawTerraWarrior(V, terracotta::randterra ? (c->wparam & 7) : (5 - (c->wparam & 7)), 7, 0);
       #endif
       break;
     
@@ -2222,7 +2222,7 @@ void celldrawer::draw_wall_full() {
     if(c->wall == waFireTrap)
       asciicol = trapcol[c->wparam & 3];
     if(c->wall == waTerraWarrior)
-      asciicol = terracol[c->landparam & 7];
+      asciicol = terracol[c->wparam & 7];
 
     if(c->wall == waMineOpen) {
       int mines = countMinesAround(c);
