@@ -599,7 +599,7 @@ EX void wandering() {
       if (hrand(10) || peace::on)
         c->monst = moRedTroll;
       else if (!pseudohept(c))
-        c->monst = moHexSnake;
+        c->monst = moHexSnake, c->hitpoints = 1;
       }
 
     else if(c->land == laCaves && wchance(items[itGold], 5))
