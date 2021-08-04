@@ -906,7 +906,6 @@ cdata *getHeptagonCdata(heptagon *h) {
         if(hs.at->master->distance > d) break;
         }
       setHeptagonRval(hs.at->master);
-      println(hlog, "affect by bits for ", hs.at, " ", wsname(ws));
       affect(mydata, ws == NOWALLSEP_SWAP ? hs.at->master->rval1 : hs.at->master->rval0, 1);
       }
     }
