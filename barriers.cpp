@@ -264,6 +264,11 @@ EX bool general_barrier_check(cellwalker bb, int q, int dir, eLand ws, eLand l1 
   return general_barrier_check(bb, q-1, dir, ws, l1, l2);
   }
 
+EX bool general_barrier_check_after(cellwalker bb, int steps, int q, int dir, eLand ws, eLand l1 IS(laNone), eLand l2 IS(laNone)) {
+  for(int i=0; i<steps; i++) general_barrier_advance(bb, dir, l1, l2, ws, l1 != l2);
+  return general_barrier_check(bb, q, dir, ws, l1, l2);
+  }
+
 EX eWall getElementalWall(eLand l) {
   if(l == laEAir) return waChasm;
   if(l == laEEarth) return waStone;
@@ -426,12 +431,62 @@ EX void general_barrier_extend(cell *c) {
     cw.cpeek()->barleft = NOWALLSEP_USED;
     }
 
+  if(ws == NOWALLSEP_WALL && barrier_cross(l1, l2)) {
+
+    cellwalker p_cw = cw;
+    eLand p_l1 = l1, p_l2 = l2;
+    eLand p_ws = ws;
+    int i = 1;
+    general_barrier_advance(p_cw, i, p_l1, p_l2, p_ws, false);
+
+    cellwalker n_cw = cw;
+    eLand n_l1 = l1, n_l2 = l2;
+    eLand n_ws = ws;
+    i = -1;
+    general_barrier_advance(n_cw, i, n_l1, n_l2, n_ws, false);
+
+    int dir = 0;
+
+    println(hlog, "left ", n_cw, " = ", n_cw.at->barleft, " right ", p_cw, " = ", p_cw.at->barleft, " USED = ", NOWALLSEP_USED);
+
+    if(n_cw.at->barleft == NOWALLSEP_USED && p_cw.at->barleft != NOWALLSEP_USED) dir = 1;
+    if(p_cw.at->barleft == NOWALLSEP_USED && n_cw.at->barleft != NOWALLSEP_USED) dir = -1;
+
+    if(dir) {
+      if(!general_barrier_check_after(cw, 2, 10, 1, NOWALLSEP_WALL_EPOS, l1, l1)) {
+        println(hlog, "failed to check 1");
+        dir = 0;
+        }
+      if(!general_barrier_check_after(cw+wstep, 2, 10, 1, NOWALLSEP_WALL_EPOS, l1, l1)) {
+        println(hlog, "failed to check 2");
+        dir = 0;
+        }
+      }
+
+    if(dir) {
+      eLand xl1 = oppositeElement(l1, l2);
+      eLand xl2 = oppositeElement(l2, l1);
+
+      if(dir == 1) {
+        general_barrier_check_after(cw, 0, 10, 1, NOWALLSEP_WALL_EPOS, l1, xl2);
+        general_barrier_check_after(cw+wstep, 0, 10, 1, NOWALLSEP_WALL_EPOS, xl1, l2);
+        }
+      else {
+        general_barrier_check_after(cw, 0, 10, 1, NOWALLSEP_WALL_EPOS, xl2, l1);
+        general_barrier_check_after(cw+wstep, 0, 10, 1, NOWALLSEP_WALL_EPOS, l2, xl1);
+        }
+
+      general_barrier_check(cw, 10, dir, ws, xl2, xl1);
+      return;
+      }
+    }
+
   for(int i: {-1, 1}) {  
 
     if(i == -1 && among(ws, NOWALLSEP_WALL_CPOS, NOWALLSEP_WALL_EPOS)) continue;
     if(i == +1 && among(ws, NOWALLSEP_WALL_CNEG, NOWALLSEP_WALL_ENEG)) continue;
 
-    general_barrier_check((cw, 10, i, ws, l1, l2);
+    // general_barrier_check((cw, 10, i, ws, l1, l2);
 
     cellwalker cw0 = cw;
     eLand xl1 = l1, xl2 = l2;
@@ -486,6 +541,12 @@ EX bool isbar4(cell *c) {
     c->land == laMercuryRiver;
   }  
 
+EX bool barrier_cross(eLand l, eLand r) {
+  if(l == laCrossroads3 || r == laCrossroads3) return hrand(100) < 66;
+  if(isElemental(l) && isElemental(r)) return hrand(100) < 75;
+  return false;
+  }
+
 EX void extendBarrier(cell *c) {
   limitgen("extend barrier %p\n", hr::voidp(c)); 
   if(buggyGeneration) return;
@@ -537,10 +598,7 @@ EX void extendBarrier(cell *c) {
     if(buildBarrier6(cw, 2)) return;    
     }
     
-  if(((c->barleft == laCrossroads3 || c->barright == laCrossroads3) && hrand(100) < 66) ||
-    (isElemental(c->barleft) && isElemental(c->barright) && hrand(100) < 75) 
-    || (firstmirror && hrand(100) < 60)
-    ) {
+  if(barrier_cross(c->barleft, c->barright) || (firstmirror && hrand(100) < 60)) {
     
     cellwalker cw(c, c->bardir);
     if(PURE) {
