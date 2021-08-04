@@ -48,10 +48,13 @@ EX map<void*, int> pointer_indices;
 
 EX string index_pointer(void *v) {
   if(v == nullptr) return "0";
-  if(!pointer_indices.count(v)) pointer_indices[v] = isize(pointer_indices);
+  if(!pointer_indices.count(v)) {
+    int s = isize(pointer_indices);
+    pointer_indices[v] = s;
+    }
+  int i = pointer_indices[v];
   string res;
-  int i = pointer_indices[v] + 1;
-  while(i) { res += ('A' + (i % 26)); i /= 26; }
+  while(true) { res += ('A' + (i % 26)); i /= 26; if(!i) break; i--; }
   return res;
   }
 
