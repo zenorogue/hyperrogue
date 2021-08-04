@@ -3367,7 +3367,9 @@ ld wavefun(ld x) {
   else return 0; */
   }
 
-EX colortable nestcolors = { 0x800000, 0x008000, 0x000080, 0x404040, 0x700070, 0x007070, 0x707000, 0x606060 };
+// Color components in nestcolors must be less than 0x80 (for addition in drawMonster for Rock Snakes)
+// and must be divisible by 4 (for brightening of raised cells in celldrawer::setcolors)
+EX colortable nestcolors = { 0x7C0000, 0x007C00, 0x00007C, 0x404040, 0x700070, 0x007070, 0x707000, 0x606060 };
 
 color_t floorcolors[landtypes];
 
