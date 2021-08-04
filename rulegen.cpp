@@ -1314,7 +1314,7 @@ void rules_iteration() {
           if(r[a] == DIR_UNKNOWN) r[a] = DIR_LEFT;      
         last_live_branch = i;
         }
-    if(id == 0) examine_branch(id, last_live_branch, first_live_branch);
+    if(treestates[id].is_root) examine_branch(id, last_live_branch, first_live_branch);
     for(int a=last_live_branch; a<isize(r); a++)
       if(r[a] == DIR_UNKNOWN) r[a] = DIR_RIGHT;
     }
