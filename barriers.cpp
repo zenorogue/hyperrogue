@@ -241,7 +241,7 @@ EX bool general_barrier_advance(cellwalker& bb, int& dir, eLand& l1, eLand& l2, 
   return ok;
   }
 
-EX bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand ws, eLand l1 IS(laNone), eLand l2 IS(laNone)) {
+EX bool general_barrier_check(cellwalker bb, int q, int dir, eLand ws, eLand l1 IS(laNone), eLand l2 IS(laNone)) {
 
   if(l1 == l2) {
     if(bb.at->mpdist < BARLEV || bb.cpeek()->mpdist < BARLEV || bb.cpeek()->bardir != NODIR || bb.at->bardir != NODIR)
@@ -257,11 +257,11 @@ EX bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand ws, eLand l1 IS
     bb.at->bardir = bb.spin; bb.at->barright = l2; bb.at->barleft = ws; 
     setland(bb.at, l1);
     }
-  if(q > 20) return true;
+  if(q <= 0) return true;
   
   bool b = general_barrier_advance(bb, dir, l1, l2, ws, l1 != l2);
   if(l1 == l2 && !b) return false;
-  return checkBarriersNowall(bb, q+1, dir, ws, l1, l2);
+  return general_barrier_check(bb, q-1, dir, ws, l1, l2);
   }
 
 EX eWall getElementalWall(eLand l) {
@@ -431,7 +431,7 @@ EX void general_barrier_extend(cell *c) {
     if(i == -1 && among(ws, NOWALLSEP_WALL_CPOS, NOWALLSEP_WALL_EPOS)) continue;
     if(i == +1 && among(ws, NOWALLSEP_WALL_CNEG, NOWALLSEP_WALL_ENEG)) continue;
 
-    checkBarriersNowall(cw, 10, i, ws, l1, l2);
+    general_barrier_check((cw, 10, i, ws, l1, l2);
 
     cellwalker cw0 = cw;
     eLand xl1 = l1, xl2 = l2;
@@ -1053,18 +1053,18 @@ EX bool general_barrier_build(eLand ws, cell *c, eLand l2, int forced_dir IS(NOD
   
   if(forced_dir != NODIR) {
     cellwalker cw(c, forced_dir);
-    checkBarriersNowall(cw, 0, -1, ws, l1, l2);
-    checkBarriersNowall(cw, 0, 1, ws, l1, l2);
+    general_barrier_check(cw, 20, -1, ws, l1, l2);
+    general_barrier_check(cw, 20, 1, ws, l1, l2);
     extendBarrier(c);
     return true;
     }
 
   for(int d: ds) {
     if(c->move(d) && c->move(d)->mpdist <= c->mpdist) continue;    
-    cellwalker cw(c, d);
-    if(checkBarriersNowall(cw, 0, -1, ws, wsx, wsx) && checkBarriersNowall(cw, 0, 1, ws, wsx, wsx)) {
-      checkBarriersNowall(cw, 0, -1, ws, l1, l2);
-      checkBarriersNowall(cw, 0, 1, ws, l1, l2);
+    cellwalker cw(c, d);    
+    if(general_barrier_check(cw, 20, -1, ws, wsx, wsx) && general_barrier_check(cw, 20, 1, ws, wsx, wsx)) {
+      general_barrier_check(cw, 20, -1, ws, l1, l2);
+      general_barrier_check(cw, 20, 1, ws, l1, l2);
       extendBarrier(c);
       return true;
       }
