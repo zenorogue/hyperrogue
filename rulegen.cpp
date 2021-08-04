@@ -1682,6 +1682,7 @@ EX bool prepare_rules() {
     rules_known_for = arb::current.name;
     rule_status = XLAT("rules generated successfully: %1 states using %2-%3 cells", 
       its(isize(treestates)), its(tcellcount), its(tunified));
+    if(debugflags & DF_GEOM) println(hlog, rule_status);
     return true;
     }
   catch(rulegen_retry& e) {
@@ -1693,6 +1694,7 @@ EX bool prepare_rules() {
   catch(rulegen_failure& e) {
     rule_status = XLAT("bug: %1", e.what());
     }
+  if(debugflags & DF_GEOM) println(hlog, rule_status);
   return false;
   }
 
