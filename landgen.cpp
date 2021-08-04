@@ -1034,7 +1034,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             else c2->mondir = NODIR;
             }
           }
-        if(!c->monst && !tactic::on && !racing::on && !yendor::on && !randomPatternsMode && !peace::on && !euclid && hrand(4000) < 10 && !safety) {
+        if(!c->monst && !ls::single() && !racing::on && !yendor::on && !randomPatternsMode && !peace::on && !euclid && hrand(4000) < 10 && !safety) {
           c->item = itBabyTortoise;
           tortoise::babymap[c] = tortoise::getb(c) ^ tortoise::getRandomBits();
           }
@@ -1807,7 +1807,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         
         int chance = 50 + items[itBabyTortoise]*2;
         if(quickfind(laTortoise)) chance += 150;
-        if((tactic::on || euclid || peace::on) && hrand(4000) < chance && !safety) {
+        if((ls::single() || euclid || peace::on) && hrand(4000) < chance && !safety) {
           c->item = itBabyTortoise;
           tortoise::babymap[c] = tortoise::getb(c) ^ tortoise::getRandomBits();
           }
