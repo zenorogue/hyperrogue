@@ -4731,7 +4731,7 @@ Orb("Recall", "Возвращения")
 S("When the charges on this Orb expire, "
   "you will be automatically returned to the place where you have found it. "
   "Extra Orbs of Recall delay this without changing the recall location. "
-  "Pick up an Orb of Safety causes an immediate recall.",
+  "Picking up an Orb of Safety causes an immediate recall.",
  
   "Когда заряды этой сферы заканчиваются, вы автоматически возвращаетесь "
   "в место, где вы её нашли. Дополнительные сферы откладывают этот момент, "
