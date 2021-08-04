@@ -300,6 +300,7 @@ EX void compute_vertex_valence() {
   for(auto& sh: ac.shapes)
     sh.cycle_length = isize(sh.vertices);
   
+  recompute:
   while(true) {
 
     for(auto& sh: ac.shapes) {
@@ -361,7 +362,10 @@ EX void compute_vertex_valence() {
       while(total < 360*degree - 1e-6);
       if(total > 360*degree + 1e-6) throw hr_parse_exception("improper total in compute_stats");
       if(at.sid != i) throw hr_parse_exception("ended at wrong type determining vertex_valence");
-      if((at.eid - k) % ac.shapes[i].cycle_length) throw hr_parse_exception("ended at wrong edge determining vertex_valence");
+      if((at.eid - k) % ac.shapes[i].cycle_length) {
+        ac.shapes[i].cycle_length = abs(gcd(ac.shapes[i].cycle_length, at.eid - k));
+        goto recompute;
+        }
       sh.vertex_valence[k] = qty;
       }
     if(debugflags & DF_GEOM) 
