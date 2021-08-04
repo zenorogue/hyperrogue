@@ -527,10 +527,12 @@ EX void wandering() {
           forCellCM(c3, c2) if(c3->monst || c3->wall != waSea) 
             goto notfound;
           c2->monst = moKrakenH;
+          c2->stuntime = 0;
           playSeenSound(c2);
           for(int i=0; i<c2->type; i++) {
             c2->move(i)->monst = moKrakenT;
             c2->move(i)->hitpoints = 1;
+            c2->move(i)->stuntime = 0;
             c2->move(i)->mondir = c2->c.spin(i);
             }
           goto found;
