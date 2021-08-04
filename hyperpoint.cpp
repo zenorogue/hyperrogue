@@ -1535,6 +1535,7 @@ EX unsigned bucketer(hyperpoint h) {
     }
   dx += bucketer(h[0]) + 1000 * bucketer(h[1]) + 1000000 * bucketer(h[2]);
   if(MDIM == 4) dx += bucketer(h[3]) * 1000000001;
+  if(elliptic) dx = min(dx, -dx);
   return dx;
   }  
 
