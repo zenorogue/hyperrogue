@@ -866,6 +866,7 @@ EX void destroyTrapsOn(cell *c) {
   if(c->wall == waArrowTrap) {
     changes.ccell(c);
     c->wall = waNone;
+    drawParticles(c, 0xFF0000, 4);
     destroyTrapsAround(c);
     }
   }
