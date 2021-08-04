@@ -760,7 +760,7 @@ cdata orig_cdata;
 
 EX bool geometry_supports_cdata() {
   if(hybri) return PIU(geometry_supports_cdata());
-  return among(geometry, gEuclid, gEuclidSquare, gNormal, gOctagon, g45, g46, g47, gBinaryTiling) || (arcm::in() && !sphere);
+  return among(geometry, gEuclid, gEuclidSquare, gNormal, gOctagon, g45, g46, g47, gBinaryTiling) || (arcm::in() && !sphere) || currentmap->strict_tree_rules();
   }
 
 void affect(cdata& d, short rv, signed char signum) {
@@ -867,6 +867,8 @@ cdata *getHeptagonCdata(heptagon *h) {
     }
   #endif
 
+  if(currentmap->strict_tree_rules()) starting = h->distance <= 0;
+
   if(starting) {
     h->cdata = new cdata(orig_cdata);
     for(int& v: h->cdata->val) v = 0;
@@ -875,13 +877,38 @@ cdata *getHeptagonCdata(heptagon *h) {
     return h->cdata;
     }
   
-  int dir = bt::in() ? 5 : 0;
+  int dir = updir(h);
   
   cdata mydata = *getHeptagonCdata(h->cmove(dir));
 
   if(S3 >= OINF) {
     setHeptagonRval(h);
     affect(mydata, h->rval0, 1); 
+    }
+  else if(currentmap->strict_tree_rules()) {
+    for(eLand ws: {NOWALLSEP, NOWALLSEP_SWAP}) {
+      lalign(0, h->c7);
+      int dir = 1;
+      cellwalker hs(h->c7, dir, false);
+      eLand dummy = laNone;
+      vector<cell*> lpath, rpath;
+      while(true) {
+        int d = hs.at->master->distance;
+        general_barrier_advance(hs, dir, dummy, dummy, ws, false);
+        lpath.push_back(hs.at);
+        if(hs.at->master->distance > d) break;
+        }
+      dir = -dir;
+      while(true) {
+        int d = hs.at->master->distance;
+        general_barrier_advance(hs, dir, dummy, dummy, ws, false);
+        rpath.push_back(hs.at);
+        if(hs.at->master->distance > d) break;
+        }
+      setHeptagonRval(hs.at->master);
+      println(hlog, "affect by bits for ", hs.at, " ", wsname(ws));
+      affect(mydata, ws == NOWALLSEP_SWAP ? hs.at->master->rval1 : hs.at->master->rval0, 1);
+      }
     }
   else if(S3 == 4) {
     heptspin hs(h, 0);
@@ -1002,7 +1029,7 @@ EX int getCdata(cell *c, int j) {
 #if CAP_ARCM
   else if(arcm::in() && euclid)
     return getEuclidCdata(pseudocoords(c))->val[j];
-  else if(arcm::in() && hyperbolic) 
+  else if(arcm::in() && (hyperbolic || sl2)) 
     return arcmCdata(c)->val[j]*3;
 #endif
   else if(!geometry_supports_cdata()) return 0;
