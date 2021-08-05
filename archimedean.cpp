@@ -524,6 +524,8 @@ EX bool use_gmatrix = true;
  *  not used by arcm itself, but used in fake arcm
  */
 
+EX geometry_information *alt_cgip;
+
 struct hrmap_archimedean : hrmap {
   map<gp::loc, struct cdata> eucdata;
   heptagon *origin;
@@ -543,13 +545,20 @@ struct hrmap_archimedean : hrmap {
     heptagon *alt = NULL;
     
     if(hyperbolic) {
-      dynamicval<eGeometry> g(geometry, gNormal); 
-      alt = init_heptagon(S7);
-      alt->s = hsOrigin;
-      alt->alt = alt;
-      current_altmap = newAltMap(alt); 
+      dynamicval<eGeometry> g(geometry, gNormal);
+      dynamicval<eVariation> gv(variation, eVariation::pure);
+      if(1) {
+        dynamicval<geometry_information*> gi(cgip, cgip);
+        check_cgi();
+        cgi.require_basics();
+        alt_cgip = cgip;
+        alt = init_heptagon(S7);
+        alt->s = hsOrigin;
+        alt->alt = alt;
+        current_altmap = newAltMap(alt);
+        }
       }
-  
+
     transmatrix T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * Id;
     archimedean_gmatrix[origin] = make_pair(alt, T);
     altmap[alt].emplace_back(origin, T);
@@ -591,6 +600,8 @@ struct hrmap_archimedean : hrmap {
     archimedean_gmatrix.clear();
     if(current_altmap) {
       dynamicval<eGeometry> g(geometry, gNormal);       
+      dynamicval<eVariation> gv(variation, eVariation::pure);
+      dynamicval<geometry_information*> gi(cgip, alt_cgip);
       delete current_altmap;
       current_altmap = NULL;
       }
@@ -619,7 +630,9 @@ struct hrmap_archimedean : hrmap {
     transmatrix U = Id;
     
     if(hyperbolic) {
-      dynamicval<eGeometry> g(geometry, gNormal); 
+      dynamicval<eGeometry> g(geometry, gNormal);
+      dynamicval<eVariation> gv(variation, eVariation::pure);
+      dynamicval<geometry_information*> gi(cgip, alt_cgip);
       dynamicval<hrmap*> cm(currentmap, current_altmap);
       U = T;
       current_altmap->virtualRebase(alt, T);

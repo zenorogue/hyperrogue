@@ -1194,6 +1194,7 @@ EX void check_cgi() {
   cgi.timestamp = ++ntimestamp;
   if(hybri) hybrid::underlying_cgip->timestamp = ntimestamp;
   if(fake::in()) fake::underlying_cgip->timestamp = ntimestamp;
+  if(arcm::alt_cgip) arcm::alt_cgip->timestamp = ntimestamp;
   
   if(isize(cgis) > 4) {
     vector<pair<int, string>> timestamps;
