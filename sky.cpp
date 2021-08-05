@@ -203,14 +203,9 @@ void compute_skyvertices(const vector<sky_item>& sky) {
         
         int k = isize(vertices);
   
-        println(hlog, "bb ", k);
-          
         color_t ccolor;
         for(int i=0; i<k; i++) ccolor = gradient(ccolor, vcolors[i], 0, 1, i+1);
         
-        println(hlog, "vertices = ", vertices);
-        println(hlog, "ccolor = ", ccolor);
-  
         hyperpoint ctr = Hypc;
         for(auto& p: vertices) ctr = ctr + p;
         normalize(ctr);
