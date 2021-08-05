@@ -854,6 +854,18 @@ int png_read_args() {
     shot::shoty = 720;
     shot::transparent = false;
     }
+  else if(argis("-shot-qfhd")) {
+    shot::shotformat = -1;
+    shot::shotx = 960;
+    shot::shoty = 540;
+    shot::transparent = false;
+    }
+  else if(argis("-shot-qhd")) {
+    shot::shotformat = -1;
+    shot::shotx = 640;
+    shot::shoty = 360;
+    shot::transparent = false;
+    }
   else if(argis("-shot-1000")) {
     shot::shotformat = -1;
     shot::shotx = 1000;
