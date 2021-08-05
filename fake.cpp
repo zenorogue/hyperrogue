@@ -83,7 +83,7 @@ EX namespace fake {
       return FPIU(currentmap->create_step(parent, d));
       }
 
-    virtual hyperpoint get_corner(cell *c, int cid, ld cf=3) { 
+    hyperpoint get_corner(cell *c, int cid, ld cf=3) override { 
 
       if(arcm::in()) {
         return underlying_map->get_corner(c, cid, cf);
