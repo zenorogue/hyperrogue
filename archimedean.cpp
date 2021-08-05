@@ -526,6 +526,13 @@ EX bool use_gmatrix = true;
 
 EX geometry_information *alt_cgip;
 
+EX geometry_information *find_alt_cgip() {
+  if(alt_cgip) return alt_cgip;
+  check_cgi();
+  cgi.require_basics();
+  return alt_cgip = cgip;
+  }
+
 struct hrmap_archimedean : hrmap {
   map<gp::loc, struct cdata> eucdata;
   heptagon *origin;
@@ -547,16 +554,11 @@ struct hrmap_archimedean : hrmap {
     if(hyperbolic) {
       dynamicval<eGeometry> g(geometry, gNormal);
       dynamicval<eVariation> gv(variation, eVariation::pure);
-      if(1) {
-        dynamicval<geometry_information*> gi(cgip, cgip);
-        check_cgi();
-        cgi.require_basics();
-        alt_cgip = cgip;
-        alt = init_heptagon(S7);
-        alt->s = hsOrigin;
-        alt->alt = alt;
-        current_altmap = newAltMap(alt);
-        }
+      dynamicval<geometry_information*> gi(cgip, find_alt_cgip());
+      alt = init_heptagon(S7);
+      alt->s = hsOrigin;
+      alt->alt = alt;
+      current_altmap = newAltMap(alt);
       }
 
     transmatrix T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * Id;
@@ -601,7 +603,7 @@ struct hrmap_archimedean : hrmap {
     if(current_altmap) {
       dynamicval<eGeometry> g(geometry, gNormal);       
       dynamicval<eVariation> gv(variation, eVariation::pure);
-      dynamicval<geometry_information*> gi(cgip, alt_cgip);
+      dynamicval<geometry_information*> gi(cgip, find_alt_cgip());
       delete current_altmap;
       current_altmap = NULL;
       }
@@ -632,7 +634,7 @@ struct hrmap_archimedean : hrmap {
     if(hyperbolic) {
       dynamicval<eGeometry> g(geometry, gNormal);
       dynamicval<eVariation> gv(variation, eVariation::pure);
-      dynamicval<geometry_information*> gi(cgip, alt_cgip);
+      dynamicval<geometry_information*> gi(cgip, find_alt_cgip());
       dynamicval<hrmap*> cm(currentmap, current_altmap);
       U = T;
       current_altmap->virtualRebase(alt, T);
@@ -1040,8 +1042,15 @@ auto hook =
 
 #if MAXMDIM >= 4
 auto hooksw = addHook(hooks_swapdim, 100, [] {
+
+  dynamicval<eGeometry> g(geometry, gNormal);
+  dynamicval<eVariation> gv(variation, eVariation::pure);
+  dynamicval<geometry_information*> gi(cgip, find_alt_cgip());
+
   for(auto& p: altmap) for(auto& pp: p.second) swapmatrix(pp.second);
   for(auto& p: archimedean_gmatrix) swapmatrix(p.second.second);
+
+  alt_cgip = nullptr;
   });
 #endif
 
