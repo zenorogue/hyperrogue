@@ -610,7 +610,7 @@ struct hrmap_archimedean : hrmap {
 
   heptagon *create_step(heptagon *h, int d) override {
   
-    DEBB(DF_GEOM, (format("%p.%d ~ ?\n", hr::voidp(h), d)));
+    DEBB(DF_GEOM, (heptspin(h,d), " ~ ?"));
 
     dynamicval<geometryinfo1> gi(ginf[geometry].g, ginf[gArchimedean].g);
     
@@ -820,7 +820,7 @@ EX hrmap *new_map() { return new hrmap_archimedean; }
 heptagon *build_child(heptspin p, pair<int, int> adj) {
   indenter ind;
   auto h = buildHeptagon1(tailored_alloc<heptagon> (isize(current.adjacent[adj.first])), p.at, p.spin, hstate(1), 0);
-  DEBB(DF_GEOM, (format("NEW %p.%d ~ %p.0\n", hr::voidp(p.at), p.spin, hr::voidp(h))));
+  DEBB(DF_GEOM, ("NEW ", p, " ~ ", heptspin(h, 0)));
   id_of(h) = adj.first;
   parent_index_of(h) = adj.second;
   int nei = neighbors_of(h);
@@ -870,7 +870,7 @@ void connect_digons_too(heptspin h1, heptspin h2) {
   }
 
 void connectHeptagons(heptspin hi, heptspin hs) {
-  DEBB(DF_GEOM, (format("OLD %p.%d ~ %p.%d\n", hr::voidp(hi.at), hi.spin, hr::voidp(hs.at), hs.spin)));
+  DEBB(DF_GEOM, ("OLD ", hi, " ~ ", hs));
   if(hi.at->move(hi.spin) == hs.at && hi.at->c.spin(hi.spin) == hs.spin) {
     DEBB(DF_GEOM, (format("WARNING: already connected\n")));
     return;
