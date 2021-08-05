@@ -1553,7 +1553,7 @@ EX void start_game() {
   check_cgi();
   cgi.require_basics();
   #if CAP_ARCM
-  arcm::current.compute_geometry();
+  arcm::current_or_fake().compute_geometry();
   #endif
   initcells();
   expansion.reset();

@@ -80,8 +80,18 @@ EX namespace fake {
       }
     
     heptagon *create_step(heptagon *parent, int d) override {
-      parent->c.connect(d, parent, d, false);
-      return parent;
+      return FPIU(currentmap->create_step(parent, d));
+      }
+
+    virtual hyperpoint get_corner(cell *c, int cid, ld cf=3) { 
+
+      if(arcm::in()) {
+        return underlying_map->get_corner(c, cid, cf);
+        }
+
+      hyperpoint h;
+      h = FPIU(currentmap->get_corner(c, cid, cf));
+      return befake(h);
       }
 
     transmatrix adj(cell *c, int d) override {
@@ -361,6 +371,8 @@ EX namespace fake {
       }
 
     transmatrix ray_iadj(cell *c, int i) override {
+      if(WDIM == 2)
+        return to_other_side(get_corner(c, i), get_corner(c, i+1));
       if(PURE) return iadj(c, i);      
       auto& v = get_cellshape(c).faces_local[i];
       hyperpoint h = 
@@ -390,8 +402,8 @@ EX namespace fake {
   #endif
 
 EX hyperpoint befake(hyperpoint h) {
-  auto h1 = h / h[WDIM] * scale;
-  h1[WDIM] = 1;
+  auto h1 = h / h[LDIM] * scale;
+  h1[LDIM] = 1;
   if(material(h1) > 1e-3)
     h1 = normalize(h1);
   return h1;
