@@ -4472,3 +4472,13 @@ Bugfixes:
 * fixed incorrect graphics in binary tilings
 * fixed bugs with moving the key with boats
 * Princess Quest no longer shows fail screen merely due to the princess being in peril
+
+2021-08-05 13:23 Update 12.0f:
+
+* fixed fake geometry with 2D tessellations (many fixes)
+* fractal landscapes for strict tree-based rules
+* improved the memory performance of strict tree rules generator (see 12.0e)
+* crossing Great Walls (CR3/Elemental Planes) for all 2D tessellations, fixed some bugs with Great Walls
+* fixed switching places (message shown correctly, can't switch with saved tortoises and dice in peace mode)
+* fixed possible bugs with Brownian colors, snake colors, interactions of arrow traps and terracotta warriors (thanks to @jruderman)
+* fixed 3-dimensional elliptic space
