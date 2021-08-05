@@ -4482,3 +4482,4 @@ Bugfixes:
 * fixed switching places (message shown correctly, can't switch with saved tortoises and dice in peace mode)
 * fixed possible bugs with Brownian colors, snake colors, interactions of arrow traps and terracotta warriors (thanks to @jruderman)
 * fixed 3-dimensional elliptic space
+* tes files: fixed a bug with 'ended at wrong edge determining vertex_valence'
