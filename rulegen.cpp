@@ -421,7 +421,10 @@ void unify_distances(tcell *c1, tcell *c2) {
 void handle_distance_errors() {
   bool b = solid_errors;
   solid_errors = 0;
-  if(b && !no_errors) throw hr_solid_error();
+  if(b && !no_errors) {
+    analyzers.clear();
+    throw hr_solid_error();
+    }
   }
 
 /** make sure that we know c->dist */
@@ -555,7 +558,7 @@ void analyzer::add_step(int pid, int s) {
   spin.push_back(s);
   }
 
-map<aid_t, analyzer> analyzers;
+EX map<aid_t, analyzer> analyzers;
 
 EX aid_t get_aid(twalker cw) {
   ufind(cw);
@@ -597,8 +600,8 @@ void extend_analyzer(twalker cw_target, int dir, int id, int mism, twalker rg) {
   twalker cw_conflict = cw_target + dir + wstep;
   auto &a_target = get_analyzer(cw_target);
   auto &a_conflict = get_analyzer(cw_conflict);
-  twalker model = a_target.spread[0] + dir + wstep;
-  auto res = spread(a_conflict, model);
+  // twalker model = a_target.spread[0] + dir + wstep;
+  // auto res = spread(a_conflict, model);
   vector<int> ids_to_add;
   int k = id;
   while(k) {
