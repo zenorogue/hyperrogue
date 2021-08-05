@@ -92,6 +92,7 @@ ifeq (${TOOLCHAIN},gcc)
   CXXFLAGS_EARLY += -march=native -fPIC
   CXXFLAGS_EARLY += -W -Wall -Wextra -Werror -pedantic
   CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized
+  CXXFLAGS_EARLY += -Wno-invalid-offsetof
 endif
 
 ifeq (${TOOLCHAIN},mingw)
@@ -99,6 +100,7 @@ ifeq (${TOOLCHAIN},mingw)
   CXXFLAGS_EARLY += -march=native
   CXXFLAGS_EARLY += -W -Wall -Wextra -Werror
   CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized
+  CXXFLAGS_EARLY += -Wno-invalid-offsetof
 endif
 
 
