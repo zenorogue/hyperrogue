@@ -926,6 +926,8 @@ EX void initConfig() {
   #endif
   addsaver(slr::steps, "slr-steps");
   addsaver(slr::range_xy, "slr-range-xy");
+
+  param_f(arcm::euclidean_edge_length, "arcm-euclid-length");
   
   #if CAP_ARCM
   addsaver(arcm::current.symbol, "arcm-symbol", "4^5");

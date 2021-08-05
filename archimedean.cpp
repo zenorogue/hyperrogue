@@ -14,6 +14,8 @@ EX namespace arcm {
 
 EX bool in() { return cgflags & qARCHI; }
 
+EX ld euclidean_edge_length = .5;
+
 #if HDR
 struct hr_archimedean_error : hr_exception {
   hr_archimedean_error(string _s) : hr_exception(_s) {}
@@ -399,7 +401,6 @@ void archimedean_tiling::compute_geometry() {
   inradius.resize(N+1); inradius[N] = 0;
   circumradius.resize(N+1); circumradius[N] = 0;
   alphas.resize(N);
-  ld elmin = 0, elmax = hyperbolic ? 10 : sphere ? M_PI : 1;
   
   ld total = M_PI;
 
@@ -410,6 +411,8 @@ void archimedean_tiling::compute_geometry() {
     ginf[geometry].g = get_geometry(fake::around / N);
     }
   
+  ld elmin = 0, elmax = hyperbolic ? 10 : sphere ? M_PI : 2 * euclidean_edge_length;
+
   /* inradius[N] is used in farcorner and nearcorner. Probably a bug */
   
   if(real_faces == 2) {
