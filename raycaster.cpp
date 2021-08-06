@@ -2026,6 +2026,14 @@ EX void cast() {
       }
     rmap->assign_uniforms(&*o);
     }
+
+  // we may learn about this now...
+  if(need_many_cell_types() && o->uWallOffset == -1) {
+    reset_raycaster();
+    cast();
+    return;
+    }
+
   GLERR("uniform mediump start");
   
   if(!o) { cast(); return; }
