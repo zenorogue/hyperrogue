@@ -1744,7 +1744,7 @@ struct raycast_map {
   
   void generate_connections() {
     int id = 0;
-    for(cell* c: lst)
+    for(cell* c: lst) if(!reset_rmap)
       generate_connections(c, id++);
     }
   
@@ -1803,7 +1803,7 @@ struct raycast_map {
   };
 
 unique_ptr<raycast_map> rmap;
-bool reset_rmap = false;
+EX bool reset_rmap = false;
 
 EX void reset_raycaster() { 
   our_raycaster = nullptr; 
@@ -2008,6 +2008,11 @@ EX void cast() {
   
   if(rmap->need_to_create(cs)) {
     rmap->create_all(cs);  
+    if(reset_rmap) {
+      reset_raycaster();
+      cast();
+      return;
+      }
     if(rmap->gms_exceeded()) {
       if(isize(rmap->ms) > gms_limit || can_via_texture) {
         m_via_texture = true;
