@@ -40,6 +40,8 @@
 
 #include "notknot.cpp"
 
+#include "weirdmaze.cpp"
+
 #include "inner-maps.cpp"
 #include "planets.cpp"
 #include "hyperbolic-analogs.cpp"
