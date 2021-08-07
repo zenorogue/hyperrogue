@@ -1261,6 +1261,7 @@ EX namespace reg3 {
           hyperpoint p = tC0(T);
           tmatrices[0][b] = rspintox(p) * xpush(hdist0(p)) * cspin(2, 1, angle) * spintox(p);
           }
+        make_subconnections();
         }
       };
 
@@ -1282,6 +1283,7 @@ EX namespace reg3 {
             tmatrices[a][b] = rspintox(p) * xpush(hdist0(p)) * cspin(2, 1, 108 * degree) * spintox(p);
             }
           }      
+        make_subconnections();
         }
       };
     
