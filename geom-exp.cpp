@@ -204,7 +204,7 @@ EX void ge_land_selection() {
       if(landvisited[l]) dialog::do_if_confirmed(dual::mayboth([l] {
         stop_game_and_switch_mode(tactic::on ? rg::tactic : rg::nothing);
         firstland = specialland = l;
-        if(l == laCanvas || l == laAsteroids)
+        if(l == laCanvas || l == laAsteroids || (land_validity(l).flags & lv::switch_to_single))
           land_structure = lsSingle;
         else if(among(l, laCrossroads, laCrossroads2))
           land_structure = lsNiceWalls;

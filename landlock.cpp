@@ -598,6 +598,7 @@ namespace lv {
   static const flagtype appears_in_ptm = 8;
   static const flagtype display_in_help = 16;
   static const flagtype one_and_half = 32;
+  static const flagtype switch_to_single = 64;
   }
 
 struct land_validity_t {
@@ -693,6 +694,7 @@ namespace lv {
   land_validity_t shmup_only = {0, q0, "This land works only in the shmup mode."}; 
   land_validity_t not_in_shmup = {0, q0, "This land is not available in the shmup mode."}; 
   land_validity_t not_in_multi = {0, q0, "This land is not available in multiplayer."}; 
+  land_validity_t single_only = {2, q0 | switch_to_single, "Available in single land mode only." };
   }
 
 // old Daily Challenges should keep their validity forever
@@ -952,12 +954,16 @@ EX land_validity_t& land_validity(eLand l) {
     if(l == laEndorian && geometry)
       return not_implemented;
     // special Euclidean implementations
-    if(euclid && (l == laIvoryTower || l == laMountain || l == laOcean || l == laMountain)) 
+    if(euclid && !ls::single() && old_daily_id > 9999) return single_only;
+    if(euclid && (l == laIvoryTower || l == laMountain || l == laOcean || l == laMountain)) {
       return special_geo;
+      }
     // in other geometries, it works
     if(geometry)
       return ok;
     }
+
+  if(l == laCaribbean && !ls::single() && old_daily_id > 9999) return single_only;
   
   if(l == laPrincessQuest && ls::any_chaos())
     return not_in_chaos;
