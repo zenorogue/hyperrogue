@@ -246,6 +246,7 @@ bool pcmove::movepcto() {
   if(d >= 0 && !checkonly && subdir != 1 && subdir != -1) printf("subdir = %d\n", subdir);
   mip.t = NULL;
   switchplaces = false;
+  warning_shown = false;
 
   if(d == MD_USE_ORB) 
     return targetRangedOrb(multi::whereto[multi::cpid].tgt, roMultiGo);
@@ -293,7 +294,7 @@ bool pcmove::movepcto() {
 
     if(items[itOrbFlash]) {
       if(checkonly) { nextmovetype = lmInstant; return true; }
-      if(orbProtection(itOrbFlash)) return true;
+      if(warning_shown || orbProtection(itOrbFlash)) return true;
       activateFlash();
       checkmove();
       return true;
@@ -301,7 +302,7 @@ bool pcmove::movepcto() {
 
     if(items[itOrbLightning]) {
       if(checkonly) { nextmovetype = lmInstant; return true; }
-      if(orbProtection(itOrbLightning)) return true;
+      if(warning_shown || orbProtection(itOrbLightning)) return true;
       activateLightning();
       checkmove();
       return true;
@@ -1277,11 +1278,13 @@ bool pcmove::stay() {
 inline bool movepcto(const movedir& md) { return movepcto(md.d, md.subdir); }
 #endif
 
+EX bool warning_shown;
 
 EX bool warningprotection(const string& s) {
   if(hardcore) return false;
   if(multi::activePlayers() > 1) return false;
   if(items[itWarning]) return false;
+  warning_shown = true;
   pushScreen([s] () {
     gamescreen(1);
     dialog::addBreak(250);
