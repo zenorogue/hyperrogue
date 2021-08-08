@@ -486,7 +486,7 @@ struct movei {
   movei(cell *_s, int _d) : s(_s), d(_d) {
     if(d == STRONGWIND) t = whirlwind::jumpDestination(s);
     else if(d < 0 || d >= s->type) t = s;
-    else t = s->move(d);
+    else t = s->cmove(d);
     }
   movei(cell *_s, cell *_t, int _d) : s(_s), t(_t), d(_d) {}
   movei(cellwalker cw) : s(cw.at), t(cw.cpeek()), d(cw.spin) {}
