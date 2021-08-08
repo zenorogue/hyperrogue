@@ -1355,6 +1355,7 @@ EX void movehex(bool mounted, int colorpair) {
   }
 
 EX void movehex_rest(bool mounted) {
+  pathdata pd(4);
   for(int i=0; i<isize(hexsnakes); i++) {
     cell *c = hexsnakes[i];
     int colorpair;
