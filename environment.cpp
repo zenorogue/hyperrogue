@@ -865,4 +865,25 @@ EX void monstersTurn() {
 #endif
   }
 
+/** check if whirlline is looped, if yes, remove the repeat; may not detect loops immediately */
+EX bool looped(vector<cell*>& whirlline) {
+  if(isize(whirlline) == 1)
+    return false;
+  if(whirlline.back() == whirlline.front()) {
+    whirlline.pop_back();
+    return true;
+    }
+  int pos = isize(whirlline)/2;
+  if(isize(whirlline) > 2 && whirlline.back() == whirlline[pos]) {
+    while(pos && whirlline.back() == whirlline[pos])
+      whirlline.pop_back();
+    /* something weird must have happened... */
+    static bool once = true;
+    if(once) addMessage("warning: a looped line");
+    once = false;
+    return true;
+    }
+  return false;
+  }
+
 }

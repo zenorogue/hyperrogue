@@ -102,6 +102,7 @@ EX namespace whirlwind {
     again: 
     cell *at = whirlline[isize(whirlline)-1];
     cell *prev = whirlline[isize(whirlline)-2];
+    if(looped(whirlline)) return;
     for(int i=0; i<at->type; i++) 
       if(at->move(i) && (euclid || at->move(i)->master->alt) && celldistAlt(at->move(i)) == d && at->move(i) != prev) {
         whirlline.push_back(at->move(i));
@@ -1062,10 +1063,9 @@ EX namespace whirlpool {
     again: 
     cell *at = whirlline[isize(whirlline)-1];
     cell *prev = whirlline[isize(whirlline)-2];
+    if(looped(whirlline)) return;
     for(int i=0; i<at->type; i++) 
       if(at->move(i) && (eubinary || at->move(i)->master->alt) && celldistAlt(at->move(i)) == d && at->move(i) != prev) {
-        if(at->move(i) == whirlline[0]) return; // loops in weird geometries?
-        if(at->move(i) == whirlline[isize(whirlline)/2]) return; // even weirder geometry?
         whirlline.push_back(at->move(i));
         goto again;
         }
