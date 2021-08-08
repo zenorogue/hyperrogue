@@ -903,7 +903,7 @@ bool pcmove::after_escape() {
     tell_why_impassable();
     return false;
     }
-  else if(items[itFatigue] + fatigue_cost(mi) > 10) {
+  else if(markOrb(itCurseFatigue) && items[itFatigue] + fatigue_cost(mi) > 10) {
     if(vmsg(miRESTRICTED)) 
       addMessage(XLAT("You are too fatigued!"));
     return false;
