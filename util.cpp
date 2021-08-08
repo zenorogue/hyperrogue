@@ -339,6 +339,7 @@ cld exp_parser::parse(int prio) {
     else if(number == "random") res = randd();
     else if(number == "mousez") res = cld(mousex - current_display->xcenter, mousey - current_display->ycenter) / cld(current_display->radius, 0);
     else if(number == "shot") res = inHighQual ? 1 : 0;
+    else if(number == "fake_edgelength") res = arcm::fake_current.edgelength;
     else if(number[0] >= 'a' && number[0] <= 'z') throw hr_parse_exception("unknown value: " + number);
     else if(number[0] >= 'A' && number[0] <= 'Z') throw hr_parse_exception("unknown value: " + number);
     else if(number[0] == '_') throw hr_parse_exception("unknown value: " + number);
