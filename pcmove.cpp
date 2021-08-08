@@ -1147,11 +1147,11 @@ bool pcmove::perform_actual_move() {
 
   movecost(cwt.at, c2, 1);
 
-  if(!boatmove && collectItem(c2)) return true;
+  if(!boatmove && collectItem(c2, cwt.at)) return true;
   if(boatmove && c2->item && cwt.at->item) {
      eItem it = c2->item;
      c2->item = cwt.at->item;
-     if(collectItem(c2)) return true;
+     if(collectItem(c2, cwt.at)) return true;
      eItem it2 = c2->item;
      c2->item = it;
      cwt.at->item = it2;
@@ -1167,7 +1167,7 @@ bool pcmove::perform_actual_move() {
     forCellEx(c3, c2) if(c3->wall == waIcewall && c3->item) {
       changes.ccell(c3);
       markOrb(itOrbWinter);
-      if(collectItem(c3)) return true;
+      if(collectItem(c3, cwt.at)) return true;
       }
   
   movecost(cwt.at, c2, 2);

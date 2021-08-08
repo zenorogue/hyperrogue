@@ -661,7 +661,7 @@ EX namespace inv {
           eItem it = cwt.at->item; 
           cwt.at->item = orbmap[uni];
           inv::activating = true;
-          collectItem(cwt.at, true);
+          collectItem(cwt.at, cwt.at, true);
           inv::activating = false;
           addMessage(XLAT("You activate %the1.", orbmap[uni]));
           if(!cwt.at->item) usedup[orbmap[uni]]++;

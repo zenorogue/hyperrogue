@@ -57,23 +57,23 @@ EX bool doPickupItemsWithMagnetism(cell *c) {
       else if(c3->item == itOrbSafety || c3->item == itBuggy || c3->item == itBuggy2)
         csaf = c3;
       else if(markOrb(itOrbMagnetism))
-        collectItem(c3, false);
+        collectItem(c3, c3, false);
       }
   if(csaf)
-    return collectItem(csaf, false);
+    return collectItem(csaf, csaf, false);
   return false;
   }
 
-EX void pickupMovedItems(cell *c) {
+EX void pickupMovedItems(cell *c, cell *from) {
   if(!c->item) return;
   if(c->item == itOrbSafety) return;
-  if(isPlayerOn(c)) collectItem(c, true);  
+  if(isPlayerOn(c)) collectItem(c, from, true);
   if(items[itOrbMagnetism])
     forCellEx(c2, c)
       if(isPlayerOn(c2) && canPickupItemWithMagnetism(c, c2)) {
         changes.ccell(c2);
         changes.ccell(c);
-        collectItem(c, true);
+        collectItem(c, c2, true);
         }
   }
 
@@ -81,7 +81,7 @@ EX bool in_lovasz() {
   return specialland == laMotion && bounded && ls::single() && !daily::on;
   }
 
-EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
+EX bool collectItem(cell *c2, cell *last, bool telekinesis IS(false)) {
 
   bool dopickup = true;
   bool had_choice = false;
@@ -119,7 +119,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
   #endif
   
   if(isRevivalOrb(c2->item) && multi::revive_queue.size()) {
-    multiRevival(cwt.at, c2);
+    multiRevival(last, c2);
     }
   else if(isShmupLifeOrb(c2->item) && shmup::on) {
     playSound(c2, "pickup-orb"); // TODO summon
@@ -165,12 +165,12 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     }
   else if(c2->item == itOrbLife) {
     playSound(c2, "pickup-orb"); // TODO summon
-    placeGolem(cwt.at, c2, moGolem);
+    placeGolem(last, c2, moGolem);
     if(cwt.at->monst == moGolem) cwt.at->stuntime = 0;
     }
   else if(c2->item == itOrbFriend) {
     playSound(c2, "pickup-orb"); // TODO summon
-    placeGolem(cwt.at, c2, moTameBomberbird);
+    placeGolem(last, c2, moTameBomberbird);
     if(cwt.at->monst == moTameBomberbird) cwt.at->stuntime = 0;
     }
 #if CAP_TOUR
@@ -209,7 +209,7 @@ EX bool collectItem(cell *c2, bool telekinesis IS(false)) {
     changes.value_set(tortoise::seekbits, bnew);
     changes.value_set(tortoise::last, seekbits);
     if(seek()) {
-      cell *c = passable(cwt.at, NULL, 0) ? cwt.at : c2;
+      cell *c = passable(last, NULL, 0) ? last : c2;
       changes.ccell(c);
       c->item = itBabyTortoise;
       if(c == c2) dopickup = false;

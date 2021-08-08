@@ -144,7 +144,7 @@ EX namespace whirlwind {
         animateMovement(match(whirlline[i+1], whirlline[i]), LAYER_BOAT);
       }
     for(int i=0; i<z; i++) 
-      pickupMovedItems(whirlline[i]);
+      pickupMovedItems(whirlline[i], i==z-1 ? whirlline[0] : whirlline[i+1]);
     }
   
   EX void move() {
@@ -1119,8 +1119,8 @@ EX namespace whirlpool {
       if(wfrom->item == itKey || wfrom->item == itOrbYendor)
         for(int i=0; i<wto->type; i++) createMov(wto, i);
       moveItem(wfrom, wto, false);
-      pickupMovedItems(wfrom);
-      pickupMovedItems(wto);
+      pickupMovedItems(wfrom, wto);
+      pickupMovedItems(wto, wfrom);
       }
     
     if(wto && !wfrom) 
@@ -2466,7 +2466,7 @@ EX void livecaves() {
       if(hv > 0 && c->wall == waNone) {
         if(c->item && c->cpdist == 1 && markOrb(itOrbWater)) {
           bool saf = c->item == itOrbSafety;
-          collectItem(c);
+          collectItem(c, c);
           if(saf) return;
           }
         c->wall = waSea;

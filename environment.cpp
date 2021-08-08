@@ -799,7 +799,7 @@ EX void monstersTurn() {
   if(!phase2) movemonsters();
 
   for(cell *pc: player_positions()) if(pc->item == itOrbSafety)  {
-    collectItem(pc, true);
+    collectItem(pc, pc, true);
     return;
     }
 

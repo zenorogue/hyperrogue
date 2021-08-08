@@ -695,7 +695,7 @@ EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMons
     from = NULL;
     }
   if(cwt.at->item != itOrbYendor && cwt.at->item != itHolyGrail) {
-    auto c = collectItem(cwt.at, true);
+    auto c = collectItem(cwt.at, from, true);
     if(c) {
       return true;
       }
@@ -777,7 +777,7 @@ void telekinesis(cell *dest) {
     }    
 
   moveItem(dest, cwt.at, true);
-  collectItem(cwt.at, true);
+  collectItem(cwt.at, cwt.at, true);
   useupOrb(itOrbSpace, cost.first);
   if(cost.second) 
     markOrb(itOrbMagnetism);

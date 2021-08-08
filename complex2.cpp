@@ -261,7 +261,7 @@ EX namespace westwall {
         animateMovement(match(whirlline[i+1], whirlline[i]), LAYER_BOAT);
       }
     for(int i=0; i<z; i++) 
-      pickupMovedItems(whirlline[i]);
+      pickupMovedItems(whirlline[i], i<z-1 ? whirlline[i+1] : whirlline[0]);
     }
   
   EX void move() {
