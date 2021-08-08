@@ -3997,7 +3997,7 @@ EX subcellshape& generate_subcellshape_if_needed(cell *c, int id) {
   
   cell *c1 = hybri ? hybrid::get_where(c).first : c;
   
-  if(prod || WDIM == 2) for(int i=0; i<c1->type; i++) {
+  if(hybri || WDIM == 2) for(int i=0; i<c1->type; i++) {
     hyperpoint w;
     auto f = [&] { 
       /* mirror image of C0 in the axis h1-h2 */
