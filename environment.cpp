@@ -236,24 +236,34 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
 
 #if HDR
 struct pathdata {
-  void checklock() { 
-    if(pd_from) pd_from = NULL, clear_pathdata();
-    if(pathlock) printf("path error\n"); 
-    pathlock++; 
-    }
-  ~pathdata() {
-    pathlock--;
-    clear_pathdata();
-    }
-  pathdata(eMonster m, bool include_allies IS(true)) { 
-    checklock();
-    computePathdist(m, include_allies); 
-    }
-  pathdata(int i) { 
-    checklock();
-    }
+  void checklock();
+  ~pathdata();
+  pathdata(eMonster m, bool include_allies IS(true));
+  pathdata(int i);
   };
 #endif
+
+pathdata::~pathdata() {
+  pathlock--;
+  clear_pathdata();
+  }
+
+void pathdata::checklock() {
+  if(pd_from) pd_from = NULL, clear_pathdata();
+  if(pathlock) printf("path error\n");
+  pathlock++;
+  }
+
+pathdata::pathdata(int i) { checklock(); }
+
+pathdata::pathdata(eMonster m, bool include_allies IS(true)) {
+  checklock();
+  if(isize(pathq))
+    println(hlog, "! we got tiles on pathq: ", isize(pathq));
+
+  computePathdist(m, include_allies);
+  }
+
 // pathdist end
 
 /** calculate cpdist, 'have' flags, and do general fixings */
