@@ -57,9 +57,9 @@ vector<pair<cell*, eMonster>> tempmonsters;
 /** additional direction information for BFS algorithms.
  *  It remembers from where we have got to this location
  *  the opposite cell will be added to the queue first,
- *  which helps the AI.
+ *  which helps the AI. Used by computePathdist and its callees.
  **/
-EX vector<int> reachedfrom;
+EX vector<int> path_reachedfrom;
 
 /** The position of the first cell in dcal in distance 7. New wandering monsters can be generated in dcal[first7..]. */
 EX int first7;           
@@ -93,17 +93,15 @@ EX void onpath(cell *c, int d) {
   pathq.push_back(c);
   }
 
-EX void onpath(cell *c, int d, int sp) {
-  c->pathdist = d;
-  pathq.push_back(c);
-  reachedfrom.push_back(sp);
+void onpath_rf(cell *c, int d, int sp) {
+  onpath(c, d);
+  path_reachedfrom.push_back(sp);
   }
 
 EX void clear_pathdata() {
   for(auto c: pathq) c->pathdist = PINFD;
   pathq.clear(); 
   pathqm.clear();
-  reachedfrom.clear(); 
   }
 
 EX int pathlock = 0;
@@ -166,15 +164,17 @@ void princess_ai::run() {
         info[0].visit(c1);
       }
     if(k == radius && c->wall == waOpenPlate && c->pathdist == PINFD)
-      onpath(c, d, hrand(c->type));
+      onpath_rf(c, d, hrand(c->type));
     }
   }
 
 EX void computePathdist(eMonster param, bool include_allies IS(true)) {
   
+  path_reachedfrom.clear();
+
   for(cell *c: targets)
     if(include_allies || isPlayerOn(c))
-      onpath(c, isPlayerOn(c) ? 0 : 1, hrand(c->type));
+      onpath_rf(c, isPlayerOn(c) ? 0 : 1, hrand(c->type));
 
   int qtarg = isize(targets);
   
@@ -188,7 +188,7 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
   
   for(; qb < isize(pathq); qb++) {
     cell *c = pathq[qb];
-    int fd = reachedfrom[qb] + c->type/2;
+    int fd = path_reachedfrom[qb] + c->type/2;
     if(c->monst && !isBug(c) && !(isFriendly(c) && !c->stuntime)) {
       pathqm.push_back(c); 
       continue; // no paths going through monsters
@@ -220,7 +220,7 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
             continue;
           }
 
-        onpath(c2, d+1, c->c.spin(i));
+        onpath_rf(c2, d+1, c->c.spin(i));
         }
       
       else if(c2 && c2->wall == waClosedGate && princess)
@@ -266,6 +266,13 @@ pathdata::pathdata(eMonster m, bool include_allies IS(true)) {
 
 // pathdist end
 
+/** additional direction information for BFS algorithms.
+ *  It remembers from where we have got to this location
+ *  the opposite cell will be added to the queue first,
+ *  which helps the AI. Used in bfs().
+ **/
+EX vector<int> bfs_reachedfrom;
+
 /** calculate cpdist, 'have' flags, and do general fixings */
 EX void bfs() {
 
@@ -293,7 +300,7 @@ EX void bfs() {
   airmap.clear();
   if(!(hadwhat & HF_ROSE)) rosemap.clear();
   
-  dcal.clear(); reachedfrom.clear(); 
+  dcal.clear(); bfs_reachedfrom.clear();
 
   recalcTide = false;
   
@@ -302,7 +309,7 @@ EX void bfs() {
     c->cpdist = 0;
     checkTide(c);
     dcal.push_back(c);
-    reachedfrom.push_back(hrand(c->type));
+    bfs_reachedfrom.push_back(hrand(c->type));
     if(!invismove) targets.push_back(c);
     }
   
@@ -318,7 +325,7 @@ EX void bfs() {
   first7 = 0;
   while(true) {
     if(qb == isize(dcal)) break;
-    int i, fd = reachedfrom[qb] + 3;
+    int i, fd = bfs_reachedfrom[qb] + dcal[qb]->type/2;
     cell *c = dcal[qb++];
     
     int d = c->cpdist;
@@ -399,7 +406,7 @@ EX void bfs() {
         
         if(!keepLightning) c2->ligon = 0;
         dcal.push_back(c2);
-        reachedfrom.push_back(c->c.spin(i));
+        bfs_reachedfrom.push_back(c->c.spin(i));
         
         checkTide(c2);
                 
