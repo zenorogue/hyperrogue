@@ -242,8 +242,8 @@ EM_BOOL resize_callback(int eventType, const EmscriptenUiEvent *resizeEvent, voi
 
 EX void initweb() {
   // toggleanim(false);
-  emscripten_set_fullscreenchange_callback(0, NULL, false, fsc_callback);
-  emscripten_set_resize_callback(0, NULL, false, resize_callback);
+  emscripten_set_fullscreenchange_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, NULL, false, fsc_callback);
+  emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, NULL, false, resize_callback);
   printf("showstartmenu = %d\n", showstartmenu);
   if(showstartmenu) pushScreen(showDemo);
   }
