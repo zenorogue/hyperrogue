@@ -2076,10 +2076,10 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
                       if(valence() != 3 || isNeighbor(dog1, dog2)) {
                         dog1->monst = moHunterGuard;
                         dog1->stuntime = 0;
-                        dog1->landparam = 0;
+                        if(dog1->land == laHunting) dog1->landparam = 0;
                         dog2->monst = moHunterGuard;
                         dog2->stuntime = 0;
-                        dog2->landparam = 1;
+                        if(dog2->land == laHunting) dog2->landparam = 1;
                         break;
                         }
                       }
