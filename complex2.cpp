@@ -225,6 +225,13 @@ EX namespace westwall {
     again: 
     cell *at = whirlline[isize(whirlline)-1];
     cell *prev = whirlline[isize(whirlline)-2];
+    if(isize(whirlline) > 2 && at == whirlline[isize(whirlline)/2]) {
+      /* something weird must have happened... */
+      static bool once = true;
+      if(once) addMessage("warning: a bug in building a whirl line");
+      once = false;
+      return;
+      }
     for(int i=0; i<at->type; i++) 
       if(at->move(i) && coastvalEdge1(at->move(i)) == d && at->move(i) != prev) {
         whirlline.push_back(at->move(i));
