@@ -587,8 +587,12 @@ EX int gravityLevel(cell *c) {
   }
 
 EX int gravityLevelDiff(cell *c, cell *d) {
-  if(c->land != laWestWall || d->land != laWestWall)
-    return gravityLevel(c) - gravityLevel(d);
+  if(c->land != laWestWall || d->land != laWestWall) {
+    int res = gravityLevel(c) - gravityLevel(d);
+    if(res > 1) return 1;
+    if(res < -1) return -1;
+    return res;
+    }
   
   if(shmup::on) return 0;
 
