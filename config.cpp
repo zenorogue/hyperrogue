@@ -2287,7 +2287,8 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   addsaver(vid.use_wall_radar, "wallradar", true);
   addsaver(vid.fixed_facing, "fixed facing", 0);
   addsaver(vid.fixed_facing_dir, "fixed facing dir", 90);
-  addsaver(vid.fixed_yz, "fixed YZ", true);
+  param_b(vid.fixed_yz, "fixed YZ", true);
+  param_b(draw_sky, "draw sky", true);
   param_f(vid.depth, "depth", "3D depth", 1)
     ->editable(0, 5, .1, "Ground level below the plane", "", 'd')
     ->set_extra([] {

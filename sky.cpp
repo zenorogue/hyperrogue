@@ -52,8 +52,11 @@ vector<glhr::colored_vertex> skyvertices;
 cell *sky_centerover;
 shiftmatrix sky_cview;
 
+EX bool draw_sky = true;
+
 void compute_skyvertices(const vector<sky_item>& sky) {
   skyvertices.clear();
+  if(!draw_sky) return;
 
   int sk = get_skybrightness();
   
@@ -245,7 +248,7 @@ void compute_skyvertices(const vector<sky_item>& sky) {
   }
 
 void dqi_sky::draw() {
-  if(!vid.usingGL || sky.empty()) return;
+  if(!vid.usingGL || sky.empty() || skyvertices.empty()) return;
   
   #if CAP_VR
   transmatrix s = (vrhr::rendering() ? vrhr::master_cview : cview()).T * inverse(sky_cview.T);
