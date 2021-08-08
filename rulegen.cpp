@@ -1699,6 +1699,7 @@ EX bool prepare_rules() {
   return false;
   }
 
+#if CAP_COMMANDLINE
 int args() {
   using namespace arg;
            
@@ -1725,9 +1726,11 @@ int args() {
   return 0;
   }
 
-auto hooks = 
-    addHook(hooks_args, 100, args)
-  + addHook(hooks_configfile, 100, [] {
+auto hooks_arg = 
+    addHook(hooks_args, 100, args);
+#endif
+
+auto hooks = addHook(hooks_configfile, 100, [] {
       param_i(max_retries, "max_retries");
       param_i(max_tcellcount, "max_tcellcount")
       ->editable(0, 16000000, 100000, "maximum cellcount", "controls the max memory usage of conversion algorithm -- the algorithm fails if exceeded", 'c');
