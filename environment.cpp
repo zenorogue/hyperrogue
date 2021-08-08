@@ -89,6 +89,7 @@ EX cell *pd_from;
 EX int pd_range;
 
 EX void onpath(cell *c, int d) {
+  if(!pathlock) { println(hlog, "onpath without pathlock"); }
   c->pathdist = d;
   pathq.push_back(c);
   }
@@ -117,6 +118,7 @@ EX void compute_graphical_distance() {
   pd_range = sr;
   c1->pathdist = 0;
   pathq.push_back(pd_from);
+  pathlock++;
 
   for(int qb=0; qb<isize(pathq); qb++) {
     cell *c = pathq[qb];
@@ -126,6 +128,8 @@ EX void compute_graphical_distance() {
       if(c1->pathdist == PINFD)
         onpath(c1, c->pathdist + 1);
     }
+
+  pathlock--;
   }
 
 const int max_radius = 16;
