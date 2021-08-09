@@ -1230,11 +1230,11 @@ EX int check_vault(cell *cf, cell *ct, flagtype flags, cell*& jumpthru) {
     }
   jumpthru = c2;
   if(!c2) return 0;
+  if(c3) return 1;
   bool cutwall = among(c2->wall, waShrub, waExplosiveBarrel, waSmallTree, waBigTree);
-  if(!c2->monst && !cutwall) return 1;
+  if(!c2->monst && !cutwall) return 2;
   bool for_monster = !(flags & P_ISPLAYER);
-  if(for_monster && c2->monst && frog_power(c2->monst) && !items[itOrbDiscord]) return 1; 
-  if(c3) return 2;
+  if(for_monster && c2->monst && frog_power(c2->monst) && !items[itOrbDiscord]) return 2;
   if(!cutwall && !passable(c2, cwt.at, flags | P_JUMP1 | P_MONSTER)) return 3;
   if(!passable(ct, c2, flags | P_JUMP2)) return 4;
   if(!cutwall && !canAttack(cwt.at, moPlayer, c2, c2->monst, 0)) return 5;
