@@ -1693,7 +1693,6 @@ addHook(hooks_gamedata, 0, [] (gamedata* gd) {
   gd->store(pd_from);
   gd->store(pd_range);
   gd->store(pathqm);
-  gd->store(reachedfrom);
   gd->store(gravity_state);
   gd->store(last_gravity_state);
   gd->store(shpos);
