@@ -191,7 +191,7 @@ void randomMove()
     // try to use a ranged orb
     cell *ct = cellToTarget();
     eItem ti = targetRangedOrb(ct, roMouseForce);
-    const char *tm = (ti == eItem(-1)) ? "orb cannot be used (see message log)" : iinf[ti].name;
+    const char *tm = iinf[ti].name;
     printf("TARGET %p: %s\n", (void*)ct, tm);
   }
 }
