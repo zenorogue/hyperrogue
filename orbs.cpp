@@ -1244,6 +1244,8 @@ EX int check_vault(cell *cf, cell *ct, flagtype flags, cell*& jumpthru) {
 EX eItem targetRangedOrb(cell *c, orbAction a) {
 
   if(!haveRangedOrb()) {
+    if(!isWeakCheck(a))
+      addMessage(XLAT("You have no ranged Orbs!"));
     return itNone;
     }
   
@@ -1251,7 +1253,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     int r = rosemap[cwt.at];
     int r2 = rosemap[c];
     if(r2 <= r && !markOrb(itOrbBeauty)) {
-      if(a == roKeyboard || a == roMouseForce ) 
+      if(a == roKeyboard || a == roMouseForce)
         addMessage(XLAT("Those roses smell too nicely. You can only target cells closer to them!"));
       return itNone;
       }
@@ -1275,14 +1277,20 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     return itNone;
     }
   
+  vector<string> orb_error_messages;
+
+  #define CHKV(b, v) ((b) ? true : (v, false))
+  #define CHK(b, s) CHKV(b, orb_error_messages.push_back(s))
+
   // (0-) strong wind
-  if(items[itStrongWind] && c->cpdist == 2 && cwt.at == whirlwind::jumpFromWhereTo(c, true)) {
+  if(items[itStrongWind]
+    && CHK(c->cpdist == 2 && cwt.at == whirlwind::jumpFromWhereTo(c, true), XLAT("Strong wind can only take you to a specific place!"))) {
     changes.init(isCheck(a));
     if(jumpTo(a, c, itStrongWind)) return itStrongWind;
     }
   
   // (0x) control
-  if(haveMount() && items[itOrbDomination] && dragon::whichturn != turncount) {
+  if(items[itOrbDomination] && haveMount() && dragon::whichturn != turncount) {
     if(!isCheck(a)) { 
       dragon::target = c;
       dragon::whichturn = turncount;
@@ -1293,8 +1301,15 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     }
   
   // (0) telekinesis
-  if(c->item && !itemHiddenFromSight(c) && !cwt.at->item && items[itOrbSpace] >= fixpower(spacedrain(c).first) && !cantGetGrimoire(c, !isCheck(a))
-    && c->item != itBarrow) {
+
+  if(items[itOrbSpace]
+    && CHK(c->item && !itemHiddenFromSight(c), XLAT("%The1 can only be used on items!", itOrbSpace))
+    && CHK(!cwt.at->item, XLAT("Cannot use %the1 here!", itOrbSpace))
+    && CHK(!saved_tortoise_on(c), XLAT("No, that would be heartless!"))
+    && CHK(items[itOrbSpace] >= fixpower(spacedrain(c).first), XLAT("Not enough power for telekinesis!"))
+    && CHK(!cantGetGrimoire(c, !isCheck(a)), XLAT("Cannot use %the1 here!", itOrbSpace))
+    && CHK(c->item != itBarrow, XLAT("%The1 is protected from this kind of magic!", c->item))
+    ) {
     if(!isCheck(a)) {
       bool saf = c->item == itOrbSafety;
       telekinesis(c);
@@ -1304,11 +1319,14 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     }
   
   // (0') air blow
-  bool nowhereToBlow = false;
-  if(items[itOrbAir] && (isBlowableMonster(c->monst) || isPushable(c->wall) || c->wall == waBigStatue || isBoat(c))) {
+  if(items[itOrbAir]
+    && CHK(isBlowableMonster(c->monst) || isPushable(c->wall) || c->wall == waBigStatue || isBoat(c),
+        c->monst ? XLAT("%The1 is immune to wind!", c->monst) : XLAT("Nothing to blow here!"))
+    ) {
     int di = NODIR;
     movei mi = blowoff_destination(c, di);
     auto& c2 = mi.t;
+    bool nowhereToBlow = false;
     if(!mi.op()) nowhereToBlow = true;
     else if(isBoat(c) && !isWatery(c2) && c2->wall != waNone) nowhereToBlow = true;
     else if(c->wall == waBigStatue && !canPushStatueOn(c2, P_BLOW)) nowhereToBlow = true;
@@ -1316,35 +1334,39 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
       if(!isCheck(a)) blowoff(mi), apply_impact(c);
       return itOrbAir;
       }
+    CHK(!nowhereToBlow, isBlowableMonster(c->monst) ? XLAT("Nowhere to blow %the1!", c->monst) : XLAT("Nowhere to blow %the1!", c->wall));
     }
   
+  int jumpstate = 0;
+
   // nature
-  if(items[itOrbNature] && numplayers() == 1 && c->monst != moFriendlyIvy) {
+  if(items[itOrbNature]
+    && CHK(numplayers() == 1, XLAT("Cannot be used in multiplayer"))
+    && CHK(c->monst != moFriendlyIvy, XLAT("You cannot grow on yourself!"))
+    ) {
     vector<int> dirs;
     forCellIdCM(cf, d, c)
       if(cf->monst == moFriendlyIvy) {
 
-        if(c->monst) {
-          if(!canAttack(cf, moFriendlyIvy, c, c->monst, 0)) continue;
-          if(monstersnear(cwt.at, moPlayer)) continue;
-          }
-        else {
-          if(!passable(c, cf, P_ISPLAYER | P_MONSTER)) continue;
-          if(strictlyAgainstGravity(c, cf, false, MF_IVY)) continue;
-          if(monstersnear(cwt.at, moPlayer)) continue;
-          }
-        dirs.push_back(d);
+        if(c->monst ? (
+          CHK(canAttack(cf, moFriendlyIvy, c, c->monst, 0), XLAT("Cannot attack there!")) &&
+          CHKV(!monstersnear(cwt.at, moPlayer), jumpstate = 99)
+          ) : (
+          CHK(passable(c, cf, P_ISPLAYER | P_MONSTER), XLAT("Cannot grow there!")) &&
+          CHK(!strictlyAgainstGravity(c, cf, false, MF_IVY), XLAT("Cannot grow against gravity!")) &&
+          CHKV(!monstersnear(cwt.at, moPlayer), jumpstate = 99))
+          )
+          dirs.push_back(d);
         }
       
     int di = hrand_elt(dirs, -1);
-    if(di != -1) {
+    if(CHK(di != -1, XLAT("You cannot grow there from any adjacent cell!"))) {
       if(!isCheck(a)) growIvyTo(movei(c, di).rev()), apply_impact(c);
       return itOrbNature;
       }
     }
     
   // (0'') jump
-  int jumpstate = 0;
   cell *jumpthru = NULL;
   
   // orb of vaulting
@@ -1408,20 +1430,29 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     }
   
   // (1) switch with an illusion
-  if(items[itOrbTeleport] && c->monst == moIllusion && !cwt.at->monst && teleportAction() == 1) {
+  if(items[itOrbTeleport] && c->monst == moIllusion
+    && CHK(!cwt.at->monst, XLAT("You need to move to give space to %the1!", cwt.at->monst))
+    && CHK(teleportAction() == 1, XLAT("All players are in the game!"))) {
     if(!isCheck(a)) teleportTo(c), apply_impact(c);
     return itOrbTeleport;
     }
 
   // (2) place illusion
-  if(!shmup::on && items[itOrbIllusion] && c->monst == moNone && c->item == itNone && passable(c, NULL, P_MIRROR)) {
+  if(!shmup::on && items[itOrbIllusion]
+    && CHK(c->monst == moNone, XLAT("Cannot cast illusion on a monster!"))
+    && CHK(c->item == itNone, XLAT("Cannot cast illusion on an item!"))
+    && CHK(passable(c, NULL, P_MIRROR), XLAT("Cannot cast illusion here!"))) {
     if(!isCheck(a)) placeIllusion(c), apply_impact(c);
     return itOrbIllusion;
     }
-  
+
   // (3) teleport
-  if(items[itOrbTeleport] && c->monst == moNone && (c->item == itNone || itemHidden(c)) && 
-    passable(c, NULL, P_ISPLAYER | P_TELE) && teleportAction() && shmup::verifyTeleport()) {
+  if(items[itOrbTeleport]
+    && CHK(c->monst == moNone, XLAT("Cannot teleport on a monster!"))
+    && CHK(c->item == itNone || itemHidden(c), XLAT("Cannot teleport on an item!"))
+    && CHK(passable(c, NULL, P_ISPLAYER | P_TELE), XLAT("Cannot teleport here!"))
+    && CHK(teleportAction(),  XLAT("All players are in the game!"))
+    && shmup::verifyTeleport()) {
     if(!isCheck(a)) teleportTo(c), apply_impact(c);
     return itOrbTeleport;
     }
@@ -1438,7 +1469,10 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     }
 
   // (4a) colt
-  if(!shmup::on && items[itRevolver] && c->monst && canAttack(cwt.at, moPlayer, c, c->monst, AF_GUN)) {
+  if(items[itRevolver] && !shmup::on
+    && CHK(c->monst, XLAT("Can only use %the1 on a monster!", itRevolver))
+    && CHK(canAttack(cwt.at, moPlayer, c, c->monst, AF_GUN), XLAT("%The1 is immune to %the2!", c->monst, itRevolver))
+    ) {
     bool inrange = false;
     for(cell *c1: gun_targets(cwt.at)) if(c1 == c) inrange = true;
     if(inrange) {
@@ -1448,50 +1482,66 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     }
   
   // (5) psi blast (non-shmup variant)
-  if(!shmup::on && items[itOrbPsi] && c->monst && (isDragon(c->monst) || !isWorm(c)) && c->monst != moShadow && c->monst != moKrakenH) {
+  if(!shmup::on && items[itOrbPsi]
+    && CHK(c->monst, XLAT("Can only use %the1 on a monster!", itOrbPsi))
+    && CHK((isDragon(c->monst) || !isWorm(c)) && c->monst != moShadow && c->monst != moKrakenH, XLAT("%The1 is immune to mental blasts!", c->monst))
+    ) {
     if(!isCheck(a)) psi_attack(c), apply_impact(c);
     return itOrbPsi;
     }
   
   // (5a) summoning
-  if(items[itOrbSummon] && summonedAt(c)) {
+  if(items[itOrbSummon]
+    && CHK(summonedAt(c), c->monst ? XLAT("Cannot summon on a monster!") : XLAT("No summoning possible here!"))
+    ) {
     if(!isCheck(a)) summonAt(c), apply_impact(c);
     return itOrbSummon;
     }
-  
+
   // (5b) matter
-  if(items[itOrbMatter] && tempWallPossibleAt(c)) {
+  if(items[itOrbMatter]
+    && CHK(tempWallPossibleAt(c), 
+      c->monst ? XLAT("Cannot create temporary matter on a monster!") :
+      c->item ? XLAT("Cannot create temporary matter on an item!") :
+      XLAT("Cannot create temporary matter here!"))
+    ) {
     if(!isCheck(a)) tempWallAt(c), apply_impact(c);
     return itOrbMatter;
     }
 
   // (5c) stun
-  if(items[itOrbStunning] && c->monst && !isMultitile(c->monst) && c->monst != moMimic && c->stuntime < 3 && !shmup::on) {
+  if(items[itOrbStunning] && !shmup::on
+    && CHK(c->monst, XLAT("%The1 can only be used on monsters.", itOrbStunning))
+    && CHK(!isMultitile(c->monst),XLAT("%The1 cannot be used on big monsters.", itOrbStunning))
+    && CHK(c->monst != moMimic, XLAT("%The1 cannot be used on %the2.", itOrbStunning, c->monst))
+    && CHK(c->stuntime < 3, XLAT("%The1 is already stunned!", c->monst))
+    ) {
     if(!isCheck(a)) stun_attack(c), apply_impact(c);
     return itOrbStunning;
     }
   
   // (5d) poly
-  if(items[itOrbMorph] && c->monst && !isMultitile(c->monst) && !shmup::on) {
+  if(items[itOrbMorph] && !shmup::on
+    && CHK(c->monst, XLAT("%The1 can only be used on monsters.", itOrbMorph))
+    && CHK(!isMultitile(c->monst), XLAT("%The1 cannot be used on big monsters.", itOrbMorph))
+    ) {
     if(!isCheck(a)) poly_attack(c), apply_impact(c);
     return itOrbMorph;
     }
   
   // (6) place fire (non-shmup variant)
-  if(!shmup::on && items[itOrbDragon] && makeflame(c, 20, true)) {
+  if(items[itOrbDragon] && !shmup::on
+    && CHK(makeflame(c, 20, true), XLAT("Cannot throw fire there!"))
+    ) {
     if(!isCheck(a)) useOrbOfDragon(c), apply_impact(c);
     return itOrbDragon;
     }
   
   if(isWeakCheck(a)) return itNone;
   
-  if(nowhereToBlow && isBlowableMonster(c->monst)) {
-    addMessage(XLAT("Nowhere to blow %the1!", c->monst));
-    }  
-  else if(nowhereToBlow) {
-    addMessage(XLAT("Nowhere to blow %the1!", c->wall));
-    }
-  else if(jumpstate == 1 && jumpthru && jumpthru->monst) {
+  for(string s: orb_error_messages) addMessage(s);
+
+  if(jumpstate == 1 && jumpthru && jumpthru->monst) {
     addMessage(XLAT("Cannot jump through %the1!", jumpthru->monst));
     }
   else if(jumpstate == 1 && jumpthru) {
@@ -1505,58 +1555,13 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     }
   else if(jumpstate == 3) 
     wouldkill("%The1 would get you there!");
-  else if(items[itOrbAir] && c->monst) {
-    addMessage(XLAT("%The1 is immune to wind!", c->monst));
-    }  
-  else if(items[itOrbPsi] && c->monst) {
-    addMessage(XLAT("%The1 is immune to mental blasts!", c->monst));
-    }  
-  else if(items[itOrbTeleport] && c->monst) {
-    addMessage(XLAT("Cannot teleport on a monster!"));
-    }
-  else if(items[itOrbSpace] && c->item == itBarrow)
-    addMessage(XLAT("%The1 is protected from this kind of magic!", c->item));
-  else if(items[itOrbSpace] && saved_tortoise_on(c))
-    addMessage(XLAT("No, that would be heartless!"));
-  else if(c->item && items[itOrbSpace] && !itemHiddenFromSight(c)) {
-    if(cwt.at->item)
-      addMessage(XLAT("Cannot use %the1 here!", itOrbSpace));
-    addMessage(XLAT("Not enough power for telekinesis!"));
-    }
-  else if(items[itOrbIllusion] && c->item)
-    addMessage(XLAT("Cannot cast illusion on an item!"));
-  else if(items[itOrbIllusion] && c->monst)
-    addMessage(XLAT("Cannot cast illusion on a monster!"));
-  else if(items[itOrbIllusion] && !passable(c, NULL, P_MIRROR))
-    addMessage(XLAT("Cannot cast illusion here!"));
-  else if(items[itOrbTeleport] && teleportAction() == 0) {
-    addMessage(XLAT("All players are in the game!"));
-    }
-  else if(items[itOrbTeleport] && !passable(c, NULL, P_TELE | P_ISPLAYER)) {
-    addMessage(XLAT("Cannot teleport here!"));
-    }
-  else if(items[itOrbMatter] && !tempWallPossibleAt(c)) {
-    if(c->monst)
-      addMessage(XLAT("Cannot create temporary matter on a monster!"));
-    else if(c->item)
-      addMessage(XLAT("Cannot create temporary matter on an item!"));
-    else addMessage(XLAT("Cannot create temporary matter here!"));
-    }
-  else if(items[itOrbSummon] && !summonedAt(c)) {
-    if(c->monst)
-      addMessage(XLAT("Cannot summon on a monster!"));
-    else
-      addMessage(XLAT("No summoning possible here!"));
-    }
-  else if(items[itOrbTeleport] && c->item) {
-    addMessage(XLAT("Cannot teleport on an item!"));
-    }
-  else if(items[itOrbDragon] && !makeflame(c, 20, true)) {
-    addMessage(XLAT("Cannot throw fire there!"));
-    }
-  else return eItem(0);
+  else if(jumpstate == 99)
+    wouldkill("%The1 would get you if you grew there!");
+
+  #undef CHK
+  #undef CHKV
   
-  return eItem(-1);
+  return itNone;
   }
 
 EX int orbcharges(eItem it) {
