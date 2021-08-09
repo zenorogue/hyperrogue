@@ -1475,7 +1475,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   // (2) place illusion
   if(!shmup::on && items[itOrbIllusion]
     && CHK(c->monst == moNone, XLAT("Cannot cast illusion on a monster!"))
-    && CHK(c->item == itNone, XLAT("Cannot cast illusion on an item!"))
+    && CHK(c->item == itNone || itemHidden(c), XLAT("Cannot cast illusion on an item!"))
     && CHK(passable(c, NULL, P_MIRROR), XLAT("Cannot cast illusion here!"))) {
     if(!isCheck(a)) placeIllusion(c), apply_impact(c);
     return itOrbIllusion;
