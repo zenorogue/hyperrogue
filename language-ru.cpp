@@ -724,7 +724,7 @@ S("These warriors of the Forest wield exotic weapons called hedgehog blades. "
  "easily by moving from one place next to them to another.",
  "Эти лесные воители вооружены экзотическим оружием, называемым ежиным клинком. "
  "Клинки защищают их от прямых атак, но они могут быть 'заколоты', "
- "достаточно перейти с одной клетки рядом с нм на другую.")
+ "достаточно перейти с одной клетки рядом с ним на другую.")
 
 S("This being radiates an aura of wisdom. "
  "It is made of a beautiful crystal, you would love to take it home. "
