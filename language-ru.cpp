@@ -7246,6 +7246,14 @@ S("When the 'mark heptagons' option (hotkey '7') is on, moves between unmarked c
 
   "Когда опция 'отметить семиугольники' (клавиша '7') включена, ходы между неотмеченными клетками запрещены.")
 
+// 10.4p
+
+// in the sight range dialog
+S("enable the cheat mode for additional options", "включите режим обманщика для дополнительныx опций")
+
+// steal a baby tortoise with Orb of Space
+S("No, that would be heartless!", "Нет, это было бы бессердечно!")
+
 // this is the marked line
 
 // [PL:7392] new lands
