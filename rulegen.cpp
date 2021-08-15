@@ -263,14 +263,16 @@ int solid_errors;
 
 int get_parent_dir(tcell *c);
 
+#if HDR
 struct shortcut {
   vector<int> pre;
   vector<int> post;
   tcell *sample;
   int delta;
   };
+#endif
 
-map<int, vector<shortcut> > shortcuts;
+map<int, vector<unique_ptr<shortcut>> > shortcuts;
 
 vector<int> root_path(twalker cw) {
   cw += wstep;
@@ -355,18 +357,24 @@ void check_solid(tcell *c, int d) {
 
   int delta = at1.to_spin(walkers2.back().spin);
 
-  for(auto s: shortcuts[c->id]) if(s.pre == pre && s.post == post) return;
+  for(auto& s: shortcuts[c->id]) if(s->pre == pre && s->post == post) return;
 
   if(debugflags & DF_GEOM)
     println(hlog, "new shortcut found, pre =  ", pre, " post = ", post, " pre reaches ", at1, " post reaches ", walkers2.back(), " of type ", at1.at->id, " sample = ", c);
 
-  shortcuts[c->id].emplace_back(shortcut{pre, post, c, delta});
+  shortcuts[c->id].emplace_back(unique_ptr<shortcut> (new shortcut));
+  auto& sh = shortcuts[c->id].back();
+  sh->pre = pre;
+  sh->post = post;
+  sh->sample = c;
+  sh->delta = delta;
+  auto& sh1 = *sh;
 
   if(debugflags & DF_GEOM) println(hlog, "exhaustive search:");
   indenter ind(2);
   tcell* c1 = first_tcell;
   while(c1) {
-    if(c1->id == c->id) look_for_shortcuts(c1);
+    if(c1->id == c->id) look_for_shortcuts(c1, sh1);
     c1 = c1->next;
     }
   }
@@ -444,51 +452,53 @@ void be_solid(tcell *c) {
   c->is_solid = true;
   }
 
-EX void look_for_shortcuts(tcell *c) {
-  if(c->dist > 0) for(int i=0; i<isize(shortcuts[c->id]); i++) {
-    auto sh = shortcuts[c->id][i];
-    if(1) {
-      twalker tw0(c, 0);
-      twalker tw(c, 0);
-      ufind(tw);
-      ufind(tw0);
+EX void look_for_shortcuts(tcell *c, shortcut& sh) {
+  if(c->dist <= 0) return;
+  if(1) {
+    twalker tw0(c, 0);
+    twalker tw(c, 0);
+    ufind(tw);
+    ufind(tw0);
 
-      vector<tcell*> opath;
+    vector<tcell*> opath;
 
-      for(auto& v: sh.pre) {
-        opath.push_back(tw.at);
-        tw += v;
-        if(!tw.peek()) goto next_shortcut;
-        if(tw.peek()->dist != tw.at->dist-1) goto next_shortcut;
-        ufind(tw);
-        tw += wstep;
-        }
+    for(auto& v: sh.pre) {
       opath.push_back(tw.at);
+      tw += v;
+      if(!tw.peek()) return;
+      if(tw.peek()->dist != tw.at->dist-1) return;
+      ufind(tw);
+      tw += wstep;
+      }
+    opath.push_back(tw.at);
 
-      ufind(tw0);
-      vector<tcell*> npath;
-      for(auto& v: sh.post) {
-        npath.push_back(tw0.at);
-        tw0 += v;
-        ufind(tw0);
-        tw0 += wstep;
-        calc_distances(tw0.at);
-        }
+    ufind(tw0);
+    vector<tcell*> npath;
+    for(auto& v: sh.post) {
       npath.push_back(tw0.at);
-      int d = sh.delta;
-      auto tw1 = tw + d;
-      fix_queue.push([=] { unify(tw1, tw0); });
-      process_fix_queue();
-      for(auto t: npath) {
-        ufindc(t);
-        fix_distances(t);
-        }
-
-      ufindc(c);
+      tw0 += v;
+      ufind(tw0);
+      tw0 += wstep;
+      calc_distances(tw0.at);
+      }
+    npath.push_back(tw0.at);
+    int d = sh.delta;
+    auto tw1 = tw + d;
+    fix_queue.push([=] { unify(tw1, tw0); });
+    process_fix_queue();
+    for(auto t: npath) {
+      ufindc(t);
+      fix_distances(t);
       }
 
-    next_shortcut: ;
+    ufindc(c);
     }
+  }
+
+EX void look_for_shortcuts(tcell *c) {
+  if(c->dist > 0)
+  for(int i=0; i<isize(shortcuts[c->id]); i++)
+    look_for_shortcuts(c, *shortcuts[c->id][i]);
   }
 
 /** which neighbor will become the parent of c */
