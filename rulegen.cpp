@@ -1115,27 +1115,15 @@ void advance(vector<branchdata>& bdata, branchdata at, int dir, bool start_forwa
     }
   }
 
-map<int, branchdata> split;
-
-void assign_lr(branchdata bd, int dir) {
+void verify_lr(branchdata bd, int dir) {
   if(dir) { bd.spin_full(dir); if(bd.dir == 0) bd.dir = bd.at.at->type; }
   auto& r = treestates[bd.id].rules;
   for(int i=0; i<isize(r); i++) {
-    if(!among(r[i], DIR_UNKNOWN, DIR_LEFT, DIR_RIGHT)) continue;
     int val = i < bd.dir ? DIR_LEFT : DIR_RIGHT;
-    if(r[i] == DIR_UNKNOWN)
-      r[i] = val;
-    else if(r[i] != val) {
-      if(debugflags & DF_GEOM) {
-        println(hlog, "state ", bd.id, " index ", i, ":", bd.dir, "/", bd.at.at->type, " was ", split[bd.id]);
-        println(hlog, important);
-        }
-      important.push_back(bd.at.at);
-      important.push_back(split[bd.id].at.at);
-      throw mismatch_error();
-      }
+    int wrong = val ^ DIR_LEFT ^ DIR_RIGHT;
+    if(r[i] == wrong)
+      throw rulegen_failure("assign_lr direction error");
     }
-  split[bd.id] = bd;
   }
 
 set<vector<int> > branch_hashes;
@@ -1180,13 +1168,13 @@ void examine_branch(int id, int left, int right) {
       if(!bdata[i].temporary && !bdata[i+1].temporary && paired(bdata[i].at, bdata[i+1].at) && min(bdata[i].at.at->dist, bdata[i+1].at.at->dist) <= dist_at) {
         advcount++;
         if(bdata2.size() && !bdata2.back().temporary && equiv(bdata2.back().at, bdata[i].at)) { 
-          assign_lr(bdata[i], 0);
+          verify_lr(bdata[i], 0);
           eatcount++; bdata2.pop_back(); 
           }
         else
           advance(bdata2, bdata[i], -1, false, true, dist_at+dlbonus);
         if(i+2 < isize(bdata) && !bdata[i+1].temporary && !bdata[i+2].temporary && equiv(bdata[i+1].at, bdata[i+2].at)) { 
-          assign_lr(bdata[i+1], +1);
+          verify_lr(bdata[i+1], +1);
           eatcount++; i += 2; bdata2.push_back(bdata[i+1]); 
           }
         else
@@ -1305,6 +1293,12 @@ void rules_iteration() {
           }
         }
       }
+
+    for(int i=0; i<isize(r); i++) if(r[i] == DIR_UNKNOWN) {
+      int val = treestates[id].code.second[i+1];
+      if(val < 2 || val >= 8) throw rulegen_failure("wrong code in gen_rule");
+      r[i] = ((val & 1) ? DIR_RIGHT : DIR_LEFT);
+      }
     }
 
   // print_rules();
@@ -1321,13 +1315,9 @@ void rules_iteration() {
         if(first_live_branch == -1) first_live_branch = i;
         if(last_live_branch >= 0)
           examine_branch(id, last_live_branch, i);
-        else for(int a=0; a<i; a++) 
-          if(r[a] == DIR_UNKNOWN) r[a] = DIR_LEFT;      
         last_live_branch = i;
         }
     if(treestates[id].is_root) examine_branch(id, last_live_branch, first_live_branch);
-    for(int a=last_live_branch; a<isize(r); a++)
-      if(r[a] == DIR_UNKNOWN) r[a] = DIR_RIGHT;
     }
   
   handle_distance_errors();
@@ -1337,13 +1327,7 @@ void rules_iteration() {
   minimize_rules();
   find_possible_parents();
   
-  for(int id=0; id<isize(treestates); id++) {
-    auto& ts = treestates[id];
-    for(auto& r: ts.rules) if(r == DIR_UNKNOWN)
-      throw rulegen_failure("UNKNOWN remaining");
-    }
-
-  if(isize(important) != N) 
+  if(isize(important) != N)
     throw mismatch_error();
   handle_distance_errors();
   }
@@ -1359,13 +1343,13 @@ void clear_tcell_data() {
     c = c->next;
     }
   for(auto& c: t_origin) c->dist = 0;
+  in_fixing = false; fix_queue = {};
   }
 
 void cleanup() {
   clear_tcell_data();
   analyzers.clear();
   code_to_id.clear();
-  split.clear();
   important.clear();
   shortcuts.clear();
   }
@@ -1408,7 +1392,6 @@ EX void generate_rules() {
   clear_all();
 
   analyzers.clear();
-  split.clear();
 
   t_origin.clear();
   for(auto& ts: arb::current.shapes) {
@@ -1537,8 +1520,6 @@ struct hrmap_rulegen : hrmap {
       hsconnect(hs, hs1);
       return h1;
       }
-    else if(r == DIR_UNKNOWN)
-      throw rulegen_failure("UNKNOWN rule remained");
     else if(r == DIR_MULTI_GO_LEFT) {
       // hs = (hs - 1) + wstep;
       hsconnect(hs, hs - 1 + wstep - 1);
