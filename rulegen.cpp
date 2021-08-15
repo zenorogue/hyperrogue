@@ -515,29 +515,38 @@ int get_parent_dir(tcell *c) {
     auto& sh = arb::current.shapes[c->id];
     int n = sh.size();
     int k = sh.cycle_length;
-    vector<int> olen;
-    for(int i=0; i<k; i++) {
-      vector<int> nearer;
-      for(int j=0; j<n/k; j++) {
-        tcell *c1 = c->cmove(i+j*k);
-        be_solid(c1);
-        olen.push_back(c1->dist);
-        if(c1->dist < c->dist) {
-          nearer.push_back(j);
-          }
-        }
-      if(nearer.size() == 1) {bestd = i+nearer[0]*k; break; }
-      if(nearer.size() == 2 && nearer[1] == nearer[0] + 1) {
-        bestd = i + nearer[0] * k;
-        break;
-        }
-      if(nearer.size() == 2 && nearer[0] == 0 && nearer[1] == n/k-1) {
-        bestd = i + nearer[1] * k;
-        break;
-        }
-      if(nearer.size() > 1) throw rulegen_failure("still confused");
+    vector<int> nearer;
+
+    auto beats = [&] (int i, int old) {
+      if(old == -1) return true;
+      if(i%k != old%k) return i%k < old%k;
+      if(i < (n+1)/2) return i < old && old < i+n/2;
+      return i < old || old < i-(n+1)/2;
+      };
+
+    int d = c->dist;
+
+    for(int i=0; i<n; i++) {
+      tcell *c1 = c->cmove(i);
+      be_solid(c1);
+      if(c1->dist < d) nearer.push_back(i);
       }
-    if(bestd == -1) throw rulegen_failure("should not happen");
+
+    ufindc(c); if(d != c->dist) return get_parent_dir(c);
+
+    // celebrity identification problem
+
+    for(auto ne: nearer)
+      if(beats(ne, bestd))
+        bestd = ne;
+
+    for(auto ne: nearer)
+      if(ne != bestd && beats(ne, bestd))
+        throw rulegen_failure("still confused");
+
+    if(bestd == -1) {
+      throw rulegen_failure("should not happen");
+      }
     }
     
   c->parent_dir = bestd;
