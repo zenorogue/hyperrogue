@@ -1124,14 +1124,22 @@ void advance(vector<branchdata>& bdata, branchdata at, int dir, bool start_forwa
     }
   }
 
+bool dubious_lr;
+
 void verify_lr(branchdata bd, int dir) {
   if(dir) { bd.spin_full(dir); if(bd.dir == 0) bd.dir = bd.at.at->type; }
   auto& r = treestates[bd.id].rules;
   for(int i=0; i<isize(r); i++) {
     int val = i < bd.dir ? DIR_LEFT : DIR_RIGHT;
     int wrong = val ^ DIR_LEFT ^ DIR_RIGHT;
-    if(r[i] == wrong)
-      throw rulegen_failure("assign_lr direction error");
+    if(r[i] == wrong) {
+      if(dubious_lr)
+        r[i] = val;
+      else {
+        debuglist = { bd.at };
+        throw rulegen_failure("assign_lr direction error");
+        }
+      }
     }
   }
 
@@ -1143,7 +1151,8 @@ void examine_branch(int id, int left, int right) {
     println(hlog, "need to examine branches ", tie(left, right), " of ", id, " starting from ", rg);
   vector<branchdata> bdata;
   int dist_at = rg.at->dist;
-  while(left != right) {
+  dubious_lr = left == right;
+  do {
     /* can be false in case of multi-edges */
     if(treestates[id].rules[left] >= 0) {      
 
@@ -1161,14 +1170,20 @@ void examine_branch(int id, int left, int right) {
       advance(bdata, br, +1, true, false, dist_at+5);
       }
     }
+  while(left != right);
   int steps = 0;
   while(true) {
     steps++;
-    if(steps == max_examine_branch)
+
+    if(steps == max_examine_branch) {
+      debuglist = { rg };
       throw rulegen_failure("max_examine_branch exceeded");
+      }
     
-    if(isize(bdata) > max_bdata)
+    if(isize(bdata) > max_bdata) {
+      debuglist = { rg };
       throw rulegen_failure("max_bdata exceeded");
+      }
 
     /* advance both */
     vector<branchdata> bdata2;
