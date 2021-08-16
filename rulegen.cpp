@@ -692,8 +692,6 @@ static const int C_PARENT = 8;
 
 EX vector<treestate> treestates;
 
-set<twalker> sideswap;
-
 /** is what on the left side, or the right side, of to_what? */
 
 int get_side(tcell *what, tcell *to_what) {
