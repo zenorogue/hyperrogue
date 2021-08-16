@@ -379,6 +379,15 @@ void check_solid(tcell *c, int d) {
     }
   }
 
+EX void remove_parentdir(tcell *c) {
+  c->parent_dir = MYSTERY;
+  c->code = MYSTERY;
+  for(int i=0; i<c->type; i++) if(c->move(i)) {
+    c->move(i)->parent_dir = MYSTERY;
+    c->move(i)->code = MYSTERY;
+    }
+  }
+
 void fix_distances(tcell *c) {
   c->distance_fixed = true;
   vector<tcell*> q = {c};
@@ -393,13 +402,14 @@ void fix_distances(tcell *c) {
       c1 = c->cmove(i);
       if(c1->dist == MYSTERY) continue;
       auto& d1 = c1->dist;
-      if(d > d1+1) { d = d1+1; goto restart; }
+      if(d > d1+1) { d = d1+1; remove_parentdir(c); goto restart; }
       if(d1 > d+1) {
         if(c1->is_solid) {
           check_solid(c1, d+1);
           solid_errors++;
           }
         d1 = d+1; 
+        remove_parentdir(c1);
         q.push_back(c1);
         }
       }
@@ -422,6 +432,7 @@ void unify_distances(tcell *c1, tcell *c2) {
   if(c2->is_solid && d != d2) solid_errors++;
   c1->distance_fixed = c1->distance_fixed || c2->distance_fixed;
   c1->is_solid = c1->is_solid || c2->is_solid;
+  remove_parentdir(c1);
   if(c1->dist < MYSTERY) 
     fix_distances(c1);
   }
@@ -503,7 +514,7 @@ EX void look_for_shortcuts(tcell *c) {
 
 /** which neighbor will become the parent of c */
 
-int get_parent_dir(tcell *c) {
+EX int get_parent_dir(tcell *c) {
   if(c->parent_dir != MYSTERY) return c->parent_dir;
   int bestd = -1;
   vector<int> bestrootpath;
@@ -520,8 +531,8 @@ int get_parent_dir(tcell *c) {
     auto beats = [&] (int i, int old) {
       if(old == -1) return true;
       if(i%k != old%k) return i%k < old%k;
-      if(i < (n+1)/2) return i < old && old < i+n/2;
-      return i < old || old < i-(n+1)/2;
+      if(old < i) old += n;
+      return old < i+(n+1)/2;
       };
 
     int d = c->dist;
@@ -532,7 +543,10 @@ int get_parent_dir(tcell *c) {
       if(c1->dist < d) nearer.push_back(i);
       }
 
-    ufindc(c); if(d != c->dist) return get_parent_dir(c);
+    auto oc = c;
+    ufindc(c); if(d != c->dist || oc != c) {
+      return get_parent_dir(c);
+      }
 
     // celebrity identification problem
 
@@ -541,8 +555,10 @@ int get_parent_dir(tcell *c) {
         bestd = ne;
 
     for(auto ne: nearer)
-      if(ne != bestd && beats(ne, bestd))
+      if(ne != bestd && beats(ne, bestd)) {
+        debuglist = { c };
         throw rulegen_failure("still confused");
+        }
 
     if(bestd == -1) {
       throw rulegen_failure("should not happen");
