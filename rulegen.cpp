@@ -1261,7 +1261,6 @@ void find_sub_status() {
     if(ts.rules[im] >= 0 || ts.rules[im] == DIR_PARENT)
     for(int i=0; i<isize(ts.rules); i++) if(i != im) {
       if((ts.giver+im).peek() == (ts.giver+i).peek()) {
-        println(hlog, "found multi connection at ", id, ":", i, " equals ", im, ts.rules[im] == DIR_PARENT ? " [parent]" : " [child]");
         ts.sub_status[i] = 1;
         }
       }
