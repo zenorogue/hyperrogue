@@ -719,7 +719,6 @@ struct treestate {
   int id;
   bool known;
   vector<int> rules;
-  vector<int> sub_status; // 1 if DIR_LEFT or DIR_RIGHT and connected to a child
   twalker giver;
   int sid;
   int parent_dir;
@@ -1251,22 +1250,6 @@ void find_single_live_branch(twalker at) {
     }
   }
 
-void find_sub_status() {
-  for(int id=0; id<isize(treestates); id++) 
-    treestates[id].sub_status.resize(isize(treestates[id].rules), 0);
-
-  for(int id=0; id<isize(treestates); id++) {
-    auto& ts = treestates[id];
-    for(int im=0; im<isize(ts.rules); im++)
-    if(ts.rules[im] >= 0 || ts.rules[im] == DIR_PARENT)
-    for(int i=0; i<isize(ts.rules); i++) if(i != im) {
-      if((ts.giver+im).peek() == (ts.giver+i).peek()) {
-        ts.sub_status[i] = 1;
-        }
-      }
-    }
-  }
-
 void rules_iteration() {
   clear_codes();
   
@@ -1340,8 +1323,6 @@ void rules_iteration() {
   verified_branches.clear();
 
   int q = isize(single_live_branch_close_to_root);
-
-  find_sub_status();
 
   for(int id=0; id<isize(treestates); id++) if(treestates[id].is_live) {
     auto& r = treestates[id].rules;
