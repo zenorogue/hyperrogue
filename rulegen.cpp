@@ -820,6 +820,7 @@ code_t id_at_spin(twalker cw) {
     if(pid > -1 && (res.second[pid] != C_CHILD)) {
       x = C_IGNORE;
       }
+    else if(id == 0) x = C_CHILD;
     else {
       int p = get_parent_dir(cs.at);
       if(p >= 0 && get_parent_dir(cs.at) == cs.spin)
