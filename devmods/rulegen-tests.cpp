@@ -237,8 +237,6 @@ void print_rules();
 
 string rule_name(int r) {
   if(r == DIR_UNKNOWN) return "??";
-  else if(r == DIR_MULTI_GO_LEFT) return "ML";
-  else if(r == DIR_MULTI_GO_RIGHT) return "MR";
   else if(r == DIR_LEFT) return "L";
   else if(r == DIR_RIGHT) return "R";
   else if(r == DIR_PARENT) return "P";
