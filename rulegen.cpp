@@ -719,6 +719,7 @@ struct treestate {
   int id;
   bool known;
   vector<int> rules;
+  vector<int> sub_status; // 1 if DIR_LEFT or DIR_RIGHT and connected to a child
   twalker giver;
   int sid;
   int parent_dir;
@@ -891,10 +892,6 @@ struct mismatch_error : rulegen_retry {
   mismatch_error() : rulegen_retry("mismatch error") {}
   };
 
-struct double_edges: rulegen_surrender {
-  double_edges() : rulegen_surrender("double edges detected") {}
-  };
-
 EX int rule_root;
 
 vector<int> gen_rule(twalker cwmain);
@@ -907,8 +904,6 @@ vector<tcell*> cq;
 #if HDR
 /* special codes */
 static const int DIR_UNKNOWN = -1;
-static const int DIR_MULTI_GO_LEFT = -2;
-static const int DIR_MULTI_GO_RIGHT = -3;
 static const int DIR_LEFT = -4;
 static const int DIR_RIGHT = -5;
 static const int DIR_PARENT = -6;
@@ -1107,7 +1102,6 @@ struct bad_tree : rulegen_retry {
 
 bool equiv(twalker w1, twalker w2);
 
-inline bool IS_DIR_MULTI(int d) { return among(d, DIR_MULTI_GO_LEFT, DIR_MULTI_GO_RIGHT); }
 struct branchdata {
   int id;
   int dir;
@@ -1133,11 +1127,6 @@ struct branchdata {
     dir += i;
     dir = gmod(dir, isize(treestates[id].rules));
     }
-  void spin_full(int i) {
-    spin(i);
-    while(IS_DIR_MULTI(treestates[id].rules[dir]))
-      spin(i);
-    }
   };
 
 inline void print(hstream& hs, const branchdata& bd) { print(hs, "[", bd.id,":",bd.dir, " ", bd.at, ":", bd.temporary, "]"); }
@@ -1145,28 +1134,20 @@ inline void print(hstream& hs, const branchdata& bd) { print(hs, "[", bd.id,":",
 /* we need to be careful with multiple edges */
 
 bool paired(twalker w1, twalker w2) {
-  if(w1 + wstep == w2) return true;
-  if(w1.cpeek() == w2.at && w2.cpeek() == w1.at) {
-    return true;
-    }
-  return false;
+  return w1 + wstep == w2;
   }
 
 bool equiv(twalker w1, twalker w2) {
-  if(w1 == w2) return true;
-  if(w1.at == w2.at && w1.cpeek() == w2.cpeek()) {
-    return true;
-    }
-  return false;
+  return w1 == w2;
   }
 
 void advance(vector<branchdata>& bdata, branchdata at, int dir, bool start_forward, bool stack, int distlimit) {
   if(start_forward) {
     at.step();
-    at.spin_full(dir);
+    at.spin(dir);
     }
   else {
-    at.spin_full(dir);
+    at.spin(dir);
     }
   vector<branchdata> b;
   int steps = 0;
@@ -1175,7 +1156,13 @@ void advance(vector<branchdata>& bdata, branchdata at, int dir, bool start_forwa
       throw rulegen_failure("max_adv_steps exceeded");
     auto& ts = treestates[at.id];
     auto r = ts.rules[at.dir];
-    if(r < 0) {
+    if(ts.sub_status[at.dir]) {
+      at.temporary = 0;
+      b.push_back(at);
+      b.push_back(at);
+      at.spin(dir);
+      }
+    else if(r < 0) {
       at.temporary = 0;
       b.push_back(at);
       break;
@@ -1186,11 +1173,11 @@ void advance(vector<branchdata>& bdata, branchdata at, int dir, bool start_forwa
         b.pop_back();
       else
         advance(b, at, -dir, true, true, distlimit);
-      at.spin_full(dir);
+      at.spin(dir);
       }
     else {
       at.step();
-      if(at.at.at->dist < distlimit || !ts.is_live) at.spin_full(dir);
+      if(at.at.at->dist < distlimit || !ts.is_live) at.spin(dir);
       else {
         at.temporary = dir;
         b.push_back(at);
@@ -1207,7 +1194,8 @@ void advance(vector<branchdata>& bdata, branchdata at, int dir, bool start_forwa
   }
 
 void verify_lr(branchdata bd, int dir) {
-  if(dir) { bd.spin_full(dir); if(bd.dir == 0) bd.dir = bd.at.at->type; }
+  return;
+  if(dir) { bd.spin(dir); if(bd.dir == 0) bd.dir = bd.at.at->type; }
   auto& r = treestates[bd.id].rules;
   for(int i=0; i<isize(r); i++) {
     int val = i < bd.dir ? DIR_LEFT : DIR_RIGHT;
@@ -1225,25 +1213,26 @@ void examine_branch(int id, int left, int right) {
   auto rg = treestates[id].giver;
   if(debugflags & DF_GEOM)
     println(hlog, "need to examine branches ", tie(left, right), " of ", id, " starting from ", rg);
+  indenter ind(2);
   vector<branchdata> bdata;
   int dist_at = rg.at->dist;
 
   do {
-    /* can be false in case of multi-edges */
-    if(treestates[id].rules[left] >= 0) {      
-
-      if(bdata.size() && bdata.back().dir == 0)
-        bdata.pop_back();
-      else {
-        auto bl = branchdata{id, left, rg+left, dist_at+dlbonus};
+    if(true) {
+      auto bl = branchdata{id, left, rg+left, dist_at+dlbonus};
+      bl.temporary = 0;
+      if(treestates[id].rules[left] >= 0)
         advance(bdata, bl, -1, true, true, dist_at+5);
-        }
+      else bdata.push_back(bl);
       }
     left++;
     if(left == rg.at->type) left = 0;
-    if(treestates[id].rules[left] >= 0) {
+    if(true) {
       auto br = branchdata{id, left, rg+left, dist_at+dlbonus};
-      advance(bdata, br, +1, true, false, dist_at+5);
+      br.temporary = 0;
+      if(treestates[id].rules[left] >= 0)
+        advance(bdata, br, +1, true, false, dist_at+5);
+      else bdata.push_back(br);
       }
     }
   while(left != right);
@@ -1340,6 +1329,23 @@ void find_single_live_branch(twalker at) {
     }
   }
 
+void find_sub_status() {
+  for(int id=0; id<isize(treestates); id++) 
+    treestates[id].sub_status.resize(isize(treestates[id].rules), 0);
+
+  for(int id=0; id<isize(treestates); id++) {
+    auto& ts = treestates[id];
+    for(int im=0; im<isize(ts.rules); im++)
+    if(ts.rules[im] >= 0 || ts.rules[im] == DIR_PARENT)
+    for(int i=0; i<isize(ts.rules); i++) if(i != im) {
+      if((ts.giver+im).peek() == (ts.giver+i).peek()) {
+        println(hlog, "found multi connection at ", id, ":", i, " equals ", im, ts.rules[im] == DIR_PARENT ? " [parent]" : " [child]");
+        ts.sub_status[i] = 1;
+        }
+      }
+    }
+  }
+
 void rules_iteration() {
   clear_codes();
   
@@ -1394,25 +1400,15 @@ void rules_iteration() {
     }
   
   for(int id=0; id<isize(treestates); id++) {
-    auto& rg = treestates[id].giver;
     auto& r = treestates[id].rules;
-
-    for(int p=0; p<2; p++)
-    for(int it=0; it<isize(r); it++) {
-      for(int i=0; i<isize(r); i++) {
-        int i1 = gmod(i+1, isize(r));
-        if((rg+i).peek() == (rg+i1).peek()) {
-          if(r[i1] == DIR_UNKNOWN && (r[i] >= (p?DIR_UNKNOWN:0) || r[i] == DIR_PARENT || r[i] == DIR_MULTI_GO_LEFT))
-            r[i1] = DIR_MULTI_GO_LEFT;
-          if(r[i] == DIR_UNKNOWN && (r[i1] >= 0 || r[i1] == DIR_PARENT || r[i+1] == DIR_MULTI_GO_RIGHT))
-            r[i] = DIR_MULTI_GO_RIGHT;
-          }
-        }
-      }
 
     for(int i=0; i<isize(r); i++) if(r[i] == DIR_UNKNOWN) {
       int val = treestates[id].code.second[i+1];
-      if(val < 2 || val >= 8) throw rulegen_failure("wrong code in gen_rule");
+      if(val < 2 || val >= 8) {
+        debuglist = { treestates[id].giver };
+        println(hlog, "id = ", id, " i = ", i, " val = ", val, " code = ", treestates[id].code);
+        throw rulegen_failure("wrong code in gen_rule");
+        }
       r[i] = ((val & 1) ? DIR_RIGHT : DIR_LEFT);
       }
     }
@@ -1423,6 +1419,8 @@ void rules_iteration() {
   branch_hashes.clear();
 
   int q = isize(single_live_branch_close_to_root);
+
+  find_sub_status();
 
   for(int id=0; id<isize(treestates); id++) if(treestates[id].is_live) {
     auto& r = treestates[id].rules;
