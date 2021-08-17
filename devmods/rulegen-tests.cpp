@@ -23,6 +23,7 @@ struct hrmap_testproto : hrmap {
       h->distance = 0;
       h->cdata = nullptr;
       h->c7 = newCell(o->type, h);
+      h->c7->land = laCanvas;
       }
     return h;
     }
