@@ -118,7 +118,7 @@ void ufind(twalker& p) {
   p = p1 + p.spin;
   }
 
-void ufindc(tcell*& c) {
+EX void ufindc(tcell*& c) {
   twalker cw = c; ufind(cw); c = cw.at;
   }
 
@@ -147,9 +147,9 @@ tcell *gen_tcell(int id) {
 tcell* tmove(tcell *c, int d) {
   if(d<0 || d >= c->type) throw hr_exception("wrong d");
   if(c->move(d)) return c->move(d);
-  auto& co = arb::current.shapes[c->id].connections[d];
   auto cd = twalker(c, d);
   ufind(cd);
+  auto& co = arb::current.shapes[c->id].connections[cd.spin];
   tcell *c1 = gen_tcell(co.sid);
   connect_and_check(cd, twalker(c1, co.eid));
   return c1;
@@ -200,6 +200,7 @@ void check_loops(twalker pw) {
   }
 
 void connect_and_check(twalker p1, twalker p2) {
+  ufind(p1); ufind(p2);
   p1.at->c.connect(p1.spin, p2.at, p2.spin, false);
   fix_queue.push([=] { check_loops(p1); });
   fix_queue.push([=] { check_loops(p2); });
@@ -209,6 +210,7 @@ void connect_and_check(twalker p1, twalker p2) {
 EX void unify(twalker pw1, twalker pw2) {
   ufind(pw1);
   ufind(pw2);
+  if(pw1 == pw2) return;
   if(pw1.at->unified_to.at != pw1.at)
     throw hr_exception("not unified to itself");
   if(pw2.at->unified_to.at != pw2.at)
@@ -764,8 +766,13 @@ EX set<tcell*> single_live_branch_close_to_root;
 
 void treewalk(twalker& cw, int delta) {
   int d = get_parent_dir(cw.at);
-  if(cw.spin == d || get_parent_dir(cw.cpeek()) == (cw+wstep).spin)
-    cw += wstep;
+  if(cw.spin == d) cw += wstep;
+  else {
+    auto cw1 = cw+wstep;
+    get_parent_dir(cw1.at);
+    ufind(cw1);
+    if(get_parent_dir(cw1.at) == cw1.spin) cw += wstep;
+    }
   cw+=delta;
   }
 
