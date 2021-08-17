@@ -867,7 +867,7 @@ code_t id_at_spin(twalker cw) {
 map<code_t, int> code_to_id;
   
 EX pair<int, int> get_code(tcell *c) {
-  if(c->code != MYSTERY) {
+  if(c->code != MYSTERY && c->parent_dir != MYSTERY) {
     int bestd = c->parent_dir;
     if(bestd == -1) bestd = 0;
     return {bestd, c->code};
