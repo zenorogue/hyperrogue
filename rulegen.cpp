@@ -1100,8 +1100,6 @@ struct bad_tree : rulegen_retry {
   bad_tree() : rulegen_retry("bad tree") {}
   };
 
-bool equiv(twalker w1, twalker w2);
-
 struct branchdata {
   int id;
   int dir;
@@ -1130,16 +1128,6 @@ struct branchdata {
   };
 
 inline void print(hstream& hs, const branchdata& bd) { print(hs, "[", bd.id,":",bd.dir, " ", bd.at, ":", bd.temporary, "]"); }
-
-/* we need to be careful with multiple edges */
-
-bool paired(twalker w1, twalker w2) {
-  return w1 + wstep == w2;
-  }
-
-bool equiv(twalker w1, twalker w2) {
-  return w1 == w2;
-  }
 
 void advance(vector<branchdata>& bdata, branchdata at, int dir, bool start_forward, bool stack, int distlimit) {
   if(start_forward) {
@@ -1254,15 +1242,18 @@ void examine_branch(int id, int left, int right) {
     vector<branchdata> bdata2;
     int advcount = 0, eatcount = 0;
     for(int i=0; i<isize(bdata); i+=2) {
-      if(!bdata[i].temporary && !bdata[i+1].temporary && paired(bdata[i].at, bdata[i+1].at) && min(bdata[i].at.at->dist, bdata[i+1].at.at->dist) <= dist_at) {
+      if(!bdata[i].temporary && !bdata[i+1].temporary && bdata[i].at + wstep == bdata[i+1].at && min(bdata[i].at.at->dist, bdata[i+1].at.at->dist) <= dist_at) {
+        println(hlog, "pairing ", bdata[i], " and ", bdata[i+1]);
         advcount++;
-        if(bdata2.size() && !bdata2.back().temporary && equiv(bdata2.back().at, bdata[i].at)) { 
+        if(bdata2.size() && !bdata2.back().temporary && bdata2.back().at == bdata[i].at) {
+          println(hlog, "eating ", bdata2.back(), " and ", bdata[i]);
           verify_lr(bdata[i], 0);
           eatcount++; bdata2.pop_back(); 
           }
         else
           advance(bdata2, bdata[i], -1, false, true, dist_at+dlbonus);
-        if(i+2 < isize(bdata) && !bdata[i+1].temporary && !bdata[i+2].temporary && equiv(bdata[i+1].at, bdata[i+2].at)) { 
+        if(i+2 < isize(bdata) && !bdata[i+1].temporary && !bdata[i+2].temporary && bdata[i+1].at == bdata[i+2].at) {
+          println(hlog, "eating ", bdata[i+1], " and ", bdata[i+2]);
           verify_lr(bdata[i+1], +1);
           eatcount++; i += 2; bdata2.push_back(bdata[i+1]); 
           }
@@ -1487,25 +1478,6 @@ void clear_all() {
   cleanup();
   }
 
-bool double_edges_check(cell *c, set<int>& visited) {
-  int i = shvid(c);
-  if(visited.count(i)) return false;
-  visited.insert(i);
-  for(int j=0; j<c->type; j++) {
-    cellwalker cw(c, j);
-    bool on = true;
-    if(double_edges_check(cw.cpeek(), visited)) return true;
-    int qty = 0;
-    for(int k=0; k<=c->type; k++) {
-      bool on2 = (cw+k).cpeek() == cw.cpeek();
-      if(on != on2) qty++;
-      on = on2;
-      }
-    if(qty > 2) return true;
-    }
-  return false;
-  }
-
 EX void generate_rules() {
 
   delete_tmap();
@@ -1528,10 +1500,6 @@ EX void generate_rules() {
     t_origin.push_back(c);
     }
   
-  set<int> visited;
-  if(double_edges_check(currentmap->gamestart(), visited))
-    throw double_edges();
-   
   try_count = 0;
   
   important = t_origin;
@@ -1603,28 +1571,6 @@ struct hrmap_rulegen : hrmap {
     a.at->c.connect(a.spin, b.at, b.spin, false);
     }
 
-  void group_connect(heptspin a, heptspin b) {
-    /* go leftmost with a */
-    while(get_rule(a) == DIR_MULTI_GO_LEFT || get_rule(a-1) == DIR_MULTI_GO_RIGHT)
-      a--;
-    /* go rightmost with b */
-    while(get_rule(b) == DIR_MULTI_GO_RIGHT || get_rule(b+1) == DIR_MULTI_GO_LEFT)
-      b++;
-    int gr = 0;
-    // verify_connection(a, b);
-    while(true) {
-      hsconnect(a, b); gr++;
-      bool can_a = get_rule(a) == DIR_MULTI_GO_RIGHT || get_rule(a+1) == DIR_MULTI_GO_LEFT;
-      if(can_a) a++;
-      bool can_b = get_rule(b) == DIR_MULTI_GO_LEFT || get_rule(b-1) == DIR_MULTI_GO_RIGHT;
-      if(can_b) b--;
-      if(can_a && can_b) continue;
-      if(can_a || can_b) 
-        throw rulegen_failure("multi disagreement");
-      break;
-      }      
-    }
-  
   heptagon *create_step(heptagon *h, int d) override {
     heptspin hs(h, d);
     int r = get_rule(hs);
@@ -1648,36 +1594,19 @@ struct hrmap_rulegen : hrmap {
       hsconnect(hs, hs1);
       return h1;
       }
-    else if(r == DIR_MULTI_GO_LEFT) {
-      // hs = (hs - 1) + wstep;
-      hsconnect(hs, hs - 1 + wstep - 1);
-      return h->move(d);
-      }
-    else if(r == DIR_MULTI_GO_RIGHT) {
-      // hs = (hs + 1) + wstep;
-      hsconnect(hs, hs + 1 + wstep + 1);
-      return h->move(d);
-      }
     else if(r == DIR_LEFT || r == DIR_RIGHT) {
       heptspin hs1 = hs;
       int delta = r == DIR_LEFT ? -1 : 1;
       int rev = (DIR_LEFT ^ DIR_RIGHT ^ r);
-      while(IS_DIR_MULTI(get_rule(hs1))) hs1 += delta;
       hs1 += delta;
       while(true) {
         int r1 = get_rule(hs1);
         if(r1 == rev) {
-          group_connect(hs, hs1);
+          hsconnect(hs, hs1);
           return hs1.at;
-          }
-        else if(IS_DIR_MULTI(r1)) {
-          hs1 += delta;
           }
         else if(r1 == r || r1 == DIR_PARENT || r1 >= 0) {
           hs1 += wstep;
-          while(get_rule(hs1) == (r == DIR_RIGHT ? DIR_MULTI_GO_RIGHT : DIR_MULTI_GO_LEFT)) {
-            hs1 += delta;
-            }
           hs1 += delta;
           }
         else throw rulegen_failure("bad R1");
@@ -1881,8 +1810,6 @@ EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {
     if(ep.eat("PARENT")) ts.rules.push_back(DIR_PARENT);
     else if(ep.eat("LEFT")) ts.rules.push_back(DIR_LEFT);
     else if(ep.eat("RIGHT")) ts.rules.push_back(DIR_RIGHT);
-    else if(ep.eat("MLEFT")) ts.rules.push_back(DIR_MULTI_GO_LEFT);
-    else if(ep.eat("MRIGHT")) ts.rules.push_back(DIR_MULTI_GO_RIGHT);
     else { int i = ep.iparse(); ts.rules.push_back(i); }
     }
   for(int i=0; i<N; i++) {
@@ -1903,7 +1830,7 @@ EX void verify_parsed_treestates() {
   if(rule_root < 0 || rule_root >= isize(treestates))
     throw hr_parse_exception("undefined treestate as root");
   for(auto& ts: treestates) for(auto& r: ts.rules) {
-    if(r < 0 && !among(r, DIR_PARENT, DIR_LEFT, DIR_RIGHT, DIR_MULTI_GO_LEFT, DIR_MULTI_GO_RIGHT))
+    if(r < 0 && !among(r, DIR_PARENT, DIR_LEFT, DIR_RIGHT))
       throw hr_parse_exception("negative number in treestates");
     if(r > isize(treestates))
       throw hr_parse_exception("undefined treestate");
