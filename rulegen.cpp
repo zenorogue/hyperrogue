@@ -364,6 +364,11 @@ void check_solid(tcell *c, int d) {
   if(debugflags & DF_GEOM)
     println(hlog, "new shortcut found, pre =  ", pre, " post = ", post, " pre reaches ", at1, " post reaches ", walkers2.back(), " of type ", at1.at->id, " sample = ", c);
 
+  if(isize(pre) > 500) {
+    debuglist = { c };
+    throw rulegen_failure("shortcut too long");
+    }
+
   shortcuts[c->id].emplace_back(unique_ptr<shortcut> (new shortcut));
   auto& sh = shortcuts[c->id].back();
   sh->pre = pre;
