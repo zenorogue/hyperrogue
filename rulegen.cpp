@@ -745,6 +745,13 @@ EX set<tcell*> single_live_branch_close_to_root;
 
 /** is what on the left side, or the right side, of to_what? */
 
+void treewalk(twalker& cw, int delta) {
+  int d = get_parent_dir(cw.at);
+  if(cw.spin == d || get_parent_dir(cw.cpeek()) == (cw+wstep).spin)
+    cw += wstep;
+  cw+=delta;
+  }
+
 int get_side(twalker what) {
   twalker w = what;
   twalker tw = what + wstep;
@@ -784,22 +791,16 @@ int get_side(twalker what) {
   // failed to solve this in the simple way (ended at the root) -- go around the tree
   twalker wl = what;
   twalker wr = wl;
-  auto go = [&] (twalker& cw, int delta) {
-    int d = get_parent_dir(cw.at);
-    if(cw.spin == d || get_parent_dir(cw.cpeek()) == (cw+wstep).spin)
-      cw += wstep;
-    cw+=delta;
-    };
   auto to_what = what + wstep;
-  auto ws = what; go(ws, 0); if(ws == to_what) return 0;
+  auto ws = what; treewalk(ws, 0); if(ws == to_what) return 0;
 
   while(true) {
     steps++; if(steps > 1000000) {
       debuglist = {what, to_what, w, tw};
       throw rulegen_failure("get_side freeze II");
       }
-    go(wl, -1);
-    go(wr, +1);
+    treewalk(wl, -1);
+    treewalk(wr, +1);
     if(wl == to_what) return +1;
     if(wr == to_what) return -1;
     }
@@ -1096,199 +1097,129 @@ void find_possible_parents() {
 
 /* == branch testing == */
 
-struct bad_tree : rulegen_retry {
-  bad_tree() : rulegen_retry("bad tree") {}
-  };
+void verified_treewalk(twalker& cw, int delta) {
+  if((cw+wstep).spin == get_parent_dir(cw.peek())) {
+    }
+  }
 
-struct branchdata {
-  int id;
-  int dir;
-  twalker at;
-  int temporary;
-  void step() { 
-    if(treestates[id].rules[dir] < 0)
-      throw rulegen_failure("invalid step");
-    id = treestates[id].rules[dir]; dir = 0; at += wstep;
-    auto co = get_code(at.at);
-    auto& d1 = co.first;
-    auto& id1 = co.second;
-    if(id != id1 || d1 != at.spin) {
-      important.push_back(at.at);
-      if(debugflags & DF_GEOM)
-        println(hlog, "expected ", id, " found ", id1, " at ", at);
-      important.push_back(at.at->cmove(get_parent_dir(at.at)));
-      throw bad_tree();
-      }
-    }
-  void spin(int i) {
-    at += i;
-    dir += i;
-    dir = gmod(dir, isize(treestates[id].rules));
-    }
-  };
+using tsinfo = pair<int, int>;
 
-inline void print(hstream& hs, const branchdata& bd) { print(hs, "[", bd.id,":",bd.dir, " ", bd.at, ":", bd.temporary, "]"); }
+tsinfo get_tsinfo(twalker tw) {
+  auto co = get_code(tw.at);
+  int spin;
+  if(co.first == -1) spin = tw.spin;
+  else spin = gmod(tw.spin - co.first, tw.at->type);
+  return {co.second, spin};
+  }
 
-void advance(vector<branchdata>& bdata, branchdata at, int dir, bool start_forward, bool stack, int distlimit) {
-  if(start_forward) {
-    at.step();
-    at.spin(dir);
-    }
-  else {
-    at.spin(dir);
-    }
-  vector<branchdata> b;
-  int steps = 0;
+int get_rule(tsinfo s) {
+  return treestates[s.first].rules[s.second];
+  }
+
+set<vector<tsinfo> > verified_branches;
+
+void push_deadstack(vector<tsinfo>& hash, twalker w, tsinfo tsi, int dir) {
+
+  hash.push_back(tsi);
+
   while(true) {
-    steps++; if(steps == max_adv_steps) 
-      throw rulegen_failure("max_adv_steps exceeded");
-    auto& ts = treestates[at.id];
-    auto r = ts.rules[at.dir];
-    if(ts.sub_status[at.dir]) {
-      at.temporary = 0;
-      b.push_back(at);
-      b.push_back(at);
-      at.spin(dir);
-      }
-    else if(r < 0) {
-      at.temporary = 0;
-      b.push_back(at);
-      break;
-      }
-    else if(!treestates[r].is_live) {
-      advance(b, at, dir, true, false, distlimit);
-      if(b.back().dir == 0)
-        b.pop_back();
-      else
-        advance(b, at, -dir, true, true, distlimit);
-      at.spin(dir);
+    tsi.second += dir; w += dir;
+    auto& ts = treestates[tsi.first];
+    if(tsi.second == 0 || tsi.second == isize(ts.rules)) {
+      w += wstep;
+      tsi = get_tsinfo(w);
+      hash.push_back(tsi);
       }
     else {
-      at.step();
-      if(at.at.at->dist < distlimit || !ts.is_live) at.spin(dir);
-      else {
-        at.temporary = dir;
-        b.push_back(at);
-        break;
-        }
-      }
-    }
-  if(stack) {
-    while(b.size()) { bdata.push_back(b.back()); b.pop_back(); }
-    }
-  else {
-    for(auto& bd: b) bdata.push_back(bd);
-    }
-  }
-
-void verify_lr(branchdata bd, int dir) {
-  return;
-  if(dir) { bd.spin(dir); if(bd.dir == 0) bd.dir = bd.at.at->type; }
-  auto& r = treestates[bd.id].rules;
-  for(int i=0; i<isize(r); i++) {
-    int val = i < bd.dir ? DIR_LEFT : DIR_RIGHT;
-    int wrong = val ^ DIR_LEFT ^ DIR_RIGHT;
-    if(r[i] == wrong) {
-      debuglist = { bd.at };
-      throw rulegen_failure("assign_lr direction error");
+      int r = ts.rules[tsi.second];
+      if(r > 0 && treestates[r].is_live) return;
       }
     }
   }
 
-set<vector<int> > branch_hashes;
+void verified_treewalk(twalker& tw, int id, int dir) {
+  if(id >= 0) {
+    auto co = get_code(tw.cpeek());
+    if(co.second != id || co.first != (tw+wstep).spin) {
+      important.push_back(tw.at);
+      important.push_back(tw.cpeek());
+      if(debugflags & DF_GEOM)
+        println(hlog, "expected ", make_pair((tw+wstep).spin,id), " found ", co);
+      debuglist = {tw, tw+wstep};
+      throw rulegen_retry("verify_advance failed");
+      }
+    }
+  treewalk(tw, dir);
+  }
 
 void examine_branch(int id, int left, int right) {
   auto rg = treestates[id].giver;
+
   if(debugflags & DF_GEOM)
     println(hlog, "need to examine branches ", tie(left, right), " of ", id, " starting from ", rg);
   indenter ind(2);
-  vector<branchdata> bdata;
-  int dist_at = rg.at->dist;
 
-  do {
-    if(true) {
-      auto bl = branchdata{id, left, rg+left, dist_at+dlbonus};
-      bl.temporary = 0;
-      if(treestates[id].rules[left] >= 0)
-        advance(bdata, bl, -1, true, true, dist_at+5);
-      else bdata.push_back(bl);
-      }
-    left++;
-    if(left == rg.at->type) left = 0;
-    if(true) {
-      auto br = branchdata{id, left, rg+left, dist_at+dlbonus};
-      br.temporary = 0;
-      if(treestates[id].rules[left] >= 0)
-        advance(bdata, br, +1, true, false, dist_at+5);
-      else bdata.push_back(br);
-      }
-    }
-  while(left != right);
+  auto wl = rg+left;
+  auto wr = rg+left+1;
+
+  vector<twalker> lstack, rstack;
+
   int steps = 0;
   while(true) {
     steps++;
-
-    if(steps == max_examine_branch) {
-      debuglist = { rg };
+    if(steps > max_examine_branch) {
+      debuglist = { rg+left, wl, wr };
       throw rulegen_failure("max_examine_branch exceeded");
       }
     
-    if(isize(bdata) > max_bdata) {
-      debuglist = { rg };
-      throw rulegen_failure("max_bdata exceeded");
+    auto tsl = get_tsinfo(wl);
+    auto tsr = get_tsinfo(wr);
+
+    auto rl = get_rule(tsl);
+    auto rr = get_rule(tsr);
+
+    // println(hlog, "wl = ", wl, " -> ", wl+wstep, " R", rl, " wr = ", wr, " -> ", wr+wstep, " R", rr, " lstack = ", lstack, " rstack = ", rstack);
+
+    if(rl == DIR_RIGHT && rr == DIR_LEFT && lstack.empty() && rstack.empty()) {
+      vector<tsinfo> hash;
+      push_deadstack(hash, wl, tsl, -1);
+      hash.emplace_back(-1, -1);
+      push_deadstack(hash, wr, tsr, +1);
+      // println(hlog, "hash = ", hash);
+      if(verified_branches.count(hash)) return;
+      verified_branches.insert(hash);
+
+      verified_treewalk(wl, rl, -1);
+      verified_treewalk(wr, rr, +1);
       }
 
-    /* advance both */
-    vector<branchdata> bdata2;
-    int advcount = 0, eatcount = 0;
-    for(int i=0; i<isize(bdata); i+=2) {
-      if(!bdata[i].temporary && !bdata[i+1].temporary && bdata[i].at + wstep == bdata[i+1].at && min(bdata[i].at.at->dist, bdata[i+1].at.at->dist) <= dist_at) {
-        println(hlog, "pairing ", bdata[i], " and ", bdata[i+1]);
-        advcount++;
-        if(bdata2.size() && !bdata2.back().temporary && bdata2.back().at == bdata[i].at) {
-          println(hlog, "eating ", bdata2.back(), " and ", bdata[i]);
-          verify_lr(bdata[i], 0);
-          eatcount++; bdata2.pop_back(); 
-          }
-        else
-          advance(bdata2, bdata[i], -1, false, true, dist_at+dlbonus);
-        if(i+2 < isize(bdata) && !bdata[i+1].temporary && !bdata[i+2].temporary && bdata[i+1].at == bdata[i+2].at) {
-          println(hlog, "eating ", bdata[i+1], " and ", bdata[i+2]);
-          verify_lr(bdata[i+1], +1);
-          eatcount++; i += 2; bdata2.push_back(bdata[i+1]); 
-          }
-        else
-          advance(bdata2, bdata[i+1], +1, false, false, dist_at+dlbonus);
-        }
-      else {
-        if(bdata[i].temporary && bdata[i].at.at->dist <= dist_at+dlbonus-2) {
-           advcount++;
-           advance(bdata2, bdata[i], bdata[i].temporary, false, bdata[i].temporary < 0, dist_at+dlbonus);
-           }
-        else bdata2.push_back(bdata[i]);
+    else if(rl == DIR_RIGHT && !lstack.empty() && lstack.back() == wl+wstep) {
+      lstack.pop_back();
+      verified_treewalk(wl, rl, -1);
+      }
 
-        if(bdata[i+1].temporary && bdata[i+1].at.at->dist <= dist_at+3) {
-           advcount++;
-           advance(bdata2, bdata[i+1], bdata[i+1].temporary, false, bdata[i+1].temporary < 0, dist_at+dlbonus);
-           }
-        else bdata2.push_back(bdata[i+1]);
-        }
+    else if(rr == DIR_LEFT && !rstack.empty() && rstack.back() == wr+wstep) {
+      rstack.pop_back();
+      verified_treewalk(wr, rr, +1);
       }
-    bdata = bdata2;
-    if(!advcount) dist_at++;  
-    if(advcount) {
-      vector<int> hash;
-      for(int i=0; i<isize(bdata); i++) {
-        hash.push_back(bdata[i].id);
-        hash.push_back(bdata[i].dir);
-        hash.push_back(bdata[i].temporary);
-        hash.push_back(bdata[i].at.at->dist - dist_at);
-        }
-      if(branch_hashes.count(hash)) {
-        return;
-        }
-      branch_hashes.insert(hash);
+
+    else if(rl == DIR_LEFT) {
+      lstack.push_back(wl);
+      verified_treewalk(wl, rl, -1);
       }
+
+    else if(rr == DIR_RIGHT) {
+      rstack.push_back(wr);
+      verified_treewalk(wr, rr, +1);
+      }
+
+    else if(rl != DIR_RIGHT)
+      verified_treewalk(wl, rl, -1);
+
+    else if(rr != DIR_RIGHT)
+      verified_treewalk(wr, rr, +1);
+
+    else throw rulegen_failure("cannot advance while examining");
     }
   }
 
@@ -1407,7 +1338,7 @@ void rules_iteration() {
   // print_rules();
   
   handle_distance_errors();
-  branch_hashes.clear();
+  verified_branches.clear();
 
   int q = isize(single_live_branch_close_to_root);
 
