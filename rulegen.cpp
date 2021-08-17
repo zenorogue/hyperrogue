@@ -985,6 +985,7 @@ void rules_iteration_for(tcell *c) {
 
           extend_analyzer(cwmain, z, k, mismatches, treestates[id].giver);
           mismatches++;
+          throw mismatch_error();
           }
         }
       }
