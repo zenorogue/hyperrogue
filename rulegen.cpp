@@ -706,8 +706,9 @@ void extend_analyzer(twalker cw_target, int dir, int id, int mism, twalker rg) {
       }
     gid = next_gid;
     }
-  if(mism == 0 && !added) 
-    throw rulegen_failure("no extension");
+  if(mism == 0 && !added)
+    /* in rare cases this happens due to unification or something */
+    throw rulegen_retry("no extension");
   }
 
 #if HDR
