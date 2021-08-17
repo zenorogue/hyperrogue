@@ -692,6 +692,8 @@ static const int C_PARENT = 8;
 
 EX vector<treestate> treestates;
 
+EX set<tcell*> single_live_branch_close_to_root;
+
 /** is what on the left side, or the right side, of to_what? */
 
 int get_side(tcell *what, tcell *to_what) {
@@ -714,8 +716,8 @@ int get_side(tcell *what, tcell *to_what) {
     }
   if(w.spin == -1 || tw.spin == -1) return 0;
   int d = get_parent_dir(w.at);
-  
-  if(d >= 0) {
+
+  if(d >= 0 && !single_live_branch_close_to_root.count(w.at)) {
     twalker last(w.at, d);
     return last.to_spin(w.spin) - last.to_spin(tw.spin);
     }
@@ -1138,8 +1140,6 @@ void advance(vector<branchdata>& bdata, branchdata at, int dir, bool start_forwa
     }
   }
 
-bool dubious_lr;
-
 void verify_lr(branchdata bd, int dir) {
   if(dir) { bd.spin_full(dir); if(bd.dir == 0) bd.dir = bd.at.at->type; }
   auto& r = treestates[bd.id].rules;
@@ -1147,12 +1147,8 @@ void verify_lr(branchdata bd, int dir) {
     int val = i < bd.dir ? DIR_LEFT : DIR_RIGHT;
     int wrong = val ^ DIR_LEFT ^ DIR_RIGHT;
     if(r[i] == wrong) {
-      if(dubious_lr)
-        r[i] = val;
-      else {
-        debuglist = { bd.at };
-        throw rulegen_failure("assign_lr direction error");
-        }
+      debuglist = { bd.at };
+      throw rulegen_failure("assign_lr direction error");
       }
     }
   }
@@ -1165,7 +1161,7 @@ void examine_branch(int id, int left, int right) {
     println(hlog, "need to examine branches ", tie(left, right), " of ", id, " starting from ", rg);
   vector<branchdata> bdata;
   int dist_at = rg.at->dist;
-  dubious_lr = left == right;
+
   do {
     /* can be false in case of multi-edges */
     if(treestates[id].rules[left] >= 0) {      
@@ -1262,6 +1258,22 @@ void clear_codes() {
     }
   }
 
+void find_single_live_branch(twalker at) {
+  handle_distance_errors();
+  int id = get_code(at.at).second;
+  int t = at.at->type;
+  auto& r = treestates[id].rules;
+  int q = 0;
+  for(int i=0; i<t; i++) if(r[i] >= 0) {
+    if(treestates[r[i]].is_live) q++;
+    }
+  for(int i=0; i<t; i++) if(r[i] >= 0) {
+    single_live_branch_close_to_root.insert(at.at);
+    if(!treestates[r[i]].is_live || q == 1)
+      find_single_live_branch(at + i + wstep);
+    }
+  }
+
 void rules_iteration() {
   clear_codes();
   
@@ -1344,6 +1356,8 @@ void rules_iteration() {
   handle_distance_errors();
   branch_hashes.clear();
 
+  int q = isize(single_live_branch_close_to_root);
+
   for(int id=0; id<isize(treestates); id++) if(treestates[id].is_live) {
     auto& r = treestates[id].rules;
     int last_live_branch = -1;
@@ -1355,6 +1369,18 @@ void rules_iteration() {
           examine_branch(id, last_live_branch, i);
         last_live_branch = i;
         }
+    if(first_live_branch == last_live_branch && treestates[id].is_root) {
+      println(hlog, "for id ", id, " we have a single live branch");
+      indenter ind(2);
+      find_single_live_branch(treestates[id].giver);
+      }
+    if(isize(single_live_branch_close_to_root) != q) {
+      vector<tcell*> v;
+      for(auto c: single_live_branch_close_to_root) v.push_back(c);
+      println(hlog, "changed single_live_branch_close_to_root from ", q, " to ", v);
+      debuglist = { treestates[id].giver };
+      throw rulegen_retry("single live branch");
+      }
     if(treestates[id].is_root) examine_branch(id, last_live_branch, first_live_branch);
     }
   
