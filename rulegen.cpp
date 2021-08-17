@@ -416,6 +416,7 @@ void fix_distances(tcell *c) {
     auto& d = c->dist;
     restart:
     for(int i=0; i<c->type; i++) {
+      if(!c->move(i)) continue;
       tcell *c1 = c->cmove(i);
       ufindc(c);
       c1 = c->cmove(i);
@@ -963,8 +964,6 @@ void rules_iteration_for(tcell *c) {
     ts.sid = cwmain.at->id;
     ts.parent_dir = cwmain.spin;
     ts.is_root = c->dist == 0;
-    for(int d=0; d<c->type; d++)
-      cq.push_back(c->cmove(d));
     }
   else if(ts.rules != cids) {
     handle_distance_errors();
