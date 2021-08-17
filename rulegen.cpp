@@ -676,6 +676,7 @@ EX vector<twalker> spread(analyzer& a, twalker cw) {
   }
 
 void extend_analyzer(twalker cw_target, int dir, int id, int mism, twalker rg) {
+  ufind(cw_target); ufind(rg);
   if(debugflags & DF_GEOM)
     println(hlog, "extend called, cw_target = ", cw_target);
   twalker cw_conflict = cw_target + dir + wstep;
