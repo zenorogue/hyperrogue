@@ -1122,8 +1122,11 @@ void push_deadstack(vector<tsinfo>& hash, twalker w, tsinfo tsi, int dir) {
   hash.push_back(tsi);
 
   while(true) {
+    ufind(w);
+    if(isize(hash) > 10000) throw rulegen_failure("deadstack overflow");
     tsi.second += dir; w += dir;
     auto& ts = treestates[tsi.first];
+    if(ts.is_root) return;
     if(tsi.second == 0 || tsi.second == isize(ts.rules)) {
       w += wstep;
       tsi = get_tsinfo(w);
