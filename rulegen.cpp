@@ -532,7 +532,7 @@ EX int get_parent_dir(tcell *c) {
       if(old == -1) return true;
       if(i%k != old%k) return i%k < old%k;
       if(old < i) old += n;
-      return old < i+(n+1)/2;
+      return old <= i+n/2;
       };
 
     int d = c->dist;
