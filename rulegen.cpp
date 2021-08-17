@@ -88,6 +88,13 @@ using twalker = walker<tcell>;
 
 queue<reaction_t> fix_queue;
 
+void push_unify(twalker a, twalker b) {
+  if(a.at->id != b.at->id) {
+    throw hr_exception("queued bad unify");
+    }
+  fix_queue.push([=] { unify(a, b); });
+  }
+
 bool in_fixing = false;
 
 void unify_distances(tcell *c1, tcell *c2);
@@ -138,6 +145,7 @@ tcell *gen_tcell(int id) {
   }
 
 tcell* tmove(tcell *c, int d) {
+  if(d<0 || d >= c->type) throw hr_exception("wrong d");
   if(c->move(d)) return c->move(d);
   auto& co = arb::current.shapes[c->id].connections[d];
   auto cd = twalker(c, d);
@@ -166,7 +174,7 @@ void check_loops(twalker pw) {
       else throw hr_exception("vertex valence too small");
       }
     if(steps == valence) {
-      fix_queue.push([=] { unify(pwf, pwb); });
+      push_unify(pwf, pwb);
       return;
       }
     }
@@ -181,7 +189,7 @@ void check_loops(twalker pw) {
       else throw hr_exception("vertex valence too small");
       }
     if(steps == valence) {
-      fix_queue.push([=] { unify(pwf, pwb); });
+      push_unify(pwf, pwb);
       return;
       }
     }
@@ -198,7 +206,7 @@ void connect_and_check(twalker p1, twalker p2) {
   process_fix_queue();
   }
 
-void unify(twalker pw1, twalker pw2) {
+EX void unify(twalker pw1, twalker pw2) {
   ufind(pw1);
   ufind(pw2);
   if(pw1.at->unified_to.at != pw1.at)
@@ -215,6 +223,10 @@ void unify(twalker pw1, twalker pw2) {
     throw hr_exception("unifying two cells of different id's");
 
   auto& shs = arb::current.shapes;
+
+  if((pw1.spin - pw2.spin) % shs[pw1.at->id].cycle_length)
+    throw hr_exception("unification spin disagrees with cycle_length");
+
   int id = pw1.at->id;
   for(int i=0; i<shs[id].size(); i++) {
     if(!pw2.peek()) {
@@ -224,7 +236,7 @@ void unify(twalker pw1, twalker pw2) {
       connect_and_check(pw1, pw2+wstep);
       }
     else {
-      fix_queue.push([=] { unify(pw1+wstep, pw2+wstep); });
+      push_unify(pw1+wstep, pw2+wstep);
       auto ss = pw1+wstep;
       connect_and_check(pw1, pw2+wstep);
       connect_and_check(pw1, ss);
@@ -502,7 +514,7 @@ EX void look_for_shortcuts(tcell *c, shortcut& sh) {
     npath.push_back(tw0.at);
     int d = sh.delta;
     auto tw1 = tw + d;
-    fix_queue.push([=] { unify(tw1, tw0); });
+    push_unify(tw1, tw0);
     process_fix_queue();
     for(auto t: npath) {
       ufindc(t);
