@@ -554,6 +554,8 @@ int testargs() {
     try_to_resolve_confusion = true;
   else if(argis("-view-debug"))
     view_debug();
+  else if(argis("-print-rules"))
+    print_rules();
   else if(argis("-clear-debug"))
     clear_debug();
 
