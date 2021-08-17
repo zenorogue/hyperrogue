@@ -512,6 +512,29 @@ EX void look_for_shortcuts(tcell *c) {
     look_for_shortcuts(c, *shortcuts[c->id][i]);
   }
 
+EX bool try_to_resolve_confusion = false;
+
+void trace_root_path(vector<int>& rp, twalker cw) {
+  auto d = cw.peek()->dist;
+  cw += wstep;
+
+  next:
+  if(d > 0) {
+    for(int i=0; i<cw.at->type; i++) {
+      tcell *c1 = (cw+i).peek();
+      be_solid(c1);
+      if(c1->dist < d) {
+        rp.push_back(i);
+        cw += i;
+        cw += wstep;
+        d--;
+        goto next;
+        }
+      }
+    }
+  rp.push_back(cw.to_spin(0));
+  }
+
 /** which neighbor will become the parent of c */
 
 EX int get_parent_dir(tcell *c) {
@@ -556,6 +579,22 @@ EX int get_parent_dir(tcell *c) {
 
     for(auto ne: nearer)
       if(ne != bestd && beats(ne, bestd)) {
+
+        if(try_to_resolve_confusion) {
+          vector<int> best;
+          int bestfor = ne;
+          trace_root_path(best, twalker(c, ne));
+
+          for(auto ne1: nearer) {
+            vector<int> other;
+            trace_root_path(other, twalker(c, ne1));
+            if(other < best) best = other, bestfor = ne1;
+            }
+
+          bestd = bestfor;
+          break;
+          }
+
         debuglist = { c };
         throw rulegen_failure("still confused");
         }
