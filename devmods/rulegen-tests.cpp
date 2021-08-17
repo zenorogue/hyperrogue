@@ -550,6 +550,8 @@ int testargs() {
   else if(argis("-trv")) {
     shift(); test_rotate_val = argi();
     }
+  else if(argis("-resolve"))
+    try_to_resolve_confusion = true;
   else if(argis("-view-debug"))
     view_debug();
   else if(argis("-clear-debug"))
