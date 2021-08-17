@@ -1385,6 +1385,7 @@ void cleanup() {
   code_to_id.clear();
   important.clear();
   shortcuts.clear();
+  single_live_branch_close_to_root.clear();
   }
 
 void clear_all() {  
