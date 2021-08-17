@@ -41,6 +41,8 @@ const int MYSTERY = 31999;
 const int MYSTERY_DIST = 31998;
 #endif
 
+EX bool parent_debug;
+
 /* === tcell === */
 
 /** number of tcells created */
@@ -563,8 +565,11 @@ EX int get_parent_dir(tcell *c) {
     for(int i=0; i<n; i++) {
       tcell *c1 = c->cmove(i);
       be_solid(c1);
+      if(parent_debug) println(hlog, "direction = ", i, " distance = ", c1->dist);
       if(c1->dist < d) nearer.push_back(i);
       }
+
+    if(parent_debug) println(hlog, "nearer = ", nearer, " n=", n, " k=", k);
 
     auto oc = c;
     ufindc(c); if(d != c->dist || oc != c) {
@@ -576,6 +581,8 @@ EX int get_parent_dir(tcell *c) {
     for(auto ne: nearer)
       if(beats(ne, bestd))
         bestd = ne;
+
+    if(parent_debug) for(auto ne: nearer) println(hlog, "beats", tie(ne, bestd), " = ", beats(ne, bestd));
 
     for(auto ne: nearer)
       if(ne != bestd && beats(ne, bestd)) {
