@@ -265,7 +265,7 @@ void print_rules() {
     else
       print(hlog, " (no giver)");
     
-    println(hlog, " rg:", ts.giver, ts.is_live ? " [live]" : " [dead]");
+    println(hlog, " rg:", ts.giver, ts.is_root ? " [root]" : ts.is_live ? " [live]" : " [dead]");
     }
   }
 
