@@ -95,7 +95,7 @@ void view_debug() {
       tcell *tc = m->counterpart[c->master];
       
       string s;
-      auto label = (tc->code == MYSTERY ? "?" : its(tc->code)) + "/" + (tc->dist == MYSTERY ? "?" : its(tc->dist));
+      auto label = (tc->code == MYSTERY ? "?" : its(tc->code)) + "/" + (tc->dist == MYSTERY ? "?" : tc->dist == MYSTERY_DIST ? "*" : its(tc->dist));
       
       color_t col = 0xFFFFFF + 0x512960 * tc->code;
   
