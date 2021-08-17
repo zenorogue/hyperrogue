@@ -466,7 +466,7 @@ void test_from_file(string list) {
   std::ifstream is("devmods/rulegen-tests/" + list + ".lst");
   string s;
   while(getline(is, s)) {
-    if(s != "") filenames.push_back(s);
+    if(s != "" && s[0] != '#') filenames.push_back(s);
     }
   int trv = test_rotate_val;
   
