@@ -743,15 +743,25 @@ EX set<tcell*> single_live_branch_close_to_root;
 
 /** is what on the left side, or the right side, of to_what? */
 
-int get_side(tcell *what, tcell *to_what) {
-  twalker w(what, -1);
-  twalker tw(to_what, -1);
+int get_side(twalker what) {
+  twalker w = what;
+  twalker tw = what + wstep;
   auto adv = [] (twalker& cw) {
     int d = get_parent_dir(cw.at);
+    ufind(cw);
+    if(cw.at->move(d)->dist >= cw.at->dist) {
+      println(hlog, "/CSV/ get_parent_dir error at ", cw, " and ", cw.at->move(d), ": ", cw.at->dist, "::", cw.at->move(d)->dist);
+      exit(1);
+      }
     cw.spin = d;
     cw += wstep;
     };
+  int steps = 0;
   while(w.at != tw.at) {
+    steps++; if(steps > 1000000) {
+      debuglist = {what, w, tw};
+      throw rulegen_failure("get_side freeze");
+      }
     ufind(w); ufind(tw);
     if(w.at->dist > tw.at->dist)
       adv(w);
@@ -770,7 +780,7 @@ int get_side(tcell *what, tcell *to_what) {
     }
 
   // failed to solve this in the simple way (ended at the root) -- go around the tree
-  twalker wl(what, get_parent_dir(what));
+  twalker wl = what;
   twalker wr = wl;
   auto go = [&] (twalker& cw, int delta) {
     int d = get_parent_dir(cw.at);
@@ -778,11 +788,18 @@ int get_side(tcell *what, tcell *to_what) {
       cw += wstep;
     cw+=delta;
     };
+  auto to_what = what + wstep;
+  auto ws = what; go(ws, 0); if(ws == to_what) return 0;
+
   while(true) {
+    steps++; if(steps > 1000000) {
+      debuglist = {what, to_what, w, tw};
+      throw rulegen_failure("get_side freeze II");
+      }
     go(wl, -1);
     go(wr, +1);
-    if(wl.at == to_what) return +1;
-    if(wr.at == to_what) return -1;
+    if(wl == to_what) return +1;
+    if(wr == to_what) return -1;
     }
   }
 
@@ -816,7 +833,7 @@ code_t id_at_spin(twalker cw) {
         else if(y == 0) x = C_EQUAL;
         else if(y == -1) x = C_UNCLE;
         else throw rulegen_failure("distance problem y=" + its(y) + lalign(0, " cs=", cs, " cs2=", cs2, " peek=", cs.peek(), " dist=", cs.at->dist, " dist2=", cs2.at->dist));
-        auto gs = get_side(cs.at, cs.peek());
+        auto gs = get_side(cs);
         if(gs == 0 && x == C_UNCLE) x = C_PARENT;
         if(gs > 0) x++;
         }
