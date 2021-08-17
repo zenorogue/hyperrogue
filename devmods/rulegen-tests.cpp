@@ -126,6 +126,16 @@ void view_debug() {
         sprawl_shown.clear();
         for(int i=0; i<isize(res); i++) sprawl_shown[res[i].at] = i;
         }));
+
+      v.push_back(named_functionality("parent_dir", [m] {
+        tcell *c = m->counterpart[centerover->master];
+        println(hlog, "parent_dir = ", c->parent_dir);
+        c->parent_dir = MYSTERY;
+        parent_debug = true;
+        get_parent_dir(c);
+        parent_debug = false;
+        println(hlog, "parent_dir = ", c->parent_dir);
+        }));
       }));
     
     for(auto dw: debuglist)
