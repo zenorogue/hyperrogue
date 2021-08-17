@@ -279,6 +279,10 @@ void restart_game_on(hrmap *m) {
   delHook(hooks_newmap, a);
   }
 
+bool add_header = false;
+bool add_labels = true;
+string test_stats = "gsmctTf";
+
 void test_current() {
   stop_game();
   pointer_indices.clear();
@@ -308,26 +312,30 @@ void test_current() {
     View = Id; shot::take(t+"-old.png");
     }
   
-  string status;
+  string status, message;
   bool ok = false;
 
   int tstart = SDL_GetTicks();
   try {
     generate_rules();
-    status = "ACC;OK";
+    status = "ACC";
+    message = "OK";
     ok = true;
     }
   catch(rulegen_surrender& e) {
     println(hlog, "surrender: ** ", e.what());
-    status = s0 + "SUR;\"" + e.what() + "\"";
+    status = "SUR";
+    message = e.what();
     }
   catch(rulegen_retry& e) {
     println(hlog, "try exceeded: ** ", e.what());
-    status = s0 + "TRY;\"" + e.what() + "\"";
+    status = "TRY";
+    message = e.what();
     }
   catch(rulegen_failure& e) {
     println(hlog, "error: ** ", e.what());
-    status = s0 + "ERR;\"" + e.what() + "\"";
+    status = "ERR";
+    message = e.what();
     }
 
   if(t_origin.size() && (draw_which & 2)) {
@@ -356,10 +364,40 @@ void test_current() {
     c = c->next;
     }
   
-  println(hlog, "after rulegen: tcellcount = ", tcellcount, "-", tunified, " qsolid = ", qsolid, " qdist = ", qdist, " qcode = ", qcode, " radius = ", prepare_around_radius, " try_count = ", try_count, " ticks = ", tstart);
+  vector<ld> areas;
+  for(auto& sh: arb::current.shapes) {
+    ld s = 0; int i = 0;
+    for(auto a: sh.angles) { while(a > 2 * M_PI) a -= 2 * M_PI; while(a<0) a += 2 * M_PI; s += a; i++; }
+    areas.push_back((i-2) * M_PI - s);
+    }
+  sort(areas.begin(), areas.end());
 
-  println(hlog, "CSV;", euclid ? "E" : hyperbolic ? "H" : "?", ";", status, ";", tcellcount, ";", tunified, ";", qsolid, ";", qdist, ";", qcode, ";", prepare_around_radius, ";", try_count, ";", tstart, ";", isize(treestates), ";", arb::current.filename);
+  again:
+  print(hlog, "CSV");
+
+  #define Out(title,value) if(add_header) print(hlog, ";", title); else if(add_labels) print(hlog, " ", title, "=", value);  else print(hlog, ";", value); break;
+
+  for(char c: test_stats) switch(c) {
+    case 'g': Out("geom", euclid ? "E" : hyperbolic ? "H" : "?");
+    case 's': Out("status", status);
+    case 'm': Out("message", message);
+    case 'c': Out("cells", tcellcount);
+    case 'u': Out("unis", tunified);
+    case 'q': Out("solid", qsolid);
+    case 'd': Out("dist", qdist);
+    case 'C': Out("code", qcode);
+    case 't': Out("try", try_count);
+    case 'T': Out("T", tstart / 1000.);
+    case 'y': Out("tree", isize(treestates));
+    case 'a': Out("amin;amax", lalign(0, areas[0], ";", areas.back()));
+    case 'h': Out("shapes", isize(arb::current.shapes));
+    case 'f': Out("file", arb::current.filename);
+    }
+  println(hlog);
   fflush(stdout);
+  if(add_header) { add_header = false; goto again; }
+
+  // for(auto& sh: shortcuts) println(hlog, sh.first, " : ", isize(sh.second), " shortcuts (CSV)");
 
   print_rules();
   /* for(auto& a: analyzers)
@@ -479,6 +517,16 @@ int testargs() {
   else if(argis("-testproto")) {
     restart_game_on(new hrmap_testproto);
     println(hlog, "creatad a testproto map with ", tcellcount, " cells");
+    }
+  else if(argis("-test-stats")) {
+    shift(); test_stats = args();
+    add_header = true;
+    add_labels = false;
+    }
+  else if(argis("-test-stats-label")) {
+    shift(); test_stats = args();
+    add_header = false;
+    add_labels = true;
     }
   else if(argis("-test-this")) {
     PHASEFROM(3);
