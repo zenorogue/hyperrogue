@@ -1277,7 +1277,19 @@ void find_single_live_branch(twalker at) {
     }
   }
 
-void rules_iteration() {
+EX void rules_iteration() {
+  try_count++;
+
+  if((try_count & (try_count-1)) == 0) {
+    analyzers.clear();
+    important = t_origin;
+    }
+
+  if(debugflags & DF_GEOM) println(hlog, "attempt: ", try_count);
+
+  auto c = first_tcell;
+  while(c) { c->code = MYSTERY; c = c->next; }
+  
   clear_codes();
   
   cq = important;
@@ -1443,24 +1455,15 @@ EX void generate_rules() {
   
   important = t_origin;
   
-  retry:  
-  try {
-    rules_iteration();
-  }
-  catch(rulegen_retry& e) {
-    try_count++;
-    if(try_count >= max_retries)
-      throw;
-    if(debugflags & DF_GEOM) println(hlog, "attempt: ", try_count);
-    auto c = first_tcell;
-    while(c) {
-      c->is_solid = false;
-      c->parent_dir = MYSTERY;
-      c->code = MYSTERY;
-      c = c->next;
+  while(true) {
+    try {
+      rules_iteration();
+      break;
       }
-    goto retry;
-    }  
+    catch(rulegen_retry& e) { 
+      if(try_count >= max_retries) throw;
+      }
+    }
   }
 
 int reclevel;
