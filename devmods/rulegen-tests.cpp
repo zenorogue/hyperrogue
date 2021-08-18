@@ -102,11 +102,11 @@ void iterate(int qty) {
     catch(rulegen_retry& f) {
       println(hlog, "retry on: ", f.what());
       }
-    catch(rulegen_failure& f) {
-      println(hlog, "failure: ", f.what());
-      }
     catch(rulegen_surrender& f) {
       println(hlog, "surrender: ", f.what());
+      }
+    catch(rulegen_failure& f) {
+      println(hlog, "failure: ", f.what());
       }
     }
   println(hlog, "try_count = ", try_count, " states = ", isize(treestates), " imp = ", isize(important), " analyzers = ", total_analyzers(), " cell = ", tcellcount);
