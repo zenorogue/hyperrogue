@@ -401,6 +401,7 @@ void check_solid(tcell *c, int d) {
   }
 
 EX void remove_parentdir(tcell *c) {
+  sidecache.clear();
   c->parent_dir = MYSTERY;
   c->code = MYSTERY;
   for(int i=0; i<c->type; i++) if(c->move(i)) {
@@ -463,7 +464,7 @@ void handle_distance_errors() {
   bool b = solid_errors;
   solid_errors = 0;
   if(b && !no_errors) {
-    analyzers.clear();
+    sidecache.clear();
     throw hr_solid_error();
     }
   }
@@ -776,7 +777,11 @@ void treewalk(twalker& cw, int delta) {
   cw+=delta;
   }
 
+EX std::map<twalker, int> sidecache;
+
 int get_side(twalker what) {
+  auto ww = at_or_null(sidecache, what);
+  if(ww) return *ww;
   twalker w = what;
   twalker tw = what + wstep;
   auto adv = [] (twalker& cw) {
@@ -804,12 +809,11 @@ int get_side(twalker what) {
       adv(w); adv(tw);
       }
     }
-  if(w.spin == -1 || tw.spin == -1) return 0;
   int d = get_parent_dir(w.at);
 
   if(d >= 0 && !single_live_branch_close_to_root.count(w.at)) {
     twalker last(w.at, d);
-    return last.to_spin(w.spin) - last.to_spin(tw.spin);
+    return sidecache[what] = last.to_spin(w.spin) - last.to_spin(tw.spin);
     }
 
   // failed to solve this in the simple way (ended at the root) -- go around the tree
@@ -819,14 +823,15 @@ int get_side(twalker what) {
   auto ws = what; treewalk(ws, 0); if(ws == to_what) return 0;
 
   while(true) {
-    steps++; if(steps > 1000000) {
-      debuglist = {what, to_what, w, tw};
-      throw rulegen_failure("get_side freeze II");
+    handle_distance_errors();
+    steps++; if(steps > 10000) {
+      debuglist = {what, to_what, wl, wr};
+      throw rulegen_failure("xsidefreeze");
       }
     treewalk(wl, -1);
     treewalk(wr, +1);
-    if(wl == to_what) return +1;
-    if(wr == to_what) return -1;
+    if(wl == to_what) return sidecache[what] = +1;
+    if(wr == to_what) return sidecache[what] = -1;
     }
   }
 
