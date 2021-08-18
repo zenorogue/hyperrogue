@@ -287,7 +287,7 @@ struct shortcut {
   };
 #endif
 
-map<int, vector<unique_ptr<shortcut>> > shortcuts;
+EX map<int, vector<unique_ptr<shortcut>> > shortcuts;
 
 vector<int> root_path(twalker cw) {
   cw += wstep;
@@ -481,7 +481,8 @@ void be_solid(tcell *c) {
   ufindc(c);
   if(c->dist == MYSTERY_DIST) {
     println(hlog, "set solid but no dist ", c);
-    exit(3);
+    debuglist = { c };
+    throw rulegen_failure("set solid but no dist");
     }
   c->is_solid = true;
   }
@@ -586,7 +587,7 @@ EX int get_parent_dir(tcell *c) {
     for(int i=0; i<n; i++) {
       tcell *c1 = c->cmove(i);
       be_solid(c1);
-      if(parent_debug) println(hlog, "direction = ", i, " distance = ", c1->dist);
+      if(parent_debug) println(hlog, "direction = ", i, " is ", c1, " distance = ", c1->dist);
       if(c1->dist < d) nearer.push_back(i);
       }
 
@@ -632,6 +633,7 @@ EX int get_parent_dir(tcell *c) {
       }
     }
     
+  if(parent_debug) println(hlog, "set parent_dir to ", bestd);
   c->parent_dir = bestd;
   return bestd;
   }
@@ -798,7 +800,7 @@ int get_side(twalker what) {
   while(w.at != tw.at) {
     steps++; if(steps > 1000000) {
       debuglist = {what, w, tw};
-      throw rulegen_failure("get_side freeze");
+      throw rulegen_failure("qsidefreeze");
       }
     ufind(w); ufind(tw);
     if(w.at->dist > tw.at->dist)
@@ -901,7 +903,9 @@ EX pair<int, int> get_code(tcell *c) {
   
   int id = isize(treestates);
   code_to_id[v] = id;
-  if(c->code != MYSTERY && (c->code != id || c->parent_dir != bestd)) exit(1);
+  if(c->code != MYSTERY && (c->code != id || c->parent_dir != bestd)) {
+    throw rulegen_retry("exit from get_code");
+    }
   c->code = id;
 
   treestates.emplace_back();
@@ -927,7 +931,7 @@ EX int rule_root;
 vector<int> gen_rule(twalker cwmain);
 
 EX int try_count;
-vector<tcell*> important;
+EX vector<tcell*> important;
 
 vector<tcell*> cq;
 
