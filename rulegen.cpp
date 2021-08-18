@@ -447,7 +447,6 @@ void fix_distances(tcell *c) {
 
 void calc_distances(tcell *c) {
   if(c->dist != MYSTERY) return;
-  c->dist = MYSTERY_DIST;
   fix_distances(c);
   }
 
@@ -485,7 +484,7 @@ void be_solid(tcell *c) {
   ufindc(c);
   look_for_shortcuts(c);
   ufindc(c);
-  if(c->dist == MYSTERY_DIST) {
+  if(c->dist == MYSTERY) {
     println(hlog, "set solid but no dist ", c);
     debuglist = { c };
     throw rulegen_failure("set solid but no dist");
