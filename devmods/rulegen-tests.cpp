@@ -69,6 +69,7 @@ struct hrmap_testproto : hrmap {
     }
 
   transmatrix adj(heptagon *h, int dir) override {
+    if(h->move(dir) == &oob || h == &oob) return Id;
     return arb::get_adj(arb::current_or_slided(), shvid(h->c7), dir, -1, h->c.move(dir) ? h->c.spin(dir) : -1);
     }
 
@@ -81,12 +82,116 @@ struct hrmap_testproto : hrmap {
     return cc->id;
     }
   
-  bool strict_tree_rules() { return true; }
+  bool strict_tree_rules() { return false; }
   };
 
 reaction_t clear_debug = [] {};
 
 map<tcell*,int> sprawl_shown;
+
+int total_analyzers();
+
+void iterate(int qty) {
+  auto m = dynamic_cast<hrmap_testproto*> (currentmap);
+  for(int i=0; i<qty; i++) {
+    try {
+      rules_iteration();
+      try_count--;
+      break;
+      }
+    catch(rulegen_retry& f) {
+      println(hlog, "retry on: ", f.what());
+      }
+    catch(rulegen_failure& f) {
+      println(hlog, "failure: ", f.what());
+      }
+    catch(rulegen_surrender& f) {
+      println(hlog, "surrender: ", f.what());
+      }
+    }
+  println(hlog, "try_count = ", try_count, " states = ", isize(treestates), " imp = ", isize(important), " analyzers = ", total_analyzers(), " cell = ", tcellcount);
+  auto *c = first_tcell;
+  while(c) {
+    auto wh = m->clone(c);
+    for(int i=0; i<wh->type; i++) if(wh->move(i) == &oob) wh->move(i) = nullptr;
+    for(int i=0; i<wh->c7->type; i++) if(wh->c7->move(i) == &out_of_bounds) wh->c7->move(i) = nullptr;
+    c = c->next;
+    }
+  }
+
+void print_rules();
+
+void debug_menu() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);
+  auto m = dynamic_cast<hrmap_testproto*> (currentmap);
+  dialog::init("debug menu");
+  
+  dialog::addItem("sprawl", 's');
+  dialog::add_action([m] {
+    tcell *c = m->counterpart[centerover->master];
+    auto [d, id] = get_code(c);
+    twalker cw(c, d);
+    auto res = spread(get_analyzer(cw), cw);
+    println(hlog, "sprawl result = ", res);
+    sprawl_shown.clear();
+    for(int i=0; i<isize(res); i++) sprawl_shown[res[i].at] = i;
+    });
+
+  dialog::addItem("parent_dir", 'p');
+  dialog::add_action([m] {
+    tcell *c = m->counterpart[centerover->master];
+    auto c1 = c;
+    ufindc(c1);
+    if(c != c1) {
+      println(hlog, "ufindc changes ", c, " to ", c1);
+      for(int i=0; i<c->type; i++)
+        println(hlog, twalker(c,i), twalker(c,i)+wstep, twalker(c,i)+wstep+wstep);
+      }
+    println(hlog, "parent_dir = ", c->parent_dir);
+    c->parent_dir = MYSTERY;
+    parent_debug = true;
+    get_parent_dir(c);
+    parent_debug = false;
+    println(hlog, "parent_dir = ", c->parent_dir);
+    });
+  
+  dialog::addItem("iterate", 'm');
+  dialog::add_action([] { iterate(1); });
+
+  dialog::addItem("iterate x100", 'M');
+  dialog::add_action([] { iterate(100); });
+
+  dialog::addItem("iterate x1000", 'T');
+  dialog::add_action([] { iterate(1000); });
+
+  dialog::addItem("debug tiles", 'd');
+  dialog::add_action_push([m] { 
+    cmode = sm::SIDE | sm::MAYDARK;
+    gamescreen(0);
+    dialog::init();
+    for(auto dw: debuglist) {
+      dialog::addItem("go to " + index_pointer(dw.at), 'a');
+      dialog::add_action([dw,m] {
+        cwt = cellwalker(m->clone(dw.at)->c7, dw.spin, dw.mirrored);
+        centerover = cwt.at;
+        View = Id;
+        });
+      }
+    dialog::display();
+    });
+  
+  dialog::addItem("print rules", 'P');
+  dialog::add_action(print_rules);
+
+  dialog::addItem("clean data", 'c');
+  dialog::add_action(clean_data);
+
+  dialog::addItem("clean data and parents", 'C');
+  dialog::add_action(clean_parents);
+
+  dialog::display();
+  }  
 
 void view_debug() {
   auto m = dynamic_cast<hrmap_testproto*> (currentmap);
@@ -95,7 +200,7 @@ void view_debug() {
       tcell *tc = m->counterpart[c->master];
       
       string s;
-      auto label = (tc->code == MYSTERY ? "?" : its(tc->code)) + "/" + (tc->dist == MYSTERY ? "?" : tc->dist == MYSTERY_DIST ? "*" : its(tc->dist));
+      auto label = (tc->code == MYSTERY ? "?" : its(tc->code)) + "/" + (tc->dist == MYSTERY ? "?" : its(tc->dist));
       
       color_t col = 0xFFFFFF + 0x512960 * tc->code;
   
@@ -117,35 +222,14 @@ void view_debug() {
     vector<int> dh;
 
     dh.push_back(addHook(hooks_o_key, 15, [m] (o_funcs& v) {  
-      v.push_back(named_functionality("sprawl", [m] {
-        tcell *c = m->counterpart[centerover->master];
-        auto [d, id] = get_code(c);
-        twalker cw(c, d);
-        auto res = spread(get_analyzer(cw), cw);
-        println(hlog, "sprawl result = ", res);
-        sprawl_shown.clear();
-        for(int i=0; i<isize(res); i++) sprawl_shown[res[i].at] = i;
-        }));
+      /* v.push_back(named_functionality("mark", [m] {
+        for(auto c: marklist)
+          m->clone(c.at)->c7->item = itGold;
+        })); */
 
-      v.push_back(named_functionality("parent_dir", [m] {
-        tcell *c = m->counterpart[centerover->master];
-        println(hlog, "parent_dir = ", c->parent_dir);
-        c->parent_dir = MYSTERY;
-        parent_debug = true;
-        get_parent_dir(c);
-        parent_debug = false;
-        println(hlog, "parent_dir = ", c->parent_dir);
-        }));
+      v.push_back(named_dialog("debug menu", debug_menu));
       }));
     
-    for(auto dw: debuglist)
-      dh.push_back(addHook(hooks_o_key, 10, [m,dw] (o_funcs& v) {  
-        v.push_back(named_functionality(lalign(0, "go to ", dw), [dw,m] {
-          cwt = cellwalker(m->clone(dw.at)->c7, dw.spin, dw.mirrored);
-          centerover = cwt.at;
-          View = Id;
-          }));
-        }));
     clear_debug = [ah, dh] {
       delHook(hooks_drawcell, ah);
       for(auto dhk: dh) delHook(hooks_o_key, dhk);
@@ -281,7 +365,29 @@ void restart_game_on(hrmap *m) {
 
 bool add_header = false;
 bool add_labels = true;
-string test_stats = "gsmctTf";
+string test_stats = "gsmctTlAhf";
+
+pair<int,int> longest_shortcut() {
+  int res = 0;
+  int qty = 0;
+  for(auto& p: shortcuts) for(auto& v: p.second) {
+    res = max<int>(res, isize(v->pre));
+    qty++;
+    }
+  return {qty, res};
+  }
+
+int longest_analyzer() {
+  int res = 0;
+  for(auto& a: analyzers) res = max(res, isize(a.second.spread));
+  return res;
+  }
+
+int total_analyzers() {
+  int res = 0;
+  for(auto& a: analyzers) res += isize(a.second.spread);
+  return res;
+  }
 
 void test_current() {
   stop_game();
@@ -392,6 +498,8 @@ void test_current() {
     case 'a': Out("amin;amax", lalign(0, areas[0], ";", areas.back()));
     case 'h': Out("shapes", isize(arb::current.shapes));
     case 'f': Out("file", arb::current.filename);
+    case 'l': Out("shortcut", longest_shortcut());
+    case 'A': Out("analyzer", longest_analyzer());
     }
   println(hlog);
   fflush(stdout);
