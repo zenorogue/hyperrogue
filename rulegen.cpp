@@ -1182,6 +1182,7 @@ void verified_treewalk(twalker& tw, int id, int dir) {
   if(id >= 0) {
     auto co = get_code(tw.cpeek());
     if(co.second != id || co.first != (tw+wstep).spin) {
+      handle_distance_errors();
       important.push_back(tw.at);
       important.push_back(tw.cpeek());
       if(debugflags & DF_GEOM)
@@ -1207,6 +1208,7 @@ void examine_branch(int id, int left, int right) {
 
   int steps = 0;
   while(true) {
+    handle_distance_errors();
     steps++;
     if(steps > max_examine_branch) {
       debuglist = { rg+left, wl, wr };
@@ -1282,6 +1284,7 @@ void find_single_live_branch(twalker at) {
   int t = at.at->type;
   auto& r = treestates[id].rules;
   int q = 0;
+  if(r.empty()) { important.push_back(at.at); throw mismatch_error(); }
   for(int i=0; i<t; i++) if(r[i] >= 0) {
     if(treestates[r[i]].is_live) q++;
     }
