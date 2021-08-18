@@ -38,7 +38,6 @@ struct rulegen_surrender : rulegen_failure {
   };
 
 const int MYSTERY = 31999;
-const int MYSTERY_DIST = 31998;
 #endif
 
 EX bool parent_debug;
@@ -307,7 +306,8 @@ void check_solid(tcell *c, int d) {
   ufindc(c);
   if(debugflags & DF_GEOM)
     println(hlog, "solid ", c, " changes ", c->dist, " to ", d);
-  if(c->dist == MYSTERY_DIST) exit(2);
+  if(c->dist == MYSTERY)
+    throw rulegen_failure("check_solid with MYSTERY distance");
   set<tcell*> seen;
   vector<twalker> walkers;
   vector<int> walkerdir = {-1};
