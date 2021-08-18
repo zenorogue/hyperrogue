@@ -123,6 +123,12 @@ EX void ufindc(tcell*& c) {
 
 EX tcell *first_tcell = nullptr;
 
+twalker addstep(twalker x) {
+  x.cpeek();
+  ufind(x);
+  return x + wstep;
+  }
+
 void connect_and_check(twalker p1, twalker p2);
 void unify(twalker pw1, twalker pw2);
 
@@ -771,7 +777,7 @@ void treewalk(twalker& cw, int delta) {
   int d = get_parent_dir(cw.at);
   if(cw.spin == d) cw += wstep;
   else {
-    auto cw1 = cw+wstep;
+    auto cw1 = addstep(cw);
     get_parent_dir(cw1.at);
     ufind(cw1);
     if(get_parent_dir(cw1.at) == cw1.spin) cw += wstep;
