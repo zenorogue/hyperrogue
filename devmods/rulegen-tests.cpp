@@ -73,6 +73,19 @@ struct hrmap_testproto : hrmap {
     return arb::get_adj(arb::current_or_slided(), shvid(h->c7), dir, -1, h->c.move(dir) ? h->c.spin(dir) : -1);
     }
 
+  hyperpoint get_corner(cell *c, int cid, ld cf) override {
+    auto h = c->master;
+    if(!counterpart.count(h)) {
+      auto& sh = arb::current_or_slided().shapes[c->master->zebraval];
+      cid = gmod(cid, sh.size());
+      return normalize(C0 + (sh.vertices[cid] - C0) * 3 / cf);
+      }
+    int s = counterpart[h]->id;
+    auto& sh = arb::current_or_slided().shapes[s];
+
+    return normalize(C0 + (sh.vertices[cid] - C0) * 3 / cf);
+    }
+
   int shvid(cell *c) override {
     if(!counterpart.count(c->master)) {
       /* may happen while handling floorshapes */
@@ -91,8 +104,18 @@ map<tcell*,int> sprawl_shown;
 
 int total_analyzers();
 
-void iterate(int qty) {
+void cleanup_protomap() {
   auto m = dynamic_cast<hrmap_testproto*> (currentmap);
+  auto *c = first_tcell;
+  while(c) {
+    auto wh = m->clone(c);
+    for(int i=0; i<wh->type; i++) if(wh->move(i) == &oob) wh->move(i) = nullptr;
+    for(int i=0; i<wh->c7->type; i++) if(wh->c7->move(i) == &out_of_bounds) wh->c7->move(i) = nullptr;
+    c = c->next;
+    }
+  }
+
+void iterate(int qty) {
   for(int i=0; i<qty; i++) {
     try {
       rules_iteration();
@@ -110,16 +133,30 @@ void iterate(int qty) {
       }
     }
   println(hlog, "try_count = ", try_count, " states = ", isize(treestates), " imp = ", isize(important), " analyzers = ", total_analyzers(), " cell = ", tcellcount);
-  auto *c = first_tcell;
-  while(c) {
-    auto wh = m->clone(c);
-    for(int i=0; i<wh->type; i++) if(wh->move(i) == &oob) wh->move(i) = nullptr;
-    for(int i=0; i<wh->c7->type; i++) if(wh->c7->move(i) == &out_of_bounds) wh->c7->move(i) = nullptr;
-    c = c->next;
-    }
+  cleanup_protomap();
   }
 
 void print_rules();
+
+void irradiate() {
+  try{
+    vector<tcell*> last;
+    auto *c = first_tcell;
+    while(c) {
+      last.push_back(c);
+      c = c->next;
+      }
+    for(tcell* l: last) {
+      ufindc(l);
+      for(int i=0; i<l->type; i++) l->cmove(i);
+      }
+    handle_distance_errors();
+    }
+  catch(rulegen_failure& r) {
+    println(hlog, "error in irradiate: ", r.what());
+    }
+  cleanup_protomap();
+  }
 
 void debug_menu() {
   cmode = sm::SIDE | sm::MAYDARK;
@@ -151,9 +188,15 @@ void debug_menu() {
     println(hlog, "parent_dir = ", c->parent_dir);
     c->parent_dir = MYSTERY;
     parent_debug = true;
-    get_parent_dir(c);
+    try {
+      get_parent_dir(c);
+      }
+    catch(rulegen_failure& f) {
+      println(hlog, "catched: ", f.what());
+      }
     parent_debug = false;
     println(hlog, "parent_dir = ", c->parent_dir);
+    cleanup_protomap();
     });
   
   dialog::addItem("iterate", 'm');
@@ -190,6 +233,12 @@ void debug_menu() {
   dialog::addItem("clean data and parents", 'C');
   dialog::add_action(clean_parents);
 
+  dialog::addItem("irradiate", 'i');
+  dialog::add_action(irradiate);
+
+  dialog::addItem("name", 'n');
+  dialog::add_action([m] { println(hlog, "name = ", index_pointer(m->counterpart[cwt.at->master])); });
+
   dialog::display();
   }  
 
@@ -215,6 +264,14 @@ void view_debug() {
         
       if(sprawl_shown.count(tc))
         queuepoly(V, cgi.shDisk, 0xFF0000FF);
+      
+      for(int i=0; i<tc->type; i++) if(!tc->move(i)) {
+        vid.linewidth *= 8;
+        hyperpoint h1 = currentmap->get_corner(c, (i+1)%tc->type);
+        hyperpoint h2 = currentmap->get_corner(c, i);
+        queueline(V * h1, V * h2, 0xFF0000FF);
+        vid.linewidth /= 8;
+        }
 
       return false;
       });
