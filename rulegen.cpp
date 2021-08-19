@@ -852,10 +852,16 @@ int get_side(twalker what) {
       debuglist = {what, to_what, wl, wr};
       throw rulegen_failure("xsidefreeze");
       }
-    treewalk(wl, -1);
-    treewalk(wr, +1);
-    if(wl == to_what) return sidecache[what] = +1;
-    if(wr == to_what) return sidecache[what] = -1;
+    bool gl = wl.at->dist <= wr.at->dist;
+    bool gr = wl.at->dist >= wr.at->dist;
+    if(gl) {
+      treewalk(wl, -1);
+      if(wl == to_what) return sidecache[what] = +1;
+      }
+    if(gr) {
+      treewalk(wr, +1);
+      if(wr == to_what) return sidecache[what] = -1;
+      }
     }
   }
 
