@@ -1342,19 +1342,15 @@ EX void rules_iteration() {
   if(debugflags & DF_GEOM)
     println(hlog, "rule_root = ", rule_root);
 
-  int N = isize(important);
-  
   for(int id=0; id<isize(treestates); id++) {
     if(!treestates[id].known) {
-      important.push_back(treestates[id].where_seen);
-      if(debugflags & DF_GEOM)
-        println(hlog, "no rule found for ", id);
+      auto ws = treestates[id].where_seen;
+      rules_iteration_for(ws);
       continue;
       }
     }
 
-  if(isize(important) != N) 
-    throw mismatch_error();
+  int N = isize(important);
 
   int new_deadends = -1;
   
