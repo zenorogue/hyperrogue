@@ -17,6 +17,7 @@ EX int max_tcellcount = 1000000;
 EX int max_adv_steps = 100;
 EX int max_examine_branch = 5040;
 EX int max_bdata = 1000;
+EX int max_getside = 10000;
 
 /* other parameters */
 EX int dlbonus = 0;
@@ -820,7 +821,7 @@ int get_side(twalker what) {
     };
   int steps = 0;
   while(w.at != tw.at) {
-    steps++; if(steps > 1000000) {
+    steps++; if(steps > max_getside) {
       debuglist = {what, w, tw};
       throw rulegen_failure("qsidefreeze");
       }
@@ -848,7 +849,7 @@ int get_side(twalker what) {
 
   while(true) {
     handle_distance_errors();
-    steps++; if(steps > 10000) {
+    steps++; if(steps > max_getside) {
       debuglist = {what, to_what, wl, wr};
       throw rulegen_failure("xsidefreeze");
       }
@@ -1774,6 +1775,7 @@ auto hooks = addHook(hooks_configfile, 100, [] {
       ->editable(0, 16000000, 100000, "maximum cellcount", "controls the max memory usage of conversion algorithm -- the algorithm fails if exceeded", 'c');
       param_i(max_adv_steps, "max_adv_steps");
       param_i(max_examine_branch, "max_examine_branch");
+      param_i(max_getside, "max_getside");
       param_i(max_bdata, "max_bdata");
       param_i(dlbonus, "dlbonus");
     });
