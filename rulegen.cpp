@@ -370,12 +370,12 @@ EX void shortcut_found(tcell *c, tcell *alt, const vector<twalker> &walkers, con
     }
   }
 
-EX void check_solid(tcell *c, int d, tcell *alt, int delta) {
+EX void find_new_shortcuts(tcell *c, int d, tcell *alt, int delta) {
   ufindc(c);
   if(debugflags & DF_GEOM)
     println(hlog, "solid ", c, " changes ", c->dist, " to ", d, " alt=", alt);
   if(c->dist == MYSTERY)
-    throw rulegen_failure("check_solid with MYSTERY distance");
+    throw rulegen_failure("find_new_shortcuts with MYSTERY distance");
   set<tcell*> seen;
   vector<twalker> walkers;
   vector<int> walkerdir = {-1};
@@ -449,7 +449,7 @@ void fix_distances(tcell *c) {
       if(d > d1+1) { d = d1+1; remove_parentdir(c); goto restart; }
       if(d1 > d+1) {
         if(c1->is_solid) {
-          check_solid(c1, d+1, c1, 0);
+          find_new_shortcuts(c1, d+1, c1, 0);
           solid_errors++;
           }
         d1 = d+1; 
@@ -469,9 +469,9 @@ EX void unify_distances(tcell *c1, tcell *c2, int delta) {
   int d1 = c1->dist;
   int d2 = c2->dist;
   int d = min(d1, d2);
-  if(c1->is_solid && d != d1) { solid_errors++; check_solid(c1, d, c2, delta); remove_parentdir(c1); fix_distances(c1); }
+  if(c1->is_solid && d != d1) { solid_errors++; find_new_shortcuts(c1, d, c2, delta); remove_parentdir(c1); fix_distances(c1); }
   c1->dist = d;
-  if(c2->is_solid && d != d2) { solid_errors++; check_solid(c2, d, c1, -delta); remove_parentdir(c2); fix_distances(c2); }
+  if(c2->is_solid && d != d2) { solid_errors++; find_new_shortcuts(c2, d, c1, -delta); remove_parentdir(c2); fix_distances(c2); }
   c2->dist = d;
   c1->distance_fixed = c2->distance_fixed = c1->distance_fixed || c2->distance_fixed;
   c1->is_solid = c2->is_solid = c1->is_solid || c2->is_solid;
