@@ -971,7 +971,7 @@ static const int DIR_RIGHT = -5;
 static const int DIR_PARENT = -6;
 #endif
 
-vector<int> gen_rule(twalker cwmain) {
+vector<int> gen_rule(twalker cwmain, int id) {
   vector<int> cids;
   for(int a=0; a<cwmain.at->type; a++) {
     auto front = cwmain+a;
@@ -987,18 +987,30 @@ vector<int> gen_rule(twalker cwmain) {
       }
     cids.push_back(id1);
     }
+
+  for(int i=0; i<isize(cids); i++) if(cids[i] == DIR_UNKNOWN) {
+    int val = treestates[id].code.second[i+1];
+    if(val < 2 || val >= 8) {
+      debuglist = { cwmain };
+      println(hlog, "i = ", i, " val = ", val, " code = ", treestates[id].code);
+      throw rulegen_retry("wrong code in gen_rule");
+      }
+    cids[i] = ((val & 1) ? DIR_RIGHT : DIR_LEFT);
+    }
+
   return cids;
   }
 
 void rules_iteration_for(tcell *c) {
   indenter ri(2);
+  ufindc(c);
   auto co = get_code(c);
   auto& d = co.first;
   auto& id = co.second;
   twalker cwmain(c,d);
   ufind(cwmain);
 
-  vector<int> cids = gen_rule(cwmain);
+  vector<int> cids = gen_rule(cwmain, id);
   auto& ts = treestates[id];
 
   if(!ts.known) {
@@ -1019,8 +1031,10 @@ void rules_iteration_for(tcell *c) {
     int mismatches = 0;
     for(int z=0; z<isize(cids); z++) {
       if(r[z] == cids[z]) continue;
-      if(r[z] < 0 || cids[z] < 0) 
+      if(r[z] < 0 || cids[z] < 0) {
+        debuglist = { cwmain, ts.giver };
         throw rulegen_failure("neg rule mismatch");
+        }
 
       auto& c1 = treestates[r[z]].code.second;
       auto& c2 = treestates[cids[z]].code.second;
@@ -1306,6 +1320,7 @@ void clear_codes() {
 
 void find_single_live_branch(twalker at) {
   handle_distance_errors();
+  rules_iteration_for(at.at);
   int id = get_code(at.at).second;
   int t = at.at->type;
   auto& r = treestates[id].rules;
@@ -1393,20 +1408,6 @@ EX void rules_iteration() {
       println(hlog, "deadend states found: ", new_deadends);
     }
   
-  for(int id=0; id<isize(treestates); id++) {
-    auto& r = treestates[id].rules;
-
-    for(int i=0; i<isize(r); i++) if(r[i] == DIR_UNKNOWN) {
-      int val = treestates[id].code.second[i+1];
-      if(val < 2 || val >= 8) {
-        debuglist = { treestates[id].giver };
-        println(hlog, "id = ", id, " i = ", i, " val = ", val, " code = ", treestates[id].code);
-        throw rulegen_retry("wrong code in gen_rule");
-        }
-      r[i] = ((val & 1) ? DIR_RIGHT : DIR_LEFT);
-      }
-    }
-
   // print_rules();
   
   handle_distance_errors();
@@ -1429,6 +1430,7 @@ EX void rules_iteration() {
     if(first_live_branch == last_live_branch && treestates[id].is_root) {
       println(hlog, "for id ", id, " we have a single live branch");
       indenter ind(2);
+      debuglist = { treestates[id].giver };
       find_single_live_branch(treestates[id].giver);
       }
     if(isize(single_live_branch_close_to_root) != q) {
