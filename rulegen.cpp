@@ -566,8 +566,11 @@ void trace_root_path(vector<int>& rp, twalker cw) {
 
   next:
   if(d > 0) {
+    ufind(cw);
+    handle_distance_errors();
     for(int i=0; i<cw.at->type; i++) {
       tcell *c1 = (cw+i).peek();
+      if(!c1) continue;
       be_solid(c1);
       if(c1->dist < d) {
         rp.push_back(i);
