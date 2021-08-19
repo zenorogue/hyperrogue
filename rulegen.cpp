@@ -811,8 +811,9 @@ int get_side(twalker what) {
     int d = get_parent_dir(cw.at);
     ufind(cw);
     if(cw.at->move(d)->dist >= cw.at->dist) {
-      println(hlog, "/CSV/ get_parent_dir error at ", cw, " and ", cw.at->move(d), ": ", cw.at->dist, "::", cw.at->move(d)->dist);
-      exit(1);
+      handle_distance_errors();
+      println(hlog, "get_parent_dir error at ", cw, " and ", cw.at->move(d), ": ", cw.at->dist, "::", cw.at->move(d)->dist);
+      throw rulegen_failure("get_parent_dir error");
       }
     cw.spin = d;
     cw += wstep;
