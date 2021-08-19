@@ -1392,7 +1392,7 @@ EX void rules_iteration() {
       if(val < 2 || val >= 8) {
         debuglist = { treestates[id].giver };
         println(hlog, "id = ", id, " i = ", i, " val = ", val, " code = ", treestates[id].code);
-        throw rulegen_failure("wrong code in gen_rule");
+        throw rulegen_retry("wrong code in gen_rule");
         }
       r[i] = ((val & 1) ? DIR_RIGHT : DIR_LEFT);
       }
