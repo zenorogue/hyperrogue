@@ -1312,12 +1312,23 @@ void find_single_live_branch(twalker at) {
     }
   }
 
+EX void clean_data() {
+  analyzers.clear();
+  important = t_origin;
+  }
+
+EX void clean_parents() {
+  clean_data();
+  sidecache.clear();
+  auto c = first_tcell;
+  while(c) { c->parent_dir = MYSTERY; c = c->next; }
+  }
+
 EX void rules_iteration() {
   try_count++;
 
   if((try_count & (try_count-1)) == 0) {
-    analyzers.clear();
-    important = t_origin;
+    clean_data();
     }
 
   if(debugflags & DF_GEOM) println(hlog, "attempt: ", try_count);
