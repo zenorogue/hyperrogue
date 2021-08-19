@@ -401,7 +401,7 @@ EX void find_new_shortcuts(tcell *c, int d, tcell *alt, int delta) {
   walkers2.push_back(twalker(alt, delta));
   for(int j=0; j<isize(walkers2); j++) {
     auto w = walkers2[j];
-    if(!seen.count(w.at))
+    if(j == 0 || !seen.count(w.at))
     for(int s=0; s<w.at->type; s++) {
       twalker w1 = w + s;
       if(!w1.peek()) continue;
