@@ -944,10 +944,6 @@ EX pair<int, int> get_code(tcell *c) {
 
 /* == rule generation == */
 
-struct mismatch_error : rulegen_retry {
-  mismatch_error() : rulegen_retry("mismatch error") {}
-  };
-
 EX int rule_root;
 
 vector<int> gen_rule(twalker cwmain);
@@ -1039,7 +1035,7 @@ void rules_iteration_for(tcell *c) {
 
           extend_analyzer(cwmain, z, k, mismatches, treestates[id].giver);
           mismatches++;
-          throw mismatch_error();
+          throw rulegen_retry("mismatch error");
           }
         }
       }
@@ -1047,7 +1043,7 @@ void rules_iteration_for(tcell *c) {
     debuglist = { cwmain, ts.giver };
     
     if(mismatches)
-      throw mismatch_error();
+      throw rulegen_retry("mismatch error");
     
     throw rulegen_failure("no mismatches?!");
     }
@@ -1305,7 +1301,7 @@ void find_single_live_branch(twalker at) {
   int t = at.at->type;
   auto& r = treestates[id].rules;
   int q = 0;
-  if(r.empty()) { important.push_back(at.at); throw mismatch_error(); }
+  if(r.empty()) { important.push_back(at.at); throw rulegen_retry("no giver in find_single_live_branch"); }
   for(int i=0; i<t; i++) if(r[i] >= 0) {
     if(treestates[r[i]].is_live) q++;
     }
@@ -1426,14 +1422,14 @@ EX void rules_iteration() {
     }
   
   handle_distance_errors();
-  if(isize(important) != N) 
-    throw mismatch_error();
+  if(isize(important) != N)
+    throw rulegen_retry("need more rules after examine");
 
   minimize_rules();
   find_possible_parents();
   
   if(isize(important) != N)
-    throw mismatch_error();
+    throw rulegen_retry("need more rules after minimize");
   handle_distance_errors();
   }
 
