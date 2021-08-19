@@ -558,7 +558,7 @@ EX void look_for_shortcuts(tcell *c) {
     look_for_shortcuts(c, *shortcuts[c->id][i]);
   }
 
-EX bool try_to_resolve_confusion = false;
+EX bool try_to_resolve_confusion = true;
 
 void trace_root_path(vector<int>& rp, twalker cw) {
   auto d = cw.peek()->dist;
