@@ -1153,11 +1153,6 @@ void find_possible_parents() {
 
 /* == branch testing == */
 
-void verified_treewalk(twalker& cw, int delta) {
-  if((cw+wstep).spin == get_parent_dir(cw.peek())) {
-    }
-  }
-
 using tsinfo = pair<int, int>;
 
 tsinfo get_tsinfo(twalker tw) {
