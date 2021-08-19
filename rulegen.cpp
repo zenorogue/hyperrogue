@@ -1194,6 +1194,8 @@ void push_deadstack(vector<tsinfo>& hash, twalker w, tsinfo tsi, int dir) {
     }
   }
 
+struct verify_advance_failed : hr_exception {};
+
 void verified_treewalk(twalker& tw, int id, int dir) {
   if(id >= 0) {
     auto co = get_code(tw.cpeek());
@@ -1204,7 +1206,7 @@ void verified_treewalk(twalker& tw, int id, int dir) {
       if(debugflags & DF_GEOM)
         println(hlog, "expected ", make_pair((tw+wstep).spin,id), " found ", co);
       debuglist = {tw, tw+wstep};
-      throw rulegen_retry("verify_advance failed");
+      throw verify_advance_failed();
       }
     }
   treewalk(tw, dir);
@@ -1223,6 +1225,7 @@ void examine_branch(int id, int left, int right) {
   vector<twalker> lstack, rstack;
 
   int steps = 0;
+  try {
   while(true) {
     handle_distance_errors();
     steps++;
@@ -1280,6 +1283,8 @@ void examine_branch(int id, int left, int right) {
 
     else throw rulegen_failure("cannot advance while examining");
     }
+    }
+  catch(verify_advance_failed&) { }
   }
 
 /* == main algorithm == */
@@ -1394,7 +1399,8 @@ EX void rules_iteration() {
   int q = isize(single_live_branch_close_to_root);
 
   for(int id=0; id<isize(treestates); id++) if(treestates[id].is_live) {
-    auto& r = treestates[id].rules;
+    auto r = treestates[id].rules; /* no & because treestates might have moved */
+    if(r.empty()) continue;
     int last_live_branch = -1;
     int first_live_branch = -1;
     for(int i=0; i<isize(r); i++)
