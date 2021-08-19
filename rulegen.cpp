@@ -96,9 +96,6 @@ void push_unify(twalker a, twalker b) {
 
 bool in_fixing = false;
 
-void unify_distances(tcell *c1, tcell *c2);
-void handle_distance_errors();
-
 void process_fix_queue() {
   if(in_fixing) return;
   in_fixing = true;
@@ -234,6 +231,8 @@ EX void unify(twalker pw1, twalker pw2) {
   if((pw1.spin - pw2.spin) % shs[pw1.at->id].cycle_length)
     throw hr_exception("unification spin disagrees with cycle_length");
 
+  unify_distances(pw1.at, pw2.at, pw2.spin - pw1.spin);
+
   int id = pw1.at->id;
   for(int i=0; i<shs[id].size(); i++) {
     if(!pw2.peek()) {
@@ -253,7 +252,6 @@ EX void unify(twalker pw1, twalker pw2) {
     }
   pw2.at->unified_to = pw1 - pw2.spin;
   tunified++;
-  unify_distances(pw1.at, pw2.at);
   }
 
 EX vector<tcell*> t_origin;
@@ -308,10 +306,74 @@ vector<int> root_path(twalker cw) {
     }
   }
 
-void check_solid(tcell *c, int d) {
+EX void shortcut_found(tcell *c, tcell *alt, const vector<twalker> &walkers, const vector<twalker> &walkers2, const vector<int>& walkerdir, const vector<int>& walkerdir2) {
+  auto at0 = walkers2.back().at;
+
+  tcell* at = at0;
+
+  twalker at1; at1.at = nullptr;
+  for(int i=isize(walkers)-1; i>=1; i--) if(at == walkers[i].at) at1 = walkers[i];
+  
+  if(!at1.at) return; /* made obsolete by unification */
+
+  vector<int> pre;
+  for(int i=isize(walkers)-1; i>=1; i--) if(at == walkers[i].at) {
+    pre.push_back(walkerdir[i]); at = walkers[i].peek();
+    }
+  if(at != c) {
+    if(parent_debug) println(hlog, "did not return to c");
+    return;
+    }
+
+  at = at0;
+  vector<int> post;
+  for(int i=isize(walkers2)-1; i>=1; i--) if(at == walkers2[i].at) {
+    post.push_back(walkerdir2[i]); at = walkers2[i].peek();
+    }
+  if(at != alt) {
+    if(parent_debug) println(hlog, "did not return to alt");
+    return;
+    }
+  reverse(pre.begin(), pre.end());
+  reverse(post.begin(), post.end());
+
+  println(hlog, "now at1 is ", at1);
+  int delta = at1.to_spin(walkers2.back().spin);
+
+  for(auto& s: shortcuts[c->id]) if(s->pre == pre && s->post == post) {
+    if(parent_debug) println(hlog, "already knew that ", pre, " ~ ", post);
+    return;
+    }
+
+  if(debugflags & DF_GEOM)
+    println(hlog, "new shortcut found, pre =  ", pre, " post = ", post, " pre reaches ", at1, " post reaches ", walkers2.back(), " of type ", at1.at->id, " sample = ", c);
+
+  if(isize(pre) > 500) {
+    debuglist = { c };
+    throw rulegen_failure("shortcut too long");
+    }
+
+  shortcuts[c->id].emplace_back(unique_ptr<shortcut> (new shortcut));
+  auto& sh = shortcuts[c->id].back();
+  sh->pre = pre;
+  sh->post = post;
+  sh->sample = c;
+  sh->delta = delta;
+  auto& sh1 = *sh;
+
+  if(debugflags & DF_GEOM) println(hlog, "exhaustive search:");
+  indenter ind(2);
+  tcell* c1 = first_tcell;
+  while(c1) {
+    if(c1->id == c->id) look_for_shortcuts(c1, sh1);
+    c1 = c1->next;
+    }
+  }
+
+EX void check_solid(tcell *c, int d, tcell *alt, int delta) {
   ufindc(c);
   if(debugflags & DF_GEOM)
-    println(hlog, "solid ", c, " changes ", c->dist, " to ", d);
+    println(hlog, "solid ", c, " changes ", c->dist, " to ", d, " alt=", alt);
   if(c->dist == MYSTERY)
     throw rulegen_failure("check_solid with MYSTERY distance");
   set<tcell*> seen;
@@ -336,7 +398,7 @@ void check_solid(tcell *c, int d) {
   set<tcell*> seen2;
   vector<twalker> walkers2;
   vector<int> walkerdir2 = {-1};
-  walkers2.push_back(c);
+  walkers2.push_back(twalker(alt, delta));
   for(int j=0; j<isize(walkers2); j++) {
     auto w = walkers2[j];
     for(int s=0; s<w.at->type; s++) {
@@ -346,63 +408,16 @@ void check_solid(tcell *c, int d) {
         seen2.insert(w1.peek());
         walkers2.push_back(w1 + wstep);
         walkerdir2.push_back(s);
-        if(seen.count(w1.peek()))  goto found;
+        if(seen.count(w1.peek())) {
+          shortcut_found(c, alt, walkers, walkers2, walkerdir, walkerdir2);
+          /* we do not want to go further */
+          for(auto& w: walkers) ufind(w);
+          for(auto& w: walkers2) ufind(w);
+          seen.clear(); for(auto& w: walkers) seen.insert(w.at);
+          seen2.clear(); for(auto& w: walkers2) seen2.insert(w.at);
+          }
         }
       }
-    }
-
-  return;
-
-  found:
-
-  auto at0 = walkers2.back().at;
-
-  tcell* at = at0;
-
-  twalker at1;
-  for(int i=isize(walkers)-1; i>=1; i--) if(at == walkers[i].at) at1 = walkers[i];
-
-  vector<int> pre;
-  for(int i=isize(walkers)-1; i>=1; i--) if(at == walkers[i].at) {
-    pre.push_back(walkerdir[i]); at = walkers[i].peek();
-    }
-  if(at != c) return;
-
-  at = at0;
-  vector<int> post;
-  for(int i=isize(walkers2)-1; i>=1; i--) if(at == walkers2[i].at) {
-    post.push_back(walkerdir2[i]); at = walkers2[i].peek();
-    }
-  if(at != c) return;
-  reverse(pre.begin(), pre.end());
-  reverse(post.begin(), post.end());
-
-  int delta = at1.to_spin(walkers2.back().spin);
-
-  for(auto& s: shortcuts[c->id]) if(s->pre == pre && s->post == post) return;
-
-  if(debugflags & DF_GEOM)
-    println(hlog, "new shortcut found, pre =  ", pre, " post = ", post, " pre reaches ", at1, " post reaches ", walkers2.back(), " of type ", at1.at->id, " sample = ", c);
-
-  if(isize(pre) > 500) {
-    debuglist = { c };
-    throw rulegen_failure("shortcut too long");
-    }
-
-  shortcuts[c->id].emplace_back(unique_ptr<shortcut> (new shortcut));
-  auto& sh = shortcuts[c->id].back();
-  sh->pre = pre;
-  sh->post = post;
-  sh->sample = c;
-  sh->delta = delta;
-  auto& sh1 = *sh;
-
-  if(debugflags & DF_GEOM) println(hlog, "exhaustive search:");
-  indenter ind(2);
-  tcell* c1 = first_tcell;
-  while(c1) {
-    if(c1->id == c->id) look_for_shortcuts(c1, sh1);
-    c1 = c1->next;
     }
   }
 
@@ -434,7 +449,7 @@ void fix_distances(tcell *c) {
       if(d > d1+1) { d = d1+1; remove_parentdir(c); goto restart; }
       if(d1 > d+1) {
         if(c1->is_solid) {
-          check_solid(c1, d+1);
+          check_solid(c1, d+1, c1, 0);
           solid_errors++;
           }
         d1 = d+1; 
@@ -450,22 +465,19 @@ void calc_distances(tcell *c) {
   fix_distances(c);
   }
 
-void unify_distances(tcell *c1, tcell *c2) {
+EX void unify_distances(tcell *c1, tcell *c2, int delta) {
   int d1 = c1->dist;
   int d2 = c2->dist;
   int d = min(d1, d2);
+  if(c1->is_solid && d != d1) { solid_errors++; check_solid(c1, d, c2, delta); remove_parentdir(c1); fix_distances(c1); }
   c1->dist = d;
+  if(c2->is_solid && d != d2) { solid_errors++; check_solid(c2, d, c1, -delta); remove_parentdir(c2); fix_distances(c2); }
   c2->dist = d;
-  if(c1->is_solid && d != d1) solid_errors++;
-  if(c2->is_solid && d != d2) solid_errors++;
-  c1->distance_fixed = c1->distance_fixed || c2->distance_fixed;
-  c1->is_solid = c1->is_solid || c2->is_solid;
-  remove_parentdir(c1);
-  if(c1->dist < MYSTERY) 
-    fix_distances(c1);
+  c1->distance_fixed = c2->distance_fixed = c1->distance_fixed || c2->distance_fixed;
+  c1->is_solid = c2->is_solid = c1->is_solid || c2->is_solid;
   }
 
-void handle_distance_errors() {
+EX void handle_distance_errors() {
   bool b = solid_errors;
   solid_errors = 0;
   if(b && !no_errors) {
@@ -524,7 +536,10 @@ EX void look_for_shortcuts(tcell *c, shortcut& sh) {
     npath.push_back(tw0.at);
     int d = sh.delta;
     auto tw1 = tw + d;
-    push_unify(tw1, tw0);
+    if(tw1.at->id != tw0.at->id)
+      println(hlog, "ERROR: improper shortcut");
+    else
+      push_unify(tw1, tw0);
     process_fix_queue();
     for(auto t: npath) {
       ufindc(t);
