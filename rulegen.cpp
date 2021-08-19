@@ -1198,10 +1198,14 @@ void verified_treewalk(twalker& tw, int id, int dir) {
     auto co = get_code(tw.cpeek());
     if(co.second != id || co.first != (tw+wstep).spin) {
       handle_distance_errors();
-      important.push_back(tw.at);
-      important.push_back(tw.cpeek());
-      if(debugflags & DF_GEOM)
-        println(hlog, "expected ", make_pair((tw+wstep).spin,id), " found ", co);
+      if(!treestates[co.second].known) {
+        treestates[co.second].known = true;
+        important.push_back(tw.at);
+        if(debugflags & DF_GEOM)
+          println(hlog, "expected ", make_pair((tw+wstep).spin,id), " found ", co);
+        }
+      else
+        println(hlog, "expected ", make_pair((tw+wstep).spin,id), " found ", co, " again");
       debuglist = {tw, tw+wstep};
       throw verify_advance_failed();
       }
