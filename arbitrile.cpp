@@ -1112,7 +1112,6 @@ void be_identified(cellwalker cw1, cellwalker cw2) {
   if(id2.target != id1.target) {
     auto oid2 = id2;
     id1.modval = gcd(id1.modval, id2.modval);
-    if(id1.modval < 6 && t == 6) throw hr_exception("reducing hex");
     for(auto& p: identification) {
       auto& idr = p.second;
       if(idr.target == oid2.target) {
@@ -1129,7 +1128,6 @@ void be_identified(cellwalker cw1, cellwalker cw2) {
   if(d2 != d1) {
     auto oid2 = id2;
     id2.modval = gcd(id2.modval, abs(d2-d1));
-    if(id1.modval == 1 && t == 6) throw hr_exception("reducing hex");
     for(auto& p: identification) 
       if(p.second.target == oid2.target) p.second.modval = id2.modval;
     changes++;
