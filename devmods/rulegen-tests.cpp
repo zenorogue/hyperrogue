@@ -446,15 +446,14 @@ int total_analyzers() {
   return res;
   }
 
-void test_current() {
+void test_current(string tesname) {
   stop_game();
   pointer_indices.clear();
-  string s = arb::in() ? arb::current.filename : full_geometry_name();
   // if(s.find("884-211-045") == string::npos) return;
   start_game();
 
-  string t = testdir;
-  for(char c: s) 
+  string t = testdir + "/";
+  for(char c: tesname)
     if(isalnum(c)) t += c;
     else if(c == ',') t += "_";
     else if(c == ' ') t += "__";
@@ -468,7 +467,7 @@ void test_current() {
   if(sphere) pconf.scale = .5;
   shot::transparent = hyperbolic;
 
-  println(hlog, "TESTING: ", s, " AS: ", t);
+  println(hlog, "TESTING: ", tesname, " AS: ", t);
   indenter ind(2);
   
   if(draw_which & 1) {
@@ -477,6 +476,9 @@ void test_current() {
   
   string status, message;
   bool ok = false;
+
+  // make print_rules() not crash in case of a conversion error
+  treestates.clear();
 
   int tstart = SDL_GetTicks();
   try {
@@ -538,6 +540,9 @@ void test_current() {
   again:
   print(hlog, "CSV");
 
+  // easier parsing
+  for(auto& ch: message) if(ch == ' ') ch = '_';
+
   #define Out(title,value) if(add_header) print(hlog, ";", title); else if(add_labels) print(hlog, " ", title, "=", value);  else print(hlog, ";", value); break;
 
   for(char c: test_stats) switch(c) {
@@ -554,7 +559,7 @@ void test_current() {
     case 'y': Out("tree", isize(treestates));
     case 'a': Out("amin;amax", lalign(0, areas[0], ";", areas.back()));
     case 'h': Out("shapes", isize(arb::current.shapes));
-    case 'f': Out("file", arb::current.filename);
+    case 'f': Out("file", tesname);
     case 'l': Out("shortcut", longest_shortcut());
     case 'A': Out("analyzer", longest_analyzer());
     }
@@ -623,6 +628,18 @@ void set_dir(string s) {
   system(("mkdir -p " + testdir).c_str());
   }
 
+void set_arcm(eVariation v, string symbol) {
+  auto& c = arcm::current;
+  c.parse(symbol);
+  c.compute_geometry();
+  set_geometry(gArchimedean);
+  set_variation(v);
+  if(c.errors) {
+    println(hlog, "ERROR: incorrect Archimedean symbol ", symbol);
+    exit(1);
+    }
+  }
+
 void test_from_file(string list) {
 
   set_dir("devmods/rulegen-tests/" + list);
@@ -631,6 +648,7 @@ void test_from_file(string list) {
   std::ifstream is("devmods/rulegen-tests/" + list + ".lst");
   string s;
   while(getline(is, s)) {
+    while(s != "" && s[0] == ' ')  s = s.substr(1);
     if(s != "" && s[0] != '#') filenames.push_back(s);
     }
   int trv = test_rotate_val;
@@ -640,8 +658,19 @@ void test_from_file(string list) {
   for(const string& s: filenames) {  
     if(trv) { trv--; id++; continue; }
     stop_game();
-    set_geometry(gArbitrary);
-    try {
+    if(s[0] == 'X') {
+      int a, b, c, d;
+      sscanf(s.c_str()+2, "%d%d%d%d", &a, &b, &c, &d);
+      geometry = eGeometry(a);
+      variation = eVariation(b);
+      gp::param = {c, d};
+      println(hlog, "parsed ", s, " as ", full_geometry_name());
+      }
+    else if(s[0] == 'P') set_arcm(eVariation::pure, s.c_str()+2);
+    else if(s[0] == 'D') set_arcm(eVariation::dual, s.c_str()+2);
+    else if(s[0] == 'B') set_arcm(eVariation::bitruncated, s.c_str()+2);
+    else try {
+      set_geometry(gArbitrary);
       println(hlog, "loading ", s, "... ", id++, "/", isize(filenames));
       arb::load(s);
       }
@@ -663,14 +692,7 @@ void test_from_file(string list) {
     if(sphere) { 
       println(hlog, "illgeal tessellation found: spherical"); continue; 
       }
-    test_current();
-    }
-  }
-
-void test_all_geoms(int i) {
-  if(i&1) {
-    set_dir("regular/");
-    test_all_regular({gNormal, gOctagon, g45, g46, g47, gEuclid, gEuclidSquare});
+    test_current(s);
     }
   }
 
@@ -696,7 +718,7 @@ int testargs() {
   else if(argis("-test-this")) {
     PHASEFROM(3);
     try {
-      test_current();
+      test_current(arb::current.filename);
       }
     catch(rulegen_failure& e) {
       }
@@ -705,12 +727,6 @@ int testargs() {
     PHASEFROM(3);
     shift(); 
     test_from_file(args());
-    }
-  else if(argis("-test-all")) {
-    PHASEFROM(3);
-    shift(); 
-    test_all_geoms(argi());
-    start_game();
     }
   else if(argis("-trv")) {
     shift(); test_rotate_val = argi();
