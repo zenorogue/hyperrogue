@@ -339,7 +339,6 @@ EX void shortcut_found(tcell *c, tcell *alt, const vector<twalker> &walkers, con
   reverse(pre.begin(), pre.end());
   reverse(post.begin(), post.end());
 
-  println(hlog, "now at1 is ", at1);
   int delta = at1.to_spin(walkers2.back().spin);
 
   for(auto& s: shortcuts[c->id]) if(s->pre == pre && s->post == post) {
@@ -500,7 +499,8 @@ void be_solid(tcell *c) {
   look_for_shortcuts(c);
   ufindc(c);
   if(c->dist == MYSTERY) {
-    println(hlog, "set solid but no dist ", c);
+    if(debugflags & DF_GEOM)
+      println(hlog, "set solid but no dist ", c);
     debuglist = { c };
     throw rulegen_failure("set solid but no dist");
     }
@@ -818,7 +818,8 @@ int get_side(twalker what) {
     ufind(cw);
     if(cw.at->move(d)->dist >= cw.at->dist) {
       handle_distance_errors();
-      println(hlog, "get_parent_dir error at ", cw, " and ", cw.at->move(d), ": ", cw.at->dist, "::", cw.at->move(d)->dist);
+      if(debugflags & DF_GEOM)
+        println(hlog, "get_parent_dir error at ", cw, " and ", cw.at->move(d), ": ", cw.at->dist, "::", cw.at->move(d)->dist);
       throw rulegen_failure("get_parent_dir error");
       }
     cw.spin = d;
@@ -994,7 +995,8 @@ vector<int> gen_rule(twalker cwmain, int id) {
     int val = treestates[id].code.second[i+1];
     if(val < 2 || val >= 8) {
       debuglist = { cwmain };
-      println(hlog, "i = ", i, " val = ", val, " code = ", treestates[id].code);
+      if(debugflags & DF_GEOM)
+        println(hlog, "i = ", i, " val = ", val, " code = ", treestates[id].code);
       throw rulegen_retry("wrong code in gen_rule");
       }
     cids[i] = ((val & 1) ? DIR_RIGHT : DIR_LEFT);
@@ -1224,7 +1226,7 @@ void verified_treewalk(twalker& tw, int id, int dir) {
         if(debugflags & DF_GEOM)
           println(hlog, "expected ", make_pair((tw+wstep).spin,id), " found ", co);
         }
-      else
+      else if(debugflags & DF_GEOM)
         println(hlog, "expected ", make_pair((tw+wstep).spin,id), " found ", co, " again");
       debuglist = {tw, tw+wstep};
       throw verify_advance_failed();
