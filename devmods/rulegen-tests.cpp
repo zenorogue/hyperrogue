@@ -447,6 +447,12 @@ int total_analyzers() {
   return res;
   }
 
+int shape_edges() {
+  int res = 0;
+  for(auto& sh: arb::current.shapes) res += sh.size();
+  return res;
+  }
+
 void test_current(string tesname) {
   stop_game();
   pointer_indices.clear();
@@ -564,6 +570,7 @@ void test_current(string tesname) {
     case 'y': Out("tree", isize(treestates));
     case 'a': Out("amin;amax", lalign(0, areas[0], ";", areas.back()));
     case 'h': Out("shapes", isize(arb::current.shapes));
+    case 'e': Out("edges", shape_edges());
     case 'f': Out("file", tesname);
     case 'l': Out("shortcut", longest_shortcut());
     case '3': Out("shqty", longest_shortcut().first);
