@@ -19,9 +19,6 @@ EX int max_examine_branch = 5040;
 EX int max_bdata = 1000;
 EX int max_getside = 10000;
 
-/* other parameters */
-EX int dlbonus = 0;
-
 #if HDR
 /** exception thrown by this algoritm in case of any problems */
 struct rulegen_failure : hr_exception {
