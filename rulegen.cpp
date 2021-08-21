@@ -52,6 +52,28 @@ EX int hard_parents = 0;
 EX int single_live_branches = 0;
 /** the number of roots with double live branches */
 EX int double_live_branches = 0;
+/** the number of treestates pre-minimization */
+EX int states_premini = 0;
+
+/** change some flags -- they usually make it worse */
+static const flagtype w_numerical = Flag(1); /*< build trees numerically (to be implemented) */
+static const flagtype w_single_shortcut = Flag(2); /*< generate just one shortcut */
+static const flagtype w_no_shortcut = Flag(3); /*< generate no shortcuts */
+static const flagtype w_no_restart = Flag(4); /*< do not restart at powers of two */
+static const flagtype w_no_sidecache = Flag(5); /*< do not cache get_side */
+static const flagtype w_no_relative_distance = Flag(6); /*< do not build relative distances into codes */
+static const flagtype w_examine_once = Flag(7); /*< restart after first conflict found in analysis */
+static const flagtype w_examine_all = Flag(8); /*< focus on all conflicts found in analysis even if we know them */
+static const flagtype w_conflict_all = Flag(9); /*< full extension in case of conflicts */
+static const flagtype w_parent_always = Flag(10); /*< always consider the full parent rule */
+static const flagtype w_parent_reverse = Flag(11); /*< reverse paths in parent_dir */
+static const flagtype w_parent_side = Flag(12); /*< allow side paths in parent_dir */
+static const flagtype w_parent_never = Flag(13); /*< never consider the full parent rule */
+static const flagtype w_always_clean = Flag(14); /*< restart following phases after any distance errors */
+static const flagtype w_single_origin = Flag(15); /*< consider only one origin */
+static const flagtype w_slow_side = Flag(16); /*< do not try get_side optimization */
+
+EX flagtype flags = 0;
 
 #if HDR
 struct tcell* tmove(tcell *c, int d);
@@ -372,6 +394,9 @@ EX void shortcut_found(tcell *c, tcell *alt, const vector<twalker> &walkers, con
   }
 
 EX void find_new_shortcuts(tcell *c, int d, tcell *alt, int delta) {
+
+  if(flags & w_no_shortcut) return;
+
   ufindc(c);
   if(debugflags & DF_GEOM)
     println(hlog, "solid ", c, " changes ", c->dist, " to ", d, " alt=", alt);
@@ -412,6 +437,7 @@ EX void find_new_shortcuts(tcell *c, int d, tcell *alt, int delta) {
         walkerdir2.push_back(s);
         if(seen.count(w1.peek())) {
           shortcut_found(c, alt, walkers, walkers2, walkerdir, walkerdir2);
+          if(flags & w_single_shortcut) return;
           /* we do not want to go further */
           for(auto& w: walkers) ufind(w);
           for(auto& w: walkers2) ufind(w);
@@ -484,6 +510,7 @@ EX void handle_distance_errors() {
   solid_errors = 0;
   if(b && !no_errors) {
     sidecache.clear();
+    if(flags & w_always_clean) clean_data();
     throw hr_solid_error();
     }
   }
@@ -559,17 +586,19 @@ EX void look_for_shortcuts(tcell *c) {
     look_for_shortcuts(c, *shortcuts[c->id][i]);
   }
 
-EX bool try_to_resolve_confusion = true;
-
 void trace_root_path(vector<int>& rp, twalker cw) {
   auto d = cw.peek()->dist;
   cw += wstep;
+
+  bool side = (flags & w_parent_side);
 
   next:
   if(d > 0) {
     ufind(cw);
     handle_distance_errors();
+    int di = side ? -1 : get_parent_dir(cw.at);
     for(int i=0; i<cw.at->type; i++) {
+      if((!side) && (cw+i).spin != di) continue;
       tcell *c1 = (cw+i).peek();
       if(!c1) continue;
       be_solid(c1);
@@ -583,6 +612,7 @@ void trace_root_path(vector<int>& rp, twalker cw) {
       }
     }
   rp.push_back(cw.to_spin(0));
+  if(flags & w_parent_reverse) reverse(rp.begin(), rp.end());
   }
 
 /** which neighbor will become the parent of c */
@@ -624,6 +654,9 @@ EX int get_parent_dir(tcell *c) {
       return get_parent_dir(c);
       }
 
+    bool failed = false;
+    if(flags & w_parent_always) {failed = true; goto resolve; }
+
     // celebrity identification problem
 
     for(auto ne: nearer)
@@ -633,27 +666,30 @@ EX int get_parent_dir(tcell *c) {
     if(parent_debug) for(auto ne: nearer) println(hlog, "beats", tie(ne, bestd), " = ", beats(ne, bestd));
 
     for(auto ne: nearer)
-      if(ne != bestd && beats(ne, bestd)) {
+      if(ne != bestd && beats(ne, bestd))
+        failed = true;
 
-        if(try_to_resolve_confusion) {
-          hard_parents++;
-          vector<int> best;
-          int bestfor = ne;
-          trace_root_path(best, twalker(c, ne));
+    if(failed) {
 
-          for(auto ne1: nearer) {
-            vector<int> other;
-            trace_root_path(other, twalker(c, ne1));
-            if(other < best) best = other, bestfor = ne1;
-            }
-
-          bestd = bestfor;
-          break;
-          }
-
+      if(flags & w_parent_never) {
         debuglist = { c };
         throw rulegen_failure("still confused");
         }
+
+      resolve:
+      hard_parents++;
+      vector<int> best;
+      int bestfor = nearer[0];
+      trace_root_path(best, twalker(c, nearer[0]));
+
+      for(auto ne1: nearer) {
+        vector<int> other;
+        trace_root_path(other, twalker(c, ne1));
+        if(other < best) best = other, bestfor = ne1;
+        }
+
+      bestd = bestfor;
+      }
 
     if(bestd == -1) {
       throw rulegen_failure("should not happen");
@@ -809,51 +845,62 @@ void treewalk(twalker& cw, int delta) {
 EX std::map<twalker, int> sidecache;
 
 int get_side(twalker what) {
-  auto ww = at_or_null(sidecache, what);
-  if(ww) return *ww;
-  twalker w = what;
-  twalker tw = what + wstep;
-  auto adv = [] (twalker& cw) {
-    int d = get_parent_dir(cw.at);
-    ufind(cw);
-    if(cw.at->move(d)->dist >= cw.at->dist) {
-      handle_distance_errors();
-      if(debugflags & DF_GEOM)
-        println(hlog, "get_parent_dir error at ", cw, " and ", cw.at->move(d), ": ", cw.at->dist, "::", cw.at->move(d)->dist);
-      throw rulegen_failure("get_parent_dir error");
-      }
-    cw.spin = d;
-    cw += wstep;
-    };
-  int steps = 0;
-  while(w.at != tw.at) {
-    steps++; if(steps > max_getside) {
-      debuglist = {what, w, tw};
-      throw rulegen_failure("qsidefreeze");
-      }
-    ufind(w); ufind(tw);
-    if(w.at->dist > tw.at->dist)
-      adv(w);
-    else if(w.at->dist < tw.at->dist)
-      adv(tw);
-    else {
-      adv(w); adv(tw);
-      }
-    }
-  int d = get_parent_dir(w.at);
 
-  if(d >= 0 && !single_live_branch_close_to_root.count(w.at)) {
-    twalker last(w.at, d);
-    return sidecache[what] = last.to_spin(w.spin) - last.to_spin(tw.spin);
+  bool side = !(flags & w_no_sidecache);
+  bool fast = !(flags & w_slow_side);
+
+  if(side) {
+    auto ww = at_or_null(sidecache, what);
+    if(ww) return *ww;
+    }
+
+  int res = 99;
+  int steps = 0;
+
+  if(fast) {
+    twalker w = what;
+    twalker tw = what + wstep;
+    auto adv = [] (twalker& cw) {
+      int d = get_parent_dir(cw.at);
+      ufind(cw);
+      if(cw.at->move(d)->dist >= cw.at->dist) {
+        handle_distance_errors();
+        if(debugflags & DF_GEOM)
+          println(hlog, "get_parent_dir error at ", cw, " and ", cw.at->move(d), ": ", cw.at->dist, "::", cw.at->move(d)->dist);
+        throw rulegen_failure("get_parent_dir error");
+        }
+      cw.spin = d;
+      cw += wstep;
+      };
+    while(w.at != tw.at) {
+      steps++; if(steps > max_getside) {
+        debuglist = {what, w, tw};
+        throw rulegen_failure("qsidefreeze");
+        }
+      ufind(w); ufind(tw);
+      if(w.at->dist > tw.at->dist)
+        adv(w);
+      else if(w.at->dist < tw.at->dist)
+        adv(tw);
+      else {
+        adv(w); adv(tw);
+        }
+      }
+    int d = get_parent_dir(w.at);
+
+    if(d >= 0 && !single_live_branch_close_to_root.count(w.at)) {
+      twalker last(w.at, d);
+      res = last.to_spin(w.spin) - last.to_spin(tw.spin);
+      }
     }
 
   // failed to solve this in the simple way (ended at the root) -- go around the tree
   twalker wl = what;
   twalker wr = wl;
   auto to_what = what + wstep;
-  auto ws = what; treewalk(ws, 0); if(ws == to_what) return 0;
+  auto ws = what; treewalk(ws, 0); if(ws == to_what) res = 0;
 
-  while(true) {
+  while(res == 99) {
     handle_distance_errors();
     steps++; if(steps > max_getside) {
       debuglist = {what, to_what, wl, wr};
@@ -863,13 +910,16 @@ int get_side(twalker what) {
     bool gr = wl.at->dist >= wr.at->dist;
     if(gl) {
       treewalk(wl, -1);
-      if(wl == to_what) return sidecache[what] = +1;
+      if(wl == to_what) { res = 1; }
       }
     if(gr) {
       treewalk(wr, +1);
-      if(wr == to_what) return sidecache[what] = -1;
+      if(wr == to_what) {res = -1; }
       }
     }
+
+  if(side) sidecache[what] = res;
+  return res;
   }
 
 code_t id_at_spin(twalker cw) {
@@ -899,7 +949,9 @@ code_t id_at_spin(twalker cw) {
         ufind(cs); ufind(cs2); be_solid(cs2.at);
         fix_distances(cs.at);
         int y = cs.at->dist - cs.peek()->dist;
-        if(y == 1) x = C_NEPHEW;
+
+        if(!(flags & w_no_relative_distance)) x = C_EQUAL;
+        else if(y == 1) x = C_NEPHEW;
         else if(y == 0) x = C_EQUAL;
         else if(y == -1) x = C_UNCLE;
         else throw rulegen_failure("distance problem y=" + its(y) + lalign(0, " cs=", cs, " cs2=", cs2, " peek=", cs.peek(), " dist=", cs.at->dist, " dist2=", cs2.at->dist));
@@ -1063,7 +1115,9 @@ void rules_iteration_for(tcell *c) {
 
           extend_analyzer(cwmain, z, k, mismatches, treestates[id].giver);
           mismatches++;
-          throw rulegen_retry("mismatch error");
+
+          if(!(flags & w_conflict_all))
+            throw rulegen_retry("mismatch error");
           }
         }
       }
@@ -1220,7 +1274,8 @@ void verified_treewalk(twalker& tw, int id, int dir) {
     auto co = get_code(tw.cpeek());
     if(co.second != id || co.first != (tw+wstep).spin) {
       handle_distance_errors();
-      if(!treestates[co.second].known) {
+
+      if(!treestates[co.second].known || (flags & w_examine_all)) {
         treestates[co.second].known = true;
         important.push_back(tw.at);
         if(debugflags & DF_GEOM)
@@ -1307,7 +1362,9 @@ void examine_branch(int id, int left, int right) {
     else throw rulegen_failure("cannot advance while examining");
     }
     }
-  catch(verify_advance_failed&) { }
+  catch(verify_advance_failed&) {
+    if(flags & w_examine_once) throw rulegen_retry("advance failed");
+    }
   }
 
 /* == main algorithm == */
@@ -1355,7 +1412,7 @@ EX void clean_parents() {
 EX void rules_iteration() {
   try_count++;
 
-  if((try_count & (try_count-1)) == 0) {
+  if((try_count & (try_count-1)) == 0) if(!(flags & w_no_restart)) {
     clean_data();
     }
 
@@ -1515,7 +1572,13 @@ EX void generate_rules() {
   hard_parents = single_live_branches = double_live_branches = 0;
 
   t_origin.clear();
-  for(auto& ts: arb::current.shapes) {
+
+  if(flags & w_single_origin) {
+    tcell *c = gen_tcell(0);
+    c->dist = 0;
+    t_origin.push_back(c);
+    }
+  else for(auto& ts: arb::current.shapes) {
     tcell *c = gen_tcell(ts.id);
     c->dist = 0;
     t_origin.push_back(c);
