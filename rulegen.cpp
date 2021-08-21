@@ -1132,6 +1132,7 @@ void rules_iteration_for(tcell *c) {
   }
 
 void minimize_rules() {
+  states_premini = isize(treestates);
   if(debugflags & DF_GEOM)
     println(hlog, "minimizing rules...");
   int next_id = isize(treestates);
