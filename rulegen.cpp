@@ -18,6 +18,7 @@ EX int max_adv_steps = 100;
 EX int max_examine_branch = 5040;
 EX int max_bdata = 1000;
 EX int max_getside = 10000;
+EX int rulegen_timeout = 60;
 
 #if HDR
 /** exception thrown by this algoritm in case of any problems */
@@ -1556,6 +1557,7 @@ void clear_all() {
 
 EX void generate_rules() {
 
+  int t = SDL_GetTicks();
   delete_tmap();
 
   if(!arb::in()) try {
@@ -1590,6 +1592,8 @@ EX void generate_rules() {
   important = t_origin;
   
   while(true) {
+    if(SDL_GetTicks() > t + 1000 * rulegen_timeout)
+      throw rulegen_surrender("timeout");
     try {
       rules_iteration();
       break;
@@ -1862,6 +1866,7 @@ auto hooks = addHook(hooks_configfile, 100, [] {
       param_i(max_examine_branch, "max_examine_branch");
       param_i(max_getside, "max_getside");
       param_i(max_bdata, "max_bdata");
+      param_i(rulegen_timeout, "rulegen_timeout");
     });
 
 EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {
