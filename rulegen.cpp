@@ -46,6 +46,12 @@ EX bool parent_debug;
 EX int tcellcount = 0;
 /** number of tcells united into other tcells */
 EX int tunified = 0;
+/** hard cases for get_parent_dir */
+EX int hard_parents = 0;
+/** the number of roots with single live branches */
+EX int single_live_branches = 0;
+/** the number of roots with double live branches */
+EX int double_live_branches = 0;
 
 #if HDR
 struct tcell* tmove(tcell *c, int d);
@@ -277,8 +283,6 @@ struct hr_solid_error : rulegen_retry {
   };
 
 int solid_errors;
-
-int get_parent_dir(tcell *c);
 
 #if HDR
 struct shortcut {
@@ -632,6 +636,7 @@ EX int get_parent_dir(tcell *c) {
       if(ne != bestd && beats(ne, bestd)) {
 
         if(try_to_resolve_confusion) {
+          hard_parents++;
           vector<int> best;
           int bestfor = ne;
           trace_root_path(best, twalker(c, ne));
@@ -1411,21 +1416,29 @@ EX void rules_iteration() {
   verified_branches.clear();
 
   int q = isize(single_live_branch_close_to_root);
+  
+  single_live_branches = 0;
+  double_live_branches = 0;
 
   for(int id=0; id<isize(treestates); id++) if(treestates[id].is_live) {
     auto r = treestates[id].rules; /* no & because treestates might have moved */
     if(r.empty()) continue;
     int last_live_branch = -1;
     int first_live_branch = -1;
+    int qbranches = 0;
     for(int i=0; i<isize(r); i++)
       if(r[i] >= 0 && treestates[r[i]].is_live) {
         if(first_live_branch == -1) first_live_branch = i;
         if(last_live_branch >= 0)
           examine_branch(id, last_live_branch, i);
         last_live_branch = i;
+        qbranches++;
         }
+    if(qbranches == 2) double_live_branches++;
     if(first_live_branch == last_live_branch && treestates[id].is_root) {
-      println(hlog, "for id ", id, " we have a single live branch");
+      if(debugflags & DF_GEOM)
+        println(hlog, "for id ", id, " we have a single live branch");
+      single_live_branches++;
       indenter ind(2);
       debuglist = { treestates[id].giver };
       find_single_live_branch(treestates[id].giver);
@@ -1433,7 +1446,8 @@ EX void rules_iteration() {
     if(isize(single_live_branch_close_to_root) != q) {
       vector<tcell*> v;
       for(auto c: single_live_branch_close_to_root) v.push_back(c);
-      println(hlog, "changed single_live_branch_close_to_root from ", q, " to ", v);
+      if(debugflags & DF_GEOM) 
+        println(hlog, "changed single_live_branch_close_to_root from ", q, " to ", v);
       debuglist = { treestates[id].giver };
       throw rulegen_retry("single live branch");
       }
@@ -1494,6 +1508,9 @@ EX void generate_rules() {
   clear_all();
 
   analyzers.clear();
+  important.clear();
+  treestates.clear();
+  hard_parents = single_live_branches = double_live_branches = 0;
 
   t_origin.clear();
   for(auto& ts: arb::current.shapes) {
