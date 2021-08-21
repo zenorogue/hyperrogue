@@ -2,6 +2,7 @@
 
 #include "../hyper.h"
 #include <fstream>
+#include <chrono>
 
 namespace hr {
 namespace rulegen {
@@ -481,6 +482,7 @@ void test_current(string tesname) {
   treestates.clear();
 
   int tstart = SDL_GetTicks();
+  auto begin = std::chrono::high_resolution_clock::now();
   try {
     generate_rules();
     status = "ACC";
@@ -502,6 +504,8 @@ void test_current(string tesname) {
     status = "ERR";
     message = e.what();
     }
+
+  auto end = std::chrono::high_resolution_clock::now();
 
   if(t_origin.size() && (draw_which & 2)) {
     restart_game_on(new hrmap_testproto);
@@ -556,12 +560,19 @@ void test_current(string tesname) {
     case 'C': Out("code", qcode);
     case 't': Out("try", try_count);
     case 'T': Out("T", tstart / 1000.);
+    case 'P': Out("Tp", std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count() / 1000000000.);
     case 'y': Out("tree", isize(treestates));
     case 'a': Out("amin;amax", lalign(0, areas[0], ";", areas.back()));
     case 'h': Out("shapes", isize(arb::current.shapes));
     case 'f': Out("file", tesname);
     case 'l': Out("shortcut", longest_shortcut());
+    case '3': Out("shqty", longest_shortcut().first);
+    case '4': Out("shlong", longest_shortcut().second);
     case 'A': Out("analyzer", longest_analyzer());
+    case 'H': Out("hard", hard_parents);
+    case '1': Out("single", single_live_branches);
+    case '2': Out("double", double_live_branches);
+    case 'p': Out("premini", states_premini);
     }
   println(hlog);
   fflush(stdout);
@@ -731,8 +742,10 @@ int testargs() {
   else if(argis("-trv")) {
     shift(); test_rotate_val = argi();
     }
-  else if(argis("-resolve"))
-    try_to_resolve_confusion = true;
+  else if(argis("-ruleflag")) {
+    shift();
+    rulegen::flags ^= Flag(argi());
+    }
   else if(argis("-view-debug"))
     view_debug();
   else if(argis("-print-rules"))
