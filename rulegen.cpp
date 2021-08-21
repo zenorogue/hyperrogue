@@ -1796,7 +1796,6 @@ auto hooks = addHook(hooks_configfile, 100, [] {
       param_i(max_examine_branch, "max_examine_branch");
       param_i(max_getside, "max_getside");
       param_i(max_bdata, "max_bdata");
-      param_i(dlbonus, "dlbonus");
     });
 
 EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {
