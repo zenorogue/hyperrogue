@@ -1262,8 +1262,15 @@ tsinfo get_tsinfo(twalker tw) {
   return {co.second, spin};
   }
 
-int get_rule(tsinfo s) {
-  return treestates[s.first].rules[s.second];
+int get_rule(const twalker tw, tsinfo s) {
+
+  auto& r = treestates[s.first].rules;
+  if(r.empty()) {
+    important.push_back(tw.at);
+    throw rulegen_retry("unknown rule in get_rule");
+    }
+
+  return r[s.second];
   }
 
 set<vector<tsinfo> > verified_branches;
@@ -1338,8 +1345,8 @@ void examine_branch(int id, int left, int right) {
     auto tsl = get_tsinfo(wl);
     auto tsr = get_tsinfo(wr);
 
-    auto rl = get_rule(tsl);
-    auto rr = get_rule(tsr);
+    auto rl = get_rule(wl, tsl);
+    auto rr = get_rule(wr, tsr);
 
     // println(hlog, "wl = ", wl, " -> ", wl+wstep, " R", rl, " wr = ", wr, " -> ", wr+wstep, " R", rr, " lstack = ", lstack, " rstack = ", rstack);
 
@@ -1407,7 +1414,7 @@ void find_single_live_branch(twalker at) {
   rules_iteration_for(at.at);
   int id = get_code(at.at).second;
   int t = at.at->type;
-  auto& r = treestates[id].rules;
+  auto r = treestates[id].rules; /* no & because may move */
   int q = 0;
   if(r.empty()) { important.push_back(at.at); throw rulegen_retry("no giver in find_single_live_branch"); }
   for(int i=0; i<t; i++) if(r[i] >= 0) {
@@ -1534,6 +1541,10 @@ EX void rules_iteration() {
       throw rulegen_retry("single live branch");
       }
     if(treestates[id].is_root) examine_branch(id, last_live_branch, first_live_branch);
+    }
+
+  for(int id=0; id<isize(treestates); id++) if(!treestates[id].giver.at) {
+    important.push_back(treestates[id].where_seen);
     }
   
   handle_distance_errors();
