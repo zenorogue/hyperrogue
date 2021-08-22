@@ -56,7 +56,7 @@ EX int double_live_branches = 0;
 /** the number of treestates pre-minimization */
 EX int states_premini = 0;
 
-#ifdef HDR
+#if HDR
 /** change some flags -- they usually make it worse */
 static const flagtype w_numerical = Flag(1); /*< build trees numerically */
 static const flagtype w_single_shortcut = Flag(2); /*< generate just one shortcut */
