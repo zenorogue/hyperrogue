@@ -32,6 +32,7 @@ string linker;
 string libs;
 
 bool verbose = false;
+bool quiet = false;
 
 int batch_size = thread::hardware_concurrency() + 1;
 bool mingw64 = false;
@@ -164,6 +165,9 @@ int main(int argc, char **argv) {
     else if(s == "-v") {
       verbose = true;
       }
+    else if(s == "-q") {
+      quiet = true;
+      }
     else if(s == "-mingw64") {
       set_os("mingw64");
       obj_dir += "/mingw64";
@@ -284,7 +288,7 @@ int main(int argc, char **argv) {
     }
   fsm.close();
   
-  printf("preprocessing...\n");
+  if(!quiet) printf("preprocessing...\n");
   if(mysystem(preprocessor + " " + opts + " "+obj_dir+"/hyper.cpp -o "+obj_dir+"/hyper.E")) { printf("preprocessing error\n"); exit(1); }
   
   if(true) {
@@ -301,7 +305,7 @@ int main(int argc, char **argv) {
   modules.push_back("savepng");
 
   if(get_file_time(obj_dir + "/hyper.o") < get_file_time("hyper.cpp")) {
-    printf("compiling hyper...\n");
+    if(!quiet) printf("compiling hyper...\n");
     if(mysystem(compiler + " -DREM " + opts + " " + obj_dir + "/hyper.cpp -c -o " + obj_dir + "/hyper.o")) { printf("error\n"); exit(1); }
     }
   
@@ -331,7 +335,7 @@ int main(int argc, char **argv) {
       tasks.push_back(task);
       }
     else {
-      printf("ok: %s\n", m.c_str());
+      if(!quiet) printf("ok: %s\n", m.c_str());
       }
     allobj += " ";
     allobj += obj;
@@ -359,7 +363,8 @@ int main(int argc, char **argv) {
       auto task = tasks[tasks_taken];
       int mid = task.first;
       function<int(void)> do_work = task.second;
-      printf("compiling %s... [%d/%d]\n", modules[mid].c_str(), tasks_taken+1, tasks_amt);
+      if(!quiet)
+        printf("compiling %s... [%d/%d]\n", modules[mid].c_str(), tasks_taken+1, tasks_amt);
       worker = async(launch::async, do_work);
       ++tasks_taken;
       }
