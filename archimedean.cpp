@@ -649,14 +649,14 @@ struct hrmap_archimedean : hrmap {
       
     DEBB(DF_GEOM, ("look for: ", alt, " / ", T * C0));
   
-    for(auto& p2: altmap[alt]) if(intval(p2.second * C0, T * C0) < 1e-4) {
+    for(auto& p2: altmap[alt]) if(same_point_may_warn(p2.second * C0, T * C0)) {
       DEBB(DF_GEOM, ("cell found: ", p2.first));
       for(int d2=0; d2<p2.first->degree(); d2++) {
         heptspin hs(p2.first, d2);
         auto& t2 = current.get_triangle(p2.first, d2);
         transmatrix T1 = T * spin(M_PI + t2.first);
         DEBB(DF_GEOM, ("compare: ", T1 * xpush0(1), ":: ", p2.second * xpush0(1)));
-        if(intval(T1 * xpush0(1), p2.second * xpush0(1)) < 1e-4) {
+        if(same_point_may_warn(T1 * xpush0(1), p2.second * xpush0(1))) {
         
           // T1 = p2.second
           // T * spin(pi+t2.first) == p2.second

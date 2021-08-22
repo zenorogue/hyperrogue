@@ -1681,5 +1681,21 @@ EX bool clockwise(hyperpoint h1, hyperpoint h2) {
   return h1[0] * h2[1] > h1[1] * h2[0];
   }
 
+EX ld worst_precision_error;
+
+#if HDR
+struct hr_precision_error : hr_exception { hr_precision_error() : hr_exception("precision error") {} };
+#endif
+
+/** check if a and b are the same, testing for equality. Throw an exception or warning if not sure */
+EX bool same_point_may_warn(hyperpoint a, hyperpoint b) {
+  ld d = hdist(a, b);
+  if(d > 1e-2) return false;
+  if(d > 1e-3) throw hr_precision_error();
+  if(d > 1e-6 && worst_precision_error <= 1e-6)
+    addMessage("warning: precision errors are building up!");
+  if(d > worst_precision_error) worst_precision_error = d;
+  return true;
+  }
 
 }
