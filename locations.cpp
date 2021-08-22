@@ -269,7 +269,7 @@ template<class T> struct walker {
   template<class U> walker operator + (U t) const { walker<T> w = *this; w += t; return w; }
   template<class U> walker operator - (U t) const { walker<T> w = *this; w += (-t); return w; }
   /** \brief what T are we facing, without creating it */
-  T*& peek() { return at->move(spin); }
+  T*& peek() const { return at->move(spin); }
   /** \brief what T are we facing, with creating it */
   T* cpeek() { return at->cmove(spin); }
   /** \brief would we create a new T if we stepped forwards? */
