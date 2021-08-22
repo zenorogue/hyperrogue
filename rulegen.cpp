@@ -56,6 +56,7 @@ EX int double_live_branches = 0;
 /** the number of treestates pre-minimization */
 EX int states_premini = 0;
 
+#ifdef HDR
 /** change some flags -- they usually make it worse */
 static const flagtype w_numerical = Flag(1); /*< build trees numerically (to be implemented) */
 static const flagtype w_single_shortcut = Flag(2); /*< generate just one shortcut */
@@ -73,6 +74,7 @@ static const flagtype w_parent_never = Flag(13); /*< never consider the full par
 static const flagtype w_always_clean = Flag(14); /*< restart following phases after any distance errors */
 static const flagtype w_single_origin = Flag(15); /*< consider only one origin */
 static const flagtype w_slow_side = Flag(16); /*< do not try get_side optimization */
+#endif
 
 EX flagtype flags = 0;
 
