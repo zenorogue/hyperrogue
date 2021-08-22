@@ -1589,7 +1589,7 @@ void clear_all() {
 
 EX void generate_rules() {
 
-  int t = SDL_GetTicks();
+  auto t = SDL_GetTicks();
   delete_tmap();
 
   if(!arb::in()) try {
