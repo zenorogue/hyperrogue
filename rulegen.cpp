@@ -58,7 +58,7 @@ EX int states_premini = 0;
 
 #ifdef HDR
 /** change some flags -- they usually make it worse */
-static const flagtype w_numerical = Flag(1); /*< build trees numerically (to be implemented) */
+static const flagtype w_numerical = Flag(1); /*< build trees numerically */
 static const flagtype w_single_shortcut = Flag(2); /*< generate just one shortcut */
 static const flagtype w_no_shortcut = Flag(3); /*< generate no shortcuts */
 static const flagtype w_no_restart = Flag(4); /*< do not restart at powers of two */
@@ -175,9 +175,23 @@ tcell *gen_tcell(int id) {
   return c;
   }
 
+map<cell*, tcell*> cell_to_tcell;
+map<tcell*, cell*> tcell_to_cell;
+
 tcell* tmove(tcell *c, int d) {
   if(d<0 || d >= c->type) throw hr_exception("wrong d");
   if(c->move(d)) return c->move(d);
+  if(flags & w_numerical) {
+    cell *oc = tcell_to_cell[c];
+    cell *oc1 = oc->cmove(d);
+    auto& c1 = cell_to_tcell[oc1];
+    if(!c1) {
+      c1 = gen_tcell(shvid(oc1));
+      tcell_to_cell[c1] = oc1;
+      }
+    c->c.connect(d, cell_to_tcell[oc1], oc->c.spin(d), false);
+    return c1;
+    }
   auto cd = twalker(c, d);
   ufind(cd);
   auto& co = arb::current.shapes[c->id].connections[cd.spin];
@@ -1577,8 +1591,19 @@ EX void generate_rules() {
   hard_parents = single_live_branches = double_live_branches = 0;
 
   t_origin.clear();
+  cell_to_tcell.clear();
+  tcell_to_cell.clear();
 
-  if(flags & w_single_origin) {
+  if(flags & w_numerical) {
+    start_game();
+    cell *s = currentmap->gamestart();
+    tcell *c = gen_tcell(shvid(s));
+    cell_to_tcell[s] = c;
+    tcell_to_cell[c] = s;
+    c->dist = 0;
+    t_origin.push_back(c);
+    }
+  else if(flags & w_single_origin) {
     tcell *c = gen_tcell(0);
     c->dist = 0;
     t_origin.push_back(c);
