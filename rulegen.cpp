@@ -1594,6 +1594,7 @@ EX void generate_rules() {
 
   if(!arb::in()) try {
     arb::convert::convert();
+    if(flags & w_numerical) arb::convert::activate();
     }
   catch(hr_exception& e) {
     throw rulegen_surrender("conversion failure");
