@@ -1588,7 +1588,6 @@ void clear_tcell_data() {
     c->distance_fixed = false;
     c = c->next;
     }
-  for(auto& c: t_origin) c->dist = 0;
   in_fixing = false; fix_queue = {};
   }
 
@@ -1629,6 +1628,8 @@ EX void generate_rules() {
   t_origin.clear();
   cell_to_tcell.clear();
   tcell_to_cell.clear();
+  sidecache.clear();
+  fix_queue = {}; in_fixing = false;
 
   if(flags & w_numerical) {
     start_game();
