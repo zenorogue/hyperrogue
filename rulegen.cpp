@@ -321,7 +321,11 @@ struct hr_solid_error : rulegen_retry {
   hr_solid_error() : rulegen_retry("solid error") {}
   };
 
+/** since the last restart */
 int solid_errors;
+
+/** total solid errors */
+EX int all_solid_errors;
 
 #if HDR
 struct shortcut {
@@ -412,6 +416,8 @@ EX void shortcut_found(tcell *c, tcell *alt, const vector<twalker> &walkers, con
 
 EX void find_new_shortcuts(tcell *c, int d, tcell *alt, int delta) {
 
+  solid_errors++;
+  all_solid_errors++;
   if(flags & w_no_shortcut) return;
 
   ufindc(c);
@@ -495,7 +501,6 @@ void fix_distances(tcell *c) {
       if(d1 > d+1) {
         if(c1->is_solid) {
           find_new_shortcuts(c1, d+1, c1, 0);
-          solid_errors++;
           }
         d1 = d+1; 
         remove_parentdir(c1);
@@ -1588,7 +1593,7 @@ EX void generate_rules() {
   analyzers.clear();
   important.clear();
   treestates.clear();
-  hard_parents = single_live_branches = double_live_branches = 0;
+  hard_parents = single_live_branches = double_live_branches = all_solid_errors = 0;
 
   t_origin.clear();
   cell_to_tcell.clear();
