@@ -74,6 +74,7 @@ static const flagtype w_parent_never = Flag(13); /*< never consider the full par
 static const flagtype w_always_clean = Flag(14); /*< restart following phases after any distance errors */
 static const flagtype w_single_origin = Flag(15); /*< consider only one origin */
 static const flagtype w_slow_side = Flag(16); /*< do not try get_side optimization */
+static const flagtype w_bfs = Flag(17); /*< compute distances using BFS */
 #endif
 
 EX flagtype flags = 0;
@@ -482,7 +483,25 @@ EX void remove_parentdir(tcell *c) {
     }
   }
 
+queue<tcell*> bfs_queue;
+
 void fix_distances(tcell *c) {
+  if(flags & w_bfs) while(true) {
+    ufindc(c);
+    if(c->dist != MYSTERY) return;
+    if(tcellcount >= max_tcellcount) throw rulegen_surrender("max_tcellcount exceeded");
+    if(bfs_queue.empty()) throw rulegen_failure("empty bfs queue");
+    auto c1 = bfs_queue.front();
+    ufindc(c1);
+    bfs_queue.pop();
+    for(int i=0; i<c1->type; i++) {
+      tcell *c2 = c1->cmove(i);
+      if(c2->dist == MYSTERY) {
+        c2->dist = c1->dist + 1;
+        bfs_queue.push(c2);
+        }
+      }
+    }
   c->distance_fixed = true;
   vector<tcell*> q = {c};
   
@@ -1630,6 +1649,9 @@ EX void generate_rules() {
     c->dist = 0;
     t_origin.push_back(c);
     }
+
+  bfs_queue = {};
+  if(flags & w_bfs) for(auto c: t_origin) bfs_queue.push(c);
   
   try_count = 0;
   
