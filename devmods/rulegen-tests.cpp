@@ -454,6 +454,8 @@ int shape_edges() {
   }
 
 void test_current(string tesname) {
+
+  worst_precision_error = 0;
   stop_game();
   pointer_indices.clear();
   // if(s.find("884-211-045") == string::npos) return;
@@ -510,6 +512,11 @@ void test_current(string tesname) {
     status = "ERR";
     message = e.what();
     }
+  catch(hr_precision_error& e) {
+    println(hlog, "precision error: ** ", e.what());
+    status = "PRE";
+    message = e.what();
+    }
 
   auto end = std::chrono::high_resolution_clock::now();
 
@@ -560,8 +567,15 @@ void test_current(string tesname) {
     case 's': Out("status", status);
     case 'm': Out("message", message);
     case 'c': Out("cells", tcellcount);
-    case 'u': Out("unis", tunified);
+    case 'u':
+      if(flags & w_numerical) {
+        Out("precision", worst_precision_error);
+        }
+      else {
+        Out("unis", tunified);
+        }
     case 'q': Out("solid", qsolid);
+    case 'Q': Out("solid_err", all_solid_errors);
     case 'd': Out("dist", qdist);
     case 'C': Out("code", qcode);
     case 't': Out("try", try_count);
