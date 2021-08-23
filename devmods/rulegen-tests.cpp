@@ -159,6 +159,17 @@ void irradiate() {
   cleanup_protomap();
   }
 
+void move_to(cellwalker cw) {
+  cwt = cw;
+  centerover = cwt.at;
+  View = Id;
+  }
+
+void move_to(twalker dw) {
+  auto m = dynamic_cast<hrmap_testproto*> (currentmap);
+  move_to(cellwalker(m->clone(dw.at)->c7, dw.spin, dw.mirrored));
+  }
+
 void debug_menu() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
@@ -216,10 +227,8 @@ void debug_menu() {
     dialog::init();
     for(auto dw: debuglist) {
       dialog::addItem("go to " + index_pointer(dw.at), 'a');
-      dialog::add_action([dw,m] {
-        cwt = cellwalker(m->clone(dw.at)->c7, dw.spin, dw.mirrored);
-        centerover = cwt.at;
-        View = Id;
+      dialog::add_action([dw] {
+        move_to(dw);
         });
       }
     dialog::display();
