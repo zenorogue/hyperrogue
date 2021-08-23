@@ -417,6 +417,7 @@ EX void shortcut_found(tcell *c, tcell *alt, const vector<twalker> &walkers, con
 
 EX void find_new_shortcuts(tcell *c, int d, tcell *alt, int delta) {
 
+  debuglist.push_back(c);
   solid_errors++;
   all_solid_errors++;
   if(flags & w_no_shortcut) return;
@@ -1467,6 +1468,7 @@ EX void clean_parents() {
 
 EX void rules_iteration() {
   try_count++;
+  debuglist = {};
 
   if((try_count & (try_count-1)) == 0) if(!(flags & w_no_restart)) {
     clean_data();
