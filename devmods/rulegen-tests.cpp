@@ -562,7 +562,7 @@ void test_current(string tesname) {
     }
 
   int tstart = SDL_GetTicks();
-  auto begin = std::chrono::high_resolution_clock::now();
+  auto begin = clock(); // std::chrono::high_resolution_clock::now();
   try {
     generate_rules();
     status = "ACC";
@@ -590,7 +590,7 @@ void test_current(string tesname) {
     message = e.what();
     }
 
-  auto end = std::chrono::high_resolution_clock::now();
+  auto end = clock(); // std::chrono::high_resolution_clock::now();
 
   if(t_origin.size() && (draw_which & 2)) {
     restart_game_on(new hrmap_testproto);
@@ -652,7 +652,8 @@ void test_current(string tesname) {
     case 'C': Out("code", qcode);
     case 't': Out("try", try_count);
     case 'T': Out("T", tstart / 1000.);
-    case 'P': Out("Tp", std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count() / 1000000000.);
+//  case 'P': Out("Tp", std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count() / 1000000000.);
+    case 'P': Out("Tp", (end-begin) * 1. / CLOCKS_PER_SEC);
     case 'y': Out("tree", isize(treestates));
     case 'a': Out("amin;amax", lalign(0, areas[0], ";", areas.back()));
     case 'h': Out("shapes", isize(arb::current.shapes));
