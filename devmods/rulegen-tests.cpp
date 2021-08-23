@@ -489,6 +489,16 @@ void test_current(string tesname) {
   // make print_rules() not crash in case of a conversion error
   treestates.clear();
 
+  /* we do not want to include the conversion time */
+  if(!arb::in()) try {
+    arb::convert::convert();
+    arb::convert::activate();
+    }
+  catch(hr_exception& e) {
+    println(hlog, "CSV; failed to convert ", tesname);
+    return;
+    }
+
   int tstart = SDL_GetTicks();
   auto begin = std::chrono::high_resolution_clock::now();
   try {
