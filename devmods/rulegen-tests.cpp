@@ -252,6 +252,11 @@ void debug_menu() {
   dialog::display();
   }  
 
+color_t label_color = 1, wall_color = 0, tree_color = 0xFFFFFFFF, out_color = 0xFF0000FF;
+
+bool show_codes = true;
+bool show_dist = true;
+
 void view_debug() {
   auto m = dynamic_cast<hrmap_testproto*> (currentmap);
   if(m) {
@@ -259,28 +264,38 @@ void view_debug() {
       tcell *tc = m->counterpart[c->master];
       
       string s;
-      auto label = (tc->code == MYSTERY ? "?" : its(tc->code)) + "/" + (tc->dist == MYSTERY ? "?" : its(tc->dist));
+      auto label = (tc->dist == MYSTERY ? "?" : its(tc->dist));
       
-      color_t col = 0xFFFFFF + 0x512960 * tc->code;
+      if(show_codes) {
+        string code = (tc->code == MYSTERY ? "?" : its(tc->code));
+        if(show_dist) label = label + "/" + code;
+        else label = code;
+        }
+      
+      color_t col = label_color == 1 ? 0xFFFFFF + 0x512960 * tc->code : label_color;
   
       if(pointer_indices.count(tc)) label += " " + index_pointer(tc);
       
       queuestr(V, 0.4, label, col, 1);
-      if(tc->parent_dir >= 0 && tc->parent_dir < tc->type) {
-        vid.linewidth *= 8;
-        queueline(V * C0, V * currentmap->adj(c, tc->parent_dir) * C0, 0xFFFFFFFF);
-        vid.linewidth /= 8;
+      if(tree_color) {
+        if(tc->parent_dir >= 0 && tc->parent_dir < tc->type) {
+          vid.linewidth *= 8;
+          queueline(V * C0, V * currentmap->adj(c, tc->parent_dir) * C0, tree_color);
+          vid.linewidth /= 8;
+          }
         }
         
       if(sprawl_shown.count(tc))
         queuepoly(V, cgi.shDisk, 0xFF0000FF);
       
-      for(int i=0; i<tc->type; i++) if(!tc->move(i)) {
-        vid.linewidth *= 8;
-        hyperpoint h1 = currentmap->get_corner(c, (i+1)%tc->type);
-        hyperpoint h2 = currentmap->get_corner(c, i);
-        queueline(V * h1, V * h2, 0xFF0000FF);
-        vid.linewidth /= 8;
+      if(out_color) {
+        for(int i=0; i<tc->type; i++) if(!tc->move(i)) {
+          vid.linewidth *= 8;
+          hyperpoint h1 = currentmap->get_corner(c, (i+1)%tc->type);
+          hyperpoint h2 = currentmap->get_corner(c, i);
+          queueline(V * h1, V * h2, 0xFF0000FF);
+          vid.linewidth /= 8;
+          }
         }
 
       return false;
@@ -747,6 +762,57 @@ void test_from_file(string list) {
     }
   }
 
+void label_all(int i, int mode) {
+  queue<tcell*> to_label;
+  auto m = dynamic_cast<hrmap_testproto*> (currentmap);  
+  set<tcell*> visited;
+  
+  tcell *next_dist = nullptr;
+  int cdist = 0;
+  
+  auto visit = [&] (tcell *c) {
+    if(visited.count(c)) return;
+    visited.insert(c);
+    to_label.push(c);
+    if(!next_dist) next_dist = c;
+    };
+
+  visit(m->counterpart[cwt.at->master]);
+  while(true) {
+    tcell *c = to_label.front();
+    if(c == next_dist) { 
+      println(hlog, "next distance for ", c);
+      next_dist = nullptr;
+      cdist++;
+      if(cdist == i) break;
+      }
+    try {
+      if(mode & 4) index_pointer(c);
+      if(mode & 1) get_parent_dir(c);
+      if(mode & 2) get_code(c);
+      }
+    catch(hr_exception& ex) {    
+      }
+    to_label.pop();
+    for(int i=0; i<c->type; i++) 
+      visit(c->cmove(i));
+    }
+  
+  cleanup_protomap();
+  }
+
+void seek_label(string s) {
+  auto *c = first_tcell;
+  while(c) {
+    if(pointer_indices.count(c) && index_pointer(c) == s) {
+      move_to(c);
+      return;
+      }
+    c = c->next;
+    }
+  println(hlog, "not found");
+  }
+
 int testargs() {
   using namespace arg;
            
@@ -792,7 +858,82 @@ int testargs() {
     print_rules();
   else if(argis("-clear-debug"))
     clear_debug();
+  
+  /* tools for taking screenshots -- after testproto */
 
+  else if(argis("-label-all")) {
+    shift(); int q = argi();
+    shift(); int mode = argi();
+    label_all(q, mode);
+    }
+
+  else if(argis("-label-clean")) {
+    pointer_indices.clear();
+    }
+
+  else if(argis("-label-seek")) {
+    shift();
+    seek_label(args());
+    }
+
+  else if(argis("-color-this")) {
+    auto m = dynamic_cast<hrmap_testproto*> (currentmap);  
+    shift(); 
+    color_t hex = arghex();
+    println(hlog, "assigning ", hex, " to ", m->counterpart[cwt.at->master]);
+    setdist(cwt.at, 7, nullptr);
+    cwt.at->landparam = hex;
+    }
+
+  else if(argis("-color-label")) {
+    shift(); label_color = arghex();
+    }
+
+  else if(argis("-color-wall")) {
+    shift(); wall_color = arghex();
+    }
+
+  else if(argis("-color-out")) {
+    shift(); out_color = arghex();
+    }
+
+  else if(argis("-color-tree")) {
+    shift(); tree_color = arghex();
+    }
+
+  else if(argis("-draw-which")) {
+    shift(); draw_which = argi();
+    }
+
+  else if(argis("-no-codes")) {
+    show_codes = false;
+    }
+
+  else if(argis("-no-dist")) {
+    show_dist = false;
+    }
+
+  else if(argis("-dseek-start")) {
+    shift(); move_to(t_origin[argi()]);
+    }
+
+  else if(argis("-dseek-giver")) {
+    shift(); move_to(treestates[argi()].giver);
+    }
+
+  else if(argis("-dseek")) {
+    shift();
+    int i = argi();
+    if(i >= 0 && i < isize(debuglist)) {
+      auto m = dynamic_cast<hrmap_testproto*> (currentmap);  
+      cwt = {m->clone(debuglist[i].at)->c7, debuglist[i].spin};
+      centerover = cwt.at;
+      View = Id;      
+      }
+    else
+      println(hlog, "wrong dseek index");
+    }
+    
   else return 1;
   return 0;
   }
