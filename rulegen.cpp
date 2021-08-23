@@ -136,7 +136,7 @@ void process_fix_queue() {
   in_fixing = false;
   }
 
-void ufind(twalker& p) {
+EX void ufind(twalker& p) {
   if(p.at->unified_to.at == p.at) return;
   twalker p1 = p.at->unified_to;
   ufind(p1);
