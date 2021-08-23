@@ -1625,6 +1625,8 @@ void clear_all() {
   cleanup();
   }
 
+EX int origin_id;
+
 EX void generate_rules() {
 
   auto t = SDL_GetTicks();
@@ -1662,7 +1664,7 @@ EX void generate_rules() {
     t_origin.push_back(c);
     }
   else if(flags & w_single_origin) {
-    tcell *c = gen_tcell(0);
+    tcell *c = gen_tcell(origin_id);
     c->dist = 0;
     t_origin.push_back(c);
     }
