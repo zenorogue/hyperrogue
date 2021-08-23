@@ -708,7 +708,7 @@ void set_arcm(eVariation v, string symbol) {
 
 void test_from_file(string list) {
 
-  set_dir("devmods/rulegen-tests/" + list);
+  set_dir(list);
 
   vector<string> filenames;
   std::ifstream is("devmods/rulegen-tests/" + list + ".lst");
