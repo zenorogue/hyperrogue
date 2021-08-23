@@ -103,6 +103,9 @@ reaction_t clear_debug = [] {};
 
 map<tcell*,int> sprawl_shown;
 
+vector<twalker> old_sprawl, cur_sprawl;
+int old_sprawl_id;
+
 int total_analyzers();
 
 void cleanup_protomap() {
@@ -167,7 +170,32 @@ void move_to(cellwalker cw) {
 
 void move_to(twalker dw) {
   auto m = dynamic_cast<hrmap_testproto*> (currentmap);
+  ufind(dw);
   move_to(cellwalker(m->clone(dw.at)->c7, dw.spin, dw.mirrored));
+  }
+
+void sprawl(tcell *c) {
+  auto [d, id] = get_code(c);
+  twalker cw(c, d);
+  cur_sprawl = spread(get_analyzer(cw), cw);
+  println(hlog, "sprawl result = ", cur_sprawl);
+  println(hlog, "code = ", treestates[id].code);
+  sprawl_shown.clear();
+  for(int i=0; i<isize(cur_sprawl); i++) sprawl_shown[cur_sprawl[i].at] = i;
+  if(isize(cur_sprawl) == isize(old_sprawl) && old_sprawl_id < isize(treestates)) {
+    auto& oldcode = treestates[old_sprawl_id].code.second;
+    auto& newcode = treestates[id].code.second;
+    int q = isize(cur_sprawl);
+    debuglist = {};
+    for(int i=0; i<q; i++)
+      if(oldcode[i] != newcode[i]) {
+        println(hlog, "index: ", i, " old: ", oldcode[i], " new: ", newcode[i], " at ", old_sprawl[i], " vs ", cur_sprawl[i]);
+        debuglist.push_back(old_sprawl[i]);
+        debuglist.push_back(cur_sprawl[i]);
+        }
+    }
+  old_sprawl = cur_sprawl;
+  old_sprawl_id = id;
   }
 
 void debug_menu() {
@@ -178,13 +206,7 @@ void debug_menu() {
   
   dialog::addItem("sprawl", 's');
   dialog::add_action([m] {
-    tcell *c = m->counterpart[centerover->master];
-    auto [d, id] = get_code(c);
-    twalker cw(c, d);
-    auto res = spread(get_analyzer(cw), cw);
-    println(hlog, "sprawl result = ", res);
-    sprawl_shown.clear();
-    for(int i=0; i<isize(res); i++) sprawl_shown[res[i].at] = i;
+    sprawl(m->counterpart[centerover->master]);
     });
 
   dialog::addItem("parent_dir", 'p');
@@ -234,6 +256,19 @@ void debug_menu() {
     dialog::display();
     });
   
+  dialog::addItem("furthest", 'f');
+  dialog::add_action([m] { 
+    auto *c = first_tcell;
+    tcell *furthest = c;
+    while(c) {
+      if(c->unified_to.at == c)
+        if(c->dist < MYSTERY && c->dist > furthest->dist) furthest = c;
+      c = c->next;
+      }
+    println(hlog, "furthest in distance = ", furthest->dist);
+    move_to(furthest);
+    });
+  
   dialog::addItem("print rules", 'P');
   dialog::add_action(print_rules);
 
@@ -245,6 +280,9 @@ void debug_menu() {
 
   dialog::addItem("irradiate", 'i');
   dialog::add_action(irradiate);
+
+  dialog::addItem("irradiate x10", 'I');
+  dialog::add_action([] { for(int i=0; i<10; i++) irradiate(); });
 
   dialog::addItem("name", 'n');
   dialog::add_action([m] { println(hlog, "name = ", index_pointer(m->counterpart[cwt.at->master])); });
@@ -921,6 +959,10 @@ int testargs() {
     shift(); move_to(treestates[argi()].giver);
     }
 
+  else if(argis("-origin-id")) {
+    shift(); origin_id = argi();
+    }
+    
   else if(argis("-dseek")) {
     shift();
     int i = argi();
