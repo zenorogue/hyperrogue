@@ -1536,6 +1536,15 @@ EX void rules_iteration() {
 
   branch_conflicts_seen.clear();
 
+  // handle dead roots -- some of their branches MUST live
+  for(int id=0; id<isize(treestates); id++) if(treestates[id].is_root && !treestates[id].is_live) {
+    auto r = treestates[id].rules;
+    for(int i=0; i<isize(r); i++) if(r[i] >= 0) {
+      examine_branch(id, i, i);
+      break;
+      }
+    }
+
   for(int id=0; id<isize(treestates); id++) if(treestates[id].is_live) {
     auto r = treestates[id].rules; /* no & because treestates might have moved */
     if(r.empty()) continue;
