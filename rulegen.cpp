@@ -1318,20 +1318,26 @@ void push_deadstack(vector<tsinfo>& hash, twalker w, tsinfo tsi, int dir) {
 
 struct verify_advance_failed : hr_exception {};
 
+using conflict_id_type = pair<pair<int, int>, pair<int, int>>;
+
+set<conflict_id_type> branch_conflicts_seen;
+
 void verified_treewalk(twalker& tw, int id, int dir) {
   if(id >= 0) {
     auto co = get_code(tw.cpeek());
     if(co.second != id || co.first != (tw+wstep).spin) {
       handle_distance_errors();
 
-      if(!treestates[co.second].known || (flags & w_examine_all)) {
-        treestates[co.second].known = true;
+      conflict_id_type conflict_id = make_pair(make_pair((tw+wstep).spin,id), co);
+
+      if((flags & w_examine_all) || !branch_conflicts_seen.count(conflict_id)) {
+        branch_conflicts_seen.insert(conflict_id);
         important.push_back(tw.at);
         if(debugflags & DF_GEOM)
-          println(hlog, "expected ", make_pair((tw+wstep).spin,id), " found ", co);
+          println(hlog, "branch conflict ", conflict_id, " found");
         }
       else if(debugflags & DF_GEOM)
-        println(hlog, "expected ", make_pair((tw+wstep).spin,id), " found ", co, " again");
+        println(hlog, "branch conflict ", conflict_id, " found again");
       debuglist = {tw, tw+wstep};
       throw verify_advance_failed();
       }
@@ -1528,6 +1534,8 @@ EX void rules_iteration() {
   single_live_branches = 0;
   double_live_branches = 0;
 
+  branch_conflicts_seen.clear();
+
   for(int id=0; id<isize(treestates); id++) if(treestates[id].is_live) {
     auto r = treestates[id].rules; /* no & because treestates might have moved */
     if(r.empty()) continue;
@@ -1628,6 +1636,7 @@ EX void generate_rules() {
   t_origin.clear();
   cell_to_tcell.clear();
   tcell_to_cell.clear();
+  branch_conflicts_seen.clear();
   sidecache.clear();
   fix_queue = {}; in_fixing = false;
 
