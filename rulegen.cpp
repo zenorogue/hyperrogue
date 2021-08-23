@@ -514,7 +514,6 @@ void fix_distances(tcell *c) {
       tcell *c1 = c->cmove(i);
       ufindc(c);
       c1 = c->cmove(i);
-      if(c1->dist == MYSTERY) continue;
       auto& d1 = c1->dist;
       if(d > d1+1) { d = d1+1; remove_parentdir(c); goto restart; }
       if(d1 > d+1) {
@@ -538,9 +537,11 @@ EX void unify_distances(tcell *c1, tcell *c2, int delta) {
   int d1 = c1->dist;
   int d2 = c2->dist;
   int d = min(d1, d2);
-  if(c1->is_solid && d != d1) { solid_errors++; find_new_shortcuts(c1, d, c2, delta); remove_parentdir(c1); fix_distances(c1); }
+  if(c1->is_solid && d != d1) { solid_errors++; find_new_shortcuts(c1, d, c2, delta); remove_parentdir(c1); }
+  if(d != d1) fix_distances(c1);
   c1->dist = d;
-  if(c2->is_solid && d != d2) { solid_errors++; find_new_shortcuts(c2, d, c1, -delta); remove_parentdir(c2); fix_distances(c2); }
+  if(c2->is_solid && d != d2) { solid_errors++; find_new_shortcuts(c2, d, c1, -delta); remove_parentdir(c2); }
+  if(d != d2) fix_distances(c2);
   c2->dist = d;
   c1->distance_fixed = c2->distance_fixed = c1->distance_fixed || c2->distance_fixed;
   c1->is_solid = c2->is_solid = c1->is_solid || c2->is_solid;
