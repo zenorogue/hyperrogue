@@ -59,7 +59,7 @@ EX int states_premini = 0;
 #if HDR
 /** change some flags -- they usually make it worse */
 static const flagtype w_numerical = Flag(1); /*< build trees numerically */
-static const flagtype w_single_shortcut = Flag(2); /*< generate just one shortcut */
+static const flagtype w_near_solid = Flag(2); /*< solid's pre-parent is also solid */
 static const flagtype w_no_shortcut = Flag(3); /*< generate no shortcuts */
 static const flagtype w_no_restart = Flag(4); /*< do not restart at powers of two */
 static const flagtype w_no_sidecache = Flag(5); /*< do not cache get_side */
@@ -568,6 +568,8 @@ void be_solid(tcell *c) {
     throw rulegen_failure("set solid but no dist");
     }
   c->is_solid = true;
+  if(c->dist > 0 && !(flags & w_near_solid))
+    be_solid(c->move(c->any_nearer));
   }
 
 EX void look_for_shortcuts(tcell *c, shortcut& sh) {
