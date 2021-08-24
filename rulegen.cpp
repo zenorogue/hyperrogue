@@ -568,8 +568,10 @@ void be_solid(tcell *c) {
     throw rulegen_failure("set solid but no dist");
     }
   c->is_solid = true;
-  if(c->dist > 0 && !(flags & w_near_solid))
-    be_solid(c->move(c->any_nearer));
+  if(c->dist > 0 && !(flags & w_near_solid)) {
+    tcell *c1 = c->move(c->any_nearer);
+    if(c1) be_solid(c1);
+    }
   }
 
 EX void look_for_shortcuts(tcell *c, shortcut& sh) {
