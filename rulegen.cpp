@@ -727,6 +727,7 @@ EX int get_parent_dir(tcell *c) {
       }
 
     if(bestd == -1) {
+      debuglist = { c };
       throw rulegen_failure("should not happen");
       }
     }
@@ -1304,6 +1305,7 @@ void push_deadstack(vector<tsinfo>& hash, twalker w, tsinfo tsi, int dir) {
       hash.push_back(tsi);
       }
     else {
+      if(ts.rules.empty()) throw rulegen_retry("empty rule");
       int r = ts.rules[tsi.second];
       if(r > 0 && treestates[r].is_live) return;
       }
