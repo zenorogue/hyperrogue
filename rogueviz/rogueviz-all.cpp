@@ -40,6 +40,8 @@
 
 #include "notknot.cpp"
 
+#include "recursive-house.cpp"
+
 #include "weirdmaze.cpp"
 
 #include "inner-maps.cpp"
