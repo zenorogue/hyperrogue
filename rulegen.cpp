@@ -404,13 +404,18 @@ EX void find_new_shortcuts(tcell *c, int d, tcell *alt, int newdir, int delta) {
   debuglist.push_back(c);
   solid_errors++;
   all_solid_errors++;
+  check_timeout(); /* may freeze no this */
   if(flags & w_no_shortcut) return;
 
   ufindc(c);
   if(debugflags & DF_GEOM)
     println(hlog, "solid ", c, " changes ", c->dist, " to ", d, " alt=", alt);
 
-  if(newdir == c->any_nearer) return;
+  if(newdir == c->any_nearer) {
+    if(debugflags & DF_GEOM)
+      println(hlog, "same direction");
+    return;
+    }
   /* {
     throw rulegen_failure("direction did not change");
     } */
