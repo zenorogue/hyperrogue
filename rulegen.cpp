@@ -152,6 +152,7 @@ EX void ufindc(tcell*& c) {
 
 EX tcell *first_tcell = nullptr;
 
+// sometimes the standard x+wstep returns nullptr because of unification
 twalker addstep(twalker x) {
   x.cpeek();
   ufind(x);
@@ -872,12 +873,12 @@ EX set<tcell*> single_live_branch_close_to_root;
 
 void treewalk(twalker& cw, int delta) {
   int d = get_parent_dir(cw.at);
-  if(cw.spin == d) cw += wstep;
+  if(cw.spin == d) cw = addstep(cw);
   else {
     auto cw1 = addstep(cw);
     get_parent_dir(cw1.at);
     ufind(cw1);
-    if(get_parent_dir(cw1.at) == cw1.spin) cw += wstep;
+    if(get_parent_dir(cw1.at) == cw1.spin) cw = cw1;
     }
   cw+=delta;
   }
