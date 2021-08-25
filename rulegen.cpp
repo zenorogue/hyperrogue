@@ -1632,9 +1632,16 @@ void clear_all() {
 
 EX int origin_id;
 
+EX unsigned start_time;
+
+EX void check_timeout() {
+  if(SDL_GetTicks() > start_time + 1000 * rulegen_timeout)
+    throw rulegen_surrender("timeout");
+  }
+
 EX void generate_rules() {
 
-  auto t = SDL_GetTicks();
+  start_time = SDL_GetTicks();
   delete_tmap();
 
   if(!arb::in()) try {
@@ -1687,8 +1694,7 @@ EX void generate_rules() {
   important = t_origin;
   
   while(true) {
-    if(SDL_GetTicks() > t + 1000 * rulegen_timeout)
-      throw rulegen_surrender("timeout");
+    check_timeout();
     try {
       rules_iteration();
       break;
