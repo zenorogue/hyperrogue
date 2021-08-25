@@ -451,7 +451,7 @@ EX void find_new_shortcuts(tcell *c, int d, tcell *alt, int newdir, int delta) {
   walkers2.push_back(twalker(alt, delta));
   for(int j=0; j<isize(walkers2); j++) {
     auto w = walkers2[j];
-    if(w.at->dist == 0) return;
+    if(w.at->dist == 0) break;
     for(int s=0; s<w.at->type; s++) {
       twalker w1 = w + s;
       ufind(w1);
@@ -575,7 +575,7 @@ void be_solid(tcell *c) {
     throw rulegen_failure("set solid but no dist");
     }
   c->is_solid = true;
-  if(c->dist > 0 && !(flags & w_near_solid)) {
+  if(c->dist > 0 && !(flags & w_near_solid) && c->any_nearer >= 0 && c->any_nearer < c->type) {
     tcell *c1 = c->move(c->any_nearer);
     if(c1) be_solid(c1);
     }
