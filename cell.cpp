@@ -380,7 +380,7 @@ EX void clearcell(cell *c) {
     if(c->move(t)->move(c->c.spin(t)) != NULL &&
       c->move(t)->move(c->c.spin(t)) != c) {
         DEBB(DF_MEMORY | DF_ERROR, (format("cell error: type = %d %d -> %d\n", c->type, t, c->c.spin(t))));
-        exit(1);
+        if(worst_precision_error < 1e-3) exit(1);
         }
     c->move(t)->move(c->c.spin(t)) = NULL;
     }
