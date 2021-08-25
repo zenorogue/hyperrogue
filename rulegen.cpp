@@ -485,6 +485,7 @@ queue<tcell*> bfs_queue;
 
 EX void fix_distances(tcell *c) {
   if(flags & w_bfs) while(true) {
+    if(in_fixing) return;
     ufindc(c);
     if(c->dist != MYSTERY) return;
     if(tcellcount >= max_tcellcount) throw rulegen_surrender("max_tcellcount exceeded");
