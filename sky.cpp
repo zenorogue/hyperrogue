@@ -5,6 +5,8 @@ namespace hr {
 EX bool context_fog = true;
 
 EX ld camera_level;
+EX bool draw_sky = true;
+
 #if MAXMDIM >= 4 && CAP_GL
 
 EX int get_skybrightness(int mul IS(1)) {
@@ -51,8 +53,6 @@ EX void prepare_sky() {
 vector<glhr::colored_vertex> skyvertices;
 cell *sky_centerover;
 shiftmatrix sky_cview;
-
-EX bool draw_sky = true;
 
 void compute_skyvertices(const vector<sky_item>& sky) {
   skyvertices.clear();
