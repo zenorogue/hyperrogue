@@ -68,9 +68,13 @@ void set_linux() {
     opts = "-DFHS -DLINUX -I/usr/include/SDL2";
     libs = " -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSDL2_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
     }
-  else {
+  else if(sdlver == 1) {
     opts = "-DFHS -DLINUX -I/usr/include/SDL";
     libs = " -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
+    }
+  else {
+    opts = "-DFHS -DLINUX";
+    libs = " -rdynamic -lpthread -lz";
     }
   }
 
@@ -201,6 +205,13 @@ int main(int argc, char **argv) {
       setdir += "../";
       opts += " -DCAP_SDL2=0";
       }
+    else if(s == "-sdl0") {
+      sdlver = 0;
+      set_os(os);
+      obj_dir += "/sdl0";
+      setdir += "../";
+      opts += " -DCAP_SDL=0 -DCAP_GL=0 -DCAP_PNG=0";
+      }
     else if(s == "-sdl2") {
       sdlver = 2;
       set_os(os);
@@ -302,7 +313,7 @@ int main(int argc, char **argv) {
       }
     }
   
-  modules.push_back("savepng");
+  if(sdlver) modules.push_back("savepng");
 
   if(get_file_time(obj_dir + "/hyper.o") < get_file_time("hyper.cpp")) {
     if(!quiet) printf("compiling hyper...\n");
