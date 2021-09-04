@@ -62,7 +62,7 @@ string os = "linux";
 
 void set_linux() {
   preprocessor = "g++ -E";
-  compiler = "g++ -Wall -Wextra -Wno-maybe-uninitialized -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-invalid-offsetof -rdynamic -fdiagnostics-color=always -c";
+  compiler = "g++ -Wall -Wextra -Wno-maybe-uninitialized -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-invalid-offsetof -rdynamic -fdiagnostics-color=always -c -march=native";
   linker = "g++ -rdynamic -o hyper";
   if(sdlver == 2) {
     opts = "-DFHS -DLINUX -I/usr/include/SDL2";
