@@ -494,6 +494,7 @@ void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const str
   else
     poly_outline = (bordcolor << 8) | 0xFF;
   
+  #if CAP_TEXTURE
   if(cp.img) {
     for(hyperpoint h: cp.img->vertices)
       curvepoint(h);
@@ -502,6 +503,7 @@ void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const str
     qc.flags |= POLY_TRIANGLES;
     return;
     }
+  #endif
     
   shiftmatrix V1;
   
