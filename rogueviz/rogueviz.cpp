@@ -567,7 +567,7 @@ transmatrix& memo_relative_matrix(cell *c1, cell *c2) {
 void queue_prec(const shiftmatrix& V, edgeinfo*& ei, color_t col) {
   if(!fat_edges)
     queuetable(V, ei->prec, isize(ei->prec), col, 0, PPR::STRUCT0);
-  #if MAXMDIM >= 4
+  #if MAXMDIM >= 4 && CAP_TEXTURE
   else {
     auto& t = queuetable(V, ei->prec, isize(ei->prec), 0, col | 0x000000FF, PPR::STRUCT0);
     t.flags |= (1<<22), // poly triangles
