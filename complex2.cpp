@@ -1390,6 +1390,7 @@ EX namespace dice {
       
       #if !CAP_EXTFONT
       if(!vid.usingGL) continue;
+      #if CAP_GL
       pointfunction pf = [&] (ld x, ld y) {
         dynamicval<eGeometry> g(geometry, highdim);
         return sphere_to_space(normalize(ctr + cx * x + cy * y));
@@ -1418,6 +1419,7 @@ EX namespace dice {
         else s = its(fid);
         write_in_space(V1, max_glfont_size, dw->faces < 10 ? -1.2 : -.75, s, 0xFFFFFFFF, 0, 8, PPR::WALL, pf);
         }
+      #endif
       #endif
       }
     }

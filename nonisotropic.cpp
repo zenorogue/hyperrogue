@@ -132,6 +132,7 @@ EX namespace sn {
     }
   
   GLuint tabled_inverses::get_texture_id() {
+    #if CAP_GL
     if(!toload) return texture_id;
   
     load();
@@ -164,7 +165,8 @@ EX namespace sn {
     // glTexStorage3D(GL_TEXTURE_3D, 1, 34836 /*GL_RGBA32F*/, PRECX, PRECX, PRECZ);
     // glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, PRECX, PRECY, PRECZ, GL_RGBA, GL_FLOAT, xbuffer);
     #endif
-    delete[] xbuffer;    
+    delete[] xbuffer;
+    #endif
     return texture_id;
     }
   
