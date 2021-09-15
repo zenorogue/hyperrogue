@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use RogueViz in your research, please cite it as below. Please also cite the 2017 paper about HyperRogue (see https://archive.bridgesmathart.org/2017/bridges2017-9.html)."
+message: "If you use RogueViz in your research, please cite it as below. Please also cite the 2017 paper about HyperRogue (see https://archive.bridgesmathart.org/2017/bridges2017-9.html for BibTeX)."
 authors:
 - family-names: "Kopczyński"
   given-names: "Eryk"
@@ -23,12 +23,11 @@ references:
       given-names: Marek
   title: "HyperRogue: Playing with Hyperbolic Geometry"
   pages: "9--16"
-  collection-title: "Proceedings of Bridges 2017: Mathematics, Art, Music, Architecture, Education, Culture"  
+  collection-title: "Proceedings of Bridges 2017: Mathematics, Art, Music, Architecture, Education, Culture"
   year: 2017
   editor: "Swart, David and S\'equin, Carlo H. and Fenyvesi, Krist\'of"
   isbn: "978-1-938664-22-9"
   issn: "1099-6702"
   publisher: "Tessellations Publishing, Phoenix, Arizona"
-  note: "Available online at \url{http://archive.bridgesmathart.org/2017/bridges2017-9.pdf"
+  note: "Available online at \url{http://archive.bridgesmathart.org/2017/bridges2017-9.pdf}" 
   type: article
-  url: "https://archive.bridgesmathart.org/2017/bridges2017-9.html"
