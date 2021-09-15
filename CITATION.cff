@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use RogueViz in your research, please cite it as below. You can also cite the 2017 paper about HyperRogue."
+message: "If you use RogueViz in your research, please cite it as below. Please also cite the 2017 paper about HyperRogue (see https://archive.bridgesmathart.org/2017/bridges2017-9.html)."
 authors:
 - family-names: "Kopczyński"
   given-names: "Eryk"
@@ -13,8 +13,8 @@ version: 12.0f
 date-released: 2021-08-05
 url: "https://github.com/zenorogue/hyperrogue/"
 
-preferred-citation:
-  authors:
+references:
+- authors:
     - family-names: Kopczyński
       given-names: Eryk
     - family-names: Celińska
