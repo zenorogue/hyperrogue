@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use RogueViz in your research, please cite it as below. You can also cite the 2017 paper about HyperRogue."
+authors:
+- family-names: "Kopczyński"
+  given-names: "Eryk"
+  orcid: "https://orcid.org/0000-0001-5588-1181"
+- family-names: "Celińska-Kopczyńska"
+  given-names: "Dorota"
+  orcid: "https://orcid.org/0000-0001-5910-0039"
+title: "RogueViz: non-Euclidean geometry engine for visualizations, games, math art, and research"
+type: software
+version: 12.0f
+date-released: 2021-08-05
+url: "https://github.com/zenorogue/hyperrogue/"
+
+preferred-citation:
+  authors:
+    - family-names: Kopczyński
+      given-names: Eryk
+    - family-names: Celińska
+      given-names: Dorota
+    - family-names: Čtrnáct
+      given-names: Marek
+  title: "HyperRogue: Playing with Hyperbolic Geometry"
+  type: article
+  url: "https://archive.bridgesmathart.org/2017/bridges2017-9.html"
