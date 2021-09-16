@@ -123,6 +123,7 @@
 #include "inforder.cpp"
 #include "dpgen.cpp"
 #include "vr.cpp"
+#include "intra.cpp"
 
 #if CAP_ROGUEVIZ
 #include "rogueviz/rogueviz-all.cpp"

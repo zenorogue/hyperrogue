@@ -4014,6 +4014,11 @@ EX subcellshape& generate_subcellshape_if_needed(cell *c, int id) {
     ss.walltester.push_back(w);
     }
 
+  if(hybri || WDIM == 2) {
+    ss.walltester.push_back(C0);
+    ss.walltester.push_back(C0);
+    }
+
   for(int i=0; i<c1->type; i++)
     ss.faces.push_back({hybrid::get_corner(c1, i, 0, -1), hybrid::get_corner(c1, i, 0, +1), hybrid::get_corner(c1, i, 1, +1), hybrid::get_corner(c1, i, 1, -1)});
 

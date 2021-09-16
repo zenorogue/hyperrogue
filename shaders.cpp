@@ -751,6 +751,7 @@ EX void add_fixed_functions(string& shader) {
 
   add_if(shader, "tanh", "mediump float tanh(mediump float x) { return sinh(x) / cosh(x); }\n");
   add_if(shader, "sinh", "mediump float sinh(mediump float x) { return (exp(x) - exp(-x)) / 2.0; }\n");
+  add_if(shader, "asin_clamp", "mediump float asin_clamp(mediump float x) { return x > 1. ? PI/2. : x < -1. ? -PI/2. : asin(x); }\n");
   add_if(shader, "cosh", "mediump float cosh(mediump float x) { return (exp(x) + exp(-x)) / 2.0; }\n");
   add_if(shader, "asinh", "mediump float asinh(mediump float x) { return log(sqrt(x*x + 1.0) + x); }\n");
   add_if(shader, "acosh", "mediump float acosh(mediump float x) { return log(sqrt(x*x - 1.0) + x); }\n");

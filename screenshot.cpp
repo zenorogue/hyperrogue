@@ -801,21 +801,23 @@ EX void take(string fname, const function<void()>& what IS(default_screenshot_co
       #if CAP_WRL
       wrl::take(fname);
       #endif
-      return;
+      break;
     
     case screenshot_format::svg:
       #if CAP_SVG
       svg::render(fname, what);
       #endif
-      return;
+      break;
     
     case screenshot_format::png:
     case screenshot_format::rawfile:
       #if CAP_PNG
       render_png(fname, what);
       #endif
-      return;
+      break;
     }
+
+  v.backup.plevel_factor = vid.plevel_factor;
   }
 
 #if CAP_COMMANDLINE

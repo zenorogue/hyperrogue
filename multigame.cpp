@@ -61,6 +61,8 @@ void gamedata_all(gamedata& gd) {
   gd.store(land_structure);
   gd.store(*current_display);
   gd.store(cgip);
+  gd.store(hybrid::underlying);
+  gd.store(hybrid::underlying_cgip);
   gd.store_ptr(vid);
   gd.store(sightrange_bonus);
   gd.store(genrange_bonus);

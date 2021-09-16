@@ -1450,7 +1450,7 @@ EX int valence() {
 /** portalspaces are not defined outside of a boundary */
 EX bool is_boundary(cell *c) {
   if(c == &out_of_bounds) return true;
-  return (cgflags & qPORTALSPACE) && isWall(c->wall);
+  return ((cgflags & qPORTALSPACE) || intra::in) && isWall(c->wall);
   }
 
 /** compute the distlimit for a tessellation automatically */

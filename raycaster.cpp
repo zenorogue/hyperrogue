@@ -57,11 +57,13 @@ EX int max_cells = 2048;
 EX bool rays_generate = true;
 
 EX ld& exp_decay_current() {
+  if(intra::in) return exp_decay_exp;
   if(fake::in()) return *FPIU(&exp_decay_current());
   return (sn::in() || hyperbolic || sl2) ? exp_decay_exp : exp_decay_poly;
   }
 
 EX int& max_iter_current() {
+  if(intra::in) return max_iter_iso;
   if(nonisotropic || stretch::in()) return max_iter_sol;
   else if(is_eyes()) return max_iter_eyes;
   else return max_iter_iso;
@@ -93,6 +95,7 @@ ld& maxstep_current() {
 eGeometry last_geometry;
 
 vector<pair<int, cell*>> used_sample_list() {
+  if(intra::in) return intra::full_sample_list;
   return hybrid::gen_sample_list();
   }
 
@@ -322,7 +325,8 @@ struct raygen {
   void compute_which_and_dist();
   void apply_reflect();
   void move_forward();
-  void emit_iterate();
+  void emit_intra_portal(int gid1, int gid2);
+  void emit_iterate(int gid1);
   void create();
   };
 
@@ -336,7 +340,7 @@ void raygen::compute_which_and_dist() {
     fmain +=
       "  if(which == -1) {\n";
 
-    fmain += "for(int i="+its(flat1)+"; i<"+(prod ? "sides-2" : (WDIM == 2 || is_subcube_based(variation)) ? "sides" : its(flat2))+"; i++) {\n";
+    fmain += "for(int i="+its(flat1)+"; i<"+(prod ? "sides-2" : (WDIM == 2 || is_subcube_based(variation) || intra::in) ? "sides" : its(flat2))+"; i++) {\n";
 
     // fmain += "int woi = walloffset+i;\n";
 
@@ -961,14 +965,131 @@ void raygen::apply_reflect() {
     }
   }
 
-void raygen::emit_iterate() {
+void raygen::emit_intra_portal(int gid1, int gid2) {
+
+  int they_curvature = false;
+  if(1) {
+    intra::resetter ir;
+    intra::switch_to(gid2);
+    they_curvature = hyperbolic ? -1 : sphere ? 1 : 0;
+    /* product also has 0 */
+    }
+
+  if(prod && they_curvature) {
+    string fn = in_h2xe() ? "to_poco_h2xr_h" : "to_poco_s2xr_s";
+    fmain +=
+      "    mediump vec4 nposition = position + tangent * xspeed * 1e-3;\n"
+      "    position = "+fn+"(position);\n"
+      "    position.z = 0.;\n" // zpos - uPLevel;\n"
+      "    nposition = "+fn+"(nposition);\n"
+      "    nposition.z = zspeed * 1e-3;\n";
+    }
+  else if(prod) {
+    string fn = in_h2xe() ? "to_poco_h2xr_e" : "to_poco_s2xr_e";
+    fmain +=
+      "    mediump vec4 nposition = position + tangent * xspeed * 1e-3;\n"
+      "    mediump mat4 tkt = " + getM("mid+1") + ";\n"
+      "    position = "+fn+"(tkt * position);\n"
+      "    position.y = zpos;\n"
+      "    nposition = "+fn+"(tkt * nposition);\n"
+      "    nposition.y = zpos + zspeed * 1e-3;\n";
+    }
+  else {
+    fmain +=
+      "    mediump vec4 nposition = position + tangent * 1e-3;\n"
+      "    mediump mat4 tkt = " + getM("mid+1") + ";\n";
+    if(hyperbolic) fmain +=
+      "    position = to_poco_h3(tkt * position);\n"
+      "    nposition = to_poco_h3(tkt * nposition);\n";
+    else if(sphere) fmain +=
+      "    position = to_poco_s3(tkt * position);\n"
+      "    nposition = to_poco_s3(tkt * nposition);\n";
+    else fmain +=
+      "    position = tkt * position;\n"
+      "    nposition = tkt * nposition;\n";
+    }
+
+  fmain +=
+    "    mediump mat4 m = " + getM("mid") + ";\n"
+    "    position = m * position;\n"
+    "    nposition = m * nposition;\n";
+
+  int we_curvature = hyperbolic ? -1 : sphere ? 1 : 0;
+
+  intra::resetter ir;
+  intra::switch_to(gid2);
+
+  if(prod && we_curvature) {
+    string sgn = in_h2xe() ? "-" : "+";
+    string fn = in_h2xe() ? "from_poco_h2xr_h" : "from_poco_s2xr_s";
+    ld their_plevel = cgi.plevel / 2;
+    fmain +=
+    "    zspeed = (nposition.z - position.z) * 1e3;\n"
+    "    zpos = position.z + " + glhr::to_glsl(their_plevel) + ";\n"
+    "    position = "+fn+"(position);\n"
+    "    nposition = "+fn+"(nposition);\n"
+    "    tangent = (nposition - position) * 1e3;\n"
+    "    mediump float pnorm = tangent.z * position.z "+sgn+" tangent.x * position.x "+sgn+" tangent.y * position.y;\n"
+    "    tangent -= position * pnorm;\n"
+    "    xspeed = sqrt(tangent.x * tangent.x + tangent.y * tangent.y "+sgn+" tangent.z * tangent.z);\n"
+    "    tangent /= xspeed;\n";
+    }
+  else if(prod) {
+    string sgn = in_h2xe() ? "-" : "+";
+    string fn = in_h2xe() ? "from_poco_h2xr_e" : "from_poco_s2xr_e";
+    fmain +=
+    "    mediump mat4 itkt = " + getM("mid+2") + ";\n";
+    fmain +=
+    "    zpos = position.y;\n"
+    "    zspeed = (nposition.y - zpos) * 1e3;\n"
+    "    position = itkt * "+fn+"(position);\n"
+    "    nposition = itkt * "+fn+"(nposition);\n"
+    "    tangent = (nposition - position) * 1e3;\n"
+    "    mediump float pnorm = tangent.z * position.z "+sgn+" dot(position.xy, tangent.xy);\n"
+    "    tangent -= position * pnorm;\n"
+    "    xspeed = sqrt(dot(tangent.xy, tangent.xy) "+sgn+" tangent.z * tangent.z);\n"
+    "    tangent /= xspeed;\n"
+    "    mediump float l = xspeed*xspeed+zspeed*zspeed;\n"
+    "    xspeed /= sqrt(l); zspeed /= sqrt(l);\n";
+    }
+  else {
+    string sgn = hyperbolic ? "-" : "+";
+    string he = hyperbolic ? "from_poco_h3" : "from_poco_s3";
+    fmain +=
+    "    mediump mat4 itkt = " + getM("mid+2") + ";\n";
+
+    if(hyperbolic || sphere) fmain +=
+    "    position = itkt * "+he+"(position);\n"
+    "    nposition = itkt * "+he+"(nposition);\n"
+    "    tangent = (nposition - position) * 1e3;\n"
+    "    mediump float pnorm = position.w * position.w "+sgn+" dot(position.xyz, position.xyz);\n"
+    "    position /= sqrt(pnorm);\n"
+    "    pnorm = tangent.w * position.w "+sgn+" dot(position.xyz, tangent.xyz);\n"
+    "    tangent -= position * pnorm;\n"
+    "    mediump float xspeed = sqrt(dot(tangent.xyz, tangent.xyz) "+sgn+" tangent.w * tangent.w);\n"
+    "    tangent /= xspeed;\n";
+
+    else fmain +=
+    "    position = itkt * position;\n"
+    "    nposition = itkt * nposition;\n"
+    "    tangent = (nposition - position) * 1e3;\n"
+    "    tangent /= dot(tangent.xyz, tangent.xyz);\n";
+    }
+  }
+
+void raygen::emit_iterate(int gid1) {
   using glhr::to_glsl;
+
+  if(intra::in && prod)
+    fmain += "  const mediump float uPLevel = " + to_glsl(cgi.plevel/2) + ";\n";
 
   fmain +=
     "  mediump float dist = 100.;\n";
 
   fmain +=
     "  int which = -1;\n";
+
+  if(hyperbolic && intra::in) fmain += "iter +=8;\n";
 
   if(in_e2xe() && !eyes) fmain += "tangent.w = position.w = 0.;\n";
 
@@ -1183,7 +1304,111 @@ void raygen::emit_iterate() {
     "  m[0][1] = -m[0][1]; m[1][0] = -m[1][0];\n" // inverse
     "  toOrig = toOrig * m;\n";
 
-  fmain += no_intra_portal;
+  if(!intra::in) fmain += no_intra_portal;
+  else {
+
+    if(hyperbolic) {
+      fsh +=
+        "mediump vec4 to_poco_h3(mediump vec4 pos) {\n"
+        "  return pos / pos[3];\n"
+        "  }\n\n";
+
+      fsh +=
+        "mediump vec4 from_poco_h3(mediump vec4 pos) {\n"
+        "  float s = 1. - dot(pos.xyz, pos.xyz);\n"
+        "  return pos / sqrt(s);\n"
+        "  }\n\n";
+      }
+
+    if(sphere) {
+      fsh +=
+        "mediump vec4 to_poco_s3(mediump vec4 pos) {\n"
+        "  return pos / pos[3];\n"
+        "  }\n\n";
+
+      fsh +=
+        "mediump vec4 from_poco_s3(mediump vec4 pos) {\n"
+        "  float s = 1. + dot(pos.xyz, pos.xyz);\n"
+        "  return pos / sqrt(s);\n"
+        "  }\n\n";
+      }
+
+    if(prod) {
+      if(in_h2xe()) {
+        fsh +=
+          "mediump vec4 from_poco_h2xr_h(mediump vec4 pos) {\n"
+          "  float s = 1. - pos.x*pos.x - pos.y * pos.y;\n"
+          "  pos.z = 1.;\n"
+          "  return pos / sqrt(s);\n"
+          "  }\n\n";
+
+        fsh +=
+          "mediump vec4 to_poco_h2xr_h(mediump vec4 pos) {\n"
+          "  pos /= pos[2];\n"
+          "  pos.w = 1.;\n"
+          "  return pos;\n"
+          "  }\n\n";
+
+        fsh +=
+          "mediump vec4 from_poco_h2xr_e(mediump vec4 pos) {\n"
+            "  return vec4(sinh(pos[2]) * cosh(pos[0]), sinh(pos[0]), cosh(pos[0]) * cosh(pos[2]), 0);\n"
+          "  }\n\n";
+
+        fsh +=
+          "mediump vec4 to_poco_h2xr_e(mediump vec4 pos) {\n"
+          "  mediump float x = asinh(pos[1]);\n"
+          "  return vec4(x, 0, asinh(pos[0] / cosh(x)), 1);\n"
+          "  }\n\n";
+        }
+      else {
+        fsh +=
+          "mediump vec4 from_poco_s2xr_s(mediump vec4 pos) {\n"
+          "  float s = 1. + pos.x*pos.x + pos.y * pos.y;\n"
+          "  pos.z = 1.;\n"
+          "  return pos / sqrt(s);\n"
+          "  }\n\n";
+
+        fsh +=
+          "mediump vec4 to_poco_s2xr_s(mediump vec4 pos) {\n"
+          "  pos /= pos[2];\n"
+          "  pos.w = 1.;\n"
+          "  return pos;\n"
+          "  }\n\n";
+
+        fsh +=
+          "mediump vec4 from_poco_s2xr_e(mediump vec4 pos) {\n"
+            "  return vec4(sin(pos[2]) * cos(pos[0]), sin(pos[0]), cos(pos[0]) * cos(pos[2]), 0);\n"
+          "  }\n\n";
+
+        fsh +=
+          "mediump vec4 to_poco_s2xr_e(mediump vec4 pos) {\n"
+          "  mediump float x = asin_clamp(pos[1]);\n"
+          "  return vec4(x, 0, asin_clamp(pos[0] / cos(x)), 1);\n"
+          "  }\n\n";
+        }
+      }
+
+    if(intra::in) {
+      int q = isize(intra::data);
+      for(int gid2=0; gid2<q; gid2++) {
+        if(gid2 == q-1)
+          fmain += "  {\n";
+        else  {
+          fmain += "  if(nwalloffset < " + its(intra::data[gid2+1].wallindex) + ") {\n";
+          }
+        if(gid1 == gid2)
+          fmain += no_intra_portal;
+        else
+          emit_intra_portal(gid1, gid2);
+        if(gid2 == q-1)
+          fmain += "  }\n";
+        else
+          fmain += "  } else\n";
+        }
+      }
+    else
+      fmain += no_intra_portal;
+    }
 
   if(many_cell_types) {
     fmain +=
@@ -1239,7 +1464,15 @@ void raygen::create() {
       "  gl_Position = aPosition; at = uProjection * aPosition; \n"
       "  }\n";
 
-    irays = isize(cgi.raywall);
+    if(intra::in) {
+      irays = 0;
+      intra::resetter ir;
+      for(int i=0; i<isize(intra::data); i++) {
+        intra::switch_to(i);
+        irays += isize(cgi.raywall);
+        }
+      }
+    else irays = isize(cgi.raywall);
     string rays = its(irays);
 
     fsh =
@@ -1481,6 +1714,11 @@ void raygen::create() {
         "  mediump vec4 position = vw * vec4(0., 0., 0., 1.);\n"
         "  mediump vec4 tangent = vw * at0;\n";
       }
+    if(intra::in && !prod) {
+      fmain += "  mediump float zspeed = 1.;\n";
+      fmain += "  mediump float xspeed = 1.;\n";
+      fmain += "  mediump float zpos = 0.;\n";
+      }
     
     if(eyes) {
       fsh += "mediump uniform mat4 uEyeShift;\n";
@@ -1522,7 +1760,25 @@ void raygen::create() {
       "  mediump vec2 cid = uStartid;\n"
       "  for(int iter=0; iter<" + its(max_iter_current()) + "; iter++) {\n";
 
-    emit_iterate();
+    if(intra::in) {
+      int gi = isize(intra::data);
+      for(int i=0; i<gi; i++) {
+        if(i == gi-1)
+          fmain += "  {\n";
+        else  {
+          fmain += "  if(walloffset < " + its(intra::data[i+1].wallindex) + ") {\n";
+          }
+        intra::resetter ir;
+        intra::switch_to(i);
+        emit_iterate(i);
+        if(i == gi-1)
+          fmain += "  }\n";
+        else
+          fmain += "  } else\n";
+        }
+      }
+    else
+      emit_iterate(-1);
 
     fmain +=
       "  }\n"
@@ -1644,9 +1900,12 @@ struct raycast_map {
     ms.clear();
     ms.resize(sa.back().first, Id);
     
+    intra::resetter ir;
+
     for(auto& p: sa) {
       int id = p.first;
       cell *c = p.second;
+      intra::may_switch_to(c);
       if(!c) continue;
       for(int j=0; j<c->type; j++)
         ms[id+j] = protect_prod(currentmap->ray_iadj(c, j));
@@ -1667,6 +1926,7 @@ struct raycast_map {
         int id = p.first;
         cell *c = p.second;
         if(!c) continue;
+        intra::may_switch_to(c);
         for(int j=0; j<c->type; j++)
           ms[mirror_shift+id+j] = protect_prod(mirrorize(ms[id+j]));
         if(WDIM == 2) for(int a: {0, 1}) {
@@ -1680,12 +1940,14 @@ struct raycast_map {
         }
       }    
 
-    if(prod) {
-      for(auto p: sa) {
-        int id =p.first;
-        if(id == 0) continue;
-        ms[id-2] = Id;
-        ms[id-1] = Id;
+    for(auto p: sa) {
+      cell *c = p.second;
+      if(!c) continue;
+      intra::may_switch_to(c);
+      int id =p.first;
+      if(prod) {
+        ms[id+c->type-2] = Id;
+        ms[id+c->type-1] = Id;
         }
       }
     }
@@ -1694,13 +1956,22 @@ struct raycast_map {
     manual_celllister cl;
     cl.add(cs);
     bool optimize = !isWall3(cs);
+    intra::resetter ir;
     // vector<int> legaldir = { -1 };
     for(int i=0; i<isize(cl.lst); i++) {
       cell *c = cl.lst[i];
+      intra::may_switch_to(c);
       if(racing::on && i > 0 && c->wall == waBarrier) continue;
       if(optimize && isWall3(c)) continue;
       forCellIdCM(c2, d, c) {
         // if(reflect_val == 0 && !((1<<d) & legaldir[i])) continue;
+
+        if(intra::in) {
+          cellwalker cw(c, d);
+          auto p = at_or_null(intra::connections, cw);
+          if(p) c2 = p->tcw.at;
+          }
+
         if(rays_generate) setdist(c2, 7, c);
         /* if(!cl.listed(c2))
           legaldir.push_back(legaldir[i] &~ (1<<((d+3)%6)) ); */
@@ -1722,6 +1993,7 @@ struct raycast_map {
     }
 
   void generate_connections(cell *c, int id) {
+    intra::may_switch_to(c);
     auto& vmap = volumetric::vmap;
     if(volumetric::on) {
       celldrawer dd;
@@ -1735,7 +2007,14 @@ struct raycast_map {
         vcolor = (backcolor << 8);
       volumetric[u] = glhr::acolor(vcolor);
       }
-    forCellIdEx(c1, i, c) {
+    forCellIdEx(c1_real, i, c) {
+      cell *c1 = c1_real;
+      const intra::connection_data *p = nullptr;
+      if(intra::in) {
+        cellwalker cw(c, i);
+        p = at_or_null(intra::connections, cw);
+        if(p) c1 = p->tcw.at;
+        }
       int u = (id/per_row*length) + (id%per_row * deg) + i;
       if(!ids.count(c1)) {
         wallcolor[u] = glhr::acolor(color_out_of_range | 0xFF);
@@ -1775,23 +2054,36 @@ struct raycast_map {
           }
         }
       
-      int wo = currentmap->wall_offset(c);
+      int wo = intra::full_wall_offset(c);
       if(wo >= our_raygen.irays) {
         println(hlog, "wo=", wo, " irays = ", our_raygen.irays);
         reset_raycaster();
         return;
         }
-      transmatrix T = currentmap->iadj(c, i) * inverse(ms[wo + i]);
-      if(in_e2xe() && i >= c->type-2)
-        T = Id;
-      T = protect_prod(T);
-      for(int k=0; k<=isize(ms); k++) {
-        if(k < isize(ms) && !eqmatrix(ms[k], T, 1e-5)) continue;
-        if(k == isize(ms)) ms.push_back(T);
+      if(p) {
+        int k = isize(ms);
+        auto bak = geometry;
+        ms.push_back(p->T);
+        geometry = bak;
+        ms.push_back(p->id1.T);
+        ms.push_back(p->id2.iT);
         connections[u][2] = (k+.5) / 1024.;
-        break;
         }
-      auto wo1 = currentmap->wall_offset(c1);
+      else {
+        transmatrix T = currentmap->iadj(c, i) * inverse(ms[wo + i]);
+        if(in_e2xe() && i >= c->type-2)
+          T = Id;
+        T = protect_prod(T);
+        for(int k=0; k<=isize(ms); k++) {
+          if(k < isize(ms) && !eqmatrix(ms[k], T, 1e-5)) continue;
+          if(k == isize(ms)) ms.push_back(T);
+          connections[u][2] = (k+.5) / 1024.;
+          break;
+          }
+        }
+      intra::resetter ir;
+      intra::may_switch_to(c1);
+      int wo1 = intra::full_wall_offset(c1);
       if(wo1 >= max_wall_offset)
         println(hlog, "error: wall_offset ", wo1, " exceeds ", max_wall_offset);
       if(c1->type >= max_celltype)
@@ -1815,6 +2107,7 @@ struct raycast_map {
   
   void generate_connections() {
     int id = 0;
+    intra::resetter ir;
     for(cell* c: lst) if(!reset_rmap)
       generate_connections(c, id++);
     }
@@ -2012,14 +2305,22 @@ EX void cast() {
     }
   
   if(o->uWallOffset != -1) {
-    glUniform1i(o->uWallOffset, currentmap->wall_offset(cs));
+    glUniform1i(o->uWallOffset, intra::full_wall_offset(cs));
     glUniform1i(o->uSides, cs->type + (WDIM == 2 ? 2 : 0));
     }
 
   vector<glvertex> wallx, wally;
   vector<GLint> wallstart;
 
-  load_walls(wallx, wally, wallstart);
+  if(intra::in) {
+    intra::resetter ir;
+    for(int i=0; i<isize(intra::data); i++) {
+      intra::switch_to(i);
+      load_walls(wallx, wally, wallstart);
+      }
+    }
+  else
+    load_walls(wallx, wally, wallstart);
 
   if(wall_via_texture) {
     int wlength = next_p2(isize(wallx));

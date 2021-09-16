@@ -2902,6 +2902,17 @@ EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V) {
 /** shift the view according to the given tangent vector */
 EX void shift_view(hyperpoint H) {
   if(callhandlers(false, hooks_shift_view, H)) return;
+  static bool recursive = false;
+  if(!recursive && intra::in) {
+    H /= 10;
+    recursive = true;
+    for(int i=0; i<10; i++) {
+      shift_view(H);
+      intra::check_portal_movement();
+      }
+    recursive = false;
+    return;
+    }
   auto oView = View;
   View = get_shift_view_of(H, View);
   auto& wc = current_display->which_copy;
