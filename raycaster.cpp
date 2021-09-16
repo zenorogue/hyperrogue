@@ -1607,6 +1607,12 @@ transmatrix mirrorize(transmatrix T) {
   return rspintox(h) * xpush(d/2) * MirrorX * xpush(-d/2) * spintox(h);
   }
 
+transmatrix protect_prod(transmatrix T) {
+  if(MDIM == 3)
+    for(int i=0; i<4; i++) T[i][3] = T[3][i] = i == 3;
+  return T;
+  }
+
 struct raycast_map {
 
   int saved_frameid;
@@ -1643,7 +1649,7 @@ struct raycast_map {
       cell *c = p.second;
       if(!c) continue;
       for(int j=0; j<c->type; j++)
-        ms[id+j] = currentmap->ray_iadj(c, j);
+        ms[id+j] = protect_prod(currentmap->ray_iadj(c, j));
       if(WDIM == 2) for(int a: {0, 1}) {
         ms[id+c->type+a] = get_ms(c, a, false);
         }
@@ -1662,7 +1668,7 @@ struct raycast_map {
         cell *c = p.second;
         if(!c) continue;
         for(int j=0; j<c->type; j++)
-          ms[mirror_shift+id+j] = mirrorize(ms[id+j]);
+          ms[mirror_shift+id+j] = protect_prod(mirrorize(ms[id+j]));
         if(WDIM == 2) for(int a: {0, 1}) {
           ms[mirror_shift+id+c->type+a] = get_ms(c, a, true);
           }
@@ -1770,14 +1776,15 @@ struct raycast_map {
         }
       
       int wo = currentmap->wall_offset(c);
-      if(wo >= irays) {
-        println(hlog, "wo=", wo, " irays = ", irays);
+      if(wo >= our_raygen.irays) {
+        println(hlog, "wo=", wo, " irays = ", our_raygen.irays);
         reset_raycaster();
         return;
         }
       transmatrix T = currentmap->iadj(c, i) * inverse(ms[wo + i]);
       if(in_e2xe() && i >= c->type-2)
         T = Id;
+      T = protect_prod(T);
       for(int k=0; k<=isize(ms); k++) {
         if(k < isize(ms) && !eqmatrix(ms[k], T, 1e-5)) continue;
         if(k == isize(ms)) ms.push_back(T);
@@ -1829,8 +1836,7 @@ struct raycast_map {
       for(int i=0; i<isize(ms); i++)
         for(int a=0; a<4; a++)
         for(int b=0; b<4; b++) {
-          if(MDIM == 3 && (a==3 || b==3)) m_map[i+a*mlength][b] = .5;
-          else m_map[i+a*mlength][b] = ms[i][a][b]/ray_scale + .5;
+          m_map[i+a*mlength][b] = ms[i][a][b]/ray_scale + .5;
           }
 
       bind_array(m_map, o->tM, txM, 7, mlength);
