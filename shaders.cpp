@@ -171,7 +171,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   else if(!vid.consider_shader_projection) {
     shader_flags |= SF_PIXELS;
     }        
-  else if(among(pmodel, mdDisk, mdBall) && GDIM == 2 && vrhr::rendering() && !sphere) {
+  else if(among(pmodel, mdDisk, mdBall) && GDIM == 2 && vrhr::rendering() && !sphere && !(hyperbolic && pconf.alpha < 0 && pconf.alpha > -1)) {
     shader_flags |= SF_DIRECT | SF_BOX;
     vsh += "uniform mediump float uAlpha, uDepth, uDepthScaling, uCamera;";
     
