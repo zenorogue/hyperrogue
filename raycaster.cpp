@@ -958,7 +958,8 @@ void raygen::apply_reflect() {
     "    tangent = " + getM("uMirrorShift+walloffset+which") + " * tangent;\n"
     "    continue;\n"
     "    }\n";
-    fsh += "uniform int uMirrorShift;\n";
+    if(fsh.find("uMirrorShift") == string::npos)
+      fsh += "uniform int uMirrorShift;\n";
     }
   }
 
