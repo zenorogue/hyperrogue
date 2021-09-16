@@ -18,7 +18,7 @@ struct intra_data {
 EX vector<intra_data> data;
 
 /** index of the space we are currently in */
-EX int intra_current;
+EX int current;
 
 /** map cells to their intra spaces */
 EX map<cell*, int> intra_id;
@@ -153,11 +153,11 @@ EX connection_data* find_connection(int a, int b) {
   }
 
 EX void switch_to(int id) {
-  if(intra_current == id) return;
-  data[intra_current].gd.storegame();
-  intra_current = id;
-  ginf[gProduct] = data[intra_current].gi;
-  data[intra_current].gd.restoregame();
+  if(current == id) return;
+  data[current].gd.storegame();
+  current = id;
+  ginf[gProduct] = data[current].gi;
+  data[current].gd.restoregame();
   }
 
 void connect_portal_1(cellwalker cw1, cellwalker cw2) {
@@ -199,8 +199,9 @@ EX void connect_portal(cellwalker cw1, cellwalker cw2) {
 /** make currentmap into one of the spaces in intra */
 EX void become() {
   auto& ac = currentmap->allcells();
+  current = isize(data);
   for(cell *c: ac)
-    intra_id[c] = intra_current;
+    intra_id[c] = current;
   for(cell *c: ac)
     currentmap->wall_offset(c);
   for(cell *c: ac) c->item = itNone;
@@ -223,17 +224,17 @@ EX void become() {
 /** after called become() on some spaces, actually start intra */
 EX void start(int id IS(0)) {
   in = true;
-  intra_current = id;
-  data[intra_current].gd.restoregame();
-  ginf[gProduct] = data[intra_current].gi;
+  current = id;
+  data[current].gd.restoregame();
+  ginf[gProduct] = data[current].gi;
   }
 
 #if HDR
 /** a convenience struct to switch back after a temporary switch_to */
 struct resetter {
   int ic;
-  resetter() { ic = intra::intra_current; }
-  ~resetter() { if(intra::in) switch_to(ic); }
+  resetter() { ic = current; }
+  ~resetter() { if(in) switch_to(ic); }
   };
 #endif
 
