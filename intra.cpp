@@ -71,10 +71,10 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
 
 hyperpoint portal_data::from_poco(hyperpoint h) const {
   if(prod && kind == 1) {
-    ld d = h[2];
+    ld xd = h[2];
     h[2] = 1;
     auto z = product_decompose(h).first;
-    return h * exp(d+d-z);
+    return h * exp(d+xd-z);
     }
   else if(prod && kind == 0) {
     auto h0 = h;
