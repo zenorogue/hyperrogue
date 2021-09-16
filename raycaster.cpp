@@ -342,50 +342,47 @@ void raygen::compute_which_and_dist() {
 
     fmain += "for(int i="+its(flat1)+"; i<"+(prod ? "sides-2" : (WDIM == 2 || is_subcube_based(variation) || intra::in) ? "sides" : its(flat2))+"; i++) {\n";
 
-    // fmain += "int woi = walloffset+i;\n";
+    fmain += "    mediump mat4 m = " + getM("walloffset+i") + ";\n";
 
     if(in_h2xe()) fmain +=
-        "    mediump float v = ((position - " + getM("woi") + " * position)[2] / (" + getM("woi") + " * tangent - tangent)[2]);\n"
+        "    mediump float v = ((position - m * position)[2] / (m * tangent - tangent)[2]);\n"
         "    if(v > 1. || v < -1.) continue;\n"
         "    mediump float d = atanh(v);\n"
         "    mediump vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
-        "    if(next_tangent[2] < (" + getM("woi") + " * next_tangent)[2]) continue;\n"
+        "    if(next_tangent[2] < (m * next_tangent)[2]) continue;\n"
         "    d /= xspeed;\n";
     else if(in_s2xe()) fmain +=
-        "    mediump float v = ((position - " + getM("woi") + " * position)[2] / (" + getM("woi") + " * tangent - tangent)[2]);\n"
+        "    mediump float v = ((position - m * position)[2] / (m * tangent - tangent)[2]);\n"
         "    mediump float d = atan(v);\n"
         "    mediump vec4 next_tangent = tangent * cos(d) - position * sin(d);\n"
-        "    if(next_tangent[2] > (" + getM("woi") + " * next_tangent)[2]) continue;\n"
+        "    if(next_tangent[2] > (m * next_tangent)[2]) continue;\n"
         "    d /= xspeed;\n";
     else if(in_e2xe()) fmain +=
-        "    mediump float deno = dot(position, tangent) - dot(" + getM("woi") + "*position, " + getM("woi") + "*tangent);\n"
+        "    mediump float deno = dot(position, tangent) - dot(m*position, m*tangent);\n"
         "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
-        "    mediump float d = (dot(" + getM("woi") + "*position, " + getM("woi") + "*position) - dot(position, position)) / 2. / deno;\n"
+        "    mediump float d = (dot(m*position, m*position) - dot(position, position)) / 2. / deno;\n"
         "    if(d < 0.) continue;\n"
         "    mediump vec4 next_position = position + d * tangent;\n"
-        "    if(dot(next_position, tangent) < dot(" + getM("woi") + "*next_position, " + getM("woi") + "*tangent)) continue;\n"
+        "    if(dot(next_position, tangent) < dot(m*next_position, m*tangent)) continue;\n"
         "    d /= xspeed;\n";
     else if(hyperbolic) fmain +=
-        "    mediump float v = ((position - " + getM("woi") + " * position)[3] / (" + getM("woi") + " * tangent - tangent)[3]);\n"
+        "    mediump float v = ((position - m * position)[3] / (m * tangent - tangent)[3]);\n"
         "    if(v > 1. || v < -1.) continue;\n"
         "    mediump float d = atanh(v);\n"
         "    mediump vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
-        "    if(next_tangent[3] < (" + getM("woi") + " * next_tangent)[3]) continue;\n";
+        "    if(next_tangent[3] < (m * next_tangent)[3]) continue;\n";
     else if(sphere) fmain +=
-        "    mediump float v = ((position - " + getM("woi") + " * position)[3] / (" + getM("woi") + " * tangent - tangent)[3]);\n"
+        "    mediump float v = ((position - m * position)[3] / (m * tangent - tangent)[3]);\n"
         "    mediump float d = atan(v);\n"
         "    mediump vec4 next_tangent = -position * sin(d) + tangent * cos(d);\n"
-        "    if(next_tangent[3] > (" + getM("woi") + " * next_tangent)[3]) continue;\n";
+        "    if(next_tangent[3] > (m * next_tangent)[3]) continue;\n";
     else fmain +=
-        "    mediump float deno = dot(position, tangent) - dot(" + getM("woi") + "*position, " + getM("woi") + "*tangent);\n"
+        "    mediump float deno = dot(position, tangent) - dot(m*position, m*tangent);\n"
         "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
-        "    mediump float d = (dot(" + getM("woi") + "*position, " + getM("woi") + "*position) - dot(position, position)) / 2. / deno;\n"
+        "    mediump float d = (dot(m*position, m*position) - dot(position, position)) / 2. / deno;\n"
         "    if(d < 0.) continue;\n"
         "    mediump vec4 next_position = position + d * tangent;\n"
-        "    if(dot(next_position, tangent) < dot(" + getM("woi") + "*next_position, " + getM("woi") + "*tangent)) continue;\n";
-
-    replace_str(fmain, "[woi]", "[walloffset+i]");
-    replace_str(fmain, "(woi)", "(walloffset+i)");
+        "    if(dot(next_position, tangent) < dot(m*next_position, m*tangent)) continue;\n";
 
     fmain +=
         "  if(d < dist) { dist = d; which = i; }\n"
