@@ -3057,11 +3057,28 @@ EX int read_config_args() {
   else if(argis("-r")) { 
     PHASEFROM(2);
     shift(); 
-    int clWidth=0, clHeight=0, clFont=0;
-    sscanf(argcs(), "%dx%dx%d", &clWidth, &clHeight, &clFont);
-    if(clWidth) vid.xres = clWidth;
-    if(clHeight) vid.yres = clHeight;
-    if(clFont) vid.abs_fsize = clFont, vid.relative_font = true;
+    if(vid.want_fullscreen) {
+      int clWidth=0, clHeight=0, clFont=0;
+      sscanf(argcs(), "%dx%dx%d", &clWidth, &clHeight, &clFont);
+      vid.change_fullscr = clWidth;
+      if(clWidth) vid.fullscreen_x = clWidth;
+      if(clHeight) vid.fullscreen_y = clHeight;
+      if(clFont) vid.abs_fsize = clFont, vid.relative_font = true;
+      }
+    else if(args().find(".") != string::npos) {
+      vid.relative_window_size = true;
+      ld dWidth=0, dHeight=0;
+      sscanf(argcs(), "%lfx%lf", &dWidth, &dHeight);
+      if(dWidth) vid.window_rel_x = dWidth;
+      if(dHeight) vid.window_rel_y = dHeight;
+      }
+    else {
+      vid.want_fullscreen = false;
+      vid.relative_window_size = false;
+      int clFont=0;
+      sscanf(argcs(), "%dx%dx%d", &vid.window_x, &vid.window_y, &clFont);
+      if(clFont) vid.abs_fsize = clFont, vid.relative_font = true;
+      }
     }    
   else if(argis("-msm")) {
     PHASEFROM(2); memory_saving_mode = true;
