@@ -167,6 +167,9 @@ struct geometry_information {
   /** distance from heptagon center to heptagon vertex (either hexf or hcrossf) */
   ld rhexf;
 
+  /** edge length */
+  ld edgelen;
+
   /** basic parameters for 3D geometries */
   map<int, int> close_distances;
 
@@ -635,6 +638,7 @@ void geometry_information::prepare_basics() {
   hexf = fmin;
   
   rhexf = BITRUNCATED ? hexf : hcrossf;
+  edgelen = hdist(xpush0(rhexf), xspinpush0(M_PI*2/S7, rhexf));
   
   if(BITRUNCATED && !(S7&1))
     hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
@@ -679,6 +683,7 @@ void geometry_information::prepare_basics() {
     crossf = hcrossf7 * ac.scale();
     hexvdist = ac.scale() * .5;
     rhexf = ac.scale() * .5;
+    edgelen = ac.edgelength;
     }
   #endif
   #if CAP_BT
