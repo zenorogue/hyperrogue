@@ -522,6 +522,7 @@ EX namespace mapstream {
     }
   
   EX void load_geometry(hstream& f) {
+    bool was_default = pmodel == default_model();
     auto vernum = f.get_vernum();
     f.read(geometry);
     char nbtype;
@@ -649,6 +650,7 @@ EX namespace mapstream {
       }
     if(vernum >= 0xA810)
       f.read(mine_adjacency_rule);
+    geometry_settings(was_default);
     }
   
   EX hookset<void(fhstream&)> hooks_savemap, hooks_loadmap_old;

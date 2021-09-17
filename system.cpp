@@ -1329,6 +1329,12 @@ EX eModel default_model() {
 
 EX purehookset hooks_on_geometry_change;
 
+EX void geometry_settings(bool was_default) {
+  if(was_default) pmodel = default_model();
+  if(WDIM == 2 && (cgflags & qIDEAL) && vid.always3 && vid.texture_step < 32) vid.texture_step = 32;
+  if(sl2) nisot::geodesic_movement = true;
+  }
+
 EX void set_geometry(eGeometry target) {
   bool was_default = pmodel == default_model();
   callhooks(hooks_on_geometry_change);
@@ -1363,9 +1369,7 @@ EX void set_geometry(eGeometry target) {
     if(INVERSE && !hybri) variation = gp::variation_for(gp::param);
     if(ginf[target].default_variation == eVariation::pure && geometry != gArchimedean)
       variation = eVariation::pure;
-    if(was_default) pmodel = default_model();
-    if(WDIM == 2 && (cgflags & qIDEAL) && vid.always3 && vid.texture_step < 32) vid.texture_step = 32;
-    if(sl2) nisot::geodesic_movement = true;
+    geometry_settings(was_default);
     
     if(geometry == gArbitrary) {
       arb::convert::base_geometry = geometry;
