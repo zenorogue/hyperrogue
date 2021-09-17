@@ -454,8 +454,15 @@ EX namespace mapstream {
       using namespace fieldpattern;
       f.write(quotient_field_changed);
       if(quotient_field_changed) {
-        f.write(current_extra);
-        f.write(fgeomextras[current_extra].current_prime_id);
+        decltype(current_extra) cex = WDIM == 3 ? -1 : current_extra;
+        f.write(cex);
+        if(cex == -1) {
+          f.write(fieldpattern::underlying_geometry);
+          hwrite_fpattern(f, currfp);
+          }
+        else {
+          f.write(fgeomextras[current_extra].current_prime_id);
+          }
         }
       }
     #endif
@@ -549,18 +556,30 @@ EX namespace mapstream {
       using namespace fieldpattern;
       f.read(quotient_field_changed);
       if(quotient_field_changed) {
+        auto cex = current_extra;
         f.read(current_extra);
-        auto& ge = fgeomextras[current_extra];
-        auto& id = ge.current_prime_id;
-        f.read(id);
-        if(vernum < 0xA80C) switch(ge.base) {
-          case gNormal: id++; break;
-          case g45: id++; break;
-          case g46: id+=2; break;
-          case g47: id++; break;
-          default: ;
+        if(current_extra == -1) {
+          current_extra = cex;
+          f.read(geometry);
+          check_cgi();
+          cgi.require_basics();
+          fieldpattern::field_from_current();
+          set_geometry(gFieldQuotient);
+          hread_fpattern(f, currfp);
           }
-        enableFieldChange();
+        else {
+          auto& ge = fgeomextras[current_extra];
+          auto& id = ge.current_prime_id;
+          f.read(id);
+          if(vernum < 0xA80C) switch(ge.base) {
+            case gNormal: id++; break;
+            case g45: id++; break;
+            case g46: id+=2; break;
+            case g47: id++; break;
+            default: ;
+            }
+          enableFieldChange();
+          }
         }
       }
     #endif

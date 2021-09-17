@@ -90,7 +90,7 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
     }
   }
 
-EX portal_data make_portal(cellwalker cw) {
+EX portal_data make_portal(cellwalker cw, int spin) {
   auto& ss = currentmap->get_cellshape(cw.at);
   auto& fac = ss.faces[cw.spin];
   portal_data id;
@@ -126,8 +126,13 @@ EX portal_data make_portal(cellwalker cw) {
     }
   id.iT = inverse(id.T);
   if(MDIM == 3) for(int i=0; i<4; i++) id.iT[3][i] = id.iT[i][3] = i==3;
-  id.co0 = id.to_poco(fac[(in_s2xe() || sphere) ? 2 : 0]);
-  id.co1 = id.to_poco(fac[1]);
+  int first = spin;
+  int second = spin + 1;
+  if(in_s2xe() || sphere) swap(first, second);
+  first = gmod(first, isize(fac));
+  second = gmod(second, isize(fac));
+  id.co0 = id.to_poco(fac[first]);
+  id.co1 = id.to_poco(fac[second]);
   return id;
   }
 
@@ -140,6 +145,8 @@ struct connection_data {
   portal_data id1;
   portal_data id2;
   transmatrix T;
+  int spin_value;
+  bool mirrored; /* not implemented */
   };
 #endif
 
@@ -160,16 +167,16 @@ EX void switch_to(int id) {
   data[current].gd.restoregame();
   }
 
-void connect_portal_1(cellwalker cw1, cellwalker cw2) {
+void connect_portal_1(cellwalker cw1, cellwalker cw2, int spin) {
   auto& p = connections[cw1];
   p.source_world = intra_id[cw1.at];
   p.target_world = intra_id[cw2.at];
   p.scw = cw1;
   p.tcw = cw2;
   switch_to(intra_id[cw1.at]);
-  p.id1 = make_portal(cw1);
+  p.id1 = make_portal(cw1, 0);
   switch_to(intra_id[cw2.at]);
-  p.id2 = make_portal(cw2);
+  p.id2 = make_portal(cw2, spin);
 
   if(1) {
     dynamicval<eGeometry> g(geometry, gCubeTiling);
@@ -191,9 +198,9 @@ void connect_portal_1(cellwalker cw1, cellwalker cw2) {
 
 EX vector<pair<int, cell*>> full_sample_list;
 
-EX void connect_portal(cellwalker cw1, cellwalker cw2) {
-  connect_portal_1(cw1, cw2);
-  connect_portal_1(cw2, cw1);
+EX void connect_portal(cellwalker cw1, cellwalker cw2, int spin) {
+  connect_portal_1(cw1, cw2, spin);
+  connect_portal_1(cw2, cw1, -spin);
   }
 
 /** make currentmap into one of the spaces in intra */
@@ -301,6 +308,8 @@ void erase_unconnected(cellwalker cw) {
       unconnected.erase(unconnected.begin() + i);
   }
 
+int edit_spin;
+
 void show_portals() {
   gamescreen(1);
 
@@ -339,10 +348,12 @@ void show_portals() {
     for(auto p: unconnected) {
       dialog::addItem(XLAT("connect " + lalign(0, p)), '1');
       dialog::add_action([p, cw] {
-        connect_portal(cw, p);
+        connect_portal(cw, p, edit_spin);
         erase_unconnected(p);
         });
       }
+    dialog::addSelItem(XLAT("portal orientation"), its(edit_spin), 'o');
+    dialog::add_action([] { edit_spin = edit_spin + 1; });
     }
 
   dialog::display();
