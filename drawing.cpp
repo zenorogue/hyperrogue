@@ -2277,6 +2277,16 @@ EX void set_vr_sphere() {
 EX void draw_main() {
   DEBBI(DF_GRAPH, ("draw_main"));
   
+  if(pconf.back_and_front == 1 && vid.consider_shader_projection) {
+    dynamicval<int> pa(pconf.back_and_front);
+    pconf.back_and_front = 0;
+    draw_main();
+    pconf.back_and_front = 2;
+    reset_projection();
+    draw_main();
+    return;
+    }
+
   set_vr_sphere();  
   
   if(sphere && GDIM == 3 && pmodel == mdPerspective && !stretch::in() && !ray::in_use) {

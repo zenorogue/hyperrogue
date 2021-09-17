@@ -2164,6 +2164,10 @@ EX void show3D() {
         XLAT("Rotate the camera. Can be used to obtain a first person perspective, "
         "or third person perspective when combined with Y shift.")
         );
+      dialog::extra_options = [] {
+        dialog::addBoolItem(XLAT("render behind the camera"), vpconf.back_and_front, 'R');
+        dialog::add_action([] { vpconf.back_and_front = !vpconf.back_and_front; });
+        };
       });
     }
   if(GDIM == 2) {

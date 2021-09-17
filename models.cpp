@@ -1040,6 +1040,8 @@ EX namespace models {
       param_f(p.xposition, sp+"xposition", 0);
       param_f(p.yposition, sp+"yposition", 0);
 
+      param_i(p.back_and_front, sp+"backandfront", 0);
+
       addsaver(p.alpha, sp+"projection", 1);
       param_custom(p.alpha, sp+"projection", menuitem_projection_distance, 'p')
       ->help_text = "projection distance|Gans Klein Poincare orthographic stereographic";

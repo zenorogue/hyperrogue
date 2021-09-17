@@ -652,6 +652,8 @@ void display_data::set_projection(int ed, ld shift) {
     GLfloat sc = current_display->radius / (cd->ysize/2.);
     glhr::projection_multiply(glhr::frustum(cd->xsize / cd->ysize, 1));
     glhr::projection_multiply(glhr::scale(sc, -sc, -1));
+    if(pconf.back_and_front)
+      glhr::projection_multiply(glhr::scale(-1,-1,-1));
     u_alpha = true;
     }
 
