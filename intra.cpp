@@ -293,6 +293,66 @@ EX void check_portal_movement() {
     }
   }
 
+vector<cellwalker> unconnected;
+
+void erase_unconnected(cellwalker cw) {
+  for(int i=0; i<isize(unconnected); i++)
+    if(unconnected[i] == cw)
+      unconnected.erase(unconnected.begin() + i);
+  }
+
+void show_portals() {
+  gamescreen(1);
+
+  dialog::init(XLAT("manage portals"));
+
+  cellwalker cw(centerover, point_direction);
+  bool valid = point_direction >= 0 && point_direction < centerover->type;
+
+  dialog::addItem(XLAT("move to the next space"), 'm');
+  dialog::add_action([] {
+    int ic = (current + 1) % isize(data);
+    switch_to(ic);
+    });
+
+  bool in_list = false; for(cellwalker x: unconnected) if(x == cw) in_list = true;
+
+  if(!valid) ;
+  else if(connections.count(cw)) {
+    dialog::addItem(XLAT("disconnect this portal"), 'd');
+    dialog::add_action([cw] {
+      auto tcw = connections[cw].tcw;
+      unconnected.push_back(tcw);
+      connections.erase(cw);
+      connections.erase(tcw);
+      });
+    }
+  else if(in_list) {
+    dialog::addItem(XLAT("remove %1 from the list", lalign(0, cw)), 'r');
+    dialog::add_action([cw] {
+      erase_unconnected(cw);
+      });
+    }
+  else {
+    dialog::addItem(XLAT("add to list"), 'a');
+    dialog::add_action([cw] { unconnected.push_back(cw); });
+    for(auto p: unconnected) {
+      dialog::addItem(XLAT("connect " + lalign(0, p)), '1');
+      dialog::add_action([p, cw] {
+        connect_portal(cw, p);
+        erase_unconnected(p);
+        });
+      }
+    }
+
+  dialog::display();
+  }
+
+auto hooks1 =
+  addHook(hooks_o_key, 90, [] (o_funcs& v) {
+    if(intra::in) v.push_back(named_dialog(XLAT("manage portals"), show_portals));
+    });
+
 EX }
 
 }
