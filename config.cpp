@@ -710,7 +710,7 @@ EX void initConfig() {
   ->editable("openGL mode", 'o');
   
   addsaver(vid.want_antialias, "antialias", AA_NOGL | AA_FONT | (ISWEB ? AA_MULTI : AA_LINES) | AA_VERSION);
-  addsaver(vid.fineline, "fineline", true);
+  param_b(vid.fineline, "fineline", true);
   param_f(vid.linewidth, "linewidth", 1);
   addsaver(precise_width, "precisewidth", .5);
   addsaver(perfect_linewidth, "perfect_linewidth", 1);
