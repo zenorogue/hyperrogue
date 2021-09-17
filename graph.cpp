@@ -4849,17 +4849,20 @@ EX shiftmatrix cview(ld base_shift IS(0)) {
   return shiftless(actual_view_transform * View, base_shift);
   }
 
+EX int point_direction;
+
 EX void precise_mouseover() {
   if(WDIM == 3) { 
     mouseover2 = mouseover = centerover;
     ld best = HUGE_VAL;
     shiftpoint h = shiftless(direct_exp(lp_iapply(ztangent(0.01))));
+    point_direction = -1;
 
     shiftmatrix cov = ggmatrix(mouseover2);
     forCellIdEx(c1, i, mouseover2) {
       shiftpoint h1 = tC0(cov * currentmap->adj(mouseover2, i));
       ld dist = geo_dist(h, h1) - geo_dist(shiftless(C0), h1);
-      if(dist < best) mouseover = c1, best = dist;
+      if(dist < best) mouseover = c1, best = dist, point_direction = i;
       }
     return; 
     }
