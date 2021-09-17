@@ -1461,8 +1461,11 @@ EX void enableFieldChange() {
   fieldpattern::current_quotient_field.init(gxcur.primes[gxcur.current_prime_id].p);
   }
 
+EX eGeometry underlying_geometry;
+
 EX void field_from_current() {
   auto& go = ginf[geometry];
+  underlying_geometry = geometry;
   dynamicval<eGeometry> g(geometry, gFieldQuotient);
   auto& gg = ginf[geometry];
   gg.sides = go.sides;
