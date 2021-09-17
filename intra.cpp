@@ -359,6 +359,28 @@ void show_portals() {
   dialog::display();
   }
 
+#if HDR
+struct portal_to_save {
+  cellwalker cw1;
+  cellwalker cw2;
+  int spin;
+  bool mirrored;
+  };
+#endif
+
+EX vector<portal_to_save> portals_to_save;
+
+EX void prepare_to_save() {
+  portals_to_save.clear();
+  for(auto c: connections) if(c.second.scw < c.second.tcw) {
+    portals_to_save.emplace_back(portal_to_save{c.second.scw, c.second.tcw, c.second.spin_value, false});
+    }
+  }
+
+EX void load_saved_portals() {
+  for(const auto& p: portals_to_save) connect_portal(p.cw1, p.cw2, p.spin);
+  }
+
 auto hooks1 =
   addHook(hooks_o_key, 90, [] (o_funcs& v) {
     if(intra::in) v.push_back(named_dialog(XLAT("manage portals"), show_portals));

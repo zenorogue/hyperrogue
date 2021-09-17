@@ -750,6 +750,25 @@ EX namespace mapstream {
     if(multi::players > 1)
       for(int i=0; i<multi::players; i++)
         f.write(cellids[multi::player[i].at]);
+
+    if(intra::in) {
+      for(int i=0; i<isize(intra::portals_to_save); i++) {
+        auto& p = intra::portals_to_save[i];
+        if(cellids.count(p.cw1.at)) {
+          f.write<char>(1);
+          f.write(i);
+          f.write(cellids[p.cw1.at]);
+          f.write<char>(p.cw1.spin);
+          }
+        if(cellids.count(p.cw2.at)) {
+          f.write<char>(2);
+          f.write(i);
+          f.write(cellids[p.cw2.at]);
+          f.write<char>(p.cw2.spin);
+          }
+        }
+      f.write<char>(0);
+      }
       
     callhooks(hooks_savemap, f);
     f.write<int>(0);
@@ -962,7 +981,21 @@ EX namespace mapstream {
           mp.mirrored = false;
           }
       }
-    
+
+    if(intra::in) {
+      while(true) {
+        char k = f.get<char>();
+        if(!k) break;
+        int i = f.get<int>();
+        int id = f.get<int>();
+        int spin = f.get<char>();
+        auto& p = intra::portals_to_save[i];
+        auto& cw = (k==1 ? p.cw1 : p.cw2);
+        cw.at = cellbyid[id];
+        cw.spin = fixspin(relspin[id], spin, cw.at->type, f.vernum);
+        }
+      }
+
     if(f.vernum >= 0xA848) {
       int i;
       f.read(i);
@@ -1007,9 +1040,24 @@ EX namespace mapstream {
     if(!f.f) return false;
     f.write(f.vernum);
     f.write(dual::state);
-    // make sure we save in correct order
-    if(dual::state) dual::switch_to(1);
-    dual::split_or_do([&] { save_only_map(f); });
+    int q = intra::in ? isize(intra::data) : 0;
+    f.write(q);
+    if(q) {
+      intra::prepare_to_save();
+      int qp = isize(intra::portals_to_save);
+      f.write(qp);
+      for(auto& ps: intra::portals_to_save) {
+        f.write(ps.spin);
+        f.write(ps.mirrored);
+        }
+      intra::resetter ir;
+      for(int i=0; i<q; i++) { intra::switch_to(i); save_only_map(f); }
+      }
+    else {
+      // make sure we save in correct order
+      if(dual::state) dual::switch_to(1);
+      dual::split_or_do([&] { save_only_map(f); });
+      }
     save_usershapes(f);
     return true;
     }
@@ -1027,7 +1075,31 @@ EX namespace mapstream {
       ds = 0;
     if(ds == 1 && dual::state == 0) dual::enable();
     if(ds == 0 && dual::state == 1) dual::disable();
-    dual::split_or_do([&] { load_only_map(f); });
+    int q = 0;
+    if(f.vernum >= 0xA907) {
+      f.read(q);
+      }
+    if(q) {
+      int qp;
+      f.read(qp);
+      intra::portals_to_save.resize(qp);
+      for(auto& ps: intra::portals_to_save) {
+        f.read(ps.spin);
+        f.read(ps.mirrored);
+        println(hlog, tie(ps.spin, ps.mirrored));
+        }
+      for(int i=0; i<q; i++) {
+        intra::in = true; /* so that it knows to load portals */
+        load_only_map(f);
+        intra::in = false;
+        intra::become();
+        }
+      intra::start();
+      intra::load_saved_portals();
+      }
+    else {
+      dual::split_or_do([&] { load_only_map(f); });
+      }
     if(dual::state) dual::assign_landsides();
     if(f.vernum >= 0xA61A) 
       load_usershapes(f);
