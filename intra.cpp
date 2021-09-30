@@ -395,7 +395,9 @@ EX void load_saved_portals() {
 auto hooks1 =
   addHook(hooks_o_key, 90, [] (o_funcs& v) {
     if(intra::in) v.push_back(named_dialog(XLAT("manage portals"), show_portals));
-    });
+    })
+  + arg::add3("-intra-add", [] { start_game(); become(); })
+  + arg::add3("-intra-start", [] { start_game(); become(); start(0); });
 
 EX }
 
