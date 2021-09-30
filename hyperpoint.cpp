@@ -317,6 +317,7 @@ EX ld asin_auto_clamp(ld x) {
     case gcHyperbolic: return asinh(x);
     case gcSL2: return asinh(x);
     case gcSphere: return asin_clamp(x);
+    case gcProduct: return PIU(asin_auto_clamp(x));
     default: return x;
     }
   }
