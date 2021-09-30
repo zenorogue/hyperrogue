@@ -4,6 +4,8 @@ namespace rogueviz {
 
 namespace magic { void magic(int i); }
 
+namespace crystal_sokoban { void run_sb(); }
+
 namespace colorpicker {
 
 int current_step;
@@ -638,6 +640,19 @@ tour::slide *gen_high_demo() {
         sync(mode, 0);
         if(mode == pmStart) {
           magic::magic(-1);
+          }
+        }
+      });
+
+  v.emplace_back(
+    slide{"3D Sokoban", 999, LEGAL::NONE,
+      "A three-dimensional Sokoban puzzle visualized using H2.\n\n"
+      "The puzzle is designed so that all three dimensions matter.\n\n"
+      "Press 'r' or Backspace to undo moves.",
+      [] (presmode mode) {
+        sync(mode, 0);
+        if(mode == pmStart) {
+          crystal_sokoban::run_sb();
           }
         }
       });
