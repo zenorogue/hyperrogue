@@ -1186,11 +1186,13 @@ EX namespace gp {
     cell *create_move(cell *parent, int d) {
       if(UNRECTIFIED) {
         cellwalker cw(mapping[parent], d);
+        bool b = cw.mirrored;
         in_underlying([&] {
           cw += wstep;
           cw --;
           cw += wstep;
           cw --;
+          if(cw.mirrored != b) cw++;
           });
         cw.at = get_mapped(cw.at, 0);
         parent->c.connect(d, cw.at, cw.spin, cw.mirrored);
