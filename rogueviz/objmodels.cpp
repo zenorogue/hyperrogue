@@ -23,6 +23,8 @@ bool model::available() {
 
 bool root = false;
 
+string ignore_mtlname = "XXX";
+
 void model::load_obj(model_data& md) {
   md.prec_used = prec;
 
@@ -156,7 +158,8 @@ void model::load_obj(model_data& md) {
             else
               co->color = 0xFFFFFFFF;
             }
-          println(hlog, "set textured to ", textured);
+          if(mtlname.find(ignore_mtlname) != string::npos) co->color = 0;
+          println(hlog, "set textured to ", textured, " color ", co->color, " mtlname = '", mtlname, "'");
           }
         else if(s == "f") {
           struct vertexinfo { int f, t, n; };
