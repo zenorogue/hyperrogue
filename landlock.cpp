@@ -963,7 +963,7 @@ EX land_validity_t& land_validity(eLand l) {
       return ok;
     }
 
-  if(l == laCaribbean && !ls::single() && old_daily_id > 9999) return single_only;
+  if(euclid && l == laCaribbean && !ls::single() && old_daily_id > 9999) return single_only;
   
   if(l == laPrincessQuest && ls::any_chaos())
     return not_in_chaos;
