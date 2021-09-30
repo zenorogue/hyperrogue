@@ -1137,6 +1137,9 @@ EX void convert() {
   manual_celllister cl;
   cl.add(currentmap->gamestart());
   
+  int more_tests = 1000;
+  pointer_indices.clear();
+
   int chg = -1;
   while(changes > chg) {
     changes = chg;
@@ -1147,7 +1150,10 @@ EX void convert() {
       auto c = cl.lst[i];
       auto& id = get_identification(c);
       
-      if(masters_analyzed.count(id.target)) continue;
+      if(masters_analyzed.count(id.target)) {
+        more_tests--;
+        if(more_tests < 0) continue;
+        }
       masters_analyzed.insert(id.target);
       
       cellwalker cw0(c, id.shift);
