@@ -2899,12 +2899,19 @@ EX namespace linepatterns {
         }
       )
     );
+  EX ld parallel_count = 6;
+  EX ld parallel_max = 90 * degree;
+  EX ld parallel_length = 180 * degree;
   linepattern patParallels("parallels", 0xFFFFFF00, always_available, 
     ATCENTER(
-      for(int i=-90; i<=90; i += 15) {
+      for(int i=-int(parallel_count); i<=parallel_count; i ++) {
+        ld phi = i * parallel_max / parallel_count;
+        ld xbase = 0;
+        if(!sphere) xbase = asin_auto((inverse(unshift(V)) * C0)[0]);
+        println(hlog, "xbase = ", xbase);
         for(int j=-180; j<180; j+=15) {
           for(int k=0; k<=15; k++) 
-            curvepoint(xpush((j+k) * degree) * ypush0(i * degree));
+            curvepoint(xpush(xbase + (j+k) * degree) * ypush0(phi));
           queuecurve(V, col, 0, PPR::LINE).V=V;
           }
         }
