@@ -49,6 +49,7 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
     h[1] /= h[2];
     h[2] = dec.first - d;
     h[3] = 1;
+    if(d<0) h[2] = -h[2];
     return h;
     }
   else if(prod && kind == 0) {
@@ -72,6 +73,7 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
 hyperpoint portal_data::from_poco(hyperpoint h) const {
   if(prod && kind == 1) {
     ld xd = h[2];
+    if(d<0) xd = -xd;
     h[2] = 1;
     auto z = product_decompose(h).first;
     return h * exp(d+xd-z);
@@ -101,7 +103,9 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     id.v0 = C0 * exp(id.d);
     }
   else if(prod && cw.spin == cw.at->type - 2) {
-    throw hr_exception("cannot construct a portal in this direction");
+    id.kind = 1;
+    id.d = product_decompose(fac[0]).first;
+    id.v0 = C0 * exp(id.d);
     }
   else if(prod) {
     id.kind = 0;

@@ -15,7 +15,7 @@ EX namespace ray {
 #if CAP_RAY
 
 /** texture IDs */
-GLuint txConnections = 0, txWallcolor = 0, txTextureMap = 0, txVolumetric = 0, txM = 0, txWall = 0;
+GLuint txConnections = 0, txWallcolor = 0, txTextureMap = 0, txVolumetric = 0, txM = 0, txWall = 0, txPortalConnections = 0;
 
 EX bool in_use;
 EX bool comparison_mode;
@@ -169,6 +169,7 @@ struct raycaster : glhr::GLprogram {
   GLint tM, uInvLengthM;
   GLint tWall, uInvLengthWall;
   
+  GLint tPortalConnections;
   raycaster(string vsh, string fsh);
   };
 #endif
@@ -218,6 +219,8 @@ raycaster::raycaster(string vsh, string fsh) : GLprogram(vsh, fsh) {
     tWallcolor = glGetUniformLocation(_program, "tWallcolor");
     tTextureMap = glGetUniformLocation(_program, "tTextureMap");
     tVolumetric = glGetUniformLocation(_program, "tVolumetric");
+
+    tPortalConnections = glGetUniformLocation(_program, "tPortalConnections");
 
     tM = glGetUniformLocation(_program, "tM");
     uInvLengthM = glGetUniformLocation(_program, "uInvLengthM");
@@ -965,32 +968,36 @@ void raygen::apply_reflect() {
 
 void raygen::emit_intra_portal(int gid1, int gid2) {
 
-  int they_curvature = false;
   if(1) {
     intra::resetter ir;
     intra::switch_to(gid2);
-    they_curvature = hyperbolic ? -1 : sphere ? 1 : 0;
-    /* product also has 0 */
     }
 
-  if(prod && they_curvature) {
-    string fn = in_h2xe() ? "to_poco_h2xr_h" : "to_poco_s2xr_s";
-    fmain +=
-      "    mediump vec4 nposition = position + tangent * xspeed * 1e-3;\n"
-      "    position = "+fn+"(position);\n"
-      "    position.z = 0.;\n" // zpos - uPLevel;\n"
-      "    nposition = "+fn+"(nposition);\n"
-      "    nposition.z = zspeed * 1e-3;\n";
-    }
-  else if(prod) {
-    string fn = in_h2xe() ? "to_poco_h2xr_e" : "to_poco_s2xr_e";
-    fmain +=
-      "    mediump vec4 nposition = position + tangent * xspeed * 1e-3;\n"
-      "    mediump mat4 tkt = " + getM("mid+1") + ";\n"
-      "    position = "+fn+"(tkt * position);\n"
-      "    position.y = zpos;\n"
-      "    nposition = "+fn+"(tkt * nposition);\n"
-      "    nposition.y = zpos + zspeed * 1e-3;\n";
+  if(prod) {
+    fmain += "mediump vec4 nposition;\n";
+    fmain += "if(pconnection.x != .5) {\n"; // kind != 0
+    if(1) {
+      string fn = in_h2xe() ? "to_poco_h2xr_h" : "to_poco_s2xr_s";
+      fmain +=
+        "    nposition = position + tangent * xspeed * 1e-3;\n"
+        "    position = "+fn+"(position);\n"
+        "    position.z = 0.;\n" // zpos - uPLevel;\n"
+        "    nposition = "+fn+"(nposition);\n"
+        "    nposition.z = zspeed * 1e-3;\n"
+        "    if(pconnection.y < .5) { nposition.z = -nposition.z; }\n";
+      }
+    fmain += "  } else {\n";
+    if(1) {
+      string fn = in_h2xe() ? "to_poco_h2xr_e" : "to_poco_s2xr_e";
+      fmain +=
+        "    nposition = position + tangent * xspeed * 1e-3;\n"
+        "    mediump mat4 tkt = " + getM("mid+1") + ";\n"
+        "    position = "+fn+"(tkt * position);\n"
+        "    position.y = zpos;\n"
+        "    nposition = "+fn+"(tkt * nposition);\n"
+        "    nposition.y = zpos + zspeed * 1e-3;\n";
+      }
+    fmain += "  }\n";
     }
   else {
     fmain +=
@@ -1012,43 +1019,47 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
     "    position = m * position;\n"
     "    nposition = m * nposition;\n";
 
-  int we_curvature = hyperbolic ? -1 : sphere ? 1 : 0;
-
   intra::resetter ir;
   intra::switch_to(gid2);
 
-  if(prod && we_curvature) {
-    string sgn = in_h2xe() ? "-" : "+";
-    string fn = in_h2xe() ? "from_poco_h2xr_h" : "from_poco_s2xr_s";
-    ld their_plevel = cgi.plevel / 2;
-    fmain +=
-    "    zspeed = (nposition.z - position.z) * 1e3;\n"
-    "    zpos = position.z + " + glhr::to_glsl(their_plevel) + ";\n"
-    "    position = "+fn+"(position);\n"
-    "    nposition = "+fn+"(nposition);\n"
-    "    tangent = (nposition - position) * 1e3;\n"
-    "    mediump float pnorm = tangent.z * position.z "+sgn+" tangent.x * position.x "+sgn+" tangent.y * position.y;\n"
-    "    tangent -= position * pnorm;\n"
-    "    xspeed = sqrt(tangent.x * tangent.x + tangent.y * tangent.y "+sgn+" tangent.z * tangent.z);\n"
-    "    tangent /= xspeed;\n";
-    }
-  else if(prod) {
-    string sgn = in_h2xe() ? "-" : "+";
-    string fn = in_h2xe() ? "from_poco_h2xr_e" : "from_poco_s2xr_e";
-    fmain +=
-    "    mediump mat4 itkt = " + getM("mid+2") + ";\n";
-    fmain +=
-    "    zpos = position.y;\n"
-    "    zspeed = (nposition.y - zpos) * 1e3;\n"
-    "    position = itkt * "+fn+"(position);\n"
-    "    nposition = itkt * "+fn+"(nposition);\n"
-    "    tangent = (nposition - position) * 1e3;\n"
-    "    mediump float pnorm = tangent.z * position.z "+sgn+" dot(position.xy, tangent.xy);\n"
-    "    tangent -= position * pnorm;\n"
-    "    xspeed = sqrt(dot(tangent.xy, tangent.xy) "+sgn+" tangent.z * tangent.z);\n"
-    "    tangent /= xspeed;\n"
-    "    mediump float l = xspeed*xspeed+zspeed*zspeed;\n"
-    "    xspeed /= sqrt(l); zspeed /= sqrt(l);\n";
+  if(prod) {
+    fmain += "if(pconnection.z != .5) {\n"; // kind != 0
+    if(1) {
+      string sgn = in_h2xe() ? "-" : "+";
+      string fn = in_h2xe() ? "from_poco_h2xr_h" : "from_poco_s2xr_s";
+
+      fmain +=
+      "    if(pconnection.w < .5) { position.z = -position.z; nposition.z = -nposition.z; }\n"
+      "    zspeed = (nposition.z - position.z) * 1e3;\n"
+      "    zpos = position.z + (pconnection.w - .5) * 16.;\n"
+      "    position = "+fn+"(position);\n"
+      "    nposition = "+fn+"(nposition);\n"
+      "    tangent = (nposition - position) * 1e3;\n"
+      "    mediump float pnorm = tangent.z * position.z "+sgn+" tangent.x * position.x "+sgn+" tangent.y * position.y;\n"
+      "    tangent -= position * pnorm;\n"
+      "    xspeed = sqrt(tangent.x * tangent.x + tangent.y * tangent.y "+sgn+" tangent.z * tangent.z);\n"
+      "    tangent /= xspeed;\n";
+      }
+    fmain += "  } else {\n";
+    if(1) {
+      string sgn = in_h2xe() ? "-" : "+";
+      string fn = in_h2xe() ? "from_poco_h2xr_e" : "from_poco_s2xr_e";
+      fmain +=
+      "    mediump mat4 itkt = " + getM("mid+2") + ";\n";
+      fmain +=
+      "    zpos = position.y;\n"
+      "    zspeed = (nposition.y - zpos) * 1e3;\n"
+      "    position = itkt * "+fn+"(position);\n"
+      "    nposition = itkt * "+fn+"(nposition);\n"
+      "    tangent = (nposition - position) * 1e3;\n"
+      "    mediump float pnorm = tangent.z * position.z "+sgn+" dot(position.xy, tangent.xy);\n"
+      "    tangent -= position * pnorm;\n"
+      "    xspeed = sqrt(dot(tangent.xy, tangent.xy) "+sgn+" tangent.z * tangent.z);\n"
+      "    tangent /= xspeed;\n"
+      "    mediump float l = xspeed*xspeed+zspeed*zspeed;\n"
+      "    xspeed /= sqrt(l); zspeed /= sqrt(l);\n";
+      }
+    fmain += "}\n";
     }
   else {
     string sgn = hyperbolic ? "-" : "+";
@@ -1388,16 +1399,18 @@ void raygen::emit_iterate(int gid1) {
 
     if(intra::in) {
       int q = isize(intra::data);
+      fmain +="  mediump vec4 pconnection = texture2D(tPortalConnections, u);\n";
+      fmain += "if(pconnection.x == 0.) {\n";
+      fmain += no_intra_portal;
+      fmain += "  } else\n";
+
       for(int gid2=0; gid2<q; gid2++) {
         if(gid2 == q-1)
           fmain += "  {\n";
         else  {
           fmain += "  if(nwalloffset < " + its(intra::data[gid2+1].wallindex) + ") {\n";
           }
-        if(gid1 == gid2)
-          fmain += no_intra_portal;
-        else
-          emit_intra_portal(gid1, gid2);
+        emit_intra_portal(gid1, gid2);
         if(gid2 == q-1)
           fmain += "  }\n";
         else
@@ -1486,6 +1499,9 @@ void raygen::create() {
     "uniform mediump sampler2D tTextureMap;\n"
     "uniform mediump vec4 uFogColor;\n"
     "uniform mediump float uLinearSightRange, uExpStart, uExpDecay;\n";
+
+    if(intra::in) fsh +=
+      "uniform mediump sampler2D tPortalConnections;\n";
 
     if(wall_via_texture) {
       fsh +=
@@ -1878,7 +1894,7 @@ struct raycast_map {
 
   int length, per_row, rows, mirror_shift, deg;
 
-  vector<array<float, 4>> connections, wallcolor, texturemap, volumetric;
+  vector<array<float, 4>> connections, wallcolor, texturemap, volumetric, portal_connections;
   
   void apply_shape() {
     length = 4096;
@@ -1887,6 +1903,7 @@ struct raycast_map {
     rows = next_p2((isize(lst)+per_row-1) / per_row);  
     int q = length * rows;
     connections.resize(q);
+    portal_connections.resize(q);
     wallcolor.resize(q);
     texturemap.resize(q);
     volumetric.resize(q);
@@ -2022,6 +2039,7 @@ struct raycast_map {
       auto code = enc(ids[c1], 0);
       connections[u][0] = code[0];
       connections[u][1] = code[1];
+      portal_connections[u][0] = 0;
       if(isWall3(c1)) {
         celldrawer dd;
         dd.c = c1;
@@ -2066,6 +2084,10 @@ struct raycast_map {
         ms.push_back(p->id1.T);
         ms.push_back(p->id2.iT);
         connections[u][2] = (k+.5) / 1024.;
+        portal_connections[u][0] = p->id1.kind / 16. + .5;
+        portal_connections[u][1] = p->id1.d / 16 + .5;
+        portal_connections[u][2] = p->id2.kind / 16. + .5;
+        portal_connections[u][3] = p->id2.d / 16 + .5;
         }
       else {
         transmatrix T = currentmap->iadj(c, i) * inverse(ms[wo + i]);
@@ -2143,6 +2165,7 @@ struct raycast_map {
     bind_array(connections, o->tConnections, txConnections, 3, length);
     bind_array(texturemap, o->tTextureMap, txTextureMap, 5, length);
     if(volumetric::on) bind_array(volumetric, o->tVolumetric, txVolumetric, 6, length);
+    bind_array(portal_connections, o->tPortalConnections, txPortalConnections, 1, length);
 
     if(o->uMirrorShift != -1) {
       glUniform1i(o->uMirrorShift, mirror_shift);
