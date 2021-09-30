@@ -1229,7 +1229,7 @@ EX namespace mirror {
       c->wall == waMirrorWall || c->wall == waPetrifiedBridge;
     }
 
-  void destroyKilled() {
+  EX void destroyKilled() {
     int j = 0;
     for(int i=0; i<isize(mirrors); i++)
       if(mirrors[i].second.at->monst == moMimic)

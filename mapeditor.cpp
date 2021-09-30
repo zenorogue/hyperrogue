@@ -1349,6 +1349,8 @@ EX namespace mapeditor {
         if(isDie(c->monst)) {
           if(!dice::generate_random(c)) c->monst = moNone;
           }
+
+        mirror::destroyKilled();
         break;
         }
       case 1: {
