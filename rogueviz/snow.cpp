@@ -20,6 +20,11 @@ namespace rogueviz {
 
 namespace snow {
 
+using rogueviz::objmodels::model;
+using rogueviz::objmodels::tf_result;
+
+vector<model> models;
+
 ld snow_lambda = 0;
 
 color_t snow_color = 0xFFFFFFFF;
@@ -37,7 +42,12 @@ bool snow_texture = true;
 
 int snow_shape = 0;
 
-map<cell*, vector<transmatrix> > matrices_at;
+struct snowball {
+  transmatrix T;
+  int model_id;
+  };
+
+map<cell*, vector<snowball>> snowballs_at;
 
 hpcshape& shapeid(int i) {
   switch(i) {
@@ -104,8 +114,8 @@ transmatrix random_snow_matrix(cell *c) {
 
 bool draw_snow(cell *c, const shiftmatrix& V) {
   
-  if(!matrices_at.count(c)) {
-    auto& v = matrices_at[c];
+  if(!snowballs_at.count(c)) {
+    auto& v = snowballs_at[c];
     int cnt = 0;
     ld prob = randd();
     ld poisson = exp(-snow_lambda);
@@ -125,14 +135,19 @@ bool draw_snow(cell *c, const shiftmatrix& V) {
       }      
 
     for(int t=0; t<cnt; t++) 
-      v.push_back(random_snow_matrix(c));
+      v.emplace_back(snowball{random_snow_matrix(c), isize(models) ? hrand(isize(models)) : 0});
     }
   
   poly_outline = 0xFF;
-  for(auto& T: matrices_at[c]) {
-    auto& p = queuepoly(V * T, shapeid(snow_shape), snow_color);
-    if(!snow_texture) p.tinf = nullptr;
-    if(snow_intense) p.flags |= POLY_INTENSE;
+  for(auto& T: snowballs_at[c]) {
+    if(models.size()) {
+      models[T.model_id].render(V*T.T);
+      }
+    else {
+      auto& p = queuepoly(V * T.T, shapeid(snow_shape), snow_color);
+      if(!snow_texture) p.tinf = nullptr;
+      if(snow_intense) p.flags |= POLY_INTENSE;
+      }
     }
 
   return false;
@@ -179,7 +194,7 @@ void show() {
   dialog::addSelItem("lambda", fts(snow_lambda), 'l');
   dialog::add_action([]() {
     dialog::editNumber(snow_lambda, 0, 100, 1, 10, "lambda", "snowball density");
-    dialog::reaction = [] { matrices_at.clear(); };
+    dialog::reaction = [] { snowballs_at.clear(); };
     });
 
   dialog::addSelItem("size", fts(snow_shape), 's');
@@ -198,7 +213,7 @@ void o_key(o_funcs& v) {
 auto hchook = addHook(hooks_drawcell, 100, draw_snow)
 
 + addHook(hooks_clearmemory, 40, [] () {
-    matrices_at.clear();
+    snowballs_at.clear();
     })
 
 + addHook(hooks_o_key, 80, o_key)
@@ -228,6 +243,17 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
     }
   else if(argis("-snow-glitch")) {
     snow_test = true;
+    }
+  else if(argis("-use-model")) {
+    shift(); string s = args();
+    shift(); ld scale = argf();
+    shift(); int qty = argf();
+    for(int i=0; i<qty; i++) {
+      transmatrix T = random_spin();
+      println(hlog, "T = ", T);
+      models.emplace_back("rogueviz/models/", s, [scale,T] (hyperpoint h) { tf_result res{0, direct_exp(T*h*scale)}; return res; });
+      s = "/" + s;
+      }
     }
   else return 1;
   return 0;
