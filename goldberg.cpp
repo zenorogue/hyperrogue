@@ -355,6 +355,10 @@ EX namespace gp {
       }
     
     if(S3 == 4 && param == loc(1,1)) {
+      if(ac1.cw.mirrored != hs.mirrored) ac1.cw--;
+      if(ac2.cw.mirrored != hs.mirrored) ac2.cw--;
+      auto& ac3 = get_mapping(vc[2]);
+      if(ac3.cw.mirrored != hs.mirrored) ac3.cw--;
       conn(loc(0,0), 1);
       conn(loc(0,1), 0);
       conn(loc(0,1), 1);
