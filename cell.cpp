@@ -272,7 +272,7 @@ void hrmap_standard::find_cell_connection(cell *c, int d) {
   else if(GOLDBERG) {
     gp::extend_map(c, d);
     if(!c->move(d)) {
-      printf("extend failed to create for %p/%d\n", hr::voidp(c), d);
+      println(hlog, "extend failed to create for ", cellwalker(c, d));
       exit(1);
       }
     hybrid::link();

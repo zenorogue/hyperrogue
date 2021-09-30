@@ -235,11 +235,11 @@ EX namespace gp {
     auto wcw = get_localwalk(wc, dir);
     auto& wc1 = get_mapping(at + eudir(dir));
     DEBB0(DF_GP, (format("  md:%02d s:%d", wc.mindir, wc.cw.spin)); )
-    DEBB0(DF_GP, ("  connection ", at, "/", dir, " ", wc.cw+dir, "=", wcw, " ~ ", at+eudir(dir), "/", dir1); )
+    DEBB0(DF_GP, ("  connection ", at, "/", dir, " ", wc.cw+dir, "=", wcw, " ~ ", at+eudir(dir), "/", dir1, " "); )
     if(!wc1.cw.at) {
       wc1.start = wc.start;
       if(peek(wcw)) {
-        DEBB0(DF_GP, ("(pulled) "); )
+        DEBB0(DF_GP, (" (pulled) "); )
         set_localwalk(wc1, dir1, wcw + wstep);
         if(do_adjm) wc1.adjm = wc.adjm * get_adj(wcw.at, wcw.spin);
         }
@@ -249,14 +249,14 @@ EX namespace gp {
         set_localwalk(wc1, dir1, wcw + wstep);
         if(do_adjm) wc1.adjm = wc.adjm;
         spawn++;
-        DEBB0(DF_GP, ("(created) "); )
+        DEBB0(DF_GP, (" (created) "); )
         }
       }
     DEBB0(DF_GP, (wc1.cw+dir1, " "));
     auto wcw1 = get_localwalk(wc1, dir1);
     if(peek(wcw)) {
       if(wcw+wstep != wcw1) {
-        DEBB(DF_GP, ("FAIL: ", wcw, " / ", wcw1); exit(1); )
+        DEBB(DF_GP, ("FAIL: ", wcw, " connected to ", wcw+wstep, " not to ", wcw1); exit(1); )
         }
       else {
         DEBB(DF_GP, ("(was there)"));
@@ -296,6 +296,7 @@ EX namespace gp {
 
   EX void extend_map(cell *c, int d) {
     DEBB(DF_GP, ("EXTEND ",c, " ", d));
+    indenter ind(2);
     if(c->master->c7 != c) {
       while(c->master->c7 != c) {
         DEBB(DF_GP, (c, " direction 0 corresponds to ", c->move(0), " direction ", c->c.spin(0)); )
