@@ -584,6 +584,8 @@ int brm_limit = 1000;
 ld labelshift = .2;
 ld labelscale = .2; // .28 in SVG
 
+ld edgewidth = 1;
+
 bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
   if(m->dead) return true;
   if(m->type != moRogueviz) return false;
@@ -620,8 +622,9 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
 
     // if(hilite) ghilite = true;
     
-    if(ei->lastdraw < frameid || multidraw) { 
+    if(ei->lastdraw < frameid || multidraw) {
       ei->lastdraw = frameid;
+      dynamicval<ld> w(vid.linewidth, vid.linewidth * edgewidth);
       
       color_t col = (hilite ? ei->type->color_hi : ei->type->color);
       auto& alpha = part(col, 0);
@@ -1213,6 +1216,8 @@ auto hooks  =
   addHook(hooks_markers, 100, search_marker) +
   addHook(hooks_configfile, 100, [] {
     param_i(brm_limit, "brm_limit");
+    param_f(edgewidth, "rvedgewidth");
+    param_f(min_line_splits, "edgeminsplits");
     }) +
  0;
 
