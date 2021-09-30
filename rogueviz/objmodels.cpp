@@ -236,8 +236,7 @@ void model::load_obj(model_data& md) {
             }
           
           while(among(peek(fs), ' ', '\r', '\n')) scan(fs, bar);
-          if(isdigit(peek(fs))) { vis[1] = vis[2]; println(hlog, "next triangle"); goto next_triangle; }
-          println(hlog, "last triangle");
+          if(isdigit(peek(fs))) { vis[1] = vis[2]; goto next_triangle; }
           }
         else if(s == "l") {
           int a, b;
