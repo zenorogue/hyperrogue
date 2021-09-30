@@ -128,7 +128,6 @@ EX portal_data make_portal(cellwalker cw, int spin) {
   if(MDIM == 3) for(int i=0; i<4; i++) id.iT[3][i] = id.iT[i][3] = i==3;
   int first = spin;
   int second = spin + 1;
-  if(in_s2xe() || sphere) swap(first, second);
   first = gmod(first, isize(fac));
   second = gmod(second, isize(fac));
   id.co0 = id.to_poco(fac[first]);
@@ -193,6 +192,12 @@ void connect_portal_1(cellwalker cw1, cellwalker cw2, int spin) {
     if(debugflags & DF_GEOM) for(int i=0; i<4; i++)
       println(hlog, "mapping ", get_column(T1, i), " to ", get_column(T2, i));
     p.T = T2 * inverse(T1);
+
+    if(det(p.T) < 0) {
+      set_column(T2, 0, p.id2.co1);
+      set_column(T2, 1, p.id2.co0);
+      p.T = T2 * inverse(T1);
+      }
     }
   }
 
