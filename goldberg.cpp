@@ -355,11 +355,15 @@ EX namespace gp {
         }
       }
     
-    if(S3 == 4 && param == loc(1,1)) {
+    auto fix_mirrors = [&] {
       if(ac1.cw.mirrored != hs.mirrored) ac1.cw--;
       if(ac2.cw.mirrored != hs.mirrored) ac2.cw--;
       auto& ac3 = get_mapping(vc[2]);
       if(ac3.cw.mirrored != hs.mirrored) ac3.cw--;
+      };
+
+    if(S3 == 4 && param == loc(1,1)) {
+      fix_mirrors();
       conn(loc(0,0), 1);
       conn(loc(0,1), 0);
       conn(loc(0,1), 1);
@@ -367,11 +371,54 @@ EX namespace gp {
       conn(loc(0,1), 3);
       return;
       }
+
+    if(S3 == 4 && param.first == param.second && nonorientable) {
+      fix_mirrors();
+
+      int size = param.first;
+
+      // go along the boundary of the 'diamond'
+
+      for(int dir=0; dir<4; dir++) {
+        int dir_orth = (dir+1) & 3;
+
+        loc at = vc[dir];
+
+        for(int i=0; i<size; i++) {
+          if(!pull(at, dir)) break;
+          at = at + eudir(dir);
+
+          if(!pull(at, dir_orth)) break;
+          at = at + eudir(dir_orth);
+          }
+        }
+
+      // build the skeleton
+
+      for(int dir=0; dir<4; dir++) {
+        int dir_orth = (dir+1) & 3;
+        for(int i=0; i<size; i++) {
+          conn(vc[dir] + eudir(dir_orth) * i, dir_orth);
+          }
+        }
+
+      // fill everything
+
+      for(int y=0; y<2*size; y++) {
+        int xdist = min(y, 2*size-y);
+        for(int x=0; x<xdist; x++)
+        for(int d=0; d<4; d++) {
+          conn(loc(x, y), d);
+          conn(loc(-x, y), d);
+          }
+        }
+
+      return;
+      }
     
     if(nonorientable && param.first == param.second) {
       int x = param.first;
-      if(ac1.cw.mirrored != hs.mirrored) ac1.cw--;
-      if(ac2.cw.mirrored != hs.mirrored) ac2.cw--;
+      fix_mirrors();
       
       for(int d=0; d<3; d++) for(int k=0; k<3; k++) 
       for(int i=0; i<x; i++) {
