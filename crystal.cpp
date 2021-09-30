@@ -639,6 +639,8 @@ struct hrmap_crystal : hrmap_standard {
     transmatrix res;
     ld gdist = S7 == 12 ? hdist0(tC0(cgi.adjmoves[0])) : cgi.strafedist;
 
+    h->cmove(d);
+
     for(auto& cr: cgi.cellrotations) {
 
       transmatrix U = T * cr.M;
