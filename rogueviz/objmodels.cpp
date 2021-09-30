@@ -21,6 +21,8 @@ bool model::available() {
   return false;
   }
 
+bool root = false;
+
 void model::load_obj(model_data& md) {
   md.prec_used = prec;
 
@@ -69,9 +71,9 @@ void model::load_obj(model_data& md) {
         if(s == "Kd") {
           ld a, b, c;
           scan(fsm, a, b, c);
-          part(nextcol, 1) = a * 319.99;
-          part(nextcol, 2) = b * 319.99;
-          part(nextcol, 3) = c * 319.99;
+          part(nextcol, 3) = root ? sqrt(a) * 255.99 : a * 319.99;
+          part(nextcol, 2) = root ? sqrt(b) * 255.99 : b * 319.99;
+          part(nextcol, 1) = root ? sqrt(c) * 255.99 : c * 319.99;
           }
         if(s == "newmtl") {
           emit_material();
