@@ -571,7 +571,7 @@ void display_data::set_projection(int ed, ld shift) {
       auto cols = glhr::acolor(darkena(backcolor, 0, 0xFF));
       glUniform4f(selected->uFogColor, cols[0], cols[1], cols[2], cols[3]);
       }
-    else M[2][2] /= 1000;
+    else M[2][2] /= 10000;
     glhr::projection_multiply(M);
     if(nisot::local_perspective_used() && (shader_flags & SF_BOX))
       glhr::projection_multiply(glhr::tmtogl_transpose(NLP));
