@@ -15,6 +15,8 @@
 #include "hyper.h"
 namespace hr {
 
+EX bool disable_bigstuff;
+
 // horocycles
 
 EX int newRoundTableRadius() {
@@ -1922,6 +1924,7 @@ EX void gen_temple(cell *c) {
   }
 
 EX void moreBigStuff(cell *c) {
+  if(disable_bigstuff) return;
 
   if((bearsCamelot(c->land) && !euclid && !quotient && !nil) || c->land == laCamelot) 
   if(have_alt(c)) if(!(bt::in() && specialland != laCamelot)) 

@@ -214,6 +214,7 @@ EX void initgame() {
   pregen();  
   setdist(cwt.at, BARLEV, NULL);
 
+  if(!disable_bigstuff)
   if(isCyclic(specialland) || specialland == laCanvas) {
     #if CAP_COMPLEX2
     camelot::anthraxBonus = items[itHolyGrail];
