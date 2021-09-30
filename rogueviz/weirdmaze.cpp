@@ -27,6 +27,12 @@ int atleast = 1;
 set<cell*> visited;
 
 bool restrict(cell *c, const shiftmatrix& V) {
+
+  if(atleast == -1) {
+    c->wall = c->type == 3 ? waWaxWall : waNone;
+    return false;
+    }
+
   if(visited.count(c)) return false;
   
   visited.insert(c);
