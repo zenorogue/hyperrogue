@@ -737,6 +737,7 @@ enum eGeometry {
   gSpace535, gSpace536, gSeifertCover, gSeifertWeber, gHomologySphere,
   gInfOrderMixed, gSpace436, gFake,
   gSpace345, gSpace353, gSpace354, gSpace355,
+  gHalfBring,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSolNIH, gcNil, gcProduct, gcSL2 };
@@ -932,6 +933,7 @@ EX vector<geometryinfo> ginf = {
   {"{3,5,3}","none",    "{3,5,3} hyperbolic honeycomb",               "353",     20, 5, 0,         giHyperb3, {{7, 2}}, eVariation::pure},
   {"{3,5,4}","none",    "{3,5,4} hyperbolic honeycomb",               "354",     20, 5, qIDEAL | qULTRA,    giHyperb3, {{7, 2}}, eVariation::pure},
   {"{3,5,5}","none",    "{3,5,5} hyperbolic honeycomb",               "355",     20, 5, qIDEAL | qULTRA,    giHyperb3, {{7, 2}}, eVariation::pure},
+  {"{5,4}", "pBring",   "projective Bring's Surface",                 "pBring",   5, 4, qsSMALLN,   giHyperb2, {{6, 4}}, eVariation::bitruncated},
   };
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 

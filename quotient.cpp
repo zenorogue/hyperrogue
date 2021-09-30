@@ -318,6 +318,24 @@ struct hrmap_quotient : hrmap_standard {
         break;
         }
 
+      case gHalfBring: {
+        connections = {
+          5, 12, 16, 23, 29,
+          0, 32, 36, 43, 49,
+          50, 41|symmask, 1, 48, 34|symmask,
+          53|symmask, 2, 42|symmask, 45|symmask, 39,
+          40, 31|symmask, 37|symmask, 3, 54|symmask,
+          38|symmask, 52, 47|symmask, 33, 4,
+          55, 21|symmask, 6, 28, 14|symmask,
+          58|symmask, 7, 22|symmask, 25|symmask, 19,
+          20, 11|symmask, 17|symmask, 8, 59|symmask,
+          18|symmask, 57, 27|symmask, 13, 9,
+          10, 56|symmask, 26, 15|symmask, 24|symmask,
+          30, 51|symmask, 46, 35|symmask, 44|symmask
+          };
+        break;
+        };
+
       case gSchmutzM2: {
         connections = {
           23,  47,  27,  14,  38,  30,  17,  41,  33,  20,  44,  24, 
