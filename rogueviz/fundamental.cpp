@@ -232,7 +232,7 @@ int readArgs() {
   return 0;
   }
 
-auto fundamentalhook = addHook(hooks_args, 100, readArgs) + addHook(hooks_frame, 100, fundamental_marker);
+auto fundamentalhook = addHook(hooks_args, 100, readArgs) + addHook(hooks_frame, 100, fundamental_marker) + addHook(hooks_clearmemory, 100, [] { same.clear(); gm.clear(); });
 
 }
 
