@@ -459,21 +459,22 @@ void storevertex(vector<glvertex>& tab, const hyperpoint& h) {
   tab.push_back(glhr::pointtogl(h));
   }
 
-double linequality = .1;
+double min_line_step = .1;
+double min_line_splits = 0;
 
-void storelineto(vector<glvertex>& tab, const hyperpoint& h1, const hyperpoint& h2) {
-  if(intval(h1, h2) < linequality)
+void storelineto(vector<glvertex>& tab, const hyperpoint& h1, const hyperpoint& h2, int s) {
+  if(intval(h1, h2) < min_line_step && s >= min_line_splits)
     storevertex(tab, h2);
   else {
     hyperpoint h3 = mid(h1, h2);
-    storelineto(tab, h1, h3);
-    storelineto(tab, h3, h2);
+    storelineto(tab, h1, h3, s+1);
+    storelineto(tab, h3, h2, s+1);
     }
   }
 
 void storeline(vector<glvertex>& tab, const hyperpoint& h1, const hyperpoint& h2) {
   storevertex(tab, h1);
-  storelineto(tab, h1, h2);
+  storelineto(tab, h1, h2, 0);
   }
 
 color_t darken_a(color_t c) {
@@ -1029,7 +1030,7 @@ int readArgs() {
     patterns::whichShape = '8';
     }
   else if(argis("-lq")) {
-    shift_arg_formula(linequality);
+    shift_arg_formula(min_line_step);
     }
   else if(argis("-nolegend")) {
     legend.clear();
