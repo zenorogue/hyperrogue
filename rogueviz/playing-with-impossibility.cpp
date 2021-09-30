@@ -465,7 +465,7 @@ void enable_earth() {
   texture::texture_aura = true;
   stop_game();
   set_geometry(gSphere);
-  firstland = specialland = laCanvas;
+  enable_canvas();
   patterns::whichCanvas = 'F';
   start_game();        
   texture::config.configname = "textures/earth.txc";
@@ -499,7 +499,7 @@ slide dmv_slides[] = {
   {"Euclidean plane", 999, LEGAL::NONE | QUICKGEO, 
     "The sum of angles of a triangle is 180 degrees.\n\n",
     [] (presmode mode) {
-      if(mode == pmStartAll) firstland = specialland = laCanvas;
+      if(mode == pmStartAll) enable_canvas();
       setCanvas(mode, 'F');
       if(mode == pmStart) {
         stop_game();
@@ -573,7 +573,7 @@ slide dmv_slides[] = {
     "Hyperbolic geometry works the opposite way to spherical geometry."
     "In hyperbolic geometry, the sum of angles of a triangle is less than 180 degrees.\n\n",
     [] (presmode mode) {
-      if(mode == pmStartAll) firstland = specialland = laCanvas;
+      if(mode == pmStartAll) enable_canvas();
       setCanvas(mode, 'F');
       if(mode == pmStart) {
         stop_game();

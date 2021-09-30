@@ -373,7 +373,7 @@ void enable() {
   using rogueviz::rv_hook;
   
   vid.linequality = 4;
-  firstland = specialland = laCanvas;
+  enable_canvas();
   patterns::whichCanvas = 'F';
 
   colortables['F'][0] = 0x80C080;
@@ -391,12 +391,12 @@ void enable() {
   dual::switch_to(0);
   set_geometry(gSphere);
   set_variation(eVariation::pure);
-  firstland = specialland = laCanvas;
+  enable_canvas();
 
   dual::switch_to(1);
   set_geometry(gNormal);
   set_variation(eVariation::pure);
-  firstland = specialland = laCanvas;
+  enable_canvas();
 
   rv_hook(hooks_frame, 100, draw_earth);
   rv_hook(hooks_drawcell, 100, restrict_cell);

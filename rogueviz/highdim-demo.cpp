@@ -71,7 +71,7 @@ void run_cpick() {
   stop_game();
   crystal::set_crystal(6);
   set_variation(eVariation::pure);
-  firstland = specialland = laCanvas;
+  enable_canvas();
   patterns::whichCanvas = 'g';
   patterns::canvasback = 0;
   check_cgi();
@@ -205,7 +205,7 @@ void run_sb() {
   stop_game();
   crystal::set_crystal(6);
   set_variation(eVariation::pure);
-  firstland = specialland = laCanvas;
+  enable_canvas();
   patterns::whichCanvas = 'g';
   patterns::canvasback = 0;
   check_cgi();
@@ -240,7 +240,7 @@ void sync(int mode, flagtype flags) {
   if(mode == pmStart) {
     crystal::compass_probability = 0;
     crystal::crystal_period = 0;
-    firstland = specialland = laCanvas;
+    enable_canvas();
     mapeditor::drawplayer = (flags & PLAYER);
     vid.smart_range_detail = 1;
     vid.use_smart_range = 2;
@@ -404,7 +404,7 @@ auto explore_structure(int _shapeid) {
       tour::slide_backup(smooth_scrolling, true);
       stop_game();
       set_geometry(geometry == gCrystal534 ? gCrystal534 : gCrystal344);
-      firstland = specialland = laCanvas;
+      enable_canvas();
       patterns::whichCanvas = ' ';
       shapeid = _shapeid;
       enable();
@@ -441,7 +441,7 @@ void house(int sides, int shape = 10) {
   else
     crystal::set_crystal(sides);
   set_variation(eVariation::pure);
-  firstland = specialland = laCanvas;
+  enable_canvas();
   patterns::whichCanvas = ' ';
   shapeid = shape;
   check_cgi();

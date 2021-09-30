@@ -45,7 +45,7 @@ void run_sb() {
   stop_game();
   crystal::set_crystal(6);
   set_variation(eVariation::pure);
-  firstland = specialland = laCanvas;
+  enable_canvas();
   patterns::whichCanvas = 'g';
   patterns::canvasback = 0x101010;
   check_cgi();

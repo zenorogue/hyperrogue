@@ -519,7 +519,7 @@ void pick_pattern() {
   dialog::addItem("green football", 'g');
   dialog::add_action([] { 
     chg_pattern([] {
-      firstland = specialland = laCanvas;
+      enable_canvas();
       patterns::whichCanvas = 'B';
       });
     });
@@ -530,7 +530,7 @@ void pick_pattern() {
       gp::param.first = 9;
       gp::param.second = 0;
       set_variation(eVariation::goldberg);
-      firstland = specialland = laCanvas;
+      enable_canvas();
       patterns::whichCanvas = 'F';
       });
     });
@@ -539,7 +539,7 @@ void pick_pattern() {
   dialog::add_action([] { 
     chg_pattern([] {
       set_geometry(gOctagon);
-      firstland = specialland = laCanvas;
+      enable_canvas();
       patterns::whichCanvas = 'T';
       });
     });
@@ -572,7 +572,7 @@ void pick_pattern() {
       set_variation(eVariation::pure);
       arcm::current.parse("4^5");
       set_geometry(gArchimedean);
-      firstland = specialland = laCanvas;
+      enable_canvas();
       patterns::whichCanvas = 'A';
       });
     });

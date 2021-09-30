@@ -143,7 +143,7 @@ void magic(int sides) {
   else
     crystal::set_crystal(sides);
   set_variation(eVariation::pure);
-  firstland = specialland = laCanvas;
+  enable_canvas();
   patterns::whichCanvas = 'g';
   patterns::canvasback = back;
   check_cgi();

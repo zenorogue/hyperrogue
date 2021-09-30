@@ -27,7 +27,7 @@ auto geoslide(eGeometry g, char canvas, int jhole, int jblock) {
       tour::slide_backup<ld>(sightranges[gSol], 7);
       tour::slide_backup<ld>(sightranges[gSpace435], 7);
       vid.texture_step = 4;
-      firstland = specialland = laCanvas;
+      enable_canvas();
       tour::slide_backup(patterns::jhole, jhole);
       tour::slide_backup(patterns::rwalls, jhole);
       tour::slide_backup(patterns::jblock, jblock);

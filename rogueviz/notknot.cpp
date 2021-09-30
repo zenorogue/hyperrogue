@@ -1397,7 +1397,7 @@ void nk_launch() {
   margin = 4;
   mapeditor::drawplayer = false;
   stop_game();
-  firstland = specialland = laCanvas;
+  enable_canvas();
   set_geometry(gNotKnot);
   sightranges[geometry] = .5;
   ray::max_cells = 600000;

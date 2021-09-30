@@ -378,7 +378,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_bird)
       }
     
     in = true;
-    firstland = specialland = laCanvas;
+    enable_canvas();
     patterns::whichCanvas = 'r';
     patterns::rwalls = 100;
     mapeditor::drawplayer = false;
