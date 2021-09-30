@@ -140,7 +140,7 @@ transmatrix try_harder_relative_matrix(cell *at, cell *from) {
   }
 
 void edit_segment(int aid) {
-  cmode = sm::SIDE;
+  cmode = 0;
   gamescreen(0);
   dialog::init(XLAT("animation segment"), 0xFFFFFFFF, 150, 0);
   dialog::addSelItem("interval", fts(anims[aid].start_interval), 'i');
@@ -180,7 +180,7 @@ void edit_segment(int aid) {
 void generate_trace();
 
 void edit_step(animation& anim, int id) {
-  cmode = sm::SIDE;
+  cmode = 0;
   gamescreen(0);
   dialog::init(XLAT("animation step"), 0xFFFFFFFF, 150, 0);
   auto& f = anim.frames[id];
@@ -267,7 +267,7 @@ ld c_front_dist = 0, c_up_dist = 0;
 void handle_animation(ld t);
 
 void show() {
-  cmode = sm::SIDE;
+  cmode = 0;
   gamescreen(0);
   draw_crosshair();
   dialog::init(XLAT("smooth camera"), 0xFFFFFFFF, 150, 0);
