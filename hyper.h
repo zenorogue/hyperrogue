@@ -267,6 +267,8 @@ struct projection_configuration {
   ld hyperboloid_scaling;
   ld vr_angle, vr_zshift, vr_scale_factor;
 
+  int back_and_front; /* 0 = do not, 1 = do, 2 = only back */
+
   projection_configuration() { 
     formula = "z^2"; top_z = 5; model_transition = 1; spiral_angle = 70; spiral_x = 10; spiral_y = 7; 
     rotational_nil = 1;
@@ -286,6 +288,7 @@ struct projection_configuration {
     hyperboloid_scaling = 1;
     vr_zshift = 0;
     vr_scale_factor = 1;
+    back_and_front = 0;
     }
   };
 
