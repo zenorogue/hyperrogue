@@ -1613,7 +1613,7 @@ void clear_tcell_data() {
     c->distance_fixed = false;
     c = c->next;
     }
-  in_fixing = false; fix_queue = {};
+  in_fixing = false; fix_queue = std::queue<reaction_t>{};
   }
 
 void cleanup() {
@@ -1664,7 +1664,7 @@ EX void generate_rules() {
   tcell_to_cell.clear();
   branch_conflicts_seen.clear();
   sidecache.clear();
-  fix_queue = {}; in_fixing = false;
+  fix_queue = queue<reaction_t>();; in_fixing = false;
 
   if(flags & w_numerical) {
     start_game();
@@ -1686,7 +1686,7 @@ EX void generate_rules() {
     t_origin.push_back(c);
     }
 
-  bfs_queue = {};
+  bfs_queue = queue<tcell*>();
   if(flags & w_bfs) for(auto c: t_origin) bfs_queue.push(c);
   
   try_count = 0;
