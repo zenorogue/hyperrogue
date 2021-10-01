@@ -249,7 +249,7 @@ S("You feel that you have enough treasure to access new lands!", "Вы чувс�
 S("Collect more treasures, there are still more lands waiting...", "Собирайте больше сокровищ, ещё много земель Вас ждут...")
 S("You feel that the stars are right, and you can access R'Lyeh!", "Вы чувствуете, что звёзды правы, Вы можете открыть Р'Льех!")
 S("Kill monsters and collect treasures, and you may get access to Hell...", "Убивайте монстров и собирайте сокровища, и Вы сможете открыть Ад...")
-S("To access Hell, collect %1 treasures each of 9 kinds...", "Чтобы открыть Ад, соберите по %1 сокровищ из 9 различных мест...")
+S("To access Hell, collect %1 treasures each of %2 kinds...", "Чтобы открыть Ад, соберите по %1 сокровищ из %2 различных мест...")
 S("Abandon all hope, the gates of Hell are opened!", "Оставь надежду, врата Ада открылись!")
 S("And the Orbs of Yendor await!", "Шары Йендора ждут!")
 S("You switch places with %the1.", "Вы поменялись местами с %abl1.")

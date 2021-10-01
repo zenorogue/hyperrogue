@@ -542,7 +542,7 @@ EX void gainItem(eItem it) {
     IF(R30*5/2)
       addMessage(XLAT("Kill monsters and collect treasures, and you may get access to Hell..."));
     IF(R10 * 9) 
-      addMessage(XLAT("To access Hell, collect %1 treasures each of 9 kinds...", its(R10)));
+      addMessage(XLAT("To access Hell, collect %1 treasures each of %2 kinds...", its(R10), its(lands_for_hell())));
     if(landUnlocked(laHell) && !lhu) {
       addMessage(XLAT("Abandon all hope, the gates of Hell are opened!"));
       addMessage(XLAT("And the Orbs of Yendor await!"));

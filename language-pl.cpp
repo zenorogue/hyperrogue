@@ -248,7 +248,7 @@ S("You feel that you have enough treasure to access new lands!", "Masz wystarcza
 S("Collect more treasures, there are still more lands waiting...", "Zbieraj skarby, nowe krainy czekają...")
 S("You feel that the stars are right, and you can access R'Lyeh!", "Gwiazdy są na miejscu, R'Lyeh czeka!")
 S("Kill monsters and collect treasures, and you may get access to Hell...", "Zabijaj potwory, zdobywaj skarby, może trafisz do Piekła...")
-S("To access Hell, collect %1 treasures each of 9 kinds...", "By dostać się do Piekła, znajdź po %1 skarbów każdego z 9 rodzajów...")
+S("To access Hell, collect %1 treasures each of %2 kinds...", "By dostać się do Piekła, znajdź po %1 skarbów każdego z %2 rodzajów...")
 S("Abandon all hope, the gates of Hell are opened!", "Porzuć wszelką nadzieję, bramy Piekła są otwarte!")
 S("And the Orbs of Yendor await!", "I sfery Yendoru czekają!")
 S("You switch places with %the1.", "Zamieniasz się miejscami z %abl1.")

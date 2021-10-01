@@ -265,7 +265,7 @@ S("You feel that you have enough treasure to access new lands!", "Cítíš, že 
 S("Collect more treasures, there are still more lands waiting...", "Sbírej další poklady, další kraje stále čekají...")
 S("You feel that the stars are right, and you can access R'Lyeh!", "Cítíš, že postavení hvězd je správné, a ty můžeš vstoupit do R'Lyeh!")
 S("Kill monsters and collect treasures, and you may get access to Hell...", "Zabíjej netvory a sbírej poklady a možná najdeš cestu do Pekla...")
-S("To access Hell, collect %1 treasures each of 9 kinds...", "Aby ses dostal do Pekla, sesbírej %1 pokladů od každého z 9 různých typů...")
+S("To access Hell, collect %1 treasures each of %2 kinds...", "Aby ses dostal do Pekla, sesbírej %1 pokladů od každého z %2 různých typů...")
 S("Abandon all hope, the gates of Hell are opened!", "Zanech vší naděje, brány Pekla jsou otevřeny!")
 S("And the Orbs of Yendor await!", "A Yendorské sféry čekají!")
 S("You switch places with %the1.", "Vyměni%l0 sis místo s %abl1.")

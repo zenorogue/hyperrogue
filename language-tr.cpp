@@ -229,7 +229,7 @@ S("You feel that you have enough treasure to access new lands!", "Yeni diyarlara
 S("Collect more treasures, there are still more lands waiting...", "Daha fazla hazine topla, hâlâ seni bekleyen diyarlar var...")
 S("You feel that the stars are right, and you can access R'Lyeh!", "Yıldızlar sana, R'Lyeh'e ulaşabileceğini söylüyor!")
 S("Kill monsters and collect treasures, and you may get access to Hell...", "Canavarlar öldür, hazineler topla ve belki Cehenneme erişebilirsin...")
-S("To access Hell, collect %1 treasures each of 9 kinds...", "Cehenneme erişmek için her 9 hazine tipinden %1'ar tane toplamalısın...")
+S("To access Hell, collect %1 treasures each of %2 kinds...", "Cehenneme erişmek için her %2 hazine tipinden %1'ar tane toplamalısın...")
 S("Abandon all hope, the gates of Hell are opened!", "Umutlar tükendi, Cehennemin kapıları açıldı!")
 S("And the Orbs of Yendor await!", "Yendorun Küresi seni bekliyor!")
 S("You switch places with %the1.", "%abl1 yer değiştirdin.")
