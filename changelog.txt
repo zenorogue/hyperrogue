@@ -4483,3 +4483,33 @@ Bugfixes:
 * fixed possible bugs with Brownian colors, snake colors, interactions of arrow traps and terracotta warriors (thanks to @jruderman)
 * fixed 3-dimensional elliptic space
 * tes files: fixed a bug with 'ended at wrong edge determining vertex_valence'
+
+2021-09-30 17:55 Update 12.0g:
+
+Geometries/projections:
+* new manifold (projective Bring surface)
+* fixed the interesting dodecahedral quotient spaces (535c, 535s, 533s)
+* fixed rotation spaces
+* fixed a possible crash in Crystal
+* fixes to the tree rule generator
+* some Euclidean lands are now available only in single land mode
+* two-sided display of hyperbolic disk with -1<projection<0
+* load maps with intra-geometric portals
+
+Gameplay bugfixes:
+* Erase rosemap entries for deleted cells
+* Orb of Trickery messages no longer reveal underwater items
+* Add Orb error messages for Phasing and Vaulting
+* improved ranged Orb error messages
+* warning protection no longer evokes Flash/Lightning
+* no more fatigue cost checking when the Curse is gone
+* cleaned up where summoned creature appears for Orb of Life and Orb of Friendship
+
+Other fixes:
+* fixed PAGEDOWN rotating in the same direction as PAGEUP
+* wall shadows no longer drawn with noshadow
+* an option to disable sky drawing
+* improved the CLI option to set the resolution
+* mimics now destroyed correctly in the map editor
+* parallel linepattern is now configurable
+* fixed message about 9 treasure types in casual
