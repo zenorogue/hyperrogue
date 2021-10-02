@@ -49,7 +49,7 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
     h[1] /= h[2];
     h[2] = dec.first - d;
     h[3] = 1;
-    if(d<0) h[2] = -h[2];
+    if(d<0) h[2] = -h[2], h[0] = -h[0];
     return h;
     }
   else if(prod && kind == 0) {
@@ -73,7 +73,7 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
 hyperpoint portal_data::from_poco(hyperpoint h) const {
   if(prod && kind == 1) {
     ld xd = h[2];
-    if(d<0) xd = -xd;
+    if(d<0) xd = -xd, h[0] = -h[0];
     h[2] = 1;
     auto z = product_decompose(h).first;
     return h * exp(d+xd-z);

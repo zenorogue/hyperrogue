@@ -984,7 +984,7 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
         "    position.z = 0.;\n" // zpos - uPLevel;\n"
         "    nposition = "+fn+"(nposition);\n"
         "    nposition.z = zspeed * 1e-3;\n"
-        "    if(pconnection.y < .5) { nposition.z = -nposition.z; }\n";
+        "    if(pconnection.y < .5) { nposition.z = -nposition.z; nposition.x = -nposition.x; position.x = -position.x; }\n";
       }
     fmain += "  } else {\n";
     if(1) {
@@ -1029,7 +1029,7 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
       string fn = in_h2xe() ? "from_poco_h2xr_h" : "from_poco_s2xr_s";
 
       fmain +=
-      "    if(pconnection.w < .5) { position.z = -position.z; nposition.z = -nposition.z; }\n"
+      "    if(pconnection.w < .5) { position.z = -position.z; nposition.z = -nposition.z; nposition.x = -nposition.x; position.x = -position.x; }\n"
       "    zspeed = (nposition.z - position.z) * 1e3;\n"
       "    zpos = position.z + (pconnection.w - .5) * 16.;\n"
       "    position = "+fn+"(position);\n"
