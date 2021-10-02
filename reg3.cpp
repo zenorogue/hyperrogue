@@ -17,10 +17,8 @@ EX hyperpoint final_coords(hyperpoint h) {
   if(sn::in() || !bt::in()) 
     return ultra_normalize(h);
   #if CAP_BT
-  if(bt::in()) {
-    ld yy = log(2) / 2;
-    return bt::parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
-    }
+  if(bt::in()) 
+    return bt::bt_to_minkowski(h);
   #endif
   return h;
   }
