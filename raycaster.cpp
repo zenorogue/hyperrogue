@@ -1472,12 +1472,10 @@ void raygen::add_functions() {
         "  float co = " + glhr::to_glsl(vid.binary_width / log(2) / 4) + ";\n"
         "  h.x *= co; h.y *= co;\n"
         "  float diag = (h.x*h.x + h.y*h.y)/2.;\n"
-        "  float px = sinh(h.z);\n"
-        "  float pw = cosh(h.z);\n"
-        "  res.x = (1.-diag) * px + diag * pw;\n"
-        "  res.y = (-h.x) * px + h.x * pw;\n"
-        "  res.z = (-h.y) * px + h.y * pw;\n"
-        "  res.w = (-diag) * px + (1.+diag) * pw;\n"
+        "  res.x = sinh(h.z) + diag * exp(-h.z);\n"
+        "  res.y = h.x * exp(-h.z);\n"
+        "  res.z = h.y * exp(-h.z);\n"
+        "  res.w = cosh(h.z) + diag * exp(-h.z);\n"
         "  return res;\n"
         "  }\n\n");
 
