@@ -303,7 +303,6 @@ struct raygen {
   bool use_reflect;
   bool many_cell_types;
   bool eyes;
-  bool stepbased;
 
   string getM(string s) {
     if(m_via_texture)
@@ -348,7 +347,7 @@ void raygen::add_if(const string& seek, const string& function) {
 void raygen::compute_which_and_dist(int flat1, int flat2) {
   using glhr::to_glsl;
 
-  if(!stepbased) {
+  if(!is_stepbased()) {
 
     fmain +=
       "  if(which == -1) {\n";
@@ -455,32 +454,32 @@ void raygen::compute_which_and_dist(int flat1, int flat2) {
 
 void raygen::move_forward() {
   using glhr::to_glsl;
-  if(in_h2xe() && !stepbased) fmain +=
+  if(in_h2xe() && !is_stepbased()) fmain +=
     "  mediump float ch = cosh(dist*xspeed); mediump float sh = sinh(dist*xspeed);\n"
     "  mediump vec4 v = position * ch + tangent * sh;\n"
     "  tangent = tangent * ch + position * sh;\n"
     "  position = v;\n"
     "  zpos += dist * zspeed;\n";
-  else if(in_s2xe() && !stepbased) fmain +=
+  else if(in_s2xe() && !is_stepbased()) fmain +=
     "  mediump float ch = cos(dist*xspeed); mediump float sh = sin(dist*xspeed);\n"
     "  mediump vec4 v = position * ch + tangent * sh;\n"
     "  tangent = tangent * ch - position * sh;\n"
     "  position = v;\n"
     "  zpos += dist * zspeed;\n";
-  else if(in_e2xe() && !stepbased) fmain +=
+  else if(in_e2xe() && !is_stepbased()) fmain +=
     "  position = position + tangent * dist * xspeed;\n"
     "  zpos += dist * zspeed;\n";
-  else if(hyperbolic && !stepbased) fmain +=
+  else if(hyperbolic && !is_stepbased()) fmain +=
     "  mediump float ch = cosh(dist); mediump float sh = sinh(dist);\n"
     "  mediump vec4 v = position * ch + tangent * sh;\n"
     "  tangent = tangent * ch + position * sh;\n"
     "  position = v;\n";
-  else if(sphere && !stepbased) fmain +=
+  else if(sphere && !is_stepbased()) fmain +=
     "  mediump float ch = cos(dist); mediump float sh = sin(dist);\n"
     "  mediump vec4 v = position * ch + tangent * sh;\n"
     "  tangent = tangent * ch - position * sh;\n"
     "  position = v;\n";
-  else if(stepbased) {
+  else if(is_stepbased()) {
 
     bool use_christoffel = true;
 
@@ -1691,8 +1690,6 @@ void raygen::create() {
 
    eyes = is_eyes();
 
-   stepbased = is_stepbased();
-
    fmain = "void main() {\n";
 
    if(use_reflect) fmain += "  bool depthtoset = true;\n";
@@ -1758,7 +1755,7 @@ void raygen::create() {
     if(eyes) s *= vrhr::absolute_unit_in_meters;
     #endif
     
-    if(stepbased) fmain += 
+    if(is_stepbased() || intra::in) fmain +=
       "  const mediump float maxstep = " + fts(maxstep_current() * s) + ";\n"
       "  const mediump float minstep = " + fts(minstep * s) + ";\n"
       "  mediump float next = maxstep;\n";          
