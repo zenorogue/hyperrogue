@@ -353,7 +353,7 @@ void raygen::compute_which_and_dist(int flat1, int flat2) {
     fmain +=
       "  if(which == -1) {\n";
 
-    fmain += "for(int i="+its(flat1)+"; i<"+(prod ? "sides-2" : (WDIM == 2 || is_subcube_based(variation) || intra::in) ? "sides" : its(flat2))+"; i++) {\n";
+    fmain += "for(int i="+its(flat1)+"; i<"+(prod ? "sides-2" : ((WDIM == 2 || is_subcube_based(variation) || intra::in) && !bt::in()) ? "sides" : its(flat2))+"; i++) {\n";
 
     fmain += "    mediump mat4 m = " + getM("walloffset+i") + ";\n";
 
