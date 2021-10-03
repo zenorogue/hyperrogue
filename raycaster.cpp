@@ -1307,11 +1307,12 @@ void raygen::emit_iterate(int gid1) {
     "      t.w = 1.;\n";
 
   if(levellines) {
-    if(hyperbolic && !eyes)
+    if(hyperbolic && !eyes && !intra::in)
       fmain += "gl_FragColor.xyz *= 0.5 + 0.5 * cos(z/cosh(go) * uLevelLines * 2. * PI);\n";
     else
-      fmain += "gl_FragColor.xyz *= 0.5 + 0.5 * cos(z * uLevelLines * 2. * PI);\n";
-    fsh += "uniform mediump float uLevelLines;\n";
+      fmain += "gl_FragColor.xyz *= 0.5 + 0.5 * cos(go * uLevelLines * 2. * PI);\n";
+    if(fsh.find("uLevelLines") == string::npos)
+      fsh += "uniform mediump float uLevelLines;\n";
     }
 
   if(panini_alpha)
