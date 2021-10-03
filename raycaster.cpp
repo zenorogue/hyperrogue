@@ -296,13 +296,14 @@ int max_celltype = 64;
 struct raygen {
   string fsh, vsh, fmain;
 
+  void add_if(const string& seek, const string& function);
+
   int deg, irays;
   bool asonov;
   bool use_reflect;
   bool many_cell_types;
   bool eyes;
   bool stepbased;
-  int flat1, flat2;
 
   string getM(string s) {
     if(m_via_texture)
@@ -325,17 +326,26 @@ struct raygen {
       return "uWallstart[" + s + "]";
     };
   
-  void compute_which_and_dist();
-  void apply_reflect();
+  void compute_which_and_dist(int flat1, int flat2);
+  void apply_reflect(int flat1, int flat2);
   void move_forward();
   void emit_intra_portal(int gid1, int gid2);
   void emit_iterate(int gid1);
   void create();
+
+  string f_xpush() { return hyperbolic ? "xpush_h" : "xpush_s"; }
+  string f_len() { return hyperbolic ? "len_h" : (sphere && rotspace) ? "len_sr" : sl2 ? "len_sl2" : sphere ? "len_s" : "len_x"; }
+  void add_functions();
   };
 
 raygen our_raygen;
 
-void raygen::compute_which_and_dist() {
+void raygen::add_if(const string& seek, const string& function) {
+  if(fsh.find(seek) != string::npos || fmain.find(seek) != string::npos)
+    fsh = function + fsh;
+  }
+
+void raygen::compute_which_and_dist(int flat1, int flat2) {
   using glhr::to_glsl;
 
   if(!stepbased) {
@@ -411,8 +421,8 @@ void raygen::compute_which_and_dist() {
       fmain +=
         "for(int i=20; i<22; i++) {\n"
           "mediump float sgn = i == 20 ? -1. : 1.;\n"
-          "mediump vec4 zpos = xpush(uBLevel*sgn) * position;\n"
-          "mediump vec4 ztan = xpush(uBLevel*sgn) * tangent;\n"
+          "mediump vec4 zpos = xpush_h(uBLevel*sgn) * position;\n"
+          "mediump vec4 ztan = xpush_h(uBLevel*sgn) * tangent;\n"
           "mediump float Mp = zpos.w - zpos.x;\n"
           "mediump float Mt = ztan.w - ztan.x;\n"
           "mediump float a = (Mp*Mp-Mt*Mt);\n"
@@ -779,20 +789,19 @@ void raygen::move_forward() {
     bool reg = hyperbolic || sphere || euclid || sl2 || prod;
 
     if(reg) {
-      fsh += "mediump float len_h(vec4 h) { return 1. - h[3]; }\n";
       string s = (rotspace || prod) ? "-2" : "";
       fmain +=
-    "    mediump float best = len(nposition);\n"
+    "    mediump float best = "+f_len()+"(nposition);\n"
     "    for(int i=0; i<sides"+s+"; i++) {\n"
-    "      mediump float cand = len(" + getM("walloffset+i") + " * nposition);\n"
+    "      mediump float cand = "+f_len()+"(" + getM("walloffset+i") + " * nposition);\n"
     "      if(cand < best) { best = cand; which = i; }\n"
     "      }\n";
       if(rotspace) fmain +=
     "   if(which == -1) {\n"
-    "     best = len_h(nposition);\n"
-    "     mediump float cand1 = len_h(" + getM("walloffset+sides-2") + "*nposition);\n"
+    "     best = len_rotspace(nposition);\n"
+    "     mediump float cand1 = len_rotspace(" + getM("walloffset+sides-2") + "*nposition);\n"
     "     if(cand1 < best) { best = cand1; which = sides-2; }\n"
-    "     mediump float cand2 = len_h(" + getM("walloffset+sides-1") + "*nposition);\n"
+    "     mediump float cand2 = len_rotspace(" + getM("walloffset+sides-1") + "*nposition);\n"
     "     if(cand2 < best) { best = cand2; which = sides-1; }\n"
     "     }\n";
       if(prod) {
@@ -837,14 +846,14 @@ void raygen::move_forward() {
         "if(sp.z > 1.) {\n"
           "mediump float best = 999.;\n"
           "for(int i=0; i<4; i++) {\n"
-            "mediump float cand = len(uStraighten * " + getM("i") + " * position);\n"
+            "mediump float cand = "+f_len()+"(uStraighten * " + getM("i") + " * position);\n"
             "if(cand < best) { best = cand; which = i;}\n"
             "}\n"
           "}\n"
         "if(sp.z < -1.) {\n"
           "mediump float best = 999.;\n"
           "for(int i=6; i<10; i++) {\n"
-            "mediump float cand = len(uStraighten * " + getM("i") + " * position);\n"
+            "mediump float cand = "+f_len()+"(uStraighten * " + getM("i") + " * position);\n"
             "if(cand < best) { best = cand; which = i;}\n"
             "}\n"
           "}\n";
@@ -912,17 +921,17 @@ void raygen::move_forward() {
     "position = position + tangent * dist;\n";
   }
 
-void raygen::apply_reflect() {
+void raygen::apply_reflect(int flat1, int flat2) {
   if(prod) fmain += "if(reflect && which >= sides-2) { zspeed = -zspeed; continue; }\n";
   if(hyperbolic && bt::in()) fmain +=
     "if(reflect && (which < "+its(flat1)+" || which >= "+its(flat2)+")) {\n"
     "  mediump float x = -log(position.w - position.x);\n"
-    "  mediump vec4 xtan = xpush(-x) * tangent;\n"
+    "  mediump vec4 xtan = xpush_h(-x) * tangent;\n"
     "  mediump float diag = (position.y*position.y+position.z*position.z)/2.;\n"
     "  mediump vec4 normal = vec4(1.-diag, -position.y, -position.z, -diag);\n"
     "  mediump float mdot = dot(xtan.xyz, normal.xyz) - xtan.w * normal.w;\n"
     "  xtan = xtan - normal * mdot * 2.;\n"
-    "  tangent = xpush(x) * xtan;\n"
+    "  tangent = xpush_h(x) * xtan;\n"
     "  continue;\n"
     "  }\n";
   if(asonov) {
@@ -1109,6 +1118,20 @@ void raygen::emit_iterate(int gid1) {
   if(intra::in && prod)
     fmain += "  const mediump float uPLevel = " + to_glsl(cgi.plevel/2) + ";\n";
 
+  int flat1 = 0, flat2 = deg;
+  if(prod || rotspace) flat2 -= 2;
+
+#if CAP_BT
+  if(hyperbolic && bt::in()) {
+    if(intra::in)
+      fmain += "mediump float uBLevel = " + to_glsl(log(bt::expansion()) / 2) + ";\n";
+    else
+      fsh += "uniform mediump float uBLevel;\n";
+    flat1 = bt::dirs_outer();
+    flat2 -= bt::dirs_inner();
+    }
+#endif
+
   fmain +=
     "  mediump float dist = 100.;\n";
 
@@ -1121,14 +1144,14 @@ void raygen::emit_iterate(int gid1) {
 
   if(IN_ODS) fmain +=
     "  if(go == 0.) {\n"
-    "    mediump float best = len(position);\n"
+    "    mediump float best = "+f_len()+"(position);\n"
     "    for(int i=0; i<sides; i++) {\n"
-    "      mediump float cand = len(" + getM("i") + " * position);\n"
+    "      mediump float cand = "+f_len()+"(" + getM("i") + " * position);\n"
     "      if(cand < best - .001) { dist = 0.; best = cand; which = i; }\n"
     "      }\n"
     "    }\n";
 
-  compute_which_and_dist();
+  compute_which_and_dist(flat1, flat2);
 
   vid.fixed_yz = false;
 
@@ -1155,14 +1178,14 @@ void raygen::emit_iterate(int gid1) {
       "if(which == 20) {\n"
       "  mediump float best = 999.;\n"
       "  for(int i="+its(flat2)+"; i<"+its(S7)+"; i++) {\n"
-        "  mediump float cand = len(" + getM("i") + " * position);\n"
+        "  mediump float cand = "+f_len()+"(" + getM("i") + " * position);\n"
         "  if(cand < best) { best = cand; which = i; }\n"
         "  }\n"
         "}\n"
       "if(which == 21) {\n"
         "mediump float best = 999.;\n"
         "for(int i=0; i<"+its(flat1)+"; i++) {\n"
-        "  mediump float cand = len(" + getM("i") + " * position);\n"
+        "  mediump float cand = "+f_len()+"(" + getM("i") + " * position);\n"
         "  if(cand < best) { best = cand; which = i; }\n"
         "  }\n"
 //          "gl_FragColor = vec4(.5 + .5 * sin((go+dist)*100.), 1, float(which)/3., 1); return;\n"
@@ -1295,7 +1318,7 @@ void raygen::emit_iterate(int gid1) {
     "    }\n";
 
   if(use_reflect)
-    apply_reflect();
+    apply_reflect(flat1, flat2);
 
   // next cell
   fmain +=
@@ -1332,119 +1355,6 @@ void raygen::emit_iterate(int gid1) {
 
   if(!intra::in) fmain += no_intra_portal;
   else {
-
-    if(hyperbolic && bt::in()) {
-      fsh +=
-        "mediump vec4 minkowski_to_bt(mediump vec4 h) {\n"
-        "  h /= (1. + h[3]);\n"
-        "  h[0] -= 1.;\n"
-        "  h /= h.x*h.x + h.y*h.y + h.z * h.z;\n"
-        "  h[0] += .5;\n"
-        "  float co = " + to_glsl(vid.binary_width / log(2) / 8) + ";\n"
-        "  mediump vec4 res;\n"
-        "  res.x = h.y / co;\n"
-        "  res.y = h.z / co;\n"
-        "  res.z = (log(2.) + log(-h.x)) / (log(2.)/2.);\n"
-        "  res.w = 1.;\n"
-        "  return res;\n"
-        "  }\n\n"
-
-        "mediump vec4 bt_to_minkowski(mediump vec4 h) {\n"
-        "  h.z = h.z * " + to_glsl(log(2)/2) + ";\n"
-        "  mediump vec4 res;\n"
-        "  float co = " + to_glsl(vid.binary_width / log(2) / 4) + ";\n"
-        "  h.x *= co; h.y *= co;\n"
-        "  float diag = (h.x*h.x + h.y*h.y)/2.;\n"
-        "  float px = sinh(h.z);\n"
-        "  float pw = cosh(h.z);\n"
-        "  res.x = (1.-diag) * px + diag * pw;\n"
-        "  res.y = (-h.x) * px + h.x * pw;\n"
-        "  res.z = (-h.y) * px + h.y * pw;\n"
-        "  res.w = (-diag) * px + (1.+diag) * pw;\n"
-        "  return res;\n"
-        "  }\n\n";
-      }
-
-    else if(hyperbolic) {
-      fsh +=
-        "mediump vec4 to_poco_h3(mediump vec4 pos) {\n"
-        "  return pos / pos[3];\n"
-        "  }\n\n";
-
-      fsh +=
-        "mediump vec4 from_poco_h3(mediump vec4 pos) {\n"
-        "  float s = 1. - dot(pos.xyz, pos.xyz);\n"
-        "  return pos / sqrt(s);\n"
-        "  }\n\n";
-      }
-
-    if(sphere) {
-      fsh +=
-        "mediump vec4 to_poco_s3(mediump vec4 pos) {\n"
-        "  return pos / pos[3];\n"
-        "  }\n\n";
-
-      fsh +=
-        "mediump vec4 from_poco_s3(mediump vec4 pos) {\n"
-        "  float s = 1. + dot(pos.xyz, pos.xyz);\n"
-        "  return pos / sqrt(s);\n"
-        "  }\n\n";
-      }
-
-    if(prod) {
-      if(in_h2xe()) {
-        fsh +=
-          "mediump vec4 from_poco_h2xr_h(mediump vec4 pos) {\n"
-          "  float s = 1. - pos.x*pos.x - pos.y * pos.y;\n"
-          "  pos.z = 1.;\n"
-          "  return pos / sqrt(s);\n"
-          "  }\n\n";
-
-        fsh +=
-          "mediump vec4 to_poco_h2xr_h(mediump vec4 pos) {\n"
-          "  pos /= pos[2];\n"
-          "  pos.w = 1.;\n"
-          "  return pos;\n"
-          "  }\n\n";
-
-        fsh +=
-          "mediump vec4 from_poco_h2xr_e(mediump vec4 pos) {\n"
-            "  return vec4(sinh(pos[2]) * cosh(pos[0]), sinh(pos[0]), cosh(pos[0]) * cosh(pos[2]), 0);\n"
-          "  }\n\n";
-
-        fsh +=
-          "mediump vec4 to_poco_h2xr_e(mediump vec4 pos) {\n"
-          "  mediump float x = asinh(pos[1]);\n"
-          "  return vec4(x, 0, asinh(pos[0] / cosh(x)), 1);\n"
-          "  }\n\n";
-        }
-      else {
-        fsh +=
-          "mediump vec4 from_poco_s2xr_s(mediump vec4 pos) {\n"
-          "  float s = 1. + pos.x*pos.x + pos.y * pos.y;\n"
-          "  pos.z = 1.;\n"
-          "  return pos / sqrt(s);\n"
-          "  }\n\n";
-
-        fsh +=
-          "mediump vec4 to_poco_s2xr_s(mediump vec4 pos) {\n"
-          "  pos /= pos[2];\n"
-          "  pos.w = 1.;\n"
-          "  return pos;\n"
-          "  }\n\n";
-
-        fsh +=
-          "mediump vec4 from_poco_s2xr_e(mediump vec4 pos) {\n"
-            "  return vec4(sin(pos[2]) * cos(pos[0]), sin(pos[0]), cos(pos[0]) * cos(pos[2]), 0);\n"
-          "  }\n\n";
-
-        fsh +=
-          "mediump vec4 to_poco_s2xr_e(mediump vec4 pos) {\n"
-          "  mediump float x = asin_clamp(pos[1]);\n"
-          "  return vec4(x, 0, asin_clamp(pos[0] / cos(x)), 1);\n"
-          "  }\n\n";
-        }
-      }
 
     if(intra::in) {
       int q = isize(intra::data);
@@ -1498,6 +1408,158 @@ void enable_raycaster() {
     our_raycaster = make_shared<raycaster> (g.vsh, g.fsh);
     }
   full_enable(our_raycaster);
+  }
+
+void raygen::add_functions() {
+
+  add_if("xpush_h",
+
+    "mediump mat4 xpush_h(float x) { return mat4("
+         "cosh(x), 0., 0., sinh(x),\n"
+         "0., 1., 0., 0.,\n"
+         "0., 0., 1., 0.,\n"
+         "sinh(x), 0., 0., cosh(x)"
+         ");}\n");
+
+  add_if("xpush_s",
+
+    "mediump mat4 xpush(float x) { return mat4("
+         "cos(x), 0., 0., sin(x),\n"
+         "0., 1., 0., 0.,\n"
+         "0., 0., 1., 0.,\n"
+         "-sin(x), 0., 0., cos(x)"
+         ");}\n"
+    );
+
+  add_if("xzspin",
+
+    "mediump mat4 xzspin(float x) { return mat4("
+         "cos(x), 0., sin(x), 0.,\n"
+         "0., 1., 0., 0.,\n"
+         "-sin(x), 0., cos(x), 0.,\n"
+         "0., 0., 0., 1."
+         ");}\n");
+
+  add_if("yzspin",
+
+    "mediump mat4 yzspin(float x) { return mat4("
+         "1., 0., 0., 0.,\n"
+         "0., cos(x), sin(x), 0.,\n"
+         "0., -sin(x), cos(x), 0.,\n"
+         "0., 0., 0., 1."
+         ");}\n"
+     );
+
+  add_if("minkowski_to_bt",
+        "mediump vec4 minkowski_to_bt(mediump vec4 h) {\n"
+        "  h /= (1. + h[3]);\n"
+        "  h[0] -= 1.;\n"
+        "  h /= h.x*h.x + h.y*h.y + h.z * h.z;\n"
+        "  h[0] += .5;\n"
+        "  float co = " + glhr::to_glsl(vid.binary_width / log(2) / 8) + ";\n"
+        "  mediump vec4 res;\n"
+        "  res.x = h.y / co;\n"
+        "  res.y = h.z / co;\n"
+        "  res.z = (log(2.) + log(-h.x)) / (log(2.)/2.);\n"
+        "  res.w = 1.;\n"
+        "  return res;\n"
+        "  }\n\n");
+
+  add_if("bt_to_minkowski",
+        "mediump vec4 bt_to_minkowski(mediump vec4 h) {\n"
+        "  h.z = h.z * " + glhr::to_glsl(log(2)/2) + ";\n"
+        "  mediump vec4 res;\n"
+        "  float co = " + glhr::to_glsl(vid.binary_width / log(2) / 4) + ";\n"
+        "  h.x *= co; h.y *= co;\n"
+        "  float diag = (h.x*h.x + h.y*h.y)/2.;\n"
+        "  float px = sinh(h.z);\n"
+        "  float pw = cosh(h.z);\n"
+        "  res.x = (1.-diag) * px + diag * pw;\n"
+        "  res.y = (-h.x) * px + h.x * pw;\n"
+        "  res.z = (-h.y) * px + h.y * pw;\n"
+        "  res.w = (-diag) * px + (1.+diag) * pw;\n"
+        "  return res;\n"
+        "  }\n\n");
+
+  add_if("to_poco_h3",
+        "mediump vec4 to_poco_h3(mediump vec4 pos) {\n"
+        "  return pos / pos[3];\n"
+        "  }\n\n");
+
+  add_if("from_poco_h3",
+        "mediump vec4 from_poco_h3(mediump vec4 pos) {\n"
+        "  float s = 1. - dot(pos.xyz, pos.xyz);\n"
+        "  return pos / sqrt(s);\n"
+        "  }\n\n");
+
+  add_if("to_poco_s3",
+        "mediump vec4 to_poco_s3(mediump vec4 pos) {\n"
+        "  return pos / pos[3];\n"
+        "  }\n\n");
+
+  add_if("from_poco_s3",
+        "mediump vec4 from_poco_s3(mediump vec4 pos) {\n"
+        "  float s = 1. + dot(pos.xyz, pos.xyz);\n"
+        "  return pos / sqrt(s);\n"
+        "  }\n\n");
+
+  add_if("from_poco_h2xr_h",
+          "mediump vec4 from_poco_h2xr_h(mediump vec4 pos) {\n"
+          "  float s = 1. - pos.x*pos.x - pos.y * pos.y;\n"
+          "  pos.z = 1.;\n"
+          "  return pos / sqrt(s);\n"
+          "  }\n\n");
+
+  add_if("to_poco_h2xr_h",
+          "mediump vec4 to_poco_h2xr_h(mediump vec4 pos) {\n"
+          "  pos /= pos[2];\n"
+          "  pos.w = 1.;\n"
+          "  return pos;\n"
+          "  }\n\n");
+
+  add_if("from_poco_h2xr_e",
+          "mediump vec4 from_poco_h2xr_e(mediump vec4 pos) {\n"
+            "  return vec4(sinh(pos[2]) * cosh(pos[0]), sinh(pos[0]), cosh(pos[0]) * cosh(pos[2]), 0);\n"
+          "  }\n\n");
+
+  add_if("to_poco_h2xr_e",
+          "mediump vec4 to_poco_h2xr_e(mediump vec4 pos) {\n"
+          "  mediump float x = asinh(pos[1]);\n"
+          "  return vec4(x, 0, asinh(pos[0] / cosh(x)), 1);\n"
+          "  }\n\n");
+
+  add_if("from_poco_s2xr_s",
+          "mediump vec4 from_poco_s2xr_s(mediump vec4 pos) {\n"
+          "  float s = 1. + pos.x*pos.x + pos.y * pos.y;\n"
+          "  pos.z = 1.;\n"
+          "  return pos / sqrt(s);\n"
+          "  }\n\n");
+
+  add_if("to_poco_s2xr_s",
+          "mediump vec4 to_poco_s2xr_s(mediump vec4 pos) {\n"
+          "  pos /= pos[2];\n"
+          "  pos.w = 1.;\n"
+          "  return pos;\n"
+          "  }\n\n");
+
+  add_if("from_poco_s2xr_e",
+          "mediump vec4 from_poco_s2xr_e(mediump vec4 pos) {\n"
+            "  return vec4(sin(pos[2]) * cos(pos[0]), sin(pos[0]), cos(pos[0]) * cos(pos[2]), 0);\n"
+          "  }\n\n");
+
+  add_if("to_poco_s2xr_e",
+          "mediump vec4 to_poco_s2xr_e(mediump vec4 pos) {\n"
+          "  mediump float x = asin_clamp(pos[1]);\n"
+          "  return vec4(x, 0, asin_clamp(pos[0] / cos(x)), 1);\n"
+          "  }\n\n");
+
+  add_if("len_rotspace", "mediump float len_rotspace(vec4 h) { return 1. - h[3]; }\n");
+
+  add_if("len_h",  "  mediump float len_h(mediump vec4 x) { return x[3]; }\n");
+  add_if("len_sr", "  mediump float len(mediump vec4 x) { return 1.+x.x*x.x+x.y*x.y-x.z*x.z-x.w*x.w; }\n");
+  add_if("len_sl2","  mediump float len(mediump vec4 x) { return 1.+x.x*x.x+x.y*x.y; }\n");
+  add_if("len_s",  "  mediump float len(mediump vec4 x) { return 1.-x[3]; }\n");
+  add_if("len_x",  "  mediump float len(mediump vec4 x) { return length(x.xyz); }\n");
   }
 
 void raygen::create() {
@@ -1607,51 +1669,6 @@ void raygen::create() {
     if(many_cell_types) fsh +=
       "uniform int uWallOffset, uSides;\n";
 
-    flat1 = 0, flat2 = deg;
-    if(prod || rotspace) flat2 -= 2;
-
-#if CAP_BT
-    if(hyperbolic && bt::in()) {
-      fsh += "uniform mediump float uBLevel;\n";
-      flat1 = bt::dirs_outer();
-      flat2 -= bt::dirs_inner();
-      }
-#endif
-    
-    if(hyperbolic) fsh += 
-
-    "mediump mat4 xpush(float x) { return mat4("
-         "cosh(x), 0., 0., sinh(x),\n"
-         "0., 1., 0., 0.,\n"
-         "0., 0., 1., 0.,\n"
-         "sinh(x), 0., 0., cosh(x)"
-         ");}\n";
-
-    if(sphere) fsh += 
-
-    "mediump mat4 xpush(float x) { return mat4("
-         "cos(x), 0., 0., sin(x),\n"
-         "0., 1., 0., 0.,\n"
-         "0., 0., 1., 0.,\n"
-         "-sin(x), 0., 0., cos(x)"
-         ");}\n";
-        
-    if(IN_ODS) fsh += 
-
-    "mediump mat4 xzspin(float x) { return mat4("
-         "cos(x), 0., sin(x), 0.,\n"
-         "0., 1., 0., 0.,\n"
-         "-sin(x), 0., cos(x), 0.,\n"
-         "0., 0., 0., 1."
-         ");}\n"
-      
-    "mediump mat4 yzspin(float x) { return mat4("
-         "1., 0., 0., 0.,\n"
-         "0., cos(x), sin(x), 0.,\n"
-         "0., -sin(x), cos(x), 0.,\n"
-         "0., 0., 0., 1."
-         ");}\n";    
-    
    if(many_cell_types) {
      fsh += "int walloffset, sides;\n";
      }
@@ -1688,7 +1705,7 @@ void raygen::create() {
     "  mediump float eye;\n"
     "  if(at.y < 0.) { phi = at.y + PI/2.; eye = uIPD / 2.; }\n" // right
     "  else { phi = at.y - PI/2.; eye = -uIPD / 2.; }\n"
-    "  mediump mat4 vw = uStart * xzspin(-lambda) * xpush(eye) * yzspin(phi);\n"
+    "  mediump mat4 vw = uStart * xzspin(-lambda) * "+f_xpush()+"(eye) * yzspin(phi);\n"
     "  mediump vec4 at0 = vec4(0., 0., 1., 0.);\n";
     
     else {
@@ -1738,13 +1755,6 @@ void raygen::create() {
       if(eyes) fmain += "  at0.xyz /= uAbsUnit;\n";
       }
       
-    if(hyperbolic) fsh += "  mediump float len(mediump vec4 x) { return x[3]; }\n";
-    else if(sphere && rotspace) fsh += "  mediump float len(mediump vec4 x) { return 1.+x.x*x.x+x.y*x.y-x.z*x.z-x.w*x.w; }\n";
-    else if(sl2) fsh += "  mediump float len(mediump vec4 x) { return 1.+x.x*x.x+x.y*x.y; }\n";
-    else if(sphere) fsh += "  mediump float len(mediump vec4 x) { return 1.-x[3]; }\n";
-
-    else fsh += "  mediump float len(mediump vec4 x) { return length(x.xyz); }\n";
-    
     ld s = 1;
     #if CAP_VR
     if(eyes) s *= vrhr::absolute_unit_in_meters;
@@ -1857,6 +1867,8 @@ void raygen::create() {
     fmain +=
       "  }";
     }
+
+  add_functions();
   }
 
 void bind_array(vector<array<float, 4>>& v, GLint t, GLuint& tx, int id, int length) {
@@ -2035,6 +2047,8 @@ struct raycast_map {
           auto p = at_or_null(intra::connections, cw);
           if(p) c2 = p->tcw.at;
           }
+
+        if(intra::in && !intra::intra_id.count(c2)) intra::intra_id[c2] = intra::current;
 
         if(rays_generate) setdist(c2, 7, c);
         /* if(!cl.listed(c2))
