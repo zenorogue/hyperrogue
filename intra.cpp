@@ -464,7 +464,7 @@ auto hooks1 =
   + arg::add3("-be-square", [] { 
       check_cgi();
       cgi.require_basics();
-      vid.plevel_factor = cgi.edgelen / cgi.scalefactor;
+      PIU( vid.plevel_factor = cgi.edgelen / cgi.scalefactor );
       check_cgi();
       cgi.require_basics();
       });
