@@ -295,6 +295,19 @@ EX void start(int id IS(0)) {
   current = id;
   data[current].gd.restoregame();
   ginf[gProduct] = data[current].gi;
+
+  again:
+  int missing = 0;
+  for(auto p: intra_id)
+    for(int i=0; i<p.first->type; i++) {
+      cell *c1 = p.first->move(i);
+      if(!c1) continue;
+      if(intra_id.count(c1) == 0) {
+        intra_id[c1] = p.second;
+        missing++;
+        }
+      }
+  if(missing) goto again;
   }
 
 #if HDR
