@@ -195,14 +195,17 @@ EX void switch_to(int id) {
 
 void connect_portal_1(cellwalker cw1, cellwalker cw2, int spin) {
   auto& p = connections[cw1];
-  p.source_world = intra_id[cw1.at];
-  p.target_world = intra_id[cw2.at];
+  p.source_world = intra_id.at(cw1.at);
+  p.target_world = intra_id.at(cw2.at);
   p.scw = cw1;
   p.tcw = cw2;
-  switch_to(intra_id[cw1.at]);
-  p.id1 = make_portal(cw1, 0);
-  switch_to(intra_id[cw2.at]);
-  p.id2 = make_portal(cw2, spin);
+  switch_to(intra_id.at(cw1.at));
+  int pspin = 0, nspin = 0;
+  if(spin > 0) pspin = spin; else nspin = -spin;
+  p.id1 = make_portal(cw1, nspin);
+  switch_to(intra_id.at(cw2.at));
+  p.id2 = make_portal(cw2, pspin);
+  p.spin_value = spin;
 
   if(1) {
     dynamicval<eGeometry> g(geometry, gCubeTiling);
