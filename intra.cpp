@@ -63,6 +63,8 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
     h[3] = 1;
     return h;
     }
+  else if(hyperbolic && bt::in())
+    return T * bt::minkowski_to_bt(h);
   else {
     h = T * h;
     h /= h[3];
@@ -86,6 +88,8 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
     h[3] = 1;
     return iT * h * exp(h0[1]);
     }
+  else if(hyperbolic && bt::in())
+    return bt::bt_to_minkowski(iT * h);
   else {
     h[3] = 1;
     return normalize(iT * h);
@@ -94,7 +98,7 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
 
 EX portal_data make_portal(cellwalker cw, int spin) {
   auto& ss = currentmap->get_cellshape(cw.at);
-  auto& fac = ss.faces[cw.spin];
+  auto fac = ss.faces[cw.spin];
   portal_data id;
   id.scale = 1;
   if(prod && cw.spin == cw.at->type - 1) {
@@ -121,6 +125,24 @@ EX portal_data make_portal(cellwalker cw, int spin) {
       println(hlog, kz(h), " -> ", kz(spintox(id.v0)*h), " -> ", kz(cpush(0, -hdist0(id.v0))) * kz(spintox(id.v0) * h), " -> ", kz(id.to_poco(h)));
       }
     }
+  else if(hyperbolic && bt::in()) {
+    if(isize(fac) == 5) fac.erase(fac.begin() + 1);
+    id.kind = 0;
+    id.v0 = Hypc;
+    id.T = Id;
+    for(auto& h: fac) h[3] = 1;
+    for(auto p: fac) id.v0 += p;
+    id.v0 /= isize(fac);
+    dynamicval<eGeometry> g(geometry, gCubeTiling);
+    id.T = gpushxto0(id.v0);
+    for(auto p: fac) {
+      if(abs((id.T * p)[2]) > 1e-3 && abs((id.T * p)[0]) < 1e-3)
+        id.T = cspin(2, 0, 90*degree) * id.T;
+      if(abs((id.T * p)[2]) > 1e-3 && abs((id.T * p)[1]) < 1e-3)
+        id.T = cspin(2, 1, 90*degree) * id.T;
+      }
+    if((id.T * C03)[2] > 0) id.T = cspin(2, 0, 180*degree) * id.T;
+    }
   else {
     id.kind = 0;
     id.v0 = Hypc;
@@ -134,8 +156,9 @@ EX portal_data make_portal(cellwalker cw, int spin) {
   int second = spin + 1;
   first = gmod(first, isize(fac));
   second = gmod(second, isize(fac));
-  id.co0 = id.to_poco(fac[first]);
-  id.co1 = id.to_poco(fac[second]);
+  id.co0 = id.to_poco(final_coords(fac[first]));
+  id.co1 = id.to_poco(final_coords(fac[second]));
+
   return id;
   }
 

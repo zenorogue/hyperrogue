@@ -999,6 +999,13 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
       }
     fmain += "  }\n";
     }
+  else if(hyperbolic && bt::in()) {
+    fmain +=
+      "    mediump vec4 nposition = position + tangent * 1e-3;\n"
+      "    mediump mat4 tkt = " + getM("mid+1") + ";\n"
+      "    position = tkt * minkowski_to_bt(position);\n"
+      "    nposition = tkt * minkowski_to_bt(nposition);\n";
+    }
   else {
     fmain +=
       "    mediump vec4 nposition = position + tangent * 1e-3;\n"
@@ -1062,14 +1069,23 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
     fmain += "}\n";
     }
   else {
-    string sgn = hyperbolic ? "-" : "+";
-    string he = hyperbolic ? "from_poco_h3" : "from_poco_s3";
     fmain +=
     "    mediump mat4 itkt = " + getM("mid+2") + ";\n";
 
-    if(hyperbolic || sphere) fmain +=
+    if(hyperbolic || sphere) {
+      string sgn = hyperbolic ? "-" : "+";
+      if(hyperbolic && bt::in()) {
+        fmain +=
+       "    position = bt_to_minkowski(itkt * position);\n"
+       "    nposition = bt_to_minkowski(itkt * nposition);\n";
+         }
+      else {
+        string he = hyperbolic ? "from_poco_h3" : "from_poco_s3";
+        fmain +=
     "    position = itkt * "+he+"(position);\n"
-    "    nposition = itkt * "+he+"(nposition);\n"
+    "    nposition = itkt * "+he+"(nposition);\n";
+        }
+      fmain +=
     "    tangent = (nposition - position) * 1e3;\n"
     "    mediump float pnorm = position.w * position.w "+sgn+" dot(position.xyz, position.xyz);\n"
     "    position /= sqrt(pnorm);\n"
@@ -1077,6 +1093,7 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
     "    tangent -= position * pnorm;\n"
     "    mediump float xspeed = sqrt(dot(tangent.xyz, tangent.xyz) "+sgn+" tangent.w * tangent.w);\n"
     "    tangent /= xspeed;\n";
+      }
 
     else fmain +=
     "    position = itkt * position;\n"
@@ -1316,7 +1333,39 @@ void raygen::emit_iterate(int gid1) {
   if(!intra::in) fmain += no_intra_portal;
   else {
 
-    if(hyperbolic) {
+    if(hyperbolic && bt::in()) {
+      fsh +=
+        "mediump vec4 minkowski_to_bt(mediump vec4 h) {\n"
+        "  h /= (1. + h[3]);\n"
+        "  h[0] -= 1.;\n"
+        "  h /= h.x*h.x + h.y*h.y + h.z * h.z;\n"
+        "  h[0] += .5;\n"
+        "  float co = " + to_glsl(vid.binary_width / log(2) / 8) + ";\n"
+        "  mediump vec4 res;\n"
+        "  res.x = h.y / co;\n"
+        "  res.y = h.z / co;\n"
+        "  res.z = (log(2.) + log(-h.x)) / (log(2.)/2.);\n"
+        "  res.w = 1.;\n"
+        "  return res;\n"
+        "  }\n\n"
+
+        "mediump vec4 bt_to_minkowski(mediump vec4 h) {\n"
+        "  h.z = h.z * " + to_glsl(log(2)/2) + ";\n"
+        "  mediump vec4 res;\n"
+        "  float co = " + to_glsl(vid.binary_width / log(2) / 4) + ";\n"
+        "  h.x *= co; h.y *= co;\n"
+        "  float diag = (h.x*h.x + h.y*h.y)/2.;\n"
+        "  float px = sinh(h.z);\n"
+        "  float pw = cosh(h.z);\n"
+        "  res.x = (1.-diag) * px + diag * pw;\n"
+        "  res.y = (-h.x) * px + h.x * pw;\n"
+        "  res.z = (-h.y) * px + h.y * pw;\n"
+        "  res.w = (-diag) * px + (1.+diag) * pw;\n"
+        "  return res;\n"
+        "  }\n\n";
+      }
+
+    else if(hyperbolic) {
       fsh +=
         "mediump vec4 to_poco_h3(mediump vec4 pos) {\n"
         "  return pos / pos[3];\n"
