@@ -1997,8 +1997,8 @@ struct raycast_map {
     for(auto& p: sa) {
       int id = p.first;
       cell *c = p.second;
-      intra::may_switch_to(c);
       if(!c) continue;
+      intra::may_switch_to(c);
       for(int j=0; j<c->type; j++)
         ms[id+j] = protect_prod(currentmap->ray_iadj(c, j));
       if(WDIM == 2) for(int a: {0, 1}) {
