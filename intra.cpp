@@ -63,8 +63,13 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
     h[3] = 1;
     return h;
     }
-  else if(hyperbolic && bt::in())
-    return T * bt::minkowski_to_bt(h);
+  else if(hyperbolic && bt::in()) {
+    h = T * bt::minkowski_to_bt(h);
+    for(int i: {0,1,2}) h[i] *= (log(2)/2);
+    return h;
+    }
+  else if(sol)
+    return T * h;
   else {
     h = T * h;
     h /= h[3];
@@ -88,8 +93,12 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
     h[3] = 1;
     return iT * h * exp(h0[1]);
     }
-  else if(hyperbolic && bt::in())
+  else if(hyperbolic && bt::in()) {
+    for(int i: {0,1,2}) h[i] *= (2/log(2));
     return bt::bt_to_minkowski(iT * h);
+    }
+  else if(sol)
+    return iT * h;
   else {
     h[3] = 1;
     return normalize(iT * h);
@@ -101,6 +110,7 @@ EX portal_data make_portal(cellwalker cw, int spin) {
   auto fac = ss.faces[cw.spin];
   portal_data id;
   id.scale = 1;
+  auto gg = geometry;
   if(prod && cw.spin == cw.at->type - 1) {
     id.kind = 1;
     id.d = product_decompose(fac[0]).first;
@@ -125,8 +135,13 @@ EX portal_data make_portal(cellwalker cw, int spin) {
       println(hlog, kz(h), " -> ", kz(spintox(id.v0)*h), " -> ", kz(cpush(0, -hdist0(id.v0))) * kz(spintox(id.v0) * h), " -> ", kz(id.to_poco(h)));
       }
     }
-  else if(hyperbolic && bt::in()) {
-    if(isize(fac) == 5) fac.erase(fac.begin() + 1);
+  else if(bt::in()) {
+    for(int i=0; i<isize(fac); i++) {
+      int i1 = i+1; if(i1 >= isize(fac)) i1 = 0;
+      int i2 = i1+1; if(i2 >= isize(fac)) i2 = 0;
+      if(hypot_d(3, 2*fac[i1] - fac[i] - fac[i2]) < 1e-3)
+        fac.erase(fac.begin()+i1);
+      }
     id.kind = 0;
     id.v0 = Hypc;
     id.T = Id;
@@ -142,6 +157,15 @@ EX portal_data make_portal(cellwalker cw, int spin) {
         id.T = cspin(2, 1, 90*degree) * id.T;
       }
     if((id.T * C03)[2] > 0) id.T = cspin(2, 0, 180*degree) * id.T;
+    vector<hyperpoint> v;
+    geometry = gg;
+    for(auto f: fac) v.push_back(id.to_poco(final_coords(f)));
+    geometry = gCubeTiling;
+    ld sca = 1;
+    for(int i=0; i<isize(v); i++)
+      sca *= sqhypot_d(3, v[i] - v[(1+i) % isize(v)]);
+    sca = pow(sca, .5 / isize(v));
+    id.scale = sca / 2;
     }
   else {
     id.kind = 0;

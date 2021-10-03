@@ -1012,7 +1012,16 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
       "    mediump vec4 nposition = position + tangent * 1e-3;\n"
       "    mediump mat4 tkt = " + getM("mid+1") + ";\n"
       "    position = tkt * minkowski_to_bt(position);\n"
-      "    nposition = tkt * minkowski_to_bt(nposition);\n";
+      "    nposition = tkt * minkowski_to_bt(nposition);\n"
+      "    position.xyz *= " + glhr::to_glsl(log(2)/2) + ";\n"
+      "    nposition.xyz *= " + glhr::to_glsl(log(2)/2) + ";\n";
+    }
+  else if(sol) {
+    fmain +=
+      "    mediump vec4 nposition = position + tangent * 1e-3;\n"
+      "    mediump mat4 tkt = " + getM("mid+1") + ";\n"
+      "    position = tkt * position;\n"
+      "    nposition = tkt * nposition;\n";
     }
   else {
     fmain +=
@@ -1076,6 +1085,15 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
       }
     fmain += "}\n";
     }
+  else if(sol) {
+    fmain +=
+   "    mediump mat4 itkt = " + getM("mid+2") + ";\n";
+    fmain +=
+   "    position = itkt * position;\n"
+   "    nposition = itkt * nposition;\n"
+   "    tangent = (nposition - position) * 1e3;\n"
+   "    float next = maxstep;\n";
+    }
   else {
     fmain +=
     "    mediump mat4 itkt = " + getM("mid+2") + ";\n";
@@ -1084,6 +1102,8 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
       string sgn = hyperbolic ? "-" : "+";
       if(hyperbolic && bt::in()) {
         fmain +=
+       "    position.xyz *= " + glhr::to_glsl(2/log(2)) + ";\n"
+       "    nposition.xyz *= " + glhr::to_glsl(2/log(2)) + ";\n"
        "    position = bt_to_minkowski(itkt * position);\n"
        "    nposition = bt_to_minkowski(itkt * nposition);\n";
          }
