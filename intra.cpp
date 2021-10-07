@@ -67,12 +67,18 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
     return h;
     }
   else if(hyperbolic && bt::in()) {
-    h = T * bt::minkowski_to_bt(h);
-    for(int i: {0,1,2}) h[i] *= (log(2)/2);
+    h = deparabolic13(h);
+    h[3] = 1;
+    tie(h[0], h[1], h[2]) = make_tuple(h[1], h[2], h[0]);
+    h = T * h;
+    h[2] *= exp(h[1]);
     return h;
     }
-  else if(sol)
-    return T * h;
+  else if(sol) {
+    h = T * h;
+    h[2] *= exp(-h[1]);
+    return h;
+    }
   else {
     h = T * h;
     h /= h[3];
@@ -94,14 +100,17 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
     h[1] = sin_auto(h0[0]);
     h[2] = cos_auto(h0[0]) * cos_auto(h0[2]);
     h[3] = 1;
-    return iT * h * exp(h0[1]);
+    return iT * h * exp(-h0[1]);
     }
   else if(hyperbolic && bt::in()) {
-    for(int i: {0,1,2}) h[i] *= (2/log(2));
-    return bt::bt_to_minkowski(iT * h);
+    h[2] *= exp(-h[1]);
+    h = iT * h;
+    return hr::parabolic13(h[0], h[1]) * xpush0(h[2]);
     }
-  else if(sol)
+  else if(sol) {
+    h[2] *= exp(h[1]);
     return iT * h;
+    }
   else {
     h[3] = 1;
     return normalize(iT * h);
@@ -139,27 +148,46 @@ EX portal_data make_portal(cellwalker cw, int spin) {
       }
     }
   else if(bt::in()) {
+    hyperpoint removed = Hypc;
     for(int i=0; i<isize(fac); i++) {
       int i1 = i+1; if(i1 >= isize(fac)) i1 = 0;
       int i2 = i1+1; if(i2 >= isize(fac)) i2 = 0;
-      if(hypot_d(3, 2*fac[i1] - fac[i] - fac[i2]) < 1e-3)
+      if(hypot_d(3, 2*fac[i1] - fac[i] - fac[i2]) < 1e-3) {
+        removed = fac[i1];
         fac.erase(fac.begin()+i1);
+        }
       }
     id.kind = 0;
     id.v0 = Hypc;
     id.T = Id;
     for(auto& h: fac) h[3] = 1;
-    for(auto p: fac) id.v0 += p;
+    auto fac1 = fac;
+
+    auto to_coords = [] (hyperpoint& p) {
+      if(hyperbolic) {
+        p[0] *= bt::xy_mul();
+        p[1] *= bt::xy_mul();
+        p[2] *= log(2) / 2;
+        }
+      };
+
+    for(auto& p: fac1)
+      to_coords(p);
+    to_coords(removed);
+
+    for(auto p: fac1) id.v0 += p;
     id.v0 /= isize(fac);
     dynamicval<eGeometry> g(geometry, gCubeTiling);
     id.T = gpushxto0(id.v0);
-    for(auto p: fac) {
+    for(auto p: fac1) {
       if(abs((id.T * p)[2]) > 1e-3 && abs((id.T * p)[0]) < 1e-3)
         id.T = cspin(2, 0, 90*degree) * id.T;
       if(abs((id.T * p)[2]) > 1e-3 && abs((id.T * p)[1]) < 1e-3)
         id.T = cspin(2, 1, 90*degree) * id.T;
       }
     if((id.T * C03)[2] > 0) id.T = cspin(2, 0, 180*degree) * id.T;
+    if(abs((id.T * removed)[0]) > 1e-2) id.T = cspin(0, 1, 90*degree) * id.T;
+    if((id.T * removed)[1] < -1e-2) id.T = cspin(0, 1, 180*degree) * id.T;
     vector<hyperpoint> v;
     geometry = gg;
     for(auto f: fac) v.push_back(id.to_poco(final_coords(f)));
