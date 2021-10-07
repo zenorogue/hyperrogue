@@ -241,7 +241,7 @@ EX map<cellwalker, connection_data> connections;
 
 EX connection_data* find_connection(int a, int b) {
   for(auto& p: connections)
-    if(intra_id[p.first.at] == a && p.second.target_world == b)
+    if(intra_id.at(p.first.at) == a && p.second.target_world == b)
       return &p.second;
   return nullptr;
   }
@@ -360,12 +360,12 @@ struct resetter {
 #endif
 
 EX void may_switch_to(cell *c) {
-  if(in) switch_to(intra_id[c]);
+  if(in) switch_to(intra_id.at(c));
   }
 
 EX int full_wall_offset(cell *c) {
   int wo = currentmap->wall_offset(c);
-  if(in) wo += data[intra_id[c]].wallindex;
+  if(in) wo += data[intra_id.at(c)].wallindex;
   return wo;
   }
 
