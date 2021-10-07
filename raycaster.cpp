@@ -1011,17 +1011,21 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
     fmain +=
       "    mediump vec4 nposition = position + tangent * 1e-3;\n"
       "    mediump mat4 tkt = " + getM("mid+1") + ";\n"
-      "    position = tkt * minkowski_to_bt(position);\n"
-      "    nposition = tkt * minkowski_to_bt(nposition);\n"
-      "    position.xyz *= " + glhr::to_glsl(log(2)/2) + ";\n"
-      "    nposition.xyz *= " + glhr::to_glsl(log(2)/2) + ";\n";
+      "    position = minkowski_to_bt(position);\n"
+      "    nposition = minkowski_to_bt(nposition);\n"
+      "    position = tkt * position;\n"
+      "    nposition = tkt * nposition;\n"
+      "    position.z *= exp(position.y);\n"
+      "    nposition.z *= exp(nposition.y);\n";
     }
   else if(sol) {
     fmain +=
       "    mediump vec4 nposition = position + tangent * 1e-3;\n"
       "    mediump mat4 tkt = " + getM("mid+1") + ";\n"
       "    position = tkt * position;\n"
-      "    nposition = tkt * nposition;\n";
+      "    nposition = tkt * nposition;\n"
+      "    position.z *= exp(-position.y);\n"
+      "    nposition.z *= exp(-nposition.y);\n";
     }
   else {
     fmain +=
@@ -1089,6 +1093,8 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
     fmain +=
    "    mediump mat4 itkt = " + getM("mid+2") + ";\n";
     fmain +=
+   "    position.z *= exp(position.y);\n"
+   "    nposition.z *= exp(nposition.y);\n"
    "    position = itkt * position;\n"
    "    nposition = itkt * nposition;\n"
    "    tangent = (nposition - position) * 1e3;\n"
@@ -1102,10 +1108,12 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
       string sgn = hyperbolic ? "-" : "+";
       if(hyperbolic && bt::in()) {
         fmain +=
-       "    position.xyz *= " + glhr::to_glsl(2/log(2)) + ";\n"
-       "    nposition.xyz *= " + glhr::to_glsl(2/log(2)) + ";\n"
-       "    position = bt_to_minkowski(itkt * position);\n"
-       "    nposition = bt_to_minkowski(itkt * nposition);\n";
+       "    position.z *= exp(-position.y);\n"
+       "    nposition.z *= exp(-nposition.y);\n"
+       "    position = itkt * position;\n"
+       "    nposition = itkt * nposition;\n"
+       "    position = bt_to_minkowski(position);\n"
+       "    nposition = bt_to_minkowski(nposition);\n";
          }
       else {
         string he = hyperbolic ? "from_poco_h3" : "from_poco_s3";
@@ -1470,27 +1478,25 @@ void raygen::add_functions() {
          ");}\n"
      );
 
+  // these minkowski_to_bt and bt_to_minkowski do not take binary_width nor log(2)/2 into account
+  
   add_if("minkowski_to_bt",
         "mediump vec4 minkowski_to_bt(mediump vec4 h) {\n"
         "  h /= (1. + h[3]);\n"
         "  h[0] -= 1.;\n"
         "  h /= h.x*h.x + h.y*h.y + h.z * h.z;\n"
         "  h[0] += .5;\n"
-        "  float co = " + glhr::to_glsl(vid.binary_width / log(2) / 8) + ";\n"
         "  mediump vec4 res;\n"
-        "  res.x = h.y / co;\n"
-        "  res.y = h.z / co;\n"
-        "  res.z = (log(2.) + log(-h.x)) / (log(2.)/2.);\n"
+        "  res.x = h.y * 2.;\n"
+        "  res.y = h.z * 2.;\n"
+        "  res.z = (log(2.) + log(-h.x));\n"
         "  res.w = 1.;\n"
         "  return res;\n"
         "  }\n\n");
 
   add_if("bt_to_minkowski",
         "mediump vec4 bt_to_minkowski(mediump vec4 h) {\n"
-        "  h.z = h.z * " + glhr::to_glsl(log(2)/2) + ";\n"
         "  mediump vec4 res;\n"
-        "  float co = " + glhr::to_glsl(vid.binary_width / log(2) / 4) + ";\n"
-        "  h.x *= co; h.y *= co;\n"
         "  float diag = (h.x*h.x + h.y*h.y)/2.;\n"
         "  res.x = sinh(h.z) + diag * exp(-h.z);\n"
         "  res.y = h.x * exp(-h.z);\n"
