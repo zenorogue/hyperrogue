@@ -357,8 +357,12 @@ void raygen::compute_which_and_dist(int flat1, int flat2) {
     fmain +=
       "  if(which == -1) {\n";
 
-    if(in_h2xe() && bt::in())
-      fmain += "for(int i=2; i<=4; i++) if(i == 2 || i == 4) {";
+    if(in_h2xe() && hybrid::underlying == gBinary4)
+      fmain += "for(int i=2; i<=4; i+=2) {";
+    else if(in_h2xe() && hybrid::underlying == gTernary)
+      fmain += "for(int i=3; i<=5; i+=2) {";
+    else if(in_h2xe() && hybrid::underlying == gBinaryTiling)
+      fmain += "for(int i=0; i<=4; i++) if(i == 0 || i == 4) {";
     else
       fmain += "for(int i="+its(flat1)+"; i<"+(prod ? "sides-2" : ((WDIM == 2 || is_subcube_based(variation) || intra::in) && !bt::in()) ? "sides" : its(flat2))+"; i++) {\n";
 
@@ -1227,6 +1231,14 @@ void raygen::emit_iterate(int gid1) {
     if(in_h2xe() && hybrid::underlying == gBinary4) {
       w21 = "  for(int i=0; i<2; i++) {\n";
       w20 = "int i=3; {\n";
+      }
+    else if(in_h2xe() && hybrid::underlying == gTernary) {
+      w21 = "  for(int i=0; i<3; i++) {\n";
+      w20 = "int i=4; {\n";
+      }
+    else if(in_h2xe() && hybrid::underlying == gBinaryTiling) {
+      w20 = "int i = sides == 8 ? 5 : position.y < 0. ? 5 : 6; {\n";
+      w21 = "for(int i=1; i<4; i++) {\n";
       }
     else {
       w20 = "  for(int i="+its(flat2)+"; i<"+its(S7)+"; i++) {\n";
