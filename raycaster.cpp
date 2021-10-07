@@ -1011,8 +1011,8 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
     fmain +=
       "    mediump vec4 nposition = position + tangent * 1e-3;\n"
       "    mediump mat4 tkt = " + getM("mid+1") + ";\n"
-      "    position = minkowski_to_bt(position);\n"
-      "    nposition = minkowski_to_bt(nposition);\n"
+      "    position = deparabolic13(position);\n"
+      "    nposition = deparabolic13(nposition);\n"
       "    position = tkt * position;\n"
       "    nposition = tkt * nposition;\n"
       "    position.z *= exp(position.y);\n"
@@ -1112,8 +1112,8 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
        "    nposition.z *= exp(-nposition.y);\n"
        "    position = itkt * position;\n"
        "    nposition = itkt * nposition;\n"
-       "    position = bt_to_minkowski(position);\n"
-       "    nposition = bt_to_minkowski(nposition);\n";
+       "    position = enparabolic13(position);\n"
+       "    nposition = enparabolic13(nposition);\n";
          }
       else {
         string he = hyperbolic ? "from_poco_h3" : "from_poco_s3";
@@ -1260,8 +1260,8 @@ void raygen::emit_iterate(int gid1) {
     fmain += "  mediump vec4 pos = position;\n";
     if(nil) fmain += "if(which == 2 || which == 5) pos.z = 0.;\n";
     else if(hyperbolic && bt::in()) fmain +=
-        "pos = vec4(-log(pos.w-pos.x), pos.y, pos.z, 1);\n"
-        "pos.yz *= exp(pos.x);\n";
+        "pos = deparabolic13(pos);\n"
+        "pos.xyz = pos.zxy;\n";
     else if(hyperbolic || sphere) fmain +=
         "pos /= pos.w;\n";
     else if(prod) fmain +=
@@ -1478,10 +1478,8 @@ void raygen::add_functions() {
          ");}\n"
      );
 
-  // these minkowski_to_bt and bt_to_minkowski do not take binary_width nor log(2)/2 into account
-  
-  add_if("minkowski_to_bt",
-        "mediump vec4 minkowski_to_bt(mediump vec4 h) {\n"
+  add_if("deparabolic13",
+        "mediump vec4 deparabolic13(mediump vec4 h) {\n"
         "  h /= (1. + h[3]);\n"
         "  h[0] -= 1.;\n"
         "  h /= h.x*h.x + h.y*h.y + h.z * h.z;\n"
@@ -1494,8 +1492,8 @@ void raygen::add_functions() {
         "  return res;\n"
         "  }\n\n");
 
-  add_if("bt_to_minkowski",
-        "mediump vec4 bt_to_minkowski(mediump vec4 h) {\n"
+  add_if("enparabolic13",
+        "mediump vec4 enparabolic13(mediump vec4 h) {\n"
         "  mediump vec4 res;\n"
         "  float diag = (h.x*h.x + h.y*h.y)/2.;\n"
         "  res.x = sinh(h.z) + diag * exp(-h.z);\n"
