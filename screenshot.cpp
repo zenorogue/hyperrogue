@@ -781,6 +781,8 @@ EX void take(string fname, const function<void()>& what IS(default_screenshot_co
       if(chg[i]) *anims::aps[i].value = anims::aps[i].last;
     });
   
+  if(intra::in) what();
+
   dynamicval<videopar> v(vid, vid);
   dynamicval<bool> v2(inHighQual, true);
   dynamicval<bool> v6(auraNOGL, true);
