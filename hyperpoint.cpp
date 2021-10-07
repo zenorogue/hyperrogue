@@ -1468,6 +1468,8 @@ constexpr flagtype pNORMAL    = 0;
 EX hyperpoint inverse_exp(const shiftpoint h, flagtype prec IS(pNORMAL)) {
   #if CAP_SOLV
   if(sn::in()) {
+    /* this will be more precise for use in set_view in intra */
+    if(sqhypot_d(3, h.h) < 2e-9) return h.h - C0;
     if(nih) 
       return sn::get_inverse_exp_nsym(h.h, prec);
     else
