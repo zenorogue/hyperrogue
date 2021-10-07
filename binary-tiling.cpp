@@ -809,12 +809,14 @@ EX namespace bt {
     }
   #endif
 
+  EX ld xy_mul() { return vid.binary_width * log(2) / 2; }
+
   EX transmatrix parabolic(ld u) {
-    return parabolic1(u * vid.binary_width / log(2) / 2);
+    return parabolic1(u * xy_mul());
     }
 
   EX transmatrix parabolic3(ld y, ld z) {
-    ld co = vid.binary_width / log(2) / 4;
+    ld co = xy_mul();
     return hr::parabolic13(y * co, z * co);
     }
 
@@ -827,30 +829,22 @@ EX namespace bt {
     return log(2) + log(-h[0]);
     }
   
-  /** you probably want minkowski_to_bt */
-  EX hyperpoint deparabolic3(hyperpoint h) {
-    h /= (1 + h[3]);
-    hyperpoint one = point3(1,0,0);
-    h -= one;
-    h /= sqhypot_d(3, h);
-    h[0] += .5;
-    ld co = vid.binary_width / log(2) / 8;
-    return point3(log(2) + log(-h[0]), h[1] / co, h[2] / co);
-    }
-
   /** \brief convert BT coordinates to Minkowski coordinates 
       in the BT coordinates, h[2] is vertical; the center of the horosphere in Klein model is (1,0,0) 
       */
 
   EX hyperpoint bt_to_minkowski(hyperpoint h) {
     ld yy = log(2) / 2;
-    return parabolic3(h[0], h[1]) * xpush0(yy*h[2]);
+    ld co = xy_mul();
+    return hr::parabolic13(h[0] * co, h[1] * co) * xpush0(yy*h[2]);
     }
 
   /** \brief inverse of bt_to_minkowski */
   EX hyperpoint minkowski_to_bt(hyperpoint h) {
-    h = bt::deparabolic3(h);
-    h = point3(h[1], h[2], h[0] / (log(2)/2));
+    h = deparabolic13(h);
+    ld co = xy_mul();
+    ld yy = log(2) / 2;
+    h = point31(h[1] / co, h[2] / co, h[0] / yy);
     return h;
     }
 
