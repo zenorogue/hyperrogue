@@ -810,6 +810,8 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       auto d = product_decompose(vertices[i]);
       altitudes[i] = d.first;
       vertices[i] = d.second;
+      if(bt::in())
+        vertices[i] = deparabolic13(vertices[i]);
       }
     }
   
@@ -817,7 +819,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
 
   ld w = 0;
   for(int i=0; i<n; i++) center += vertices[i] * weights[i], w += weights[i];
-  if(prod) center = normalize_flat(center);
+  if(prod && !bt::in()) center = normalize_flat(center);
   else center /= w;
   
   ld center_altitude = 0;
@@ -847,7 +849,8 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       hyperpoint h = center + v1 * x + v2 * y;
       if(nil && (x || y))
         h = nilv::on_geodesic(center, nilv::on_geodesic(v1+center, v2+center, y / (x+y)), x + y);
-      if(prod) { 
+      if(prod) {
+        if(bt::in()) h = PIU( parabolic13(h) );
         h = zshift(normalize_flat(h), center_altitude * (1-x-y) + altitudes[a] * x + altitudes[b] * y);
         hpcpush(h); return; 
         }
@@ -862,6 +865,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       if(triangles && (a%3 != 1)) continue;
       hyperpoint h = (vertices[a] * (STEP-y) + vertices[(a+1)%n] * y)/STEP;
       if(prod) { 
+        if(bt::in()) h = PIU( parabolic13(h) );
         h = zshift(normalize_flat(h), (altitudes[a] * (STEP-y) + altitudes[(a+1)%n] * y) / STEP);
         hpcpush(h);
         }
