@@ -2248,7 +2248,8 @@ struct raycast_map {
     bind_array(connections, o->tConnections, txConnections, 3, length);
     bind_array(texturemap, o->tTextureMap, txTextureMap, 5, length);
     if(volumetric::on) bind_array(volumetric, o->tVolumetric, txVolumetric, 6, length);
-    bind_array(portal_connections, o->tPortalConnections, txPortalConnections, 1, length);
+    if(o->tPortalConnections != -1)
+      bind_array(portal_connections, o->tPortalConnections, txPortalConnections, 1, length);
 
     if(o->uMirrorShift != -1) {
       glUniform1i(o->uMirrorShift, mirror_shift);
