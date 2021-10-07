@@ -20,6 +20,9 @@ EX vector<intra_data> data;
 /** index of the space we are currently in */
 EX int current;
 
+/** portal debugging flags */
+EX int debug_portal;
+
 /** map cells to their intra spaces */
 EX map<cell*, int> intra_id;
 
@@ -183,6 +186,12 @@ EX portal_data make_portal(cellwalker cw, int spin) {
   id.co0 = id.to_poco(final_coords(fac[first]));
   id.co1 = id.to_poco(final_coords(fac[second]));
 
+  if(debug_portal) for(auto p: fac) {
+    auto p1 = final_coords(p);
+    auto p2 = id.to_poco(p1);
+    auto p3 = id.from_poco(p2);
+    println(hlog, p, " > ", p1, " > ", p2, " > ", p3);
+    }
   return id;
   }
 
@@ -243,9 +252,12 @@ void connect_portal_1(cellwalker cw1, cellwalker cw2, int spin) {
     set_column(T2, 1, p.id2.co1);
     set_column(T2, 2, hyperpoint(0,0,-p.id2.scale,0));
     set_column(T2, 3, C03);
-    if(debugflags & DF_GEOM) for(int i=0; i<4; i++)
-      println(hlog, "mapping ", get_column(T1, i), " to ", get_column(T2, i));
+    if(debug_portal) for(int i=0; i<4; i++)
+      println(hlog, "mapping [", p.source_world, "]", get_column(T1, i), " to [", p.target_world, "] ", get_column(T2, i));
     p.T = T2 * inverse(T1);
+
+    if(debug_portal)
+      println(hlog, "det = ", det(p.T));
 
     if(det(p.T) < 0) {
       set_column(T2, 0, p.id2.co1);
@@ -329,6 +341,27 @@ EX int full_wall_offset(cell *c) {
   return wo;
   }
 
+ld dsdet(array<hyperpoint, 4> ds) {
+  transmatrix T;
+  set_column(T, 0, ds[1]-ds[0]);
+  set_column(T, 1, ds[2]-ds[0]);
+  set_column(T, 2, ds[3]-ds[0]);
+  return det3(T);
+  }
+
+EX void analyze_orthonormal(array<hyperpoint, 4> ds, ld sca) {
+  transmatrix T = gpushxto0(ds[0]);
+  vector<ld> orths;
+  for(int i: {1,2,3}) {
+    ds[i] = T * ds[i];
+    if(prod) ds[i][2]--;
+    }
+  for(int i=0; i<3; i++)
+  for(int j=0; j<3; j++)
+    orths.push_back(dot_d(3, ds[i+1], ds[j+1]) * sca);
+  println(hlog, "orths = ", kz(orths));
+  }
+
 EX void shift_view_portal(hyperpoint H) {
   shift_view(H);
   if(!through_portal()) return;
@@ -367,13 +400,25 @@ EX void check_portal_movement() {
     ld eps = 1e-3;
     c /= p->id1.scale;
     anims::cycle_length /= p->id1.scale;
+    ld ss = pow(eps, -2);
 
-    array<hyperpoint, 3> ds; /* camera, forward, upward */
+    array<hyperpoint, 4> ds; /* camera, forward, upward */
     ds[0] = inverse(View) * C0;
     ds[1] = inverse(get_shift_view_of(ctangent(2, -eps), View)) * C0;
     ds[2] = inverse(get_shift_view_of(ctangent(1, +eps), View)) * C0;
+    ds[3] = inverse(get_shift_view_of(ctangent(0, +eps), View)) * C0;
+    if(debug_portal) {
+      println(hlog, "at = ", ds[0], " det = ", dsdet(ds), " bt = ", bt::minkowski_to_bt(ds[0]));
+      analyze_orthonormal(ds, ss);
+      }
 
     for(auto& h: ds) h = p->id1.to_poco(h);
+
+    if(debug_portal) {
+      println(hlog, "poco: at = ", ds[0], " det = ", dsdet(ds));
+      dynamicval<eGeometry> g(geometry, gCubeTiling);
+      analyze_orthonormal(ds, ss);
+      }
 
     /* reset the original */
     View = Id; NLP = Id;
@@ -386,10 +431,30 @@ EX void check_portal_movement() {
       for(auto& h: ds) h = p->T * h;
       }
 
+    if(debug_portal) {
+      println(hlog, "poco2: at = ", ds[0], " det = ", dsdet(ds));
+      dynamicval<eGeometry> g(geometry, gCubeTiling);
+      analyze_orthonormal(ds, ss);
+      }
+
     for(auto& h: ds) h = p->id2.from_poco(h);
 
+    if(debug_portal) {
+      println(hlog, "goal: at = ", ds[0], " det = ", dsdet(ds));
+      analyze_orthonormal(ds, ss);
+      }
+
     set_view(ds[0], ds[1], ds[2]);
-    
+
+    if(debug_portal) {
+      array<hyperpoint, 4> xds; /* camera, forward, upward */
+      xds[0] = inverse(View) * C0;
+      xds[1] = inverse(get_shift_view_of(ctangent(2, -eps), View)) * C0;
+      xds[2] = inverse(get_shift_view_of(ctangent(1, +eps), View)) * C0;
+      xds[3] = inverse(get_shift_view_of(ctangent(0, +eps), View)) * C0;
+      println(hlog, "goal: at = ", xds[0], " det = ", dsdet(xds), " bt = ", bt::minkowski_to_bt(xds[0]));
+      }
+
     c *= p->id2.scale;
     anims::cycle_length *= p->id2.scale;
     camera_speed = c;
@@ -419,6 +484,19 @@ void show_portals() {
     int ic = (current + 1) % isize(data);
     switch_to(ic);
     });
+
+  if(debug_portal) {
+    dialog::addItem(XLAT("debug"), 'd');
+    dialog::add_action([] {
+      ld eps = 1e-5;
+      array<hyperpoint, 4> ds; /* camera, forward, upward */
+      ds[0] = inverse(View) * C0;
+      ds[1] = inverse(get_shift_view_of(ctangent(2, -eps), View)) * C0;
+      ds[2] = inverse(get_shift_view_of(ctangent(1, +eps), View)) * C0;
+      ds[3] = inverse(get_shift_view_of(ctangent(0, +eps), View)) * C0;
+      set_view(ds[0], ds[1], ds[2]);
+      });
+    }
 
   bool in_list = false; for(cellwalker x: unconnected) if(x == cw) in_list = true;
 
@@ -450,6 +528,10 @@ void show_portals() {
       }
     dialog::addSelItem(XLAT("portal orientation"), its(edit_spin), 'o');
     dialog::add_action([] { edit_spin = edit_spin + 1; });
+    if(debug_portal) {
+      dialog::addItem(XLAT("mirror connection"), 'm');
+      dialog::add_action([cw] { connect_portal(cw, cw, edit_spin); });
+      }
     }
 
   dialog::display();
@@ -489,7 +571,8 @@ auto hooks1 =
       PIU( vid.plevel_factor = cgi.edgelen / cgi.scalefactor );
       check_cgi();
       cgi.require_basics();
-      });
+      })
+  + arg::add3("-debug-portal", [] { arg::shift(); debug_portal = arg::argi(); });
 
 
 EX }
