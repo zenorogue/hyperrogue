@@ -2904,13 +2904,8 @@ EX void shift_view(hyperpoint H) {
   if(callhandlers(false, hooks_shift_view, H)) return;
   static bool recursive = false;
   if(!recursive && intra::in) {
-    H /= 10;
-    recursive = true;
-    for(int i=0; i<10; i++) {
-      shift_view(H);
-      intra::check_portal_movement();
-      }
-    recursive = false;
+    dynamicval<bool> r(recursive, true);
+    intra::shift_view_portal(H);
     return;
     }
   auto oView = View;

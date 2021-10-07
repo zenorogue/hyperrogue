@@ -329,7 +329,25 @@ EX int full_wall_offset(cell *c) {
   return wo;
   }
 
-EX void check_portal_movement() {
+EX void shift_view_portal(hyperpoint H) {
+  shift_view(H);
+  if(!through_portal()) return;
+  shift_view(-H);
+  ld minv = 0, maxv = 1;
+  for(int i=0; i<30; i++) {
+    ld t = (minv + maxv) / 2;
+    shift_view(H * t);
+    bool b = through_portal();
+    if(b) maxv = t; else minv = t;
+    shift_view(H * -t);
+    }
+  println(hlog, "maxv = ", maxv);
+  shift_view(H * maxv);
+  check_portal_movement();
+  shift_view(H * (1 - maxv));
+  }
+
+EX const connection_data* through_portal() {
   transmatrix iView = view_inverse(View);
   ld dist = hdist0(iView * C0);
   int nei = -1;
@@ -339,8 +357,12 @@ EX void check_portal_movement() {
     }
 
   auto cw1 = cellwalker(centerover, nei);
+  return at_or_null(connections, cw1);
+  }
+
+EX void check_portal_movement() {
+  auto p = through_portal();
   ld c = camera_speed;
-  auto p = at_or_null(connections, cw1);
   if(p) {
     ld eps = 1e-3;
     c /= p->id1.scale;
