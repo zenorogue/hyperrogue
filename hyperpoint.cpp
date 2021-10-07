@@ -753,6 +753,16 @@ EX hyperpoint deparabolic10(const hyperpoint h) {
   return point31(x, h[1] * exp(x), h[2] * exp(x));
   }
 
+/** this looks correct */
+EX hyperpoint deparabolic13(hyperpoint h) {
+  h /= (1 + h[3]);
+  hyperpoint one = point3(1,0,0);
+  h -= one;
+  h /= sqhypot_d(3, h);
+  h[0] += .5;
+  return point3(log(2) + log(-h[0]), h[1] * 2, h[2] * 2);
+  }
+
 EX transmatrix spintoc(const hyperpoint& H, int t, int f) {
   transmatrix T = Id;
   ld R = hypot(H[f], H[t]);
