@@ -17,7 +17,7 @@ EX hyperpoint final_coords(hyperpoint h) {
   if(sn::in() || !bt::in()) 
     return ultra_normalize(h);
   #if CAP_BT
-  if(bt::in()) 
+  if(bt::in() && !prod)
     return bt::bt_to_minkowski(h);
   #endif
   return h;

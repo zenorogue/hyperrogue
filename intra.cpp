@@ -48,10 +48,17 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
   if(prod && kind == 1) {
     auto dec = product_decompose(h);
     h = dec.second;
-    h[0] /= h[2];
-    h[1] /= h[2];
-    h[2] = dec.first - d;
-    h[3] = 1;
+    if(bt::in()) {
+      h = PIU( deparabolic13(h) );
+      h[2] = dec.first - d;
+      h[3] = 1;
+      }
+    else {
+      h[0] /= h[2];
+      h[1] /= h[2];
+      h[2] = dec.first - d;
+      h[3] = 1;
+      }
     if(d<0) h[2] = -h[2], h[0] = -h[0];
     return h;
     }
@@ -90,6 +97,10 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
   if(prod && kind == 1) {
     ld xd = h[2];
     if(d<0) xd = -xd, h[0] = -h[0];
+    if(bt::in()) {
+      h[2] = 0;
+      return PIU( parabolic13(h) ) * exp(d+xd);
+      }
     h[2] = 1;
     auto z = product_decompose(h).first;
     return h * exp(d+xd-z);
@@ -100,7 +111,7 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
     h[1] = sin_auto(h0[0]);
     h[2] = cos_auto(h0[0]) * cos_auto(h0[2]);
     h[3] = 1;
-    return iT * h * exp(-h0[1]);
+    return iT * h * exp(h0[1]);
     }
   else if(hyperbolic && bt::in()) {
     h[2] *= exp(-h[1]);
@@ -123,15 +134,14 @@ EX portal_data make_portal(cellwalker cw, int spin) {
   portal_data id;
   id.scale = 1;
   auto gg = geometry;
-  if(prod && cw.spin == cw.at->type - 1) {
+  if(prod && cw.spin >= cw.at->type - 2) {
     id.kind = 1;
     id.d = product_decompose(fac[0]).first;
     id.v0 = C0 * exp(id.d);
-    }
-  else if(prod && cw.spin == cw.at->type - 2) {
-    id.kind = 1;
-    id.d = product_decompose(fac[0]).first;
-    id.v0 = C0 * exp(id.d);
+    if(bt::in()) {
+      fac.pop_back();
+      id.scale = log(2)/2;
+      }
     }
   else if(prod) {
     id.kind = 0;
@@ -139,7 +149,9 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     id.scale = cgi.plevel;
     for(auto p: fac) id.v0 += p;
     id.v0 /= sqrt(abs(intval(id.v0, Hypc)));
-    id.T = cpush(0, -hdist0(id.v0)) * spintox(id.v0);
+    hyperpoint h = fac[0];
+    h /=  sqrt(abs(intval(h, Hypc)));
+    id.T = cspin(0, 1, -90*degree) * spintox(gpushxto0(id.v0) * h) * gpushxto0(id.v0);
     for(int i=0; i<3; i++) id.T[3][i] = id.T[i][3] = i==3;
     if(debugflags & DF_GEOM)
     for(int a=0; a<4; a++) {

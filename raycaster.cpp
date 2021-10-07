@@ -1011,7 +1011,7 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
     fmain += "mediump vec4 nposition;\n";
     fmain += "if(pconnection.x != .5) {\n"; // kind != 0
     if(1) {
-      string fn = in_h2xe() ? "to_poco_h2xr_h" : "to_poco_s2xr_s";
+      string fn = bt::in() ? "to_poco_h2xr_b" : in_h2xe() ? "to_poco_h2xr_h" : "to_poco_s2xr_s";
       fmain +=
         "    nposition = position + tangent * xspeed * 1e-3;\n"
         "    position = "+fn+"(position);\n"
@@ -1080,7 +1080,7 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
     fmain += "if(pconnection.z != .5) {\n"; // kind != 0
     if(1) {
       string sgn = in_h2xe() ? "-" : "+";
-      string fn = in_h2xe() ? "from_poco_h2xr_h" : "from_poco_s2xr_s";
+      string fn = bt::in() ? "from_poco_h2xr_b" : in_h2xe() ? "from_poco_h2xr_h" : "from_poco_s2xr_s";
 
       fmain +=
       "    if(pconnection.w < .5) { position.z = -position.z; nposition.z = -nposition.z; nposition.x = -nposition.x; position.x = -position.x; }\n"
@@ -1547,19 +1547,6 @@ void raygen::add_functions() {
         "  return res;\n"
         "  }\n\n");
 
-  add_if("deparabolic12",
-        "mediump vec4 deparabolic12(mediump vec4 h) {\n"
-        "  h /= (1. + h.z);\n"
-        "  h[0] -= 1.;\n"
-        "  h /= h.x*h.x + h.y*h.y;\n"
-        "  h[0] += .5;\n"
-        "  mediump vec4 res;\n"
-        "  res.x = (log(2.) + log(-h.x));\n"
-        "  res.y = h.y * 2.;\n"
-        "  res.w = 1.;\n"
-        "  return res;\n"
-        "  }\n\n");
-
   add_if("enparabolic13",
         "mediump vec4 enparabolic13(mediump vec4 h) {\n"
         "  mediump vec4 res;\n"
@@ -1607,6 +1594,18 @@ void raygen::add_functions() {
           "  return pos;\n"
           "  }\n\n");
 
+  add_if("from_poco_h2xr_b",
+          "mediump vec4 from_poco_h2xr_b(mediump vec4 pos) {\n"
+          "  return enparabolic12(pos);\n"
+          "  }\n\n");
+
+  add_if("to_poco_h2xr_b",
+          "mediump vec4 to_poco_h2xr_b(mediump vec4 pos) {\n"
+          "  pos /= sqrt(pos.z*pos.z-pos.x*pos.x-pos.y*pos.y);\n"
+          "  pos = deparabolic12(pos);\n"
+          "  return pos;\n"
+          "  }\n\n");
+
   add_if("from_poco_h2xr_e",
           "mediump vec4 from_poco_h2xr_e(mediump vec4 pos) {\n"
             "  return vec4(sinh(pos[2]) * cosh(pos[0]), sinh(pos[0]), cosh(pos[0]) * cosh(pos[2]), 0);\n"
@@ -1642,6 +1641,29 @@ void raygen::add_functions() {
           "  mediump float x = asin_clamp(pos[1]);\n"
           "  return vec4(x, 0, asin_clamp(pos[0] / cos(x)), 1);\n"
           "  }\n\n");
+
+  add_if("deparabolic12",
+        "mediump vec4 deparabolic12(mediump vec4 h) {\n"
+        "  h /= (1. + h.z);\n"
+        "  h[0] -= 1.;\n"
+        "  h /= h.x*h.x + h.y*h.y;\n"
+        "  h[0] += .5;\n"
+        "  mediump vec4 res;\n"
+        "  res.x = (log(2.) + log(-h.x));\n"
+        "  res.y = h.y * 2.;\n"
+        "  res.w = 1.;\n"
+        "  return res;\n"
+        "  }\n\n");
+
+  add_if("enparabolic12",
+        "mediump vec4 enparabolic12(mediump vec4 h) {\n"
+        "  mediump vec4 res;\n"
+        "  float diag = h.y*h.y /2.;\n"
+        "  res.x = sinh(h.x) + diag * exp(-h.x);\n"
+        "  res.y = h.y * exp(-h.x);\n"
+        "  res.z = cosh(h.x) + diag * exp(-h.x);\n"
+        "  return res;\n"
+        "  }\n\n");
 
   add_if("len_rotspace", "mediump float len_rotspace(vec4 h) { return 1. - h[3]; }\n");
 
