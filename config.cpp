@@ -1050,7 +1050,7 @@ EX void initConfig() {
   callhooks(hooks_configfile);
   
   #if CAP_SHOT
-  addsaver(levellines, "levellines");
+  param_f(levellines, "levellines", 0);
   #endif
 
 #if CAP_CONFIG
