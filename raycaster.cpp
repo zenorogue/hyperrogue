@@ -1248,14 +1248,14 @@ void raygen::emit_iterate(int gid1) {
       "if(which == 20) {\n"
       "  mediump float best = 999.;\n"
       +w20+
-        "  mediump float cand = "+f_len_prod()+"(" + getM("i") + " * position);\n"
+        "  mediump float cand = "+f_len_prod()+"(" + getM("walloffset+i") + " * position);\n"
         "  if(cand < best) { best = cand; which = i; }\n"
         "  }\n"
         "}\n"
       "if(which == 21) {\n"
         "mediump float best = 999.;\n"
         +w21+
-        "  mediump float cand = "+f_len_prod()+"(" + getM("i") + " * position);\n"
+        "  mediump float cand = "+f_len_prod()+"(" + getM("walloffset+i") + " * position);\n"
         "  if(cand < best) { best = cand; which = i; }\n"
         "  }\n"
         "}\n";
