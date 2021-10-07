@@ -425,7 +425,7 @@ EX void check_portal_movement() {
   auto p = through_portal();
   ld c = camera_speed;
   if(p) {
-    ld eps = 1e-3;
+    ld eps = 1e-5;
     c /= p->id1.scale;
     anims::cycle_length /= p->id1.scale;
     ld ss = pow(eps, -2);
