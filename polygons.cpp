@@ -772,7 +772,7 @@ hyperpoint ray_kleinize(hyperpoint h, int id, ld pz) {
   if(hyperbolic && bt::in()) {
     // ld co = vid.binary_width / log(2) / 4;
     // hyperpoint res = point31(h[2]*log(2)/2, h[0]*co, h[1]*co);
-    return deparabolic10(bt::parabolic3(h[0], h[1]) * xpush0(log(2)/2*h[2]));
+    return deparabolic13(bt::bt_to_minkowski(h));
     }
   #endif
   if(prod) {

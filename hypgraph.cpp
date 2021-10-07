@@ -723,7 +723,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         models::apply_orientation(H[0], H[1]);
         }
       
-      ret = hyperbolic ? deparabolic10(H) : H;
+      ret = hyperbolic ? deparabolic13(H) : H;
       ret *= .5;
       ret[LDIM] = 1;
       
