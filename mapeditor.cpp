@@ -501,6 +501,7 @@ EX namespace mapstream {
       f.write(hybrid::csteps);
       f.write(product::cspin);
       f.write(product::cmirror);
+      f.write(vid.plevel_factor);
       }
     if(rotspace) {
       f.write(hybrid::csteps);
@@ -626,6 +627,7 @@ EX namespace mapstream {
       f.read(hybrid::csteps);
       if(vernum >= 0xA80D) f.read(product::cspin);
       if(vernum >= 0xA833) f.read(product::cmirror);
+      if(vernum >= 0xA908) f.read(vid.plevel_factor);
       }
     if(geometry == gRotSpace && vernum >= 0xA833) {
       f.read(hybrid::csteps);
