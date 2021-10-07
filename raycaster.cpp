@@ -1578,10 +1578,10 @@ void raygen::add_functions() {
   add_if("len_rotspace", "mediump float len_rotspace(vec4 h) { return 1. - h[3]; }\n");
 
   add_if("len_h",  "  mediump float len_h(mediump vec4 x) { return x[3]; }\n");
-  add_if("len_sr", "  mediump float len(mediump vec4 x) { return 1.+x.x*x.x+x.y*x.y-x.z*x.z-x.w*x.w; }\n");
-  add_if("len_sl2","  mediump float len(mediump vec4 x) { return 1.+x.x*x.x+x.y*x.y; }\n");
-  add_if("len_s",  "  mediump float len(mediump vec4 x) { return 1.-x[3]; }\n");
-  add_if("len_x",  "  mediump float len(mediump vec4 x) { return length(x.xyz); }\n");
+  add_if("len_sr", "  mediump float len_sr(mediump vec4 x) { return 1.+x.x*x.x+x.y*x.y-x.z*x.z-x.w*x.w; }\n");
+  add_if("len_sl2","  mediump float len_sl2(mediump vec4 x) { return 1.+x.x*x.x+x.y*x.y; }\n");
+  add_if("len_s",  "  mediump float len_s(mediump vec4 x) { return 1.-x[3]; }\n");
+  add_if("len_x",  "  mediump float len_x(mediump vec4 x) { return length(x.xyz); }\n");
   }
 
 void raygen::create() {
