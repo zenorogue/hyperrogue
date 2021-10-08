@@ -54,6 +54,7 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
       h[3] = 1;
       }
     else {
+      h = T * h;
       h[0] /= h[2];
       h[1] /= h[2];
       h[2] = dec.first - d;
@@ -103,7 +104,7 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
       }
     h[2] = 1;
     auto z = product_decompose(h).first;
-    return h * exp(d+xd-z);
+    return iT * h * exp(d+xd-z);
     }
   else if(prod && kind == 0) {
     auto h0 = h;
@@ -130,7 +131,7 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
 
 EX portal_data make_portal(cellwalker cw, int spin) {
   auto& ss = currentmap->get_cellshape(cw.at);
-  auto fac = ss.faces[cw.spin];
+  auto fac = ss.faces_local[cw.spin];
   portal_data id;
   id.scale = 1;
   auto gg = geometry;
@@ -141,6 +142,12 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     if(bt::in()) {
       fac.pop_back();
       id.scale = log(2)/2;
+      }
+    else {
+      hyperpoint ctr = Hypc;
+      for(auto p: fac) ctr += product_decompose(p).second;
+      ctr = normalize_flat(ctr);
+      id.T = gpushxto0(ctr);
       }
     }
   else if(prod) {
@@ -161,28 +168,30 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     }
   else if(bt::in()) {
     hyperpoint removed = Hypc;
-    for(int i=0; i<isize(fac); i++) {
-      int i1 = i+1; if(i1 >= isize(fac)) i1 = 0;
-      int i2 = i1+1; if(i2 >= isize(fac)) i2 = 0;
-      if(hypot_d(3, 2*fac[i1] - fac[i] - fac[i2]) < 1e-3) {
+
+    auto facmod = fac;
+    if(hyperbolic) for(auto& h: facmod) h = deparabolic13(h);
+
+    for(int i=0; i<isize(facmod); i++) {
+      int i1 = i+1; if(i1 >= isize(facmod)) i1 = 0;
+      int i2 = i1+1; if(i2 >= isize(facmod)) i2 = 0;
+      if(hypot_d(3, 2*facmod[i1] - facmod[i] - facmod[i2]) < 1e-3) {
         removed = fac[i1];
+        facmod.erase(facmod.begin()+i1);
         fac.erase(fac.begin()+i1);
         }
       }
     id.kind = 0;
     id.v0 = Hypc;
     id.T = Id;
-    for(auto& h: fac) h[3] = 1;
-    auto fac1 = fac;
 
+    auto fac1 = fac;
     auto to_coords = [] (hyperpoint& p) {
       if(hyperbolic) {
-        p[0] *= bt::xy_mul();
-        p[1] *= bt::xy_mul();
-        p[2] *= log(2) / 2;
+        p = deparabolic13(p);
+        p = hyperpoint(p[1], p[2], p[0], 1);
         }
       };
-
     for(auto& p: fac1)
       to_coords(p);
     to_coords(removed);
@@ -202,7 +211,7 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     if((id.T * removed)[1] < -1e-2) id.T = cspin(0, 1, 180*degree) * id.T;
     vector<hyperpoint> v;
     geometry = gg;
-    for(auto f: fac) v.push_back(id.to_poco(final_coords(f)));
+    for(auto f: fac) v.push_back(id.to_poco(f));
     geometry = gCubeTiling;
     ld sca = 1;
     for(int i=0; i<isize(v); i++)
@@ -212,19 +221,22 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     }
   else {
     id.kind = 0;
-    id.v0 = Hypc;
-    for(auto p: fac) id.v0 += p;
-    id.v0 = normalize(id.v0);
+    id.v0 = project_on_triangle(fac[0], fac[1], fac[2]);
     id.T = cpush(2, -hdist0(id.v0)) * cspin(2, 0, 90*degree) * spintox(id.v0);
+    hyperpoint ctr = Hypc;
+    for(auto p: fac) ctr += id.T*p;
+    ctr = normalize(ctr);
+    id.T = gpushxto0(ctr) * id.T;
     }
+  if(MDIM == 3) for(int i=0; i<4; i++) id.T[3][i] = id.T[i][3] = i==3;
   id.iT = inverse(id.T);
   if(MDIM == 3) for(int i=0; i<4; i++) id.iT[3][i] = id.iT[i][3] = i==3;
   int first = spin;
   int second = spin + 1;
   first = gmod(first, isize(fac));
   second = gmod(second, isize(fac));
-  id.co0 = id.to_poco(final_coords(fac[first]));
-  id.co1 = id.to_poco(final_coords(fac[second]));
+  id.co0 = id.to_poco(fac[first]);
+  id.co1 = id.to_poco(fac[second]);
 
   if(debug_portal) for(auto p: fac) {
     auto p1 = final_coords(p);

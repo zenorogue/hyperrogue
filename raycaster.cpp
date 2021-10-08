@@ -1013,10 +1013,11 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
     if(1) {
       string fn = bt::in() ? "to_poco_h2xr_b" : in_h2xe() ? "to_poco_h2xr_h" : "to_poco_s2xr_s";
       fmain +=
+        "    mediump mat4 tkt = " + getM("mid+1") + ";\n"
         "    nposition = position + tangent * xspeed * 1e-3;\n"
-        "    position = "+fn+"(position);\n"
+        "    position = "+fn+"(tkt*position);\n"
         "    position.z = 0.;\n" // zpos - uPLevel;\n"
-        "    nposition = "+fn+"(nposition);\n"
+        "    nposition = "+fn+"(tkt*nposition);\n"
         "    nposition.z = zspeed * 1e-3;\n"
         "    if(pconnection.y < .5) { nposition.z = -nposition.z; nposition.x = -nposition.x; position.x = -position.x; }\n";
       }
@@ -1086,8 +1087,9 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
       "    if(pconnection.w < .5) { position.z = -position.z; nposition.z = -nposition.z; nposition.x = -nposition.x; position.x = -position.x; }\n"
       "    zspeed = (nposition.z - position.z) * 1e3;\n"
       "    zpos = position.z + (pconnection.w - .5) * 16.;\n"
-      "    position = "+fn+"(position);\n"
-      "    nposition = "+fn+"(nposition);\n"
+      "    mediump mat4 itkt = " + getM("mid+2") + ";\n"
+      "    position = itkt*"+fn+"(position);\n"
+      "    nposition = itkt*"+fn+"(nposition);\n"
       "    tangent = (nposition - position) * 1e3;\n"
       "    mediump float pnorm = tangent.z * position.z "+sgn+" tangent.x * position.x "+sgn+" tangent.y * position.y;\n"
       "    tangent -= position * pnorm;\n"
