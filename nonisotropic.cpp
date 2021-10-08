@@ -1308,7 +1308,12 @@ EX namespace hybrid {
       cell *c1 = hybrid::get_where(c).first; 
       return PIU( hr::shvid(c1) );      
       }
-  
+
+    int full_shvid(cell *c) override {
+      cell *c1 = hybrid::get_where(c).first;
+      return PIU( currentmap->full_shvid(c1) );
+      }
+
     virtual transmatrix spin_to(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return in_underlying([&] { return currentmap->spin_to(c, d, bonus); }); }
     virtual transmatrix spin_from(cell *c, int d, ld bonus) override { if(d >= c->type-2) return Id; c = get_where(c).first; return in_underlying([&] { return currentmap->spin_from(c, d, bonus); }); }
 
