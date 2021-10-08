@@ -1415,7 +1415,9 @@ EX namespace hybrid {
     vector<pair<int, cell*>> result;
     for(auto& v: cgi.walloffsets) if(v.first >= 0) result.push_back(v);
     sort(result.begin(), result.end());
-    result.emplace_back(isize(cgi.wallstart)-1, nullptr);
+    // not a correct fix
+    result.emplace_back(result.back().first + result.back().second->type, nullptr);
+    // result.emplace_back(isize(cgi.wallstart), nullptr);
     return result;
     }
 
