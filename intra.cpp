@@ -663,18 +663,31 @@ EX void load_saved_portals() {
   for(const auto& p: portals_to_save) connect_portal(p.cw1, p.cw2, p.spin);
   }
 
+EX void be_ratio(ld v IS(1)) {
+  check_cgi();
+  cgi.require_basics();
+  PIU( vid.plevel_factor = v * cgi.edgelen / cgi.scalefactor );
+  check_cgi();
+  cgi.require_basics();
+  }
+
+EX void be_ratio_edge(int i, ld v IS(1)) {
+  start_game();
+  ld len = hdist(currentmap->get_corner(cwt.at, i), currentmap->get_corner(cwt.at, (i+1)%cwt.at->type));
+  PIU( vid.plevel_factor = v * len / cgi.scalefactor );
+  check_cgi();
+  cgi.require_basics();
+  }
+
 auto hooks1 =
   addHook(hooks_o_key, 90, [] (o_funcs& v) {
     if(intra::in) v.push_back(named_dialog(XLAT("manage portals"), show_portals));
     })
   + arg::add3("-intra-add", [] { start_game(); become(); })
   + arg::add3("-intra-start", [] { start_game(); become(); start(0); })
-  + arg::add3("-be-square", [] { 
-      check_cgi();
-      cgi.require_basics();
-      PIU( vid.plevel_factor = cgi.edgelen / cgi.scalefactor );
-      check_cgi();
-      cgi.require_basics();
+  + arg::add3("-be-square", [] { be_ratio(); })
+  + arg::add3("-be-square-edge", [] {
+      arg::shift(); int i = arg::argi(); be_ratio_edge(i);
       })
   + arg::add3("-debug-portal", [] { arg::shift(); debug_portal = arg::argi(); });
 
