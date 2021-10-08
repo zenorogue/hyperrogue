@@ -449,6 +449,12 @@ EX namespace mapstream {
       f.write(gp::param.second);
       }
     #endif
+    if(variation == eVariation::coxeter) {
+      f.write(reg3::coxeter_param);
+      }
+    if(is_subcube_based(variation )) {
+      f.write(reg3::subcube_count);
+      }
     #if CAP_FIELD
     if(geometry == gFieldQuotient) {
       using namespace fieldpattern;
@@ -535,6 +541,12 @@ EX namespace mapstream {
       f.read(gp::param.second);
       }
     #endif
+    if(variation == eVariation::coxeter && vernum >= 0xA908) {
+      f.read(reg3::coxeter_param);
+      }
+    if(is_subcube_based(variation) && vernum >= 0xA908) {
+      f.read(reg3::subcube_count);
+      }
     #if CAP_CRYSTAL
     if(cryst && vernum >= 10504) {
       int sides;
