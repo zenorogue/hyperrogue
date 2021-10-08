@@ -364,6 +364,13 @@ EX void connect_portal(cellwalker cw1, cellwalker cw2, int spin) {
 
 /** make currentmap into one of the spaces in intra */
 EX void become() {
+  if(intra::in) {
+    /* let them add more spaces in this case */
+    data[current].gd.storegame();
+    intra::in = false;
+    return;
+    }
+
   check_cgi();
   cgi.require_shapes();
   auto& ac = currentmap->allcells();
