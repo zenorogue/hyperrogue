@@ -760,7 +760,7 @@ cdata orig_cdata;
 
 EX bool geometry_supports_cdata() {
   if(hybri) return PIU(geometry_supports_cdata());
-  return among(geometry, gEuclid, gEuclidSquare, gNormal, gOctagon, g45, g46, g47, gBinaryTiling) || (arcm::in() && !sphere) || currentmap->strict_tree_rules();
+  return among(geometry, gEuclid, gEuclidSquare, gNormal, gOctagon, g45, g46, g47, gBinaryTiling) || (arcm::in() && !sphere) || (currentmap && currentmap->strict_tree_rules());
   }
 
 void affect(cdata& d, short rv, signed char signum) {
