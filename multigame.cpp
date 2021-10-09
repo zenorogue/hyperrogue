@@ -62,12 +62,14 @@ void gamedata_all(gamedata& gd) {
   gd.store(*current_display);
   gd.store(cgip);
   gd.store(hybrid::underlying);
+  gd.store(hybrid::csteps);
   gd.store(hybrid::underlying_cgip);
   gd.store_ptr(vid);
   gd.store(sightrange_bonus);
   gd.store(genrange_bonus);
   gd.store(gamerange_bonus);
   gd.store(targets);
+  gd.store(patterns::rwalls);
   if(GDIM == 3) {
     gd.store(radarlines);
     gd.store(radarpoints);
