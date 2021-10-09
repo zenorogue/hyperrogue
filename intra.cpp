@@ -371,6 +371,29 @@ EX void connect_portal(cellwalker cw1, cellwalker cw2, int spin) {
   connect_portal_1(cw2, cw1, -spin);
   }
 
+EX void generate_sample_list_for_current() {
+  auto v = hybrid::gen_sample_list();
+  int gi = 0;
+  if(full_sample_list.size()) {
+    gi = full_sample_list.back().first;
+    full_sample_list.pop_back();
+    }
+  data[current].wallindex = gi;
+  for(auto x: v)
+    full_sample_list.emplace_back(x.first + gi, x.second);
+  println(hlog, "added ", isize(v)-1, " samples, wallindex = ", data[current].wallindex);
+  }
+
+EX void regenerate_full_sample_list() {
+  resetter ir;
+  full_sample_list.clear();
+  for(int i=0; i<isize(data); i++) {
+    switch_to(i);
+    generate_sample_list_for_current();
+    }
+  println(hlog, isize(full_sample_list), " samples known");
+  }
+
 /** make currentmap into one of the spaces in intra */
 EX void become() {
   if(intra::in) {
@@ -392,16 +415,7 @@ EX void become() {
   data.emplace_back();
   data.back().gd.storegame();
   data.back().gi = ginf[gProduct];
-
-  auto v = hybrid::gen_sample_list();
-  int gi = 0;
-  if(full_sample_list.size()) {
-    gi = full_sample_list.back().first;
-    full_sample_list.pop_back();
-    }
-  data.back().wallindex = gi;
-  for(auto x: v)
-    full_sample_list.emplace_back(x.first + gi, x.second);
+  generate_sample_list_for_current();
   sightranges[geometry] = 10;
   }
 
@@ -688,12 +702,36 @@ EX void be_ratio_edge(int i, ld v IS(1)) {
   cgi.require_basics();
   }
 
+/** Remove the space with the given id. Turns off intra */
+EX void kill(int id) {
+  if(in) become();
+  data.erase(data.begin()+id);
+  vector<cellwalker> to_remove;
+  for(auto& p: connections) if(intra_id[p.second.scw.at] == id || intra_id[p.second.tcw.at] == id)
+    to_remove.push_back(p.first);
+    else {
+      if(p.second.source_world >= id) p.second.source_world--;
+      if(p.second.target_world >= id) p.second.target_world--;
+      }
+  for(auto r: to_remove) connections.erase(r);
+  vector<cell*> to_erase_cell;
+  for(auto& p: intra_id)
+    if(p.second == id) 
+      to_erase_cell.push_back(p.first);
+    else if(p.second > id)
+      p.second--;
+  for(auto c: to_erase_cell) 
+    intra_id.erase(c);
+  println(hlog, isize(to_remove), " connections and ", isize(to_erase_cell), " cells erased");
+  }
+
 auto hooks1 =
   addHook(hooks_o_key, 90, [] (o_funcs& v) {
     if(intra::in) v.push_back(named_dialog(XLAT("manage portals"), show_portals));
     })
   + arg::add3("-intra-add", [] { start_game(); become(); })
   + arg::add3("-intra-start", [] { start_game(); become(); start(0); })
+  + arg::add3("-intra-kill", [] { arg::shift(); kill(arg::argi()); start(0); regenerate_full_sample_list(); })
   + arg::add3("-be-square", [] { be_ratio(); })
   + arg::add3("-be-square-edge", [] {
       arg::shift(); int i = arg::argi(); be_ratio_edge(i);
