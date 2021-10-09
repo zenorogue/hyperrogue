@@ -337,6 +337,7 @@ struct raygen {
   void move_forward();
   void emit_intra_portal(int gid1, int gid2);
   void emit_iterate(int gid1);
+  void emit_raystarter();
   void create();
 
   string f_xpush() { return hyperbolic ? "xpush_h3" : "xpush_s3"; }
@@ -1687,6 +1688,64 @@ void raygen::add_functions() {
   add_if("len_e2",  "  mediump float len_e2(mediump vec4 x) { return length(x.xy); }\n");
   }
 
+void raygen::emit_raystarter() {
+  if(prod) {
+    string sgn=in_h2xe() ? "-" : "+";
+    fmain +=
+    "  position = vw * vec4(0., 0., 1., 0.);\n"
+    "  mediump vec4 at1 = uLP * at0;\n";
+    if(in_e2xe()) fmain +=
+    "  zpos = log(position.z);\n";
+    else fmain +=
+    "  zpos = log(position.z*position.z"+sgn+"position.x*position.x"+sgn+"position.y*position.y)/2.;\n";
+    if(eyes) fmain +=
+    "  vw *= exp(-zpos);\n";
+    else fmain +=
+    "  position *= exp(-zpos);\n"
+    "  zspeed = at1.z;\n"
+    "  xspeed = length(at1.xy);\n"
+    "  tangent = vw * exp(-zpos) * vec4(at1.xy, 0, 0) / xspeed;\n";
+    }
+  else if(!eyes) {
+    fmain +=
+      "  position = vw * vec4(0., 0., 0., 1.);\n"
+      "  tangent = vw * at0;\n";
+    }
+
+  if(eyes) {
+    fsh += "mediump uniform mat4 uEyeShift;\n";
+    fsh += "mediump uniform float uAbsUnit;\n";
+    }
+
+  if(stretch::in()) {
+    if(stretch::mstretch) {
+      fsh += "mediump uniform mat4 uITOA;\n";
+      fsh += "mediump uniform mat4 uATOI;\n";
+      fsh += "mediump uniform mat4 uToOrig;\n";
+      fsh += "mediump uniform mat4 uFromOrig;\n";
+      fsh += "mediump mat4 toOrig;\n";
+      fsh += "mediump mat4 fromOrig;\n";
+      fmain +=
+        "toOrig = uToOrig;\n"
+        "fromOrig = uFromOrig;\n";
+      fmain +=
+        "tangent = s_itranslate(toOrig * position) * toOrig * tangent;\n";
+      fmain +=
+        "tangent = uITOA * tangent;\n";
+      fmain +=
+        "tangent = fromOrig * s_translate(toOrig * position) * tangent;\n";
+      }
+    else {
+      fmain +=
+        "tangent = s_itranslate(position) * tangent;\n";
+      fmain +=
+        "tangent[2] /= " + glhr::to_glsl(stretch::not_squared()) + ";\n";
+      fmain +=
+        "tangent = s_translate(position) * tangent;\n";
+      }
+    }
+  }
+
 void raygen::create() {
   using glhr::to_glsl;
   currentmap->wall_offset(centerover); /* so raywall is not empty and deg is not zero */
@@ -1785,10 +1844,10 @@ void raygen::create() {
       fsh += build_getter("mediump mat4", "uM", gms_limit);
     #endif
 
-    if(prod) fsh +=
+    if(prod || intra::in) fsh +=
       "uniform mediump mat4 uLP;\n";
 
-    if(prod) fsh +=
+    if(prod || intra::in) fsh +=
       "uniform mediump float uPLevel;\n";
 
     if(many_cell_types) fsh +=
@@ -1886,70 +1945,42 @@ void raygen::create() {
     if(is_stepbased() || intra::in) fmain +=
       "  const mediump float maxstep = " + fts(maxstep_current() * s) + ";\n"
       "  const mediump float minstep = " + fts(minstep * s) + ";\n"
-      "  mediump float next = maxstep;\n";          
+      "  mediump float next = maxstep;\n";
     
-    if(prod) {
-      string sgn=in_h2xe() ? "-" : "+";
-      fmain +=     
-      "  mediump vec4 position = vw * vec4(0., 0., 1., 0.);\n"
-      "  mediump vec4 at1 = uLP * at0;\n";
-      if(in_e2xe()) fmain +=
-      "  mediump float zpos = log(position.z);\n";
-      else fmain +=
-      "  mediump float zpos = log(position.z*position.z"+sgn+"position.x*position.x"+sgn+"position.y*position.y)/2.;\n";
-      if(eyes) fmain +=
-      "  vw *= exp(-zpos);\n";
-      else fmain +=
-      "  position *= exp(-zpos);\n"
-      "  mediump float zspeed = at1.z;\n"
-      "  mediump float xspeed = length(at1.xy);\n"
-      "  mediump vec4 tangent = vw * exp(-zpos) * vec4(at1.xy, 0, 0) / xspeed;\n";
-      }
-    else if(!eyes) {
-      fmain +=
-        "  mediump vec4 position = vw * vec4(0., 0., 0., 1.);\n"
-        "  mediump vec4 tangent = vw * at0;\n";
-      }
-    if(intra::in && !prod) {
+    string fmain_prod, fmain_nprod;
+
+    fmain += "  mediump vec4 position;\n";
+    fmain += "  mediump vec4 tangent;\n";
+
+    if(prod || intra::in) {
       fmain += "  mediump float zspeed = 1.;\n";
       fmain += "  mediump float xspeed = 1.;\n";
       fmain += "  mediump float zpos = 0.;\n";
       }
-    
-    if(eyes) {
-      fsh += "mediump uniform mat4 uEyeShift;\n";
-      fsh += "mediump uniform float uAbsUnit;\n";
-      }
-      
-    if(stretch::in()) {
-      if(stretch::mstretch) {
-        fsh += "mediump uniform mat4 uITOA;\n";
-        fsh += "mediump uniform mat4 uATOI;\n";
-        fsh += "mediump uniform mat4 uToOrig;\n";
-        fsh += "mediump uniform mat4 uFromOrig;\n";
-        fsh += "mediump mat4 toOrig;\n";
-        fsh += "mediump mat4 fromOrig;\n";
-        fmain +=
-          "toOrig = uToOrig;\n"
-          "fromOrig = uFromOrig;\n";
-        fmain += 
-          "tangent = s_itranslate(toOrig * position) * toOrig * tangent;\n";
-        fmain += 
-          "tangent = uITOA * tangent;\n";
-        fmain += 
-          "tangent = fromOrig * s_translate(toOrig * position) * tangent;\n";
-        }
-      else {
-        fmain += 
-          "tangent = s_itranslate(position) * tangent;\n";
-        fmain +=
-          "tangent[2] /= " + to_glsl(stretch::not_squared()) + ";\n";
-        fmain +=
-          "tangent = s_translate(position) * tangent;\n";
-        }
-      }
 
     if(many_cell_types) fmain += "  walloffset = uWallOffset; sides = uSides;\n";
+
+    if(intra::in) {
+
+      int q = isize(intra::data);
+
+      intra::resetter ir;
+
+      for(int gid2=0; gid2<q; gid2++) {
+        if(gid2 == q-1)
+          fmain += "  {\n";
+        else  {
+          fmain += "  if(walloffset < " + its(intra::data[gid2+1].wallindex) + ") {\n";
+          }
+        intra::switch_to(gid2);
+        emit_raystarter();
+        if(gid2 == q-1)
+          fmain += "  }\n";
+        else
+          fmain += "  } else\n";
+        }
+      }
+    else emit_raystarter();
 
     fmain +=
       "  mediump float go = 0.;\n"
