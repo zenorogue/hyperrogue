@@ -41,6 +41,7 @@ EX int gms_array_size = 16;
 EX ld maxstep_sol = .05;
 EX ld maxstep_nil = .1;
 EX ld maxstep_pro = .5;
+EX ld maxstep_intra = .05;
 EX ld minstep = .001;
 
 EX ld reflect_val = 0;
@@ -49,6 +50,7 @@ static const int NO_LIMIT = 999999;
 
 EX ld hard_limit = NO_LIMIT;
 
+EX int max_iter_intra = 600;
 EX int max_iter_sol = 600;
 EX int max_iter_iso = 60;
 EX int max_iter_eyes = 200;
@@ -63,7 +65,7 @@ EX ld& exp_decay_current() {
   }
 
 EX int& max_iter_current() {
-  if(intra::in) return max_iter_iso;
+  if(intra::in) return max_iter_intra;
   if(nonisotropic || stretch::in()) return max_iter_sol;
   else if(is_eyes()) return max_iter_eyes;
   else return max_iter_iso;
@@ -86,6 +88,7 @@ EX bool horos() {
   }
 
 ld& maxstep_current() {
+  if(intra::in) return maxstep_intra;
   if(sn::in() || stretch::in()) return maxstep_sol;
   #if CAP_VR
   if(vrhr::active() && vrhr::eyes == vrhr::eEyes::equidistant)
