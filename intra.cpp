@@ -136,6 +136,7 @@ EX portal_data make_portal(cellwalker cw, int spin) {
   auto fac = ss.faces_local[cw.spin];
   portal_data id;
   id.scale = 1;
+  id.T = Id;
   auto gg = geometry;
   if(prod && cw.spin >= cw.at->type - 2) {
     id.kind = 1;
