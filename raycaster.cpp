@@ -2196,13 +2196,17 @@ struct raycast_map {
       forCellIdCM(c2, d, c) {
         // if(reflect_val == 0 && !((1<<d) & legaldir[i])) continue;
 
+        if(intra::in && !intra::intra_id.count(c2)) intra::intra_id[c2] = intra::current;
+
         if(intra::in) {
           cellwalker cw(c, d);
           auto p = at_or_null(intra::connections, cw);
-          if(p) c2 = p->tcw.at;
+          if(p) {
+            cell *c3 = p->tcw.at;
+            if(rays_generate && c3->mpdist > 7) { intra::may_switch_to(c3); setdist(c3, 7, c); intra::may_switch_to(c2); }
+            cl.add(c3);
+            }
           }
-
-        if(intra::in && !intra::intra_id.count(c2)) intra::intra_id[c2] = intra::current;
 
         if(rays_generate) setdist(c2, 7, c);
         /* if(!cl.listed(c2))
