@@ -2969,7 +2969,7 @@ void addconfig() {
   param_f(exp_decay_poly, "ray_exp_decay_poly");
   addsaver(max_iter_iso, "ray_max_iter_iso");
   addsaver(max_iter_sol, "ray_max_iter_sol");
-  addsaver(max_cells, "ray_max_cells");
+  param_i(max_cells, "ray_max_cells");
   addsaver(rays_generate, "ray_generate");
   param_b(fixed_map, "ray_fixed_map");
   }
