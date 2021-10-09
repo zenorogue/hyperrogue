@@ -671,7 +671,7 @@ EX namespace mapstream {
   EX hookset<void(fhstream&, int)> hooks_loadmap;
   
   EX cell *save_start() {
-    return (bounded || euclid || prod || arcm::in() || INVERSE) ? currentmap->gamestart() : cwt.at->master->c7;
+    return (bounded || euclid || prod || arcm::in() || sol || INVERSE) ? currentmap->gamestart() : cwt.at->master->c7;
     }
 
 #if CAP_EDIT  
