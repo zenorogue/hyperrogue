@@ -1012,12 +1012,17 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
     fmain += "if(pconnection.x != .5) {\n"; // kind != 0
     if(1) {
       string fn = bt::in() ? "to_poco_h2xr_b" : in_h2xe() ? "to_poco_h2xr_h" : "to_poco_s2xr_s";
+      string tmul = "";
+      if(!bt::in()) {
+        fmain +=
+        "    mediump mat4 tkt = " + getM("mid+1") + ";\n";
+        tmul = "tkt*";
+        }
       fmain +=
-        "    mediump mat4 tkt = " + getM("mid+1") + ";\n"
         "    nposition = position + tangent * xspeed * 1e-3;\n"
-        "    position = "+fn+"(tkt*position);\n"
+        "    position = "+fn+"("+tmul+"position);\n"
         "    position.z = 0.;\n" // zpos - uPLevel;\n"
-        "    nposition = "+fn+"(tkt*nposition);\n"
+        "    nposition = "+fn+"("+tmul+"nposition);\n"
         "    nposition.z = zspeed * 1e-3;\n"
         "    if(pconnection.y < .5) { nposition.z = -nposition.z; nposition.x = -nposition.x; position.x = -position.x; }\n";
       }
@@ -1081,15 +1086,15 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
     fmain += "if(pconnection.z != .5) {\n"; // kind != 0
     if(1) {
       string sgn = in_h2xe() ? "-" : "+";
-      string fn = bt::in() ? "from_poco_h2xr_b" : in_h2xe() ? "from_poco_h2xr_h" : "from_poco_s2xr_s";
+      string fn = bt::in() ? "from_poco_h2xr_b" : in_h2xe() ? "itkt*from_poco_h2xr_h" : "itkt*from_poco_s2xr_s";
 
       fmain +=
       "    if(pconnection.w < .5) { position.z = -position.z; nposition.z = -nposition.z; nposition.x = -nposition.x; position.x = -position.x; }\n"
       "    zspeed = (nposition.z - position.z) * 1e3;\n"
       "    zpos = position.z + (pconnection.w - .5) * 16.;\n"
       "    mediump mat4 itkt = " + getM("mid+2") + ";\n"
-      "    position = itkt*"+fn+"(position);\n"
-      "    nposition = itkt*"+fn+"(nposition);\n"
+      "    position = "+fn+"(position);\n"
+      "    nposition = "+fn+"(nposition);\n"
       "    tangent = (nposition - position) * 1e3;\n"
       "    mediump float pnorm = tangent.z * position.z "+sgn+" tangent.x * position.x "+sgn+" tangent.y * position.y;\n"
       "    tangent -= position * pnorm;\n"

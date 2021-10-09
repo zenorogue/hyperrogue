@@ -142,7 +142,12 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     id.d = product_decompose(fac[0]).first;
     id.v0 = C0 * exp(id.d);
     if(bt::in()) {
-      fac.pop_back();
+      for(auto h: fac)
+        println(hlog, PIU(deparabolic13(normalize_flat(h))));
+      if(cw.spin == cw.at->type - 2)
+        fac.pop_back();
+      else
+        fac.erase(fac.begin() + 1);
       id.scale = log(2)/2;
       }
     else {
@@ -157,12 +162,12 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     id.v0 = Hypc;
     id.scale = cgi.plevel;
     for(auto p: fac) id.v0 += p;
-    id.v0 /= sqrt(abs(intval(id.v0, Hypc)));
-    hyperpoint h = fac[0];
-    h /=  sqrt(abs(intval(h, Hypc)));
+    id.v0 = normalize_flat(id.v0);
+    hyperpoint h = normalize_flat(fac[0]);
     id.T = cspin(0, 1, -90*degree) * spintox(gpushxto0(id.v0) * h) * gpushxto0(id.v0);
+    if((id.T * C0)[0] > 0) id.T = cspin(0, 1, 180*degree) * id.T;
     for(int i=0; i<3; i++) id.T[3][i] = id.T[i][3] = i==3;
-    if(debugflags & DF_GEOM)
+    // if(debugflags & DF_GEOM)
     for(int a=0; a<4; a++) {
       hyperpoint h = fac[a];
       println(hlog, kz(h), " -> ", kz(spintox(id.v0)*h), " -> ", kz(cpush(0, -hdist0(id.v0))) * kz(spintox(id.v0) * h), " -> ", kz(id.to_poco(h)));
