@@ -4513,3 +4513,13 @@ Other fixes:
 * mimics now destroyed correctly in the map editor
 * parallel linepattern is now configurable
 * fixed message about 9 treasure types in casual
+
+2021-10-09 XX:XX Update 12.0h:
+  - improvements to intra portals
+  - Solv maps and subdivided 3D maps are now saved correctly
+  - fixed a crash when generating daily, also Dice Reserve, Cursed Canyon, and the new walls should appear soon
+  - do not switch variation to pure when switching to Archimedean product
+  - fixed Archimedean dual product
+  - raycaster now works correctly in binary products
+  - binary product spaces now use curved shapes
+  - fixed some formulas in binary spaces, and made the default width equal to Solv
