@@ -706,9 +706,9 @@ const int landscapes_when = 177;
 
 EX const int frog_when = 205;
 
-EX const int cursed_when = 9999; /* don't do Dice and Curse for now in daily */
+EX const int cursed_when = 386;
 
-EX const int walls_when = 9999; /* don't do walls for now in daily */
+EX const int walls_when = 388;
 
 // check if the given land should appear in lists
 EX land_validity_t& land_validity(eLand l) {
