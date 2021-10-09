@@ -609,6 +609,9 @@ void show_portals() {
     switch_to(ic);
     });
 
+  dialog::addSelItem(XLAT("mode"), ray::fixed_map ? "perf" : "edit", 'e');
+  dialog::add_action([] { ray::fixed_map = !ray::fixed_map; });
+
   if(debug_portal) {
     dialog::addItem(XLAT("debug"), 'd');
     dialog::add_action([] {
