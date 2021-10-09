@@ -817,6 +817,9 @@ int read_cheat_args() {
   else if(argis("-top")) {
     PHASE(3); View = View * spin(-M_PI/2);
     }
+  else if(argis("-idv")) {
+    PHASE(3); View = Id;
+    }
   else if(argis("-gencells")) {
     PHASEFROM(2); shift(); start_game();
     printf("Generating %d cells...\n", argi());
