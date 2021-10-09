@@ -167,7 +167,7 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     id.T = cspin(0, 1, -90*degree) * spintox(gpushxto0(id.v0) * h) * gpushxto0(id.v0);
     if((id.T * C0)[0] > 0) id.T = cspin(0, 1, 180*degree) * id.T;
     for(int i=0; i<3; i++) id.T[3][i] = id.T[i][3] = i==3;
-    // if(debugflags & DF_GEOM)
+    if(debug_portal & 128)
     for(int a=0; a<4; a++) {
       hyperpoint h = fac[a];
       println(hlog, kz(h), " -> ", kz(spintox(id.v0)*h), " -> ", kz(cpush(0, -hdist0(id.v0))) * kz(spintox(id.v0) * h), " -> ", kz(id.to_poco(h)));
@@ -251,10 +251,13 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     println(hlog, "chosen edge is ", first, "--", second);
     }
 
-  if(debug_portal & 1) for(auto p: fac) {
-    auto p2 = id.to_poco(p);
-    auto p3 = id.from_poco(p2);
-    println(hlog, kz(p), " > ", kz(p2), " > ", kz(p3));
+  if(debug_portal & 1) {
+    for(auto p: fac) {
+      auto p2 = id.to_poco(p);
+      auto p3 = id.from_poco(p2);
+      println(hlog, kz(p), " > ", kz(p2), " > ", kz(p3));
+      }
+    println(hlog, kz(C0), " > ", kz(id.to_poco(C0)), " > ", kz(id.from_poco(id.to_poco(C0))));
     }
 
   return id;
@@ -318,7 +321,8 @@ void connect_portal_1(cellwalker cw1, cellwalker cw2, int spin) {
     set_column(T2, 2, hyperpoint(0,0,-p.id2.scale,0));
     set_column(T2, 3, C03);
     if(debug_portal & 2) for(int i=0; i<4; i++)
-      println(hlog, "mapping [", p.source_world, "]", get_column(T1, i), " to [", p.target_world, "] ", get_column(T2, i));
+      println(hlog, "mapping [", p.source_world, "]", get_column(T1, i), " to [", p.target_world, "] ", get_column(T2, i),
+        " dists = ", hypot_d(2, get_column(T1,i)), ",", hypot_d(2, get_column(T2,i)));
     p.T = T2 * inverse(T1);
 
     if(debug_portal & 2)
