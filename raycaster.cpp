@@ -148,6 +148,7 @@ EX bool available() {
 EX bool requested() {
   if(cgflags & qRAYONLY) return true;
   if(!want_use) return false;
+  if(intra::in) return true;
   if(stretch::in() && sphere) return true;
   #if CAP_TEXTURE
   if(texture::config.tstate == texture::tsActive) return false;
@@ -290,7 +291,7 @@ tuple<
     vrhr::state, 
     vrhr::eyes,
     #endif
-    cgi_string()
+    intra::in ? "INTRA" : cgi_string()
     );
   }
 
