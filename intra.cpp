@@ -726,6 +726,29 @@ EX void kill(int id) {
   println(hlog, isize(to_remove), " connections and ", isize(to_erase_cell), " cells erased");
   }
 
+EX set<cell*> need_to_save;
+
+EX void prepare_need_to_save() {
+  need_to_save.clear();
+  map<cell*, cell*> parent;
+  vector<cell*> q;
+  cell *s = mapstream::save_start();
+  parent[s] = s;
+  q = {s};
+  for(int i=0; i<isize(q); i++) {
+    cell *c = q[i];
+    forCellEx(c2, c)
+      if(!parent.count(c2)) { parent[c2] = c; q.push_back(c2); }
+    }
+  for(int i=isize(q)-1; i>=0; i--) {
+    cell *c = q[i];
+    if(c == cwt.at) need_to_save.insert(c);
+    for(auto& p: connections) if(p.first.at == c) need_to_save.insert(c);
+    if(need_to_save.count(c)) need_to_save.insert(parent[c]);
+    }
+  println(hlog, "need to save ", isize(need_to_save), " out of ", isize(q), " cells");
+  }
+
 auto hooks1 =
   addHook(hooks_o_key, 90, [] (o_funcs& v) {
     if(intra::in) v.push_back(named_dialog(XLAT("manage portals"), show_portals));

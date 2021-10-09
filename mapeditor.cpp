@@ -702,6 +702,7 @@ EX namespace mapstream {
     }
     
     addToQueue(save_start());
+    if(intra::in) intra::prepare_need_to_save();
     for(int i=0; i<isize(cellbyid); i++) {
       cell *c = cellbyid[i];
       if(i) {
@@ -743,6 +744,9 @@ EX namespace mapstream {
       // f.write_char(c->bardir);
       f.write(c->wparam); f.write(c->landparam);
       f.write_char(c->stuntime); f.write_char(c->hitpoints);
+      bool blocked = false;
+      if(intra::in && isWall3(c) && !intra::need_to_save.count(c)) blocked = true;
+      if(!blocked)
       for(int j=0; j<c->type; j++) {
         cell *c2 = c->move(j);
         if(c2 && c2->land != laNone) addToQueue(c2);
