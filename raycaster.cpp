@@ -1202,7 +1202,10 @@ void raygen::emit_iterate(int gid1) {
   fmain +=
     "  int which = -1;\n";
 
-  if(hyperbolic && intra::in) fmain += "iter +=8;\n";
+  if(intra::in) {
+    if(hyperbolic) fmain += "iter += 44;\n";
+    else if(!sol) fmain += "iter += 4;\n";
+    }
 
   if(in_e2xe() && !eyes) fmain += "tangent.w = position.w = 0.;\n";
 
