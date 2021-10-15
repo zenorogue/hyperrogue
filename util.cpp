@@ -107,6 +107,10 @@ struct exp_parser {
   bool ok() { return at == isize(s); }
   char next(int step=0) { if(at >= isize(s)-step) return 0; else return s[at+step]; }
   
+  char eatchar() {
+    return s[at++];
+    }
+
   bool eat(const char *c) {
     int orig_at = at;
     while(*c && *c == next()) at++, c++;
