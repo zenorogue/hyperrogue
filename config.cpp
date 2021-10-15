@@ -2304,7 +2304,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     ->editable(0, 360*degree, 15*degree, "last parallel drawn", "", 'n');
   param_f(vid.depth_bonus, "depth_bonus", 0)
     ->editable(-5, 5, .1, "depth bonus in pseudohedral", "", 'b');
-  param_b(vid.pseudohedral, "pseudogonal", false)
+  param_b(vid.pseudohedral, "pseudohedral", false)
     ->editable("make the tiles flat", 'p');
   param_f(vid.depth, "depth", "3D depth", 1)
     ->editable(0, 5, .1, "Ground level below the plane", "", 'd')
