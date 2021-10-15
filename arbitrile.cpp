@@ -70,7 +70,7 @@ struct slider {
 struct arbi_tiling {
 
   int order;
-  bool have_line, have_ph, have_tree;
+  bool have_line, have_ph, have_tree, is_star;
   int yendor_backsteps;
 
   vector<shape> shapes;
@@ -339,6 +339,8 @@ EX void compute_vertex_valence() {
     }
   
   if(cgflags & qAFFINE) return;
+  if(ac.is_star) return;
+
   for(auto& sh: ac.shapes) {
     int n = sh.size();
     int i = sh.id;
@@ -403,6 +405,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
   c.have_ph = c.have_line = false;
   c.have_tree = false;
   c.yendor_backsteps = 0;
+  c.is_star = false;
   exp_parser ep;
   ep.s = s;
   ld angleunit = 1, distunit = 1, angleofs = 0;
@@ -466,6 +469,9 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       }
     else if(ep.eat("legacysign.")) {
       if(legacy) angleunit *= -1;
+      }
+    else if(ep.eat("star.")) {
+      c.is_star = true;
       }
     else if(ep.eat("angleunit(")) angleunit = real(ep.parsepar());
     else if(ep.eat("angleofs(")) {
