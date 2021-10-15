@@ -2183,6 +2183,11 @@ EX void show3D() {
   if((WDIM == 2 && GDIM == 3) || prod)
     dialog::addBoolItem_action(XLAT("fixed Y/Z rotation"), vid.fixed_yz, 'Z');
 
+  if(WDIM == 2 && GDIM == 3) {
+    add_edit(vid.pseudogonal);
+    // add_edit(vid.depth_bonus);
+    }
+
   if(true) {
     dialog::addBreak(50);
     dialog::addSelItem(XLAT("projection"), current_proj_name(), 'M');
@@ -2297,6 +2302,10 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     ->editable(0, 24, 1, "number of parallels drawn", "", 'n');
   param_f(linepatterns::parallel_max, "parallel_max")
     ->editable(0, 360*degree, 15*degree, "last parallel drawn", "", 'n');
+  param_f(vid.depth_bonus, "depth_bonus", 0)
+    ->editable(-5, 5, .1, "depth bonus in pseudogonal", "", 'b');
+  param_b(vid.pseudogonal, "pseudogonal", false)
+    ->editable("make the tiles flat", 'p');
   param_f(vid.depth, "depth", "3D depth", 1)
     ->editable(0, 5, .1, "Ground level below the plane", "", 'd')
     ->set_extra([] {

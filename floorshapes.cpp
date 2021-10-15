@@ -601,8 +601,19 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         #endif
         if(1) {
           int s = fsh.b[id].s;
-          int e = fsh.b[id].e-1;        
-          for(int t=0; t<e-s; t++) {
+          int e = fsh.b[id].e-1;
+          hyperpoint ctr = Hypc;
+          for(int t=0; t<e-s; t++)
+            ctr += orthogonal_move(may_kleinize(hpc[s+t]), dfloor_table[k]);
+          ctr = normalize(ctr);
+          if(vid.pseudogonal) for(int t=0; t<e-s; t++) {
+            hyperpoint v1 = orthogonal_move(may_kleinize(hpc[s+t]), dfloor_table[k]) - ctr;
+            hyperpoint v2 = orthogonal_move(may_kleinize(hpc[s+t+1]), dfloor_table[k]) - ctr;
+            texture_order([&] (ld x, ld y) {
+              hpcpush(normalize(ctr + v1 * x + v2 * y));
+              });
+            }
+          if(!vid.pseudogonal) for(int t=0; t<e-s; t++) {
             hyperpoint v1 = may_kleinize(hpc[s+t]) - C0;
             hyperpoint v2 = may_kleinize(hpc[s+t+1]) - C0;
             texture_order([&] (ld x, ld y) { 
