@@ -85,6 +85,8 @@ struct arbi_tiling {
   ld boundary_ratio;
   string filename;
   
+  vector<string> options;
+
   int min_valence, max_valence;
 
   geometryinfo1& get_geometry();
@@ -472,6 +474,16 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       }
     else if(ep.eat("star.")) {
       c.is_star = true;
+      }
+    else if(ep.eat("option(\"")) {
+      next:
+      string s = "";
+      while(ep.next() != '"') s += ep.eatchar();
+      ep.force_eat("\"");
+      c.options.push_back(s);
+      ep.skip_white();
+      if(ep.eat(",")) { ep.skip_white(); ep.force_eat("\""); goto next; }
+      ep.force_eat(")");
       }
     else if(ep.eat("angleunit(")) angleunit = real(ep.parsepar());
     else if(ep.eat("angleofs(")) {
@@ -987,6 +999,7 @@ EX void run(string fname) {
   try {
      load(fname);
      ginf[gArbitrary].tiling_name = current.name;
+     arg::run_arguments(current.options);
      }
    catch(hr_polygon_error& poly) {
      set_geometry(g);
