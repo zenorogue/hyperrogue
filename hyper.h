@@ -400,7 +400,7 @@ struct videopar {
   ld lake_top, lake_bottom;
   ld rock_wall_ratio;
   ld human_wall_ratio;
-  bool pseudogonal; // in 3D modes
+  bool pseudohedral; // in 3D modes
   ld depth_bonus;   // to fiix the placement of 3D models in pseudogonal -- not working currently
 
   int tc_alpha, tc_depth, tc_camera;

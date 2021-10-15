@@ -1177,7 +1177,7 @@ EX string cgi_string() {
     V("ASH", ONOFF(vid.gp_autoscale_heights));
     V("LT", fts(vid.lake_top));
     V("LB", fts(vid.lake_bottom));
-    if(GDIM == 3 && vid.pseudogonal)
+    if(GDIM == 3 && vid.pseudohedral)
       V("PS", fts(vid.depth_bonus));
     }
 
