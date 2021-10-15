@@ -126,6 +126,12 @@ EX namespace arg {
 
   EX void cheat() { autocheat = true; cheater++; timerghost = false; }
   
+  EX void run_arguments(const vector<string> vec) {
+    dynamicval<int> p(pos, 0);
+    dynamicval<vector<string>> orig(argument, vec);
+    read(3);
+    }
+
   EX void init(int argc, char **argv) { for(int i=0; i<argc; i++) argument.push_back(argv[i]); lshift(); }
  
   EX void phaseerror(int x) {
