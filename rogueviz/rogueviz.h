@@ -109,13 +109,17 @@ namespace rogueviz {
   
   void do_cleanup();
 
+  inline void on_cleanup_or_next(const reaction_t& del) {
+    if(tour::on) tour::on_restore(del);
+    else cleanup.push_back(del);
+    }
+
   template<class T, class U> void rv_hook(hookset<T>& m, int prio, U&& hook) {
     int p = addHook(m, prio, hook);
     auto del = [&m, p] { 
       delHook(m, p); 
       };
-    if(tour::on) tour::on_restore(del);
-    else cleanup.push_back(del);
+    on_cleanup_or_next(del);
     }
 
   namespace anygraph {
