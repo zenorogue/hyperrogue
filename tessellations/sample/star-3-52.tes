@@ -1,0 +1,18 @@
+## HyperRogue standard tiling
+s2.
+star.
+
+let(v = 3)
+let(u = 5/2)
+
+distunit(edge_angles(2*pi/v,pi/u,pi/u))
+
+let(u7 = regangle(1, v))
+unittile(u7,u7,u7)
+
+option("-switch-fpp", "-canvas-random", "0", "coolfog=0", "draw_sky=0", "fixed_YZ=0", "-PM", "0", "pseudohedral=1")
+
+c(0,0,0,0,0)
+c(0,1,0,1,0)
+c(0,2,0,2,0)
+
