@@ -32,6 +32,10 @@ struct colortable: vector<color_t> {
   const color_t& operator [] (int i) const { i %= size(); if(i<0) i += size(); return ((vector<color_t>&)(*this)) [i]; }
   colortable(std::initializer_list<color_t> v) : vector(v) {}
   colortable() : vector({0}) {}
+  void allocate(int num) {
+    int q = size();
+    for(int i=q; i<num; i++) push_back((*this)[i % q]);
+    }
   };
 #endif
 

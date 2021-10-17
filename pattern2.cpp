@@ -3110,10 +3110,11 @@ int read_pattern_args() {
           ((color_t*)(&vid.cs.skincolor)) [d] = h;
         return 0;
         }
-      else ct = &(colortables[patterns::whichCanvas]);
+      else ct = &(colortables[args()[0]]);
       shift();
       }
     int d = argi();
+    ct->allocate(d+1);
     shift(); (*ct)[d] = arghex();
     }
   else if(argis("-canvas")) {
