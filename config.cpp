@@ -2951,38 +2951,38 @@ EX int read_color_args() {
   using namespace arg;
 
   if(argis("-back")) {
-    PHASEFROM(2); shift(); backcolor = arghex();
+    PHASEFROM(2); shift(); backcolor = argcolor(24);
     }
   else if(argis("-fillmodel")) {
-    PHASEFROM(2); shift(); modelcolor = arghex();
+    PHASEFROM(2); shift(); modelcolor = argcolor(32);
     }
   else if(argis("-ring")) {
-    PHASEFROM(2); shift(); ringcolor = arghex();
+    PHASEFROM(2); shift(); ringcolor = argcolor(32);
     }
   else if(argis("-ringw")) {
     PHASEFROM(2); shift_arg_formula(vid.multiplier_ring);
     }
   else if(argis("-stdgrid")) {
-    PHASEFROM(2); shift(); stdgridcolor = arghex();
+    PHASEFROM(2); shift(); stdgridcolor = argcolor(32);
     }
   else if(argis("-gridw")) {
     PHASEFROM(2); shift_arg_formula(vid.multiplier_grid);
     }
   else if(argis("-period")) {
-    PHASEFROM(2); shift(); periodcolor = arghex();
+    PHASEFROM(2); shift(); periodcolor = argcolor(32);
     }
   else if(argis("-crosshair")) {
-    PHASEFROM(2); shift(); crosshair_color = arghex();
+    PHASEFROM(2); shift(); crosshair_color = argcolor(32);
     shift_arg_formula(crosshair_size);
     }
   else if(argis("-borders")) {
-    PHASEFROM(2); shift(); bordcolor = arghex();
+    PHASEFROM(2); shift(); bordcolor = argcolor(24);
     }
   else if(argis("-fore")) {
-    PHASEFROM(2); shift(); forecolor = arghex();
+    PHASEFROM(2); shift(); forecolor = argcolor(24);
     }
   else if(argis("-dialog")) {
-    PHASEFROM(2); shift(); dialog::dialogcolor = arghex();
+    PHASEFROM(2); shift(); dialog::dialogcolor = argcolor(24);
     }
   else if(argis("-d:color"))
     launch_dialog(show_color_dialog);

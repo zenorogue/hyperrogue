@@ -1762,7 +1762,7 @@ int readArgs() {
     rotation_center_View = View;
     shift_arg_formula(circle_spins);
     shift_arg_formula(circle_radius);
-    shift(); circle_display_color = arghex();
+    shift(); circle_display_color = argcolor(24);
     }
   else if(argis("-animmove")) {
     ma = maTranslation; 

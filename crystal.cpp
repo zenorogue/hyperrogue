@@ -1406,7 +1406,7 @@ int readArgs() {
     launch_dialog(show);
   else if(argis("-cvcol")) {
     shift(); int d = argi();
-    shift(); coordcolors[d] = arghex();
+    shift(); coordcolors[d] = argcolor(24);
     }
   else return 1;
   return 0;

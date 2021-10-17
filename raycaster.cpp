@@ -2904,7 +2904,7 @@ int readArgs() {
     shift_arg_formula(hard_limit);
     }
   else if(argis("-ray-out")) {
-    PHASEFROM(2); shift(); color_out_of_range = arghex();
+    PHASEFROM(2); shift(); color_out_of_range = argcolor(32);
     }
   else if(argis("-ray-comp")) {
     PHASEFROM(2);
@@ -2947,7 +2947,7 @@ int readArgs() {
   else if(argis("-ray-cursor")) {
     start_game();
     volumetric::enable();
-    shift(); volumetric::vmap[centerover] = arghex();
+    shift(); volumetric::vmap[centerover] = argcolor(32);
     }
   else return 1;
   return 0;

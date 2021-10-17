@@ -934,7 +934,7 @@ int expansion_readArgs() {
 
   else if(argis("-expansion-labelcolor")) {
     dist_label_colored = false;
-    shift(); dist_label_color = arghex();
+    shift(); dist_label_color = argcolor(24);
     }
 
   else if(argis("-expansion-off")) {

@@ -3072,7 +3072,7 @@ int read_pattern_args() {
     shift(); 
     for(auto& lp: linepatterns::patterns)
       if(appears(lp->lpname, ss))
-        lp->color = arghex();
+        lp->color = argcolor(32);
     }
 
   else if(argis("-fat-edges")) {
@@ -3102,10 +3102,10 @@ int read_pattern_args() {
       if(c == 't') ct = &nestcolors;
       else if(c == 'd') ct = &distcolors;
       else if(c == 'm') ct = &minecolors;
-      else if(c == 'E') { shift(); int d = argi(); shift(); expcolors[d] = arghex(); return 0; }      
+      else if(c == 'E') { shift(); int d = argi(); shift(); expcolors[d] = argcolor(24); return 0; }
       else if(c == 'P') { 
         shift(); int d = argi(); shift();
-        color_t h = arghex();
+        color_t h = argcolor(32);
         if(d >= 0 && d < 7)
           ((color_t*)(&vid.cs.skincolor)) [d] = h;
         return 0;
@@ -3115,7 +3115,7 @@ int read_pattern_args() {
       }
     int d = argi();
     ct->allocate(d+1);
-    shift(); (*ct)[d] = arghex();
+    shift(); (*ct)[d] = argcolor(24);
     }
   else if(argis("-canvas")) {
     PHASEFROM(2);
@@ -3124,7 +3124,7 @@ int read_pattern_args() {
     shift();
     if(args() == "i") canvas_default_wall = waInvisibleFloor;
     else if(args().size() == 1) patterns::whichCanvas = args()[0];
-    else patterns::canvasback = arghex();
+    else patterns::canvasback = argcolor(24);
     stop_game_and_switch_mode(rg::nothing);
     }
   else if(argis("-canvas-random")) {
