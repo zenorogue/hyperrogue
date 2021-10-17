@@ -999,7 +999,6 @@ EX void run(string fname) {
   try {
      load(fname);
      ginf[gArbitrary].tiling_name = current.name;
-     arg::run_arguments(current.options);
      }
    catch(hr_polygon_error& poly) {
      set_geometry(g);
@@ -1301,6 +1300,9 @@ int readArgs() {
     shift(); 
     run(args());
     }
+  else if(argis("-tes-opt")) {
+     arg::run_arguments(current.options);
+    }
   else if(argis("-arb-legacy")) {
     legacy = true;
     }
@@ -1352,6 +1354,8 @@ EX void choose() {
   dialog::openFileDialog(tes, XLAT("open a tiling"), ".tes", 
   [] () {
     run(tes);
+    if(!current.options.empty())
+      dialog::push_confirm_dialog([] { arg::run_arguments(current.options); start_game(); }, "load the settings defined in this file?");
     return true;
     });
   }
