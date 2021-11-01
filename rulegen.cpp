@@ -1385,7 +1385,7 @@ void examine_branch(int id, int left, int right) {
     if(rl == DIR_RIGHT && rr == DIR_LEFT && lstack.empty() && rstack.empty()) {
       vector<tsinfo> hash;
       push_deadstack(hash, wl, tsl, -1);
-      hash.emplace_back(-1, -1);
+      hash.emplace_back(-1, wl.at->dist - wr.at->dist);
       push_deadstack(hash, wr, tsr, +1);
       // println(hlog, "hash = ", hash);
       if(verified_branches.count(hash)) return;
