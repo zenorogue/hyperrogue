@@ -517,6 +517,7 @@ int shape_edges() {
 
 void test_current(string tesname) {
 
+  disable_bigstuff = true;
   worst_precision_error = 0;
   stop_game();
   pointer_indices.clear();
