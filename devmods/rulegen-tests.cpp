@@ -561,11 +561,38 @@ void test_current(string tesname) {
     println(hlog, "CSV; failed to convert ", tesname);
     return;
     }
-
+  
+  if(flags & w_known_structure) {
+    dynamicval<flagtype> f(rulegen::flags, sub_rulegen_flags);
+    prepare_rules();
+    alt_treestates = treestates;
+    pointer_indices.clear();
+    }
+  
   int tstart = SDL_GetTicks();
+  int attempts = 0;
+  double max_time = 0, avg_time = 0, variance_time = 0;
   auto begin = clock(); // std::chrono::high_resolution_clock::now();
+  auto last = begin;
   try {
-    generate_rules();
+    while(!attempts) { // || (clock() < begin + 0.1 * CLOCKS_PER_SEC && attempts < 1000)) {
+      
+      if(true) {
+        rulegen::delete_tmap();
+        rulegen::clear_all();
+        last = clock();
+        rulegen::movecount = 0;
+        }
+    
+      generate_rules();
+      auto cur = clock();
+      double t = (cur - last) * 1. / CLOCKS_PER_SEC;
+      last = cur;
+      if(t > max_time) max_time = t;
+      avg_time += t;
+      variance_time += t * t;
+      attempts++;
+      }
     status = "ACC";
     message = "OK";
     ok = true;
@@ -589,6 +616,20 @@ void test_current(string tesname) {
     println(hlog, "precision error: ** ", e.what());
     status = "PRE";
     message = e.what();
+    }
+  if(!attempts) { 
+    auto cur = clock();
+    double t = (cur - last) * 1. / CLOCKS_PER_SEC;
+    avg_time += t; variance_time += t*t; max_time = t;
+    attempts = 1;
+    }
+  
+  avg_time /= attempts;
+  variance_time /= attempts;
+  variance_time -= avg_time * avg_time;
+  if(attempts > 1) {
+    variance_time *= attempts;
+    variance_time /= (attempts-1);
     }
 
   auto end = clock(); // std::chrono::high_resolution_clock::now();
@@ -655,6 +696,10 @@ void test_current(string tesname) {
     case 'T': Out("T", tstart / 1000.);
 //  case 'P': Out("Tp", std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count() / 1000000000.);
     case 'P': Out("Tp", (end-begin) * 1. / CLOCKS_PER_SEC);
+    case 'N': Out("attempts", attempts);
+    case 'M': Out("maxtime", max_time);
+    case 'E': Out("avgtime", avg_time);
+    case 'V': Out("vartime", variance_time);
     case 'y': Out("tree", isize(treestates));
     case 'a': Out("amin;amax", lalign(0, areas[0], ";", areas.back()));
     case 'h': Out("shapes", isize(arb::current.shapes));

@@ -79,6 +79,8 @@ static const flagtype w_bfs = Flag(17); /*< compute distances using BFS */
 
 EX flagtype flags = 0;
 
+EX int64_t movecount;
+
 #if HDR
 struct tcell* tmove(tcell *c, int d);
 
@@ -104,11 +106,11 @@ struct tcell {
   /** sometimes we find out that multiple tcells represent the same actual cell -- in this case we unify them; unified_to is used for the union-find algorithm */
   walker<tcell> unified_to;
   int degree() { return type; }
-  connection_table<tcell> c;                           
-  tcell*& move(int d) { return c.move(d); }
-  tcell*& modmove(int d) { return c.modmove(d); }
-  tcell* cmove(int d) { return tmove(this, d); }
-  tcell* cmodmove(int d) { return tmove(this, c.fix(d)); }
+  connection_table<tcell> c;
+  tcell*& move(int d) { movecount++; return c.move(d); }
+  tcell*& modmove(int d) { movecount++; return c.modmove(d); }
+  tcell* cmove(int d) { movecount++; return tmove(this, d); }
+  tcell* cmodmove(int d) { movecount++; return tmove(this, c.fix(d)); }
   tcell() { }
   };
 
