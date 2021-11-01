@@ -517,6 +517,18 @@ int shape_edges() {
   return res;
   }
 
+int max_edge() {
+  int res = 0;
+  for(auto& sh: arb::current.shapes) res = max(res, sh.size());
+  return res;
+  }
+
+int max_valence() {
+  int res = 0;
+  for(auto& sh: arb::current.shapes) for(auto& va: sh.vertex_valence) res = max(res, va);
+  return res;
+  }
+
 void test_current(string tesname) {
 
   disable_bigstuff = true;
@@ -664,11 +676,35 @@ void test_current(string tesname) {
   
   vector<ld> areas;
   for(auto& sh: arb::current.shapes) {
-    ld s = 0; int i = 0;
-    for(auto a: sh.angles) { while(a > 2 * M_PI) a -= 2 * M_PI; while(a<0) a += 2 * M_PI; s += a; i++; }
-    areas.push_back((i-2) * M_PI - s);
+    if(hyperbolic) {
+      ld s = 0; int i = 0;
+      for(auto a: sh.angles) { while(a > 2 * M_PI) a -= 2 * M_PI; while(a<0) a += 2 * M_PI; s += a; i++; }
+      areas.push_back((i-2) * M_PI - s);
+      }
+    else {
+      ld s = 0;
+      for(int i=0; i<sh.size(); i++) {
+        auto v = sh.vertices[i];
+        auto v2 = sh.vertices[(i+1)%sh.size()];
+        s += (v2[0] - v[0]) * (v[1] + v2[1]);
+        }
+      s /= 2;
+      if(s < 0) s = -s;
+      areas.push_back(s);
+      }
     }
   sort(areas.begin(), areas.end());
+
+  vector<ld> edgelens;
+  for(auto& sh: arb::current.shapes) {
+    for(int i=0; i<sh.size(); i++) {
+      auto v = sh.vertices[i];
+      auto v2 = sh.vertices[(i+1)%sh.size()];
+      ld len = hdist(v, v2);
+      edgelens.push_back(len);
+      }
+    }
+  sort(edgelens.begin(), edgelens.end());
 
   again:
   print(hlog, "CSV");
@@ -704,8 +740,10 @@ void test_current(string tesname) {
     case 'V': Out("vartime", variance_time);
     case 'y': Out("tree", isize(treestates));
     case 'a': Out("amin;amax", lalign(0, areas[0], ";", areas.back()));
+    case 'j': Out("emin;emax", lalign(0, edgelens[0], ";", edgelens.back()));
     case 'h': Out("shapes", isize(arb::current.shapes));
     case 'e': Out("edges", shape_edges());
+    case 'W': Out("max_valence;max_edge", lalign(0, max_valence(), ";", max_edge()));
     case 'f': Out("file", tesname);
     case 'l': Out("shortcut", longest_shortcut());
     case '3': Out("shqty", longest_shortcut().first);
@@ -715,19 +753,20 @@ void test_current(string tesname) {
     case '1': Out("single", single_live_branches);
     case '2': Out("double", double_live_branches);
     case 'p': Out("premini", states_premini);
+    case 'K': Out("movecount", format("%ld", rulegen::movecount));
     }
   println(hlog);
   fflush(stdout);
   if(add_header) { add_header = false; goto again; }
 
   // for(auto& sh: shortcuts) println(hlog, sh.first, " : ", isize(sh.second), " shortcuts (CSV)");
-
-  print_rules();
+  
+  if(status != "ACC") treestates = alt_treestates;
+  if(status == "ACC") print_rules();
   /* for(auto& a: analyzers)
     println(hlog, "analyzer ", a.first, " size is ", isize(a.second.spread)); */
   fflush(stdout);
   list_sequence();
-
 
   fflush(stdout);
   }
