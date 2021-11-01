@@ -599,12 +599,15 @@ EX void fix_distances(tcell *c) {
       ufindc(c);
       c1 = c->cmove(i);
       auto& d1 = c1->dist;
-      if(d > d1+1) { d = d1+1; c->any_nearer = i; remove_parentdir(c); goto restart; }
+      if(d > d1+1) {
+        if(c->is_solid)
+          find_new_shortcuts(c, d1+1, c, i, 0);
+        d = d1+1; c->any_nearer = i; remove_parentdir(c); goto restart;
+        }
       if(d1 > d+1) {
         int i1 = c->c.spin(i);
-        if(c1->is_solid) {
+        if(c1->is_solid)
           find_new_shortcuts(c1, d+1, c1, i1, 0);
-          }
         d1 = d+1;
         c1->any_nearer = i1;
         remove_parentdir(c1);
