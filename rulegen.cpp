@@ -1618,7 +1618,7 @@ void clear_tcell_data() {
   in_fixing = false; fix_queue = std::queue<reaction_t>{};
   }
 
-void cleanup() {
+EX void cleanup() {
   clear_tcell_data();
   analyzers.clear();
   code_to_id.clear();
@@ -1627,7 +1627,7 @@ void cleanup() {
   single_live_branch_close_to_root.clear();
   }
 
-void clear_all() {  
+EX void clear_all() {  
   treestates.clear();
   cleanup();
   }
@@ -1900,7 +1900,7 @@ EX int get_state(cell *c) {
   return c->master->fieldval;
   }
 
-string rules_known_for = "unknown";
+EX string rules_known_for = "unknown";
 string rule_status;
 
 EX bool known() {
