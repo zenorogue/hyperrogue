@@ -835,6 +835,54 @@ void set_arcm(eVariation v, string symbol) {
     }
   }
 
+bool set_general(const string& s) {
+  stop_game();
+  if(s[0] == 'X') {
+    int a, b, c, d;
+    sscanf(s.c_str()+2, "%d%d%d%d", &a, &b, &c, &d);
+    geometry = eGeometry(a);
+    variation = eVariation(b);
+    gp::param = {c, d};
+    println(hlog, "parsed ", s, " as ", full_geometry_name());
+    }
+  else if(s[0] == 'P') set_arcm(eVariation::pure, s.c_str()+2);
+  else if(s[0] == 'D') set_arcm(eVariation::dual, s.c_str()+2);
+  else if(s[0] == 'B') set_arcm(eVariation::bitruncated, s.c_str()+2);
+  else try {
+    set_geometry(gArbitrary);
+    arb::load(s);
+    }
+  catch(hr_parse_exception& ex) {
+    println(hlog, "failed: ", ex.s);
+    return false;
+    }
+  catch(arb::hr_polygon_error& ex) {
+    println(hlog, "poly error");
+    return false;
+    }
+  catch(hr_exception& ex) {
+    println(hlog, "other exception");
+    return false;
+    }
+  if(cgflags & qAFFINE) {
+    println(hlog, "illegal tessellation found: affine");
+    return false;
+    }
+  if(arb::current.is_star) {
+    println(hlog, "illegal tessellation found: star");
+    return false;
+    }
+  if(arb::current.have_tree) {
+    println(hlog, "illegal tessellation found: tree");
+    return false;
+    }
+  if(sphere) {
+    println(hlog, "illegal tessellation found: spherical");
+    return false;
+    }
+  return true;
+  }
+
 void test_from_file(string list) {
 
   set_dir(list);
@@ -851,43 +899,10 @@ void test_from_file(string list) {
   int id = 0;
   
   for(const string& s: filenames) {  
+    println(hlog, "loading ", s, "... ", id++, "/", isize(filenames));
     if(trv) { trv--; id++; continue; }
-    stop_game();
-    if(s[0] == 'X') {
-      int a, b, c, d;
-      sscanf(s.c_str()+2, "%d%d%d%d", &a, &b, &c, &d);
-      geometry = eGeometry(a);
-      variation = eVariation(b);
-      gp::param = {c, d};
-      println(hlog, "parsed ", s, " as ", full_geometry_name());
-      }
-    else if(s[0] == 'P') set_arcm(eVariation::pure, s.c_str()+2);
-    else if(s[0] == 'D') set_arcm(eVariation::dual, s.c_str()+2);
-    else if(s[0] == 'B') set_arcm(eVariation::bitruncated, s.c_str()+2);
-    else try {
-      set_geometry(gArbitrary);
-      println(hlog, "loading ", s, "... ", id++, "/", isize(filenames));
-      arb::load(s);
-      }
-    catch(hr_parse_exception& ex) {
-      println(hlog, "failed: ", ex.s);
-      continue;
-      }
-    catch(arb::hr_polygon_error& ex) {
-      println(hlog, "poly error");
-      continue;
-      }
-    catch(hr_exception& ex) {
-      println(hlog, "other exception");
-      continue;
-      }
-    if(cgflags & qAFFINE) { 
-      println(hlog, "illgeal tessellation found: affine"); continue; 
-      }
-    if(sphere) { 
-      println(hlog, "illgeal tessellation found: spherical"); continue; 
-      }
-    test_current(s);
+    if(set_general(s))
+      test_current(s);
     }
   }
 
@@ -1055,6 +1070,18 @@ int testargs() {
 
   else if(argis("-origin-id")) {
     shift(); origin_id = argi();
+    }
+
+  else if(argis("-tesgen")) {
+    shift(); string s = args();
+    set_general(s);
+    if(!arb::in()) try {
+      arb::convert::convert();
+      arb::convert::activate();
+      }
+    catch(hr_exception& e) {
+      println(hlog, "failed to convert ", s);
+      }
     }
     
   else if(argis("-dseek")) {
