@@ -244,6 +244,7 @@ void check_loops(twalker pw) {
   
   if(steps == valence - 1) {
     connect_and_check(pwb, pwf);
+    fix_distances(pwb.at);
     }
   }
 
