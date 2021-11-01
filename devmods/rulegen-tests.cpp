@@ -7,6 +7,8 @@
 namespace hr {
 namespace rulegen {
 
+EX flagtype sub_rulegen_flags;
+
 string testroot = "devmods/rulegen-tests/";
 string testdir = testroot;
 
@@ -936,6 +938,9 @@ int testargs() {
   else if(argis("-ruleflag")) {
     shift();
     rulegen::flags ^= Flag(argi());
+    }
+  else if(argis("-ruleflag-sub")) {
+    swap(rulegen::flags, sub_rulegen_flags);
     }
   else if(argis("-view-debug"))
     view_debug();

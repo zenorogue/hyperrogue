@@ -75,6 +75,9 @@ static const flagtype w_always_clean = Flag(14); /*< restart following phases af
 static const flagtype w_single_origin = Flag(15); /*< consider only one origin */
 static const flagtype w_slow_side = Flag(16); /*< do not try get_side optimization */
 static const flagtype w_bfs = Flag(17); /*< compute distances using BFS */
+static const flagtype w_numerical_fix = Flag(18); /*< when doing numerical, find out filled vertices */
+static const flagtype w_known_structure = Flag(19); /*< do flagless first, then use the known distances from there (handled in ruletest) */
+static const flagtype w_known_distances = Flag(20); /*< with, use the actual distances */
 #endif
 
 EX flagtype flags = 0;
@@ -181,18 +184,98 @@ tcell *gen_tcell(int id) {
 map<cell*, tcell*> cell_to_tcell;
 map<tcell*, cell*> tcell_to_cell;
 
+void numerical_fix(twalker pw) {
+  auto& shs = arb::current.shapes;
+  int id = pw.at->id;
+  int valence = shs[id].vertex_valence[pw.spin];
+    
+  int steps = 0;
+  twalker pwf = pw;
+  twalker pwb = pw;
+  vector<twalker> deb = {pwb};
+  while(true) {
+    if(!pwb.peek()) break;
+    pwb = pwb + wstep - 1;
+    deb.push_back(pwb);
+    steps++;
+    if(pwb == pwf) {
+      if(steps == valence) return; /* that's great, we already know this loop */
+      else {
+        debuglist = deb;
+        println(hlog, "deb = ", deb);
+        throw rulegen_failure("vertex valence too small");
+        }
+      }
+    if(steps == valence) {
+      println(hlog, "steps = ", steps, " valence = ", valence, " (D)");
+      debuglist = deb;
+      println(hlog, "deb = ", deb);
+      throw rulegen_failure("incorrect looping");
+      }
+    }
+  
+  while(true) {
+    pwf++;
+    if(!pwf.peek()) break;
+    pwf += wstep;
+    steps++;
+    if(pwb == pwf) {
+      if(steps == valence) return; /* that's great, we already know this loop */
+      else throw rulegen_failure("vertex valence too small");
+      }
+    if(steps == valence) {
+      println(hlog, "steps = ", steps, " valence = ", valence, " (C)");
+      debuglist = deb;
+      println(hlog, "deb = ", deb);
+      throw rulegen_failure("incorrect looping");
+      }
+    }
+  
+  if(steps == valence - 1) {
+    pwb.at->c.connect(pwb.spin, pwf.at, pwf.spin, false);
+    }
+  }
+
 tcell* tmove(tcell *c, int d) {
   if(d<0 || d >= c->type) throw hr_exception("wrong d");
-  if(c->move(d)) return c->move(d);
-  if(flags & w_numerical) {
+  if(c->c.move(d)) return c->c.move(d);
+  if(flags & (w_numerical | w_known_structure)) {
+    indenter ind(2);
+    if(flags & w_known_structure) swap_treestates();
     cell *oc = tcell_to_cell[c];
-    cell *oc1 = oc->cmove(d);
+    int d1 = d;
+
+    if(flags & w_known_structure) {
+      d1 = gmod(d1 - treestates[oc->master->fieldval].parent_dir, oc->type);
+      }
+
+    cell *oc1 = oc->cmove(d1);
     auto& c1 = cell_to_tcell[oc1];
     if(!c1) {
       c1 = gen_tcell(shvid(oc1));
       tcell_to_cell[c1] = oc1;
+      if(flags & w_known_distances)
+        c1->dist = oc1->master->distance;
       }
-    c->c.connect(d, cell_to_tcell[oc1], oc->c.spin(d), false);
+
+    int d2 = oc->c.spin(d1);
+    if(flags & w_known_structure) {
+      d2 = gmod(d2 + treestates[oc1->master->fieldval].parent_dir, oc1->type);
+      }
+
+    c->c.connect(d, cell_to_tcell[oc1], d2, false);
+    /* if(arb::current.shapes[c->id].connections[d].eid != d2)
+      throw hr_exception("Wrong type!"); */
+
+    if(flags & w_known_structure)
+      swap_treestates();
+
+    ensure_shorter(c1);
+
+    if(flags & w_numerical_fix) {
+      numerical_fix(twalker(c, d));
+      numerical_fix(twalker(c, d) + wstep);
+      }
     return c1;
     }
   auto cd = twalker(c, d);
@@ -406,6 +489,7 @@ EX void find_new_shortcuts(tcell *c, int d, tcell *alt, int newdir, int delta) {
   all_solid_errors++;
   check_timeout(); /* may freeze no this */
   if(flags & w_no_shortcut) return;
+  if(flags & w_known_distances) return;
 
   ufindc(c);
   if(debugflags & DF_GEOM)
@@ -502,6 +586,7 @@ EX void fix_distances(tcell *c) {
       }
     }
   c->distance_fixed = true;
+  if(flags & w_known_distances) return;
   vector<tcell*> q = {c};
   
   for(int qi=0; qi<isize(q); qi++) {
@@ -712,6 +797,7 @@ EX int get_parent_dir(tcell *c) {
     int d = c->dist;
 
     for(int i=0; i<n; i++) {
+      ensure_shorter(twalker(c, i));
       tcell *c1 = c->cmove(i);
       be_solid(c1);
       if(parent_debug) println(hlog, "direction = ", i, " is ", c1, " distance = ", c1->dist);
@@ -1698,7 +1784,9 @@ EX void generate_rules() {
   sidecache.clear();
   fix_queue = queue<reaction_t>();; in_fixing = false;
 
-  if(flags & w_numerical) {
+  if(flags & (w_numerical | w_known_structure)) {
+    if(flags & w_known_structure) swap_treestates();
+    stop_game();
     start_game();
     cell *s = currentmap->gamestart();
     tcell *c = gen_tcell(shvid(s));
@@ -1706,6 +1794,11 @@ EX void generate_rules() {
     tcell_to_cell[c] = s;
     c->dist = 0;
     t_origin.push_back(c);
+
+    if((flags & w_known_structure) && !(flags & w_single_origin))
+      add_other_origins(currentmap);
+
+    if(flags & w_known_structure) swap_treestates();
     }
   else if(flags & w_single_origin) {
     tcell *c = gen_tcell(origin_id);
@@ -1915,6 +2008,31 @@ struct hrmap_rulegen : hrmap {
     return true;
     }
   };
+
+EX vector<treestate> alt_treestates;
+
+EX void swap_treestates() {
+  swap(treestates, alt_treestates);
+  }
+
+EX void add_other_origins(hrmap *m0) {
+  auto m = dynamic_cast<hrmap_rulegen*> (m0);
+  if(!m) throw hr_exception("add_other_origins not on hrmap_rulegen");
+
+  /* we check for sid because state 0 is already there */
+  for(int i=1; i<isize(treestates); i++) if(treestates[i].is_root && treestates[i].sid) {
+    heptagon *extra_origin = m->gen(i, 0, true);
+    extra_origin->s = hsOrigin;
+    cell *s = extra_origin->c7;
+    tcell *c = gen_tcell(shvid(s));
+    cell_to_tcell[s] = c;
+    tcell_to_cell[c] = s;
+    c->dist = 0;
+    t_origin.push_back(c);
+    }
+
+  println(hlog, "t_origin size = ", isize(t_origin));
+  }
 
 EX int get_arb_dir(cell *c, int dir) {
   return ((hrmap_rulegen*)currentmap)->get_arb_dir(c->master->fieldval, dir);
