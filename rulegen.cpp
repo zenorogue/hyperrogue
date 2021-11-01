@@ -793,8 +793,9 @@ EX int get_parent_dir(tcell *c) {
     auto beats = [&] (int i, int old) {
       if(old == -1) return true;
       if(i%k != old%k) return i%k < old%k;
-      if(old < i) old += n;
-      return old <= i+n/2;
+      return true;
+      /* if(old < i) old += n;
+      return old <= i+n/2; */
       };
 
     int d = c->dist;
