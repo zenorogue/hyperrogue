@@ -161,9 +161,6 @@ twalker addstep(twalker x) {
   return x + wstep;
   }
 
-void connect_and_check(twalker p1, twalker p2);
-void unify(twalker pw1, twalker pw2);
-
 tcell *gen_tcell(int id) {
   int d = isize(arb::current.shapes[id].connections);
   auto c = tailored_alloc<tcell> (d);
@@ -250,7 +247,7 @@ void check_loops(twalker pw) {
     }
   }
 
-void connect_and_check(twalker p1, twalker p2) {
+EX void connect_and_check(twalker p1, twalker p2) {
   ufind(p1); ufind(p2);
   p1.at->c.connect(p1.spin, p2.at, p2.spin, false);
   fix_queue.push([=] { check_loops(p1); });
