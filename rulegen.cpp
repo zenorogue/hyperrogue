@@ -644,11 +644,15 @@ void trace_root_path(vector<int>& rp, twalker cw) {
     ufind(cw);
     handle_distance_errors();
     int di = side ? -1 : get_parent_dir(cw.at);
+    auto cw1 = cw;
+    ufind(cw);
+    if(cw != cw1) goto next;
     for(int i=0; i<cw.at->type; i++) {
       if((!side) && (cw+i).spin != di) continue;
       tcell *c1 = (cw+i).peek();
       if(!c1) continue;
       be_solid(c1);
+      handle_distance_errors();
       if(c1->dist < d) {
         rp.push_back(i);
         cw += i;
