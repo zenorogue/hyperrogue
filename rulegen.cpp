@@ -633,9 +633,26 @@ EX void look_for_shortcuts(tcell *c) {
     look_for_shortcuts(c, *shortcuts[c->id][i]);
   }
 
+EX void ensure_shorter(twalker cw) {
+  /* if cw.peek() has shorter dist, ensure it exists */
+  /* only with w_known_distances */
+  if(flags & w_known_distances) {
+    swap_treestates();
+    int d1 = cw.spin;
+    auto oc = tcell_to_cell[cw.at];
+    d1 = gmod(d1 - treestates[oc->master->fieldval].parent_dir, oc->type);
+    cell *c1 = oc->cmove(d1);
+    // println(hlog, "cw=", cw, " oc=", oc, " c1=", c1, " d=", oc->master->distance, "=", cw.at->dist, " vs ", c1->master->distance);
+    bool ok = c1->master->distance < cw.at->dist;
+    swap_treestates();
+    if(ok)
+      cw.at->cmove(cw.spin);
+    }
+  }
+
 void trace_root_path(vector<int>& rp, twalker cw) {
   auto d = cw.peek()->dist;
-  cw += wstep;
+  cw += wstep; auto scw = cw;
 
   bool side = (flags & w_parent_side);
 
@@ -661,6 +678,10 @@ void trace_root_path(vector<int>& rp, twalker cw) {
         goto next;
         }
       }
+    }
+  if(d > 0) {
+    debuglist = {scw};
+    throw rulegen_failure("should not happen [trace]");
     }
   rp.push_back(cw.to_spin(0));
   if(flags & w_parent_reverse) reverse(rp.begin(), rp.end());
@@ -1167,6 +1188,8 @@ void rules_iteration_for(tcell *c) {
           extend_analyzer(cwmain, z, k, mismatches, treestates[id].giver);
           mismatches++;
 
+          debuglist = { cwmain, ts.giver };
+
           if(!(flags & w_conflict_all))
             throw rulegen_retry("mismatch error");
           }
@@ -1360,7 +1383,8 @@ void examine_branch(int id, int left, int right) {
   auto rg = treestates[id].giver;
 
   if(debugflags & DF_GEOM)
-    println(hlog, "need to examine branches ", tie(left, right), " of ", id, " starting from ", rg);
+    println(hlog, "need to examine branches ", tie(left, right), " of ", id, " starting from ", rg, " step = ", rg+left+wstep, " vs ", rg+right+wstep);
+
   indenter ind(2);
 
   auto wl = rg+left;
@@ -1384,15 +1408,19 @@ void examine_branch(int id, int left, int right) {
     auto rl = get_rule(wl, tsl);
     auto rr = get_rule(wr, tsr);
 
-    // println(hlog, "wl = ", wl, " -> ", wl+wstep, " R", rl, " wr = ", wr, " -> ", wr+wstep, " R", rr, " lstack = ", lstack, " rstack = ", rstack);
+    if(0) if(debugflags & DF_GEOM)
+      println(hlog, "wl = ", wl, " -> ", wl+wstep, " R", rl, " wr = ", wr, " -> ", wr+wstep, " R", rr, " lstack = ", lstack, " rstack = ", rstack);
 
     if(rl == DIR_RIGHT && rr == DIR_LEFT && lstack.empty() && rstack.empty()) {
       vector<tsinfo> hash;
       push_deadstack(hash, wl, tsl, -1);
       hash.emplace_back(-1, wl.at->dist - wr.at->dist);
       push_deadstack(hash, wr, tsr, +1);
-      // println(hlog, "hash = ", hash);
-      if(verified_branches.count(hash)) return;
+      if(0) if(debugflags & DF_GEOM)
+        println(hlog, "got hash: ", hash);
+      if(verified_branches.count(hash)) {
+        return;
+        }
       verified_branches.insert(hash);
 
       verified_treewalk(wl, rl, -1);
