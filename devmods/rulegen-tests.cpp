@@ -4,6 +4,9 @@
 #include <fstream>
 #include <chrono>
 
+// extra ruleflags:
+// 30: do not clear memory
+
 namespace hr {
 namespace rulegen {
 
