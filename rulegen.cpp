@@ -1703,6 +1703,7 @@ EX void rules_iteration() {
       if(debugflags & DF_GEOM) 
         println(hlog, "changed single_live_branch_close_to_root from ", q, " to ", v);
       debuglist = { treestates[id].giver };
+      sidecache.clear();
       throw rulegen_retry("single live branch");
       }
     if(treestates[id].is_root) examine_branch(id, last_live_branch, first_live_branch);
