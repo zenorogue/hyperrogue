@@ -233,6 +233,7 @@ void numerical_fix(twalker pw) {
   
   if(steps == valence - 1) {
     pwb.at->c.connect(pwb.spin, pwf.at, pwf.spin, false);
+    fix_distances(pwb.at);
     }
   }
 
