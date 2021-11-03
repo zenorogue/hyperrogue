@@ -1490,7 +1490,11 @@ void examine_branch(int id, int left, int right) {
     steps++;
     if(steps > max_examine_branch) {
       debuglist = { rg+left, wl, wr };
-      throw rulegen_failure("max_examine_branch exceeded");
+      if(branch_conflicts_seen.size())
+        /* may be not a real problem, but caused by incorrect detection of live branches */
+        throw rulegen_retry("max_examine_branch exceeded after a conflict");
+      else
+        throw rulegen_failure("max_examine_branch exceeded");
       }
     
     auto tsl = get_tsinfo(wl);
