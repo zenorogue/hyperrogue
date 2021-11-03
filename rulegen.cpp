@@ -1845,6 +1845,7 @@ void build_test();
 struct hrmap_rulegen : hrmap {
   hrmap *base;
   heptagon *origin;
+  vector<heptagon*> extra_origins;
 
   heptagon* gen(int s, int d, bool c7) {
     int t = arb::current.shapes[treestates[s].sid].size();
@@ -1858,7 +1859,8 @@ struct hrmap_rulegen : hrmap {
     }
   
   ~hrmap_rulegen() { 
-    clearfrom(origin);   
+    clearfrom(origin);
+    for(auto eo: extra_origins) clearfrom(eo);
     }
 
   hrmap_rulegen() {
@@ -2035,6 +2037,7 @@ EX void add_other_origins(hrmap *m0) {
     tcell_to_cell[c] = s;
     c->dist = 0;
     t_origin.push_back(c);
+    m->extra_origins.push_back(extra_origin);
     }
 
   println(hlog, "t_origin size = ", isize(t_origin));
