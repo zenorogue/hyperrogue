@@ -2908,7 +2908,6 @@ EX void shift_view(hyperpoint H) {
     intra::shift_view_portal(H);
     return;
     }
-  auto oView = View;
   View = get_shift_view_of(H, View);
   auto& wc = current_display->which_copy;
   wc = get_shift_view_of(H, wc);
