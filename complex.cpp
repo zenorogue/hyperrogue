@@ -2325,8 +2325,6 @@ EX namespace heat {
 
 EX }
 
-bool gardener = false;
-
 EX void livecaves() {
   vector<cell*>& allcells = currentmap->allcells();
   int dcs = isize(allcells);
@@ -2455,10 +2453,8 @@ EX void livecaves() {
       if(hv > 0) c->wall = waCavefloor;
       if(hv < 0) {
         c->wall = waCavewall;
-        if(c->land != laCaves && c->land != laDeadCaves && c->land != laEmerald && !gardener) {
-          gardener = true;
+        if(c->land != laCaves && c->land != laDeadCaves && c->land != laEmerald)
           achievement_gain_once("GARDENER");
-          }
         }
       }
     else if(c->land == laLivefjord) {
