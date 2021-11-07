@@ -2880,7 +2880,7 @@ EX void rotate_view(transmatrix T) {
   if(callhandlers(false, hooks_rotate_view, T)) return;
   transmatrix& which = get_view_orientation();
   which = T * which;
-  if(!prod && !nonisotropic && !rug::rugged) current_display->which_copy = T * current_display->which_copy;
+  if(!prod && !rug::rugged) current_display->which_copy = T * current_display->which_copy;
   }
 
 /** shift the view according to the given tangent vector */
@@ -2911,13 +2911,7 @@ EX void shift_view(hyperpoint H) {
   auto oView = View;
   View = get_shift_view_of(H, View);
   auto& wc = current_display->which_copy;
-  if(nonisotropic || stretch::in()) {
-    transmatrix ioldv = eupush(tC0(view_inverse(oView)));
-    transmatrix newv = inverse(eupush(tC0(view_inverse(View))));
-    wc = newv * ioldv * wc;
-    }
-  else
-    wc = get_shift_view_of(H, wc);
+  wc = get_shift_view_of(H, wc);
   }
 
 void multiply_view(transmatrix T) {
