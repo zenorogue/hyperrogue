@@ -434,7 +434,7 @@ EX void countLocalTreasure() {
   currentLocalTreasure = i ? items[i] : 0;
   if(i != itHyperstone) for(int i=0; i<isize(dcal); i++) {
     cell *c2 = dcal[i];
-    if(c2->cpdist > 3) break;
+    if(c2->cpdist > (WDIM == 3 ? 1 : 3)) break;
     eItem i2 = treasureType(c2->land);
     if(i2 && items[i2] < currentLocalTreasure)
       currentLocalTreasure = items[i2];
