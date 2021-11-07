@@ -105,14 +105,15 @@ EX namespace sn {
     hyperpoint res;
     
     if(lazy) {
+      if(isnan(ix) || isnan(iy) || isnan(iz)) return Hypc;
       return decompress(get_int(int(ix+.5), int(iy+.5), int(iz+.5)));
       }
     
     else {
   
-      if(ix >= PRECX-1) ix = PRECX-2;
-      if(iy >= PRECX-1) iy = PRECX-2;
-      if(iz >= PRECZ-1) iz = PRECZ-2;
+      if(ix >= PRECX-1 || isnan(ix)) ix = PRECX-2;
+      if(iy >= PRECX-1 || isnan(iy)) iy = PRECX-2;
+      if(iz >= PRECZ-1 || isnan(iz)) iz = PRECZ-2;
       
       int ax = ix, bx = ax+1;
       int ay = iy, by = ay+1;
