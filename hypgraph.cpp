@@ -1933,7 +1933,7 @@ EX void centerpc(ld aspd) {
   if(vid.sspeed >= 4.99) aspd = 1000;
   DEBBI(DF_GRAPH, ("center pc"));
 
-  auto& W = current_display->which_copy;                                                            
+  auto& W = current_display->which_copy;
   ors::unrotate(W); ors::unrotate(View); ors::unrotate(cwtV.T);
 
   /* what should we center? */
