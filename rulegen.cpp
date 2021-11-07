@@ -271,6 +271,9 @@ tcell* tmove(tcell *c, int d) {
     if(flags & w_known_structure)
       swap_treestates();
 
+    if(!(flags & w_known_distances))
+      fix_distances(c);
+
     ensure_shorter(c1);
 
     if(flags & w_numerical_fix) {
