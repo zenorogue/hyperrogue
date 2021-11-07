@@ -1714,7 +1714,7 @@ EX void buildBigStuff(cell *c, cell *from) {
   }
 
 EX bool openplains(cell *c) {
-  if(ls::any_chaos()) {
+  if(ls::any_chaos() || ls::no_walls()) {
     forCellEx(c2, c) if(c2->land != laHunting) return false;
     return true;
     }
