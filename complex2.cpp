@@ -653,6 +653,7 @@ static constexpr bool randterra = false;
 
 EX void check(cell *c) {
   if(c->wall == waTerraWarrior && !c->monst && !racing::on) {
+    changes.ccell(c);
     bool live = false;
     if(randterra) {
       c->wparam++;
