@@ -1417,7 +1417,7 @@ EX namespace hybrid {
     for(auto& v: cgi.walloffsets) if(v.first >= 0) result.push_back(v);
     sort(result.begin(), result.end());
     // not a correct fix
-    result.emplace_back(result.back().first + result.back().second->type, nullptr);
+    result.emplace_back(result.back().first + result.back().second->type + (WDIM == 2 ? 2 : 0), nullptr);
     // result.emplace_back(isize(cgi.wallstart), nullptr);
     return result;
     }
