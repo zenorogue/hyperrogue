@@ -197,7 +197,7 @@ EX void present_screen() {
 
 #if CAP_SDLTTF
 
-EX string fontpath = ISWEB ? "sans-serif" : HYPERPATH "DejaVuSans-Bold.ttf";
+EX string fontpath = ISWEB ? "sans-serif" : HYPERFONTPATH "DejaVuSans-Bold.ttf";
 
 void loadfont(int siz) {
   fix_font_size(siz);
