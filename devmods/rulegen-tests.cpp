@@ -167,7 +167,7 @@ void irradiate() {
   cleanup_protomap();
   }
 
-void move_to(cellwalker cw) {
+void move_to(cellwalker cw) {  
   cwt = cw;
   centerover = cwt.at;
   View = Id;
@@ -470,7 +470,7 @@ void print_rules() {
     for(auto r: ts.rules)
       print(hlog, " ", rule_name(r));
     if(ts.giver.at)
-      print(hlog, " ", get_aid(ts.giver));
+      print(hlog, " ", ts.giver);
     else
       print(hlog, " (no giver)");
     
@@ -490,7 +490,7 @@ void restart_game_on(hrmap *m) {
 
 bool add_header = false;
 bool add_labels = true;
-string test_stats = "gsmctTlAhf";
+string test_stats = "gsmTPcuQthlpf"; // "gsmctTlAhf";
 
 pair<int,int> longest_shortcut() {
   int res = 0;
@@ -764,8 +764,8 @@ void test_current(string tesname) {
 
   // for(auto& sh: shortcuts) println(hlog, sh.first, " : ", isize(sh.second), " shortcuts (CSV)");
   
+  /*if(status == "ACC")*/ print_rules();
   if(status != "ACC") treestates = alt_treestates;
-  if(status == "ACC") print_rules();
   /* for(auto& a: analyzers)
     println(hlog, "analyzer ", a.first, " size is ", isize(a.second.spread)); */
   fflush(stdout);
@@ -837,6 +837,7 @@ void set_arcm(eVariation v, string symbol) {
 
 bool set_general(const string& s) {
   stop_game();
+  arb::current.name = s;
   if(s[0] == 'X') {
     int a, b, c, d;
     sscanf(s.c_str()+2, "%d%d%d%d", &a, &b, &c, &d);
@@ -903,6 +904,58 @@ void test_from_file(string list) {
     if(trv) { trv--; id++; continue; }
     if(set_general(s))
       test_current(s);
+    }
+  }
+
+void rulecat(string list) {
+
+  set_dir(list);
+
+  vector<string> filenames;
+  std::ifstream is("devmods/rulegen-tests/" + list + ".lst");
+  string s;
+  while(getline(is, s)) {
+    while(s != "" && s[0] == ' ')  s = s.substr(1);
+    if(s != "" && s[0] != '#') filenames.push_back(s);
+    }
+  
+  for(const string& s: filenames) {
+    string cat1;
+    /*
+    if(s[0] == 'X' && s[4] == '1')
+      cat1 = "regular";
+    else if(s[0] == 'X' && s[4] == '0')
+      cat1 = "bitruncated";
+    else if(s[0] == 'X' && s[4] == '5' && s[6] == 1 && s[7] == 0)
+      cat1 = "regular"; */
+    if(0) ;
+    else if(s[0] == 'X')
+      cat1 = "variations";
+    /*
+    else if(s[0] == 'P' && is_reg(s))
+      cat1 = "regular";
+    else if(s[0] == 'D' && is_reg(s))
+      cat1 = "regular";
+    else if(s[0] == 'B' && is_reg(s))    
+      cat1 = "bitruncated";
+    */
+    else if(s[0] == 'P')
+      cat1 = "archimedean";
+    else if(s[0] == 'D')
+      cat1 = "lavasz";
+    else if(s[0] == 'B')
+      cat1 = "archibi";
+    else {
+      int i = 0;
+      while(s[i] != '/') i++;
+      i++;
+      int i1 = i;
+      while(s[i] != '/') i++;
+      cat1 = s.substr(i1, i-i1);
+      if(cat1 == "multitile" && s.substr(i+1, 9) == "polyforms")
+        cat1 = "polyforms";
+      }
+    printf("CSV;%s;%s\n", cat1.c_str(), s.c_str());
     }
   }
 
@@ -988,6 +1041,11 @@ int testargs() {
     PHASEFROM(3);
     shift(); 
     test_from_file(args());
+    }
+  else if(argis("-rulecat")) {
+    PHASEFROM(3);
+    shift(); 
+    rulecat(args());
     }
   else if(argis("-trv")) {
     shift(); test_rotate_val = argi();
