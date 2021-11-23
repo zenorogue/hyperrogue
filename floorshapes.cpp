@@ -26,7 +26,10 @@ EX vector<basic_textureinfo> floor_texture_vertices;
 EX vector<glvertex> floor_texture_map;
 EX struct renderbuffer *floor_textures;
 
+EX bool disable_floorshapes = false; /* tiles generates faster, but crash on drawing */
+
 void geometry_information::init_floorshapes() {
+  if(disable_floorshapes) return;
   all_escher_floorshapes.clear();
   all_plain_floorshapes = { 
     &shFloor, &shMFloor, &shMFloor2, &shMFloor3, &shMFloor4, 
