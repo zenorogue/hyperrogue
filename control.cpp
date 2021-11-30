@@ -364,6 +364,8 @@ EX void full_strafe_camera(ld t) {
     }
   }
 
+EX ld third_person_rotation = 0;
+
 EX void full_rotate_camera(int dir, ld val) {
   if(rug::rug_control() && lshiftclick) {
     val *= camera_rot_speed;
@@ -389,6 +391,7 @@ EX void full_rotate_camera(int dir, ld val) {
   #endif
   else if(GDIM == 3) {
     val *= camera_rot_speed;
+    if(third_person_rotation) shift_view(ctangent(2, -third_person_rotation)), didsomething = true, playermoved = false;
     if(keep_vertical()) {
       hyperpoint vv = vertical_vector();
       ld alpha = -atan2(vv[2], vv[1]);
@@ -403,6 +406,7 @@ EX void full_rotate_camera(int dir, ld val) {
       }
     else
       rotate_view(cspin(dir, 2, val));
+    if(third_person_rotation) shift_view(ctangent(2, third_person_rotation));
     if(!rug::rug_control()) didsomething = true;
     }
   else
