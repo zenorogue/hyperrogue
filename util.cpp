@@ -327,7 +327,7 @@ cld exp_parser::parse(int prio) {
     else if(number == "e") res = exp(1);
     else if(number == "i") res = cld(0, 1);
     else if(number == "p" || number == "pi") res = M_PI;
-    else if(number == "" && next() == '-') { at++; res = -parse(prio); }
+    else if(number == "" && next() == '-') { at++; res = -parse(20); }
     else if(number == "") throw hr_parse_exception("number missing, " + where());
     else if(number == "s") res = ticks / 1000.;
     else if(number == "ms") res = ticks;
