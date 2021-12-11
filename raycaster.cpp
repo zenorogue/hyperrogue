@@ -2415,6 +2415,14 @@ struct raycast_map {
 unique_ptr<raycast_map> rmap;
 EX bool reset_rmap = false;
 
+EX cell* rmap_get_by_id(int id) {
+  return rmap->lst[id];
+  }
+
+EX int rmap_get_id_of(cell *c) {
+  return rmap->ids[c];
+  }
+
 EX void reset_raycaster() { 
   our_raycaster = nullptr; 
   reset_rmap = true;
