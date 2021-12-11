@@ -876,6 +876,7 @@ EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor, b
 
     cellwalker ycw = start;
     if(for_yendor) setdist(p.path[0], 7, NULL);
+    auto& expansion = get_expansion();
 
     for(int i=0; i<length; i++) {
 
@@ -939,7 +940,7 @@ EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor, b
           t = type_in(expansion, randomdir ? start.at : start.cpeek(), sdist);
           ycw--;
           if(valence() == 3) ycw--;
-          bignum b = expansion.get_descendants(randomdir ? length : length-1, t);
+          bignum b = get_expansion().get_descendants(randomdir ? length : length-1, t);
           p.full_id_0 = full_id = hrand(b);
           }
 

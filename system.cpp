@@ -1561,7 +1561,7 @@ EX void start_game() {
   arcm::current_or_fake().compute_geometry();
   #endif
   initcells();
-  expansion.reset();
+  get_expansion().reset();
 
   if(randomPatternsMode) {
     for(int i=0; i<landtypes; i++) {

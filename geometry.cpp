@@ -107,6 +107,8 @@ struct gi_extension {
   virtual ~gi_extension() {}
   };
 
+struct expansion_analyzer;
+
 /** both for 'heptagon' 3D cells and subdivided 3D cells */
 struct subcellshape {
   /** \brief raw coordinates of vertices of all faces */
@@ -499,6 +501,8 @@ hpcshape
     };
   shared_ptr<gpdata_t> gpdata = nullptr;
   #endif
+
+  shared_ptr<expansion_analyzer> expansion = nullptr;
   
   int state = 0;
   int usershape_state = 0;

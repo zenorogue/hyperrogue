@@ -254,7 +254,7 @@ EX hint hints[] = {
     []() { return !canmove && sizes_known() && celldist(cwt.at) >= 50; },
     []() {
       int d = celldist(cwt.at);
-      string s = expansion.approximate_descendants(d, 10000);
+      string s = get_expansion().approximate_descendants(d, 10000);
       dialog::addHelp(XLAT(
         "You are %1 cells away from the starting point, or "
         "the place where you used an Orb of Safety last time. "

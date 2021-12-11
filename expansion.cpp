@@ -23,6 +23,7 @@ void canonicize(vector<int>& t) {
 
 #if HDR
 struct expansion_analyzer {
+  int sibling_limit;
   vector<int> gettype(cell *c);
   int N;
   vector<cell*> samples;  
@@ -456,6 +457,7 @@ int position;
 EX int type_in_reduced(expansion_analyzer& ea, cell *c, const cellfunction& f) {
   int a = ea.N;
   int t = type_in(ea, c, f);
+  auto& expansion = get_expansion();
   if(expansion.N != a) {
     expansion.reduce_grouping();
     t = type_in(ea, c, f);
@@ -598,7 +600,7 @@ void celldrawer::do_viewdist() {
           if(c->master->alt) t = c->master->alt->fieldval;
           break;
         }
-      else t = type_in_reduced(expansion, c, curr_dist);
+      else t = type_in_reduced(get_expansion(), c, curr_dist);
       if(t >= 0) label = its(t), dc = distribute_color(t);
       break;
       }
@@ -727,6 +729,7 @@ void expansion_analyzer::view_distances_dialog() {
   
   int maxlen = bounded ? 128 : 16 + first_distance;
   vector<bignum> qty(maxlen);
+  auto& expansion = get_expansion();
   
   bool really_use_analyzer = use_analyzer && sizes_known();
   
@@ -826,6 +829,7 @@ void compute_coefficients() {
   println(hlog, gp::operation_name(), " ", ginf[geometry].tiling_name);
   start_game();
   
+    auto& expansion = get_expansion();
     printf("  sizes:");
     for(int i=0; i<expansion.valid_from+10; i++) printf(" %d", expansion.get_descendants(i).approx_int());
     
@@ -847,6 +851,7 @@ int expansion_readArgs() {
   else if(argis("-vap")) { 
     PHASEFROM(2); 
     start_game();
+    auto& expansion = get_expansion();
     shift(); int radius = argi();
     while(true) {
       string s = expansion.approximate_descendants(radius, 100);
@@ -857,6 +862,7 @@ int expansion_readArgs() {
   else if(argis("-csizes")) { 
     PHASEFROM(2); 
     start_game();
+    auto& expansion = get_expansion();
     expansion.get_growth();
     shift(); for(int i=0; i<argi(); i++)
       printf("%s / %s\n", expansion.get_descendants(i).get_str(1000).c_str(), expansion.get_descendants(i, expansion.diskid).get_str(1000).c_str());  
@@ -864,6 +870,7 @@ int expansion_readArgs() {
   else if(argis("-csolve")) { 
     PHASEFROM(2); 
     start_game();
+    auto& expansion = get_expansion();
     printf("preliminary_grouping...\n");
     expansion.preliminary_grouping();
     printf("N = %d\n", expansion.N);
@@ -949,11 +956,13 @@ auto ea_hook = addHook(hooks_args, 100, expansion_readArgs);
 #endif
 #endif
 
-EX expansion_analyzer expansion;
-
-EX int sibling_limit = 0;
+EX expansion_analyzer& get_expansion() {
+  if(!cgi.expansion) cgi.expansion = make_shared<expansion_analyzer> ();
+  return *cgi.expansion;
+  }
 
 EX void set_sibling_limit() {
+  auto& sibling_limit = get_expansion().sibling_limit;
   if(0) ;
   #if CAP_IRR
   else if(IRREGULAR) sibling_limit = 3;
@@ -1006,6 +1015,7 @@ EX int hyperbolic_celldistance(cell *c1, cell *c2) {
   int found_distance = INF;
   
   int d = 0, d1 = celldist0(c1), d2 = celldist0(c2), sl_used = 0;
+  auto& sibling_limit = get_expansion().sibling_limit;
 
   cell *cl1=c1, *cr1=c1, *cl2=c2, *cr2=c2;
   while(true) {

@@ -412,7 +412,7 @@ EX void drawStats() {
   if(nohud) return;
   if(callhandlers(false, hooks_prestats)) return;
   if(viewdists && show_distance_lists) 
-    expansion.view_distances_dialog();
+    get_expansion().view_distances_dialog();
   if(current_display->sidescreen) return;
   
   first_cell_to_draw = true;

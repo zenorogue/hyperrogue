@@ -1003,6 +1003,7 @@ EX namespace clearing {
     cell *c1 = c;
     if(c->mondir < c->type)
       c1 = c->move(c->mondir);
+    auto& expansion = get_expansion();
     return make_tuple(
       celldistAlt(c), type_in(expansion, c, celldistAlt), 
       celldistAlt(c1), type_in(expansion, c1, celldistAlt)

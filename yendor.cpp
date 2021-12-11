@@ -317,6 +317,7 @@ EX namespace yendor {
 
       if(key->land == laWestWall && trees_known()) {
 
+        auto& expansion = get_expansion();
         int t = type_in(expansion, yendor, [yendor] (cell *c) { return celldistance(yendor, c); });
         int maxage = 10;
         for(int i=0; i<min(items[itOrbYendor], 8); i++)
