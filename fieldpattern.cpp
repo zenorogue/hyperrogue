@@ -1121,9 +1121,9 @@ void fpattern::analyze() {
   int riverdist = dijkstra(PURE ? distflower : distriver, indist);
   DEBB(DF_FIELD, ("river dist = %d\n", riverdist));
   
-  for(int i=0; i<isize(currfp.matrices); i++)
-    if(currfp.distflower[i] == 0) {
-      distflower0 = currfp.inverses[i]+1;
+  for(int i=0; i<isize(matrices); i++)
+    if(distflower[i] == 0) {
+      distflower0 = inverses[i]+1;
       break;
       }
   
