@@ -2063,10 +2063,10 @@ EX void prettypoly(const vector<hyperpoint>& t, color_t fillcol, color_t linecol
   ptd.intester = C0;
   ptd.draw();
   }
-  
-vector<glvertex> curvedata;
-int curvestart = 0;
-bool keep_curvedata = false;
+
+EX vector<glvertex> curvedata;
+EX int curvestart = 0;
+EX bool keep_curvedata = false;
 
 EX void queuereset(eModel m, PPR prio) {
   queueaction(prio, [m] () { glflush(); pmodel = m; });
