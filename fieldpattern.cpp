@@ -295,6 +295,7 @@ struct fpattern {
       exit(1);
       }
     build();
+    analyze();
     }
     
   fpattern(int p) {
