@@ -269,7 +269,7 @@ EX string helptitle(string s, color_t col) {
 string princessReviveHelp() {
   if(inv::on) return "";
   string h = "\n\n" +
-    XLAT("Killed %1 can be revived with Orb of the Love, after you collect 20 more $$$.", moPrincess);
+    XLAT("Killed %1 can be revived with an Orb of Love, after you collect 20 more $$$.", moPrincess);
   if(princess::reviveAt)
     h += "\n\n" +
     XLAT("%The1 will be revivable at %2 $$$", moPrincess, its(princess::reviveAt));

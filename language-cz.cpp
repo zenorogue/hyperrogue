@@ -4444,7 +4444,7 @@ S("and not in a chaos without norms.\"",
 S("You have enough treasure now to revive %the1!",
   "Nyní máš dost pokladů na to, abys mohl oživit %a1!")
 
-S("Killed %1 can be revived with Orb of the Love, after you collect 20 more $$$.",
+S("Killed %1 can be revived with an Orb of Love, after you collect 20 more $$$.",
   "Zabit%ého1 %a1 je možné oživit pomocí Sféry Lásky, "
   "ale předtím musíš získat ještě 20 $$$."
   )
