@@ -1710,7 +1710,7 @@ EX namespace hive {
   EX int bugcount[BUGCOLORS];
   
   bool isBugEnemy(cell *c, int k) {
-    if(isPlayerOn(c) && !invismove) return true;
+    if(isPlayerOn(c) && !invismove && !peace::on) return true;
     if(!c->monst) return false;
     if(c->monst == moBug0+k) return false;
     if(isIvy(c)) return false;
@@ -1865,13 +1865,16 @@ EX namespace hive {
       int gmoves[8], q=0, bqual = -1;
       
       if(againstRose(c, NULL)) bqual = -40;
+
+      auto getplayer = peace::on ? AF_GETPLAYER : 0;
   
       for(int dir=0; dir<c->type; dir++) {
         cell *c2 = c->move(dir);
         int qual = -10;
         if(!c2) continue;
         else if(againstRose(c, c2)) qual = -50;
-        else if(canAttack(c, m, c2, c2->monst, AF_GETPLAYER))
+        else if(isPlayerOn(c2) && peace::on) qual = -45;
+        else if(canAttack(c, m, c2, c2->monst, getplayer))
           qual = c2->monst == moDeadBug ? -60: isBugEnemy(c2,k) ? 2 : -20;
         else if(!passable(c2, c, 0)) 
           qual = passable(c2, c, P_DEADLY) ? -30 : -60;
@@ -1890,13 +1893,13 @@ EX namespace hive {
       int d = gmoves[hrand(q)];
       movei mi(c, d);
       auto& c2 = mi.t;
-      if(c2->monst || isPlayerOn(c2)) {
+      if(c2->monst || (isPlayerOn(c2) && !peace::on)) {
         eMonster killed = c2->monst;
-        if(isPlayerOn(c2)) killed = moPlayer;
+        if(isPlayerOn(c2) && !peace::on) killed = moPlayer;
         if(isBug(killed)) battlecount++;
         else if(killed != moPlayer && !fightspam(c2))
           addMessage(XLAT("%The1 fights with %the2!", c->monst, killed));
-        attackMonster(c2, AF_NORMAL | AF_GETPLAYER, c->monst);
+        attackMonster(c2, AF_NORMAL | getplayer, c->monst);
         // killMonster(c);
         if(isBug(killed)) {
           c2->monst = moDeadBug, deadbug.push_back(c2);
