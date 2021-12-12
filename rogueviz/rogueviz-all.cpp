@@ -57,6 +57,9 @@
 #include "playing-with-impossibility.cpp"
 #endif
 #include "highdim-demo.cpp"
+#include "horo63.cpp"
+#include "platformer.cpp"
+#include "gobot.cpp"
 
 #include "kohonen.cpp"
 #include "embeddings.cpp"
