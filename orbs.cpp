@@ -1364,7 +1364,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
           CHK(canAttack(cf, moFriendlyIvy, c, c->monst, f), XLAT("Cannot attack there!")) &&
           CHKV(!monstersnear(cwt.at, moPlayer), wouldkill_here = true)
           ) : (
-          CHK(passable(c, cf, P_ISPLAYER | P_MONSTER), XLAT("Cannot grow there!")) &&
+          CHK(passable(c, cf, P_ISFRIEND | P_MONSTER), XLAT("Cannot grow there!")) &&
           CHK(!strictlyAgainstGravity(c, cf, false, MF_IVY), XLAT("Cannot grow against gravity!")) &&
           CHKV(!monstersnear(cwt.at, moPlayer), wouldkill_here = true))
           )
