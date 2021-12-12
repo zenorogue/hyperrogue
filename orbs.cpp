@@ -735,8 +735,16 @@ EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMons
 
 void growIvyTo(const movei& mi) {
   auto& dest = mi.t;
+  flagtype f = AF_NORMAL | AF_MSG;
+  if(items[itOrbEmpathy] && items[itOrbSlaying]) {
+    if(!canAttack(mi.s, moFriendlyIvy, mi.t, mi.t->monst, AF_MUSTKILL)) {
+      markOrb(itOrbEmpathy); markOrb(itOrbSlaying);
+      }
+    f |= AF_CRUSH;
+    }
+
   if(dest->monst) 
-    attackMonster(dest, AF_NORMAL | AF_MSG, moFriendlyIvy);
+    attackMonster(dest, f, moFriendlyIvy);
   else {
     dest->monst = moFriendlyIvy;
     dest->mondir = mi.rev_dir_or(NODIR);
@@ -1349,8 +1357,11 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     forCellIdCM(cf, d, c)
       if(cf->monst == moFriendlyIvy) {
 
+        flagtype f = 0;
+        if(items[itOrbEmpathy] && items[itOrbSlaying]) f |= AF_CRUSH;
+
         if(c->monst ? (
-          CHK(canAttack(cf, moFriendlyIvy, c, c->monst, 0), XLAT("Cannot attack there!")) &&
+          CHK(canAttack(cf, moFriendlyIvy, c, c->monst, f), XLAT("Cannot attack there!")) &&
           CHKV(!monstersnear(cwt.at, moPlayer), wouldkill_here = true)
           ) : (
           CHK(passable(c, cf, P_ISPLAYER | P_MONSTER), XLAT("Cannot grow there!")) &&
