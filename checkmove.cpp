@@ -168,7 +168,7 @@ EX bool monstersnear(cell *c, eMonster who) {
       if(elec::affected(c2)) continue;
       if(fast && c2->monst != moWitchSpeed) continue;
       // Krakens just destroy boats
-      if(who == moPlayer && c2->monst == moKrakenT && c->wall == waBoat) {
+      if(who == moPlayer && c2->monst == moKrakenT && c->wall == waBoat && !peace::on) {
         kraken_will_destroy_boat = true;
         continue;
         }

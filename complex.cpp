@@ -2981,7 +2981,7 @@ EX namespace kraken {
           attackMonster(c2, AF_NORMAL | AF_MSG, c->monst);
           sleep(c);
           }
-        else for(int i=0; i<numplayers(); i++) if(playerpos(i) == c2) {
+        else for(int i=0; i<numplayers(); i++) if(playerpos(i) == c2 && !peace::on) {
           if(isPlayerInBoatOn(c2, i)) {
             addMessage(XLAT("%The1 destroys your boat!", moKrakenH));
             dboat = true;
