@@ -862,7 +862,7 @@ EX void achievement_victory(bool hyper) {
   if(peace::on) return;
   if(tactic::on) return;
   if(!ls::nice_walls()) return;
-  if(!ineligible_starting_land) return;
+  if(ineligible_starting_land) return;
   LATE( achievement_victory(hyper); )
   DEBB(DF_STEAM, ("after checks"))
 
