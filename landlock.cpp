@@ -417,6 +417,11 @@ EX eLand getNewLand(eLand old) {
   if(tactic::on) return specialland;
   if(specialland != old && easy_to_find_specialland) return specialland;
 
+  if(specialland != old && easy_specialland) {
+    easy_specialland--;
+    return specialland;
+    }
+
   if(yendor::on && (yendor::clev().flags & YF_WALLS)) {
     if(old != yendor::clev().l) return yendor::clev().l;
     else if(old == laOcean) return pick(laLivefjord, laCaribbean);

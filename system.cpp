@@ -150,6 +150,8 @@ EX hookset<void()> hooks_post_initgame;
 
 EX bool ineligible_starting_land;
 
+EX int easy_specialland;
+
 /** \brief initialize the game */
 EX void initgame() {
   DEBBI(DF_INIT, ("initGame"));
@@ -181,6 +183,8 @@ EX void initgame() {
   if(firstland == laNone || firstland == laBarrier)
     firstland = laCrossroads;
 
+  easy_specialland = 0;
+
   if(firstland == laOceanWall) firstland = laOcean; 
   if(firstland == laHauntedWall) firstland = laGraveyard; 
   if(firstland == laHaunted && !tactic::on) firstland = laGraveyard;
@@ -188,8 +192,10 @@ EX void initgame() {
   if(firstland == laMountain && !tactic::on) firstland = laJungle;
   if(firstland == laPrincessQuest) firstland = laPalace;
   if(firstland == laMemory) firstland = laIce;
-  if((isGravityLand(firstland) && !isCyclic(firstland)) || (firstland == laOcean && !safety && !yendor::on)) 
+  if((isGravityLand(firstland) && !isCyclic(firstland)) || (firstland == laOcean && !safety && !yendor::on)) {
     firstland = weirdhyperbolic ? laCrossroads4 : laCrossroads;
+    easy_specialland = 3;
+    }
   
   clear_euland(firstland);
 
