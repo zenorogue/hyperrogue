@@ -4549,3 +4549,7 @@ Other:
 - refer to color by HTML name in commandline arguments, and an option to allocate more colors via CLI
 - pseudohedral display mode in 2.5D
 - TES files: a feature to add commandline options, and stars
+
+2021-12-13 22:32 Update 12.0j:
+- fixed the victory leaderboards (turns/time to Orb of Yendor/Hyperstones)
+- fixed the starting land selection feature for equidistant-based lands
