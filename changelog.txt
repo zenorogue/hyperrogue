@@ -4514,7 +4514,7 @@ Other fixes:
 * parallel linepattern is now configurable
 * fixed message about 9 treasure types in casual
 
-2021-10-09 XX:XX Update 12.0h:
+2021-10-10 01:13 Update 12.0h:
   - improvements to intra portals
   - Solv maps and subdivided 3D maps are now saved correctly
   - fixed a crash when generating daily, also Dice Reserve, Cursed Canyon, and the new walls should appear soon
@@ -4523,3 +4523,29 @@ Other fixes:
   - raycaster now works correctly in binary products
   - binary product spaces now use curved shapes
   - fixed some formulas in binary spaces, and made the default width equal to Solv
+
+2021-12-12 23:06 Update 12.0i:
+
+Gameplay:
+- Hyperbugs now ignore the player in peace mode
+- fixed the Nature + movement orb combo, without Empathy
+- fixed the Nature + Slaying + Empathy combo
+- Krakens no longer destroy player boats in peaceful mode
+- fixed allies affecting Terracotta Warriors without actually moving next to them
+- fixed reporting the Gardener achievement
+
+Other:
+- fixed grammar error 'Orb of the Love'
+- fixed a bug in parsing unary -
+- perf/edit setting in intra-geometric portals
+- do not remove faraway treasures in 3D geometries (they are not that far away...)
+- reduced the other land range for currentLocalTreasure in 3D geometries
+- fixed openplains in nowalls mode
+- fixed raycaster in 2dim geometries crashing
+- the problem of moving in Cat geometry should be fixed
+- stop crashing in Solv if coordinates are NAN
+- fixed weird colors in coxeter
+- fixes to rulegen
+- refer to color by HTML name in commandline arguments, and an option to allocate more colors via CLI
+- pseudohedral display mode in 2.5D
+- TES files: a feature to add commandline options, and stars
