@@ -877,6 +877,10 @@ void celldrawer::draw_grid() {
                 mm = lerp(1-cgi.ultra_material_part, cgi.ultra_material_part, .99);
               tie(a, b) = make_pair(normalize(lerp(a, b, mm)), normalize(lerp(b, a, mm)));
               }
+            else {
+              a = normalize(a);
+              b = normalize(b);
+              }
             gridline(V, a, b, gridcolor(c, c->move(t)), prec);            
 
             if(reg3::ultra_mirror_in()) {
