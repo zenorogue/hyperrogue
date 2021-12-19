@@ -240,6 +240,13 @@ int main(int argc, char **argv) {
       exec_name = argv[i+1];
       i++;
       }
+    else if(s == "-shared") {
+      obj_dir += "/shared";
+      setdir += "../";
+      opts += " -fPIC -DNOMAIN";
+      linker += " -shared -fPIC";
+      default_exec_name = "libhyper.so";
+      }
     else if(s == "-O2")
       optimized = 2, compiler += " -O2", obj_dir += "/O2", setdir += "../";
     else if(s == "-O3")
