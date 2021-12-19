@@ -31,8 +31,10 @@ void moreStack() {
 namespace hr {
 EX hookset<bool(int argc, char** argv)> hooks_main;
 
-EX int hyper_main(int argc, char **argv) {
-  using namespace hr; 
+EX bool initialized = false;
+
+/** convenience function for libhyper.so: initialize libhyper with given parameters */
+EX int hyper_init(int argc, char **argv) {
 #if ISWEB
   emscripten_get_commandline();
 #elif ISMOBILE
@@ -53,6 +55,29 @@ EX int hyper_main(int argc, char **argv) {
   arg::read(3);
   start_game();
 #endif
+  initialized = true;
+  return 1;
+  }
+
+EX int hyper_init() {
+  return hyper_init(0, nullptr);
+  }
+
+/** \brief convenience function for libhyper.so: play the game loop 
+ * sample use: 
+ * ./mymake -O3 -shared
+ * cling -DFHS -DLINUX -I /usr/include/SDL -l libhyper.so -include hyper.h "-DRun=using namespace hr; hyper_loop();"
+ * Run
+ **/
+
+EX void hyper_loop() {
+  if(!initialized) hyper_init();
+  quitmainloop = false;
+  mainloop();
+  }
+
+EX int hyper_main(int argc, char **argv) {
+  if(!hyper_init(argc, argv)) return 0;
 #if !ISWEB
   if(showstartmenu && !vid.skipstart) {
     #if CAP_STARTANIM
