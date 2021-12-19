@@ -30,6 +30,7 @@ string preprocessor;
 string compiler;
 string linker;
 string libs;
+string default_exec_name;
 
 bool verbose = false;
 bool quiet = false;
@@ -60,10 +61,13 @@ string os = "mingw64";
 string os = "linux";
 #endif
 
+string exec_name = "";
+
 void set_linux() {
   preprocessor = "g++ -E";
   compiler = "g++ -Wall -Wextra -Wno-maybe-uninitialized -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-invalid-offsetof -rdynamic -fdiagnostics-color=always -c -march=native";
-  linker = "g++ -rdynamic -o hyper";
+  linker = "g++ -rdynamic";
+  default_exec_name = "hyper";
   if(sdlver == 2) {
     opts = "-DFHS -DLINUX -I/usr/include/SDL2";
     libs = " -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSDL2_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
@@ -81,7 +85,8 @@ void set_linux() {
 void set_mac() {
   preprocessor = "g++ -E";
   compiler = "g++ -march=native -W -Wall -Wextra -Wsuggest-override -pedantic -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-invalid-offsetof -c";
-  linker = "g++ -o hyper";
+  linker = "g++";
+  default_exec_name = "hyper";
   opts = "-DMAC -I/usr/local/include";
   libs = " -L/usr/local/lib -framework AppKit -framework OpenGL -lSDL -lSDLMain -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpng -lpthread -lz";
   }
@@ -90,7 +95,8 @@ void set_mingw64() {
   mingw64 = true;
   preprocessor = "g++ -E";
   compiler = "g++ -mwindows -march=native -W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-invalid-offsetof -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
-  linker = "g++ -o hyper";
+  linker = "g++";
+  default_exec_name = "hyper";
   opts = "-DWINDOWS -DCAP_GLEW=1 -DCAP_PNG=1";
   libs = " hyper.res -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
   setvbuf(stdout, NULL, _IONBF, 0); // MinGW is quirky with output buffering
@@ -100,7 +106,8 @@ void set_mingw64() {
 void set_mingw64_cross() {
   preprocessor = "x86_64-w64-mingw32-g++ -E";
   compiler = "x86_64-w64-mingw32-g++ -mwindows -march=native -W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-invalid-offsetof -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
-  linker = "x86_64-w64-mingw32-g++ -o hyper.exe";
+  linker = "x86_64-w64-mingw32-g++";
+  default_exec_name = "hyper.exe";
   opts = "-DWINDOWS -DGLEW_STATIC -DUSE_STDFUNCTION=1 -DCAP_PNG=1 -I /usr/x86_64-w64-mingw32/include/SDL/";
   libs = " hyper64.res -static-libgcc -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
   setvbuf(stdout, NULL, _IONBF, 0); // MinGW is quirky with output buffering
@@ -117,7 +124,8 @@ void set_web() {
     "/usr/lib/emscripten/em++ -s USE_ZLIB=1 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 -s TOTAL_MEMORY=512MB "
     "-s EXTRA_EXPORTED_RUNTIME_METHODS='[\"FS\",\"ccall\"]' "
     "-s EXPORTED_FUNCTIONS=\"['_main', '_use_file']\" "
-    "-s DISABLE_EXCEPTION_CATCHING=0 -o mhyper.html";
+    "-s DISABLE_EXCEPTION_CATCHING=0";
+  default_exec_name = "mhyper.html";
   libs = "";
   }
 
@@ -227,6 +235,10 @@ int main(int argc, char **argv) {
         if(!isalnum(c)) obj_dir += "_"; 
         else obj_dir += c;
       linker += " " + s;
+      }
+    else if(s = "-o") {
+      exec_name = argv[i+1];
+      i++;
       }
     else if(s == "-O2")
       optimized = 2, compiler += " -O2", obj_dir += "/O2", setdir += "../";
@@ -388,7 +400,8 @@ int main(int argc, char **argv) {
     }
 
   printf("linking...\n");
-  retval = mysystem(linker + allobj + libs);
+  if(exec_name == "") exec_name = default_exec_name;
+  retval = mysystem(linker + " -o " + exec_name + allobj + libs);
   if (retval) { printf("linking error!\n"); exit(retval); }
   return 0;
   }
