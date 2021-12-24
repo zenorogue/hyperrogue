@@ -57,6 +57,10 @@ struct shape {
   int cycle_length;
   /** list of valences of vertices in the tesfile convention */
   vector<int> vertex_valence;
+  /** list of periods of vertices in the tesfile convention */
+  vector<int> vertex_period;
+  /** list of angles at vertices in the tesfile convention */
+  vector<vector<ld>> vertex_angles;
   };
 
 struct slider {
@@ -84,6 +88,7 @@ struct arbi_tiling {
   ld floor_scale;
   ld boundary_ratio;
   string filename;
+  int mirror_rules;
   
   vector<string> options;
 
@@ -261,7 +266,8 @@ EX bool do_unmirror = true;
 
 /** \brief for tessellations which contain mirror rules, remove them by taking the orientable double cover */
 EX void unmirror() {
-  int mirror_rules = 0;
+  auto& mirror_rules = arb::current.mirror_rules;
+  mirror_rules = 0;
   for(auto& s: arb::current.shapes)
     for(auto& t: s.connections)
       if(t.mirror)
@@ -347,16 +353,23 @@ EX void compute_vertex_valence() {
     int n = sh.size();
     int i = sh.id;
     sh.vertex_valence.resize(n);
+    sh.vertex_period.resize(n);
+    sh.vertex_angles.resize(n);
     for(int k=0; k<n; k++) {
       ld total = 0;
-      int qty = 0;
+      int qty = 0, pqty = 0;
       connection_t at = {i, k, false};
+      connection_t at1 = at;
+      vector<ld> anglelist;
       do {
+        if(at.sid == at1.sid && (at.eid-at1.eid) % ac.shapes[at.sid].cycle_length == 0) pqty = 0;
         ld a = ac.shapes[at.sid].angles[at.eid];
         while(a < 0) a += 360 * degree;
         while(a > 360 * degree) a -= 360 * degree;
         total += a;
+        anglelist.push_back(a);
         qty++;
+        pqty++;
 
         at.eid++;
         if(at.eid == isize(ac.shapes[at.sid].angles)) at.eid = 0;
@@ -371,6 +384,8 @@ EX void compute_vertex_valence() {
         goto recompute;
         }
       sh.vertex_valence[k] = qty;
+      sh.vertex_period[k] = pqty;
+      sh.vertex_angles[k] = std::move(anglelist);
       }
     if(debugflags & DF_GEOM) 
       println(hlog, "computed vertex_valence of ", i, " as ", ac.shapes[i].vertex_valence);
