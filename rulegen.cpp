@@ -450,6 +450,8 @@ vector<int> root_path(twalker& cw) {
     }
   }
 
+EX void calc_distances(tcell *c);
+
 EX void shortcut_found(tcell *c, tcell *alt, vector<twalker> &walkers, vector<twalker> &walkers2, const vector<int>& walkerdir, const vector<int>& walkerdir2, int wpos) {
 
   vector<int> pre;
