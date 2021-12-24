@@ -405,6 +405,8 @@ EX void delete_tmap() {
 /* used in the debugger */
 EX vector<twalker> debuglist;
 
+EX vector<twalker> solid_errors_list;
+
 /* === distances === */
 
 bool no_errors = false;
@@ -493,7 +495,8 @@ EX void shortcut_found(tcell *c, tcell *alt, vector<twalker> &walkers, vector<tw
 
 EX void find_new_shortcuts(tcell *c, int d, tcell *alt, int newdir, int delta) {
 
-  debuglist.push_back(c);
+  if(!solid_errors) debuglist = {};
+  solid_errors_list.push_back(c);
   solid_errors++;
   all_solid_errors++;
   check_timeout(); /* may freeze no this */
@@ -651,6 +654,8 @@ EX void handle_distance_errors() {
   if(b && !no_errors) {
     sidecache.clear();
     if(flags & w_always_clean) clean_data();
+    debuglist = solid_errors_list;
+    solid_errors_list = {};
     throw hr_solid_error();
     }
   }
