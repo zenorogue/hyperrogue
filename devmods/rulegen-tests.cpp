@@ -429,7 +429,9 @@ void test_rules() {
   println(hlog, "sequence: ", seq);
   }
 
-void list_sequence() {  
+fhstream *seq_stream;
+
+void list_all_sequences(string tesname) {
 
   int N = isize(treestates);
   if(!N) {
@@ -437,23 +439,29 @@ void list_sequence() {
     return;
     }
 
-  vector<bignum> howmany(N);
-  howmany[0] = 1;
+  for(int i=0; i<N; i++) if(treestates[i].is_root) {
+    vector<bignum> howmany(N);
   
-  vector<string> seq;
-  
-  for(int iter=0; iter<30; iter++) {
-    bignum total;
-    for(auto& h: howmany) total += h;
-    seq.push_back(total.get_str(100));
-    vector<bignum> next(N);
-    for(int id=0; id<N; id++)
-      for(int s: treestates[id].rules) if(s >= 0)
-        next[s] += howmany[id];
-    howmany = std::move(next);
+    howmany[i] = 1;
+
+    vector<string> seq;
+
+    for(int iter=0; iter<60; iter++) {
+      bignum total;
+      for(auto& h: howmany) total += h;
+      seq.push_back(total.get_str(100));
+      vector<bignum> next(N);
+      for(int id=0; id<N; id++)
+        for(int s: treestates[id].rules) if(s >= 0)
+          next[s] += howmany[id];
+      howmany = std::move(next);
+      }
+
+    println(*seq_stream, (hyperbolic ? "H " : "E "), "FILE ", tesname, ", id ");
+    println(*seq_stream, seq);
     }
-  
-  println(hlog, "sequence: ", seq);
+
+  fflush(seq_stream->f);
   }
 
 void print_rules();
@@ -772,7 +780,9 @@ void test_current(string tesname) {
   /* for(auto& a: analyzers)
     println(hlog, "analyzer ", a.first, " size is ", isize(a.second.spread)); */
   fflush(stdout);
-  list_sequence();
+  
+  if(seq_stream)
+    list_all_sequences(tesname);
 
   fflush(stdout);
   }
@@ -1132,6 +1142,11 @@ int testargs() {
 
   else if(argis("-origin-id")) {
     shift(); origin_id = argi();
+    }
+
+  else if(argis("-seqf")) {
+    shift();
+    seq_stream = new fhstream(args(), "w");
     }
 
   else if(argis("-tesgen")) {
