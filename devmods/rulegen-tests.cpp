@@ -801,6 +801,7 @@ void test_current(string tesname) {
   if(flags & w_known_structure) {
     dynamicval<flagtype> f(rulegen::flags, sub_rulegen_flags);
     prepare_rules();
+    if(!known()) return;
     alt_treestates = treestates;
     pointer_indices.clear();
     }
