@@ -125,6 +125,7 @@ void cleanup_protomap() {
   }
 
 void iterate(int qty) {
+  dynamicval<int> set_timeout(rulegen_timeout, 999999);
   for(int i=0; i<qty; i++) {
     try {
       rules_iteration();
@@ -148,6 +149,7 @@ void iterate(int qty) {
 void print_rules();
 
 void irradiate() {
+  dynamicval<int> set_timeout(rulegen_timeout, 999999);
   try{
     vector<tcell*> last;
     auto *c = first_tcell;
