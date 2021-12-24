@@ -543,6 +543,214 @@ int max_valence() {
   return res;
   }
 
+bool same_shape_at(const arb::shape& s1, const arb::shape& s2, int i) {
+  auto N = s1.size();
+  for(int j=0; j<N; j++) {
+    if(abs(s1.edges[j] - s2.edges[(i+j)%N]) > 1e-6)
+      return false;
+    if(abs(s1.angles[j] - s2.angles[(i+j)%N]) > 1e-6)
+      return false;
+    }
+  return true;
+  }
+
+bool same_shape_inv_at(const arb::shape& s1, const arb::shape& s2, int i) {
+  auto N = s1.size();
+  for(int j=0; j<N; j++) {
+    if(abs(s1.edges[N-1-j] - s2.edges[(i+j)%N]) > 1e-6)
+      return false;
+    if(abs(s1.angles[(N*2-2-j) % N] - s2.angles[(i+j)%N]) > 1e-6)
+      return false;
+    }
+  return true;
+  }
+
+bool same_shape(arb::shape& s1, arb::shape& s2, bool sym) {
+  if(s1.size() != s2.size()) return false;
+  for(int i=0; i<s1.size(); i++)
+    if(same_shape_at(s1, s2, i))
+      return true;
+  if(sym) for(int i=0; i<s1.size(); i++)
+    if(same_shape_inv_at(s1, s2, i))
+      return true;
+  return false;
+  }
+
+int count_different_shapes(bool sym) {
+  vector<arb::shape*> dsi;
+  for(auto& sh: arb::current.shapes) {
+    for(auto& ksh: dsi) if(same_shape(sh, *ksh, sym)) goto next;
+    dsi.push_back(&sh);
+    next: ;
+    }
+  return isize(dsi);
+  }
+
+int count_vertex_orbits() {
+  double t = 0;
+  for(auto& sh: arb::current.shapes) {
+    for(int i=0; i<sh.cycle_length; i++)
+      t += 1. / sh.vertex_period[i];
+    }
+  int res = int(t + .5);
+  if(abs(t - res) > .01) throw hr_exception("count_vertex_orbits error");
+  return res;
+  }
+
+int count_edge_orbits() {
+  int eo = 0;
+  for(auto& sh: arb::current.shapes) 
+    eo += sh.cycle_length;
+  return eo;
+  }
+
+vector<ld> normalize_anglelist(vector<ld> v, bool sym) {
+  for(auto& va: v) va = int(va * 1000000 + .5);
+  vector<ld> res = v;
+  for(int r=0; r<2; r++) {
+    for(int u=0; u<isize(v); u++) {
+      if(v < res) res = v;
+      std::rotate(v.begin(), v.begin()+1, v.end());
+      }
+    if(!sym) break;
+    reverse(v.begin(), v.end());
+    }
+  return res;
+  }
+
+int count_different_vertices(bool sym) {
+  set<vector<ld>> seen;
+  for(auto& sh: arb::current.shapes)
+  for(auto& al: sh.vertex_angles) {
+    al = normalize_anglelist(al, sym);
+    seen.insert(al);
+    }
+  return isize(seen);
+  }
+
+int count_different_edges() {
+  vector<ld> seen;
+  for(auto& sh: arb::current.shapes)
+  for(auto& e: sh.edges)
+    seen.push_back(e);
+  sort(seen.begin(), seen.end());
+  int res = 1;
+  for(int i=1; i<isize(seen); i++)
+    if(seen[i] > seen[i-1] + 1e-5) res++;
+  return res;
+  }
+
+string count_uniform() {
+  auto& sh = arb::current.shapes;  
+  int N = sh.size();
+  vector<int> starts;
+  int qty = 0;
+  for(auto& s: sh) { starts.push_back(qty); qty += s.cycle_length * 2; }
+  // for(auto s: sh) println(hlog, "CSV;clen: ", s.cycle_length);
+  // println(hlog, "CSV;size: ", starts, " N=", N);
+  
+  vector<int> rtile(qty), rvert(qty, -4), redge(qty), rangle(qty); 
+  
+  for(int i=0; i<N; i++) 
+  for(int j=0; j<sh[i].cycle_length; j++) {
+    auto c = sh[i].cycle_length;
+    int a = starts[i]+2*j;
+    int b = a+1;
+    int jp = gmod(j+1, c);
+    int jn = gmod(j-1, c);
+    rtile[a] = starts[i] + 2*jp;
+    rtile[b] = starts[i] + 2*jn + 1;
+    rangle[a] = rangle[b] = int(sh[i].angles[j] * 100000 + .5);
+    redge[a] = int(sh[i].edges[jp] * 100000 + .5);
+    redge[b] = int(sh[i].edges[j] * 100000 + .5);
+    // rvert[a]: go through the edge and through the tile
+    auto co = sh[i].connections[jp];
+    // println(hlog, "CSV; for ", tie(i,j), " got ", tie(co.sid, co.eid), "with jp=", jp);
+    auto res = starts[co.sid] + 2 * gmod(co.eid, sh[co.sid].cycle_length);
+    rvert[a] = res;
+    co = sh[i].connections[j];
+    res = starts[co.sid] + 2 * gmod(co.eid-1, sh[co.sid].cycle_length) + 1;
+    // println(hlog, "CSV; for ", tie(i,j), " got ", tie(co.sid, co.eid), " .. ", sh[i].connections);
+    rvert[b] = res;
+    }
+  
+  /*
+  println(hlog, "CSV;tile=", rtile);
+  println(hlog, "CSV;vert=", rvert);
+  println(hlog, "CSV;", rangle);
+  println(hlog, "CSV;", redge);
+  */
+
+  std::vector<int> eq_class(qty, 0);
+  int num_eq_class = 1;
+  int last_num_eq_class = 0;
+
+  while (num_eq_class > last_num_eq_class) {
+    // println(hlog, "CSV;", eq_class);
+    using vertex_data = std::array<int, 6>;
+    std::vector<std::pair<vertex_data, int > > data(qty);
+    last_num_eq_class = num_eq_class;
+    for (int i = 0; i < qty; i++) {
+      data[i].first[0] = eq_class[i];
+      data[i].first[1] = rangle[i];
+      data[i].first[2] = redge[i];
+      data[i].first[3] = eq_class[rtile[i]];
+      data[i].first[4] = eq_class[rvert[i]];
+      data[i].first[5] = eq_class[i^1];
+      data[i].second = i;
+      }
+
+      sort(data.begin(), data.end());
+      eq_class[data[0].second] = 0;
+
+      num_eq_class = 0;
+
+      for (int i = 1; i < qty; i++) {
+          if (data[i].first != data[i - 1].first) num_eq_class++;
+          eq_class[data[i].second] = num_eq_class;
+      }
+    num_eq_class++;
+    }
+  std::vector<int> reps(num_eq_class, -1);
+  for(int i=0; i<qty; i++) reps[eq_class[i]] = i;
+  
+  int num_edges = num_eq_class;
+  int num_vert = 0, num_tile = 0, num_vert_sym = 0, num_tile_sym = 0, num_edges_sym = 0, num_edges_ev = 0, num_edges_et = 0, num_edges_ez = 0;
+
+  for(int i: reps) {
+    int i1 = reps[eq_class[rvert[i] ^ 1]];
+    int i2 = reps[eq_class[rtile[i] ^ 1]];
+    int i3 = reps[eq_class[rtile[i1] ^ 1]];
+    // println(hlog, "CSV; ", i, " with ", tie(i1, i2, i3));
+    if(i >= i1 && i >= i2 && i >= i3) num_edges_sym++;
+    if(i >= i1) num_edges_ev++;
+    if(i >= i2) num_edges_et++;
+    if(i >= i3) num_edges_ez++;
+    }
+
+  for (int i: reps) {
+    if(rtile[i] >= 0) {
+      num_tile++;
+      int maxj = i;
+      int j = i; while(rtile[j] >= 0) maxj = max(maxj, j), tie(j, rtile[j]) = make_pair(reps[eq_class[rtile[j]]], -1);
+      if(maxj&1) num_tile_sym++;
+      // println(hlog, "CSV;found ", i);
+      }
+    if(rvert[i] >= 0) {
+      num_vert++;
+      int maxj = i;
+      int j = i; while(rvert[j] >= 0) maxj = max(maxj, j), tie(j, rvert[j]) = make_pair(reps[eq_class[rvert[j]]], -1);
+      if(maxj&1) num_vert_sym++;
+      }
+    }
+
+  // println(hlog, "CSV;eq_class = ", eq_class);
+
+  // println(hlog, "CSV;", lalign(0, num_tile, ";", num_vert, ";", num_tile_sym, ";", num_vert_sym, ";", num_edges), " = tv/stv/e");
+
+  return lalign(0, num_tile, ";", num_vert, ";", num_edges, ";", num_tile_sym, ";", num_vert_sym, ";", num_edges_sym,";", num_edges_ev, ";", num_edges_et, ";", num_edges_ez);
+  }
+
 void test_current(string tesname) {
 
   disable_bigstuff = true;
@@ -758,6 +966,12 @@ void test_current(string tesname) {
     case 'h': Out("shapes", isize(arb::current.shapes));
     case 'e': Out("edges", shape_edges());
     case 'W': Out("max_valence;max_edge", lalign(0, max_valence(), ";", max_edge()));
+    
+    case 'D': Out("dshapes;dverts;dedges;bshapes;bverts", lalign(0, count_different_shapes(true), ";", count_different_vertices(true), ";", count_different_edges(), ";", count_different_shapes(false), ";", count_different_vertices(false)));
+    case 'O': Out("overts;oedges", lalign(0, count_vertex_orbits(), ";", count_edge_orbits()));
+    case 'U': Out("vshapes;vverts;ushapes;uverts;uedges;xea;xeb;xec", count_uniform());
+    case 'L': Out("mirror_rules", arb::current.mirror_rules);
+
     case 'f': Out("file", tesname);
     case 'l': Out("shortcut", longest_shortcut());
     case '3': Out("shqty", longest_shortcut().first);
