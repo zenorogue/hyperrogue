@@ -45,7 +45,7 @@ struct hrmap_testproto : hrmap {
     }
 
   heptagon *getOrigin() override { 
-    return clone(t_origin[0]);
+    return clone(t_origin[0].at);
     }
   
   heptagon *create_step(heptagon *h, int d) override {
@@ -179,9 +179,9 @@ void move_to(twalker dw) {
   move_to(cellwalker(m->clone(dw.at)->c7, dw.spin, dw.mirrored));
   }
 
-void sprawl(tcell *c) {
+void sprawl(twalker c) {
   auto [d, id] = get_code(c);
-  twalker cw(c, d);
+  twalker cw(c.at, d);
   cur_sprawl = spread(get_analyzer(cw), cw);
   println(hlog, "sprawl result = ", cur_sprawl);
   println(hlog, "code = ", treestates[id].code);
@@ -211,7 +211,7 @@ void debug_menu() {
   
   dialog::addItem("sprawl", 's');
   dialog::add_action([m] {
-    sprawl(m->counterpart[centerover->master]);
+    sprawl(twalker(m->counterpart[centerover->master], 0));
     });
 
   dialog::addItem("parent_dir", 'p');
@@ -228,7 +228,8 @@ void debug_menu() {
     c->parent_dir = MYSTERY;
     parent_debug = true;
     try {
-      get_parent_dir(c);
+      twalker cw(c, 0);
+      get_parent_dir(cw);
       }
     catch(rulegen_failure& f) {
       println(hlog, "catched: ", f.what());
@@ -984,9 +985,10 @@ void label_all(int i, int mode) {
       if(cdist == i) break;
       }
     try {
+      twalker cw(c, 0);
       if(mode & 4) index_pointer(c);
-      if(mode & 1) get_parent_dir(c);
-      if(mode & 2) get_code(c);
+      if(mode & 1) get_parent_dir(cw);
+      if(mode & 2) get_code(cw);
       }
     catch(hr_exception& ex) {    
       }
