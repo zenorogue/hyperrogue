@@ -702,7 +702,7 @@ EX void look_for_shortcuts(tcell *c, shortcut& sh) {
     for(auto& v: sh.pre) {
       opath.push_back(tw.at);
       tw += v;
-      if(!tw.peek() && (flags & w_less_smart_retrace)) return;
+      if(!tw.peek() && !(flags & w_less_smart_retrace)) return;
       ufind(tw);
       tw += wstep;
       calc_distances(tw.at);
@@ -714,7 +714,7 @@ EX void look_for_shortcuts(tcell *c, shortcut& sh) {
 
     for(auto it = sh.post.rbegin(); it != sh.post.rend(); it++) {
       auto& v = *it;
-      if(tw.at->dist >= expected_dist && !tw.peek() && (flags & w_less_smart_advance)) return;
+      if(tw.at->dist >= expected_dist && !tw.peek() && !(flags & w_less_smart_advance)) return;
       ufind(tw);
       tw += wstep;
       calc_distances(tw.at);
