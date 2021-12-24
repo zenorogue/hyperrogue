@@ -78,6 +78,9 @@ static const flagtype w_bfs = Flag(17); /*< compute distances using BFS */
 static const flagtype w_numerical_fix = Flag(18); /*< when doing numerical, find out filled vertices */
 static const flagtype w_known_structure = Flag(19); /*< do flagless first, then use the known distances from there (handled in ruletest) */
 static const flagtype w_known_distances = Flag(20); /*< with, use the actual distances */
+static const flagtype w_no_smart_shortcuts = Flag(21); /*< disable the 'smart shortcut' optimization */
+static const flagtype w_less_smart_retrace = Flag(22); /*< stop early when examining smart shortcut retraction */
+static const flagtype w_less_smart_advance = Flag(23); /*< stop early when examining smart shortcut advancement */
 #endif
 
 EX flagtype flags = 0;
@@ -687,7 +690,47 @@ void be_solid(tcell *c) {
 
 EX void look_for_shortcuts(tcell *c, shortcut& sh) {
   if(c->dist <= 0) return;
-  if(1) {
+
+  if(!(flags & w_no_smart_shortcuts)) {
+    twalker tw0(c, 0);
+    twalker tw(c, 0);
+    ufind(tw);
+    ufind(tw0);
+
+    vector<tcell*> opath;
+
+    for(auto& v: sh.pre) {
+      opath.push_back(tw.at);
+      tw += v;
+      if(!tw.peek() && (flags & w_less_smart_retrace)) return;
+      ufind(tw);
+      tw += wstep;
+      calc_distances(tw.at);
+      }
+
+    int expected_dist = c->dist - isize(sh.pre);
+
+    tw += sh.delta;
+
+    for(auto it = sh.post.rbegin(); it != sh.post.rend(); it++) {
+      auto& v = *it;
+      if(tw.at->dist >= expected_dist && !tw.peek() && (flags & w_less_smart_advance)) return;
+      ufind(tw);
+      tw += wstep;
+      calc_distances(tw.at);
+      expected_dist++;
+      tw -= v;
+      }
+
+    if(tw.at->dist < c->dist) {
+      println(hlog, "smart shortcut updated ", c->dist, " to ", tw.at->dist);
+      push_unify(tw, tw0);
+      }
+
+    process_fix_queue();
+    }
+
+  else {
     twalker tw0(c, 0);
     twalker tw(c, 0);
     ufind(tw);
