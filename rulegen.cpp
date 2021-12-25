@@ -1690,6 +1690,7 @@ EX void rules_iteration() {
 
   if((try_count & (try_count-1)) == 0) if(!(flags & w_no_restart)) {
     clean_data();
+    clean_parents();
     }
 
   if(debugflags & DF_GEOM) println(hlog, "attempt: ", try_count);
