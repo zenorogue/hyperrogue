@@ -608,28 +608,63 @@ EX void fix_distances(tcell *c) {
   
   for(int qi=0; qi<isize(q); qi++) {
     c = q[qi];
-    auto& d = c->dist;
     restart:
     for(int i=0; i<c->type; i++) {
       if(!c->move(i)) continue;
-      tcell *c1 = c->cmove(i);
       ufindc(c);
-      c1 = c->cmove(i);
-      auto& d1 = c1->dist;
-      if(d > d1+1) {
-        if(c->is_solid)
-          find_new_shortcuts(c, d1+1, c, i, 0);
-        d = d1+1; c->any_nearer = i; remove_parentdir(c); goto restart;
-        }
-      if(d1 > d+1) {
-        int i1 = c->c.spin(i);
-        if(c1->is_solid)
-          find_new_shortcuts(c1, d+1, c1, i1, 0);
-        d1 = d+1;
-        c1->any_nearer = i1;
-        remove_parentdir(c1);
-        q.push_back(c1);
-        }
+
+      auto process_edge = [&] (twalker tgtw, twalker srcw) {
+        tcell *tgt = tgtw.at;
+        tcell *src = srcw.at;
+        auto& tgt_d = tgt->dist;
+        int new_d = src->dist + 1;
+        if(tgt_d > new_d) {
+          if(tgt->is_solid)
+            find_new_shortcuts(tgt, new_d, tgt, tgtw.spin, 0);
+          ufind(tgtw); tgt = tgtw.at;
+          tgt_d = new_d;
+          sidecache.clear();
+          tgt->any_nearer = tgtw.spin;
+          tgt->parent_dir = MYSTERY;
+          if(tgt->is_solid) tgt->parent_dir = tgtw.spin;
+          tgt->code = MYSTERY;
+          return true;
+          }
+        if(tgt_d == new_d && tgt->parent_dir != MYSTERY && tgt->parent_dir != tgtw.spin) {
+          auto& sh = arb::current.shapes[tgt->id];
+          auto k = sh.cycle_length;
+
+          int dif = tgtw.spin % k - tgt->parent_dir % k;
+
+          auto oldp = get_parent_dir(tgtw);
+
+          if(dif == 0) {
+            tgtw.at->parent_dir = MYSTERY;
+            auto newp = get_parent_dir(tgtw);
+            if(oldp != newp) {
+              if(newp != tgtw) throw rulegen_retry("parent_dir confusion should not happen");
+              dif = -1;
+              }
+            }
+
+          if(dif < 0) {
+            tgtw.at->parent_dir = tgtw.spin;
+            tgtw.at->code = MYSTERY;
+            ufind(oldp);
+            indenter ind(2);
+            tgtw.at->any_nearer = oldp.spin;
+            find_new_shortcuts(tgtw.at, new_d, tgtw.at, tgtw.spin, 0);
+            sidecache.clear();
+            }
+          }
+        return false;
+        };
+
+      twalker ci1(c->cmove(i), c->c.spin(i));
+      twalker ci(c, i);
+
+      if(process_edge(ci, ci1)) goto restart;
+      if(process_edge(ci1, ci)) q.push_back(ci1.at);
       }
     }
   }
