@@ -433,6 +433,7 @@ struct shortcut {
   vector<int> post;
   tcell *sample;
   int delta;
+  int last_dir;
   };
 #endif
 
@@ -490,6 +491,7 @@ EX void shortcut_found(tcell *c, tcell *alt, vector<twalker> &walkers, vector<tw
   sh->post = post;
   sh->sample = c;
   sh->delta = delta;
+  sh->last_dir = c->any_nearer;
   auto& sh1 = *sh;
 
   if(debugflags & DF_GEOM) println(hlog, "exhaustive search:");
@@ -719,25 +721,28 @@ EX void look_for_shortcuts(tcell *c, shortcut& sh) {
       calc_distances(tw.at);
       }
 
-    int expected_dist = c->dist - isize(sh.pre);
+    int more_steps = isize(sh.post);
+    int d = arb::current.shapes[c->id].cycle_length;
+    if(sh.last_dir % d < c->any_nearer % d) more_steps--;
 
     tw += sh.delta;
 
     for(auto it = sh.post.rbegin(); it != sh.post.rend(); it++) {
       auto& v = *it;
-      if(tw.at->dist > expected_dist && !tw.peek() && !(flags & w_less_smart_advance)) return;
       ufind(tw);
+      if(!tw.peek() && tw.at->dist + more_steps > c->dist && !(flags & w_less_smart_advance)) return;
       tw += wstep;
       calc_distances(tw.at);
-      expected_dist++;
+      more_steps--;
       tw -= v;
       }
 
+    process_fix_queue();
     if(tw.at->dist < c->dist) {
       if(debugflags & DF_GEOM)
         println(hlog, "smart shortcut updated ", c->dist, " to ", tw.at->dist);
-      push_unify(tw, tw0);
       }
+    push_unify(tw, tw0);
 
     process_fix_queue();
     }
