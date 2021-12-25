@@ -104,6 +104,8 @@ struct tcell {
   short code;
   /** direction to the parent in the tree */
   short parent_dir;
+  /** direction to the OLD parent in the tree */
+  short old_parent_dir;
   /** direction to anyone closer */
   short any_nearer;
   /** can we assume that dist is correct? if we assumed that the dist is correct but then find out it was wrong, throw an error */
@@ -178,6 +180,7 @@ tcell *gen_tcell(int id) {
   c->dist = MYSTERY;
   c->code = MYSTERY;
   c->parent_dir = MYSTERY;
+  c->old_parent_dir = MYSTERY;
   first_tcell = c;
   // println(hlog, c, " is a new tcell of id ", id);
   tcellcount++;
@@ -574,9 +577,11 @@ EX void find_new_shortcuts(tcell *c, int d, tcell *alt, int newdir, int delta) {
 
 EX void remove_parentdir(tcell *c) {
   sidecache.clear();
+  if(c->parent_dir) c->old_parent_dir = c->parent_dir;
   c->parent_dir = MYSTERY;
   c->code = MYSTERY;
   for(int i=0; i<c->type; i++) if(c->move(i)) {
+    if(c->move(i)->parent_dir) c->move(i)->old_parent_dir = c->move(i)->parent_dir;
     c->move(i)->parent_dir = MYSTERY;
     c->move(i)->code = MYSTERY;
     }
@@ -625,37 +630,8 @@ EX void fix_distances(tcell *c) {
           tgt_d = new_d;
           sidecache.clear();
           tgt->any_nearer = tgtw.spin;
-          tgt->parent_dir = MYSTERY;
-          if(tgt->is_solid) tgt->parent_dir = tgtw.spin;
-          tgt->code = MYSTERY;
+          remove_parentdir(tgt);
           return true;
-          }
-        if(tgt_d == new_d && tgt->parent_dir != MYSTERY && tgt->parent_dir != tgtw.spin) {
-          auto& sh = arb::current.shapes[tgt->id];
-          auto k = sh.cycle_length;
-
-          int dif = tgtw.spin % k - tgt->parent_dir % k;
-
-          auto oldp = get_parent_dir(tgtw);
-
-          if(dif == 0) {
-            tgtw.at->parent_dir = MYSTERY;
-            auto newp = get_parent_dir(tgtw);
-            if(oldp != newp) {
-              if(newp != tgtw) throw rulegen_retry("parent_dir confusion should not happen");
-              dif = -1;
-              }
-            }
-
-          if(dif < 0) {
-            tgtw.at->parent_dir = tgtw.spin;
-            tgtw.at->code = MYSTERY;
-            ufind(oldp);
-            indenter ind(2);
-            tgtw.at->any_nearer = oldp.spin;
-            find_new_shortcuts(tgtw.at, new_d, tgtw.at, tgtw.spin, 0);
-            sidecache.clear();
-            }
           }
         return false;
         };
@@ -951,6 +927,12 @@ EX twalker get_parent_dir(twalker& cw) {
     
   if(parent_debug) println(hlog, "set parent_dir to ", bestd);
   c->parent_dir = bestd;
+
+  if(c->old_parent_dir != MYSTERY && c->old_parent_dir != bestd && c == oc) {
+    c->any_nearer = c->old_parent_dir;
+    find_new_shortcuts(c, c->dist, c, bestd, 0);
+    }
+
   return twalker(c, bestd);
   }
 
