@@ -758,7 +758,8 @@ EX void look_for_shortcuts(tcell *c, shortcut& sh) {
       }
 
     if(tw.at->dist < c->dist) {
-      println(hlog, "smart shortcut updated ", c->dist, " to ", tw.at->dist);
+      if(debugflags & DF_GEOM)
+        println(hlog, "smart shortcut updated ", c->dist, " to ", tw.at->dist);
       push_unify(tw, tw0);
       }
 
