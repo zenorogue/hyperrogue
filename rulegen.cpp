@@ -848,6 +848,8 @@ void trace_root_path(vector<int>& rp, twalker cw) {
   if(flags & w_parent_reverse) reverse(rp.begin(), rp.end());
   }
 
+EX int parent_updates;
+
 /** which neighbor will become the parent of c */
 
 EX twalker get_parent_dir(twalker& cw) {
@@ -1141,7 +1143,8 @@ int get_side(twalker what) {
     handle_distance_errors();
     steps++; if(steps > max_getside) {
       debuglist = {what, to_what, wl, wr};
-      throw rulegen_failure("xsidefreeze");
+      if(parent_updates) throw rulegen_retry("xsidefreeze");
+      else throw rulegen_failure("xsidefreeze");
       }
     bool gl = wl.at->dist <= wr.at->dist;
     bool gr = wl.at->dist >= wr.at->dist;
@@ -1695,6 +1698,7 @@ EX void rules_iteration() {
   while(c) { c->code = MYSTERY; c = c->next; }
   
   clear_codes();
+  parent_updates = 0;
   
   cq = important;
   
