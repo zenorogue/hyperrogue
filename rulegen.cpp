@@ -940,6 +940,8 @@ EX twalker get_parent_dir(twalker& cw) {
     find_new_shortcuts(c, c->dist, c, bestd, 0);
     }
 
+  parent_updates++;
+
   return twalker(c, bestd);
   }
 
