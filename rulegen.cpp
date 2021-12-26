@@ -1716,7 +1716,7 @@ EX void rules_iteration() {
     clean_parents();
     }
 
-  if(debugflags & DF_GEOM) println(hlog, "attempt: ", try_count);
+  if(debugflags & DF_GEOM) println(hlog, "attempt: ", try_count, " important = ", isize(important), " cells = ", tcellcount);
 
   auto c = first_tcell;
   while(c) { c->code = MYSTERY; c = c->next; }
@@ -1952,6 +1952,8 @@ EX void generate_rules() {
       break;
       }
     catch(rulegen_retry& e) { 
+      if(debugflags & DF_GEOM)
+        println(hlog, "result ", try_count, ": ", e.what());
       if(try_count >= max_retries) throw;
       }
     }
