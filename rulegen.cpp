@@ -1089,7 +1089,7 @@ void treewalk(twalker& cw, int delta) {
   cw+=delta;
   }
 
-EX std::map<twalker, int> sidecache;
+EX map<twalker, int> sidecache;
 
 int get_side(twalker what) {
 
