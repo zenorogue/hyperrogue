@@ -81,6 +81,7 @@ static const flagtype w_known_distances = Flag(20); /*< with, use the actual dis
 static const flagtype w_no_smart_shortcuts = Flag(21); /*< disable the 'smart shortcut' optimization */
 static const flagtype w_less_smart_retrace = Flag(22); /*< stop early when examining smart shortcut retraction */
 static const flagtype w_less_smart_advance = Flag(23); /*< stop early when examining smart shortcut advancement */
+static const flagtype w_no_queued_extensions = Flag(24); /*< consider extensions one by one */
 #endif
 
 EX flagtype flags = 0;
@@ -1037,9 +1038,12 @@ void extend_analyzer(twalker cw_target, int dir, int id, int mism, twalker rg) {
       }
     gid = next_gid;
     }
-  if(mism == 0 && !added)
-    /* in rare cases this happens due to unification or something */
-    throw rulegen_retry("no extension");
+  if(mism == 0 && !added) {
+    if(debugflags & DF_GEOM) println(hlog, "no extension");
+    if(flags & w_no_queued_extensions)
+      /* in rare cases this happens due to unification or something */
+      throw rulegen_retry("no extension");
+    }
   }
 
 #if HDR
@@ -1305,6 +1309,14 @@ vector<int> gen_rule(twalker cwmain, int id) {
   return cids;
   }
 
+vector<reaction_t> queued_extensions;
+
+void handle_queued_extensions() {
+  if(queued_extensions.empty()) return;
+  for(auto& r: queued_extensions) r();
+  throw rulegen_retry("mismatch error");
+  }
+
 void rules_iteration_for(twalker& cw) {
   indenter ri(2);
   ufind(cw);
@@ -1359,6 +1371,13 @@ void rules_iteration_for(twalker& cw) {
             println(hlog, "rulegiver = ", treestates[id].giver, " c = ", cwmain);
             println(hlog, "gshvid = ", cw.at->id);
             println(hlog, "cellcount = ", tcellcount, "-", tunified, " codes discovered = ", isize(treestates));
+            }
+
+          auto& a = get_analyzer(cw);
+          int q = isize(a.spread);
+          if(!(flags & w_no_queued_extensions)) {
+            queued_extensions.push_back([&a, q, cwmain, z, k, mismatches, id] { extend_analyzer(cwmain, z, k, mismatches, treestates[id].giver); });
+            return;
             }
 
           extend_analyzer(cwmain, z, k, mismatches, treestates[id].giver);
@@ -1690,6 +1709,8 @@ EX void rules_iteration() {
   try_count++;
   debuglist = {};
 
+  queued_extensions.clear();
+
   if((try_count & (try_count-1)) == 0) if(!(flags & w_no_restart)) {
     clean_data();
     clean_parents();
@@ -1711,7 +1732,7 @@ EX void rules_iteration() {
   for(int i=0; i<isize(cq); i++) {
     rules_iteration_for(cq[i]);
     }
-
+  
   handle_distance_errors();
   if(debugflags & DF_GEOM)
     println(hlog, "number of treestates = ", isize(treestates));
@@ -1726,6 +1747,8 @@ EX void rules_iteration() {
       continue;
       }
     }
+
+  handle_queued_extensions();
 
   int N = isize(important);
 
@@ -1770,6 +1793,8 @@ EX void rules_iteration() {
       }
     }
 
+  handle_queued_extensions();
+
   for(int id=0; id<isize(treestates); id++) if(treestates[id].is_live) {
     auto r = treestates[id].rules; /* no & because treestates might have moved */
     if(r.empty()) continue;
@@ -1792,6 +1817,7 @@ EX void rules_iteration() {
       indenter ind(2);
       debuglist = { treestates[id].giver };
       find_single_live_branch(treestates[id].giver);
+      handle_queued_extensions();
       }
     if(isize(single_live_branch_close_to_root) != q) {
       vector<tcell*> v;
@@ -1810,6 +1836,7 @@ EX void rules_iteration() {
     }
   
   handle_distance_errors();
+  handle_queued_extensions();
   if(isize(important) != N)
     throw rulegen_retry("need more rules after examine");
 
