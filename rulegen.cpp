@@ -814,38 +814,29 @@ EX void ensure_shorter(twalker cw) {
     }
   }
 
-void trace_root_path(vector<int>& rp, twalker cw) {
-  auto d = cw.peek()->dist;
-  cw += wstep; auto scw = cw;
+EX bool beats_exhaustive(twalker w1, twalker w2) {
+  int iter = 0;
+  while(true) { iter++;
+    w1 += wstep;
+    w2 += wstep;
 
-  bool side = (flags & w_parent_side);
+    if(w1.at->dist == 0)
+      return w1.spin > w2.spin;
 
-  next:
-  if(d > 0) {
-    ufind(cw);
+    be_solid(w1.at);
+    be_solid(w2.at);
     handle_distance_errors();
-    auto cwd = get_parent_dir(cw);
-    for(int i=0; i<cw.at->type; i++) {
-      if((!side) && (cw+i) != cwd) continue;
-      tcell *c1 = cwd.peek();
-      if(!c1) continue;
-      be_solid(c1);
-      handle_distance_errors();
-      if(c1->dist < d) {
-        rp.push_back(i);
-        cw += i;
-        cw += wstep;
-        d--;
-        goto next;
-        }
-      }
+
+    auto sw1 = get_parent_dir(w1);
+    auto sw2 = get_parent_dir(w2);
+
+    int d1 = w1.to_spin(sw1.spin);
+    int d2 = w2.to_spin(sw2.spin);
+    if(d1 != d2) return d1 < d2;
+
+    w1 = sw1;
+    w2 = sw2;
     }
-  if(d > 0) {
-    debuglist = {scw};
-    throw rulegen_failure("should not happen [trace]");
-    }
-  rp.push_back(cw.to_spin(0));
-  if(flags & w_parent_reverse) reverse(rp.begin(), rp.end());
   }
 
 EX int parent_updates;
@@ -913,17 +904,10 @@ EX twalker get_parent_dir(twalker& cw) {
 
       resolve:
       hard_parents++;
-      vector<int> best;
-      int bestfor = nearer[0];
-      trace_root_path(best, twalker(c, nearer[0]));
+      bestd = nearer[0];
 
-      for(auto ne1: nearer) {
-        vector<int> other;
-        trace_root_path(other, twalker(c, ne1));
-        if(other < best) best = other, bestfor = ne1;
-        }
-
-      bestd = bestfor;
+      for(auto ne1: nearer) if(ne1 != bestd && beats_exhaustive(twalker(c, ne1), twalker(c, bestd)))
+        bestd = ne1;
       }
 
     if(bestd == -1) {
