@@ -11,6 +11,8 @@
 namespace hr {
 namespace rulegen {
 
+pair<int,int> longest_shortcut();
+
 EX flagtype sub_rulegen_flags;
 
 string testroot = "devmods/rulegen-tests/";
@@ -143,7 +145,7 @@ void iterate(int qty) {
       println(hlog, "failure: ", f.what());
       }
     }
-  println(hlog, "try_count = ", try_count, " states = ", isize(treestates), " imp = ", isize(important), " analyzers = ", total_analyzers(), " cell = ", tcellcount);
+  println(hlog, "try_count = ", try_count, " states = ", isize(treestates), " imp = ", isize(important), " analyzers = ", total_analyzers(), " cell = ", tcellcount, " shortcuts = ", longest_shortcut());
   cleanup_protomap();
   }
 
@@ -255,7 +257,7 @@ void debug_menu() {
   dialog::addItem("clean data", 'c');
   dialog::add_action(clean_data);
 
-  dialog::addItem("clean data and parents", 'C');
+  dialog::addItem("clean parents", 'p');
   dialog::add_action(clean_parents);
 
   dialog::addItem("irradiate", 'i');
@@ -478,23 +480,15 @@ string test_stats = "gsmTPcuQthlpf"; // "gsmctTlAhf";
 pair<int,int> longest_shortcut() {
   int res = 0;
   int qty = 0;
-  for(auto& p: shortcuts) for(auto& v: p.second) {
+  for(auto& p: shortcuts) for(auto& v: p) {
     res = max<int>(res, isize(v->pre));
     qty++;
     }
   return {qty, res};
   }
 
-int longest_analyzer() {
-  int res = 0;
-  for(auto& a: analyzers) res = max(res, isize(a.second.spread));
-  return res;
-  }
-
 int total_analyzers() {
-  int res = 0;
-  for(auto& a: analyzers) res += isize(a.second.spread);
-  return res;
+  return isize(all_analyzers);
   }
 
 int shape_edges() {
@@ -598,6 +592,21 @@ int count_different_vertices(bool sym) {
     seen.insert(al);
     }
   return isize(seen);
+  }
+
+EX long long get_shapelist() {
+  long long res = 0;
+  for(auto& sh: arb::current.shapes)
+    res |= 1ll << min<int>(sh.size(), 61);
+  return res;
+  }
+
+EX long long get_valence_list() {
+  long long res = 0;
+  for(auto& sh: arb::current.shapes)
+  for(auto& vv: sh.vertex_valence)
+    res |= 1ll << min<int>(vv, 61);
+  return res;
   }
 
 int count_different_edges() {
@@ -956,14 +965,15 @@ void test_current(string tesname) {
     
     case 'D': Out("dshapes;dverts;dedges;bshapes;bverts", lalign(0, count_different_shapes(true), ";", count_different_vertices(true), ";", count_different_edges(), ";", count_different_shapes(false), ";", count_different_vertices(false)));
     case 'O': Out("overts;oedges", lalign(0, count_vertex_orbits(), ";", count_edge_orbits()));
-    case 'U': Out("vshapes;vverts;ushapes;uverts;uedges;xea;xeb;xec", count_uniform());
+    case 'U': Out("vshapes;vverts;vedges;ushapes;uverts;uedges;xea;xeb;xec", count_uniform());
     case 'L': Out("mirror_rules", arb::current.mirror_rules);
+    case 'B': Out("listshape;listvalence", format("%lld;%lld", get_shapelist(), get_valence_list()));
 
     case 'f': Out("file", tesname);
     case 'l': Out("shortcut", longest_shortcut());
     case '3': Out("shqty", longest_shortcut().first);
     case '4': Out("shlong", longest_shortcut().second);
-    case 'A': Out("analyzer", longest_analyzer());
+    case 'A': Out("analyzer", total_analyzers());
     case 'H': Out("hard", hard_parents);
     case '1': Out("single", single_live_branches);
     case '2': Out("double", double_live_branches);
