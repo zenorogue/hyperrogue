@@ -3,6 +3,7 @@
 #include "../hyper.h"
 #include <fstream>
 #include <chrono>
+#include <semaphore.h>
 
 // extra ruleflags:
 // 30: do not clear memory
