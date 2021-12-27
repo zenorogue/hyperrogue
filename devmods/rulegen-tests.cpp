@@ -400,7 +400,7 @@ void test_rules() {
   println(hlog, "sequence: ", seq);
   }
 
-fhstream *seq_stream;
+hstream *seq_stream, *test_out;
 
 void list_all_sequences(string tesname) {
 
@@ -432,7 +432,7 @@ void list_all_sequences(string tesname) {
     println(*seq_stream, seq);
     }
 
-  fflush(seq_stream->f);
+  seq_stream->flush();
   }
 
 void print_rules();
@@ -722,6 +722,17 @@ string count_uniform() {
   return lalign(0, num_tile, ";", num_vert, ";", num_edges, ";", num_tile_sym, ";", num_vert_sym, ";", num_edges_sym,";", num_edges_ev, ";", num_edges_et, ";", num_edges_ez);
   }
 
+sem_t sem;
+int max_children = 7;
+bool forked;
+
+void setup_fork(int m, string fname) {
+  max_children = m;
+  forked = true;
+  sem_init(&sem, true, 1);
+  test_out = new fhstream(fname, "wt");
+  }
+
 void test_current(string tesname) {
 
   disable_bigstuff = true;
@@ -900,13 +911,16 @@ void test_current(string tesname) {
     }
   sort(edgelens.begin(), edgelens.end());
 
+  if(!test_out) test_out = &hlog;
+
+  if(forked) sem_wait(&sem);
   again:
-  print(hlog, "CSV");
+  print(*test_out, "CSV");
 
   // easier parsing
   for(auto& ch: message) if(ch == ' ') ch = '_';
-
-  #define Out(title,value) if(add_header) print(hlog, ";", title); else if(add_labels) print(hlog, " ", title, "=", value);  else print(hlog, ";", value); break;
+  
+  #define Out(title,value) if(add_header) print(*test_out, ";", title); else if(add_labels) print(*test_out, " ", title, "=", value);  else print(*test_out, ";", value); break;
 
   for(char c: test_stats) switch(c) {
     case 'g': Out("geom", euclid ? "E" : hyperbolic ? "H" : "?");
@@ -955,8 +969,8 @@ void test_current(string tesname) {
     case 'p': Out("premini", states_premini);
     case 'K': Out("movecount", format("%ld", rulegen::movecount));
     }
-  println(hlog);
-  fflush(stdout);
+  println(*test_out);
+  test_out->flush();
   if(add_header) { add_header = false; goto again; }
 
   // for(auto& sh: shortcuts) println(hlog, sh.first, " : ", isize(sh.second), " shortcuts (CSV)");
@@ -970,7 +984,8 @@ void test_current(string tesname) {
   if(seq_stream)
     list_all_sequences(tesname);
 
-  fflush(stdout);
+  test_out->flush();
+  if(forked) sem_post(&sem);
   }
 
 void out_reg() {
@@ -1098,11 +1113,34 @@ void test_from_file(string list) {
   
   int id = 0;
   
+  int children = 0;
+  fflush(stdout);
+
   for(const string& s: filenames) {  
+
     println(hlog, "loading ", s, "... ", id++, "/", isize(filenames));
+    println(hlog, "START: ", s); fflush(stdout);
     if(trv) { trv--; id++; continue; }
+
+    if(forked && id > 1) {
+      int pid;
+      if(children >= max_children) { 
+        wait(&pid); children--; 
+        }
+      if((pid = fork())) children++;
+      else goto doit;
+      continue;
+      }
+
+    doit:
+    
     if(set_general(s))
       test_current(s);
+    
+    println(hlog, "DONE: ", s); fflush(stdout);
+
+    if(forked && id > 1) exit(0);
+    if(forked && id == 1) stop_game();
     }
   }
 
@@ -1241,6 +1279,11 @@ int testargs() {
     PHASEFROM(3);
     shift(); 
     test_from_file(args());
+    }
+  else if(argis("-test-fork")) {
+    PHASEFROM(3);
+    shift(); int i = argi();
+    shift(); setup_fork(i, args());
     }
   else if(argis("-rulecat")) {
     PHASEFROM(3);
