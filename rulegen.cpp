@@ -1817,7 +1817,6 @@ EX void rules_iteration() {
       indenter ind(2);
       debuglist = { treestates[id].giver };
       find_single_live_branch(treestates[id].giver);
-      handle_queued_extensions();
       }
     if(isize(single_live_branch_close_to_root) != q) {
       vector<tcell*> v;
