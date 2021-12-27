@@ -438,7 +438,7 @@ struct shortcut {
   };
 #endif
 
-EX map<int, vector<unique_ptr<shortcut>> > shortcuts;
+EX vector<vector<unique_ptr<shortcut>> > shortcuts;
 
 vector<int> root_path(twalker& cw) {
   cw += wstep;
@@ -962,7 +962,7 @@ struct analyzer_state {
 
 int next_analyzer_id;
 
-EX map<aid_t, analyzer_state*> analyzers;
+EX vector<vector<analyzer_state*>> analyzers;
 EX vector<analyzer_state*> all_analyzers;
 
 analyzer_state *alloc_analyzer() {
@@ -1187,7 +1187,7 @@ int move_code(twalker cs) {
 EX void id_at_spin(twalker cw, vector<twalker>& sprawl, vector<analyzer_state*>& states) {
   ufind(cw);
   auto aid = get_aid(cw);
-  auto a_ptr = &(analyzers[aid]);
+  auto a_ptr = &(analyzers[aid.first][aid.second]);
   sprawl = { cw };
   states = { nullptr };
 
@@ -1669,7 +1669,7 @@ void find_single_live_branch(twalker& at) {
 
 EX void clean_analyzers() {
   for(auto a: all_analyzers) delete a;
-  analyzers.clear();
+  for(auto& av: analyzers) for(auto& a: av) a = nullptr;
   all_analyzers.clear();
   next_analyzer_id = 0;
   }
@@ -1901,6 +1901,11 @@ EX void generate_rules() {
   important.clear();
   treestates.clear();
   hard_parents = single_live_branches = double_live_branches = all_solid_errors = 0;
+
+  int NS = isize(arb::current.shapes);
+  shortcuts.resize(NS);
+  analyzers.resize(NS);
+  for(int i=0; i<NS; i++) analyzers[i].resize(arb::current.shapes[i].cycle_length);
 
   t_origin.clear();
   cell_to_tcell.clear();
