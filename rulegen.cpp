@@ -995,7 +995,8 @@ void extend_analyzer(twalker cwmain, int z, twalker giver) {
 
   for(int i=0;; i++) {
     if(i == isize(sub_states) || i == isize(giver_states))
-      throw rulegen_failure("reached the end");
+      /* may happen if something changed but not updated */
+      throw rulegen_retry("reached the end");
     if(giver_states[i] != sub_states[i]) {
       i--;
       while(i != 0) {
