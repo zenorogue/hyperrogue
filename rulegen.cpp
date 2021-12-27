@@ -1045,6 +1045,7 @@ struct treestate {
   twalker giver;
   int sid;
   int parent_dir;
+  int astate;
   twalker where_seen;
   bool is_live;
   bool is_possible_parent;
@@ -1254,6 +1255,7 @@ EX pair<int, int> get_treestate_id(twalker& cw) {
     nts.where_seen = cw;
     nts.known = false;
     nts.is_live = true;
+    nts.astate = co.second;
     }
   co.second = v->dir;
   return co;
@@ -1543,7 +1545,7 @@ void verified_treewalk(twalker& tw, int id, int dir) {
   treewalk(tw, dir);
   }
 
-void examine_branch(int id, int left, int right) {
+bool examine_branch(int id, int left, int right) {
   auto rg = treestates[id].giver;
 
   if(debugflags & DF_GEOM)
@@ -1587,7 +1589,7 @@ void examine_branch(int id, int left, int right) {
       if(0) if(debugflags & DF_GEOM)
         println(hlog, "got hash: ", hash);
       if(verified_branches.count(hash)) {
-        return;
+        return true;
         }
       verified_branches.insert(hash);
 
@@ -1626,6 +1628,7 @@ void examine_branch(int id, int left, int right) {
     }
   catch(verify_advance_failed&) {
     if(flags & w_examine_once) throw rulegen_retry("advance failed");
+    return false;
     }
   }
 
@@ -1706,6 +1709,9 @@ void clear_treestates() {
   for(auto a: all_analyzers)
     if(a->id == MYSTERY) a->dir = MYSTERY;
   }
+
+using branch_check = tuple<int, int, int>;
+set<branch_check> checks_to_skip;
 
 EX void rules_iteration() {
   try_count++;
@@ -1795,6 +1801,17 @@ EX void rules_iteration() {
 
   handle_queued_extensions();
 
+  vector<reaction_t> skipped_branches;
+
+  auto examine_or_skip_branch = [&] (int id, int fb, int sb) {
+    auto b = branch_check{treestates[id].astate, fb, sb};
+    if(checks_to_skip.count(b)) {
+      skipped_branches.emplace_back([id, fb, sb] { examine_branch(id, fb, sb); });
+      return;
+      }
+    if(examine_branch(id, fb, sb)) checks_to_skip.insert(b);
+    };
+
   for(int id=0; id<isize(treestates); id++) if(treestates[id].is_live) {
     auto r = treestates[id].rules; /* no & because treestates might have moved */
     if(r.empty()) continue;
@@ -1805,7 +1822,7 @@ EX void rules_iteration() {
       if(r[i] >= 0 && treestates[r[i]].is_live) {
         if(first_live_branch == -1) first_live_branch = i;
         if(last_live_branch >= 0)
-          examine_branch(id, last_live_branch, i);
+          examine_or_skip_branch(id, last_live_branch, i);
         last_live_branch = i;
         qbranches++;
         }
@@ -1827,9 +1844,11 @@ EX void rules_iteration() {
       clear_sidecache_and_codes();
       throw rulegen_retry("single live branch");
       }
-    if(treestates[id].is_root) examine_branch(id, last_live_branch, first_live_branch);
+    if(treestates[id].is_root)
+      examine_or_skip_branch(id, last_live_branch, first_live_branch);
     }
 
+  after_branches:
   for(int id=0; id<isize(treestates); id++) if(!treestates[id].giver.at) {
     important.push_back(treestates[id].where_seen);
     }
@@ -1838,6 +1857,13 @@ EX void rules_iteration() {
   handle_queued_extensions();
   if(isize(important) != N)
     throw rulegen_retry("need more rules after examine");
+
+  if(skipped_branches.size()) {
+    checks_to_skip.clear();
+    for(auto sb: skipped_branches) sb();
+    skipped_branches.clear();
+    goto after_branches;
+    }
 
   minimize_rules();
   find_possible_parents();
