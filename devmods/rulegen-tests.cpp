@@ -1111,6 +1111,9 @@ bool set_general(const string& s) {
 
 void test_from_file(string list) {
 
+  dynamicval<int> df(floorshapes_level);
+  if(specialland == laCanvas) floorshapes_level = 1;
+
   set_dir(list);
 
   vector<string> filenames;
