@@ -1340,7 +1340,7 @@ void rules_iteration_for(twalker& cw) {
       if(r[z] == cids[z]) continue;
       if(r[z] < 0 || cids[z] < 0) {
         debuglist = { cwmain, ts.giver };
-        throw rulegen_failure("neg rule mismatch");
+        throw rulegen_retry("neg rule mismatch");
         }
 
       auto tg = ts.giver;
