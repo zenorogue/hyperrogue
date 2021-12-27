@@ -181,41 +181,12 @@ void move_to(twalker dw) {
   move_to(cellwalker(m->clone(dw.at)->c7, dw.spin, dw.mirrored));
   }
 
-void sprawl(twalker c) {
-  auto [d, id] = get_code(c);
-  twalker cw(c.at, d);
-  cur_sprawl = spread(get_analyzer(cw), cw);
-  println(hlog, "sprawl result = ", cur_sprawl);
-  println(hlog, "code = ", treestates[id].code);
-  sprawl_shown.clear();
-  for(int i=0; i<isize(cur_sprawl); i++) sprawl_shown[cur_sprawl[i].at] = i;
-  if(isize(cur_sprawl) == isize(old_sprawl) && old_sprawl_id < isize(treestates)) {
-    auto& oldcode = treestates[old_sprawl_id].code.second;
-    auto& newcode = treestates[id].code.second;
-    int q = isize(cur_sprawl);
-    debuglist = {};
-    for(int i=0; i<q; i++)
-      if(oldcode[i] != newcode[i]) {
-        println(hlog, "index: ", i, " old: ", oldcode[i], " new: ", newcode[i], " at ", old_sprawl[i], " vs ", cur_sprawl[i]);
-        debuglist.push_back(old_sprawl[i]);
-        debuglist.push_back(cur_sprawl[i]);
-        }
-    }
-  old_sprawl = cur_sprawl;
-  old_sprawl_id = id;
-  }
-
 void debug_menu() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
   auto m = dynamic_cast<hrmap_testproto*> (currentmap);
   dialog::init("debug menu");
   
-  dialog::addItem("sprawl", 's');
-  dialog::add_action([m] {
-    sprawl(twalker(m->counterpart[centerover->master], 0));
-    });
-
   dialog::addItem("parent_dir", 'p');
   dialog::add_action([m] {
     tcell *c = m->counterpart[centerover->master];
