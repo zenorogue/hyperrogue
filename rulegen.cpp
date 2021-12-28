@@ -37,6 +37,7 @@ struct rulegen_surrender : rulegen_failure {
   };
 
 const int MYSTERY = 31999;
+const int MYSTERY_LARGE = 31999999;
 #endif
 
 EX bool parent_debug;
@@ -102,7 +103,7 @@ struct tcell {
   /** distance from the root */
   short dist;
   /** cached code */
-  short code;
+  int code;
   /** direction to the parent in the tree */
   short parent_dir;
   /** direction to the OLD parent in the tree */
@@ -179,7 +180,7 @@ tcell *gen_tcell(int id) {
   c->is_solid = false;
   c->distance_fixed = false;
   c->dist = MYSTERY;
-  c->code = MYSTERY;
+  c->code = MYSTERY_LARGE;
   c->parent_dir = MYSTERY;
   c->old_parent_dir = MYSTERY;
   first_tcell = c;
@@ -582,11 +583,11 @@ EX void remove_parentdir(tcell *c) {
   clear_sidecache_and_codes();
   if(c->parent_dir) c->old_parent_dir = c->parent_dir;
   c->parent_dir = MYSTERY;
-  c->code = MYSTERY;
+  c->code = MYSTERY_LARGE;
   for(int i=0; i<c->type; i++) if(c->move(i)) {
     if(c->move(i)->parent_dir) c->move(i)->old_parent_dir = c->move(i)->parent_dir;
     c->move(i)->parent_dir = MYSTERY;
-    c->move(i)->code = MYSTERY;
+    c->move(i)->code = MYSTERY_LARGE;
     }
   }
 
@@ -1219,7 +1220,7 @@ EX void id_at_spin(twalker cw, vector<twalker>& sprawl, vector<analyzer_state*>&
 
 EX pair<int, int> get_code(twalker& cw) {
   tcell *c = cw.at;
-  if(c->code != MYSTERY && c->parent_dir != MYSTERY) {
+  if(c->code != MYSTERY_LARGE && c->parent_dir != MYSTERY) {
     int bestd = c->parent_dir;
     if(bestd == -1) bestd = 0;
     return {bestd, c->code};
@@ -1644,7 +1645,7 @@ void clear_codes() {
     c = c->next;
     }
   for(auto a: all_analyzers) {
-    for(auto tw: a->inhabitants) tw.at->code = MYSTERY;
+    for(auto tw: a->inhabitants) tw.at->code = MYSTERY_LARGE;
     a->inhabitants.clear();
     }
   }
@@ -1693,7 +1694,7 @@ EX void update_all_codes(analyzer_state *a) {
   for(auto tw: old) {
     ufind(tw);
     if(tw.at->code == a->analyzer_id)
-      tw.at->code = MYSTERY;
+      tw.at->code = MYSTERY_LARGE;
     }
   }
 
@@ -1879,7 +1880,7 @@ void clear_tcell_data() {
     c->is_solid = false;
     // c->dist = MYSTERY;
     c->parent_dir = MYSTERY;
-    c->code = MYSTERY;
+    c->code = MYSTERY_LARGE;
     c->distance_fixed = false;
     c = c->next;
     }
