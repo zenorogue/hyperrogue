@@ -1694,8 +1694,12 @@ EX void clean_analyzers() {
   next_analyzer_id = 0;
   }
 
+using branch_check = tuple<int, int, int>;
+set<branch_check> checks_to_skip;
+
 EX void clean_data() {
   clean_analyzers();
+  checks_to_skip.clear();
   important = t_origin;
   }
 
@@ -1726,9 +1730,6 @@ void clear_treestates() {
   for(auto a: all_analyzers)
     if(a->id == MYSTERY) a->dir = MYSTERY;
   }
-
-using branch_check = tuple<int, int, int>;
-set<branch_check> checks_to_skip;
 
 EX void rules_iteration() {
   try_count++;
