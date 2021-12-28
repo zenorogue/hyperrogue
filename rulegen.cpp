@@ -1170,7 +1170,7 @@ int get_side(twalker what) {
       }
     }
 
-  if(side) sidecache[what] = res;
+  if(side) sidecache[what] = res, sidecache[what + wstep] = -res;
   return res;
   }
 
