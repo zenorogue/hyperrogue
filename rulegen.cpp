@@ -1655,11 +1655,6 @@ bool need_clear_codes;
 
 void clear_codes() {
   need_clear_codes = false;
-  auto c = first_tcell;
-  while(c) {
-    c->code = MYSTERY;
-    c = c->next;
-    }
   for(auto a: all_analyzers) {
     for(auto tw: a->inhabitants) tw.at->code = MYSTERY_LARGE;
     a->inhabitants.clear();
@@ -1688,6 +1683,7 @@ void find_single_live_branch(twalker& at) {
   }
 
 EX void clean_analyzers() {
+  for(auto a: all_analyzers) for(auto tw: a->inhabitants) tw.at->code = MYSTERY_LARGE;
   for(auto a: all_analyzers) delete a;
   for(auto& av: analyzers) for(auto& a: av) a = nullptr;
   all_analyzers.clear();
