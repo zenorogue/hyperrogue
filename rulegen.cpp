@@ -429,6 +429,12 @@ int solid_errors;
 /** total solid errors */
 EX int all_solid_errors;
 
+/** the next distance to warn about */
+EX int next_distance_warning;
+
+/** current distance warnings */
+EX int distance_warnings;
+
 #if HDR
 struct shortcut {
   vector<int> pre;
@@ -634,6 +640,10 @@ EX void fix_distances(tcell *c) {
           remove_parentdir(tgt);
           tgt_d = new_d;
           tgt->any_nearer = tgtw.spin;
+          if(new_d >= next_distance_warning) {
+            if(new_d >= MYSTERY-1) throw rulegen_failure("distance limit exceeded");
+            next_distance_warning = new_d; distance_warnings++;
+            }
           return true;
           }
         return false;
@@ -676,6 +686,12 @@ EX void handle_distance_errors() {
     debuglist = solid_errors_list;
     solid_errors_list = {};
     throw hr_solid_error();
+    }
+  b = distance_warnings;
+  distance_warnings = 0;
+  if(b && !no_errors) {
+    clean_parents();
+    throw rulegen_retry("distance exceeded");
     }
   }
 
@@ -1927,7 +1943,9 @@ EX void generate_rules() {
   analyzers.clear();
   important.clear();
   treestates.clear();
-  hard_parents = single_live_branches = double_live_branches = all_solid_errors = 0;
+  hard_parents = single_live_branches = double_live_branches = all_solid_errors = solid_errors = 0;
+
+  next_distance_warning = 30000;
 
   int NS = isize(arb::current.shapes);
   shortcuts.resize(NS);
