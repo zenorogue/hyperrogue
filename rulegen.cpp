@@ -83,6 +83,7 @@ static const flagtype w_no_smart_shortcuts = Flag(21); /*< disable the 'smart sh
 static const flagtype w_less_smart_retrace = Flag(22); /*< stop early when examining smart shortcut retraction */
 static const flagtype w_less_smart_advance = Flag(23); /*< stop early when examining smart shortcut advancement */
 static const flagtype w_no_queued_extensions = Flag(24); /*< consider extensions one by one */
+static const flagtype w_no_branch_skipping = Flag(24); /*< do not skip branches */
 #endif
 
 EX flagtype flags = 0;
@@ -454,6 +455,10 @@ struct shortcut {
 
 EX vector<vector<unique_ptr<shortcut>> > shortcuts;
 
+vector<reaction_t> skipped_branches;
+using branch_check = tuple<int, int, int>;
+set<branch_check> checks_to_skip;
+
 vector<int> root_path(twalker& cw) {
   cw += wstep;
   vector<int> res;
@@ -694,12 +699,14 @@ EX void handle_distance_errors() {
     if(flags & w_always_clean) clean_data();
     debuglist = solid_errors_list;
     solid_errors_list = {};
+    checks_to_skip.clear();
     throw hr_solid_error();
     }
   b = distance_warnings;
   distance_warnings = 0;
   if(b && !no_errors) {
     clean_parents();
+    checks_to_skip.clear();
     throw rulegen_retry("distance exceeded");
     }
   }
@@ -1191,6 +1198,7 @@ int get_side(twalker what) {
     handle_distance_errors();
     steps++; if(steps > max_getside) {
       debuglist = {what, to_what, wl, wr};
+      checks_to_skip.clear();
       if(parent_updates) throw rulegen_retry("xsidefreeze");
       else throw rulegen_failure("xsidefreeze");
       }
@@ -1613,10 +1621,6 @@ void verified_treewalk(twalker& tw, int id, int dir) {
   treewalk(tw, dir);
   }
 
-vector<reaction_t> skipped_branches;
-using branch_check = tuple<int, int, int>;
-set<branch_check> checks_to_skip;
-
 bool examine_branch(int id, int left, int right) {
   auto rg = treestates[id].giver;
 
@@ -1874,6 +1878,10 @@ EX void rules_iteration() {
   skipped_branches.clear();
 
   auto examine_or_skip_branch = [&] (int id, int fb, int sb) {
+    if(flags & w_no_branch_skipping) {
+      examine_branch(id, fb, sb);
+      return;
+      }
     auto b = branch_check{treestates[id].astate, fb, sb};
     if(checks_to_skip.count(b)) {
       skipped_branches.emplace_back([id, fb, sb] { examine_branch(id, fb, sb); });
