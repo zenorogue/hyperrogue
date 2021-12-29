@@ -400,6 +400,7 @@ EX void unify(twalker pw1, twalker pw2) {
 EX vector<twalker> t_origin;
 
 EX void delete_tmap() {
+  clean_analyzers();
   while(first_tcell) {
     auto second = first_tcell->next;
     tailored_delete(first_tcell);
