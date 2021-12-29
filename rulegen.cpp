@@ -90,6 +90,8 @@ EX flagtype flags = 0;
 
 EX int64_t movecount;
 
+EX int current_getside, current_examine_branch;
+
 #if HDR
 struct tcell* tmove(tcell *c, int d);
 
@@ -656,7 +658,9 @@ EX void fix_distances(tcell *c) {
           tgt->any_nearer = tgtw.spin;
           if(new_d >= next_distance_warning) {
             if(new_d >= MYSTERY-1) throw rulegen_failure("distance limit exceeded");
-            next_distance_warning = new_d; distance_warnings++;
+            if(next_distance_warning < 10000) next_distance_warning *= 2;
+            else if(next_distance_warning < 20000) next_distance_warning = 20000;
+            else next_distance_warning = new_d; distance_warnings++;
             }
           return true;
           }
@@ -1196,11 +1200,17 @@ int get_side(twalker what) {
   lstack.resize(1); rstack.resize(1);
   while(res == 99) {
     handle_distance_errors();
-    steps++; if(steps > max_getside) {
+    steps++; if(steps > current_getside) {
       debuglist = {what, to_what, wl, wr};
       checks_to_skip.clear();
       if(parent_updates) throw rulegen_retry("xsidefreeze");
-      else throw rulegen_failure("xsidefreeze");
+      else if(steps > max_getside) {
+        throw rulegen_failure("xsidefreeze");
+        }
+      else {
+        current_getside *= 2;
+        throw rulegen_retry("xsidefreeze double");
+        }
       }
     bool gl = wl.at->dist <= wr.at->dist;
     bool gr = wl.at->dist >= wr.at->dist;
@@ -1639,7 +1649,7 @@ bool examine_branch(int id, int left, int right) {
   while(true) {
     handle_distance_errors();
     steps++;
-    if(steps > max_examine_branch) {
+    if(steps > current_examine_branch) {
       debuglist = { rg+left, wl, wr };
       if(skipped_branches.size()) {
         checks_to_skip.clear();
@@ -1648,8 +1658,12 @@ bool examine_branch(int id, int left, int right) {
       else if(branch_conflicts_seen.size())
         /* may be not a real problem, but caused by incorrect detection of live branches */
         throw rulegen_retry("max_examine_branch exceeded after a conflict");
-      else
+      else if(steps > max_examine_branch)
         throw rulegen_failure("max_examine_branch exceeded");
+      else {
+        current_examine_branch *= 2;
+        throw rulegen_retry("max_examine_branch exceeded, doubling");
+        }
       }
     
     auto tsl = get_tsinfo(wl);
@@ -2006,7 +2020,9 @@ EX void generate_rules() {
   treestates.clear();
   hard_parents = single_live_branches = double_live_branches = all_solid_errors = solid_errors = 0;
 
-  next_distance_warning = 30000;
+  next_distance_warning = 512;
+  current_getside = 512;
+  current_examine_branch = 512;
 
   int NS = isize(arb::current.shapes);
   shortcuts.resize(NS);
