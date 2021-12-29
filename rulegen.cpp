@@ -587,8 +587,10 @@ EX void find_new_shortcuts(tcell *c, int d, tcell *alt, int newdir, int delta) {
   }
 
 EX void remove_parentdir(tcell *c) {
-  clear_sidecache_and_codes();
-  if(c->parent_dir) c->old_parent_dir = c->parent_dir;
+  if(c->parent_dir != MYSTERY) {
+    clear_sidecache_and_codes();
+    c->old_parent_dir = c->parent_dir;
+    }
   c->parent_dir = MYSTERY;
   c->code = MYSTERY_LARGE;
   for(int i=0; i<c->type; i++) if(c->move(i)) {
