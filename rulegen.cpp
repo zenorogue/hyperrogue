@@ -113,6 +113,10 @@ struct tcell {
   /** can we assume that dist is correct? if we assumed that the dist is correct but then find out it was wrong, throw an error */
   bool is_solid;
   bool distance_fixed;
+  /** is side info cached? */
+  unsigned long long known_sides;
+  /** which side is it */
+  unsigned long long which_side;
   /** sometimes we find out that multiple tcells represent the same actual cell -- in this case we unify them; unified_to is used for the union-find algorithm */
   walker<tcell> unified_to;
   int degree() { return type; }
@@ -183,6 +187,8 @@ tcell *gen_tcell(int id) {
   c->code = MYSTERY_LARGE;
   c->parent_dir = MYSTERY;
   c->old_parent_dir = MYSTERY;
+  c->known_sides = 0;
+  c->which_side = 0;
   first_tcell = c;
   // println(hlog, c, " is a new tcell of id ", id);
   tcellcount++;
@@ -1098,7 +1104,32 @@ void treewalk(twalker& cw, int delta) {
   cw+=delta;
   }
 
-EX map<twalker, int> sidecache;
+EX vector<tcell*> sidecaches_to_clear;
+
+void clear_sidecache() {
+  if(sidecaches_to_clear.size()) {
+    for(auto c: sidecaches_to_clear)
+      c->which_side = c->known_sides = 0;
+    sidecaches_to_clear.clear();
+    }
+  }
+
+void set_sidecache(twalker what, int side) {
+  auto c = what.at;
+  if(c->known_sides == 0) sidecaches_to_clear.push_back(c);
+  unsigned long long bit = 1ll<<what.spin;
+  c->known_sides |= bit;
+  if(side > 0)
+    c->which_side |= bit;
+  }
+
+int get_sidecache(twalker what) {
+  auto c = what.at;
+  unsigned long long bit = 1ll<<what.spin;
+  if(c->known_sides & bit)
+    return (c->which_side & bit) ? 1 : -1;
+  return 0;
+  }
 
 int get_side(twalker what) {
 
@@ -1106,8 +1137,8 @@ int get_side(twalker what) {
   bool fast = !(flags & w_slow_side);
 
   if(side) {
-    auto ww = at_or_null(sidecache, what);
-    if(ww) return *ww;
+    auto w = get_sidecache(what);
+    if(w) return w;
     }
 
   int res = 99;
@@ -1154,6 +1185,8 @@ int get_side(twalker what) {
   auto to_what = what + wstep;
   auto ws = what; treewalk(ws, 0); if(ws == to_what) res = 0;
 
+  static vector<twalker> lstack = {nullptr}, rstack = {nullptr};
+  lstack.resize(1); rstack.resize(1);
   while(res == 99) {
     handle_distance_errors();
     steps++; if(steps > max_getside) {
@@ -1164,16 +1197,31 @@ int get_side(twalker what) {
     bool gl = wl.at->dist <= wr.at->dist;
     bool gr = wl.at->dist >= wr.at->dist;
     if(gl) {
+      if(get_sidecache(wl) == 1) wl += wstep;
       treewalk(wl, -1);
       if(wl == to_what) { res = 1; }
+      if(lstack.back() == wl+wstep) {
+        set_sidecache(lstack.back(), 1);
+        set_sidecache(wl, -1);
+        lstack.pop_back();
+        }
+      else if(wl.at->parent_dir != wl.spin && (wl+wstep).at->parent_dir != (wl+wstep).spin) lstack.push_back(wl);
       }
     if(gr) {
+      if(get_sidecache(wr) == -1) wr += wstep;
       treewalk(wr, +1);
       if(wr == to_what) {res = -1; }
+      if(rstack.back() == wr+wstep) {
+        set_sidecache(rstack.back(), -1);
+        set_sidecache(wr, +1);
+        rstack.pop_back();
+        }
+      else if(wr.at->parent_dir != wr.spin && (wr+wstep).at->parent_dir != (wr+wstep).spin) rstack.push_back(wr);
       }
     }
 
-  if(side) sidecache[what] = res, sidecache[what + wstep] = -res;
+  if(side && res)
+    set_sidecache(what, res), set_sidecache(what + wstep, -res);
   return res;
   }
 
@@ -1708,7 +1756,7 @@ EX void clean_data() {
   }
 
 EX void clear_sidecache_and_codes() {
-  sidecache.clear();
+  clear_sidecache();
   need_clear_codes = true;
   }
 
