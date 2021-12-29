@@ -1141,7 +1141,7 @@ int get_sidecache(twalker what) {
 int get_side(twalker what) {
 
   bool side = !(flags & w_no_sidecache);
-  bool fast = !(flags & w_slow_side);
+  bool fast = (flags & w_slow_side);
 
   if(side) {
     auto w = get_sidecache(what);
@@ -1905,7 +1905,7 @@ EX void rules_iteration() {
         qbranches++;
         }
     if(qbranches == 2) double_live_branches++;
-    if(first_live_branch == last_live_branch && treestates[id].is_root) {
+    if((flags & w_slow_side) && first_live_branch == last_live_branch && treestates[id].is_root) {
       if(debugflags & DF_GEOM)
         println(hlog, "for id ", id, " we have a single live branch");
       single_live_branches++;
