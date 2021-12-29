@@ -1565,6 +1565,10 @@ void verified_treewalk(twalker& tw, int id, int dir) {
   treewalk(tw, dir);
   }
 
+vector<reaction_t> skipped_branches;
+using branch_check = tuple<int, int, int>;
+set<branch_check> checks_to_skip;
+
 bool examine_branch(int id, int left, int right) {
   auto rg = treestates[id].giver;
 
@@ -1585,7 +1589,11 @@ bool examine_branch(int id, int left, int right) {
     steps++;
     if(steps > max_examine_branch) {
       debuglist = { rg+left, wl, wr };
-      if(branch_conflicts_seen.size())
+      if(skipped_branches.size()) {
+        checks_to_skip.clear();
+        throw rulegen_retry("max_examine_branch exceeded after a skipped check");
+        }
+      else if(branch_conflicts_seen.size())
         /* may be not a real problem, but caused by incorrect detection of live branches */
         throw rulegen_retry("max_examine_branch exceeded after a conflict");
       else
@@ -1692,9 +1700,6 @@ EX void clean_analyzers() {
   all_analyzers.clear();
   next_analyzer_id = 0;
   }
-
-using branch_check = tuple<int, int, int>;
-set<branch_check> checks_to_skip;
 
 EX void clean_data() {
   clean_analyzers();
@@ -1818,7 +1823,7 @@ EX void rules_iteration() {
 
   handle_queued_extensions();
 
-  vector<reaction_t> skipped_branches;
+  skipped_branches.clear();
 
   auto examine_or_skip_branch = [&] (int id, int fb, int sb) {
     auto b = branch_check{treestates[id].astate, fb, sb};
