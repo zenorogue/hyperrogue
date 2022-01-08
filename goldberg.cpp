@@ -736,12 +736,22 @@ EX namespace gp {
 
   loc config;
   
-  loc internal_representation(loc v) {
+  EX bool rotate_and_check_limits(loc& v) {
     int& x = v.first, &y = v.second;
     while(x < 0 || y < 0 || (x == 0 && y > 0))
       v = v * loc(0, 1);
-    if(x > 8) x = 8;
-    if(y > 8) y = 8;
+    return 2*(x+y) < (1<<GOLDBERG_BITS);
+    }
+
+  EX bool check_limits(loc v) {
+    return rotate_and_check_limits(v);
+    }
+
+  loc internal_representation(loc v) {
+    int& x = v.first, &y = v.second;
+    while(!rotate_and_check_limits(v)) {
+      if(x > y) x--; else y--;
+      }
     if(S3 == 3 && y > x) v = v * loc(1, -1);
     return v;
     }
@@ -863,6 +873,8 @@ EX namespace gp {
     dialog::addSelItem("y", its(config.second), 'y');
     dialog::add_action([] { dialog::editNumber(config.second, 0, 8, 1, 1, "y", helptext()); });
     
+    if(!check_limits(config))
+      dialog::addInfo(XLAT("Outside of the supported limits"));
     if(config.second && config.second != config.first && nonorientable) {
       dialog::addInfo(XLAT("This does not work in non-orientable geometries"));
       }
