@@ -26,10 +26,11 @@ EX vector<basic_textureinfo> floor_texture_vertices;
 EX vector<glvertex> floor_texture_map;
 EX struct renderbuffer *floor_textures;
 
-EX bool disable_floorshapes = false; /* tiles generates faster, but crash on drawing */
+/* 0: generate no floorshapes; 1: generate only plain floorshapes; 2: generate all */
+EX int floorshapes_level = 2;
 
 void geometry_information::init_floorshapes() {
-  if(disable_floorshapes) return;
+  if(floorshapes_level == 0) return;
   all_escher_floorshapes.clear();
   all_plain_floorshapes = { 
     &shFloor, &shMFloor, &shMFloor2, &shMFloor3, &shMFloor4, 
@@ -39,6 +40,7 @@ void geometry_information::init_floorshapes() {
   for(auto s: all_plain_floorshapes) s->is_plain = true;
   
   auto init_escher = [this] (escher_floorshape& sh, int s0, int s1, int noft, int s2) {
+    if(floorshapes_level == 1) return;
     sh.shapeid0 = s0;
     sh.shapeid1 = s1;
     sh.noftype = noft;
