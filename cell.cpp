@@ -27,7 +27,7 @@ struct hrmap {
     return create_step(h, direction);
     }
   virtual heptagon *create_step(heptagon *h, int direction);
-private:
+protected:
   virtual transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint);
   virtual transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint);
 public:

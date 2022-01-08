@@ -676,7 +676,7 @@ struct hrmap_crystal : hrmap_standard {
     }
 
   transmatrix relative_matrixc(cell *h2, cell *h1, const hyperpoint& hint) override { 
-    if(!crystal3()) return hrmap_standard::relative_matrix(h2, h1, hint);
+    if(!crystal3()) return hrmap_standard::relative_matrixc(h2, h1, hint);
     if(h2 == h1) return Id;
     for(int i=0; i<S7; i++) if(h2 == h1->move(i)) return adj(h1->master, i);
     if(gmatrix0.count(h2) && gmatrix0.count(h1))
@@ -686,7 +686,7 @@ struct hrmap_crystal : hrmap_standard {
     }
 
   transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override { 
-    if(!crystal3()) return hrmap::relative_matrix(h2, h1, hint);
+    if(!crystal3()) return hrmap::relative_matrixh(h2, h1, hint);
     return relative_matrix(h2->c7, h1->c7, hint);
     }
   #endif
