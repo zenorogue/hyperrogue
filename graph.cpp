@@ -323,7 +323,8 @@ void drawCurse(const shiftmatrix& V, color_t col) {
 
 #define UNTRANS (GDIM == 3 ? 0x000000FF : 0)
 
-EX void drawPlayerEffects(const shiftmatrix& V, cell *c, bool onplayer) {
+EX void drawPlayerEffects(const shiftmatrix& V, cell *c, eMonster m) {
+  bool onplayer = m == moPlayer;
   if(!onplayer && !items[itOrbEmpathy]) return;
   if(items[itOrbShield] > (shmup::on ? 0 : ORBBASE)) drawShield(V, itOrbShield);
   if(items[itOrbShell] > (shmup::on ? 0 : ORBBASE)) drawShield(V, itOrbShell);
@@ -1423,7 +1424,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
     
     case moGolem: case moGolemMoved: {
       ShadowV(V, cgi.shPBody);
-      const transmatrix VBS = otherbodyparts(V, darkena(col, 1, 0XC0), m, footphase);
+      const transmatrix VBS = otherbodyparts(V, darkena(col, 1, 0XC0), items[itOrbFish] && items[itOrbEmpathy] ? moWaterElemental : m, footphase);
       queuepoly(VBODY * VBS, cgi.shPBody, darkena(col, 0, 0XC0));
       queuepoly(VHEAD, cgi.shGolemhead, darkena(col, 1, 0XFF));
       humanoid_eyes(V, 0xC0C000FF, darkena(col, 0, 0xFF));
@@ -1447,7 +1448,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
       int facecolor = evil ? 0xC0B090FF : 0xD0C080FF;
       
       ShadowV(V, girl ? cgi.shFemaleBody : cgi.shPBody);
-      const transmatrix VBS = otherbodyparts(V, facecolor, m, footphase);
+      const transmatrix VBS = otherbodyparts(V, facecolor, !evil && items[itOrbFish] && items[itOrbEmpathy] ? moWaterElemental : m, footphase);
       queuepoly(VBODY * VBS, girl ? cgi.shFemaleBody : cgi.shPBody, facecolor);
   
       if(m == moPrincessArmed) 
@@ -2854,7 +2855,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       if(!nospins && flipplayer) Vs = Vs * pispin;
       
       res = res && drawMonsterType(moMimic, c, Vs, col, footphase, asciicol);
-      drawPlayerEffects(Vs, c, false);
+      drawPlayerEffects(Vs, c, c->monst);
       }
     }
   
@@ -2864,7 +2865,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
     multi::cpid = 0;
     if(c->monmirror) Vs = Vs * Mirror;
     drawMonsterType(c->monst, c, Vs, col, footphase, asciicol);
-    drawPlayerEffects(Vs, c, false);
+    drawPlayerEffects(Vs, c, c->monst);
     }
 
   // wolves face the heat
@@ -2921,7 +2922,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
     if(!nospins && c->mondir < c->type) Vs = Vs * ddspin(c, c->mondir, M_PI);
     if(c->monst == moPair) Vs = Vs * xpush(-.12);
     if(c->monmirror) Vs = Vs * Mirror;
-    if(isFriendly(c)) drawPlayerEffects(Vs, c, false);
+    if(isFriendly(c)) drawPlayerEffects(Vs, c, c->monst);
     res = res && drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase, asciicol);
     }
 
@@ -2975,7 +2976,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
 
     asciicol = getcs().uicolor >> 8;
 
-    drawPlayerEffects(Vs, c, true);
+    drawPlayerEffects(Vs, c, moPlayer);
     if(inmirrorcount && !mouseout() && !nospins && GDIM == 2) {
       hyperpoint h = inverse_shift(ocwtV, mouseh);
       if(flipplayer) h = pispin * h;
