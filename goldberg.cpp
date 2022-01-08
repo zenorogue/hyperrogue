@@ -358,8 +358,10 @@ EX namespace gp {
     auto fix_mirrors = [&] {
       if(ac1.cw.mirrored != hs.mirrored) ac1.cw--;
       if(ac2.cw.mirrored != hs.mirrored) ac2.cw--;
-      auto& ac3 = get_mapping(vc[2]);
-      if(ac3.cw.mirrored != hs.mirrored) ac3.cw--;
+      if(S3 == 4) {
+        auto& ac3 = get_mapping(vc[2]);
+        if(ac3.cw.mirrored != hs.mirrored) ac3.cw--;
+        }
       };
 
     if(S3 == 4 && param == loc(1,1)) {
