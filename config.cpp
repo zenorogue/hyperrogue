@@ -713,7 +713,7 @@ EX void initConfig() {
   param_b(vid.fineline, "fineline", true);
   param_f(vid.linewidth, "linewidth", 1);
   addsaver(precise_width, "precisewidth", .5);
-  addsaver(perfect_linewidth, "perfect_linewidth", 1);
+  param_i(perfect_linewidth, "perfect_linewidth", 1);
   param_f(linepatterns::width, "lpwidth", "pattern-linewidth", 1);
   addsaver(fat_edges, "fat-edges");
   param_f(vid.sspeed, "sspeed", "scrollingspeed", 0);
