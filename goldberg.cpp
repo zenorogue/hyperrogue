@@ -298,6 +298,8 @@ EX namespace gp {
     DEBB(DF_GP, ("EXTEND ",c, " ", d));
     indenter ind(2);
     if(c->master->c7 != c) {
+      auto c1 = c;
+      auto d1 = d;
       while(c->master->c7 != c) {
         DEBB(DF_GP, (c, " direction 0 corresponds to ", c->move(0), " direction ", c->c.spin(0)); )
         d = c->c.spin(0);
@@ -307,10 +309,17 @@ EX namespace gp {
       extend_map(c, d);
       extend_map(c, c->c.fix(d-1));
       extend_map(c, c->c.fix(d+1));
-      if(S3 == 4 && !c->move(d))
+      if(S3 == 4 && !c1->move(d1)) {
         for(int i=0; i<S7; i++)
         for(int j=0; j<S7; j++)
           extend_map(createStep(c->master, i)->c7, j);
+        }
+      if(S3 == 4 && !c1->move(d1)) {
+        for(int i=0; i<S7; i++)
+        for(int i1=0; i1<S7; i1++)
+        for(int j=0; j<S7; j++)
+          extend_map(createStep(createStep(c->master, i), i1)->c7, j);
+        }
       return;
       }
 
