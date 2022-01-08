@@ -1252,6 +1252,12 @@ int read_geom_args() {
     shift(); gp::param.second = argi();
     set_variation(eVariation::goldberg);
     }
+  else if(argis("-gph")) {
+    PHASEFROM(2);
+    shift(); int x = argi();
+    shift(); int y = argi();
+    gp::whirl_set({x, y});
+    }
   else if(argis("-unrectified")) {
     PHASEFROM(2);
     set_variation(eVariation::unrectified);

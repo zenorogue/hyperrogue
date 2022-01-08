@@ -761,7 +761,7 @@ EX namespace gp {
     return eVariation::goldberg;
     }
   
-  void whirl_set(loc xy) {
+  EX void whirl_set(loc xy) {
     xy = internal_representation(xy);
     if(xy.second && xy.second != xy.first && nonorientable) {
       addMessage(XLAT("This does not work in non-orientable geometries"));
