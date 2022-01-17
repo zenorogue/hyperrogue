@@ -236,7 +236,7 @@ int main(int argc, char **argv) {
         else obj_dir += c;
       linker += " " + s;
       }
-    else if(s = "-o") {
+    else if(s == "-o") {
       exec_name = argv[i+1];
       i++;
       }
