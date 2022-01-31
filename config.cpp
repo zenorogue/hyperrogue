@@ -718,6 +718,7 @@ EX void initConfig() {
   addsaver(fat_edges, "fat-edges");
   param_f(vid.sspeed, "sspeed", "scrollingspeed", 0);
   param_f(vid.mspeed, "mspeed", "movement speed", 1);
+  param_f(vid.ispeed, "ispeed", "idle speed", 1);
   addsaver(vid.aurastr, "aura strength", ISMOBILE ? 0 : 128);
   addsaver(vid.aurasmoothen, "aura smoothen", 5);
   param_enum(vid.graphglyph, "graphglyph", "graphical items/kills", 1)
@@ -1648,6 +1649,14 @@ EX void showGraphConfig() {
     });
     
   dialog::addSelItem(XLAT("movement animation speed"), fts(vid.mspeed), 'm');
+  
+  dialog::addSelItem(XLAT("idle animation speed"), fts(vid.ispeed), 'i');
+  dialog::add_action([] {
+    dialog::editNumber(vid.ispeed, 0, 4, 0.1, 1, 
+      XLAT("idle animation speed"),
+      "0 = disable\n\nThis affects non-movement animations such as orb effects, item rotation, and more."
+      );
+    });
 
   dialog::addItem(XLAT("extra graphical effects"), 'u');
 
