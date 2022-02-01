@@ -1171,10 +1171,12 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       
       // 4 pi / 2pi = M_PI 
       
-      if(pmodel == mdEquivolume)
+      if(md == mdEquivolume)
         d = pow(volume_auto(d), 1/3.) * pow(M_PI / 2, 1/3.);
-      else if(pmodel == mdEquiarea && sphere)
+      else if(md == mdEquiarea && sphere) {
         d = sqrt(2*(1 - cos(d))) * M_PI / 2;
+        //d = sin((d+90*degree)/2);
+        }
       else if(pmodel == mdEquiarea && hyperbolic)
         d = sqrt(2*(cosh(d) - 1)) / 1.5;
       
