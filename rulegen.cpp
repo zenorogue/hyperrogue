@@ -20,6 +20,7 @@ EX int max_bdata = 1000;
 EX int max_getside = 10000;
 EX int rulegen_timeout = 60;
 EX int max_shortcut_length = 1200;
+EX int first_restart_on = 512;
 
 #if HDR
 /** exception thrown by this algoritm in case of any problems */
@@ -2021,9 +2022,9 @@ EX void generate_rules() {
   treestates.clear();
   hard_parents = single_live_branches = double_live_branches = all_solid_errors = solid_errors = 0;
 
-  next_distance_warning = 512;
-  current_getside = 512;
-  current_examine_branch = 512;
+  next_distance_warning = first_restart_on;
+  current_getside = first_restart_on;
+  current_examine_branch = first_restart_on;
 
   int NS = isize(arb::current.shapes);
   shortcuts.resize(NS);
@@ -2377,6 +2378,7 @@ auto hooks = addHook(hooks_configfile, 100, [] {
       param_i(max_bdata, "max_bdata");
       param_i(max_shortcut_length, "max_shortcut_length");
       param_i(rulegen_timeout, "rulegen_timeout");
+      param_i(first_restart_on, "first_restart_on");
     });
 
 EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {
