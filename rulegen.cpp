@@ -19,6 +19,7 @@ EX int max_examine_branch = 5040;
 EX int max_bdata = 1000;
 EX int max_getside = 10000;
 EX int rulegen_timeout = 60;
+EX int max_shortcut_length = 1200;
 
 #if HDR
 /** exception thrown by this algoritm in case of any problems */
@@ -502,7 +503,7 @@ EX void shortcut_found(tcell *c, tcell *alt, vector<twalker> &walkers, vector<tw
   if(debugflags & DF_GEOM)
     println(hlog, "new shortcut found, pre =  ", pre, " post = ", post, " pre reaches ", walkers[wpos], " post reaches ", walkers2.back(), " of type ", walkers[wpos].at->id, " sample = ", c);
 
-  if(isize(pre) > 500) {
+  if(isize(pre) > max_shortcut_length) {
     debuglist = { c };
     throw rulegen_failure("shortcut too long");
     }
@@ -2374,6 +2375,7 @@ auto hooks = addHook(hooks_configfile, 100, [] {
       param_i(max_examine_branch, "max_examine_branch");
       param_i(max_getside, "max_getside");
       param_i(max_bdata, "max_bdata");
+      param_i(max_shortcut_length, "max_shortcut_length");
       param_i(rulegen_timeout, "rulegen_timeout");
     });
 
