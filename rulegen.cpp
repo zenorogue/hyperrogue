@@ -1217,10 +1217,11 @@ int get_side(twalker what) {
     bool gl = wl.at->dist <= wr.at->dist;
     bool gr = wl.at->dist >= wr.at->dist;
     if(gl) {
-      if(get_sidecache(wl) == 1) wl += wstep;
+      if(side && get_sidecache(wl) == 1) wl += wstep;
       treewalk(wl, -1);
       if(wl == to_what) { res = 1; }
-      if(lstack.back() == wl+wstep) {
+      if(!side) ;
+      else if(lstack.back() == wl+wstep) {
         set_sidecache(lstack.back(), 1);
         set_sidecache(wl, -1);
         lstack.pop_back();
@@ -1228,10 +1229,11 @@ int get_side(twalker what) {
       else if(wl.at->parent_dir != wl.spin && (wl+wstep).at->parent_dir != (wl+wstep).spin) lstack.push_back(wl);
       }
     if(gr) {
-      if(get_sidecache(wr) == -1) wr += wstep;
+      if(side && get_sidecache(wr) == -1) wr += wstep;
       treewalk(wr, +1);
       if(wr == to_what) {res = -1; }
-      if(rstack.back() == wr+wstep) {
+      if(!side) ;
+      else if(rstack.back() == wr+wstep) {
         set_sidecache(rstack.back(), -1);
         set_sidecache(wr, +1);
         rstack.pop_back();
@@ -2035,6 +2037,7 @@ EX void generate_rules() {
   cell_to_tcell.clear();
   tcell_to_cell.clear();
   branch_conflicts_seen.clear();
+  sidecaches_to_clear.clear();
   clear_sidecache_and_codes();
   fix_queue = queue<reaction_t>();; in_fixing = false;
 
