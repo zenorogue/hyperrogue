@@ -184,6 +184,43 @@ void move_to(twalker dw) {
   move_to(cellwalker(m->clone(dw.at)->c7, dw.spin, dw.mirrored));
   }
 
+vector<twalker> old_givers;
+
+void try_sprawling(tcell *c) {
+  twalker cw = c;
+  cw = get_parent_dir(cw);
+  ufind(cw);
+  auto aid = get_aid(cw);
+  auto a_ptr = &(analyzers[aid.first][aid.second]);
+  vector<twalker> sprawl = { cw };
+  vector<analyzer_state*> states = { nullptr };
+
+  while(true) {
+    auto& a = *a_ptr;
+    if(!a) {
+      println(hlog, "analyzer not allocated");
+      return;
+      }
+    states.push_back(a);
+    if(isize(sprawl) <= cw.at->type) {
+      a->id = 0, a->dir = isize(sprawl)-1;
+      }
+    if(a->id == MYSTERY) {
+      println(hlog, "reached codeid ", a->analyzer_id, " which is state ", a->dir);
+      return;
+      }
+    auto t = sprawl[a->id];
+    twalker tw = t + a->dir;
+    ufind(tw);
+    tw.cpeek();
+    ufind(tw);
+    int mc = move_code(tw + wstep);
+    sprawl.push_back(tw + wstep);
+    println(hlog, "codeid ", a->analyzer_id, ": going from ", tw, " in direction ", a->dir, " reaching ", sprawl.back(), " of movecode ", mc);
+    a_ptr = &(a->substates[mc]);
+    }
+  }
+
 void debug_menu() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
@@ -266,6 +303,33 @@ void debug_menu() {
   dialog::addItem("irradiate x10", 'I');
   dialog::add_action([] { for(int i=0; i<10; i++) irradiate(); });
 
+  dialog::addItem("record givers", 'g');
+  dialog::add_action([] {
+    old_givers.clear();
+    for(int i=0; i<isize(treestates); i++) old_givers.push_back(treestates[i].giver);
+    println(hlog, "old_givers = ", old_givers);
+    debuglist = old_givers;
+    });
+
+  dialog::addItem("compare givers", 'G');
+  dialog::add_action([] {
+    int Q = isize(old_givers);
+    debuglist = {};
+    for(int i=0; i<Q; i++)
+    for(int j=0; j<i; j++) {
+      auto c1 = get_treestate_id(old_givers[i]);
+      auto c2 = get_treestate_id(old_givers[j]);
+      if(c1.second == c2.second) {
+        println(hlog, "old state ", i, " at ", old_givers[i], " and old state ", j, " at ", old_givers[j], " have now code ", c1);
+        debuglist.push_back(old_givers[i]);
+        debuglist.push_back(old_givers[j]);
+        }
+      }
+    });
+
+  dialog::addItem("sprawl", 's');
+  dialog::add_action([m] { try_sprawling(m->counterpart[cwt.at->master]); });
+
   dialog::addItem("name", 'n');
   dialog::add_action([m] { println(hlog, "name = ", index_pointer(m->counterpart[cwt.at->master])); });
 
@@ -287,9 +351,12 @@ void view_debug() {
       auto label = (tc->dist == MYSTERY ? "?" : its(tc->dist));
       
       if(show_codes) {
-        string code = (tc->code == MYSTERY ? "?" : its(tc->code));
-        if(show_dist) label = label + "/" + code;
-        else label = code;
+        int code = tc->code;
+        if(code != MYSTERY_LARGE) code = all_analyzers[code]->dir;
+        else code = MYSTERY;
+        string codestr = (code == MYSTERY ? "?" : its(code));
+        if(show_dist) label = label + "/" + codestr;
+        else label = codestr;
         }
       
       color_t col = label_color == 1 ? 0xFFFFFF + 0x512960 * tc->code : label_color;
@@ -743,6 +810,16 @@ void setup_fork(int m, string fname) {
   test_out = new fhstream(fname, "wt");
   }
 
+int max_dist() {
+  int result = -1;
+  tcell* c1 = first_tcell;
+  while(c1) {
+    if(c1->dist != MYSTERY && c1->dist > result) result = c1->dist;
+    c1 = c1->next;
+    }
+  return result;
+  }
+
 void test_current(string tesname) {
 
   disable_bigstuff = true;
@@ -968,6 +1045,7 @@ void test_current(string tesname) {
     case 'U': Out("vshapes;vverts;vedges;ushapes;uverts;uedges;xea;xeb;xec", count_uniform());
     case 'L': Out("mirror_rules", arb::current.mirror_rules);
     case 'B': Out("listshape;listvalence", format("%lld;%lld", get_shapelist(), get_valence_list()));
+    case 'F': Out("maxdist", max_dist());
 
     case 'f': Out("file", tesname);
     case 'l': Out("shortcut", longest_shortcut());
@@ -986,7 +1064,7 @@ void test_current(string tesname) {
 
   // for(auto& sh: shortcuts) println(hlog, sh.first, " : ", isize(sh.second), " shortcuts (CSV)");
   
-  /*if(status == "ACC")*/ print_rules();
+  if(status == "ACC" && !forked) print_rules();
   if(status != "ACC") treestates = alt_treestates;
   /* for(auto& a: analyzers)
     println(hlog, "analyzer ", a.first, " size is ", isize(a.second.spread)); */
@@ -1156,6 +1234,7 @@ void test_from_file(string list) {
     if(forked && id > 1) exit(0);
     if(forked && id == 1) stop_game();
     }
+  while(children) { int pid; wait(&pid); children--; }
   }
 
 void rulecat(string list) {
@@ -1402,6 +1481,10 @@ int testargs() {
     catch(hr_exception& e) {
       println(hlog, "failed to convert ", s);
       }
+    }
+
+  else if(argis("-veb")) {
+    view_examine_branch = true;
     }
     
   else if(argis("-dseek")) {

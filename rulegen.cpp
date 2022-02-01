@@ -19,6 +19,8 @@ EX int max_examine_branch = 5040;
 EX int max_bdata = 1000;
 EX int max_getside = 10000;
 EX int rulegen_timeout = 60;
+EX int max_shortcut_length = 1200;
+EX int first_restart_on = 512;
 
 #if HDR
 /** exception thrown by this algoritm in case of any problems */
@@ -502,7 +504,7 @@ EX void shortcut_found(tcell *c, tcell *alt, vector<twalker> &walkers, vector<tw
   if(debugflags & DF_GEOM)
     println(hlog, "new shortcut found, pre =  ", pre, " post = ", post, " pre reaches ", walkers[wpos], " post reaches ", walkers2.back(), " of type ", walkers[wpos].at->id, " sample = ", c);
 
-  if(isize(pre) > 500) {
+  if(isize(pre) > max_shortcut_length) {
     debuglist = { c };
     throw rulegen_failure("shortcut too long");
     }
@@ -1215,10 +1217,11 @@ int get_side(twalker what) {
     bool gl = wl.at->dist <= wr.at->dist;
     bool gr = wl.at->dist >= wr.at->dist;
     if(gl) {
-      if(get_sidecache(wl) == 1) wl += wstep;
+      if(side && get_sidecache(wl) == 1) wl += wstep;
       treewalk(wl, -1);
       if(wl == to_what) { res = 1; }
-      if(lstack.back() == wl+wstep) {
+      if(!side) ;
+      else if(lstack.back() == wl+wstep) {
         set_sidecache(lstack.back(), 1);
         set_sidecache(wl, -1);
         lstack.pop_back();
@@ -1226,10 +1229,11 @@ int get_side(twalker what) {
       else if(wl.at->parent_dir != wl.spin && (wl+wstep).at->parent_dir != (wl+wstep).spin) lstack.push_back(wl);
       }
     if(gr) {
-      if(get_sidecache(wr) == -1) wr += wstep;
+      if(side && get_sidecache(wr) == -1) wr += wstep;
       treewalk(wr, +1);
       if(wr == to_what) {res = -1; }
-      if(rstack.back() == wr+wstep) {
+      if(!side) ;
+      else if(rstack.back() == wr+wstep) {
         set_sidecache(rstack.back(), -1);
         set_sidecache(wr, +1);
         rstack.pop_back();
@@ -1243,7 +1247,7 @@ int get_side(twalker what) {
   return res;
   }
 
-int move_code(twalker cs) {
+EX int move_code(twalker cs) {
    bool child = false;
    if(cs.at->dist) {
      auto csd = get_parent_dir(cs);
@@ -1631,6 +1635,8 @@ void verified_treewalk(twalker& tw, int id, int dir) {
   treewalk(tw, dir);
   }
 
+EX bool view_examine_branch = false;
+
 bool examine_branch(int id, int left, int right) {
   auto rg = treestates[id].giver;
 
@@ -1672,7 +1678,7 @@ bool examine_branch(int id, int left, int right) {
     auto rl = get_rule(wl, tsl);
     auto rr = get_rule(wr, tsr);
 
-    if(0) if(debugflags & DF_GEOM)
+    if(view_examine_branch) if(debugflags & DF_GEOM)
       println(hlog, "wl = ", wl, " -> ", wl+wstep, " R", rl, " wr = ", wr, " -> ", wr+wstep, " R", rr, " lstack = ", lstack, " rstack = ", rstack);
 
     if(rl == DIR_RIGHT && rr == DIR_LEFT && lstack.empty() && rstack.empty()) {
@@ -1680,7 +1686,7 @@ bool examine_branch(int id, int left, int right) {
       push_deadstack(hash, wl, tsl, -1);
       hash.emplace_back(-1, wl.at->dist - wr.at->dist);
       push_deadstack(hash, wr, tsr, +1);
-      if(0) if(debugflags & DF_GEOM)
+      if(view_examine_branch) if(debugflags & DF_GEOM)
         println(hlog, "got hash: ", hash);
       if(verified_branches.count(hash)) {
         return true;
@@ -1866,8 +1872,6 @@ EX void rules_iteration() {
       println(hlog, "deadend states found: ", new_deadends);
     }
   
-  // print_rules();
-  
   handle_distance_errors();
   verified_branches.clear();
 
@@ -2020,9 +2024,9 @@ EX void generate_rules() {
   treestates.clear();
   hard_parents = single_live_branches = double_live_branches = all_solid_errors = solid_errors = 0;
 
-  next_distance_warning = 512;
-  current_getside = 512;
-  current_examine_branch = 512;
+  next_distance_warning = first_restart_on;
+  current_getside = first_restart_on;
+  current_examine_branch = first_restart_on;
 
   int NS = isize(arb::current.shapes);
   shortcuts.resize(NS);
@@ -2033,6 +2037,7 @@ EX void generate_rules() {
   cell_to_tcell.clear();
   tcell_to_cell.clear();
   branch_conflicts_seen.clear();
+  sidecaches_to_clear.clear();
   clear_sidecache_and_codes();
   fix_queue = queue<reaction_t>();; in_fixing = false;
 
@@ -2374,7 +2379,9 @@ auto hooks = addHook(hooks_configfile, 100, [] {
       param_i(max_examine_branch, "max_examine_branch");
       param_i(max_getside, "max_getside");
       param_i(max_bdata, "max_bdata");
+      param_i(max_shortcut_length, "max_shortcut_length");
       param_i(rulegen_timeout, "rulegen_timeout");
+      param_i(first_restart_on, "first_restart_on");
     });
 
 EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {
