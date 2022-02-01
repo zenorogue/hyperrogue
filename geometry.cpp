@@ -50,7 +50,7 @@ struct hpcshape {
 #define SIDE_BSHA 12
 #define SIDEPARS  13
 
-/** GOLDBERG_BITS controls the size of tables for Goldberg: 2*(x+y) should be below (1<<GOLDBERG_BITS) */
+/** GOLDBERG_BITS controls the size of tables for Goldberg. see gp::check_limits */
 
 #ifndef GOLDBERG_BITS
 #define GOLDBERG_BITS 5
