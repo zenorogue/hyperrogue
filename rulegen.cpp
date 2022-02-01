@@ -1247,7 +1247,7 @@ int get_side(twalker what) {
   return res;
   }
 
-int move_code(twalker cs) {
+EX int move_code(twalker cs) {
    bool child = false;
    if(cs.at->dist) {
      auto csd = get_parent_dir(cs);
@@ -1635,6 +1635,8 @@ void verified_treewalk(twalker& tw, int id, int dir) {
   treewalk(tw, dir);
   }
 
+EX bool view_examine_branch = false;
+
 bool examine_branch(int id, int left, int right) {
   auto rg = treestates[id].giver;
 
@@ -1676,7 +1678,7 @@ bool examine_branch(int id, int left, int right) {
     auto rl = get_rule(wl, tsl);
     auto rr = get_rule(wr, tsr);
 
-    if(0) if(debugflags & DF_GEOM)
+    if(view_examine_branch) if(debugflags & DF_GEOM)
       println(hlog, "wl = ", wl, " -> ", wl+wstep, " R", rl, " wr = ", wr, " -> ", wr+wstep, " R", rr, " lstack = ", lstack, " rstack = ", rstack);
 
     if(rl == DIR_RIGHT && rr == DIR_LEFT && lstack.empty() && rstack.empty()) {
@@ -1684,7 +1686,7 @@ bool examine_branch(int id, int left, int right) {
       push_deadstack(hash, wl, tsl, -1);
       hash.emplace_back(-1, wl.at->dist - wr.at->dist);
       push_deadstack(hash, wr, tsr, +1);
-      if(0) if(debugflags & DF_GEOM)
+      if(view_examine_branch) if(debugflags & DF_GEOM)
         println(hlog, "got hash: ", hash);
       if(verified_branches.count(hash)) {
         return true;
@@ -1869,8 +1871,6 @@ EX void rules_iteration() {
     if(debugflags & DF_GEOM)
       println(hlog, "deadend states found: ", new_deadends);
     }
-  
-  // print_rules();
   
   handle_distance_errors();
   verified_branches.clear();
