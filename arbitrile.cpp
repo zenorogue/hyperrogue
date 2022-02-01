@@ -49,7 +49,7 @@ struct shape {
   /** list of edge connections */
   vector<connection_t> connections;
   int size() const { return isize(vertices); }
-  void build_from_angles_edges();
+  void build_from_angles_edges(bool is_comb);
   vector<pair<int, int> > sublines;
   vector<pair<ld, ld>> stretch_shear;
   int repeat_value;
@@ -74,7 +74,17 @@ struct slider {
 struct arbi_tiling {
 
   int order;
-  bool have_line, have_ph, have_tree, is_star;
+  /* have_line and have_ph: line and ph flags have been marked for tiles */
+  bool have_line, have_ph;
+  /* is the tree structure given in the tes file */
+  bool have_tree;
+  /* use "star." if the tessellation includs star polygons */
+  bool is_star;
+  /* use "combinatorial." for combinatorial tessellations; vertex valences computed based on their angles. Currently only rulegen works for combinatorial tessellations */
+  bool is_combinatorial;
+  /* reserved for future flags */
+  bool res0, res1, res2, res3;
+
   int yendor_backsteps;
 
   vector<shape> shapes;
@@ -187,7 +197,7 @@ void start_poly_debugger(hr_polygon_error& err) {
   #endif
   }
 
-void shape::build_from_angles_edges() {
+void shape::build_from_angles_edges(bool is_comb) {
   transmatrix at = Id;
   vertices.clear();
   int n = isize(angles);
@@ -202,6 +212,8 @@ void shape::build_from_angles_edges() {
     at = at * xpush(edges[i]) * spin(angles[i]);
     }
   matrices.push_back(at);
+  if(!legacy) for(auto& a: angles) a -= M_PI;
+  if(is_comb) return;
   if(!eqmatrix(at, Id)) {
     throw hr_polygon_error(matrices, id, at);
     }
@@ -215,7 +227,6 @@ void shape::build_from_angles_edges() {
       }
     if(debugflags & DF_GEOM) println(hlog, "ctr = ", ctr);
     }
-  if(!legacy) for(auto& a: angles) a -= M_PI;
   ctr = normalize(ctr);
   for(auto& v: vertices) v = gpushxto0(ctr) * v;
   }
@@ -247,7 +258,7 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
     else throw hr_parse_exception("expecting , or )");
     }
   try {
-    cc.build_from_angles_edges();
+    cc.build_from_angles_edges(c.is_combinatorial);
     }
   catch(hr_parse_exception& ex) {
     throw hr_parse_exception(ex.s + ep.where());
@@ -423,6 +434,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
   c.have_tree = false;
   c.yendor_backsteps = 0;
   c.is_star = false;
+  c.is_combinatorial = false;
   exp_parser ep;
   ep.s = s;
   ld angleunit = 1, distunit = 1, angleofs = 0;
@@ -489,6 +501,9 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       }
     else if(ep.eat("star.")) {
       c.is_star = true;
+      }
+    else if(ep.eat("combinatorial.")) {
+      c.is_combinatorial = true;
       }
     else if(ep.eat("option(\"")) {
       next:
@@ -841,7 +856,7 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int t1, int xdl) {
   
   if(co.mirror) swap(vl, vr);
   
-  if(hdist(vl, Res*xvr) + hdist(vr, Res*xvl) > .1) {
+  if(hdist(vl, Res*xvr) + hdist(vr, Res*xvl) > .1 && !c.is_combinatorial) {
     println(hlog, "s1 = ", kz(spintox(rm*vr)), " s2 = ", kz(rspintox(xrm*xvr)));    
     println(hlog, tie(t, dl), " = ", kz(Res));    
     println(hlog, hdist(vl, Res * xvr), " # ", hdist(vr, Res * xvl));
