@@ -31,8 +31,10 @@ namespace rg {
   static const char global = 'x'; 
   /** \brief wrongmode only -- change vid.scfg.players then restart_game(rg::nothing) instead */
   static const char multi = 'm';
-  /** \brief wrongmode only -- mark achievements for special geometries/variations */
+  /** \brief wrongmode only -- mark achievements for special geometries/variations, this automatically marks the expected land_structure as lsSingle */
   static const char special_geometry = 'g';
+  /** \brief wrongmode only -- mark achievements for special geometries/variations */
+  static const char special_geometry_nicewalls = 'G';
   }
 #endif
 
@@ -1495,7 +1497,7 @@ EX void switch_game_mode(char switchWhat) {
       peace::on = false;
       tour::on = false;
       inv::on = false;
-      land_structure = lsSingle;
+      land_structure = racing::on ? lsSingle : lsNiceWalls;
       princess::challenge = false;
       dual::disable();
       break;

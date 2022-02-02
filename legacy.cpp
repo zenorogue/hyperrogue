@@ -204,7 +204,15 @@ int modecodetable[42][6] = {
 
 EX modecode_t legacy_modecode() {
   if(int(geometry) > 3 || int(variation) > 1) return UNKNOWN;
-  if(!ls::nice_walls() && !ls::std_chaos() && !yendor::on && !tactic::on) return UNKNOWN;
+
+  bool is_default_land_structure =
+    (princess::challenge || tactic::on) ? ls::single() :
+    racing::on ? (land_structure == lsSingle) :
+    yendor::on ? (land_structure == yendor::get_land_structure()) :
+    ls::nice_walls();
+
+  if(!is_default_land_structure && !ls::std_chaos()) return UNKNOWN;
+
   // compute the old code
   int xcode = 0;
 
@@ -219,7 +227,7 @@ EX modecode_t legacy_modecode() {
     if(elliptic) xcode += 6;
     }
   
-  if(ls::any_chaos()) xcode += 21;
+  if(ls::any_chaos() && !yendor::on) xcode += 21;
   
   int np = numplayers()-1; if(np<0 || np>5) np=5;
 
