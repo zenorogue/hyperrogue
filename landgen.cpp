@@ -2466,15 +2466,15 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
         if(!BITRUNCATED && c->land == laCrossroads5 && hrand(100) < 60)
           c->wall = waBarrier;
         else if(!inv::on && items[itShard] >= 10 && hrand(8000) < 120*orbcrossfun(items[itShard]) && mirror::build(c)) ;
-        else if(hyperstonesUnlocked() && hrand(8000) < 100 && mirror::build(c)) ;
+        else if(hyperstonesUnlocked() && !racing::on && hrand(8000) < 100 && mirror::build(c)) ;
         else if(tactic::on && isCrossroads(specialland) && hrand(8000) < 120 && mirror::build(c)) ;
         else if(c->land == laCrossroads4 && hrand(24000) < 10 && tactic::on)
           c->wall = waRose;
         else {
-          if(hyperstonesUnlocked() && hrand(25000) < min(PT(tkills(), 2000), 5000) && notDippingFor(itHyperstone))
+          if(hyperstonesUnlocked() && !racing::on && hrand(25000) < min(PT(tkills(), 2000), 5000) && notDippingFor(itHyperstone))
             c->item = itHyperstone;
           int freq = 4000;
-          if(ls::single() && specialland == laCrossroads5)
+          if(ls::single() && specialland == laCrossroads5 && !racing::on)
             freq = 250;
           if(hrand_monster(freq) < items[itHyperstone] && !c->monst) {
             // only interesting monsters here!

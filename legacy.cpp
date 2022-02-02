@@ -246,6 +246,56 @@ EX modecode_t legacy_modecode() {
   return mct;
   }
 
+#if CAP_RACING
+EX bool legacy_racing() {
+  return racing::on && geometry == gNormal && BITRUNCATED;
+  }
+
+EX bool rcheck(string which, int qty, int x) {
+  return hrand(qty) < x;
+  };
+
+EX int wallchance_legacy(cell *c, bool deepOcean) {
+  eLand l = c->land;
+  return
+    inmirror(c) ? 0 :
+    isElemental(l) ? 4000 :
+    l == laCrossroads ? 5000 :
+    (l == laMirror && !yendor::generating) ? 6000 :
+    l == laTerracotta ? 250 :
+    0;
+  }
+
+EX void buildBigStuff_legacy(cell *c, cell *from) {
+  int chaosmode = 0;
+
+  bool deepOcean = false;
+
+  if(geometry == gNormal && celldist(c) < 3 && !GOLDBERG) {
+    if(top_land && c == cwt.at->master->move(3)->c7) {
+      buildBarrierStrong(c, 6, true, top_land);
+      }
+    }
+
+  else if(good_for_wall(c) && rcheck("D", 10000, 20) && !generatingEquidistant && !yendor::on && !tactic::on && !racing::on) {}
+
+  else if(ctof(c) && c->land && rcheck("F", 10000, wallchance_legacy(c, deepOcean))) {
+    int bd = 2 + hrand(2) * 3;
+    buildBarrier(c, bd);
+    }
+
+  if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && !bt::in() &&
+    (quickfind(laCamelot) || peace::on || (hrand(2000) < (c->land == laCrossroads4 ? 800 : 200) && horo_ok() && false))) {
+    }
+
+  if(!chaosmode && c->land == laJungle && ctof(c) &&
+    (quickfind(laMountain) || (hrand(2000) < 100 && horo_ok() &&
+    !randomPatternsMode && !tactic::on && !yendor::on && !racing::on && landUnlocked(laMountain)))) {}
+
+  if(hasbardir(c)) extendBarrier(c);
+  }
+#endif
+
 #if CAP_COMMANDLINE
 /* legacy options */
 int read_legacy_args() {

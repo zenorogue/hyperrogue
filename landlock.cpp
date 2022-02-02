@@ -366,6 +366,13 @@ EX bool all_unlocked = false;
 
 EX eLand getNewLand(eLand old) {
 
+  #if CAP_LEGACY
+  if(legacy_racing()) {
+    if(old == laMirror && hrand(10) >= ((tactic::on || racing::on) ? 0 : markOrb(itOrbLuck) ? 5 : 2)) return laMirrored;
+    if(old == laTerracotta && hrand(5) >= ((tactic::on || racing::on) ? 0 : markOrb(itOrbLuck) ? 2 : 1) && !weirdhyperbolic) return laTerracotta;
+    }
+  #endif
+
   eLand l = callhandlers(laNone, hooks_nextland, old);
   if(l) return l;
   
