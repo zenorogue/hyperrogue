@@ -1027,6 +1027,10 @@ EX void checkStunKill(cell *dest) {
       return;
       }
     }
+  if(dest->monst == moShadow) {
+    addMessage(XLAT("%The1 is destroyed!", dest->monst));
+    killMonster(dest, moNone);
+    }
   /* if(!isPermanentFlying(dest->monst) && cellEdgeUnstable(dest)) {
     addMessage(XLAT("%The1 falls!", dest->monst));
     fallMonster(dest);
