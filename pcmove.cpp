@@ -576,6 +576,9 @@ void apply_chaos() {
   if (cb->wall == waStone) destroyTrapsAround(cb);
   changes.ccell(ca);
   changes.ccell(cb);
+  /* needs to be called separately for Shadows */
+  if(ca->monst == moShadow) checkStunKill(ca);
+  if(cb->monst == moShadow) checkStunKill(cb);
   gcell coa = *ca;
   gcell cob = *cb;
   if(ca->monst != cb->monst)
@@ -588,10 +591,14 @@ void apply_chaos() {
   copy_metadata(cb, &coa);
   if(!switch_lhu_in(ca->land)) ca->LHU = coa.LHU;
   if(!switch_lhu_in(cb->land)) cb->LHU = cob.LHU;
-  if(ca->monst && !(isFriendly(ca) && markOrb(itOrbEmpathy)))
+  if(ca->monst && !(isFriendly(ca) && markOrb(itOrbEmpathy))) {
     ca->stuntime = min(ca->stuntime + 3, 15), markOrb(itOrbChaos);
-  if(cb->monst && !(isFriendly(cb) && markOrb(itOrbEmpathy)))
+    checkStunKill(ca);
+    }
+  if(cb->monst && !(isFriendly(cb) && markOrb(itOrbEmpathy))) {
     cb->stuntime = min(cb->stuntime + 3, 15), markOrb(itOrbChaos);
+    checkStunKill(cb);
+    }
   ca->monmirror = !ca->monmirror;
   cb->monmirror = !cb->monmirror;
   ca->mondir = chaos_mirror_dir(ca->mondir, wb, wa);
