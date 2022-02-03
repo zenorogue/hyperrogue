@@ -109,6 +109,22 @@ EX void moveEffect(const movei& mi, eMonster m) {
   #endif
   }
 
+EX void check_beauty(cell *ct, cell *cf, eMonster m) {
+  bool adj = false;
+  if(ct->cpdist == 1 && (items[itOrb37] || !nonAdjacent(cf,ct)) && markOrb(itOrbBeauty) && !isFriendly(ct))
+    adj = true;
+
+  if(!adj && items[itOrbEmpathy] && items[itOrbBeauty] && !isFriendly(ct)) {
+    for(int i=0; i<ct->type; i++) if(ct->move(i) && isFriendly(ct->move(i)))
+      adj = true, markOrb(itOrbEmpathy), markOrb(itOrbBeauty);
+    }
+
+  if(adj && ct->stuntime == 0 && !isMimic(m)) {
+    ct->stuntime = 2;
+    checkStunKill(ct);
+    }
+  }
+
 EX void moveMonster(const movei& mi) {
   auto& cf = mi.s;
   auto& ct = mi.t;
@@ -254,20 +270,8 @@ EX void moveMonster(const movei& mi) {
   if(m == moWitchFire) makeflame(cf, 10, false);
   if(m == moFireElemental) { makeflame(cf, 20, false); if(cf->wparam < 20) cf->wparam = 20; }
   
-  bool adj = false;  
-  if(ct->cpdist == 1 && (items[itOrb37] || !nonAdjacent(cf,ct)) && markOrb(itOrbBeauty) && !isFriendly(ct))
-    adj = true;
-    
-  if(!adj && items[itOrbEmpathy] && items[itOrbBeauty] && !isFriendly(ct)) {
-    for(int i=0; i<ct->type; i++) if(ct->move(i) && isFriendly(ct->move(i)))
-      adj = true, markOrb(itOrbEmpathy), markOrb(itOrbBeauty);
-    }
+  check_beauty(ct, cf, m);
   
-  if(adj && ct->stuntime == 0 && !isMimic(m)) {
-    ct->stuntime = 2;
-    checkStunKill(ct);
-    }
-
   if(!cellEdgeUnstable(ct)) {
     if(isMetalBeast(m)) ct->stuntime += 2;
     if(m == moTortoise) ct->stuntime += 3;
@@ -1487,6 +1491,8 @@ EX void moveshadow() {
       where->stuntime = 0;
       // the Shadow sets off the mines and stuff
       moveEffect(movei(where, where, NODIR), moShadow);
+      // Beauty kills the Shadow
+      check_beauty(where, where, moShadow);
       }
     }
   }
