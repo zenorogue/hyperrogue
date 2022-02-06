@@ -139,16 +139,7 @@ EX bool collectItem(cell *c2, cell *last, bool telekinesis IS(false)) {
     else if(it == itOrbSpeed) playSound(c2, "pickup-speed");
     else if(it == itRevolver) playSound(c2, "pickup-key");
     else playSound(c2, "pickup-orb");
-    if(items[itOrbChoice]) items[itOrbChoice] = 0, had_choice = true;
-    int oc = orbcharges(it);
-    if(dual::state && among(it, itOrbTeleport, itOrbFrog, itOrbPhasing, itOrbDash, itOrbRecall)) {
-      oc = 10;
-      it = itOrbSpeed;
-      }
-    if(c2->land == laAsteroids) oc = 10;
-    if(markOrb(itOrbIntensity)) oc = intensify(oc);
-    if(!items[it]) items[it]++;
-    items[it] += oc;
+    had_choice = items[itOrbChoice];
     
     if(it == itOrbPurity) {
       bool no_curses = true;
@@ -162,6 +153,18 @@ EX bool collectItem(cell *c2, cell *last, bool telekinesis IS(false)) {
         items[itOrbChoice] += 5;
         }
       }
+
+    if(had_choice) items[itOrbChoice] = 0;
+
+    int oc = orbcharges(it);
+    if(dual::state && among(it, itOrbTeleport, itOrbFrog, itOrbPhasing, itOrbDash, itOrbRecall)) {
+      oc = 10;
+      it = itOrbSpeed;
+      }
+    if(c2->land == laAsteroids) oc = 10;
+    if(markOrb(itOrbIntensity)) oc = intensify(oc);
+    if(!items[it]) items[it]++;
+    items[it] += oc;
     }
   else if(c2->item == itOrbLife) {
     playSound(c2, "pickup-orb"); // TODO summon

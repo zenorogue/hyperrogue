@@ -570,6 +570,7 @@ EX void placeLocalSpecial(cell *c, int outof, int loc IS(1), int priz IS(1)) {
   }
 
 EX void placeCrossroadOrbs(cell *c) {
+  if(racing::on) return;
   if(peace::on) return;
   if(daily::on) return;
   for(auto& oi: orbinfos) {

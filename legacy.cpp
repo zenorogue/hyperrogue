@@ -204,7 +204,15 @@ int modecodetable[42][6] = {
 
 EX modecode_t legacy_modecode() {
   if(int(geometry) > 3 || int(variation) > 1) return UNKNOWN;
-  if(!ls::nice_walls() && !ls::std_chaos() && !yendor::on && !tactic::on) return UNKNOWN;
+
+  bool is_default_land_structure =
+    (princess::challenge || tactic::on) ? ls::single() :
+    racing::on ? (land_structure == lsSingle) :
+    yendor::on ? (land_structure == yendor::get_land_structure()) :
+    ls::nice_walls();
+
+  if(!is_default_land_structure && !ls::std_chaos()) return UNKNOWN;
+
   // compute the old code
   int xcode = 0;
 
@@ -219,7 +227,7 @@ EX modecode_t legacy_modecode() {
     if(elliptic) xcode += 6;
     }
   
-  if(ls::any_chaos()) xcode += 21;
+  if(ls::any_chaos() && !yendor::on) xcode += 21;
   
   int np = numplayers()-1; if(np<0 || np>5) np=5;
 
@@ -237,6 +245,56 @@ EX modecode_t legacy_modecode() {
   
   return mct;
   }
+
+#if CAP_RACING
+EX bool legacy_racing() {
+  return racing::on && geometry == gNormal && BITRUNCATED;
+  }
+
+EX bool rcheck(string which, int qty, int x) {
+  return hrand(qty) < x;
+  };
+
+EX int wallchance_legacy(cell *c, bool deepOcean) {
+  eLand l = c->land;
+  return
+    inmirror(c) ? 0 :
+    isElemental(l) ? 4000 :
+    l == laCrossroads ? 5000 :
+    (l == laMirror && !yendor::generating) ? 6000 :
+    l == laTerracotta ? 250 :
+    0;
+  }
+
+EX void buildBigStuff_legacy(cell *c, cell *from) {
+  int chaosmode = 0;
+
+  bool deepOcean = false;
+
+  if(geometry == gNormal && celldist(c) < 3 && !GOLDBERG) {
+    if(top_land && c == cwt.at->master->move(3)->c7) {
+      buildBarrierStrong(c, 6, true, top_land);
+      }
+    }
+
+  else if(good_for_wall(c) && rcheck("D", 10000, 20) && !generatingEquidistant && !yendor::on && !tactic::on && !racing::on) {}
+
+  else if(ctof(c) && c->land && rcheck("F", 10000, wallchance_legacy(c, deepOcean))) {
+    int bd = 2 + hrand(2) * 3;
+    buildBarrier(c, bd);
+    }
+
+  if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && !bt::in() &&
+    (quickfind(laCamelot) || peace::on || (hrand(2000) < (c->land == laCrossroads4 ? 800 : 200) && horo_ok() && false))) {
+    }
+
+  if(!chaosmode && c->land == laJungle && ctof(c) &&
+    (quickfind(laMountain) || (hrand(2000) < 100 && horo_ok() &&
+    !randomPatternsMode && !tactic::on && !yendor::on && !racing::on && landUnlocked(laMountain)))) {}
+
+  if(hasbardir(c)) extendBarrier(c);
+  }
+#endif
 
 #if CAP_COMMANDLINE
 /* legacy options */

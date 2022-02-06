@@ -109,7 +109,7 @@ EX bool wrongMode(char flags) {
   if(casual) return true;
   if(flags == rg::global) return false;
 
-  if(flags != rg::special_geometry) {
+  if(flags != rg::special_geometry && flags != rg::special_geometry_nicewalls) {
     if(!BITRUNCATED) return true;
     if(geometry != gNormal) return true;
     }
@@ -128,12 +128,13 @@ EX bool wrongMode(char flags) {
 #if CAP_TOUR
   if(tour::on) return true;
 #endif
-  if(flags == rg::special_geometry && !ls::single())
-    return true;
-  if(flags != rg::special_geometry && ineligible_starting_land)
-    return true;
-  if(flags == rg::chaos && !ls::std_chaos()) return true;
-  if(flags != rg::chaos && flags != rg::special_geometry && !ls::nice_walls()) return true;
+  eLandStructure dls = lsNiceWalls;
+  if(flags == rg::special_geometry || flags == rg::racing || flags == rg::princess)
+    dls = lsSingle;
+  if(flags == rg::chaos)
+    dls = lsChaos;
+
+  if(land_structure != dls) return true;
   if((numplayers() > 1) != (flags == rg::multi)) return true;
   return false;
   }

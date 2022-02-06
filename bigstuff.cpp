@@ -1704,8 +1704,16 @@ EX void build_horocycles(cell *c, cell *from) {
     for(cell *c: cl.lst) if(c->master->alt) currentmap->extend_altmap(c->master);
     }
   }
-  
+
 EX void buildBigStuff(cell *c, cell *from) {
+
+  #if CAP_LEGACY
+  if(legacy_racing()) {
+    buildBigStuff_legacy(c, from);
+    return;
+    }
+  #endif
+
   build_walls(c, from);
   
   build_horocycles(c, from);
