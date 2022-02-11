@@ -4553,3 +4553,25 @@ Other:
 2021-12-13 22:32 Update 12.0j:
 - fixed the victory leaderboards (turns/time to Orb of Yendor/Hyperstones)
 - fixed the starting land selection feature for equidistant-based lands
+
+2022-02-03 01:07 Update 12.0k:
+Orb-related fixes:
+- Lazurite Figurines no longer appear immediately after using an Orb of Safety
+- Orb of Chaos is now forbidden in the Dungeon
+- Stunning from the Orb of Chaos now destroys birds/shadows just like the other sources of stunning
+- Shadows are now affected by the Orb of Beauty
+- Stunning the Shadow now temporarily destroys it
+- draining Orb of Choice now happens after gaining the Purity extras
+- Orb of Slaying now works against big trees
+- draw fishtails on friends with empathy
+
+Achievement fixes:
+- fixed racing (official tracks are generated again and acknowledged)
+- Princess Challenge and Heptagonal Knight achievements should be fixed
+
+Geometry:
+- more distinct colors in 'eight domains'
+- improvements to tree rule generator
+- Goldberg-Coxeter improvements (larger limits supported, warn if outside of the supported limits, some are fixed)
+- fixed fat edges in some H3 honeycombs
+- fixed some bugs with Multi-dimensional Crystal quotient space
