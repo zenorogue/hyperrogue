@@ -862,7 +862,7 @@ bool pcmove::after_escape() {
   if(attackable && fmsAttack && !dont_attack && !items[itCurseWeakness]) {
     if(checkNeedMove(checkonly, true)) return false;
     nextmovetype = nm ? lmAttack : lmSkip;
-    if(c2->wall == waSmallTree) {
+    if(c2->wall == waSmallTree || (c2->wall == waBigTree && markOrb(itOrbSlaying))) {
       drawParticles(c2, winf[c2->wall].color, 4);
       addMessage(XLAT("You chop down the tree."));
       playSound(c2, "hit-axe" + pick123());
