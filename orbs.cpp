@@ -5,7 +5,9 @@
  *  \brief Implementation of various Orb effects, and their properties such as default and maximum charges
  */
 
+#include <ctime>
 #include "hyper.h"
+
 namespace hr {
 
 EX bool orbused[ittypes], lastorbused[ittypes];
@@ -1602,6 +1604,12 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   return itNone;
   }
 
+bool isValentines() {
+  const time_t now = time(NULL);
+  const struct tm *datetime = localtime(&now);
+  return datetime->tm_mon == 1 && datetime->tm_mday == 14;
+}
+
 EX int orbcharges(eItem it) {
   switch(it) {
     case itRevolver: //pickup-key
@@ -1611,6 +1619,7 @@ EX int orbcharges(eItem it) {
     case itOrbDiscord:
       return inv::on ? 46 : 23;
     case itOrbLove:
+      return isValentines() ? 31 : 30;
     case itOrbUndeath:
     case itOrbSpeed: //"pickup-speed");
     case itOrbInvis:
