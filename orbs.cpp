@@ -1608,7 +1608,7 @@ bool isValentines() {
   const time_t now = time(NULL);
   const struct tm *datetime = localtime(&now);
 
-  // 0-indexed tm_mon, 1-index tm_mday
+  // 0-indexed tm_mon, 1-indexed tm_mday
   // So this is February (2nd month), and the 14th day.
   return datetime->tm_mon == 1 && datetime->tm_mday == 14;
 }
