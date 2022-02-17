@@ -2907,7 +2907,9 @@ EX void shift_view(hyperpoint H) {
   static bool recursive = false;
   if(!recursive && intra::in) {
     dynamicval<bool> r(recursive, true);
+    #if MAXMDIM >= 4
     intra::shift_view_portal(H);
+    #endif
     return;
     }
   View = get_shift_view_of(H, View);

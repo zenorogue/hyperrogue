@@ -373,12 +373,16 @@ EX namespace fake {
     transmatrix ray_iadj(cell *c, int i) override {
       if(WDIM == 2)
         return to_other_side(get_corner(c, i), get_corner(c, i+1));
+      #if MAXMDIM >= 4
       if(PURE) return iadj(c, i);      
       auto& v = get_cellshape(c).faces_local[i];
       hyperpoint h = 
         project_on_triangle(v[0], v[1], v[2]);
       transmatrix T = rspintox(h);
       return T * xpush(-2*hdist0(h)) * spintox(h);
+      #else
+      return Id;
+      #endif
       }
     };
   

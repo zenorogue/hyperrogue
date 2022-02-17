@@ -6,6 +6,7 @@ EX namespace intra {
 
 EX bool in;
 
+#if MAXMDIM >= 4
 #if HDR
 /** information per every space connected with intra-portals */
 struct intra_data {
@@ -766,6 +767,6 @@ auto hooks1 =
   + arg::add3("-debug-portal", [] { arg::shift(); debug_portal = arg::argi(); });
 
 
+#endif
 EX }
-
 }
