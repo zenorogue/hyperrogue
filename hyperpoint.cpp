@@ -466,8 +466,8 @@ EX transmatrix to_other_side(hyperpoint h1, hyperpoint h2) {
 
 /** @brief positive for a material vertex, 0 for ideal vertex, negative for ultra-ideal vertex */
 EX ld material(const hyperpoint& h) {
-  if(sphere) return intval(h, Hypc);
-  else if(hyperbolic) return -intval(h, Hypc);
+  if(sphere || in_s2xe()) return intval(h, Hypc);
+  else if(hyperbolic || in_h2xe()) return -intval(h, Hypc);
   else if(sl2) return h[2]*h[2] + h[3]*h[3] - h[0]*h[0] - h[1]*h[1];
   else return h[LDIM];
   }
