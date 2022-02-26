@@ -139,8 +139,8 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
   }
 
 EX portal_data make_portal(cellwalker cw, int spin) {
-  if(debug_portal & 33)
-    println(hlog, "working in: ", full_geometry_name());
+  if(debug_portal & 289)
+    println(hlog, "working in: ", full_geometry_name(), " wall no ", cw.spin, "/", cw.at->type);
   auto& ss = currentmap->get_cellshape(cw.at);
   auto fac = ss.faces_local[cw.spin];
   portal_data id;
@@ -259,6 +259,23 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     for(int i=0; i<isize(fac); i++)
       println(hlog, "edge ", i, " length is ", hdist(fac[i], fac[(i+1)%isize(fac)]));
     println(hlog, "chosen edge is ", first, "--", second);
+    }
+
+  if(debug_portal & 256) {
+    println(hlog, "portal scale = ", id.scale);
+    auto res = [&] (ld x, ld y, ld z) {
+      hyperpoint h = hyperpoint(x, y, z, 1);
+      return id.from_poco(h);
+      };
+    for(int x=0; x<5; x++) {
+      println(hlog, "horizontal ", x, " = ", hdist(res(x*.1,0,0), res(x*.1+.001,0,0)));
+      println(hlog, "vertical   ", x, " = ", hdist(res(x*.1,0,0), res(x*.1,0.001,0)));
+      println(hlog, "deep       ", x, " = ", hdist(res(x*.1,0,0), res(x*.1,0,0.001)));
+      }
+    hyperpoint a = hyperpoint(.4, .2, .1, 1);
+    println(hlog, "a = ", a);
+    println(hlog, "b = ", id.from_poco(a));
+    println(hlog, "c = ", id.to_poco(id.from_poco(a)));
     }
 
   if(debug_portal & 1) {
