@@ -152,6 +152,7 @@ struct int_setting : public setting {
   void show_edit_option(char key) override;
   cld get_cld() override { return *value; }
   int_setting *editable(int min_value, int max_value, ld step, string menu_item_name, string help_text, char key) {
+    this->is_editable = true;
     this->min_value = min_value;
     this->max_value = max_value;
     this->menu_item_name = menu_item_name;
