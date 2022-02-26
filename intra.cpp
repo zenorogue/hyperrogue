@@ -613,6 +613,7 @@ EX void check_portal_movement() {
     if(walking::eye_level != -1) walking::eye_level *= scale;
 
     walking::floor_dir = -1;
+    walking::on_floor_of = nullptr;
     }
   }
 
@@ -812,14 +813,13 @@ EX ld eye_level = 0.2174492;
 EX ld eye_angle = 0;
 EX ld eye_angle_scale = 1;
 
-map<cell*, int> recorded_floor_dir;
-
 int ticks_end, ticks_last;
 
 EX set<color_t> colors_of_floors;
 
 EX bool isFloor(cell *c) {
   if(!isWall(c)) return false;
+  if(colors_of_floors.empty()) return true;
   return colors_of_floors.count(c->landparam);
   }
 
@@ -837,6 +837,27 @@ EX void handle() {
     if(isize(choices) == 1) {
       on_floor_of = centerover;
       floor_dir = choices[0];
+      }
+    else if(colors_of_floors.empty() && sn::in()) {
+      on_floor_of = centerover;
+      auto z = inverse(View) * C0;
+      switch(geometry) {
+         case gSol:
+           floor_dir = (z[2] > 0) ? 2 : 6;
+           return;
+         case gNIH:
+           floor_dir = (z[2] > 0) ? 5 : 4;
+           return;
+         case gSolN:
+           floor_dir = (z[2] > 0) ? 4 : 6;
+           return;
+         default: throw hr_exception("not solnihv");
+         }
+      }
+    else if(colors_of_floors.empty() && hyperbolic && bt::in()) {
+      auto z = bt::minkowski_to_bt(inverse(View) * C0);
+      on_floor_of = centerover;
+      floor_dir = z[2] > 0 ? bt::updir() : 0;
       println(hlog, "set floor_dir to ", floor_dir);
       }
     else {
@@ -858,13 +879,10 @@ EX void handle() {
 
   auto find_nearest = [&] (const face& fac, hyperpoint at) {
     if(sol) { at[2] = fac.h0[2]; return at; }
-    else if(sphere && false) {
-      hyperpoint h =
-        project_on_triangle(csh.faces_local[floor_dir][0], csh.faces_local[floor_dir][1], csh.faces_local[floor_dir][2]);
-      transmatrix T = rspintox(h);
-      T = T * MirrorX;
-      transmatrix M = ToOld * T * xpush(-2*hdist0(h)) * spintox(h);
-      return mid(at, M * at);
+    else if(hyperbolic && bt::in()) {
+      auto z = bt::minkowski_to_bt(at);
+      z[2] = bt::minkowski_to_bt(fac.h0)[2];
+      return bt::bt_to_minkowski(z);
       }
     else if(prod && bt::in()) {
       auto dec = product_decompose(at);
@@ -889,9 +907,6 @@ EX void handle() {
     }
 
   auto wallpt = find_nearest(f, at);
-
-  if(on_floor_of == centerover)
-    recorded_floor_dir[centerover] = floor_dir;
 
   ld view_eps = 1e-5;
 
@@ -972,7 +987,7 @@ auto a = addHook(hooks_configfile, 100, [] {
       "1 = the angle can be changed with keyboard or mouse movements, 0 = the angle is fixed",
       'k');
   })
- + addHook(hooks_clearmemory, 40, [] { recorded_floor_dir.clear(); on_floor_of = nullptr; floor_dir = -1; });
+ + addHook(hooks_clearmemory, 40, [] { on_floor_of = nullptr; floor_dir = -1; });
 
 EX }
 }
