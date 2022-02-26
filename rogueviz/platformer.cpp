@@ -632,6 +632,7 @@ void render_room(room *r) {
 template<class R> void render_room_objects(room *r, R render_at) {
   auto pb = get_pixel_bbox();  
   if(r != current_room) return;
+  create_sprite_texture();
   render_at(sprite_texture->textureid, pb.minx, pb.miny, pb.maxx, pb.maxy, 0, 0, man_x/256., man_y/256.);
   }
 
