@@ -764,6 +764,12 @@ EX namespace mapstream {
     int32_t n = -1; f.write(n);
     int32_t id = cellids.count(cwt.at) ? cellids[cwt.at] : -1;
     f.write(id);
+
+    if(f.vernum >= 0xA90C) {
+      vector<color_t> v;
+      for(auto c: walking::colors_of_floors) v.push_back(c);
+      f.write(v);
+      }
     
     save_drawing_tool(f);
 
@@ -980,6 +986,13 @@ EX namespace mapstream {
     savecount = 0; savetime = 0;
     cheater = 1;
     
+    if(f.vernum >= 0xA90C) {
+      vector<color_t> v;
+      f.read(v);
+      walking::colors_of_floors.clear();
+      for(auto c: v) walking::colors_of_floors.insert(c);
+      }
+
     load_drawing_tool(f);
 
     dynamicval<bool> a3(vid.always3, vid.always3);
