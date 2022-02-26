@@ -451,6 +451,7 @@ void raygen::compute_which_and_dist(int flat1, int flat2) {
           "mediump float zsgn = (Mt > 0. ? -sgn : sgn);\n"
           "mediump float u = sqrt(b*b-c)*zsgn + b;\n"
           "mediump float v = -(Mp*u-1.) / Mt;\n"
+          "if(a < 1e-5) v = (1.-Mp*Mp) / (2. * Mt);\n"
           "mediump float d = asinh(v);\n";
       if(prod) fmain += "d /= xspeed;\n";
       fmain +=
