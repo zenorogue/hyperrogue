@@ -2881,7 +2881,7 @@ void list_setting::show_edit_option(char key) {
     int q = isize(options);
     for(int i=0; i<q; i++) {
       dialog::addBoolItem(XLAT(options[i].first), get_value() == i, 'a'+i);
-      dialog::add_action([this, i] { set_value(i); popScreen(); });
+      dialog::add_action([this, i] { set_value(i); if(reaction) reaction(); popScreen(); });
       dialog::addBreak(100);
       if(options[i].second != "") {
         dialog::addHelp(XLAT(options[i].second));
