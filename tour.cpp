@@ -206,25 +206,29 @@ void return_geometry() {
   addMessage(XLAT("Returned to your game."));
   }
 
+EX bool next_slide() {
+  flagtype flags = slides[currentslide].flags;
+  popScreenAll();
+  if(gamestack::pushed()) {
+    return_geometry();
+    if(!(flags & QUICKGEO)) return true;
+    }
+  if(flags & FINALSLIDE) return true;
+  presentation(pmStop);
+  slide_restore_all();
+  currentslide++;
+  presentation(pmStart);
+  slidehelp();
+  return true;
+  }
+
 bool handleKeyTour(int sym, int uni) {
   if(!tour::on) return false;
   if(!(cmode & sm::DOTOUR)) return false;
   bool inhelp = cmode & sm::HELP;
   flagtype flags = slides[currentslide].flags;
-  if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (!inhelp || (flags & QUICKSKIP))) {
-    popScreenAll();
-    if(gamestack::pushed()) { 
-      return_geometry();
-      if(!(flags & QUICKGEO)) return true; 
-      }
-    if(flags & FINALSLIDE) return true;
-    presentation(pmStop);
-    slide_restore_all();
-    currentslide++;
-    presentation(pmStart);
-    slidehelp();
-    return true;
-    }
+  if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (!inhelp || (flags & QUICKSKIP)))
+    return next_slide();
   if(sym == SDLK_BACKSPACE) {
     if(gamestack::pushed()) { 
       gamestack::pop();
