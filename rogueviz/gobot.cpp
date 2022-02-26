@@ -18,7 +18,7 @@
 #include <aegis.hpp>
 #endif
 
-#include "../hyper.h"
+#include "rogueviz.h"
 
 namespace hr {
 
@@ -44,6 +44,8 @@ int labels_value = 1;
 
 vector<boarddata> history;
 
+bool draw_go(cell *c, const shiftmatrix& V);
+
 void init_go() {
   ac = currentmap->allcells();
   current.taken.resize(isize(ac), 2);
@@ -52,6 +54,7 @@ void init_go() {
   current.captures[1] = 0;
   for(int i=0; i<isize(ac); i++)
     indices[ac[i]] = i;
+  rogueviz::addHook(hooks_drawcell, 100, draw_go);
   }
 
 void hwrite(hstream& hs, const boarddata& b) {
@@ -602,7 +605,6 @@ int rugArgs() {
 
 auto gobot_hook = 
   addHook(hooks_args, 100, rugArgs) +
-  addHook(hooks_drawcell, 100, draw_go) +
   addHook(shmup::hooks_turn, 100, [] (int t) {
     if(shot_state == 1) {
       shot::take("go-temp.png");
