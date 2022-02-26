@@ -2066,7 +2066,7 @@ void uniform2(GLint id, array<float, 2> fl) {
 
 color_t color_out_of_range = 0x0F0800FF;
 
-transmatrix get_ms(cell *c, int a, bool mirror) {
+EX transmatrix get_ms(cell *c, int a, bool mirror) {
   int z = a ? 1 : -1;
   
   if(c->type == 3) {
@@ -2096,7 +2096,7 @@ transmatrix get_ms(cell *c, int a, bool mirror) {
 
 int nesting;
 
-transmatrix mirrorize(transmatrix T) {
+EX transmatrix mirrorize(transmatrix T) {
   T = inverse(T);
   hyperpoint h = tC0(T);
   ld d = hdist0(h);

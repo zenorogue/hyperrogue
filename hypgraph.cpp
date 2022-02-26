@@ -2013,6 +2013,8 @@ EX void optimizeview() {
   fixmatrix(View);
   callhooks(hooks_postoptimize);
   
+  walking::handle();
+
   if(is_boundary(centerover))
     centerover = c, View = oView;
   else
