@@ -1575,22 +1575,28 @@ void raygen::add_functions() {
 
   add_if("to_poco_h3",
         "mediump vec4 to_poco_h3(mediump vec4 pos) {\n"
-        "  return pos / pos[3];\n"
+        "  pos = pos / pos[3];\n"
+        "  pos[2] /= sqrt(1.-pos.x*pos.x-pos.y*pos.y);\n"
+        "  return pos;\n"
         "  }\n\n");
 
   add_if("from_poco_h3",
         "mediump vec4 from_poco_h3(mediump vec4 pos) {\n"
+        "  pos[2] *= sqrt(1.-pos.x*pos.x-pos.y*pos.y);\n"
         "  float s = 1. - dot(pos.xyz, pos.xyz);\n"
         "  return pos / sqrt(s);\n"
         "  }\n\n");
 
   add_if("to_poco_s3",
         "mediump vec4 to_poco_s3(mediump vec4 pos) {\n"
-        "  return pos / pos[3];\n"
+        "  pos = pos / pos[3];\n"
+        "  pos[2] /= sqrt(1.+pos.x*pos.x+pos.y*pos.y);\n"
+        "  return pos;\n"
         "  }\n\n");
 
   add_if("from_poco_s3",
         "mediump vec4 from_poco_s3(mediump vec4 pos) {\n"
+        "  pos[2] *= sqrt(1.+pos.x*pos.x+pos.y*pos.y);\n"
         "  float s = 1. + dot(pos.xyz, pos.xyz);\n"
         "  return pos / sqrt(s);\n"
         "  }\n\n");

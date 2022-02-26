@@ -91,6 +91,10 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
   else {
     h = T * h;
     h /= h[3];
+    if(sphere)
+      h[2] /= sqrt(1+h[0]*h[0]+h[1]*h[1]);
+    if(hyperbolic)
+      h[2] /= sqrt(1-h[0]*h[0]-h[1]*h[1]);
     return h;
     }
   }
@@ -126,6 +130,10 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
     }
   else {
     h[3] = 1;
+    if(sphere)
+      h[2] *= sqrt(1+h[0]*h[0]+h[1]*h[1]);
+    if(hyperbolic)
+      h[2] *= sqrt(1-h[0]*h[0]-h[1]*h[1]);
     return normalize(iT * h);
     }
   }
