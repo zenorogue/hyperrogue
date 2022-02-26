@@ -1623,13 +1623,13 @@ void raygen::add_functions() {
 
   add_if("from_poco_h2xr_e",
           "mediump vec4 from_poco_h2xr_e(mediump vec4 pos) {\n"
-            "  return vec4(sinh(pos[2]) * cosh(pos[0]), sinh(pos[0]), cosh(pos[0]) * cosh(pos[2]), 0);\n"
+            "  return vec4(sinh(pos[2]), sinh(pos[0]) * cosh(pos[2]), cosh(pos[0]) * cosh(pos[2]), 0);\n"
           "  }\n\n");
 
   add_if("to_poco_h2xr_e",
           "mediump vec4 to_poco_h2xr_e(mediump vec4 pos) {\n"
-          "  mediump float x = asinh(pos[1]);\n"
-          "  return vec4(x, 0, asinh(pos[0] / cosh(x)), 1);\n"
+          "  mediump float x = asinh(pos[0]);\n"
+          "  return vec4(asinh(pos[1] / cosh(x)), 0, x, 1);\n"
           "  }\n\n");
 
   add_if("from_poco_s2xr_s",
@@ -1648,13 +1648,13 @@ void raygen::add_functions() {
 
   add_if("from_poco_s2xr_e",
           "mediump vec4 from_poco_s2xr_e(mediump vec4 pos) {\n"
-            "  return vec4(sin(pos[2]) * cos(pos[0]), sin(pos[0]), cos(pos[0]) * cos(pos[2]), 0);\n"
+          "  return vec4(sin(pos[2]), sin(pos[0]) * cos(pos[2]), cos(pos[0]) * cos(pos[2]), 0);\n"
           "  }\n\n");
 
   add_if("to_poco_s2xr_e",
           "mediump vec4 to_poco_s2xr_e(mediump vec4 pos) {\n"
-          "  mediump float x = asin_clamp(pos[1]);\n"
-          "  return vec4(x, 0, asin_clamp(pos[0] / cos(x)), 1);\n"
+          "  mediump float x = asin_clamp(pos[0]);\n"
+          "  return vec4(asin_clamp(pos[1] / cos(x)), 0, x, 1);\n"
           "  }\n\n");
 
   add_if("deparabolic12",

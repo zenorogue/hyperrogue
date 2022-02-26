@@ -69,9 +69,9 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
     ld z = product_decompose(h).first;
     h /= exp(z);
     auto h1 = h;
-    h[0] = asin_auto(h1[1]);
+    h[2] = asin_auto_clamp(h1[0]);
     h[1] = z;
-    h[2] = asin_auto_clamp(h1[0] / cos_auto(h[0]));
+    h[0] = asin_auto_clamp(h1[1] / cos_auto(h[2]));
     h[3] = 1;
     return h;
     }
@@ -109,8 +109,8 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
     }
   else if(prod && kind == 0) {
     auto h0 = h;
-    h[0] = sin_auto(h0[2]) * cos_auto(h0[0]);
-    h[1] = sin_auto(h0[0]);
+    h[0] = sin_auto(h0[2]);
+    h[1] = sin_auto(h0[0]) * cos_auto(h0[2]);
     h[2] = cos_auto(h0[0]) * cos_auto(h0[2]);
     h[3] = 1;
     return iT * h * exp(h0[1]);
