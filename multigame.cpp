@@ -179,8 +179,7 @@ EX namespace dual {
     dynamicval<int> dm(dual::state, 2);
     int cg = currently_loaded;
       
-    bool orbusedbak[ittypes];
-    for(int i=0; i<ittypes; i++) orbusedbak[i] = orbused[i];
+    auto orbusedbak = orbused;
 
     if(d < 0) {
       if(d == -2 && items[itGreenStone] < 2) {
@@ -193,7 +192,7 @@ EX namespace dual {
       for(int k=0; k<2; k++) {
         switch_to(k);
         ok = ok && movepcto(d, subdir, true);
-        for(int i=0; i<ittypes; i++) orbused[i] = orbusedbak[i];
+        orbused = orbusedbak;
         }
       if(ok && checkonly) {
         switch_to(cg);
