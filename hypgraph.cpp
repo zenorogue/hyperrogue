@@ -628,9 +628,9 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       ret[0] = -models::osin - H[0];
       ld height = 0;
       if(zlev != 1) {
-        if(abs(models::ocos) > 1e-5)
+        if(abs(models::ocos) > 1e-9)
           height += H[1] * (pow(zlev, models::ocos) - 1);
-        if(abs(models::ocos) > 1e-5 && models::osin)
+        if(abs(models::ocos) > 1e-9 && models::osin)
           height += H[0] * models::osin * (pow(zlev, models::ocos) - 1) / models::ocos;
         else if(models::osin)
           height += H[0] * models::osin * log(zlev);
