@@ -836,6 +836,7 @@ EX set<color_t> colors_of_floors;
 EX bool isFloor(cell *c) {
   if(!isWall(c)) return false;
   if(colors_of_floors.empty()) return true;
+  if(c->wall != waWaxWall) return false;
   return colors_of_floors.count(c->landparam);
   }
 
@@ -983,6 +984,17 @@ EX void add_options() {
     });
   add_edit(eye_level);
   add_edit(eye_angle);
+  if(point_direction >= 0 && point_direction < centerover->type) {
+    cell *c = centerover->move(point_direction);
+    if(c && c->wall == waWaxWall) {
+      color_t col = c->landparam;
+      dialog::addBoolItem("we are facing floor (color " + format("%06X", col) + ")", colors_of_floors.count(col), 'n');
+      dialog::add_action([col] {
+        if(colors_of_floors.count(col)) colors_of_floors.erase(col);
+        else colors_of_floors.insert(col);
+        });
+      }
+    }
   }
 
 auto a = addHook(hooks_configfile, 100, [] {
