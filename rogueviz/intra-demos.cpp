@@ -468,8 +468,47 @@ auto hooks =
   // generate binary-tiling H2xE with floors to the current scene, runs automatically
 + arg::add3("-intra-bxe", create_intra_bxe)
   // generate Sol with floors to the current scene, runs autimatically
-+ arg::add3("-intra-sol", create_intra_sol);
++ arg::add3("-intra-sol", create_intra_sol)
 //+ arg::add3("-intra-more", create_intra_more);
++ arg::add3("-intra-demo-floors", [] {
+  walking::colors_of_floors = {
+    0xFFFF40, 0xD0D000,
+    0xC0FFC0, 0x80C080,
+    0xC0FFFF, 0x40FFFF,
+    0x8080FF, 0x0000FF,
+    0xFF80FF, 0xFF00FF,
+    0x64BF95, 0xA4FFD5,
+    0xFFFDD0, 0xFFD080
+    };
+  })
++ addHook_rvslides(191, [] (string s, vector<tour::slide>& v) {
+    if(s != "mixed") return;
+    v.push_back(tour::slide{
+      "inter-geometric portals", 10, tour::LEGAL::NONE | tour::QUICKSKIP | tour::QUICKGEO,
+      "Portals between different geometries.\n"
+      "These levels take some time to load, so you need to load them using the buttons below."
+      ,
+      [] (tour::presmode mode) {
+        setCanvas(mode, '0');
+        slide_url(mode, 'y', "portals (YouTube)", "https://youtu.be/yqUv2JO2BCs");
+        slide_url(mode, 't', "portals (Twitter)", "https://twitter.com/ZenoRogue/status/1496867204419452935");
+        using namespace tour;
+        auto load = [&] (string s, ld x) {
+          return [s, x] {
+            slide_backup(vid.cells_drawn_limit, 100);
+            slide_backup(smooth_scrolling, true);
+            slide_backup(ray::max_cells, 999999);
+            slide_backup(walking::on, true);
+            slide_backup(walking::eye_level, x);
+            mapstream::loadMap(s);
+            };
+          };
+        slide_action(mode, 'p', "load portals", load("portalscene3.lev", 0.2174492));
+        slide_url(mode, 'C', "curved landscape (Twitter)", "https://twitter.com/ZenoRogue/status/1446127100516130826");
+        slide_action(mode, 'c', "load curved landscape", load("solv-h3-scene.lev", 0.05));
+        }
+      });
+    });
 
 }
 
