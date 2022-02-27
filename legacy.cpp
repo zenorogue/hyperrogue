@@ -253,7 +253,7 @@ EX bool legacy_racing() {
 
 EX bool rcheck(string which, int qty, int x) {
   return hrand(qty) < x;
-  };
+  }
 
 EX int wallchance_legacy(cell *c, bool deepOcean) {
   eLand l = c->land;
