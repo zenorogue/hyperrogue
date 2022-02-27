@@ -5,7 +5,6 @@
  *  \brief Implementation of various Orb effects, and their properties such as default and maximum charges
  */
 
-#include <ctime>
 #include "hyper.h"
 
 namespace hr {
