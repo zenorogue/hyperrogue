@@ -763,6 +763,21 @@ EX void kill(int id) {
   println(hlog, isize(to_remove), " connections and ", isize(to_erase_cell), " cells erased");
   }
 
+EX void erase_all_maps() {
+  println(hlog, "erase_all_maps called");
+  data[current].gd.storegame();
+  in = false;
+  for(int i=0; i<isize(data); i++) {
+    current = i;
+    ginf[gProduct] = data[i].gi;
+    data[i].gd.restoregame();
+    clearCellMemory();
+    }
+  intra_id.clear();
+  connections.clear();
+  data.clear();
+  }
+
 EX set<cell*> need_to_save;
 
 EX void prepare_need_to_save() {
