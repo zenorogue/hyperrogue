@@ -732,6 +732,11 @@ EX void open_url(string s) {
   
 const char *urlhex = "0123456789ABCDEF";
 EX void open_wiki(const char *title) {
+  // Since "Crossroads" is ambiguous, we use the direct link to Crossroads I.
+  if (!strcmp(title, "Crossroads")) {
+    title = "Crossroads (Land)";
+  }
+
   string url = "https://hyperrogue.miraheze.org/wiki/";
   unsigned char c;
   for (size_t i = 0; (c = title[i]); ++i) {
