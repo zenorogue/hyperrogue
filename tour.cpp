@@ -103,6 +103,11 @@ EX void slide_url(presmode mode, char key, string text, string url) {
       }});
   }
 
+EX void slide_action(presmode mode, char key, string text, reaction_t act) {
+  if(mode == pmHelpEx)
+    help_extensions.push_back(help_extension{key, text, act});
+  }
+
 /** \brief an auxiliary function to enable a visualization in the Canvas land */
 EX void setCanvas(presmode mode, char canv) {
   if(mode == pmStart) {
