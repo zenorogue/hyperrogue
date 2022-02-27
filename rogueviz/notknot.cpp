@@ -1417,6 +1417,85 @@ void nk_launch() {
   #endif
   }
 
+void portal_slideshow(tour::ss::slideshow_callback cb) {
+
+  using namespace rogueviz::pres;
+  using namespace tour;
+  static vector<slide> portal_slides;
+
+  if(portal_slides.empty()) {
+
+    portal_slides.emplace_back(slide{"portal collection", 100, LEGAL::NONE | QUICKSKIP,
+       "This is a collection of portals. We start with knotted portals in Euclidean geometry, "
+       "then we visit portals in other geometries, and finally, we explore portals between different "
+       "geometries.\n\nLoading these may take some time, so you need to press 'r' to run them. In most slides you can also press '5' to change various parameters.",
+       [] (presmode mode) {}
+       });
+
+    auto add = [&] (string s, string text, string youtube, reaction_t act) {
+
+      portal_slides.emplace_back(
+        tour::slide{s, 100, LEGAL::NONE | QUICKGEO | QUICKSKIP, text,
+          [=] (presmode mode) {
+            setCanvas(mode, '0');
+            if(youtube != "")
+              slide_url(mode, 'y', "YouTube link", youtube);
+            slide_action(mode, 'r', "run", [=] {
+              slide_backup(margin);
+              slide_backup(mapeditor::drawplayer);
+              slide_backup(firstland);
+              slide_backup(specialland);
+              slide_backup(ray::max_cells, 600000);
+              slide_backup(smooth_scrolling, 1);
+              slide_backup(camera_speed, 10);
+              slide_backup(ray::exp_decay_poly, 30);
+              slide_backup(ray::fixed_map, true);
+              slide_backup(ray::max_iter_iso, 80);
+              #if CAP_VR
+              slide_backup(vrhr::hsm);
+              slide_backup(vrhr::eyes);
+              slide_backup(vrhr::cscr);
+              slide_backup(vrhr::absolute_unit_in_meters);
+              #endif
+
+              on_restore([] { nilv::set_flags(); asonov::set_flags(); });
+
+              slide_backup(nilv::nilwidth);
+              slide_backup(nilv::nilperiod);
+
+              slide_backup(vid.binary_width);
+              slide_backup(asonov::period_xy);
+              slide_backup(asonov::period_z);
+
+              act();
+              start_game();
+              loop = 2;
+              });
+
+            if(mode == tour::pmKey) pushScreen(show);
+            }});
+      };
+
+    auto launch_euc_with = [] (bool b) {
+      return [b] {
+        self_hiding = b;
+        launch_euc();
+        };
+      };
+    add("knotted portal", "This is a knotted portal in Euclidean space.", "https://www.youtube.com/watch?v=eb2DhCcGH7U", launch_euc_with(false));
+    add("self-hiding portal", "This knotted portal is 'self-hiding'. It appears that the portal enters itself and disappears!", "https://www.youtube.com/watch?v=vFLZ2NGtuGw", launch_euc_with(true));
+    add("non-Euclidean portal in Nil", "A portal in Nil geometry.", "https://www.youtube.com/watch?v=2K-v8tK68AE", launch_nil);
+    add("spherical portal", "A portal in spherical geometry. Such a portal lets us create a space with spherical geometry that has more volume than the sphere.", "https://www.youtube.com/watch?v=PerPeQFu5gw", launch_sphereknot);
+    add("Cat Portal in Solv", "A portal in Solv geometry. The honeycomb is based on the mapping torus of Arnold's cat mapping.", "https://www.youtube.com/watch?v=CGiSxC9B6i0", launch_solv);
+
+    callhooks(rogueviz::pres::hooks_build_rvtour, "portal", portal_slides);
+
+    add_end(portal_slides);
+    }
+
+  cb(XLAT("portal collection"), &portal_slides[0], 'p');
+  }
+
 auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
   + addHook(hooks_welcome_message, 100, [] {
     if(geometry == gNotKnot) {
@@ -1496,59 +1575,9 @@ auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
     param_i(loop_any, "nk_loopany");
     })
 #ifndef NOTKNOT
-  + addHook_rvslides(180, [] (string s, vector<tour::slide>& v) {
-      if(s != "mixed") return;
-      v.push_back(tour::slide{
-        "weird portals", 10, tour::LEGAL::NONE | tour::QUICKSKIP,
-        "Some experiments with weird portals. Press '5' to change between available experiments.\n"
-        ,
-        [] (tour::presmode mode) {
-          slide_url(mode, 'k', "knotted portal (YouTube)", "https://www.youtube.com/watch?v=eb2DhCcGH7U");
-          slide_url(mode, 'h', "self-hiding knot portal (YouTube)", "https://www.youtube.com/watch?v=vFLZ2NGtuGw");
-          slide_url(mode, 'n', "non-Euclidean portal in Nil (YouTube)", "https://www.youtube.com/watch?v=2K-v8tK68AE");
-          slide_url(mode, 's', "spherical portal (YouTube)", "https://www.youtube.com/watch?v=PerPeQFu5gw");
-          slide_url(mode, 'c', "Cat Portal in Solv (YouTube)", "https://www.youtube.com/watch?v=CGiSxC9B6i0");
-          setCanvas(mode, '0');
-          using namespace tour;
-          if(mode == pmStart) {
-            slide_backup(margin);
-            slide_backup(mapeditor::drawplayer);
-            slide_backup(firstland);
-            slide_backup(specialland);
-            slide_backup(ray::max_cells);
-            slide_backup(smooth_scrolling);
-            slide_backup(camera_speed);
-            slide_backup(ray::exp_decay_poly);
-            slide_backup(ray::fixed_map);
-            slide_backup(ray::max_iter_iso);
-            #if CAP_VR
-            slide_backup(vrhr::hsm);
-            slide_backup(vrhr::eyes);
-            slide_backup(vrhr::cscr);
-            slide_backup(vrhr::absolute_unit_in_meters);
-            #endif
-
-            on_restore([] { nilv::set_flags(); asonov::set_flags(); });
-
-            slide_backup(nilv::nilwidth);
-            slide_backup(nilv::nilperiod);
-
-            slide_backup(vid.binary_width);
-            slide_backup(asonov::period_xy);
-            slide_backup(asonov::period_z);
-
-            nk_launch();
-            start_game();
-            loop = 2;
-            }
-          if(mode == tour::pmKey) {
-            pushScreen(show);
-            }
-          }
-        });
-      })
++ addHook_slideshows(120, portal_slideshow)
 #endif
-      ;
+  ;
 
 #ifdef NOTKNOT
 auto hook1=
