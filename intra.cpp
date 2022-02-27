@@ -776,6 +776,7 @@ EX void erase_all_maps() {
   intra_id.clear();
   connections.clear();
   data.clear();
+  full_sample_list.clear();
   }
 
 EX set<cell*> need_to_save;
