@@ -13,6 +13,7 @@ g -- generate the current room (buggy)
 m -- see the map (toggle)
 p -- pause (toggle)
 z -- screenshot menu
+v -- HyperRogue settings
 q -- quit
 s -- save to platformer.lev
 1 -- place a small block under the mouse
@@ -704,6 +705,9 @@ void run() {
   dialog::add_key_action('m', [] { 
     map_on = !map_on;
     });
+  dialog::add_key_action('v', [] {
+    pushScreen(showSettings);
+    });
   dialog::add_key_action('p', [] { 
     paused = !paused;
     });
@@ -817,7 +821,7 @@ auto chk = arg::add3("-platformer", enable)
       if(s != "mixed") return;
       v.push_back(tour::slide{
         "platformer", 10, tour::LEGAL::NONE | tour::QUICKSKIP | tour::QUICKGEO,
-        "A non-Euclidean platformer. Press up/left/right to move the guy.\n"
+        "A non-Euclidean platformer.\n\nPress up/left/right to move the guy.\n\nM to see the map\n\nP to pause\n\nV to change HyperRogue settings.\n\nPress Q when you are done.\n"
         ,
         [] (tour::presmode mode) {
           slide_url(mode, 'y', "non-Euclidean platformer (YouTube)", "https://www.youtube.com/watch?v=eb2DhCcGH7U");
