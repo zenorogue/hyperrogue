@@ -1142,6 +1142,7 @@ EX namespace mapstream {
         }
       for(int i=0; i<q; i++) {
         intra::in = true; /* so that it knows to load portals */
+        game_active = false;
         load_only_map(f);
         intra::in = false;
         intra::become();
