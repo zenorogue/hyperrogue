@@ -64,7 +64,11 @@ void gamedata_all(gamedata& gd) {
   gd.store(hybrid::underlying);
   gd.store(hybrid::csteps);
   gd.store(hybrid::underlying_cgip);
-  gd.store_ptr(vid);
+  gd.store_ptr(vid.projection_config);
+  gd.store_ptr(vid.rug_config);
+  gd.store(vid.yshift);
+  gd.store(vid.plevel_factor);
+  gd.store(vid.binary_width);
   gd.store(sightrange_bonus);
   gd.store(genrange_bonus);
   gd.store(gamerange_bonus);
