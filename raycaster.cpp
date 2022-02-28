@@ -2493,24 +2493,27 @@ EX void cast() {
   
   #if CAP_VR
   if(o->uEyeShift != -1) {
+    dynamicval<eGeometry> g(geometry, gCubeTiling);
     transmatrix T = vrhr::eyeshift;
     if(nonisotropic)
       T = inverse(NLP) * T;
-    glUniformMatrix4fv(o->uEyeShift, 1, 0, glhr::tmtogl_transpose3(T).as_array());
+    glUniformMatrix4fv(o->uEyeShift, 1, 0, glhr::tmtogl_transpose(T).as_array());
     glUniform1f(o->uAbsUnit, vrhr::absolute_unit_in_meters);
     }
   if(vrhr::rendering_eye()) {
-    glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(vrhr::eyeproj).as_array());
+    dynamicval<eGeometry> g(geometry, gCubeTiling);
+    glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose(vrhr::eyeproj).as_array());
     }
   #else
   if(0) ;
   #endif
   else {
+    dynamicval<eGeometry> g(geometry, gCubeTiling);
     transmatrix proj = Id;
     proj = eupush(-global_projection * d, 0) * proj;
     proj = euscale(cd->tanfov / (vid.stereo_mode == sLR ? 2 : 1), cd->tanfov * cd->ysize / cd->xsize) * proj;
     proj = eupush(-((cd->xcenter-cd->xtop)*2./cd->xsize - 1), -((cd->ycenter-cd->ytop)*2./cd->ysize - 1)) * proj;
-    glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(proj).as_array());
+    glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose(proj).as_array());
     }
   
   if(!callhandlers(false, hooks_rayset, o)) {
