@@ -1041,11 +1041,31 @@ EX void render() {
     if(1) {
       make_actual_view();
       master_cview = cview();
+
+      /* unfortunately we need to backup everything that could change by shift_view... */
       dynamicval<transmatrix> tN(NLP, NLP);
       dynamicval<transmatrix> tV(View, View);
       dynamicval<transmatrix> tC(current_display->which_copy, current_display->which_copy);
       dynamicval<transmatrix> trt(radar_transform);
       
+      /* changed in intra */
+      dynamicval<ld> tcs(camera_speed);
+      dynamicval<ld> tcl(anims::cycle_length);
+      dynamicval<ld> tau(vrhr::absolute_unit_in_meters);
+      dynamicval<ld> tel(walking::eye_level);
+      dynamicval<int> tfd(walking::floor_dir);
+      dynamicval<cell*> tof(walking::on_floor_of);
+
+      int id = intra::current;
+      cell *co = centerover;
+      finalizer fin([&] {
+        if(intra::current != id) {
+          println(hlog, "rendering via portal");
+          intra::switch_to(id);
+          centerover = co;
+          }
+        });
+
       if(hsm == eHeadset::rotation_only) {
         transmatrix T = hmd_at;
         be_33(T);
