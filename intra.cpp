@@ -1032,7 +1032,14 @@ auto a = addHook(hooks_configfile, 100, [] {
       "1 = the angle can be changed with keyboard or mouse movements, 0 = the angle is fixed",
       'k');
   })
- + addHook(hooks_clearmemory, 40, [] { on_floor_of = nullptr; floor_dir = -1; });
+ + addHook(hooks_clearmemory, 40, [] { on_floor_of = nullptr; floor_dir = -1; })
+ + arg::add3("-walk-on", [] {
+    on = true;
+    if(auto_eyelevel) eye_level = -1;
+    floor_dir = -1;
+    on_floor_of = nullptr;
+    ticks_last = ticks_end = ticks;
+    });
 
 EX }
 }
