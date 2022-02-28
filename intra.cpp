@@ -608,7 +608,7 @@ EX void check_portal_movement() {
     camera_speed *= scale;
     anims::cycle_length *= scale;
     #if CAP_VR
-    absolute_units_in_meters *= scale;
+    vrhr::absolute_unit_in_meters *= scale;
     #endif
     if(walking::eye_level != -1) walking::eye_level *= scale;
 
@@ -927,7 +927,24 @@ EX void handle() {
 
   ld view_eps = 1e-5;
 
-  if(eye_angle) rotate_view(cspin(1, 2, -eye_angle * degree));
+  transmatrix spin_T;
+  bool use_T = false;
+
+  if(eye_angle) use_T = true, spin_T = cspin(1, 2, -eye_angle * degree);
+  #if CAP_VR
+  if(vrhr::active() && !vrhr::first && vrhr::hsm != vrhr::eHeadset::none) {
+    use_T = true;
+    spin_T = vrhr::hmd_ref_at;
+    // print(hlog, "HMD seems to be at altitude ", spin_T[1][3], " depth ", spin_T[2][3], " zeros are ", spin_T[3][1], " and ", spin_T[3][2]);
+    dynamicval<eGeometry> g(geometry, gCubeTiling);
+    spin_T = vrhr::sm * inverse(spin_T);
+    eye_level = -spin_T[1][3] / vrhr::absolute_unit_in_meters;
+    if(eye_level < .001) eye_level = 0.001;
+    vrhr::be_33(spin_T);
+    }
+  #endif
+
+  if(use_T) rotate_view(spin_T);
   hyperpoint front = inverse(get_shift_view_of(ctangent(2, -view_eps), View)) * C0;
   hyperpoint up = inverse(get_shift_view_of(ctangent(1, +view_eps), View)) * C0;
 
@@ -959,7 +976,7 @@ EX void handle() {
     smooth(front, inverse(Tf) * direct_exp(dxf / hypot_d(3, dxf) * eye_level)),
     smooth(up, inverse(T) * direct_exp(dx / hypot_d(3, dx) * (eye_level + view_eps)))
     );
-  if(eye_angle) rotate_view(cspin(1, 2, eye_angle * degree));
+  if(use_T) rotate_view(inverse(spin_T));
   playermoved = false;
 
   auto nat = tC0(inverse(View));
