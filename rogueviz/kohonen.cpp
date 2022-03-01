@@ -656,6 +656,7 @@ void step() {
     if(pct != lpct) {
       lpct = pct;
       analyze();
+}
       
 //      if(gaussian)
 //        println(hlog, format("t = %6d/%6d %3d%% sigma=%10.7lf maxudist=%10.7lf\n", t, tmax, pct, sigma, maxudist));
