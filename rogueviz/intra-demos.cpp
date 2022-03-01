@@ -496,6 +496,7 @@ auto hooks =
         mapstream::loadMap(s);
         slide_backup(ray::fixed_map, true);
         slide_backup(ray::max_iter_intra, y);
+        slide_backup(mapeditor::drawplayer, false);
         };
       };
 
