@@ -684,12 +684,18 @@ void step() {
   cellcrawler& s = scc[cid.first];
   s.sprawl(cellwalker(n.where, cid.second));
 
-  vector<double> fake(1,1);
+  vector<float> fake(0,0);
+  /* for(auto& sd: s.data) 
+    fake.push_back(exp(-sqr(sd.dist/sigma))); */
+  
+  int dispersion_count = isize(s.dispersion);
+  int dispid = int(dispersion_count * tt);
+
   auto it = gaussian ? fake.begin() : s.dispersion[dispid].begin();
 
   for(auto& sd: s.data) {
     neuron *n2 = getNeuron(sd.target.at);
-    if(!n2) continue;
+    if(!n2) { it++; continue; }
     n2->debug++;
     double nu = learning_factor;
     
@@ -703,15 +709,15 @@ void step() {
     
     for(int k=0; k<columns; k++) {
       n2->net[k] += nu * (data[id].val[k] - n2->net[k]);
-      if(isnan(n2->net[k])) 
-        throw hr_exception("obtained nan somehow, nu = " + lalign(0, nu));
+      /* if(isnan(n2->net[k]))
+        throw hr_exception("obtained nan somehow, nu = " + lalign(0, nu)); */
       }
     }
 
-  for(auto& n2: net) {
+  /* for(auto& n2: net) {
     if(n2.debug > 1) throw hr_exception("sprawler error");
     n2.debug = 0;
-    }
+    } */
   
   t--;
   if(t == 0) analyze();
