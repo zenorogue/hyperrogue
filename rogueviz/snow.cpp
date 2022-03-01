@@ -40,11 +40,15 @@ bool snow_glitch = false;
 /* disable textures */
 bool snow_texture = true;
 
+/* draw single objects? */
+bool single_objects = true;
+
 int snow_shape = 0;
 
 struct snowball {
   transmatrix T;
   int model_id;
+  int object_id;
   };
 
 map<cell*, vector<snowball>> snowballs_at;
@@ -134,14 +138,29 @@ bool draw_snow(cell *c, const shiftmatrix& V) {
         }
       }      
 
-    for(int t=0; t<cnt; t++) 
-      v.emplace_back(snowball{random_snow_matrix(c), isize(models) ? hrand(isize(models)) : 0});
+    for(int t=0; t<cnt; t++) {
+      snowball b{random_snow_matrix(c), 0, -1};
+      if(isize(models)) {
+        b.model_id = hrand(isize(models));
+        if(single_objects)
+          b.object_id = hrand(isize(models[b.model_id].get().objindex)-1);
+        }
+      v.emplace_back(b);
+      }
     }
   
   poly_outline = 0xFF;
   for(auto& T: snowballs_at[c]) {
     if(models.size()) {
-      models[T.model_id].render(V*T.T);
+     if(T.object_id == -1)
+        models[T.model_id].render(V*T.T);
+      else {
+        auto& m = models[T.model_id].get();
+        for(int i=m.objindex[T.object_id]; i<m.objindex[T.object_id+1]; i++) {
+          auto& obj = m.objs[i];
+          if(obj->color) queuepoly(V*T.T, obj->sh, obj->color);
+          }
+        }
       }
     else {
       auto& p = queuepoly(V * T.T, shapeid(snow_shape), snow_color);
