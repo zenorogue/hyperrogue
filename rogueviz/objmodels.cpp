@@ -81,7 +81,8 @@ void model::load_obj(model_data& md) {
           emit_material();
           nextcol = 0xFFFFFFFF;
           texname = "";
-          mtlname = scanline(fsm);
+          fsm.get<char>();
+          scan(fsm, mtlname);
           }
         if(s == "map_Kd") {
           scan(fsm, texname);
@@ -93,8 +94,13 @@ void model::load_obj(model_data& md) {
       next_object:
       object *co = nullptr;
       bool textured = false;
-      string oname = scanline(fs);
+      fs.get<char>();
+      string oname;
+      scan(fs, oname);
       println(hlog, "reading object: ", oname);
+      md.objindex.push_back(isize(md.objs));
+      hyperpoint ctr = Hypc;
+      int cqty = 0;
       while(true) {
         if(feof(fs.f)) {
           if(co) cgi.finishshape();
@@ -117,6 +123,7 @@ void model::load_obj(model_data& md) {
           h[1] /= 100;
           h[2] /= 100;
           vertices.push_back(h);
+          ctr += h; cqty++;
           }
         else if(s == "vt") {
           ld u, v;
@@ -134,7 +141,10 @@ void model::load_obj(model_data& md) {
         else if(s == "usemtl") {
           if(co) cgi.finishshape();
           if(co) println(hlog, "vertices = ", co->sh.e-co->sh.s, " tvertices = ", isize(co->tv.tvertices));
-          string mtlname = scanline(fs);
+          fs.get<char>();
+          string mtlname;
+          scan(fs, mtlname);
+          //string mtlname = scanline(fs);
           co = nullptr;
           if(mtlname.find("Layer_Layer0") != string::npos) continue;
           objects.push_back(make_shared<object>());
@@ -196,6 +206,14 @@ void model::load_obj(model_data& md) {
             tot.push_back(textured ? tvertices[vis[i].t] : point3(0,0,0));
             }
           if(!co) continue;
+
+          if(shift_to_ctr) {
+            hyperpoint ctr1 = ctr / cqty;
+            ctr1[3] = 0;
+            println(hlog, "ctr1 = ", ctr1, "hys = ", hys[0]);
+            for(auto& h: hys)
+              h -= ctr1;
+            }
           
           hyperpoint norm = (hys[1] - hys[0]) ^ (hys[2] - hys[0]);
           norm /= hypot_d(3, norm);
@@ -255,7 +273,8 @@ void model::load_obj(model_data& md) {
   
   println(hlog, "reading finished");
 
-  cgi.extra_vertices();  
+  md.objindex.push_back(isize(md.objs));
+  cgi.extra_vertices();
   }
 
 model_data& model::get() {
@@ -277,8 +296,8 @@ model_data& model::get() {
   }
 
 void model_data::render(const shiftmatrix& V) {
-  for(auto& obj: objs) {
-    queuepoly(V, obj->sh, obj->color);  
+  for(auto& obj: objs) if(obj->color) {
+    queuepoly(V, obj->sh, obj->color);
     }
   }
 
@@ -303,6 +322,7 @@ auto cf = addHook(hooks_configfile, 100, [] {
   ->editable(1, 100, 1, "3D model precision", "higher-precision models take more time to load and to render.", 'p')
   ->set_sets([] { dialog::numberdark = dialog::DONT_SHOW; })
   ; 
+  param_b(shift_to_ctr, "shift_to_ctr");
   });
 
 }
