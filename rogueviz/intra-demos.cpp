@@ -510,6 +510,7 @@ auto hooks =
           if(twitter != "")
             slide_url(mode, 't', "Twitter link", twitter);
           slide_action(mode, 'r', "run this visualization", loader);
+          slidecommand = "portal options";
           if(mode == tour::pmKey) pushScreen(intra::show_portals);
           }
         });

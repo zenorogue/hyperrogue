@@ -435,6 +435,7 @@ void choose_projection() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
   dialog::init(XLAT("choose projection"), 0xFFFFFFFF, 150, 0);
+  dynamicval<int> di(index);
   for(int i=0; i<8; i++) {
     index = i;
     dynamicval<eModel> md(pmodel, pmodel);
@@ -520,7 +521,7 @@ auto msc =
 
         "We can also project a sphere to a sphere of different curvature. For example, what about the azimuthal equidistant projection from Earth to Moon? "
         "This projection correctly maps the angles and distances from a chosen point at Earth. "
-        "Press 'o' to use the place on Earth you are in as the chosen point, try other projections, or change the other settings!"
+        "Press '5' to use the place on Earth you are in as the chosen point, try other projections, or change the other settings!"
         ,
         [] (presmode mode) {
           slide_url(mode, 't', "Twitter link (with description)", "https://twitter.com/ZenoRogue/status/1339946298460483589");
@@ -533,9 +534,12 @@ auto msc =
             slide_backup(pmodel, mdDisk);
             slide_backup(pconf.scale, 1000);
             slide_backup(pconf.alpha, 1000);
+            slide_backup(mapeditor::drawplayer, false);
             start_game();
             slide_backup(max_alpha, 192);
             }
+          slidecommand = "options";
+          if(mode == tour::pmKey) pushScreen(show);
           }});
       });
 

@@ -1474,6 +1474,7 @@ void portal_slideshow(tour::ss::slideshow_callback cb) {
               loop = 2;
               });
 
+            slidecommand = "notknot options";
             if(mode == tour::pmKey) pushScreen(show);
             }});
       };
