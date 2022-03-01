@@ -452,7 +452,8 @@ auto fifteen_hook =
     if(fifteen_slides.empty()) {
       fifteen_slides.emplace_back(
         slide{"Introduction", 999, LEGAL::NONE, 
-          "This is a collection of some geometric and topological variants of the Fifteen puzzle."
+          "This is a collection of some geometric and topological variants of the Fifteen puzzle. Most of these "
+          "are digital implementations of the mechanical designs by Henry Segerman."
           ,
           [] (presmode mode) {}
           });
@@ -490,11 +491,16 @@ auto fifteen_hook =
       add("coiled", "coiled", "Coiled fifteen puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=rfAEgxNEOrQ");
       add("Möbius band", "mobiusband", "Fifteen puzzle on a Möbius band.");
       add("Kite-and-dart", "kitedart", "Kite-and-dart puzzle.");
+      add("29", "29", "The 29 puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30");
+      add("12", "12", "The 12 puzzle mentioned in the same video by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30");
+      add("124", "124", "The 124 puzzle mentioned in the same video by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30");
+      add("60", "60", "The 124 puzzle mentioned in the same video by Henry Segerman.", "https://www.youtube.com/watch?v=EitWHthBY30");
+      add("Continental drift", "sphere19", "Based on the Continental Drift puzzle by Henry Segerman.", "https://www.youtube.com/watch?v=0uQx33KFMO0");
       
       add_end(fifteen_slides);
       }
 
-    cb(XLAT("variants of the fifteen puzzle"), &fifteen_slides[0], 'h');
+    cb(XLAT("variants of the fifteen puzzle"), &fifteen_slides[0], 'f');
     });
 #endif
 
