@@ -95,8 +95,7 @@ void model::load_obj(model_data& md) {
       object *co = nullptr;
       bool textured = false;
       fs.get<char>();
-      string oname;
-      scan(fs, oname);
+      string oname = scanline(fs);
       println(hlog, "reading object: ", oname);
       md.objindex.push_back(isize(md.objs));
       hyperpoint ctr = Hypc;
