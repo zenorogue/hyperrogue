@@ -3058,7 +3058,7 @@ EX void addaura(shiftpoint h, color_t col, int fd) {
   if(!haveaura_cached) return;
   apply_joukowsky_aura(h);
 
-  int r = int(2*AURA + atan2(h[1], h[0]) * AURA / 2 / M_PI) % AURA; 
+  int r = gmod(atan2(h[1], h[0]) * AURA / 2 / M_PI, AURA);
   aurac[r][3] += auramemo << fd;
   col = darkened(col);
   aurac[r][0] += (col>>16)&255;
