@@ -235,6 +235,7 @@ void choose_presentation() {
       if(!tour::texts) nomenukey = true;
       popScreenAll();
       tour::start();
+      if(!tour::on) tour::start();
       });
     });
     
