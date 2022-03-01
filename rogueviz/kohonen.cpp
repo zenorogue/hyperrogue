@@ -650,7 +650,6 @@ void step() {
   tt = pow(tt, ttpower);
 
   double sigma = maxdist * tt;
-  int dispid = int(dispersion_count * tt);
 
   if(qpct) {
     int pct = (int) ((qpct * (t+.0)) / tmax);
@@ -658,12 +657,12 @@ void step() {
       lpct = pct;
       analyze();
       
-      if(gaussian)
-        println(hlog, format("t = %6d/%6d %3d%% sigma=%10.7lf maxudist=%10.7lf\n", t, tmax, pct, sigma, maxudist));
-      else
-        println(hlog, format("t = %6d/%6d %3d%% dispid=%5d maxudist=%10.7lf\n", t, tmax, pct, dispid, maxudist));
-      }
-    }
+//      if(gaussian)
+//        println(hlog, format("t = %6d/%6d %3d%% sigma=%10.7lf maxudist=%10.7lf\n", t, tmax, pct, sigma, maxudist));
+//      else
+//        println(hlog, format("t = %6d/%6d %3d%% dispid=%5d maxudist=%10.7lf\n", t, tmax, pct, dispid, maxudist));
+//      }
+    } //
   int id = hrand(samples);
   neuron& n = winner(id);
   whowon.resize(samples);
