@@ -1140,7 +1140,7 @@ slide dmv_slides[] = {
 int phooks = 
   0 +
   addHook_slideshows(100, [] (tour::ss::slideshow_callback cb) {
-    cb(XLAT("Playing with Impossibility"), &dmv_slides[0], 'p');
+    cb(XLAT("Playing with Impossibility"), &dmv_slides[0], 'i');
     });
  
 }
