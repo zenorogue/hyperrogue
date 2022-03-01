@@ -38,7 +38,6 @@ void init_landscape_det(const vector<cell*>& ac) {
   int dimensions = isize(delta_at);
   landscape_at.clear();
   landscape_at[currentmap->gamestart()].resize(dimensions, 0);
-  int id = 0;
   println(hlog, "qdelta = ", qdelta, " size of delta_at = ", isize(delta_at));
   for(auto& d: delta_at) {
     d.second.resize(dimensions, 0);
