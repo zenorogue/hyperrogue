@@ -3674,15 +3674,18 @@ bool allemptynear(cell *c) {
   }
 
 EX bool bright;
+EX int canvasdark;
 
 // how much to darken
 EX int getfd(cell *c) {
   if(bright) return 0;
   if(among(c->land, laAlchemist, laHell, laVariant, laEclectic) && WDIM == 2 && GDIM == 3) return 0;
   switch(c->land) {
+    case laCanvas:
+      return min(2,max(0,canvasdark));
+
     case laRedRock:
     case laReptile:
-    case laCanvas: 
       return 0;
       
     case laSnakeNest:

@@ -117,7 +117,7 @@ EX eGravity get_move_gravity(cell *c, cell *c2) {
   }
 
 EX bool isWarped(cell *c) {
-  return isWarpedType(c->land) || (!inmirrororwall(c->land) && (items[itOrb37] && c->cpdist <= 4));
+  return isWarpedType(c->land) || (c->land == laCanvas && canvasfloor == 3) || (!inmirrororwall(c->land) && (items[itOrb37] && c->cpdist <= 4));
   }
 
 EX bool nonAdjacent(cell *c, cell *c2) {
