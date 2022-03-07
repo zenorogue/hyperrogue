@@ -2588,7 +2588,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
 
         bool locked = true;
         forCellEx(c1, c) if(!c1->wall) locked = false;
-        if(locked) c->item = itEclectic;
+        if(locked && !safety) c->item = itEclectic;
 
         if(c->wall == waNone && hrand_monster(2500) < 30 + items[itEclectic] + yendor::hardness() && !safety) 
           gen_eclectic_monster(c);

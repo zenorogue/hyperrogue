@@ -451,6 +451,7 @@ void raygen::compute_which_and_dist(int flat1, int flat2) {
           "mediump float zsgn = (Mt > 0. ? -sgn : sgn);\n"
           "mediump float u = sqrt(b*b-c)*zsgn + b;\n"
           "mediump float v = -(Mp*u-1.) / Mt;\n"
+          "if(a < 1e-5) v = (1.-Mp*Mp) / (2. * Mt);\n"
           "mediump float d = asinh(v);\n";
       if(prod) fmain += "d /= xspeed;\n";
       fmain +=
@@ -1575,22 +1576,28 @@ void raygen::add_functions() {
 
   add_if("to_poco_h3",
         "mediump vec4 to_poco_h3(mediump vec4 pos) {\n"
-        "  return pos / pos[3];\n"
+        "  pos = pos / pos[3];\n"
+        "  pos[2] /= sqrt(1.-pos.x*pos.x-pos.y*pos.y);\n"
+        "  return pos;\n"
         "  }\n\n");
 
   add_if("from_poco_h3",
         "mediump vec4 from_poco_h3(mediump vec4 pos) {\n"
+        "  pos[2] *= sqrt(1.-pos.x*pos.x-pos.y*pos.y);\n"
         "  float s = 1. - dot(pos.xyz, pos.xyz);\n"
         "  return pos / sqrt(s);\n"
         "  }\n\n");
 
   add_if("to_poco_s3",
         "mediump vec4 to_poco_s3(mediump vec4 pos) {\n"
-        "  return pos / pos[3];\n"
+        "  pos = pos / pos[3];\n"
+        "  pos[2] /= sqrt(1.+pos.x*pos.x+pos.y*pos.y);\n"
+        "  return pos;\n"
         "  }\n\n");
 
   add_if("from_poco_s3",
         "mediump vec4 from_poco_s3(mediump vec4 pos) {\n"
+        "  pos[2] *= sqrt(1.+pos.x*pos.x+pos.y*pos.y);\n"
         "  float s = 1. + dot(pos.xyz, pos.xyz);\n"
         "  return pos / sqrt(s);\n"
         "  }\n\n");
@@ -1623,13 +1630,13 @@ void raygen::add_functions() {
 
   add_if("from_poco_h2xr_e",
           "mediump vec4 from_poco_h2xr_e(mediump vec4 pos) {\n"
-            "  return vec4(sinh(pos[2]) * cosh(pos[0]), sinh(pos[0]), cosh(pos[0]) * cosh(pos[2]), 0);\n"
+            "  return vec4(sinh(pos[2]), sinh(pos[0]) * cosh(pos[2]), cosh(pos[0]) * cosh(pos[2]), 0);\n"
           "  }\n\n");
 
   add_if("to_poco_h2xr_e",
           "mediump vec4 to_poco_h2xr_e(mediump vec4 pos) {\n"
-          "  mediump float x = asinh(pos[1]);\n"
-          "  return vec4(x, 0, asinh(pos[0] / cosh(x)), 1);\n"
+          "  mediump float x = asinh(pos[0]);\n"
+          "  return vec4(asinh(pos[1] / cosh(x)), 0, x, 1);\n"
           "  }\n\n");
 
   add_if("from_poco_s2xr_s",
@@ -1648,13 +1655,13 @@ void raygen::add_functions() {
 
   add_if("from_poco_s2xr_e",
           "mediump vec4 from_poco_s2xr_e(mediump vec4 pos) {\n"
-            "  return vec4(sin(pos[2]) * cos(pos[0]), sin(pos[0]), cos(pos[0]) * cos(pos[2]), 0);\n"
+          "  return vec4(sin(pos[2]), sin(pos[0]) * cos(pos[2]), cos(pos[0]) * cos(pos[2]), 0);\n"
           "  }\n\n");
 
   add_if("to_poco_s2xr_e",
           "mediump vec4 to_poco_s2xr_e(mediump vec4 pos) {\n"
-          "  mediump float x = asin_clamp(pos[1]);\n"
-          "  return vec4(x, 0, asin_clamp(pos[0] / cos(x)), 1);\n"
+          "  mediump float x = asin_clamp(pos[0]);\n"
+          "  return vec4(asin_clamp(pos[1] / cos(x)), 0, x, 1);\n"
           "  }\n\n");
 
   add_if("deparabolic12",
@@ -2059,7 +2066,7 @@ void uniform2(GLint id, array<float, 2> fl) {
 
 color_t color_out_of_range = 0x0F0800FF;
 
-transmatrix get_ms(cell *c, int a, bool mirror) {
+EX transmatrix get_ms(cell *c, int a, bool mirror) {
   int z = a ? 1 : -1;
   
   if(c->type == 3) {
@@ -2089,7 +2096,7 @@ transmatrix get_ms(cell *c, int a, bool mirror) {
 
 int nesting;
 
-transmatrix mirrorize(transmatrix T) {
+EX transmatrix mirrorize(transmatrix T) {
   T = inverse(T);
   hyperpoint h = tC0(T);
   ld d = hdist0(h);
@@ -2486,24 +2493,27 @@ EX void cast() {
   
   #if CAP_VR
   if(o->uEyeShift != -1) {
+    dynamicval<eGeometry> g(geometry, gCubeTiling);
     transmatrix T = vrhr::eyeshift;
     if(nonisotropic)
       T = inverse(NLP) * T;
-    glUniformMatrix4fv(o->uEyeShift, 1, 0, glhr::tmtogl_transpose3(T).as_array());
+    glUniformMatrix4fv(o->uEyeShift, 1, 0, glhr::tmtogl_transpose(T).as_array());
     glUniform1f(o->uAbsUnit, vrhr::absolute_unit_in_meters);
     }
   if(vrhr::rendering_eye()) {
-    glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(vrhr::eyeproj).as_array());
+    dynamicval<eGeometry> g(geometry, gCubeTiling);
+    glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose(vrhr::eyeproj).as_array());
     }
   #else
   if(0) ;
   #endif
   else {
+    dynamicval<eGeometry> g(geometry, gCubeTiling);
     transmatrix proj = Id;
     proj = eupush(-global_projection * d, 0) * proj;
     proj = euscale(cd->tanfov / (vid.stereo_mode == sLR ? 2 : 1), cd->tanfov * cd->ysize / cd->xsize) * proj;
     proj = eupush(-((cd->xcenter-cd->xtop)*2./cd->xsize - 1), -((cd->ycenter-cd->ytop)*2./cd->ysize - 1)) * proj;
-    glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose3(proj).as_array());
+    glUniformMatrix4fv(o->uProjection, 1, 0, glhr::tmtogl_transpose(proj).as_array());
     }
   
   if(!callhandlers(false, hooks_rayset, o)) {

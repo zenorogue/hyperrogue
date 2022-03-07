@@ -744,10 +744,12 @@ void geometry_information::prepare_basics() {
     base_distlimit = arb::current.range;
     }
   
+  #if MAXMDIM >= 4
   if(is_subcube_based(variation)) {
     scalefactor /= reg3::subcube_count;
     orbsize /= reg3::subcube_count;
     }
+  #endif
 
   if(scale_used()) {
     scalefactor *= vid.creature_scale;
@@ -1142,8 +1144,10 @@ EX string cgi_string() {
   
   if(GOLDBERG_INV) V("GP", its(gp::param.first) + "," + its(gp::param.second));
   if(IRREGULAR) V("IRR", its(irr::irrid));
+  #if MAXMDIM >= 4
   if(is_subcube_based(variation)) V("SC", its(reg3::subcube_count));
   if(variation == eVariation::coxeter) V("COX", its(reg3::coxeter_param));
+  #endif
 
   #if CAP_ARCM
   if(arcm::in()) V("ARCM", arcm::current.symbol);
@@ -1198,6 +1202,12 @@ EX string cgi_string() {
   return s;
   }
 
+#if MAXMDIM >= 4
+#define IFINTRA(x,y) x
+#else
+#define IFINTRA(x,y) y
+#endif
+
 EX void check_cgi() {
   string s = cgi_string();
   
@@ -1207,7 +1217,7 @@ EX void check_cgi() {
   if(fake::in()) fake::underlying_cgip->timestamp = ntimestamp;
   if(arcm::alt_cgip) arcm::alt_cgip->timestamp = ntimestamp;
   
-  if(isize(cgis) > 4 && intra::data.empty()) {
+  if(isize(cgis) > 4 && IFINTRA(intra::data.empty(), true)) {
     vector<pair<int, string>> timestamps;
     for(auto& t: cgis) timestamps.emplace_back(-t.second.timestamp, t.first);
     sort(timestamps.begin(), timestamps.end());

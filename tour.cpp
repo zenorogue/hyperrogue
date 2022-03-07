@@ -103,6 +103,11 @@ EX void slide_url(presmode mode, char key, string text, string url) {
       }});
   }
 
+EX void slide_action(presmode mode, char key, string text, reaction_t act) {
+  if(mode == pmHelpEx)
+    help_extensions.push_back(help_extension{key, text, act});
+  }
+
 /** \brief an auxiliary function to enable a visualization in the Canvas land */
 EX void setCanvas(presmode mode, char canv) {
   if(mode == pmStart) {
@@ -206,25 +211,29 @@ void return_geometry() {
   addMessage(XLAT("Returned to your game."));
   }
 
+EX bool next_slide() {
+  flagtype flags = slides[currentslide].flags;
+  popScreenAll();
+  if(gamestack::pushed()) {
+    return_geometry();
+    if(!(flags & QUICKGEO)) return true;
+    }
+  if(flags & FINALSLIDE) return true;
+  presentation(pmStop);
+  slide_restore_all();
+  currentslide++;
+  presentation(pmStart);
+  slidehelp();
+  return true;
+  }
+
 bool handleKeyTour(int sym, int uni) {
   if(!tour::on) return false;
   if(!(cmode & sm::DOTOUR)) return false;
   bool inhelp = cmode & sm::HELP;
   flagtype flags = slides[currentslide].flags;
-  if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (!inhelp || (flags & QUICKSKIP))) {
-    popScreenAll();
-    if(gamestack::pushed()) { 
-      return_geometry();
-      if(!(flags & QUICKGEO)) return true; 
-      }
-    if(flags & FINALSLIDE) return true;
-    presentation(pmStop);
-    slide_restore_all();
-    currentslide++;
-    presentation(pmStart);
-    slidehelp();
-    return true;
-    }
+  if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (!inhelp || (flags & QUICKSKIP)))
+    return next_slide();
   if(sym == SDLK_BACKSPACE) {
     if(gamestack::pushed()) { 
       gamestack::pop();

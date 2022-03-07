@@ -401,7 +401,7 @@ EX eOrbLandRelation getOLR(eItem it, eLand l) {
   if(l == laDungeon) {
     if(it == itOrbSafety || it == itOrbFrog || 
       it == itOrbTeleport || it == itOrbMatter || it == itOrbNature ||
-      it == itOrbAether || it == itOrbSummon || it == itOrbStone) 
+      it == itOrbAether || it == itOrbSummon || it == itOrbStone || it == itOrbChaos)
       return olrForbidden;
     }
 

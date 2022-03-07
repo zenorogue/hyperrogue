@@ -1162,6 +1162,7 @@ EX namespace gp {
       return S3 == 3 ? XLAT("chamfered") : XLAT("expanded");
     else if(GOLDBERG && param == loc(3, 0) && S3 == 3)
       return XLAT("2x bitruncated");
+    #if MAXMDIM >= 4
     else if(variation == eVariation::subcubes)
       return XLAT("subcubed") + "(" + its(reg3::subcube_count) + ")";
     else if(variation == eVariation::dual_subcubes)
@@ -1170,6 +1171,7 @@ EX namespace gp {
       return XLAT("bitruncated-subcubed") + "(" + its(reg3::subcube_count) + ")";
     else if(variation == eVariation::coxeter)
       return XLAT("subdivided") + "(" + its(reg3::coxeter_param) + ")";
+    #endif
     else {
       auto p = human_representation(param);
       string s = "GP(" + its(p.first) + "," + its(p.second) + ")";

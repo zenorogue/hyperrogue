@@ -307,7 +307,7 @@ EX void achievement_collection2(eItem it, int q) {
   if(it == itHolyGrail) {
     if(q == 1) achievement_gain("GRAIL2");
     if(PURE && geometry == gNormal)
-      achievement_gain("GRAILH", rg::special_geometry);
+      achievement_gain("GRAILH", rg::special_geometry_nicewalls);
     #if CAP_CRYSTAL
     if(PURE && cryst && ginf[gCrystal].sides == 8 && ginf[gCrystal].vertex == 4 && !crystal::used_compass_inside)
       achievement_gain("GRAIL4D", rg::special_geometry);

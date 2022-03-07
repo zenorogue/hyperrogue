@@ -466,8 +466,8 @@ EX transmatrix to_other_side(hyperpoint h1, hyperpoint h2) {
 
 /** @brief positive for a material vertex, 0 for ideal vertex, negative for ultra-ideal vertex */
 EX ld material(const hyperpoint& h) {
-  if(sphere) return intval(h, Hypc);
-  else if(hyperbolic) return -intval(h, Hypc);
+  if(sphere || in_s2xe()) return intval(h, Hypc);
+  else if(hyperbolic || in_h2xe()) return -intval(h, Hypc);
   else if(sl2) return h[2]*h[2] + h[3]*h[3] - h[0]*h[0] - h[1]*h[1];
   else return h[LDIM];
   }
@@ -505,7 +505,7 @@ EX hyperpoint normalize(hyperpoint H) {
 /** like normalize but makes (ultra)ideal points material */
 EX hyperpoint ultra_normalize(hyperpoint H) {
   if(material(H) <= 0) {
-    H[LDIM] = hypot_d(LDIM, H) + 1e-6;
+    H[LDIM] = hypot_d(LDIM, H) + 1e-10;
     }
   return normalize(H);
   }
@@ -760,7 +760,7 @@ EX hyperpoint parabolic13(hyperpoint h) {
 EX transmatrix spintoc(const hyperpoint& H, int t, int f) {
   transmatrix T = Id;
   ld R = hypot(H[f], H[t]);
-  if(R >= 1e-12) {
+  if(R >= 1e-15) {
     T[t][t] = +H[t]/R; T[t][f] = +H[f]/R;
     T[f][t] = -H[f]/R; T[f][f] = +H[t]/R;
     }
@@ -774,7 +774,7 @@ EX transmatrix spintoc(const hyperpoint& H, int t, int f) {
 EX transmatrix rspintoc(const hyperpoint& H, int t, int f) {
   transmatrix T = Id;
   ld R = hypot(H[f], H[t]);
-  if(R >= 1e-12) {
+  if(R >= 1e-15) {
     T[t][t] = +H[t]/R; T[t][f] = -H[f]/R;
     T[f][t] = +H[f]/R; T[f][f] = +H[t]/R;
     }
@@ -853,7 +853,7 @@ EX transmatrix ggpushxto0(const hyperpoint& H, ld co) {
     return mscale(PIU(ggpushxto0(d.second, co)), d.first * co);
     }
   transmatrix res = Id;
-  if(sqhypot_d(GDIM, H) < 1e-12) return res;
+  if(sqhypot_d(GDIM, H) < 1e-16) return res;
   ld fac = -curvature()/(H[LDIM]+1);
   for(int i=0; i<GDIM; i++)
   for(int j=0; j<GDIM; j++)

@@ -794,6 +794,24 @@ EX void track_actions() {
     }  
   }
 
+EX void get_eyes() {
+  for(int a=0; a<2; a++) {
+    auto eye = vr::EVREye(a);
+    E4;
+    vrdata.proj[a] =
+      vr_to_hr(vrdata.vr->GetProjectionMatrix(eye, 0.01, 300));
+
+    vrdata.iproj[a] = MirrorZ * inverse(vrdata.proj[a]);
+
+    // println(hlog, "projection = ", vrdata.proj[a]);
+
+    vrdata.eyepos[a] =
+      vr_to_hr(vrdata.vr->GetEyeToHeadTransform(eye));
+
+    // println(hlog, "eye-to-head = ", vrdata.eyepos[a]);
+    }
+  }
+
 EX void start_vr() {
 
   if(true) { sm = Id; sm[1][1] = sm[2][2] = -1; }
@@ -830,23 +848,12 @@ EX void start_vr() {
   println(hlog, "recommended size: ", int(vrdata.xsize), " x ", int(vrdata.ysize));
   
   for(int a=0; a<2; a++) {
-    auto eye = vr::EVREye(a);
     vrdata.eyes[a] = new vr_framebuffer(vrdata.xsize, vrdata.ysize);
     println(hlog, "eye ", a, " : ", vrdata.eyes[a]->ok ? "OK" : "Error");
-    
-    vrdata.proj[a] = 
-      vr_to_hr(vrdata.vr->GetProjectionMatrix(eye, 0.01, 300));
-    
-    vrdata.iproj[a] = MirrorZ * inverse(vrdata.proj[a]);
-    
-    println(hlog, "projection = ", vrdata.proj[a]);
-    
-    vrdata.eyepos[a] =
-      vr_to_hr(vrdata.vr->GetEyeToHeadTransform(eye));
-
-    println(hlog, "eye-to-head = ", vrdata.eyepos[a]);
     }
-  
+    
+  get_eyes();
+
   //CreateFrameBuffer( m_nRenderWidth, m_nRenderHeight, leftEyeDesc );
   //CreateFrameBuffer( m_nRenderWidth, m_nRenderHeight, rightEyeDesc );
   
@@ -1021,7 +1028,8 @@ EX void gen_mv() {
 EX shiftmatrix master_cview;
 
 EX void render() {
-  track_poses();  
+  track_poses();
+  get_eyes();
   resetbuffer rb;
   state = 2;
   vrhr::frusta.clear();
@@ -1033,11 +1041,31 @@ EX void render() {
     if(1) {
       make_actual_view();
       master_cview = cview();
+
+      /* unfortunately we need to backup everything that could change by shift_view... */
       dynamicval<transmatrix> tN(NLP, NLP);
       dynamicval<transmatrix> tV(View, View);
       dynamicval<transmatrix> tC(current_display->which_copy, current_display->which_copy);
       dynamicval<transmatrix> trt(radar_transform);
       
+      /* changed in intra */
+      dynamicval<ld> tcs(camera_speed);
+      dynamicval<ld> tcl(anims::cycle_length);
+      dynamicval<ld> tau(vrhr::absolute_unit_in_meters);
+      dynamicval<ld> tel(walking::eye_level);
+      dynamicval<int> tfd(walking::floor_dir);
+      dynamicval<cell*> tof(walking::on_floor_of);
+
+      int id = intra::current;
+      cell *co = centerover;
+      finalizer fin([&] {
+        if(intra::current != id) {
+          println(hlog, "rendering via portal");
+          intra::switch_to(id);
+          centerover = co;
+          }
+        });
+
       if(hsm == eHeadset::rotation_only) {
         transmatrix T = hmd_at;
         be_33(T);

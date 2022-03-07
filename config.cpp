@@ -152,6 +152,7 @@ struct int_setting : public setting {
   void show_edit_option(char key) override;
   cld get_cld() override { return *value; }
   int_setting *editable(int min_value, int max_value, ld step, string menu_item_name, string help_text, char key) {
+    this->is_editable = true;
     this->min_value = min_value;
     this->max_value = max_value;
     this->menu_item_name = menu_item_name;
@@ -2890,7 +2891,7 @@ void list_setting::show_edit_option(char key) {
     int q = isize(options);
     for(int i=0; i<q; i++) {
       dialog::addBoolItem(XLAT(options[i].first), get_value() == i, 'a'+i);
-      dialog::add_action([this, i] { set_value(i); popScreen(); });
+      dialog::add_action([this, i] { set_value(i); if(reaction) reaction(); popScreen(); });
       dialog::addBreak(100);
       if(options[i].second != "") {
         dialog::addHelp(XLAT(options[i].second));

@@ -13,6 +13,7 @@ g -- generate the current room (buggy)
 m -- see the map (toggle)
 p -- pause (toggle)
 z -- screenshot menu
+v -- HyperRogue settings
 q -- quit
 s -- save to platformer.lev
 1 -- place a small block under the mouse
@@ -151,7 +152,6 @@ struct room {
   
   void initial() {
     int ylev = where->master->distance;
-    println(hlog, "ylev = ", ylev);
     if(ylev <= 0)
       for(int y=room_y-6; y<room_y; y++)
       for(int x=0; x<room_x; x++)
@@ -550,7 +550,7 @@ bool draw_room_on_map(cell *c, const shiftmatrix& V) {
   p.tinf = &roomtinf;
   p.offset_texture = 0;
   p.texture_id = r.room_texture->textureid;
-  println(hlog, "offset = ", p.offset, " texture_offset = ", p.offset_texture);
+  // println(hlog, "offset = ", p.offset, " texture_offset = ", p.offset_texture);
   
   auto render_at = [&] (GLuint texid, double px0, double py0, double px1, double py1,
     double tx0, double ty0, double tx1, double ty1) {
@@ -632,6 +632,7 @@ void render_room(room *r) {
 template<class R> void render_room_objects(room *r, R render_at) {
   auto pb = get_pixel_bbox();  
   if(r != current_room) return;
+  create_sprite_texture();
   render_at(sprite_texture->textureid, pb.minx, pb.miny, pb.maxx, pb.maxy, 0, 0, man_x/256., man_y/256.);
   }
 
@@ -704,14 +705,29 @@ void run() {
   dialog::add_key_action('m', [] { 
     map_on = !map_on;
     });
+  dialog::add_key_action('v', [] {
+    pushScreen(showSettings);
+    });
   dialog::add_key_action('p', [] { 
     paused = !paused;
     });
   dialog::add_key_action('z', [] { 
     pushScreen(shot::menu);
     });
-  dialog::add_key_action('q', [] {  exit(0); });
-  dialog::add_key_action('s', [] {  
+  dialog::add_key_action('q', [] {
+    if(tour::on) tour::next_slide();
+    else exit(0);
+    });
+  dialog::add_key_action('o', [] {
+    if(tour::on) tour::next_slide();
+    });
+  dialog::add_key_action(SDLK_ESCAPE, [] {
+    if(tour::on) tour::next_slide();
+    });
+  dialog::add_key_action(SDLK_F10, [] {
+    if(tour::on) tour::next_slide();
+    });
+  dialog::add_key_action('s', [] {
     mapstream::saveMap("platformer.lev");
     });
   
@@ -801,6 +817,24 @@ void add_platf_hooks() {
   }
 
 auto chk = arg::add3("-platformer", enable)
+  + addHook_rvslides(195, [] (string s, vector<tour::slide>& v) {
+      if(s != "mixed") return;
+      v.push_back(tour::slide{
+        "platformer", 10, tour::LEGAL::NONE | tour::QUICKSKIP | tour::QUICKGEO,
+        "A non-Euclidean platformer.\n\nPress up/left/right to move the guy.\n\nM to see the map\n\nP to pause\n\nV to change HyperRogue settings.\n\nPress Q when you are done.\n"
+        ,
+        [] (tour::presmode mode) {
+          slide_url(mode, 'y', "non-Euclidean platformer (YouTube)", "https://www.youtube.com/watch?v=eb2DhCcGH7U");
+          slide_url(mode, 't', "non-Euclidean platformer (Twitter)", "https://twitter.com/ZenoRogue/status/1467233150380089345");
+          slide_url(mode, 'g', "how to edit this", "https://github.com/zenorogue/hyperrogue/blob/master/rogueviz/platformer.cpp");
+          setCanvas(mode, '0');
+          using namespace tour;
+          if(mode == pmStart) {
+            mapstream::loadMap("platformer.lev");
+            }
+          }
+        });
+      })
 + addHook(mapstream::hooks_loadmap, 100, [] (fhstream& f, int id) {
     if(id == 66) {
       println(hlog, "loading platformer");

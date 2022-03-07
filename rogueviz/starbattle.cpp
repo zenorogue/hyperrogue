@@ -488,6 +488,7 @@ void launch() {
   
   showstartmenu = false;
   mapeditor::drawplayer = false;
+  rv::hook(hooks_drawcell, 100, draw_star);
   }
 
 #if CAP_COMMANDLINE
@@ -515,7 +516,6 @@ int rugArgs() {
 
 auto starbattle_hook = 
   addHook(hooks_args, 100, rugArgs) +
-  addHook(hooks_drawcell, 100, draw_star) +
   addHook(mapstream::hooks_savemap, 100, [] (fhstream& f) {
     f.write<int>(isize(sdata));
     for(auto& sd: sdata) {

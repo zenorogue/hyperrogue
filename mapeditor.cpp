@@ -449,12 +449,14 @@ EX namespace mapstream {
       f.write(gp::param.second);
       }
     #endif
+    #if MAXMDIM >= 4
     if(variation == eVariation::coxeter) {
       f.write(reg3::coxeter_param);
       }
     if(is_subcube_based(variation )) {
       f.write(reg3::subcube_count);
       }
+    #endif
     #if CAP_FIELD
     if(geometry == gFieldQuotient) {
       using namespace fieldpattern;
@@ -541,12 +543,14 @@ EX namespace mapstream {
       f.read(gp::param.second);
       }
     #endif
+    #if MAXMDIM >= 4
     if(variation == eVariation::coxeter && vernum >= 0xA908) {
       f.read(reg3::coxeter_param);
       }
     if(is_subcube_based(variation) && vernum >= 0xA908) {
       f.read(reg3::subcube_count);
       }
+    #endif
     #if CAP_CRYSTAL
     if(cryst && vernum >= 10504) {
       int sides;
@@ -702,7 +706,9 @@ EX namespace mapstream {
     }
     
     addToQueue(save_start());
+    #if MAXMDIM >= 4
     if(intra::in) intra::prepare_need_to_save();
+    #endif
     for(int i=0; i<isize(cellbyid); i++) {
       cell *c = cellbyid[i];
       if(i) {
@@ -745,7 +751,9 @@ EX namespace mapstream {
       f.write(c->wparam); f.write(c->landparam);
       f.write_char(c->stuntime); f.write_char(c->hitpoints);
       bool blocked = false;
+      #if MAXMDIM >= 4
       if(intra::in && isWall3(c) && !intra::need_to_save.count(c)) blocked = true;
+      #endif
       if(!blocked)
       for(int j=0; j<c->type; j++) {
         cell *c2 = c->move(j);
@@ -756,6 +764,12 @@ EX namespace mapstream {
     int32_t n = -1; f.write(n);
     int32_t id = cellids.count(cwt.at) ? cellids[cwt.at] : -1;
     f.write(id);
+
+    if(f.vernum >= 0xA90C) {
+      vector<color_t> v;
+      for(auto c: walking::colors_of_floors) v.push_back(c);
+      f.write(v);
+      }
     
     save_drawing_tool(f);
 
@@ -771,6 +785,7 @@ EX namespace mapstream {
       for(int i=0; i<multi::players; i++)
         f.write(cellids[multi::player[i].at]);
 
+    #if MAXMDIM >= 4
     if(intra::in) {
       for(int i=0; i<isize(intra::portals_to_save); i++) {
         auto& p = intra::portals_to_save[i];
@@ -789,6 +804,7 @@ EX namespace mapstream {
         }
       f.write<char>(0);
       }
+    #endif
       
     callhooks(hooks_savemap, f);
     f.write<int>(0);
@@ -970,6 +986,13 @@ EX namespace mapstream {
     savecount = 0; savetime = 0;
     cheater = 1;
     
+    if(f.vernum >= 0xA90C) {
+      vector<color_t> v;
+      f.read(v);
+      walking::colors_of_floors.clear();
+      for(auto c: v) walking::colors_of_floors.insert(c);
+      }
+
     load_drawing_tool(f);
 
     dynamicval<bool> a3(vid.always3, vid.always3);
@@ -1002,6 +1025,7 @@ EX namespace mapstream {
           }
       }
 
+    #if MAXMDIM >= 4
     if(intra::in) {
       while(true) {
         char k = f.get<char>();
@@ -1015,6 +1039,7 @@ EX namespace mapstream {
         cw.spin = fixspin(relspin[id], spin, cw.at->type, f.vernum);
         }
       }
+    #endif
 
     if(f.vernum >= 0xA848) {
       int i;
@@ -1060,9 +1085,14 @@ EX namespace mapstream {
     if(!f.f) return false;
     f.write(f.vernum);
     f.write(dual::state);
+    #if MAXMDIM >= 4
     int q = intra::in ? isize(intra::data) : 0;
     f.write(q);
+    #else
+    int q = 0;
+    #endif
     if(q) {
+      #if MAXMDIM >= 4
       intra::prepare_to_save();
       int qp = isize(intra::portals_to_save);
       f.write(qp);
@@ -1072,6 +1102,7 @@ EX namespace mapstream {
         }
       intra::resetter ir;
       for(int i=0; i<q; i++) { intra::switch_to(i); save_only_map(f); }
+      #endif
       }
     else {
       // make sure we save in correct order
@@ -1102,6 +1133,7 @@ EX namespace mapstream {
     if(q) {
       int qp;
       f.read(qp);
+      #if MAXMDIM >= 4
       intra::portals_to_save.resize(qp);
       for(auto& ps: intra::portals_to_save) {
         f.read(ps.spin);
@@ -1110,12 +1142,14 @@ EX namespace mapstream {
         }
       for(int i=0; i<q; i++) {
         intra::in = true; /* so that it knows to load portals */
+        game_active = false;
         load_only_map(f);
         intra::in = false;
         intra::become();
         }
       intra::start();
       intra::load_saved_portals();
+      #endif
       }
     else {
       dual::split_or_do([&] { load_only_map(f); });

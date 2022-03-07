@@ -24,6 +24,11 @@ EX int newRoundTableRadius() {
   }
 
 #if CAP_COMPLEX2
+/** should we generate 'Castle Anthrax' instead of Camelot (an infinite sequence of horocyclic Camelot-likes */
+EX bool anthrax() {
+  return ls::single() && hyperbolic && !cryst;
+  }
+
 EX int getAnthraxData(cell *c, bool b) {
   int d = celldistAlt(c);
   int rad = 28 + 3 * camelot::anthraxBonus;
@@ -62,7 +67,7 @@ EX int celldistAltRelative(cell *c) {
     return celldist(c) - 3;
     }
   #if CAP_COMPLEX2
-  if(ls::single()) return getAnthraxData(c, false);
+  if(anthrax()) return getAnthraxData(c, false);
   #endif
   return celldistAlt(c) - roundTableRadius(c);
   }
@@ -1777,7 +1782,7 @@ EX eMonster camelot_monster() {
 
 EX void buildCamelot(cell *c) {
   int d = celldistAltRelative(c);
-  if(ls::single() || (d <= 14 && roundTableRadius(c) > 20)) {
+  if(anthrax() || (d <= 14 && roundTableRadius(c) > 20)) {
     gen_alt(c);
     preventbarriers(c);
     if(d == 10) {
@@ -1817,7 +1822,8 @@ EX void buildCamelot(cell *c) {
         }
       }
     if(d == 0) c->wall = waRoundTable;
-    if(celldistAlt(c) == 0 && !ls::single()) c->item = itHolyGrail;
+    if(celldistAlt(c) == 0 && !anthrax()) println(hlog, "placed Holy Grail on ", c);
+    if(celldistAlt(c) == 0 && !anthrax()) c->item = itHolyGrail;
     if(d < 0 && hrand(7000) <= 10 + items[itHolyGrail] * 5)
       c->monst = camelot_monster();
     if(d == 1) {
@@ -1829,12 +1835,12 @@ EX void buildCamelot(cell *c) {
         if(c->move(i) && celldistAltRelative(c->move(i)) < d)
           c->mondir = (i+3) % 6;
       }
-    if(ls::single() && d >= 2 && d <= 8 && hrand(1000) < 10)
+    if(anthrax() && d >= 2 && d <= 8 && hrand(1000) < 10)
       c->item = itOrbSafety;
-    if(d == 5 && ls::single())
+    if(d == 5 && anthrax())
       c->item = itGreenStone;
     if(d <= 10) c->land = laCamelot;
-    if(d > 10 && !eubinary && !ls::single()) {
+    if(d > 10 && !eubinary && !anthrax()) {
       setland(c, eLand(altmap::orig_land(c->master->alt->alt)));
       if(c->land == laNone) printf("Camelot\n"); // NONEDEBUG
       }

@@ -1270,6 +1270,7 @@ int read_geom_args() {
     PHASEFROM(2);
     set_variation(eVariation::warped);
     }
+  #if MAXMDIM >= 4
   else if(argis("-subcubes")) {
     PHASEFROM(2);
     stop_game();
@@ -1300,6 +1301,7 @@ int read_geom_args() {
     set_variation(eVariation::coxeter);
     shift(); reg3::coxeter_param = argi();
     }
+  #endif
   #endif
   #if CAP_FIELD
   else if(argis("-fi")) {

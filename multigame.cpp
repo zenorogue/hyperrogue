@@ -64,7 +64,11 @@ void gamedata_all(gamedata& gd) {
   gd.store(hybrid::underlying);
   gd.store(hybrid::csteps);
   gd.store(hybrid::underlying_cgip);
-  gd.store_ptr(vid);
+  gd.store_ptr(vid.projection_config);
+  gd.store_ptr(vid.rug_config);
+  gd.store(vid.yshift);
+  gd.store(vid.plevel_factor);
+  gd.store(vid.binary_width);
   gd.store(sightrange_bonus);
   gd.store(genrange_bonus);
   gd.store(gamerange_bonus);
@@ -179,8 +183,7 @@ EX namespace dual {
     dynamicval<int> dm(dual::state, 2);
     int cg = currently_loaded;
       
-    bool orbusedbak[ittypes];
-    for(int i=0; i<ittypes; i++) orbusedbak[i] = orbused[i];
+    auto orbusedbak = orbused;
 
     if(d < 0) {
       if(d == -2 && items[itGreenStone] < 2) {
@@ -193,7 +196,7 @@ EX namespace dual {
       for(int k=0; k<2; k++) {
         switch_to(k);
         ok = ok && movepcto(d, subdir, true);
-        for(int i=0; i<ittypes; i++) orbused[i] = orbusedbak[i];
+        orbused = orbusedbak;
         }
       if(ok && checkonly) {
         switch_to(cg);

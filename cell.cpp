@@ -1293,6 +1293,12 @@ EX vector<cell*> build_shortest_path(cell *c1, cell *c2) {
   }
 
 EX void clearCellMemory() {
+  #if MAXMDIM >= 4
+  if(intra::in) {
+    intra::erase_all_maps();
+    return;
+    }
+  #endif
   for(int i=0; i<isize(allmaps); i++) 
     if(allmaps[i])
       delete allmaps[i];

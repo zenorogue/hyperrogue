@@ -6,9 +6,11 @@
  */
 
 #include "hyper.h"
+
 namespace hr {
 
-EX bool orbused[ittypes], lastorbused[ittypes];
+EX array<bool, ittypes> orbused;
+EX array<bool, ittypes> lastorbused;
 
 EX bool markOrb(eItem it) {
   if(!items[it]) return false;
@@ -314,6 +316,7 @@ EX bool distanceBound(cell *c1, cell *c2, int d) {
 
 EX void checkFreedom(cell *cf) {
   manual_celllister cl;
+  dynamicval<decltype(orbused)> d(orbused);
   cl.add(cf);
   for(int i=0; i<isize(cl.lst); i++) {
     cell *c = cl.lst[i];
@@ -1027,6 +1030,10 @@ EX void checkStunKill(cell *dest) {
       return;
       }
     }
+  if(dest->monst == moShadow) {
+    addMessage(XLAT("%The1 is destroyed!", dest->monst));
+    killMonster(dest, moNone);
+    }
   /* if(!isPermanentFlying(dest->monst) && cellEdgeUnstable(dest)) {
     addMessage(XLAT("%The1 falls!", dest->monst));
     fallMonster(dest);
@@ -1598,6 +1605,15 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   return itNone;
   }
 
+bool isValentines() {
+  const time_t now = time(NULL);
+  const struct tm *datetime = localtime(&now);
+
+  // 0-indexed tm_mon, 1-indexed tm_mday
+  // So this is February (2nd month), and the 14th day.
+  return datetime->tm_mon == 1 && datetime->tm_mday == 14;
+}
+
 EX int orbcharges(eItem it) {
   switch(it) {
     case itRevolver: //pickup-key
@@ -1607,6 +1623,7 @@ EX int orbcharges(eItem it) {
     case itOrbDiscord:
       return inv::on ? 46 : 23;
     case itOrbLove:
+      return isValentines() ? 31 : 30;
     case itOrbUndeath:
     case itOrbSpeed: //"pickup-speed");
     case itOrbInvis:

@@ -392,11 +392,17 @@ EX void full_rotate_camera(int dir, ld val) {
   else if(GDIM == 3) {
     val *= camera_rot_speed;
     if(third_person_rotation) shift_view(ctangent(2, -third_person_rotation)), didsomething = true, playermoved = false;
-    if(keep_vertical()) {
+    ld max_angle = quarter_circle - 1e-4;
+    if(walking::on && dir == 1) {
+      max_angle /= degree;
+      walking::eye_angle += val * walking::eye_angle_scale / degree;
+      if(walking::eye_angle > max_angle) walking::eye_angle = max_angle;
+      if(walking::eye_angle < -max_angle) walking::eye_angle = -max_angle;
+      }
+    else if(keep_vertical()) {
       hyperpoint vv = vertical_vector();
       ld alpha = -atan2(vv[2], vv[1]);
       rotate_view(cspin(2, 1, alpha));
-      ld max_angle = quarter_circle - 1e-4;
       if(dir == 1 && alpha + val > max_angle)
         val = max_angle - alpha;
       if(dir == 1 && alpha + val < -max_angle)

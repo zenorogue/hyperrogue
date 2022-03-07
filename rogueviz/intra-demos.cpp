@@ -468,8 +468,62 @@ auto hooks =
   // generate binary-tiling H2xE with floors to the current scene, runs automatically
 + arg::add3("-intra-bxe", create_intra_bxe)
   // generate Sol with floors to the current scene, runs autimatically
-+ arg::add3("-intra-sol", create_intra_sol);
++ arg::add3("-intra-sol", create_intra_sol)
 //+ arg::add3("-intra-more", create_intra_more);
++ arg::add3("-intra-demo-floors", [] {
+  walking::colors_of_floors = {
+    0xFFFF40, 0xD0D000,
+    0xC0FFC0, 0x80C080,
+    0xC0FFFF, 0x40FFFF,
+    0x8080FF, 0x0000FF,
+    0xFF80FF, 0xFF00FF,
+    0x64BF95, 0xA4FFD5,
+    0xFFFDD0, 0xFFD080
+    };
+  })
++ addHook_rvslides(10, ([] (string s, vector<tour::slide>& v) {
+    println(hlog, "called with s='", s, "'");
+    if(s != "portal") return;
+
+    using namespace tour;
+    auto load = [] (string s, ld x, int y) {
+      return [s, x, y] {
+        slide_backup(vid.cells_drawn_limit, 100);
+        slide_backup(smooth_scrolling, true);
+        slide_backup(ray::max_cells, 999999);
+        slide_backup(walking::on, true);
+        slide_backup(walking::eye_level, x);
+        mapstream::loadMap(s);
+        slide_backup(ray::fixed_map, true);
+        slide_backup(ray::max_iter_intra, y);
+        };
+      };
+
+    auto add = [&] (string s, string desc, string youtube, string twitter, reaction_t loader) {
+      v.push_back(tour::slide{
+        s, 10, tour::LEGAL::NONE | tour::QUICKSKIP | tour::QUICKGEO, desc,
+        [=] (tour::presmode mode) {
+          setCanvas(mode, '0');
+          if(youtube != "")
+            slide_url(mode, 'y', "YouTube link", youtube);
+          if(twitter != "")
+            slide_url(mode, 't', "Twitter link", twitter);
+          slide_action(mode, 'r', "run this visualization", loader);
+          if(mode == tour::pmKey) pushScreen(intra::show_portals);
+          }
+        });
+      };
+
+    add("inter-geometric portals",
+      "In this world we can find portals between six different geometries. The camera is in 'walking mode' i.e. restricted to keep close to the floor (this can be disabled with '5').",
+      "https://youtu.be/yqUv2JO2BCs", "https://twitter.com/ZenoRogue/status/1496867204419452935",
+      load("portalscene3.lev", 0.2174492, 600)
+      );
+    add("curved landscape",
+      "Here we create portals between Solv and H3 geometries, resulting in a scene looking a bit like a curved landscape.",
+      "", "https://twitter.com/ZenoRogue/status/1446127100516130826",
+      load("solv-h3-scene.lev", 0.05, 3000));
+    }));
 
 }
 

@@ -213,7 +213,7 @@ ld find_zlev(hyperpoint& H) {
 
   if(spatial_graphics) {
     ld zlev = zlevel(H);
-    if(zlev > 1-1e-6 && zlev < 1+1e-6) return 1;
+    if(zlev > 1-1e-9 && zlev < 1+1e-9) return 1;
     H /= zlev;
     return zlev;
     }  
@@ -628,9 +628,9 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       ret[0] = -models::osin - H[0];
       ld height = 0;
       if(zlev != 1) {
-        if(abs(models::ocos) > 1e-5)
+        if(abs(models::ocos) > 1e-9)
           height += H[1] * (pow(zlev, models::ocos) - 1);
-        if(abs(models::ocos) > 1e-5 && models::osin)
+        if(abs(models::ocos) > 1e-9 && models::osin)
           height += H[0] * models::osin * (pow(zlev, models::ocos) - 1) / models::ocos;
         else if(models::osin)
           height += H[0] * models::osin * log(zlev);
@@ -2013,6 +2013,8 @@ EX void optimizeview() {
   fixmatrix(View);
   callhooks(hooks_postoptimize);
   
+  walking::handle();
+
   if(is_boundary(centerover))
     centerover = c, View = oView;
   else
@@ -2756,7 +2758,7 @@ EX bool do_draw(cell *c) {
   // do not display not fully generated cells, unless changing range allowed
   if(c->mpdist > 7 && !allowChangeRange()) return false;
   // in the Yendor Challenge, scrolling back is forbidden
-  if(c->cpdist > 7 && (yendor::on || isHaunted(cwt.at->land)) && !cheater && !autocheat) return false;
+  if(c->cpdist > get_sightrange() && (yendor::on || isHaunted(cwt.at->land)) && !cheater && !autocheat) return false;
 
   return true;
   }  
@@ -2907,7 +2909,9 @@ EX void shift_view(hyperpoint H) {
   static bool recursive = false;
   if(!recursive && intra::in) {
     dynamicval<bool> r(recursive, true);
+    #if MAXMDIM >= 4
     intra::shift_view_portal(H);
+    #endif
     return;
     }
   View = get_shift_view_of(H, View);

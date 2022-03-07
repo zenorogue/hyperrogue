@@ -59,6 +59,7 @@
 #include "highdim-demo.cpp"
 #include "horo63.cpp"
 #include "platformer.cpp"
+#include "intra-demos.cpp"
 #include "gobot.cpp"
 
 #include "kohonen.cpp"
