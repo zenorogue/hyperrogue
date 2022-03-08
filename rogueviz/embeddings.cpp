@@ -11,13 +11,41 @@ embedding_type etype = eNatural;
 map<cell*, kohvec> landscape_at;
 
 map<cellwalker, kohvec> delta_at;
+map<cellwalker, int> delta_id;
+
+int qdelta;
 
 void init_landscape(int dimensions) {
   etype = eLandscape;
   landscape_at.clear();
   delta_at.clear();
+  delta_id.clear();
+  qdelta = 0;
   landscape_at[currentmap->gamestart()].resize(dimensions, 0);
   println(hlog, "initialized for ", currentmap->gamestart());
+  }
+
+kohvec& get_landscape_at(cell *h);
+
+void init_landscape_det(const vector<cell*>& ac) {
+  etype = eLandscape;
+  landscape_at.clear();
+  delta_at.clear();
+  delta_id.clear();
+  qdelta = 0;
+  landscape_at[currentmap->gamestart()].resize(0, 0);
+  for(cell *c: ac) get_landscape_at(c);
+  int dimensions = isize(delta_at);
+  landscape_at.clear();
+  landscape_at[currentmap->gamestart()].resize(dimensions, 0);
+  println(hlog, "qdelta = ", qdelta, " size of delta_at = ", isize(delta_at));
+  for(auto& d: delta_at) {
+    d.second.resize(dimensions, 0);
+    // d.second[id++] = 1;
+    d.second[delta_id[d.first]] = 1;
+    }
+
+  println(hlog, "initialized for ", currentmap->gamestart(), ", dimensions = ", dimensions);
   }
 
 void normalize(cellwalker& cw) {
@@ -55,17 +83,25 @@ void normalize(cellwalker& cw) {
     }
   }
 
+ld hrandd() {
+  return ((hrngen() & HRANDMAX) + .5) / HRANDMAX;
+  }
+
 ld gaussian_random() {
-  return (hrand(1000) + hrand(1000) - hrand(1000) - hrand(1000)) / 1000.;
+  ld u1 = hrandd();
+  ld u2 = hrandd();
+  return sqrt(-2*log(u1)) * cos(2*M_PI*u2);
   }
 
 void apply_delta(cellwalker cw, kohvec& v) {
   normalize(cw);
 
   auto& da = delta_at[cw];
-  if(da.empty()) {
+  if(!delta_id.count(cw)) {
+    delta_id[cw] = qdelta++;
     da.resize(isize(v));
-    for(auto& x: da) x = gaussian_random();
+    for(int i=0; i<min(200, isize(da)); i++)
+      if(i < isize(da)) da[i] = gaussian_random();
     }
 
   for(int i=0; i<isize(v); i++) v[i] += da[i];
@@ -183,7 +219,7 @@ void get_coordinates(kohvec& v, cell *c, cell *c0) {
         for(int i=0; i<MDIM; i++)
           v[i] = h[i];
         }
-      else if(euclid && bounded && WDIM == 2 && T0[0][1] == 0 && T0[1][0] == 0 && T0[0][0] == T0[1][1]) {
+      else if(euclid && bounded && S3 == 3 && WDIM == 2 && T0[0][1] == 0 && T0[1][0] == 0 && T0[0][0] == T0[1][1]) {
         columns = 6;
         alloc(v);
         int s = T0[0][0];
@@ -191,11 +227,11 @@ void get_coordinates(kohvec& v, cell *c, cell *c0) {
           hyperpoint h1 = spin(120*degree*i) * h;
           ld x = h1[1];
           ld alpha = 2 * M_PI * x / s / (sqrt(3) / 2);
-          println(hlog, kz(x), " -> ", kz(alpha));
+          // println(hlog, kz(x), " -> ", kz(alpha));
           v[2*i] = cos(alpha);
           v[2*i+1] = sin(alpha);
           }
-        println(hlog, kz(h), " -> ", v);
+        // println(hlog, kz(h), " -> ", v);
         }
       else if(euclid && bounded && WDIM == 2) {
         columns = 4;

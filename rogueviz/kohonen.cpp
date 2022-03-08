@@ -264,10 +264,7 @@ bool triangulate(kohvec d, neuron& w, map<cell*, neuron*>& find, transmatrix& re
         }
       if(diff < bdiff) bdiff = diff, candidate = w2, cdir = i;      
       }
-    if(cdir == -1) {
-      println(hlog, "not enough directions");
-      return false;
-      }
+    if(cdir == -1) break;
     dirs.push_back(cdir);
     other.push_back(candidate);
     kv.push_back(candidate->net);
@@ -291,6 +288,7 @@ bool triangulate(kohvec d, neuron& w, map<cell*, neuron*>& find, transmatrix& re
   for(int i=0; i<q; i++) {
     R[i][i] = vdot(kv[i], kv[i]);
     if(R[i][i] < 1e-12) {
+      /*
       auto head = [] (const vector<ld>& v) { vector<ld> res; for(int i=0; i<10; i++) res.push_back(v[i]); return res; };
       println(hlog, "dot too small, i=", i,", dirs=", dirs);
       println(hlog, "a = ", head(a));
@@ -299,6 +297,7 @@ bool triangulate(kohvec d, neuron& w, map<cell*, neuron*>& find, transmatrix& re
         println(hlog, "orig kv: ", head(z->net), " @ ", z->where);
       for(auto z: kv)
         println(hlog, "curr kv: ", head(z));
+      */
       return false;
       }
     for(int j=i+1; j<q; j++) {
@@ -445,7 +444,7 @@ struct cellcrawler {
         store(cw, i, j, cl);
         }
       }
-    if(gaussian) for(cellcrawlerdata& s: data)
+    if(gaussian || true) for(cellcrawlerdata& s: data)
       s.dist = mydistance(s.orig.at, start.at);
     }
   
@@ -462,10 +461,12 @@ struct cellcrawler {
       }
     }
 
-  vector<vector<ld>> dispersion;
+  vector<vector<float>> dispersion;
   };
 
 double dispersion_end_at = 1.6;
+
+bool dispersion_long;
 
 double dispersion_precision = .0001;
 int dispersion_each = 1;
@@ -476,10 +477,10 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
   cr.build(cellwalker(c,dir));
 
   if(!gaussian) {
-    vector<ld> curtemp;
-    vector<ld> newtemp;
+    vector<float> curtemp;
+    vector<float> newtemp;
     vector<int> qty;
-    vector<pair<ld*, ld*> > pairs;
+    vector<pair<float*, float*> > pairs;
     int N = isize(net);
     
     curtemp.resize(N, 0);
@@ -503,8 +504,8 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
     auto &d = cr.dispersion;
     
     d.clear();
-  
-    DEBBI(DF_LOG, ("Building dispersion, precision = ", dispersion_precision, " end_at = ", dispersion_end_at, "...\n"));
+    
+    // DEBBI(DF_LOG, ("Building dispersion, precision = ", dispersion_precision, " end_at = ", dispersion_end_at, "...\n"));
     
     for(iter=0; dispersion_count ? true : vmax > vmin * dispersion_end_at; iter++) {
       if(iter % dispersion_each == 0) {
@@ -527,10 +528,13 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
       for(int i=0; i<N; i++) 
         if(curtemp[i] < vmin) vmin = curtemp[i];
         else if(curtemp[i] > vmax) vmax = curtemp[i];
+      // if(iter % 50 == 0) println(hlog, "iter=", iter, " vmin=", vmin, " vmax=", vmax, " pairs=", isize(pairs));
       }
   
-    dispersion_count = isize(d);
-    DEBB(DF_LOG, ("Dispersion count = ", dispersion_count));
+    if(!dispersion_count) {
+      if(!dispersion_long) dispersion_count = isize(d);
+      DEBB(DF_LOG, ("Dispersion count = ", isize(d), " celldist = ", celldist(c)));
+      }
     /*
     println(hlog, "dlast = ", d.back());
     println(hlog, "dlast2 = ", d[d.size()-2]);
@@ -542,7 +546,9 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
 map<int, cellcrawler> scc;
 
 pair<int, int> get_cellcrawler_id(cell *c) {
-  if(among(geometry, gZebraQuotient, gMinimal, gArnoldCat, gField435, gField534) || (euclid && quotient && !bounded) || IRREGULAR || (GDIM == 3 && sphere) || (hyperbolic && GDIM == 3 && quotient)
+  if(!bounded)
+    return make_pair(neuronId(*getNeuronSlow(c)), 0);
+  if(among(geometry, gZebraQuotient, gMinimal, gArnoldCat, gField435, gField534) || (euclid && quotient && !bounded) || IRREGULAR || (GDIM == 3 && sphere) || (hyperbolic && GDIM == 3)
     || (euclid && nonorientable)) {
     // Zebra Quotient does exhibit some symmetries,
     // but these are so small anyway that it is safer to just build
@@ -644,20 +650,20 @@ void step() {
   tt = pow(tt, ttpower);
 
   double sigma = maxdist * tt;
-  int dispid = int(dispersion_count * tt);
 
   if(qpct) {
     int pct = (int) ((qpct * (t+.0)) / tmax);
     if(pct != lpct) {
       lpct = pct;
       analyze();
+}
       
-      if(gaussian)
-        println(hlog, format("t = %6d/%6d %3d%% sigma=%10.7lf maxudist=%10.7lf\n", t, tmax, pct, sigma, maxudist));
-      else
-        println(hlog, format("t = %6d/%6d %3d%% dispid=%5d maxudist=%10.7lf\n", t, tmax, pct, dispid, maxudist));
-      }
-    }
+//      if(gaussian)
+//        println(hlog, format("t = %6d/%6d %3d%% sigma=%10.7lf maxudist=%10.7lf\n", t, tmax, pct, sigma, maxudist));
+//      else
+//        println(hlog, format("t = %6d/%6d %3d%% dispid=%5d maxudist=%10.7lf\n", t, tmax, pct, dispid, maxudist));
+//      }
+    } //
   int id = hrand(samples);
   neuron& n = winner(id);
   whowon.resize(samples);
@@ -678,12 +684,18 @@ void step() {
   cellcrawler& s = scc[cid.first];
   s.sprawl(cellwalker(n.where, cid.second));
 
-  vector<double> fake(1,1);
+  vector<float> fake(0,0);
+  /* for(auto& sd: s.data) 
+    fake.push_back(exp(-sqr(sd.dist/sigma))); */
+  
+  int dispersion_count = isize(s.dispersion);
+  int dispid = int(dispersion_count * tt);
+
   auto it = gaussian ? fake.begin() : s.dispersion[dispid].begin();
 
   for(auto& sd: s.data) {
     neuron *n2 = getNeuron(sd.target.at);
-    if(!n2) continue;
+    if(!n2) { it++; continue; }
     n2->debug++;
     double nu = learning_factor;
     
@@ -697,15 +709,15 @@ void step() {
     
     for(int k=0; k<columns; k++) {
       n2->net[k] += nu * (data[id].val[k] - n2->net[k]);
-      if(isnan(n2->net[k])) 
-        throw hr_exception("obtained nan somehow, nu = " + lalign(0, nu));
+      /* if(isnan(n2->net[k]))
+        throw hr_exception("obtained nan somehow, nu = " + lalign(0, nu)); */
       }
     }
 
-  for(auto& n2: net) {
+  /* for(auto& n2: net) {
     if(n2.debug > 1) throw hr_exception("sprawler error");
     n2.debug = 0;
-    }
+    } */
   
   t--;
   if(t == 0) analyze();
@@ -893,7 +905,7 @@ void initialize_dispersion() {
 
   DEBBI(DF_LOG, ("Initializing dispersion"));
 
-  if(gaussian) {
+  if(gaussian || true) {
     DEBB(DF_LOG, ("dist = ", fts(mydistance(net[0].where, net[1].where))));
     cell *c1 = net[cells/2].where;
     vector<double> mapdist;
@@ -902,18 +914,25 @@ void initialize_dispersion() {
     maxdist = mapdist[isize(mapdist)*5/6] * distmul;
     DEBB(DF_LOG, ("maxdist = ", fts(maxdist)));
     }
-    
+
   dispersion_count = 0;  
-  
+
+  if(!gaussian)
+    DEBB(DF_LOG, ("dispersion precision = ", dispersion_precision, " end_at = ", dispersion_end_at, "...\n"));
+
+  DEBB(DF_LOG, ("building crawlers...\n"));
+
   scc.clear();
   for(int i=0; i<cells; i++) {
     cell *c = net[i].where;
     auto cid = get_cellcrawler_id(c);
     if(!scc.count(cid.first)) {
-      DEBB(DF_LOG, ("Building cellcrawler id = ", itsh(cid.first)));
+      // DEBB(DF_LOG, ("Building cellcrawler id = ", itsh(cid.first)));
       buildcellcrawler(c, scc[cid.first], cid.second);
       }
     }
+
+  DEBB(DF_LOG, ("crawlers constructed = ", isize(scc), "\n"));
 
   lpct = -46130;
   state |= KS_DISPERSION;
@@ -1552,7 +1571,7 @@ int readArgs() {
     gaussian = 0; 
     state &=~ KS_DISPERSION;
     }
-  else if(argis("-somcgauss")) {
+  else if(argis("-somcgauss") || argis("-cgauss")) {
     gaussian = 1;
     state &=~ KS_DISPERSION;
     }
@@ -1582,9 +1601,16 @@ int readArgs() {
     shift(); t = (t*1./tmax) * argi();
     tmax = argi();
     }
+  else if(argis("-somlong")) {
+    shift(); dispersion_long = argi();
+    }
   else if(argis("-somlearn")) {
     // this one can be changed at any moment
     shift_arg_formula(learning_factor);
+    }
+
+  else if(argis("-som-analyze")) {
+    analyze();
     }
 
   else if(argis("-somrun")) {

@@ -235,6 +235,7 @@ void choose_presentation() {
       if(!tour::texts) nomenukey = true;
       popScreenAll();
       tour::start();
+      if(!tour::on) tour::start();
       });
     });
     
@@ -250,7 +251,7 @@ int phooks =
   + addHook(dialog::hooks_display_dialog, 100, [] () {
     if(current_screen_cfunction() == showStartMenu) { 
       dialog::addBreak(100);
-      dialog::addBigItem(XLAT("RogueViz demos"), 'p');
+      dialog::addBigItem(XLAT("RogueViz demos"), 'd');
       dialog::add_action([] () { pushScreen(choose_presentation); });
       }
     });

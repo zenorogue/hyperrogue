@@ -440,6 +440,10 @@ auto msc = arg::add3("-analogs", enable)
           slide_url(mode, 'm', "HyperRogue page about projections", "http://www.roguetemple.com/z/hyper/models.php");
           setCanvas(mode, '0');
           if(mode == pmStart) {
+            slide_backup(mapeditor::drawplayer);
+            slide_backup(vid.use_smart_range);
+            slide_backup(vid.smart_range_detail);
+            slide_backup(vid.linequality);
             enable();
             start_game();
             slide_backup(cycle_models);

@@ -1451,7 +1451,9 @@ void portal_slideshow(tour::ss::slideshow_callback cb) {
               slide_backup(ray::exp_decay_poly, 30);
               slide_backup(ray::fixed_map, true);
               slide_backup(ray::max_iter_iso, 80);
-              #if CAP_VR
+              slide_backup(vid.cells_drawn_limit, 100);
+              slide_backup(mapeditor::drawplayer, false);
+        #if CAP_VR
               slide_backup(vrhr::hsm);
               slide_backup(vrhr::eyes);
               slide_backup(vrhr::cscr);
@@ -1472,6 +1474,7 @@ void portal_slideshow(tour::ss::slideshow_callback cb) {
               loop = 2;
               });
 
+            slidecommand = "notknot options";
             if(mode == tour::pmKey) pushScreen(show);
             }});
       };
