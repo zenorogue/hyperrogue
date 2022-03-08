@@ -418,6 +418,7 @@ struct videopar {
   int faraway_highlight_color; // 0 = monster color, 100 = red-green oscillation
 
   ld ispeed;
+  bool flasheffects;
   };
 
 extern videopar vid;

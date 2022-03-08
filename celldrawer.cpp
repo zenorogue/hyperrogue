@@ -1104,6 +1104,7 @@ void celldrawer::set_land_floor(const shiftmatrix& Vf) {
           if(!chasmgraph(c) && ctof(c) && STDVAR && !arcm::in() && !bt::in() && GDIM == 2) for(int i=0; i<c->type; i++)
             queuepoly(Vf * ddspin(c, i, M_PI/S7) * xpush(cgi.rhexf), cgi.shSwitchDisk, darkena(fcol, fd, 0xFF));
           break;
+        case caflTower: set_towerfloor(celldist); break;
         case caflNone: default:
           set_floor(cgi.shFloor); break;
         }
@@ -2516,7 +2517,7 @@ void celldrawer::add_map_effects() {
     for(int t=0; t<c->type; t++) if(c->move(t)) {
       if(c->move(t)->ligon) {
         int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
-        queueline(V*chei(xspinpush(ticks * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
+        queueline(V*chei(xspinpush((vid.flasheffects ? ticks : ptick(8)) * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
         }
       for(int u: {-1, 1}) {
         cellwalker cw = cellwalker(c, t) + wstep + u;
@@ -2524,7 +2525,7 @@ void celldrawer::add_map_effects() {
         cell *c2 = cw.peek();
         if(c2 && c2->ligon) {
           int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
-          queueline(V*chei(xspinpush(ticks * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t)*currentmap->adj(cw.at, cw.spin), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
+          queueline(V*chei(xspinpush((vid.flasheffects ? ticks : ptick(8)) * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t)*currentmap->adj(cw.at, cw.spin), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
           }
         }
       }

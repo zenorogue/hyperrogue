@@ -629,7 +629,7 @@ EX walltype winf[walltypes] = {
 enum eCanvasFloor { caflNone, caflM, caflFull, caflWarp, caflStar, caflCloud, caflCross, caflCharged,
   caflSStar, caflOver, caflTri, caflFeather, caflBarrow, caflNew, caflTroll, caflButterfly, caflLava,
   caflPalace, caflDemon, caflCave, caflDesert, caflPower, caflRose, caflTurtle, caflDragon, caflReptile,
-  caflHive, caflSwitch, caflEND };
+  caflHive, caflSwitch, caflTower, caflEND };
 
 static const flagtype LF_GENERATE_ALL = Flag(0);
 static const flagtype LF_ICY = Flag(1);
@@ -670,7 +670,7 @@ EX const char *canvasFloorNames[caflEND] = {
   "default", "smaller", "full", "warped", "star", "cloud", "cross", "charged",
   "saloon", "overgrown", "triangle", "feather", "barrow", "elemental", "troll", "butterfly", "lava",
   "palace", "demon", "cave", "desert", "power", "rose", "turtle", "dragon", "reptile",
-  "hive", "jelly"
+  "hive", "jelly", "tower"
   };
 
 EX const landtype linf[landtypes] = {

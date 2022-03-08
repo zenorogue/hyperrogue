@@ -299,22 +299,39 @@ void drawWinter(const shiftmatrix& V, ld hdir, color_t col) {
 
 void drawLightning(const shiftmatrix& V) {
 #if CAP_QUEUE
+  float ds = ptick(600);
   color_t col = darkena(iinf[itOrbLightning].color, 0, 0xFF);
   for(int u=0; u<20; u++) {
-    ld leng = 0.5 / (0.1 + (rand() % 100) / 100.0);
-    ld rad = rand() % 1000;
+    ld leng, rad;
+    if(vid.flasheffects) {
+      leng = 0.5 / (0.1 + (rand() % 100) / 100.0);
+      rad = rand() % 1000;
+      }
+    else {
+      if(u % 5) leng = 1.25 + sintick(200, ld(u) * 1.25) * 0.25;
+      else leng = 2 + sintick(200, ld(u) * 1.25);
+      rad = (u + ds) * (M_PI / 10);
+      }
     shiftmatrix V1 = chei(V, u, 20);
     queueline(V1*xspinpush0(rad, cgi.hexf*0.3), V1*xspinpush0(rad, cgi.hexf*leng), col, 2 + vid.linequality);
     }
 #endif
   }
 
-void drawCurse(const shiftmatrix& V, color_t col) {
+void drawCurse(const shiftmatrix& V, eItem it) {
 #if CAP_QUEUE
-  col = darkena(col, 0, 0xFF);
+  float ds = ptick(450) + (it * 5.5); // Extra offset so both Gluttony and Repulsion are easily visible
+  color_t col = darkena(iinf[it].color, 0, 0xFF);
   for(int u=0; u<20; u++) {
-    ld leng = 0.6 + 0.3 * randd();
-    ld rad = rand() % 1000;
+    ld leng, rad;
+    if(vid.flasheffects) {
+      leng = 0.6 + 0.3 * randd();
+      rad = rand() % 1000;
+      }
+    else {
+      leng = 0.85 + sintick(150, ld(u) * 1.25) * 0.15;
+      rad = (u + ds) * (M_PI / 10);
+      }
     shiftmatrix V1 = chei(V, u, 20);
     queueline(V1*xspinpush0(rad, cgi.hexf*0.3), V1*xspinpush0(rad, cgi.hexf*leng), col, 2 + vid.linequality);
     }
@@ -330,8 +347,8 @@ EX void drawPlayerEffects(const shiftmatrix& V, cell *c, eMonster m) {
   if(items[itOrbShell] > (shmup::on ? 0 : ORBBASE)) drawShield(V, itOrbShell);
 
   if(items[itOrbSpeed]) drawSpeed(V); 
-  if(items[itCurseGluttony]) drawCurse(V, iinf[itCurseGluttony].color); 
-  if(items[itCurseRepulsion]) drawCurse(V, iinf[itCurseRepulsion].color); 
+  if(items[itCurseGluttony]) drawCurse(V, itCurseGluttony); 
+  if(items[itCurseRepulsion]) drawCurse(V, itCurseRepulsion); 
 
   if(onplayer && (items[itOrbSword] || items[itOrbSword2])) {
     using namespace sword;
