@@ -882,8 +882,10 @@ EX namespace mapstream {
         f.read(canvas_default_wall);
       f.read(mapeditor::drawplayer);
       if(patterns::whichCanvas == 'f') f.read(patterns::color_formula);
-      f.read(canvasfloor);
-      f.read(canvasdark);
+      if(f.vernum >= 0xA90C) { // TODO Please replace this with the next version this pull request is included in
+        f.read(canvasfloor);
+        f.read(canvasdark);
+        }
       
       int i;
       f.read(i); if(i > ittypes || i < 0) throw hstream_exception();
