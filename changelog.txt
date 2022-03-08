@@ -4575,3 +4575,21 @@ Geometry:
 - Goldberg-Coxeter improvements (larger limits supported, warn if outside of the supported limits, some are fixed)
 - fixed fat edges in some H3 honeycombs
 - fixed some bugs with Multi-dimensional Crystal quotient space
+
+2022-03-01 09:39 Update 12.0l:
+Orb-related fixes:
+- Curse of Repulsion now correctly marked when used
+- when having Orb of Freedom + Orb of Time, other orbs are no longer drained by Freedom checks
+- Valentine's Easter Egg: Add +1 extra charge to Orb of Love
+
+Geometry:
+- fixed VR in product geometries
+- portals between geometries: fixed some formulas, walking mode
+- fixed dark lines in binary tiling x R raycasting which happened when we got a=0 in quadratic equation
+- made Yendor/Haunted sight radius consistent when the tiling is changed
+- infinite generation for single-land Camelot now only happens in hyperbolic geometry (also fixes the missing Grail in Crystal)
+- additions and fixes to RogueViz
+
+Other:
+- fixed Crossroads wiki links
+- fixed some settings incorrectly showing a warning on editing (this also brings back the 'play music when out of focus' option)

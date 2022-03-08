@@ -42,6 +42,7 @@ EX bool doPickupItemsWithMagnetism(cell *c) {
           c4->item = c3->item;
           moveEffect(movei(c3, c4, (cw+j).spin), moDeadBird);
           c3->item = itNone;
+          markOrb(itCurseRepulsion);
           }
         }
       }

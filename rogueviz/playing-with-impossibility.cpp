@@ -169,7 +169,13 @@ void geodesic_screen(presmode mode, int id) {
   use_angledir(mode, id == 0);
   
   setCanvas(mode, '0');
-  if(mode == pmStart) stop_game(), pmodel = mdHorocyclic, geometry = gCubeTiling, pconf.clip_min = -10000, pconf.clip_max = +100, start_game();
+  if(mode == pmStart) {
+    slide_backup(pmodel);
+    slide_backup(pconf.clip_min);
+    slide_backup(pconf.clip_max);
+    slide_backup(vid.cells_drawn_limit);
+    stop_game(), pmodel = mdHorocyclic, geometry = gCubeTiling, pconf.clip_min = -10000, pconf.clip_max = +100, start_game();
+    }
   
   add_stat(mode, [id] {
     cmode |= sm::SIDE;
@@ -540,6 +546,7 @@ slide dmv_slides[] = {
     [] (presmode mode) {
       setCanvas(mode, '0');
       if(mode == pmStart) {
+        tour::slide_backup(mapeditor::drawplayer, false);
         enable_earth();
       
         View = Id;
@@ -653,6 +660,7 @@ slide dmv_slides[] = {
         set_geometry(gFieldQuotient);
         */
         start_game();
+        tour::slide_backup(mapeditor::drawplayer, false);
         pentaroll::create_pentaroll(true);
         tour::slide_backup(anims::period, 30000.);
         tour::slide_backup(sightranges[geometry], 4);
@@ -1132,7 +1140,7 @@ slide dmv_slides[] = {
 int phooks = 
   0 +
   addHook_slideshows(100, [] (tour::ss::slideshow_callback cb) {
-    cb(XLAT("Playing with Impossibility"), &dmv_slides[0], 'p');
+    cb(XLAT("Playing with Impossibility"), &dmv_slides[0], 'i');
     });
  
 }
