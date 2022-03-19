@@ -2163,28 +2163,30 @@ EX namespace mapeditor {
       displaymm('e', vid.xres-8, 8+fs, 2, vid.fsize, XLAT("e = edit this"), 16);
 #endif
 
+    int prec = snapping ? 15 : 4;
+
     if(!mouseout()) {
-      hyperpoint mh;
-      if(GDIM == 2) {
-        transmatrix T = z_inverse(unshift(drawtrans)) * rgpushxto0(ccenter); /* todo? */
-        mh = spintox(gpushxto0(ccenter) * coldcenter) * T * unshift(mouseh);
-        }
-      else
-        mh = inverse_shift(drawtrans, find_mouseh3());
-        
-      displayfr(vid.xres-8, vid.yres-8-fs*7, 2, vid.fsize, XLAT("x: %1", fts(mh[0],4)), 0xC0C0C0, 16);
-      displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("y: %1", fts(mh[1],4)), 0xC0C0C0, 16);
-      displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("z: %1", fts(mh[2],4)), 0xC0C0C0, 16);
+      shiftpoint h1 = drawtrans * ccenter;
+      shiftpoint h2 = drawtrans * coldcenter;
+      transmatrix T = gpushxto0(unshift(h1));
+      T = spintox(T*unshift(h2)) * T;
+
+      shiftpoint mh1 = full_mouseh();
+      hyperpoint mh = T * unshift(mh1);
+
+      displayfr(vid.xres-8, vid.yres-8-fs*7, 2, vid.fsize, XLAT("x: %1", fts(mh[0],prec)), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("y: %1", fts(mh[1],prec)), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("z: %1", fts(mh[2],prec)), 0xC0C0C0, 16);
       if(MDIM == 4)
-        displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("w: %1", fts(mh[3],4)), 0xC0C0C0, 16);
+        displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("w: %1", fts(mh[3],prec)), 0xC0C0C0, 16);
       mh = inverse_exp(shiftless(mh));
-      displayfr(vid.xres-8, vid.yres-8-fs*3, 2, vid.fsize, XLAT("r: %1", fts(hypot_d(3, mh),4)), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*3, 2, vid.fsize, XLAT("r: %1", fts(hypot_d(3, mh),prec)), 0xC0C0C0, 16);
       if(GDIM == 3) {
-        displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[2], hypot_d(2, mh)) / degree,4)), 0xC0C0C0, 16);
-        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("λ: %1°", fts(-atan2(mh[1], mh[0]) / degree,4)), 0xC0C0C0, 16);
+        displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[2], hypot_d(2, mh)) / degree,prec)), 0xC0C0C0, 16);
+        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("λ: %1°", fts(-atan2(mh[1], mh[0]) / degree,prec)), 0xC0C0C0, 16);
         }
       else {
-        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[1], mh[0]) / degree,4)), 0xC0C0C0, 16);
+        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[1], mh[0]) / degree,prec)), 0xC0C0C0, 16);
         }
       }
 
@@ -2192,7 +2194,7 @@ EX namespace mapeditor {
       cgi.require_usershapes();
       auto& sh = cgi.ushr[&us->d[dslayer]];
       if(sh.e >= sh.s + 3)
-        displayButton(vid.xres-8, vid.yres-8-fs*8, XLAT("area: %1", area_in_pi ? fts(compute_area(sh) / M_PI, 4) + "π" : fts(compute_area(sh), 4)), 'w', 16);
+        displayButton(vid.xres-8, vid.yres-8-fs*8, XLAT("area: %1", area_in_pi ? fts(compute_area(sh) / M_PI, 4) + "π" : fts(compute_area(sh), prec)), 'w', 16);
       }
 
     
