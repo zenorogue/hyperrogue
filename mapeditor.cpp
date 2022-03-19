@@ -12,6 +12,7 @@ EX namespace mapeditor {
 
   EX bool drawing_tool;
   EX bool intexture;
+  EX bool snapping;
 
   #if HDR
   enum eShapegroup { sgPlayer, sgMonster, sgItem, sgFloor, sgWall };
@@ -156,6 +157,12 @@ EX namespace mapeditor {
   
   EX void clear_dtshapes() { dtshapes.clear(); }
   
+  EX shiftpoint full_mouseh() {
+    if(GDIM == 3) return find_mouseh3();
+    if(snapping) return mouse_snap();
+    return mouseh;
+    }
+
   EX void draw_dtshapes() {
 #if CAP_EDIT
     for(auto& shp: dtshapes) {
@@ -169,7 +176,7 @@ EX namespace mapeditor {
       }
 
     if(drawing_tool && (cmode & sm::DRAW)) {
-      shiftpoint moh = GDIM == 2 ? mouseh : find_mouseh3();      
+      shiftpoint moh = full_mouseh();
       dynamicval<ld> lw(vid.linewidth, vid.linewidth * dtwidth * 100);
       if(holdmouse && mousekey == 'c')
         queue_hcircle(rgpushxto0(lstart), hdist(lstart, moh));
@@ -1904,6 +1911,9 @@ EX namespace mapeditor {
       queuecurve(d2, (u%5==0) ? gridcolor : lightgrid, 0, PPR::LINE);
       }
     queueline(drawtrans*ccenter, drawtrans*coldcenter, gridcolor, 4 + vid.linequality);
+
+    if(snapping && !mouseout())
+      queuestr(mouse_snap(), 10, "x", 0xC040C0);
     }
 
   void drawHandleKey(int sym, int uni);
@@ -1959,6 +1969,27 @@ EX namespace mapeditor {
     }
 
 #define EDITING_TRIANGLES (GDIM == 3)
+
+  EX shiftpoint mouse_snap() {
+    ld xdist = HUGE_VAL;
+    shiftpoint resh;
+    auto snap_to = [&] (shiftpoint h) {
+      ld dist = hdist(h, mouseh);
+      if(dist < xdist) xdist = dist, resh = h;
+      };
+    for(auto& p: gmatrix) {
+      cell *c = p.first;
+      auto& T = p.second;
+      snap_to(T * C0);
+      for(int i=0; i<c->type; i++) {
+        hyperpoint h1 = get_corner_position(c, i);
+        hyperpoint h2 = get_corner_position(c, (i+1) % c->type);
+        snap_to(T * h1);
+        snap_to(T * mid(h1, h2));
+        }
+      }
+    return resh;
+    }
 
   EX void showDrawEditor() {
 #if CAP_POLY
@@ -2076,7 +2107,8 @@ EX namespace mapeditor {
         displayButton(8, 8+fs*16, XLAT("p = paint"), 'p', 0);
       if(GDIM == 2) 
         displayfr(8, 8+fs*17, 2, vid.fsize, XLAT("z = z-level"), 0xC0C0C0, 0);
-
+      if(GDIM == 2)
+        displayButton(8, 8+fs*18, XLAT("S = snap (%1)", ONOFF(snapping)), 'S', 0);
       }
 #if CAP_TEXTURE
     else if(freedraw) {
@@ -2105,6 +2137,8 @@ EX namespace mapeditor {
       displaymm('u', 8, 8+fs*6, 2, vid.fsize, XLAT("'u' to load current"), 0);
       if(mousekey == 'a' || mousekey == 'd' || mousekey == 'd' ||
         mousekey == 'c') mousekey = 'n';
+      if(GDIM == 2)
+        displayButton(8, 8+fs*7, XLAT("S = snap (%1)", ONOFF(snapping)), 'S', 0);
       }
     
     if(GDIM == 3)
@@ -2240,6 +2274,7 @@ EX namespace mapeditor {
       if(uni == 'n')
         initShape(sg, id);
       else if(uni == 'u') ;
+      else if(uni == 'S') { snapping = !snapping; return; }
       else if(uni >= '0' && uni <= '9') {
         initShape(sg, id);
         xnew = true;
@@ -2259,6 +2294,8 @@ EX namespace mapeditor {
     if(uni == 'u') 
       loadShapes(sg, id);
     
+    if(uni == 'S') snapping = !snapping;
+
     if(uni == 'z' && haveshape && GDIM == 2)
       dialog::editNumber(dsCur->zlevel, -10, +10, 0.1, 0, XLAT("z-level"),
         XLAT("Changing the z-level will make this layer affected by the parallax effect."));
@@ -2527,7 +2564,7 @@ EX namespace mapeditor {
         addMessage(XLAT("Hint: use F7 to edit floor under the player"));
       }
     
-    shiftpoint mh = GDIM == 2 ? mouseh : find_mouseh3();
+    shiftpoint mh = full_mouseh();
     hyperpoint mh1 = inverse_shift(drawtrans, mh);
 
     bool clickused = false;
@@ -2969,7 +3006,7 @@ EX namespace mapeditor {
      
         usershapelayer &ds(us->d[mapeditor::dslayer]);
         
-        shiftpoint moh = GDIM == 2 ? mouseh : find_mouseh3();
+        shiftpoint moh = full_mouseh();
         
         hyperpoint mh = inverse_shift(mapeditor::drawtrans, moh);
     
