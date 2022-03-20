@@ -263,6 +263,8 @@ namespace objmodels {
   
   inline ld prec = 1;
   
+  inline bool shift_to_ctr = false;
+
   struct object {
     hpcshape sh;
     basic_textureinfo tv;
@@ -272,6 +274,7 @@ namespace objmodels {
   struct model_data : gi_extension {
     ld prec_used;
     vector<shared_ptr<object>> objs;
+    vector<int> objindex;
     void render(const shiftmatrix& V);
     };
   
