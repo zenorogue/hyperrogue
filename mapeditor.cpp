@@ -12,6 +12,7 @@ EX namespace mapeditor {
 
   EX bool drawing_tool;
   EX bool intexture;
+  EX bool snapping;
 
   #if HDR
   enum eShapegroup { sgPlayer, sgMonster, sgItem, sgFloor, sgWall };
@@ -156,6 +157,12 @@ EX namespace mapeditor {
   
   EX void clear_dtshapes() { dtshapes.clear(); }
   
+  EX shiftpoint full_mouseh() {
+    if(GDIM == 3) return find_mouseh3();
+    if(snapping) return mouse_snap();
+    return mouseh;
+    }
+
   EX void draw_dtshapes() {
 #if CAP_EDIT
     for(auto& shp: dtshapes) {
@@ -169,7 +176,7 @@ EX namespace mapeditor {
       }
 
     if(drawing_tool && (cmode & sm::DRAW)) {
-      shiftpoint moh = GDIM == 2 ? mouseh : find_mouseh3();      
+      shiftpoint moh = full_mouseh();
       dynamicval<ld> lw(vid.linewidth, vid.linewidth * dtwidth * 100);
       if(holdmouse && mousekey == 'c')
         queue_hcircle(rgpushxto0(lstart), hdist(lstart, moh));
@@ -1904,6 +1911,9 @@ EX namespace mapeditor {
       queuecurve(d2, (u%5==0) ? gridcolor : lightgrid, 0, PPR::LINE);
       }
     queueline(drawtrans*ccenter, drawtrans*coldcenter, gridcolor, 4 + vid.linequality);
+
+    if(snapping && !mouseout())
+      queuestr(mouse_snap(), 10, "x", 0xC040C0);
     }
 
   void drawHandleKey(int sym, int uni);
@@ -1959,6 +1969,27 @@ EX namespace mapeditor {
     }
 
 #define EDITING_TRIANGLES (GDIM == 3)
+
+  EX shiftpoint mouse_snap() {
+    ld xdist = HUGE_VAL;
+    shiftpoint resh;
+    auto snap_to = [&] (shiftpoint h) {
+      ld dist = hdist(h, mouseh);
+      if(dist < xdist) xdist = dist, resh = h;
+      };
+    for(auto& p: gmatrix) {
+      cell *c = p.first;
+      auto& T = p.second;
+      snap_to(T * C0);
+      for(int i=0; i<c->type; i++) {
+        hyperpoint h1 = get_corner_position(c, i);
+        hyperpoint h2 = get_corner_position(c, (i+1) % c->type);
+        snap_to(T * h1);
+        snap_to(T * mid(h1, h2));
+        }
+      }
+    return resh;
+    }
 
   EX void showDrawEditor() {
 #if CAP_POLY
@@ -2076,7 +2107,8 @@ EX namespace mapeditor {
         displayButton(8, 8+fs*16, XLAT("p = paint"), 'p', 0);
       if(GDIM == 2) 
         displayfr(8, 8+fs*17, 2, vid.fsize, XLAT("z = z-level"), 0xC0C0C0, 0);
-
+      if(GDIM == 2)
+        displayButton(8, 8+fs*18, XLAT("S = snap (%1)", ONOFF(snapping)), 'S', 0);
       }
 #if CAP_TEXTURE
     else if(freedraw) {
@@ -2105,6 +2137,8 @@ EX namespace mapeditor {
       displaymm('u', 8, 8+fs*6, 2, vid.fsize, XLAT("'u' to load current"), 0);
       if(mousekey == 'a' || mousekey == 'd' || mousekey == 'd' ||
         mousekey == 'c') mousekey = 'n';
+      if(GDIM == 2)
+        displayButton(8, 8+fs*7, XLAT("S = snap (%1)", ONOFF(snapping)), 'S', 0);
       }
     
     if(GDIM == 3)
@@ -2129,28 +2163,30 @@ EX namespace mapeditor {
       displaymm('e', vid.xres-8, 8+fs, 2, vid.fsize, XLAT("e = edit this"), 16);
 #endif
 
+    int prec = snapping ? 15 : 4;
+
     if(!mouseout()) {
-      hyperpoint mh;
-      if(GDIM == 2) {
-        transmatrix T = z_inverse(unshift(drawtrans)) * rgpushxto0(ccenter); /* todo? */
-        mh = spintox(gpushxto0(ccenter) * coldcenter) * T * unshift(mouseh);
-        }
-      else
-        mh = inverse_shift(drawtrans, find_mouseh3());
-        
-      displayfr(vid.xres-8, vid.yres-8-fs*7, 2, vid.fsize, XLAT("x: %1", fts(mh[0],4)), 0xC0C0C0, 16);
-      displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("y: %1", fts(mh[1],4)), 0xC0C0C0, 16);
-      displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("z: %1", fts(mh[2],4)), 0xC0C0C0, 16);
+      shiftpoint h1 = drawtrans * ccenter;
+      shiftpoint h2 = drawtrans * coldcenter;
+      transmatrix T = gpushxto0(unshift(h1));
+      T = spintox(T*unshift(h2)) * T;
+
+      shiftpoint mh1 = full_mouseh();
+      hyperpoint mh = T * unshift(mh1);
+
+      displayfr(vid.xres-8, vid.yres-8-fs*7, 2, vid.fsize, XLAT("x: %1", fts(mh[0],prec)), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("y: %1", fts(mh[1],prec)), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("z: %1", fts(mh[2],prec)), 0xC0C0C0, 16);
       if(MDIM == 4)
-        displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("w: %1", fts(mh[3],4)), 0xC0C0C0, 16);
+        displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("w: %1", fts(mh[3],prec)), 0xC0C0C0, 16);
       mh = inverse_exp(shiftless(mh));
-      displayfr(vid.xres-8, vid.yres-8-fs*3, 2, vid.fsize, XLAT("r: %1", fts(hypot_d(3, mh),4)), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*3, 2, vid.fsize, XLAT("r: %1", fts(hypot_d(3, mh),prec)), 0xC0C0C0, 16);
       if(GDIM == 3) {
-        displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[2], hypot_d(2, mh)) / degree,4)), 0xC0C0C0, 16);
-        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("λ: %1°", fts(-atan2(mh[1], mh[0]) / degree,4)), 0xC0C0C0, 16);
+        displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[2], hypot_d(2, mh)) / degree,prec)), 0xC0C0C0, 16);
+        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("λ: %1°", fts(-atan2(mh[1], mh[0]) / degree,prec)), 0xC0C0C0, 16);
         }
       else {
-        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[1], mh[0]) / degree,4)), 0xC0C0C0, 16);
+        displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("ϕ: %1°", fts(-atan2(mh[1], mh[0]) / degree,prec)), 0xC0C0C0, 16);
         }
       }
 
@@ -2158,7 +2194,7 @@ EX namespace mapeditor {
       cgi.require_usershapes();
       auto& sh = cgi.ushr[&us->d[dslayer]];
       if(sh.e >= sh.s + 3)
-        displayButton(vid.xres-8, vid.yres-8-fs*8, XLAT("area: %1", area_in_pi ? fts(compute_area(sh) / M_PI, 4) + "π" : fts(compute_area(sh), 4)), 'w', 16);
+        displayButton(vid.xres-8, vid.yres-8-fs*8, XLAT("area: %1", area_in_pi ? fts(compute_area(sh) / M_PI, 4) + "π" : fts(compute_area(sh), prec)), 'w', 16);
       }
 
     
@@ -2240,6 +2276,7 @@ EX namespace mapeditor {
       if(uni == 'n')
         initShape(sg, id);
       else if(uni == 'u') ;
+      else if(uni == 'S') { snapping = !snapping; return; }
       else if(uni >= '0' && uni <= '9') {
         initShape(sg, id);
         xnew = true;
@@ -2259,6 +2296,8 @@ EX namespace mapeditor {
     if(uni == 'u') 
       loadShapes(sg, id);
     
+    if(uni == 'S') snapping = !snapping;
+
     if(uni == 'z' && haveshape && GDIM == 2)
       dialog::editNumber(dsCur->zlevel, -10, +10, 0.1, 0, XLAT("z-level"),
         XLAT("Changing the z-level will make this layer affected by the parallax effect."));
@@ -2527,7 +2566,7 @@ EX namespace mapeditor {
         addMessage(XLAT("Hint: use F7 to edit floor under the player"));
       }
     
-    shiftpoint mh = GDIM == 2 ? mouseh : find_mouseh3();
+    shiftpoint mh = full_mouseh();
     hyperpoint mh1 = inverse_shift(drawtrans, mh);
 
     bool clickused = false;
@@ -2969,7 +3008,7 @@ EX namespace mapeditor {
      
         usershapelayer &ds(us->d[mapeditor::dslayer]);
         
-        shiftpoint moh = GDIM == 2 ? mouseh : find_mouseh3();
+        shiftpoint moh = full_mouseh();
         
         hyperpoint mh = inverse_shift(mapeditor::drawtrans, moh);
     
