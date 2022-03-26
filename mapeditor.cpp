@@ -704,6 +704,8 @@ EX namespace mapstream {
     f.write(canvas_default_wall);
     f.write(mapeditor::drawplayer);
     if(patterns::whichCanvas == 'f') f.write(patterns::color_formula);
+    f.write(canvasfloor);
+    f.write(canvasdark);
     
     {
     int i = ittypes; f.write(i);
@@ -887,6 +889,10 @@ EX namespace mapstream {
         f.read(canvas_default_wall);
       f.read(mapeditor::drawplayer);
       if(patterns::whichCanvas == 'f') f.read(patterns::color_formula);
+      if(f.vernum >= 0xA90C) { // TODO Please replace this with the next version this pull request is included in
+        f.read(canvasfloor);
+        f.read(canvasdark);
+        }
       
       int i;
       f.read(i); if(i > ittypes || i < 0) throw hstream_exception();
@@ -3094,6 +3100,20 @@ EX namespace mapeditor {
     }
 #endif
 
+
+  string canvasFloorName(int id) {
+    if(id>=0 && id<caflEND)
+      return XLAT(canvasFloorNames[id]);
+    return its(id);
+    }
+  string allCanvasFloorNames() {
+    string ret;
+    for(int i=0; i<caflEND; i++) {
+      ret += its(i) + ":" + canvasFloorName(i) + "  ";
+      }
+    return ret;
+    }
+
   EX void map_settings() {
     cmode = sm::SIDE | sm::MAYDARK;
     gamescreen(1);
@@ -3125,6 +3145,19 @@ EX namespace mapeditor {
 
     dialog::addItem(XLAT("edit cell values"), 'G');
     dialog::add_action(push_debug_screen);
+
+    dialog::addSelItem(XLAT("canvas floor shape"), canvasFloorName(canvasfloor), 'S');
+    dialog::add_action([] {
+      dialog::editNumber(canvasfloor, 0, caflEND - 1, 1, 0, XLAT("canvas floor shape"),allCanvasFloorNames());
+      });
+
+    dialog::addSelItem(XLAT("canvas darkness"), its(canvasdark), 'd');
+    dialog::add_action([] {
+      dialog::editNumber(canvasdark, 0, 2, 1, 0, XLAT("canvas darkness"),
+      "0: no darkening (bright mode, canvas, reptiles, etc)\n"
+      "1: light darkening (r'lyeh, palace, dragon chasms, etc)\n"
+      "2: normal darkening (default, most lands)");
+      });
     
     dialog::addBack();
     dialog::display();

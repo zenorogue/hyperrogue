@@ -416,6 +416,9 @@ struct videopar {
   
   eThreatLevel faraway_highlight; // draw attention to monsters on the horizon
   int faraway_highlight_color; // 0 = monster color, 100 = red-green oscillation
+
+  ld ispeed;
+  bool flasheffects;
   };
 
 extern videopar vid;

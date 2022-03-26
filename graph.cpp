@@ -72,7 +72,7 @@ EX int animation_lcm = 0;
 
 EX ld ptick(int period, ld phase IS(0)) {
   if(animation_lcm) animation_lcm = animation_lcm * (period / gcd(animation_lcm, period));
-  return (ticks * animation_factor) / period + phase * 2 * M_PI;
+  return (ticks * animation_factor * vid.ispeed) / period + phase * 2 * M_PI;
   }
 
 EX ld fractick(int period, ld phase IS(0)) {
@@ -299,22 +299,39 @@ void drawWinter(const shiftmatrix& V, ld hdir, color_t col) {
 
 void drawLightning(const shiftmatrix& V) {
 #if CAP_QUEUE
+  float ds = ptick(600);
   color_t col = darkena(iinf[itOrbLightning].color, 0, 0xFF);
   for(int u=0; u<20; u++) {
-    ld leng = 0.5 / (0.1 + (rand() % 100) / 100.0);
-    ld rad = rand() % 1000;
+    ld leng, rad;
+    if(vid.flasheffects) {
+      leng = 0.5 / (0.1 + (rand() % 100) / 100.0);
+      rad = rand() % 1000;
+      }
+    else {
+      if(u % 5) leng = 1.25 + sintick(200, ld(u) * 1.25) * 0.25;
+      else leng = 2 + sintick(200, ld(u) * 1.25);
+      rad = (u + ds) * (M_PI / 10);
+      }
     shiftmatrix V1 = chei(V, u, 20);
     queueline(V1*xspinpush0(rad, cgi.hexf*0.3), V1*xspinpush0(rad, cgi.hexf*leng), col, 2 + vid.linequality);
     }
 #endif
   }
 
-void drawCurse(const shiftmatrix& V, color_t col) {
+void drawCurse(const shiftmatrix& V, eItem it) {
 #if CAP_QUEUE
-  col = darkena(col, 0, 0xFF);
+  float ds = ptick(450) + (it * 5.5); // Extra offset so both Gluttony and Repulsion are easily visible
+  color_t col = darkena(iinf[it].color, 0, 0xFF);
   for(int u=0; u<20; u++) {
-    ld leng = 0.6 + 0.3 * randd();
-    ld rad = rand() % 1000;
+    ld leng, rad;
+    if(vid.flasheffects) {
+      leng = 0.6 + 0.3 * randd();
+      rad = rand() % 1000;
+      }
+    else {
+      leng = 0.85 + sintick(150, ld(u) * 1.25) * 0.15;
+      rad = (u + ds) * (M_PI / 10);
+      }
     shiftmatrix V1 = chei(V, u, 20);
     queueline(V1*xspinpush0(rad, cgi.hexf*0.3), V1*xspinpush0(rad, cgi.hexf*leng), col, 2 + vid.linequality);
     }
@@ -330,8 +347,8 @@ EX void drawPlayerEffects(const shiftmatrix& V, cell *c, eMonster m) {
   if(items[itOrbShell] > (shmup::on ? 0 : ORBBASE)) drawShield(V, itOrbShell);
 
   if(items[itOrbSpeed]) drawSpeed(V); 
-  if(items[itCurseGluttony]) drawCurse(V, iinf[itCurseGluttony].color); 
-  if(items[itCurseRepulsion]) drawCurse(V, iinf[itCurseRepulsion].color); 
+  if(items[itCurseGluttony]) drawCurse(V, itCurseGluttony); 
+  if(items[itCurseRepulsion]) drawCurse(V, itCurseRepulsion); 
 
   if(onplayer && (items[itOrbSword] || items[itOrbSword2])) {
     using namespace sword;
@@ -816,8 +833,8 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     }  
     
 #if CAP_SHAPES
-  auto sinptick = [c, pticks] (int period) { return c ? sintick(period) : sin(animation_factor * pticks / period);};
-  auto spinptick = [c, pticks] (int period, ld phase) { return c ? spintick(period, phase) : spin((animation_factor * pticks + phase) / period); };
+  auto sinptick = [c, pticks] (int period) { return c ? sintick(period) : sin(animation_factor * vid.ispeed * pticks / period);};
+  auto spinptick = [c, pticks] (int period, ld phase) { return c ? spintick(period, phase) : spin((animation_factor * vid.ispeed * pticks + phase) / period); };
   int ct6 = c ? ctof(c) : 1;
   hpcshape *xsh = 
     (it == itPirate || it == itKraken) ? &cgi.shPirateX :
@@ -934,7 +951,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     if(GDIM == 3 && WDIM == 2) {
       ld h = cgi.human_height;
       dynamicval<qfloorinfo> qfi2(qfi, qfi);
-      shiftmatrix V2 = V * spin(ticks / 1500.);
+      shiftmatrix V2 = V * spin(pticks * vid.ispeed / 1500.);
       /* divisors should be higher than in plate renderer */
       qfi.fshape = &cgi.shMFloor2;
       draw_shapevec(c, V2 * zpush(-h/30), qfi.fshape->levels[0], 0xFFD500FF, PPR::WALL);
@@ -947,7 +964,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
       }
     else if(WDIM == 3 && c) {
       ld h = cgi.human_height;
-      shiftmatrix V2 = Vit * spin(ticks / 1500.);
+      shiftmatrix V2 = Vit * spin(pticks * vid.ispeed / 1500.);
       draw_floorshape(c, V2 * zpush(h/100), cgi.shMFloor3, 0xFFD500FF);
       draw_floorshape(c, V2 * zpush(h/50), cgi.shMFloor4, darkena(icol, 0, 0xFF));
       queuepoly(V2, cgi.shGem[ct6], 0xFFD500FF);
@@ -959,7 +976,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     #endif
     {
       color_t hider = hidden ? 0xFFFFFF20 : 0xFFFFFFFF;
-      shiftmatrix V2 = Vit * spin(ticks / 1500.);
+      shiftmatrix V2 = Vit * spin(pticks * vid.ispeed / 1500.);
       draw_floorshape(c, V2, cgi.shMFloor3, 0xFFD500FF & hider);
       draw_floorshape(c, V2, cgi.shMFloor4, darkena(icol, 0, 0xFF) & hider);
       queuepoly(V2, cgi.shGem[ct6], 0xFFD500FF & hider);
@@ -3674,15 +3691,18 @@ bool allemptynear(cell *c) {
   }
 
 EX bool bright;
+EX int canvasdark;
 
 // how much to darken
 EX int getfd(cell *c) {
   if(bright) return 0;
   if(among(c->land, laAlchemist, laHell, laVariant, laEclectic) && WDIM == 2 && GDIM == 3) return 0;
   switch(c->land) {
+    case laCanvas:
+      return min(2,max(0,canvasdark));
+
     case laRedRock:
     case laReptile:
-    case laCanvas: 
       return 0;
       
     case laSnakeNest:

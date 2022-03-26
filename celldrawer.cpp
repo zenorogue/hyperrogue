@@ -1057,8 +1057,59 @@ void celldrawer::draw_mirrorwall() {
     }
   }
 
+EX int canvasfloor;
+
 void celldrawer::set_land_floor(const shiftmatrix& Vf) {
   switch(c->land) {
+    case laCanvas:
+      switch(canvasfloor) {
+        case caflM: set_floor(cgi.shMFloor); break;
+        case caflFull: set_floor(cgi.shFullFloor); break;
+//      case caflWarp is warped floor
+        case caflStar: set_floor(cgi.shStarFloor); break;
+        case caflCloud: set_floor(cgi.shCloudFloor); break;
+        case caflCross: set_floor(cgi.shCrossFloor); break;
+        case caflCharged: set_floor(cgi.shChargedFloor); break;
+        case caflSStar: set_floor(cgi.shSStarFloor); break;
+        case caflOver: set_floor(cgi.shOverFloor); break;
+        case caflTri: set_floor(cgi.shTriFloor); break;
+        case caflFeather: set_floor(cgi.shFeatherFloor); break;
+        case caflBarrow: set_floor(cgi.shBarrowFloor); break;
+        case caflNew: set_floor(cgi.shNewFloor); break;
+        case caflTroll: set_floor(cgi.shTrollFloor); break;
+        case caflButterfly: set_floor(cgi.shButterflyFloor); break;
+        case caflLava: set_floor(cgi.shLavaFloor); break;
+        case caflPalace: set_floor(cgi.shPalaceFloor); break;
+        case caflDemon: set_floor(cgi.shDemonFloor); break;
+        case caflCave: set_floor(cgi.shCaveFloor); break;
+        case caflDesert: set_floor(cgi.shDesertFloor); break;
+        case caflPower: set_floor(cgi.shPowerFloor); break;
+        case caflRose: set_floor(cgi.shRoseFloor); break;
+        case caflTurtle: set_floor(cgi.shTurtleFloor); break;
+        case caflDragon: set_floor(cgi.shDragonFloor); break;
+        case caflReptile: set_reptile_floor(V, fcol); break;
+        case caflHive:
+          if(c->wall != waFloorB && c->wall != waFloorA && c->wall != waMirror && c->wall != waCloud && !chasmgraph(c)) {
+            set_floor(cgi.shFloor);
+            if(GDIM == 2) {
+              draw_floorshape(c, V, cgi.shMFloor, darkena(fcol, fd + 1, 0xFF), PPR::FLOORa);
+              draw_floorshape(c, V, cgi.shMFloor2, darkena(fcol, fcol==uint(c->landparam) ? fd : fd + 1, 0xFF), PPR::FLOORb);
+              }
+            }
+          else
+            set_floor(cgi.shFloor);
+          break;
+        case caflSwitch:
+          set_floor(cgi.shSwitchFloor);
+          if(!chasmgraph(c) && ctof(c) && STDVAR && !arcm::in() && !bt::in() && GDIM == 2) for(int i=0; i<c->type; i++)
+            queuepoly(Vf * ddspin(c, i, M_PI/S7) * xpush(cgi.rhexf), cgi.shSwitchDisk, darkena(fcol, fd, 0xFF));
+          break;
+        case caflTower: set_towerfloor(celldist); break;
+        case caflNone: default:
+          set_floor(cgi.shFloor); break;
+        }
+      break;
+
     case laPrairie:
     case laAlchemist:
       set_floor(cgi.shCloudFloor);
@@ -2466,7 +2517,7 @@ void celldrawer::add_map_effects() {
     for(int t=0; t<c->type; t++) if(c->move(t)) {
       if(c->move(t)->ligon) {
         int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
-        queueline(V*chei(xspinpush(ticks * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
+        queueline(V*chei(xspinpush((vid.flasheffects ? ticks : ptick(8)) * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
         }
       for(int u: {-1, 1}) {
         cellwalker cw = cellwalker(c, t) + wstep + u;
@@ -2474,7 +2525,7 @@ void celldrawer::add_map_effects() {
         cell *c2 = cw.peek();
         if(c2 && c2->ligon) {
           int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
-          queueline(V*chei(xspinpush(ticks * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t)*currentmap->adj(cw.at, cw.spin), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
+          queueline(V*chei(xspinpush((vid.flasheffects ? ticks : ptick(8)) * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t)*currentmap->adj(cw.at, cw.spin), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
           }
         }
       }
