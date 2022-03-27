@@ -525,6 +525,10 @@ EX void make_air() {
 
     vid.xres = AIR_TEXTURE;
     vid.yres = AIR_TEXTURE;
+    dynamicval<ld> g1(current_display->xmin, 0);
+    dynamicval<ld> g2(current_display->ymin, 0);
+    dynamicval<ld> g3(current_display->xmax, 1);
+    dynamicval<ld> g4(current_display->ymax, 1);
     calcparam();
     models::configure();
   
