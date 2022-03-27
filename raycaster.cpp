@@ -156,6 +156,7 @@ EX bool requested() {
   if(!available()) return false;
   if(want_use == 2) return true;
   if(rotspace) return false; // not very good
+  if(WDIM == 2) return false; // not very good
   return racing::on || quotient || fake::in();
   }
 
