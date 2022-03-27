@@ -32,6 +32,7 @@ EX namespace multi {
   EX bool pvp_mode;
   EX bool friendly_fire = true;
   EX bool self_hits;
+  EX bool two_focus;
 
   EX int players = 1;
   EX cellwalker player[MAXPLAYER];
@@ -518,6 +519,7 @@ EX void showConfigureMultiplayer() {
       });
     }
 
+  add_edit(self_hits);
   if(multi::players > 1) {
     dialog::addItem(XLAT("reset per-player statistics"), 'r');
     dialog::add_action([] {
@@ -531,7 +533,6 @@ EX void showConfigureMultiplayer() {
     if(shmup::on && !racing::on) {
       add_edit(pvp_mode);
       add_edit(friendly_fire);
-      add_edit(self_hits);
       if(pvp_mode)
         dialog::addInfo(XLAT("PvP grants infinite lives -- achievements disabled"));
       else if(friendly_fire)
@@ -539,10 +540,16 @@ EX void showConfigureMultiplayer() {
       else
         dialog::addBreak(100);
       }
-    else
+    else {
       dialog::addInfo(XLAT("PvP available only in shmup"));
+      dialog::addBreak(400);
+      }
+    if(multi::players == 2 && !split_screen)
+      add_edit(two_focus);
+    else
+      dialog::addBreak(100);
     }
-  else dialog::addBreak(200);
+  else dialog::addBreak(600);
   
   dialog::addBack();
   dialog::display();
@@ -720,6 +727,8 @@ EX void initConfig() {
     ->editable("friendly fire", 'f');
   param_b(multi::self_hits, "self_hits", false)
     ->editable("self hits", 'h');
+  param_b(multi::two_focus, "two_focus", false)
+    ->editable("auto-adjust two-focus projections", 'f');
   addsaver(alwaysuse, "use configured keys");  
   // unfortunately we cannot use key names here because SDL is not yet initialized
   for(int i=0; i<512; i++)

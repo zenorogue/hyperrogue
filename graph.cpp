@@ -4918,6 +4918,21 @@ EX transmatrix Viewbase;
 
 EX bool no_wall_rendering;
 
+EX bool set_multi = false;
+EX hyperpoint multi_point;
+
+EX void center_multiplayer_map(const vector<hyperpoint>& hs) {
+  hyperpoint h = Hypc;
+  for(auto h1: hs) h += h1;
+  h /= isize(hs);
+  h = normalize(h);
+  cwtV = shiftless(rgpushxto0(h));
+  if(isize(hs) == 2) {
+    set_multi = true;
+    multi_point = hs[1];
+    }
+  }
+
 EX void drawthemap() {
   check_cgi();
   cgi.require_shapes();
@@ -5032,6 +5047,7 @@ EX void drawthemap() {
   drawFlashes();
   
   mapeditor::draw_dtshapes();
+  set_multi = false;
   
   if(multi::players > 1 && !shmup::on) {
     if(multi::split_screen)
@@ -5039,13 +5055,10 @@ EX void drawthemap() {
     else if(multi::centerplayer != -1)
       cwtV = multi::whereis[multi::centerplayer];
     else {
-      hyperpoint h = Hypc;
-      for(int p=0; p<multi::players; p++) if(multi::playerActive(p)) {
-        hyperpoint h1 = unshift(tC0(multi::whereis[p]));
-        h += h1;
-        }
-      h = mid(h, h);
-      cwtV = shiftless(rgpushxto0(h));
+      vector<hyperpoint> pts;
+      for(int p=0; p<multi::players; p++) if(multi::playerActive(p))
+        pts.push_back(unshift(tC0(multi::whereis[p])));
+      center_multiplayer_map(pts);
       }
     }
   
@@ -5057,13 +5070,10 @@ EX void drawthemap() {
     else if(multi::centerplayer != -1)
       cwtV = shmup::pc[multi::centerplayer]->pat;
     else {
-      hyperpoint h = Hypc;
-      for(int p=0; p<multi::players; p++) {
-        hyperpoint h1 = unshift(tC0(shmup::pc[p]->pat));
-        h += h1;
-        }
-      h = mid(h, h);
-      cwtV = shiftless(rgpushxto0(h));
+      vector<hyperpoint> pts;
+      for(int p=0; p<multi::players; p++)
+        pts.push_back(unshift(tC0(shmup::pc[p]->pat)));
+      center_multiplayer_map(pts);
       }
     }
 

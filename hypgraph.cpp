@@ -947,6 +947,9 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         
       if(pmodel == mdJoukowskyInverted) {
         ld r2 = sqhypot_d(2, ret);
+        if(pconf.dualfocus_autoscale)
+          ret *= (1-pconf.model_transition) / 2;
+
         ret[0] = ret[0] / r2;
         ret[1] = -ret[1] / r2;
         move_y_to_z(ret, yz);      
@@ -1315,11 +1318,18 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       }
     
     case mdPanini: {
+      find_zlev(H);
+      models::apply_orientation_yz(H[1], H[2]);
+      models::apply_orientation(H[0], H[1]);
+
       ld proh = sqrt(H[2]*H[2] + curvature() * H[0] * H[0]);
       H /= proh;
       H /= (H[2] + pconf.alpha);
       ret = H;
       ret[2] = 0; ret[3] = 1;
+
+      models::apply_orientation(ret[1], ret[0]);
+      models::apply_orientation_yz(ret[2], ret[1]);
       break;
       }
     
@@ -1996,6 +2006,17 @@ EX void centerpc(ld aspd) {
     fixmatrix(View);
     fixmatrix(current_display->which_copy);
     spinEdge(aspd);
+    }
+
+  if(set_multi && multi::two_focus) {
+    pconf.model_orientation = atan2(multi_point) / degree;
+    auto& d = pconf.twopoint_param;
+    d = hdist0(multi_point);
+    if(among(pmodel, mdJoukowsky, mdJoukowskyInverted)) {
+      pconf.model_orientation += 90;
+      pconf.model_transition = sinh(d) / (1 + cosh(d));
+      pconf.dualfocus_autoscale = true;
+      }
     }
 
   ors::rerotate(W); ors::rerotate(cwtV.T); ors::rerotate(View);

@@ -600,6 +600,9 @@ EX namespace models {
 
     if(among(vpmodel, mdJoukowsky, mdJoukowskyInverted, mdSpiral) && GDIM == 2) 
       add_edit(vpconf.skiprope);
+
+    if(vpmodel == mdJoukowskyInverted)
+      add_edit(vpconf.dualfocus_autoscale);
     
     if(vpmodel == mdHemisphere && euclid) 
       add_edit(vpconf.euclid_to_sphere);
@@ -1024,6 +1027,9 @@ EX namespace models {
   
       param_f(p.skiprope, sp+"mobius", 0)
       -> editable(0, 360, 15, "Möbius transformations", "", 'S')->unit = "°";
+
+      param_b(p.dualfocus_autoscale, sp+"dualfocus_autoscale", 0)
+      -> editable("autoscale dual focus", 'A');
       
       addsaver(p.formula, sp+"formula");
       addsaverenum(p.basic_model, sp+"basic model");

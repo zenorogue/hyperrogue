@@ -266,6 +266,7 @@ struct projection_configuration {
   ld depth_scaling;
   ld hyperboloid_scaling;
   ld vr_angle, vr_zshift, vr_scale_factor;
+  bool dualfocus_autoscale;
 
   int back_and_front; /* 0 = do not, 1 = do, 2 = only back */
 
@@ -289,6 +290,7 @@ struct projection_configuration {
     vr_zshift = 0;
     vr_scale_factor = 1;
     back_and_front = 0;
+    dualfocus_autoscale = false;
     }
   };
 
