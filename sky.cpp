@@ -560,7 +560,7 @@ EX void make_air() {
       if(1) {
         geometry = gSpace534;
         S = g.T.T;
-        S = radar_transform * S;
+        S = current_display->radar_transform * S;
         geometry = orig;
         swapmatrix(S);
         }

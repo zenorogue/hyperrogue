@@ -82,7 +82,7 @@ EX bool mouseout2() {
 EX movedir vectodir(hyperpoint P) {
 
   transmatrix U = unshift(ggmatrix(cwt.at));
-  if(GDIM == 3 && WDIM == 2)  U = radar_transform * U;
+  if(GDIM == 3 && WDIM == 2)  U = current_display->radar_transform * U;
 
   P = direct_exp(lp_iapply(P));
 

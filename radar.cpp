@@ -1,28 +1,9 @@
 #include "hyper.h"
 namespace hr {
 
-#if HDR
-struct radarpoint {
-  hyperpoint h;
-  char glyph;
-  color_t color;
-  color_t line;
-  };
-
-struct radarline {
-  hyperpoint h1, h2;
-  color_t line;
-  };
-#endif
-
-EX vector<radarpoint> radarpoints;
-EX vector<radarline> radarlines;
-
-EX transmatrix radar_transform;
-
 #if MAXMDIM >= 4
 pair<bool, hyperpoint> makeradar(shiftpoint h) {
-  if(GDIM == 3 && WDIM == 2) h.h = radar_transform * h.h;
+  if(GDIM == 3 && WDIM == 2) h.h = current_display->radar_transform * h.h;
 
   ld d = hdist0(h);
 
@@ -62,14 +43,14 @@ EX void addradar(const shiftmatrix& V, char ch, color_t col, color_t outline) {
   shiftpoint h = tC0(V);
   auto hp = makeradar(h);
   if(hp.first)
-    radarpoints.emplace_back(radarpoint{hp.second, ch, col, outline});
+    current_display->radarpoints.emplace_back(radarpoint{hp.second, ch, col, outline});
   }
 
 EX void addradar(const shiftpoint h1, const shiftpoint h2, color_t col) {
   auto hp1 = makeradar(h1);
   auto hp2 = makeradar(h2);
   if(hp1.first && hp2.first)
-    radarlines.emplace_back(radarline{hp1.second, hp2.second, col});
+    current_display->radarlines.emplace_back(radarline{hp1.second, hp2.second, col});
   }
 
 void celldrawer::drawcell_in_radar() {
@@ -98,6 +79,7 @@ void celldrawer::radar_grid() {
 
 EX void draw_radar(bool cornermode) {
 #if MAXMDIM >= 4
+  if(subscreens::split([=] () { calcparam(); draw_radar(false); })) return;
   if(dual::split([] { dual::in_subscreen([] { calcparam(); draw_radar(false); }); })) return;
   bool d3 = WDIM == 3;
   bool hyp = hyperbolic;
@@ -110,10 +92,17 @@ EX void draw_radar(bool cornermode) {
   dynamicval<geometryinfo1> gi(ginf[gEuclid].g, giEuclid2);
   initquickqueue();
   int rad = vid.radarsize;
-  if(dual::state) rad /= 2; 
+  int divby = 1;
+  if(dual::state) divby *= 2;
+  if(subscreens::in) divby *= 2;
+  rad /= divby;
+  auto& cd = current_display;
   
-  ld cx = dual::state ? (dual::currently_loaded ? vid.xres/2+rad+2 : vid.xres/2-rad-2) : cornermode ? rad+2 : vid.xres-rad-2;
-  ld cy = vid.yres-rad-2 - vid.fsize;
+  ld cx = dual::state ? (dual::currently_loaded ? vid.xres/2+rad+2 : vid.xres/2-rad-2) :
+          subscreens::in ? cd->xtop + cd->xsize - rad - 2 :
+          cornermode ? rad+2 : vid.xres-rad-2;
+  ld cy = subscreens::in ? cd->ytop + cd->ysize - rad - 2 - vid.fsize :
+          vid.yres-rad-2 - vid.fsize;
   
   auto sId = shiftless(Id);
 
@@ -142,7 +131,7 @@ EX void draw_radar(bool cornermode) {
     queuecurve(sId, 0xFF8000FF, 0, PPR::ZERO);
     }
   
-  if(d3) for(auto& r: radarpoints) {    
+  if(d3) for(auto& r: cd->radarpoints) {
     queueline(sId*atscreenpos(cx+rad * r.h[0], cy - rad * r.h[2] * si + rad * r.h[1] * co, 0)*C0, sId*atscreenpos(cx+rad*r.h[0], cy - rad*r.h[2] * si, 0)*C0, r.line, -1);
     }
   
@@ -169,7 +158,7 @@ EX void draw_radar(bool cornermode) {
       return point3(cx + rad * h[0], cy + rad * h[1], rad * cgi.scalefactor / (vid.radarrange + cgi.scalefactor/4) * 0.8);
     };
   
-  for(auto& r: radarlines) {
+  for(auto& r: cd->radarlines) {
     hyperpoint h1 = locate(r.h1);
     hyperpoint h2 = locate(r.h2);
     h1 = tC0(atscreenpos(h1[0], h1[1], 1));
@@ -180,11 +169,11 @@ EX void draw_radar(bool cornermode) {
   quickqueue();
   glflush();
   
-  for(auto& r: radarpoints) {
+  for(auto& r: cd->radarpoints) {
     if(d3) displaychr(int(cx + rad * r.h[0]), int(cy - rad * r.h[2] * si + rad * r.h[1] * co), 0, 8, r.glyph, r.color);
     else {
       hyperpoint h = locate(r.h);
-      displaychr(int(h[0]), int(h[1]), 0, int(h[2]), r.glyph, r.color);
+      displaychr(int(h[0]), int(h[1]), 0, int(h[2]) / divby, r.glyph, r.color);
       }
     }
 #endif

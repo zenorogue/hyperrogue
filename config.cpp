@@ -2343,7 +2343,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
             "distances.)"
             );
         if(GDIM == 3 && pmodel == mdPerspective && !euclid) {
-          ld current_camera_level = hdist0(tC0(radar_transform));
+          ld current_camera_level = hdist0(tC0(current_display->radar_transform));
           help += "\n\n";
           if(abs(current_camera_level) < 1e-6)
             help += XLAT(

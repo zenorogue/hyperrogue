@@ -4864,7 +4864,7 @@ EX void make_actual_view() {
     ld z = -asin_auto(tC0(view_inverse(T)) [2]);
     T = zpush(-z) * T;
 
-    radar_transform = T * U;
+    current_display->radar_transform = T * U;
     }
   #endif
   Viewbase = View;
@@ -4943,8 +4943,8 @@ EX void drawthemap() {
   firelimit = 0;
 
   make_clipping_planes();
-  radarpoints.clear();
-  radarlines.clear();
+  current_display->radarpoints.clear();
+  current_display->radarlines.clear();
   callhooks(hooks_drawmap);
 
   frameid++;
@@ -5627,7 +5627,7 @@ auto graphcm = addHook(hooks_clearmemory, 0, [] () {
   gd->store(animations);
   gd->store(flashes);
   gd->store(fallanims);
-  gd->store(radar_transform);
+  gd->store(current_display->radar_transform);
   gd->store(actual_view_transform);
   });
 

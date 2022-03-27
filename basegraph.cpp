@@ -9,6 +9,18 @@
 namespace hr {
 
 #if HDR
+struct radarpoint {
+  hyperpoint h;
+  char glyph;
+  color_t color;
+  color_t line;
+  };
+
+struct radarline {
+  hyperpoint h1, h2;
+  color_t line;
+  };
+
 /** configuration of the current view */
 struct display_data {
   /** The cell which is currently in the center. */
@@ -35,6 +47,10 @@ struct display_data {
 
   ld tanfov;
   flagtype next_shader_flags;
+
+  vector<radarpoint> radarpoints;
+  vector<radarline> radarlines;
+  transmatrix radar_transform;
 
   ld eyewidth();
   bool stereo_active();

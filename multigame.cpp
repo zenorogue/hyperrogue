@@ -74,10 +74,6 @@ void gamedata_all(gamedata& gd) {
   gd.store(gamerange_bonus);
   gd.store(targets);
   gd.store(patterns::rwalls);
-  if(GDIM == 3) {
-    gd.store(radarlines);
-    gd.store(radarpoints);
-    }
   if(GOLDBERG) gd.store(gp::param);
   callhooks(hooks_gamedata, &gd);
   }
