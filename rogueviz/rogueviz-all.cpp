@@ -61,6 +61,7 @@
 #include "platformer.cpp"
 #include "intra-demos.cpp"
 #include "gobot.cpp"
+#include "extra-projections.cpp"
 
 #include "kohonen.cpp"
 #include "embeddings.cpp"
