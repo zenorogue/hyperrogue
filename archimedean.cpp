@@ -1439,6 +1439,10 @@ EX void show() {
 void archimedean_tiling::get_nom_denom(int& anom, int& adenom) {
   int nom = 2 - N, denom = 2;
   for(int f: faces) {
+    if(f == 0) {
+      /* prevent a crash */
+      anom = 1; adenom = 1; return;
+      }
     int g = gcd(denom, f);
     nom = (nom * f + denom) / g;
     denom = denom / g * f;
