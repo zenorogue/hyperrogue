@@ -789,6 +789,15 @@ EX ld scale_at(const shiftmatrix& T) {
   applymodel(tC0(T), h1);
   applymodel(T * xpush0(.01), h2);
   applymodel(T * ypush(.01) * C0, h3);
+  if(mdBandAny()) {
+    ld x2 = 2;
+    if(pmodel == mdBandEquiarea) x2 /= 2;
+    ld x4 = 2 * x2;
+    if(h2[0] > h1[0] + x2) h2[0] -= x4;
+    if(h2[0] < h1[0] - x2) h2[0] += x4;
+    if(h3[0] > h1[0] + x2) h3[0] -= x4;
+    if(h3[0] < h1[0] - x2) h3[0] += x4;
+    }
   return sqrt(hypot_d(2, h2-h1) * hypot_d(2, h3-h1) / .0001);
   }
 
