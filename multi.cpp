@@ -730,7 +730,7 @@ EX void initConfig() {
   param_b(multi::self_hits, "self_hits", false)
     ->editable("self hits", 'h');
   param_b(multi::two_focus, "two_focus", false)
-    ->editable("auto-adjust two-focus projections", 'f');
+    ->editable("auto-adjust dual-focus projections", 'f');
   addsaver(alwaysuse, "use configured keys");  
   // unfortunately we cannot use key names here because SDL is not yet initialized
   for(int i=0; i<512; i++)
