@@ -967,6 +967,7 @@ namespace mf {
   static const flagtype twopoint = 2048;
   static const flagtype uses_bandshift = 4096;
   static const flagtype broken = 8192; /* in spherical case, these are broken along the meridian 180 deg */
+  static const flagtype technical = 16384; /* don't display in the list */
   
   static const flagtype band = (cylindrical | pseudocylindrical | uses_bandshift);
   static const flagtype pseudoband = (pseudocylindrical | uses_bandshift);
@@ -1006,7 +1007,7 @@ enum eModel : int {
   // 32..38
   mdWerner, mdAitoff, mdHammer, mdLoximuthal, mdMiller, mdGallStereographic, mdWinkelTripel,
   // 39..
-  mdPoorMan, mdPanini, mdRetroCraig, mdRetroLittrow, mdRetroHammer, mdThreePoint,
+  mdPoorMan, mdPanini, mdRetroCraig, mdRetroLittrow, mdRetroHammer, mdThreePoint, 
   // 45..
   mdGUARD, mdPixel, mdHyperboloidFlat, mdPolynomial, mdManual
   };
@@ -1065,8 +1066,11 @@ EX vector<modelinfo> mdinf = {
   {X3("Littrow retroazimuthal"), mf::euc_boring | mf::broken, DEFAULTS}, // retroazimuthal conformal
   {X3("Hammer retroazimuthal"), mf::euc_boring, DEFAULTS}, // retroazimuthal equidistant
   {X3("three-point equidistant"), mf::euc_boring, DEFAULTS},
-  {X3("guard"), 0, DEFAULTS},
-  {X3("polynomial"), mf::conformal, DEFAULTS},
+  {X3("guard"), mf::technical, DEFAULTS},
+  {X3("pixel"), mf::technical, DEFAULTS},
+  {X3("hypflat"), mf::technical, DEFAULTS},
+  {X3("polynomial"), mf::technical | mf::conformal, DEFAULTS},
+  {X3("manual"), mf::technical, DEFAULTS},
   };
 
 #undef X3
