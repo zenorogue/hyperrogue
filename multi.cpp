@@ -28,6 +28,8 @@ EX namespace multi {
   EX config scfg;  
   EX charstyle scs[MAXPLAYER];
 
+  EX bool split_screen;
+
   EX int players = 1;
   EX cellwalker player[MAXPLAYER];
   EX vector<int> revive_queue; // queue for revival
@@ -519,6 +521,7 @@ EX void showConfigureMultiplayer() {
 
     dialog::addSelItem(XLAT("keyboard & joysticks"), "", 'k');
     dialog::add_action(multi::configure);
+    add_edit(split_screen);
     }
   else dialog::addBreak(200);
   
@@ -690,6 +693,8 @@ EX void initConfig() {
   
   #if CAP_CONFIG
   addsaver(multi::players, "mode-number of players");
+  param_b(multi::split_screen, "splitscreen", false)
+    ->editable("split screen mode", 's');
   addsaver(alwaysuse, "use configured keys");  
   // unfortunately we cannot use key names here because SDL is not yet initialized
   for(int i=0; i<512; i++)

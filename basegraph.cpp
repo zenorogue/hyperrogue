@@ -1497,6 +1497,7 @@ EX int calcfps() {
 EX namespace subscreens {
 
   EX vector<display_data> player_displays;
+  /** 'in' is on if we are currently working on a single display */
   EX bool in;
   EX int current_player;
   
@@ -1528,7 +1529,7 @@ EX namespace subscreens {
   EX bool split(reaction_t what) {
     using namespace racing;
     if(in) return false;
-    if(!racing::on && !(shmup::on && GDIM == 3)) return false;
+    if(!multi::split_screen) return false;
     if(!player_displays.empty()) {
       in = true;
       int& p = current_player;
