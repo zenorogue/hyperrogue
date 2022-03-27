@@ -277,6 +277,10 @@ template<class T> void makeband(shiftpoint H, hyperpoint& ret, const T& f) {
   return;
   }
 
+EX void makeband_f(shiftpoint H, hyperpoint& ret, const hr::function<void(ld&,ld&)>& f) {
+  makeband(H, ret, f);
+  }
+
 void band_conformal(ld& x, ld& y) {
   switch(cgclass) {
     case gcSphere:
