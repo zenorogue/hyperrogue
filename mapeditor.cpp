@@ -889,7 +889,7 @@ EX namespace mapstream {
         f.read(canvas_default_wall);
       f.read(mapeditor::drawplayer);
       if(patterns::whichCanvas == 'f') f.read(patterns::color_formula);
-      if(f.vernum >= 0xA90C) { // TODO Please replace this with the next version this pull request is included in
+      if(f.vernum >= 0xA90D) {
         f.read(canvasfloor);
         f.read(canvasdark);
         }

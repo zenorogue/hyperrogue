@@ -4593,3 +4593,31 @@ Geometry:
 Other:
 - fixed Crossroads wiki links
 - fixed some settings incorrectly showing a warning on editing (this also brings back the 'play music when out of focus' option)
+
+2022-03-27 20:51 Update 12.0m:
+
+Improvements to multiplayer:
+- "split screen mode" can now be set explicitly (don't lose the other player, and don't tell the other player to go right, holonomy matters ;)
+- an option to automatically adjust dual-focus projections to focus on both players (try it with inverted Joukowsky, two-point equidistant/azimuthal and band projections)
+- an option to toggle friendly fire and self-hits in wrapped spaces
+- an option to toggle player-vs-player (this disables limited lives)
+- fixed the radar and cool fog in splitscreen
+
+New options thanks to lottieratworld:
+- idle animation option
+- extra canvas-specific options (map editor->settings)
+
+Other new features:
+- mouse snapping feature in shape editor -- can be used to precisely measure distances and angles (press 'o' to select the point to measure from)
+- when the player is hidden (e.g. in RogueViz visualizations) and the user tries to use WASD, display a hint that they should be using arrow keys instead
+- prevent a crash when entering '(0,0)' in Archimedean
+
+Rendering fixes:
+- fixed levellines in hyperbolic
+- in non-fake 2.5D the raycaster is now disabled by default
+- fixed scale_at for cylindrical projections
+- fixed the orientation of two-point azimuthal and two-point hybrid
+
+Gameplay fixes:
+- fixed the Orb of Safety not disappearing upon use in shmup+OSM
+- fixed the displayed unlock rule for Crossroads III in Casual
