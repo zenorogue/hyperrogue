@@ -1379,7 +1379,7 @@ void raygen::emit_iterate(int gid1) {
 
   if(levellines) {
     if(hyperbolic && !eyes && !intra::in)
-      fmain += "gl_FragColor.xyz *= 0.5 + 0.5 * cos(z/cosh(go) * uLevelLines * 2. * PI);\n";
+      fmain += "gl_FragColor.xyz *= 0.5 + 0.5 * cos(t.z * uLevelLines * 2. * PI);\n";
     else
       fmain += "gl_FragColor.xyz *= 0.5 + 0.5 * cos(go * uLevelLines * 2. * PI);\n";
     if(fsh.find("uLevelLines") == string::npos)
