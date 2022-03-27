@@ -198,15 +198,15 @@ string listkeys(int id) {
 #define SCJOY 16
 
 string dsc(int id) {
-  string buf = XLAT(" (%d $$$, %d kills, %d deaths)",
+  string buf = XLAT(" (%1 $$$, %2 kills, %3 deaths)",
     its(multi::treasures[id]),
     its(multi::kills[id]),
     its(multi::deaths[id])
     );
   if(friendly_fire)
-    buf += XLAT(" (%d pkills)", its(multi::pkills[id]));
+    buf += XLAT(" (%1 pkills)", its(multi::pkills[id]));
   if(self_hits)
-    buf += XLAT(" (%d self)", its(multi::suicides[id]));
+    buf += XLAT(" (%1 self)", its(multi::suicides[id]));
   return buf;
   }
 
