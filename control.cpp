@@ -597,6 +597,9 @@ EX void handleKeyNormal(int sym, int uni) {
   if(sym == PSEUDOKEY_MENU) 
     pushScreen(showMainMenu);
   
+  if(sym == PSEUDOKEY_NOHINT)
+    no_find_player = true;
+
   if(sym == '-' || sym == PSEUDOKEY_WHEELDOWN) {
     actonrelease = false;
     

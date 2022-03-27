@@ -5427,6 +5427,9 @@ EX void normalscreen() {
   if(!playerfound && !anims::any_on() && !sphere && !no_find_player && mapeditor::drawplayer)
     displayButton(current_display->xcenter, current_display->ycenter, mousing ? XLAT("find the player") : XLAT("press SPACE to find the player"), ' ', 8);
 
+  if(!mapeditor::drawplayer && playermoved && !no_find_player)
+    displayButton(current_display->xcenter, current_display->ycenter, XLAT("move the camera with arrow keys and Home/End"), PSEUDOKEY_NOHINT, 8);
+
   describeMouseover();
   }
 

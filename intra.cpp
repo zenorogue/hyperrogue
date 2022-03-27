@@ -841,7 +841,7 @@ EX bool isFloor(cell *c) {
   }
 
 EX void handle() {
-  if(!on) return;
+  if(playermoved || !on) return;
 
   if(floor_dir == -1 || on_floor_of != centerover) {
     vector<int> choices;
@@ -977,7 +977,6 @@ EX void handle() {
     smooth(up, inverse(T) * direct_exp(dx / hypot_d(3, dx) * (eye_level + view_eps)))
     );
   if(use_T) rotate_view(inverse(spin_T));
-  playermoved = false;
 
   auto nat = tC0(inverse(View));
   if(invalid_point(nat)) {
