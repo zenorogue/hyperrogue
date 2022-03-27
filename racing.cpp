@@ -800,10 +800,27 @@ EX bool set_view() {
   if(use_standard_centering()) return false;
   if(player_relative && specialland == laAsteroids) return false;
 
-  transmatrix at = ypush(-vid.yshift) * unshift(ggmatrix(who->base)) * who->at;
+  hyperpoint at;
+  transmatrix atm;
+  if(multi::players == 1 || multi::split_screen) {
+    atm = ypush(-vid.yshift) * unshift(ggmatrix(who->base)) * who->at;
+    at = atm * C0;
+    }
+  else {
+    at = Hypc;
+    hyperpoint first;
+    for(int i=0; i<multi::players; i++) {
+      hyperpoint h = ypush(-vid.yshift) * unshift(ggmatrix(shmup::pc[i]->base)) * tC0(shmup::pc[i]->at);;
+      if(i == 0) first = h;
+      at += h;
+      }
+    at /= multi::players;
+    at = normalize(at);
+    atm = rgpushxto0(at) * spin(-90*degree) * rspintox(gpushxto0(at) * first);
+    }
   
   if(racing::player_relative || quotient || (kite::in() && GDIM == 3)) {
-    View = iso_inverse(at) * View;
+    View = iso_inverse(atm) * View;
     }
   else {
     /* this works only in isotropic geometries, but we don't really care about this in 3D */
@@ -816,7 +833,7 @@ EX bool set_view() {
 
     transmatrix T = spintox(iT1 * T2 * C0);
     
-    hyperpoint h = T * iT1 * ypush(vid.yshift) * at * C0;
+    hyperpoint h = T * iT1 * ypush(vid.yshift) * at;
     ld y = GDIM == 2 ? asin_auto(h[1]) : asin_auto(hypot(h[1], h[2]));
     ld x = asin_auto(h[0] / cos_auto(y));
     x += race_advance;
