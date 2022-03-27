@@ -59,7 +59,7 @@ hyperpoint p(int i) {
 
 vector<int> inext, inext2;
 
-vector<int> fibs = {1, 2};
+vector<int> fibs;
 
 color_t sunflower1 = 0xC04000FF;
 color_t sunflower2 = 0xFFD500FF;
@@ -104,10 +104,25 @@ bool sunflower_cell(cell *c, shiftmatrix V) {
   if(outward) qfrac = 0;
   if(iqty < 0 || iqty > 2000000) return false;
   
+  if(fibs.empty()) {
+    ld best_error = 1;
+    vector<int> sgns;
+    for(int i=1; i<iqty; i++) {
+      ld v = i * step_angle / (2*M_PI);
+      v = frac(v);
+      auto sgn = v > .5;
+      if(sgn) v = 1-v;
+      if(v < best_error) fibs.push_back(i), sgns.push_back(sgn), best_error = v;
+      }
+    println(hlog, "fibs = ", fibs);
+    println(hlog, "sgns = ", sgns);
+    }
+
   ps.resize(iqty);
   inext.resize(iqty);
   inext2.resize(iqty);
   while(fibs.back() < iqty) {
+    /* to do: might not work correctly if step_angle is changed */
     auto add = fibs.back() + *(fibs.end()-2);
     fibs.push_back(add);
     }
@@ -203,6 +218,9 @@ int readArgs() {
     }
   else if(argis("-sunflower-out")) {
     shift(); outward = argi();
+    }
+  else if(argis("-sunflower-angle")) {
+    shift_arg_formula(step_angle, [] { fibs.clear(); });
     }
   else if(argis("-sunflower-adj")) {
     adjust_rug = true;
