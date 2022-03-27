@@ -1369,13 +1369,18 @@ void raygen::emit_iterate(int gid1) {
   else fmain +=
     "    if(col.w == 1.) {\n";
 
-  if(hyperbolic && !eyes) fmain +=
-    "      mediump vec4 t = at0 * sinh(go);\n";
-  else fmain +=
-    "      mediump vec4 t = at0 * go;\n";
-
-  fmain +=
+  if(hyperbolic && !eyes && !intra::in) {
+    fmain +=
+    "      mediump vec4 t = at0 * tanh(go);\n"
     "      t.w = 1.;\n";
+    fmain += "gl_FragColor.xyz *= 0.9999 + 0.0001 * t.z;\n";
+    fmain += "gl_FragColor.xyz /= 0.9999 + 0.0001 * t.z;\n";
+    }
+  else {
+    fmain +=
+    "      mediump vec4 t = at0 * go;\n"
+    "      t.w = 1.;\n";
+    }
 
   if(levellines) {
     if(hyperbolic && !eyes && !intra::in)
