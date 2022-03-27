@@ -186,6 +186,7 @@ EX namespace models {
     }
   
   EX bool model_available(eModel pm) {
+    if(mdinf[pm].flags & mf::technical) return false;
     if(prod) {
       if(pm == mdPerspective) return true;
       if(among(pm, mdBall, mdHemisphere)) return false;
@@ -360,7 +361,7 @@ EX namespace models {
     USING_NATIVE_GEOMETRY_IN_RUG;
     #endif
 
-    for(int i=0; i<mdGUARD; i++) {
+    for(int i=0; i<isize(mdinf); i++) {
       eModel m = eModel(i);
       if(m == mdFormula && ISMOBILE) continue;
       if(model_available(m)) {
@@ -773,7 +774,7 @@ EX namespace models {
 
   #if CAP_COMMANDLINE
   
-  eModel read_model(const string& ss) {
+  EX eModel read_model(const string& ss) {
     for(int i=0; i<isize(mdinf); i++) {
       if(appears(mdinf[i].name_hyperbolic, ss)) return eModel(i);
       if(appears(mdinf[i].name_euclidean, ss)) return eModel(i);

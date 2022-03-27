@@ -497,6 +497,8 @@ EX void threepoint_projection(const hyperpoint& H, hyperpoint& ret) {
   }
 #endif
 
+EX vector<hr::function<void(shiftpoint& H_orig, hyperpoint& H, hyperpoint& ret)>> extra_projections;
+
 EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
 
   hyperpoint H = H_orig.h;
@@ -1345,6 +1347,11 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       }
     
     case mdGUARD: case mdManual: break;
+
+    default:
+      if(md < isize(extra_projections) && extra_projections[md])
+        extra_projections[md](H_orig, H, ret);
+      break;
     }
 
   ghcheck(ret,H_orig);
