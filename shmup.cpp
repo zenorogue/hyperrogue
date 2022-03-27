@@ -441,12 +441,13 @@ EX void killThePlayer(eMonster m) {
 
 monster *playerCrash(monster *who, shiftpoint where) {
   if(who->isVirtual) return NULL;
-  // in the racing mode, neither crashing nor getting too far away is a problem
-  if(racing::on) return NULL;
   for(int j=0; j<players; j++) if(pc[j] && pc[j]!=who) {
     if(pc[j]->isVirtual) continue;
     double d = sqdist(pc[j]->pat*C0, where);
-    if(d < 0.1 * SCALE2 || d > 100 || (WDIM == 3 && hdist(tC0(pc[j]->pat), where) > sightranges[geometry]/2)) return pc[j];
+    /* crash into another player -- not taken into account in racing */
+    if(d < 0.1 * SCALE2 && !racing::on) return pc[j];
+    /* too far away -- irrelevant in split_screen */
+    if(!split_screen && (d > 100 || (WDIM == 3 && hdist(tC0(pc[j]->pat), where) > sightranges[geometry]/2))) return pc[j];
     }
   return NULL;
   }
@@ -725,9 +726,7 @@ void movePlayer(monster *m, int delta) {
 
   cpid = m->pid;
 
-  #if CAP_RACING
-  if(racing::on && cpid != subscreens::current_player) return;
-  #endif
+  if(multi::players > 1 && multi::split_screen && cpid != subscreens::current_player) return;
   
   double mturn = 0, mgo = 0, mdx = 0, mdy = 0;
   
