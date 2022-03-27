@@ -45,6 +45,7 @@ EX bool hide_player() {
      ;
   }
 
+#if HDR
 template<class T>
 class span {
   T *begin_ = nullptr;
@@ -62,6 +63,7 @@ hr::span<const shiftmatrix> span_at(const Map& map, const Key& key) {
   auto it = map.find(key);
   return (it == map.end()) ? hr::span<const shiftmatrix>() : hr::span<const shiftmatrix>(it->second.data(), it->second.size());
   }
+#endif
 
 EX hookset<bool(int sym, int uni)> hooks_handleKey;
 EX hookset<bool(cell *c, const shiftmatrix& V)> hooks_drawcell;
