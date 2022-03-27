@@ -36,32 +36,29 @@ EX namespace shmup {
 #if HDR
 struct monster {
   eMonster type;
-  cell *base;
-  cell *torigin; 
-    // tortoises: origin
-    // butterflies: last position
-  transmatrix at;
-  shiftmatrix pat;
-  /** orientation for the product geometry */
-  transmatrix ori;
+  cell *base;      ///< on which base cell this monster currently is
+  cell *torigin;   ///< tortoises: origin, butterflies: last position
+  transmatrix at;  ///< position relative to base
+  shiftmatrix pat; ///< position relative to current projection center
+  transmatrix ori; ///< orientation for the product geometry
   eMonster stk;
   bool dead;
   bool notpushed;
   bool inBoat;
   bool no_targetting;
-  monster *parent; // who shot this missile
-  int nextshot;    // when will it be able to shot (players/flailers)
-  int pid;         // player ID
-  int hitpoints;   // hitpoints; or time elapsed in Asteroids
+  monster *parent; ///< who shot this missile
+  int nextshot;    ///< when will it be able to shot (players/flailers)
+  int pid;         ///< player ID
+  int hitpoints;   ///< hitpoints; or time elapsed in Asteroids
   int stunoff;
   int blowoff;
-  double swordangle; // sword angle wrt at
-  double vel;        // velocity, for flail balls
+  double swordangle; ///< sword angle wrt at
+  double vel;        ///< velocity, for flail balls
   double footphase;
-  bool isVirtual;  // off the screen: gmatrix is unknown, and pat equals at
-  hyperpoint inertia;// for frictionless lands
+  bool isVirtual;    ///< off the screen: gmatrix is unknown, and pat equals at
+  hyperpoint inertia;///< for frictionless lands
   
-  int refs;         // +1 for every reference (parent, lists of active monsters)
+  int refs;         ///< +1 for every reference (parent, lists of active monsters)
   
   monster() { 
     dead = false; inBoat = false; parent = NULL; nextshot = 0; 
