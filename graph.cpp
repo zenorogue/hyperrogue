@@ -5035,11 +5035,10 @@ EX void drawthemap() {
     if(multi::centerplayer != -1) 
       cwtV = multi::whereis[multi::centerplayer];
     else {
-      hyperpoint h;
-      for(int i=0; i<3; i++) h[i] = 0;
+      hyperpoint h = Hypc;
       for(int p=0; p<multi::players; p++) if(multi::playerActive(p)) {
         hyperpoint h1 = unshift(tC0(multi::whereis[p]));
-        for(int i=0; i<3; i++) h[i] += h1[i];
+        h += h1;
         }
       h = mid(h, h);
       cwtV = shiftless(rgpushxto0(h));
@@ -5052,11 +5051,10 @@ EX void drawthemap() {
     else if(multi::centerplayer != -1) 
       cwtV = shmup::pc[multi::centerplayer]->pat;
     else {
-      hyperpoint h;
-      for(int i=0; i<3; i++) h[i] = 0;
+      hyperpoint h = Hypc;
       for(int p=0; p<multi::players; p++) {
         hyperpoint h1 = unshift(tC0(shmup::pc[p]->pat));
-        for(int i=0; i<3; i++) h[i] += h1[i];
+        h += h1;
         }
       h = mid(h, h);
       cwtV = shiftless(rgpushxto0(h));
