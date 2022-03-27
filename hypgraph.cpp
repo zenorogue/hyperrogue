@@ -884,8 +884,10 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       ret[1] = (ret[0] + pconf.twopoint_param) * lyx;
       ret[2] = 0;
 
+      ret[0] = -ret[0]; ret[1] = -ret[1];
+
       move_y_to_z(ret, yz);      
-      models::apply_orientation(ret[0], ret[1]);
+      models::apply_orientation(ret[1], ret[0]);
       models::apply_orientation_yz(ret[2], ret[1]);
       break;
       }
@@ -898,7 +900,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       ret = compute_hybrid(H, whateveri[0]); 
       
       move_y_to_z(ret, yz);      
-      models::apply_orientation(ret[0], ret[1]);
+      models::apply_orientation(ret[1], ret[0]);
       models::apply_orientation_yz(ret[2], ret[1]);
       break;
       }
