@@ -137,6 +137,7 @@ EX bool wrongMode(char flags) {
   if(land_structure != dls) return true;
   if(numplayers() > 1 && !multi::friendly_fire) return true;
   if(numplayers() > 1 && multi::pvp_mode) return true;
+  if(numplayers() > 1 && multi::split_screen) return true;
   if((numplayers() > 1) != (flags == rg::multi)) return true;
   return false;
   }
@@ -781,7 +782,8 @@ EX void achievement_final(bool really_final) {
   if(NONSTDVAR) return;
 
   if(numplayers() > 1 && !multi::friendly_fire) return;
-  if(numplayers() > 1 && multi::pvp) return;
+  if(numplayers() > 1 && multi::pvp_mode) return;
+  if(numplayers() > 1 && multi::split_screen) return true;
   
   // determine the correct leaderboard ID for 'total score'
   // or return if no leaderboard for the current mode

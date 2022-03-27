@@ -537,6 +537,8 @@ EX void showConfigureMultiplayer() {
         dialog::addInfo(XLAT("PvP grants infinite lives -- achievements disabled"));
       else if(friendly_fire)
         dialog::addInfo(XLAT("friendly fire off -- achievements disabled"));
+      else if(split_screen)
+        dialog::addInfo(XLAT("achievements disabled in split screen"));
       else
         dialog::addBreak(100);
       }
