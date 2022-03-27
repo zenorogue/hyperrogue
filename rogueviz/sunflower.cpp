@@ -205,11 +205,13 @@ int readArgs() {
     nohud = true;
     }
   else if(argis("-sunflower-dr")) {
-    enable();
     infer = 'q';
     shift_arg_formula(zdensity);
     shift_arg_formula(range);
+    enable();
+    /*
     patterns::whichShape = '9';
+    */
     insert_param();
     nohud = true;
     }
