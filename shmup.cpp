@@ -271,7 +271,7 @@ void killMonster(monster* m, eMonster who_kills, flagtype flags = 0) {
   if(callhandlers(false, hooks_kill, m)) return;
   if(m->dead) return;
   m->dead = true;
-  if(isPlayer(m)) {
+  if(isPlayer(m) && m->fragoff < ticks) {
     if(multi::cpid == m->pid)
       multi::suicides[multi::cpid]++;
     else if(multi::cpid >= 0)
@@ -408,7 +408,7 @@ ld bullet_velocity(eMonster t) {
 int frontdir() { return WDIM == 2 ? 0 : 2; }
 
 /** cannot hit yourself during first 100ms after shooting a bullet */
-const int bullet_time = 100;
+const int bullet_time = 300;
 
 void shootBullet(monster *m) {
   monster* bullet = new monster;
