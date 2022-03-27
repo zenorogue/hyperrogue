@@ -443,11 +443,13 @@ monster *playerCrash(monster *who, shiftpoint where) {
   if(who->isVirtual) return NULL;
   for(int j=0; j<players; j++) if(pc[j] && pc[j]!=who) {
     if(pc[j]->isVirtual) continue;
+    if(!gmatrix.count(pc[j]->base)) continue;
     double d = sqdist(pc[j]->pat*C0, where);
     /* crash into another player -- not taken into account in racing */
     if(d < 0.1 * SCALE2 && !racing::on) return pc[j];
     /* too far away -- irrelevant in split_screen */
-    if(!split_screen && (d > 100 || (WDIM == 3 && hdist(tC0(pc[j]->pat), where) > sightranges[geometry]/2))) return pc[j];
+    if(!split_screen && (d > 100 || (WDIM == 3 && hdist(tC0(pc[j]->pat), where) > sightranges[geometry]/2)))
+      return pc[j];
     }
   return NULL;
   }
@@ -1447,6 +1449,7 @@ EX int reflect(cell*& c2, cell*& mbase, shiftmatrix& nat) {
   }
 
 void moveMimic(monster *m) {
+  if(multi::players > 1 && multi::split_screen && cpid != subscreens::current_player) return;
   virtualize(m);
   shiftmatrix nat = m->pat;
   cpid = m->pid;
@@ -2515,7 +2518,7 @@ EX hookset<bool(int)> hooks_turn;
 
 EX void turn(int delta) {
 
-  if(racing::on && subscreens::split( [delta] () { turn(delta); })) return;
+  if(split_screen && subscreens::split( [delta] () { turn(delta); })) return;
   
   int id = 0;
   #if CAP_MOUSEGRAB

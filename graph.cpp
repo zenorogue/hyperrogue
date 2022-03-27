@@ -5032,7 +5032,9 @@ EX void drawthemap() {
   mapeditor::draw_dtshapes();
   
   if(multi::players > 1 && !shmup::on) {
-    if(multi::centerplayer != -1) 
+    if(multi::split_screen)
+      cwtV = multi::whereis[subscreens::current_player];
+    else if(multi::centerplayer != -1)
       cwtV = multi::whereis[multi::centerplayer];
     else {
       hyperpoint h = Hypc;
@@ -5046,9 +5048,11 @@ EX void drawthemap() {
     }
   
   if(shmup::on) {
-    if(multi::players == 1)
+    if(multi::split_screen)
+      cwtV = shmup::pc[subscreens::current_player]->pat;
+    else if(multi::players == 1)
       cwtV = shmup::pc[0]->pat;
-    else if(multi::centerplayer != -1) 
+    else if(multi::centerplayer != -1)
       cwtV = shmup::pc[multi::centerplayer]->pat;
     else {
       hyperpoint h = Hypc;
