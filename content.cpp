@@ -1276,7 +1276,7 @@ LAND( 0x4040FF, "Crossroads III", laCrossroads3, ZERO, itHyperstone, RESERVED,
     "An alternate layout of the Crossroads. Great Walls cross here at right angles."
     )
   NATIVE(0)
-  REQ(NUMBER(orbsUnlocked(), 9, XLAT("Finished lands required: %1 (collect %2 treasure)\n", "9", its(R10))))
+  REQ(NUMBER(orbsUnlocked(), lands_for_hell(), XLAT("Finished lands required: %1 (collect %2 treasure)\n", "9", its(R10))))
 
 LAND( 0x4040C0, "Sea Border", laOceanWall, ZERO | LF_TECHNICAL | LF_SEA, itNone, RESERVED, "Border between seas.")
   // REQAS(laOcean,)
