@@ -59,11 +59,15 @@ struct monster {
   hyperpoint inertia;///< for frictionless lands
   
   int refs;         ///< +1 for every reference (parent, lists of active monsters)
-  
+
+  int split_owner;  ///< in splitscreen mode, which player handles this
+  int split_tick;   ///< in which tick was split_owner computed
+
   monster() { 
     dead = false; inBoat = false; parent = NULL; nextshot = 0; 
     stunoff = 0; blowoff = 0; footphase = 0; no_targetting = false;
     swordangle = 0; inertia = Hypc; ori = Id; refs = 1;
+    split_tick = -1; split_owner = -1;
     }
   
   eMonster get_parenttype() { return parent ? parent->type : moNone; }
@@ -1639,7 +1643,26 @@ EX int protect_pid(int i) {
   return i;
   }
 
+EX bool check_split(monster *m) {
+  if(!(split_screen && multi::players > 1)) return true;
+  if(m->split_tick != ticks) {
+    m->split_tick = ticks;
+    ld min_dist = HUGE_VAL;
+    int i = 0;
+    for(auto& d: subscreens::player_displays) {
+      for(const shiftmatrix& V : hr::span_at(d.all_drawn_copies, m->base)) {
+        ld dist = hdist0(tC0(V * m->at));
+        if(dist < min_dist) min_dist = dist, m->split_owner = i;
+        }
+      i++;
+      }
+    }
+  return m->split_owner == subscreens::current_player;
+  }
+
 void moveBullet(monster *m, int delta) {
+  if(!check_split(m)) return;
+
   cpid = protect_pid(m->pid);
   m->findpat();
   virtualize(m);
@@ -1881,6 +1904,8 @@ EX bool dragonbreath(cell *dragon) {
 #define BULLSTUN (1500)
 
 void moveMonster(monster *m, int delta) {
+
+  if(!check_split(m)) return;
 
   bool inertia_based = m->type == moAsteroid || m->type == moRogueviz;
   
