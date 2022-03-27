@@ -2312,6 +2312,7 @@ EX void draw_model_elements() {
       }
 
     case mdTwoPoint: case mdSimulatedPerspective: fallthrough: {
+      if(set_multi) return; /* no need */
       ld a = -pconf.model_orientation * degree;
       queuestr(shiftless(xspinpush0(a, +pconf.twopoint_param)), vid.xres / 100, "X", ringcolor >> 8);
       queuestr(shiftless(xspinpush0(a, -pconf.twopoint_param)), vid.xres / 100, "X", ringcolor >> 8);
