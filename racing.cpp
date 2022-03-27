@@ -893,13 +893,13 @@ auto hook =
     for(auto &ch: current_history) ch.clear();
     })
 + addHook(hooks_configfile, 100, [] {
-    addsaver(racing::race_advance, "race_advance");
-    addsaver(racing::race_angle, "race_angle");
-    addsaver(racing::ghosts_to_show, "race_ghosts_to_show");
-    addsaver(racing::ghosts_to_save, "race_ghosts_to_save");
-    addsaver(racing::guiding, "race_guiding");
-    addsaver(racing::player_relative, "race_player_relative");
-    addsaver(racing::standard_centering, "race_standard_centering");
+    param_f(racing::race_advance, "race_advance");
+    param_f(racing::race_angle, "race_angle");
+    param_i(racing::ghosts_to_show, "race_ghosts_to_show");
+    param_i(racing::ghosts_to_save, "race_ghosts_to_save");
+    param_b(racing::guiding, "race_guiding");
+    param_b(racing::player_relative, "race_player_relative");
+    param_b(racing::standard_centering, "race_standard_centering");
     })
 // + addHook(hooks_handleKey, 120, akh);
   ;
