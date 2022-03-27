@@ -29,6 +29,9 @@ EX namespace multi {
   EX charstyle scs[MAXPLAYER];
 
   EX bool split_screen;
+  EX bool pvp_mode;
+  EX bool friendly_fire = true;
+  EX bool self_hits;
 
   EX int players = 1;
   EX cellwalker player[MAXPLAYER];
@@ -39,7 +42,7 @@ EX namespace multi {
   EX bool flipped[MAXPLAYER];
   
   // treasure collection, kill, and death statistics
-  EX int treasures[MAXPLAYER], kills[MAXPLAYER], deaths[MAXPLAYER];
+  EX int treasures[MAXPLAYER], kills[MAXPLAYER], deaths[MAXPLAYER], pkills[MAXPLAYER], suicides[MAXPLAYER];
   
   EX bool alwaysuse = false;
 
@@ -194,18 +197,21 @@ string listkeys(int id) {
 #define SCJOY 16
 
 string dsc(int id) {
-  char buf[64];
-  sprintf(buf, " (%d $$$, %d kills, %d deaths)", 
-    multi::treasures[id],
-    multi::kills[id],
-    multi::deaths[id]
+  string buf = XLAT(" (%d $$$, %d kills, %d deaths)",
+    its(multi::treasures[id]),
+    its(multi::kills[id]),
+    its(multi::deaths[id])
     );
+  if(friendly_fire)
+    buf += XLAT(" (%d pkills)", its(multi::pkills[id]));
+  if(self_hits)
+    buf += XLAT(" (%d self)", its(multi::suicides[id]));
   return buf;
   }
 
 EX void resetScores() {
   for(int i=0; i<MAXPLAYER; i++)
-    multi::treasures[i] = multi::kills[i] = multi::deaths[i] = 0;
+    multi::treasures[i] = multi::kills[i] = multi::deaths[i] = multi::pkills[i] = multi::suicides[i] = 0;
   }
  
 bool configdead;
@@ -522,6 +528,19 @@ EX void showConfigureMultiplayer() {
     dialog::addSelItem(XLAT("keyboard & joysticks"), "", 'k');
     dialog::add_action(multi::configure);
     add_edit(split_screen);
+    if(shmup::on && !racing::on) {
+      add_edit(pvp_mode);
+      add_edit(friendly_fire);
+      add_edit(self_hits);
+      if(pvp_mode)
+        dialog::addInfo(XLAT("PvP grants infinite lives -- achievements disabled"));
+      else if(friendly_fire)
+        dialog::addInfo(XLAT("friendly fire off -- achievements disabled"));
+      else
+        dialog::addBreak(100);
+      }
+    else
+      dialog::addInfo(XLAT("PvP available only in shmup"));
     }
   else dialog::addBreak(200);
   
@@ -695,6 +714,12 @@ EX void initConfig() {
   addsaver(multi::players, "mode-number of players");
   param_b(multi::split_screen, "splitscreen", false)
     ->editable("split screen mode", 's');
+  param_b(multi::pvp_mode, "pvp_mode", false)
+    ->editable("player vs player", 'v');
+  param_b(multi::friendly_fire, "friendly_fire", true)
+    ->editable("friendly fire", 'f');
+  param_b(multi::self_hits, "self_hits", false)
+    ->editable("self hits", 'h');
   addsaver(alwaysuse, "use configured keys");  
   // unfortunately we cannot use key names here because SDL is not yet initialized
   for(int i=0; i<512; i++)

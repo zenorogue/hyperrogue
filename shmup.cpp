@@ -50,8 +50,9 @@ struct monster {
   int nextshot;    ///< when will it be able to shot (players/flailers)
   int pid;         ///< player ID
   int hitpoints;   ///< hitpoints; or time elapsed in Asteroids
-  int stunoff;
-  int blowoff;
+  int stunoff;     ///< when does the stun end
+  int blowoff;     ///< when does the blow end
+  int fragoff;     ///< when does the frag end in PvP
   double swordangle; ///< sword angle wrt at
   double vel;        ///< velocity, for flail balls
   double footphase;
@@ -65,8 +66,8 @@ struct monster {
 
   monster() { 
     dead = false; inBoat = false; parent = NULL; nextshot = 0; 
-    stunoff = 0; blowoff = 0; footphase = 0; no_targetting = false;
-    swordangle = 0; inertia = Hypc; ori = Id; refs = 1;
+    stunoff = 0; blowoff = 0; fragoff = 0; footphase = 0; no_targetting = false;
+    swordangle = 0; inertia = Hypc; ori = Id; refs = 1;    
     split_tick = -1; split_owner = -1;
     }
   
@@ -270,6 +271,12 @@ void killMonster(monster* m, eMonster who_kills, flagtype flags = 0) {
   if(callhandlers(false, hooks_kill, m)) return;
   if(m->dead) return;
   m->dead = true;
+  if(isPlayer(m)) {
+    if(multi::cpid == m->pid)
+      multi::suicides[multi::cpid]++;
+    else if(multi::cpid >= 0)
+      multi::pkills[multi::cpid]++;
+    }
   if(isBullet(m) || isPlayer(m)) return;
   m->stk = m->base->monst;
   if(m->inBoat && isWatery(m->base)) {
@@ -400,6 +407,9 @@ ld bullet_velocity(eMonster t) {
 
 int frontdir() { return WDIM == 2 ? 0 : 2; }
 
+/** cannot hit yourself during first 100ms after shooting a bullet */
+const int bullet_time = 100;
+
 void shootBullet(monster *m) {
   monster* bullet = new monster;
   bullet->base = m->base;
@@ -412,6 +422,7 @@ void shootBullet(monster *m) {
   bullet->inertia = m->inertia;
   bullet->inertia[frontdir()] += bullet_velocity(m->type) * SCALE;
   bullet->hitpoints = 0;
+  bullet->fragoff = ticks + bullet_time;
 
   additional.push_back(bullet);
   
@@ -429,6 +440,7 @@ void shootBullet(monster *m) {
     bullet->set_parent(m);
     bullet->pid = m->pid;
     bullet->hitpoints = 0;
+    bullet->fragoff = ticks + bullet_time;
     bullet->inertia = cspin(0, WDIM-1, -M_PI/4 * i) * m->inertia;
     bullet->inertia[frontdir()] += bullet_velocity(m->type) * SCALE;
     additional.push_back(bullet);
@@ -1755,8 +1767,10 @@ void moveBullet(monster *m, int delta) {
 
   // items[itOrbWinter] = 100; items[itOrbLife] = 100;
   
+  bool no_self_hits = !multi::self_hits || m->fragoff > ticks;
+
   if(!m->isVirtual) for(monster* m2: nonvirtual) {
-    if(m2 == m || (m2 == m->parent && m->vel >= 0) || m2->parent == m->parent) 
+    if(m2 == m || (m2 == m->parent && no_self_hits) || (m2->parent == m->parent && no_self_hits))
       continue;
     
     if(m2->dead) continue;
@@ -1765,7 +1779,9 @@ void moveBullet(monster *m, int delta) {
     if(m2->type == moFlailer && m2 != m->parent) continue;
     // be nice to your images! would be too hard otherwise...
     if(isPlayerOrImage(parentOrSelf(m)->type) && isPlayerOrImage(parentOrSelf(m2)->type) &&
-      m2->pid == m->pid)
+      m2->pid == m->pid && no_self_hits)
+      continue;
+    if(isPlayer(parentOrSelf(m)) && isPlayer(m2) && m2->pid != m->pid && !friendly_fire)
       continue;
     // fireballs/airballs don't collide
     if(m->type == moFireball && m2->type == moFireball) continue;
@@ -2538,6 +2554,9 @@ EX void fixStorage() {
 
 EX hookset<bool(int)> hooks_turn;
 
+/** the amount of time chars are disabled in PvP */
+EX int pvp_delay = 2000;
+
 EX void turn(int delta) {
 
   if(split_screen && subscreens::split( [delta] () { turn(delta); })) return;
@@ -2752,6 +2771,15 @@ EX void turn(int delta) {
         useupOrb(itOrbShell, 10);
         items[itOrbShield] = 1;
         orbused[itOrbShield] = true;
+        }
+
+      if(pc[i]->dead && pvp_mode) {
+        pc[i]->dead = false;
+        if(ticks > pc[i]->fragoff) {
+          pc[i]->fragoff = ticks + pvp_delay;
+          pc[i]->nextshot = min(pc[i]->nextshot, pc[i]->fragoff);
+          multi::deaths[i]++;
+          }
         }
     
       if(pc[i]->dead && items[itOrbLife]) {
@@ -3033,7 +3061,11 @@ bool celldrawer::draw_shmup_monster() {
               }
             }
           if(m->inBoat) m->footphase = 0;
-          if(mapeditor::drawplayer) drawMonsterType(moPlayer, c, view, 0xFFFFFFC0, m->footphase, 0xFFFFFFC0);
+          if(mapeditor::drawplayer) {
+            if(m->fragoff > ticks)
+              drawShield(view, itWarning);
+            drawMonsterType(moPlayer, c, view, 0xFFFFFFC0, m->footphase, 0xFFFFFFC0);
+            }
           }
 
         if(ths && h) first_cell_to_draw = false;

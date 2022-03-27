@@ -168,7 +168,7 @@ EX int lightat, safetyat;
 EX void drawLightning() { lightat = ticks; }
 EX void drawSafety() { safetyat = ticks; }
 
-void drawShield(const shiftmatrix& V, eItem it) {
+EX void drawShield(const shiftmatrix& V, eItem it) {
 #if CAP_CURVE
   float ds = ptick(300);
   color_t col = iinf[it].color;
