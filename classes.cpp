@@ -834,6 +834,7 @@ extern eGeometry geometry;
 extern eVariation variation;
 #endif
 
+#if HDR
 static const flagtype qsNONOR           = qANYQ | qSMALL | qBOUNDED | qNONORIENTABLE;
 static const flagtype qsNONORE          = qsNONOR | qELLIPTIC;
 static const flagtype qsBQ              = qANYQ | qSMALL | qBOUNDED;
@@ -848,6 +849,7 @@ static const flagtype qsSMALLBE         = qsSMALLB | qELLIPTIC | qANYQ;
 static const flagtype qsBP              = qBINARY | qKITE;
 
 static const flagtype qsSINGLE          = qANYQ | qSMALL | qBOUNDED | qSINGLE;
+#endif
 
 EX geometryinfo1 giEuclid2 = { gcEuclid,     2, 2, 3, {1,1, 0,0 } };
 EX geometryinfo1 giHyperb2 = { gcHyperbolic, 2, 2, 3, {1,1,-1,0 } };
