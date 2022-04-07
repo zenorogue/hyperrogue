@@ -3099,7 +3099,7 @@ bool celldrawer::draw_shmup_monster() {
         else
           col = (minf[m->get_parenttype()].color << 8) | 0xFF;
         if(getcs().charid >= 4) {
-          queuepoly(mmscale(view, 1.15), cgi.shPHead, col);
+          queuepoly(GDIM == 3 ? mscale(view, cgi.BODY) : mmscale(view, 1.15), cgi.shPHead, col);
           ShadowV(view, cgi.shPHead);
           }
         else if(peace::on) {
