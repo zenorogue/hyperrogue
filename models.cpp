@@ -783,6 +783,11 @@ EX namespace models {
   
   EX eModel read_model(const string& ss) {
     for(int i=0; i<isize(mdinf); i++) {
+      if(hyperbolic && appears(mdinf[i].name_hyperbolic, ss)) return eModel(i);
+      if(euclid && appears(mdinf[i].name_euclidean, ss)) return eModel(i);
+      if(sphere && appears(mdinf[i].name_spherical, ss)) return eModel(i);
+      }
+    for(int i=0; i<isize(mdinf); i++) {
       if(appears(mdinf[i].name_hyperbolic, ss)) return eModel(i);
       if(appears(mdinf[i].name_euclidean, ss)) return eModel(i);
       if(appears(mdinf[i].name_spherical, ss)) return eModel(i);
