@@ -163,7 +163,10 @@ void read_all(int fd, void *buf, int cnt) {
 /* note: this loads the whole animation uncompressed into memory, so it is suitable only for short presentations */
 void show_animation(presmode mode, string s, int sx, int sy, int frames, int fps) {
 #if CAP_VIDEO
-  if(mode == pmStartAll) {
+  if(mode == pmStartAll || mode == pmStart) {
+    /* load only once */
+    if(textures.count(s + "@0")) return;
+    /* actually load */
     array<int, 2> tab;
     if(pipe(&tab[0])) {
       addMessage(format("Error: %s", strerror(errno)));

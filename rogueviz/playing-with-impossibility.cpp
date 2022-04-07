@@ -1015,10 +1015,19 @@ slide dmv_slides[] = {
     "(the animation is not included with RogueViz)"
     ,
     [] (presmode mode) {
+      static bool pic_exists, video_exists;
+      if(mode == pmStartAll || mode == pmStart) {
+        pic_exists = file_exists("rogueviz/nil/emty-ring.png");
+        video_exists = file_exists("rogueviz/nil/emty-ring.mp4");
+        }
       slide_url(mode, 'i', "Instagram link", "https://www.instagram.com/p/B756GCynErw/");
       empty_screen(mode);
-      // show_picture(mode, "rogueviz/nil/emty-ring.png");
-      // show_animation(mode, "rogueviz/nil/emty-ring.mp4", 720, 900, 300, 30);
+      if(video_exists)
+        show_animation(mode, "rogueviz/nil/emty-ring.mp4", 720, 900, 300, 30);
+      else if(pic_exists)
+        show_picture(mode, "rogueviz/nil/emty-ring.png");
+      else
+        slide_error(mode, "(image not available)");
       no_other_hud(mode);
       }
     },

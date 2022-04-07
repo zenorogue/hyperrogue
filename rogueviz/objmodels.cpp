@@ -17,7 +17,7 @@ char peek(fhstream& fs) {
 bool model::available() {
   if(av_checked) return is_available;
   av_checked = true;
-  is_available = false;
+  is_available = file_exists(path + fname);
   return false;
   }
 
