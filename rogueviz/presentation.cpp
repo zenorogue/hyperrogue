@@ -398,6 +398,41 @@ int pres_hooks =
     }) +
   0;
 
+void launch_slideshow_by_name(string s) {
+  ss::for_all_slideshows([s] (string title, slide *sl, char ch) {
+    println(hlog, "comparing ", s, " to ", title);
+    if(s.size() == 1 ? s[0] == ch : appears(title, s)) {
+      tour::slides = sl;
+      nomenukey = true;
+      popScreenAll();
+      tour::start();
+      if(!tour::on) tour::start();
+      }
+    });
+  }
+
+int runslide = arg::add3("-slides", [] {
+  arg::shift(); launch_slideshow_by_name(arg::args());
+  }) + arg::add3("-slide", [] {
+  arg::shift(); launch_slideshow_by_name(arg::args());
+  presentation(pmStop);
+  arg::shift(); string s = arg::args();
+  int i;
+  currentslide = -1;
+  for(i=0; (i==0 || !(slides[i-1].flags & FINALSLIDE)); i++) {
+    if(appears(slides[i].name, s)) {
+      currentslide = i;
+      break;
+      }
+    }
+  if(currentslide == -1) {
+    int j = atoi(s.c_str());
+    if(j >= 0 && j < i) currentslide = j;
+    else currentslide = 0;
+    }
+  presentation(pmStart);
+  });
+
 }
 #endif
 }
