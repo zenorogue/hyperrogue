@@ -492,6 +492,8 @@ EX const char *conffile = "hyperrogue.ini";
 /* extra space if more geometries are added */
 EX array<ld, gGUARD+64> sightranges;
 
+EX bool logfog;
+
 EX videopar vid;
 
 #define DEFAULT_WALLMODE (ISMOBILE ? 3 : 5)
@@ -774,6 +776,8 @@ EX void initConfig() {
 
   param_b(vid.darkhepta, "mark heptagons", false);
   
+  param_b(logfog, "logfog", false);
+
   for(auto& lp: linepatterns::patterns) {
     addsaver(lp->color, "lpcolor-" + lp->lpname);
     addsaver(lp->multiplier, "lpwidth-" + lp->lpname);

@@ -402,7 +402,10 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
       }
     else if(distfun != "") {
       have_vfogs = true;
-      vmain += "vFogs = (uFogBase - " + distfun + " / uFog);\n";
+      if(logfog)
+        vmain += "vFogs = uFogBase * exp(- " + distfun + " / uFog);\n";
+      else
+        vmain += "vFogs = clamp(uFogBase - " + distfun + " / uFog, 0.0, 1.0);\n";
       vsh += 
         "uniform mediump float uFog;\n"
         "uniform mediump float uFogBase;\n";
