@@ -783,7 +783,7 @@ EX void achievement_final(bool really_final) {
 
   if(numplayers() > 1 && !multi::friendly_fire) return;
   if(numplayers() > 1 && multi::pvp_mode) return;
-  if(numplayers() > 1 && multi::split_screen) return true;
+  if(numplayers() > 1 && multi::split_screen) return;
   
   // determine the correct leaderboard ID for 'total score'
   // or return if no leaderboard for the current mode
