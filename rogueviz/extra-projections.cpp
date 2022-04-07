@@ -159,6 +159,28 @@ void add_extra_projections() {
   add_complex("Wagner VI", mf::equiarea | mf::pseudoband, [] (cld& x, cld& y) {
     x = x * sqrt(1. - 3. * pow(y/M_PI, 2));
     });      
+
+  /* does the Poincare model work in spherical? -- hint: it does not, as expected */
+  if(0) add_complex("alt poincare", mf::equiarea | mf::pseudoband, [] (cld& x, cld& y) {
+    cld i(0, 1);
+    x /= i;
+    y /= i;
+    cld c1(1, 0);
+    auto ax = cosh(y) * sinh(x);
+    auto ay = sinh(y);
+    auto az = cosh(x) * cosh(y);
+    ax /= (az+c1);
+    ay /= (az+c1);
+    ay += c1;
+    cld z = ax*ax + ay*ay;
+    ax /= z;
+    ay /= z;
+    ay -= c1;
+    ax *= i;
+    ay *= i;
+    x = ax;
+    y = ay;
+    });
   }
 
 int ar = addHook(hooks_initialize, 100, add_extra_projections);
