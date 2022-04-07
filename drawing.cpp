@@ -304,7 +304,7 @@ EX bool two_sided_model() {
   #endif
   if(GDIM == 3) return false;
   if(in_vr_sphere) return true;
-  if(pmodel == mdHyperboloid) return !euclid && !in_vr;
+  if(models::is_hyperboloid(pmodel)) return !euclid && !in_vr;
   // if(pmodel == mdHemisphere) return true;
   if(pmodel == mdDisk) return sphere || (hyperbolic && pconf.alpha < 0 && pconf.alpha > -1);
   if(pmodel == mdRetroLittrow) return sphere;
@@ -348,10 +348,20 @@ EX int get_side(const hyperpoint& H) {
     return (models::sin_ball * H[2] > -models::cos_ball * H[1]) ? -1 : 1;
   if(pmodel == mdHyperboloid && sphere)
     return (models::sin_ball * H[2] > models::cos_ball * H[1]) ? -1 : 1;
-  if(pmodel == mdHemisphere) {
+  if(pmodel == mdHyperboloidFlat && sphere)
+    return H[2] >= 0 ? 1 : -1;
+  if(pmodel == mdHemisphere && hyperbolic) {
     hyperpoint res;
     applymodel(shiftless(H), res);
     return res[2] < 0 ? -1 : 1;
+    }
+  if(pmodel == mdHemisphere && sphere) {
+    auto H1 = H;
+    int s = H1[2] > 0 ? 1 : -1;
+    if(hemi_side && s != hemi_side) return -spherespecial;
+    H1[0] /= H1[2]; H1[1] /= H1[2];
+    H1[2] = s * sqrt(1 + H1[0]*H1[0] + H1[1] * H1[1]);
+    return (models::sin_ball * H1[2] > models::cos_ball * H1[1]) ? 1 : -1;
     }
   if(pmodel == mdSpiral && pconf.spiral_cone < 360) {    
     return cone_side(shiftless(H));
@@ -2283,6 +2293,8 @@ EX void set_vr_sphere() {
   #endif
   }
 
+EX int hemi_side = 0;
+
 EX void draw_main() {
   DEBBI(DF_GRAPH, ("draw_main"));
   
@@ -2293,6 +2305,24 @@ EX void draw_main() {
     pconf.back_and_front = 2;
     reset_projection();
     draw_main();
+    return;
+    }
+
+  if(pmodel == mdHemisphere && sphere && hemi_side == 0 && !vrhr::rendering()) {
+    hemi_side = models::sin_ball > 0 ? 1 : -1;
+    draw_main();
+
+    if(pconf.show_hyperboloid_flat) {
+      dynamicval<eModel> dv (pmodel, mdHyperboloidFlat);
+      dynamicval<int> ds (spherespecial, 1);
+      for(auto& ptd: ptds)
+        if(!among(ptd->prio, PPR::MOBILE_ARROW, PPR::OUTCIRCLE, PPR::CIRCLE))
+          ptd->draw();
+      }
+
+    hemi_side *= -1;
+    draw_main();
+    hemi_side = 0;
     return;
     }
 

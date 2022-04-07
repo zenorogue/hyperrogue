@@ -222,6 +222,10 @@ EX namespace models {
     if(sphere) return (mdinf[m].flags & mf::broken) ? 2 : 0;
     return 0;
     }
+
+  EX bool is_hyperboloid(eModel m) {
+    return m == (sphere ? mdHemisphere : mdHyperboloid);
+    }
   
   EX bool is_perspective(eModel m) {
     return among(m, mdPerspective, mdGeodesic);
@@ -592,7 +596,7 @@ EX namespace models {
         });
       }
     
-    if(vpmodel == mdHyperboloid) 
+    if(is_hyperboloid(vpmodel))
       add_edit(vpconf.top_z);
     
     if(has_transition(vpmodel)) 
@@ -613,7 +617,7 @@ EX namespace models {
     if(vpmodel == mdFisheye) 
       add_edit(vpconf.fisheye_param);
 
-    if(vpmodel == mdHyperboloid) 
+    if(is_hyperboloid(vpmodel))
       add_edit(pconf.show_hyperboloid_flat);
     
     if(vpmodel == mdCollignon) 

@@ -1030,7 +1030,7 @@ EX vector<modelinfo> mdinf = {
   {X3("azimuthal equi-area"), mf::azimuthal | mf::equiarea | mf::euc_boring, DEFAULTS},
   {X3("ball model"), mf::conformal | mf::azimuthal | mf::space, DEFAULTS},
   {"Minkowski hyperboloid", "plane", "sphere", mf::conformal | mf::space | mf::euc_boring, DEFAULTS},
-  {"hemisphere", "sphere", "sphere", mf::conformal | mf::space, DEFAULTS},
+  {"hemisphere", "sphere", "Minkowski hyperboloid", mf::conformal | mf::space, DEFAULTS},
   {X3("band equidistant"), mf::band | mf::equidistant | mf::euc_boring, DEFAULTS},
   {X3("band equi-area"), mf::band | mf::equiarea | mf::euc_boring, DEFAULTS},
   {X3("sinusoidal"), mf::pseudoband | mf::equiarea | mf::euc_boring, DEFAULTS},

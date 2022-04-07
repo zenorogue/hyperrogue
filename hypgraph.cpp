@@ -778,11 +778,23 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         
         case gcSphere: {
           if(vrhr::rendering()) { vr_sphere(ret, H, md); return; }
+          ld z = sqhypot_d(3, H);
+          int s = H[2] > 0 ? 1 : -1;
           ret = H;
+          ret /= ret[2];
+          ret[2] = sqrt(1 + ret[0]*ret[0] + ret[1]*ret[1]) * s;
+          ret *= z;
+          ld& topz = pconf.top_z;
+          if(abs(ret[2]) > topz || (hemi_side && s != hemi_side)) {
+            ld scale = sqrt(topz*topz-1) / hypot_d(2, ret);
+            ret *= scale;
+            ret[2] = topz * s;
+            }
           if(pconf.depth_scaling != 1) {
             ld v = intval(H, Hypc);
             ret *= pow(v, (dir * pconf.depth_scaling-1) / 2);
             }
+          ret /= 3;
           break;
           }
         }
@@ -823,27 +835,35 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         }
       #endif
       
+      ret = H;
+
+      if(sphere && pmodel == mdHyperboloidFlat) {
+        int s = H[2] > 0 ? 1 : -1;
+        ret /= ret[2];
+        ret[2] = sqrt(1 + ret[0]*ret[0] + ret[1]*ret[1]) * s;
+        }
+
       if(pconf.depth_scaling != 1) {
-        ld v = intval(H, Hypc);
-        H *= pow(v, (pconf.depth_scaling-1) / 2);
+        ld v = intval(ret, Hypc);
+        ret *= pow(v, (pconf.depth_scaling-1) / 2);
         }
 
       if(pmodel == mdHyperboloid) {
         ld& topz = pconf.top_z;
-        if(H[2] > topz) {
-          ld scale = sqrt(topz*topz-1) / hypot_d(2, H);
-          H *= scale;
-          H[2] = topz;
+        if(ret[2] > topz) {
+          ld scale = sqrt(topz*topz-1) / hypot_d(2, ret);
+          ret *= scale;
+          ret[2] = topz;
           }
         }
       else {
-        H = space_to_perspective(H, pconf.alpha);
-        H[2] = 1 - pconf.alpha;
+        ret = space_to_perspective(ret, pconf.alpha);
+        ret[2] = 1 - pconf.alpha;
+        if(sphere) ret[2] = -ret[2];
         }
   
-      ret[0] = H[0] / 3;
-      ret[1] = (1 - H[2]) / 3;
-      ret[2] = H[1] / 3;
+      ret[0] = ret[0] / 3;
+      tie(ret[1], ret[2]) = make_pair(((sphere?0:1) - ret[2]) / 3, ret[1] / 3);
       
       models::apply_ball(ret[2], ret[1]);
       break;
@@ -2276,7 +2296,7 @@ EX color_t modelcolor = 0;
 EX void draw_model_elements() {
 
   #if CAP_VR
-  if(vrhr::active() && pmodel == mdHyperboloid) return;
+  if(vrhr::active() && is_hyperboloid(pmodel)) return;
   #endif
 
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
@@ -2339,9 +2359,10 @@ EX void draw_model_elements() {
       return;
       }
     
-    case mdHyperboloid: {
+    case mdHyperboloid:
+    case mdHemisphere: {
       if(!pconf.show_hyperboloid_flat) return;
-      if(hyperbolic) {
+      if(models::is_hyperboloid(pmodel)) {
 #if CAP_QUEUE
         curvepoint(point3(0,0,1));
         curvepoint(point3(0,0,-pconf.alpha));
@@ -2550,7 +2571,7 @@ EX void draw_boundary(int w) {
         queuecurve(shiftless(Id), lc, fc, p);
         queuereset(pmodel, p);
         }
-      if(euclid || sphere) {
+      if(euclid) {
         queuereset(mdPixel, p);  
         for(int i=0; i<=360; i++) {
           curvepoint(point3(current_display->radius * cos(i * degree), current_display->radius * sin(i * degree), 0));
@@ -2558,13 +2579,15 @@ EX void draw_boundary(int w) {
         queuecurve(shiftless(Id), lc, fc, p);
         queuereset(pmodel, p);
         }
+      if(sphere) goto as_hyperboloid;
       return;
       }
     
     case mdHyperboloid: {
       if(hyperbolic) {
+        as_hyperboloid:
         ld& tz = pconf.top_z;
-        ld mz = acosh(tz);
+        ld mz = sphere ? atan(sqrt(tz*tz-1)) : acosh(tz);
         ld cb = models::cos_ball;
         ld sb = models::sin_ball;
         
@@ -2609,6 +2632,13 @@ EX void draw_boundary(int w) {
           curvepoint(xspinpush0(t * degree, mz));
 
         queuecurve(shiftless(Id), lc, fc, p);
+
+        if(sphere) {
+          for(ld t=0; t<=360; t ++)
+            curvepoint(xspinpush0(t * degree, M_PI-mz));
+
+          queuecurve(shiftless(Id), lc, fc, p);
+          }
         }
       return;
       }
