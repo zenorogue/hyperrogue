@@ -1046,7 +1046,7 @@ EX void render() {
       dynamicval<transmatrix> tN(NLP, NLP);
       dynamicval<transmatrix> tV(View, View);
       dynamicval<transmatrix> tC(current_display->which_copy, current_display->which_copy);
-      dynamicval<transmatrix> trt(radar_transform);
+      dynamicval<transmatrix> trt(current_display->radar_transform);
       
       /* changed in intra */
       dynamicval<ld> tcs(camera_speed);
@@ -1082,7 +1082,7 @@ EX void render() {
 
       make_actual_view();
       hmd_pre = hmd_pre_for[i] = cview().T * inverse(master_cview.T);
-      radar_transform = trt.backup * inverse(hmd_pre);
+      current_display->radar_transform = trt.backup * inverse(hmd_pre);
       
       if(i < 2)
         frusta.push_back(frustum_info{hmd_pre, NLP, false, vrdata.proj[i]});
