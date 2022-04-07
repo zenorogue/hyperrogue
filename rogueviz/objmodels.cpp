@@ -81,11 +81,10 @@ void model::load_obj(model_data& md) {
           emit_material();
           nextcol = 0xFFFFFFFF;
           texname = "";
-          fsm.get<char>();
-          scan(fsm, mtlname);
+          mtlname = scanline_noblank(fsm);
           }
         if(s == "map_Kd") {
-          scan(fsm, texname);
+          texname = scanline_noblank(fsm);
           }
         }
       emit_material();
@@ -94,8 +93,7 @@ void model::load_obj(model_data& md) {
       next_object:
       object *co = nullptr;
       bool textured = false;
-      fs.get<char>();
-      string oname = scanline(fs);
+      string oname = scanline_noblank(fs);
       println(hlog, "reading object: ", oname);
       md.objindex.push_back(isize(md.objs));
       hyperpoint ctr = Hypc;
@@ -140,10 +138,7 @@ void model::load_obj(model_data& md) {
         else if(s == "usemtl") {
           if(co) cgi.finishshape();
           if(co) println(hlog, "vertices = ", co->sh.e-co->sh.s, " tvertices = ", isize(co->tv.tvertices));
-          fs.get<char>();
-          string mtlname;
-          scan(fs, mtlname);
-          //string mtlname = scanline(fs);
+          string mtlname = scanline_noblank(fs);
           co = nullptr;
           if(mtlname.find("Layer_Layer0") != string::npos) continue;
           objects.push_back(make_shared<object>());
