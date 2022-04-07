@@ -351,6 +351,13 @@ bool scan(fhstream& hs, ld& x) { return fscanf(hs.f, "%lf", &x) == 1; }
 bool scan(fhstream& hs, string& s) { char t[10000]; t[0] = 0; int err = fscanf(hs.f, "%9500s", t); s = t; return err == 1 && t[0]; }
 string scanline(fhstream& hs) { char buf[10000]; buf[0] = 0; ignore(fgets(buf, 10000, hs.f)); return buf; }
 
+EX string scanline_noblank(fhstream& hs) {
+  string s = scanline(hs);
+  while(s.size() && among(s.back(), '\t', '\r', ' ', '\n')) s.pop_back();
+  while(s.size() && among(s[0], '\t', '\r', ' ', '\n')) s = s.substr(1);
+  return s;
+  }
+
 /*
 string fts_smartdisplay(ld x, int maxdisplay) {
   string rv;
