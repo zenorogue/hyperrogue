@@ -183,7 +183,41 @@ void add_extra_projections() {
     });
   }
 
-int ar = addHook(hooks_initialize, 100, add_extra_projections);
+void gen_dual() {
+  int q = isize(mdinf);
+  eModel p = pmodel;
+  auto& mo=  mdinf[p];
+  mdinf.push_back(mo);
+  auto& m = mdinf.back();
+  m.name_hyperbolic = strdup((string("dual to ") + mo.name_spherical).c_str());
+  m.name_euclidean = strdup((string("dual to ") + mo.name_euclidean).c_str());
+  m.name_spherical = strdup((string("dual to ") + mo.name_hyperbolic).c_str());
+  while(isize(extra_projections) < q) extra_projections.emplace_back();
+  extra_projections.emplace_back([p] (shiftpoint& H_orig, hyperpoint& H, hyperpoint& ret) {
+    if(hyperbolic) {
+      auto Hdual = H_orig;
+      auto& H1 = Hdual.h;
+      H1 /= H1[2];
+      H1[2] = sqrt(1 - H1[0] * H1[0] - H1[1] * H1[1]);
+      dynamicval<eGeometry> g(geometry, gSphere);
+      apply_other_model(Hdual, ret, p);
+      }
+    else if(sphere) {
+      auto Hdual = H_orig;
+      auto& H1 = Hdual.h;
+      H1 /= H1[2];
+      H1[2] = sqrt(1 + H1[0] * H1[0] + H1[1] * H1[1]);
+      dynamicval<eGeometry> g(geometry, gNormal);
+      apply_other_model(Hdual, ret, p);
+      }
+    else
+      apply_other_model(H_orig, ret, p);
+    });
+  pmodel = eModel(q);
+  }
+
+int ar = addHook(hooks_initialize, 100, add_extra_projections)
+  + arg::add3("-gen-dual", gen_dual);
 
 }
 }
