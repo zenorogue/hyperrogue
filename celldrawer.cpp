@@ -1093,7 +1093,7 @@ void celldrawer::set_land_floor(const shiftmatrix& Vf) {
             set_floor(cgi.shFloor);
             if(GDIM == 2) {
               draw_floorshape(c, V, cgi.shMFloor, darkena(fcol, fd + 1, 0xFF), PPR::FLOORa);
-              draw_floorshape(c, V, cgi.shMFloor2, darkena(fcol, fcol==uint(c->landparam) ? fd : fd + 1, 0xFF), PPR::FLOORb);
+              draw_floorshape(c, V, cgi.shMFloor2, darkena(fcol, fcol==color_t(c->landparam) ? fd : fd + 1, 0xFF), PPR::FLOORb);
               }
             }
           else
