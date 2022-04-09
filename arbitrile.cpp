@@ -14,8 +14,6 @@ EX namespace arb {
 
 EX int affine_limit = 200;
 
-EX bool legacy; /* angleofs command */
-
 #if HDR
 
 /** a type used to specify the connections between shapes */
@@ -205,16 +203,14 @@ void shape::build_from_angles_edges(bool is_comb) {
   int n = isize(angles);
   hyperpoint ctr = Hypc;
   vector<transmatrix> matrices;
-  if(!legacy) for(auto& a: angles) a += M_PI;
   for(int i=0; i<n; i++) {
     matrices.push_back(at);
     if(debugflags & DF_GEOM) println(hlog, "at = ", at);
     vertices.push_back(tC0(at));
     ctr += tC0(at);
-    at = at * xpush(edges[i]) * spin(angles[i]);
+    at = at * xpush(edges[i]) * spin(angles[i]+M_PI);
     }
   matrices.push_back(at);
-  if(!legacy) for(auto& a: angles) a -= M_PI;
   if(is_comb) return;
   if(!eqmatrix(at, Id)) {
     throw hr_polygon_error(matrices, id, at);
@@ -254,7 +250,7 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
       }
     cld angle = ep.parse(0);
     cc.edges.push_back(ep.validate_real(dist * ep.extra_params["distunit"]));
-    cc.angles.push_back(ep.validate_real(angle * ep.extra_params["angleunit"] + ep.extra_params["angleofs"]));
+    cc.angles.push_back(ep.validate_real(angle * ep.extra_params["angleunit"]));
     if(ep.eat(",")) continue;
     else if(ep.eat(")")) break;
     else throw hr_parse_exception("expecting , or )");
@@ -439,7 +435,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
   c.is_combinatorial = false;
   exp_parser ep;
   ep.s = s;
-  ld angleunit = 1, distunit = 1, angleofs = 0;
+  ld angleunit = 1, distunit = 1;
   auto addflag = [&] (int f) {
     int ai;
     if(ep.next() == ')') ai = isize(c.shapes)-1;
@@ -452,7 +448,6 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
 
     ep.extra_params["distunit"] = distunit;
     ep.extra_params["angleunit"] = angleunit;
-    ep.extra_params["angleofs"] = angleofs;
 
     ep.skip_white();
     if(ep.next() == 0) break;
@@ -498,9 +493,6 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       set_flag(ginf[gArbitrary].flags, qAFFINE, false);
       geom3::apply_always3();
       }
-    else if(ep.eat("legacysign.")) {
-      if(legacy) angleunit *= -1;
-      }
     else if(ep.eat("star.")) {
       c.is_star = true;
       }
@@ -518,10 +510,6 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       ep.force_eat(")");
       }
     else if(ep.eat("angleunit(")) angleunit = real(ep.parsepar());
-    else if(ep.eat("angleofs(")) {
-      angleofs = real(ep.parsepar());
-      if(!legacy) angleofs = 0;
-      }
     else if(ep.eat("distunit(")) distunit = real(ep.parsepar());
     else if(ep.eat("line(")) {
       addflag(arcm::sfLINE);
@@ -1334,9 +1322,6 @@ int readArgs() {
     }
   else if(argis("-tes-opt")) {
      arg::run_arguments(current.options);
-    }
-  else if(argis("-arb-legacy")) {
-    legacy = true;
     }
   else if(argis("-arb-convert")) {
     try {
