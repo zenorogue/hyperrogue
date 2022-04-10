@@ -299,6 +299,24 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
   cc.repeat_value = 1;
   while(ep.next() != ')') {
     cld dist = 1;
+    ep.skip_white();
+    if(ep.eat("*")) {
+      int rep = ep.iparse(0);
+      int repeat_from = 0;
+      int repeat_to = cc.in_edges.size();
+      for(int i=1; i<rep; i++)
+      for(int j=repeat_from; j<repeat_to; j++) {
+        cc.in_edges.push_back(cc.in_edges[j]);
+        cc.in_angles.push_back(cc.in_angles[j]);
+        cc.ideal_markers.push_back(cc.ideal_markers[j]);
+        }
+      ep.skip_white();
+      if(ep.eat(")")) {
+        if(repeat_from == 0) cc.repeat_value = rep;
+        break;
+        }
+      else throw hr_parse_exception("expecting ) after repeat");
+      }
     if(!unit) {
       dist = ep.parse(0);
       ep.force_eat(",");
