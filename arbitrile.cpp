@@ -408,6 +408,22 @@ EX void compute_vertex_valence() {
       }      
   }
 
+EX void add_connection(arbi_tiling& c, int ai, int as, int bi, int bs, int m) {
+  int as0 = as, bs0 = bs;
+  auto& ash = c.shapes[ai];
+  auto& bsh = c.shapes[bi];
+  do {
+    ash.connections[as] = connection_t{bi, bs, m};
+    as = gmod(as + ash.size() / ash.repeat_value, ash.size());
+    }
+  while(as != as0);
+  do {
+    c.shapes[bi].connections[bs] = connection_t{ai, as, m};
+    bs = gmod(bs + bsh.size() / bsh.repeat_value, bsh.size());
+    }
+  while(bs != bs0);
+  }
+
 EX void load(const string& fname, bool after_sliding IS(false)) {
   fhstream f(fname, "rt");
   if(!f.f) throw hr_parse_exception("file " + fname + " does not exist");
@@ -600,8 +616,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
         verify_index(as, c.shapes[ai], ep);
         verify_index(bi, c.shapes, ep);
         verify_index(bs, c.shapes[bi], ep);
-        c.shapes[ai].connections[as] = connection_t{bi, bs, m};
-        c.shapes[bi].connections[bs] = connection_t{ai, as, m};
+        add_connection(c, ai, as, bi, bs, m);
         }
       ep.force_eat(")");
       }
@@ -611,8 +626,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       int bi = ep.iparse(); verify_index(bi, c.shapes, ep); ep.force_eat(",");
       int bs = ep.iparse(); verify_index(bs, c.shapes[bi], ep); ep.force_eat(",");
       int m = ep.iparse(); ep.force_eat(")");
-      c.shapes[ai].connections[as] = connection_t{bi, bs, m};
-      c.shapes[bi].connections[bs] = connection_t{ai, as, m};
+      add_connection(c, ai, as, bi, bs, m);
       }
     else if(ep.eat("subline(")) {
       int ai = ep.iparse(); verify_index(ai, c.shapes, ep); ep.force_eat(",");
