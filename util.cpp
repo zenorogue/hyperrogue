@@ -245,6 +245,16 @@ cld exp_parser::parse(int prio) {
       res /= *distunit;
     }
   #endif
+  else if(eat("ideal_angle(")) {
+    ld edges = rparse(0);
+    force_eat(")");
+    return arb::rep_ideal(edges).second;
+    }
+  else if(eat("ideal_edge(")) {
+    ld edges = rparse(0);
+    force_eat(")");
+    return arb::rep_ideal(edges).first;
+    }
   else if(eat("regangle(")) {
     cld edgelen = parse(0);
     if (auto *distunit = hr::at_or_null(extra_params, "distunit")) {

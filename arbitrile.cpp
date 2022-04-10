@@ -35,6 +35,13 @@ inline void print(hstream& hs, const connection_t& conn) { print(hs, tie(conn.si
  *  note: the tesfile convention is: edge 0, vertex 0, edge 1, vertex 1, ...
  */
 
+/** edge with infinite end on the left */
+constexpr ld INFINITE_LEFT = -1;
+/** edge with infinite end on the right */
+constexpr ld INFINITE_RIGHT = -2;
+/** edge with two infinite ends */
+constexpr ld INFINITE_BOTH = -3;
+
 struct shape {
   /** index in the arbi_tiling::shapes */
   int id;
@@ -46,6 +53,12 @@ struct shape {
   vector<ld> angles;
   /** list of edge lengths */
   vector<ld> edges;
+  /** list of input edges */
+  vector<ld> in_edges;
+  /** list of input angles */
+  vector<ld> in_angles;
+  /** (ultra)ideal markers */
+  vector<bool> ideal_markers;
   /** list of edge connections */
   vector<connection_t> connections;
   int size() const { return isize(vertices); }
@@ -199,16 +212,14 @@ void start_poly_debugger(hr_polygon_error& err) {
 
 void shape::build_from_angles_edges(bool is_comb) {
   transmatrix at = Id;
-  vertices.clear();
-  int n = isize(angles);
+  int n = isize(in_angles);
   hyperpoint ctr = Hypc;
   vector<transmatrix> matrices;
   for(int i=0; i<n; i++) {
     matrices.push_back(at);
     if(debugflags & DF_GEOM) println(hlog, "at = ", at);
-    vertices.push_back(tC0(at));
     ctr += tC0(at);
-    at = at * xpush(edges[i]) * spin(angles[i]+M_PI);
+    at = at * xpush(in_edges[i]) * spin(in_angles[i]+M_PI);
     }
   matrices.push_back(at);
   if(is_comb) return;
@@ -220,13 +231,56 @@ void shape::build_from_angles_edges(bool is_comb) {
     // try to move towards the center
     if(debugflags & DF_GEOM) println(hlog, "special case encountered");
     for(int i=0; i<n; i++) {
-      ctr += at * xpush(edges[i]) * spin((angles[i]+M_PI)/2) * xpush0(.01);
-      at = at * xpush(edges[i]) * spin(angles[i]);
+      ctr += at * xpush(in_edges[i]) * spin((in_angles[i]+M_PI)/2) * xpush0(.01);
+      at = at * xpush(in_edges[i]) * spin(in_angles[i]);
       }
     if(debugflags & DF_GEOM) println(hlog, "ctr = ", ctr);
     }
   ctr = normalize(ctr);
-  for(auto& v: vertices) v = gpushxto0(ctr) * v;
+  vertices.clear();
+  angles.clear();
+  for(int i=0; i<n; i++) {
+    edges.push_back(in_edges[i]);
+    if(!ideal_markers[i]) {
+      vertices.push_back(tC0(gpushxto0(ctr) * matrices[i]));
+      angles.push_back(in_angles[i]);
+      }
+    else {
+      angles.push_back(0);
+      hyperpoint a1 = tC0(matrices[i]);
+      hyperpoint t1 = get_column(matrices[i], 0);
+      hyperpoint a2 = tC0(matrices[i+2]);
+      hyperpoint t2 = get_column(matrices[i+2], 0);
+
+      a1 /= a1[2];
+      a2 /= a2[2];
+
+      t1 -= a1 * t1[2];
+      t2 -= a2 * t2[2];
+
+      ld c1 = a2[0] - a1[0], c2 = a2[1] - a1[1];
+      ld v1 = t1[0], v2 = t1[1];
+      ld u1 = t2[0], u2 = t2[1];
+
+      ld r = (u2 * c1 - c2 * u1) / (v1 * u2 - v2 * u1);
+      ld s = (v2 * c1 - c2 * v1) / (v1 * u2 - v2 * u1);
+
+      hyperpoint v = a1 + r * t1;
+      hyperpoint w = a2 + s * t2;
+      v[2] = 1;
+      v = gpushxto0(ctr) * v;
+      v /= v[2];
+      vertices.push_back(v);
+      i++;
+      }
+    }
+  for(int i=0; i<n; i++) {
+    bool left = angles[(i+1) % isize(vertices)] == 0;
+    bool right = angles[i] == 0;
+    if(left && right) edges[i] = INFINITE_BOTH;
+    else if(left) edges[i] = INFINITE_LEFT;
+    else if(right) edges[i] = INFINITE_RIGHT;
+    }
   }
 
 EX bool correct_index(int index, int size) { return index >= 0 && index < size; }
@@ -248,9 +302,22 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
       dist = ep.parse(0);
       ep.force_eat(",");
       }
-    cld angle = ep.parse(0);
-    cc.edges.push_back(ep.validate_real(dist * ep.extra_params["distunit"]));
-    cc.angles.push_back(ep.validate_real(angle * ep.extra_params["angleunit"]));
+    cld angle;
+    ep.skip_white();
+    if(ep.eat("[")) {
+      cc.in_edges.push_back(ep.validate_real(dist * ep.extra_params["distunit"]));
+      angle = ep.parse(0); ep.force_eat(",");
+      cc.in_angles.push_back(ep.validate_real(angle * ep.extra_params["angleunit"]));
+      cc.ideal_markers.push_back(true);
+      dist = ep.parse(0); ep.force_eat(",");
+      angle = ep.parse(0); ep.force_eat("]");
+      set_flag(ginf[gArbitrary].flags, qIDEAL, true);
+      }
+    else
+      angle = ep.parse(0);
+    cc.in_edges.push_back(ep.validate_real(dist * ep.extra_params["distunit"]));
+    cc.in_angles.push_back(ep.validate_real(angle * ep.extra_params["angleunit"]));
+    cc.ideal_markers.push_back(false);
     if(ep.eat(",")) continue;
     else if(ep.eat(")")) break;
     else throw hr_parse_exception("expecting , or )");
@@ -372,6 +439,7 @@ EX void compute_vertex_valence() {
       vector<ld> anglelist;
       do {
         if(at.sid == at1.sid && (at.eid-at1.eid) % ac.shapes[at.sid].cycle_length == 0) pqty = 0;
+        if(qty && pqty == 0 && !total) break;
         ld a = ac.shapes[at.sid].angles[at.eid];
         while(a < 0) a += 360 * degree;
         while(a > 360 * degree) a -= 360 * degree;
@@ -386,6 +454,7 @@ EX void compute_vertex_valence() {
         at = ac.shapes[at.sid].connections[at.eid];
         }
       while(total < 360*degree - 1e-6);
+      if(total == 0) qty = OINF;
       if(total > 360*degree + 1e-6) throw hr_parse_exception("improper total in compute_stats");
       if(at.sid != i) throw hr_parse_exception("ended at wrong type determining vertex_valence");
       if((at.eid - k) % ac.shapes[i].cycle_length) {
@@ -702,6 +771,8 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
         auto con = sh.connections[j];
         auto& xsh = c.shapes[con.sid];
         ld d2 = xsh.edges[con.eid];
+        if(d1 == INFINITE_LEFT) d1 = INFINITE_RIGHT;
+        else if(d1 == INFINITE_RIGHT) d1 = INFINITE_LEFT;
         if(abs(d1 - d2) > 1e-6)
           throw hr_parse_exception(lalign(0, "connecting ", make_pair(i,j), " to ", con, " of different lengths only possible in a2"));
         }
@@ -815,6 +886,27 @@ EX hrmap *current_altmap;
 
 heptagon *build_child(heptspin p, pair<int, int> adj);
 
+/** the point in distance 1 from 'material' to 'ideal' */
+EX hyperpoint at1(hyperpoint material, hyperpoint ideal) {
+  transmatrix T = gpushxto0(material);
+  hyperpoint id = T * ideal;
+  return rgpushxto0(material) * rspintox(id) * xpush0(1);
+  }
+
+/** get the midedge of lr; it takes infinite vertices into account */
+EX hyperpoint get_midedge(ld len, const hyperpoint &l, const hyperpoint &r) {
+  if(len == INFINITE_BOTH) {
+    return normalize(kleinize(l) + kleinize(r));
+    }
+  else if(len == INFINITE_LEFT) {
+    return at1(r, l);
+    }
+  else if(len == INFINITE_RIGHT) {
+    return at1(l, r);
+    }
+  else return mid(l, r);
+  }
+
 EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int t1, int xdl) {
   
   auto& sh = c.shapes[t];
@@ -831,13 +923,13 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int t1, int xdl) {
 
   hyperpoint vl = sh.vertices[dl];
   hyperpoint vr = sh.vertices[dr];
-  hyperpoint vm = mid(vl, vr);
+  hyperpoint vm = get_midedge(sh.edges[dr], vl, vr);
       
   transmatrix rm = gpushxto0(vm);
   
   hyperpoint xvl = xsh.vertices[xdl];
   hyperpoint xvr = xsh.vertices[xdr];
-  hyperpoint xvm = mid(xvl, xvr);
+  hyperpoint xvm = get_midedge(sh.edges[xdr], xvl, xvr);
   
   transmatrix xrm = gpushxto0(xvm);
   
@@ -1017,7 +1109,11 @@ struct hrmap_arbi : hrmap {
 
   hyperpoint get_corner(cell *c, int cid, ld cf) override {
     auto& sh = arb::current_or_slided().shapes[arb::id_of(c->master)];
-    return normalize(C0 + (sh.vertices[gmod(cid, c->type)] - C0) * 3 / cf);
+    int id = gmod(cid, c->type);
+    if(sh.angles[id] == 0) {
+      return normalize(C0 + 999 * kleinize(sh.vertices[id]));
+      }
+    return normalize(C0 + (sh.vertices[id] - C0) * 3 / cf);
     }
 
   };
@@ -1389,6 +1485,22 @@ EX void choose() {
       dialog::push_confirm_dialog([] { arg::run_arguments(current.options); start_game(); }, "load the settings defined in this file?");
     return true;
     });
+  }
+
+EX pair<ld, ld> rep_ideal(ld e) {
+  ld alpha = 2 * M_PI / e;
+  hyperpoint h1 = point3(cos(alpha), -sin(alpha), 1);
+  hyperpoint h2 = point3(1, 0, 1);
+  hyperpoint h3 = point3(cos(alpha), sin(alpha), 1);
+  hyperpoint h12 = mid(h1, h2);
+  hyperpoint h23 = mid(h2, h3);
+  ld len = hdist(h12, h23);
+  transmatrix T = gpushxto0(h12);
+  auto T0 = T * C0;
+  auto Th23 = T * h23;
+  ld beta = atan2(T0);
+  ld gamma = atan2(Th23);
+  return {len, 90 * degree - (gamma - beta)};
   }
 
 #if MAXMDIM >= 4
