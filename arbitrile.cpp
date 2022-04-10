@@ -263,10 +263,10 @@ void shape::build_from_angles_edges(bool is_comb) {
       ld u1 = t2[0], u2 = t2[1];
 
       ld r = (u2 * c1 - c2 * u1) / (v1 * u2 - v2 * u1);
-      ld s = (v2 * c1 - c2 * v1) / (v1 * u2 - v2 * u1);
+      // ld s = (v2 * c1 - c2 * v1) / (v1 * u2 - v2 * u1);
 
       hyperpoint v = a1 + r * t1;
-      hyperpoint w = a2 + s * t2;
+      // also v == a2 + s * t2;
       v[2] = 1;
       v = gpushxto0(ctr) * v;
       v /= v[2];
@@ -274,6 +274,7 @@ void shape::build_from_angles_edges(bool is_comb) {
       i++;
       }
     }
+  n = isize(angles);
   for(int i=0; i<n; i++) {
     bool left = angles[(i+1) % isize(vertices)] == 0;
     bool right = angles[i] == 0;
