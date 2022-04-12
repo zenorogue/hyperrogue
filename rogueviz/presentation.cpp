@@ -528,7 +528,12 @@ int runslide = arg::add3("-slides", [] {
     else currentslide = 0;
     }
   presentation(pmStart);
-  });
+  })
+  + arg::add3("-presangle", [] {
+    arg::shift_arg_formula(angle);
+    dir = 0;
+    });
+  ;
 
 }
 #endif
