@@ -378,7 +378,7 @@ void enable() {
   rogueviz::rv_hook(anims::hooks_anim, 100, [] { 
 
     if(!animation) return;
-    ld t = ticks * 1. / anims::period;
+    ld t = ticks * 1. * anims::loop_multiplier / anims::period;
     t *= isize(path);
     
     hyperpoint at = interp(t);
