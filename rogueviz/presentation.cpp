@@ -148,6 +148,97 @@ void show_picture(presmode mode, string s) {
     });
   }
 
+string gen_latex(presmode mode, string s, int res) {
+  unsigned hash = 0;
+  for(char c: s) hash = (hash << 3) ^ hash ^ c;
+  string filename = format("latex-cache/%08X.png", hash);
+  if(mode == pmStartAll) {
+    if(!file_exists(filename)) {
+      system("mkdir latex-cache");
+      FILE *f = fopen("latex-cache/rogueviz-latex.tex", "w");
+      fprintf(f,
+        "\\documentclass[border=2pt]{standalone}\n"
+        "\\usepackage{amsmath}\n"
+        "\\usepackage{varwidth}\n"
+        "\\begin{document}\n"
+        "\\begin{varwidth}{\\linewidth}\n"
+        "%s"
+        "\\end{varwidth}\n"
+        "\\end{document}\n", s.c_str());
+      fclose(f);
+      system("cd latex-cache; pdflatex rogueviz-latex.tex");
+      string pngline = "cd latex-cache; pdftopng -r " + its(res) + " rogueviz-latex.pdf t";
+      system(pngline.c_str());
+      rename("latex-cache/t-000001.png", filename.c_str());
+      }
+    }
+  return filename;
+  }
+
+void show_latex(presmode mode, string s) {
+  show_picture(mode, gen_latex(mode, s, 2400));
+  }
+
+void dialog_add_latex(string s, color_t col, int size) {
+  string fn = gen_latex(pmStart, s, 600);
+  if(!textures.count(fn)) {
+    gen_latex(pmStartAll, s, 600);
+    auto& tex = textures[fn];
+    tex.original = true;
+    println(hlog, "rt = ", tex.readtexture(fn));
+    for(int y=0; y<tex.theight; y++)
+    for(int x=0; x<tex.twidth; x++) {
+      auto& pix = tex.get_texture_pixel(x, y);
+      if(y <= tex.base_y || y >= tex.base_y + tex.stry || x <= tex.base_x || x >= tex.base_x + tex.strx) { pix = 0; continue; }
+      int dark = 255 - part(pix, 1);
+      pix = 0xFFFFFF + (dark << 24);
+      }
+    println(hlog, "gl = ", tex.loadTextureGL());
+    println(hlog, "fn is ", fn);
+    }
+  dialog::addCustom(size, [s, fn, col] {
+    auto& tex = textures[fn];
+    flat_model_enabler fme;
+
+    ld tx = tex.tx;
+    ld ty = tex.ty;
+    int size = dialog::tothei - dialog::top;
+    ld scale = size / 116. / 2;
+
+    static vector<glhr::textured_vertex> rtver(4);
+    for(int i=0; i<4; i++) {
+      ld cx[4] = {1,0,0,1};
+      ld cy[4] = {1,1,0,0};
+      rtver[i].texture[0] = (tex.base_x + (cx[i] ? tex.strx : 0.)) / tex.twidth;
+      rtver[i].texture[1] = (tex.base_y + (cy[i] ? tex.stry : 0.)) / tex.theight;
+      ld x = dialog::dcenter + (cx[i]*2-1) * scale * tx;
+      ld y = (dialog::top + dialog::tothei)/2 + (cy[i]*2-1) * scale * ty;
+      rtver[i].coords = glhr::pointtogl( atscreenpos(x, y, 1) * C0 );
+      }
+
+    glhr::be_textured();
+    current_display->set_projection(0, false);
+    glBindTexture(GL_TEXTURE_2D, tex.textureid);
+    glhr::color2(col);
+    glhr::id_modelview();
+    current_display->set_mask(0);
+    glhr::prepare(rtver);
+    glhr::set_depthtest(false);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    });
+  }
+
+bool rv_latex = false;
+
+void dialog_may_latex(string latex, string normal, color_t col, int size) {
+  if(rv_latex)
+    dialog_add_latex(latex, (col << 8) | 0xFF, size * 3/2);
+  else {
+    dialog::addInfo(normal, col);
+    dialog::items.back().scale = size;
+    }
+  }
+
 int video_start = 0;
 
 void read_all(int fd, void *buf, int cnt) {
@@ -249,8 +340,11 @@ void choose_presentation() {
   dialog::display();
   }
 
-int phooks = 
+int phooks =
   0
+  + addHook(hooks_configfile, 100, [] {
+    param_b(rv_latex, "rv_latex");
+    })
   + addHook(dialog::hooks_display_dialog, 100, [] () {
     if(current_screen_cfunction() == showStartMenu) { 
       dialog::addBreak(100);

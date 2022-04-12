@@ -234,6 +234,10 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   void use_angledir(presmode mode, bool reset);
   void slide_error(presmode mode, string s);
 
+  void show_latex(presmode mode, string s);
+  void dialog_add_latex(string s, color_t color, int size = 100);
+  void dialog_may_latex(string latex, string normal, color_t col = dialog::dialogcolor, int size = 100);
+
   inline ld angle = 0;
   inline int dir = -1;
   hyperpoint p2(ld x, ld y);
