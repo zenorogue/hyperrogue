@@ -794,6 +794,7 @@ EX void take(string fname, const function<void()>& what IS(default_screenshot_co
   set_shotx();
   vid.xres = shotx * multiplier;
   vid.yres = shoty * multiplier;
+  vid.fsize *= multiplier;
   calcparam();
   models::configure();
   callhooks(hooks_take);
