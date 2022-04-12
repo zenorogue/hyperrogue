@@ -96,7 +96,7 @@ void nil_screen(presmode mode, int id) {
     ld t = 1e-3;
     
     if(id == 2) {
-      t = ticks / 1000.;
+      t = inHighQual ? ticks * anims::loop_multiplier * 4. / anims::period : ticks / 1000.;
       if(t - floor(t) > .5) t = ceil(t);
       else t = floor(t) + 2 * (t - floor(t));
       t -= floor(t/4)*4;
