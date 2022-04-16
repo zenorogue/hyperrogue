@@ -313,7 +313,7 @@ void virtualRebase(cell*& base, T& at, const U& check) {
   if(nil) {
     hyperpoint h = check(at);
     auto step = [&] (int i) {
-      at = currentmap->iadj(base, i) * at; 
+      at = currentmap->adj(base, (i+S7/2) % S7) * at;
       base = base->cmove(i);
       h = check(at);
       };
