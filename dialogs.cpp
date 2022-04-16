@@ -17,7 +17,7 @@ EX namespace dialog {
 
   static const int DONT_SHOW = 16;
 
-  enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diIntSlider, diSlider, diBigItem, diKeyboard};
+  enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diIntSlider, diSlider, diBigItem, diKeyboard, diCustom};
 
   struct item {
     tDialogItem type;
@@ -29,6 +29,7 @@ EX namespace dialog {
     double param;
     int p1, p2, p3;
     int position;
+    reaction_t customfun;
     };
   
   struct scaler {
@@ -234,6 +235,16 @@ EX namespace dialog {
     items.push_back(it);
     }
 
+  EX void addCustom(int size, reaction_t custom) {
+    item it;
+    it.type = diCustom;
+    it.color = dialogcolor;
+    it.colors = 0xFF8000;
+    it.scale = size;
+    it.customfun = custom;
+    items.push_back(it);
+    }
+
   EX void addColorItem(string body, int value, int key) {
     item it;
     it.type = diItem;
@@ -353,7 +364,7 @@ EX namespace dialog {
     return y;
     }
 
-  EX int tothei, dialogwidth, dfsize, dfspace, leftwidth, rightwidth, innerwidth, itemx, keyx, valuex;
+  EX int tothei, dialogwidth, dfsize, dfspace, leftwidth, rightwidth, innerwidth, itemx, keyx, valuex, top;
   
   EX string highlight_text;
   
@@ -434,7 +445,7 @@ EX namespace dialog {
         continue;
         }
         
-      int top = tothei;
+      top = tothei;
       tothei += dfspace * I.scale / 100;
       int mid = (top + tothei) / 2;
       I.position = mid;
@@ -496,6 +507,9 @@ EX namespace dialog {
           displayfr(sr, mid, 2, dfsize * I.scale/100, "}", I.color, 0);
           }
         if(xthis) getcstat = I.key, inslider = true, slider_x = mousex;
+        }
+      else if(I.type == diCustom) {
+        I.customfun();
         }
       else if(I.type == diKeyboard) {
         int len = 0;
