@@ -1121,7 +1121,8 @@ EX int noframes = 30;
 EX ld cycle_length = 2 * M_PI;
 EX ld parabolic_length = 1;
 EX ld skiprope_rotation;
-EX ld loop_multiplier;
+EX ld loop_multiplier = 1;
+EX ld loop_shift = 0;
 
 int lastticks, bak_turncount;
 
@@ -1737,6 +1738,9 @@ int readArgs() {
     }
   else if(argis("-animloop")) {
     PHASEFROM(2); shift_arg_formula(loop_multiplier);
+    }
+  else if(argis("-animloopshift")) {
+    PHASEFROM(2); shift_arg_formula(loop_shift);
     }
 #if CAP_SHOT
   else if(argis("-animrecordf")) {
