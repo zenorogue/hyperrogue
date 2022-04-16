@@ -1555,7 +1555,7 @@ EX bool in_smart_range(const shiftmatrix& T) {
   if(invalid_point(h)) return false;
   if(nil || nih) return true;
   #if CAP_SOLV
-  if(pmodel == mdGeodesic) return sn::in_table_range(h.h);
+  if(pmodel == mdGeodesic) return nisot::in_table_range(h.h);
   #endif
   hyperpoint h1;
   applymodel(h, h1);
