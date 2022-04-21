@@ -1121,8 +1121,8 @@ EX int noframes = 30;
 EX ld cycle_length = 2 * M_PI;
 EX ld parabolic_length = 1;
 EX ld skiprope_rotation;
-EX ld loop_multiplier = 1;
-EX ld loop_shift = 0;
+
+EX string time_formula = "-";
 
 int lastticks, bak_turncount;
 
@@ -1394,6 +1394,17 @@ EX bool record_animation_of(reaction_t content) {
     printf("%d/%d\n", i, noframes);
     callhooks(hooks_record_anim, i, noframes);
     int newticks = i * period / noframes;
+    if(time_formula != "-") {
+      dynamicval<int> t(ticks, newticks);
+      exp_parser ep;
+      ep.s = time_formula;
+      try {
+        newticks = ep.iparse();
+        }
+      catch(hr_parse_exception&) {
+        println(hlog, "warning: failed to parse time_formula");
+        }
+      }
     cmode = (env_shmup ? sm::NORMAL : 0);
     while(ticks < newticks) shmup::turn(1), ticks++;
     if(cheater && numturns) {
@@ -1736,11 +1747,8 @@ int readArgs() {
   else if(argis("-animperiod")) {
     PHASEFROM(2); shift_arg_formula(period);
     }
-  else if(argis("-animloop")) {
-    PHASEFROM(2); shift_arg_formula(loop_multiplier);
-    }
-  else if(argis("-animloopshift")) {
-    PHASEFROM(2); shift_arg_formula(loop_shift);
+  else if(argis("-animformula")) {
+    PHASEFROM(2); shift(); time_formula = args();
     }
 #if CAP_SHOT
   else if(argis("-animrecordf")) {
