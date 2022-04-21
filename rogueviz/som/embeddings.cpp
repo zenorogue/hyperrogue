@@ -1,3 +1,6 @@
+// here the embeddings used in our experiments are implemented
+// Copyright (C) 2011-2022 Tehora and Zeno Rogue, see 'hyper.cpp' for details
+
 #include "kohonen.h"
 
 namespace rogueviz {

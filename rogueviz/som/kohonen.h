@@ -1,8 +1,10 @@
-/* a header file for kohonen and embedding */
+// a header file for kohonen and embedding
+// Copyright (C) 2011-2022 Tehora and Zeno Rogue, see 'hyper.cpp' for details
+
 #ifndef _KOHONEN_H_
 #define _KOHONEN_H_
 
-#include "rogueviz.h"
+#include "../rogueviz.h"
 
 namespace rogueviz {
 

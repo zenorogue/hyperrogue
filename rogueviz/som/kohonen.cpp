@@ -1,8 +1,5 @@
-// Hyperbolic Rogue
-// Copyright (C) 2011-2018 Zeno and Tehora Rogue, see 'hyper.cpp' for details
-
-// Kohonen's self-organizing maps. 
-// This is a part of RogueViz, not a part of HyperRogue.
+// the general implementation of non-Euclidean self-organizing maps
+// Copyright (C) 2011-2022 Tehora and Zeno Rogue, see 'hyper.cpp' for details
 
 #include "kohonen.h"
 
