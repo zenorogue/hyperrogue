@@ -1384,12 +1384,25 @@ void neurondisttable(const string &name) {
   fclose(f);
   }
 
-bool animate = true;
+bool animate_loop;
+bool animate_once;
 
 void steps() {
-  if(kohonen::animate && !kohonen::finished()) {
+  if(kohonen::animate_once && !kohonen::finished()) {
     unsigned int t = SDL_GetTicks();
     while(SDL_GetTicks() < t+20) kohonen::step();
+    setindex(false);
+    }
+  if(kohonen::animate_loop) {
+    ld tfrac = frac(1 - ticks * 1. / anims::period);
+    int t1 = tmax * tfrac;
+    println(hlog, "got t1 = ", t1, "/", tmax);
+    if(t1 > t) {
+      initialize_rv();
+      set_neuron_initial();
+      t = tmax;
+      }
+    while(t > t1) kohonen::step();
     setindex(false);
     }
   }
@@ -1784,7 +1797,8 @@ auto hooks4 = addHook(hooks_clearmemory, 100, clear)
     -> editable(0, 2, .2, "precise placement", "0 = make all visible, 1 = place ideally, n = place 1/n of the distance from center to ideal placement", 'p')
     -> set_reaction([] { if((state & KS_NEURONS) && (state & KS_SAMPLES)) distribute_neurons(); });
     param_b(show_rings, "som_show_rings");
-    param_b(animate, "animate");
+    param_b(animate_once, "som_animate_once");
+    param_b(animate_loop, "som_animate_loop");
     param_f(dispersion_precision, "som_dispersion")
     -> set_reaction([] { state &=~ KS_DISPERSION; });
     });
