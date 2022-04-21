@@ -492,9 +492,9 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
         qty[i]++;
         }
       }
-    
+
     curtemp[neuronId(*getNeuron(c))] = 1;
-  
+
     ld vmin = 0, vmax = 1;
     int iter;
     
@@ -525,9 +525,8 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
       for(int i=0; i<N; i++) 
         if(curtemp[i] < vmin) vmin = curtemp[i];
         else if(curtemp[i] > vmax) vmax = curtemp[i];
-      // if(iter % 50 == 0) println(hlog, "iter=", iter, " vmin=", vmin, " vmax=", vmax, " pairs=", isize(pairs));
       }
-  
+,,
     if(!dispersion_count) {
       if(!dispersion_long) dispersion_count = isize(d);
       DEBB(DF_LOG, ("Dispersion count = ", isize(d), " celldist = ", celldist(c)));
@@ -665,7 +664,7 @@ void step() {
   neuron& n = winner(id);
   whowon.resize(samples);
   whowon[id] = &n;
-    
+
   /* 
   for(neuron& n2: net) {
     int d = celldistance(n.where, n2.where);

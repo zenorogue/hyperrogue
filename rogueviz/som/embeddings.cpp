@@ -47,7 +47,7 @@ void init_landscape_det(const vector<cell*>& ac) {
     // d.second[id++] = 1;
     d.second[delta_id[d.first]] = 1;
     }
-
+  
   println(hlog, "initialized for ", currentmap->gamestart(), ", dimensions = ", dimensions);
   }
 
@@ -215,7 +215,6 @@ void get_coordinates(kohvec& v, cell *c, cell *c0) {
 
       using namespace euc;
       auto& T0 = eu_input.user_axes;
-
       if(sphere) {      
         columns = MDIM;
         alloc(v);
