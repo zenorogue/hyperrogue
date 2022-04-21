@@ -526,7 +526,6 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
         if(curtemp[i] < vmin) vmin = curtemp[i];
         else if(curtemp[i] > vmax) vmax = curtemp[i];
       }
-,,
     if(!dispersion_count) {
       if(!dispersion_long) dispersion_count = isize(d);
       DEBB(DF_LOG, ("Dispersion count = ", isize(d), " celldist = ", celldist(c)));
