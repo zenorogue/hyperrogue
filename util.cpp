@@ -240,19 +240,21 @@ cld exp_parser::parse(int prio) {
     }
   #if CAP_ARCM
   else if(eat("arcmedge(")) {
-    vector<int> vals;
-    vals.push_back(iparse(0));
+    if(!hyperbolic && !sphere) throw hr_parse_exception("arcmedge works only in hyperbolic and spherical geometry");
+    vector<pair<ld, ld>> vals;
+    vals.emplace_back(rparse(0), 1);
     while(true) {
       skip_white();
-      if(eat(",")) vals.push_back(iparse(0));
+      if(eat(":^")) {
+        ld rep = rparse(0);
+        vals.back().second *= rep;
+        }
+      if(eat(",")) vals.emplace_back(rparse(0), 1);
       else break;
       }
     force_eat(")");
-    arcm::archimedean_tiling test;
-    test.faces = vals;
-    test.compute_sum();
-    test.compute_geometry();
-    res = test.edgelength;
+    res = arcm::compute_edgelength(vals);
+    if(real(res) < 1e-10) throw hr_parse_exception("wrong geometry for this arcmedge");
     if (auto *distunit = hr::at_or_null(extra_params, "distunit"))
       res /= *distunit;
     }

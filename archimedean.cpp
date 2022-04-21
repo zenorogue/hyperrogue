@@ -152,6 +152,29 @@ void archimedean_tiling::make_match(int a, int i, int b, int j) {
 /** mostly to protect the user from entering too large numbers */
 const int MAX_EDGE_ARCM = FULL_EDGE;
 
+/** compute the edge length of an Archimedean tiling. Each element of facemul is (face sides, multiplicity) */
+EX ld compute_edgelength(vector<pair<ld, ld>> facemul, ld halftotal IS(M_PI)) {
+  ld elmin = 0, elmax = hyperbolic ? 10 : sphere ? M_PI : 2 * euclidean_edge_length;
+  ld edgelength;
+  for(int p=0; p<100; p++) {
+    edgelength = (elmin + elmax) / 2;
+    ld alpha_total = 0;
+    for(auto fm: facemul) {
+      ld gamma = M_PI / fm.first;
+      auto c = asin_auto(sin_auto(edgelength/2) / sin(gamma));
+      hyperpoint h = xpush(c) * spin(M_PI - 2*gamma) * xpush0(c);
+      ld a = atan2(h);
+      cyclefix(a, 0);
+      if(a < 0) a = -a;
+      alpha_total += a * fm.second;
+      }
+    if(isnan(alpha_total)) elmax = edgelength;
+    else if(sphere ^ (alpha_total > halftotal)) elmin = edgelength;
+    else elmax = edgelength;
+    }
+  return edgelength;
+  }
+
 void archimedean_tiling::compute_sum() {
   N = isize(faces);
   euclidean_angle_sum = 0;
@@ -436,6 +459,7 @@ void archimedean_tiling::compute_geometry() {
       inradius[i] = 0;
     }
   else for(int p=0; p<100; p++) {
+    /* unfortunately we cannot just use compute_edgelength because we need to set other values */
     edgelength = (elmin + elmax) / 2;
     
     ld alpha_total = 0;
