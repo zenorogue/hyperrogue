@@ -366,7 +366,7 @@ void distribute_neurons() {
   }
 
 int last_analyze_step;
-int analyze_each;
+ld analyze_each;
 
 void analyze() {
 
@@ -1789,7 +1789,7 @@ auto hooks4 = addHook(hooks_clearmemory, 100, clear)
     param_b(show_rings, "som_show_rings");
     param_b(animate_once, "som_animate_once");
     param_b(animate_loop, "som_animate_loop");
-    param_i(analyze_each, "som_analyze_each");
+    param_f(analyze_each, "som_analyze_each");
     param_f(dispersion_precision, "som_dispersion")
     -> set_reaction([] { state &=~ KS_DISPERSION; });
     });
