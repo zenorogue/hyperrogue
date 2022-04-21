@@ -160,13 +160,20 @@ EX ld compute_edgelength(vector<pair<ld, ld>> facemul, ld halftotal IS(M_PI)) {
     edgelength = (elmin + elmax) / 2;
     ld alpha_total = 0;
     for(auto fm: facemul) {
-      ld gamma = M_PI / fm.first;
-      auto c = asin_auto(sin_auto(edgelength/2) / sin(gamma));
-      hyperpoint h = xpush(c) * spin(M_PI - 2*gamma) * xpush0(c);
-      ld a = atan2(h);
-      cyclefix(a, 0);
-      if(a < 0) a = -a;
-      alpha_total += a * fm.second;
+      if(isinf(fm.first)) {
+        ld u = sqrt(cosh(edgelength) * 2 - 2);
+        ld a = atan2(1, u/2);
+        alpha_total += a * fm.second;
+        }
+      else {
+        ld gamma = M_PI / fm.first;
+        auto c = asin_auto(sin_auto(edgelength/2) / sin(gamma));
+        hyperpoint h = xpush(c) * spin(M_PI - 2*gamma) * xpush0(c);
+        ld a = atan2(h);
+        cyclefix(a, 0);
+        if(a < 0) a = -a;
+        alpha_total += a * fm.second;
+        }
       }
     if(isnan(alpha_total)) elmax = edgelength;
     else if(sphere ^ (alpha_total > halftotal)) elmin = edgelength;
