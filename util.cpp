@@ -344,6 +344,7 @@ cld exp_parser::parse(int prio) {
     else if (auto *p = hr::at_or_null(params, number)) res = (*p)->get_cld();
     else if(number == "e") res = exp(1);
     else if(number == "i") res = cld(0, 1);
+    else if(number == "inf") res = HUGE_VAL;
     else if(number == "p" || number == "pi") res = M_PI;
     else if(number == "" && next() == '-') { at++; res = -parse(20); }
     else if(number == "") throw hr_parse_exception("number missing, " + where());
