@@ -1371,13 +1371,13 @@ auto khook = arg::add3("-kst-keys", [] { rv_hook(hooks_handleKey, 150, kst_key);
           }
     vid.linewidth /= 3;
     })
-  + addHook(anims::hooks_record_anim, 100, [] (int i, int noframes) {
+  + arg::add3("-kst-animate", [] { rv_hook(anims::hooks_record_anim, 100, [] (int i, int noframes) {
     bool steps = false;
     ld nf = noframes;
     while(t * nf > (nf - i) * tmax)
       step(), steps = true;
     if(steps) analyze();
-    });
+    }); });
 
 }}
 

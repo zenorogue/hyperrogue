@@ -365,6 +365,9 @@ void distribute_neurons() {
   setindex(false);
   }
 
+int last_analyze_step;
+int analyze_each;
+
 void analyze() {
 
   initialize_neurons();
@@ -389,6 +392,7 @@ void analyze() {
   if(!noshow) distribute_neurons();
   
   coloring();
+  last_analyze_step = t;
   }
 
 bool show_rings = true;
@@ -646,19 +650,6 @@ void step() {
 
   double sigma = maxdist * tt;
 
-  if(qpct) {
-    int pct = (int) ((qpct * (t+.0)) / tmax);
-    if(pct != lpct) {
-      lpct = pct;
-      analyze();
-}
-      
-//      if(gaussian)
-//        println(hlog, format("t = %6d/%6d %3d%% sigma=%10.7lf maxudist=%10.7lf\n", t, tmax, pct, sigma, maxudist));
-//      else
-//        println(hlog, format("t = %6d/%6d %3d%% dispid=%5d maxudist=%10.7lf\n", t, tmax, pct, dispid, maxudist));
-//      }
-    } //
   int id = hrand(samples);
   neuron& n = winner(id);
   whowon.resize(samples);
@@ -714,8 +705,7 @@ void step() {
     n2.debug = 0;
     } */
   
-  t--;
-  if(t == 0) analyze();
+  t--; if(t == 0) analyze();
   }
 
 int initdiv = 1;
@@ -1400,7 +1390,7 @@ void steps() {
     if(t1 > t) {
       initialize_rv();
       set_neuron_initial();
-      t = tmax;
+      last_analyze_step = t = tmax;
       }
     while(t > t1) kohonen::step();
     setindex(false);
@@ -1624,7 +1614,7 @@ int readArgs() {
   else if(argis("-somrun")) {
     initialize_rv(); 
     set_neuron_initial();
-    t = tmax;
+    t = last_analyze_step = tmax;
     }
 
   // #3: load the neuron data (usually without #2)
@@ -1799,6 +1789,7 @@ auto hooks4 = addHook(hooks_clearmemory, 100, clear)
     param_b(show_rings, "som_show_rings");
     param_b(animate_once, "som_animate_once");
     param_b(animate_loop, "som_animate_loop");
+    param_i(analyze_each, "som_analyze_each");
     param_f(dispersion_precision, "som_dispersion")
     -> set_reaction([] { state &=~ KS_DISPERSION; });
     });
@@ -1808,6 +1799,10 @@ bool mark(cell *c) {
   distfrom = getNeuronSlow(c);
   coloring();
   return true;
+  }
+
+void analyzer() {
+  if(t < last_analyze_step - analyze_each) analyze();
   }
 
 void initialize_rv() {
@@ -1821,6 +1816,7 @@ void initialize_rv() {
   rv_hook(rogueviz::hooks_rvmenu, 100, showMenu);
   rv_hook(hooks_readcolor, 100, kohonen_color);
   rv_hook(hooks_drawcell, 100, coloring_3d);
+  rv_hook(anims::hooks_anim, 100, analyzer);
   }
 
 }
