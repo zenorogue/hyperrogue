@@ -84,17 +84,31 @@ struct dmv_grapher : grapher {
   };
 
 void nil_screen(presmode mode, int id) {
+  use_angledir(mode, id == 0);
+  setCanvas(mode, '0');
+  if(mode == pmStart) {
+    slide_backup(pmodel);
+    slide_backup(pconf.clip_min);
+    slide_backup(pconf.clip_max);
+    slide_backup(vid.cells_drawn_limit);
+    stop_game(), pmodel = mdHorocyclic, geometry = gCubeTiling, pconf.clip_min = -10000, pconf.clip_max = +100, start_game();
+    }
   add_stat(mode, [id] {
     cmode |= sm::SIDE;
-    flat_model_enabler fme;
+    calcparam();
+
+    vid.cells_drawn_limit = 0;
+    drawthemap();
+
+    // flat_model_enabler fme;
     initquickqueue();
     
-    dmv_grapher g(Id);
+    dmv_grapher g(MirrorZ * cspin(1, 2, .8 * angle) * spin(angle/2));
     
     vid.linewidth *= 3;
     
     ld t = 1e-3;
-    
+
     if(id == 2) {
       t = inHighQual ? ticks * 4. / anims::period : ticks / 1000.;
       if(t - floor(t) > .5) t = ceil(t);
@@ -113,21 +127,113 @@ void nil_screen(presmode mode, int id) {
       queuecurve(g.T, col | 0xFF, col | 0x20, PPR::LINE);  
       }
     
-    g.arrow(p2(5,5), p2(7,5), .3);
-    g.arrow(p2(5,5), p2(5,7), .3);
-    g.arrow(p2(5,5), p2(3,5), .3);
-    g.arrow(p2(5,5), p2(5,3), .3);
+    if(id < 3) {
+      g.arrow(p2(5,5), p2(7,5), .3);
+      g.arrow(p2(5,5), p2(5,7), .3);
+      g.arrow(p2(5,5), p2(3,5), .3);
+      g.arrow(p2(5,5), p2(5,3), .3);
+      }
 
     vid.linewidth /= 3;
     
-    drawMonsterType(moEagle, nullptr, g.pos(5,5,1.5) * spin(-t * 90 * degree), 0xFF80D080, ticks / 1000., 0);
+    if(id < 3) {
+
+      if(id == 2) {
+        drawMonsterType(moEagle, nullptr, g.pos(5,5,1.5) * spin(-t * 90 * degree) * xyzscale(1.5), 0x40C040, ticks / 1000., 0);
+        }
     
-    queuestr(g.pos(7.5, 5, 1), 1., "E", 0);
-    queuestr(g.pos(5, 7.5, 1), 1., "N", 0);
-    queuestr(g.pos(2.5, 5, 1), 1., "W", 0);
-    queuestr(g.pos(5, 2.5, 1), 1., "S", 0);
+      color_t dark = 0xFF;
+
+      write_in_space(g.pos(7.5, 5, 1) * MirrorY, max_glfont_size, 1., "E", dark);
+      write_in_space(g.pos(5, 7.5, 1) * MirrorY, max_glfont_size, 1., "N", dark);
+      write_in_space(g.pos(2.5, 5, 1) * MirrorY, max_glfont_size, 1., "W", dark);
+      write_in_space(g.pos(5, 2.5, 1) * MirrorY, max_glfont_size, 1., "S", dark);
+      }
     
+    if(id == 3) {
+      vid.linewidth *= 3;
+      t = ticks / anims::period;
+      ld ti = ticks / 1000.;
+      t = frac(t);
+      vector<hyperpoint> loop = { p2(9, 4), p2(9, 9), p2(1, 9), p2(1, 5), p2(6, 6), p2(9,4) };
+      int q = isize(loop) - 1;
+
+      for(hyperpoint h: loop) curvepoint(h);
+      queuecurve(g.T, 0x40C040FF, 0, PPR::LINE);
+      ld total_length = 0;
+      for(int i=0; i<q; i++) total_length += hypot_d(2, loop[i+1] - loop[i]);
+      t *= total_length;
+      t *= 1.2;
+      curvepoint(p2(0,0));
+      shiftmatrix T1 = g.pos(loop[0][0], loop[0][1], 1.5);
+      shiftmatrix T2 = g.pos(loop[0][0], loop[0][1], 1.5);
+
+      ld t1 = t;
+
+      for(int i=0; i<=q; i++) {
+        curvepoint(loop[i]);
+        if(i == q) {
+          T1 = g.pos(loop[i][0],loop[i][1],1.5) * rspintox(loop[i] - loop[i-1]);
+          break;
+          }
+        ld len = hypot_d(2, loop[i+1] - loop[i]);
+        if(len < t1) { t1 -= len; continue; }
+        hyperpoint cur = lerp(loop[i], loop[i+1], t1 / len);
+        T1 = g.pos(cur[0],cur[1],1.5) * rspintox(loop[i+1] - loop[i]);
+        curvepoint(cur);
+        break;
+        }
+      curvepoint(p2(0,0));
+      color_t col = 0x8080FF00;
+      queuecurve(g.T, col | 0xFF, col | 0x40, PPR::LINE);
+
+      ld z = 0;
+
+      ld zsca = .05;
+
+      vector<pair<hyperpoint, hyperpoint> > vlines;
+
+      for(int i=0; i<=q; i++) {
+        vlines.emplace_back(loop[i], loop[i] + ztangent(z));
+        curvepoint(loop[i] + ztangent(z));
+        if(i == q) {
+          T2 = g.pos(loop[i][0],loop[i][1],1.5) * cpush(2, z) * rspintox(loop[i] - loop[i-1]);
+          break;
+          }
+        ld len = hypot_d(2, loop[i+1] - loop[i]);
+        if(len < t) {
+          t -= len;
+          z += (loop[i+1][1] * loop[i][0] - loop[i+1][0] * loop[i][1]) * zsca;
+          continue;
+          }
+        hyperpoint cur = lerp(loop[i], loop[i+1], t / len);
+        z += (cur[1] * loop[i][0] - cur[0] * loop[i][1]) * zsca;
+        T2 = g.pos(cur[0],cur[1],1.5) * cpush(2, z) * rspintox(loop[i+1] - loop[i]);
+        curvepoint(cur + ztangent(z));
+        break;
+        }
+      queuecurve(g.T, 0x40C040FF, 0, PPR::LINE);
+
+      for(auto l: vlines) queueline(g.T*l.first, g.T*l.second, 0x40, 0, PPR::MONSTER_BODY);
+
+      vid.linewidth /= 3;
+
+      drawMonsterType(moEagle, nullptr, T2, 0x40C040, ti, 0);
+      auto& bp = cgi.shEagle;
+      if(bp.she > bp.shs && bp.she < bp.shs + 1000) {
+        auto& p = queuepolyat(T1, bp, 0x80, PPR::TRANSPARENT_SHADOW);
+        p.outline = 0;
+        p.subprio = -100;
+        p.offset = bp.shs;
+        p.cnt = bp.she - bp.shs;
+        p.flags &=~ POLY_TRIANGLES;
+        p.tinf = NULL;
+        }
+      // queuepolyat(T2, cgi.shEagle, 0x40C040FF, PPR::SUPERLINE);
+      }
+
     quickqueue();
+    glflush();
 
     dialog::init();        
     // dialog::addTitle(id ? "Nil coordinates" : "Cartesian coordinates", forecolor, 150);
@@ -135,27 +241,34 @@ void nil_screen(presmode mode, int id) {
     poly_outline = 0xFFFFFFFF;
     
     dialog::addBreak(100);
-    dialog::addInfo("start: (x,y,z)");
     dialog::addBreak(50);
+    auto dirbox = [] (string s) {
+      return "\\makebox[5em][r]{\\textsf{" + s + "}} ";
+      };
+    auto cbox = [] (string s) {
+      return "\\makebox[9em][l]{$" + s + "$} ";
+      };
+    dialog_may_latex(dirbox("start:") + cbox("(x,y,z)"), "start: (x,y,z)");
+    dialog::addBreak(50);
+
     if(id == 0) {
-      dialog::addInfo("N: (x,y+d,z)");
-      dialog::addInfo("W: (x-d,y,z)");
-      dialog::addInfo("S: (x,y-d,z)");
-      dialog::addInfo("E: (x+d,y,z)");
+      dialog_may_latex(dirbox("N:") + cbox("(x,y+d,z)"), "N: (x,y+d,z)");
+      dialog_may_latex(dirbox("W:") + cbox("(x-d,y,z)"), "W: (x-d,y,z)");
+      dialog_may_latex(dirbox("S:") + cbox("(x,y-d,z)"), "S: (x,y-d,z)");
+      dialog_may_latex(dirbox("E:") + cbox("(x+d,y,z)"), "E: (x+d,y,z)");
       }
     else {
-      dialog::addInfo("N: (x,y+d,z+xd/2)", t == 1 ? 0xFFD500 : dialog::dialogcolor);
-      dialog::addInfo("W: (x-d,y,z+yd/2)", t == 2 ? 0xFFD500 : dialog::dialogcolor);
-      dialog::addInfo("S: (x,y-d,z-xd/2)", t == 3 ? 0xFFD500 : dialog::dialogcolor);
-      dialog::addInfo("E: (x+d,y,z-yd/2)", t == 0 ? 0xFFD500 : dialog::dialogcolor);
+      dialog_may_latex(dirbox("N:") + cbox("(x,y+d,z+\\frac{xd}{2})"), "N: (x,y+d,z+xd/2)", t == 1 ? 0xFFD500 : dialog::dialogcolor);
+      dialog_may_latex(dirbox("W:") + cbox("(x-d,y,z+\\frac{yd}{2})"), "W: (x-d,y,z+yd/2)", t == 2 ? 0xFFD500 : dialog::dialogcolor);
+      dialog_may_latex(dirbox("S:") + cbox("(x,y-d,z-\\frac{xd}{2})"), "S: (x,y-d,z-xd/2)", t == 3 ? 0xFFD500 : dialog::dialogcolor);
+      dialog_may_latex(dirbox("E:") + cbox("(x+d,y,z-\\frac{yd}{2})"), "E: (x+d,y,z-yd/2)", t == 0 ? 0xFFD500 : dialog::dialogcolor);
       }
     dialog::addBreak(50);
-    dialog::addInfo("U: (x,y,z-d)");
-    dialog::addInfo("D: (x,y,z+d)");
+    dialog_may_latex(dirbox("U:") + cbox("(x,y,z-d)"), "U: (x,y,z-d)");
+    dialog_may_latex(dirbox("D:") + cbox("(x,y,z+d)"), "D: (x,y,z+d)");
     dialog::display();
     
     dynamicval<eGeometry> gg(geometry, gNil);
-    println(hlog, eupush(point31(5, 0, 0)) * eupush(point31(0, 5, 0)) * eupush(point31(-5, 0, 0)) * eupush(point31(0, -5, 0)) * C0);
 
     return false;
     });
@@ -204,8 +317,8 @@ void geodesic_screen(presmode mode, int id) {
     ld zmove = val - M_PI * radh * radh;
     ld len = hypot(2 * M_PI * radh, zmove);
     
-    ld t = (ticks - geo_zero) / 500;
-    
+    ld t = inHighQual ? ticks / 1000. : (ticks - geo_zero) / 500;
+
     auto frac_of = [&] (ld z) { return t - z * floor(t/z); };
     
     t = frac_of(val);
@@ -313,30 +426,30 @@ void geodesic_screen(presmode mode, int id) {
     quickqueue();
 
     dialog::init();
-    dialog::addTitle("from (0,0,0) to (0,0,25)", forecolor, 150);
+    dialog_may_latex("\\textsf{from $(0,0,0)$ to $(0,0,25)$}", "from (0,0,0) to (0,0,25)", forecolor, 150);
 
     dialog::addBreak(100);
-    dialog::addInfo("straight upwards", straight >> 8);
-    dialog::addInfo("25", straight >> 8);
+    dialog_may_latex("\\textsf{straight upwards}", "straight upwards", straight >> 8);
+    dialog_may_latex("$25$", "25", straight >> 8);
     
     if(id >= 1) {
       dialog::addBreak(100);
-      dialog::addInfo("square", square >> 8);
-      dialog::addInfo("20", square >> 8);
+      dialog_may_latex("\\textsf{square}", "square", square >> 8);
+      dialog_may_latex("$20$", "20", square >> 8);
       }
     else dialog::addBreak(300);
 
     if(id >= 2) {
       dialog::addBreak(100);
-      dialog::addInfo("circle", circle >> 8);
-      dialog::addInfo(fts(2 * M_PI * rad), circle >> 8);
+      dialog_may_latex("\\textsf{circle}", "circle", circle >> 8);
+      dialog_may_latex("$"+fts(2 * M_PI * rad)+"$", fts(2 * M_PI * rad), circle >> 8);
       }
     else dialog::addBreak(300);
 
     if(id >= 3) {
       dialog::addBreak(100);
-      dialog::addInfo("helix", helix >> 8);
-      dialog::addInfo(fts(len), helix >> 8);
+      dialog_may_latex("\\textsf{helix}", "helix", helix >> 8);
+      dialog_may_latex("$"+fts(len)+"$", fts(len), helix >> 8);
       }
     else dialog::addBreak(300);
     
@@ -767,17 +880,17 @@ slide dmv_slides[] = {
         color_t d = dialog::dialogcolor;
 
         dialog::addTitle("Euclidean geometry", 0xC00000, 200);
-        dialog::addTitle("lines stay parallel", d, 150);
+        dialog::addTitle("parallel lines stay in the same distance", d, 150);
         
         dialog::addBreak(100);
 
         dialog::addTitle("spherical geometry", 0xC00000, 200);
-        dialog::addTitle("lines converge", d, 150);
+        dialog::addTitle("no parallel lines -- they converge", d, 150);
 
         dialog::addBreak(100);
 
         dialog::addTitle("hyperbolic geometry", 0xC00000, 200);
-        dialog::addTitle("lines diverge", d, 150);
+        dialog::addTitle("parallel lines diverge", d, 150);
 
         dialog::display();
         return true;
@@ -844,14 +957,22 @@ slide dmv_slides[] = {
     "The formulas look strange at a first glance, but the idea is actually simple: "
     "the change in the 'z' coordinate is the area of a triangle, as shown in the picture. "
     "The change is positive if we go counterclockwise, and negative if we go clockwise.\n\n"
-    "If we make a tour in Nil moving only in the directions N, E, S, W, such that "
+    ,
+    [] (presmode mode) {
+      empty_screen(mode);
+      nil_screen(mode, 2);
+      no_other_hud(mode);
+      }
+    },
+  {"Nil coordinates (loop)", 999, LEGAL::NONE,
+    "If we make a tour in Nil moving only in the directions N, W, S, E, such that "
     "the analogous tour in Euclidean space would return us to the starting point, "
     "then the tour in Nil would return us directly above or below the starting point, "
     "with the difference in the z-coordinate proportional to the area of the loop."
     ,
     [] (presmode mode) {
       empty_screen(mode);
-      nil_screen(mode, 2);
+      nil_screen(mode, 3);
       no_other_hud(mode);
       }
     },
