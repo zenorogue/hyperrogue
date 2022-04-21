@@ -779,10 +779,6 @@ void pcmove::tell_why_cannot_attack() {
     addMessage(XLAT("You cannot attack %the1 directly!", c2->monst));
     addMessage(XLAT("Make him hit himself by walking away from him."));
     }
-  else if(c2->monst == moVizier && c2->hitpoints > 1 && !(attackflags & AF_FAST)) {
-    addMessage(XLAT("You cannot attack %the1 directly!", c2->monst));
-    addMessage(XLAT("Hit him by walking away from him."));
-    }
   else if(c2->monst == moShadow)
     addMessage(XLAT("You cannot defeat the Shadow!"));
   else if(c2->monst == moGreater || c2->monst == moGreaterM)
