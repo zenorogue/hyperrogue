@@ -1051,7 +1051,6 @@ struct hrmap_notknot : hrmap {
     }
 
   void add_fog() {
-    vector<color_t> cols = {0xFF000001, 0xC0C00001, 0x00FF0001, 0x00C0C001, 0x0000FF01, 0xC000C001};
     int id = 0;
     map<cell*, pair<int, int> > dist;
     vector<cell*> lst;
@@ -1079,11 +1078,10 @@ struct hrmap_notknot : hrmap {
       if(all[i]->where->c7->wall == waFloorA) {
         cell *c = all[i]->result->c7;
         if(dist.count(c)) continue;
-        int idd = (id++) % isize(cols);
+        int idd = (id++);
         color_t col = rainbow_color(1, idd * 1. / qty);
         col <<= 8; col |= 1;
-        
-        color(c, cols[idd], 0);
+        color(c, col, 0);
         }
     
     for(int i=0; i<isize(lst); i++) {
