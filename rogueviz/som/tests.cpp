@@ -1342,7 +1342,7 @@ int readArgs() {
 auto hooks3 = addHook(hooks_args, 100, readArgs);
 #endif
 
-auto khook = addHook(hooks_handleKey, 150, kst_key)
+auto khook = arg::add3("-kst-keys", [] { rv_hook(hooks_handleKey, 150, kst_key); })
   + addHook(hooks_configfile, 100, [] {
     param_i(ks_empty, "ks_empty", 0);
     param_i(ks_distant, "ks_distant", 0);
