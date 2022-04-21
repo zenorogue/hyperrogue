@@ -63,7 +63,12 @@
 #include "gobot.cpp"
 #include "extra-projections.cpp"
 
-#include "kohonen.cpp"
-#include "embeddings.cpp"
+#include "som/kohonen.cpp"
+#include "som/embeddings.cpp"
+#include "som/analyzer.cpp"
+#include "som/tests.cpp"
+#include "som/voronoi.cpp"
+#include "som/measures.cpp"
+
 //#endif
 
