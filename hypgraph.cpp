@@ -2296,7 +2296,7 @@ EX color_t modelcolor = 0;
 EX void draw_model_elements() {
 
   #if CAP_VR
-  if(vrhr::active() && is_hyperboloid(pmodel)) return;
+  if(vrhr::active() && models::is_hyperboloid(pmodel)) return;
   #endif
 
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
