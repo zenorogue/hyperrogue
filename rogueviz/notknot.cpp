@@ -1525,6 +1525,8 @@ auto shot_hooks = addHook(hooks_initialize, 100, create_notknot)
       start_game();
       gen_knot();
       }
+    else if(argis("-nk-solv"))
+      launch_solv();
     else if(argis("-nk-findloop")) {
       do_check_cycle = true;
       }
