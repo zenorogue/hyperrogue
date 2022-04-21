@@ -196,6 +196,18 @@ cld exp_parser::parse(int prio) {
   else if(eat("floor(")) res = floor(validate_real(parsepar()));
   else if(eat("frac(")) { res = parsepar(); res = res - floor(validate_real(res)); }
   else if(eat("to01(")) { res = parsepar(); return atan(res) / ld(M_PI) + ld(0.5); }
+  else if(eat("min(")) {
+    ld a = rparse(0);
+    while(skip_white(), eat(",")) a = min(a, rparse(0));
+    force_eat(")");
+    res = a;
+    }
+  else if(eat("max(")) {
+    ld a = rparse(0);
+    while(skip_white(), eat(",")) a = max(a, rparse(0));
+    force_eat(")");
+    res = a;
+    }
   else if(eat("edge(")) {
     ld a = rparse(0);
     force_eat(",");
