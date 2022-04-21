@@ -1077,6 +1077,7 @@ EX void initConfig() {
   ->help_text = "hyperbolic|spherical|Euclidean";
   
   param_i(stamplen, "stamplen");
+  param_f(anims::period, "animperiod");
   }
 
 EX bool inSpecialMode() {
