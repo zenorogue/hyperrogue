@@ -1401,8 +1401,8 @@ EX bool record_animation_of(reaction_t content) {
       try {
         newticks = ep.iparse();
         }
-      catch(hr_parse_exception&) {
-        println(hlog, "warning: failed to parse time_formula");
+      catch(hr_parse_exception& e) {
+        println(hlog, "warning: failed to parse time_formula, ", e.s);
         }
       }
     cmode = (env_shmup ? sm::NORMAL : 0);
