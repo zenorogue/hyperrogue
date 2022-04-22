@@ -905,23 +905,16 @@ EX hrmap *current_altmap;
 
 heptagon *build_child(heptspin p, pair<int, int> adj);
 
-/** the point in distance 1 from 'material' to 'ideal' */
-EX hyperpoint at1(hyperpoint material, hyperpoint ideal) {
-  transmatrix T = gpushxto0(material);
-  hyperpoint id = T * ideal;
-  return rgpushxto0(material) * rspintox(id) * xpush0(1);
-  }
-
 /** get the midedge of lr; it takes infinite vertices into account */
 EX hyperpoint get_midedge(ld len, const hyperpoint &l, const hyperpoint &r) {
   if(len == INFINITE_BOTH) {
     return normalize(kleinize(l) + kleinize(r));
     }
-  else if(len == INFINITE_LEFT) {
-    return at1(r, l);
-    }
   else if(len == INFINITE_RIGHT) {
-    return at1(l, r);
+    return towards_ideal(r, l);
+    }
+  else if(len == INFINITE_LEFT) {
+    return towards_ideal(l, r);
     }
   else return mid(l, r);
   }
@@ -942,13 +935,13 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int t1, int xdl) {
 
   hyperpoint vl = sh.vertices[dl];
   hyperpoint vr = sh.vertices[dr];
-  hyperpoint vm = get_midedge(sh.edges[dr], vl, vr);
+  hyperpoint vm = get_midedge(sh.edges[dl], vl, vr);
       
   transmatrix rm = gpushxto0(vm);
   
   hyperpoint xvl = xsh.vertices[xdl];
   hyperpoint xvr = xsh.vertices[xdr];
-  hyperpoint xvm = get_midedge(sh.edges[xdr], xvl, xvr);
+  hyperpoint xvm = get_midedge(sh.edges[xdl], xvl, xvr);
   
   transmatrix xrm = gpushxto0(xvm);
   

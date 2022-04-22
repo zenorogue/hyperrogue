@@ -1684,6 +1684,13 @@ EX hyperpoint circumscribe(hyperpoint a, hyperpoint b, hyperpoint c, hyperpoint 
   return h;
   }
 
+/** the point in distance dist from 'material' to 'ideal' */
+EX hyperpoint towards_ideal(hyperpoint material, hyperpoint ideal, ld dist IS(1)) {
+  transmatrix T = gpushxto0(material);
+  hyperpoint id = T * ideal;
+  return rgpushxto0(material) * rspintox(id) * xpush0(1);
+  }
+
 EX bool clockwise(hyperpoint h1, hyperpoint h2) {
   return h1[0] * h2[1] > h1[1] * h2[0];
   }
