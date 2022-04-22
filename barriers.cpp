@@ -72,6 +72,14 @@ EX bool warped_version(eLand l1, eLand l2) {
   }
 
 EX int get_valence(cellwalker bb, int dir, bool& ok) {
+  if(arb::in()) {
+    auto& sh = arb::current_or_slided().shapes[arb::id_of(bb.at->master)];
+    if(bb.mirrored) dir = -dir;
+    if(dir == 1)
+      return sh.vertex_valence[bb.spin];
+    else
+      return sh.vertex_valence[gmod(bb.spin - 1, bb.at->type)];
+    }
   int steps = 0;
   cellwalker bb1 = bb;
   while(bb1 != bb || !steps) {
