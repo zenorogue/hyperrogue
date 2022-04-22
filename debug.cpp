@@ -910,6 +910,11 @@ int read_cheat_args() {
     cheat();
     gen_wandering = false;
     }
+  else if(argis("-canvasfloor")) {
+    shift(); canvasfloor = argi();
+    for(int i=0; i<caflEND; i++) if(appears(mapeditor::canvasFloorName(i), args()))
+      canvasfloor = i;
+    }
   else if(argis("-hroll")) {
     shift();
     int i = argi();

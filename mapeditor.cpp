@@ -3101,7 +3101,7 @@ EX namespace mapeditor {
 #endif
 
 
-  string canvasFloorName(int id) {
+  EX string canvasFloorName(int id) {
     if(id>=0 && id<caflEND)
       return XLAT(canvasFloorNames[id]);
     return its(id);
