@@ -84,6 +84,9 @@ void geometry_information::init_floorshapes() {
   for(auto sh: all_escher_floorshapes) sh->id = ids++;
   }
 
+/** matrixitem::second[2][2] == APEIROGONAL_INVALID is used to denote a matrix that uses fake apeirogon vertices and thus should not be used */
+const ld APEIROGONAL_INVALID = -2;
+
 typedef pair<transmatrix, vector<transmatrix>> matrixitem;
 
 struct mesher {
@@ -239,22 +242,35 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
   
   bshape(sh, prio);
 
+  /* in case of apeirogonal shapes, we may need to cyclically rotate */
+  bool apeirogonal = false;
+  vector<hyperpoint> backup;
+
   for(int r=0; r<nsym; r+=osym/rots) {
     for(hyperpoint h: lst) {
       hyperpoint nh = may_kleinize(h);
       int mapped = 0;
+      int invalid = 0;
       for(auto& m: matrices) {        
         hyperpoint z = m.first * h;
         if(z[0] > -1e-5 && z[1] > -1e-5 && z[2] > -1e-5) {
+          if(m.second[r][2][2] == APEIROGONAL_INVALID) invalid++;
           nh = m.second[r] * z, mapped++;
           }
         }
       if(mapped == 0) printf("warning: not mapped (shapeid %d)\n", shapeid);
-      hpcpush(mid(nh, nh));
+      if(invalid) {
+        apeirogonal = true;
+        for(int i=last->s; i<isize(hpc); i++) backup.push_back(hpc[i]);
+        hpc.resize(last->s);
+        first = true;
+        }
+      if(!invalid) hpcpush(mid(nh, nh));
       }
     }
-  
-  hpcpush(hpc[last->s]);
+
+  for(auto& b: backup) hpcpush(b);
+  if(!apeirogonal) hpcpush(hpc[last->s]);
   }
 
 template<class T> void sizeto(T& t, int n) {
@@ -334,6 +350,16 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, ld
 namespace irr { void generate_floorshapes(); }
 #endif
 
+void geometry_information::finish_apeirogon(hyperpoint center) {
+  last->flags |= POLY_APEIROGONAL;
+  last->she = isize(hpc);
+  hyperpoint b = hpc.back();
+  for(int i=1; i<15; i++) hpcpush(towards_inf(b, center, i));
+  hpcpush(normalize(1e-9 * C0 + center));
+  for(int i=15; i>=1; i--) hpcpush(towards_inf(hpc[last->s], center, i));
+  hpcpush(hpc[last->s]);
+  }
+
 // !siid equals pseudohept(c)
 
 void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
@@ -384,6 +410,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
     vector<hyperpoint> cornerlist;
     
     int cor = c->type;
+    bool apeirogonal = false;
 
     if(&fsh == &shTriheptaFloor) {
       if(!siid) {
@@ -446,7 +473,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
           min_dist = dist;
         }
       
-      ld dist = min_dist * (1 - 3 / sca) * arb::current_or_slided().boundary_ratio;
+      auto &ac = arb::current_or_slided();
+      ld dist = min_dist * (1 - 3 / sca) * ac.boundary_ratio;
       
       ld area = 0;
       for(int j=0; j<cor; j++) {
@@ -454,12 +482,23 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         hyperpoint last = kleinize(actual[j?j-1:cor-1]);
         area += current[0] * last[1] - last[0] * current[1];
         }
-      if(area < 0) dist = -dist;      
+      if(area < 0) dist = -dist;
+
+      int id = arb::id_of(c->master);
+      auto& sh = ac.shapes[id];
+      apeirogonal = sh.apeirogonal;
       
       for(int j=0; j<cor; j++) {
         hyperpoint last = actual[j?j-1:cor-1];
         hyperpoint current = ypush(1e-6 * randd()) * xpush(1e-6) * actual[j];
         hyperpoint next = actual[j<cor-1?j+1:0];
+
+        if(apeirogonal) {
+          if(j == 0) last = arb::get_adj(arb::current_or_slided(), id, cor-1, id, cor-2) * actual[cor-3];
+          if(j == cor-2) next = arb::get_adj(arb::current_or_slided(), id, cor-2, id, cor-1) * actual[1];
+          if(j == cor-1) { cornerlist.push_back(sh.vertices.back()); continue; }
+          }
+
         auto T = gpushxto0(current);
         last = T * last;
         next = T * next;
@@ -491,6 +530,10 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
     else if(&fsh == &shTriheptaFloor && cor == 4 && siid)
       /* trihepta floors generate digons too */
       for(int i=0; i<=cor; i++) hpcpush(spin((i&1) ? .1 : -.1) * cornerlist[i%cor]);
+    else if(apeirogonal) {
+      for(int i=0; i<=cor-2; i++) hpcpush(cornerlist[i]);
+      finish_apeirogon(cornerlist.back());
+      }
     else
       for(int i=0; i<=cor; i++) hpcpush(cornerlist[i%cor]);
     
@@ -544,7 +587,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
       auto& m = (siid && geosupport_football() == 2) ? hex_matrices : hept_matrices;
       
       int cor = c->type;
-          
+      bool apeirogonal = arb::is_apeirogonal(c);
+
       m.n.sym = cor;
 
       int v = sidir+siid;
@@ -556,13 +600,24 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
           hyperpoint center = hpxy(0,0);
     
           for(int cid=0; cid<cor; cid++) {
-            hyperpoint nlcorner = get_corner_position(c, (d+cid+v+1) % cor, 3 / fsh.scale * (ii ? 1/SHADMUL : 1));
-            hyperpoint nrcorner = get_corner_position(c, (d+cid+v+2) % cor, 3 / fsh.scale * (ii ? 1/SHADMUL : 1));
-            
-            hyperpoint nfar = nearcorner(c, (d+cid+v+1) % cor);
-            
-            hyperpoint nlfar = farcorner(c, (d+cid+v+1) % cor, 0);
-            hyperpoint nrfar = farcorner(c, (d+cid+v+1) % cor, 1);
+            int dcidv = d + cid + v;
+            if(apeirogonal) dcidv--;
+            int dcidv1 = gmod(dcidv + 1, cor);
+            int dcidv2 = gmod(dcidv + 2, cor);
+
+            if(apeirogonal && dcidv1 >= cor-2) {
+              for(int j: {0,1,2,3})
+                m.v[i+j].second[cid][2][2] = APEIROGONAL_INVALID;
+              continue;
+              }
+
+            hyperpoint nlcorner = get_corner_position(c, dcidv1, 3 / fsh.scale * (ii ? 1/SHADMUL : 1));
+            hyperpoint nrcorner = get_corner_position(c, dcidv2, 3 / fsh.scale * (ii ? 1/SHADMUL : 1));
+
+            hyperpoint nfar = nearcorner(c, dcidv1);
+
+            hyperpoint nlfar = farcorner(c, dcidv1, 0);
+            hyperpoint nrfar = farcorner(c, dcidv1, 1);
             m.v[i].second[cid] = build_matrix(center, nlcorner, nrcorner,C02);
             m.v[i+1].second[cid] = build_matrix(nfar, nlcorner, nrcorner,C02);
             m.v[i+2].second[cid] = build_matrix(nfar, nlcorner, nlfar,C02);
@@ -572,8 +627,16 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
           i += 4;
           }
   
-        if(i != isize(m.v)) printf("warning: i=%d sm=%d\n", i, isize(m.v));      
+        if(i != isize(m.v)) printf("warning: i=%d sm=%d\n", i, isize(m.v));
         bshape2((ii?fsh.shadow:fsh.b)[id], fsh.prio, (fsh.shapeid2 && geosupport_football() < 2) ? fsh.shapeid2 : siid?fsh.shapeid0:fsh.shapeid1, m);
+
+        if(apeirogonal) {
+          int id = arb::id_of(c->master);
+          auto &ac = arb::current_or_slided();
+          auto& sh = ac.shapes[id];
+          hpcpush(arb::get_adj(arb::current_or_slided(), id, cor-2, id, cor-1) * hpc[last->s]);
+          finish_apeirogon(sh.vertices.back());
+          }
         }
       }
     }

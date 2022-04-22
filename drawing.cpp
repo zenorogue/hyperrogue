@@ -38,6 +38,7 @@ static const int POLY_PRINTABLE = (1<<25);      // these walls are printable
 static const int POLY_FAT = (1<<26);            // fatten this model in WRL export (used for Rug)
 static const int POLY_SHADE_TEXTURE = (1<<27);  // texture has 'z' coordinate for shading
 static const int POLY_ONE_LEVEL = (1<<28);      // only one level of the universal cover in SL(2,R)
+static const int POLY_APEIROGONAL = (1<<29);    // only vertices indexed up to she are drawn as the boundary
 
 /** \brief A graphical element that can be drawn. Objects are not drawn immediately but rather queued.
  *
@@ -71,6 +72,8 @@ struct dqi_poly : drawqueueitem {
   int offset;
   /** \brief how many vertices in the model */
   int cnt;
+  /** cnt for POLY_APEIROGONAL */
+  int apeiro_cnt;
   /** \brief the offset in the texture vertices */
   int offset_texture;
   /** \brief outline color */
@@ -759,6 +762,7 @@ void dqi_poly::gldraw() {
       }
     
     if(outline && !tinf) {
+      if(flags & POLY_APEIROGONAL) cnt = apeiro_cnt;
       glhr::color2(outline);
       glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
       glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW && prio != PPR::EUCLIDEAN_SKY);
@@ -2575,6 +2579,7 @@ EX dqi_poly& queuepolyat(const shiftmatrix& V, const hpcshape& h, color_t col, P
   ptd.tinf = h.tinf;
   if(neon_mode != eNeon::none && (h.flags & POLY_TRIANGLES))
     ptd.tinf = nullptr;
+  ptd.apeiro_cnt = h.she - h.s;
   ptd.offset_texture = h.texture_offset;
   ptd.intester = h.intester;
   return ptd;

@@ -65,6 +65,9 @@ struct shape {
   void build_from_angles_edges(bool is_comb);
   vector<pair<int, int> > sublines;
   vector<pair<ld, ld>> stretch_shear;
+  /** '*inf' was applied to represent an apeirogon/pseudogon */
+  bool apeirogonal;
+  /** connections repeat `repeat_value` times */
   int repeat_value;
   /** if a tile/edge combination may be connected to edges j1 and j2 of this, j1-j2 must be divisible by cycle_length */
   int cycle_length;
@@ -223,7 +226,7 @@ void shape::build_from_angles_edges(bool is_comb) {
     }
   matrices.push_back(at);
   if(is_comb) return;
-  if(!eqmatrix(at, Id)) {
+  if(!eqmatrix(at, Id) && !apeirogonal) {
     throw hr_polygon_error(matrices, id, at);
     }
   if(sqhypot_d(3, ctr) < 1e-2) {
@@ -235,6 +238,19 @@ void shape::build_from_angles_edges(bool is_comb) {
       at = at * xpush(in_edges[i]) * spin(in_angles[i]);
       }
     if(debugflags & DF_GEOM) println(hlog, "ctr = ", ctr);
+    }
+  hyperpoint inf_point;
+  if(apeirogonal) {
+    transmatrix U = at;
+    for(int i=0; i<3; i++) for(int j=0; j<3; j++) U[i][j] -= Id[i][j];
+    hyperpoint v;
+    ld det = U[0][1] * U[1][0] - U[1][1] * U[0][0];
+    v[1] = (U[1][2] * U[0][0] - U[0][2] * U[1][0]) / det;
+    v[0] = (U[0][2] * U[1][1] - U[1][2] * U[0][1]) / det;
+    v[2] = 1;
+    inf_point = v;
+    ctr = mid(C0, tC0(at));
+    ctr = towards_inf(ctr, inf_point);
     }
   ctr = normalize(ctr);
   vertices.clear();
@@ -274,6 +290,17 @@ void shape::build_from_angles_edges(bool is_comb) {
       i++;
       }
     }
+  if(apeirogonal) {
+    vertices.push_back(gpushxto0(ctr) * tC0(at));
+    hyperpoint v = gpushxto0(ctr) * inf_point;
+    v /= v[2];
+    vertices.push_back(v);
+    angles.push_back(angles[0]/2);
+    angles[0] /= 2;
+    angles.push_back(0);
+    edges.push_back(0);
+    edges.push_back(0);
+    }
   n = isize(angles);
   for(int i=0; i<n; i++) {
     bool left = angles[(i+1) % isize(vertices)] == 0;
@@ -301,9 +328,22 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
     cld dist = 1;
     ep.skip_white();
     if(ep.eat("*")) {
-      int rep = ep.iparse(0);
+      ld frep = ep.rparse(0);
+      if(isinf(frep)) {
+        cc.apeirogonal = true;
+        set_flag(ginf[gArbitrary].flags, qIDEAL, true);
+        ep.force_eat(")");
+        break;
+        }
+      int rep = int(frep+.5);
       int repeat_from = 0;
       int repeat_to = cc.in_edges.size();
+      if(rep == 0) {
+        cc.in_edges.resize(repeat_from);
+        cc.in_angles.resize(repeat_from);
+        cc.ideal_markers.resize(repeat_from);
+        }
+      else if(rep < 0) throw hr_parse_exception("don't know how to use a negative repeat in tile definition");
       for(int i=1; i<rep; i++)
       for(int j=repeat_from; j<repeat_to; j++) {
         cc.in_edges.push_back(cc.in_edges[j]);
@@ -351,10 +391,15 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
     poly.params = ep.extra_params;
     throw;
     }
-  cc.connections.resize(cc.size());
+  int n = cc.size();
+  cc.connections.resize(n);
   for(int i=0; i<isize(cc.connections); i++)
     cc.connections[i] = connection_t{cc.id, i, false};
-  cc.stretch_shear.resize(cc.size(), make_pair(1, 0));
+  if(cc.apeirogonal) {
+    cc.connections[n-2].eid = n-1;
+    cc.connections[n-1].eid = n-2;
+    }
+  cc.stretch_shear.resize(n, make_pair(1, 0));
   }
 
 EX bool do_unmirror = true;
@@ -919,8 +964,13 @@ EX hyperpoint get_midedge(ld len, const hyperpoint &l, const hyperpoint &r) {
   else return mid(l, r);
   }
 
+EX bool is_apeirogonal(cell *c) {
+  if(!in()) return false;
+  return current_or_slided().shapes[id_of(c->master)].apeirogonal;
+  }
+
 EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int t1, int xdl) {
-  
+
   auto& sh = c.shapes[t];
   
   int dr = gmod(dl+1, sh.size());

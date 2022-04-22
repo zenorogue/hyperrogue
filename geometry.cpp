@@ -454,6 +454,7 @@ hpcshape
   void generate_floorshapes_for(int id, cell *c, int siid, int sidir);
   void generate_floorshapes();
   void make_floor_textures_here();
+  void finish_apeirogon(hyperpoint center);
 
   vector<hyperpoint> get_shape(hpcshape sh);
   void add_cone(ld z0, const vector<hyperpoint>& vh, ld z1);
