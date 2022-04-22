@@ -911,10 +911,10 @@ EX hyperpoint get_midedge(ld len, const hyperpoint &l, const hyperpoint &r) {
     return normalize(kleinize(l) + kleinize(r));
     }
   else if(len == INFINITE_RIGHT) {
-    return towards_ideal(r, l);
+    return towards_inf(r, l);
     }
   else if(len == INFINITE_LEFT) {
-    return towards_ideal(l, r);
+    return towards_inf(l, r);
     }
   else return mid(l, r);
   }
