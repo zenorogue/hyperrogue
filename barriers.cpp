@@ -149,6 +149,7 @@ EX bool general_barrier_advance(cellwalker& bb, int& dir, eLand& l1, eLand& l2, 
 
     int steps = get_valence(bb, dir, ok);
     if(steps % 2 == 0) goto again;
+    if(steps >= OINF) return ok;
 
     int s = (steps - 1) / 2;
     surround_by(setit, bb, dir, 1, s, l1, false, ok);
@@ -177,6 +178,7 @@ EX bool general_barrier_advance(cellwalker& bb, int& dir, eLand& l1, eLand& l2, 
       bb1 -= dir;
       for(int i=1; i<q; i++) {
         int d = get_valence(bb1, -dir, ok);
+        if(d >= OINF) return ok;
         surround_by(setit, bb1, -dir, 1, d, l1, false, ok);
         bb1-=dir;
         }
@@ -185,6 +187,7 @@ EX bool general_barrier_advance(cellwalker& bb, int& dir, eLand& l1, eLand& l2, 
     bb += dir;
     for(int i=1; i<q; i++) {
       int d = get_valence(bb, dir, ok);
+      if(d >= OINF) return ok;
       surround_by(setit, bb, dir, 1, d, l2, true, ok);
       bb+=dir;
       }
@@ -194,12 +197,14 @@ EX bool general_barrier_advance(cellwalker& bb, int& dir, eLand& l1, eLand& l2, 
     if(t % 2 == (at_corner ? 1 : 0)) {
       if(setit) setbarrier(current, l1, l2, at_corner);
       int d = get_valence(bb, dir, ok);
+      if(d >= OINF) return ok;
       surround_by(setit, bb, dir, 2, d, l2, true, ok);
 
       bb += dir;
       bb += wstep;
 
       d = get_valence(bb, -dir, ok);
+      if(d >= OINF) return ok;
       surround_by(setit, bb, -dir, 2, d-1, l1, false, ok);
 
       ws = dir > 0 ? NOWALLSEP_WALL_EPOS : NOWALLSEP_WALL_ENEG;
@@ -207,6 +212,7 @@ EX bool general_barrier_advance(cellwalker& bb, int& dir, eLand& l1, eLand& l2, 
       }
     
     int steps1 = get_valence(bb, dir, ok);
+    if(steps1 >= OINF) return ok;
     if(setit) setbarrier(current, l1, l2, true);
 
     if(steps1 % 2 == 0) {
@@ -234,6 +240,7 @@ EX bool general_barrier_advance(cellwalker& bb, int& dir, eLand& l1, eLand& l2, 
     again:
     cellwalker bb1 = bb;
     int steps = get_valence(bb, dir, ok);
+    if(steps >= OINF) return ok;
     int s = 2;
     if(ws == NOWALLSEP_SWAP) s = 5 - s;
     if(dir == -1) s = 5 - s;
