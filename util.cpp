@@ -279,14 +279,20 @@ cld exp_parser::parse(int prio) {
     ld edges = rparse(0);
     force_eat(")");
     ld alpha = M_PI / edges;
-    ld c = asin_auto(sin_auto(validate_real(edgelen)/2) / sin(alpha));
-    hyperpoint h = xpush(c) * spin(M_PI - 2*alpha) * xpush0(c);
-    ld result = 2 * atan2(h);
-    if(result < 0) result = -result;
-    while(result > 2 * M_PI) result -= 2 * M_PI;
-    if(result > M_PI) result = 2 * M_PI - result;
-    
-    res = result;
+    if(isinf(edges)) {
+      ld u = sqrt(cosh(validate_real(edgelen)) * 2 - 2);
+      ld a = atan2(1, u/2);
+      res = 2 * a;
+      }
+    else {
+      ld c = asin_auto(sin_auto(validate_real(edgelen)/2) / sin(alpha));
+      hyperpoint h = xpush(c) * spin(M_PI - 2*alpha) * xpush0(c);
+      ld result = 2 * atan2(h);
+      if(result < 0) result = -result;
+      while(result > 2 * M_PI) result -= 2 * M_PI;
+      if(result > M_PI) result = 2 * M_PI - result;
+      res = result;
+      }
 
     if (auto *angleunit = hr::at_or_null(extra_params, "angleunit"))
       res /= *angleunit;
