@@ -1767,6 +1767,11 @@ EX namespace patterns {
     
     int i = callhandlers(-1, hooks_generate_canvas, c);
     if(i != -1) return i;
+    if(arb::is_apeirogonal(c)) {
+      for(cell *c1: {c->move(c->type-1), c->move(c->type-2), c->cmove(c->type-1)->move(c->type-1), c->cmove(c->type-2)->move(c->type-2)})
+        if(c1 && c1->mpdist <= BARLEV) return c1->landparam;
+      }
+
     switch(whichCanvas) {
       #if CAP_CRYSTAL
       case 'K': case '#': case '=': case 'O': case '/': case '@':
