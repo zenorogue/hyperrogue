@@ -462,12 +462,12 @@ EX bool proper(cell *c, int d) { return d >= 0 && d < c->type; }
 
 #if HDR
 
-constexpr int STRONGWIND = 99;
-constexpr int FALL = 98;
-constexpr int NO_SPACE = 97;
-constexpr int TELEPORT = 96;
-constexpr int JUMP = 95;
-constexpr int STAY = 94;
+constexpr int STRONGWIND = 199;
+constexpr int FALL = 198;
+constexpr int NO_SPACE = 197;
+constexpr int TELEPORT = 196;
+constexpr int JUMP = 195;
+constexpr int STAY = 194;
 
 namespace whirlwind { cell *jumpDestination(cell*); }
 
