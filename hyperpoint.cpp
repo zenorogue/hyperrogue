@@ -1688,7 +1688,7 @@ EX hyperpoint circumscribe(hyperpoint a, hyperpoint b, hyperpoint c, hyperpoint 
 EX hyperpoint towards_inf(hyperpoint material, hyperpoint dir, ld dist IS(1)) {
   transmatrix T = gpushxto0(material);
   hyperpoint id = T * dir;
-  return rgpushxto0(material) * rspintox(id) * xpush0(1);
+  return rgpushxto0(material) * rspintox(id) * xpush0(dist);
   }
 
 EX bool clockwise(hyperpoint h1, hyperpoint h2) {
