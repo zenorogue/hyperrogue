@@ -1265,7 +1265,7 @@ EX void run(string fname) {
 
 string slider_error;
 
-EX void sliders_changed(bool need_restart) {
+EX void sliders_changed(bool need_restart, bool need_start) {
   if(need_restart) stop_game();
   auto& c = current_or_slided();
   arbi_tiling backup = c;
@@ -1285,7 +1285,7 @@ EX void sliders_changed(bool need_restart) {
     c = backup;
     slider_error = poly.generate_error();
     }
-  if(need_restart) start_game();
+  if(need_restart && need_start) start_game();
   }
 
 EX void set_sliders() {
@@ -1298,7 +1298,7 @@ EX void set_sliders() {
     dialog::addSelItem(sl.name, fts(sl.current), ch++);
     dialog::add_action([&] {
       dialog::editNumber(sl.current, sl.min, sl.max, 1, sl.zero, sl.name, sl.name);
-      dialog::reaction = [] { sliders_changed(false); };
+      dialog::reaction = [] { sliders_changed(false, false); };
       });
     }
   if(isize(current.intsliders))
@@ -1307,7 +1307,7 @@ EX void set_sliders() {
     dialog::addSelItem(sl.name, its(sl.current), ch++);
     dialog::add_action([&] {
       dialog::editNumber(sl.current, sl.min, sl.max, 1, sl.zero, sl.name, sl.name);
-      dialog::reaction = [] { sliders_changed(true); };
+      dialog::reaction = [] { sliders_changed(true, true); };
       });
     }
   dialog::addInfo(slider_error);
@@ -1566,14 +1566,14 @@ int readArgs() {
     bool found = true;
     for(auto& sl: current.sliders)
       if(sl.name == slider) {
-        shift_arg_formula(sl.current, [] { sliders_changed(false); });
+        shift_arg_formula(sl.current, [] { sliders_changed(false, false); });
         found = true;
         }
     for(auto& sl: current.intsliders)
       if(sl.name == slider) {
         shift(); sl.current = argi();
         stop_game();
-        sliders_changed(false);
+        sliders_changed(true, false);
         found = true;
         }
     if(!found) {
