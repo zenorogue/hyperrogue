@@ -257,11 +257,9 @@ cld exp_parser::parse(int prio) {
     }
   #if CAP_ARCM
   else if(eat("arcmedge(")) {
-    if(!hyperbolic && !sphere && !euclid) throw hr_parse_exception("arcmedge works only in isotropic geometry");
     vector<pair<ld, ld>> vals = parse_with_reps();
     force_eat(")");
     res = euclid ? 1 : arcm::compute_edgelength(vals);
-    if(real(res) < 1e-10) throw hr_parse_exception("wrong geometry for this arcmedge");
     if (auto *distunit = hr::at_or_null(extra_params, "distunit"))
       res /= *distunit;
     }
