@@ -1,0 +1,8 @@
+## use the *inf system but for material points
+intslider(valence,3,3,MAX_VALENCE)
+intslider(sides,10,3,MAX_EDGE)
+h2.
+distunit(arcmedge(sides:^valence))
+let(u = 360*deg/valence)
+unittile(u,*inf)
+conway("(0 0)")

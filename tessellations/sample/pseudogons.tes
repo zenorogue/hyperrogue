@@ -1,0 +1,8 @@
+## {inf, k} but with ultraideal vertices
+intslider(valence,3,3,MAX_VALENCE)
+slider(multiplier, 1.1, 1, 2)
+h2.
+distunit(arcmedge(inf:^valence)*multiplier)
+let(u = 360*deg/valence)
+unittile(u,*inf)
+conway("(0 0)")
