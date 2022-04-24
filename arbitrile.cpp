@@ -408,15 +408,15 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
 EX bool do_unmirror = true;
 
 /** \brief for tessellations which contain mirror rules, remove them by taking the orientable double cover */
-EX void unmirror() {
-  auto& mirror_rules = arb::current.mirror_rules;
+EX void unmirror(arbi_tiling& c) {
+  auto& mirror_rules = c.mirror_rules;
   mirror_rules = 0;
-  for(auto& s: arb::current.shapes)
+  for(auto& s: c.shapes)
     for(auto& t: s.connections)
       if(t.mirror)
         mirror_rules++;
   if(!mirror_rules) return;
-  auto& sh = current.shapes;
+  auto& sh = c.shapes;
   int s = isize(sh);
   for(int i=0; i<s; i++)
     sh.push_back(sh[i]);
@@ -443,9 +443,7 @@ EX void unmirror() {
     }
   }
 
-EX void compute_vertex_valence() {
-  auto& ac = arb::current;
-
+EX void compute_vertex_valence(arb::arbi_tiling& ac) {
   int tcl = -1;
 
   for(auto& sh: ac.shapes)
@@ -856,11 +854,11 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
     }
 
   if(do_unmirror) {
-    unmirror();
+    unmirror(c);
     }
-  if(!c.have_tree) compute_vertex_valence();
+  if(!c.have_tree) compute_vertex_valence(c);
 
-  if(c.have_tree) rulegen::verify_parsed_treestates();
+  if(c.have_tree) rulegen::verify_parsed_treestates(c);
   
   if(!after_sliding) slided = current;
   }
@@ -1474,7 +1472,7 @@ EX void convert() {
       }
     }
   
-  arb::compute_vertex_valence();
+  arb::compute_vertex_valence(ac);
   }
 
 EX bool in() {

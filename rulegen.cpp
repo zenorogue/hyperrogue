@@ -2422,7 +2422,7 @@ EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {
   ep.force_eat(")");
   }
 
-EX void verify_parsed_treestates() {
+EX void verify_parsed_treestates(arb::arbi_tiling& c) {
   if(rule_root < 0 || rule_root >= isize(treestates))
     throw hr_parse_exception("undefined treestate as root");
   for(auto& ts: treestates) for(auto& r: ts.rules) {
@@ -2431,7 +2431,7 @@ EX void verify_parsed_treestates() {
     if(r > isize(treestates))
       throw hr_parse_exception("undefined treestate");
     }
-  for(auto& sh: arb::current.shapes) sh.cycle_length = sh.size();
+  for(auto& sh: c.shapes) sh.cycle_length = sh.size();
   find_possible_parents();
   }
 
