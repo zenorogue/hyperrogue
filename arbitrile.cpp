@@ -127,10 +127,13 @@ struct arbi_tiling {
   };
 #endif
 
+/** currently loaded tiling */
 EX arbi_tiling current;
 
+/** is the currently displayed map current or slided */
 EX bool using_slided;
 
+/** for real-valued sliders, current is the tiling used by the map, while slided is the tiling used for the display */
 EX arbi_tiling slided;
 
 EX bool in_slided() { return in() && using_slided; }
