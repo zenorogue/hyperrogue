@@ -1,0 +1,28 @@
+## triangle alpha-beta-gamma, where alpha+beta+gamma = 360/k degrees
+##
+## You can change alpha (=360/k deg * a/3), beta (=360/k deg * b/3), and k using 'tessellation sliders' in the geometry experiments menu.
+##
+## Changing k reloads the map, while changing other parameters does not
+##
+## Note: the spherical version (k=1) is buggy
+##
+intslider(k,2,1,5)
+c2(2-k)
+angleunit(deg)
+
+slider(av,1,0,3)
+slider(bv,1,0,3)
+
+let(a = av*120/k)
+let(b = bv*120/k)
+let(c = (3-av-bv)*120/k)
+
+# note the 'if zero' conditional
+let(ea=test(ifz(k-2, sin(a*deg), edge_angles(a,b,c))))
+let(eb=test(ifz(k-2, sin(b*deg), edge_angles(b,c,a))))
+let(ec=test(ifz(k-2, sin(c*deg), edge_angles(c,a,b))))
+
+tile(ea, b, ec, a, eb, c)
+conway("(0)(1)(2)")
+
+cscale(.75)

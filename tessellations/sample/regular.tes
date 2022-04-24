@@ -1,0 +1,12 @@
+## Arbitrary regular tiling
+## You can change the values of sides and valence. Set sides to max to get infinite sides.
+intslider(sides,6,3,MAX_EDGE+1)
+intslider(valence,5,3,MAX_VALENCE)
+c2(arcmcurv(sides:^valence))
+
+let(sides1=ifp(sides - MAX_EDGE, inf, sides))
+
+distunit(arcmedge(sides1:^valence))
+let(u = regangle(1, sides1))
+unittile(u,*sides1)
+conway("(0 0)")
