@@ -87,6 +87,14 @@ struct slider {
   ld max;
   };
 
+struct intslider {
+  string name;
+  int zero;
+  int current;
+  int min;
+  int max;
+  };
+
 struct arbi_tiling {
 
   int order;
@@ -108,6 +116,7 @@ struct arbi_tiling {
   string comment;
   
   vector<slider> sliders;
+  vector<intslider> intsliders;
   
   ld cscale;
   int range;
@@ -558,7 +567,7 @@ EX void add_connection(arbi_tiling& c, int ai, int as, int bi, int bs, int m) {
   while(bs != bs0);
   }
 
-EX void load(const string& fname, bool after_sliding IS(false)) {
+EX void load(const string& fname, bool load_as_slided IS(false), bool keep_sliders IS(false)) {
   fhstream f(fname, "rt");
   if(!f.f) throw hr_parse_exception("file " + fname + " does not exist");
   string s;
@@ -567,10 +576,14 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
     if(c < 0) break;
     s += c;
     }
-  auto& c = after_sliding ? slided : current;
+  auto& c = load_as_slided ? slided : current;
   c.order++;
   c.shapes.clear();
-  c.sliders.clear();
+  if(!keep_sliders) {
+    c.sliders.clear();
+    c.intsliders.clear();
+    }
+  int qsliders = 0, qintsliders = 0;
   c.name = unnamed;
   c.comment = "";
   c.filename = fname;
@@ -688,9 +701,27 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
       ep.force_eat(",");
       sl.max = ep.rparse();
       ep.force_eat(")");
-      c.sliders.push_back(sl);
-      if(after_sliding)
-        ep.extra_params[sl.name] = current.sliders[isize(c.sliders)-1].current;
+      if(load_as_slided || !keep_sliders)
+        c.sliders.push_back(sl);
+      if(load_as_slided || keep_sliders)
+        ep.extra_params[sl.name] = current.sliders[qsliders++].current;
+      else
+        ep.extra_params[sl.name] = sl.zero;
+      }
+    else if(ep.eat("intslider(")) {
+      intslider sl;
+      sl.name = ep.next_token();
+      ep.force_eat(",");
+      sl.current = sl.zero = ep.iparse();
+      ep.force_eat(",");
+      sl.min = ep.iparse();
+      ep.force_eat(",");
+      sl.max = ep.iparse();
+      ep.force_eat(")");
+      if(load_as_slided || !keep_sliders)
+        c.intsliders.push_back(sl);
+      if(load_as_slided || keep_sliders)
+        ep.extra_params[sl.name] = current.intsliders[qintsliders++].current;
       else
         ep.extra_params[sl.name] = sl.zero;
       }
@@ -860,7 +891,7 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
 
   if(c.have_tree) rulegen::verify_parsed_treestates(c);
   
-  if(!after_sliding) slided = current;
+  if(!load_as_slided) slided = current;
   }
 
 arbi_tiling debugged;
@@ -1234,35 +1265,49 @@ EX void run(string fname) {
 
 string slider_error;
 
-EX void sliders_changed() {
+EX void sliders_changed(bool need_restart) {
+  if(need_restart) stop_game();
+  auto& c = current_or_slided();
+  arbi_tiling backup = c;
   try {
-    load(current.filename, true);
-    using_slided = true;
+    load(current.filename, !need_restart, need_restart);
+    using_slided = !need_restart;
     slider_error = "OK";
     #if CAP_TEXTURE
     texture::config.remap();
     #endif
     }
   catch(hr_parse_exception& ex) {
-    using_slided = false;
+    c = backup;
     slider_error = ex.s;
     }
   catch(hr_polygon_error& poly) {
-    using_slided = false;
+    c = backup;
     slider_error = poly.generate_error();
     }
+  if(need_restart) start_game();
   }
 
 EX void set_sliders() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(1);
   dialog::init(XLAT("tessellation sliders"));
+  dialog::addHelp(current.comment);
   char ch = 'A';
   for(auto& sl: current.sliders) {
     dialog::addSelItem(sl.name, fts(sl.current), ch++);
     dialog::add_action([&] {
       dialog::editNumber(sl.current, sl.min, sl.max, 1, sl.zero, sl.name, sl.name);
-      dialog::reaction = sliders_changed;
+      dialog::reaction = [] { sliders_changed(false); };
+      });
+    }
+  if(isize(current.intsliders))
+    dialog::addInfo(XLAT("the following sliders will restart the game"));
+  for(auto& sl: current.intsliders) {
+    dialog::addSelItem(sl.name, its(sl.current), ch++);
+    dialog::add_action([&] {
+      dialog::editNumber(sl.current, sl.min, sl.max, 1, sl.zero, sl.name, sl.name);
+      dialog::reaction = [] { sliders_changed(true); };
       });
     }
   dialog::addInfo(slider_error);
@@ -1521,7 +1566,14 @@ int readArgs() {
     bool found = true;
     for(auto& sl: current.sliders)
       if(sl.name == slider) {
-        shift_arg_formula(sl.current, sliders_changed);
+        shift_arg_formula(sl.current, [] { sliders_changed(false); });
+        found = true;
+        }
+    for(auto& sl: current.intsliders)
+      if(sl.name == slider) {
+        shift(); sl.current = argi();
+        stop_game();
+        sliders_changed(false);
         found = true;
         }
     if(!found) {

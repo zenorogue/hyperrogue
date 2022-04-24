@@ -1130,9 +1130,11 @@ EX string cgi_string() {
   V("GEO", its(int(geometry)));
   V("VAR", its(int(variation)));
   
-  if(arb::in() && arb::using_slided) {
+  if(arb::in()) {
     for(auto& sl: arb::current.sliders)
       V("AS", fts(sl.current));
+    for(auto& sl: arb::current.intsliders)
+      V("AS", its(sl.current));
     }
   
   if(fake::in()) {

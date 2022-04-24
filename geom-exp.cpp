@@ -976,7 +976,7 @@ EX void showEuclideanMenu() {
       });
     }
   
-  if(arb::in() && !arb::current.sliders.empty()) {
+  if(arb::in() && !(arb::current.sliders.empty() && arb::current.intsliders.empty())) {
     dialog::addItem(XLAT("tessellation sliders"), '4');
     dialog::add_action_push(arb::set_sliders);
     }
