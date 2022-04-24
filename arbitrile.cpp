@@ -613,6 +613,15 @@ EX void load(const string& fname, bool after_sliding IS(false)) {
           }
         }
       }
+    else if(ep.eat("c2(")) {
+      ld curv = ep.rparse(0);
+      ep.force_eat(")");
+      ginf[gArbitrary].g = curv > 0 ? giSphere2 : curv < 0 ? giHyperb2 : giEuclid2;
+      ginf[gArbitrary].sides = 7;
+      set_flag(ginf[gArbitrary].flags, qBOUNDED, curv > 0);
+      set_flag(ginf[gArbitrary].flags, qAFFINE, false);
+      geom3::apply_always3();
+      }
     else if(ep.eat("e2.")) {
       ginf[gArbitrary].g = giEuclid2;
       ginf[gArbitrary].sides = 7;
