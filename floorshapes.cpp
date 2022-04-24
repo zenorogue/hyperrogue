@@ -354,21 +354,27 @@ void geometry_information::finish_apeirogon(hyperpoint center) {
   last->flags |= POLY_APEIROGONAL;
   last->she = isize(hpc);
   hyperpoint b = hpc.back();
-  for(int i=1; i<15; i++) hpcpush(towards_inf(b, center, i));
-  hyperpoint h = 1e-9 * C0 + center;
-  if(material(h) > 0)
-    hpcpush(normalize(h));
-  else {
-    ld left = -atan2(towards_inf(b, center, 15));
-    ld right = -atan2(towards_inf(hpc[last->s], center, 15));
-    if(right > left + 180*degree) right -= 360*degree;
-    if(right < left - 180*degree) right += 360*degree;
-    hyperpoint l1 = towards_inf(b, center, 15); l1 /= l1[2];
-    hyperpoint l2 = xspinpush0(left, 15); l2 /= l2[2];
-    /* call hpc.push_back directly to avoid adding points */
-    for(int i=0; i<=10; i++) hpc.push_back(xspinpush0(lerp(left, right, i/10.), 15));
+  if(material(-1e-9 * C0 + center) > 0) {
+    hpcpush(normalize(center));
     }
-  for(int i=15; i>=1; i--) hpcpush(towards_inf(hpc[last->s], center, i));
+  else {
+    for(int i=1; i<15; i++) hpcpush(towards_inf(b, center, i));
+    hyperpoint h = 1e-9 * C0 + center;
+    if(material(h) > 0)
+      hpcpush(normalize(h));
+    else {
+      ld left = -atan2(towards_inf(b, center, 15));
+      ld right = -atan2(towards_inf(hpc[last->s], center, 15));
+      if(right > left + 180*degree) right -= 360*degree;
+      if(right < left - 180*degree) right += 360*degree;
+      hyperpoint l1 = towards_inf(b, center, 15); l1 /= l1[2];
+      hyperpoint l2 = xspinpush0(left, 15); l2 /= l2[2];
+      println(hlog, "doing that ", left, "..", right);
+      /* call hpc.push_back directly to avoid adding points */
+      for(int i=0; i<=10; i++) hpc.push_back(xspinpush0(lerp(left, right, i/10.), 15));
+      }
+    for(int i=15; i>=1; i--) hpcpush(towards_inf(hpc[last->s], center, i));
+    }
   hpcpush(hpc[last->s]);
   }
 
