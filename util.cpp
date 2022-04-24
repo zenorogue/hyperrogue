@@ -125,6 +125,8 @@ struct exp_parser {
 
   char snext(int step=0) { skip_white(); return next(step); }
 
+  vector<pair<ld, ld>> parse_with_reps();
+
   cld parse(int prio = 0);
 
   ld rparse(int prio = 0) { return validate_real(parse(prio)); }
@@ -169,6 +171,21 @@ string exp_parser::next_token() {
     else break;
     }
   return token;
+  }
+
+vector<pair<ld, ld>> exp_parser::parse_with_reps() {
+  vector<pair<ld, ld>> vals;
+  vals.emplace_back(rparse(0), 1);
+  while(true) {
+    skip_white();
+    if(eat(":^")) {
+      ld rep = rparse(0);
+      vals.back().second *= rep;
+      }
+    if(eat(",")) vals.emplace_back(rparse(0), 1);
+    else break;
+    }
+  return vals;
   }
 
 cld exp_parser::parse(int prio) {
@@ -240,23 +257,22 @@ cld exp_parser::parse(int prio) {
     }
   #if CAP_ARCM
   else if(eat("arcmedge(")) {
-    if(!hyperbolic && !sphere) throw hr_parse_exception("arcmedge works only in hyperbolic and spherical geometry");
-    vector<pair<ld, ld>> vals;
-    vals.emplace_back(rparse(0), 1);
-    while(true) {
-      skip_white();
-      if(eat(":^")) {
-        ld rep = rparse(0);
-        vals.back().second *= rep;
-        }
-      if(eat(",")) vals.emplace_back(rparse(0), 1);
-      else break;
-      }
+    if(!hyperbolic && !sphere && !euclid) throw hr_parse_exception("arcmedge works only in isotropic geometry");
+    vector<pair<ld, ld>> vals = parse_with_reps();
     force_eat(")");
-    res = arcm::compute_edgelength(vals);
+    res = euclid ? 1 : arcm::compute_edgelength(vals);
     if(real(res) < 1e-10) throw hr_parse_exception("wrong geometry for this arcmedge");
     if (auto *distunit = hr::at_or_null(extra_params, "distunit"))
       res /= *distunit;
+    }
+  else if(eat("arcmcurv(")) {
+    vector<pair<ld, ld>> vals = parse_with_reps();
+    force_eat(")");
+    ld total = 0;
+    for(auto p: vals) total += p.second * (180 - 360 / p.first);
+    total = (360 - total) * degree;
+    if(abs(total) < 1e-10) total = 0;
+    res = total;
     }
   #endif
   else if(eat("ideal_angle(")) {
