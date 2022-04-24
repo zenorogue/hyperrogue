@@ -828,7 +828,7 @@ static const flagtype qCAT             = Flag(28);
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
-static const int OINF = 100;
+static const int OINF = 123;
 
 extern eGeometry geometry;
 extern eVariation variation;
