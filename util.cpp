@@ -323,6 +323,14 @@ cld exp_parser::parse(int prio) {
     cld no = parsepar();
     res = real(cond) > 0 ? yes : no;
     }  
+  else if(eat("ifz(")) {
+    cld cond = parse(0);
+    force_eat(",");
+    cld yes = parse(0);
+    force_eat(",");
+    cld no = parsepar();
+    res = abs(cond) < 1e-8 ? yes : no;
+    }
   else if(eat("wallif(")) {
     cld val0 = parse(0);
     force_eat(",");
