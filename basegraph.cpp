@@ -1117,6 +1117,8 @@ EX bool need_to_reopen_window() {
     return true;
   if(want_vsync() != vid.current_vsync)
     return true;
+  if(vid.usingGL && make_pair(vid.xres, vid.yres) != get_requested_resolution())
+    return true;
   return false;
   }
 
