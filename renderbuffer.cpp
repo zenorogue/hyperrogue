@@ -83,13 +83,14 @@ renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
   srf = NULL; 
   #endif  
 
+  tx = next_p2(x);
+  ty = next_p2(y);
+
   # if CAP_GL
   if(gl) {
     GLERR("renderbuffer init");
     resetbuffer rb;
     GLERR("after resetbuffer");
-    tx = next_p2(x);
-    ty = next_p2(y);
   
     FramebufferName = renderedTexture = depth_stencil_rb = 0;
     GLERR("even before");
