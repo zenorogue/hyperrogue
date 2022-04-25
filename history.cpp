@@ -81,19 +81,22 @@ namespace spiral {
 
   void loop(vector<SDL_Surface*> _band) {
 
+    renderbuffer rb(vid.xres, vid.yres, false);
+
+    if(vid.usingGL) {
+      rb.make_surface();
+      out = rb.srf;
+      }
+    else
+      out = s;
+
     band = _band;
-    out = s;
     precompute();
     if(CX == 0) return;
     shiftx = shifty = 0;
     velx=1; vely=1;
     bool dosave = false;
-
-    bool saveGL = vid.wantGL;
-    vid.wantGL = false;
-    apply_screen_settings();
-    out = s;
-
+    
     while(true) {
 
       time_t timer;
@@ -101,15 +104,40 @@ namespace spiral {
       char buf[128]; 
       strftime(buf, 128, "spiral-%y%m%d-%H%M%S" IMAGEEXT, localtime(&timer));
 
-      SDL_LockSurface(s);
+      SDL_LockSurface(out);
       draw();
-      if(dosave) { dosave = false; IMAGESAVE(s, buf); }
-      SDL_UnlockSurface(s);
+      if(vid.usingGL) {
+        setGLProjection();
+        gamescreen(0);
+        current_display->next_shader_flags = GF_TEXTURE;
+        dynamicval<eModel> m(pmodel, mdPixel);
+        glhr::color2(0xFFFFFFFF);
+        glhr::set_depthtest(false);
+        glhr::current_vertices = NULL;
+        current_display->set_all(0,0);
+        vector<glhr::textured_vertex> rtver(4);
+        for(int i=0; i<4; i++) {
+          int cx[4] = {0, 1, 1, 0};
+          int cy[4] = {0, 0, 1, 1};
+          rtver[i].texture[0] = cx[i] * rb.x * 1. / rb.tx;
+          rtver[i].texture[1] = 1 - cy[i] * rb.y * 1. / rb.ty;
+          rtver[i].coords[0] = vid.xres * cx[i] - current_display->xcenter;
+          rtver[i].coords[1] = vid.yres * cy[i] - current_display->ycenter;
+          rtver[i].coords[2] = 0;
+          rtver[i].coords[3] = 1;
+          }
+        glhr::prepare(rtver);
+        rb.use_as_texture();
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        }
+      if(dosave) { dosave = false; IMAGESAVE(out, buf); }
+      SDL_UnlockSurface(out);
       if(displayhelp) {
         displaystr(SX/2, vid.fsize*2, 0, vid.fsize, "arrows = navigate, ESC = return, h = hide help", forecolor, 8);
         displaystr(SX/2, SY - vid.fsize*2, 0, vid.fsize, XLAT("s = save to " IMAGEEXT, buf), forecolor, 8);
+        glflush();
         }
-      present_surface();
+      present_screen();
       shiftx += velx; shifty += vely;
 
       SDL_Event event;
@@ -150,8 +178,6 @@ namespace spiral {
     
     breakloop:
     quickmap.clear();
-    vid.wantGL = saveGL;
-    apply_screen_settings();
     }
 
   }
