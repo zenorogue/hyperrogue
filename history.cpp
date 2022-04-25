@@ -107,8 +107,8 @@ namespace spiral {
       SDL_LockSurface(out);
       draw();
       if(vid.usingGL) {
+        calcparam();
         setGLProjection();
-        gamescreen(0);
         current_display->next_shader_flags = GF_TEXTURE;
         dynamicval<eModel> m(pmodel, mdPixel);
         glhr::color2(0xFFFFFFFF);
