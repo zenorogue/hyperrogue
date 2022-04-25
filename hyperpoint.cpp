@@ -472,6 +472,40 @@ EX ld material(const hyperpoint& h) {
   else return h[LDIM];
   }
 
+EX int safe_classify_ideals(hyperpoint h) {
+  if(hyperbolic || in_h2xe()) {
+    h /= h[LDIM];
+    ld x = MDIM == 3 ? 1 - (h[0] * h[0] + h[1] * h[1]) : 1 - (h[0] * h[0] + h[1] * h[1] + h[2] * h[2]);
+    if(x > 1e-6) return 1;
+    if(x < -1e-6) return -1;
+    return 0;
+    }
+  return 1;
+  }
+
+EX ld ideal_limit = 10;
+EX ld ideal_each = degree;
+
+EX hyperpoint safe_approximation_of_ideal(hyperpoint h) {
+  return towards_inf(C0, h, ideal_limit);
+  }
+
+/** the point on the line ab which is closest to zero. Might not be normalized. Works even if a and b are (ultra)ideal */
+EX hyperpoint closest_to_zero(hyperpoint a, hyperpoint b) {
+  if(sqhypot_d(MDIM, a-b) < 1e-9) return a;
+  if(isnan(a[0])) return a;
+  a /= a[LDIM];
+  b /= b[LDIM];
+  ld mul_a = 0, mul_b = 0;
+  for(int i=0; i<LDIM; i++) {
+    ld z = a[i] - b[i];
+    mul_a += a[i] * z;
+    mul_b -= b[i] * z;
+    }
+
+  return (mul_b * a + mul_a * b) / (mul_a + mul_b);
+  }
+
 EX ld zlevel(const hyperpoint &h) {
   if(sl2) return sqrt(-intval(h, Hypc));
   else if(translatable) return h[LDIM];

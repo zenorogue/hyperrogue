@@ -15,21 +15,80 @@ static constexpr ld NEWSHAPE = (-13.5);
 #endif
 static constexpr ld WOLF = (-15.5);
 
+void geometry_information::hpc_connect_ideal(hyperpoint a, hyperpoint b) {
+  ld left = -atan2(a);
+  ld right = -atan2(b);
+  if(right > left + 180*degree) right -= 360*degree;
+  if(right < left - 180*degree) right += 360*degree;
+  /* call hpc.push_back directly to avoid adding points */
+  ld qty = ceil(abs(right-left) / ideal_each);
+  for(int i=0; i<=qty; i++) hpc.push_back(xspinpush0(lerp(left, right, i/qty), ideal_limit));
+  }
+
 void geometry_information::hpcpush(hyperpoint h) {
-  if(sphere) h = mid(h,h);
+
+  if(GDIM == 3 || (last->flags & POLY_TRIANGLES)) {
+    hpc.push_back(h);
+    return;
+    }
+
   ld error_threshold = euclid ? 1000 : 1e10;
-  ld threshold = (GDIM == 3 || last->flags & POLY_TRIANGLES)  ? error_threshold : (sphere ? (ISMOBWEB || NONSTDVAR ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
-  if(/*vid.usingGL && */!first) {
-    ld i = intval(hpc.back(), h);
-    if(i > threshold && i < error_threshold) {
-      hyperpoint md = mid(hpc.back(), h);
-      hpcpush(md);
-      hpcpush(h);
-      return;
+  ld threshold = (sphere ? (ISMOBWEB || NONSTDVAR ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
+
+  if(first) {
+    starting_ideal = starting_point = last_point = last_ideal = h;
+    first = false;
+    int c = safe_classify_ideals(h);
+    if(c == 0) {
+      starting_ideal = safe_approximation_of_ideal(h);
+      hpc.push_back(starting_ideal);
+      }
+    else if(c > 0) {
+      hpc.push_back(normalize(h));
       }
     }
-  first = false;
-  hpc.push_back(h);
+  else {
+    int c1 = safe_classify_ideals(last_point);
+    int c2 = safe_classify_ideals(h);
+    if(c1 > 0 && c2 > 0) {
+      h = normalize(h);
+      ld i = intval(last_point, h);
+      if(i > threshold && i < error_threshold) {
+        hyperpoint md = mid(hpc.back(), h);
+        hpcpush(md);
+        hpcpush(h);
+        return;
+        }
+      else {
+        hpc.push_back(h);
+        last_point = last_ideal = h;
+        }
+      }
+    else if(c1 > 0 && c2 <= 0) {
+      for(ld t = threshold; t < ideal_limit; t += threshold) hpc.push_back(last_ideal = towards_inf(last_point, h, t));
+      last_point = h;
+      }
+    else if(c1 <= 0 && c2 > 0) {
+      hyperpoint next_ideal = towards_inf(h, last_point, ideal_limit);
+      hpc_connect_ideal(last_ideal, next_ideal);
+      ld t = threshold; while(t < ideal_limit) t += threshold; t -= threshold;
+      for(; t > threshold/2; t -= threshold) hpc.push_back(towards_inf(h, last_point, t));
+      last_point = last_ideal = h;
+      }
+    else if(c1 <= 0 && c2 <= 0) {
+      hyperpoint p = closest_to_zero(last_point, h);
+      indenter ind(2);
+      int cp = safe_classify_ideals(p);
+      if(cp > 0) {
+        hpcpush(normalize(p));
+        hpcpush(h);
+        return;
+        }
+      else {
+        last_ideal = last_point = h;
+        }
+      }
+    }
   }
 
 void geometry_information::chasmifyPoly(double fac, double fac2, int k) {
@@ -119,6 +178,10 @@ hyperpoint geometry_information::turtlevertex(int u, double x, double y, double 
 
 void geometry_information::finishshape() {
   if(!last) return;
+
+  if(!first && safe_classify_ideals(starting_point) <= 0 && sqhypot_d(LDIM, starting_point - last_point) < 1e-9)
+    hpc_connect_ideal(last_ideal, starting_ideal);
+
   last->e = isize(hpc);
   double area = 0;
   for(int i=last->s; i<last->e-1; i++)

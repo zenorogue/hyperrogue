@@ -244,7 +244,7 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
 
   /* in case of apeirogonal shapes, we may need to cyclically rotate */
   bool apeirogonal = false;
-  vector<hyperpoint> backup;
+  vector<hyperpoint> tail, head;
 
   for(int r=0; r<nsym; r+=osym/rots) {
     for(hyperpoint h: lst) {
@@ -260,17 +260,17 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
         }
       if(mapped == 0) printf("warning: not mapped (shapeid %d)\n", shapeid);
       if(invalid) {
-        apeirogonal = true;
-        for(int i=last->s; i<isize(hpc); i++) backup.push_back(hpc[i]);
-        hpc.resize(last->s);
-        first = true;
+        apeirogonal = true;        
+        for(auto h: head) tail.push_back(h);
+        head.clear();
         }
-      if(!invalid) hpcpush(mid(nh, nh));
+      if(!invalid) head.push_back(nh);
       }
     }
 
-  for(auto& b: backup) hpcpush(b);
-  if(!apeirogonal) hpcpush(hpc[last->s]);
+  for(auto& h: head) hpcpush(h);
+  for(auto& h: tail) hpcpush(h);
+  if(!apeirogonal) hpcpush(starting_point);
   }
 
 template<class T> void sizeto(T& t, int n) {
@@ -353,29 +353,8 @@ namespace irr { void generate_floorshapes(); }
 void geometry_information::finish_apeirogon(hyperpoint center) {
   last->flags |= POLY_APEIROGONAL;
   last->she = isize(hpc);
-  hyperpoint b = hpc.back();
-  if(material(-1e-9 * C0 + center) > 0) {
-    hpcpush(normalize(center));
-    }
-  else {
-    for(int i=1; i<15; i++) hpcpush(towards_inf(b, center, i));
-    hyperpoint h = 1e-9 * C0 + center;
-    if(material(h) > 0)
-      hpcpush(normalize(h));
-    else {
-      ld left = -atan2(towards_inf(b, center, 15));
-      ld right = -atan2(towards_inf(hpc[last->s], center, 15));
-      if(right > left + 180*degree) right -= 360*degree;
-      if(right < left - 180*degree) right += 360*degree;
-      hyperpoint l1 = towards_inf(b, center, 15); l1 /= l1[2];
-      hyperpoint l2 = xspinpush0(left, 15); l2 /= l2[2];
-      println(hlog, "doing that ", left, "..", right);
-      /* call hpc.push_back directly to avoid adding points */
-      for(int i=0; i<=10; i++) hpc.push_back(xspinpush0(lerp(left, right, i/10.), 15));
-      }
-    for(int i=15; i>=1; i--) hpcpush(towards_inf(hpc[last->s], center, i));
-    }
-  hpcpush(hpc[last->s]);
+  hpcpush(center);
+  hpcpush(starting_point);
   }
 
 // !siid equals pseudohept(c)
@@ -648,11 +627,11 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         if(i != isize(m.v)) printf("warning: i=%d sm=%d\n", i, isize(m.v));
         bshape2((ii?fsh.shadow:fsh.b)[id], fsh.prio, (fsh.shapeid2 && geosupport_football() < 2) ? fsh.shapeid2 : siid?fsh.shapeid0:fsh.shapeid1, m);
 
-        if(apeirogonal) {
+        if(apeirogonal && !first) {
           int id = arb::id_of(c->master);
           auto &ac = arb::current_or_slided();
           auto& sh = ac.shapes[id];
-          hpcpush(arb::get_adj(arb::current_or_slided(), id, cor-2, id, cor-1) * hpc[last->s]);
+          hpcpush(arb::get_adj(arb::current_or_slided(), id, cor-2, id, cor-1) * starting_point);
           finish_apeirogon(sh.vertices.back());
           }
         }

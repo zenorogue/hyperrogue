@@ -275,13 +275,17 @@ cld exp_parser::parse(int prio) {
   #endif
   else if(eat("ideal_angle(")) {
     ld edges = rparse(0);
+    ld u = 1;
+    skip_white(); if(eat(",")) u = rparse(0);
     force_eat(")");
-    return arb::rep_ideal(edges).second;
+    return arb::rep_ideal(edges, u).second;
     }
   else if(eat("ideal_edge(")) {
     ld edges = rparse(0);
+    ld u = 1;
+    skip_white(); if(eat(",")) u = rparse(0);
     force_eat(")");
-    return arb::rep_ideal(edges).first;
+    return arb::rep_ideal(edges, u).first;
     }
   else if(eat("regangle(")) {
     cld edgelen = parse(0);

@@ -380,8 +380,20 @@ hpcshape
   ld dlow_table[SIDEPARS], dhi_table[SIDEPARS], dfloor_table[SIDEPARS];
 
   int prehpc;
+  /** list of points in all shapes */
   vector<hyperpoint> hpc;
+  /** what shape are we currently creating */
+  hpcshape *last;
+  /** is the current shape already started? first = not yet */
   bool first;
+  /** starting point of the current shape, can be ultraideal */
+  hyperpoint starting_point;
+  /** first ideal point of the current shape */
+  hyperpoint starting_ideal;
+  /** last added point of the current shape, can be ultraideal */
+  hyperpoint last_point;
+  /** last ideal point of the current shape */
+  hyperpoint last_ideal;
 
   bool validsidepar[SIDEPARS];
 
@@ -389,7 +401,6 @@ hpcshape
 #endif
 
   hpcshape shFullCross[2];
-  hpcshape *last;
 
   int SD3, SD6, SD7, S12, S14, S21, S28, S42, S36, S84;
   
@@ -422,6 +433,7 @@ hpcshape
   void prepare_usershapes();
 
   void hpcpush(hyperpoint h);
+  void hpc_connect_ideal(hyperpoint a, hyperpoint b);
   void hpcsquare(hyperpoint h1, hyperpoint h2, hyperpoint h3, hyperpoint h4);
   void chasmifyPoly(double fac, double fac2, int k);
   void shift(hpcshape& sh, double dx, double dy, double dz);

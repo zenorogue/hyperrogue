@@ -1213,9 +1213,8 @@ struct hrmap_arbi : hrmap {
   hyperpoint get_corner(cell *c, int cid, ld cf) override {
     auto& sh = arb::current_or_slided().shapes[arb::id_of(c->master)];
     int id = gmod(cid, c->type);
-    if(sh.angles[id] == 0) {
-      return normalize(C0 + 999 * kleinize(sh.vertices[id]));
-      }
+    if(sh.angles[id] <= 0)
+      return sh.vertices[id];
     return normalize(C0 + (sh.vertices[id] - C0) * 3 / cf);
     }
 
@@ -1611,11 +1610,11 @@ EX void choose() {
     });
   }
 
-EX pair<ld, ld> rep_ideal(ld e) {
+EX pair<ld, ld> rep_ideal(ld e, ld u IS(1)) {
   ld alpha = 2 * M_PI / e;
-  hyperpoint h1 = point3(cos(alpha), -sin(alpha), 1);
-  hyperpoint h2 = point3(1, 0, 1);
-  hyperpoint h3 = point3(cos(alpha), sin(alpha), 1);
+  hyperpoint h1 = point3(cos(alpha)*u, -sin(alpha)*u, 1);
+  hyperpoint h2 = point3(u, 0, 1);
+  hyperpoint h3 = point3(cos(alpha)*u, sin(alpha)*u, 1);
   hyperpoint h12 = mid(h1, h2);
   hyperpoint h23 = mid(h2, h3);
   ld len = hdist(h12, h23);
