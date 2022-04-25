@@ -1042,8 +1042,8 @@ void geometry_information::configure_floorshapes() {
 
   double spherezoom = sphere ? 1.2375 : 1;
 
-  double trihepta0 = scalefactor*spherezoom*(.2776+p) * gsca(a4, 1.3, a46, .975, a47, .85, a38, .9) * bscale6;
-  double trihepta1 = (sphere ? .54 : scalefactor*spherezoom*(.5273-2*p)) * gsca(a4, .8, a46, 1.075, sphere4, 1.3) * bscale7;
+  double trihepta0 = spherezoom*(.2776+p) * gsca(a4, 1.3, a46, .975, a47, .85, a38, .9) * bscale6;
+  double trihepta1 = (sphere ? .54 : spherezoom*(.5273-2*p)) * gsca(a4, .8, a46, 1.075, sphere4, 1.3) * bscale7;
 
   double eps = hexhexdist * .05;
   if(euclid) trihepta0 = hexhexdist * .5 - eps * sqrt(3)/2, trihepta1 = hexhexdist * sqrt(3)/2 - eps; // .5-.1; .75-.05
@@ -1158,48 +1158,48 @@ void geometry_information::prepare_shapes() {
 
   for(auto& sh: shTriheptaSpecial) sh.clear();
 
-  bshape(shTriheptaSpecial[2], PPR::FLOOR,  scalefactor, 32);
-  bshape(shTriheptaSpecial[3], PPR::FLOOR,  scalefactor, 33);
-  bshape(shTriheptaSpecial[4], PPR::FLOOR,  scalefactor, 34);
-  bshape(shTriheptaSpecial[5], PPR::FLOOR,  scalefactor, 35);
-  bshape(shTriheptaSpecial[6], PPR::FLOOR,  scalefactor, 36);
-  bshape(shTriheptaSpecial[7], PPR::FLOOR,  scalefactor, 37);
-  bshape(shTriheptaSpecial[12], PPR::FLOOR,  scalefactor, 373);
-  bshape(shTriheptaSpecial[9], PPR::FLOOR,  scalefactor, 38);
-  bshape(shTriheptaSpecial[10], PPR::FLOOR,  scalefactor, 39);
-  bshape(shTriheptaSpecial[11], PPR::FLOOR,  scalefactor, 372);
-  bshape(shSemiFloorShadow, PPR::FLOOR, scalefactor, 263);
+  bshape(shTriheptaSpecial[2], PPR::FLOOR,  1, 32);
+  bshape(shTriheptaSpecial[3], PPR::FLOOR,  1, 33);
+  bshape(shTriheptaSpecial[4], PPR::FLOOR,  1, 34);
+  bshape(shTriheptaSpecial[5], PPR::FLOOR,  1, 35);
+  bshape(shTriheptaSpecial[6], PPR::FLOOR,  1, 36);
+  bshape(shTriheptaSpecial[7], PPR::FLOOR,  1, 37);
+  bshape(shTriheptaSpecial[12], PPR::FLOOR,  1, 373);
+  bshape(shTriheptaSpecial[9], PPR::FLOOR,  1, 38);
+  bshape(shTriheptaSpecial[10], PPR::FLOOR,  1, 39);
+  bshape(shTriheptaSpecial[11], PPR::FLOOR,  1, 372);
+  bshape(shSemiFloorShadow, PPR::FLOOR, 1, 263);
 
-  bshape(shMercuryBridge[0], PPR::FLOOR,  scalefactor, 365);
-  bshape(shMercuryBridge[1], PPR::FLOOR,  scalefactor, 366);
+  bshape(shMercuryBridge[0], PPR::FLOOR,  1, 365);
+  bshape(shMercuryBridge[1], PPR::FLOOR,  1, 366);
   bshape(shWindArrow, PPR::HEPTAMARK,  scalefactor, 367);
 
   bshape(shPalaceGate, PPR::STRUCT1, scalefactor, 47);
-  bshape(shSemiFeatherFloor[0], PPR::FLOOR,  scalefactor, 48);
-  bshape(shSemiFeatherFloor[1], PPR::FLOOR,  scalefactor, 49);
+  bshape(shSemiFeatherFloor[0], PPR::FLOOR,  1, 48);
+  bshape(shSemiFeatherFloor[1], PPR::FLOOR,  1, 49);
 
-  bshape(shZebra[0], PPR::FLOOR,  scalefactor, 162);
-  bshape(shZebra[1], PPR::FLOOR,  scalefactor, 163);
-  bshape(shZebra[2], PPR::FLOOR,  scalefactor, 164);
-  bshape(shZebra[3], PPR::FLOOR,  scalefactor, 165);
+  bshape(shZebra[0], PPR::FLOOR,  1, 162);
+  bshape(shZebra[1], PPR::FLOOR,  1, 163);
+  bshape(shZebra[2], PPR::FLOOR,  1, 164);
+  bshape(shZebra[3], PPR::FLOOR,  1, 165);
   bshape(shZebra[4], PPR::FLOOR,  1, 166); // for pure
-  bshape(shEmeraldFloor[0], PPR::FLOOR,  scalefactor, 167); // 4
-  bshape(shEmeraldFloor[1], PPR::FLOOR,  scalefactor, 168); // 12
-  bshape(shEmeraldFloor[2], PPR::FLOOR,  scalefactor, 169); // 16
-  bshape(shEmeraldFloor[3], PPR::FLOOR,  scalefactor, 170); // 20
-  bshape(shEmeraldFloor[4], PPR::FLOOR,  scalefactor, 171); // 28
-  bshape(shEmeraldFloor[5], PPR::FLOOR,  scalefactor, 172); // 36
-  bshape(shTower[0], PPR::FLOOR_TOWER,  scalefactor, 196); // 4
-  bshape(shTower[1], PPR::FLOOR_TOWER,  scalefactor, 197); // 5
-  bshape(shTower[2], PPR::FLOOR_TOWER,  scalefactor, 198); // 6
-  bshape(shTower[3], PPR::FLOOR_TOWER,  scalefactor, 199); // 8
-  bshape(shTower[4], PPR::FLOOR_TOWER,  scalefactor, 200); // 9
-  bshape(shTower[5], PPR::FLOOR_TOWER,  scalefactor, 201); // 10
-  bshape(shTower[6], PPR::FLOOR_TOWER,  scalefactor, 202); // 10
+  bshape(shEmeraldFloor[0], PPR::FLOOR,  1, 167); // 4
+  bshape(shEmeraldFloor[1], PPR::FLOOR,  1, 168); // 12
+  bshape(shEmeraldFloor[2], PPR::FLOOR,  1, 169); // 16
+  bshape(shEmeraldFloor[3], PPR::FLOOR,  1, 170); // 20
+  bshape(shEmeraldFloor[4], PPR::FLOOR,  1, 171); // 28
+  bshape(shEmeraldFloor[5], PPR::FLOOR,  1, 172); // 36
+  bshape(shTower[0], PPR::FLOOR_TOWER,  1, 196); // 4
+  bshape(shTower[1], PPR::FLOOR_TOWER,  1, 197); // 5
+  bshape(shTower[2], PPR::FLOOR_TOWER,  1, 198); // 6
+  bshape(shTower[3], PPR::FLOOR_TOWER,  1, 199); // 8
+  bshape(shTower[4], PPR::FLOOR_TOWER,  1, 200); // 9
+  bshape(shTower[5], PPR::FLOOR_TOWER,  1, 201); // 10
+  bshape(shTower[6], PPR::FLOOR_TOWER,  1, 202); // 10
   bshape(shTower[7], PPR::FLOOR_TOWER,  1, 203); // pure 7
   bshape(shTower[8], PPR::FLOOR_TOWER,  1, 204); // pure 11
   bshape(shTower[9], PPR::FLOOR_TOWER,  1, 205); // pure 15
-  bshape(shTower[10], PPR::FLOOR_TOWER,  scalefactor, 206);  // Euclidean
+  bshape(shTower[10], PPR::FLOOR_TOWER,  1, 206);  // Euclidean
 
   // structures & walls
   bshape(shBoatOuter, PPR::STRUCT0, scalefactor, 154);
@@ -1301,7 +1301,7 @@ void geometry_information::prepare_shapes() {
 
   for(int i=0; i<5; i++)
     for(int j=0; j<4; j++)
-      bshape(shReptile[i][j], j >= 2 ? PPR::LIZEYE : j == 1 ? PPR::FLOORa : PPR::FLOOR_DRAGON, scalefactor * gsca(euclid, 1.16), 277+i*4+j);
+      bshape(shReptile[i][j], j >= 2 ? PPR::LIZEYE : j == 1 ? PPR::FLOORa : PPR::FLOOR_DRAGON, (hyperbolic && S3 == 3 && S7 == 7 && BITRUNCATED) ? 1 : scalefactor * gsca(euclid, 1.16), 277+i*4+j); // todo
 
   finishshape();
 
