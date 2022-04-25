@@ -12,6 +12,7 @@ namespace hr {
 EX namespace netgen {
 
   // We need a two-dimensional vector class for this.
+  // (actually we could just use hyperpoint but this is very old...)
   
   struct vec {
     double x, y;
@@ -491,21 +492,48 @@ EX namespace netgen {
         (edgist[i]+edgist[j]) * ang(rot[j] + 2*M_PI*(je+.5)/jt);
     }
 
+  shiftpoint vec_to_p(vec v) {
+    return shiftless(hyperpoint(v.x - current_display->xcenter, v.y - current_display->ycenter, 0, 1));
+    }
+
+  void netline(vec a, vec b, color_t col) {
+    if(vid.usingGL)
+      queueline(vec_to_p(a), vec_to_p(b), col, 0);
+    else
+      blackline(a, b, col);
+    }
+
+  void netcircle(vec ctr, int rad, color_t col) {
+    if(vid.usingGL)
+      queuecircle(ctr.x, ctr.y, rad, col);
+    else
+      blackcircle(ctr, rad, col);
+    }
+
   void displaynets() {
-    SDL_LockSurface(s);
+    if(!vid.usingGL) SDL_LockSurface(s);
 
     setRaylen();
     
-    for(int uy=SY-1; uy>=0; uy--)
-    for(int ux=SX-1; ux>=0; ux--) {
-      qpixel(s, ux, uy) = 0;
+    if(vid.usingGL) {
+      calcparam();
+      setGLProjection();
+      glhr::set_depthtest(false);
+      current_display->set_all(0,0);
+      }
+    else {
+      for(int uy=SY-1; uy>=0; uy--)
+      for(int ux=SX-1; ux>=0; ux--) {
+        qpixel(s, ux, uy) = 0;
+        }
+      initquickqueue();
       }
     
     for(int y=1; y<PY; y++)
-      blackline(vec(0,SY*y/PY), vec(SX,SY*y/PY), 0x404080FF);
+      netline(vec(0,SY*y/PY), vec(SX,SY*y/PY), 0x404080FF);
 
     for(int x=1; x<PX; x++)
-      blackline(vec(SX*x/PX,0), vec(SX*x/PX,SY), 0x404080FF);
+      netline(vec(SX*x/PX,0), vec(SX*x/PX,SY), 0x404080FF);
     
     for(int i=0; i<CELLS; i++) {
       
@@ -515,13 +543,13 @@ EX namespace netgen {
       int t = ct[i];
   
       if(i == whichcell)
-        blackcircle(center[i], 10, 0x40FF40FF);
+        netcircle(center[i], 10, 0x40FF40FF);
   
       if(i == bei || i == nei[bei][bee])
-        blackcircle(center[i], 5, 0x40FF40FF);
+        netcircle(center[i], 5, 0x40FF40FF);
       
       if(glued[i] == -1)
-        blackcircle(center[i], 7, 0xFF4040FF);
+        netcircle(center[i], 7, 0xFF4040FF);
       
       if(glued[i] != -1) 
         applyGlue(i);
@@ -544,7 +572,7 @@ EX namespace netgen {
           nei[i][e] >= 0 ? 0xC0C0C0FF : 
           0x808080FF;
   
-        blackline(v1, v2, col);
+        netline(v1, v2, col);
         
         if(nei[i][e] != -1 && nei[i][e] != glued[i] && glued[nei[i][e]] != i) {
           vec vd = v2-v1;
@@ -553,15 +581,16 @@ EX namespace netgen {
           vd.x *= factor; vd.y *= factor;
           vec v4 = v3 + vd;
           
-          blackline(v1, v4, 0xFFC0C0C0);
-          blackline(v2, v4, 0xFFC0C0C0);
+          netline(v1, v4, 0xFFC0C0C0);
+          netline(v2, v4, 0xFFC0C0C0);
           }
         }
       }
     
-    SDL_UnlockSurface(s);
+    if(!vid.usingGL) SDL_UnlockSurface(s);
+    else quickqueue();
     
-    present_surface();    
+    present_screen();
     }
 
   double rs, rz;
@@ -655,6 +684,9 @@ EX namespace netgen {
       dynamicval<bool> dr(resizable, false);
       dynamicval<bool> dws(vid.relative_window_size, false);
       dynamicval<bool> dfs(vid.change_fullscr, true);
+      dynamicval<bool> dcf(vid.want_fullscreen, false);
+      dynamicval<eModel> m(pmodel, mdPixel);
+
       apply_screen_settings();
 
       netgen_loop();
