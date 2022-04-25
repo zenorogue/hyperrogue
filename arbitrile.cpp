@@ -994,7 +994,7 @@ heptagon *build_child(heptspin p, pair<int, int> adj);
 /** get the midedge of lr; it takes infinite vertices into account */
 EX hyperpoint get_midedge(ld len, const hyperpoint &l, const hyperpoint &r) {
   if(len == INFINITE_BOTH) {
-    return normalize(kleinize(l) + kleinize(r));
+    return normalize(closest_to_zero(l, r));
     }
   else if(len == INFINITE_RIGHT) {
     return towards_inf(r, l);
