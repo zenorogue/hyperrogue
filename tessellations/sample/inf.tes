@@ -2,8 +2,13 @@
 intslider(sides,3,3,MAX_EDGE)
 h2.
 
+# ideal_angle and ideal_edge produce appropriate values for the bracket format below
 let(ia = ideal_angle(sides))
 let(ie = ideal_edge(sides))
+
+# ideal vertices can be specified as e1, [a1, e2, a2], e3
+# this means that the edges e1 and e3 are extended until they meet (in an ideal or ultra-ideal point), eliminating e2
+
 tile(0, [ia, ie, ia], *sides)
 
 conway("(0 0)")

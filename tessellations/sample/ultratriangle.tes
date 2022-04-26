@@ -3,6 +3,8 @@ intslider(sides,3,3,MAX_EDGE)
 slider(multiplier, 1.1, 1, 2)
 h2.
 
+# multiplier > 1 produces the appropriate parameters for ultraideal vertices
+# this produces a Klein regular sides-gon with circumradius multiplier
 let(ia = ideal_angle(sides, multiplier))
 let(ie = ideal_edge(sides, multiplier))
 tile(0, [ia, ie, ia], *sides)
