@@ -3978,7 +3978,10 @@ EX bool fat_edges = false;
 
 EX void gridline(const shiftmatrix& V1, const hyperpoint h1, const shiftmatrix& V2, const hyperpoint h2, color_t col, int prec) {
   transmatrix U2 = unshift(V2, V1.shift);
-  ld d = hdist(V1.T*h1, U2*h2);
+
+  int c1 = safe_classify_ideals(h1);
+  int c2 = safe_classify_ideals(h2);
+  ld d = (c1 <= 0 || c2 <= 0) ? 99 : hdist(V1.T*h1, U2*h2);
   
   #if MAXMDIM >= 4
   if(WDIM == 3 && fat_edges) {
@@ -3992,7 +3995,25 @@ EX void gridline(const shiftmatrix& V1, const hyperpoint h1, const shiftmatrix& 
 
   while(d > precise_width && d < 100 && grid_depth < 10) { 
     if(V1.shift != V2.shift || !eqmatrix(V1.T, V2.T, 1e-6)) { gridline(V1, h1, V1, inverse_shift(V1, V2) * h2, col, prec); return; }
-    hyperpoint h = midz(h1, h2); 
+    hyperpoint h;
+    if(c1 <= 0 && c2 <= 0) {
+      h = closest_to_zero(h1, h2);
+      if(safe_classify_ideals(h) <= 0) return;
+      h = normalize(h);
+      }
+    else if(c2 <= 0) {
+      dynamicval<int> dw(grid_depth, 99);
+      for(ld a=0; a<ideal_limit; a+=precise_width)
+        gridline(V1, towards_inf(h1, h2, a), V1, towards_inf(h1, h2, a+precise_width), col, prec);
+      return;
+      }
+    else if(c1 <= 0) {
+      dynamicval<int> dw(grid_depth, 99);
+      for(ld a=0; a<ideal_limit; a+=precise_width)
+        gridline(V1, towards_inf(h2, h1, a), V1, towards_inf(h2, h1, a+precise_width), col, prec);
+      return;
+      }
+    else h = midz(h1, h2);
     grid_depth++;
     gridline(V1, h1, V1, h, col, prec); 
     gridline(V1, h, V1, h2, col, prec); 
