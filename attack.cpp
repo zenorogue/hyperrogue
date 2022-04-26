@@ -226,6 +226,27 @@ EX void killIvy(cell *c, eMonster who) {
       killIvy(c->move(i), who), kills[moIvyDead]++;
   }
 
+struct spillinfo {
+  eWall orig;
+  int spill_a, spill_b;
+  spillinfo() { spill_a = spill_b = 0; }
+  };
+
+map<cell*, spillinfo> spillinfos;
+
+EX void reset_spill() {
+  spillinfos.clear();
+  }
+
+EX void record_spillinfo(cell *c, eWall t) {
+  if(!isAlchAny(t)) return;
+  auto& si = spillinfos[c];
+  if(si.spill_a == 0 && si.spill_b == 0) si.orig = c->wall;
+  if(si.spill_a == 0 && si.spill_b == 0) si.orig = c->wall;
+  if(t == waFloorA) si.spill_a++;
+  if(t == waFloorB) si.spill_b++;
+  }
+
 EX void prespill(cell* c, eWall t, int rad, cell *from) {
   if(againstWind(c, from)) return;
   changes.ccell(c);
@@ -280,8 +301,10 @@ EX void prespill(cell* c, eWall t, int rad, cell *from) {
     c->wall == waCamelotMoat || c->wall == waSea || c->wall == waCTree ||
     c->wall == waRubble || c->wall == waGargoyleFloor || c->wall == waGargoyle ||
     c->wall == waRose || c->wall == waPetrified || c->wall == waPetrifiedBridge || c->wall == waRuinWall ||
-    among(c->wall, waDeepWater, waShallow))
+    among(c->wall, waDeepWater, waShallow)) {
+      record_spillinfo(c, t);
       t = waTemporary;
+      }
 
   if(c->wall == waSulphur) {
     // remove the center as it would not look good
@@ -296,6 +319,7 @@ EX void prespill(cell* c, eWall t, int rad, cell *from) {
     
   destroyHalfvine(c);
   if(c->wall == waTerraWarrior) kills[waTerraWarrior]++;
+  record_spillinfo(c, t);
   c->wall = t;
   // destroy items...
   c->item = itNone;
@@ -324,7 +348,18 @@ EX void spillfix(cell* c, eWall t, int rad) {
   }
 
 EX void spill(cell* c, eWall t, int rad) {
-  prespill(c,t,rad, c); spillfix(c,t,rad);
+  if(isAlchAny(c) && (spillinfos[c].spill_a || spillinfos[c].spill_b) && isAlchAny(spillinfos[c].orig))
+    t = spillinfos[c].orig;
+  prespill(c,t,rad, c);
+  spillfix(c,t,rad);
+  for(auto si: spillinfos) {
+    if(si.second.spill_a && si.second.spill_b)
+    si.first->wall =
+      si.second.spill_a > si.second.spill_b ? waFloorA :
+      si.second.spill_b > si.second.spill_a ? waFloorB :
+      isAlchAny(si.second.orig) ? si.second.orig :
+      waNone;
+    }
   }
 
 EX void degradeDemons() {

@@ -809,6 +809,7 @@ EX void findWormIvy(cell *c) {
   }
   
 EX void monstersTurn() {
+  reset_spill();
   checkSwitch();
   mirror::breakAll();
   DEBB(DF_TURN, ("bfs"));

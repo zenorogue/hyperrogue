@@ -218,12 +218,12 @@ EX void reduceOrbPowers() {
   items[itWarning] = 0;
   }
 
+eWall orig_wall;
+
 EX void flashAlchemist(cell *c) {
-  if(isAlch(c)) {
-    if(isAlch(cwt.at))
-      c->wall = cwt.at->wall;
-    else
-      c->wall = eWall(c->wall ^ waFloorB ^ waFloorA);
+  if(isAlch(c) && isAlch(orig_wall)) {
+    record_spillinfo(c, orig_wall);
+    c->wall = orig_wall;
     }
   }
 
@@ -292,6 +292,7 @@ EX void flashCell(cell *c, eMonster killer, flagtype flags) {
 
 EX void activateFlashFrom(cell *cf, eMonster who, flagtype flags) {
   drawFlash(cf);
+  orig_wall = cwt.at->wall;
   playSound(cf, "storm");
   for(int i=0; i<isize(dcal); i++) {
     cell *c = dcal[i];
