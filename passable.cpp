@@ -374,6 +374,8 @@ bool slimepassable(cell *w, cell *c) {
   int ogroup = slimegroup(w);
   if(!ogroup) return false;
   bool hv = (group == ogroup);
+  if(nonorientable && isAlchAny(c) && isAlchAny(w))
+    hv = !anti_alchemy(c, w);
 
   if(sword::at(w, 0)) return false;
   
