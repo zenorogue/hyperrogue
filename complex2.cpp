@@ -1181,6 +1181,9 @@ EX namespace dice {
       return;
       }
 
+    /* priority used for dice */
+    const auto prio = PPR::BIGSTATUE;
+
     eGeometry orig = geometry;
     bool fpp = GDIM == 3;
 
@@ -1387,7 +1390,7 @@ EX namespace dice {
         cy = face[1] - (face[3] + face[4]) * .4;
         }
       
-      queuecurve(V1, 0xFFFFFFFF, color & 0xFFFFFF9F, PPR::WALL);
+      queuecurve(V1, 0xFFFFFFFF, color & 0xFFFFFF9F, prio);
       
       #if !CAP_EXTFONT
       if(!vid.usingGL) continue;
@@ -1409,7 +1412,7 @@ EX namespace dice {
             cx = (face[j2] - face[j]) / 2;
             cy = face[j1] - (face[j] + face[j2]) / 4;
             }
-          write_in_space(V1, max_glfont_size, -1.2, its(1+dw->sides[q][j]), 0xFFFFFFFF, 0, 8, PPR::WALL, pf);
+          write_in_space(V1, max_glfont_size, -1.2, its(1+dw->sides[q][j]), 0xFFFFFFFF, 0, 8, prio, pf);
           }
         }
       else {
@@ -1418,7 +1421,7 @@ EX namespace dice {
         if(fid == 6) s = "6.";
         else if(fid == 9) s = "9.";
         else s = its(fid);
-        write_in_space(V1, max_glfont_size, dw->faces < 10 ? -1.2 : -.75, s, 0xFFFFFFFF, 0, 8, PPR::WALL, pf);
+        write_in_space(V1, max_glfont_size, dw->faces < 10 ? -1.2 : -.75, s, 0xFFFFFFFF, 0, 8, prio, pf);
         }
       #endif
       #endif
