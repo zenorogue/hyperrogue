@@ -160,8 +160,12 @@ EX int default_levs() {
 
 #if HDR
 namespace altmap {
+
+  /* in quotient space we cannot use alt for quotient */
+  extern map<heptagon*, short> quotient_relspins;
+
   /** h->move(relspin(h->alt)) corresponds to h->alt->move(0) */
-  inline short& relspin(heptagon *alt) { return alt->zebraval; }
+  inline short& relspin(heptagon *alt) { return quotient ? quotient_relspins[alt] : alt->zebraval; }
 
   /** for Camelot, the radius */
   inline short& radius(heptagon *alt) { return alt->emeraldval; }
@@ -175,6 +179,9 @@ namespace altmap {
   /** NOTE: do not use fieldval, because it would conflict with the map generation for hrmap_h3_rule and hrmap_rulegen */
   }
 #endif
+
+map<heptagon*, short> altmap::quotient_relspins;
+auto qclear = addHook(hooks_clearmemory, 200, [] { altmap::quotient_relspins.clear(); });
 
 void hrmap::extend_altmap(heptagon *h, int levs, bool link_cdata) {
   if(hybri) { PIU ( extend_altmap(h, levs, link_cdata) ); }
