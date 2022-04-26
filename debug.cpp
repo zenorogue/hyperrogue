@@ -915,6 +915,30 @@ int read_cheat_args() {
     for(int i=0; i<caflEND; i++) if(appears(mapeditor::canvasFloorName(i), args()))
       canvasfloor = i;
     }
+  else if(argis("-keys")) {
+    shift(); string s = args();
+    bool quote = false;
+    for(char c: s)
+      if(quote) {
+        quote = false;
+        if(c == '\\') dialog::queue_key(c), quote = false;
+        else if(c >= '1' && c <= '9') dialog::queue_key(SDLK_F1 + c - '1');
+        else if(c == 'e') dialog::queue_key(SDLK_ESCAPE);
+        else if(c == 'r') dialog::queue_key(SDLK_RETURN);
+        else if(c == 't') dialog::queue_key(SDLK_TAB);
+        else if(c == 'b') dialog::queue_key(SDLK_BACKSPACE);
+        else if(c == 'R') dialog::queue_key(SDLK_RIGHT);
+        else if(c == 'L') dialog::queue_key(SDLK_LEFT);
+        else if(c == 'U') dialog::queue_key(SDLK_UP);
+        else if(c == 'D') dialog::queue_key(SDLK_DOWN);
+        else if(c == 'H') dialog::queue_key(SDLK_HOME);
+        else if(c == 'E') dialog::queue_key(SDLK_END);
+        else if(c == 'P') dialog::queue_key(SDLK_PAGEUP);
+        else if(c == 'Q') dialog::queue_key(SDLK_PAGEDOWN);
+        }
+      else if(c == '\\') quote = true;
+      else dialog::queue_key(c);
+    }
   else if(argis("-hroll")) {
     shift();
     int i = argi();

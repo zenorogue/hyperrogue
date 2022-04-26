@@ -940,8 +940,9 @@ EX void mainloopiter() {
   for(auto d: dialog::key_queue) {
     println(hlog, "handling key ", d);
     handlekey(d, d);
+    dialog::key_queue.erase(dialog::key_queue.begin());
+    break;
     }
-  dialog::key_queue.clear();
       
   while(SDL_PollEvent(&ev)) handle_event(ev);
   fix_mouseh();
