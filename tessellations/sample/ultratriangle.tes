@@ -1,0 +1,11 @@
+## {k,inf} but with ultra-ideal vertices
+intslider(sides,3,3,MAX_EDGE)
+slider(multiplier, 1.1, 1, 2)
+h2.
+
+let(ia = ideal_angle(sides, multiplier))
+let(ie = ideal_edge(sides, multiplier))
+tile(0, [ia, ie, ia], *sides)
+
+conway("(0 0)")
+#repeat(0, sides)
