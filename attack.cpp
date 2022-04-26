@@ -302,8 +302,15 @@ EX void prespill(cell* c, eWall t, int rad, cell *from) {
   // block spill
   if(t == waTemporary) return;
   // cwt.at->item = itNone;
-  if(rad) for(cell *c2: adj_minefield_cells(c))
-    prespill(c2, t, rad-1, c);
+  if(rad) for(auto p: adj_minefield_cells_with_orientation(c)) {
+    prespill(p.first, conditional_flip_slime(p.second, t), rad-1, c);
+    }
+  }
+
+EX eWall conditional_flip_slime(bool flip, eWall t) {
+  if(flip && t == waFloorA) return waFloorB;
+  if(flip && t == waFloorB) return waFloorA;
+  return t;
   }
 
 EX void spillfix(cell* c, eWall t, int rad) {
@@ -311,8 +318,9 @@ EX void spillfix(cell* c, eWall t, int rad) {
     changes.ccell(c);
     c->wall = t;
     }
-  if(rad) for(cell *c2: adj_minefield_cells(c))
-    spillfix(c2, t, rad-1);
+  if(rad) for(auto p: adj_minefield_cells_with_orientation(c)) {
+    spillfix(p.first, conditional_flip_slime(p.second, t), rad-1);
+    }
   }
 
 EX void spill(cell* c, eWall t, int rad) {

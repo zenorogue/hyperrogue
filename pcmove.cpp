@@ -1112,7 +1112,7 @@ bool pcmove::perform_actual_move() {
     });
   if(c2->item && isAlch(c2)) {
     if(alchMayDuplicate(cwt.at->wall)) {
-      c2->wall = cwt.at->wall;
+      c2->wall = conditional_flip_slime(mi.mirror(), cwt.at->wall);
       c2->wparam = cwt.at->wparam;
       }
     else

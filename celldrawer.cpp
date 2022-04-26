@@ -502,6 +502,8 @@ void celldrawer::setcolors() {
       }
     
     case waFloorA: case waFloorB: // isAlch
+      wcol = winf[conditional_flip_slime(det(V.T) < 0, c->wall)].color;
+
       if(c->item && !(history::includeHistory && history::infindhistory.count(c)))
         fcol = wcol = iinf[c->item].color;
       else
@@ -2422,7 +2424,7 @@ void celldrawer::draw_monster_full() {
       moncol >>= 1;
 
     if(c->monst == moSlime) {
-      moncol = winf[c->wall].color;
+      moncol = winf[conditional_flip_slime(det(V.T) < 0, c->wall)].color;
       moncol |= (moncol>>1);
       }
     

@@ -89,9 +89,16 @@ EX bool strictlyAgainstGravity(cell *w, cell *from, bool revdir, flagtype flags)
   }
 
 EX bool anti_alchemy(cell *w, cell *from) {
-  bool alch1 = w->wall == waFloorA && from && from->wall == waFloorB && !w->item && !from->item;
-  alch1 |= w->wall == waFloorB && from && from->wall == waFloorA && !w->item && !from->item;
-  return alch1;
+  if(!from) return false;
+  if(!isAlchAny(w)) return false;
+  if(!isAlchAny(from)) return false;
+  if(w->item) return false;
+  if(from->item) return false;
+  if(!nonorientable) return w->wall != from->wall;
+  forCellIdEx(c1, i, w)
+    if(c1 == from && (w->c.mirror(i) ? w->wall != from->wall : w->wall == from->wall))
+      return false;
+  return true;
   }
 
 #if HDR
