@@ -646,6 +646,11 @@ EX void initConfig() {
   param_b(resizable, "resizable", true)
   -> editable("resizable window", 'r');
 
+  param_b(arb::apeirogon_consistent_coloring, "apeirogon_consistent_coloring", true)
+  -> editable("apeirogon_consistent_coloring", 'c');
+  param_b(arb::apeirogon_hide_grid_edges, "apeirogon_hide_grid_edges", true)
+  -> editable("apeirogon_hide_grid_edges", 'h');
+
   param_b(display_yasc_codes, "yasc", false)
   -> editable("YASC codes", 'Y')
   -> set_reaction([] { 

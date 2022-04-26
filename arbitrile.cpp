@@ -1010,6 +1010,9 @@ EX bool is_apeirogonal(cell *c) {
   return current_or_slided().shapes[id_of(c->master)].apeirogonal;
   }
 
+EX bool apeirogon_consistent_coloring = true;
+EX bool apeirogon_hide_grid_edges = true;
+
 EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int t1, int xdl) {
 
   auto& sh = c.shapes[t];

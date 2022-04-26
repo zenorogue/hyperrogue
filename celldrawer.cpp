@@ -924,7 +924,9 @@ void celldrawer::draw_grid() {
       gridline(V, get_warp_corner(c, t%c->type), get_warp_corner(c, (t+1)%c->type), gridcolor(c, c->move(t)), prec);
     }
   else {
-    for(int t=0; t<c->type; t++)
+    int maxt = c->type;
+    if(arb::apeirogon_hide_grid_edges && arb::is_apeirogonal(c)) maxt -= 2;
+    for(int t=0; t<maxt; t++)
       if(c->move(t) && (c->move(t) < c || isWarped(c->move(t)) || fake::split()))
       gridline(V, get_corner_position(c, t%c->type), get_corner_position(c, (t+1)%c->type), gridcolor(c, c->move(t)), prec);
     }
