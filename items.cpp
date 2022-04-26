@@ -82,6 +82,12 @@ EX bool in_lovasz() {
   return specialland == laMotion && bounded && ls::single() && !daily::on;
   }
 
+EX int threshold_met(int i) {
+  for(int a: {500, 250, 100, 50, 25, 10, 5})
+    if(i >= a) return a;
+  return 0;
+  }
+
 EX bool collectItem(cell *c2, cell *last, bool telekinesis IS(false)) {
 
   bool dopickup = true;
@@ -286,14 +292,21 @@ EX bool collectItem(cell *c2, cell *last, bool telekinesis IS(false)) {
     halloween::getTreat(c2);
     }   
   else {
+    int q = items[c2->item];
+    int q_el = items[itElemental];
+
     if(c2->item == itBarrow) 
       for(int i=0; i<c2->landparam; i++) gainItem(c2->item);
     else if(c2->item) gainItem(c2->item);
 
-    if(c2->item && (vid.bubbles_all || (among(items[c2->item], 5, 10, 25, 50, 100, 250, 500) && vid.bubbles_threshold))) {
+    if(c2->item && items[c2->item] > q && (vid.bubbles_all || (threshold_met(items[c2->item]) > threshold_met(q) && vid.bubbles_threshold))) {
       drawBubble(c2, iinf[c2->item].color, its(items[c2->item]), 0.5);
       }
     
+    if(c2->item && items[itElemental] > q_el && (vid.bubbles_all || (threshold_met(items[itElemental]) > threshold_met(q_el) && vid.bubbles_threshold))) {
+      drawBubble(c2, iinf[itElemental].color, its(items[itElemental]), 0.5);
+      }
+
     if(c2->item) {
       char ch = iinf[c2->item].glyph;
       if(ch == '*') playSound(c2, "pickup-gem");
@@ -565,6 +578,9 @@ EX void gainShard(cell *c2, const char *msg) {
   if(is_mirrorland(c2) && !peace::on) {
      collectMessage(c2, itShard);
      gainItem(itShard);
+     if(vid.bubbles_all || (threshold_met(items[itShard]) == items[itShard] && vid.bubbles_threshold)) {
+       drawBubble(c2, iinf[itShard].color, its(items[itShard]), 0.5);
+       }
      s += itemcounter(items[itShard]);
      }
   addMessage(s);
