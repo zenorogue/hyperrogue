@@ -3094,7 +3094,7 @@ EX namespace prairie {
     if(ls::any_chaos()) {
       c->LHU.fi.rval = 0;
       }    
-    else if(quotient) { // fix cylinder
+    else if(quotient && geometry != gFieldQuotient) { // fix cylinder
       c->LHU.fi.rval = 0;
       }
     else if(euclid) {
