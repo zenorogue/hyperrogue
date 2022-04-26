@@ -4621,3 +4621,38 @@ Rendering fixes:
 Gameplay fixes:
 - fixed the Orb of Safety not disappearing upon use in shmup+OSM
 - fixed the displayed unlock rule for Crossroads III in Casual
+
+2022-04-26 16:19 Update 12.0n:
+
+Gameplay:
+- Viziers were immune to some attacks in illogical circumstances -- this is no longer the case
+- mirrors and non-orientable spaces now flip Alchemist Lab colors
+- slime spills should now have deterministic effect when a cell is hit with slimes of both color simultaneously
+- fixed Zebra-patterned lands in Zebra quotient space
+- fixed Prairie in field quotient space
+
+Graphical/writing bugfixes:
+- the hyperboloid model of S2 (as an anolog of the hemisphere model of H2)
+- fixed hadoken missiles not displaying correctly in shmup 3D
+- fixed some floors scaled incorrectly when 'creature scale' is changed
+- floating bubbles now should work correctly for Mirror Shards, Elemental Gems and Ancient Jewelry
+- fixed the dice layering issue
+- paper model designer and spiral renderer could crash because they were implemented without OpenGL -- should be fixed now
+- "run away from the lava"
+- Hell is no longer "the Hell"
+
+Tes file format:
+- repeat can now be declared before conway or c
+- (unit)tile now accepts the last argument written as "*x", which copies the list x times and also automatically sets repeat (see regular.tes)
+- as a special case, "*inf" produces apeirogonal or pseudogonal tiles with hidden splitting edges (regular.tes, pseudogons.tes, fake-inf-polygon.tes)
+- arcmedge accepts "x:^q" which means that x can be repeated q times. Both x and q can be real, and x can be infinite (see regular.tes)
+- new geometry definition "c2(v)" which automatically selects geometry based on the sign of v -- also arcmcurv command which produces appropriate v (see regular.tes)
+- ideal vertices can now be with the bracket format (see inf.tes or ultratriangle.tes)
+- min, max, ifz (if zero) functions and inf, MAX_EDGE, MAX_VALENCE constants in the parser
+- integer sliders: change the integer values of sliders in the 'experiment with geometry' menu (contrary to real-value sliders, this resets the map) (see e.g. regular.tes)
+
+CLI options:
+- -animformula [formula] to change the timing of an animation
+- -canvasfloor [f] sets the canvas floor type
+- -keys [key list] simulates a list of keypresses
+
