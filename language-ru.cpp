@@ -6178,7 +6178,7 @@ S("would be destroyed in %the1", "будет уничтожено %abl1")
 S(" to go cold", " чтобы остыть")
 S("%The1 is destroyed by lava!", "%1 уничтожен%E1 лавой!")
 S("%The1 is killed by lava!", "%1 убит%E1 лавой!")
-S("Run away from the magma!", "Беги из лавы!")
+S("Run away from the lava!", "Беги из лавы!")
 
 // Terracotta Army
 //-----------------

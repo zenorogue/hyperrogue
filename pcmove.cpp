@@ -159,7 +159,7 @@ bool pcmove::checkNeedMove(bool checkonly, bool attacking) {
   else if(cwt.at->wall == waMagma && !markOrb(itOrbWinter) && !markOrb(itCurseWater) && !markOrb2(itOrbShield)) {
     if(markOrb2(itOrbAether)) return false;
     if(in_gravity_zone(cwt.at) && passable(cwt.at, cwt.at, P_ISPLAYER)) return false;
-    if(vmsg(miWALL)) addMessage(XLAT("Run away from the magma!"));
+    if(vmsg(miWALL)) addMessage(XLAT("Run away from the lava!"));
     }
   else if(cwt.at->wall == waChasm) {
     if(markOrb2(itOrbAether)) return false;
