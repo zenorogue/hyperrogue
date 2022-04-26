@@ -308,6 +308,7 @@ int main() {
 
   nothe.insert("R'Lyeh");
   nothe.insert("Camelot");
+  nothe.insert("Hell");
   plural.insert("Crossroads");
   plural.insert("Crossroads II");
   plural.insert("Crossroads III");
