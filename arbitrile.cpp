@@ -49,7 +49,7 @@ struct shape {
   int flags;
   /** list of vertices in the usual convention */
   vector<hyperpoint> vertices;
-  /** list of vertices in the tesfile convention */
+  /** list of angles in the tesfile convention */
   vector<ld> angles;
   /** list of edge lengths */
   vector<ld> edges;
@@ -307,16 +307,16 @@ void shape::build_from_angles_edges(bool is_comb) {
     hyperpoint v = gpushxto0(ctr) * inf_point;
     v /= v[2];
     vertices.push_back(v);
+    angles.push_back(0);
     angles.push_back(angles[0]/2);
     angles[0] /= 2;
-    angles.push_back(0);
     edges.push_back(0);
     edges.push_back(0);
     }
   n = isize(angles);
   for(int i=0; i<n; i++) {
-    bool left = angles[(i+1) % isize(vertices)] == 0;
-    bool right = angles[i] == 0;
+    bool left = angles[i] == 0;
+    bool right = angles[gmod(i-1, isize(vertices))] == 0;
     if(left && right) edges[i] = INFINITE_BOTH;
     else if(left) edges[i] = INFINITE_LEFT;
     else if(right) edges[i] = INFINITE_RIGHT;
@@ -416,6 +416,10 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
 
 EX bool do_unmirror = true;
 
+template<class T> void cycle(vector<T>& t) {
+  std::rotate(t.begin(), t.begin() + 2, t.end());
+  }
+
 /** \brief for tessellations which contain mirror rules, remove them by taking the orientable double cover */
 EX void unmirror(arbi_tiling& c) {
   auto& mirror_rules = c.mirror_rules;
@@ -435,9 +439,21 @@ EX void unmirror(arbi_tiling& c) {
     for(auto& v: sh[i].vertices) 
       v[1] = -v[1];
     reverse(sh[i].edges.begin(), sh[i].edges.end());
+    for(auto& e: sh[i].edges) {
+      if(e == INFINITE_LEFT) e = INFINITE_RIGHT;
+      else if(e == INFINITE_RIGHT) e = INFINITE_LEFT;
+      }
     reverse(sh[i].vertices.begin()+1, sh[i].vertices.end());
     reverse(sh[i].angles.begin(), sh[i].angles.end()-1);
     reverse(sh[i].connections.begin(), sh[i].connections.end());
+    if(sh[i].apeirogonal) {
+      cycle(sh[i].edges);
+      cycle(sh[i].vertices);
+      println(hlog, "angles before = ", sh[i].angles);
+      cycle(sh[i].angles);
+      println(hlog, "angles now = ", sh[i].angles);
+      cycle(sh[i].connections);
+      }
     }
 
   if(true) for(int i=0; i<s+s; i++) {
@@ -447,6 +463,8 @@ EX void unmirror(arbi_tiling& c) {
       if(mirr) {
         co.sid += s;
         co.eid = isize(sh[co.sid].angles) - 1 - co.eid;
+        if(sh[co.sid].apeirogonal)
+          co.eid = gmod(co.eid - 2, isize(sh[co.sid].angles));
         }
       }
     }
@@ -456,8 +474,8 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
   int tcl = -1;
 
   for(auto& sh: ac.shapes)
-    sh.cycle_length = isize(sh.vertices);
-  
+    sh.cycle_length = isize(sh.vertices) / sh.repeat_value;
+
   recompute:
   while(true) {
 
@@ -1035,7 +1053,7 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int t1, int xdl) {
   
   hyperpoint xvl = xsh.vertices[xdl];
   hyperpoint xvr = xsh.vertices[xdr];
-  hyperpoint xvm = get_midedge(sh.edges[xdl], xvl, xvr);
+  hyperpoint xvm = get_midedge(xsh.edges[xdl], xvl, xvr);
   
   transmatrix xrm = gpushxto0(xvm);
   
