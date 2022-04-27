@@ -44,7 +44,7 @@ void geometry_information::hpcpush(hyperpoint h) {
       hpc.push_back(starting_ideal);
       }
     else if(c > 0) {
-      hpc.push_back(normalize(h));
+      hpc.push_back(starting_ideal = starting_point = last_point = last_ideal = normalize(h));
       }
     }
   else {
