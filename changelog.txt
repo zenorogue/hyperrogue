@@ -4656,3 +4656,6 @@ CLI options:
 - -canvasfloor [f] sets the canvas floor type
 - -keys [key list] simulates a list of keypresses
 
+2022-04-28 00:03 Update 12.0o:
+
+Fixed some bugs in the new features for tes, and also fixed spherical geometry.

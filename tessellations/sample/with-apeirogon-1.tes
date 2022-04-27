@@ -1,0 +1,15 @@
+## A1 ((3,3,5,oo)+(3,5,5,5)), (3,5,3,oo)A, (3,5,5,5)A, (3,5,5,5)F
+h2.
+distunit(arcmedge(3,5,5,5))
+let(u3 = regangle(1, 3))
+let(u5 = regangle(1, 5))
+let(u0 = regangle(1, inf))
+unittile(u0,*inf)
+unittile(u3,u3,u3)
+unittile(u5,u5,u5,u5,u5)
+unittile(u5,u5,u5,u5,u5)
+unittile(u3,*3)
+unittile(u3,*3)
+repeat(4, 3)
+repeat(5, 3)
+conway("(0 0')(1' 0'')(2' 1'')(2'' 0''')(3'' 3''')(4'' 1''')(2''' 0@5)(4''' 0@4)")
