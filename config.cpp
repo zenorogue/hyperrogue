@@ -2985,6 +2985,9 @@ EX int read_color_args() {
   else if(argis("-fillmodel")) {
     PHASEFROM(2); shift(); modelcolor = argcolor(32);
     }
+  else if(argis("-apeirocolor")) {
+    PHASEFROM(2); shift(); patterns::apeirogonal_color = argcolor(32);
+    }
   else if(argis("-ring")) {
     PHASEFROM(2); shift(); ringcolor = argcolor(32);
     }

@@ -1752,7 +1752,9 @@ EX namespace patterns {
     }
   
   EX hookset<int(cell*)> hooks_generate_canvas;
-  
+
+  EX color_t apeirogonal_color = 0xFFFFFFFF;
+
   EX int jhole = 0;
   EX int jblock = 0;
   EX int rwalls = 50;
@@ -1787,6 +1789,7 @@ EX namespace patterns {
         if(arb::in()) return colortables['A'][shvid(c) + c->master->emeraldval * isize(arb::current.shapes)];
         return colortables['A'][shvid(c)];
       case 'B':
+        if(arb::is_apeirogonal(c)) return apeirogonal_color;
         return colortables['B'][c->type & 15];
       #if CAP_FIELD
       case 'C': {
