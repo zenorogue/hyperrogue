@@ -307,9 +307,10 @@ void shape::build_from_angles_edges(bool is_comb) {
     hyperpoint v = gpushxto0(ctr) * inf_point;
     v /= v[2];
     vertices.push_back(v);
+    auto b = angles.back() / 2;
+    angles.back() = b;
     angles.push_back(0);
-    angles.push_back(angles[0]/2);
-    angles[0] /= 2;
+    angles.push_back(b);
     edges.push_back(0);
     edges.push_back(0);
     }
@@ -470,6 +471,11 @@ EX void unmirror(arbi_tiling& c) {
     }
   }
 
+static void reduce_gcd(int& a, int b) {
+  int nv = abs(gcd(a, b));
+  a = abs(gcd(a, b));
+  }
+
 EX void compute_vertex_valence(arb::arbi_tiling& ac) {
   int tcl = -1;
 
@@ -490,14 +496,14 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
           println(hlog, "ik = ", tie(i,k), " co=", co, "co1=", co1, " cl=", sh.cycle_length);
           throw hr_parse_exception("connection error #2 in compute_vertex_valence");
           }
-        ac.shapes[co.sid].cycle_length = abs(gcd(ac.shapes[co.sid].cycle_length, co.eid - co1.eid));
+        reduce_gcd(ac.shapes[co.sid].cycle_length, co.eid - co1.eid);
         }
 
       for(int k=0; k<n; k++) {
         auto co = sh.connections[k];
         co = ac.shapes[co.sid].connections[co.eid];
         if(co.sid != i) throw hr_parse_exception("connection error in compute_vertex_valence");
-        sh.cycle_length = abs(gcd(sh.cycle_length, k-co.eid));
+        reduce_gcd(sh.cycle_length, k-co.eid);
         }
       if(debugflags & DF_GEOM) 
         println(hlog, "tile ", i, " cycle_length = ", sh.cycle_length, " / ", n);
@@ -550,7 +556,7 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
       if(total > 360*degree + 1e-6) throw hr_parse_exception("improper total in compute_stats");
       if(at.sid != i) throw hr_parse_exception("ended at wrong type determining vertex_valence");
       if((at.eid - k) % ac.shapes[i].cycle_length) {
-        ac.shapes[i].cycle_length = abs(gcd(ac.shapes[i].cycle_length, at.eid - k));
+        reduce_gcd(ac.shapes[i].cycle_length, at.eid - k);
         goto recompute;
         }
       sh.vertex_valence[k] = qty;
