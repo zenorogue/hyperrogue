@@ -2440,6 +2440,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     ->set_reaction([] {
       if(vid.highdetail > vid.middetail) vid.highdetail = vid.middetail;
       });
+  param_b(debug_tiles, "debug_tiles");
   addsaver(vid.gp_autoscale_heights, "3D Goldberg autoscaling", true);  
   });
 

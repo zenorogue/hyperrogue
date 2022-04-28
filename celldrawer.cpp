@@ -1930,6 +1930,8 @@ void celldrawer::check_rotations() {
     }
   }
 
+EX bool debug_tiles;
+
 void celldrawer::bookkeeping() {
   bool orig = false;
   if(!inmirrorcount) {
@@ -2020,6 +2022,15 @@ void celldrawer::draw_cellstat() {
   if(c->land == laMirrored || c->land == laMirrorWall2 || c->land == laMirrored2) {
     string label = its(c->landparam);
     queuestr(V, 1 * .2, label, 0xFFFFFFFF, 1);
+    }
+
+  if(debug_tiles) {
+    string label = its(shvid(c));
+    queuestr(V, .5, label, 0xFFFFFFFF, 1);
+    for(int i=0; i<c->type; i++) {
+      queuestr(V * rgpushxto0(currentmap->get_corner(c, i, 4)), .2, its(i), 0xFFFFFFFF, 1);
+      queuestr(V * rgpushxto0(mid(currentmap->get_corner(c, i, 4), currentmap->get_corner(c, i+1, 5))), .2, its(i), 0xFFFFFFFF, 1);
+      }
     }
     
   if(cmode & sm::TORUSCONFIG) {
