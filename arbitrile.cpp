@@ -1234,7 +1234,7 @@ struct hrmap_arbi : hrmap {
   hyperpoint get_corner(cell *c, int cid, ld cf) override {
     auto& sh = arb::current_or_slided().shapes[arb::id_of(c->master)];
     int id = gmod(cid, c->type);
-    if(sh.angles[id] <= 0)
+    if(sh.angles[gmod(id-1, c->type)] <= 0)
       return sh.vertices[id];
     return normalize(C0 + (sh.vertices[id] - C0) * 3 / cf);
     }
