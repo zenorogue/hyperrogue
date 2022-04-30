@@ -736,6 +736,7 @@ EX void mainloopiter() {
   
   mousepan = cmode & sm::NORMAL;
   if((cmode & (sm::DRAW | sm::MAP)) && !hiliteclick) mousepan = true;
+  if(cmode & sm::SHOWCURSOR) mousepan = false;
   mousepan = mousepan && mouseaiming(false) && mouseaim_sensitivity;
   if(mousepan != oldmousepan) {
     oldmousepan = mousepan;

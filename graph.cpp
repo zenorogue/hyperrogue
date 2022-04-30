@@ -5489,6 +5489,7 @@ namespace sm {
   static const int EXPANSION = (1<<16);
   static const int HEXEDIT = (1<<17);
   static const int VR_MENU = (1<<18); // always show the menu in VR
+  static const int SHOWCURSOR = (1<<19); // despite MAP/DRAW always show the cursor, no panning
   }
 #endif
 
