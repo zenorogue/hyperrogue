@@ -242,9 +242,9 @@ bool level::handle_planning(int sym, int uni) {
           };
         int next_id = 0;
         for(auto p: plan) {
-          check(p.at, next_id, 0);
           check(p.at + p.vel, next_id, 1);
           check(p.at - p.vel, next_id, -1);
+          check(p.at, next_id, 0);
           next_id++;
           }
         }
