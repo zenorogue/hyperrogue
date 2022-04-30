@@ -269,13 +269,19 @@ bool level::handle_planning(int sym, int uni) {
       return false;
       }
     case 'i': {
-      if(uni == '-') {        
+      if(uni == '-' && !holdmouse) {
         planpoint pt(C0, C0);
         pt.at = get_spline(closest_t);
-        pt.vel = (get_spline(closest_t + 1e-3) - pt.at) / 1e-3;
+        pt.vel = hpxy(0, 0);
         plan.insert(plan.begin() + int(ceil(closest_t)), pt);
+        move_id = int(ceil(closest_t));
+        holdmouse = true;
         clean_history_to(int(closest_t));
         return true;
+        }
+      else if(uni == '-' && holdmouse) {
+        plan[move_id].vel = mousept - plan[move_id].at;
+        clean_history_to(move_id - 1);
         }
       return false;
       }
