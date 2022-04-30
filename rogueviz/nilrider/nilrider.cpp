@@ -69,6 +69,8 @@ void run() {
     curlev->current = curlev->history[ttick];  
     curlev->current.centerview(curlev);
     }
+  if(planning_mode && !view_simulation)
+    cmode |= sm::SHOWCURSOR;
   gamescreen(0);
   if(planning_mode && !view_simulation) {
     curlev->draw_planning_screen();
