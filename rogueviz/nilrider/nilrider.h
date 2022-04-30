@@ -13,11 +13,17 @@ struct timestamp {
   ld circpos;       /**< controls the wheel graphics */
   ld slope;         /**< the current slope */
   ld t;             /**< planning spline parameter */
+
+  flagtype collected_triangles; /**< a bitset which shows which triangles are collected */
+  flagtype achievements;        /**< a bitset which shows which achievements are complete */
+  flagtype achflags;            /**< a bitset which marks failed conducts, etc. */
+
   bool tick(level*);/**< one tick of the simulation -- returns false if the unicycle has stopped or crashed */
   void centerview(level*);
   void draw_unilcycle(const shiftmatrix&);
   void draw_instruments(ld t);
   ld energy_in_squares();
+  bool collect(level*);
   };
 
 struct planpoint {
@@ -32,6 +38,12 @@ struct statue {
   transmatrix T;
   hpcshape *shape;
   color_t color;
+  };
+
+struct triangledata {
+  int x, y;
+  hyperpoint where;
+  array<color_t, 7> colors;
   };
 
 struct level {
@@ -59,6 +71,7 @@ struct level {
   hpcshape shCastle; /**< the 3D model of the 'castle' */
   
   vector<statue> statues;
+  vector<triangledata> triangles;
 
   /** the texture data used for the ground */
   texture::texture_data *unil_texture;
@@ -90,7 +103,7 @@ struct level {
 
   hyperpoint get_spline(ld t);
   hyperpoint mappt(ld x, ld y, int s);
-  ld safe_alt(hyperpoint h, ld mul = 1);
+  ld safe_alt(hyperpoint h, ld mul = 1, ld mulx = 1);
   void compute_plan_transform();
   bool handle_planning(int sym, int uni);
   };

@@ -223,6 +223,18 @@ void level::init() {
         hyperpoint h = mappt(x+.5, y+.5, 1);
         statues.emplace_back(statue{rgpushxto0(h), &shGeostatue, 0xFFFFFFFF});
         }
+
+      if(bmch == '*') {
+        hyperpoint h = mappt(x+.5, y+.5, 1);
+        h[2] += safe_alt(h, .5, .85);
+        triangledata d;
+        d.where = h;
+        d.x = x;
+        d.y = y;
+        for(int i=0; i<7; i++)
+          d.colors[i] = gradient(0xFFD500FF, 0xFF, 0, i, 8);
+        triangles.emplace_back(d);
+        }
       }
     cgi.finishshape();
     // println(hlog, shFloor[i].s, " to ", shFloor[i].e);
@@ -276,11 +288,11 @@ void level::init_plan() {
   timer = 0;
   }
 
-ld level::safe_alt(hyperpoint h, ld mul) {
+ld level::safe_alt(hyperpoint h, ld mul, ld mulx) {
   ld maxv = 0;
   for(int x: {-1, 0, 1})
   for(int y: {-1, 0, 1}) {
-    hyperpoint c = sym_to_heis(point31(x*.5*scale, y*.5*scale, 0));
+    hyperpoint c = sym_to_heis(point31(x*.5*scale*mulx, y*.5*scale*mulx, 0));
     hyperpoint j = rgpushxto0(h) * c;
     maxv = max(maxv, mul * (surface(j) - j[2]));
     }    
@@ -288,10 +300,17 @@ ld level::safe_alt(hyperpoint h, ld mul) {
   }
 
 void level::draw_level(const shiftmatrix& V) {
-  if(false) for(int i=0; i<6; i++) {
-    auto &poly = queuepoly(V * rgpushxto0(start.where) * cpush(2, 0.3 + 0.3 * sin(ticks / 500.)), shMini[i], 0xFFFF00FF);
-    poly.tinf = &floor_texture_vertices[cgi.shFloor.id];
-    ensure_vertex_number(*poly.tinf, poly.cnt);
+  int id = 0;
+  for(auto& t: triangles) {
+    bool gotit = current.collected_triangles & Flag(id);
+    id++;
+    if(!gotit) {
+      for(int i=0; i<6; i++) {
+        auto &poly = queuepoly(V * rgpushxto0(t.where) * cpush(2, abs(0.2 * sin(timer * 5))), shMini[i], t.colors[i]);
+        poly.tinf = &floor_texture_vertices[cgi.shFloor.id];
+        ensure_vertex_number(*poly.tinf, poly.cnt);
+        }
+      }
     }
 
   if(true) {
