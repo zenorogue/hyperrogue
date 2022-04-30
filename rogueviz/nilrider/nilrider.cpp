@@ -4,6 +4,7 @@
 #include "levels.cpp"
 #include "level.cpp"
 #include "planning.cpp"
+#include "solver.cpp"
 
 namespace nilrider {
 
@@ -267,6 +268,7 @@ void initialize() {
 
 auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] { planning_mode = true; }) + arg::add3("-viewsim", [] { view_simulation = true; })
   + arg::add3("-oqc", [] { on_quit = popScreenAll; })
+  + arg::add3("-nilsolve", [] { curlev->solve(); })
   + arg::add3("-fullsim", [] {
     /* for animations */
     popScreenAll();

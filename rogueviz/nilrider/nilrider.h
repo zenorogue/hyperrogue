@@ -106,6 +106,7 @@ struct level {
   ld safe_alt(hyperpoint h, ld mul = 1, ld mulx = 1);
   void compute_plan_transform();
   bool handle_planning(int sym, int uni);
+  void solve();
   };
 
 /** ticks per second */
