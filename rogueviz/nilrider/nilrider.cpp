@@ -5,6 +5,7 @@
 #include "level.cpp"
 #include "planning.cpp"
 #include "solver.cpp"
+#include "save.cpp"
 
 namespace nilrider {
 
@@ -254,13 +255,19 @@ void main_menu() {
     dialog::addItem("view the replay", 'v');
     dialog::add_action(toggle_replay);
   
-    dialog::addItem("save the replay", 'e');
+    dialog::addItem("save the replay", 's');
     dialog::add_action([] {
+      vector<int> ang;
+      for(auto& h: curlev->history) ang.push_back(heading_to_int(h.heading_angle));
+      curlev->manual_replays.emplace_back(manual_replay{new_replay_name(), std::move(ang)});
+      save();
       });
     }
   else {
     dialog::addItem("save this plan", 's');
     dialog::add_action([] {
+      curlev->plan_replays.emplace_back(plan_replay{new_replay_name(), curlev->plan});
+      save();
       });
     }
 

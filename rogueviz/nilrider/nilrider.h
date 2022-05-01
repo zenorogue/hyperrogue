@@ -33,6 +33,8 @@ struct planpoint {
   planpoint(hyperpoint a, hyperpoint v): at(a), vel(v) {};
   };
 
+using plan_t = vector<planpoint>;
+
 constexpr flagtype nrlPolar = Flag(1);
 
 struct statue {
@@ -45,6 +47,16 @@ struct triangledata {
   int x, y;
   hyperpoint where;
   array<color_t, 7> colors;
+  };
+
+struct manual_replay {
+  string name;
+  vector<int> headings;
+  };
+
+struct plan_replay {
+  string name;
+  plan_t plan;
   };
 
 struct level {
@@ -94,8 +106,11 @@ struct level {
 
   vector<timestamp> history;
   
+  vector<manual_replay> manual_replays;
+  vector<plan_replay> plan_replays;
+
   /** plan for the planning mode */
-  vector<planpoint> plan;
+  plan_t plan;
   void init_plan();
   bool simulate();
   void draw_planning_screen();
