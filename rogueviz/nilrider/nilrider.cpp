@@ -15,6 +15,8 @@ bool planning_mode = false;
 bool view_simulation = false;
 int simulation_start_tick;
 
+ld aimspeed_key_x = 1, aimspeed_key_y = 1, aimspeed_mouse_x = 1, aimspeed_mouse_y = 1;
+
 void frame() {
   if(planning_mode && !view_simulation) return;
 
@@ -28,19 +30,23 @@ void frame() {
 bool turn(int delta) {
   if(planning_mode && !view_simulation) return false;
   Uint8 *keystate = SDL_GetKeyState(NULL);
-  if(keystate[SDLK_RIGHT] && !paused) curlev->current.heading_angle -= delta / 1000.;
-  if(keystate[SDLK_LEFT] && !paused) curlev->current.heading_angle += delta / 1000.;
-  
-  if(keystate[SDLK_UP] && !paused) min_gfx_slope -= delta / 1000.;
-  if(keystate[SDLK_DOWN] && !paused) min_gfx_slope += delta / 1000.;
 
-  curlev->current.heading_angle += mouseaim_x;
-  min_gfx_slope += mouseaim_y;
+  ld mul = 1;
+  if(keystate[SDLK_LCTRL]) mul /= 5;
+  
+  if(keystate[SDLK_RIGHT] && !paused) curlev->current.heading_angle -= aimspeed_key_x * mul * delta / 1000.;
+  if(keystate[SDLK_LEFT] && !paused) curlev->current.heading_angle += aimspeed_key_x * mul * delta / 1000.;
+
+  if(keystate[SDLK_UP] && !paused) min_gfx_slope -= aimspeed_key_y * mul * delta / 1000.;
+  if(keystate[SDLK_DOWN] && !paused) min_gfx_slope += aimspeed_key_y * mul * delta / 1000.;
+
+  curlev->current.heading_angle -= aimspeed_mouse_x * mouseaim_x * mul;
+  min_gfx_slope += aimspeed_mouse_y * mouseaim_y * mul;
 
   #if CAP_VR
   if(vrhr::active()) {
-    curlev->current.heading_angle += vrhr::vraim_x * delta / 400;
-    min_gfx_slope -= vrhr::vraim_y * delta / 400;
+    curlev->current.heading_angle -= aimspeed_mouse_x * vrhr::vraim_x * mul * delta / 400;
+    min_gfx_slope -= aimspeed_mouse_y * vrhr::vraim_y * mul * delta / 400;
     }
   #endif
 
@@ -71,6 +77,8 @@ void run() {
     curlev->current.centerview(curlev);
     }
   if(planning_mode && !view_simulation)
+    cmode |= sm::SHOWCURSOR;
+  if(aimspeed_mouse_x == 0 && aimspeed_mouse_y == 0)
     cmode |= sm::SHOWCURSOR;
   gamescreen(0);
   if(planning_mode && !view_simulation) {
@@ -182,6 +190,10 @@ void pick_game() {
 
 void settings() {
   dialog::init(XLAT("settings"), 0xC0C0FFFF, 150, 100);
+  add_edit(aimspeed_key_x);
+  add_edit(aimspeed_key_y);
+  add_edit(aimspeed_mouse_x);
+  add_edit(aimspeed_mouse_y);
   dialog::addItem("RogueViz settings", 'r');
   dialog::add_key_action('r', [] {
     pushScreen(showSettings);
@@ -269,6 +281,16 @@ void initialize() {
 auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] { planning_mode = true; }) + arg::add3("-viewsim", [] { view_simulation = true; })
   + arg::add3("-oqc", [] { on_quit = popScreenAll; })
   + arg::add3("-nilsolve", [] { curlev->solve(); })
+  + addHook(hooks_configfile, 100, [] {
+    param_f(aimspeed_key_x, "nilrider_key_x")
+    ->editable(-5, 5, 0.1, "navigation sensitivity (keyboard)", "press Left/Right to navigate (lCtrl to fine-tune)", 'n');
+    param_f(aimspeed_key_y, "nilrider_key_y")
+    ->editable(-5, 5, 0.1, "camera sensitivity (keyboard)", "press Up/Down to set the camera angle (lCtrl to fine-tune)", 'c');
+    param_f(aimspeed_mouse_x, "nilrider_mouse_x")
+    ->editable(-5, 5, 0.1, "navigation sensitivity (mouse/vr)", "move mouse Left/Right to navigate (lCtrl to fine-tune)", 'N');
+    param_f(aimspeed_mouse_y, "nilrider_mouse_y")
+    ->editable(-5, 5, 0.1, "camera sensitivity (mouse/vr)", "move mouse Up/Down to set the camera angle (lCtrl to fine-tune)", 'C');
+    })
   + arg::add3("-fullsim", [] {
     /* for animations */
     popScreenAll();
