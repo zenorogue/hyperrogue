@@ -590,23 +590,8 @@ EX void add_connection(arbi_tiling& c, int ai, int as, int bi, int bs, int m) {
   while(bs != bs0);
   }
 
-EX void load(const string& fname, bool load_as_slided IS(false), bool keep_sliders IS(false)) {
-  fhstream f(fname, "rt");
-  if(!f.f) throw hr_parse_exception("file " + fname + " does not exist");
-  string s;
-  while(true) {
-    int c = fgetc(f.f);
-    if(c < 0) break;
-    s += c;
-    }
-  auto& c = load_as_slided ? slided : current;
+EX void set_defaults(arb::arbi_tiling& c, bool keep_sliders, string fname) {
   c.order++;
-  c.shapes.clear();
-  if(!keep_sliders) {
-    c.sliders.clear();
-    c.intsliders.clear();
-    }
-  int qsliders = 0, qintsliders = 0;
   c.name = unnamed;
   c.comment = "";
   c.filename = fname;
@@ -619,6 +604,25 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
   c.yendor_backsteps = 0;
   c.is_star = false;
   c.is_combinatorial = false;
+  c.shapes.clear();
+  if(!keep_sliders) {
+    c.sliders.clear();
+    c.intsliders.clear();
+    }
+  }
+
+EX void load(const string& fname, bool load_as_slided IS(false), bool keep_sliders IS(false)) {
+  fhstream f(fname, "rt");
+  if(!f.f) throw hr_parse_exception("file " + fname + " does not exist");
+  string s;
+  while(true) {
+    int c = fgetc(f.f);
+    if(c < 0) break;
+    s += c;
+    }
+  auto& c = load_as_slided ? slided : current;
+  set_defaults(c, keep_sliders, fname);
+  int qsliders = 0, qintsliders = 0;
   exp_parser ep;
   ep.s = s;
   ld angleunit = 1, distunit = 1;
