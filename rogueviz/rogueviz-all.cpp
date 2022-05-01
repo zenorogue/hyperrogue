@@ -63,6 +63,7 @@
 #include "gobot.cpp"
 #include "extra-projections.cpp"
 #include "nil-compass.cpp"
+#include "balloonsim.cpp"
 
 #include "som/kohonen.cpp"
 #include "som/embeddings.cpp"
