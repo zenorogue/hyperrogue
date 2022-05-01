@@ -472,7 +472,6 @@ EX void unmirror(arbi_tiling& c) {
   }
 
 static void reduce_gcd(int& a, int b) {
-  int nv = abs(gcd(a, b));
   a = abs(gcd(a, b));
   }
 
