@@ -34,7 +34,7 @@ void frame() {
 bool turn(int delta) {
   if(planning_mode && !view_replay) return false;
 
-  multi::handleInput(0);
+  multi::get_actions();
   auto& a = multi::actionspressed;
   auto& la = multi::lactionpressed;
 
