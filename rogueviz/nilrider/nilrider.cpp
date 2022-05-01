@@ -12,7 +12,7 @@ namespace nilrider {
 bool paused = false;
 
 bool planning_mode = false;
-bool view_simulation = false;
+bool view_replay = false;
 int simulation_start_tick;
 
 ld aimspeed_key_x = 1, aimspeed_key_y = 1, aimspeed_mouse_x = 1, aimspeed_mouse_y = 1;
@@ -22,7 +22,7 @@ vector<string> move_names = { "camera down", "move left", "camera up", "move rig
 int reversals = 0;
 
 void frame() {
-  if(planning_mode && !view_simulation) return;
+  if(planning_mode && !view_replay) return;
 
   shiftmatrix V = ggmatrix(cwt.at);  
   
@@ -32,7 +32,7 @@ void frame() {
   }
 
 bool turn(int delta) {
-  if(planning_mode && !view_simulation) return false;
+  if(planning_mode && !view_replay) return false;
 
   multi::handleInput(0);
   auto& a = multi::actionspressed;
@@ -78,7 +78,7 @@ bool turn(int delta) {
       }
     }
 
-  if(!paused && !view_simulation && !backing) for(int i=0; i<delta; i++) {
+  if(!paused && !view_replay && !backing) for(int i=0; i<delta; i++) {
     curlev->history.push_back(curlev->current);
     bool b = curlev->current.tick(curlev);
     if(b) timer += 1. / tps;
@@ -94,22 +94,33 @@ void main_menu();
 #define PSEUDOKEY_PAUSE 2511
 #define PSEUDOKEY_SIM 2512
 
+void toggle_replay() {
+  view_replay = !view_replay;
+  paused = false;
+  simulation_start_tick = ticks;
+  if(!view_replay && !planning_mode) {
+    paused = true;
+    curlev->current = curlev->history.back();
+    timer = isize(curlev->history) * 1. / tps;
+    }
+  }
+
 void run() {
   cmode = sm::MAP;
   clearMessages();
   dialog::init();
-  if(view_simulation && !paused) {
+  if(view_replay && !paused) {
     int ttick = gmod(ticks - simulation_start_tick, isize(curlev->history));
     timer = ttick * 1. / tps;
     curlev->current = curlev->history[ttick];  
     curlev->current.centerview(curlev);
     }
-  if(planning_mode && !view_simulation)
+  if(planning_mode && !view_replay)
     cmode |= sm::SHOWCURSOR;
   if(aimspeed_mouse_x == 0 && aimspeed_mouse_y == 0)
     cmode |= sm::SHOWCURSOR;
   gamescreen(0);
-  if(planning_mode && !view_simulation) {
+  if(planning_mode && !view_replay) {
     curlev->draw_planning_screen();
     if(!holdmouse) {
       auto t0 = SDL_GetTicks();
@@ -131,20 +142,14 @@ void run() {
     x += textwidth(vid.fsize, s) + vid.fsize;
     };
   
-  if(planning_mode && !view_simulation) {
+  if(planning_mode && !view_replay) {
     for(auto& b: buttons) show_button(b.first, b.second, planmode == b.first ? 0xFFD500 : dialog::dialogcolor);
     show_button(PSEUDOKEY_SIM, "simulation");
     }
   
-  bool pause_av = false;
-  if(planning_mode && view_simulation) {
-    show_button(PSEUDOKEY_SIM, "return");
-    pause_av = true;
-    show_button(PSEUDOKEY_PAUSE, "pause", paused ? 0xFF0000 : dialog::dialogcolor);
-    }
-  
-  if(!planning_mode) {
-    pause_av = true;
+  bool pause_av = view_replay || !planning_mode;
+  if(pause_av) {
+    show_button(PSEUDOKEY_SIM, planning_mode ? "return" : "replay", (view_replay  && !planning_mode) ? 0xFF0000 : dialog::dialogcolor);
     show_button(PSEUDOKEY_PAUSE, "pause", paused ? 0xFF0000 : dialog::dialogcolor);
     }
   
@@ -156,17 +161,13 @@ void run() {
     });
   if(pause_av) dialog::add_key_action(PSEUDOKEY_PAUSE, [] {
     paused = !paused;
-    if(view_simulation && !paused) 
+    if(view_replay && !paused)
       simulation_start_tick = ticks - timer * tps;
     });
   dialog::add_key_action('-', [] {
     paused = false;
     });
-  if(planning_mode) dialog::add_key_action(PSEUDOKEY_SIM, [] {
-    view_simulation = !view_simulation;
-    paused = false;
-    simulation_start_tick = ticks;
-    });
+  dialog::add_key_action(PSEUDOKEY_SIM, toggle_replay);
   dialog::display();
 
   char* t = multi::scfg.keyaction;
@@ -179,7 +180,7 @@ void run() {
   
   keyhandler = [] (int sym, int uni) {
     if(paused) handlePanning(sym, uni);
-    if(planning_mode && !view_simulation && curlev->handle_planning(sym, uni)) return;
+    if(planning_mode && !view_replay && curlev->handle_planning(sym, uni)) return;
     dialog::handleNavigation(sym, uni);
     };
   }
@@ -250,8 +251,7 @@ void main_menu() {
       });
   
     dialog::addItem("view the replay", 'v');
-    dialog::add_action([] {
-      });
+    dialog::add_action(toggle_replay);
   
     dialog::addItem("save the replay", 'e');
     dialog::add_action([] {
@@ -321,7 +321,7 @@ void initialize() {
   pushScreen(run);
   }
 
-auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] { planning_mode = true; }) + arg::add3("-viewsim", [] { view_simulation = true; })
+auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] { planning_mode = true; }) + arg::add3("-viewsim", [] { view_replay = true; })
   + arg::add3("-oqc", [] { on_quit = popScreenAll; })
   + arg::add3("-nilsolve", [] { curlev->solve(); })
   + addHook(hooks_configfile, 100, [] {
