@@ -24,6 +24,7 @@ struct timestamp {
   void draw_instruments(ld t);
   ld energy_in_squares();
   bool collect(level*);
+  void be_consistent();
   };
 
 struct planpoint {

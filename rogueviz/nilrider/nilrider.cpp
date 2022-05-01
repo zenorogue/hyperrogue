@@ -80,6 +80,7 @@ bool turn(int delta) {
 
   if(!paused && !view_replay && !backing) for(int i=0; i<delta; i++) {
     curlev->history.push_back(curlev->current);
+    curlev->current.be_consistent();
     bool b = curlev->current.tick(curlev);
     if(b) timer += 1. / tps;
     else curlev->history.pop_back();

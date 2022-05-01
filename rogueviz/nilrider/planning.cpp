@@ -52,6 +52,7 @@ bool level::simulate() {
   at.heading_angle = atan2(h[1] - at.where[1], h[0] - at.where[0]);
   history.back() = at;
   
+  at.be_consistent();
   if(!at.tick(this)) return false;
   at.t = goal_t;
   history.push_back(at);

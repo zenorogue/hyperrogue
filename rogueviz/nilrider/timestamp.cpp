@@ -89,6 +89,26 @@ bool timestamp::collect(level *lev) {
   return true;
   }
 
+/* convert heading to integral units, to make saved replays consistent */
+
+constexpr ld h_units = 360 * 60 * 60;
+constexpr ld h_mul = h_units / 2 / M_PI;
+
+int heading_to_int(ld a) {
+  a = a * h_mul;
+  int ai = floor(a + .5);
+  ai = gmod(ai, h_units);
+  return ai;
+  }
+
+ld int_to_heading(ld a) {
+  return a / h_mul;
+  }
+
+void timestamp::be_consistent() {
+  heading_angle = int_to_heading(heading_to_int(heading_angle));
+  }
+
 bool timestamp::tick(level *lev) {
   
   if(!collect(lev)) return false;
