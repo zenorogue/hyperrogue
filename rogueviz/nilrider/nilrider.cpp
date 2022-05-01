@@ -223,6 +223,9 @@ void settings() {
   add_edit(aimspeed_key_y);
   add_edit(aimspeed_mouse_x);
   add_edit(aimspeed_mouse_y);
+  add_edit(whrad);
+  add_edit(whdist);
+  add_edit(min_gfx_slope);
   dialog::addItem("configure keys", 'k');
   dialog::add_action_push(multi::get_key_configurer(1, move_names, "Nilrider keys"));
   dialog::addItem("RogueViz settings", 'r');
@@ -341,6 +344,12 @@ auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] 
     ->editable(-5, 5, 0.1, "navigation sensitivity (mouse/vr)", "move mouse Left/Right to navigate (lCtrl to fine-tune)", 'N');
     param_f(aimspeed_mouse_y, "nilrider_mouse_y")
     ->editable(-5, 5, 0.1, "camera sensitivity (mouse/vr)", "move mouse Up/Down to set the camera angle (lCtrl to fine-tune)", 'C');
+    param_f(whrad, "nilrider_radius")
+    ->editable(0, 0.5, 0.01, "wheel radius", "note: this parameter is just visual, it does not affect the physics in any way", 'w');
+    param_f(whdist, "nilrider_dist")
+    ->editable(0, 5, 0.05, "camera distance", "how far is the unicycle from the camera", 'd');
+    param_f(min_gfx_slope, "min_gfx_slope")
+    ->editable(-90*degree, 90*degree, degree, "min camera slope", "affected by up/down", 'm');
     })
   + arg::add3("-fullsim", [] {
     /* for animations */
