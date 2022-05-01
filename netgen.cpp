@@ -686,6 +686,7 @@ EX namespace netgen {
       dynamicval<bool> dfs(vid.change_fullscr, true);
       dynamicval<bool> dcf(vid.want_fullscreen, false);
       dynamicval<eModel> m(pmodel, mdPixel);
+      request_resolution_change = true;
 
       apply_screen_settings();
 

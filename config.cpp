@@ -759,27 +759,27 @@ EX void initConfig() {
   
   param_i(vid.fullscreen_x, "fullscreen_x", 1280)
   -> editable(640, 3840, 640, "fullscreen resolution to use (X)", "", 'x')
-  -> set_sets([] { dialog::bound_low(640); });
+  -> set_sets([] { dialog::bound_low(640); dialog::reaction_final = do_request_resolution_change; });
   
   param_i(vid.fullscreen_y, "fullscreen_y", 1024)
   -> editable(480, 2160, 480, "fullscreen resolution to use (Y)", "", 'x')
-  -> set_sets([] { dialog::bound_low(480); });
+  -> set_sets([] { dialog::bound_low(480); dialog::reaction_final = do_request_resolution_change; });
 
   param_i(vid.window_x, "window_x", 1280)
   -> editable(160, 3840, 160, "window resolution to use (X)", "", 'x')
-  -> set_sets([] { dialog::bound_low(160); });
+  -> set_sets([] { dialog::bound_low(160); dialog::reaction_final = do_request_resolution_change; });
 
   param_i(vid.window_y, "window_y", 1024)
   -> editable(120, 2160, 120, "window resolution to use (Y)", "", 'x')
-  -> set_sets([] { dialog::bound_low(120); });
+  -> set_sets([] { dialog::bound_low(120); dialog::reaction_final = do_request_resolution_change; });
 
   param_f(vid.window_rel_x, "window_rel_x", .9)
   -> editable(.1, 1, .1, "screen size percentage to use (X)", "", 'x')
-  -> set_sets([] { dialog::bound_low(.1); });
+  -> set_sets([] { dialog::bound_low(.1); dialog::reaction_final = do_request_resolution_change; });
 
   param_f(vid.window_rel_y, "window_rel_y", .9)
   -> editable(.1, 1, .1, "screen size percentage to use (Y)", "", 'x')
-  -> set_sets([] { dialog::bound_low(.1); });
+  -> set_sets([] { dialog::bound_low(.1); dialog::reaction_final = do_request_resolution_change; });
 
   param_b(vid.darkhepta, "mark heptagons", false);
   

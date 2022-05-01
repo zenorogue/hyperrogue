@@ -1104,6 +1104,10 @@ EX void compute_fsize() {
 
 EX bool graphics_on;
 
+EX bool request_resolution_change;
+
+EX void do_request_resolution_change() { request_resolution_change = true; }
+
 EX bool want_vsync() {
   if(vrhr::active())
     return false;
@@ -1117,7 +1121,7 @@ EX bool need_to_reopen_window() {
     return true;
   if(want_vsync() != vid.current_vsync)
     return true;
-  if(vid.usingGL && make_pair(vid.xres, vid.yres) != get_requested_resolution())
+  if(request_resolution_change)
     return true;
   return false;
   }
