@@ -17,6 +17,10 @@ int simulation_start_tick;
 
 ld aimspeed_key_x = 1, aimspeed_key_y = 1, aimspeed_mouse_x = 1, aimspeed_mouse_y = 1;
 
+vector<string> move_names = { "camera down", "move left", "camera up", "move right", "fine control", "pause", "reverse time", "view simulation", "menu" };
+
+int reversals = 0;
+
 void frame() {
   if(planning_mode && !view_simulation) return;
 
@@ -29,16 +33,17 @@ void frame() {
 
 bool turn(int delta) {
   if(planning_mode && !view_simulation) return false;
-  Uint8 *keystate = SDL_GetKeyState(NULL);
+
+  multi::handleInput(0);
+  auto& a = multi::actionspressed;
+  auto& la = multi::lactionpressed;
 
   ld mul = 1;
-  if(keystate[SDLK_LCTRL]) mul /= 5;
-  
-  if(keystate[SDLK_RIGHT] && !paused) curlev->current.heading_angle -= aimspeed_key_x * mul * delta / 1000.;
-  if(keystate[SDLK_LEFT] && !paused) curlev->current.heading_angle += aimspeed_key_x * mul * delta / 1000.;
-
-  if(keystate[SDLK_UP] && !paused) min_gfx_slope -= aimspeed_key_y * mul * delta / 1000.;
-  if(keystate[SDLK_DOWN] && !paused) min_gfx_slope += aimspeed_key_y * mul * delta / 1000.;
+  if(a[16+4]) mul /= 5;
+  if(a[16+3] && !paused) curlev->current.heading_angle -= aimspeed_key_x * mul * delta / 1000.;
+  if(a[16+1] && !paused) curlev->current.heading_angle += aimspeed_key_x * mul * delta / 1000.;
+  if(a[16+2] && !paused) min_gfx_slope -= aimspeed_key_y * mul * delta / 1000.;
+  if(a[16+0] && !paused) min_gfx_slope += aimspeed_key_y * mul * delta / 1000.;
 
   curlev->current.heading_angle -= aimspeed_mouse_x * mouseaim_x * mul;
   min_gfx_slope += aimspeed_mouse_y * mouseaim_y * mul;
@@ -53,7 +58,27 @@ bool turn(int delta) {
   if(min_gfx_slope < -90*degree) min_gfx_slope = -90*degree;
   if(min_gfx_slope > +90*degree) min_gfx_slope = +90*degree;
 
-  if(!paused && !view_simulation) for(int i=0; i<delta; i++) {    
+  bool backing = false;
+
+  if(a[16+6]) {
+    if(!la[16+6]) reversals++;
+    if(planning_mode)
+      simulation_start_tick += 2*delta;
+    else for(int i=0; i<delta; i++) {
+      if(isize(curlev->history) > 1) {
+        backing = true;
+        curlev->history.pop_back();
+        curlev->current = curlev->history.back();
+        timer = isize(curlev->history) * 1. / tps;
+        }
+      else {
+        reversals = 0;
+        timer = 0;
+        }
+      }
+    }
+
+  if(!paused && !view_simulation && !backing) for(int i=0; i<delta; i++) {
     curlev->history.push_back(curlev->current);
     bool b = curlev->current.tick(curlev);
     if(b) timer += 1. / tps;
@@ -65,6 +90,9 @@ bool turn(int delta) {
   }
 
 void main_menu();
+
+#define PSEUDOKEY_PAUSE 2511
+#define PSEUDOKEY_SIM 2512
 
 void run() {
   cmode = sm::MAP;
@@ -97,7 +125,7 @@ void run() {
     }
   
   int x = vid.fsize;
-  auto show_button = [&] (char c, string s, color_t col = dialog::dialogcolor) {
+  auto show_button = [&] (int c, string s, color_t col = dialog::dialogcolor) {
     if(displayButtonS(x, vid.yres - vid.fsize, s, col, 0, vid.fsize))
       getcstat = c;
     x += textwidth(vid.fsize, s) + vid.fsize;
@@ -105,25 +133,28 @@ void run() {
   
   if(planning_mode && !view_simulation) {
     for(auto& b: buttons) show_button(b.first, b.second, planmode == b.first ? 0xFFD500 : dialog::dialogcolor);
-    show_button('s', "simulation");
+    show_button(PSEUDOKEY_SIM, "simulation");
     }
   
+  bool pause_av = false;
   if(planning_mode && view_simulation) {
-    show_button('s', "return");
-    show_button('p', "pause", paused ? 0xFF0000 : dialog::dialogcolor);
+    show_button(PSEUDOKEY_SIM, "return");
+    pause_av = true;
+    show_button(PSEUDOKEY_PAUSE, "pause", paused ? 0xFF0000 : dialog::dialogcolor);
     }
   
   if(!planning_mode) {
-    show_button('p', "pause", paused ? 0xFF0000 : dialog::dialogcolor);
+    pause_av = true;
+    show_button(PSEUDOKEY_PAUSE, "pause", paused ? 0xFF0000 : dialog::dialogcolor);
     }
   
-  show_button('v', "menu");  
+  show_button(PSEUDOKEY_MENU, "menu");
 
-  dialog::add_key_action('v', [] { 
+  dialog::add_key_action(PSEUDOKEY_MENU, [] {
     paused = true;
     pushScreen(main_menu);
     });
-  dialog::add_key_action('p', [] {
+  if(pause_av) dialog::add_key_action(PSEUDOKEY_PAUSE, [] {
     paused = !paused;
     if(view_simulation && !paused) 
       simulation_start_tick = ticks - timer * tps;
@@ -131,21 +162,20 @@ void run() {
   dialog::add_key_action('-', [] {
     paused = false;
     });
-  dialog::add_key_action('b', [] {
-    if(planning_mode)
-      simulation_start_tick += 500;
-    else {
-      for(int i=0; i<500; i++) if(!curlev->history.empty()) curlev->history.pop_back();
-      curlev->current = curlev->history.back();
-      timer = isize(curlev->history) * 1. / tps;
-      }
-    });
-  if(planning_mode) dialog::add_key_action('s', [] {
+  if(planning_mode) dialog::add_key_action(PSEUDOKEY_SIM, [] {
     view_simulation = !view_simulation;
     paused = false;
     simulation_start_tick = ticks;
     });
   dialog::display();
+
+  char* t = multi::scfg.keyaction;
+  for(int i=1; i<512; i++) {
+    auto& ka = dialog::key_actions;
+    if(t[i] == 16+5) ka[i] = ka[PSEUDOKEY_PAUSE];
+    if(t[i] == 16+7) ka[i] = ka[PSEUDOKEY_SIM];
+    if(t[i] == 16+8) ka[i] = ka[PSEUDOKEY_MENU];
+    }
   
   keyhandler = [] (int sym, int uni) {
     if(paused) handlePanning(sym, uni);
@@ -194,6 +224,8 @@ void settings() {
   add_edit(aimspeed_key_y);
   add_edit(aimspeed_mouse_x);
   add_edit(aimspeed_mouse_y);
+  dialog::addItem("configure keys", 'k');
+  dialog::add_action_push(multi::get_key_configurer(1, move_names, "Nilrider keys"));
   dialog::addItem("RogueViz settings", 'r');
   dialog::add_key_action('r', [] {
     pushScreen(showSettings);
@@ -251,7 +283,30 @@ void main_menu() {
 
 bool on;
 
+void change_default_key(int key, int val) {
+  char* t = multi::scfg.keyaction;
+  t[key] = val;
+  set_saver_default(t[key]);
+  }
+
+void nilrider_keys() {
+  for(int i=0; i<512; i++)
+    if(multi::scfg.keyaction[i] >= 16 && multi::scfg.keyaction[i] < 32)
+      change_default_key(i, 0);
+  change_default_key('s', 16 + 0);
+  change_default_key('a', 16 + 1);
+  change_default_key('w', 16 + 2);
+  change_default_key('d', 16 + 3);
+  change_default_key(SDLK_LCTRL, 16 + 4);
+  change_default_key('p', 16 + 5);
+  change_default_key('b', 16 + 6);
+  change_default_key('r', 16 + 7);
+  change_default_key('v', 16 + 8);
+  }
+
 void initialize() {
+
+  nilrider_keys();
 
   check_cgi();
   cgi.prepare_shapes();
