@@ -1169,7 +1169,9 @@ EX string cgi_string() {
   #endif
 
   if(arb::in()) V("ARB", its(arb::current.order));
-  
+
+  if(arb::in()) V("AP", its(arb::apeirogon_simplified_display));
+
   if(cryst) V("CRYSTAL", its(ginf[gCrystal].sides) + its(ginf[gCrystal].vertex));
   
   if(bt::in() || GDIM == 3) V("WQ", its(vid.texture_step));

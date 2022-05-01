@@ -353,8 +353,17 @@ namespace irr { void generate_floorshapes(); }
 void geometry_information::finish_apeirogon(hyperpoint center) {
   last->flags |= POLY_APEIROGONAL;
   last->she = isize(hpc);
-  hpcpush(center);
-  hpcpush(starting_point);
+  if(arb::apeirogon_simplified_display) {
+    hyperpoint p = towards_inf(last_point, center, ideal_limit);
+    hyperpoint q = towards_inf(starting_point, center, ideal_limit);
+    hpc.push_back(p);
+    hpc_connect_ideal(p, q);
+    hpc.push_back(q);
+    }
+  else {
+    hpcpush(center);
+    hpcpush(starting_point);
+    }
   }
 
 // !siid equals pseudohept(c)

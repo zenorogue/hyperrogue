@@ -650,6 +650,8 @@ EX void initConfig() {
   -> editable("apeirogon_consistent_coloring", 'c');
   param_b(arb::apeirogon_hide_grid_edges, "apeirogon_hide_grid_edges", true)
   -> editable("apeirogon_hide_grid_edges", 'h');
+  param_b(arb::apeirogon_simplified_display, "apeirogon_simplified_display", false)
+  -> editable("simplified display of apeirogons", 'f');
 
   param_b(display_yasc_codes, "yasc", false)
   -> editable("YASC codes", 'Y')

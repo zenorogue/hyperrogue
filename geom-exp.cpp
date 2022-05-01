@@ -980,6 +980,7 @@ EX void showEuclideanMenu() {
     dialog::addItem(XLAT("tessellation sliders"), '4');
     dialog::add_action_push(arb::set_sliders);
     }
+  if(arb::is_apeirogonal()) add_edit(arb::apeirogon_simplified_display);
   
   #if MAXMDIM >= 4
   if(cgflags & qULTRA) {
