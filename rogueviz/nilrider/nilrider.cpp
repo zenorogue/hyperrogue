@@ -184,9 +184,6 @@ void run() {
     };
   }
 
-int speedlimit = 0;
-vector<string> speedlimit_names = {"none", "yellow", "green", "full"};
-
 void pick_level() {
   clearMessages();
   dialog::init(XLAT("select the track"), 0xC0C0FFFF, 150, 100);
@@ -211,7 +208,6 @@ void pick_game() {
   dialog::add_action_push(pick_level);
   dialog::addInfo(curlev->longdesc);
   dialog::addBreak(100);
-  add_edit(speedlimit);
   add_edit(planning_mode);
   dialog::addBreak(100);
   dialog::addBack();
@@ -317,14 +313,6 @@ void initialize() {
 
   param_enum(planning_mode, "nil_planning", "nil_planning", false)
     -> editable({{"manual", "control the unicycle manually"}, {"planning", "try to plan the optimal route!"}}, "game mode", 'p');
-
-  param_enum(speedlimit, "nil_speedlimit", "nil_speedlimit", 0)
-    -> editable({
-      {"no limit", "reach the goals as fast as you wan"}, 
-      {"yellow", "your speed must be in the yellow zone to collect"},
-      {"green", "your speed must be in the green zone to collect"},
-      {"full", "you must fully stop to collect"}
-      }, "speed limit", 's');
 
   rv_hook(hooks_frame, 100, frame);
   rv_hook(shmup::hooks_turn, 100, turn);
