@@ -751,10 +751,7 @@ EX void initConfig() {
   #endif
   }
 
-EX void handleInput(int delta) {
-#if CAP_SDL
-  double d = delta / 500.;
-
+EX void get_actions() {
   const Uint8 *keystate = SDL12_GetKeyState(NULL);
 
   for(int i=0; i<NUMACT; i++) 
@@ -790,7 +787,15 @@ EX void handleInput(int delta) {
       }
     }
 #endif
+  }
 
+EX void handleInput(int delta) {
+#if CAP_SDL
+  double d = delta / 500.;
+
+  get_actions();
+
+  const Uint8 *keystate = SDL12_GetKeyState(NULL);
   if(keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL]) d /= 5;
   
   double panx = 
