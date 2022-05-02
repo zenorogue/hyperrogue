@@ -237,6 +237,57 @@ void settings() {
   dialog::addBack();
   }
 
+bool deleting = false;
+
+template<class T, class U> void replays_of_type(vector<T>& v, const U& loader) {
+  int i = 0;
+  for(auto& r: v) {
+    dialog::addItem(r.name, 'a');
+    dialog::add_action([&v, i, loader] {
+      if(deleting) {
+        dialog::push_confirm_dialog(
+          [&, i] { v.erase(v.begin() + i); save(); },
+          "Are you sure you want to delete '" + v[i].name + "'?"
+          );
+        }
+      else loader(v[i]);
+      });
+    i++;
+    }
+  }
+
+void replays() {
+  dialog::init(XLAT(planning_mode ? "saved plans" : "replays"), 0xC0C0FFFF, 150, 100);
+  if(!planning_mode) replays_of_type(curlev->manual_replays, [] (manual_replay& r) {
+    view_replay = false;
+    curlev->history.clear();
+    auto& current = curlev->current;
+    current = curlev->start;
+    for(auto h: r.headings) {
+      current.heading_angle = int_to_heading(h);
+      curlev->history.push_back(current);
+      if(!current.tick(curlev)) break;
+      }
+    toggle_replay();
+    popScreen();
+    });
+  if(planning_mode) replays_of_type(curlev->plan_replays, [] (plan_replay& r) {
+    view_replay = false;
+    curlev->history.clear();
+    curlev->plan = r.plan;
+    popScreen();
+    });
+  dialog::addBoolItem_action("delete", deleting, 'X');
+  dialog::addBack();
+  dialog::display();
+  }
+
+void pop_and_push_replays() {
+  deleting = false;
+  popScreen();
+  pushScreen(replays);
+  }
+
 reaction_t on_quit = [] { exit(0); }; 
 
 void main_menu() {
@@ -265,6 +316,9 @@ void main_menu() {
       curlev->manual_replays.emplace_back(manual_replay{new_replay_name(), std::move(ang)});
       save();
       });
+
+    dialog::addItem("load a replay", 'l');
+    dialog::add_action(pop_and_push_replays);
     }
   else {
     dialog::addItem("save this plan", 's');
@@ -272,6 +326,9 @@ void main_menu() {
       curlev->plan_replays.emplace_back(plan_replay{new_replay_name(), curlev->plan});
       save();
       });
+
+    dialog::addItem("load a plan", 'l');
+    dialog::add_action(pop_and_push_replays);
     }
 
   dialog::addItem("change track or game settings", 't');
@@ -312,7 +369,7 @@ void nilrider_keys() {
   }
 
 void initialize() {
-
+  load();
   nilrider_keys();
 
   check_cgi();
