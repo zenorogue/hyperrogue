@@ -338,7 +338,7 @@ level geodesical4(
   "ffffffffffffffff",
   "gggggggggggggggg",
   "ggGggggggggGgggg",
-  "+--------------+",
+  "+--------------*",
   "gggggGggggGggggg",
   "gggGgggggGgggggg",
   "ffffffffffffffff",
