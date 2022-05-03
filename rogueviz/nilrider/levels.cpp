@@ -294,14 +294,18 @@ level rotplane(
 level longtrack(
   "A Long Track", 'l', 0,
   "The main street is horizontal, as well as the lines orthogonal to it.",
-  0*dft_block, +2.5*dft_block, 64*dft_block, -1.5*dft_block,
+  0*dft_block, +6.5*dft_block, 64*dft_block, -1.5*dft_block,
   {
+  "Ggggggggr!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+  "Ggggggggr!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+  "Ggggggggr!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!x!",
+  "Ggggxgggr!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
   "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
   "ggggggggrggggggrggggggggrGggggggggGGggggGGGgggggGGGGggggggggggGG",
   "g+------------------------------------------------------------*G",
   "gggggfffffggggggggggggggggggggggggggggggggggggggggggggggggggggGG"
   },
-  0, 1,
+  0, 5,
   long_x
   );
 
