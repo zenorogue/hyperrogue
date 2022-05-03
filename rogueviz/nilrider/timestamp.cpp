@@ -152,6 +152,8 @@ void timestamp::centerview(level *lev) {
       hyperpoint p = inverse(View) * C0;
       ld room = p[2] - lev->surface(p);
       if(room < .1 * lev->scale) return true;
+      for(hyperpoint h: {point3(0,0,0), point3(.001,0,0), point3(-.001,0,0), point3(0,-0.001,0), point3(0,0.001,0)})
+        if(lev->mapchar(p+h) == 'r') return true;
       }
     return false;
     });
