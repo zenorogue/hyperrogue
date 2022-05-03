@@ -245,6 +245,12 @@ void level::init() {
   }
 
 xy_float level::get_xy_f(hyperpoint h) {
+  if(flags & nrlPolar) {
+    tie(h[0], h[1]) = make_pair(atan2(h[0], h[1]), hypot(h[0], h[1]));
+    ld bar = (minx + maxx) / 2;
+    while(h[0] < bar - M_PI) h[0] += 2 * M_PI;
+    while(h[0] > bar + M_PI) h[0] -= 2 * M_PI;
+    }
   int tY = isize(map_tiles);
   int tX = isize(map_tiles[0]);
   ld rtx = ilerp(minx, maxx, h[0]) * tX;
