@@ -59,6 +59,10 @@ struct plan_replay {
   plan_t plan;
   };
 
+using xy_float = pair<ld, ld>;
+using xy_int = pair<int, int>;
+inline xy_float pfloor(xy_int p) { return {floor(p.first), floor(p.second)}; }
+
 struct level {
   string name;
   char hotkey;
@@ -123,6 +127,12 @@ struct level {
   void compute_plan_transform();
   bool handle_planning(int sym, int uni);
   void solve();
+
+  xy_float get_xy_f(hyperpoint h);
+  xy_int get_xy_i(hyperpoint h) { return pfloor(get_xy_f(h)); }
+  char mapchar(xy_int p);
+  char mapchar(xy_float p) { return mapchar(pfloor(p)); }
+  char mapchar(hyperpoint h) { return mapchar(pfloor(get_xy_f(h))); }
   };
 
 /** ticks per second */

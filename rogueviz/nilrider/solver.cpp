@@ -47,8 +47,6 @@ void level::solve() {
   
   get_id(0, 0);
   transmatrix Rstart = gpushxto0(vertices[0].where);
-  int tY = isize(map_tiles);
-  int tX = isize(map_tiles[0]);  
   
   for(int id=0; id<isize(vertices); id++) {
     auto& v = vertices[id];
@@ -58,13 +56,9 @@ void level::solve() {
     auto y0 = v.y;
     auto point0 = v.where;
 
-    ld rtx0 = ilerp(minx, maxx, point0[0]) * tX;
-    ld rty0 = ilerp(miny, maxy, point0[1]) * tY;
+    xy_float f0 = get_xy_f(point0);
 
-    int tx = floor(rtx0);
-    int ty = floor(rty0);
-
-    char ch = map_tiles[ty][tx];
+    char ch = mapchar(f0);
     v.goal = ch == '*';
     v.zval = (Rstart * point0)[2];
 
@@ -78,18 +72,16 @@ void level::solve() {
       hyperpoint point1 = getpt(x1, y1);
       e.zval1 = (Rstart * point1)[2];
       
-      ld rtx1 = ilerp(minx, maxx, point1[0]) * tX;
-      ld rty1 = ilerp(miny, maxy, point1[1]) * tY;
+      xy_float f1 = get_xy_f(point1);
       
-      int txmin = floor(min(rtx0, rtx1) - 1e-3);
-      int txmax = floor(max(rtx0, rtx1) + 1e-3);
-      int tymin = floor(min(rty0, rty1) - 1e-3);
-      int tymax = floor(max(rty0, rty1) + 1e-3);
-      if(txmin < 0 || tymin < 0 || txmax >= tX || tymax >= tY) continue;
+      int txmin = floor(min(f0.first, f1.first) - 1e-3);
+      int txmax = floor(max(f0.first, f1.first) + 1e-3);
+      int tymin = floor(min(f0.second, f1.second) - 1e-3);
+      int tymax = floor(max(f0.second, f1.second) + 1e-3);
       bool bad = false;
       for(int tyi=tymin; tyi<=tymax; tyi++)
       for(int txi=txmin; txi<=txmax; txi++)
-        if(among(map_tiles[tyi][txi], '!', 'r')) bad = true;
+        if(among(mapchar(xy_int{txi, tyi}), '!', 'r')) bad = true;
       if(bad) continue;
 
       hyperpoint rpoint = gpushxto0(point1) * point0;

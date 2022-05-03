@@ -71,19 +71,13 @@ void timestamp::draw_unilcycle(const shiftmatrix& V) {
 bool tick_debug = false;
 
 bool timestamp::collect(level *lev) {
-  int tY = isize(lev->map_tiles);
-  int tX = isize(lev->map_tiles[0]);
-  // println(hlog, where, tie(lev->minx, lev->miny), tie(lev->maxx, lev->maxy));
-  int x = floor(ilerp(lev->minx, lev->maxx, where[0]) * tX);
-  int y = floor(ilerp(lev->miny, lev->maxy, where[1]) * tY);
-  if(x < 0 || y < 0 || x >= tX || y >= tY)
-    return false;
-  char ch = lev->map_tiles[y][x];
+  auto xy = lev->get_xy_i(where);
+  char ch = lev->mapchar(xy);
   if(ch == 'r' || ch == '!') return false;
   if(ch == '*') {
     for(int i=0; i<isize(lev->triangles); i++) {
       auto& t = lev->triangles[i];
-      if(t.x == x && t.y == y) collected_triangles |= (1<<i);
+      if(t.x == xy.first && t.y == xy.second) collected_triangles |= (1<<i);
       }
     }
   return true;

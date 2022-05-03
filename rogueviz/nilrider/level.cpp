@@ -244,6 +244,23 @@ void level::init() {
   init_plan();
   }
 
+xy_float level::get_xy_f(hyperpoint h) {
+  int tY = isize(map_tiles);
+  int tX = isize(map_tiles[0]);
+  ld rtx = ilerp(minx, maxx, h[0]) * tX;
+  ld rty = ilerp(miny, maxy, h[1]) * tY;
+  return {rtx, rty};
+  }
+
+char level::mapchar(xy_int p) {
+  auto x = p.first;
+  auto y = p.second;
+  int tY = isize(map_tiles);
+  int tX = isize(map_tiles[0]);
+  if(x < 0 || y < 0 || x >= tX || y >= tY) return '!';
+  return map_tiles[y][x];
+  }
+
 /* convert ASCII map coordinates to Heisenberg coordinates */
 hyperpoint level::mappt(ld x, ld y, int s) {
   int tY = isize(map_tiles);
