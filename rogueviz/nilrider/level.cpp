@@ -247,6 +247,13 @@ void level::init() {
     // println(hlog, shFloor[i].s, " to ", shFloor[i].e);
     }
   
+  if(flags & nrlOrder) {
+    sort(triangles.begin(), triangles.end(), [this] (triangledata a, triangledata b) {
+      return atan2(spin(120*degree)*(a.where - start.where)) < atan2(spin(120*degree)*(b.where - start.where));
+      });
+    for(auto t: triangles) println(hlog, t.where);
+    }
+
   cgi.extra_vertices();
   init_plan();
   }

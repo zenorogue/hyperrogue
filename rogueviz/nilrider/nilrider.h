@@ -36,6 +36,7 @@ struct planpoint {
 using plan_t = vector<planpoint>;
 
 constexpr flagtype nrlPolar = Flag(1);
+constexpr flagtype nrlOrder = Flag(2);
 
 struct statue {
   transmatrix T;

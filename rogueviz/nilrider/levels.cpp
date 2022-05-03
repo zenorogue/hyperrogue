@@ -370,11 +370,15 @@ level heisenberg0(
   "!!!!!!!!!!!!!!!!"
   },
   8, 8,
-  f_heisenberg0
+  f_heisenberg0,
+  {
+    // the solver[0.25] result is 49:15
+    goal{0x40FFd0, "Collect all triangles in below 0:55", basic_check(55, 999)}
+    }
   );
 
 level rotwell(
-  "Deep Well", 'd', 0,
+  "Deep Well", 'd', nrlOrder,
   "Can you escape this well?",
   -7.5*dft_block, 7.5*dft_block, 8.5*dft_block, -8.5*dft_block,
   {
