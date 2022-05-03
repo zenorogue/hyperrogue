@@ -55,6 +55,13 @@ void level::init() {
   println(hlog, "start.where = ", start.where);
   println(hlog, "current.where = ", current.where, " : ", format("%p", &current));
   
+  /* start facing slightly to the right from the slope */
+  for(auto b: {true, false}) while(true) {
+    auto c = start;
+    if(c.tick(this) == b) break;
+    start.heading_angle -= 1 * degree;
+    }
+
   for(int s=0; s<2; s++) {  
     cgi.bshape(s == 0 ? shFloor : shPlanFloor, PPR::WALL);
     shFloor.flags |= POLY_TRIANGLES;
