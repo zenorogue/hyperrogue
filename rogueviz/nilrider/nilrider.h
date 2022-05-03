@@ -15,8 +15,8 @@ struct timestamp {
   ld t;             /**< planning spline parameter */
 
   flagtype collected_triangles; /**< a bitset which shows which triangles are collected */
-  flagtype achievements;        /**< a bitset which shows which achievements are complete */
-  flagtype achflags;            /**< a bitset which marks failed conducts, etc. */
+  flagtype goals;               /**< a bitset which shows which goals are complete */
+  flagtype failed;              /**< a bitset which shows which goals are failed */
 
   bool tick(level*);/**< one tick of the simulation -- returns false if the unicycle has stopped or crashed */
   void centerview(level*);
@@ -64,6 +64,23 @@ using xy_float = pair<ld, ld>;
 using xy_int = pair<int, int>;
 inline xy_int pfloor(xy_int p) { return {floor(p.first), floor(p.second)}; }
 
+enum eGoalResult { grNone, grSuccess, grFailed };
+
+struct checkerparam {
+  timestamp *t;
+  level *l;
+  ld timer;
+  int rev;
+  };
+
+using goalchecker = std::function<eGoalResult(checkerparam)>;
+
+struct goal {
+  color_t color;
+  string desc;
+  goalchecker check;
+  };
+
 struct level {
   string name;
   char hotkey;
@@ -77,8 +94,8 @@ struct level {
   
   bool initialized;
   
-  level(string name, char hotkey, flagtype flags, string longdesc, ld minx, ld miny, ld maxx, ld maxy, const vector<string>& mt, ld sx, ld sy, const std::function<ld(hyperpoint h)>& surf) :
-    name(name), hotkey(hotkey), longdesc(longdesc), flags(flags), minx(minx), miny(miny), maxx(maxx), maxy(maxy), map_tiles(mt), startx(sx), starty(sy), surface(surf) { initialized = false; }
+  level(string name, char hotkey, flagtype flags, string longdesc, ld minx, ld miny, ld maxx, ld maxy, const vector<string>& mt, ld sx, ld sy, const std::function<ld(hyperpoint h)>& surf, vector<goal> g) :
+    name(name), hotkey(hotkey), longdesc(longdesc), flags(flags), minx(minx), miny(miny), maxx(maxx), maxy(maxy), map_tiles(mt), startx(sx), starty(sy), surface(surf), goals(g) { initialized = false; }
   
   ld real_minx, real_miny, real_maxx, real_maxy;
 
@@ -90,6 +107,7 @@ struct level {
   
   vector<statue> statues;
   vector<triangledata> triangles;
+  vector<goal> goals;
 
   /** the texture data used for the ground */
   texture::texture_data *unil_texture;

@@ -121,7 +121,7 @@ bool timestamp::tick(level *lev) {
   vel -= sin(slope) * gravity / tps;
   if(vel < 0) {
     vel = 0;
-    return false;
+    if(ovel == 0) return false;
     }
   
   auto mvel = (vel + ovel) / 2;

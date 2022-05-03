@@ -1,5 +1,49 @@
 namespace nilrider {
 
+bool all(checkerparam c) { return c.t->collected_triangles == Flag(isize(c.l->triangles))-1; }
+
+goalchecker basic_check(ld time_limit, ld rev_limit) {
+  return [=] (checkerparam c) {
+    if(c.timer > time_limit || c.rev > rev_limit) return grFailed;
+    if(all(c)) return grSuccess;
+    return grNone;
+    };
+  }
+
+goalchecker get_any(ld time_limit, ld rev_limit) {
+  return [=] (checkerparam c) {
+    if(c.timer > time_limit || c.rev > rev_limit) return grFailed;
+    if(c.t->collected_triangles) return grSuccess;
+    return grNone;
+    };
+  }
+
+goalchecker get_ordered(ld time_limit, ld rev_limit) {
+  return [=] (checkerparam c) {
+    if(c.timer > time_limit || c.rev > rev_limit) return grFailed;
+    if(c.t->collected_triangles & (c.t->collected_triangles+1)) return grFailed;
+    if(all(c)) return grSuccess;
+    return grNone;
+    };
+  }
+
+goalchecker yplus_check(ld time_limit, ld rev_limit) {
+  return [=] (checkerparam c) {
+    if(c.timer > time_limit || c.rev > rev_limit) return grFailed;
+    if(c.t->where[1] < 0) return grFailed;
+    if(all(c)) return grSuccess;
+    return grNone;
+    };
+  }
+
+goalchecker fullstop_check(ld time_limit, ld rev_limit) {
+  return [=] (checkerparam c) {
+    if(c.timer > time_limit || c.rev > rev_limit) return grFailed;
+    if(all(c) && c.t->vel == 0) return grSuccess;
+    return grNone;
+    };
+  }
+
 ld f_heisenberg0(hyperpoint h) { return 0; }
 
 ld rot_plane(hyperpoint h) {
@@ -288,7 +332,12 @@ level rotplane(
   "!!!!!!!!!!!!!!!!"
   },
   6, 6,
-  rot_plane
+  rot_plane,
+  {
+    // the solver[0.25] result is 36.92
+    goal{0x40FF40, "Collect all the triangles in below 60 seconds", basic_check(60, 999)},
+    goal{0xFFD500, "Collect all the triangles in below 38 seconds", basic_check(38, 999)}
+    }
   );
 
 level longtrack(
@@ -306,7 +355,15 @@ level longtrack(
   "gggggfffffggggggggggggggggggggggggggggggggggggggggggggggggggggGG"
   },
   0, 5,
-  long_x
+  long_x,
+  {
+    // the solver[0.25] result is 1:08.56 (reduced to 1:08.45 by removing some points)
+    goal{0xFFD500, "Collect the triangle in below 1:15", basic_check(75, 999)},
+    // the solver[0.25] + some manual modifications achieves 1:37.44
+    goal{0xFF4040, "Stop where the triangle is in below 1:45", fullstop_check(75, 999)},
+    // the solver[0.25] result is 1:45.52
+    goal{0x303030, "Reach the triangle without going on the right side of the road below 2:00", yplus_check(120, 999)},
+    }
   );
 
 level geodesical(
@@ -325,7 +382,11 @@ level geodesical(
   "bbbbbbbbbbbbbbbb",
   },
   0, 6,
-  geodesics_0
+  geodesics_0,
+  {
+    // the solver[0.25] result is 26.10
+    goal{0xFFD500, "Collect both triangles in below 30 seconds", basic_check(30, 999)}
+    }
   );
 
 level geodesical4(
@@ -344,7 +405,11 @@ level geodesical4(
   "ffffffffffffffff",
   },
   0, 5,
-  geodesics_at_4
+  geodesics_at_4,
+  {
+    // the solver[0.25] result is 32.04
+    goal{0xFFD500, "Collect the triangle in below 35 seconds", basic_check(35, 999)}
+    }
   );
 
 level heisenberg0(
@@ -400,7 +465,11 @@ level rotwell(
   "!!!!!!!!!!!!!!!!"
   },
   8, 8,
-  f_rot_well
+  f_rot_well,
+  {
+    // the solver[0.5] result is 1:19.54 (obtained using get_ordered)
+    goal{0xFFD500, "Collect all triangles below 1:25", basic_check(85, 999)}
+    }
   );
 
 level labyrinth(
@@ -426,7 +495,14 @@ level labyrinth(
   "!!!!!!!!!!!!!!!!"
   },
   8, 8,
-  rot_plane
+  rot_plane,
+  {
+    // the solver[0.1] result is 1:03.53
+    // the solver[0.15] result is 1:06.58
+    // the solver[0.24] result is 1:08.54
+    // the solver[0.25] result is 1:22.09 (it goes north for some reason)
+    goal{0xFFD500, "Collect the triangle in below 1:15", basic_check(75, 999)}
+    }
   );
 
 level *curlev = &rotplane;

@@ -1,8 +1,12 @@
 namespace nilrider {
 
+bool nospeed = false;
+int goal_id = 0;
+ld solver_unit = .25;
+
 void level::solve() {
 
-  ld xunit = .25, yunit = .25, eunit = xunit * yunit / 2;
+  ld xunit = solver_unit, yunit = solver_unit, eunit = xunit * yunit / 2;
   
   struct edge {
     int id;
@@ -14,6 +18,7 @@ void level::solve() {
   struct vertex {
     int id;
     int x, y;
+    flagtype collected;
     ld zval;
     hyperpoint where;
     bool goal;
@@ -21,7 +26,7 @@ void level::solve() {
     vector<edge> edges;
     };
   
-  map<pair<int, int>, int> xy_to_id;
+  map<tuple<int, int, flagtype>, int> xy_to_id;
   vector<vertex> vertices;
   
   auto getpt = [&] (int x, int y) {
@@ -30,22 +35,23 @@ void level::solve() {
     return p;
     };
 
-  auto get_id = [&] (int x, int y) {
-    if(xy_to_id.count({x, y}))
-      return xy_to_id[{x, y}];
+  auto get_id = [&] (int x, int y, flagtype co) {
+    if(xy_to_id.count({x, y, co}))
+      return xy_to_id[{x, y, co}];
     else {
       int id = isize(vertices);
-      xy_to_id[{x,y}] = id;
+      xy_to_id[{x,y, co}] = id;
       vertices.emplace_back();
       auto& b = vertices.back();
       b.where = getpt(x, y);
       b.id = id;
       b.x = x; b.y = y;
+      b.collected = co;
       return id;
       }
     };
   
-  get_id(0, 0);
+  get_id(0, 0, 0);
   transmatrix Rstart = gpushxto0(vertices[0].where);
   
   for(int id=0; id<isize(vertices); id++) {
@@ -58,8 +64,15 @@ void level::solve() {
 
     xy_float f0 = get_xy_f(point0);
 
-    char ch = mapchar(f0);
-    v.goal = ch == '*';
+    timestamp ts;
+    ts.where = point0;
+    ts.collected_triangles = v.collected;
+    ts.collect(this);
+    checkerparam p {&ts, this, 0, 0};
+    auto res = goals[goal_id].check(p);
+    if(res == grFailed) continue;
+
+    v.goal = res == grSuccess;
     v.zval = (Rstart * point0)[2];
 
     for(int dx=-2; dx<=2; dx++)
@@ -87,11 +100,9 @@ void level::solve() {
       hyperpoint rpoint = gpushxto0(point1) * point0;
       rpoint[2] -= rpoint[0] * rpoint[1] / 2;
       e.length = hypot_d(3, rpoint);
-      e.id = get_id(x1, y1);
+      e.id = get_id(x1, y1, ts.collected_triangles);
       
       vertices[id].edges.push_back(e);
-      
-      println(hlog, "edge from ", id, " to ", e.id);
       }
     }
   
@@ -125,6 +136,7 @@ void level::solve() {
     step++;
     
     if(v.goal) {
+      if(nospeed && z0 * eunit - v.zval > eunit) continue;
       println(hlog, "reached the goal in time ", t0);
       vector<hyperpoint> positions;
       while(id0 || z0) {

@@ -391,6 +391,11 @@ void initialize() {
 
 auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] { planning_mode = true; }) + arg::add3("-viewsim", [] { view_replay = true; })
   + arg::add3("-oqc", [] { on_quit = popScreenAll; })
+  + arg::add3("-nilsolve-set", [] {
+    arg::shift(); solver_unit = arg::argf();
+    arg::shift(); nospeed = arg::argi();
+    arg::shift(); goal_id = arg::argi();
+    curlev->solve(); })
   + arg::add3("-nilsolve", [] { curlev->solve(); })
   + addHook(hooks_configfile, 100, [] {
     param_f(aimspeed_key_x, "nilrider_key_x")
