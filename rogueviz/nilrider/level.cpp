@@ -290,30 +290,8 @@ hyperpoint level::mappt(ld x, ld y, int s) {
   return h;
   };
 
-/*
-  plan.emplace_back(start.where, hpxy(0, 1));
-  plan.emplace_back(mappt(4.5, 10.5), hpxy(1, 1));
-  plan.emplace_back(mappt(0.01, 3, 1), hpxy(0, -2));
-  plan.emplace_back(mappt(2, 3.99, 1), hpxy(4, 0));
-  plan.emplace_back(mappt(42, 3.99, 1), hpxy(4, 0));
-*/
-
 void level::init_plan() {
-  plan.emplace_back(start.where, hpxy(0, -1));
-  plan.emplace_back(mappt(6.8, 10.2, 1), hpxy(1.5, -1.5));
-  plan.emplace_back(mappt(10.5, 10.5, 1), hpxy(1.5, 1.5));
-  plan.emplace_back(mappt(10.5, 4.5, 1), hpxy(-1.5, 1.5));
-  plan.emplace_back(mappt(4.5, 4.5, 1), hpxy(-1.5, 1.5));
-  plan.emplace_back(mappt(4.5, 2, 1), hpxy(1.5, 0.5));
-  plan.emplace_back(mappt(10.5, 2, 1), hpxy(1.5, -0.5));
-  plan.emplace_back(mappt(10.5, 4.5, 1), hpxy(-2, 0));
-  plan.emplace_back(mappt(6.5, 6.5, 1), hpxy(-1.5, -1.5));
-  plan.emplace_back(mappt(4.5, 10.5, 1), hpxy(1.5, -1.5));
-  plan.emplace_back(mappt(10.5, 9.5, 1), hpxy(1.5, 1.5));
-/*  plan.emplace_back(mappt(0.01, 3, 1), hpxy(0, -2));
-  plan.emplace_back(mappt(2, 3.99, 1), hpxy(4, 0));
-  plan.emplace_back(mappt(42, 3.99, 1), hpxy(4, 0));
-*/
+  plan.emplace_back(start.where, hpxy(cos(start.heading_angle + 90*degree) * 2, sin(start.heading_angle + 90*degree) * 2));
   current = start;
   timer = 0;
   }
