@@ -318,7 +318,7 @@ level geodesical(
   "ffffffffffffffff",
   "----------------",
   "----------------",
-  "----------------",
+  "*--------------*",
   "----------------",
   "----------------",
   "----------------",
@@ -354,7 +354,7 @@ level heisenberg0(
   {
   "ggggggg|ggggggg!",
   "grggggg|gggggrg!",
-  "ggggggg|ggggggg!",
+  "gg*gggg|gggg*gg!",
   "gggffgg|ggggggg!",
   "gggffgg|ggfrggg!",
   "ggggggg|gggggGg!",
@@ -364,7 +364,7 @@ level heisenberg0(
   "gggGgog|ggggggg!",
   "ggggggg|ggrgrgg!",
   "gggGgGg|ggggggg!",
-  "ggggggg|ggggggg!",
+  "gg*gggg|gggg*gg!",
   "grggggg|gggggrg!",
   "ggggggg|ggggggg!",
   "!!!!!!!!!!!!!!!!"
