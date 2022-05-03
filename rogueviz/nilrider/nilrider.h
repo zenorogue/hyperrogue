@@ -61,7 +61,7 @@ struct plan_replay {
 
 using xy_float = pair<ld, ld>;
 using xy_int = pair<int, int>;
-inline xy_float pfloor(xy_int p) { return {floor(p.first), floor(p.second)}; }
+inline xy_int pfloor(xy_int p) { return {floor(p.first), floor(p.second)}; }
 
 struct level {
   string name;
