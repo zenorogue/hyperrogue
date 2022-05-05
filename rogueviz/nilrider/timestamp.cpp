@@ -169,6 +169,7 @@ void timestamp::draw_instruments(level* l, ld t) {
   dynamicval<eGeometry> g(geometry, gEuclid);
   dynamicval<eModel> pm(pmodel, mdDisk);
   dynamicval<bool> ga(vid.always3, false);
+  dynamicval<color_t> ou(poly_outline);
   dynamicval<geometryinfo1> gi(ginf[gEuclid].g, giEuclid2);
   initquickqueue();
   check_cgi(); cgi.require_shapes();
