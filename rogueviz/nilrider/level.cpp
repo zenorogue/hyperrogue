@@ -1,13 +1,76 @@
 namespace nilrider {
 
+const int steps_per_block = 16;
+const int texture_density = 64;
+
+void level::init_textures() {
+  int tY = isize(map_tiles);
+  int tX = isize(map_tiles[0]);
+
+  for(int stepped: {0, 1}) {
+
+    auto& target = stepped ? unil_texture_stepped : unil_texture;
+
+    target = new texture::texture_data;
+
+    auto& tex = *target;
+
+    tex.twidth = tex.tx = tX * texture_density;
+    tex.theight = tex.ty = tY * texture_density;
+    tex.stretched = false;
+    tex.strx = tex.tx;
+    tex.stry = tex.ty;
+    tex.base_x = 0;
+    tex.base_y = 0;
+    tex.whitetexture();
+
+    auto getpix = [&] (int x, int y) {
+      int px = x / pixel_per_block;
+      int py = y / pixel_per_block;
+      if(px < 0 || py < 0 || px >= tX || py >= tY) return '!';
+      char bmch = map_tiles[py][px];
+      if(bmch == '!') return '!';
+      return submaps[bmch][y % pixel_per_block][x % pixel_per_block];
+      };
+
+    int subpixels = texture_density / pixel_per_block;
+    int stepdiv = texture_density / steps_per_block;
+
+    for(int y=0; y<tex.ty; y++)
+    for(int x=0; x<tex.tx; x++) {
+      color_t col;
+      if(!stepped) {
+        char c = getpix(x / subpixels, y / subpixels);
+        col = bcols[c];
+        }
+      else {
+        int mx = x % stepdiv;
+        int my = y % stepdiv;
+        int mx0, mx1, my0, my1;
+        if(mx < stepdiv/2) { mx0 = mx1 = 2*mx; } else {mx0 = stepdiv-2; mx1=stepdiv; }
+        if(my < stepdiv/2) { my0 = my1 = 2*my; } else {my0 = stepdiv-2; my1=stepdiv; }
+        int ax = (x/stepdiv) * stepdiv;
+        int ay = (y/stepdiv) * stepdiv;
+        char c0 = getpix((mx0 + ax) / subpixels, (my0 + ay) / subpixels);
+        char c1 = getpix((mx1 + ax) / subpixels, (my1 + ay) / subpixels);
+        if(c0 == '!') col = bcols[c1];
+        else if(c1 == '!') col = bcols[c0];
+        else col = gradient(bcols[c0], bcols[c1], 0, .5, 1);
+        if(mx0 != mx1)  col = gradient(col, 0xFF000000, 0, .1, 1);
+        if(my0 != my1)  col = gradient(col, 0xFF000000, 0, .2, 1);
+        }
+      tex.get_texture_pixel(x, y) = col;
+      tex.get_texture_pixel(x, y) |= 0xFF000000;
+      tex.get_texture_pixel(x, y) ^= hrand(0x1000000) & 0xF0F0F;
+      }
+    tex.loadTextureGL();
+    }
+  }
+
 void level::init() {
   if(initialized) return;
   initialized = true;
 
-  unil_texture = new texture::texture_data;
-  
-  auto& tex = *unil_texture;
-  
   real_minx = HUGE_VAL;
   real_miny = HUGE_VAL;
   real_maxx = -HUGE_VAL;
@@ -17,37 +80,12 @@ void level::init() {
     scale = 1;
   else
     scale = abs(maxx - minx) / isize(map_tiles[0]);
-  
   println(hlog, "SCALE IS ", this->scale);
+
+  init_textures();
 
   int tY = isize(map_tiles);
   int tX = isize(map_tiles[0]);
-  
-  tex.twidth = tex.tx = tX * 64;
-  tex.theight = tex.ty = tY * 64;
-  tex.stretched = false;
-  tex.strx = tex.tx;
-  tex.stry = tex.ty;
-  tex.base_x = 0;
-  tex.base_y = 0;
-  tex.whitetexture();
-  println(hlog, "tX=", tX, " tY=", tY, " tex=", tex.tx, "x", tex.ty);
-  
-  for(int y=0; y<tex.ty; y++)
-  for(int x=0; x<tex.tx; x++) {
-    int bx = x / 64;
-    int by = y / 64;    
-    char bmch = map_tiles[by][bx];
-    int sx = (x % 64) / 4;
-    int sy = (y % 64) / 4;
-    if(bmch == '!') continue;
-    char smch = submaps[bmch][sy][sx];
-    tex.get_texture_pixel(x, y) = bcols[smch];
-    tex.get_texture_pixel(x, y) |= 0xFF000000;
-    tex.get_texture_pixel(x, y) ^= hrand(0x1000000) & 0xF0F0F;
-    // (x * 256 / TEXSIZE + (((y * 256) / TEXSIZE) << 8)) | 0xFF000000;
-    }
-  tex.loadTextureGL();
   
   start.where = mappt(startx+.5, starty+.5, 1);
   start.t = 0;
@@ -62,30 +100,72 @@ void level::init() {
     start.heading_angle -= 1 * degree;
     }
 
-  for(int s=0; s<2; s++) {  
-    cgi.bshape(s == 0 ? shFloor : shPlanFloor, PPR::WALL);
+  for(int s=0; s<3; s++) {  
+    cgi.bshape(s == 0 ? shFloor : s == 1 ? shPlanFloor : shStepFloor, PPR::WALL);
     shFloor.flags |= POLY_TRIANGLES;
     shPlanFloor.flags |= POLY_TRIANGLES;
+    shStepFloor.flags |= POLY_TRIANGLES;
+
+    int prec = 16;
+    if(s == 2) prec *= 2;
+    int cdiv = prec / steps_per_block;
     
     auto pt = [&] (int x, int y) {
-      if(s == 0) uniltinf.tvertices.push_back(glhr::makevertex(x * 1. / tX / 16, y * 1. / tY / 16, 0));
-      hyperpoint h = mappt(x, y, 16);
+      if(s == 0) uniltinf.tvertices.push_back(glhr::makevertex(x * 1. / tX / prec, y * 1. / tY / prec, 0));
+      if(s == 2) uniltinf_stepped.tvertices.push_back(glhr::makevertex(x * 1. / tX / prec, y * 1. / tY / prec, 0));
+
+      hyperpoint h = mappt(x, y, prec);
+      if(s == 2) {
+        if(x % cdiv == cdiv/2+1) x += cdiv/2 - 1;
+        if(y % cdiv == cdiv/2+1) y += cdiv/2 - 1;
+        int gx = x/cdiv*cdiv + (x%cdiv) * 2;
+        int gy = y/cdiv*cdiv + (y%cdiv) * 2;
+        hyperpoint gh = mappt(gx, gy, prec);
+        int ax = x/cdiv*cdiv + cdiv/2;
+        int ay = y/cdiv*cdiv + cdiv/2;
+        hyperpoint ah = mappt(ax, ay, prec);
+        gh[0] = gh[0] - ah[0];
+        gh[1] = gh[1] - ah[1];
+        gh[2] = 0;
+        gh = sym_to_heis(gh);
+        h = rgpushxto0(ah) * gh;
+        ld delta = 0;
+        // make sure steps are below the actual level
+        for(int z=0; z<4; z++) {
+          int zx = x/cdiv*cdiv + ((z&1)?cdiv:0);
+          int zy = y/cdiv*cdiv + ((z&2)?cdiv:0);
+          hyperpoint zh = mappt(zx, zy, prec);
+          hyperpoint uh;
+          uh[0] = zh[0] - ah[0];
+          uh[1] = zh[1] - ah[1];
+          uh[2] = 0; uh[3] = 1;
+          uh = sym_to_heis(uh);
+          uh = rgpushxto0(ah) * uh;
+          delta = max(delta, uh[2] - zh[2]);
+          }
+        h[2] -= delta;
+        }
+
       real_minx = min(real_minx, h[0]);
       real_maxx = max(real_maxx, h[0]);
       real_miny = min(real_miny, h[1]);
       real_maxy = max(real_maxy, h[1]);
       if(s == 1) h[2] = h[3] = 1;
-      // h[2] = h[0] * h[1] / 2 + .1;
-      // h[3] = 1;
       cgi.hpcpush(h);
-      // println(hlog, "entered ", h);
-      // cgi.hpcpush(hyperpoint(rand() % 10 - 5, rand() % 10 - 5, rand() % 10 - 5, 1));
       };
 
-    for(int y=0; y<tY * 16; y++)
-    for(int x=0; x<tX * 16; x++) {
-      char bmch = map_tiles[y/16][x/16];
+    for(int y=0; y<tY * prec; y++)
+    for(int x=0; x<tX * prec; x++) {
+      char bmch = map_tiles[y/prec][x/prec];
       if(bmch == '!') continue;
+      if(s == 2) {
+        int q = 0;
+        if(x % cdiv == (cdiv/2)) q++;
+        if(x % cdiv > (cdiv/2)) q+=2;
+        if(y % cdiv == (cdiv/2)) q++;
+        if(y % cdiv > (cdiv/2)) q+=2;
+        if(q > 1) continue;
+        }
       pt(x, y);
       pt(x, y+1);
       pt(x+1, y);
@@ -245,7 +325,6 @@ void level::init() {
         }
       }
     cgi.finishshape();
-    // println(hlog, shFloor[i].s, " to ", shFloor[i].e);
     }
   
   if(flags & nrlOrder) {
@@ -315,6 +394,8 @@ ld level::safe_alt(hyperpoint h, ld mul, ld mulx) {
   return maxv;
   }
 
+bool stepped_display;
+
 void level::draw_level(const shiftmatrix& V) {
   int id = 0;
   for(auto& t: triangles) {
@@ -339,9 +420,16 @@ void level::draw_level(const shiftmatrix& V) {
 
   queuepoly(V, shField, 0xFFFF00FF);
 
-  auto& poly = queuepoly(V, shFloor, 0xFFFFFFFF); // 0xFFFFFFFF);
-  poly.tinf = &uniltinf;
-  uniltinf.texture_id = unil_texture->textureid;  
+  if(!stepped_display) {
+    auto& poly = queuepoly(V, shFloor, 0xFFFFFFFF); // 0xFFFFFFFF);
+    poly.tinf = &uniltinf;
+    uniltinf.texture_id = unil_texture->textureid;
+    }
+  else {
+    auto& poly = queuepoly(V, shStepFloor, 0xFFFFFFFF); // 0xFFFFFFFF);
+    poly.tinf = &uniltinf_stepped;
+    uniltinf_stepped.texture_id = unil_texture_stepped->textureid;
+    }
   }
   
 }

@@ -226,6 +226,7 @@ void settings() {
   add_edit(whrad);
   add_edit(whdist);
   add_edit(min_gfx_slope);
+  add_edit(stepped_display);
   dialog::addItem("configure keys", 'k');
   dialog::add_action_push(multi::get_key_configurer(1, move_names, "Nilrider keys"));
   dialog::addItem("RogueViz settings", 'r');
@@ -381,6 +382,9 @@ void initialize() {
 
   param_enum(planning_mode, "nil_planning", "nil_planning", false)
     -> editable({{"manual", "control the unicycle manually"}, {"planning", "try to plan the optimal route!"}}, "game mode", 'p');
+
+  param_enum(stepped_display, "stepped_display", "stepped_display", false)
+    -> editable({{"smooth", "ride on a smooth surface"}, {"blocky", "makes slopes more visible -- actual physics are not affected"}}, "game mode", 's');
 
   rv_hook(hooks_frame, 100, frame);
   rv_hook(shmup::hooks_turn, 100, turn);

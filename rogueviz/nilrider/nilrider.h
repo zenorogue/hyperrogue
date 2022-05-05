@@ -102,6 +102,7 @@ struct level {
   /* data */
   hpcshape shFloor;  /**< the 3D model of floor */
   hpcshape shPlanFloor;  /**< the 3D model of floor for planning */
+  hpcshape shStepFloor;  /**< the 3D model of stepped floor */
   hpcshape shField;  /**< the 3D model of the 'field' */
   hpcshape shCastle; /**< the 3D model of the 'castle' */
   
@@ -112,11 +113,17 @@ struct level {
   /** the texture data used for the ground */
   texture::texture_data *unil_texture;
 
+  /** the texture data used for the ground in the stepped mode */
+  texture::texture_data *unil_texture_stepped;
+
   /** the texture used for the ground */
   basic_textureinfo uniltinf;
 
   /** the texture used for the ground */
   basic_textureinfo castle_tinf;
+
+  /** the texture used for the ground in the stepped mode*/
+  basic_textureinfo uniltinf_stepped;
   
   /** starting timestamp */
   timestamp start;
@@ -124,7 +131,10 @@ struct level {
   /** current timestamp */
   timestamp current;
   
-  /** initialize textures and start */
+  /** initialize textures */
+  void init_textures();
+
+  /** initialize all */
   void init();
 
   vector<timestamp> history;

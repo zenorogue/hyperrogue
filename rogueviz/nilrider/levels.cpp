@@ -88,9 +88,12 @@ map<char, color_t> bcols = {
   {'2', 0xFF404040},
   {'4', 0xFF808080},
   {'6', 0xFFC0C0C0},
+  {'!', 0xFF000000}
   };
 
-map<char, array<string, 16> > submaps = {
+const int pixel_per_block = 16;
+
+map<char, array<string, pixel_per_block> > submaps = {
   {'o', {
     "WWWWWWWWWWWWWWWW",
     "W22222222222222W",
