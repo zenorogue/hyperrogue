@@ -21,7 +21,7 @@ struct timestamp {
   bool tick(level*);/**< one tick of the simulation -- returns false if the unicycle has stopped or crashed */
   void centerview(level*);
   void draw_unilcycle(const shiftmatrix&);
-  void draw_instruments(ld t);
+  void draw_instruments(level*, ld t);
   ld energy_in_squares();
   bool collect(level*);
   void be_consistent();
@@ -185,5 +185,7 @@ extern map<char, color_t> bcols;
 extern map<char, array<string, 16> > submaps;
 
 hyperpoint sym_to_heis(hyperpoint H);
+
+extern int reversals;
 
 }

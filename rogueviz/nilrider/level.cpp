@@ -240,6 +240,7 @@ void level::init() {
         d.y = y;
         for(int i=0; i<7; i++)
           d.colors[i] = gradient(0xFFD500FF, 0xFF, 0, i, 8);
+        d.colors[6] = d.colors[0];
         triangles.emplace_back(d);
         }
       }

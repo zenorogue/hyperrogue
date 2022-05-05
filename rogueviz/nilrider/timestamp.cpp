@@ -165,12 +165,13 @@ void timestamp::centerview(level *lev) {
   playermoved = false;   
   }
 
-void timestamp::draw_instruments(ld t) {
+void timestamp::draw_instruments(level* l, ld t) {
   dynamicval<eGeometry> g(geometry, gEuclid);
   dynamicval<eModel> pm(pmodel, mdDisk);
   dynamicval<bool> ga(vid.always3, false);
   dynamicval<geometryinfo1> gi(ginf[gEuclid].g, giEuclid2);
   initquickqueue();
+  check_cgi(); cgi.require_shapes();
   
   ld rad = 40;
 
@@ -269,12 +270,57 @@ void timestamp::draw_instruments(ld t) {
   curvepoint(hpxy(rad/4, 0));
   queuecurve(sId * atscreenpos(cx, cy, pix) * spin(e_to_angle(energy_in_squares())), 0xFF, 0xFF8080FF, PPR::ZERO);
   
+  cx += rad;
+
+  int tid = 0;
+
+  for(int i=0; i<isize(l->triangles); i++) {
+    bool have = collected_triangles & Flag(i);
+    color_t f = l->triangles[i].colors[6];
+    if(have) {
+      poly_outline = 0xFF;
+      }
+    else {
+      poly_outline = f;
+      f = 0x40;
+      }
+
+    queuepoly(sId * atscreenpos(cx+rad/2, cy+(tid&1?1:-1)*rad/3, pix * rad * 1.2) * spin(90*degree), cgi.shTriangle, f);
+    tid++;
+    if(tid == 2) { tid = 0; cx += rad/1.4; }
+    }
+  if(tid) cx += rad/1.4;
+  cx += 5;
+
+  int gid = 0;
+  for(auto& g: l->goals) {
+    bool gfailed = failed & Flag(gid);
+    bool gsuccess = goals & Flag(gid);
+    if(lshiftclick) gfailed = true, gsuccess = false;
+    if(anyctrlclick) gfailed = false, gsuccess = true;
+    string s = format("%d:%02d.%02d", int(t / 60), int(t) % 60, int(frac(t) * 100));
+    shiftmatrix T = sId * atscreenpos(cx+rad/2, cy+(gid-1)*rad/1.2, pix * rad * 1.2);
+    poly_outline = 0xFF; color_t f = darkena(g.color, 0, 0xFF);
+    if(gsuccess) {
+      queuepoly(T * spin(90*degree), cgi.shGrail, f);
+      displaystr(cx+rad, cy+(gid-1)*rad/1.2, 0, vid.fsize*.75, s, 0, 0);
+      }
+    else {
+      poly_outline = f; f = 0x40;
+      queuepoly(T * spin(90*degree), cgi.shGrail, f);
+      if(gfailed) { poly_outline = 0xFF; queuepoly(T, cgi.shPirateX, 0xC00000FF); }
+      }
+    gid++;
+    }
+
   quickqueue();
   glflush();
   
   string s = format("%d:%02d.%02d", int(t / 60), int(t) % 60, int(frac(t) * 100));
-  
   displaystr(vid.xres - vid.fsize, vid.fsize*2, 0, vid.fsize * 2, s, 0, 16);
+
+  if(reversals) s = format("+%d", reversals);
+  displaystr(vid.xres - vid.fsize, vid.fsize*4, 0, vid.fsize, s, 0, 16);
   }
 
 }

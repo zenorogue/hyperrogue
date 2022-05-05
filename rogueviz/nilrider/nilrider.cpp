@@ -131,7 +131,7 @@ void run() {
         }  
       }
     }
-  curlev->current.draw_instruments(timer);
+  curlev->current.draw_instruments(curlev, timer);
   
   if(paused && !planning_mode) {
     displayButton(current_display->xcenter, current_display->ycenter, mousing ? XLAT("paused -- click to unpause") : XLAT("paused -- press p to continue"), 'p', 8);
