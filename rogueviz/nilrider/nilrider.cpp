@@ -413,7 +413,8 @@ auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] 
     param_f(whrad, "nilrider_radius")
     ->editable(0, 0.5, 0.01, "wheel radius", "note: this parameter is just visual, it does not affect the physics in any way", 'w');
     param_f(whdist, "nilrider_dist")
-    ->editable(0, 5, 0.05, "camera distance", "how far is the unicycle from the camera", 'd');
+    ->editable(0, 5, 0.05, "camera distance", "how far is the unicycle from the camera", 'd')
+    ->set_reaction([] { curlev->current.centerview(curlev); });
     param_f(min_gfx_slope, "min_gfx_slope")
     ->editable(-90*degree, 90*degree, degree, "min camera slope", "affected by up/down", 'm');
     })
