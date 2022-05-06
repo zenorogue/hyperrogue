@@ -110,6 +110,9 @@ void level::init() {
   /* start facing slightly to the right from the slope */
   for(auto b: {true, false}) while(true) {
     auto c = start;
+    /* no treasures are known, which confuses goals */
+    dynamicval<bool> lop1(loaded_or_planned, true);
+    dynamicval<bool> lop2(planning_mode, false);
     if(c.tick(this) == b) break;
     start.heading_angle -= 1 * degree;
     }

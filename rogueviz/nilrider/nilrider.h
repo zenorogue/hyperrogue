@@ -202,4 +202,6 @@ hyperpoint sym_to_heis(hyperpoint H);
 extern int reversals;
 extern bool loaded_or_planned;
 extern bool planning_mode;
+
+void save();
 }

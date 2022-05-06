@@ -68,6 +68,7 @@ void level::solve() {
     ts.where = point0;
     ts.collected_triangles = v.collected;
     ts.timer = 0;
+    loaded_or_planned = true;
     ts.collect(this);
     checkerparam p {&ts, this, 0};
     auto res = goals[goal_id].check(p);

@@ -275,9 +275,29 @@ void pick_game() {
   dialog::init(XLAT("how do you want to play?"), 0xC0C0FFFF, 150, 100);
   dialog::addSelItem("selected track", curlev->name, 't');
   dialog::add_action_push(pick_level);
-  dialog::addInfo(curlev->longdesc);
+  dialog::addBreak(50);
+  dialog::addHelp(curlev->longdesc);
   dialog::addBreak(100);
   add_edit(planning_mode);
+
+  int gid = 0;
+  for(auto& g: curlev->goals) {
+    dialog::addBreak(50);
+    auto man = curlev->records[0][gid];
+    auto plan = curlev->records[1][gid];
+    if(man && plan)
+      dialog::addInfo("manual: " + format_timer(man) + " planning: " + format_timer(plan), g.color);
+    else if(man)
+      dialog::addInfo("manual: " + format_timer(man), g.color);
+    else if(plan)
+      dialog::addInfo("planning: " + format_timer(plan), g.color);
+    else
+      dialog::addInfo("goal not obtained:", g.color);
+    dialog::addBreak(50);
+    dialog::addHelp(g.desc);
+    gid++;
+    }
+
   dialog::addBreak(100);
   dialog::addBack();
   dialog::display();
@@ -425,10 +445,10 @@ void main_menu() {
     dialog::add_action(pop_and_push_replays);
     }
 
-  dialog::addItem("change track or game settings", 't');
+  dialog::addItem("track / mode / goals", 't');
   dialog::add_action_push(pick_game);
 
-  dialog::addItem("change other settings", 'o');
+  dialog::addItem("change settings", 'o');
   dialog::add_action_push(settings);
 
   dialog::addItem("quit", 'q');

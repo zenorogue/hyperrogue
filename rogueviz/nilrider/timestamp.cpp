@@ -98,9 +98,14 @@ bool timestamp::collect(level *lev) {
     else if(res == grSuccess) {
       goals |= Flag(gid);
       lev->current_score[gid] = timer;
-      auto &res = lev->records[planning_mode][gid];
-      if(res == 0 || timer < res)
-        res = timer;
+      if(planning_mode || !loaded_or_planned) {
+        auto &res = lev->records[planning_mode][gid];
+        if(res == 0 || timer < res) {
+          res = timer;
+          println(hlog, "saved -- success on goal ", gid, " in time ", timer);
+          save();
+          }
+        }
       }
     gid++;
     }

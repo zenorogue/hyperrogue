@@ -15,6 +15,17 @@ void save() {
   fhstream f("nilrider.save", "wt");
   println(f, "NilRider version ", ver);
   for(auto l: all_levels) {
+    for(int i: {0,1}) {
+      int qg = isize(l->records[i]);
+      for(int g=0; g<qg; g++)
+        if(l->records[i][g]) {
+          println(f, "*RECORD");
+          println(f, l->name);
+          println(f, format("%d %d %f", i, g, l->records[i][g]));
+          }
+      }
+    }
+  for(auto l: all_levels) {
     for(auto& p: l->manual_replays) {
       println(f, "*MANUAL");
       println(f, l->name);
@@ -71,7 +82,21 @@ void load() {
       if(l) l->plan_replays.emplace_back(plan_replay{name, std::move(plan)});
       continue;
       }
-    println(hlog, "error: unknown content ", s);
+    if(s == "*RECORD") {
+      string lev = scanline_noblank(f);
+      int i = scan<int>(f);
+      int g = scan<int>(f);
+      ld t = scan<ld>(f);
+      auto l = level_by_name(lev);
+      if(l) {
+        int qg = isize(l->goals);
+        if(i < 0 || i > 1) println(hlog, "error: wrong number as i");
+        if(g < 0 || g >= qg) println(hlog, "error: wrong goal index");
+        l->records[i].resize(qg, 0);
+        l->records[i][g] = t;
+        }
+      println(hlog, "error: unknown content ", s);
+      }
     }
   }
 
