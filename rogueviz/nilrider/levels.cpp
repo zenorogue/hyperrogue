@@ -313,8 +313,13 @@ map<char, array<string, pixel_per_block> > submaps = {
   };
 
 level rotplane(
-  "Trying to be horizontal", 'r', 0, 
-  "All the lines going through the center are horizontal.",
+  "Trying to be horizontal", 'r', 0,
+  "Collect all the triangles!\n\n"
+  "All the lines going through the center are horizontal.\n"
+  "However, this is Nil geometry. The other lines are NOT horizontal! Clockwise ones slope upwards, and counterclockwise ones slop edownwards.\n"
+  "Your unicycle is powered only by the gravity. Use that to your advantage!"
+  ,
+
   -7.5*dft_block, 7.5*dft_block, 8.5*dft_block, -8.5*dft_block,
   {
   "ggggggggggggggg!",
@@ -371,7 +376,11 @@ level longtrack(
 
 level geodesical(
   "Roads are Geodesics", 'g', nrlPolar,
-  "All the roads here are helical geodesics.",  
+  "Geodesics are the lines that are (locally) shortest. In the default settings, "
+  "the space in Nil Rider is rendered according to the Fermat's principle, that is, "
+  "light rays are assumed to be geodesics.\n\n"
+  "Geodesics in Nil are horizontal, vertical, and helical. "
+  "In this level, all the roads are (fragments of) helical geodesics.",
   -45*degree, 3*dft_block, 225*degree, 0,
   // -8*dft_block, +8*dft_block, +8*dft_block, 0, 
   {
@@ -447,7 +456,11 @@ level heisenberg0(
 
 level rotwell(
   "Deep Well", 'd', nrlOrder,
-  "Can you escape this well?",
+  "Can you escape this well?\n\n"
+  "The sculpture in the center is built around eight helical geodesics which start in a point on the floor, and all cross in a point in the sky. Try to find that point and "
+  "look below!\n\n"
+  "Note: you can move the camera freely (using the arrow keys and PageUp/Down/Home/End) while the game is paused."
+  ,
   -7.5*dft_block, 7.5*dft_block, 8.5*dft_block, -8.5*dft_block,
   {
   "ggggggggggggggg!",
@@ -477,7 +490,8 @@ level rotwell(
 
 level labyrinth(
   "Labyrinth", 'l', 0,
-  "Go clockwise. The squares of this level have half of their usual length.",
+  "You will have to go clockwise this time!\n\n"
+  "The squares of this level have half of their usual length.",
   -7.5*dft_block/2, 7.5*dft_block/2, 8.5*dft_block/2, -8.5*dft_block/2,
   {
   "ogggrfffffffffo!",
