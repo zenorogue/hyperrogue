@@ -2952,16 +2952,47 @@ EX void rotate_view(transmatrix T) {
   if(!prod && !rug::rugged) current_display->which_copy = T * current_display->which_copy;
   }
 
+EX hyperpoint lie_exp(hyperpoint h) {
+  if(nil) {
+    h[3] = 1;
+    h[2] += h[0] * h[1] / 2;
+    }
+  else if(sol) {
+    h[3] = 1;
+    h[0] *= (exp(-h[2]) - 1) / -h[2];
+    h[1] *= (exp(+h[2]) - 1) / h[2];
+    }
+  else if(sol && nih) {
+    h[3] = 1;
+    ld z = h[2] * log(2);
+    h[0] *= (exp(-z) - 1) / -z;
+    z = h[2] * log(3);
+    h[1] *= (exp(+z) - 1) / z;
+    }
+  else if(nih) {
+    h[3] = 1;
+    ld z = h[2] * log(2);
+    h[0] *= (exp(+z) - 1) / z;
+    z = h[2] * log(3);
+    h[1] *= (exp(+z) - 1) / z;
+    }
+  else if(sl2) {
+    /* not implemented */
+    }
+  return h;
+  }
+
 /** shift the view according to the given tangent vector */
 EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V) {
   if(!nonisotropic && !stretch::in()) {
     return rgpushxto0(direct_exp(lp_iapply(H))) * V;
     }
   else if(!nisot::geodesic_movement) {
-    transmatrix IV = view_inverse(V);
-    nisot::fixmatrix(IV);
-    const transmatrix V1 = iview_inverse(IV);
-    return V1 * eupush(IV * eupush(H) * V1 * C0);
+    transmatrix IV = view_inverse(View);
+    transmatrix view_shift = eupush( tC0(IV) );
+    transmatrix rot = View * view_shift;
+    hyperpoint tH = lie_exp(inverse(rot) * H);
+    return rot * eupush(tH) * inverse(view_shift);
     }
   else {
     return iview_inverse(nisot::parallel_transport(view_inverse(V), -H));
