@@ -1,3 +1,32 @@
+#if NILRIDER
+#define CUSTOM_CAPTION "Nil Rider 0.1"
+#define MAXMDIM 4
+#define CAP_INV 0
+#define CAP_COMPLEX2 0
+#define CAP_EDIT 0
+#define CAP_BT 0
+#define CAP_SOLV 0
+#define CAP_THREAD 0
+#define CAP_RUG 0
+#define CAP_SVG 0
+#define CAP_TOUR 0
+#define CAP_IRR 0
+#define CAP_CRYSTAL 0
+#define CAP_ARCM 0
+#define CAP_HISTORY 0
+#define CAP_STARTANIM 0
+#define CAP_SAVE 0
+#define CAP_TRANS 0
+
+#ifdef BWEB
+#include "../../hyperweb.cpp"
+#else
+#include "../../hyper.cpp"
+#endif
+#include "../simple-impossible.cpp"
+#include "../rogueviz.cpp"
+#endif
+
 #include "nilrider.h"
 #include "statues.cpp"
 #include "timestamp.cpp"
@@ -498,5 +527,13 @@ auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] 
       pconf.rotational_nil = 0;
       });
 
+#ifdef NILRIDER
+auto hook1=
+    addHook(hooks_config, 100, [] {
+      if(arg::curphase == 1)
+        conffile = "nilrider.ini";
+      if(arg::curphase == 2) initialize_all();
+      });
+#endif
 
 }
