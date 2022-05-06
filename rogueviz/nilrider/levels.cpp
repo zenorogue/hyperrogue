@@ -354,7 +354,7 @@ level longtrack(
   "Ggggxgggr!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
   "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
   "ggggggggrggggggrggggggggrGggggggggGGggggGGGgggggGGGGggggggggggGG",
-  "g+------------------------------------------------------------*G",
+  "--------------------------------------------------------------*G",
   "gggggfffffggggggggggggggggggggggggggggggggggggggggggggggggggggGG"
   },
   0, 5,
