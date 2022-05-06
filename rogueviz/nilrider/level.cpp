@@ -51,11 +51,17 @@ void level::init_textures() {
         if(my < stepdiv/2) { my0 = my1 = 2*my; } else {my0 = stepdiv-2; my1=stepdiv; }
         int ax = (x/stepdiv) * stepdiv;
         int ay = (y/stepdiv) * stepdiv;
-        char c0 = getpix((mx0 + ax) / subpixels, (my0 + ay) / subpixels);
-        char c1 = getpix((mx1 + ax) / subpixels, (my1 + ay) / subpixels);
-        if(c0 == '!') col = bcols[c1];
-        else if(c1 == '!') col = bcols[c0];
-        else col = gradient(bcols[c0], bcols[c1], 0, .5, 1);
+
+        ld maxh = -HUGE_VAL;
+        char c = '!';
+        for(int i=0; i<4; i++) {
+          hyperpoint h = mappt(ax + ((mx0 != mx1) ? (i&1?3:1)*stepdiv/2 : mx0), ay + ((my0 != my1) ? (i&2?3:1)*stepdiv/2 : my0), texture_density);
+          if(h[2] > maxh) {
+            c = getpix(((i&1?mx1:mx0) + ax) / subpixels, ((i&2?my1:my0)+ ay) / subpixels);
+            if(c != '!') maxh = h[2];
+            }
+          }
+        col = bcols[c];
         if(mx0 != mx1)  col = gradient(col, 0xFF000000, 0, .1, 1);
         if(my0 != my1)  col = gradient(col, 0xFF000000, 0, .2, 1);
         }
@@ -107,13 +113,32 @@ void level::init() {
     shStepFloor.flags |= POLY_TRIANGLES;
 
     int prec = 16;
-    if(s == 2) prec *= 2;
+    if(s == 2) prec *= 4;
     int cdiv = prec / steps_per_block;
     
-    auto pt = [&] (int x, int y) {
+    auto pt = [&] (int x, int y, int qx, int qy) {
       if(s == 0) uniltinf.tvertices.push_back(glhr::makevertex(x * 1. / tX / prec, y * 1. / tY / prec, 0));
-      if(s == 2) uniltinf_stepped.tvertices.push_back(glhr::makevertex(x * 1. / tX / prec, y * 1. / tY / prec, 0));
-
+      if(s == 2) {
+        ld ax = x, ay = y;
+        if(qx) {
+          if(x % cdiv == cdiv/2+1) qx = 0;
+          }
+        else {
+          ax -= (x % cdiv);
+          ax += .5;
+          ax += (x % cdiv) * (cdiv/2-1.) / (cdiv/2);
+          }
+        if(qy) {
+          if(y % cdiv == cdiv/2+1) qy = 0;
+          }
+        else {
+          ay -= (y % cdiv);
+          ay += .5;
+          ay += (y % cdiv) * (cdiv/2-1.) / (cdiv/2);
+          }
+        uniltinf_stepped.tvertices.push_back(glhr::makevertex((ax+qx) / tX / prec, (ay+qy) / tY / prec, 0));
+        }
+      
       hyperpoint h = mappt(x, y, prec);
       if(s == 2) {
         if(x % cdiv == cdiv/2+1) x += cdiv/2 - 1;
@@ -158,20 +183,20 @@ void level::init() {
     for(int x=0; x<tX * prec; x++) {
       char bmch = map_tiles[y/prec][x/prec];
       if(bmch == '!') continue;
+      int qx = 0, qy = 0;
       if(s == 2) {
-        int q = 0;
-        if(x % cdiv == (cdiv/2)) q++;
-        if(x % cdiv > (cdiv/2)) q+=2;
-        if(y % cdiv == (cdiv/2)) q++;
-        if(y % cdiv > (cdiv/2)) q+=2;
-        if(q > 1) continue;
+        if(x % cdiv == (cdiv/2)) qx++;
+        if(x % cdiv > (cdiv/2)) qx+=2;
+        if(y % cdiv == (cdiv/2)) qy++;
+        if(y % cdiv > (cdiv/2)) qy+=2;
+        if(qx + qy > 1) continue;
         }
-      pt(x, y);
-      pt(x, y+1);
-      pt(x+1, y);
-      pt(x+1, y+1);
-      pt(x+1, y);
-      pt(x, y+1);
+      pt(x, y, qx, qy);
+      pt(x, y+1, qx, qy);
+      pt(x+1, y, qx, qy);
+      pt(x+1, y+1, qx, qy);
+      pt(x+1, y, qx, qy);
+      pt(x, y+1, qx, qy);
       }
     cgi.finishshape();
     }
