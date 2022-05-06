@@ -70,7 +70,6 @@ enum eGoalResult { grNone, grSuccess, grFailed };
 struct checkerparam {
   timestamp *t;
   level *l;
-  ld timer;
   int rev;
   };
 

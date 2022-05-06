@@ -67,8 +67,9 @@ void level::solve() {
     timestamp ts;
     ts.where = point0;
     ts.collected_triangles = v.collected;
+    ts.timer = 0;
     ts.collect(this);
-    checkerparam p {&ts, this, 0, 0};
+    checkerparam p {&ts, this, 0};
     auto res = goals[goal_id].check(p);
     if(res == grFailed) continue;
 

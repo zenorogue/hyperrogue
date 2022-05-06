@@ -4,7 +4,7 @@ bool all(checkerparam c) { return c.t->collected_triangles == Flag(isize(c.l->tr
 
 goalchecker basic_check(ld time_limit, ld rev_limit) {
   return [=] (checkerparam c) {
-    if(c.timer > time_limit || c.rev > rev_limit) return grFailed;
+    if(c.t->timer > time_limit || c.rev > rev_limit) return grFailed;
     if(all(c)) return grSuccess;
     return grNone;
     };
@@ -12,7 +12,7 @@ goalchecker basic_check(ld time_limit, ld rev_limit) {
 
 goalchecker get_any(ld time_limit, ld rev_limit) {
   return [=] (checkerparam c) {
-    if(c.timer > time_limit || c.rev > rev_limit) return grFailed;
+    if(c.t->timer > time_limit || c.rev > rev_limit) return grFailed;
     if(c.t->collected_triangles) return grSuccess;
     return grNone;
     };
@@ -20,7 +20,7 @@ goalchecker get_any(ld time_limit, ld rev_limit) {
 
 goalchecker get_ordered(ld time_limit, ld rev_limit) {
   return [=] (checkerparam c) {
-    if(c.timer > time_limit || c.rev > rev_limit) return grFailed;
+    if(c.t->timer > time_limit || c.rev > rev_limit) return grFailed;
     if(c.t->collected_triangles & (c.t->collected_triangles+1)) return grFailed;
     if(all(c)) return grSuccess;
     return grNone;
@@ -29,7 +29,7 @@ goalchecker get_ordered(ld time_limit, ld rev_limit) {
 
 goalchecker yplus_check(ld time_limit, ld rev_limit) {
   return [=] (checkerparam c) {
-    if(c.timer > time_limit || c.rev > rev_limit) return grFailed;
+    if(c.t->timer > time_limit || c.rev > rev_limit) return grFailed;
     if(c.t->where[1] < 0) return grFailed;
     if(all(c)) return grSuccess;
     return grNone;
@@ -38,7 +38,7 @@ goalchecker yplus_check(ld time_limit, ld rev_limit) {
 
 goalchecker fullstop_check(ld time_limit, ld rev_limit) {
   return [=] (checkerparam c) {
-    if(c.timer > time_limit || c.rev > rev_limit) return grFailed;
+    if(c.t->timer > time_limit || c.rev > rev_limit) return grFailed;
     if(all(c) && c.t->vel == 0) return grSuccess;
     return grNone;
     };
