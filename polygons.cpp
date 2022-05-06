@@ -1108,7 +1108,7 @@ void geometry_information::prepare_shapes() {
   S84 = S42 * 2;
 
   // printf("crossf = %f euclid = %d sphere = %d\n", float(crossf), euclid, sphere);
-  hpc.clear();
+  hpc.clear(); ext.clear();
 
   make_sidewalls();
 
