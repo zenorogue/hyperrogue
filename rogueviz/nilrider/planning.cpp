@@ -94,6 +94,7 @@ void level::compute_plan_transform() {
   }
 
 void level::draw_planning_screen() {
+  if(just_refreshing) return;
   curlev->init_textures();
   dynamicval<eGeometry> g(geometry, gEuclid);
   dynamicval<eModel> pm(pmodel, mdDisk);
