@@ -49,8 +49,8 @@ void timestamp::draw_unilcycle(const shiftmatrix& V) {
   
   if(1) {
     curvepoint(base + Ta * point3(hublen, 0, whrad+hublen));
-    curvepoint(base + Ta * point3(0, -hublen, whrad+hublen));
-    curvepoint(base + Ta * point3(0, +hublen, whrad+hublen));
+    curvepoint(base + Ta * point3(-hublen, -hublen, whrad+hublen));
+    curvepoint(base + Ta * point3(-hublen, +hublen, whrad+hublen));
     curvepoint(base + Ta * point3(hublen, 0, whrad+hublen));
     queuecurve(V * rgpushxto0(where), 0xFF, 0x303030FF, PPR::WALL);
     
