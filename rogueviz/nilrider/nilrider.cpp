@@ -425,6 +425,7 @@ void initialize_all() {
   showstartmenu = false;
   stop_game();
   geometry = gNil;
+  variation = eVariation::pure;
   nil_set_geodesic();
   enable_canvas();
   patterns::canvasback = 0;
