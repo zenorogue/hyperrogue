@@ -62,6 +62,8 @@ void frame() {
   curlev->current.draw_unilcycle(V);  
   }
 
+bool crash_sound = true;
+
 bool turn(int delta) {
   if(planning_mode && !view_replay) return false;
 
@@ -101,21 +103,45 @@ bool turn(int delta) {
         curlev->history.pop_back();
         curlev->current = curlev->history.back();
         timer = isize(curlev->history) * 1. / tps;
+        crash_sound = true;
         }
       else {
         reversals = 0;
         loaded_or_planned = false;
         timer = 0;
+        crash_sound = true;
         }
       }
     }
 
-  if(!paused && !view_replay && !backing) for(int i=0; i<delta; i++) {
-    curlev->history.push_back(curlev->current);
-    curlev->current.be_consistent();
-    bool b = curlev->current.tick(curlev);
-    if(b) timer += 1. / tps;
-    else curlev->history.pop_back();
+  if(!paused && !view_replay && !backing) {
+
+    auto t = curlev->current.collected_triangles;
+    bool fail = false;
+
+    for(int i=0; i<delta; i++) {
+      curlev->history.push_back(curlev->current);
+      curlev->current.be_consistent();
+      bool b = curlev->current.tick(curlev);
+      if(b) timer += 1. / tps;
+      else curlev->history.pop_back(), fail = true;
+      }
+
+    if(t != curlev->current.collected_triangles)
+      playSound(cwt.at, "pickup-gold");
+
+    if(fail && crash_sound) {
+      char ch = curlev->mapchar(curlev->current.where);
+      println(hlog, "got ch = ", ch);
+      if(ch == 'r') {
+        playSound(cwt.at, "closegate");
+        crash_sound = false;
+        }
+      if(ch == '!') {
+        playSound(cwt.at, "seen-air");
+        crash_sound = false;
+        }
+      }
     }
  
   if(!paused) curlev->current.centerview(curlev);
@@ -226,6 +252,7 @@ void clear_path(level *l) {
   paused = false;
   reversals = 0;
   loaded_or_planned = false;
+  crash_sound = true;
   }
 
 void pick_level() {
