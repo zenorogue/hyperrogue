@@ -97,6 +97,7 @@ void level::init() {
   
   start.where = mappt(startx+.5, starty+.5, 1);
   start.t = 0;
+  start.timer = 0;
   current = start;
   println(hlog, "start.where = ", start.where);
   println(hlog, "current.where = ", current.where, " : ", format("%p", &current));
@@ -407,7 +408,6 @@ hyperpoint level::mappt(ld x, ld y, int s) {
 void level::init_plan() {
   plan.emplace_back(start.where, hpxy(cos(start.heading_angle + 90*degree) * 2, sin(start.heading_angle + 90*degree) * 2));
   current = start;
-  timer = 0;
   }
 
 ld level::safe_alt(hyperpoint h, ld mul, ld mulx) {
@@ -430,7 +430,7 @@ void level::draw_level(const shiftmatrix& V) {
     id++;
     if(!gotit) {
       for(int i=0; i<6; i++) {
-        auto &poly = queuepoly(V * rgpushxto0(t.where) * cpush(2, abs(0.2 * sin(timer * 5))), shMini[i], t.colors[i]);
+        auto &poly = queuepoly(V * rgpushxto0(t.where) * cpush(2, abs(0.2 * sin(current.timer * 5))), shMini[i], t.colors[i]);
         poly.tinf = &floor_texture_vertices[cgi.shFloor.id];
         ensure_vertex_number(*poly.tinf, poly.cnt);
         }

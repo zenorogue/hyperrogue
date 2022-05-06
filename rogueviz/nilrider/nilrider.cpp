@@ -102,13 +102,11 @@ bool turn(int delta) {
         backing = true;
         curlev->history.pop_back();
         curlev->current = curlev->history.back();
-        timer = isize(curlev->history) * 1. / tps;
         crash_sound = true;
         }
       else {
         reversals = 0;
         loaded_or_planned = false;
-        timer = 0;
         crash_sound = true;
         }
       }
@@ -123,8 +121,10 @@ bool turn(int delta) {
       curlev->history.push_back(curlev->current);
       curlev->current.be_consistent();
       bool b = curlev->current.tick(curlev);
-      if(b) timer += 1. / tps;
-      else curlev->history.pop_back(), fail = true;
+      if(!b) {
+        curlev->history.pop_back();
+        fail = true;
+        }
       }
 
     if(t != curlev->current.collected_triangles)
@@ -160,7 +160,6 @@ void toggle_replay() {
   if(!view_replay && !planning_mode) {
     paused = true;
     curlev->current = curlev->history.back();
-    timer = isize(curlev->history) * 1. / tps;
     }
   }
 
@@ -170,7 +169,6 @@ void run() {
   dialog::init();
   if(view_replay && !paused) {
     int ttick = gmod(ticks - simulation_start_tick, isize(curlev->history));
-    timer = ttick * 1. / tps;
     curlev->current = curlev->history[ttick];  
     curlev->current.centerview(curlev);
     }
@@ -188,7 +186,7 @@ void run() {
         }  
       }
     }
-  curlev->current.draw_instruments(curlev, timer);
+  curlev->current.draw_instruments(curlev);
   
   if(paused && !planning_mode) {
     displayButton(current_display->xcenter, current_display->ycenter, mousing ? XLAT("paused -- click to unpause") : XLAT("paused -- press p to continue"), 'p', 8);
@@ -221,7 +219,7 @@ void run() {
   if(pause_av) dialog::add_key_action(PSEUDOKEY_PAUSE, [] {
     paused = !paused;
     if(view_replay && !paused)
-      simulation_start_tick = ticks - timer * tps;
+      simulation_start_tick = ticks - curlev->current.timer * tps;
     });
   dialog::add_key_action('-', [] {
     paused = false;
@@ -248,7 +246,6 @@ void clear_path(level *l) {
   l->history.clear();
   l->current = l->start;
   l->history.push_back(l->start);
-  timer = 0;
   paused = false;
   reversals = 0;
   loaded_or_planned = false;
@@ -538,7 +535,6 @@ auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] 
     popScreenAll();
     rv_hook(anims::hooks_anim, 100, [] {
       int ttick = ticks % isize(curlev->history);
-      timer = ttick * 1. / tps;
       curlev->current = curlev->history[ttick];  
       curlev->current.centerview(curlev);
       anims::moved();

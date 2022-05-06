@@ -13,6 +13,7 @@ struct timestamp {
   ld circpos;       /**< controls the wheel graphics */
   ld slope;         /**< the current slope */
   ld t;             /**< planning spline parameter */
+  ld timer = 0;     /**< the timer, in seconds */
 
   flagtype collected_triangles; /**< a bitset which shows which triangles are collected */
   flagtype goals;               /**< a bitset which shows which goals are complete */
@@ -21,7 +22,7 @@ struct timestamp {
   bool tick(level*);/**< one tick of the simulation -- returns false if the unicycle has stopped or crashed */
   void centerview(level*);
   void draw_unilcycle(const shiftmatrix&);
-  void draw_instruments(level*, ld t);
+  void draw_instruments(level*);
   ld energy_in_squares();
   bool collect(level*);
   void be_consistent();
@@ -184,9 +185,6 @@ inline ld min_gfx_slope = +M_PI/2;
 
 /** current slope for rendering */
 inline ld gfx_slope = 0;
-
-/** the timer */
-inline ld timer = 0;
 
 /** default block unit */
 inline double dft_block = 1;

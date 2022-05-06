@@ -134,6 +134,7 @@ bool timestamp::tick(level *lev) {
   where[2] = lev->surface(where);
   circpos += mvel / whrad / tps;
   
+  timer += 1. / tps;
   return true;
   }
 
@@ -169,7 +170,11 @@ void timestamp::centerview(level *lev) {
   playermoved = false;   
   }
 
-void timestamp::draw_instruments(level* l, ld t) {
+string format_timer(ld t) {
+  return format("%d:%02d.%02d", int(t / 60), int(t) % 60, int(frac(t) * 100));
+  }
+
+void timestamp::draw_instruments(level* l) {
   dynamicval<eGeometry> g(geometry, gEuclid);
   dynamicval<eModel> pm(pmodel, mdDisk);
   dynamicval<bool> ga(vid.always3, false);
@@ -303,7 +308,7 @@ void timestamp::draw_instruments(level* l, ld t) {
     bool gsuccess = goals & Flag(gid);
     if(lshiftclick) gfailed = true, gsuccess = false;
     if(anyctrlclick) gfailed = false, gsuccess = true;
-    string s = format("%d:%02d.%02d", int(t / 60), int(t) % 60, int(frac(t) * 100));
+    string s = format_timer(timer);
     shiftmatrix T = sId * atscreenpos(cx+rad/2, cy+(gid-1)*rad/1.2, pix * rad * 1.2);
     poly_outline = 0xFF; color_t f = darkena(g.color, 0, 0xFF);
     if(gsuccess) {
@@ -321,9 +326,9 @@ void timestamp::draw_instruments(level* l, ld t) {
   quickqueue();
   glflush();
   
-  string s = format("%d:%02d.%02d", int(t / 60), int(t) % 60, int(frac(t) * 100));
-  displaystr(vid.xres - vid.fsize, vid.fsize*2, 0, vid.fsize * 2, s, 0, 16);
+  displaystr(vid.xres - vid.fsize, vid.fsize*2, 0, vid.fsize * 2, format_timer(timer), 0, 16);
 
+  string s;
   if(loaded_or_planned) s = "R";
   else if(reversals) s = format("+%d", reversals);
   else return;

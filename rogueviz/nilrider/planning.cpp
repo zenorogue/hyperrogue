@@ -178,7 +178,6 @@ void level::draw_planning_screen() {
       }
       
     current = history[mint];
-    timer = mint * 1. / tps;
     }
 
   draw_sq(get_spline(closest_t), 0x8080FFFF, PPR::ITEM);
