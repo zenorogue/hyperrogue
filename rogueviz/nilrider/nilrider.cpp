@@ -421,6 +421,20 @@ void initialize() {
   pushScreen(run);
   }
 
+void initialize_all() {
+  showstartmenu = false;
+  stop_game();
+  geometry = gNil;
+  nil_set_geodesic();
+  enable_canvas();
+  patterns::canvasback = 0;
+  vid.cells_drawn_limit = 1;
+  mapeditor::drawplayer = false;
+  backcolor = 0xC0C0FFFF;
+  logfog = 1;
+  initialize();
+  }
+
 auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] { planning_mode = true; }) + arg::add3("-viewsim", [] { view_replay = true; })
   + arg::add3("-oqc", [] { on_quit = popScreenAll; })
   + arg::add3("-nilsolve-set", [] {
@@ -431,6 +445,7 @@ auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] 
   + arg::add3("-nilsolve", [] { curlev->solve(); })
   + arg::add3("-nilgeo", nil_set_geodesic)
   + arg::add3("-nilper", nil_set_perspective)
+  + arg::add3("-nilrider", initialize_all)
   + addHook(hooks_configfile, 100, [] {
     param_f(aimspeed_key_x, "nilrider_key_x")
     ->editable(-5, 5, 0.1, "navigation sensitivity (keyboard)", "press Left/Right to navigate (lCtrl to fine-tune)", 'n');
