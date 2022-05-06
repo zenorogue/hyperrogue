@@ -735,7 +735,7 @@ EX void mainloopiter() {
     }
   
   mousepan = cmode & sm::NORMAL;
-  if((cmode & (sm::DRAW | sm::MAP)) && !hiliteclick) mousepan = true;
+  if((cmode & sm::PANNING) && !hiliteclick) mousepan = true;
   if(cmode & sm::SHOWCURSOR) mousepan = false;
   mousepan = mousepan && mouseaiming(false) && mouseaim_sensitivity;
   if(mousepan != oldmousepan) {
@@ -900,7 +900,7 @@ EX void mainloopiter() {
     #endif
     }
   
-  if(smooth_scrolling && !shmup::on && (cmode & sm::NORMAL)) {
+  if(smooth_scrolling && !shmup::on && (cmode & (sm::NORMAL | sm::PANNING))) {
     rug::using_rugview urv;
     auto& lastticks = sc_ticks;
     ld t = (ticks - lastticks) * shiftmul / 1000.;

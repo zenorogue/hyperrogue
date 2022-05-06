@@ -1321,7 +1321,7 @@ EX namespace mapeditor {
   EX set<int> affected_id;
 
   EX void showMapEditor() {
-    cmode = sm::MAP;
+    cmode = sm::MAP | sm::PANNING;
     gamescreen(0);
   
     int fs = editor_fsize();
@@ -2001,7 +2001,7 @@ EX namespace mapeditor {
 
   EX void showDrawEditor() {
 #if CAP_POLY
-    cmode = sm::DRAW;
+    cmode = sm::DRAW | sm::PANNING;
     gamescreen(0);
     drawGrid();
     if(callhandlers(false, hooks_prestats)) return;

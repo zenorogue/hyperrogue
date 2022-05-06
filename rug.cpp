@@ -1539,7 +1539,7 @@ EX void rug_geometry_choice() {
   }
 
 EX void show() {
-  cmode = sm::SIDE | sm::MAYDARK;
+  cmode = sm::SIDE | sm::MAYDARK | sm::PANNING;
   gamescreen(0);
   dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
   
