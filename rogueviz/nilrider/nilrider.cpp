@@ -428,6 +428,7 @@ void initialize() {
 
   rv_hook(hooks_frame, 100, frame);
   rv_hook(shmup::hooks_turn, 100, turn);
+  rv_hook(hooks_resetGL, 100, cleanup_textures);
   on = true;
   on_cleanup_or_next([] { on = false; });
   pushScreen(run);

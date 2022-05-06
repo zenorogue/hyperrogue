@@ -10,6 +10,7 @@ void level::init_textures() {
   for(int stepped: {0, 1}) {
 
     auto& target = stepped ? unil_texture_stepped : unil_texture;
+    if(target) return;
 
     target = new texture::texture_data;
 
@@ -446,6 +447,7 @@ void level::draw_level(const shiftmatrix& V) {
 
   queuepoly(V, shField, 0xFFFF00FF);
 
+  curlev->init_textures();
   if(!stepped_display) {
     auto& poly = queuepoly(V, shFloor, 0xFFFFFFFF); // 0xFFFFFFFF);
     poly.tinf = &uniltinf;
@@ -457,5 +459,13 @@ void level::draw_level(const shiftmatrix& V) {
     uniltinf_stepped.texture_id = unil_texture_stepped->textureid;
     }
   }
-  
+
+void cleanup_textures() {
+  for(auto l: all_levels) {
+    if(l->unil_texture) delete(l->unil_texture);
+    l->unil_texture = nullptr;
+    if(l->unil_texture_stepped) delete(l->unil_texture_stepped);
+    l->unil_texture_stepped = nullptr;
+    }
+  }
 }
