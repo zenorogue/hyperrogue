@@ -124,6 +124,7 @@ bool turn(int delta) {
       if(!b) {
         curlev->history.pop_back();
         fail = true;
+        break;
         }
       }
 

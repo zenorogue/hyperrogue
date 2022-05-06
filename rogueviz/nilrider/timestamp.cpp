@@ -199,7 +199,7 @@ void timestamp::centerview(level *lev) {
         if(lev->mapchar(p+h) == 'r') return true;
       }
     return false;
-    });
+    }, 10);
   
   View = T;
   rotate_view(cspin(1, 2, gfx_slope));
