@@ -96,6 +96,7 @@ void load() {
         l->records[i][g] = t;
         }
       println(hlog, "error: unknown content ", s);
+      continue;
       }
     }
   }
