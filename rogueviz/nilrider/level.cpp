@@ -4,6 +4,7 @@ const int steps_per_block = 16;
 const int texture_density = 64;
 
 void level::init_textures() {
+  create_castle();
   int tY = isize(map_tiles);
   int tX = isize(map_tiles[0]);
 
@@ -459,6 +460,7 @@ void level::draw_level(const shiftmatrix& V) {
   int id = 0;
   init_statues();
   curlev->init_shapes();
+  curlev->init_textures();
 
   for(auto& t: triangles) {
     bool gotit = current.collected_triangles & Flag(id);
@@ -482,7 +484,6 @@ void level::draw_level(const shiftmatrix& V) {
 
   queuepoly(V, shField, 0xFFFF00FF);
 
-  curlev->init_textures();
   if(!stepped_display) {
     auto& poly = queuepoly(V, shFloor, 0xFFFFFFFF); // 0xFFFFFFFF);
     poly.tinf = &uniltinf;
@@ -495,12 +496,17 @@ void level::draw_level(const shiftmatrix& V) {
     }
   }
 
+void cleanup_texture(texture::texture_data*& d) {
+  if(d) delete d;
+  d = nullptr;
+  }
+
 void cleanup_textures() {
   for(auto l: all_levels) {
-    if(l->unil_texture) delete(l->unil_texture);
-    l->unil_texture = nullptr;
-    if(l->unil_texture_stepped) delete(l->unil_texture_stepped);
-    l->unil_texture_stepped = nullptr;
+    cleanup_texture(l->unil_texture);
+    cleanup_texture(l->unil_texture_stepped);
     }
+  println(hlog, "CLEANUP texture");
+  cleanup_texture(castle_texture);
   }
 }

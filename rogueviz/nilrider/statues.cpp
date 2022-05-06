@@ -25,6 +25,8 @@ hpcshape shMini[6];
 
 void create_minitriangle() {
   using namespace bricks;
+  bricks::bricks.clear();
+  build(false);
   hyperpoint ctr = Hypc;
   for(auto& b: bricks::bricks) ctr += b.location;
   ctr /= ctr[3];
@@ -79,9 +81,6 @@ void create_castle() {
       tex.get_texture_pixel(x, y) = bcols[submaps['b'][y][x]];
     tex.loadTextureGL();
     }
-
-  bricks::build(false);
-  create_minitriangle();
   }
 
 hpcshape shBall;
@@ -118,7 +117,6 @@ void init_statues() {
   if(cgi.ext.count("nil-statues")) return;
   cgi.ext["nil-statues"] = nullptr;
   create_minitriangle();
-  create_castle();
   
   cgi.bshape(shBall, PPR::WALL);
   shBall.flags |= POLY_TRIANGLES;
