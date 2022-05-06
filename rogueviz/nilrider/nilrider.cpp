@@ -213,7 +213,7 @@ void run() {
   show_button(PSEUDOKEY_MENU, "menu");
 
   dialog::add_key_action(PSEUDOKEY_MENU, [] {
-    paused = true;
+    if(curlev->current.timer) paused = true;
     pushScreen(main_menu);
     });
   if(pause_av) dialog::add_key_action(PSEUDOKEY_PAUSE, [] {
