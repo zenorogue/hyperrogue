@@ -2976,8 +2976,15 @@ EX hyperpoint lie_exp(hyperpoint h) {
     z = h[2] * log(3);
     h[1] *= (exp(+z) - 1) / z;
     }
-  else if(sl2) {
-    /* not implemented */
+  else {
+    /* not implemented -- approximate for now */
+    const int steps = 16;
+    h /= (1<<steps);
+    h[3] = 1;
+    normalize(h);
+    transmatrix T = eupush(h);
+    for(int i=0; i<16; i++) T = T * T;
+    h = tC0(T);
     }
   return h;
   }
