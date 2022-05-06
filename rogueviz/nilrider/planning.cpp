@@ -3,6 +3,7 @@ namespace nilrider {
 hyperpoint get_spline(ld t);
 
 bool level::simulate() {
+  loaded_or_planned = true;
   if(history.empty())
     history.push_back(start);
   auto at = history.back();

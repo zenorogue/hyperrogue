@@ -197,5 +197,6 @@ extern map<char, array<string, 16> > submaps;
 hyperpoint sym_to_heis(hyperpoint H);
 
 extern int reversals;
+extern bool loaded_or_planned;
 
 }

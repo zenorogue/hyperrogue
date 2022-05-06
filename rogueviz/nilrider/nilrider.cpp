@@ -21,6 +21,7 @@ ld aimspeed_key_x = 1, aimspeed_key_y = 1, aimspeed_mouse_x = 1, aimspeed_mouse_
 vector<string> move_names = { "camera down", "move left", "camera up", "move right", "fine control", "pause", "reverse time", "view simulation", "menu" };
 
 int reversals = 0;
+bool loaded_or_planned = false;
 
 void frame() {
   if(planning_mode && !view_replay) return;
@@ -74,6 +75,7 @@ bool turn(int delta) {
         }
       else {
         reversals = 0;
+        loaded_or_planned = false;
         timer = 0;
         }
       }
@@ -187,6 +189,16 @@ void run() {
     };
   }
 
+void clear_path(level *l) {
+  l->history.clear();
+  l->current = l->start;
+  l->history.push_back(l->start);
+  timer = 0;
+  paused = false;
+  reversals = 0;
+  loaded_or_planned = false;
+  }
+
 void pick_level() {
   clearMessages();
   dialog::init(XLAT("select the track"), 0xC0C0FFFF, 150, 100);
@@ -196,6 +208,7 @@ void pick_level() {
       curlev = l;
       recompute_plan_transform = true;
       l->init();
+      clear_path(l);
       popScreen();
       });
     }
@@ -292,6 +305,7 @@ void replays() {
     curlev->history.clear();
     auto& current = curlev->current;
     current = curlev->start;
+    loaded_or_planned = true;
     for(auto h: r.headings) {
       current.heading_angle = int_to_heading(h);
       curlev->history.push_back(current);
@@ -329,9 +343,7 @@ void main_menu() {
   if(!planning_mode) {
     dialog::addItem("restart", 'r');
     dialog::add_action([] {
-      curlev->current = curlev->start;
-      timer = 0;
-      paused = false;
+      clear_path(curlev);
       popScreen();
       });
   
