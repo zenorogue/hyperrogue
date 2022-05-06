@@ -140,7 +140,7 @@ transmatrix try_harder_relative_matrix(cell *at, cell *from) {
   }
 
 void edit_segment(int aid) {
-  cmode = 0;
+  cmode = sm::PANNING;
   gamescreen(0);
   dialog::init(XLAT("animation segment"), 0xFFFFFFFF, 150, 0);
   dialog::addSelItem("interval", fts(anims[aid].start_interval), 'i');
