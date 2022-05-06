@@ -132,7 +132,6 @@ bool turn(int delta) {
 
     if(fail && crash_sound) {
       char ch = curlev->mapchar(curlev->current.where);
-      println(hlog, "got ch = ", ch);
       if(ch == 'r') {
         playSound(cwt.at, "closegate");
         crash_sound = false;
