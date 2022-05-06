@@ -95,6 +95,7 @@ void level::init_shapes() {
     int prec = 16;
     if(s == 2) prec *= 4;
     int cdiv = prec / steps_per_block;
+    prec >>= reduce_quality;
     
     bool need_uniltinf = uniltinf.tvertices.empty();
     

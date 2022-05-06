@@ -15,7 +15,7 @@ EX hyperpoint sym_to_heis(hyperpoint H) {
   }
 
 void timestamp::draw_unilcycle(const shiftmatrix& V) {
-  const int points = 60;
+  const int points = 60 / (1 + reduce_quality);
   const int spoke_each = 5;
   hyperpoint whpoint[points+1];
   

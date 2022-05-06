@@ -206,5 +206,7 @@ extern int reversals;
 extern bool loaded_or_planned;
 extern bool planning_mode;
 
+inline int reduce_quality = 0;
+
 void save();
 }

@@ -545,6 +545,7 @@ auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] 
   + arg::add3("-nilgeo", nil_set_geodesic)
   + arg::add3("-nilper", nil_set_perspective)
   + arg::add3("-nilrider", initialize_all)
+  + arg::add3("-nilrider-q", [] { arg::shift(); reduce_quality = arg::argi(); })
   + addHook(hooks_configfile, 100, [] {
     param_f(aimspeed_key_x, "nilrider_key_x")
     ->editable(-5, 5, 0.1, "navigation sensitivity (keyboard)", "press Left/Right to navigate (lCtrl to fine-tune)", 'n');
