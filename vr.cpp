@@ -1299,15 +1299,7 @@ EX void show_vr_demos() {
   dialog::display();
   }
 
-EX void show_vr_settings() {
-  cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
-  dialog::init(XLAT("VR settings"));
-
-  dialog::addItem(XLAT("VR demos"), 'D');
-  dialog::add_action_push(show_vr_demos);
-
-  
+EX void vr_enable_button() {
   dialog::addBoolItem(XLAT("VR enabled"), enabled, 'o');
   dialog::add_action([] {
     enabled = !enabled;
@@ -1318,6 +1310,17 @@ EX void show_vr_settings() {
     dialog::addInfo(XLAT("error: ") + error_msg, 0xC00000);
   else
     dialog::addInfo(XLAT("VR initialized correctly"), 0x00C000);
+  }
+
+EX void show_vr_settings() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);
+  dialog::init(XLAT("VR settings"));
+
+  dialog::addItem(XLAT("VR demos"), 'D');
+  dialog::add_action_push(show_vr_demos);
+
+  vr_enable_button();
   
   dialog::addBreak(100);
 
