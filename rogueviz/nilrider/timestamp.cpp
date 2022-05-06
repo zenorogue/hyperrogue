@@ -84,6 +84,27 @@ bool timestamp::collect(level *lev) {
       if(t.x == xy.first && t.y == xy.second) collected_triangles |= (1<<i);
       }
     }
+
+  int gid = 0;
+  for(auto& g: lev->goals) {
+    bool gfailed = failed & Flag(gid);
+    bool gsuccess = goals & Flag(gid);
+    if(gfailed || gsuccess) continue;
+    checkerparam cp {this, lev, reversals};
+    auto res = g.check(cp);
+    if(res == grFailed) {
+      failed |= Flag(gid);
+      }
+    else if(res == grSuccess) {
+      goals |= Flag(gid);
+      lev->current_score[gid] = timer;
+      auto &res = lev->records[planning_mode][gid];
+      if(res == 0 || timer < res)
+        res = timer;
+      }
+    gid++;
+    }
+
   return true;
   }
 
@@ -306,14 +327,11 @@ void timestamp::draw_instruments(level* l) {
   for(auto& g: l->goals) {
     bool gfailed = failed & Flag(gid);
     bool gsuccess = goals & Flag(gid);
-    if(lshiftclick) gfailed = true, gsuccess = false;
-    if(anyctrlclick) gfailed = false, gsuccess = true;
-    string s = format_timer(timer);
     shiftmatrix T = sId * atscreenpos(cx+rad/2, cy+(gid-1)*rad/1.2, pix * rad * 1.2);
     poly_outline = 0xFF; color_t f = darkena(g.color, 0, 0xFF);
     if(gsuccess) {
       queuepoly(T * spin(90*degree), cgi.shGrail, f);
-      displaystr(cx+rad, cy+(gid-1)*rad/1.2, 0, vid.fsize*.75, s, 0, 0);
+      displaystr(cx+rad, cy+(gid-1)*rad/1.2, 0, vid.fsize*.75, format_timer(l->current_score[gid]), 0, 0);
       }
     else {
       poly_outline = f; f = 0x40;

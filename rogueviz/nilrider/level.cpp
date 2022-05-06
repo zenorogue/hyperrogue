@@ -102,6 +102,11 @@ void level::init() {
   println(hlog, "start.where = ", start.where);
   println(hlog, "current.where = ", current.where, " : ", format("%p", &current));
   
+  int qgoals = isize(goals);
+  records[0].resize(qgoals, 0);
+  records[1].resize(qgoals, 0);
+  current_score.resize(qgoals, 0);
+
   /* start facing slightly to the right from the slope */
   for(auto b: {true, false}) while(true) {
     auto c = start;

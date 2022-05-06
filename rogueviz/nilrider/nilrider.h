@@ -142,6 +142,12 @@ struct level {
   vector<manual_replay> manual_replays;
   vector<plan_replay> plan_replays;
 
+  /* vector of records in no-planning and planning for each goal (0 = no record known) */
+  vector<ld> records[2];
+
+  /* vector of current time for each goal */
+  vector<ld> current_score;
+
   /** plan for the planning mode */
   plan_t plan;
   void init_plan();
@@ -195,5 +201,5 @@ hyperpoint sym_to_heis(hyperpoint H);
 
 extern int reversals;
 extern bool loaded_or_planned;
-
+extern bool planning_mode;
 }
