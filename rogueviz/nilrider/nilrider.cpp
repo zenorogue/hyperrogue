@@ -163,7 +163,7 @@ void toggle_replay() {
   }
 
 void run() {
-  cmode = sm::MAP;
+  cmode = sm::PANNING;
   clearMessages();
   dialog::init();
   if(view_replay && !paused) {
@@ -518,6 +518,7 @@ void initialize_all() {
   enable_canvas();
   patterns::canvasback = 0;
   vid.cells_drawn_limit = 1;
+  smooth_scrolling = true;
   mapeditor::drawplayer = false;
   backcolor = 0xC0C0FFFF;
   logfog = 1;
