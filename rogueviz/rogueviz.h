@@ -110,8 +110,11 @@ namespace rogueviz {
   void do_cleanup();
 
   inline void on_cleanup_or_next(const reaction_t& del) {
+    #if CAP_TOUR
     if(tour::on) tour::on_restore(del);
-    else cleanup.push_back(del);
+    else
+    #endif
+    cleanup.push_back(del);
     }
 
   template<class T, class U> void rv_hook(hookset<T>& m, int prio, U&& hook) {

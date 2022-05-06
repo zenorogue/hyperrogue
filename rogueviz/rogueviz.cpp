@@ -912,10 +912,12 @@ void init(flagtype _vizflags) {
   autocheat = true; 
   showstartmenu = false;
 
+  #if CAP_TOUR
   if(tour::on) {
     tour::slide_backup(mapeditor::drawplayer);
     tour::slide_backup(timerghost);
     }
+  #endif
 
 #if !ISWEB
   mapeditor::drawplayer = false;
