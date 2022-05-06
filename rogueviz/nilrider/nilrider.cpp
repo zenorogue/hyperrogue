@@ -410,6 +410,7 @@ reaction_t on_quit = [] { exit(0); };
 
 void main_menu() {
   clearMessages();
+  poly_outline = 0xFF;
   dialog::init(XLAT("Nil Rider"), 0xC0C0FFFF, 150, 100);
 
   dialog::addItem("continue", 'c');
