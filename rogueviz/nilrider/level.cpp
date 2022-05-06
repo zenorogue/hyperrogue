@@ -76,6 +76,7 @@ void level::init_textures() {
 void level::init() {
   if(initialized) return;
   initialized = true;
+  check_cgi();
 
   real_minx = HUGE_VAL;
   real_miny = HUGE_VAL;
