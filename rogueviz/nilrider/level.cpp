@@ -74,50 +74,18 @@ void level::init_textures() {
     }
   }
 
-void level::init() {
-  if(initialized) return;
-  initialized = true;
+void level::init_shapes() {
   check_cgi();
-
-  real_minx = HUGE_VAL;
-  real_miny = HUGE_VAL;
-  real_maxx = -HUGE_VAL;
-  real_maxy = -HUGE_VAL;
+  string s = "nillevel-" + name;
+  if(cgi.ext.count(s)) return;
+  cgi.ext[s] = nullptr;
   
-  if(flags & nrlPolar)
-    scale = 1;
-  else
-    scale = abs(maxx - minx) / isize(map_tiles[0]);
-  println(hlog, "SCALE IS ", this->scale);
-
-  init_textures();
-
   int tY = isize(map_tiles);
   int tX = isize(map_tiles[0]);
   
-  start.where = mappt(startx+.5, starty+.5, 1);
-  start.t = 0;
-  start.timer = 0;
-  current = start;
-  println(hlog, "start.where = ", start.where);
-  println(hlog, "current.where = ", current.where, " : ", format("%p", &current));
-  
-  int qgoals = isize(goals);
-  records[0].resize(qgoals, 0);
-  records[1].resize(qgoals, 0);
-  current_score.resize(qgoals, 0);
-
-  /* start facing slightly to the right from the slope */
-  for(auto b: {true, false}) while(true) {
-    auto c = start;
-    /* no treasures are known, which confuses goals */
-    dynamicval<bool> lop1(loaded_or_planned, true);
-    dynamicval<bool> lop2(planning_mode, false);
-    if(c.tick(this) == b) break;
-    start.heading_angle -= 1 * degree;
-    }
-
-  for(int s=0; s<3; s++) {  
+  for(int s=0; s<3; s++) {
+    if(euclid && s != 1) continue;
+    if(nil && s == 1) continue;
     cgi.bshape(s == 0 ? shFloor : s == 1 ? shPlanFloor : shStepFloor, PPR::WALL);
     shFloor.flags |= POLY_TRIANGLES;
     shPlanFloor.flags |= POLY_TRIANGLES;
@@ -127,8 +95,10 @@ void level::init() {
     if(s == 2) prec *= 4;
     int cdiv = prec / steps_per_block;
     
+    bool need_uniltinf = uniltinf.tvertices.empty();
+    
     auto pt = [&] (int x, int y, int qx, int qy) {
-      if(s == 0) uniltinf.tvertices.push_back(glhr::makevertex(x * 1. / tX / prec, y * 1. / tY / prec, 0));
+      if(need_uniltinf) uniltinf.tvertices.push_back(glhr::makevertex(x * 1. / tX / prec, y * 1. / tY / prec, 0));
       if(s == 2) {
         ld ax = x, ay = y;
         if(qx) {
@@ -334,7 +304,37 @@ void level::init() {
             ptc(.4, asdw, -oasdw2, x2, y2);
             }
           }
-        }
+        }      
+      }
+    cgi.finishshape();
+    }
+
+  cgi.extra_vertices();
+  }
+
+void level::init() {
+  if(initialized) return;
+  initialized = true;
+  check_cgi();
+
+  real_minx = HUGE_VAL;
+  real_miny = HUGE_VAL;
+  real_maxx = -HUGE_VAL;
+  real_maxy = -HUGE_VAL;
+
+  if(flags & nrlPolar)
+    scale = 1;
+  else
+    scale = abs(maxx - minx) / isize(map_tiles[0]);
+  println(hlog, "SCALE IS ", this->scale);
+
+  if(1) {
+    int tY = isize(map_tiles);
+    int tX = isize(map_tiles[0]);
+
+    for(int y=0; y<tY; y++)
+    for(int x=0; x<tX; x++) {
+      char bmch = map_tiles[y][x];
       
       if(bmch == 'o') {
         hyperpoint h = mappt(x+.5, y+.5, 1);
@@ -362,15 +362,39 @@ void level::init() {
       }
     cgi.finishshape();
     }
+
+  init_textures();
+  init_shapes();
+
+  start.where = mappt(startx+.5, starty+.5, 1);
+  start.t = 0;
+  start.timer = 0;
+  current = start;
+  println(hlog, "start.where = ", start.where);
+  println(hlog, "current.where = ", current.where, " : ", format("%p", &current));
   
+  int qgoals = isize(goals);
+  records[0].resize(qgoals, 0);
+  records[1].resize(qgoals, 0);
+  current_score.resize(qgoals, 0);
+
+  /* start facing slightly to the right from the slope */
+  for(auto b: {true, false}) while(true) {
+    auto c = start;
+    /* no treasures are known, which confuses goals */
+    dynamicval<bool> lop1(loaded_or_planned, true);
+    dynamicval<bool> lop2(planning_mode, false);
+    if(c.tick(this) == b) break;
+    start.heading_angle -= 1 * degree;
+    }
+
   if(flags & nrlOrder) {
     sort(triangles.begin(), triangles.end(), [this] (triangledata a, triangledata b) {
       return atan2(spin(120*degree)*(a.where - start.where)) < atan2(spin(120*degree)*(b.where - start.where));
       });
     for(auto t: triangles) println(hlog, t.where);
     }
-
-  cgi.extra_vertices();
+  
   init_plan();
   }
 
@@ -433,6 +457,9 @@ bool stepped_display;
 
 void level::draw_level(const shiftmatrix& V) {
   int id = 0;
+  init_statues();
+  curlev->init_shapes();
+
   for(auto& t: triangles) {
     bool gotit = current.collected_triangles & Flag(id);
     id++;

@@ -100,6 +100,9 @@ void level::draw_planning_screen() {
   dynamicval<eModel> pm(pmodel, mdDisk);
   dynamicval<bool> ga(vid.always3, false);
   dynamicval<geometryinfo1> gi(ginf[gEuclid].g, giEuclid2);
+  check_cgi();
+  cgi.require_shapes();
+  curlev->init_shapes();
   initquickqueue();
   
   if(recompute_plan_transform) {

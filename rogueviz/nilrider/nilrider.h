@@ -134,6 +134,9 @@ struct level {
   /** initialize textures */
   void init_textures();
 
+  /** initialize shapes */
+  void init_shapes();
+
   /** initialize all */
   void init();
 

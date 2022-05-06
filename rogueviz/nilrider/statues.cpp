@@ -114,6 +114,9 @@ template<class T1, class T2> void add_statue(const T1& grid, const T2& f) {
 hpcshape shGeostatue;
 
 void init_statues() {
+  check_cgi();
+  if(cgi.ext.count("nil-statues")) return;
+  cgi.ext["nil-statues"] = nullptr;
   create_minitriangle();
   create_castle();
   
