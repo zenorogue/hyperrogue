@@ -377,7 +377,9 @@ EX always_false in;
     if(!p.tinf) return 0;
 #if CAP_PNG
     if(!textures) return 0;
+    #if CAP_RUG
     if(p.tinf == &rug::tinf) return 1;
+    #endif
     #if MAXMDIM >= 4
     if(p.tinf->texture_id == (int) floor_textures->renderedTexture)
       return (p.tinf->tvertices[0][0] == 0) ? 2 : 3;
@@ -574,6 +576,7 @@ EX always_false in;
       }
     
     #if CAP_PNG
+    #if CAP_RUG
     if(used_rug) {
       resetbuffer rb;
       rug::glbuf->enable();
@@ -582,6 +585,7 @@ EX always_false in;
       dynamicval<int> dy(shot::shoty, rug::texturesize);
       shot::postprocess(filename + "-rug.png", s, s);
       }
+    #endif
     
     #if MAXMDIM >= 4
     if(isize(texture_position) || isize(gradient_position)) {

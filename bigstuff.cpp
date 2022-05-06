@@ -1788,6 +1788,7 @@ EX eMonster camelot_monster() {
   }
 
 EX void buildCamelot(cell *c) {
+  #if CAP_COMPLEX2
   int d = celldistAltRelative(c);
   if(anthrax() || (d <= 14 && roundTableRadius(c) > 20)) {
     gen_alt(c);
@@ -1852,6 +1853,7 @@ EX void buildCamelot(cell *c) {
       if(c->land == laNone) printf("Camelot\n"); // NONEDEBUG
       }
     }
+  #endif
   }
 
 EX int masterAlt(cell *c) {

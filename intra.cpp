@@ -75,6 +75,7 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
     h[3] = 1;
     return h;
     }
+  #if CAP_BT
   else if(hyperbolic && bt::in()) {
     h = deparabolic13(h);
     h[3] = 1;
@@ -83,6 +84,7 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
     h[2] *= exp(h[1]);
     return h;
     }
+  #endif
   else if(sol) {
     h = T * h;
     h[2] *= exp(-h[1]);
@@ -103,10 +105,12 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
   if(prod && kind == 1) {
     ld xd = h[2];
     if(d<0) xd = -xd, h[0] = -h[0];
+    #if CAP_BT
     if(bt::in()) {
       h[2] = 0;
       return PIU( parabolic13(h) ) * exp(d+xd);
       }
+    #endif
     h[2] = 1;
     auto z = product_decompose(h).first;
     return iT * h * exp(d+xd-z);
@@ -119,6 +123,7 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
     h[3] = 1;
     return iT * h * exp(h0[1]);
     }
+  #if CAP_BT
   else if(hyperbolic && bt::in()) {
     h[2] *= exp(-h[1]);
     h = iT * h;
@@ -128,6 +133,7 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
     h[2] *= exp(h[1]);
     return iT * h;
     }
+  #endif
   else {
     h[3] = 1;
     if(sphere)
@@ -151,6 +157,7 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     id.kind = 1;
     id.d = product_decompose(fac[0]).first;
     id.v0 = C0 * exp(id.d);
+    #if CAP_BT
     if(bt::in()) {
       for(auto h: fac)
         println(hlog, PIU(deparabolic13(normalize_flat(h))));
@@ -160,6 +167,9 @@ EX portal_data make_portal(cellwalker cw, int spin) {
         fac.erase(fac.begin() + 1);
       id.scale = log(2)/2;
       }
+    #else
+    if(false) {}
+    #endif
     else {
       hyperpoint ctr = Hypc;
       for(auto p: fac) ctr += product_decompose(p).second;
@@ -183,6 +193,7 @@ EX portal_data make_portal(cellwalker cw, int spin) {
       println(hlog, kz(h), " -> ", kz(spintox(id.v0)*h), " -> ", kz(cpush(0, -hdist0(id.v0))) * kz(spintox(id.v0) * h), " -> ", kz(id.to_poco(h)));
       }
     }
+  #if CAP_BT
   else if(bt::in()) {
     hyperpoint removed = Hypc;
 
@@ -236,6 +247,7 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     sca = pow(sca, .5 / isize(v));
     id.scale = sca / 2;
     }
+  #endif
   else {
     id.kind = 0;
     id.v0 = project_on_triangle(fac[0], fac[1], fac[2]);
@@ -552,7 +564,9 @@ EX void check_portal_movement() {
     ds[2] = inverse(get_shift_view_of(ctangent(1, +eps), View)) * C0;
     ds[3] = inverse(get_shift_view_of(ctangent(0, +eps), View)) * C0;
     if(debug_portal & 8) {
+      #if CAP_BT
       println(hlog, "at = ", ds[0], " det = ", dsdet(ds), " bt = ", bt::minkowski_to_bt(ds[0]));
+      #endif
       analyze_orthonormal(ds, ss);
       }
 
@@ -600,7 +614,9 @@ EX void check_portal_movement() {
       xds[1] = inverse(get_shift_view_of(ctangent(2, -eps), View)) * C0;
       xds[2] = inverse(get_shift_view_of(ctangent(1, +eps), View)) * C0;
       xds[3] = inverse(get_shift_view_of(ctangent(0, +eps), View)) * C0;
+      #if CAP_BT
       println(hlog, "goal: at = ", xds[0], " det = ", dsdet(xds), " bt = ", bt::minkowski_to_bt(xds[0]));
+      #endif
       }
 
     ld scale = p->id2.scale / p->id1.scale;
@@ -871,12 +887,14 @@ EX void handle() {
          default: throw hr_exception("not solnihv");
          }
       }
+    #if CAP_BT
     else if(colors_of_floors.empty() && hyperbolic && bt::in()) {
       auto z = bt::minkowski_to_bt(inverse(View) * C0);
       on_floor_of = centerover;
       floor_dir = z[2] > 0 ? bt::updir() : 0;
       println(hlog, "set floor_dir to ", floor_dir);
       }
+    #endif
     else {
       println(hlog, "there are ", isize(choices), " choices for floor_dir");
       if(!on_floor_of) return;
@@ -895,6 +913,7 @@ EX void handle() {
   f.hy = ToOld * csh.faces_local[floor_dir][2];
 
   auto find_nearest = [&] (const face& fac, hyperpoint at) {
+    #if CAP_BT
     if(sol) { at[2] = fac.h0[2]; return at; }
     else if(hyperbolic && bt::in()) {
       auto z = bt::minkowski_to_bt(at);
@@ -909,6 +928,9 @@ EX void handle() {
       dep[0] = h[0];
       return zshift(PIU(parabolic13(dep)), dec.first);
       }
+    #else
+    if(false) {}
+    #endif
     else {
       transmatrix M = ray::mirrorize(currentmap->ray_iadj(on_floor_of, floor_dir));
       M = ToOld * M * inverse(ToOld);

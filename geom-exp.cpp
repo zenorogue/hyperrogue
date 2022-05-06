@@ -634,7 +634,9 @@ EX string full_geometry_name() {
   
   string fgname = XLAT(ginf[geometry].tiling_name);
   if(qstring != "none") fgname += " " + XLAT(qstring);
+  #if CAP_ARCM
   if(arcm::in()) fgname = arcm::current.symbol;
+  #endif
   if(variable) fgname = gp::operation_name() + " " + fgname;
   return fgname;
   }

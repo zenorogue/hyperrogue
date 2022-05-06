@@ -158,8 +158,10 @@ EX namespace mapeditor {
   EX void clear_dtshapes() { dtshapes.clear(); }
   
   EX shiftpoint full_mouseh() {
+    #if CAP_EDIT
     if(GDIM == 3) return find_mouseh3();
     if(snapping) return mouse_snap();
+    #endif
     return mouseh;
     }
 

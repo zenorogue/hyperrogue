@@ -403,6 +403,7 @@ struct debugScreen {
           dialog::use_hexeditor();
           });
         }
+      #if CAP_COMPLEX2
       if(dice::on(what)) {
         dialog::addSelItem(XLAT("die shape"), dice::die_name(dice::data[what].which), 'A');
         dialog::add_action_push([what] {
@@ -435,6 +436,7 @@ struct debugScreen {
           });
         dialog::addBoolItem_action(XLAT("die mirror status"), dice::data[what].mirrored, 'D');
         }
+      #endif
       dialog::addBreak(50);
       
       if(show_debug_data) {

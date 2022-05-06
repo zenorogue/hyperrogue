@@ -1050,8 +1050,10 @@ bool texture_config::save() {
 
   if(arb::in()) tes = arb::current.filename;
   
+  csymbol = "";
+  #if CAP_ARCM
   if(arcm::in()) csymbol = arcm::current.symbol;
-  else csymbol = "";
+  #endif
   
   for(auto s: texturesavers) if(s->dosave())
     fprintf(f, "%s=%s\n", s->name.c_str(), s->save().c_str());
@@ -1080,6 +1082,7 @@ bool texture_config::load() {
 
     if(targetgeometry != geometry) {
       stop_game();
+      #if CAP_ARCM
       if(targetgeometry == gArchimedean) {
         arcm::current.symbol = csymbol;
         arcm::current.parse();
@@ -1089,6 +1092,7 @@ bool texture_config::load() {
           return false;
           }
         }
+      #endif
       if(targetgeometry == gArbitrary) {
         arb::run(tes);
         stop_game();

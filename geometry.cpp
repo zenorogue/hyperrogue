@@ -1232,7 +1232,9 @@ EX void check_cgi() {
   cgi.timestamp = ++ntimestamp;
   if(hybri) hybrid::underlying_cgip->timestamp = ntimestamp;
   if(fake::in()) fake::underlying_cgip->timestamp = ntimestamp;
+  #if CAP_ARCM
   if(arcm::alt_cgip) arcm::alt_cgip->timestamp = ntimestamp;
+  #endif
   
   if(isize(cgis) > 4 && IFINTRA(intra::data.empty(), true)) {
     vector<pair<int, string>> timestamps;

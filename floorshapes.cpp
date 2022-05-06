@@ -908,12 +908,14 @@ void geometry_information::generate_floorshapes() {
     generate_floorshapes_for(0, &model, 1, 0);
     }
 
+  #if CAP_BT
   else if(bt::in()) {
     dynamicval<hrmap*> c(currentmap, bt::new_alt_map(nullptr));
     model.type = S6; generate_floorshapes_for(0, &model, 0, 0);
     model.type = S7; generate_floorshapes_for(1, &model, 1, 0);
     delete currentmap;
     }
+  #endif
 
   else {
     static hrmap_standard stdmap;

@@ -8,10 +8,10 @@
  */
 
 #include "hyper.h"
-#if CAP_COMPLEX2
 
 namespace hr {
 
+#if CAP_COMPLEX2
 EX namespace brownian {
 
   #if HDR
@@ -1450,5 +1450,13 @@ EX namespace dice {
   int hook = addHook(hooks_clearmemory, 0, [] () { data.clear(); });
 EX }
 
-}
 #endif
+
+#if !CAP_COMPLEX2
+EX namespace dice {
+  EX bool on(cell *c) { return false; }
+  EX bool swap_forbidden(cell *a, cell *b) { return false; }
+  EX void chaos_swap(cellwalker wa, cellwalker wb) {}
+EX }
+#endif
+}

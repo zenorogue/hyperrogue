@@ -267,6 +267,8 @@ void hrmap_standard::find_cell_connection(cell *c, int d) {
   if(IRREGULAR) {
     irr::link_cell(c, d);
     }
+  #else
+  if(0) {}
   #endif
   #if CAP_GP
   else if(GOLDBERG) {
