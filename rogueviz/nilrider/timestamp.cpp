@@ -166,6 +166,18 @@ bool timestamp::tick(level *lev) {
 
 void timestamp::centerview(level *lev) {
   // static bool once = false; if(once) return; once = true;
+
+  if(vrhr::active()) {
+    transmatrix Ta = cspin(0, 1, -heading_angle);
+    transmatrix Tb = cspin(0, 2, -slope);
+
+    hyperpoint base = Ta * Tb * point31(0, 0, whrad);
+    hyperpoint refpoint = rgpushxto0(where) * rgpushxto0(base) * point31(0, 0, whrad+whrad);
+    centerover = cwt.at; playermoved = false;
+    View = cspin(0, 2, heading_angle-90*degree) * cspin(1, 2, -90*degree) * gpushxto0(refpoint);
+    return;
+    }
+
   auto w = where;
   w[2] += 0.2 * lev->scale;
   hyperpoint front = rgpushxto0(w) * sym_to_heis(hyperpoint(1e-3 * cos(heading_angle), 1e-3*sin(heading_angle), 0, 1));

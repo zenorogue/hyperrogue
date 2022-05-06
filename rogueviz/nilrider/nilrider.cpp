@@ -344,6 +344,7 @@ void settings() {
   dialog::add_action_push(nil_projection);
   dialog::addItem("configure keys", 'k');
   dialog::add_action_push(multi::get_key_configurer(1, move_names, "Nilrider keys"));
+  vrhr::vr_enable_button();
   dialog::addItem("RogueViz settings", 'r');
   dialog::add_key_action('r', [] {
     pushScreen(showSettings);
@@ -525,6 +526,9 @@ void initialize_all() {
   initialize();
   poly_outline = 0xFF;
   pushScreen(pick_game);
+  vrhr::hsm = vrhr::eHeadset::reference;
+  vrhr::eyes = vrhr::eEyes::equidistant;
+  vrhr::absolute_unit_in_meters = 6;
   }
 
 auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] { planning_mode = true; }) + arg::add3("-viewsim", [] { view_replay = true; })
