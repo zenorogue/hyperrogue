@@ -272,13 +272,11 @@ void pick_level() {
 
 void pick_game() {
   clearMessages();
-  dialog::init(XLAT("how do you want to play?"), 0xC0C0FFFF, 150, 100);
-  dialog::addSelItem("selected track", curlev->name, 't');
-  dialog::add_action_push(pick_level);
+  dialog::init();
+  poly_outline = 0xFF;
+  dialog::addBigItem(curlev->name, 't');
   dialog::addBreak(50);
   dialog::addHelp(curlev->longdesc);
-  dialog::addBreak(100);
-  add_edit(planning_mode);
 
   int gid = 0;
   for(auto& g: curlev->goals) {
@@ -299,6 +297,10 @@ void pick_game() {
     }
 
   dialog::addBreak(100);
+  dialog::addItem("change the track", 't');
+  dialog::add_action_push(pick_level);
+  dialog::addBreak(100);
+  add_edit(planning_mode);
   dialog::addBack();
   dialog::display();
   }
@@ -520,6 +522,8 @@ void initialize_all() {
   backcolor = 0xC0C0FFFF;
   logfog = 1;
   initialize();
+  poly_outline = 0xFF;
+  pushScreen(pick_game);
   }
 
 auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] { planning_mode = true; }) + arg::add3("-viewsim", [] { view_replay = true; })
