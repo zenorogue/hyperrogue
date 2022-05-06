@@ -2,10 +2,14 @@ namespace nilrider {
 
 ld timestamp::energy_in_squares() { return vel * vel / (2 * gravity); }
 
+EX ld sym_to_heis_bonus(const hyperpoint& H) {
+  return H[0] * H[1] / 2;
+  }
+
 /** convert rotationally symmetric to Heisenberg model */
 EX hyperpoint sym_to_heis(hyperpoint H) {
   if(nil) {
-    H[2] += H[0] * H[1] / 2;
+    H[2] += sym_to_heis_bonus(H);
     }
   return H;
   }

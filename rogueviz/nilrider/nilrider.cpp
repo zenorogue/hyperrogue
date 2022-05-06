@@ -217,6 +217,32 @@ void pick_game() {
   dialog::display();
   }
 
+void nil_set_geodesic() {
+  pmodel = mdGeodesic;
+  nisot::geodesic_movement = true;
+  popScreen();
+  }
+
+void nil_set_perspective() {
+  pmodel = mdPerspective;
+  nisot::geodesic_movement = false;
+  pconf.rotational_nil = 0;
+  }
+
+void nil_projection() {
+  dialog::init(XLAT("projection of Nil"), 0xC0C0FFFF, 150, 100);
+  dialog::addBoolItem("geodesics", pmodel == mdGeodesic, 'g');
+  dialog::add_action([] { popScreen(); nil_set_geodesic(); });
+  dialog::addInfo("In this mode, the light is assumed to travel along the geodesics (the shortest paths in Nil).");
+  dialog::addBreak(100);
+  dialog::addBoolItem("constant direction", pmodel == mdPerspective, 'c');
+  dialog::add_action([] { popScreen(); nil_set_perspective(); });
+  dialog::addInfo("In this mode, the light is assumed to travel along the lines of constant direction.");
+  dialog::addBreak(100);
+  dialog::addBack();
+  dialog::display();
+  }
+
 void settings() {
   dialog::init(XLAT("settings"), 0xC0C0FFFF, 150, 100);
   add_edit(aimspeed_key_x);
@@ -227,6 +253,8 @@ void settings() {
   add_edit(whdist);
   add_edit(min_gfx_slope);
   add_edit(stepped_display);
+  dialog::addItem("projection", 'P');
+  dialog::add_action_push(nil_projection);
   dialog::addItem("configure keys", 'k');
   dialog::add_action_push(multi::get_key_configurer(1, move_names, "Nilrider keys"));
   dialog::addItem("RogueViz settings", 'r');
@@ -234,8 +262,8 @@ void settings() {
     pushScreen(showSettings);
     });
   dialog::addBreak(100);
-  dialog::display();
   dialog::addBack();
+  dialog::display();
   }
 
 bool deleting = false;
@@ -401,6 +429,8 @@ auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] 
     arg::shift(); goal_id = arg::argi();
     curlev->solve(); })
   + arg::add3("-nilsolve", [] { curlev->solve(); })
+  + arg::add3("-nilgeo", nil_set_geodesic)
+  + arg::add3("-nilper", nil_set_perspective)
   + addHook(hooks_configfile, 100, [] {
     param_f(aimspeed_key_x, "nilrider_key_x")
     ->editable(-5, 5, 0.1, "navigation sensitivity (keyboard)", "press Left/Right to navigate (lCtrl to fine-tune)", 'n');
