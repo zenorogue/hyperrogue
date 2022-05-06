@@ -163,7 +163,7 @@ void toggle_replay() {
   }
 
 void run() {
-  cmode = sm::PANNING;
+  cmode = sm::PANNING | sm::NORMAL;
   clearMessages();
   dialog::init();
   if(view_replay && !paused) {
@@ -344,7 +344,9 @@ void settings() {
   dialog::add_action_push(nil_projection);
   dialog::addItem("configure keys", 'k');
   dialog::add_action_push(multi::get_key_configurer(1, move_names, "Nilrider keys"));
-  vrhr::vr_enable_button();
+  vrhr::enable_button();
+  vrhr::reference_button();
+
   dialog::addItem("RogueViz settings", 'r');
   dialog::add_key_action('r', [] {
     pushScreen(showSettings);

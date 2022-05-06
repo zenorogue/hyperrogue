@@ -172,7 +172,7 @@ void timestamp::centerview(level *lev) {
     transmatrix Tb = cspin(0, 2, -slope);
 
     hyperpoint base = Ta * Tb * point31(0, 0, whrad);
-    hyperpoint refpoint = rgpushxto0(where) * rgpushxto0(base) * point31(0, 0, whrad+whrad);
+    hyperpoint refpoint = rgpushxto0(where) * rgpushxto0(base) * point31(0, 0, whrad*3);
     centerover = cwt.at; playermoved = false;
     View = cspin(0, 2, heading_angle-90*degree) * cspin(1, 2, -90*degree) * gpushxto0(refpoint);
     return;
