@@ -1299,7 +1299,7 @@ EX void show_vr_demos() {
   dialog::display();
   }
 
-EX void vr_enable_button() {
+EX void enable_button() {
   dialog::addBoolItem(XLAT("VR enabled"), enabled, 'o');
   dialog::add_action([] {
     enabled = !enabled;
@@ -1312,6 +1312,17 @@ EX void vr_enable_button() {
     dialog::addInfo(XLAT("VR initialized correctly"), 0x00C000);
   }
 
+EX void reference_button() {
+  if(enabled && among(hsm, eHeadset::reference, eHeadset::model_viewing)) {
+    E4;
+    hyperpoint h = hmd_at * inverse(hmd_ref_at) * C0;
+      
+    dialog::addSelItem(XLAT("reset the reference point"), state ? fts(hypot_d(3, h)) + "m" : "", 'r');
+    dialog::add_action([] { hmd_ref_at = hmd_at; });
+    }
+  else dialog::addBreak(100);
+  }
+
 EX void show_vr_settings() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
@@ -1320,7 +1331,7 @@ EX void show_vr_settings() {
   dialog::addItem(XLAT("VR demos"), 'D');
   dialog::add_action_push(show_vr_demos);
 
-  vr_enable_button();
+  enable_button();
   
   dialog::addBreak(100);
 
@@ -1351,14 +1362,7 @@ EX void show_vr_settings() {
   dialog::addSelItem(XLAT("projection"), current_proj_name(), 'M');
   dialog::add_action_push(models::model_menu);
     
-  if(among(hsm, eHeadset::reference, eHeadset::model_viewing)) {
-    E4;
-    hyperpoint h = hmd_at * inverse(hmd_ref_at) * C0;
-      
-    dialog::addSelItem(XLAT("reset the reference point"), state ? fts(hypot_d(3, h)) + "m" : "", 'r');
-    dialog::add_action([] { hmd_ref_at = hmd_at; });
-    }
-  else dialog::addBreak(100);
+  reference_button();
 
   dialog::addSelItem(XLAT("pointer length"), fts(pointer_length) + "m", 'p');
   dialog::add_action([] {
