@@ -498,6 +498,11 @@ auto hooks =
         slide_backup(ray::max_iter_intra, y);
         slide_backup(mapeditor::drawplayer, false);
         slide_backup(playermoved, false);
+        #if CAP_VR
+        slide_backup(vrhr::hsm, vrhr::eHeadset::holonomy);
+        slide_backup(vrhr::eyes, vrhr::eEyes::truesim);
+        slide_backup(vrhr::cscr, vrhr::eCompScreen::eyes);
+        #endif
         };
       };
 
