@@ -43,6 +43,8 @@ vector<shape> shapes;
 
 bool known;
 
+int zeroticks;
+
 bool draw_compass(cell *c, const shiftmatrix& V) {
 
   if(!known) {
@@ -85,7 +87,7 @@ bool draw_compass(cell *c, const shiftmatrix& V) {
   poly_outline = 0;
   for(auto& [col, i, is, sh]: shapes) {
 
-    ld t = 36 + ticks / 1000.;
+    ld t = 36 + (ticks - zeroticks) / 1000.;
     
     auto remap = [&] (int _i, int _is) {
       if(i == _i && is == _is) return col;

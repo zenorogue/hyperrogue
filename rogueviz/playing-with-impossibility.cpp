@@ -12,6 +12,11 @@ namespace cylon {
   extern bool cylanim;
   }
 
+namespace nilcompass {
+  bool draw_compass(cell *c, const shiftmatrix& V);
+  extern int zeroticks;
+  }
+
 namespace balls {
   struct ball {
     hyperpoint at;
@@ -899,12 +904,36 @@ slide dmv_slides[] = {
       }
     },
 
-  {"a Puzzle about a Bear", 123, LEGAL::ANY, 
+  {"Compasses in Nil", 123, LEGAL::ANY,
     "However, it turns out that there actually exists a non-Euclidean geometry, "
     "known as the Nil geometry, where constructions such as Penrose staircases and "
     "triangles naturally appear!\n\n"
     "Nil is a three-dimensional geometry, which gives new possibilities -- "
-    "Lines 'diverge in the third dimension' there. "
+    "lines 'diverge in the third dimension' there. "
+    "Every point has "
+    "well-defined North, East, South, West, Up and Down direction.\n\n"
+    "(press Home/End and arrow keys to move)",
+
+    [] (presmode mode) {
+      setCanvas(mode, '0');
+      slidecommand = "highlight dimensions";
+      if(mode == pmStart) {
+        tour::slide_backup(pmodel, mdGeodesic);
+        set_geometry(gNil);
+        start_game();
+        rogueviz::rv_hook(hooks_drawcell, 100, rogueviz::nilcompass::draw_compass);
+        tour::slide_backup(smooth_scrolling, true);
+        tour::slide_backup(mapeditor::drawplayer, false);
+        View = Id;
+        shift_view(ztangent(.5));
+        playermoved = false;
+        }
+      if(mode == pmStart || mode == pmKey)
+        rogueviz::nilcompass::zeroticks = ticks;
+      }
+    },
+
+  {"a Puzzle about a Bear", 123, LEGAL::ANY,
     "To explain Nil geometry, we will start with a well-known puzzle.",
   
     [] (presmode mode) {
@@ -1226,6 +1255,7 @@ slide dmv_slides[] = {
     ,
     [] (presmode mode) {
       slide_url(mode, 'y', "YouTube link", "https://www.youtube.com/watch?v=mxvUAcgN3go");
+      slide_url(mode, 'n', "Nil Rider", "https://zenorogue.itch.io/nil-rider");
       setCanvas(mode, '0');
       if(mode == pmStart) {
         stop_game();
