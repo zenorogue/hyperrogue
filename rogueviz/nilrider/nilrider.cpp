@@ -4,6 +4,7 @@
 #define CAP_INV 0
 #define CAP_COMPLEX2 0
 #define CAP_EDIT 0
+#define CAP_TEXTURE 1
 #define CAP_BT 0
 #define CAP_SOLV 0
 #define CAP_THREAD 0
@@ -498,7 +499,9 @@ bool on;
 void change_default_key(int key, int val) {
   char* t = multi::scfg.keyaction;
   t[key] = val;
+  #if CAP_CONFIG
   set_saver_default(t[key]);
+  #endif
   }
 
 void nilrider_keys() {
