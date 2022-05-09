@@ -593,7 +593,6 @@ auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] 
     param_f(min_gfx_slope, "min_gfx_slope")
     ->editable(-90*degree, 90*degree, degree, "min camera slope", "affected by up/down", 'm');
     })
-  + arg::add3("-unilrun", [] { pushScreen(run); })
   + arg::add3("-fullsim", [] {
     /* for animations */
     popScreenAll();
