@@ -522,10 +522,32 @@ level labyrinth(
     }
   );
 
+level obstacle(
+  "Obstacle Course", 'o', 0,
+  "The main street is horizontal, as well as the lines orthogonal to it.",
+  0*dft_block, 2.5*dft_block, 64*dft_block, -5.5*dft_block,
+  {
+  "ggggggGrggGrgggggggggggggggggggggGrxgggggggggGrggggggggGrggggggo",
+  "ggggggGrggGrgggGrgggggGrgggggggggGrgggggggggggggGrgggggGrggggggo",
+  "-----------r----r------r----r-----r--r---------r---------------*",
+  "ggggggGrgggggggGrgggggGrggggggggggggGrggggggGrgggggggggGrggggggo",
+  "ggggggGrgggggggGrgggggggggggggggggggGrgggggggggGrggggggGrggggggo",
+  "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+  "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+  "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+  },
+  0, 4,
+  long_x,
+  {
+    goal{0xFFFFC0, "Collect the triangle in below 1:25, reversing time at most 3 times", basic_check(85, 3)},
+    goal{0xFFD500, "Collect the triangle in below 1:10, reversing time at most 3 times", basic_check(70, 3)},
+    }
+  );
+
 level *curlev = &rotplane;
 
 vector<level*> all_levels = {
-  &rotplane, &longtrack, &geodesical, &geodesical4, &heisenberg0, &rotwell, &labyrinth
+  &rotplane, &longtrack, &geodesical, &geodesical4, &heisenberg0, &rotwell, &labyrinth, &obstacle
   };
   
 }
