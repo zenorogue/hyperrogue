@@ -95,6 +95,10 @@ void level::compute_plan_transform() {
 
 void level::draw_planning_screen() {
   if(just_refreshing) return;
+
+  if(inHighQual) {
+    new_levellines_for = mousept = current.where;
+    }
   curlev->init_textures();
   dynamicval<eGeometry> g(geometry, gEuclid);
   dynamicval<eModel> pm(pmodel, mdDisk);
@@ -119,9 +123,9 @@ void level::draw_planning_screen() {
     return h;
     };
   
-  mousept = scr_to_map(hpxy(mousex, mousey));
+  if(!inHighQual) mousept = scr_to_map(hpxy(mousex, mousey));
 
-  box = scr_to_map(hpxy(mousex + 5, mousey))[0] - mousept[0];
+  box = inHighQual ? scr_to_map(hpxy(10, 0))[0] - scr_to_map(hpxy(0,0))[0] : scr_to_map(hpxy(mousex + 5, mousey))[0] - mousept[0];
   
   /* draw the map */
   auto& p = queuepolyat(T, shPlanFloor, 0xFFFFFFFF, PPR::FLOOR);

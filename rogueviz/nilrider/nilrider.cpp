@@ -459,6 +459,32 @@ void main_menu() {
   dialog::addItem("change settings", 'o');
   dialog::add_action_push(settings);
 
+  #if CAP_VIDEO
+  dialog::addItem("record video", 'v');
+  dialog::add_action([] {
+    dialog::openFileDialog(anims::videofile, XLAT("record to video file"),
+      ".mp4", [] {
+        anims::period = isize(curlev->history);
+        anims::noframes = anims::period * 60 / 1000;
+        int a = addHook(anims::hooks_anim, 100, [] {
+          int ttick = ticks % isize(curlev->history);
+          curlev->current = curlev->history[ttick];
+          curlev->current.centerview(curlev);
+          anims::moved();
+          });
+        int af = addHook(hooks_frame, 100, [] {
+          int ttick = ticks % isize(curlev->history);
+          curlev->current = curlev->history[ttick];
+          if(planning_mode && !view_replay) curlev->draw_planning_screen();
+          });
+        bool b = anims::record_video_std();
+        delHook(anims::hooks_anim, a);
+        delHook(hooks_frame, af);
+        return b;
+        });
+    });
+  #endif
+
   dialog::addItem("quit", 'q');
   dialog::add_action([] { 
     on_quit();
