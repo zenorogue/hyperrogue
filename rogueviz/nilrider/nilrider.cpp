@@ -379,6 +379,7 @@ template<class T, class U> void replays_of_type(vector<T>& v, const U& loader) {
     }
   }
 
+#if CAP_SAVE
 void replays() {
   dialog::init(XLAT(planning_mode ? "saved plans" : "replays"), 0xC0C0FFFF, 150, 100);
   if(!planning_mode) replays_of_type(curlev->manual_replays, [] (manual_replay& r) {
@@ -411,6 +412,7 @@ void pop_and_push_replays() {
   popScreen();
   pushScreen(replays);
   }
+#endif
 
 reaction_t on_quit = [] { exit(0); }; 
 
@@ -432,6 +434,7 @@ void main_menu() {
     dialog::addItem("view the replay", 'v');
     dialog::add_action(toggle_replay);
   
+    #if CAP_SAVE
     dialog::addItem("save the replay", 's');
     dialog::add_action([] {
       vector<int> ang;
@@ -442,8 +445,10 @@ void main_menu() {
 
     dialog::addItem("load a replay", 'l');
     dialog::add_action(pop_and_push_replays);
+    #endif
     }
   else {
+    #if CAP_SAVE
     dialog::addItem("save this plan", 's');
     dialog::add_action([] {
       curlev->plan_replays.emplace_back(plan_replay{new_replay_name(), curlev->plan});
@@ -452,6 +457,7 @@ void main_menu() {
 
     dialog::addItem("load a plan", 'l');
     dialog::add_action(pop_and_push_replays);
+    #endif
     }
 
   dialog::addItem("track / mode / goals", 't');

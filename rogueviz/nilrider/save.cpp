@@ -11,6 +11,7 @@ string new_replay_name() {
   }
 
 void save() {
+  #if CAP_SAVE
   println(hlog, "save called");
   fhstream f("nilrider.save", "wt");
   println(f, "NilRider version ", ver);
@@ -43,6 +44,7 @@ void save() {
       println(f);
       }
     }
+  #endif
   }
 
 level *level_by_name(string s) {
@@ -52,6 +54,7 @@ level *level_by_name(string s) {
   }
 
 void load() {
+  #if CAP_SAVE
   println(hlog, "load called");
   fhstream f("nilrider.save", "rt");
   if(!f.f) return;
@@ -99,6 +102,7 @@ void load() {
       }
     println(hlog, "error: unknown content ", s);
     }
+  #endif
   }
 
 }
