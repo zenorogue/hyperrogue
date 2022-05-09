@@ -116,10 +116,19 @@ struct level {
   /** the texture data used for the ground in the stepped mode */
   texture::texture_data *unil_texture_stepped;
 
+  /** the texture data used for the ground with level lines */
+  texture::texture_data *unil_texture_levels;
+
   /** the texture used for the ground */
   basic_textureinfo uniltinf;
 
-  /** the texture used for the ground */
+  /** currently used point for levellines -- levellines[3]==0 means none */
+  hyperpoint levellines_for;
+
+  /** requested point for levellines (texture redrawn in init_textures) */
+  hyperpoint new_levellines_for;
+
+  /** the texture used for the castles */
   basic_textureinfo castle_tinf;
 
   /** the texture used for the ground in the stepped mode*/

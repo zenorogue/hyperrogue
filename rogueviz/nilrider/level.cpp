@@ -8,23 +8,31 @@ void level::init_textures() {
   int tY = isize(map_tiles);
   int tX = isize(map_tiles[0]);
 
-  for(int stepped: {0, 1}) {
+  transmatrix T = gpushxto0(new_levellines_for);
 
-    auto& target = stepped ? unil_texture_stepped : unil_texture;
-    if(target) return;
+  for(int which: {0, 1, 2}) {
 
-    target = new texture::texture_data;
+    bool stepped = which == 1;
+    bool levels = which == 2;
+
+    auto& target = stepped ? unil_texture_stepped : levels ? unil_texture_levels : unil_texture;
+    if(target && !(levels && levellines_for != new_levellines_for)) continue;
+
+    bool regen = !target;
+    if(regen) target = new texture::texture_data;
 
     auto& tex = *target;
 
-    tex.twidth = tex.tx = tX * texture_density;
-    tex.theight = tex.ty = tY * texture_density;
-    tex.stretched = false;
-    tex.strx = tex.tx;
-    tex.stry = tex.ty;
-    tex.base_x = 0;
-    tex.base_y = 0;
-    tex.whitetexture();
+    if(regen) {
+      tex.twidth = tex.tx = tX * texture_density;
+      tex.theight = tex.ty = tY * texture_density;
+      tex.stretched = false;
+      tex.strx = tex.tx;
+      tex.stry = tex.ty;
+      tex.base_x = 0;
+      tex.base_y = 0;
+      tex.whitetexture();
+      }
 
     auto getpix = [&] (int x, int y) {
       int px = x / pixel_per_block;
@@ -44,6 +52,12 @@ void level::init_textures() {
       if(!stepped) {
         char c = getpix(x / subpixels, y / subpixels);
         col = bcols[c];
+        if(levels && new_levellines_for[3]) {
+          hyperpoint h = T * mappt(x, y, texture_density);
+          ld z = h[2] - sym_to_heis_bonus(h);
+          if(z > 0) col = gradient(col, 0xFFFF0000, 0, z - floor(z), 4);
+          if(z < 0) col = gradient(col, 0xFF0000FF, 0, -z - floor(-z), 4);
+          }
         }
       else {
         int mx = x % stepdiv;
@@ -69,10 +83,12 @@ void level::init_textures() {
         }
       tex.get_texture_pixel(x, y) = col;
       tex.get_texture_pixel(x, y) |= 0xFF000000;
-      tex.get_texture_pixel(x, y) ^= hrand(0x1000000) & 0xF0F0F;
+      if(!levels)
+        tex.get_texture_pixel(x, y) ^= hrand(0x1000000) & 0xF0F0F;
       }
     tex.loadTextureGL();
     }
+  levellines_for = new_levellines_for;
   }
 
 void level::init_shapes() {
@@ -329,6 +345,8 @@ void level::init() {
   else
     scale = abs(maxx - minx) / isize(map_tiles[0]);
   println(hlog, "SCALE IS ", this->scale);
+
+  levellines_for = new_levellines_for = C0;
 
   if(1) {
     int tY = isize(map_tiles);

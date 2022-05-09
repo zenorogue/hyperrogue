@@ -74,7 +74,7 @@ ld closest_t;
 
 char planmode = 'p';
 vector<pair<char, string> > buttons = {
-  {'p', "pan"}, {'a', "add"}, {'m', "move"}, {'i', "insert"}, {'d', "delete"}
+  {'p', "pan"}, {'a', "add"}, {'m', "move"}, {'i', "insert"}, {'d', "delete"}, {'l', "levels"}
   };
 
 bool recompute_plan_transform = true;
@@ -126,7 +126,7 @@ void level::draw_planning_screen() {
   /* draw the map */
   auto& p = queuepolyat(T, shPlanFloor, 0xFFFFFFFF, PPR::FLOOR);
   p.tinf = &uniltinf;
-  uniltinf.texture_id = unil_texture->textureid;
+  uniltinf.texture_id = unil_texture_levels->textureid;
   
   auto draw_sq = [&] (hyperpoint h, color_t col, PPR prio) {
     curvepoint(hpxy(h[0]+box, h[1]+box));
@@ -143,6 +143,9 @@ void level::draw_planning_screen() {
     queuecurve(T, col, 0, prio);
     };
   
+  if(levellines_for[3])
+    draw_sq(levellines_for, 0xFFC0FFFF, PPR::ITEM);
+
   /* draw the plan */
   for(auto& pp: plan) {
     draw_sq(pp.at - pp.vel, 0xFF8080FF, PPR::ITEM);
@@ -210,7 +213,10 @@ bool level::handle_planning(int sym, int uni) {
     plan_transform.T = atscreenpos(mousex, mousey, 1) * inverse(atscreenpos(mousex, mousey, 1.2)) * plan_transform.T;
     return true;
     }
-  for(auto& b: buttons) if(uni == b.first) { planmode = uni; return true; }
+  for(auto& b: buttons) if(uni == b.first) {
+    if(uni == 'l' && planmode == 'l') new_levellines_for[3] = 0;
+    planmode = uni; return true;
+    }
   auto clean_history_to = [&] (int i) {
     while(history.size() > 1 && history.back().t > i) history.pop_back();
     };
@@ -288,6 +294,15 @@ bool level::handle_planning(int sym, int uni) {
       else if(uni == '-' && holdmouse) {
         plan[move_id].vel = mousept - plan[move_id].at;
         clean_history_to(move_id - 1);
+        }
+      return false;
+      }
+    case 'l': {
+      if(uni == '-') {
+        new_levellines_for = mousept;
+        new_levellines_for[2] = surface(new_levellines_for);
+        holdmouse = true;
+        return true;
         }
       return false;
       }
