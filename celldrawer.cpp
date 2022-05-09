@@ -2315,6 +2315,13 @@ void celldrawer::draw_wall_full() {
     color_t col = (highwall(c) || c->wall == waTower) ? wcol : fcol;
     forCellIdEx(c2, i, c) if(chasmgraph(c2) && c2->wall != waShallow)
       if(placeSidewall(c, i, SIDE_BSHA, V, D(.6))) break;
+    forCellIdEx(c2, i, c) if(chasmgraph(c2) == 2) {
+      dynamicval<qfloorinfo> qfib(qfi, qfi);
+      set_floor(cgi.shFullFloor);
+      placeSidewall(c, i, SIDE_LAKE, V, 0x202030FF);
+      // placeSidewall(c, i, SIDE_LTOB, V, 0x181820FF);
+      placeSidewall(c, i, SIDE_BTOI, V, 0x101010FF);
+      }
     }
 
   else if(wmspatial && sha && WDIM == 2) {
