@@ -93,8 +93,12 @@ void level::compute_plan_transform() {
   plan_transform = sId * atscreenpos(cd->xcenter, cd->ycenter, pix * scale) * eupush(-(real_minx+real_maxx)/2, (real_miny+real_maxy)/2) * MirrorY;
   }
 
+bool restored = false;
+
 void level::draw_planning_screen() {
   if(just_refreshing) return;
+
+  restored = true;
 
   if(inHighQual) {
     new_levellines_for = mousept = current.where;
@@ -233,7 +237,8 @@ bool level::handle_planning(int sym, int uni) {
         }
       else if(uni == '-' && holdmouse) {
         dynamicval<eGeometry> g(geometry, gEuclid);
-        plan_transform.T = plan_transform.T * eupush(mousept-mousept_drag);
+        if(restored) plan_transform.T = plan_transform.T * eupush(mousept-mousept_drag);
+        restored = false;
         return true;
         }
       return false;
