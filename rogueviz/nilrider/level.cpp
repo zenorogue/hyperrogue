@@ -346,7 +346,7 @@ void level::init() {
     scale = abs(maxx - minx) / isize(map_tiles[0]);
   println(hlog, "SCALE IS ", this->scale);
 
-  levellines_for = new_levellines_for = C0;
+  levellines_for = new_levellines_for = Hypc;
 
   if(1) {
     int tY = isize(map_tiles);
