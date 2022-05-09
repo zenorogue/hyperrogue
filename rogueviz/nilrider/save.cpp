@@ -95,9 +95,9 @@ void load() {
         l->records[i].resize(qg, 0);
         l->records[i][g] = t;
         }
-      println(hlog, "error: unknown content ", s);
       continue;
       }
+    println(hlog, "error: unknown content ", s);
     }
   }
 
