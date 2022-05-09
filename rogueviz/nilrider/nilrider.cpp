@@ -345,8 +345,10 @@ void settings() {
   dialog::add_action_push(nil_projection);
   dialog::addItem("configure keys", 'k');
   dialog::add_action_push(multi::get_key_configurer(1, move_names, "Nilrider keys"));
+  #if CAP_VR
   vrhr::enable_button();
   vrhr::reference_button();
+  #endif
 
   dialog::addItem("RogueViz settings", 'r');
   dialog::add_key_action('r', [] {
@@ -529,9 +531,11 @@ void initialize_all() {
   initialize();
   poly_outline = 0xFF;
   pushScreen(pick_game);
+  #if CAP_VR
   vrhr::hsm = vrhr::eHeadset::reference;
   vrhr::eyes = vrhr::eEyes::equidistant;
   vrhr::absolute_unit_in_meters = 6;
+  #endif
   }
 
 auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] { planning_mode = true; }) + arg::add3("-viewsim", [] { view_replay = true; })
