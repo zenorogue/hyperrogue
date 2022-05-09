@@ -717,7 +717,7 @@ EX namespace mapstream {
     }
     
     addToQueue(save_start());
-    #if MAXMDIM >= 4
+    #if MAXMDIM >= 4 && CAP_RAY
     if(intra::in) intra::prepare_need_to_save();
     #endif
     for(int i=0; i<isize(cellbyid); i++) {
@@ -762,7 +762,7 @@ EX namespace mapstream {
       f.write(c->wparam); f.write(c->landparam);
       f.write_char(c->stuntime); f.write_char(c->hitpoints);
       bool blocked = false;
-      #if MAXMDIM >= 4
+      #if MAXMDIM >= 4 && CAP_RAY
       if(intra::in && isWall3(c) && !intra::need_to_save.count(c)) blocked = true;
       #endif
       if(!blocked)
@@ -796,7 +796,7 @@ EX namespace mapstream {
       for(int i=0; i<multi::players; i++)
         f.write(cellids[multi::player[i].at]);
 
-    #if MAXMDIM >= 4
+    #if MAXMDIM >= 4 && CAP_RAY
     if(intra::in) {
       for(int i=0; i<isize(intra::portals_to_save); i++) {
         auto& p = intra::portals_to_save[i];
@@ -1040,7 +1040,7 @@ EX namespace mapstream {
           }
       }
 
-    #if MAXMDIM >= 4
+    #if MAXMDIM >= 4 && CAP_RAY
     if(intra::in) {
       while(true) {
         char k = f.get<char>();
@@ -1100,14 +1100,14 @@ EX namespace mapstream {
     if(!f.f) return false;
     f.write(f.vernum);
     f.write(dual::state);
-    #if MAXMDIM >= 4
+    #if MAXMDIM >= 4 && CAP_RAY
     int q = intra::in ? isize(intra::data) : 0;
     f.write(q);
     #else
     int q = 0;
     #endif
     if(q) {
-      #if MAXMDIM >= 4
+      #if MAXMDIM >= 4 && CAP_RAY
       intra::prepare_to_save();
       int qp = isize(intra::portals_to_save);
       f.write(qp);
@@ -1148,7 +1148,7 @@ EX namespace mapstream {
     if(q) {
       int qp;
       f.read(qp);
-      #if MAXMDIM >= 4
+      #if MAXMDIM >= 4 && CAP_RAY
       intra::portals_to_save.resize(qp);
       for(auto& ps: intra::portals_to_save) {
         f.read(ps.spin);

@@ -3012,7 +3012,7 @@ EX void shift_view(hyperpoint H) {
   static bool recursive = false;
   if(!recursive && intra::in) {
     dynamicval<bool> r(recursive, true);
-    #if MAXMDIM >= 4
+    #if MAXMDIM >= 4 && CAP_RAY
     intra::shift_view_portal(H);
     #endif
     return;

@@ -6,7 +6,7 @@ EX namespace intra {
 
 EX bool in;
 
-#if MAXMDIM >= 4
+#if CAP_RAY && MAXMDIM >= 4
 #if HDR
 /** information per every space connected with intra-portals */
 struct intra_data {
@@ -931,11 +931,15 @@ EX void handle() {
     #else
     if(false) {}
     #endif
+    #if CAP_RAY
     else {
       transmatrix M = ray::mirrorize(currentmap->ray_iadj(on_floor_of, floor_dir));
       M = ToOld * M * inverse(ToOld);
       return mid(at, M * at);
       }
+    #else
+    else return at;
+    #endif
     };
 
   hyperpoint at = tC0(inverse(View));

@@ -1219,7 +1219,7 @@ EX string cgi_string() {
   return s;
   }
 
-#if MAXMDIM >= 4
+#if MAXMDIM >= 4 && CAP_RAY
 #define IFINTRA(x,y) x
 #else
 #define IFINTRA(x,y) y

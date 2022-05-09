@@ -1295,7 +1295,7 @@ EX vector<cell*> build_shortest_path(cell *c1, cell *c2) {
   }
 
 EX void clearCellMemory() {
-  #if MAXMDIM >= 4
+  #if MAXMDIM >= 4 && CAP_RAY
   if(intra::in) {
     intra::erase_all_maps();
     return;
