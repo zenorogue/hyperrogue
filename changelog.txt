@@ -4659,3 +4659,12 @@ CLI options:
 2022-04-28 00:03 Update 12.0o:
 
 Fixed some bugs in the new features for tes, and also fixed spherical geometry.
+
+2022-05-10 08:55 Update 12.0p:
+
+- draw the side walls between shallow water and chasms
+- the smooth movement option now works in the map editor (and some other special screens)
+- "movement along geodesics" off now means that the movement is based on the Lie group exponentials (e.g. straight lines in simple view in rotiationally symmetric model of Nil)
+- buggy window resizing should be fixed
+- simplified display option for tes tilings with apeirogons
+- RogueViz: fixed the VR for the portal demo, and some improvements to the impossibility presentation
