@@ -11,7 +11,6 @@
 
 #include "hyper.h"
 namespace hr {
-#if MAXMDIM >= 4
 
 EX hyperpoint final_coords(hyperpoint h) {
   if(sn::in() || !bt::in()) 
@@ -68,6 +67,19 @@ void subcellshape::compute_hept() {
   compute_common();
   }
 
+EX namespace reg3 {
+EX void make_vertices_only(vector<hyperpoint>& vo, const vector<vector<hyperpoint>>& csh) {
+  vo.clear();
+  for(auto& v: csh)
+  for(hyperpoint h: v) {
+    bool found = false;
+    for(hyperpoint h2: vo) if(hdist(h, h2) < 1e-6) found = true;
+    if(!found) vo.push_back(h);
+    }
+  }
+EX }
+
+#if MAXMDIM >= 4
 void subcellshape::compute_sub() {
   hyperpoint gres = Hypc;
   for(auto& face: faces) {
@@ -165,16 +177,6 @@ EX namespace reg3 {
         cgi.ultra_mirrors.push_back(rspintox(v) * xpush(cgi.ultra_mirror_dist*2) * MirrorX * spintox(v));
         }
       }    
-    }
-
-  EX void make_vertices_only(vector<hyperpoint>& vo, const vector<vector<hyperpoint>>& csh) {
-    vo.clear();
-    for(auto& v: csh)
-    for(hyperpoint h: v) {
-      bool found = false;
-      for(hyperpoint h2: vo) if(hdist(h, h2) < 1e-6) found = true;
-      if(!found) vo.push_back(h);
-      }
     }
 
   EX void generate() {

@@ -34,8 +34,12 @@ EX namespace fake {
     if(arcm::in() && PURE) return true;
     if(WDIM == 2) return false;
     if(among(geometry, gBitrunc3)) return false;
+    #if MAXMDIM >= 4
     if(reg3::in() && !among(variation, eVariation::pure, eVariation::subcubes, eVariation::coxeter, eVariation::bch_oct)) return false;
     return euc::in() || reg3::in();
+    #else
+    return euc::in();
+    #endif
     }
   
   map<cell*, ld> random_order;
@@ -133,7 +137,11 @@ EX namespace fake {
         }
       transmatrix S1, S2;
       ld dist;
+      #if MAXMDIM >= 4
       bool impure = reg3::in() && !PURE;
+      #else
+      bool impure = !PURE;
+      #endif
       vector<int> mseq;
       if(impure) {
         mseq = FPIU ( currentmap->get_move_seq(c, d) );
