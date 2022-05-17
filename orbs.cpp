@@ -1257,6 +1257,8 @@ EX int check_vault(cell *cf, cell *ct, flagtype flags, cell*& jumpthru) {
   return 6;
   }
 
+EX bool disable_orb_range = false;
+
 EX eItem targetRangedOrb(cell *c, orbAction a) {
 
   if(!haveRangedOrb()) {
@@ -1282,15 +1284,17 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   
   // (-1) distance
 
-  if(c == cwt.at || isNeighbor(cwt.at, c)) {
-    if(!isWeakCheck(a))
-      addMessage(XLAT("You cannot target that close!"));
-    return itNone;
-    }
-  if(c->cpdist > 7) {
-    if(!isWeakCheck(a))
-      addMessage(XLAT("You cannot target that far away!"));
-    return itNone;
+  if(!disable_orb_range) {
+    if(c == cwt.at || isNeighbor(cwt.at, c)) {
+      if(!isWeakCheck(a))
+        addMessage(XLAT("You cannot target that close!"));
+      return itNone;
+      }
+    if(c->cpdist > 7) {
+      if(!isWeakCheck(a))
+        addMessage(XLAT("You cannot target that far away!"));
+      return itNone;
+      }
     }
   
   vector<string> orb_error_messages;
