@@ -1366,6 +1366,8 @@ bool celldrawer::set_randompattern_floor() {
   return true;
   }
 
+EX bool numerical_minefield;
+
 void celldrawer::draw_features() {
   char xch = winf[c->wall].glyph;
   #if CAP_SHAPES
@@ -1610,10 +1612,18 @@ void celldrawer::draw_features() {
     
     case waMineOpen: {
       int mines = countMinesAround(c);
-      if(mines >= 10)
-        queuepoly(V, cgi.shBigMineMark[ct6], darkena(minecolors[(mines/10) % 10], 0, 0xFF));
-      if(mines)
-        queuepoly(V, cgi.shMineMark[ct6], darkena(minecolors[mines%10], 0, 0xFF));
+      if(numerical_minefield) {
+        if(mines) {
+          string label = its(mines);
+          queuestr(V, mines >= 10 ? .5 : 1, label, minecolors[mines%10], 8);
+          }
+        }
+      else {
+        if(mines >= 10)
+          queuepoly(V, cgi.shBigMineMark[ct6], darkena(minecolors[(mines/10) % 10], 0, 0xFF));
+        if(mines)
+          queuepoly(V, cgi.shMineMark[ct6], darkena(minecolors[mines%10], 0, 0xFF));
+        }
       break;
       }
     
