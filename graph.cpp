@@ -5496,6 +5496,8 @@ namespace sm {
 
 EX int cmode;
 
+EX bool dont_display_minecount = false;
+
 EX void drawscreen() {
 
   DEBBI(DF_GRAPH, ("drawscreen"));
@@ -5588,13 +5590,13 @@ EX void drawscreen() {
     
     if(tmines == 7) seenSevenMines = true;
     
-    for(int p: player_indices()) 
+    if(!dont_display_minecount) for(int p: player_indices())
       displayfr(vid.xres * (p+.5) / numplayers(),
         current_display->ycenter - current_display->radius * 3/4, 2,
         vid.fsize, 
         mines[p] > 7 ? its(mines[p]) : XLAT(minetexts[mines[p]]), minecolors[mines[p]%10], 8);
 
-    if(minefieldNearby && !shmup::on && cwt.at->land != laMinefield && cwt.peek()->land != laMinefield) {
+    if(minefieldNearby && !shmup::on && cwt.at->land != laMinefield && cwt.peek()->land != laMinefield && !dont_display_minecount) {
       displayfr(vid.xres/2, current_display->ycenter - current_display->radius * 3/4 - vid.fsize*3/2, 2,
         vid.fsize, 
         XLAT("WARNING: you are entering a minefield!"), 

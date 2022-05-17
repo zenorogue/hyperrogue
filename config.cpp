@@ -2328,6 +2328,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   param_b(vid.fixed_yz, "fixed YZ", true);
   param_b(frustum_culling, "frustum_culling");
   param_b(numerical_minefield, "numerical_minefield");
+  param_b(dont_display_minecount, "dont_display_minecount");
   param_b(draw_sky, "draw sky", true);
   param_f(linepatterns::parallel_count, "parallel_count")
     ->editable(0, 24, 1, "number of parallels drawn", "", 'n');
