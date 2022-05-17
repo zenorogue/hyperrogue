@@ -2957,24 +2957,30 @@ EX hyperpoint lie_exp(hyperpoint h) {
     h[3] = 1;
     h[2] += h[0] * h[1] / 2;
     }
-  else if(sol) {
+  else if(sol && !nih) {
     h[3] = 1;
-    h[0] *= (exp(-h[2]) - 1) / -h[2];
-    h[1] *= (exp(+h[2]) - 1) / h[2];
+    if(abs(h[2]) > 1e-6) {
+      h[0] *= (exp(-h[2]) - 1) / -h[2];
+      h[1] *= (exp(+h[2]) - 1) / h[2];
+      }
     }
   else if(sol && nih) {
     h[3] = 1;
-    ld z = h[2] * log(2);
-    h[0] *= (exp(-z) - 1) / -z;
-    z = h[2] * log(3);
-    h[1] *= (exp(+z) - 1) / z;
+    if(abs(h[2]) > 1e-6) {
+      ld z = h[2] * log(2);
+      h[0] *= (exp(-z) - 1) / -z;
+      z = h[2] * log(3);
+      h[1] *= (exp(+z) - 1) / z;
+      }
     }
   else if(nih) {
     h[3] = 1;
-    ld z = h[2] * log(2);
-    h[0] *= (exp(+z) - 1) / z;
-    z = h[2] * log(3);
-    h[1] *= (exp(+z) - 1) / z;
+    if(abs(h[2]) > 1e-6) {
+      ld z = h[2] * log(2);
+      h[0] *= (exp(+z) - 1) / z;
+      z = h[2] * log(3);
+      h[1] *= (exp(+z) - 1) / z;
+      }
     }
   else {
     /* not implemented -- approximate for now */
