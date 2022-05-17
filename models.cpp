@@ -193,11 +193,13 @@ EX namespace models {
       return PIU(model_available(pm));
       }
     if(sl2) return pm == mdGeodesic;
-    if(nonisotropic) return among(pm, mdDisk, mdPerspective, mdHorocyclic, mdGeodesic, mdEquidistant, mdFisheye);
-    if(pm == mdGeodesic && !sol) return false;
+    if(nonisotropic) return among(pm, mdDisk, mdPerspective, mdHorocyclic, mdGeodesic, mdEquidistant, mdFisheye, mdLiePerspective, mdLieOrthogonal);
     if(sphere && (pm == mdHalfplane || pm == mdBall))
       return false;
-    if(GDIM == 2 && pm == mdPerspective) return false;
+    if(GDIM == 2 && is_perspective(pm)) return false;
+    if(pm == mdGeodesic && !nonisotropic) return false;
+    if(pm == mdLiePerspective && sphere) return false;
+    if(pm == mdLieOrthogonal && sphere) return false;
     if(GDIM == 2 && pm == mdEquivolume) return false;
     if(pm == mdThreePoint && !(GDIM == 3 && !nonisotropic && !prod)) return false;
     if(GDIM == 3 && among(pm, mdBall, mdHyperboloid, mdFormula, mdPolygonal, mdRotatedHyperboles, mdSpiral, mdHemisphere)) return false;
@@ -208,8 +210,8 @@ EX namespace models {
     }    
   
   EX bool has_orientation(eModel m) {
-    if(m == mdHorocyclic)
-      return hyperbolic;
+    if(among(m, mdHorocyclic, mdLieOrthogonal, mdLiePerspective))
+      return hyperbolic || in_h2xe();
     if((m == mdPerspective || m == mdGeodesic) && panini_alpha) return true;
     return
       among(m, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral, mdSimulatedPerspective, mdTwoHybrid, mdHorocyclic, mdAxial, mdAntiAxial, mdQuadrant,
@@ -228,7 +230,7 @@ EX namespace models {
     }
   
   EX bool is_perspective(eModel m) {
-    return among(m, mdPerspective, mdGeodesic);
+    return among(m, mdPerspective, mdGeodesic, mdLiePerspective);
     }
 
   EX bool is_3d(const projection_configuration& p) {
@@ -256,7 +258,7 @@ EX namespace models {
       if(m == mdHorocyclic && !sol) return XLAT("simple model: projection");
       if(m == mdPerspective) return XLAT("simple model: perspective");
       if(m == mdGeodesic) return XLAT("native perspective");
-      if(among(m, mdEquidistant, mdFisheye, mdHorocyclic)) return XLAT(mdinf[m].name_hyperbolic);
+      if(among(m, mdEquidistant, mdFisheye, mdHorocyclic, mdLiePerspective, mdLieOrthogonal)) return XLAT(mdinf[m].name_hyperbolic);
       }
     if(m == mdDisk && GDIM == 3) return XLAT("perspective in 4D");
     if(m == mdHalfplane && GDIM == 3 && hyperbolic) return XLAT("half-space");
@@ -540,6 +542,12 @@ EX namespace models {
 
     if(vpmodel == mdRotatedHyperboles) {
       dialog::addBoolItem_action(XLAT("use atan to make it finite"), vpconf.use_atan, 'x');
+      }
+
+    if(among(vpmodel, mdLieOrthogonal, mdLiePerspective)) {
+      if(in_s2xe() || (sphere && GDIM == 2)) dialog::addInfo(XLAT("this is not a Lie group"), 0xC00000);
+      else if(!hyperbolic && !sol && !nih && !nil && !euclid && !in_h2xe() && !in_e2xe())
+        dialog::addInfo(XLAT("not implemented"));
       }
 
     if(vpmodel == mdBall && !vr_settings) {

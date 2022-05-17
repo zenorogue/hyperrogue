@@ -88,6 +88,27 @@ EX string stereo_shader() {
     "t.w = 1.;\n";
   }
 
+EX string shader_lie_log() {
+  if(nil) {
+    return "vec4 lie_log(vec4 v) { v[2] += v[0] * v[1] / 2.; return v; }\n";
+    }
+  else if(sol && !nih) {
+    return "vec4 lie_log(vec4 v) { if(abs(v[2]) > 1e-6) { v[0] *= -v[2] / (exp(-v[2])-1.); v[1] *= v[2] / (exp(v[2])-1.); } return v; }\n";
+    }
+  else if(sol && nih) {
+    return "vec4 lie_log(vec4 v) { if(abs(v[2]) > 1e-6) { float z = v[2] * log(2); v[0] *= -z / (exp(-z)-1.); z = v[2] * log(3); v[1] *= z / (exp(z)-1.); } return v; }\n";
+    }
+  else if(nih) {
+    return "vec4 lie_log(vec4 v) { if(abs(v[2]) > 1e-6) { float z = v[2] * log(2); v[0] *= z / (exp(z)-1.); z = v[2] * log(3); v[1] *= z / (exp(z)-1.); } return v; }\n";
+    }
+  else if(hyperbolic) {
+    return "vec4 lie_log(vec4 v) { v = deparabolic13(v); v[3] = 1.; /* if(abs(v[0]) > 1e-6) { float m = v[0] / (exp(v[0]) - 1.); v[1] *= m; v[2] *= m; } */ return v; }\n";
+    }
+  else {
+    return "vec4 lie_log(vec4 v) { return v; }\n";
+    }
+  }
+
 shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   string varying, vsh, fsh, vmain = "void main() {\n", fmain = "void main() {\n";
 
@@ -237,6 +258,16 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
       "mediump float rads = dot(t.xyz, t.xyz);\n"
       "t.xyz /= -rads; t[3] = 1.0;\n";        
     if(dim3) shader_flags |= SF_ZFOG;
+    }
+  else if(pmodel == mdLiePerspective) {
+    shader_flags |= SF_PERS3 | SF_DIRECT;
+    if(hyperbolic) {
+      shader_flags |= SF_ORIENT;
+      coordinator += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
+      }
+    coordinator += "t = lie_log(t);\n";
+    distfun = "length(t.xyz)";
+    vsh += shader_lie_log();
     }
   else if(pmodel == mdGeodesic) {
     shader_flags |= SF_PERS3 | SF_DIRECT;
@@ -768,6 +799,20 @@ EX void add_fixed_functions(string& shader) {
     "if(y >= 0.) return atan(y / x) + PI;\n" 
     "if(y < 0.) return atan(y / x) - PI;\n"
     "}\n");
+
+  add_if(shader, "deparabolic13",
+        "mediump vec4 deparabolic13(mediump vec4 h) {\n"
+        "  h /= (1. + h[3]);\n"
+        "  h[0] -= 1.;\n"
+        "  h /= h.x*h.x + h.y*h.y + h.z * h.z;\n"
+        "  h[0] += .5;\n"
+        "  mediump vec4 res;\n"
+        "  res.x = (log(2.) + log(-h.x));\n"
+        "  res.y = h.y * 2.;\n"
+        "  res.z = h.z * 2.;\n"
+        "  res.w = 1.;\n"
+        "  return res;\n"
+        "  }\n\n");
 
   add_if(shader, "PI", "#define PI 3.14159265358979324\n");
   #ifndef GLES_ONLY

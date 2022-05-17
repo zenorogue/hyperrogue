@@ -480,6 +480,8 @@ void coords_to_poly() {
 bool behind3(shiftpoint h) {
   if(pmodel == mdGeodesic) 
     return lp_apply(inverse_exp(h))[2] < 0;
+  if(pmodel == mdLiePerspective)
+    return lp_apply(lie_log(unshift(h)))[2] < 0;
   return h[2] < 0;
   }
 
@@ -496,7 +498,7 @@ void addpoly(const shiftmatrix& V, const vector<glvertex> &tab, int ofs, int cnt
     return;
     }
   tofix.clear(); knowgood = false;
-  if(among(pmodel, mdPerspective, mdGeodesic)) {
+  if(in_perspective()) {
     if(poly_flags & POLY_TRIANGLES) {
       for(int i=ofs; i<ofs+cnt; i+=3) {
         shiftpoint h0 = V * glhr::gltopoint(tab[i]);

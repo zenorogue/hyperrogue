@@ -30,11 +30,11 @@ EX int detaillevel = 0;
 EX bool first_cell_to_draw = true;
 
 EX bool in_perspective() {
-  return among(pconf.model, mdPerspective, mdGeodesic);
+  return models::is_perspective(pconf.model);
   }
 
 EX bool in_perspective_v() {
-  return among(vpconf.model, mdPerspective, mdGeodesic);
+  return models::is_perspective(vpconf.model);
   }
 
 EX bool hide_player() {

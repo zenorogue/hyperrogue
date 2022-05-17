@@ -527,6 +527,30 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       return;
       }
       
+    case mdLiePerspective: {
+      if(false) {
+        hyperpoint h = point31(0, 0, 1);
+        hyperpoint a = point31(0, 0, 0);
+        hyperpoint b = point31(0.1, 0, 0);
+        println(hlog, rgpushxto0(h) * a);
+        println(hlog, rgpushxto0(h) * b);
+        exit(1);
+        /* x wanes as z grows! */
+        }
+      if(hyperbolic) {
+        models::apply_orientation_yz(H[1], H[2]);
+        models::apply_orientation(H[0], H[1]);
+        }
+      auto S = lie_log(H); S[3] = 1;
+      S = lp_apply(S);
+      if(hyperbolic) {
+        models::apply_orientation(ret[1], ret[0]);
+        models::apply_orientation_yz(ret[2], ret[1]);
+        }
+      apply_perspective(S, ret);
+      return;
+      }
+
     case mdPixel:
       ret = H / current_display->radius;
       return; 
@@ -742,7 +766,29 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
 
       break;
       }
-    
+
+    case mdLieOrthogonal: {
+      find_zlev(H);
+
+      if(hyperbolic) {
+        models::apply_orientation_yz(H[1], H[2]);
+        models::apply_orientation(H[0], H[1]);
+        }
+
+      ret = lie_log(H);
+      ret *= .5;
+      ret[LDIM] = 1;
+
+      if(hyperbolic) {
+        models::apply_orientation(ret[1], ret[0]);
+        models::apply_orientation_yz(ret[2], ret[1]);
+        }
+
+      if(nonisotropic && !vrhr::rendering()) ret = lp_apply(ret);
+
+      break;
+      }
+
     case mdHemisphere: {
   
       #if CAP_VR
@@ -2991,6 +3037,51 @@ EX hyperpoint lie_exp(hyperpoint h) {
     transmatrix T = eupush(h);
     for(int i=0; i<16; i++) T = T * T;
     h = tC0(T);
+    }
+  return h;
+  }
+
+EX hyperpoint lie_log(hyperpoint h) {
+  if(nil) {
+    h[3] = 0;
+    h[2] -= h[0] * h[1] / 2;
+    }
+  else if(sol && !nih) {
+    h[3] = 0;
+    if(abs(h[2] > 1e-6)) {
+      h[0] *= -h[2] / (exp(-h[2]) - 1);
+      h[1] *= h[2] / (exp(+h[2]) - 1);
+      }
+    }
+  else if(sol && nih) {
+    h[3] = 0;
+    if(abs(h[2] > 1e-6)) {
+      ld z = h[2] * log(2);
+      h[0] *= -z / (exp(-z) - 1);
+      z = h[2] * log(3);
+      h[1] *= z / (exp(+z) - 1);
+      }
+    }
+  else if(nih) {
+    h[3] = 1;
+    if(abs(h[2] > 1e-6)) {
+      ld z = h[2] * log(2);
+      h[0] *= z / (exp(+z) - 1);
+      z = h[2] * log(3);
+      h[1] *= z / (exp(+z) - 1);
+      }
+    }
+  else if(euclid) {
+    h[LDIM] = 0;
+    }
+  else if(hyperbolic) {
+    h = deparabolic13(h);
+    if(abs(h[0]) > 1e-6)
+      for(int i=1; i<LDIM; i++)
+        h[i] *= h[0] / (exp(h[0])-1);
+    }
+  else {
+    /* not implemented */
     }
   return h;
   }
