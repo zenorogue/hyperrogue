@@ -1050,8 +1050,8 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
     fmain +=
       "    mediump vec4 nposition = position + tangent * 1e-3;\n"
       "    mediump mat4 tkt = " + getM("mid+1") + ";\n"
-      "    position = deparabolic13(position);\n"
-      "    nposition = deparabolic13(nposition);\n"
+      "    position = deparabolici13(position);\n"
+      "    nposition = deparabolici13(nposition);\n"
       "    position = tkt * position;\n"
       "    nposition = tkt * nposition;\n"
       "    position.z *= exp(position.y);\n"
@@ -1152,8 +1152,8 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
        "    nposition.z *= exp(-nposition.y);\n"
        "    position = itkt * position;\n"
        "    nposition = itkt * nposition;\n"
-       "    position = enparabolic13(position);\n"
-       "    nposition = enparabolic13(nposition);\n";
+       "    position = enparabolici13(position);\n"
+       "    nposition = enparabolici13(nposition);\n";
          }
       else {
         string he = hyperbolic ? "from_poco_h3" : "from_poco_s3";
@@ -1319,7 +1319,7 @@ void raygen::emit_iterate(int gid1) {
     fmain += "  mediump vec4 pos = position;\n";
     if(nil) fmain += "if(which == 2 || which == 5) pos.z = 0.;\n";
     else if(hyperbolic && bt::in()) fmain +=
-        "pos = deparabolic13(pos);\n"
+        "pos = deparabolici13(pos);\n"
         "pos.xyz = pos.zxy;\n";
     else if(hyperbolic || sphere) fmain +=
         "pos /= pos.w;\n";
@@ -1555,8 +1555,9 @@ void raygen::add_functions() {
          ");}\n"
      );
 
-  add_if("deparabolic13",
-        "mediump vec4 deparabolic13(mediump vec4 h) {\n"
+  /* note: this is called deparabolici13 because it orders the coordinates differently from deparabolic13 */
+  add_if("deparabolici13",
+        "mediump vec4 deparabolici13(mediump vec4 h) {\n"
         "  h /= (1. + h[3]);\n"
         "  h[0] -= 1.;\n"
         "  h /= h.x*h.x + h.y*h.y + h.z * h.z;\n"
@@ -1569,8 +1570,9 @@ void raygen::add_functions() {
         "  return res;\n"
         "  }\n\n");
 
-  add_if("enparabolic13",
-        "mediump vec4 enparabolic13(mediump vec4 h) {\n"
+  /* note: this is called eeparabolici13 because it orders the coordinates differently from enparabolic13 */
+  add_if("enparabolici13",
+        "mediump vec4 enparabolici13(mediump vec4 h) {\n"
         "  mediump vec4 res;\n"
         "  float diag = (h.x*h.x + h.y*h.y)/2.;\n"
         "  res.x = sinh(h.z) + diag * exp(-h.z);\n"
