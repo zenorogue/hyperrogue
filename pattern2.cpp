@@ -2693,7 +2693,7 @@ EX namespace linepatterns {
       )
     );
 
-  linepattern patTree("underlying tree", 0x00d0d000, cheating, 
+  EX linepattern patTree = linepattern("underlying tree", 0x00d0d000, cheating,
     ALLCELLS(
       if(is_master(c)) {
         int dir = updir(c->master);
@@ -2896,7 +2896,7 @@ EX namespace linepatterns {
         }
       )
     );
-  linepattern patMeridians("meridians", 0xFFFFFF00, always_available, 
+  EX linepattern patMeridians = linepattern("meridians", 0xFFFFFF00, always_available,
     ATCENTER(
       for(int j=-180; j<=180; j+=15) {
         for(int i=-90; i<90; i+=15) {

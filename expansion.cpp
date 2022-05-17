@@ -426,9 +426,11 @@ EX string dfnames[3] = { "player", "start", "land" };
 
 eDistanceFrom distance_from = dfPlayer;
 
+#if HDR
 enum eNumberCoding { ncNone, ncDistance, ncType, ncDebug, ncError };
+#endif
 EX string ncnames[5] = { "NO", "distance", "type", "debug", "error" };
-eNumberCoding number_coding = ncDistance;
+EX eNumberCoding number_coding = ncDistance;
 
 bool mod_allowed() {
   return cheater || autocheat || arcm::in() || tour::on;
