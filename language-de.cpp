@@ -196,7 +196,7 @@ S("Stab them by walking around them.", "Erstich sie, indem du um sie herumgehst.
 S("You feel more experienced in demon fighting!", "Du fühlst dich erfahrener im Kampf gegen Dämonen!")
 S("Cthulhu withdraws his tentacle!", "Cthulhu zieht seinen Tentakel zurück!")
 S("The sandworm explodes in a cloud of Spice!", "Der Sandwurm explodiert in einer Wolke aus Spice")
-S("%The1 is confused!", "%Der1 %1 ist verwirrt.")
+S("Surprisingly, %the1 does not kill you!", "%Der1 %1 ist verwirrt.") //TODO UPDATE
 S("%The1 raises some undead!", "%Der1 %1 beschwört die Toten!")
 S("%The1 throws fire at you!", "%Der1 %1 wirft Feuer nach dir!")
 S("%The1 shows you two fingers.", "%Der1 %1 zeigt dir zwei Finger.")

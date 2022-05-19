@@ -200,7 +200,7 @@ S("Stab them by walking around them.", "Probodni ho tím, že ho obejdeš.")
 S("You feel more experienced in demon fighting!", "Cítíš se zkušenější v boji proti pekelným démonům!")
 S("Cthulhu withdraws his tentacle!", "Cthulhu stahuje své chapadlo!")
 S("The sandworm explodes in a cloud of Spice!", "Písečný červ vybuchl v oblaku Koření!")
-S("%The1 is confused!", "%1 je zmaten%ý1.")
+S("Surprisingly, %the1 does not kill you!", "%1 je zmaten%ý1.") //TODO UPDATE
 S("%The1 raises some undead!", "%1 probudil nemrtvé!")
 S("%The1 throws fire at you!", "%1 po tobě vystřelil oheň!")
 S("%The1 shows you two fingers.", "%1 ti ukáza%l1 dva prsty.")
