@@ -331,18 +331,63 @@ EX void eumerge(cell* c1, int s1, cell *c2, int s2, bool mirror) {
 
 EX hookset<hrmap*()> hooks_newmap;
 
-EX int req_disksize, disksize;
+#if HDR
+enum eDiskShape { dshTiles, dshVertices, dshGeometric };
+#endif
+
+/** requested disk size */
+EX int req_disksize;
+/** currently used disk size */
+EX int disksize;
+/** all the cells in the disk */
 EX vector<cell*> all_disk_cells;
+/** for quick test of membership */
 EX vector<cell*> all_disk_cells_sorted;
+/** the disk shape to use */
+EX eDiskShape diskshape;
 
 EX void init_disk_cells() {
   disksize = req_disksize;
   all_disk_cells.clear();
   all_disk_cells_sorted.clear();
   if(!disksize) return;
-  celllister cl(currentmap->gamestart(), 1000000, disksize, NULL);
-  all_disk_cells = cl.lst;
-  all_disk_cells_sorted = cl.lst;
+  if(diskshape == dshTiles) {
+    celllister cl(currentmap->gamestart(), 1000000, disksize, NULL);
+    all_disk_cells = cl.lst;
+    }
+  else {
+    struct tileinfo {
+      ld dist;
+      cell *c;
+      transmatrix T;
+      bool operator < (const tileinfo& t2) const { return -dist < -t2.dist - 1e-6; }
+      };
+    set<cell*> seen;
+    std::priority_queue<tileinfo> tiles;
+    tiles.push(tileinfo{0, currentmap->gamestart(), Id});
+    ld last_dist = 0;
+    dynamicval<int> dmar(mine_adjacency_rule, 1);
+    while(isize(tiles)) {
+      auto ti = tiles.top();
+      tiles.pop();
+      println(hlog, "dist=", ti.dist, " for c=", ti.c);
+      if(seen.count(ti.c)) continue;
+      seen.insert(ti.c);
+      if(ti.dist > last_dist + 1e-6 && isize(all_disk_cells) >= disksize) break;
+      last_dist = ti.dist;
+      all_disk_cells.push_back(ti.c);
+      for(auto p: adj_minefield_cells_full(ti.c)) {
+        tileinfo next;
+        next.c = p.c;
+        next.T = ti.T * p.T;
+        if(diskshape == dshVertices) next.dist = ti.dist + 1;
+        else next.dist = hdist0(tC0(next.T));
+        println(hlog, ti.c, " -> ", p.c, " at ", next.dist);
+        tiles.push(next);
+        }
+      }
+    }
+  all_disk_cells_sorted = all_disk_cells;
   sort(all_disk_cells_sorted.begin(), all_disk_cells_sorted.end());
   }
 
