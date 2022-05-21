@@ -4668,3 +4668,10 @@ Fixed some bugs in the new features for tes, and also fixed spherical geometry.
 - buggy window resizing should be fixed
 - simplified display option for tes tilings with apeirogons
 - RogueViz: fixed the VR for the portal demo, and some improvements to the impossibility presentation
+
+2022-05-21 17:16 Update 12.0q:
+- In 'experiments with geometry', added an option to play on a disk. This lets you use the "bounded space" rules on infinite manifolds. Especially useful with Minefield and Halloween.
+- also improved the Halloween generation (outside of spheres)
+- teleportation in bounded minesweeper no longer follows the limited range rule
+- you can now display Minefield clues as numbers (right-click minefield to get its help screen where you can change this option)
+- new projections mostly for Solv: Lie perspective and Lie orthogonal
