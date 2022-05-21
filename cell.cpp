@@ -333,19 +333,22 @@ EX hookset<hrmap*()> hooks_newmap;
 
 EX int req_disksize, disksize;
 EX vector<cell*> all_disk_cells;
+EX vector<cell*> all_disk_cells_sorted;
 
 EX void init_disk_cells() {
   disksize = req_disksize;
   all_disk_cells.clear();
+  all_disk_cells_sorted.clear();
   if(!disksize) return;
   celllister cl(currentmap->gamestart(), 1000000, disksize, NULL);
   all_disk_cells = cl.lst;
-  sort(all_disk_cells.begin(), all_disk_cells.end());
+  all_disk_cells_sorted = cl.lst;
+  sort(all_disk_cells_sorted.begin(), all_disk_cells_sorted.end());
   }
 
 EX bool is_in_disk(cell *c) {
-  auto it = lower_bound(all_disk_cells.begin(), all_disk_cells.end(), c);
-  if(it == all_disk_cells.end()) return false;
+  auto it = lower_bound(all_disk_cells_sorted.begin(), all_disk_cells_sorted.end(), c);
+  if(it == all_disk_cells_sorted.end()) return false;
   return *it == c;
   }
 
