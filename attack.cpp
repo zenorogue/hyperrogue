@@ -326,8 +326,8 @@ EX void prespill(cell* c, eWall t, int rad, cell *from) {
   // block spill
   if(t == waTemporary) return;
   // cwt.at->item = itNone;
-  if(rad) for(auto p: adj_minefield_cells_with_orientation(c)) {
-    prespill(p.first, conditional_flip_slime(p.second, t), rad-1, c);
+  if(rad) for(auto p: adj_minefield_cells_full(c)) {
+    prespill(p.c, conditional_flip_slime(p.mirrored, t), rad-1, c);
     }
   }
 
@@ -342,8 +342,8 @@ EX void spillfix(cell* c, eWall t, int rad) {
     changes.ccell(c);
     c->wall = t;
     }
-  if(rad) for(auto p: adj_minefield_cells_with_orientation(c)) {
-    spillfix(p.first, conditional_flip_slime(p.second, t), rad-1);
+  if(rad) for(auto p: adj_minefield_cells_full(c)) {
+    spillfix(p.c, conditional_flip_slime(p.mirrored, t), rad-1);
     }
   }
 

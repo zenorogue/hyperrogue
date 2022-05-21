@@ -1355,7 +1355,15 @@ EX int neighborId(cell *ofWhat, cell *whichOne) {
 
 EX int mine_adjacency_rule = 0;
 
-EX map<cell*, vector<pair<cell*, bool>>> adj_memo;
+#if HDR
+struct adj_data {
+  cell *c;
+  bool mirrored;
+  transmatrix T;
+  };
+#endif
+
+EX map<cell*, vector<adj_data>> adj_memo;
 
 EX bool geometry_has_alt_mine_rule() {
   if(S3 >= OINF) return false;
@@ -1364,24 +1372,29 @@ EX bool geometry_has_alt_mine_rule() {
   return true;
   }
 
-EX vector<pair<cell*, bool>> adj_minefield_cells_with_orientation(cell *c) {
-  vector<pair<cell*, bool>> res;
-  if(mine_adjacency_rule == 0 || !geometry_has_alt_mine_rule())
-    forCellIdCM(c2, i, c) res.emplace_back(c2, c->c.mirror(i));
+EX vector<adj_data> adj_minefield_cells_full(cell *c) {
+  if(adj_memo.count(c)) return adj_memo[c];
+  if(isize(adj_memo) > 10000) adj_memo.clear();
+  auto& res = adj_memo[c];
+  if(mine_adjacency_rule == 0 || !geometry_has_alt_mine_rule()) {
+    forCellIdCM(c2, i, c) res.emplace_back(adj_data{c2, c->c.mirror(i), currentmap->adj(c, i)});
+    }
   else if(WDIM == 2) {
     cellwalker cw(c, 0);
+    transmatrix T = Id;
+    T = T * currentmap->adj(c, 0);
     cw += wstep;
     cw++;
     cellwalker cw1 = cw;
     do {
-      res.emplace_back(cw.at, cw.mirrored);
+      res.emplace_back(adj_data{cw.at, cw.mirrored, T});
+      T = T * currentmap->adj(c, cw.spin);
       cw += wstep;
       cw++;
       if(cw.cpeek() == c) cw++;
       }
     while(cw != cw1);
     }
-  else if(adj_memo.count(c)) return adj_memo[c];
   else {
     auto& ss = currentmap->get_cellshape(c);
     const vector<hyperpoint>& vertices = ss.vertices_only_local;
@@ -1397,7 +1410,7 @@ EX vector<pair<cell*, bool>> adj_minefield_cells_with_orientation(cell *c) {
         auto& vertices1 = ss1.vertices_only_local;
         for(hyperpoint h: vertices) for(hyperpoint h2: vertices1)
           if(hdist(h, T * h2) < 1e-6) shares = true;
-        if(shares) res.emplace_back(c1, det(T) < 0);
+        if(shares) res.emplace_back(adj_data{c1, det(T) < 0, T});
         }
       if(shares || c == c1) forCellIdEx(c2, i, c1) {
         if(cl.listed(c2)) continue;
@@ -1405,16 +1418,14 @@ EX vector<pair<cell*, bool>> adj_minefield_cells_with_orientation(cell *c) {
         M.push_back(T * currentmap->adj(c1, i));
         }
       }
-    // println(hlog, "adjacent to ", c, " = ", isize(res), " of ", isize(M));
-    adj_memo[c] = res;
     }
   return res;
   }
 
 EX vector<cell*> adj_minefield_cells(cell *c) {
   vector<cell*> res;
-  auto ori = adj_minefield_cells_with_orientation(c);
-  for(auto p: ori) res.push_back(p.first);
+  auto ori = adj_minefield_cells_full(c);
+  for(auto p: ori) res.push_back(p.c);
   return res;
   }
 
