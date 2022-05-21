@@ -183,7 +183,8 @@ transmatrix hrmap::adj(heptagon *h, int i) { return relative_matrix(h->cmove(i),
 
 vector<cell*>& hrmap::allcells() { 
   static vector<cell*> default_allcells;
-  if(bounded && !(cgflags & qHUGE_BOUNDED) && !(hybri && hybrid::csteps == 0)) {
+  if(disksize) return all_disk_cells;
+  if(closed_manifold && !(cgflags & qHUGE_BOUNDED) && !(hybri && hybrid::csteps == 0)) {
     celllister cl(gamestart(), 1000000, 1000000, NULL);
     default_allcells = cl.lst;
     return default_allcells;
@@ -329,6 +330,24 @@ EX void eumerge(cell* c1, int s1, cell *c2, int s2, bool mirror) {
 //  map<pair<eucoord, eucoord>, cell*> euclidean;
 
 EX hookset<hrmap*()> hooks_newmap;
+
+EX int req_disksize, disksize;
+EX vector<cell*> all_disk_cells;
+
+EX void init_disk_cells() {
+  disksize = req_disksize;
+  all_disk_cells.clear();
+  if(!disksize) return;
+  celllister cl(currentmap->gamestart(), 1000000, disksize, NULL);
+  all_disk_cells = cl.lst;
+  sort(all_disk_cells.begin(), all_disk_cells.end());
+  }
+
+EX bool is_in_disk(cell *c) {
+  auto it = lower_bound(all_disk_cells.begin(), all_disk_cells.end(), c);
+  if(it == all_disk_cells.end()) return false;
+  return *it == c;
+  }
 
 /** create a map in the current geometry */
 EX void initcells() {
@@ -520,7 +539,7 @@ EX int celldist(cell *c) {
     return hybrid::celldistance(c, currentmap->gamestart());
   if(nil && !quotient) return DISTANCE_UNKNOWN;
   if(euc::in()) return celldistance(currentmap->gamestart(), c);
-  if(sphere || bt::in() || WDIM == 3 || cryst || sn::in() || kite::in() || bounded) return celldistance(currentmap->gamestart(), c);
+  if(sphere || bt::in() || WDIM == 3 || cryst || sn::in() || kite::in() || closed_manifold) return celldistance(currentmap->gamestart(), c);
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
   #endif
@@ -1204,7 +1223,7 @@ EX int celldistance(cell *c1, cell *c2) {
     }
   #endif
   
-  if(bounded) return bounded_celldistance(c1, c2);
+  if(closed_manifold) return bounded_celldistance(c1, c2);
   
   #if CAP_CRYSTAL
   if(cryst) return crystal::precise_distance(c1, c2);

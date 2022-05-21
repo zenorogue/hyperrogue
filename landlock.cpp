@@ -139,7 +139,7 @@ EX string land_structure_name(bool which) {
   }
 
 EX void fix_land_structure_choice() {  
-  if(bounded) {
+  if(closed_or_bounded) {
     if(land_structure != lsTotalChaos && land_structure != lsChaosRW)
       land_structure = lsSingle;
     }
@@ -155,7 +155,7 @@ EX void fix_land_structure_choice() {
     land_structure = lsSingle;
   if(land_structure == lsPatchedChaos && !(stdeuc || nil || cryst || (euclid && WDIM == 3)))
     land_structure = lsSingle;
-  if(bounded && !among(land_structure, lsChaosRW, lsTotalChaos, lsSingle))
+  if(closed_or_bounded && !among(land_structure, lsChaosRW, lsTotalChaos, lsSingle))
     land_structure = lsSingle;
   }
 
@@ -777,12 +777,12 @@ EX land_validity_t& land_validity(eLand l) {
     return disabled;
   #endif
 
-  if(l == laMinefield && bounded)
+  if(l == laMinefield && closed_or_bounded)
     return special_geo3;
   
   if(l == laAsteroids) {
     if(!shmup::on) return shmup_only;
-    if(!bounded) return bounded_only;
+    if(!closed_manifold) return bounded_only;
     return specially_designed;
     }
   
@@ -901,7 +901,7 @@ EX land_validity_t& land_validity(eLand l) {
     return not_implemented; 
   
   // Halloween needs bounded world (can be big bounded)
-  if(l == laHalloween && !bounded)
+  if(l == laHalloween && !closed_or_bounded)
     return bounded_only;
   
   // Crystal World is designed for nice_dual geometries
@@ -960,7 +960,7 @@ EX land_validity_t& land_validity(eLand l) {
     if(geometry == gBinary4)
       return not_implemented;
     // no equidistants supported in these geometries (big sphere is OK though)
-    if(bounded && !bigsphere)
+    if(closed_or_bounded && !bigsphere)
       return unbounded_only_except_bigsphere;
     // Yendorian only implemented in standard
     if(l == laEndorian && geometry)
@@ -1004,7 +1004,7 @@ EX land_validity_t& land_validity(eLand l) {
   
   if(l == laClearing)
     if(!(stdeucx || geometry == gBinaryTiling || a38 || (a45 && BITRUNCATED) || (a47 && BITRUNCATED)) || NONSTDVAR)
-    if(!bounded)
+    if(!closed_or_bounded)
       return not_implemented;
 
   // does not work in non-bitrunc a4
@@ -1012,7 +1012,7 @@ EX land_validity_t& land_validity(eLand l) {
     return some0;
 
   // does not work in bounded either
-  if(l == laOvergrown && bounded)
+  if(l == laOvergrown && closed_or_bounded)
     return some0;
   
   // horocycle-based lands, not available in bounded geometries nor in Chaos mode
@@ -1023,7 +1023,7 @@ EX land_validity_t& land_validity(eLand l) {
       return not_in_chaos;
       }
     if(arcm::in() || kite::in()) return not_implemented;
-    if(bounded) return unbounded_only;
+    if(closed_or_bounded) return unbounded_only;
     if(INVERSE) return not_implemented;
     }
   
@@ -1064,7 +1064,7 @@ EX land_validity_t& land_validity(eLand l) {
     return technical;
   
   // only in bounded geometry, and not in PTM
-  if(l == laCA && !bounded)
+  if(l == laCA && !closed_or_bounded)
     return bounded_only;
 
   if(l == laCA && tactic::on)
@@ -1121,7 +1121,7 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laStorms && hyperbolic_not37)
     return pattern_not_implemented_random;
   
-  if(l == laTrollheim && !stdeucx && !bounded)
+  if(l == laTrollheim && !stdeucx && !closed_or_bounded)
     return some1;
 
   if(l == laReptile && sol) return ugly_version_nofull;
@@ -1174,7 +1174,7 @@ EX land_validity_t& land_validity(eLand l) {
   if(l == laPrairie) {
     if(GOLDBERG) return not_implemented;
     else if(stdeucx || (bigsphere && BITRUNCATED && !elliptic) || (geometry == gFieldQuotient)) ;
-    else if(!bounded) return not_implemented;
+    else if(!closed_or_bounded) return not_implemented;
     else return unbounded_only;
     }
   
@@ -1191,10 +1191,10 @@ EX land_validity_t& land_validity(eLand l) {
   if(sol && l == laCamelot)
     return not_implemented;
 
-  if(euclid && quotient && !bounded && l == laCrossroads && euc::sdxy().second == -2 * euc::sdxy().first)
+  if(euclid && quotient && !closed_or_bounded && l == laCrossroads && euc::sdxy().second == -2 * euc::sdxy().first)
     return full_game;
   
-  if(euclid && quotient && !bounded && l == laCrossroads4 && euc::sdxy().second == 0)
+  if(euclid && quotient && !closed_or_bounded && l == laCrossroads4 && euc::sdxy().second == 0)
     return full_game;
   
   // highlight Zebra-based lands on Zebra Quotient!
@@ -1231,7 +1231,7 @@ EX land_validity_t& land_validity(eLand l) {
     return pattern_not_implemented_exclude;
     }
   
-  if(l == laStorms && euclid && bounded) 
+  if(l == laStorms && euclid && closed_manifold)
     return interesting;
   
   if(l == laMagnetic)

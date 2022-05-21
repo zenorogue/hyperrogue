@@ -760,7 +760,7 @@ EX geometry_data compute_geometry_data() {
   if(euclid) gd.euler = 0;
   else if(sphere && nonorientable) gd.euler = 1;
   else if(sphere) gd.euler = 2;
-  else if(!bounded) gd.euler = -2;
+  else if(!closed_manifold) gd.euler = -2;
   else if(WDIM == 3) gd.euler = 0;
   else switch(geometry) {
     case gFieldQuotient:
@@ -810,7 +810,7 @@ EX geometry_data compute_geometry_data() {
     gd.denom /= g;
     }
   
-  if(euclid && bounded) {
+  if(euclid && closed_manifold) {
     gd.worldsize = euc::eu.det;
     if(BITRUNCATED) gd.worldsize *= (a4 ? 2 : 3);
     if(GOLDBERG) gd.worldsize *= cgi.gpdata->area;
@@ -821,7 +821,7 @@ EX geometry_data compute_geometry_data() {
   else 
   gd.worldsize = gd.denom ? gd.nom / gd.denom : 0;
   
-  if(gd.euler < 0 && !bounded)
+  if(gd.euler < 0 && !closed_manifold)
     gd.worldsize = -gd.worldsize;
 
   string spf = its(ts);
@@ -895,6 +895,7 @@ EX geometry_data compute_geometry_data() {
     }
 
   gd.size_str =
+    disksize ? its(isize(currentmap->allcells())) :
     #if CAP_BT
     bt::in() ? fts(8 * M_PI * sqrt(2) * log(2) / pow(vid.binary_width, WDIM-1), 4) + " exp(∞)" :
     #endif
@@ -905,10 +906,10 @@ EX geometry_data compute_geometry_data() {
     #if CAP_CRYSTAL
     cryst ? "∞^" + its(ts/2) :
     #endif
-    WDIM == 3 && bounded ? its(isize(currentmap->allcells())) :
+    WDIM == 3 && closed_manifold ? its(isize(currentmap->allcells())) :
     WDIM == 3 && euclid ? "∞" :
     gd.worldsize < 0 ? (gd.nom%gd.denom ? its(gd.nom)+"/"+its(gd.denom) : its(-gd.worldsize)) + " exp(∞)": 
-    (euclid && quotient && !bounded) ? "∞" :
+    (euclid && quotient && !closed_manifold) ? "∞" :
     gd.worldsize == 0 ? "∞²" :
     its(gd.worldsize);
 
@@ -1057,8 +1058,9 @@ EX void showEuclideanMenu() {
   
   dialog::addBreak(100);
   menuitem_land_structure('l');
+  add_edit(req_disksize);
   
-  if(specialland == laMinefield && bounded) {
+  if(specialland == laMinefield && closed_or_bounded) {
     dialog::addSelItem(XLAT("number of mines"), its(bounded_mine_quantity), 'm');
     dialog::add_action([] {
       dialog::editNumber(bounded_mine_quantity, 0, bounded_mine_max, 1, (bounded_mine_max+5)/10, 
@@ -1129,7 +1131,7 @@ EX void showEuclideanMenu() {
     else if(viewdists) viewdists = false;
     });
 
-  if(bounded) {
+  if(closed_manifold) {
     dialog::addSelItem(XLAT("Euler characteristics"), its(gd.euler), 0);
     if(WDIM == 3) ;
     else if(nonorientable)

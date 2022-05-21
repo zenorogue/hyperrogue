@@ -962,7 +962,7 @@ EX namespace nilv {
     int coords = 0;
     for(int a=0; a<3; a++) if(nilperiod[a]) coords++;
     set_flag(ginf[gNil].flags, qANYQ, coords);
-    set_flag(ginf[gNil].flags, qBOUNDED, coords == 3);
+    set_flag(ginf[gNil].flags, qCLOSED, coords == 3);
     set_flag(ginf[gNil].flags, qSMALL, coords == 3 && nilperiod[0] * nilperiod[1] * nilperiod[2] <= 4096);
     }
 
@@ -1229,7 +1229,7 @@ EX namespace hybrid {
     
     EX void fix_bounded_cycles() {
       if(!rotspace) return;
-      if(!bounded) return;
+      if(!closed_manifold) return;
       in_underlying([&] {
         cellwalker final(currentmap->gamestart(), 0);
         auto& ac = currentmap->allcells();
@@ -1505,7 +1505,7 @@ EX namespace hybrid {
     dialog::extra_options = [=] () { 
       if(rotspace) {
         int e_steps = cgi.psl_steps / gcd(cgi.single_step, cgi.psl_steps); 
-        bool ubounded = PIU(bounded);
+        bool ubounded = PIU(closed_manifold);
         dialog::addSelItem( sphere ? XLAT("elliptic") : XLAT("PSL(2,R)"), its(e_steps), 'P');
         dialog::add_action(set_s(e_steps, true));
         dialog::addSelItem( sphere ? XLAT("sphere") : XLAT("SL(2,R)"), its(2*e_steps), 'P');

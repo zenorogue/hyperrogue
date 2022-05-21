@@ -79,7 +79,7 @@ EX void pickupMovedItems(cell *c, cell *from) {
   }
 
 EX bool in_lovasz() {
-  return specialland == laMotion && bounded && ls::single() && !daily::on;
+  return specialland == laMotion && closed_or_bounded && ls::single() && !daily::on;
   }
 
 EX int threshold_met(int i) {

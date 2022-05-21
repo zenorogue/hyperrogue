@@ -659,21 +659,21 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
       ep.force_eat(")");
       ginf[gArbitrary].g = curv > 0 ? giSphere2 : curv < 0 ? giHyperb2 : giEuclid2;
       ginf[gArbitrary].sides = 7;
-      set_flag(ginf[gArbitrary].flags, qBOUNDED, curv > 0);
+      set_flag(ginf[gArbitrary].flags, qCLOSED, curv > 0);
       set_flag(ginf[gArbitrary].flags, qAFFINE, false);
       geom3::apply_always3();
       }
     else if(ep.eat("e2.")) {
       ginf[gArbitrary].g = giEuclid2;
       ginf[gArbitrary].sides = 7;
-      set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
+      set_flag(ginf[gArbitrary].flags, qCLOSED, false);
       set_flag(ginf[gArbitrary].flags, qAFFINE, false);
       geom3::apply_always3();
       }
     else if(ep.eat("a2.")) {
       ginf[gArbitrary].g = giEuclid2;
       ginf[gArbitrary].sides = 7;
-      set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
+      set_flag(ginf[gArbitrary].flags, qCLOSED, false);
       set_flag(ginf[gArbitrary].flags, qAFFINE, true);
       affine_limit = 200;
       geom3::apply_always3();
@@ -681,14 +681,14 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
     else if(ep.eat("h2.")) {
       ginf[gArbitrary].g = giHyperb2;
       ginf[gArbitrary].sides = 7;
-      set_flag(ginf[gArbitrary].flags, qBOUNDED, false);
+      set_flag(ginf[gArbitrary].flags, qCLOSED, false);
       set_flag(ginf[gArbitrary].flags, qAFFINE, false);
       geom3::apply_always3();
       }
     else if(ep.eat("s2.")) {
       ginf[gArbitrary].g = giSphere2;
       ginf[gArbitrary].sides = 5;
-      set_flag(ginf[gArbitrary].flags, qBOUNDED, true);
+      set_flag(ginf[gArbitrary].flags, qCLOSED, true);
       set_flag(ginf[gArbitrary].flags, qAFFINE, false);
       geom3::apply_always3();
       }
@@ -1504,7 +1504,7 @@ EX void convert() {
   ac.shapes.resize(N);
 
   ginf[gArbitrary].g = cginf.g;
-  ginf[gArbitrary].flags = cgflags & qBOUNDED;
+  ginf[gArbitrary].flags = cgflags & qCLOSED;
   
   for(int i=0; i<N; i++) {
     auto id = identification[old_shvids[i]];

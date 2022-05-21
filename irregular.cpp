@@ -1045,7 +1045,7 @@ EX bool ctof(cell* c) {
   }
 
 EX bool supports(eGeometry g) {
-  if(g == gEuclid || g == gEuclidSquare) return ginf[g].flags & qBOUNDED;
+  if(g == gEuclid || g == gEuclidSquare) return ginf[g].flags & qCLOSED;
   return among(g, gNormal, gKleinQuartic, gOctagon, gBolza2, gFieldQuotient, gSphere, gSmallSphere, gTinySphere);
   }
 

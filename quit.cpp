@@ -371,7 +371,7 @@ EX void showMission() {
       }
     dialog::addInfo(XLAT("Dropped floors: %1/%2", its(score), its(all)));
     if(score == all) dialog::addInfo(XLAT("CONGRATULATIONS!"), iinf[itOrbYendor].color);
-    if(score == all && geometry == gKleinQuartic && variation == eVariation::untruncated && gp::param == gp::loc(1,1))
+    if(score == all && geometry == gKleinQuartic && variation == eVariation::untruncated && gp::param == gp::loc(1,1) && !disksize)
       achievement_gain_once("LOVASZ", rg::special_geometry);      
     }
   else {  

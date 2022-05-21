@@ -934,6 +934,11 @@ EX void initConfig() {
   param_b(vid.smart_area_based, "smart-area-based", false);
   param_i(vid.cells_drawn_limit, "limit on cells drawn", 10000);
   param_i(vid.cells_generated_limit, "limit on cells generated", 250);
+
+  param_i(req_disksize, "disk_size")
+  ->editable(10, 100000, 10, "disk size", "Play on a disk. Enables the special game rules for small bounded spaces (especially relevant for e.g. Minefield and Halloween). The number given is the number of tiles to use; it is not used exactly, actually the smallest disk above this size is used. Set to 0 to disable.", 'd')
+  ->set_sets([] { dialog::bound_low(0); })
+  ->set_reaction([] { if(game_active) { stop_game(); start_game(); } });
   
   #if CAP_SOLV
   addsaver(sn::solrange_xy, "solrange-xy");

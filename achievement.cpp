@@ -112,6 +112,7 @@ EX bool wrongMode(char flags) {
   if(flags != rg::special_geometry && flags != rg::special_geometry_nicewalls) {
     if(!BITRUNCATED) return true;
     if(geometry != gNormal) return true;
+    if(disksize) return true;
     }
 
   if(shmup::on != (flags == rg::shmup || flags == rg::racing)) return true;
@@ -225,10 +226,10 @@ EX void achievement_collection2(eItem it, int q) {
   if(randomPatternsMode) return;
   LATE( achievement_collection2(it, q); )
 
-  if(it == itTreat && q == 50 && (geometry == gSphere || geometry == gElliptic) && BITRUNCATED) 
+  if(it == itTreat && q == 50 && (geometry == gSphere || geometry == gElliptic) && BITRUNCATED && !disksize)
     achievement_gain("HALLOWEEN1", rg::special_geometry);
 
-  if(it == itTreat && q == 100 && (geometry == gSphere || geometry == gElliptic) && BITRUNCATED) 
+  if(it == itTreat && q == 100 && (geometry == gSphere || geometry == gElliptic) && BITRUNCATED && !disksize)
     achievement_gain("HALLOWEEN2", rg::special_geometry);
 
   if(q == 1) {
@@ -309,12 +310,12 @@ EX void achievement_collection2(eItem it, int q) {
   // 32
   if(it == itHolyGrail) {
     if(q == 1) achievement_gain("GRAIL2");
-    if(PURE && geometry == gNormal)
+    if(PURE && geometry == gNormal && !disksize)
       achievement_gain("GRAILH", rg::special_geometry_nicewalls);
     #if CAP_CRYSTAL
-    if(PURE && cryst && ginf[gCrystal].sides == 8 && ginf[gCrystal].vertex == 4 && !crystal::used_compass_inside)
+    if(PURE && cryst && ginf[gCrystal].sides == 8 && ginf[gCrystal].vertex == 4 && !crystal::used_compass_inside && !disksize)
       achievement_gain("GRAIL4D", rg::special_geometry);
-    if(BITRUNCATED && cryst && ginf[gCrystal].sides == 8 && ginf[gCrystal].vertex == 3 && !crystal::used_compass_inside)
+    if(BITRUNCATED && cryst && ginf[gCrystal].sides == 8 && ginf[gCrystal].vertex == 3 && !crystal::used_compass_inside && !disksize)
       achievement_gain("GRAIL4D2", rg::special_geometry);
     #endif
     if(q == 3) achievement_gain("GRAIL3");
@@ -599,7 +600,7 @@ EX void achievement_count(const string& s, int current, int prev) {
     achievement_gain("LIGHTNING2");
   if(s == "LIGHTNING" && current-prev >= 10)
     achievement_gain("LIGHTNING3");
-  if(s == "MIRAGE" && current >= 35 && geometry == gEuclid)
+  if(s == "MIRAGE" && current >= 35 && geometry == gEuclid && !disksize)
     achievement_gain("MIRAGE", rg::special_geometry);
   if(s == "ORB" && current >= 10)
     achievement_gain("ORB3");
@@ -633,6 +634,7 @@ EX void achievement_score(int cat, int number) {
   if(cheater) return;
   if(casual) return;
   LATE( achievement_score(cat, number); )
+  if(disksize) return;
   if(cat == LB_HALLOWEEN) {
     if(geometry != gSphere && geometry != gElliptic)
       return;
@@ -943,7 +945,7 @@ EX string get_rich_presence_text() {
     return "Guided Tour";
 
   string res;
-  if(geometry != gNormal || !BITRUNCATED) 
+  if(geometry != gNormal || !BITRUNCATED || disksize)
     res = res + full_geometry_name() + " ";
   
   if(land_structure != default_land_structure()) res += land_structure_name(false) + " ";

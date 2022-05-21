@@ -490,7 +490,7 @@ void explore() {
 
   ginf[gArbitrary].g = giEuclid2;
   ginf[gArbitrary].sides = 7;
-  set_flag(ginf[gArbitrary].flags, qBOUNDED, true);
+  set_flag(ginf[gArbitrary].flags, qCLOSED, true);
   set_flag(ginf[gArbitrary].flags, qAFFINE, false);
   geom3::apply_always3();
 

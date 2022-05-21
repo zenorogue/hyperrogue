@@ -346,11 +346,14 @@ EX void initgame() {
     makeEmpty(cwt.at);
     }
   
-  if(specialland == laMinefield && bounded) {
+  if(specialland == laMinefield && closed_or_bounded) {
     bfs();
     generate_mines();
     }
-  
+
+  if(specialland == laHalloween)
+    halloween::generate();
+
   if(in_lovasz()) {
     cwt.at->item = itOrbInvis;
     }
@@ -1455,7 +1458,7 @@ EX void switch_game_mode(char switchWhat) {
       if(tactic::on) firstland = laIce;
       yendor::on = tactic::on = princess::challenge = false;
       land_structure = ls::any_chaos() ? lsNiceWalls : lsChaos;
-      if(bounded) set_geometry(gNormal);
+      if(closed_or_bounded) set_geometry(gNormal);
       racing::on = false;
       break;
 
@@ -1570,6 +1573,7 @@ EX void start_game() {
   #endif
   initcells();
   get_expansion().reset();
+  init_disk_cells();
 
   if(randomPatternsMode) {
     for(int i=0; i<landtypes; i++) {

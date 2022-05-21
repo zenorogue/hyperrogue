@@ -392,7 +392,7 @@ int type_in_quick(expansion_analyzer& ea, cell *c, const cellfunction& f) {
 
 EX bool sizes_known() {
   if(reg3::in_rule()) return true;
-  if(bounded) return false;
+  if(closed_manifold) return false;
   // Castle Anthrax is infinite
   if(bt::in()) return false;
   // not implemented
@@ -717,7 +717,7 @@ string produce_coef_formula(vector<int> coef) {
 
 void expansion_analyzer::view_distances_dialog() {
   static int lastticks;
-  if(scrolling_distances && !bounded) {
+  if(scrolling_distances && !closed_manifold) {
     scrolltime += SDL_GetTicks() - lastticks;
     first_distance += scrolltime / scrollspeed;
     scrolltime %= scrollspeed;
@@ -729,7 +729,7 @@ void expansion_analyzer::view_distances_dialog() {
   dialog::init("");
   cmode |= sm::DIALOG_STRICT_X | sm::EXPANSION;
   
-  int maxlen = bounded ? 128 : 16 + first_distance;
+  int maxlen = closed_manifold ? 128 : 16 + first_distance;
   vector<bignum> qty(maxlen);
   auto& expansion = get_expansion();
   
@@ -748,12 +748,12 @@ void expansion_analyzer::view_distances_dialog() {
     }
   else {
     if(distance_from == dfPlayer) {
-      celllister cl(cwt.at, bounded ? maxlen-1 : gamerange(), 100000, NULL);
+      celllister cl(cwt.at, closed_manifold ? maxlen-1 : gamerange(), 100000, NULL);
       for(int d: cl.dists)
         if(d >= 0 && d < maxlen) qty[d]++;
       }
     else {
-      celllister cl(cwt.at, bounded ? maxlen-1 : gamerange(), 100000, NULL);
+      celllister cl(cwt.at, closed_manifold ? maxlen-1 : gamerange(), 100000, NULL);
       for(cell *c: cl.lst) if((not_only_descendants || is_descendant(c)) && curr_dist(c) < maxlen) qty[curr_dist(c)]++;
       }
     #if !CAP_GMP

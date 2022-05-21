@@ -15,7 +15,7 @@ EX namespace whirlwind {
   EX int fzebra3(cell *c) {
     if(arcm::in()) return 0;
     if(euclid) {
-      if(bounded) return 0;
+      if(closed_manifold) return 0;
       auto co = euc2_coordinates(c);
       int y = co.second;
       return 1+((((signed short)(y)+int(50000))/3)%3);
@@ -1011,7 +1011,7 @@ EX namespace clearing {
     }
   
   EX void imput(cell *c) {
-    if(bounded) return;
+    if(closed_manifold) return;
     if(score.count(c)) return;
     changes.map_value(score, c);
     auto& is = score[c];
@@ -1216,7 +1216,7 @@ EX namespace mirror {
   #endif
   
   bool noMirrorOn(cell *c) {
-    return c->monst || (!shmup::on && isPlayerOn(c)) || (!bounded && c->cpdist > gamerange());
+    return c->monst || (!shmup::on && isPlayerOn(c)) || (!closed_or_bounded && c->cpdist > gamerange());
     }
 
   bool cellMirrorable(cell *c) {
@@ -3670,6 +3670,53 @@ EX }
 EX namespace halloween {
   EX cell *dragoncells[4];
   vector<cell*> srch;
+
+  EX void generate() {
+    auto lst = currentmap->allcells();
+    for(cell *c: lst)
+      setdist(c, 7, nullptr);
+
+    halloween::dragoncells[0] = NULL;
+
+    if(sphere && geometry == gNormal) {
+      for(cell *c: lst) {
+        if(GOLDBERG) {
+          int fv = c->master->fiftyval;
+          if(fv == 1 || fv == 4 || fv == 10)
+            c->wall = waChasm;
+          if(c == c->master->c7 && fv == 3)
+            c->item = itTreat;
+          }
+        else if(!BITRUNCATED) {
+          int fv = c->master->fiftyval;
+          if(fv == 1 || fv == 4 || fv == 2)
+            c->wall = waChasm;
+          if(fv == 3) c->item = itTreat;
+          }
+        else {
+          if(c->type == 5) {
+            int fv = c->master->fiftyval;
+            if(fv == 3 || fv == 4 || fv == 2 || fv == 5)
+              c->wall = waChasm;
+            if(fv == 2) halloween::dragoncells[0] = c;
+            if(fv == 5) halloween::dragoncells[3] = c;
+            if(fv == 1) c->item = itTreat;
+            }
+          if(c->type == 6) {
+            int fvset = 0;
+            for(int i=0; i<6; i+=2) fvset |= 1 << createMov(c, i)->master->fiftyval;
+            if(fvset == 35 || fvset == 7) c->wall = waChasm;
+            if(fvset == 7) halloween::dragoncells[1] = c;
+            if(fvset == 35) halloween::dragoncells[2] = c;
+            }
+          }
+        }
+      }
+    else {
+      for(int i=1; i<isize(lst); i+=60) lst[i]->item = itTreat;
+      for(int i=2; i<isize(lst); i+=6) lst[i]->wall = waChasm;
+      }
+    }
 
   cell *farempty(bool lastresort = false) {
     int maxdist = 0;

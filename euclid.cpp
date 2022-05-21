@@ -149,7 +149,7 @@ EX namespace euc {
 
     vector<cell*> toruscells;  
     vector<cell*>& allcells() override { 
-      if(bounded) {
+      if(closed_manifold && !disksize) {
         if(isize(toruscells) == 0) {
           celllister cl(getOrigin()->c7, 1000, 1000000, NULL);
           toruscells = cl.lst;
@@ -634,7 +634,7 @@ EX namespace euc {
       }
     
     set_flag(ginf[g].flags, qANYQ, eu.infinite_dims < dim);
-    set_flag(ginf[g].flags, qBOUNDED, eu.infinite_dims == 0);
+    set_flag(ginf[g].flags, qCLOSED, eu.infinite_dims == 0);
     set_flag(ginf[g].flags, qSMALL, eu.infinite_dims == 0 && eu.det <= 4096);
     bool nonori = false;
     if(eu.twisted&1) nonori = !nonori;

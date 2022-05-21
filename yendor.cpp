@@ -1234,7 +1234,7 @@ EX namespace peace {
           reset_modes();
           if(peace::on) stop_game_and_switch_mode(rg::peace);
           specialland = firstland = laMinefield;
-          if(!bounded) {
+          if(!closed_or_bounded) {
             geometry = gBring;
             variation = eVariation::goldberg;
             gp::param = gp::loc(2, 1);

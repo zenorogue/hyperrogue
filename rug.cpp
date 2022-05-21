@@ -183,7 +183,7 @@ EX rugpoint *addRugpoint(shiftpoint h, double dist) {
   m->y1 = (1 - onscreen[1] * pconf.scale) / 2;
   m->valid = false;
 
-  if(euclid && quotient && !bounded) {
+  if(euclid && quotient && !closed_manifold) {
     hyperpoint h1 = iso_inverse(models::euclidean_spin) * eumove(euc::eu.user_axes[1]) * C0;
     h1 /= sqhypot_d(2, h1);
     if(nonorientable) h1 /= 2;
@@ -557,7 +557,7 @@ EX void buildRug() {
   need_mouseh = true;
   good_shape = false;
   #if MAXMDIM >= 4
-  if(euclid && bounded) {
+  if(euclid && closed_manifold) {
     good_shape = true;
     buildTorusRug();
     return;
@@ -785,7 +785,7 @@ EX int precision_increases;
 bool stop = false;
 
 EX bool subdivide_further() {
-  if(euclid && bounded) return false;
+  if(euclid && closed_manifold) return false;
   if(GDIM == 3) return false;
   return isize(points) * 4 < vertex_limit;
   }
@@ -794,7 +794,7 @@ EX void subdivide() {
   int N = isize(points);
   // if(euclid && gwhere == gEuclid) return;
   if(!subdivide_further()) {
-    if(euclid && !bounded && gwhere == gEuclid) {
+    if(euclid && !closed_manifold && gwhere == gEuclid) {
       println(hlog, "Euclidean -- full precision");
       stop = true; 
       }

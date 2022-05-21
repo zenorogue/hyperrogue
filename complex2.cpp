@@ -531,7 +531,7 @@ EX void count_status() {
   }
 
 EX bool in_minesweeper() {
-  return bounded && specialland == laMinefield;
+  return closed_or_bounded && specialland == laMinefield;
   }
 
 EX bool uncoverMines(cell *c, int lev, int dist, bool just_checking) {
@@ -620,7 +620,7 @@ EX bool safe() {
 
 EX void uncover_full(cell *c2) {
   int mineradius = 
-    bounded ? 3 :
+    closed_or_bounded ? 3 :
     (items[itBombEgg] < 1 && !tactic::on) ? 0 :
     items[itBombEgg] < 20 ? 1 :
     items[itBombEgg] < 30 ? 2 :

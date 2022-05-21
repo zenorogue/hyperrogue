@@ -475,7 +475,7 @@ EX void generate_track() {
     }
     
   try {
-  if(bounded && !prod && !(cgflags & qHUGE_BOUNDED)) {
+  if(closed_or_bounded && !prod && !(cgflags & qHUGE_BOUNDED)) {
     bounded_track = true;
     make_bounded_track(s);
     }
@@ -754,7 +754,7 @@ bool inrec = false;
 EX ld race_angle = 90;
 
 EX bool force_standard_centering() {
-  return nonisotropic || hybri || quotient || bounded;
+  return nonisotropic || hybri || quotient || closed_or_bounded;
   }
 
 EX bool use_standard_centering() {

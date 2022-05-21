@@ -770,9 +770,9 @@ EX bool makeEmpty(cell *c) {
     c->wall = waBoat; // , c->item = itOrbYendor;
   else if(c->land == laMinefield)
     c->wall = waMineOpen;
-  else if(c->wall == waFan && bounded)
+  else if(c->wall == waFan && closed_manifold)
     ;
-  else if(c->wall == waOpenPlate && bounded)
+  else if(c->wall == waOpenPlate && closed_manifold)
     ;
   else if(c->wall == waTrunk || c->wall == waSolidBranch || c->wall == waWeakBranch)
     ;
@@ -786,13 +786,13 @@ EX bool makeEmpty(cell *c) {
     ;
   else if(c->land == laDocks)
     c->wall = waBoat;
-  else if(c->wall == waFreshGrave && bounded)
+  else if(c->wall == waFreshGrave && closed_manifold)
     ;
   else if(c->wall == waBarrier && sphere && WDIM == 3)
     ;
   else if(isReptile(c->wall))
     c->wparam = reptilemax();
-  else if(c->wall == waAncientGrave && bounded)
+  else if(c->wall == waAncientGrave && closed_manifold)
     ;
   else if(c->wall != waRoundTable)
     c->wall = waNone;

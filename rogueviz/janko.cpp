@@ -126,7 +126,7 @@ void create_janko() {
   gJanko1 = eGeometry(isize(ginf) - 1);
   // variation = eVariation::pure;
   auto& gi = ginf.back();
-  gi.flags = qANYQ | qBOUNDED | qEXPERIMENTAL;
+  gi.flags = qANYQ | qCLOSED | qEXPERIMENTAL;
   gi.quotient_name = "Janko";
   gi.shortname = "Janko";
   gi.menu_displayed_name = "Janko group J1";

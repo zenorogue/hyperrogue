@@ -602,7 +602,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
   
   bool multidraw = quotient;
   
-  bool use_brm = bounded && isize(currentmap->allcells()) <= brm_limit;
+  bool use_brm = closed_or_bounded && isize(currentmap->allcells()) <= brm_limit;
         
   if(!lshiftclick) for(int j=0; j<isize(vd.edges); j++) {
     edgeinfo *ei = vd.edges[j].second;

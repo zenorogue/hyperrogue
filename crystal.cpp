@@ -1358,7 +1358,7 @@ EX void set_crystal_period_flags() {
   for(auto& g: ginf)
     if(g.flags & qCRYSTAL) {
       set_flag(ginf[gNil].flags, qSMALL, crystal_period && crystal_period <= 8);
-      set_flag(ginf[gNil].flags, qBOUNDED, crystal_period);
+      set_flag(ginf[gNil].flags, qCLOSED, crystal_period);
       }
   }
 

@@ -441,12 +441,12 @@ EX int fieldval_uniq(cell *c) {
     }
   else if(euc::in(2)) {
     auto p = euc2_coordinates(c);
-    if(bounded) return p.first + p.second * (1 << 16);
+    if(closed_manifold) return p.first + p.second * (1 << 16);
     return gmod(p.first - 22 * p.second, 3*127);
     }
   else if(euc::in(3)) {
     auto co = euc::get_ispacemap()[c->master];
-    if(bounded) return co[0] + (co[1] << 10) + (co[2] << 20);
+    if(closed_manifold) return co[0] + (co[1] << 10) + (co[2] << 20);
     return gmod(co[0] + 3 * co[1] + 9 * co[2], 3*127);
     }
   else if(bt::in() || arcm::in() || nil || S3 >= OINF || (cgflags & qIDEAL)) return 0;
@@ -1604,7 +1604,7 @@ EX namespace patterns {
   
   color_t nearer_map(cell *c) {
     if(computed_nearer_map.count(c)) return computed_nearer_map[c];
-    if(!bounded) return 0;
+    if(!closed_manifold) return 0;
 
     cell *sc = currentmap->gamestart();
     auto ac = currentmap->allcells();
@@ -1645,7 +1645,7 @@ EX namespace patterns {
   color_t furthest_map(cell *c, int reduce) {
     auto& cfm = computed_furthest_map;
     if(cfm.count(c)) return cfm[c];
-    if(!bounded) return 0;
+    if(!closed_manifold) return 0;
 
     cell *sc = currentmap->gamestart();
     auto ac = currentmap->allcells();
@@ -2031,7 +2031,7 @@ EX namespace patterns {
       dialog::addSelItem(XLAT("Penrose staircase"), "Nil", '/');
       }
     
-    if(bounded) {
+    if(closed_manifold) {
       dialog::addSelItem(XLAT("nearer end"), "bounded", 'Z');
       dialog::addSelItem(XLAT("furthest from start"), "bounded", 'Y');
       }

@@ -419,7 +419,7 @@ geometryinfo1& archimedean_tiling::get_geometry(ld mul) {
 
 void archimedean_tiling::compute_geometry() {
   ginf[gArchimedean].g = get_geometry();
-  set_flag(ginf[gArchimedean].flags, qBOUNDED, get_class() == gcSphere);
+  set_flag(ginf[gArchimedean].flags, qCLOSED, get_class() == gcSphere);
   
   DEBB(DF_GEOM, (format("euclidean_angle_sum = %f\n", float(euclidean_angle_sum))));
   

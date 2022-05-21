@@ -1458,7 +1458,7 @@ EX void enableFieldChange() {
   ginf[geometry].distlimit = ginf[gxcur.base].distlimit;
   ginf[geometry].tiling_name = ginf[gxcur.base].tiling_name;
   ginf[geometry].default_variation = ginf[gxcur.base].default_variation;
-  ginf[geometry].flags = qFIELD | qANYQ | qBOUNDED;
+  ginf[geometry].flags = qFIELD | qANYQ | qCLOSED;
   fieldpattern::current_quotient_field.init(gxcur.primes[gxcur.current_prime_id].p);
   }
 
@@ -1473,7 +1473,7 @@ EX void field_from_current() {
   gg.vertex = go.vertex;
   gg.distlimit = go.distlimit;
   gg.tiling_name = go.tiling_name;
-  gg.flags = go.flags | qANYQ | qFIELD | qBOUNDED;
+  gg.flags = go.flags | qANYQ | qFIELD | qCLOSED;
   gg.g = go.g;
   gg.default_variation = go.default_variation;
   fieldpattern::quotient_field_changed = true;  

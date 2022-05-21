@@ -785,7 +785,7 @@ struct geometryinfo {
   eVariation default_variation;
   };
 
-static const flagtype qBOUNDED         = 1;
+static const flagtype qCLOSED         = 1;
 static const flagtype qANYQ            = 2;
 static const flagtype qNONORIENTABLE   = 4;
 static const flagtype qSMALL           = 8;
@@ -835,20 +835,20 @@ extern eVariation variation;
 #endif
 
 #if HDR
-static const flagtype qsNONOR           = qANYQ | qSMALL | qBOUNDED | qNONORIENTABLE;
+static const flagtype qsNONOR           = qANYQ | qSMALL | qCLOSED | qNONORIENTABLE;
 static const flagtype qsNONORE          = qsNONOR | qELLIPTIC;
-static const flagtype qsBQ              = qANYQ | qSMALL | qBOUNDED;
-static const flagtype qsSMALL           = qANYQ | qSMALL | qBOUNDED;
-static const flagtype qsSMALLN          = qANYQ | qSMALL | qBOUNDED | qNONORIENTABLE;
-static const flagtype qsZEBRA           = qANYQ | qSMALL | qBOUNDED | qZEBRA;
-static const flagtype qsFIELD           = qANYQ | qFIELD | qBOUNDED;
-static const flagtype qsDOCKS           = qANYQ | qSMALL | qBOUNDED | qDOCKS;
-static const flagtype qsSMALLB          = qSMALL | qBOUNDED;
+static const flagtype qsBQ              = qANYQ | qSMALL | qCLOSED;
+static const flagtype qsSMALL           = qANYQ | qSMALL | qCLOSED;
+static const flagtype qsSMALLN          = qANYQ | qSMALL | qCLOSED | qNONORIENTABLE;
+static const flagtype qsZEBRA           = qANYQ | qSMALL | qCLOSED | qZEBRA;
+static const flagtype qsFIELD           = qANYQ | qFIELD | qCLOSED;
+static const flagtype qsDOCKS           = qANYQ | qSMALL | qCLOSED | qDOCKS;
+static const flagtype qsSMALLB          = qSMALL | qCLOSED;
 static const flagtype qsSMALLBF         = qsSMALLB | qsFIELD | qANYQ;
 static const flagtype qsSMALLBE         = qsSMALLB | qELLIPTIC | qANYQ;
 static const flagtype qsBP              = qBINARY | qKITE;
 
-static const flagtype qsSINGLE          = qANYQ | qSMALL | qBOUNDED | qSINGLE;
+static const flagtype qsSINGLE          = qANYQ | qSMALL | qCLOSED | qSINGLE;
 #endif
 
 EX geometryinfo1 giEuclid2 = { gcEuclid,     2, 2, 3, {1,1, 0,0 } };

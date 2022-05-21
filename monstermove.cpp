@@ -1393,7 +1393,7 @@ EX void movehex_rest(bool mounted) {
 EX void movemutant() {
   manual_celllister mcells;
   for(cell *c: currentmap->allcells()) mcells.add(c);
-  if(!bounded) 
+  if(!closed_or_bounded)
     for(int i=0; i<isize(mcells.lst); i++) {
       cell *c = mcells.lst[i];
       if(c->land == laClearing && c->monst != moMutant && !pseudohept(c))
@@ -1427,7 +1427,7 @@ EX void movemutant() {
       if(isPlayerOn(c2)) continue;
 
       if((c2->land == laOvergrown || !pseudohept(c2)) && passable(c2, c, 0)) {
-        if(c2->land == laClearing && !bounded && c2->mpdist > 7) continue;
+        if(c2->land == laClearing && !closed_or_bounded && c2->mpdist > 7) continue;
         c2->monst = moMutant;
         c2->mondir = c->c.spin(j);
         c2->stuntime = mutantphase;
@@ -2096,7 +2096,7 @@ EX void movemonsters() {
   DEBB(DF_TURN, ("leader"));
   if(havewhat & HF_LEADER) groupmove(moPirate, 0);
   DEBB(DF_TURN, ("mutant"));
-  if((havewhat & HF_MUTANT) || (bounded && among(specialland, laOvergrown, laClearing))) movemutant();
+  if((havewhat & HF_MUTANT) || (closed_or_bounded && among(specialland, laOvergrown, laClearing))) movemutant();
   DEBB(DF_TURN, ("bugs"));
   if(havewhat & HF_BUG) hive::movebugs();
   DEBB(DF_TURN, ("whirlpool"));

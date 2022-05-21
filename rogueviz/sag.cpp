@@ -63,7 +63,7 @@ namespace sag {
     
   int snakedist(int i, int j) {
     if(i < insnaketab && j < insnaketab) return sdist[i][j];
-    if(bounded) return celldistance(snakecells[i], snakecells[j]);
+    if(closed_manifold) return celldistance(snakecells[i], snakecells[j]);
     int i0 = i, i1 = i, j0 = j, j1 = j;
     int cost = 0;
     // intersect
@@ -77,7 +77,7 @@ namespace sag {
     }
   
   void initSnake(int n) {
-    if(bounded) n = isize(currentmap->allcells());
+    if(closed_or_bounded) n = isize(currentmap->allcells());
     numsnake = n;
     snakecells.resize(numsnake);
     snakefirst.resize(numsnake);
@@ -85,7 +85,7 @@ namespace sag {
     snakenode.resize(numsnake);
     lpbak.resize(numsnake);
     wpbak.resize(numsnake);
-    if(bounded) {
+    if(closed_or_bounded) {
       for(int i=0; i<n; i++) {
         cellwalker cw(currentmap->allcells()[i], 0);
         setsnake(cw, i);

@@ -139,7 +139,7 @@ transmatrix hrmap_standard::relative_matrixh(heptagon *h2, heptagon *h1, const h
     steps++; if(steps > 10000) {
       println(hlog, "not found"); return Id; 
       }
-    if(bounded) {
+    if(closed_manifold) {
       transmatrix T;
       ld bestdist = 1e9;
       for(int d=0; d<S7; d++) {
@@ -817,7 +817,7 @@ EX bool exhaustive_distance_appropriate() {
   if(asonov::in() && asonov::period_xy && asonov::period_xy <= 256) return true;
   #endif
 
-  if(bounded) return true;
+  if(closed_manifold) return true;
 
   return false;
   }

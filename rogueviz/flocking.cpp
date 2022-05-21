@@ -503,8 +503,8 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
   }
   
   void init() {
-    if(!bounded) {
-      addMessage("Flocking simulation needs a bounded space.");
+    if(!closed_manifold) {
+      addMessage("Flocking simulation needs a closed manifold.");
       return;
       }
     stop_game();

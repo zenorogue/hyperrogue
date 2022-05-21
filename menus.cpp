@@ -704,7 +704,7 @@ EX void mode_higlights() {
   }  
 
 EX eLandStructure default_land_structure() {
-  if(bounded) return lsSingle;
+  if(closed_or_bounded) return lsSingle;
   if(tactic::on || princess::challenge) return lsSingle;
   if(yendor::on) return yendor::get_land_structure();
   if(specialland == laCanvas) return lsSingle;
@@ -1171,7 +1171,7 @@ EX named_functionality get_o_key() {
 
   dialog::infix = "";
 
-  if((geometry != gNormal || NONSTDVAR) && !daily::on)
+  if((geometry != gNormal || NONSTDVAR || disksize) && !daily::on)
     res.push_back(named_functionality(XLAT("experiment with geometry"), runGeometryExperiments));
   
   if(res.empty()) return named_dialog(XLAT("world overview"), showOverview);

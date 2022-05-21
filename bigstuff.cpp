@@ -2008,7 +2008,7 @@ EX void moreBigStuff(cell *c) {
 EX void generate_mines() {
   vector<cell*> candidates;
 
-  if(bounded)
+  if(closed_or_bounded)
     for(cell *c: currentmap->allcells())
       setdist(c, 7, nullptr);
   

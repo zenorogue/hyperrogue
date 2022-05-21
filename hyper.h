@@ -152,11 +152,12 @@ void addMessage(string s, char spamtype = 0);
 #define nonorientable (cgflags & qNONORIENTABLE)
 #define elliptic (cgflags & qELLIPTIC)
 #define quotient (cgflags & qANYQ)
-#define smallbounded (cgflags & qSMALL)
-#define bounded (cgflags & qBOUNDED)
+#define smallbounded ((cgflags & qSMALL) || disksize)
+#define closed_manifold (cgflags & qCLOSED)
+#define closed_or_bounded (closed_manifold || disksize)
 
 // Dry Forest burning, heat transfer, etc. are performed on the whole universe
-#define doall (bounded)
+#define doall (closed_or_bounded)
 
 #define sphere_narcm (sphere && !arcm::in())
 

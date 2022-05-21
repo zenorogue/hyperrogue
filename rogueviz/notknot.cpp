@@ -1148,7 +1148,7 @@ void create_notknot() {
     }
   else ginf[gNotKnot] = ginf[base];
   auto& gi = ginf.back();
-  gi.flags |= qANYQ | qBOUNDED | qEXPERIMENTAL | qPORTALSPACE;
+  gi.flags |= qANYQ | qCLOSED | qEXPERIMENTAL | qPORTALSPACE;
   gi.quotient_name = "notknot";
   gi.shortname = "notknot";
   gi.menu_displayed_name = "notknot";
