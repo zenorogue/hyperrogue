@@ -538,7 +538,7 @@ void celldrawer::setcolors() {
       if(mine::marked_safe(c))
         fcol = wcol = gradient(wcol, 0x40FF40, 0, 0.2, 1);
       else if(mine::marked_mine(c))
-        fcol = wcol = gradient(wcol, 0xFF4040, -1, sintick(100), 1);
+        fcol = wcol = gradient(wcol, 0xFF4040, -1, vid.ispeed ? sintick(100) : 1, 1);
       goto fallthrough;
       #endif
 
