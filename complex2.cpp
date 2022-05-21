@@ -581,6 +581,8 @@ EX bool mightBeMine(cell *c) {
 
 EX hookset<bool(cell*)> hooks_mark;
 
+EX bool mark_always = true;
+
 EX void performMarkCommand(cell *c) {
   if(!c) return;
   if(callhandlers(false, hooks_mark, c)) return;
@@ -596,6 +598,7 @@ EX void performMarkCommand(cell *c) {
   if(c->item) return;
   if(!mightBeMine(c)) return;
   bool adj = false;
+  if(mark_always) adj = true;
   forCellEx(c2, c) if(c2->wall == waMineOpen) adj = true;
   if(adj) c->landparam ^= 1;
   }
