@@ -547,6 +547,8 @@ void addMinefieldExplanation(string& s) {
 #else
   s += XLAT("Known mines may be marked by touching while in drag mode. Your allies won't step on marked mines.");
 #endif
+
+  help_extensions.push_back(help_extension{'n', XLAT("toggle numerical display"), [] () { numerical_minefield = !numerical_minefield; }});
   }
 
 EX string generateHelpForWall(eWall w) {
