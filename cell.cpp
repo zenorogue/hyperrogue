@@ -1363,7 +1363,7 @@ struct adj_data {
   };
 #endif
 
-EX map<cell*, vector<adj_data>> adj_memo;
+EX array<map<cell*, vector<adj_data>>, 2> adj_memo;
 
 EX bool geometry_has_alt_mine_rule() {
   if(S3 >= OINF) return false;
@@ -1373,9 +1373,10 @@ EX bool geometry_has_alt_mine_rule() {
   }
 
 EX vector<adj_data> adj_minefield_cells_full(cell *c) {
-  if(adj_memo.count(c)) return adj_memo[c];
-  if(isize(adj_memo) > 10000) adj_memo.clear();
-  auto& res = adj_memo[c];
+  auto& am = adj_memo[mine_adjacency_rule];
+  if(am.count(c)) return am[c];
+  if(isize(am) > 10000) am.clear();
+  auto& res = am[c];
   if(mine_adjacency_rule == 0 || !geometry_has_alt_mine_rule()) {
     forCellIdCM(c2, i, c) res.emplace_back(adj_data{c2, c->c.mirror(i), currentmap->adj(c, i)});
     }
