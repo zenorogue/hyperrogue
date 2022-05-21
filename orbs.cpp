@@ -1284,7 +1284,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   
   // (-1) distance
 
-  if(!disable_orb_range) {
+  if(!disable_orb_range && !mine::in_minesweeper()) {
     if(c == cwt.at || isNeighbor(cwt.at, c)) {
       if(!isWeakCheck(a))
         addMessage(XLAT("You cannot target that close!"));
