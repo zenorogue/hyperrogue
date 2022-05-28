@@ -144,11 +144,11 @@ void mark_signposts(bool full, const vector<cell*>& ac) {
   println(hlog, "marking signposts");  
   signposts.clear();
   int maxd = 0;
-  if(!bounded)
+  if(!closed_manifold)
     for(cell *c: ac) maxd = max(celldist(c), maxd);
   for(cell *c: ac)
     if(full || c->type != 6)
-    if(bounded || celldist(c) == maxd)
+    if(closed_manifold || celldist(c) == maxd)
       signposts.push_back(c);
   }
 
@@ -159,7 +159,7 @@ void mark_signposts_subg(int a, int b, const vector<cell*>& ac) {
   println(hlog, "marking bitrunc signposts");
   signposts.clear();
   int maxd = 0;
-  if(!bounded)
+  if(!closed_manifold)
     for(cell *c: ac) maxd = max(celldist(c), maxd);
   for(cell *c: ac) {
     auto li = gp::get_local_info(c);
@@ -221,7 +221,7 @@ void get_coordinates(kohvec& v, cell *c, cell *c0) {
         for(int i=0; i<MDIM; i++)
           v[i] = h[i];
         }
-      else if(euclid && bounded && S3 == 3 && WDIM == 2 && T0[0][1] == 0 && T0[1][0] == 0 && T0[0][0] == T0[1][1]) {
+      else if(euclid && closed_manifold && S3 == 3 && WDIM == 2 && T0[0][1] == 0 && T0[1][0] == 0 && T0[0][0] == T0[1][1]) {
         columns = 6;
         alloc(v);
         int s = T0[0][0];
@@ -235,7 +235,7 @@ void get_coordinates(kohvec& v, cell *c, cell *c0) {
           }
         // println(hlog, kz(h), " -> ", v);
         }
-      else if(euclid && bounded && WDIM == 2) {
+      else if(euclid && closed_manifold && WDIM == 2) {
         columns = 4;
         alloc(v);
         rug::clifford_torus ct;
@@ -243,7 +243,7 @@ void get_coordinates(kohvec& v, cell *c, cell *c0) {
         for(int i=0; i<4; i++)
           v[i] = h[i];
         }
-      else if(euclid && bounded && WDIM == 3) {
+      else if(euclid && closed_manifold && WDIM == 3) {
         columns = 6;
         alloc(v);
         using namespace euc;
