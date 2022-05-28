@@ -700,8 +700,13 @@ void dqi_poly::gldraw() {
       current_display->set_all(ed, sl2 ? 0 : V.shift);
       glhr::set_index_sl(V.shift + M_PI * min_slr * hybrid::csteps / cgi.psl_steps);
       }
+    else if(sl2) {
+      current_display->set_all(ed, 0);
+      glhr::set_index_sl(V.shift);
+      }
     else {
-      current_display->set_all(ed, V.shift);
+      current_display->set_all(ed, sl2 ? 0 : V.shift);
+      glhr::set_index_sl(V.shift + M_PI * min_slr * hybrid::csteps / cgi.psl_steps);
       }
     bool draw = color;
 
