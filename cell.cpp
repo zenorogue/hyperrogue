@@ -454,8 +454,8 @@ EX void clearcell(cell *c) {
     c->move(t)->move(c->c.spin(t)) = NULL;
     }
   DEBB(DF_MEMORY, (format("DEL %p\n", hr::voidp(c))));
-  destroy_cell(c);
   gp::delete_mapped(c);
+  destroy_cell(c);
   }
 
 EX heptagon deletion_marker;
