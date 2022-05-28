@@ -14,8 +14,6 @@
 // cutoff is cut off from the disk
 // radius is the radius of the disk to generate
 
--geo Cryst3 -crf4
-
 namespace hr {
 
 namespace dynamic_wfc {
