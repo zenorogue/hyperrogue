@@ -53,6 +53,7 @@
 #include "ascending-descending.cpp"
 #include "balls.cpp"
 #include "pentaroll.cpp"
+#include "nil-compass.cpp"
 #if CAP_RVSLIDES
 #include "playing-with-impossibility.cpp"
 #endif
@@ -62,7 +63,6 @@
 #include "intra-demos.cpp"
 #include "gobot.cpp"
 #include "extra-projections.cpp"
-#include "nil-compass.cpp"
 #include "balloonsim.cpp"
 
 #include "som/kohonen.cpp"
