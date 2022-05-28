@@ -84,13 +84,14 @@ EX void playSeenSound(cell *c) {
 
 bool loaded[landtypes];
 Mix_Music* music[landtypes];
-int musicpos[landtypes];
+EX int musicpos[landtypes];
 int musstart;
 int musfadeval = 2000;
 
 eLand cid = laNone;
 
-hookset<bool(eLand&)> hooks_music;
+EX hookset<bool(eLand&)> hooks_music;
+EX hookset<void(eLand&)> hooks_sync_music;
 
 EX bool music_out_of_focus = false;
 
@@ -125,6 +126,7 @@ EX void handlemusic() {
       // printf("fadeout %d, pos %d\n", musfadeval, musicpos[cid]);
       }
     if(music[id] && !Mix_PlayingMusic()) {
+      callhooks(hooks_sync_music, id);
       cid = id;
       Mix_VolumeMusic(musicvolume);
       Mix_FadeInMusicPos(music[id], -1, musfadeval, musicpos[id] / 1000.0);
