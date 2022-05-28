@@ -185,6 +185,7 @@ void dialog_add_latex(string s, color_t col, int size) {
     gen_latex(pmStartAll, s, 600);
     auto& tex = textures[fn];
     tex.original = true;
+    tex.twidth = 4096;
     println(hlog, "rt = ", tex.readtexture(fn));
     for(int y=0; y<tex.theight; y++)
     for(int x=0; x<tex.twidth; x++) {
