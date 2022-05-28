@@ -268,15 +268,15 @@ EX int fiftyval049(cell *c) {
     for(int i=0; i<3; i++)
       if(polara50(ar[i]->fiftyval) == pa && polarb50(ar[i]->fiftyval) == pb)
         a[qa++] = fiftyval049(ar[i]);
-    // 0-1-2
-    sort(a, a+qa);
+    // somehow sort(a, a+qa) produces a warning in gcc 12.1.0, so we sort manually
     if(qa == 1) return 43+a[0]-1;
+    // sort the two elements
+    if(a[0] > a[1]) swap(a[0], a[1]);
     if(qa == 2 && a[1] == a[0]+7) return 36+a[0]-1;
     if(qa == 2 && a[1] != a[0]+7) return 29+a[0]-1;
-    // 3: zgodnie
-    // 1: zgodnie
-    // 0: przeciwnie
-    // 2: przeciwnie
+    // sort the three elements
+    if(a[1] > a[2]) swap(a[1], a[2]);
+    if(a[0] > a[1]) swap(a[0], a[1]);
     // 168: 
     if(a[1] == 1 && a[2] == 7) 
       return 15 + 6; // (polarb50(c) ? 0 : 6);
