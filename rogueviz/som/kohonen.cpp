@@ -545,9 +545,9 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
 map<int, cellcrawler> scc;
 
 pair<int, int> get_cellcrawler_id(cell *c) {
-  if(!bounded)
+  if(!closed_manifold)
     return make_pair(neuronId(*getNeuronSlow(c)), 0);
-  if(among(geometry, gZebraQuotient, gMinimal, gArnoldCat, gField435, gField534) || (euclid && quotient && !bounded) || IRREGULAR || (GDIM == 3 && sphere) || (hyperbolic && GDIM == 3)
+  if(among(geometry, gZebraQuotient, gMinimal, gArnoldCat, gField435, gField534) || (euclid && quotient && !closed_manifold) || IRREGULAR || (GDIM == 3 && sphere) || (hyperbolic && GDIM == 3)
     || (euclid && nonorientable)) {
     // Zebra Quotient does exhibit some symmetries,
     // but these are so small anyway that it is safer to just build
@@ -555,7 +555,7 @@ pair<int, int> get_cellcrawler_id(cell *c) {
     return make_pair(neuronId(*getNeuronSlow(c)), 0);
     // not yet implemented for cylinder
     }
-  if(euclid && bounded && PURE && nonorientable)
+  if(euclid && closed_manifold && PURE && nonorientable)
     return make_pair(euc2_coordinates(c).second * 2 + ctof(c), 0);
   int id = 0, dir = 0;
 #if CAP_GP

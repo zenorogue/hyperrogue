@@ -776,7 +776,7 @@ void shot_settings() {
     pconf.alpha = 1;
     pconf.scale = pconf.scale / 2 / maxs / cd->radius;
     pconf.scale /= 1.2;
-    if(bounded) pconf.scale = WDIM == 3 ? 0.2 : 0.07;
+    if(closed_manifold) pconf.scale = WDIM == 3 ? 0.2 : 0.07;
     }
   
   if(GDIM == 3) pmodel = mdPerspective;
@@ -886,7 +886,7 @@ void create_index() {
     Out("gpy", gp::univ_param().second);
     Out("orientable", nonorientable ? 0 : 1);
     Out("symmetric", (flags & m_symmetric) ? 1 : 0);
-    Out("closed", bounded ? 1 : 0);
+    Out("closed", closed_manifold ? 1 : 0);
     Out("quotient", quotient ? 1 : 0);
     Out("dim", WDIM);
     Out("valence", S3);
@@ -1352,7 +1352,7 @@ auto khook = arg::add3("-kst-keys", [] { rv_hook(hooks_handleKey, 150, kst_key);
   + addHook(hooks_markers, 100, [] () {
     int N = isize(net);
     bool multidraw = quotient;
-    bool use_brm = bounded && isize(currentmap->allcells()) <= brm_limit;
+    bool use_brm = closed_manifold && isize(currentmap->allcells()) <= brm_limit;
     vid.linewidth *= 3;
     for(auto e: voronoi_edges)
       if(e.first < N && e.second < N)
