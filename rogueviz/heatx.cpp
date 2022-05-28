@@ -40,7 +40,7 @@ void advance_heat_wave() {
 
   int steps = mode == 2 ? (frac * qsteps) : (frac * frac * qsteps);
 
-  if(steps != last_steps) {
+  if(steps != last_steps || mode == 3) {
     celllister cl(cwt.at, 999999, simulation_range, nullptr);
     if(steps < last_steps) {
       last_steps = 0;
@@ -92,6 +92,15 @@ void advance_heat_wave() {
         }
       last_steps++;
       }
+
+    if(mode == 3) {
+      ld fsteps = qsteps * frac;
+      for(cell *c: cl.lst) {
+        ld d = hdist0(tC0(ggmatrix(c)));
+        m1[c] = m2[c] = m3[c] = exp(-d*d/(fsteps+1e-3));
+        }
+      }
+
     ld maxv = 0;
     for(auto p: m1) maxv = max(maxv, abs(p.second));
     for(cell *c: cl.lst) {
@@ -184,6 +193,7 @@ auto heathook = arg::add3("-heatx", enable)
     ->editable(0, 1, 0.001, "scale", "scaling factor", 'f');
     param_i(simulation_range, "heat_range")
     ->editable(0, 100000, 1000, "heat simulation range", "number of cells to consider", 'r');
+    param_i(mode, "heat_mode");
     })
   + addHook_rvslides(180, [] (string s, vector<tour::slide>& v) {
       if(s != "mixed") return;
