@@ -64,6 +64,42 @@ void frame() {
   }
 
 bool crash_sound = true;
+bool running;
+bool backing;
+
+static double music_internal_duration(Mix_Music *music)
+{
+    if (music->interface->Duration) {
+        return music->interface->Duration(music->context);
+    } else {
+        Mix_SetError("Duration not implemented for music type");
+        return -1;
+    }
+}
+
+double MIXCALLCC Mix_MusicDuration(Mix_Music *music)
+{
+    double retval;
+
+    Mix_LockAudio();
+    if (music) {
+        retval = music_internal_duration(music);
+    } else if (music_playing) {
+        retval = music_internal_duration(music_playing);
+    } else {
+        Mix_SetError("music is NULL and no playing music");
+        retval = -1.0;
+    }
+    Mix_UnlockAudio();
+
+    return(retval);
+}
+
+void sync_music(eLand l) {
+  if(music[laCanvas])
+    println(hlog, "duration = ", Mix_MusicDuration(music[laCanvas]));
+  musicpos[laCanvas] = curlev->current.timer * 1000;
+  }
 
 bool turn(int delta) {
   if(planning_mode && !view_replay) return false;
@@ -91,8 +127,8 @@ bool turn(int delta) {
 
   if(min_gfx_slope < -90*degree) min_gfx_slope = -90*degree;
   if(min_gfx_slope > +90*degree) min_gfx_slope = +90*degree;
-
-  bool backing = false;
+  
+  backing = false;
 
   if(a[16+6]) {
     if(!la[16+6]) reversals++;
@@ -122,6 +158,7 @@ bool turn(int delta) {
       curlev->history.push_back(curlev->current);
       curlev->current.be_consistent();
       bool b = curlev->current.tick(curlev);
+      running = b;
       if(!b) {
         curlev->history.pop_back();
         fail = true;
@@ -525,6 +562,19 @@ void nilrider_keys() {
   change_default_key('v', 16 + 8);
   }
 
+bool nilrider_music(eLand& l) {
+  if(planning_mode && !view_replay)
+    l = eLand(1);
+  else if(paused)
+    l = eLand(2);
+  else if(!running)
+    l = eLand(3);
+  else if(backing)
+    l = eLand(4);
+  else l = laCanvas;
+  return false;
+  }
+
 void initialize() {
   load();
   nilrider_keys();
@@ -545,6 +595,8 @@ void initialize() {
   rv_hook(hooks_frame, 100, frame);
   rv_hook(shmup::hooks_turn, 100, turn);
   rv_hook(hooks_resetGL, 100, cleanup_textures);
+  rv_hook(hooks_music, 100, nilrider_music);
+  rv_hook(hooks_sync_music, 100, sync_music);
   on = true;
   on_cleanup_or_next([] { on = false; });
   pushScreen(run);
