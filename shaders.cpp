@@ -570,7 +570,7 @@ void display_data::set_projection(int ed, ld shift) {
   if(selected->uIterations != -1) {
     glhr::set_index_sl(0);
     glhr::set_sv(stretch::not_squared());
-    glhr::set_sl_iterations(slr::steps);
+    glhr::set_sl_iterations(slr::shader_iterations);
     }
 
   glhr::new_projection();

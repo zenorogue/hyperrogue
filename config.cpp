@@ -952,8 +952,8 @@ EX void initConfig() {
   addsaver(sn::solrange_xy, "solrange-xy");
   addsaver(sn::solrange_z, "solrange-z");
   #endif
-  addsaver(slr::steps, "slr-steps");
-  addsaver(slr::range_xy, "slr-range-xy");
+  param_i(slr::shader_iterations, "slr-steps");
+  param_f(slr::range_xy, "slr-range-xy");
 
   param_f(arcm::euclidean_edge_length, "arcm-euclid-length");
   
@@ -1399,9 +1399,9 @@ EX void edit_sightrange() {
     dialog::add_action([] {
       dialog::editNumber(slr::range_xy, 0, 10, 0.5, 4, XLAT("max difference in X/Y coordinates"), "");
       });
-    dialog::addSelItem(XLAT("steps"), its(slr::steps), 'z');
+    dialog::addSelItem(XLAT("shader_iterations"), its(slr::shader_iterations), 'z');
     dialog::add_action([] {
-      dialog::editNumber(slr::steps, 0, 50, 1, 10, "", "");
+      dialog::editNumber(slr::shader_iterations, 0, 50, 1, 10, "", "");
       });
     }
   if(vid.use_smart_range && WDIM == 2) {

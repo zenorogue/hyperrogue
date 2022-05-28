@@ -1690,8 +1690,10 @@ EX }
 
 EX namespace slr {
 
+  /** in what range are we rendering H2xR */
   EX ld range_xy = 2;
-  EX int steps = 15;
+  /** the number of steps for inverse_exp in the shader */
+  EX int shader_iterations = 15;
 
   EX transmatrix translate(hyperpoint h) {
     return matrix4(
