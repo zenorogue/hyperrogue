@@ -2745,7 +2745,7 @@ EX void write_in_space(const shiftmatrix& V, int fsize, double size, const strin
     }
   
   if(frame) for(int i=0; i<360; i+=45) {
-    auto &res = queuetable(V * xspinpush(i*degree, frame*scale), curvedata, isize(curvedata)-curvestart, col & 0xFF, col & 0xFF, prio);
+    auto &res = queuetable(V * xspinpush(i*degree, frame*scale), curvedata, isize(curvedata)-curvestart, poly_outline, poly_outline, prio);
     res.offset = curvestart;
     res.offset_texture = fstart;
     res.tinf = &finf;
