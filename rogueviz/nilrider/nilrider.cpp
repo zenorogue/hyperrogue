@@ -67,37 +67,7 @@ bool crash_sound = true;
 bool running;
 bool backing;
 
-static double music_internal_duration(Mix_Music *music)
-{
-    if (music->interface->Duration) {
-        return music->interface->Duration(music->context);
-    } else {
-        Mix_SetError("Duration not implemented for music type");
-        return -1;
-    }
-}
-
-double MIXCALLCC Mix_MusicDuration(Mix_Music *music)
-{
-    double retval;
-
-    Mix_LockAudio();
-    if (music) {
-        retval = music_internal_duration(music);
-    } else if (music_playing) {
-        retval = music_internal_duration(music_playing);
-    } else {
-        Mix_SetError("music is NULL and no playing music");
-        retval = -1.0;
-    }
-    Mix_UnlockAudio();
-
-    return(retval);
-}
-
 void sync_music(eLand l) {
-  if(music[laCanvas])
-    println(hlog, "duration = ", Mix_MusicDuration(music[laCanvas]));
   musicpos[laCanvas] = curlev->current.timer * 1000;
   }
 

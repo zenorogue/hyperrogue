@@ -435,7 +435,6 @@ void save(string s) {
   }
 
 auto wfc_hook = 
-  addHook(hooks_handleKey, 100, wfc_handleKey) +
   addHook(hooks_args, 100, [] {
     using namespace arg;
 
@@ -449,6 +448,9 @@ auto wfc_hook =
       }
     else if(argis("-dynamic-wfc-save")) {
       shift(); save(args());
+      }
+    else if(argis("-wfc-regen-key")) {
+      rogueviz::rv_hook(hooks_handleKey, 100, wfc_handleKey);
       }
       
     else return 1;
