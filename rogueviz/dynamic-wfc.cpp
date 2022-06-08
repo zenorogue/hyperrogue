@@ -18,6 +18,8 @@ namespace hr {
 
 namespace dynamic_wfc {
 
+bool animated = false;
+
 vector<cell*> generate_pd_list(celllister& cl) {
   cell *croot = cl.lst.back();
   
@@ -116,6 +118,12 @@ vector<cell*> ctf;
 vector<cell*> global_list;
 
 int wfctype, wfcrad, cutoff;
+
+void wfc_clear() {
+  trans.clear();
+  ctf.clear();
+  global_list.clear();
+  }
 
 void wfc_build() {  
   int code_at = trans.back().news;
@@ -279,10 +287,24 @@ void wfc() {
   */
 
   long long tfreq = 0;
+
+  if(animated)
+  for(int j=0; j<ls; j++)
+      for(auto& nns: new_neighborhoods[j]) for(auto c: nns) c->landparam = 0x202020;
   
   for(int i=0; i<ls; i++) if(consider.count(l[i])) {
     tfreq += isize(freq);
-    println(hlog, i, "/", ls, ": freqs = ", isize(freq), " inpath ", isize(inpath));
+    string s = lalign(0, i, "/", ls, ": freqs = ", isize(freq), " inpath ", isize(inpath));
+    println(hlog, s);
+
+    if(animated) {
+      for(int j=0; j<i; j++)
+        for(auto& nns: new_neighborhoods[j]) for(auto c: nns) c->landparam = multiplicity[c] ? 0xFFFF00 : 0x00FF00;
+      for(auto& nns: new_neighborhoods[i]) for(auto c: nns) c->landparam = 0xFFFFFF;
+
+      history::progress(s);
+      }
+
     inpath.push_back(l[i]);
   
     int sh = cpo * (isize(inpath)-1);
@@ -378,6 +400,7 @@ void wfc() {
   println(hlog, "tfreq = ", format("%lld", tfreq));
   println(hlog, "trans size = ", isize(trans));
   println(hlog, "next code = ", nextcode);
+  clearMessages();
   
   wfc_build();
   }
