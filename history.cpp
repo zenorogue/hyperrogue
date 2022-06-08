@@ -194,10 +194,12 @@ EX namespace history {
     mouseovers = "";
     }
 
+  EX int progress_each = 250;
+
   EX void progress(string str) {
 #if CAP_SDL
     int tick = SDL_GetTicks();
-    if(tick > lastprogress + 250) {
+    if(tick > lastprogress + progress_each) {
       lastprogress = tick;
       msgs.clear();
       addMessage(str);
