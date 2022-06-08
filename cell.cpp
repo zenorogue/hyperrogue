@@ -1434,7 +1434,7 @@ EX vector<adj_data> adj_minefield_cells_full(cell *c) {
     cellwalker cw1 = cw;
     do {
       res.emplace_back(adj_data{cw.at, cw.mirrored, T});
-      T = T * currentmap->adj(c, cw.spin);
+      T = T * currentmap->adj(cw.at, cw.spin);
       cw += wstep;
       cw++;
       if(cw.cpeek() == c) cw++;
