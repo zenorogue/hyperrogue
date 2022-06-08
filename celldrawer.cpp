@@ -1615,7 +1615,7 @@ void celldrawer::draw_features() {
       if(numerical_minefield) {
         if(mines) {
           string label = its(mines);
-          queuestr(V, mines >= 10 ? .5 : 1, label, minecolors[mines%10], 8);
+          queuestr(V, mines >= 10 ? .5 : 1, label, darkened(minecolors[mines%10]), 8);
           }
         }
       else {
