@@ -231,6 +231,7 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   void add_stat(presmode mode, const bool_reaction_t& stat);  
   void compare_projections(presmode mode, eModel a, eModel b);
   void no_other_hud(presmode mode);
+  void white_screen(presmode mode, color_t col = 0xFFFFFFFF);
   void empty_screen(presmode mode, color_t col = 0xFFFFFFFF);
   void show_picture(presmode mode, string s);    
   void show_animation(presmode mode, string s, int sx, int sy, int frames, int fps);

@@ -76,9 +76,8 @@ void no_other_hud(presmode mode) {
   clearMessages();
   }
 
-void empty_screen(presmode mode, color_t col) {
+void white_screen(presmode mode, color_t col) {
   if(mode == pmStart) {
-    tour::slide_backup(nomap, true);
     tour::slide_backup(backcolor, col);
     tour::slide_backup(ringcolor, color_t(0));
     tour::slide_backup<color_t>(dialog::dialogcolor, 0);
@@ -86,6 +85,13 @@ void empty_screen(presmode mode, color_t col) {
     tour::slide_backup<color_t>(bordcolor, 0xFFFFFFFF);
     tour::slide_backup(vid.aurastr, 0);
     }
+  }
+
+void empty_screen(presmode mode, color_t col) {
+  if(mode == pmStart) {
+    tour::slide_backup(nomap, true);
+    }
+  white_screen(mode, col);
   }
 
 void slide_error(presmode mode, string s) {
