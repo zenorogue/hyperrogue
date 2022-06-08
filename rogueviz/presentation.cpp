@@ -517,7 +517,9 @@ void launch_slideshow_by_name(string s) {
 
 int runslide = arg::add3("-slides", [] {
   arg::shift(); launch_slideshow_by_name(arg::args());
-  }) + arg::add3("-slide", [] {
+  }) + arg::add3("-slide-textoff", [] {
+    tour::texts = false;
+    }) + arg::add3("-slide", [] {
   arg::shift(); launch_slideshow_by_name(arg::args());
   presentation(pmStop);
   arg::shift(); string s = arg::args();
