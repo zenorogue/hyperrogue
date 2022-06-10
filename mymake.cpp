@@ -108,8 +108,13 @@ void set_mingw64_cross() {
   compiler = "x86_64-w64-mingw32-g++ -mwindows -march=native -W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-invalid-offsetof -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
   linker = "x86_64-w64-mingw32-g++";
   default_exec_name = "hyper.exe";
-  opts = "-DWINDOWS -DGLEW_STATIC -DUSE_STDFUNCTION=1 -DCAP_PNG=1 -I /usr/x86_64-w64-mingw32/include/SDL/";
-  libs = " hyper64.res -static-libgcc -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
+  opts = "-DWINDOWS -DGLEW_STATIC -DUSE_STDFUNCTION=1 -DCAP_PNG=1";
+  if(sdlver == 1) opts += " -I /usr/x86_64-w64-mingw32/include/SDL/";
+  if(sdlver == 2) opts += " -I /usr/x86_64-w64-mingw32/include/SDL2/";
+  libs = " hyper64.res -static-libgcc -lopengl32";
+  if(sdlver == 1) libs += " -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf";
+  if(sdlver == 2) libs += " -lSDL2 -lSDL2_gfx -lSDL2_mixer -lSDL2_ttf";
+  libs += " -lpthread -lz -lglew32 -lpng";
   setvbuf(stdout, NULL, _IONBF, 0); // MinGW is quirky with output buffering
   if(!file_exists("hyper64.res"))
     mysystem("x86_64-w64-mingw32-windres hyper.rc -O coff -o hyper64.res");
@@ -266,8 +271,14 @@ int main(int argc, char **argv) {
     else if(s == "-vr") {
       obj_dir += "/vr";
       setdir += "../";
-      linker += " -lopenvr_api";
-      opts += " -DCAP_VR=1 -I/usr/include/openvr/";
+      if(os == "mingw64" || os == "mingw64-cross") {
+        linker += " for-win64/mingw64/bin/libopenvr_api.dll";
+        opts += " -DCAP_VR=1 -I./for-win64/mingw64/include/openvr/";
+        }
+      else {
+        linker += " -lopenvr_api";
+        opts += " -DCAP_VR=1 -I/usr/include/openvr/";
+        }
       }
     else if(s == "-rv") {
       
