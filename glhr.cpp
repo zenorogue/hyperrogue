@@ -153,7 +153,7 @@ struct glmatrix {
 
 #endif
 
-bool glew   = false;
+EX bool glew   = false;
 
 bool current_depthtest, current_depthwrite;
 ld fogbase;
@@ -697,6 +697,7 @@ void init() {
   #if CAP_GLEW
     if(!glew) { 
       glew = true; 
+      glewExperimental = GL_TRUE;
       printf("Initializing GLEW\n");
       GLenum err = glewInit();
       if (GLEW_OK != err) {
