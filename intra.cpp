@@ -1014,16 +1014,18 @@ EX void handle() {
   ticks_last = ticks;
   }
 
+EX void switch_walking() {
+  on = !on;
+  if(on && auto_eyelevel) eye_level = -1;
+  floor_dir = -1;
+  on_floor_of = nullptr;
+  ticks_last = ticks;
+  ticks_end = ticks + 1000;
+  }
+
 EX void add_options() {
   dialog::addBoolItem("walking mode", on, 'w');
-  dialog::add_action([] {
-    on = !on;
-    if(on && auto_eyelevel) eye_level = -1;
-    floor_dir = -1;
-    on_floor_of = nullptr;
-    ticks_last = ticks;
-    ticks_end = ticks + 1000;
-    });
+  dialog::add_action(switch_walking);
   add_edit(eye_level);
   add_edit(eye_angle);
   if(point_direction >= 0 && point_direction < centerover->type) {
