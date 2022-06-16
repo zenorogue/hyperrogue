@@ -376,7 +376,6 @@ EX void initgame() {
     truelotus = 0;
     asteroids_generated = 0;
     asteroid_orbs_generated = 0;
-    dpgen::in = false;
     survivalist = true;
     #if CAP_CRYSTAL
     crystal::used_compass_inside = false;
@@ -1022,7 +1021,6 @@ EX void saveStats(bool emergency IS(false)) {
   if(randomPatternsMode) return;
   if(daily::on) return;
   if(peace::on) return;
-  if(dpgen::in) return;
   if(experimental) return;
 
   if(!gold() && !racing::on) return;

@@ -5,7 +5,7 @@
  *  \brief dual geometry puzzle generator
  */
 
-#include "hyper.h"
+#include "rogueviz.h"
 
 namespace hr {
 
@@ -57,6 +57,8 @@ void solve(cpos at) {
   }
 
 int last_elimit, last_hlimit;
+
+void check();
 
 void launch(int seed, int elimit, int hlimit) {
 
@@ -159,6 +161,10 @@ void launch(int seed, int elimit, int hlimit) {
 
   worst.first->wall = waOpenPlate;
   worst.second->wall = waOpenPlate;
+  rogueviz::rv_hook(dual::hooks_after_move, 100, dpgen::check);
+  bool b = gen_wandering;
+  rogueviz::on_cleanup_or_next([b] { gen_wandering = b; });
+  gen_wandering = false;
   }
 
 struct puzzle {
@@ -260,7 +266,21 @@ auto sbhook = addHook(hooks_args, 100, [] {
   return 0;
   }) + addHook(hooks_o_key, 91, [] (o_funcs& v) {
     if(in) v.push_back(named_dialog(XLAT("select a puzzle"), show_menu));
-    });
+    })
+  + addHook_rvslides(205, [] (string s, vector<tour::slide>& v) {
+      if(s != "mixed") return;
+      v.push_back(tour::slide{
+        "dual geometry puzzle", 10, tour::LEGAL::NONE | tour::QUICKSKIP | tour::QUICKGEO,
+        "Move both characters to marked squares at once!\n"
+        ,
+        [] (tour::presmode mode) {
+          slide_action(mode, 'r', "launch the dual geometry puzzle", [] {
+            pushScreen(show_menu);
+            });
+          }
+        });
+      })
+    ;
 #endif
 
 EX }

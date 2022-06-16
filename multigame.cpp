@@ -136,6 +136,8 @@ EX namespace dual {
   
   hyperpoint which_dir;
   
+  EX purehookset hooks_after_move;
+  
   int remap_direction(int d, int cg) {
     if(WDIM == 2 || cg == currently_loaded) return d;
     
@@ -247,7 +249,7 @@ EX namespace dual {
       switch_to(1); forcedmovetype = fm; movepcto(0, subdir, false); forcedmovetype = fmSkip;
       switch_to(cg);
       reduceOrbPowers();
-      dpgen::check();  
+      callhooks(hooks_after_move);
       return true;
       }
     addMessage(XLAT("Impossible."));
