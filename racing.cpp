@@ -1211,7 +1211,8 @@ map<string, map<eLand, int> > scoreboard;
 void uploadScore() {
   int tscore = 0;
   for(eLand l: race_lands) {
-    int i = get_score_in_land(l);
+    if(!best_scores.count(l)) continue;
+    int i = best_scores[l];
     if(!i) continue;
     scoreboard[myname()][l] = i;
     int score = 60000000 / i; // 1000 points for minute, 2000 points for 30 sec
