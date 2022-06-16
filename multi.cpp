@@ -826,7 +826,7 @@ EX void handleInput(int delta) {
 #endif
   
   if(actionspressed[58] && !lactionpressed[58]) 
-    pushScreen(showMainMenu);
+    pushScreen(showGameMenu);
     
   panx *= d;
   pany *= d;

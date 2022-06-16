@@ -313,10 +313,11 @@ eLand nextHyperstone() {
   return laCrossroads;
   }
 
-EX void showMission() {
+EX void showGameMenu() {
 
   cmode = sm::DOTOUR | sm::MISSION | sm::CENTER;
   gamescreen(1); drawStats();
+  getcstat = SDLK_ESCAPE;
 
   dialog::init(
 #if CAP_TOUR
@@ -329,8 +330,7 @@ EX void showMission() {
     XLAT("GAME OVER"), 
     0xC00000, 200, 100
     );
-  keyhandler = handleKeyQuit;
-  
+
   #if CAP_COMPLEX2
   bool sweeper = mine::in_minesweeper();
   #else
@@ -490,21 +490,25 @@ EX void showMission() {
       }
     else
       dialog::addBreak(200);
-    dialog::addItem(XLAT("main menu"), 'v');
     dialog::addItem("continue", SDLK_ESCAPE);
 #endif
     }
   else {
     dialog::addItem(contstr(), SDLK_ESCAPE);
-    dialog::addItem(XLAT("main menu"), 'v');
-    dialog::addItem(XLAT("restart"), SDLK_F5);
-    if(inv::on && items[itInventory])
+    dialog::addItem(get_o_key().first, 'o');
+    dialog::add_action([] {
+      clearMessages();
+      get_o_key().second();
+      });
+    if(inv::on && items[itInventory]) {
       dialog::addItem(XLAT("inventory"), 'i');
+      dialog::add_action([] {
+        clearMessages();
+        pushScreen(inv::show);
+        });
+      }
     if(racing::on)
       dialog::addItem(XLAT("racing menu"), 'o');
-#if !ISMOBILE
-    dialog::addItem(quitsaves() ? XLAT("save") : XLAT("quit"), SDLK_F10);
-#endif
     if(casual || ISMOBILE) {
       if(savecount)
         dialog::addItem(XLAT("load (%1 turns passed)", its(turncount - save_turns)), SDLK_F9);
@@ -517,6 +521,50 @@ EX void showMission() {
     }
   dialog::addItem(XLAT("message log"), 'l');
   
+  if(cheater) {
+    dialog::addItem(XLAT("cheats"), 'c');
+    dialog::add_action_push(showCheatMenu);
+    }
+  dialog::addItem(XLAT("settings"), 's');
+  dialog::add_action_push(showSettings);
+  dialog::addItem(XLAT("special modes"), 'm');
+  dialog::add_action_push(showChangeMode);
+#if CAP_SAVE
+  dialog::addItem(XLAT("local highscores"), 't');
+  dialog::add_action([] { scores::load(); });
+#endif
+  #if ISMOBILE
+  dialog::addItem(XLAT("visit the website"), 'q');
+  dialog::add_action([] {
+    extern void openURL();
+    openURL();
+    });
+  #endif
+#if ISMOBILE
+#if CAP_ACHIEVE
+  dialog::addItem(XLAT("leaderboards/achievements"), '3'); 
+  dialog::add_action([] {
+    achievement_final(false);
+    pushScreen(leader::showMenu);
+    });
+#endif
+#endif
+  dialog::addHelp();
+  dialog::addItem(XLAT("restart"), SDLK_F5);
+  dialog::addItem(inSpecialMode() ? XLAT("reset special modes") : XLAT("back to the start menu"), 'R');
+  dialog::add_action([] {
+    dialog::do_if_confirmed([] {
+      #if CAP_STARTANIM
+      startanims::pick();
+      #endif
+      popScreenAll(), pushScreen(showStartMenu);
+      });
+    });
+#if !ISMOBILE
+  dialog::addItem(quitsaves() ? XLAT("save") : XLAT("quit"), SDLK_F10);
+#endif
+  
+  keyhandler = handleKeyQuit;
   dialog::display();
   }
 
@@ -558,7 +606,6 @@ EX void handleKeyQuit(int sym, int uni) {
     restart_game(rg::nothing);
     msgs.clear();
     });
-  else if(uni == 'v') popScreenAll(), pushScreen(showMainMenu);
   else if(uni == 'l') popScreenAll(), pushScreen(showMessageLog), messagelogpos = isize(gamelog);
   else if(uni == 'z') hints[hinttoshow].action();
   #if CAP_SAVE
@@ -611,7 +658,7 @@ EX void showMissionScreen() {
     #endif
     }
   else
-    pushScreen(showMission);
+    pushScreen(showGameMenu);
 
 #if CAP_TOUR
   if(!tour::on)

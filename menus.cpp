@@ -207,121 +207,6 @@ EX void showOverview() {
     };
   }
 
-// -- main menu --
-
-EX void showMainMenu() {
-  cancel(); cancel = noaction;
-  gamescreen(2);
-
-  getcstat = ' ';
-  
-  dialog::init(XLAT("HyperRogue %1", VER), 0xC00000, 200, 100);
-
-  dialog::addItem(XLAT("settings"), 's');
-  dialog::add_action_push(showSettings);
-  dialog::addItem(XLAT("special modes"), 'm');
-
-#if CAP_SAVE
-  dialog::addItem(XLAT("local highscores"), 't');
-#endif
-  dialog::addHelp();
-  if(cheater)
-    dialog::addItem(XLAT("cheats"), 'c');
-  else dialog::addBreak(100);
-  dialog::addItem(XLAT("restart game"), 'r');
-
-  dialog::addItem(inSpecialMode() ? XLAT("reset special modes") : XLAT("back to the start menu"), 'R');
-  
-  string q;
-  #if ISMOBILE
-  dialog::addItem(XLAT("visit the website"), 'q');
-  #else
-  q = quitsaves() ? XLAT("save the game") : XLAT("quit the game"); 
-  dialog::addItem(q, 'q');
-  #endif
-
-  if(canmove)
-    q = XLAT("review your quest");
-  else
-    q = XLAT("game over screen");
-  dialog::addItem(q, SDLK_ESCAPE);
-  dialog::addItem(get_o_key().first, 'o');    
-
-  if(inv::on)
-    dialog::addItem(XLAT("inventory"), 'i');    
-
-#if ISMOBILE
-#if CAP_ACHIEVE
-  dialog::addItem(XLAT("leaderboards/achievements"), '3'); 
-#endif
-#endif
-
-#if CAP_ANDROIDSHARE
-  dialog::addItem("SHARE", 's'-96);
-#endif
-
-  if(!canmove) q = XLAT("review the scene");
-  else if(turncount > 0) q = XLAT("continue game");
-  else q = XLAT("play the game!");
-  
-  dialog::addItem(q, ' ');
-  dialog::display();
-  
-  keyhandler = [] (int sym, int uni) {
-    dialog::handleNavigation(sym, uni);
-    if(sym == SDLK_F1 || uni == 'h') gotoHelp("@");
-    else if(uni == 'c' && cheater) pushScreen(showCheatMenu);
-    else if(uni == 'm') pushScreen(showChangeMode);
-    else if(uni == 'R') dialog::do_if_confirmed([] {
-      #if CAP_STARTANIM
-      startanims::pick();
-      #endif
-      popScreenAll(), pushScreen(showStartMenu);
-      });
-  #if CAP_SAVE
-    else if(uni == 't') scores::load();
-  #endif
-    else if(uni == 'r' || sym == SDLK_F5) dialog::do_if_confirmed([] {
-      restart_game();
-      });
-    else if(uni == 'q' || sym == SDLK_F10) {
-      if(needConfirmation()) dialog::do_if_confirmed([] {
-#if ISMOBILE
-        extern void openURL();
-        openURL();
-#else
-        quitmainloop = true;
-#endif
-        });
-      else quitmainloop = true;
-      }
-    else if(uni == 'o') {
-      clearMessages();
-      get_o_key().second();
-      }
-#if CAP_INV
-    else if(uni == 'i') {
-      clearMessages();
-      pushScreen(inv::show);
-      }
-#endif
-    else if(sym == SDLK_ESCAPE) 
-      showMissionScreen();
-  #if ISMOBILE
-  #ifdef HAVE_ACHIEVEMENTS
-    else if(NUMBERKEY == '3') {
-      achievement_final(false);
-      pushScreen(leader::showMenu);
-      }
-  #endif
-  #endif
-    else if(doexiton(sym, uni)) {
-      popScreenAll();
-      msgs.clear();
-      }
-    };
-  }
-
 // -- display modes --
 
 EX void editScale() {
@@ -1094,7 +979,7 @@ EX void showStartMenu() {
 #endif
     else if(uni == 'm') {
       popScreen();
-      pushScreen(showMainMenu);
+      pushScreen(showGameMenu);
       }
     else if(sym == SDLK_F10)
       quitmainloop = true;
@@ -1262,7 +1147,7 @@ int read_menu_args() {
     PHASEFROM(2); launch_dialog(showOverview);
     }
   else if(argis("-d:main")) {
-    PHASEFROM(2); launch_dialog(showMainMenu);
+    PHASEFROM(2); launch_dialog(showGameMenu);
     }
   else if(argis("-d:mode")) {
     PHASEFROM(2); launch_dialog(showChangeMode);

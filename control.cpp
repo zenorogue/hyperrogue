@@ -558,7 +558,7 @@ EX void handleKeyNormal(int sym, int uni) {
     else
     #endif
     if(needConfirmation()) 
-      pushScreen(showMission);
+      pushScreen(showGameMenu);
     else restart_game();
     }
 
@@ -574,7 +574,7 @@ EX void handleKeyNormal(int sym, int uni) {
     if(daily::on) daily::handleQuit(2);
     else
     #endif
-    if(needConfirmation()) pushScreen(showMission);
+    if(needConfirmation()) pushScreen(showGameMenu);
     else quitmainloop = true;
     }
   
@@ -592,10 +592,10 @@ EX void handleKeyNormal(int sym, int uni) {
     }
   
   if(sym == 'v' && DEFAULTNOR(sym)) 
-    pushScreen(showMainMenu);
+    showMissionScreen();
 
   if(sym == PSEUDOKEY_MENU) 
-    pushScreen(showMainMenu);
+    showMissionScreen();
   
   if(sym == PSEUDOKEY_NOHINT)
     no_find_player = true;
