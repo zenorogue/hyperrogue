@@ -256,6 +256,11 @@ int arg::readCommon() {
     shift(); ld b = argf();
     View = View * spin(M_PI * 2 * a / b);
     }
+  else if(argis("-rotate-up")) {
+    start_game();
+    shiftmatrix S = ggmatrix(cwt.at->master->move(0)->c7);
+    View = spin(90*degree) * spintox(S.T*C0) * View;
+    }
   else if(argis("-rotate3")) {
     PHASE(3);  start_game();
     shift(); ld a = argf();
