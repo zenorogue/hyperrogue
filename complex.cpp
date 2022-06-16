@@ -3678,7 +3678,7 @@ EX namespace halloween {
 
     halloween::dragoncells[0] = NULL;
 
-    if(sphere && geometry == gNormal) {
+    if(sphere && geometry == gSphere) {
       for(cell *c: lst) {
         if(GOLDBERG) {
           int fv = c->master->fiftyval;
