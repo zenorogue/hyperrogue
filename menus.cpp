@@ -457,6 +457,25 @@ EX void mode_higlights() {
   dialog::addInfo(XLAT("classic game except hyperbolic"));
   dialog::extend();
 
+  dialog::addBigItem(XLATN("hyperbolic Minesweeper"), 'e');
+  dialog::add_action([] { 
+    dialog::do_if_confirmed([] {
+      resetModes();
+      specialland = firstland = laMinefield;
+      if(!closed_or_bounded) {
+        geometry = gBring;
+        variation = eVariation::goldberg;
+        gp::param = gp::loc(2, 1);
+        mine_adjacency_rule = true;
+        bounded_mine_percentage = .2;
+        }
+      start_game();
+      popScreenAll();
+      });
+    });
+  dialog::addInfo(XLAT("yet another classic game"));
+  dialog::extend();
+
   #if CAP_RACING && MAXMDIM >= 4
   dialog::addBigItem(XLAT("Racing in Thurston geometries"), 't'-96);
   dialog::add_action(dialog::add_confirmation(racing::start_thurston));
@@ -606,12 +625,6 @@ EX void menuitem_land_structure(char key) {
 EX void showChangeMode() {
   gamescreen(3);
   dialog::init(XLAT("special modes"));
-                               // gameplay modes
-
-#if CAP_TOUR
-  dialog::addBoolItem(XLAT("guided tour"), tour::on, 'T');
-  dialog::add_action_confirmed(tour::start);
-#endif
 
   dialog::addBoolItem(XLAT("experiment with geometry"), geometry || CHANGED_VARIATION || viewdists, 'e');
   dialog::add_action(runGeometryExperiments);
@@ -644,6 +657,38 @@ EX void showChangeMode() {
   dialog::addBoolItem(XLAT("Orb Strategy mode"), (inv::on), 'i');
   dialog::add_action_confirmed([] { restart_game(rg::inv); });
 
+  dialog::addBoolItem(XLAT("random pattern mode"), (randomPatternsMode), 'r');
+  dialog::add_action_confirmed([] { 
+    stop_game();
+    firstland = laIce;
+    restart_game(rg::randpattern); 
+    });
+
+#if CAP_ARCM && !ISWEB
+  if(multi::players == 1) {
+    dialog::addBoolItem(XLAT("dual geometry mode"), dual::state, 'D');
+    dialog::add_action_confirmed([] { restart_game(rg::dualmode); });
+    }
+#endif
+
+  dialog::addBoolItem(XLAT("cheat mode"), (cheater), 'c');
+  dialog::add_action(enable_cheat);
+
+  dialog::addBreak(50);
+#if CAP_TOUR
+  dialog::addBoolItem(XLAT("guided tour"), tour::on, 'T');
+  dialog::add_action_confirmed(tour::start);
+#endif
+#if CAP_DAILY
+  dialog::addBoolItem(XLAT("Strange Challenge"), daily::on, 'z');
+  dialog::add_action_push(daily::showMenu);    
+#endif
+  dialog::addBoolItem(XLAT("%1 Challenge", moPrincess), (princess::challenge), 'P');
+  dialog::add_action_confirmed([] {
+    if(!princess::everSaved)
+      addMessage(XLAT("Save %the1 first to unlock this challenge!", moPrincess));
+    else restart_game(rg::princess);
+    });  
   dialog::addBoolItem(XLAT("pure tactics mode"), (tactic::on), 't');
   dialog::add_action(tactic::start);
 
@@ -654,42 +699,10 @@ EX void showChangeMode() {
       pushScreen(yendor::showMenu);
     else gotoHelp(yendor::chelp);
     });
-
-  dialog::addBoolItem(XLAT("%1 Challenge", moPrincess), (princess::challenge), 'P');
-  dialog::add_action_confirmed([] {
-    if(!princess::everSaved)
-      addMessage(XLAT("Save %the1 first to unlock this challenge!", moPrincess));
-    else restart_game(rg::princess);
-    });  
-  
-  dialog::addBoolItem(XLAT("random pattern mode"), (randomPatternsMode), 'r');
-  dialog::add_action_confirmed([] { 
-    stop_game();
-    firstland = laIce;
-    restart_game(rg::randpattern); 
-    });
-
 #if CAP_RACING
   dialog::addBoolItem(XLAT("racing mode"), racing::on, 'R');
   dialog::add_action(racing::configure_race);
-#endif
-#if CAP_ARCM && !ISWEB
-  if(multi::players == 1) {
-    dialog::addBoolItem(XLAT("dual geometry mode"), dual::state, 'D');
-    dialog::add_action_confirmed([] { restart_game(rg::dualmode); });
-    }
-  if(dual::state) {
-    dialog::addBoolItem(XLAT("dual geometry puzzle"), dpgen::in, 'G');
-    dialog::add_action_confirmed([] { pushScreen(dpgen::show_menu); });
-    }
-#endif
-#if CAP_DAILY
-  dialog::addBoolItem(XLAT("Strange Challenge"), daily::on, 'z');
-  dialog::add_action_push(daily::showMenu);    
-#endif
-
-  dialog::addBoolItem(XLAT("cheat mode"), (cheater), 'c');
-  dialog::add_action(enable_cheat);
+#endif  
 
   dialog::addBreak(50);
 
