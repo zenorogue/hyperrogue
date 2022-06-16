@@ -173,10 +173,6 @@ EX void initgame() {
     firstland = safetyland;
     }
 
-  #if CAP_RACING  
-  if(racing::on) racing::apply_seed();
-  #endif
-  
   if(!safety) {
     firstland = specialland;
     ineligible_starting_land = !landUnlocked(specialland);
@@ -1028,7 +1024,8 @@ EX void saveStats(bool emergency IS(false)) {
   if(peace::on) return;
   if(dpgen::in) return;
   if(experimental) return;
-  if(!gold()) return;
+
+  if(!gold() && !racing::on) return;
   
   remove_emergency_save();
   
@@ -1081,6 +1078,16 @@ EX void saveStats(bool emergency IS(false)) {
         buf);
 
     fclose(f);
+    return;
+    }
+
+  if(racing::on) {
+    if(racing::official_race && !cheater) {
+      fprintf(f, "RACING %s %d %d date: %s\n", VER,
+        int(specialland), racing::best_scores[specialland],
+        buf);
+      fclose(f);
+      }
     return;
     }
 
@@ -1249,6 +1256,14 @@ EX void loadsave() {
           }
         }
       }
+
+  if(buf[0] == 'R' && buf[1] == 'A' && buf[2] == 'C') {
+    char buf1[80], ver[10];
+    int land, score;
+    sscanf(buf, "%70s%9s%d%d", buf1, ver, &land, &score);
+    racing::best_scores[eLand(land)] = score;
+    println(hlog, "loaded the score for ", dnameof(eLand(land)), " of ", score);
+    }
 
     }
   fclose(f);
