@@ -76,12 +76,15 @@ EX string get_stamp() {
 inline string ONOFF(bool b) { return b ? XLAT("ON") : XLAT("OFF"); }
 
 struct hstream {
+  color_t vernum;
   virtual void write_char(char c) = 0;
   virtual void write_chars(const char* c, size_t q) { while(q--) write_char(*(c++)); }
   virtual char read_char() = 0;
   virtual void read_chars(char* c, size_t q) { while(q--) *(c++) = read_char(); }
-  virtual color_t get_vernum() { return VERNUM_HEX; }
+  virtual color_t get_vernum() { return vernum; }
   virtual void flush() {}
+  
+  hstream() { vernum = VERNUM_HEX; }
 
   template<class T> void write(const T& t) { hwrite(*this, t); }
   template<class T> void read(T& t) { hread(*this, t); }
@@ -139,12 +142,10 @@ template<class C, class C1, class... CS> void hread(hstream& hs, C& c, C1& c1, C
 struct hstream_exception : hr_exception { hstream_exception() {} };
 
 struct fhstream : hstream {
-  color_t vernum;
   FILE *f;
-  explicit fhstream() { f = NULL; vernum = VERNUM_HEX; }
+  explicit fhstream() { f = NULL; }
   explicit fhstream(const string pathname, const char *mode) { f = fopen(pathname.c_str(), mode); vernum = VERNUM_HEX; }
   ~fhstream() { if(f) fclose(f); }
-  color_t get_vernum() override { return vernum; }
   void write_char(char c) override { write_chars(&c, 1); }
   void write_chars(const char* c, size_t i) override { if(fwrite(c, i, 1, f) != 1) throw hstream_exception(); }
   void read_chars(char* c, size_t i) override { if(fread(c, i, 1, f) != 1) throw hstream_exception(); }
@@ -153,11 +154,9 @@ struct fhstream : hstream {
   };
 
 struct shstream : hstream { 
-  color_t vernum;
   string s;
   int pos;
   explicit shstream(const string& t = "") : s(t) { pos = 0; vernum = VERNUM_HEX; }
-  color_t get_vernum() override { return vernum; }
   void write_char(char c) override { s += c; }
   char read_char() override { if(pos == isize(s)) throw hstream_exception(); return s[pos++]; }
   };

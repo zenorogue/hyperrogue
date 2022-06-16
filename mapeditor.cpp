@@ -395,7 +395,7 @@ EX namespace mapstream {
   EX vector<cell*> cellbyid;
   EX vector<char> relspin;
   
-  void load_drawing_tool(fhstream& hs) {
+  void load_drawing_tool(hstream& hs) {
     using namespace mapeditor;
     if(hs.vernum < 0xA82A) return;
     int i = hs.get<int>();
@@ -680,15 +680,15 @@ EX namespace mapstream {
     geometry_settings(was_default);
     }
   
-  EX hookset<void(fhstream&)> hooks_savemap, hooks_loadmap_old;
-  EX hookset<void(fhstream&, int)> hooks_loadmap;
+  EX hookset<void(hstream&)> hooks_savemap, hooks_loadmap_old;
+  EX hookset<void(hstream&, int)> hooks_loadmap;
   
   EX cell *save_start() {
     return (closed_manifold || euclid || prod || arcm::in() || sol || INVERSE) ? currentmap->gamestart() : cwt.at->master->c7;
     }
 
 #if CAP_EDIT  
-  void save_only_map(fhstream& f) {
+  void save_only_map(hstream& f) {
     f.write(patterns::whichPattern);
     save_geometry(f);
     
@@ -824,7 +824,7 @@ EX namespace mapstream {
     cellbyid.clear();
     }
   
-  void load_usershapes(fhstream& f) {
+  void load_usershapes(hstream& f) {
     if(f.vernum >= 7400) while(true) {
       int i = f.get<int>();
       if(i == -1) break;
@@ -854,7 +854,7 @@ EX namespace mapstream {
       }    
     }
   
-  void load_only_map(fhstream& f) {
+  void load_only_map(hstream& f) {
     stop_game();
     if(f.vernum >= 10420 && f.vernum < 10503) {
       int i;
@@ -1073,7 +1073,7 @@ EX namespace mapstream {
     game_active = true;
     }
   
-  void save_usershapes(fhstream& f) {
+  void save_usershapes(hstream& f) {
     int32_t n;
     #if CAP_POLY    
     for(int i=0; i<mapeditor::USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
@@ -1098,7 +1098,12 @@ EX namespace mapstream {
   EX bool saveMap(const char *fname) {
     fhstream f(fname, "wb");
     if(!f.f) return false;
-    f.write(f.vernum);
+    saveMap(f);
+    return true;
+    }
+
+  EX void saveMap(hstream& f) {
+    f.write(f.get_vernum());
     f.write(dual::state);
     #if MAXMDIM >= 4 && CAP_RAY
     int q = intra::in ? isize(intra::data) : 0;
@@ -1125,12 +1130,15 @@ EX namespace mapstream {
       dual::split_or_do([&] { save_only_map(f); });
       }
     save_usershapes(f);
-    return true;
     }
   
   EX bool loadMap(const string& fname) {
     fhstream f(fname, "rb");
     if(!f.f) return false;
+    return loadMap(f);
+    }
+    
+  EX bool loadMap(hstream& f) {
     f.read(f.vernum);
     if(f.vernum > 10505 && f.vernum < 11000) 
       f.vernum = 11005;
