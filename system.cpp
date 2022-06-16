@@ -1620,6 +1620,11 @@ EX void start_game() {
 // popAllScreens + popAllGames + stop_game + switch_game_mode + start_game
 EX void restart_game(char switchWhat IS(rg::nothing)) {
   popScreenAll();  
+  if(switchWhat == rg::nothing && racing::on) {
+    racing::restore_goals();
+    racing::reset_race();
+    return;
+    }
   stop_game();
   switch_game_mode(switchWhat);
   start_game();
