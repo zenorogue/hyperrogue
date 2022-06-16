@@ -752,13 +752,15 @@ EX namespace mapstream {
         f.write_char(dat.dir);
         f.write_char(dat.mirrored);
         }
-      // f.write_char(c->barleft);
-      // f.write_char(c->barright);
       f.write_char(c->item);
       if(c->item == itBabyTortoise)
         f.write(tortoise::babymap[c]);
       f.write_char(c->mpdist);
-      // f.write_char(c->bardir);
+      if(inmirrororwall(c)) {
+        f.write_char(c->barleft);
+        f.write_char(c->barright);
+        f.write_char(c->bardir);
+        }
       f.write(c->wparam); f.write(c->landparam);
       f.write_char(c->stuntime); f.write_char(c->hitpoints);
       bool blocked = false;
@@ -953,6 +955,11 @@ EX namespace mapstream {
         f.read(tortoise::babymap[c]);
       c->mpdist = f.read_char();
       c->bardir = NOBARRIERS;
+      if(inmirrororwall(c) && f.vernum >= 0xA912) {
+        c->barleft = (eLand) f.read_char();
+        c->barright = (eLand) f.read_char();
+        c->bardir = fixspin(rspin, f.read_char(), c->type, f.vernum);
+        }
       // fixspin(rspin, f.read_char(), c->type);
       if(f.vernum < 7400) {
         short z;
