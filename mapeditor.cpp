@@ -691,6 +691,7 @@ EX namespace mapstream {
   void save_only_map(hstream& f) {
     f.write(patterns::whichPattern);
     save_geometry(f);
+    if(racing::on) racing::restore_goals();
     
     // game settings
     f.write(safety);
