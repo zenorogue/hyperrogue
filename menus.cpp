@@ -1063,7 +1063,6 @@ EX void showStartMenu() {
       resetModes();
       stop_game();
       switch_game_mode(rg::racing);
-      racing::track_code = "OFFICIAL";
       specialland = racing::race_lands[rand() % isize(racing::race_lands)];
       start_game();
       pmodel = mdBand;
