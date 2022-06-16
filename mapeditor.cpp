@@ -770,7 +770,7 @@ EX namespace mapstream {
       if(!blocked)
       for(int j=0; j<c->type; j++) {
         cell *c2 = c->move(j);
-        if(c2 && c2->land != laNone) addToQueue(c2);
+        if(c2 && c2->land != laNone && c2->land != laMemory) addToQueue(c2);
         }
       }
     printf("cells saved = %d\n", isize(cellbyid));
