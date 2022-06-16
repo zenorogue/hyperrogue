@@ -1143,31 +1143,29 @@ EX namespace peace {
       }
   EX }
   
-  EX bool in_minefield, in_dual;
-
-  void reset_modes() {
-    stop_game();
-    if(in_minefield) {
-      geometry = gNormal;
-      variation = eVariation::bitruncated;
-      in_minefield = false;
-      }
-    if(in_dual) {
-      stop_game_and_switch_mode(rg::dualmode);
-      geometry = gNormal;
-      variation = eVariation::bitruncated;
-      in_dual = false;
-      }
-    }    
-  
   EX void showMenu() {
+    dialog::init();
+    
+    int kind = 0;
+
+    if(true) {
+      dialog::addBreak(100);
+      dialog::addBoolItem(XLAT("puzzles"), otherpuzzles, '1');
+      dialog::add_action([] { otherpuzzles = true; explore_other = false; });
+      dialog::addBoolItem(XLAT("exploration"), explore_other, '2');
+      dialog::add_action([] { otherpuzzles = true; explore_other = true; });
+      dialog::addBoolItem(XLAT("memory game"), !otherpuzzles && !explore_other, '2');
+      dialog::add_action([] { otherpuzzles = false; explore_other = false; });
+      dialog::addBreak(50);
+      }
+
     string title = 
       !otherpuzzles ? XLAT("memory game") :
       explore_other ? XLAT("exploration") : 
       XLAT("puzzles");
-    dialog::init(title, 0x40A040, 150, 100);
-
-    int kind = 0;
+    dialog::addBreak(100);
+    dialog::addTitle(title, 0x40A040, 150);
+    dialog::addBreak(100);
 
     if(!otherpuzzles) {
       levellist = simonlevels, kind = 1;
@@ -1175,37 +1173,22 @@ EX namespace peace {
       dialog::addInfo("You have to return to the starting location!");
       dialog::addBreak(50);
       }
-    else if(explore_other)
-      levellist = explorelevels, kind = 2;
     else {
-      levellist = puzzlelevels, kind = 0;
       dialog::addInfo("This mode removes roguelike elements,");
       dialog::addInfo("focusing on puzzles and exploration");
       dialog::addBreak(50);
+      if(explore_other)
+        levellist = explorelevels, kind = 2;
+      else
+        levellist = puzzlelevels, kind = 0;
       }
     
     char key = 'a';
     for(auto lev: levellist) {
-      if(kind == 0) switch(lev) {
-        case laBurial:
-          dialog::addItem("excavate the treasures using your magical shovel", 'a');
-          break;
-        case laTortoise:
-          dialog::addItem("find an adult tortoise matching the baby", 'b');
-          break;
-        case laCamelot:
-          dialog::addItem("find the center of the Round Table in Camelot", 'c');
-          break;
-        case laPalace:
-          dialog::addItem("follow the mouse", 'd');
-          break;
-        default: ;
-        }
-      else
-        dialog::addItem(XLAT1(linf[lev].name), key++);
+      dialog::addItem(XLAT1(linf[lev].name), key++);
       dialog::add_action([lev] {
         dialog::do_if_confirmed([lev] {
-          reset_modes();
+          stop_game();
           firstland = specialland = lev;
           if(!peace::on)
             stop_game_and_switch_mode(rg::peace);
@@ -1213,65 +1196,34 @@ EX namespace peace {
           popScreenAll();
           });
         });
+      if(kind == 0) {
+        switch(lev) {
+          case laBurial:
+            dialog::addInfo("excavate the treasures using your magical shovel");
+            break;
+          case laTortoise:
+            dialog::addInfo("find an adult tortoise matching the baby");
+            break;
+          case laCamelot:
+            dialog::addInfo("find the center of the Round Table in Camelot");
+            break;
+          case laPalace:
+            dialog::addInfo("follow the mouse");
+            break;
+          default: ;
+          }
+        dialog::addBreak(100);
+        }
       }
-
-    if(kind == 1) {
-      dialog::addBreak(100);
-      dialog::addItem(XLAT("other puzzles"), '1');
-      dialog::add_action([] { otherpuzzles = true; explore_other = false; });
-      }
-
-    if(kind == 2) {
-      dialog::addBreak(100);
-      dialog::addItem(XLAT("other puzzles"), '1');
-      dialog::add_action([] { otherpuzzles = true; explore_other = false; });
-      }
+    dialog::addBreak(1400 - 100 * isize(levellist) * (kind == 0 ? 3 : 1));
     
-    if(kind == 0) {
-      dialog::addItem(XLAT("hyperbolic Minesweeper"), 'e');
-      dialog::add_action([] { 
-        dialog::do_if_confirmed([] {
-          reset_modes();
-          if(peace::on) stop_game_and_switch_mode(rg::peace);
-          specialland = firstland = laMinefield;
-          if(!closed_or_bounded) {
-            geometry = gBring;
-            variation = eVariation::goldberg;
-            gp::param = gp::loc(2, 1);
-            mine_adjacency_rule = true;
-            in_minefield = true;
-            bounded_mine_percentage = .2;
-            }
-          start_game();
-          popScreenAll();
-          });
-        });
-      dialog::addItem(XLAT("dual geometry puzzle"), 'f');
-      dialog::add_action([] { 
-        dialog::do_if_confirmed([] {
-          reset_modes();
-          if(peace::on) stop_game_and_switch_mode(rg::peace);
-          restart_game(rg::dualmode);
-          in_dual = true;
-          popScreenAll();
-          pushScreen(dpgen::show_menu);          
-          });
-        });
-      dialog::addItem(XLAT("memory game"), 'g');
-      dialog::add_action([] { otherpuzzles = false; });
-      dialog::addItem(XLAT("exploration"), 'h');
-      dialog::add_action([] { explore_other = true; });
-      }
-
-    dialog::addBreak(100);    
-    
-    dialog::addBoolItem(XLAT("display hints"), hint, '2');
+    dialog::addBoolItem(XLAT("display hints"), hint, '4');
     dialog::add_action([] {
       hint = !hint; popScreen();
       });
     dialog::addItem(XLAT("Return to the normal game"), '0');
     dialog::add_action([] {
-      reset_modes();
+      stop_game();
       if(peace::on) stop_game_and_switch_mode(rg::peace);
       });
 
