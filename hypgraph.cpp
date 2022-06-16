@@ -2775,6 +2775,12 @@ EX hyperpoint inverse_shift(const shiftmatrix& T1, const shiftpoint& T2) {
   return iso_inverse(T1.T) * unshift(T2, T1.shift);
   }
 
+EX void optimize_shift(shiftpoint& h) {
+  if(sl2) {
+    change_shift(h, atan2(h[2], h[3]));
+    }
+  }
+
 EX void optimize_shift(shiftmatrix& T) {
   if(((mdinf[pmodel].flags & mf::uses_bandshift) && T[LDIM][LDIM] > 1e6) || (sphere && pmodel == mdSpiral)) {   
     T.T = spin(pconf.model_orientation * degree) * T.T;
