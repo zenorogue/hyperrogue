@@ -5428,7 +5428,7 @@ EX void normalscreen() {
   mouseovers = standard_help();
 
 #if CAP_TOUR  
-  if(tour::on) mouseovers = tour::tourhelp;
+  if(tour::on) mouseovers = (tour::slides[tour::currentslide].flags & tour::NOTITLE) ? "" : tour::tourhelp;
 #endif
 
   if(GDIM == 3 || !outofmap(mouseh.h)) getcstat = '-';
