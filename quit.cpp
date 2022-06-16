@@ -522,11 +522,13 @@ EX void showGameMenu() {
   dialog::addItem(XLAT("message log"), 'l');
   
   if(cheater) {
-    dialog::addItem(XLAT("cheats"), 'c');
+    dialog::addItem(XLAT("cheats"), 'C');
     dialog::add_action_push(showCheatMenu);
     }
   dialog::addItem(XLAT("settings"), 's');
   dialog::add_action_push(showSettings);
+  dialog::addItem(XLAT("creative mode"), 'c');
+  dialog::add_action_push(showCreative);
   dialog::addItem(XLAT("special modes"), 'm');
   dialog::add_action_push(showChangeMode);
 #if CAP_SAVE

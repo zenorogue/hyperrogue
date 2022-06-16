@@ -374,9 +374,6 @@ EX void showCreative() {
     }
 #endif
 
-  dialog::addBoolItem(XLAT("cheat mode"), (cheater), 'c');
-  dialog::add_action(enable_cheat);
-
 //  dialog::addBoolItem(XLAT("expansion"), viewdists, 'x');
   
   dialog::addBreak(50);
@@ -616,13 +613,8 @@ EX void showChangeMode() {
   dialog::add_action_confirmed(tour::start);
 #endif
 
-  dialog::addBoolItem(XLAT("creative mode"), (false), 'c');
-  dialog::add_action_push(showCreative);
-
   dialog::addBoolItem(XLAT("experiment with geometry"), geometry || CHANGED_VARIATION || viewdists, 'e');
   dialog::add_action(runGeometryExperiments);
-
-  dialog::addBreak(100);
 
   dialog::addBoolItem(XLAT(SHMUPTITLE), shmup::on, 's');
   dialog::add_action_confirmed(shmup::switch_shmup);
@@ -695,6 +687,9 @@ EX void showChangeMode() {
   dialog::addBoolItem(XLAT("Strange Challenge"), daily::on, 'z');
   dialog::add_action_push(daily::showMenu);    
 #endif
+
+  dialog::addBoolItem(XLAT("cheat mode"), (cheater), 'c');
+  dialog::add_action(enable_cheat);
 
   dialog::addBreak(50);
 
