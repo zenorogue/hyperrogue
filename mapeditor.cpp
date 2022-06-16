@@ -819,6 +819,15 @@ EX namespace mapstream {
       }
     #endif
       
+    if(f.vernum >= 0xA912) {
+      f.write(racing::on);
+      if(racing::on) {
+        f.write<int>(isize(racing::track));
+        for(auto& t: racing::track) f.write<int>(cellids[t]);
+        racing::save_ghosts(f);
+        }
+      }
+
     callhooks(hooks_savemap, f);
     f.write<int>(0);
 
@@ -1062,6 +1071,20 @@ EX namespace mapstream {
         }
       }
     #endif
+    
+    if(f.vernum >= 0xA912) {
+      f.read(racing::on);
+      if(racing::on) {
+        if(!shmup::on) {
+          shmup::on = true;
+          shmup::init();
+          }
+        racing::track.resize(f.get<int>());
+        for(auto& t: racing::track) t = cellbyid[f.get<int>()];
+        racing::load_ghosts(f);
+        racing::configure_track(false);
+        }
+      }
 
     if(f.vernum >= 0xA848) {
       int i;
