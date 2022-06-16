@@ -2971,7 +2971,6 @@ EX void switch_shmup() {
   switch_game_mode(rg::shmup);
   resetScores();
   start_game();
-  configure();
   }
 
 #if MAXMDIM >= 4
