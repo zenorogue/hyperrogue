@@ -637,7 +637,7 @@ EX void configure_track(bool gen) {
   
   for(auto cc: rti) if(blockoff(cc)) to_block.push_back(cc.c);
   
-  block_cells(to_block, [&blockoff] (cell *c) {
+  if(gen) block_cells(to_block, [&blockoff] (cell *c) {
     forCellEx(c2, c) if(passable(c2, c, P_ISPLAYER) && !blockoff(get_info(c2))) return true;
     return false;
     });
