@@ -342,7 +342,7 @@ void drawCurse(const shiftmatrix& V, eItem it) {
 
 #define UNTRANS (GDIM == 3 ? 0x000000FF : 0)
 
-EX void drawPlayerEffects(const shiftmatrix& V, cell *c, eMonster m) {
+EX void drawPlayerEffects(const shiftmatrix& V, const shiftmatrix& Vparam, cell *c, eMonster m) {
   bool onplayer = m == moPlayer;
   if(!onplayer && !items[itOrbEmpathy]) return;
   if(items[itOrbShield] > (shmup::on ? 0 : ORBBASE)) drawShield(V, itOrbShield);
@@ -369,7 +369,7 @@ EX void drawPlayerEffects(const shiftmatrix& V, cell *c, eMonster m) {
 #if CAP_SHAPES
       shiftmatrix Vsword = 
         shmup::on ? V * shmup::swordmatrix[multi::cpid] * cspin(2, 0, M_PI/2) 
-                  : gmatrix[c] * rgpushxto0(inverse_shift(gmatrix[c], tC0(V))) * sword::dir[multi::cpid].T;
+                  : Vparam * rgpushxto0(inverse_shift(gmatrix[c], tC0(V))) * sword::dir[multi::cpid].T;
 
       if(items[itOrbSword])
         queuepoly(Vsword * cspin(1,2, ticks / 150.), (peace::on ? cgi.shMagicShovel : cgi.shMagicSword), darkena(iinf[itOrbSword].color, 0, 0xC0 + 0x30 * sintick(200)));
@@ -384,7 +384,7 @@ EX void drawPlayerEffects(const shiftmatrix& V, cell *c, eMonster m) {
       ang %= sword::sword_angles;
 
 #if CAP_QUEUE || CAP_SHAPES
-      shiftmatrix Vnow = gmatrix[c] * rgpushxto0(inverse_shift(gmatrix[c], tC0(V))) * ddspin(c,0,M_PI);
+      shiftmatrix Vnow = Vparam * rgpushxto0(inverse_shift(Vparam, tC0(V))) * ddspin(c,0,M_PI);
 #endif
 
       int adj = 1 - ((sword_angles/cwt.at->type)&1);
@@ -2874,7 +2874,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       if(!nospins && flipplayer) Vs = Vs * pispin;
       
       res = res && drawMonsterType(moMimic, c, Vs, col, footphase, asciicol);
-      drawPlayerEffects(Vs, c, c->monst);
+      drawPlayerEffects(Vs, Vparam, c, c->monst);
       }
     }
   
@@ -2884,7 +2884,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
     multi::cpid = 0;
     if(c->monmirror) Vs = Vs * Mirror;
     drawMonsterType(c->monst, c, Vs, col, footphase, asciicol);
-    drawPlayerEffects(Vs, c, c->monst);
+    drawPlayerEffects(Vs, Vparam, c, c->monst);
     }
 
   // wolves face the heat
@@ -2941,7 +2941,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
     if(!nospins && c->mondir < c->type) Vs = Vs * ddspin(c, c->mondir, M_PI);
     if(c->monst == moPair) Vs = Vs * xpush(-.12);
     if(c->monmirror) Vs = Vs * Mirror;
-    if(isFriendly(c)) drawPlayerEffects(Vs, c, c->monst);
+    if(isFriendly(c)) drawPlayerEffects(Vs, Vparam, c, c->monst);
     res = res && drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase, asciicol);
     }
 
@@ -2995,7 +2995,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
 
     asciicol = getcs().uicolor >> 8;
 
-    drawPlayerEffects(Vs, c, moPlayer);
+    drawPlayerEffects(Vs, Vparam, c, moPlayer);
     if(inmirrorcount && !mouseout() && !nospins && GDIM == 2) {
       hyperpoint h = inverse_shift(ocwtV, mouseh);
       if(flipplayer) h = pispin * h;

@@ -3049,7 +3049,7 @@ bool celldrawer::draw_shmup_monster() {
         bool ths = subscreens::is_current_player(m->pid);
         
         if(!ths || !h) {
-          drawPlayerEffects(view, c, m->type);
+          drawPlayerEffects(view, V, c, m->type);
           if(WDIM == 3) {
             if(prod) {
               hyperpoint h = m->ori * C0; // ztangent(1)
