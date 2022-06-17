@@ -248,6 +248,7 @@ bool pcmove::movepcto() {
   mip.t = NULL;
   switchplaces = false;
   warning_shown = false;
+  suicidal = false;
 
   if(d == MD_USE_ORB) 
     return targetRangedOrb(multi::whereto[multi::cpid].tgt, roMultiGo);
@@ -1495,6 +1496,8 @@ EX bool swordAttack(cell *mt, eMonster who, cell *c, int bb) {
     }
   if(c->wall == waExplosiveBarrel)
     explodeBarrel(c);
+  if(!peace::on && isPlayerOn(c) && whichPlayerOn(c) != multi::cpid && !markOrb(itOrbEmpathy)) killThePlayer(moPlayer, whichPlayerOn(mt), 0);
+  if(!peace::on && mt == c && !markOrb(itOrbEmpathy)) killThePlayer(moPlayer, multi::cpid, 0);
   if(!peace::on && canAttack(mt, who, c, m, AF_SWORD)) {
     changes.ccell(c);
     markOrb(bb ? itOrbSword2: itOrbSword);

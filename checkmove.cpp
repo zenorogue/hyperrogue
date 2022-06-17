@@ -241,6 +241,10 @@ EX bool monstersnear_aux() {
 
 /** like monstersnear but add the potential moves of other players into account */
 EX bool monstersnear_add_pmi(player_move_info pmi0) {
+  if(suicidal) {
+    who_kills_me = moPlayer;
+    return true;
+    }
   pmi.push_back(pmi0);
   bool b = monstersnear_aux();
   pmi.pop_back();

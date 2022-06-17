@@ -1202,6 +1202,8 @@ EX void killHardcorePlayer(int id, flagtype flags) {
     }
   }
 
+EX bool suicidal;
+
 EX void killThePlayer(eMonster m, int id, flagtype flags) {
   if(markOrb(itOrbShield)) return;
   if(shmup::on) {
@@ -1231,6 +1233,7 @@ EX void killThePlayer(eMonster m, int id, flagtype flags) {
   else {
 //  printf("confused!\n");
     addMessage(XLAT("%The1 is confused!", m));
+    changes.value_set(suicidal, true);
     }
   }
 
@@ -1283,7 +1286,8 @@ EX void stabbingAttack(movei mi, eMonster who, int bonuskill IS(0)) {
     
     bool stabthere = false, away = true;
     if(logical_adjacent(mt, who, c)) stabthere = true, away = false;
-  
+    if(inmirror(c)) c = mirror::reflect(c).at;
+
     if(stabthere && c->wall == waExplosiveBarrel && markOrb(itOrbThorns))
       explodeBarrel(c);
     
