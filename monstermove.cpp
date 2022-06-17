@@ -1528,7 +1528,7 @@ EX void moveghosts() {
       
       vector<int> mdir;
 
-      for(int j=0; j<c->type; j++) 
+      for(int p: {0, 1}) for(int j=0; j<c->type; j++) if(p == 1 || (c->move(j) && isPlayerOn(c->move(j))))
         if(c->move(j) && canAttack(c, c->monst, c->move(j), c->move(j)->monst, AF_GETPLAYER | AF_ONLY_FBUG)) {
           // XLATC ghost/greater shark
           
