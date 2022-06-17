@@ -2834,7 +2834,9 @@ EX namespace sword {
     if(s<0) s += sword_angles * 2;
     s *= t;
     s /= (sword_angles * 2);
-    return c->move(s);
+    auto c1 = c->move(s);
+    if(inmirror(c1)) c1 = mirror::reflect(c1).at;
+    return c1;
     }
   
   EX cell *pos(cell *c, const sworddir& sd, bool rev) {
