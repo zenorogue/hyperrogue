@@ -4675,3 +4675,28 @@ Fixed some bugs in the new features for tes, and also fixed spherical geometry.
 - teleportation in bounded minesweeper no longer follows the limited range rule
 - you can now display Minefield clues as numbers (right-click minefield to get its help screen where you can change this option)
 - new projections mostly for Solv: Lie perspective and Lie orthogonal
+
+2022-06-17 12:17 Update 12.0r:
+
+Gameplay:
+- ghosts prioritize attacking players over attacking allies
+- fixed some Orbs not affecting slime
+- Orb of the Sword can now kill yourself through mirror or topology
+- sword attacks reflect in mirrors
+- swords in mirrors are now displayed correctly
+- mimic movements are now affected by Empathy, and no longer can reverse slime colors by going through mirror
+- Woods+Time: do not waste charge on attacking monsters in trees
+- fixed help for life Orbs in the shmup mode
+- Halloween:: fixed the jack-o-lantern
+- the Racing mode now loads pre-generated files instead of trusting the track will be generated in the same way
+- you can also edit the Racing tracks and save them ()
+- Hall of Mirror maps should now be saved correctly
+- fixed a crash bug in computing minefield neighborhoods in some tilings
+- fixed sl2 rendering
+
+Menu improvements:
+- unified the quest status (previously ESC) and main menu (previously V) into a single screen ("game menu")
+- 'creative mode' is moved to the game menu
+- a cleanup to some menus (special modes, highlights, peace&exploration)
+- dual geometry puzzle removed (will still be available in RogueViz)
+- switching shmup mode no longer invokes keyboard configuration
