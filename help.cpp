@@ -337,7 +337,18 @@ string power_help =
 EX string generateHelpForItem(eItem it) {
 
    string help = helptitle(XLATN(iinf[it].name), iinf[it].color);
+
+   if(shmup::on && isShmupLifeOrb(it)) {
+     int cnt = 0;
+     help += XLAT(
+       "The following Orbs act an extra lives in the shmup mode:");
+     for(int i=0; i<ittypes; i++) {
+       eItem it2 = eItem(i);
+       if(isShmupLifeOrb(it2)) help += cnt++ ? XLAT(", %1", it2) : XLAT(" %1", it2);
+       }
+     }
    
+   else
    #if CAP_CRYSTAL
    if(it == itCompass && cryst)
      help += crystal::compass_help();
