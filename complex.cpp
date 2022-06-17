@@ -1446,7 +1446,8 @@ EX namespace mirror {
         changes.ccell(c);
         if(!m.second.mirrored) nummirage++;
         auto cw2 = m.second + wstep;
-        if(inmirror(cw2)) cw2 = reflect(cw2);
+        bool thru = inmirror(cw2);
+        if(thru) cw2 = reflect(cw2);
         cell *c2 = cw2.at;
         changes.ccell(c2);
         if(c2->monst) {
@@ -1464,7 +1465,11 @@ EX namespace mirror {
         else if(c2->wall == waSmallTree)
           c2->wall = waNone;
         if(fwd) {
-          if(noMirrorOn(c2) || !passable_for(moMimic, c2, c, P_MONSTER | P_MIRROR | P_MIRRORWALL)) {
+          if(thru && c == c2 && isAlchAny(c) && !checkflags(P_ISFRIEND | P_MONSTER | P_MIRROR | P_MIRRORWALL, P_AETHER)) {
+            survive = false;
+            continue;
+            }
+          if(noMirrorOn(c2) || !passable_for(moMimic, c2, c, P_ISFRIEND | P_MONSTER | P_MIRROR | P_MIRRORWALL)) {
             survive = false;
             continue;
             }
