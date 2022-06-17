@@ -807,7 +807,7 @@ void pcmove::tell_why_cannot_attack() {
 bool pcmove::after_escape() {
   cell*& c2 = mi.t;
   
-  bool push_behind = c2->wall == waBigStatue || (among(c2->wall, waCTree, waSmallTree, waBigTree, waShrub, waVinePlant) && markOrb(itOrbWoods));
+  bool push_behind = c2->wall == waBigStatue || (among(c2->wall, waCTree, waSmallTree, waBigTree, waShrub, waVinePlant) && !c2->monst && markOrb(itOrbWoods));
   
   if(thruVine(c2, cwt.at) && markOrb(itOrbWoods)) push_behind = true;
   
