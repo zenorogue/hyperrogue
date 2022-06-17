@@ -340,6 +340,7 @@ EX void checkFreedom(cell *cf) {
     }
   addMessage(XLAT("Your %1 activates!", itOrbFreedom));
   drainOrb(itOrbFreedom);
+  orig_wall = cwt.at->wall;
   for(cell *pc: player_positions()) 
     drawBigFlash(pc);
   for(int i=0; i<isize(dcal); i++) {
@@ -357,6 +358,7 @@ EX void activateFlash() {
     drawFlash(pc);
 
   addMessage(XLAT("You activate the Flash spell!"));
+  orig_wall = cwt.at->wall;
   playSound(cwt.at, "storm");
   drainOrb(itOrbFlash);
   for(int i=0; i<isize(dcal); i++) {
@@ -548,6 +550,7 @@ EX void castLightningBolt(cellwalker lig) {
   }
 
 EX void castLightningBoltFrom(cell *c) {
+  orig_wall = c->wall;
   for(int i=0; i<c->type; i++) castLightningBolt(cellwalker(c, i));
   }
 
