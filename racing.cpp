@@ -677,6 +677,7 @@ EX void reset_race() {
   for(int i=0; i<multi::players; i++) {
     auto who = shmup::pc[i];
     if(!who) { println(hlog, "who missing"); continue; }
+    who->reset();
     // this is intentionally not hrand
     
     for(int j=0; j<100; j++) {

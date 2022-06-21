@@ -64,13 +64,20 @@ struct monster {
   int split_owner;  ///< in splitscreen mode, which player handles this
   int split_tick;   ///< in which tick was split_owner computed
 
-  monster() { 
-    dead = false; inBoat = false; parent = NULL; nextshot = 0; 
-    stunoff = 0; blowoff = 0; fragoff = 0; footphase = 0; no_targetting = false;
-    swordangle = 0; inertia = Hypc; ori = Id; refs = 1;    
-    split_tick = -1; split_owner = -1;
+  void reset() {
+    nextshot = 0;
+    stunoff = 0; blowoff = 0; fragoff = 0; footphase = 0;
+    inertia = Hypc; ori = Id; vel = 0;
+    swordangle = 0;
     }
-  
+
+  monster() {
+    reset();
+    refs = 1; split_tick = -1; split_owner = -1;
+    no_targetting = false;
+    dead = false; inBoat = false; parent = NULL;
+    }
+
   eMonster get_parenttype() { return parent ? parent->type : moNone; }
 
   void store();
