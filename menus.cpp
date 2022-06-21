@@ -463,9 +463,9 @@ EX void mode_higlights() {
       resetModes();
       specialland = firstland = laMinefield;
       if(!closed_or_bounded) {
-        geometry = gBring;
-        variation = eVariation::goldberg;
+        set_geometry(gBring);
         gp::param = gp::loc(2, 1);
+        set_variation(eVariation::goldberg);
         mine_adjacency_rule = true;
         bounded_mine_percentage = .2;
         }
