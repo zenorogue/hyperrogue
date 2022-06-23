@@ -282,6 +282,10 @@ int arg::readCommon() {
     shift(); int j = argi();
     shift(); View = View * cspin(i, j, argf());
     }
+  else if(argis("-cview")) {
+    PHASE(3);  start_game();
+    View = Id;
+    }
   else if(argis("-exit")) {
     PHASE(3); printf("Success.\n");
     exit(0);
