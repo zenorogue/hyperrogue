@@ -16,6 +16,7 @@
 // (This why in HyperRogue we have long but narrow snakes, and ivies which grow, but nothing wider than a Kraken could move. This is because in HyperRogue time is added in in Euclidean way; anti-de Sitter spacetime adds time to the hyperbolic plane in a "better" way.) (5/5)
 
 // [https://twitter.com/ZenoRogue/status/1538874019948150790] Actually it would not remain in the same space (i.e., that is not a timelike geodesic) -- see the star in the center of the simulation here, it starts without movement relative to C (unmarked center), but then "wobbles". [This animation is faster than the ones in the thread]
+// [moved the center manually using ijkl, then enter to animate]
 // ./hyper -shothud 1 ads_srange=7 -csc .4 -rotspace -canvas-random 10 -prodperiod 0 -ads-ca-check -ads-ca-view -noscr -ads-keys -run ads_simspeed="2*pi" -zoom .95 -shot-1000 -animvideo 1800 ads-ca-faster.mp4 -exit
 
 // [https://twitter.com/ZenoRogue/status/1539871748950315010] However, we could render the hyperbolic plane using Beltrami-Klein projection (as below, contrary to Poincar‚ in other animations), then Beltrami-Klein stretching counterbalances the Lorentz contraction and we get (rotating) hyperbolic plane in Poincar‚ model.
