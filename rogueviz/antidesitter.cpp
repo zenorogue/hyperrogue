@@ -1,12 +1,32 @@
+// In our world, you cannot tell whether you are moving or not.
+
+// In the world of HyperRogue, 
+
 // https://www.quora.com/Are-there-variations-of-Conways-Game-of-Life-based-upon-a-triangular-or-hexagonal-grid
 // https://arunarjunakani.github.io/HexagonalGameOfLife/
 // B2 S34
+
+// Creating a roguelike in 2+1D anti-de Sitter spacetime seems hard, so let's start with a cellular automaton. The rules are like Conway's Game of life, except that hex tile are born at 2 neighbors and overcrowded at 3. (1/5)
+// ./ht srange=7 -shothud 1 -csc .4 -rotspace -canvas-random 10 -prodperiod 0 -ads-ca-check -ads-ca-view -noscr simspeed=3 -ads-keys -ads-keylist xaxwxsxdx -ads-keylist 0 -zoom .95 -shot-1000 -animvideo 1800 ads-ca.mp4
+
+// However, it takes 4 iterations for neighbors (brown) to affect a cell (red). (Information cannot travel faster than c -- with <4 iterations cells would depend on their own future.) The blue 'plague' shows which cells are affected by the original source. (2/5)
+// ./ht plague=221 srange=7 -shothud 1 -csc .4 -rotspace -canvas-random 10 -prodperiod 0 -ads-ca-check -ads-ca-view -noscr simspeed=3 -ads-keys -ads-keylist xaxwxsxdx -ads-keylist 0 -zoom .95 -shot-1000 -ads-highlight -animvideo 1800 ads-ca-plague.mp4 -exit
+
+// Here is how the situation changes when we don't just sit on a star and try to travel. In this viz we see the situation "at the current time" (of course IRL we would see the past states). (It is more fun to play with when you can control it manually, of course.) (3/5)
+
+// (Why would we want a roguelike in adS spacetime? In our world we do not feel whether we are moving on not; in the world of HyperRogue, this is not the case. https://twitter.com/ZenoRogue/status/1418957609269440512) (4/5)
+
+// (This why in HyperRogue we have long but narrow snakes, and ivies which grow, but nothing wider than a Kraken could move. This is because in HyperRogue time is added in in Euclidean way; anti-de Sitter spacetime adds time to the hyperbolic plane in a "better" way.) (5/5)
+
 
 #include "../rogueviz/rogueviz.h"
 
 namespace hr {
 
 namespace ads {
+
+shiftpoint kz(shiftpoint x) { x.h = hr::kz(x.h); x.shift = hr::kz(x.shift); return x; }
+shiftmatrix kz(shiftmatrix x) { x.T = hr::kz(x.T); x.shift = hr::kz(x.shift); return x; }
 
 vector<hyperpoint> hs;
 

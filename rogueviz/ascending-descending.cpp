@@ -260,6 +260,12 @@ void enable() {
     t *= 1000;
     
     centerover = currentmap->gamestart();
+
+    #if CAP_VR
+    if(vrhr::active())
+      View = gpushxto0(interpolate_at(route, t));
+    else
+    #endif
     set_view(
       interpolate_at(route, t),
       interpolate_at(forwards, t),
