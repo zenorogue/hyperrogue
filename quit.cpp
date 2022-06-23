@@ -507,8 +507,6 @@ EX void showGameMenu() {
         pushScreen(inv::show);
         });
       }
-    if(racing::on)
-      dialog::addItem(XLAT("racing menu"), 'o');
     if(casual || ISMOBILE) {
       if(savecount)
         dialog::addItem(XLAT("load (%1 turns passed)", its(turncount - save_turns)), SDLK_F9);
