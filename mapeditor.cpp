@@ -1739,6 +1739,7 @@ EX namespace mapeditor {
     if(mouseover) for(int i=0; i<mouseover->type; i++) createMov(mouseover, i);
     if(uni == 'u') applyUndo();
     else if(uni == 'v' || sym == SDLK_F10 || sym == SDLK_ESCAPE) popScreen();
+    else if(uni == 'A') popScreen();
     else if(uni >= '0' && uni <= '9') radius = uni - '0';
     else if(uni == 'm') pushScreen(showList), painttype = 0, dialog::infix = "";
     else if(uni == 'i') pushScreen(showList), painttype = 1, dialog::infix = "";
@@ -2729,6 +2730,7 @@ EX namespace mapeditor {
       }
 
     if(sym == SDLK_F10) popScreen();
+    else if(uni == 'A') popScreen();
 
     (void)clickused;
     
