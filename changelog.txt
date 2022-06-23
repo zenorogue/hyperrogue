@@ -4700,3 +4700,12 @@ Menu improvements:
 - a cleanup to some menus (special modes, highlights, peace&exploration)
 - dual geometry puzzle removed (will still be available in RogueViz)
 - switching shmup mode no longer invokes keyboard configuration
+
+2022-06-23 10:50 Update 12.0s:
+
+- fixed Minesweeper in the highlights menu
+- fixed the racers keeping their speed when restarting
+- when generating strict tree maps for Archimedean/regular tessellation, you now have an option to have all the symmetries of the tessellation taken into account (to minimize the tree)
+- tes files with tree data (tessellations/sample/horotiling.tes) and star tes files (tessellations/sample/star-7-72.tes) should load correctly again
+- show treasure bubbles in the Dice Reserve
+- Shift+A key leaves the map editor, also all options are now displayed in the cheat menu (some obsolete ones are removed)
