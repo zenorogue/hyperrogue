@@ -1056,6 +1056,9 @@ EX void handle_event(SDL_Event& ev) {
         }      
       #else
       uni = ev.key.keysym.unicode;
+      if(uni == 0 && (sym >= 'a' && sym <= 'z')) {
+        if(ev.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)) uni = sym - 96;
+        }
       if(ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) shiftmul = -1;
       if(ev.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)) shiftmul /= 10;
       #endif
