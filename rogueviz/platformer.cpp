@@ -796,7 +796,7 @@ void add_platf_hooks() {
 
   rogueviz::rv_hook(hooks_drawcell, 90, draw_room_on_map);
 
-  rogueviz::rv_hook(mapstream::hooks_savemap, 100, [] (fhstream& f) {
+  rogueviz::rv_hook(mapstream::hooks_savemap, 100, [] (hstream& f) {
     f.write<int>(66);
     for(auto& p: rooms) {
       f.write(mapstream::cellids[p.first]);
@@ -835,7 +835,7 @@ auto chk = arg::add3("-platformer", enable)
           }
         });
       })
-+ addHook(mapstream::hooks_loadmap, 100, [] (fhstream& f, int id) {
++ addHook(mapstream::hooks_loadmap, 100, [] (hstream& f, int id) {
     if(id == 66) {
       println(hlog, "loading platformer");
       while(true) {

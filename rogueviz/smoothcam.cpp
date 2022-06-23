@@ -571,7 +571,7 @@ void enable() {
   rogueviz::rv_hook(anims::hooks_anim, 100, handle_animation0);
   rogueviz::rv_hook(hooks_drawcell, 100, draw_labels);
   rogueviz::rv_hook(hooks_o_key, 190, [] (o_funcs& v) { v.push_back(named_dialog("smoothcam", show)); });
-  rogueviz::rv_hook(mapstream::hooks_savemap, 100, [] (fhstream& f) {
+  rogueviz::rv_hook(mapstream::hooks_savemap, 100, [] (hstream& f) {
     f.write<int>(17);
     hwrite(f, anims);
     });
@@ -598,7 +598,7 @@ auto hooks = arg::add3("-smoothcam", enable_and_show)
       dialog::add_action(enable_and_show);
       }
     }) +
-  + addHook(mapstream::hooks_loadmap, 100, [] (fhstream& f, int id) {
+  + addHook(mapstream::hooks_loadmap, 100, [] (hstream& f, int id) {
     if(id == 17) {
       enable();
       hread(f, anims);

@@ -487,7 +487,7 @@ int pres_hooks =
       }
     }) +
   addHook(dialog::hooks_display_dialog, 100, [] () {
-    if(current_screen_cfunction() == showMainMenu) {
+    if(current_screen_cfunction() == showGameMenu) {
       dialog::addItem(XLAT("RogueViz demos"), 'd'); 
       dialog::add_action_push(choose_presentation);
       }
