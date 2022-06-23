@@ -1373,6 +1373,7 @@ EX namespace hybrid {
   #define PIU(x) hr::hybrid::in_underlying_geometry([&] { return (x); })
   #endif
 
+  // next: 0 = i-th corner, 1 = next corner, 2 = center of the wall
   EX hyperpoint get_corner(cell *c, int i, int next, ld z) {
     ld lev = cgi.plevel * z / 2;
     if(WDIM == 2) {
@@ -1392,12 +1393,20 @@ EX namespace hybrid {
       in_underlying_geometry([&] {
         hyperpoint h1 = get_corner_position(c, i);
         hyperpoint h2 = get_corner_position(c, i+1);
-        hyperpoint hm = mid(h1, h2);
+        hyperpoint hm;
+        if(next == 2) {
+          hm = h1;
+          he = 0;
+          }
+        else {
+          hyperpoint hm = mid(h1, h2);
+          he = hdist(hm, h2)/2;
+          if(next) he = -he;
+          }
         tf = hdist0(hm)/2;
-        he = hdist(hm, h2)/2;
         alpha = atan2(hm[1], hm[0]);
         });
-      return spin(alpha) * rots::uxpush(tf) * rots::uypush(next?he:-he) * rots::uzpush(lev) * C0;
+      return spin(alpha) * rots::uxpush(tf) * rots::uypush(he) * rots::uzpush(lev) * C0;
       #else
       throw hr_exception();
       #endif
