@@ -64,6 +64,8 @@
 #include "gobot.cpp"
 #include "extra-projections.cpp"
 #include "balloonsim.cpp"
+#include "dpgen.cpp"
+#include "antidesitter.cpp"
 
 #include "som/kohonen.cpp"
 #include "som/embeddings.cpp"
