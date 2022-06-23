@@ -652,6 +652,10 @@ EX void initConfig() {
   -> editable("apeirogon_hide_grid_edges", 'h');
   param_b(arb::apeirogon_simplified_display, "apeirogon_simplified_display", false)
   -> editable("simplified display of apeirogons", 'f');
+  param_b(arb::convert::minimize_on_convert, "tes_minimize_on_convert", false)
+  -> editable("minimize tessellation on convert", 'm');
+  param_b(arb::convert::reverse_order, "tes_reverse_order", false)
+  -> editable("tes reverse order on convert", 'r');
 
   param_b(display_yasc_codes, "yasc", false)
   -> editable("YASC codes", 'Y')

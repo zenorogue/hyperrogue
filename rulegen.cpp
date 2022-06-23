@@ -2476,6 +2476,7 @@ EX void show() {
       }
     });
 
+  add_edit(arb::convert::minimize_on_convert);
   dialog::addBoolItem(XLAT("strict tree based"), currentmap->strict_tree_rules(), 's');
   dialog::add_action([] {
     if(!currentmap->strict_tree_rules()) {

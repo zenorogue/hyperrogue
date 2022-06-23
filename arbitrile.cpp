@@ -1432,8 +1432,10 @@ void be_identified(cellwalker cw1, cellwalker cw2) {
     }
   }
 
-EX void convert() {
-  start_game();
+EX bool reverse_order;
+EX bool minimize_on_convert;
+
+EX void convert_max() {
   identification.clear(); changes = 0;
 
   manual_celllister cl;
@@ -1483,7 +1485,82 @@ EX void convert() {
         }
       }
     }
+  }
+
+EX void convert_minimize(int N, vector<int>& old_shvids, map<int, int>& old_to_new) {
+  vector<pair<int, int>> address;
+  vector<int> next;
+  for(int i=0; i<N; i++) {
+    int q = identification[old_shvids[i]].modval;
+    int c = isize(address);
+    for(int j=0; j<q; j++) {
+      address.emplace_back(i, j);
+      next.emplace_back(j == q-1 ? c : c+j+1);
+      }
+    }
+
+  int K = isize(address);  
+  vector<array<ld, 3> > dists(K);
+  for(int i=0; i<K; i++) {
+    auto pi = address[i];
+    auto si = identification[old_shvids[pi.first]];
+    pi.second += si.shift;
+    array<hyperpoint, 3> pcorner;
+    array<ld, 3> pdists;
+
+    for(int j=0; j<3; j++)
+      pcorner[j] = currentmap->get_corner(si.sample, gmod(pi.second+j, si.sample->type));
+
+    for(int j=0; j<3; j++)
+      pdists[j] = hdist(pcorner[j], pcorner[(j+1)%3]);
+
+    dists[i] = pdists;
+    }
+
+  // this is O(K^3) and also possibly could get confused on convex/concave,
+  // but should be good enough, hopefully
   
+  vector<vector<int>> equal(K);
+  for(int i=0; i<K; i++) equal[i].resize(K, 0);
+  for(int i=0; i<K; i++)
+  for(int j=0; j<K; j++) {
+
+    equal[i][j] = true;
+    for(int s=0; s<3; s++)
+      equal[i][j] = equal[i][j] && abs(dists[i][s] - dists[j][s]) < 1e-6;
+    }
+  
+  int chg = 1;
+  while(chg) {
+    for(auto& eq: equal) println(hlog, eq);
+    chg = 0;
+    for(int i=0; i<K; i++)
+    for(int j=0; j<K; j++)
+      if(equal[i][j] && !equal[next[i]][next[j]]) {
+        equal[i][j] = false;
+        chg++;
+        }
+    }
+
+  for(int i=0; i<K; i++)
+  for(int j=0; j<K; j++) if(i!=j && equal[i][j]) {
+    auto pi = address[i];
+    auto si = identification[old_shvids[pi.first]];
+    cellwalker cwi(si.sample, si.shift + pi.second);
+
+    auto pj = address[j];
+    auto sj = identification[old_shvids[pj.first]];
+    cellwalker cwj(sj.sample, sj.shift + pj.second);
+
+    be_identified(cwi, cwj);
+    }
+  }
+
+EX void convert() {
+  start_game();
+  convert_max();
+  bool minimize = minimize_on_convert;
+  reidentify:
   vector<int> old_shvids;
   map<int, int> old_to_new;
   for(auto id: identification)
@@ -1492,6 +1569,20 @@ EX void convert() {
       old_shvids.push_back(id.first);
       }
   
+  int N = isize(old_shvids);
+  println(hlog, "N = ", N);
+  if(minimize) {
+    convert_minimize(N, old_shvids, old_to_new);
+    minimize = false;
+    goto reidentify;
+    }
+
+  if(reverse_order) {
+    reverse(old_shvids.begin(), old_shvids.end());
+    for(int i=0; i<isize(old_shvids); i++)
+      old_to_new[old_shvids[i]] = i;
+    }
+
   auto& ac = arb::current;
   ac.order++; 
   ac.comment = ac.filename = "converted from: " + full_geometry_name();
@@ -1499,7 +1590,6 @@ EX void convert() {
   ac.boundary_ratio = 1;
   ac.floor_scale = cgi.hexvdist / cgi.scalefactor;
   ac.range = cgi.base_distlimit;
-  int N = isize(old_shvids);
   ac.shapes.clear();
   ac.shapes.resize(N);
 
