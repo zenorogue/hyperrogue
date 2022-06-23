@@ -45,6 +45,11 @@ bool known;
 
 int zeroticks;
 
+void reset() {
+  known = false;
+  shapes.clear();
+  }
+
 bool draw_compass(cell *c, const shiftmatrix& V) {
 
   if(!known) {
