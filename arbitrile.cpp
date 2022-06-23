@@ -102,6 +102,8 @@ struct arbi_tiling {
   bool have_line, have_ph;
   /* is the tree structure given in the tes file */
   bool have_tree;
+  /* is the valence data reliable */
+  bool have_valence;
   /* use "star." if the tessellation includs star polygons */
   bool is_star;
   /* use "combinatorial." for combinatorial tessellations; vertex valences computed based on their angles. Currently only rulegen works for combinatorial tessellations */
@@ -477,6 +479,7 @@ static void reduce_gcd(int& a, int b) {
 
 EX void compute_vertex_valence(arb::arbi_tiling& ac) {
   int tcl = -1;
+  ac.have_valence = true;
 
   for(auto& sh: ac.shapes)
     sh.cycle_length = isize(sh.vertices) / sh.repeat_value;
@@ -601,6 +604,7 @@ EX void set_defaults(arb::arbi_tiling& c, bool keep_sliders, string fname) {
   c.floor_scale = .5;
   c.have_ph = c.have_line = false;
   c.have_tree = false;
+  c.have_valence = false;
   c.yendor_backsteps = 0;
   c.is_star = false;
   c.is_combinatorial = false;
