@@ -498,7 +498,7 @@ EX array<int, 8> keys_numpad = {{SDLK_KP6, SDLK_KP3, SDLK_KP2, SDLK_KP1, SDLK_KP
 EX void handleKeyNormal(int sym, int uni) {
 
   if(cheater && sym < 256 && sym > 0) {
-    if(applyCheat(uni, mouseover))
+    if(applyCheat(uni))
       uni = sym = 0;
     }
 

@@ -45,15 +45,10 @@ bool errorReported = false;
 
 EX void describeCell(cell *c) {
   if(!c) { printf("NULL\n"); return; }
-  printf("describe %p: ", hr::voidp(c));
-  printf("%-15s", linf[c->land].name);
-  printf("%-15s", winf[c->wall].name);
-  printf("%-15s", iinf[c->item].name);
-  printf("%-15s", minf[c->monst].name);
-  printf("LP%08x", c->landparam);
-  printf("D%3d", c->mpdist);
-  printf("MON%3d", c->mondir);
-  printf("\n");
+  print(hlog, "describe ", lalign(6, c), ": ");
+  vector<cell*> nei;
+  for(int i=0; i<c->type; i++) nei.push_back(c->move(i));
+  println(hlog, ">> ", nei);
   }
 
 static int orbid = 0;
@@ -101,21 +96,14 @@ EX void cheatMoveTo(eLand l) {
   cheatdest = laNone;
   }
 
-EX bool applyCheat(char u, cell *c IS(NULL)) {
+struct cheatkey {
+  int key;
+  string desc;
+  reaction_t action;
+  };
 
-  if(u == 'L') {
-    do {
-      if(firstland == eLand(landtypes-1))
-        firstland = eLand(2);
-      else
-        firstland = eLand(firstland+1);
-      }
-    while(isTechnicalLand(firstland) || isCyclic(firstland));
-    specialland = firstland;
-    cheater++; addMessage(XLAT("You will now start your games in %1", firstland));
-    return true;
-    }
-  if(u == 'C') {
+vector<cheatkey> cheats = {
+  cheatkey{'C', "Hyperstone Quest", [] {
     cheater++; 
     cheatMoveTo(laCrossroads);
     addMessage(XLAT("Activated the Hyperstone Quest!"));
@@ -132,25 +120,22 @@ EX bool applyCheat(char u, cell *c IS(NULL)) {
     kills[moMonkey] = qkills;
     kills[moCultist] = qkills;
     kills[moTroll] = qkills;
-    return true;
-    }
-  if(u == 'M') {
+    }},
+  cheatkey{'M', "deplete orb powers", [] {
     for(int i=0; i<ittypes; i++) 
       if(itemclass(eItem(i)) == IC_ORB) 
         items[i] = 0;
     cheater++; addMessage(XLAT("Orb power depleted!"));
-    return true;
-    }
-  if(u == 'O') {
+    }},
+  cheatkey{'O', "summon orbs", [] {
     cheater++; addMessage(XLAT("Orbs summoned!"));
     for(int i=0; i<cwt.at->type; i++) 
       if(passable(cwt.at->move(i), NULL, 0)) {
         eItem it = nextOrb();
         cwt.at->move(i)->item = it;
         }
-    return true;
-    }
-  if(u == 'F') {
+    }},
+  cheatkey{'F', "gain orb powers", [] {
     if(hardcore && !canmove) { 
       canmove = true; 
       addMessage(XLAT("Revived!"));
@@ -165,52 +150,31 @@ EX bool applyCheat(char u, cell *c IS(NULL)) {
       cheater++; addMessage(XLAT("Orb power gained!"));
       canmove = true;
       }
-    return true;
-    }
-  if(u == 'D') {
-    items[itGreenStone] += 10;
-    cheater++; addMessage(XLAT("Dead orbs gained!"));
-    return true;
-    }
-  if(u == 'R'-64) buildRosemap();
-#if CAP_EDIT
-  if(u == 'A') {
+    }},
+  cheatkey{'R'-64, "advance the rose wave", buildRosemap},
+  #if CAP_EDIT
+  cheatkey{'A', "start the Map Editor", [] {
     lastexplore = turncount;
     pushScreen(mapeditor::showMapEditor);
-    return true;
-    }
-  if(u == 'A'-64) {
+    }},
+  cheatkey{'A'-64, "start the Vector Graphics Editor", [] {
     mapeditor::drawcell = mouseover ? mouseover : cwt.at;
     pushScreen(mapeditor::showDrawEditor);
-    return true;
-    }
-#elif CAP_SHOT
-  if(u == 'A') {
+    }},
+  #else
+  cheatkey{'A', "take screenshot", [] {
     pushScreen(shot::menu);
-    return true;
-    }
-#endif
-  if(u == 'T') {
+    }},
+  #endif
+  cheatkey{'T', "summon treasure", [] {
     items[randomTreasure2(10)] += 10;
     cheater++; addMessage(XLAT("Treasure gained!"));
-    return true;
-    }
-  if(u == 'T'-64) {
+    }},
+  cheatkey{'T'-64, "summon lots of treasure", [] {
     items[randomTreasure2(100)] += 100;
     cheater++; addMessage(XLAT("Lots of treasure gained!"));
-    return true;
-    }
-  if(u == 'I'-64) {
-    items[randomTreasure2(10)] += 25;
-    cheater++; addMessage(XLAT("Treasure gained!"));
-    return true;
-    }
-  if(u == 'U'-64) {
-    items[randomTreasure2(10)] += 50;
-    cheater++; addMessage(XLAT("Treasure gained!"));
-    return true;
-    }
-  if(u == 'Z') {
+    }},
+  cheatkey{'Z', "rotate the character", [] {
     if (flipplayer) {
       cwt += cwt.at->type/2;
       flipplayer = false;
@@ -221,24 +185,21 @@ EX bool applyCheat(char u, cell *c IS(NULL)) {
     cwt.at->mondir %= cwt.at->type;
 
     if(shmup::on) shmup::pc[0]->at = Id;
-    return true;
-    }
-  if(u == 'J') {
+    }},
+  cheatkey{'J', "lose all treasure", [] {
     if(items[localTreasureType()] > 0)
       items[localTreasureType()] = 0;
     else for(int i=1; i<ittypes; i++) 
       if(itemclass(eItem(i)) == IC_TREASURE) 
         items[i] = 0;
     cheater++; addMessage(XLAT("Treasure lost!"));
-    return true;
-    }
-  if(u == 'K') {
+    }},
+  cheatkey{'K', "gain kills", [] {
     for(int i=0; i<motypes; i++) kills[i] += 10;
     kills[moPlayer] = 0;
     cheater++; addMessage(XLAT("Kills gained!"));
-    return true;
-    }
-  if(u == 'Y') {
+    }},
+  cheatkey{'Y', "unlock Orbs of Yendor", [] {
     for(auto& y: yendor::yi) {
       if(y.path[YDIST-1]->item == itKey)
         y.path[YDIST-1]->item = itNone;
@@ -246,67 +207,56 @@ EX bool applyCheat(char u, cell *c IS(NULL)) {
       y.found = true;
       }
     cheater++; addMessage(XLAT("Collected the keys!"));
-    }
-  if(u == 'Y'-64) {
+    }},
+  cheatkey{'Y'-64, "gain Orb of Yendor", [] {
     yendor::collected(cwt.at);
     cheater++;
-    }
-  if(u == 'P') {
+    }},
+  cheatkey{'P', "save a Princess", [] {
     items[itSavedPrincess]++;
     princess::saved = true;
     princess::everSaved = true;
     if(inv::on && !princess::reviveAt)
       princess::reviveAt = gold(NO_LOVE);
     cheater++; addMessage(XLAT("Saved the Princess!"));
-    }
-  if(u == 'S') {
+    }},
+  cheatkey{'S', "Safety (quick save)", [] {
     canmove = true;
     cheatMoveTo(cwt.at->land);
     items[itOrbSafety] += 3;
     cheater++; addMessage(XLAT("Activated Orb of Safety!"));
-    return true;
-    }
-  if(u == 'U') {
-    canmove = true;
-    cheatMoveTo(firstland);
-    cheater++; addMessage(XLAT("Teleported to %1!", firstland));
-    return true;
-    }
-  if(u == 'W'-64) {
+    }},
+  cheatkey{'W'-64, "switch web display", [] {
     pushScreen(linepatterns::showMenu);
-    return true;
-    }
-  if(u == 'G'-64) {
+    }},
+  cheatkey{'G'-64, "switch ghost timer", [] {
     timerghost = !timerghost;
     cheater++; 
     addMessage(XLAT("turn count = %1 last exploration = %2 ghost timer = %3",
       its(turncount), its(lastexplore), ONOFF(timerghost)));
-    return true;
-    }
-  if(u == 'L'-64) {
+    }},
+  cheatkey{'G', "edit cell values", push_debug_screen},
+  cheatkey{'L'-64, "cell info", [] {
+    debug_cellnames = !debug_cellnames;
     cell *c = mouseover;
+    if(!c) return;
     describeCell(c);
-    printf("Neighbors:"); for(int i=0; i<c->type; i++) printf("%p ",  hr::voidp(c->move(i)));
-    printf("Barrier: dir=%d left=%d right=%d\n",
-      c->bardir, c->barleft, c->barright);
-    return true;
-    }
-  if(u == 'C'-64) {
-    cblind = !cblind;
-    return true;
-    }
-  if(u == 'G') {
-    push_debug_screen();
-    return true;
-    }
-  if(u == 'P'-64) 
+    }},
+  cheatkey{'P'-64, "peaceful mode", [] {
     peace::on = !peace::on;
+    }},
 #ifdef CHEAT_DISABLE_ALLOWED
-  if(u == 'D'-64) {
+  cheatkey{'D'-64, "cheat disable", [] {
     cheater = 0; autocheat = 0;
-    return true;
     }
 #endif
+  };
+
+EX bool applyCheat(char u) {
+  for(auto& ch: cheats) if(u == ch.key) {
+    ch.action();
+    return true;
+    }
   return false;
   }
 
@@ -500,7 +450,7 @@ struct debugScreen {
     keyhandler = [this, what] (int sym, int uni) {
       handlePanning(sym, uni);
       dialog::handleNavigation(sym, uni);
-      if(applyCheat(uni, what)) ;
+      if(applyCheat(uni)) ;
       else if(sym == PSEUDOKEY_WHEELUP || sym == PSEUDOKEY_WHEELDOWN) ;
       else if(sym == '-') debugged_cell = mouseover;
       else if(doexiton(sym, uni)) {
@@ -520,43 +470,13 @@ EX void push_debug_screen() {
 EX void showCheatMenu() {
   gamescreen(1);
   dialog::init("cheat menu");
-  dialog::addItem(XLAT("gain orb powers"), 'F');
-  dialog::addItem(XLAT("summon treasure"), 'T');
-  dialog::addItem(XLAT("summon dead orbs"), 'D');
-  dialog::addItem(XLAT("lose all treasure"), 'J');
-  dialog::addItem(XLAT("gain kills"), 'K');
-  dialog::addItem(XLAT("Hyperstone Quest"), 'C');
-  dialog::addItem(XLAT("summon orbs"), 'O');
-  dialog::addItem(XLAT("summon lots of treasure"), 'T'-64);
-  dialog::addItem(XLAT("Safety (quick save)"), 'S');
-  dialog::addItem(XLAT("Select the land ---"), 'L');
-  dialog::addItem(XLAT("--- and teleport there"), 'U');
-  dialog::addItem(XLAT("rotate the character"), 'Z');
-  dialog::addItem(XLAT("deplete orb powers"), 'M');
-  dialog::addItem(XLAT("save a Princess"), 'P');
-  dialog::addItem(XLAT("unlock Orbs of Yendor"), 'Y');
-  dialog::addItem(XLAT("gain Orb of Yendor"), 'Y'-64);
-  dialog::addItem(XLAT("switch ghost timer"), 'G'-64);
-  dialog::addItem(XLAT("switch web display"), 'W'-64);
-  dialog::addItem(XLAT("peaceful mode"), 'P'-64);
+  for(auto& ch: cheats) {
+    dialog::addItem(XLAT(ch.desc), ch.key);
+    dialog::add_action([ch] { ch.action(); popScreen(); });
+    }
   dialog::addBreak(50);
   dialog::addBack();
   dialog::display();
-  keyhandler = []   (int sym, int uni) {
-    dialog::handleNavigation(sym, uni);
-    if(uni != 0) {
-      applyCheat(uni);
-      if(uni == 'F' || uni == 'C' || uni == 'O' ||
-        uni == 'S' || uni == 'U' || uni == 'G' ||
-        uni == 'W' || uni == 'I' || uni == 'E' ||
-        uni == 'H' || uni == 'B' || uni == 'M' ||
-        uni == 'M' || uni == 'Y'-64 || uni == 'G'-64 ||
-        uni == ' ' || uni == 8 || uni == 13 ||
-        uni == SDLK_ESCAPE || uni == 'q' || uni == 'v' || sym == SDLK_ESCAPE ||
-        sym == SDLK_F10) 
-        popScreen();
-      }
-    };
   }
 
 /** view all the monsters and items */
