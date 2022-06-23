@@ -479,7 +479,6 @@ static void reduce_gcd(int& a, int b) {
 
 EX void compute_vertex_valence(arb::arbi_tiling& ac) {
   int tcl = -1;
-  ac.have_valence = true;
 
   for(auto& sh: ac.shapes)
     sh.cycle_length = isize(sh.vertices) / sh.repeat_value;
@@ -524,6 +523,7 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
   
   if(cgflags & qAFFINE) return;
   if(ac.is_star) return;
+  ac.have_valence = true;
 
   for(auto& sh: ac.shapes) {
     int n = sh.size();
