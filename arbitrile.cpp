@@ -1514,7 +1514,8 @@ EX void convert() {
     int t = s->type;
     sh.vertices.clear();
     sh.connections.clear();
-    sh.repeat_value = id.modval;
+    sh.cycle_length = id.modval;
+    sh.repeat_value = t / id.modval;
     for(int j=0; j<t; j++) {
       auto co = currentmap->get_corner(s, j);
       sh.vertices.push_back(co);
