@@ -162,6 +162,7 @@ script:
   fi
 - |-
   # Build hyperrogue.
+  export CXXFLAGS_EARLY=-Werror
   if [[ "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
     make
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "mymake" ]]; then
