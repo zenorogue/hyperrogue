@@ -3054,14 +3054,14 @@ EX hyperpoint lie_log(hyperpoint h) {
     }
   else if(sol && !nih) {
     h[3] = 0;
-    if(abs(h[2] > 1e-6)) {
+    if(abs(h[2]) > 1e-6) {
       h[0] *= -h[2] / (exp(-h[2]) - 1);
       h[1] *= h[2] / (exp(+h[2]) - 1);
       }
     }
   else if(sol && nih) {
     h[3] = 0;
-    if(abs(h[2] > 1e-6)) {
+    if(abs(h[2]) > 1e-6) {
       ld z = h[2] * log(2);
       h[0] *= -z / (exp(-z) - 1);
       z = h[2] * log(3);
@@ -3070,7 +3070,7 @@ EX hyperpoint lie_log(hyperpoint h) {
     }
   else if(nih) {
     h[3] = 1;
-    if(abs(h[2] > 1e-6)) {
+    if(abs(h[2]) > 1e-6) {
       ld z = h[2] * log(2);
       h[0] *= z / (exp(+z) - 1);
       z = h[2] * log(3);
