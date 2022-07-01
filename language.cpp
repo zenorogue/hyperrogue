@@ -16,7 +16,7 @@ EX const string dnameof(eWall w) { return w >= 0 && w < walltypes ? winf[w].name
 EX const string dnameof(eItem i) { return i >= 0 && i < ittypes ? iinf[i].name : format("[ITEM %d]", i); }
 
 #if HDR
-#define NUMLAN 7
+#define NUMLAN 8
 
 struct stringpar {
   string v;
