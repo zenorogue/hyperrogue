@@ -63,7 +63,7 @@ savepng-loc.o: savepng.cpp
 hyper-rogueviz.o: hyper.cpp graph.cpp hyperpoint.cpp geometry.cpp cell.cpp heptagon.cpp game.cpp classes.cpp polygons.cpp language.cpp language-data.cpp achievement.cpp shmup.cpp patterns.cpp mapeditor.cpp netgen.cpp yendor.cpp hyper.h rug.cpp flags.cpp system.cpp landgen.cpp orbs.cpp complex.cpp conformal.cpp menus.cpp init.cpp dialogs.cpp sound.cpp util.cpp ${drogueviz} fieldpattern.cpp ${MAIN} control.cpp commandline.cpp
 	${CXX} ${PROF} ${MAIN} -c -o hyper-rogueviz.o ${MYFLAGS}
 
-langen: langen.cpp language-cz.cpp language-pl.cpp language-tr.cpp language-ru.cpp language-de.cpp
+langen: langen.cpp language-cz.cpp language-pl.cpp language-tr.cpp language-ru.cpp language-de.cpp language-ptbr.cpp language-fr.cpp
 	${CXX} langen.cpp -o langen -g
 
 language-data.cpp: langen

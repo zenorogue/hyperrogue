@@ -2737,7 +2737,7 @@ EX void selectLanguageScreen() {
   int v = vid.language;  
   dynamicval<int> d(vid.language, -1);
   
-  for(int i=0; i<NUMLAN-1 || i == v; i++) {
+  for(int i=0; i<NUMLAN; i++) {
     vid.language = i;
     dialog::addSelItem(XLAT("EN"), its(100 * transcompleteness[i] / transcompleteness[0]) + "%", 'a'+i);
     }
