@@ -3352,9 +3352,9 @@ Orb("Beauty", "Piękna")
 N("Thornless Rose", GEN_F, "Róża bez Kolców", "Róże bez Kolców", "Różę bez Kolców", "Różą bez Kolców")
 
 S("Don't be fooled by this red-haired girl, or you will be stabbed if you come too close!",
-  "Nie daj się zwieść tej rudowłosej, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%ya1 nożem!")
+  "Nie daj się zwieść tej rudowłosej, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%ya0 nożem!")
 S("Don't be fooled by this red-haired boy, or you will be stabbed if you come too close!",
-  "Nie daj się zwieść temu rudowłosemu, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%ya1 nożem!")
+  "Nie daj się zwieść temu rudowłosemu, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%ya0 nożem!")
 S("This false princess is immune to the alluring scent of roses.",
   "Ta fałszywa księżniczka jest niewrażliwa na zapach róż.")
 S("This false prince is immune to the alluring scent of roses.",
