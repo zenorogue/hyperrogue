@@ -389,17 +389,17 @@ void bantar_frame() {
     drawthemap();
     if(0) for(auto p: parent) if(gmatrix.count(p.first) && gmatrix.count(p.second) && infos[p.first].gid == i && infos[p.second].gid == i)
       queueline(tC0(gmatrix[p.first]), tC0(gmatrix[p.second]), 0xFFFFFFFF, 2);
-    subscr[i] = move(ptds);
+    subscr[i] = std::move(ptds);
     }
   
   map<int, map<int, vector<unique_ptr<drawqueueitem>>>> xptds;
   for(int i=0; i<4; i++) for(auto& p: subscr[i])
-    xptds[int(p->prio)][i].push_back(move(p));
+    xptds[int(p->prio)][i].push_back(std::move(p));
 
   for(auto& sm: xptds) for(auto& sm2: sm.second) {
     int i = sm2.first;
     ptds.clear();
-    for(auto& p: sm2.second) ptds.push_back(move(p));
+    for(auto& p: sm2.second) ptds.push_back(std::move(p));
 
     pconf.scale = .5;
     pconf.xposition = (!(i&2)) ? xdst : -xdst;

@@ -160,7 +160,7 @@ string gen_latex(presmode mode, string s, int res) {
   string filename = format("latex-cache/%08X.png", hash);
   if(mode == pmStartAll) {
     if(!file_exists(filename)) {
-      system("mkdir latex-cache");
+      hr::ignore(system("mkdir latex-cache"));
       FILE *f = fopen("latex-cache/rogueviz-latex.tex", "w");
       fprintf(f,
         "\\documentclass[border=2pt]{standalone}\n"
@@ -172,9 +172,9 @@ string gen_latex(presmode mode, string s, int res) {
         "\\end{varwidth}\n"
         "\\end{document}\n", s.c_str());
       fclose(f);
-      system("cd latex-cache; pdflatex rogueviz-latex.tex");
+      hr::ignore(system("cd latex-cache; pdflatex rogueviz-latex.tex"));
       string pngline = "cd latex-cache; pdftopng -r " + its(res) + " rogueviz-latex.pdf t";
-      system(pngline.c_str());
+      hr::ignore(system(pngline.c_str()));
       rename("latex-cache/t-000001.png", filename.c_str());
       }
     }
@@ -542,9 +542,8 @@ int runslide = arg::add3("-slides", [] {
   + arg::add3("-presangle", [] {
     arg::shift_arg_formula(angle);
     dir = 0;
-    });
+    })
   ;
-
 }
 #endif
 }

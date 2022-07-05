@@ -148,7 +148,7 @@ EX namespace brownian {
   
   EX void apply_futures(cell *c) {
     if(futures.count(c)) {
-      auto m = move(futures[c]);
+      auto m = std::move(futures[c]);
       futures.erase(c);
       for(auto p: m)
         recurse(p.first, p.second);

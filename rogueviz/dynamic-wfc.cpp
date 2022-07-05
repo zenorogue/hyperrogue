@@ -313,7 +313,7 @@ void wfc() {
       nfreq.emplace_back(p);
       nfreq.back().code |= (code_t(c) << sh);
       }
-    freq = move(nfreq);
+    freq = std::move(nfreq);
     nfreq = {};
     // println(hlog, "inpath = ", inpath);
     // println(hlog, "freqs = ", isize(freq));

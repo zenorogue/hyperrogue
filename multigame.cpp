@@ -26,25 +26,24 @@ struct gamedata {
     if(ssize & 7) ssize = (ssize | 7) + 1;
     if(mode == 0) {
       record.resize(index+ssize);
-      T& at = *(new (&record[index]) T());
-      at = move(x);
+      ::new (&record[index]) T(std::move(x));
       }
     else {
       T& at = (T&) record[index];
-      x = move(at);
+      x = std::move(at);
       at.~T();
       }
     index += ssize;
     }
   template<class T> void store_ptr(T& x) {
-    T* copy;
     if(mode == 0) {
-      copy = new T;
-      *copy = move(x);
+      T* copy = new T(std::move(x));
+      store(copy);
       }
-    store(copy);
-    if(mode != 0) {
-      x = move(*copy);
+    else {
+      T* copy = nullptr;
+      store(copy);
+      x = std::move(*copy);
       delete copy;
       }
     }

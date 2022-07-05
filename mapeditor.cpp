@@ -2371,7 +2371,7 @@ EX namespace mapeditor {
           }
         if(uni == 'c') dsCur->list.push_back(best);
         else if(uni == 'd') {
-          vector<hyperpoint> oldlist = move(dsCur->list);
+          vector<hyperpoint> oldlist = std::move(dsCur->list);
           dsCur->list.clear();
           int i;
           for(i=0; i<isize(oldlist); i+=3)

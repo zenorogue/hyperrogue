@@ -97,7 +97,7 @@ void create_data() {
     where.push_back(c);
     sample s;
     embeddings::get_coordinates(s.val, c, c0);
-    data.push_back(move(s));
+    data.push_back(std::move(s));
     }
   samples = isize(data);
   test_orig.size = samples;
@@ -800,7 +800,7 @@ bool more = true;
 
 void create_index() {
 
-  system(("mkdir " + som_test_dir).c_str());
+  hr::ignore(system(("mkdir " + som_test_dir).c_str()));
 
   fhstream f(som_test_dir + "index-" + its(current_scale) + ".html", "wt");
 
@@ -958,7 +958,7 @@ void all_pairs(bool one) {
 
   string dir = som_test_dir + "pairs" + cg();
 
-  system(("mkdir -p " + dir + "/img").c_str());  
+  hr::ignore(system(("mkdir -p " + dir + "/img").c_str()));
 
   int sid = 0;
   for(auto s1: shapelist) {
@@ -1093,7 +1093,7 @@ void all_pairs(bool one) {
       }
     }
 
-  system("touch done");  
+  hr::ignore(system("touch done"));
   }
 
 bool verify_distlists = false;

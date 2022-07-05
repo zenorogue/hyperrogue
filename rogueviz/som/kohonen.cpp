@@ -91,7 +91,7 @@ void loadsamples(const string& fname) {
       if(c == '!' && s.name == "") shown = true;
       else if(!rv_ignore(c)) s.name += c;
       }
-    data.push_back(move(s));
+    data.push_back(std::move(s));
     if(shown) 
       samples_to_show.push_back(isize(data)-1);
     }
@@ -624,7 +624,7 @@ void verify_crawlers() {
       breakcheck:
       cellcrawler cr;
       cr.build(cellwalker(c, id.second));
-      allcrawlers[id.first] = move(cr);
+      allcrawlers[id.first] = std::move(cr);
       uniq++;
       }
     }

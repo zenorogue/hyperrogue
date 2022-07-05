@@ -157,8 +157,8 @@ void clean_old_shots() {
        sh.get().delete_message();
       }
     else
-      remaining.emplace_back(move(sh));
-  old_shots = move(remaining);
+      remaining.emplace_back(std::move(sh));
+  old_shots = std::move(remaining);
   */
   }
 
@@ -533,10 +533,9 @@ void go_menu() {
     else if(current.owner[i] != Free)
       owned_by[current.owner[i]]++;
     
-    shstream ss;
-    println(ss, "black: ", stones[0], " stones, ", owned_by[0], " area, ", current.captures[1], " prisoners");
-    println(ss, "white: ", stones[1], " stones, ", owned_by[1], " area, ", current.captures[0], " prisoners");
-
+  shstream ss;
+  println(ss, "black: ", stones[0], " stones, ", owned_by[0], " area, ", current.captures[1], " prisoners");
+  println(ss, "white: ", stones[1], " stones, ", owned_by[1], " area, ", current.captures[0], " prisoners");
 
   dialog::addSelItem("play black", its(stones[0]), 'b');
   dialog::add_action([] { try_to_play(mouse_label(), 0); });
@@ -610,8 +609,7 @@ auto gobot_hook =
       shot_state = 2;
       }
     return false;
-    });
-    
+    })
   ;
   
 #endif

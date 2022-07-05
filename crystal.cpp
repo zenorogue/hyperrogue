@@ -269,7 +269,7 @@ struct crystal_structure {
     next.resize(4, {2,3,1,0});
     next_to_prev();
     while(dir < S7) {
-      crystal_structure csx = move(*this);
+      crystal_structure csx = std::move(*this);
       add_dimension_to(csx);
       }
     if(dir > S7) remove_half_dimension();

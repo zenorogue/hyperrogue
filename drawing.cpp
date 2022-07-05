@@ -2206,13 +2206,13 @@ EX void sort_drawqueue() {
 
   #if MINIMIZE_GL_CALLS
   map<color_t, vector<unique_ptr<drawqueueitem>>> subqueue;
-  for(auto& p: ptds) subqueue[(p->prio == PPR::CIRCLE || p->prio == PPR::OUTCIRCLE) ? 0 : p->outline_group()].push_back(move(p));
+  for(auto& p: ptds) subqueue[(p->prio == PPR::CIRCLE || p->prio == PPR::OUTCIRCLE) ? 0 : p->outline_group()].push_back(std::move(p));
   ptds.clear();
-  for(auto& p: subqueue) for(auto& r: p.second) ptds.push_back(move(r));
+  for(auto& p: subqueue) for(auto& r: p.second) ptds.push_back(std::move(r));
   subqueue.clear();
-  for(auto& p: ptds) subqueue[(p->prio == PPR::CIRCLE || p->prio == PPR::OUTCIRCLE) ? 0 : p->color].push_back(move(p));
+  for(auto& p: ptds) subqueue[(p->prio == PPR::CIRCLE || p->prio == PPR::OUTCIRCLE) ? 0 : p->color].push_back(std::move(p));
   ptds.clear();
-  for(auto& p: subqueue) for(auto& r: p.second) ptds.push_back(move(r));
+  for(auto& p: subqueue) for(auto& r: p.second) ptds.push_back(std::move(r));
   #endif
     
   for(auto& p: ptds) {
@@ -2233,7 +2233,7 @@ EX void sort_drawqueue() {
   vector<unique_ptr<drawqueueitem>> ptds2;  
   ptds2.resize(siz);
   
-  for(int i = 0; i<siz; i++) ptds2[qp[int(ptds[i]->prio)]++] = move(ptds[i]);
+  for(int i = 0; i<siz; i++) ptds2[qp[int(ptds[i]->prio)]++] = std::move(ptds[i]);
   swap(ptds, ptds2);
   }
 

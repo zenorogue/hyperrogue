@@ -2082,7 +2082,7 @@ EX namespace heat {
         }
       }
     
-    offscreen_heat = move(offscreen2);
+    offscreen_heat = std::move(offscreen2);
   
     for(int i=0; i<numplayers(); i++) {
       cell *c = playerpos(i);
@@ -2329,7 +2329,7 @@ EX namespace heat {
         }
       }
    
-    offscreen_fire = move(offscreen2);
+    offscreen_fire = std::move(offscreen2);
     }  
 
 EX }

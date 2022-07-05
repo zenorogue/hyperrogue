@@ -88,11 +88,11 @@ EX namespace sn {
     FILE *f = fopen(fname.c_str(), "rb");
     if(!f) f = fopen((rsrcdir + fname).c_str(), "rb");
     if(!f) { addMessage(XLAT("geodesic table missing")); pmodel = mdPerspective; return; }
-    ignore(fread(&PRECX, 4, 1, f));
-    ignore(fread(&PRECY, 4, 1, f));
-    ignore(fread(&PRECZ, 4, 1, f));
+    hr::ignore(fread(&PRECX, 4, 1, f));
+    hr::ignore(fread(&PRECY, 4, 1, f));
+    hr::ignore(fread(&PRECZ, 4, 1, f));
     tab.resize(PRECX * PRECY * PRECZ);
-    ignore(fread(&tab[0], sizeof(compressed_point) * PRECX * PRECY * PRECZ, 1, f));
+    hr::ignore(fread(&tab[0], sizeof(compressed_point) * PRECX * PRECY * PRECZ, 1, f));
     fclose(f);
     loaded = true;    
     }
