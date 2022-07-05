@@ -185,26 +185,26 @@ void genderrep(string& x, const string& w, const noun& N) {
   if(l == 7) {
     if(genus & GENF_PROPER)
     {
-      rep(x, "%le"+w, ""g+N.nom);
-      rep(x, "%Le"+w, ""g+N.nom);
-      rep(x, "%un"+w, ""g+N.nom);
-      rep(x, "%Un"+w, ""g+N.nom);
+      rep(x, "%le"+w, N.nom);
+      rep(x, "%Le"+w, N.nom);
+      rep(x, "%un"+w, N.nom);
+      rep(x, "%Un"+w, N.nom);
       }
     else if(genus & GENF_PLURALONLY)
     {
-      rep(x, "%le"+w, "les "g+N.nomp);
-      rep(x, "%Le"+w, "Les "g+N.nomp);
-      rep(x, "%un"+w, "des "g+N.nomp);
-      rep(x, "%Un"+w, "Des "g+N.nomp);
+      rep(x, "%le"+w, s0+"les "+N.nomp);
+      rep(x, "%Le"+w, s0+"Les "+N.nomp);
+      rep(x, "%un"+w, s0+"des "+N.nomp);
+      rep(x, "%Un"+w, s0+"Des "+N.nomp);
       }
     else if(genus & GENF_ELISION)
     {
-      rep(x, "%le"+w, "l'"g+N.nom);
-      rep(x, "%Le"+w, "L'"g+N.nom);
+      rep(x, "%le"+w, s0+"l'"+N.nom);
+      rep(x, "%Le"+w, s0+"L'"+N.nom);
       }
     if(genus == 0) {
-      rep(x, " de %le"+w, " du "+N.nom);
-      rep(x, " à %le"+w, " au "+N.nom);
+      rep(x, " de %le"+w, s0+" du "+N.nom);
+      rep(x, " à %le"+w, s0+" au "+N.nom);
       }
     rep(x, "%le"+w, choose2(genus, "le ", "la ")+N.nom);
     rep(x, "%Le"+w, choose2(genus, "Le ", "La ")+N.nom);

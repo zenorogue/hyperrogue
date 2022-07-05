@@ -2279,7 +2279,7 @@ S("%The1 squeaks in despair.", "%Le1 couine désespérément.")
 S("%The1 squeaks sadly.", "%Le1 couine tristement.")
 S("%The1 squeaks with hope!", "%Le1 couine plaine d'espoir !")
 S("%The1 squeaks happily!", "%Le1 couine joyeusement !")
-S("%The1 squeaks excitedly!", "%Le1 couine pleine d'excitation' !")
+S("%The1 squeaks excitedly!", "%Le1 couine pleine d'excitation !")
 
 N("giant rug", GEN_M, "tapis géant", "tapis géants", "tapis géant")
 
