@@ -276,7 +276,7 @@ void langFR() {
     };
   static std::pair<const char *, noun2> ns[] = {
     #define S(a,b)
-    #define N(a,b,c,d,e) { a, noun2{ b, c, d, "", e } },
+    #define N(a,b,c,d,e) { a, noun2{ b, c, d, e, e } },
     #include "language-fr.cpp"
     #undef N
     #undef S
