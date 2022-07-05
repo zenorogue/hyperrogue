@@ -81,24 +81,23 @@ endif
 
 ifeq (${TOOLCHAIN},clang)
   CXXFLAGS_STD = -std=c++11
-  CXXFLAGS_EARLY += -march=native -fPIC
-  CXXFLAGS_EARLY += -W -Wall -Wextra -Wsuggest-override -Werror -pedantic
+  CXXFLAGS_EARLY += -fPIC
+  CXXFLAGS_EARLY += -W -Wall -Wextra -Wsuggest-override -pedantic
   CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized -Wno-unknown-warning-option
   CXXFLAGS_EARLY += -Wno-invalid-offsetof
 endif
 
 ifeq (${TOOLCHAIN},gcc)
   CXXFLAGS_STD = -std=c++11
-  CXXFLAGS_EARLY += -march=native -fPIC
-  CXXFLAGS_EARLY += -W -Wall -Wextra -Werror -pedantic
+  CXXFLAGS_EARLY += -fPIC
+  CXXFLAGS_EARLY += -W -Wall -Wextra -pedantic
   CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized
   CXXFLAGS_EARLY += -Wno-invalid-offsetof
 endif
 
 ifeq (${TOOLCHAIN},mingw)
   CXXFLAGS_STD = -std=c++11
-  CXXFLAGS_EARLY += -march=native
-  CXXFLAGS_EARLY += -W -Wall -Wextra -Werror
+  CXXFLAGS_EARLY += -W -Wall -Wextra
   CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized
   CXXFLAGS_EARLY += -Wno-invalid-offsetof
 endif

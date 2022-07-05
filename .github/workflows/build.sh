@@ -17,6 +17,7 @@ fi
 
 export CC=$GH_COMPILER
 export CXX=${CC%cc}++
+export CXXFLAGS_EARLY=-Werror
 
 if [[ "$GH_BUILDSYS" == "makefile" ]]; then
   make
