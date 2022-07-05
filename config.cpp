@@ -742,6 +742,9 @@ EX void initConfig() {
   -> editable(0, 8, 1, "menu map darkening", "A larger number means darker game map in the background. Set to 8 to disable the background.", 'd')
   -> set_sets([] { dialog::bound_low(0); dialog::bound_up(8); dialog::dialogflags |= sm::DARKEN; });
 
+  param_b(startanims::enabled, "startanim", true)
+  -> editable("start animations", 's');
+
   addsaver(vid.flasheffects, "flasheffects", 1);
 
   param_f(vid.binary_width, "bwidth", "binary-tiling-width", 1);
@@ -1846,6 +1849,7 @@ EX void configureInterface() {
     });
 
   add_edit(menu_darkening);
+  add_edit(startanims::enabled);
    
   dialog::addBreak(50);
   dialog::addBack();

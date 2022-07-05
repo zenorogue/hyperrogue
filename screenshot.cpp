@@ -1883,6 +1883,8 @@ EX }
 
 EX namespace startanims {
 
+EX bool enabled = true;
+
 int ticks_start = 0;
 
 #if HDR
