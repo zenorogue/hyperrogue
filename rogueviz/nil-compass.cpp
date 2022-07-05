@@ -90,22 +90,22 @@ bool draw_compass(cell *c, const shiftmatrix& V) {
     }
 
   poly_outline = 0;
-  for(auto& [col, i, is, sh]: shapes) {
+  for(const auto& s: shapes) {
 
     ld t = 36 + (ticks - zeroticks) / 1000.;
     
     auto remap = [&] (int _i, int _is) {
-      if(i == _i && is == _is) return col;
-      int c = part(col, 1) + part(col, 2) + part(col, 3);
+      if(s.i == _i && s.is == _is) return col;
+      int c = part(s.col, 1) + part(s.col, 2) + part(s.col, 3);
       c += 1; c /= 12;
-      color_t col1 = col;
+      color_t col1 = s.col;
       part(col1, 1) = part(col1, 2) = part(col1, 3) = c;
-      return gradient(col, col1, 0, 0.9, 1);
+      return gradient(s.col, col1, 0, 0.9, 1);
       };
     
     vector<pair<ld, color_t>> clist = {
-      {36, col},
-      {42.5, col},
+      {36, s.col},
+      {42.5, s.col},
       {42.7, remap(1, -1)},
       {43.9, remap(1, -1)},
       {44.1, remap(0, +1)},
@@ -118,8 +118,8 @@ bool draw_compass(cell *c, const shiftmatrix& V) {
       {48.1, remap(2, -1)},
       {48.3, remap(2, +1)},
       {49.1, remap(2, +1)},
-      {49.3, col},
-      {99, col}
+      {49.3, s.col},
+      {99, s.col}
       };
     
     int step = 0;
@@ -128,7 +128,7 @@ bool draw_compass(cell *c, const shiftmatrix& V) {
     auto t1 = ilerp(clist[step].first, clist[step+1].first, t);
     auto col1 = gradient(clist[step].second, clist[step+1].second, 0, smoothen(t1), 1);
     
-    queuepoly(V, sh, col1);
+    queuepoly(V, s.sh, col1);
     }
 
   return false;
