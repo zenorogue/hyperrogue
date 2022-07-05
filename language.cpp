@@ -96,23 +96,23 @@ template<class T> const T* findInHashTableS(string s, const T *table, int size) 
 #endif
 
 string choose2(int g, string a, string b) {
-  if(g == GEN_M || g == GEN_O) return a;
-  if(g == GEN_F || g == GEN_N) return b;
+  if((g & 0b11) == GEN_M || (g & 0b11) == GEN_O) return a;
+  if((g & 0b11) == GEN_F || (g & 0b11) == GEN_N) return b;
   return "?" + a;
   }
 
 string choose3(int g, string a, string b, string c) {
-  if(g == GEN_M || g == GEN_O) return a;
-  if(g == GEN_F) return b;
-  if(g == GEN_N) return c;
+  if((g & 0b11) == GEN_M || (g & 0b11) == GEN_O) return a;
+  if((g & 0b11) == GEN_F) return b;
+  if((g & 0b11) == GEN_N) return c;
   return "?" + a;
   }
 
 string choose4(int g, string a, string b, string c, string d) {
-  if(g == GEN_M) return a;
-  if(g == GEN_F) return b;
-  if(g == GEN_N) return c;
-  if(g == GEN_O) return d;
+  if((g & 0b11) == GEN_M) return a;
+  if((g & 0b11) == GEN_F) return b;
+  if((g & 0b11) == GEN_N) return c;
+  if((g & 0b11) == GEN_O) return d;
   return "?" + a;
   }
 
@@ -183,28 +183,31 @@ void genderrep(string& x, const string& w, const noun& N) {
     }
 
   if(l == 7) {
-    bool vowel = among(N.nom[0], 'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U');
-    if(N.nom[0]) vowel = vowel || among(s0+N.nom[0] + N.nom[1], "É");
-    if(vowel) {
-      rep(x, "%le"+w, s0+"l'"+N.nom);
-      rep(x, "%Le"+w, s0+"L'"+N.nom);
-      rep(x, "%lea"+w, s0+"l'"+N.acc);
-      rep(x, "%Lea"+w, s0+"L'"+N.acc);
-      rep(x, "%led"+w, s0+"l'"+N.abl);
-      rep(x, "%Led"+w, s0+"L'"+N.abl);
+    if(genus & GENF_PROPER)
+    {
+      rep(x, "%le"+w, ""g+N.nom);
+      rep(x, "%Le"+w, ""g+N.nom);
+      rep(x, "%un"+w, ""g+N.nom);
+      rep(x, "%Un"+w, ""g+N.nom);
       }
-    else {
-      if(genus == 0) {
-        rep(x, " de %le"+w, s0+" du "+N.nom);
-        rep(x, " à %le"+w, s0+" au "+N.nom);
-        }
-      rep(x, "%le"+w, choose2(genus, "le ", "la ")+N.nom);
-      rep(x, "%Le"+w, choose2(genus, "Le ", "La ")+N.nom);
-      rep(x, "%lea"+w, choose2(genus, "le ", "la ")+N.acc);
-      rep(x, "%Lea"+w, choose2(genus, "Le ", "La ")+N.acc);
-      rep(x, "%led"+w, choose2(genus, "le ", "la ")+N.abl);
-      rep(x, "%Led"+w, choose2(genus, "Le ", "La ")+N.abl);
+    else if(genus & GENF_PLURALONLY)
+    {
+      rep(x, "%le"+w, "les "g+N.nomp);
+      rep(x, "%Le"+w, "Les "g+N.nomp);
+      rep(x, "%un"+w, "des "g+N.nomp);
+      rep(x, "%Un"+w, "Des "g+N.nomp);
       }
+    else if(genus & GENF_ELISION)
+    {
+      rep(x, "%le"+w, "l'"g+N.nom);
+      rep(x, "%Le"+w, "L'"g+N.nom);
+      }
+    if(genus == 0) {
+      rep(x, " de %le"+w, " du "+N.nom);
+      rep(x, " à %le"+w, " au "+N.nom);
+      }
+    rep(x, "%le"+w, choose2(genus, "le ", "la ")+N.nom);
+    rep(x, "%Le"+w, choose2(genus, "Le ", "La ")+N.nom);
     rep(x, "%un"+w, choose2(genus, "un ", "une ")+N.nom);
     rep(x, "%Un"+w, choose2(genus, "Un ", "Une ")+N.nom);
     }

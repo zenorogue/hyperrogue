@@ -14,6 +14,10 @@
 #define GEN_N 2
 #define GEN_O 3
 
+#define GENF_ELISION    (1 << 3)
+#define GENF_PLURALONLY (1 << 4)
+#define GENF_PROPER     (1 << 5)
+
 #if MAC
  #define IF_MAC(y,z) y
 #else
