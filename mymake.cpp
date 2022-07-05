@@ -65,7 +65,7 @@ string exec_name = "";
 
 void set_linux() {
   preprocessor = "g++ -E";
-  compiler = "g++ -Wall -Wextra -Wno-maybe-uninitialized -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-invalid-offsetof -rdynamic -fdiagnostics-color=always -c -march=native";
+  compiler = "g++ -Wall -Wextra -Wno-maybe-uninitialized -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-invalid-offsetof -rdynamic -fdiagnostics-color=always -c";
   linker = "g++ -rdynamic";
   default_exec_name = "hyper";
   if(sdlver == 2) {
@@ -84,7 +84,7 @@ void set_linux() {
 
 void set_mac() {
   preprocessor = "g++ -E";
-  compiler = "g++ -march=native -W -Wall -Wextra -Wsuggest-override -pedantic -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-invalid-offsetof -c";
+  compiler = "g++ -W -Wall -Wextra -Wsuggest-override -pedantic -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-invalid-offsetof -c";
   linker = "g++";
   default_exec_name = "hyper";
   opts = "-DMAC -I/usr/local/include";
@@ -94,7 +94,7 @@ void set_mac() {
 void set_mingw64() {
   mingw64 = true;
   preprocessor = "g++ -E";
-  compiler = "g++ -mwindows -march=native -W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-invalid-offsetof -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
+  compiler = "g++ -mwindows -W -Wall -Wextra -Wno-unused-parameter -Wno-invalid-offsetof -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
   linker = "g++";
   default_exec_name = "hyper";
   opts = "-DWINDOWS -DCAP_GLEW=1 -DCAP_PNG=1";
@@ -105,7 +105,7 @@ void set_mingw64() {
 /* cross-compile Linux to Windows (tested on Archlinux) */
 void set_mingw64_cross() {
   preprocessor = "x86_64-w64-mingw32-g++ -E";
-  compiler = "x86_64-w64-mingw32-g++ -mwindows -march=native -W -Wall -Wextra -Werror -Wno-unused-parameter -Wno-invalid-offsetof -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
+  compiler = "x86_64-w64-mingw32-g++ -mwindows -W -Wall -Wextra -Wno-unused-parameter -Wno-invalid-offsetof -Wno-implicit-fallthrough -Wno-maybe-uninitialized -c";
   linker = "x86_64-w64-mingw32-g++";
   default_exec_name = "hyper.exe";
   opts = "-DWINDOWS -DGLEW_STATIC -DUSE_STDFUNCTION=1 -DCAP_PNG=1";
@@ -232,13 +232,14 @@ int main(int argc, char **argv) {
       setdir += "../";
       opts += " -DCAP_SDL2=1";
       }
-    else if(s.substr(0, 2) == "-f") {
+    else if(s.substr(0, 2) == "-f" || s.substr(0, 2) == "-m") {
       opts += " " + s;
       obj_dir += "/";
       setdir += "../";
       for(char c: s) 
         if(!isalnum(c)) obj_dir += "_"; 
         else obj_dir += c;
+      compiler += " " + s;
       linker += " " + s;
       }
     else if(s == "-o") {
@@ -256,6 +257,8 @@ int main(int argc, char **argv) {
       optimized = 2, compiler += " -O2", obj_dir += "/O2", setdir += "../";
     else if(s == "-O3")
       optimized = 3, compiler += " -O3", obj_dir += "/O3", setdir += "../";
+    else if(s == "-Werror")
+      compiler += " -Werror", obj_dir += "/Werror", setdir += "../";
     else if(s.substr(0, 4) == "-std")
       standard = s;
     else if(s.substr(0, 2) == "-l")
