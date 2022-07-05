@@ -111,6 +111,10 @@ struct hr_shortest_path_exception { };
 #define GEN_N 2
 #define GEN_O 3
 
+#define GENF_ELISION    (4 << 0)
+#define GENF_PLURALONLY (4 << 1)
+#define GENF_PROPER     (4 << 2)
+
 // Add a message to the GUI.
 // If multiple messages appear with the same spamtype != 0, the older ones disappear quickly
 void addMessage(string s, char spamtype = 0);
