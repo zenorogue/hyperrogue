@@ -1362,6 +1362,7 @@ EX void edit_sightrange() {
   #if CAP_RUG
   USING_NATIVE_GEOMETRY_IN_RUG;
   #endif
+  cmode = sm::SIDE;
   gamescreen();
   dialog::init("sight range settings");
   add_edit(vid.use_smart_range);
