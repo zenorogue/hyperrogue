@@ -1110,7 +1110,7 @@ N("Blue Hyperbug", GEN_M, "Hyperinsecte Bleu", "Hyperinsectes Bleus", "Hyperinse
 N("Royal Jelly", GEN_N, "Gelée Royale", "Gelée Royale", "Gelée Royale")
 N("weird rock", GEN_M, "Pierre bizarre", "Pierres bizarres", "Pierres bizarres")
 
-Orb("Invisibility", "d'Invisibilité'")
+Orb("Invisibility", "d'Invisibilité")
 
 S("A weirdly colored rock. Hyperentomologists claim that the "
   "Hyperbug armies use these rocks to navigate back home after a victorious battle.",
@@ -1446,7 +1446,7 @@ S("Cannot throw fire there!", "Vous ne pouvez pas jeter du feu ici !")
 // teleport -> target
 // You cannot target that close!
 
-S("or ESC to see how it ended", "ou ESC pour voir comment ça s'est fini'")
+S("or ESC to see how it ended", "ou ESC pour voir comment ça s'est fini")
 S("high contrast", "augmenter le contraste")
 S("draw the heptagons darker", "noircir les heptagones")
 S("targetting ranged Orbs Shift+click only", "tirer avec les Orbes à distance avec Shift-click")
@@ -1569,7 +1569,7 @@ N("rock I", GEN_F, "Roche I", "Roches I", "Roche I")
 N("rock II", GEN_F, "Roche II", "Roches II", "Roche II")
 N("rock III", GEN_F, "Roche III", "Roches III", "Roche III")
 
-Orb("Space", "de l'Espace'")
+Orb("Space", "de l'Espace")
 
 S("Not enough power for telekinesis!", "Pas assez de pouvoir pour la télékinésie !")
 
@@ -1759,7 +1759,7 @@ S("When the tide is away, beautiful ambers can be found on the hyperbolic beache
   "Quand la marée est basse, de magnifiques ambres peuvent être trouvées sur les "
   "plages hyperboliques. Peut-être y avait il une forêt autrefois...?")
 
-Orb("Air", "de l'Air'")
+Orb("Air", "de l'Air")
 
 S("This Orb allows you to blow your enemies away.\n\n"
   "Click a monster to blow it one cell away. It cannot be used against mimics, ghosts, sharks and other monsters restricted to a specific terrain, and multi-tile monsters.",
@@ -1799,7 +1799,7 @@ S("You do not know exactly why, but there are valuable pearls on many boats "
   "Vous ne savez pas exactement pourquoi, mais il y a des perles précieuses "
   "sur de nombreux bateaux dans le tourbillon.")
 
-Orb("Water", "d'Eau'")
+Orb("Water", "d'Eau")
 
 S("This Orb allows your boat to go against the current, "
   "and also to go into the land, creating water on the way.",
@@ -1862,7 +1862,7 @@ S("Bomberbird eggs are big and tasty, and thus valuable. "
   "(mais ça n'arrivera jamais pendant que vous regarder).")
 
 
-Orb("Friendship", "de l'Amitié'")
+Orb("Friendship", "de l'Amitié")
 
 S("This Orb summons a friendly Bomberbird.",
   "Cette Orbe invoque un Oiseau-Bombe amical.")
@@ -2005,7 +2005,7 @@ N("Viking", GEN_M, "Viking", "Vikings", "Viking")
 S("Mighty warriors from the Fjord, who can use boats.",
   "De puissants guerriers du Fjord, qui peuvent utiliser des bateaux.")
 
-N("Water Elemental", GEN_M, "Élémental d'Eau'", "Élémentaux d'Eau", "Élémental d'Eau")
+N("Water Elemental", GEN_M, "Élémental d'Eau", "Élémentaux d'Eau", "Élémental d'Eau")
 S("Wherever this powerful being goes, the living fjord "
   "sinks below water, non-magical boats are destroyed, and fires are extinguished.\n\n"
   "As a special case, you can attack the Water Elemental from the water, without drowning immediately.",
@@ -2323,7 +2323,7 @@ S("\"Straight lines stay close to each other forever, this is so romantic!\"",
 S("\"Maps... Just like the world, but smaller... how is that even possible?!\"",
   "\"Des cartes... comme le monde, mais plus petit... comment est-ce possible ?!\"")
 
-Orb("Love", "de l'Amour'")
+Orb("Love", "de l'Amour")
 S("Love takes time, but it heals all wounds, and transcends time and space.\n\n"
   "The Orb of Love is worth 30$$$, if you end the game with it.\n",
 
