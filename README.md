@@ -78,7 +78,8 @@ make
 
 The `mymake` program builds HyperRogue in parts. It takes longer than the method shown above, but it uses significantly less memory during compilation, and when you change something, `mymake` will only recompile the changed file.
 Additionally, it can be easily configured, e.g., to produce an optimized build, or to include addons (see `mymake.cpp` for some example invocations, and `devmods` for some example addons).
-Most useful parameters include `-O3` (optimized build), `-rv` (include the RogueViz demos), `-vr` (build the VR version).
+Most useful parameters include `-O3` (optimized build), `-rv` (include the RogueViz demos), `-vr` (build the VR version). Compiler flags like `-Werror` (treat warnings as errors) and `-march=native` work too.
+
 
 ```
 make mymake && ./mymake
