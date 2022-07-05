@@ -148,7 +148,7 @@ void bitruncate() {
           cells[id].neid[(k+5)%6] = bitruncated_id[make_pair(i, next)];
           }
       }
-    cells[i].neid = move(newnei);
+    cells[i].neid = std::move(newnei);
     }
   make_cells_of_heptagon();
   compute_jpoints();
@@ -241,7 +241,7 @@ bool step(int delta) {
             ld val = hdist(h, relmatrices[p.owner] * p.p);
             if(val < mindist) mindist = val;
             }
-          if(mindist > bestval) bestval = mindist, s.owner = c, s.p = h, s.relmatrices = move(relmatrices);
+          if(mindist > bestval) bestval = mindist, s.owner = c, s.p = h, s.relmatrices = std::move(relmatrices);
           }
         }
       make_cells_of_heptagon();

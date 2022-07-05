@@ -480,8 +480,8 @@ void run_kuen() {
   int it = 0;
   for(auto p: rug::points) p->dexp_id = it++;
   
-  vector<rug::rugpoint*> mesh = move(rug::points);
-  vector<rug::triangle> old_triangles = move(rug::triangles);
+  vector<rug::rugpoint*> mesh = std::move(rug::points);
+  vector<rug::triangle> old_triangles = std::move(rug::triangles);
   
   rug::clear_model();
   

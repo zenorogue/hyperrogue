@@ -97,7 +97,7 @@ void create_data() {
     where.push_back(c);
     sample s;
     embeddings::get_coordinates(s.val, c, c0);
-    data.push_back(move(s));
+    data.push_back(std::move(s));
     }
   samples = isize(data);
   test_orig.size = samples;

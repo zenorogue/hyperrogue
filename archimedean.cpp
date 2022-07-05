@@ -1314,7 +1314,7 @@ EX void show() {
       }
     else {
       tested.coloring = col;
-      tilings.push_back(move(tested));
+      tilings.push_back(std::move(tested));
       /* sort(tilings.begin(), tilings.end(), [] (archimedean_tiling& s1, archimedean_tiling& s2) {
         if(s1.euclidean_angle_sum < s2.euclidean_angle_sum - 1e-6) return true;
         if(s2.euclidean_angle_sum < s1.euclidean_angle_sum - 1e-6) return false;

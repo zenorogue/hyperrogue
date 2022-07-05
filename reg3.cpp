@@ -1231,7 +1231,7 @@ EX namespace reg3 {
               nb.insert(v - by * (v[index] / by[index]));
             else println(hlog, "error");    
           
-          boundaries = move(nb);
+          boundaries = std::move(nb);
           break;
           }
         }

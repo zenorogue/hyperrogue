@@ -979,7 +979,7 @@ string tes;
 
 void init_textureconfig() {
 #if CAP_CONFIG
-  texturesavers = move(savers);  
+  texturesavers = std::move(savers);  
   for(int i=0; i<3; i++)
   for(int j=0; j<3; j++)
     addsaver(config.itt[i][j], "texturematrix_" + its(i) + its(j), i==j ? 1 : 0);
@@ -1131,10 +1131,10 @@ bool texture_config::load() {
   models::configure();
   drawthemap();
   config.tstate = config.tstate_max = tsActive;
-  string s = move(texture_tuner);
+  string s = std::move(texture_tuner);
   perform_mapping();
   
-  texture_tuner = move(s);
+  texture_tuner = std::move(s);
   
   if(texture_tuner != "") {
     texture_tuned = true;
@@ -1665,7 +1665,7 @@ void texture_config::true_remap() {
       if(GOLDBERG || IRREGULAR) pshift += si.dir;
       mapTexture(c, mi2, si, ggmatrix(c), pshift);
       mapTexture2(mi2);
-      mi2.tvertices = move(new_tvertices);
+      mi2.tvertices = std::move(new_tvertices);
       // printf("%08x remapping %d vertices to %d vertices\n", si.id, isize(mi.tvertices), isize(mi2.tvertices));
       }
     catch(out_of_range&) { 

@@ -859,7 +859,7 @@ EX void monstersTurn() {
   
   changes.value_keep(crush_now);
   changes.value_keep(crush_next);
-  crush_now = move(crush_next);
+  crush_now = std::move(crush_next);
   crush_next.clear();
   
   DEBB(DF_TURN, ("heat"));

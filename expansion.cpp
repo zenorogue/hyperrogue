@@ -190,7 +190,7 @@ void expansion_analyzer::reduce_grouping() {
   for(int i=0; i<nogroups; i++) 
     for(int j: children[groupsample[i]])
       newchildren[i].push_back(grouping[j]);
-  children = move(newchildren);
+  children = std::move(newchildren);
   for(auto& p: codeid) p.second = grouping[p.second];
   N = nogroups;
   rootid = grouping[rootid];

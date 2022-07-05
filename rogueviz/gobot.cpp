@@ -157,8 +157,8 @@ void clean_old_shots() {
        sh.get().delete_message();
       }
     else
-      remaining.emplace_back(move(sh));
-  old_shots = move(remaining);
+      remaining.emplace_back(std::move(sh));
+  old_shots = std::move(remaining);
   */
   }
 
