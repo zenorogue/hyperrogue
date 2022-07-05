@@ -244,7 +244,7 @@ int readArgs() {
 
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("sunflower spirals"), 0xFFFFFFFF, 150, 0);
   
   dialog::addSelItem("density", fts(zdensity), 'd');

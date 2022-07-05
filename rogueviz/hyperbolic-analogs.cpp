@@ -331,7 +331,7 @@ int current_index = -1;
 
 void choose_projection() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("choose projection"), 0xFFFFFFFF, 150, 0);
   for(int i=0; i<isize(models_to_use); i++) {
     hypername = "";
@@ -355,7 +355,7 @@ void choose_projection() {
 
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("hyperbolic analogs"), 0xFFFFFFFF, 150, 0);
   add_edit(prec);
   dialog::addItem("choose a projection", 'p');

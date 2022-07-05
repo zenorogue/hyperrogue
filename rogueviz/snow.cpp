@@ -207,7 +207,7 @@ void snow_slide(vector<tour::slide>& v, string title, string desc, reaction_t t)
 
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("snowballs"), 0xFFFFFFFF, 150, 0);
 
   dialog::addSelItem("lambda", fts(snow_lambda), 'l');

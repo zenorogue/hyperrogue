@@ -49,7 +49,7 @@ void sumotron_puzzle() {
   cmode = 0;
   if(dialog_shown) cmode = sm::SIDE | sm::DIALOG_STRICT_X | sm::MAYDARK;
   dynamicval<bool> dp(mapeditor::drawplayer, false);
-  gamescreen(0);
+  gamescreen();
 
   initquickqueue();
   for(auto p: value) {

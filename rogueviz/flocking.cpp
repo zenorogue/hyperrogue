@@ -388,7 +388,7 @@ namespace flocking {
 
   void show() {
     cmode = sm::SIDE | sm::MAYDARK;
-    gamescreen(0);
+    gamescreen();
     dialog::init(XLAT("flocking"), iinf[itPalace].color, 150, 0);
     
     dialog::addSelItem("initial speed", fts(ini_speed), 'i');

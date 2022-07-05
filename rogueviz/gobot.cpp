@@ -516,9 +516,8 @@ void go_discord() {
 void go_menu() {
 
   getcstat = '-';
-  cmode = 0;
   cmode = sm::SIDE | sm::DIALOG_STRICT_X;
-  gamescreen(0);
+  gamescreen();
 
   dialog::init("HyperGo", iinf[itPalace].color, 150, 100);
   

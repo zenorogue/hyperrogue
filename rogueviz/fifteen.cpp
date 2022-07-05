@@ -164,7 +164,7 @@ void edit_fifteen() {
 
   auto ss = mapstream::save_start();
   ss->item = itGold;
-  gamescreen(0);
+  gamescreen();
   ss->item = itNone;
   
   dialog::init("Fifteen Puzzle", iinf[itPalace].color, 150, 100);

@@ -290,7 +290,7 @@ void rugframe() {
 
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init("Pentagonal Exploration");
   auto add_key = [] (char c, int a, int b) {
     dialog::addBoolItem(lalign(0, "based on {",a,",",b,"}"), global_v == a && global_w == b, c);

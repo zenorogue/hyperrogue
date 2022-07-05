@@ -1271,13 +1271,13 @@ void launch_solv() {
 
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("notknot"), 0xFFFFFFFF, 150, 0);
   
   dialog::addItem("available scenes", 'a');
   dialog::add_action_push([] {
     cmode = sm::SIDE | sm::MAYDARK;
-    gamescreen(0);
+    gamescreen();
 
     dialog::init(XLAT("notknot scenes"), 0xFFFFFFFF, 150, 0);
     

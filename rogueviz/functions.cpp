@@ -87,7 +87,7 @@ int editwhich = -1;
 
 void show_graph() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);  
+  gamescreen();
   dialog::init(XLAT("graph"));
   for(int i=0; i<isize(formula); i++) {
     if(editwhich == i) {

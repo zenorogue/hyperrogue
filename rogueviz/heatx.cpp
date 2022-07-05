@@ -122,7 +122,7 @@ void advance_heat_wave() {
 
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("heat transfer simulation"), 0xFFFFFFFF, 150, 0);
   add_edit(delta);
   add_edit(qsteps);

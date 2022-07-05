@@ -1062,7 +1062,7 @@ int readArgs() {
 void configure_edge_display() {
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
   static int mode = 0;
-  gamescreen(0);  
+  gamescreen();
   dialog::init(XLAT("rogueviz edges"));
   for(int i=0; i<isize(edgetypes); i++) {
     auto t = edgetypes[i];
@@ -1122,7 +1122,7 @@ void search_marker() {
 
 void showVertexSearch() {
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
-  gamescreen(0); search_for = -1;
+  gamescreen(); search_for = -1;
 
   dialog::init(XLAT("vertex search"));
   dialog::v.clear();
@@ -1156,7 +1156,7 @@ void showVertexSearch() {
 void showMenu() {
   if(callhandlers(false, hooks_rvmenu_replace)) return;
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
-  gamescreen(0);  
+  gamescreen();
 
   dialog::init(XLAT("rogueviz configuration"));
 

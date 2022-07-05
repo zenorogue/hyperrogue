@@ -184,7 +184,7 @@ void run() {
     cmode |= sm::SHOWCURSOR;
   if(aimspeed_mouse_x == 0 && aimspeed_mouse_y == 0)
     cmode |= sm::SHOWCURSOR;
-  gamescreen(0);
+  gamescreen();
   if(planning_mode && !view_replay) {
     curlev->draw_planning_screen();
     if(!holdmouse) {

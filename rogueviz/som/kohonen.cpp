@@ -1041,8 +1041,8 @@ namespace levelline {
 
   void show() {
     if(levellines.size() == 0) create();
-    gamescreen(0);
     cmode = sm::SIDE | sm::MAYDARK;
+    gamescreen();
     dialog::init("level lines");
     char nx = 'a';
     for(auto &l : levellines) {

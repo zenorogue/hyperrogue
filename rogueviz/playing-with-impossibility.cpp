@@ -608,7 +608,8 @@ slide dmv_slides[] = {
       empty_screen(mode);
       show_picture(mode, "rogueviz/nil/penrose-triangle.png");
       add_stat(mode, [] {
-        gamescreen(2);
+        cmode |= sm::DARKEN;
+        gamescreen();
         dialog::init();
         dialog::addBreak(400);
         dialog::addTitle("playing with impossibility", dialog::dialogcolor, 150);

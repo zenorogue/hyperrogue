@@ -694,7 +694,7 @@ void run() {
   sprite_vertices.tvertices.clear();
   if(map_on) {
     render_room(current_room);
-    gamescreen(0);
+    gamescreen();
     }
   else {
     draw_room();

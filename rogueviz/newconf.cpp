@@ -472,7 +472,7 @@ void pick_algorithm() {
   dialog::addItem("visualize (fast)", 'b');
   dialog::add_action([] { nconf_prepare(true); popScreen(); });
   dialog::addSelItem("visualization speed", its(algo_speed), 'v');
-  dialog::add_action([] { dialog::editNumber(algo_speed, 100, 1000000, 0.1, 10000, "", ""), dialog::scaleLog(), dialog::dialogflags = 0, dialog::numberdark = dialog::DONT_SHOW; });
+  dialog::add_action([] { dialog::editNumber(algo_speed, 100, 1000000, 0.1, 10000, "", ""), dialog::scaleLog(), dialog::dialogflags = sm::NOSCR; });
   dialog::addBreak(50);
   dialog::addBoolItem_action("pretty corners", pretty, 'p');
   dialog::addBreak(50);
@@ -824,7 +824,7 @@ void ncee_work() {
 
   calcparam();
   
-  if(ncee_map_prepared < 5) { cmode = sm::NORMAL; ncee_map_prepared++; if(ncee_map_prepared == 5) prepare_ncee_map(); gamescreen(2); return; }
+  if(ncee_map_prepared < 5) { cmode = sm::NORMAL | sm::DARKEN; ncee_map_prepared++; if(ncee_map_prepared == 5) prepare_ncee_map(); gamescreen(); return; }
 
   #if CAP_NCONF
   if(in_visualization) 
@@ -907,7 +907,7 @@ void ncee() {
     if(uni == 's') show_mapping = !show_mapping;
     if(uni == 'g') show_mgrid = !show_mgrid;
     if(uni == 't') pushScreen(conf_shapes);
-    if(uni == 'y') dialog::editNumber(mapping_split, 0, 1, 0.05, 0.75, "", ""), dialog::dialogflags = 0, dialog::numberdark = dialog::DONT_SHOW;
+    if(uni == 'y') dialog::editNumber(mapping_split, 0, 1, 0.05, 0.75, "", ""), dialog::dialogflags = sm::NOSCR;
     if(uni == '-') {
       int x = (mousex - cd->xcenter - xc - x0) / siz;
       int y = (mousey - cd->ycenter - yc - y0) / siz;

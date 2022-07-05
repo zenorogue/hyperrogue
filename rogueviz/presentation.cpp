@@ -323,7 +323,8 @@ void show_animation(presmode mode, string s, int sx, int sy, int frames, int fps
   }
 
 void choose_presentation() {
-  gamescreen(2);
+  cmode = sm::NOSCR;
+  gamescreen();
 
   getcstat = ' ';
   

@@ -433,7 +433,7 @@ EX void compare() {
 
 void choose_projection() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("choose projection"), 0xFFFFFFFF, 150, 0);
   dynamicval<int> di(index);
   for(int i=0; i<8; i++) {
@@ -450,7 +450,7 @@ void choose_projection() {
 
 void choose_planet(texture::texture_data *& t) {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("choose the planet"), 0xFFFFFFFF, 150, 0);
   for(auto opt: {&earth, &moon, &sun, &mars, &neptune}) {
     dialog::addSelItem(pname[opt], its(radius[opt]) + " km", key[opt]);
@@ -462,7 +462,7 @@ void choose_planet(texture::texture_data *& t) {
 
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("projections between planets"), 0xFFFFFFFF, 150, 0);
   add_edit(alpha);
   add_edit(latit);

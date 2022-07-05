@@ -191,7 +191,7 @@ void make_staircase() {
 
 void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("Spiral Staircase"), iinf[itPalace].color, 150, 0);
   
   add_edit(scurvature);

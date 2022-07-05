@@ -111,7 +111,7 @@ int args() {
 
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("random walk"), 0xFFFFFFFF, 150, 0);
 
   dialog::addSelItem("step size", fts(step_size), 'd');

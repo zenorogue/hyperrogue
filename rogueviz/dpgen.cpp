@@ -199,7 +199,8 @@ bool hide_random = false;
 int last_seed = 0;
   
 EX void show_menu() {
-  gamescreen(1);
+  cmode = sm::DARKEN;
+  gamescreen();
   dialog::init(XLAT("dual geometry puzzles"));
   dialog::addHelp(XLAT("move both characters to marked squares at once!"));
   dialog::addBreak(100);

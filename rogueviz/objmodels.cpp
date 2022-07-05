@@ -314,7 +314,7 @@ void add_model_settings() {
 auto cf = addHook(hooks_configfile, 100, [] {
   param_f(prec, "obj_prec")
   ->editable(1, 100, 1, "3D model precision", "higher-precision models take more time to load and to render.", 'p')
-  ->set_sets([] { dialog::numberdark = dialog::DONT_SHOW; })
+  ->set_sets([] { cmode = sm::NOSCR; })
   ; 
   param_b(shift_to_ctr, "shift_to_ctr");
   });

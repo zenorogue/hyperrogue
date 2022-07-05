@@ -230,7 +230,7 @@ void shift() {
 
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("inner maps"), 0xFFFFFFFF, 150, 0);
   add_edit(texture_alpha);
   add_edit(inner_alpha);

@@ -216,7 +216,7 @@ bool draw_ply() {
 
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("Ascending & Descending"), 0xFFFFFFFF, 150, 0);
 
   dialog::addSelItem("advance", fts(advance), 'a');
