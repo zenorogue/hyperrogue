@@ -503,7 +503,8 @@ EX namespace dialog {
     tothei = (vid.yres - tothei) / 2;
     
     if(current_display->sidescreen && darken < menu_darkening) {
-      color_t col = (backcolor << 8) | (255 - (255 >> (menu_darkening - darken)));
+      int steps = menu_darkening - darken;
+      color_t col = (backcolor << 8) | (255 - (255 >> steps));
 
       if(svg::in || !(auraNOGL || vid.usingGL)) {
         flat_model_enabler fme;
@@ -524,12 +525,14 @@ EX namespace dialog {
         auto full = part(col, 0);
         static vector<glhr::colored_vertex> auravertices;
         auravertices.clear();
+        ld width = vid.xres / 100;
+        for(int i=4; i<steps && i < 8; i++) width /= sqrt(2);
         for(int x=0; x<16; x++) {
           for(int c=0; c<6; c++) {
             int bx = (c == 1 || c == 3 || c == 5) ? x+1 : x;
             int by = (c == 2 || c == 4 || c == 5) ? vid.yres : 0;
             int cx = bx == 0 ? 0 : bx == 16 ?vid.xres :
-              vid.xres - dwidth + vid.xres / 100 * tan((bx-8)/8. * 90 * degree);
+              vid.xres - dwidth + width * tan((bx-8)/8. * 90 * degree);
             part(col, 0) = lerp(0, full, bx / 16.);
             if(c == 0) println(hlog, "bx = ", bx, " -> cx = ", cx, " darken = ", part(col, 0));
             auravertices.emplace_back(hyperpoint(cx - current_display->xcenter, by - current_display->ycenter, 0, 1), col);
