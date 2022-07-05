@@ -1376,8 +1376,87 @@ void neurondisttable(const string &name) {
 
 bool animate_loop;
 bool animate_once;
+bool animate_dispersion;
+int heatmap_width = 16;
+
+color_t heatmap(ld x) {
+  if(x < 1/10.) return gradient(0x101010, 0x800000, 0, x, 1/10.);
+  else if(x < 1/2.) return gradient(0x800000, 0xFF8000, 1/10., x, 1/2.);
+  else return gradient(0xFF8000, 0xFFFFFF, 1/2., x, 1);
+  }
+
+bool draw_heatmap() {
+  if(animate_dispersion && heatmap_width) {
+    dynamicval<eGeometry> g(geometry, gEuclid);
+    dynamicval<eModel> pm(pmodel, mdDisk);
+    dynamicval<bool> ga(vid.always3, false);
+    dynamicval<color_t> ou(poly_outline);
+    dynamicval<geometryinfo1> gi(ginf[gEuclid].g, giEuclid2);
+    initquickqueue();
+    check_cgi(); cgi.require_shapes();
+    println(hlog, "animate_dispersion called");
+
+    int pixstep = 4;
+    int width = heatmap_width;
+    for(int y=width; y<vid.yres-width; y+=pixstep) {
+      curvepoint(atscreenpos(width, y, 1) * C0);
+      curvepoint(atscreenpos(width*2, y, 1) * C0);
+      curvepoint(atscreenpos(width*2, y+pixstep, 1) * C0);
+      curvepoint(atscreenpos(width, y+pixstep, 1) * C0);
+      queuecurve(shiftless(Id), 0, darkena(heatmap(ilerp(width, vid.yres-width, y+pixstep/2.)), 0, 0xFF), PPR::LINE);
+      }
+    for(int p=0; p<=10; p++) {
+      ld y = lerp(width, vid.yres-width, p / 10.);
+      curvepoint(atscreenpos(width*2, y, 1) * C0);
+      curvepoint(atscreenpos(width*3, y, 1) * C0);
+      queuecurve(shiftless(Id), 0xFFFFFFFF, 0, PPR::LINE);
+      }
+    quickqueue();
+    return true;
+    }
+  return false;
+  }
 
 void steps() {
+  if(kohonen::animate_dispersion) {
+    initialize_rv();
+    initialize_neurons_initial();
+    initialize_dispersion();
+    setindex(false);
+    ld tfrac = frac(ticks * 1. / anims::period);
+    ld tt = pow(tfrac, ttpower);
+    println(hlog, "tt = ", tt);
+
+    double sigma = maxdist * tt;
+
+    neuron& n = net[0];
+
+    auto cid = get_cellcrawler_id(n.where);
+    cellcrawler& s = scc[cid.first];
+    s.sprawl(cellwalker(n.where, cid.second));
+
+    vector<float> fake(0,0);
+
+    int dispersion_count = isize(s.dispersion);
+    int dispid = int(dispersion_count * tt);
+
+    auto it = gaussian ? fake.begin() : s.dispersion[dispid].begin();
+
+    println(hlog, "it done");
+
+    for(auto& sd: s.data) {
+      neuron *n2 = getNeuron(sd.target.at);
+
+      ld nu;
+      if(gaussian) {
+        nu = exp(-sqr(sd.dist/sigma));
+        }
+      else
+        nu = *(it++);
+
+      n2->where->landparam = heatmap(nu);
+      }
+    }
   if(kohonen::animate_once && !kohonen::finished()) {
     unsigned int t = SDL_GetTicks();
     while(SDL_GetTicks() < t+20) kohonen::step();
@@ -1390,7 +1469,8 @@ void steps() {
     if(t1 > t) {
       initialize_rv();
       set_neuron_initial();
-      last_analyze_step = t = tmax;
+      t = tmax;
+      analyze();
       }
     while(t > t1) kohonen::step();
     setindex(false);
@@ -1789,7 +1869,9 @@ auto hooks4 = addHook(hooks_clearmemory, 100, clear)
     param_b(show_rings, "som_show_rings");
     param_b(animate_once, "som_animate_once");
     param_b(animate_loop, "som_animate_loop");
+    param_b(animate_dispersion, "som_animate_dispersion");
     param_f(analyze_each, "som_analyze_each");
+    param_i(heatmap_width, "som_heatmap_width");
     param_f(dispersion_precision, "som_dispersion")
     -> set_reaction([] { state &=~ KS_DISPERSION; });
     });
@@ -1817,6 +1899,7 @@ void initialize_rv() {
   rv_hook(hooks_readcolor, 100, kohonen_color);
   rv_hook(hooks_drawcell, 100, coloring_3d);
   rv_hook(anims::hooks_anim, 100, analyzer);
+  rv_hook(hooks_prestats, 25, draw_heatmap);
   }
 
 }
