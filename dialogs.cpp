@@ -401,6 +401,72 @@ EX namespace dialog {
   
   EX void queue_key(int key) { key_queue.push_back(key); }
   
+  EX void draw_slider(int sl, int sr, int y, item& I) {
+    int sw = sr-sl;
+    int mid = y;
+
+    if(!wmascii) {
+      int a = S7;
+      if(a < 3) a = 3;
+      if(a > 36) a = 36;
+
+      flat_model_enabler fme;
+      initquickqueue();
+      ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
+      shiftmatrix V = shiftless(atscreenpos(0, 0, pix));
+
+      color_t col = (I.color << 8) | 0xFF;
+
+      ld siz = dfsize * I.scale / 150;
+      ld si = siz / 2;
+      if(I.type == diIntSlider && I.p2 < sw/4) {
+        for(int a=0; a<=I.p2; a++) {
+          ld x = sl + sw * a * 1. / I.p2;
+          curvepoint(hyperpoint(x, y-si, 1, 1));
+          curvepoint(hyperpoint(x, y+si, 1, 1));
+          queuecurve(V, col, 0, PPR::LINE);
+          }
+        }
+
+      curvepoint(hyperpoint(sl, y-si, 1, 1));
+      for(int i=0; i<=a/2; i++)
+        curvepoint(hyperpoint(sr + si * sin(i*2*M_PI/a), y - si * cos(i*2*M_PI/a), 1, 1));
+      for(int i=(a+1)/2; i<=a; i++)
+        curvepoint(hyperpoint(sl + si * sin(i*2*M_PI/a), y - si * cos(i*2*M_PI/a), 1, 1));
+      queuecurve(V, col, 0x80, PPR::LINE);
+      quickqueue();
+
+      ld x = sl + sw * (I.type == diIntSlider ? I.p1 * 1. / I.p2 : I.param);
+      if(x < sl-si) {
+        curvepoint(hyperpoint(sl-si, y, 1, 1));
+        curvepoint(hyperpoint(x, y, 1, 1));
+        queuecurve(V, col, 0x80, PPR::LINE);
+        quickqueue();
+        }
+      if(x > sr+si) {
+        curvepoint(hyperpoint(sr+si, y, 1, 1));
+        curvepoint(hyperpoint(x, y, 1, 1));
+        queuecurve(V, col, 0x80, PPR::LINE);
+        quickqueue();
+        }
+      for(int i=0; i<=a; i++) curvepoint(hyperpoint(x + siz * sin(i*2*M_PI/a), y - siz * cos(i*2*M_PI/a), 1, 1));
+      queuecurve(V, col, col, PPR::LINE);
+      quickqueue();
+      }
+    else if(I.type == diSlider) {
+      displayfr(sl, mid, 2, dfsize * I.scale/100, "(", I.color, 16);
+      displayfr(sl + double(sw * I.param), mid, 2, dfsize * I.scale/100, "#", I.color, 8);
+      displayfr(sr, mid, 2, dfsize * I.scale/100, ")", I.color, 0);
+      }
+    else {
+      displayfr(sl, mid, 2, dfsize * I.scale/100, "{", I.color, 16);
+      if(I.p2 < sw / 4) for(int a=0; a<=I.p2; a++) if(a != I.p1)
+        displayfr(sl + double(sw * a / I.p2), mid, 2, dfsize * I.scale/100, a == I.p1 ? "#" : ".", I.color, 8);
+      displayfr(sl + double(sw * I.p1 / I.p2), mid, 2, dfsize * I.scale/100, "#", I.color, 8);
+      displayfr(sr, mid, 2, dfsize * I.scale/100, "}", I.color, 0);
+      }
+    }
+
   EX void display() {
 
     callhooks(hooks_display_dialog);
@@ -493,19 +559,7 @@ EX namespace dialog {
           sl = vid.yres + vid.fsize*2, sr = vid.xres - vid.fsize*2;
         else
           sl = vid.xres/4, sr = vid.xres*3/4;
-        int sw = sr-sl;
-        if(I.type == diSlider) {
-          displayfr(sl, mid, 2, dfsize * I.scale/100, "(", I.color, 16);
-          displayfr(sl + double(sw * I.param), mid, 2, dfsize * I.scale/100, "#", I.color, 8);
-          displayfr(sr, mid, 2, dfsize * I.scale/100, ")", I.color, 0);
-          }
-        else {
-          displayfr(sl, mid, 2, dfsize * I.scale/100, "{", I.color, 16);
-          if(I.p2 < sw / 4) for(int a=0; a<=I.p2; a++) if(a != I.p1)
-            displayfr(sl + double(sw * a / I.p2), mid, 2, dfsize * I.scale/100, a == I.p1 ? "#" : ".", I.color, 8);
-          displayfr(sl + double(sw * I.p1 / I.p2), mid, 2, dfsize * I.scale/100, "#", I.color, 8);
-          displayfr(sr, mid, 2, dfsize * I.scale/100, "}", I.color, 0);
-          }
+        draw_slider(sl, sr, mid, I);
         if(xthis) getcstat = I.key, inslider = true, slider_x = mousex;
         }
       else if(I.type == diCustom) {
