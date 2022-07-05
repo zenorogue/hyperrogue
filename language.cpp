@@ -95,6 +95,12 @@ template<class T> const T* findInHashTableS(string s, const T *table, int size) 
 #define findInHashTable(s,t) findInHashTableS(s, t, sizeof(t) / sizeof(t[0]))
 #endif
 
+string choose2(int g, string a, string b) {
+  if(g == GEN_M || g == GEN_O) return a;
+  if(g == GEN_F || g == GEN_N) return b;
+  return "?" + a;
+  }
+
 string choose3(int g, string a, string b, string c) {
   if(g == GEN_M || g == GEN_O) return a;
   if(g == GEN_F) return b;
@@ -119,9 +125,10 @@ EX bool translation_exists(const string& x) {
 #endif
 
 /** replace gender-based codes in x, based on gender genus; some gender-based codes need to know the word (nom) */
-void genderrep(string& x, string w, int genus, string nom) {
+void genderrep(string& x, const string& w, const noun& N) {
 #if CAP_TRANS
   int l = lang();
+  auto& genus = N.genus;
   if(l == 1) {
     rep(x, "%łem"+w, choose3(genus, "łem", "łam", "łom"));
     rep(x, "%łeś"+w, choose3(genus, "łeś", "łaś", "łoś"));
@@ -167,12 +174,39 @@ void genderrep(string& x, string w, int genus, string nom) {
   if(l == 6) {
     rep(x, "%oa"+w, choose4(genus, "o", "a", "os", "as"));
     rep(x, "%seu"+w, choose4(genus, "seu", "sua", "seus", "suas"));
-    rep(x, "%na"+w, choose4(genus, "o", "a", "os", "as") + " " + nom);
-    rep(x, "%Na"+w, choose4(genus, "O", "A", "Os", "As") + " " + nom);
-    rep(x, "%g"+w, choose4(genus, "do", "da", "dos", "das")+ " " + nom);
-    rep(x, "%d"+w, choose4(genus, "ao", "à", "aos", "às")+ " " + nom);
-    rep(x, "%l"+w, choose4(genus, "no", "na", "nos", "nas")+ " " + nom);
-    rep(x, "%abl"+w, choose4(genus, "pelo", "pela", "pelos", "pelas")+ " " + nom);
+    rep(x, "%na"+w, choose4(genus, "o", "a", "os", "as") + " " + N.nom);
+    rep(x, "%Na"+w, choose4(genus, "O", "A", "Os", "As") + " " + N.nom);
+    rep(x, "%g"+w, choose4(genus, "do", "da", "dos", "das")+ " " + N.nom);
+    rep(x, "%d"+w, choose4(genus, "ao", "à", "aos", "às")+ " " + N.nom);
+    rep(x, "%l"+w, choose4(genus, "no", "na", "nos", "nas")+ " " + N.nom);
+    rep(x, "%abl"+w, choose4(genus, "pelo", "pela", "pelos", "pelas")+ " " + N.nom);
+    }
+
+  if(l == 7) {
+    bool vowel = among(N.nom[0], 'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U');
+    if(N.nom[0]) vowel = vowel || among(s0+N.nom[0] + N.nom[1], "É");
+    if(vowel) {
+      rep(x, "%le"+w, s0+"l'"+N.nom);
+      rep(x, "%Le"+w, s0+"L'"+N.nom);
+      rep(x, "%lea"+w, s0+"l'"+N.acc);
+      rep(x, "%Lea"+w, s0+"L'"+N.acc);
+      rep(x, "%led"+w, s0+"l'"+N.abl);
+      rep(x, "%Led"+w, s0+"L'"+N.abl);
+      }
+    else {
+      if(genus == 0) {
+        rep(x, " de %le"+w, s0+" du "+N.nom);
+        rep(x, " à %le"+w, s0+" au "+N.nom);
+        }
+      rep(x, "%le"+w, choose2(genus, "le ", "la ")+N.nom);
+      rep(x, "%Le"+w, choose2(genus, "Le ", "La ")+N.nom);
+      rep(x, "%lea"+w, choose2(genus, "le ", "la ")+N.acc);
+      rep(x, "%Lea"+w, choose2(genus, "Le ", "La ")+N.acc);
+      rep(x, "%led"+w, choose2(genus, "le ", "la ")+N.abl);
+      rep(x, "%Led"+w, choose2(genus, "Le ", "La ")+N.abl);
+      }
+    rep(x, "%un"+w, choose2(genus, "un ", "une ")+N.nom);
+    rep(x, "%Un"+w, choose2(genus, "Un ", "Une ")+N.nom);
     }
 #endif
   }
@@ -191,7 +225,10 @@ void basicrep(string& x) {
     if(s) x = s->xlat[l-1];
     }
   
-  genderrep(x, "0", playergender(), "");
+  noun dummy;
+  dummy.genus = playergender();
+  dummy.nom = dummy.nomp = dummy.acc = dummy.abl = "player";
+  genderrep(x, "0", dummy);
 #endif
   }
 
@@ -206,7 +243,7 @@ void parrep(string& x, string w, stringpar p) {
     dummy.genus = -1;
     }
   
-  genderrep(x, w, data.genus, data.nom);
+  genderrep(x, w, data);
 
   if(l == 1) {
     rep(x, "%"+w, data.nom);
@@ -246,6 +283,13 @@ void parrep(string& x, string w, stringpar p) {
   if(l == 6) {
     rep(x, "%"+w, data.nom);
     rep(x, "%P"+w, data.nomp);
+    }
+  if(l == 7) {
+    rep(x, "%"+w, data.nom);
+    rep(x, "%P"+w, data.nomp);
+    rep(x, "%a"+w, data.acc);
+    rep(x, "%abl"+w, data.abl);
+    rep(x, "%d"+w, data.abl); // Dativ (which equals Ablative in German)
     }
 #endif
   if(true) {
