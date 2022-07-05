@@ -610,8 +610,7 @@ auto gobot_hook =
       shot_state = 2;
       }
     return false;
-    });
-    
+    })
   ;
   
 #endif
