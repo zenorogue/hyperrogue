@@ -361,7 +361,7 @@ EX namespace models {
 
   EX void model_list() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
-    gamescreen(0);
+    gamescreen();
     dialog::init(XLAT("models & projections"));
     #if CAP_RUG
     USING_NATIVE_GEOMETRY_IN_RUG;
@@ -417,7 +417,7 @@ EX namespace models {
 
   EX void model_menu() {
     cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
-    gamescreen(0);
+    gamescreen();
     #if CAP_RUG
     USING_NATIVE_GEOMETRY_IN_RUG;
     #endif
@@ -704,8 +704,8 @@ EX namespace models {
     }
     
   EX void quick_model() {
-    cmode = sm::CENTER;
-    gamescreen(1);
+    cmode = sm::CENTER | sm::SIDE | sm::MAYDARK;
+    gamescreen();
     dialog::init("models & projections");
     
     if(GDIM == 2 && !euclid) {

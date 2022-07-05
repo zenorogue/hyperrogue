@@ -683,7 +683,7 @@ EX namespace dialog {
   
   EX void drawColorDialog() {
     cmode = sm::NUMBER | dialogflags;
-    if(cmode & sm::SIDE) gamescreen(0);
+    if(cmode & sm::SIDE) gamescreen();
     else emptyscreen();
 
     dcenter = vid.xres/2;
@@ -827,8 +827,6 @@ EX namespace dialog {
       };
     }
 
-  EX int numberdark;
-
   EX void formula_keyboard(bool lr) {
     addKeyboardItem("1234567890");
     addKeyboardItem("=+-*/^()\x3");
@@ -891,9 +889,7 @@ EX namespace dialog {
   
   EX void drawNumberDialog() {
     cmode = sm::NUMBER | dialogflags;
-    if(numberdark < DONT_SHOW)
-    gamescreen(numberdark);
-    else emptyscreen();
+    gamescreen();
     init(ne.title);
     addInfo(ne.s);
     if(ne.intval && ne.sc.direct == &identity_f)
@@ -1057,7 +1053,6 @@ EX namespace dialog {
     reaction = reaction_t();
     reaction_final = reaction_t();
     extra_options = reaction_t();
-    numberdark = 0;
     ne.animatable = true;
     #if CAP_ANIMATIONS
     anims::get_parameter_animation(x, ne.s);
@@ -1297,9 +1292,7 @@ EX namespace dialog {
   
   EX void string_edit_dialog() {
     cmode = sm::NUMBER | dialogflags;
-    if(numberdark < DONT_SHOW)
-    gamescreen(numberdark);
-    else emptyscreen();
+    gamescreen();
     init(ne.title);
     addInfo(view_edited_string());
     addBreak(100);
@@ -1336,11 +1329,11 @@ EX namespace dialog {
     pushScreen(string_edit_dialog);
     reaction = reaction_t();
     extra_options = reaction_t();
-    numberdark = 0;
     }
 
   EX void confirm_dialog(const string& text, const reaction_t& act) {
-    gamescreen(1);
+    cmode = sm::DARKEN;
+    gamescreen();
     dialog::addBreak(250);
     dialog::init(XLAT("WARNING"), 0xFF0000, 150, 100);
     dialog::addHelp(text);

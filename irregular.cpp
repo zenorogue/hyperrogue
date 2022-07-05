@@ -868,7 +868,7 @@ bool too_small_euclidean() {
 
 void show_gridmaker() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);  
+  gamescreen();
   dialog::init(XLAT("irregular grid"));
   dialog::addSelItem(XLAT("density"), fts(density), 'd');
   dialog::add_action([] {

@@ -670,7 +670,7 @@ EX int shot_aa = 1;
 
 EX void default_screenshot_content() {
 
-  gamescreen(0);
+  gamescreen();
 
   if(caption != "")
     displayfr(vid.xres/2, vid.fsize+vid.fsize/4, 3, vid.fsize*2, caption, forecolor, 8);
@@ -934,7 +934,7 @@ EX string format_extension() {
 
 EX void choose_screenshot_format() {
   cmode = sm::SIDE; 
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("screenshots"), iinf[itPalace].color, 150, 100);
   #if CAP_PNG
   dialog::addItem(XLAT("PNG"), 'p');
@@ -954,7 +954,7 @@ EX void choose_screenshot_format() {
 
 EX void menu() {
   cmode = sm::SIDE; 
-  gamescreen(0);
+  gamescreen();
   if(format == screenshot_format::svg && !CAP_SVG) 
     format = screenshot_format::png;
   if(format == screenshot_format::png && !CAP_PNG) 
@@ -1530,7 +1530,7 @@ EX void rug_angle_options() {
 EX void show() {
   cmode = sm::SIDE; needs_highqual = false;
   animation_lcm = 1;
-  gamescreen(0);
+  gamescreen();
   animation_period = 2 * M_PI * animation_lcm / animation_factor;
   dialog::init(XLAT("animations"), iinf[itPalace].color, 150, 100);
   dialog::addSelItem(XLAT("period"), fts(period)+ " ms", 'p');
@@ -1905,7 +1905,7 @@ void explorable(reaction_t ee) {
 
 void no_init() { }
 
-startanim null_animation { "", no_init, [] { gamescreen(2); }};
+startanim null_animation { "", no_init, [] { gamescreen(); }};
 
 #if CAP_STARTANIM
 startanim joukowsky { "Joukowsky transform", no_init, [] {
@@ -1915,7 +1915,7 @@ startanim joukowsky { "Joukowsky transform", no_init, [] {
   dynamicval<ld> ds(pconf.scale, 1/4.);
   models::configure();
   dynamicval<color_t> dc(ringcolor, 0);  
-  gamescreen(2);
+  gamescreen();
   explorable([] { pmodel = mdJoukowskyInverted; pushScreen(models::model_menu); });
   }};
 
@@ -1924,7 +1924,7 @@ startanim bandspin { "spinning in the band model", no_init, [] {
   dynamicval<ld> dt(pconf.model_orientation, ticks / 25.);
   dynamicval<int> dv(vid.use_smart_range, 2);
   models::configure();
-  gamescreen(2);
+  gamescreen();
   explorable([] { pmodel = mdJoukowskyInverted; pushScreen(models::model_menu); });
   }};
 
@@ -1937,7 +1937,7 @@ startanim perspective { "projection distance", no_init, [] {
   dynamicval<ld> da(pconf.alpha, x);
   dynamicval<ld> ds(pconf.scale, (1+x)/2);
   calcparam();
-  gamescreen(2);
+  gamescreen();
   explorable(projectionDialog);
   }};
 
@@ -1953,7 +1953,7 @@ startanim rug { "Hypersian Rug", [] {
   dynamicval<bool> b(rug::rugged, true);
   rug::physics();
   dynamicval<transmatrix> t(rug::rugView, cspin(1, 2, ticks / 3000.) * rug::rugView);
-  gamescreen(2);
+  gamescreen();
   if(!rug::rugged) current = &null_animation;
   explorable([] { rug::rugged = true; pushScreen(rug::show); });
   #endif
@@ -1965,7 +1965,7 @@ startanim spin_around { "spinning around", no_init,  [] {
   ld alpha = 2 * M_PI * ticks / 10000.;
   ld circle_radius = acosh(2.);
   dynamicval<transmatrix> dv(View, spin(-cos_auto(circle_radius)*alpha) * xpush(circle_radius) * spin(alpha) * View);
-  gamescreen(2);
+  gamescreen();
   }};
 #endif
 
@@ -1995,7 +1995,7 @@ startanim row_of_ghosts { "row of ghosts", no_init, [] {
         }
     });
   dynamicval<bool> rd(mapeditor::drawplayer, false);
-  gamescreen(2);
+  gamescreen();
   }};
 
 startanim army_of_ghosts { "army of ghosts", no_init, [] {
@@ -2020,7 +2020,7 @@ startanim army_of_ghosts { "army of ghosts", no_init, [] {
         }
       }
     });
-  gamescreen(2);
+  gamescreen();
   }};
 
 startanim ghost_spiral { "ghost spiral", no_init, [] {
@@ -2030,7 +2030,7 @@ startanim ghost_spiral { "ghost spiral", no_init, [] {
       draw_ghost(spin(t * i * 2 * M_PI) * xpush(asinh(15. / i)) * spin(M_PI/2), 1);
       }
     });
-  gamescreen(2);
+  gamescreen();
   }};
 
 startanim fib_ghosts { "Fibonacci ghosts", no_init, [] {
@@ -2047,14 +2047,14 @@ startanim fib_ghosts { "Fibonacci ghosts", no_init, [] {
       draw_ghost(T, i);
       }
     });
-  gamescreen(2);
+  gamescreen();
   }};
 
 startanim fpp { "first-person perspective", no_init, [] {
   if(MAXMDIM == 3) { current = &null_animation; return; }
   geom3::switch_fpp();
   View = cspin(0, 2, ticks / 5000.) * View;
-  gamescreen(2);
+  gamescreen();
   View = cspin(0, 2, -ticks / 5000.) * View;
   geom3::switch_fpp();
   }};
@@ -2066,7 +2066,7 @@ startanim fpp { "first-person perspective", no_init, [] {
 EX startanim *current = &null_animation;
 
 EX void pick() {
-  if(((gold() > 0 || tkills() > 0) && canmove) || geometry != gNormal || ISWEB || ISMOBILE || vid.always3 || pmodel || rug::rugged || vid.wallmode < 2 || vid.monmode < 2 || glhr::noshaders || !vid.usingGL) {
+  if(((gold() > 0 || tkills() > 0) && canmove) || geometry != gNormal || ISWEB || ISMOBILE || vid.always3 || pmodel || rug::rugged || vid.wallmode < 2 || vid.monmode < 2 || glhr::noshaders || !vid.usingGL || !enabled) {
     current = &null_animation;
     return;
     }

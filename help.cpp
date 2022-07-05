@@ -1072,14 +1072,14 @@ EX void describeMouseover() {
   }
 
 EX void showHelp() {
-  cmode = sm::HELP | sm::DOTOUR;
+  cmode = sm::HELP | sm::DOTOUR | sm::DARKEN;
   getcstat = SDLK_ESCAPE;
   if(help == "HELPFUN") {
     help_delegate();
     return;
     }
 
-  gamescreen(2);
+  gamescreen();
   string help2;
   if(help[0] == '@') {
     int iv = help.find("\t");

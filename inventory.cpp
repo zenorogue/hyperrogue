@@ -490,10 +490,10 @@ EX namespace inv {
   
     if(remaining[itOrbSword]) items[itOrbSword]++;
     if(remaining[itOrbSword2]) items[itOrbSword2]++;
-    gamescreen(2);
+    cmode = sm::CENTER | sm::DARKEN;
+    gamescreen();
     if(remaining[itOrbSword]) items[itOrbSword]--;
     if(remaining[itOrbSword2]) items[itOrbSword2]--;
-    cmode = sm::CENTER;
 
     orbcoord.clear();
     for(int y=-3; y<=3; y++) for(int x=-5; x<=5; x++) if(x+y<=6 && x+y >= -6 && (x||y))

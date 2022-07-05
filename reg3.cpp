@@ -2507,7 +2507,7 @@ int target_subcube_count;
 
 EX void edit_variation() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);  
+  gamescreen();
   dialog::init(XLAT("variations"));
 
   dialog::addBoolItem(XLAT("pure"), target_variation == eVariation::pure, 'p');

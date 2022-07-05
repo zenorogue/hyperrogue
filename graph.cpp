@@ -5323,14 +5323,21 @@ extern bool wclick;
 
 EX bool just_refreshing;
 
-EX void gamescreen(int _darken) {
+EX int menu_darkening = 2;
+
+EX void gamescreen() {
+
+  if(cmode & sm::NOSCR) {
+    emptyscreen();
+    return;
+    }
 
   if(just_refreshing) return;
 
   if(subscreens::split([=] () {
     calcparam();
     compute_graphical_distance();
-    gamescreen(_darken);
+    gamescreen();
     })) {
     if(racing::on) return;
     // create the gmatrix
@@ -5348,7 +5355,7 @@ EX void gamescreen(int _darken) {
   if(dual::split([=] () { 
     vid.xres = gx;
     vid.yres = gy;
-    dual::in_subscreen([=] () { gamescreen(_darken); });
+    dual::in_subscreen([=] () { gamescreen(); });
     })) {
     calcparam(); 
     return; 
@@ -5356,13 +5363,21 @@ EX void gamescreen(int _darken) {
   
   calcparam();
   
-  if((cmode & sm::MAYDARK) && !current_display->sidescreen && !inHighQual) {
-    _darken += 2;
+  darken = 0;
+
+  if(!inHighQual && !vrhr::active()) {
+    if((cmode & sm::MAYDARK) && !current_display->sidescreen)
+      darken += menu_darkening;
+    else if(cmode & sm::DARKEN)
+      darken += menu_darkening;
+    }
+  if(vid.highlightmode == (hiliteclick ? 0 : 2))
+    darken++;
+  if(darken >= 8) {
+    emptyscreen();
+    return;
     }
 
-  darken = _darken;
-  if(vrhr::active()) darken = 0;
-  
   if(history::includeHistory) history::restore();
 
   anims::apply();
@@ -5434,7 +5449,7 @@ EX void normalscreen() {
   if(GDIM == 3 || !outofmap(mouseh.h)) getcstat = '-';
   cmode = sm::NORMAL | sm::DOTOUR | sm::CENTER;
   if(viewdists && show_distance_lists) cmode |= sm::SIDE | sm::MAYDARK;
-  gamescreen((vid.highlightmode == (hiliteclick ? 0 : 2)) ? 1 : 0); drawStats();
+  gamescreen(); drawStats();
   if(nomenukey || ISMOBILE)
     ;
 #if CAP_TOUR
@@ -5491,6 +5506,8 @@ namespace sm {
   static const int VR_MENU = (1<<18); // always show the menu in VR
   static const int SHOWCURSOR = (1<<19); // despite MAP/DRAW always show the cursor, no panning
   static const int PANNING = (1<<20); // smooth scrolling works
+  static const int DARKEN = (1<<21); // darken the game background
+  static const int NOSCR = (1<<22); // do not show the game background
   }
 #endif
 

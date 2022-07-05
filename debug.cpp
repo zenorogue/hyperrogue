@@ -293,7 +293,7 @@ struct debugScreen {
   
   void operator () () {
     cmode = sm::SIDE | sm::DIALOG_STRICT_X;
-    gamescreen(0);
+    gamescreen();
     getcstat = '-';
 
     dialog::init(show_debug_data ? XLAT("debug values") : XLAT("internal details"));
@@ -468,7 +468,8 @@ EX void push_debug_screen() {
 
 /** show the cheat menu */
 EX void showCheatMenu() {
-  gamescreen(1);
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
   dialog::init("cheat menu");
   for(auto& ch: cheats) {
     dialog::addItem(XLAT(ch.desc), ch.key);

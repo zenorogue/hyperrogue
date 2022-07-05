@@ -631,7 +631,7 @@ void celldrawer::do_viewdist() {
 EX void viewdist_configure_dialog() {
   dialog::init("");
   cmode |= sm::SIDE | sm::MAYDARK | sm::EXPANSION;
-  gamescreen(0);
+  gamescreen();
   
   dialog::addSelItem(XLAT("which distance"), XLAT(dfnames[distance_from]), 'c');
   dialog::add_action([] () { distance_from = mod_allowed() ? eDistanceFrom((distance_from + 1) % 3) : eDistanceFrom(2 - distance_from); });

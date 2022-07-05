@@ -226,7 +226,7 @@ EX void prepare_config() {
   
 EX void show_config() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(1);  
+  gamescreen();
   dialog::init(XLAT("Solv quotient spaces"));
 
   dialog::addSelItem(XLAT("%1 period", "X/Y"), its(period_xy_edit), 'x');

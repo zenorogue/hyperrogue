@@ -1168,7 +1168,7 @@ bool texture_config::load() {
 
 void showMagicMenu() {
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
-  gamescreen(0);  
+  gamescreen();
 
   dialog::init(XLAT("texture auto-adjustment"));
 
@@ -1270,7 +1270,7 @@ EX void start_editor() {
 
 EX void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
-  gamescreen(0);
+  gamescreen();
   if(config.tstate == tsAdjusting) {
     ptds.clear();
     config.mark_triangles();

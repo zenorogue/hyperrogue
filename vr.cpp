@@ -1153,7 +1153,7 @@ EX void render() {
 
 EX void show_vr_demos() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("VR demos"));
   dialog::addInfo(XLAT("warning: these will restart your game!"));
   
@@ -1325,7 +1325,7 @@ EX void reference_button() {
 
 EX void show_vr_settings() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("VR settings"));
 
   dialog::addItem(XLAT("VR demos"), 'D');

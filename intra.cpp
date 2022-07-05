@@ -644,7 +644,8 @@ void erase_unconnected(cellwalker cw) {
 int edit_spin;
 
 EX void show_portals() {
-  gamescreen(1);
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
 
   dialog::init(XLAT("manage portals"));
 

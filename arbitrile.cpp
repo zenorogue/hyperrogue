@@ -936,7 +936,7 @@ string primes(int i) {
 
 void connection_debugger() {
   cmode = sm::SIDE | sm::DIALOG_STRICT_X;
-  gamescreen(0);
+  gamescreen();
   
   auto& last = debug_polys.back();
   
@@ -1331,7 +1331,7 @@ EX void sliders_changed(bool need_restart, bool need_start) {
 
 EX void set_sliders() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(1);
+  gamescreen();
   dialog::init(XLAT("tessellation sliders"));
   dialog::addHelp(current.comment);
   char ch = 'A';

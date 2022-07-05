@@ -136,7 +136,8 @@ void toggleanim(bool v) {
   }
 
 void showDemo() {
-  gamescreen(2);
+  cmode = sm::DARKEN;
+  gamescreen();
 
   getcstat = ' ';
   

@@ -231,7 +231,7 @@ EX void memory_for_lib() {
   }
 
 EX void show_memory_menu() {
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("memory"));
 
   dialog::addHelp(XLAT(

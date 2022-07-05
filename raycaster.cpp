@@ -2745,7 +2745,7 @@ EX void random_fog() {
 
 EX void menu() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("volumetric raycasting"));  
 
   if(!cheater) {
@@ -2797,7 +2797,7 @@ EX }
 
 EX void configure() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("raycasting configuration"));
   
   dialog::addBoolItem(XLAT("available in current geometry"), available(), 0);

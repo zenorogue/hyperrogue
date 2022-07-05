@@ -1405,7 +1405,7 @@ void delayed_reset() {
 EX void show() {
 #if CAP_ORIENTATION
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
 
   dialog::init(XLAT("scrolling by device rotation"));
   

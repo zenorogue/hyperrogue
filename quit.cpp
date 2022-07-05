@@ -315,8 +315,8 @@ eLand nextHyperstone() {
 
 EX void showGameMenu() {
 
-  cmode = sm::DOTOUR | sm::MISSION | sm::CENTER;
-  gamescreen(1); drawStats();
+  cmode = sm::DOTOUR | sm::MISSION | sm::CENTER | sm::MAYDARK | sm::SIDE;
+  gamescreen(); drawStats();
   getcstat = SDLK_ESCAPE;
 
   dialog::init(

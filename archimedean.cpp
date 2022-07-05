@@ -1323,7 +1323,7 @@ EX void show() {
       }
     }
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);  
+  gamescreen();
   dialog::init(XLAT("Archimedean tilings"));
   
   if(symbol_editing) {

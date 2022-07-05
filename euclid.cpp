@@ -882,7 +882,7 @@ EX namespace euc {
     auto& T_edit = eu_edit.user_axes;
     auto& twisted_edit = eu_edit.twisted;
     cmode = sm::SIDE | sm::MAYDARK | sm::TORUSCONFIG;
-    gamescreen(1);  
+    gamescreen();
     dialog::init(XLAT("Euclidean quotient spaces"));
     
     for(int y=0; y<dim+1; y++)

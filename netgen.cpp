@@ -699,7 +699,7 @@ EX namespace netgen {
 
   void show() {
     cmode = sm::SIDE;
-    gamescreen(0);
+    gamescreen();
     if(true) {
       initquickqueue();
       for(int i=0; i<CELLS; i++) {

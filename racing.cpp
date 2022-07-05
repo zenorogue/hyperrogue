@@ -918,8 +918,8 @@ EX void load_official_track() {
   }
 
 void track_chooser(bool official) {
-  cmode = 0;
-  gamescreen(2);
+  cmode = sm::NOSCR;
+  gamescreen();
   dialog::init(XLAT(official ? "Official tracks" : "Generate a racing track"));
   
   map<char, eLand> landmap;
@@ -959,7 +959,7 @@ void track_chooser(bool official) {
 
 void race_projection() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(1);
+  gamescreen();
   
   dialog::init(XLAT("racing projections"));
 
@@ -1065,7 +1065,8 @@ void race_projection() {
   
   #if MAXMDIM >= 4
   EX void thurston_racing() {
-    gamescreen(1);
+    cmode = sm::NOSCR;
+    gamescreen();
     dialog::init(XLAT("racing in Thurston geometries"));
     
     dialog::addBreak(100);
@@ -1119,7 +1120,8 @@ void race_projection() {
 
   void raceconfigurer() {
   
-    gamescreen(1);
+    cmode = sm::SIDE | sm::MAYDARK;
+    gamescreen();
   
     dialog::init(XLAT("Racing"));
 

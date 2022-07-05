@@ -806,7 +806,7 @@ EX namespace gp {
 
   void show() {
     cmode = sm::SIDE | sm::MAYDARK;
-    gamescreen(0);  
+    gamescreen();
     dialog::init(XLAT("variations"));
     
     int min_quality_chess = 0;

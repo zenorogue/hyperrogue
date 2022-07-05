@@ -40,7 +40,8 @@ string euchelp =
 #if CAP_FIELD
 void showQuotientConfig() {
   using namespace fieldpattern;
-  gamescreen(2);
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
   dialog::init(XLAT("field quotient"));
   fgeomextra& gxcur = fgeomextras[current_extra];
   for(int i=0; i<isize(fgeomextras); i++) {
@@ -102,7 +103,8 @@ void showQuotientConfig() {
     auto& cfp = currfp;
     auto triplets = cfp.find_triplets();
     pushScreen([triplets] {
-      gamescreen(2);
+      cmode = sm::SIDE | sm::MAYDARK;
+      gamescreen();
       dialog::init(XLAT("alternate manifolds"));
       int id = 0;
       for(auto t: triplets) {
@@ -153,7 +155,7 @@ string validclasses[4] = {" (X)", " (½)", "", " (!)"};
   
 EX void ge_land_selection() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);  
+  gamescreen();
 
   if(cheater) for(int i=0; i<landtypes; i++) landvisited[i] = true;
 
@@ -275,7 +277,7 @@ EX vector<geometry_filter*> available_filters = { &gf_hyperbolic, &gf_spherical,
 
 void ge_select_filter() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(2);  
+  gamescreen();
 
   dialog::init(XLAT("geometries"));
   
@@ -365,7 +367,7 @@ bool same_tiling(eGeometry g2) {
 
 void ge_select_tiling() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);  
+  gamescreen();
 
   if(!current_filter) { popScreen(); return; }
   dialog::init();
@@ -447,7 +449,8 @@ EX string dim_name() {
 EX void showQuotientConfig3() {
 
   using namespace fieldpattern;
-  gamescreen(2);
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
   dialog::init(XLAT("field quotient"));
   
   auto& ds = discoveries[cginf.tiling_name];
@@ -546,7 +549,7 @@ EX string geometry_name() {
 
 EX void select_quotient_screen() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
 
   dialog::init(XLAT("quotient spaces in ") + ginf[geometry].tiling_name);
   char key = 'a';
@@ -932,7 +935,7 @@ EX void showEuclideanMenu() {
   // for(int i=2; i<lt; i++) landvisited[i] = true;
 
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
 
   dialog::init(XLAT("experiment with geometry"));
 

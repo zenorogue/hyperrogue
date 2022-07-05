@@ -1511,7 +1511,7 @@ ld old_distance;
 
 EX void rug_geometry_choice() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
   
   USING_NATIVE_GEOMETRY; 
@@ -1540,7 +1540,7 @@ EX void rug_geometry_choice() {
 
 EX void show() {
   cmode = sm::SIDE | sm::MAYDARK | sm::PANNING;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
   
   dialog::addBoolItem(XLAT("enable the Hypersian Rug mode"), rug::rugged, 'u');

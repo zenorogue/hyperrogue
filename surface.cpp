@@ -676,7 +676,7 @@ transmatrix coverage_matrix;
 
 EX void show_surfaces() {
   cmode = sm::SIDE;
-  gamescreen(0);
+  gamescreen();
   dialog::init(XLAT("constant curvature surfaces"), iinf[itPalace].color, 150, 0);
   
   bool b = rug::rugged || coverage_style;

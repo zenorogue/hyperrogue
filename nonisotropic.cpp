@@ -1000,7 +1000,7 @@ EX void prepare_niltorus3() {
   
 EX void show_niltorus3() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(1);  
+  gamescreen();
   dialog::init(XLAT("Nil quotient spaces"));
   for(int a=0; a<3; a++) {
     string title = XLAT("%1 period", s0+char('X'+a));
@@ -1662,7 +1662,7 @@ EX namespace product {
 
   EX void show_config() {
     cmode = sm::SIDE | sm::MAYDARK;
-    gamescreen(1);
+    gamescreen();
     dialog::init(XLAT("quotient product spaces"));
     dialog::addSelItem(XLAT("%1 period", "Z"), its(hybrid::csteps), 'z');
     dialog::add_action(hybrid::configure_period);

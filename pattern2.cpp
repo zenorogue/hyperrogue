@@ -1969,7 +1969,7 @@ EX namespace patterns {
 
   void showPrePatternP(bool instant) {
     cmode = sm::SIDE | sm::MAYDARK;
-    gamescreen(0);
+    gamescreen();
 
     dialog::init("predesigned patterns");
     dialog::addItem(WDIM == 3 ? XLAT("empty") : XLAT("single color"), 'g');
@@ -2178,7 +2178,7 @@ EX namespace patterns {
     cmode = sm::SIDE | sm::MAYDARK;
     {
     dynamicval<bool> dc(displaycodes, whichPattern);
-    gamescreen(0);
+    gamescreen();
     }
     dialog::init();
 
@@ -2466,7 +2466,7 @@ EX namespace patterns {
     cmode = sm::SIDE | sm::MAYDARK;
     {
     dynamicval<bool> dc(displaycodes, true);
-    gamescreen(0);
+    gamescreen();
     }
     dialog::init();
     for(int i=0; i<isize(cpatterns); i++) {
@@ -2986,7 +2986,7 @@ EX namespace linepatterns {
   
   EX void showMenu() {
     cmode = sm::SIDE | sm::MAYDARK;
-    gamescreen(0);
+    gamescreen();
 
     dialog::init(XLAT("line patterns"));
 

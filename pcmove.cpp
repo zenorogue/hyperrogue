@@ -1291,7 +1291,8 @@ EX bool warningprotection(const string& s) {
   if(items[itWarning]) return false;
   warning_shown = true;
   pushScreen([s] () {
-    gamescreen(1);
+    cmode = sm::DARKEN;
+    gamescreen();
     dialog::addBreak(250);
     dialog::init(XLAT("WARNING"), 0xFF0000, 150, 100);
     dialog::addBreak(500);

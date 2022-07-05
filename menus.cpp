@@ -221,7 +221,7 @@ EX const char *hlmodes[3] = {"press Alt", "highlight", "super-highlight"};
 
 EX void showGraphQuickKeys() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
 
   dialog::init(XLAT("quick options"));
   
@@ -309,7 +309,7 @@ EX void switch_casual() {
 
 EX void showCreative() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(3);
+  gamescreen();
   dialog::init(XLAT("creative mode"));
 
 #if CAP_EDIT
@@ -382,7 +382,8 @@ EX void showCreative() {
   }
 
 EX void show_chaos() {
-  gamescreen(3);
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
   dialog::init(XLAT("land structure"));
   chaosUnlocked = chaosUnlocked || autocheat;
 
@@ -439,7 +440,8 @@ EX void show_chaos() {
   }
 
 EX void mode_higlights() {
-  gamescreen(3);
+  cmode = sm::NOSCR;
+  gamescreen();
   dialog::init(XLAT("highlights & achievements"));
   
   dialog::addBigItem(XLATN("Space Rocks"), 'r');
@@ -623,7 +625,8 @@ EX void menuitem_land_structure(char key) {
   }
   
 EX void showChangeMode() {
-  gamescreen(3);
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
   dialog::init(XLAT("special modes"));
 
   dialog::addBoolItem(XLAT("experiment with geometry"), geometry || CHANGED_VARIATION || viewdists, 'e');
@@ -752,6 +755,7 @@ EX void showStartMenu() {
   getcstat = ' ';
   
   #if CAP_STARTANIM
+  cmode = sm::DARKEN;
   startanims::display();
   #endif
 

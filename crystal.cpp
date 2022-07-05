@@ -1443,7 +1443,8 @@ string make_help() {
   }
 
 EX void crystal_knight_help() {  
-  gamescreen(1);    
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
   dialog::init();
   
   dialog::addHelp(XLAT(
@@ -1467,7 +1468,7 @@ EX void crystal_knight_help() {
 
 EX void show() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);  
+  gamescreen();
   dialog::init(XLAT("dimensional crystal"));
   for(int i=5; i<=14; i++) {
     string s;

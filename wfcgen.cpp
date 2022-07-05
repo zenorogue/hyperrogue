@@ -241,7 +241,7 @@ void use_probs() {
 
 EX void wfc_menu() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(1);
+  gamescreen();
   dialog::init(XLAT("Wave Function Collapse"));
   
   dialog::addSelItem(XLAT("import the current map"), XLAT("rules: %1", its(isize(probs))), 'i');

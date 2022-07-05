@@ -2437,7 +2437,7 @@ EX void verify_parsed_treestates(arb::arbi_tiling& c) {
 
 EX void show() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(1);
+  gamescreen();
   dialog::init(XLAT("strict tree maps"));
 
   dialog::addHelp(XLAT(

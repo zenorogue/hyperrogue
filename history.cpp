@@ -190,7 +190,7 @@ EX namespace history {
   int lastprogress;
   
   EX void progress_screen() {
-    gamescreen(0);
+    gamescreen();
     mouseovers = "";
     }
 
@@ -570,7 +570,7 @@ EX namespace history {
   
   EX void history_menu() {
     cmode = sm::SIDE | sm::MAYDARK;
-    gamescreen(0);
+    gamescreen();
     
     dialog::init(XLAT("history mode"));
 

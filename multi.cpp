@@ -393,8 +393,8 @@ struct shmup_configurer {
 
   void operator()() {
   #if CAP_SDL
-    cmode = sm::SHMUPCONFIG;
-    gamescreen(3);
+    cmode = sm::SHMUPCONFIG | sm::SIDE | sm::DARKEN;
+    gamescreen();
     dialog::init(XLAT("keyboard & joysticks"));
     
     bool haveconfig = shmup::on || players > 1 || multi::alwaysuse;
@@ -503,7 +503,8 @@ EX void configure() {
   }
 
 EX void showConfigureMultiplayer() {
-  gamescreen(1);
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
   dialog::init("multiplayer");
   
   for(int i=1; i <= MAXPLAYER; i++) {

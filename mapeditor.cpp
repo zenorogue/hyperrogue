@@ -1361,7 +1361,7 @@ EX namespace mapeditor {
 
   EX void showMapEditor() {
     cmode = sm::MAP | sm::PANNING;
-    gamescreen(0);
+    gamescreen();
   
     int fs = editor_fsize();
     
@@ -2042,7 +2042,7 @@ EX namespace mapeditor {
   EX void showDrawEditor() {
 #if CAP_POLY
     cmode = sm::DRAW | sm::PANNING;
-    gamescreen(0);
+    gamescreen();
     drawGrid();
     if(callhandlers(false, hooks_prestats)) return;
 
@@ -3159,7 +3159,7 @@ EX namespace mapeditor {
 
   EX void map_settings() {
     cmode = sm::SIDE | sm::MAYDARK;
-    gamescreen(1);
+    gamescreen();
   
     dialog::init(XLAT("Map settings"));
   
