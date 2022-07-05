@@ -775,17 +775,23 @@ EX namespace dialog {
         }
       }
 
+    item it;
+    it.type = diSlider;
+    it.scale = 100;
+
     for(int i=0; i<4; i++) {
       int y = vid.yres / 2 + (2-i) * vid.fsize * 2;
       if(i == 3 && !colorAlpha) continue;
-      
-      color_t col = ((i==colorp) && !mousing) ? 0xFFD500 : dialogcolor;
+      int in = 3 - i - (colorAlpha?0:1);
 
-      displayColorButton(dcenter - dwidth/4, y, "(", 0, 16, 0, col);
-      string rgt = ") "; rgt += "ABGR" [i+(colorAlpha?0:1)];
-      displayColorButton(dcenter + dwidth/4, y, rgt, 0, 0, 0, col);
-      displayColorButton(dcenter - dwidth/4 + dwidth * part(color, i) / 510, y, "#", 0, 8, 0, col);
-      
+      color_t colors[4] = {0xFF0000, 0x00FF00, 0x0000FF, 0xFFFFFF};
+      it.color = colors[in];
+      it.param = part(color, i) / 255.;
+      draw_slider(dcenter - dwidth / 4, dcenter + dwidth / 4, y, it);
+
+      color_t col = ((i==colorp) && !mousing) ? 0xFFD500 : dialogcolor;
+      string rgt; rgt += "RGBA" [in];
+      displayColorButton(dcenter + dwidth/4 + vid.fsize, y, rgt, 0, 0, 0, col);
       if(mousey >= y - vid.fsize && mousey < y + vid.fsize)
         getcstat = 'A' + i, inslider = true, slider_x = mousex;
       }
