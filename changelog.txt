@@ -4709,3 +4709,18 @@ Menu improvements:
 - tes files with tree data (tessellations/sample/horotiling.tes) and star tes files (tessellations/sample/star-7-72.tes) should load correctly again
 - show treasure bubbles in the Dice Reserve
 - Shift+A key leaves the map editor, also all options are now displayed in the cheat menu (some obsolete ones are removed)
+
+2022-07-05 14:12 Update 10.2t:
+  Tranlations and bugfixes:
+  - French translation by 3raven (42% complete and untested yet)
+  - fixed the Polish translation of the description of False Princess
+  - a bug where some racing times are set to 0 should now be fixed
+
+  Menu improvements:
+  - fixed the help button in the pause menu
+  - you can now configure by how much you want to darken the background in the menu
+  - menu display should be more consistent now
+  - in sidescreen menus, the background under the menu is now darkened
+  - start animations now can be disabled
+  - nicer sliders and color selectors (unless the ASCII mode is on)
+
