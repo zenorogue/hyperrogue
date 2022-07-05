@@ -39,7 +39,7 @@ struct hrmap_rewrite : hrmap_hyperbolic {
   map<heptagon*, pair<heptagon*, string> > asg;
   map<pair<heptagon*, string>, heptagon*> asg_rev;
 
-  heptagon *create_step(heptagon *h, int direction) {
+  heptagon *create_step(heptagon *h, int direction) override {
     if(h->move(direction)) return h->move(direction);
     if(asg.empty()) { asg[h] = {h, start}; h->zebraval = 0; }
     
