@@ -134,7 +134,7 @@ N("tree", GEN_M, "arbre", "arbres", "arbre")
 // LANDS
 // =====
 
-N("Great Wall", GEN_M, "Grand Mur", "Grands Murs", "sur les Grands Musr")
+N("Great Wall", GEN_M, "Grand Mur", "Grands Murs", "sur les Grands Murs")
 N("Crossroads", GEN_M, "Croisement", "Croisements", "sur les Croisements")
 N("Desert", GEN_F, "Désert", "Déserts", "dans les Déserts")
 N("Icy Land", GEN_M, "Pays des Glaces", "Pays des Glaces", "dans les Pays des Glaces")
@@ -204,7 +204,7 @@ S("This spot will be burning soon! RUN!", "Cet endroit sera bientôt en feu ! CO
 S("The floor has collapsed! RUN!", "Le sol s'est effondré ! COUREZ !")
 S("You need to find the right Key to unlock this Orb of Yendor!",
   "Vous devez trouver la bonne clé pour ouvrir l'Orbe de Yendor !")
-S("You fall into a wormhole!", "Vous tmobez dans un trou de ver !")
+S("You fall into a wormhole!", "Vous tombez dans un trou de ver !")
 S("You activate %the1.", "Vous activez %lea1.")
 S("No room to push %the1.", "Aucun espace pour pousser %lea1.")
 S("You push %the1.", "Vous poussez %lea1.")
@@ -217,7 +217,7 @@ S("You cannot defeat the Greater Demon yet!", "Vous ne pouvez pas encore vaincre
 S("That was easy, but groups could be dangerous.", "C'était facile, mais des groupes peuvent être dangereux.")
 S("Good to know that your fighting skills serve you well in this strange world.", "Bon à savoir, que vos compétences de combat vous aident dans ce monde étrange.")
 S("You wonder where all these monsters go, after their death...", "Vous vous demandez où vont tous ces monstres, après leur mort...")
-S("You feel that the souls of slain enemies pull you to the Graveyard...", "Vous sentez les âmes de vos ennemis tombés vous entraînez vers le cimetière...")
+S("You feel that the souls of slain enemies pull you to the Graveyard...", "Vous sentez les âmes de vos ennemis tombés vous entraîner vers le Cimetière...")
 S("Wrong color!", "Mauvaise Couleur !")
 S("You cannot move through %the1!", "Vous ne pouvez pas passer à travers %lea1 !")
 S("%The1 would kill you there!", "%Le1 vous tuerais ici !")
@@ -277,7 +277,7 @@ S("Dead orbs gained!", "Orbe morte récupérée !")
 S("Orb of Yendor gained!", "Orbe de Yendor récupérée")
 S("Treasure gained!", "Trésor récupéré !")
 S("Lots of treasure gained!", "Plein de trésors récupérés !")
-S("You summon a sandworm!", "Vous invoquez une tempête de sable !")
+S("You summon a sandworm!", "Vous invoquez un Ver des sables !")
 S("You summon an Ivy!", "Vous invoquez un Lierre !")
 S("You summon a monster!", "Vous invoquez un monstre !")
 S("You summon some Thumpers!", "Vous invoquez des Marteleurs !")
@@ -1431,7 +1431,7 @@ S("Illusions are targeted "
   "Les Illusions sont attaquées comme vous, les Marteleurs et vos alliésS.")
 
 S("You create an Illusion!", "Vous créer une Illusion !")
-S("You take the Illusion away.", "Vous retirez l''Illusion.")
+S("You take the Illusion away.", "Vous retirez l'Illusion.")
 
 S("You cannot target that far away!", "Trop loin !")
 S("You cannot target that close!", "Trop près !")
@@ -1851,7 +1851,7 @@ S("This bomberbird will follow you at some distance, and attack your enemies. "
   "Cet Oiseau-Bombe vous suit à distance, et attaque vos ennemis. "
   "Vous pouvez le tuez pour placer une mine.")
 
-N("Bomberbird Egg", GEN_M, "Œuf d''Oiseau-Bombe", "Œufs d'Oiseaux-Bombe", "Œuf d''Oiseau-Bombe")
+N("Bomberbird Egg", GEN_M, "Œuf d'Oiseau-Bombe", "Œufs d'Oiseaux-Bombe", "Œuf d'Oiseau-Bombe")
 
 S("Bomberbird eggs are big and tasty, and thus valuable. "
   "They can hatch when left alone for some time (but this will never happen "
@@ -1868,7 +1868,7 @@ S("This Orb summons a friendly Bomberbird.",
   "Cette Orbe invoque un Oiseau-Bombe amical.")
 
 S("Still confused? Read the FAQ on the HyperRogue website!\n\n",
-  "Toujours confus ? Lisez la FAQ sur le site d''HyperRogue !\n\n")
+  "Toujours confus ? Lisez la FAQ sur le site d'HyperRogue !\n\n")
 
 S("Nowhere to blow %the1!", "Pas de place pour faire exploser %le1 !")
 S("%The1 is immune to wind!", "%Le1 est immunisé contre le vent !")
@@ -2377,7 +2377,7 @@ N("Tentacle+Ghost", GEN_M, "Tentacule+Fantôme", "Tentacules+Fantômes", "Tentac
 // Land Overview
 // -------------
 
-S("world overview", "Vue d'ensemble")
+S("world overview", "vue d'ensemble")
 S("or 'o' to see the world overview", "ou 'o' pour la vue d'ensemble")
 
 S("forbidden to find in %the1", "interdit de ramasser dans %le1")
