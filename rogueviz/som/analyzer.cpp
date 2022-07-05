@@ -36,13 +36,13 @@ void load_maniset(maniset& m, int scale) {
       m.names.push_back(buf);
     auto& md = m.mdata[buf];
     int N, M;
-    fscanf(f, "%d%d", &N, &M);
+    hr::ignore(fscanf(f, "%d%d", &N, &M));
     println(hlog, "reading ", buf, " of size ", N, " and ", M, " edges");
     md.size = N;
     auto& ed = md.edges;
     for(int i=0; i<M; i++) {
       int a, b;
-      fscanf(f, "%d%d", &a, &b);
+      hr::ignore(fscanf(f, "%d%d", &a, &b));
       ed.emplace_back(a, b);
       }
     md.distances = measures::build_distance_matrix(N, md.edges);
@@ -125,10 +125,10 @@ void analyze_test() {
 
             while(current_row < it) {
               current_row++;
-              for(int i=0; i<No; i++) fscanf(f, "%d", &mapp[i]);
-              int V = 0; fscanf(vor, "%d", &V);
+              for(int i=0; i<No; i++) hr::ignore(fscanf(f, "%d", &mapp[i]));
+              int V = 0; hr::ignore(fscanf(vor, "%d", &V));
               vor_edges.resize(V);
-              for(int i=0; i<V; i++) fscanf(vor, "%d%d", &vor_edges[i].first, &vor_edges[i].second);
+              for(int i=0; i<V; i++) hr::ignore(fscanf(vor, "%d%d", &vor_edges[i].first, &vor_edges[i].second));
               if(mapp.back() == -2) goto next_pair;
               if(current_row == it)
                 edo_recreated = measures::recreate_topology(mapp, edo);
