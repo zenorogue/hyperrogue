@@ -96,23 +96,26 @@ template<class T> const T* findInHashTableS(string s, const T *table, int size) 
 #endif
 
 string choose2(int g, string a, string b) {
-  if((g & 0b11) == GEN_M || (g & 0b11) == GEN_O) return a;
-  if((g & 0b11) == GEN_F || (g & 0b11) == GEN_N) return b;
+  g &= GEN_BASE_MASK;
+  if(g == GEN_M || g == GEN_O) return a;
+  if(g == GEN_F || g == GEN_N) return b;
   return "?" + a;
   }
 
 string choose3(int g, string a, string b, string c) {
-  if((g & 0b11) == GEN_M || (g & 0b11) == GEN_O) return a;
-  if((g & 0b11) == GEN_F) return b;
-  if((g & 0b11) == GEN_N) return c;
+  g &= GEN_BASE_MASK;
+  if(g == GEN_M || g == GEN_O) return a;
+  if(g == GEN_F) return b;
+  if(g == GEN_N) return c;
   return "?" + a;
   }
 
 string choose4(int g, string a, string b, string c, string d) {
-  if((g & 0b11) == GEN_M) return a;
-  if((g & 0b11) == GEN_F) return b;
-  if((g & 0b11) == GEN_N) return c;
-  if((g & 0b11) == GEN_O) return d;
+  g &= GEN_BASE_MASK;
+  if(g == GEN_M) return a;
+  if(g == GEN_F) return b;
+  if(g == GEN_N) return c;
+  if(g == GEN_O) return d;
   return "?" + a;
   }
 

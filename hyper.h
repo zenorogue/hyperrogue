@@ -110,10 +110,11 @@ struct hr_shortest_path_exception { };
 #define GEN_F 1
 #define GEN_N 2
 #define GEN_O 3
+#define GEN_BASE_MASK   7
 
-#define GENF_ELISION    (4 << 0)
-#define GENF_PLURALONLY (4 << 1)
-#define GENF_PROPER     (4 << 2)
+#define GENF_ELISION    (1 << 3)
+#define GENF_PLURALONLY (1 << 4)
+#define GENF_PROPER     (1 << 5)
 
 // Add a message to the GUI.
 // If multiple messages appear with the same spamtype != 0, the older ones disappear quickly
