@@ -2574,13 +2574,15 @@ EX void refresh_canvas() {
     }
   }
 
+EX color_t addalpha(color_t c) { return (c << 8) | 0xFF; }
+
 EX void edit_color_table(colortable& ct, const reaction_t& r IS(reaction_t()), bool has_bit IS(false)) {
   cmode = sm::SIDE;
   gamescreen();
   dialog::init(XLAT("colors & aura"));
   
   for(int i=0; i<isize(ct); i++) {
-    dialog::addColorItem(its(i), ct[i] << 8, 'a'+i);
+    dialog::addColorItem(its(i), addalpha(ct[i]), 'a'+i);
     if(WDIM == 3 && has_bit && !(ct[i] & 0x1000000)) dialog::lastItem().value = XLAT("(no wall)");
     dialog::add_action([i, &ct, r, has_bit] () { 
       if(WDIM == 3 && has_bit) {
@@ -2604,16 +2606,16 @@ EX void show_color_dialog() {
   gamescreen();
   dialog::init(XLAT("colors & aura"));
 
-  dialog::addColorItem(XLAT("background"), backcolor << 8, 'b');
+  dialog::addColorItem(XLAT("background"), addalpha(backcolor), 'b');
   dialog::add_action([] () { dialog::openColorDialog(backcolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
   
   if(WDIM == 2 && GDIM == 3 && hyperbolic)
     dialog::addBoolItem_action(XLAT("cool fog effect"), context_fog, 'B');
 
-  dialog::addColorItem(XLAT("foreground"), forecolor << 8, 'f');
+  dialog::addColorItem(XLAT("foreground"), addalpha(forecolor), 'f');
   dialog::add_action([] () { dialog::openColorDialog(forecolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
 
-  dialog::addColorItem(XLAT("borders"), bordcolor << 8, 'o');
+  dialog::addColorItem(XLAT("borders"), addalpha(bordcolor), 'o');
   dialog::add_action([] () { dialog::openColorDialog(bordcolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
 
   dialog::addColorItem(XLAT("projection boundary"), ringcolor, 'r');
@@ -2638,7 +2640,7 @@ EX void show_color_dialog() {
   dialog::addColorItem(XLAT("projection period"), periodcolor, 'p');
   dialog::add_action([] () { dialog::openColorDialog(periodcolor); dialog::dialogflags |= sm::SIDE; });
 
-  dialog::addColorItem(XLAT("dialogs"), dialog::dialogcolor << 8, 'd');
+  dialog::addColorItem(XLAT("dialogs"), addalpha(dialog::dialogcolor), 'd');
   dialog::add_action([] () { dialog::openColorDialog(dialog::dialogcolor); dialog::colorAlpha = false; dialog::dialogflags |= sm::SIDE; });
 
   dialog::addBreak(50);
