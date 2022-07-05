@@ -17,7 +17,7 @@ EX namespace dialog {
 
   static const int DONT_SHOW = 16;
 
-  enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diIntSlider, diSlider, diBigItem, diKeyboard, diCustom};
+  enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diIntSlider, diSlider, diBigItem, diKeyboard, diCustom, diColorItem};
 
   struct item {
     tDialogItem type;
@@ -246,17 +246,11 @@ EX namespace dialog {
     }
 
   EX void addColorItem(string body, int value, int key) {
-    item it;
-    it.type = diItem;
-    it.body = body;
-    it.value = COLORBAR;
-    it.key = key;
-    it.color = it.colorv = displaycolor(value);
-    it.colors = it.color ^ 0x404040;
-    it.colorc = it.color ^ 0x808080;
-    it.colork = 0x808080;
-    it.scale = 100;
-    items.push_back(it);
+    addSelItem(body, COLORBAR, key);
+    auto& it = items.back();
+    it.type = diColorItem;
+    it.colorv = displaycolor(value);
+    it.param = value & 0xFF;
     }
 
   EX void addHelp(string body) {
@@ -378,7 +372,7 @@ EX namespace dialog {
         tothei += displayLong(items[i].body, dfsize * items[i].scale / 100, 0, true);
       else {
         tothei += dfspace * items[i].scale / 100;
-        if(items[i].type == diItem) 
+        if(among(items[i].type, diItem, diColorItem))
           innerwidth = max(innerwidth, textwidth(dfsize * items[i].scale / 100, items[i].body));
         if(items[i].type == diTitle || items[i].type == diInfo || items[i].type == diBigItem)
           dialogwidth = max(dialogwidth, textwidth(dfsize * items[i].scale / 100, items[i].body) * 10/9);
@@ -401,21 +395,26 @@ EX namespace dialog {
   
   EX void queue_key(int key) { key_queue.push_back(key); }
   
+  EX int uishape() {
+    int a = S7;
+    if(a < 3) a = 3;
+    if(a > 36) a = 36;
+    return a;
+    }
+
   EX void draw_slider(int sl, int sr, int y, item& I) {
     int sw = sr-sl;
     int mid = y;
 
     if(!wmascii) {
-      int a = S7;
-      if(a < 3) a = 3;
-      if(a > 36) a = 36;
+      int a =uishape();
 
       flat_model_enabler fme;
       initquickqueue();
       ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
       shiftmatrix V = shiftless(atscreenpos(0, 0, pix));
 
-      color_t col = (I.color << 8) | 0xFF;
+      color_t col = addalpha(I.color);
 
       ld siz = dfsize * I.scale / 150;
       ld si = siz / 2;
@@ -522,7 +521,7 @@ EX namespace dialog {
         displayfr(dcenter, mid, 2, dfsize * I.scale/100, I.body, I.color, 8);
         if(xthis) getcstat = I.key;
         }
-      else if(I.type == diItem || I.type == diBigItem) {
+      else if(among(I.type, diItem, diBigItem, diColorItem)) {
         bool xthis = (mousey >= top && mousey < tothei);
         if(cmode & sm::DIALOG_STRICT_X)
           xthis = xthis && (mousex >= dcenter - dialogwidth/2 && mousex <= dcenter + dialogwidth/2);
@@ -546,9 +545,25 @@ EX namespace dialog {
           if(!mousing)
             displayfr(keyx, mid, 2, dfsize * I.scale/100, keyname(I.key), I.colork, 16);
           displayfr(itemx, mid, 2, dfsize * I.scale/100, I.body, I.color, 0);
-          int siz = dfsize * I.scale/100;
-          while(siz > 6 && textwidth(siz, I.value) >= vid.xres - valuex) siz--;
-          displayfr(valuex, mid, 2, siz, I.value, I.colorv, 0);
+
+          if(I.type == diColorItem && !wmascii) {
+            int a = uishape();
+            flat_model_enabler fme;
+            initquickqueue();
+            ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
+            color_t col = addalpha(I.color);
+            ld sizf = dfsize * I.scale / 150;
+            ld siz = sizf * sqrt(0.15+0.85*I.param/255.);
+            for(int i=0; i<=a; i++) curvepoint(hyperpoint(siz * sin(i*2*M_PI/a), -siz * cos(i*2*M_PI/a), 1, 1));
+            shiftmatrix V = shiftless(atscreenpos(valuex + sizf, mid, pix));
+            queuecurve(V, col, (I.colorv << 8) | 0xFF, PPR::LINE);
+            quickqueue();
+            }
+          else {
+            int siz = dfsize * I.scale/100;
+            while(siz > 6 && textwidth(siz, I.value) >= vid.xres - valuex) siz--;
+            displayfr(valuex, mid, 2, siz, I.value, I.colorv, 0);
+            }
           }
         if(xthis) getcstat = I.key;
         }      
@@ -604,7 +619,7 @@ EX namespace dialog {
     }
 
   bool isitem(item& it) {
-    return it.type == diItem || it.type == diBigItem;
+    return among(it.type, diItem, diBigItem, diColorItem);
     }
 
   EX void handle_actions(int &sym, int &uni) {
