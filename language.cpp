@@ -202,6 +202,7 @@ void genderrep(string& x, const string& w, const noun& N) {
       }
     else if(genus & GENF_ELISION)
     {
+      rep(x, "%de"+w, s0+"d'"+N.nom);
       rep(x, "%le"+w, s0+"l'"+N.nom);
       rep(x, "%Le"+w, s0+"L'"+N.nom);
       }
@@ -213,6 +214,11 @@ void genderrep(string& x, const string& w, const noun& N) {
     rep(x, "%Le"+w, choose2(genus, "Le ", "La ")+N.nom);
     rep(x, "%un"+w, choose2(genus, "un ", "une ")+N.nom);
     rep(x, "%Un"+w, choose2(genus, "Un ", "Une ")+N.nom);
+    rep(x, "%de"+w, s0+"de "+N.nom);
+    
+    rep(x, "%er"+w, choose2(genus, "er", "ère"));
+    rep(x, "%e"+w, choose2(genus, "", "e"));
+    rep(x, "%x"+w, choose2(genus, "x", "se"));
     }
 #endif
   }
