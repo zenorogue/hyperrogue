@@ -520,6 +520,7 @@ string rule_name(int r) {
   else if(r == DIR_LEFT) return "L";
   else if(r == DIR_RIGHT) return "R";
   else if(r == DIR_PARENT) return "P";
+  else if(r < -100) return "S"+its(r);
   else return its(r);
   }
 
@@ -866,7 +867,7 @@ void test_current(string tesname) {
   treestates.clear();
 
   /* we do not want to include the conversion time */
-  if(!arb::in()) try {
+  if(!arb::in() && WDIM != 3) try {
     arb::convert::convert();
     arb::convert::activate();
     }
@@ -1567,6 +1568,65 @@ void animate_to(int i) {
   println(hlog, "steps = ", steps);
   }
 
+void genhoneycomb(string fname) {
+  if(WDIM != 3) throw hr_exception("genhoneycomb not in honeycomb");
+
+  int qc = isize(t_origin);
+
+  vector<short> data;
+  string side_data;
+
+  map<int, vector<int>> rev_roadsign_id;
+  for(auto& rs: roadsign_id) rev_roadsign_id[rs.second] = rs.first;
+
+  for(int i=0; i<isize(treestates); i++) {
+    auto& ts = treestates[i];
+    for(int j=0; j<S7; j++) {
+      int j1 = gmod(j - ts.giver.spin, S7);
+      auto r =ts.rules[j1];
+      if(r == DIR_PARENT) {
+        data.push_back(-1);
+        side_data += ('A' + j);
+        side_data += ",";
+        }
+      else if(r >= 0) {
+        data.push_back(r);
+        }
+      else {
+        data.push_back(-1);
+        auto& str = rev_roadsign_id[r];
+        bool next = true;
+        for(auto ch: str) {
+          if(next) side_data += ('a' + ch);
+          next = !next;
+          }
+        side_data += ",";
+        }
+      }
+    }
+
+  shstream ss;
+
+  auto& fp = currfp;
+  hwrite_fpattern(ss, fp);
+
+  vector<int> root(qc, 0);
+  for(int i=0; i<qc; i++) root[i] = get_treestate_id(t_origin[i]).second;
+  println(hlog, "root = ", root);
+  hwrite(ss, root);
+
+  println(hlog, "data = ", data);
+  hwrite(ss, data);
+  println(hlog, "side_data = ", side_data);
+  hwrite(ss, side_data);
+
+  println(hlog, "compress_string");
+  string s = compress_string(ss.s);
+
+  fhstream of(fname, "wb");
+  print(of, s);
+  }
+
 void animate_steps(int i) {
   while(i--) {
     if(state != 1) break;
@@ -1709,6 +1769,10 @@ int testargs() {
     shift(); tesgen(args());
     }
 
+  else if(argis("-gen-honeycomb")) {
+    shift(); genhoneycomb(args());
+    }
+
   else if(argis("-tes-animate")) {
     animate();
     }
@@ -1749,6 +1813,16 @@ int testargs() {
       println(hlog, "wrong dseek index");
     }
     
+  else if(argis("-urq")) {
+    // -urq 7 to generate honeycombs
+    stop_game();
+    shift(); int i = argi();
+    reg3::reg3_rule_available = (i & 8) ? 0 : 1;
+    fieldpattern::use_rule_fp = (i & 1) ? 0 : 1;
+    fieldpattern::use_quotient_fp = (i & 2) ? 0 : 1;;
+    reg3::minimize_quotient_maps = (i & 4) ? 0 : 1;;
+    }
+
   else return 1;
   return 0;
   }
