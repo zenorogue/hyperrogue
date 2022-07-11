@@ -1423,6 +1423,7 @@ EX namespace reg3 {
   
     heptagon *origin;
     hrmap *binary_map;
+    vector<heptagon*> extra_origins;
     
     map<heptagon*, pair<heptagon*, transmatrix>> reg_gmatrix;
     map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;
@@ -1636,6 +1637,7 @@ EX namespace reg3 {
       #endif
       if(quotient_map) delete quotient_map;
       clearfrom(origin);
+      for(auto e: extra_origins) clearfrom(e);
       }
     
     map<heptagon*, int> reducers;
@@ -1691,6 +1693,36 @@ EX namespace reg3 {
       return T;
       }
     
+    cell* gen_extra_origin(int fv) override {
+      auto orig = isize(extra_origins) ? extra_origins.back() : origin;
+
+      auto& p1 = reg_gmatrix[orig];
+      heptagon *alt = p1.first;
+      #if CAP_FIELD
+      transmatrix T = p1.second * xpush(10);
+      #else
+      transmatrix T = p1.second * xpush(10);
+      #endif
+      #if CAP_BT
+      if(hyperbolic) {
+        dynamicval<eGeometry> g(geometry, gBinary3);
+        dynamicval<hrmap*> cm(currentmap, binary_map);
+        binary_map->virtualRebase(alt, T);
+        fixmatrix(T);
+        }
+      #endif
+
+      heptagon *created = init_heptagon(S7);
+      created->c7 = newCell(S7, created);
+      created->s = hsOrigin;
+      created->fieldval = fv;
+      fixmatrix(T);
+      reg_gmatrix[created] = make_pair(alt, T);
+      altmap[alt].emplace_back(created, T);
+
+      extra_origins.push_back(created);
+      return created->c7;
+      }
     };
 
     };
