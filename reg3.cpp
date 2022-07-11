@@ -1720,15 +1720,15 @@ EX namespace reg3 {
       #endif
 
       heptagon *created = init_heptagon(S7);
-      created->c7 = newCell(S7, created);
+
       created->s = hsOrigin;
-      created->fieldval = fv;
+      created->fieldval = quotient_map->acells[fv]->master->fieldval;
       fixmatrix(T);
       reg_gmatrix[created] = make_pair(alt, T);
       altmap[alt].emplace_back(created, T);
 
       extra_origins.push_back(created);
-      return created->c7;
+      return get_cell_at(created, fv);
       }
     };
 
