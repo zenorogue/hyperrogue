@@ -74,6 +74,9 @@ public:
 
   /** \brief the sequence of heptagon movement direction to get from c->master to c->move(i)->master; implemented only for reg3 */
   virtual const vector<int>& get_move_seq(cell *c, int i);
+
+  /** generate a new map that is disconnected from what we already have, disconnected from the map we have so far */
+  virtual cell* gen_extra_origin(int fv) { throw hr_exception("gen_extra_origin not supported on this map"); }
   };
 
 /** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient  

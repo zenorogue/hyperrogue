@@ -182,8 +182,23 @@ twalker addstep(twalker x) {
   return x + wstep;
   }
 
+int get_id(cell *c) {
+  if(arb::in()) return shvid(c);
+  throw hr_exception("unknown get_id");
+  }
+
+int shape_size(int id) {
+  if(arb::in()) return isize(arb::current.shapes[id].connections);
+  throw hr_exception("unknown shape_size");
+  }
+
+int cycle_size(int id) {
+  if(arb::in()) return arb::current.shapes[id].cycle_length;
+  throw hr_exception("unknown shape size");
+  }
+
 tcell *gen_tcell(int id) {
-  int d = isize(arb::current.shapes[id].connections);
+  int d = shape_size(id);
   auto c = tailored_alloc<tcell> (d);
   c->id = id;
   c->next = first_tcell;
@@ -274,7 +289,7 @@ tcell* tmove(tcell *c, int d) {
     cell *oc1 = oc->cmove(d1);
     auto& c1 = cell_to_tcell[oc1];
     if(!c1) {
-      c1 = gen_tcell(shvid(oc1));
+      c1 = gen_tcell(get_id(oc1));
       tcell_to_cell[c1] = oc1;
       if(flags & w_known_distances)
         c1->dist = oc1->master->distance;
@@ -386,15 +401,12 @@ EX void unify(twalker pw1, twalker pw2) {
   if(pw1.at->id != pw2.at->id)
     throw hr_exception("unifying two cells of different id's");
 
-  auto& shs = arb::current.shapes;
-
-  if((pw1.spin - pw2.spin) % shs[pw1.at->id].cycle_length)
+  if((pw1.spin - pw2.spin) % cycle_size(pw1.at->id))
     throw hr_exception("unification spin disagrees with cycle_length");
 
   unify_distances(pw1.at, pw2.at, pw2.spin - pw1.spin);
 
-  int id = pw1.at->id;
-  for(int i=0; i<shs[id].size(); i++) {
+  for(int i=0; i<pw1.at->type; i++) {
     if(!pw2.peek()) {
       /* no need to reconnect */
       }
@@ -768,7 +780,7 @@ EX void look_for_shortcuts(tcell *c, shortcut& sh) {
       }
 
     int more_steps = isize(sh.post);
-    int d = arb::current.shapes[c->id].cycle_length;
+    int d = cycle_size(c->id);
     if(sh.last_dir % d < c->any_nearer % d) more_steps--;
 
     tw += sh.delta;
@@ -909,9 +921,9 @@ EX twalker get_parent_dir(twalker& cw) {
   auto oc = c;
 
   if(c->dist > 0) {
-    auto& sh = arb::current.shapes[c->id];
-    int n = sh.size();
-    int k = sh.cycle_length;
+    int n = c->type;
+    int k = cycle_size(c->id);
+
     vector<int> nearer;
 
     auto beats = [&] (int i, int old) {
@@ -1021,7 +1033,7 @@ analyzer_state *alloc_analyzer() {
 EX aid_t get_aid(twalker cw) {
   ufind(cw);
   auto ide = cw.at->id;
-  return {ide, gmod(cw.to_spin(0), arb::current.shapes[ide].cycle_length)};
+  return {ide, gmod(cw.to_spin(0), cycle_size(ide))};
   }
 
 void extend_analyzer(twalker cwmain, int z, twalker giver) {
@@ -2038,7 +2050,7 @@ EX void generate_rules() {
   int NS = isize(arb::current.shapes);
   shortcuts.resize(NS);
   analyzers.resize(NS);
-  for(int i=0; i<NS; i++) analyzers[i].resize(arb::current.shapes[i].cycle_length);
+  for(int i=0; i<NS; i++) analyzers[i].resize(cycle_size(i));
 
   t_origin.clear();
   cell_to_tcell.clear();
@@ -2053,14 +2065,14 @@ EX void generate_rules() {
     stop_game();
     start_game();
     cell *s = currentmap->gamestart();
-    tcell *c = gen_tcell(shvid(s));
+    tcell *c = gen_tcell(get_id(s));
     cell_to_tcell[s] = c;
     tcell_to_cell[c] = s;
     c->dist = 0;
     t_origin.push_back(twalker(c, 0));
 
-    if((flags & w_known_structure) && !(flags & w_single_origin))
-      add_other_origins(currentmap);
+    if(!(flags & w_single_origin))
+      add_other_origins(NS);
 
     if(flags & w_known_structure) swap_treestates();
     }
@@ -2116,6 +2128,13 @@ struct hrmap_rulegen : hrmap {
     h->zebraval = treestates[s].sid;
     h->s = hsA;
     return h;
+    }
+
+  cell* gen_extra_origin(int fv) {
+    heptagon *extra_origin = gen(fv, 0, true);
+    extra_origin->s = hsOrigin;
+    extra_origins.push_back(extra_origin);
+    return extra_origin->c7;
     }
   
   ~hrmap_rulegen() { 
@@ -2262,7 +2281,7 @@ struct hrmap_rulegen : hrmap {
 
     int odir = hts.parent_dir + dir;
     
-    int cl = arb::current.shapes[psid].cycle_length;
+    int cl = cycle_size(psid);
 
     vector<int> choices;
     for(auto& ts: treestates)
@@ -2283,21 +2302,14 @@ EX void swap_treestates() {
   swap(treestates, alt_treestates);
   }
 
-EX void add_other_origins(hrmap *m0) {
-  auto m = dynamic_cast<hrmap_rulegen*> (m0);
-  if(!m) throw hr_exception("add_other_origins not on hrmap_rulegen");
-
-  /* we check for sid because state 0 is already there */
-  for(int i=1; i<isize(treestates); i++) if(treestates[i].is_root && treestates[i].sid) {
-    heptagon *extra_origin = m->gen(i, 0, true);
-    extra_origin->s = hsOrigin;
-    cell *s = extra_origin->c7;
-    tcell *c = gen_tcell(shvid(s));
+EX void add_other_origins(int qty) {
+  for(int i=1; i<qty; i++) {
+    cell *s = currentmap->gen_extra_origin(i);
+    tcell *c = gen_tcell(get_id(s));
     cell_to_tcell[s] = c;
     tcell_to_cell[c] = s;
     c->dist = 0;
     t_origin.push_back(twalker(c, 0));
-    m->extra_origins.push_back(extra_origin);
     }
 
   println(hlog, "t_origin size = ", isize(t_origin));
