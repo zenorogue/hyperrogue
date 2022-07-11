@@ -138,6 +138,8 @@ inline void print(hstream& hs, tcell* h) { print(hs, "P", index_pointer(h)); }
 using twalker = walker<tcell>;
 #endif
 
+EX hookset<void(int, twalker)> hooks_gen_tcell;
+
 queue<reaction_t> fix_queue;
 
 void push_unify(twalker a, twalker b) {
@@ -305,6 +307,8 @@ tcell* tmove(tcell *c, int d) {
   ufind(cd);
   auto& co = arb::current.shapes[c->id].connections[cd.spin];
   tcell *c1 = gen_tcell(co.sid);
+  c1->c.connect(co.eid, cd.at, cd.spin, false);
+  callhooks(hooks_gen_tcell, 1, twalker(c1, co.eid));
   connect_and_check(cd, twalker(c1, co.eid));
   return c1;
   }
@@ -349,6 +353,7 @@ void check_loops(twalker pw) {
     }
   
   if(steps == valence - 1) {
+    callhooks(hooks_gen_tcell, 2, pwb);
     connect_and_check(pwb, pwf);
     fix_distances(pwb.at);
     }
@@ -366,6 +371,8 @@ EX void unify(twalker pw1, twalker pw2) {
   ufind(pw1);
   ufind(pw2);
   if(pw1 == pw2) return;
+  callhooks(hooks_gen_tcell, 3, pw1);
+  callhooks(hooks_gen_tcell, 4, pw2);
   if(pw1.at->unified_to.at != pw1.at)
     throw hr_exception("not unified to itself");
   if(pw2.at->unified_to.at != pw2.at)
