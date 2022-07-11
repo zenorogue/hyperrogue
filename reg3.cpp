@@ -1014,30 +1014,32 @@ EX namespace reg3 {
     }
     
 #if CAP_CRYSTAL
-  int encode_coord(const crystal::coord& co) {
+  int encode_coord(int bits, const crystal::coord& co) {
     int c = 0;
-    for(int i=0; i<4; i++) c |= ((co[i]>>1) & 3) << (2*i);
+    for(int i=0; i<(1<<bits); i++) c |= ((co[i]>>1) & ((1<<bits)-1)) << (bits*i);
     return c;
     }
 
-  EX crystal::coord decode_coord(int a) {
+  EX crystal::coord decode_coord(int bits, int a) {
     crystal::coord co;
-    for(int i=0; i<4; i++) co[i] = (a & 3) * 2, a >>= 2;
+    for(int i=0; i<(1<<bits); i++) co[i] = (a & ((1<<bits)-1)) * 2, a >>= bits;
     return co;
     }
   
   struct hrmap_from_crystal : hrmap_quotient3 {
-  
-    hrmap_from_crystal() {
-      initialize(256);
+    int bits;
+
+    hrmap_from_crystal(int b) : bits(b) {
+      int size = 1 << (4*bits);
+      initialize(size);
       if(1) {
         auto m = crystal::new_map();
         dynamicval<hrmap*> cm(currentmap, m);
-        for(int a=0; a<256; a++) {
-          auto co = decode_coord(a);
+        for(int a=0; a<size; a++) {
+          auto co = decode_coord(bits, a);
           heptagon *h1 = get_heptagon_at(co);
           for(int d=0; d<8; d++) {
-            int b = encode_coord(crystal::get_coord(h1->cmove(d)));
+            int b = encode_coord(bits, crystal::get_coord(h1->cmove(d)));
             allh[a]->c.connect(d, allh[b], h1->c.spin(d), false);
             tmatrices[a].push_back(crystal::get_adj(h1, d));
             }
@@ -1289,6 +1291,28 @@ EX namespace reg3 {
     
     }
 
+  EX bool minimize_quotient_maps = false;
+
+  hrmap_quotient3 *gen_quotient_map(bool minimized, fieldpattern::fpattern &fp) {
+    #if CAP_FIELD
+    #if CAP_CRYSTAL
+    if(geometry == gSpace344) {
+      return new hrmap_from_crystal(minimized ? 1 : 2);
+      }
+    else
+    #endif
+    if(geometry == gSpace535 && minimized) {
+      return new seifert_weber::hrmap_singlecell(108*degree);
+      }
+    else if(geometry == gSpace535)
+      return new seifert_weber::hrmap_seifert_cover;
+    else if(hyperbolic) {
+      return new hrmap_field3(&fp);
+      }
+    #endif
+    return nullptr;
+    }
+
   struct hrmap_h3 : hrmap {
   
     heptagon *origin;
@@ -1315,22 +1339,8 @@ EX namespace reg3 {
       transmatrix T = Id;
       
       binary_map = nullptr;
-      quotient_map = nullptr;
+      quotient_map = gen_quotient_map(minimize_quotient_maps, currfp);
       
-      #if CAP_FIELD
-      #if CAP_CRYSTAL
-      if(geometry == gSpace344) {
-        quotient_map = new hrmap_from_crystal;
-        }
-      else 
-      #endif
-      if(geometry == gSpace535) {
-        quotient_map = new seifert_weber::hrmap_seifert_cover;
-        }
-      else if(hyperbolic) {
-        quotient_map = new hrmap_field3(&currfp);
-        }
-      #endif
       h.zebraval = quotient_map ? quotient_map->allh[0]->zebraval : 0;
       
       #if CAP_BT
@@ -1816,25 +1826,9 @@ EX namespace reg3 {
           }
         }
       
-      quotient_map = nullptr;
+      quotient_map = gen_quotient_map(is_minimized(), fp);
+      emerald_map = gen_quotient_map(false, currfp);
       
-      if(geometry == gSpace535)
-        quotient_map = new seifert_weber::hrmap_seifert_cover();
-      #if CAP_CRYSTAL
-      else if(geometry == gSpace344) 
-        quotient_map = new hrmap_from_crystal;
-      #endif
-      else
-        quotient_map = new hrmap_field3(&fp);        
-      
-      if(geometry == gSpace535)
-        emerald_map = new seifert_weber::hrmap_seifert_cover();
-      #if CAP_CRYSTAL
-      else if(geometry == gSpace344) 
-        emerald_map = new hrmap_from_crystal;
-      #endif
-      else
-        emerald_map = new hrmap_field3(&currfp);
       h.emeraldval = 0;
       
       find_mappings();
@@ -2121,6 +2115,10 @@ bool hrmap_h3_rule::link_alt(heptagon *h, heptagon *alt, hstate firststate, int 
 
 EX bool reg3_rule_available = true;
 EX string other_rule = "";
+
+EX bool is_minimized() {
+  return geometry == gSpace535;
+  }
 
 EX string get_rule_filename() {
   if(other_rule != "") return other_rule;

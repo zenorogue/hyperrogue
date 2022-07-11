@@ -723,7 +723,7 @@ EX color_t colorize(cell *c, char whichCanvas) {
   if(cryst) co = m->get_coord(c), dim = m->cs.dim;
   #if MAXMDIM >= 4
   else if(geometry == gSpace344) {
-    co = told(reg3::decode_coord(c->master->fieldval)), dim = 4;
+    co = told(reg3::decode_coord(reg3::minimize_quotient_maps ? 1 : 2, c->master->fieldval)), dim = 4;
     for(int a=0; a<4; a++) if(co[a] > 4) co[a] -= 8;
     }
   else if(geometry == gSeifertCover) {
