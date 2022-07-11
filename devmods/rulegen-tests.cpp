@@ -223,7 +223,7 @@ void try_sprawling(tcell *c) {
 
 void debug_menu() {
   cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen(0);
+  gamescreen();
   auto m = dynamic_cast<hrmap_testproto*> (currentmap);
   dialog::init("debug menu");
   
@@ -264,7 +264,7 @@ void debug_menu() {
   dialog::addItem("debug tiles", 'd');
   dialog::add_action_push([m] { 
     cmode = sm::SIDE | sm::MAYDARK;
-    gamescreen(0);
+    gamescreen();
     dialog::init();
     for(auto dw: debuglist) {
       dialog::addItem("go to " + index_pointer(dw.at), 'a');
