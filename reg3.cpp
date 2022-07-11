@@ -1732,6 +1732,16 @@ EX namespace reg3 {
       }
     };
 
+  EX int get_aid(cell *c) {
+    auto m = dynamic_cast<hrmap_h3*> (currentmap);
+    if(!m) throw hr_exception("get_aid incorrect");
+    return m->cell_id[c];
+    }
+
+  EX int get_size_of_aid(int aid) {
+    auto m = dynamic_cast<hrmap_h3*> (currentmap);
+    if(!m) throw hr_exception("get_size_of_fv incorrect");
+    return m->quotient_map->acells[aid]->type;
     };
 
   struct hrmap_sphere3 : hrmap_closed3 {
@@ -2204,6 +2214,10 @@ hrmap_h3* hypmap() {
 
 EX int quotient_count() {
   return isize(hypmap()->quotient_map->allh);
+  }
+
+EX int quotient_count_sub() {
+  return isize(hypmap()->quotient_map->acells);
   }
 
 /** This is a generalization of hyperbolic_celldistance in expansion.cpp to three dimensions.

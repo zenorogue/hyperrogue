@@ -184,21 +184,25 @@ twalker addstep(twalker x) {
 
 int number_of_types() {
   if(arb::in()) return isize(arb::current.shapes);
+  if(WDIM == 3) return reg3::quotient_count_sub();
   throw hr_exception("unknown number_of_types");
   }
 
 int get_id(cell *c) {
   if(arb::in()) return shvid(c);
+  if(GDIM == 3) return reg3::get_aid(c);
   throw hr_exception("unknown get_id");
   }
 
 int shape_size(int id) {
   if(arb::in()) return isize(arb::current.shapes[id].connections);
+  if(GDIM == 3) return reg3::get_size_of_aid(id);
   throw hr_exception("unknown shape_size");
   }
 
 int cycle_size(int id) {
   if(arb::in()) return arb::current.shapes[id].cycle_length;
+  if(GDIM == 3) return reg3::get_size_of_aid(id);
   throw hr_exception("unknown shape size");
   }
 
@@ -222,8 +226,8 @@ tcell *gen_tcell(int id) {
   return c;
   }
 
-map<cell*, tcell*> cell_to_tcell;
-map<tcell*, cell*> tcell_to_cell;
+EX map<cell*, tcell*> cell_to_tcell;
+EX map<tcell*, cell*> tcell_to_cell;
 
 void numerical_fix(twalker pw) {
   auto& shs = arb::current.shapes;
@@ -335,6 +339,7 @@ tcell* tmove(tcell *c, int d) {
 
 /** check whether we have completed the vertex to the right of edge d of c */
 void check_loops(twalker pw) {
+  if(GDIM == 3) throw hr_exception("check_loops called");
   ufind(pw);
   auto& shs = arb::current.shapes;
   int id = pw.at->id;
@@ -391,6 +396,7 @@ EX void unify(twalker pw1, twalker pw2) {
   ufind(pw1);
   ufind(pw2);
   if(pw1 == pw2) return;
+  if(GDIM == 3) throw hr_exception("check_loops called");
   callhooks(hooks_gen_tcell, 3, pw1);
   callhooks(hooks_gen_tcell, 4, pw2);
   if(pw1.at->unified_to.at != pw1.at)
@@ -1016,8 +1022,8 @@ using aid_t = pair<int, int>;
 struct analyzer_state {
   int analyzer_id;
   int id, dir;
-  array<analyzer_state*, 10> substates;
-  analyzer_state() { id = MYSTERY; dir = MYSTERY; for(int i=0; i<10; i++) substates[i] = nullptr; }
+  map<int, analyzer_state*> substates;
+  analyzer_state() { id = MYSTERY; dir = MYSTERY; } // for(int i=0; i<10; i++) substates[i] = nullptr; }
   vector<twalker> inhabitants;
   };
 
@@ -1169,6 +1175,7 @@ int get_sidecache(twalker what) {
   }
 
 int get_side(twalker what) {
+  if(WDIM == 3) throw hr_exception("called get_side");
 
   bool side = !(flags & w_no_sidecache);
   bool fast = (flags & w_slow_side);
@@ -1287,6 +1294,11 @@ EX int move_code(twalker cs) {
 
      int x;
 
+     if(WDIM == 3) {
+       if(cs2.at->parent_dir == cs2.spin) return C_PARENT;
+       else return get_roadsign(cs);
+       }
+
      if(!(flags & w_no_relative_distance)) x = C_EQUAL;
      else if(y == 1) x = C_NEPHEW;
      else if(y == 0) x = C_EQUAL;
@@ -1313,7 +1325,15 @@ EX void id_at_spin(twalker cw, vector<twalker>& sprawl, vector<analyzer_state*>&
       a = alloc_analyzer();
       }
     states.push_back(a);
-    if(isize(sprawl) <= cw.at->type) {
+    if(WDIM == 3) {
+      auto& ae = check_all_edges(cw, a, isize(sprawl));
+      int id = isize(sprawl);
+      if(id < isize(ae)) {
+        a->id = ae[id].first;
+        a->dir = ae[id].second;
+        }
+      }
+    else if(isize(sprawl) <= cw.at->type) {
       a->id = 0, a->dir = isize(sprawl)-1;
       // println(hlog, "need to go in direction ", a->dir);
       }
@@ -1411,8 +1431,11 @@ vector<int> gen_rule(twalker cwmain, int id) {
     cids.push_back(id1);
     }
 
-  for(int i=0; i<isize(cids); i++) if(cids[i] == DIR_UNKNOWN)
+  if(WDIM != 3) for(int i=0; i<isize(cids); i++) if(cids[i] == DIR_UNKNOWN)
     cids[i] = get_side(cwmain+i) < 0 ? DIR_RIGHT : DIR_LEFT;
+
+  if(WDIM == 3) for(int i=0; i<isize(cids); i++) if(cids[i] == DIR_UNKNOWN)
+    cids[i] = get_roadsign(cwmain+i);
 
   return cids;
   }
@@ -1662,6 +1685,7 @@ void verified_treewalk(twalker& tw, int id, int dir) {
 EX bool view_examine_branch = false;
 
 bool examine_branch(int id, int left, int right) {
+  if(WDIM == 3) return true;
   auto rg = treestates[id].giver;
 
   if(debugflags & DF_GEOM)
@@ -2012,6 +2036,7 @@ EX void cleanup() {
   important.clear();
   shortcuts.clear();
   single_live_branch_close_to_root.clear();
+  cleanup3();
   }
 
 EX void clear_all() {  
@@ -2033,7 +2058,15 @@ EX void generate_rules() {
   start_time = SDL_GetTicks();
   delete_tmap();
 
-  if(!arb::in()) try {
+  if(WDIM == 3) {
+    stop_game();
+    reg3::reg3_rule_available = false;
+    fieldpattern::use_rule_fp = true;
+    fieldpattern::use_quotient_fp = true;
+    flags |= w_numerical;
+    start_game();
+    }
+  else if(!arb::in()) try {
     arb::convert::convert();
     if(flags & w_numerical) arb::convert::activate();
     }
