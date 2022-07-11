@@ -1313,11 +1313,116 @@ EX namespace reg3 {
     return nullptr;
     }
 
-  struct hrmap_h3 : hrmap {
+  struct hrmap_h3_abstract : hrmap {
+
+    reg3::hrmap_quotient3 *quotient_map;
+
+    transmatrix adj(heptagon *h, int d) override {
+      throw hr_exception("any adj");
+      }
+
+    transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) override {
+      if(PURE) return relative_matrix(c2->master, c1->master, hint);
+      return relative_matrix_via_masters(c2, c1, hint);
+      }
+
+    transmatrix master_relative(cell *c, bool get_inverse) override {
+      if(PURE) return Id;
+      int aid = cell_id.at(c);
+      return quotient_map->master_relative(quotient_map->acells[aid], get_inverse);
+      }
+
+    int shvid(cell *c) override {
+      if(PURE) return 0;
+      if(!cell_id.count(c)) return quotient_map->shvid(c);
+      int aid = cell_id.at(c);
+      return quotient_map->shvid(quotient_map->acells[aid]);
+      }
+
+    int wall_offset(cell *c) override {
+      if(PURE) return 0;
+      if(!cell_id.count(c)) return quotient_map->wall_offset(c); /* necessary because ray samples are from quotient_map */
+      int aid = cell_id.at(c);
+      return quotient_map->wall_offset(quotient_map->acells[aid]);
+      }
+
+    transmatrix adj(cell *c, int d) override {
+      if(PURE) return adj(c->master, d);
+      if(!cell_id.count(c)) return quotient_map->adj(c, d); /* necessary because ray samples are from quotient_map */
+      int aid = cell_id.at(c);
+      return quotient_map->tmatrices_cell[aid][d];
+      }
+
+    subcellshape& get_cellshape(cell *c) override {
+      if(PURE) return *cgi.heptshape;
+      int aid = cell_id.at(c);
+      return quotient_map->get_cellshape(quotient_map->acells[aid]);
+      }
+
+    map<cell*, int> cell_id;
+    map<pair<heptagon*, int>, cell*> cell_at;
+
+    cell *get_cell_at(heptagon *h, int acell_id) {
+      pair<heptagon*, int> p(h, acell_id);
+      auto& ca = cell_at[p];
+      if(!ca) {
+        ca = newCell(quotient_map->acells[acell_id]->type, h);
+        cell_id[ca] = acell_id;
+        if(!h->c7) h->c7 = ca;
+        }
+      return ca;
+      }
+
+    void find_cell_connection(cell *c, int d) override {
+      if(PURE) {
+        auto h = c->master->cmove(d);
+        c->c.connect(d, h->c7, c->master->c.spin(d), false);
+        return;
+        }
+      int id = cell_id.at(c);
+      heptagon *h = c->master;
+      for(int dir: quotient_map->move_sequences[id][d])
+        h = h->cmove(dir);
+      auto ac = quotient_map->acells[id];
+      cell *c1 = get_cell_at(h, quotient_map->local_id[ac->move(d)].first);
+      c->c.connect(d, c1, ac->c.spin(d), false);
+      }
+
+    transmatrix ray_iadj(cell *c, int i) override {
+      if(PURE) return iadj(c, i);
+      if(!cell_id.count(c)) return quotient_map->ray_iadj(c, i); /* necessary because ray samples are from quotient_map */
+      int aid = cell_id.at(c);
+      return quotient_map->ray_iadj(quotient_map->acells[aid], i);
+      }
+
+    const vector<int>& get_move_seq(cell *c, int i) override {
+      int aid = cell_id.at(c);
+      return quotient_map->get_move_seq(quotient_map->acells[aid], i);
+      }
+
+    cellwalker strafe(cellwalker cw, int j) override {
+
+      hyperpoint hfront = tC0(cgi.adjmoves[cw.spin]);
+      cw.at->cmove(j);
+      transmatrix T = currentmap->adj(cw.at, j);
+      cellwalker res1;
+      for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
+        if(hdist(hfront, T * tC0(cgi.adjmoves[i])) < cgi.strafedist + .01)
+          res1 = cellwalker(cw.at->cmove(j), i);
+
+      int aid = PURE ? cw.at->master->fieldval : cell_id.at(cw.at);
+      auto res = quotient_map->strafe(cellwalker(quotient_map->acells[aid], cw.spin), j);
+      cellwalker res2 = cellwalker(cw.at->cmove(j), res.spin);
+
+      if(PURE && res1 != res2) println(hlog, "h3: ", res1, " vs ", res2);
+      return res2;
+      }
+    };
+
+  struct hrmap_h3 : hrmap_h3_abstract {
   
     heptagon *origin;
     hrmap *binary_map;
-    hrmap_quotient3 *quotient_map;
     
     map<heptagon*, pair<heptagon*, transmatrix>> reg_gmatrix;
     map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;
@@ -1330,7 +1435,7 @@ EX namespace reg3 {
       origin = init_heptagon(S7);
       heptagon& h = *origin;
       h.s = hsOrigin;
-      h.c7 = newCell(S7, origin);
+      if(PURE) h.c7 = newCell(S7, origin);
       worst_error1 = 0, worst_error2 = 0;
       
       dynamicval<hrmap*> cr(currentmap, this);
@@ -1357,12 +1462,16 @@ EX namespace reg3 {
       
       reg_gmatrix[origin] = make_pair(alt, T);
       altmap[alt].emplace_back(origin, T);
-      
-      celllister cl(origin->c7, 4, 100000, NULL);
-      for(cell *c: cl.lst) {
-        hyperpoint h = tC0(relative_matrix(c->master, origin, C0));
-        cgi.close_distances[bucketer(h)] = cl.getdist(c);
+
+      if(PURE) {
+        celllister cl(origin->c7, 4, 100000, NULL);
+        for(cell *c: cl.lst) {
+          hyperpoint h = tC0(relative_matrix(c->master, origin, C0));
+          cgi.close_distances[bucketer(h)] = cl.getdist(c);
+          }
         }
+
+      if(!PURE) get_cell_at(origin, 0);
       }
     
     ld worst_error1, worst_error2;
@@ -1500,7 +1609,6 @@ EX namespace reg3 {
         }
       #endif
       heptagon *created = init_heptagon(S7);
-      created->c7 = newCell(S7, created);
       #if CAP_FIELD
       if(quotient_map) {
         created->emeraldval = fv;
@@ -1583,19 +1691,7 @@ EX namespace reg3 {
       return T;
       }
     
-    subcellshape& get_cellshape(cell *c) override {
-      return *cgi.heptshape;
-      }
-
-    cellwalker strafe(cellwalker cw, int j) override {
-      hyperpoint hfront = tC0(cgi.adjmoves[cw.spin]);
-      cw.at->cmove(j);
-      transmatrix T = currentmap->adj(cw.at, j);
-      for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
-        if(hdist(hfront, T * tC0(cgi.adjmoves[i])) < cgi.strafedist + .01)
-          return cellwalker(cw.at->cmove(j), i);
-      throw hr_exception("incorrect strafe");
-      }
+    };
 
     };
 
@@ -1686,10 +1782,9 @@ EX namespace reg3 {
     return ((hrmap_sphere3*)currentmap)->locations[v];
     }
 
-  struct hrmap_h3_rule : hrmap {
+  struct hrmap_h3_rule : hrmap_h3_abstract {
   
     heptagon *origin;
-    reg3::hrmap_quotient3 *quotient_map;
     reg3::hrmap_quotient3 *emerald_map;
 
     fieldpattern::fpattern fp;
@@ -1978,103 +2073,6 @@ EX namespace reg3 {
       return relative_matrix_recursive(h2, h1);
       }
     
-    transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) override {
-      if(PURE) return relative_matrix(c2->master, c1->master, hint);
-      return relative_matrix_via_masters(c2, c1, hint);
-      }
-    
-    transmatrix master_relative(cell *c, bool get_inverse) override {
-      if(PURE) return Id;
-      int aid = cell_id.at(c);
-      return quotient_map->master_relative(quotient_map->acells[aid], get_inverse);
-      }
-
-    int shvid(cell *c) override {
-      if(PURE) return 0;
-      if(!cell_id.count(c)) return quotient_map->shvid(c);
-      int aid = cell_id.at(c);
-      return quotient_map->shvid(quotient_map->acells[aid]);
-      }    
-
-    int wall_offset(cell *c) override {
-      if(PURE) return 0;
-      if(!cell_id.count(c)) return quotient_map->wall_offset(c); /* necessary because ray samples are from quotient_map */
-      int aid = cell_id.at(c);
-      return quotient_map->wall_offset(quotient_map->acells[aid]);
-      }
-
-    transmatrix adj(cell *c, int d) override {
-      if(PURE) return adj(c->master, d);
-      if(!cell_id.count(c)) return quotient_map->adj(c, d); /* necessary because ray samples are from quotient_map */
-      int aid = cell_id.at(c);
-      return quotient_map->tmatrices_cell[aid][d];
-      }     
-    
-    subcellshape& get_cellshape(cell *c) override {
-      if(PURE) return *cgi.heptshape;
-      int aid = cell_id.at(c);
-      return quotient_map->get_cellshape(quotient_map->acells[aid]);
-      }
-    
-    map<cell*, int> cell_id;
-    map<pair<heptagon*, int>, cell*> cell_at;
-    
-    cell *get_cell_at(heptagon *h, int acell_id) {
-      pair<heptagon*, int> p(h, acell_id);
-      auto& ca = cell_at[p];
-      if(!ca) {
-        ca = newCell(quotient_map->acells[acell_id]->type, h);
-        cell_id[ca] = acell_id;
-        if(!h->c7) h->c7 = ca;
-        }
-      return ca;
-      }
-    
-    void find_cell_connection(cell *c, int d) override {
-      if(PURE) {
-        auto h = c->master->cmove(d);
-        c->c.connect(d, h->c7, c->master->c.spin(d), false);
-        return;
-        }
-      int id = cell_id.at(c);
-      heptagon *h = c->master;
-      for(int dir: quotient_map->move_sequences[id][d])
-        h = h->cmove(dir);
-      auto ac = quotient_map->acells[id];
-      cell *c1 = get_cell_at(h, quotient_map->local_id[ac->move(d)].first);
-      c->c.connect(d, c1, ac->c.spin(d), false);
-      }
-
-    transmatrix ray_iadj(cell *c, int i) override {
-      if(PURE) return iadj(c, i);
-      if(!cell_id.count(c)) return quotient_map->ray_iadj(c, i); /* necessary because ray samples are from quotient_map */
-      int aid = cell_id.at(c);
-      return quotient_map->ray_iadj(quotient_map->acells[aid], i);
-      }
-
-    cellwalker strafe(cellwalker cw, int j) override {
-
-      hyperpoint hfront = tC0(cgi.adjmoves[cw.spin]);
-      cw.at->cmove(j);
-      transmatrix T = currentmap->adj(cw.at, j);
-      cellwalker res1;
-      for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
-        if(hdist(hfront, T * tC0(cgi.adjmoves[i])) < cgi.strafedist + .01)
-          res1 = cellwalker(cw.at->cmove(j), i);
-
-      int aid = PURE ? cw.at->master->fieldval : cell_id.at(cw.at);
-      auto res = quotient_map->strafe(cellwalker(quotient_map->acells[aid], cw.spin), j);
-      cellwalker res2 = cellwalker(cw.at->cmove(j), res.spin);
-      
-      if(PURE && res1 != res2) println(hlog, "h3: ", res1, " vs ", res2);
-      return res2;
-      }
-
-    const vector<int>& get_move_seq(cell *c, int i) override {
-      int aid = cell_id.at(c);
-      return quotient_map->get_move_seq(quotient_map->acells[aid], i);
-      }
-
     virtual bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override;
     };
 
