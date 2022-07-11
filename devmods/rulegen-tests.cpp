@@ -1349,6 +1349,232 @@ void seek_label(string s) {
   println(hlog, "not found");
   }
 
+void tesgen(string s) {
+  set_general(s);
+  if(!arb::in()) try {
+    arb::convert::convert();
+    arb::convert::activate();
+    }
+  catch(hr_exception& e) {
+    println(hlog, "failed to convert ", s);
+    }
+  }
+
+std::mutex lock;
+std::condition_variable cv;
+shared_ptr<std::thread> anim_thread;
+int state; // 0 = computing, 1 = animating, 2 = finished, 3 = post-finished
+
+struct edgedata {
+  int type;
+  twalker tw;
+  int gtick;
+  int ftick;
+  };
+
+struct animdata {
+  map<tcell*, shiftmatrix> where;
+  vector<edgedata> data;
+  };
+
+animdata ad;
+
+void seek(twalker tw, int gt) {
+  for(auto& d: ad.data) if(d.tw == tw && d.ftick == -1) d.ftick = gt;
+  }
+
+void pcurvepoint(hyperpoint h) {
+  hyperpoint last = glhr::gltopoint(curvedata.back());
+  if(hdist(last, h) > .2) {
+    pcurvepoint(mid(h, last));
+    pcurvepoint(h);
+    }
+  else curvepoint(h);
+  }
+
+map<tcell*, color_t> marked;
+
+void drawline(twalker tw, color_t col) {
+  vid.linewidth *= 3;
+  queueline(ad.where[tw.peek()] * C0, ad.where[tw.at] * C0, col, 4, PPR::FLOOR);
+  vid.linewidth /= 3;
+
+  auto tw1 = tw+wstep;
+  if(tw.at->parent_dir == tw.spin || tw1.at->parent_dir == tw1.spin) {
+    shiftmatrix& M1 = ad.where[tw.at];
+    shiftmatrix& M2 = ad.where[tw.peek()];
+    transmatrix pre = inverse_shift(M1, M2);
+
+    auto& sh = arb::current_or_slided().shapes[tw.at->id];
+    auto& sh1 = arb::current_or_slided().shapes[tw1.at->id];
+    curvepoint(C0);
+    pcurvepoint(normalize(5 * C0 + sh.vertices[tw.spin]));
+    pcurvepoint(pre * normalize(5 * C0 + sh1.vertices[(tw1.spin+1)%tw1.at->type]));
+    pcurvepoint(pre * C0);
+    pcurvepoint(pre * normalize(5 * C0 + sh1.vertices[tw1.spin]));
+    pcurvepoint(normalize(5 * C0 + sh.vertices[(tw.spin+1)%tw.at->type]));
+    pcurvepoint(C0);
+    queuecurve(M1, 0, 0xFF000080, PPR::LINE);
+    }
+  }
+
+void animate_draw() {
+  ad.where.clear();
+  for(auto& p: ad.data) {
+    if(p.type == 0) ad.where[p.tw.at] = ggmatrix(cwt.at); // shiftless(Id);
+    else if(p.type == 1) {
+      transmatrix T = arb::get_adj(arb::current_or_slided(), p.tw.peek()->id, (p.tw+wstep).spin, -1, p.tw.spin);
+      transmatrix prespin = rspintox(tC0(T));
+      T = spintox(tC0(T)) * T;
+      ld length = hdist0(tC0(T));
+      T = xpush(-length) * T;
+
+      ld age = min(ticks - p.gtick, 1000);
+      ld extension = lerp(3, 1.2, age / 1000.);
+      color_t col = gradient(0, 0xFFFF, 0, age, 1000);
+
+      if(p.ftick != -1) {
+        age = min(ticks - p.ftick, 1000);
+        extension = lerp(extension, 1, age / 1000.);
+        col = gradient(col, 0xFFFFFFFF, 0, age, 1000);
+        }
+
+      ad.where[p.tw.at] = ad.where[p.tw.peek()] * prespin * xpush(length * extension) * T;
+      drawline(p.tw, col);
+      }
+    else if(p.type == 2) {
+      auto tw1 = p.tw;
+      do {
+        seek(tw1, p.gtick);
+        seek(tw1+wstep, p.gtick);
+        tw1 = tw1 + wstep - 1;
+        }
+      while(p.tw != tw1);
+
+      ld age = min(ticks - p.gtick, 1000);
+      color_t col = gradient(0, 0xFFFFFFFF, 0, age, 1000);
+      drawline(p.tw, col);
+      }
+    else if(p.type == 3 || p.type == 4) {
+      for(int i=0; i<isize(ad.data); i++) if(ad.data[i].tw.at == p.tw.at) {
+        println(hlog, "found for i = ", i);
+        break;
+        }
+      queuepolyat(ad.where[p.tw.at], cgi.shGem[0], 0xFFFFFFFF, PPR::MONSTER_BODY);
+      }
+    }
+  for(auto& w: ad.where) {
+    int id = w.first->id;
+    color_t col = colortables['A'][id];
+    if(marked.count(w.first)) col = marked[w.first];
+    col <<= 8; col |= 0xFF;
+    queuepolyat(w.second, cgi.shFullFloor.b[id], col, PPR::WALL);
+    addaura(tC0(w.second), 0x800000, 0);
+    }
+  }
+
+void wait_one_step() {
+  std::unique_lock<std::mutex> lk(lock);
+  state = 0;
+  lk.unlock();
+  cv.notify_one();
+  lk.lock();
+  cv.wait(lk, [] { return state == 1 || state == 2; });
+  }
+
+void animate() {
+  rulegen::flags |= Flag(15);
+  ad.data.clear();
+
+  int i = addHook(hooks_gen_tcell, 100, [] (int i, twalker tw) {
+    println(hlog, "hooks_gen_tcell called with i=", i);
+    ad.data.emplace_back(edgedata{i, tw, ticks, -1});
+    std::unique_lock<std::mutex> lk(lock);
+    state = 1;
+    lk.unlock();
+    cv.notify_one();
+    lk.lock();
+    cv.wait(lk, [] { return state == 0; });
+    rulegen::start_time = ticks;
+    });
+
+  state = 0;
+  anim_thread = make_shared<std::thread>([]{
+    try {
+      test_current(arb::current.filename);
+      }
+    catch(rulegen_failure& e) {
+      }
+    std::unique_lock<std::mutex> lk(lock);
+    println(hlog, "thread finished");
+    state = 2;
+    lk.unlock();
+    cv.notify_one();
+    });
+
+  if(1) {
+    std::unique_lock<std::mutex> lk(lock);
+    cv.wait(lk, [] { return state == 1 || state == 2; });
+    }
+
+  int f = addHook(hooks_frame, 100, animate_draw);
+  println(hlog, "f = ", f);
+
+  vid.cells_drawn_limit = 0; mapeditor::drawplayer = false; cwt.at->wall = waChasm;
+  no_find_player = true;
+
+  int *k = new int;
+  *k = addHook(hooks_handleKey, 0, [i, k, f] (int sym, int uni) {
+    if(uni == 'y' && state == 2) {
+      println(hlog, "on finished");
+      anim_thread->join();
+      anim_thread = nullptr;
+      delHook(hooks_gen_tcell, i);
+      println(hlog, "deleting handleKey hook at ", *k);
+      int pk = *k;
+      delete k;
+      delHook(hooks_handleKey, pk);
+      delHook(hooks_frame, f);
+      println(hlog, "finished");
+      return true;
+      }
+    if(uni == 't') {
+      if(state == 2) {
+        println(hlog, "finished!");
+        return true;
+        }
+      else if(state == 3) {
+        println(hlog, "wrong state");
+        return true;
+        }
+      else {
+        println(hlog, "waiting...");
+        wait_one_step();
+        return true;
+        }
+      }
+    return false;
+    });
+  }
+
+void animate_to(int i) {
+  int steps = 0;
+  while(ad.data.back().type != i) {
+    if(state != 1) break;
+    wait_one_step();
+    steps++;
+    }
+  println(hlog, "steps = ", steps);
+  }
+
+void animate_steps(int i) {
+  while(i--) {
+    if(state != 1) break;
+    wait_one_step();
+    }
+  println(hlog, "after ", i, " steps");
+  }
+
 int testargs() {
   using namespace arg;
            
@@ -1480,15 +1706,25 @@ int testargs() {
     }
 
   else if(argis("-tesgen")) {
-    shift(); string s = args();
-    set_general(s);
-    if(!arb::in()) try {
-      arb::convert::convert();
-      arb::convert::activate();
-      }
-    catch(hr_exception& e) {
-      println(hlog, "failed to convert ", s);
-      }
+    shift(); tesgen(args());
+    }
+
+  else if(argis("-tes-animate")) {
+    animate();
+    }
+
+  else if(argis("-tes-animate-to")) {
+    shift(); animate_to(argi());
+    }
+
+  else if(argis("-tes-animate-steps")) {
+    shift(); animate_steps(argi());
+    }
+
+  else if(argis("-tes-animate-marked")) {
+    shift(); int i = argi();
+    shift(); color_t col = arghex();
+    marked[ad.data[i].tw.at] = col;
     }
 
   else if(argis("-veb")) {
