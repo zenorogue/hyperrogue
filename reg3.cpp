@@ -1616,6 +1616,7 @@ EX namespace reg3 {
         }
       #endif
       heptagon *created = init_heptagon(S7);
+      if(PURE && parent->c7) created->c7 = newCell(S7, created);
       #if CAP_FIELD
       if(quotient_map) {
         created->emeraldval = fv;
