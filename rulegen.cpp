@@ -182,6 +182,11 @@ twalker addstep(twalker x) {
   return x + wstep;
   }
 
+int number_of_types() {
+  if(arb::in()) return isize(arb::current.shapes);
+  throw hr_exception("unknown number_of_types");
+  }
+
 int get_id(cell *c) {
   if(arb::in()) return shvid(c);
   throw hr_exception("unknown get_id");
@@ -2047,7 +2052,7 @@ EX void generate_rules() {
   current_getside = first_restart_on;
   current_examine_branch = first_restart_on;
 
-  int NS = isize(arb::current.shapes);
+  int NS = number_of_types();
   shortcuts.resize(NS);
   analyzers.resize(NS);
   for(int i=0; i<NS; i++) analyzers[i].resize(cycle_size(i));
