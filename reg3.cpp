@@ -1293,6 +1293,8 @@ EX namespace reg3 {
 
   EX bool minimize_quotient_maps = false;
 
+  EX bool strafe_test = false;
+
   hrmap_quotient3 *gen_quotient_map(bool minimized, fieldpattern::fpattern &fp) {
     #if CAP_FIELD
     #if CAP_CRYSTAL
@@ -1402,20 +1404,24 @@ EX namespace reg3 {
 
     cellwalker strafe(cellwalker cw, int j) override {
 
-      hyperpoint hfront = tC0(cgi.adjmoves[cw.spin]);
-      cw.at->cmove(j);
-      transmatrix T = currentmap->adj(cw.at, j);
-      cellwalker res1;
-      for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
-        if(hdist(hfront, T * tC0(cgi.adjmoves[i])) < cgi.strafedist + .01)
-          res1 = cellwalker(cw.at->cmove(j), i);
-
       int aid = PURE ? cw.at->master->fieldval : cell_id.at(cw.at);
-      auto res = quotient_map->strafe(cellwalker(quotient_map->acells[aid], cw.spin), j);
-      cellwalker res2 = cellwalker(cw.at->cmove(j), res.spin);
+      auto ress = quotient_map->strafe(cellwalker(quotient_map->acells[aid], cw.spin), j);
+      cellwalker res = cellwalker(cw.at->cmove(j), ress.spin);
 
-      if(PURE && res1 != res2) println(hlog, "h3: ", res1, " vs ", res2);
-      return res2;
+      if(PURE && strafe_test) {
+        hyperpoint hfront = tC0(cgi.adjmoves[cw.spin]);
+        cw.at->cmove(j);
+        transmatrix T = currentmap->adj(cw.at, j);
+        for(int i=0; i<S7; i++) if(i != cw.at->c.spin(j))
+          if(hdist(hfront, T * tC0(cgi.adjmoves[i])) < cgi.strafedist + .01) {
+            auto resx = cellwalker(cw.at->cmove(j), i);
+            if(res == resx) return res;
+            if(PURE && res != resx) println(hlog, "h3: ", res, " vs ", resx);
+            }
+        throw hr_exception("incorrect strafe");
+        }
+
+      return res;
       }
     };
 
