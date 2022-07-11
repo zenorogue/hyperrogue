@@ -505,6 +505,14 @@ void list_all_sequences(string tesname) {
   seq_stream->flush();
   }
 
+void view_actual_seq(int max) {
+  celllister cl(cwt.at, 1000, max, nullptr);
+  vector<int> dlist(1000, 0);
+  for(auto d: cl.dists) dlist[d]++;
+  while(dlist.back() == 0) dlist.pop_back();
+  println(hlog, "obtained dlist = ", dlist);
+  }
+
 void print_rules();
 
 string rule_name(int r) {
@@ -1487,6 +1495,11 @@ int testargs() {
     view_examine_branch = true;
     }
     
+  else if(argis("-act-seq")) {
+    start_game();
+    shift(); view_actual_seq(argi());
+    }
+
   else if(argis("-dseek")) {
     shift();
     int i = argi();
