@@ -17,7 +17,7 @@
 
 #define ISANDROID 1
 #define GL_ES
-#define CAP_ACHIEVE 1
+#define CAP_ACHIEVE 0
 #define CAP_SHADER 1
 #define CAP_VERTEXBUFFER 0
 #define CAP_TIMEOFDAY 1
