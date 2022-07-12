@@ -6,18 +6,24 @@ namespace hr {
 
 namespace tests {
 
+int errors = 0;
+
 string test_eq(hyperpoint h1, hyperpoint h2, ld err = 1e-6) {
   if(sqhypot_d(MDIM, h1 -h2) < err)
-    return "OK";
-  else
-    return "ERROR";
+    return lalign(0, "OK ", h1, " ", h2);
+  else {
+    errors++;
+    return lalign(0, "ERROR", " ", h1, " ", h2);
+    }
   }
 
 string test_eq(transmatrix T1, transmatrix T2, ld err = 1e-6) {
   if(eqmatrix(T1, T2, err))
     return "OK";
-  else
+  else {
+    errors++;
     return "ERROR";
+    }
   }
 
 int readArgs() {
@@ -28,7 +34,6 @@ int readArgs() {
     start_game();
     shift(); int d = argi();
     vector<cell*> l = currentmap->allcells();
-    int errors = 0;
     int unknown = 0;
     for(cell *c1: l) if(c1->cpdist <= d)
     for(cell *c2: l) if(c2->cpdist <= d) {
@@ -94,8 +99,25 @@ int readArgs() {
       println(hlog, "test rgpushxto0: ", test_eq(rgpushxto0(h) * C0, h));
       println(hlog, "test gpushxto0: ", test_eq(gpushxto0(h) * h, C0));
       println(hlog, "test inverses: ", test_eq(inverse(rgpushxto0(h)), gpushxto0(h)));
+      println(hlog, "test iso_inverse: ", test_eq(iso_inverse(rgpushxto0(h)), gpushxto0(h)));
       }
+    if(errors) exit(1);
     }
+
+  else if(argis("-partest", [] {
+    hyperpoint h = point31(.01, .05, 0);
+    if(LDIM == 3) h[2] = .015;
+    println(hlog, "h = ", h);
+    println(hlog, "good Ph = ", parabolic13(h));
+    println(hlog, "good DPh = ", test_eq(h, deparabolic13(parabolic13(h))));
+    // println(hlog, "bad Ph = ", parabolic10(h));
+    // println(hlog, "bad DPh = ", test_eq(h, deparabolic10(parabolic10(h))));
+    if(LDIM == 3) {
+      println(hlog, "min Ph = ", bt::bt_to_minkowski(h));
+      println(hlog, "min DPh = ", test_eq(h, bt::minkowski_to_bt(bt::bt_to_minkowski(h))));
+      }
+    });
+
   else return 1;
   return 0;
   }
