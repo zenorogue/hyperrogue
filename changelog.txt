@@ -4724,3 +4724,9 @@ Menu improvements:
   - start animations now can be disabled
   - nicer sliders and color selectors (unless the ASCII mode is on)
 
+2022-07-12 14:47 Update 12.0u:
+  - honeycomb tree rules for 345 and 355 (better performance, variations work)
+  - some fixes to the French translation
+  - options to show less items/kills in the portrait/landscape mode
+  - an option to have menus centered even in widescreen
+  - mobile fixes: fixed an incorrect button shown in the mobile game menu, and items/kills going over buttons
