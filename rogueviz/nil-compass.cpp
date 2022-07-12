@@ -95,8 +95,9 @@ bool draw_compass(cell *c, const shiftmatrix& V) {
     ld t = 36 + (ticks - zeroticks) / 1000.;
     
     auto remap = [&] (int _i, int _is) {
+      auto col = s.col;
       if(s.i == _i && s.is == _is) return col;
-      int c = part(s.col, 1) + part(s.col, 2) + part(s.col, 3);
+      int c = part(col, 1) + part(col, 2) + part(col, 3);
       c += 1; c /= 12;
       color_t col1 = s.col;
       part(col1, 1) = part(col1, 2) = part(col1, 3) = c;
