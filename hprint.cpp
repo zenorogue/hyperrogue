@@ -231,6 +231,13 @@ template<class T> void print(hstream& hs, const vector<T>& a) { print(hs, "("); 
 
 template<class T, class U> void print(hstream& hs, const map<T,U>& a) { print(hs, "("); comma_printer c(hs); for(auto& t: a) c(t); print(hs, ")"); }
 
+template<class T> string separated(string separator, const vector<T>& a) {
+  shstream ss;
+  bool first = true;
+  for(auto& v: a) { if(first) first = false; else print(ss, separator); print(ss, v); }
+  return ss.s;
+  }
+
 inline void print(hstream& hs, const hyperpoint h) { print(hs, (const array<ld, MAXMDIM>&)h); }
 inline void print(hstream& hs, const transmatrix T) { 
   print(hs, "("); comma_printer c(hs);
@@ -300,6 +307,10 @@ struct indenter {
 
 struct indenter_finish : indenter {
   explicit indenter_finish(bool b = true): indenter(b ? 2:0) {}
+  explicit indenter_finish(string s): indenter(2) {
+    indenter tmp(-2);
+    println(hlog, s);
+    }
   ~indenter_finish() { if(hlog.indentation != ind.backup) println(hlog, "(done)"); }
   };
 
