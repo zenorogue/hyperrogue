@@ -5212,7 +5212,7 @@ EX void calcparam() {
     }
   else {
     bool ok = !vrhr::active();
-    if(vid.xres > vid.yres * 4/3+16 && (cmode & sm::SIDE) && ok)
+    if(vid.xres > vid.yres * 4/3+16 && (cmode & sm::SIDE) && ok && !((cmode & sm::MAYDARK) && centered_menus))
       current_display->sidescreen = true;
 #if CAP_TOUR
     if(tour::on && (tour::slides[tour::currentslide].flags & tour::SIDESCREEN) && ok)
@@ -5324,6 +5324,7 @@ extern bool wclick;
 EX bool just_refreshing;
 
 EX int menu_darkening = 2;
+EX bool centered_menus = false;
 
 EX void gamescreen() {
 

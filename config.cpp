@@ -749,6 +749,8 @@ EX void initConfig() {
   param_i(menu_darkening, "menu_darkening", 2)
   -> editable(0, 8, 1, "menu map darkening", "A larger number means darker game map in the background. Set to 8 to disable the background.", 'd')
   -> set_sets([] { dialog::bound_low(0); dialog::bound_up(8); dialog::dialogflags |= sm::DARKEN; });
+  param_b(centered_menus, "centered_menus", false)
+  -> editable("centered menus in widescreen", 'c');
 
   param_b(startanims::enabled, "startanim", true)
   -> editable("start animations", 's');
@@ -1860,6 +1862,7 @@ EX void configureInterface() {
     });
 
   add_edit(menu_darkening);
+  add_edit(centered_menus);
   add_edit(startanims::enabled);
    
   dialog::addBreak(50);
