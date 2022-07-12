@@ -508,7 +508,7 @@ EX void showGameMenu() {
         });
       }
     if(casual || ISMOBILE) {
-      if(savecount)
+      if(casual && savecount)
         dialog::addItem(XLAT("load (%1 turns passed)", its(turncount - save_turns)), SDLK_F9);
       else
         dialog::addItem(XLAT("how to find an Orb of Safety?"), SDLK_F9);
