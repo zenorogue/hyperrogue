@@ -2173,10 +2173,10 @@ EX string get_rule_filename() {
   switch(geometry) {
     case gSpace336: return "honeycomb-rules-336.dat";
     case gSpace344: return "honeycomb-rules-344.dat";
-//  case gSpace345: return "honeycomb-rules-345.dat";
+    case gSpace345: return "honeycomb-rules-345.dat";
     case gSpace353: return "honeycomb-rules-353.dat";
     case gSpace354: return "honeycomb-rules-354.dat";
-//  case gSpace355: return "honeycomb-rules-355.dat";
+    case gSpace355: return "honeycomb-rules-355.dat";
     case gSpace435: return "honeycomb-rules-435.dat";
     case gSpace436: return "honeycomb-rules-436.dat";
     case gSpace534: return "honeycomb-rules-534.dat";
