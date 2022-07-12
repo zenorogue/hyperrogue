@@ -1737,8 +1737,10 @@ EX void choose() {
   dialog::openFileDialog(tes, XLAT("open a tiling"), ".tes", 
   [] () {
     run(tes);
+    #if CAP_COMMANDLINE
     if(!current.options.empty())
       dialog::push_confirm_dialog([] { arg::run_arguments(current.options); start_game(); }, "load the settings defined in this file?");
+    #endif
     return true;
     });
   }

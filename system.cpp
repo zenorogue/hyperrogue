@@ -1079,6 +1079,7 @@ EX void saveStats(bool emergency IS(false)) {
     return;
     }
 
+  #if CAP_RACING
   if(racing::on) {
     if(racing::official_race && !cheater) {
       fprintf(f, "RACING %s %d %d date: %s\n", VER,
@@ -1088,6 +1089,7 @@ EX void saveStats(bool emergency IS(false)) {
       }
     return;
     }
+  #endif
 
   fprintf(f, "HyperRogue: game statistics (version " VER ")\n");
   if(cheater)
@@ -1255,6 +1257,7 @@ EX void loadsave() {
         }
       }
 
+  #if CAP_RACING
   if(buf[0] == 'R' && buf[1] == 'A' && buf[2] == 'C') {
     char buf1[80], ver[10];
     int land, score;
@@ -1262,6 +1265,7 @@ EX void loadsave() {
     racing::best_scores[eLand(land)] = score;
     println(hlog, "loaded the score for ", dnameof(eLand(land)), " of ", score);
     }
+  #endif
 
     }
   fclose(f);
@@ -1618,11 +1622,13 @@ EX void start_game() {
 // popAllScreens + popAllGames + stop_game + switch_game_mode + start_game
 EX void restart_game(char switchWhat IS(rg::nothing)) {
   popScreenAll();  
+  #if CAP_RACING
   if(switchWhat == rg::nothing && racing::on) {
     racing::restore_goals();
     racing::reset_race();
     return;
     }
+  #endif
   stop_game();
   switch_game_mode(switchWhat);
   start_game();

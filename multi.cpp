@@ -753,6 +753,7 @@ EX void initConfig() {
   }
 
 EX void get_actions() {
+  #if !ISMOBILE
   const Uint8 *keystate = SDL12_GetKeyState(NULL);
 
   for(int i=0; i<NUMACT; i++) 
@@ -787,6 +788,7 @@ EX void get_actions() {
       axespressed[scfg.axeaction[j][b] % SHMUPAXES] += value;
       }
     }
+#endif
 #endif
   }
 

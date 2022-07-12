@@ -691,7 +691,9 @@ EX namespace mapstream {
   void save_only_map(hstream& f) {
     f.write(patterns::whichPattern);
     save_geometry(f);
+    #if CAP_RACING
     if(racing::on) racing::restore_goals();
+    #endif
     
     // game settings
     f.write(safety);
@@ -821,12 +823,17 @@ EX namespace mapstream {
     #endif
       
     if(f.vernum >= 0xA912) {
+      #if CAP_RACING
       f.write(racing::on);
       if(racing::on) {
         f.write<int>(isize(racing::track));
         for(auto& t: racing::track) f.write<int>(cellids[t]);
         racing::save_ghosts(f);
         }
+      #else
+      bool on = false;
+      f.write(on);
+      #endif
       }
 
     callhooks(hooks_savemap, f);
@@ -1074,6 +1081,7 @@ EX namespace mapstream {
     #endif
     
     if(f.vernum >= 0xA912) {
+      #if CAP_RACING
       f.read(racing::on);
       if(racing::on) {
         if(!shmup::on) {
@@ -1085,6 +1093,10 @@ EX namespace mapstream {
         racing::load_ghosts(f);
         racing::configure_track(false);
         }
+      #else
+      bool on;
+      f.read(on);
+      #endif
       }
 
     if(f.vernum >= 0xA848) {
