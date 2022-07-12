@@ -2182,7 +2182,7 @@ struct hrmap_rulegen : hrmap {
     return h;
     }
 
-  cell* gen_extra_origin(int fv) {
+  cell* gen_extra_origin(int fv) override {
     heptagon *extra_origin = gen(fv, 0, true);
     extra_origin->s = hsOrigin;
     extra_origins.push_back(extra_origin);
