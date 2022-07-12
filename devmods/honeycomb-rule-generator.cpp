@@ -145,7 +145,7 @@ void listnear_compact(cell *c, ext_nei_rules_t& e, const transmatrix& T, int id,
   for(int i=0; i<S7; i++) {
     bool ok = false;
     transmatrix U = T * currentmap->adj(c, i);
-    for(auto v: cgi.vertices_only) for(auto w: cgi.vertices_only)
+    for(auto v: cgi.heptshape->vertices_only) for(auto w: cgi.heptshape->vertices_only)
       if(hdist(v, U*w) < 1e-3) ok = true;
     if(!ok) continue;
     cell *c1 = c->cmove(i);
@@ -182,7 +182,7 @@ void listnear_exh(cell *c, ext_nei_rules_t& e, int maxdist) {
     int di = dist[ca] + 1;
     int odi = origdir[ca];
     for(int i=0; i<S7; i++) {
-      if(odi >= 0 && !cgi.dirs_adjacent[i][odi]) continue;
+      if(odi >= 0 && cgi.heptshape->dirdist[i][odi] != 1) continue;
       cell *c1 = ca->cmove(i);
       e.from.push_back(k);
       e.dir.push_back(i);
@@ -268,6 +268,8 @@ void add_candidate(cell *c) {
   candidates_list.push_back(c);
   }
 
+bool single_origin = false;
+
 /** the main function */
 void test_canonical(string fname) {
   stop_game();
@@ -283,7 +285,8 @@ void test_canonical(string fname) {
   if(optimize_344 && geometry == gSpace344) qc = 16;
   
   /* we start from a 'center' in every get_id-type */
-  if(geometry == gSpace535) {
+  if(single_origin) c0 = {cwt.at};
+  else if(geometry == gSpace535) {
     c0.resize(qc, cwt.at);
     }
   else {
@@ -501,6 +504,7 @@ void test_canonical(string fname) {
   auto& fp = currfp;
   hwrite_fpattern(ss, fp);
 
+  qc = isize(c0);
   vector<int> root(qc, 0);
   for(int i=0; i<qc; i++) root[i] = id_of[generate_ext_nei(c0[i])];
   println(hlog, "root = ", root);
