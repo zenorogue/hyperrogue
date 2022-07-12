@@ -17,7 +17,7 @@
 // Add e.g. '-dim 128 128 128' before -write to generate
 // a more/less precise table.
 
-// # ./hyper -geo Sol -iz-list -sn-unittest -build -write solv-geodesics-a.dat -visualize devmods/san1/solva-%04d.png -improve -write solv-geodesics.dat -visualize devmods/san1/solvb-%04d.png
+// # ./hyper -rk-steps 100 -geo Sol -iz-list -sn-unittest -build -write solv-geodesics-a.dat -visualize devmods/san1/solva-%04d.png -improve -write solv-geodesics.dat -visualize devmods/san1/solvb-%04d.png
 // # ./hyper -dim 32 32 32 -geo 3:1/2 -iz-list -sn-unittest -build -write ssol-geodesics-a.dat -visualize devmods/san1/ssola-%04d.png -improve -write ssol-geodesics.dat -visualize devmods/san1/ssolb-%04d.png
 // # ./hyper -dim 32 32 32 -geo 3:2 -iz-list -sn-unittest -build -write shyp-geodesics.dat -visualize devmods/san1/shypa-%04d.png
 
@@ -51,11 +51,11 @@ int max_iter = 999999;
 
 hyperpoint fail(.1, .2, .3, .4);
 
-hyperpoint iterative_solve(hyperpoint xp, hyperpoint candidate, int prec, ld minerr, bool debug = false) {
+hyperpoint iterative_solve(hyperpoint xp, hyperpoint candidate, ld minerr, bool debug = false) {
 
   transmatrix T = Id; T[0][1] = 8; T[2][2] = 5;
   
-  auto f = [&] (hyperpoint x) { return nisot::numerical_exp(x, prec); }; // T * x; };
+  auto f = [&] (hyperpoint x) { return nisot::numerical_exp(x); }; // T * x; };
 
   auto ver = f(candidate);
   ld err = solerror(xp, ver);
@@ -136,6 +136,8 @@ hyperpoint iterative_solve(hyperpoint xp, hyperpoint candidate, int prec, ld min
     nextiter: ;
     }
   
+  // println(hlog, "#it = ", iter);
+  
   return at;
   }
 
@@ -201,9 +203,11 @@ void build_sols(int PRECX, int PRECY, int PRECZ) {
     if((nih && iz == 0) || iz == PRECZ-1) return;
   
     auto solve_at = [&] (int ix, int iy) {
+      // if(ix != 30 || iy <= 50 || iz) return;
       ld x = ix_to_x(ix / (PRECX-1.));
       ld y = ix_to_x(iy / (PRECY-1.));
       ld z = iz_to_z(iz / (PRECZ-1.));
+      
       
       auto v = hyperpoint ({x,y,z,1});
       
@@ -212,8 +216,6 @@ void build_sols(int PRECX, int PRECY, int PRECZ) {
       
       candidates.push_back(point3(0,0,0)); 
       
-      static constexpr int prec = 100;
-      
       // sort(candidates.begin(), candidates.end(), [&] (hyperpoint a, hyperpoint b) { return solerror(v, direct_exp(a, prec)) > solerror(v, direct_exp(b, prec)); });
       
       // cand_best = candidates.back();
@@ -221,16 +223,16 @@ void build_sols(int PRECX, int PRECY, int PRECZ) {
       vector<hyperpoint> solved_candidates;
       
       for(auto c: candidates)  {
-        auto solt = iterative_solve(v, c, prec, 1e-6, false);
+        auto solt = iterative_solve(v, c, 1e-6, false);
         solved_candidates.push_back(solt);
-        if(solerror(v, nisot::numerical_exp(solt, prec)) < 1e-9) break;
+        if(solerror(v, nisot::numerical_exp(solt)) < 1e-9) break;
         }
 
-      sort(solved_candidates.begin(), solved_candidates.end(), [&] (hyperpoint a, hyperpoint b) { return solerror(v, nisot::numerical_exp(a, prec)) > solerror(v, nisot::numerical_exp(b, prec)); });
+      sort(solved_candidates.begin(), solved_candidates.end(), [&] (hyperpoint a, hyperpoint b) { return solerror(v, nisot::numerical_exp(a)) > solerror(v, nisot::numerical_exp(b)); });
       
       cand = solved_candidates.back();
 
-      auto xerr = solerror(v, nisot::numerical_exp(cand, prec));
+      auto xerr = solerror(v, nisot::numerical_exp(cand));
       
       if(cand == fail) {
         println(hlog, format("[%2d %2d %2d] FAIL", iz, iy, ix));
@@ -239,7 +241,7 @@ void build_sols(int PRECX, int PRECY, int PRECZ) {
       else if(xerr > 1e-3) {
         println(hlog, format("[%2d %2d %2d] ", iz, iy, ix));
         println(hlog, "f(?) = ", v);
-        println(hlog, "f(", cand, ") = ", nisot::numerical_exp(cand, prec));
+        println(hlog, "f(", cand, ") = ", nisot::numerical_exp(cand));
         println(hlog, "error = ", xerr);
         println(hlog, "canned = ", compress(azeq_to_table(cand)));
         max_err = xerr;
@@ -418,7 +420,7 @@ hyperpoint find_optimal_geodesic(hyperpoint res) {
       max_iter = 1000;
       auto h1 = iterative_solve(res, p.first * quality(p) / hypot_d(3, p.first), 100, 1e-6);
 
-      if(deb) println(hlog, "h1 returns ", h1, " of length ", hypot_d(3, h1), " and error ", hypot_d(3, nisot::numerical_exp(h1, 100) - res));
+      if(deb) println(hlog, "h1 returns ", h1, " of length ", hypot_d(3, h1), " and error ", hypot_d(3, nisot::numerical_exp(h1) - res));
 
       if(h1 == fail) return;
       
