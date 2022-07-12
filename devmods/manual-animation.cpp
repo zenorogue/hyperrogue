@@ -17,37 +17,100 @@ namespace hr {
 
 bool saving_positions;
 
+bool smooth_aim = true;
+
 int next_pos_tick;
 
-using frame = tuple<transmatrix, transmatrix, cell*>;
+struct frame {
+  transmatrix V;
+  transmatrix lp;
+  transmatrix msm;
+  cell *co;
+  int steps_to_change;
+  int step_smoothing;
+  ld stepdist;
+  ld stepang;
+  };
+
 vector<frame> saved;
 
-bool trailer_turn(int delta) {
-  if(saving_positions)
-    View = cpush(2, -delta/8000.) * cspin(0, 2, (mousex - current_display->xcenter) * delta / -1000000.) * cspin(1, 2, (mousey - current_display->ycenter) * delta / -1000000.) * View;
-  return true;
-  }
+int collection;
 
 bool recording;
-
 bool keys_on = false;
+ld stepdist = 0.02;
+ld stepang = 0.01;
+EX int step_smoothing = 1;
+EX int steps_to_change;
+
+void move_camera1(transmatrix T);
+
+void recall(frame& f = saved.back()) {
+  View = f.V;
+  current_display->local_perspective = f.lp;
+  stretch::mstretch_matrix = f.msm;
+  centerover = f.co;
+  steps_to_change = f.steps_to_change;
+  step_smoothing = f.step_smoothing;
+  stepdist = f.stepdist;
+  stepang = f.stepang;
+  playermoved = false;
+  }
+
+frame saveframe() {
+  frame f;
+  f.V = View;
+  f.lp = current_display->local_perspective;
+  f.msm = stretch::mstretch_matrix;
+  f.co = centerover;
+  f.steps_to_change = steps_to_change;
+  f.step_smoothing = step_smoothing;
+  f.stepdist = stepdist;
+  f.stepang = stepang;
+  playermoved = false;
+  return f;
+  }
 
 void trailer_frame() {
   // if(saving_positions || !isize(saved)) 
   if(!recording && keys_on) queuestr(current_display->xcenter, current_display->ycenter, 0, 16, "+", 0xFFFFFFFF);
   if(!recording && keys_on) queuestr(current_display->xcenter/2, current_display->ycenter, 0, 16, "+", 0xFFFFFFFF);
   if(!recording && keys_on) queuestr(current_display->xcenter*3/2, current_display->ycenter, 0, 16, "+", 0xFFFFFFFF);
+  if(!recording && keys_on) queuestr(mousex, mousey, 0, 16, "+", 0xFFFFFFFF);
+  }
 
-  if(saving_positions && ticks > next_pos_tick) {
-    next_pos_tick += 66;
-    saved.emplace_back(View, current_display->local_perspective, centerover);
-    println(hlog, "frames = ", isize(saved));
+ld next_stepdist = stepdist;
+ld next_stepang = stepang;
+
+void apply_steps_to_change() {
+  if(steps_to_change) {
+    stepang = stepang + (next_stepang-stepang) / steps_to_change;
+    stepdist = stepdist + (next_stepdist-stepdist) / steps_to_change;
+    steps_to_change--;
     }
   }
 
-ld stepdist = 0.02;
-
-ld stepang = 0.01;
+bool trailer_turn(int delta) {
+  if(saving_positions) {
+    collection += delta * 60;
+    while(collection > 1000) {
+      apply_steps_to_change();
+      collection -= 1000;
+      View = cpush(2, -stepdist) * View;
+            
+      if(smooth_aim) {
+        ld dx = (mousex - current_display->xcenter) * stepang / -50.;
+        ld dy = (mousey - current_display->ycenter) * stepang / -50.;
+        View = cspin(0, 2, dx) * cspin(1, 2, dy) * View;
+        }
+      optimizeview();
+      saved.emplace_back(saveframe());
+      if(isize(saved) % 100 == 0)
+        println(hlog, "frames = ", isize(saved));
+      }
+    }
+  return true;
+  }
 
 ld spin_distance = 0;
 
@@ -57,17 +120,14 @@ bool fixed_orientation;
 
 transmatrix orientation_to_fix;
 
-EX int step_smoothing = 1;
-
-EX int steps_to_change;
-
-ld next_stepdist = stepdist;
-ld next_stepang = stepang;
-
 string videofile;
 
 void move_camera1(transmatrix T) {
-  saved.emplace_back(View, current_display->local_perspective, centerover);
+  // println(hlog, "rayfix: saving frame ", isize(saved));
+  // optimizeview();
+  // ray::cast();
+  optimizeview();
+  saved.emplace_back(saveframe());
   if(spinning_around) {
     for(int s=0; s<100; s++) 
       shift_view(ztangent(-spin_distance/100));
@@ -100,11 +160,7 @@ bool move_camera(transmatrix T) {
 template<class Type> bool move_camera_smoothchange(const Type& T) {
   for(int it=0; it<5; it++) {
     println(hlog, "steps_to_change = ", steps_to_change, " stepdist = ", stepdist);
-    if(steps_to_change) {
-      stepang = stepang + (next_stepang-stepang) / steps_to_change;
-      stepdist = stepdist + (next_stepdist-stepdist) / steps_to_change;
-      steps_to_change--;
-      }
+    apply_steps_to_change();
     move_camera1(T());
     }
   println(hlog, "frames = ", isize(saved), " distance = ", spin_distance);
@@ -173,31 +229,34 @@ void get_b4_distance() {
     }
   }
 
-void recall(frame& f = saved.back()) {
-  tie(View, current_display->local_perspective, centerover) = f;
-  playermoved = false;
-  }
-
 void load_animation(string fname) {
   fhstream f(fname, "r");
   int siz;
   f.read<int>(siz);
   saved.resize(siz);
   for(int i=0; i<isize(saved); i++) {
-    auto& [a, b, d] = saved[i];
-    hread_raw(f, a);
-    hread_raw(f, b);
+    auto& s = saved[i];
+    hread_raw(f, s.V);
+    hread_raw(f, s.lp);
     int tmp = 0; hread_raw(f, tmp);
     if(cryst) {
       crystal::coord co;
       hread_raw(f, co);
-      d = crystal::get_heptagon_at(co)->c7;
+      s.co = crystal::get_heptagon_at(co)->c7;
       }
+    else
     if(nil) {
       nilv::mvec co;
       hread_raw(f, co);
-      d = nilv::get_heptagon_at(co)->c7;
+      s.co = nilv::get_heptagon_at(co)->c7;
       }
+    else if(bounded) {    
+      auto ac = currentmap->allcells();
+      int i;
+      hread_raw(f, i);
+      s.co = ac[i];
+      }
+    else s.co = cwt.at;
     }
   println(hlog, "loaded animation of ", isize(saved), " frames");
   recall();
@@ -212,9 +271,9 @@ EX transmatrix spintox_good(const hyperpoint& H) {
 
 void denan() {
   for(int i=1; i<isize(saved)-1; i++) {
-    auto& [V, b, co] = saved[i];
-    if(isnan(V[0][0])) {
-      println(hlog, "nan at ", i, " @ ", co);
+    auto& s = saved[i];
+    if(isnan(s.V[0][0])) {
+      println(hlog, "nan at ", i, " @ ", s.co);
       saved[i] = saved[i-1];
       }
     }
@@ -232,27 +291,27 @@ void smoothen() {
   
   for(int a=1; a<3; a++)
   for(int i=1; i<isize(saved)-1; i++) if((a^i)&1) {
-    auto& [V, b, co] = saved[i];
-    auto& [Vl, bl, col] = saved[i-1];
-    auto& [Vn, bn, con] = saved[i+1];
-    forCellCM(c, co);
-    hyperpoint hl = V * relm(col, co) * inverse(Vl) * C0;
-    hyperpoint hn = V * relm(con, co) * inverse(Vn) * C0;
+    auto& s = saved[i];
+    auto& sl = saved[i-1];
+    auto& sn = saved[i+1];
+    forCellCM(c, s.co);
+    hyperpoint hl = s.V * relm(sl.co, s.co) * inverse(sl.V) * C0;
+    hyperpoint hn = s.V * relm(sl.co, s.co) * inverse(sn.V) * C0;
     hyperpoint hm = mid(hl, hn);
     if(isnan(hm[0])) {
-      println(hlog, "Vl = ", Vl);
-      println(hlog, "V  = ", V);
-      println(hlog, "Vn = ", Vn);
-      println(hlog, "cells ", col, co, con);
-      println(hlog, "crl= ", relm(col, co));
-      println(hlog, "crm= ", relm(con, co));
+      println(hlog, "Vl = ", sl.V);
+      println(hlog, "V  = ", s.V);
+      println(hlog, "Vn = ", sn.V);
+      println(hlog, "cells ", sl.co, s.co, sn.co);
+      println(hlog, "crl= ", relm(sl.co, s.co));
+      println(hlog, "crm= ", relm(sn.co, s.co));
       continue;
       }
     total += hdist0(hm);
-    V = gpushxto0(hm) * V;
+    s.V = gpushxto0(hm) * s.V;
     auto xhn = gpushxto0(hm) * hn;
     transmatrix T = cspin(0, 2, -M_PI/2) * spintox_good(cspin(0, 2, M_PI/2) * xhn) * cspin(0, 2, M_PI/2);
-    V = T * V;
+    s.V = T * s.V;
     // println(hlog, hn, " -> ", T * xhn);
     }
   println(hlog, "total = ", total);
@@ -316,6 +375,7 @@ void do_recording() {
   auto f = [&] {
     for(auto& p: saved) {
       recall(p);
+      println(hlog, "rayfix: render ", i);
       ticks = i * 1000 / mrec_fps;
       
       if(i >= mrec_first && i < mrec_last) {
@@ -341,6 +401,71 @@ void do_recording() {
   recording = false;
   }
   
+void show_man_options() {
+  gamescreen(2);
+  dialog::init("manual animation");
+  
+  dialog::addSelItem("stepdist", fts(next_stepdist), 'd');
+  dialog::add_action([] {
+    dialog::editNumber(next_stepdist, 0, 1, 0.001, 0.02, "stepdist", "stepdist");
+    dialog::reaction = [] { set_stepdist(next_stepdist); };
+    });
+
+  dialog::addSelItem("stepang", fts(next_stepang), 'a');
+  dialog::add_action([] {
+    dialog::editNumber(next_stepang, 0, 1, 0.001, 0.02, "stepang", "stepang");
+    dialog::reaction = [] { set_stepang(next_stepang); };
+    });
+
+  dialog::addItem("b4 distance", 'b');
+  dialog::add_action(get_b4_distance);
+
+  dialog::addSelItem("step smoothing", its(step_smoothing), 's');
+  dialog::add_action([] {
+    dialog::editNumber(step_smoothing, 1, 30, 1, 1, "step_smoothing", "step_smoothing");
+    dialog::reaction = [] { steps_to_change = step_smoothing; };
+    });
+
+  dialog::addItem("save path", '[');
+  dialog::add_action([] {
+    fhstream f("devmods/manan-record.mar", "w");
+    f.write<int>(isize(saved));
+    for(int i=0; i<isize(saved); i++) {
+      auto& s = saved[i];
+      hwrite_raw(f, s.V);
+      hwrite_raw(f, s.lp);
+      int tmp = 0; hwrite_raw(f, tmp);
+      if(cryst) {
+        auto at = crystal::get_coord(s.co->master);
+        hwrite_raw(f, at);
+        }
+      else if(nil) {
+        auto at = nilv::get_coord(s.co->master);
+        hwrite_raw(f, at);
+        }
+      else if(bounded) {
+        auto ac = currentmap->allcells();
+        for(int i=0; i<isize(ac); i++) if(ac[i] == s.co)
+          hwrite_raw(f, i);
+        }
+      }
+    println(hlog, "saved animation of ", isize(saved), " frames");
+    });
+
+  dialog::addItem("load path", ']');
+  dialog::add_action([] {
+    load_animation("devmods/manan-record.mar");
+    });
+  
+  dialog::addItem("do record", 'r');
+  dialog::add_action(do_recording);
+
+  dialog::addItem("clear", 'c');
+  dialog::add_action([] { saved.clear(); });
+
+  dialog::display();      
+  }
+  
 bool trailer_handleKey(int sym, int uni) {  
 
   if(sym == 'f' && (cmode & sm::NORMAL)) {
@@ -349,7 +474,7 @@ bool trailer_handleKey(int sym, int uni) {
     return true;
     }
 
-  if(keys_on) {
+  if(keys_on && (cmode & sm::NORMAL)) {
 
     if(sym == ',') { vid.fov *= 1.1; mouseaim_sensitivity *= 1.1; println(hlog, "fov = ", vid.fov, " sens = ", mouseaim_sensitivity); }
     if(sym == '.') { vid.fov /= 1.1; mouseaim_sensitivity /= 1.1; println(hlog, "fov = ", vid.fov, " sens = ", mouseaim_sensitivity); }
@@ -388,18 +513,13 @@ bool trailer_handleKey(int sym, int uni) {
     if(sym == '1') { set_stepdist(0); return true; }
     if(sym == '2') { set_stepdist(0.005); return true; }
     if(sym == '3') { set_stepdist(0.02); return true; }
-    if(sym == '4') { set_stepang(0); return true; }
+    if(sym == '5') { set_stepang(0); return true; }
 
     if(sym == '6') { set_stepang(0.001); return true; }
     if(sym == '7') { set_stepang(0.003); return true; }
     if(sym == '8') { set_stepang(0.01); return true; }
     if(sym == '9') { set_stepang(0.03); return true; }
     if(sym == '0') { set_stepang(0.1); return true; }
-    
-    if(sym == 'p') { get_b4_distance(); return true; }
-    
-    if(sym == 'm') { step_smoothing = 1; println(hlog, "step_smoothing = ", step_smoothing); return true; }
-    if(sym == 'n') { step_smoothing = 15; println(hlog, "step_smoothing = ", step_smoothing); return true; }
     
     if(sym == 'o') { 
       println(hlog, "spin_distance = ", spin_distance, " reset to 0, i to spin");
@@ -429,6 +549,7 @@ bool trailer_handleKey(int sym, int uni) {
       saving_positions = !saving_positions;
       next_pos_tick = ticks;
       println(hlog, "saving_positions = ", saving_positions);
+      mouseaim_sensitivity = 0;
       return true;
       }
   
@@ -446,38 +567,13 @@ bool trailer_handleKey(int sym, int uni) {
       return true;
       }
     
-    if(sym == '[') {
-      fhstream f("devmods/manan-record.mar", "w");
-      f.write<int>(isize(saved));
-      for(int i=0; i<isize(saved); i++) {
-        auto& [a, b, d] = saved[i];
-        hwrite_raw(f, a);
-        hwrite_raw(f, b);
-        int tmp = 0; hwrite_raw(f, tmp);
-        if(cryst) {
-          auto at = crystal::get_coord(d->master);
-          hwrite_raw(f, at);
-          }
-        else if(nil) {
-          auto at = nilv::get_coord(d->master);
-          hwrite_raw(f, at);
-          }
-        }
-      println(hlog, "saved animation of ", isize(saved), " frames");
-      }
-  
-    if(sym == ']') load_animation("devmods/manan-record.mar");
-    
-    if(sym == 'r') {
-      do_recording();
-      return true;
-      }
+    if(sym == 'r') pushScreen(show_man_options);
     }
     
   return false;
   }
 
-int readArgs() {
+int ma_readArgs() {
   using namespace arg;
            
   if(0) ;
@@ -521,18 +617,17 @@ int readArgs() {
     shift(); mrec_first_opt = pos;
     while(args() != cap) shift();
     mrec_last_opt = pos;
-    shift();
     }
   else return 1;
   return 0;
   }
 
 
-auto hook = 
+auto mahook = 
   addHook(hooks_handleKey, 100, trailer_handleKey)
 + addHook(hooks_drawmap, 100, trailer_frame)
 + addHook(shmup::hooks_turn, 100, trailer_turn)
-+ addHook(hooks_args, 100, readArgs)
++ addHook(hooks_args, 100, ma_readArgs)
 + 0;
 
 }
