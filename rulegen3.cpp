@@ -79,10 +79,12 @@ EX vector<pair<int, int>>& check_all_edges(twalker cw, analyzer_state* a, int id
       auto& sh0 = currentmap->get_cellshape(tcell_to_cell[cw.at]);
       auto& sh1 = currentmap->get_cellshape(tcell_to_cell[tw.at]);
       int common = 0;
+      vector<hyperpoint> kleinized;
       vector<hyperpoint> rotated;
-      for(auto w: sh1.vertices_only_local) rotated.push_back(T*w);
+      for(auto v: sh0.vertices_only) kleinized.push_back(kleinize(sh0.from_cellcenter * v));
+      for(auto w: sh1.vertices_only) rotated.push_back(kleinize(T*sh1.from_cellcenter * w));
       
-      for(auto v: sh0.vertices_only_local)      
+      for(auto v: kleinized)
       for(auto w: rotated)
         if(sqhypot_d(MDIM, v-w) < 1e-6)
           common++;
