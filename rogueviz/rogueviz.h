@@ -70,6 +70,8 @@ namespace rogueviz {
   extern vector<int> legend;
   extern vector<cell*> named;
   
+  int readLabel(fhstream& f);
+
   #if CAP_TEXTURE
   struct rvimage {
     basic_textureinfo tinf;
