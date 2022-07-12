@@ -261,88 +261,6 @@ int readLabel(fhstream& f) {
   return getid(s);
   }
 
-namespace anygraph {
-  double R, alpha, T;
-  vector<pair<double, double> > coords;
-  
-  edgetype *any;
-  
-  int N;
-               
-  void fixedges() {
-    for(int i=N; i<isize(vdata); i++) if(vdata[i].m) vdata[i].m->dead = true;
-    for(int i=0; i<isize(vdata); i++) vdata[i].edges.clear();
-    vdata.resize(N);
-    for(auto e: edgeinfos) {
-      e->orig = NULL;
-      addedge(e->i, e->j, e);
-      }
-    }
-  
-  void tst() {}
-
-  void read(string fn, bool subdiv, bool doRebase, bool doStore) {
-    init(RV_GRAPH);
-    any = add_edgetype("embedded edges");
-    fname = fn;
-    fhstream f(fn + "-coordinates.txt", "rt");
-    if(!f.f) {
-      printf("Missing file: %s-coordinates.txt\n", fname.c_str());
-      exit(1);
-      }
-    printf("Reading coordinates...\n");
-    string ignore;
-    if(!scan(f, ignore, ignore, ignore, ignore, N, anygraph::R, anygraph::alpha, anygraph::T)) {
-      printf("Error: incorrect format of the first line\n"); exit(1);
-      }
-    vdata.reserve(N);
-    while(true) {
-      string s = scan<string>(f);
-      println(hlog, "s: ", s.c_str());
-      if(s == "D11.11") tst();
-      if(s == "" || s == "#ROGUEVIZ_ENDOFDATA") break;
-      int id = getid(s);
-      vertexdata& vd(vdata[id]);
-      vd.name = s;
-      vd.cp = colorpair(dftcolor);
-      
-      double r, alpha;
-      if(!scan(f, r, alpha)) { printf("Error: incorrect format of r/alpha\n"); exit(1); }
-      coords.push_back(make_pair(r, alpha));
-  
-      transmatrix h = spin(alpha * degree) * xpush(r);
-      
-      createViz(id, currentmap->gamestart(), h);
-      }
-    
-    fhstream g(fn + "-links.txt", "rt");
-    if(!g.f) {
-      println(hlog, "Missing file: ", fname, "-links.txt");
-      exit(1);
-      }
-    println(hlog, "Reading links...");
-    int qlink = 0;
-    while(true) {
-      int i = readLabel(g), j = readLabel(g);
-      if(i == -1 || j == -1) break;
-      addedge(i, j, 1, subdiv, any);
-      qlink++;
-      }
-  
-    if(doRebase) {
-      printf("Rebasing...\n");
-      for(int i=0; i<isize(vdata); i++) {
-        if(i % 10000 == 0) printf("%d/%d\n", i, isize(vdata));
-        if(vdata[i].m) virtualRebase(vdata[i].m);
-        }
-      printf("Done.\n");
-      }
-    
-    if(doStore) storeall();
-    }
-  
-  }
-
 ld maxweight;
 
 bool edgecmp(edgeinfo *e1, edgeinfo *e2) {
@@ -964,7 +882,6 @@ void close() {
   legend.clear();
   for(int i=0; i<isize(edgeinfos); i++) delete edgeinfos[i];
   edgeinfos.clear();
-  anygraph::coords.clear();
   callhooks(hooks_close);
   edgetypes.clear();
   do_cleanup();
@@ -981,15 +898,6 @@ int readArgs() {
     shift(); dftcolor = parse(args());
     }  
 
-// graph visualizer
-//------------------
-
-// this visualizes the data from: https://hpi.de/friedrich/research/hyperbolic
-
-  else if(argis("-graph")) {
-    PHASE(3); shift(); anygraph::read(args());
-    }
-  
 // graphical parameters
 //------------------
 

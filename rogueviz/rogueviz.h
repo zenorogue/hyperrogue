@@ -127,15 +127,6 @@ namespace rogueviz {
     on_cleanup_or_next(del);
     }
 
-  namespace anygraph {
-    extern double R, alpha, T;
-    extern vector<pair<double, double> > coords;
-    
-    void fixedges();
-    void read(string fn, bool subdiv = true, bool doRebase = true, bool doStore = true);
-    extern int N;
-    }
-  
   extern bool showlabels;
 
   extern bool rog3;
