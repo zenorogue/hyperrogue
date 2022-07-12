@@ -1093,10 +1093,14 @@ void extend_analyzer(twalker cwmain, int z, twalker giver) {
 
     v->id = currently_at;
     v->dir = sub_states[l]->dir;
-    for(int i=0; i<10; i++) if(sub_states[l]->substates[i] == sub_states[l+1]) {
-      v = v->substates[i] = alloc_analyzer();
-      currently_at = new_id++;
-      goto next_l;
+
+    for(auto p: sub_states[l]->substates) {
+      int i = p.first;
+      if(sub_states[l]->substates[i] == sub_states[l+1]) {
+        v = v->substates[i] = alloc_analyzer();
+        currently_at = new_id++;
+        goto next_l;
+        }
       }
 
     next_l: ;
@@ -1339,6 +1343,11 @@ EX void id_at_spin(twalker cw, vector<twalker>& sprawl, vector<analyzer_state*>&
       }
     if(a->id == MYSTERY) {
       return;
+      }
+    if(a->id >= isize(sprawl)) {
+      println(hlog, sprawl);
+      println(hlog, "id = ", a->id);
+      throw hr_exception("sprawl error");
       }
     auto t = sprawl[a->id];
     twalker tw = t + a->dir;
