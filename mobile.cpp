@@ -159,10 +159,7 @@ void handleclick(MOBPAR_FORMAL) {
     if(andmode >= 10) andmode -= 10;
 
   if(andmode == 3) {
-    if(tour::on)
-      showMissionScreen();
-    else
-      pushScreen(showMainMenu);
+    pushScreen(showGameMenu);
     andmode = 0;
     }
   }
