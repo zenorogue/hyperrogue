@@ -1866,9 +1866,9 @@ int testargs() {
     stop_game();
     shift(); int i = argi();
     reg3::reg3_rule_available = (i & 8) ? 0 : 1;
-    fieldpattern::use_rule_fp = (i & 1) ? 0 : 1;
-    fieldpattern::use_quotient_fp = (i & 2) ? 0 : 1;;
-    reg3::minimize_quotient_maps = (i & 4) ? 0 : 1;;
+    fieldpattern::use_rule_fp = (i & 1) ? 1 : 0;
+    fieldpattern::use_quotient_fp = (i & 2) ? 1 : 0;
+    reg3::minimize_quotient_maps = (i & 4) ? 1 : 0;
     }
 
   else return 1;
