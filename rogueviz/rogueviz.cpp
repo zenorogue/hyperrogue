@@ -461,9 +461,10 @@ void storevertex(vector<glvertex>& tab, const hyperpoint& h) {
 
 double min_line_step = .1;
 double min_line_splits = 0;
+double max_line_splits = 6;
 
 void storelineto(vector<glvertex>& tab, const hyperpoint& h1, const hyperpoint& h2, int s) {
-  if(intval(h1, h2) < min_line_step && s >= min_line_splits)
+  if(s >= max_line_splits || (intval(h1, h2) < min_line_step && s >= min_line_splits))
     storevertex(tab, h2);
   else {
     hyperpoint h3 = mid(h1, h2);
@@ -1220,6 +1221,7 @@ auto hooks  =
     param_i(brm_limit, "brm_limit");
     param_f(edgewidth, "rvedgewidth");
     param_f(min_line_splits, "edgeminsplits");
+    param_f(max_line_splits, "edgemaxsplits");
     }) +
  0;
 
