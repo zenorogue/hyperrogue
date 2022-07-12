@@ -148,11 +148,32 @@ void set_os(string o) {
   }
 
 vector<string> modules;
+vector<string> hidden_dependencies;
 
 time_t get_file_time(const string s) {
   struct stat attr;
   if(stat(s.c_str(), &attr)) return 0;
-  return attr.st_mtime;
+  time_t res = attr.st_mtime;
+
+  for(auto& hd: hidden_dependencies) if(s.substr(0, hd.size()) == hd) {
+    int pos = 0;
+    vector<int> slashes = {0};
+    int numslash = 0;
+    for(char c: s) { pos++; if(c == '/') slashes.push_back(pos), numslash++; }
+    ifstream ifs(s);
+    string s1;
+    while(getline(ifs, s1)) {
+      if(s1.substr(0, 10) == "#include \"") {
+        string t = s1.substr(10);
+        t = t.substr(0, t.find("\""));
+        int qdot = 0;
+        while(t.substr(0, 3) == "../" && qdot < numslash) qdot++, t = t.substr(3);
+        string u = s.substr(0, slashes[numslash - qdot]) + t;
+        res = max(res, get_file_time(u));
+        }
+      }
+    }
+  return res;
   }
 
 int optimized = 0;
@@ -295,6 +316,10 @@ int main(int argc, char **argv) {
           string t = s.substr(10);
           t = t.substr(0, t.find(".cpp\""));
           modules.push_back("rogueviz/" + t);
+          }
+        if(s.substr(0, 24) == "// hidden dependencies: ") {
+          while(s.back() == 10 || s.back() == 13) s.pop_back();
+          hidden_dependencies.push_back(s.substr(24));
           }
         }
       }
