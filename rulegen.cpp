@@ -143,6 +143,10 @@ EX hookset<void(int, twalker)> hooks_gen_tcell;
 queue<reaction_t> fix_queue;
 
 void push_unify(twalker a, twalker b) {
+  if(WDIM == 3 && a != b) {
+    println(hlog, "pushing unify of ", tie(a, b));
+    throw hr_exception("bad unify");
+    }
   if(a.at->id != b.at->id) {
     throw hr_exception("queued bad unify");
     }
@@ -385,6 +389,7 @@ void check_loops(twalker pw) {
   }
 
 EX void connect_and_check(twalker p1, twalker p2) {
+  if(GDIM == 3) throw hr_exception("connect_and_check called");
   ufind(p1); ufind(p2);
   p1.at->c.connect(p1.spin, p2.at, p2.spin, false);
   fix_queue.push([=] { check_loops(p1); });
@@ -396,7 +401,7 @@ EX void unify(twalker pw1, twalker pw2) {
   ufind(pw1);
   ufind(pw2);
   if(pw1 == pw2) return;
-  if(GDIM == 3) throw hr_exception("check_loops called");
+  if(GDIM == 3) throw hr_exception("unify called");
   callhooks(hooks_gen_tcell, 3, pw1);
   callhooks(hooks_gen_tcell, 4, pw2);
   if(pw1.at->unified_to.at != pw1.at)
