@@ -1579,10 +1579,58 @@ void genhoneycomb(string fname) {
   map<int, vector<int>> rev_roadsign_id;
   for(auto& rs: roadsign_id) rev_roadsign_id[rs.second] = rs.first;
 
-  for(int i=0; i<isize(treestates); i++) {
-    auto& ts = treestates[i];
-    for(int j=0; j<S7; j++) {
-      int j1 = gmod(j - ts.giver.spin, S7);
+  int N = isize(treestates);
+  using classdata = pair<vector<int>, int>;
+  vector<classdata> nclassify(N);
+  for(int i=0; i<N; i++) nclassify[i] = {{0}, i};
+
+  int numclass = 1;
+  while(true) {
+    println(hlog, "N = ", N, " numclass = ", numclass);
+    for(int i=0; i<N; i++) {
+      auto& ts = treestates[i];
+      for(int j=0; j<isize(ts.rules); j++) {
+        int j1 = gmod(j - ts.giver.spin, isize(ts.rules));
+        auto r = ts.rules[j1];
+        if(r < 0) nclassify[i].first.push_back(r);
+        else nclassify[i].first.push_back(nclassify[r].first[0]);
+        }
+      }
+    sort(nclassify.begin(), nclassify.end());
+    vector<int> last = {}; int newclass = 0;
+    for(int i=0; i<N; i++) {
+      if(nclassify[i].first != last) {
+        newclass++;
+        last = nclassify[i].first;
+        }
+      nclassify[i].first = {newclass-1};
+      }
+    sort(nclassify.begin(), nclassify.end(), [] (const classdata& a, const classdata& b) { return a.second < b.second; });
+    if(numclass == newclass) break;
+    numclass = newclass;
+    }
+  vector<int> representative(numclass);
+  for(int i=0; i<isize(treestates); i++) representative[nclassify[i].first[0]] = i;
+
+  println(hlog, "Minimized rules (", numclass, " states):");
+  for(int i=0; i<numclass; i++) {
+    auto& ts = treestates[representative[i]];
+    print(hlog, lalign(4, i), ":");
+    for(int j=0; j<isize(ts.rules); j++) {
+      int j1 = gmod(j - ts.giver.spin, isize(ts.rules));
+      auto r =ts.rules[j1];
+      if(r == DIR_PARENT) print(hlog, " P");
+      else if(r >= 0) print(hlog, " ", nclassify[r].first[0]);
+      else print(hlog, " S", r);
+      }
+    println(hlog);
+    }
+  println(hlog);
+
+  for(int i=0; i<numclass; i++) {
+    auto& ts = treestates[representative[i]];
+    for(int j=0; j<isize(ts.rules); j++) {
+      int j1 = gmod(j - ts.giver.spin, isize(ts.rules));
       auto r =ts.rules[j1];
       if(r == DIR_PARENT) {
         data.push_back(-1);
@@ -1590,7 +1638,7 @@ void genhoneycomb(string fname) {
         side_data += ",";
         }
       else if(r >= 0) {
-        data.push_back(r);
+        data.push_back(nclassify[r].first[0]);
         }
       else {
         data.push_back(-1);
@@ -1611,7 +1659,7 @@ void genhoneycomb(string fname) {
   hwrite_fpattern(ss, fp);
 
   vector<int> root(qc, 0);
-  for(int i=0; i<qc; i++) root[i] = get_treestate_id(t_origin[i]).second;
+  for(int i=0; i<qc; i++) root[i] = nclassify[get_treestate_id(t_origin[i]).second].first[0];
   println(hlog, "root = ", root);
   hwrite(ss, root);
 
