@@ -435,7 +435,7 @@ bool forked = false;
 int max_children = 7;
 
 void test_all(string setname) {
-  disable_floorshapes = true;
+  floorshapes_level = 1;
   vector<string> filenames;
   std::ifstream is("devmods/rulegen-tests/"+setname+".lst");
   string s;
