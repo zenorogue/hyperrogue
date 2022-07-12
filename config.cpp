@@ -717,6 +717,14 @@ EX void initConfig() {
       {"by land", ""},
       {"by number", ""}
       }, "inventory/kill sorting", 'k');
+
+  param_b(less_in_landscape, "less_in_landscape", false)
+  ->editable("less items/kills in landscape", 'L')
+  -> set_sets([] { dialog::reaction_final = [] { println(hlog, "Reset"); vid.killreduction = 0; }; });
+
+  param_b(less_in_portrait, "less_in_portrait", false)
+  ->editable("less items/kills in portrait", 'P')
+  -> set_sets([] { dialog::reaction_final = [] { println(hlog, "Reset"); vid.killreduction = 0; }; });
   
   // basic graphics
   
@@ -1833,6 +1841,8 @@ EX void configureInterface() {
   
   add_edit(glyphsortorder);
   add_edit(vid.graphglyph);
+  add_edit(less_in_landscape);
+  add_edit(less_in_portrait);
 
   add_edit(display_yasc_codes);
 

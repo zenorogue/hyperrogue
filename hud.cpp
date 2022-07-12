@@ -45,6 +45,7 @@ EX int subclass(int i) {
 #define GLYPH_LOCAL2     256
 #define GLYPH_TARGET     512
 #define GLYPH_INSQUARE   1024
+#define GLYPH_INLANDSCAPE 2048
 
 #if HDR
 enum eGlyphsortorder {
@@ -147,7 +148,7 @@ int glyphflags(int gid) {
       if(i == localshardof(cwt.at->land)) f |= GLYPH_LOCAL2;
       }
     if(i == treasureType(cwt.at->land) || daily::on) 
-      f |= GLYPH_LOCAL | GLYPH_LOCAL2 | GLYPH_IMPORTANT | GLYPH_INSQUARE;
+      f |= GLYPH_LOCAL | GLYPH_LOCAL2 | GLYPH_IMPORTANT | GLYPH_INSQUARE | GLYPH_INPORTRAIT | GLYPH_INLANDSCAPE;
     if(i == itHolyGrail) {
       if(items[i] >= 3 && !inv::on) f |= GLYPH_MARKOVER;
       }
@@ -156,19 +157,21 @@ int glyphflags(int gid) {
       else if(items[i] < 10) f |= GLYPH_MARKTODO;
       }
     else {
-      f |= GLYPH_IMPORTANT | GLYPH_INSQUARE;
+      f |= GLYPH_IMPORTANT | GLYPH_INSQUARE | GLYPH_INPORTRAIT | GLYPH_INLANDSCAPE;
       if(itemclass(i) == IC_ORB && items[i] < 10) f |= GLYPH_RUNOUT;
       }
     if(i == orbToTarget) f |= GLYPH_TARGET;
-    f |= GLYPH_INPORTRAIT;
+    if(!less_in_portrait) f |= GLYPH_INPORTRAIT;
+    if(!less_in_landscape) f |= GLYPH_INLANDSCAPE;
     }
   else {
     eMonster m = eMonster(gid-ittypes);
-    if(m == moLesser) f |= GLYPH_IMPORTANT | GLYPH_DEMON | GLYPH_INPORTRAIT | GLYPH_INSQUARE;
+    if(m == moLesser) f |= GLYPH_IMPORTANT | GLYPH_DEMON | GLYPH_INPORTRAIT | GLYPH_INSQUARE | GLYPH_INLANDSCAPE;
     int isnat = isNative(cwt.at->land, m);
-    if(isnat) f |= GLYPH_LOCAL | GLYPH_IMPORTANT | GLYPH_INPORTRAIT | GLYPH_INSQUARE;
+    if(isnat) f |= GLYPH_LOCAL | GLYPH_IMPORTANT | GLYPH_INPORTRAIT | GLYPH_INSQUARE | GLYPH_INLANDSCAPE;
     if(isnat == 2) f |= GLYPH_LOCAL2;
     if(m == monsterToSummon) f |= GLYPH_TARGET;
+    if(!less_in_landscape) f |= GLYPH_INLANDSCAPE;
     }
   return f;
   }
@@ -405,6 +408,8 @@ EX void draw_crosshair() {
     }
   return;
   }
+
+EX bool less_in_portrait, less_in_landscape;
   
 EX void drawStats() {
   if(vid.stereo_mode == sLR) return;
@@ -506,18 +511,21 @@ EX void drawStats() {
   
     instat = false;
     bool portrait = vid.xres < vid.yres;
-    int colspace = portrait ? (vid.yres - vid.xres - vid.fsize*3) : (vid.xres - vid.yres - 16) / 2;
+    int colspace = portrait ? (current_display->ycenter - current_display->scrsize - 3 * vid.fsize) : (vid.xres - vid.yres - 16) / 2;
     int rowspace = portrait ? vid.xres - 16 : vid.yres - vid.fsize * (vid.msgleft ? 9 : 4);
     int colid[4], rowid[4];
     int maxbyclass[4];
     for(int z=0; z<4; z++) maxbyclass[z] = 0;
+
+    flagtype flag = portrait ? GLYPH_INPORTRAIT : GLYPH_INLANDSCAPE;
+
     for(int i=0; i<glyphs; i++) if(ikappear(i))
-      if(!portrait || (glyphflags(i) | GLYPH_INPORTRAIT))
+      if(glyphflags(i) & flag)
         maxbyclass[glyphclass(i)]++;
     int buttonsize;
     int columns, rows;
     bool imponly = false;
-    int minsize = vid.fsize * (portrait ? 4 : 2);  
+    int minsize = vid.fsize * (portrait ? 3 : 2);
     rows = 0;
     while((buttonsize = minsize - vid.killreduction)) {
       columns = colspace / buttonsize;
@@ -549,6 +557,7 @@ EX void drawStats() {
       if(!ikappear(i)) continue;
       int z = glyphclass(i);
       int imp = glyphflags(i);
+      if(!(imp & flag)) continue;
       if(imponly) { z &=~1; if(!(imp & GLYPH_IMPORTANT)) continue; }
   
       int cx, cy;
