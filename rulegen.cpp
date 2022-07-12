@@ -784,10 +784,7 @@ EX void look_for_shortcuts(tcell *c, shortcut& sh) {
     ufind(tw);
     ufind(tw0);
 
-    vector<tcell*> opath;
-
     for(auto& v: sh.pre) {
-      opath.push_back(tw.at);
       tw += v;
       if(!tw.peek() && !(flags & w_less_smart_retrace)) return;
       ufind(tw);
