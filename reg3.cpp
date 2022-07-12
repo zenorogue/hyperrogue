@@ -1735,6 +1735,7 @@ EX namespace reg3 {
   EX int get_aid(cell *c) {
     auto m = dynamic_cast<hrmap_h3*> (currentmap);
     if(!m) throw hr_exception("get_aid incorrect");
+    if(PURE) return c->master->fieldval;
     return m->cell_id[c];
     }
 
