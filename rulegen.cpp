@@ -2581,5 +2581,23 @@ EX void show() {
   dialog::display();
   }
 
+#if CAP_COMMANDLINE
+int readRuleArgs() {
+  using namespace arg;
+
+  if(0) ;
+
+  else if(argis("-ruleflag")) {
+    shift();
+    rulegen::flags ^= Flag(argi());
+    }
+
+  else return 1;
+  return 0;
+  }
+
+auto hook = addHook(hooks_args, 100, readRuleArgs);
+#endif
+
 EX }
 }
