@@ -117,10 +117,11 @@ void expansion_analyzer::preliminary_grouping() {
 #if MAXMDIM >= 4
     rootid = reg3::rule_get_root(0);
     auto& chi = reg3::rule_get_children();
-    N = isize(chi) / S7;    
+    auto& chpos = reg3::rule_get_childpos();
+    N = isize(chpos) - 1;
     children.resize(N);
     int k = 0;
-    for(int i=0; i<N; i++) for(int j=0; j<S7; j++) {
+    for(int i=0; i<N; i++) for(int j=0; j<chpos[i+1]-chpos[i]; j++) {
       int ck = chi[k];
       if(ck < -1) ck += (1<<16);
       if(ck >= 0)

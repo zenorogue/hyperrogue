@@ -169,7 +169,10 @@ void genhoneycomb(string fname) {
     }
   println(hlog);
 
+  vector<int> childpos;
+
   for(int i=0; i<numclass; i++) {
+    childpos.push_back(isize(data));
     auto& ts = treestates[representative[i]];
     for(int j=0; j<isize(ts.rules); j++) {
       int j1 = gmod(j - ts.giver.spin, isize(ts.rules));
@@ -194,8 +197,15 @@ void genhoneycomb(string fname) {
         }
       }
     }
+  childpos.push_back(isize(data));
 
   shstream ss;
+
+  ss.write(ss.get_vernum());
+  mapstream::save_geometry(ss);
+  ss.write(fieldpattern::use_rule_fp);
+  ss.write(fieldpattern::use_quotient_fp);
+  ss.write(reg3::minimize_quotient_maps);
 
   auto& fp = currfp;
   hwrite_fpattern(ss, fp);
@@ -209,6 +219,8 @@ void genhoneycomb(string fname) {
   hwrite(ss, data);
   println(hlog, "side_data = ", side_data);
   hwrite(ss, side_data);
+  println(hlog, "childpos = ", childpos);
+  hwrite(ss, childpos);
 
   println(hlog, "compress_string");
   string s = compress_string(ss.s);
@@ -226,7 +238,7 @@ int readRuleArgs3() {
     }
 
   else if(argis("-urq")) {
-    // -urq 7 to generate honeycombs
+    // -urq 7 to prepare honeycomb generation
     stop_game();
     shift(); int i = argi();
     reg3::reg3_rule_available = (i & 8) ? 0 : 1;
@@ -235,9 +247,13 @@ int readRuleArgs3() {
     reg3::minimize_quotient_maps = (i & 4) ? 1 : 0;
     }
 
-  else if(argis("-subrule")) {
+  else if(argis("-subrule")) {    
+    stop_game();
     shift(); reg3::other_rule = args();
-    shift(); reg3::subrule = argi();
+    shstream ins(decompress_string(read_file_as_string(args())));
+    ins.read(ins.vernum);
+    mapstream::load_geometry(ins);
+    reg3::subrule = true;
     }
 
   else return 1;

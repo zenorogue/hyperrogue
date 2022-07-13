@@ -677,7 +677,7 @@ EX int updir(heptagon *h) {
   #endif
   #if MAXMDIM >= 4
   if(WDIM == 3 && reg3::in_rule()) {
-    for(int i=0; i<S7; i++) if(h->move(i) && h->move(i)->distance < h->distance) 
+    for(int i=0; i<h->type; i++) if(h->move(i) && h->move(i)->distance < h->distance) 
       return i;
     return -1;
     }

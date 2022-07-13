@@ -1292,6 +1292,7 @@ EX namespace reg3 {
     }
 
   EX bool minimize_quotient_maps = false;
+  EX bool subrule = false;
 
   EX bool strafe_test = false;
 
@@ -1846,30 +1847,36 @@ EX namespace reg3 {
     ruleset() : fp(0) {}
 
     void load_ruleset(string fname) {
-      string buf;
-      #if ISANDROID || ISIOS
-      buf = get_asset(fname);
-      #else
-      FILE *f = fopen(fname.c_str(), "rb");
-      if(!f) f = fopen((rsrcdir + fname).c_str(), "rb");
-      buf.resize(1000000);
-      int qty = fread(&buf[0], 1, 1000000, f);
-      buf.resize(qty);
-      fclose(f);
-      #endif
 
-      shstream ins(decompress_string(buf));
+      shstream ins(decompress_string(read_file_as_string(fname)));
       dynamicval<bool> q(fieldpattern::use_quotient_fp, true);      
       hread_fpattern(ins, fp);
-      
+
       hread(ins, root);
       hread(ins, children);
       hread(ins, other);
-      }
+      // hread(ins, childpos);
 
-    void default_childpos(int t) {
+      int t = S7;
       int qty = isize(children) / t;
       for(int i=0; i<=qty; i++) childpos.push_back(i * t);
+      }
+
+    void load_ruleset_new(string fname) {
+
+      shstream ins(decompress_string(read_file_as_string(fname)));
+      ins.read(ins.vernum);
+      mapstream::load_geometry(ins);
+      ins.read(fieldpattern::use_rule_fp);
+      ins.read(fieldpattern::use_quotient_fp);
+      ins.read(reg3::minimize_quotient_maps);
+
+      hread_fpattern(ins, fp);
+
+      hread(ins, root);
+      hread(ins, children);
+      hread(ins, other);
+      hread(ins, childpos);
       }
 
     /** \brief address = (fieldvalue, state) */
@@ -1995,7 +2002,6 @@ EX namespace reg3 {
     hrmap_h3_rule() {
 
       load_ruleset(get_rule_filename());
-      default_childpos(S7);
       quotient_map = gen_quotient_map(is_minimized(), fp);
       find_mappings();
       
@@ -2157,6 +2163,144 @@ EX namespace reg3 {
       }
     };
 
+  int lev;
+
+  struct hrmap_h3_subrule : hrmap, ruleset {
+
+    heptagon *origin;
+    hrmap_quotient3 *quotient_map;
+    hrmap_quotient3 *qmap() { return quotient_map; }
+
+    int connection(int fv, int d) override {
+      return quotient_map->local_id[quotient_map->acells[fv]->move(d)].first;
+      }
+
+    hrmap_h3_subrule() {
+
+      println(hlog, "loading a subrule ruleset");
+
+      load_ruleset_new(get_rule_filename());
+      quotient_map = gen_quotient_map(is_minimized(), fp);
+      int t = quotient_map->acells[0]->type;
+      find_mappings();
+
+      origin = init_heptagon(t);
+      heptagon& h = *origin;
+      h.s = hsOrigin;
+      h.fieldval = 0;
+      h.fiftyval = root[0];
+      h.c7 = newCell(t, origin);      
+      }
+
+    heptagon *getOrigin() override {
+      return origin;
+      }
+
+    heptagon *create_step(heptagon *parent, int d) override {
+      dynamicval<int> rl(lev, lev+1);
+      if(lev > 10) println(hlog, "create_step called for ", tie(parent, d), " in distance ", parent->distance);
+      indenter ind(lev > 10 ? 2 : 0);
+      int id = parent->fiftyval;
+      if(id < 0) id += (1<<16);
+      if(lev > 30) throw hr_exception("create_step deep recursion");
+
+      int qid = parent->fieldval;
+
+      int d2 = quotient_map->acells[qid]->c.spin(d);
+      int qid2 = quotient_map->local_id[quotient_map->acells[qid]->move(d)].first;
+
+      if(lev > 10) println(hlog, tie(id, qid, d2, qid2));
+    
+      heptagon *res = nullptr;
+
+      int id1 = children[childpos[id]+d];
+      int pos = otherpos[childpos[id]+d];
+      if(id1 < -1) id1 += (1<<16);
+
+      if(id1 != -1) {
+        int t = childpos[id1+1] - childpos[id1];
+        res = init_heptagon(t);
+        res->c7 = newCell(t, res);
+        res->fieldval = qid2;
+        res->distance = parent->distance + 1;
+        res->fiftyval = id1;
+        }
+
+      else if(other[pos] == ('A' + d) && other[pos+1] == ',') {
+        vector<int> possible;
+        for(auto s: nonlooping_earlier_states[address{qid, id}]) possible.push_back(s.second);
+        println(hlog, "possible size = ", isize(possible));
+        if(possible.empty()) throw hr_exception("impossible");
+        id1 = hrand_elt(possible, 0);
+
+        int t = childpos[id1+1] - childpos[id1];
+        res = init_heptagon(t);
+        res->alt = parent->alt;
+        res->fieldval = qid2;
+        res->distance = parent->distance - 1;
+        println(hlog, tie(qid, id), " => ", tie(qid2, id1));
+        res->fiftyval = id1;
+        }
+
+      else {
+        if(lev > 10) println(hlog, "path = ", other.substr(pos, 20));
+        heptagon *at = parent;
+        while(other[pos] != ',') {
+          int dir = (other[pos++] & 31) - 1;
+          at = at->cmove(dir);
+          if(lev > 10) println(hlog, "currently at ", at, " in distance ", at->distance);
+          }
+        res = at;
+        }
+
+      if(!res) throw hr_exception("res missing");
+
+      if(res->move(d2)) println(hlog, "res conflict: ", heptspin(res,d2), " already connected to ", heptspin(res,d2)+wstep, " and should be connected to ", heptspin(parent,d));
+
+      res->c.connect(d2, parent, d, false);
+      return res;
+      }
+
+    ~hrmap_h3_subrule() {
+      if(quotient_map) delete quotient_map;
+      clearfrom(origin);
+      }
+
+    transmatrix adj(heptagon *h, int d) override {
+      return quotient_map->adj(quotient_map->acells[h->fieldval], d);
+      }
+
+    transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+      return relative_matrix_recursive(h2, h1);
+      }
+
+    int shvid(cell *c) override {
+      return quotient_map->shvid(quotient_map->acells[c->master->fieldval]);
+      }
+
+    int wall_offset(cell *c) override {
+      return quotient_map->wall_offset(quotient_map->acells[c->master->fieldval]);
+      }
+
+    subcellshape& get_cellshape(cell *c) override {
+      return quotient_map->get_cellshape(quotient_map->acells[c->master->fieldval]);
+      }
+
+    transmatrix ray_iadj(cell *c, int i) override {
+      return quotient_map->ray_iadj(quotient_map->acells[c->master->fieldval], i);
+      }
+
+    cellwalker strafe(cellwalker cw, int j) override {
+      int aid = cw.at->master->fieldval;
+      auto ress = quotient_map->strafe(cellwalker(quotient_map->acells[aid], cw.spin), j);
+      return cellwalker(cw.at->cmove(j), ress.spin);
+      }
+
+    bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override {
+      return ruleset_link_alt(h, alt, firststate, dir);
+      }
+    };
+
   struct hrmap_h3_rule_alt : hrmap {
     
     heptagon *origin;
@@ -2202,12 +2346,22 @@ EX bool in_rule() {
   return reg3_rule_available && get_rule_filename() != "";
   }
 
+ruleset& get_ruleset() {
+  if(subrule) return *((hrmap_h3_subrule*)currentmap);
+  if(in_rule()) return *((hrmap_h3_rule*)currentmap);
+  throw hr_exception("get_ruleset called but not in rule");
+  }
+
 EX int rule_get_root(int i) {
-  return ((hrmap_h3_rule*)currentmap)->root[i];
+  return get_ruleset().root[i];
   }
 
 EX const vector<short>& rule_get_children() {
-  return ((hrmap_h3_rule*)currentmap)->children;
+  return get_ruleset().children;
+  }
+
+EX const vector<int>& rule_get_childpos() {
+  return get_ruleset().childpos;
   }
 
 EX hrmap* new_map() {
@@ -2215,6 +2369,7 @@ EX hrmap* new_map() {
   if(geometry == gSeifertWeber) return new seifert_weber::hrmap_singlecell(108*degree);
   if(geometry == gHomologySphere) return new seifert_weber::hrmap_singlecell(36*degree);
   if(quotient && !sphere) return new hrmap_field3(&currfp);
+  if(subrule) return new hrmap_h3_subrule;
   if(in_rule()) return new hrmap_h3_rule;
   if(sphere) return new hrmap_sphere3;
   return new hrmap_h3;
@@ -2334,6 +2489,8 @@ EX bool pseudohept(cell *c) {
       return c->master->fieldval % 31 == 0;
     return c->master->fieldval == 0;
     }
+  auto ms = dynamic_cast<hrmap_h3_subrule*> (currentmap);
+  if(ms) return c->master->fieldval == 0;
   if(m && hyperbolic) {
     heptagon *h = m->reg_gmatrix[c->master].first;
     return (h->zebraval == 1) && (h->distance & 1);
