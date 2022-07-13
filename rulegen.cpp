@@ -1021,11 +1021,13 @@ EX twalker get_parent_dir(twalker& cw) {
 #if HDR
 using aid_t = pair<int, int>;
 
+/* for leaves, id equals MYSTERY and dir equals treestate ID for this code */
+
 struct analyzer_state {
   int analyzer_id;
   int id, dir;
   map<int, analyzer_state*> substates;
-  analyzer_state() { id = MYSTERY; dir = MYSTERY; } // for(int i=0; i<10; i++) substates[i] = nullptr; }
+  analyzer_state() { id = MYSTERY; dir = MYSTERY_LARGE; } // for(int i=0; i<10; i++) substates[i] = nullptr; }
   vector<twalker> inhabitants;
   };
 
@@ -1391,7 +1393,7 @@ EX pair<int, int> get_code(twalker& cw) {
 EX pair<int, int> get_treestate_id(twalker& cw) {
   auto co = get_code(cw);
   auto v = all_analyzers[co.second];
-  if(v->dir == MYSTERY) {
+  if(v->dir == MYSTERY_LARGE) {
     int id = isize(treestates);
     v->dir = id;
     treestates.emplace_back();
@@ -1863,7 +1865,7 @@ EX void clean_parents() {
 void clear_treestates() {
   treestates.clear();
   for(auto a: all_analyzers)
-    if(a->id == MYSTERY) a->dir = MYSTERY;
+    if(a->id == MYSTERY) a->dir = MYSTERY_LARGE;
   }
 
 EX void rules_iteration() {
