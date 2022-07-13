@@ -2204,6 +2204,7 @@ EX namespace reg3 {
     };
 
   int lev;
+  int err_on = 500;
 
   struct hrmap_h3_subrule : hrmap, ruleset {
 
@@ -2238,11 +2239,11 @@ EX namespace reg3 {
 
     heptagon *create_step(heptagon *parent, int d) override {
       dynamicval<int> rl(lev, lev+1);
-      if(lev > 10) println(hlog, "create_step called for ", tie(parent, d), " in distance ", parent->distance);
-      indenter ind(lev > 10 ? 2 : 0);
+      if(lev > err_on) println(hlog, "create_step called for ", tie(parent, d), " in distance ", parent->distance);
+      indenter ind(lev > err_on ? 2 : 0);
       int id = parent->fiftyval;
       if(id < 0) id += (1<<16);
-      if(lev > 30) throw hr_exception("create_step deep recursion");
+      if(lev > err_on) throw hr_exception("create_step deep recursion");
 
       int qid = parent->fieldval;
 
@@ -2269,7 +2270,6 @@ EX namespace reg3 {
       else if(other[pos] == ('A' + d) && other[pos+1] == ',') {
         vector<int> possible;
         for(auto s: nonlooping_earlier_states[address{qid, id}]) possible.push_back(s.second);
-        println(hlog, "possible size = ", isize(possible));
         if(possible.empty()) throw hr_exception("impossible");
         id1 = hrand_elt(possible, 0);
 
@@ -2278,17 +2278,14 @@ EX namespace reg3 {
         res->alt = parent->alt;
         res->fieldval = qid2;
         res->distance = parent->distance - 1;
-        println(hlog, tie(qid, id), " => ", tie(qid2, id1));
         res->fiftyval = id1;
         }
 
       else {
-        if(lev > 10) println(hlog, "path = ", other.substr(pos, 20));
         heptagon *at = parent;
         while(other[pos] != ',') {
           int dir = (other[pos++] & 31) - 1;
           at = at->cmove(dir);
-          if(lev > 10) println(hlog, "currently at ", at, " in distance ", at->distance);
           }
         res = at;
         }
