@@ -1916,7 +1916,7 @@ EX namespace reg3 {
         address last = bfs[i];
         int state = last.second;
         int fv = last.first;
-        for(int d=0; d<S7; d++) {
+        for(int d=0; d<childpos[state+1]-childpos[state]; d++) {
           int nstate = children[childpos[state]+d];
           if(nstate < -1) nstate += (1<<16);
           if(nstate >= 0) {
@@ -1934,13 +1934,13 @@ EX namespace reg3 {
       DEBB(DF_GEOM, ("q2 = ", q2));
       
       bfs = {};
-      for(int i=0; i<qty; i++) 
+      for(int i=0; i<isize(root); i++)
         bfs.emplace_back(i, root[i]);
       for(int i=0; i<isize(bfs); i++) {
         address last = bfs[i];
         int state = last.second;
         int fv = last.first;
-        for(int d=0; d<S7; d++) {
+        for(int d=0; d<childpos[state+1]-childpos[state]; d++) {
           int nstate = children[childpos[state]+d];
           if(nstate < -1) nstate += (1<<16);
           if(nstate >= 0) {
