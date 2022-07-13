@@ -11,6 +11,78 @@ namespace hr {
 
 EX namespace rulegen {
 
+struct road_shortcut_trie_vertex {
+  set<vector<int>> backpaths;
+  map<int, shared_ptr<struct road_shortcut_trie_vertex>> children;
+  };
+
+EX map<int, shared_ptr<struct road_shortcut_trie_vertex>> road_shortcuts;
+
+int qroad;
+
+map<int, int> qroad_for;
+map<tcell*, int> qroad_memo;
+
+EX void add_road_shortcut(tcell *s, tcell *t) {
+  shared_ptr<road_shortcut_trie_vertex> u;
+  vector<int> tpath;
+  if(!road_shortcuts.count(s->id)) road_shortcuts[s->id] = make_shared<road_shortcut_trie_vertex>();
+  u = road_shortcuts[s->id];
+  while(true) {
+    // println(hlog, s, " dist=", s->dist, " parent = ", s->parent_dir, " vs ", t, " dist=", t->dist, " parent = ", t->parent_dir);
+    if(s == t) {
+      reverse(tpath.begin(), tpath.end());
+      auto& ba = u->backpaths;
+      if(!ba.count(tpath)) qroad++, qroad_for[s->id]++;
+      ba.insert(tpath);
+      return;
+      }
+    if(s->dist >= t->dist) {
+      twalker sw = s;
+      get_parent_dir(sw);
+      if(s->parent_dir == MYSTERY) throw hr_exception("unknown parent_dir (s) in add_road_shortcut");
+      if(!u->children.count(s->parent_dir)) u->children[s->parent_dir] = make_shared<road_shortcut_trie_vertex>();
+      u = u->children[s->parent_dir];
+      s = s->move(s->parent_dir);
+      }
+    if(t->dist > s->dist) {
+      twalker tw = t;
+      get_parent_dir(tw);
+      if(t->parent_dir == MYSTERY) throw hr_exception("unknown parent_dir (t) in add_road_shortcut");
+      tpath.push_back(t->c.spin(t->parent_dir));
+      t = t->move(t->parent_dir);
+      }
+    }
+  }
+
+EX int newcon;
+
+EX void apply_road_shortcut(tcell *s) {
+  auto& mem = qroad_memo[s];
+  if(mem == qroad_for[s->id]) return;
+  mem = qroad_for[s->id];
+  shared_ptr<road_shortcut_trie_vertex> u;
+  if(!road_shortcuts.count(s->id)) return;
+  u = road_shortcuts[s->id];
+  int q = tcellcount;
+  while(true) {
+    for(auto& v: u->backpaths) {
+      auto s1 = s;
+      for(auto x: v) {
+        s1 = s1->cmove(x);
+        be_solid(s1);
+        }
+      }
+    twalker s0 = s; get_parent_dir(s0);
+    if(!u->children.count(s->parent_dir)) break;
+    u = u->children[s->parent_dir];
+    s = s->move(s->parent_dir);
+    }
+  static int qmax = 0;
+  newcon += tcellcount - q;
+  if(tcellcount > q + qmax) println(hlog, "road shortcuts created ", qmax = tcellcount-q, " new connections");
+  }
+
 /** next roadsign ID -- they start at -100 and go downwards */
 int next_roadsign_id = -100;
 
@@ -20,6 +92,7 @@ EX map<vector<int>, int> roadsign_id;
 EX int get_roadsign(twalker what) {
   int dlimit = what.at->dist - 1;
   tcell *s = what.at, *t = what.peek();
+  apply_road_shortcut(s);
   vector<int> result;
   while(s->dist > dlimit) { 
     twalker s0 = s;
@@ -55,6 +128,7 @@ EX int get_roadsign(twalker what) {
         visit(c->move(i), c->c.spin(i));
     }
   while(t != s) {
+    add_road_shortcut(s, t);
     int d = visited.at(t);
     tail.push_back(t->dist - dlimit);
     tail.push_back(t->c.spin(d));
@@ -73,6 +147,7 @@ EX vector<pair<int, int>>& check_all_edges(twalker cw, analyzer_state* a, int id
   if(ae.empty()) {
     set<tcell*> seen;
     vector<pair<twalker, transmatrix> > visited;
+    vector<pair<int, int>> ae1;
     auto visit = [&] (twalker tw, const transmatrix& T, int id, int dir) {
       if(seen.count(tw.at)) return;
       seen.insert(tw.at);
@@ -88,7 +163,12 @@ EX vector<pair<int, int>>& check_all_edges(twalker cw, analyzer_state* a, int id
       for(auto w: rotated)
         if(sqhypot_d(MDIM, v-w) < 1e-6)
           common++;
-      if(common < 2) return;
+      if(flags & w_vertex_edges) {
+        if(common < 1) { ae1.emplace_back(id, dir); return; }
+        }
+      else {
+        if(common < 2) { ae1.emplace_back(id, dir); return; }
+        }
       visited.emplace_back(tw, T);
       ae.emplace_back(id, dir);
       };
@@ -99,6 +179,7 @@ EX vector<pair<int, int>>& check_all_edges(twalker cw, analyzer_state* a, int id
         visit(tw + j + wstep, visited[i].second * currentmap->adj(tcell_to_cell[tw.at], (tw+j).spin), i, j);
         }
       }
+    if(flags & w_ae_extra_step) for(auto p: ae1) ae.push_back(p);
     println(hlog, "for ", tie(cw.at->id, cw.spin), " generated all_edges structure: ", ae, " of size ", isize(ae));
     }
   return ae;
@@ -108,6 +189,21 @@ EX void cleanup3() {
   all_edges.clear();
   roadsign_id.clear();
   next_roadsign_id = -100;
+  }
+
+int last_qroad;
+
+EX void check_road_shortcuts() {
+  println(hlog, "road shortcuts = ", qroad, " treestates = ", isize(treestates), " roadsigns = ", next_roadsign_id);
+  if(qroad > last_qroad) {
+    println(hlog, "qroad_for = ", qroad_for);
+    println(hlog, "newcon = ", newcon, " tcellcount = ", tcellcount); newcon = 0;
+    clear_codes();
+    last_qroad = qroad;
+    roadsign_id.clear();
+    next_roadsign_id = -100;
+    throw rulegen_retry("new road shortcuts");
+    }
   }
 
 void genhoneycomb(string fname) {

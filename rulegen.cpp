@@ -86,6 +86,8 @@ static const flagtype w_less_smart_retrace = Flag(22); /*< stop early when exami
 static const flagtype w_less_smart_advance = Flag(23); /*< stop early when examining smart shortcut advancement */
 static const flagtype w_no_queued_extensions = Flag(24); /*< consider extensions one by one */
 static const flagtype w_no_branch_skipping = Flag(24); /*< do not skip branches */
+static const flagtype w_vertex_edges = Flag(25); /*< in reg3 all_edges, consider vertex adjacency */
+static const flagtype w_ae_extra_step = Flag(26); /*< in reg3 all_edges, make one extra step */
 #endif
 
 EX flagtype flags = 0;
@@ -186,15 +188,17 @@ twalker addstep(twalker x) {
   return x + wstep;
   }
 
+EX int less_states;
+
 int number_of_types() {
   if(arb::in()) return isize(arb::current.shapes);
-  if(WDIM == 3) return reg3::quotient_count_sub();
+  if(WDIM == 3) return gcd(reg3::quotient_count_sub(), less_states);
   throw hr_exception("unknown number_of_types");
   }
 
 int get_id(cell *c) {
   if(arb::in()) return shvid(c);
-  if(GDIM == 3) return reg3::get_aid(c);
+  if(GDIM == 3) return zgmod(reg3::get_aid(c), less_states);
   throw hr_exception("unknown get_id");
   }
 
@@ -753,7 +757,7 @@ EX void handle_distance_errors() {
   }
 
 /** make sure that we know c->dist */
-void be_solid(tcell *c) {
+EX void be_solid(tcell *c) {
   if(c->is_solid) return;
   if(tcellcount >= max_tcellcount) 
     throw rulegen_surrender("max_tcellcount exceeded");
@@ -1797,7 +1801,7 @@ bool examine_branch(int id, int left, int right) {
 
 bool need_clear_codes;
 
-void clear_codes() {
+EX void clear_codes() {
   need_clear_codes = false;
   for(auto a: all_analyzers) {
     for(auto tw: a->inhabitants) tw.at->code = MYSTERY_LARGE;
@@ -2014,6 +2018,10 @@ EX void rules_iteration() {
   handle_queued_extensions();
   if(isize(important) != N)
     throw rulegen_retry("need more rules after examine");
+
+  if(WDIM == 3) {
+    check_road_shortcuts();
+    }
 
   if(skipped_branches.size()) {
     checks_to_skip.clear();
