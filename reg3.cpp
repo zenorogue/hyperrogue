@@ -2284,7 +2284,7 @@ EX namespace reg3 {
       else {
         heptagon *at = parent;
         while(other[pos] != ',') {
-          int dir = (other[pos++] & 31) - 1;
+          int dir = other[pos++] - 'a';
           at = at->cmove(dir);
           }
         res = at;
