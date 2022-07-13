@@ -1974,7 +1974,7 @@ EX namespace reg3 {
     bool ruleset_link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) {
       alt->fieldval = h->fieldval;
       if(firststate == hsOrigin) {
-        alt->fiftyval = root[alt->fieldval];
+        alt->fiftyval = root[alt->fieldval % isize(root)];
         return true;
         }
       vector<int>& choices = possible_states[alt->fieldval];

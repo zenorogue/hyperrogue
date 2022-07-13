@@ -352,6 +352,10 @@ int readRuleArgs3() {
     reg3::subrule = true;
     }
 
+  else if(argis("-less-states")) {
+    shift(); rulegen::less_states = argi();
+    }
+
   else return 1;
   return 0;
   }
