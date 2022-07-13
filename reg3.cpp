@@ -1706,25 +1706,25 @@ EX namespace reg3 {
 
       auto& p1 = reg_gmatrix[orig];
       heptagon *alt = p1.first;
-      #if CAP_FIELD
-      transmatrix T = p1.second * xpush(10);
-      #else
-      transmatrix T = p1.second * xpush(10);
-      #endif
-      #if CAP_BT
-      if(hyperbolic) {
-        dynamicval<eGeometry> g(geometry, gBinary3);
-        dynamicval<hrmap*> cm(currentmap, binary_map);
-        binary_map->virtualRebase(alt, T);
-        fixmatrix(T);
+
+      transmatrix T = p1.second;
+
+      for(int a=0; a<10; a++) {
+        T = T * xpush(10);
+        #if CAP_BT
+        if(hyperbolic) {
+          dynamicval<eGeometry> g(geometry, gBinary3);
+          dynamicval<hrmap*> cm(currentmap, binary_map);
+          binary_map->virtualRebase(alt, T);
+          fixmatrix(T);
+          }
+        #endif
         }
-      #endif
 
       heptagon *created = init_heptagon(S7);
 
       created->s = hsOrigin;
       created->fieldval = quotient_map->acells[fv]->master->fieldval;
-      fixmatrix(T);
       reg_gmatrix[created] = make_pair(alt, T);
       altmap[alt].emplace_back(created, T);
 
