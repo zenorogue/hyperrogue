@@ -805,6 +805,21 @@ EX void open_wiki(const char *title) {
   open_url(url);
 }
 
+EX string read_file_as_string(string fname) {
+  string buf;
+  #if ISANDROID || ISIOS
+  buf = get_asset(fname);
+  #else
+  FILE *f = fopen(fname.c_str(), "rb");
+  if(!f) f = fopen((rsrcdir + fname).c_str(), "rb");
+  buf.resize(1000000);
+  int qty = fread(&buf[0], 1, 1000000, f);
+  buf.resize(qty);
+  fclose(f);
+  #endif
+  return buf;
+  }
+
 EX void floyd_warshall(vector<vector<char>>& v) {
   int N = isize(v);
   for(int k=0; k<N; k++)
