@@ -1904,6 +1904,8 @@ EX namespace reg3 {
           }
         }
 
+      /* find all back paths */
+
       auto &nles = nonlooping_earlier_states;
       nles.clear();
       vector<address> bfs;
@@ -1933,6 +1935,8 @@ EX namespace reg3 {
       for(auto p: q) q2[p]++;
       DEBB(DF_GEOM, ("q2 = ", q2));
       
+      /* remove BFS roots, and addresses that lead only there */
+
       bfs = {};
       for(int i=0; i<isize(root); i++)
         bfs.emplace_back(i, root[i]);
@@ -1957,7 +1961,43 @@ EX namespace reg3 {
         }
       
       DEBB(DF_GEOM, ("removed cases = ", isize(bfs)));
-      
+
+      /* remove non-branching states */
+
+      set<address> good;
+      bfs = {};
+      auto visit = [&] (address a) { if(good.count(a)) return; good.insert(a); bfs.push_back(a); };
+      for(auto& a: nonlooping_earlier_states) if(isize(a.second) > 1) visit(a.first);
+      for(int i=0; i<isize(bfs); i++) {
+        address last = bfs[i];
+        int state = last.second;
+        int fv = last.first;
+        for(int d=0; d<childpos[state+1]-childpos[state]; d++) {
+          int nstate = children[childpos[state]+d];
+          if(nstate < -1) nstate += (1<<16);
+          if(nstate >= 0) {
+            address next = {connection(fv, d), nstate};
+            if(!nles.count(next)) continue;
+            visit(next);
+            }
+          }
+        }
+
+      set<address> bad;
+      for(auto& a: nonlooping_earlier_states) if(!good.count(a.first)) bad.insert(a.first);
+
+      for(auto& b: bad) nonlooping_earlier_states.erase(b);
+
+      int to_cut = 0;
+
+      for(auto& a: nonlooping_earlier_states) {
+        set<address> goods;
+        for(auto& b: a.second) if(good.count(b)) goods.insert(b); else to_cut++;
+        a.second = goods;
+        }
+
+      println(hlog, "to_cut = ", to_cut, " from ", isize(bad), " bad cases");
+
       // just the number of FV's
       int pstable = 0;
       for(auto& p: nonlooping_earlier_states)
