@@ -1832,19 +1832,18 @@ EX namespace reg3 {
     return ((hrmap_sphere3*)currentmap)->locations[v];
     }
 
-  struct hrmap_h3_rule : hrmap_h3_abstract {
-  
-    heptagon *origin;
-    reg3::hrmap_quotient3 *emerald_map;
-
+  struct ruleset {
     fieldpattern::fpattern fp;
-
     vector<int> root;
     string other;
     vector<short> children;
-    
+
     vector<int> otherpos;
-    
+
+    virtual hrmap_quotient3 *qmap() = 0;
+
+    ruleset() : fp(0) {}
+
     void load_ruleset(string fname) {
       string buf;
       #if ISANDROID || ISIOS
@@ -1881,13 +1880,11 @@ EX namespace reg3 {
       auto &nles = nonlooping_earlier_states;
       nles.clear();
       vector<address> bfs;
-      int qty = isize(quotient_map->allh);
-      if(geometry == gSpace535) qty = 1;
+      int qty = isize(qmap()->allh);
       for(int i=0; i<qty; i++) 
         bfs.emplace_back(i, root[i]);
       auto mov = [&] (int fv, int d) {
-        if(geometry == gSpace535) return 0;
-        return quotient_map->allh[fv]->move(d)->fieldval;
+        return qmap()->allh[fv]->move(d)->fieldval;
         };
       int qstate = isize(children) / S7;
       DEBB(DF_GEOM, ("qstate = ", qstate));
@@ -1908,7 +1905,7 @@ EX namespace reg3 {
       
       vector<int> q(qstate, 0);
       for(auto p: bfs) q[p.second]++;
-      vector<int> q2(isize(quotient_map->allh)+1, 0);
+      vector<int> q2(isize(qmap()->allh)+1, 0);
       for(auto p: q) q2[p]++;
       DEBB(DF_GEOM, ("q2 = ", q2));
       
@@ -1948,9 +1945,17 @@ EX namespace reg3 {
       for(auto& p: nonlooping_earlier_states)
         possible_states[p.first.first].push_back(p.first.second);
       }
+    };
 
-    hrmap_h3_rule() : fp(0) {
-    
+  struct hrmap_h3_rule : hrmap_h3_abstract, ruleset {
+
+    heptagon *origin;
+    reg3::hrmap_quotient3 *emerald_map;
+
+    hrmap_quotient3 *qmap() override { return quotient_map; }
+
+    hrmap_h3_rule() {
+
       load_ruleset(get_rule_filename());
       
       origin = init_heptagon(S7);
@@ -1994,11 +1999,6 @@ EX namespace reg3 {
     vector<short> evmemo;
     
     void find_emeraldval(heptagon *target, heptagon *parent, int d) {
-      if(geometry == gSpace535) {
-        target->emeraldval = target->fieldval;
-        target->zebraval = 0;
-        return;
-        }
       generate_cellrotations();
       auto& cr = cgi.cellrotations;
       if(evmemo.empty()) {
@@ -2085,7 +2085,6 @@ EX namespace reg3 {
         res->distance = parent->distance - 1;
         vector<int> possible;
         int pfv = parent->fieldval;
-        if(geometry == gSpace535) pfv = 0;
         for(auto s: nonlooping_earlier_states[address{pfv, id}]) possible.push_back(s.second);
         id1 = hrand_elt(possible, 0);
         res->fiftyval = id1;
@@ -2137,12 +2136,35 @@ EX namespace reg3 {
     };
 
 EX hrmap *new_alt_map(heptagon *o) {
+  println(hlog, "new_alt_map called");
   return new hrmap_h3_rule_alt(o);
+  }
+
+bool hrmap_h3_subrule::link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) {
+  println(hlog, "link_alt called");
+  alt->fieldval = h->fieldval;
+  if(firststate == hsOrigin) {
+    alt->fiftyval = root[alt->fieldval];
+    println(hlog, "ROOTED AT ", alt->fieldval, " : ", alt->fiftyval);
+    return true;
+    }
+  vector<int>& choices = possible_states[alt->fieldval];
+  vector<int> choices2;
+  int t = quotient_map->acells[0]->type;
+  for(auto c: choices) {
+    bool ok = true;
+    for(int d=0; d<t; d++) 
+      if(h->cmove(d)->distance < h->distance)
+        if(children[t*c+d] == -1)
+          ok = false;
+    if(ok) choices2.push_back(c);
+    }
+  alt->fiftyval = hrand_elt(choices2, -1);
+  return alt->fiftyval != -1;
   }
 
 bool hrmap_h3_rule::link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) {
   alt->fieldval = h->fieldval;
-  if(geometry == gSpace535) alt->fieldval = 0;
   if(firststate == hsOrigin) {
     alt->fiftyval = root[alt->fieldval];
     return true;
