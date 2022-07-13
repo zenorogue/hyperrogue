@@ -1837,6 +1837,7 @@ EX namespace reg3 {
     vector<int> root;
     string other;
     vector<short> children;
+    vector<int> childpos;
 
     vector<int> otherpos;
 
@@ -1865,7 +1866,12 @@ EX namespace reg3 {
       hread(ins, children);
       hread(ins, other);
       }
-    
+
+    void default_childpos(int t) {
+      int qty = isize(children) / t;
+      for(int i=0; i<=qty; i++) childpos.push_back(i * t);
+      }
+
     /** \brief address = (fieldvalue, state) */
     typedef pair<int, int> address;
     
@@ -1876,27 +1882,38 @@ EX namespace reg3 {
 
     vector<vector<int>> possible_states;
 
+    virtual int connection(int fv, int d) = 0;
+
     void find_mappings() {
+      int opos = 0;
+      for(int c: children) {
+        if(c < -1) c += (1<<16);
+        if(c >= 0)
+          otherpos.push_back(-1);
+        else {
+          otherpos.push_back(opos);
+          while(other[opos] != ',') opos++;
+          opos++;
+          }
+        }
+
       auto &nles = nonlooping_earlier_states;
       nles.clear();
       vector<address> bfs;
-      int qty = isize(qmap()->allh);
+      int qty = isize(root);
       for(int i=0; i<qty; i++) 
         bfs.emplace_back(i, root[i]);
-      auto mov = [&] (int fv, int d) {
-        return qmap()->allh[fv]->move(d)->fieldval;
-        };
-      int qstate = isize(children) / S7;
+      int qstate = isize(childpos) - 1;
       DEBB(DF_GEOM, ("qstate = ", qstate));
       for(int i=0; i<isize(bfs); i++) {
         address last = bfs[i];
         int state = last.second;
         int fv = last.first;
         for(int d=0; d<S7; d++) {
-          int nstate = children[state*S7+d];
+          int nstate = children[childpos[state]+d];
           if(nstate < -1) nstate += (1<<16);
           if(nstate >= 0) {
-            address next = {mov(fv, d), nstate};
+            address next = {connection(fv, d), nstate};
             if(!nles.count(next)) bfs.push_back(next);
             nles[next].insert(last);
             }
@@ -1917,10 +1934,10 @@ EX namespace reg3 {
         int state = last.second;
         int fv = last.first;
         for(int d=0; d<S7; d++) {
-          int nstate = children[state*S7+d];
+          int nstate = children[childpos[state]+d];
           if(nstate < -1) nstate += (1<<16);
           if(nstate >= 0) {
-            address next = {mov(fv, d), nstate};
+            address next = {connection(fv, d), nstate};
             if(!nles.count(next)) continue;
             int c = isize(nles[next]);
             nles[next].erase(last);
@@ -1945,6 +1962,27 @@ EX namespace reg3 {
       for(auto& p: nonlooping_earlier_states)
         possible_states[p.first.first].push_back(p.first.second);
       }
+
+
+    bool ruleset_link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) {
+      alt->fieldval = h->fieldval;
+      if(firststate == hsOrigin) {
+        alt->fiftyval = root[alt->fieldval];
+        return true;
+        }
+      vector<int>& choices = possible_states[alt->fieldval];
+      vector<int> choices2;
+      for(auto c: choices) {
+        bool ok = true;
+        for(int d=0; d<childpos[c+1]-childpos[c]; d++)
+          if(h->cmove(d)->distance < h->distance)
+            if(children[childpos[c]+d] == -1)
+              ok = false;
+        if(ok) choices2.push_back(c);
+        }
+      alt->fiftyval = hrand_elt(choices2, -1);
+      return alt->fiftyval != -1;
+      }
     };
 
   struct hrmap_h3_rule : hrmap_h3_abstract, ruleset {
@@ -1957,6 +1995,9 @@ EX namespace reg3 {
     hrmap_h3_rule() {
 
       load_ruleset(get_rule_filename());
+      default_childpos(S7);
+      quotient_map = gen_quotient_map(is_minimized(), fp);
+      find_mappings();
       
       origin = init_heptagon(S7);
       heptagon& h = *origin;
@@ -1964,28 +2005,17 @@ EX namespace reg3 {
       h.fiftyval = root[0];
       if(PURE) h.c7 = newCell(S7, origin);
       
-      int opos = 0;
-      for(int c: children) {
-        if(c < -1) c += (1<<16);
-        if(c >= 0)
-          otherpos.push_back(-1);
-        else {
-          otherpos.push_back(opos);
-          while(other[opos] != ',') opos++;
-          opos++;
-          }
-        }
-      
-      quotient_map = gen_quotient_map(is_minimized(), fp);
       emerald_map = gen_quotient_map(false, currfp);
-      
+
       h.emeraldval = 0;
-      
-      find_mappings();
       
       if(!PURE) get_cell_at(origin, 0);
       }
     
+    int connection(int fv, int d) override {
+      return qmap()->allh[fv]->move(d)->fieldval;
+      }
+
     heptagon *getOrigin() override {
       return origin;
       }
@@ -2122,7 +2152,9 @@ EX namespace reg3 {
       return relative_matrix_recursive(h2, h1);
       }
     
-    virtual bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override;
+    virtual bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override {
+      return ruleset_link_alt(h, alt, firststate, dir);
+      }
     };
 
   struct hrmap_h3_rule_alt : hrmap {
@@ -2138,49 +2170,6 @@ EX namespace reg3 {
 EX hrmap *new_alt_map(heptagon *o) {
   println(hlog, "new_alt_map called");
   return new hrmap_h3_rule_alt(o);
-  }
-
-bool hrmap_h3_subrule::link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) {
-  println(hlog, "link_alt called");
-  alt->fieldval = h->fieldval;
-  if(firststate == hsOrigin) {
-    alt->fiftyval = root[alt->fieldval];
-    println(hlog, "ROOTED AT ", alt->fieldval, " : ", alt->fiftyval);
-    return true;
-    }
-  vector<int>& choices = possible_states[alt->fieldval];
-  vector<int> choices2;
-  int t = quotient_map->acells[0]->type;
-  for(auto c: choices) {
-    bool ok = true;
-    for(int d=0; d<t; d++) 
-      if(h->cmove(d)->distance < h->distance)
-        if(children[t*c+d] == -1)
-          ok = false;
-    if(ok) choices2.push_back(c);
-    }
-  alt->fiftyval = hrand_elt(choices2, -1);
-  return alt->fiftyval != -1;
-  }
-
-bool hrmap_h3_rule::link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) {
-  alt->fieldval = h->fieldval;
-  if(firststate == hsOrigin) {
-    alt->fiftyval = root[alt->fieldval];
-    return true;
-    }
-  vector<int>& choices = possible_states[alt->fieldval];
-  vector<int> choices2;
-  for(auto c: choices) {
-    bool ok = true;
-    for(int d=0; d<S7; d++) 
-      if(h->cmove(d)->distance < h->distance)
-        if(children[S7*c+d] == -1)
-          ok = false;
-    if(ok) choices2.push_back(c);
-    }
-  alt->fiftyval = hrand_elt(choices2, -1);
-  return alt->fiftyval != -1;
   }
 
 EX bool reg3_rule_available = true;
