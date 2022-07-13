@@ -244,7 +244,7 @@ int readRuleArgs3() {
   return 0;
   }
 
-auto hook = addHook(hooks_args, 100, readRuleArgs3);
+auto hook3 = addHook(hooks_args, 100, readRuleArgs3);
 #endif
 
 }
