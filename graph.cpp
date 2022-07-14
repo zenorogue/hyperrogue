@@ -3987,7 +3987,8 @@ EX void gridline(const shiftmatrix& V1, const hyperpoint h1, const shiftmatrix& 
   if(WDIM == 3 && fat_edges) {
     shiftmatrix T = V1 * rgpushxto0(h1);
     transmatrix S = rspintox(inverse_shift(T, V2) * h2);
-    auto& p = queuepoly(T * S, cgi.generate_pipe(d, vid.linewidth), col);
+    transmatrix U = rspintoc(inverse_shift(T*S, shiftless(C0)), 2, 1) * cspin(1, 2, 180*degree);
+    auto& p = queuepoly(T * S * U, cgi.generate_pipe(d, vid.linewidth), col);
     p.intester = xpush0(d/2);
     return;
     }
