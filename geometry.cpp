@@ -142,6 +142,8 @@ struct subcellshape {
   void compute_common();
   };
 
+enum class ePipeEnd {sharp, ball};
+
 /** basic geometry parameters */
 struct geometry_information {
 
@@ -530,7 +532,7 @@ hpcshape
   void require_usershapes() { if(usershape_state == usershape_changes) return; usershape_state = usershape_changes; prepare_usershapes(); }
   int timestamp;
   
-  hpcshape& generate_pipe(ld length, ld width);
+  hpcshape& generate_pipe(ld length, ld width, ePipeEnd endtype = ePipeEnd::sharp);
   
   map<string, unique_ptr<gi_extension>> ext;
   };
