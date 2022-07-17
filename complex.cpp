@@ -2709,6 +2709,7 @@ EX namespace dragon {
       total += c->hitpoints;
       if(c->mondir == NODIR) return total;
       c = c->move(c->mondir);
+      if(!c) return total;
       }
     return total;
     }
@@ -2737,6 +2738,7 @@ EX namespace dragon {
           }
         while(c->mondir != NODIR) {
           c = c->move(c->mondir);
+          if(!c) return;
           c->stuntime = 2;
           }
         break;

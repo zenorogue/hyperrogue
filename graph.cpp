@@ -2539,7 +2539,7 @@ EX int cellcolor(cell *c) {
 
 int taildist(cell *c) {
   int s = 0;
-  while(s < 1000 && c->mondir != NODIR && isWorm(c->monst)) {
+  while(s < 1000 && c && c->mondir != NODIR && isWorm(c->monst)) {
     s++; c = c->move(c->mondir);
     }
   return s;

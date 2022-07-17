@@ -454,7 +454,7 @@ EX void killMutantIvy(cell *c, eMonster who) {
   changes.ccell(c);
   removeIvy(c);
   for(int i=0; i<c->type; i++)
-    if(c->move(i)->mondir == c->c.spin(i) && (isMutantIvy(c->move(i)) || c->move(i)->monst == moFriendlyIvy))
+    if(c->move(i) && c->move(i)->mondir == c->c.spin(i) && (isMutantIvy(c->move(i)) || c->move(i)->monst == moFriendlyIvy))
       kills[c->move(i)->monst]++, killMutantIvy(c->move(i), who);
   if(c->land == laClearing) clearing::imput(c);
   }

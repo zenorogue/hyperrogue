@@ -817,6 +817,7 @@ EX void moveWorm(cell *c) {
     while(c2->mondir != NODIR) {
       allcells.push_back(c2);
       c2 = c2->move(c2->mondir);
+      if(!c2) { allcells.pop_back(); break; }
       }
     allcells.push_back(c2);
     for(int i=isize(allcells)-2; i>=0; i--) {
@@ -865,7 +866,7 @@ EX void moveWorm(cell *c) {
       }
     eItem loc = treasureType(c->land);
     bool spiceSeen = false;
-    while(c->monst == moWorm || c->monst == moWormtail || c->monst == moTentacle || c->monst == moTentacletail) {
+    while(c && (c->monst == moWorm || c->monst == moWormtail || c->monst == moTentacle || c->monst == moTentacletail)) {
       // if(!id) 
       explodeAround(c);
       drawParticles(c, minf[c->monst].color, 16);
@@ -981,7 +982,7 @@ EX void removeIvy(cell *c) {
   c->monst = moNone; // NEWYEARFIX
   for(int i=0; i<c->type; i++)
   // note that semi-vines don't count
-    if(c->move(i)->wall == waVinePlant) {
+    if(c->move(i) && c->move(i)->wall == waVinePlant) {
       destroyHalfvine(c);
       if (!do_not_touch_this_wall(c))
         c->wall = waVinePlant;
