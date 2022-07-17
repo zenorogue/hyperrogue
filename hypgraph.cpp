@@ -1866,8 +1866,7 @@ void hrmap_standard::draw_at(cell *at, const shiftmatrix& where) {
   }
 
 EX bool keep_vertical() {
-  if(CAP_ORIENTATION) return false;
-  if((WDIM == 2 || prod) && GDIM == 3 && vid.fixed_yz) return true;
+  if((WDIM == 2 || prod) && GDIM == 3 && vid.fixed_yz) return !CAP_ORIENTATION;
   if(downseek.qty) return true;
   return false;
   }
