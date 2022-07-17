@@ -686,7 +686,7 @@ EX SDL_Surface *empty_surface(int x, int y, bool alpha) {
 
 #if CAP_PNG
 
-void output(SDL_Surface* s, const string& fname) {
+EX void output(SDL_Surface* s, const string& fname) {
   if(format == screenshot_format::rawfile) {
     for(int y=0; y<shoty; y++)
       ignore(write(rawfile_handle, &qpixel(s, 0, y), 4 * shotx));
@@ -695,7 +695,10 @@ void output(SDL_Surface* s, const string& fname) {
     IMAGESAVE(s, fname.c_str());
   }
 
+EX hookset<bool(string, SDL_Surface*, SDL_Surface*)> hooks_postprocess;
+
 EX void postprocess(string fname, SDL_Surface *sdark, SDL_Surface *sbright) {
+  if(callhandlers(false, hooks_postprocess, fname, sdark, sbright)) return;
   if(gamma == 1 && shot_aa == 1 && sdark == sbright) {
     output(sdark, fname);
     return;
