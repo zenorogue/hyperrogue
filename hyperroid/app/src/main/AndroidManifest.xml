@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.roguetemple.hyperroid"
-      android:versionCode="12070" android:versionName="12.0u"
+      android:versionCode="12080" android:versionName="12.0v"
       android:installLocation="auto">
 <!--    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />         -->
 <!--    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="9" /> -->
@@ -13,7 +13,7 @@
                   android:windowSoftInputMode="adjustResize"
                   android:configChanges="orientation|keyboardHidden|screenSize"
                   android:name=".HyperRogue"
-                  android:launchMode="singleTask" android:exported="false">
+                  android:launchMode="singleTask" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -50,7 +50,8 @@ public class ForegroundService extends Service {
        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
      PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-             notificationIntent, 0);
+             notificationIntent, PendingIntent.FLAG_IMMUTABLE
+     );
 
      Notification notification = new NotificationCompat.Builder(this, getChannelId())
      .setContentTitle("HyperRogue")
