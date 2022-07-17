@@ -46,7 +46,7 @@ void slow_delete_cell(cell *c) {
     if(c->move(i))
       c->move(i)->move(c->c.spin(i)) = NULL;
   removed_cells.push_back(c);
-  delete c;
+  destroy_cell(c);
   }
 
 void delete_heptagon(heptagon *h2) {
@@ -60,7 +60,7 @@ void delete_heptagon(heptagon *h2) {
   for(int i=0; i<S7; i++)
     if(h2->move(i))
       h2->move(i)->move(h2->c.spin(i)) = NULL;
-  delete h2;
+  tailored_delete(h2);
   }
 
 void recursive_delete(heptagon *h, int i) {
