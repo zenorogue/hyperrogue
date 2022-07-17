@@ -819,7 +819,7 @@ EX void initConfig() {
 
   addsaver(vid.always3, "3D always", false);
   
-  addsaver(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA || ISWEB) ? 1 : 0);
+  param_b(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA || ISWEB) ? 1 : 0);
   param_i(reserve_limit, "memory_reserve", 128);
   addsaver(show_memory_warning, "show_memory_warning");
 
