@@ -3506,6 +3506,7 @@ auto ccm = addHook(hooks_clearmemory, 0, [] () {
     }) +
   addHook(hooks_removecells, 0, [] () {
     for(cell *c: removed_cells) clearing::score.erase(c);
+    for(auto& am: adj_memo) for(cell *c: removed_cells) am.erase(c);
     eliminate_if(heat::offscreen_heat, is_cell_removed);
     eliminate_if(heat::offscreen_fire, is_cell_removed);
     eliminate_if(princess::infos, [] (princess::info*& i) { 
