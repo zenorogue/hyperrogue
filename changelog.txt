@@ -4730,3 +4730,10 @@ Menu improvements:
   - options to show less items/kills in the portrait/landscape mode
   - an option to have menus centered even in widescreen
   - mobile fixes: fixed an incorrect button shown in the mobile game menu, and items/kills going over buttons
+
+2022-07-17 14:47 Update 12.0v:
+  - fixes for new Android
+  - preliminary work on tree structures for 3D honeycombs
+  - auto-rotation (Ivory Tower etc.) now works on devices who know their orientation
+  - nicer "pipes" (fat grid lines) in 3D
+  - fixed some crash bugs related to the memory saving mode
