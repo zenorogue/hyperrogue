@@ -230,6 +230,7 @@ template<class T, size_t X> void print(hstream& hs, const array<T, X>& a) { prin
 template<class T> void print(hstream& hs, const vector<T>& a) { print(hs, "("); comma_printer c(hs); for(const T& t: a) c(t); print(hs, ")"); }
 
 template<class T, class U> void print(hstream& hs, const map<T,U>& a) { print(hs, "("); comma_printer c(hs); for(auto& t: a) c(t); print(hs, ")"); }
+template<class T> void print(hstream& hs, const set<T>& a) { print(hs, "("); comma_printer c(hs); for(auto& t: a) c(t); print(hs, ")"); }
 
 template<class T> string separated(string separator, const vector<T>& a) {
   shstream ss;
