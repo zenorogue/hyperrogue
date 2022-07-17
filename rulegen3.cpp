@@ -193,6 +193,167 @@ EX void cleanup3() {
 
 int last_qroad;
 
+vector<vector<pair<int,int>>> possible_parents;
+
+struct vcell {
+  int tid;
+  vector<int> adj;
+  void become(int _tid) { tid = _tid; adj.clear(); adj.resize(isize(treestates[tid].rules), -1); }
+  };
+
+struct vstate {
+  bool need_cycle;
+  vector<pair<int, int>> movestack;
+  vector<vcell> vcells;
+  int current_pos;
+  int current_root;
+  vector<pair<int, int>> rpath;
+  };
+
+map<int, vector<int>> rev_roadsign_id;
+
+int get_abs_rule(int tid, int j) {
+  auto& ts = treestates[tid];
+  int j1 = gmod(j - ts.giver.spin, isize(ts.rules));
+  return ts.rules[j1];
+  }
+
+void build(vstate& vs, vector<tcell*>& places, int where, int where_last, tcell *g) {
+  places[where] = g;
+  // twalker wh = g;
+  // println(hlog, "[", where, "<-", where_last, "] expected treestate = ", vs.vcells[where].tid, " actual treestate = ", get_treestate_id(wh));
+  auto& c = vs.vcells[where];
+  for(int i=0; i<isize(c.adj); i++)
+    if(c.adj[i] != -1 && c.adj[i] != where_last) {
+      indenter ind(2);
+      int rule = get_abs_rule(vs.vcells[where].tid, i);
+      auto g1 = g->cmove(i);
+      twalker wh1 = g1;
+      auto ts = get_treestate_id(wh1).second;
+      if(ts != rule) {
+        important.push_back(g);
+        important.push_back(g1);
+        continue;
+        }
+      build(vs, places, c.adj[i], where, g1);
+      }
+  }
+
+void print_rules();
+
+EX int max_ignore_level = 30;
+int ignore_level;
+
+int check_debug = 0;
+
+void error_found(vstate& vs) {
+  println(hlog, "current root = ", vs.current_root);
+  int id = 0;
+  for(auto& v: vs.vcells) {
+    println(hlog, "vcells[", id++, "]: tid=", v.tid, " adj = ", v.adj);
+    }
+  vector<tcell*> places(isize(vs.vcells), nullptr);
+  tcell *g = treestates[vs.vcells[vs.current_root].tid].giver.at;
+  int q = isize(important);
+  build(vs, places, vs.current_root, -1, g);
+  if(q == 0) for(auto& p: places) if(!p) throw rulegen_failure("bad tree");
+
+  // for(auto p: places) important.push_back(p);
+  // println(hlog, "added to important: ", places);
+  if(!vs.movestack.empty()) {
+    auto p = places[vs.current_pos];
+    if(p) {
+      important.push_back(p);
+      auto p1 = p->cmove(vs.movestack.back().first);
+      important.push_back(p1);
+      println(hlog, "last: ", p, " -> ", p1);
+      }
+    }
+
+  println(hlog, "added to important ", isize(important)-q, " places");
+  throw rulegen_retry("3D error subtree found");
+  }
+
+void check(vstate& vs) {
+  if(check_debug >= 3) println(hlog, "vcells=", isize(vs.vcells), " pos=", vs.current_pos, " stack=", vs.movestack, " rpath=", vs.rpath);
+  indenter ind(check_debug >= 3 ? 2 : 0);
+
+  if(vs.movestack.empty()) {
+    if(vs.need_cycle && vs.current_pos != 0) {
+      println(hlog, "rpath: ", vs.rpath, " does not cycle correctly");
+      error_found(vs);
+      }
+    if(check_debug >= 2) println(hlog, "rpath: ", vs.rpath, " successful");
+    return;
+    }
+  auto p = vs.movestack.back();
+  auto& c = vs.vcells[vs.current_pos];
+
+  int ctid = c.tid;
+  int rule = get_abs_rule(ctid, p.first);
+
+  /* connection already exists */
+  if(c.adj[p.first] != -1) {
+    dynamicval<int> d(vs.current_pos, c.adj[p.first]);
+    int dif = (rule == DIR_PARENT) ? -1 : 1;
+    if(p.second != dif && p.second != MYSTERY)
+      error_found(vs);
+    vs.movestack.pop_back();
+    check(vs);
+    vs.movestack.push_back(p);
+    }
+
+  /* parent connection */
+  else if(rule == DIR_PARENT) {
+
+    if(isize(vs.rpath) >= ignore_level) {
+      if(check_debug >= 1) println(hlog, "rpath: ", vs.rpath, " ignored for ", vs.movestack);
+      return;
+      }
+    if(check_debug >= 3) println(hlog, "parent connection");
+
+    dynamicval<int> r(vs.current_root, isize(vs.vcells));
+    vs.vcells[vs.current_pos].adj[p.first] = vs.current_root;
+    for(auto pp: possible_parents[ctid]) {
+      if(check_debug >= 3) println(hlog, tie(vs.current_pos, p.first), " is a child of ", pp);
+      vs.rpath.emplace_back(pp);
+      vs.vcells.emplace_back();
+      vs.vcells.back().become(pp.first);
+      vs.vcells.back().adj[pp.second] = vs.current_pos;
+      check(vs);
+      vs.vcells.pop_back();
+      vs.rpath.pop_back();
+      }
+    vs.vcells[vs.current_pos].adj[p.first] = -1;
+    }
+
+  /* child connection */
+  else if(rule >= 0) {
+    if(check_debug >= 3) println(hlog, "child connection");
+    vs.vcells[vs.current_pos].adj[p.first] = isize(vs.vcells);
+    vs.vcells.emplace_back();
+    vs.vcells.back().become(rule);
+    vs.vcells.back().adj[treestates[rule].giver.spin] = vs.current_pos;
+    check(vs);
+    vs.vcells.pop_back();
+    vs.vcells[vs.current_pos].adj[p.first] = -1;
+    }
+
+  /* side connection */
+  else {
+    auto& v = rev_roadsign_id[rule];
+    if(v.back() != p.second + 1 && p.second != MYSTERY)
+      error_found(vs);
+    int siz = isize(vs.movestack);
+    vs.movestack.pop_back();
+    if(check_debug >= 3) println(hlog, "side connection: ", v);
+    for(int i=v.size()-2; i>=0; i-=2) vs.movestack.emplace_back(v[i], i == 0 ? -1 : v[i+1] - v[i-1]);
+    check(vs);
+    vs.movestack.resize(siz);
+    vs.movestack.back() = p;
+    }
+  }
+
 EX void check_road_shortcuts() {
   println(hlog, "road shortcuts = ", qroad, " treestates = ", isize(treestates), " roadsigns = ", next_roadsign_id);
   if(qroad > last_qroad) {
@@ -204,7 +365,106 @@ EX void check_road_shortcuts() {
     next_roadsign_id = -100;
     throw rulegen_retry("new road shortcuts");
     }
+  println(hlog, "checking validity, important = ", important);
+  possible_parents.clear();
+  int N = isize(treestates);
+  possible_parents.resize(N);
+  for(int i=0; i<N; i++) {
+    auto& ts = treestates[i];
+    for(int j=0; j<isize(ts.rules); j++) if(ts.rules[j] >= 0)
+      possible_parents[ts.rules[j]].emplace_back(i, gmod(j + ts.giver.spin, isize(ts.rules)));
+    }
+
+  rev_roadsign_id.clear();
+  for(auto& rs: roadsign_id) rev_roadsign_id[rs.second] = rs.first;
+
+  vstate vs;
+  build_cycle_data();
+
+  for(ignore_level=1; ignore_level <= max_ignore_level; ignore_level++) {
+    println(hlog, "test ignore_level ", ignore_level);
+    vs.need_cycle = false;
+
+    for(int i=0; i<N; i++) {
+      for(int j=0; j<isize(treestates[i].rules); j++) {
+        int r = get_abs_rule(i, j);
+        if(r < 0 && r != DIR_PARENT) {
+          vs.vcells.clear();
+          vs.vcells.resize(1);
+          vs.vcells[0].become(i);
+          vs.current_pos = vs.current_root = 0;
+          vs.movestack = { {j, MYSTERY} };
+          if(check_debug >= 1) println(hlog, "checking ", tie(i, j));
+          indenter ind(2);
+          check(vs);
+          }
+        }
+      }
+
+    vs.need_cycle = true;
+    for(int i=0; i<N; i++) {
+      int id = treestates[i].giver.at->id;
+      for(auto &cd: cycle_data[id]) {
+        vs.vcells.clear();
+        vs.vcells.resize(1);
+        vs.vcells[0].become(i);
+        vs.current_pos = vs.current_root = 0;
+        vs.movestack.clear();
+        for(auto v: cd) vs.movestack.emplace_back(v, MYSTERY);
+        reverse(vs.movestack.begin(), vs.movestack.end());
+        if(check_debug >= 1) println(hlog, "checking ", tie(i, id, cd));
+        indenter ind(2);
+        check(vs);
+        }
+      }
+    }
   }
+
+EX vector<vector<vector<int>>> cycle_data;
+
+EX void build_cycle_data() {
+  cycle_data.clear();
+  cycle_data.resize(number_of_types());
+  for(int t=0; t<number_of_types(); t++) {
+    cell *start = tcell_to_cell[t_origin[t].at];
+    auto& sh0 = currentmap->get_cellshape(start);
+    for(int i=0; i<start->type; i++) {
+      auto& f = sh0.faces[i];
+      for(int j=0; j<isize(f); j++) {
+        hyperpoint v1 = kleinize(sh0.from_cellcenter * sh0.faces[i][j]);
+        hyperpoint v2 = kleinize(sh0.from_cellcenter * sh0.faces[i][(j+1) % isize(f)]);
+        vector<int> path = {i};
+        transmatrix T = currentmap->adj(start, i);
+        cell *at = start->cmove(i);
+        cell *last = start;
+        while(at != start) {
+          auto &sh1 = currentmap->get_cellshape(at);
+          int dir = -1;
+          for(int d=0; d<at->type; d++) if(at->move(d) != last) {
+            int ok = 0;
+            for(auto rv: sh1.faces[d]) {
+              hyperpoint v = kleinize(T * sh1.from_cellcenter * rv);
+              if(sqhypot_d(3, v-v1) < 1e-6) ok |= 1;
+              if(sqhypot_d(3, v-v2) < 1e-6) ok |= 2;
+              }
+            if(ok == 3) dir = d;
+            }
+          if(dir == -1) throw hr_exception("cannot cycle");
+          path.push_back(dir);
+          T = T * currentmap->adj(at, dir);
+          last = at;
+          at = at->cmove(dir);
+          }
+        cycle_data[t].push_back(std::move(path));
+        }
+      }
+    }
+  println(hlog, "cycle data = ", cycle_data);
+  }
+
+using classdata = pair<vector<int>, int>;
+vector<classdata> nclassify;
+vector<int> representative;
 
 void genhoneycomb(string fname) {
   if(WDIM != 3) throw hr_exception("genhoneycomb not in honeycomb");
@@ -218,8 +478,8 @@ void genhoneycomb(string fname) {
   for(auto& rs: roadsign_id) rev_roadsign_id[rs.second] = rs.first;
 
   int N = isize(treestates);
-  using classdata = pair<vector<int>, int>;
-  vector<classdata> nclassify(N);
+  nclassify.clear();
+  nclassify.resize(N);
   for(int i=0; i<N; i++) nclassify[i] = {{0}, i};
 
   int numclass = 1;
@@ -247,7 +507,7 @@ void genhoneycomb(string fname) {
     if(numclass == newclass) break;
     numclass = newclass;
     }
-  vector<int> representative(numclass);
+  representative.resize(numclass);
   for(int i=0; i<isize(treestates); i++) representative[nclassify[i].first[0]] = i;
 
   println(hlog, "Minimized rules (", numclass, " states):");

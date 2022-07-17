@@ -2465,6 +2465,7 @@ auto hooks = addHook(hooks_configfile, 100, [] {
       param_i(max_shortcut_length, "max_shortcut_length");
       param_i(rulegen_timeout, "rulegen_timeout");
       param_i(first_restart_on, "first_restart_on");
+      param_i(max_ignore_level, "max_ignore_level");
     });
 
 EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {
