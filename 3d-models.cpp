@@ -1236,7 +1236,9 @@ void geometry_information::make_3d_models() {
   }
 
 hpcshape& geometry_information::generate_pipe(ld length, ld width, ePipeEnd endtype) {
-  int id = int(length * 17 + .5) + int(157003 * log(width+.001));
+  int id = int(length * 172 + .5) + int(157003 * log(width+.001));
+  bool pers = in_perspective();
+  if(!pers) id ^= 0x4126891;
   if(shPipe.count(id)) return shPipe[id];
   hpcshape& pipe = shPipe[id];
   println(hlog, "generating pipe of length ", length, " and width ", width);
@@ -1257,7 +1259,7 @@ hpcshape& geometry_information::generate_pipe(ld length, ld width, ePipeEnd endt
     ld alpha = 360 * degree * a / MAX_R;
     hpcpush(xpush(i * length / MAX_X) * cspin(1, 2, alpha) * ypush0(width*z));
     #if CAP_GL
-    if(floor_textures) utt.tvertices.push_back(glhr::makevertex(0, 0.55 - s * 0.45 * sin(alpha), 0));
+    if(floor_textures) utt.tvertices.push_back(glhr::makevertex(0, pers ? 0.549 - s * 0.45 * sin(alpha) : 0.999, 0));
     #endif
     };
   for(int i=0; i<MAX_X; i++) {
