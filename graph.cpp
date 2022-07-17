@@ -4285,6 +4285,10 @@ struct flashdata {
 
 vector<flashdata> flashes;
 
+auto ahgf = addHook(hooks_removecells, 1, [] () {
+  eliminate_if(flashes, [] (flashdata& f) { return is_cell_removed(f.where); });
+  });
+
 EX void drawBubble(cell *c, color_t col, string s, ld size) {
   LATE( drawBubble(c, col, s, size); )
   auto fd = flashdata(ticks, 1000, c, col, 0);
