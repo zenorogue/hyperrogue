@@ -2197,8 +2197,7 @@ EX namespace reg3 {
       }
     };
 
-  int lev;
-  int err_on = 500;
+  vector<heptspin> starts = {nullptr};
 
   struct hrmap_h3_subrule : hrmap, ruleset {
 
@@ -2208,6 +2207,46 @@ EX namespace reg3 {
 
     int connection(int fv, int d) override {
       return quotient_map->local_id[quotient_map->acells[fv]->move(d)].first;
+      }
+
+    void explain_conflict(vector<heptspin> hs) {
+      vector<heptagon*> v;
+      for(auto h: hs) v.push_back(h.at);
+      int N = isize(v);
+      vector<vector<int>> paths(N);
+      while(true) {
+
+        bool eq = true;
+        for(auto c: v) if(c != v[0]) eq = false;
+        if(eq) break;
+
+        int mindist = 999999;
+        int maxdist = -999999;
+        for(auto c: v) {
+          if(c->distance < mindist) mindist = c->distance;
+          if(c->distance > maxdist) maxdist = c->distance;
+          }
+
+        int goal = min(mindist, maxdist-1);
+        println(hlog, "mindist = ", mindist, " maxdist = ", maxdist, " goal = ", goal);
+
+        int id = 0;
+        for(auto& c: v) {
+          while(c->distance > goal) {
+            println(hlog, c, " distance is ", c);
+            int d = find_parent(c);
+            paths[id].push_back(c->c.spin(d));
+            c = c->move(d);
+            }
+          id++;
+          }
+        }
+      for(auto& p: paths) reverse(p.begin(), p.end());
+      hs.push_back(heptspin(v[0], find_parent(v[0])));
+      for(auto h: hs) {
+        println(hlog, h, " : dist = ", h.at->distance, " id = ", h.at->fiftyval, " qid = ", h.at->fieldval);
+        }
+      println(hlog, "paths = ", paths);
       }
 
     hrmap_h3_subrule() {
@@ -2232,26 +2271,31 @@ EX namespace reg3 {
       }
 
     heptagon *create_step(heptagon *parent, int d) override {
-      dynamicval<int> rl(lev, lev+1);
-      if(lev > err_on) println(hlog, "create_step called for ", tie(parent, d), " in distance ", parent->distance);
-      indenter ind(lev > err_on ? 2 : 0);
+      if(starts[isize(starts)/2] == parent) {
+        int i = 0;
+        vector<heptspin> cut;
+        for(auto s: starts) if(i++ >= isize(starts)/2) cut.push_back(s);
+        println(hlog, "cycle detected is ", cut);
+        explain_conflict(cut);
+        throw hr_exception("create_step cycle detected");
+        }
+      starts.push_back(parent);
+      finalizer f([] { starts.pop_back(); });
+
       int id = parent->fiftyval;
       if(id < 0) id += (1<<16);
-      if(lev > err_on) throw hr_exception("create_step deep recursion");
 
       int qid = parent->fieldval;
 
       int d2 = quotient_map->acells[qid]->c.spin(d);
       int qid2 = quotient_map->local_id[quotient_map->acells[qid]->move(d)].first;
 
-      if(lev > 10) println(hlog, tie(id, qid, d2, qid2));
-    
       heptagon *res = nullptr;
 
       int id1 = children[childpos[id]+d];
       int pos = otherpos[childpos[id]+d];
       if(id1 < -1) id1 += (1<<16);
-
+      
       if(id1 != -1) {
         int t = childpos[id1+1] - childpos[id1];
         res = init_heptagon(t);
@@ -2286,10 +2330,28 @@ EX namespace reg3 {
 
       if(!res) throw hr_exception("res missing");
 
-      if(res->move(d2)) println(hlog, "res conflict: ", heptspin(res,d2), " already connected to ", heptspin(res,d2)+wstep, " and should be connected to ", heptspin(parent,d));
+      if(res->move(d2)) {
+        heptspin a(res, d2);
+        heptspin b = a + wstep;
+        heptspin c(parent, d);
+        println(hlog, "res conflict: ", a, " already connected to ", b, " and should be connected to ", c);
+        explain_conflict({a, b, c});
+        }
 
       res->c.connect(d2, parent, d, false);
       return res;
+      }
+
+    int find_parent(heptagon *h) {
+      int id = h->fiftyval;
+      int pos = childpos[id];
+      for(int i=0; i<childpos[id+1]-childpos[id]; i++)
+        if(other[otherpos[pos+i]] == 'A'+i && other[otherpos[pos+i]+1] == ',') {
+          println(hlog, "find_parent returns ", i, " for ", h);
+          return i;
+          }
+      println(hlog, "find_parent fails");
+      return 0;
       }
 
     ~hrmap_h3_subrule() {
