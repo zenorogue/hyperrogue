@@ -88,6 +88,7 @@ static const flagtype w_no_queued_extensions = Flag(24); /*< consider extensions
 static const flagtype w_no_branch_skipping = Flag(24); /*< do not skip branches */
 static const flagtype w_vertex_edges = Flag(25); /*< in reg3 all_edges, consider vertex adjacency */
 static const flagtype w_ae_extra_step = Flag(26); /*< in reg3 all_edges, make one extra step */
+static const flagtype w_adj_only = Flag(27); /*< in reg3 adjacent only */
 #endif
 
 EX flagtype flags = 0;
@@ -190,7 +191,7 @@ twalker addstep(twalker x) {
 
 EX int less_states;
 
-int number_of_types() {
+EX int number_of_types() {
   if(arb::in()) return isize(arb::current.shapes);
   if(WDIM == 3) return gcd(reg3::quotient_count_sub(), less_states);
   throw hr_exception("unknown number_of_types");
@@ -1337,7 +1338,7 @@ EX void id_at_spin(twalker cw, vector<twalker>& sprawl, vector<analyzer_state*>&
       a = alloc_analyzer();
       }
     states.push_back(a);
-    if(WDIM == 3) {
+    if(WDIM == 3 && !(flags & w_adj_only)) {
       auto& ae = check_all_edges(cw, a, isize(sprawl));
       int id = isize(sprawl);
       if(id < isize(ae)) {
@@ -2153,6 +2154,10 @@ EX void generate_rules() {
   
   important = t_origin;
   
+  rule_iterations();
+  }
+
+EX void rule_iterations() {
   while(true) {
     check_timeout();
     try {
