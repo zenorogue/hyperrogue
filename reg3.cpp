@@ -1929,12 +1929,6 @@ EX namespace reg3 {
           }
         }
       
-      vector<int> q(qstate, 0);
-      for(auto p: bfs) q[p.second]++;
-      vector<int> q2(isize(qmap()->allh)+1, 0);
-      for(auto p: q) q2[p]++;
-      DEBB(DF_GEOM, ("q2 = ", q2));
-      
       /* remove BFS roots, and addresses that lead only there */
 
       bfs = {};
