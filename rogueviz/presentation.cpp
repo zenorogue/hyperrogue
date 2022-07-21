@@ -154,9 +154,9 @@ void show_picture(presmode mode, string s) {
     });
   }
 
-string gen_latex(presmode mode, string s, int res) {
+string gen_latex(presmode mode, string s, int res, flagtype flags) {
   unsigned hash = 0;
-  for(char c: s) hash = (hash << 3) ^ hash ^ c;
+  for(char c: s) hash = (hash << 3) ^ hash ^ c ^ flags;
   string filename = format("latex-cache/%08X.png", hash);
   if(mode == pmStartAll) {
     if(!file_exists(filename)) {
@@ -166,6 +166,7 @@ string gen_latex(presmode mode, string s, int res) {
         "\\documentclass[border=2pt]{standalone}\n"
         "\\usepackage{amsmath}\n"
         "\\usepackage{varwidth}\n"
+        "\\usepackage{color}\n"
         "\\begin{document}\n"
         "\\begin{varwidth}{\\linewidth}\n"
         "%s"
@@ -173,7 +174,11 @@ string gen_latex(presmode mode, string s, int res) {
         "\\end{document}\n", s.c_str());
       fclose(f);
       hr::ignore(system("cd latex-cache; pdflatex rogueviz-latex.tex"));
-      string pngline = "cd latex-cache; pdftopng -r " + its(res) + " rogueviz-latex.pdf t";
+      string pngline = 
+        (flags & LATEX_COLOR) ? 
+          "cd latex-cache; pdftopng -alpha -r " + its(res) + " rogueviz-latex.pdf t"
+        : "cd latex-cache; pdftopng -r " + its(res) + " rogueviz-latex.pdf t";
+      println(hlog, "calling: ", pngline);
       hr::ignore(system(pngline.c_str()));
       rename("latex-cache/t-000001.png", filename.c_str());
       }
@@ -182,17 +187,18 @@ string gen_latex(presmode mode, string s, int res) {
   }
 
 void show_latex(presmode mode, string s) {
-  show_picture(mode, gen_latex(mode, s, 2400));
+  show_picture(mode, gen_latex(mode, s, 2400, 0));
   }
 
-void dialog_add_latex(string s, color_t col, int size) {
-  string fn = gen_latex(pmStart, s, 600);
+void dialog_add_latex(string s, color_t col, int size, flagtype flags) {
+  string fn = gen_latex(pmStart, s, 600, flags);
   if(!textures.count(fn)) {
-    gen_latex(pmStartAll, s, 600);
+    gen_latex(pmStartAll, s, 600, flags);
     auto& tex = textures[fn];
     tex.original = true;
     tex.twidth = 4096;
     println(hlog, "rt = ", tex.readtexture(fn));
+    if(!(flags & LATEX_COLOR))
     for(int y=0; y<tex.theight; y++)
     for(int x=0; x<tex.twidth; x++) {
       auto& pix = tex.get_texture_pixel(x, y);
@@ -237,9 +243,11 @@ void dialog_add_latex(string s, color_t col, int size) {
 
 bool rv_latex = false;
 
-void dialog_may_latex(string latex, string normal, color_t col, int size) {
-  if(rv_latex)
-    dialog_add_latex(latex, (col << 8) | 0xFF, size * 3/2);
+void dialog_may_latex(string latex, string normal, color_t col, int size, flagtype flags) {
+  if(rv_latex) {
+    if(flags & LATEX_COLOR) col = 0xFFFFFFFF;
+    dialog_add_latex(latex, (col << 8) | 0xFF, size * 3/2, flags);
+    }
   else {
     dialog::addInfo(normal, col);
     dialog::items.back().scale = size;
