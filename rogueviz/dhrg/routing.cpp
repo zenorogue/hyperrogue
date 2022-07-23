@@ -12,6 +12,7 @@ vector<vector<char> > actual;
 vector<pairdata> pairs;
 
 vector<int> last_goal;
+vector<int> next_stop;
 
 void prepare_pairs() {
   pairs.resize(N);
@@ -37,6 +38,8 @@ void prepare_pairs() {
     }
   last_goal.clear();
   last_goal.resize(N, -1);
+  next_stop.clear();
+  next_stop.resize(N, -1);
   }
 
 void route_from(int src, int goal, const vector<ld>& distances_from_goal) {
@@ -44,6 +47,7 @@ void route_from(int src, int goal, const vector<ld>& distances_from_goal) {
   if(src == goal) {
     pairs[src].success = 1;
     pairs[src].route_length = 0;
+    next_stop[src] = -1;
     }
   else {
     ld bestd = distances_from_goal[src] - 1e-5;
@@ -65,6 +69,9 @@ void route_from(int src, int goal, const vector<ld>& distances_from_goal) {
       pairs[src].success += pairs[c].success / isize(candidates);
       pairs[src].route_length += (1 + pairs[c].route_length) / isize(candidates);
       }
+
+    if(isize(candidates) > 0) next_stop[src] = candidates[0];
+    else next_stop[src] = -1;
     // iprintf("success = %f, route = %f\n", pairs[src].success, pairs[src].route_length);
     // indent -= 2;
     }
@@ -76,24 +83,26 @@ struct iddata {
   iddata() { tot = suc = routedist = bestdist = 0; }
   } datas[6];
 
-template<class T> void greedy_routing(int id, const T& distance_function) {
-  for(int goal=0; goal<N; goal++) {
-    vector<ld> distances_from_goal(N);
-    for(int src=0; src<N; src++)
-      distances_from_goal[src] = distance_function(goal, src);
-    for(int src=0; src<N; src++)
-      route_from(src, goal, distances_from_goal);
-      
-    auto& d = datas[id];
+template<class T> void greedy_routing_to(int id, int goal, const T& distance_function) {
+  vector<ld> distances_from_goal(N);
+  for(int src=0; src<N; src++)
+    distances_from_goal[src] = distance_function(goal, src);
+  for(int src=0; src<N; src++)
+    route_from(src, goal, distances_from_goal);
 
-    for(int j=0; j<N; j++) if(j != goal){
-      d.tot++;
-      ld p = pairs[j].success;
-      d.suc += p;
-      d.routedist += pairs[j].route_length;
-      d.bestdist += p * actual[goal][j];
-      }
+  auto& d = datas[id];
+
+  for(int j=0; j<N; j++) if(j != goal){
+    d.tot++;
+    ld p = pairs[j].success;
+    d.suc += p;
+    d.routedist += pairs[j].route_length;
+    d.bestdist += p * actual[goal][j];
     }
+  }
+
+template<class T> void greedy_routing(int id, const T& distance_function) {
+  for(int goal=0; goal<N; goal++) greedy_routing_to(id, goal, distance_function);
   }
 
 void routing_test(string s) {
@@ -145,6 +154,24 @@ void routing_test(string s) {
 
   println(hlog, "HDR;", separated(";", reps), ";N;GROWTH\n");
   println(hlog, "RES;", separated(";", values), ";", N, ";", cgi.expansion->get_growth());
+  }
+
+int current_goal;
+void prepare_goal(int goal) {
+  greedy_routing_to(0, current_goal = goal, [] (int i, int j) { return hdist(vertexcoords[i], vertexcoords[j]); });
+  }
+
+vector<int> path(int src) {
+  vector<int> res;
+  while(src != -1) {
+    res.push_back(src);
+    src = next_stop[src];
+    }
+  return res;
+  }
+
+int get_actual(int src) {
+  return actual[src][current_goal];
   }
 
 }
