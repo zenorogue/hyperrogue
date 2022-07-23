@@ -704,7 +704,7 @@ bool rogueviz_hud() {
 
   int legit = qet + isize(legend);
   
-  if(legit == 0) return true;
+  if(legit == 0) return false;
   
   initquickqueue();
   
