@@ -2849,7 +2849,7 @@ EX namespace linepatterns {
         }
       )
     );
-  linepattern patTriRings("triangle grid: rings", 0xFFFFFF00, always_available, 
+  EX linepattern patTriRings = linepattern("triangle grid: rings", 0xFFFFFF00, always_available, 
     ALLCELLS(
       forCellIdEx(c2, i, c) {
         if(S3 == 4) c2 = (cellwalker(c, i) + wstep + 1).cpeek();
@@ -2858,14 +2858,14 @@ EX namespace linepatterns {
         }
       )
     );
-  linepattern patTriTree("triangle grid: tree edges", 0xFFFFFF00, always_available,
+  EX linepattern patTriTree = linepattern("triangle grid: tree edges", 0xFFFFFF00, always_available,
     ALLCELLS(
       cell *parent = ts::right_parent(c, curr_dist);
       if(gmatrix.count(parent)) 
         gridlinef(V, C0, V * currentmap->adj(c, neighborId(c, parent)), C0, col, 2 + vid.linequality);
       )
     );
-  linepattern patTriOther("triangle grid: other edges", 0xFFFFFF00, always_available, 
+  EX linepattern patTriOther = linepattern("triangle grid: other edges", 0xFFFFFF00, always_available, 
     ALLCELLS(
       cell *parent = ts::right_parent(c, curr_dist);
       forCellIdEx(c2, i, c) if(curr_dist(c2) < curr_dist(c) && c2 != parent)

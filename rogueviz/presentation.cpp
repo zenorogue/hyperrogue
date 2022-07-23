@@ -154,9 +154,21 @@ void show_picture(presmode mode, string s) {
     });
   }
 
+string latex_packages =
+  "\\usepackage{amsmath}\n"
+  "\\usepackage{amssymb}\n"
+  "\\usepackage{amsfonts}\n"
+  "\\usepackage{varwidth}\n"
+  "\\usepackage{amsfonts}\n"
+  "\\usepackage{enumitem}\n"
+  "\\usepackage{color}\n"
+  "\\usepackage{graphicx}\n"
+  "\\definecolor{remph}{rgb}{0,0.5,0}\n"
+  "\\renewcommand{\\labelitemi}{{\\color{remph}$\\blacktriangleright$}}\n";
+
 string gen_latex(presmode mode, string s, int res, flagtype flags) {
   unsigned hash = 0;
-  for(char c: s) hash = (hash << 3) ^ hash ^ c ^ flags;
+  for(char c: latex_packages + s) hash = (hash << 3) ^ hash ^ c ^ flags;
   string filename = format("latex-cache/%08X.png", hash);
   if(mode == pmStartAll) {
     if(!file_exists(filename)) {
@@ -164,14 +176,12 @@ string gen_latex(presmode mode, string s, int res, flagtype flags) {
       FILE *f = fopen("latex-cache/rogueviz-latex.tex", "w");
       fprintf(f,
         "\\documentclass[border=2pt]{standalone}\n"
-        "\\usepackage{amsmath}\n"
-        "\\usepackage{varwidth}\n"
-        "\\usepackage{color}\n"
+        "%s"
         "\\begin{document}\n"
         "\\begin{varwidth}{\\linewidth}\n"
         "%s"
         "\\end{varwidth}\n"
-        "\\end{document}\n", s.c_str());
+        "\\end{document}\n", latex_packages.c_str(), s.c_str());
       fclose(f);
       hr::ignore(system("cd latex-cache; pdflatex rogueviz-latex.tex"));
       string pngline = 
