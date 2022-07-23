@@ -79,4 +79,14 @@ namespace dhrg {
     if(doStore) rogueviz::storeall();
     }
   
+  void unsnap() {
+    for(int i=0; i<N; i++) {
+      using rogueviz::vdata;
+      transmatrix h = spin(coords[i].second * degree) * xpush(coords[i].first);
+      vdata[i].m->base = currentmap->gamestart();
+      vdata[i].m->at = h;
+      virtualRebase(vdata[i].m);
+      }
+    fixedges();
+    }
   }

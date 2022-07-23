@@ -123,6 +123,14 @@ int ts_coords;
 int ts_vertices;
 bool stored;
 
+void graphv(string s) {
+  dhrg_init(); read_graph(s, true, true, true);
+  next_timestamp++;
+  ts_rogueviz = next_timestamp;
+  ts_rbase = next_timestamp;
+  stored = true;
+  }
+
 int dhrgArgs() {
   using namespace arg;
            
@@ -141,11 +149,7 @@ int dhrgArgs() {
     }
 
   else if(argis("-graphv")) {
-    PHASE(3); shift(); dhrg_init(); read_graph(args(), true, true, true);
-    next_timestamp++;
-    ts_rogueviz = next_timestamp;
-    ts_rbase = next_timestamp;
-    stored = true;
+    PHASE(3); shift(); graphv(args());
     }
   
   else if(argis("-analyze_grid")) {
@@ -286,4 +290,4 @@ auto hook =
 #include "visualize.cpp"
 #endif
 
-} 
+}
