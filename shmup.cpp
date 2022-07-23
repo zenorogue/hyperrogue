@@ -2910,7 +2910,7 @@ EX void clearMemory() {
   }
 
 void gamedata(hr::gamedata* gd) { 
-  if(shmup::on) {
+  if(true) {
     gd->store(pc[0]); // assuming 1 player!
     gd->store(nextmove);
     gd->store(curtime);
