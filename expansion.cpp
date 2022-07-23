@@ -422,10 +422,12 @@ string expansion_analyzer::approximate_descendants(int d, int max_length) {
   return XLAT("about ") + fts(pow(10, log_10 - more_digits)) + "E" + its(more_digits);
   }
 
+#if HDR
 enum eDistanceFrom { dfPlayer, dfStart, dfWorld };
+#endif
 EX string dfnames[3] = { "player", "start", "land" };
 
-eDistanceFrom distance_from = dfPlayer;
+EX eDistanceFrom distance_from = dfPlayer;
 
 #if HDR
 enum eNumberCoding { ncNone, ncDistance, ncType, ncDebug, ncError };
