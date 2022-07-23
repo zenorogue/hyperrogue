@@ -86,9 +86,6 @@ void place_rogueviz_vertices() {
   for(int i=0; i<N; i++) vdata[i].m->base = vertices[i]->ascell();
   for(int i=0; i<N; i++) vdata[i].m->at = Id;
   fixedges(); 
-  for(int i=N; i<isize(vdata); i++)
-    if(vdata[i].m)
-      vdata[i].m->store();
   }
 
 int destroy;
@@ -97,6 +94,8 @@ void clear() {
   coords.clear();  
   // destroytallies();
   //  todo: correct cleanup!
+  for(int i=0; i<MAXDIST; i++) tally[i] = 0;
+  for(int i=0; i<MAXDIST; i++) edgetally[i] = 0;
 #ifdef BUILD_ON_HR
   mymap.clear();
 #else
@@ -265,8 +264,22 @@ int dhrgArgs() {
   return 0;
   }
 
+void gamedata(hr::gamedata* gd) {
+  if(true) {
+    for(auto& t: tally) gd->store(t);
+    for(auto& t: edgetally) gd->store(t);
+    gd->store(coords);
+#ifdef BUILD_ON_HR
+    gd->store(mymap);
+#else
+    gd->store(mroot);
+#endif
+    }
+  }
+
 auto hook = 
     addHook(hooks_args, 50, dhrgArgs)
+  + addHook(hooks_gamedata, 230, gamedata)
   + addHook(hooks_clearmemory, 200, clear);
 
 #if CAP_SDL

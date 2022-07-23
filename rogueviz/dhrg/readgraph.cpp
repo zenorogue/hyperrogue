@@ -15,6 +15,7 @@ namespace dhrg {
       e->orig = NULL;
       addedge(e->i, e->j, e);
       }
+    storeall(N);
     }
   
   void tst() {}
