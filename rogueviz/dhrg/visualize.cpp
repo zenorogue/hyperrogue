@@ -87,6 +87,7 @@ void show_likelihood() {
   
   keyhandler = [] (int sym, int uni) {
 
+    handlePanning(sym, uni);
     if(uni == '-' && held_id == -1) {
       for(int i=0; i<N; i++) if(rogueviz::vdata[i].m->base == mouseover)
         held_id = i;
