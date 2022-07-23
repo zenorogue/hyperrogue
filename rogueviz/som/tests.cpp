@@ -148,12 +148,14 @@ void create_subdata(int qty) {
   edge_data = false;
   }
 
+bool colorless = false;
+
 void create_edgedata() {
   if(edge_data) return;
   edge_data = true;
   create_data();
 
-  for(int i=0; i<samples; i++) {
+  if(!colorless) for(int i=0; i<samples; i++) {
     if(is_special[i])    
       vdata[i].cp.color1 = gradient(0xC0C000FF, 0xC00000FF, 0, ctrdist[i], ctrdist_max);
     else
@@ -1349,6 +1351,7 @@ auto khook = arg::add3("-kst-keys", [] { rv_hook(hooks_handleKey, 150, kst_key);
     param_i(ks_nonadj, "ks_nonadj", 0);
     param_i(max_distance, "ks_max");
     })
+  + arg::add3("-kst-colorless", [] { colorless = true; })
   + addHook(hooks_markers, 100, [] () {
     int N = isize(net);
     bool multidraw = quotient;
