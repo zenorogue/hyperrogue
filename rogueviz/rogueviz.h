@@ -28,14 +28,19 @@ namespace rogueviz {
   inline flagtype vizflags;
   extern string weight_label;
   extern ld maxweight;
+  extern ld ggamma;
+  extern bool highlight_target;
   
   extern int vertex_shape;
+  extern int search_for;
 
   void drawExtra();
   void close();
 
   void init(flagtype flags);
   
+  void graph_rv_hooks();
+
   struct edgetype {
     double visible_from;
     double visible_from_hi;
