@@ -505,6 +505,8 @@ ld labelscale = .2; // .28 in SVG
 
 ld edgewidth = 1;
 
+bool highlight_target = true;
+
 bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
   if(m->dead) return true;
   if(m->type != moRogueviz) return false;
@@ -532,7 +534,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
     int oi = ei->i, oj = ei->j;
     bool hilite = false;
     if(vdata[oi].special && vdata[oj].special && specialmark) hilite = true;
-    else if(svg::in || inHighQual) hilite = false;
+    else if(svg::in || inHighQual || !highlight_target) hilite = false;
     else if(vd1.m == shmup::mousetarget) hilite = true;
     else if(vd2.m == shmup::mousetarget) hilite = true;
     else if(oi == lid || oj == lid) hilite = true;
