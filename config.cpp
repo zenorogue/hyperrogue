@@ -3071,6 +3071,9 @@ EX int read_color_args() {
   else if(argis("-fore")) {
     PHASEFROM(2); shift(); forecolor = argcolor(24);
     }
+  else if(argis("-title")) {
+    PHASEFROM(2); shift(); titlecolor = argcolor(24);
+    }
   else if(argis("-dialog")) {
     PHASEFROM(2); shift(); dialog::dialogcolor = argcolor(24);
     }

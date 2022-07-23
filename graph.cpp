@@ -5521,6 +5521,8 @@ EX int cmode;
 
 EX bool dont_display_minecount = false;
 
+EX color_t titlecolor;
+
 EX void drawscreen() {
 
   DEBBI(DF_GRAPH, ("drawscreen"));
@@ -5578,6 +5580,7 @@ EX void drawscreen() {
 #if !ISMOBILE
   color_t col = linf[cwt.at->land].color;
   if(cwt.at->land == laRedRock) col = 0xC00000;
+  if(titlecolor) col = titlecolor;
   if(!nohelp)
     displayfr(vid.xres/2, vid.fsize,   2, vid.fsize, mouseovers, col, 8);
 #endif
