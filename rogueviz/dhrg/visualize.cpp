@@ -3,7 +3,7 @@
 int held_id = -1;
 
 void show_likelihood() {
-  cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
+  cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X | sm::PANNING;
   gamescreen();
 
   dialog::init("DHRG information");
