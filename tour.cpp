@@ -108,16 +108,20 @@ EX void slide_action(presmode mode, char key, string text, reaction_t act) {
     help_extensions.push_back(help_extension{key, text, act});
   }
 
+EX void enable_canvas_backup(char canv) {
+  slide_backup(patterns::whichCanvas, canv);
+  slide_backup(firstland, laCanvas);
+  slide_backup(specialland, laCanvas);
+  slide_backup(land_structure);
+  slide_backup(randomPatternsMode);
+  enable_canvas();
+  }
+
 /** \brief an auxiliary function to enable a visualization in the Canvas land */
 EX void setCanvas(presmode mode, char canv) {
   if(mode == pmStart) {
     gamestack::push();
-    slide_backup(patterns::whichCanvas, canv);
-    slide_backup(firstland, laCanvas);
-    slide_backup(specialland, laCanvas);
-    slide_backup(land_structure);
-    slide_backup(randomPatternsMode);
-    enable_canvas();
+    enable_canvas_backup(canv);
     start_game();
     resetview();
     }
