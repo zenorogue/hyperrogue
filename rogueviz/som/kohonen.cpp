@@ -151,6 +151,8 @@ double maxudist;
 
 neuron *distfrom;
 
+eWall som_floor = waNone;
+
 void coloring() {
   if(noshow) return;
   setindex(false);
@@ -216,7 +218,7 @@ void coloring() {
         part(net[i].where->landparam_color, pid) = 32 + (191 * (listing[i] - minl)) / (maxl - minl);
 
       for(int i=0; i<cells; i++) 
-        net[i].where->wall = waNone;
+        net[i].where->wall = som_floor;
       
       vid.wallmode = 2;
       }
@@ -1775,6 +1777,9 @@ int readArgs() {
   else if(argis("-somverify")) {
     start_game();
     verify_crawlers();
+    }
+  else if(argis("-som-no-floor")) {
+    som_floor = waInvisibleFloor;
     }
   else if(argis("-somrestrict")) {
     shift(); kohrestrict = argi();
