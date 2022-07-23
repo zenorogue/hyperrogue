@@ -60,9 +60,7 @@ void show_likelihood() {
     else shmup::fixStorage();
     });
   
-  dialog::addItem("move", 'm');
-  dialog::add_action([] () { popScreen(); });
-
+  dialog::addBack();
   dialog::display();
 
   if(held_id >= 0) {
@@ -95,6 +93,7 @@ void show_likelihood() {
       }
 
     dialog::handleNavigation(sym, uni);    
+    if(doexiton(sym, uni)) popScreen();
     };
   }
 
