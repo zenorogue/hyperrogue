@@ -3,7 +3,7 @@
 // used in: https://twitter.com/zenorogue/status/1212408644941295619
 
 // run with:
-// ./hyper -innner-map -noscr -canvas r -canvas i -wsh 0 -smart 4 -shott 0 -alpha 1
+// ./hyper -noscr -canvas r -canvas i -wsh 0 -smart 4 -shott 0 -alpha 1 -inner-map
 
 #include "rogueviz.h"
 
