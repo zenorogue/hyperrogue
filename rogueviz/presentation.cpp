@@ -545,7 +545,11 @@ void launch_slideshow_by_name(string s) {
     });
   }
 
-int runslide = arg::add3("-slides", [] {
+int runslide =
+  addHook(hooks_resetGL, 100, [] {
+    textures.clear();
+    })
++ arg::add3("-slides", [] {
   arg::shift(); launch_slideshow_by_name(arg::args());
   }) + arg::add3("-slide-textoff", [] {
     tour::texts = false;
