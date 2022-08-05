@@ -243,6 +243,8 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   void show_latex(presmode mode, string s);
   void dialog_add_latex(string s, color_t color, int size = 100, flagtype flag = 0);
   void dialog_may_latex(string latex, string normal, color_t col = dialog::dialogcolor, int size = 100, flagtype flag = 0);
+  void uses_game(presmode mode, string name, reaction_t launcher, reaction_t restore);
+  void latex_slide(presmode mode, string s, flagtype flags = 0, int size = 100);
 
   inline ld angle = 0;
   inline int dir = -1;

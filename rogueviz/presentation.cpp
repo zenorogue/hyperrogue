@@ -505,6 +505,51 @@ vector<slide> rvslides_default = {
       },
   };
 
+map<string, gamedata> switch_gd;
+
+EX void switch_game(string from, string to) {
+  if(game_active) switch_gd[from].storegame();
+  if(switch_gd.count(to)) {
+    switch_gd[to].restoregame();
+    switch_gd.erase(to);
+    }
+  }
+
+/** have a separate 'game' that lives between several slides */
+void uses_game(presmode mode, string name, reaction_t launcher, reaction_t restore) {
+  if(mode == pmStart) {
+    switch_game("main", name);
+    if(!game_active) launcher();
+    else restore();
+    restorers.push_back([name] { switch_game(name, "main"); });
+    }
+  }
+
+void latex_slide(presmode mode, string s, flagtype flags, int size) {
+  empty_screen(mode);
+  add_stat(mode, [=] {
+    tour::slide_backup(no_find_player, true);
+    if(flags & sm::SIDE) {
+      cmode |= sm::SIDE;
+      dynamicval<bool> db(nomap, false);
+      dynamicval<color_t> dc(modelcolor, 0xFF);
+      dynamicval<color_t> dc2(bordcolor, 0);
+      gamescreen();
+      }
+    else
+      gamescreen();
+    dialog::init();
+    dialog_may_latex(
+      s,
+      "(LaTeX is off)",
+      dialog::dialogcolor, size, LATEX_COLOR
+      );
+    dialog::display();
+    return true;
+    });
+  no_other_hud(mode);
+  }
+
 int pres_hooks = 
   addHook(hooks_slide, 100, [] (int mode) {
     if(currentslide == 0 && slides == default_slides) {
