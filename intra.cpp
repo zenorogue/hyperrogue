@@ -18,6 +18,9 @@ struct intra_data {
 
 EX vector<intra_data> data;
 
+/** tells gamedata store that we are just storing one world */
+EX bool switching;
+
 /** index of the space we are currently in */
 EX int current;
 
@@ -327,6 +330,7 @@ EX connection_data* find_connection(int a, int b) {
 
 EX void switch_to(int id) {
   if(current == id) return;
+  dynamicval<bool> is(switching, true);
   data[current].gd.storegame();
   current = id;
   ginf[gProduct] = data[current].gi;
@@ -435,6 +439,7 @@ EX void regenerate_full_sample_list() {
 
 /** make currentmap into one of the spaces in intra */
 EX void become() {
+  dynamicval<bool> is(switching, true);
   if(intra::in) {
     /* let them add more spaces in this case */
     data[current].gd.storegame();
@@ -462,6 +467,7 @@ EX void become() {
 EX void start(int id IS(0)) {
   in = true;
   current = id;
+  dynamicval<bool> is(switching, true);
   data[current].gd.restoregame();
   ginf[gProduct] = data[current].gi;
 
@@ -782,6 +788,7 @@ EX void kill(int id) {
 
 EX void erase_all_maps() {
   println(hlog, "erase_all_maps called");
+  dynamicval<bool> is(switching, true);
   data[current].gd.storegame();
   in = false;
   for(int i=0; i<isize(data); i++) {
