@@ -853,7 +853,7 @@ EX ld eye_level = 0.2174492;
 EX ld eye_angle = 0;
 EX ld eye_angle_scale = 1;
 
-int ticks_end, ticks_last;
+EX int ticks_end, ticks_last;
 
 EX set<color_t> colors_of_floors;
 
