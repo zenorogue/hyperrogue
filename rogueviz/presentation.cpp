@@ -76,6 +76,17 @@ void no_other_hud(presmode mode) {
   clearMessages();
   }
 
+/** disable all the HyperRogue game stuff */
+void non_game_slide(presmode mode) {
+  if(mode == pmStart) {
+    tour::slide_backup(game_keys_scroll, true);
+    tour::slide_backup(mapeditor::drawplayer, false);
+    tour::slide_backup(no_find_player, true);
+    tour::slide_backup(playermoved, false);
+    }
+  no_other_hud(mode);
+  }
+
 void white_screen(presmode mode, color_t col) {
   if(mode == pmStart) {
     tour::slide_backup(backcolor, col);
