@@ -60,8 +60,14 @@ void gamedata_all(gamedata& gd) {
   gd.store(land_structure);
   gd.store(*current_display);
   gd.store(cgip);
+  if(gd.mode == 0) cgip->use_count++;
+  if(gd.mode != 0) cgip->use_count--;
   gd.store(hybrid::underlying);
   gd.store(hybrid::csteps);
+  if(hybri && hybrid::underlying_cgip) {
+    if(gd.mode == 0) hybrid::underlying_cgip->use_count++;
+    if(gd.mode != 0) hybrid::underlying_cgip->use_count--;
+    }
   gd.store(hybrid::underlying_cgip);
   gd.store_ptr(vid.projection_config);
   gd.store_ptr(vid.rug_config);

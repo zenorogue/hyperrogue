@@ -524,8 +524,8 @@ hpcshape
 
   /** contains the texture point coordinates for 3D models */
   basic_textureinfo models_texture;
-  
-  geometry_information() { last = NULL; }
+
+  geometry_information() { last = NULL; use_count = 0; }
   
   void require_basics() { if(state & 1) return; state |= 1; prepare_basics(); }
   void require_shapes() { if(state & 2) return; state |= 2; prepare_shapes(); }
@@ -535,6 +535,9 @@ hpcshape
   hpcshape& generate_pipe(ld length, ld width, ePipeEnd endtype = ePipeEnd::sharp);
   
   map<string, unique_ptr<gi_extension>> ext;
+
+  /** prevent from being destroyed */
+  int use_count;
   };
 #endif
 
@@ -1238,9 +1241,11 @@ EX void check_cgi() {
   if(arcm::alt_cgip) arcm::alt_cgip->timestamp = ntimestamp;
   #endif
   
-  if(isize(cgis) > 4 && IFINTRA(intra::data.empty(), true)) {
+  int limit = 4;
+  for(auto& t: cgis) if(t.second.use_count) limit++;
+  if(isize(cgis) > limit) {
     vector<pair<int, string>> timestamps;
-    for(auto& t: cgis) timestamps.emplace_back(-t.second.timestamp, t.first);
+    for(auto& t: cgis) if(!t.second.use_count) timestamps.emplace_back(-t.second.timestamp, t.first);
     sort(timestamps.begin(), timestamps.end());
     while(isize(timestamps) > 4) {
       DEBB(DF_GEOM, ("erasing geometry ", timestamps.back().second));
