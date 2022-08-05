@@ -1589,10 +1589,10 @@ EX hyperpoint project_on_triangle(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
   transmatrix T;
   T[0] = h1; T[1] = h2; T[2] = h3;
   T[3] = C0;
-  ld det_orig = det(T);
+  ld det_orig = det3(T);
   hyperpoint orthogonal = (h2 - h1) ^ (h3 - h1);
   T[0] = orthogonal; T[1] = h2-h1; T[2] = h3-h1;
-  ld det_orth = det(T);
+  ld det_orth = det3(T);
   hyperpoint result = orthogonal * (det_orig / det_orth);
   result[3] = 1;
   return normalize(result);
