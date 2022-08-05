@@ -646,6 +646,9 @@ EX void initConfig() {
   param_b(resizable, "resizable", true)
   -> editable("resizable window", 'r');
 
+  param_b(no_find_player, "no_find_player");
+  param_b(game_keys_scroll, "game_keys_scroll");
+
   param_b(arb::apeirogon_consistent_coloring, "apeirogon_consistent_coloring", true)
   -> editable("apeirogon_consistent_coloring", 'c');
   param_b(arb::apeirogon_hide_grid_edges, "apeirogon_hide_grid_edges", true)
