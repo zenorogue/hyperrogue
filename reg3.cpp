@@ -319,9 +319,9 @@ EX namespace reg3 {
     for(int i=1; i<S7; i++) cgi.adjmoves[i] = spins[i] * cgi.adjmoves[0];
 
     for(int a=0; a<S7; a++)
-      DEBB(DF_GEOM, ("center of ", a, " is ", tC0(cgi.adjmoves[a])));
+      DEBB(DF_GEOM, ("center of ", a, " is ", kz(tC0(cgi.adjmoves[a]))));
     
-    DEBB(DF_GEOM, ("doublemove = ", tC0(cgi.adjmoves[0] * cgi.adjmoves[0])));
+    DEBB(DF_GEOM, ("doublemove = ", kz(tC0(cgi.adjmoves[0] * cgi.adjmoves[0]))));
 
     adjcheck = hdist(tC0(cgi.adjmoves[0]), tC0(cgi.adjmoves[1])) * 1.0001;
 

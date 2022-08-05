@@ -285,9 +285,9 @@ EX portal_data make_portal(cellwalker cw, int spin) {
       println(hlog, "deep       ", x, " = ", hdist(res(x*.1,0,0), res(x*.1,0,0.001)));
       }
     hyperpoint a = hyperpoint(.4, .2, .1, 1);
-    println(hlog, "a = ", a);
-    println(hlog, "b = ", id.from_poco(a));
-    println(hlog, "c = ", id.to_poco(id.from_poco(a)));
+    println(hlog, "a = ", kz(a));
+    println(hlog, "b = ", kz(id.from_poco(a)));
+    println(hlog, "c = ", kz(id.to_poco(id.from_poco(a))));
     }
 
   if(debug_portal & 1) {
