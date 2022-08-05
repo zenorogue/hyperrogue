@@ -239,7 +239,7 @@ template<class T> string separated(string separator, const vector<T>& a) {
   return ss.s;
   }
 
-inline void print(hstream& hs, const hyperpoint h) { print(hs, (const array<ld, MAXMDIM>&)h); }
+inline void print(hstream& hs, const hyperpoint h) { print(hs, "("); for(int i=0; i<MDIM; i++) { if(i) print(hs, ","); print(hs, h[i]); } print(hs, ")"); } // (const array<ld, MAXMDIM>&)h); }
 inline void print(hstream& hs, const transmatrix T) { 
   print(hs, "("); comma_printer c(hs);
   for(int i=0; i<MDIM; i++)
