@@ -845,7 +845,10 @@ int windtotal;
 EX hookset<void(cell*)> hooks_mouseover;
 
 template<class T> void set_help_to(T t) { 
-  help = bygen([t] { gotoHelpFor(t); });
+  help = bygen([t] {
+    gotoHelpFor(t);
+    help_extensions.push_back(help_extension{'h', XLAT("HyperRogue help"), [] () { buildHelpText(); }});
+    });
   }
 
 EX void describeMouseover() {
