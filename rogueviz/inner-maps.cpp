@@ -28,9 +28,13 @@ shiftmatrix rendercenterV;
 
 bool auto_move = false;
 
+bool full_disk = false;
+
+ld alpha_channel = 1;
 ld texture_alpha = 1;
 ld inner_alpha = 1;
-bool dense = false;
+/** 0 = not every heptagon, 1 = every heptagon, 2 = every cell */
+int dense = 0;
 
 // should do 30x -- temporarily disabled
 
@@ -39,12 +43,15 @@ ld iterations = 1;
 ld iterations_bank;
 
 void gentexture() {
-  if(out) iterations_bank += iterations;
+  if(!out) return;
+  iterations_bank += iterations;
+  println(hlog, tie(current_display->xcenter, current_display->ycenter, current_display->xtop, current_display->ytop, current_display->xsize, current_display->ysize));
   while(iterations_bank >= 1) {
     iterations_bank -= 1;
     println(hlog, "# = ", isize(lti));
     dynamicval<bool> b(out, false);
     dynamicval<ld> va(pconf.alpha, texture_alpha);
+    dynamicval<ld> vb(pconf.scale, 1);
     if(!buf1) {
       buf1 = new renderbuffer(rug::texturesize, rug::texturesize, true);
       buf2 = new renderbuffer(rug::texturesize, rug::texturesize, true);
@@ -71,8 +78,11 @@ void gentexture() {
     
     rendercenter = centerover;
     rendercenterV = gmatrix[centerover];
-
     }
+  calcparam();
+  println(hlog, tie(current_display->xcenter, current_display->ycenter, current_display->xtop, current_display->ytop, current_display->xsize, current_display->ysize));
+  current_display->set_viewport(0);
+  reset_projection();
   }
 
 void frame() {
@@ -86,24 +96,35 @@ void frame() {
 
 bool done;
 
-hpcshape edgeshape;
-
-hpcshape circ;
-
-ld crad = dense ? .5 : 1.82;
+// should be .5 for dense
+ld crad = 1.82;
 ld ceps = .02;
 
-ld crad_p;
+bool auto_crad = false;
 
 void need_redo() {
   done = false;
   }
 
-void make_shape() {
-  if(done) return;
+struct shapes {
+  hpcshape edgeshape, circ;
+  ld crad_p;
+  };
+
+struct inner_ext: gi_extension {
+  map<int, shapes> sh;
+  };
+
+shapes& get_shapes(ld crad) {
+  if(!cgi.ext["innermaps"]) cgi.ext["innermaps"] = std::make_unique<inner_ext>();
+  auto& ie = (inner_ext&) *cgi.ext["innermaps"];
+  int rad = int(crad * 100000 + .5);
+  bool done = ie.sh.count(rad);
+  auto& sh = ie.sh[rad];
+  if(done) return sh;
   done = true;
-  cgi.bshape(circ, PPR::WALL);
-  circ.flags |= POLY_TRIANGLES;
+  cgi.bshape(sh.circ, PPR::WALL);
+  sh.circ.flags |= POLY_TRIANGLES;
   int k = for_klein ? 1 : 2;
   int maxz = for_klein ? 120 : 30;
   for(int z=0; z<maxz; z++) {
@@ -124,9 +145,9 @@ void make_shape() {
       }
     }
   cgi.finishshape();
-  println(hlog, "circ vertices = ", circ.e - circ.s);
 
-  cgi.bshape(edgeshape, PPR::WALL);
+  cgi.bshape(sh.edgeshape, PPR::WALL);
+  if(!full_disk)
   for(int i=0; i<=360; i+=k) {
     ld a = i * degree;
     cgi.hpcpush(xspinpush0(a, crad - ceps));
@@ -141,14 +162,19 @@ void make_shape() {
 
   hyperpoint ph = xspinpush0(0, crad);
   ph /= (inner_alpha+ph[2]);
-  crad_p = ph[0];
+  sh.crad_p = ph[0];
+  println(hlog, "done");
+  return sh;
   }
 
 set<cell*> gs;
 
 bool render(cell *c, const shiftmatrix& V) {
   if(!buf1 || !buf2 || !rendercenter) return false;
-  make_shape();
+  if(auto_crad) {
+    crad = hdist0(mid(get_corner_position(c, 0), get_corner_position(c, 1))) - ceps;
+    }
+  auto& sh = get_shapes(crad);
   if(false && !gs.count(c)) {
     gs.insert(c);
     c->mondir = hrand(c->type);
@@ -171,7 +197,7 @@ bool render(cell *c, const shiftmatrix& V) {
         break;
       }
     }
-  if(dense ? pseudohept(c) : cdist50(c) == 0) {
+  if(dense == 2 ? true : dense == 1 ? pseudohept(c) : cdist50(c) == 0) {
     dynamicval<color_t> po(poly_outline, 0x000000FF);
     auto& p = lti[c];
     p.texture_id = buf2->renderedTexture;
@@ -183,12 +209,13 @@ bool render(cell *c, const shiftmatrix& V) {
   crad_p = ph[0];
   */
 
-    for(int i=circ.s; i<circ.e; i++) {
+    if(full_disk) queuepoly(V, sh.edgeshape, darkena(c->landparam, 0, 0xFF));
+    for(int i=sh.circ.s; i<sh.circ.e; i++) {
       hyperpoint h = cgi.hpc[i];
       // hyperboloid to Poincare
       h /= (inner_alpha + h[2]);
       // scale up
-      h /= crad_p;
+      h /= sh.crad_p;
       h *= .99999999;
       // Poincare to hyperboloid
       
@@ -211,8 +238,10 @@ bool render(cell *c, const shiftmatrix& V) {
       hyperpoint scr = h / (texture_alpha + h[2]);
       p.tvertices.push_back(glhr::makevertex(.5 + .5 * scr[0], .5 - .5 * scr[1], 0));
       }
-    queuepoly(V, circ, 0xFFFFFFFF).tinf = &p;
-    queuepoly(V, edgeshape, darkena(c->landparam, 0, 0xFF));
+    auto& pe = queuepoly(V, sh.circ, 0xFFFFFFFF);
+    pe.tinf = &p;
+    part(pe.color, 0) = 255 * alpha_channel;
+    if(!full_disk) queuepoly(V, sh.edgeshape, darkena(c->landparam, 0, 0xFF));
     }
   return false;
   }
@@ -238,6 +267,7 @@ void show() {
   add_edit(crad);
   add_edit(ceps);
   add_edit(auto_move);
+  add_edit(auto_crad);
   add_edit(iterations);
   dialog::addBack();
   dialog::display();
@@ -258,8 +288,10 @@ auto hook = arg::add3("-inner-map", enable)
     param_f(inner_alpha, "inner_ialpha")
     ->editable(0, 5, .1, "inner projection distance", "", 'i')
     ->set_reaction(need_redo);
-    param_b(dense, "inner_dense")
-    ->editable("densely packed maps", 'd');
+    param_i(dense, "inner_dense")
+    ->editable(0, 2, 1, "densely packed maps", "0=palace pattern, 1=heptagons, 2=all", 'd');
+    param_b(auto_crad, "inner_auto_crad")
+    ->editable("assign crad automatically to cell inradius", 'a');
     param_f(crad, "inner_crad")
     ->editable(0, 10, .1, "radii of the inner maps", "", 'r')
     ->set_reaction(need_redo);
@@ -268,6 +300,10 @@ auto hook = arg::add3("-inner-map", enable)
     ->set_reaction(need_redo);
     param_b(auto_move, "auto_move")
     ->editable("animate", 'a');
+    param_b(full_disk, "inner_full_disk")
+    ->editable("use full disk", 'F');
+    param_f(alpha_channel, "inner_alpha_channel")
+    ->editable(0, .1, 1, "alpha channel to use in inner maps", "", 'C');
     param_f(iterations, "inner_iterations")
     ->editable(0, 30, 0.2, "iterations per frame", 
       "How many times per frame should we re-render the map", 
