@@ -188,6 +188,7 @@ EX void buildHelpText() {
     + "http//roguetemple.com/z/hyper/\n\n";
   
 #if CAP_TOUR
+  if(!tour::on)
   help += XLAT("Try the Guided Tour to help with understanding the "
     "geometry of HyperRogue (menu -> special modes).\n\n");
 #endif
