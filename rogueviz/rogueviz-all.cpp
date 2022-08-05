@@ -56,6 +56,8 @@
 #include "nil-compass.cpp"
 #if CAP_RVSLIDES
 #include "playing-with-impossibility.cpp"
+#include "hyperbolic-minesweeper-pres.cpp"
+#include "dhrg-pres.cpp"
 #endif
 #include "highdim-demo.cpp"
 #include "horo63.cpp"
@@ -66,6 +68,8 @@
 #include "balloonsim.cpp"
 #include "dpgen.cpp"
 #include "antidesitter.cpp"
+
+#include "dhrg/dhrg.cpp"
 
 #include "som/kohonen.cpp"
 #include "som/embeddings.cpp"
