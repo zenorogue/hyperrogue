@@ -12,8 +12,6 @@ auto geoslide(eGeometry g, char canvas, int jhole, int jblock) {
   using namespace tour;
   return [=] (presmode mode) {
     if(mode == pmStart) {
-      tour::slide_backup(mapeditor::drawplayer, false);
-      tour::slide_backup(smooth_scrolling, true);
       stop_game();
       set_geometry(g);
       if(g == gSphere) {
@@ -39,6 +37,7 @@ auto geoslide(eGeometry g, char canvas, int jhole, int jblock) {
         sightranges[gSol] = 4;
         }
       }
+    rogueviz::pres::non_game_slide_scroll(mode);
     if(mode == pmStop && jblock < 0)
       pmodel = mdGeodesic;
     slidecommand = "switch raycaster";

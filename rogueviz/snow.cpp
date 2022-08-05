@@ -192,15 +192,13 @@ void snow_slide(vector<tour::slide>& v, string title, string desc, reaction_t t)
     
     if(mode == pmStart) {
       stop_game();
-      tour::slide_backup(mapeditor::drawplayer, false);
       tour::slide_backup<ld>(snow_lambda, 1);
       tour::slide_backup(snow_color, 0xC0C0C0FF);
       tour::slide_backup(snow_intense, true);
-      tour::slide_backup(smooth_scrolling, true);
       t();
       start_game();
-      playermoved = false;
       }
+    rogueviz::pres::non_game_slide_scroll(mode);
     }}
     );
   }

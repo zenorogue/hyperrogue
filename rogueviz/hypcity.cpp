@@ -124,10 +124,8 @@ auto hypcity_ah = arg::add3("-hypcity", enable)
                 geom3::switch_fpp();
                 }
               setCanvas(mode, '0');
-              slide_backup(mapeditor::drawplayer, false);
               if(mode == pmStart) {
                 slide_backup(canvas_default_wall, waInvisibleFloor);
-                slide_backup(smooth_scrolling, 1);
                 if(dim == 2) slide_backup(vid.camera, 0);
                 if(dim == 2) slide_backup(vid.depth, 0);
                 slide_backup(context_fog, false);
@@ -135,6 +133,7 @@ auto hypcity_ah = arg::add3("-hypcity", enable)
                 start_game();
                 enable();
                 }
+              non_game_slide_scroll(mode);
               }});
         };
       

@@ -489,15 +489,12 @@ auto hooks =
     auto load = [] (string s, ld x, int y) {
       return [s, x, y] {
         slide_backup(vid.cells_drawn_limit, 100);
-        slide_backup(smooth_scrolling, true);
         slide_backup(ray::max_cells, 999999);
         slide_backup(walking::on, true);
         slide_backup(walking::eye_level, x);
         mapstream::loadMap(s);
         slide_backup(ray::fixed_map, true);
         slide_backup(ray::max_iter_intra, y);
-        slide_backup(mapeditor::drawplayer, false);
-        slide_backup(playermoved, false);
         #if CAP_VR
         slide_backup(vrhr::hsm, vrhr::eHeadset::holonomy);
         slide_backup(vrhr::eyes, vrhr::eEyes::truesim);
@@ -518,6 +515,7 @@ auto hooks =
           slide_action(mode, 'r', "run this visualization", loader);
           slidecommand = "portal options";
           if(mode == tour::pmKey) pushScreen(intra::show_portals);
+          rogueviz::pres::non_game_slide_scroll(mode);
           }
         });
       };

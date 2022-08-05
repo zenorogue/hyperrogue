@@ -218,11 +218,11 @@ auto hooks =
               slide_backup(ray::max_cells, 32768);
               slide_backup(ray::fixed_map, true);
               #endif
-              slide_backup(smooth_scrolling, true);
               slide_backup(camera_speed, .1);
               enable();
               start_game();
               }
+            rogueviz::pres::non_game_slide_scroll(mode);
             if(mode == pmKey)
               edit_stretch();
             }});
@@ -245,11 +245,11 @@ auto hooks =
               slide_backup(ray::fixed_map, true);
               slide_backup(ray::want_use, 2);
               #endif
-              slide_backup(smooth_scrolling, true);
               slide_backup(camera_speed, .1);
               enable();
               start_game();
               }
+            rogueviz::pres::non_game_slide_scroll(mode);
             if(mode == pmKey)
               edit_stretch();
             }});

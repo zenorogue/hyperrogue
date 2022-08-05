@@ -87,6 +87,11 @@ void non_game_slide(presmode mode) {
   no_other_hud(mode);
   }
 
+void non_game_slide_scroll(presmode mode) {
+  non_game_slide(mode);
+  slide_backup(smooth_scrolling, true);
+  }
+
 void white_screen(presmode mode, color_t col) {
   if(mode == pmStart) {
     tour::slide_backup(backcolor, col);

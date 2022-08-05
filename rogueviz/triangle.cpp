@@ -504,10 +504,8 @@ void slide_itri(tour::presmode mode, int id) {
   if(mode == pmStart) {
     stop_game();
     set_geometry(gNil);
-    tour::slide_backup(mapeditor::drawplayer, false);
     tour::slide_backup(on, true);
     tour::slide_backup(net, id == 2 ? true : false);
-    tour::slide_backup(smooth_scrolling, true);
     tour::on_restore(nilv::set_flags);
     if(id == 0)
       tour::slide_backup(nilv::nilperiod, make_array(3, 3, 3));
@@ -524,6 +522,7 @@ void slide_itri(tour::presmode mode, int id) {
     playermoved = false;
     tour::on_restore(reset);
     }     
+  rogueviz::pres::non_game_slide_scroll(mode);
   }
 
 string cap = "Impossible architecture in Nil/";

@@ -819,7 +819,6 @@ slide dmv_slides[] = {
       ply_slide(mode, gCubeTiling, mdPerspective, false);
       if(!ply::staircase.available()) return;
       if(mode == pmStart) {
-        tour::slide_backup(smooth_scrolling, true);
         tour::slide_backup(sightranges[geometry], 200);
         tour::slide_backup(vid.cells_drawn_limit, 200);
         tour::slide_backup(camera_speed, 5);
@@ -831,6 +830,7 @@ slide dmv_slides[] = {
 
         // tour::slide_backup(vid.fov, 120);
         }
+      non_game_slide_scroll(mode);
       if(mode == pmKey) {
         println(hlog, ggmatrix(currentmap->gamestart()));
         println(hlog, View);
@@ -923,12 +923,10 @@ slide dmv_slides[] = {
         set_geometry(gNil);
         start_game();
         rogueviz::rv_hook(hooks_drawcell, 100, rogueviz::nilcompass::draw_compass);
-        tour::slide_backup(smooth_scrolling, true);
-        tour::slide_backup(mapeditor::drawplayer, false);
         View = Id;
         shift_view(ztangent(.5));
-        playermoved = false;
         }
+      non_game_slide_scroll(mode);
       if(mode == pmStart || mode == pmKey)
         rogueviz::nilcompass::zeroticks = ticks;
       }
@@ -1205,15 +1203,13 @@ slide dmv_slides[] = {
     if(mode == pmStart) {
       stop_game();
       set_geometry(gNil);
-      tour::slide_backup(mapeditor::drawplayer, false);
       rogueviz::cylon::enable();
-      tour::slide_backup(smooth_scrolling, true);
       tour::on_restore(nilv::set_flags);
       tour::slide_backup(nilv::nilperiod, make_array(3, 3, 3));
       nilv::set_flags();
       start_game();
-      playermoved = false;
       }
+    non_game_slide_scroll(mode);
     }},
 
   {"3D model (geodesic)", 999, LEGAL::NONE | QUICKGEO, 
@@ -1263,15 +1259,13 @@ slide dmv_slides[] = {
         set_geometry(gNil);
         check_cgi();
         cgi.require_shapes();
-        tour::slide_backup(mapeditor::drawplayer, false);
-        tour::slide_backup(smooth_scrolling, true);
         start_game();
         rogueviz::balls::initialize(1);
         rogueviz::balls::balls.resize(3);
         pmodel = mdEquidistant;
-        playermoved = false;
         View = cspin(1, 2, M_PI/2);
         }
+      non_game_slide_scroll(mode);
       }
     },
 

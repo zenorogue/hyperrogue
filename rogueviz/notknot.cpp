@@ -1400,6 +1400,7 @@ void nk_launch() {
   sightranges[geometry] = .5;
   ray::max_cells = 600000;
   smooth_scrolling = 1;
+  game_keys_scroll = true;
   camera_speed = 10;
   // panini_alpha = 1;
   // fov = 150;
@@ -1438,19 +1439,18 @@ void portal_slideshow(tour::ss::slideshow_callback cb) {
             setCanvas(mode, '0');
             if(youtube != "")
               slide_url(mode, 'y', "YouTube link", youtube);
+            non_game_slide_scroll(mode);
             slide_action(mode, 'r', "run", [=] {
               slide_backup(margin);
               slide_backup(mapeditor::drawplayer);
               slide_backup(firstland);
               slide_backup(specialland);
               slide_backup(ray::max_cells, 600000);
-              slide_backup(smooth_scrolling, 1);
               slide_backup(camera_speed, 10);
               slide_backup(ray::exp_decay_poly, 30);
               slide_backup(ray::fixed_map, true);
               slide_backup(ray::max_iter_iso, 80);
               slide_backup(vid.cells_drawn_limit, 100);
-              slide_backup(mapeditor::drawplayer, false);
         #if CAP_VR
               slide_backup(vrhr::hsm);
               slide_backup(vrhr::eyes);
