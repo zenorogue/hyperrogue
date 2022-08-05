@@ -2714,6 +2714,12 @@ EX void cast() {
     }
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  if(!floor_textures) {
+    println(hlog, "make_floor_textures called");
+    make_floor_textures();
+    check_cgi();
+    }
+
   glActiveTexture(GL_TEXTURE0 + 0);
   glBindTexture(GL_TEXTURE_2D, floor_textures->renderedTexture);
 
