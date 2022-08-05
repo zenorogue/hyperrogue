@@ -97,23 +97,23 @@ EX void buildHelpText() {
 #endif
   help += XLAT("! (version %1)\n\n", VER);
   
-  help += XLAT(
+  if(!game_keys_scroll) help += XLAT(
     "You have been trapped in a strange, non-Euclidean world. Collect as much treasure as possible "
     "before being caught by monsters. The more treasure you collect, the more "
     "monsters come to hunt you, as long as you are in the same land type. The "
     "Orbs of Yendor are the ultimate treasure; get at least one of them to win the game!"
     );
-  help += XLAT(" (press ESC for some hints about it).");
-  help += "\n\n";
+  if(!game_keys_scroll) help += XLAT(" (press ESC for some hints about it).");
+  if(!game_keys_scroll) help += "\n\n";
   
-  if(!shmup::on && !hardcore)
+  if(!shmup::on && !hardcore && !game_keys_scroll)
     help += XLAT(
       "You can fight most monsters by moving into their location. "
       "The monster could also kill you by moving into your location, but the game "
       "automatically cancels all moves which result in that.\n\n"
       );
       
-  if(shmup::on) {
+  if(shmup::on && !game_keys_scroll) {
     help += XLAT(
       "Shmup (shoot'em up) mode: You can play a hyperbolic shoot'em up game. The game is based "
       "on the usual turn-based grid-based HyperRogue, but there are some changes. You fight by "
@@ -122,14 +122,14 @@ EX void buildHelpText() {
       "adapted too.\n\n");  
     }
   
-  if(shmup::on && multi::players > 1) {
+  if(shmup::on && multi::players > 1 && !game_keys_scroll) {
     help += XLAT(
       "Multiplayer: Play cooperatively (locally); treasures, kills, and deaths are calculated "
       "for each player too, for more competitive play. Orbs and treasures are shared, orbs drain "
       "faster, knives recharge slower, and player characters are not allowed to separate.\n\n");
     }
   
-  if(multi::players > 1 && !shmup::on) {
+  if(multi::players > 1 && !shmup::on && !game_keys_scroll) {
     help += XLAT(
       "Turn-based multiplayer: Turns are executed in parallel. A player can leave the game "
       "by pressing a designated key (useful when about to get killed or lost). The following "
@@ -143,11 +143,11 @@ EX void buildHelpText() {
     }
 
 #if CAP_INV    
-  if(inv::on)
+  if(inv::on && !game_keys_scroll)
   help += XLAT(
     inv::helptext
     );
-  else
+  else if(!game_keys_scroll)
 #endif
   help += XLAT(
     "There are many lands in HyperRogue. Collect 10 treasure "
@@ -156,7 +156,7 @@ EX void buildHelpText() {
     "get access to new lands. At 25 treasures "
     "this type of Orbs starts appearing in other lands as well. Press 'o' to "
     "get the details of all the Lands.\n\n");
-  help += "\n\n";
+  if(!game_keys_scroll) help += "\n\n";
     
 #if ISMOBILE
   help += XLAT(
@@ -166,11 +166,17 @@ EX void buildHelpText() {
     "numbers displayed to get their meanings.\n"
     );
 #else
-  if(DEFAULTCONTROL)
+  if(DEFAULTCONTROL && !game_keys_scroll)
     help += XLAT(
       "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Space. "
       "To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n"
       );
+  else if(DEFAULTCONTROL && WDIM == 2)
+    help += XLAT(
+      "You are currently in a visualization. Press wasd to scroll, qe to rotate. You can also use the arrow keys. ESC for menu.\n\n");
+  else if(DEFAULTCONTROL && WDIM == 3)
+    help += XLAT(
+      "You are currently in a visualization. Press wasdqe to rotate the camera, ijklyh to move. You can also use the arrow keys and Home/End and PgUp/PgDn. ESC for menu.\n\n");
   help += XLAT(
     "You can right click any element to get more information about it.\n\n"
     );
