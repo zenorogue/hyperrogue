@@ -2146,6 +2146,8 @@ EX void generate_rules() {
     t_origin.push_back(twalker(c, 0));
     }
 
+  if(GDIM == 3) build_cycle_data();
+
   bfs_queue = queue<tcell*>();
   if(flags & w_bfs) for(auto c: t_origin) bfs_queue.push(c.at);
   
@@ -2464,7 +2466,11 @@ auto hooks = addHook(hooks_configfile, 100, [] {
       param_i(max_shortcut_length, "max_shortcut_length");
       param_i(rulegen_timeout, "rulegen_timeout");
       param_i(first_restart_on, "first_restart_on");
-      param_i(max_ignore_level, "max_ignore_level");
+      param_i(max_ignore_level_pre, "max_ignore_level_pre");
+      param_i(max_ignore_level_post, "max_ignore_level_post");
+      param_i(max_ignore_time_pre, "max_ignore_time_pre");
+      param_i(max_ignore_time_post, "max_ignore_time_post");
+      param_i(honeycomb_value, "honeycomb_value");
     });
 
 EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {
