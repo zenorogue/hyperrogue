@@ -195,6 +195,9 @@ int last_qroad;
 
 vector<vector<pair<int,int>>> possible_parents;
 
+set<tcell*> imp_as_set;
+int impcount;
+
 struct vcell {
   int tid;
   vector<int> adj;
@@ -218,6 +221,14 @@ int get_abs_rule(int tid, int j) {
   return ts.rules[j1];
   }
 
+void be_important(tcell *c) {
+  if(imp_as_set.count(c)) {
+    return;
+    }
+  important.push_back(c);
+  imp_as_set.insert(c);
+  }
+
 void build(vstate& vs, vector<tcell*>& places, int where, int where_last, tcell *g) {
   places[where] = g;
   // twalker wh = g;
@@ -231,8 +242,10 @@ void build(vstate& vs, vector<tcell*>& places, int where, int where_last, tcell 
       twalker wh1 = g1;
       auto ts = get_treestate_id(wh1).second;
       if(ts != rule) {
-        important.push_back(g);
-        important.push_back(g1);
+        be_important(g);
+        // be_important(treestates[ts0.second].giver.at);
+        be_important(g1);
+        // be_important(treestates[ts].giver.at);
         continue;
         }
       build(vs, places, c.adj[i], where, g1);
