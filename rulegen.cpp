@@ -86,10 +86,9 @@ static const flagtype w_less_smart_retrace = Flag(22); /*< stop early when exami
 static const flagtype w_less_smart_advance = Flag(23); /*< stop early when examining smart shortcut advancement */
 static const flagtype w_no_queued_extensions = Flag(24); /*< consider extensions one by one */
 static const flagtype w_no_branch_skipping = Flag(24); /*< do not skip branches */
-static const flagtype w_vertex_edges = Flag(25); /*< in reg3 all_edges, consider vertex adjacency */
-static const flagtype w_ae_extra_step = Flag(26); /*< in reg3 all_edges, make one extra step */
-static const flagtype w_adj_only = Flag(27); /*< in reg3 adjacent only */
 #endif
+
+EX int honeycomb_value = 1; /* how far to build local for honeycombs */
 
 EX flagtype flags = 0;
 
@@ -1338,7 +1337,7 @@ EX void id_at_spin(twalker cw, vector<twalker>& sprawl, vector<analyzer_state*>&
       a = alloc_analyzer();
       }
     states.push_back(a);
-    if(WDIM == 3 && !(flags & w_adj_only)) {
+    if(WDIM == 3 && honeycomb_value) {
       auto& ae = check_all_edges(cw, a, isize(sprawl));
       int id = isize(sprawl);
       if(id < isize(ae)) {

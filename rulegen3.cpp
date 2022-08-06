@@ -163,7 +163,7 @@ EX vector<pair<int, int>>& check_all_edges(twalker cw, analyzer_state* a, int id
       for(auto w: rotated)
         if(sqhypot_d(MDIM, v-w) < 1e-6)
           common++;
-      if(flags & w_vertex_edges) {
+      if(honeycomb_value >= 2) {
         if(common < 1) { ae1.emplace_back(id, dir); return; }
         }
       else {
@@ -179,7 +179,7 @@ EX vector<pair<int, int>>& check_all_edges(twalker cw, analyzer_state* a, int id
         visit(tw + j + wstep, visited[i].second * currentmap->adj(tcell_to_cell[tw.at], (tw+j).spin), i, j);
         }
       }
-    if(flags & w_ae_extra_step) for(auto p: ae1) ae.push_back(p);
+    if(honeycomb_value >= 3) for(auto p: ae1) ae.push_back(p);
     println(hlog, "for ", tie(cw.at->id, cw.spin), " generated all_edges structure: ", ae, " of size ", isize(ae));
     }
   return ae;
