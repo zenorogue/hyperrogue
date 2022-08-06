@@ -1052,6 +1052,7 @@ EX namespace reg3 {
           }
         delete m;
         }
+      make_subconnections();
       }        
     };
 #endif
