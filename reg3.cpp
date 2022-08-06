@@ -743,6 +743,10 @@ EX namespace reg3 {
     void initialize(int cell_count);
     vector<cell*>& allcells() override { return acells; }
 
+    ~hrmap_closed3() {
+      clearfrom(getOrigin());
+      }
+
     subcellshape& get_cellshape(cell *c) override {
       if(PURE) return *cgi.heptshape ;
       int id = local_id.at(c).second;
