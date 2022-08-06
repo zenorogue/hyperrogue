@@ -737,6 +737,7 @@ EX string compress_string(string s) {
   if(deflate(&strm, Z_FINISH) != Z_STREAM_END) throw hr_exception("z-error-2");
   println(hlog, "deflate ok");
   string out(&buf[0], (char*)(strm.next_out) - &buf[0]);
+  deflateEnd(&strm);
   println(hlog, isize(s), " -> ", isize(out));
   return out;
   }
@@ -753,8 +754,9 @@ EX string decompress_string(string s) {
   vector<char> buf(10000000, 0);
   strm.avail_out = 10000000;
   strm.next_out = (Bytef*) &buf[0];
-  if(inflate(&strm, Z_FINISH) != Z_STREAM_END) throw hr_exception("z-error-2");
+  if(inflate(&strm, Z_FINISH) != Z_STREAM_END) throw hr_exception("z-error-2");  
   string out(&buf[0], (char*)(strm.next_out) - &buf[0]);
+  inflateEnd(&strm);
   println(hlog, isize(s), " -> ", isize(out));
   return out;
   }

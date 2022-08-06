@@ -1028,6 +1028,7 @@ EX void find_multiple_interpretation() {
   }
 
 EX void test_transducers() {
+  if(flags & w_skip_transducers) return;
   autom.clear();
   int iterations = 0;
   while(true) {
@@ -1159,7 +1160,7 @@ EX void test_transducers() {
         extract(autom, special[tid][dir], tid, dir);
       }
 
-    for(int tid=0; tid<isize(t_origin); tid++) {
+    if(!(flags & w_skip_transducer_loops)) for(int tid=0; tid<isize(t_origin); tid++) {
       int id = 0;
 
       /* if correct, each loop iteration recovers the identity, so we can build it just once */
@@ -1189,7 +1190,7 @@ EX void test_transducers() {
         }
       }
 
-    if(true) {
+    if(!(flags & w_skip_transducer_terminate)) {
       println(hlog, "Verifying distances");
       
       map<pair<int, int>, vector< pair<int, int>> > by_roadsign;

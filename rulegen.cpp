@@ -86,6 +86,11 @@ static const flagtype w_less_smart_retrace = Flag(22); /*< stop early when exami
 static const flagtype w_less_smart_advance = Flag(23); /*< stop early when examining smart shortcut advancement */
 static const flagtype w_no_queued_extensions = Flag(24); /*< consider extensions one by one */
 static const flagtype w_no_branch_skipping = Flag(24); /*< do not skip branches */
+
+/* for 3D honeycombs */
+static const flagtype w_skip_transducers = Flag(32); /*< skip the transducer test */
+static const flagtype w_skip_transducer_loops = Flag(33); /*< skip loops during the transducer test */
+static const flagtype w_skip_transducer_terminate = Flag(34); /*< skip termination during the transducer test */
 #endif
 
 EX int honeycomb_value = 1; /* how far to build local for honeycombs */
