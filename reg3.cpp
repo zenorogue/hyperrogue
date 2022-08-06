@@ -665,6 +665,8 @@ EX namespace reg3 {
     }
 
   EX void generate_subcells() {
+
+    cgi.subshapes.clear();
     
     switch(variation) {
       case eVariation::subcubes:
