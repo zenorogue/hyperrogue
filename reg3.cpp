@@ -2278,7 +2278,8 @@ EX namespace reg3 {
       }
 
     heptagon *create_step(heptagon *parent, int d) override {
-      if(starts[isize(starts)/2] == parent) {
+      heptspin parentd(parent, d);
+      if(starts[isize(starts)/2] == parentd) {
         int i = 0;
         vector<heptspin> cut;
         for(auto s: starts) if(i++ >= isize(starts)/2) cut.push_back(s);
@@ -2286,7 +2287,7 @@ EX namespace reg3 {
         explain_conflict(cut);
         throw hr_exception("create_step cycle detected");
         }
-      starts.push_back(parent);
+      starts.push_back(parentd);
       finalizer f([] { starts.pop_back(); });
 
       int id = parent->fiftyval;
