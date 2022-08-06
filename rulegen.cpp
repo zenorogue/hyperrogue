@@ -196,7 +196,7 @@ EX int number_of_types() {
   throw hr_exception("unknown number_of_types");
   }
 
-int get_id(cell *c) {
+EX int get_id(cell *c) {
   if(arb::in()) return shvid(c);
   if(GDIM == 3) return zgmod(reg3::get_aid(c), less_states);
   throw hr_exception("unknown get_id");
@@ -475,7 +475,7 @@ struct hr_solid_error : rulegen_retry {
   };
 
 /** since the last restart */
-int solid_errors;
+EX int solid_errors;
 
 /** total solid errors */
 EX int all_solid_errors;
@@ -1465,7 +1465,7 @@ void handle_queued_extensions() {
   throw rulegen_retry("mismatch error");
   }
 
-void rules_iteration_for(twalker& cw) {
+EX void rules_iteration_for(twalker& cw) {
   indenter ri(2);
   ufind(cw);
   auto co = get_treestate_id(cw);
