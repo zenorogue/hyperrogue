@@ -915,6 +915,7 @@ EX void initConfig() {
   #endif
   
   param_b(nohud, "no-hud", false);
+  param_b(nomap, "nomap", false);
   param_b(nofps, "no-fps", false);
   
   #if CAP_IRR
