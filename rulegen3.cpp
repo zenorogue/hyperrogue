@@ -257,8 +257,6 @@ void build(vstate& vs, vector<tcell*>& places, int where, int where_last, tcell 
       }
   }
 
-void print_rules();
-
 EX int max_ignore_level_pre = 3;
 EX int max_ignore_level_post = 0;
 EX int max_ignore_time_pre = 999999;
