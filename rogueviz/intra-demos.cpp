@@ -500,6 +500,8 @@ auto hooks =
         slide_backup(vrhr::eyes, vrhr::eEyes::truesim);
         slide_backup(vrhr::cscr, vrhr::eCompScreen::eyes);
         #endif
+        popScreenAll();
+        resetGL();
         };
       };
 
