@@ -1826,10 +1826,6 @@ EX namespace reg3 {
       make_subconnections();
       }
     
-    ~hrmap_sphere3() {
-      clearfrom(allh[0]);
-      }    
-
     transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
       return iso_inverse(locations[h1->fieldval]) * locations[h2->fieldval];
       }
