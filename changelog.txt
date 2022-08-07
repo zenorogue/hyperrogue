@@ -4737,3 +4737,11 @@ Menu improvements:
   - auto-rotation (Ivory Tower etc.) now works on devices who know their orientation
   - nicer "pipes" (fat grid lines) in 3D
   - fixed some crash bugs related to the memory saving mode
+
+2022-08-07 03:03 Update 12.0w:
+- fixed a bug with 'world overview' breaking ESC menu
+- racing fixed (hopefully)
+- minor changes to HyperRogue help: now directly offered when displaying context help; do not suggest to try the Guided Tour if already in the Guided Tour
+- made the RogueViz presentations which contain no HyperRogue PC easier to control (control the camera by using the keys which usually move the PC)
+- added some more demos to RogueViz
+
