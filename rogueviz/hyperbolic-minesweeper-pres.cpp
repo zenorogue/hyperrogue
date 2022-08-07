@@ -23,7 +23,7 @@ void geom_sphere() {
 
 void geom_tes() {
   tour::slide_backup(vid.creature_scale, 0.5);
-  arb::run("tessellations/pseudo-Archimedean/hybrid/34344/33444 + 34344.tes");
+  arb::run("tessellations/rogueviz/hybrid34.tes");
   tour::slide_backup(vid.use_smart_range, 2);
   tour::slide_backup(vid.smart_range_detail, 1);
   }
