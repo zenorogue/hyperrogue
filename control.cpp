@@ -951,7 +951,6 @@ EX void mainloopiter() {
     auto& lastticks = sc_ticks2;
     ld t = (ticks - lastticks) * shiftmul / 1000.;
     lastticks = ticks;
-    println(hlog, "t = ", t);
 
     if(keystate['d'] && DEFAULTNOR('d')) full_rotate_camera(0, -t);
     if(keystate['a'] && DEFAULTNOR('a')) full_rotate_camera(0, t);
