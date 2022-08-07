@@ -182,11 +182,15 @@ string latex_packages =
   "\\definecolor{remph}{rgb}{0,0.5,0}\n"
   "\\renewcommand{\\labelitemi}{{\\color{remph}$\\blacktriangleright$}}\n";
 
-/* note: you pdftopng from the xpdf package for this to work! */
-string gen_latex(presmode mode, string s, int res, flagtype flags) {
+string latex_cachename(string s, flagtype flags) {
   unsigned hash = 0;
   for(char c: latex_packages + s) hash = (hash << 3) ^ hash ^ c ^ flags;
-  string filename = format("latex-cache/%08X.png", hash);
+  return format("latex-cache/%08X.png", hash);
+  }
+
+/* note: you pdftopng from the xpdf package for this to work! */
+string gen_latex(presmode mode, string s, int res, flagtype flags) {
+  string filename = latex_cachename(s, flags);
   if(mode == pmStartAll) {
     if(!file_exists(filename)) {
       hr::ignore(system("mkdir latex-cache"));
@@ -268,10 +272,23 @@ void dialog_add_latex(string s, color_t col, int size, flagtype flags) {
     });
   }
 
-bool rv_latex = false;
+/** possible values: 
+ *  0 = never display latex
+ *  1 = if a file exists in the cache, use it
+ *  2 = otherwise, use pdflatex and xpdf to generate it
+ */
+int rv_latex = 1;
+
+map<string, bool> file_exists_cache;
 
 void dialog_may_latex(string latex, string normal, color_t col, int size, flagtype flags) {
-  if(rv_latex) {
+  bool use_latex = rv_latex == 2;
+  if(rv_latex == 1) {  
+    string filename = latex_cachename(latex, flags);
+    if(!file_exists_cache.count(filename)) file_exists_cache[filename] = file_exists(filename);
+    if(file_exists_cache[filename]) use_latex = true;
+    }
+  if(use_latex) {
     if(flags & LATEX_COLOR) col = 0xFFFFFFFF;
     dialog_add_latex(latex, (col << 8) | 0xFF, size * 3/2, flags);
     }
@@ -386,7 +403,7 @@ void choose_presentation() {
 int phooks =
   0
   + addHook(hooks_configfile, 100, [] {
-    param_b(rv_latex, "rv_latex");
+    param_i(rv_latex, "rv_latex");
     })
   + addHook(dialog::hooks_display_dialog, 100, [] () {
     if(current_screen_cfunction() == showStartMenu) { 
