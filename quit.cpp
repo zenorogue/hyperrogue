@@ -139,7 +139,7 @@ EX hint hints[] = {
 #endif
         );
       dialog::addBreak(50);
-      dialog::addItem(XLAT("world overview"), 'z');
+      dialog::addItem(XLAT("world overview") + " ", 'z');
       },
     []() {
       pushScreen(showOverview);
