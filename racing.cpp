@@ -80,6 +80,7 @@ vector<ghost> ghostset;
 array<vector<ghostmoment>, MAXPLAYER> current_history;
 
 EX map<eLand, int> best_scores;
+EX map<eLand, int> best_scores_to_save;
 
 string ghost_prefix = "default";
 
@@ -1287,6 +1288,7 @@ EX void race_won() {
       if(!best_scores.count(specialland))
         best_scores[specialland] = result;
       best_scores[specialland] = min(best_scores[specialland], result);
+      best_scores_to_save[specialland] = result;
       saveStats();
       if(official_race) uploadScore();
       }

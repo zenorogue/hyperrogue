@@ -1081,11 +1081,13 @@ EX void saveStats(bool emergency IS(false)) {
 
   #if CAP_RACING
   if(racing::on) {
-    if(racing::official_race && !cheater) {
+    auto& bs = racing::best_scores_to_save;
+    if(racing::official_race && !cheater && bs.count(specialland)) {
       fprintf(f, "RACING %s %d %d date: %s\n", VER,
-        int(specialland), racing::best_scores[specialland],
+        int(specialland), bs[specialland],
         buf);
       fclose(f);
+      bs.erase(specialland);
       }
     return;
     }
@@ -1262,7 +1264,8 @@ EX void loadsave() {
     char buf1[80], ver[10];
     int land, score;
     sscanf(buf, "%70s%9s%d%d", buf1, ver, &land, &score);
-    racing::best_scores[eLand(land)] = score;
+    /* score may equal 0 because of earlier bugs */
+    if(score) racing::best_scores[eLand(land)] = score;
     println(hlog, "loaded the score for ", dnameof(eLand(land)), " of ", score);
     }
   #endif
