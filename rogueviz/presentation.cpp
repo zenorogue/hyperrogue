@@ -182,6 +182,7 @@ string latex_packages =
   "\\definecolor{remph}{rgb}{0,0.5,0}\n"
   "\\renewcommand{\\labelitemi}{{\\color{remph}$\\blacktriangleright$}}\n";
 
+/* note: you pdftopng from the xpdf package for this to work! */
 string gen_latex(presmode mode, string s, int res, flagtype flags) {
   unsigned hash = 0;
   for(char c: latex_packages + s) hash = (hash << 3) ^ hash ^ c ^ flags;
