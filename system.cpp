@@ -1265,7 +1265,10 @@ EX void loadsave() {
     int land, score;
     sscanf(buf, "%70s%9s%d%d", buf1, ver, &land, &score);
     /* score may equal 0 because of earlier bugs */
-    if(score) racing::best_scores[eLand(land)] = score;
+    if(score) {
+      auto& res = racing::best_scores[eLand(land)];
+      if(score < res || res == 0) res = score;
+      }
     println(hlog, "loaded the score for ", dnameof(eLand(land)), " of ", score);
     }
   #endif
