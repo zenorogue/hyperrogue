@@ -2210,7 +2210,7 @@ EX namespace reg3 {
 
     heptagon *origin;
     hrmap_quotient3 *quotient_map;
-    hrmap_quotient3 *qmap() { return quotient_map; }
+    hrmap_quotient3 *qmap() override { return quotient_map; }
 
     int connection(int fv, int d) override {
       return quotient_map->local_id[quotient_map->acells[fv]->move(d)].first;
