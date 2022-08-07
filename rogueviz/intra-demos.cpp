@@ -133,7 +133,7 @@ void create_intra_floors() {
   build_wall(cwt, 0xFF80FF, 0xFF00FF);
   become();
 
-  start();
+  intra::start();
 
   // rogueviz::rv_hook(hooks_handleKey, 150, intra_key);
   }
@@ -193,7 +193,7 @@ void create_intra_solv() {
     }
   become();
 
-  start();
+  intra::start();
   
   println(hlog, "Started");
 
