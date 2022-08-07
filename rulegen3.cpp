@@ -1495,7 +1495,7 @@ int readRuleArgs3() {
   using namespace arg;
   if(0) ;
   else if(argis("-gen-honeycomb")) {
-    shift(); genhoneycomb(args());
+    shift(); genhoneycomb(arg::args());
     }
 
   else if(argis("-urq")) {
@@ -1511,7 +1511,7 @@ int readRuleArgs3() {
   else if(argis("-subrule")) {    
     stop_game();
     shift(); reg3::other_rule = args();
-    shstream ins(decompress_string(read_file_as_string(args())));
+    shstream ins(decompress_string(read_file_as_string(arg::args())));
     ins.read(ins.vernum);
     mapstream::load_geometry(ins);
     reg3::subrule = true;
