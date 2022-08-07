@@ -268,7 +268,7 @@ int dhrgArgs() {
   return 0;
   }
 
-void gamedata(hr::gamedata* gd) {
+void store_gamedata(struct hr::gamedata* gd) {
   if(true) {
     for(auto& t: tally) gd->store(t);
     for(auto& t: edgetally) gd->store(t);
@@ -283,7 +283,7 @@ void gamedata(hr::gamedata* gd) {
 
 auto hook = 
     addHook(hooks_args, 50, dhrgArgs)
-  + addHook(hooks_gamedata, 230, gamedata)
+  + addHook(hooks_gamedata, 230, store_gamedata)
   + addHook(hooks_clearmemory, 200, clear);
 
 #if CAP_SDL
