@@ -83,7 +83,7 @@ EX string stereo_shader() {
     "float s = t.z;\n"
     "float l = length(t.xyz);\n"
     "t /= max(l, 1e-2);\n"
-    "t.z += " + glhr::to_glsl(panini_alpha) + ";\n"
+    "t.z += " + glhr::to_glsl(stereo_alpha) + ";\n"
     "t *= l;\n"
     "t.w = 1.;\n";
   }
