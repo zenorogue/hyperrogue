@@ -507,13 +507,15 @@ auto hooks =
 
     auto add = [&] (string s, string desc, string youtube, string twitter, reaction_t loader) {
       v.push_back(tour::slide{
-        s, 10, tour::LEGAL::NONE | tour::QUICKSKIP | tour::QUICKGEO, desc,
+        s, 10, tour::LEGAL::NONE | tour::QUICKSKIP | tour::QUICKGEO | tour::ALWAYS_TEXT, desc,
         [=] (tour::presmode mode) {
           setCanvas(mode, '0');
           if(youtube != "")
             slide_url(mode, 'y', "YouTube link", youtube);
           if(twitter != "")
             slide_url(mode, 't', "Twitter link", twitter);
+            
+          slide_url(mode, 'b', "Bridges paper link", "https://archive.bridgesmathart.org/2022/bridges2022-297.html");
           slide_action(mode, 'r', "run this visualization", loader);
           slidecommand = "portal options";
           if(mode == tour::pmKey) pushScreen(intra::show_portals);

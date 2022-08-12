@@ -286,9 +286,11 @@ slide dhrg_slides[] = {
         dialog::addTitle("Discrete Hyperbolic Random Graph Model", dialog::dialogcolor, 150);
         dialog::addBreak(1600);
         dialog::addTitle(" ", dialog::dialogcolor, 150);
+        dialog::addItem("paper on arXiv",  '5');
         dialog::display();
         return true;
         });
+      if(mode == pmKey) open_url("https://arxiv.org/abs/2109.11772");
       }
     },
   

@@ -367,10 +367,12 @@ slide sweeper_slides[] = {
         dialog::addTitle("Hyperbolic Minesweeper is in P", dialog::dialogcolor, 150);
         dialog::addBreak(1600);
         dialog::addTitle(" ", dialog::dialogcolor, 150);
+        dialog::addItem("paper on arXiv",  '5');
         dialog::display();
         return true;
         });
       no_other_hud(mode);
+      if(mode == pmKey) open_url("https://arxiv.org/abs/2002.09534");
       }
     },
 
