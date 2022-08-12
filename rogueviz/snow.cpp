@@ -43,12 +43,19 @@ bool snow_texture = true;
 /* draw single objects? */
 bool single_objects = true;
 
+/* use random colors? */
+bool random_colors = false;
+
+/* just one snowball per cell, in the center */
+bool just_centered = false;
+
 int snow_shape = 0;
 
 struct snowball {
   transmatrix T;
   int model_id;
   int object_id;
+  color_t color;
   };
 
 map<cell*, vector<snowball>> snowballs_at;
@@ -137,9 +144,12 @@ bool draw_snow(cell *c, const shiftmatrix& V) {
         cnt = snow_lambda;
         }
       }      
+    if(just_centered) cnt = 1;
 
     for(int t=0; t<cnt; t++) {
-      snowball b{random_snow_matrix(c), 0, -1};
+      snowball b{just_centered ? Id : random_snow_matrix(c), 0, -1, snow_color};
+      if(random_colors)
+        b.color = (hrand(0x1000000) << 8) | 0x808080FF;
       if(isize(models)) {
         b.model_id = hrand(isize(models));
         if(single_objects)
@@ -163,7 +173,7 @@ bool draw_snow(cell *c, const shiftmatrix& V) {
         }
       }
     else {
-      auto& p = queuepoly(V * T.T, shapeid(snow_shape), snow_color);
+      auto& p = queuepoly(V * T.T, shapeid(snow_shape), T.color);
       if(!snow_texture) p.tinf = nullptr;
       if(snow_intense) p.flags |= POLY_INTENSE;
       }
@@ -276,6 +286,11 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
   return 0;
   })
 #endif
+
++ addHook(hooks_configfile, 100, [] {
+    param_b(random_colors, "snow_random_colors");
+    param_b(just_centered, "snow_just_centered");
+    })
 
 + addHook_rvslides(161, [] (string s, vector<tour::slide>& v) {
   if(s != "noniso") return;
