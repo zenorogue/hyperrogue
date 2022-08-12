@@ -248,7 +248,6 @@ void sync(int mode, flagtype flags) {
     vid.use_smart_range = 2;
     crystal::view_coordinates = (flags & VC);
     smooth_scrolling = true;
-    tour::slide_backup(game_keys_scroll, true);
     }
   if(mode == pmKey && !(flags & NO_VC))
     crystal::view_coordinates = !crystal::view_coordinates;
@@ -405,7 +404,6 @@ auto explore_structure(int _shapeid) {
     if(mode == pmStart) {
       tour::slide_backup(mapeditor::drawplayer, false);
       tour::slide_backup(smooth_scrolling, true);
-      tour::slide_backup(game_keys_scroll, true);
       stop_game();
       set_geometry(geometry == gCrystal534 ? gCrystal534 : gCrystal344);
       enable_canvas();

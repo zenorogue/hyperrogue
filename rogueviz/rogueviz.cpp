@@ -666,7 +666,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
     }
   
   
-  if(showlabels) {
+  if(showlabels && !darken) {
     bool doshow = true;
     if((vizflags & RV_COMPRESS_LABELS) && i > 0 && !vd.virt) {
       vertexdata& vdp = vdata[vd.data];

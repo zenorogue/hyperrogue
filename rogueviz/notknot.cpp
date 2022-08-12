@@ -1434,7 +1434,7 @@ void portal_slideshow(tour::ss::slideshow_callback cb) {
     auto add = [&] (string s, string text, string youtube, reaction_t act) {
 
       portal_slides.emplace_back(
-        tour::slide{s, 100, LEGAL::NONE | QUICKGEO | QUICKSKIP, text,
+        tour::slide{s, 100, LEGAL::NONE | QUICKGEO | QUICKSKIP | ALWAYS_TEXT, text,
           [=] (presmode mode) {
             setCanvas(mode, '0');
             if(youtube != "")
@@ -1488,7 +1488,7 @@ void portal_slideshow(tour::ss::slideshow_callback cb) {
     add("self-hiding portal", "This knotted portal is 'self-hiding'. It appears that the portal enters itself and disappears!", "https://www.youtube.com/watch?v=vFLZ2NGtuGw", launch_euc_with(true));
     add("non-Euclidean portal in Nil", "A portal in Nil geometry.", "https://www.youtube.com/watch?v=2K-v8tK68AE", launch_nil);
     add("spherical portal", "A portal in spherical geometry. Such a portal lets us create a space with spherical geometry that has more volume than the sphere.", "https://www.youtube.com/watch?v=PerPeQFu5gw", launch_sphere);
-    add("kontted spherical portal", "A knotted portal in spherical geometry.", "https://www.youtube.com/watch?v=PerPeQFu5gw", launch_sphereknot);
+    add("knotted spherical portal", "A knotted portal in spherical geometry.", "https://www.youtube.com/watch?v=PerPeQFu5gw", launch_sphereknot);
     add("Cat Portal in Solv", "A portal in Solv geometry. The honeycomb is based on the mapping torus of Arnold's cat mapping.", "https://www.youtube.com/watch?v=CGiSxC9B6i0", launch_solv);
 
     callhooks(rogueviz::pres::hooks_build_rvtour, "portal", portal_slides);

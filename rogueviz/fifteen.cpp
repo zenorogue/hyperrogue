@@ -474,8 +474,10 @@ auto fifteen_hook =
                 slide_backup(mapeditor::drawplayer, mapeditor::drawplayer);
                 slide_backup(vid.wallmode, 2);
                 slide_backup(pconf.scale, .6);
+                slide_backup(no_find_player, true);
                 stop_game();
                 mapstream::loadMap(fname);
+                popScreenAll();
                 fullcenter();
                 if(lev == "coiled" || lev == "mobiusband")
                   View = spin(90*degree) * View;
