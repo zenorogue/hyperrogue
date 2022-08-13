@@ -4745,3 +4745,6 @@ Menu improvements:
 - made the RogueViz presentations which contain no HyperRogue PC easier to control (control the camera by using the keys which usually move the PC)
 - added some more demos to RogueViz
 
+2022-08-7 15:01 Update 12.0x:
+- yet another fix to racing
+- fixed a crash when deleting 3-sphere maps
