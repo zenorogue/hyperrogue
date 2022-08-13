@@ -287,7 +287,7 @@ int arg::readCommon() {
     View = Id;
     }
   else if(argis("-exit")) {
-    PHASE(3); printf("Success.\n");
+    PHASE(3); println(hlog, "Success.\n");
     exit(0);
     }
 
