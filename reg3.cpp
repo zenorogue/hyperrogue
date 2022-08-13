@@ -116,9 +116,12 @@ EX namespace reg3 {
 
   EX bool ultra_mirror_in() { return (cgflags & qULTRA) && ultra_mirror_on; }
   
+  EX bool cubes_reg3;
+
   EX bool in() {
     if(fake::in()) return FPIU(in());
-    return WDIM == 3 && !euclid && !bt::in() && !nonisotropic && !hybri && !kite::in();
+    if(geometry == gCubeTiling && (cubes_reg3 || !PURE)) return true;
+    return WDIM == 3 && /* !euclid && */ !bt::in() && !nonisotropic && !hybri && !kite::in();
     }
 
   EX void compute_ultra() {
@@ -266,6 +269,8 @@ EX namespace reg3 {
     
     /* precise ideal vertex */
     if(klein_scale > 1-1e-5 && klein_scale < 1+1e-5) klein_scale = 1;
+
+    if(euclid) klein_scale = sqrt(3)/2;
     
     /* actual vertex */
     hyperpoint v2 = C0 + klein_scale * h012;
@@ -1319,6 +1324,8 @@ EX namespace reg3 {
     else if(hyperbolic) {
       return new hrmap_field3(&fp);
       }
+    else if(geometry == gCubeTiling)
+      return new seifert_weber::hrmap_singlecell(0);
     #endif
     return nullptr;
     }

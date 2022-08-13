@@ -1308,6 +1308,8 @@ EX int celldistance(cell *c1, cell *c2) {
     /* TODO */
     }
 
+  if(euclid) return clueless_celldistance(c1, c2);
+
   return hyperbolic_celldistance(c1, c2);
   }
 

@@ -650,7 +650,7 @@ void action_change_variation() {
   else if(arcm::in()) arcm::next_variation();
   #endif
   #if MAXMDIM >= 4
-  else if(reg3::in()) reg3::configure_variation();
+  else if(reg3::in() || geometry == gCubeTiling) reg3::configure_variation();
   #endif
   else if(euc::in(2,4) || !CAP_GP) dialog::do_if_confirmed([] {
     set_variation(PURE ? eVariation::bitruncated : eVariation::pure);
@@ -1015,7 +1015,7 @@ EX void showEuclideanMenu() {
   else if(nil) {
     menuitem_nilwidth('v');
     }
-  else if((WDIM == 3 || kite::in() || arb::in()) && !reg3::in()) dialog::addBreak(100);
+  else if((WDIM == 3 || kite::in() || arb::in()) && !reg3::in() && geometry != gCubeTiling) dialog::addBreak(100);
   else 
     menuitem_change_variation('v');
 
