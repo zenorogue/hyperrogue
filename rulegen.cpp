@@ -1320,7 +1320,7 @@ EX int move_code(twalker cs) {
 
      if(WDIM == 3) {
        if(cs2.at->parent_dir == cs2.spin) return C_PARENT;
-       else return get_roadsign(cs);
+       else return get_roadsign(cs+wstep);
        }
 
      if(!(flags & w_no_relative_distance)) x = C_EQUAL;
