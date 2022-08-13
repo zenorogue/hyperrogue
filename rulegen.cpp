@@ -1076,9 +1076,16 @@ void extend_analyzer(twalker cwmain, int z, twalker giver) {
   vector<int> idlist;
 
   for(int i=0;; i++) {
-    if(i == isize(sub_states) || i == isize(giver_states))
+    if(i == isize(sub_states) || i == isize(giver_states)) {
       /* may happen if something changed but not updated */
+
+      cwmain.at->code = MYSTERY_LARGE;
+      giver.at->code = MYSTERY_LARGE;
+      (cwmain+z+wstep).at->code = MYSTERY_LARGE;
+      (giver+z+wstep).at->code = MYSTERY_LARGE;
+
       throw rulegen_retry("reached the end");
+      }
     if(giver_states[i] != sub_states[i]) {
       i--;
       while(i != 0) {
