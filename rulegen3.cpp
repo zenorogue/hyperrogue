@@ -1386,6 +1386,7 @@ vector<int> representative;
 
 void genhoneycomb(string fname) {
   if(WDIM != 3) throw hr_exception("genhoneycomb not in honeycomb");
+  if(!known()) throw hr_exception("rules not known");
 
   int qc = isize(t_origin);
 
