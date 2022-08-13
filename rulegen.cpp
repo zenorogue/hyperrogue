@@ -91,6 +91,7 @@ static const flagtype w_no_branch_skipping = Flag(24); /*< do not skip branches 
 static const flagtype w_skip_transducers = Flag(32); /*< skip the transducer test */
 static const flagtype w_skip_transducer_loops = Flag(33); /*< skip loops during the transducer test */
 static const flagtype w_skip_transducer_terminate = Flag(34); /*< skip termination during the transducer test */
+static const flagtype w_r3_all_errors = Flag(35); /*< consider all errors for R3 */
 #endif
 
 EX int honeycomb_value = 1; /* how far to build local for honeycombs */

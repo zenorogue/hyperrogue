@@ -319,6 +319,8 @@ void error_found(vstate& vs) {
     }
 
   println(hlog, "added to important ", isize(important)-q, " places, solid_errors = ", solid_errors, " distance warnings = ", distance_warnings);
+  if(flags & w_r3_all_errors) return;
+
   if(isize(important) == impcount) {
     handle_distance_errors();
     throw rulegen_failure("nothing important added");
@@ -334,6 +336,7 @@ void check(vstate& vs) {
     if(vs.need_cycle && vs.current_pos != 0) {
       println(hlog, "rpath: ", vs.rpath, " does not cycle correctly");
       error_found(vs);
+      return;
       }
     if(check_debug >= 2) println(hlog, "rpath: ", vs.rpath, " successful");
     return;
@@ -352,6 +355,7 @@ void check(vstate& vs) {
       vs.recursions.push_back({vs.current_pos, p});
       error_found(vs);
       vs.recursions.pop_back();
+      return;
       }
     dynamicval<int> d(vs.current_pos, c.adj[p.first]);
     vs.movestack.pop_back();
@@ -402,6 +406,8 @@ void check(vstate& vs) {
     if(v.back() != p.second + 1 && p.second != MYSTERY) {
       println(hlog, "error: side connection");
       error_found(vs);
+      vs.recursions.pop_back();
+      return;
       }
     int siz = isize(vs.movestack);
     vs.movestack.pop_back();
@@ -436,14 +442,17 @@ void check_det(vstate& vs) {
   if(c.adj[p.first] != -1) {
     vs.current_pos = c.adj[p.first];
     int dif = (rule == DIR_PARENT) ? -1 : 1;
-    if(p.second != dif && p.second != MYSTERY)
+    if(p.second != dif && p.second != MYSTERY) {
       error_found(vs);
+      return;
+      }
     vs.movestack.pop_back();
     goto back;
     }
 
   /* parent connection */
   else if(rule == DIR_PARENT) {
+    if((flags & w_r3_all_errors) && isize(important) > impcount) throw rulegen_retry("checking PARENT");
     throw rulegen_failure("checking PARENT");
     }
 
@@ -460,8 +469,10 @@ void check_det(vstate& vs) {
   /* side connection */
   else {
     auto& v = rev_roadsign_id[rule];
-    if(v.back() != p.second + 1 && p.second != MYSTERY)
+    if(v.back() != p.second + 1 && p.second != MYSTERY) {
       error_found(vs);
+      return;
+      }
     vs.movestack.pop_back();
     if(check_debug >= 3) println(hlog, "side connection: ", v);
     for(int i=v.size()-2; i>=0; i-=2) vs.movestack.emplace_back(v[i], i == 0 ? -1 : v[i+1] - v[i-1]);
@@ -747,6 +758,7 @@ void throw_identity_errors(const transducer& id, const vector<int>& cyc) {
       build_vstate(vs, path1, parent_dir, parent_id, i, [&] (int i) { return q[i].ts; });
       println(hlog, "suspicious path found at ", path1);
       check_det(vs);
+      if(flags & w_r3_all_errors) return;
       throw rulegen_failure("suspicious path worked");
       }
     for(auto p: sch.at->t) {
@@ -803,6 +815,7 @@ void throw_distance_errors(const transducer& id, int dir, int delta) {
       build_vstate(vs, path1, parent_dir, parent_id, i, [&] (int i) { return q[i].ts; });
       println(hlog, "suspicious distance path found at ", path1);
       check_det(vs);
+      if(flags & w_r3_all_errors) return;
       throw rulegen_failure("suspicious distance path worked");
       }
     for(auto p: sch.at->t) {
@@ -946,7 +959,7 @@ EX void find_multiple_interpretation() {
 
   for(int i=0; i<isize(q); i++) {
     searcher sch = q[i];
-    println(hlog, i, ": ", tie(sch.ts1, sch.ts2, sch.ts3, sch.fin1, sch.fin2, sch.fin3, sch.split), tie(parent_id[i], parent_dir1[i], parent_dir2[i], parent_dir3[i]));
+    // println(hlog, i, ": ", tie(sch.ts1, sch.ts2, sch.ts3, sch.fin1, sch.fin2, sch.fin3, sch.split), tie(parent_id[i], parent_dir1[i], parent_dir2[i], parent_dir3[i]));
 
     flagtype both = sch.q2->accepting_directions & sch.q3->accepting_directions;
     if(both && !(sch.fin1 && sch.fin2 && sch.fin3) && sch.split) {
@@ -988,7 +1001,7 @@ EX void find_multiple_interpretation() {
       make_path_important(s2, path1);
       make_path_important(s3, path1);
       if(isize(important) == impcount) throw rulegen_failure("nothing important added");
-      throw rulegen_retry("multiple interpretation");
+      if(!(flags & w_r3_all_errors)) throw rulegen_retry("multiple interpretation");
       }
 
     int dirs1 = isize(treestates[sch.ts1].rules);
@@ -1020,20 +1033,21 @@ EX void find_multiple_interpretation() {
       }
     }
 
-  println(hlog, "no multiple interpretation found");
-  fflush(stdout);
-  exit(0);
+  if((flags & w_r3_all_errors) && isize(important) > impcount) throw rulegen_retry("no multiple interpretation found after importants added");
+  throw rulegen_failure("no multiple interpretation found");
   }
 
 EX void test_transducers() {
   if(flags & w_skip_transducers) return;
   autom.clear();
   int iterations = 0;
+  int multiple_interpretations = 0;
   while(true) {
     next_iteration:
     check_timeout();
     iterations++;
     int changes = 0;
+    multiple_interpretations = 0;
 
     struct searcher {
       int ts;
@@ -1088,8 +1102,9 @@ EX void test_transducers() {
             if(at == -1) break;
             }
 
+          multiple_interpretations++;
           // print_transducer(autom);
-          find_multiple_interpretation();
+          if(!(flags & w_r3_all_errors)) find_multiple_interpretation();
           }
         if(qty == 0) {
           vstate vs;
@@ -1148,6 +1163,13 @@ EX void test_transducers() {
       goto next_iteration;
       }
 
+    if((flags & w_r3_all_errors) && isize(important) > impcount) throw rulegen_retry("errors found by transducers");
+
+    if((flags & w_r3_all_errors) && multiple_interpretations) {
+      println(hlog, "multiple interpretations reported: ", multiple_interpretations);
+      find_multiple_interpretation();
+      }
+
     println(hlog, "transducers found successfully after ", iterations, " iterations, ", isize(autom), " states checked, queue size = ", isize(q));
     
     vector<vector<transducer>> special(isize(t_origin));
@@ -1187,6 +1209,7 @@ EX void test_transducers() {
         if(id_size != isize(cum)) println(hlog, "error: identity not recovered correctly");
         }
       }
+    if((flags & w_r3_all_errors) && isize(important) > impcount) throw rulegen_retry("loop errors found by transducers");
 
     if(!(flags & w_skip_transducer_terminate)) {
       println(hlog, "Verifying distances");
@@ -1225,6 +1248,7 @@ EX void test_transducers() {
           }
         }
       }
+    if((flags & w_r3_all_errors) && isize(important) > impcount) throw rulegen_retry("rule distance errors found by transducers");
     break;
     }
   }
@@ -1273,6 +1297,8 @@ EX void check_upto(int lev, int t) {
         check(vs);
         }
       }
+
+    if((flags & w_r3_all_errors) && isize(important) > impcount) throw rulegen_retry("errors found");
     }
   }
 
