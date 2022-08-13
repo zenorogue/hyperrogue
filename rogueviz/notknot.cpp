@@ -1137,6 +1137,7 @@ auto h = addHook(hooks_newmap, 0, [] {
 void create_notknot() {
   if(true) {
     dynamicval<eGeometry> b(geometry, base);
+    dynamicval<eVariation> bv(variation, eVariation::pure);
     check_cgi();
     cgi.require_basics();
     cgi.require_shapes();
