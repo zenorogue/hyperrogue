@@ -1031,6 +1031,7 @@ EX namespace mapstream {
       walking::colors_of_floors.clear();
       for(auto c: v) walking::colors_of_floors.insert(c);
       }
+    else walking::colors_of_floors.clear();
 
     load_drawing_tool(f);
 
