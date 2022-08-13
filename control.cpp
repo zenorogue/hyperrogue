@@ -117,7 +117,7 @@ EX movedir vectodir(hyperpoint P) {
   }
 
 EX void remission() {
-  if(!canmove && (cmode & sm::NORMAL)) showMissionScreen();
+  if(!canmove && (cmode & sm::NORMAL) && !game_keys_scroll) showMissionScreen();
  }
 
 EX hyperpoint move_destination_vec(int d) {
