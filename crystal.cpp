@@ -813,7 +813,7 @@ EX bool crystal_cell(cell *c, shiftmatrix V) {
     queuestr(V, 0.3, its(d), 0xFFFFFF, 1);
     }
 
-  if(view_coordinates && WDIM == 2 && cheater) {
+  if(view_coordinates && WDIM == 2 && (cheater || tour::on)) {
     
     auto m = crystal_map();
     
