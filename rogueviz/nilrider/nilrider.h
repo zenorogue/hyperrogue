@@ -220,4 +220,8 @@ extern bool planning_mode;
 inline int reduce_quality = 0;
 
 void save();
+
+extern bool on;
+extern void restart();
+extern bool stepped_display;
 }

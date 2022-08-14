@@ -432,6 +432,10 @@ void pop_and_push_replays() {
 
 reaction_t on_quit = [] { exit(0); }; 
 
+void restart() {
+  clear_path(curlev);
+  }
+
 void main_menu() {
   clearMessages();
   poly_outline = 0xFF;
