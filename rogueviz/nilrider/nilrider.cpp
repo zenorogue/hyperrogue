@@ -362,6 +362,12 @@ void settings() {
   dialog::add_action_push(nil_projection);
   dialog::addItem("configure keys", 'k');
   dialog::add_action_push(multi::get_key_configurer(1, move_names, "Nilrider keys"));
+
+  #if CAP_AUDIO
+  add_edit(effvolume);
+  add_edit(musicvolume);
+  #endif
+
   #if CAP_VR
   vrhr::enable_button();
   vrhr::reference_button();
