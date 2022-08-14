@@ -1159,7 +1159,7 @@ EX void test_transducers() {
       }
     
     if(changes) {
-      println(hlog, "changes = ", changes);
+      println(hlog, "changes = ", changes, " with ", isize(autom), " states");
       goto next_iteration;
       }
 
