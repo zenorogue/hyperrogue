@@ -1724,7 +1724,7 @@ EX namespace reg3 {
       transmatrix T = p1.second;
 
       for(int a=0; a<10; a++) {
-        T = T * xpush(10);
+        T = T * xpush(euclid ? 1000 : 10);
         #if CAP_BT
         if(hyperbolic) {
           dynamicval<eGeometry> g(geometry, gBinary3);
