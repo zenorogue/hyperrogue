@@ -84,7 +84,7 @@ EX map<eLand, int> best_scores_to_save;
 
 string ghost_prefix = "default";
 
-#if CAP_FILES
+#if CAP_FILES && CAP_EDIT
 void hread(hstream& hs, ghostmoment& m) {
   int id;
   hread(hs, m.step, id, m.alpha, m.distance, m.beta, m.footphase);
@@ -913,7 +913,9 @@ EX void load_official_track() {
     }
   string s = decompress_string(tracks[l]);
   shstream sf(s);
+  #if CAP_EDIT
   mapstream::loadMap(sf);
+  #endif
   cheater = autocheat = 0;
   official_race = true;
   }
@@ -1289,7 +1291,9 @@ EX void race_won() {
         best_scores[specialland] = result;
       best_scores[specialland] = min(best_scores[specialland], result);
       best_scores_to_save[specialland] = result;
+      #if CAP_SAVE
       saveStats();
+      #endif
       if(official_race) uploadScore();
       }
     }

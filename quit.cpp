@@ -500,6 +500,7 @@ EX void showGameMenu() {
       clearMessages();
       get_o_key().second();
       });
+    #if CAP_INV
     if(inv::on && items[itInventory]) {
       dialog::addItem(XLAT("inventory"), 'i');
       dialog::add_action([] {
@@ -507,6 +508,7 @@ EX void showGameMenu() {
         pushScreen(inv::show);
         });
       }
+    #endif
     if(casual || ISMOBILE) {
       if(casual && savecount)
         dialog::addItem(XLAT("load (%1 turns passed)", its(turncount - save_turns)), SDLK_F9);

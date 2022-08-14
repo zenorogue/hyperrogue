@@ -1461,5 +1461,9 @@ EX namespace dice {
   EX bool swap_forbidden(cell *a, cell *b) { return false; }
   EX void chaos_swap(cellwalker wa, cellwalker wb) {}
 EX }
+
+EX namespace mine {
+  EX bool in_minesweeper() { return false; }
+EX }
 #endif
 }
