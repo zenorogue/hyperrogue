@@ -1061,15 +1061,19 @@ EX aid_t get_aid(twalker cw) {
   return {ide, gmod(cw.to_spin(0), cycle_size(ide))};
   }
 
+vector<int> gen_rule(twalker cwmain, int id);
+
 void extend_analyzer(twalker cwmain, int z, twalker giver) {
   ufind(giver);
   ufind(cwmain);
 
   vector<twalker> giver_sprawl, main_sprawl, sub_sprawl;
   vector<analyzer_state*> giver_states, main_states, sub_states;
-
+  
   id_at_spin(cwmain, main_sprawl, main_states);
+
   id_at_spin((cwmain+z)+wstep, sub_sprawl, sub_states);
+
   id_at_spin((giver+z)+wstep, giver_sprawl, giver_states);
 
   int currently_at = 1+z;
