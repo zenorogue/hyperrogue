@@ -13,13 +13,19 @@ void playSound(cell *c, const string& fname, int vol = 100);
 void resetmusic();
 #endif
 
+#if HDR
+/** RogueViz may be used for situations where music does not correspond to lands, so we allow extra IDs */
+static constexpr int MUSIC_MAX = 500;
+#endif
+
 EX const char *musicfile = "";
 EX bool audio;
 EX string musiclicense;
-EX string musfname[landtypes];
+EX string musfname[MUSIC_MAX];
 EX int musicvolume = 60;
 EX int effvolume = 60;
 EX bool music_available;
+EX int musiclength[MUSIC_MAX];
 
 EX eLand getCurrentLandForMusic() {
   eLand id = ((anims::center_music()) && centerover) ? centerover->land : cwt.at->land;
@@ -82,10 +88,10 @@ EX void playSeenSound(cell *c) {
 
 #if CAP_SDLAUDIO
 
-bool loaded[landtypes];
-Mix_Music* music[landtypes];
-EX int musicpos[landtypes];
-int musstart;
+bool loaded[MUSIC_MAX];
+Mix_Music* music[MUSIC_MAX];
+EX int musicpos[MUSIC_MAX];
+EX int musstart;
 int musfadeval = 2000;
 
 eLand cid = laNone;
@@ -162,9 +168,11 @@ EX bool loadMusicInfo(string dir) {
       for(int i=0; buf[i]; i++) if(buf[i] == 10 || buf[i] == 13) buf[i] = 0;
       if(buf[0] == '[' && buf[3] == ']') {
         int id = (buf[1] - '0') * 10 + buf[2] - '0';
-        if(id >= 0 && id < landtypes) {
-          if(buf[5] == '*' && buf[6] == '/') musfname[id] = dir2 + (buf+7);
+        if(id >= 0 && id < MUSIC_MAX) {
+          if(buf[5] == 'L' && buf[6] == '=') musiclength[id] = atoi(buf+7);
+          else if(buf[5] == '*' && buf[6] == '/') musfname[id] = dir2 + (buf+7);
           else musfname[id] = buf+5;
+          println(hlog, "set up for id=", id);
           music_available = true;
           }
         else {
