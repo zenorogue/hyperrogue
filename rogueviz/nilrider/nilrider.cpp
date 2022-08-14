@@ -67,8 +67,17 @@ bool crash_sound = true;
 bool running;
 bool backing;
 
+/* land for music */
+
+eLand music_nilrider = eLand(400);
+eLand music_nilrider_back = eLand(401);
+eLand music_nilrider_paused = eLand(402);
+eLand music_nilrider_planning = eLand(403);
+eLand music_nilrider_nonrunning = eLand(404);
+
 void sync_music(eLand l) {
-  musicpos[laCanvas] = curlev->current.timer * 1000;
+  musicpos[music_nilrider] = zgmod(curlev->current.timer * 1000, musiclength[music_nilrider]);
+  musicpos[music_nilrider_back] = zgmod(-curlev->current.timer * 1000, musiclength[music_nilrider_back]);
   }
 
 bool turn(int delta) {
@@ -534,14 +543,14 @@ void nilrider_keys() {
 
 bool nilrider_music(eLand& l) {
   if(planning_mode && !view_replay)
-    l = eLand(1);
+    l = music_nilrider_planning;
   else if(paused)
-    l = eLand(2);
+    l = music_nilrider_paused;
   else if(!running)
-    l = eLand(3);
+    l = music_nilrider_nonrunning;
   else if(backing)
-    l = eLand(4);
-  else l = laCanvas;
+    l = music_nilrider_back;
+  else l = music_nilrider;
   return false;
   }
 
@@ -561,6 +570,9 @@ void initialize() {
 
   param_enum(stepped_display, "stepped_display", "stepped_display", false)
     -> editable({{"smooth", "ride on a smooth surface"}, {"blocky", "makes slopes more visible -- actual physics are not affected"}}, "game mode", 's');
+
+  param_i(nilrider_tempo, "nilrider_tempo");
+  param_i(nilrider_shift, "nilrider_shift");
 
   rv_hook(hooks_frame, 100, frame);
   rv_hook(shmup::hooks_turn, 100, turn);

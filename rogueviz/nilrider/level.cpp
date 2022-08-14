@@ -472,6 +472,9 @@ ld level::safe_alt(hyperpoint h, ld mul, ld mulx) {
 
 bool stepped_display;
 
+int nilrider_tempo = 562;
+int nilrider_shift = 2633;
+
 void level::draw_level(const shiftmatrix& V) {
   int id = 0;
   init_statues();
@@ -483,7 +486,11 @@ void level::draw_level(const shiftmatrix& V) {
     id++;
     if(!gotit) {
       for(int i=0; i<6; i++) {
-        auto &poly = queuepoly(V * rgpushxto0(t.where) * cpush(2, abs(0.2 * sin(current.timer * 5))), shMini[i], t.colors[i]);
+        ld tim = current.timer * 1000;
+        tim -= nilrider_shift;
+        tim /= nilrider_tempo;
+        tim = abs(0.2 * sin(tim * M_PI));
+        auto &poly = queuepoly(V * rgpushxto0(t.where) * cpush(2, tim), shMini[i], t.colors[i]);
         poly.tinf = &floor_texture_vertices[cgi.shFloor.id];
         ensure_vertex_number(*poly.tinf, poly.cnt);
         }
