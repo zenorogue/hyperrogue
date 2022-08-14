@@ -546,8 +546,271 @@ level obstacle(
 
 level *curlev = &rotplane;
 
+struct complex_surface {
+  hyperpoint cur;
+  map<pair<int, int>, surface_fun> blocks;
+
+  static transmatrix flatpush(hyperpoint h) { return rgpushxto0(point31(h[0], h[1], rot_plane(h))); }
+  static transmatrix hpush(hyperpoint h) { h[1] = 0; h[2] = 0; return flatpush(h); }
+  static transmatrix vpush(hyperpoint h) { h[0] = 0; h[2] = 0; return flatpush(h); }
+
+  static hyperpoint spin_around(hyperpoint h, hyperpoint start, hyperpoint ctr, ld dir) {
+    auto h1 = h - ctr;
+
+    auto d = hypot_d(2, h1);
+    ld r = 2;
+    h1 = h1 * (r / d);
+    ld phi = atan2(h1[1], h1[0]) + 90*degree;
+    ld phis = atan2((start-ctr)[1], (start-ctr)[0]) + 90 * degree;
+    if(phi < phis-M_PI) phi += 2 * M_PI;
+    if(phi > phis+M_PI) phi -= 2 * M_PI;
+    h1 += ctr;
+    auto z = [&] (ld a) { return point31(r*sin(a), -r*cos(a), (r * r / 2) * (a-sin(a)*cos(a))); };
+
+    if(0) {
+      // not smooth enough ....
+      transmatrix q = gpushxto0(z(phis)) * rgpushxto0(z(phi));
+      hyperpoint arc = rgpushxto0(start) * q * flatpush(h-h1) * C0;
+      return arc;
+      }
+
+    hyperpoint h2 = h; if(start[0] == ctr[0]) h2[1] = start[1]; else h2[0] = start[0];
+    hyperpoint pre = rgpushxto0(start) * flatpush(h2-start) * flatpush(h-h2) * C0;
+
+    hyperpoint last = rgpushxto0(start) * gpushxto0(z(phis)) * rgpushxto0(z(phis + dir * 90*degree)) * C0;
+    hyperpoint h3 = h; if(start[0] != ctr[0]) h3[1] = last[1]; else h3[0] = last[0];
+    hyperpoint post = rgpushxto0(last) * flatpush(h3-last) * flatpush(h-h3) * C0;
+
+    ld p = (1+sin((phi-phis)*2 - 90*degree)) / 2.;
+
+    pre[2] = pre[2] + (post[2] - pre[2]) * p;
+
+    // println(hlog, "START = ", start, " LAST = ", last, " h = ", h, " h2 = ", h2, " h3 = ", h3, " p = ", p, " pre = ", pre);
+    // exit(1);
+
+    return pre;
+    // flatpush(h1 - start) * flatpush(h - h1) * C0;
+    }
+
+  static hyperpoint rel(int x, int y) { return point30(x, y, 0); };
+
+  surface_fun& at(hyperpoint h) {
+    int ax = int(floor(h[0] / 4));
+    int ay = int(floor(h[1] / 4));
+    return blocks[{ax, ay}];
+    };
+
+  void right_block() {
+    auto c = cur;
+    println(hlog, "RIGHT at ", c);
+    auto f = [c] (hyperpoint h) { return rgpushxto0(c) * hpush(h-c) * vpush(h-c) * C0; };
+    at(c+rel(2, 0)) = [f] (hyperpoint h) { return f(h)[2]; };
+    cur = f(c+rel(4, 0));
+    }
+
+  void left_block() {
+    auto c = cur;
+    println(hlog, "LEFT at ", c);
+    auto f = [c] (hyperpoint h) { return rgpushxto0(c) * hpush(h-c) * vpush(h-c) * C0; };
+    at(c+rel(-2, 0)) = [f] (hyperpoint h) { return f(h)[2]; };
+    cur = f(c+rel(-4, 0));
+    }
+
+  void up_block() {
+    auto c = cur;
+    println(hlog, "UP at ", c);
+    auto f = [c] (hyperpoint h) { return rgpushxto0(c) * vpush(h-c) * hpush(h-c) * C0; };
+    at(c+rel(0, 2)) = [f] (hyperpoint h) { return f(h)[2]; };
+    cur = f(c+rel(0, 4));
+    }
+
+  void down_block() {
+    auto c = cur;
+    println(hlog, "DOWN at ", c);
+    auto f = [c] (hyperpoint h) { return rgpushxto0(c) * vpush(h-c) * hpush(h-c) * C0; };
+    at(c+rel(0, -2)) = [f] (hyperpoint h) { return f(h)[2]; };
+    cur = f(c+rel(0, -4));
+    }
+
+  /* counterclockwise */
+  void turn_up_block() {
+    auto c = cur;
+    println(hlog, "TURN UP at ", c);
+    auto f = [c] (hyperpoint h) { return (spin_around(h, c, c+rel(0, 2), 1)); };
+    at(c+rel(2, 0)) = [f] (hyperpoint h) { return f(h)[2]; };
+    cur = f(c+rel(2, 2));
+    };
+  void turn_left_block() {
+    auto c = cur;
+    auto f = [c] (hyperpoint h) { return (spin_around(h, c, c+rel(-2, 0), 1)); };
+    at(c+rel(0, 2)) = [f] (hyperpoint h) { return f(h)[2]; };
+    cur = f(c+rel(-2, 2));
+    };
+  void turn_down_block () {
+    auto c = cur;
+    auto f = [c] (hyperpoint h) { return (spin_around(h, c, c+rel(0, -2), 1)); };
+    at(c+rel(-2, 0)) = [f] (hyperpoint h) { return f(h)[2]; };
+    cur = f(c+rel(-2, -2));
+    };
+  void turn_right_block() {
+    auto c = cur;
+    auto f = [c] (hyperpoint h) { return (spin_around(h, c, c+rel(2, 0), 1)); };
+    at(c+rel(0, -2)) = [f] (hyperpoint h) { return f(h)[2]; };
+    cur = f(c+rel(2, -2));
+    };
+
+  /* clockwise */
+  void turn_up_block2() {
+    auto c = cur;
+    println(hlog, "TURN UP at ", c);
+    auto f = [c] (hyperpoint h) { return (spin_around(h, c, c+rel(0, 2), -1)); };
+    at(c+rel(-2, 0)) = [f] (hyperpoint h) { return f(h)[2]; };
+    cur = f(c+rel(-2, 2));
+    };
+  void turn_left_block2() {
+    auto c = cur;
+    auto f = [c] (hyperpoint h) { return (spin_around(h, c, c+rel(-2, 0), -1)); };
+    at(c+rel(0, -2)) = [f] (hyperpoint h) { return f(h)[2]; };
+    cur = f(c+rel(-2, -2));
+    };
+  void turn_down_block2() {
+    auto c = cur;
+    auto f = [c] (hyperpoint h) { return (spin_around(h, c, c+rel(0, -2), -1)); };
+    at(c+rel(2, 0)) = [f] (hyperpoint h) { return f(h)[2]; };
+    cur = f(c+rel(2, -2));
+    };
+  void turn_right_block2() {
+    auto c = cur;
+    auto f = [c] (hyperpoint h) { return (spin_around(h, c, c+rel(2, 0), -1)); };
+    at(c+rel(0, 2)) = [f] (hyperpoint h) { return f(h)[2]; };
+    cur = f(c+rel(2, 2));
+    };
+
+  ld get(hyperpoint h) {
+    int ax = int(floor(h[0] / 4));
+    int ay = int(floor(h[1] / 4));
+    if(blocks.count({ax, ay})) return blocks[{ax, ay}] (h);
+    return 0;
+    }
+
+  complex_surface(hyperpoint h) : cur(h) {}
+  };
+
+complex_surface *spiral, *hilbert;
+
+ld spiral_level(hyperpoint h) {
+  if(!spiral) {
+    spiral = new complex_surface(point31(-4, 2, 0));
+    spiral->right_block();
+    spiral->right_block();
+    spiral->right_block();
+    spiral->right_block();
+    spiral->turn_up_block();
+    spiral->up_block();
+    spiral->up_block();
+    spiral->turn_left_block();
+    spiral->left_block();
+    spiral->left_block();
+    spiral->turn_down_block();
+    spiral->down_block();
+    spiral->turn_right_block();
+    spiral->right_block();
+    spiral->turn_up_block();
+    spiral->turn_left_block();
+    spiral->left_block();
+    }
+  return spiral->get(h);
+  }
+
+ld hilbert_level(hyperpoint h) {
+  if(!hilbert) {
+    hilbert = new complex_surface(point31(2, 0, 0));
+    hilbert->up_block();
+    hilbert->turn_right_block2();
+    hilbert->turn_down_block2();
+    hilbert->turn_right_block();
+    hilbert->right_block();
+    hilbert->turn_up_block();
+    hilbert->turn_left_block();
+    hilbert->turn_up_block2();
+    hilbert->turn_right_block2();
+    hilbert->turn_up_block();
+    hilbert->turn_left_block();
+    hilbert->left_block();
+    hilbert->turn_down_block();
+    hilbert->turn_left_block2();
+    hilbert->turn_up_block2();
+    hilbert->up_block();
+    }
+  return hilbert->get(h);
+  }
+
+level spirallev(
+  "Square Spiral", 's', 0,
+  "The projection of this track is shaped like a square spiral.",
+  0.5*dft_block, 16.5*dft_block, 16.5*dft_block, 0.5*dft_block,
+
+  {
+  "!!!!!!!!!!!!!!!!",
+  "rgggggggggggggr!",
+  "g+-----------+g!",
+  "g|gGgggggggGg|g!",
+  "g|G!!!!!!!!!G|g!",
+  "g|g!rgggggr!g|g!",
+  "g|g!g*---+g!g|g!",
+  "g|g!rgggg|g!g|g!",
+  "g|G!!!!!x|g!g|g!",
+  "g|gGgggGg|g!g|g!",
+  "g+-------+g!g|g!",
+  "rgggggggggr!g|g!",
+  "!!!!!!!!!!!!G|g!",
+  "fffggggggggGg|g!",
+  "-------------+g!",
+  "ggggggggggggggr!"
+  },
+
+  1, 15.4, spiral_level,
+  {
+    // the solver result is 55.239
+    goal{0xFFD500, "Collect the triangle in below 60 seconds", basic_check(60, 999)},
+    goal{0xFF4040, "Collect the triangle in below 70 seconds", basic_check(70, 999)},
+  }
+  );
+
+level hilbertlev(
+  "Hilbert's Curve", 's', 0,
+  "The projection of this track is shaped like the Hilbert curve.",
+  0.5*dft_block, 16.5*dft_block, 16.5*dft_block, 0.5*dft_block,
+
+  {
+  "!!!!!!!!!!!!!!!!",
+  "ggg!rgggGGGgggr!",
+  "g*g!gf-------fg!",
+  "g|g!g|ggGGGgg|g!",
+  "g|g!g|g!!!!!g|g!",
+  "g|gxg|g!rgggg|g!",
+  "gf---fg!gf---fg!",
+  "rgggggr!g|ggggr!",
+  "!!!!!!!!g|o!!!!!",
+  "rgggggr!g|ggggr!",
+  "gf---fg!gf---fg!",
+  "g|ggg|g!rgggg|g!",
+  "g|g!x|g!!!!!g|g!",
+  "g|g!g|ggGGGgg|g!",
+  "g|g!gf-------fg!",
+  "g|g!rgggGGGgggr!"
+  },
+
+  2.4, 15.4, hilbert_level,
+  {
+    // the solver result is 50.94
+    goal{0xFFD500, "Collect the triangle in below 55 seconds", basic_check(55, 999)},
+    goal{0xFF4040, "Collect the triangle in below 60 seconds", basic_check(60, 999)},
+  }
+  );
+
 vector<level*> all_levels = {
-  &rotplane, &longtrack, &geodesical, &geodesical4, &heisenberg0, &rotwell, &labyrinth, &obstacle
+  &rotplane, &longtrack, &geodesical, &geodesical4, &heisenberg0, &rotwell, &labyrinth, &obstacle, &spirallev, &hilbertlev
   };
   
 }
