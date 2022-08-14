@@ -534,7 +534,11 @@ void nilrider_keys() {
   change_default_key('a', 16 + 1);
   change_default_key('w', 16 + 2);
   change_default_key('d', 16 + 3);
+  #if CAP_SDL2
+  change_default_key(SDL_SCANCODE_LCTRL, 16 + 4);
+  #else
   change_default_key(SDLK_LCTRL, 16 + 4);
+  #endif
   change_default_key('p', 16 + 5);
   change_default_key('b', 16 + 6);
   change_default_key('r', 16 + 7);
