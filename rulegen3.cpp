@@ -513,7 +513,19 @@ struct transducer_transitions {
 inline void print(hstream& hs, transducer_transitions* h) { print(hs, "T", index_pointer(h)); }
 inline void print(hstream& hs, const transducer_state& s) { print(hs, "S", tie(s.tstate1, s.tstate2, s.relation)); }
 
-using transducer = map<transducer_state, transducer_transitions>;
+template<class T> size_t hsh(T t) { return std::hash<T>()(t); }
+
+struct tshash {
+  size_t operator() (const transducer_state& s) const {
+    size_t res = hsh(s.tstate1) ^ (hsh(s.tstate2) << 16);
+    res ^= size_t(s.relation) + 0x9e3779b9 + (res << 6) + (res >> 2);
+    return res;
+    }
+  };
+
+using tpair = pair<const transducer_state, transducer_transitions>;
+
+using transducer = std::unordered_map<transducer_state, transducer_transitions, tshash>;
 
 transducer autom;
 int comp_step;
@@ -546,7 +558,15 @@ tcell* get_move(tcell *c, int dir) {
   return c->cmove(dir);
   }
 
+struct tuplehash {
+  size_t operator() (const tuple<tcell*, int, int>& tu) const { return hsh(get<0>(tu)) + (hsh(get<1>(tu)) << 8) + (hsh(get<2>(tu)) << 16); }
+  };
+
+std::unordered_map<tuple<tcell*, int, int>, tcell*, tuplehash> rmmemo;
+
 tcell *rev_move2(tcell *t, int dir1, int dir2) {
+  auto& memo = rmmemo[{t, dir1, dir2}];
+  if(memo) return memo;
   if(dir1 != ENDED) t = rev_move(t, dir1);
   if(dir2 != ENDED) {
     t = t->cmove(dir2);
@@ -555,7 +575,7 @@ tcell *rev_move2(tcell *t, int dir1, int dir2) {
     }
   twalker tw = t; get_parent_dir(tw);
   if(t->dist && t->parent_dir == MYSTERY) throw rulegen_failure("no parent_dir assigned after rev_move2!");
-  return t;
+  return memo = t;
   }
 
 vector<int> desc(tcell *t) {
@@ -664,10 +684,20 @@ void compose_with(const transducer& tr, const transducer& dir, transducer& resul
     transducer_transitions *ires;
     const transducer_transitions *t1;
     const transducer_transitions *t2;
-    bool operator < (const searcher& s2) const { return tie(ts1, ts2, ts3, tat, fin1, fin2, fin3, ires, t1, t2) < tie(s2.ts1, s2.ts2, s2.ts3, s2.tat, s2.fin1, s2.fin2, s2.fin3, s2.ires, s2.t1, s2.t2); };
+    bool operator == (const searcher& s2) const { return tie(fin1, fin2, fin3, ires, t1, t2) == tie(s2.fin1, s2.fin2, s2.fin3, s2.ires, s2.t1, s2.t2); };
     };
 
-  set<searcher> in_queue;
+  struct searchhash {
+    size_t operator() (const searcher& s) const {
+      size_t res = size_t(s.fin1+2*s.fin2+4*s.fin3);
+      res ^= size_t(s.ires) + 0x9e3779b9 + (res << 6) + (res >> 2);
+      res ^= size_t(s.t1) + 0x9e3779b9 + (res << 6) + (res >> 2);
+      res ^= size_t(s.t2) + 0x9e3779b9 + (res << 6) + (res >> 2);
+      return res;
+      }
+    };
+
+  std::unordered_set<searcher, searchhash> in_queue;
   vector<searcher> q;
   auto enqueue = [&] (const searcher& s) {
     if(in_queue.count(s)) return;
@@ -684,54 +714,68 @@ void compose_with(const transducer& tr, const transducer& dir, transducer& resul
     searcher sch = searcher{ ts.tstate1, ts.tstate1, ts.tstate1, false, false, false, t.at, &(result[ts]), &(tr.at(ts)), &(dir.at(ts)) };
     enqueue(sch);
     }
+  
+  int tdc = 0, tdc2 = 0;
 
   for(int i=0; i<isize(q); i++) {
     auto sch = q[i];
     if(sch.t1->accepting_directions && sch.t2->accepting_directions)
       sch.ires->accepting_directions = 1;
 
-    int dirs1 = isize(treestates[sch.ts1].rules);
-    int dirs2 = isize(treestates[sch.ts2].rules);
-    int dirs3 = isize(treestates[sch.ts3].rules);
     searcher next;
-    for(int d1=ENDED; d1<dirs1; d1++) {
-      if(d1 != ENDED && sch.fin1) break;
-      auto r1 = get_abs_rule1(sch.ts1, d1);
-      if(r1 < 0) continue;
-      for(int d2=ENDED; d2<dirs2; d2++) {
-        if(d2 != ENDED && sch.fin2) break;
-        auto r2 = get_abs_rule1(sch.ts2, d2);
-        if(r2 < 0) continue;
-        next.t1 = sch.t1;
-        if(d1 != ENDED || d2 != ENDED) {
-          if(!sch.t1->t.count({d1, d2})) continue;
-          next.t1 = sch.t1->t.at({d1, d2});
-          }
-        for(int d3=ENDED; d3<dirs3; d3++) {
-          if(d3 != ENDED && sch.fin3) break;
-          auto r3 = get_abs_rule1(sch.ts3, d3);
-          if(r3 < 0) continue;
-          next.t2 = sch.t2;
-          if(d2 != ENDED || d3 != ENDED) {
-            if(!sch.t2->t.count({d2, d3})) continue;
-            next.t2 = sch.t2->t.at({d2, d3});
-            }
+    
+    auto try_d3 = [&] (int d1, int d2, int r1, int r2) {
+      tdc++;
 
-          next.ts1 = r1; next.fin1 = d1 == ENDED;
-          next.ts2 = r2; next.fin2 = d2 == ENDED;
-          next.ts3 = r3; next.fin3 = d3 == ENDED;
-          next.tat = rev_move2(sch.tat, d1, d3);
-          auto nstate_key = transducer_state { next.ts1, next.ts3, next.tat };
+      auto try_done = [&] (int d3, int r3) {
+        tdc2++;
+        next.ts1 = r1; next.fin1 = d1 == ENDED;
+        next.ts2 = r2; next.fin2 = d2 == ENDED;
+        next.ts3 = r3; next.fin3 = d3 == ENDED;
+        next.tat = rev_move2(sch.tat, d1, d3);
+        auto nstate_key = transducer_state { next.ts1, next.ts3, next.tat };
 
-          next.ires = sch.ires;
-          if(d1 != ENDED || d3 != ENDED)
-            next.ires = sch.ires->t[{d1, d3}] = &(result[nstate_key]);
+        next.ires = sch.ires;
+        if(d1 != ENDED || d3 != ENDED)
+          next.ires = sch.ires->t[{d1, d3}] = &(result[nstate_key]);
 
-          enqueue(next);
-          }
+        enqueue(next);
+        };
+      
+      if(d2 == ENDED) {
+        next.t2 = sch.t2;
+        try_done(ENDED, sch.ts3);
         }
+      
+      auto p = sch.t2->t.lower_bound({d2, -999});
+      while(p != sch.t2->t.end() && p->first.first == d2) {
+        int d3 = p->first.second;
+        if(sch.fin3 && d3 != ENDED) break; // we can break right away
+        auto r3 = get_abs_rule1(sch.ts3, d3);
+        next.t2 = p->second;
+        try_done(d3, r3);
+        p++;
+        }
+      };
+    
+    next.t1 = sch.t1;
+    try_d3(ENDED, ENDED, sch.ts1, sch.ts2);
+
+    for(auto& p12: sch.t1->t) {
+      int d1 = p12.first.first;
+      int d2 = p12.first.second;
+      if(sch.fin1 && d1 != ENDED) break; /* we can break right away -- no more to find */
+      if(sch.fin2 && d2 != ENDED) continue; /* ... but here we cannot */
+      auto r1 = get_abs_rule1(sch.ts1, d1);
+      auto r2 = get_abs_rule1(sch.ts2, d2);
+
+      next.t1 = p12.second;
+
+      try_d3(d1, d2, r1, r2);
       }
     }
+
+  println(hlog, "composition queue = ", isize(q), " tdc = ", tie(tdc, tdc2));
   }
 
 void throw_identity_errors(const transducer& id, const vector<int>& cyc) {
@@ -1052,11 +1096,14 @@ EX void find_multiple_interpretation() {
   throw rulegen_failure("no multiple interpretation found");
   }
 
+EX int max_err_iter = 4;
+
 EX void test_transducers() {
   if(flags & w_skip_transducers) return;
   autom.clear();
   int iterations = 0;
   int multiple_interpretations = 0;
+  int err_iter = 0;
   while(true) {
     next_iteration:
     check_timeout();
@@ -1067,10 +1114,20 @@ EX void test_transducers() {
     struct searcher {
       int ts;
       vector<transducer_transitions*> pstates;
-      bool operator < (const searcher& s2) const { return tie(ts, pstates) < tie(s2.ts, s2.pstates); }
+      // bool operator < (const searcher& s2) const { return tie(ts, pstates) < tie(s2.ts, s2.pstates); }
+      bool operator == (const searcher& s2) const { return tie(ts, pstates) == tie(s2.ts, s2.pstates); }
       };
 
-    set<searcher> in_queue;
+    struct searchhash {
+      size_t operator() (const searcher& s) const {
+        size_t res = hsh(s.ts);
+        // https://stackoverflow.com/questions/20511347/a-good-hash-function-for-a-vector
+        for(auto p: s.pstates) res ^= size_t(p) + 0x9e3779b9 + (res << 6) + (res >> 2);
+        return res;
+        }
+      };
+
+    std::unordered_set<searcher, searchhash> in_queue;
     vector<searcher> q;
     vector<int> parent_id;
     vector<int> parent_dir;
@@ -1090,7 +1147,8 @@ EX void test_transducers() {
       searcher sch = searcher{ ts.tstate1, { &(autom[ts]) } };
       enqueue(sch, -1, -1);
       }
-    for(int i=0; i<isize(q); i++) {
+
+    auto process = [&] (int i) {
       searcher sch = q[i];
 
       int dirs = isize(treestates[sch.ts].rules);
@@ -1101,25 +1159,26 @@ EX void test_transducers() {
         for(auto v: sch.pstates) if(v->accepting_directions & (1<<dir)) qty++;
         for(auto v: sch.pstates) for(auto& p: v->t) if(p.first.first == ENDED && (p.second->accepting_directions & (1<<dir))) qty++;
         if(qty > 1) {
-
-          vstate vs;
-          vector<int> path1;
-          int at = build_vstate(vs, path1, parent_dir, parent_id, i, [&] (int i) { return q[i].ts; });
-          println(hlog, "after path = ", path1, " got multiple interpretation");
-          for(auto v: sch.pstates) if(v->accepting_directions & (1<<dir)) println(hlog, "state ", v);
-          for(auto v: sch.pstates) for(auto& p: v->t) if(p.first.first == ENDED && (p.second->accepting_directions & (1<<dir))) println(hlog, "state ", v, " after accepting END/", p.first.second);
-          println(hlog, "starting at state: ", q[at].ts, " reached state ", q[i].ts);
-
-          at = i;
-          while(true) {
-            println(hlog, "state ", q[at].ts, " vs ", q[at].pstates, " dir = ", parent_dir[at]);
-            at = parent_id[at];
-            if(at == -1) break;
-            }
-
           multiple_interpretations++;
           // print_transducer(autom);
-          if(!(flags & w_r3_all_errors)) find_multiple_interpretation();
+          if(!(flags & w_r3_all_errors)) {
+            vstate vs;
+            vector<int> path1;
+            int at = build_vstate(vs, path1, parent_dir, parent_id, i, [&] (int i) { return q[i].ts; });
+            println(hlog, "after path = ", path1, " got multiple interpretation");
+            for(auto v: sch.pstates) if(v->accepting_directions & (1<<dir)) println(hlog, "state ", v);
+            for(auto v: sch.pstates) for(auto& p: v->t) if(p.first.first == ENDED && (p.second->accepting_directions & (1<<dir))) println(hlog, "state ", v, " after accepting END/", p.first.second);
+            println(hlog, "starting at state: ", q[at].ts, " reached state ", q[i].ts);
+
+            at = i;
+            while(true) {
+              println(hlog, "state ", q[at].ts, " vs ", q[at].pstates, " dir = ", parent_dir[at]);
+              at = parent_id[at];
+              if(at == -1) break;
+              }
+
+            find_multiple_interpretation();
+            }
           }
         if(qty == 0) {
           vstate vs;
@@ -1171,11 +1230,15 @@ EX void test_transducers() {
         next.pstates.resize(ip - next.pstates.begin());
         enqueue(next, i, s);
         }
-      }
+      };
+
+    for(int i=0; i<isize(q); i++) process(i);
     
     if(changes) {
-      println(hlog, "changes = ", changes, " with ", isize(autom), " states");
-      goto next_iteration;
+      println(hlog, "changes = ", changes, " with ", isize(autom), " states, queue size = ", isize(q), ", add = ", isize(important)-impcount, " MI = ", multiple_interpretations);
+      if(isize(important) > impcount || multiple_interpretations) err_iter++;
+      if(err_iter < max_err_iter) goto next_iteration;
+      if(err_iter == max_err_iter) max_err_iter++;
       }
 
     if((flags & w_r3_all_errors) && isize(important) > impcount) throw rulegen_retry("errors found by transducers");
@@ -1185,7 +1248,7 @@ EX void test_transducers() {
       find_multiple_interpretation();
       }
 
-    println(hlog, "transducers found successfully after ", iterations, " iterations, ", isize(autom), " states checked, queue size = ", isize(q));
+    println(hlog, "transducers found successfully after ", iterations, " iterations, ", isize(autom), " states checked, queue size = ", isize(q), " rmmemo size = ", isize(rmmemo));
     
     vector<vector<transducer>> special(isize(t_origin));
     for(int tid=0; tid<isize(t_origin); tid++) {
@@ -1534,6 +1597,8 @@ EX void cleanup3() {
   qroad_for.clear();
   qroad_memo.clear();
   possible_parents.clear();
+  rmmemo.clear();
+  max_err_iter = 4;
   }
 
 #if CAP_COMMANDLINE
