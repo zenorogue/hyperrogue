@@ -94,6 +94,9 @@ static const flagtype w_skip_transducer_terminate = Flag(34); /*< skip terminati
 static const flagtype w_r3_all_errors = Flag(35); /*< consider all errors for R3 */
 #endif
 
+/** these control the output */
+EX flagtype rdebug_flags;
+
 EX int honeycomb_value = 1; /* how far to build local for honeycombs */
 
 EX flagtype flags = 0;
@@ -1893,6 +1896,12 @@ EX void clean_parents() {
   while(c) { c->parent_dir = MYSTERY; c = c->next; }
   }
 
+int qshortcuts() {
+  int res = 0;
+  for(auto& sh: shortcuts) res += isize(sh);
+  return res;
+  }
+
 void clear_treestates() {
   treestates.clear();
   for(auto a: all_analyzers)
@@ -1910,7 +1919,7 @@ EX void rules_iteration() {
     clean_parents();
     }
 
-  if(debugflags & DF_GEOM) println(hlog, "attempt: ", try_count, " important = ", isize(important), " cells = ", tcellcount);
+  if(rdebug_flags & 1) println(hlog, "attempt: ", try_count, " important = ", isize(important), " cells = ", tcellcount, " shortcuts = ", qshortcuts());
 
   parent_updates = 0;
   clear_treestates();
@@ -1918,7 +1927,7 @@ EX void rules_iteration() {
   
   cq = important;
   
-  if(debugflags & DF_GEOM)
+  if(rdebug_flags & 2)
     println(hlog, "important = ", cq);
 
   for(int i=0; i<isize(cq); i++) {
@@ -1960,7 +1969,7 @@ EX void rules_iteration() {
         treestates[id].is_live = false, new_deadends++;
       }
     
-    if(debugflags & DF_GEOM)
+    if(rdebug_flags & 4)
       println(hlog, "deadend states found: ", new_deadends);
     }
   
@@ -2193,7 +2202,7 @@ EX void rule_iterations() {
       break;
       }
     catch(rulegen_retry& e) { 
-      if(debugflags & DF_GEOM)
+      if(rdebug_flags & 8)
         println(hlog, "result ", try_count, ": ", e.what());
       if(try_count >= max_retries) throw;
       }
@@ -2636,6 +2645,11 @@ int readRuleArgs() {
   else if(argis("-ruleflag")) {
     shift();
     rulegen::flags ^= Flag(argi());
+    }
+
+  else if(argis("-ruledflags")) {
+    shift();
+    rulegen::rdebug_flags = argi();
     }
 
   else return 1;
