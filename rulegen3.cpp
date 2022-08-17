@@ -229,11 +229,13 @@ void be_important(tcell *c) {
   imp_as_set.insert(c);
   }
 
+int error_debug = 0;
+
 void build(vstate& vs, vector<tcell*>& places, int where, int where_last, tcell *g) {
   places[where] = g;
   twalker wh = g;
   auto ts0 = get_treestate_id(wh);
-  println(hlog, "[", where, "<-", where_last, "] [", g, " ] expected treestate = ", vs.vcells[where].tid, " actual treestate = ", ts0);
+  if(error_debug >= 2) println(hlog, "[", where, "<-", where_last, "] [", g, " ] expected treestate = ", vs.vcells[where].tid, " actual treestate = ", ts0);
 
   vector<tcell*> v;
   vector<int> spins;
@@ -241,7 +243,7 @@ void build(vstate& vs, vector<tcell*>& places, int where, int where_last, tcell 
     v.push_back(g->cmove(i));
     spins.push_back(g->c.spin(i));
     }
-  println(hlog, g, " -> ", v, " spins: ", spins);
+  if(error_debug >= 2) println(hlog, g, " -> ", v, " spins: ", spins);
 
   auto& c = vs.vcells[where];
   for(int i=0; i<isize(c.adj); i++)
@@ -270,11 +272,13 @@ int ignore_level;
 
 int check_debug = 0;
 
+int side_errors, rpath_errors, dist_errors;
+
 void error_found(vstate& vs) {
-  println(hlog, "current root = ", vs.current_root);
+  if(error_debug >= 2) println(hlog, "current root = ", vs.current_root);
   int id = 0;
   for(auto& v: vs.vcells) {
-    println(hlog, "vcells[", id++, "]: tid=", v.tid, " adj = ", v.adj);
+    if(error_debug >= 2) println(hlog, "vcells[", id++, "]: tid=", v.tid, " adj = ", v.adj);
     }
   vector<tcell*> places(isize(vs.vcells), nullptr);
   tcell *g = treestates[vs.vcells[vs.current_root].tid].giver.at;
@@ -294,20 +298,22 @@ void error_found(vstate& vs) {
       twalker pw = p;
       pw.at->code = MYSTERY_LARGE;
       int tsid = get_treestate_id(pw).second;
-      if(imp_as_set.count(p) && imp_as_set.count(p1))
+      if(error_debug >= 2 && imp_as_set.count(p) && imp_as_set.count(p1))
         println(hlog, "last: ", p, " -> ", p1, " actual diff = ", p1->dist, "-", p->dist, " expected diff = ", diff, " dir = ", dir, " ts = ", tsid);
       indenter ind(2);
       for(int i=0; i<pw.at->type; i++) {
         int r = get_abs_rule(tsid, i);
-        if(r < 0 && r != DIR_PARENT) {
-          println(hlog, "rule ", tie(tsid, i), " is: ", r, " which means ", rev_roadsign_id[r]);
-          }
-        else {
-          println(hlog, "rule ", tie(tsid, i), " is: ", r);
+        if(error_debug >= 2) {
+          if(r < 0 && r != DIR_PARENT) {
+            println(hlog, "rule ", tie(tsid, i), " is: ", r, " which means ", rev_roadsign_id[r]);
+            }
+          else {
+            println(hlog, "rule ", tie(tsid, i), " is: ", r);
+            }
           }
         }
       int r = get_abs_rule(tsid, dir);
-      if(r < 0 && r != DIR_PARENT) {
+      if(error_debug >= 2 && r < 0 && r != DIR_PARENT) {
         tcell *px = p;
         auto rr = rev_roadsign_id[r];
         for(int i=0; i<isize(rr); i+=2) {
@@ -323,7 +329,7 @@ void error_found(vstate& vs) {
       }
     }
 
-  println(hlog, "added to important ", isize(important)-q, " places, solid_errors = ", solid_errors, " distance warnings = ", distance_warnings);
+  if(error_debug >= 1) println(hlog, "added to important ", isize(important)-q, " places, solid_errors = ", solid_errors, " distance warnings = ", distance_warnings);
   if(flags & w_r3_all_errors) return;
 
   if(isize(important) == impcount) {
@@ -339,7 +345,8 @@ void check(vstate& vs) {
 
   if(vs.movestack.empty()) {
     if(vs.need_cycle && vs.current_pos != 0) {
-      println(hlog, "rpath: ", vs.rpath, " does not cycle correctly");
+      if(error_debug >= 1) println(hlog, "rpath: ", vs.rpath, " does not cycle correctly");
+      rpath_errors++;
       error_found(vs);
       return;
       }
@@ -356,7 +363,9 @@ void check(vstate& vs) {
   if(c.adj[p.first] != -1) {
     int dif = (rule == DIR_PARENT) ? -1 : 1;
     if(p.second != dif && p.second != MYSTERY) {
-      println(hlog, "error: connection ", p.first, " at ", vs.current_pos, " has distance ", dif, " but ", p.second, " is expected");
+      if(error_debug >= 1)
+        println(hlog, "error: connection ", p.first, " at ", vs.current_pos, " has distance ", dif, " but ", p.second, " is expected");
+      dist_errors++;
       vs.recursions.push_back({vs.current_pos, p});
       error_found(vs);
       vs.recursions.pop_back();
@@ -409,7 +418,8 @@ void check(vstate& vs) {
     vs.recursions.push_back({vs.current_pos, p});
     auto& v = rev_roadsign_id[rule];
     if(v.back() != p.second + 1 && p.second != MYSTERY) {
-      println(hlog, "error: side connection");
+      if(error_debug >= 1) println(hlog, "error: side connection");
+      side_errors++;
       error_found(vs);
       vs.recursions.pop_back();
       return;
@@ -1265,6 +1275,7 @@ EX void check_upto(int lev, int t) {
   for(ignore_level=1; ignore_level <= lev; ignore_level++) {
     println(hlog, "test ignore_level ", ignore_level);
     vs.need_cycle = false;
+    side_errors = rpath_errors = dist_errors = 0;
 
     for(int i=0; i<N; i++) {
       for(int j=0; j<isize(treestates[i].rules); j++) {
@@ -1303,12 +1314,15 @@ EX void check_upto(int lev, int t) {
         }
       }
 
-    if((flags & w_r3_all_errors) && isize(important) > impcount) throw rulegen_retry("errors found");
+    if((flags & w_r3_all_errors) && isize(important) > impcount) {
+      println(hlog, "found errors: side ", side_errors, " dist ", dist_errors, " rpath ", rpath_errors);
+      throw rulegen_retry("errors found");
+      }
     }
   }
 
 EX void check_road_shortcuts() {
-  println(hlog, "road shortcuts = ", qroad, " treestates = ", isize(treestates), " roadsigns = ", next_roadsign_id, " tcellcount = ", tcellcount);
+  println(hlog, "road shortcuts = ", qroad, " treestates = ", isize(treestates), " roadsigns = ", next_roadsign_id, " tcellcount = ", tcellcount, " try = ", try_count);
   if(qroad > last_qroad) {
     println(hlog, "qroad_for = ", qroad_for);
     println(hlog, "newcon = ", newcon, " tcellcount = ", tcellcount); newcon = 0;
@@ -1318,7 +1332,7 @@ EX void check_road_shortcuts() {
     next_roadsign_id = -100;
     throw rulegen_retry("new road shortcuts");
     }
-  println(hlog, "checking validity, important = ", important);
+  println(hlog, "checking validity, important = ", isize(important));
   imp_as_set.clear();
   for(auto t: important) imp_as_set.insert(t.at);
   impcount = isize(important);
