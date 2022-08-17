@@ -42,8 +42,6 @@ const int MYSTERY = 31999;
 const int MYSTERY_LARGE = 31999999;
 #endif
 
-EX bool parent_debug;
-
 /* === tcell === */
 
 /** number of tcells created */
@@ -545,7 +543,7 @@ EX void shortcut_found(tcell *c, tcell *alt, vector<twalker> &walkers, vector<tw
   int delta = walkers[wpos].to_spin(walkers2.back().spin);
 
   for(auto& s: shortcuts[c->id]) if(s->pre == pre && s->post == post) {
-    if(parent_debug) 
+    if(rdebug_flags & 16)
       println(hlog, "already knew that ", pre, " ~ ", post);
     return;
     }
@@ -977,12 +975,12 @@ EX twalker get_parent_dir(twalker& cw) {
       ensure_shorter(cw+i);
       tcell *c1 = c->cmove(i);
       be_solid(c1);
-      if(parent_debug) println(hlog, "direction = ", i, " is ", c1, " distance = ", c1->dist);
+      if(rdebug_flags & 16) println(hlog, "direction = ", i, " is ", c1, " distance = ", c1->dist);
       if(c1->dist < d) nearer.push_back(i);
       ufind(cw); if(d != cw.at->dist || oc != cw.at) return get_parent_dir(cw);
       }
 
-    if(parent_debug) println(hlog, "nearer = ", nearer, " n=", n, " k=", k);
+    if(rdebug_flags & 16) println(hlog, "nearer = ", nearer, " n=", n, " k=", k);
 
     bool failed = false;
     if(flags & w_parent_always) {failed = true; goto resolve; }
@@ -993,7 +991,7 @@ EX twalker get_parent_dir(twalker& cw) {
       if(beats(ne, bestd))
         bestd = ne;
 
-    if(parent_debug) for(auto ne: nearer) println(hlog, "beats", tie(ne, bestd), " = ", beats(ne, bestd));
+    if(rdebug_flags & 16) for(auto ne: nearer) println(hlog, "beats", tie(ne, bestd), " = ", beats(ne, bestd));
 
     for(auto ne: nearer)
       if(ne != bestd && beats(ne, bestd))
@@ -1027,7 +1025,7 @@ EX twalker get_parent_dir(twalker& cw) {
       }
     }
     
-  if(parent_debug) println(hlog, "set parent_dir to ", bestd);
+  if(rdebug_flags & 16) println(hlog, "set parent_dir to ", bestd);
   c->parent_dir = bestd;
 
   if(c->old_parent_dir != MYSTERY && c->old_parent_dir != bestd && c == oc) {
@@ -1732,8 +1730,6 @@ void verified_treewalk(twalker& tw, int id, int dir) {
   treewalk(tw, dir);
   }
 
-EX bool view_examine_branch = false;
-
 bool examine_branch(int id, int left, int right) {
   if(WDIM == 3) return true;
   auto rg = treestates[id].giver;
@@ -1776,7 +1772,7 @@ bool examine_branch(int id, int left, int right) {
     auto rl = get_rule(wl, tsl);
     auto rr = get_rule(wr, tsr);
 
-    if(view_examine_branch) if(debugflags & DF_GEOM)
+    if(rdebug_flags & 32)
       println(hlog, "wl = ", wl, " -> ", wl+wstep, " R", rl, " wr = ", wr, " -> ", wr+wstep, " R", rr, " lstack = ", lstack, " rstack = ", rstack);
 
     if(rl == DIR_RIGHT && rr == DIR_LEFT && lstack.empty() && rstack.empty()) {
@@ -1784,7 +1780,7 @@ bool examine_branch(int id, int left, int right) {
       push_deadstack(hash, wl, tsl, -1);
       hash.emplace_back(-1, wl.at->dist - wr.at->dist);
       push_deadstack(hash, wr, tsr, +1);
-      if(view_examine_branch) if(debugflags & DF_GEOM)
+      if(rdebug_flags & 32)
         println(hlog, "got hash: ", hash);
       if(verified_branches.count(hash)) {
         return true;

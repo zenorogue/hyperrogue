@@ -239,7 +239,7 @@ void debug_menu() {
       }
     println(hlog, "parent_dir = ", c->parent_dir);
     c->parent_dir = MYSTERY;
-    parent_debug = true;
+    rulegen::rdebug_flags |= 16;
     try {
       twalker cw(c, 0);
       get_parent_dir(cw);
@@ -247,7 +247,7 @@ void debug_menu() {
     catch(rulegen_failure& f) {
       println(hlog, "catched: ", f.what());
       }
-    parent_debug = false;
+    rulegen::rdebug_flags &= ~16;
     println(hlog, "parent_dir = ", c->parent_dir);
     cleanup_protomap();
     });
@@ -1725,7 +1725,7 @@ int testargs() {
     }
 
   else if(argis("-veb")) {
-    view_examine_branch = true;
+    rulegen::rdebug_flags |= 32;
     }
     
   else if(argis("-act-seq")) {
