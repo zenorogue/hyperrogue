@@ -911,6 +911,7 @@ void test_current(string tesname) {
     status = "ACC";
     message = "OK";
     ok = true;
+    rules_known_for = arb::current.name;
     }
   catch(rulegen_surrender& e) {
     println(hlog, "surrender: ** ", e.what());
