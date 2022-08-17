@@ -92,6 +92,7 @@ static const flagtype w_skip_transducers = Flag(32); /*< skip the transducer tes
 static const flagtype w_skip_transducer_loops = Flag(33); /*< skip loops during the transducer test */
 static const flagtype w_skip_transducer_terminate = Flag(34); /*< skip termination during the transducer test */
 static const flagtype w_r3_all_errors = Flag(35); /*< consider all errors for R3 */
+static const flagtype w_r3_no_road_shortcuts = Flag(36); /*< consider all errors for R3 */
 #endif
 
 /** these control the output */

@@ -24,6 +24,7 @@ map<int, int> qroad_for;
 map<tcell*, int> qroad_memo;
 
 EX void add_road_shortcut(tcell *s, tcell *t) {
+  if(flags & w_r3_no_road_shortcuts) return;
   shared_ptr<road_shortcut_trie_vertex> u;
   vector<int> tpath;
   if(!road_shortcuts.count(s->id)) road_shortcuts[s->id] = make_shared<road_shortcut_trie_vertex>();
@@ -58,6 +59,7 @@ EX void add_road_shortcut(tcell *s, tcell *t) {
 EX int newcon;
 
 EX void apply_road_shortcut(tcell *s) {
+  if(flags & w_r3_no_road_shortcuts) return;
   auto& mem = qroad_memo[s];
   if(mem == qroad_for[s->id]) return;
   mem = qroad_for[s->id];
