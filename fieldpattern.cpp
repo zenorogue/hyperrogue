@@ -1364,6 +1364,10 @@ EX struct fpattern& getcurrfp() {
     fp.Prime = 11; fp.force_hash = 0x363D8DA4u; fp.solve();
     return fp;
     }
+  if(geometry == gCubeTiling) {
+    static fpattern fp(2);
+    return fp;
+    }
   if(!hyperbolic) return fp_invalid;
   if(WDIM == 3 && !quotient && !hybri && !bt::in()) {
     static fpattern fp(0);
