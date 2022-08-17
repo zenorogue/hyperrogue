@@ -110,30 +110,33 @@ EX int get_roadsign(twalker what) {
     tail.push_back(t->c.spin(t->parent_dir));
     t = t->move(t->parent_dir);
     }
-  map<tcell*, int> visited;
-  queue<tcell*> vqueue;
+  /* we reuse known_sides */
+  vector<tcell*> vqueue;
   auto visit = [&] (tcell *c, int dir) {
-    if(visited.count(c)) return;
-    visited[c] = dir;
-    vqueue.push(c);
+    if(c->known_sides) return;
+    c->known_sides = dir + 1;
+    vqueue.push_back(c);
     };
   visit(s, MYSTERY);
-  while(true) {
-    if(vqueue.empty()) throw hr_exception("vqueue empty");
-    tcell *c = vqueue.front();
+  for(int i=0;; i++) {
+    if(i == isize(vqueue)) throw hr_exception("vqueue empty");
+    tcell *c = vqueue[i];
     if(c == t) break;
-    vqueue.pop();
-    for(int i=0; i<c->type; i++)
-      if(c->move(i) && c->move(i)->dist <= dlimit)
-        visit(c->move(i), c->c.spin(i));
+    for(int i=0; i<c->type; i++) {
+      tcell *c1 = c->move(i);
+      if(c1 && c1->dist <= dlimit)
+        visit(c1, c->c.spin(i));
+      if(c1 == t) break;
+      }
     }
   while(t != s) {
     add_road_shortcut(s, t);
-    int d = visited.at(t);
+    int d = t->known_sides-1;
     tail.push_back(t->dist - dlimit);
     tail.push_back(t->c.spin(d));
     t = t->move(d);
     }
+  for(auto c: vqueue) c->known_sides = 0;
   reverse(tail.begin(), tail.end());
   for(auto t: tail) result.push_back(t);
   if(roadsign_id.count(result)) return roadsign_id[result];
