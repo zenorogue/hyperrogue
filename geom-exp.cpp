@@ -350,7 +350,7 @@ void set_or_configure_geometry(eGeometry g) {
 bool same_tiling(eGeometry g2) {
   if(g2 == gCrystal)
     return S3 == 4;
-  if(g2 == gFieldQuotient && hyperbolic && standard_tiling())
+  if(g2 == gFieldQuotient && (hyperbolic || (geometry == gCubeTiling && reg3::cubes_reg3)) && standard_tiling())
     return true;
   if(g2 == gFieldQuotient && geometry != gFieldQuotient) {
     int ce = 0;
@@ -595,7 +595,7 @@ EX void select_quotient_screen() {
   }
 
 EX void select_quotient() {
-  if(euclid && !kite::in() && !arcm::in()) {
+  if(euclid && !kite::in() && !arcm::in() && !reg3::cubes_reg3) {
     euc::prepare_torus3();
     pushScreen(euc::show_torus3);
     }
