@@ -518,6 +518,8 @@ typedef unsigned GLuint;
 #include <stdexcept>
 #include <array>
 #include <set>
+#include <unordered_set>
+#include <unordered_map>
 #include <random>
 #include <complex>
 #include <new>
