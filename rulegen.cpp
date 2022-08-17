@@ -96,7 +96,7 @@ static const flagtype w_r3_no_road_shortcuts = Flag(36); /*< consider all errors
 /** these control the output */
 EX flagtype rdebug_flags;
 
-EX int honeycomb_value = 1; /* how far to build local for honeycombs */
+EX int r3_neighborhood_decision = 1; /* how far to build local for honeycombs */
 
 EX flagtype flags = 0;
 
@@ -1366,8 +1366,8 @@ EX void id_at_spin(twalker cw, vector<twalker>& sprawl, vector<analyzer_state*>&
       a = alloc_analyzer();
       }
     states.push_back(a);
-    if(WDIM == 3 && honeycomb_value) {
-      auto& ae = check_all_edges(cw, a, isize(sprawl));
+    if(WDIM == 3 && r3_neighborhood_decision) {
+      auto& ae = get_decision_neighborhood(cw);
       int id = isize(sprawl);
       if(id < isize(ae)) {
         a->id = ae[id].first;
@@ -2505,7 +2505,7 @@ auto hooks = addHook(hooks_configfile, 100, [] {
       param_i(max_ignore_level_post, "max_ignore_level_post");
       param_i(max_ignore_time_pre, "max_ignore_time_pre");
       param_i(max_ignore_time_post, "max_ignore_time_post");
-      param_i(honeycomb_value, "honeycomb_value");
+      param_i(r3_neighborhood_decision, "r3_neighborhood_decision");
     });
 
 EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {

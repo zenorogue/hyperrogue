@@ -145,48 +145,54 @@ EX int get_roadsign(twalker what) {
   return roadsign_id[result] = next_roadsign_id--;
   }
 
-map<pair<int, int>, vector<pair<int, int>> > all_edges;
+#if HDR
+using neighborhood = vector<pair<int, int>>;
+#endif
 
-EX vector<pair<int, int>>& check_all_edges(twalker cw, analyzer_state* a, int id) {
-  auto& ae = all_edges[{cw.at->id, cw.spin}];
-  if(ae.empty()) {
-    set<tcell*> seen;
-    vector<pair<twalker, transmatrix> > visited;
-    vector<pair<int, int>> ae1;
-    auto visit = [&] (twalker tw, const transmatrix& T, int id, int dir) {
-      if(seen.count(tw.at)) return;
-      seen.insert(tw.at);
-      auto& sh0 = currentmap->get_cellshape(tcell_to_cell[cw.at]);
-      auto& sh1 = currentmap->get_cellshape(tcell_to_cell[tw.at]);
-      int common = 0;
-      vector<hyperpoint> kleinized;
-      vector<hyperpoint> rotated;
-      for(auto v: sh0.vertices_only) kleinized.push_back(kleinize(sh0.from_cellcenter * v));
-      for(auto w: sh1.vertices_only) rotated.push_back(kleinize(T*sh1.from_cellcenter * w));
-      
-      for(auto v: kleinized)
-      for(auto w: rotated)
-        if(sqhypot_d(MDIM, v-w) < 1e-6)
-          common++;
-      if(honeycomb_value >= 2) {
-        if(common < 1) { ae1.emplace_back(id, dir); return; }
-        }
-      else {
-        if(common < 2) { ae1.emplace_back(id, dir); return; }
-        }
-      visited.emplace_back(tw, T);
-      ae.emplace_back(id, dir);
-      };
-    visit(cw, Id, -1, -1);
-    for(int i=0; i<isize(visited); i++) {
-      auto tw = visited[i].first;      
-      for(int j=0; j<tw.at->type; j++) {
-        visit(tw + j + wstep, visited[i].second * currentmap->adj(tcell_to_cell[tw.at], (tw+j).spin), i, j);
-        }
+map<pair<int, int>, neighborhood> all_edges;
+
+EX void build_neighborhood(twalker cw, neighborhood& ae, flagtype dec) {
+  set<tcell*> seen;
+  vector<pair<twalker, transmatrix> > visited;
+  vector<pair<int, int>> ae1;
+  auto visit = [&] (twalker tw, const transmatrix& T, int id, int dir) {
+    if(seen.count(tw.at)) return;
+    seen.insert(tw.at);
+    auto& sh0 = currentmap->get_cellshape(tcell_to_cell[cw.at]);
+    auto& sh1 = currentmap->get_cellshape(tcell_to_cell[tw.at]);
+    int common = 0;
+    vector<hyperpoint> kleinized;
+    vector<hyperpoint> rotated;
+    for(auto v: sh0.vertices_only) kleinized.push_back(kleinize(sh0.from_cellcenter * v));
+    for(auto w: sh1.vertices_only) rotated.push_back(kleinize(T*sh1.from_cellcenter * w));
+    
+    for(auto v: kleinized)
+    for(auto w: rotated)
+      if(sqhypot_d(MDIM, v-w) < 1e-6)
+        common++;
+    if(dec & 2) {
+      if(common < 1) { ae1.emplace_back(id, dir); return; }
       }
-    if(honeycomb_value >= 3) for(auto p: ae1) ae.push_back(p);
-    println(hlog, "for ", tie(cw.at->id, cw.spin), " generated all_edges structure: ", ae, " of size ", isize(ae));
+    else {
+      if(common < 2) { ae1.emplace_back(id, dir); return; }
+      }
+    visited.emplace_back(tw, T);
+    ae.emplace_back(id, dir);
+    };
+  visit(cw, Id, -1, -1);
+  for(int i=0; i<isize(visited); i++) {
+    auto tw = visited[i].first;      
+    for(int j=0; j<tw.at->type; j++) {
+      visit(tw + j + wstep, visited[i].second * currentmap->adj(tcell_to_cell[tw.at], (tw+j).spin), i, j);
+      }
     }
+  if(dec & 4) for(auto p: ae1) ae.push_back(p);
+  println(hlog, "for ", tie(cw.at->id, cw.spin), " generated all_edges structure: ", ae, " of size ", isize(ae));
+  }
+
+EX neighborhood& get_decision_neighborhood(twalker cw) {
+  auto& ae = all_edges[{cw.at->id, cw.spin}];
+  if(ae.empty()) build_neighborhood(cw, ae, r3_neighborhood_decision);
   return ae;
   }
 
