@@ -1526,6 +1526,8 @@ EX void rules_iteration_for(twalker& cw) {
       if(r[z] == cids[z]) continue;
       if(r[z] < 0 || cids[z] < 0) {
         debuglist = { cwmain, ts.giver };
+        cwmain.at->code = MYSTERY_LARGE;
+        ts.giver.at->code = MYSTERY_LARGE;
         throw rulegen_retry("neg rule mismatch");
         }
 
