@@ -1329,14 +1329,14 @@ EX int move_code(twalker cs) {
      auto cs2 = cs + wstep;
      be_solid(cs.at); ufind(cs); ufind(cs2); be_solid(cs2.at);
      fix_distances(cs.at);
-     int y = cs.at->dist - cs.peek()->dist;
-
-     int x;
 
      if(WDIM == 3) {
        if(cs2.at->parent_dir == cs2.spin) return C_PARENT;
        else return get_roadsign(cs+wstep);
        }
+
+     int y = cs.at->dist - cs.peek()->dist;
+     int x;
 
      if(!(flags & w_no_relative_distance)) x = C_EQUAL;
      else if(y == 1) x = C_NEPHEW;
