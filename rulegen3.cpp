@@ -1267,12 +1267,27 @@ EX void test_transducers() {
       be_productive(cum);
       int id_size = isize(cum);
 
+      set<cycle> checked;
+
       for(auto& cyc: cycle_data[tid]) {
-        println(hlog, "Working on tid=", tid, " cycle ", cyc, " (", id++, "/", isize(cycle_data[tid]), ")");
+        if(checked.count(cyc)) {
+          continue;
+          }
+        auto cyc2 = cyc;
+        int q = isize(cyc.dirs);
+        for(int i=0; i<q; i++) {
+          for(int j=1; j<q; j++) {
+            swap(cyc2.dirs[j], cyc2.dirs[j-1]);
+            swap(cyc2.tids[j], cyc2.tids[j-1]);
+            swap(cyc2.rdirs[j], cyc2.rdirs[j-1]);
+            }
+          checked.insert(cyc2);
+          }
+        println(hlog, "Working on tid=", tid, " cycle ", cyc.dirs, " (", id++, "/", isize(cycle_data[tid]), ")");
         check_timeout();
         indenter ind(2);
         int ctid = tid;
-        for(auto c: cyc.first) {
+        for(auto c: cyc.dirs) {
           transducer result;
           println(hlog, "special is ", tie(ctid, c));
           compose_with(cum, special[ctid][c], result);
@@ -1283,7 +1298,7 @@ EX void test_transducers() {
         int err = 0;
         for(auto duc: cum) for(auto p: duc.second.t)
           if(p.first.first == ENDED || p.first.second != p.first.first) err++;
-        throw_identity_errors(cum, cyc.first);
+        throw_identity_errors(cum, cyc.dirs);
         if(id_size != isize(cum)) println(hlog, "error: identity not recovered correctly");
         }
       }
@@ -1369,9 +1384,9 @@ EX void check_upto(int lev, int t) {
         vs.vcells[0].become(i);
         vs.current_pos = vs.current_root = 0;
         vs.movestack.clear();
-        for(auto v: cd.first) vs.movestack.emplace_back(v, MYSTERY);
+        for(auto v: cd.dirs) vs.movestack.emplace_back(v, MYSTERY);
         reverse(vs.movestack.begin(), vs.movestack.end());
-        if(check_debug >= 1) println(hlog, "checking ", tie(i, id, cd));
+        if(check_debug >= 1) println(hlog, "checking ", tie(i, id, cd.dirs));
         indenter ind(2);
         check(vs);
         }
@@ -1418,7 +1433,16 @@ EX void check_road_shortcuts() {
   println(hlog, "Got it!");
   }
 
-EX vector<vector<pair<vector<int>, vector<int>>>> cycle_data;
+#if HDR
+struct cycle {
+  vector<int> dirs;
+  vector<int> tids;
+  vector<int> rdirs;
+  bool operator < (const cycle& c2) const { return tie(dirs, tids, rdirs) < tie(c2.dirs, c2.tids, c2.rdirs); }
+  };
+#endif
+
+EX vector<vector<cycle>> cycle_data;
 
 EX void build_cycle_data() {
   cycle_data.clear();
@@ -1431,8 +1455,10 @@ EX void build_cycle_data() {
       for(int j=0; j<isize(f); j++) {
         hyperpoint v1 = kleinize(sh0.from_cellcenter * sh0.faces[i][j]);
         hyperpoint v2 = kleinize(sh0.from_cellcenter * sh0.faces[i][(j+1) % isize(f)]);
-        vector<int> path = {i};
-        vector<int> rpath = {start->c.spin(i)};
+        cycle cc;
+        cc.dirs = {i};
+        cc.tids = {t};
+        cc.rdirs = {start->c.spin(i)};
         transmatrix T = currentmap->adj(start, i);
         cell *at = start->cmove(i);
         cell *last = start;
@@ -1449,17 +1475,18 @@ EX void build_cycle_data() {
             if(ok == 3) dir = d;
             }
           if(dir == -1) throw hr_exception("cannot cycle");
-          path.push_back(dir);
-          rpath.push_back(at->c.spin(dir));
+          cc.tids.push_back(get_id(at));
+          cc.dirs.push_back(dir);
+          cc.rdirs.push_back(at->c.spin(dir));
           T = T * currentmap->adj(at, dir);
           last = at;
           at = at->cmove(dir);
           }
-        cycle_data[t].push_back({std::move(path), std::move(rpath)});
+        cycle_data[t].push_back({std::move(cc)});
         }
       }
     }
-  println(hlog, "cycle data = ", cycle_data);
+  println(hlog, "cycle data computed");
   }
 
 using classdata = pair<vector<int>, int>;
