@@ -1671,7 +1671,8 @@ void genhoneycomb(string fname) {
   }
 
 EX void cleanup3() {
-  all_edges.clear();
+  decision_neighborhoods.clear();
+  validate_neighborhoods.clear();
   roadsign_id.clear();
   rev_roadsign_id.clear();
   next_roadsign_id = -100;
