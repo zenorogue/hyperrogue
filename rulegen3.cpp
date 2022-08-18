@@ -486,14 +486,14 @@ void check(vstate& vs) {
     }
   }
 
-void check_det(vstate& vs) {
+bool check_det(vstate& vs) {
   indenter ind(check_debug >= 3 ? 2 : 0);
   back: ;
   if(check_debug >= 3) println(hlog, "vcells=", isize(vs.vcells), " pos=", vs.current_pos, " stack=", vs.movestack, " rpath=", vs.rpath);
 
   if(vs.movestack.empty()) {
     if(check_debug >= 2) println(hlog, "rpath: ", vs.rpath, " successful");
-    return;
+    return true;
     }
   auto p = vs.movestack.back();
   auto& c = vs.vcells[vs.current_pos];
@@ -507,7 +507,7 @@ void check_det(vstate& vs) {
     int dif = (rule == DIR_PARENT) ? -1 : 1;
     if(p.second != dif && p.second != MYSTERY && !(flags & w_ignore_transducer_dist)) {
       error_found(vs);
-      return;
+      return false;
       }
     vs.movestack.pop_back();
     goto back;
@@ -534,7 +534,7 @@ void check_det(vstate& vs) {
     auto& v = rev_roadsign_id[rule];
     if(v.back() != p.second + 1 && p.second != MYSTERY && !(flags & w_ignore_transducer_dist)) {
       error_found(vs);
-      return;
+      return false;
       }
     vs.movestack.pop_back();
     if(check_debug >= 3) println(hlog, "side connection: ", v);
@@ -864,9 +864,9 @@ void throw_identity_errors(const transducer& id, const vector<int>& cyc) {
       vector<int> path1;
       build_vstate(vs, path1, parent_dir, parent_id, i, [&] (int i) { return q[i].ts; });
       println(hlog, "suspicious path found at ", path1);
-      check_det(vs);
-      if(flags & w_r3_all_errors) return;
-      throw rulegen_failure("suspicious path worked");
+      bool ok = check_det(vs);
+      if(ok) throw rulegen_failure("suspicious path worked");
+      return;
       }
     for(auto p: sch.at->t) {
       int d = p.first.first;
@@ -921,9 +921,9 @@ void throw_distance_errors(const transducer& id, int dir, int delta) {
       vector<int> path1;
       build_vstate(vs, path1, parent_dir, parent_id, i, [&] (int i) { return q[i].ts; });
       println(hlog, "suspicious distance path found at ", path1);
-      check_det(vs);
-      if(flags & w_r3_all_errors) return;
-      throw rulegen_failure("suspicious distance path worked");
+      bool ok = check_det(vs);
+      if(ok) throw rulegen_failure("suspicious distance path worked");
+      return;
       }
     for(auto p: sch.at->t) {
       int d = p.first.first;
@@ -1089,7 +1089,8 @@ EX void find_multiple_interpretation() {
       int at0 = at;
       println(hlog, path1);
       vs.movestack = {{xdir, MYSTERY}};
-      check_det(vs);
+      bool ok = check_det(vs);
+      if(!ok) return;
       gen_path(vs, path4);
       println(hlog, "path4 = ", path4);
       build_vstate(vs, path2, parent_dir2, parent_id, i, [&] (int i) { return q[i].ts2; });
@@ -1234,7 +1235,8 @@ EX void test_transducers() {
           vs.movestack = { { dir, MYSTERY } };
           vector<int> path1, path2;
           int at = build_vstate(vs, path1, parent_dir, parent_id, i, [&] (int j) { return q[j].ts; });
-          check_det(vs);
+          bool ok = check_det(vs);
+          if(!ok) return;
           gen_path(vs, path2);
           int trans = max(isize(path1), isize(path2));
           int ts1 = q[at].ts;
