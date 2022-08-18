@@ -1464,6 +1464,7 @@ EX void build_cycle_data() {
         cycle cc;
         cc.dirs = {i};
         cc.tids = {t};
+        start->cmove(i);
         cc.rdirs = {start->c.spin(i)};
         transmatrix T = currentmap->adj(start, i);
         cell *at = start->cmove(i);
@@ -1471,7 +1472,7 @@ EX void build_cycle_data() {
         while(at != start) {
           auto &sh1 = currentmap->get_cellshape(at);
           int dir = -1;
-          for(int d=0; d<at->type; d++) if(at->move(d) != last) {
+          for(int d=0; d<at->type; d++) if(at->cmove(d) != last) {
             int ok = 0;
             for(auto rv: sh1.faces[d]) {
               hyperpoint v = kleinize(T * sh1.from_cellcenter * rv);
