@@ -1264,6 +1264,8 @@ EX void test_transducers() {
         extract(autom, special[tid][dir], tid, dir);
       }
 
+    set<cycle> checked;
+
     if(!(flags & w_skip_transducer_loops)) for(int tid=0; tid<isize(t_origin); tid++) {
       int id = 0;
 
@@ -1272,8 +1274,6 @@ EX void test_transducers() {
       extract_identity(tid, -1, cum);
       be_productive(cum);
       int id_size = isize(cum);
-
-      set<cycle> checked;
 
       for(auto& cyc: cycle_data[tid]) {
         if(checked.count(cyc)) {
