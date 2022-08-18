@@ -1455,6 +1455,91 @@ EX void check_upto(int lev, int t) {
     }
   }
 
+EX void optimize() {
+
+  imp_as_set.clear();
+  for(auto t: important) imp_as_set.insert(t.at);
+
+  /* optimize givers */
+  set<int> seen;
+  vector<int> oqueue;
+
+  int changes = 0;
+  int errors = 0;
+
+  auto visit = [&] (twalker w, int expected, twalker parent) {
+    int id = get_treestate_id(w).second;
+    if(expected >= 0 && expected != id) {
+      errors++;
+      important.push_back(parent);
+      important.push_back(w);
+      return;
+      }
+    if(seen.count(id)) return;
+    seen.insert(id);
+    oqueue.push_back(id);
+    auto& g = treestates[id].giver;
+    if(g != w) changes++;
+    g = w;
+    };
+
+  for(auto t: t_origin) visit(t, -1, t);
+
+  for(int ii=0; ii<isize(oqueue); ii++) {
+    int i = oqueue[ii];
+    for(int j=0; j<isize(treestates[i].rules); j++) if(treestates[i].rules[j] >= 0)
+      visit(treestates[i].giver + j + wstep, treestates[i].rules[j], treestates[i].giver);
+    }
+
+  int N = isize(treestates);
+
+  println(hlog, "optimize: changes = ", changes, " errors = ", errors, " unreachable = ", N - isize(seen));
+
+  if(errors) throw rulegen_retry("error found in optimize");
+
+  int steps = 0;
+  for(int i=0; i<N; i++) if(!seen.count(i)) {
+    twalker at = treestates[i].giver;
+    if(!at.at) continue;
+    int r = i;
+    while(true) {
+      if(at.at->dist == 0) throw rulegen_failure("reached the root");
+      steps++;
+      get_parent_dir(at);
+      if(at.at->parent_dir == -1) throw rulegen_failure("no parent_dir for at");
+      at.spin = at.at->parent_dir;
+      at += wstep;
+      get_parent_dir(at);
+      if(at.at->parent_dir == -1) throw rulegen_failure("no parent_dir for at2");
+      int r2 = get_treestate_id(at).second;
+      auto at2 = at;
+      at2.spin = at.at->parent_dir;
+      if(at.at->dist == 0) at.at->parent_dir = 0;
+      int j = -1;
+      for(int k=0; k<at.at->type; k++) if(at2 + k == at) j = k;
+      if(treestates[r2].rules.empty()) {
+        important.push_back(at);
+        break;
+        }
+
+      // println(hlog, "found: ", r2, " seen: ", int(seen.count(r2)), " expected: ", r, " found: ", treestates[r2].rules[j], " dist=", at.at->dist);
+
+      if(treestates[r2].rules[j] != r) {
+        // println(hlog, "expected: ", r, " found: ", treestates[r2].rules[j], " add ", at+wstep, at2);
+        if(imp_as_set.count((at+wstep).at) && imp_as_set.count(at2.at))
+          throw rulegen_failure("already in imp");
+        important.push_back(at+wstep); important.push_back(at2); break;
+        }
+      r = r2; steps++;
+      }
+    }
+
+  if(steps) { println(hlog, "steps = ", steps); throw rulegen_retry("unreachable found in optimize"); }
+
+  important.clear();
+  for(auto s: seen) important.push_back(treestates[s].giver);
+  }
+
 EX void check_road_shortcuts() {
   println(hlog, "road shortcuts = ", qroad, " treestates = ", isize(treestates), " roadsigns = ", next_roadsign_id, " tcellcount = ", tcellcount, " try = ", try_count);
   if(qroad > last_qroad) {
@@ -1467,6 +1552,7 @@ EX void check_road_shortcuts() {
     throw rulegen_retry("new road shortcuts");
     }
   println(hlog, "checking validity, important = ", isize(important));
+  optimize();
   imp_as_set.clear();
   for(auto t: important) imp_as_set.insert(t.at);
   impcount = isize(important);
