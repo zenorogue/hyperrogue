@@ -381,6 +381,13 @@ void error_found(vstate& vs) {
   }
 
 void check(vstate& vs) {
+  dynamicval<int> vst(vs.steps, vs.steps + 1);
+  if(vs.steps >= 5000) {
+    println(hlog, "check does not seem to terminate: ", isize(vs.vcells), " cells, ", isize(vs.movestack), " stack");
+    error_found(vs);
+    throw rulegen_retry("check does not terminate");
+    }
+
   if(check_debug >= 3) println(hlog, "vcells=", isize(vs.vcells), " pos=", vs.current_pos, " stack=", vs.movestack, " rpath=", vs.rpath);
   indenter ind(check_debug >= 3 ? 2 : 0);
 
@@ -403,7 +410,7 @@ void check(vstate& vs) {
   /* connection already exists */
   if(c.adj[p.first] != -1) {
     int dif = (rule == DIR_PARENT) ? -1 : 1;
-    if(p.second != dif && p.second != MYSTERY) {
+    if(p.second != dif && p.second != MYSTERY && !(flags & w_ignore_transducer_dist)) {
       if(error_debug >= 1)
         println(hlog, "error: connection ", p.first, " at ", vs.current_pos, " has distance ", dif, " but ", p.second, " is expected");
       dist_errors++;
@@ -458,7 +465,7 @@ void check(vstate& vs) {
   else {
     vs.recursions.push_back({vs.current_pos, p});
     auto& v = rev_roadsign_id[rule];
-    if(v.back() != p.second + 1 && p.second != MYSTERY) {
+    if(v.back() != p.second + 1 && p.second != MYSTERY && !(flags & w_ignore_transducer_dist)) {
       if(error_debug >= 1) println(hlog, "error: side connection");
       side_errors++;
       error_found(vs);
@@ -498,7 +505,7 @@ void check_det(vstate& vs) {
   if(c.adj[p.first] != -1) {
     vs.current_pos = c.adj[p.first];
     int dif = (rule == DIR_PARENT) ? -1 : 1;
-    if(p.second != dif && p.second != MYSTERY) {
+    if(p.second != dif && p.second != MYSTERY && !(flags & w_ignore_transducer_dist)) {
       error_found(vs);
       return;
       }
@@ -525,7 +532,7 @@ void check_det(vstate& vs) {
   /* side connection */
   else {
     auto& v = rev_roadsign_id[rule];
-    if(v.back() != p.second + 1 && p.second != MYSTERY) {
+    if(v.back() != p.second + 1 && p.second != MYSTERY && !(flags & w_ignore_transducer_dist)) {
       error_found(vs);
       return;
       }
