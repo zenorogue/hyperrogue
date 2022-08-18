@@ -149,11 +149,13 @@ EX int get_roadsign(twalker what) {
 using neighborhood = vector<pair<int, int>>;
 #endif
 
-map<pair<int, int>, neighborhood> all_edges;
+map<pair<int, int>, neighborhood> decision_neighborhoods;
+map<pair<int, int>, neighborhood> validate_neighborhoods;
 
 EX void build_neighborhood(twalker cw, neighborhood& ae, flagtype dec) {
   set<tcell*> seen;
   vector<pair<twalker, transmatrix> > visited;
+  vector<pair<twalker, transmatrix> > visited1;
   vector<pair<int, int>> ae1;
   auto visit = [&] (twalker tw, const transmatrix& T, int id, int dir) {
     if(seen.count(tw.at)) return;
@@ -186,14 +188,47 @@ EX void build_neighborhood(twalker cw, neighborhood& ae, flagtype dec) {
       visit(tw + j + wstep, visited[i].second * currentmap->adj(tcell_to_cell[tw.at], (tw+j).spin), i, j);
       }
     }
-  if(dec & 4) for(auto p: ae1) ae.push_back(p);
-  println(hlog, "for ", tie(cw.at->id, cw.spin), " generated all_edges structure: ", ae, " of size ", isize(ae));
+  if(dec & 4) {
+    for(auto p: ae1) ae.push_back(p);
+    for(auto v: visited1) visited1.push_back(v);
+    }
+  if(dec & 8) {
+    for(int i=0; i<isize(visited); i++) {
+      for(int j=0; j<visited[i].first.at->type; j++) {
+        twalker t = visited[i].first + j + wstep;
+        for(int s=i+1; s<isize(visited); s++) {
+          if(visited[s].first.at == t.at && ae[s].first != i)
+            ae.push_back({i, j});
+          }
+        }
+      }
+    }
   }
 
 EX neighborhood& get_decision_neighborhood(twalker cw) {
-  auto& ae = all_edges[{cw.at->id, cw.spin}];
-  if(ae.empty()) build_neighborhood(cw, ae, r3_neighborhood_decision);
+  auto& ae = decision_neighborhoods[{cw.at->id, cw.spin}];
+  if(ae.empty()) {
+    build_neighborhood(cw, ae, r3_neighborhood_decision);
+    println(hlog, "built decision neighborhood for ", tie(cw.at->id, cw.spin), " of size ", isize(ae));
+    }
   return ae;
+  }
+
+EX neighborhood& get_validate_neighborhood(twalker cw) {
+  auto& ae = validate_neighborhoods[{cw.at->id, cw.spin}];
+  if(ae.empty()) {
+    build_neighborhood(cw, ae, r3_neighborhood_validate);
+    println(hlog, "built validate neighborhood for ", tie(cw.at->id, cw.spin), " of size ", isize(ae));
+    }
+  return ae;
+  }
+
+EX void validate_neighborhood(twalker cw) {
+  if(!r3_neighborhood_validate) return;
+  auto& ae = get_validate_neighborhood(cw);
+  vector<twalker> list = { cw };
+  for(auto v: ae) if(v.first != -1)
+    list.push_back(list[v.first] + v.second + wstep);
   }
 
 int last_qroad;
