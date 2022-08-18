@@ -339,6 +339,10 @@ void error_found(vstate& vs) {
       twalker pw = p;
       pw.at->code = MYSTERY_LARGE;
       int tsid = get_treestate_id(pw).second;
+      if(!treestates[tsid].giver.at) {
+        be_important(pw.at);
+        continue;
+        }
       if(error_debug >= 2 && imp_as_set.count(p) && imp_as_set.count(p1))
         println(hlog, "last: ", p, " -> ", p1, " actual diff = ", p1->dist, "-", p->dist, " expected diff = ", diff, " dir = ", dir, " ts = ", tsid);
       indenter ind(2);
@@ -525,7 +529,8 @@ bool check_det(vstate& vs) {
     vs.vcells[vs.current_pos].adj[p.first] = isize(vs.vcells);
     vs.vcells.emplace_back();
     vs.vcells.back().become(rule);
-    vs.vcells.back().adj[treestates[rule].giver.spin] = vs.current_pos;
+    int dir = treestates[rule].giver.spin;
+    vs.vcells.back().adj[dir] = vs.current_pos;
     goto back;
     }
 
@@ -649,7 +654,8 @@ template<class T> int build_vstate(vstate& vs, vector<int>& path1, const vector<
     if(dir == -1) continue;
     vs.vcells.emplace_back();
     vs.vcells.back().become(state(at));
-    vs.vcells[vs.current_root].adj[treestates[ots].giver.at->parent_dir] = vs.current_root+1;
+    int xdir = treestates[ots].giver.at->parent_dir;
+    vs.vcells[vs.current_root].adj[xdir] = vs.current_root+1;
     vs.vcells[vs.current_root+1].adj[dir] = vs.current_root;
     vs.current_root++;
     }
@@ -1285,7 +1291,7 @@ EX void test_transducers() {
     for(int i=0; i<isize(q); i++) process(i);
     
     if(changes) {
-      println(hlog, "changes = ", changes, " with ", isize(autom), " states, queue size = ", isize(q), ", add = ", isize(important)-impcount, " MI = ", multiple_interpretations);
+      println(hlog, "iteration ", iterations, ": changes = ", changes, " with ", isize(autom), " states, queue size = ", isize(q), ", add = ", isize(important)-impcount, " MI = ", multiple_interpretations);
       if(isize(important) > impcount || multiple_interpretations) err_iter++;
       if(err_iter < max_err_iter) goto next_iteration;
       if(err_iter == max_err_iter) max_err_iter++;
