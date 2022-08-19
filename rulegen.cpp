@@ -2059,6 +2059,9 @@ EX void rules_iteration() {
 
   if(WDIM == 3) {
     check_road_shortcuts();
+    optimize();
+    N = isize(important);
+    check_validity_3d();
     }
 
   if(skipped_branches.size()) {

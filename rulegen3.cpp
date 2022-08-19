@@ -1569,8 +1569,10 @@ EX void check_road_shortcuts() {
     next_roadsign_id = -100;
     throw rulegen_retry("new road shortcuts");
     }
+  }
+
+EX void check_validity_3d() {
   println(hlog, "checking validity, important = ", isize(important));
-  optimize();
   imp_as_set.clear();
   for(auto t: important) imp_as_set.insert(t.at);
   impcount = isize(important);
