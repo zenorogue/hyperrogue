@@ -1985,7 +1985,7 @@ EX void rules_iteration() {
   branch_conflicts_seen.clear();
 
   // handle dead roots -- some of their branches MUST live
-  for(int id=0; id<isize(treestates); id++) if(treestates[id].is_root && !treestates[id].is_live) {
+  if(WDIM == 2) for(int id=0; id<isize(treestates); id++) if(treestates[id].is_root && !treestates[id].is_live) {
     auto r = treestates[id].rules;
     for(int i=0; i<isize(r); i++) if(r[i] >= 0) {
       examine_branch(id, i, i);
@@ -2010,7 +2010,7 @@ EX void rules_iteration() {
     if(examine_branch(id, fb, sb)) checks_to_skip.insert(b);
     };
 
-  for(int id=0; id<isize(treestates); id++) if(treestates[id].is_live) {
+  if(WDIM == 2) for(int id=0; id<isize(treestates); id++) if(treestates[id].is_live) {
     auto r = treestates[id].rules; /* no & because treestates might have moved */
     if(r.empty()) continue;
     int last_live_branch = -1;
@@ -2067,7 +2067,7 @@ EX void rules_iteration() {
     goto after_branches;
     }
 
-  minimize_rules();
+  if(WDIM == 2) minimize_rules();
   find_possible_parents();
   
   if(isize(important) != N)
