@@ -145,92 +145,6 @@ EX int get_roadsign(twalker what) {
   return roadsign_id[result] = next_roadsign_id--;
   }
 
-#if HDR
-using neighborhood = vector<pair<int, int>>;
-#endif
-
-map<pair<int, int>, neighborhood> decision_neighborhoods;
-map<pair<int, int>, neighborhood> validate_neighborhoods;
-
-EX void build_neighborhood(twalker cw, neighborhood& ae, flagtype dec) {
-  set<tcell*> seen;
-  vector<pair<twalker, transmatrix> > visited;
-  vector<pair<twalker, transmatrix> > visited1;
-  vector<pair<int, int>> ae1;
-  auto visit = [&] (twalker tw, const transmatrix& T, int id, int dir) {
-    if(seen.count(tw.at)) return;
-    seen.insert(tw.at);
-    auto& sh0 = currentmap->get_cellshape(tcell_to_cell[cw.at]);
-    auto& sh1 = currentmap->get_cellshape(tcell_to_cell[tw.at]);
-    int common = 0;
-    vector<hyperpoint> kleinized;
-    vector<hyperpoint> rotated;
-    for(auto v: sh0.vertices_only) kleinized.push_back(kleinize(sh0.from_cellcenter * v));
-    for(auto w: sh1.vertices_only) rotated.push_back(kleinize(T*sh1.from_cellcenter * w));
-    
-    for(auto v: kleinized)
-    for(auto w: rotated)
-      if(sqhypot_d(MDIM, v-w) < 1e-6)
-        common++;
-    if(dec & 2) {
-      if(common < 1) { ae1.emplace_back(id, dir); return; }
-      }
-    else {
-      if(common < 2) { ae1.emplace_back(id, dir); return; }
-      }
-    visited.emplace_back(tw, T);
-    ae.emplace_back(id, dir);
-    };
-  visit(cw, Id, -1, -1);
-  for(int i=0; i<isize(visited); i++) {
-    auto tw = visited[i].first;      
-    for(int j=0; j<tw.at->type; j++) {
-      visit(tw + j + wstep, visited[i].second * currentmap->adj(tcell_to_cell[tw.at], (tw+j).spin), i, j);
-      }
-    }
-  if(dec & 4) {
-    for(auto p: ae1) ae.push_back(p);
-    for(auto v: visited1) visited1.push_back(v);
-    }
-  if(dec & 8) {
-    for(int i=0; i<isize(visited); i++) {
-      for(int j=0; j<visited[i].first.at->type; j++) {
-        twalker t = visited[i].first + j + wstep;
-        for(int s=i+1; s<isize(visited); s++) {
-          if(visited[s].first.at == t.at && ae[s].first != i)
-            ae.push_back({i, j});
-          }
-        }
-      }
-    }
-  }
-
-EX neighborhood& get_decision_neighborhood(twalker cw) {
-  auto& ae = decision_neighborhoods[{cw.at->id, cw.spin}];
-  if(ae.empty()) {
-    build_neighborhood(cw, ae, r3_neighborhood_decision);
-    println(hlog, "built decision neighborhood for ", tie(cw.at->id, cw.spin), " of size ", isize(ae));
-    }
-  return ae;
-  }
-
-EX neighborhood& get_validate_neighborhood(twalker cw) {
-  auto& ae = validate_neighborhoods[{cw.at->id, cw.spin}];
-  if(ae.empty()) {
-    build_neighborhood(cw, ae, r3_neighborhood_validate);
-    println(hlog, "built validate neighborhood for ", tie(cw.at->id, cw.spin), " of size ", isize(ae));
-    }
-  return ae;
-  }
-
-EX void validate_neighborhood(twalker cw) {
-  if(!r3_neighborhood_validate) return;
-  auto& ae = get_validate_neighborhood(cw);
-  vector<twalker> list = { cw };
-  for(auto v: ae) if(v.first != -1)
-    list.push_back(list[v.first] + v.second + wstep);
-  }
-
 int last_qroad;
 
 vector<vector<pair<int,int>>> possible_parents;
@@ -1777,8 +1691,6 @@ void genhoneycomb(string fname) {
   }
 
 EX void cleanup3() {
-  decision_neighborhoods.clear();
-  validate_neighborhoods.clear();
   roadsign_id.clear();
   rev_roadsign_id.clear();
   next_roadsign_id = -100;

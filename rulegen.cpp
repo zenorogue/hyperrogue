@@ -97,9 +97,6 @@ static const flagtype w_ignore_transducer_dist = Flag(37); /*< ignore distance e
 /** these control the output */
 EX flagtype rdebug_flags;
 
-EX int r3_neighborhood_decision = 1; /* how far to build local for honeycombs, for decision trees */
-EX int r3_neighborhood_validate = 0; /* how far to build local for honeycombs, for validation */
-
 EX flagtype flags = 0;
 
 EX int64_t movecount;
@@ -1368,15 +1365,7 @@ EX void id_at_spin(twalker cw, vector<twalker>& sprawl, vector<analyzer_state*>&
       a = alloc_analyzer();
       }
     states.push_back(a);
-    if(WDIM == 3 && r3_neighborhood_decision) {
-      auto& ae = get_decision_neighborhood(cw);
-      int id = isize(sprawl);
-      if(id < isize(ae)) {
-        a->id = ae[id].first;
-        a->dir = ae[id].second;
-        }
-      }
-    else if(isize(sprawl) <= cw.at->type) {
+    if(isize(sprawl) <= cw.at->type) {
       a->id = 0, a->dir = isize(sprawl)-1;
       // println(hlog, "need to go in direction ", a->dir);
       }
@@ -1408,7 +1397,6 @@ EX pair<int, int> get_code(twalker& cw) {
     }
 
   be_solid(c);
-  if(WDIM == 3) validate_neighborhood(cw.at);
 
   twalker cd = c->dist == 0 ? twalker(c, 0) : get_parent_dir(cw);
   if(cd.at != c) ufind(cw);
@@ -2511,8 +2499,6 @@ auto hooks = addHook(hooks_configfile, 100, [] {
       param_i(max_ignore_level_post, "max_ignore_level_post");
       param_i(max_ignore_time_pre, "max_ignore_time_pre");
       param_i(max_ignore_time_post, "max_ignore_time_post");
-      param_i(r3_neighborhood_decision, "r3_neighborhood_decision");
-      param_i(r3_neighborhood_validate, "r3_neighborhood_validate");
     });
 
 EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {
