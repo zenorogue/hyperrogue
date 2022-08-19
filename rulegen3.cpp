@@ -252,6 +252,8 @@ struct vstate {
   int current_pos;
   int current_root;
   vector<pair<int, int>> rpath;
+  int steps;
+  vstate() { steps = 0; }
   };
 
 map<int, vector<int>> rev_roadsign_id;
