@@ -872,8 +872,24 @@ void throw_identity_errors(const transducer& id, const vector<int>& cyc) {
       vector<int> path1;
       build_vstate(vs, path1, parent_dir, parent_id, i, [&] (int i) { return q[i].ts; });
       println(hlog, "suspicious path found at ", path1);
+      int err = vs.current_pos;
       bool ok = check_det(vs);
-      if(ok) throw rulegen_failure("suspicious path worked");
+      if(ok) {
+        vector<int> path2;
+        gen_path(vs, path2);
+        println(hlog, "after cycle: ", path2, " (", vs.current_pos, " vs ", err, ")");
+        if(vs.current_pos != err) {
+          rpath_errors++;
+          error_found(vs);
+          return;
+          }
+        else {
+          if(isize(important) > impcount)
+            throw rulegen_retry("suspicious path worked");
+          else
+            throw rulegen_failure("suspicious path worked");
+          }
+        }
       return;
       }
     for(auto p: sch.at->t) {
