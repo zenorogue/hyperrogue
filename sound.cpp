@@ -172,7 +172,6 @@ EX bool loadMusicInfo(string dir) {
           if(buf[5] == 'L' && buf[6] == '=') musiclength[id] = atoi(buf+7);
           else if(buf[5] == '*' && buf[6] == '/') musfname[id] = dir2 + (buf+7);
           else musfname[id] = buf+5;
-          println(hlog, "set up for id=", id);
           music_available = true;
           }
         else {
