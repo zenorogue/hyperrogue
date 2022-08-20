@@ -2243,7 +2243,7 @@ EX namespace reg3 {
         int id = 0;
         for(auto& c: v) {
           while(c->distance > goal) {
-            println(hlog, c, " distance is ", c);
+            println(hlog, c, " distance is ", c->distance);
             int d = find_parent(c);
             paths[id].push_back(c->c.spin(d));
             c = c->move(d);
@@ -2361,7 +2361,9 @@ EX namespace reg3 {
           println(hlog, "find_parent returns ", i, " for ", h);
           return i;
           }
-      println(hlog, "find_parent fails");
+      println(hlog, "find_parent fails for ", h);
+      println(hlog, "aid size = ", isize(quotient_map->acells));
+      println(hlog, "roots size = ", isize(root));
       return 0;
       }
 
