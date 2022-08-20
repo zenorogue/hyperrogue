@@ -942,16 +942,6 @@ EX twalker get_parent_dir(twalker& cw) {
   
   be_solid(c);
 
-  if(WDIM == 3) {
-    for(int i=0; i<c->type; i++) {
-      tcell *c1 = c->cmove(i);
-      if(c1->dist < c->dist) {
-        c->parent_dir = i;
-        return twalker(c, i);
-        }
-      }
-    }
-
   auto oc = c;
 
   if(c->dist > 0) {
