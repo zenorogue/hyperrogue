@@ -377,6 +377,15 @@ void settings() {
   dialog::add_key_action('r', [] {
     pushScreen(showSettings);
     });
+
+  #if CAP_FILES && !ISWEB
+  dialog::addItem("save the current config", 's');
+  dialog::add_action([] {
+    dynamicval<eGeometry> g(geometry, gNormal);
+    saveConfig();
+    });
+  #endif
+
   dialog::addBreak(100);
   dialog::addBack();
   dialog::display();
