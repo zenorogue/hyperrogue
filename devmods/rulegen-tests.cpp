@@ -1747,6 +1747,24 @@ int testargs() {
       println(hlog, "wrong dseek index");
     }
 
+  else if(argis("-fields")) {
+    fieldpattern::fpattern fp(0);
+    start_game();
+    fp.force_hash = 1;
+    fieldpattern::use_quotient_fp = true;
+    set<unsigned> seen_hashes;
+    addHook(fieldpattern::hooks_solve3, 100, [&] {
+      if(seen_hashes.count(fp.hashv)) return;
+      seen_hashes.insert(fp.hashv);
+      println(hlog, "FOUND p=", fp.Prime, " f=", fp.Field, " hash = ", fp.hashv);
+      });
+    for(int p=2; p<100; p++) {
+      println(hlog, "listing hashes for p=", p);
+      fp.Prime = p;
+      fp.solve();
+      }
+    }
+
   else return 1;
   return 0;
   }
