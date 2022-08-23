@@ -2264,7 +2264,7 @@ EX namespace reg3 {
       println(hlog, "loading a subrule ruleset");
 
       load_ruleset_new(get_rule_filename());
-      quotient_map = gen_quotient_map(is_minimized(), fp);
+      quotient_map = gen_quotient_map(minimize_quotient_maps, fp);
       int t = quotient_map->acells[0]->type;
       find_mappings();
 
@@ -2426,7 +2426,7 @@ EX bool reg3_rule_available = true;
 EX string other_rule = "";
 
 EX bool is_minimized() {
-  return geometry == gSpace535;
+  return geometry != gSpace535 && geometry != gSpace344;
   }
 
 EX string get_rule_filename() {
