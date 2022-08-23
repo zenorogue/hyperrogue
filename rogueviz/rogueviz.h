@@ -342,6 +342,25 @@ namespace objmodels {
 #define addHook_slideshows(x, y) 0
 #define addHook_rvtour(x, y) 0
 #endif
+
+  /* parallelize a computation */
+  inline int threads = 1;
+
+  template<class T> auto parallelize(long long N, T action) -> decltype(action(0,0)) {
+    if(threads == 1) return action(0,N);
+    std::vector<std::thread> v;
+    typedef decltype(action(0,0)) Res;
+    std::vector<Res> results(threads);
+    for(int k=0; k<threads; k++)
+      v.emplace_back([&,k] () { 
+        results[k] = action(N*k/threads, N*(k+1)/threads); 
+        });
+    for(std::thread& t:v) t.join();
+    Res res = 0;
+    for(Res r: results) res += r;
+    return res;
+    }
+
   }
 
 #endif

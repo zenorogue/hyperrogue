@@ -16,30 +16,6 @@
 
 // press 'o' when flocking active to change the parameters.
 
-#ifdef USE_THREADS
-#include <thread>
-int threads = 1;
-#endif
-
-template<class T> auto parallelize(long long N, T action) -> decltype(action(0,0)) {
-#ifndef USE_THREADS
-  return action(0,N);
-#else
-  if(threads == 1) return action(0,N);
-  std::vector<std::thread> v;
-  typedef decltype(action(0,0)) Res;
-  std::vector<Res> results(threads);
-  for(int k=0; k<threads; k++)
-    v.emplace_back([&,k] () { 
-      results[k] = action(N*k/threads, N*(k+1)/threads); 
-      });
-  for(std::thread& t:v) t.join();
-  Res res = 0;
-  for(Res r: results) res += r;
-  return res;
-#endif
-  }
-
 #include "rogueviz.h"
 
 namespace rogueviz {
@@ -372,11 +348,9 @@ namespace flocking {
       shift(); ini_speed = argf();
       shift(); max_speed = argf();
       }
-    #ifdef USE_THREADS
     else if(argis("-threads")) {
       shift(); threads = argi();
       }
-    #endif
     else return 1;
     return 0;
     }
