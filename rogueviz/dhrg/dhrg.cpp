@@ -1,40 +1,8 @@
 // see this paper: https://arxiv.org/abs/2109.11772
 
-#define DHRGVER "7.1"
-#include "../rogueviz.h"
-
-#define LONG_BRACKETS
+#include "dhrg.h"
 
 namespace rogueviz { extern string fname; }
-
-namespace dhrg {
-
-using namespace hr;
-
-#ifndef BOXSIZE
-static const int BOXSIZE = 32;
-#endif
-static const int MAXDIST = (2*BOXSIZE);
-static const int SETS = 4;
-
-struct segment;
-
-cell *croot() { return currentmap->gamestart(); }
-
-int M;
-vector<struct mycell*> vertices;
-
-vector<ld> disttable0, disttable1;
-
-void memoryInfo();
-
-void cellcoords();
-void origcoords();
-void build_disttable();
-
-void dhrg_init();
-bool dhrg_animate(int sym, int uni);
-}
 
 #include "readgraph.cpp"
 #include "dhrg-utils.cpp"
@@ -52,6 +20,10 @@ bool dhrg_animate(int sym, int uni);
 #include "routing.cpp"
 
 namespace dhrg {
+
+int M;
+vector<struct mycell*> vertices;
+vector<ld> disttable0, disttable1;
 
 void memoryInfo() {
   string s = "";

@@ -2,9 +2,10 @@
 
 #include <thread>
 #define USE_THREADS
-int threads = 32;
 
 namespace dhrg {
+
+int threads = 32;
 
 ld llcont_approx_prec = 10000;
 
@@ -73,15 +74,6 @@ ld bestll(ld a, ld b) {
 ld bestll2(ld a, ld ab) { return bestll(a, ab-a); }
 
 // various methods of loglikelihood computation
-
-struct logistic {
-  ld R, T;
-  ld yes(ld d) { return 1/(1 + exp((d-R) / 2 / T)); }
-  ld no(ld d) { return 1/(1 + exp(-(d-R) / 2 / T)); }
-  ld lyes(ld d) { return log(yes(d)); }
-  ld lno(ld d) { return log(no(d)); }
-  void setRT(ld _R, ld _T) { R = _R; T = _T; }
-  };
 
 template<class T> void fix_logistic_parameters(logistic& l, const T& f, const char *name, ld eps) {
   indenter_finish im("fix_logistic_parameters");
@@ -379,7 +371,7 @@ void build_disttable_approx() {
         disttable_approx[i][j] += r[i][j];
   }
 
-ld loglik_cont_approx(logistic& l = current_logistic) {
+ld loglik_cont_approx(logistic& l) {
     
   ld llh = 0;
   int N = isize(disttable_approx);
@@ -389,46 +381,50 @@ ld loglik_cont_approx(logistic& l = current_logistic) {
     if(disttable_approx[i][1])
       llh += l.lyes((i+.5)/llcont_approx_prec) * disttable_approx[i][1];
     }
-  
   return llh;
   }
 
-template<class T> void fast_loglik_cont(logistic& l, const T& f, const char *name, ld start, ld eps) {
+using logisticfun = std::function<ld(logistic&)>;
 
-  indenter_finish im("fix_logistic_parameters");
+void fast_loglik_cont(logistic& l, const logisticfun& f, const char *name, ld start, ld eps) {
+
+  if(name) println(hlog, "fix_logistic_parameters");
+  indenter_finish im(name);
   ld cur = f(l);
-  println(hlog, format("%s = %20.10" PLDF " (R=%10.5" PLDF " T=%" PLDF ")\n", name, cur, l.R, l.T));
+  if(name) println(hlog, format("%s = %20.10" PLDF " (R=%10.5" PLDF " T=%" PLDF ")", name, cur, l.R, l.T));
 
   map<pair<double, double>, double> memo;
   auto ff = [&] () {
+    if(l.T < -5) exit(1);
     if(memo.count(make_pair(l.R, l.T)))
       return memo[make_pair(l.R, l.T)];
     return memo[make_pair(l.R, l.T)] = f(l);
     };
+  
+  int steps = 0;
 
   for(ld step=start; step>eps; step /= 2) {
   
     loop:
     bool changed = false;        
     
-    while(true) { l.R += step; ld t = ff(); if(t <= cur) break; cur = t; changed = true; }
+    while(true) { steps++; l.R += step; ld t = ff(); if(t <= cur || steps > 1000) break; cur = t; changed = true; }
     l.R -= step;
     
-    while(true) { l.R -= step; ld t = ff(); if(t <= cur) break; cur = t; changed = true; }
+    while(true) { steps++; l.R -= step; ld t = ff(); if(t <= cur || steps > 1000) break; cur = t; changed = true; }
     l.R += step;
 
-    while(true) { l.T += step; ld t = ff(); if(t <= cur) break; cur = t; changed = true; }
+    while(true) { steps++; l.T += step; ld t = ff(); if(t <= cur || steps > 1000) break; cur = t; changed = true; }
     l.T -= step;
     
-    while(true) { l.T -= step; ld t = ff(); if(t <= cur) break; cur = t; changed = true; }
+    while(true) { steps++; l.T -= step; ld t = ff(); if(t <= cur || l.T < 1e-3 || steps > 1000) break; cur = t; changed = true; }
     l.T += step;
     
     if(changed) goto loop;
 
-    println(hlog, format("%s = %20.10" PLDF " (R=%10.5" PLDF " T=%10.5" PLDF ")\n", name, cur, l.R, l.T));
+    if(name) println(hlog, format("%s = %20.10" PLDF " (R=%10.5" PLDF " T=%10.5" PLDF ")", name, cur, l.R, l.T));
     fflush(stdout);
     }
   }
-
 
 }

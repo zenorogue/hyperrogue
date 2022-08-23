@@ -3,8 +3,6 @@
 
 namespace dhrg {
 
-typedef long long ll;
-
 struct progressbar : indenter_finish {
   string name;
   static const int PBSIZE = 64;
