@@ -451,7 +451,6 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
       shader_flags |= SF_ORIENT;
       }
     else if((shader_flags & SF_PERS3) && stereo_alpha && !vrhr::rendering_eye()) {
-      vmain += "t = uPP * t;", vsh += "uniform mediump mat4 uPP;";
       vmain += stereo_shader();
       }
       
