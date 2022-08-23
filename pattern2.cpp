@@ -2565,7 +2565,7 @@ EX namespace patterns {
   EX }
 
 EX bool is_master(cell *c) { 
-  if(euclid) return pseudohept(c);
+  if(euc::in(2)) return pseudohept(c);
   else return c->master->c7 == c;
   }
 
