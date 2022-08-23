@@ -121,7 +121,7 @@ EX namespace reg3 {
   EX bool in() {
     if(fake::in()) return FPIU(in());
     if(geometry == gCubeTiling && (cubes_reg3 || !PURE)) return true;
-    return WDIM == 3 && /* !euclid && */ !bt::in() && !nonisotropic && !hybri && !kite::in();
+    return WDIM == 3 && !euclid && !bt::in() && !nonisotropic && !hybri && !kite::in();
     }
 
   EX void compute_ultra() {
