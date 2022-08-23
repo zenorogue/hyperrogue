@@ -585,6 +585,8 @@ void fpattern::generate_quotientgroup() {
   
   }
 
+EX purehookset hooks_solve3;
+
 int fpattern::solve3() {
   reg3::construct_relations();
   
@@ -630,6 +632,7 @@ int fpattern::solve3() {
       }
     P = xP; R = xR; X = xX;
     if(!generate_all3()) continue;
+    callhooks(hooks_solve3);
     #if CAP_THREAD && MAXMDIM >= 4
     if(dis) { dis->discovered(); continue; }
     #endif
