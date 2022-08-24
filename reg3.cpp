@@ -2485,6 +2485,10 @@ hrmap_h3* hypmap() {
   return ((hrmap_h3*) currentmap);
   }
 
+EX bool in_hrmap_h3() {
+  return dynamic_cast<hrmap_h3*> (currentmap);
+  }
+
 EX int quotient_count() {
   return isize(hypmap()->quotient_map->allh);
   }
