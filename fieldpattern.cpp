@@ -142,14 +142,23 @@ struct fpattern {
     }
   
   int sqr(int x) { return mul(x,x); }
-  
+
+  int err;
+
   matrix mmul(const matrix& A, const matrix& B) {
     matrix res;
     for(int i=0; i<MWDIM; i++) for(int k=0; k<MWDIM; k++) {
       int t = 0;
   #ifdef EASY
-      for(int j=0; j<MWDIM; j++) t += mul(A[i][j], B[j][k]);
-      t %= Prime;
+      int tp = 0, tn = 0;
+      for(int j=0; j<MWDIM; j++) {
+        int val = mul(A[i][j], B[j][k]);
+        if(val > 0) tp += val;
+        else tn += val;
+        }
+      tp %= Prime; tn %= Prime;
+      if(tp && tn) err++;
+      t = tp + tn;
   #else
       for(int j=0; j<MWDIM; j++) t = add(t, mul(A[i][j], B[j][k]));
   #endif
@@ -362,12 +371,13 @@ struct discovery {
 #endif
 
 bool fpattern::check_order(matrix M, int req) {
+  int err = 0;
   matrix P = M;
   for(int i=1; i<req; i++) {
     if(P == Id) return false;
     P = mmul(P, M);
     }
-  return P == Id;
+  return P == Id && !err;
   }
 
 vector<matrix> fpattern::generate_isometries() {
@@ -497,6 +507,7 @@ unsigned fpattern::compute_hash() {
 bool fpattern::generate_all3() {
 
   reg3::generate_fulls();
+  err = 0;
 
   matrices.clear();
   matcode.clear();
@@ -505,19 +516,23 @@ bool fpattern::generate_all3() {
   for(int i=0; i<isize(matrices); i++) {
     add1(mmul(matrices[i], R), fullv[i] * cgi.full_R);
     add1(mmul(matrices[i], X), fullv[i] * cgi.full_X);
+    if(err) return false;
     }
   local_group = isize(matrices);
+  if(local_group != isize(cgi.cellrotations)) return false;
+
   for(int i=0; i<(int)matrices.size(); i++) {
     matrix E = mmul(matrices[i], P);
     if(!matcode.count(E))
       for(int j=0; j<local_group; j++) add1(mmul(E, matrices[j]));
+    if(err) return false;
     if(isize(matrices) >= limitv) { println(hlog, "limitv exceeded"); return false; }
     }
   hashv = compute_hash();
   DEBB(DF_FIELD, ("all = ", isize(matrices), "/", local_group, " = ", isize(matrices) / local_group, " hash = ", hashv, " count = ", ++hash_found[hashv]));
   
   if(use_quotient_fp) 
-    generate_quotientgroup();
+    generate_quotientgroup();  
   return true;
   }
 
@@ -588,7 +603,8 @@ void fpattern::generate_quotientgroup() {
 EX purehookset hooks_solve3;
 
 int fpattern::solve3() {
-  reg3::construct_relations();
+
+  reg3::generate_fulls();
   
   DEBB(DF_FIELD, ("generating isometries for ", Field));
   
@@ -596,10 +612,6 @@ int fpattern::solve3() {
   auto iso4 = generate_isometries3();
 
   int cmb = 0;
-  
-  int N = isize(cgi.rels);
-  
-  vector<int> fails(N);
   
   vector<matrix> possible_P, possible_X, possible_R;
   
@@ -616,20 +628,18 @@ int fpattern::solve3() {
   DEBB(DF_FIELD, ("field = ", Field, " #P = ", isize(possible_P), " #X = ", isize(possible_X), " #R = ", isize(possible_R), " r_order = ", cgi.r_order, " xp_order = ", cgi.xp_order));
                                                                                                                                
   for(auto& xX: possible_X)
-  for(auto& xP: possible_P) if(check_order(mmul(xP, xX), cgi.xp_order))
-  for(auto& xR: possible_R) if(check_order(mmul(xR, xX), cgi.rx_order)) { // if(xR[0][0] == 1 && xR[0][1] == 0) 
-    #if CAP_THREAD && MAXMDIM >+ 4
+  for(auto& xP: possible_P) if(check_order(mmul(xP, xX), cgi.xp_order)) 
+  for(auto& xR: possible_R) if(check_order(mmul(xR, xX), cgi.rx_order)) {
+
+    err = 0;
+    if(mmul(xX, xP) != mmul(xR, mmul(mmul(xP, xX), xR))) continue;
+    if(err) continue;
+
+    #if CAP_THREAD && MAXMDIM >= 4
     if(dis) dis->check_suspend();
     if(dis && dis->stop_it) return 0;
     #endif
-    auto by = [&] (char ch) -> matrix& { return ch == 'X' ? xX : ch == 'R' ? xR : xP; };
-    for(int i=0; i<N; i++) {
-      matrix ml = Id;
-      for(char c: cgi.rels[i].first) { ml = mmul(ml, by(c)); if(ml == Id) { fails[i]++; goto bad; }}
-      matrix mr = Id;
-      for(char c: cgi.rels[i].second) { mr = mmul(mr, by(c)); if(mr == Id) { fails[i]++; goto bad; }}
-      if(ml != mr) { fails[i]++; goto bad;}
-      }
+
     P = xP; R = xR; X = xX;
     if(!generate_all3()) continue;
     callhooks(hooks_solve3);
@@ -639,13 +649,11 @@ int fpattern::solve3() {
     if(force_hash && hashv != force_hash) continue;
     cmb++;
     goto ok;
-    bad: ;
     }
-  
+
   ok:
 
   DEBB(DF_FIELD, ("cmb = ", cmb, " for field = ", Field));
-  for(int i=0; i<N; i++) if(fails[i]) DEBB(DF_FIELD, (cgi.rels[i], " fails = ", fails[i]));
   
   return cmb;
   }
