@@ -191,7 +191,6 @@ struct geometry_information {
   
   vector<transmatrix> ultra_mirrors;  
 
-  vector<pair<string, string> > rels;
   int xp_order, r_order, rx_order;
 
   transmatrix full_X, full_R, full_P;
