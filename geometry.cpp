@@ -585,6 +585,8 @@ void geometry_information::prepare_basics() {
   
   heptshape = nullptr;
 
+  xp_order = 0;
+
   if(arcm::in() && !prod) 
     ginf[gArchimedean].cclass = gcHyperbolic;
   

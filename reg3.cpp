@@ -2748,6 +2748,7 @@ EX int matrix_order(const transmatrix A) {
 
 EX void generate_fulls() {
   reg3::generate_cellrotations();
+  if(cgi.xp_order) return;
 
   auto cons = [&] (int i0, int i1, int i2) {
     transmatrix T = build_matrix(cgi.adjmoves[ 0]*C0, cgi.adjmoves[ 1]*C0, cgi.adjmoves[ 2]*C0, C0);
