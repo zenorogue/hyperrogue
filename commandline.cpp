@@ -287,7 +287,12 @@ int arg::readCommon() {
     View = Id;
     }
   else if(argis("-exit")) {
-    PHASE(3); println(hlog, "Success.\n");
+    PHASE(3);
+    int t = SDL_GetTicks();
+    if(t > 1800 * 1000)
+      println(hlog, "Great Success!\n");
+    else
+      println(hlog, "Success.\n");
     exit(0);
     }
 
