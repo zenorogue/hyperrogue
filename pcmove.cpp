@@ -1552,7 +1552,7 @@ EX void sideAttackAt(cell *mf, int dir, cell *mt, eMonster who, eItem orb, cell 
     if(who != moPlayer) markOrb(itOrbEmpathy);
     int kk = 0;
     if(orb == itOrbPlague) kk = tkills();
-    if(attackMonster(mt, AF_NORMAL | AF_SIDE | AF_MSG, who) || isAnyIvy(m)) {
+    if(attackMonster(mt, AF_NORMAL | f | AF_MSG, who) || isAnyIvy(m)) {
       if(orb == itOrbPlague && kk < tkills())
         plague_kills++;
       if(mt->monst != m) spread_plague(mf, mt, dir, who);
