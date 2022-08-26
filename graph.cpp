@@ -1046,8 +1046,10 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     
     if(xch == 'c')
       queuepolyat(Vit * spinptick(500, 0), cgi.shMoonDisk, darkena(0x801080, 0, hidden ? 0x20 : 0xC0), prio);
-    else
-      queuepolyat(Vit, cgi.shDisk, darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), prio);
+    else {
+      auto shape = (it == itOrbFriend) ? cgi.shTinyBird : cgi.shDisk;;
+      queuepolyat(Vit, shape, darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), prio);
+    }
 
     queue_ring(Vit * spinptick(1500, 0), orbshape(iinf[it].orbshape), col, prio);
     }
