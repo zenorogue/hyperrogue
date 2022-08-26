@@ -1722,7 +1722,7 @@ auto hook = addHook(hooks_args, 100, readArgs);
 
 EX bool in() { return geometry == gArbitrary; }
 
-EX string tes = "tessellations/sample/marjorie-rice.tes";
+EX string tes = find_file("tessellations/sample/marjorie-rice.tes");
 
 EX bool linespattern(cell *c) {
   return current.shapes[id_of(c->master)].flags & arcm::sfLINE;

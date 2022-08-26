@@ -766,6 +766,19 @@ EX bool file_exists(string fname) {
   return access(fname.c_str(), F_OK) != -1;
   }
 
+/** find a file named s, possibly in HYPERPATH */
+EX string find_file(string s) {
+  string s1;
+  if(file_exists(s)) return s;
+  char *p = getenv("HYPERPATH");
+  if(p && file_exists(s1 = s0 + p + s)) return s1;
+  if(file_exists(s1 = HYPERPATH + s)) return s1;
+#ifdef FHS
+  if(file_exists(s1 = "/usr/share/hyperrogue/" + s)) return s1;
+#endif
+  return s;
+  }
+
 EX void open_url(string s) {
   #if ISWEB
   EM_ASM_({

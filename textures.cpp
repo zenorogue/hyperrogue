@@ -28,6 +28,10 @@ struct textureinfo : basic_textureinfo {
   };
 #endif
 
+#if HDR
+string find_file(string s);
+#endif
+
 EX namespace texture {
 
 #if HDR
@@ -120,8 +124,8 @@ struct texture_config {
 
   texture_config() {
     // argh, no member initialization in some of my compilers
-    texturename = "textures/hyperrogue-texture.png";
-    configname = "textures/hyperrogue.txc";
+    texturename = find_file("textures/hyperrogue-texture.png");
+    configname = find_file("textures/hyperrogue.txc");
     itt = Id; 
     grid_color = 0;
     mesh_color = 0;

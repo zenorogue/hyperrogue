@@ -207,7 +207,7 @@ EX bool loadMusicInfo() {
 #endif
 #ifdef FHS
     || loadMusicInfo("/usr/share/hyperrogue/hyperrogue-music.txt") 
-    || loadMusicInfo(s0 + getenv("HOME") + "/.hyperrogue-music.txt")
+    || (getenv("HOME") && loadMusicInfo(s0 + getenv("HOME") + "/.hyperrogue-music.txt"))
 #endif
     ;
   }
