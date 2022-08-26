@@ -1349,6 +1349,7 @@ void geometry_information::prepare_shapes() {
   bshape(shFrogJumpLeg, PPR::MONSTER_FOOT, scalefactor, 404);
 
   bshape(shPBody, PPR::MONSTER_BODY, scalefactor, 85);
+  bshape(shSmallPBody, PPR::MONSTER_BODY, scalefactor/2, 85);
   bshape(shYeti, PPR::MONSTER_BODY, scalefactor, 86);
   bshape(shPSword, PPR::MONSTER_WPN, scalefactor, 90);
   bshape(shFerocityM, PPR::MONSTER_WPN, scalefactor, 361);

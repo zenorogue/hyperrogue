@@ -276,7 +276,7 @@ hpcshape
   shWolf1, shWolf2, shWolf3,
   shRatEye1, shRatEye2, shRatEye3,
   shDogStripes,
-  shPBody, shPSword, shPKnife,
+  shPBody, shSmallPBody, shPSword, shPKnife,
   shFerocityM, shFerocityF, 
   shHumanFoot, shHumanLeg, shHumanGroin, shHumanNeck, shSkeletalFoot, shYetiFoot,
   shMagicSword, shMagicShovel, shSeaTentacle, shKrakenHead, shKrakenEye, shKrakenEye2,
