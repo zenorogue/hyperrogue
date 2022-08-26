@@ -215,8 +215,6 @@ namespace sag {
   
   // std::mt19937 los;
 
-  bool infullsa;
-  
   double cost;
 
   vector<double> chgs;  
@@ -365,6 +363,33 @@ namespace sag {
       
       }
     
+    temperature = -5;
+    sagmode = sagOff;
+    reassign();
+    }
+
+  void dofullsa_iterations(int saiter) {
+    sagmode = sagSA;
+
+    decltype(SDL_GetTicks()) t1 = -999999;
+
+    for(int i=0; i<saiter; i++) {
+
+      temperature = hightemp - ((i+.5)/saiter*(hightemp-lowtemp));
+      numiter++;
+      sag::saiter();
+
+      if(numiter % 10000 == 0) {
+        auto t2 = SDL_GetTicks();
+        if(t2 - t1 > 1000) {
+          t1 = t2;
+          println(hlog, format("it %8d temp %6.4f [1/e at %13.6f] cost = %f ",
+            numiter, double(sag::temperature), (double) exp(sag::temperature),
+            double(sag::cost)));
+          }
+        }
+      }
+
     temperature = -5;
     sagmode = sagOff;
     reassign();
@@ -953,6 +978,7 @@ int readArgs() {
   else if(argis("-sagrt")) {
     shift(); sag::lgsag.R = argf();
     shift(); sag::lgsag.T = argf();
+    if(sag::logistic_cost) compute_loglik_tab();
     }
   else if(argis("-sag_use_loglik")) {  
     shift(); sag::logistic_cost = argi();
@@ -1003,12 +1029,18 @@ int readArgs() {
   else if(argis("-sagfull")) {
     shift(); sag::dofullsa(argi());
     }
+  else if(argis("-sagfulli")) {
+    shift(); sag::dofullsa_iterations(argi());
+    }
   else if(argis("-sagviz")) {
     sag::vizsa_start = SDL_GetTicks();
     shift(); sag::vizsa_len = argi();
     }
   else if(argis("-sagstats")) {
     output_stats();
+    }
+  else if(argis("-sagstats-logid")) {
+    shift(); logid = argi();
     }
 // (5) save the positioning
   else if(argis("-sagsave")) {
