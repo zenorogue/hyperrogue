@@ -1061,10 +1061,26 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
           if (i>=5 && i<=7)
             queuepolyat(Vit*Mirror, cgi.shTortoise[i][2], dark, prio);
           }
+      else if (it == itOrbFrog) {
+        queuepolyat(Vit, cgi.shSmallFrogBody, dark, prio);
+        queuepolyat(Vit, cgi.shSmallFrogRearFoot, dark, prio);
+        queuepolyat(Vit, cgi.shSmallFrogRearLeg, dark, prio);
+        queuepolyat(Vit, cgi.shSmallFrogRearLeg2, dark, prio);
+        queuepolyat(Vit, cgi.shSmallFrogFrontFoot, dark, prio);
+        queuepolyat(Vit, cgi.shSmallFrogFrontLeg, dark, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallFrogRearFoot, dark, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallFrogRearLeg, dark, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallFrogRearLeg2, dark, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallFrogFrontFoot, dark, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallFrogFrontLeg, dark, prio);
+        }
       else {
         auto shape = (it == itOrbFriend) ? cgi.shTinyBird :
+                     (it == itOrbSide1) ? cgi.shSmallPSword :
                         cgi.shDisk;
         queuepolyat(Vit, shape, dark, prio);
+        if (it == itOrbSide1)
+          queuepolyat(Vit*Mirror, shape, dark, prio);
         }
       }
 

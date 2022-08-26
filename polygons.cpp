@@ -1348,6 +1348,12 @@ void geometry_information::prepare_shapes() {
   bshape(shFrogFrontLeg, PPR::MONSTER_LEG, scalefactor, 396);
   bshape(shFrogRearLeg2, PPR::MONSTER_LEG, scalefactor, 397);
   bshape(shFrogBody, PPR::MONSTER_BODY, scalefactor, 398);
+  bshape(shSmallFrogRearFoot, PPR::MONSTER_FOOT, scalefactor/2, 393);
+  bshape(shSmallFrogFrontFoot, PPR::MONSTER_FOOT, scalefactor/2, 394);
+  bshape(shSmallFrogRearLeg, PPR::MONSTER_LEG, scalefactor/2, 395);
+  bshape(shSmallFrogFrontLeg, PPR::MONSTER_LEG, scalefactor/2, 396);
+  bshape(shSmallFrogRearLeg2, PPR::MONSTER_LEG, scalefactor/2, 397);
+  bshape(shSmallFrogBody, PPR::MONSTER_BODY, scalefactor/2, 398);
   bshape(shFrogEye, PPR::MONSTER_EYE0, scalefactor, 399);
   bshape(shFrogStripe, PPR::MONSTER_BODY, scalefactor, 400);
   bshape(shFrogJumpFoot, PPR::MONSTER_FOOT, scalefactor, 401);
@@ -1357,6 +1363,7 @@ void geometry_information::prepare_shapes() {
   bshape(shSmallPBody, PPR::MONSTER_BODY, scalefactor/2, 85);
   bshape(shYeti, PPR::MONSTER_BODY, scalefactor, 86);
   bshape(shPSword, PPR::MONSTER_WPN, scalefactor, 90);
+  bshape(shSmallPSword, PPR::MONSTER_WPN, scalefactor/2, 90);
   bshape(shFerocityM, PPR::MONSTER_WPN, scalefactor, 361);
   bshape(shFerocityF, PPR::MONSTER_WPN, scalefactor, 362);
   bshape(shPKnife, PPR::MONSTER_WPN, scalefactor, 91);
