@@ -2387,6 +2387,65 @@ EX namespace reg3 {
     bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override {
       return ruleset_link_alt(h, alt, firststate, dir);
       }
+
+    void dump(string fname) {
+      fhstream f(fname, "wt");
+      int T = isize(quotient_map->acells);
+      println(hlog, hyperbolic ? "h3." : "e3.");
+      println(f, "celltypes ", T);
+      for(int t=0; t<T; t++) {
+        auto &sh = quotient_map->get_cellshape(quotient_map->acells[t]);
+        println(f, "celltype ", t, " ", isize(sh.faces));
+        int id = 0;
+        for(auto& fa: sh.faces_local) {
+          println(f, "face ", t, " ", id++, " ", isize(fa));
+          for(auto& h: fa) {
+            auto h1 = kleinize(h);
+            println(f, format("%.20f %.20f %.20f", h1[0], h1[1], h1[2]));
+            }
+          }
+        println(f);
+        }
+      for(int t=0; t<T; t++) {
+        auto c = quotient_map->acells[t];
+        for(int i=0; i<c->type; i++) {
+          auto c1 = c->move(i);
+          auto t1 = c1->master->fieldval % T;
+          auto s1 = c->c.spin(i);
+          println(f, "connection ", t, " ", i, " ", t1, " ", s1);
+          transmatrix T = quotient_map->adj(c, i);
+          for(int i=0; i<4; i++) {
+            for(int j=0; j<4; j++) {
+              print(f, format("%.20f", T[i][j]), j == 3 ? "\n" : " ");
+              }
+            }
+          println(f);
+          }
+        }
+      println(f, "states ", isize(childpos) - 1);
+      for(int t=0; t<T; t++) print(f, root[t % isize(root)], t == T-1 ? "\n" : " ");
+      for(int i=0; i<isize(childpos)-1; i++) {
+        int S = childpos[i+1] - childpos[i];
+        print(f, "state ", i, " ", S);
+        for(int u=childpos[i]; u<childpos[i+1]; u++) {
+          if(children[u] >= 0) {
+            print(f, " ", children[u]);
+            continue;
+            }
+          int pos = otherpos[u];
+          if(other[pos] == ('A' + u - childpos[i]) && other[pos+1] == ',') {
+            print(f, " P");
+            continue;
+            }
+          print(f, " (");
+          while(other[pos] != ',') {
+            print(f, " ", other[pos++] - 'a');
+            }
+          print(f, " )");
+          }
+        println(f);
+        }
+      }
     };
 
   struct hrmap_h3_rule_alt : hrmap {
@@ -2442,6 +2501,11 @@ ruleset& get_ruleset() {
   auto h2 = dynamic_cast<hrmap_h3_rule*> (currentmap);
   if(h2) return *h2;
   throw hr_exception("get_ruleset called but not in rule");
+  }
+
+EX void dump_rules(string fname) {
+  auto h = dynamic_cast<hrmap_h3_subrule*> (currentmap);
+  if(h) h->dump(fname);
   }
 
 EX int rule_get_root(int i) {

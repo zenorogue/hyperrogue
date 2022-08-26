@@ -1736,6 +1736,11 @@ int readRuleArgs3() {
     shift(); rulegen::less_states = argi();
     }
 
+  else if(argis("-dump-rules")) {
+    start_game();
+    shift(); reg3::dump_rules(args());
+    }
+
   else if(argis("-clean-rules")) {
     cleanup();
     }
