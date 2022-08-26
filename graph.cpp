@@ -1055,6 +1055,12 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
       else if (it == itOrbBeauty)
         for(int u=0; u<3; u++)
           queuepolyat(Vit * spin(2*M_PI / 3 / 3 * u), cgi.shSmallRose, dark, prio);
+      else if (it == itOrbShell)
+        for(int i = 1; i<8; i++) {
+          queuepolyat(Vit, cgi.shTortoise[i][2], dark, prio);
+          if (i>=5 && i<=7)
+            queuepolyat(Vit*Mirror, cgi.shTortoise[i][2], dark, prio);
+          }
       else {
         auto shape = (it == itOrbFriend) ? cgi.shTinyBird :
                         cgi.shDisk;
