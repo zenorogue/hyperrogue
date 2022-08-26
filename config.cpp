@@ -649,6 +649,8 @@ EX void initConfig() {
   param_b(no_find_player, "no_find_player");
   param_b(game_keys_scroll, "game_keys_scroll");
   param_b(reg3::cubes_reg3, "cubes_reg3");
+  param_f(linepatterns::tree_starter, "tree_starter")
+  -> editable(0, 1, 0.05, "tree-drawing parameter", "How much of edges to draw for tree patterns (to show how the tree edges are oriented).", 't');
 
   param_b(arb::apeirogon_consistent_coloring, "apeirogon_consistent_coloring", true)
   -> editable("apeirogon_consistent_coloring", 'c');

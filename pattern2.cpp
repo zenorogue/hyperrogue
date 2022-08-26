@@ -2693,13 +2693,15 @@ EX namespace linepatterns {
       )
     );
 
+  EX ld tree_starter = 0.25;
+
   EX linepattern patTree = linepattern("underlying tree", 0x00d0d000, cheating,
     ALLCELLS(
       if(is_master(c)) {
         int dir = updir(c->master);
         if(dir == -1) continue;
         hyperpoint end = currentmap->master_relative(c, true) * currentmap->adj(c->master, dir) * C0;
-        hyperpoint start = mid(C0, mid(C0, mid(C0, end)));
+        hyperpoint start = normalize(C0 + tree_starter * (end - C0));
         gridlinef(V, start, V, end, col, 2 + vid.linequality);
         }
       )
@@ -2710,7 +2712,7 @@ EX namespace linepatterns {
         int dir = updir_alt(c->master);
         if(dir == -1) continue;
         hyperpoint end = currentmap->master_relative(c, true) * currentmap->adj(c->master, dir) * C0;
-        hyperpoint start = mid(C0, mid(C0, mid(C0, end)));
+        hyperpoint start = normalize(C0 + tree_starter * (end - C0));
         gridlinef(V, start, V, end, col, 2 + vid.linequality);
         }
       )
@@ -2861,8 +2863,11 @@ EX namespace linepatterns {
   EX linepattern patTriTree = linepattern("triangle grid: tree edges", 0xFFFFFF00, always_available,
     ALLCELLS(
       cell *parent = ts::right_parent(c, curr_dist);
-      if(gmatrix.count(parent)) 
-        gridlinef(V, C0, V * currentmap->adj(c, neighborId(c, parent)), C0, col, 2 + vid.linequality);
+      if(gmatrix.count(parent)) {
+        hyperpoint end = tC0(currentmap->adj(c, neighborId(c, parent)));
+        hyperpoint start = normalize(C0 + tree_starter * (end - C0));
+        gridlinef(V, start, V, end, col, 2 + vid.linequality);
+        }
       )
     );
   EX linepattern patTriOther = linepattern("triangle grid: other edges", 0xFFFFFF00, always_available, 
@@ -3023,6 +3028,8 @@ EX namespace linepatterns {
     dialog::add_action([] () { 
       dialog::editNumber(width, 0, 10, 0.1, 1, XLAT("line width"), "");
       });
+
+    add_edit(tree_starter);
 
     dialog::addBoolItem_action("edit widths individually", indiv, 'I');
 
