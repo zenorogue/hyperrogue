@@ -534,7 +534,11 @@ struct tuplehash {
 std::unordered_map<tuple<tcell*, int, int>, tcell*, tuplehash> rmmemo;
 
 tcell *rev_move2(tcell *t, int dir1, int dir2) {
-  auto& memo = rmmemo[{t, dir1, dir2}];
+  tuple<tcell*, int, int> key;
+  get<0>(key) = t;
+  get<1>(key) = dir1;
+  get<2>(key) = dir2;
+  auto& memo = rmmemo[key];
   if(memo) return memo;
   if(dir1 != ENDED) t = rev_move(t, dir1);
   if(dir2 != ENDED) {
@@ -1725,7 +1729,7 @@ int readRuleArgs3() {
   else if(argis("-load-honeycomb")) {
     PHASE(3);
     stop_game();
-    shift(); string s = args();
+    shift(); string s = arg::args();
     reg3::replace_rule_file = s;
     shstream ins(decompress_string(read_file_as_string(s)));
     ins.read(ins.vernum);
@@ -1739,7 +1743,7 @@ int readRuleArgs3() {
 
   else if(argis("-dump-rules")) {
     start_game();
-    shift(); reg3::dump_rules(args());
+    shift(); reg3::dump_rules(arg::args());
     }
 
   else if(argis("-clean-rules")) {
