@@ -1723,9 +1723,10 @@ int readRuleArgs3() {
     }
 
   else if(argis("-load-honeycomb")) {
+    PHASE(3);
     stop_game();
-    string s = args();
-    shift(); reg3::replace_rule_file = s;
+    shift(); string s = args();
+    reg3::replace_rule_file = s;
     shstream ins(decompress_string(read_file_as_string(s)));
     ins.read(ins.vernum);
     mapstream::load_geometry(ins);

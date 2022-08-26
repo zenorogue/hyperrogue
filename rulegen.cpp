@@ -2104,6 +2104,9 @@ EX void generate_rules() {
     flags |= w_numerical;
     start_game();
     }
+  else if(WDIM == 3) {
+    flags |= w_numerical;
+    }
   else if(!arb::in()) try {
     arb::convert::convert();
     if(flags & w_numerical) arb::convert::activate();
