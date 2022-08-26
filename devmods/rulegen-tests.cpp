@@ -505,12 +505,37 @@ void list_all_sequences(string tesname) {
   seq_stream->flush();
   }
 
-void view_actual_seq(int max) {
+vector<int> gen_actual_seq(int max) {
   celllister cl(cwt.at, 1000, max, nullptr);
   vector<int> dlist(1000, 0);
   for(auto d: cl.dists) dlist[d]++;
   while(dlist.back() == 0) dlist.pop_back();
-  println(hlog, "obtained dlist = ", dlist);
+  return dlist;
+  }
+
+string unspace(const string& s) {
+  string res;
+  for(char c: s) if(c != ' ') res += c;
+  return res;
+  }
+
+vector<string> seq_as_stringlist() {
+  auto& e = cgi.expansion;
+  vector<string> res;
+  for(int i=0; i<100; i++) res.push_back(unspace(e->get_descendants(i).get_str(1000)));
+  return res;
+  }
+
+void view_seq_stats() {
+  start_game();
+  println(hlog, "SEQ rules  ", seq_as_stringlist());
+  println(hlog, "SEQ verify ", gen_actual_seq(100000));
+  if(true) {
+    stop_game();
+    reg3::consider_rules = 0;
+    start_game();
+    println(hlog, "SEQ stupid ", gen_actual_seq(euclid ? 1000 : 100000));
+    }
   }
 
 void print_rules();
@@ -1731,7 +1756,13 @@ int testargs() {
     
   else if(argis("-act-seq")) {
     start_game();
-    shift(); view_actual_seq(argi());
+    shift();
+    println(hlog, "obtained dlist = ", gen_actual_seq(argi()));
+    }
+
+  else if(argis("-seq-stats")) {
+    start_game();
+    view_seq_stats();
     }
 
   else if(argis("-dseek")) {
