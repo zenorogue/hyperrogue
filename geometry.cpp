@@ -308,7 +308,7 @@ hpcshape
   shPrincessDress, shPrinceDress,
   shWizardCape1, shWizardCape2,
   shBigCarpet1, shBigCarpet2, shBigCarpet3,
-  shGoatHead, shRose, shRoseItem, shThorns,
+  shGoatHead, shRose, shRoseItem, shSmallRose, shThorns,
   shRatHead, shRatTail, shRatEyes, shRatCape1, shRatCape2,
   shWizardHat1, shWizardHat2,
   shTortoise[13][6],

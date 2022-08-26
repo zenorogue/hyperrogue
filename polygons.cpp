@@ -792,6 +792,11 @@ void geometry_information::procedural_shapes() {
 
   shRoseItem = shRose;
 
+  bshape(shSmallRose, PPR::ITEM);
+  PRING(t)
+    hpcpush(xspinpush0(M_PI * t / (S42+.0), scalefactor/2 * hcrossf7 * (0.2 + .15 * sin(M_PI * t / (S42+.0) * 3))));
+  finishshape();
+
   bshape(shThorns, PPR::THORNS);
   for(int t=0; t<=60; t++)
     hpcpush(xspinpush0(M_PI * t / 30.0, scalefactor * hcrossf7 * ((t&1) ? 0.3 : 0.6)));

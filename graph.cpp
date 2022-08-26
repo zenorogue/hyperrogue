@@ -1047,13 +1047,17 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     if(xch == 'c')
       queuepolyat(Vit * spinptick(500, 0), cgi.shMoonDisk, darkena(0x801080, 0, hidden ? 0x20 : 0xC0), prio);
     else {
-      auto dark = darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0);
+      auto dark = darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : (it == itOrbBeauty) ? 0xA0 : 0xC0);
       if (it == itOrbLife) {
         queuepolyat(Vit, cgi.shSmallPBody, dark, prio);
         queuepolyat(Vit, cgi.shDiskM, dark, prio);
         }
+      else if (it == itOrbBeauty)
+        for(int u=0; u<3; u++)
+          queuepolyat(Vit * spin(2*M_PI / 3 / 3 * u), cgi.shSmallRose, dark, prio);
       else {
-        auto shape = (it == itOrbFriend) ? cgi.shTinyBird : cgi.shDisk;
+        auto shape = (it == itOrbFriend) ? cgi.shTinyBird :
+                        cgi.shDisk;
         queuepolyat(Vit, shape, dark, prio);
         }
       }
