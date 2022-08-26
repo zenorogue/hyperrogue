@@ -2391,7 +2391,7 @@ EX namespace reg3 {
     void dump(string fname) {
       fhstream f(fname, "wt");
       int T = isize(quotient_map->acells);
-      println(hlog, hyperbolic ? "h3." : "e3.");
+      println(f, hyperbolic ? "h3." : "e3.");
       println(f, "celltypes ", T);
       for(int t=0; t<T; t++) {
         auto &sh = quotient_map->get_cellshape(quotient_map->acells[t]);
