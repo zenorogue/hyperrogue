@@ -113,7 +113,7 @@ void expansion_analyzer::preliminary_grouping() {
       for(int v: rulegen::treestates[i].rules)
         if(v >= 0) children[i].push_back(v);
     }
-  else if(reg3::in_rule()) {
+  else if(reg3::exact_rules()) {
 #if MAXMDIM >= 4
     rootid = reg3::rule_get_root(0);
     auto& chi = reg3::rule_get_children();
@@ -145,7 +145,7 @@ void expansion_analyzer::preliminary_grouping() {
   }
 
 void expansion_analyzer::reduce_grouping() {
-  if(reg3::in_rule()) return;
+  if(reg3::exact_rules()) return;
   if(currentmap->strict_tree_rules()) return;
   int old_N = N;
   vector<int> grouping;
@@ -239,7 +239,7 @@ bool expansion_analyzer::verify(int id) {
 
 int expansion_analyzer::valid(int v, int step) {
   if(step < 0) return 0;
-  int more = reg3::in_rule() ? 1 : 5;
+  int more = reg3::exact_rules() ? 1 : 5;
   #if CAP_GMP == 0
   if(get_descendants(step+v+v+more).approx_int() >= bignum::BASE) return 0;
   typedef ld val;
@@ -392,7 +392,7 @@ int type_in_quick(expansion_analyzer& ea, cell *c, const cellfunction& f) {
   }
 
 EX bool sizes_known() {
-  if(reg3::in_rule()) return true;
+  if(reg3::exact_rules()) return true;
   if(closed_manifold) return false;
   // Castle Anthrax is infinite
   if(bt::in()) return false;
@@ -583,7 +583,7 @@ void celldrawer::do_viewdist() {
       }
     case ncType: {
       int t = -1;
-      if(reg3::in_rule()) switch(distance_from) {
+      if(reg3::exact_rules()) switch(distance_from) {
         case dfPlayer: 
           t = -1;
           break;
@@ -740,7 +740,7 @@ void expansion_analyzer::view_distances_dialog() {
   
   if(really_use_analyzer) {
     int t;
-    if(reg3::in_rule() || currentmap->strict_tree_rules()) {
+    if(reg3::exact_rules() || currentmap->strict_tree_rules()) {
       if(!N) preliminary_grouping();      
       t = rootid;
       }

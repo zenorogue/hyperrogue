@@ -1716,19 +1716,20 @@ int readRuleArgs3() {
     // -urq 7 to prepare honeycomb generation
     stop_game();
     shift(); int i = argi();
-    reg3::reg3_rule_available = (i & 8) ? 0 : 1;
+    reg3::consider_rules = i >> 3;
     fieldpattern::use_rule_fp = (i & 1) ? 1 : 0;
     fieldpattern::use_quotient_fp = (i & 2) ? 1 : 0;
     reg3::minimize_quotient_maps = (i & 4) ? 1 : 0;
     }
 
-  else if(argis("-subrule")) {    
+  else if(argis("-load-honeycomb")) {
     stop_game();
-    shift(); reg3::other_rule = args();
-    shstream ins(decompress_string(read_file_as_string(arg::args())));
+    string s = args();
+    shift(); reg3::replace_rule_file = s;
+    shstream ins(decompress_string(read_file_as_string(s)));
     ins.read(ins.vernum);
     mapstream::load_geometry(ins);
-    reg3::subrule = true;
+    reg3::consider_rules = 2;
     }
 
   else if(argis("-less-states")) {

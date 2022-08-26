@@ -2098,11 +2098,9 @@ EX void generate_rules() {
   start_time = SDL_GetTicks();
   delete_tmap();
 
-  if(WDIM == 3) {
+  if(WDIM == 3 && reg3::in_hrmap_rule_or_subrule()) {
     stop_game();
-    reg3::reg3_rule_available = false;
-    fieldpattern::use_rule_fp = true;
-    fieldpattern::use_quotient_fp = true;
+    reg3::consider_rules = 0;
     flags |= w_numerical;
     start_game();
     }

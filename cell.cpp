@@ -232,7 +232,7 @@ EX vector<hrmap*> allmaps;
 
 EX hrmap *newAltMap(heptagon *o) { 
   #if MAXMDIM >= 4
-  if(reg3::in_rule())
+  if(reg3::in_hrmap_rule_or_subrule())
     return reg3::new_alt_map(o);
   #endif
   if(currentmap->strict_tree_rules())
@@ -638,7 +638,7 @@ EX int celldistAlt(cell *c) {
     }
   #if MAXMDIM >= 4
   if(euc::in()) return euc::dist_alt(c);
-  if(hyperbolic && WDIM == 3 && !reg3::in_rule())
+  if(hyperbolic && WDIM == 3 && !reg3::in_hrmap_rule_or_subrule())
     return reg3::altdist(c->master);
   #endif
   if(!c->master->alt) return 0;
@@ -676,7 +676,7 @@ EX int updir(heptagon *h) {
   if(bt::in()) return bt::updir();
   #endif
   #if MAXMDIM >= 4
-  if(WDIM == 3 && reg3::in_rule()) {
+  if(WDIM == 3 && reg3::in_hrmap_rule_or_subrule()) {
     for(int i=0; i<h->type; i++) if(h->move(i) && h->move(i)->distance < h->distance) 
       return i;
     return -1;
@@ -690,7 +690,7 @@ EX int updir(heptagon *h) {
 EX int updir_alt(heptagon *h) {
   if(euclid || !h->alt) return -1;
   #if MAXMDIM >= 4
-  if(WDIM == 3 && reg3::in_rule()) {
+  if(WDIM == 3 && reg3::in_hrmap_rule_or_subrule()) {
     for(int i=0; i<S7; i++) if(h->move(i) && h->move(i)->alt && h->move(i)->alt->distance < h->alt->distance) 
       return i;
     return -1;

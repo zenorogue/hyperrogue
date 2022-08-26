@@ -153,7 +153,7 @@ EX int default_levs() {
   if(S3 >= OINF)
     return 1;
   #if MAXMDIM >= 4
-  if(reg3::in_rule()) return 0;
+  if(reg3::in_hrmap_rule_or_subrule()) return 0;
   #endif
   return S3-3;
   }
@@ -240,7 +240,7 @@ EX heptagon *create_altmap(cell *c, int rad, hstate firststate, int special IS(0
   int gdir = -1;
   for(int i=0; i<c->type; i++) {
     #if MAXMDIM >= 4
-    if(!reg3::in_rule()) {
+    if(!reg3::in_hrmap_rule_or_subrule()) {
     #else
     if(true) {
     #endif
@@ -252,7 +252,7 @@ EX heptagon *create_altmap(cell *c, int rad, hstate firststate, int special IS(0
       }
     }
   #if MAXMDIM >= 4
-  if(reg3::in_rule() && c->master->distance == 0) gdir = 0;
+  if(reg3::in_hrmap_rule_or_subrule() && c->master->distance == 0) gdir = 0;
   #endif
   if(gdir < 0) return NULL;
   
@@ -1670,7 +1670,7 @@ EX void build_horocycles(cell *c, cell *from) {
 
   if(ls::any_order() && bearsCamelot(c->land) && can_start_horo(c) && !bt::in() && 
     #if MAXMDIM >= 4
-    !(hyperbolic && WDIM == 3 && !reg3::in_rule()) && 
+    !(hyperbolic && WDIM == 3 && !reg3::in_hrmap_rule_or_subrule()) &&
     #endif
     (quickfind(laCamelot) || peace::on || (hrand(I2000) < (c->land == laCrossroads4 || ls::no_walls() ? 800 : 200) && horo_ok() &&
     items[itEmerald] >= U5))) 
@@ -1860,7 +1860,7 @@ EX void buildCamelot(cell *c) {
 EX int masterAlt(cell *c) {
   if(eubinary) return celldistAlt(c);
   #if MAXMDIM >= 4
-  if(WDIM == 3 && hyperbolic && !reg3::in_rule()) return reg3::altdist(c->master);
+  if(WDIM == 3 && hyperbolic && !reg3::in_hrmap_rule_or_subrule()) return reg3::altdist(c->master);
   #endif
   return c->master->alt->distance;
   }

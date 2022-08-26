@@ -192,7 +192,7 @@ EX bool is_zebra_trapdoor(cell *c) {
   else if(arb::in() && arb::current.have_line)
     return arb::linespattern(c);
   #if MAXMDIM >= 4
-  else if(reg3::in_rule()) switch(geometry) {
+  else if(PURE && reg3::exact_rules()) switch(geometry) {
     case gSpace534: {
       if(c->master->fieldval == 0) return true;
       forCellCM(c1, c) if(c1->master->fieldval == 0) return true;

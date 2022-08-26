@@ -1304,18 +1304,11 @@ EX namespace reg3 {
     }
 
   EX bool minimize_quotient_maps = false;
-  EX bool subrule = false;
 
   EX bool strafe_test = false;
 
   hrmap_quotient3 *gen_quotient_map(bool minimized, fieldpattern::fpattern &fp) {
     #if CAP_FIELD
-    #if CAP_CRYSTAL
-    if(geometry == gSpace344) {
-      return new hrmap_from_crystal(minimized ? 1 : 2);
-      }
-    else
-    #endif
     if(geometry == gSpace535 && minimized) {
       return new seifert_weber::hrmap_singlecell(108*degree);
       }
@@ -1454,6 +1447,7 @@ EX namespace reg3 {
       }
 
     hrmap_h3() {
+      println(hlog, "generating hrmap_h3");
       origin = init_heptagon(S7);
       heptagon& h = *origin;
       h.s = hsOrigin;
@@ -1856,22 +1850,6 @@ EX namespace reg3 {
 
     ruleset() : fp(0) {}
 
-    void load_ruleset(string fname) {
-
-      shstream ins(decompress_string(read_file_as_string(fname)));
-      dynamicval<bool> q(fieldpattern::use_quotient_fp, true);      
-      hread_fpattern(ins, fp);
-
-      hread(ins, root);
-      hread(ins, children);
-      hread(ins, other);
-      // hread(ins, childpos);
-
-      int t = S7;
-      int qty = isize(children) / t;
-      for(int i=0; i<=qty; i++) childpos.push_back(i * t);
-      }
-
     void load_ruleset_new(string fname) {
 
       shstream ins(decompress_string(read_file_as_string(fname)));
@@ -1887,6 +1865,8 @@ EX namespace reg3 {
       hread(ins, children);
       hread(ins, other);
       hread(ins, childpos);
+
+      println(hlog, "roots = ", isize(root), " states = ", isize(childpos)-1, " hashv = ", fp.hashv);
       }
 
     /** \brief address = (fieldvalue, state) */
@@ -2045,8 +2025,10 @@ EX namespace reg3 {
 
     hrmap_h3_rule() {
 
-      load_ruleset(get_rule_filename());
-      quotient_map = gen_quotient_map(is_minimized(), fp);
+      println(hlog, "generating hrmap_h3_rule");
+
+      load_ruleset_new(get_rule_filename(false));
+      quotient_map = gen_quotient_map(minimize_quotient_maps, fp);
       find_mappings();
       
       origin = init_heptagon(S7);
@@ -2263,7 +2245,7 @@ EX namespace reg3 {
 
       println(hlog, "loading a subrule ruleset");
 
-      load_ruleset_new(get_rule_filename());
+      load_ruleset_new(get_rule_filename(true));
       quotient_map = gen_quotient_map(minimize_quotient_maps, fp);
       int t = quotient_map->acells[0]->type;
       find_mappings();
@@ -2422,39 +2404,43 @@ EX hrmap *new_alt_map(heptagon *o) {
   return new hrmap_h3_rule_alt(o);
   }
 
-EX bool reg3_rule_available = true;
-EX string other_rule = "";
+/** 1 -- consider pure rules, 2 -- consider variation rules, 3 -- consider both */
+EX int consider_rules = 3;
 
-EX bool is_minimized() {
-  return geometry != gSpace535 && geometry != gSpace344;
-  }
+EX string replace_rule_file;
 
-EX string get_rule_filename() {
-  if(other_rule != "") return other_rule;
-  switch(geometry) {
-    case gSpace336: return "honeycomb-rules-336.dat";
-    case gSpace344: return "honeycomb-rules-344.dat";
-    case gSpace345: return "honeycomb-rules-345.dat";
-    case gSpace353: return "honeycomb-rules-353.dat";
-    case gSpace354: return "honeycomb-rules-354.dat";
-    case gSpace355: return "honeycomb-rules-355.dat";
-    case gSpace435: return "honeycomb-rules-435.dat";
-    case gSpace436: return "honeycomb-rules-436.dat";
-    case gSpace534: return "honeycomb-rules-534.dat";
-    case gSpace535: return "honeycomb-rules-535.dat";
-    case gSpace536: return "honeycomb-rules-536.dat";
-    
-    default: return "";
+EX string get_rule_filename(bool with_variations) {
+  if(replace_rule_file != "") return replace_rule_file;
+  string s;
+  s += "honeycombs/";
+  s += ginf[geometry].tiling_name[1];
+  s += ginf[geometry].tiling_name[3];
+  s += ginf[geometry].tiling_name[5];
+  if(hyperbolic) s += "h";
+  else s += "c";
+  if(with_variations) {
+    if(variation == eVariation::coxeter) s += "-c" + its(coxeter_param);
+    if(variation == eVariation::subcubes) s += "-s" + its(subcube_count);
+    if(variation == eVariation::dual_subcubes) s += "-d" + its(subcube_count);
+    if(variation == eVariation::bch) s += "-bs" + its(subcube_count);
     }
+  s += ".dat";
+  return find_file(s);
   }
 
-EX bool in_rule() {
-  return reg3_rule_available && get_rule_filename() != "";
+EX bool variation_rule_available() {
+  return (consider_rules & 2) && file_exists(get_rule_filename(true));
+  }
+
+EX bool pure_rule_available() {
+  return (consider_rules & 1) && file_exists(get_rule_filename(false));
   }
 
 ruleset& get_ruleset() {
-  if(subrule) return *((hrmap_h3_subrule*)currentmap);
-  if(in_rule()) return *((hrmap_h3_rule*)currentmap);
+  auto h1 = dynamic_cast<hrmap_h3_subrule*> (currentmap);
+  if(h1) return *h1;
+  auto h2 = dynamic_cast<hrmap_h3_rule*> (currentmap);
+  if(h2) return *h2;
   throw hr_exception("get_ruleset called but not in rule");
   }
 
@@ -2475,8 +2461,8 @@ EX hrmap* new_map() {
   if(geometry == gSeifertWeber) return new seifert_weber::hrmap_singlecell(108*degree);
   if(geometry == gHomologySphere) return new seifert_weber::hrmap_singlecell(36*degree);
   if(quotient && !sphere) return new hrmap_field3(&currfp);
-  if(subrule) return new hrmap_h3_subrule;
-  if(in_rule()) return new hrmap_h3_rule;
+  if(variation_rule_available()) return new hrmap_h3_subrule;
+  if(pure_rule_available()) return new hrmap_h3_rule;
   if(sphere) return new hrmap_sphere3;
   return new hrmap_h3;
   }
@@ -2487,6 +2473,15 @@ hrmap_h3* hypmap() {
 
 EX bool in_hrmap_h3() {
   return dynamic_cast<hrmap_h3*> (currentmap);
+  }
+
+EX bool in_hrmap_rule_or_subrule() {
+  return dynamic_cast<hrmap_h3_rule*> (currentmap) || dynamic_cast<hrmap_h3_subrule*> (currentmap);
+  }
+
+EX bool exact_rules() {
+  if(PURE) return in_hrmap_rule_or_subrule();
+  return dynamic_cast<hrmap_h3_subrule*> (currentmap);
   }
 
 EX int quotient_count() {
@@ -2553,7 +2548,7 @@ EX int celldistance(cell *c1, cell *c2) {
   int b = bucketer(h);
   if(cgi.close_distances.count(b)) return cgi.close_distances[b];
   
-  if(in_rule())
+  if(in_hrmap_rule_or_subrule())
     return clueless_celldistance(c1, c2);
 
   dynamicval<eGeometry> g(geometry, gBinary3);  
