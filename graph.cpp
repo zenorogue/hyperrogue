@@ -807,6 +807,8 @@ EX color_t orb_auxiliary_color(eItem it) {
   if(it == itOrbSlaying) return 0xFF0000;
   if(it == itOrbSide1) return 0x307080;
   if(it == itOrbDigging) return 0x606060;
+  //if(it == itOrbEnergy) return 0x8B4513;
+  if(it == itOrbEnergy) return 0xFFFF80;
   return iinf[it].color;
   }
 
@@ -1083,7 +1085,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         }
       else if (it == itOrbSlaying) {
         queuepolyat(Vit, cgi.shSmallFlailTrunk, dark, prio);
-        queuepolyat(Vit, cgi.shSmallHammerHead, dark*2, prio);
+        queuepolyat(Vit, cgi.shSmallHammerHead, col, prio);
         }
       else {
         auto shape = (it == itOrbFriend) ? cgi.shTinyBird :
@@ -1096,10 +1098,15 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      (it == itOrbMorph) ? cgi.shDiskS :
                      //(it == itOrbDiscord) ? cgi.shDiskM :
                      (it == itOrbMatter || it == itOrbStone) ? cgi.shDiskSq :
+                     (it == itOrbEnergy) ? cgi.shHalfDisk :
                         cgi.shDisk;
         queuepolyat(Vit, shape, dark, prio);
         if (it == itOrbSide1)
           queuepolyat(Vit*Mirror, shape, dark, prio);
+        if (it == itOrbEnergy)
+          queuepolyat(Vit*Mirror, shape, col, prio);
+        if (it == itOrbIntensity)
+          queuepolyat(Vit, cgi.shDiskM, 0x80, prio);
         }
       }
 

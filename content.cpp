@@ -706,7 +706,7 @@ ITEM( 'o', 0xFFFF80, "Orb of the Warp", itOrb37, IC_ORB, ZERO, RESERVED, osWarpi
     "This Orb creates a warped zone of radius 5 around you, "
     "and also allows you to move diagonally in warped zones."
     )
-ITEM( 'o', 0xFFFF80, "Orb of Energy", itOrbEnergy, IC_ORB, ZERO, RESERVED, osPowerUtility, 
+ITEM( 'o', 0x8B4513, "Orb of Energy", itOrbEnergy, IC_ORB, ZERO, RESERVED, osPowerUtility, 
     "This Orb halves the power usage of orbs which cost some "
     "charges with each activation. It even affects the "
     "one-shot orbs such as Flash or Teleport. If such an activation "
