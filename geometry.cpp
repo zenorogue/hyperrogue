@@ -279,7 +279,7 @@ hpcshape
   shPBody, shSmallPBody, shPSword, shSmallPSword, shPKnife,
   shFerocityM, shFerocityF, 
   shHumanFoot, shHumanLeg, shHumanGroin, shHumanNeck, shSkeletalFoot, shYetiFoot,
-  shMagicSword, shMagicShovel, shSeaTentacle, shKrakenHead, shKrakenEye, shKrakenEye2,
+  shMagicSword, shSmallSword, shMagicShovel, shSeaTentacle, shKrakenHead, shKrakenEye, shKrakenEye2,
   shArrow,
   shPHead, shPFace, shGolemhead, shHood, shArmor, 
   shAztecHead, shAztecCap,

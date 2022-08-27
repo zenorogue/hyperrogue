@@ -764,11 +764,10 @@ EX hpcshape& orbshape(eOrbshape s) {
   switch(s) {
      case osLove: return cgi.shLoveRing;
      case osRanged: return cgi.shTargetRing;
-     case osOffensive: return cgi.shSawRing;
+     case osOffensive: case osDirectional: return cgi.shSawRing;
      case osFriend: return cgi.shPeaceRing;
      case osUtility: return cgi.shGearRing;
      case osPowerUtility: return cgi.shPowerGearRing;
-     case osDirectional: return cgi.shSpearRing;
      case osWarping: return cgi.shHeptaRing;
      case osFrog: return cgi.shFrogRing;
      case osProtective: return cgi.shProtectiveRing;
@@ -1090,6 +1089,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         auto shape = (it == itOrbFriend) ? cgi.shTinyBird :
                      (it == itOrbSide1) ? cgi.shSmallPSword :
                      (it == itOrbDigging) ? cgi.shSmallPickAxe :
+                     (it == itOrbSword || it == itOrbSword2) ? cgi.shSmallSword :
                         cgi.shDisk;
         queuepolyat(Vit, shape, dark, prio);
         if (it == itOrbSide1)
