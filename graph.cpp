@@ -192,7 +192,7 @@ EX void drawShield(const shiftmatrix& V, eItem it) {
 #endif
   }
 
-void drawSpeed(const shiftmatrix& V) {
+void drawSpeed(const shiftmatrix& V, ld scale=1) {
 #if CAP_CURVE
   ld ds = ptick(10);
   color_t col = darkena(iinf[itOrbSpeed].color, 0, 0xFF);
@@ -202,7 +202,7 @@ void drawSpeed(const shiftmatrix& V) {
 #endif
   for(int b=0; b<cgi.S84; b+=cgi.S14) {
     PRING(a)
-      curvepoint(xspinpush0((ds+b+a) * M_PI/cgi.S42, cgi.hexf*a/cgi.S84));
+      curvepoint(xspinpush0((ds+b+a) * M_PI/cgi.S42, cgi.hexf*a/cgi.S84*scale));
     queuecurve(V, col, 0x8080808, PPR::LINE);
     }
 #endif
@@ -1087,6 +1087,8 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit, cgi.shSmallFlailTrunk, dark, prio);
         queuepolyat(Vit, cgi.shSmallHammerHead, col, prio);
         }
+      else if (it == itOrbSpeed)
+        drawSpeed(Vit, 0.4);
       else {
         auto shape = (it == itOrbFriend) ? cgi.shTinyBird :
                      (it == itOrbSide1) ? cgi.shSmallPSword :
@@ -1107,6 +1109,8 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
           queuepolyat(Vit*Mirror, shape, col, prio);
         if (it == itOrbIntensity)
           queuepolyat(Vit, cgi.shDiskM, 0x80, prio);
+        if (it == itOrbSafety || it == itOrbFreedom)
+          queuepolyat(Vit, cgi.shDiskSq, 0x80, prio);
         }
       }
 
