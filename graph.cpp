@@ -804,7 +804,9 @@ EX color_t orb_auxiliary_color(eItem it) {
   if(it == itOrbAir) return 0xFFFFFF;
   if(it == itOrbUndeath) return minf[moFriendlyGhost].color;
   if(it == itOrbRecall) return 0x101010;
+  if(it == itOrbLife) return 0x90B090;
   if(it == itOrbSlaying) return 0xFF0000;
+  if(it == itOrbSide1) return 0x307080;
   return iinf[it].color;
   }
 
@@ -1073,6 +1075,15 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit*Mirror, cgi.shSmallFrogRearLeg2, dark, prio);
         queuepolyat(Vit*Mirror, cgi.shSmallFrogFrontFoot, dark, prio);
         queuepolyat(Vit*Mirror, cgi.shSmallFrogFrontLeg, dark, prio);
+        }
+      else if (it == itOrbUndeath) {
+        dark = darkena(minf[moFriendlyGhost].color, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0);
+        queuepolyat(Vit, cgi.shMiniGhost, dark, prio);
+        queuepolyat(Vit, cgi.shMiniEyes, 0xFF, prio);
+        }
+      else if (it == itOrbSlaying) {
+        queuepolyat(Vit, cgi.shSmallFlailTrunk, dark, prio);
+        queuepolyat(Vit, cgi.shSmallHammerHead, dark*2, prio);
         }
       else {
         auto shape = (it == itOrbFriend) ? cgi.shTinyBird :

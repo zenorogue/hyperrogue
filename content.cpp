@@ -478,7 +478,7 @@ ITEM( 'o', 0x8080FF, "Orb of Winter", itOrbWinter, IC_ORB, ZERO | IF_FIREPROOF |
     "This orb can be used to invoke a wall of ice. It also protects you from fires.")
 ITEM( 'o', 0xFF6060, "Orb of Speed", itOrbSpeed, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osMovement,
     "This orb can be used to move faster for some time.")
-ITEM( 'o', 0x90B090, "Orb of Life", itOrbLife, IC_ORB, ZERO | IF_SHMUPLIFE | IF_REVIVAL, RESERVED, osFriend,
+ITEM( 'o', 0x306000, "Orb of Life", itOrbLife, IC_ORB, ZERO | IF_SHMUPLIFE | IF_REVIVAL, RESERVED, osFriend,
     "This orb can be used to summon friendly golems. It is used instantly when you pick it up.")
 ITEM( 'o', 0x60D760, "Orb of Shielding", itOrbShield, IC_ORB, ZERO | IF_PROTECTION | IF_EMPATHY, RESERVED, osProtective,
     "This orb can protect you from damage.")
@@ -816,7 +816,7 @@ ITEM( '*', 0x40E0D0, "Turquoise", itHunting, IC_TREASURE, ZERO, RESERVED, osNone
 ITEM( '*', 0x009090, "Forgotten Relic", itBlizzard, IC_TREASURE, ZERO, RESERVED, osNone, blizzarddesc)
 ITEM( '(', 0xFFE080, "Ancient Weapon", itTerra, IC_TREASURE, ZERO, RESERVED, osNone, 
     "This ancient weapon is beautifully encrusted with precious gems, but you prefer your own -- it is much lighter.")
-ITEM( 'o', 0x307080, "Orb of Slashing", itOrbSide1, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osOffensive, 
+ITEM( 'o', 0x00FF00, "Orb of Slashing", itOrbSide1, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osOffensive, 
     "Whenever you attack with this Orb, you also hit the monsters adjacent both to you and the monster you originally attacked.")
 ITEM( 'o', 0x30A080, "Orb of the Triangle", itOrbSide2, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osOffensive, 
     "Whenever you attack with this Orb, you also hit the monsters adjacent to you which are neither adjacent nor opposite to the monster "
@@ -840,7 +840,7 @@ ITEM( 'o', 0xFFFF80, "Orb of Phasing", itOrbPhasing, IC_ORB, ZERO, RESERVED, osF
     "This orb lets you pass through walls (one cell wide), and also through monsters, as long as they will not attack you in transit.")
 ITEM( 'o', 0xFFFF80, "Orb of Magnetism", itOrbMagnetism, IC_ORB, ZERO, RESERVED, osUtility, 
     "This orb makes you immediately pickup all the items on adjacent cells.")
-ITEM( 'o', 0x202020, "Orb of Slaying", itOrbSlaying, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osOffensive,
+ITEM( 'o', 0x20FF20, "Orb of Slaying", itOrbSlaying, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osOffensive,
     "This Orb lets you defeat Raiders and other tough single-cell monsters in melee."
     )
 ITEM( '*', 0xFFA860, "Tiger's Eye", itBrownian, IC_TREASURE, ZERO, RESERVED, osNone,

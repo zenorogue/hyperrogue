@@ -1463,8 +1463,10 @@ void geometry_information::prepare_shapes() {
   bshape(shPike, PPR::MONSTER_WPN, scalefactor, 150);
   bshape(shFlailBall, PPR::MONSTER_WPN, scalefactor, 151);
   bshape(shFlailTrunk, PPR::MONSTER_WPN, scalefactor, 152);
+  bshape(shSmallFlailTrunk, PPR::MONSTER_WPN, scalefactor/2, 152);
   bshape(shFlailChain, PPR::MONSTER_SUBWPN, scalefactor, 153);
   bshape(shHammerHead, PPR::MONSTER_WPN, scalefactor, 376);
+  bshape(shSmallHammerHead, PPR::MONSTER_WPN, scalefactor/2, 376);
   // bshape(shScratch, 17, scalefactor, 156);
   bshape(shSkeletonBody, PPR::MONSTER_BODY, scalefactor, 157);
   bshape(shSkull, PPR::MONSTER_HEAD, scalefactor, 158);
