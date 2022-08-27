@@ -289,7 +289,7 @@ hpcshape
   shGhost, shEyes, shSlime, shJelly, shJoint, shWormHead, shTentHead, shShark, shWormSegment, shSmallWormSegment, shWormTail, shSmallWormTail,
   shSlimeEyes, shDragonEyes, shWormEyes, shGhostEyes,
   shMiniGhost, shMiniEyes,
-  shHedgehogBlade, shHedgehogBladePlayer,
+  shHedgehogBlade, shSmallHedgehogBlade, shHedgehogBladePlayer,
   shWolfBody, shWolfHead, shWolfLegs, shWolfEyes,
   shWolfFrontLeg, shWolfRearLeg, shWolfFrontPaw, shWolfRearPaw,
   shFemaleBody, shFemaleHair, shFemaleDress, shWitchDress,

@@ -1090,6 +1090,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      (it == itOrbSide1) ? cgi.shSmallPSword :
                      (it == itOrbDigging) ? cgi.shSmallPickAxe :
                      (it == itOrbSword || it == itOrbSword2) ? cgi.shSmallSword :
+                     (it == itOrbThorns) ? cgi.shSmallHedgehogBlade :
                         cgi.shDisk;
         queuepolyat(Vit, shape, dark, prio);
         if (it == itOrbSide1)

@@ -1370,6 +1370,7 @@ void geometry_information::prepare_shapes() {
   bshape(shPirateHook, PPR::MONSTER_WPN, scalefactor, 92);
   bshape(shSabre, PPR::MONSTER_WPN, scalefactor, 93);
   bshape(shHedgehogBlade, PPR::MONSTER_WPN, scalefactor, 94);
+  bshape(shSmallHedgehogBlade, PPR::MONSTER_WPN, scalefactor/2, 94);
   bshape(shHedgehogBladePlayer, PPR::MONSTER_WPN, scalefactor, 95);
   bshape(shFemaleBody, PPR::MONSTER_BODY, scalefactor, 96);
   bshape(shFemaleDress, PPR::MONSTER_ARMOR0, scalefactor, 97);
