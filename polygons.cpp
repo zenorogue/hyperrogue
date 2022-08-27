@@ -259,7 +259,8 @@ void geometry_information::bshape(hpcshape& sh, PPR prio) {
   if(last) finishshape();
   hpc.push_back(hpxy(0,0));
   last = &sh;
-  last->s = isize(hpc), last->prio = prio;
+  last->s = isize(hpc);
+  last->prio = prio;
   last->flags = 0;
   last->tinf = NULL;
   first = true;
@@ -606,13 +607,18 @@ void geometry_information::procedural_shapes() {
     hpcpush(ddi(i, orbsize * .1) * C0);
     }
 
+  bshape(shEccentricDisk, PPR::ITEM);
+  for(int i=0; i<=S84; i+=SD3) {
+    hpcpush(hpxy(sin(i*2*M_PI/S84)*orbsize*.075,
+                 cos(i*2*M_PI/S84)*orbsize*.075 + .07));
+    }
+
   bshape(shDiskSq, PPR::ITEM);
   for(int i=0; i<=S84; i+=S21) {
     hpcpush(ddi(i, orbsize * .15) * C0);
     }
 
   bshape(shEgg, PPR::ITEM);
-  
   RING(i)
     hpcpush(hpxy(sin(i*2*M_PI/S84)*0.242 * orbsize, cos(i*2*M_PI/S84)*0.177*orbsize));
   

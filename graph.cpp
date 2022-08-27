@@ -1096,12 +1096,12 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      (it == itOrbSide2 || it == itOrb37) ? cgi.shDiskT :
                      (it == itOrbGravity) ? cgi.shTinyArrow :
                      (it == itOrbMorph) ? cgi.shDiskS :
-                     //(it == itOrbDiscord) ? cgi.shDiskM :
                      (it == itOrbMatter || it == itOrbStone) ? cgi.shDiskSq :
                      (it == itOrbEnergy) ? cgi.shHalfDisk :
+                     (it == itOrbChoice) ? cgi.shEccentricDisk :
                         cgi.shDisk;
         queuepolyat(Vit, shape, dark, prio);
-        if (it == itOrbSide1)
+        if (it == itOrbSide1 || it == itOrbChoice)
           queuepolyat(Vit*Mirror, shape, dark, prio);
         if (it == itOrbEnergy)
           queuepolyat(Vit*Mirror, shape, col, prio);
