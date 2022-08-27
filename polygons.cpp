@@ -1460,6 +1460,7 @@ void geometry_information::prepare_shapes() {
   bshape(shWolfEyes, PPR::MONSTER_EYE0, WOLF, 147);
   bshape(shWitchDress, PPR::MONSTER_ARMOR0, scalefactor, 148);
   bshape(shPickAxe, PPR::MONSTER_WPN, scalefactor, 149);
+  bshape(shSmallPickAxe, PPR::MONSTER_WPN, scalefactor/2, 149);
   bshape(shPike, PPR::MONSTER_WPN, scalefactor, 150);
   bshape(shFlailBall, PPR::MONSTER_WPN, scalefactor, 151);
   bshape(shFlailTrunk, PPR::MONSTER_WPN, scalefactor, 152);

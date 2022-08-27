@@ -807,6 +807,7 @@ EX color_t orb_auxiliary_color(eItem it) {
   if(it == itOrbLife) return 0x90B090;
   if(it == itOrbSlaying) return 0xFF0000;
   if(it == itOrbSide1) return 0x307080;
+  if(it == itOrbDigging) return 0x606060;
   return iinf[it].color;
   }
 
@@ -1088,6 +1089,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
       else {
         auto shape = (it == itOrbFriend) ? cgi.shTinyBird :
                      (it == itOrbSide1) ? cgi.shSmallPSword :
+                     (it == itOrbDigging) ? cgi.shSmallPickAxe :
                         cgi.shDisk;
         queuepolyat(Vit, shape, dark, prio);
         if (it == itOrbSide1)
