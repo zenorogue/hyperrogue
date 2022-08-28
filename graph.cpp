@@ -1065,6 +1065,17 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
           if (i>=5 && i<=7)
             queuepolyat(Vit*Mirror, cgi.shTortoise[i][2], dark, prio);
           }
+      else if (it == itOrbHorns) {
+        queuepolyat(Vit, cgi.shSmallBullHead, dark, prio);
+        queuepolyat(Vit, cgi.shSmallBullHorn, dark, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallBullHorn, dark, prio);
+        }
+      else if (it == itOrbBull) {
+        queuepolyat(Vit, cgi.shTinyBullBody, dark, prio);
+        queuepolyat(Vit, cgi.shTinyBullHead, dark, prio);
+        queuepolyat(Vit, cgi.shTinyBullHorn, dark, prio);
+        queuepolyat(Vit * Mirror, cgi.shTinyBullHorn, dark, prio);
+        }
       else if (it == itOrbFrog) {
         queuepolyat(Vit, cgi.shSmallFrogBody, dark, prio);
         queuepolyat(Vit, cgi.shSmallFrogRearFoot, dark, prio);

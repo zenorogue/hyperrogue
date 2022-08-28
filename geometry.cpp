@@ -325,6 +325,8 @@ hpcshape
   shTrylobiteFrontLeg, shTrylobiteRearLeg, shTrylobiteFrontClaw, shTrylobiteRearClaw,
   
   shBullBody, shBullHead, shBullHorn, shBullRearHoof, shBullFrontHoof,
+  shSmallBullHead, shSmallBullHorn,
+  shTinyBullHead, shTinyBullHorn, shTinyBullBody,
   
   shButterflyBody, shButterflyWing, shGadflyBody, shGadflyWing, shGadflyEye,
 
