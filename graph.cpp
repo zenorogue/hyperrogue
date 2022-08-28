@@ -1120,6 +1120,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      (it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism) ? cgi.shEccentricDisk :
                      (it == itOrbWinter) ? cgi.shSnowflake :
                      (it == itOrbLuck) ? cgi.shSmallerDodeca :
+                     (it == itOrbFlash) ? cgi.shFlash :
                         cgi.shDisk;
         queuepolyat(Vit, shape, dark, prio);
         if (it == itOrbSide1 || it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism)

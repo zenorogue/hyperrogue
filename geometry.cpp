@@ -253,7 +253,7 @@ hpcshape
   shTriheptaSpecial[14], 
   shCross, shGiantStar[2], shLake, shMirror,
   shHalfFloor[6], shHalfMirror[3],
-  shGem[2], shStar, shDisk, shHalfDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shEccentricDisk,
+  shGem[2], shStar, shFlash, shDisk, shHalfDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shEccentricDisk,
   shTinyBird, shTinyShark,
   shEgg,
   shRing, shSpikedRing, shTargetRing, shSawRing, shGearRing, shPeaceRing,

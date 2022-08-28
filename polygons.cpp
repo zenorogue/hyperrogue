@@ -551,6 +551,13 @@ void geometry_information::procedural_shapes() {
     if(t != S84) hpcpush(ddi(t+3,   zhexf*.6) * C0);
     }
 
+  bshape(shFlash, PPR::ITEM);
+  for(int t=0; t<S84+SD6; t+=SD6) {
+    hpcpush(ddi(t, zhexf*.25) * C0);
+    hpcpush(ddi(t+3,   zhexf*.4) * C0);
+    }
+  hpcpush(ddi(3, zhexf*.4) * C0);
+
   bshape(shDaisy, PPR::ITEM);
   for(int t=0; t<=SD6; t++) {
     hpcpush(ddi(t*S14, zhexf*.8*3/4) * C0);
