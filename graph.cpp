@@ -795,8 +795,8 @@ EX color_t orb_auxiliary_color(eItem it) {
   if(it == itOrbFriend || it == itOrbDiscord) return 0xC0C0C0;
   if(it == itOrbFrog) return 0xFF0000;
   if(it == itOrbImpact) return 0xFF0000;
-  if(it == itOrbPhasing) return 0xFF0000;
-  if(it == itOrbDash) return 0xFF0000;
+  if(it == itOrbPhasing) return 0xFFFF80;
+  if(it == itOrbDash) return 0x8080FF;
   if(it == itOrbFreedom) return 0xC0FF00;
   if(it == itOrbPlague) return 0x409040;
   if(it == itOrbChaos) return 0xFF00FF;
@@ -1127,9 +1127,9 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
           queuepolyat(Vit*Mirror, shape, dark, prio);
         if (it == itOrbEnergy)
           queuepolyat(Vit*Mirror, shape, col, prio);
-        if (it == itOrbIntensity)
+        if (it == itOrbIntensity || it == itOrbImpact)
           queuepolyat(Vit, cgi.shDiskM, 0x80, prio);
-        if (it == itOrbSafety || it == itOrbFreedom)
+        if (it == itOrbSafety || it == itOrbFreedom || it == itOrbRecall)
           queuepolyat(Vit, cgi.shDiskSq, 0x80, prio);
         }
       }

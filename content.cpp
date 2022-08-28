@@ -783,7 +783,7 @@ ITEM( 'o', 0xC00040, "Orb of Recall", itOrbRecall, IC_ORB, ZERO, RESERVED, osUti
 ITEM( ']', 0x8080FF, "Dodecahedron", itDodeca, IC_TREASURE, ZERO, RESERVED, osNone, 
     "These dodecahedra made of a mysterious material are the Reptiles' favorite toy."
     )
-ITEM( 'o', 0x8080FF, "Orb of Vaulting", itOrbDash, IC_ORB, ZERO | IF_RANGED, RESERVED, osFrog, 
+ITEM( 'o', 0xFF0000, "Orb of Vaulting", itOrbDash, IC_ORB, ZERO | IF_RANGED, RESERVED, osFrog, 
     "This Orb allows you to jump over an adjacent monster, killing or stunning it. "
     "You can only vault in a roughly straight line. "
     "Target a cell on the other side to use it."
@@ -836,7 +836,7 @@ ITEM( '!', 0x80FF80, "Sea Glass", itDock, IC_TREASURE, ZERO, RESERVED, osNone, N
 ITEM( '*', 0xBBCC99, "Chrysoberyl", itRuins, IC_TREASURE, ZERO, RESERVED, osNone, "Fragment of the past glory.")
 ITEM( '*', 0x80FF80, "Monopole", itMagnet, IC_TREASURE, ZERO, RESERVED, osNone, NODESCYET)
 ITEM( '!', 0xFF00FF, "Tasty Jelly", itSwitch, IC_TREASURE, ZERO, RESERVED, osNone, "A tasty byproduct of the Jelly Revolution.")
-ITEM( 'o', 0xFFFF80, "Orb of Phasing", itOrbPhasing, IC_ORB, ZERO, RESERVED, osFrog, 
+ITEM( 'o', 0xFF0000, "Orb of Phasing", itOrbPhasing, IC_ORB, ZERO, RESERVED, osFrog, 
     "This orb lets you pass through walls (one cell wide), and also through monsters, as long as they will not attack you in transit.")
 ITEM( 'o', 0xFFFF80, "Orb of Magnetism", itOrbMagnetism, IC_ORB, ZERO, RESERVED, osUtility, 
     "This orb makes you immediately pickup all the items on adjacent cells.")
