@@ -1098,6 +1098,12 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit, cgi.shSmallFlailTrunk, dark, prio);
         queuepolyat(Vit, cgi.shSmallHammerHead, col, prio);
         }
+      /*else if (it == itOrbNature) {
+        //queuepolyat(Vit, cgi.shILeaf[0], dark, prio);
+        //queuepolyat(Vit, cgi.shILeaf[0], dark, prio);
+        //queuepolyat(Vit, cgi.shILeaf[2], dark, prio);
+        queuepolyat(Vit, cgi.shIBranch, dark, prio);
+        }*/
       else if (it == itOrbSpeed)
         drawSpeed(Vit, 0.4);
       else {
@@ -1111,10 +1117,12 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      (it == itOrbMorph) ? cgi.shDiskS :
                      (it == itOrbMatter || it == itOrbStone) ? cgi.shDiskSq :
                      (it == itOrbEnergy) ? cgi.shHalfDisk :
-                     (it == itOrbChoice) ? cgi.shEccentricDisk :
+                     (it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism) ? cgi.shEccentricDisk :
+                     (it == itOrbWinter) ? cgi.shSnowflake :
+                     (it == itOrbLuck) ? cgi.shSmallerDodeca :
                         cgi.shDisk;
         queuepolyat(Vit, shape, dark, prio);
-        if (it == itOrbSide1 || it == itOrbChoice)
+        if (it == itOrbSide1 || it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism)
           queuepolyat(Vit*Mirror, shape, dark, prio);
         if (it == itOrbEnergy)
           queuepolyat(Vit*Mirror, shape, col, prio);

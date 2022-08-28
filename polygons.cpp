@@ -558,6 +558,14 @@ void geometry_information::procedural_shapes() {
     }
   hpcpush(ddi(0, zhexf*.6) * C0);
 
+  bshape(shSnowflake, PPR::ITEM);
+  for(int t=0; t<=SD6; t++) {
+    hpcpush(ddi(t*S14, zhexf*.7*.8*3/4) * C0);
+    if(t != SD6) hpcpush(ddi(t*S14+SD7, zhexf*.7*-.5*3/4) * C0);
+    }
+  hpcpush(ddi(0, zhexf*.7*.6) * C0);
+  //copyshape(shSnowflake, shDaisy, PPR::ITEM);
+
   bshape(shTriangle, PPR::ITEM);
   for(int t=0; t<=SD3; t++) {
     hpcpush(ddi(t*S28, zhexf*.5) * C0);
@@ -1341,6 +1349,7 @@ void geometry_information::prepare_shapes() {
   bshape(shReptileTail, PPR::MONSTER_BODY, scalefactor, 303);
   bshape(shReptileEye, PPR::MONSTER_EYE0, scalefactor, 304);
   bshape(shDodeca, PPR::ITEM, scalefactor, 305);
+  bshape(shSmallerDodeca, PPR::ITEM, scalefactor*.8, 305);
 
   bshape(shTerraArmor1, PPR::MONSTER_BODY, scalefactor, 349);
   bshape(shTerraArmor2, PPR::MONSTER_BODY, scalefactor, 350);

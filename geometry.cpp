@@ -260,7 +260,7 @@ hpcshape
   shHeptaRing, shSpearRing, shLoveRing, shFrogRing, 
   shPowerGearRing, shProtectiveRing, shTerraRing, shMoveRing,
   shReserved4, shMoonDisk,
-  shDaisy, shTriangle, shNecro, shStatue, shKey, shWindArrow,
+  shDaisy, shSnowflake, shTriangle, shNecro, shStatue, shKey, shWindArrow,
   shGun,
   shFigurine, shTreat,
   shElementalShard,
@@ -339,7 +339,7 @@ hpcshape
   
   shPBodyOnly, shPBodyArm, shPBodyHand, shPHeadOnly,
   
-  shDodeca;
+  shDodeca, shSmallerDodeca;
   
   hpcshape shFrogRearFoot, shFrogFrontFoot, shFrogRearLeg, shFrogFrontLeg, shFrogRearLeg2, shFrogBody, shFrogEye, shFrogStripe, shFrogJumpFoot, shFrogJumpLeg, shSmallFrogRearFoot, shSmallFrogFrontFoot, shSmallFrogRearLeg, shSmallFrogFrontLeg, shSmallFrogRearLeg2, shSmallFrogBody;
 
