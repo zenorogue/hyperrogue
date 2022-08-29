@@ -809,7 +809,7 @@ EX color_t orb_auxiliary_color(eItem it) {
   if(it == itOrbSide1) return 0x307080;
   if(it == itOrbDigging) return 0x606060;
   if(it == itOrbEnergy) return 0xFFFF80;
-  if(it == itOrbPurity) return 0xFFD520;
+  //if(it == itOrbPurity) return 0xFFD520;
   return iinf[it].color;
   }
 
@@ -1079,8 +1079,6 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit*Mirror, cgi.shSmallFrogFrontFoot, dark, prio);
         queuepolyat(Vit*Mirror, cgi.shSmallFrogFrontLeg, dark, prio);
         }
-      else if (it == itOrbPurity)
-        queuepolyat(Vit, cgi.shSmallEgg, dark, prio);
       else if (it == itOrbSpeed)
         drawSpeed(Vit, 0.4);
       else if (it == itOrbStunning) {
@@ -1122,6 +1120,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      (it == itOrbEnergy) ? &cgi.shHalfDisk :
                      (it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism) ? &cgi.shEccentricDisk :
                      (it == itOrbPsi || it == itOrbSide3) ? &cgi.shDiskS :
+                     (it == itOrbPurity) ? &cgi.shSmallEgg :
                         &cgi.shDisk;
         queuepolyat(Vit, cgi.shDisk, dark, prio);
         if (shape != &cgi.shDisk)
@@ -1140,7 +1139,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
           queuepolyat(Vit*Mirror, cgi.shSmallBullHorn, 0x80, prio);
           }
         if (it == itOrbUndeath) {
-dark = darkena(minf[moFriendlyGhost].color, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0);
+          dark = darkena(minf[moFriendlyGhost].color, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0);
           queuepolyat(Vit, cgi.shMiniGhost, dark, prio);
           queuepolyat(Vit, cgi.shMiniEyes, 0xFF, prio);
           }
