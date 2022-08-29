@@ -1428,8 +1428,8 @@ void geometry_information::prepare_shapes() {
   bshape(shBullRearHoof, PPR::MONSTER_FOOT, scalefactor, 317);
   bshape(shBullFrontHoof, PPR::MONSTER_FOOT, scalefactor, 318);
   bshape(shBullHead, PPR::MONSTER_HEAD, scalefactor, 319);
-  bshape(shSmallBullHead, PPR::MONSTER_HEAD, scalefactor/1.5, 411);
-  bshape(shSmallBullHorn, PPR::MONSTER_HEAD, scalefactor/1.5, 412);
+  bshape(shSmallBullHead, PPR::MONSTER_HEAD, scalefactor/1.7, 411);
+  bshape(shSmallBullHorn, PPR::MONSTER_HEAD, scalefactor/1.7, 412);
   bshape(shTinyBullHead, PPR::MONSTER_HEAD, scalefactor/2.5, 319);
   bshape(shTinyBullHorn, PPR::MONSTER_HEAD, scalefactor/2.5, 316);
   bshape(shTinyBullBody, PPR::MONSTER_BODY, scalefactor/2.5, 315);

@@ -1053,23 +1053,12 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
       queuepolyat(Vit * spinptick(500, 0), cgi.shMoonDisk, darkena(0x801080, 0, hidden ? 0x20 : 0xC0), prio);
     else {
       auto dark = darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : (it == itOrbBeauty) ? 0xA0 : 0xC0);
-      if (it == itOrbLife) {
-        queuepolyat(Vit, cgi.shSmallPBody, dark, prio);
-        queuepolyat(Vit, cgi.shDiskM, dark, prio);
-        }
-      else if (it == itOrbBeauty)
+      if (it == itOrbBeauty)
         for(int u=0; u<3; u++)
           queuepolyat(Vit * spin(2*M_PI / 3 / 3 * u), cgi.shSmallRose, dark, prio);
-      else if (it == itOrbShell)
-        for(int i = 1; i<8; i++) {
-          queuepolyat(Vit, cgi.shTortoise[i][2], dark, prio);
-          if (i>=5 && i<=7)
-            queuepolyat(Vit*Mirror, cgi.shTortoise[i][2], dark, prio);
-          }
-      else if (it == itOrbHorns) {
-        queuepolyat(Vit, cgi.shSmallBullHead, dark, prio);
-        queuepolyat(Vit, cgi.shSmallBullHorn, dark, prio);
-        queuepolyat(Vit*Mirror, cgi.shSmallBullHorn, dark, prio);
+      else if (it == itOrbLife) {
+        queuepolyat(Vit, cgi.shSmallPBody, dark, prio);
+        queuepolyat(Vit, cgi.shDiskM, dark, prio);
         }
       else if (it == itOrbBull) {
         queuepolyat(Vit, cgi.shTinyBullBody, dark, prio);
@@ -1100,16 +1089,11 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit, cgi.shSmallHammerHead, col, prio);
         }
       else if (it == itOrbPurity)
-          queuepolyat(Vit, cgi.shSmallEgg, dark, prio);
-      /*else if (it == itOrbNature) {
-        //queuepolyat(Vit, cgi.shILeaf[0], dark, prio);
-        //queuepolyat(Vit, cgi.shILeaf[0], dark, prio);
-        //queuepolyat(Vit, cgi.shILeaf[2], dark, prio);
-        queuepolyat(Vit, cgi.shIBranch, dark, prio);
-        }*/
+        queuepolyat(Vit, cgi.shSmallEgg, dark, prio);
       else if (it == itOrbSpeed)
         drawSpeed(Vit, 0.4);
       else if (it == itOrbStunning) {
+        queuepolyat(Vit, cgi.shDiskM, dark, prio);
         for (int i=0; i<5; i++) {
           shiftmatrix V2 = Vit * spin(2*M_PI * i / 5 + ptick(300));
           queuepolyat(V2, cgi.shSmallFlailBall, dark, prio);
@@ -1127,32 +1111,49 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit, cgi.shSmallWormEyes, 0x60, prio);
         queuepolyat(Vit*Mirror, cgi.shSmallWormEyes, 0x60, prio);
         }
+      else if (it == itOrbMorph || it == itOrbChaos || it == itOrbPlague)
+        queuepolyat(Vit, cgi.shSmallTreat, dark, prio);
+      else if (it == itOrbWinter)
+        queuepolyat(Vit, cgi.shSnowflake, dark, prio);
+      else if (it == itOrbLuck)
+        queuepolyat(Vit, cgi.shSmallerDodeca, dark, prio);
+      else if (it == itOrbFlash)
+        queuepolyat(Vit, cgi.shFlash, dark, prio);
       else {
-        auto shape = (it == itOrbFriend) ? cgi.shTinyBird :
-                     (it == itOrbSide1) ? cgi.shSmallPSword :
-                     (it == itOrbDigging) ? cgi.shSmallPickAxe :
-                     (it == itOrbSword || it == itOrbSword2) ? cgi.shSmallSword :
-                     (it == itOrbThorns) ? cgi.shSmallHedgehogBlade :
-                     (it == itOrbSide2 || it == itOrb37) ? cgi.shDiskT :
-                     (it == itOrbGravity) ? cgi.shTinyArrow :
-                     (it == itOrbMatter || it == itOrbStone) ? cgi.shDiskSq :
-                     (it == itOrbEnergy) ? cgi.shHalfDisk :
-                     (it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism) ? cgi.shEccentricDisk :
-                     (it == itOrbWinter) ? cgi.shSnowflake :
-                     (it == itOrbLuck) ? cgi.shSmallerDodeca :
-                     (it == itOrbFlash) ? cgi.shFlash :
-                     (it == itOrbMorph || it == itOrbChaos || it == itOrbPlague) ? cgi.shSmallTreat :
-                     (it == itOrbPsi || it == itOrbSide3) ? cgi.shDiskS :
-                        cgi.shDisk;
-        queuepolyat(Vit, shape, dark, prio);
-        if (it == itOrbSide1 || it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism)
-          queuepolyat(Vit*Mirror, shape, dark, prio);
+        auto shape = (it == itOrbFriend) ? &cgi.shTinyBird :
+                     (it == itOrbSide1) ? &cgi.shSmallPSword :
+                     (it == itOrbDigging) ? &cgi.shSmallPickAxe :
+                     (it == itOrbSword || it == itOrbSword2) ? &cgi.shSmallSword :
+                     (it == itOrbThorns) ? &cgi.shSmallHedgehogBlade :
+                     (it == itOrbSide2 || it == itOrb37) ? &cgi.shDiskT :
+                     (it == itOrbGravity) ? &cgi.shTinyArrow :
+                     (it == itOrbMatter || it == itOrbStone) ? &cgi.shDiskSq :
+                     (it == itOrbEnergy) ? &cgi.shHalfDisk :
+                     (it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism) ? &cgi.shEccentricDisk :
+                     (it == itOrbPsi || it == itOrbSide3) ? &cgi.shDiskS :
+                        &cgi.shDisk;
+        queuepolyat(Vit, cgi.shDisk, dark, prio);
+        if (shape != &cgi.shDisk)
+          queuepolyat(Vit, *shape, 0x80, prio);
+        if (it == itOrbSide1 || shape == &cgi.shEccentricDisk)
+          queuepolyat(Vit*Mirror, *shape, 0x80, prio);
         if (it == itOrbEnergy)
-          queuepolyat(Vit*Mirror, shape, col, prio);
+          queuepolyat(Vit*Mirror, *shape, col, prio);
         if (it == itOrbIntensity || it == itOrbImpact)
           queuepolyat(Vit, cgi.shDiskM, 0x80, prio);
         if (it == itOrbSafety || it == itOrbFreedom || it == itOrbRecall)
           queuepolyat(Vit, cgi.shDiskSq, 0x80, prio);
+        if (it == itOrbHorns) {
+          queuepolyat(Vit, cgi.shSmallBullHead, 0x80, prio);
+          queuepolyat(Vit, cgi.shSmallBullHorn, 0x80, prio);
+          queuepolyat(Vit*Mirror, cgi.shSmallBullHorn, 0x80, prio);
+          }
+        if (it == itOrbShell)
+          for(int i = 1; i<8; i++) {
+            queuepolyat(Vit, cgi.shTortoise[i][2], 0x80, prio);
+            if (i>=5 && i<=7)
+              queuepolyat(Vit*Mirror, cgi.shTortoise[i][2], 0x80, prio);
+            }
         }
       }
 
