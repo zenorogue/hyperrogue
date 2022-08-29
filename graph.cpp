@@ -1079,15 +1079,6 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit*Mirror, cgi.shSmallFrogFrontFoot, dark, prio);
         queuepolyat(Vit*Mirror, cgi.shSmallFrogFrontLeg, dark, prio);
         }
-      else if (it == itOrbUndeath) {
-        dark = darkena(minf[moFriendlyGhost].color, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0);
-        queuepolyat(Vit, cgi.shMiniGhost, dark, prio);
-        queuepolyat(Vit, cgi.shMiniEyes, 0xFF, prio);
-        }
-      else if (it == itOrbSlaying) {
-        queuepolyat(Vit, cgi.shSmallFlailTrunk, dark, prio);
-        queuepolyat(Vit, cgi.shSmallHammerHead, col, prio);
-        }
       else if (it == itOrbPurity)
         queuepolyat(Vit, cgi.shSmallEgg, dark, prio);
       else if (it == itOrbSpeed)
@@ -1147,6 +1138,15 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
           queuepolyat(Vit, cgi.shSmallBullHead, 0x80, prio);
           queuepolyat(Vit, cgi.shSmallBullHorn, 0x80, prio);
           queuepolyat(Vit*Mirror, cgi.shSmallBullHorn, 0x80, prio);
+          }
+        if (it == itOrbUndeath) {
+dark = darkena(minf[moFriendlyGhost].color, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0);
+          queuepolyat(Vit, cgi.shMiniGhost, dark, prio);
+          queuepolyat(Vit, cgi.shMiniEyes, 0xFF, prio);
+          }
+        if (it == itOrbSlaying) {
+          queuepolyat(Vit, cgi.shSmallFlailTrunk, 0x80, prio);
+          queuepolyat(Vit, cgi.shSmallHammerHead, 0x80, prio);
           }
         if (it == itOrbShell)
           for(int i = 1; i<8; i++) {
