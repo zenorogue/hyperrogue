@@ -1123,6 +1123,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      (it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism) ? &cgi.shEccentricDisk :
                      (it == itOrbPsi || it == itOrbSide3) ? &cgi.shDiskS :
                      (it == itOrbPurity) ? &cgi.shSmallEgg :
+                     (it == itOrbLightning) ? &cgi.shLightningBolt :
                         NULL;
         queuepolyat(Vit, cgi.shDisk, dark, prio);
         if (shape)

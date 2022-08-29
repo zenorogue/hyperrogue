@@ -571,7 +571,6 @@ void geometry_information::procedural_shapes() {
     if(t != SD6) hpcpush(ddi(t*S14+SD7, zhexf*.7*-.5*3/4) * C0);
     }
   hpcpush(ddi(0, zhexf*.7*.6) * C0);
-  //copyshape(shSnowflake, shDaisy, PPR::ITEM);
 
   bshape(shTriangle, PPR::ITEM);
   for(int t=0; t<=SD3; t++) {
@@ -1255,6 +1254,7 @@ void geometry_information::prepare_shapes() {
   bshape(shPirateX, PPR::ITEM, scalefactor, 124);
   bshape(shTreat, PPR::ITEM, scalefactor, 253);
   bshape(shSmallTreat, PPR::ITEM, scalefactor/1.5, 253);
+  bshape(shLightningBolt, PPR::ITEM, scalefactor/1.5, 413);
 
   wormscale = WDIM == 3 ? 3 : 1;
 
@@ -2408,6 +2408,13 @@ NEWSHAPE, 410, 1, 1, 0.202167+x,-0.134605+y, 0.204591+x,-0.145446+y, 0.192856+x,
 NEWSHAPE, 411, 1, 2, 0.004622,-0.050250, -0.022393,-0.096839, -0.048261,-0.111332, -0.07182,-0.106443, -0.093094,-0.077841, -0.115158,-0.061865, -0.145038,-0.040355, -0.131374,-0.028054, -0.134834,-0.013460, -0.14853,-0.002240,
 // shSmallBullHorn
 NEWSHAPE, 412, 1, 1, -0.008298,-0.078714, -0.000397,-0.122456, 0.012058,-0.140037, 0.030561,-0.149754, 0.049070,-0.152553, 0.065131,-0.150636, 0.093718,-0.142016, 0.118897,-0.133266, 0.111750,-0.150756, 0.096899,-0.163295, 0.073192,-0.169643, 0.041044,-0.173385, 0.015193,-0.167994, -0.016582,-0.152134, -0.02649,-0.135781, -0.032758,-0.118441, -0.037756,-0.102342, -0.021201,-0.096856,
+
+// shLightningBolt
+#define x (-.25)
+#define y (-.25)
+NEWSHAPE, 413, 1,1, .2824+x,.0656+y, .4176+x,.0656+y, .3184+x,.1720+y, .3792+x,.1720+y, .2960+x,.2656+y, .3568+x,.2656+y, .1184+x,.4112+y, .2096+x,.3032+y, .1488+x,.3032+y, .2222+x,.2048+y, .1680+x,.2048+y,
+#undef x
+#undef y
 
 NEWSHAPE, NEWSHAPE
 };
