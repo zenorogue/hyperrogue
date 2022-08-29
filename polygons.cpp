@@ -1505,6 +1505,7 @@ void geometry_information::prepare_shapes() {
   bshape(shSmallPickAxe, PPR::MONSTER_WPN, scalefactor/1.5, 408);
   bshape(shPike, PPR::MONSTER_WPN, scalefactor, 150);
   bshape(shFlailBall, PPR::MONSTER_WPN, scalefactor, 151);
+  bshape(shSmallFlailBall, PPR::MONSTER_WPN, scalefactor/2, 151);
   bshape(shFlailTrunk, PPR::MONSTER_WPN, scalefactor, 152);
   bshape(shSmallFlailTrunk, PPR::MONSTER_WPN, scalefactor/2, 409);
   bshape(shFlailChain, PPR::MONSTER_SUBWPN, scalefactor, 153);

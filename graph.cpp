@@ -1109,6 +1109,12 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         }*/
       else if (it == itOrbSpeed)
         drawSpeed(Vit, 0.4);
+      else if (it == itOrbStunning) {
+        for (int i=0; i<5; i++) {
+          shiftmatrix V2 = Vit * spin(2*M_PI * i / 5 + ptick(300));
+          queuepolyat(V2, cgi.shSmallFlailBall, dark, prio);
+          }
+        }
       else if (it == itOrbDragon) {
         queuepolyat(Vit, cgi.shSmallDragonHead, dark, prio);
         queuepolyat(Vit, cgi.shSmallDragonNostril, 0xFF, prio);

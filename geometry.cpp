@@ -295,7 +295,7 @@ hpcshape
   shFemaleBody, shFemaleHair, shFemaleDress, shWitchDress,
   shWitchHair, shBeautyHair, shFlowerHair, shFlowerHand, shSuspenders, shTrophy,
   shBugBody, shBugArmor, shBugLeg, shBugAntenna,
-  shPickAxe, shSmallPickAxe, shPike, shFlailBall, shFlailTrunk, shSmallFlailTrunk, shFlailChain, shHammerHead, shSmallHammerHead,
+  shPickAxe, shSmallPickAxe, shPike, shFlailBall, shSmallFlailBall, shFlailTrunk, shSmallFlailTrunk, shFlailChain, shHammerHead, shSmallHammerHead,
   shBook, shBookCover, shGrail,
   shBoatOuter, shBoatInner, shCompass1, shCompass2, shCompass3,
   shKnife, shTongue, shFlailMissile, shTrapArrow,
