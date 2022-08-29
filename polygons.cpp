@@ -636,6 +636,10 @@ void geometry_information::procedural_shapes() {
   bshape(shEgg, PPR::ITEM);
   RING(i)
     hpcpush(hpxy(sin(i*2*M_PI/S84)*0.242 * orbsize, cos(i*2*M_PI/S84)*0.177*orbsize));
+
+  bshape(shSmallEgg, PPR::ITEM);
+  RING(i)
+    hpcpush(hpxy(sin(i*2*M_PI/S84)*0.242 * orbsize/2, cos(i*2*M_PI/S84)*0.177*orbsize/2));
   
   auto make_ring = [this] (hpcshape& sh, reaction_t f) {
     bshape(sh, PPR::ITEM);

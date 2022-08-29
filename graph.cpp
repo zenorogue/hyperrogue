@@ -792,6 +792,7 @@ void queue_ring(const shiftmatrix& V, hpcshape& sh, color_t col, PPR p) {
 
 EX color_t orb_auxiliary_color(eItem it) {
   if(it == itOrbFire) return firecolor(200);
+  if(it == itOrbWater) return 0x000060;
   if(it == itOrbFriend || it == itOrbDiscord) return 0xC0C0C0;
   if(it == itOrbFrog) return 0xFF0000;
   if(it == itOrbImpact) return 0xFF0000;
@@ -807,8 +808,8 @@ EX color_t orb_auxiliary_color(eItem it) {
   if(it == itOrbSlaying) return 0xFF0000;
   if(it == itOrbSide1) return 0x307080;
   if(it == itOrbDigging) return 0x606060;
-  //if(it == itOrbEnergy) return 0x8B4513;
   if(it == itOrbEnergy) return 0xFFFF80;
+  if(it == itOrbPurity) return 0xF0F0FF;
   return iinf[it].color;
   }
 
@@ -1098,6 +1099,8 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit, cgi.shSmallFlailTrunk, dark, prio);
         queuepolyat(Vit, cgi.shSmallHammerHead, col, prio);
         }
+      else if (it == itOrbPurity)
+          queuepolyat(Vit, cgi.shSmallEgg, dark, prio);
       /*else if (it == itOrbNature) {
         //queuepolyat(Vit, cgi.shILeaf[0], dark, prio);
         //queuepolyat(Vit, cgi.shILeaf[0], dark, prio);

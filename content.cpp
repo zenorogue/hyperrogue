@@ -591,7 +591,7 @@ ITEM( '$', 0xFFFFFF, "Pearl", itWhirlpool, IC_TREASURE, ZERO, RESERVED, osNone,
 ITEM( 'o', 0x306000, "Orb of Friendship", itOrbFriend, IC_ORB, ZERO | IF_SHMUPLIFE | IF_REVIVAL, RESERVED, osFriend, 
     "This Orb summons a friendly Bomberbird."
     )
-ITEM( 'o', 0x000060, "Orb of Water", itOrbWater, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osTerraform, 
+ITEM( 'o', 0x0070C0, "Orb of Water", itOrbWater, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osTerraform, 
    "This Orb allows your boat to go against the current, "
    "and also to go into the land, creating water on the way."
     )
@@ -1646,7 +1646,7 @@ WALL( '$', 0x40FD40, "Crate on Target", waCrateOnTarget, WF_WALL | WF_PUSHABLE, 
     "A crate already on a target."
     )
 
-ITEM( 'o', 0xF0F0FF, "Orb of Purity", itOrbPurity, IC_ORB, ZERO, RESERVED, osProtective, 
+ITEM( 'o', 0xFFD520, "Orb of Purity", itOrbPurity, IC_ORB, ZERO, RESERVED, osProtective, 
   "Reverses all the curses. When found far away from the Cursed Canyon, you gain low amounts of various reversed curse powers."
   )
 

@@ -255,7 +255,7 @@ hpcshape
   shHalfFloor[6], shHalfMirror[3],
   shGem[2], shStar, shFlash, shDisk, shHalfDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shEccentricDisk,
   shTinyBird, shTinyShark,
-  shEgg,
+  shEgg, shSmallEgg,
   shRing, shSpikedRing, shTargetRing, shSawRing, shGearRing, shPeaceRing,
   shHeptaRing, shSpearRing, shLoveRing, shFrogRing, 
   shPowerGearRing, shProtectiveRing, shTerraRing, shMoveRing,
