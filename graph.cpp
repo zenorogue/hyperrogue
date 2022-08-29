@@ -1108,22 +1108,24 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit, cgi.shSmallerDodeca, dark, prio);
       else if (it == itOrbFlash)
         queuepolyat(Vit, cgi.shFlash, dark, prio);
+      else if (it == itOrbMatter || it == itOrbStone)
+        queuepolyat(Vit, cgi.shDiskSq, dark, prio);
       else {
         auto shape = (it == itOrbFriend) ? &cgi.shTinyBird :
                      (it == itOrbSide1) ? &cgi.shSmallPSword :
                      (it == itOrbDigging) ? &cgi.shSmallPickAxe :
                      (it == itOrbSword || it == itOrbSword2) ? &cgi.shSmallSword :
                      (it == itOrbThorns) ? &cgi.shSmallHedgehogBlade :
-                     (it == itOrbSide2 || it == itOrb37) ? &cgi.shDiskT :
+                     (it == itOrbSide2 || it == itOrb37 || it == itOrbLava) ? &cgi.shDiskT :
                      (it == itOrbGravity) ? &cgi.shTinyArrow :
-                     (it == itOrbMatter || it == itOrbStone) ? &cgi.shDiskSq :
+                     (it == itOrbSafety || it == itOrbFreedom || it == itOrbRecall) ? &cgi.shDiskSq :
                      (it == itOrbEnergy) ? &cgi.shHalfDisk :
                      (it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism) ? &cgi.shEccentricDisk :
                      (it == itOrbPsi || it == itOrbSide3) ? &cgi.shDiskS :
                      (it == itOrbPurity) ? &cgi.shSmallEgg :
-                        &cgi.shDisk;
+                        NULL;
         queuepolyat(Vit, cgi.shDisk, dark, prio);
-        if (shape != &cgi.shDisk)
+        if (shape)
           queuepolyat(Vit, *shape, 0x80, prio);
         if (it == itOrbSide1 || shape == &cgi.shEccentricDisk)
           queuepolyat(Vit*Mirror, *shape, 0x80, prio);
@@ -1131,8 +1133,6 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
           queuepolyat(Vit*Mirror, *shape, col, prio);
         if (it == itOrbIntensity || it == itOrbImpact)
           queuepolyat(Vit, cgi.shDiskM, 0x80, prio);
-        if (it == itOrbSafety || it == itOrbFreedom || it == itOrbRecall)
-          queuepolyat(Vit, cgi.shDiskSq, 0x80, prio);
         if (it == itOrbHorns) {
           queuepolyat(Vit, cgi.shSmallBullHead, 0x80, prio);
           queuepolyat(Vit, cgi.shSmallBullHorn, 0x80, prio);
