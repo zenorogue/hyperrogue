@@ -1254,6 +1254,7 @@ void geometry_information::prepare_shapes() {
   bshape(shKey, PPR::ITEM, scalefactor, 68);
   bshape(shPirateX, PPR::ITEM, scalefactor, 124);
   bshape(shTreat, PPR::ITEM, scalefactor, 253);
+  bshape(shSmallTreat, PPR::ITEM, scalefactor/1.5, 253);
 
   wormscale = WDIM == 3 ? 3 : 1;
 

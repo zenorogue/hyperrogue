@@ -809,7 +809,7 @@ EX color_t orb_auxiliary_color(eItem it) {
   if(it == itOrbSide1) return 0x307080;
   if(it == itOrbDigging) return 0x606060;
   if(it == itOrbEnergy) return 0xFFFF80;
-  if(it == itOrbPurity) return 0xF0F0FF;
+  if(it == itOrbPurity) return 0xFFD520;
   return iinf[it].color;
   }
 
@@ -1117,13 +1117,13 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      (it == itOrbThorns) ? cgi.shSmallHedgehogBlade :
                      (it == itOrbSide2 || it == itOrb37) ? cgi.shDiskT :
                      (it == itOrbGravity) ? cgi.shTinyArrow :
-                     (it == itOrbMorph) ? cgi.shDiskS :
                      (it == itOrbMatter || it == itOrbStone) ? cgi.shDiskSq :
                      (it == itOrbEnergy) ? cgi.shHalfDisk :
                      (it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism) ? cgi.shEccentricDisk :
                      (it == itOrbWinter) ? cgi.shSnowflake :
                      (it == itOrbLuck) ? cgi.shSmallerDodeca :
                      (it == itOrbFlash) ? cgi.shFlash :
+                     (it == itOrbMorph || it == itOrbChaos || it == itOrbPlague) ? cgi.shSmallTreat :
                         cgi.shDisk;
         queuepolyat(Vit, shape, dark, prio);
         if (it == itOrbSide1 || it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism)

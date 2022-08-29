@@ -262,7 +262,7 @@ hpcshape
   shReserved4, shMoonDisk,
   shDaisy, shSnowflake, shTriangle, shNecro, shStatue, shKey, shWindArrow,
   shGun,
-  shFigurine, shTreat,
+  shFigurine, shTreat, shSmallTreat,
   shElementalShard,
   // shBranch, 
   shIBranch, shTentacle, shTentacleX, shILeaf[3], 

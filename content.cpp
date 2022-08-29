@@ -1646,7 +1646,7 @@ WALL( '$', 0x40FD40, "Crate on Target", waCrateOnTarget, WF_WALL | WF_PUSHABLE, 
     "A crate already on a target."
     )
 
-ITEM( 'o', 0xFFD520, "Orb of Purity", itOrbPurity, IC_ORB, ZERO, RESERVED, osProtective, 
+ITEM( 'o', 0xF0F0FF, "Orb of Purity", itOrbPurity, IC_ORB, ZERO, RESERVED, osProtective, 
   "Reverses all the curses. When found far away from the Cursed Canyon, you gain low amounts of various reversed curse powers."
   )
 
