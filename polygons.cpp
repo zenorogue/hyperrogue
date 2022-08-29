@@ -1268,6 +1268,7 @@ void geometry_information::prepare_shapes() {
   copyshape(shJoint, shDisk, PPR::ONTENTACLE);
   bshape(shTentHead, PPR::ONTENTACLE, scalefactor * wormscale, 79);
   bshape(shWormHead, PPR::ONTENTACLE, scalefactor * wormscale, 80);
+  bshape(shSmallWormHead, PPR::ONTENTACLE, scalefactor * wormscale / 2, 80);
 
   bshape(shWormSegment, PPR::TENTACLE1);
   RING(i)
@@ -1284,6 +1285,8 @@ void geometry_information::prepare_shapes() {
   bshape(shDragonTail, PPR::TENTACLE1, scalefactor * wormscale, 240); //239 alt
   bshape(shDragonNostril, PPR::ONTENTACLE_EYES, scalefactor * wormscale, 241);
   bshape(shDragonHead, PPR::ONTENTACLE, scalefactor * wormscale, 242);
+  bshape(shSmallDragonNostril, PPR::ONTENTACLE_EYES, scalefactor * wormscale / 2, 241);
+  bshape(shSmallDragonHead, PPR::ONTENTACLE, scalefactor * wormscale / 2, 242);
 
   ld krsc = 1;
   if(sphere) krsc *= 1.4;
@@ -1478,9 +1481,11 @@ void geometry_information::prepare_shapes() {
   bshape(shFlowerHand, PPR::MONSTER_WPN, scalefactor, 133);
   bshape(shPFace, PPR::MONSTER_FACE, scalefactor, 134);
   bshape(shEyes, PPR::MONSTER_EYE0, scalefactor, 135);
+  bshape(shSmallEyes, PPR::MONSTER_EYE0, scalefactor/2, 135);
   bshape(shMiniEyes, PPR::MONSTER_EYE0, scalefactor/3, 135);
   bshape(shShark, PPR::MONSTER_BODY, scalefactor, 136);
   shSlimeEyes = shDragonEyes = shWormEyes = shGhostEyes = shEyes;
+  shSmallDragonEyes = shSmallWormEyes = shSmallEyes;
   bshape(shTinyShark, PPR::MONSTER_BODY, scalefactor / 2, 136);
   bshape(shBugBody, PPR::MONSTER_BODY, scalefactor, 137);
   bshape(shBugArmor, PPR::MONSTER_ARMOR0, scalefactor, 138);

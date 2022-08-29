@@ -1109,6 +1109,18 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         }*/
       else if (it == itOrbSpeed)
         drawSpeed(Vit, 0.4);
+      else if (it == itOrbDragon) {
+        queuepolyat(Vit, cgi.shSmallDragonHead, dark, prio);
+        queuepolyat(Vit, cgi.shSmallDragonNostril, 0xFF, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallDragonNostril, 0xFF, prio);
+        queuepolyat(Vit, cgi.shSmallDragonEyes, 0x60, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallDragonEyes, 0x60, prio);
+        }
+      else if (it == itOrbDomination) {
+        queuepolyat(Vit, cgi.shSmallWormHead, dark, prio);
+        queuepolyat(Vit, cgi.shSmallWormEyes, 0x60, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallWormEyes, 0x60, prio);
+        }
       else {
         auto shape = (it == itOrbFriend) ? cgi.shTinyBird :
                      (it == itOrbSide1) ? cgi.shSmallPSword :
@@ -1124,6 +1136,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      (it == itOrbLuck) ? cgi.shSmallerDodeca :
                      (it == itOrbFlash) ? cgi.shFlash :
                      (it == itOrbMorph || it == itOrbChaos || it == itOrbPlague) ? cgi.shSmallTreat :
+                     (it == itOrbPsi) ? cgi.shDiskS :
                         cgi.shDisk;
         queuepolyat(Vit, shape, dark, prio);
         if (it == itOrbSide1 || it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism)
