@@ -1130,11 +1130,11 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      (it == itOrbPsi || it == itOrbSide3) ? &cgi.shDiskS :
                      (it == itOrbPurity) ? &cgi.shSmallEgg :
                      (it == itOrbLightning) ? &cgi.shLightningBolt :
-                     (it == itOrbIllusion) ? &cgi.shHumanoid :
+                     (it == itOrbIllusion || it == itOrbInvis) ? &cgi.shHumanoid :
                         NULL;
         queuepolyat(Vit, cgi.shDisk, dark, prio);
         if (shape)
-          queuepolyat(Vit, *shape, 0x80, prio);
+          queuepolyat(Vit, *shape, (it == itOrbInvis) ? 0x20 : 0x80, prio);
         if (it == itOrbSide1 || shape == &cgi.shEccentricDisk)
           queuepolyat(Vit*Mirror, *shape, 0x80, prio);
         if (it == itOrbEnergy)
