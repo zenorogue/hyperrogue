@@ -1106,10 +1106,12 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit, cgi.shSnowflake, dark, prio);
       else if (it == itOrbLuck)
         queuepolyat(Vit, cgi.shSmallerDodeca, dark, prio);
-      /*else if (it == itOrbIllusion) {
-        queuepolyat(Vit, cgi.shHumanoid, dark, prio);
-        //queuepolyat(Vit*Mirror, cgi.shHalfHumanoid, dark, prio);
-        }*/
+      else if (it == itOrbAether) {
+        queuepolyat(Vit, cgi.shHalfDisk, dark, prio);
+        queuepolyat(Vit*Mirror, cgi.shHalfDisk, 0xFF, prio);
+        queuepolyat(Vit, cgi.shHalfHumanoid, dark, prio);
+        queuepolyat(Vit*Mirror, cgi.shHalfHumanoid, 0xFF, prio);
+        }
       else if (it == itOrbFlash)
         queuepolyat(Vit, cgi.shFlash, dark, prio);
       else if (it == itOrbMatter || it == itOrbStone)
