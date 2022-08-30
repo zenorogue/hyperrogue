@@ -1255,6 +1255,7 @@ void geometry_information::prepare_shapes() {
   bshape(shTreat, PPR::ITEM, scalefactor, 253);
   bshape(shSmallTreat, PPR::ITEM, scalefactor/1.5, 253);
   bshape(shLightningBolt, PPR::ITEM, scalefactor/1.5, 413);
+  bshape(shHumanoid, PPR::ITEM, scalefactor/5.5, 414);
 
   wormscale = WDIM == 3 ? 3 : 1;
 
@@ -2413,6 +2414,14 @@ NEWSHAPE, 412, 1, 1, -0.008298,-0.078714, -0.000397,-0.122456, 0.012058,-0.14003
 #define x (-.25)
 #define y (-.25)
 NEWSHAPE, 413, 1,1, .2824+x,.0656+y, .4176+x,.0656+y, .3184+x,.1720+y, .3792+x,.1720+y, .2960+x,.2656+y, .3568+x,.2656+y, .1184+x,.4112+y, .2096+x,.3032+y, .1488+x,.3032+y, .2222+x,.2048+y, .1680+x,.2048+y,
+#undef x
+#undef y
+
+// shHumanoid
+#define x (-.636)
+#define y (-.8)
+NEWSHAPE, 414, 1, 2, .966+y,.636+x, 1.419+y,.822+x, 1.419+y,.984+x, .930+y,.807+x, .639+y,.765+x, .840+y,.890+x, .762+y,.975+x, .480+y,.822+x, .432+y,.714+x, .333+y,.774+x, .231+y,.777+x, .141+y,.717+x, .126+y,.723+x, .100+y,.636+x,
+
 #undef x
 #undef y
 

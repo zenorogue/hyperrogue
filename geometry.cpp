@@ -341,7 +341,7 @@ hpcshape
   
   shDodeca, shSmallerDodeca,
 
-  shLightningBolt;
+  shLightningBolt, shHumanoid;
   
   hpcshape shFrogRearFoot, shFrogFrontFoot, shFrogRearLeg, shFrogFrontLeg, shFrogRearLeg2, shFrogBody, shFrogEye, shFrogStripe, shFrogJumpFoot, shFrogJumpLeg, shSmallFrogRearFoot, shSmallFrogFrontFoot, shSmallFrogRearLeg, shSmallFrogFrontLeg, shSmallFrogRearLeg2, shSmallFrogBody;
 
