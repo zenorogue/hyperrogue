@@ -654,6 +654,7 @@ EX void teleportTo(cell *dest) {
   #endif
   }
 
+/* calls changes.rollback or changes.commit */
 EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMonster dashmon IS(moNone)) {
   if(byWhat != itStrongWind) playSound(dest, "orb-frog");
   cell *from = cwt.at;
@@ -740,7 +741,8 @@ EX bool jumpTo(orbAction a, cell *dest, eItem byWhat, int bonuskill IS(0), eMons
   return true;
   }
 
-void growIvyTo(const movei& mi) {
+/* calls changes.rollback or changes.commit */
+bool growIvyTo(orbAction a, const movei& mi) {
   auto& dest = mi.t;
   flagtype f = AF_NORMAL | AF_MSG;
   if(items[itOrbEmpathy] && items[itOrbSlaying]) {
@@ -749,6 +751,8 @@ void growIvyTo(const movei& mi) {
       }
     f |= AF_CRUSH;
     }
+
+  changes.ccell(dest);
 
   if(dest->monst) 
     attackMonster(dest, f, moFriendlyIvy);
@@ -759,8 +763,24 @@ void growIvyTo(const movei& mi) {
     moveEffect(mi, moFriendlyIvy);
     empathyMove(mi);
     }
+
+  apply_impact(dest);
+  markOrb(itOrbNature);
+
+  if(monstersnearO(a, cwt.at)) {
+    changes.rollback();
+    return false;
+    }
+
+  if(isCheck(a)) {
+    changes.rollback();
+    return true;
+    }
+
+  changes.commit();
   createNoise(1);
   monstersTurn();
+  return true;
   }
 
 pair<int, bool> spacedrain(cell *c) {
@@ -1377,21 +1397,20 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
         if(items[itOrbEmpathy] && items[itOrbSlaying]) f |= AF_CRUSH;
 
         if(c->monst ? (
-          CHK(canAttack(cf, moFriendlyIvy, c, c->monst, f), XLAT("Cannot attack there!")) &&
-          CHKV(!monstersnear(cwt.at, moPlayer), wouldkill_here = true)
+          CHK(canAttack(cf, moFriendlyIvy, c, c->monst, f), XLAT("Cannot attack there!"))
           ) : (
           CHK(passable(c, cf, P_ISFRIEND | P_MONSTER), XLAT("Cannot grow there!")) &&
-          CHK(!strictlyAgainstGravity(c, cf, false, MF_IVY), XLAT("Cannot grow against gravity!")) &&
-          CHKV(!monstersnear(cwt.at, moPlayer), wouldkill_here = true))
-          )
+          CHK(!strictlyAgainstGravity(c, cf, false, MF_IVY), XLAT("Cannot grow against gravity!"))
+          ))
           dirs.push_back(d);
         }
       
     int di = hrand_elt(dirs, -1);
     if(CHK(di != -1, XLAT("You cannot grow there from any adjacent cell!"))) {
-      if(!isCheck(a)) growIvyTo(movei(c, di).rev()), apply_impact(c), changes.commit();
-      else changes.rollback();
-      return itOrbNature;
+      if(growIvyTo(a, movei(c, di).rev()))
+        return itOrbNature;
+      else
+        wouldkill_here = true;
       }
     else changes.rollback();
     }
@@ -1401,10 +1420,8 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   
   // orb of vaulting
   if(!shmup::on && items[itOrbDash] && c->cpdist == 2) {
-    int i = items[itOrbAether];
-    if(i) items[itOrbAether] = i-1;
+    changes.init(isCheck(a));
     int vaultstate = check_vault(cwt.at, c, P_ISPLAYER, jumpthru);
-    items[itOrbAether] = i;
 
     if(vaultstate == 0) orb_error_messages.push_back(XLAT("ERROR: No common neighbor to vault through!"));
     if(vaultstate == 1) orb_error_messages.push_back(XLAT("Can only vault in a roughly straight line!"));
@@ -1415,7 +1432,6 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     if(vaultstate == 5) orb_error_messages.push_back(XLAT("Cannot attack %the1 while vaulting!", jumpthru->monst));
 
     if(vaultstate == 6) {
-      changes.init(isCheck(a));
       int k = tkills();
       eMonster m = jumpthru->monst;
       if(jumpthru->wall == waShrub) {
@@ -1440,13 +1456,12 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
       else wouldkill_there = true;
       if(vaultstate == 7) return itOrbDash;
       }
+    else changes.rollback();
     }
   
   if(items[itOrbFrog] && c->cpdist == 2) {
-    int i = items[itOrbAether];
-    if(i) items[itOrbAether] = i-1;
+    changes.init(isCheck(a));
     int frogstate = check_jump(cwt.at, c, P_ISPLAYER, jumpthru);
-    items[itOrbAether] = i;
     if(frogstate == 1 && jumpthru && jumpthru->monst) {
       orb_error_messages.push_back(XLAT("Cannot jump through %the1!", jumpthru->monst));
       }
@@ -1461,19 +1476,17 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
       }
 
     if(frogstate == 3) {
-      changes.init(isCheck(a));
       if(jumpTo(a, c, itOrbFrog)) frogstate = 4;
       else wouldkill_there = true;
       if(frogstate == 4) return itOrbFrog;
       }
+    else changes.rollback();
     }
   
   if(items[itOrbPhasing] && c->cpdist == 2) {
+    changes.init(isCheck(a));
     if(shmup::on) shmup::pushmonsters();
-    int i = items[itOrbAether];
-    if(i) items[itOrbAether] = i-1;
     int phasestate = check_phase(cwt.at, c, P_ISPLAYER, jumpthru);
-    items[itOrbAether] = i;
     if(phasestate == 1 && c->monst) {
       orb_error_messages.push_back(XLAT("Cannot phase onto %the1!", c->monst));
       }
@@ -1485,10 +1498,10 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
       }
 
     if(phasestate == 3) {
-      changes.init(isCheck(a));
       if(jumpTo(a, c, itOrbPhasing)) phasestate = 4;
       else wouldkill_there = true;
       }
+    else changes.rollback();
     if(shmup::on) shmup::popmonsters();
     if(phasestate == 4) return itOrbPhasing;
     }
