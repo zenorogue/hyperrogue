@@ -1368,6 +1368,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     && CHK(numplayers() == 1, XLAT("Cannot be used in multiplayer"))
     && CHK(c->monst != moFriendlyIvy, XLAT("You cannot grow on yourself!"))
     ) {
+    changes.init(isCheck(a));
     vector<int> dirs;
     forCellIdCM(cf, d, c)
       if(cf->monst == moFriendlyIvy) {
@@ -1388,9 +1389,11 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
       
     int di = hrand_elt(dirs, -1);
     if(CHK(di != -1, XLAT("You cannot grow there from any adjacent cell!"))) {
-      if(!isCheck(a)) growIvyTo(movei(c, di).rev()), apply_impact(c);
+      if(!isCheck(a)) growIvyTo(movei(c, di).rev()), apply_impact(c), changes.commit();
+      else changes.rollback();
       return itOrbNature;
       }
+    else changes.rollback();
     }
     
   // (0'') jump
