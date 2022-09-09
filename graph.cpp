@@ -5115,10 +5115,7 @@ EX void drawthemap() {
     cellwalker cw = cwt; bool f = flipplayer;
     items[itWarning]+=2;
     
-    bool recorduse[ittypes];
-    for(int i=0; i<ittypes; i++) recorduse[i] = orbused[i];
     movepcto(mousedest.d, mousedest.subdir, true);
-    for(int i=0; i<ittypes; i++) orbused[i] = recorduse[i];
     items[itWarning] -= 2;
     if(cw.spin != cwt.spin) mirror::act(-mousedest.d, mirror::SPINSINGLE);
     cwt = cw; flipplayer = f;

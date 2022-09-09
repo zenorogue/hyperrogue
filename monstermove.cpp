@@ -1686,8 +1686,7 @@ EX void movegolems(flagtype flags) {
       if(m == moGolem) qg++;
       if(m == moFriendlyGhost) markOrb(itOrbUndeath);
 
-      bool recorduse[ittypes];
-      for(int i=0; i<ittypes; i++) recorduse[i] = orbused[i];
+      auto recorduse = orbused;
 
       DEBB(DF_TURN, ("stayval"));
       int bestv = stayvalue(m, c);
@@ -1711,7 +1710,7 @@ EX void movegolems(flagtype flags) {
           }
         }
 
-      for(int i=0; i<ittypes; i++) orbused[i] = recorduse[i];
+      orbused = recorduse;
       
 //    printf("stayvalue = %d, result = %d, bq = %d\n", stayvalue(m,c), bestv, bq);
         
