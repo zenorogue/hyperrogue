@@ -335,35 +335,35 @@ void virtualRebase(cell*& base, T& at, const U& check) {
     /** the general algorithm sometimes makes much more iterations than needed... try to approximate the geodesic */
     hyperpoint h = check(at);
     auto step = [&] (int i) {
-      at = currentmap->adj(base, i) * at;
+      at = currentmap->iadj(base, i) * at;
       base = base->cmove(i);
       h = check(at);
       };
 
     auto nw = vid.binary_width * log(2);
-    while(abs(h[0]) > 2) step(2);
-    while(h[0] < -0.5 * nw) step(0);
-    while(h[0] > +0.5 * nw) step(4);
+    while(abs(h[0]) > 2) step(6);
+    while(h[0] < -0.5 * nw) step(4);
+    while(h[0] > +0.5 * nw) step(0);
     while(abs(h[1]) > 2) {
-      step(6);
-      while(h[0] < -0.5 * nw) step(0);
-      while(h[0] > +0.5 * nw) step(4);
+      step(2);
+      while(h[0] < -0.5 * nw) step(4);
+      while(h[0] > +0.5 * nw) step(0);
       }
-    while(h[1] < -0.5 * nw) step(1);
-    while(h[1] > +0.5 * nw) step(5);
+    while(h[1] < -0.5 * nw) step(5);
+    while(h[1] > +0.5 * nw) step(1);
     while(h[2] > 1) {
-      step(6);
-      while(h[0] < -0.5 * nw) step(0);
-      while(h[0] > +0.5 * nw) step(4);
-      while(h[1] < -0.5 * nw) step(1);
-      while(h[1] > +0.5 * nw) step(5);
+      step(2);
+      while(h[0] < -0.5 * nw) step(4);
+      while(h[0] > +0.5 * nw) step(0);
+      while(h[1] < -0.5 * nw) step(5);
+      while(h[1] > +0.5 * nw) step(1);
       }
     while(h[2] < -1) {
-      step(2);
-      while(h[0] < -0.5 * nw) step(0);
-      while(h[0] > +0.5 * nw) step(4);
-      while(h[1] < -0.5 * nw) step(1);
-      while(h[1] > +0.5 * nw) step(5);
+      step(6);
+      while(h[0] < -0.5 * nw) step(4);
+      while(h[0] > +0.5 * nw) step(0);
+      while(h[1] < -0.5 * nw) step(5);
+      while(h[1] > +0.5 * nw) step(1);
       }
     }
   /* todo variants of sol */
