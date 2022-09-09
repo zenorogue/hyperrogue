@@ -1854,7 +1854,12 @@ EX namespace reg3 {
 
       shstream ins(decompress_string(read_file_as_string(fname)));
       ins.read(ins.vernum);
-      mapstream::load_geometry(ins);
+      if(1) {
+        dynamicval<eVariation> dv(variation);
+        dynamicval<flagtype> dc(coxeter_param);
+        dynamicval<int> ds(subcube_count);
+        mapstream::load_geometry(ins);
+        }
       ins.read(fieldpattern::use_rule_fp);
       ins.read(fieldpattern::use_quotient_fp);
       ins.read(reg3::minimize_quotient_maps);
