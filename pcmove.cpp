@@ -436,6 +436,7 @@ struct changes_t {
     forCellEx(c1, cwt.at) ccell(c1);
     value_keep(kills);
     value_keep(items);
+    value_keep(orbused);
     value_keep(hrngen);
     checking = ch;
     }
