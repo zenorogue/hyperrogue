@@ -4748,3 +4748,19 @@ Menu improvements:
 2022-08-7 15:01 Update 12.0x:
 - yet another fix to racing
 - fixed a crash when deleting 3-sphere maps
+
+2022-08-26 13:46 Update 12.0y:
+  - new implemenatation of hyperbolic honeycombs in action
+  - field quotients in 3D now finds more honeycombs
+  - variations now work for Euclidean cube tiling
+  - tessellation, texture, etc. files can now be found via HYPERPATH
+  - fixed the Slaying+side attack combo
+  - Pearls now use the Disk graphics
+  - Added some land incompatibilities
+  - updates to French translation
+  - fixes to stereographic projection (as a way to get high FOV)
+
+2022-09-06 14:20 Update 12.0z:
+- various fixes related to 'orb used' rollback
+- fixed Sol geometry (a bug caused the map to change incorrectly when moving)
+- fixed variations of hyperbolic honeycombs (when a ruleset was available only for the pure honeycomb, loading it would reset variation to pure)
