@@ -293,6 +293,7 @@ int arg::readCommon() {
       println(hlog, "Great Success!\n");
     else
       println(hlog, "Success.\n");
+    fflush(stdout);
     exit(0);
     }
 
