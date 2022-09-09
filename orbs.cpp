@@ -39,13 +39,13 @@ EX bool markOrb2(eItem it) {
   return items[it] > 1; */
   }
 
-EX int fixpower(int qty) {
-  if(markOrb(itOrbEnergy)) qty = (qty+1)/2;
+EX int fixpower(int qty, bool checking) {
+  if(checking ? items[itOrbEnergy] : markOrb(itOrbEnergy)) qty = (qty+1)/2;
   return qty;
   }
 
 EX void useupOrb(eItem it, int qty) {
-  items[it] -= fixpower(qty);
+  items[it] -= fixpower(qty, false);
   if(items[it] < 0) items[it] = 0;
   }
 
@@ -1332,7 +1332,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     && CHK(c->item && !itemHiddenFromSight(c), XLAT("%The1 can only be used on items!", itOrbSpace))
     && CHK(!cwt.at->item, XLAT("Cannot use %the1 here!", itOrbSpace))
     && CHK(!saved_tortoise_on(c), XLAT("No, that would be heartless!"))
-    && CHK(items[itOrbSpace] >= fixpower(spacedrain(c).first), XLAT("Not enough power for telekinesis!"))
+    && CHK(items[itOrbSpace] >= fixpower(spacedrain(c).first, isCheck(a)), XLAT("Not enough power for telekinesis!"))
     && CHK(!cantGetGrimoire(c, !isCheck(a)), XLAT("Cannot use %the1 here!", itOrbSpace))
     && CHK(c->item != itBarrow, XLAT("%The1 is protected from this kind of magic!", c->item))
     ) {
