@@ -14,7 +14,7 @@ void fire() {
   ads_matrix S1 = S0 * lorentz(0, 2, 3); // 0.995c
   
   auto& ro = ci_at[c].rocks;
-  ro.emplace_back(rockinfo{oMissile, c, S1, 0xC0C0FFFF });
+  ro.emplace_back(ads_object{oMissile, c, S1, 0xC0C0FFFF });
   auto& r = ro.back();
 
   ads_matrix Scell(Id, 0);    

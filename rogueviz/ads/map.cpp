@@ -4,7 +4,7 @@ namespace ads_game {
 
 enum eObjType { oRock, oMissile, oParticle };
 
-struct rockinfo {
+struct ads_object {
   eObjType type;
   cell *owner;
   ads_matrix at;
@@ -14,7 +14,7 @@ struct rockinfo {
   flatresult pt_main;
   vector<flatresult> pts;
   
-  rockinfo(eObjType t, cell *_owner, const ads_matrix& T, color_t _col) : type(t), owner(_owner), at(T), col(_col) { 
+  ads_object(eObjType t, cell *_owner, const ads_matrix& T, color_t _col) : type(t), owner(_owner), at(T), col(_col) { 
     life_start = -HUGE_VAL;
     life_end = HUGE_VAL;
     }
@@ -25,7 +25,7 @@ enum eWalltype { wtNone, wtDestructible, wtSolid, wtGate };
 struct cellinfo {
   int mpd_terrain; /* 0 = fully generated terrain */
   int rock_dist; /* rocks generated in this radius */
-  vector<rockinfo> rocks;
+  vector<ads_object> rocks;
   eWalltype type;
   cellinfo() {
     mpd_terrain = 4;
@@ -119,7 +119,7 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
     hybrid::in_actual([&] {
       int q = rpoisson(.25);
       
-      auto add_rock = [&] (rockinfo&& r) {
+      auto add_rock = [&] (ads_object&& r) {
         if(geometry != gRotSpace) { println(hlog, "wrong geometry detected in gen_rocks 2!");  exit(1); }
         compute_life(hybrid::get_at(c, 0), unshift(r.at), [&] (cell *c, ld t) {
           auto& ci = ci_at[c];
@@ -133,9 +133,9 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
       for(int i=0; i<q; i++) {
         int kind = hrand(100);
         if(kind < 50) 
-          add_rock(rockinfo(oRock, c, ads_matrix(rots::uxpush(randd() * .6 - .3) * rots::uypush(randd() * .6 - .3)), 0xC0C0C0FF));
+          add_rock(ads_object(oRock, c, ads_matrix(rots::uxpush(randd() * .6 - .3) * rots::uypush(randd() * .6 - .3)), 0xC0C0C0FF));
         else
-          add_rock(rockinfo(oRock, c, ads_matrix(rots::uypush(randd() * .6 - .3) * lorentz(0, 3, 0.5 + randd() * 1)), 0xC04040FF));
+          add_rock(ads_object(oRock, c, ads_matrix(rots::uypush(randd() * .6 - .3) * lorentz(0, 3, 0.5 + randd() * 1)), 0xC04040FF));
         }        
       });
     }
@@ -145,7 +145,7 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
 void gen_particles(int qty, cell *c, shiftmatrix from, color_t col, ld t) {
   auto& ro = ci_at[c].rocks;
   for(int i=0; i<qty; i++) {
-    ro.emplace_back(rockinfo{oParticle, c, from * spin(randd() * TAU) * lorentz(0, 2, 1 + randd()), col });
+    ro.emplace_back(ads_object{oParticle, c, from * spin(randd() * TAU) * lorentz(0, 2, 1 + randd()), col });
     auto& r = ro.back();
     r.life_end = randd() * t;
     r.life_start = 0;
@@ -153,8 +153,8 @@ void gen_particles(int qty, cell *c, shiftmatrix from, color_t col, ld t) {
   }
 
 void handle_crashes() {
-  vector<rockinfo*> missiles;
-  vector<rockinfo*> rocks;
+  vector<ads_object*> missiles;
+  vector<ads_object*> rocks;
   for(auto m: displayed) {
     if(m->type == oMissile)
       missiles.push_back(m);
