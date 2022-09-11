@@ -11,8 +11,8 @@ struct ads_object {
   color_t col;
   
   ld life_start, life_end;
-  flatresult pt_main;
-  vector<flatresult> pts;
+  cross_result pt_main;
+  vector<cross_result> pts;
   
   ads_object(eObjType t, cell *_owner, const ads_matrix& T, color_t _col) : type(t), owner(_owner), at(T), col(_col) { 
     life_start = -HUGE_VAL;

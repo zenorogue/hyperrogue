@@ -104,7 +104,7 @@ ads_matrix ads_inverse(const ads_matrix& T) {
   return res;
   }
 
-struct flatresult {
+struct cross_result {
   hyperpoint h;
   ld shift;
   };
@@ -115,7 +115,7 @@ extern ads_matrix current;
  *  shift is T's proper time at the point of crossing, and h=(x,y,z) is the Minkowski hyperboloid point where it crosses.
  **/
 
-flatresult cross0(ads_matrix hz) {
+cross_result cross0(ads_matrix hz) {
   
   transmatrix deg90 = chg_shift(90*degree);
   hyperpoint uhz = unshift(hz * C0);
@@ -142,7 +142,7 @@ flatresult cross0(ads_matrix hz) {
   tie(uhzt[2], uhzt[3]) = make_pair(uhzt[3], -uhzt[2]);
   t += get_shift_cycles(-hz.shift-t);
   
-  return flatresult{uhzt, t};
+  return cross_result{uhzt, t};
   }
 
 /** sample from Poisson distribution */

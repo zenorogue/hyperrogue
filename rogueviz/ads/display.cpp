@@ -2,7 +2,7 @@ namespace hr {
 
 namespace ads_game {
 
-flatresult findflat(shiftpoint h) {
+cross_result findflat(shiftpoint h) {
   return cross0(current * rgpushxto0(h));
   }
 
@@ -11,8 +11,8 @@ void draw_game_cell(cell *cs, ads_matrix V, ld plev) {
   adjust_to_zero(V, g, plev);
   auto c = g.first;
   
-  flatresult center;
-  vector<flatresult> hlist;
+  cross_result center;
+  vector<cross_result> hlist;
 
   hybrid::in_actual([&]{    
     for(int i=0; i<=c->type; i++) {
@@ -106,7 +106,7 @@ void draw_game_cell(cell *cs, ads_matrix V, ld plev) {
     for(int i=0; i<isize(shape); i += 2) {
       hybrid::in_actual([&]{
         auto h = V * rock.at * rots::uxpush(shape[i]) * rots::uypush(shape[i+1]);
-        flatresult f = cross0(current * h);
+        cross_result f = cross0(current * h);
         rock.pts.push_back(f);
         });
       }
@@ -131,7 +131,7 @@ bool view_ads_game() {
   gen_budget = 5;
   displayed.clear();
   
-  flatresult base;
+  cross_result base;
   if(1) {  
     // todo rebase
     base = findflat(ads_point(C0, 0));
