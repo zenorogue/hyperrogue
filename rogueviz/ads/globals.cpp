@@ -40,4 +40,9 @@ const char *tformat = "%.2f";
 
 void game_menu();
 
+/** all the missiles and objects currently displayed */
+vector<struct rockinfo*> displayed;
+
+color_t missile_color = 0xFF0000FF;
+
 }}

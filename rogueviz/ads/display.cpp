@@ -92,33 +92,35 @@ void draw_game_cell(cell *cs, ads_matrix V, ld plev) {
 
   for(auto& rock: ci.rocks) {
     
-    vector<hyperpoint> pts;
-    
-    vector<ld>& shape = rock.type ? shape_missile : shape_rock;
-    
-    flatresult fr_main;
-    if(1) hybrid::in_actual([&]{
+    hybrid::in_actual([&]{
       dynamicval<eGeometry> b(geometry, gRotSpace);
       auto h = V * rock.at;
-      fr_main = cross0(current * h);
+      rock.pt_main = cross0(current * h);
       });
-    if(fr_main.shift < rock.life_start || fr_main.shift > rock.life_end) continue;
+    
+    if(rock.pt_main.shift < rock.life_start || rock.pt_main.shift > rock.life_end) continue;
+    displayed.push_back(&rock);
 
+    rock.pts.clear();        
+    vector<ld>& shape = rock.type ? shape_missile : shape_rock;    
     for(int i=0; i<isize(shape); i += 2) {
       hybrid::in_actual([&]{
         auto h = V * rock.at * rots::uxpush(shape[i]) * rots::uypush(shape[i+1]);
         flatresult f = cross0(current * h);
-        pts.push_back(f.h);
+        rock.pts.push_back(f);
         });
       }
 
-    for(auto h: pts) curvepoint(h);
-    curvepoint(pts[0]);
-    queuecurve(shiftless(Id), rock.type == 1 ? 0xFF0000FF : 0x000000FF, rock.col, PPR::LINE);
+    for(auto h: rock.pts) curvepoint(h.h);
+    curvepoint(rock.pts[0].h);
+    queuecurve(shiftless(Id), 
+      rock.type == oMissile ? missile_color : 
+      rock.type == oParticle ? rock.col :
+      0x000000FF, rock.col, PPR::LINE);
 
     if(view_proper_times) {
-      string str = format(tformat, fr_main.shift / TAU);
-      queuestr(shiftless(rgpushxto0(fr_main.h)), .1, str, 0xFFFFFF, 8);
+      string str = format(tformat, rock.pt_main.shift / TAU);
+      queuestr(shiftless(rgpushxto0(rock.pt_main.h)), .1, str, 0xFFFFFF, 8);
       }
     }
   
@@ -127,6 +129,7 @@ void draw_game_cell(cell *cs, ads_matrix V, ld plev) {
 bool view_ads_game() {
   auto plev = cgi.plevel; /* we are in another CGI so we have no access to that... */
   gen_budget = 5;
+  displayed.clear();
   
   flatresult base;
   if(1) {  

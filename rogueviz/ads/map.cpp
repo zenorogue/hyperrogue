@@ -2,14 +2,19 @@ namespace hr {
 
 namespace ads_game {
 
+enum eObjType { oRock, oMissile, oParticle };
+
 struct rockinfo {
-  int type;
+  eObjType type;
+  cell *owner;
   ads_matrix at;
   color_t col;
   
   ld life_start, life_end;
+  flatresult pt_main;
+  vector<flatresult> pts;
   
-  rockinfo(int t, const ads_matrix& T, color_t _col) : type(t), at(T), col(_col) { 
+  rockinfo(eObjType t, cell *_owner, const ads_matrix& T, color_t _col) : type(t), owner(_owner), at(T), col(_col) { 
     life_start = -HUGE_VAL;
     life_end = HUGE_VAL;
     }
@@ -112,7 +117,7 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
 
   if(radius == 0) {
     hybrid::in_actual([&] {
-      int q = rpoisson(.05);
+      int q = rpoisson(.25);
       
       auto add_rock = [&] (rockinfo&& r) {
         if(geometry != gRotSpace) { println(hlog, "wrong geometry detected in gen_rocks 2!");  exit(1); }
@@ -128,14 +133,60 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
       for(int i=0; i<q; i++) {
         int kind = hrand(100);
         if(kind < 50) 
-          add_rock(rockinfo(0, ads_matrix(rots::uxpush(randd() * .6 - .3) * rots::uypush(randd() * .6 - .3)), 0xC0C0C0FF));
+          add_rock(rockinfo(oRock, c, ads_matrix(rots::uxpush(randd() * .6 - .3) * rots::uypush(randd() * .6 - .3)), 0xC0C0C0FF));
         else
-          add_rock(rockinfo(0, ads_matrix(rots::uypush(randd() * .6 - .3) * lorentz(0, 3, 0.5 + randd() * 1)), 0xC04040FF));
+          add_rock(rockinfo(oRock, c, ads_matrix(rots::uypush(randd() * .6 - .3) * lorentz(0, 3, 0.5 + randd() * 1)), 0xC04040FF));
         }        
       });
     }
   ci.rock_dist = radius;
   }
 
+void gen_particles(int qty, cell *c, shiftmatrix from, color_t col, ld t) {
+  auto& ro = ci_at[c].rocks;
+  for(int i=0; i<qty; i++) {
+    ro.emplace_back(rockinfo{oParticle, c, from * spin(randd() * TAU) * lorentz(0, 2, 1 + randd()), col });
+    auto& r = ro.back();
+    r.life_end = randd() * t;
+    r.life_start = 0;
+    }
+  }
+
+void handle_crashes() {
+  vector<rockinfo*> missiles;
+  vector<rockinfo*> rocks;
+  for(auto m: displayed) {
+    if(m->type == oMissile)
+      missiles.push_back(m);
+    if(m->type == oRock)
+      rocks.push_back(m);
+    }
+  hybrid::in_underlying_geometry([&] {
+    for(auto m: missiles) {
+      hyperpoint h = kleinize(m->pt_main.h);
+      for(auto r: rocks) {
+        int winding = 0;
+        vector<hyperpoint> kleins;
+        for(auto& p: r->pts) kleins.push_back(kleinize(p.h) - h);
+        auto take = [&] (hyperpoint& a, hyperpoint& b) {
+          if(asign(a[1], b[1]) && xcross(b[0], b[1], a[0], a[1]) < 1e-6)
+            winding++;
+          };
+        for(int i=1; i<isize(kleins); i++) take(kleins[i-1], kleins[i]);
+        take(kleins.back(), kleins[0]);
+        if(winding & 1) {
+          println(hlog, "winding = ", winding);
+          println(hlog, "kleins = ", kleins);
+          m->life_end = m->pt_main.shift;
+          r->life_end = r->pt_main.shift;
+          hybrid::in_actual([&] {
+            gen_particles(8, m->owner, m->at * ads_matrix(Id, m->life_end), missile_color, 0.1);
+            gen_particles(8, r->owner, r->at * ads_matrix(Id, r->life_end), r->col, 0.5);
+            });
+          }
+        }
+      }
+    });
+  }
 
 }}
