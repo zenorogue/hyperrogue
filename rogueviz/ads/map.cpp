@@ -94,18 +94,18 @@ void gen_terrain(cell *c, cellinfo& ci, int level = 0) {
   
   if(level == 2) {
     int r = hrand(100);
-    if(r < 5) {
+    if(r < 3) {
       forCellCM(c1, c) if(hrand(100) < 50)
         forCellCM(c2, c1)  if(hrand(100) < 50)
           if(ci_at[c2].type == wtNone) ci_at[c2].type = wtDestructible;
       }
-    else if(r < 10) {
+    else if(r < 6) {
       forCellCM(c1, c) if(hrand(100) < 50)
         forCellCM(c2, c1)  if(hrand(100) < 50)
           if(ci_at[c2].type < wtSolid)
             ci_at[c2].type = wtSolid;
       }
-    else if(r < 12)
+    else if(r < 8)
       ci_at[c].type = wtGate;
     }
   ci.mpd_terrain = level;
