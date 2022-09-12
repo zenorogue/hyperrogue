@@ -23,7 +23,7 @@ void make_shape() {
   int N = isize(shape_ship);
 
   vector<hyperpoint> lst;
-  for(int i=0; i<N; i += 2) lst.push_back(normalize(hpxyz(shape_ship[i] - .03, shape_ship[i+1], 1)));
+  for(int i=0; i<N; i += 2) lst.push_back(normalize(hpxyz(shape_ship[i], shape_ship[i+1], 1)));
   for(auto h: lst) cgi.hpcpush(h);
   cgi.hpcpush(lst[0]);
   cgi.finishshape();
