@@ -209,7 +209,13 @@ bool view_ads_game() {
 
     if(true) {
       poly_outline = 0xFF;
-      queuepolyat(shiftless(spin(ang*degree) * Id), shShip, 0x2020FFFF, PPR::LINE);
+      color_t shipcolor = 0x2020FFFF;
+      if(ship_pt < invincibility_pt) {
+        ld u = (invincibility_pt-ship_pt) / how_much_invincibility;
+        poly_outline = gradient(shipcolor, rsrc_color[rtHull], 0, 0.5 + cos(5*u*TAU), 1);
+        }
+      queuepolyat(shiftless(spin(ang*degree) * Id), shShip, shipcolor, PPR::LINE);
+      poly_outline = 0xFF;
 
       if(view_proper_times) {
         string str = format(tformat, ship_pt / TAU);

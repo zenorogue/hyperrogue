@@ -4,13 +4,6 @@ namespace ads_game {
 
 enum eObjType { oRock, oMissile, oParticle, oResource };
 
-enum eResourceType { rtNone, rtHull, rtGold, rtAmmo, rtFuel, rtOxygen };
-
-color_t rock_color[6] = { 0x703800FF, 0xC0A080FF, 0xC08010FF, 0xC04000FF, 0x408000FF, 0x8040A0FF,  };
-color_t rsrc_color[6] = {0, 0xC0C0C0FF, 0xFFD500FF, 0xFF0000FF, 0x00FF00FF, 0x0000FFFF };
-
-vector<ld>* rsrc_shape[6] = { nullptr, &shape_heart, &shape_gold, &shape_weapon, &shape_fuel, &shape_airtank };
-
 struct ads_object {
   eObjType type;
   eResourceType resource;
@@ -172,34 +165,47 @@ void gen_resource(cell *c, shiftmatrix from, eResourceType rsrc) {
   r->shape = rsrc_shape[rsrc];
   r->life_end = HUGE_VAL;
   r->life_start = 0;
+  r->resource = rsrc;
   ci_at[c].rocks.emplace_back(std::move(r));
+  }
+
+bool pointcrash(hyperpoint h, const vector<cross_result>& vf) {
+  int winding = 0;
+  vector<hyperpoint> kleins;
+  for(auto& p: vf) kleins.push_back(kleinize(p.h) - h);
+  auto take = [&] (hyperpoint& a, hyperpoint& b) {
+    if(asign(a[1], b[1]) && xcross(b[0], b[1], a[0], a[1]) < 1e-6)
+      winding++;
+    };
+  for(int i=1; i<isize(kleins); i++) take(kleins[i-1], kleins[i]);
+  take(kleins.back(), kleins[0]);
+  return winding & 1;
+  }
+
+void crash_ship() {
+  if(ship_pt < invincibility_pt) return;
+  invincibility_pt = ship_pt + how_much_invincibility;
+  pdata.hitpoints--;
+  if(pdata.hitpoints <= 0) game_over = true;
   }
 
 void handle_crashes() {
   vector<ads_object*> missiles;
   vector<ads_object*> rocks;
+  vector<ads_object*> resources;
   for(auto m: displayed) {
     if(m->type == oMissile)
       missiles.push_back(m);
     if(m->type == oRock)
       rocks.push_back(m);
+    if(m->type == oResource)
+      resources.push_back(m);
     }
   hybrid::in_underlying_geometry([&] {
     for(auto m: missiles) {
       hyperpoint h = kleinize(m->pt_main.h);
       for(auto r: rocks) {
-        int winding = 0;
-        vector<hyperpoint> kleins;
-        for(auto& p: r->pts) kleins.push_back(kleinize(p.h) - h);
-        auto take = [&] (hyperpoint& a, hyperpoint& b) {
-          if(asign(a[1], b[1]) && xcross(b[0], b[1], a[0], a[1]) < 1e-6)
-            winding++;
-          };
-        for(int i=1; i<isize(kleins); i++) take(kleins[i-1], kleins[i]);
-        take(kleins.back(), kleins[0]);
-        if(winding & 1) {
-          println(hlog, "winding = ", winding);
-          println(hlog, "kleins = ", kleins);
+        if(pointcrash(h, r->pts)) {
           m->life_end = m->pt_main.shift;
           r->life_end = r->pt_main.shift;
           hybrid::in_actual([&] {
@@ -207,6 +213,18 @@ void handle_crashes() {
             gen_particles(8, r->owner, r->at * ads_matrix(Id, r->life_end), r->col, 0.5);
             gen_resource(r->owner, r->at * ads_matrix(Id, r->life_end), r->resource);
             });
+          }
+        }
+      }
+    for(int i=0; i<isize(shape_ship); i+=2) {
+      hyperpoint h = kleinize(hpxyz(shape_ship[i], shape_ship[i+1], 1));
+      for(auto r: rocks) {
+        if(pointcrash(h, r->pts)) crash_ship();
+        }
+      for(auto r: resources) {
+        if(pointcrash(h, r->pts)) {
+          r->life_end = r->pt_main.shift;
+          gain_resource(r->resource);
           }
         }
       }

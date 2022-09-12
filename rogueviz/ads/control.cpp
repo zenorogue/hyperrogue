@@ -5,6 +5,8 @@ namespace ads_game {
 vector<string> move_names = { "acc down", "acc left", "acc up", "acc right", "fire", "pause", "display times", "switch spin", "menu" };
 
 void fire() {
+  if(!pdata.ammo) return;
+  pdata.ammo--;
   auto g = hybrid::get_where(vctr);
   auto c = g.first;
   if(g.second != 0) println(hlog, "WARNING: vctr not zeroed");
@@ -132,15 +134,27 @@ bool ads_turn(int idelta) {
     bool up = a[16+2];
     bool down = a[16];
     
-    if(left) apply_lorentz(lorentz(0, 2, delta*accel)), ang = 180;
-    if(right) apply_lorentz(lorentz(0, 2, -delta*accel)), ang = 0;
-    if(up) apply_lorentz(lorentz(1, 2, delta*accel)), ang = 90; 
-    if(down) apply_lorentz(lorentz(1, 2, -delta*accel)), ang = 270;
+    int clicks = (left?1:0) + (right?1:0) + (up?1:0) + (down?1:0);
+
+    if(left && right) left = right = false;
+    if(up && down) up = down = false;
+    
+    if(left) ang = 180;
+    if(right) ang = 0;
+    if(up) ang = 90; 
+    if(down) ang = 270;
     
     if(left && up) ang = 135;
     if(left && down) ang = 225;
     if(right && up) ang = 45;
     if(right && down) ang = 315;
+    
+    ld mul = clicks ? 1 : 0;
+    if(clicks > 2) mul *= .3;
+    if(pdata.fuel < 0) mul = 0;
+
+    apply_lorentz(spin(ang*degree) * lorentz(0, 2, -delta*accel*mul) * spin(-ang*degree));
+    pdata.fuel -= delta*accel*mul;
 
     current.T = cspin(3, 2, pt) * current.T;
     optimize_shift(current);    
@@ -152,6 +166,11 @@ bool ads_turn(int idelta) {
       ang += pt / degree;
 
     ship_pt += pt;
+    pdata.oxygen -= pt;
+    if(pdata.oxygen < 0) {
+      pdata.oxygen = 0;
+      game_over = true;
+      }
     }
   
   fixmatrix_ads(current.T);

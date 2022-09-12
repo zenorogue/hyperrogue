@@ -2,6 +2,13 @@ namespace hr {
 
 namespace ads_game {
 
+enum eResourceType { rtNone, rtHull, rtGold, rtAmmo, rtFuel, rtOxygen };
+
+color_t rock_color[6] = { 0x703800FF, 0xC0A080FF, 0xC08010FF, 0xC04000FF, 0x408000FF, 0x8040A0FF,  };
+color_t rsrc_color[6] = {0, 0xC0C0C0FF, 0xFFD500FF, 0xFF0000FF, 0x00FF00FF, 0x0000FFFF };
+
+vector<ld>* rsrc_shape[6] = { nullptr, &shape_heart, &shape_gold, &shape_weapon, &shape_fuel, &shape_airtank };
+
 void init_rsrc() {
   max_pdata.hitpoints = 3;
   max_pdata.score = 0;
@@ -52,13 +59,15 @@ void display(int id, int y, ld val, ld maxv, ld tank, ld unit) {
   curvepoint(atscreenpos(sta, top, 1) * C0);
   queuecurve(sId, col, col - 128, PPR::ZERO);
   
-  ld end = sta + siz * val / maxv;
-  curvepoint(atscreenpos(sta, top, 1) * C0);
-  curvepoint(atscreenpos(end, top, 1) * C0);
-  curvepoint(atscreenpos(end, bot, 1) * C0);
-  curvepoint(atscreenpos(sta, bot, 1) * C0);
-  curvepoint(atscreenpos(sta, top, 1) * C0);
-  queuecurve(sId, col, col, PPR::ZERO);
+  if(val > 0) {
+    ld end = sta + siz * val / maxv;
+    curvepoint(atscreenpos(sta, top, 1) * C0);
+    curvepoint(atscreenpos(end, top, 1) * C0);
+    curvepoint(atscreenpos(end, bot, 1) * C0);
+    curvepoint(atscreenpos(sta, bot, 1) * C0);
+    curvepoint(atscreenpos(sta, top, 1) * C0);
+    queuecurve(sId, col, col, PPR::ZERO);
+    }
   
   if(unit) for(ld u=unit; u<maxv-1e-3; u+=unit) {
     ld at = sta + siz * u / maxv;
@@ -93,6 +102,16 @@ void display_rsrc() {
   #undef D
   
   quickqueue();
+  }
+
+void gain_resource(eResourceType rsrc) {
+  #define D(id, field) if(rsrc == id) { pdata.field += tank_pdata.field; if(max_pdata.field && pdata.field > max_pdata.field) pdata.field = max_pdata.field; }
+  println(hlog, "gain resource ", int(rsrc));
+  D(1, hitpoints)
+  D(2, score)
+  D(3, ammo)
+  D(4, fuel)
+  D(5, oxygen)
   }
 
 }}

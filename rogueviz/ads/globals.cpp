@@ -26,6 +26,9 @@ ld ang = 0;
 /** ship's current proper time */
 ld ship_pt;
 
+/** until when is the ship invincible */
+ld invincibility_pt;
+
 /** is the game paused */
 bool paused;
 
@@ -45,6 +48,8 @@ vector<struct ads_object*> displayed;
 
 color_t missile_color = 0xFF0000FF;
 
+bool game_over;
+
 struct player_data {
   int hitpoints;
   int score;
@@ -52,6 +57,8 @@ struct player_data {
   ld fuel;
   ld oxygen;
   };
+
+ld how_much_invincibility = TAU / 4;
 
 player_data pdata, max_pdata, tank_pdata;
 

@@ -3,9 +3,9 @@
 #include "math.cpp"
 #include "globals.cpp"
 #include "shapes.cpp"
+#include "resources.cpp"
 #include "map.cpp"
 #include "control.cpp"
-#include "resources.cpp"
 #include "display.cpp"
 #include "menu.cpp"
 
