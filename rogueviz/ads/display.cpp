@@ -119,7 +119,7 @@ void draw_game_cell(cell *cs, ads_matrix V, ld plev) {
       rock.type == oParticle ? rock.col :
       0x000000FF, rock.col, PPR::LINE);
 
-    if(view_proper_times) {
+    if(view_proper_times && rock.type != oParticle) {
       string str = format(tformat, rock.pt_main.shift / TAU);
       queuestr(shiftless(rgpushxto0(rock.pt_main.h)), .1, str, 0xFFFFFF, 8);
       }
