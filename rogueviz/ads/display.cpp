@@ -90,7 +90,8 @@ void draw_game_cell(cell *cs, ads_matrix V, ld plev) {
     queuestr(shiftless(rgpushxto0(center.h)), .1, str, 0xFF4040, 8);
     }
 
-  for(auto& rock: ci.rocks) {
+  for(auto& r: ci.rocks) {
+    auto& rock = *r;
     
     hybrid::in_actual([&]{
       dynamicval<eGeometry> b(geometry, gRotSpace);
@@ -101,8 +102,8 @@ void draw_game_cell(cell *cs, ads_matrix V, ld plev) {
     if(rock.pt_main.shift < rock.life_start || rock.pt_main.shift > rock.life_end) continue;
     displayed.push_back(&rock);
 
-    rock.pts.clear();        
-    vector<ld>& shape = rock.type ? shape_missile : shape_rock;    
+    rock.pts.clear();
+    auto& shape = *rock.shape;
     for(int i=0; i<isize(shape); i += 2) {
       hybrid::in_actual([&]{
         auto h = V * rock.at * rots::uxpush(shape[i]) * rots::uypush(shape[i+1]);

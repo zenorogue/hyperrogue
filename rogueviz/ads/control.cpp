@@ -14,8 +14,8 @@ void fire() {
   ads_matrix S1 = S0 * lorentz(0, 2, 3); // 0.995c
   
   auto& ro = ci_at[c].rocks;
-  ro.emplace_back(ads_object{oMissile, c, S1, 0xC0C0FFFF });
-  auto& r = ro.back();
+  auto r = std::make_unique<ads_object> (oMissile, c, S1, 0xC0C0FFFF);
+  r->shape = &shape_missile;
 
   ads_matrix Scell(Id, 0);    
   cell *lcell = vctr;
@@ -23,7 +23,7 @@ void fire() {
   
   int steps = 0;
 
-  compute_life(vctr, unshift(r.at), [&] (cell *c1, ld t) {
+  compute_life(vctr, unshift(r->at), [&] (cell *c1, ld t) {
     if(true) for(int i=0; i<lcell->type; i++) {
       auto lcell1 = lcell->cmove(i);
       auto wcell1 = hybrid::get_where(lcell1);
@@ -51,18 +51,18 @@ void fire() {
       gen_rocks(c1, ci, 2);
       });
     if(among(ci.type, wtSolid, wtDestructible)) {
-      r.life_end = t;
+      r->life_end = t;
 
       auto Scell_inv = ads_inverse(Scell);
-      Scell_inv = Scell_inv * r.at;
+      Scell_inv = Scell_inv * r->at;
       Scell_inv = Scell_inv * ads_matrix(Id, t);
       optimize_shift(Scell_inv);
 
       auto X = ads_inverse(Scell);
-      X = X * (r.at * ads_matrix(Id, t));
+      X = X * (r->at * ads_matrix(Id, t));
       optimize_shift(X);
 
-      ads_matrix prel = ads_inverse(S0) * r.at * ads_matrix(Id, t);
+      ads_matrix prel = ads_inverse(S0) * r->at * ads_matrix(Id, t);
 
       println(hlog, "crashed: proper time = ", t/TAU, " wall time = ", Scell_inv.shift / TAU, " player time = ", (prel.shift+ship_pt) / TAU, " start = ", ship_pt / TAU);
       if(abs(X.shift - Scell_inv.shift) > .2) {
@@ -74,6 +74,7 @@ void fire() {
       }
     return false;
     });
+  ro.emplace_back(std::move(r));
   }
 
 bool handleKey(int sym, int uni) {

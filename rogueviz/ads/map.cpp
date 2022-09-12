@@ -2,13 +2,22 @@ namespace hr {
 
 namespace ads_game {
 
-enum eObjType { oRock, oMissile, oParticle };
+enum eObjType { oRock, oMissile, oParticle, oResource };
+
+enum eResourceType { rtNone, rtHull, rtGold, rtEnergy, rtFuel, rtOxygen };
+
+color_t rock_color[6] = { 0x703800FF, 0xC0A080FF, 0xC08010FF, 0xC04000FF, 0x408000FF, 0x8040A0FF,  };
+color_t rsrc_color[6] = {0, 0xC0C0C0FF, 0xFFD500FF, 0xFF0000FF, 0x00FF00FF, 0x0000FFFF };
+
+vector<ld>* rsrc_shape[6] = { nullptr, &shape_heart, &shape_gold, &shape_weapon, &shape_fuel, &shape_airtank };
 
 struct ads_object {
   eObjType type;
+  eResourceType resource;
   cell *owner;
   ads_matrix at;
   color_t col;
+  vector<ld>* shape;
   
   ld life_start, life_end;
   cross_result pt_main;
@@ -25,7 +34,7 @@ enum eWalltype { wtNone, wtDestructible, wtSolid, wtGate };
 struct cellinfo {
   int mpd_terrain; /* 0 = fully generated terrain */
   int rock_dist; /* rocks generated in this radius */
-  vector<ads_object> rocks;
+  vector<std::unique_ptr<ads_object>> rocks;
   eWalltype type;
   cellinfo() {
     mpd_terrain = 4;
@@ -119,23 +128,27 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
     hybrid::in_actual([&] {
       int q = rpoisson(.25);
       
-      auto add_rock = [&] (ads_object&& r) {
+      auto add_rock = [&] (ads_matrix T) {
+        eResourceType rt = eResourceType(rand() % 6);
+        auto r = std::make_unique<ads_object> (oRock, c, T, rock_color[rt]);
+        r->resource = rt;
+        r->shape = &(rand() % 2 ? shape_rock2 : shape_rock);
         if(geometry != gRotSpace) { println(hlog, "wrong geometry detected in gen_rocks 2!");  exit(1); }
-        compute_life(hybrid::get_at(c, 0), unshift(r.at), [&] (cell *c, ld t) {
+        compute_life(hybrid::get_at(c, 0), unshift(r->at), [&] (cell *c, ld t) {
           auto& ci = ci_at[c];
           hybrid::in_underlying_geometry([&] { gen_terrain(c, ci); });
           ci.type = wtNone;
           return false;
           });
-        ci.rocks.emplace_back(r);
+        ci.rocks.emplace_back(std::move(r));
         };
       
       for(int i=0; i<q; i++) {
         int kind = hrand(100);
         if(kind < 50) 
-          add_rock(ads_object(oRock, c, ads_matrix(rots::uxpush(randd() * .6 - .3) * rots::uypush(randd() * .6 - .3)), 0xC0C0C0FF));
+          add_rock(ads_matrix(rots::uxpush(randd() * .6 - .3) * rots::uypush(randd() * .6 - .3)));
         else
-          add_rock(ads_object(oRock, c, ads_matrix(rots::uypush(randd() * .6 - .3) * lorentz(0, 3, 0.5 + randd() * 1)), 0xC04040FF));
+          add_rock(ads_matrix(rots::uypush(randd() * .6 - .3) * lorentz(0, 3, 0.5 + randd() * 1)));
         }        
       });
     }
@@ -145,11 +158,21 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
 void gen_particles(int qty, cell *c, shiftmatrix from, color_t col, ld t) {
   auto& ro = ci_at[c].rocks;
   for(int i=0; i<qty; i++) {
-    ro.emplace_back(ads_object{oParticle, c, from * spin(randd() * TAU) * lorentz(0, 2, 1 + randd()), col });
-    auto& r = ro.back();
-    r.life_end = randd() * t;
-    r.life_start = 0;
+    auto r = std::make_unique<ads_object>(oParticle, c, from * spin(randd() * TAU) * lorentz(0, 2, 1 + randd()), col );
+    r->shape = &shape_particle;
+    r->life_end = randd() * t;
+    r->life_start = 0;
+    ro.emplace_back(std::move(r));
     }
+  }
+
+void gen_resource(cell *c, shiftmatrix from, eResourceType rsrc) {
+  if(!rsrc) return;
+  auto r = std::make_unique<ads_object>(oResource, c, from, rsrc_color[rsrc]);
+  r->shape = rsrc_shape[rsrc];
+  r->life_end = HUGE_VAL;
+  r->life_start = 0;
+  ci_at[c].rocks.emplace_back(std::move(r));
   }
 
 void handle_crashes() {
@@ -182,6 +205,7 @@ void handle_crashes() {
           hybrid::in_actual([&] {
             gen_particles(8, m->owner, m->at * ads_matrix(Id, m->life_end), missile_color, 0.1);
             gen_particles(8, r->owner, r->at * ads_matrix(Id, r->life_end), r->col, 0.5);
+            gen_resource(r->owner, r->at * ads_matrix(Id, r->life_end), r->resource);
             });
           }
         }
