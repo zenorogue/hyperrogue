@@ -148,7 +148,7 @@ bool ads_turn(int idelta) {
     if(right && up) ang = 45;
     if(right && down) ang = 315;
     
-    ld mul = clicks ? 1 : 0;
+    ld mul = clicks && !game_over ? 1 : 0;
     if(clicks > 2) mul *= .3;
     if(pdata.fuel < 0) mul = 0;
 

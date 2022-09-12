@@ -207,7 +207,7 @@ bool view_ads_game() {
         });
       }
 
-    if(true) {
+    if(!game_over) {
       poly_outline = 0xFF;
       color_t shipcolor = 0x2020FFFF;
       if(ship_pt < invincibility_pt) {
