@@ -41,6 +41,7 @@ void run_ads_game() {
     gen_terrain(c, ci_at[c], -2);
     forCellEx(c1, c) ci_at[c1].type = wtNone;
     ci_at[c].type = wtNone;
+    ci_at[c].rocks.clear();
     });
   vctrV = ads_matrix(Id, 0);
   rogueviz::rv_hook(hooks_prestats, 100, view_ads_game);
