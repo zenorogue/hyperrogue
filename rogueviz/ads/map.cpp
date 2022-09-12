@@ -4,7 +4,7 @@ namespace ads_game {
 
 enum eObjType { oRock, oMissile, oParticle, oResource };
 
-enum eResourceType { rtNone, rtHull, rtGold, rtEnergy, rtFuel, rtOxygen };
+enum eResourceType { rtNone, rtHull, rtGold, rtAmmo, rtFuel, rtOxygen };
 
 color_t rock_color[6] = { 0x703800FF, 0xC0A080FF, 0xC08010FF, 0xC04000FF, 0x408000FF, 0x8040A0FF,  };
 color_t rsrc_color[6] = {0, 0xC0C0C0FF, 0xFFD500FF, 0xFF0000FF, 0x00FF00FF, 0x0000FFFF };
