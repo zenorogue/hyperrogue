@@ -124,7 +124,6 @@ bool ads_turn(int idelta) {
   if(a[16+8] && !la[16+8]) pushScreen(game_menu);    
 
   if(!paused) {
-    dynamicval<eGeometry> g(geometry, geometry == gRotSpace ? geometry : gCubeTiling);
     
     /* proper time passed */
     ld pt = delta * simspeed;
@@ -155,6 +154,9 @@ bool ads_turn(int idelta) {
 
     apply_lorentz(spin(ang*degree) * lorentz(0, 2, -delta*accel*mul) * spin(-ang*degree));
     pdata.fuel -= delta*accel*mul;
+    
+    cell *c = hybrid::get_where(vctr).first;
+    gen_particles(rpoisson(delta*accel*mul*20), c, ads_inverse(current * vctrV) * spin(ang*degree+M_PI) * rots::uxpush(0.06), rsrc_color[rtFuel], 0.15, 0.02);
 
     current.T = cspin(3, 2, pt) * current.T;
     optimize_shift(current);    

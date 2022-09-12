@@ -148,10 +148,10 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
   ci.rock_dist = radius;
   }
 
-void gen_particles(int qty, cell *c, shiftmatrix from, color_t col, ld t) {
+void gen_particles(int qty, cell *c, shiftmatrix from, color_t col, ld t, ld spread = 1) {
   auto& ro = ci_at[c].rocks;
   for(int i=0; i<qty; i++) {
-    auto r = std::make_unique<ads_object>(oParticle, c, from * spin(randd() * TAU) * lorentz(0, 2, 1 + randd()), col );
+    auto r = std::make_unique<ads_object>(oParticle, c, from * spin(randd() * TAU * spread) * lorentz(0, 2, 1 + randd()), col );
     r->shape = &shape_particle;
     r->life_end = randd() * t;
     r->life_start = 0;
@@ -187,6 +187,10 @@ void crash_ship() {
   invincibility_pt = ship_pt + how_much_invincibility;
   pdata.hitpoints--;
   if(pdata.hitpoints <= 0) game_over = true;
+  hybrid::in_actual([&] {
+    cell *c = hybrid::get_where(vctr).first;
+    gen_particles(16, c, ads_inverse(current * vctrV) * spin(ang*degree), rsrc_color[rtHull], 0.5);
+    });
   }
 
 void handle_crashes() {
