@@ -231,6 +231,25 @@ void handle_crashes() {
           gain_resource(r->resource);
           }
         }
+
+      hyperpoint h1 = normalize(h);
+      swap(h1[2], h1[3]);
+      bool crashed = false;
+      hybrid::in_actual([&] {
+        ads_point rel = ads_inverse(current * vctrV) * ads_point(h1, 0);
+        cell *c = vctr;
+        virtualRebase(c, rel.h);
+        optimize_shift(rel);
+        auto w = hybrid::get_where(c);
+        auto& ci = ci_at[w.first];
+        ld t = rel.shift + w.second * cgi.plevel;
+        if(ci.type == wtDestructible || ci.type == wtSolid || (ci.type == wtGate && (int(floor(t)) & 3) == 0)) {
+          if(!crashed && ship_pt > invincibility_pt) println(hlog, "crashed at t = ", t / TAU, " shift = ", rel.shift/TAU, " sec = ", w.second*cgi.plevel/TAU);
+          crashed = true;
+          }
+        });
+
+      if(crashed) crash_ship();
       }
     });
   }
