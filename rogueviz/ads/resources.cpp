@@ -77,7 +77,7 @@ void display(int id, int y, ld val, ld maxv, ld tank, ld unit) {
     }
 
   for(ld u=tank; u<maxv-1e-3; u+=tank) {
-    ld at = sta + siz * u / maxv;
+    ld at = sta + siz * (1 - u / maxv);
     curvepoint(atscreenpos(at, ctr, 1) * C0);
     curvepoint(atscreenpos(at, bot, 1) * C0);
     queuecurve(sId, 0x80, 0, PPR::ZERO);
