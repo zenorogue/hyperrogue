@@ -45,4 +45,14 @@ vector<struct ads_object*> displayed;
 
 color_t missile_color = 0xFF0000FF;
 
+struct player_data {
+  int hitpoints;
+  int score;
+  int ammo;
+  ld fuel;
+  ld oxygen;
+  };
+
+player_data pdata, max_pdata, tank_pdata;
+
 }}

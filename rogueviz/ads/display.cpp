@@ -223,6 +223,7 @@ bool view_ads_game() {
     drawaura();
     });
   check_cgi();
+  display_rsrc();
   return true;
   }
 

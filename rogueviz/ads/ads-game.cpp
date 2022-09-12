@@ -5,6 +5,7 @@
 #include "shapes.cpp"
 #include "map.cpp"
 #include "control.cpp"
+#include "resources.cpp"
 #include "display.cpp"
 #include "menu.cpp"
 
@@ -45,6 +46,7 @@ void run_ads_game() {
   rogueviz::rv_hook(hooks_prestats, 100, view_ads_game);
   rogueviz::rv_hook(hooks_handleKey, 0, handleKey);
   rogueviz::rv_hook(shmup::hooks_turn, 0, ads_turn);
+  init_rsrc();
   }
 
 auto shot_hooks = 
