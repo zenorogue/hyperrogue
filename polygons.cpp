@@ -1257,6 +1257,7 @@ void geometry_information::prepare_shapes() {
   bshape(shLightningBolt, PPR::ITEM, scalefactor/1.5, 413);
   bshape(shHumanoid, PPR::ITEM, scalefactor/5.5, 414);
   bshape(shHalfHumanoid, PPR::ITEM, scalefactor/5.5, 415);
+  bshape(shHourglass, PPR::ITEM, scalefactor/3.0 /*1250*/, 416);
 
   wormscale = WDIM == 3 ? 3 : 1;
 
@@ -2417,6 +2418,30 @@ NEWSHAPE, 413, 1,1, 0.0324, -0.1844, 0.1676, -0.1844, 0.0684, -0.078, 0.1292, -0
 // shHumanoid
 NEWSHAPE, 414, 1, 2, 0.166, 0, 0.619, 0.186, 0.619, 0.348, 0.13, 0.171, -0.161, 0.129, 0.04, 0.254, -0.038, 0.339, -0.32, 0.186, -0.368, 0.078, -0.467, 0.138, -0.569, 0.141, -0.659, 0.081, -0.674, 0.087, -0.7, 0,
 NEWSHAPE, 415, 1, 1, 0.166, 0, 0.619, 0.186, 0.619, 0.348, 0.13, 0.171, -0.161, 0.129, 0.04, 0.254, -0.038, 0.339, -0.32, 0.186, -0.368, 0.078, -0.467, 0.138, -0.569, 0.141, -0.659, 0.081, -0.674, 0.087, -0.7, 0,
+
+// shHourglass
+#define x (-0.2)
+#define y (-0.2)
+NEWSHAPE, 416, 1,2, 
+0.065+x,
+0.244+y,
+0.065+x,
+ 0.366+y,
+0.095+x,
+ 0.366+y,
+0.095+x,
+ 0.348+y,
+0.132+x,
+ 0.349+y,
+0.171+x,
+ 0.342+y,
+0.198+x,
+ 0.327+y,
+0.244+x,
+ 0.269+y,
+ 
+#undef x
+#undef y
 
 NEWSHAPE, NEWSHAPE
 };
