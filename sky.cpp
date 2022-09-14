@@ -518,6 +518,8 @@ EX void make_air() {
   dynamicval<int> i(vrhr::state, 0);
   #endif
 
+  bool missing = false;
+
   if(1) {
     //shot::take("airtest.png", drawqueue); 
     dynamicval<videopar> v(vid, vid);    
@@ -545,8 +547,10 @@ EX void make_air() {
     pmodel = mdDisk;
 
     vid.always3 = false;
-    geom3::apply_always3();    
+    geom3::apply_always3();
     check_cgi();
+    missing = !(cgi.state & 2);
+    if(missing) arb::swap_vertices();
     cgi.require_shapes();
     
     eGeometry orig = geometry;
@@ -595,6 +599,7 @@ EX void make_air() {
 
   GLERR("after draw");
   geom3::apply_always3();
+  if(missing) arb::swap_vertices();
   check_cgi();
   calcparam();
   GLERR("after make_air");

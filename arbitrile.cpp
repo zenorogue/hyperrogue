@@ -1277,7 +1277,7 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int t1, int xdl) {
     println(hlog, "s1 = ", kz(spintox(rm*vr)), " s2 = ", kz(rspintox(xrm*xvr)));    
     println(hlog, tie(t, dl), " = ", kz(Res));    
     println(hlog, hdist(vl, Res * xvr), " # ", hdist(vr, Res * xvl));
-    exit(3);
+    throw hr_exception("error in arb::get_adj");
     }
         
   return Res;
@@ -1952,12 +1952,17 @@ EX pair<ld, ld> rep_ideal(ld e, ld u IS(1)) {
   return {len, 90 * degree - (gamma - beta)};
   }
 
-#if MAXMDIM >= 4
-auto hooksw = addHook(hooks_swapdim, 100, [] {
+EX void swap_vertices() {
   for(auto& p: {&current, &slided}) 
     for(auto& s: p->shapes)
       for(auto& v: s.vertices)
         swapmatrix(v);
+  }
+
+#if MAXMDIM >= 4
+auto hooksw = addHook(hooks_swapdim, 100, [] {
+  println(hlog, "swapmatrix called for vertices");
+  swap_vertices();
   for(auto& p: altmap) for(auto& pp: p.second) swapmatrix(pp.second);
   for(auto& p: arbi_matrix) swapmatrix(p.second.second);
   });
