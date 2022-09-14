@@ -2586,8 +2586,9 @@ EX namespace linepatterns {
   
   bool always_available() { return true; }
   bool stdhyp_only() { return stdhyperbolic; }
-  bool needs_valence_3() { return valence() == 3; }
+  bool needs_valence_3() { return valence() == 3 && geosupport_football(); }
   bool horo_only() { return horo_ok() && mod_allowed(); }
+  bool if_pseudohept() { return  geosupport_football(); }
 
   color_t lessalpha(color_t col, int m) {
     part(col, 0) /= m;
@@ -2653,14 +2654,14 @@ EX namespace linepatterns {
       )
     );
   
-  linepattern patHepta("Gray Raider moves", 0xC0C0C000, always_available,
+  linepattern patHepta("Gray Raider moves", 0xC0C0C000, if_pseudohept,
     ALLCELLS(
       forCellIdEx(c2, i, c) if(way(c,i)) if(pseudohept(c) == pseudohept(c2)) 
         gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
       )
     );
   
-  linepattern patRhomb("Green Raider moves", 0x00FF0000, always_available,
+  linepattern patRhomb("Green Raider moves", 0x00FF0000, if_pseudohept,
     ALLCELLS(
       forCellIdEx(c2, i, c) if(way(c,i)) if(pseudohept(c) != pseudohept(c2)) 
         gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
