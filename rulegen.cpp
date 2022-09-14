@@ -198,26 +198,26 @@ twalker addstep(twalker x) {
 EX int less_states;
 
 EX int number_of_types() {
-  if(arb::in()) return isize(arb::current.shapes);
+  if(arb::in() || WDIM == 2) return isize(arb::current.shapes);
   if(WDIM == 3) return gcd(reg3::quotient_count_sub(), less_states);
   throw hr_exception("unknown number_of_types");
   }
 
 EX int get_id(cell *c) {
-  if(arb::in()) return shvid(c);
-  if(GDIM == 3) return zgmod(reg3::get_aid(c), less_states);
+  if(arb::in() || WDIM == 2) return shvid(c);
+  if(WDIM == 3) return zgmod(reg3::get_aid(c), less_states);
   throw hr_exception("unknown get_id");
   }
 
 int shape_size(int id) {
-  if(arb::in()) return isize(arb::current.shapes[id].connections);
-  if(GDIM == 3) return reg3::get_size_of_aid(id);
+  if(arb::in() || WDIM == 2) return isize(arb::current.shapes[id].connections);
+  if(WDIM == 3) return reg3::get_size_of_aid(id);
   throw hr_exception("unknown shape_size");
   }
 
 int cycle_size(int id) {
-  if(arb::in()) return arb::current.shapes[id].cycle_length;
-  if(GDIM == 3) return reg3::get_size_of_aid(id);
+  if(arb::in() || WDIM == 2) return arb::current.shapes[id].cycle_length;
+  if(WDIM == 3) return reg3::get_size_of_aid(id);
   throw hr_exception("unknown shape size");
   }
 
