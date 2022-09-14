@@ -607,6 +607,7 @@ EX void check_football_colorability(arbi_tiling& c) {
         auto &co = sh.connections[j];
         auto t = sh.football_type;
         if(c.have_ph && ((sh.flags & arcm::sfPH) != (t==2))) bad = true;
+        if(sh.apeirogonal && t < 2 && (isize(sh) & 1)) bad = true;
 
         auto assign = [&] (int tt) {
           auto& t1 = c.shapes[co.sid].football_type;
@@ -696,7 +697,7 @@ EX void check_football_colorability(arbi_tiling& c) {
       for(int i=0; i<isize(oldshapes); i++)
         for(int t=0; t<3; t++)
           if(!(oldshapes[i].football_type & (1<<t))) {
-            if(t == 1 && (oldshapes[i].cycle_length & 1)) continue;
+            if(t == 1 && (oldshapes[i].cycle_length & 1) && !oldshapes[i].apeirogonal) continue;
             new_indices[i][t] = isize(c.shapes);
             c.shapes.push_back(oldshapes[i]);
             c.shapes.back().football_type = t;
@@ -720,6 +721,12 @@ EX void check_football_colorability(arbi_tiling& c) {
               co.sid = ni1;
               };
 
+            if(sh.apeirogonal && j >= isize(sh)-2) {
+              co.sid = ni;
+              if(t < 2 && (isize(sh) & 1)) co.sid = new_indices[i][t^1];
+              continue;
+              }
+
             co.eid %= oldshapes[co.sid].cycle_length;
             if(t < 2) {
               if((j & 1) == t) assign(2); else assign((co.eid & 1) ? 0 : 1);
@@ -729,7 +736,7 @@ EX void check_football_colorability(arbi_tiling& c) {
               }
             }
 
-          if((sh.cycle_length&1) && (t < 2)) sh.cycle_length *= 2;
+          if((sh.cycle_length&1) && (t < 2) && !sh.apeirogonal) sh.cycle_length *= 2;
           if(debugflags & DF_GEOM)
             println(hlog, tie(i,t), " becomes ", ni, " with connections ", sh.connections, " and cycle length = ", sh.cycle_length);
           }
