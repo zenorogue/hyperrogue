@@ -2639,6 +2639,15 @@ EX namespace linepatterns {
   linepattern patDual("dual grid", 0xFFFFFF00, always_available,
     ALLCELLS(
       forCellIdEx(c2, i, c) if(way(c,i)) {
+        if((patTriTree.color & 0xFF) || (PURE && (patTree.color & 0xFF))) {
+          cell *parent = ts::right_parent(c, curr_dist);
+          if(c2 == parent) continue;
+          cell *parent2 = ts::right_parent(c2, curr_dist);
+          if(c == parent2) continue;
+          }
+        if((patTriRings.color & 0xFF)) {
+          if(curr_dist(c2) == curr_dist(c)) continue;
+          }
         gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
         }
       )
