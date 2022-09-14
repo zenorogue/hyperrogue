@@ -655,15 +655,8 @@ EX void viewdist_configure_dialog() {
   dialog::addBoolItem(XLAT("strict tree maps"), currentmap->strict_tree_rules(), 's');
   dialog::add_action_push(rulegen::show);
 
-  int id = 0;
-  using namespace linepatterns;
-  for(auto& lp: {&patTriTree, &patTriRings, &patTriOther}) {
-    dialog::addColorItem(XLAT(lp->lpname), lp->color, '1'+(id++));
-    dialog::add_action([&lp] () {
-      dialog::openColorDialog(lp->color, NULL);
-      dialog::dialogflags |= sm::MAYDARK | sm::SIDE | sm::EXPANSION;
-      });
-    }
+  dialog::addItem(XLAT("line patterns"), 'L');
+  dialog::add_action_push(linepatterns::showMenu);
   
   if(!mod_allowed()) {
     dialog::addItem(XLAT("enable the cheat mode for additional options"), 'C');
