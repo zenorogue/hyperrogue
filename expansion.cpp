@@ -435,7 +435,7 @@ enum eNumberCoding { ncNone, ncDistance, ncType, ncDebug, ncError };
 EX string ncnames[5] = { "NO", "distance", "type", "debug", "error" };
 EX eNumberCoding number_coding = ncDistance;
 
-bool mod_allowed() {
+EX bool mod_allowed() {
   return cheater || autocheat || arcm::in() || tour::on;
   }
 
