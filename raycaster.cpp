@@ -3005,6 +3005,8 @@ void addconfig() {
   param_i(max_cells, "ray_max_cells");
   addsaver(rays_generate, "ray_generate");
   param_b(fixed_map, "ray_fixed_map");
+  param_i(max_wall_offset, "max_wall_offset");
+  param_i(max_celltype, "max_celltype");
   }
 auto hookc = addHook(hooks_configfile, 100, addconfig);
 #endif
