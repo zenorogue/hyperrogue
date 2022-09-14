@@ -64,7 +64,7 @@ Programming-style functions: `ifz(x,a,b)` (a if x=0, b otherwise), `ifp(x,a,b)` 
 
 Specialized functions are very useful for defining tilings.
 
-* `edge_angles(x,y,z)` is the edge opposite x of the triangle with angles x, y, z (angles given in angleunits, length returned in absolute units). Works only in non-Euclidean geometry. Length returned in absolute units.
+* `edge_angles(x,y,z)` is the edge opposite x of the triangle with angles x, y, z (angles given in angleunits). Works only in non-Euclidean geometry. Length returned in absolute units.
 
 * `edge(a,b)` is the edge of the {a,b} tiling. Works only if the {a,b} tiling is possible in the current non-Euclidean geometry.  Length returned in absolute units.
 
@@ -73,7 +73,7 @@ Specialized functions are very useful for defining tilings.
 * `arcmedge(3^2,4^3)` is the edge x such that the total internal angle of two triangles and three quadrangles of edge x equals 360 degrees. Works only if the tiling is possible in the current geometry.
 Returns 1 in Euclidean geometry. Length returned in absolute units.
 
-* `regangle(e,a)` is the internal angle of an a-sided regular tile with edge length e distunits. Angle returned in angle units.
+* `regangle(d,s)` is the internal angle of an s-sided regular tile with edge length d distunits. Angle returned in angle units.
 
 ## Special features
 
@@ -89,7 +89,7 @@ be changed using sliders. Changing the value of an integer-valued slider usually
 `affine` subdirectory.
 
 * Tiles with (ultra-)ideal angles. To achieve these, put `e1, [a1, e2, a2], e3` inside the `tile` definition; this will generate the tile as `e1, a1, e2, a2, e3` would, and then the edges `e1` and `e3`
-are extended until they cross (usually, in an (ultra-)ideal point), and the edge `e2` is removed. Two convenients functions `ideal_angle` and `ideal_edge` are helpful. See e.g. `inf.tes`. 
+are extended until they cross (usually, in an (ultra-)ideal point), and the edge `e2` is removed. Two convenient functions `ideal_angle` and `ideal_edge` are helpful. See e.g. `inf.tes`. 
 
 * Apeirogonal tiles. These are achieved by giving the tile multiplier as `*inf` (e.g., `tile(e0, a0, *inf)`). See e.g. `pseudogons.tes`.
 
@@ -129,6 +129,11 @@ Normally, when you choose to load a tes file, a game of HyperRogue is run on the
 
 * You can also try menu -> creative mode -> map editor -> map settings -> canvas floor shape. This applies some HyperRogue floor shape tessellations to the current tiling. (You need to select the 'pattern'
   first as explained above).
+  
+* Most options can be also set from the commandline. For example `hyperrogue -tes tessellations/sample/hr-standard-tiling.tes -canvas B -wsh 9 -shot-1000 -shott 1 -fillmodel 000000ff -zoom .95 -smart 1 -noplayer -vlq 3 -lw 5`
+  will load the named tessellation file, color the tiles with "sides" pattern (B), use full floors, make screenshots of size 1000x1000, make screenshot transparent with the Poincaré disk black, set scaling to
+  0.95, and draw tiles if their size is at least 1 pixel, hide the player character, line quality to 3, and line width to 5. Add `-genlimit 999999 -pngshot x.png` or `-svgshot x.svg` to take a screenshot
+  (genlimit here makes sure that tiles are generated, the default is at most 250 tiles generated per call). -rulegen-play -palrgba gtree ffffffff -palw gtree 3 -expansion 1 2 7` to generate and display a tree (explained below).
 
 # How is this implemented
 
