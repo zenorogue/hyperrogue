@@ -430,6 +430,7 @@ template<class T> void cycle(vector<T>& t) {
 
 /** \brief for tessellations which contain mirror rules, remove them by taking the orientable double cover */
 EX void unmirror(arbi_tiling& c) {
+  if(cgflags & qAFFINE) return;
   auto& mirror_rules = c.mirror_rules;
   mirror_rules = 0;
   for(auto& s: c.shapes)
@@ -585,6 +586,7 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
 bool extended_football = true;
 
 EX void check_football_colorability(arbi_tiling& c) {
+  if(cgflags & qAFFINE) return;
   for(auto&sh: c.shapes) for(auto v: sh.vertex_valence)
     if(v % 3) return;
 
