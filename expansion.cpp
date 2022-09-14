@@ -444,6 +444,7 @@ EX int curr_dist(cell *c) {
     case dfPlayer:
       return c->cpdist < INFD ? c->cpdist : celldistance(cwt.at, c);
     case dfStart:
+      if(!mod_allowed()) return 0;
       return celldist(c);
     case dfWorld:
       if(!mod_allowed() && !among(c->land, laOcean, laIvoryTower, laEndorian, laDungeon, laTemple, laWhirlpool, laCanvas))
