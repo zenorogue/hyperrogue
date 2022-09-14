@@ -452,9 +452,9 @@ EX void unmirror(arbi_tiling& c) {
     if(sh[i].apeirogonal) {
       cycle(sh[i].edges);
       cycle(sh[i].vertices);
-      println(hlog, "angles before = ", sh[i].angles);
+      if(debugflags & DF_GEOM) println(hlog, "angles before = ", sh[i].angles);
       cycle(sh[i].angles);
-      println(hlog, "angles now = ", sh[i].angles);
+      if(debugflags & DF_GEOM) println(hlog, "angles now = ", sh[i].angles);
       cycle(sh[i].connections);
       }
     }

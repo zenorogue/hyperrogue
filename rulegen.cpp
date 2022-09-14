@@ -2523,9 +2523,9 @@ EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {
   if(qparent > 1) throw hr_parse_exception("multiple parent at " + ep.where());
   if(qparent == 1) {
     ts.parent_dir = sumparent;
-    println(hlog, "before: ", ts.rules);
+    if(debugflags & DF_GEOM) println(hlog, "before: ", ts.rules);
     std::rotate(ts.rules.begin(), ts.rules.begin() + sumparent, ts.rules.end());
-    println(hlog, "after : ", ts.rules);
+    if(debugflags & DF_GEOM) println(hlog, "after : ", ts.rules);
     }
   ep.force_eat(")");
   }
