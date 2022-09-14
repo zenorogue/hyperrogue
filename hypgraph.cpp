@@ -2781,7 +2781,7 @@ EX void optimize_shift(shiftpoint& h) {
   }
 
 EX void optimize_shift(shiftmatrix& T) {
-  if(((mdinf[pmodel].flags & mf::uses_bandshift) && T[LDIM][LDIM] > 1e6) || (sphere && pmodel == mdSpiral)) {   
+  if(((mdinf[pmodel].flags & mf::uses_bandshift) && T[LDIM][LDIM] > 30) || (sphere && pmodel == mdSpiral)) {
     T.T = spin(pconf.model_orientation * degree) * T.T;
     hyperpoint H = tC0(T.T);
     find_zlev(H);
