@@ -54,10 +54,10 @@ always connects to a tile indexed i. (The engine ignores this; but for new tesse
 
 As mentioned above, all the numerical values can be provided as formulas. Formulas can use complex numbers.
 
-You can use the constants: `pi`, `deg`, `e`, `i`, `inf` (infinity). You can also declare new constants as in `let(tau=2*pi)`.
+You can use the constants: `pi`, `deg` (pi/180), `e`, `i`, `inf` (infinity). You can also declare new constants as in `let(tau=2*pi)`.
 
 You can use the standard math operators `+`, `-`, `*` (multiplication), `/` (division), `^` (exponentation), and math functions `sin`, `cos`, `tan`, `sinh`, `cosh`, `tanh`, `asin`, `acos`, `atan`, `asinh`, `acosh`, `atanh`, `exp`, `sqrt`, `log` (natural logarithm), `tan`,
-`re` (real part), `im` (imaginary part), `conj` (conjugation), `floor`, `frac` (fractional part), `min`, `max`. 
+`re` (real part), `im` (imaginary part), `conj` (conjugation), `floor`, `frac` (fractional part), `min`, `max`.
 
 Programming-style functions: `ifz(x,a,b)` (a if x=0, b otherwise), `ifp(x,a,b)` (a if x is positive, b otherwise), `test(x)` (returns x but also displays x while reading the file), 
 `let(x=a,b)` (compute the formula a and use its value as `x` in b).
