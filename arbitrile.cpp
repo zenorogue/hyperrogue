@@ -77,6 +77,8 @@ struct shape {
   vector<int> vertex_period;
   /** list of angles at vertices in the tesfile convention */
   vector<vector<ld>> vertex_angles;
+  /** football types */
+  int football_type;
   };
 
 struct slider {
@@ -98,8 +100,10 @@ struct intslider {
 struct arbi_tiling {
 
   int order;
-  /* have_line and have_ph: line and ph flags have been marked for tiles */
-  bool have_line, have_ph;
+  /* line flags have been marked for tiles */
+  bool have_line;
+  /* pseudohept flags have been marked for tiles (1), or the tiling is football-colorable (2), or neither (0) */
+  int have_ph;
   /* is the tree structure given in the tes file */
   bool have_tree;
   /* is the valence data reliable */
@@ -130,6 +134,7 @@ struct arbi_tiling {
   vector<string> options;
 
   int min_valence, max_valence;
+  bool is_football_colorable;
 
   geometryinfo1& get_geometry();
   eGeometryClass get_class() { return get_geometry().kind; }
@@ -577,6 +582,164 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
       }      
   }
 
+bool extended_football = true;
+
+EX void check_football_colorability(arbi_tiling& c) {
+  for(auto&sh: c.shapes) for(auto v: sh.vertex_valence)
+    if(v % 3) return;
+
+  for(int i=0; i<3; i++) {
+    for(auto&sh: c.shapes) sh.football_type = 3;
+
+    vector<int> aqueue;
+
+    c.shapes[0].football_type = i;
+    aqueue = {0};
+    bool bad = false;
+    for(int qi=0; qi<isize(aqueue); qi++) {
+      int sid = aqueue[qi];
+
+      auto& sh = c.shapes[sid];
+
+      for(int j=0; j<sh.size(); j++) {
+        auto &co = sh.connections[j];
+        auto t = sh.football_type;
+        if(c.have_ph && ((sh.flags & arcm::sfPH) != (t==2))) bad = true;
+
+        auto assign = [&] (int tt) {
+          auto& t1 = c.shapes[co.sid].football_type;
+          if(t1 == 3) {
+            t1 = tt;
+            aqueue.push_back(co.sid);
+            }
+          else {
+            if(t1 != tt) bad = true;
+            }
+          };
+
+        if(t < 2) {
+          if((j & 1) == t) assign(2); else assign((co.eid & 1) ? 0 : 1);
+          }
+        else {
+          assign((co.eid & 1) ? 1 : 0);
+          }
+        }
+      }
+    if(!bad) {
+      c.have_ph = 2;
+      for(auto& sh: c.shapes) if(sh.football_type == 2) sh.flags |= arcm::sfPH;
+      return;
+      }
+    }
+
+  if(extended_football) {
+    for(auto&sh: c.shapes)
+      sh.football_type = 0;
+
+    for(int i=0; i<3*isize(c.shapes); i++) {
+      for(auto&sh: c.shapes) {
+        int &res = sh.football_type;
+        int siz = sh.size();
+        if(sh.apeirogonal) siz -= 2;
+        else if(siz & 1) res |= 3;
+        if((sh.cycle_length & 1) && !sh.apeirogonal) {
+          if(res & 3) res |= 3;
+          }
+        if(sh.apeirogonal && (siz & 1)) {
+          if(res & 3) res |= 3;
+          }
+        if(sh.flags & arcm::sfPH) res |= 3;
+        for(int i=0; i<sh.size(); i++) {
+          auto co = sh.connections[i];
+          co.eid %= c.shapes[co.sid].cycle_length;
+          if(res & 1) {
+            if(i&1) {
+              if(co.eid & 1)
+                c.shapes[co.sid].football_type |= 1;
+              else
+                c.shapes[co.sid].football_type |= 2;
+              }
+            else
+              c.shapes[co.sid].football_type |= 4;
+            }
+          if(res & 2) {
+            if(!(i&1)) {
+              if(co.eid & 1)
+                c.shapes[co.sid].football_type |= 1;
+              else
+                c.shapes[co.sid].football_type |= 2;
+              }
+            else
+              c.shapes[co.sid].football_type |= 4;
+            }
+          if(res & 4) {
+            if(co.eid & 1)
+              c.shapes[co.sid].football_type |= 2;
+            else
+              c.shapes[co.sid].football_type |= 1;
+            }
+          }
+        }
+      }
+
+    c.is_football_colorable = true;
+    for(auto&sh: c.shapes)
+     if(sh.football_type == 7)
+       c.is_football_colorable = false;
+
+    if(c.is_football_colorable) {
+      vector<array<int, 3> > new_indices(isize(c.shapes), make_array(-1, -1, -1));
+      auto oldshapes = c.shapes;
+      c.shapes.clear();
+      for(int i=0; i<isize(oldshapes); i++)
+        for(int t=0; t<3; t++)
+          if(!(oldshapes[i].football_type & (1<<t))) {
+            if(t == 1 && (oldshapes[i].cycle_length & 1)) continue;
+            new_indices[i][t] = isize(c.shapes);
+            c.shapes.push_back(oldshapes[i]);
+            c.shapes.back().football_type = t;
+            if(t == 2) c.shapes.back().flags |= arcm::sfPH;
+            }
+
+      for(int i=0; i<isize(oldshapes); i++)
+        for(int t=0; t<3; t++) {
+          int ni = new_indices[i][t];
+          if(ni == -1) continue;
+          auto& sh = c.shapes[ni];
+          for(int j=0; j<isize(sh); j++) {
+            auto &co = sh.connections[j];
+            auto assign = [&] (int tt) {
+              auto ni1 = new_indices[co.sid][tt];
+              if(ni1 == -1 && tt == 1) {
+                ni1 = new_indices[co.sid][0];
+                co.eid += oldshapes[co.sid].cycle_length;
+                co.eid %= isize(oldshapes[co.sid]);
+                }
+              co.sid = ni1;
+              };
+
+            co.eid %= oldshapes[co.sid].cycle_length;
+            if(t < 2) {
+              if((j & 1) == t) assign(2); else assign((co.eid & 1) ? 0 : 1);
+              }
+            else {
+              assign((co.eid & 1) ? 1 : 0);
+              }
+            }
+
+          if((sh.cycle_length&1) && (t < 2)) sh.cycle_length *= 2;
+          if(debugflags & DF_GEOM)
+            println(hlog, tie(i,t), " becomes ", ni, " with connections ", sh.connections, " and cycle length = ", sh.cycle_length);
+          }
+
+      c.have_ph = 2;
+      return;
+      }
+    }
+
+  for(auto&sh: c.shapes) sh.football_type = 3;
+  }
+
 EX void add_connection(arbi_tiling& c, int ai, int as, int bi, int bs, int m) {
   int as0 = as, bs0 = bs;
   auto& ash = c.shapes[ai];
@@ -602,7 +765,9 @@ EX void set_defaults(arb::arbi_tiling& c, bool keep_sliders, string fname) {
   c.range = 0;
   c.boundary_ratio = 1;
   c.floor_scale = .5;
-  c.have_ph = c.have_line = false;
+  c.have_ph = 0;
+  c.have_line = false;
+  c.is_football_colorable = false;
   c.have_tree = false;
   c.have_valence = false;
   c.yendor_backsteps = 0;
@@ -919,6 +1084,8 @@ EX void load(const string& fname, bool load_as_slided IS(false), bool keep_slide
     unmirror(c);
     }
   if(!c.have_tree) compute_vertex_valence(c);
+
+  check_football_colorability(c);
 
   if(c.have_tree) rulegen::verify_parsed_treestates(c);
   

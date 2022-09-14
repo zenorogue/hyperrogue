@@ -885,7 +885,7 @@ void geometry_information::generate_floorshapes() {
         ms.c.connect(j, &models[co.sid], co.eid, co.mirror);
         }
       }
-    for(int i=0; i<n; i++) generate_floorshapes_for(i, &models[i], 0, 0);
+    for(int i=0; i<n; i++) generate_floorshapes_for(i, &models[i], c.shapes[i].football_type < 2, c.shapes[i].football_type == 0);
     }
   
   else if(geometry == gBinary4) {
