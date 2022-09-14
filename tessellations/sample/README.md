@@ -70,7 +70,7 @@ Specialized functions are very useful for defining tilings.
 
 * `regradius(a,b)` is the radius of the circumscribed circle on {a,b} tile. Works only if the {a,b} tiling is possible in the current non-Euclidean geometry. Length returned in absolute units.
 
-* `arcmedge(3^2,4^3)` is the edge x such that the total internal angle of two triangles and three quadrangles of edge x equals 360 degrees. Works only if the tiling is possible in the current geometry.
+* `arcmedge(3:^2,4:^3)` is the edge x such that the total internal angle of two triangles and three quadrangles of edge x equals 360 degrees. Works only if the tiling is possible in the current geometry.
 Returns 1 in Euclidean geometry. Length returned in absolute units.
 
 * `regangle(d,s)` is the internal angle of an s-sided regular tile with edge length d distunits. Angle returned in angle units.
