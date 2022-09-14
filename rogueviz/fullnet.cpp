@@ -37,7 +37,7 @@ auto hooks = arg::add3("-net", [] {
       init(0);
       rv_hook(hooks_frame, 0, drawExtra);
       linepatterns::patTriTree.color = 0x30;
-      linepatterns::patTriOther.color = 0x10;
+      linepatterns::patDual.color = 0x10;
       linepatterns::patTriRings.color = 0xFF;
       });
 
