@@ -2852,12 +2852,20 @@ EX namespace linepatterns {
         }
       )
     );
-  EX linepattern patTriRings = linepattern("triangle grid: rings", 0xFFFFFF00, always_available, 
+  EX linepattern patTriRings = linepattern("lines of equal distance", 0xFFFFFF00, trees_known,
     ALLCELLS(
-      forCellIdEx(c2, i, c) {
-        if(S3 == 4) c2 = (cellwalker(c, i) + wstep + 1).cpeek();
-        if(c2 > c) if(curr_dist(c) == curr_dist(c2)) 
-          gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
+      if(valence() == 3) {
+        forCellIdEx(c2, i, c) {
+          if(c2 > c) if(curr_dist(c) == curr_dist(c2))
+            gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
+          }
+        }
+      else {
+        dynamicval<int> dmar(mine_adjacency_rule, 1);
+        int d = curr_dist(c);
+        for(auto p: adj_minefield_cells_full(c))
+          if(p.c < c && d == curr_dist(p.c))
+            gridlinef(V, C0, V, tC0(p.T), col, 2 + vid.linequality);
         }
       )
     );
