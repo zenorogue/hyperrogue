@@ -75,6 +75,9 @@ Returns 1 in Euclidean geometry. Length returned in absolute units.
 
 * `regangle(d,s)` is the internal angle of an s-sided regular tile with edge length d distunits. Angle returned in angle units.
 
+Note: while it may seem that a and b in `edge`, `regradius`, and `arcmedge(a:^b)` are integers, the formulas actually also make sense for real numbers, which is sometimes useful (e.g. for star tilings).
+Also a is allowed to be infinity (inf).
+
 ## Special features
 
 The tes format also has some more features. Please read the tes files in `samples` subdirectory to see these in action.
