@@ -1255,7 +1255,7 @@ EX void race_won() {
     int result = ticks - race_start_tick;
     int losers = 0;
     int place = 1;
-    for(int i=0; i<multi::players; i++) if(race_finish_tick[i]) place++; else losers = 0;
+    for(int i=0; i<multi::players; i++) if(race_finish_tick[i]) place++;
     for(auto& ghost: ghostset) if(ghost.result < result) place++; else losers++;
 
     if(place == 1 && losers) trophy[multi::cpid] = 0xFFD500FF;
@@ -1267,7 +1267,7 @@ EX void race_won() {
     else
       addMessage(XLAT("Finished the race in time %1!", racetimeformat(result)));
     
-    if(place == 1 && losers && official_race && isize(ghostset))
+    if(place == 1 && official_race)
       achievement_gain("RACEWON", rg::racing);
     
     race_finish_tick[multi::cpid] = ticks;

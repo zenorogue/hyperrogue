@@ -1086,9 +1086,9 @@ EX void saveStats(bool emergency IS(false)) {
       fprintf(f, "RACING %s %d %d date: %s\n", VER,
         int(specialland), bs[specialland],
         buf);
-      fclose(f);
       bs.erase(specialland);
       }
+    fclose(f);
     return;
     }
   #endif
