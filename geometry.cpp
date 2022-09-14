@@ -1178,6 +1178,8 @@ EX string cgi_string() {
 
   if(arb::in()) V("AP", its(arb::apeirogon_simplified_display));
 
+  if(arb::in()) V("F", its(arb::extended_football));
+
   if(cryst) V("CRYSTAL", its(ginf[gCrystal].sides) + its(ginf[gCrystal].vertex));
   
   if(bt::in() || GDIM == 3) V("WQ", its(vid.texture_step));

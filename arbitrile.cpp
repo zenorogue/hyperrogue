@@ -583,7 +583,7 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
       }      
   }
 
-bool extended_football = true;
+EX bool extended_football = true;
 
 EX void check_football_colorability(arbi_tiling& c) {
   if(cgflags & qAFFINE) return;
@@ -635,7 +635,7 @@ EX void check_football_colorability(arbi_tiling& c) {
       }
     }
 
-  if(extended_football) {
+  if(extended_football && !c.have_tree) {
     for(auto&sh: c.shapes)
       sh.football_type = 0;
 
@@ -1452,6 +1452,7 @@ EX void run(string fname) {
   try {
      load(fname);
      ginf[gArbitrary].tiling_name = current.name;
+     tes = fname;
      }
    catch(hr_polygon_error& poly) {
      set_geometry(g);
@@ -1789,6 +1790,8 @@ EX void convert() {
     sh.connections.clear();
     sh.cycle_length = id.modval;
     sh.repeat_value = t / id.modval;
+    sh.flags = hr::pseudohept(s) ? arcm::sfPH : 0;
+    if(arcm::in() && arcm::linespattern(s)) { sh.flags |= arcm::sfLINE; ac.have_line = true; }
     for(int j=0; j<t; j++) {
       auto co = currentmap->get_corner(s, j);
       sh.vertices.push_back(co);
@@ -1829,6 +1832,9 @@ EX void convert() {
     }
   
   arb::compute_vertex_valence(ac);
+
+  ac.have_ph = geosupport_football() ? 1 : 0;
+  arb::check_football_colorability(ac);
   }
 
 EX bool in() {

@@ -2584,6 +2584,28 @@ EX void show() {
       }
     });
 
+  dialog::addBoolItem(XLAT("extended football colorability"), arb::extended_football, 'f');
+  dialog::add_action([] {
+    arb::extended_football = !arb::extended_football;
+    rules_known_for = "unknown";
+    rule_status = "manually disabled";
+    if(arb::convert::in()) {
+      stop_game();
+      arb::convert::convert();
+      arb::convert::activate();
+      start_game();
+      }
+    else if(arb::in()) {
+      stop_game();
+      try {
+        arb::load(arb::tes);
+        }
+      catch(hr_parse_exception& ex) {
+        println(hlog, "failed: ", ex.s);
+        }
+      start_game();
+      }
+    });
   add_edit(arb::convert::minimize_on_convert);
   dialog::addBoolItem(XLAT("strict tree based"), currentmap->strict_tree_rules(), 's');
   dialog::add_action([] {
