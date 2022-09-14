@@ -1118,6 +1118,7 @@ EX namespace hybrid {
   EX geometry_information *pcgip;
   EX eGeometry actual_geometry;
   
+  #if HDR
   template<class T> auto in_actual(const T& t) -> decltype(t()) {
     dynamicval<eGeometry> g(geometry, actual_geometry);
     dynamicval<geometry_information*> gc(cgip, pcgip);
@@ -1125,6 +1126,9 @@ EX namespace hybrid {
     dynamicval<hrmap*> gup(pmap, NULL);
     return t();  
     }
+
+  #define PIA(x) hr::hybrid::in_actual([&] { return (x); })
+  #endif
   
   struct hrmap_hybrid : hrmap {
     
@@ -1360,8 +1364,8 @@ EX namespace hybrid {
   #if HDR
   template<class T> auto in_underlying_geometry(const T& f) -> decltype(f()) {
     if(!hybri) return f();
-    dynamicval<eGeometry> g(geometry, underlying);
     dynamicval<eGeometry> gag(actual_geometry, geometry);
+    dynamicval<eGeometry> g(geometry, underlying);
     dynamicval<int> gss(underlying_cgip->single_step, cgi.single_step);
     dynamicval<int> gsp(underlying_cgip->psl_steps, cgi.psl_steps);
     dynamicval<geometry_information*> gc(cgip, underlying_cgip);
