@@ -2261,7 +2261,9 @@ EX namespace rots {
 
   EX hyperpoint formula_exp(hyperpoint vel) {
     bool sp = sphere;
-    ld K = sp ? 1 : -1;    
+    ld K = sp ? 1 : -1;
+
+    if(vel[0] == 0 && vel[1] == 0 && vel[2] == 0) return C0;
   
     ld len = hypot_d(3, vel);
   
