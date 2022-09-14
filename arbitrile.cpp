@@ -1861,6 +1861,12 @@ int readArgs() {
       println(hlog, "failed to convert: ", e.what());
       }
     }
+  else if(argis("-arb-unmirror")) {
+    shift(); do_unmirror = argi();
+    }
+  else if(argis("-arb-football")) {
+    shift(); extended_football = argi();
+    }
   else if(argis("-arb-slider")) {
     PHASEFROM(2);
     shift();
