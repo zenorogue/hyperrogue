@@ -1389,6 +1389,9 @@ struct hrmap_arbi : hrmap {
     for(auto& p2: altmap[alt]) if(id_of(p2.first) == co.sid && same_point_may_warn(tC0(p2.second), tC0(T))) {
       for(int oth=0; oth < p2.first->type; oth++) {
         if(same_point_may_warn(p2.second * xsh.vertices[oth], T * xsh.vertices[co.eid])) {
+          if(p2.first->move(oth)) {
+            throw hr_exception("already connected!");
+            }
           h->c.connect(d, p2.first, oth%p2.first->type, co.mirror);
           return p2.first;
           }
