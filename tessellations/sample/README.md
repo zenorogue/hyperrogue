@@ -50,7 +50,7 @@ This indexing will not be consistent: there is no way to index edges of every ti
 always connects to a tile indexed i. (The engine ignores this; but for new tessellations it is recommended to use 
 `*k` or `repeat` to explain the situation explicitly.)
 
-# Formulas
+## Formulas
 
 As mentioned above, all the numerical values can be provided as formulas. Formulas can use complex numbers.
 
@@ -101,7 +101,7 @@ enable "configure FPP automatically", and also "make the tiles flat"; then leave
 * If the tessellation is invalid, HyperRogue will invoke a debugger, which lets you see the tiles you have defined and move according to their connections. You can also invoke this debugger
   maually with `debug(tile_index)`.
 
-## How to make the tessellations look good
+# How to make the tessellations look good
 
 Normally, when you choose to load a tes file, a game of HyperRogue is run on the tiling selected. Which might be not what you wanted. Here are some hints for making nice pictures.
 
@@ -130,7 +130,7 @@ Normally, when you choose to load a tes file, a game of HyperRogue is run on the
 * You can also try menu -> creative mode -> map editor -> map settings -> canvas floor shape. This applies some HyperRogue floor shape tessellations to the current tiling. (You need to select the 'pattern'
   first as explained above).
 
-## How is this implemented
+# How is this implemented
 
 Every tile on screen is represented in the memory. Tiles are generated as needed.
 
@@ -138,5 +138,5 @@ By default, Archimedean/tes files are generated using a simple method: when we c
 if no we generate a new tile. However, coordinate-based computations in hyperbolic geometry are prone to numerical precision errors, so occassionally this may result in errors.
 
 HyperRogue also implements the algorithm described [here](https://arxiv.org/abs/2111.12040) to create tree structures which avoid this problem. This is not used by default because occassionally (very rarely)
-generating a tree structure can take some time. To run the algorithm, in 'experiment with geometry' pick 'size of the world' -> 'strict tree maps' -> 'strict tree based'. In the 'size of the world' menu
+generating a tree structure can take some time (also it currently does not support affine, star, or tessellations with (ultra-)ideal-vertices). To run the algorithm, in 'experiment with geometry' pick 'size of the world' -> 'strict tree maps' -> 'strict tree based'. In the 'size of the world' menu
 you can also get various information regarding the tree structure obtained.
