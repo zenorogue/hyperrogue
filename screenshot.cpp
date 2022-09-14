@@ -631,7 +631,7 @@ EX }
 void IMAGESAVE(SDL_Surface *s, const char *fname) {
   SDL_Surface *s2 = SDL_PNGFormatAlpha(s);
   SDL_SavePNG(s2, fname);
-  SDL_FreeSurface(s2);
+  if(s != s2) SDL_FreeSurface(s2);
   }
 #endif
 
