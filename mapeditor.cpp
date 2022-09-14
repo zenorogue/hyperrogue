@@ -2887,6 +2887,32 @@ EX namespace mapeditor {
             println(hlog);
             }
           }
+
+        for(int i=0; i<USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
+          auto us = usp.second;
+          if(!us) continue;
+
+          for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
+            usershapelayer& ds(us->d[l]);
+            println(hlog, spaced("//", i, usp.first, l, "[", ds.color, double(ds.zlevel), "]"));
+            print(hlog, "{");
+
+            for(int r=0; r<us->d[l].rots; r++) {
+              for(int i=0; i<isize(us->d[l].list); i++) {
+                hyperpoint h = us->d[l].list[i];
+                h = spin(360 * degree * r / us->d[l].rots) * h;
+                for(int d=0; d<GDIM; d++) print(hlog, fts(h[d]), ", ");
+                }
+              if(us->d[l].sym) for(int i=isize(us->d[l].list)-1; i>=0; i--) {
+                hyperpoint h = us->d[l].list[i];
+                h[1] = -h[1];
+                h = spin(360 * degree * r / us->d[l].rots) * h;
+                for(int d=0; d<GDIM; d++) print(hlog, fts(h[d]), ", ");
+                }
+              }
+            println(hlog, "}, ");
+            }
+          }
         }
   
       if(uni == 'p') {
