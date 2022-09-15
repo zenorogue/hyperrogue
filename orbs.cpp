@@ -1421,7 +1421,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   cell *jumpthru = NULL;
   
   // orb of vaulting
-  if(!shmup::on && items[itOrbDash] && c->cpdist == 2) {
+  if(!shmup::on && items[itOrbDash] && CHK(c->cpdist == 2, XLAT("Cannot vault that far!"))) {
     changes.init(isCheck(a));
     int vaultstate = check_vault(cwt.at, c, P_ISPLAYER, jumpthru);
 
@@ -1461,7 +1461,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     else changes.rollback();
     }
   
-  if(items[itOrbFrog] && c->cpdist == 2) {
+  if(items[itOrbFrog] && CHK(c->cpdist == 2, XLAT("Cannot jump that far!"))) {
     changes.init(isCheck(a));
     int frogstate = check_jump(cwt.at, c, P_ISPLAYER, jumpthru);
     if(frogstate == 1 && jumpthru && jumpthru->monst) {
@@ -1485,7 +1485,7 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     else changes.rollback();
     }
   
-  if(items[itOrbPhasing] && c->cpdist == 2) {
+  if(items[itOrbPhasing] && CHK(c->cpdist == 2, XLAT("Cannot phase that far!"))) {
     changes.init(isCheck(a));
     if(shmup::on) shmup::pushmonsters();
     int phasestate = check_phase(cwt.at, c, P_ISPLAYER, jumpthru);
