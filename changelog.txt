@@ -4764,3 +4764,17 @@ Menu improvements:
 - various fixes related to 'orb used' rollback
 - fixed Sol geometry (a bug caused the map to change incorrectly when moving)
 - fixed variations of hyperbolic honeycombs (when a ruleset was available only for the pure honeycomb, loading it would reset variation to pure)
+
+2022-09-15 12:40 Update 12.1:
+- documentation for TES files added
+- an option to select the savefile on startup (settings -> other settings)
+- fixed missing 'too far' messages on Frog-like orbs
+- fixed Teleport and Illusion draining Aether etc on mousing (disregarding Time)
+- fixed a crash problem with tes files in 2.5D
+- fixed a possible crash in raytracer
+- when tes files are loaded, football-colorability is now detected (and used to improve the graphics and gameplay)
+- GPU glitches when rendering long bands should be no more
+- fixed the loading of tessellations/affine/affine-square.tes
+- fixed the crash on converting regular/Archimedean tilings to tes format and generating tree rules
+- improvements to line patterns
+- fixed a possible crash when saving images

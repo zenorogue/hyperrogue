@@ -13,8 +13,8 @@
 #define _HYPER_H_
 
 // version numbers
-#define VER "12.0z"
-#define VERNUM_HEX 0xA91B
+#define VER "12.1"
+#define VERNUM_HEX 0xA920
 
 #include "sysconfig.h"
 
@@ -129,7 +129,7 @@ void addMessage(string s, char spamtype = 0);
 #define hyperbolic_37 (S7 == 7 && S3 == 3 && !bt::in() && !arcm::in())
 #define hyperbolic_not37 ((S7 > 7 || S3 > 3 || bt::in() || arcm::in()) && hyperbolic)
 #define weirdhyperbolic ((S7 > 7 || S3 > 3 || !STDVAR || bt::in() || arcm::in() || arb::in()) && hyperbolic)
-#define stdhyperbolic (S7 == 7 && S3 == 3 && STDVAR && !bt::in() && !arcm::in())
+#define stdhyperbolic (S7 == 7 && S3 == 3 && STDVAR && !bt::in() && !arcm::in() && !arb::in())
 
 #define cgflags cginf.flags 
 
