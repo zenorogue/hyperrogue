@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=HyperRogue
+Comment=Roguelike in a non-euclidean world
+Exec=hyperrogue
+Icon=hyperrogue
+Terminal=false
+Type=Application
+Categories=Game;AdventureGame;
