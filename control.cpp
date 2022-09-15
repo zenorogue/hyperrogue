@@ -918,11 +918,6 @@ EX void mainloopiter() {
     lastticks = ticks;
     
     #if CAP_SDL2
-    rug::using_rugview urv;
-    auto& lastticks = sc_ticks;
-    ld t = (ticks - lastticks) * shiftmul / 1000.;
-    lastticks = ticks;
-
     if(keystate[SDL_SCANCODE_END] && GDIM == 3 && DEFAULTNOR(SDL_SCANCODE_END)) full_forward_camera(-t);
     if(keystate[SDL_SCANCODE_HOME] && GDIM == 3 && DEFAULTNOR(SDL_SCANCODE_HOME)) full_forward_camera(t);
     if(keystate[SDL_SCANCODE_RIGHT] && DEFAULTNOR(SDL_SCANCODE_RIGHT)) full_rotate_camera(0, -t);
