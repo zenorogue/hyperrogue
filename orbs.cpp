@@ -1324,6 +1324,8 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
 
   #define CHKV(b, v) ((b) ? true : (v, false))
   #define CHK(b, s) CHKV(b, orb_error_messages.push_back(s))
+  #define INI (changes.init(isCheck(a)), true)
+  #define CHK_ROLLBACK(b, s) CHKV(b, (orb_error_messages.push_back(s), changes.rollback()))
 
   bool wouldkill_there = false;
   bool wouldkill_here = false;
@@ -1518,20 +1520,27 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
   if(!shmup::on && items[itOrbIllusion]
     && CHK(c->monst == moNone, XLAT("Cannot cast illusion on a monster!"))
     && CHK(c->item == itNone || itemHidden(c), XLAT("Cannot cast illusion on an item!"))
-    && CHK(passable(c, NULL, P_MIRROR), XLAT("Cannot cast illusion here!"))) {
-    if(!isCheck(a)) placeIllusion(c), apply_impact(c);
-    return itOrbIllusion;
+    && INI && CHK_ROLLBACK(passable(c, NULL, P_MIRROR), XLAT("Cannot cast illusion here!"))) {
+    if(!isCheck(a)) {
+      changes.commit(), placeIllusion(c), apply_impact(c);
+      return itOrbIllusion;
+      }
+    else changes.rollback();
     }
 
   // (3) teleport
   if(items[itOrbTeleport]
     && CHK(c->monst == moNone, XLAT("Cannot teleport on a monster!"))
     && CHK(c->item == itNone || itemHidden(c), XLAT("Cannot teleport on an item!"))
-    && CHK(passable(c, NULL, P_ISPLAYER | P_TELE), XLAT("Cannot teleport here!"))
     && CHK(teleportAction(),  XLAT("All players are in the game!"))
-    && shmup::verifyTeleport()) {
-    if(!isCheck(a)) teleportTo(c), apply_impact(c);
-    return itOrbTeleport;
+    && shmup::verifyTeleport()
+    && INI && CHK_ROLLBACK(passable(c, NULL, P_ISPLAYER | P_TELE), XLAT("Cannot teleport here!"))
+    ) {
+    if(!isCheck(a)) {
+      changes.commit(), teleportTo(c), apply_impact(c), println(hlog, "commiting teleport ", items[itOrbTeleport]);
+      return itOrbTeleport;
+      }
+    else changes.rollback();
     }
     
   // (4) remove an illusion
@@ -1625,6 +1634,8 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
 
   #undef CHK
   #undef CHKV
+  #undef CHK_ROLLBACK
+  #undef INI
   
   return itNone;
   }
