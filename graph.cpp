@@ -1126,7 +1126,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      (it == itOrbGravity) ? &cgi.shTinyArrow :
                      (it == itOrbSafety || it == itOrbFreedom || it == itOrbRecall) ? &cgi.shDiskSq :
                      (it == itOrbEnergy) ? &cgi.shHalfDisk :
-                     (it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism) ? &cgi.shEccentricDisk :
+                     (it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism || it == itOrbDiscord) ? &cgi.shEccentricDisk :
                      (it == itOrbPsi || it == itOrbSide3) ? &cgi.shDiskS :
                      (it == itOrbPurity) ? &cgi.shSmallEgg :
                      (it == itOrbLightning) ? &cgi.shLightningBolt :
@@ -1137,11 +1137,9 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit, cgi.shDisk, dark, prio);
         if (shape)
           queuepolyat(Vit, *shape, (it == itOrbInvis || it == itOrbTeleport) ? 0x20 : 0x80, prio);
-        if (it == itOrbSide1 || shape == &cgi.shEccentricDisk)
+        if (it == itOrbSide1 || (shape == &cgi.shEccentricDisk && it != itOrbDiscord))
           queuepolyat(Vit*Mirror, *shape, 0x80, prio);
-        if (it == itOrbEnergy)
-          queuepolyat(Vit*Mirror, *shape, col, prio);
-        if (it == itOrbPhasing || it == itOrbDash)
+        if (it == itOrbPhasing || it == itOrbDash || it == itOrbEnergy)
           queuepolyat(Vit*Mirror, *shape, col, prio);
         if (it == itOrbIntensity || it == itOrbImpact)
           queuepolyat(Vit, cgi.shDiskM, 0x80, prio);
