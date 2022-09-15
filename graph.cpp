@@ -1130,6 +1130,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      (it == itOrbGravity) ? &cgi.shTinyArrow :
                      (it == itOrbSafety || it == itOrbFreedom || it == itOrbRecall) ? &cgi.shDiskSq :
                      (it == itOrbEnergy) ? &cgi.shHalfDisk :
+                     (it == itOrbSpace) ? &cgi.shSmallPirateHook :
                      (it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism || it == itOrbDiscord) ? &cgi.shEccentricDisk :
                      (it == itOrbPsi || it == itOrbSide3) ? &cgi.shDiskS :
                      (it == itOrbPurity) ? &cgi.shSmallEgg :

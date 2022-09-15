@@ -300,7 +300,7 @@ hpcshape
   shBook, shBookCover, shGrail,
   shBoatOuter, shBoatInner, shCompass1, shCompass2, shCompass3,
   shKnife, shTongue, shFlailMissile, shTrapArrow,
-  shPirateHook, shPirateHood, shEyepatch, shPirateX,
+  shPirateHook, shSmallPirateHook, shPirateHood, shEyepatch, shPirateX,
   // shScratch, 
   shHeptaMarker, shSnowball, shHugeDisk, shSun, shNightStar, shEuclideanSky,
   shSkeletonBody, shSkull, shSkullEyes, shFatBody, shWaterElemental,

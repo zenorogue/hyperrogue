@@ -1416,6 +1416,7 @@ void geometry_information::prepare_shapes() {
   bshape(shFerocityF, PPR::MONSTER_WPN, scalefactor, 362);
   bshape(shPKnife, PPR::MONSTER_WPN, scalefactor, 91);
   bshape(shPirateHook, PPR::MONSTER_WPN, scalefactor, 92);
+  bshape(shSmallPirateHook, PPR::MONSTER_WPN, scalefactor/2, 417);
   bshape(shSabre, PPR::MONSTER_WPN, scalefactor, 93);
   bshape(shHedgehogBlade, PPR::MONSTER_WPN, scalefactor, 94);
   bshape(shSmallHedgehogBlade, PPR::MONSTER_WPN, scalefactor/2, 406);
@@ -2432,6 +2433,13 @@ NEWSHAPE, 415, 1, 1, 0.166, 0, 0.619, 0.186, 0.619, 0.348, 0.13, 0.171, -0.161, 
 
 // shHourglass
 NEWSHAPE, 416, 1, 2, -0.155, -0.072, -0.155, 0.085, -0.125, 0.085, -0.125, 0.062, -0.088, 0.063, -0.049, 0.054, -0.022, 0.035, 0.024, -0.040, -0.024, 0.040, 0.022, -0.035, 0.049, -0.054, 0.088, -0.063, 0.125, -0.062, 0.125, -0.085, 0.155, -0.085, 0.155, 0.072,
+
+// shSmallPirateHook (1x1)
+#define x (-0.1)
+#define y (-0.15)
+NEWSHAPE,  417, 1,1, 0.025637+x,0.290334+y, 0.015893+x,0.212083+y, 0.070681+x,0.208634+y, 0.078764+x,0.213716+y, 0.092820+x,0.214478+y, 0.128742+x,0.099394+y, 0.114620+x,0.096368+y, 0.104002+x,0.089501+y, 0.096284+x,0.072719+y, 0.093155+x,0.050966+y, 0.099066+x,0.033609+y, 0.110446+x,0.021946+y, 0.127291+x,0.014728+y, 0.145718+x,0.008586+y, 0.167517+x,0.008308+y, 0.156477+x,0.015183+y, 0.140613+x,0.023565+y, 0.132241+x,0.028989+y, 0.118961+x,0.034720+y, 0.108990+x,0.048739+y, 0.107378+x,0.058592+y, 0.115339+x,0.077749+y, 0.131027+x,0.084323+y, 0.151797+x,0.088283+y, 0.113111+x,0.234773+y, 0.104917+x,0.253698+y, 0.105424+x,0.258064+y, 0.096993+x,0.264198+y, 0.089213+x,0.264464+y, 0.087585+x,0.273426+y, 0.080433+x,0.279698+y, 0.072806+x,0.281526+y,
+#undef x
+#undef y
 
 
 NEWSHAPE, NEWSHAPE
