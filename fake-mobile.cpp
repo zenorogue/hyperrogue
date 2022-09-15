@@ -9,7 +9,7 @@
 #include <string>
 
 namespace hr {
-  const char *scorefile = "fakemobile_score.txt";  
+  string scorefile = "fakemobile_score.txt";  
   }
 
 #include <SDL/SDL.h>

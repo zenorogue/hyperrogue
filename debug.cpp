@@ -611,8 +611,8 @@ int read_cheat_args() {
   else if(argis("-g")) {
     /* debugging mode */
     if(curphase == 1) {
-      /* use a separate score file */
-      scorefile = "xx";
+      /* use no score file */
+      scorefile = "";
       /* set seed for reproducible results */
       if(!fixseed) {
         fixseed = true; autocheat = true;

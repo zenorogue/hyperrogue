@@ -1001,9 +1001,10 @@ EX }
 long long saveposition = -1;
 
 EX void remove_emergency_save() {
+  if(scorefile == "") return;
 #if !ISWINDOWS
   if(saveposition >= 0) { 
-    if(truncate(scorefile, saveposition)) {}
+    if(truncate(scorefile.c_str(), saveposition)) {}
     saveposition = -1;
     }
 #endif
@@ -1015,6 +1016,7 @@ EX void saveStats(bool emergency IS(false)) {
   DEBBI(DF_INIT, ("saveStats [", scorefile, "]"));
 
   if(autocheat) return;
+  if(scorefile == "") return;
   #if CAP_TOUR
   if(tour::on) return;
   #endif
@@ -1031,7 +1033,7 @@ EX void saveStats(bool emergency IS(false)) {
 
   xcode = modecode();
   
-  FILE *f = fopen(scorefile, "at");
+  FILE *f = fopen(scorefile.c_str(), "at");
   
   if(!f) {
     // printf("Could not open the score file '%s'!\n", scorefile);
@@ -1156,12 +1158,13 @@ bool tamper = false;
 // load the save
 EX void loadsave() {
   if(autocheat) return;
+  if(scorefile == "") return;
 #if CAP_TOUR
   if(tour::on) return;
 #endif
   DEBBI(DF_INIT, ("loadSave"));
 
-  FILE *f = fopen(scorefile, "rt");
+  FILE *f = fopen(scorefile.c_str(), "rt");
   havesave = f;
   if(!f) return;
   bool ok = false;
@@ -1659,6 +1662,33 @@ EX eLand firstland0;
 
 EX purehookset hooks_initialize;
 
+EX bool savefile_selection = false;
+
+EX void select_savefile() {
+  if(!savefile_selection) return;
+  start_game();
+  bool canceled = true;
+  if(scorefile == "") scorefile = "hyperrogue.log";
+  pushScreen([] { quitmainloop = true; });
+  dialog::openFileDialog(scorefile, XLAT("choose your score/save file"), ".log", [&] {
+    println(hlog, "hook called");
+    canceled = false;
+    quitmainloop = true;
+    return true;
+    });
+  clearMessages();
+  mainloop();
+  quitmainloop = false;
+  stop_game();
+  popScreenAll();
+  if(canceled) scorefile = "";
+  }
+
+EX void progress_warning() {
+  if(scorefile == "" && savefile_selection)
+    addMessage(XLAT("Your progress will not be saved."));
+  }
+
 EX void initAll() {
   callhooks(hooks_initialize);
   init_floorcolors();
@@ -1676,7 +1706,9 @@ EX void initAll() {
   
   // initlanguage();
   initialize_all();
+  
 #if CAP_SAVE
+  select_savefile();
   loadsave();
   if(IRREGULAR) irr::auto_creator();
 #endif

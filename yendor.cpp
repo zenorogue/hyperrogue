@@ -999,8 +999,11 @@ EX modecode_t modecode(int mode) {
   code_for[ss.s] = next;
   
   if(mode == 2) return next;
+
+  if(scorefile == "") return next;
   
-  FILE *f = fopen(scorefile, "at");
+  FILE *f = fopen(scorefile.c_str(), "at");
+  if(!f) return next;
   string s = as_hexstring(ss.s);
   fprintf(f, "MODE %d %s\n", next, s.c_str());
   fclose(f);

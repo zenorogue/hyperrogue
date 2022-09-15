@@ -287,10 +287,11 @@ void show() {
   }
 
 void load() {
+  if(scorefile == "") return;
   scores.clear();
-  FILE *f = fopen(scorefile, "rt");
+  FILE *f = fopen(scorefile.c_str(), "rt");
   if(!f) {
-    printf("Could not open the score file '%s'!\n", scorefile);
+    printf("Could not open the score file '%s'!\n", scorefile.c_str());
     addMessage(s0 + "Could not open the score file: " + scorefile);
     return;
     }

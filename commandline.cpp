@@ -17,7 +17,7 @@ EX string rsrcdir = "";
 #endif
 
 #if CAP_COMMANDLINE
-EX const char *scorefile = "hyperrogue.log";
+EX string scorefile = "hyperrogue.log";
 
 EX namespace arg {
 EX eLand readland(const string& ss) {
@@ -63,7 +63,7 @@ EX void initializeCLI() {
   if(getenv("HOME")) {
     sbuf = getenv("HOME"); sbuf += "/."; sbuf += scorefile;
     cbuf = getenv("HOME"); cbuf += "/."; cbuf += conffile;
-    scorefile = sbuf.c_str();
+    scorefile = sbuf;
     conffile = cbuf.c_str();
     }
   #endif
@@ -168,7 +168,8 @@ int arg::readCommon() {
 
 // first phase options
 
-  if(argis("-s")) { PHASE(1); shift(); scorefile = argcs(); }
+  if(argis("-s")) { PHASE(2); shift(); scorefile = args(); savefile_selection = false; }
+  else if(argis("-no-s")) { PHASE(2); scorefile = ""; savefile_selection = false; }
   else if(argis("-rsrc")) { PHASE(1); shift(); rsrcdir = args(); }
   else if(argis("-nogui")) { PHASE(1); noGUI = true; }
 #ifndef EMSCRIPTEN

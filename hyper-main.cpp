@@ -86,6 +86,7 @@ EX int hyper_main(int argc, char **argv) {
     pushScreen(showStartMenu);
     }
 #endif
+  progress_warning();
   mainloop();
   finishAll();  
   return 0;

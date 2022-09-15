@@ -1811,6 +1811,8 @@ EX void configureOther() {
   dialog::addSelItem(XLAT("whatever"), fts(whatever[0]), 'j');
   dialog::add_action([] { edit_whatever('f', 0); });
 #endif
+
+  add_edit(savefile_selection);
   
   dialog::addBreak(50);
   dialog::addBack();
@@ -2498,6 +2500,17 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
       });
   param_b(debug_tiles, "debug_tiles");
   addsaver(vid.gp_autoscale_heights, "3D Goldberg autoscaling", true);  
+  addsaver(scorefile, "savefile");
+  param_b(savefile_selection, "savefile_selection")
+  -> editable("select the score/save file on startup", 's')
+  -> set_reaction([] {
+    if(savefile_selection)
+      addMessage(XLAT("Save the config and restart to select another score/save file."));
+    else if(scorefile == "")
+      addMessage(XLAT("Save the config to always play without recording your progress."));
+    else
+      addMessage(XLAT("Save the config to always use %1.", scorefile));
+    });
   });
 
 EX void switchcolor(unsigned int& c, unsigned int* cs) {

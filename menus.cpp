@@ -948,6 +948,7 @@ EX void showStartMenu() {
       resetModes(uni);
       clearMessages();
       welcomeMessage();
+      progress_warning();
       stampbase = ticks;
       if(uni == 's') 
         multi::configure();
@@ -1003,6 +1004,7 @@ EX void showStartMenu() {
       stampbase = ticks;
       clearMessages();
       welcomeMessage();
+      progress_warning();
       }
     else if(sym == SDLK_F5) { 
       #if CAP_STARTANIM

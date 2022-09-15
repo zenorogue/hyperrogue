@@ -174,7 +174,7 @@ EX void achievement_log(const char* s, char flags) {
 #if CAP_SAVE
   remove_emergency_save();
 
-  FILE *f = fopen(scorefile, "at");
+  FILE *f = fopen(scorefile.c_str(), "at");
   if(!f) return;
   
   int t = (int) (time(NULL) - timerstart);
