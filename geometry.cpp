@@ -254,6 +254,7 @@ hpcshape
   shCross, shGiantStar[2], shLake, shMirror,
   shHalfFloor[6], shHalfMirror[3],
   shGem[2], shStar, shFlash, shDisk, shHalfDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shEccentricDisk, shDiskSegment,
+  shHeptagon, shHeptagram,
   shTinyBird, shTinyShark,
   shEgg, shSmallEgg,
   shRing, shSpikedRing, shTargetRing, shSawRing, shGearRing, shPeaceRing,

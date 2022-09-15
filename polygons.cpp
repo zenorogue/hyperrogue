@@ -581,6 +581,13 @@ void geometry_information::procedural_shapes() {
   for(ld d: {0, 90, -90, 0})
     hpcpush(xspinpush0(d*degree, zhexf*.2));
 
+  bshape(shHeptagon, PPR::ITEM);
+  for(int i=0; i<=S84; i+=S12)
+    hpcpush(ddi(i, orbsize * .2) * C0);
+  bshape(shHeptagram, PPR::ITEM);
+  for(int i=0, skip=3; i<=S84*skip; i+=S12*skip)
+    hpcpush(ddi(i, orbsize * .2) * C0);
+
   bshape(shDisk, PPR::ITEM);
   for(int i=0; i<=S84; i+=SD3)
     hpcpush(ddi(i, orbsize * .2) * C0);

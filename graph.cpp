@@ -1116,6 +1116,10 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit, cgi.shFlash, dark, prio);
       else if (it == itOrbMatter || it == itOrbStone)
         queuepolyat(Vit, cgi.shDiskSq, dark, prio);
+      else if (it == itOrbSummon) {
+        queuepolyat(Vit, cgi.shHeptagon, dark, prio);
+        queuepolyat(Vit, cgi.shHeptagram, dark, prio);
+        }
       else {
         auto shape = (it == itOrbFriend) ? &cgi.shTinyBird :
                      (it == itOrbSide1) ? &cgi.shSmallPSword :
