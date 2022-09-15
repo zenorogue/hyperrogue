@@ -90,8 +90,9 @@ bull: https://www.freesound.org/people/confusion_music/sounds/103425/
 apple: https://freesound.org/people/jgriffie919/sounds/400174/
 levelup: https://freesound.org/people/InspectorJ/sounds/411460/
 
-recorded by Tehora Rogue:
-=========================
+recorded by Tehora Rogue, under the CC BY 4.0 license:
+======================================================
+[ https://creativecommons.org/licenses/by-sa/4.0/ ]
 
 die-princess
 dzia-princess
@@ -102,8 +103,9 @@ seen-fairy
 seen-rosebeauty
 speak-princess
 
-recorded by Zeno Rogue:
-=======================
+recorded by Zeno Rogue, under the CC BY 4.0 license:
+====================================================
+[ https://creativecommons.org/licenses/by-sa/4.0/ ]
 
 die-prince
 dzia-prince
@@ -114,8 +116,9 @@ seen-necromancer
 seen-vizier
 speak-prince
 
-recorded by KosGD:
-==================
+recorded by KosGD, under the CC BY 4.0 license:
+===============================================
+[ https://creativecommons.org/licenses/by-sa/4.0/ ]
 
 seen-cultist
 seen-cultistfire
