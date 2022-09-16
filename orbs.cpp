@@ -1523,9 +1523,9 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     && INI && CHK_ROLLBACK(passable(c, NULL, P_MIRROR), XLAT("Cannot cast illusion here!"))) {
     if(!isCheck(a)) {
       changes.commit(), placeIllusion(c), apply_impact(c);
-      return itOrbIllusion;
       }
     else changes.rollback();
+    return itOrbIllusion;
     }
 
   // (3) teleport
@@ -1538,9 +1538,9 @@ EX eItem targetRangedOrb(cell *c, orbAction a) {
     ) {
     if(!isCheck(a)) {
       changes.commit(), teleportTo(c), apply_impact(c), println(hlog, "commiting teleport ", items[itOrbTeleport]);
-      return itOrbTeleport;
       }
     else changes.rollback();
+    return itOrbTeleport;
     }
     
   // (4) remove an illusion
