@@ -1269,7 +1269,7 @@ void geometry_information::prepare_shapes() {
   bshape(shHumanoid, PPR::ITEM, scalefactor/5.5, 414);
   bshape(shHalfHumanoid, PPR::ITEM, scalefactor/5.5, 415);
   bshape(shHourglass, PPR::ITEM, scalefactor/2.0, 416);
-  bshape(shShield, PPR::ITEM, scalefactor/600, 418);
+  bshape(shShield, PPR::ITEM, scalefactor/650, 418);
 
   wormscale = WDIM == 3 ? 3 : 1;
 
@@ -2441,9 +2441,18 @@ NEWSHAPE, 417, 1, 1, -0.037181, 0.070167, -0.042053, 0.031041, -0.014659, 0.0293
 // shShield
 #define x (-100)
 #define y (-175)
-NEWSHAPE, 418, 1, 1,
-96.7+x,211+y, 108+x,204.7+y, 125+x,201+y, 140.3+x,204.7+y, 159.6+x,211.4+y,
-158.5+x,190.3+y, 154.8+x,171.6+y, 145.7+x,147+y, 138.5+x,130+y, 116+x,116.3+y, 99.4+x,106+y,
+NEWSHAPE, 418, 1,2,
+211+y, 96.7+x,
+204.7+y, 108+x,
+201+y, 125+x,
+204.7+y, 140.3+x,
+211.4+y, 159.6+x,
+190.3+y, 158.5+x,
+171.6+y, 154.8+x,
+147+y, 145.7+x,
+130+y, 138.5+x,
+116.3+y, 116+x,
+106+y, 99.4+x,
 #undef x
 #undef y
 
