@@ -1135,6 +1135,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      (it == itOrbPsi || it == itOrbSide3) ? &cgi.shDiskS :
                      (it == itOrbPurity) ? &cgi.shSmallEgg :
                      (it == itOrbLightning) ? &cgi.shLightningBolt :
+                     (it == itOrbShield) ? &cgi.shShield :
                      (it == itOrbTime) ? &cgi.shHourglass :
                      (it == itOrbIllusion || it == itOrbInvis || it == itOrbTeleport) ? &cgi.shHumanoid :
                      (it == itOrbPhasing || it == itOrbDash) ? &cgi.shDiskSegment :
