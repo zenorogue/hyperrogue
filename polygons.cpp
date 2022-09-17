@@ -1266,6 +1266,7 @@ void geometry_information::prepare_shapes() {
   bshape(shTreat, PPR::ITEM, scalefactor, 253);
   bshape(shSmallTreat, PPR::ITEM, scalefactor/1.5, 253);
   bshape(shLightningBolt, PPR::ITEM, scalefactor/1.5, 413);
+  bshape(shSmallFan, PPR::ITEM, scalefactor/3, 59);
   bshape(shHumanoid, PPR::ITEM, scalefactor/5.5, 414);
   bshape(shHalfHumanoid, PPR::ITEM, scalefactor/5.5, 415);
   bshape(shHourglass, PPR::ITEM, scalefactor/2.0, 416);

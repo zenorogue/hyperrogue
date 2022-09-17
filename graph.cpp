@@ -1112,6 +1112,8 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit, cgi.shHalfHumanoid, dark, prio);
         queuepolyat(Vit*Mirror, cgi.shHalfHumanoid, 0xFF, prio);
         }
+      //else if (it == itOrbAir)
+      //  queuepolyat(Vit, cgi.shSmallFan, dark, prio);
       else if (it == itOrbFlash)
         queuepolyat(Vit, cgi.shFlash, dark, prio);
       else if (it == itOrbMatter || it == itOrbStone)
@@ -1131,12 +1133,13 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      (it == itOrbSafety || it == itOrbFreedom || it == itOrbRecall) ? &cgi.shDiskSq :
                      (it == itOrbEnergy) ? &cgi.shHalfDisk :
                      (it == itOrbSpace) ? &cgi.shSmallPirateHook :
-                     (it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism || it == itOrbDiscord) ? &cgi.shEccentricDisk :
+                     (it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism || it == itOrbEmpathy || it == itOrbDiscord) ? &cgi.shEccentricDisk :
                      (it == itOrbPsi || it == itOrbSide3) ? &cgi.shDiskS :
                      (it == itOrbPurity) ? &cgi.shSmallEgg :
                      (it == itOrbLightning) ? &cgi.shLightningBolt :
                      (it == itOrbShield) ? &cgi.shShield :
                      (it == itOrbTime) ? &cgi.shHourglass :
+                     (it == itOrbAir) ? &cgi.shSmallFan :
                      (it == itOrbIllusion || it == itOrbInvis || it == itOrbTeleport) ? &cgi.shHumanoid :
                      (it == itOrbPhasing || it == itOrbDash) ? &cgi.shDiskSegment :
                         NULL;
