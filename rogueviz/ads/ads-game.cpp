@@ -47,10 +47,27 @@ void run_ads_game() {
     ci_at[c].rocks.clear();
     });
   vctrV = new_vctrV = ads_matrix(Id, 0);
-  rogueviz::rv_hook(hooks_prestats, 100, view_ads_game);
+  rogueviz::rv_hook(hooks_frame, 100, view_ads_game);
+  rogueviz::rv_hook(hooks_prestats, 100, display_rsrc);
   rogueviz::rv_hook(hooks_handleKey, 0, handleKey);
   rogueviz::rv_hook(shmup::hooks_turn, 0, ads_turn);
   init_rsrc();
+  
+  cgi.use_count++;
+  hybrid::in_underlying_geometry([] {
+    cgi.use_count++;
+    });
+
+  auto umap = hybrid::get_umap();
+  hybrid::actual_geometry = geometry;
+  geometry = hybrid::underlying;
+  hybrid::underlying_cgip->single_step = cgi.single_step;
+  hybrid::underlying_cgip->psl_steps = cgi.psl_steps;
+  cgip = hybrid::underlying_cgip;
+  hybrid::pmap = currentmap;
+  currentmap = umap;  
+  pmodel = mdDisk;
+  cwt.at = centerover = currentmap->gamestart();
   }
 
 auto shot_hooks = 

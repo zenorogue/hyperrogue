@@ -127,15 +127,18 @@ void draw_game_cell(cell *cs, ads_matrix V, ld plev) {
   
   }
 
-bool view_ads_game() {
-  auto plev = cgi.plevel; /* we are in another CGI so we have no access to that... */
-  gen_budget = 3;
+void view_ads_game() {
+  ld plev;
   displayed.clear();
   
-  vctr = new_vctr;
-  vctrV = new_vctrV;
-  cross_result base;
-  if(1) {  
+  hybrid::in_actual([&] {
+    plev = cgi.plevel; /* we are in another CGI so we have no access to that... */
+    gen_budget = 3;
+    
+    vctr = new_vctr;
+    vctrV = new_vctrV;
+    cross_result base;
+
     // todo rebase
     base = findflat(ads_point(C0, 0));
     // println(hlog, base.h);
@@ -161,19 +164,13 @@ bool view_ads_game() {
       else { current = bcurrent; }
       }
     }
+    );
   // current = current * gpushxto0(p);
   // vctrV = rgpushxto0(p) * vctrV;
 
-  hybrid::in_underlying_geometry([&] {
-    dynamicval<eModel> p(pmodel, mdDisk);
-    check_cgi();
-    cgi.require_basics();
-    cgi.require_shapes();
-    ptds.clear();
-    calcparam();
-    clearaura();
+  if(1) {
     make_shape();
-    
+
     set<cell*> visited;
     queue<pair<cell*, ads_matrix>> dq;
     auto visit = [&] (cell *c, const ads_matrix& V) {
@@ -229,15 +226,7 @@ bool view_ads_game() {
       string str = format(tformat, view_pt / TAU);
       queuestr(shiftless(Id), .1, str, 0xFFFF00, 8);
       }
-
-    if(false) queuepolyat(shiftless(rgpushxto0(base.h)), cgi.shGem[0], 0x2020FFFF, PPR::LINE);
-    
-    drawqueue();
-    drawaura();
-    });
-  check_cgi();
-  display_rsrc();
-  return true;
+    }
   }
 
 }}

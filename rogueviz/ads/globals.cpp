@@ -68,4 +68,6 @@ ld how_much_invincibility = TAU / 4;
 
 player_data pdata, max_pdata, tank_pdata;
 
+bool auto_angle = true;
+
 }}

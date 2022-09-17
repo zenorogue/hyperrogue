@@ -84,7 +84,7 @@ void display(int id, int y, ld val, ld maxv, ld tank, ld unit) {
     }  
   }
 
-void display_rsrc() {
+bool display_rsrc() {
   dynamicval<eGeometry> g(geometry, gEuclid);
   dynamicval<eModel> pm(pmodel, mdDisk);
   dynamicval<bool> ga(vid.always3, false);
@@ -102,6 +102,7 @@ void display_rsrc() {
   #undef D
   
   quickqueue();
+  return true;
   }
 
 void gain_resource(eResourceType rsrc) {
