@@ -18,6 +18,7 @@ void fire() {
   auto& ro = ci_at[c].rocks;
   auto r = std::make_unique<ads_object> (oMissile, c, S1, 0xC0C0FFFF);
   r->shape = &shape_missile;
+  r->life_start = 0;
 
   ads_matrix Scell(Id, 0);    
   cell *lcell = vctr;
