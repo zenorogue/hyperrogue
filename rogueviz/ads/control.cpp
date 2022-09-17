@@ -189,7 +189,7 @@ bool ads_turn(int idelta) {
     else if(a[16+9]) tc = pt;
     else if(a[16+10]) tc = -pt;
 
-    if(!paused) {
+    if(!paused && !game_over) {
       auto& v = ci_at[hybrid::get_where(vctr).first].shipstates;
       v.emplace_back();
       v.back().at = ads_inverse(current * vctrV) * spin((ang+90)*degree);
