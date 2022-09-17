@@ -54,20 +54,14 @@ EX vector<cell*> worms, ivies, ghosts, golems, hexsnakes;
 /** temporary changes during bfs */
 vector<pair<cell*, eMonster>> tempmonsters;
 
-/** additional direction information for BFS algorithms.
- *  It remembers from where we have got to this location
- *  the opposite cell will be added to the queue first,
- *  which helps the AI. Used by computePathdist and its callees.
- **/
-EX vector<int> path_reachedfrom;
-
 /** The position of the first cell in dcal in distance 7. New wandering monsters can be generated in dcal[first7..]. */
 EX int first7;           
 
 /** the list of all nearby cells, according to cpdist */
 EX vector<cell*> dcal;
+
 /** the list of all nearby cells, according to current pathdist */
-EX vector<cell*> pathq;
+EX vector<cellwalker> pathq;
 
 /** the number of big statues -- they increase monster generation */
 EX int statuecount;
@@ -88,24 +82,60 @@ EX int gamerange() { return getDistLimit() + gamerange_bonus; }
 EX cell *pd_from;
 EX int pd_range;
 
-EX void onpath(cell *c, int d) {
-  if(!pathlock) { println(hlog, "onpath without pathlock"); }
-  c->pathdist = d;
-  pathq.push_back(c);
+#if HDR
+/** The pathdata is used to keep a list of visited cells. It is used as follows:
+ *  1) create pathdata object: pathdata pd(identifier)
+ *  2) use one of the following methods to mark cells as visited:
+ *  2a) onpath_with_dir or onpath_random_dir, to mark a cell together with its distance and the direction we came from (used by computePathdist to make pathfinding not sensitive to direction indexing)
+ *  2b) onpath, to mark a cell at its distance (used when ordering is irrelevant: compute_graphical_distance and in shmup)
+ *  2c) onpatk_mark, to just mark a cell (used in groupmove2)
+ *  3) All the visited cells are listed in pathq, and they have 'pathdist' set to their recorded distance (0 in case of onpath_mark).
+ *  4) When the pathdata object is deleted, all the pathdist values are cleared back to PINFD.
+ *  The variable 'pathlock' ensures that we do not use two pathdata objects at once.
+ **/
+
+struct pathdata {
+  void checklock();
+  ~pathdata();
+  pathdata(eMonster m, bool include_allies IS(true));
+  pathdata(int i);
+  };
+#endif
+
+/** using pathdata, record a cell (together with direction) as visited */
+EX void onpath_with_dir(cellwalker cw, int d) {
+  if(!pathlock) {
+    println(hlog, "onpath(", cw, ", ", d, ") without pathlock");
+    }
+  cw.at->pathdist = d;
+  pathq.push_back(cw);
   }
 
-void onpath_rf(cell *c, int d, int sp) {
-  onpath(c, d);
-  path_reachedfrom.push_back(sp);
+/** using pathdata, record a cell as visited, with random direction */
+EX void onpath_random_dir(cell *c, int d) {
+  onpath_with_dir(cellwalker(c, hrand(c->type), hrand(2)), d);
+  }
+
+EX void onpath(cell *c, int d) {
+  onpath_with_dir(cellwalker(c, 0, 0), d);
+  }
+
+EX void onpath_mark(cell *c) {
+  onpath_with_dir(cellwalker(c, 0, 0), 0);
   }
 
 EX void clear_pathdata() {
-  for(auto c: pathq) c->pathdist = PINFD;
+  for(auto c: pathq) c.at->pathdist = PINFD;
   pathq.clear(); 
   pathqm.clear();
   }
 
+/** This ensures that we do not use two pathdata objects at once */
 EX int pathlock = 0;
+
+/** compute_graphical_distance determines the distance of every cell
+ *  from the current FOV center. It uses the pathq structures but
+ *  does not lock them */
 
 EX void compute_graphical_distance() {
   if(pathlock) { printf("path error: compute_graphical_distance\n"); }
@@ -114,14 +144,13 @@ EX void compute_graphical_distance() {
   if(pd_from == c1 && pd_range == sr) return;
   clear_pathdata();
   
+  pathlock++;
   pd_from = c1;
   pd_range = sr;
-  c1->pathdist = 0;
-  pathq.push_back(pd_from);
-  pathlock++;
+  onpath(c1, 0);
 
   for(int qb=0; qb<isize(pathq); qb++) {
-    cell *c = pathq[qb];
+    cell *c = pathq[qb].at;
     if(c->pathdist == pd_range) break;
     if(qb == 0) forCellCM(c1, c) ;
     forCellEx(c1, c)
@@ -153,7 +182,7 @@ struct princess_ai {
 void princess_ai::run() {
   int radius = toggle_radius(waOpenPlate);
   if(pathq.empty()) return;
-  int d = pathq.back()->pathdist;
+  int d = pathq.back().at->pathdist;
   if(d == PINFD - 1) return;
   d++;
   if(d < 5) d = 5; /* the Princess AI avoids plates when too close to the player */
@@ -168,17 +197,15 @@ void princess_ai::run() {
         info[0].visit(c1);
       }
     if(k == radius && c->wall == waOpenPlate && c->pathdist == PINFD)
-      onpath_rf(c, d, hrand(c->type));
+      onpath_random_dir(c, d);
     }
   }
 
 EX void computePathdist(eMonster param, bool include_allies IS(true)) {
   
-  path_reachedfrom.clear();
-
   for(cell *c: targets)
     if(include_allies || isPlayerOn(c))
-      onpath_rf(c, isPlayerOn(c) ? 0 : 1, hrand(c->type));
+      onpath_random_dir(c, isPlayerOn(c) ? 0 : 1);
 
   int qtarg = isize(targets);
   
@@ -191,8 +218,10 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
   princess_retry:
   
   for(; qb < isize(pathq); qb++) {
-    cell *c = pathq[qb];
-    int fd = path_reachedfrom[qb] + c->type/2;
+    cellwalker cw = pathq[qb];
+    /* The opposite cell will be added to the queue first, which helps the AI. */
+    cw += cw.at->type/2;
+    cell*& c = cw.at;
     if(c->monst && !isBug(c) && !(isFriendly(c) && !c->stuntime)) {
       pathqm.push_back(c); 
       continue; // no paths going through monsters
@@ -206,9 +235,9 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
     int d = c->pathdist;
     if(d == PINFD - 1) continue;
     for(int j=0; j<c->type; j++) {
-      int i = (fd+j) % c->type; 
+      cellwalker cw1 = cw + j;
       // printf("i=%d cd=%d\n", i, c->move(i)->cpdist);
-      cell *c2 = c->move(i);
+      cell *c2 = cw1.peek();
       
       flagtype f = P_MONSTER | P_REVDIR;
       if(param == moTameBomberbird) f |= P_FLYING;
@@ -224,7 +253,7 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
             continue;
           }
 
-        onpath_rf(c2, d+1, c->c.spin(i));
+        onpath_with_dir(cw1 + wstep, d+1);
         }
       
       else if(c2 && c2->wall == waClosedGate && princess)
@@ -237,15 +266,6 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
     if(qb < isize(pathq)) goto princess_retry;
     }
   }
-
-#if HDR
-struct pathdata {
-  void checklock();
-  ~pathdata();
-  pathdata(eMonster m, bool include_allies IS(true));
-  pathdata(int i);
-  };
-#endif
 
 pathdata::~pathdata() {
   pathlock--;

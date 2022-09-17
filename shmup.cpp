@@ -2667,7 +2667,7 @@ EX void turn(int delta) {
 
     int qb = 0;
     for(qb=0; qb < isize(pathq); qb++) {
-      cell *c = pathq[qb];
+      cell *c = pathq[qb].at;
       int d = c->pathdist;
       if(d == PINFD-1) continue;
       for(int i=0; i<c->type; i++) {

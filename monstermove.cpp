@@ -1135,7 +1135,7 @@ EX void groupmove2(const movei& mi, eMonster movtype, flagtype mf) {
     if((mf & MF_ONLYEAGLE) && bird_disruption(c) && markOrb(itOrbGravity)) return;
     // in the gravity lands, eagles cannot ascend in their second move
     if((mf & MF_ONLYEAGLE) && gravityLevelDiff(c, from) < 0) {
-      onpath(c, 0);
+      onpath_mark(c);
       return;
       }
     if((mf & MF_NOFRIEND) && isFriendly(c)) return;
@@ -1150,12 +1150,12 @@ EX void groupmove2(const movei& mi, eMonster movtype, flagtype mf) {
       if(c->move(j) && canAttack(c, c->monst, c->move(j), c->move(j)->monst, af)) {
         attackMonster(c->move(j), AF_NORMAL | AF_GETPLAYER | AF_MSG, c->monst);
         animateAttack(movei(c, j), LAYER_SMALL);
-        onpath(c, 0);
+        onpath_mark(c);
         // XLATC eagle
         return;
         }
     
-    if(from->cpdist == 0 || from->monst) { onpath(c, 0); return; }
+    if(from->cpdist == 0 || from->monst) { onpath_mark(c); return; }
     
     if(movtype == moDragonHead) {
       dragon::move(mi);
@@ -1164,16 +1164,16 @@ EX void groupmove2(const movei& mi, eMonster movtype, flagtype mf) {
     
     moveMonster(mi);
     
-    onpath(from, 0);
+    onpath_mark(from);
 
     if(isDie(mi.t->monst)) {
       /* other dice will not pathfind through the original cell */
       /* this makes it easier for the player to roll dice correctly */
-      onpath(c, 0);
+      onpath_mark(c);
       return;
       }
     }
-  onpath(c, 0);
+  onpath_mark(c);
   // MAXGCELL
   if(isize(gendfs) < 1000 || c->cpdist <= 6) gendfs.push_back(c);
   }
@@ -1232,7 +1232,7 @@ EX void groupmove(eMonster movtype, flagtype mf) {
     if((mf & MF_ONLYEAGLE) && c->monst != moEagle && c->monst != moBat) return;
     if(movegroup(c->monst) == movtype && c->pathdist != 0) {
       cell *c2 = moveNormal(c, mf);
-      if(c2) onpath(c2, 0);
+      if(c2) onpath_mark(c2);
       }
     }
   }
@@ -1323,7 +1323,7 @@ EX void hexvisit(cell *c, cell *from, int d, bool mounted, int colorpair) {
     moveHexSnake(movei(from, d).rev(), mounted);
     }
 
-  onpath(c, 0);
+  onpath_mark(c);
 
   // MAXGCELL
   if(isize(hexdfs) < 2000 || c->cpdist <= 6) 
@@ -1337,12 +1337,12 @@ EX void movehex(bool mounted, int colorpair) {
   if(mounted) { 
     if(dragon::target && dragon::target->monst != moHexSnake) {
       hexdfs.push_back(dragon::target); 
-      onpath(dragon::target, 0);
+      onpath_mark(dragon::target);
       }
     }
   else for(cell *c: targets) {
     hexdfs.push_back(c);
-    onpath(c, 0);
+    onpath_mark(c);
     }
   //hexdfs.push_back(cwt.at);
   
