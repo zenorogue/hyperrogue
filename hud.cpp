@@ -197,6 +197,7 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
   
   if(graphglyph(isMonster)) {
     initquickqueue();
+    poly_outline = bordcolor << 8;
     if(isMonster) {
       eMonster m = eMonster(id - ittypes);
       double bsize = buttonsize * 2/3;
@@ -231,8 +232,17 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
         ((glyph == 't' && qty%5) || it == itOrbYendor) ? ticks/2 : 
         it == itTerra ? glyphphase[id] * 3 * M_PI + 900 * M_PI:
         glyphphase[id] * 2;
+
       drawItemType(it, NULL, shiftless(V), icol, t, false);
+      
+      int c1 = max(color_diff(color, backcolor), color_diff(color, bordcolor));
+      if(c1 < 0x80) {
+        color = orb_auxiliary_color(it);
+        }
       }
+    int c1 = max(color_diff(color, backcolor), color_diff(color, bordcolor));
+    if(c1 < 0x80)
+      color = gradient(color, forecolor, 0, .4, 1);
     sortquickqueue();
     quickqueue();
     }
