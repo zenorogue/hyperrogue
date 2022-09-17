@@ -69,14 +69,12 @@ void set_linux() {
   linker = "g++ -rdynamic";
   default_exec_name = "hyper";
   if(sdlver == 2) {
-    opts = "-DFHS -DLINUX -I/usr/include/SDL2 -DCAP_GLEW=0";
+    opts = "-DFHS -DLINUX -I/usr/include/SDL2";
     libs = " -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSDL2_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
-    libs = " -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSDL2_gfx -lGL -lpng -rdynamic -lpthread -lz";
     }
   else if(sdlver == 1) {
-    opts = "-DFHS -DLINUX -I/usr/include/SDL -DCAP_GLEW=0";
+    opts = "-DFHS -DLINUX -I/usr/include/SDL";
     libs = " -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGLEW -lGL -lpng -rdynamic -lpthread -lz";
-    libs = " -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx -lGL -lpng -rdynamic -lpthread -lz";
     }
   else {
     opts = "-DFHS -DLINUX";
@@ -100,7 +98,6 @@ void set_mingw64() {
   linker = "g++";
   default_exec_name = "hyper";
   opts = "-DWINDOWS -DCAP_GLEW=1 -DCAP_PNG=1";
-  opts = "-DWINDOWS -DCAP_GLEW=0 -DCAP_PNG=1";
   libs = " hyper.res -lopengl32 -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf -lpthread -lz -lglew32 -lpng";
   setvbuf(stdout, NULL, _IONBF, 0); // MinGW is quirky with output buffering
   }
