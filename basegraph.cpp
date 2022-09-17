@@ -915,6 +915,13 @@ EX color_t colormix(color_t a, color_t b, color_t c) {
   return a;
   }
 
+/* color difference for 24-bit colors, from 0 to 255*3 */
+EX int color_diff(color_t a, color_t b) {
+  int res = 0;
+  for(int i=0; i<3; i++) res += abs(part(a, i) - part(b, i));
+  return res;
+  }
+
 EX int rhypot(int a, int b) { return (int) sqrt(a*a - b*b); }
 
 EX ld realradius() {
