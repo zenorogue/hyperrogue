@@ -1272,6 +1272,7 @@ void geometry_information::prepare_shapes() {
   bshape(shHourglass, PPR::ITEM, scalefactor/2.0, 416);
   bshape(shShield, PPR::ITEM, scalefactor, 418);
   bshape(shTreeIcon, PPR::ITEM, scalefactor/1.7, 419);
+  bshape(shLeafIcon, PPR::ITEM, scalefactor/10000, 420);
 
   wormscale = WDIM == 3 ? 3 : 1;
 
@@ -2445,6 +2446,22 @@ NEWSHAPE, 418, 1, 2, 0.055384, -0.005846, 0.043076, 0.010769, 0.033846, 0.033846
 
 // shTreeIcon
 NEWSHAPE, 419, 1, 2, -0.175, 0.010, -0.048, 0.100, -0.044, 0.070, 0.025, 0.118, 0.030, 0.074, 0.107, 0.144, 0.110, 0.030, 0.165, 0.010,
+
+// shLeafIcon
+#define x (-900)
+#define y (-640)
+NEWSHAPE, 420, 1, 1,
+480+x,1600+y,
+484+x,1623+y, 385+x,1400+y, 336+x,1023+y,
+    470+x,750+y,
+    567+x,660+y,
+860+x,450+y, 1400+x,280+x,
+1290+x,690+y, 1300+x,900+y, 1260+x,1315+y, 1130+x,1500+y, 725+x,1650+y,
+539+x,1634+y, 594+x,1375+y, 897+x,1271+y, 644+x,1298+y, 781+x,1029+y, 1067+x,924+x,
+979+x,710+y, 644+x,1095+y, 561+x,902+y, 605+x,1188+y, 490+x,1518+y,
+480+x,1600+y,
+
+
 
 NEWSHAPE, NEWSHAPE
 };
