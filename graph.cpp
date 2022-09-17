@@ -1112,8 +1112,6 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit, cgi.shHalfHumanoid, dark, prio);
         queuepolyat(Vit*Mirror, cgi.shHalfHumanoid, 0xFF, prio);
         }
-      //else if (it == itOrbAir)
-      //  queuepolyat(Vit, cgi.shSmallFan, dark, prio);
       else if (it == itOrbFlash)
         queuepolyat(Vit, cgi.shFlash, dark, prio);
       else if (it == itOrbMatter || it == itOrbStone)
@@ -1140,6 +1138,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      (it == itOrbShield) ? &cgi.shShield :
                      (it == itOrbTime) ? &cgi.shHourglass :
                      (it == itOrbAir) ? &cgi.shSmallFan :
+                     (it == itOrbWoods) ? &cgi.shTreeIcon :
                      (it == itOrbIllusion || it == itOrbInvis || it == itOrbTeleport) ? &cgi.shHumanoid :
                      (it == itOrbPhasing || it == itOrbDash) ? &cgi.shDiskSegment :
                         NULL;
