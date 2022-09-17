@@ -4778,3 +4778,9 @@ Menu improvements:
 - fixed the crash on converting regular/Archimedean tilings to tes format and generating tree rules
 - improvements to line patterns
 - fixed a possible crash when saving images
+
+2022-09-17 12:12 Update 12.1a:
+- fixed Orb of Teleport/Illusion thinking that they are unusable
+- Orb of Earth no longer marked useless in Wetland
+- some fixes for the treasure/kill list: fixed the Onyx graphics; made some icons larger; dark stuff have their text brightened (or use the auxiliary orb color)
+- the monster movement order is more random now (no preference for clockwise)
