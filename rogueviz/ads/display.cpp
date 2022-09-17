@@ -129,7 +129,7 @@ void draw_game_cell(cell *cs, ads_matrix V, ld plev) {
 
 bool view_ads_game() {
   auto plev = cgi.plevel; /* we are in another CGI so we have no access to that... */
-  gen_budget = 5;
+  gen_budget = 3;
   displayed.clear();
   
   vctr = new_vctr;

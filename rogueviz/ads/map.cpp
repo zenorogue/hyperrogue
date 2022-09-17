@@ -67,7 +67,7 @@ void compute_life(cell *c, transmatrix S1, const worldline_visitor& wv) {
         return true;
         }
       return false;
-      }, 20);
+      }, 10);
     if(!next_c) return;
     S1 = next_S1;
     cur_w = next_w;
