@@ -215,11 +215,19 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
     else {
       eItem it = eItem(id);
       double bsize = buttonsize / 2;
-      if(glyph =='*') bsize *= 2;
+      if(glyph == '*') bsize *= 2;
+      if(glyph == '%') bsize *= 2;
+      if(glyph == '!') bsize *= 2;
+      if(glyph == '?') bsize *= 2;
+      if(glyph == ';') bsize *= 2;
       if(glyph == '$') bsize = (bsize*5+2)/3;
       if(glyph == 'o') bsize = (bsize*3+1)/2;
+      if(glyph == 'c') bsize = (bsize*3+1)/2;
       if(glyph == 't') bsize = bsize*5/2;
       if(glyph == '(') bsize = bsize*2.5;
+      if(glyph == '/') bsize = bsize*2;
+      if(glyph == ']') bsize = bsize*1.5;
+      if(glyph == 'x') bsize = bsize*1.5;
       if(it == itWarning) bsize *= 2;
       if(it == itBombEgg || it == itTrollEgg || it == itDodeca) bsize = bsize*3/2;
       int icol = color;
