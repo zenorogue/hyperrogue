@@ -127,12 +127,29 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
         r->resource = rt;
         r->shape = &(rand() % 2 ? shape_rock2 : shape_rock);
         if(geometry != gRotSpace) { println(hlog, "wrong geometry detected in gen_rocks 2!");  exit(1); }
-        compute_life(hybrid::get_at(c, 0), unshift(r->at), [&] (cell *c, ld t) {
+        int q = 0;
+
+        auto cleanup = [&] (cell *c, ld t) {
           auto& ci = ci_at[c];
           hybrid::in_underlying_geometry([&] { gen_terrain(c, ci); });
           ci.type = wtNone;
+          q++;
           return false;
-          });
+          };
+
+        if(q == 0) ci.type = wtNone;
+        compute_life(hybrid::get_at(c, 0), unshift(r->at), cleanup);
+                
+        /* for(int i=0; i<isize(r->shape[0]); i += 2) { // exact check is too slow here
+          hyperpoint h;
+          h[0] = r->shape[0][i];
+          h[1] = r->shape[0][i+1];
+          h[2] = 0;
+          h[3] = 1; */
+        if(0) for(int i=0; i<4; i++) {
+          hyperpoint h = spin(90*degree*i) * rots::uxpush(0.15) * C0;
+          compute_life(hybrid::get_at(c, 0), unshift(r->at) * rgpushxto0(h), cleanup);
+          }
         ci.rocks.emplace_back(std::move(r));
         };
       
