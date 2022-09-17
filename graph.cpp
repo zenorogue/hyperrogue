@@ -809,7 +809,6 @@ EX color_t orb_auxiliary_color(eItem it) {
   if(it == itOrbSide1) return 0x307080;
   if(it == itOrbDigging) return 0x606060;
   if(it == itOrbEnergy) return 0xFFFF80;
-  //if(it == itOrbPurity) return 0xFFD520;
   return iinf[it].color;
   }
 

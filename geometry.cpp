@@ -259,7 +259,7 @@ hpcshape
   shTinyBird, shTinyShark,
   shEgg, shSmallEgg,
   shRing, shSpikedRing, shTargetRing, shSawRing, shGearRing, shPeaceRing,
-  shHeptaRing, shSpearRing, shLoveRing, shFrogRing, 
+  shHeptaRing, shSpearRing, shLoveRing, shFrogRing,
   shPowerGearRing, shProtectiveRing, shTerraRing, shMoveRing,
   shReserved4, shMoonDisk,
   shDaisy, shSnowflake, shTriangle, shNecro, shStatue, shKey, shWindArrow,
