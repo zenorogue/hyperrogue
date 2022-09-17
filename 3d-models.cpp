@@ -1254,7 +1254,7 @@ hpcshape& geometry_information::generate_pipe(ld length, ld width, ePipeEnd endt
 
   const int MAX_X = 8;
   const int MAX_R = 20;
-  auto at = [&] (ld i, ld a, ld z = 1, ld s = 1) {
+  auto at = [&] (ld i, ld a, ld z, ld s) {
     a += 0.5;
     ld alpha = 360 * degree * a / MAX_R;
     hpcpush(xpush(i * length / MAX_X) * cspin(1, 2, alpha) * ypush0(width*z));

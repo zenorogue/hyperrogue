@@ -1752,7 +1752,7 @@ EX namespace reg3 {
     auto m = dynamic_cast<hrmap_h3*> (currentmap);
     if(!m) throw hr_exception("get_size_of_fv incorrect");
     return m->quotient_map->acells[aid]->type;
-    };
+    }
 
   struct hrmap_sphere3 : hrmap_closed3 {
   
