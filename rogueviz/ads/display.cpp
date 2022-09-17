@@ -2,6 +2,8 @@ namespace hr {
 
 namespace ads_game {
 
+color_t shipcolor = 0x2020FFFF;
+
 cross_result findflat(shiftpoint h) {
   return cross0(current * rgpushxto0(h));
   }
@@ -125,6 +127,31 @@ void draw_game_cell(cell *cs, ads_matrix V, ld plev) {
       }
     }
   
+  /* todo: binary search */
+  if(paused) for(auto& rock: ci.shipstates) {
+    ld t;
+    hybrid::in_actual([&]{
+      dynamicval<eGeometry> b(geometry, gRotSpace);
+      auto h = V * rock.at;
+      t = cross0(current * h).shift;
+      });
+    
+    if(t < -1e-6 || t > rock.duration + 1e-6) continue;
+    vector<hyperpoint> pts;
+
+    auto& shape = shape_ship;
+    for(int i=0; i<isize(shape); i += 2) {
+      hybrid::in_actual([&]{
+        auto h = V * rock.at * rgpushxto0(normalize(hyperpoint(shape[i], shape[i+1], 1, 0)));
+        pts.push_back(cross0(current * h).h);
+        });
+      }
+
+    for(auto h: pts) curvepoint(h);
+    curvepoint(pts[0]);
+    queuecurve(shiftless(Id), 0xFF, shipcolor, PPR::LINE);
+    }
+  
   }
 
 void view_ads_game() {
@@ -208,7 +235,6 @@ void view_ads_game() {
 
     if(!game_over && !paused) {
       poly_outline = 0xFF;
-      color_t shipcolor = 0x2020FFFF;
       if(ship_pt < invincibility_pt) {
         ld u = (invincibility_pt-ship_pt) / how_much_invincibility;
         poly_outline = gradient(shipcolor, rsrc_color[rtHull], 0, 0.5 + cos(5*u*TAU), 1);

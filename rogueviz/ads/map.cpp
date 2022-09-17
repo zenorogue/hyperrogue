@@ -24,10 +24,17 @@ struct ads_object {
 
 enum eWalltype { wtNone, wtDestructible, wtSolid, wtGate };
 
+struct shipstate {
+  ads_matrix at;
+  ld start;
+  ld duration;
+  };
+
 struct cellinfo {
   int mpd_terrain; /* 0 = fully generated terrain */
   int rock_dist; /* rocks generated in this radius */
   vector<std::unique_ptr<ads_object>> rocks;
+  vector<shipstate> shipstates;
   eWalltype type;
   cellinfo() {
     mpd_terrain = 4;
