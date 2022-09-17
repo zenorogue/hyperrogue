@@ -24,7 +24,7 @@ void draw_game_cell(cell *cs, ads_matrix V, ld plev) {
   
   if(1) {
     ld d = hdist0(center.h);
-    if(d < vctr_dist) vctr_dist = d, vctr = PIA( hybrid::get_at(c, 0) ), vctrV = V;
+    if(d < vctr_dist) vctr_dist = d, new_vctr = PIA( hybrid::get_at(c, 0) ), new_vctrV = V;
     }
 
   auto& ci = ci_at[c];
@@ -132,6 +132,8 @@ bool view_ads_game() {
   gen_budget = 5;
   displayed.clear();
   
+  vctr = new_vctr;
+  vctrV = new_vctrV;
   cross_result base;
   if(1) {  
     // todo rebase
@@ -207,7 +209,7 @@ bool view_ads_game() {
         });
       }
 
-    if(!game_over) {
+    if(!game_over && !paused) {
       poly_outline = 0xFF;
       color_t shipcolor = 0x2020FFFF;
       if(ship_pt < invincibility_pt) {
@@ -221,6 +223,11 @@ bool view_ads_game() {
         string str = format(tformat, ship_pt / TAU);
         queuestr(shiftless(Id), .1, str, 0xFFFFFF, 8);
         }
+      }
+    
+    if(paused && view_proper_times) {
+      string str = format(tformat, view_pt / TAU);
+      queuestr(shiftless(Id), .1, str, 0xFFFF00, 8);
       }
 
     if(false) queuepolyat(shiftless(rgpushxto0(base.h)), cgi.shGem[0], 0x2020FFFF, PPR::LINE);

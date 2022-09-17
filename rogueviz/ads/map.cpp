@@ -194,6 +194,7 @@ void crash_ship() {
   }
 
 void handle_crashes() {
+  if(paused) return;
   vector<ads_object*> missiles;
   vector<ads_object*> rocks;
   vector<ads_object*> resources;

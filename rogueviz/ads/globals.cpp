@@ -8,14 +8,17 @@ ld simspeed = TAU;
 /** by how much do WAS keys accelerate */
 ld accel = 6;
 
-/** transform world coordinates to ship coordinates */
+/** transform world coordinates to current view coordinates */
 ads_matrix current;
 
-/** SL cell closest to the ship */
-cell *vctr;
+/** transform world coordinates to ship coordinates (used when paused) */
+ads_matrix current_ship;
+
+/** SL cell closest to the current view/ship */
+cell *vctr, *new_vctr, *vctr_ship;
 
 /** world coordinates of vctr -- technically, this is a shiftmatrix */
-ads_matrix vctrV;
+ads_matrix vctrV, new_vctrV, vctrV_ship;
 
 /** how far is vctr from the ship */
 ld vctr_dist;
@@ -25,6 +28,9 @@ ld ang = 0;
 
 /** ship's current proper time */
 ld ship_pt;
+
+/** paused camera's current proper time */
+ld view_pt;
 
 /** until when is the ship invincible */
 ld invincibility_pt;

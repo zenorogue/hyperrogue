@@ -2,7 +2,7 @@ namespace hr {
 
 namespace ads_game {
 
-vector<string> move_names = { "acc down", "acc left", "acc up", "acc right", "fire", "pause", "display times", "switch spin", "menu" };
+vector<string> move_names = { "acc down", "acc left", "acc up", "acc right", "fire", "pause", "display times", "switch spin", "menu", "[paused] future", "(paused] past", "[paused] move switch" };
 
 void fire() {
   if(!pdata.ammo) return;
@@ -118,12 +118,25 @@ bool ads_turn(int idelta) {
   for(int i=0; i<NUMACT; i++) if(a[i]) ap.push_back(i);
   
   if(a[16+4] && !la[16+4]) fire();
-  if(a[16+5] && !la[16+5]) paused = !paused;
+  if(a[16+5] && !la[16+5]) {
+    paused = !paused;
+    if(paused) {
+      current_ship = current;
+      vctr_ship = vctr;
+      vctrV_ship = vctrV;
+      view_pt = 0;
+      }
+    else {
+      current = current_ship;
+      vctr = new_vctr = vctr_ship;
+      vctrV = new_vctrV = vctrV_ship;
+      }
+    }
   if(a[16+6] && !la[16+6]) view_proper_times = !view_proper_times;
   if(a[16+7] && !la[16+7]) auto_rotate = !auto_rotate;
   if(a[16+8] && !la[16+8]) pushScreen(game_menu);    
 
-  if(!paused) {
+  if(true) {
     
     /* proper time passed */
     ld pt = delta * simspeed;
@@ -148,31 +161,48 @@ bool ads_turn(int idelta) {
     if(right && up) ang = 45;
     if(right && down) ang = 315;
     
-    ld mul = clicks && !game_over ? 1 : 0;
+    ld mul = clicks ? 1 : 0;
     if(clicks > 2) mul *= .3;
-    if(pdata.fuel < 0) mul = 0;
+    if(!paused) {
+      if(game_over || pdata.fuel < 0) mul = 0;
+      }
 
-    apply_lorentz(spin(ang*degree) * lorentz(0, 2, -delta*accel*mul) * spin(-ang*degree));
-    pdata.fuel -= delta*accel*mul;
+    if(paused && a[16+11]) {
+      current = ads_matrix(spin(ang*degree) * xpush(mul*delta*5) * spin(-ang*degree), 0) * current;
+      }
+    else
+      apply_lorentz(spin(ang*degree) * lorentz(0, 2, -delta*accel*mul) * spin(-ang*degree));
     
-    cell *c = hybrid::get_where(vctr).first;
-    gen_particles(rpoisson(delta*accel*mul*20), c, ads_inverse(current * vctrV) * spin(ang*degree+M_PI) * rots::uxpush(0.06), rsrc_color[rtFuel], 0.15, 0.02);
+    if(!paused) {
+      pdata.fuel -= delta*accel*mul;
+      cell *c = hybrid::get_where(vctr).first;
+      gen_particles(rpoisson(delta*accel*mul*20), c, ads_inverse(current * vctrV) * spin(ang*degree+M_PI) * rots::uxpush(0.06), rsrc_color[rtFuel], 0.15, 0.02);
+      }
 
-    current.T = cspin(3, 2, pt) * current.T;
+    ld tc = 0;
+    if(!paused) tc = pt;
+    else if(a[16+9]) tc = pt;
+    else if(a[16+10]) tc = -pt;
+
+    current.T = cspin(3, 2, tc) * current.T;
+    
     optimize_shift(current);    
     hassert(eqmatrix(chg_shift(current.shift) * current.T, unshift(current)));
     
     if(auto_rotate)
-      current.T = cspin(1, 0, pt) * current.T;
-    else
-      ang += pt / degree;
+      current.T = cspin(1, 0, tc) * current.T;
+    else if(!paused)
+      ang += tc / degree;
 
-    ship_pt += pt;
-    pdata.oxygen -= pt;
-    if(pdata.oxygen < 0) {
-      pdata.oxygen = 0;
-      game_over = true;
+    if(!paused) {
+      ship_pt += pt;
+      pdata.oxygen -= pt;
+      if(pdata.oxygen < 0) {
+        pdata.oxygen = 0;
+        game_over = true;
+        }
       }
+    else view_pt += tc;
     }
   
   fixmatrix_ads(current.T);

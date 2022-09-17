@@ -32,10 +32,13 @@ void run_ads_game() {
   change_default_key('t', 16 + 6);
   change_default_key('o', 16 + 7);
   change_default_key('m', 16 + 8);
+  change_default_key('i', 16 + 9);
+  change_default_key('k', 16 + 10);
+  change_default_key('l', 16 + 11);
 
   nomap = true;
   no_find_player = true;
-  vctr = cwt.at;
+  vctr = new_vctr = cwt.at;
   cell *c = hybrid::get_where(vctr).first;
   hybrid::in_underlying_geometry([&] {
     gen_terrain(c, ci_at[c], -2);
@@ -43,7 +46,7 @@ void run_ads_game() {
     ci_at[c].type = wtNone;
     ci_at[c].rocks.clear();
     });
-  vctrV = ads_matrix(Id, 0);
+  vctrV = new_vctrV = ads_matrix(Id, 0);
   rogueviz::rv_hook(hooks_prestats, 100, view_ads_game);
   rogueviz::rv_hook(hooks_handleKey, 0, handleKey);
   rogueviz::rv_hook(shmup::hooks_turn, 0, ads_turn);
