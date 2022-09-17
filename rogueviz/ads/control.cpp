@@ -172,7 +172,7 @@ bool ads_turn(int idelta) {
       }
 
     if(paused && a[16+11]) {
-      current = ads_matrix(spin(ang*degree) * xpush(mul*delta*5) * spin(-ang*degree), 0) * current;
+      current = ads_matrix(spin(ang*degree) * xpush(mul*delta*-5) * spin(-ang*degree), 0) * current;
       }
     else
       apply_lorentz(spin(ang*degree) * lorentz(0, 2, -delta*accel*mul) * spin(-ang*degree));
