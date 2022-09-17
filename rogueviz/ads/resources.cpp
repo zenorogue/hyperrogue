@@ -35,14 +35,14 @@ void display(int id, int y, ld val, ld maxv, ld tank, ld unit) {
   auto& shape = rsrc_shape[id][0];
   int N = isize(shape);
   
-  ld ctr = 20*y+10;
+  ld ctr = current_display->ycenter - current_display->radius + 20 * y;
+  ld sta = current_display->xcenter - current_display->radius + 20;
   
-  for(int i=0; i<N; i+=2) curvepoint(atscreenpos(10 + shape[i+1] * 100, ctr - shape[i] * 100, 1) * C0);
+  for(int i=0; i<N; i+=2) curvepoint(atscreenpos(sta - 10 + shape[i+1] * 100, ctr - shape[i] * 100, 1) * C0);
   curvedata.push_back(curvedata[curvestart]);
   queuecurve(sId, 0x000000FF, col, PPR::ZERO);
   
-  ld sta = 20;
-  ld siz = 200;
+  ld siz = 150;
   ld fen = sta + siz;
   ld top = ctr-5;
   ld bot = ctr+5;
