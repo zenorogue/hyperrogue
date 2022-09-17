@@ -5295,6 +5295,8 @@ EX void drawfullmap() {
 
   clearaura();
   if(!nomap) drawthemap();
+  else callhooks(hooks_frame);
+
   if(!inHighQual) {
     if((cmode & sm::NORMAL) && !rug::rugged) {
       if(multi::players > 1) {
