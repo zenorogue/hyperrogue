@@ -3,6 +3,9 @@ namespace hr {
 namespace ads_game {
 
 void edit_difficulty() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+
   dialog::init(XLAT("AdS game parameters"), 0xC0C0FFFF, 150, 100);
   add_edit(simspeed);
   add_edit(accel);
@@ -17,6 +20,9 @@ void edit_difficulty() {
   }
 
 void game_menu() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+
   dialog::init(XLAT("AdS game settings"), 0xC0C0FFFF, 150, 100);
   
   dialog::addItem(XLAT("set game parameters"), 'm');
@@ -43,7 +49,7 @@ void game_menu() {
   #endif
 
   dialog::addItem("RogueViz settings", 'v');
-  dialog::add_key_action('r', [] {
+  dialog::add_action([] {
     pushScreen(showSettings);
     });
 
@@ -54,6 +60,11 @@ void game_menu() {
     saveConfig();
     });
   #endif
+
+  dialog::addItem("quit the game", 'q');
+  dialog::add_action([] {
+    quitmainloop = true;
+    });
 
   dialog::addBreak(100);
   dialog::addBack();
