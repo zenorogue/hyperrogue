@@ -8,9 +8,20 @@ cross_result findflat(shiftpoint h) {
   return cross0(current * rgpushxto0(h));
   }
 
-void draw_game_cell(cell *c, ads_matrix V, ld plev) {
-  
+struct cell_to_draw {
   cross_result center;
+  ld d;
+  cell *c;
+  ads_matrix V;
+  bool operator < (const cell_to_draw& c2) const { return d > c2.d; }
+  };
+
+void draw_game_cell(const cell_to_draw& cd) {
+
+  using cellptr = cell*;
+  const cellptr& c = cd.c;
+  const ads_matrix& V = cd.V;
+
   vector<cross_result> hlist;
 
   hybrid::in_actual([&]{    
@@ -74,13 +85,13 @@ void draw_game_cell(cell *c, ads_matrix V, ld plev) {
       0x181818FF;
 
     for(auto h: hlist) curvepoint(h.h);
-    addaura(shiftless(center.h), col >> 8, 0);
+    addaura(shiftless(cd.center.h), col >> 8, 0);
     queuecurve(shiftless(Id), 0x101010FF, col, PPR::WALL);
     }
 
   if(view_proper_times) {
-    string str = format(tformat, center.shift / time_unit);
-    queuestr(shiftless(rgpushxto0(center.h)), .1, str, 0xFF4040, 8);
+    string str = format(tformat, cd.center.shift / time_unit);
+    queuestr(shiftless(rgpushxto0(cd.center.h)), .1, str, 0xFF4040, 8);
     }
 
   for(auto& r: ci.rocks) {
@@ -211,31 +222,36 @@ void view_ads_game() {
     make_shape();
 
     set<cell*> visited;
-    using key = tuple<ld, cell*, ads_matrix>;
-    auto cmp = [] (const key& a1, const key& a2) { return get<0>(a1) < get<0>(a2); };
-    std::priority_queue<key, vector<key>, decltype(cmp)> dq(cmp);
-    auto visit = [&] (ld t, cell *c, const ads_matrix& V) {
+    std::priority_queue<cell_to_draw> dq;
+    auto visit = [&] (cell *c, const ads_matrix& V) {
       if(visited.count(c)) return;
       visited.insert(c);
-      dq.emplace(t, c, V);
+      
+      cell_to_draw cd;
+      cd.c = c;
+      cd.V = V;
+      cd.center = findflat(V * C0);
+      cd.d = hdist0(cd.center.h);
+      if(cd.d < vctr_dist) vctr_dist = cd.d, new_vctr = c, new_vctrV = V;
+      
+      dq.emplace(cd);
       };
     
     hybrid::in_actual([&] {
-      dynamicval<eGeometry> b(geometry, gRotSpace);
-      visit(0, vctr, vctrV);
       vctr_dist = HUGE_VAL;
+      visit(vctr, vctrV);
       });
     
     int i = 0;
     while(!dq.empty()) {
 
       i++; if(i > draw_per_frame) break;
-      auto& p = dq.top();
-      cell *c = get<1>(p);
-      ads_matrix V = get<2>(p);
-      dq.pop();
+      auto& cd = dq.top();
+      draw_game_cell(cd);
 
-      draw_game_cell(c, V, plev);
+      cell *c = cd.c;
+      ads_matrix V = cd.V;
+      dq.pop();
       
       hybrid::in_actual([&] {
         auto csl = hybrid::get_at(c, 0);
@@ -245,14 +261,9 @@ void view_ads_game() {
           optimize_shift(V1);
 
           auto g = hybrid::get_where(csl2);
-          adjust_to_zero(V1, g, plev);
-          auto center = findflat(V1 * C0);
+          adjust_to_zero(V1, g, cgi.plevel);
 
-          center = findflat(V * C0);
-          ld d = hdist0(center.h);
-          if(d < vctr_dist) vctr_dist = d, new_vctr = c, new_vctrV = V;
-
-          visit(-d, g.first, V1);
+          visit(g.first, V1);
           }
         });
       }
