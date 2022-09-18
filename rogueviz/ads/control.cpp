@@ -81,22 +81,13 @@ void fire() {
   }
 
 bool handleKey(int sym, int uni) {
-  /*
-  if(uni == 'p') paused = !paused;
-  
-  if(among(uni, 'a', 'd', 's', 'w')) return true;
-  
-  if(uni == 't') { view_proper_times = !view_proper_times; return true; }
-  if(uni == 'o') { auto_rotate = !auto_rotate; return true; }
-  
-  if(uni == 'f') fire();
-  */
-
-  if(sym > 0 && sym < 512 && (cmode & sm::NORMAL)) {
+  if(cmode & sm::NORMAL) {
     char* t = multi::scfg.keyaction;
     if(t[sym] >= 16 && t[sym] < 32) return true;
+    if(sym == 'v') pushScreen(game_menu);
+    if(sym == SDLK_ESCAPE) pushScreen(game_menu);
+    return true;
     }
-  
   return false;
   }
 
