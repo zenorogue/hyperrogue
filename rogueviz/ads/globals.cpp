@@ -54,6 +54,7 @@ bool view_proper_times = false;
 const char *tformat = "%.2f";
 
 void game_menu();
+void restart();
 
 /** all the missiles and objects currently displayed */
 vector<struct ads_object*> displayed;
