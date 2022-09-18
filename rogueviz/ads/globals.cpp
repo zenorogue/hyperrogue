@@ -8,6 +8,12 @@ ld simspeed = TAU;
 /** by how much do WAS keys accelerate */
 ld accel = 6;
 
+/** cursor movement speed while paused */
+ld pause_speed = 5;
+
+/** time unit for time display */
+ld time_unit = TAU;
+
 /** transform world coordinates to current view coordinates */
 ads_matrix current;
 
@@ -69,5 +75,7 @@ ld how_much_invincibility = TAU / 4;
 player_data pdata, max_pdata, tank_pdata;
 
 bool auto_angle = true;
+
+cell *starting_point;
 
 }}
