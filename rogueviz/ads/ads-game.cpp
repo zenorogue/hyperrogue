@@ -132,7 +132,8 @@ auto shot_hooks =
     param_f(time_unit, "ads_time_unit")
     -> editable(0, 2*TAU, 1, "time unit",
       "Controls the unit used when the 'display the proper times' option is on.\n\n"
-      "It takes tau(=2π) units to go the full circle, so the default time unit is tau. You can also use the absolute units (1)."
+      "It takes tau(=2π) units to go the full circle, so the default time unit is tau. You can also use the absolute units (1).\n\n"
+      "Times in settings are always specified in absolute units."
       , 'a');
     param_f(pause_speed, "ads_pause_speed")
     -> editable(0, 30, 1, "movement speed while paused", "Controls the speed of camera movement while paused and holding the 'move switch' key.", 'v');
