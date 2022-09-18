@@ -23,6 +23,9 @@ ads_matrix current_ship;
 /** SL cell closest to the current view/ship */
 cell *vctr, *new_vctr, *vctr_ship;
 
+/** hyperbolic cell closest to the current view/ship */
+cell *vctr_ship_base;
+
 /** world coordinates of vctr -- technically, this is a shiftmatrix */
 ads_matrix vctrV, new_vctrV, vctrV_ship;
 

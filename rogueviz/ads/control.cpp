@@ -118,6 +118,7 @@ bool ads_turn(int idelta) {
       current_ship = current;
       vctr_ship = vctr;
       vctrV_ship = vctrV;
+      vctr_ship_base = hybrid::get_where(vctr_ship).first;
       view_pt = 0;
       }
     else {
