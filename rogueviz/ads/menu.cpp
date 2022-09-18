@@ -2,6 +2,12 @@ namespace hr {
 
 namespace ads_game {
 
+void adjust_for_scale() {
+  if(scale < 0.3) max_gen_per_frame = 1, draw_per_frame = 30, missile_rapidity = 1;
+  else if(scale < 0.8) max_gen_per_frame = 2, draw_per_frame = 100, missile_rapidity = 1;
+  else max_gen_per_frame = 3, draw_per_frame = 1000, missile_rapidity = 3;
+  }
+
 void edit_difficulty() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
@@ -12,7 +18,8 @@ void edit_difficulty() {
   add_edit(how_much_invincibility);
   add_edit(rock_max_rapidity);
   add_edit(rock_density);
-  
+  add_edit(scale);
+
   dialog::addBreak(100);
   add_edit(max_gen_per_frame);
   add_edit(draw_per_frame);
@@ -21,6 +28,18 @@ void edit_difficulty() {
   edit_rsrc();
   
   dialog::addBreak(100);
+  dialog::addItem(XLAT("scale everything :2"), '!');
+  dialog::add_action([] {
+    change_scale(1/2.);
+    adjust_for_scale();
+    restart();
+    });
+  dialog::addItem(XLAT("scale everything *2"), '@');
+  dialog::add_action([] {
+    change_scale(2.);
+    adjust_for_scale();
+    restart();
+    });
   dialog::addBack();
   dialog::display();
   }

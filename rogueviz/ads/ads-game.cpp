@@ -100,9 +100,24 @@ void run_ads_game_std() {
   showstartmenu = false;
   }
 
+void change_scale(ld s) {
+  scale *= s;
+  rock_density /= (s * s);
+  rock_max_rapidity *= s;
+  simspeed *= s;
+  pconf.scale /= s;
+  how_much_invincibility *= s;
+  max_pdata.oxygen *= s;
+  tank_pdata.oxygen *= s;
+  crash_particle_life *= s;
+  fuel_particle_life *= s;
+  }
+
 auto shot_hooks = 
   arg::add3("-ads-game1", run_ads_game)
 + arg::add3("-ads-game", run_ads_game_std)
++ arg::add3("-ads-scale", [] { arg::shift(); ld s = arg::argf(); change_scale(s); })
++ arg::add3("-ads-restart", restart)
 + addHook(hooks_configfile, 100, [] {
     param_f(how_much_invincibility, "ads_invinc")
     -> editable(0, TAU, TAU/4, "invincibility time", "How long does the period of invincibility after crashing last, in absolute units.", 'i');
