@@ -126,7 +126,7 @@ bool ads_turn(int idelta) {
     }
   if(a[16+6] && !la[16+6]) view_proper_times = !view_proper_times;
   if(a[16+7] && !la[16+7]) auto_rotate = !auto_rotate;
-  if(a[16+8] && !la[16+8]) pushScreen(game_menu);    
+  if(a[16+8] && !la[16+8]) pushScreen(game_menu);
 
   if(auto_angle) pconf.model_orientation += ang;
 
