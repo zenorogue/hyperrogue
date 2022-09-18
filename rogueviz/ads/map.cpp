@@ -181,10 +181,10 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
   ci.rock_dist = radius;
   }
 
-void gen_particles(int qty, cell *c, shiftmatrix from, color_t col, ld t, ld spread = 1) {
+void gen_particles(int qty, cell *c, shiftmatrix from, color_t col, ld spd, ld t, ld spread = 1) {
   auto& ro = ci_at[c].rocks;
   for(int i=0; i<qty; i++) {
-    auto r = std::make_unique<ads_object>(oParticle, c, from * spin(randd() * TAU * spread) * lorentz(0, 2, 1 + randd()), col );
+    auto r = std::make_unique<ads_object>(oParticle, c, from * spin(randd() * TAU * spread) * lorentz(0, 2, (.5 + randd() * .5) * spd), col );
     r->shape = &shape_particle;
     r->life_end = randd() * t;
     r->life_start = 0;
@@ -222,7 +222,7 @@ void crash_ship() {
   if(pdata.hitpoints <= 0) game_over = true;
   hybrid::in_actual([&] {
     cell *c = hybrid::get_where(vctr).first;
-    gen_particles(16, c, ads_inverse(current * vctrV) * spin(ang*degree), rsrc_color[rtHull], 0.5);
+    gen_particles(rpoisson(crash_particle_qty * 2), c, ads_inverse(current * vctrV) * spin(ang*degree), rsrc_color[rtHull], crash_particle_rapidity, crash_particle_life);
     });
   }
 
@@ -247,8 +247,8 @@ void handle_crashes() {
           m->life_end = m->pt_main.shift;
           r->life_end = r->pt_main.shift;
           hybrid::in_actual([&] {
-            gen_particles(8, m->owner, m->at * ads_matrix(Id, m->life_end), missile_color, 0.1);
-            gen_particles(8, r->owner, r->at * ads_matrix(Id, r->life_end), r->col, 0.5);
+            gen_particles(rpoisson(crash_particle_qty), m->owner, m->at * ads_matrix(Id, m->life_end), missile_color, crash_particle_rapidity, crash_particle_life);
+            gen_particles(rpoisson(crash_particle_qty), r->owner, r->at * ads_matrix(Id, r->life_end), r->col, crash_particle_rapidity, crash_particle_life);
             gen_resource(r->owner, r->at * ads_matrix(Id, r->life_end), r->resource);
             });
           }

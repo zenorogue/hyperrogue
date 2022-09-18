@@ -86,6 +86,16 @@ bool auto_angle = true;
 ld rock_density = 0.25;
 ld rock_max_rapidity = 1.5;
 
+ld missile_rapidity = 3; // speed is tanh(3) = about 0.95c
+
+ld crash_particle_rapidity = 1;
+ld crash_particle_qty = 8;
+ld crash_particle_life = .5;
+
+ld fuel_particle_rapidity = 1;
+ld fuel_particle_qty = 20;
+ld fuel_particle_life = .15;
+
 cell *starting_point;
 
 }}

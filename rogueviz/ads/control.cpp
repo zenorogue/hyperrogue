@@ -13,7 +13,7 @@ void fire() {
 
   ads_matrix S0 = ads_inverse(current * vctrV) * spin(ang*degree);
 
-  ads_matrix S1 = S0 * lorentz(0, 2, 3); // 0.995c
+  ads_matrix S1 = S0 * lorentz(0, 2, missile_rapidity);
   
   auto& ro = ci_at[c].rocks;
   auto r = std::make_unique<ads_object> (oMissile, c, S1, 0xC0C0FFFF);
@@ -173,7 +173,7 @@ bool ads_turn(int idelta) {
     if(!paused) {
       pdata.fuel -= delta*accel*mul;
       cell *c = hybrid::get_where(vctr).first;
-      gen_particles(rpoisson(delta*accel*mul*20), c, ads_inverse(current * vctrV) * spin(ang*degree+M_PI) * rots::uxpush(0.06), rsrc_color[rtFuel], 0.15, 0.02);
+      gen_particles(rpoisson(delta*accel*mul*fuel_particle_qty), c, ads_inverse(current * vctrV) * spin(ang*degree+M_PI) * rots::uxpush(0.06), rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
       }
 
     ld tc = 0;

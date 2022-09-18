@@ -125,10 +125,26 @@ auto shot_hooks =
     -> editable(0, 5, 0.05, "rock density", "how many rocks to generate", 'd');
     param_f(rock_max_rapidity, "ads_rock_rapidity")
     -> editable(0, 5, 0.05, "rock rapidity", "how fast should the rocks be relative to the map", 'w');
+    param_f(missile_rapidity, "ads_missile_rapidity")
+    -> editable(0, 5, 0.05, "missile rapidity", "how fast should the missiles go relative to the ship", 'm');
     param_b(auto_rotate, "ads_auto_rotate")
     -> editable("automatically rotate the screen", 'r');
     param_b(view_proper_times, "ads_display")
     -> editable("display the proper times", 't');
+
+    param_f(crash_particle_rapidity, "ads_crash_rapidity")
+    -> editable(0, 5, 0.1, "crash particle rapidity", "how fast should the crash particles be", 'r');
+    param_f(crash_particle_qty, "ads_crash_qty")
+    -> editable(0, 5, 0.1, "crash particle quantity", "how many crash particles", 'q');
+    param_f(crash_particle_life, "ads_crash_life")
+    -> editable(0, 5, 0.1, "crash particle lifetime", "how long should the crash particles live", 'l');
+    param_f(fuel_particle_rapidity, "ads_fuel_rapidity")
+    -> editable(0, 5, 0.1, "fuel particle rapidity", "how fast should the fuel particles be", 'R');
+    param_f(fuel_particle_qty, "ads_fuel_qty")
+    -> editable(0, 5, 0.1, "fuel particle quantity", "how many fuel particles", 'Q');
+    param_f(fuel_particle_life, "ads_fuel_life")
+    -> editable(0, 5, 0.1, "fuel particle lifetime", "how long should the fuel particles live", 'L');
+
     rsrc_config();
     });
 

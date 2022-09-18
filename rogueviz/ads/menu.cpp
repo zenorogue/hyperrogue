@@ -21,6 +21,24 @@ void edit_difficulty() {
   dialog::display();
   }
 
+void edit_particles() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+
+  dialog::init(XLAT("AdS particle settings"), 0xC0C0FFFF, 150, 100);
+
+  add_edit(crash_particle_rapidity);
+  add_edit(crash_particle_qty);
+  add_edit(crash_particle_life);
+  add_edit(fuel_particle_rapidity);
+  add_edit(fuel_particle_qty);
+  add_edit(fuel_particle_life);
+
+  dialog::addBreak(100);
+  dialog::addBack();
+  dialog::display();
+  }
+
 void game_menu() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
@@ -35,6 +53,9 @@ void game_menu() {
   add_edit(time_unit);
   add_edit(auto_rotate);
   add_edit(auto_angle);
+
+  dialog::addItem(XLAT("particle settings"), 'p');
+  dialog::add_action_push(edit_particles);
 
   dialog::addItem(XLAT("restart game"), 'r');
   dialog::add_action([] { ads_game::restart(); popScreen(); });
