@@ -217,17 +217,19 @@ void view_ads_game() {
     make_shape();
 
     set<cell*> visited;
-    queue<pair<cell*, ads_matrix>> dq;
-    auto visit = [&] (cell *c, const ads_matrix& V) {
+    using key = tuple<ld, cell*, ads_matrix>;
+    auto cmp = [] (const key& a1, const key& a2) { return get<0>(a1) < get<0>(a2); };
+    std::priority_queue<key, vector<key>, decltype(cmp)> dq(cmp);
+    auto visit = [&] (ld t, cell *c, const ads_matrix& V) {
       auto w = hybrid::get_where(c);
       if(visited.count(w.first)) return;
       visited.insert(w.first);
-      dq.emplace(c, V);
+      dq.emplace(t, c, V);
       };
     
     hybrid::in_actual([&] {
       dynamicval<eGeometry> b(geometry, gRotSpace);
-      visit(vctr, vctrV);
+      visit(0, vctr, vctrV);
       vctr_dist = HUGE_VAL;
       });
     
@@ -235,9 +237,9 @@ void view_ads_game() {
     while(!dq.empty()) {
 
       i++; if(i > draw_per_frame) break;
-      auto& p = dq.front();
-      cell *c = p.first;
-      ads_matrix V = p.second;
+      auto& p = dq.top();
+      cell *c = get<1>(p);
+      ads_matrix V = get<2>(p);
       dq.pop();
 
       draw_game_cell(c, V, plev);
@@ -247,7 +249,13 @@ void view_ads_game() {
           cell *c2 = c->cmove(i);
           auto V1 = V * currentmap->adj(c, i);
           optimize_shift(V1);
-          visit(c2, V1);
+
+          auto g = hybrid::get_where(c2);
+          adjust_to_zero(V1, g, plev);
+          c2 = hybrid::get_at(g.first, 0);
+          auto center = findflat(V1 * C0);
+
+          visit(-hdist0(center.h), c2, V1);
           }
         });
       }
