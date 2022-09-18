@@ -25,7 +25,7 @@ void restart() {
 
   hybrid::in_actual([&] {
     vctr = new_vctr = starting_point;
-    vctrV = new_vctrV = ads_matrix(Id, 0);
+    vctrV = new_vctrV = current = ads_matrix(Id, 0);
     init_rsrc();
     });
 
@@ -35,6 +35,9 @@ void restart() {
   forCellEx(c1, vctr) ci_at[c1].type = wtNone;
   ci_at[vctr].type = wtNone;
   invincibility_pt = how_much_invincibility;
+
+  paused = false;
+  ship_pt = 0;
   }
 
 void run_ads_game() {
