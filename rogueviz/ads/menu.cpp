@@ -10,6 +10,8 @@ void edit_difficulty() {
   add_edit(simspeed);
   add_edit(accel);
   add_edit(how_much_invincibility);
+  add_edit(rock_max_rapidity);
+  add_edit(rock_density);
 
   dialog::addBreak(100);
   edit_rsrc();

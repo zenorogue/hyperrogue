@@ -118,6 +118,38 @@ void gen_terrain(cell *c, cellinfo& ci, int level = 0) {
   ci.mpd_terrain = level;
   }
 
+void add_rock(cell *c, cellinfo& ci, const ads_matrix& T) {
+  eResourceType rt = eResourceType(rand() % 6);
+  auto r = std::make_unique<ads_object> (oRock, c, T, rock_color[rt]);
+  r->resource = rt;
+  r->shape = &(rand() % 2 ? shape_rock2 : shape_rock);
+  if(geometry != gRotSpace) { println(hlog, "wrong geometry detected in gen_rocks 2!");  exit(1); }
+  int q = 0;
+
+  auto cleanup = [&] (cell *c, ld t) {
+    auto& ci = ci_at[c];
+    hybrid::in_underlying_geometry([&] { gen_terrain(c, ci); });
+    ci.type = wtNone;
+    q++;
+    return false;
+    };
+
+  if(q == 0) ci.type = wtNone;
+  compute_life(hybrid::get_at(c, 0), unshift(r->at), cleanup);
+
+  /* for(int i=0; i<isize(r->shape[0]); i += 2) { // exact check is too slow here
+    hyperpoint h;
+    h[0] = r->shape[0][i];
+    h[1] = r->shape[0][i+1];
+    h[2] = 0;
+    h[3] = 1; */
+  if(0) for(int i=0; i<4; i++) {
+    hyperpoint h = spin(90*degree*i) * rots::uxpush(0.15) * C0;
+    compute_life(hybrid::get_at(c, 0), unshift(r->at) * rgpushxto0(h), cleanup);
+    }
+  ci.rocks.emplace_back(std::move(r));
+  }
+
 void gen_rocks(cell *c, cellinfo& ci, int radius) {
   if(radius <= ci.rock_dist) return;
   if(ci.rock_dist < radius - 1) gen_rocks(c, ci, radius-1);
@@ -125,49 +157,26 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
   if(geometry != gNormal) { println(hlog, "wrong geometry detected in gen_rocks 1!");  exit(1); }
 
   if(radius == 0) {
-    hybrid::in_actual([&] {
-      int q = rpoisson(.25);
-      
-      auto add_rock = [&] (ads_matrix T) {
-        eResourceType rt = eResourceType(rand() % 6);
-        auto r = std::make_unique<ads_object> (oRock, c, T, rock_color[rt]);
-        r->resource = rt;
-        r->shape = &(rand() % 2 ? shape_rock2 : shape_rock);
-        if(geometry != gRotSpace) { println(hlog, "wrong geometry detected in gen_rocks 2!");  exit(1); }
-        int q = 0;
+    int q = rpoisson(rock_density);
+    for(int i=0; i<q; i++) {
 
-        auto cleanup = [&] (cell *c, ld t) {
-          auto& ci = ci_at[c];
-          hybrid::in_underlying_geometry([&] { gen_terrain(c, ci); });
-          ci.type = wtNone;
-          q++;
-          return false;
-          };
+      /* any point inside the cell equally likely */
+      ld maxr = cgi.rhexf;
+      cell *c1 = nullptr;
+      ld r, alpha;
+      while(c1 != c) {
+        ld vol = randd() * wvolarea_auto(maxr);
+        r = binsearch(0, maxr, [vol] (ld r) { return wvolarea_auto(r) > vol; });
+        alpha = randd() * TAU;
+        hyperpoint h = spin(alpha) * xpush0(r);
+        c1 = c;
+        virtualRebase(c1, h);
+        }
 
-        if(q == 0) ci.type = wtNone;
-        compute_life(hybrid::get_at(c, 0), unshift(r->at), cleanup);
-                
-        /* for(int i=0; i<isize(r->shape[0]); i += 2) { // exact check is too slow here
-          hyperpoint h;
-          h[0] = r->shape[0][i];
-          h[1] = r->shape[0][i+1];
-          h[2] = 0;
-          h[3] = 1; */
-        if(0) for(int i=0; i<4; i++) {
-          hyperpoint h = spin(90*degree*i) * rots::uxpush(0.15) * C0;
-          compute_life(hybrid::get_at(c, 0), unshift(r->at) * rgpushxto0(h), cleanup);
-          }
-        ci.rocks.emplace_back(std::move(r));
-        };
-      
-      for(int i=0; i<q; i++) {
-        int kind = hrand(100);
-        if(kind < 50) 
-          add_rock(ads_matrix(rots::uxpush(randd() * .6 - .3) * rots::uypush(randd() * .6 - .3)));
-        else
-          add_rock(ads_matrix(rots::uypush(randd() * .6 - .3) * lorentz(0, 3, 0.5 + randd() * 1)));
-        }        
-      });
+      hybrid::in_actual([&] {
+        add_rock(c, ci, ads_matrix(spin(alpha) * rots::uxpush(r/2) * chg_shift(randd() * TAU) * spin(randd() * TAU) * lorentz(0, 3, randd() * rock_max_rapidity)));
+        });
+      }
     }
   ci.rock_dist = radius;
   }

@@ -80,6 +80,9 @@ player_data pdata, max_pdata, tank_pdata;
 
 bool auto_angle = true;
 
+ld rock_density = 0.25;
+ld rock_max_rapidity = 1.5;
+
 cell *starting_point;
 
 }}

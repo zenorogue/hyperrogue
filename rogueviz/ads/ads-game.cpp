@@ -119,6 +119,10 @@ auto shot_hooks =
       , 'a');
     param_f(pause_speed, "ads_pause_speed")
     -> editable(0, 30, 1, "movement speed while paused", "Controls the speed of camera movement while paused and holding the 'move switch' key.", 'v');
+    param_f(rock_density, "ads_rock_density")
+    -> editable(0, 5, 0.05, "rock density", "how many rocks to generate", 'd');
+    param_f(rock_max_rapidity, "ads_rock_rapidity")
+    -> editable(0, 5, 0.05, "rock rapidity", "how fast should the rocks be relative to the map", 'w');
     param_b(auto_rotate, "ads_auto_rotate")
     -> editable("automatically rotate the screen", 'r');
     param_b(view_proper_times, "ads_display")
