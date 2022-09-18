@@ -15,10 +15,10 @@ struct ads_point : shiftpoint {
 /** similarly, ads_matrix represents a transformation of the universal cover space */
 struct ads_matrix : shiftmatrix {
   ads_matrix(transmatrix _h = Id, ld _s = 0) { T = _h; shift = _s; }
-  ads_point operator* (ads_point);
-  ads_matrix operator* (ads_matrix);
-  ads_point operator* (hyperpoint h) { return ads_point(T*h, shift); }
-  ads_matrix operator* (transmatrix h) { return ads_matrix(T*h, shift); }
+  ads_point operator* (ads_point) const;
+  ads_matrix operator* (ads_matrix) const;
+  ads_point operator* (const hyperpoint& h) const { return ads_point(T*h, shift); }
+  ads_matrix operator* (const transmatrix& h) const { return ads_matrix(T*h, shift); }
   ads_matrix(shiftmatrix _s) : shiftmatrix(_s) {}
   };
 
@@ -61,7 +61,7 @@ transmatrix chg_shift(ld x) {
   return cspin(2, 3, x) * cspin(0, 1, x);
   }
 
-ads_point ads_matrix::operator*(ads_point h) {
+ads_point ads_matrix::operator*(ads_point h) const {
   auto& T = *this;
   optimize_shift(h);
   ld sh = get_shift_cycles(h.shift);
@@ -78,7 +78,7 @@ ads_point ads_matrix::operator*(ads_point h) {
   return res2;
   }
 
-ads_matrix ads_matrix::operator*(ads_matrix h) {
+ads_matrix ads_matrix::operator*(ads_matrix h) const {
   auto& T = *this;
   optimize_shift(h);
   ld sh = get_shift_cycles(h.shift);
