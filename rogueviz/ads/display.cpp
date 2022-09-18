@@ -8,10 +8,7 @@ cross_result findflat(shiftpoint h) {
   return cross0(current * rgpushxto0(h));
   }
 
-void draw_game_cell(cell *cs, ads_matrix V, ld plev) {  
-  auto g = PIA( hybrid::get_where(cs) );
-  adjust_to_zero(V, g, plev);
-  auto c = g.first;
+void draw_game_cell(cell *c, ads_matrix V, ld plev) {
   
   cross_result center;
   vector<cross_result> hlist;
@@ -26,7 +23,7 @@ void draw_game_cell(cell *cs, ads_matrix V, ld plev) {
   
   if(1) {
     ld d = hdist0(center.h);
-    if(d < vctr_dist) vctr_dist = d, new_vctr = PIA( hybrid::get_at(c, 0) ), new_vctrV = V;
+    if(d < vctr_dist) vctr_dist = d, new_vctr = c, new_vctrV = V;
     }
 
   auto& ci = ci_at[c];
@@ -152,7 +149,7 @@ void draw_game_cell(cell *cs, ads_matrix V, ld plev) {
     queuecurve(shiftless(Id), 0xFF, shipcolor, PPR::LINE);
     }
   
-  if(paused && c == vctr_ship_base && !game_over) {
+  if(paused && c == vctr_ship && !game_over) {
     vector<hyperpoint> pts;
     vector<ld> times;
     int ok = 0, bad = 0;
@@ -210,8 +207,6 @@ void view_ads_game() {
       }
     }
     );
-  // current = current * gpushxto0(p);
-  // vctrV = rgpushxto0(p) * vctrV;
 
   if(1) {
     make_shape();
@@ -221,9 +216,8 @@ void view_ads_game() {
     auto cmp = [] (const key& a1, const key& a2) { return get<0>(a1) < get<0>(a2); };
     std::priority_queue<key, vector<key>, decltype(cmp)> dq(cmp);
     auto visit = [&] (ld t, cell *c, const ads_matrix& V) {
-      auto w = hybrid::get_where(c);
-      if(visited.count(w.first)) return;
-      visited.insert(w.first);
+      if(visited.count(c)) return;
+      visited.insert(c);
       dq.emplace(t, c, V);
       };
     
@@ -245,17 +239,17 @@ void view_ads_game() {
       draw_game_cell(c, V, plev);
       
       hybrid::in_actual([&] {
-        for(int i=0; i<c->type-2; i++) {
-          cell *c2 = c->cmove(i);
-          auto V1 = V * currentmap->adj(c, i);
+        auto csl = hybrid::get_at(c, 0);
+        for(int i=0; i<c->type; i++) {
+          cell *csl2 = csl->cmove(i);
+          auto V1 = V * currentmap->adj(csl, i);
           optimize_shift(V1);
 
-          auto g = hybrid::get_where(c2);
+          auto g = hybrid::get_where(csl2);
           adjust_to_zero(V1, g, plev);
-          c2 = hybrid::get_at(g.first, 0);
           auto center = findflat(V1 * C0);
 
-          visit(-hdist0(center.h), c2, V1);
+          visit(-hdist0(center.h), g.first, V1);
           }
         });
       }

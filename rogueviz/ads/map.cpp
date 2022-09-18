@@ -221,8 +221,7 @@ void crash_ship() {
   pdata.hitpoints--;
   if(pdata.hitpoints <= 0) game_over = true;
   hybrid::in_actual([&] {
-    cell *c = hybrid::get_where(vctr).first;
-    gen_particles(rpoisson(crash_particle_qty * 2), c, ads_inverse(current * vctrV) * spin(ang*degree), rsrc_color[rtHull], crash_particle_rapidity, crash_particle_life);
+    gen_particles(rpoisson(crash_particle_qty * 2), vctr, ads_inverse(current * vctrV) * spin(ang*degree), rsrc_color[rtHull], crash_particle_rapidity, crash_particle_life);
     });
   }
 
@@ -271,7 +270,7 @@ void handle_crashes() {
       hybrid::in_actual([&] {
         swap(h1[2], h1[3]);
         ads_point rel = ads_inverse(current * vctrV) * ads_point(h1, 0);
-        cell *c = vctr;
+        cell *c = hybrid::get_at(vctr, 0);
         virtualRebase(c, rel.h);
         optimize_shift(rel);
         auto w = hybrid::get_where(c);

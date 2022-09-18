@@ -33,10 +33,10 @@ void restart() {
 
   ci_at.clear();
 
-  gen_terrain(c, ci_at[c], -2);
-  forCellEx(c1, c) ci_at[c1].type = wtNone;
-  ci_at[c].type = wtNone;
-  ci_at[c].rocks.clear();
+  gen_terrain(vctr, ci_at[c], -2);
+  forCellEx(c1, vctr) ci_at[c1].type = wtNone;
+  ci_at[vctr].type = wtNone;
+  invincibility_pt = how_much_invincibility;
   }
 
 void run_ads_game() {
@@ -62,7 +62,7 @@ void run_ads_game() {
     }
   start_game();
 
-  starting_point = cwt.at;
+  starting_point = hybrid::get_where(cwt.at).first;
   
   rogueviz::rv_hook(hooks_frame, 100, view_ads_game);
   rogueviz::rv_hook(hooks_prestats, 100, display_rsrc);

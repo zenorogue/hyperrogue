@@ -7,9 +7,7 @@ vector<string> move_names = { "acc down", "acc left", "acc up", "acc right", "fi
 void fire() {
   if(!pdata.ammo) return;
   pdata.ammo--;
-  auto g = hybrid::get_where(vctr);
-  auto c = g.first;
-  if(g.second != 0) println(hlog, "WARNING: vctr not zeroed");
+  auto c = vctr;
 
   ads_matrix S0 = ads_inverse(current * vctrV) * spin(ang*degree);
 
@@ -21,12 +19,12 @@ void fire() {
   r->life_start = 0;
 
   ads_matrix Scell(Id, 0);    
-  cell *lcell = vctr;
-  auto wcell = hybrid::get_where(lcell);
+  cell *lcell = hybrid::get_at(vctr, 0);
+  auto wcell = make_pair(vctr, 0);
   
   int steps = 0;
 
-  compute_life(vctr, unshift(r->at), [&] (cell *c1, ld t) {
+  compute_life(lcell, unshift(r->at), [&] (cell *c1, ld t) {
     if(true) for(int i=0; i<lcell->type; i++) {
       auto lcell1 = lcell->cmove(i);
       auto wcell1 = hybrid::get_where(lcell1);
@@ -118,7 +116,6 @@ bool ads_turn(int idelta) {
       current_ship = current;
       vctr_ship = vctr;
       vctrV_ship = vctrV;
-      vctr_ship_base = hybrid::get_where(vctr_ship).first;
       view_pt = 0;
       }
     else {
@@ -172,8 +169,7 @@ bool ads_turn(int idelta) {
     
     if(!paused) {
       pdata.fuel -= delta*accel*mul;
-      cell *c = hybrid::get_where(vctr).first;
-      gen_particles(rpoisson(delta*accel*mul*fuel_particle_qty), c, ads_inverse(current * vctrV) * spin(ang*degree+M_PI) * rots::uxpush(0.06 * scale), rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
+      gen_particles(rpoisson(delta*accel*mul*fuel_particle_qty), vctr, ads_inverse(current * vctrV) * spin(ang*degree+M_PI) * rots::uxpush(0.06 * scale), rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
       }
 
     ld tc = 0;
@@ -182,7 +178,7 @@ bool ads_turn(int idelta) {
     else if(a[16+10]) tc = -pt;
 
     if(!paused && !game_over) {
-      auto& v = ci_at[hybrid::get_where(vctr).first].shipstates;
+      auto& v = ci_at[vctr].shipstates;
       v.emplace_back();
       v.back().at = ads_inverse(current * vctrV) * spin((ang+90)*degree);
       v.back().start = ship_pt;
