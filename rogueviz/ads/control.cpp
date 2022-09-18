@@ -209,7 +209,7 @@ bool ads_turn(int idelta) {
   if(auto_angle) pconf.model_orientation -= ang;
   
   fixmatrix_ads(current.T);
-  fixmatrix_ads(vctrV.T);
+  fixmatrix_ads(new_vctrV.T);
   });
 
   return true;
