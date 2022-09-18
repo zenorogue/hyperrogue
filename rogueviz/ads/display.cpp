@@ -108,7 +108,7 @@ void draw_game_cell(cell *cs, ads_matrix V, ld plev) {
     auto& shape = *rock.shape;
     for(int i=0; i<isize(shape); i += 2) {
       hybrid::in_actual([&]{
-        auto h = V * rock.at * rots::uxpush(shape[i]) * rots::uypush(shape[i+1]);
+        auto h = V * rock.at * rots::uxpush(shape[i] * scale) * rots::uypush(shape[i+1] * scale);
         cross_result f = cross0(current * h);
         rock.pts.push_back(f);
         });
@@ -142,7 +142,7 @@ void draw_game_cell(cell *cs, ads_matrix V, ld plev) {
     auto& shape = shape_ship;
     for(int i=0; i<isize(shape); i += 2) {
       hybrid::in_actual([&]{
-        auto h = V * rock.at * rgpushxto0(normalize(hyperpoint(shape[i], shape[i+1], 1, 0)));
+        auto h = V * rock.at * rgpushxto0(normalize(hyperpoint(shape[i] * scale, shape[i+1] * scale, 1, 0)));
         pts.push_back(cross0(current * h).h);
         });
       }

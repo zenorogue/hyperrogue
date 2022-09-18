@@ -62,6 +62,9 @@ void restart();
 /** all the missiles and objects currently displayed */
 vector<struct ads_object*> displayed;
 
+/** how much should be the objects scaled */
+ld scale = 1;
+
 color_t missile_color = 0xFF0000FF;
 
 bool game_over;

@@ -255,7 +255,7 @@ void handle_crashes() {
         }
       }
     if(!game_over) for(int i=0; i<isize(shape_ship); i+=2) {
-      hyperpoint h = spin(ang*degree) * hpxyz(shape_ship[i], shape_ship[i+1], 1);
+      hyperpoint h = spin(ang*degree) * hpxyz(shape_ship[i] * scale, shape_ship[i+1] * scale, 1);
       for(auto r: rocks) {
         if(pointcrash(h, r->pts)) crash_ship();
         }

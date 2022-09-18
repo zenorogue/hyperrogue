@@ -110,6 +110,8 @@ auto shot_hooks =
     -> editable("automatically rotate the projection", 'a');
     param_f(simspeed, "ads_game_simspeed")
     -> editable(0, 2*TAU, TAU/4, "game speed", "Controls the speed of the game.", 's');
+    param_f(scale, "ads_game_scale")
+    -> editable(0, 2, 0.1, "game scale", "Controls the scaling of game objects.", 'c');
     param_f(accel, "ads_game_accel")
     -> editable(0, 30, 1, "acceleration", "Controls the speed of your ship's acceleration.", 'a');
     param_f(time_unit, "ads_time_unit")
