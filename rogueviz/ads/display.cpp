@@ -18,14 +18,8 @@ void draw_game_cell(cell *c, ads_matrix V, ld plev) {
       hyperpoint ha = hybrid::get_corner(c, i, 2, 0);
       hlist.push_back(findflat(V * ha));
       }
-    center = findflat(V * C0);
     });
   
-  if(1) {
-    ld d = hdist0(center.h);
-    if(d < vctr_dist) vctr_dist = d, new_vctr = c, new_vctrV = V;
-    }
-
   auto& ci = ci_at[c];
   if(ci.mpd_terrain > 0) {
     if(!gen_budget) return;
@@ -249,7 +243,11 @@ void view_ads_game() {
           adjust_to_zero(V1, g, plev);
           auto center = findflat(V1 * C0);
 
-          visit(-hdist0(center.h), g.first, V1);
+          center = findflat(V * C0);
+          ld d = hdist0(center.h);
+          if(d < vctr_dist) vctr_dist = d, new_vctr = c, new_vctrV = V;
+
+          visit(-d, g.first, V1);
           }
         });
       }
