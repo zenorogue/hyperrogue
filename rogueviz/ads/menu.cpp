@@ -12,6 +12,10 @@ void edit_difficulty() {
   add_edit(how_much_invincibility);
   add_edit(rock_max_rapidity);
   add_edit(rock_density);
+  
+  dialog::addBreak(100);
+  add_edit(max_gen_per_frame);
+  add_edit(draw_per_frame);
 
   dialog::addBreak(100);
   edit_rsrc();

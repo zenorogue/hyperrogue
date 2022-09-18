@@ -98,4 +98,7 @@ ld fuel_particle_life = .15;
 
 cell *starting_point;
 
+int max_gen_per_frame = 3;
+int draw_per_frame = 1000;
+
 }}

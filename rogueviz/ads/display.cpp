@@ -178,7 +178,7 @@ void view_ads_game() {
   
   hybrid::in_actual([&] {
     plev = cgi.plevel; /* we are in another CGI so we have no access to that... */
-    gen_budget = 3;
+    gen_budget = max_gen_per_frame;
     
     vctr = new_vctr;
     vctrV = new_vctrV;
@@ -233,7 +233,8 @@ void view_ads_game() {
     
     int i = 0;
     while(!dq.empty()) {
-      i++; if(i > 1000) break;
+
+      i++; if(i > draw_per_frame) break;
       auto& p = dq.front();
       cell *c = p.first;
       ads_matrix V = p.second;

@@ -145,6 +145,11 @@ auto shot_hooks =
     param_f(fuel_particle_life, "ads_fuel_life")
     -> editable(0, 5, 0.1, "fuel particle lifetime", "how long should the fuel particles live", 'L');
 
+    param_i(max_gen_per_frame, "ads_gen_per_frame")
+    -> editable(0, 100, 1, "tiles to generate per frame", "reduce if the framerate is low", 'G');
+    param_i(draw_per_frame, "ads_draw_per_frame")
+    -> editable(0, 3000, 0.1, "tiles to draw per frame", "reduce if the framerate is low", 'D');
+
     rsrc_config();
     });
 
