@@ -10,6 +10,7 @@ struct ads_object {
   cell *owner;
   ads_matrix at;
   color_t col;
+  int expire;
   vector<ld>* shape;
   
   ld life_start, life_end;
@@ -23,6 +24,10 @@ struct ads_object {
   };
 
 enum eWalltype { wtNone, wtDestructible, wtSolid, wtGate };
+
+int gen_expire() {
+  return 20 / randd() - 15;
+  }
 
 struct shipstate {
   ads_matrix at;
@@ -122,6 +127,7 @@ void add_rock(cell *c, cellinfo& ci, const ads_matrix& T) {
   eResourceType rt = eResourceType(rand() % 6);
   auto r = std::make_unique<ads_object> (oRock, c, T, rock_color[rt]);
   r->resource = rt;
+  r->expire = gen_expire();
   r->shape = &(rand() % 2 ? shape_rock2 : shape_rock);
   if(geometry != gRotSpace) { println(hlog, "wrong geometry detected in gen_rocks 2!");  exit(1); }
   int q = 0;
@@ -192,13 +198,14 @@ void gen_particles(int qty, cell *c, shiftmatrix from, color_t col, ld spd, ld t
     }
   }
 
-void gen_resource(cell *c, shiftmatrix from, eResourceType rsrc) {
+void gen_resource(cell *c, shiftmatrix from, eResourceType rsrc, int expire) {
   if(!rsrc) return;
   auto r = std::make_unique<ads_object>(oResource, c, from, rsrc_color[rsrc]);
   r->shape = rsrc_shape[rsrc];
   r->life_end = HUGE_VAL;
   r->life_start = 0;
   r->resource = rsrc;
+  r->expire = expire;
   ci_at[c].rocks.emplace_back(std::move(r));
   }
 
@@ -248,7 +255,7 @@ void handle_crashes() {
           hybrid::in_actual([&] {
             gen_particles(rpoisson(crash_particle_qty), m->owner, m->at * ads_matrix(Id, m->life_end), missile_color, crash_particle_rapidity, crash_particle_life);
             gen_particles(rpoisson(crash_particle_qty), r->owner, r->at * ads_matrix(Id, r->life_end), r->col, crash_particle_rapidity, crash_particle_life);
-            gen_resource(r->owner, r->at * ads_matrix(Id, r->life_end), r->resource);
+            gen_resource(r->owner, r->at * ads_matrix(Id, r->life_end), r->resource, r->expire);
             });
           }
         }

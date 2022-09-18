@@ -85,6 +85,11 @@ void draw_game_cell(cell *c, ads_matrix V, ld plev) {
 
   for(auto& r: ci.rocks) {
     auto& rock = *r;
+
+    if(!paused) {
+      if(rock.type == oRock && rock.expire < pdata.score) { rock.resource = rtNone; rock.col = rock_color[rtNone]; rock.expire = 999999; }
+      if(rock.type == oResource && rock.expire < pdata.score) { rock.resource = rtNone; rock.col = rsrc_color[rtNone]; rock.shape = rsrc_shape[rtNone]; rock.expire = 999999; }
+      }
     
     hybrid::in_actual([&]{
       dynamicval<eGeometry> b(geometry, gRotSpace);

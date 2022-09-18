@@ -5,9 +5,9 @@ namespace ads_game {
 enum eResourceType { rtNone, rtHull, rtGold, rtAmmo, rtFuel, rtOxygen };
 
 color_t rock_color[6] = { 0x703800FF, 0xC0A080FF, 0xC08010FF, 0xC04000FF, 0x408000FF, 0x8040A0FF,  };
-color_t rsrc_color[6] = {0, 0xC0C0C0FF, 0xFFD500FF, 0xFF0000FF, 0x00FF00FF, 0x0000FFFF };
+color_t rsrc_color[6] = { 0x404040FF, 0xC0C0C0FF, 0xFFD500FF, 0xFF0000FF, 0x00FF00FF, 0x0000FFFF };
 
-vector<ld>* rsrc_shape[6] = { nullptr, &shape_heart, &shape_gold, &shape_weapon, &shape_fuel, &shape_airtank };
+vector<ld>* rsrc_shape[6] = { &shape_particle, &shape_heart, &shape_gold, &shape_weapon, &shape_fuel, &shape_airtank };
 
 void rsrc_config() {
   max_pdata.hitpoints = 3;
