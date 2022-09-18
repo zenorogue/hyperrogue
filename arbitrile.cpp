@@ -1961,7 +1961,6 @@ EX void swap_vertices() {
 
 #if MAXMDIM >= 4
 auto hooksw = addHook(hooks_swapdim, 100, [] {
-  println(hlog, "swapmatrix called for vertices");
   swap_vertices();
   for(auto& p: altmap) for(auto& pp: p.second) swapmatrix(pp.second);
   for(auto& p: arbi_matrix) swapmatrix(p.second.second);
