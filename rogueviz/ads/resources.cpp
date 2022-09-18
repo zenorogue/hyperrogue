@@ -9,7 +9,7 @@ color_t rsrc_color[6] = {0, 0xC0C0C0FF, 0xFFD500FF, 0xFF0000FF, 0x00FF00FF, 0x00
 
 vector<ld>* rsrc_shape[6] = { nullptr, &shape_heart, &shape_gold, &shape_weapon, &shape_fuel, &shape_airtank };
 
-void init_rsrc() {
+void rsrc_config() {
   max_pdata.hitpoints = 3;
   max_pdata.score = 0;
   max_pdata.ammo = 50;
@@ -22,7 +22,35 @@ void init_rsrc() {
   tank_pdata.fuel = 4 * TAU;
   tank_pdata.oxygen = 5 * TAU;
   
+  auto all = [] (player_data& d, string s, string t, string u) {
+    param_i(d.hitpoints, s+"hp")
+    ->editable(0, 10, 3, t + (": hitpoints"), u + ("Hitpoints are drained whenever you are hit."), '1');
+    param_i(d.ammo, s+"ammo")
+    ->editable(0, 10, 3, t + (": ammo"), u + ("Ammo is drained whenever you shoot."), '1');
+    param_f(d.fuel, s+"fuel")
+    ->editable(0, 10, 3, t + (": fuel"), u + ("Fuel is drained whenever you thrust."), '1');
+    param_f(d.oxygen, s+"oxygen")
+    ->editable(0, 10, 3, t + (": oxygen"), u + ("Oxygen is drained whenever continuously."), '1');
+    };
+
+  all(max_pdata, "ads_max_", "maximum", "These control the maximum and initial values of your resources. ");
+  all(tank_pdata, "ads_tank_", "bonus", "These control the amount of resource in a bonus tank. ");
+  }
+
+void edit_rsrc() {
+  auto all = [] (player_data& d) {
+    add_edit(d.hitpoints);
+    add_edit(d.ammo);
+    add_edit(d.fuel);
+    add_edit(d.oxygen);
+    };
+  all(max_pdata);
+  all(tank_pdata);
+  }
+
+void init_rsrc() {
   pdata = max_pdata;
+  game_over = false;
   }
 
 void display(int id, int y, ld val, ld maxv, ld tank, ld unit) {
