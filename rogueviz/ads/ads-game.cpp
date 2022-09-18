@@ -22,18 +22,16 @@ void change_default_key(int key, int val) {
   }
 
 void restart() {
-  cell *c;
 
   hybrid::in_actual([&] {
     vctr = new_vctr = starting_point;
     vctrV = new_vctrV = ads_matrix(Id, 0);
     init_rsrc();
-    c = hybrid::get_where(vctr).first;
     });
 
   ci_at.clear();
 
-  gen_terrain(vctr, ci_at[c], -2);
+  gen_terrain(vctr, ci_at[vctr], -2);
   forCellEx(c1, vctr) ci_at[c1].type = wtNone;
   ci_at[vctr].type = wtNone;
   invincibility_pt = how_much_invincibility;
