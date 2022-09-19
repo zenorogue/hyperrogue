@@ -93,6 +93,37 @@ void apply_lorentz(transmatrix lor) {
   current = ads_matrix(lor, 0) * current;
   }
 
+ld read_movement() {
+  auto& a = multi::actionspressed;
+  bool left = a[16+1];
+  bool right = a[16+3];
+  bool up = a[16+2];
+  bool down = a[16];
+
+  int clicks = (left?1:0) + (right?1:0) + (up?1:0) + (down?1:0);
+
+  if(left && right) left = right = false;
+  if(up && down) up = down = false;
+
+  if(left) ang = 180;
+  if(right) ang = 0;
+  if(up) ang = 90;
+  if(down) ang = 270;
+
+  if(left && up) ang = 135;
+  if(left && down) ang = 225;
+  if(right && up) ang = 45;
+  if(right && down) ang = 315;
+
+  ld mul = clicks ? 1 : 0;
+  if(clicks > 2) mul *= .3;
+  if(!paused) {
+    if(game_over || pdata.fuel < 0) mul = 0;
+    }
+
+  return mul;
+  }
+
 bool ads_turn(int idelta) {
   multi::handleInput(idelta);
   ld delta = idelta / anims::period;
@@ -134,32 +165,8 @@ bool ads_turn(int idelta) {
     
     /* proper time passed */
     ld pt = delta * simspeed;
-
-    bool left = a[16+1];
-    bool right = a[16+3];
-    bool up = a[16+2];
-    bool down = a[16];
     
-    int clicks = (left?1:0) + (right?1:0) + (up?1:0) + (down?1:0);
-
-    if(left && right) left = right = false;
-    if(up && down) up = down = false;
-    
-    if(left) ang = 180;
-    if(right) ang = 0;
-    if(up) ang = 90; 
-    if(down) ang = 270;
-    
-    if(left && up) ang = 135;
-    if(left && down) ang = 225;
-    if(right && up) ang = 45;
-    if(right && down) ang = 315;
-    
-    ld mul = clicks ? 1 : 0;
-    if(clicks > 2) mul *= .3;
-    if(!paused) {
-      if(game_over || pdata.fuel < 0) mul = 0;
-      }
+    ld mul = read_movement();
 
     if(paused && a[16+11]) {
       current = ads_matrix(spin(ang*degree) * xpush(mul*delta*-pause_speed) * spin(-ang*degree), 0) * current;
