@@ -8,6 +8,7 @@
 #include "control.cpp"
 #include "display.cpp"
 #include "menu.cpp"
+#include "ds-game.cpp"
 
 namespace hr {
 
