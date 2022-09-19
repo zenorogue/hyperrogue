@@ -137,9 +137,6 @@ bool ads_turn(int idelta) {
   auto& a = multi::actionspressed;
   auto& la = multi::lactionpressed;
   
-  vector<int> ap;
-  for(int i=0; i<NUMACT; i++) if(a[i]) ap.push_back(i);
-  
   if(a[16+4] && !la[16+4] && !paused) fire();
   if(a[16+5] && !la[16+5]) {
     paused = !paused;

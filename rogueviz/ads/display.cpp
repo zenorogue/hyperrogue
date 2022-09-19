@@ -183,11 +183,9 @@ void draw_game_cell(const cell_to_draw& cd) {
   }
 
 void view_ads_game() {
-  ld plev;
   displayed.clear();
   
   hybrid::in_actual([&] {
-    plev = cgi.plevel; /* we are in another CGI so we have no access to that... */
     gen_budget = max_gen_per_frame;
     
     vctr = new_vctr;
