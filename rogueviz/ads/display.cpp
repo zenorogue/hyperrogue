@@ -136,14 +136,14 @@ void draw_game_cell(const cell_to_draw& cd) {
   
   /* todo: binary search */
   if(paused) for(auto& rock: ci.shipstates) {
-    ld t;
+    cross_result cr;
     hybrid::in_actual([&]{
       dynamicval<eGeometry> b(geometry, gRotSpace);
       auto h = V * rock.at;
-      t = cross0(current * h).shift;
+      cr = cross0(current * h);
       });
-    
-    if(t < -1e-6 || t > rock.duration + 1e-6) continue;
+        
+    if(cr.shift < -1e-6 || cr.shift > rock.duration + 1e-6) continue;
     vector<hyperpoint> pts;
 
     auto& shape = shape_ship;
@@ -157,6 +157,9 @@ void draw_game_cell(const cell_to_draw& cd) {
     for(auto h: pts) curvepoint(h);
     curvepoint(pts[0]);
     queuecurve(shiftless(Id), 0xFF, shipcolor, PPR::LINE);
+
+    string str = format(tformat, (cr.shift + rock.start) / time_unit);
+    queuestr(shiftless(rgpushxto0(cr.h)), .1, str, 0xC0C0C0, 8);
     }
   
   if(paused && c == vctr_ship && !game_over) {
