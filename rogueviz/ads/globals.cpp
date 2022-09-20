@@ -99,4 +99,8 @@ cell *starting_point;
 int max_gen_per_frame = 3;
 int draw_per_frame = 1000;
 
+/* for DS */
+
+ld ds_split_speed = 0.1;
+
 }}
