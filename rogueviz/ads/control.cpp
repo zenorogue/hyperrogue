@@ -182,11 +182,15 @@ bool ads_turn(int idelta) {
     else if(a[16+10]) tc = -pt;
 
     if(!paused && !game_over) {
-      auto& v = ci_at[vctr].shipstates;
-      v.emplace_back();
-      v.back().at = ads_inverse(current * vctrV) * spin((ang+90)*degree);
-      v.back().start = ship_pt;
-      v.back().duration = pt;
+      shipstate ss;
+      ss.at = ads_inverse(current * vctrV) * spin((ang+90)*degree);
+      ss.ang = ang;
+      ss.start = ship_pt;
+      ss.duration = pt;
+      ss.vctrV = vctrV;
+      ss.vctr = vctr;
+      history.emplace_back(ss);
+      ci_at[vctr].shipstates.emplace_back(ss);
       }
 
     current.T = cspin(3, 2, tc) * current.T;

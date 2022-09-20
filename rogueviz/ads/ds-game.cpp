@@ -8,8 +8,6 @@ void set_default_keys();
 
 transmatrix dscurrent, dscurrent_ship;
 
-vector<shipstate> ds_states;
-
 vector<unique_ptr<ads_object>> rocks;
 
 void init_ds_game() {
@@ -146,11 +144,12 @@ bool ds_turn(int idelta) {
     else if(a[16+10]) tc = -pt;
 
     if(!paused && !game_over) {
-      auto& v = ds_states;
-      v.emplace_back();
-      v.back().at.T = inverse(dscurrent) * spin(ang*degree);
-      v.back().start = ship_pt;
-      v.back().duration = pt;
+      shipstate ss;
+      ss.at.T = inverse(dscurrent) * spin(ang*degree);
+      ss.start = ship_pt;
+      ss.duration = pt;
+      ss.ang = ang;
+      history.emplace_back(ss);
       }
     
     dscurrent = lorentz(3, 2, -tc) * dscurrent;
@@ -166,8 +165,8 @@ bool ds_turn(int idelta) {
     else view_pt += tc;
 
     if(a[16+4] && !la[16+4] && false) {
-      if(ds_states.size())
-        ds_states.back().duration = HUGE_VAL;
+      if(history.size())
+        history.back().duration = HUGE_VAL;
       dscurrent = random_spin3();
       }
     }
@@ -249,7 +248,7 @@ void view_ds_game() {
       }      
 
     ld delta = paused ? 1e-4 : -1e-4;
-    for(auto& ss: ds_states) {
+    for(auto& ss: history) {
       dynamicval<eGeometry> g(geometry, gSpace435);
       cross_result cr = ds_cross0(dscurrent * ss.at.T);
       if(cr.shift < delta) continue;
@@ -321,8 +320,38 @@ void run_ds_game() {
   rogueviz::rv_hook(hooks_handleKey, 0, handleKey);
   }
 
+void ds_record() {
+  ld full = anims::period;
+  anims::period = full * history.back().start / simspeed;
+  anims::noframes = anims::period * 60 / 1000;
+  dynamicval<bool> b(paused, true);
+  int a = addHook(anims::hooks_anim, 100, [&] {
+    view_pt = (ticks / full) * simspeed;
+    for(auto& ss: history)
+      if(ss.start + ss.duration > view_pt) {
+        if(sphere) {
+          dynamicval<eGeometry> g(geometry, gSpace435);
+          dscurrent = inverse(ss.at.T * spin(-ss.ang*degree));
+          dscurrent = lorentz(3, 2, view_pt - ss.start) * dscurrent;
+          }
+        else PIA([&] {
+          current = ads_inverse(ss.at * spin(-ss.ang*degree));
+          vctr = ss.vctr;
+          vctrV = ss.vctrV;
+          current.T = cspin(3, 2, view_pt - ss.start) * current.T;
+          if(auto_rotate)
+            current.T = cspin(1, 0, view_pt - ss.start) * current.T;
+          });
+        break;
+        }
+    });
+  anims::record_video_std();
+  delHook(anims::hooks_anim, a);
+  }
+
 auto ds_hooks = 
   arg::add3("-ds-game", run_ds_game)
++ arg::add3("-ds-record", ds_record)
 ;
 
 }

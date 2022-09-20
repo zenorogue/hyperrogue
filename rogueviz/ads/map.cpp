@@ -33,7 +33,12 @@ struct shipstate {
   ads_matrix at;
   ld start;
   ld duration;
+  ld ang;
+  ads_matrix vctrV;
+  cell *vctr;
   };
+
+vector<shipstate> history;
 
 struct cellinfo {
   int mpd_terrain; /* 0 = fully generated terrain */
