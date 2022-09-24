@@ -256,22 +256,26 @@ int arg::readCommon() {
     shift(); ld a = argf();
     shift(); ld b = argf();
     View = View * spin(M_PI * 2 * a / b);
+    playermoved = false;
     }
   else if(argis("-rotate-up")) {
     start_game();
     shiftmatrix S = ggmatrix(cwt.at->master->move(0)->c7);
     View = spin(90*degree) * spintox(S.T*C0) * View;
+    playermoved = false;
     }
   else if(argis("-rotate3")) {
     PHASE(3);  start_game();
     shift(); ld a = argf();
     shift(); ld b = argf();
     View = View * cspin(1, 2, M_PI * 2 * a / b);
+    playermoved = false;
     }
   else if(argis("-face-vertex")) {
     PHASE(3);  start_game();
     auto &ss = currentmap->get_cellshape(cwt.at);
     View = cspin(0, 2, M_PI/2) * spintox(ss.vertices_only_local[0]);
+    playermoved = false;
     }
   else if(argis("-face-face")) {
     PHASE(3);  start_game();
@@ -282,6 +286,7 @@ int arg::readCommon() {
     shift(); int i = argi();
     shift(); int j = argi();
     shift(); View = View * cspin(i, j, argf());
+    playermoved = false;
     }
   else if(argis("-cview")) {
     PHASE(3);  start_game();
