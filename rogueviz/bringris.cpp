@@ -1179,7 +1179,7 @@ void draw_screen(int xstart, bool show_next) {
   ray::max_cells = (isize(level) + isize(out_level)) * (camera_level+2);
   
   if(explore) {
-    gamescreen(0);
+    gamescreen();
     mouseaim_sensitivity = 0.01;
     camera_speed = 2;
     smooth_scrolling = true;
@@ -1216,7 +1216,7 @@ void draw_screen(int xstart, bool show_next) {
     
     sightranges[geometry] *= 100;
     if(state == tsFalling && !explore && !cur_ang && !lctrlclick) remove_shape();    
-    gamescreen(0);
+    gamescreen();
     if(state == tsFalling && !explore && !cur_ang) draw_shape();
 
     extern void render_next(int xstart);
@@ -1282,7 +1282,8 @@ void geometry_menu() {
   }
 
 void visual_menu() {
-  gamescreen(2);
+  cmode = sm::MAYDARK;
+  gamescreen();
   dialog::init("Bringris visuals");
 
   dialog::addBoolItem_action("flashes on level completed", flashes, 'f');
@@ -1291,7 +1292,6 @@ void visual_menu() {
 
   dialog::addSelItem(XLAT("iterations in raycasting"), its(ray::max_iter_current()), 's');
   dialog::add_action([&] {
-    dialog::numberdark = dialog::DONT_SHOW;
     dialog::editNumber(ray::max_iter_current(), 0, 600, 1, 60, XLAT("iterations in raycasting"), "");
     dialog::reaction = ray::reset_raycaster;
     });
@@ -1304,7 +1304,6 @@ void visual_menu() {
 
   dialog::addSelItem(XLAT("cells to draw per level"), its(draw_per_level), 'R');
   dialog::add_action([&] {
-    dialog::numberdark = dialog::DONT_SHOW;
     dialog::editNumber(draw_per_level, 0, 1000, 500, 50, XLAT("cells to draw"), 
       "If the level size is 30, 600 cells to draw means that every cell is drawn 20 times on average. "
       "Used when raycasting is off, and to draw the wireframes");
