@@ -5390,7 +5390,7 @@ EX void gamescreen() {
   anims::apply();
 #if CAP_RUG
   if(rug::rugged) {
-    rug::actDraw();
+    if(!nomap) rug::actDraw();
     } else
 #endif
   wrap_drawfullmap();
