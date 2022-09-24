@@ -114,7 +114,7 @@ void model::load_obj(model_data& md) {
           goto next_object;
           }
         else if(s == "v") {        
-          hyperpoint h = C0;
+          hyperpoint h = C03;
           scan(fs, h[0], h[1], h[2]); // assume all
           h[0] /= 100;
           h[1] /= 100;
