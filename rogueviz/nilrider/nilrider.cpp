@@ -231,10 +231,12 @@ void run() {
 
   dialog::add_key_action(PSEUDOKEY_MENU, [] {
     if(curlev->current.timer) paused = true;
+    game_keys_scroll = true;
     pushScreen(main_menu);
     });
   if(pause_av) dialog::add_key_action(PSEUDOKEY_PAUSE, [] {
     paused = !paused;
+    game_keys_scroll = true;
     if(view_replay && !paused)
       simulation_start_tick = ticks - curlev->current.timer * tps;
     });
