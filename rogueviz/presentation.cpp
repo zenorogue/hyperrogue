@@ -83,6 +83,9 @@ void non_game_slide(presmode mode) {
     tour::slide_backup(mapeditor::drawplayer, false);
     tour::slide_backup(no_find_player, true);
     tour::slide_backup(playermoved, false);
+    tour::slide_backup(vid.axes, 0);
+    tour::slide_backup(vid.drawmousecircle, false);
+    tour::slide_backup(draw_centerover, false);
     }
   no_other_hud(mode);
   }
@@ -122,7 +125,7 @@ void slide_error(presmode mode, string s) {
 
 map<string, texture::texture_data> textures;
 
-void draw_texture(texture::texture_data& tex) {
+void draw_texture(texture::texture_data& tex, ld dx, ld dy, ld scale1) {
   static vector<glhr::textured_vertex> rtver(4);
   
   int fs = inHighQual ? 0 : 2 * vid.fsize;
@@ -139,8 +142,8 @@ void draw_texture(texture::texture_data& tex) {
     ld cy[4] = {1,1,0,0};
     rtver[i].texture[0] = (tex.base_x + (cx[i] ? tex.strx : 0.)) / tex.twidth;
     rtver[i].texture[1] = (tex.base_y + (cy[i] ? tex.stry : 0.)) / tex.theight;
-    rtver[i].coords[0] = (cx[i]*2-1) * scale * tx;
-    rtver[i].coords[1] = (cy[i]*2-1) * scale * ty;
+    rtver[i].coords[0] = (cx[i]*2-1) * scale * tx * scale1 + dx;
+    rtver[i].coords[1] = (cy[i]*2-1) * scale * ty * scale1 + dy;
     rtver[i].coords[2] = 1;
     rtver[i].coords[3] = 1;
     }
@@ -155,19 +158,25 @@ void draw_texture(texture::texture_data& tex) {
   glhr::set_depthtest(false);
   glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
   }
+
+void sub_picture(string s, flagtype flags, ld dx, ld dy, ld scale) {
+  if(!textures.count(s)) {
+    auto& tex = textures[s];
+    println(hlog, "rt = ", tex.readtexture(s));
+    println(hlog, "gl = ", tex.loadTextureGL());
+    }
+  auto& tex = textures[s];
+  flat_model_enabler fme;
+  draw_texture(tex, dx, dy, scale);
+  }
   
-void show_picture(presmode mode, string s) {
+void show_picture(presmode mode, string s, flagtype flags) {
   if(mode == pmStartAll) {
     auto& tex = textures[s];
     println(hlog, "rt = ", tex.readtexture(s));
     println(hlog, "gl = ", tex.loadTextureGL());
     }
-  add_stat(mode, [s] {
-    auto& tex = textures[s];
-    flat_model_enabler fme;    
-    draw_texture(tex);
-    return false;
-    });
+  add_stat(mode, [s, flags] { sub_picture(s, flags); return false; });
   }
 
 string latex_packages =
@@ -177,6 +186,8 @@ string latex_packages =
   "\\usepackage{varwidth}\n"
   "\\usepackage{amsfonts}\n"
   "\\usepackage{enumitem}\n"
+  "\\usepackage[utf8]{inputenc}\n"
+  "\\usepackage[T1]{fontenc}\n"
   "\\usepackage{color}\n"
   "\\usepackage{graphicx}\n"
   "\\definecolor{remph}{rgb}{0,0.5,0}\n"
@@ -549,10 +560,11 @@ void latex_slide(presmode mode, string s, flagtype flags, int size) {
     tour::slide_backup(no_find_player, true);
     if(flags & sm::SIDE) {
       cmode |= sm::SIDE;
-      dynamicval<bool> db(nomap, false);
-      dynamicval<color_t> dc(modelcolor, 0xFF);
+      dynamicval<bool> db(nomap, (flags & sm::NOSCR));
+      dynamicval<color_t> dc(modelcolor, nomap ? 0 : 0xFF);
       dynamicval<color_t> dc2(bordcolor, 0);
       gamescreen();
+      callhooks(hooks_latex_slide);
       }
     else
       gamescreen();

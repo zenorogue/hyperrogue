@@ -124,6 +124,12 @@ namespace rogueviz {
     cleanup.push_back(del);
     }
 
+  template<class T> void rv_change(T& variable, const T& value) {
+    T backup = variable;
+    variable = value;
+    on_cleanup_or_next([backup, &variable] { variable = backup; });
+    }
+
   template<class T, class U> void rv_hook(hookset<T>& m, int prio, U&& hook) {
     int p = addHook(m, prio, hook);
     auto del = [&m, p] { 
@@ -157,8 +163,10 @@ namespace rogueviz {
     inline hookset<void(string, vector<slide>&)> hooks_build_rvtour;
     slide *gen_rvtour();
     #if CAP_TEXTURE
-    void draw_texture(texture::texture_data& tex);
+    void draw_texture(texture::texture_data& tex, ld dx = 0, ld dy = 0, ld scale = 1);
     #endif
+
+    extern map<string, texture::texture_data> textures;
 
 template<class T, class U> function<void(presmode)> roguevizslide(char c, const T& t, const U& f) {
   return [c,t,f] (presmode mode) {
@@ -233,7 +241,8 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   void non_game_slide_scroll(presmode mode);
   void white_screen(presmode mode, color_t col = 0xFFFFFFFF);
   void empty_screen(presmode mode, color_t col = 0xFFFFFFFF);
-  void show_picture(presmode mode, string s);    
+  void show_picture(presmode mode, string s, flagtype flags = 0);
+  void sub_picture(string s, flagtype flags = 0, ld dx = 0, ld dy = 0, ld scale = 1);
   void show_animation(presmode mode, string s, int sx, int sy, int frames, int fps);
   void use_angledir(presmode mode, bool reset);
   void slide_error(presmode mode, string s);
@@ -245,6 +254,8 @@ function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) 
   void dialog_may_latex(string latex, string normal, color_t col = dialog::dialogcolor, int size = 100, flagtype flag = 0);
   void uses_game(presmode mode, string name, reaction_t launcher, reaction_t restore);
   void latex_slide(presmode mode, string s, flagtype flags = 0, int size = 100);
+  
+  inline purehookset hooks_latex_slide;
 
   inline ld angle = 0;
   inline int dir = -1;
