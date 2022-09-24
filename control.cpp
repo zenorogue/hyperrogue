@@ -941,7 +941,7 @@ EX void mainloopiter() {
     }
   else sc_ticks = ticks;
 
-  if(game_keys_scroll && !shmup::on && (cmode & sm::NORMAL)) {
+  if(game_keys_scroll && !shmup::on && (cmode & sm::NORMAL) && !keystate[SDLK_LALT] && !keystate[SDLK_RALT]) {
     rug::using_rugview urv;
     auto& lastticks = sc_ticks2;
     ld t = (ticks - lastticks) * shiftmul / 1000.;
