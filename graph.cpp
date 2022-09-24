@@ -5187,6 +5187,8 @@ EX int corner_centering;
 
 EX bool permaside;
 
+EX bool old_center;
+
 EX void calcparam() {
 
   DEBBI(DF_GRAPH, ("calc param"));
@@ -5209,7 +5211,7 @@ EX void calcparam() {
 
   current_display->sidescreen = permaside;
   
-  if(vid.xres < vid.yres - 2 * vid.fsize && !inHighQual && !in_perspective()) {
+  if(vid.xres < vid.yres - 2 * vid.fsize && !inHighQual && (old_center || !in_perspective())) {
     cd->ycenter = lerp(vid.fsize + cd->scrsize, vid.yres - cd->scrsize - vid.fsize, .8);
     }
   else {
