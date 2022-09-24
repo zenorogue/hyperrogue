@@ -367,7 +367,7 @@ EX void full_cstrafe_camera(int dir, ld t) {
 EX void full_strafe_camera(ld t) { full_cstrafe_camera(0, t); }
 
 EX void full_ystrafe_camera(ld t) {
-  if(walking::on) walking::eye_level += t;
+  if(walking::on) { walking::eye_level += t; if(walking::eye_level < 1e-3) walking::eye_level = 1e-3; }
   else full_cstrafe_camera(1, t);
   }
 
