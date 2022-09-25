@@ -163,21 +163,24 @@ void draw_game_cell(const cell_to_draw& cd) {
     }
   
   if(paused && c == vctr_ship && !game_over) {
-    vector<hyperpoint> pts;
-    vector<ld> times;
-    int ok = 0, bad = 0;
-    for(int i=0; i<=360; i++) {
-      hybrid::in_actual([&]{
-        auto h = ads_inverse(current_ship * vctrV_ship) * spin(i*degree) * lorentz(0, 2, 6);
-        auto cr = cross0(current * V * h);
-        pts.push_back(cr.h);
-        times.push_back(cr.shift);
-        if(cr.shift > 0 && cr.shift < 90*degree) ok++; else bad++;
-        });
-      }
-    if(bad == 0) {
+    cross_result cr;
+    hybrid::in_actual([&]{
+      auto h = ads_inverse(current_ship * vctrV_ship);
+      cr = cross0(current * V * h);
+      // println(hlog, current * V * h);
+      println(hlog, "cr shift = ", cr.shift);
+      });
+    if(cr.shift > 0 && cr.shift < M_PI) {
+      vector<hyperpoint> pts;
+      for(int i=0; i<=360; i++) {
+        hybrid::in_actual([&]{
+          auto h = ads_inverse(current_ship * vctrV_ship) * spin(i*degree);
+          auto cr = cross0_light(current * V * h);
+          pts.push_back(cr.h);
+          });
+        }
       for(auto h: pts) curvepoint(h);
-      queuecurve(shiftless(Id), 0x000000C0, 0x00000060, PPR::SUPERLINE);
+      queuecurve(shiftless(Id), 0xFF0000C0, 0x00000060, PPR::SUPERLINE);
       }
     }
   }

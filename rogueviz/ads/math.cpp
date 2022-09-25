@@ -145,6 +145,19 @@ cross_result cross0(ads_matrix hz) {
   return cross_result{uhzt, t};
   }
 
+/** Similar as cross0_light but for light-like wordlines.
+ *  The point returned by cross0_light(T) is the same as the limit of cross0(T * lorentz(0, 2, v)).
+ **/
+
+cross_result cross0_light(ads_matrix hz) {
+  transmatrix uhz = unshift(hz);
+  ld t = uhz[2][3] / -(uhz[2][2] + uhz[2][0]);
+  hyperpoint uhzt = uhz * hyperpoint(t, 0, t, 1);
+  tie(uhzt[2], uhzt[3]) = make_pair(uhzt[3], -uhzt[2]);
+  if(uhzt[2] < 0) uhzt = -uhzt;
+  return cross_result{uhzt, t};
+  }
+
 /** sample from Poisson distribution */
 int rpoisson(ld lambda) {
   ld prob = randd();

@@ -190,6 +190,15 @@ cross_result ds_cross0(transmatrix T) {
   return res;
   }
 
+cross_result ds_cross0_light(transmatrix T) {
+  // h = T * (t 0 1 t); h[3] == 0
+  ld t = T[3][2] / -(T[3][0] + T[3][3]);
+  cross_result res;
+  res.shift = t;
+  res.h = T * hyperpoint(t, 0, 1, t);
+  return res;
+  }
+
 transmatrix tpt(ld x, ld y) {
   return cspin(0, 2, x * scale) * cspin(1, 2, y * scale);
   }
@@ -291,6 +300,22 @@ void view_ds_game() {
     if(paused && view_proper_times) {
       string str = format(tformat, view_pt / time_unit);
       queuestr(shiftless(Id), .1, str, 0xFFFF00, 8);
+      }
+
+    if(paused && !game_over) {
+      vector<hyperpoint> pts;
+      int ok = 0, bad = 0;
+      for(int i=0; i<=360; i++) {
+        dynamicval<eGeometry> g(geometry, gSpace435);
+        auto h = inverse(dscurrent_ship) * spin(i*degree);
+        auto cr = ds_cross0_light(dscurrent * h);
+        pts.push_back(cr.h);
+        if(cr.shift > 0) ok++; else bad++;
+        }
+      if(bad == 0) {
+        for(auto h: pts) curvepoint(h);
+        queuecurve(shiftless(Id), 0xFF0000C0, 0x00000060, PPR::SUPERLINE);
+        }
       }
     }
   }
