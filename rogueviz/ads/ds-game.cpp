@@ -17,37 +17,206 @@ bool mark_origin = false;
 
 ads_object *main_rock;
 
+struct rock_generator {
+  ld cshift;
+
+  ads_object* add(transmatrix T) {
+    auto r = std::make_unique<ads_object> (oRock, nullptr, ads_matrix(T, cshift), 0xFFFFFFFF);
+    r->shape = &shape_disk;
+    auto res = &*r;
+    rocks.emplace_back(std::move(r));
+    return res;
+    };
+
+  void report(string s) {
+    println(hlog, lalign(10, format(tformat, cshift/time_unit)), ": ", s);
+    };
+
+  ld rand_range(ld a, ld b) { return lerp(a, b, randd()); };
+
+  transmatrix rand_place() {
+    geometry = gSphere;
+    hyperpoint h = random_spin3() * C0;
+    transmatrix T = gpushxto0(h);
+    geometry = gSpace435;
+    for(int i=0; i<4; i++) T[i][3] = T[3][i] = i == 3;
+    return T;
+    };
+
+  void death_cross(int qty) {
+    ld rapidity = rand_range(1, 3);
+    cshift += rand_range(0.5, 1);
+    ld alpha = randd() * TAU;
+    report(lalign(0, "Death Cross ", qty));
+    for(int a=0; a<qty; a++)
+      add(spin(a * TAU / qty + alpha) * lorentz(0, 3, rapidity));
+    cshift += rand_range(0.5, 1);
+    }
+
+  void static_starry_field() {
+    cshift += rand_range(1, 2);
+    report("Static Starry Field");
+    for(int i=0; i<100; i++) {
+      transmatrix T = rand_place();
+      add(inverse(T));
+      }
+    cshift += rand_range(1, 2);
+    }
+
+  void chaotic_starry_field() {
+    cshift += rand_range(2, 3);
+    report("Chaotic Starry Field");
+    for(int i=0; i<50; i++) {
+      transmatrix T = rand_place();
+      add(inverse(T) * spin(randd() * TAU) * lorentz(0, 3, rand_range(0, 3)));
+      }
+    cshift += rand_range(2, 3);
+    }
+
+  /* that pattern does not work */
+  void death_spiral() {
+    cshift += rand_range(2, 3) + 1.5;
+    report("Death Spiral");
+    for(int i=0; i<30; i++) {
+      add(spin(i * TAU * 14 / 30) * lorentz(0, 3, exp((i-15)/5.)));
+      }
+    cshift += rand_range(2, 3);
+    }
+
+  transmatrix div_matrix() {
+    /* we need to find the limit of this as appr -> inf */
+    ld appr = 5;
+    transmatrix T = lorentz(2, 3, -appr) * cspin(0, 2, exp(-appr)) * lorentz(2, 3, appr);
+    /* all the entries happen to be multiples of .5 */
+    for(int i=0; i<4; i++) for(int j=0; j<4; j++) {
+      auto& b = T[i][j];
+      b = floor(b * 10 + .5) / 10;
+      }
+    return T;
+    }
+
+  /* see div_matrix */
+  transmatrix conv_matrix() {
+    ld appr = 5;
+    transmatrix T = lorentz(2, 3, appr) * cspin(0, 2, exp(-appr)) * lorentz(2, 3, -appr);
+    for(int i=0; i<4; i++) for(int j=0; j<4; j++) {
+      auto& b = T[i][j];
+      b = floor(b * 10 + .5) / 10;
+      }
+    return T;
+    }
+
+  void divergent_spiral() {
+    report("Divergent Spiral");
+    cshift += rand_range(.3, .7);
+    ld alpha = randd() * TAU;
+    ld step = rand_range(0.17, 0.23);
+    for(int i=0; i<45; i++) {
+      cshift += step;
+      add(spin(alpha + i * TAU / 30) * div_matrix());
+      }
+    cshift += rand_range(.3, .7);
+    }
+
+  void convergent_spiral() {
+    report("Convergent Spiral");
+    cshift += rand_range(.3, .7);
+    ld alpha = randd() * TAU;
+    ld step = rand_range(0.17, 0.23);
+    for(int i=0; i<45; i++) {
+      cshift += step;
+      add(spin(alpha + i * TAU / 30) * conv_matrix());
+      }
+    cshift += rand_range(.3, .7);
+    }
+
+  void rack() {
+    report("Rack");
+    int qty = 3 + rand() % 4;
+    ld rapidity = rand_range(1, 3);
+    ld step = rand_range(.45, .75);
+    ld alpha = rand_range(0, TAU);
+    ld spinv = rand_range(0, TAU);
+    for(int i=0; i<qty; i++) {
+      cshift ++;
+      for(ld j=-3; j<=3; j++) {
+        add(spin(alpha + i * spinv) * cspin(0, 2, j * step) * spin(90*degree) * lorentz(0, 3, rapidity));
+        }
+      }
+    }
+
+  void hyperboloid() {
+    report("Hyperboloid");
+    ld alpha = randd() * TAU;
+    ld range1 = rand_range(0.15, 0.25);
+    ld range2 = rand_range(0.35, 0.45);
+    cshift += rand_range(2, 3);
+    ld rapidity = rand_range(-3, 3);
+    int qty = 20 + rand() % 10;
+    for(int i=0; i<qty; i++)
+      add(spin(alpha) * cspin(0, 2, range1) * spin(i * TAU / qty) * cspin(0, 2, range2) * lorentz(1, 3, rapidity));
+    cshift += rand_range(2, 3);
+    }
+
+  void machinegun() {
+    report("Machinegun");
+    ld alpha = randd() * TAU;
+    int qty = 10 + 1 / (.05 + randd());
+    ld rapidity = rand_range(3, 6);
+    ld step = rand_range(0.1, 0.15);
+    for(int i=0; i<qty; i++) {
+      cshift += step;
+      add(spin(alpha) * lorentz(1, 3, rapidity));
+      }
+    }
+
+  void add_random() {
+
+    int r = rand() % 1000;
+
+    #define Chance(q) if(r < 0) return; r -= (q); if(r < 0)
+    Chance(10) death_cross(4);
+    Chance(10) death_cross(3);
+    Chance(10) static_starry_field();
+    Chance(10) chaotic_starry_field();
+    Chance(10) divergent_spiral();
+    Chance(10) convergent_spiral();
+    Chance(10) rack();
+    Chance(10) hyperboloid();
+    Chance(10) machinegun();
+    #undef Chance
+    }
+
+  void add_until(ld t) {
+    while(cshift < t) add_random();
+    }
+
+  };
+
+rock_generator rockgen;
+
+auto future_shown = 3 * TAU;
+
 void init_ds_game() {
 
+  dynamicval<eGeometry> g(geometry, gSpace435);
+
+  rockgen.cshift = 0;
+
   /* create the main rock first */
-  if(1) {
-    dynamicval<eGeometry> g(geometry, gSpace435);
-    auto r = std::make_unique<ads_object> (oRock, nullptr, ads_matrix(Id, 0), 0xFFD500FF);
-    r->shape = &shape_gold;
-    main_rock = &*r;
-    rocks.emplace_back(std::move(r));
-    }
+  main_rock = rockgen.add(Id);
+  main_rock->col = 0xFFD500FF;
+  main_rock->shape = &shape_gold;
 
-  for(int i=0; i<500; i++) {
-    hyperpoint h = random_spin3() * C0;
-    println(hlog, "h = ", h);
-
-    transmatrix T = gpushxto0(h);
-    dynamicval<eGeometry> g(geometry, gSpace435);
-    for(int i=0; i<4; i++) T[i][3] = T[3][i] = i == 3;
-    transmatrix worldline = inverse(T);
-    worldline = worldline * spin(randd() * TAU);
-    worldline = worldline * lorentz(0, 3, randd());
-
-    auto r = std::make_unique<ads_object> (oRock, nullptr, ads_matrix(worldline, 0), 0xFFFFFFFF);
-    r->shape = &shape_disk;
-    rocks.emplace_back(std::move(r));
-    }
+  /* also create shape_disk */
   shape_disk.clear();
   for(int d=0; d<=360; d += 15) {
     shape_disk.push_back(sin(d*degree) * 0.1 * scale);
     shape_disk.push_back(cos(d*degree) * 0.1 * scale);
     }
+
+  rockgen.cshift += 2;
+  rockgen.add_until(future_shown);
   }
 
 void ds_gen_particles(int qty, transmatrix from, ld shift, color_t col, ld spd, ld t, ld spread = 1) {
@@ -180,6 +349,10 @@ bool ds_turn(int idelta) {
       }
     fixmatrix(current.T);
     
+    if(1) {
+      rockgen.add_until(current.shift + future_shown);
+      }
+
     if(!paused) {
       ship_pt += pt;
       pdata.oxygen -= pt;
@@ -240,8 +413,8 @@ void view_ds_game() {
     for(auto& r: rocks) {
       auto& rock = *r;
       poly_outline = 0xFF;
-      if(rock.at.shift < current.shift - 4 * TAU) continue;
-      if(rock.at.shift > current.shift + 4 * TAU) continue;
+      if(rock.at.shift < current.shift - future_shown) continue;
+      if(rock.at.shift > current.shift + future_shown) continue;
       
       if(1) {
         dynamicval<eGeometry> g(geometry, gSpace435);
