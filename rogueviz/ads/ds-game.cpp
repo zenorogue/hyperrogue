@@ -6,11 +6,28 @@ vector<ld> shape_disk;
 
 void set_default_keys();
 
-transmatrix dscurrent, dscurrent_ship;
+/* In DS, we also use ads_matrix, but the meaning of the shift parameter is different:
+ * 
+ */
 
 vector<unique_ptr<ads_object>> rocks;
 
+int ds_rocks = 500;
+bool mark_origin = false;
+
+ads_object *main_rock;
+
 void init_ds_game() {
+
+  /* create the main rock first */
+  if(1) {
+    dynamicval<eGeometry> g(geometry, gSpace435);
+    auto r = std::make_unique<ads_object> (oRock, nullptr, ads_matrix(Id, 0), 0xFFD500FF);
+    r->shape = &shape_gold;
+    main_rock = &*r;
+    rocks.emplace_back(std::move(r));
+    }
+
   for(int i=0; i<500; i++) {
     hyperpoint h = random_spin3() * C0;
     println(hlog, "h = ", h);
@@ -33,9 +50,9 @@ void init_ds_game() {
     }
   }
 
-void ds_gen_particles(int qty, transmatrix from, color_t col, ld spd, ld t, ld spread = 1) {
+void ds_gen_particles(int qty, transmatrix from, ld shift, color_t col, ld spd, ld t, ld spread = 1) {
   for(int i=0; i<qty; i++) {
-    auto r = std::make_unique<ads_object>(oParticle, nullptr, ads_matrix(from * spin(randd() * TAU * spread) * lorentz(0, 3, (.5 + randd() * .5) * spd), 0), col );
+    auto r = std::make_unique<ads_object>(oParticle, nullptr, ads_matrix(from * spin(randd() * TAU * spread) * lorentz(0, 3, (.5 + randd() * .5) * spd), shift), col );
     r->shape = &shape_particle;
     r->life_end = randd() * t;
     r->life_start = 0;
@@ -61,8 +78,8 @@ void ds_handle_crashes() {
         m->life_end = m->pt_main.shift;
         r->life_end = r->pt_main.shift;
         dynamicval<eGeometry> g(geometry, gSpace435);
-        ds_gen_particles(rpoisson(crash_particle_qty), m->at.T * lorentz(2, 3, m->life_end), missile_color, crash_particle_rapidity, crash_particle_life);
-        ds_gen_particles(rpoisson(crash_particle_qty), r->at.T * lorentz(2, 3, r->life_end), r->col, crash_particle_rapidity, crash_particle_life);
+        ds_gen_particles(rpoisson(crash_particle_qty), m->at.T * lorentz(2, 3, m->life_end), m->at.shift, missile_color, crash_particle_rapidity, crash_particle_life);
+        ds_gen_particles(rpoisson(crash_particle_qty), r->at.T * lorentz(2, 3, r->life_end), r->at.shift, r->col, crash_particle_rapidity, crash_particle_life);
         pdata.score++;
         int qty = 2 + rpoisson(1);
         for(int i=0; i<qty; i++) {
@@ -82,11 +99,11 @@ void ds_fire() {
   pdata.ammo--;
   dynamicval<eGeometry> g(geometry, gSpace435);
 
-  transmatrix S0 = inverse(dscurrent) * spin(ang*degree);
+  transmatrix S0 = inverse(current.T) * spin(ang*degree);
 
   transmatrix S1 = S0 * lorentz(0, 3, missile_rapidity);
 
-  auto r = std::make_unique<ads_object> (oMissile, nullptr, ads_matrix(S1, 0), 0xC0C0FFFF);
+  auto r = std::make_unique<ads_object> (oMissile, nullptr, ads_matrix(S1, current.shift), 0xC0C0FFFF);
   r->shape = &shape_missile;
   r->life_start = 0;
 
@@ -108,11 +125,11 @@ bool ds_turn(int idelta) {
   if(a[16+5] && !la[16+5]) {
     paused = !paused;
     if(paused) {
-      dscurrent_ship = dscurrent;
+      current_ship = current;
       view_pt = 0;
       }
     else {
-      dscurrent = dscurrent_ship;
+      current = current_ship;
       }
     }
 
@@ -127,15 +144,15 @@ bool ds_turn(int idelta) {
     ld mul = read_movement();
 
     if(paused && a[16+11]) {
-      dscurrent = spin(ang*degree) * cspin(0, 2, mul*delta*-pause_speed) * spin(-ang*degree) * dscurrent;
+      current.T = spin(ang*degree) * cspin(0, 2, mul*delta*-pause_speed) * spin(-ang*degree) * current.T;
       }
     else {
-      dscurrent = spin(ang*degree) * lorentz(0, 3, -delta*accel*mul) * spin(-ang*degree) * dscurrent;
+      current.T = spin(ang*degree) * lorentz(0, 3, -delta*accel*mul) * spin(-ang*degree) * current.T;
       }
     
     if(!paused) {
       pdata.fuel -= delta*accel*mul;
-      ds_gen_particles(rpoisson(delta*accel*mul*fuel_particle_qty), inverse(dscurrent) * spin(ang*degree+M_PI) * rots::uxpush(0.06 * scale), rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
+      ds_gen_particles(rpoisson(delta*accel*mul*fuel_particle_qty), inverse(current.T) * spin(ang*degree+M_PI) * rots::uxpush(0.06 * scale), current.shift, rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
       }
 
     ld tc = 0;
@@ -145,14 +162,23 @@ bool ds_turn(int idelta) {
 
     if(!paused && !game_over) {
       shipstate ss;
-      ss.at.T = inverse(dscurrent) * spin(ang*degree);
+      ss.at.T = inverse(current.T) * spin(ang*degree);
+      ss.at.shift = current.shift;
       ss.start = ship_pt;
       ss.duration = pt;
       ss.ang = ang;
       history.emplace_back(ss);
       }
     
-    dscurrent = lorentz(3, 2, -tc) * dscurrent;
+    current.T = lorentz(3, 2, -tc) * current.T;
+    
+    auto& mshift = main_rock->pt_main.shift;
+    if(mshift) {
+      current.shift += mshift;
+      current.T = current.T * lorentz(2, 3, mshift);
+      mshift = 0;
+      }
+    fixmatrix(current.T);
     
     if(!paused) {
       ship_pt += pt;
@@ -167,7 +193,7 @@ bool ds_turn(int idelta) {
     if(a[16+4] && !la[16+4] && false) {
       if(history.size())
         history.back().duration = HUGE_VAL;
-      dscurrent = random_spin3();
+      current = random_spin3();
       }
     }
 
@@ -205,22 +231,27 @@ transmatrix tpt(ld x, ld y) {
 
 void view_ds_game() {
   displayed.clear();
-  
+
+  main_rock->at.shift = current.shift;
+
   if(1) {
     make_shape();
     
     for(auto& r: rocks) {
       auto& rock = *r;
       poly_outline = 0xFF;
+      if(rock.at.shift < current.shift - 4 * TAU) continue;
+      if(rock.at.shift > current.shift + 4 * TAU) continue;
       
       if(1) {
         dynamicval<eGeometry> g(geometry, gSpace435);
-        rock.pt_main = ds_cross0(dscurrent * rock.at.T);
+        transmatrix at = current.T * lorentz(2, 3, rock.at.shift - current.shift) * rock.at.T;
+        rock.pt_main = ds_cross0(at);
         
         if(rock.pt_main.shift < rock.life_start) continue;
         if(rock.pt_main.shift > rock.life_end) continue;
 
-        transmatrix at1 = dscurrent * rock.at.T * lorentz(2, 3, rock.pt_main.shift);
+        transmatrix at1 = at * lorentz(2, 3, rock.pt_main.shift);
         rock.pts.clear();
         
         auto& sh = *rock.shape;
@@ -246,8 +277,10 @@ void view_ds_game() {
       color_t out = rock.col;
       queuecurve(shiftless(Id), out, rock.col, PPR::LINE);
 
-      if(view_proper_times) {
-        string str = format(tformat, rock.pt_main.shift / time_unit);
+      if(view_proper_times && rock.type != oParticle) {
+        ld t = rock.pt_main.shift;
+        if(&rock == main_rock) t += current.shift;
+        string str = format(tformat, t / time_unit);
         queuestr(shiftless(rgpushxto0(rock.pt_main.h)), .1, str, 0xFFFF00, 8);
         }
       
@@ -258,11 +291,13 @@ void view_ds_game() {
 
     ld delta = paused ? 1e-4 : -1e-4;
     for(auto& ss: history) {
+      if(ss.at.shift < current.shift - 4 * TAU) continue;
+      if(ss.at.shift > current.shift + 4 * TAU) continue;
       dynamicval<eGeometry> g(geometry, gSpace435);
-      cross_result cr = ds_cross0(dscurrent * ss.at.T);
+      cross_result cr = ds_cross0(current.T * lorentz(2, 3, ss.at.shift - current.shift) * ss.at.T);
       if(cr.shift < delta) continue;
       if(cr.shift > ss.duration + delta) continue;
-      transmatrix at = dscurrent * ss.at.T * lorentz(2, 3, cr.shift);
+      transmatrix at = current.T * lorentz(2, 3, cr.shift) * ss.at.T;
       
       vector<hyperpoint> pts;
       
@@ -307,8 +342,8 @@ void view_ds_game() {
       int ok = 0, bad = 0;
       for(int i=0; i<=360; i++) {
         dynamicval<eGeometry> g(geometry, gSpace435);
-        auto h = inverse(dscurrent_ship) * spin(i*degree);
-        auto cr = ds_cross0_light(dscurrent * h);
+        auto h = inverse(current_ship.T) * spin(i*degree);
+        auto cr = ds_cross0_light(current.T * lorentz(2, 3, current_ship.shift - current.shift) * h);
         pts.push_back(cr.h);
         if(cr.shift > 0) ok++; else bad++;
         }
@@ -331,7 +366,7 @@ void run_ds_game() {
   
   if(true) {
     dynamicval<eGeometry> g(geometry, gSpace435);
-    dscurrent = Id;
+    current = Id;
     }
 
   ship_pt = 0;
@@ -356,8 +391,9 @@ void ds_record() {
       if(ss.start + ss.duration > view_pt) {
         if(sphere) {
           dynamicval<eGeometry> g(geometry, gSpace435);
-          dscurrent = inverse(ss.at.T * spin(-ss.ang*degree));
-          dscurrent = lorentz(3, 2, view_pt - ss.start) * dscurrent;
+          current.shift = ss.at.shift;
+          current.T = inverse(ss.at.T * spin(-ss.ang*degree));
+          current.T = lorentz(3, 2, view_pt - ss.start) * current.T;
           }
         else PIA([&] {
           current = ads_inverse(ss.at * spin(-ss.ang*degree));
