@@ -453,8 +453,6 @@ void view_ds_game() {
   draw_textures();
 
   if(1) {
-    make_shape();
-    
     for(auto& r: rocks) {
       auto& rock = *r;
       poly_outline = 0xFF;
@@ -543,7 +541,7 @@ void view_ds_game() {
         ld u = (invincibility_pt-ship_pt) / ds_how_much_invincibility;
         poly_outline = gradient(shipcolor, rsrc_color[rtHull], 0, 0.5 + cos(5*u*TAU), 1);
         }
-      queuepolyat(shiftless(spin(ang*degree) * Id), shShip, shipcolor, PPR::MONSTER_HAIR);
+      queuepolyat(shiftless(spin(ang*degree)), make_shape(), shipcolor, PPR::MONSTER_HAIR);
       poly_outline = 0xFF;
 
       if(view_proper_times) {
