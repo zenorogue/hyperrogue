@@ -3,9 +3,9 @@ namespace hr {
 namespace ads_game {
 
 void adjust_for_scale() {
-  if(scale < 0.3) max_gen_per_frame = 1, draw_per_frame = 30, missile_rapidity = 1;
-  else if(scale < 0.8) max_gen_per_frame = 2, draw_per_frame = 100, missile_rapidity = 1;
-  else max_gen_per_frame = 3, draw_per_frame = 1000, missile_rapidity = 3;
+  if(ads_scale < 0.3) max_gen_per_frame = 1, draw_per_frame = 30, ads_missile_rapidity = 1;
+  else if(ads_scale < 0.8) max_gen_per_frame = 2, draw_per_frame = 100, ads_missile_rapidity = 1;
+  else max_gen_per_frame = 3, draw_per_frame = 1000, ads_missile_rapidity = 3;
   }
 
 void edit_difficulty() {
@@ -13,33 +13,40 @@ void edit_difficulty() {
   gamescreen();
 
   dialog::init(XLAT("AdS game parameters"), 0xC0C0FFFF, 150, 100);
-  add_edit(simspeed);
-  add_edit(accel);
-  add_edit(how_much_invincibility);
-  add_edit(rock_max_rapidity);
-  add_edit(rock_density);
-  add_edit(scale);
+  add_edit(DS_(simspeed));
+  add_edit(DS_(accel));
+  add_edit(DS_(how_much_invincibility));
+  add_edit(DS_(scale));
 
-  dialog::addBreak(100);
-  add_edit(max_gen_per_frame);
-  add_edit(draw_per_frame);
+  if(!main_rock) {
+    dialog::addBreak(100);
+    add_edit(rock_max_rapidity);
+    add_edit(rock_density);
+  
+    dialog::addBreak(100);
+    add_edit(max_gen_per_frame);
+    add_edit(draw_per_frame);
+    }
 
   dialog::addBreak(100);
   edit_rsrc();
   
-  dialog::addBreak(100);
-  dialog::addItem(XLAT("scale everything :2"), '!');
-  dialog::add_action([] {
-    change_scale(1/2.);
-    adjust_for_scale();
-    restart();
-    });
-  dialog::addItem(XLAT("scale everything *2"), '@');
-  dialog::add_action([] {
-    change_scale(2.);
-    adjust_for_scale();
-    restart();
-    });
+  if(!main_rock) {
+    dialog::addBreak(100);
+    dialog::addItem(XLAT("scale everything :2"), '!');
+    dialog::add_action([] {
+      change_scale(1/2.);
+      adjust_for_scale();
+      restart();
+      });
+    dialog::addItem(XLAT("scale everything *2"), '@');
+    dialog::add_action([] {
+      change_scale(2.);
+      adjust_for_scale();
+      restart();
+      });
+    }
+
   dialog::addBack();
   dialog::display();
   }
@@ -48,7 +55,7 @@ void edit_particles() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
 
-  dialog::init(XLAT("AdS particle settings"), 0xC0C0FFFF, 150, 100);
+  dialog::init(XLAT("particle/texture settings"), 0xC0C0FFFF, 150, 100);
 
   add_edit(crash_particle_rapidity);
   add_edit(crash_particle_qty);
@@ -56,6 +63,13 @@ void edit_particles() {
   add_edit(fuel_particle_rapidity);
   add_edit(fuel_particle_qty);
   add_edit(fuel_particle_life);
+
+  if(main_rock) {
+    dialog::addBreak(100);
+    add_edit(XSCALE);
+    add_edit(YSCALE);
+    add_edit(talpha);
+    }
 
   dialog::addBreak(100);
   dialog::addBack();
@@ -73,11 +87,11 @@ void game_menu() {
   
   add_edit(pause_speed);
   add_edit(view_proper_times);
-  add_edit(time_unit);
-  add_edit(auto_rotate);
-  add_edit(auto_angle);
+  add_edit(DS_(time_unit));
+  if(!main_rock) add_edit(auto_rotate);
+  if(!main_rock) add_edit(auto_angle);
 
-  dialog::addItem(XLAT("particle settings"), 'p');
+  dialog::addItem(XLAT("particle/texture settings"), 'p');
   dialog::add_action_push(edit_particles);
 
   dialog::addItem(XLAT("restart game"), 'r');

@@ -11,7 +11,7 @@ void fire() {
 
   ads_matrix S0 = ads_inverse(current * vctrV) * spin(ang*degree);
 
-  ads_matrix S1 = S0 * lorentz(0, 2, missile_rapidity);
+  ads_matrix S1 = S0 * lorentz(0, 2, ads_missile_rapidity);
   
   auto& ro = ci_at[c].rocks;
   auto r = std::make_unique<ads_object> (oMissile, c, S1, rsrc_color[rtAmmo]);
@@ -161,7 +161,7 @@ bool ads_turn(int idelta) {
   if(true) {
     
     /* proper time passed */
-    ld pt = delta * simspeed;
+    ld pt = delta * ads_simspeed;
     
     ld mul = read_movement();
 
@@ -169,11 +169,11 @@ bool ads_turn(int idelta) {
       current = ads_matrix(spin(ang*degree) * xpush(mul*delta*-pause_speed) * spin(-ang*degree), 0) * current;
       }
     else
-      apply_lorentz(spin(ang*degree) * lorentz(0, 2, -delta*accel*mul) * spin(-ang*degree));
+      apply_lorentz(spin(ang*degree) * lorentz(0, 2, -delta*ads_accel*mul) * spin(-ang*degree));
     
     if(!paused) {
-      pdata.fuel -= delta*accel*mul;
-      gen_particles(rpoisson(delta*accel*mul*fuel_particle_qty), vctr, ads_inverse(current * vctrV) * spin(ang*degree+M_PI) * rots::uxpush(0.06 * scale), rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
+      pdata.fuel -= delta*ads_accel*mul;
+      gen_particles(rpoisson(delta*ads_accel*mul*fuel_particle_qty), vctr, ads_inverse(current * vctrV) * spin(ang*degree+M_PI) * rots::uxpush(0.06 * ads_scale), rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
       }
 
     ld tc = 0;

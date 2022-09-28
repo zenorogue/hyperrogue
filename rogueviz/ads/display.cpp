@@ -90,7 +90,7 @@ void draw_game_cell(const cell_to_draw& cd) {
     }
 
   if(view_proper_times) {
-    string str = format(tformat, cd.center.shift / time_unit);
+    string str = format(tformat, cd.center.shift / ads_time_unit);
     queuestr(shiftless(rgpushxto0(cd.center.h)), .1, str, 0xFF4040, 8);
     }
 
@@ -115,7 +115,7 @@ void draw_game_cell(const cell_to_draw& cd) {
     auto& shape = *rock.shape;
     for(int i=0; i<isize(shape); i += 2) {
       hybrid::in_actual([&]{
-        auto h = V * rock.at * rots::uxpush(shape[i] * scale) * rots::uypush(shape[i+1] * scale);
+        auto h = V * rock.at * rots::uxpush(shape[i] * ads_scale) * rots::uypush(shape[i+1] * ads_scale);
         cross_result f = cross0(current * h);
         rock.pts.push_back(f);
         });
@@ -129,7 +129,7 @@ void draw_game_cell(const cell_to_draw& cd) {
       0x000000FF, rock.col, obj_prio[rock.type]);
 
     if(view_proper_times && rock.type != oParticle) {
-      string str = format(tformat, rock.pt_main.shift / time_unit);
+      string str = format(tformat, rock.pt_main.shift / ads_time_unit);
       queuestr(shiftless(rgpushxto0(rock.pt_main.h)), .1, str, 0xFFFFFF, 8);
       }
     }
@@ -149,7 +149,7 @@ void draw_game_cell(const cell_to_draw& cd) {
     auto& shape = shape_ship;
     for(int i=0; i<isize(shape); i += 2) {
       hybrid::in_actual([&]{
-        auto h = V * rock.at * rgpushxto0(normalize(hyperpoint(shape[i] * scale, shape[i+1] * scale, 1, 0)));
+        auto h = V * rock.at * rgpushxto0(normalize(hyperpoint(shape[i] * ads_scale, shape[i+1] * ads_scale, 1, 0)));
         pts.push_back(cross0(current * h).h);
         });
       }
@@ -158,7 +158,7 @@ void draw_game_cell(const cell_to_draw& cd) {
     curvepoint(pts[0]);
     queuecurve(shiftless(Id), 0xFF, shipcolor, PPR::MONSTER_FOOT);
 
-    string str = format(tformat, (cr.shift + rock.start) / time_unit);
+    string str = format(tformat, (cr.shift + rock.start) / ads_time_unit);
     queuestr(shiftless(rgpushxto0(cr.h)), .1, str, 0xC0C0C0, 8);
     }
   
@@ -208,7 +208,7 @@ void view_ads_game() {
     for(int u=0; u<30; u++) {
       auto bcurrent = current;
       
-      transmatrix T = spin(12*degree*u) * xpush(0.5);
+      transmatrix T = rgpushxto0( spin(12*degree*u) * xpush0(0.5) );
   
       current.T = current.T * T;
       auto base1 = findflat(ads_point(C0, 0));
@@ -275,20 +275,20 @@ void view_ads_game() {
     if(!game_over && !paused) {
       poly_outline = 0xFF;
       if(ship_pt < invincibility_pt) {
-        ld u = (invincibility_pt-ship_pt) / how_much_invincibility;
+        ld u = (invincibility_pt-ship_pt) / ads_how_much_invincibility;
         poly_outline = gradient(shipcolor, rsrc_color[rtHull], 0, 0.5 + cos(5*u*TAU), 1);
         }
       queuepolyat(shiftless(spin(ang*degree) * Id), shShip, shipcolor, PPR::MONSTER_HAIR);
       poly_outline = 0xFF;
 
       if(view_proper_times) {
-        string str = format(tformat, ship_pt / time_unit);
+        string str = format(tformat, ship_pt / ads_time_unit);
         queuestr(shiftless(Id), .1, str, 0xFFFFFF, 8);
         }
       }
     
     if(paused && view_proper_times) {
-      string str = format(tformat, view_pt / time_unit);
+      string str = format(tformat, view_pt / ads_time_unit);
       queuestr(shiftless(Id), .1, str, 0xFFFF00, 8);
       }
     }

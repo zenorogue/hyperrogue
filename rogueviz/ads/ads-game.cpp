@@ -51,7 +51,7 @@ void restart() {
   gen_terrain(vctr, ci_at[vctr], -2);
   forCellEx(c1, vctr) ci_at[c1].type = wtNone;
   ci_at[vctr].type = wtNone;
-  invincibility_pt = how_much_invincibility;
+  invincibility_pt = ads_how_much_invincibility;
 
   paused = false;
   ship_pt = 0;
@@ -108,14 +108,14 @@ void run_ads_game_std() {
   }
 
 void change_scale(ld s) {
-  scale *= s;
+  ads_scale *= s;
   rock_density /= (s * s);
   rock_max_rapidity *= s;
-  simspeed *= s;
+  ads_simspeed *= s;
   pconf.scale /= s;
-  how_much_invincibility *= s;
-  max_pdata.oxygen *= s;
-  tank_pdata.oxygen *= s;
+  ads_how_much_invincibility *= s;
+  ads_max_pdata.oxygen *= s;
+  ads_tank_pdata.oxygen *= s;
   crash_particle_life *= s;
   fuel_particle_life *= s;
   }
@@ -126,18 +126,32 @@ auto shot_hooks =
 + arg::add3("-ads-scale", [] { arg::shift(); ld s = arg::argf(); change_scale(s); })
 + arg::add3("-ads-restart", restart)
 + addHook(hooks_configfile, 100, [] {
-    param_f(how_much_invincibility, "ads_invinc")
-    -> editable(0, TAU, TAU/4, "invincibility time", "How long does the period of invincibility after crashing last, in absolute units.", 'i');
+    param_f(ads_how_much_invincibility, "ads_invinc")
+    -> editable(0, TAU, TAU/4, "AdS invincibility time", "How long does the period of invincibility after crashing last, in absolute units.", 'i');
+    param_f(ds_how_much_invincibility, "ads_invinc")
+    -> editable(0, TAU, TAU/4, "dS invincibility time", "How long does the period of invincibility after crashing last, in absolute units.", 'i');
     param_b(auto_angle, "ads_auto_angle")
     -> editable("automatically rotate the projection", 'a');
-    param_f(simspeed, "ads_game_simspeed")
-    -> editable(0, 2*TAU, TAU/4, "game speed", "Controls the speed of the game.", 's');
-    param_f(scale, "ads_game_scale")
-    -> editable(0, 2, 0.1, "game scale", "Controls the scaling of game objects.", 'c');
-    param_f(accel, "ads_game_accel")
-    -> editable(0, 30, 1, "acceleration", "Controls the speed of your ship's acceleration.", 'a');
-    param_f(time_unit, "ads_time_unit")
-    -> editable(0, 2*TAU, 1, "time unit",
+    param_f(ads_simspeed, "ads_game_simspeed")
+    -> editable(0, 2*TAU, TAU/4, "AdS game speed", "Controls the speed of the game.", 's');
+    param_f(ds_simspeed, "ads_game_simspeed")
+    -> editable(0, 2*TAU, TAU/4, "dS game speed", "Controls the speed of the game.", 's');
+    param_f(ads_scale, "ads_game_scale")
+    -> editable(0, 2, 0.1, "AdS game scale", "Controls the scaling of game objects.", 'c');
+    param_f(ds_scale, "ds_game_scale")
+    -> editable(0, 2, 0.1, "dS game scale", "Controls the scaling of game objects.", 'c');
+    param_f(ads_accel, "ads_game_accel")
+    -> editable(0, 30, 1, "AdS acceleration", "Controls the speed of your ship's acceleration.", 'a');
+    param_f(ds_accel, "ads_game_accel")
+    -> editable(0, 30, 1, "dS acceleration", "Controls the speed of your ship's acceleration.", 'a');
+    param_f(ads_time_unit, "ads_time_unit")
+    -> editable(0, 2*TAU, 1, "AdS time unit",
+      "Controls the unit used when the 'display the proper times' option is on.\n\n"
+      "It takes tau(=2π) units to go the full circle, so the default time unit is tau. You can also use the absolute units (1).\n\n"
+      "Times in settings are always specified in absolute units."
+      , 'a');
+    param_f(ds_time_unit, "ds_time_unit")
+    -> editable(0, 2*TAU, 1, "dS time unit",
       "Controls the unit used when the 'display the proper times' option is on.\n\n"
       "It takes tau(=2π) units to go the full circle, so the default time unit is tau. You can also use the absolute units (1).\n\n"
       "Times in settings are always specified in absolute units."
@@ -148,8 +162,10 @@ auto shot_hooks =
     -> editable(0, 5, 0.05, "rock density", "how many rocks to generate", 'd');
     param_f(rock_max_rapidity, "ads_rock_rapidity")
     -> editable(0, 5, 0.05, "rock rapidity", "how fast should the rocks be relative to the map", 'w');
-    param_f(missile_rapidity, "ads_missile_rapidity")
-    -> editable(0, 5, 0.05, "missile rapidity", "how fast should the missiles go relative to the ship", 'm');
+    param_f(ads_missile_rapidity, "ads_missile_rapidity")
+    -> editable(0, 5, 0.05, "AdS missile rapidity", "how fast should the missiles go relative to the ship", 'm');
+    param_f(ds_missile_rapidity, "ds_missile_rapidity")
+    -> editable(0, 5, 0.05, "dS missile rapidity", "how fast should the missiles go relative to the ship", 'm');
     param_b(auto_rotate, "ads_auto_rotate")
     -> editable("automatically rotate the screen", 'r');
     param_b(view_proper_times, "ads_display")
@@ -172,6 +188,13 @@ auto shot_hooks =
     -> editable(0, 100, 1, "tiles to generate per frame", "reduce if the framerate is low", 'G');
     param_i(draw_per_frame, "ads_draw_per_frame")
     -> editable(0, 3000, 0.1, "tiles to draw per frame", "reduce if the framerate is low", 'D');
+
+    param_i(XSCALE, "ds_xscale")
+    -> editable(4, 512, 16, "x precision of Earth-de Sitter", "", 'x');
+    param_i(YSCALE, "ds_yscale")
+    -> editable(4, 512, 16, "y precision of Earth-de Sitter", "", 'y');
+    param_i(talpha, "ds_talpha")
+    -> editable(0, 255, 16, "dS texture intensity", "", 't');
 
     rsrc_config();
     });

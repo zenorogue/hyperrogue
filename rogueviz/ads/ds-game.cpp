@@ -15,9 +15,6 @@ void set_default_keys();
 
 vector<unique_ptr<ads_object>> rocks;
 
-int ds_rocks = 500;
-bool mark_origin = false;
-
 struct rock_generator {
   ld cshift;
 
@@ -30,7 +27,7 @@ struct rock_generator {
     };
 
   void report(string s) {
-    println(hlog, lalign(10, format(tformat, cshift/time_unit)), ": ", s);
+    println(hlog, lalign(10, format(tformat, cshift/ds_time_unit)), ": ", s);
     };
 
   ld rand_range(ld a, ld b) { return lerp(a, b, randd()); };
@@ -135,7 +132,7 @@ struct rock_generator {
     report("Rack");
     int qty = 3 + rand() % 4;
     ld rapidity = rand_range(1, 3);
-    ld step = rand_range(.45, .75);
+    ld step = rand_range(.45, .75) * ds_scale;
     ld alpha = rand_range(0, TAU);
     ld spinv = rand_range(0, TAU);
     for(int i=0; i<qty; i++) {
@@ -149,8 +146,8 @@ struct rock_generator {
   void hyperboloid() {
     report("Hyperboloid");
     ld alpha = randd() * TAU;
-    ld range1 = rand_range(0.15, 0.25);
-    ld range2 = rand_range(0.35, 0.45);
+    ld range1 = rand_range(0.15, 0.25) * ds_scale;
+    ld range2 = rand_range(0.35, 0.45) * ds_scale;
     cshift += rand_range(2, 3);
     ld rapidity = rand_range(-3, 3);
     int qty = 20 + rand() % 10;
@@ -173,7 +170,7 @@ struct rock_generator {
 
   void add_random() {
 
-    int r = rand() % 1000;
+    int r = rand() % 150;
 
     #define Chance(q) if(r < 0) return; r -= (q); if(r < 0)
     Chance(10) death_cross(4);
@@ -236,8 +233,8 @@ void init_ds_game() {
   /* also create shape_disk */
   shape_disk.clear();
   for(int d=0; d<=360; d += 15) {
-    shape_disk.push_back(sin(d*degree) * 0.1 * scale);
-    shape_disk.push_back(cos(d*degree) * 0.1 * scale);
+    shape_disk.push_back(sin(d*degree) * 0.1 * ds_scale);
+    shape_disk.push_back(cos(d*degree) * 0.1 * ds_scale);
     }
 
   rockgen.cshift += 2;
@@ -295,7 +292,7 @@ void ds_handle_crashes() {
     }
 
   if(!game_over) for(int i=0; i<isize(shape_ship); i+=2) {
-    hyperpoint h = spin(ang*degree) * hpxyz(shape_ship[i] * scale, shape_ship[i+1] * scale, 1);
+    hyperpoint h = spin(ang*degree) * hpxyz(shape_ship[i] * ds_scale, shape_ship[i+1] * ds_scale, 1);
     for(auto r: drocks) {
       if(pointcrash(h, r->pts)) ds_crash_ship();
       }
@@ -315,7 +312,7 @@ void ds_fire() {
 
   transmatrix S0 = inverse(current.T) * spin(ang*degree);
 
-  transmatrix S1 = S0 * lorentz(0, 3, missile_rapidity);
+  transmatrix S1 = S0 * lorentz(0, 3, ads_missile_rapidity);
 
   auto r = std::make_unique<ads_object> (oMissile, nullptr, ads_matrix(S1, current.shift), rsrc_color[rtAmmo]);
   r->shape = &shape_missile;
@@ -354,19 +351,19 @@ bool ds_turn(int idelta) {
   if(true) {
     dynamicval<eGeometry> g(geometry, gSpace435);
     
-    ld pt = delta * simspeed;
+    ld pt = delta * ds_simspeed;
     ld mul = read_movement();
 
     if(paused && a[16+11]) {
       current.T = spin(ang*degree) * cspin(0, 2, mul*delta*-pause_speed) * spin(-ang*degree) * current.T;
       }
     else {
-      current.T = spin(ang*degree) * lorentz(0, 3, -delta*accel*mul) * spin(-ang*degree) * current.T;
+      current.T = spin(ang*degree) * lorentz(0, 3, -delta*ds_accel*mul) * spin(-ang*degree) * current.T;
       }
     
     if(!paused) {
-      pdata.fuel -= delta*accel*mul;
-      ds_gen_particles(rpoisson(delta*accel*mul*fuel_particle_qty), inverse(current.T) * spin(ang*degree+M_PI) * rots::uxpush(0.06 * scale), current.shift, rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
+      pdata.fuel -= delta*ds_accel*mul;
+      ds_gen_particles(rpoisson(delta*ds_accel*mul*fuel_particle_qty), inverse(current.T) * spin(ang*degree+M_PI) * rots::uxpush(0.06 * ds_scale), current.shift, rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
       }
 
     ld tc = 0;
@@ -445,7 +442,7 @@ cross_result ds_cross0_light(transmatrix T) {
   }
 
 transmatrix tpt(ld x, ld y) {
-  return cspin(0, 2, x * scale) * cspin(1, 2, y * scale);
+  return cspin(0, 2, x * ds_scale) * cspin(1, 2, y * ds_scale);
   }
 
 void view_ds_game() {
@@ -501,7 +498,7 @@ void view_ds_game() {
       if(view_proper_times && rock.type != oParticle) {
         ld t = rock.pt_main.shift;
         if(rock.type == oMainRock) t += current.shift;
-        string str = format(tformat, t / time_unit);
+        string str = format(tformat, t / ds_time_unit);
         queuestr(shiftless(rgpushxto0(rock.pt_main.h)), .1, str, 0xFFFF00, 8);
         }
       
@@ -533,7 +530,7 @@ void view_ds_game() {
       queuecurve(shiftless(Id), 0xFF, shipcolor, PPR::MONSTER_FOOT);
 
       if(view_proper_times) {
-        string str = format(tformat, (cr.shift + ss.start) / time_unit);
+        string str = format(tformat, (cr.shift + ss.start) / ds_time_unit);
         queuestr(shiftless(rgpushxto0(cr.h)), .1, str, 0xC0C0C0, 8);
         }
       }
@@ -541,20 +538,20 @@ void view_ds_game() {
     if(!game_over && !paused) {
       poly_outline = 0xFF;
       if(ship_pt < invincibility_pt) {
-        ld u = (invincibility_pt-ship_pt) / how_much_invincibility;
+        ld u = (invincibility_pt-ship_pt) / ds_how_much_invincibility;
         poly_outline = gradient(shipcolor, rsrc_color[rtHull], 0, 0.5 + cos(5*u*TAU), 1);
         }
       queuepolyat(shiftless(spin(ang*degree) * Id), shShip, shipcolor, PPR::MONSTER_HAIR);
       poly_outline = 0xFF;
 
       if(view_proper_times) {
-        string str = format(tformat, ship_pt / time_unit);
+        string str = format(tformat, ship_pt / ds_time_unit);
         queuestr(shiftless(Id), .1, str, 0xFFFFFF, 8);
         }
       }
     
     if(paused && view_proper_times) {
-      string str = format(tformat, view_pt / time_unit);
+      string str = format(tformat, view_pt / ds_time_unit);
       queuestr(shiftless(Id), .1, str, 0xFFFF00, 8);
       }
 
@@ -587,7 +584,8 @@ void run_ds_game() {
   
   if(true) {
     dynamicval<eGeometry> g(geometry, gSpace435);
-    current = cspin(0, 2, 0.2);
+    current = cspin(0, 2, 0.2 * ds_scale);
+    invincibility_pt = ds_how_much_invincibility;
     }
 
   ship_pt = 0;
@@ -603,11 +601,11 @@ void run_ds_game() {
 
 void ds_record() {
   ld full = anims::period;
-  anims::period = full * history.back().start / simspeed;
+  anims::period = full * history.back().start / ds_simspeed;
   anims::noframes = anims::period * 60 / 1000;
   dynamicval<bool> b(paused, true);
   int a = addHook(anims::hooks_anim, 100, [&] {
-    view_pt = (ticks / full) * simspeed;
+    view_pt = (ticks / full) * ds_simspeed;
     for(auto& ss: history)
       if(ss.start + ss.duration > view_pt) {
         if(sphere) {
@@ -633,8 +631,7 @@ void ds_record() {
 
 auto ds_hooks = 
   arg::add3("-ds-game", run_ds_game)
-+ arg::add3("-ds-record", ds_record)
-;
++ arg::add3("-ds-record", ds_record);
 
 }
 }

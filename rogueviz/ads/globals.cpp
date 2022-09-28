@@ -3,16 +3,21 @@ namespace hr {
 namespace ads_game {
 
 /** simulation speed */
-ld simspeed = TAU;
+ld ads_simspeed = TAU;
+ld ds_simspeed = M_PI;
+
+#define DS_(x) (main_rock ? ds_##x : ads_##x)
 
 /** by how much do WAS keys accelerate */
-ld accel = 6;
+ld ads_accel = 6;
+ld ds_accel = 15;
 
 /** cursor movement speed while paused */
 ld pause_speed = 5;
 
 /** time unit for time display */
-ld time_unit = TAU;
+ld ads_time_unit = TAU;
+ld ds_time_unit = 1;
 
 /** transform world coordinates to current view coordinates */
 ads_matrix current;
@@ -61,7 +66,8 @@ void change_scale(ld s);
 vector<struct ads_object*> displayed;
 
 /** how much should be the objects scaled */
-ld scale = 1;
+ld ads_scale = 1;
+ld ds_scale = 1;
 
 color_t missile_color = 0xFF0000FF;
 
@@ -75,16 +81,18 @@ struct player_data {
   ld oxygen;
   };
 
-ld how_much_invincibility = TAU / 4;
+ld ads_how_much_invincibility = TAU / 4;
+ld ds_how_much_invincibility = TAU / 4;
 
-player_data pdata, max_pdata, tank_pdata;
+player_data pdata, ads_max_pdata, ads_tank_pdata, ds_max_pdata, ds_tank_pdata;
 
 bool auto_angle = true;
 
 ld rock_density = 0.25;
 ld rock_max_rapidity = 1.5;
 
-ld missile_rapidity = 3; // speed is tanh(3) = about 0.95c
+ld ads_missile_rapidity = 3; // speed is tanh(3) = about 0.95c
+ld ds_missile_rapidity = 3; // speed is tanh(3) = about 0.95c
 
 ld crash_particle_rapidity = 1;
 ld crash_particle_qty = 8;
@@ -100,8 +108,6 @@ int max_gen_per_frame = 3;
 int draw_per_frame = 1000;
 
 /* for DS */
-
-ld ds_split_speed = 0.1;
 
 ads_object *main_rock;
 

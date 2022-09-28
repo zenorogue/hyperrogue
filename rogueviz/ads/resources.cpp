@@ -10,17 +10,29 @@ color_t rsrc_color[6] = { 0x404040FF, 0x40C0C0FF, 0xFFD500FF, 0xFF0000FF, 0x00FF
 vector<ld>* rsrc_shape[6] = { &shape_particle, &shape_heart, &shape_gold, &shape_weapon, &shape_fuel, &shape_airtank };
 
 void rsrc_config() {
-  max_pdata.hitpoints = 3;
-  max_pdata.score = 0;
-  max_pdata.ammo = 50;
-  max_pdata.fuel = 12 * TAU;
-  max_pdata.oxygen = 20 * TAU;
+  ads_max_pdata.hitpoints = 3;
+  ads_max_pdata.score = 0;
+  ads_max_pdata.ammo = 50;
+  ads_max_pdata.fuel = 12 * TAU;
+  ads_max_pdata.oxygen = 20 * TAU;
   
-  tank_pdata.hitpoints = 1;
-  tank_pdata.score = 1;
-  tank_pdata.ammo = 20;
-  tank_pdata.fuel = 4 * TAU;
-  tank_pdata.oxygen = 5 * TAU;
+  ads_tank_pdata.hitpoints = 1;
+  ads_tank_pdata.score = 1;
+  ads_tank_pdata.ammo = 20;
+  ads_tank_pdata.fuel = 4 * TAU;
+  ads_tank_pdata.oxygen = 5 * TAU;
+
+  ds_max_pdata.hitpoints = 5;
+  ds_max_pdata.score = 0;
+  ds_max_pdata.ammo = 10;
+  ds_max_pdata.fuel = 12 * TAU;
+  ds_max_pdata.oxygen = 20 * TAU;
+  
+  ds_tank_pdata.hitpoints = 1;
+  ds_tank_pdata.score = 1;
+  ds_tank_pdata.ammo = 2;
+  ds_tank_pdata.fuel = 8 * TAU;
+  ds_tank_pdata.oxygen = 15 * TAU;
   
   auto all = [] (player_data& d, string s, string t, string u) {
     param_i(d.hitpoints, s+"hp")
@@ -33,8 +45,10 @@ void rsrc_config() {
     ->editable(0, 10, 3, t + (": oxygen"), u + ("Oxygen is drained whenever continuously."), '1');
     };
 
-  all(max_pdata, "ads_max_", "maximum", "These control the maximum and initial values of your resources. ");
-  all(tank_pdata, "ads_tank_", "bonus", "These control the amount of resource in a bonus tank. ");
+  all(ads_max_pdata, "ads_max_", "AdS maximum", "These control the maximum and initial values of your resources. ");
+  all(ads_tank_pdata, "ads_tank_", "AdS bonus", "These control the amount of resource in a bonus tank. ");
+  all(ds_max_pdata, "ads_max_", "dS maximum", "These control the maximum and initial values of your resources. ");
+  all(ds_tank_pdata, "ads_tank_", "dS bonus", "These control the amount of resource in a bonus tank. ");
   }
 
 void edit_rsrc() {
@@ -44,12 +58,12 @@ void edit_rsrc() {
     add_edit(d.fuel);
     add_edit(d.oxygen);
     };
-  all(max_pdata);
-  all(tank_pdata);
+  all(DS_(max_pdata));
+  all(DS_(tank_pdata));
   }
 
 void init_rsrc() {
-  pdata = max_pdata;
+  pdata = DS_(max_pdata);
   game_over = false;
   }
 
@@ -127,7 +141,7 @@ bool display_rsrc() {
   initquickqueue();
   check_cgi(); cgi.require_shapes();
 
-  #define D(id, y, field, unit) display(id, y, pdata.field, max_pdata.field, tank_pdata.field, unit)
+  #define D(id, y, field, unit) display(id, y, pdata.field, DS_(max_pdata).field, DS_(tank_pdata).field, unit)
   D(1, 1, hitpoints, 1);
   D(3, 2, ammo, 1);
   D(4, 3, fuel, TAU);
@@ -140,6 +154,8 @@ bool display_rsrc() {
   }
 
 void gain_resource(eResourceType rsrc) {
+  auto& tank_pdata = DS_(tank_pdata);
+  auto& max_pdata = DS_(max_pdata);
   #define D(id, field) if(rsrc == id) { pdata.field += tank_pdata.field; if(max_pdata.field && pdata.field > max_pdata.field) pdata.field = max_pdata.field; }
   println(hlog, "gain resource ", int(rsrc));
   D(1, hitpoints)

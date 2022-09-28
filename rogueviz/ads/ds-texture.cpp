@@ -74,6 +74,7 @@ ld smoothstep(ld x) {
   }
 
 void draw_texture(texture_to_use& tu) {
+  if(!talpha) return;
   auto& et = *tu.tx;
   auto& tex = et.tex;
 
