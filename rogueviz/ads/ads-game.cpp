@@ -190,9 +190,9 @@ auto shot_hooks =
     -> editable(0, 3000, 0.1, "tiles to draw per frame", "reduce if the framerate is low", 'D');
 
     param_i(XSCALE, "ds_xscale")
-    -> editable(4, 512, 16, "x precision of Earth-de Sitter", "", 'x');
+    -> editable(4, 512, 8, "x precision of Earth-de Sitter", "", 'x');
     param_i(YSCALE, "ds_yscale")
-    -> editable(4, 512, 16, "y precision of Earth-de Sitter", "", 'y');
+    -> editable(4, 512, 8, "y precision of Earth-de Sitter", "", 'y');
     param_i(talpha, "ds_talpha")
     -> editable(0, 255, 16, "dS texture intensity", "", 't');
 

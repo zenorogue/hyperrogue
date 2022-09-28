@@ -111,8 +111,8 @@ int draw_per_frame = 1000;
 
 ads_object *main_rock;
 
-int XSCALE = 64;
-int YSCALE = 64;
+int XSCALE = 48;
+int YSCALE = 48;
 int talpha = 32;
 void init_textures();
 void pick_textures();
