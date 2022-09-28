@@ -86,8 +86,9 @@ void draw_texture(texture_to_use& tu) {
   et.tinf.tvertices.clear();
   
   ld MWIDTH = tex.tx * .5 / tex.ty;
-  
-  println(hlog, "shift = ", current.shift, " end = ", tu.to);
+
+  array<hyperpoint, 3> pts;
+  int pts_id = 0;
 
   auto add = [&] (int x, int y) {
     ld x0 = (y-(YSCALE/2.)) / YSCALE * M_PI * 4;
@@ -134,6 +135,14 @@ void draw_texture(texture_to_use& tu) {
       }
 
     curvepoint(cr.h);
+    cr.h[2]++; cr.h /= cr.h[2];
+    pts[pts_id++] = cr.h;
+
+    if(pts_id == 3) {
+      ld area = (pts[0] ^ pts[1])[2] + (pts[1] ^ pts[2])[2] + (pts[2] ^ pts[0])[2];
+      if(area < 0) { et.tinf.tvertices.resize(et.tinf.tvertices.size()-3); curvedata.resize(curvedata.size()-3); }
+      pts_id = 0;
+      }
     };
 
   for(int x=0; x<XSCALE; x++)
@@ -141,8 +150,8 @@ void draw_texture(texture_to_use& tu) {
     add(x, y);
     add(x+1, y);
     add(x, y+1);
-    add(x+1, y);
     add(x, y+1);
+    add(x+1, y);
     add(x+1, y+1);
     }
   
