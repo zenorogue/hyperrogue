@@ -452,6 +452,8 @@ void view_ds_game() {
   
   draw_textures();
 
+  sphereflip = sphereflipped() ? MirrorZ : Id;
+
   if(1) {
     for(auto& r: rocks) {
       auto& rock = *r;
@@ -493,13 +495,13 @@ void view_ds_game() {
 
       for(auto p: rock.pts) curvepoint(p.h);
       color_t out = rock.type == oResource ? 0xFF : rock.col;
-      queuecurve(shiftless(Id), out, rock.col, obj_prio[rock.type]);      
+      queuecurve(shiftless(sphereflip), out, rock.col, obj_prio[rock.type]);      
 
       if(view_proper_times && rock.type != oParticle) {
         ld t = rock.pt_main.shift;
         if(rock.type == oMainRock) t += current.shift;
         string str = format(tformat, t / ds_time_unit);
-        queuestr(shiftless(rgpushxto0(rock.pt_main.h)), .1, str, 0xFFFF00, 8);
+        queuestr(shiftless(sphereflip * rgpushxto0(rock.pt_main.h)), .1, str, 0xFFFF00, 8);
         }
       
       if(rock.pt_main.h[2] > 0.1 && rock.life_end == HUGE_VAL) {
@@ -527,11 +529,11 @@ void view_ds_game() {
       
       geometry = g.backup;
       for(auto pt: pts) curvepoint(pt);
-      queuecurve(shiftless(Id), 0xFF, shipcolor, PPR::MONSTER_FOOT);
+      queuecurve(shiftless(sphereflip), 0xFF, shipcolor, PPR::MONSTER_FOOT);
 
       if(view_proper_times) {
         string str = format(tformat, (cr.shift + ss.start) / ds_time_unit);
-        queuestr(shiftless(rgpushxto0(cr.h)), .1, str, 0xC0C0C0, 8);
+        queuestr(shiftless(sphereflip * rgpushxto0(cr.h)), .1, str, 0xC0C0C0, 8);
         }
       }
 
@@ -541,18 +543,18 @@ void view_ds_game() {
         ld u = (invincibility_pt-ship_pt) / ds_how_much_invincibility;
         poly_outline = gradient(shipcolor, rsrc_color[rtHull], 0, 0.5 + cos(5*u*TAU), 1);
         }
-      queuepolyat(shiftless(spin(ang*degree)), make_shape(), shipcolor, PPR::MONSTER_HAIR);
+      queuepolyat(shiftless(sphereflip * spin(ang*degree)), make_shape(), shipcolor, PPR::MONSTER_HAIR);
       poly_outline = 0xFF;
 
       if(view_proper_times) {
         string str = format(tformat, ship_pt / ds_time_unit);
-        queuestr(shiftless(Id), .1, str, 0xFFFFFF, 8);
+        queuestr(shiftless(sphereflip), .1, str, 0xFFFFFF, 8);
         }
       }
     
     if(paused && view_proper_times) {
       string str = format(tformat, view_pt / ds_time_unit);
-      queuestr(shiftless(Id), .1, str, 0xFFFF00, 8);
+      queuestr(shiftless(sphereflip), .1, str, 0xFFFF00, 8);
       }
 
     if(paused && !game_over) {
@@ -567,7 +569,7 @@ void view_ds_game() {
         }
       if(bad == 0) {
         for(auto h: pts) curvepoint(h);
-        queuecurve(shiftless(Id), 0xFF0000C0, 0x00000060, PPR::SUPERLINE);
+        queuecurve(shiftless(sphereflip), 0xFF0000C0, 0x00000060, PPR::SUPERLINE);
         }
       }
     }
