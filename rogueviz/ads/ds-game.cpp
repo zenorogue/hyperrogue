@@ -194,11 +194,27 @@ struct rock_generator {
     while(cshift < t) add_random();
     }
 
+  void add_rsrc_until(ld t) {
+    while(cshift < t) {
+      ld rapidity = rand_range(0, 3);
+      ld step = rand_range(.2, .5);
+      ld alpha = rand_range(0, TAU);
+      cshift += rand_range(0.5, 1) * (5 + cshift / 10);
+      auto r = add(spin(alpha) * cspin(0, 2, step) * lorentz(1, 3, rapidity));
+      eResourceType rt = eResourceType(2 + rand() % 4);
+      if(rt == rtGold) rt = rtHull;
+      r->type = oResource;
+      r->resource = rt;
+      r->shape = rsrc_shape[rt];
+      r->col = rsrc_color[rt];
+      }
+    }
+
   };
 
-rock_generator rockgen;
+rock_generator rockgen, rsrcgen;
 
-auto future_shown = 3 * TAU;
+auto future_shown = 2 * TAU;
 
 void init_ds_game() {
 
@@ -223,6 +239,9 @@ void init_ds_game() {
 
   rockgen.cshift += 2;
   rockgen.add_until(future_shown);
+  
+  rsrcgen.cshift += 1;
+  rsrcgen.add_rsrc_until(future_shown);
   }
 
 void ds_gen_particles(int qty, transmatrix from, ld shift, color_t col, ld spd, ld t, ld spread = 1) {
@@ -235,15 +254,25 @@ void ds_gen_particles(int qty, transmatrix from, ld shift, color_t col, ld spd, 
     }
   }
 
+void ds_crash_ship() {
+  if(ship_pt < invincibility_pt) return;
+  common_crash_ship();
+  dynamicval<eGeometry> g(geometry, gSpace435);
+  ds_gen_particles(rpoisson(crash_particle_qty * 2), inverse(current.T) * spin(ang*degree), current.shift, rsrc_color[rtHull], crash_particle_rapidity, crash_particle_life);
+  }
+
 void ds_handle_crashes() {
   if(paused) return;
   vector<ads_object*> dmissiles;
   vector<ads_object*> drocks;
+  vector<ads_object*> dresources;
   for(auto m: displayed) {
     if(m->type == oMissile)
       dmissiles.push_back(m);
     if(m->type == oRock)
       drocks.push_back(m);
+    if(m->type == oResource)
+      dresources.push_back(m);
     }
 
   for(auto m: dmissiles) {
@@ -255,15 +284,20 @@ void ds_handle_crashes() {
         dynamicval<eGeometry> g(geometry, gSpace435);
         ds_gen_particles(rpoisson(crash_particle_qty), m->at.T * lorentz(2, 3, m->life_end), m->at.shift, missile_color, crash_particle_rapidity, crash_particle_life);
         ds_gen_particles(rpoisson(crash_particle_qty), r->at.T * lorentz(2, 3, r->life_end), r->at.shift, r->col, crash_particle_rapidity, crash_particle_life);
-        pdata.score++;
-        int qty = 2 + rpoisson(1);
-        for(int i=0; i<qty; i++) {
-          auto r1 = std::make_unique<ads_object> (oRock, nullptr, ads_matrix(r->at.T * lorentz(2, 3, r->life_end) * spin(randd() * TAU) * lorentz(0, 3, randd() * ds_split_speed), 0), 0xFFFFFFFF);
-          r1->shape = &shape_disk;
-          r1->life_start = 0;
-          rocks.emplace_back(std::move(r1));
-          }
         break;
+        }
+      }
+    }
+
+  if(!game_over) for(int i=0; i<isize(shape_ship); i+=2) {
+    hyperpoint h = spin(ang*degree) * hpxyz(shape_ship[i] * scale, shape_ship[i+1] * scale, 1);
+    for(auto r: drocks) {
+      if(pointcrash(h, r->pts)) ds_crash_ship();
+      }
+    for(auto r: dresources) {
+      if(pointcrash(h, r->pts)) {
+        r->life_end = r->pt_main.shift;
+        gain_resource(r->resource);
         }
       }
     }
@@ -357,6 +391,7 @@ bool ds_turn(int idelta) {
     
     if(1) {
       rockgen.add_until(current.shift + future_shown);
+      rsrcgen.add_rsrc_until(current.shift + future_shown);
       }
 
     if(!paused) {
@@ -547,7 +582,7 @@ void run_ds_game() {
   
   if(true) {
     dynamicval<eGeometry> g(geometry, gSpace435);
-    current = Id;
+    current = cspin(0, 2, 0.2);
     }
 
   ship_pt = 0;

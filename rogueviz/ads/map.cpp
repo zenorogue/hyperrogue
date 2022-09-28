@@ -227,11 +227,14 @@ bool pointcrash(hyperpoint h, const vector<cross_result>& vf) {
   return winding & 1;
   }
 
-void crash_ship() {
-  if(ship_pt < invincibility_pt) return;
+void common_crash_ship() {
   invincibility_pt = ship_pt + how_much_invincibility;
   pdata.hitpoints--;
   if(pdata.hitpoints <= 0) game_over = true;
+  }
+  
+void ads_crash_ship() {
+  if(ship_pt < invincibility_pt) return;
   hybrid::in_actual([&] {
     gen_particles(rpoisson(crash_particle_qty * 2), vctr, ads_inverse(current * vctrV) * spin(ang*degree), rsrc_color[rtHull], crash_particle_rapidity, crash_particle_life);
     });
@@ -268,7 +271,7 @@ void handle_crashes() {
     if(!game_over) for(int i=0; i<isize(shape_ship); i+=2) {
       hyperpoint h = spin(ang*degree) * hpxyz(shape_ship[i] * scale, shape_ship[i+1] * scale, 1);
       for(auto r: rocks) {
-        if(pointcrash(h, r->pts)) crash_ship();
+        if(pointcrash(h, r->pts)) ads_crash_ship();
         }
       for(auto r: resources) {
         if(pointcrash(h, r->pts)) {
@@ -294,7 +297,7 @@ void handle_crashes() {
           }
         });
 
-      if(crashed) crash_ship();
+      if(crashed) ads_crash_ship();
       }
     });
   }
