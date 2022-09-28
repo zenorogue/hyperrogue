@@ -492,10 +492,10 @@ void view_ds_game() {
       ld area = 0;
       for(int i=0; i<isize(circle_flat)-1; i++)
         area += (circle_flat[i] ^ circle_flat[i+1]) [2];
-      
+      area += (circle_flat.back() ^ circle_flat[0]) [2];
+
       if(area > 0) continue;
 
-      // queuepolyat(shiftless(rgpushxto0(cr.h)), cgi.shGem[0], 0xFFFFFFF, PPR::LINE);
       for(auto p: rock.pts) curvepoint(p.h);
       color_t out = rock.type == oResource ? 0xFF : rock.col;
       queuecurve(shiftless(Id), out, rock.col, obj_prio[rock.type]);      
