@@ -510,7 +510,7 @@ void view_ds_game() {
       }      
 
     ld delta = paused ? 1e-4 : -1e-4;
-    for(auto& ss: history) {
+    if(paused) for(auto& ss: history) {
       if(ss.at.shift < current.shift - 4 * TAU) continue;
       if(ss.at.shift > current.shift + 4 * TAU) continue;
       dynamicval<eGeometry> g(geometry, gSpace435);
