@@ -228,7 +228,12 @@ void init_ds_game() {
   /* create the main rock first */
   main_rock = rockgen.add(Id);
   main_rock->col = 0xFFD500FF;
+  main_rock->type = oMainRock;
+
+  main_rock = rockgen.add(Id);
+  main_rock->col = 0xFF;
   main_rock->shape = &shape_gold;
+  main_rock->type = oMainRock;
 
   /* also create shape_disk */
   shape_disk.clear();
@@ -269,7 +274,7 @@ void ds_handle_crashes() {
   for(auto m: displayed) {
     if(m->type == oMissile)
       dmissiles.push_back(m);
-    if(m->type == oRock)
+    if(m->type == oRock || m->type == oMainRock)
       drocks.push_back(m);
     if(m->type == oResource)
       dresources.push_back(m);
@@ -280,10 +285,12 @@ void ds_handle_crashes() {
     for(auto r: drocks) {
       if(pointcrash(h, r->pts)) {
         m->life_end = m->pt_main.shift;
-        r->life_end = r->pt_main.shift;
+        if(r->type != oMainRock)
+          r->life_end = r->pt_main.shift;
         dynamicval<eGeometry> g(geometry, gSpace435);
         ds_gen_particles(rpoisson(crash_particle_qty), m->at.T * lorentz(2, 3, m->life_end), m->at.shift, missile_color, crash_particle_rapidity, crash_particle_life);
-        ds_gen_particles(rpoisson(crash_particle_qty), r->at.T * lorentz(2, 3, r->life_end), r->at.shift, r->col, crash_particle_rapidity, crash_particle_life);
+        if(r->type != oMainRock)
+          ds_gen_particles(rpoisson(crash_particle_qty), r->at.T * lorentz(2, 3, r->life_end), r->at.shift, r->col, crash_particle_rapidity, crash_particle_life);
         break;
         }
       }
@@ -312,7 +319,7 @@ void ds_fire() {
 
   transmatrix S1 = S0 * lorentz(0, 3, missile_rapidity);
 
-  auto r = std::make_unique<ads_object> (oMissile, nullptr, ads_matrix(S1, current.shift), 0xC0C0FFFF);
+  auto r = std::make_unique<ads_object> (oMissile, nullptr, ads_matrix(S1, current.shift), rsrc_color[rtAmmo]);
   r->shape = &shape_missile;
   r->life_start = 0;
 
@@ -448,14 +455,14 @@ void view_ds_game() {
   
   draw_textures();
 
-  main_rock->at.shift = current.shift;
-
   if(1) {
     make_shape();
     
     for(auto& r: rocks) {
       auto& rock = *r;
       poly_outline = 0xFF;
+      if(rock.type == oMainRock) rock.at.shift = current.shift;
+    
       if(rock.at.shift < current.shift - future_shown) continue;
       if(rock.at.shift > current.shift + future_shown) continue;
       
@@ -490,12 +497,12 @@ void view_ds_game() {
 
       // queuepolyat(shiftless(rgpushxto0(cr.h)), cgi.shGem[0], 0xFFFFFFF, PPR::LINE);
       for(auto p: rock.pts) curvepoint(p.h);
-      color_t out = rock.col;
-      queuecurve(shiftless(Id), out, rock.col, PPR::LINE);
+      color_t out = rock.type == oResource ? 0xFF : rock.col;
+      queuecurve(shiftless(Id), out, rock.col, obj_prio[rock.type]);      
 
       if(view_proper_times && rock.type != oParticle) {
         ld t = rock.pt_main.shift;
-        if(&rock == main_rock) t += current.shift;
+        if(rock.type == oMainRock) t += current.shift;
         string str = format(tformat, t / time_unit);
         queuestr(shiftless(rgpushxto0(rock.pt_main.h)), .1, str, 0xFFFF00, 8);
         }
@@ -525,7 +532,7 @@ void view_ds_game() {
       
       geometry = g.backup;
       for(auto pt: pts) curvepoint(pt);
-      queuecurve(shiftless(Id), 0xFF, shipcolor, PPR::LINE);
+      queuecurve(shiftless(Id), 0xFF, shipcolor, PPR::MONSTER_FOOT);
 
       if(view_proper_times) {
         string str = format(tformat, (cr.shift + ss.start) / time_unit);
@@ -539,7 +546,7 @@ void view_ds_game() {
         ld u = (invincibility_pt-ship_pt) / how_much_invincibility;
         poly_outline = gradient(shipcolor, rsrc_color[rtHull], 0, 0.5 + cos(5*u*TAU), 1);
         }
-      queuepolyat(shiftless(spin(ang*degree) * Id), shShip, shipcolor, PPR::LINE);
+      queuepolyat(shiftless(spin(ang*degree) * Id), shShip, shipcolor, PPR::MONSTER_HAIR);
       poly_outline = 0xFF;
 
       if(view_proper_times) {

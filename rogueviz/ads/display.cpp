@@ -71,7 +71,7 @@ void draw_game_cell(const cell_to_draw& cd) {
       if(isize(slice) < 3) return;
       for(auto e: slice) curvepoint(e);
       curvepoint(slice[0]);
-      queuecurve(shiftless(Id), 0xFFFFFFFF, col, PPR::LINE);
+      queuecurve(shiftless(Id), 0xFFFFFFFF, col, PPR::WALL);
       };
     
     for(int v=floor(minv); v<maxv+1; v++) {
@@ -126,7 +126,7 @@ void draw_game_cell(const cell_to_draw& cd) {
     queuecurve(shiftless(Id), 
       rock.type == oMissile ? missile_color : 
       rock.type == oParticle ? rock.col :
-      0x000000FF, rock.col, PPR::LINE);
+      0x000000FF, rock.col, obj_prio[rock.type]);
 
     if(view_proper_times && rock.type != oParticle) {
       string str = format(tformat, rock.pt_main.shift / time_unit);
@@ -156,7 +156,7 @@ void draw_game_cell(const cell_to_draw& cd) {
 
     for(auto h: pts) curvepoint(h);
     curvepoint(pts[0]);
-    queuecurve(shiftless(Id), 0xFF, shipcolor, PPR::LINE);
+    queuecurve(shiftless(Id), 0xFF, shipcolor, PPR::MONSTER_FOOT);
 
     string str = format(tformat, (cr.shift + rock.start) / time_unit);
     queuestr(shiftless(rgpushxto0(cr.h)), .1, str, 0xC0C0C0, 8);
@@ -278,7 +278,7 @@ void view_ads_game() {
         ld u = (invincibility_pt-ship_pt) / how_much_invincibility;
         poly_outline = gradient(shipcolor, rsrc_color[rtHull], 0, 0.5 + cos(5*u*TAU), 1);
         }
-      queuepolyat(shiftless(spin(ang*degree) * Id), shShip, shipcolor, PPR::LINE);
+      queuepolyat(shiftless(spin(ang*degree) * Id), shShip, shipcolor, PPR::MONSTER_HAIR);
       poly_outline = 0xFF;
 
       if(view_proper_times) {

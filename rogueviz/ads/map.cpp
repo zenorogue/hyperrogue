@@ -2,7 +2,9 @@ namespace hr {
 
 namespace ads_game {
 
-enum eObjType { oRock, oMissile, oParticle, oResource };
+enum eObjType { oRock, oMissile, oParticle, oResource, oMainRock };
+
+PPR obj_prio[5] = { PPR::MONSTER_BODY, PPR::ITEMa, PPR::ITEM_BELOW, PPR::ITEM, PPR::MONSTER_HEAD };
 
 struct ads_object {
   eObjType type;

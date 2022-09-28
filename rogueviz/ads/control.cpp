@@ -14,7 +14,7 @@ void fire() {
   ads_matrix S1 = S0 * lorentz(0, 2, missile_rapidity);
   
   auto& ro = ci_at[c].rocks;
-  auto r = std::make_unique<ads_object> (oMissile, c, S1, 0xC0C0FFFF);
+  auto r = std::make_unique<ads_object> (oMissile, c, S1, rsrc_color[rtAmmo]);
   r->shape = &shape_missile;
   r->life_start = 0;
 
