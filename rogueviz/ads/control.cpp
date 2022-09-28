@@ -6,6 +6,7 @@ vector<string> move_names = { "acc down", "acc left", "acc up", "acc right", "fi
 
 void fire() {
   if(!pdata.ammo) return;
+  playSound(nullptr, "fire");
   pdata.ammo--;
   auto c = vctr;
 

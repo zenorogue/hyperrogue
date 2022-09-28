@@ -286,6 +286,7 @@ void ds_handle_crashes() {
         ds_gen_particles(rpoisson(crash_particle_qty), m->at.T * lorentz(2, 3, m->life_end), m->at.shift, missile_color, crash_particle_rapidity, crash_particle_life);
         if(r->type != oMainRock)
           ds_gen_particles(rpoisson(crash_particle_qty), r->at.T * lorentz(2, 3, r->life_end), r->at.shift, r->col, crash_particle_rapidity, crash_particle_life);
+        playSound(nullptr, "hit-crush3");
         break;
         }
       }
@@ -308,6 +309,7 @@ void ds_handle_crashes() {
 void ds_fire() {
   if(!pdata.ammo) return;
   pdata.ammo--;
+  playSound(nullptr, "fire");
   dynamicval<eGeometry> g(geometry, gSpace435);
 
   transmatrix S0 = inverse(current.T) * spin(ang*degree);

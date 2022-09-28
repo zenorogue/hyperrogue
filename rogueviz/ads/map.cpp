@@ -233,6 +233,7 @@ void common_crash_ship() {
   invincibility_pt = ship_pt + DS_(how_much_invincibility);
   pdata.hitpoints--;
   if(pdata.hitpoints <= 0) game_over = true;
+  playSound(nullptr, "explosion");
   }
   
 void ads_crash_ship() {
@@ -266,6 +267,7 @@ void handle_crashes() {
             gen_particles(rpoisson(crash_particle_qty), m->owner, m->at * ads_matrix(Id, m->life_end), missile_color, crash_particle_rapidity, crash_particle_life);
             gen_particles(rpoisson(crash_particle_qty), r->owner, r->at * ads_matrix(Id, r->life_end), r->col, crash_particle_rapidity, crash_particle_life);
             gen_resource(r->owner, r->at * ads_matrix(Id, r->life_end), r->resource, r->expire);
+            playSound(nullptr, "hit-crush3");
             });
           }
         }

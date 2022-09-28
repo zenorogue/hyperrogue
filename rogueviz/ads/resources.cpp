@@ -8,6 +8,7 @@ color_t rock_color[6] = { 0x703800FF, 0xC0A080FF, 0xC08010FF, 0xC04000FF, 0x4080
 color_t rsrc_color[6] = { 0x404040FF, 0x40C0C0FF, 0xFFD500FF, 0xFF0000FF, 0x00FF00FF, 0x0000FFFF };
 
 vector<ld>* rsrc_shape[6] = { &shape_particle, &shape_heart, &shape_gold, &shape_weapon, &shape_fuel, &shape_airtank };
+string rsrc_sound[6] = {"", "pickup-potion", "pickup-gold", "pickup-scroll", "pickup-speed", "seen-air" };
 
 void rsrc_config() {
   ads_max_pdata.hitpoints = 3;
@@ -163,6 +164,7 @@ void gain_resource(eResourceType rsrc) {
   D(3, ammo)
   D(4, fuel)
   D(5, oxygen)
+  playSound(nullptr, rsrc_sound[rsrc]);
   }
 
 }}

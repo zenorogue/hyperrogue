@@ -105,7 +105,7 @@ void game_menu() {
 
   #if CAP_AUDIO
   add_edit(effvolume);
-  add_edit(musicvolume);
+  if(music_available) add_edit(musicvolume);
   #endif
 
   dialog::addItem("RogueViz settings", 'v');
