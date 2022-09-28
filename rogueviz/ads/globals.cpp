@@ -103,4 +103,10 @@ int draw_per_frame = 1000;
 
 ld ds_split_speed = 0.1;
 
+int XSCALE = 64;
+int YSCALE = 64;
+int talpha = 32;
+void init_textures();
+void pick_textures();
+void draw_textures();
 }}

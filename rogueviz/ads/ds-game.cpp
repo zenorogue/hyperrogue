@@ -2,6 +2,9 @@ namespace hr {
 
 namespace ads_game {
 
+void init_textures();
+void draw_textures();
+
 vector<ld> shape_disk;
 
 void set_default_keys();
@@ -198,6 +201,9 @@ rock_generator rockgen;
 auto future_shown = 3 * TAU;
 
 void init_ds_game() {
+
+  init_textures();
+  pick_textures();
 
   dynamicval<eGeometry> g(geometry, gSpace435);
 
@@ -404,6 +410,8 @@ transmatrix tpt(ld x, ld y) {
 
 void view_ds_game() {
   displayed.clear();
+  
+  draw_textures();
 
   main_rock->at.shift = current.shift;
 

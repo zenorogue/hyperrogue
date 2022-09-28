@@ -9,6 +9,7 @@
 #include "display.cpp"
 #include "menu.cpp"
 #include "ds-game.cpp"
+#include "ds-texture.cpp"
 
 namespace hr {
 
