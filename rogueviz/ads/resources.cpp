@@ -78,7 +78,11 @@ void display(int id, int y, ld val, ld maxv, ld tank, ld unit) {
   ld bot = ctr+5;
   
   if(maxv == 0) {
-    queuestr(sta, ctr, 0, 20, its(val+.05), col >> 8, 1, 0);
+    string s;
+    if(main_rock) s = format(tformat, current.shift);
+    else s = its(val + .5);
+
+    queuestr(sta, ctr, 0, 20, s, col >> 8, 1, 0);
     return;
     }
   

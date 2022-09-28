@@ -18,8 +18,6 @@ vector<unique_ptr<ads_object>> rocks;
 int ds_rocks = 500;
 bool mark_origin = false;
 
-ads_object *main_rock;
-
 struct rock_generator {
   ld cshift;
 

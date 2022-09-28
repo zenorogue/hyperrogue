@@ -103,6 +103,8 @@ int draw_per_frame = 1000;
 
 ld ds_split_speed = 0.1;
 
+ads_object *main_rock;
+
 int XSCALE = 64;
 int YSCALE = 64;
 int talpha = 32;
