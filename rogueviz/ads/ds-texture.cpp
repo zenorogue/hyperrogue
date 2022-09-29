@@ -27,6 +27,7 @@ void init_textures() {
   earth_textures.clear();
   string dir = "ds-images/";
   fhstream f(dir + "list.txt", "rt");
+  if(!f.f) return;
   string cur_copyright = "";
   while(!feof(f.f)) {
     string s = scanline_noblank(f);
