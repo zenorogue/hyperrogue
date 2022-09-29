@@ -50,7 +50,6 @@ void fire() {
     auto& ci = ci_at[c1];
     hybrid::in_underlying_geometry([&] {
       gen_terrain(c1, ci);
-      gen_rocks(c1, ci, 2);
       });
     if(among(ci.type, wtSolid, wtDestructible)) {
       r->life_end = t;
