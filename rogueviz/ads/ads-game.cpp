@@ -1,3 +1,24 @@
+/* Main file of Relative Hell. */
+/* Best run with -ads-menu; more detailed options are available too */
+
+#ifdef RELHELL
+
+#define CUSTOM_CAPTION "Relative Hell 0.9"
+#define MAXMDIM 4
+#define CAP_INV 0
+#define CAP_COMPLEX2 0
+#define CAP_EDIT 0
+#define CAP_BT 0
+#define CAP_SOLV 0
+#define CAP_THREAD 0
+#define CAP_FILES 1
+#define CAP_CONFIG 1
+#define CAP_CRYSTAL 0
+#define CAP_ARCM 0
+#define CAP_HISTORY 0
+#define CAP_STARTANIM 0
+#endif
+
 #include "../rogueviz.h"
 
 #include "math.cpp"
@@ -59,8 +80,6 @@ void restart() {
 
 void run_ads_game() {
 
-  set_default_keys();
-
   if(!sl2) set_geometry(gRotSpace);
   if(hybrid::csteps) {
     stop_game();
@@ -92,12 +111,17 @@ void run_ads_game() {
   pmodel = mdDisk;
   cwt.at = centerover = currentmap->gamestart();
 
-  rogueviz::rv_change(nohelp, true);
-  rogueviz::rv_change(nomenukey, true);
-  rogueviz::rv_change(nomap, true);
-  rogueviz::rv_change(no_find_player, true);
-
   restart();
+  }
+
+void set_config() {
+  set_default_keys();
+
+  nohelp = true;
+  nomenukey = true;
+  nomap = true;
+  no_find_player = true;
+  showstartmenu = false;
   }
 
 void run_ads_game_std() {
@@ -123,6 +147,8 @@ void change_scale(ld s) {
 auto shot_hooks = 
   arg::add3("-ads-game1", run_ads_game)
 + arg::add3("-ads-game", run_ads_game_std)
++ arg::add3("-ads-zero", set_config)
++ arg::add3("-ads-menu", [] { set_config(); pushScreen(pick_the_game); })
 + arg::add3("-ads-scale", [] { arg::shift(); ld s = arg::argf(); change_scale(s); })
 + arg::add3("-ads-restart", restart)
 + addHook(hooks_configfile, 100, [] {
@@ -198,6 +224,16 @@ auto shot_hooks =
 
     rsrc_config();
     });
+
+#ifdef RELHELL
+auto hook1=
+    addHook(hooks_config, 100, [] {
+      set_config();
+      if(arg::curphase == 1)
+        conffile = "relhell.ini";
+      if(arg::curphase == 3) pushScreen(pick_the_game);
+      });
+#endif
 
 }
 }

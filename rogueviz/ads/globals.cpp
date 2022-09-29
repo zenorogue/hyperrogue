@@ -117,4 +117,9 @@ int talpha = 32;
 void init_textures();
 void pick_textures();
 void draw_textures();
+void reset_textures();
+
+void ds_restart();
+void run_ads_game_std();
+void run_ds_game();
 }}

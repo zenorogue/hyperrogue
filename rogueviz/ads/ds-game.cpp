@@ -213,12 +213,10 @@ auto future_shown = 2 * TAU;
 
 void init_ds_game() {
 
-  init_textures();
-  pick_textures();
-
   dynamicval<eGeometry> g(geometry, gSpace435);
 
   rockgen.cshift = 0;
+  rsrcgen.cshift = 0;
 
   /* create the main rock first */
   main_rock = rockgen.add(Id);
@@ -575,15 +573,10 @@ void view_ds_game() {
     }
   }
 
-void run_ds_game() {
+void ds_restart() {
 
-  set_default_keys();
-  init_ds_game();
+  main_rock = nullptr;
 
-  rogueviz::rv_hook(hooks_frame, 100, view_ds_game);
-  rogueviz::rv_hook(shmup::hooks_turn, 0, ds_turn);
-  rogueviz::rv_hook(hooks_prestats, 100, display_rsrc);
-  
   if(true) {
     dynamicval<eGeometry> g(geometry, gSpace435);
     current = cspin(0, 2, 0.2 * ds_scale);
@@ -591,13 +584,29 @@ void run_ds_game() {
     }
 
   ship_pt = 0;
+
+  rocks.clear();
+  history.clear();
+  init_ds_game();
+  reset_textures();
+  pick_textures();
   init_rsrc();
-  
-  rogueviz::rv_change(nohelp, true);
-  rogueviz::rv_change(nomenukey, true);
-  rogueviz::rv_change(nomap, true);
-  rogueviz::rv_change(no_find_player, true);
-  rogueviz::rv_change(showstartmenu, false);
+  }
+
+void run_ds_game() {
+
+  stop_game();
+  set_geometry(gSphere);
+  start_game();
+
+  init_textures();
+  pick_textures();
+
+  ds_restart();
+
+  rogueviz::rv_hook(hooks_frame, 100, view_ds_game);
+  rogueviz::rv_hook(shmup::hooks_turn, 0, ds_turn);
+  rogueviz::rv_hook(hooks_prestats, 100, display_rsrc);
   rogueviz::rv_hook(hooks_handleKey, 0, handleKey);
   }
 

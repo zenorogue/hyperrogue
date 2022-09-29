@@ -131,4 +131,33 @@ void game_menu() {
   dialog::display();
   }
 
+void pick_the_game() {
+  cmode = sm::NOSCR;
+  clearMessages();
+  gamescreen();
+
+  dialog::init(XLAT("Relative Hell"), 0xC02020, 200, 0);
+  dialog::addInfo(XLAT("abandon all hope of going faster than light"));
+  dialog::addBreak(200);
+
+  dialog::addBigItem("anti-de Sitter space", '1');
+  dialog::add_action([] { popScreen(); run_ads_game_std(); clearMessages(); });
+  dialog::addInfo(XLAT("shoot asteroids, mine resources, collect gold"));
+
+  dialog::addBreak(100);
+
+  dialog::addBigItem("de Sitter space", '2');
+  dialog::add_action([] { popScreen(); run_ds_game(); clearMessages(); });
+  dialog::addInfo(XLAT("avoid energy balls, but do not let the main star run away!"));
+
+  dialog::addBreak(100);
+
+  dialog::addItem("not now", '3');
+  dialog::add_action([] { quitmainloop = true; });
+
+  dialog::display();
+  /* do not let the user exit this dialog */
+  keyhandler = [] (int a, int b) { dialog::handleNavigation(a,b); };
+  }
+
 }}

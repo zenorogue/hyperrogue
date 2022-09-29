@@ -19,6 +19,10 @@ struct texture_to_use {
 
 vector<texture_to_use> textures_to_use;
 
+void reset_textures() {
+  textures_to_use.clear();
+  }
+
 void init_textures() {
   earth_textures.clear();
   string dir = "ds-images/";
