@@ -48,8 +48,8 @@ void rsrc_config() {
 
   all(ads_max_pdata, "ads_max_", "AdS maximum", "These control the maximum and initial values of your resources. ");
   all(ads_tank_pdata, "ads_tank_", "AdS bonus", "These control the amount of resource in a bonus tank. ");
-  all(ds_max_pdata, "ads_max_", "dS maximum", "These control the maximum and initial values of your resources. ");
-  all(ds_tank_pdata, "ads_tank_", "dS bonus", "These control the amount of resource in a bonus tank. ");
+  all(ds_max_pdata, "ds_max_", "dS maximum", "These control the maximum and initial values of your resources. ");
+  all(ds_tank_pdata, "ds_tank_", "dS bonus", "These control the amount of resource in a bonus tank. ");
   }
 
 void edit_rsrc() {
