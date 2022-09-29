@@ -170,7 +170,6 @@ void draw_game_cell(const cell_to_draw& cd) {
       auto h = ads_inverse(current_ship * vctrV_ship);
       cr = cross0(current * V * h);
       // println(hlog, current * V * h);
-      println(hlog, "cr shift = ", cr.shift);
       });
     if(cr.shift < M_PI && cr.shift < M_PI) {
       vector<hyperpoint> pts;
