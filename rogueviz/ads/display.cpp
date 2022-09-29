@@ -158,8 +158,10 @@ void draw_game_cell(const cell_to_draw& cd) {
     curvepoint(pts[0]);
     queuecurve(shiftless(Id), 0xFF, shipcolor, PPR::MONSTER_FOOT);
 
-    string str = format(tformat, (cr.shift + rock.start) / ads_time_unit);
-    queuestr(shiftless(rgpushxto0(cr.h)), .1, str, 0xC0C0C0, 8);
+    if(view_proper_times) {
+      string str = format(tformat, (cr.shift + rock.start) / ads_time_unit);
+      queuestr(shiftless(rgpushxto0(cr.h)), .1, str, 0xC0C0C0, 8);
+      }
     }
   
   if(paused && c == vctr_ship && !game_over) {
