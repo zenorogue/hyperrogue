@@ -209,7 +209,7 @@ struct rock_generator {
 
 rock_generator rockgen, rsrcgen;
 
-auto future_shown = 2 * TAU;
+auto future_shown = 5 * TAU;
 
 void init_ds_game() {
 
@@ -462,12 +462,16 @@ void view_ds_game() {
     
       if(rock.at.shift < current.shift - future_shown) continue;
       if(rock.at.shift > current.shift + future_shown) continue;
-      
+
       if(1) {
         dynamicval<eGeometry> g(geometry, gSpace435);
         transmatrix at = current.T * lorentz(2, 3, rock.at.shift - current.shift) * rock.at.T;
         rock.pt_main = ds_cross0(at);
         
+        // sometimes the result may be incorrect due to numerical precision -- don't show that then in this case
+        ld val = sqhypot_d(3, rock.pt_main.h);
+        if(abs(val-1) > 1e-3 || isnan(val) || abs(rock.pt_main.h[3]) > 1e-3 || isnan(rock.pt_main.h[3])) continue;
+
         if(rock.pt_main.shift < rock.life_start) continue;
         if(rock.pt_main.shift > rock.life_end) continue;
 
