@@ -357,6 +357,7 @@ namespace objmodels {
   /* parallelize a computation */
   inline int threads = 1;
 
+  #if CAP_THREAD
   template<class T> auto parallelize(long long N, T action) -> decltype(action(0,0)) {
     if(threads == 1) return action(0,N);
     std::vector<std::thread> v;
@@ -371,6 +372,7 @@ namespace objmodels {
     for(Res r: results) res += r;
     return res;
     }
+  #endif
 
   }
 
