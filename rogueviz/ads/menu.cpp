@@ -95,7 +95,10 @@ void game_menu() {
   dialog::add_action_push(edit_particles);
 
   dialog::addItem(XLAT("restart game"), 'r');
-  dialog::add_action([] { ads_game::restart(); popScreen(); });
+  dialog::add_action([] {
+    if(main_rock) ds_restart();
+    else restart();
+    popScreen(); });
 
   dialog::addItem(XLAT("refill cheat"), 'R');
   dialog::add_action([] { init_rsrc(); popScreen(); });
