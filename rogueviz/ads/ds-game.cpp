@@ -377,13 +377,14 @@ bool ds_turn(int idelta) {
       ss.at.T = inverse(current.T) * spin(ang*degree);
       ss.at.shift = current.shift;
       ss.start = ship_pt;
+      ss.current = current;
       ss.duration = pt;
       ss.ang = ang;
       history.emplace_back(ss);
       }
     
     current.T = lorentz(3, 2, -tc) * current.T;
-    
+
     auto& mshift = main_rock->pt_main.shift;
     if(mshift) {
       current.shift += mshift;
@@ -619,16 +620,15 @@ void ds_record() {
     view_pt = (ticks / full) * DS_(simspeed);
     for(auto& ss: history)
       if(ss.start + ss.duration > view_pt) {
+        current = ss.current;
         if(sphere) {
           dynamicval<eGeometry> g(geometry, gSpace435);
-          current.shift = ss.at.shift;
-          current.T = inverse(ss.at.T * spin(-ss.ang*degree));
+          current.T = inverse(ss.at.T * spin(-(ss.ang+90)*degree));
           current.T = lorentz(3, 2, view_pt - ss.start) * current.T;
           }
         else PIA({
-          current = ads_inverse(ss.at * spin(-ss.ang*degree));
-          vctr = ss.vctr;
-          vctrV = ss.vctrV;
+          vctr = new_vctr = ss.vctr;
+          vctrV = new_vctrV = ss.vctrV;
           current.T = cspin(3, 2, view_pt - ss.start) * current.T;
           if(auto_rotate)
             current.T = cspin(1, 0, view_pt - ss.start) * current.T;

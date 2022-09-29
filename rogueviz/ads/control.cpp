@@ -186,6 +186,7 @@ bool ads_turn(int idelta) {
       shipstate ss;
       ss.at = ads_inverse(current * vctrV) * spin((ang+90)*degree);
       ss.ang = ang;
+      ss.current = current;
       ss.start = ship_pt;
       ss.duration = pt;
       ss.vctrV = vctrV;

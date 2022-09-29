@@ -33,6 +33,7 @@ int gen_expire() {
 
 struct shipstate {
   ads_matrix at;
+  ads_matrix current;
   ld start;
   ld duration;
   ld ang;
