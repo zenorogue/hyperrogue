@@ -238,6 +238,7 @@ void common_crash_ship() {
   
 void ads_crash_ship() {
   if(ship_pt < invincibility_pt) return;
+  common_crash_ship();
   hybrid::in_actual([&] {
     gen_particles(rpoisson(crash_particle_qty * 2), vctr, ads_inverse(current * vctrV) * spin(ang*degree), rsrc_color[rtHull], crash_particle_rapidity, crash_particle_life);
     });
