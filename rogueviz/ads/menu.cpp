@@ -3,9 +3,9 @@ namespace hr {
 namespace ads_game {
 
 void adjust_for_scale() {
-  if(ads_scale < 0.3) max_gen_per_frame = 1, draw_per_frame = 30, ads_missile_rapidity = 1;
-  else if(ads_scale < 0.8) max_gen_per_frame = 2, draw_per_frame = 100, ads_missile_rapidity = 1;
-  else max_gen_per_frame = 3, draw_per_frame = 1000, ads_missile_rapidity = 3;
+  if(ads_scale < 0.3) max_gen_per_frame = 1, draw_per_frame = 30;
+  else if(ads_scale < 0.8) max_gen_per_frame = 2, draw_per_frame = 100;
+  else max_gen_per_frame = 3, draw_per_frame = 1000;
   }
 
 void edit_difficulty() {
@@ -17,6 +17,7 @@ void edit_difficulty() {
   add_edit(DS_(accel));
   add_edit(DS_(how_much_invincibility));
   add_edit(DS_(scale));
+  add_edit(DS_(missile_rapidity));
 
   if(!main_rock) {
     dialog::addBreak(100);
