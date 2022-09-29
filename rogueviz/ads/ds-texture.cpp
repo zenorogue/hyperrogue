@@ -77,6 +77,8 @@ ld smoothstep(ld x) {
   return x * x * (3-2*x);
   }
 
+string copyright_shown;
+
 void draw_texture(texture_to_use& tu) {
   if(!talpha) return;
   auto& et = *tu.tx;
@@ -169,10 +171,13 @@ void draw_texture(texture_to_use& tu) {
   poly.tinf = &et.tinf;
   poly.flags |= POLY_TRIANGLES;
   poly.offset_texture = 0;
+  
+  copyright_shown = et.copyright;
   }
 
 void draw_textures() {
   pick_textures();
+  copyright_shown = "";
   for(auto& tu: textures_to_use)
     if(current.shift > tu.from && current.shift < tu.to)
       draw_texture(tu);

@@ -570,6 +570,8 @@ void view_ds_game() {
       queuecurve(shiftless(sphereflip), 0xFF0000C0, bad == 0 ? 0x00000060 : 0xFFFFFF10, PPR::SUPERLINE);
       }
     }
+
+  view_footer();
   }
 
 void ds_restart() {

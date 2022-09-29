@@ -1,9 +1,12 @@
 /* Main file of Relative Hell. */
+/* Compile with mymake -O3 rogueviz/ads/ads-game */
 /* Best run with -ads-menu; more detailed options are available too */
+
+#define VER_RH "0.1"
 
 #ifdef RELHELL
 
-#define CUSTOM_CAPTION "Relative Hell 0.9"
+#define CUSTOM_CAPTION "Relative Hell " VER_RH
 #define MAXMDIM 4
 #define CAP_INV 0
 #define CAP_COMPLEX2 0

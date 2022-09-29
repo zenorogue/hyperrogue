@@ -111,6 +111,8 @@ int draw_per_frame = 1000;
 
 ads_object *main_rock;
 
+extern string copyright_shown;
+
 int XSCALE = 48;
 int YSCALE = 48;
 int talpha = 32;

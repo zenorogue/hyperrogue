@@ -187,6 +187,19 @@ void draw_game_cell(const cell_to_draw& cd) {
     }
   }
 
+void view_footer() {
+  if(inHighQual) return;
+  string str = "Relative Hell ";
+  str += VER_RH;
+  if(main_rock) str += " dS";
+  else str += " AdS";
+  if(paused) str += " (paused)";
+  if(!nofps) str += XLAT(" fps: ") + its(calcfps());
+  str += " " + copyright_shown;
+
+  queuestr(10, vid.yres-vid.fsize, 0, vid.fsize/2, str, 0x202020, 0, 0);
+  }
+
 void view_ads_game() {
   displayed.clear();
   
@@ -292,6 +305,9 @@ void view_ads_game() {
       queuestr(shiftless(Id), .1, str, 0xFFFF00, 8);
       }
     }
+
+  copyright_shown = "";
+  view_footer();
   }
 
 }}
