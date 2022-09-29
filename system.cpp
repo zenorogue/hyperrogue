@@ -814,11 +814,11 @@ EX void applyBoxes() {
   addinv(itOrbMirror);
   addinv(itGreenStone);
   list_invorb();
-  applyBoxBool(inv::on, "inventory"); // 306
   #if CAP_INV
+  applyBoxBool(inv::on, "inventory"); // 306
   applyBoxNum(inv::rseed, "@inv-rseed");
   #else
-  { int u; applyBoxNum(u); }
+  { int u; applyBoxNum(u); applyBoxNum(u); }
   #endif
 
   // 10.1:
@@ -949,7 +949,9 @@ modecode_t fill_modecode() {
   dynamicval<eVariation> sp5(variation, (eVariation) save.box[186]);
   dynamicval<int> sp7(gp::param.first, save.box[342]);
   dynamicval<int> sp8(gp::param.second, save.box[343]);
+  #if CAP_INV
   dynamicval<bool> spinv(inv::on, save.box[306]);
+  #endif
 
   if(save.box[238]) geometry = gSphere;
   if(save.box[239]) geometry = gElliptic;
@@ -1301,12 +1303,14 @@ EX void load_last_save() {
 
   loadBox();
 //  printf("boxid = %d\n", boxid);
+  #if CAP_COMPLEX2
   if(items[itHolyGrail]) {
     items[itHolyGrail]--;
     camelot::knighted = newRoundTableRadius();
     items[itHolyGrail]++;
     }
   else camelot::knighted = 0;
+  #endif
   safety = true;
   if(items[itSavedPrincess] < 0) items[itSavedPrincess] = 0;
   addMessage(XLAT("Game loaded."));

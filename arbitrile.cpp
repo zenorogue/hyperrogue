@@ -1791,7 +1791,9 @@ EX void convert() {
     sh.cycle_length = id.modval;
     sh.repeat_value = t / id.modval;
     sh.flags = hr::pseudohept(s) ? arcm::sfPH : 0;
+    #if CAP_ARCM
     if(arcm::in() && arcm::linespattern(s)) { sh.flags |= arcm::sfLINE; ac.have_line = true; }
+    #endif
     for(int j=0; j<t; j++) {
       auto co = currentmap->get_corner(s, j);
       sh.vertices.push_back(co);
