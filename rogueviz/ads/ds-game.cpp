@@ -646,6 +646,7 @@ void ds_record() {
 
 auto ds_hooks = 
   arg::add3("-ds-game", run_ds_game)
++ arg::add3("-ds-recenter", [] { current = Id; })
 + arg::add3("-ds-record", ds_record);
 
 }
