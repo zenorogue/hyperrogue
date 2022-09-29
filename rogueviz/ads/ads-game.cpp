@@ -22,6 +22,9 @@
 #define CAP_STARTANIM 0
 #define CAP_VR 0
 #include "../hyper.cpp"
+
+namespace rogueviz { extern std::vector<hr::reaction_t> cleanup; }
+
 #endif
 
 #include "../rogueviz.h"
