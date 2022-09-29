@@ -85,10 +85,10 @@ struct rock_generator {
     /* we need to find the limit of this as appr -> inf */
     ld appr = 5;
     transmatrix T = lorentz(2, 3, -appr) * cspin(0, 2, exp(-appr)) * lorentz(2, 3, appr);
-    /* all the entries happen to be multiples of .5 */
+    /* all the entries happen to be multiples of .125 */
     for(int i=0; i<4; i++) for(int j=0; j<4; j++) {
       auto& b = T[i][j];
-      b = floor(b * 10 + .5) / 10;
+      b = floor(b * 8 + .5) / 8;
       }
     return T;
     }
@@ -99,7 +99,7 @@ struct rock_generator {
     transmatrix T = lorentz(2, 3, appr) * cspin(0, 2, exp(-appr)) * lorentz(2, 3, -appr);
     for(int i=0; i<4; i++) for(int j=0; j<4; j++) {
       auto& b = T[i][j];
-      b = floor(b * 10 + .5) / 10;
+      b = floor(b * 8 + .5) / 8;
       }
     return T;
     }
