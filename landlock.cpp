@@ -539,8 +539,8 @@ EX eLand getNewLand(eLand old) {
     if(!ls::std_chaos()) tab[cnt++] = laPrairie;
     if(old == laPrairie) LIKELY tab[cnt++] = laBull;
     if(old == laBull && !ls::any_chaos()) LIKELY tab[cnt++] = laPrairie;
-    if(ls::std_chaos() && geometry) tab[cnt++] = laDual;
-    if(ls::std_chaos() && geosupport_threecolor()) tab[cnt++] = laSnakeNest;
+    tab[cnt++] = laDual;
+    tab[cnt++] = laSnakeNest;
     }
   
   if(landUnlocked(laTrollheim)) {
