@@ -170,7 +170,7 @@ void draw_game_cell(const cell_to_draw& cd) {
       // println(hlog, current * V * h);
       println(hlog, "cr shift = ", cr.shift);
       });
-    if(cr.shift > 0 && cr.shift < M_PI) {
+    if(cr.shift < M_PI && cr.shift < M_PI) {
       vector<hyperpoint> pts;
       for(int i=0; i<=360; i++) {
         hybrid::in_actual([&]{
@@ -180,7 +180,7 @@ void draw_game_cell(const cell_to_draw& cd) {
           });
         }
       for(auto h: pts) curvepoint(h);
-      queuecurve(shiftless(Id), 0xFF0000C0, 0x00000060, PPR::SUPERLINE);
+      queuecurve(shiftless(Id), 0xFF0000C0, cr.shift > 0 ? 0x00000060 : 0xFFFFFF10, PPR::SUPERLINE);
       }
     }
   }

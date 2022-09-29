@@ -564,11 +564,10 @@ void view_ds_game() {
         auto cr = ds_cross0_light(current.T * lorentz(2, 3, current_ship.shift - current.shift) * h);
         pts.push_back(cr.h);
         if(cr.shift > 0) ok++; else bad++;
+        shifts.push_back(cr.shift);
         }
-      if(bad == 0) {
-        for(auto h: pts) curvepoint(h);
-        queuecurve(shiftless(sphereflip), 0xFF0000C0, 0x00000060, PPR::SUPERLINE);
-        }
+      for(auto h: pts) curvepoint(h);
+      queuecurve(shiftless(sphereflip), 0xFF0000C0, bad == 0 ? 0x00000060 : 0xFFFFFF10, PPR::SUPERLINE);
       }
     }
   }
