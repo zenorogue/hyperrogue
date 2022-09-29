@@ -493,8 +493,7 @@ void view_ds_game() {
       if(area > 0) continue;
 
       for(auto p: rock.pts) curvepoint(p.h);
-      color_t out = rock.type == oResource ? 0xFF : rock.col;
-      queuecurve(shiftless(sphereflip), out, rock.col, obj_prio[rock.type]);      
+      queuecurve(shiftless(sphereflip), rock.col, rock.col, obj_prio[rock.type]);
 
       if(view_proper_times && rock.type != oParticle) {
         ld t = rock.pt_main.shift;
