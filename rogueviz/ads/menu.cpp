@@ -12,7 +12,7 @@ void edit_difficulty() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
 
-  dialog::init(XLAT("AdS game parameters"), 0xC0C0FFFF, 150, 100);
+  dialog::init(XLAT("game parameters"), 0xC0C0FFFF, 150, 100);
   add_edit(DS_(simspeed));
   add_edit(DS_(accel));
   add_edit(DS_(how_much_invincibility));
@@ -80,7 +80,7 @@ void game_menu() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
 
-  dialog::init(XLAT("AdS game settings"), 0xC0C0FFFF, 150, 100);
+  dialog::init(XLAT("Relative Hell"), 0xC0C0FFFF, 150, 100);
   
   dialog::addItem(XLAT("set game parameters"), 'm');
   dialog::add_action_push(edit_difficulty);
@@ -104,7 +104,7 @@ void game_menu() {
   dialog::add_action([] { init_rsrc(); popScreen(); });
   
   dialog::addItem("configure keys", 'k');
-  dialog::add_action_push(multi::get_key_configurer(1, move_names, "Nilrider keys"));
+  dialog::add_action_push(multi::get_key_configurer(1, move_names, "Relative Hell keys"));
 
   #if CAP_AUDIO
   add_edit(effvolume);
