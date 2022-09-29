@@ -447,6 +447,13 @@ transmatrix tpt(ld x, ld y) {
   return cspin(0, 2, x * ds_scale) * cspin(1, 2, y * ds_scale);
   }
 
+// sometimes the result may be incorrect due to numerical precision -- don't show that then in this case
+bool invalid(cross_result& res) {
+  ld val = sqhypot_d(3, res.h);
+  if(abs(val-1) > 1e-3 || isnan(val) || abs(res.h[3]) > 1e-3 || isnan(res.h[3])) return true;
+  return false;
+  }
+
 void view_ds_game() {
   displayed.clear();
   
@@ -468,9 +475,7 @@ void view_ds_game() {
         transmatrix at = current.T * lorentz(2, 3, rock.at.shift - current.shift) * rock.at.T;
         rock.pt_main = ds_cross0(at);
         
-        // sometimes the result may be incorrect due to numerical precision -- don't show that then in this case
-        ld val = sqhypot_d(3, rock.pt_main.h);
-        if(abs(val-1) > 1e-3 || isnan(val) || abs(rock.pt_main.h[3]) > 1e-3 || isnan(rock.pt_main.h[3])) continue;
+        if(invalid(rock.pt_main)) continue;
 
         if(rock.pt_main.shift < rock.life_start) continue;
         if(rock.pt_main.shift > rock.life_end) continue;
@@ -480,11 +485,14 @@ void view_ds_game() {
         
         auto& sh = *rock.shape;
 
+        bool bad = false;
         for(int i=0; i<isize(sh); i+=2) {
           transmatrix at2 = at1 * tpt(sh[i], sh[i+1]);
           auto cr1 = ds_cross0(at2);
+          if(invalid(cr1)) { bad = true; continue; }
           rock.pts.push_back(cr1);
           }
+        if(bad) continue;
         }
       
       vector<hyperpoint> circle_flat;
