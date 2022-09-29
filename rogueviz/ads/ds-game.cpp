@@ -624,6 +624,7 @@ void run_ds_game() {
   }
 
 void ds_record() {
+  #if CAP_VIDEO
   ld full = 1000;
   anims::period = full * history.back().start / DS_(simspeed);
   anims::noframes = anims::period * 60 / 1000;
@@ -650,6 +651,7 @@ void ds_record() {
     });
   anims::record_video_std();
   delHook(anims::hooks_anim, a);
+  #endif
   }
 
 auto ds_hooks = 

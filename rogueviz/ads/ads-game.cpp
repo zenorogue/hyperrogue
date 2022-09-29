@@ -20,6 +20,8 @@
 #define CAP_ARCM 0
 #define CAP_HISTORY 0
 #define CAP_STARTANIM 0
+#define CAP_VR 0
+#include "../hyper.cpp"
 #endif
 
 #include "../rogueviz.h"
