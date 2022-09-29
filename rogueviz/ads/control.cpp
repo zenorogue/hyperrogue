@@ -127,7 +127,7 @@ ld read_movement() {
 
 bool ads_turn(int idelta) {
   multi::handleInput(idelta);
-  ld delta = idelta / anims::period;
+  ld delta = idelta / 1000.;
   
   if(!(cmode & sm::NORMAL)) return false;
   
@@ -165,16 +165,17 @@ bool ads_turn(int idelta) {
     ld pt = delta * ads_simspeed;
     
     ld mul = read_movement();
+    ld dv = pt * ads_accel * mul;
 
     if(paused && a[16+11]) {
       current = ads_matrix(spin(ang*degree) * xpush(mul*delta*-pause_speed) * spin(-ang*degree), 0) * current;
       }
     else
-      apply_lorentz(spin(ang*degree) * lorentz(0, 2, -delta*ads_accel*mul) * spin(-ang*degree));
+      apply_lorentz(spin(ang*degree) * lorentz(0, 2, -dv) * spin(-ang*degree));
     
     if(!paused) {
-      pdata.fuel -= delta*ads_accel*mul;
-      gen_particles(rpoisson(delta*ads_accel*mul*fuel_particle_qty), vctr, ads_inverse(current * vctrV) * spin(ang*degree+M_PI) * rots::uxpush(0.06 * ads_scale), rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
+      pdata.fuel -= dv;
+      gen_particles(rpoisson(dv*fuel_particle_qty), vctr, ads_inverse(current * vctrV) * spin(ang*degree+M_PI) * rots::uxpush(0.06 * ads_scale), rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
       }
 
     ld tc = 0;

@@ -3,17 +3,17 @@ namespace hr {
 namespace ads_game {
 
 /** simulation speed */
-ld ads_simspeed = TAU;
-ld ds_simspeed = M_PI;
+ld ads_simspeed = TAU / 10;
+ld ds_simspeed = M_PI / 10;
 
 #define DS_(x) (main_rock ? ds_##x : ads_##x)
 
 /** by how much do WAS keys accelerate */
-ld ads_accel = 6;
-ld ds_accel = 15;
+ld ads_accel = 6 * ads_simspeed;
+ld ds_accel = 15 * ds_simspeed;
 
 /** cursor movement speed while paused */
-ld pause_speed = 5;
+ld pause_speed = 0.5;
 
 /** time unit for time display */
 ld ads_time_unit = TAU;

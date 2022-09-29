@@ -323,7 +323,7 @@ void ds_fire() {
 
 bool ds_turn(int idelta) {
   multi::handleInput(idelta);
-  ld delta = idelta / anims::period;
+  ld delta = idelta / 1000.;
   
   if(!(cmode & sm::NORMAL)) return false;
 
@@ -347,23 +347,24 @@ bool ds_turn(int idelta) {
   if(a[16+6] && !la[16+6]) view_proper_times = !view_proper_times;
   if(a[16+7] && !la[16+7]) auto_rotate = !auto_rotate;
   if(a[16+8] && !la[16+8]) pushScreen(game_menu);
-
+  
   if(true) {
     dynamicval<eGeometry> g(geometry, gSpace435);
     
     ld pt = delta * ds_simspeed;
     ld mul = read_movement();
+    ld dv = pt * ds_accel * mul;
 
     if(paused && a[16+11]) {
       current.T = spin(ang*degree) * cspin(0, 2, mul*delta*-pause_speed) * spin(-ang*degree) * current.T;
       }
     else {
-      current.T = spin(ang*degree) * lorentz(0, 3, -delta*ds_accel*mul) * spin(-ang*degree) * current.T;
+      current.T = spin(ang*degree) * lorentz(0, 3, -dv) * spin(-ang*degree) * current.T;
       }
     
     if(!paused) {
-      pdata.fuel -= delta*ds_accel*mul;
-      ds_gen_particles(rpoisson(delta*ds_accel*mul*fuel_particle_qty), inverse(current.T) * spin(ang*degree+M_PI) * rots::uxpush(0.06 * ds_scale), current.shift, rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
+      pdata.fuel -= dv;
+      ds_gen_particles(rpoisson(dv*fuel_particle_qty), inverse(current.T) * spin(ang*degree+M_PI) * rots::uxpush(0.06 * ds_scale), current.shift, rsrc_color[rtFuel], fuel_particle_rapidity, fuel_particle_life, 0.02);
       }
 
     ld tc = 0;
@@ -611,7 +612,7 @@ void run_ds_game() {
   }
 
 void ds_record() {
-  ld full = anims::period;
+  ld full = 1000;
   anims::period = full * history.back().start / ds_simspeed;
   anims::noframes = anims::period * 60 / 1000;
   dynamicval<bool> b(paused, true);

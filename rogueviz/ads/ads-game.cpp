@@ -159,17 +159,17 @@ auto shot_hooks =
     param_b(auto_angle, "ads_auto_angle")
     -> editable("automatically rotate the projection", 'a');
     param_f(ads_simspeed, "ads_game_simspeed")
-    -> editable(0, 2*TAU, TAU/4, "AdS game speed", "Controls the speed of the game.", 's');
-    param_f(ds_simspeed, "ads_game_simspeed")
-    -> editable(0, 2*TAU, TAU/4, "dS game speed", "Controls the speed of the game.", 's');
+    -> editable(0, 2*TAU, TAU/4, "AdS game speed", "Controls the speed of the game, in absolute units per second.", 's');
+    param_f(ds_simspeed, "ds_game_simspeed")
+    -> editable(0, 2*TAU, TAU/4, "dS game speed", "Controls the speed of the game, in absolute units per second.", 's');
     param_f(ads_scale, "ads_game_scale")
     -> editable(0, 2, 0.1, "AdS game scale", "Controls the scaling of game objects.", 'c');
     param_f(ds_scale, "ds_game_scale")
     -> editable(0, 2, 0.1, "dS game scale", "Controls the scaling of game objects.", 'c');
     param_f(ads_accel, "ads_game_accel")
-    -> editable(0, 30, 1, "AdS acceleration", "Controls the speed of your ship's acceleration.", 'a');
-    param_f(ds_accel, "ads_game_accel")
-    -> editable(0, 30, 1, "dS acceleration", "Controls the speed of your ship's acceleration.", 'a');
+    -> editable(0, 30, 1, "AdS acceleration", "Controls your ship's acceleration, in absolute units per second squared.", 'a');
+    param_f(ds_accel, "ds_game_accel")
+    -> editable(0, 30, 1, "dS acceleration", "Controls your ship's acceleration, in absolute units per second squared.", 'a');
     param_f(ads_time_unit, "ads_time_unit")
     -> editable(0, 2*TAU, 1, "AdS time unit",
       "Controls the unit used when the 'display the proper times' option is on.\n\n"
@@ -183,7 +183,7 @@ auto shot_hooks =
       "Times in settings are always specified in absolute units."
       , 'a');
     param_f(pause_speed, "ads_pause_speed")
-    -> editable(0, 30, 1, "movement speed while paused", "Controls the speed of camera movement while paused and holding the 'move switch' key.", 'v');
+    -> editable(0, 30, 1, "movement speed while paused", "Controls the speed of camera movement while paused and holding the 'move switch' key. Absolute units per second.", 'v');
     param_f(rock_density, "ads_rock_density")
     -> editable(0, 5, 0.05, "rock density", "how many rocks to generate", 'd');
     param_f(rock_max_rapidity, "ads_rock_rapidity")
