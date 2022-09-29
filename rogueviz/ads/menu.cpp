@@ -104,6 +104,9 @@ void game_menu() {
   dialog::addItem(XLAT("refill cheat"), 'R');
   dialog::add_action([] { init_rsrc(); popScreen(); });
   
+  dialog::addItem(XLAT("recenter cheat"), 'C');
+  dialog::add_action([] { current.T = Id; vctrV = Id; });
+
   dialog::addItem("configure keys", 'k');
   dialog::add_action_push(multi::get_key_configurer(1, move_names, "Relative Hell keys"));
 
