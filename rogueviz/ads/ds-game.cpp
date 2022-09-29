@@ -555,7 +555,7 @@ void view_ds_game() {
       queuestr(shiftless(sphereflip), .1, str, 0xFFFF00, 8);
       }
 
-    if(paused && !game_over) {
+    if(paused && !game_over && !inHighQual) {
       vector<hyperpoint> pts;
       int ok = 0, bad = 0;
       for(int i=0; i<=360; i++) {
@@ -612,11 +612,11 @@ void run_ds_game() {
 
 void ds_record() {
   ld full = 1000;
-  anims::period = full * history.back().start / ds_simspeed;
+  anims::period = full * history.back().start / DS_(simspeed);
   anims::noframes = anims::period * 60 / 1000;
   dynamicval<bool> b(paused, true);
   int a = addHook(anims::hooks_anim, 100, [&] {
-    view_pt = (ticks / full) * ds_simspeed;
+    view_pt = (ticks / full) * DS_(simspeed);
     for(auto& ss: history)
       if(ss.start + ss.duration > view_pt) {
         if(sphere) {
@@ -625,7 +625,7 @@ void ds_record() {
           current.T = inverse(ss.at.T * spin(-ss.ang*degree));
           current.T = lorentz(3, 2, view_pt - ss.start) * current.T;
           }
-        else PIA([&] {
+        else PIA({
           current = ads_inverse(ss.at * spin(-ss.ang*degree));
           vctr = ss.vctr;
           vctrV = ss.vctrV;

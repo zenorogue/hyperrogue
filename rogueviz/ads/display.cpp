@@ -164,7 +164,7 @@ void draw_game_cell(const cell_to_draw& cd) {
       }
     }
   
-  if(paused && c == vctr_ship && !game_over) {
+  if(paused && c == vctr_ship && !game_over && !inHighQual) {
     cross_result cr;
     hybrid::in_actual([&]{
       auto h = ads_inverse(current_ship * vctrV_ship);
