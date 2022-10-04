@@ -478,11 +478,11 @@ ITEM( 'o', 0x8080FF, "Orb of Winter", itOrbWinter, IC_ORB, ZERO | IF_FIREPROOF |
     "This orb can be used to invoke a wall of ice. It also protects you from fires.")
 ITEM( 'o', 0xFF6060, "Orb of Speed", itOrbSpeed, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osMovement,
     "This orb can be used to move faster for some time.")
-ITEM( 'o', 0x306000, "Orb of Life", itOrbLife, IC_ORB, ZERO | IF_SHMUPLIFE | IF_REVIVAL, RESERVED, osFriend,
+ITEM( 'o', 0x90B090, "Orb of Life", itOrbLife, IC_ORB, ZERO | IF_SHMUPLIFE | IF_REVIVAL, RESERVED, osFriend,
     "This orb can be used to summon friendly golems. It is used instantly when you pick it up.")
 ITEM( 'o', 0x60D760, "Orb of Shielding", itOrbShield, IC_ORB, ZERO | IF_PROTECTION | IF_EMPATHY, RESERVED, osProtective,
     "This orb can protect you from damage.")
-ITEM( 'o', 0x00FF00, "Orb of Earth", itOrbDigging, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osTerraform,
+ITEM( 'o', 0x606060, "Orb of Earth", itOrbDigging, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osTerraform,
     "This orb lets you go through living walls. It also has powers in some of the other lands.")
 ITEM( 'o', 0x20FFFF, "Orb of Teleport", itOrbTeleport, IC_ORB, ZERO | IF_RANGED, RESERVED, osRanged,
     "This orb lets you instantly move to another location on the map. Just click a location which "
@@ -591,7 +591,7 @@ ITEM( '$', 0xFFFFFF, "Pearl", itWhirlpool, IC_TREASURE, ZERO, RESERVED, osNone,
 ITEM( 'o', 0x306000, "Orb of Friendship", itOrbFriend, IC_ORB, ZERO | IF_SHMUPLIFE | IF_REVIVAL, RESERVED, osFriend, 
     "This Orb summons a friendly Bomberbird."
     )
-ITEM( 'o', 0x0070C0, "Orb of Water", itOrbWater, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osTerraform, 
+ITEM( 'o', 0x000060, "Orb of Water", itOrbWater, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osTerraform, 
    "This Orb allows your boat to go against the current, "
    "and also to go into the land, creating water on the way."
     )
@@ -706,7 +706,7 @@ ITEM( 'o', 0xFFFF80, "Orb of the Warp", itOrb37, IC_ORB, ZERO, RESERVED, osWarpi
     "This Orb creates a warped zone of radius 5 around you, "
     "and also allows you to move diagonally in warped zones."
     )
-ITEM( 'o', 0x8B4513, "Orb of Energy", itOrbEnergy, IC_ORB, ZERO, RESERVED, osPowerUtility, 
+ITEM( 'o', 0xFFFF80, "Orb of Energy", itOrbEnergy, IC_ORB, ZERO, RESERVED, osPowerUtility, 
     "This Orb halves the power usage of orbs which cost some "
     "charges with each activation. It even affects the "
     "one-shot orbs such as Flash or Teleport. If such an activation "
@@ -783,7 +783,7 @@ ITEM( 'o', 0xC00040, "Orb of Recall", itOrbRecall, IC_ORB, ZERO, RESERVED, osUti
 ITEM( ']', 0x8080FF, "Dodecahedron", itDodeca, IC_TREASURE, ZERO, RESERVED, osNone, 
     "These dodecahedra made of a mysterious material are the Reptiles' favorite toy."
     )
-ITEM( 'o', 0xFF0000, "Orb of Vaulting", itOrbDash, IC_ORB, ZERO | IF_RANGED, RESERVED, osFrog, 
+ITEM( 'o', 0x8080FF, "Orb of Vaulting", itOrbDash, IC_ORB, ZERO | IF_RANGED, RESERVED, osFrog, 
     "This Orb allows you to jump over an adjacent monster, killing or stunning it. "
     "You can only vault in a roughly straight line. "
     "Target a cell on the other side to use it."
@@ -816,7 +816,7 @@ ITEM( '*', 0x40E0D0, "Turquoise", itHunting, IC_TREASURE, ZERO, RESERVED, osNone
 ITEM( '*', 0x009090, "Forgotten Relic", itBlizzard, IC_TREASURE, ZERO, RESERVED, osNone, blizzarddesc)
 ITEM( '(', 0xFFE080, "Ancient Weapon", itTerra, IC_TREASURE, ZERO, RESERVED, osNone, 
     "This ancient weapon is beautifully encrusted with precious gems, but you prefer your own -- it is much lighter.")
-ITEM( 'o', 0x00FF00, "Orb of Slashing", itOrbSide1, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osOffensive, 
+ITEM( 'o', 0x307080, "Orb of Slashing", itOrbSide1, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osOffensive, 
     "Whenever you attack with this Orb, you also hit the monsters adjacent both to you and the monster you originally attacked.")
 ITEM( 'o', 0x30A080, "Orb of the Triangle", itOrbSide2, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osOffensive, 
     "Whenever you attack with this Orb, you also hit the monsters adjacent to you which are neither adjacent nor opposite to the monster "
@@ -836,11 +836,11 @@ ITEM( '!', 0x80FF80, "Sea Glass", itDock, IC_TREASURE, ZERO, RESERVED, osNone, N
 ITEM( '*', 0xBBCC99, "Chrysoberyl", itRuins, IC_TREASURE, ZERO, RESERVED, osNone, "Fragment of the past glory.")
 ITEM( '*', 0x80FF80, "Monopole", itMagnet, IC_TREASURE, ZERO, RESERVED, osNone, NODESCYET)
 ITEM( '!', 0xFF00FF, "Tasty Jelly", itSwitch, IC_TREASURE, ZERO, RESERVED, osNone, "A tasty byproduct of the Jelly Revolution.")
-ITEM( 'o', 0xFF0000, "Orb of Phasing", itOrbPhasing, IC_ORB, ZERO, RESERVED, osFrog, 
+ITEM( 'o', 0xFFFF80, "Orb of Phasing", itOrbPhasing, IC_ORB, ZERO, RESERVED, osFrog, 
     "This orb lets you pass through walls (one cell wide), and also through monsters, as long as they will not attack you in transit.")
 ITEM( 'o', 0xFFFF80, "Orb of Magnetism", itOrbMagnetism, IC_ORB, ZERO, RESERVED, osUtility, 
     "This orb makes you immediately pickup all the items on adjacent cells.")
-ITEM( 'o', 0x20FF20, "Orb of Slaying", itOrbSlaying, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osOffensive,
+ITEM( 'o', 0x202020, "Orb of Slaying", itOrbSlaying, IC_ORB, ZERO | IF_EMPATHY, RESERVED, osOffensive,
     "This Orb lets you defeat Raiders and other tough single-cell monsters in melee."
     )
 ITEM( '*', 0xFFA860, "Tiger's Eye", itBrownian, IC_TREASURE, ZERO, RESERVED, osNone,
