@@ -192,7 +192,7 @@ EX void drawShield(const shiftmatrix& V, eItem it) {
 #endif
   }
 
-void drawSpeed(const shiftmatrix& V) {
+void drawSpeed(const shiftmatrix& V, ld scale=1) {
 #if CAP_CURVE
   ld ds = ptick(10);
   color_t col = darkena(iinf[itOrbSpeed].color, 0, 0xFF);
@@ -202,7 +202,7 @@ void drawSpeed(const shiftmatrix& V) {
 #endif
   for(int b=0; b<cgi.S84; b+=cgi.S14) {
     PRING(a)
-      curvepoint(xspinpush0((ds+b+a) * M_PI/cgi.S42, cgi.hexf*a/cgi.S84));
+      curvepoint(xspinpush0((ds+b+a) * M_PI/cgi.S42, cgi.hexf*a/cgi.S84*scale));
     queuecurve(V, col, 0x8080808, PPR::LINE);
     }
 #endif
@@ -764,11 +764,10 @@ EX hpcshape& orbshape(eOrbshape s) {
   switch(s) {
      case osLove: return cgi.shLoveRing;
      case osRanged: return cgi.shTargetRing;
-     case osOffensive: return cgi.shSawRing;
+     case osOffensive: case osDirectional: return cgi.shSawRing;
      case osFriend: return cgi.shPeaceRing;
      case osUtility: return cgi.shGearRing;
      case osPowerUtility: return cgi.shPowerGearRing;
-     case osDirectional: return cgi.shSpearRing;
      case osWarping: return cgi.shHeptaRing;
      case osFrog: return cgi.shFrogRing;
      case osProtective: return cgi.shProtectiveRing;
@@ -793,18 +792,23 @@ void queue_ring(const shiftmatrix& V, hpcshape& sh, color_t col, PPR p) {
 
 EX color_t orb_auxiliary_color(eItem it) {
   if(it == itOrbFire) return firecolor(200);
+  if(it == itOrbWater) return 0x000060;
   if(it == itOrbFriend || it == itOrbDiscord) return 0xC0C0C0;
   if(it == itOrbFrog) return 0xFF0000;
   if(it == itOrbImpact) return 0xFF0000;
-  if(it == itOrbPhasing) return 0xFF0000;
-  if(it == itOrbDash) return 0xFF0000;
+  if(it == itOrbPhasing) return 0xFFFF80;
+  if(it == itOrbDash) return 0x8080FF;
   if(it == itOrbFreedom) return 0xC0FF00;
   if(it == itOrbPlague) return 0x409040;
   if(it == itOrbChaos) return 0xFF00FF;
   if(it == itOrbAir) return 0xFFFFFF;
   if(it == itOrbUndeath) return minf[moFriendlyGhost].color;
   if(it == itOrbRecall) return 0x101010;
+  if(it == itOrbLife) return 0x90B090;
   if(it == itOrbSlaying) return 0xFF0000;
+  if(it == itOrbSide1) return 0x307080;
+  if(it == itOrbDigging) return 0x606060;
+  if(it == itOrbEnergy) return 0xFFFF80;
   return iinf[it].color;
   }
 
@@ -1046,8 +1050,129 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     
     if(xch == 'c')
       queuepolyat(Vit * spinptick(500, 0), cgi.shMoonDisk, darkena(0x801080, 0, hidden ? 0x20 : 0xC0), prio);
-    else
-      queuepolyat(Vit, cgi.shDisk, darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), prio);
+    else {
+      auto dark = darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : (it == itOrbBeauty) ? 0xA0 : 0xC0);
+      if (it == itOrbBeauty)
+        for(int u=0; u<3; u++)
+          queuepolyat(Vit * spin(2*M_PI / 3 / 3 * u), cgi.shSmallRose, dark, prio);
+      else if (it == itOrbLife) {
+        queuepolyat(Vit, cgi.shSmallPBody, dark, prio);
+        queuepolyat(Vit, cgi.shDiskM, dark, prio);
+        }
+      else if (it == itOrbBull) {
+        queuepolyat(Vit, cgi.shTinyBullBody, dark, prio);
+        queuepolyat(Vit, cgi.shTinyBullHead, dark, prio);
+        queuepolyat(Vit, cgi.shTinyBullHorn, dark, prio);
+        queuepolyat(Vit * Mirror, cgi.shTinyBullHorn, dark, prio);
+        }
+      else if (it == itOrbFrog) {
+        queuepolyat(Vit, cgi.shSmallFrogBody, dark, prio);
+        queuepolyat(Vit, cgi.shSmallFrogRearFoot, dark, prio);
+        queuepolyat(Vit, cgi.shSmallFrogRearLeg, dark, prio);
+        queuepolyat(Vit, cgi.shSmallFrogRearLeg2, dark, prio);
+        queuepolyat(Vit, cgi.shSmallFrogFrontFoot, dark, prio);
+        queuepolyat(Vit, cgi.shSmallFrogFrontLeg, dark, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallFrogRearFoot, dark, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallFrogRearLeg, dark, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallFrogRearLeg2, dark, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallFrogFrontFoot, dark, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallFrogFrontLeg, dark, prio);
+        }
+      else if (it == itOrbSpeed)
+        drawSpeed(Vit, 0.4);
+      else if (it == itOrbStunning) {
+        queuepolyat(Vit, cgi.shDiskM, dark, prio);
+        for (int i=0; i<5; i++) {
+          shiftmatrix V2 = Vit * spin(2*M_PI * i / 5 + ptick(300));
+          queuepolyat(V2, cgi.shSmallFlailBall, dark, prio);
+          }
+        }
+      else if (it == itOrbDragon) {
+        queuepolyat(Vit, cgi.shSmallDragonHead, dark, prio);
+        queuepolyat(Vit, cgi.shSmallDragonNostril, 0xFF, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallDragonNostril, 0xFF, prio);
+        queuepolyat(Vit, cgi.shSmallDragonEyes, 0x60, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallDragonEyes, 0x60, prio);
+        }
+      else if (it == itOrbDomination) {
+        queuepolyat(Vit, cgi.shSmallWormHead, dark, prio);
+        queuepolyat(Vit, cgi.shSmallWormEyes, 0x60, prio);
+        queuepolyat(Vit*Mirror, cgi.shSmallWormEyes, 0x60, prio);
+        }
+      else if (it == itOrbMorph || it == itOrbChaos || it == itOrbPlague)
+        queuepolyat(Vit, cgi.shSmallTreat, dark, prio);
+      else if (it == itOrbWinter)
+        queuepolyat(Vit, cgi.shSnowflake, dark, prio);
+      else if (it == itOrbLuck)
+        queuepolyat(Vit, cgi.shSmallerDodeca, dark, prio);
+      else if (it == itOrbAether) {
+        queuepolyat(Vit, cgi.shHalfDisk, dark, prio);
+        queuepolyat(Vit*Mirror, cgi.shHalfDisk, 0xFF, prio);
+        queuepolyat(Vit, cgi.shHalfHumanoid, dark, prio);
+        queuepolyat(Vit*Mirror, cgi.shHalfHumanoid, 0xFF, prio);
+        }
+      else if (it == itOrbFlash)
+        queuepolyat(Vit, cgi.shFlash, dark, prio);
+      else if (it == itOrbMatter || it == itOrbStone)
+        queuepolyat(Vit, cgi.shDiskSq, dark, prio);
+      else if (it == itOrbSummon) {
+        queuepolyat(Vit, cgi.shHeptagon, dark, prio);
+        queuepolyat(Vit, cgi.shHeptagram, dark, prio);
+        }
+      else {
+        auto shape = (it == itOrbFriend) ? &cgi.shTinyBird :
+                     (it == itOrbSide1) ? &cgi.shSmallPSword :
+                     (it == itOrbDigging) ? &cgi.shSmallPickAxe :
+                     (it == itOrbSword || it == itOrbSword2) ? &cgi.shSmallSword :
+                     (it == itOrbThorns) ? &cgi.shSmallHedgehogBlade :
+                     (it == itOrbSide2 || it == itOrb37 || it == itOrbLava) ? &cgi.shDiskT :
+                     (it == itOrbGravity) ? &cgi.shTinyArrow :
+                     (it == itOrbSafety || it == itOrbFreedom || it == itOrbRecall) ? &cgi.shDiskSq :
+                     (it == itOrbEnergy) ? &cgi.shHalfDisk :
+                     (it == itOrbSpace) ? &cgi.shSmallPirateHook :
+                     (it == itOrbChoice || it == itOrbMirror || it == itOrbMagnetism || it == itOrbEmpathy || it == itOrbDiscord) ? &cgi.shEccentricDisk :
+                     (it == itOrbPsi || it == itOrbSide3) ? &cgi.shDiskS :
+                     (it == itOrbPurity) ? &cgi.shSmallEgg :
+                     (it == itOrbLightning) ? &cgi.shLightningBolt :
+                     (it == itOrbShield) ? &cgi.shShield :
+                     (it == itOrbTime) ? &cgi.shHourglass :
+                     (it == itOrbAir) ? &cgi.shSmallFan :
+                     (it == itOrbWoods) ? &cgi.shTreeIcon :
+                     (it == itOrbNature) ? &cgi.shLeafIcon :
+                     (it == itOrbIllusion || it == itOrbInvis || it == itOrbTeleport) ? &cgi.shHumanoid :
+                     (it == itOrbPhasing || it == itOrbDash) ? &cgi.shDiskSegment :
+                        NULL;
+        queuepolyat(Vit, cgi.shDisk, dark, prio);
+        if (shape)
+          queuepolyat(Vit, *shape, (it == itOrbInvis || it == itOrbTeleport) ? 0x20 : 0x80, prio);
+        if (it == itOrbSide1 || (shape == &cgi.shEccentricDisk && it != itOrbDiscord))
+          queuepolyat(Vit*Mirror, *shape, 0x80, prio);
+        if (it == itOrbPhasing || it == itOrbDash || it == itOrbEnergy)
+          queuepolyat(Vit*Mirror, *shape, col, prio);
+        if (it == itOrbIntensity || it == itOrbImpact)
+          queuepolyat(Vit, cgi.shDiskM, 0x80, prio);
+        if (it == itOrbHorns) {
+          queuepolyat(Vit, cgi.shSmallBullHead, 0x80, prio);
+          queuepolyat(Vit, cgi.shSmallBullHorn, 0x80, prio);
+          queuepolyat(Vit*Mirror, cgi.shSmallBullHorn, 0x80, prio);
+          }
+        if (it == itOrbUndeath) {
+          dark = darkena(minf[moFriendlyGhost].color, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0);
+          queuepolyat(Vit, cgi.shMiniGhost, dark, prio);
+          queuepolyat(Vit, cgi.shMiniEyes, 0xFF, prio);
+          }
+        if (it == itOrbSlaying) {
+          queuepolyat(Vit, cgi.shSmallFlailTrunk, 0x80, prio);
+          queuepolyat(Vit, cgi.shSmallHammerHead, 0x80, prio);
+          }
+        if (it == itOrbShell)
+          for(int i = 1; i<8; i++) {
+            queuepolyat(Vit, cgi.shTortoise[i][2], 0x80, prio);
+            if (i>=5 && i<=7)
+              queuepolyat(Vit*Mirror, cgi.shTortoise[i][2], 0x80, prio);
+            }
+        }
+      }
 
     queue_ring(Vit * spinptick(1500, 0), orbshape(iinf[it].orbshape), col, prio);
     }

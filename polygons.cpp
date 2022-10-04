@@ -259,7 +259,8 @@ void geometry_information::bshape(hpcshape& sh, PPR prio) {
   if(last) finishshape();
   hpc.push_back(hpxy(0,0));
   last = &sh;
-  last->s = isize(hpc), last->prio = prio;
+  last->s = isize(hpc);
+  last->prio = prio;
   last->flags = 0;
   last->tinf = NULL;
   first = true;
@@ -547,8 +548,15 @@ void geometry_information::procedural_shapes() {
   bshape(shStar, PPR::ITEM);
   for(int t=0; t<=S84; t+=SD6) {
     hpcpush(ddi(t, zhexf*.2) * C0);
-    if(t != S84) hpcpush(ddi(t+3,   zhexf*.6) * C0);
+    if(t != S84) hpcpush(ddi(t+3, zhexf*.6) * C0);
     }
+
+  bshape(shFlash, PPR::ITEM);
+  for(int t=0; t<S84+SD6; t+=SD6) {
+    hpcpush(ddi(t, zhexf*.25) * C0);
+    hpcpush(ddi(t+3, zhexf*.4) * C0);
+    }
+  hpcpush(ddi(3, zhexf*.4) * C0);
 
   bshape(shDaisy, PPR::ITEM);
   for(int t=0; t<=SD6; t++) {
@@ -556,6 +564,13 @@ void geometry_information::procedural_shapes() {
     if(t != SD6) hpcpush(ddi(t*S14+SD7, zhexf*-.5*3/4) * C0);
     }
   hpcpush(ddi(0, zhexf*.6) * C0);
+
+  bshape(shSnowflake, PPR::ITEM);
+  for(int t=0; t<=SD6; t++) {
+    hpcpush(ddi(t*S14, zhexf*.7*.8*3/4) * C0);
+    if(t != SD6) hpcpush(ddi(t*S14+SD7, zhexf*.7*-.5*3/4) * C0);
+    }
+  hpcpush(ddi(0, zhexf*.7*.6) * C0);
 
   bshape(shTriangle, PPR::ITEM);
   for(int t=0; t<=SD3; t++) {
@@ -566,8 +581,23 @@ void geometry_information::procedural_shapes() {
   for(ld d: {0, 90, -90, 0})
     hpcpush(xspinpush0(d*degree, zhexf*.2));
 
+  bshape(shHeptagon, PPR::ITEM);
+  for(int i=0; i<=S84; i+=S12)
+    hpcpush(ddi(i, orbsize * .2) * C0);
+  bshape(shHeptagram, PPR::ITEM);
+  for(int i=0, skip=3; i<=S84*skip; i+=S12*skip)
+    hpcpush(ddi(i, orbsize * .2) * C0);
+
   bshape(shDisk, PPR::ITEM);
   for(int i=0; i<=S84; i+=SD3)
+    hpcpush(ddi(i, orbsize * .2) * C0);
+
+  bshape(shHalfDisk, PPR::ITEM);
+  for(int i=0; i<=S84/2; i+=SD3)
+    hpcpush(ddi(i, orbsize * .2) * C0);
+
+  bshape(shDiskSegment, PPR::ITEM);
+  for(int i=0; i<=S84/2.5; i+=SD3)
     hpcpush(ddi(i, orbsize * .2) * C0);
 
   bshape(shMoonDisk, PPR::ITEM);
@@ -602,15 +632,24 @@ void geometry_information::procedural_shapes() {
     hpcpush(ddi(i, orbsize * .1) * C0);
     }
 
+  bshape(shEccentricDisk, PPR::ITEM);
+  for(int i=0; i<=S84; i+=SD3) {
+    hpcpush(hpxy(sin(i*2*M_PI/S84)*orbsize*.075,
+                 cos(i*2*M_PI/S84)*orbsize*.075 + .07));
+    }
+
   bshape(shDiskSq, PPR::ITEM);
   for(int i=0; i<=S84; i+=S21) {
     hpcpush(ddi(i, orbsize * .15) * C0);
     }
 
   bshape(shEgg, PPR::ITEM);
-  
   RING(i)
     hpcpush(hpxy(sin(i*2*M_PI/S84)*0.242 * orbsize, cos(i*2*M_PI/S84)*0.177*orbsize));
+
+  bshape(shSmallEgg, PPR::ITEM);
+  RING(i)
+    hpcpush(hpxy(sin(i*2*M_PI/S84)*0.242 * orbsize/2, cos(i*2*M_PI/S84)*0.177*orbsize/2));
   
   auto make_ring = [this] (hpcshape& sh, reaction_t f) {
     bshape(sh, PPR::ITEM);
@@ -791,6 +830,11 @@ void geometry_information::procedural_shapes() {
   finishshape();
 
   shRoseItem = shRose;
+
+  bshape(shSmallRose, PPR::ITEM);
+  PRING(t)
+    hpcpush(xspinpush0(M_PI * t / (S42+.0), scalefactor/2 * hcrossf7 * (0.2 + .15 * sin(M_PI * t / (S42+.0) * 3))));
+  finishshape();
 
   bshape(shThorns, PPR::THORNS);
   for(int t=0; t<=60; t++)
@@ -1220,6 +1264,15 @@ void geometry_information::prepare_shapes() {
   bshape(shKey, PPR::ITEM, scalefactor, 68);
   bshape(shPirateX, PPR::ITEM, scalefactor, 124);
   bshape(shTreat, PPR::ITEM, scalefactor, 253);
+  bshape(shSmallTreat, PPR::ITEM, scalefactor/1.5, 253);
+  bshape(shLightningBolt, PPR::ITEM, scalefactor/1.5, 413);
+  bshape(shSmallFan, PPR::ITEM, scalefactor/3, 59);
+  bshape(shHumanoid, PPR::ITEM, scalefactor/5.5, 414);
+  bshape(shHalfHumanoid, PPR::ITEM, scalefactor/5.5, 415);
+  bshape(shHourglass, PPR::ITEM, scalefactor/2.0, 416);
+  bshape(shShield, PPR::ITEM, scalefactor, 418);
+  bshape(shTreeIcon, PPR::ITEM, scalefactor/1.7, 419);
+  bshape(shLeafIcon, PPR::ITEM, scalefactor, 420);
 
   wormscale = WDIM == 3 ? 3 : 1;
 
@@ -1233,6 +1286,7 @@ void geometry_information::prepare_shapes() {
   copyshape(shJoint, shDisk, PPR::ONTENTACLE);
   bshape(shTentHead, PPR::ONTENTACLE, scalefactor * wormscale, 79);
   bshape(shWormHead, PPR::ONTENTACLE, scalefactor * wormscale, 80);
+  bshape(shSmallWormHead, PPR::ONTENTACLE, scalefactor * wormscale / 2, 80);
 
   bshape(shWormSegment, PPR::TENTACLE1);
   RING(i)
@@ -1249,6 +1303,8 @@ void geometry_information::prepare_shapes() {
   bshape(shDragonTail, PPR::TENTACLE1, scalefactor * wormscale, 240); //239 alt
   bshape(shDragonNostril, PPR::ONTENTACLE_EYES, scalefactor * wormscale, 241);
   bshape(shDragonHead, PPR::ONTENTACLE, scalefactor * wormscale, 242);
+  bshape(shSmallDragonNostril, PPR::ONTENTACLE_EYES, scalefactor * wormscale / 2, 241);
+  bshape(shSmallDragonHead, PPR::ONTENTACLE, scalefactor * wormscale / 2, 242);
 
   ld krsc = 1;
   if(sphere) krsc *= 1.4;
@@ -1326,6 +1382,7 @@ void geometry_information::prepare_shapes() {
   bshape(shReptileTail, PPR::MONSTER_BODY, scalefactor, 303);
   bshape(shReptileEye, PPR::MONSTER_EYE0, scalefactor, 304);
   bshape(shDodeca, PPR::ITEM, scalefactor, 305);
+  bshape(shSmallerDodeca, PPR::ITEM, scalefactor*.8, 305);
 
   bshape(shTerraArmor1, PPR::MONSTER_BODY, scalefactor, 349);
   bshape(shTerraArmor2, PPR::MONSTER_BODY, scalefactor, 350);
@@ -1343,20 +1400,30 @@ void geometry_information::prepare_shapes() {
   bshape(shFrogFrontLeg, PPR::MONSTER_LEG, scalefactor, 396);
   bshape(shFrogRearLeg2, PPR::MONSTER_LEG, scalefactor, 397);
   bshape(shFrogBody, PPR::MONSTER_BODY, scalefactor, 398);
+  bshape(shSmallFrogRearFoot, PPR::MONSTER_FOOT, scalefactor/2, 393);
+  bshape(shSmallFrogFrontFoot, PPR::MONSTER_FOOT, scalefactor/2, 394);
+  bshape(shSmallFrogRearLeg, PPR::MONSTER_LEG, scalefactor/2, 395);
+  bshape(shSmallFrogFrontLeg, PPR::MONSTER_LEG, scalefactor/2, 396);
+  bshape(shSmallFrogRearLeg2, PPR::MONSTER_LEG, scalefactor/2, 397);
+  bshape(shSmallFrogBody, PPR::MONSTER_BODY, scalefactor/2, 398);
   bshape(shFrogEye, PPR::MONSTER_EYE0, scalefactor, 399);
   bshape(shFrogStripe, PPR::MONSTER_BODY, scalefactor, 400);
   bshape(shFrogJumpFoot, PPR::MONSTER_FOOT, scalefactor, 401);
   bshape(shFrogJumpLeg, PPR::MONSTER_FOOT, scalefactor, 404);
 
   bshape(shPBody, PPR::MONSTER_BODY, scalefactor, 85);
+  bshape(shSmallPBody, PPR::MONSTER_BODY, scalefactor/2, 85);
   bshape(shYeti, PPR::MONSTER_BODY, scalefactor, 86);
   bshape(shPSword, PPR::MONSTER_WPN, scalefactor, 90);
+  bshape(shSmallPSword, PPR::MONSTER_WPN, scalefactor/2, 407);
   bshape(shFerocityM, PPR::MONSTER_WPN, scalefactor, 361);
   bshape(shFerocityF, PPR::MONSTER_WPN, scalefactor, 362);
   bshape(shPKnife, PPR::MONSTER_WPN, scalefactor, 91);
   bshape(shPirateHook, PPR::MONSTER_WPN, scalefactor, 92);
+  bshape(shSmallPirateHook, PPR::MONSTER_WPN, scalefactor, 417);
   bshape(shSabre, PPR::MONSTER_WPN, scalefactor, 93);
   bshape(shHedgehogBlade, PPR::MONSTER_WPN, scalefactor, 94);
+  bshape(shSmallHedgehogBlade, PPR::MONSTER_WPN, scalefactor/2, 406);
   bshape(shHedgehogBladePlayer, PPR::MONSTER_WPN, scalefactor, 95);
   bshape(shFemaleBody, PPR::MONSTER_BODY, scalefactor, 96);
   bshape(shFemaleDress, PPR::MONSTER_ARMOR0, scalefactor, 97);
@@ -1380,6 +1447,11 @@ void geometry_information::prepare_shapes() {
   bshape(shBullRearHoof, PPR::MONSTER_FOOT, scalefactor, 317);
   bshape(shBullFrontHoof, PPR::MONSTER_FOOT, scalefactor, 318);
   bshape(shBullHead, PPR::MONSTER_HEAD, scalefactor, 319);
+  bshape(shSmallBullHead, PPR::MONSTER_HEAD, scalefactor/1.7, 411);
+  bshape(shSmallBullHorn, PPR::MONSTER_HEAD, scalefactor/1.7, 412);
+  bshape(shTinyBullHead, PPR::MONSTER_HEAD, scalefactor/2.5, 319);
+  bshape(shTinyBullHorn, PPR::MONSTER_HEAD, scalefactor/2.5, 316);
+  bshape(shTinyBullBody, PPR::MONSTER_BODY, scalefactor/2.5, 315);
 
   bshape(shButterflyBody, PPR::MONSTER_BODY, scalefactor, 320);
   bshape(shButterflyWing, PPR::MONSTER_BODY, scalefactor, 321);
@@ -1428,9 +1500,11 @@ void geometry_information::prepare_shapes() {
   bshape(shFlowerHand, PPR::MONSTER_WPN, scalefactor, 133);
   bshape(shPFace, PPR::MONSTER_FACE, scalefactor, 134);
   bshape(shEyes, PPR::MONSTER_EYE0, scalefactor, 135);
+  bshape(shSmallEyes, PPR::MONSTER_EYE0, scalefactor/2, 135);
   bshape(shMiniEyes, PPR::MONSTER_EYE0, scalefactor/3, 135);
   bshape(shShark, PPR::MONSTER_BODY, scalefactor, 136);
   shSlimeEyes = shDragonEyes = shWormEyes = shGhostEyes = shEyes;
+  shSmallDragonEyes = shSmallWormEyes = shSmallEyes;
   bshape(shTinyShark, PPR::MONSTER_BODY, scalefactor / 2, 136);
   bshape(shBugBody, PPR::MONSTER_BODY, scalefactor, 137);
   bshape(shBugArmor, PPR::MONSTER_ARMOR0, scalefactor, 138);
@@ -1447,11 +1521,15 @@ void geometry_information::prepare_shapes() {
   bshape(shWolfEyes, PPR::MONSTER_EYE0, WOLF, 147);
   bshape(shWitchDress, PPR::MONSTER_ARMOR0, scalefactor, 148);
   bshape(shPickAxe, PPR::MONSTER_WPN, scalefactor, 149);
+  bshape(shSmallPickAxe, PPR::MONSTER_WPN, scalefactor/1.5, 408);
   bshape(shPike, PPR::MONSTER_WPN, scalefactor, 150);
   bshape(shFlailBall, PPR::MONSTER_WPN, scalefactor, 151);
+  bshape(shSmallFlailBall, PPR::MONSTER_WPN, scalefactor/2, 151);
   bshape(shFlailTrunk, PPR::MONSTER_WPN, scalefactor, 152);
+  bshape(shSmallFlailTrunk, PPR::MONSTER_WPN, scalefactor/2, 409);
   bshape(shFlailChain, PPR::MONSTER_SUBWPN, scalefactor, 153);
   bshape(shHammerHead, PPR::MONSTER_WPN, scalefactor, 376);
+  bshape(shSmallHammerHead, PPR::MONSTER_WPN, scalefactor/1.5, 410);
   // bshape(shScratch, 17, scalefactor, 156);
   bshape(shSkeletonBody, PPR::MONSTER_BODY, scalefactor, 157);
   bshape(shSkull, PPR::MONSTER_HEAD, scalefactor, 158);
@@ -1530,6 +1608,7 @@ void geometry_information::prepare_shapes() {
 
   if(scalefactor > 1.5) bshape(shMagicSword, PPR::MAGICSWORD, scalefactor / 1.7570466583108084, 243);
   else bshape(shMagicSword, PPR::MAGICSWORD, scalefactor, 244);
+  bshape(shSmallSword, PPR::MAGICSWORD, scalefactor/2, 405);
 
   sword_size = 0;
   for(int i=shMagicSword.s; i<shMagicSword.e; i++)
@@ -1732,6 +1811,8 @@ NEWSHAPE,  88,1,2, -0.036955,0.001192, -0.036957,-0.007153, -0.048967,-0.028663,
 NEWSHAPE,  89,21,1, -0.064558,0.008369, -0.038156,0.011924,
 // shPSword (1x1)
 NEWSHAPE,  90,1,1, 0.093822,0.244697, 0.105758,0.251015, 0.110908,0.249862, 0.110690,0.245554, 0.113376,0.247134, 0.117228,0.245924, 0.127263,0.237981, 0.131886,0.226997, 0.116494,0.231721, 0.106117,0.231182, 0.105927,0.226986, 0.263283,-0.174653, 0.086104,0.209645, 0.079571,0.202657, 0.074206,0.190462, 0.068951,0.179766, 0.065727,0.200902, 0.068444,0.209067, 0.077641,0.221653, 0.086737,0.227526, 0.086260,0.248631, 0.086431,0.252937,
+// shSmallPSword
+NEWSHAPE,  407,1,1, -0.056178,0.244697, -0.044242,0.251015, -0.039092,0.249862, -0.03931,0.245554, -0.036624,0.247134, -0.032772,0.245924, -0.022737,0.237981, -0.018114,0.226997, -0.033506,0.231721, -0.043883,0.231182, -0.044073,0.226986, 0.113283,-0.174653, -0.063896,0.209645, -0.070429,0.202657, -0.075794,0.190462, -0.081049,0.179766, -0.084273,0.200902, -0.081556,0.209067, -0.072359,0.221653, -0.063263,0.227526, -0.06374,0.248631, -0.063569,0.252937,
 // shPKnife (1x1)
 NEWSHAPE,  91,1,1, 0.070235,0.261061, 0.085110,0.243297, 0.100384,0.253764, 0.115592,0.241462, 0.106046,0.228043, 0.193021,0.140235, 0.223042,0.069158, 0.217457,0.064184, 0.149083,0.101106, 0.073293,0.198875, 0.059119,0.191168, 0.049288,0.208259, 0.061401,0.222183, 0.046445,0.239874,
 // shPirateHook (1x1)
@@ -1740,6 +1821,8 @@ NEWSHAPE,  92,1,1, 0.025637,0.290334, 0.015893,0.212083, 0.070681,0.208634, 0.07
 NEWSHAPE,  93,1,1, 0.052478,0.211644, 0.042242,0.185536, 0.057979,0.181601, 0.068086,0.204991, 0.085295,0.201073, 0.100829,0.193318, 0.113718,0.184489, 0.125735,0.178476, 0.134891,0.170005, 0.144264,0.162907, 0.152391,0.155912, 0.160192,0.146346, 0.166733,0.136894, 0.180659,0.123243, 0.189268,0.108634, 0.197644,0.091550, 0.204992,0.075866, 0.207394,0.063057, 0.213308,0.045015, 0.215741,0.031014, 0.216495,0.013402, 0.217512,-0.002957, 0.216708,-0.025412, 0.215602,-0.037833, 0.209033,-0.050943, 0.249210,-0.008237, 0.247115,0.012233, 0.246190,0.028812, 0.239192,0.052194, 0.237023,0.067663, 0.231339,0.087245, 0.221702,0.107109, 0.215996,0.124316, 0.206323,0.141806, 0.194941,0.164879, 0.173125,0.180454, 0.158905,0.191858, 0.143293,0.202073, 0.128179,0.215193, 0.111272,0.224403, 0.090433,0.232613, 0.079164,0.234740, 0.083027,0.256039, 0.071081,0.264147, 0.060044,0.234679,
 // shHedgehogBlade (1x2)
 NEWSHAPE,  94,1,2, 0.117178,0.032617, 0.102699,0.066452, 0.056807,0.109987, 0.052506,0.272774, 0.079931,0.279758, 0.082589,0.170109, 0.139258,0.126935, 0.240653,0.136967, 0.177567,0.067821, 0.273978,0.042249, 0.187242,-0.000000,
+// shSmallHedgehogBlade (1x2)
+NEWSHAPE,  406,1,2, 0.017178,0.032617, 0.002699,0.066452, -0.043193,0.109987, -0.047494,0.272774, -0.020069,0.279758, -0.017411,0.170109, 0.039258,0.126935, 0.140653,0.136967, 0.077567,0.067821, 0.173978,0.042249, 0.087242,-0.000000,
 // shHedgehogBladePlayer (1x2)
 NEWSHAPE,  95,1,2, 0.117178,0.032617, 0.102699,0.066452, 0.056807,0.109987, 0.052506,0.272774, 0.079931,0.279758, 0.082589,0.170109, 0.173109,0.220554, 0.139258,0.126935, 0.240653,0.136967, 0.177567,0.067821, 0.273978,0.042249, 0.187242,-0.000000,
 // shFemaleBody (1x2)
@@ -1850,6 +1933,8 @@ NEWSHAPE, 147,1,2, 0.172835,0.002452, 0.156071,0.002439, 0.154815,0.012190, 0.13
 NEWSHAPE, 148,1,2, 0.039326,-0.001751, 0.041168,0.053278, 0.035516,0.073044, 0.024685,0.088439, 0.009671,0.096889, -0.002313,0.097795, -0.008219,0.099482, -0.016102,0.107500, -0.016016,0.108729, -0.022078,0.163499, -0.052858,0.141939, -0.084069,0.161675, -0.098088,0.129874, -0.108494,0.122098, -0.117272,0.122997, -0.128424,0.129237, -0.140905,0.138269, -0.152175,0.151195, -0.161208,0.157511, -0.178346,0.167608, -0.195945,0.176675, -0.219689,0.185527, -0.234056,0.190460, -0.219683,0.178715, -0.211330,0.162725, -0.206261,0.134376, -0.201753,0.102919, -0.205795,0.072925, -0.213892,0.049798, -0.218429,0.022623, -0.219265,0.011429,
 // shPickAxe (1x1)
 NEWSHAPE, 149,1,1, 0.064364,0.237609, 0.183353,-0.046466, 0.171819,-0.050455, 0.142623,-0.056105, 0.122591,-0.057865, 0.106467,-0.058329, 0.118180,-0.067773, 0.135948,-0.071025, 0.161536,-0.071733, 0.188994,-0.071278, 0.212623,-0.063402, 0.239189,-0.047822, 0.248564,-0.040034, 0.265990,-0.019250, 0.272276,0.000110, 0.269338,0.000001, 0.247284,-0.019782, 0.224346,-0.034255, 0.208443,-0.042147, 0.086124,0.253692,
+// shSmallPickAxe
+NEWSHAPE, 408,1,1, -0.085636,0.187609, 0.033353,-0.096466, 0.021819,-0.100455, -0.007377,-0.106105, -0.027409,-0.107865, -0.043533,-0.108329, -0.03182,-0.117773, -0.014052,-0.121025, 0.011536,-0.121733, 0.038994,-0.121278, 0.062623,-0.113402, 0.089189,-0.097822, 0.098564,-0.090034, 0.115990,-0.069250, 0.122276,-0.04989, 0.119338,-0.05, 0.097284,-0.069782, 0.074346,-0.084255, 0.058443,-0.092147, -0.063876,0.203692,
 // shPike (1x1)
 NEWSHAPE, 150,1,1, 0.096293,0.278465, 0.083339,-0.050087, 0.079276,-0.383984, 0.095192,-0.378226, 0.073482,-0.534658, 0.070202,-0.534586, 0.045864,-0.377144, 0.061795,-0.383600, 0.062148,-0.049623, 0.069133,0.279061,
 // shFlailBall (1x1)
@@ -2326,6 +2411,44 @@ NEWSHAPE, 402, 1, 2, 0.350118, -0.00051488,  0.337085, 0.0154155,  0.321993, 0.0
 NEWSHAPE, 403, 1, 1, 0.26453, 0.0305227,  0.274541, 0.0290331,  0.280348, 0.0265056,  0.271875, 0.0213835, 
 // FrogJumpLeg
 NEWSHAPE, 404, 1, 1, -0.157104, 0.037552,  -0.119742, 0.0232719,  -0.0800179, 0.03,  -0.0600636, 0.0582003,  -0.0695215, 0.0851648,  -0.0941826, 0.112117,  -0.124214, 0.117626,  -0.162927, 0.123278,  -0.20065, 0.122779,  -0.220489, 0.12271,  -0.294104, 0.0895822,  -0.341594, 0.0607798,  -0.344169, 0.0476839,  -0.336604, 0.0182726,  -0.31669, 0.0111505,  -0.296371, 0.0199419,  -0.257868, 0.0376895,  -0.219528, 0.0568778,  -0.198186, 0.0609263,  
+// shSmallSword (1x2)
+NEWSHAPE, 405,1,2, -0.226885,0.018516, -0.212399,0.032471, -0.193062,0.020928, -0.185621,0.046575, -0.192539,0.086182, -0.199612,0.102458, -0.167905,0.095887, -0.15358,0.056176, -0.148822,0.028094, 0.252221,0.023027, 0.294417,0.005175,
+// shSmallFlailTrunk
+NEWSHAPE, 409,1,1, -0.048707,0.225700, -0.042124,0.230376, -0.032941,0.233710, -0.026424,0.233978, -0.02268,0.229640, 0.047958,-0.201688, 0.041932,-0.211853, 0.038281,-0.216934, 0.029252,-0.216536, 0.018813,-0.210892, 0.012195,-0.202881,
+
+// shSmallHammerHead
+NEWSHAPE, 410, 1, 1, 0.102167, -0.184605, 0.104591, -0.195446, 0.092856, -0.189999, 0.080908, -0.186821, -0.036321, -0.200430, -0.045138, -0.204571, -0.048015, -0.209521, -0.063454, -0.112257, -0.056471, -0.116187, -0.045700, -0.119873, 0.082749, -0.114458, 0.095918, -0.107169, 0.104973, -0.102339, 0.099643, -0.128121, -0.057297, -0.134239, 0.099470, -0.127992, 0.099531, -0.140084, -0.055409, -0.148658, 0.098774, -0.139982, 0.099787, -0.150708, -0.054252, -0.163148, 0.098272, -0.150502, 0.100147, -0.160605, -0.051873, -0.174053, 0.098630, -0.160398, 0.099672, -0.171163, -0.049951, -0.188713, 0.098913, -0.171059,
+
+// shSmallBullHead
+NEWSHAPE, 411, 1, 2, 0.004622,-0.050250, -0.022393,-0.096839, -0.048261,-0.111332, -0.07182,-0.106443, -0.093094,-0.077841, -0.115158,-0.061865, -0.145038,-0.040355, -0.131374,-0.028054, -0.134834,-0.013460, -0.14853,-0.002240,
+// shSmallBullHorn
+NEWSHAPE, 412, 1, 1, -0.008298,-0.078714, -0.000397,-0.122456, 0.012058,-0.140037, 0.030561,-0.149754, 0.049070,-0.152553, 0.065131,-0.150636, 0.093718,-0.142016, 0.118897,-0.133266, 0.111750,-0.150756, 0.096899,-0.163295, 0.073192,-0.169643, 0.041044,-0.173385, 0.015193,-0.167994, -0.016582,-0.152134, -0.02649,-0.135781, -0.032758,-0.118441, -0.037756,-0.102342, -0.021201,-0.096856,
+
+// shLightningBolt
+NEWSHAPE, 413, 1,1, 0.0324, -0.1844, 0.1676, -0.1844, 0.0684, -0.078, 0.1292, -0.078, 0.046, 0.0156, 0.1068, 0.0156, -0.1316, 0.1612, -0.0404, 0.0532, -0.1012, 0.0532, -0.0278, -0.0452, -0.082, -0.0452,
+
+// shHumanoid
+NEWSHAPE, 414, 1, 2, 0.166, 0, 0.619, 0.186, 0.619, 0.348, 0.13, 0.171, -0.161, 0.129, 0.04, 0.254, -0.038, 0.339, -0.32, 0.186, -0.368, 0.078, -0.467, 0.138, -0.569, 0.141, -0.659, 0.081, -0.674, 0.087, -0.7, 0,
+NEWSHAPE, 415, 1, 1, 0.166, 0, 0.619, 0.186, 0.619, 0.348, 0.13, 0.171, -0.161, 0.129, 0.04, 0.254, -0.038, 0.339, -0.32, 0.186, -0.368, 0.078, -0.467, 0.138, -0.569, 0.141, -0.659, 0.081, -0.674, 0.087, -0.7, 0,
+
+// shHourglass
+NEWSHAPE, 416, 1, 2, -0.155, -0.072, -0.155, 0.085, -0.125, 0.085, -0.125, 0.062, -0.088, 0.063, -0.049, 0.054, -0.022, 0.035, 0.024, -0.040, -0.024, 0.040, 0.022, -0.035, 0.049, -0.054, 0.088, -0.063, 0.125, -0.062, 0.125, -0.085, 0.155, -0.085, 0.155, 0.072,
+
+// shSmallPirateHook (1x1)
+NEWSHAPE, 417, 1, 1, -0.037181, 0.070167, -0.042053, 0.031041, -0.014659, 0.029317, -0.010618, 0.031858, -0.003590, 0.032239, 0.014371, -0.025303, 0.007310, -0.026816, 0.002001, -0.030249, -0.001858, -0.038640, -0.003422, -0.049517, -0.000467, -0.058195, 0.005223, -0.064027, 0.013645, -0.067636, 0.022859, -0.070707, 0.033758, -0.070846, 0.028238, -0.067408, 0.020306, -0.063217, 0.016120, -0.060505, 0.009480, -0.057640, 0.004495, -0.050630, 0.003689, -0.045704, 0.007669, -0.036125, 0.015513, -0.032838, 0.025898, -0.030858, 0.006555, 0.042386, 0.002458, 0.051849, 0.002712, 0.054032, -0.001503, 0.057099, -0.005393, 0.057232, -0.006207, 0.061713, -0.009783, 0.064849, -0.013597, 0.065763,
+
+// shShield
+NEWSHAPE, 418, 1, 2, 0.055384, -0.005846, 0.043076, 0.010769, 0.033846, 0.033846, 0.036615, 0.052307, 0.056923, 0.092307, 0.030153, 0.092461, 0.004615, 0.084615, -0.017538, 0.080000, -0.049230, 0.068615, -0.066461, 0.058461, -0.079692, 0.041538, -0.092769, 0.016000, -0.092307, -0.005384,
+
+// shTreeIcon
+NEWSHAPE, 419, 1, 2, -0.175, 0.010, -0.048, 0.100, -0.044, 0.070, 0.025, 0.118, 0.030, 0.074, 0.107, 0.144, 0.110, 0.030, 0.165, 0.010,
+
+// shLeafIcon
+NEWSHAPE, 420, 1, 1,
+-0.05875, 0.09875, -0.05825, 0.101625, -0.070625, 0.07375, -0.07675, 0.026625, -0.06000, -0.00750, -0.047875, -0.01875, -0.01125, -0.04500, 0.05625, -0.06625, 0.04250, -0.01500, 0.04375, 0.01125, 0.03875, 0.063125, 0.02250, 0.08625, -0.028125, 0.10500, -0.051375, 0.10300, -0.04450, 0.070625, 0.01050, 0.06050, -0.03825, 0.06100, 0.003625, -0.01250, -0.03825, 0.035625, -0.048625, 0.01150, -0.043125, 0.04725, -0.05750, 0.08850, -0.05875, 0.09875,
+
+
+
 NEWSHAPE, NEWSHAPE
 };
 
