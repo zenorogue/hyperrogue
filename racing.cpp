@@ -941,12 +941,12 @@ void track_chooser(bool official) {
       stop_game();
       multi::players = playercfg;
       specialland = l;
+      if(!racing::on) switch_game_mode(rg::racing);
       if(official) {
         racing::on = false;
         load_official_track();
         }
       else {
-        if(!racing::on) switch_game_mode(rg::racing);
         start_game();
         }
       popScreenAll();
