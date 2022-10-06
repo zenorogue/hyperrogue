@@ -1128,7 +1128,7 @@ void race_projection() {
   
     dialog::init(XLAT("Racing"));
 
-    dialog::addItem(XLAT("play on an official track"), 'O');
+    dialog::addBoolItem(XLAT("play on an official track"), racing::on && official_race, 'O');
     dialog::add_action_push([/*this*/] () { track_chooser(true); }); 
 
     dialog::addItem(XLAT("generate a random track"), 's');
