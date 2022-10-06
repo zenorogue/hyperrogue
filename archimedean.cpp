@@ -1419,6 +1419,8 @@ EX void show() {
 
       dialog::addItem(XLAT("color by symmetries"), 't');
       dialog::add_action(setcanvas('A'));
+      dialog::addItem(XLAT("color by symmetries (reversed tiles marked)"), 'r');
+      dialog::add_action(setcanvas('R'));
       }
     else {
       dialog::addBreak(100);

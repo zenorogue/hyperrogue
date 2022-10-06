@@ -1544,7 +1544,7 @@ EX map<char, colortable> colortables = {
     0xF08040, 0xF04080, 0x40F080,
     0x4080F0, 0x8040F0, 0x80F040,
     0xFFD500 }},
-  {'M', { // mirrored versions of 'A'
+  {'R', { // reverse versions of 'A'
     0xF04080, 0x40F080, 0x3030D0,
     0xA0A060, 0xA000F0, 0x00A060,
     0xC0C0F0, 0x404070, 0x8080C0,
@@ -1789,7 +1789,7 @@ EX namespace patterns {
         else
           return crystal::colorize(c, whichCanvas);
       #endif
-      case 'A':
+      case 'A': case 'R':
         #if CAP_ARCM
         if(arcm::in()) {
           int id = arcm::id_of(c->master);
@@ -1797,7 +1797,7 @@ EX namespace patterns {
           int tid2 = arcm::current.tilegroup[id^1];
           bool mirrored = (id&1) && (tid != tid2);
           if(tid2 >= 0) tid = min(tid, tid2);
-          return colortables[mirrored ? 'M' : 'A'][tid];
+          return colortables[mirrored ? whichCanvas : 'A'][tid];
           }
         #endif
         if(arb::in()) {
@@ -1805,7 +1805,7 @@ EX namespace patterns {
           auto& sh = arb::current.shapes[id];
           int oid = sh.orig_id;
           bool mirrored = c->master->emeraldval || sh.is_mirrored;
-          return colortables[mirrored ? 'M' : 'A'][oid];
+          return colortables[mirrored ? whichCanvas : 'A'][oid];
           }
         return colortables['A'][shvid(c)];
       case 'B':
@@ -2057,6 +2057,7 @@ EX namespace patterns {
       }
 
     dialog::addSelItem(XLAT("types"), "types", 'A');
+    dialog::addSelItem(XLAT("types (mark reverse)"), "types", 'R');
     dialog::addSelItem(XLAT("sides"), "sides", 'B');
 
     if(!ISMOBILE)

@@ -2041,7 +2041,7 @@ void celldrawer::draw_cellstat() {
       auto& sh = arb::current.shapes[id];
       int oid = sh.orig_id;
       label = its(oid);
-      if(c->master->emeraldval || sh.is_mirrored) label += 'M';
+      if(c->master->emeraldval || sh.is_mirrored) label += 'R';
       if(arb::current.was_split_for_football) label += "F" + its(sh.football_type);
       }
     else if(arcm::in() && debug_tiles == 2) {
@@ -2051,7 +2051,7 @@ void celldrawer::draw_cellstat() {
       bool mirrored = (id&1) && (tid != tid2);
       if(tid2 >= 0) tid = min(tid, tid2);
       label = its(tid);
-      if(mirrored) label += "M";
+      if(mirrored) label += "R";
       }
     else
       label = its(shvid(c));
