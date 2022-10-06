@@ -116,7 +116,8 @@ Normally, when you choose to load a tes file, a game of HyperRogue is run on the
 
 * If you just wanted to draw the tessellation, do 'experiment with geometry' -> 'pattern'. Most useful patterns are: single color, random, types, sides.
 
-* By default, HyperRogue tiles have wide borders, which might be not what you want. Also in the 'pattern' menu, you can enable 'display full floors' to prevent this.
+* By default, HyperRogue tiles have wide borders, which might be not what you want. In the 'pattern' menu, you can enable 'display full floors' to prevent this, or 'width of cell boundaries' to change
+  the width of wide borders. You can also add `boundary_ratio(value)' to the tes file, which works similar to the 'width of cell boundaries' setting.
 
 * HyperRogue approximates the edges using polylines. If the current approximation is not sufficient, change main menu -> settings -> general graphics -> vector settings -> line quality to a higher value.
   From the same menu you can also change the line width.
