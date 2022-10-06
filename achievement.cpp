@@ -129,10 +129,13 @@ EX bool wrongMode(char flags) {
   if(tour::on) return true;
 #endif
   eLandStructure dls = lsNiceWalls;
-  if(flags == rg::special_geometry || flags == rg::racing || flags == rg::princess)
+  if(flags == rg::special_geometry || flags == rg::princess)
     dls = lsSingle;
   if(flags == rg::chaos)
     dls = lsChaos;
+  /* in the official racing achievements, the tracks are saved maps anyway */
+  if(flags == rg::racing)
+    dls = land_structure;
 
   if(land_structure != dls) return true;
   if(numplayers() > 1 && !multi::friendly_fire) return true;
