@@ -4784,3 +4784,19 @@ Menu improvements:
 - Orb of Earth no longer marked useless in Wetland
 - some fixes for the treasure/kill list: fixed the Onyx graphics; made some icons larger; dark stuff have their text brightened (or use the auxiliary orb color)
 - the monster movement order is more random now (no preference for clockwise)
+
+2022-10-06 13:13 Update 12.1b:
+- Orb icons thanks to Jacob Mandelson. (Can be disabled in general settings)
+- hostile dice are highlighted
+- racing mode fixes: the menu shows whether an official track is on; the settings are set correctly, and land structure is ignored for the achievement
+- Orb of Choice now works with Orb of Safety
+- an option to arbitrarily change the width of tile boundaries (in 'patterns' menu)
+- the option to debug tile/edge/vertexs IDs in the 'experiments with geometry' menu (if a tes file is on, but it works in general)
+- tes format now supports declaring a tile as having a mirror symmetry
+- tile-type display now displays mirror images as the same color (or slightly different colors, depending on settings)
+- tile-type display no longer assigns different colors depending on football type
+- when editing color tables, it is now possible to add more colors
+- Crystal World and Snake Nest were legal in some tilings but they did not actually appear -- should be fixed
+- ystrafe no longer brings walking eye level below 0
+
+TODO mirror with no-unmirror
