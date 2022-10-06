@@ -6055,7 +6055,7 @@ S(" This tour will not advance on its own -- you have to press Enter (not while 
   " Cette visite guidée n'avancera pas toute seule -- vous devez appuyer sur Entrée (pas pendant la lecture du texte d'aide)."
   )
 
-S("Hint: hold Alt to highlights enemies and other important features.",
+S("Hint: hold Alt to highlight enemies and other important features.",
   "Astuce: maintenir Alt appuyé pour surligner les ennemis et d'autres fonctionnalités importantes.")
 
 // Crystal World
