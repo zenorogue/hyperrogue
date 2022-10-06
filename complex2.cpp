@@ -1393,7 +1393,7 @@ EX namespace dice {
         cy = face[1] - (face[3] + face[4]) * .4;
         }
       
-      queuecurve(V1, 0xFFFFFFFF, color & 0xFFFFFF9F, prio);
+      queuecurve(V1, (poly_outline == OUTLINE_NONE) ? 0xFFFFFFFF : poly_outline, color & 0xFFFFFF9F, prio);
       
       #if !CAP_EXTFONT
       if(!vid.usingGL) continue;
