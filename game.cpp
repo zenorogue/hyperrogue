@@ -266,6 +266,10 @@ EX void activateSafety(eLand l) {
     save_turns = turncount;
     }
   #endif
+  if(items[itOrbChoice]) {
+    items[itOrbChoice] = 0;
+    cwt.at->item = itOrbSafety;
+    }
   }
 
 EX void placeGolem(cell *on, cell *moveto, eMonster m) {
