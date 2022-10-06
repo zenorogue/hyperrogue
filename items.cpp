@@ -672,7 +672,7 @@ EX void collectMessage(cell *c2, eItem which) {
     addMessage(XLAT("Better find some other place."));
     }
   else if(which == itHunting && items[itHunting] == 4 && !specialmode && !ISMOBWEB)
-    addMessage(XLAT("Hint: hold Alt to highlights enemies and other important features."));
+    addMessage(XLAT("Hint: hold Alt to highlight enemies and other important features."));
   else if(which == itSpice && items[itSpice] == U10*7/10 && !specialmode && isLandIngame(laHell))
     addMessage(XLAT("You have a vision of the future, fighting demons in Hell..."));
   else if(which == itSpice && items[itSpice] == U10-1 && !specialmode && isLandIngame(laRedRock))
