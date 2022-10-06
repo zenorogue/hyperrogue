@@ -1940,7 +1940,7 @@ void celldrawer::check_rotations() {
     }
   }
 
-EX bool debug_tiles;
+EX int debug_tiles;
 
 void celldrawer::bookkeeping() {
   bool orig = false;
@@ -2034,8 +2034,27 @@ void celldrawer::draw_cellstat() {
     queuestr(V, 1 * .2, label, 0xFFFFFFFF, 1);
     }
 
-  if(debug_tiles) {
-    string label = its(shvid(c));
+  if(debug_tiles && mod_allowed()) {
+    string label;
+    if(arb::in() && debug_tiles == 2) {
+      int id = shvid(c);
+      auto& sh = arb::current.shapes[id];
+      int oid = sh.orig_id;
+      label = its(oid);
+      if(c->master->emeraldval || sh.is_mirrored) label += 'M';
+      if(arb::current.was_split_for_football) label += "F" + its(sh.football_type);
+      }
+    else if(arcm::in() && debug_tiles == 2) {
+      int id = arcm::id_of(c->master);
+      int tid = arcm::current.tilegroup[id];
+      int tid2 = arcm::current.tilegroup[id^1];
+      bool mirrored = (id&1) && (tid != tid2);
+      if(tid2 >= 0) tid = min(tid, tid2);
+      label = its(tid);
+      if(mirrored) label += "M";
+      }
+    else
+      label = its(shvid(c));
     queuestr(V, .5, label, 0xFFFFFFFF, 1);
     for(int i=0; i<c->type; i++) {
       queuestr(V * rgpushxto0(currentmap->get_corner(c, i, 4)), .2, its(i), 0xFFFFFFFF, 1);

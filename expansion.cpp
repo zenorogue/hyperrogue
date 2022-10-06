@@ -436,7 +436,7 @@ EX string ncnames[5] = { "NO", "distance", "type", "debug", "error" };
 EX eNumberCoding number_coding = ncDistance;
 
 EX bool mod_allowed() {
-  return cheater || autocheat || arcm::in() || tour::on;
+  return cheater || autocheat || arcm::in() || arb::in() || tour::on;
   }
 
 EX int curr_dist(cell *c) {

@@ -2498,7 +2498,12 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     ->set_reaction([] {
       if(vid.highdetail > vid.middetail) vid.highdetail = vid.middetail;
       });
-  param_b(debug_tiles, "debug_tiles");
+  param_i(debug_tiles, "debug_tiles")->editable(0, 2, 1, 
+    "display tile debug values",
+    "Display cell type IDs, as well as vertex and edge identifiers.\n\n"
+    "Setting 1 uses the internal shape IDs, while setting 2 in tes files uses "
+    "the original IDs in case if extra tile types were added to "
+    "separate mirror images or different football types.", 'd');
   addsaver(vid.gp_autoscale_heights, "3D Goldberg autoscaling", true);  
   addsaver(scorefile, "savefile");
   param_b(savefile_selection, "savefile_selection")
