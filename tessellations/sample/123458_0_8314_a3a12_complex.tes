@@ -1,0 +1,13 @@
+## 123458_0_8314 A3+A12 example (5 vertices, 9 edges)
+h2.
+distunit(edge(12,4)/2)
+let(a3=regangle(1,3))
+let(a12=regangle(1,12))
+unittile(a3,a3,a3)
+unittile(a3,a3,a3)
+unittile(a12,a12,a12,a12,a12,a12,a12,a12,a12,a12,a12,a12)
+unittile(a3,a3,a3)
+unittile(a3,a3,a3)
+unittile(a12,a12,a12,*4)
+unittile(a3,a3,a3)
+conway("(0)(1 11'')(2 1'')(0')(1' 6'')(2' 8'')(0'')(2'' 0''')(3'' 0@6)(4'' 2@6)(5'' 0@4)(7'')(9'' 2@4)(10'' 1''')(2''' 1@5)(1@4 2@5)(0@5 1@6)")

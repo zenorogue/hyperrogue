@@ -1,0 +1,11 @@
+## 123458_0_8314 A3+A12 example (5 vertices, 9 edges), simplified using mirrors
+h2.
+distunit(edge(12,4)/2)
+let(a3=regangle(1,3))
+let(a12=regangle(1,12))
+unittile(a3,a3,a3)
+unittile(a12,a12,a12,a12,a12,a12,a12,a12,a12,a12,a12,a12,|7)
+unittile(a3,a3,a3)
+unittile(a12,a12,a12,*4,|0)
+unittile(a3,a3,a3,|2)
+conway("(0)(1 11')(2 1')(0')(2' 0'')(3' 0@4)[9' 1''](2'' 1''')(0''' 1@4)")

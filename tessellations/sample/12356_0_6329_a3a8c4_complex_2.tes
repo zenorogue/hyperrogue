@@ -1,0 +1,18 @@
+## 12356_0_6329 A3+A8+C4 complex example (8 vertices, 16 edges), simplified using mirrors
+h2.
+distunit(arcmedge(3,3,8,8))
+let(a3=regangle(1,3))
+let(a8=regangle(1,8))
+let(c4=regangle(3,4))
+unittile(a3,*3)
+unittile(a8,a8,a8,a8,a8,a8,a8,a8,|4)
+unittile(a3,a3,a3,|0)
+unittile(a3,a3,a3,|1)
+unittile(a8,a8,a8,a8,a8,a8,a8,a8,|2)
+unittile(a3,a3,a3,|0)
+unittile(a3,a3,a3,|1)
+unittile(pi,c4,pi,pi,c4,pi,*2,|0)
+unittile(a3,a3,a3)
+unittile(a8,a8,a8,a8,a8,a8,a8,a8,|0)
+unittile(a3,*3)
+conway("(0 1')(0' 1'')(2' 0'')(5' 0''')(6' 0@5)(2''' 1@4)(0@4 1@5)(3@4 0@6)(4@4 5@7)(5@4 0@9)(2@6 0@7)[2@7 1@8](3@7 4@9)(0@8 1@9)(2@8 3@9)(2@9 0@10)")

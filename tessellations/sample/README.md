@@ -35,12 +35,18 @@ A typical tes file consists of the following parts:
 
 Some tessellations include tiles with rotational symmetry. For example, in the standard HyperRogue tiling 
 (bitruncated {7,3}), the heptagonal tiles have 7-fold rotational symmetry, and the hexagonal tiles have 3-fold
-rotational symmetry. In this case, it is convenient to not give an index to every edge of every tile, but only
+rotational symmetry. (We mean symmetries not only of the tile itself, but of the whole tiling.)
+In this case, it is convenient to not give an index to every edge of every tile, but only
 to the part which repeats (i.e., heptagons have 7 edges of index 0, and hexagons have 3 edges of index 0 and
 3 edges of index 1).
 
 Such situation can be defined with e.g. `tile(e0, a0, e1, a1, *3)` (this defines a hexagon with edges e0,e1,e0,e1,e0,e1
 and angles a0,a1,a0,a1,a0,a1; edges are indexed with 0,1,0,1,0,1).
+
+For mirror symmetries, use e.g. `tile(e0, a0, e1, a1, e2, a2, |2)`, which means that the tile has mirror symmetry,
+and edge i is the mirror image of tile 2-i. (For simplicity, you still need to write all the edge lengths and angles
+in this case, even if mirror symmetry could theoretically be used to infer some of this information.)
+When both rotational and mirror symmetries exist, put `*` before `|`.
 
 You can also use `repeat(tile_index, qty)` to make every edge index of tile tile_index repeat qty times, for example,
 `tile(e0, a0, e1, a1, e2, a2) repeat(0, 3)` has the same effect as tile(e0, a0, e1, a1, *3).
