@@ -1530,6 +1530,7 @@ EX void switch_game_mode(char switchWhat) {
       peace::on = false;
       tour::on = false;
       inv::on = false;
+      yendor::on = false;
       land_structure = racing::on ? lsSingle : lsNiceWalls;
       princess::challenge = false;
       dual::disable();
