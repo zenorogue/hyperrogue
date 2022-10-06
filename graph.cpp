@@ -1120,9 +1120,9 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit1*Mirror, cgi.shSmallDragonEyes, 0x60, prio);
         }
       else if (it == itOrbDomination) {
-        queuepolyat(Vit1, cgi.shSmallWormHead, dark, prio);
-        queuepolyat(Vit1, cgi.shSmallWormEyes, 0x60, prio);
-        queuepolyat(Vit1*Mirror, cgi.shSmallWormEyes, 0x60, prio);
+        queuepolyat(Vit1*MirrorX, cgi.shSmallWormHead, dark, prio);
+        queuepolyat(Vit1*MirrorX, cgi.shSmallWormEyes, 0x60, prio);
+        queuepolyat(Vit1*MirrorX*Mirror, cgi.shSmallWormEyes, 0x60, prio);
         }
       else if (it == itOrbMorph || it == itOrbChaos || it == itOrbPlague) {
         queuepolyat(Vit, cgi.shDisk, dark1, prio);
