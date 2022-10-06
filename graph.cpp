@@ -1180,7 +1180,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
                      jump ? &cgi.shDiskSegment :
                         NULL;
         queuepolyat(Vit, cgi.shDisk, dark, prio);
-        bool reversed = (shape == &cgi.shTreeIcon || shape == &cgi.shHumanoid);
+        bool reversed = (shape == &cgi.shTreeIcon || shape == &cgi.shHumanoid || it == itOrbSword2);
         bool left90 = (shape == &cgi.shLeafIcon || shape == &cgi.shLightningBolt);
         if (shape)
           queuepolyat(reversed ? Vit1 * MirrorX : left90 ? Vit1 * spin(-90*degree) : Vit1, *shape, (it == itOrbInvis || it == itOrbTeleport) ? 0x20 : 0x80, prio);
