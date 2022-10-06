@@ -2697,6 +2697,11 @@ EX void show_color_dialog() {
   if(specialland == laCanvas && colortables.count(patterns::whichCanvas)) {
     dialog::addItem(XLAT("pattern colors"), 'P');
     dialog::add_action_push([] { edit_color_table(colortables[patterns::whichCanvas], refresh_canvas, true); });
+
+    if(patterns::whichCanvas == 'R') {
+      dialog::addItem(XLAT("unreversed colors"), 'U');
+      dialog::add_action_push([] { edit_color_table(colortables['A'], refresh_canvas, true); });
+      }
     }
  
   if(cwt.at->land == laMinefield) {
