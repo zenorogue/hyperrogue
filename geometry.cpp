@@ -785,8 +785,8 @@ void geometry_information::prepare_basics() {
   if(scale_used()) zhexf *= vid.creature_scale;
   if(WDIM == 2 && GDIM == 3) zhexf *= 1.5, orbsize *= 1.2;
 
-  floorrad0 = hexvdist* (GDIM == 3 ? 1 : 0.92);
-  floorrad1 = rhexf * (GDIM == 3 ? 1 : 0.94);
+  floorrad0 = hexvdist* (GDIM == 3 ? 1 : 1 - 0.08 * global_boundary_ratio);
+  floorrad1 = rhexf * (GDIM == 3 ? 1 : 1 - 0.06 * global_boundary_ratio);
   
   if(euc::in(2,4)) {
     if(!BITRUNCATED)
@@ -1185,6 +1185,8 @@ EX string cgi_string() {
   if(arb::in()) V("AP", its(arb::apeirogon_simplified_display));
 
   if(arb::in()) V("F", its(arb::extended_football));
+
+  V("BR", fts(global_boundary_ratio));
 
   if(cryst) V("CRYSTAL", its(ginf[gCrystal].sides) + its(ginf[gCrystal].vertex));
   

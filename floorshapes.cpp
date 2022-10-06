@@ -29,6 +29,8 @@ EX struct renderbuffer *floor_textures;
 /* 0: generate no floorshapes; 1: generate only plain floorshapes; 2: generate all */
 EX int floorshapes_level = 2;
 
+EX ld global_boundary_ratio = 1;
+
 void geometry_information::init_floorshapes() {
   if(floorshapes_level == 0) return;
   all_escher_floorshapes.clear();
@@ -421,26 +423,28 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
     if(&fsh == &shTriheptaFloor) {
       if(!siid) {
         for(int i=0; i<cor; i++)
-          cornerlist.push_back(midcorner(c, i, .49));
+          cornerlist.push_back(midcorner(c, i, .5 - .01 * global_boundary_ratio));
         }
       else {
         for(int i=0; i<cor; i++) {
           int ri = i;
           if((i&1) == ((sidir+siid)&1)) ri--;
           ri = c->c.fix(ri);
-          cornerlist.push_back(mid(get_corner_position(c, ri, 3.1), get_corner_position(c, c->c.fix(ri+1), 3.1)));
+          ld val = 3 + 0.1 * global_boundary_ratio;
+          cornerlist.push_back(mid(get_corner_position(c, ri, val), get_corner_position(c, c->c.fix(ri+1), val)));
           }
         }
       }
     
     else if(&fsh == &shBigTriangle) {
+      ld val = 1 - 0.06 * global_boundary_ratio;
       if(!siid) {
         for(int i=0; i<cor; i++) cornerlist.push_back(hpxy(0,0));
         }
       else if(geosupport_chessboard()) {
         for(int i=0; i<cor; i++) {
           hyperpoint nc = nearcorner(c, i);
-          cornerlist.push_back(mid_at(hpxy(0,0), nc, .94));
+          cornerlist.push_back(mid_at(hpxy(0,0), nc, val));
           }
         }
       else {
@@ -449,16 +453,17 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
           if((i&1) != ((sidir+siid)&1)) ri--;
           ri = c->c.fix(ri);
           hyperpoint nc = nearcorner(c, ri);
-          cornerlist.push_back(mid_at(hpxy(0,0), nc, .94));
+          cornerlist.push_back(mid_at(hpxy(0,0), nc, val));
           }
         }
       }
   
     else if(&fsh == &shBigHepta) {
+      ld val = 1 - 0.06 * global_boundary_ratio;
       if(!siid) {
         for(int i=0; i<cor; i++) {
           hyperpoint nc = nearcorner(c, i);
-          cornerlist.push_back(mid_at(hpxy(0,0), nc, .94));
+          cornerlist.push_back(mid_at(hpxy(0,0), nc, val));
           }
         }
       else {

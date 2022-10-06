@@ -2078,6 +2078,7 @@ EX namespace patterns {
       }
 
     dialog::addBoolItem(XLAT("display full floors"), (whichShape == '9'), '9');
+    add_edit(global_boundary_ratio);
     dialog::addSelItem(XLAT("floor type"), XLATN(winf[canvas_default_wall].name), 'i');
 
     dialog::addItem(XLAT("line patterns"), 'L');
