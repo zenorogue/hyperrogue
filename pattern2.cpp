@@ -1792,8 +1792,12 @@ EX namespace patterns {
       case 'A':
         #if CAP_ARCM
         if(arcm::in()) {
-          int id = arcm::current.tilegroup[arcm::id_of(c->master)];
-          return colortables[(id&1) ? 'M' : 'A'][id/2];
+          int id = arcm::id_of(c->master);
+          int tid = arcm::current.tilegroup[id];
+          int tid2 = arcm::current.tilegroup[id^1];
+          bool mirrored = (id&1) && (tid != tid2);
+          if(tid2 >= 0) tid = min(tid, tid2);
+          return colortables[mirrored ? 'M' : 'A'][tid];
           }
         #endif
         if(arb::in()) {
