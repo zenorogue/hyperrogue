@@ -987,6 +987,7 @@ EX void showEuclideanMenu() {
     dialog::add_action_push(arb::set_sliders);
     }
   if(arb::is_apeirogonal()) add_edit(arb::apeirogon_simplified_display);
+  if(arb::in()) add_edit(debug_tiles);
   
   #if MAXMDIM >= 4
   if(cgflags & qULTRA) {
