@@ -1544,6 +1544,13 @@ EX map<char, colortable> colortables = {
     0xF08040, 0xF04080, 0x40F080,
     0x4080F0, 0x8040F0, 0x80F040,
     0xFFD500 }},
+  {'M', { // mirrored versions of 'A'
+    0xF04060, 0x40F060, 0x4040D0,
+    0xD0D040, 0xD000F0, 0x00D040,
+    0xC0C0E0, 0x404060, 0x8080A0,
+    0xF08060, 0xF040A0, 0x40F0A0,
+    0x4080D0, 0x8040D0, 0x80F060,
+    0xFFD540 }},
   {'B', {
     // trying to get colors as in Wikipedia [ https://en.wikipedia.org/wiki/Euclidean_tilings_by_convex_regular_polygons#k-uniform_tilings ]
     0, 0, 0xFFFFFF, 0xFFFF00, 
@@ -1784,9 +1791,18 @@ EX namespace patterns {
       #endif
       case 'A':
         #if CAP_ARCM
-        if(arcm::in()) return colortables['A'][arcm::current.tilegroup[arcm::id_of(c->master)]];
+        if(arcm::in()) {
+          int id = arcm::current.tilegroup[arcm::id_of(c->master)];
+          return colortables[(id&1) ? 'M' : 'A'][id/2];
+          }
         #endif
-        if(arb::in()) return colortables['A'][shvid(c) + c->master->emeraldval * isize(arb::current.shapes)];
+        if(arb::in()) {
+          int id = shvid(c);
+          auto& sh = arb::current.shapes[id];
+          int oid = sh.orig_id;
+          bool mirrored = c->master->emeraldval || sh.is_mirrored;
+          return colortables[mirrored ? 'M' : 'A'][oid];
+          }
         return colortables['A'][shvid(c)];
       case 'B':
         if(arb::is_apeirogonal(c)) return apeirogonal_color;

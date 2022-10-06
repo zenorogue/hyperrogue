@@ -45,6 +45,8 @@ constexpr ld INFINITE_BOTH = -3;
 struct shape {
   /** index in the arbi_tiling::shapes */
   int id;
+  /** index in the original file */
+  int orig_id;
   /** flags such as sfLINE and sfPH */
   int flags;
   /** list of vertices in the usual convention */
@@ -79,6 +81,8 @@ struct shape {
   vector<vector<ld>> vertex_angles;
   /** football types */
   int football_type;
+  /** is it a mirrored version of an original tile */
+  bool is_mirrored;
   };
 
 struct slider {
@@ -135,6 +139,8 @@ struct arbi_tiling {
 
   int min_valence, max_valence;
   bool is_football_colorable;
+  bool was_unmirrored;
+  bool was_split_for_football;
 
   geometryinfo1& get_geometry();
   eGeometryClass get_class() { return get_geometry().kind; }
@@ -342,6 +348,8 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
   c.shapes.emplace_back();
   auto& cc = c.shapes.back();
   cc.id = isize(c.shapes) - 1;
+  cc.orig_id = cc.id;
+  cc.is_mirrored = false;
   cc.flags = 0;
   cc.repeat_value = 1;
   while(ep.next() != ')') {
@@ -442,8 +450,10 @@ EX void unmirror(arbi_tiling& c) {
   int s = isize(sh);
   for(int i=0; i<s; i++)
     sh.push_back(sh[i]);
-  for(int i=0; i<2*s; i++)
+  for(int i=0; i<2*s; i++) {
     sh[i].id = i;
+    if(i >= s) sh[i].is_mirrored = true;
+    }
   for(int i=s; i<s+s; i++) {
     for(auto& v: sh[i].vertices) 
       v[1] = -v[1];
@@ -686,6 +696,7 @@ EX void check_football_colorability(arbi_tiling& c) {
       }
 
     c.is_football_colorable = true;
+    c.was_split_for_football = true;
     for(auto&sh: c.shapes)
      if(sh.football_type == 7)
        c.is_football_colorable = false;
@@ -709,6 +720,7 @@ EX void check_football_colorability(arbi_tiling& c) {
           int ni = new_indices[i][t];
           if(ni == -1) continue;
           auto& sh = c.shapes[ni];
+          sh.id = ni;
           for(int j=0; j<isize(sh); j++) {
             auto &co = sh.connections[j];
             auto assign = [&] (int tt) {
@@ -782,6 +794,8 @@ EX void set_defaults(arb::arbi_tiling& c, bool keep_sliders, string fname) {
   c.yendor_backsteps = 0;
   c.is_star = false;
   c.is_combinatorial = false;
+  c.was_unmirrored = false;
+  c.was_split_for_football = false;
   c.shapes.clear();
   if(!keep_sliders) {
     c.sliders.clear();
