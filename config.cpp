@@ -2646,6 +2646,20 @@ EX void edit_color_table(colortable& ct, const reaction_t& r IS(reaction_t()), b
       });
     }
 
+  dialog::addItem("add a color", 'A');
+  dialog::add_action([&ct, r] {
+    ct.push_back(rand() & 0x1FFFFFF);
+    r();
+    });
+
+  if(isize(ct) > 2) {
+    dialog::addItem("delete a color", 'D');
+    dialog::add_action([&ct, r] {
+      ct.pop_back();
+      r();
+      });
+    }
+
   dialog::addBack();
   dialog::display();
   }
