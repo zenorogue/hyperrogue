@@ -1615,14 +1615,14 @@ void celldrawer::draw_features() {
       if(numerical_minefield) {
         if(mines) {
           string label = its(mines);
-          queuestr(V, mines >= 10 ? .5 : 1, label, darkened(minecolors[mines%10]), 8);
+          queuestr(V, mines >= 10 ? .5 : 1, label, darkened(minecolors[mines]), 8);
           }
         }
       else {
-        if(mines >= 10)
-          queuepoly(V, cgi.shBigMineMark[ct6], darkena(minecolors[(mines/10) % 10], 0, 0xFF));
+        if(mines >= isize(minecolors))
+          queuepoly(V, cgi.shBigMineMark[ct6], darkena(minecolors[mines/isize(minecolors)], 0, 0xFF));
         if(mines)
-          queuepoly(V, cgi.shMineMark[ct6], darkena(minecolors[mines%10], 0, 0xFF));
+          queuepoly(V, cgi.shMineMark[ct6], darkena(minecolors[mines], 0, 0xFF));
         }
       break;
       }
@@ -1833,9 +1833,9 @@ void celldrawer::draw_features_and_walls_3d() {
         }
       else {
         int mines = countMinesAround(c);
-        if(mines >= 10)
-          queuepoly(face_the_player(V), cgi.shBigMineMark[0], darkena(minecolors[(mines/10)%10], 0, 0xFF));
-        queuepoly(face_the_player(V), cgi.shMineMark[0], darkena(minecolors[mines%10], 0, 0xFF));
+        if(mines >= isize(minecolors))
+          queuepoly(face_the_player(V), cgi.shBigMineMark[0], darkena(minecolors[mines/isize(minecolors)], 0, 0xFF));
+        queuepoly(face_the_player(V), cgi.shMineMark[0], darkena(minecolors[mines], 0, 0xFF));
         }
       }
     
@@ -2326,10 +2326,10 @@ void celldrawer::draw_wall_full() {
       int mines = countMinesAround(c);
       if(asciichar == '.') {
         if(mines == 0) asciichar = ' ';
-        else asciichar = '0' + mines, asciicol = minecolors[mines%10];
+        else asciichar = '0' + mines, asciicol = minecolors[mines];
         }
       else if(asciichar == '@') {
-        asciicol = minecolors[mines%10];
+        asciicol = minecolors[mines];
         }
       }
     if(wmascii && !((c->item && !itemHiddenFromSight(c)) || c->monst || c->cpdist == 0)) error = true;
@@ -2740,15 +2740,7 @@ void celldrawer::draw() {
       return;
       }                  
     
-    // color_t col = 0xFFFFFF - 0x20 * c->maxdist - 0x2000 * c->cpdist;
-
     if(!buggyGeneration && c->mpdist > 8 && !cheater && !autocheat) return; // not yet generated
-    /* if(!buggyGeneration && c->mpdist > 7 && !cheater) {
-      int cd = c->mpdist;
-      string label = its(cd);
-      int dc = distcolors[cd&7];
-      queuestr(V, (cd > 9 ? .6 : 1) * .2, label, 0xFF000000 + dc, 1);
-      } */
     
     #if CAP_SHAPES
     ct6 = ctof(c);

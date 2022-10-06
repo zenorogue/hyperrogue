@@ -625,9 +625,6 @@ void celldrawer::do_viewdist() {
   
   if(!dist_label_colored) dc = dist_label_color;
 
-  // string label = its(fieldpattern::getriverdistleft(c)) + its(fieldpattern::getriverdistright(c));
-  /* queuepolyat(V, shFloor[ct6], darkena(gradient(0, distcolors[cd&7], 0, .25, 1), fd, 0xC0),
-    PPR::TEXT); */
   if(label != "")
     queuestr(V, (isize(label) > 1 ? .6 : 1), label, 0xFF000000 + dc, 1);
   }

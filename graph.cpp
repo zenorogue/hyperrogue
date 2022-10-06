@@ -5783,7 +5783,7 @@ EX void drawscreen() {
   if((minefieldNearby || tmines) && !items[itOrbAether] && !last_gravity_state && darken == 0 && normal) {
     string s;
     if(tmines > 9) tmines = 9;
-    color_t col = minecolors[tmines%10];
+    color_t col = minecolors[tmines];
     
     if(tmines == 7) seenSevenMines = true;
     
@@ -5791,7 +5791,7 @@ EX void drawscreen() {
       displayfr(vid.xres * (p+.5) / numplayers(),
         current_display->ycenter - current_display->radius * 3/4, 2,
         vid.fsize, 
-        mines[p] > 7 ? its(mines[p]) : XLAT(minetexts[mines[p]]), minecolors[mines[p]%10], 8);
+        mines[p] > 7 ? its(mines[p]) : XLAT(minetexts[mines[p]]), minecolors[mines[p]], 8);
 
     if(minefieldNearby && !shmup::on && cwt.at->land != laMinefield && cwt.peek()->land != laMinefield && !dont_display_minecount) {
       displayfr(vid.xres/2, current_display->ycenter - current_display->radius * 3/4 - vid.fsize*3/2, 2,
