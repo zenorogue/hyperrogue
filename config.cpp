@@ -724,6 +724,13 @@ EX void initConfig() {
       {"by number", ""}
       }, "inventory/kill sorting", 'k');
 
+  param_enum(vid.orbmode, "orb_mode", "orb display mode", 2)
+    ->editable({
+      {"plain", ""},
+      {"types", ""},
+      {"icons", ""},
+      }, "orb display mode", 'o');
+
   param_b(less_in_landscape, "less_in_landscape", false)
   ->editable("less items/kills in landscape", 'L')
   -> set_sets([] { dialog::reaction_final = [] { println(hlog, "Reset"); vid.killreduction = 0; }; });
@@ -1856,6 +1863,7 @@ EX void configureInterface() {
   add_edit(less_in_portrait);
 
   add_edit(display_yasc_codes);
+  add_edit(vid.orbmode);
 
   dialog::addSelItem(XLAT("draw crosshair"), crosshair_size > 0 ? fts(crosshair_size) : ONOFF(false), 'x');
   dialog::add_action([] () { 
