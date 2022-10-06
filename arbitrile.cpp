@@ -538,13 +538,22 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
           println(hlog, "ik = ", tie(i,k), " co=", co, "co1=", co1, " cl=", sh.cycle_length);
           throw hr_parse_exception("connection error #2 in compute_vertex_valence");
           }
+        if(co.mirror && ac.shapes[co.sid].symmetric_value) {
+          co.eid = gmod(ac.shapes[co.sid].symmetric_value - co.eid, ac.shapes[co.sid].cycle_length);
+          co.mirror = !co.mirror;
+          }
         reduce_gcd(ac.shapes[co.sid].cycle_length, co.eid - co1.eid);
         }
 
       for(int k=0; k<n; k++) {
         auto co = sh.connections[k];
+        auto co0 = co;
         co = ac.shapes[co.sid].connections[co.eid];
         if(co.sid != i) throw hr_parse_exception("connection error in compute_vertex_valence");
+        if((co.mirror ^ co0.mirror) && ac.shapes[co.sid].symmetric_value) {
+          co.eid = gmod(ac.shapes[co.sid].symmetric_value - co.eid, ac.shapes[co.sid].cycle_length);
+          co.mirror = !co.mirror;
+          }
         reduce_gcd(sh.cycle_length, k-co.eid);
         }
       if(debugflags & DF_GEOM) 
@@ -562,6 +571,9 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
     tcl = new_tcl;
     }
   
+  if(!ac.was_unmirrored) for(auto& sh: ac.shapes) if(sh.symmetric_value) return;
+  for(auto& sh: ac.shapes) for(auto& co: sh.connections) if(co.mirror) return;
+
   if(cgflags & qAFFINE) return;
   if(ac.is_star) return;
   ac.have_valence = true;
