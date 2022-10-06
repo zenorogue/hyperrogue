@@ -266,8 +266,51 @@ ld test_t = 0;
 ld c_front_dist = 0, c_up_dist = 0;
 void handle_animation(ld t);
 
+bool side = true;
+
+void snap_to_center() {
+  cmode = side ? sm::SIDE : 0;
+  gamescreen();
+  draw_crosshair();
+  dialog::init(XLAT("snap to center"), 0xFFFFFFFF, 150, 0);
+  
+  dialog::addItem("center on mouse", ' ');
+  dialog::add_action([] {
+    View = gpushxto0(unshift(mapeditor::mouse_snap())) * View;
+    });
+
+  dialog::addItem("mouse up", 'w');
+  dialog::add_action([] {
+    View = spin(90*degree) * spintox(unshift(mapeditor::mouse_snap())) * View;
+    });
+
+  dialog::addItem("mouse down", 's');
+  dialog::add_action([] {
+    View = spin(-90*degree) * spintox(unshift(mapeditor::mouse_snap())) * View;
+    });
+
+  dialog::addItem("mouse left", 'a');
+  dialog::add_action([] {
+    View = spin(180*degree) * spintox(unshift(mapeditor::mouse_snap())) * View;
+    });
+
+  dialog::addItem("mouse left", 'd');
+  dialog::add_action([] {
+    View = spin(0*degree) * spintox(unshift(mapeditor::mouse_snap())) * View;
+    });
+
+  dialog::addBack();
+  dialog::display();
+  
+  keyhandler = [] (int sym, int uni) {
+    handlePanning(sym, uni);
+    dialog::handleNavigation(sym, uni);
+    if(doexiton(sym, uni)) popScreen();
+    };
+  }
+
 void show() {
-  cmode = 0;
+  cmode = side ? sm::SIDE : 0;
   gamescreen();
   draw_crosshair();
   dialog::init(XLAT("smooth camera"), 0xFFFFFFFF, 150, 0);
@@ -336,6 +379,7 @@ void show() {
     view_trace = !view_trace;
     if(view_trace) generate_trace();
     });
+  dialog::addBoolItem_action("side display", side, 'M');
 
   dialog::addItem("test the animation", 't');
   dialog::add_action([] {
@@ -362,6 +406,9 @@ void show() {
     animate_on = !animate_on;
     last_time = HUGE_VAL;
     });
+  
+  if(GDIM == 2) dialog::addItem("centering", 'X');
+  dialog::add_action_push(snap_to_center);
     
   dialog::addHelp();
   dialog::add_action([] { gotoHelp(smooth_camera_help); });
