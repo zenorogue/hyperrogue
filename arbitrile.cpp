@@ -809,12 +809,10 @@ EX void add_connection(arbi_tiling& c, int ai, int as, int bi, int bs, int m) {
   int as1, bs1;
   if(ash.symmetric_value) {
     as1 = gmod(ash.symmetric_value - as, ash.size());
-    println(hlog, tie(ai, as), " also is ", tie(ai, as1), " since symmetric is ", ash.symmetric_value, "/", ash.size(), " A");
     add_connection_sub(c, ai, as1, bi, bs, !m);
     }
   if(bsh.symmetric_value) {
     bs1 = gmod(bsh.symmetric_value - bs, bsh.size());
-    println(hlog, tie(bi, bs), " also is ", tie(bi, bs1), " since symmetric is ", bsh.symmetric_value, "/", bsh.size(), " B");
     add_connection_sub(c, ai, as, bi, bs1, !m);
     }
   if(ash.symmetric_value && bsh.symmetric_value)
