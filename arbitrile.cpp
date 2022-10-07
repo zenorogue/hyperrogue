@@ -85,6 +85,16 @@ struct shape {
   int football_type;
   /** is it a mirrored version of an original tile */
   bool is_mirrored;
+  /** auxiliary function for symmetric_value: is the edge index reflectable? */
+  bool reflectable(int id) {
+    if(!symmetric_value) return false;
+    if(apeirogonal && gmod(id, size()) >= size() - 2) return false;
+    return true;
+    }
+  /** reflect a reflectable reflect index */
+  int reflect(int id) {
+    return gmod(symmetric_value - id, size() - (apeirogonal ? 2 : 0));
+    }
   };
 
 struct slider {
@@ -436,7 +446,7 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
     throw;
     }
   int n = cc.size();
-  if(is_symmetric) cc.symmetric_value += n;
+  if(is_symmetric && !cc.symmetric_value) cc.symmetric_value += n - (cc.apeirogonal ? 2 : 0);
   cc.connections.resize(n);
   for(int i=0; i<isize(cc.connections); i++)
     cc.connections[i] = connection_t{cc.id, i, false};
@@ -502,7 +512,9 @@ EX void unmirror(arbi_tiling& c) {
       bool mirr = co.mirror ^ (i >= s);
       co.mirror = false;
       if(mirr && mirrored_id[co.sid] == -1) {
-        co.eid = gmod(sh[co.sid].symmetric_value - co.eid, isize(sh[co.sid].angles));
+        if(sh[co.sid].reflectable(co.eid)) {
+          co.eid = sh[co.sid].reflect(co.eid);
+          }
         }
       else if(mirr) {
         co.sid = mirrored_id[co.sid];
@@ -512,10 +524,19 @@ EX void unmirror(arbi_tiling& c) {
         }
       }
     }
+
+  c.was_unmirrored = true;
   }
 
 static void reduce_gcd(int& a, int b) {
   a = abs(gcd(a, b));
+  }
+
+EX void mirror_connection(arb::arbi_tiling& ac, connection_t& co) {
+  if(co.mirror && ac.shapes[co.sid].reflectable(co.eid)) {
+    co.eid = ac.shapes[co.sid].reflect(co.eid);
+    co.mirror = !co.mirror;
+    }
   }
 
 EX void compute_vertex_valence(arb::arbi_tiling& ac) {
@@ -535,13 +556,11 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
         auto co = sh.connections[k];
         auto co1 = sh.connections[k-sh.cycle_length];
         if(co.sid != co1.sid) {
-          println(hlog, "ik = ", tie(i,k), " co=", co, "co1=", co1, " cl=", sh.cycle_length);
+          println(hlog, "ik = ", tie(i,k), " co=", co, " co1=", co1, " cl=", sh.cycle_length);
           throw hr_parse_exception("connection error #2 in compute_vertex_valence");
           }
-        if(co.mirror && ac.shapes[co.sid].symmetric_value) {
-          co.eid = gmod(ac.shapes[co.sid].symmetric_value - co.eid, ac.shapes[co.sid].cycle_length);
-          co.mirror = !co.mirror;
-          }
+        mirror_connection(ac, co);
+        mirror_connection(ac, co1);
         reduce_gcd(ac.shapes[co.sid].cycle_length, co.eid - co1.eid);
         }
 
@@ -550,10 +569,8 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
         auto co0 = co;
         co = ac.shapes[co.sid].connections[co.eid];
         if(co.sid != i) throw hr_parse_exception("connection error in compute_vertex_valence");
-        if((co.mirror ^ co0.mirror) && ac.shapes[co.sid].symmetric_value) {
-          co.eid = gmod(ac.shapes[co.sid].symmetric_value - co.eid, ac.shapes[co.sid].cycle_length);
-          co.mirror = !co.mirror;
-          }
+        co.mirror ^= co0.mirror;
+        mirror_connection(ac, co);
         reduce_gcd(sh.cycle_length, k-co.eid);
         }
       if(debugflags & DF_GEOM) 
@@ -820,11 +837,11 @@ EX void add_connection(arbi_tiling& c, int ai, int as, int bi, int bs, int m) {
   add_connection_sub(c, ai, as, bi, bs, m);
   int as1, bs1;
   if(ash.symmetric_value) {
-    as1 = gmod(ash.symmetric_value - as, ash.size());
+    as1 = ash.reflect(as);
     add_connection_sub(c, ai, as1, bi, bs, !m);
     }
   if(bsh.symmetric_value) {
-    bs1 = gmod(bsh.symmetric_value - bs, bsh.size());
+    bs1 = bsh.reflect(bs);
     add_connection_sub(c, ai, as, bi, bs1, !m);
     }
   if(ash.symmetric_value && bsh.symmetric_value)
