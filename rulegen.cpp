@@ -2302,7 +2302,7 @@ struct hrmap_rulegen : hrmap {
   
   transmatrix adj(heptagon *h, int dir) override {
     if(h->fieldval == -1)
-      return arb::get_adj(arb::current_or_slided(), h->zebraval, dir, -1, -1);
+      return arb::get_adj(arb::current_or_slided(), h->zebraval, dir);
 
     int s = h->fieldval;
     int dir0 = get_arb_dir(s, dir);
@@ -2316,7 +2316,7 @@ struct hrmap_rulegen : hrmap {
       sid1 = treestates[s1].sid;
       }
 
-    return arb::get_adj(arb::current_or_slided(), treestates[s].sid, dir0, sid1, dir1);
+    return arb::get_adj(arb::current_or_slided(), treestates[s].sid, dir0, sid1, dir1, false);
     }
 
   int shvid(cell *c) override {

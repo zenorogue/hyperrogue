@@ -505,8 +505,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         hyperpoint next = actual[j<cor-1?j+1:0];
 
         if(apeirogonal) {
-          if(j == 0) last = arb::get_adj(arb::current_or_slided(), id, cor-1, id, cor-2) * actual[cor-3];
-          if(j == cor-2) next = arb::get_adj(arb::current_or_slided(), id, cor-2, id, cor-1) * actual[1];
+          if(j == 0) last = arb::get_adj(arb::current_or_slided(), id, cor-1, id, cor-2, false) * actual[cor-3];
+          if(j == cor-2) next = arb::get_adj(arb::current_or_slided(), id, cor-2, id, cor-1, false) * actual[1];
           if(j == cor-1) { cornerlist.push_back(sh.vertices.back()); continue; }
           }
 
@@ -645,7 +645,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
           int id = arb::id_of(c->master);
           auto &ac = arb::current_or_slided();
           auto& sh = ac.shapes[id];
-          hpcpush(arb::get_adj(arb::current_or_slided(), id, cor-2, id, cor-1) * starting_point);
+          hpcpush(arb::get_adj(arb::current_or_slided(), id, cor-2, id, cor-1, false) * starting_point);
           finish_apeirogon(sh.vertices.back());
           }
         }

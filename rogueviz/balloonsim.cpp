@@ -464,7 +464,10 @@ struct hrmap_arbi_full : hrmap {
     }
 
   transmatrix adj(heptagon *h, int dl) override { 
-    return arb::get_adj(arb::current_or_slided(), arb::id_of(h), dl, h->c.move(dl) ? arb::id_of(h->c.move(dl)) : -1,  h->c.move(dl) ? h->c.spin(dl) : -1);
+    if(h->c.move(dl))
+      return arb::get_adj(arb::current_or_slided(), arb::id_of(h), dl, arb::id_of(h->c.move(dl)), h->c.spin(dl), h->c.mirror(dl));
+    else
+      return arb::get_adj(arb::current_or_slided(), arb::id_of(h), dl);
     }
 
   ld spin_angle(cell *c, int d) override { return SPIN_NOT_AVAILABLE; }

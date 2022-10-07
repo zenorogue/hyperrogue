@@ -1255,7 +1255,7 @@ void connection_debugger() {
     
     dialog::add_action([k, last, con] {
       if(euclid) cgflags |= qAFFINE;
-      debug_polys.emplace_back(last.first * get_adj(debugged, last.second, k, -1, -1), con.sid);
+      debug_polys.emplace_back(last.first * get_adj(debugged, last.second, k), con.sid);
       if(euclid) cgflags &= ~qAFFINE;
       });
     
@@ -1319,16 +1319,12 @@ EX bool apeirogon_consistent_coloring = true;
 EX bool apeirogon_hide_grid_edges = true;
 EX bool apeirogon_simplified_display = false;
 
-EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int t1, int xdl) {
+/** get the adj matrix corresponding to the connection of (t,dl) to connection_t{t1, xdl, xmirror} */
+EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int t1, int xdl, bool xmirror) {
 
   auto& sh = c.shapes[t];
   
   int dr = gmod(dl+1, sh.size());
-
-  auto& co = sh.connections[dl];
-  if(xdl == -1) xdl = co.eid;
-
-  if(t1 == -1) t1 = co.sid;
 
   auto& xsh = c.shapes[t1];
   int xdr = gmod(xdl+1, xsh.size());
@@ -1359,10 +1355,10 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int t1, int xdl) {
     Res = Res * Tsca;
     }
 
-  if(co.mirror) Res = Res * MirrorX;
+  if(xmirror) Res = Res * MirrorX;
   Res = Res * spintox(xrm*xvl) * xrm;
   
-  if(co.mirror) swap(vl, vr);
+  if(xmirror) swap(vl, vr);
   
   if(hdist(vl, Res*xvr) + hdist(vr, Res*xvl) > .1 && !c.is_combinatorial) {
     println(hlog, "s1 = ", kz(spintox(rm*vr)), " s2 = ", kz(rspintox(xrm*xvr)));    
@@ -1372,6 +1368,13 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int t1, int xdl) {
     }
         
   return Res;
+  }
+
+/** get the adj matrix corresponding to the connection of (t,dl) -- note: it may be incorrect for rotated/symmetric connections */
+EX transmatrix get_adj(arbi_tiling& c, int t, int dl) {
+  auto& sh = c.shapes[t];
+  auto& co = sh.connections[dl];
+  return get_adj(c, t, dl, co.sid, co.eid, co.mirror);
   }
 
 struct hrmap_arbi : hrmap {
@@ -1415,7 +1418,10 @@ struct hrmap_arbi : hrmap {
   void verify() override { }
 
   transmatrix adj(heptagon *h, int dl) override { 
-    return get_adj(current_or_slided(), id_of(h), dl, -1, h->c.move(dl) ? h->c.spin(dl) : -1);
+    if(h->c.move(dl))
+      return get_adj(current_or_slided(), id_of(h), dl, id_of(h->c.move(dl)), h->c.spin(dl), h->c.mirror(dl));
+    else
+      return get_adj(current_or_slided(), id_of(h), dl);
     }
 
   heptagon *create_step(heptagon *h, int d) override {
