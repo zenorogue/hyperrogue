@@ -656,7 +656,7 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
 EX bool extended_football = true;
 
 EX void check_football_colorability(arbi_tiling& c) {
-  if(cgflags & qAFFINE) return;
+  if(!c.have_valence) return;
   for(auto&sh: c.shapes) for(auto v: sh.vertex_valence)
     if(v % 3) return;
 
