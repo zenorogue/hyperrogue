@@ -380,7 +380,11 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
       if(isinf(frep)) {
         cc.apeirogonal = true;
         set_flag(ginf[gArbitrary].flags, qIDEAL, true);
-        if(ep.eat(",") && ep.eat("|")) is_symmetric = true, cc.symmetric_value = ep.iparse();
+        if(ep.eat(",") && ep.eat("|")) {
+          is_symmetric = true;
+          if(isize(cc.in_edges) == 1 && ep.eat(")")) break;
+          cc.symmetric_value = ep.iparse();
+          }
         ep.force_eat(")");
         break;
         }
@@ -402,10 +406,12 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
       ep.skip_white();
       if(ep.eat(",")) {
         ep.force_eat("|");
-        cc.symmetric_value = ep.iparse();
         is_symmetric = true;
+        if(repeat_to == 1 && ep.eat(")")) goto skip;
+        cc.symmetric_value = ep.iparse();
         }
       if(ep.eat(")")) {
+        skip:
         if(repeat_from == 0) cc.repeat_value = rep;
         break;
         }
