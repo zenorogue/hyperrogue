@@ -1,0 +1,36 @@
+## 123_1_3169 S4+S6+Soo example (6 vertices, 9 edges) (mirror test)
+h2.
+distunit(edge(6,4))
+let(s4=regangle(1,4))
+let(s6=pi/2)
+let(soo=regangle(1,inf))
+
+# The version with |2 makes the edge #1 of this tile self-mirrored.
+# This gives rise to an inconsistency regarding this apeirogon's
+# 'virtual edges'. However, the unmirroring process gets rid of
+# this inconsistency. However, the tiling will not load if the unmirroring
+# process is disabled (`-arb-unmirror 0`) and may look a bit weird
+# in debug. In this case we can avoid the problem by using the #B forms,
+# but this would not be possible in the cases where the period is even
+# and we have two self-mirrored edges.
+
+unittile(soo,soo,soo,soo,soo,soo,soo,soo,soo,*inf,|2)
+#B unittile(soo,soo,soo,soo,soo,soo,soo,soo,soo,*inf,|8)
+unittile(s4,s4,*2,|1)
+unittile(s4,*4,|)
+unittile(s4,s4,*2,|1)
+unittile(s4,s4,s4,s4,|1)
+unittile(s6,s6,s6,s6,s6,s6)
+unittile(s6,*6)
+
+# Note: tile #2 connects to tile 0's self-mirroring edge, so all of its 4
+# edges are self-mirrors. '|' is necessary, because otherwise the unmirroring
+# process will create two mirror copies of #2 and only one copy of #0,
+# and get confused by the inconsistency of connections: the inverted copy of #2
+# being connected to #0 which is connected to the standard #2. It is allowed in
+# this case to just use '|', or '|n' for any value of n, though.
+
+conway("(0 1')(1 0'')(3 0''')(4 0@4)(5 2@5)[2@4 1@5](0@5 3@5)(5@5)(4@5 0@6)")
+#B conway("(3 1')(4 0'')(6 0''')(7 0@4)(8 2@5)[2@4 1@5](0@5 3@5)(5@5)(4@5 0@6)")
+
+#debug(0)
