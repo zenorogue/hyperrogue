@@ -545,13 +545,10 @@ EX void mirror_connection(arb::arbi_tiling& ac, connection_t& co) {
     }
   }
 
-EX void compute_vertex_valence(arb::arbi_tiling& ac) {
+EX void compute_vertex_valence_prepare(arb::arbi_tiling& ac) {
+
   int tcl = -1;
 
-  for(auto& sh: ac.shapes)
-    sh.cycle_length = isize(sh.vertices) / sh.repeat_value;
-
-  recompute:
   while(true) {
 
     for(auto& sh: ac.shapes) {
@@ -593,14 +590,10 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
     if(new_tcl == tcl) break;
     tcl = new_tcl;
     }
-  
-  if(!ac.was_unmirrored) for(auto& sh: ac.shapes) if(sh.symmetric_value) return;
-  for(auto& sh: ac.shapes) for(auto& co: sh.connections) if(co.mirror) return;
+  }
 
-  if(cgflags & qAFFINE) return;
-  if(ac.is_star) return;
-  ac.have_valence = true;
-
+/** returns true if we need to recompute */
+EX bool compute_vertex_valence_flat(arb::arbi_tiling& ac) {
   for(auto& sh: ac.shapes) {
     int n = sh.size();
     int i = sh.id;
@@ -635,7 +628,7 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
       if(at.sid != i) throw hr_parse_exception("ended at wrong type determining vertex_valence");
       if((at.eid - k) % ac.shapes[i].cycle_length) {
         reduce_gcd(ac.shapes[i].cycle_length, at.eid - k);
-        goto recompute;
+        return true;
         }
       sh.vertex_valence[k] = qty;
       sh.vertex_period[k] = pqty;
@@ -644,7 +637,76 @@ EX void compute_vertex_valence(arb::arbi_tiling& ac) {
     if(debugflags & DF_GEOM) 
       println(hlog, "computed vertex_valence of ", i, " as ", ac.shapes[i].vertex_valence);
     }
+  return false;
+  }
+
+/** returns true if we need to recompute */
+EX bool compute_vertex_valence_generic(arb::arbi_tiling& ac) {
+  for(auto& sh: ac.shapes) {
+    int n = sh.size();
+    int i = sh.id;
+    sh.vertex_valence.resize(n);
+    for(int k=0; k<n; k++) {
+      connection_t at = {i, k, false};
+      transmatrix T = Id;
+      int qty = 0;
+      do {
+        if(qty && at.sid == i) {
+          auto co1 = at;
+          bool found = find_connection(T, Id, co1);
+          if(found) {
+            mirror_connection(ac, co1);
+            if((co1.eid - k) % ac.shapes[i].cycle_length) {
+              reduce_gcd(ac.shapes[i].cycle_length, co1.eid - k);
+              return true;
+              }
+            break;
+            }
+          }
+
+        if(at.mirror) {
+          if(at.eid == 0) at.eid = isize(ac.shapes[at.sid].angles);
+          at.eid--;
+          }
+        else {
+          at.eid++;
+          if(at.eid == isize(ac.shapes[at.sid].angles)) at.eid = 0;
+          }
+
+        auto at0 = at;
+        at = ac.shapes[at.sid].connections[at.eid];
+        T = T * get_adj(ac, at0.sid, at0.eid, at.sid, at.eid, at.mirror);
+        at.mirror ^= at0.mirror;
+        qty++;
+        }
+      while(qty < OINF);
+      sh.vertex_valence[k] = qty;
+      }
+    if(debugflags & DF_GEOM)
+      println(hlog, "computed vertex_valence of ", i, " as ", ac.shapes[i].vertex_valence);
+    }
+  return false;
+  }
+
+EX void compute_vertex_valence(arb::arbi_tiling& ac) {
+
+  for(auto& sh: ac.shapes)
+    sh.cycle_length = isize(sh.vertices) / sh.repeat_value;
+
+  bool generic = false;
   
+  if(!ac.was_unmirrored) for(auto& sh: ac.shapes) if(sh.symmetric_value) generic = true;
+  for(auto& sh: ac.shapes) for(auto& co: sh.connections) if(co.mirror) generic = true;
+
+  if(cgflags & qAFFINE) generic = true;
+  if(ac.is_star) generic = true;
+
+  recompute:
+  compute_vertex_valence_prepare(ac);
+
+  if(generic ? compute_vertex_valence_generic(ac) : compute_vertex_valence_flat(ac)) goto recompute;
+  ac.have_valence = true;
+
   ac.min_valence = UNKNOWN; ac.max_valence = 0;
   for(auto& sh: ac.shapes) 
     for(auto& val: sh.vertex_valence) {
