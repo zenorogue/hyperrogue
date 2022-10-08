@@ -4797,6 +4797,8 @@ Menu improvements:
 - tile-type display no longer assigns different colors depending on football type
 - when editing color tables, it is now possible to add more colors
 - Crystal World and Snake Nest were legal in some tilings but they did not actually appear -- should be fixed
-- ystrafe no longer brings walking eye level below 0
+- vertical strafe in walkingmode no longer brings eye level below 0
 
-TODO mirror with no-unmirror
+2022-10-08 02:14 Update 12.c:
+- some improvements to tes file support. Mirrored tiles should now work for apeirogons. Valence check and thus football colorability should now work with affine/star tessellations. 
+- also included more tes samples
