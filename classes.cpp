@@ -828,6 +828,7 @@ static const flagtype qCAT             = Flag(28);
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
+// note: check_football_colorability in arbitrile.cpp assumes OINF is divisible by 3
 static const int OINF = 123;
 
 extern eGeometry geometry;
