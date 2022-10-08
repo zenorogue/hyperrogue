@@ -1350,7 +1350,7 @@ void settings_menu() {
 
   #if CAP_AUDIO
   add_edit(effvolume);
-  add_edit(musicvolume);
+  if(music_available) add_edit(musicvolume);
   #endif
 
   dialog::addBreak(100);
