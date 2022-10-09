@@ -107,6 +107,11 @@ void game_menu() {
   dialog::addItem(XLAT("recenter cheat"), 'C');
   dialog::add_action([] { current.T = Id; vctrV = Id; });
 
+  if(paused) {
+    dialog::addBoolItem(XLAT("view replay"), in_replay, 'V');
+    dialog::add_action(switch_replay);
+    }
+
   dialog::addItem("configure keys", 'k');
   dialog::add_action_push(multi::get_key_configurer(1, move_names, "Relative Hell keys"));
 

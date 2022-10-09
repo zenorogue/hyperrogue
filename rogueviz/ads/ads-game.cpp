@@ -102,6 +102,7 @@ void run_ads_game() {
   rogueviz::rv_hook(hooks_prestats, 100, display_rsrc);
   rogueviz::rv_hook(hooks_handleKey, 0, handleKey);
   rogueviz::rv_hook(shmup::hooks_turn, 0, ads_turn);
+  rogueviz::rv_hook(anims::hooks_anim, 100, replay_animation);
   
   cgi.use_count++;
   hybrid::in_underlying_geometry([] {

@@ -568,7 +568,7 @@ void view_ds_game() {
       queuestr(shiftless(sphereflip), .1, str, 0xFFFF00, 8);
       }
 
-    if(paused && !game_over && !inHighQual) {
+    if(paused && !game_over && !in_replay) {
       vector<hyperpoint> pts;
       int ok = 0, bad = 0;
       for(int i=0; i<=360; i++) {
@@ -606,6 +606,30 @@ void ds_restart() {
   init_rsrc();
   }
 
+void replay_animation() {
+  if(!in_replay) return;
+  view_pt = (ticks / 1000.) * DS_(simspeed);
+  ld maxt = history.back().start + 0.001;
+  view_pt -= maxt * floor(view_pt / maxt);
+  for(auto& ss: history)
+    if(ss.start + ss.duration > view_pt) {
+      current = ss.current;
+      if(sphere) {
+        dynamicval<eGeometry> g(geometry, gSpace435);
+        current.T = inverse(ss.at.T * spin(-(ss.ang+90)*degree));
+        current.T = lorentz(3, 2, view_pt - ss.start) * current.T;
+        }
+      else PIA({
+        vctr = new_vctr = ss.vctr;
+        vctrV = new_vctrV = ss.vctrV;
+        current.T = cspin(3, 2, view_pt - ss.start) * current.T;
+        if(auto_rotate)
+          current.T = cspin(1, 0, view_pt - ss.start) * current.T;
+        });
+      break;
+      }
+  }
+
 void run_ds_game() {
 
   stop_game();
@@ -621,43 +645,22 @@ void run_ds_game() {
   rogueviz::rv_hook(shmup::hooks_turn, 0, ds_turn);
   rogueviz::rv_hook(hooks_prestats, 100, display_rsrc);
   rogueviz::rv_hook(hooks_handleKey, 0, handleKey);
+  rogueviz::rv_hook(anims::hooks_anim, 100, replay_animation);
   }
 
-void ds_record() {
-  #if CAP_VIDEO
-  ld full = 1000;
-  anims::period = full * history.back().start / DS_(simspeed);
-  anims::noframes = anims::period * 60 / 1000;
-  dynamicval<bool> b(paused, true);
-  int a = addHook(anims::hooks_anim, 100, [&] {
-    view_pt = (ticks / full) * DS_(simspeed);
-    for(auto& ss: history)
-      if(ss.start + ss.duration > view_pt) {
-        current = ss.current;
-        if(sphere) {
-          dynamicval<eGeometry> g(geometry, gSpace435);
-          current.T = inverse(ss.at.T * spin(-(ss.ang+90)*degree));
-          current.T = lorentz(3, 2, view_pt - ss.start) * current.T;
-          }
-        else PIA({
-          vctr = new_vctr = ss.vctr;
-          vctrV = new_vctrV = ss.vctrV;
-          current.T = cspin(3, 2, view_pt - ss.start) * current.T;
-          if(auto_rotate)
-            current.T = cspin(1, 0, view_pt - ss.start) * current.T;
-          });
-        break;
-        }
-    });
-  anims::record_video_std();
-  delHook(anims::hooks_anim, a);
-  #endif
+void switch_replay() {
+  in_replay = !in_replay;
+  if(in_replay) {
+    paused = true;
+    anims::period = 1000. * history.back().start / DS_(simspeed);    
+    anims::noframes = anims::period * 60 / 1000;
+    }
   }
 
 auto ds_hooks = 
   arg::add3("-ds-game", run_ds_game)
 + arg::add3("-ds-recenter", [] { current = Id; })
-+ arg::add3("-ds-record", ds_record);
++ arg::add3("-ds-record", switch_replay);
 
 }
 }
