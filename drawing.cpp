@@ -2627,6 +2627,10 @@ EX void curvepoint(const hyperpoint& H1) {
   curvedata.push_back(glhr::pointtogl(H1));
   }
 
+EX void curvepoint_first() {
+  curvedata.push_back(curvedata[curvestart]);
+  }
+
 EX dqi_poly& queuecurve(const shiftmatrix& V, color_t linecol, color_t fillcol, PPR prio) {
   auto &res = queuetable(V, curvedata, isize(curvedata)-curvestart, linecol, fillcol, prio);
   res.offset = curvestart;
