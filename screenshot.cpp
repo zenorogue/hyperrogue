@@ -1759,11 +1759,11 @@ int readArgs() {
     }
 #if CAP_SHOT
   else if(argis("-animrecordf")) {
-    PHASEFROM(2); shift(); noframes = argi();
+    PHASEFROM(2); shift(); noframes = argi() ? argi() : noframes;
     shift(); animfile = args();
     }
   else if(argis("-animrecord") || argis("-animrec")) {
-    PHASE(3); shift(); noframes = argi();
+    PHASE(3); shift(); noframes = argi() ? argi() : noframes;
     shift(); animfile = args(); record_animation();
     }
   else if(argis("-record-only")) {
@@ -1775,7 +1775,7 @@ int readArgs() {
 #if CAP_VIDEO
   else if(argis("-animvideo")) {
     start_game();
-    PHASE(3); shift(); noframes = argi();
+    PHASE(3); shift(); noframes = argi() ? argi() : noframes;
     shift(); videofile = args(); record_video();
     }
 #endif
