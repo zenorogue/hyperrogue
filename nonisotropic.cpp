@@ -1120,6 +1120,7 @@ EX namespace hybrid {
   
   #if HDR
   template<class T> auto in_actual(const T& t) -> decltype(t()) {
+    if(pmap == nullptr) return t();
     dynamicval<eGeometry> g(geometry, actual_geometry);
     dynamicval<geometry_information*> gc(cgip, pcgip);
     dynamicval<hrmap*> gu(currentmap, pmap);
@@ -1364,6 +1365,7 @@ EX namespace hybrid {
   #if HDR
   template<class T> auto in_underlying_geometry(const T& f) -> decltype(f()) {
     if(!hybri) return f();
+    pcgip = cgip;
     dynamicval<eGeometry> gag(actual_geometry, geometry);
     dynamicval<eGeometry> g(geometry, underlying);
     dynamicval<int> gss(underlying_cgip->single_step, cgi.single_step);
@@ -1376,6 +1378,29 @@ EX namespace hybrid {
   
   #define PIU(x) hr::hybrid::in_underlying_geometry([&] { return (x); })
   #endif
+
+  /** like in_underlying_geometry but does not return */
+  EX void switch_to_underlying() {
+    if(!hybri) return;
+    auto m = hmap();
+    pmap = m;
+    actual_geometry = geometry;
+    geometry = underlying;
+    underlying_cgip->single_step = cgi.single_step;
+    underlying_cgip->psl_steps = cgi.psl_steps;
+    pcgip = cgip;
+    cgip = underlying_cgip;
+    currentmap = m->underlying_map;
+    }
+
+  /** like in_actual but does not return */
+  EX void switch_to_actual() {
+    if(!pmap) return;
+    geometry = actual_geometry;
+    cgip = pcgip;
+    currentmap = pmap;
+    pmap = nullptr;
+    }
 
   // next: 0 = i-th corner, 1 = next corner, 2 = center of the wall
   EX hyperpoint get_corner(cell *c, int i, int next, ld z) {
