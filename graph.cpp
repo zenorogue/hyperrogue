@@ -4248,8 +4248,8 @@ EX subcellshape& generate_subcellshape_if_needed(cell *c, int id) {
         l.push_back(hybrid::get_corner(c1, i, 0, z));
       else {
         l.push_back(ctr);
-        l.push_back(hybrid::get_corner(c1, i, 0, z));
-        l.push_back(hybrid::get_corner(c1, i+1, 1, z));
+        l.push_back(hybrid::get_corner(c1, i+1, 0, z));
+        l.push_back(hybrid::get_corner(c1, i, 1, z));
         l.push_back(ctr);
         l.push_back(hybrid::get_corner(c1, i, 1, z));
         l.push_back(hybrid::get_corner(c1, i, 0, z));
