@@ -18,8 +18,9 @@ constexpr flagtype GF_VARCOLOR = 2;
 constexpr flagtype GF_LIGHTFOG = 4;
 constexpr flagtype GF_LEVELS   = 8;
 constexpr flagtype GF_TEXTURE_SHADED  = 16;
+constexpr flagtype GF_NO_FOG   = 32;
 
-constexpr flagtype GF_which    = 31;
+constexpr flagtype GF_which    = 63;
 
 constexpr flagtype SF_PERS3        = 256;
 constexpr flagtype SF_BAND         = 512;
@@ -393,7 +394,10 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   if(!skip_t) {
     vmain += "mediump vec4 t = uMV * aPosition;\n";
     vmain += coordinator;
-    if(GDIM == 3 && WDIM == 2 && hyperbolic && context_fog && pmodel == mdPerspective) {
+    if(shader_flags & GF_NO_FOG) {
+      vmain += "// no fog used";
+      }
+    else if(GDIM == 3 && WDIM == 2 && hyperbolic && context_fog && pmodel == mdPerspective) {
       vsh += 
         "uniform mediump mat4 uRadarTransform;\n"
         "uniform mediump sampler2D tAirMap;\n"
