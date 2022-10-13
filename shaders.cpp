@@ -403,7 +403,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     vmain += "mediump vec4 t = uMV * aPosition;\n";
     vmain += coordinator;
     if(shader_flags & GF_NO_FOG) {
-      vmain += "// no fog used";
+      vmain += "// no fog used\n";
       }
     else if(GDIM == 3 && WDIM == 2 && hyperbolic && context_fog && pmodel == mdPerspective) {
       vsh += 
