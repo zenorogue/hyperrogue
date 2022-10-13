@@ -192,7 +192,7 @@ EX namespace models {
       if(among(pm, mdBall, mdHemisphere)) return false;
       return PIU(model_available(pm));
       }
-    if(sl2) return pm == mdGeodesic;
+    if(sl2) return among(pm, mdGeodesic, mdEquidistant, mdHorocyclic, mdPerspective);
     if(nonisotropic) return among(pm, mdDisk, mdPerspective, mdHorocyclic, mdGeodesic, mdEquidistant, mdFisheye, mdLiePerspective, mdLieOrthogonal);
     if(sphere && (pm == mdHalfplane || pm == mdBall))
       return false;

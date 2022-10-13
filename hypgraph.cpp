@@ -744,6 +744,13 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
     
     case mdHorocyclic: {
 
+      if(sl2) {
+        ret = unshift(H_orig);
+        ret *= .5;
+        ret[LDIM] = 1;
+        ret = lp_apply(ret);
+        break;
+        }
       find_zlev(H);
 
       apply_nil_rotation(H);

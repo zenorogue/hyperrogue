@@ -349,6 +349,14 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     }
   else if(pmodel == mdPerspective) {
     shader_flags |= SF_PERS3 | SF_DIRECT;
+    if(sl2) {
+      vsh += "uniform mediump float uIndexSL;\n";
+      coordinator +=
+        "float ca = cos(uIndexSL); float sa = -sin(uIndexSL);\n"
+        "vec4 h1 = t;\n"
+        "t[2] = h1[2] * ca - h1[3] * sa; t[3] = 1.;\n"
+        "t[0] = h1[0] * ca - h1[1] * sa; t[1] = h1[1] * ca + h1[0] * sa;\n";
+      }
     #if CAP_VR
     if(vrhr::rendering() && hyperbolic && vrhr::eyes != vrhr::eEyes::truesim) {
       azi_hyperbolic = true;
