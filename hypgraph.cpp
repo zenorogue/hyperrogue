@@ -551,6 +551,13 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       return;
       }
 
+    case mdRelPerspective: {
+      auto S = rel_log(H_orig); S[3] = 1;
+      S = lp_apply(S);
+      apply_perspective(S, ret);
+      return;
+      }
+
     case mdPixel:
       ret = H / current_display->radius;
       return; 
@@ -793,6 +800,16 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
 
       if(nonisotropic && !vrhr::rendering()) ret = lp_apply(ret);
 
+      break;
+      }
+
+    case mdRelOrthogonal: {
+
+      ret = rel_log(H_orig);
+      ret *= .5;
+      ret[LDIM] = 1;
+
+      if(nonisotropic && !vrhr::rendering()) ret = lp_apply(ret);
       break;
       }
 
@@ -2354,6 +2371,30 @@ EX void draw_model_elements() {
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
   switch(pmodel) {
   
+    case mdRelOrthogonal:
+    case mdRelPerspective: {
+      constexpr ld cc = 3;
+      if(sl2) for(ld dist: {-0.1, 0.1}) {
+        transmatrix Lorentz = Id;
+        Lorentz[0][0] = Lorentz[2][2] = cosh(cc);
+        Lorentz[0][2] = Lorentz[2][0] = sinh(cc);
+        hyperpoint h = Lorentz * cspin(3, 2, dist) * C0;
+        for(int s=0; s<=360; s++)
+          curvepoint(spin(s*degree) * h);
+        queuecurve(shiftless(Id), ringcolor, 0, PPR::CIRCLE);
+        }
+      if(hyperbolic) for(ld dist: {-0.1, 0.1}) {
+        transmatrix Lorentz = Id;
+        Lorentz[0][0] = Lorentz[3][3] = cosh(cc);
+        Lorentz[0][3] = Lorentz[3][0] = sinh(cc);
+        hyperpoint h = Lorentz * hyperpoint(0, 0, cosh(dist), sinh(dist));
+        for(int s=0; s<=360; s++)
+          curvepoint(spin(s*degree) * h);
+        queuecurve(shiftless(Id), ringcolor, 0, PPR::CIRCLE);
+        }
+      return;
+      }
+
     case mdRotatedHyperboles: {
       queuestr(current_display->xcenter, current_display->ycenter + current_display->radius * pconf.alpha, 0, vid.fsize, "X", ringcolor, 1, 8);
       return;
@@ -3053,6 +3094,43 @@ EX hyperpoint lie_exp(hyperpoint h) {
     h = tC0(T);
     }
   return h;
+  }
+
+EX hyperpoint rel_log(shiftpoint h) {
+  if(sl2) {
+    optimize_shift(h);
+    ld cycles = floor(h.shift / (2*M_PI) + .5);
+    hyperpoint h1 = unshift(h);
+    ld choice = h1[2] * h1[2] - h1[0] * h1[0] - h1[1] * h1[1];
+    ld r, z;
+    if(choice > 0) {
+      ld r = sqrt(choice);
+      ld z = asin_clamp(r);
+      if(h1[3] < 0) z = M_PI - z;
+      z += cycles * 2 * M_PI;
+      }
+    else if(cycles || h1[3] < -1 || choice == 0) {
+      /* impossible, or light-like */
+      r = 1; z = 0;
+      }
+    else {
+      r = sqrt(-choice);
+      z = asinh(r);
+      }
+    h1 = h1 * z / r;
+    h1[3] = 0;
+    return h1;
+    }
+  if(hyperbolic && GDIM == 3) {
+    hyperpoint h1 = h.h;
+    ld choice = h1[3] * h1[3] - h1[0] * h1[0] - h1[1] * h1[1];
+    ld r, z;
+    if(choice > 0) { r = sqrt(choice); z = asinh(r); }
+    else { r = sqrt(-choice); z = asin_clamp(r); if(h1[2] < 0) z = M_PI - z; }
+    h1 = h1 * z / r; h1[2] = h1[3]; h1[3] = 0;
+    return h1;
+    }
+  throw hr_exception("rel_log in wrong geometry");
   }
 
 EX hyperpoint lie_log(hyperpoint h) {

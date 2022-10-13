@@ -192,7 +192,7 @@ EX namespace models {
       if(among(pm, mdBall, mdHemisphere)) return false;
       return PIU(model_available(pm));
       }
-    if(sl2) return among(pm, mdGeodesic, mdEquidistant, mdHorocyclic, mdPerspective);
+    if(sl2) return among(pm, mdGeodesic, mdEquidistant, mdRelPerspective, mdRelOrthogonal, mdHorocyclic, mdPerspective);
     if(nonisotropic) return among(pm, mdDisk, mdPerspective, mdHorocyclic, mdGeodesic, mdEquidistant, mdFisheye, mdLiePerspective, mdLieOrthogonal);
     if(sphere && (pm == mdHalfplane || pm == mdBall))
       return false;
@@ -230,7 +230,7 @@ EX namespace models {
     }
   
   EX bool is_perspective(eModel m) {
-    return among(m, mdPerspective, mdGeodesic, mdLiePerspective);
+    return among(m, mdPerspective, mdGeodesic, mdLiePerspective, mdRelPerspective);
     }
 
   EX bool is_3d(const projection_configuration& p) {
@@ -258,7 +258,7 @@ EX namespace models {
       if(m == mdHorocyclic && !sol) return XLAT("simple model: projection");
       if(m == mdPerspective) return XLAT("simple model: perspective");
       if(m == mdGeodesic) return XLAT("native perspective");
-      if(among(m, mdEquidistant, mdFisheye, mdHorocyclic, mdLiePerspective, mdLieOrthogonal)) return XLAT(mdinf[m].name_hyperbolic);
+      if(among(m, mdEquidistant, mdFisheye, mdHorocyclic, mdLiePerspective, mdLieOrthogonal, mdRelPerspective, mdRelOrthogonal)) return XLAT(mdinf[m].name_hyperbolic);
       }
     if(m == mdDisk && GDIM == 3) return XLAT("perspective in 4D");
     if(m == mdHalfplane && GDIM == 3 && hyperbolic) return XLAT("half-space");
