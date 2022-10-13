@@ -185,6 +185,9 @@ EX namespace models {
       }
     }
   
+  /** mdRelPerspective and mdRelOrthogonal in hyperbolic space only make sense if it is actually a de Sitter visualization */
+  EX bool desitter_projections;
+
   EX bool model_available(eModel pm) {
     if(mdinf[pm].flags & mf::technical) return false;
     if(prod) {
@@ -192,6 +195,7 @@ EX namespace models {
       if(among(pm, mdBall, mdHemisphere)) return false;
       return PIU(model_available(pm));
       }
+    if(hyperbolic && desitter_projections && among(pm, mdRelPerspective, mdRelOrthogonal)) return true;
     if(sl2) return among(pm, mdGeodesic, mdEquidistant, mdRelPerspective, mdRelOrthogonal, mdHorocyclic, mdPerspective);
     if(nonisotropic) return among(pm, mdDisk, mdPerspective, mdHorocyclic, mdGeodesic, mdEquidistant, mdFisheye, mdLiePerspective, mdLieOrthogonal);
     if(sphere && (pm == mdHalfplane || pm == mdBall))

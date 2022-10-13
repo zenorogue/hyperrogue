@@ -29,6 +29,7 @@ void switch_underlying() {
       initcells();
       initgame();
       nomap = false;
+      models::desitter_projections = true;
       }
 
     else if(hyperbolic) {
