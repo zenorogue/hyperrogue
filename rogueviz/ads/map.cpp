@@ -108,6 +108,7 @@ int gen_budget;
 
 void gen_terrain(cell *c, cellinfo& ci, int level = 0) {
   if(level >= ci.mpd_terrain) return;
+  if(!hyperbolic) { println(hlog, "wrong geometry detected in gen_terrain!");  exit(1); }
   if(ci.mpd_terrain > level + 1) gen_terrain(c, ci, level+1);
   forCellCM(c1, c) gen_terrain(c1, ci_at[c1], level+1);
   genstats[level]++;
@@ -168,7 +169,7 @@ void gen_rocks(cell *c, cellinfo& ci, int radius) {
   if(radius <= ci.rock_dist) return;
   if(ci.rock_dist < radius - 1) gen_rocks(c, ci, radius-1);
   forCellCM(c1, c) gen_rocks(c1, ci_at[c1], radius-1);
-  if(geometry != gNormal) { println(hlog, "wrong geometry detected in gen_rocks 1!");  exit(1); }
+  if(!hyperbolic) { println(hlog, "wrong geometry detected in gen_rocks 1!");  exit(1); }
 
   if(radius == 0) {
     int q = rpoisson(rock_density);
