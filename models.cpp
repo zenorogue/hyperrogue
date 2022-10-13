@@ -212,7 +212,7 @@ EX namespace models {
   EX bool has_orientation(eModel m) {
     if(among(m, mdHorocyclic, mdLieOrthogonal, mdLiePerspective))
       return hyperbolic || in_h2xe();
-    if((m == mdPerspective || m == mdGeodesic) && panini_alpha) return true;
+    if(is_perspective(m) && panini_alpha) return true;
     return
       among(m, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral, mdSimulatedPerspective, mdTwoHybrid, mdHorocyclic, mdAxial, mdAntiAxial, mdQuadrant,
         mdWerner, mdAitoff, mdHammer, mdLoximuthal, mdWinkelTripel, mdThreePoint) || mdBandAny();
