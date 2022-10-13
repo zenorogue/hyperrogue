@@ -17,7 +17,7 @@ struct cell_to_draw {
   };
 
 void draw_game_cell(const cell_to_draw& cd) {
-
+  bool hv = rotspace;
   using cellptr = cell*;
   const cellptr& c = cd.c;
   const ads_matrix& V = cd.V;
@@ -36,12 +36,15 @@ void draw_game_cell(const cell_to_draw& cd) {
     if(!gen_budget) return;
     gen_budget--;
     }
-  gen_terrain(c, ci);
-  gen_rocks(c, ci, 0);
+  PIU({
+    gen_terrain(c, ci);
+    gen_rocks(c, ci, 0);
+    });
 
   auto& t = ci.type;
 
-  if(t == wtGate) {
+  if(hv) ;
+  else if(t == wtGate) {
     ld minv = hlist[0].shift;
     ld maxv = hlist[0].shift;
     for(auto& h: hlist) {
@@ -120,13 +123,28 @@ void draw_game_cell(const cell_to_draw& cd) {
         rock.pts.push_back(f);
         });
       }
+    
+    if(hv) {
+      ads_point M = current * (V * rock.at) * ads_matrix(Id, rock.pt_main.shift) * C0;
+      optimize_shift(M);
+      for(ld z=-5; z<=5; z+=0.2) {
+        for(int i=0; i<isize(shape); i += 2) {
+          auto h = rots::uxpush(shape[i] * ads_scale) * rots::uypush(shape[i+1] * ads_scale) * C0;
+          curvepoint(h);
+          }
+        curvepoint_first();
+        queuecurve(current * V * rock.at * ads_matrix(Id, rock.pt_main.shift+z), rock.col, 0, PPR::LINE);
+        }
+      }
 
-    for(auto h: rock.pts) curvepoint(h.h);
-    curvepoint(rock.pts[0].h);
-    queuecurve(shiftless(Id), 
-      rock.type == oMissile ? missile_color : 
-      rock.type == oParticle ? rock.col :
-      0x000000FF, rock.col, obj_prio[rock.type]);
+    else {
+      for(auto h: rock.pts) curvepoint(h.h);
+      curvepoint(rock.pts[0].h);
+      queuecurve(shiftless(Id),
+        rock.type == oMissile ? missile_color :
+        rock.type == oParticle ? rock.col :
+        0x000000FF, rock.col, obj_prio[rock.type]);
+      }
 
     if(view_proper_times && rock.type != oParticle) {
       string str = format(tformat, rock.pt_main.shift / ads_time_unit);
@@ -137,6 +155,18 @@ void draw_game_cell(const cell_to_draw& cd) {
   /* todo: binary search */
   if(paused) for(auto& rock: ci.shipstates) {
     cross_result cr;
+
+    if(hv) {
+      auto& shape = shape_ship;
+      for(int i=0; i<isize(shape); i += 2) {
+        auto h = rots::uxpush(shape[i] * ads_scale) * rots::uypush(shape[i+1] * ads_scale) * C0;
+        curvepoint(h);
+        }
+      curvepoint_first();
+      queuecurve(current * V * rock.at, shipcolor, 0, PPR::LINE);
+      continue;
+      }
+
     hybrid::in_actual([&]{
       dynamicval<eGeometry> b(geometry, gRotSpace);
       auto h = V * rock.at;
@@ -164,7 +194,7 @@ void draw_game_cell(const cell_to_draw& cd) {
       }
     }
   
-  if(paused && c == vctr_ship && !game_over && !inHighQual) {
+  if(paused && c == vctr_ship && !game_over && !in_replay && !hv) {
     cross_result cr;
     hybrid::in_actual([&]{
       auto h = ads_inverse(current_ship * vctrV_ship);
@@ -202,6 +232,8 @@ void view_footer() {
 void view_ads_game() {
   displayed.clear();
   
+  bool hv = hybri;
+
   hybrid::in_actual([&] {
     gen_budget = max_gen_per_frame;
     
@@ -284,7 +316,7 @@ void view_ads_game() {
         });
       }
 
-    if(!game_over && !paused && !in_replay) {
+    if(!game_over && !paused && !in_replay && !hv) {
       poly_outline = 0xFF;
       if(ship_pt < invincibility_pt) {
         ld u = (invincibility_pt-ship_pt) / ads_how_much_invincibility;

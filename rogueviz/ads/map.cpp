@@ -247,6 +247,11 @@ void ads_crash_ship() {
 
 void handle_crashes() {
   if(paused) return;
+  if(rotspace) {
+    if(!currentmap) { println(hlog, "no currentmap!"); return; }
+    PIU({ handle_crashes(); });
+    return;
+    }
   vector<ads_object*> missiles;
   vector<ads_object*> rocks;
   vector<ads_object*> resources;

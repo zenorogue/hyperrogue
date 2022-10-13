@@ -128,5 +128,9 @@ void run_ds_game();
 /** in the replay mode */
 bool in_replay;
 void switch_replay();
+void replay_animation();
+
+void switch_underlying();
+bool ads_draw_cell(cell *c, const shiftmatrix& V);
 
 }}

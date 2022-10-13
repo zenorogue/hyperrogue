@@ -261,6 +261,7 @@ void ds_crash_ship() {
 
 void ds_handle_crashes() {
   if(paused) return;
+  dynamicval<eGeometry> g(geometry, gSphere);
   vector<ads_object*> dmissiles;
   vector<ads_object*> drocks;
   vector<ads_object*> dresources;
@@ -456,10 +457,13 @@ bool invalid(cross_result& res) {
 
 void view_ds_game() {
   displayed.clear();
-  
-  draw_textures();
 
-  sphereflip = sphereflipped() ? MirrorZ : Id;
+  bool hv = hyperbolic;
+  bool hvrel = among(pmodel, mdRelPerspective, mdRelOrthogonal);
+
+  sphereflip = hv ? Id : sphereflipped() ? MirrorZ : Id;
+
+  if(!hv) draw_textures();
 
   if(1) {
     for(auto& r: rocks) {
@@ -505,8 +509,39 @@ void view_ds_game() {
 
       if(area > 0) continue;
 
-      for(auto p: rock.pts) curvepoint(p.h);
-      queuecurve(shiftless(sphereflip), rock.col, rock.col, obj_prio[rock.type]);
+      if(hv) {
+        ld t = rock.at.shift;
+        if(rock.type == oMainRock) t = floor(10*t + .5) / 10;
+        transmatrix at = current.T * lorentz(2, 3, t - current.shift) * rock.at.T;
+        for(ld s=-3; s<=3; s+=0.1) {
+          transmatrix at1 = at * lorentz(2, 3, s);
+          if((at1 * pov) [2] < 0) continue;
+
+          auto& sh = *rock.shape;
+
+          for(int i=0; i<isize(sh); i+=2) {
+            hyperpoint h = hvrel ? tpt(sh[i], sh[i+1]) * pov: hpxy(sh[i], sh[i+1]);
+            curvepoint(h);
+            }
+          curvepoint_first();
+          color_t col = rock.col;
+          if(col == 0xFF) col = 0xFFD500FF;
+          if(col != 0xFFD500FF && !hvrel) part(col, 0) = part(col, 0) / 4;
+          queuecurve(shiftless(at1), col, 0, PPR::TRANSPARENT_WALL);
+          }
+        }
+
+      if(!hv) {
+        for(auto p: rock.pts) curvepoint(p.h);
+        queuecurve(shiftless(sphereflip), rock.col, rock.col, obj_prio[rock.type]);
+        }
+
+      if(pmodel == mdPerspective) {
+        for(auto p: rock.pts) curvepoint(p.h);
+        curvepoint_first();
+        color_t col = rock.col; part(col, 0) /= 2;
+        queuecurve(shiftless(sphereflip), col, 0, obj_prio[rock.type]).flags |= POLY_NO_FOG;
+        }
 
       if(view_proper_times && rock.type != oParticle) {
         ld t = rock.pt_main.shift;
@@ -524,6 +559,19 @@ void view_ds_game() {
     if(paused) for(auto& ss: history) {
       if(ss.at.shift < current.shift - 4 * TAU) continue;
       if(ss.at.shift > current.shift + 4 * TAU) continue;
+
+      auto& shape = shape_ship;
+
+      if(hv) {
+        for(int i=0; i<isize(shape); i+=2) {
+          hyperpoint h = hvrel ? tpt(shape[i], shape[i+1]) * pov: hpxy(shape[i], shape[i+1]);
+          curvepoint(h);
+          }
+        curvepoint_first();
+        queuecurve(shiftless(current.T * lorentz(2, 3, ss.at.shift - current.shift) * ss.at.T), shipcolor, 0, PPR::TRANSPARENT_WALL);
+        continue;
+        }
+
       dynamicval<eGeometry> g(geometry, gSpace435);
       cross_result cr = ds_cross0(current.T * lorentz(2, 3, ss.at.shift - current.shift) * ss.at.T);
       if(cr.shift < delta) continue;
@@ -532,15 +580,22 @@ void view_ds_game() {
       
       vector<hyperpoint> pts;
       
-      auto& shape = shape_ship;
       for(int i=0; i<isize(shape); i += 2) {
         transmatrix at1 = at * tpt(shape[i], shape[i+1]);
         pts.push_back(ds_cross0(at1).h);
         }
       
       geometry = g.backup;
-      for(auto pt: pts) curvepoint(pt);
-      queuecurve(shiftless(sphereflip), 0xFF, shipcolor, PPR::MONSTER_FOOT);
+
+      if(!hv) {
+        for(auto pt: pts) curvepoint(pt);
+        queuecurve(shiftless(sphereflip), 0xFF, shipcolor, PPR::MONSTER_FOOT);
+        }
+
+      if(pmodel == mdPerspective) {
+        for(auto pt: pts) curvepoint(pt);
+        queuecurve(shiftless(sphereflip), 0xFF, shipcolor, PPR::MONSTER_FOOT).flags |= POLY_NO_FOG;
+        }
 
       if(view_proper_times) {
         string str = format(tformat, (cr.shift + ss.start) / ds_time_unit);
@@ -554,7 +609,17 @@ void view_ds_game() {
         ld u = (invincibility_pt-ship_pt) / ds_how_much_invincibility;
         poly_outline = gradient(shipcolor, rsrc_color[rtHull], 0, 0.5 + cos(5*u*TAU), 1);
         }
-      queuepolyat(shiftless(sphereflip * spin(ang*degree)), make_shape(), shipcolor, PPR::MONSTER_HAIR);
+      if(hv) {
+        auto& shape = shape_ship;
+        for(int i=0; i<isize(shape); i += 2) {
+          transmatrix at1 = tpt(shape[i], shape[i+1]);
+          curvepoint(ds_cross0(at1).h);
+          }
+        queuecurve(shiftless(sphereflip * spin(ang*degree)), shipcolor, 0, PPR::MONSTER_HAIR).flags |= POLY_NO_FOG;
+        }
+      else {
+        queuepolyat(shiftless(sphereflip * spin(ang*degree)), make_shape(), shipcolor, PPR::MONSTER_HAIR);
+        }
       poly_outline = 0xFF;
 
       if(view_proper_times) {
@@ -568,7 +633,7 @@ void view_ds_game() {
       queuestr(shiftless(sphereflip), .1, str, 0xFFFF00, 8);
       }
 
-    if(paused && !game_over && !in_replay) {
+    if(paused && !game_over && !in_replay && !hv) {
       vector<hyperpoint> pts;
       int ok = 0, bad = 0;
       for(int i=0; i<=360; i++) {
@@ -606,30 +671,6 @@ void ds_restart() {
   init_rsrc();
   }
 
-void replay_animation() {
-  if(!in_replay) return;
-  view_pt = (ticks / 1000.) * DS_(simspeed);
-  ld maxt = history.back().start + 0.001;
-  view_pt -= maxt * floor(view_pt / maxt);
-  for(auto& ss: history)
-    if(ss.start + ss.duration > view_pt) {
-      current = ss.current;
-      if(sphere) {
-        dynamicval<eGeometry> g(geometry, gSpace435);
-        current.T = inverse(ss.at.T * spin(-(ss.ang+90)*degree));
-        current.T = lorentz(3, 2, view_pt - ss.start) * current.T;
-        }
-      else PIA({
-        vctr = new_vctr = ss.vctr;
-        vctrV = new_vctrV = ss.vctrV;
-        current.T = cspin(3, 2, view_pt - ss.start) * current.T;
-        if(auto_rotate)
-          current.T = cspin(1, 0, view_pt - ss.start) * current.T;
-        });
-      break;
-      }
-  }
-
 void run_ds_game() {
 
   stop_game();
@@ -648,19 +689,8 @@ void run_ds_game() {
   rogueviz::rv_hook(anims::hooks_anim, 100, replay_animation);
   }
 
-void switch_replay() {
-  in_replay = !in_replay;
-  if(in_replay) {
-    paused = true;
-    anims::period = 1000. * history.back().start / DS_(simspeed);    
-    anims::noframes = anims::period * 60 / 1000;
-    }
-  }
-
 auto ds_hooks = 
-  arg::add3("-ds-game", run_ds_game)
-+ arg::add3("-ds-recenter", [] { current = Id; })
-+ arg::add3("-ds-record", switch_replay);
+  arg::add3("-ds-game", run_ds_game);
 
 }
 }

@@ -39,6 +39,7 @@ namespace rogueviz { std::vector<hr::reaction_t> cleanup; }
 #include "menu.cpp"
 #include "ds-game.cpp"
 #include "ds-texture.cpp"
+#include "underlying.cpp"
 
 namespace hr {
 
@@ -101,6 +102,7 @@ void run_ads_game() {
   rogueviz::rv_hook(hooks_frame, 100, view_ads_game);
   rogueviz::rv_hook(hooks_prestats, 100, display_rsrc);
   rogueviz::rv_hook(hooks_handleKey, 0, handleKey);
+  rogueviz::rv_hook(hooks_drawcell, 0, ads_draw_cell);
   rogueviz::rv_hook(shmup::hooks_turn, 0, ads_turn);
   rogueviz::rv_hook(anims::hooks_anim, 100, replay_animation);
   
