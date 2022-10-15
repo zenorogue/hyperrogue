@@ -411,9 +411,38 @@ bool ds_turn(int idelta) {
 
 hyperpoint pov = point30(0, 0, 1);
 
-cross_result ds_cross0(transmatrix T) {
+cross_result ds_cross0_cone(const transmatrix& T, ld which) {
+
+  ld a = T[2][2];
+  ld b = T[2][3];
+  // a * cosh(t) + b * sinh(t) = 1
+  // solution: t = log((1 +- sqrt(-a^2 + b^2 + 1))/(a + b))
+
+  ld underroot = (1+b*b-a*a);
+  if(underroot < 0) return cross_result { Hypc, 0};
+
+  ld underlog = (1 + which * sqrt(underroot)) / (a + b);
+  if(underlog < 0) return cross_result { Hypc, 0};
+
+  ld t = log(underlog);
+
+  cross_result res;
+  res.shift = t;
+  res.h = T * hyperpoint(0, 0, cosh(t), sinh(t));
+
+  if(abs(res.h[2] - 1) > .01) return cross_result{Hypc, 0};
+
+  res.h[2] -= res.h[3];
+  res.h[3] = 0;
+  res.h /= hypot_d(3, res.h);
+
+  // res.h[2] = sqrt(1 - res.h[3] * res.h[3]); res.h[3] = 0;
+
+  return res;
+  }
+
+cross_result ds_cross0_sim(const transmatrix& T) {
   // h = T * (0 0 cosh(t) sinh(t))
-  // h[3] == 0
   // T[3][2] * cosh(t) + T[3][3] * sinh(t) = 0
   // T[3][2] + T[3][3] * tanh(t) = 0
   ld tt = - T[3][2] / T[3][3];
@@ -423,6 +452,10 @@ cross_result ds_cross0(transmatrix T) {
   res.shift = t;
   res.h = T * hyperpoint(0, 0, cosh(t), sinh(t));
   return res;
+  }
+
+cross_result ds_cross0(const transmatrix& T) {
+  return which_cross ? ds_cross0_cone(T, which_cross) : ds_cross0_sim(T);
   }
 
 cross_result ds_cross0_light(transmatrix T) {
@@ -626,7 +659,7 @@ void view_ds_game() {
       queuestr(shiftless(sphereflip), .1, str, 0xFFFF00, 8);
       }
 
-    if(paused && !game_over && !in_replay && !hv) {
+    if(paused && !game_over && !in_replay && !hv && !which_cross) {
       vector<hyperpoint> pts;
       int ok = 0, bad = 0;
       for(int i=0; i<=360; i++) {

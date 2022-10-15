@@ -115,7 +115,7 @@ extern ads_matrix current;
  *  shift is T's proper time at the point of crossing, and h=(x,y,z) is the Minkowski hyperboloid point where it crosses.
  **/
 
-cross_result cross0(ads_matrix hz) {
+cross_result cross0_sim(ads_matrix hz) {
   
   transmatrix deg90 = chg_shift(90*degree);
   hyperpoint uhz = unshift(hz * C0);
@@ -145,7 +145,47 @@ cross_result cross0(ads_matrix hz) {
   return cross_result{uhzt, t};
   }
 
-/** Similar as cross0_light but for light-like wordlines.
+/** 0 = draw time t=0, -1 = take light into account, +1 = predict future */
+ld which_cross;
+
+/** Similar as cross0_sim but detects a crossing with the light cone. That is,
+ *  the spacetime event that was (which==-1) or will be (which==+1) seen by
+ *  the frame of reference.
+ **/
+
+cross_result cross0_cone(ads_matrix hz, ld which) {
+
+  auto cr = cross0_sim(hz);
+  hz = hz * chg_shift(cr.shift);
+  auto uhz = unshift(hz);
+
+  // (hz.T * chg_shift(t) * C0)[3] = 1
+  // (hz.T * cspin(2, 3, t) * C0)[3] = 1
+  // (hz.T * [0, 0, sin(t), cos(t)])[3] = 1
+
+  ld a = uhz[3][3];
+  ld b = uhz[3][2];
+  // b sin(t) + a cos(t) = 1
+
+  // t = 2*atan((b +- sqrt(a^2 + b^2 - 1))/(a + 1))
+
+  ld underroot = a * a + b * b - 1;
+  if(underroot < 0) return { Hypc, 0 };
+  ld t = 2 * atan((b + which * sqrt(underroot)) / (a+1));
+
+  hyperpoint uhzt = uhz * chg_shift(t) * C0;
+
+  uhzt[2] = sqrt(uhzt[2]*uhzt[2] + uhzt[3]*uhzt[3]);
+  uhzt[3] = 0;
+
+  return cross_result{uhzt, cr.shift + t};
+  }
+
+cross_result cross0(const ads_matrix& T) {
+  return which_cross ? cross0_cone(T, which_cross) : cross0_sim(T);
+  }
+
+/** Similar as cross0_sim but for light-like wordlines.
  *  The point returned by cross0_light(T) is the same as the limit of cross0(T * lorentz(0, 2, v)).
  **/
 

@@ -340,7 +340,7 @@ void view_ads_game() {
         });
       }
 
-    if(!game_over && !paused && !in_replay && !hv) {
+    if(!game_over && !paused && !in_replay && !hv && !which_cross) {
       poly_outline = 0xFF;
       if(ship_pt < invincibility_pt) {
         ld u = (invincibility_pt-ship_pt) / ads_how_much_invincibility;
