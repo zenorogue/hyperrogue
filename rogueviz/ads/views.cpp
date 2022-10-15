@@ -165,14 +165,17 @@ void replay_animation() {
     while(s < -1) { View = chg_shift(-1) * View; sub_optimizeview(); s++; }
     View = chg_shift(s) * View; sub_optimizeview();
 
+    if(use_duality == 1) nomap = true;
+    if(use_duality == 2) View = spin(90*degree) * View;
+
     centerover->wall = waNone;
     }
   }
 
 void switch_replay() {
+  if(!paused) switch_pause();
   in_replay = !in_replay;
   if(in_replay) {
-    paused = true;
     anims::period = 1000. * history.back().start / DS_(simspeed);    
     anims::noframes = anims::period * 60 / 1000;
     }
