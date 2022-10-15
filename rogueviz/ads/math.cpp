@@ -148,6 +148,8 @@ cross_result cross0_sim(ads_matrix hz) {
 /** 0 = draw time t=0, -1 = take light into account, +1 = predict future */
 ld which_cross;
 
+extern bool auto_rotate;
+
 /** Similar as cross0_sim but detects a crossing with the light cone. That is,
  *  the spacetime event that was (which==-1) or will be (which==+1) seen by
  *  the frame of reference.
@@ -155,6 +157,7 @@ ld which_cross;
 
 cross_result cross0_cone(ads_matrix hz, ld which) {
 
+  // we use cross0_sim first to get the appropriate cycle
   auto cr = cross0_sim(hz);
   hz = hz * chg_shift(cr.shift);
   auto uhz = unshift(hz);
@@ -175,7 +178,16 @@ cross_result cross0_cone(ads_matrix hz, ld which) {
 
   hyperpoint uhzt = uhz * chg_shift(t) * C0;
 
-  uhzt[2] = sqrt(uhzt[2]*uhzt[2] + uhzt[3]*uhzt[3]);
+  ld z = sqrt(uhzt[2]*uhzt[2] + uhzt[3]*uhzt[3]);
+  if(auto_rotate) {
+    tie(uhzt[0], uhzt[1]) =
+      make_pair(
+        uhzt[0] * uhzt[3] / z - uhzt[1] * uhzt[2] / z,
+        uhzt[0] * uhzt[2] / z + uhzt[1] * uhzt[3] / z
+        );
+    }
+
+  uhzt[2] = z;
   uhzt[3] = 0;
 
   return cross_result{uhzt, cr.shift + t};
