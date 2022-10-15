@@ -138,20 +138,7 @@ bool ads_turn(int idelta) {
   auto& la = multi::lactionpressed;
   
   if(a[16+4] && !la[16+4] && !paused) fire();
-  if(a[16+5] && !la[16+5]) {
-    paused = !paused;
-    if(paused) {
-      current_ship = current;
-      vctr_ship = vctr;
-      vctrV_ship = vctrV;
-      view_pt = 0;
-      }
-    else {
-      current = current_ship;
-      vctr = new_vctr = vctr_ship;
-      vctrV = new_vctrV = vctrV_ship;
-      }
-    }
+  if(a[16+5] && !la[16+5]) switch_pause();
   if(a[16+6] && !la[16+6]) view_proper_times = !view_proper_times;
   if(a[16+7] && !la[16+7]) auto_rotate = !auto_rotate;
   if(a[16+8] && !la[16+8]) pushScreen(game_menu);

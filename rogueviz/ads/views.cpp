@@ -6,6 +6,21 @@ namespace ads_game {
 
 hrmap *map_hyp;
 
+void switch_pause() {
+  paused = !paused;
+  if(paused) {
+    current_ship = current;
+    vctr_ship = vctr;
+    vctrV_ship = vctrV;
+    view_pt = 0;
+    }
+  else {
+    current = current_ship;
+    vctr = new_vctr = vctr_ship;
+    vctrV = new_vctrV = vctrV_ship;
+    }
+  }
+
 bool hv_klein = false;
 
 transmatrix Duality;

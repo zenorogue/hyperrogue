@@ -128,6 +128,7 @@ void run_ds_game();
 /** in the replay mode */
 bool in_replay;
 void switch_replay();
+void switch_pause();
 void replay_animation();
 
 void switch_underlying();
