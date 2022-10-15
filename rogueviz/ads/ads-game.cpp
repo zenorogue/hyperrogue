@@ -139,6 +139,13 @@ void set_config() {
   nomenukey = true;
   no_find_player = true;
   showstartmenu = false;
+  mapeditor::drawplayer = false;
+  vid.drawmousecircle = false;
+  draw_centerover = false;
+  vid.axes3 = false;
+  enable_canvas();
+  patterns::whichCanvas = 'r';
+  patterns::rwalls = 0;
   }
 
 void run_ads_game_std() {
