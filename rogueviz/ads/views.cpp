@@ -27,7 +27,15 @@ int use_duality = 2;
 
 transmatrix Duality;
 
-void switch_underlying() {
+void switch_spacetime_to(bool b) {
+  if(in_spacetime() != b) switch_spacetime();
+  }
+
+bool in_spacetime() {
+  return main_rock ? hyperbolic : rotspace;
+  }
+
+void switch_spacetime() {
   clearMessages();
 
   if(main_rock) {
@@ -173,6 +181,7 @@ void switch_replay() {
 auto view_hooks =
 + arg::add3("-ds-recenter", [] { current = Id; })
 + arg::add3("-ds-record", switch_replay)
-+ arg::add3("-ds-switchu", switch_underlying);
++ arg::add3("-ads-duality", [] { arg::shift(); use_duality = arg::argi(); })
++ arg::add3("-ds-switchu", switch_spacetime);
 
 }}

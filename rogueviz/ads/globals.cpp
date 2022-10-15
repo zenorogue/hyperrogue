@@ -131,7 +131,9 @@ void switch_replay();
 void switch_pause();
 void replay_animation();
 
-void switch_underlying();
+bool in_spacetime();
+void switch_spacetime();
+void switch_spacetime_to(bool);
 bool ads_draw_cell(cell *c, const shiftmatrix& V);
 extern transmatrix Duality;
 extern int use_duality;
