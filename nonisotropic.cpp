@@ -1728,8 +1728,12 @@ EX }
 
 EX namespace slr {
 
-  /** in what range are we rendering H2xR */
+  /** in what range are we rendering SL(2,R) */
   EX ld range_xy = 2;
+
+  /** in what Z range are we rendering SL(2,R) */
+  EX ld range_z = 2;
+  
   /** the number of steps for inverse_exp in the shader */
   EX int shader_iterations = 15;
 
@@ -2876,6 +2880,7 @@ EX namespace nisot {
     #endif
     if(argis("-slrange")) {
       shift_arg_formula(slr::range_xy);
+      shift_arg_formula(slr::range_z);
       return 0;
       }
     #if CAP_SOLV

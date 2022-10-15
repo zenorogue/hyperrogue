@@ -989,6 +989,7 @@ EX void initConfig() {
   #endif
   param_i(slr::shader_iterations, "slr-steps");
   param_f(slr::range_xy, "slr-range-xy");
+  param_f(slr::range_z, "slr-range-z");
 
   param_f(arcm::euclidean_edge_length, "arcm-euclid-length");
   
@@ -1434,6 +1435,10 @@ EX void edit_sightrange() {
     dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(slr::range_xy), 'x');
     dialog::add_action([] {
       dialog::editNumber(slr::range_xy, 0, 10, 0.5, 4, XLAT("max difference in X/Y coordinates"), "");
+      });
+    dialog::addSelItem(XLAT("max difference in Z coordinate"), fts(slr::range_z), 'x');
+    dialog::add_action([] {
+      dialog::editNumber(slr::range_xy, 0, 10, 0.5, 4, XLAT("max difference in Z coordinate"), "");
       });
     dialog::addSelItem(XLAT("shader_iterations"), its(slr::shader_iterations), 'z');
     dialog::add_action([] {
