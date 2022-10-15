@@ -569,7 +569,7 @@ void view_ds_game() {
         for(auto p: rock.pts) curvepoint(p.h);
         curvepoint_first();
         color_t col = rock.col; part(col, 0) /= 2;
-        queuecurve(shiftless(sphereflip), col, 0, obj_prio[rock.type]).flags |= POLY_NO_FOG;
+        queuecurve(shiftless(sphereflip), ghost_color, 0, obj_prio[rock.type]).flags |= POLY_NO_FOG;
         }
 
       if(view_proper_times && rock.type != oParticle) {
@@ -597,8 +597,8 @@ void view_ds_game() {
           curvepoint(h);
           }
         curvepoint_first();
-        queuecurve(shiftless(current.T * lorentz(2, 3, ss.at.shift - current.shift) * ss.at.T), shipcolor, 0, PPR::TRANSPARENT_WALL);
-        continue;
+        shiftmatrix S = shiftless(current.T * lorentz(2, 3, ss.at.shift - current.shift) * ss.at.T);
+        queuecurve(S, shipcolor, 0, PPR::TRANSPARENT_WALL);
         }
 
       dynamicval<eGeometry> g(geometry, gSpace435);
@@ -623,7 +623,8 @@ void view_ds_game() {
 
       if(pmodel == mdPerspective) {
         for(auto pt: pts) curvepoint(pt);
-        queuecurve(shiftless(sphereflip), 0xFF, shipcolor, PPR::MONSTER_FOOT).flags |= POLY_NO_FOG;
+        curvepoint_first();
+        queuecurve(shiftless(sphereflip), ghost_color, 0, PPR::MONSTER_FOOT).flags |= POLY_NO_FOG;
         }
 
       if(view_proper_times) {
@@ -644,7 +645,8 @@ void view_ds_game() {
           transmatrix at1 = tpt(shape[i], shape[i+1]);
           curvepoint(ds_cross0(at1).h);
           }
-        queuecurve(shiftless(sphereflip * spin(ang*degree)), shipcolor, 0, PPR::MONSTER_HAIR).flags |= POLY_NO_FOG;
+        curvepoint_first();
+        queuecurve(shiftless(sphereflip * spin(ang*degree)), ghost_color, 0, PPR::MONSTER_HAIR).flags |= POLY_NO_FOG;
         }
       else {
         queuepolyat(shiftless(sphereflip * spin(ang*degree)), make_shape(), shipcolor, PPR::MONSTER_HAIR);
