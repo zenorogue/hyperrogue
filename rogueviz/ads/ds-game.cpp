@@ -501,10 +501,13 @@ void view_ds_game() {
 
       if(hv) {
         ld t = rock.at.shift;
-        if(rock.type == oMainRock) t = floor(10*t + .5) / 10;
+        if(rock.type == oMainRock) t = floor(t / spacetime_step + .5) * spacetime_step;
         transmatrix at = current.T * lorentz(2, 3, t - current.shift) * rock.at.T;
-        for(ld s=-3; s<=3; s+=0.1) {
-          transmatrix at1 = at * lorentz(2, 3, s);
+        for(int z0=-spacetime_qty; z0<=spacetime_qty; z0++) {
+          ld z = z0 * spacetime_step;
+          if(t-z < rock.life_start) continue;
+          if(t-z > rock.life_end) continue;
+          transmatrix at1 = at * lorentz(2, 3, z);
           if((at1 * pov) [2] < 0) continue;
 
           auto& sh = *rock.shape;

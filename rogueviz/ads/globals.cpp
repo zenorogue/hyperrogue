@@ -136,4 +136,6 @@ bool ads_draw_cell(cell *c, const shiftmatrix& V);
 extern transmatrix Duality;
 extern int use_duality;
 
+ld spacetime_step = 0.1;
+int spacetime_qty = 30;
 }}

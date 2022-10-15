@@ -135,11 +135,17 @@ void draw_game_cell(const cell_to_draw& cd) {
         rock.pts.push_back(f);
         });
       }
-    
+
     if(hv) {
-      ads_point M = current * (V * rock.at) * ads_matrix(Id, rock.pt_main.shift) * C0;
+      ld t = rock.life_start;
+      if(t < -100) t = 0;
+      ld shift = floor((rock.pt_main.shift - t) / spacetime_step) * spacetime_step + t;
+      ads_point M = current * (V * rock.at) * ads_matrix(Id, shift) * C0;
       optimize_shift(M);
-      for(ld z=-5; z<=5; z+=0.2) {
+      for(int z0=-spacetime_qty; z0<=spacetime_qty; z0++) {
+        ld z = z0 * spacetime_step;
+        if((shift+z) < rock.life_start) continue;
+        if((shift+z) > rock.life_end) continue;
         for(int i=0; i<isize(shape); i += 2) {
           auto h = rots::uxpush(shape[i] * ads_scale) * rots::uypush(shape[i+1] * ads_scale) * C0;
           curvepoint(h);
