@@ -178,7 +178,6 @@ void draw_texture(texture_to_use& tu) {
 
 void draw_textures() {
   pick_textures();
-  copyright_shown = "";
   for(auto& tu: textures_to_use)
     if(current.shift > tu.from && current.shift < tu.to)
       draw_texture(tu);

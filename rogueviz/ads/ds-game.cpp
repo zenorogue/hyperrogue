@@ -488,6 +488,7 @@ void view_ds_game() {
 
   sphereflip = hv ? Id : sphereflipped() ? MirrorZ : Id;
 
+  copyright_shown = "";
   if(!hv) draw_textures();
 
   if(1) {
