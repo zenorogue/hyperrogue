@@ -1420,7 +1420,7 @@ EX void edit_sightrange() {
       }
     }
   #if CAP_SOLV
-  if(pmodel == mdGeodesic && sol) {
+  if(models::is_perspective(pmodel) && sol) {
     dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(sn::solrange_xy), 'x');
     dialog::add_action([] {
       dialog::editNumber(sn::solrange_xy, 0.01, 200, 0.1, 50, XLAT("max difference in X/Y coordinates"), solhelp()), dialog::scaleLog();
@@ -1431,7 +1431,7 @@ EX void edit_sightrange() {
       });
     }
   #endif
-  if(pmodel == mdGeodesic && sl2) {
+  if(models::is_perspective(pmodel) && sl2) {
     dialog::addSelItem(XLAT("max difference in X/Y coordinates"), fts(slr::range_xy), 'x');
     dialog::add_action([] {
       dialog::editNumber(slr::range_xy, 0, 10, 0.5, 4, XLAT("max difference in X/Y coordinates"), "");

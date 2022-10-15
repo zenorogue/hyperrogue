@@ -2949,23 +2949,24 @@ EX bool do_draw(cell *c, const shiftmatrix& T) {
     if(cells_drawn > vid.cells_drawn_limit) return false;
     if(cells_drawn < 50) { limited_generation(c); return true; }
     #if MAXMDIM >= 4
-    if(nil && pmodel == mdGeodesic) {
+    if(nil && models::is_perspective(pmodel)) {
       ld dist = hypot_d(3, inverse_exp(tC0(T), pQUICK));
       if(dist > sightranges[geometry] + (vid.sloppy_3d ? 0 : 0.9)) return false;
       if(dist <= extra_generation_distance && !limited_generation(c)) return false;
       }
-    else if(pmodel == mdGeodesic && sol) {
+    else if(sol && models::is_perspective(pmodel)) {
       if(!nisot::in_table_range(tC0(T.T))) return false;
       if(!limited_generation(c)) return false;
       }
-    else if(pmodel == mdGeodesic && nih) {
+    else if(nih && models::is_perspective(pmodel)) {
       hyperpoint h = inverse_exp(tC0(T), pQUICK);
       ld dist = hypot_d(3, h);
       if(dist > sightranges[geometry] + (vid.sloppy_3d ? 0 : cgi.corner_bonus)) return false;
       if(dist <= extra_generation_distance && !limited_generation(c)) return false;
       }
-    else if(pmodel == mdGeodesic && sl2) {
-      if(hypot(tC0(T.T)[2], tC0(T.T)[3]) > cosh(slr::range_xy)) return false;     
+    else if(sl2 && models::is_perspective(pmodel)) {
+      if(hypot(tC0(T.T)[2], tC0(T.T)[3]) > cosh(slr::range_xy)) return false;
+      if(abs(T.shift) > (slr::range_z)) return false;
       if(abs(T.shift * stretch::not_squared()) > sightranges[geometry]) return false;
       if(!limited_generation(c)) return false;
       }
