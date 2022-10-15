@@ -70,6 +70,13 @@ void set_default_keys() {
 
 void restart() {
 
+  if(in_spacetime()) {
+    switch_spacetime();
+    restart();
+    switch_spacetime();
+    return;
+    }
+
   hybrid::in_actual([&] {
     vctr = new_vctr = starting_point;
     vctrV = new_vctrV = current = ads_matrix(Id, 0);

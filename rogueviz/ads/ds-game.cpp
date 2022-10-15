@@ -646,6 +646,13 @@ void view_ds_game() {
 
 void ds_restart() {
 
+  if(in_spacetime()) {
+    switch_spacetime();
+    ds_restart();
+    switch_spacetime();
+    return;
+    }
+
   main_rock = nullptr;
 
   if(true) {
