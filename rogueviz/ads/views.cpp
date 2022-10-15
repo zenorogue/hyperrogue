@@ -191,9 +191,10 @@ void switch_replay() {
   }
 
 auto view_hooks =
-+ arg::add3("-ds-recenter", [] { current = Id; })
-+ arg::add3("-ds-record", switch_replay)
++ arg::add3("-ads-recenter", [] { current = Id; })
++ arg::add3("-ads-replay", [] { arg::shift(); int i = arg::argi(); if(i != in_replay) switch_replay(); })
 + arg::add3("-ads-duality", [] { arg::shift(); use_duality = arg::argi(); })
-+ arg::add3("-ds-switchu", switch_spacetime);
++ arg::add3("-ads-cone", [] { arg::shift(); which_cross = arg::argi(); })
++ arg::add3("-ads-spacetime", [] { arg::shift(); switch_spacetime_to(arg::argi()); });
 
 }}
