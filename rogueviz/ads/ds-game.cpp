@@ -2,6 +2,8 @@ namespace hr {
 
 namespace ads_game {
 
+void print(hstream& hs, cross_result cr) { print(hs, cr.h, "@", cr.shift); }
+
 void init_textures();
 void draw_textures();
 
