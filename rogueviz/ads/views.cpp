@@ -45,18 +45,15 @@ void switch_underlying() {
 
       initcells();
       initgame();
-      nomap = false;
       models::desitter_projections = true;
       }
 
     else if(hyperbolic) {
-      nomap = true;
       geometry = gSphere;
       variation = eVariation::bitruncated;
       swap(currentmap, map_hyp);
       pmodel = mdDisk;
       check_cgi();
-      nomap = true;
       }
 
     }
@@ -68,7 +65,6 @@ void switch_underlying() {
       hybrid::switch_to_actual();
       pmodel = mdRelPerspective;
       hyperpoint res;
-      nomap = false;
       nonisotropic_weird_transforms = true;
       NLP = Id;
       Duality = Id;
@@ -78,7 +74,6 @@ void switch_underlying() {
     else if(hybri) {
       hybrid::switch_to_underlying();
       pmodel = mdDisk;
-      nomap = true;
       }
     cgi.use_count++;
     }
@@ -104,6 +99,8 @@ bool ads_draw_cell(cell *c, const shiftmatrix& V) {
   }
 
 void replay_animation() {
+  nomap = main_rock ? (!hyperbolic || among(pmodel, mdRelPerspective, mdRelOrthogonal)) : !sl2;
+
   if(in_replay) {
     view_pt = (ticks / 1000.) * DS_(simspeed);
     ld maxt = history.back().start + 0.001;

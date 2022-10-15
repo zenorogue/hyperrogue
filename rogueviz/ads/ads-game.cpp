@@ -130,7 +130,6 @@ void set_config() {
 
   nohelp = true;
   nomenukey = true;
-  nomap = true;
   no_find_player = true;
   showstartmenu = false;
   }
