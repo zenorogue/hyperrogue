@@ -23,6 +23,8 @@ void switch_pause() {
 
 bool hv_klein = false;
 
+int use_duality = 2;
+
 transmatrix Duality;
 
 void switch_underlying() {
@@ -69,8 +71,8 @@ void switch_underlying() {
       nomap = false;
       nonisotropic_weird_transforms = true;
       NLP = Id;
-      /* Duality = Id;
-      for(int a=0; a<4; a++) for(int b=0; b<4; b++) Duality[a][b] = (a^2) == b; */
+      Duality = Id;
+      for(int a=0; a<4; a++) for(int b=0; b<4; b++) Duality[a][b] = (a^2) == b;
       }
 
     else if(hybri) {

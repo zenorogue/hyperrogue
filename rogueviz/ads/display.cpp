@@ -16,6 +16,18 @@ struct cell_to_draw {
   bool operator < (const cell_to_draw& c2) const { return d > c2.d; }
   };
 
+void apply_duality(shiftmatrix& S) {
+  if(use_duality == 1) {
+    S.T = unshift(S);
+    S.shift = 0; // get_shift_cycles(S.shift);
+    S.T = Duality * S.T * Duality;
+    };
+  if(use_duality == 2) {
+    S = ads_matrix(Id, -90*degree) * S * ads_matrix(Id, +90*degree);
+    S.T = spin(90*degree) * S.T;
+    }
+  }
+
 void draw_game_cell(const cell_to_draw& cd) {
   bool hv = rotspace;
   using cellptr = cell*;
@@ -133,7 +145,9 @@ void draw_game_cell(const cell_to_draw& cd) {
           curvepoint(h);
           }
         curvepoint_first();
-        queuecurve(current * V * rock.at * ads_matrix(Id, rock.pt_main.shift+z), rock.col, 0, PPR::LINE);
+        ads_matrix S = current * V * rock.at * ads_matrix(Id, rock.pt_main.shift+z);
+        apply_duality(S);
+        queuecurve(S, rock.col, 0, PPR::LINE);
         }
       }
 
@@ -163,7 +177,11 @@ void draw_game_cell(const cell_to_draw& cd) {
         curvepoint(h);
         }
       curvepoint_first();
-      queuecurve(current * V * rock.at, shipcolor, 0, PPR::LINE);
+      ads_matrix S = current * V * rock.at;
+      S = S * spin(-(rock.ang+90)*degree);
+      apply_duality(S);
+      S = S * spin(+(rock.ang+90)*degree);
+      queuecurve(S, shipcolor, 0, PPR::LINE);
       continue;
       }
 

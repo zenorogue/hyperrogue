@@ -133,5 +133,7 @@ void replay_animation();
 
 void switch_underlying();
 bool ads_draw_cell(cell *c, const shiftmatrix& V);
+extern transmatrix Duality;
+extern int use_duality;
 
 }}
