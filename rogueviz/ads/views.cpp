@@ -50,9 +50,12 @@ void switch_spacetime() {
       check_cgi();
       cgi.require_basics();
       cgi.use_count++;
+      vid.grid = true;
+      stdgridcolor = 0xFFFFFFFF;
 
       initcells();
       initgame();
+      vid.fov = 150;
       models::desitter_projections = true;
       }
 
@@ -61,6 +64,7 @@ void switch_spacetime() {
       variation = eVariation::bitruncated;
       swap(currentmap, map_hyp);
       pmodel = mdDisk;
+      pconf.scale = .95;
       check_cgi();
       }
 
@@ -77,11 +81,16 @@ void switch_spacetime() {
       NLP = Id;
       Duality = Id;
       for(int a=0; a<4; a++) for(int b=0; b<4; b++) Duality[a][b] = (a^2) == b;
+      vid.fov = 150;
+      vid.grid = false;
+      slr::range_xy = 2;
+      slr::range_z = 2;
       }
 
     else if(hybri) {
       hybrid::switch_to_underlying();
       pmodel = mdDisk;
+      pconf.scale = .95;
       }
     cgi.use_count++;
     }

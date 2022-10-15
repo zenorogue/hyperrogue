@@ -140,4 +140,7 @@ extern int use_duality;
 
 ld spacetime_step = 0.1;
 int spacetime_qty = 30;
+
+color_t ghost_color = 0x800080FF;
+
 }}

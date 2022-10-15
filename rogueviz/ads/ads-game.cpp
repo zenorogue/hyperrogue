@@ -246,6 +246,14 @@ auto shot_hooks =
     param_i(talpha, "ds_talpha")
     -> editable(0, 255, 16, "dS texture intensity", "", 't');
 
+    param_f(spacetime_step, "ads_spacetime_step")
+    -> editable(0, 1, 0.05, "step size in the spacetime display", "", 's');
+
+    param_i(spacetime_qty, "ads_spacetime_qty")
+    -> editable(0, 100, 5, "step quantity in the spacetime display", "", 'q');
+
+    addsaver(ghost_color, "color:ghost");
+
     rsrc_config();
     });
 

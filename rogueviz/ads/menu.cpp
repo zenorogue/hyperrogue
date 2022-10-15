@@ -77,6 +77,76 @@ void edit_particles() {
   dialog::display();
   }
 
+void edit_view_mode() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+
+  dialog::init(XLAT("spacetime views"), 0xC0C0FFFF, 150, 100);
+
+  dialog::addBoolItem(XLAT("view replay"), in_replay, 'r');
+  dialog::add_action(switch_replay);
+
+  dialog::addBreak(100);
+
+  if(!main_rock) add_edit(auto_rotate);
+  if(!main_rock) add_edit(auto_angle);
+
+  dialog::addBoolItem("view the current time", !in_spacetime() && which_cross == 0, 'z');
+  dialog::add_action([] {
+    switch_spacetime_to(false); which_cross = 0;
+    });
+
+  dialog::addBoolItem("view the visible state", !in_spacetime() && which_cross == -1, 'x');
+  dialog::add_action([] {
+    switch_spacetime_to(false); which_cross = -1;
+    });
+
+  dialog::addBoolItem("view the future", !in_spacetime() && which_cross == 1, 'c');
+  dialog::add_action([] {
+    switch_spacetime_to(false); which_cross = 1;
+    });
+
+  dialog::addBoolItem("view the spacetime", in_spacetime() && pmodel == mdRelPerspective && !use_duality, 'v');
+  dialog::add_action([] {
+    switch_spacetime_to(true); pmodel = mdRelPerspective; use_duality = 0;
+    });
+
+  if(main_rock) {
+    dialog::addBoolItem("view the dual space", in_spacetime() && pmodel == mdPerspective, 'v');
+    dialog::add_action([] {
+      switch_spacetime_to(true);
+      pmodel = mdPerspective;
+      });
+    }
+
+  else {
+    dialog::addBoolItem("view the dual spacetime", in_spacetime() && use_duality == 1, 'b');
+    dialog::add_action([] {
+      switch_spacetime_to(true);
+      use_duality = 1;
+      });
+
+    dialog::addBoolItem("fake dual spacetime", in_spacetime() && use_duality == 2, 'n');
+    dialog::add_action([] {
+      switch_spacetime_to(true);
+      use_duality = 2;
+      });
+    }
+
+  if(in_spacetime()) {
+    add_edit(spacetime_step);
+    add_edit(spacetime_qty);
+
+    if(main_rock) {
+      dialog::addColorItem(XLAT("ultra-ideal ghost color"), ghost_color, 'X');
+      dialog::add_action([] { dialog::openColorDialog(ghost_color); });
+      }
+
+    }
+
+  dialog::display();
+  }
+
 void game_menu() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
@@ -89,8 +159,9 @@ void game_menu() {
   add_edit(pause_speed);
   add_edit(view_proper_times);
   add_edit(DS_(time_unit));
-  if(!main_rock) add_edit(auto_rotate);
-  if(!main_rock) add_edit(auto_angle);
+
+  dialog::addItem(XLAT("set view mode"), 'v');
+  dialog::add_action_push(edit_view_mode);
 
   dialog::addItem(XLAT("particle/texture settings"), 'p');
   dialog::add_action_push(edit_particles);
@@ -106,11 +177,6 @@ void game_menu() {
   
   dialog::addItem(XLAT("recenter cheat"), 'C');
   dialog::add_action([] { current.T = Id; vctrV = Id; });
-
-  if(paused) {
-    dialog::addBoolItem(XLAT("view replay"), in_replay, 'V');
-    dialog::add_action(switch_replay);
-    }
 
   dialog::addItem("configure keys", 'k');
   dialog::add_action_push(multi::get_key_configurer(1, move_names, "Relative Hell keys"));
