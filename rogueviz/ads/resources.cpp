@@ -118,14 +118,14 @@ void display(int id, int y, ld val, ld maxv, ld tank, ld unit) {
     queuecurve(sId, col, col, PPR::ZERO);
     }
   
-  if(unit) for(ld u=unit; u<maxv-1e-3; u+=unit) {
+  if(unit > 0 && maxv / unit <= siz/2 + 1e-6) for(ld u=unit; u<maxv-1e-3; u+=unit) {
     ld at = sta + siz * u / maxv;
     curvepoint(atscreenpos(at, top, 1) * C0);
     curvepoint(atscreenpos(at, ctr, 1) * C0);
     queuecurve(sId, 0x80, 0, PPR::ZERO);
     }
 
-  for(ld u=tank; u<maxv-1e-3; u+=tank) {
+  if(tank > 0 && maxv / tank <= siz/2 + 1e-6) for(ld u=tank; u<maxv-1e-3; u+=tank) {
     ld at = sta + siz * (1 - u / maxv);
     curvepoint(atscreenpos(at, ctr, 1) * C0);
     curvepoint(atscreenpos(at, bot, 1) * C0);
