@@ -94,6 +94,20 @@ void apply_lorentz(transmatrix lor) {
   }
 
 ld read_movement() {
+
+  ld mdx = multi::axespressed[4]/30000.;
+  ld mdy = multi::axespressed[5]/30000.;
+  #if CAP_VR
+  if(vrhr::active()) {
+    mdy -= vrhr::vrgo_y;
+    mdx += vrhr::vrgo_x;
+    }
+  #endif
+  if(mdx || mdy) {
+    ang = atan2(mdy, mdx) / degree;
+    return hypot(mdx, mdy);
+    }
+
   auto& a = multi::actionspressed;
   bool left = a[16+1];
   bool right = a[16+3];
