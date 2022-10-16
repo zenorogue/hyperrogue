@@ -421,6 +421,7 @@ cross_result ds_cross0_cone(const transmatrix& T, ld which) {
   // solution: t = log((1 +- sqrt(-a^2 + b^2 + 1))/(a + b))
 
   ld underroot = (1+b*b-a*a);
+  if(underroot < 1e-10) underroot = 0;
   if(underroot < 0) return cross_result { Hypc, 0};
 
   ld underlog = (1 + which * sqrt(underroot)) / (a + b);
@@ -434,9 +435,8 @@ cross_result ds_cross0_cone(const transmatrix& T, ld which) {
 
   if(abs(res.h[2] - 1) > .01) return cross_result{Hypc, 0};
 
-  res.h[2] -= res.h[3];
-  res.h[3] = 0;
   res.h /= hypot_d(3, res.h);
+  res.h[3] = 0;
 
   // res.h[2] = sqrt(1 - res.h[3] * res.h[3]); res.h[3] = 0;
 
