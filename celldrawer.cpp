@@ -2044,6 +2044,7 @@ void celldrawer::draw_cellstat() {
       if(c->master->emeraldval || sh.is_mirrored) label += 'R';
       if(arb::current.was_split_for_football) label += "F" + its(sh.football_type);
       }
+#if CAP_ARCM
     else if(arcm::in() && debug_tiles == 2) {
       int id = arcm::id_of(c->master);
       int tid = arcm::current.tilegroup[id];
@@ -2053,6 +2054,7 @@ void celldrawer::draw_cellstat() {
       label = its(tid);
       if(mirrored) label += "R";
       }
+#endif
     else
       label = its(shvid(c));
     queuestr(V, .5, label, 0xFFFFFFFF, 1);
