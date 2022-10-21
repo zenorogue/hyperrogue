@@ -1607,12 +1607,12 @@ EX namespace dialog {
     dialog::display();
     }
 
-  EX void addBoolItem_action(const string& s, bool& b, char c) { 
+  EX void addBoolItem_action(const string& s, bool& b, int c) { 
     dialog::addBoolItem(s, b, c);
     dialog::add_action([&b] { b = !b; });
     }
 
-  EX void addBoolItem_action_neg(const string& s, bool& b, char c) { 
+  EX void addBoolItem_action_neg(const string& s, bool& b, int c) { 
     dialog::addBoolItem(s, !b, c);
     dialog::add_action([&b] { b = !b; });
     }
