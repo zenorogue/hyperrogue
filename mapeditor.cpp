@@ -1673,10 +1673,12 @@ EX namespace mapeditor {
     }
   
   void showList() {
+    string caption;
     dialog::v.clear();
     if(painttype == 4) painttype = 0;
     switch(painttype) {
       case 0: 
+        caption = "monsters";
         for(int i=0; i<motypes; i++) {
           eMonster m = eMonster(i);
           if(
@@ -1691,12 +1693,15 @@ EX namespace mapeditor {
           }
         break;
       case 1:
+        caption = "items";
         for(int i=0; i<ittypes; i++) dialog::vpush(i, iinf[i].name);
         break;
       case 2:
+        caption = "lands";
         for(int i=0; i<landtypes; i++) dialog::vpush(i, linf[i].name);
         break;
       case 3:
+        caption = "walls";
         for(int i=0; i<walltypes; i++) if(i != waChasmD) dialog::vpush(i, winf[i].name);
         break;
       }
@@ -1704,26 +1709,18 @@ EX namespace mapeditor {
     
     if(dialog::infix != "") mouseovers = dialog::infix;
     
-    int q = dialog::v.size();
-    int percolumn = vid.yres / (vid.fsize+5) - 4;
-    int columns = 1 + (q-1) / percolumn;
+    cmode = 0;
+    gamescreen();
+    dialog::init(caption);
+    if(dialog::infix != "") mouseovers = dialog::infix;
+    dialog::addBreak(50);
+    dialog::start_list(900, 900, '1');
     
-    for(int i=0; i<q; i++) {
-      int x = 16 + (vid.xres * (i/percolumn)) / columns;
-      int y = (vid.fsize+5) * (i % percolumn) + vid.fsize*2;
-      
-      int actkey = 1000 + i;
-      string vv = dialog::v[i].first;
-      if(i < 9) { vv += ": "; vv += ('1' + i); }
-      
-      displayButton(x, y, vv, actkey, 0);
-      }
-    keyhandler = [] (int sym, int uni) {
-      if(uni >= '1' && uni <= '9') uni = 1000 + uni - '1';
-      if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == '-' || sym == SDLK_KP_MINUS) uni = 1000;
-      for(int z=0; z<isize(dialog::v); z++) if(1000 + z == uni) {
-        paintwhat = dialog::v[z].second;
-        paintwhat_str = dialog::v[z].first;
+    for(auto& vi: dialog::v) {
+      dialog::addItem(vi.first, dialog::list_fake_key++);
+      dialog::add_action([&vi] {
+        paintwhat = vi.second;
+        paintwhat_str = vi.first;
 
         mousepressed = false;
         popScreen();
@@ -1732,8 +1729,16 @@ EX namespace mapeditor {
           dialog::editNumber(paintstatueid, 0, 127, 1, 1, XLAT1("editable statue"), 
             XLAT("These statues are designed to have their graphics edited in the Vector Graphics Editor. Each number has its own, separate graphics.")
             );
-        return;
-        }
+        });
+      }
+
+    dialog::end_list();
+    dialog::addBreak(50);
+    dialog::addBack();
+    dialog::display();
+
+    keyhandler = [] (int sym, int uni) {
+      dialog::handleNavigation(sym, uni);
       if(dialog::editInfix(uni)) ;
       else if(doexiton(sym, uni)) popScreen();
       };    
