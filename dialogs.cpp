@@ -645,15 +645,19 @@ EX namespace dialog {
 
       if(I.type == diListStart) {
         list_left = list_actual_size;
-        draw_list_slider(dcenter + fwidth / 2 - dfsize/2, tothei);
         inlist = true;
         list_next_key = I.key;
+        list_starts_at = tothei;
         continue;
         }
 
       if(I.type == diListEnd) {
         tothei += list_left;
         inlist = false;
+        list_ends_at = tothei;
+        draw_list_slider(dcenter + fwidth / 2 - dfsize/2, list_starts_at);
+        if(mousex >= dcenter + fwidth /2 - dfsize && mousey >= list_starts_at && mousey < list_ends_at)
+          getcstat = PSEUDOKEY_LIST_SLIDER, inslider = true, slider_x = mousey;
         continue;
         }
 
@@ -831,6 +835,12 @@ EX namespace dialog {
           break;
           }
       }    
+    if(sym == PSEUDOKEY_LIST_SLIDER) {
+      uni = sym = 0;
+      list_skip = ((list_full_size - list_actual_size) * (slider_x - list_starts_at)) / list_actual_size;
+      highlight_text = "//missing";
+      return;
+      }
     if(DKEY == SDLK_UP) {
       uni = sym = 0;
       dialog::item *last = nullptr;
