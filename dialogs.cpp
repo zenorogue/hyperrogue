@@ -656,8 +656,8 @@ EX namespace dialog {
         inlist = false;
         list_ends_at = tothei;
         draw_list_slider(dcenter + fwidth / 2 - dfsize/2, list_starts_at);
-        if(mousex >= dcenter + fwidth /2 - dfsize && mousey >= list_starts_at && mousey < list_ends_at)
-          getcstat = PSEUDOKEY_LIST_SLIDER, inslider = true, slider_x = mousey;
+        if(mousex >= dcenter + fwidth /2 - dfsize && mousey >= list_starts_at && mousey < list_ends_at)          
+          getcstat = PSEUDOKEY_LIST_SLIDER;
         if(list_left > 0) {
           list_skip -= list_left;
           list_skip -= list_more_skip;
@@ -816,6 +816,16 @@ EX namespace dialog {
     }
   
   EX void handleNavigation(int &sym, int &uni) {
+    if(sym == PSEUDOKEY_LIST_SLIDER) invslider = true;
+    if(invslider) {
+      uni = sym = 0;
+      int max = list_full_size - list_actual_size;
+      list_skip = (max * (mousey - list_starts_at)) / list_actual_size;
+      if(list_skip < 0) list_skip = 0;
+      if(list_skip > max) list_skip = max;
+      highlight_text = "//missing";
+      return;
+      }
     if(uni == '\n' || uni == '\r' || DIRECTIONKEY == SDLK_KP5) {
       for(int i=0; i<isize(items); i++) 
         if(isitem(items[i]))
@@ -840,12 +850,6 @@ EX namespace dialog {
           break;
           }
       }    
-    if(sym == PSEUDOKEY_LIST_SLIDER) {
-      uni = sym = 0;
-      list_skip = ((list_full_size - list_actual_size) * (slider_x - list_starts_at)) / list_actual_size;
-      highlight_text = "//missing";
-      return;
-      }
     if(DKEY == SDLK_UP) {
       uni = sym = 0;
       dialog::item *last = nullptr;
