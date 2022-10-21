@@ -711,7 +711,7 @@ void expansion_analyzer::view_distances_dialog() {
   
   dynamicval<color_t> dv(distcolors[0], forecolor);
   dialog::init("");
-  cmode |= sm::DIALOG_STRICT_X | sm::EXPANSION;
+  cmode |= sm::DIALOG_STRICT_X | sm::EXPANSION | sm::AUTO_VALUES;
   
   int maxlen = last_distance;
   vector<bignum> qty(maxlen);
@@ -753,9 +753,12 @@ void expansion_analyzer::view_distances_dialog() {
     #endif
     }
 
-  dialog::start_list(1600, 1600);
-  for(int i=0; i<maxlen; i++) if(!qty[i].digits.empty())
-    dialog::addInfo(its(i) + ": " + qty[i].get_str(100), distcolors[i]);
+  dialog::start_list(1600, 1600, 'a');
+  for(int i=0; i<maxlen; i++) if(!qty[i].digits.empty()) {
+    dialog::addSelItem(qty[i].get_str(100), " " + its(i), dialog::list_fake_key);
+    auto& last = dialog::lastItem();
+    last.color = last.colorv = distcolors[i];
+    }
   dialog::end_list();
 
   if(sizes_known() || bt::in()) {

@@ -394,6 +394,11 @@ EX namespace dialog {
     innerwidth = 0;
     int N = items.size();
     list_starts_at = list_ends_at = list_actual_size = 0;
+
+    bool autoval = cmode & sm::AUTO_VALUES;
+    rightwidth = 0;
+    if(!autoval) rightwidth = textwidth(dfsize, "MMMMMMMM") + dfsize/2;
+
     for(int i=0; i<N; i++) {
       if(items[i].type == diListStart)
         list_starts_at = tothei;
@@ -409,13 +414,14 @@ EX namespace dialog {
         tothei += dfspace * items[i].scale / 100;
         if(among(items[i].type, diItem, diColorItem))
           innerwidth = max(innerwidth, textwidth(dfsize * items[i].scale / 100, items[i].body));
+        if(among(items[i].type, diItem))
+          rightwidth = max(rightwidth, textwidth(dfsize * items[i].scale / 100, items[i].value) + dfsize);
         if(items[i].type == diTitle || items[i].type == diInfo || items[i].type == diBigItem)
           dialogwidth = max(dialogwidth, textwidth(dfsize * items[i].scale / 100, items[i].body) * 10/9);
         }
       }
     
     leftwidth = ISMOBILE ? 0 : textwidth(dfsize, "MMMMM") + dfsize/2;
-    rightwidth = textwidth(dfsize, "MMMMMMMM") + dfsize/2;
     
     fwidth = innerwidth + leftwidth + rightwidth;
     if(list_actual_size) fwidth += dfsize;

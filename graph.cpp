@@ -5688,6 +5688,7 @@ namespace sm {
   static const int PANNING = (1<<20); // smooth scrolling works
   static const int DARKEN = (1<<21); // darken the game background
   static const int NOSCR = (1<<22); // do not show the game background
+  static const int AUTO_VALUES = (1<<23); // automatic place for values
   }
 #endif
 
