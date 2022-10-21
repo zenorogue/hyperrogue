@@ -272,8 +272,9 @@ EX geometry_filter gf_regular_3d = {"regular 3D honeycombs", [] {
 EX geometry_filter gf_quotient = {"interesting quotient spaces", [] { 
   return forced_quotient() && !elliptic;
   }};
+EX geometry_filter gf_tes_file = {"load from file", [] { return arb::in(); }};
   
-EX vector<geometry_filter*> available_filters = { &gf_hyperbolic, &gf_spherical, &gf_euclidean, &gf_other, &gf_regular_2d, &gf_regular_3d, &gf_quotient };
+EX vector<geometry_filter*> available_filters = { &gf_hyperbolic, &gf_spherical, &gf_euclidean, &gf_other, &gf_regular_2d, &gf_regular_3d, &gf_quotient, &gf_tes_file };
 
 void ge_select_filter() {
   cmode = sm::SIDE | sm::MAYDARK;
@@ -366,6 +367,7 @@ bool same_tiling(eGeometry g2) {
   }
 
 void ge_select_tiling() {
+  if(current_filter == &gf_tes_file) { popScreen(); set_or_configure_geometry(gArbitrary); }
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
 
