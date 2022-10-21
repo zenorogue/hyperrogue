@@ -1360,31 +1360,25 @@ EX namespace dialog {
   void handleKeyFile(int sym, int uni);
 
   EX void drawFileDialog() {
-    displayfr(vid.xres/2, 30 + vid.fsize, 2, vid.fsize, 
-      filecaption, forecolor, 8);
-      
-    string& cfile = *cfileptr;
+    cmode = sm::NUMBER | dialogflags;
+    gamescreen();
+    init(filecaption);
 
-    displayfr(vid.xres/2, 34 + vid.fsize * 2, 2, vid.fsize, 
-      cfile, 0xFFFF00, 8);
-    
-    displayColorButton(vid.xres*1/4, 38+vid.fsize * 3, 
-      XLAT("F4 = extension"), SDLK_F4, 8, 0, editext ? 0xFF00FF : 0xFFFF00, editext ? 0x800080 : 0x808000);
-    displayButton(vid.xres*2/4, 38+vid.fsize * 3, 
-      XLAT("Enter = choose"), SDLK_RETURN, 8);
-    displayButton(vid.xres*3/4, 38+vid.fsize * 3, 
-      XLAT("Esc = cancel"), SDLK_ESCAPE, 8);
+    string cfile = *cfileptr;
+    dialog::addItem(cfile, 0);
+
+    dialog::addBreak(100);
 
     v.clear();
-    
+
     DIR           *d;
     struct dirent *dir;
-    
+
     string where = ".";
     for(int i=0; i<isize(cfile); i++)
       if(cfile[i] == '/' || cfile[i] == '\\')
         where = cfile.substr(0, i+1);
-    
+
     d = opendir(where.c_str());
     if (d) {
       while ((dir = readdir(d)) != NULL) {
@@ -1399,21 +1393,45 @@ EX namespace dialog {
       }
     sort(v.begin(), v.end(), filecmp);
 
-    int q = v.size();
-    int percolumn = (vid.yres-38) / (vid.fsize+5) - 4;
-    int columns = 1 + (q-1) / percolumn;
-      
-    for(int i=0; i<q; i++) {
-      int x = 16 + (vid.xres * (i/percolumn)) / columns;
-      int y = 42 + vid.fsize * 4 + (vid.fsize+5) * (i % percolumn);
-        
-      displayColorButton(x, y, v[i].first, 1000 + i, 0, 0, v[i].second, 0xFFFF00);
+    dialog::start_list(1500, 1500);
+    for(auto& vv: v) {
+      dialog::addItem(vv.first, list_fake_key++);
+      dialog::lastItem().color = vv.second;
+      string vf = vv.first;
+      bool dir = vv.second == CDIR;
+      dialog::add_action([vf, dir] {
+        string& s(*cfileptr);
+        string where = "", what = s, whereparent = "../";
+        for(int i=0; i<isize(s); i++)
+          if(s[i] == '/') {
+            if(i >= 2 && s.substr(i-2,3) == "../")
+              whereparent = s.substr(0, i+1) + "../";
+            else
+              whereparent = where;
+            where = s.substr(0, i+1), what = s.substr(i+1);
+            }
+        if(vf == "../")
+          s = whereparent + what;
+        else if(dir)
+          s = where + vf + what;
+        else
+          s = where + vf;
+        });
       }
+    dialog::end_list();
+
+    dialog::addBreak(100);
+
+    dialog::addBoolItem_action("extension", editext, SDLK_F4);
+    dialog::addItem("choose", SDLK_RETURN);
+    dialog::addItem("cancel", SDLK_ESCAPE);
+    dialog::display();
 
     keyhandler = handleKeyFile;
     }
   
   EX void handleKeyFile(int sym, int uni) {
+    handleNavigation(sym, uni);
     string& s(*cfileptr);
     int i = isize(s) - (editext?0:4);
     
@@ -1425,33 +1443,11 @@ EX namespace dialog {
       popScreen();
       if(!file_action()) pushScreen(drawFileDialog);
       }
-    else if(sym == SDLK_F4) {
-      editext = !editext;
-      }
     else if(sym == SDLK_BACKSPACE && i) {
       s.erase(i-1, 1);
       }
     else if(uni >= 32 && uni < 127) {
       s.insert(i, s0 + char(uni));
-      }
-    else if(uni >= 1000 && uni <= 1000+isize(v)) {
-      string where = "", what = s, whereparent = "../";
-      for(int i=0; i<isize(s); i++)
-        if(s[i] == '/') {
-          if(i >= 2 && s.substr(i-2,3) == "../")
-            whereparent = s.substr(0, i+1) + "../";
-          else
-            whereparent = where;
-          where = s.substr(0, i+1), what = s.substr(i+1);
-          }
-      int i = uni - 1000;
-      if(v[i].first == "../") {
-        s = whereparent + what;
-        }
-      else if(v[i].second == CDIR)
-        s = where + v[i].first + what;
-      else
-        s = where + v[i].first;
       }
     return;
     }
