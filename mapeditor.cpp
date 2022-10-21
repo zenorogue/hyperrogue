@@ -1734,12 +1734,13 @@ EX namespace mapeditor {
 
     dialog::end_list();
     dialog::addBreak(50);
+    dialog::addInfo(XLAT("press letters to search"));
     dialog::addBack();
     dialog::display();
 
     keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
-      if(dialog::editInfix(uni)) ;
+      if(dialog::editInfix(uni)) dialog::list_skip = 0;
       else if(doexiton(sym, uni)) popScreen();
       };    
     }

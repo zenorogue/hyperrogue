@@ -2988,8 +2988,8 @@ EX void find_setting() {
   dialog::display();
 
   keyhandler = [] (int sym, int uni) {
-    dialog::handleNavigation(sym, uni);    
-    if(dialog::editInfix(uni)) ;
+    dialog::handleNavigation(sym, uni);
+    if(dialog::editInfix(uni)) dialog::list_skip = 0;
     else if(doexiton(sym, uni)) popScreen();
     };
   }
