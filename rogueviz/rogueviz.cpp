@@ -1038,24 +1038,24 @@ void showVertexSearch() {
   dialog::init(XLAT("vertex search"));
   dialog::v.clear();
   if(dialog::infix != "") mouseovers = dialog::infix;
-  
+
   for(int i=0; i<isize(vdata); i++) if(vdata[i].name != "") dialog::vpush(i, vdata[i].name.c_str());
-  
-  for(int i=0; i<9; i++) {
-    if(i < isize(dialog::v)) {
-      int id = dialog::v[i].second;
-      dialog::addItem(dialog::v[i].first, '1'+i);
-      dialog::add_action([id] () { 
-        search_for = id; 
-        popScreenAll(); 
-        });
-      }
-    else dialog::addBreak(100);
+
+  dialog::addBreak(50);
+  dialog::start_list(900, 900, '1');
+  for(auto& vi: dialog::v) {
+    dialog::addItem(vi.first, dialog::list_fake_key++);
+    dialog::add_action([&vi] () {
+      search_for = vi.second;
+      popScreenAll();
+      });
     }
+  dialog::end_list();
+  dialog::addBreak(50);
 
   dialog::addSelItem("matching items", its(isize(dialog::v)), 0);
   dialog::display();
-  
+
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);    
     if(dialog::editInfix(uni)) ;
