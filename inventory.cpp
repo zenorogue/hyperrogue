@@ -508,8 +508,11 @@ EX namespace inv {
     orbmap.clear();
     which = itNone;
         
-    if(plain) dialog::init(mirroring ? XLAT("mirror what?") : XLAT("inventory"), forecolor, 150, 100);
-    
+    if(plain) {
+      dialog::init(mirroring ? XLAT("mirror what?") : XLAT("inventory"), forecolor, 150, 100);
+      dialog::start_list(2000, 2000);
+      }
+
     int j = 0, oc = 6;
 
     if(1) {
@@ -562,7 +565,8 @@ EX namespace inv {
     }
 
     if(plain) {
-      dialog::addBreak(750);
+      dialog::end_list();
+      dialog::addBreak(50);
       dialog::addItem(XLAT("help"), SDLK_F1);
       dialog::addItem(XLAT("return to the game"), 'i');
       dialog::display();
