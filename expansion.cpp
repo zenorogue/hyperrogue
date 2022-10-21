@@ -783,6 +783,13 @@ void expansion_analyzer::view_distances_dialog() {
   
   dialog::addItem(XLAT("scroll"), 'S');
   dialog::addItem(XLAT("configure"), 'C');
+  dialog::addSelItem(XLAT("display distances up to"), its(last_distance), 'D');
+  dialog::add_action([] () {
+    scrolling_distances = false;
+    dialog::editNumber(last_distance, 0, 3000, 1, 0, XLAT("display distances up to"), "");
+    dialog::bound_low(0);
+    });
+
   dialog::display();
   if(dialog::list_skip + dialog::list_actual_size == dialog::list_full_size) last_distance++;
   }
