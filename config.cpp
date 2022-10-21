@@ -2966,28 +2966,27 @@ EX void find_setting() {
 
   dialog::init(XLAT("find a setting"));
   if(dialog::infix != "") mouseovers = dialog::infix;
-  
-  vector<setting*> found;
-  
+
+  dialog::start_list(900, 900, '1');
+
+  int found = 0;
+
   for(auto& p: params) {
     auto& fs = p.second;
     string key = fs->search_key();
-    if(fs->available() && dialog::hasInfix(key))
-      found.push_back(&*fs);
+    if(fs->available() && dialog::hasInfix(key)) {
+      fs->show_edit_option(dialog::list_fake_key++);
+      found++;
+      }
     }
 
-  for(int i=0; i<9; i++) {
-    if(i < isize(found)) {
-      found[i]->show_edit_option('1' + i);
-      }
-    else dialog::addBreak(100);
-    }
+  dialog::end_list();
 
   dialog::addBreak(100);
   dialog::addInfo(XLAT("press letters to search"));
-  dialog::addSelItem(XLAT("matching items"), its(isize(found)), 0);
+  dialog::addSelItem(XLAT("matching items"), its(found), 0);
   dialog::display();
-  
+
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);    
     if(dialog::editInfix(uni)) ;
@@ -3346,6 +3345,9 @@ EX int read_config_args() {
     }
   else if(argis("-d:all")) {
     PHASEFROM(2); launch_dialog(edit_all_settings);
+    }
+  else if(argis("-d:find")) {
+    PHASEFROM(2); launch_dialog(find_setting);
     }
   else if(argis("-char")) {
     auto& cs = vid.cs;
