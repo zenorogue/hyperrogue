@@ -547,7 +547,7 @@ EX bool use_color_codes = true;
 EX bool use_analyzer = true;
 EX bool show_distance_lists = true;
 
-int first_distance = 0, scrolltime = 0;
+int last_distance = 16;
 bool scrolling_distances = false;
 
 EX map<int, color_t> expcolors;
@@ -642,13 +642,6 @@ EX void viewdist_configure_dialog() {
 
   dialog::addBoolItem_action(XLAT("color codes"), use_color_codes, 'u');
 
-  dialog::addSelItem(XLAT("display distances from"), its(first_distance), 'd');
-  dialog::add_action([] () { 
-    scrolling_distances = false;
-    dialog::editNumber(first_distance, 0, 3000, 1, 0, XLAT("display distances from"), "");
-    dialog::bound_low(0);
-    });
-
   dialog::addBoolItem(XLAT("strict tree maps"), currentmap->strict_tree_rules(), 's');
   dialog::add_action_push(rulegen::show);
 
@@ -712,18 +705,15 @@ string produce_coef_formula(vector<int> coef) {
 void expansion_analyzer::view_distances_dialog() {
   static int lastticks;
   if(scrolling_distances && !closed_manifold) {
-    scrolltime += SDL_GetTicks() - lastticks;
-    first_distance += scrolltime / scrollspeed;
-    scrolltime %= scrollspeed;
+    dialog::list_skip += (SDL_GetTicks() - lastticks) * dialog::dfspace / scrollspeed;
     }
   lastticks = SDL_GetTicks();
-  if(first_distance < 0) first_distance = 0;
   
   dynamicval<color_t> dv(distcolors[0], forecolor);
   dialog::init("");
   cmode |= sm::DIALOG_STRICT_X | sm::EXPANSION;
   
-  int maxlen = closed_manifold ? 128 : 16 + first_distance;
+  int maxlen = last_distance;
   vector<bignum> qty(maxlen);
   auto& expansion = get_expansion();
   
@@ -762,13 +752,11 @@ void expansion_analyzer::view_distances_dialog() {
       }
     #endif
     }
-  
-  dialog::addBreak(100 - 100 * scrolltime / scrollspeed);
 
-  for(int i=first_distance; i<maxlen; i++) if(!qty[i].digits.empty())
+  dialog::start_list(1600, 1600);
+  for(int i=0; i<maxlen; i++) if(!qty[i].digits.empty())
     dialog::addInfo(its(i) + ": " + qty[i].get_str(100), distcolors[i]);
-  
-  dialog::addBreak(100 * scrolltime / scrollspeed);
+  dialog::end_list();
 
   if(sizes_known() || bt::in()) {
     if(euclid && !arb::in()) {
@@ -793,11 +781,13 @@ void expansion_analyzer::view_distances_dialog() {
   dialog::addItem(XLAT("scroll"), 'S');
   dialog::addItem(XLAT("configure"), 'C');
   dialog::display();
+  if(dialog::list_skip + dialog::list_actual_size == dialog::list_full_size) last_distance++;
   }
 
 EX void enable_viewdists() {
-  first_distance = 0;
-  scrolltime = 0;
+  last_distance = closed_manifold ? 128 : 16;
+  dialog::list_skip = 0;
+  scrolling_distances = false;
   viewdists = true;
   if(!mod_allowed()) {
     number_coding = ncDistance;
@@ -808,10 +798,11 @@ EX void enable_viewdists() {
 
 bool expansion_handleKey(int sym, int uni) {
   if((cmode & sm::NORMAL) && viewdists) {
+    dialog::handleNavigation(sym, uni);
     if(uni == 'S' && (cmode & sm::EXPANSION)) scrolling_distances = !scrolling_distances;
     else if(uni == 'C') pushScreen(viewdist_configure_dialog);
     else if(uni == 'A' && (cmode & sm::EXPANSION)) use_analyzer = !use_analyzer;
-    else if(sym == SDLK_ESCAPE) first_distance = 0, viewdists = false;
+    else if(sym == SDLK_ESCAPE) dialog::list_skip = 0, viewdists = false;
     else return false;
     return true;
     }
