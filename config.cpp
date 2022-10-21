@@ -50,7 +50,7 @@ struct setting {
   virtual bool affects(void *v) { return false; }
   virtual void add_as_saver() {}
   void show_edit_option() { show_edit_option(default_key); }
-  virtual void show_edit_option(char key) {
+  virtual void show_edit_option(int key) {
     println(hlog, "default called!"); }
   virtual string search_key() { 
     return parameter_name + "|" + config_name + "|" + menu_item_name + "|" + help_text;
@@ -100,7 +100,7 @@ struct list_setting : setting {
     default_key = key;
     return this;
     }
-  void show_edit_option(char key) override;
+  void show_edit_option(int key) override;
   };
 
 template<class T> struct enum_setting : list_setting {
@@ -135,7 +135,7 @@ struct float_setting : public setting {
   float_setting *modif(const function<void(float_setting*)>& r) { modify_me = r; return this; }
   void add_as_saver() override;
   bool affects(void *v) override { return v == value; }
-  void show_edit_option(char key) override;
+  void show_edit_option(int key) override;
   cld get_cld() override { return *value; }
   void load_from(const string& s) override;
   };
@@ -149,7 +149,7 @@ struct int_setting : public setting {
   function<void(int_setting*)> modify_me;
   int_setting *modif(const function<void(int_setting*)>& r) { modify_me = r; return this; }
   bool affects(void *v) override { return v == value; }
-  void show_edit_option(char key) override;
+  void show_edit_option(int key) override;
   cld get_cld() override { return *value; }
   int_setting *editable(int min_value, int max_value, ld step, string menu_item_name, string help_text, char key) {
     this->is_editable = true;
@@ -177,7 +177,7 @@ struct bool_setting : public setting {
     menu_item_name = cap; default_key = key; return this; 
     } 
   bool affects(void *v) override { return v == value; }
-  void show_edit_option(char key) override;
+  void show_edit_option(int key) override;
   cld get_cld() override { return *value ? 1 : 0; }
   void load_from(const string& s) override {
     *value = parseint(s);
@@ -188,7 +188,7 @@ struct custom_setting : public setting {
   function<void(char)> custom_viewer;
   function<cld()> custom_value;
   function<bool(void*)> custom_affect;
-  void show_edit_option(char key) override { custom_viewer(key); }
+  void show_edit_option(int key) override { custom_viewer(key); }
   cld get_cld() override { return custom_value(); }
   bool affects(void *v) override { return custom_affect(v); }
   };
@@ -320,7 +320,7 @@ void non_editable() {
   dialog::addHelp("Warning: editing this value through this menu may not work correctly");
   }
 
-void float_setting::show_edit_option(char key) {
+void float_setting::show_edit_option(int key) {
   if(modify_me) modify_me(this);
   dialog::addSelItem(XLAT(menu_item_name), fts(*value) + unit, key);
   dialog::add_action([this] () {
@@ -332,7 +332,7 @@ void float_setting::show_edit_option(char key) {
     });
   }
 
-void int_setting::show_edit_option(char key) {
+void int_setting::show_edit_option(int key) {
   if(modify_me) modify_me(this);
   dialog::addSelItem(XLAT(menu_item_name), its(*value), key);
   dialog::add_action([this] () {
@@ -344,7 +344,7 @@ void int_setting::show_edit_option(char key) {
     });
   }
 
-void bool_setting::show_edit_option(char key) {
+void bool_setting::show_edit_option(int key) {
   dialog::addBoolItem(XLAT(menu_item_name), *value, key);
   dialog::add_action([this] () {
     add_to_changed(this);
@@ -3014,7 +3014,7 @@ EX void edit_all_settings() {
   dialog::display();
   }
 
-void list_setting::show_edit_option(char key) {
+void list_setting::show_edit_option(int key) {
   string opt = options[get_value()].first;
   dialog::addSelItem(XLAT(menu_item_name), XLAT(opt), key);
   dialog::add_action_push([this] {
