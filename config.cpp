@@ -906,6 +906,8 @@ EX void initConfig() {
   
   addsaver(viewdists, "expansion mode");
   param_f(backbrightness, "back", "brightness behind sphere");
+  param_b(auto_extend, "expansion_auto_extend")
+  -> editable("extend automatically", 'E');
 
   param_f(vid.ipd, "ipd", "interpupilar-distance", 0.05);
   param_f(vid.lr_eyewidth, "lr", "eyewidth-lr", 0.5);

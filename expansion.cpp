@@ -702,6 +702,8 @@ string produce_coef_formula(vector<int> coef) {
   return fmt;
   }
 
+EX bool auto_extend = true;
+
 void expansion_analyzer::view_distances_dialog() {
   static int lastticks;
   if(scrolling_distances && !closed_manifold) {
@@ -788,10 +790,13 @@ void expansion_analyzer::view_distances_dialog() {
     scrolling_distances = false;
     dialog::editNumber(last_distance, 0, 3000, 1, 0, XLAT("display distances up to"), "");
     dialog::bound_low(0);
+    dialog::extra_options = [] {
+      add_edit(auto_extend);
+      };
     });
 
   dialog::display();
-  if(dialog::list_skip + dialog::list_actual_size == dialog::list_full_size) last_distance++;
+  if(auto_extend && dialog::list_skip + dialog::list_actual_size == dialog::list_full_size) last_distance++;
   }
 
 EX void enable_viewdists() {
