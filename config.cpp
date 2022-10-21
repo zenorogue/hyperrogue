@@ -3003,10 +3003,11 @@ EX void edit_all_settings() {
 
   for(auto &fs: params) fs.second->check_change();
 
-  int id = 0;
+  dialog::start_list(1000, 1000, 'a');
   for(auto l: last_changed) 
-    if(l->available() && id < 10)
-    l->show_edit_option('a'+(id++));
+    if(l->available())
+      l->show_edit_option(dialog::list_fake_key++);
+  dialog::end_list();
 
   dialog::addBreak(100);
   dialog::addItem(XLAT("find a setting"), '/');
@@ -3077,7 +3078,7 @@ EX void showSettings() {
   dialog::addBreak(100);
 
 #if CAP_CONFIG
-  dialog::addItem(XLAT("recently changed settings"), '/');
+  dialog::addItem(XLAT("find a setting"), '/');
   dialog::add_action_push(edit_all_settings);
 
   dialog::addItem(XLAT("save the current config"), 's');
