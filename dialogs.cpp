@@ -658,6 +658,11 @@ EX namespace dialog {
         draw_list_slider(dcenter + fwidth / 2 - dfsize/2, list_starts_at);
         if(mousex >= dcenter + fwidth /2 - dfsize && mousey >= list_starts_at && mousey < list_ends_at)
           getcstat = PSEUDOKEY_LIST_SLIDER, inslider = true, slider_x = mousey;
+        if(list_left > 0) {
+          list_skip -= list_left;
+          list_skip -= list_more_skip;
+          if(list_skip < 0) list_skip = 0;
+          }
         continue;
         }
 
