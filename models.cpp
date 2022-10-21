@@ -371,11 +371,12 @@ EX namespace models {
     USING_NATIVE_GEOMETRY_IN_RUG;
     #endif
 
+    dialog::start_list(2000, 2000, 'a');
     for(int i=0; i<isize(mdinf); i++) {
       eModel m = eModel(i);
       if(m == mdFormula && ISMOBILE) continue;
       if(model_available(m)) {
-        dialog::addBoolItem(get_model_name(m), vpconf.model == m, (i < 26 ? 'a'+i : 'A'+i-26));
+        dialog::addBoolItem(get_model_name(m), vpconf.model == m, dialog::list_fake_key++);
         dialog::add_action([m] () {
           if(m == mdFormula) {
             edit_formula();
@@ -393,6 +394,9 @@ EX namespace models {
         }
       }
     
+    dialog::end_list();
+    dialog::addBreak(100);
+    dialog::addBack();
     dialog::display();
     }
       
