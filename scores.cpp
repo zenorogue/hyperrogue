@@ -111,8 +111,6 @@ string displayfor(int scoredisplay, score* S, bool shorten = false) {
   return its(S->box[scoredisplay]);
   }
 
-vector<pair<string, int> > pickscore_options;
-
 int curcol;
 
 vector<int> columns;
@@ -121,7 +119,7 @@ bool monsterpage = false;
          
 void showPickScores() {
 
-  pickscore_options.clear();
+  dialog::v.clear();
 
   scorerev = false;
 
@@ -130,40 +128,36 @@ void showPickScores() {
     if(!fakebox[scoredisplay]) {
       string s = displayfor(scoredisplay, NULL);
       if(dialog::hasInfix(s))
-        if(monsbox[scoredisplay] == monsterpage)
-          pickscore_options.push_back(make_pair(s, i));
+        dialog::v.push_back(make_pair(s, i));
       }
     }
-  sort(pickscore_options.begin(), pickscore_options.end());
-  
-  int q = (int) pickscore_options.size();
-  int percolumn = vid.yres / (vid.fsize+3) - 4;
-  int qcolumns = 1 + (q-1) / percolumn;
-  
-  for(int i=0; i<q; i++) {
-    int x = 16 + (vid.xres * (i/percolumn)) / qcolumns;
-    int y = (vid.fsize+3) * (i % percolumn) + vid.fsize*2;
-    
-    int scoredisplay = pickscore_options[i].second;
-    if(q <= 9)
-      pickscore_options[i].first = pickscore_options[i].first + " [" + its(i+1) + "]";
-    if(!fakebox[scoredisplay])
-      displayButton(x, y, pickscore_options[i].first, 1000+i, 0);
-    }
-  
-  displayButton(vid.xres/2, vid.yres - vid.fsize*2, "kills", '/', 8);
+  sort(dialog::v.begin(), dialog::v.end());
 
-  mouseovers = dialog::infix;
-  keyhandler = [] (int sym, int uni) {
-    if(uni == '/' && dialog::infix == "") monsterpage = !monsterpage; else
-    if(uni >= '1' && uni <= '9') uni = uni + 1000 - '1';
-    else if(uni >= 1000 && uni < 1000 + isize(pickscore_options)) {
-      int scoredisplay = pickscore_options[uni - 1000].second;
+  cmode = 0;
+  gamescreen();
+  dialog::init(XLAT("pick scores"));
+  if(dialog::infix != "") mouseovers = dialog::infix;
+
+  dialog::addBreak(50);
+  dialog::start_list(900, 900, '1');
+  
+  for(auto& vi: dialog::v) {
+    dialog::addItem(vi.first, dialog::list_fake_key++);
+    dialog::add_action([&vi] {
+      int scoredisplay = vi.second;
       for(int i=0; i<=POSSCORE; i++)
         if(columns[i] == scoredisplay) swap(columns[i], columns[curcol]);
       popScreen();
-      }
-    else if(dialog::editInfix(uni)) ;
+      });
+    }
+  dialog::end_list();
+  dialog::addBack();
+  dialog::display();
+
+  mouseovers = dialog::infix;
+  keyhandler = [] (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+    if(dialog::editInfix(uni)) ;
     else if(doexiton(sym, uni)) popScreen();
     };
   }
