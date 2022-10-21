@@ -314,14 +314,14 @@ void show() {
   gamescreen();
   draw_crosshair();
   dialog::init(XLAT("smooth camera"), 0xFFFFFFFF, 150, 0);
-  char key = 'A';
   int aid = 0;
   
   labels.clear();
   
+  dialog::start_list(2000, 2000, 'A');
+  
   for(auto& anim: anims) {
-    if(key == 'Z'+1) key = 1;
-    dialog::addSelItem("segment #" + its(aid) + (&anim == current_segment ? "*" : ""), fts(anim.start_interval), key++);
+    dialog::addSelItem("segment #" + its(aid) + (&anim == current_segment ? "*" : ""), fts(anim.start_interval), dialog::list_fake_key++);
     dialog::add_action_push([aid] { edit_segment(aid); });
     int id = 0;
     for(auto& f: anim.frames) {
@@ -342,13 +342,13 @@ void show() {
           }
         }
         
-      if(key == 'Z'+1) key = 1;
-      dialog::addSelItem(f.title + " [" + dist + "]", fts(f.interval), key++);
+      dialog::addSelItem(f.title + " [" + dist + "]", fts(f.interval), dialog::list_fake_key++);
       dialog::add_action_push([&anim, id] { edit_step(anim, id); });
       id++;
       }
     aid++;
     }
+  dialog::end_list();
 
   if(current_segment) {
     dialog::addItem("create a new position", 'a');
