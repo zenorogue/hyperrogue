@@ -380,7 +380,7 @@ EX namespace dialog {
     return y;
     }
 
-  EX int tothei, dialogwidth, dfsize, dfspace, leftwidth, rightwidth, innerwidth, itemx, keyx, valuex, top, list_starts_at, list_ends_at, list_full_size, list_actual_size, list_skip, fwidth;
+  EX int tothei, dialogwidth, dfsize, dfspace, odfspace, leftwidth, rightwidth, innerwidth, itemx, keyx, valuex, top, list_starts_at, list_ends_at, list_full_size, list_actual_size, list_skip, fwidth;
 
   EX string highlight_text;
   EX int highlight_key;
@@ -404,7 +404,7 @@ EX namespace dialog {
         list_starts_at = tothei;
       else if(items[i].type == diListEnd) {
         list_full_size = tothei - list_starts_at;
-        list_actual_size = min(dfspace * list_size_max / 100, max(dfsize * list_size_min / 100, list_full_size));
+        list_actual_size = min(odfspace * list_size_max / 100, max(odfspace * list_size_min / 100, list_full_size));
         if(list_full_size < list_actual_size) list_full_size = list_actual_size;
         tothei = list_ends_at = list_starts_at + list_actual_size;
         }
@@ -552,6 +552,7 @@ EX namespace dialog {
     dfsize *= 3;
     #endif
     dfspace = dfsize * 5/4;
+    odfspace = dfspace;
     
     dcenter = vid.xres/2;
     dwidth = vid.xres;
@@ -567,13 +568,16 @@ EX namespace dialog {
       int adfsize = int(dfsize * sqrt((vid.yres - 5. * vid.fsize) / tothei));
       if(adfsize < dfsize-1) dfsize = adfsize + 1;
       else dfsize--;
-      dfspace = dfsize * 5/4;
+      odfspace = dfspace = dfsize * 5/4;
       measure();
       }
     while(dialogwidth > dwidth) {
       int adfsize = int(dfsize * sqrt(vid.xres * 1. / dialogwidth));
       if(adfsize < dfsize-1) dfsize = adfsize + 1;
-      else dfsize--; // keep dfspace
+      else dfsize--;
+      // usually we want to keep dfspace, but with NARROW_LINES, just odfspace
+      if(cmode & sm::NARROW_LINES)
+        dfspace = (dfsize + 3) * 5 / 4;
       measure();
       }
     

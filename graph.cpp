@@ -5689,6 +5689,7 @@ namespace sm {
   static const int DARKEN = (1<<21); // darken the game background
   static const int NOSCR = (1<<22); // do not show the game background
   static const int AUTO_VALUES = (1<<23); // automatic place for values
+  static const int NARROW_LINES = (1<<24); // do make the lines narrower if we needed to reduce width
   }
 #endif
 

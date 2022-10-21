@@ -711,7 +711,7 @@ void expansion_analyzer::view_distances_dialog() {
   
   dynamicval<color_t> dv(distcolors[0], forecolor);
   dialog::init("");
-  cmode |= sm::DIALOG_STRICT_X | sm::EXPANSION | sm::AUTO_VALUES;
+  cmode |= sm::DIALOG_STRICT_X | sm::EXPANSION | sm::AUTO_VALUES | sm::NARROW_LINES;
   
   int maxlen = last_distance;
   vector<bignum> qty(maxlen);
