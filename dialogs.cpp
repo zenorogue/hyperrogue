@@ -17,7 +17,7 @@ EX namespace dialog {
 
   static const int DONT_SHOW = 16;
 
-  enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diIntSlider, diSlider, diBigItem, diKeyboard, diCustom, diColorItem};
+  enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diIntSlider, diSlider, diBigItem, diKeyboard, diCustom, diColorItem, diListStart, diListEnd};
 
   struct item {
     tDialogItem type;
@@ -154,7 +154,11 @@ EX namespace dialog {
     if(doexiton(sym, uni)) popScreen();
     }
 
+  EX int list_size_min, list_size_max, list_fake_key;
+
   EX void init() {
+    list_size_min = list_size_max = 0;
+    list_fake_key = 10000;
     items.clear();
     key_actions.clear(); 
     keyhandler = dialog::handler;
@@ -306,6 +310,24 @@ EX namespace dialog {
     return items.size()-1;
     }
   
+  EX void start_list(int size_min, int size_max, int key_start IS(0)) {
+    item it;
+    it.type = diListStart;
+    it.key = key_start;
+    it.scale = 0;
+    it.param = size_min;
+    list_size_min = size_min;
+    list_size_max = size_max;
+    items.push_back(it);
+    }
+
+  EX void end_list() {
+    item it;
+    it.type = diListEnd;
+    it.scale = 0;
+    items.push_back(it);
+    }
+
   EX void addTitle(string body, color_t color, int scale) {
     item it;
     it.type = diTitle;
@@ -358,17 +380,30 @@ EX namespace dialog {
     return y;
     }
 
-  EX int tothei, dialogwidth, dfsize, dfspace, leftwidth, rightwidth, innerwidth, itemx, keyx, valuex, top;
-  
+  EX int tothei, dialogwidth, dfsize, dfspace, leftwidth, rightwidth, innerwidth, itemx, keyx, valuex, top, list_starts_at, list_ends_at, list_full_size, list_actual_size, list_skip, fwidth;
+
   EX string highlight_text;
+  EX int highlight_key;
+
+  EX bool is_highlight(item& I) { return I.body == highlight_text && I.key == highlight_key; }
+  EX void set_highlight(item& I) { highlight_text = I.body; highlight_key = I.key; }
   
   EX void measure() {
     tothei = 0;
     dialogwidth = 0;
     innerwidth = 0;
     int N = items.size();
+    list_starts_at = list_ends_at = list_actual_size = 0;
     for(int i=0; i<N; i++) {
-      if(items[i].type == diHelp)
+      if(items[i].type == diListStart)
+        list_starts_at = tothei;
+      else if(items[i].type == diListEnd) {
+        list_full_size = tothei - list_starts_at;
+        list_actual_size = min(dfspace * list_size_max / 100, max(dfsize * list_size_min / 100, list_full_size));
+        if(list_full_size < list_actual_size) list_full_size = list_actual_size;
+        tothei = list_ends_at = list_starts_at + list_actual_size;
+        }
+      else if(items[i].type == diHelp)
         tothei += displayLong(items[i].body, dfsize * items[i].scale / 100, 0, true);
       else {
         tothei += dfspace * items[i].scale / 100;
@@ -382,7 +417,8 @@ EX namespace dialog {
     leftwidth = ISMOBILE ? 0 : textwidth(dfsize, "MMMMM") + dfsize/2;
     rightwidth = textwidth(dfsize, "MMMMMMMM") + dfsize/2;
     
-    int fwidth = innerwidth + leftwidth + rightwidth;
+    fwidth = innerwidth + leftwidth + rightwidth;
+    if(list_actual_size) fwidth += dfsize;
     dialogwidth = max(dialogwidth, fwidth);
     itemx  = dcenter - fwidth / 2 + leftwidth;
     keyx   = dcenter - fwidth / 2 + leftwidth - dfsize/2;
@@ -400,6 +436,41 @@ EX namespace dialog {
     if(a < 3) a = 3;
     if(a > 36) a = 36;
     return a;
+    }
+
+  EX void draw_list_slider(int x, int yt) {
+    int a = uishape();
+
+    flat_model_enabler fme;
+    initquickqueue();
+    ld pix = 1 / (2 * cgi.hcrossf / cgi.crossf);
+    shiftmatrix V = shiftless(atscreenpos(0, 0, pix));
+
+    color_t col = 0xFFFFFFFF;
+
+    ld siz = dfsize / 2;
+    ld si = siz / 2;
+
+    int yb = yt + list_actual_size;
+
+    curvepoint(hyperpoint(x-si, yt, 1, 1));
+    for(int i=0; i<=a/2; i++)
+      curvepoint(hyperpoint(x - si * cos(i*2*M_PI/a), yb + si * sin(i*2*M_PI/a), 1, 1));
+    for(int i=(a+1)/2; i<=a; i++)
+      curvepoint(hyperpoint(x - si * cos(i*2*M_PI/a), yt + si * sin(i*2*M_PI/a), 1, 1));
+    queuecurve(V, col, 0x80, PPR::LINE);
+
+    int yt1 = yt + (list_actual_size * list_skip) / list_full_size;
+    int yb1 = yt + (list_actual_size * (list_skip + list_actual_size)) / list_full_size;
+
+    curvepoint(hyperpoint(x-siz, yt1, 1, 1));
+    for(int i=0; i<=a/2; i++)
+      curvepoint(hyperpoint(x - siz * cos(i*2*M_PI/a), yb1 + siz * sin(i*2*M_PI/a), 1, 1));
+    for(int i=(a+1)/2; i<=a; i++)
+      curvepoint(hyperpoint(x - siz * cos(i*2*M_PI/a), yt1 + siz * sin(i*2*M_PI/a), 1, 1));
+    queuecurve(V, col, 0x80, PPR::LINE);
+
+    quickqueue();
     }
 
   EX void draw_slider(int sl, int sr, int y, item& I) {
@@ -501,6 +572,12 @@ EX namespace dialog {
       }
     
     tothei = (vid.yres - tothei) / 2;
+    int list_left = list_actual_size;
+    int list_next_key;
+    if(!list_actual_size) {
+      if(list_skip) println(hlog, "list_skip reset");
+      list_skip = 0;
+      }
     
     if(current_display->sidescreen && darken < menu_darkening) {
       int steps = menu_darkening - darken;
@@ -550,6 +627,10 @@ EX namespace dialog {
       #endif
       }
 
+    bool inlist = false;
+    int need_to_skip = 0;
+    int list_more_skip = list_skip;
+
     for(int i=0; i<N; i++) {
       item& I = items[i];
 
@@ -557,9 +638,49 @@ EX namespace dialog {
         tothei = displayLong(items[i].body, dfsize * items[i].scale / 100, tothei, false);
         continue;
         }
-        
+
+      int size = dfspace * I.scale / 100;
+      dynamicval<int> dkb(I.key);
+      bool to_highlight = is_highlight(I);
+
+      if(I.type == diListStart) {
+        list_left = list_actual_size;
+        draw_list_slider(dcenter + fwidth / 2 - dfsize/2, tothei);
+        inlist = true;
+        list_next_key = I.key;
+        continue;
+        }
+
+      if(I.type == diListEnd) {
+        tothei += list_left;
+        inlist = false;
+        continue;
+        }
+
+      if(inlist && list_more_skip > 0) {
+        if(to_highlight) {
+          list_skip -= list_more_skip;
+          list_more_skip = 0;
+          }
+        else {
+          list_more_skip -= size;
+          if(list_more_skip < 0) { tothei -= list_more_skip; list_left += list_more_skip; list_more_skip = 0; }
+          continue;
+          }
+        }
+
+      if(inlist) {
+        if(list_left < size) {
+          tothei += list_left; size -= list_left; need_to_skip += size; list_left = 0;
+          if(to_highlight) list_skip += need_to_skip;
+          continue;
+          }
+        else list_left -= size;
+        if(list_next_key) { key_actions[list_next_key] = key_actions[I.key]; I.key = list_next_key++;  }
+        }
+
       top = tothei;
-      tothei += dfspace * I.scale / 100;
+      tothei += size;
       int mid = (top + tothei) / 2;
       I.position = mid;
       if(I.type == diTitle || I.type == diInfo) {
@@ -578,10 +699,12 @@ EX namespace dialog {
           I.color = I.colorc;
 #else
         if(xthis && mousemoved) {
-          highlight_text = I.body;
+          set_highlight(I);
+          highlight_key = dkb.backup;
           mousemoved = false;
+          to_highlight = true;
           }
-        if(highlight_text == I.body) {
+        if(to_highlight) {
           I.color = (xthis&&mousepressed&&actonrelease) ? I.colorc : I.colors;
           }
 #endif        
@@ -687,7 +810,7 @@ EX namespace dialog {
     if(uni == '\n' || uni == '\r' || DIRECTIONKEY == SDLK_KP5) {
       for(int i=0; i<isize(items); i++) 
         if(isitem(items[i]))
-          if(items[i].body == highlight_text) {
+          if(is_highlight(items[i])) {
             uni = sym = items[i].key;
             handle_actions(sym, uni);
             return;
@@ -696,43 +819,48 @@ EX namespace dialog {
     if(DKEY == SDLK_PAGEDOWN) {
       uni = sym = 0;
       for(int i=0; i<isize(items); i++)
-        if(isitem(items[i]))
-          highlight_text = items[i].body;
+        if(isitem(items[i])) {
+          set_highlight(items[i]);
+          }
       }
     if(DKEY == SDLK_PAGEUP) {
       uni = sym = 0;
       for(int i=0; i<isize(items); i++) 
         if(isitem(items[i])) {
-          highlight_text = items[i].body;
+          set_highlight(items[i]);
           break;
           }
       }    
     if(DKEY == SDLK_UP) {
       uni = sym = 0;
-      string last = "";
+      dialog::item *last = nullptr;
       for(int i=0; i<isize(items); i++) 
-        if(isitem(items[i]))
-          last = items[i].body;
+        if(isitem(items[i])) {
+          last = &(items[i]);
+          }
       for(int i=0; i<isize(items); i++)
         if(isitem(items[i])) {
-          if(items[i].body == highlight_text) {
-            highlight_text = last; return;
+          if(is_highlight(items[i])) {
+            set_highlight(*last);
+            return;
             }
-          else last = items[i].body;
+          else {
+           last = &(items[i]);
+           }
           }
-      highlight_text = last;
+      set_highlight(*last);
       }
     if(DKEY == SDLK_DOWN) {
       uni = sym = 0;
       int state = 0;
       for(int i=0; i<isize(items); i++)
         if(isitem(items[i])) {
-          if(state) { highlight_text = items[i].body; return; }
-          else if(items[i].body == highlight_text) state = 1;
+          if(state) { set_highlight(items[i]); return; }
+          else if(is_highlight(items[i])) state = 1;
           }
       for(int i=0; i<isize(items); i++)
         if(isitem(items[i])) {
-          highlight_text = items[i].body;
+          set_highlight(items[i]);
           break;
           }
       }
