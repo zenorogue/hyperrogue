@@ -78,7 +78,7 @@ namespace sag {
   vector<ld> loglik_tab_y, loglik_tab_n;
 
   int ipturn = 100;
-  int numiter = 0;
+  long long numiter = 0;
   
   int hightemp = 10;
   int lowtemp = -15;
@@ -356,7 +356,7 @@ namespace sag {
       
       if(t2 - tl > 980) {
         tl = t2;
-        println(hlog, format("it %8d temp %6.4f [1/e at %13.6f] cost = %f ", 
+        println(hlog, format("it %12Ld temp %6.4f [1/e at %13.6f] cost = %f ",
           numiter, double(sag::temperature), (double) exp(sag::temperature),
           double(sag::cost)));
         }
@@ -383,7 +383,7 @@ namespace sag {
         auto t2 = SDL_GetTicks();
         if(t2 - t1 > 1000) {
           t1 = t2;
-          println(hlog, format("it %8d temp %6.4f [1/e at %13.6f] cost = %f ",
+          println(hlog, format("it %12Ld temp %6.4f [1/e at %13.6f] cost = %f ",
             numiter, double(sag::temperature), (double) exp(sag::temperature),
             double(sag::cost)));
           }
@@ -407,7 +407,7 @@ namespace sag {
     if(t < 50) ipturn *= 2;
     else if(t > 200) ipturn /= 2;
     else ipturn = ipturn * 100 / t;
-    print(hlog, format("it %8d temp %6.4f [2:%8.6f,10:%8.6f,50:%8.6f] cost = %f\n", 
+    print(hlog, format("it %12Ld temp %6.4f [2:%8.6f,10:%8.6f,50:%8.6f] cost = %f\n",
       numiter, double(sag::temperature), 
       (double) exp(-2 * exp(-sag::temperature)),
       (double) exp(-10 * exp(-sag::temperature)),
