@@ -967,6 +967,24 @@ namespace sag {
       dialog::addBoolItem_action(XLAT("auto-visualize"), sag::auto_visualize, 'b');
 
       dialog::addBoolItem_action(XLAT("continuous embedding"), sag::embedding, 'e'); 
+
+      if(method == smMatch) {
+        dialog::addSelItem(XLAT("match parameter A"), fts(match_a), 'A');
+        dialog::add_action([] {
+          dialog::editNumber(match_a, 0, 10, 1, 1, XLAT("match parameter A"), "");
+          dialog::reaction = prepare_graph;
+          });
+        dialog::addSelItem(XLAT("match parameter B"), fts(match_b), 'B');
+        dialog::add_action([] {
+          dialog::editNumber(match_b, 0, 10, 1, 1, XLAT("match parameter B"), "");
+          dialog::reaction = prepare_graph;
+          });
+        }
+
+      dialog::addSelItem(XLAT("cost value"), fts(cost), 'X');
+      dialog::add_action([] {
+        optimize_sag_loglik_auto();
+        });
       });
 
     weight_label = "min weight";
