@@ -22,6 +22,8 @@ namespace sag {
   
   int sagpar = 0;
 
+  bool angular = false;
+
   int best_cost = 1000000000;
 
   enum eSagmode { sagOff, sagHC, sagSA };
@@ -518,24 +520,14 @@ namespace sag {
     }
 
   ld pdist(hyperpoint hi, hyperpoint hj) {
-    if(sol) {
-      hyperpoint h = rgpushxto0(hi) * hj;
-      
-      h[0] = abs(h[0]);
-      h[1] = abs(h[1]);
-      
-      ld d1 = approx_01(h);
-      ld d2 = approx_01(hyperpoint(h[1], h[0], -h[2], 1));
+    if(sol) return min(geo_dist(hi, hj), geo_dist(hj, hi));
+    if(prod && angular) {
 
-      h = rgpushxto0(hj) * hi;
-      
-      h[0] = abs(h[0]);
-      h[1] = abs(h[1]);
-      
-      ld d3 = approx_01(h);
-      ld d4 = approx_01(hyperpoint(h[1], h[0], -h[2], 1));
-
-      return min(min(d1, d2), min(d3, d4));
+      auto di = product_decompose(hi);
+      auto dj = product_decompose(hj);
+      ld x = hdist(di.second, dj.second);
+      ld z = di.first - dj.first;
+      return log((x*x+z*z) * (x > 0 ? sinh(x) / x : 0));
       }
     return geo_dist(hi, hj);
     };
@@ -1038,6 +1030,9 @@ int readArgs() {
     }
   else if(argis("-sagstats")) {
     output_stats();
+    }
+  else if(argis("-sag-angular")) {
+    shift(); angular = argi();
     }
   else if(argis("-sagstats-logid")) {
     shift(); logid = argi();
