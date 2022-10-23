@@ -809,7 +809,13 @@ void dqi_poly::gldraw() {
 #endif
 
 EX ld scale_at(const shiftmatrix& T) {
-  if(GDIM == 3 && pmodel == mdPerspective) return 1 / abs((tC0(unshift(T)))[2]);
+  if(GDIM == 3 && pmodel == mdPerspective) {
+    ld z = (tC0(unshift(T)))[2];
+    if(z == 0) return 1;
+    z = 1 / abs(z);
+    if(z > 10) return 10;
+    return z;
+    }
   if(sol) return 1;
   hyperpoint h1, h2, h3;
   applymodel(tC0(T), h1);
@@ -840,6 +846,17 @@ EX ld linewidthat(const shiftpoint& h) {
       dfc = 1 - dfc*dfc;
       return dfc;
       }
+    }
+  else if(hyperbolic && pmodel == mdRelPerspective) {
+    if(abs(h[3]) < 1e-6) return 1;
+    return 1 / (1 + abs(h[3]));
+    }
+  else if(sl2 && pmodel == mdRelPerspective) {
+    if(abs(h[2]) < 1e-6) return 1;
+    return 1 / (1 + abs(h[2]));
+    }
+  else if(hyperbolic && GDIM == 3 && pmodel == mdPerspective && pconf.alpha == 0 && h[3] < 0.99) {
+    return 1;
     }
   else if(perfect_linewidth >= (inHighQual ? 1 : 2)) {
     hyperpoint h0 = h.h / zlevel(h.h);
