@@ -1311,12 +1311,13 @@ int readArgs() {
 
 bool turn(int delta) {
   if(vizsa_start) {
+    if(vizsa_start == -1) vizsa_start = ticks;
     auto t = ticks;
     double d = (t-vizsa_start) / (1000. * vizsa_len);
     if(d > 1 && loglik_repeat) {
-      vizsa_start = ticks;
-      optimize_sag_loglik();
+      optimize_sag_loglik_auto();
       output_stats();
+      vizsa_start = -1;
       }
     if(d > 1) sagmode = sagOff;
     else {
