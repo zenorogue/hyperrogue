@@ -413,7 +413,7 @@ namespace sag {
     reassign();
     }
 
-  void dofullsa_iterations(ll saiter) {
+  void dofullsa_iterations(long long saiter) {
     sagmode = sagSA;
 
     decltype(SDL_GetTicks()) t1 = -999999;
