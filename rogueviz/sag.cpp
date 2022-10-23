@@ -906,9 +906,8 @@ namespace sag {
   
   ld edgepower=1, edgemul=1;
 
-  void read(string fn) {
-    fname = fn;
-    init(RV_GRAPH | RV_WHICHWEIGHT | RV_AUTO_MAXWEIGHT | RV_HAVE_WEIGHT);
+  void init() {
+    rogueviz::init(RV_GRAPH | RV_WHICHWEIGHT | RV_AUTO_MAXWEIGHT | RV_HAVE_WEIGHT);
 
     rv_hook(rogueviz::hooks_close, 100, [] { sag::sagedges.clear(); });
     rv_hook(shmup::hooks_turn, 100, turn);
@@ -948,10 +947,9 @@ namespace sag {
 
     weight_label = "min weight";
     temperature = 0; sagmode = sagOff;
-    readsag(fname.c_str());
-    if(hub_filename != "")
-      read_hubs(hub_filename);
-    
+    }
+
+  void create_viz() {
     int DN = isize(vdata);
     
     for(int i=0; i<DN; i++) vdata[i].data = 0;
@@ -962,7 +960,25 @@ namespace sag {
       
       addedge0(ei.i, ei.j, &ei);
       }
+
+    for(int i=0; i<DN; i++) {
+      int ii = i;
+      vertexdata& vd = vdata[ii];
+      vd.cp = colorpair(dftcolor);
+      createViz(ii, sagcells[sagid[i]], Id);
+      }
+
+    storeall();
+    }
+
+  void read(string fn) {
+    fname = fn;
+    init();
+    readsag(fname.c_str());
+    if(hub_filename != "")
+      read_hubs(hub_filename);
   
+    int DN = isize(vdata);
     if(legacy)
       init_snake(2 * DN);
     else
@@ -979,15 +995,50 @@ namespace sag {
     sagid.resize(DN);
     for(int i=0; i<DN; i++) sagid[i] = i;
     prepare_graph();
+    create_viz();
+    }
 
-    for(int i=0; i<DN; i++) {
-      int ii = i;
-      vertexdata& vd = vdata[ii];
-      vd.cp = colorpair(dftcolor);
-      createViz(ii, sagcells[sagid[i]], Id);
+  void generate_fake_data(int n, int m) {
+    init();
+    init_sag_cells();
+    compute_dists();
+
+    sagid.resize(n);
+    for(int i=0; i<n; i++) sagid[i] = i;
+    hrandom_shuffle(sagid);
+    if(m > n || m < 0) throw hr_exception("generate_fake_data parameters incorrect");
+    sagid.resize(m);
+    int SN = isize(sagcells);
+    int DN = isize(sagid);
+    vdata.resize(DN);
+    for(int i=0; i<DN; i++)
+      vdata[i].name = its(i) + "@" + its(sagid[i]);
+
+    sag_edge = add_edgetype("SAG edge");
+    for(int i=0; i<DN; i++)
+    for(int j=i+1; j<DN; j++) {
+      edgeinfo ei(sag_edge);
+      ei.i = i;
+      ei.j = j;
+      ei.weight = 1. / sagdist[sagid[i]][sagid[j]];
+      sagedges.push_back(ei);
       }
 
-    storeall();
+    if(SN < DN) {
+      println(hlog, "SN = ", SN, " DN = ", DN);
+      throw hr_exception("not enough cells for SAG");
+      exit(1);
+      }
+
+    prepare_graph();
+    create_viz();
+
+    for(int i=0; i<DN; i++) {
+      color_t col = patterns::compute_cell_color(sagcells[sagid[i]]);
+      col <<= 8;
+      col |= 0xFF;
+      vdata[i].cp.color1 = vdata[i].cp.color2 = col;
+      }
     }
 
 ld compute_mAP() {
@@ -1139,6 +1190,12 @@ int readArgs() {
   else if(argis("-sag")) {
     PHASE(3); 
     shift(); sag::read(args());
+    }
+  else if(argis("-sagfake")) {
+    PHASE(3);
+    shift(); int n = argi();
+    shift(); int m = argi();
+    sag::generate_fake_data(n, m);
     }
   else if(argis("-sagaviz")) {
     PHASE(3); 
