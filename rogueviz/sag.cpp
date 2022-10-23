@@ -368,7 +368,7 @@ namespace sag {
     reassign();
     }
 
-  void dofullsa_iterations(int saiter) {
+  void dofullsa_iterations(ll saiter) {
     sagmode = sagSA;
 
     decltype(SDL_GetTicks()) t1 = -999999;
@@ -1030,7 +1030,7 @@ int readArgs() {
     shift(); sag::dofullsa(argi());
     }
   else if(argis("-sagfulli")) {
-    shift(); sag::dofullsa_iterations(argi());
+    shift(); sag::dofullsa_iterations(argll());
     }
   else if(argis("-sagviz")) {
     sag::vizsa_start = SDL_GetTicks();
