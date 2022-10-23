@@ -978,6 +978,36 @@ ld compute_mAP() {
 
 int logid;
 
+void geo_stats() {
+  start_game();
+  println(hlog, "init_sag_cells started");
+  init_sag_cells();
+  println(hlog, "compute_dists started");
+  compute_dists();
+  println(hlog, "real");
+
+  vector<short> sorted_sagdist;
+  for(auto& a: sagdist) for(auto b: a) sorted_sagdist.push_back(b);
+  sort(sorted_sagdist.begin(), sorted_sagdist.end());
+  vector<int> d(5, 0);
+  for(auto a: sagdist[0]) if(a < 5) d[a]++;
+
+  for(int i=0; i<3; i++) {
+    bool first = false;
+    #define out(x, y) if(i == 0) println(hlog, x, " = ", y); else if(first) print(hlog, ";"); first = true; if(i == 1) print(hlog, x); if(i == 2) print(hlog, y);
+    out("nodes", isize(sagcells));
+    out("maxsagdist", max_sag_dist);
+    out("dim", (euclid && WDIM == 2 && euc::eu.user_axes[1][1] == 1) ? 1 : WDIM);
+    out("geometry", S3 >= OINF ? "tree" : hyperbolic ? "hyperbolic" : sphere ? "sphere" : euclid ? "euclid" : nil ? "nil" : sol ? "solv" : prod ? "product" : "other");
+    out("closed", max_sag_dist == isize(sagcells) ? 0 : closed_manifold ? 1 : 0);
+    out("angular", angular);
+    for(int p: {1, 10, 50}) { out(format("sagdist%02d", p), sorted_sagdist[(p * sorted_sagdist.size()) / 100]); }
+    for(int p: {1, 2, 3, 4}) { out(format("d%d", p), d[p]); }
+    println(hlog);
+    #undef out
+    }
+  }
+
 void output_stats() {
   if(auto_save != "" && cost < best_cost) {
     println(hlog, "cost ", cost, " beats ", best_cost);
@@ -1123,6 +1153,7 @@ int readArgs() {
   else if(argis("-sagloade")) {
     PHASE(3); shift(); sag::load_embedding(args());
     }
+  else if(argis("-sag-geo-stats")) geo_stats();
   else return 1;
 #endif
   return 0;
