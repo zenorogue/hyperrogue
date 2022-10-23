@@ -44,7 +44,7 @@ namespace sag {
   vector<cell*> sagcells;
 
   /** table of distances between SAG cells */
-  vector<vector<int>> sagdist;
+  vector<vector<unsigned short>> sagdist;
 
   /** what node is on sagcells[i] */
   vector<int> sagnode;
@@ -141,7 +141,7 @@ namespace sag {
       }
     
     max_sag_dist = 0;
-    for(auto& d: sagdist) for(auto& x: d) max_sag_dist = max(max_sag_dist, x);
+    for(auto& d: sagdist) for(auto& x: d) max_sag_dist = max<int>(max_sag_dist, x);
     max_sag_dist++;
     }
 
