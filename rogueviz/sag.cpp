@@ -478,6 +478,21 @@ namespace sag {
       }
     }
 
+  void compute_auto_rt() {
+    ld sum0 = 0, sum1 = 0, sum2 = 0;
+
+    for(auto& tab: sagdist) for(auto i: tab) {
+      sum0 ++;
+      sum1 += i;
+      sum2 += i*i;
+      }
+
+    lgsag.R = sum1 / sum0;
+    lgsag.T = sqrt((sum2 - sum1*sum1/sum0) / sum0);
+    println(hlog, "automatically set R = ", lgsag.R, " and ", lgsag.T, " max_sag_dist = ", max_sag_dist);
+    if(logistic_cost) compute_loglik_tab();
+    }
+
   void optimize_sag_loglik() {
     vector<int> indist(max_sag_dist, 0);
     
@@ -1057,6 +1072,11 @@ int readArgs() {
     shift(); sag::lgsag.T = argf();
     if(sag::logistic_cost) compute_loglik_tab();
     }
+
+  else if(argis("-sagrt-auto")) {
+    compute_auto_rt();
+    }
+
   else if(argis("-sag_use_loglik")) {  
     shift(); sag::logistic_cost = argi();
     if(sag::logistic_cost) compute_loglik_tab();
