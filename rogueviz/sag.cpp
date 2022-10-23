@@ -67,6 +67,9 @@ namespace sag {
   
   /** precision of geometric distances */
   int gdist_prec;
+
+  /** max edge for dijkstra */
+  int dijkstra_maxedge;
   
   /** the maximum value in sagdist +1 */
   int max_sag_dist;
@@ -92,6 +95,8 @@ namespace sag {
 
   void optimize_sag_loglik();
 
+  string distance_file;
+
   void compute_dists() {
     int N = isize(sagcells);
 
@@ -102,39 +107,77 @@ namespace sag {
       for(cell *c1: adj_minefield_cells(sagcells[i]))
         if(ids.count(c1)) neighbors[i].push_back(ids[c1]);
 
-    const ld ERROR = -17.3;
-    transmatrix unknown = Id; unknown[0][0] = ERROR;
+    const ld ERRORV = -17.3;
+    transmatrix unknown = Id; unknown[0][0] = ERRORV;
     cell_matrix.clear();
     cell_matrix.resize(N, unknown);
     vector<int> visited;
 
     auto visit = [&] (int id, const transmatrix& T) {
-      if(cell_matrix[id][0][0] != ERROR) return;
+      if(cell_matrix[id][0][0] != ERRORV) return;
       cell_matrix[id] = T;
       visited.push_back(id);
       };
-      
+
     visit(0, Id);
     for(int i=0; i<isize(visited); i++) {
-      cell *c0 = sagcells[i];
-      const transmatrix& T0 = cell_matrix[i];
+      cell *c0 = sagcells[visited[i]];
+      const transmatrix& T0 = cell_matrix[visited[i]];
       for(int d=0; d<c0->type; d++)
         if(ids.count(c0->move(d)))
           visit(ids[c0->move(d)], T0 * currentmap->adj(c0, d));
       }
     
-    if(gdist_prec) {
+    sagdist.clear();
+    sagdist.resize(N);
+    for(int i=0; i<N; i++) sagdist[i].resize(N, N);
+
+    if(distance_file != "") {
+      fhstream f(distance_file, "rt");
+      f.read(sagdist);
+      }
+    else if(gdist_prec && dijkstra_maxedge) {
+      vector<vector<pair<int, ld>>> dijkstra_edges(N);
+      for(int i=0; i<N; i++) {
+        celllister cl(sagcells[i], dijkstra_maxedge, 50000, nullptr);
+        for(auto c1: cl.lst) if(ids.count(c1)) if(c1 != sagcells[i])
+          dijkstra_edges[i].emplace_back(ids[c1], pdist(tC0(cell_matrix[i]), tC0(cell_matrix[ids[c1]])));
+        if(i == 0) println(hlog, i, " has ", isize(dijkstra_edges[i]), " edges");
+        }
+      parallelize(N, [&] (int a, int b) {
+      vector<ld> distances(N);
+      for(int i=a; i<b; i++) {
+        if(i % 500 == 0) println(hlog, "computing dijkstra for ", i , "/", N);
+        for(int j=0; j<N; j++) distances[j] = HUGE_VAL;
+        std::priority_queue<pair<ld, int>> pq;
+        auto visit = [&] (int i, ld dist) {
+          if(distances[i] <= dist) return;
+          distances[i] = dist;
+          pq.emplace(-dist, i);
+          };
+        visit(i, 0);
+        while(!pq.empty()) {
+          ld d = -pq.top().first;
+          int at = pq.top().second;
+          pq.pop();
+          for(auto e: dijkstra_edges[at]) visit(e.first, d + e.second);
+          }
+        for(int j=0; j<N; j++) sagdist[i][j] = distances[j] * gdist_prec + .5;
+        }
+      return 0;
+      }
+      );
+      }
+
+    else if(gdist_prec) {
       for(int i=0; i<N; i++)
       for(int j=0; j<N; j++)
         sagdist[i][j] = (pdist(tC0(cell_matrix[i]), tC0(cell_matrix[j])) + .5) * gdist_prec;
       }
     
     else {
-      sagdist.clear();
-      sagdist.resize(N);
       for(int i=0; i<N; i++) {
         auto &sdi = sagdist[i];
-        sdi.resize(N, N);
         vector<int> q;
         auto visit = [&] (int j, int dist) { if(sdi[j] < N) return; sdi[j] = dist; q.push_back(j); };
         visit(i, 0);
@@ -967,6 +1010,18 @@ int readArgs() {
   else if(argis("-sag_gdist")) {
     shift(); sag::gdist_prec = argi();
     }
+  else if(argis("-sag_gdist_dijkstra")) {
+    shift(); sag::dijkstra_maxedge = argi();
+    }
+  else if(argis("-sag_gdist_save")) {
+    shift();
+    fhstream f(args(), "wt");
+    f.write(sagdist);
+    }
+  else if(argis("-sag_gdist_load")) {
+    shift(); distance_file = args();
+    }
+
   else if(argis("-sagrt")) {
     shift(); sag::lgsag.R = argf();
     shift(); sag::lgsag.T = argf();
