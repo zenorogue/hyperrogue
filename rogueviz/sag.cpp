@@ -23,6 +23,7 @@ namespace sag {
   int sagpar = 0;
 
   bool angular = false;
+  bool report_tempi = false;
 
   int best_cost = 1000000000;
 
@@ -1035,7 +1036,9 @@ void output_stats() {
   dhrg::iddata routing_result;
   dhrg::prepare_pairs(DN, [] (int i) { return edges_yes[i]; });
   dhrg::greedy_routing(routing_result, [] (int i, int j) { return sagdist[sagid[i]][sagid[j]]; });
-  println(hlog, "CSV;", logid++, ";", isize(sagnode), ";", DN, ";", isize(sagedges), ";", lgsag.R, ";", lgsag.T, ";", cost, ";", mAP, ";", routing_result.suc / routing_result.tot, ";", routing_result.routedist / routing_result.bestdist);
+  print(hlog, "CSV;", logid++, ";", isize(sagnode), ";", DN, ";", isize(sagedges), ";", lgsag.R, ";", lgsag.T, ";", cost, ";", mAP, ";", routing_result.suc / routing_result.tot, ";", routing_result.routedist / routing_result.bestdist);
+  if(report_tempi) print(hlog, ";", hightemp,";",lowtemp,";",format("%lld", numiter));
+  println(hlog);
   }
 
 int readArgs() {
@@ -1163,6 +1166,10 @@ int readArgs() {
     }
   else if(argis("-sagembed")) {
     sag::embedding = true;
+    }
+  else if(argis("-sag0")) {
+    sag::report_tempi = true;
+    numiter = 0;
     }
   else if(argis("-sagembedoff")) {
     sag::embedding = false;
