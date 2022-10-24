@@ -1758,6 +1758,18 @@ EX namespace patterns {
       }
     }
   
+  EX color_t compute_cell_color(cell *c) {
+    color_t res;
+    for(int i=0; i<4; i++) {
+      ld v = real(compute_map_function(c, 1+i, color_formula));
+      if(i == 3) part(res, i) = (v > 0);
+      else if(v < 0) part(res, i) = 0;
+      else if(v > 1) part(res, i) = 255;
+      else part(res, i) = int(v * 255 + .5);
+      }
+    return res;
+    }
+
   EX hookset<int(cell*)> hooks_generate_canvas;
 
   EX color_t apeirogonal_color = 0xFFFFFFFF;
@@ -1957,15 +1969,7 @@ EX namespace patterns {
         return r;
         }
       case 'f': {
-        color_t res;
-        for(int i=0; i<4; i++) {
-          ld v = real(compute_map_function(c, 1+i, color_formula));
-          if(i == 3) part(res, i) = (v > 0);
-          else if(v < 0) part(res, i) = 0;
-          else if(v > 1) part(res, i) = 255;
-          else part(res, i) = int(v * 255 + .5);
-          }
-        return res;
+        return compute_cell_color(c);
         }
       case 'k': {
         /* just keep the old color */
