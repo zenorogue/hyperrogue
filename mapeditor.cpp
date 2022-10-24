@@ -3224,6 +3224,9 @@ EX namespace mapeditor {
     dialog::addBoolItem(XLAT("god mode"), autocheat, 'G');
     dialog::add_action([] () { autocheat = true; });
     dialog::addInfo(XLAT("(unlock all, allow cheats, normal character display, cannot be turned off!)"));
+
+    add_edit(game_keys_scroll);
+    dialog::addInfo(XLAT("hint: shift+A to enter the map editor"));
     
     dialog::addItem(XLAT("change the pattern/color of new Canvas cells"), 'c');
     dialog::add_action_push(patterns::showPrePatternNoninstant);

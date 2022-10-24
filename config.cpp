@@ -647,7 +647,8 @@ EX void initConfig() {
   -> editable("resizable window", 'r');
 
   param_b(no_find_player, "no_find_player");
-  param_b(game_keys_scroll, "game_keys_scroll");
+  param_b(game_keys_scroll, "game_keys_scroll")
+  -> editable("pure exploration (game keys scroll)", 'P');
   param_b(reg3::cubes_reg3, "cubes_reg3");
   param_f(linepatterns::tree_starter, "tree_starter")
   -> editable(0, 1, 0.05, "tree-drawing parameter", "How much of edges to draw for tree patterns (to show how the tree edges are oriented).", 't');
