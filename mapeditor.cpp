@@ -1238,6 +1238,7 @@ EX namespace mapeditor {
 
 #if CAP_EDIT
   int paintwhat = 0;
+  int paintwhat_alt_wall = 0;
   int painttype = 0;
   int paintstatueid = 0;
   int radius = 0;
@@ -1387,7 +1388,14 @@ EX namespace mapeditor {
     
     getcstat = '-';
 
-    displayfr(8, 8 + fs, 2, vid.fsize, paintwhat_str, forecolor, 0);
+    if(anyshiftclick) {
+      displayfr(8, 8 + fs, 2, vid.fsize,
+        (painttype == 6 && (GDIM == 3)) ? "wall" :
+        painttype == 3 ? XLATN(winf[paintwhat_alt_wall].name) : "clear",
+        forecolor, 0);
+      }
+    else
+      displayfr(8, 8 + fs, 2, vid.fsize, paintwhat_str, forecolor, 0);
     displayfr(8, 8+fs*2, 2, vid.fsize, XLAT("use at your own risk!"), 0x800000, 0);
 
     displayButton(8, 8+fs*4, XLAT("0-9 = radius (%1)", its(radius)), ('0' + (radius+1)%10), 0);
@@ -1402,6 +1410,8 @@ EX namespace mapeditor {
       displayButton(8, 8+fs*12, XLAT("f = flip %1", ONOFF(copysource.mirrored)), 'u', 0);
     displayButton(8, 8+fs*13, XLAT("r = regular"), 'r', 0);
     displayButton(8, 8+fs*14, XLAT("p = paint"), 'p', 0);
+    if(painttype == 3)
+      displayButton(8, 8+fs*15, XLAT("z = set Shift+click"), 'z', 0);
 
     displayFunctionKeys();
     displayButton(8, vid.yres-8-fs*4, XLAT("F8 = settings"), SDLK_F8, 0);
@@ -1443,6 +1453,7 @@ EX namespace mapeditor {
     saveUndo(c);
     switch(painttype) {
       case 0: {
+        if(anyshiftclick) { c->monst = moNone; mirror::destroyKilled(); break; }
         eMonster last = c->monst;
         c->monst = eMonster(paintwhat);
         c->hitpoints = 3;
@@ -1473,6 +1484,7 @@ EX namespace mapeditor {
         break;
         }
       case 1: {
+        if(anyshiftclick) { c->item = itNone; break; }
         eItem last = c->item;
         c->item = eItem(paintwhat);
         if(c->item == itBabyTortoise)
@@ -1480,6 +1492,7 @@ EX namespace mapeditor {
         break;
         }
       case 2: {
+        if(anyshiftclick) { c->land = laNone; c->wall = waNone; break; }
         eLand last = c->land;
         c->land = eLand(paintwhat);
         if(isIcyLand(c) && isIcyLand(last))
@@ -1496,7 +1509,7 @@ EX namespace mapeditor {
         }
       case 3: {
         eWall last = c->wall;
-        c->wall = eWall(paintwhat);
+        c->wall = eWall(anyshiftclick ? paintwhat_alt_wall : paintwhat);
         
         if(last != c->wall) {
           if(hasTimeout(c))
@@ -1528,7 +1541,7 @@ EX namespace mapeditor {
         break;
       case 6:
         c->land = laCanvas;
-        c->wall = GDIM == 3 ? waWaxWall : waNone;
+        c->wall = ((GDIM == 3) ^ anyshiftclick) ? waWaxWall : waNone;
         c->landparam = paintwhat >> 8;
         break;
       case 4: {
@@ -1764,6 +1777,7 @@ EX namespace mapeditor {
     else if(uni == 'i') pushScreen(showList), painttype = 1, dialog::infix = "";
     else if(uni == 'l') pushScreen(showList), painttype = 2, dialog::infix = "";
     else if(uni == 'w') pushScreen(showList), painttype = 3, dialog::infix = "";
+    else if(uni == 'z' && painttype == 3) paintwhat_alt_wall = paintwhat;
     else if(uni == 'r') pushScreen(patterns::showPattern);
     else if(uni == 't' && mouseover) {
       playermoved = true;
