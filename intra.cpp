@@ -733,13 +733,15 @@ EX void show_portals() {
   else {
     dialog::addItem(XLAT("add to list"), 'a');
     dialog::add_action([cw] { unconnected.push_back(cw); });
+    dialog::start_list(500, 500, '1');
     for(auto p: unconnected) {
-      dialog::addItem(XLAT("connect " + lalign(0, p)), '1');
+      dialog::addItem(XLAT("connect " + lalign(0, p)), dialog::list_fake_key++);
       dialog::add_action([p, cw] {
         connect_portal(cw, p, edit_spin);
         erase_unconnected(p);
         });
       }
+    dialog::end_list();
     dialog::addSelItem(XLAT("portal orientation"), its(edit_spin), 'o');
     dialog::add_action([] { edit_spin = edit_spin + 1; });
     if(debug_portal) {
