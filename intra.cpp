@@ -661,6 +661,25 @@ EX string portal_help =
   "Non-Euclidean Geometries' for some portals that work.\n\n"
   ;
 
+EX void become_menu() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+  dialog::init(XLAT("Become a portal map"));
+  dialog::addHelp(XLAT(portal_help));
+  dialog::addItem(XLAT("yes, that's what I want"), 'y');
+  dialog::add_action([] {
+    intra::become();
+    intra::start();
+    game_keys_scroll = true;
+    mapeditor::drawplayer = false;
+    popScreen();
+    pushScreen(show_portals);
+    });
+
+  dialog::addBack();
+  dialog::display();
+  }
+
 int edit_spin;
 
 EX void world_list() {

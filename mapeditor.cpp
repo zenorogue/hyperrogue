@@ -3242,6 +3242,16 @@ EX namespace mapeditor {
     add_edit(game_keys_scroll);
     dialog::addInfo(XLAT("hint: shift+A to enter the map editor"));
     
+    if(WDIM == 3 && !intra::in) {
+      dialog::addBoolItem(XLAT("become a portal map"), intra::in, 'm');
+      dialog::add_action_push(intra::become_menu);
+      }
+
+    if(WDIM == 3 && intra::in) {
+      dialog::addItem(XLAT("manage portals"), 'm');
+      dialog::add_action_push(intra::show_portals);
+      }
+
     dialog::addItem(XLAT("change the pattern/color of new Canvas cells"), 'c');
     dialog::add_action_push(patterns::showPrePatternNoninstant);
 
