@@ -647,6 +647,20 @@ void erase_unconnected(cellwalker cw) {
       unconnected.erase(unconnected.begin() + i);
   }
 
+EX string portal_help =
+  "In portal maps, you can create portals on walls. Such portals can be entered to end up in another world. "
+  "The portals are 'immersive', that is, you can see through the portals. In the current implementation, "
+  "the immersive view works only in the raycasting mode, for rendering walls -- so any other objects will not "
+  "be rendered. (You can turn raycasting off to see the world without any portals.) As a consequence, "
+  "there is no HyperRogue game in a portal map -- you can only move the camera around the scene. Pick "
+  "'set recommended settings' in the manage portals menu to optimize settings for this.\n\n"
+  "To create portals between different geometries, you need to create a map in the other geometry and save it "
+  "(using the map editor), then in your portal map such a world can be loaded to be added to the scene "
+  "(in the manage portals menu). Such portals work correctly when their intrinsic shapes are equal (including the "
+  "curvature), their extrinsic curvatures match, and are actually implemented; see the video 'Portals to "
+  "Non-Euclidean Geometries' for some portals that work.\n\n"
+  ;
+
 int edit_spin;
 
 EX void world_list() {
@@ -769,6 +783,9 @@ EX void show_portals() {
     }
 
   walking::add_options();
+
+  dialog::addHelp();
+  dialog::add_action([] { gotoHelp(portal_help); });
 
   dialog::display();
   }
