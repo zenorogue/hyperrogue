@@ -754,6 +754,20 @@ EX void show_portals() {
       }
     }
 
+  if(!game_keys_scroll || mapeditor::drawplayer || !ray::fixed_map || vid.cells_drawn_limit > 100) {
+    dialog::addItem(XLAT("set recommended settings"), 'A');
+    dialog::add_action([] {
+      game_keys_scroll = true;
+      mapeditor::drawplayer = false;
+      ray::fixed_map = true;
+      vid.cells_drawn_limit = 100;
+      });
+    }
+  else {
+    dialog::addItem(XLAT("configure raycasting"), 'A');
+    dialog::add_action_push(ray::configure);
+    }
+
   walking::add_options();
 
   dialog::display();
