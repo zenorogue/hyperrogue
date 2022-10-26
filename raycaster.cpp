@@ -2900,6 +2900,8 @@ EX void configure() {
         });
       };
     });
+
+  dialog::addBoolItem_action(XLAT("the map is fixed (improves performance)"), ray::fixed_map, 'F');
   
   if(gms_array_size > gms_limit && ray::in_use) {
     dialog::addBreak(100);
