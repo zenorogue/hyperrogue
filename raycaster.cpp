@@ -2120,6 +2120,7 @@ transmatrix protect_prod(transmatrix T) {
 struct raycast_map {
 
   int saved_frameid;
+  int saved_map_version;
   
   vector<cell*> lst;
   map<cell*, int> ids;
@@ -2415,6 +2416,7 @@ struct raycast_map {
   
   void create_all(cell *cs) {
     saved_frameid = frameid;
+    saved_map_version = mapeditor::map_version;
     generate_initial_ms(cs);
     generate_cell_listing(cs);
     apply_shape();
@@ -2423,6 +2425,7 @@ struct raycast_map {
   
   bool need_to_create(cell *cs) {
     if(!fixed_map && frameid != saved_frameid) return true;
+    if(saved_map_version != mapeditor::map_version) return true;
     return !ids.count(cs);
     }
   };
