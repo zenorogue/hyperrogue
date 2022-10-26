@@ -10,6 +10,9 @@ namespace hr {
 
 EX namespace mapeditor {
 
+  /* changes when the map is changed */
+  EX int map_version;
+
   EX bool drawing_tool;
   EX bool intexture;
   EX bool snapping;
@@ -1492,7 +1495,7 @@ EX namespace mapeditor {
         break;
         }
       case 2: {
-        if(anyshiftclick) { c->land = laNone; c->wall = waNone; break; }
+        if(anyshiftclick) { c->land = laNone; c->wall = waNone; map_version++; break; }
         eLand last = c->land;
         c->land = eLand(paintwhat);
         if(isIcyLand(c) && isIcyLand(last))
@@ -1510,6 +1513,7 @@ EX namespace mapeditor {
       case 3: {
         eWall last = c->wall;
         c->wall = eWall(anyshiftclick ? paintwhat_alt_wall : paintwhat);
+        map_version++;
         
         if(last != c->wall) {
           if(hasTimeout(c))
@@ -1532,6 +1536,7 @@ EX namespace mapeditor {
         break;
         }
       case 5:
+        map_version++;
         c->land = laNone;
         c->wall = waNone;
         c->item = itNone;
@@ -1540,11 +1545,13 @@ EX namespace mapeditor {
         // c->tmp = -1;
         break;
       case 6:
+        map_version++;
         c->land = laCanvas;
         c->wall = ((GDIM == 3) ^ anyshiftclick) ? waWaxWall : waNone;
         c->landparam = paintwhat >> 8;
         break;
       case 4: {
+        map_version++;
         cell *copywhat = where.second.at;
         c->wall = copywhat->wall;
         c->item = copywhat->item;

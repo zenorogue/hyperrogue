@@ -755,6 +755,7 @@ EX void show_portals() {
       unconnected.push_back(tcw);
       connections.erase(cw);
       connections.erase(tcw);
+      mapeditor::map_version++;
       });
     }
   else if(in_list) {
@@ -771,6 +772,7 @@ EX void show_portals() {
       dialog::addItem(XLAT("connect " + lalign(0, p)), dialog::list_fake_key++);
       dialog::add_action([p, cw] {
         connect_portal(cw, p, edit_spin);
+        mapeditor::map_version++;
         erase_unconnected(p);
         });
       }
