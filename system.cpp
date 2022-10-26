@@ -87,7 +87,9 @@ EX void welcomeMessage() {
       items[itGreenStone] = 99;
     addMessage(XLAT("Welcome to %the1 Challenge!", moPrincess));
     addMessage(XLAT("The more Hypersian Rugs you collect, the harder it is.", moPrincess));
-    }  
+    }
+  else if(intra::in)
+    addMessage(XLAT("Welcome to a portal map! Press 'o' to configure."));
   else if(randomPatternsMode)
     addMessage(XLAT("Welcome to the Random Pattern mode!"));
   else if(tactic::on)
