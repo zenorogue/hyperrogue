@@ -649,6 +649,44 @@ void erase_unconnected(cellwalker cw) {
 
 int edit_spin;
 
+EX void world_list() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+  dialog::init(XLAT("world list"));
+  dialog::start_list(900, 900, '1');
+  int c = current;
+  for(int i=0; i<isize(data); i++) {
+    switch_to(i);
+    dialog::addBoolItem(full_geometry_name(), i == c, dialog::list_fake_key++);
+    dialog::add_action([i] {
+      int ic = i;
+      switch_to(ic);
+      });
+    }
+  switch_to(c);
+  dialog::end_list();
+  dialog::addBreak(100);
+  dialog::addItem("add a saved world to the scene", 'a');
+  dialog::add_action([] {
+    dialog::openFileDialog(levelfile, XLAT("level to load:"), ".lev", [] () {
+      intra::become();
+      if(mapstream::loadMap(levelfile.c_str())) {
+        addMessage(XLAT("Map loaded from %1", levelfile));
+        intra::become();
+        intra::start();
+        return true;
+        }
+      else {
+        addMessage(XLAT("Failed to load map from %1", levelfile));
+        intra::start();
+        return false;
+        }
+      });
+    });
+  dialog::addBack();
+  dialog::display();
+  }
+
 EX void show_portals() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
@@ -658,14 +696,8 @@ EX void show_portals() {
   cellwalker cw(centerover, point_direction);
   bool valid = point_direction >= 0 && point_direction < centerover->type;
 
-  dialog::addItem(XLAT("move to the next space"), 'm');
-  dialog::add_action([] {
-    int ic = (current + 1) % isize(data);
-    switch_to(ic);
-    });
-
-  dialog::addSelItem(XLAT("mode"), ray::fixed_map ? "perf" : "edit", 'e');
-  dialog::add_action([] { ray::fixed_map = !ray::fixed_map; });
+  dialog::addItem(XLAT("view another world"), 'm');
+  dialog::add_action_push(world_list);
 
   if(debug_portal) {
     dialog::addItem(XLAT("debug"), 'd');
