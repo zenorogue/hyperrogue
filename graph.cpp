@@ -5104,6 +5104,8 @@ EX void precise_mouseover() {
           point_direction = pd;
           if(cmode & sm::EDIT_INSIDE_WALLS) {
             swap(mouseover, mouseover2);
+            }
+          else {
             point_direction =c->c.spin(pd);
             }
           return;
