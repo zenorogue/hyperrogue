@@ -848,6 +848,16 @@ EX namespace dialog {
             return;
             }
       }
+    if(sym == PSEUDOKEY_WHEELUP && list_actual_size) {
+      sym = 0;
+      list_skip -= 30;
+      highlight_text = "//missing";
+      }
+    if(sym == PSEUDOKEY_WHEELDOWN && list_actual_size) {
+      sym = 0;
+      list_skip += 30;
+      highlight_text = "//missing";
+      }
     if(DKEY == SDLK_PAGEDOWN) {
       uni = sym = 0;
       for(int i=0; i<isize(items); i++)
