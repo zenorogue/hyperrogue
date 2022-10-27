@@ -1442,12 +1442,18 @@ EX namespace dialog {
               whereparent = where;
             where = s.substr(0, i+1), what = s.substr(i+1);
             }
+        string str1;
         if(vf == "../")
-          s = whereparent + what;
+          str1 = whereparent + what;
         else if(dir)
-          s = where + vf + what;
+          str1 = where + vf + what;
         else
-          s = where + vf;
+          str1 = where + vf;
+        if(s == str1) {
+          popScreen();
+          if(!file_action()) pushScreen(drawFileDialog);
+          }
+        s = str1;
         });
       }
     dialog::end_list();
@@ -1477,9 +1483,11 @@ EX namespace dialog {
       }
     else if(sym == SDLK_BACKSPACE && i) {
       s.erase(i-1, 1);
+      highlight_text = "//missing";
       }
     else if(uni >= 32 && uni < 127) {
       s.insert(i, s0 + char(uni));
+      highlight_text = "//missing";
       }
     return;
     }
