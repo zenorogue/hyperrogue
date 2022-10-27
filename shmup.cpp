@@ -851,10 +851,10 @@ void movePlayer(monster *m, int delta) {
       mdx = mdy = 0;
       }
     facemouse = shotkey = dropgreen = false;
-    if(ticks < racing::race_start_tick || !racing::race_start_tick) (WDIM == 2 ? mgo : mdy) = 0;
+    if(!racing::started()) (WDIM == 2 ? mgo : mdy) = 0;
     }
   else {
-    if(racing::on && (ticks < racing::race_start_tick || !racing::race_start_tick)) mgo = mdx = mdy = 0;
+    if(racing::on && !racing::started()) mgo = mdx = mdy = 0;
     }
   #endif
   
@@ -2564,6 +2564,9 @@ EX hookset<bool(int)> hooks_turn;
 /** the amount of time chars are disabled in PvP */
 EX int pvp_delay = 2000;
 
+EX int count_pauses;
+EX bool in_pause;
+
 EX void turn(int delta) {
 
   if(split_screen && subscreens::split( [delta] () { turn(delta); })) return;
@@ -2592,6 +2595,13 @@ EX void turn(int delta) {
   if(!shmup::on) return;  
   if(!(cmode & sm::NORMAL)) {
     #if CAP_RACING
+    if(!in_pause) {
+      in_pause = true;
+      if(!(racing::on && !racing::started() && !racing::finished())) {
+        count_pauses++;
+        addMessage(XLAT("Pauses: %1 of %2 allowed", its(count_pauses), its(racing::pause_limit)));
+        }
+      }
     if(racing::on) {
       if(racing::race_start_tick) racing::race_start_tick += delta;
       for(int& i: racing::race_finish_tick) if(i) i += delta;
@@ -2599,6 +2609,7 @@ EX void turn(int delta) {
     #endif
     return;
     }
+  else in_pause = false;
 
   passive_switch = (gold() & 1) ? moSwitch1 : moSwitch2;
   

@@ -1250,8 +1250,26 @@ EX void displayScore(eLand l) {
     }
   }
 
+EX int pause_limit = 3;
+
+EX bool started() {
+  return race_start_tick && ticks >= race_start_tick;
+  }
+
+EX bool finished() {
+  for(int& i: racing::race_finish_tick) if(!i) return false;
+  return true;
+  }
+
 EX void race_won() {
   if(!race_finish_tick[multi::cpid]) {
+
+    if(shmup::count_pauses >= pause_limit) {
+      addMessage(XLAT("Too many pauses!"));
+      race_finish_tick[multi::cpid] = ticks;
+      return;
+      }
+
     int result = ticks - race_start_tick;
     int losers = 0;
     int place = 1;
