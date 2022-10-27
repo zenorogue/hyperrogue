@@ -150,6 +150,7 @@ EX namespace dialog {
   EX void add_action_push_clear(const reaction_t& action) { add_action([action] { clearMessages(); pushScreen(action); }); }
 
   EX void handler(int sym, int uni) {
+    if(cmode & sm::PANNING) handlePanning(sym, uni);
     dialog::handleNavigation(sym, uni);
     if(doexiton(sym, uni)) popScreen();
     }
