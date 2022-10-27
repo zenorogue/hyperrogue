@@ -5075,7 +5075,46 @@ EX shiftmatrix cview(ld base_shift IS(0)) {
 
 EX int point_direction;
 
+EX int through_wall(hyperpoint at) {
+  ld dist = hdist0(at);
+  int nei = -1;
+  for(int i=0; i<centerover->type; i++) {
+    ld dist1 = hdist0(currentmap->ray_iadj(centerover, i) * at);
+    if(dist1 < dist) nei = i, dist = dist1;
+    }
+  return nei;
+  }
+
 EX void precise_mouseover() {
+  if(WDIM == 3 && (cmode & (sm::EDIT_INSIDE_WALLS | sm::EDIT_BEFORE_WALLS))) {
+    transmatrix T = view_inverse(View);
+    transmatrix ori = Id;
+    if(prod) ori = ortho_inverse(NLP);
+    ld step = 0.2;
+    cell *c = centerover;
+    for(int i=0; i<100; i++) {
+      apply_parallel_transport(T, ori, ztangent(step));
+      int pd = through_wall(T * C0);
+      if(pd != -1) {
+        color_t col;
+        cell *c1 = c->cmove(pd);
+        if(isWall3(c1, col)) {
+          mouseover = c;
+          mouseover2 = c1;
+          point_direction = pd;
+          if(cmode & sm::EDIT_INSIDE_WALLS) {
+            swap(mouseover, mouseover2);
+            point_direction =c->c.spin(pd);
+            }
+          return;
+          }
+        else {
+          T = currentmap->iadj(c, pd) * T;
+          c = c1;
+          }
+        }
+      }
+    }
   if(WDIM == 3) { 
     mouseover2 = mouseover = centerover;
     ld best = HUGE_VAL;
@@ -5690,6 +5729,8 @@ namespace sm {
   static const int NOSCR = (1<<22); // do not show the game background
   static const int AUTO_VALUES = (1<<23); // automatic place for values
   static const int NARROW_LINES = (1<<24); // do make the lines narrower if we needed to reduce width
+  static const int EDIT_BEFORE_WALLS = (1<<25); // mouseover targets before walls
+  static const int EDIT_INSIDE_WALLS = (1<<26); // mouseover targets inside walls
   }
 #endif
 

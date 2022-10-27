@@ -16,6 +16,7 @@ EX namespace mapeditor {
   EX bool drawing_tool;
   EX bool intexture;
   EX bool snapping;
+  EX bool building_mode = true;
 
   #if HDR
   enum eShapegroup { sgPlayer, sgMonster, sgItem, sgFloor, sgWall };
@@ -1378,6 +1379,10 @@ EX namespace mapeditor {
 
   EX void showMapEditor() {
     cmode = sm::MAP | sm::PANNING;
+    if(building_mode) {
+      if(anyshiftclick) cmode |= sm::EDIT_INSIDE_WALLS;
+      else cmode |= sm::EDIT_BEFORE_WALLS;
+      }
     gamescreen();
   
     int fs = editor_fsize();
@@ -1415,6 +1420,8 @@ EX namespace mapeditor {
     displayButton(8, 8+fs*14, XLAT("p = paint"), 'p', 0);
     if(painttype == 3)
       displayButton(8, 8+fs*15, XLAT("z = set Shift+click"), 'z', 0);
+    if(WDIM == 3)
+      displayButton(8, 8+fs*16, XLAT("B = build on walls ") + ONOFF(building_mode), 'B', 0);
 
     displayFunctionKeys();
     displayButton(8, vid.yres-8-fs*4, XLAT("F8 = settings"), SDLK_F8, 0);
@@ -1772,7 +1779,8 @@ EX namespace mapeditor {
     if(uni == '-' && !holdmouse) undoLock();
     if(uni == '-' && mouseover) {
       allInPattern(mouseover_cw(false));
-      holdmouse = true;
+      if(!(GDIM == 3 && building_mode))
+        holdmouse = true;
       }
     
     if(mouseover) for(int i=0; i<mouseover->type; i++) createMov(mouseover, i);
@@ -1785,6 +1793,7 @@ EX namespace mapeditor {
     else if(uni == 'l') pushScreen(showList), painttype = 2, dialog::infix = "";
     else if(uni == 'w') pushScreen(showList), painttype = 3, dialog::infix = "";
     else if(uni == 'z' && painttype == 3) paintwhat_alt_wall = paintwhat;
+    else if(uni == 'B') building_mode = !building_mode;
     else if(uni == 'r') pushScreen(patterns::showPattern);
     else if(uni == 't' && mouseover) {
       playermoved = true;
