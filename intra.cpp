@@ -716,13 +716,24 @@ EX void world_list() {
   }
 
 EX void show_portals() {
-  cmode = sm::SIDE | sm::MAYDARK;
+  cmode = sm::SIDE | sm::MAYDARK | sm::PANNING;
+  if(mapeditor::building_mode) cmode |= sm::EDIT_INSIDE_WALLS;
   gamescreen();
 
   dialog::init(XLAT("manage portals"));
 
-  cellwalker cw(centerover, point_direction);
-  bool valid = point_direction >= 0 && point_direction < centerover->type;
+  cellwalker cw(mouseover2, point_direction);
+  bool valid = point_direction >= 0 && point_direction < mouseover2->type;
+
+  if(valid) {
+    initquickqueue();
+    for (const shiftmatrix& V : hr::span_at(current_display->all_drawn_copies, mouseover2)) {
+      dynamicval<color_t> p(poly_outline, 0xFFFFFF);
+      int ofs = currentmap->wall_offset(mouseover2);
+      queuepolyat(V, cgi.shWireframe3D[ofs + point_direction], 0, PPR::SUPERLINE);
+      }
+    quickqueue();
+    }
 
   dialog::addItem(XLAT("view another world"), 'm');
   dialog::add_action_push(world_list);
