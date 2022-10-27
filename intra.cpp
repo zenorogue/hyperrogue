@@ -809,6 +809,15 @@ EX void show_portals() {
     dialog::add_action_push(ray::configure);
     }
 
+  if(prod && point_direction < mouseover2->type - 2) {
+    ld r = get_ratio_edge(mouseover2, point_direction);
+    dialog::addSelItem(XLAT("height-to-width ratio"), fts(r), 'r');
+    dialog::add_action([] {
+      be_ratio_edge(mouseover2, point_direction);
+      });
+    }
+  else dialog::addBreak(100);
+
   walking::add_options();
 
   dialog::addHelp();
@@ -847,12 +856,26 @@ EX void be_ratio(ld v IS(1)) {
   cgi.require_basics();
   }
 
-EX void be_ratio_edge(int i, ld v IS(1)) {
-  start_game();
-  ld len = hdist(currentmap->get_corner(cwt.at, i), currentmap->get_corner(cwt.at, (i+1)%cwt.at->type));
-  PIU( vid.plevel_factor = v * len / cgi.scalefactor );
+EX ld get_edge_length(cell *c, int i) {
+  auto c1 = hybrid::get_where(c).first;
+  return PIU( hdist(currentmap->get_corner(c1, i), currentmap->get_corner(c1, (i+c1->type-1)%c1->type)) );
+  }
+
+EX ld get_ratio_edge(cell *c, int i) {
+  ld len = get_edge_length(c, i);
+  return PIU( vid.plevel_factor * cgi.scalefactor / len );
+  }
+
+EX void be_ratio_edge(cell *c, int i, ld v IS(1)) {
+  ld len = get_edge_length(c, i);
+  vid.plevel_factor = v * len / cgi.scalefactor;
   check_cgi();
   cgi.require_basics();
+  }
+
+EX void be_ratio_edge(int i, ld v IS(1)) {
+  start_game();
+  be_ratio_edge(cwt.at, i, v);
   }
 
 /** Remove the space with the given id. Turns off intra */
