@@ -201,6 +201,7 @@ EX void showOverview() {
       "Cheaters can click to move between lands, and use the "
       "mousewheel to gain or lose treasures and orbs quickly (Ctrl = precise, Shift = reverse)."
       );
+    else if(dialog::handlePageButtons(uni)) ;
     else if(dialog::editInfix(uni)) dialog::list_skip = 0;
     else if(doexiton(sym, uni)) popScreen();
     };
