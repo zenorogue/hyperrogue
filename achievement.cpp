@@ -114,6 +114,7 @@ EX bool wrongMode(char flags) {
     if(geometry != gNormal) return true;
     if(disksize) return true;
     }
+  if(ineligible_starting_land && !flags) return true;
 
   if(shmup::on != (flags == rg::shmup || flags == rg::racing)) return true;
   if(racing::on != (flags == rg::racing)) return true;
