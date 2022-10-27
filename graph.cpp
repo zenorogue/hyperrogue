@@ -5075,11 +5075,11 @@ EX shiftmatrix cview(ld base_shift IS(0)) {
 
 EX int point_direction;
 
-EX int through_wall(hyperpoint at) {
+EX int through_wall(cell *c, hyperpoint at) {
   ld dist = hdist0(at);
   int nei = -1;
-  for(int i=0; i<centerover->type; i++) {
-    ld dist1 = hdist0(currentmap->ray_iadj(centerover, i) * at);
+  for(int i=0; i<c->type; i++) {
+    ld dist1 = hdist0(currentmap->ray_iadj(c, i) * at);
     if(dist1 < dist) nei = i, dist = dist1;
     }
   return nei;
@@ -5094,7 +5094,7 @@ EX void precise_mouseover() {
     cell *c = centerover;
     for(int i=0; i<100; i++) {
       apply_parallel_transport(T, ori, ztangent(step));
-      int pd = through_wall(T * C0);
+      int pd = through_wall(c, T * C0);
       if(pd != -1) {
         color_t col;
         cell *c1 = c->cmove(pd);

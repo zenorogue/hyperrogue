@@ -546,7 +546,7 @@ EX void shift_view_portal(hyperpoint H) {
 
 EX const connection_data* through_portal() {
   transmatrix iView = view_inverse(View);
-  int nei = through_wall(iView * C0);
+  int nei = through_wall(centerover, iView * C0);
   if(nei == -1) return nullptr;
   auto cw1 = cellwalker(centerover, nei);
   return at_or_null(connections, cw1);
