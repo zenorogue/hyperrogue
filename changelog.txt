@@ -4799,6 +4799,22 @@ Menu improvements:
 - Crystal World and Snake Nest were legal in some tilings but they did not actually appear -- should be fixed
 - vertical strafe in walkingmode no longer brings eye level below 0
 
-2022-10-08 02:14 Update 12.c:
+2022-10-08 02:14 Update 12.1c:
 - some improvements to tes file support. Mirrored tiles should now work for apeirogons. Valence check and thus football colorability should now work with affine/star tessellations. 
 - also included more tes samples
+
+2022-10-27 15:53 Update 12.1d:
+- Various menus displaying lists now use a nicer list widget (including the file dialog and map editor selection).
+- Map editor improvements:
+- - "building mode", which allows Minecraft-style building in 3D geometries
+- - shift-clicking in the map editor now deletes stuff
+- - improvements to portal spaces, including easier creation (convert to portal space from the map editor -> settings, then you can add new worlds from save files)
+- improvements to SL(2,R) and similar:
+- - nonisotropic range parameters now work in all perspective modes
+- - Panini in all perspective modes
+- - more projections possible for SL(2,R)
+- - fixed the 'penrose staircases' on wall blocks in rotation spaces
+- 'load from file' appears directly in the geometry menu in 'experiments with geometry'
+- achievements disabled in ineligible starting lands
+- limit on pauses in the racing mode
+- fixed the ogg files
