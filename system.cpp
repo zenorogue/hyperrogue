@@ -211,6 +211,7 @@ EX void initgame() {
   clearing::direct = 0;
   clearing::imputed = 0;
   rosephase = 0;
+  shmup::count_pauses = 0;
 
   if(firstland == laElementalWall) cwt.at->land = randomElementalLand();
   

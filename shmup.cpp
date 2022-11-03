@@ -2581,7 +2581,7 @@ EX void turn(int delta) {
       in_pause = true;
       if(!(racing::on && !racing::started() && !racing::finished())) {
         count_pauses++;
-        addMessage(XLAT("Pauses: %1 of %2 allowed", its(count_pauses), its(racing::pause_limit)));
+        if(racing::on) addMessage(XLAT("Pauses: %1 of %2 allowed", its(count_pauses), its(racing::pause_limit)));
         }
       }
     if(racing::on) {
