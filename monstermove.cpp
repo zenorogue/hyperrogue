@@ -24,6 +24,7 @@ grow_vector<vector<cell*>> movesofgood;
 EX vector<pair<cell*, int> > butterflies;
 
 EX void addButterfly(cell *c) {
+  if(shmup::on) return;
   for(int i=0; i<isize(butterflies); i++)
     if(butterflies[i].first == c) {
       butterflies[i].second = 0;
