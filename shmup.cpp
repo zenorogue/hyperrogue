@@ -3166,7 +3166,7 @@ bool celldrawer::draw_shmup_monster() {
           c->stuntime = 1 + (m->stunoff - curtime-1)/300;
         if(hasHitpoints(m->type))
           c->hitpoints = m->hitpoints;
-        if(m->type == moTortoise) tortoise::emap[c] = getBits(m->torigin);
+        if(m->type == moTortoise) tortoise::emap[c] = getBits(m->torigin) & ((1<<tortoise::numbits)-1);
         /* if(m->type == moMimic && GDIM == 3)
           drawMonsterType(m->type, c, view * spin(-M_PI/2), col, m->footphase); */
         /* else if(GDIM == 3)
