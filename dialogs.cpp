@@ -173,6 +173,7 @@ EX namespace dialog {
     if(k == SDLK_F9) return "F9";
     if(k == SDLK_F1) return "F1";
     if(k == SDLK_F4) return "F4";
+    if(k == SDLK_F3) return "F3";
     if(k >= 10000 && k < 10500) return "";
     if(k == SDLK_HOME) return "Home";
     if(k == SDLK_BACKSPACE) return "Backspace";
@@ -1397,6 +1398,8 @@ EX namespace dialog {
   
   void handleKeyFile(int sym, int uni);
 
+  bool search_mode;
+
   EX void drawFileDialog() {
     cmode = sm::NUMBER | dialogflags | sm::DIALOG_WIDE;
     gamescreen();
@@ -1413,15 +1416,22 @@ EX namespace dialog {
     struct dirent *dir;
 
     string where = ".";
+    string what = cfile;
     for(int i=0; i<isize(cfile); i++)
-      if(cfile[i] == '/' || cfile[i] == '\\')
+      if(cfile[i] == '/' || cfile[i] == '\\') {
         where = cfile.substr(0, i+1);
+        what = cfile.substr(i+1);
+        }
 
     d = opendir(where.c_str());
     if (d) {
       while ((dir = readdir(d)) != NULL) {
         string s = dir->d_name;
         if(s != ".." && s[0] == '.') ;
+        else if(search_mode) {
+          if(has_substring(human_simplify(s, true), human_simplify(what, true)))
+            v.push_back(make_pair(s, CFILE));
+          }
         else if(isize(s) > 4 && s.substr(isize(s)-4) == cfileext)
           v.push_back(make_pair(s, CFILE));
         else if(dir->d_type & DT_DIR)
@@ -1467,6 +1477,7 @@ EX namespace dialog {
     dialog::addBreak(100);
 
     dialog::addBoolItem_action("extension", editext, SDLK_F4);
+    dialog::addBoolItem_action("search mode", search_mode, SDLK_F3);
     dialog::addItem("choose", SDLK_RETURN);
     dialog::addItem("cancel", SDLK_ESCAPE);
     dialog::display();
@@ -1538,6 +1549,15 @@ EX namespace dialog {
   EX bool hasInfix(const string &s) {
     if(infix == "") return true;
     return human_simplify(s, false).find(infix) != string::npos;
+    }
+
+  EX bool has_substring(const string &s, const string& needle) {
+    int spos = 0, npos = 0;
+    while(true) {
+      if(npos == isize(needle)) return true;
+      if(spos == isize(s)) return false;
+      if(s[spos++] == needle[npos]) npos++;
+      }
     }
 
   EX bool editInfix(int uni) {
