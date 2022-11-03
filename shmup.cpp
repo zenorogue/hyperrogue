@@ -278,7 +278,7 @@ void killMonster(monster* m, eMonster who_kills, flagtype flags = 0) {
   if(callhandlers(false, hooks_kill, m)) return;
   if(m->dead) return;
   m->dead = true;
-  if(isPlayer(m) && m->fragoff < ticks) {
+  if(isPlayer(m) && m->fragoff < curtime) {
     if(multi::cpid == m->pid)
       multi::suicides[multi::cpid]++;
     else if(multi::cpid >= 0)
@@ -429,7 +429,7 @@ void shootBullet(monster *m) {
   bullet->inertia = m->inertia;
   bullet->inertia[frontdir()] += bullet_velocity(m->type) * SCALE;
   bullet->hitpoints = 0;
-  bullet->fragoff = ticks + bullet_time;
+  bullet->fragoff = curtime + bullet_time;
 
   additional.push_back(bullet);
   
@@ -1774,11 +1774,11 @@ void moveBullet(monster *m, int delta) {
 
   // items[itOrbWinter] = 100; items[itOrbLife] = 100;
   
-  bool no_self_hits = !multi::self_hits || m->fragoff > ticks;
+  bool no_self_hits = (m->type != moFlailBullet && !multi::self_hits) || m->fragoff > curtime;
 
   if(!m->isVirtual) for(monster* m2: nonvirtual) {
-    if(m2 == m || (m2 == m->parent && no_self_hits) || (m2->parent == m->parent && no_self_hits))
-      continue;
+    if(m2 == m) continue;
+    if((m2 == m->parent && no_self_hits) || (m2->parent == m->parent && no_self_hits)) continue;
     
     if(m2->dead) continue;
 
@@ -1911,6 +1911,18 @@ bool closer(monster *m1, monster *m2) {
   return sqdist(m1->pat*C0,  closerTo) < sqdist(m2->pat*C0, closerTo);
   }
 
+EX monster *create_bullet(monster *m, eMonster type) {
+  monster* bullet = new monster;
+  bullet->base = m->base;
+  bullet->at = m->at;
+  bullet->ori = m->ori;
+  bullet->type = type;
+  bullet->set_parent(m);
+  additional.push_back(bullet);
+  bullet->fragoff = curtime + bullet_time;
+  return bullet;
+  }
+
 EX bool dragonbreath(cell *dragon) {
   int randplayer = hrand(numplayers());
   monster* bullet = new monster;
@@ -1956,7 +1968,7 @@ void moveMonster(monster *m, int delta) {
 
   if(isFireOrMagma(m->base)) {
     if(m->type == moSalamander)
-      m->stunoff = max(ticks+500, m->stunoff);
+      m->stunoff = max(curtime+500, m->stunoff);
     else if(!survivesFire(m->type))
       killMonster(m, moNone);
     }
@@ -2284,14 +2296,8 @@ void moveMonster(monster *m, int delta) {
     if(usetongue) {
       if(curtime < m->nextshot) return;
       // m->nextshot = curtime + 25;
-      monster* bullet = new monster;
-      bullet->base = m->base;
-      bullet->at = m->at;
-      bullet->ori = m->ori;
-      bullet->type = moTongue;
-      bullet->set_parent(m);
+      monster* bullet = create_bullet(m, moTongue);
       bullet->pid = whichPlayerOn(c2);
-      additional.push_back(bullet);
       return;
       }
     }
@@ -2306,7 +2312,7 @@ void moveMonster(monster *m, int delta) {
 
   if(c2 != m->base && c2->wall == waFireTrap && c2->wparam == 0 && !ignoresPlates(m->type)) {
     c2->wparam = 2;
-    firetraplist.emplace(ticks + 800, c2);
+    firetraplist.emplace(curtime + 800, c2);
     }
 
   if(c2 != m->base && mayExplodeMine(c2, m->type)) 
@@ -2434,13 +2440,7 @@ void moveMonster(monster *m, int delta) {
 
   if(direct) {
     if((m->type == moPyroCultist || m->type == moCrystalSage) && curtime >= m->nextshot) {
-      monster* bullet = new monster;
-      bullet->base = m->base;
-      bullet->at = m->at;
-      bullet->ori = m->ori;
-      bullet->type = moFireball;
-      bullet->set_parent(m);
-      additional.push_back(bullet);
+      monster* bullet = create_bullet(m, moFireball);
       bullet->pid = directi;
       if(m->type == moPyroCultist) 
         m->type = moCultist;
@@ -2448,26 +2448,14 @@ void moveMonster(monster *m, int delta) {
         m->nextshot = curtime + 100;
       }
     if(m->type == moOutlaw && curtime >= m->nextshot) {
-      monster* bullet = new monster;
-      bullet->base = m->base;
-      bullet->at = m->at;
-      bullet->ori = m->ori;
-      bullet->type = moBullet;
-      bullet->set_parent(m);
+      monster* bullet = create_bullet(m, moBullet);
       bullet->pid = directi;
-      additional.push_back(bullet);
       m->nextshot = curtime + 1500;
       }
     for(int i=0; i<players; i++) if(!pc[i]->isVirtual)
     if((m->type == moAirElemental) && curtime >= m->nextshot && sqdist(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
-      monster* bullet = new monster;
-      bullet->base = m->base;
-      bullet->at = m->at;
-      bullet->ori = m->ori;
-      bullet->type = moAirball;
-      bullet->set_parent(m);
+      monster* bullet = create_bullet(m, moAirball);
       bullet->pid = i;
-      additional.push_back(bullet);
       m->nextshot = curtime + 1500;
       }
     for(int i=0; i<players; i++) if(!pc[i]->isVirtual)
@@ -2480,28 +2468,16 @@ void moveMonster(monster *m, int delta) {
     if(m->type == moFlailer && curtime >= m->nextshot && 
       sqdist(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
       m->nextshot = curtime + 3500;
-      monster* bullet = new monster;
-      bullet->base = m->base;
-      bullet->at = m->at;
-      bullet->ori = m->ori;
-      bullet->type = moFlailBullet;
-      bullet->set_parent(m);
+      monster* bullet = create_bullet(m, moFlailBullet);
       bullet->vel = 1/400.0;
       bullet->pid = i;
-      additional.push_back(bullet);
       break;
       }
     for(int i=0; i<players; i++) if(!pc[i]->isVirtual)
     if(m->type == moCrusher && sqdist(m->pat*C0, pc[i]->pat*C0) < SCALE2 * .75) {    
       m->stunoff = curtime + 1500;
-      monster* bullet = new monster;
-      bullet->base = m->base;
-      bullet->at = m->at;
-      bullet->ori = m->ori;
-      bullet->type = moCrushball;
-      bullet->set_parent(m);
+      monster* bullet = create_bullet(m, moCrushball);
       bullet->pid = i;
-      additional.push_back(bullet);
       break;
       }
     for(int i=0; i<players; i++) if(!pc[i]->isVirtual)
@@ -2793,8 +2769,8 @@ EX void turn(int delta) {
 
       if(pc[i]->dead && pvp_mode) {
         pc[i]->dead = false;
-        if(ticks > pc[i]->fragoff) {
-          pc[i]->fragoff = ticks + pvp_delay;
+        if(curtime > pc[i]->fragoff) {
+          pc[i]->fragoff = curtime + pvp_delay;
           pc[i]->nextshot = min(pc[i]->nextshot, pc[i]->fragoff);
           multi::deaths[i]++;
           }
@@ -3079,7 +3055,7 @@ bool celldrawer::draw_shmup_monster() {
             }
           if(m->inBoat) m->footphase = 0;
           if(mapeditor::drawplayer) {
-            if(m->fragoff > ticks)
+            if(m->fragoff > curtime)
               drawShield(view, itWarning);
             drawMonsterType(moPlayer, c, view, 0xFFFFFFC0, m->footphase, 0xFFFFFFC0);
             }
