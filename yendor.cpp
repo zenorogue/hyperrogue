@@ -621,7 +621,7 @@ EX namespace yendor {
             make_pair(-sc, scoreboard[i].username));
         }
       
-      displayScore(scorehere, vid.xres / 4);
+      displayScore(scorehere, vid.fsize);
       }
 
     yendor::uploadScore();
