@@ -1441,7 +1441,7 @@ EX namespace dialog {
       }
     sort(v.begin(), v.end(), filecmp);
 
-    dialog::start_list(1500, 1500);
+    dialog::start_list(2000, 2000);
     for(auto& vv: v) {
       dialog::addItem(vv.first, list_fake_key++);
       dialog::lastItem().color = vv.second;
@@ -1450,26 +1450,38 @@ EX namespace dialog {
       dialog::add_action([vf, dir] {
         string& s(*cfileptr);
         string where = "", what = s, whereparent = "../";
+        string last = "";
         for(int i=0; i<isize(s); i++)
           if(s[i] == '/') {
-            if(i >= 2 && s.substr(i-2,3) == "../")
+            if(i >= 2 && s.substr(i-2,3) == "../") {
               whereparent = s.substr(0, i+1) + "../";
-            else
+              last = "";
+              }
+            else {
+              last = s.substr(isize(where), i + 1 - isize(where));
               whereparent = where;
+              }
             where = s.substr(0, i+1), what = s.substr(i+1);
             }
         string str1;
-        if(vf == "../")
-          str1 = whereparent + what;
-        else if(dir)
-          str1 = where + vf + what;
-        else
-          str1 = where + vf;
-        if(s == str1) {
-          popScreen();
-          if(!file_action()) pushScreen(drawFileDialog);
+        if(vf == "../") {
+          s = whereparent + what;
+          find_highlight(last);
+          list_skip = 0;
           }
-        s = str1;
+        else if(dir) {
+          s = where + vf + what;
+          find_highlight("../");
+          list_skip = 0;
+          }
+        else {
+          str1 = where + vf;
+          if(s == str1) {
+            popScreen();
+            if(!file_action()) pushScreen(drawFileDialog);
+            }
+          s = str1;
+          }
         });
       }
     dialog::end_list();
@@ -1501,10 +1513,12 @@ EX namespace dialog {
     else if(sym == SDLK_BACKSPACE && i) {
       s.erase(i-1, 1);
       highlight_text = "//missing";
+      list_skip = 0;
       }
     else if(uni >= 32 && uni < 127) {
       s.insert(i, s0 + char(uni));
       highlight_text = "//missing";
+      list_skip = 0;
       }
     return;
     }
