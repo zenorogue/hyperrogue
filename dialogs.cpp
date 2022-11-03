@@ -388,8 +388,12 @@ EX namespace dialog {
   EX string highlight_text;
   EX int highlight_key;
 
-  EX bool is_highlight(item& I) { return I.body == highlight_text && I.key == highlight_key; }
+  EX bool is_highlight(item& I) { return I.body == highlight_text && among(highlight_key, I.key, PSEUDOKEY_SELECT); }
   EX void set_highlight(item& I) { highlight_text = I.body; highlight_key = I.key; }
+  EX void find_highlight(const string& s) {
+    println(hlog, "highlight_text set to ", s);
+    highlight_text = s; highlight_key = PSEUDOKEY_SELECT;
+    }
   
   EX void measure() {
     tothei = 0;
