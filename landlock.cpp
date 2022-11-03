@@ -379,7 +379,7 @@ EX eLand getNewLand(eLand old) {
   eLand l = callhandlers(laNone, hooks_nextland, old);
   if(l) return l;
   
-  if(cheatdest != old) if(!isCyclic(cheatdest) && !isTechnicalLand(cheatdest)) return cheatdest;
+  if(cheatdest != old && cheatdest != laElementalWall) if(!isCyclic(cheatdest) && !isTechnicalLand(cheatdest)) return cheatdest;
   
   if(old == laTortoise) return laDragon;
 
@@ -425,9 +425,9 @@ EX eLand getNewLand(eLand old) {
   #endif
 
   if(tactic::on) return specialland;
-  if(specialland != old && easy_to_find_specialland) return specialland;
+  if(specialland != old && easy_to_find_specialland && specialland != laElementalWall) return specialland;
 
-  if(specialland != old && easy_specialland) {
+  if(specialland != old && easy_specialland && specialland != laElementalWall) {
     easy_specialland--;
     return specialland;
     }
