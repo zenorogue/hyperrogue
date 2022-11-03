@@ -5733,6 +5733,7 @@ namespace sm {
   static const int NARROW_LINES = (1<<24); // do make the lines narrower if we needed to reduce width
   static const int EDIT_BEFORE_WALLS = (1<<25); // mouseover targets before walls
   static const int EDIT_INSIDE_WALLS = (1<<26); // mouseover targets inside walls
+  static const int DIALOG_WIDE = (1<<27); // make dialogs wide
   }
 #endif
 

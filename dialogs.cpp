@@ -405,6 +405,8 @@ EX namespace dialog {
     bool autoval = cmode & sm::AUTO_VALUES;
     rightwidth = 0;
     if(!autoval) rightwidth = textwidth(dfsize, "MMMMMMMM") + dfsize/2;
+    if(cmode & sm::DIALOG_WIDE)
+      innerwidth = textwidth(dfsize, "MMMMM") * 7;
 
     for(int i=0; i<N; i++) {
       if(items[i].type == diListStart)
@@ -1396,7 +1398,7 @@ EX namespace dialog {
   void handleKeyFile(int sym, int uni);
 
   EX void drawFileDialog() {
-    cmode = sm::NUMBER | dialogflags;
+    cmode = sm::NUMBER | dialogflags | sm::DIALOG_WIDE;
     gamescreen();
     init(filecaption);
 
