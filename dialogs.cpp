@@ -1513,8 +1513,7 @@ EX namespace dialog {
   string foreign_letters = "ÁÄÇÈÉÍÎÖÚÜßàáâãäçèéêìíîïòóôõöøùúüýąćČčĎďĘęĚěğİıŁłńňŘřŚśŞşŠšŤťůŹźŻżŽž";
   string latin_letters   = "AACEEIIOUUsAAAAACEEEIIIIOOOOOOUUUYACCCDDEEEEGIILLNNRRSSSSSSTTUZZZZZZ";
 
-  EX bool hasInfix(const string &s) {
-    if(infix == "") return true;
+  EX string human_simplify(const string &s, bool include_symbols) {
     string t = "";
     for(int i=0; i<isize(s); i++) {
       char c = s[i];
@@ -1522,6 +1521,7 @@ EX namespace dialog {
       if(c >= 'a' && c <= 'z') tt += c - 32;
       else if(c >= 'A' && c <= 'Z') tt += c;
       else if(c == '@') tt += c;
+      else if(include_symbols && c > 0) tt += c;
       
       if(tt == 0) for(int k=0; k<isize(latin_letters); k++) {
         if(s[i] == foreign_letters[2*k] && s[i+1] == foreign_letters[2*k+1]) {
@@ -1532,9 +1532,14 @@ EX namespace dialog {
 
       if(tt) t += tt;
       }
-    return t.find(infix) != string::npos;
+    return t;
     }
-  
+
+  EX bool hasInfix(const string &s) {
+    if(infix == "") return true;
+    return human_simplify(s, false).find(infix) != string::npos;
+    }
+
   EX bool editInfix(int uni) {
     if(uni >= 'A' && uni <= 'Z') infix += uni;
     else if(uni >= 'a' && uni <= 'z') infix += uni-32;
