@@ -2433,8 +2433,14 @@ void moveMonster(monster *m, int delta) {
       }
     else {
       if(peace::on) { igo++; goto igo_retry; }
-      if(m->type == moRagingBull && m->stunoff == CHARGING)
+      if(m->type == moRagingBull && m->stunoff == CHARGING) {
+        auto old = m->base->monst;
+        m->base->monst = m->type;
+        beastcrash(c2, m->base);
+        if(m->base->monst != m->type) m->dead = true;
+        m->base->monst = old;
         m->stunoff = curtime + BULLSTUN;
+        }
       }
     }
 
