@@ -271,6 +271,7 @@ struct storydata { int s; int e; const char *text; } story[] = {
     return;
     }
   }
+#undef T
 #endif
 
 string its05(int i) { char buf[64]; sprintf(buf, "%05d", i); return buf; }
