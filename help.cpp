@@ -185,7 +185,7 @@ EX void buildHelpText() {
 #endif
 #endif
   help += XLAT("See more on the website: ") 
-    + "http//roguetemple.com/z/hyper/\n\n";
+    + "https://roguetemple.com/z/hyper/\n\n";
   
 #if CAP_TOUR
   if(!tour::on)
