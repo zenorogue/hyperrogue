@@ -1,3 +1,5 @@
+#ifndef _DHRG_H_
+#define _DHRG_H_
 #define DHRGVER "7.1"
 #include "../rogueviz.h"
 
@@ -72,5 +74,4 @@ void prepare_pairs(int N, const neighborhoodfun& nei);
 void greedy_routing(iddata& d, const distfun& distance_function);
 
 }
-
-
+#endif
