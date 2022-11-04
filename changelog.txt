@@ -4818,3 +4818,18 @@ Menu improvements:
 - achievements disabled in ineligible starting lands
 - limit on pauses in the racing mode
 - fixed the ogg files
+
+2022-10-27 15:53 Update 12.1e:
+- fixed some bugs with editing portal spaces
+- some fixes in help text
+- page buttons in PTM are back
+- layout in Yendor should be improved
+- fixed buggy generation when setting Elemental Wall as cheat destination
+- file dialog improvements (more options, automatically set position, search mode)
+- fixes to the shmup mode:
+- - Gadflies no longer appear forever with high Spinel counts
+- - pause count is no longer displayed in non-racing; also reset to 0
+- - fixed pink tortoises appearing in Galápagos
+- - Bulls now correctly destroy walls they crash into
+- - fixed wrong time used in some places (running time instead of game time)
+- - fixed the Flail Guards
