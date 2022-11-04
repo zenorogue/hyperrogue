@@ -816,11 +816,6 @@ void geometry_information::prepare_basics() {
     plevel = M_PI * single_step / psl_steps;
     }
   
-  if(hybri) {
-    /* we do not want too short creatures, better make the scale factor smaller */
-    scalefactor = min(scalefactor, cgi.plevel * 1.8 / vid.height_width);
-    }
-  
   set_sibling_limit();
   
   prepare_compute3();

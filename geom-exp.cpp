@@ -1004,6 +1004,7 @@ EX void showEuclideanMenu() {
     dialog::addSelItem(XLAT("Z-level height factor"), fts(vid.plevel_factor), 'Z');
     dialog::add_action([] {
       dialog::editNumber(vid.plevel_factor, 0, 2, 0.1, 0.7, XLAT("Z-level height factor"), "");
+      dialog::reaction = ray::reset_raycaster;
       });
     }
   else if(hybri) {

@@ -702,6 +702,8 @@ EX void world_list() {
         addMessage(XLAT("Map loaded from %1", levelfile));
         intra::become();
         intra::start();
+        mapeditor::map_version++;
+        ray::reset_raycaster();
         return true;
         }
       else {
@@ -814,6 +816,8 @@ EX void show_portals() {
     dialog::addSelItem(XLAT("height-to-width ratio"), fts(r), 'r');
     dialog::add_action([] {
       be_ratio_edge(mouseover2, point_direction);
+      mapeditor::map_version++;
+      ray::reset_raycaster();
       });
     }
   else dialog::addBreak(100);
@@ -863,7 +867,7 @@ EX ld get_edge_length(cell *c, int i) {
 
 EX ld get_ratio_edge(cell *c, int i) {
   ld len = get_edge_length(c, i);
-  return PIU( vid.plevel_factor * cgi.scalefactor / len );
+  return vid.plevel_factor * cgi.scalefactor / len;
   }
 
 EX void be_ratio_edge(cell *c, int i, ld v IS(1)) {
