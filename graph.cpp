@@ -1512,7 +1512,8 @@ void drawMimic(eMonster m, cell *where, const shiftmatrix& V, color_t col, doubl
       if(items[itOrbSide3] && emp)
         queuepoly(VBODY * VBS, (cs.charid&1) ? cgi.shFerocityF : cgi.shFerocityM, darkena(col, 0, 0x40));
 
-      queuepoly(VBODY * VBS, (cs.charid >= 2 ? cgi.shSabre : cgi.shPSword), darkena(col, 0, 0XC0));
+      shiftmatrix VWPN = cs.lefthanded ? VBODY * VBS * Mirror : VBODY * VBS;
+      queuepoly(VWPN, (cs.charid >= 2 ? cgi.shSabre : cgi.shPSword), darkena(col, 0, 0XC0));
       }
     else if(!where || shmup::curtime >= shmup::getPlayer()->nextshot)
       queuepoly(VBODY * VBS, cgi.shPKnife, darkena(col, 0, 0XC0));
