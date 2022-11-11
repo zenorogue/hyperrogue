@@ -547,10 +547,8 @@ EX namespace inv {
                 quickqueue();
                 }
               
-              int tcol = remaining[i] ? darkenedby(icol, 1) : 0;
-  
               if(remaining[i] != 1 || !gg)
-                displaystr(px, py, 2, gg?rad:rad*3/2, remaining[i] <= 0 ? "X" : remaining[i] == 1 ? "o" : its(remaining[i]), tcol, 8);
+                displaystr(px, py, 2, gg?rad:rad*3/2, remaining[i] <= 0 ? "X" : remaining[i] == 1 ? "o" : its(remaining[i]), 0, 8);
               }
             
             bool b = hypot(mousex-px, mousey-py) < rad;
