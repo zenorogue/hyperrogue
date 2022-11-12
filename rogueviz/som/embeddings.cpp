@@ -93,7 +93,7 @@ ld hrandd() {
 ld gaussian_random() {
   ld u1 = hrandd();
   ld u2 = hrandd();
-  return sqrt(-2*log(u1)) * cos(2*M_PI*u2);
+  return sqrt(-2*log(u1)) * cos(TAU*u2);
   }
 
 void apply_delta(cellwalker cw, kohvec& v) {
@@ -226,9 +226,9 @@ void get_coordinates(kohvec& v, cell *c, cell *c0) {
         alloc(v);
         int s = T0[0][0];
         for(int i=0; i<3; i++) {
-          hyperpoint h1 = spin(120*degree*i) * h;
+          hyperpoint h1 = spin(120._deg*i) * h;
           ld x = h1[1];
-          ld alpha = 2 * M_PI * x / s / (sqrt(3) / 2);
+          ld alpha = TAU * x / s / (sqrt(3) / 2);
           // println(hlog, kz(x), " -> ", kz(alpha));
           v[2*i] = cos(alpha);
           v[2*i+1] = sin(alpha);
@@ -250,7 +250,7 @@ void get_coordinates(kohvec& v, cell *c, cell *c0) {
         auto& T0 = eu_input.user_axes;
         for(int i=0; i<3; i++) {
           int s = T0[i][i];
-          ld alpha = 2 * M_PI * h[i] / s;
+          ld alpha = TAU * h[i] / s;
           v[2*i] = cos(alpha) * s;
           v[2*i+1] = sin(alpha) * s;
           }

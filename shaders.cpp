@@ -798,7 +798,7 @@ void display_data::set_projection(int ed, ld shift) {
     glhr::projection_multiply(model_orientation_gl());
 
   if(selected->shader_flags & SF_BAND)
-    glhr::projection_multiply(glhr::scale(2 / M_PI, 2 / M_PI, GDIM == 3 ? 2/M_PI : 1));
+    glhr::projection_multiply(glhr::scale(1 / 90._deg, 1 / 90._deg, GDIM == 3 ? 1/90._deg : 1));
 
   if(selected->shader_flags & SF_BAND) {
     glhr::projection_multiply(glhr::translate(shift, 0, 0));

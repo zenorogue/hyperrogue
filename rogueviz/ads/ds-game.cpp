@@ -140,7 +140,7 @@ struct rock_generator {
     for(int i=0; i<qty; i++) {
       cshift ++;
       for(ld j=-3; j<=3; j++) {
-        add(spin(alpha + i * spinv) * cspin(0, 2, j * step) * spin(90*degree) * lorentz(0, 3, rapidity));
+        add(spin(alpha + i * spinv) * cspin(0, 2, j * step) * spin90() * lorentz(0, 3, rapidity));
         }
       }
     }
@@ -197,7 +197,7 @@ struct rock_generator {
       ld step = rand_range(.2, .5);
       ld alpha = rand_range(0, TAU);
       cshift += rand_range(0.5, 1) * (1 + cshift / 10);
-      auto r = add(spin(alpha) * cspin(0, 2, step) * spin(90*degree) * lorentz(0, 3, rapidity));
+      auto r = add(spin(alpha) * cspin(0, 2, step) * spin90() * lorentz(0, 3, rapidity));
       eResourceType rt = eResourceType(2 + rand() % 4);
       if(rt == rtGold) rt = rtHull;
       r->type = oResource;

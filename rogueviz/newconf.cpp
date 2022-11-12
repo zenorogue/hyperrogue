@@ -489,7 +489,7 @@ int redraws;
 
 void redraw_texture() {
   View = Id;
-  if(arcm::in()) View = View * spin(45 * degree);
+  if(arcm::in()) View = View * spin(45._deg);
   dynamicval<int> cgl(vid.cells_generated_limit, 9999999);
   dynamicval<int> cdl(vid.cells_drawn_limit, 9999999);
   dynamicval<bool> r(mousing, false);
@@ -629,7 +629,7 @@ void draw_ncee() {
     period = 2 * hdist0(tC0(currentmap->adj(cwt.at, 0)));
     }
 
-  period *= 2 / M_PI;
+  period /= 90._deg;
   
   dynamicval<eModel> pm(pmodel, mdPixel);
   dynamicval<eGeometry> pg(geometry, gEuclid);
@@ -919,7 +919,7 @@ void ncee() {
     if(uni == 'X') {
       int D = 100;
   
-      fmap = genellipse(D, -10 * degree), reset_vxy();
+      fmap = genellipse(D, -10._deg), reset_vxy();
       #if CAP_NCONF
       nconf_solve(); 
       #endif

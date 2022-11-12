@@ -241,7 +241,7 @@ EX void drawArrowTraps() {
           hyperpoint trel = inverse_shift(tu, tC0(tv));
           shiftmatrix tpartial = tu * rspintox(trel) * xpush(hdist0(trel) * tt / 401.0);
           tpartial = tpartial * ypush(.05);
-          if(GDIM == 3) tpartial = tpartial * cspin(1, 2, M_PI/2);
+          if(GDIM == 3) tpartial = tpartial * cspin90(1, 2);
           queuepoly(tpartial, cgi.shTrapArrow, 0xFFFFFFFF);
           }
         }

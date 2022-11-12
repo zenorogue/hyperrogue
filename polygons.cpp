@@ -18,8 +18,7 @@ static constexpr ld WOLF = (-15.5);
 void geometry_information::hpc_connect_ideal(hyperpoint a, hyperpoint b) {
   ld left = -atan2(a);
   ld right = -atan2(b);
-  if(right > left + 180*degree) right -= 360*degree;
-  if(right < left - 180*degree) right += 360*degree;
+  cyclefix(right, left);
   /* call hpc.push_back directly to avoid adding points */
   ld qty = ceil(abs(right-left) / ideal_each);
   for(int i=0; i<=qty; i++) hpc.push_back(xspinpush0(lerp(left, right, i/qty), ideal_limit));
@@ -149,7 +148,7 @@ void geometry_information::extra_vertices() {
 #endif
   }
 
-transmatrix geometry_information::ddi(int a, ld x) { return xspinpush(a * M_PI / S42, x); }
+transmatrix geometry_information::ddi(int a, ld x) { return xspinpush(a * S_step, x); }
 
 void geometry_information::drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
   double tlength = max(crossf, hexhexdist);
@@ -319,7 +318,7 @@ void geometry_information::bshape(hpcshape& sh, PPR prio, double shzoom, int sha
       }
     }
   else shzoomx *= bscale7, shzoomy *= bscale7;
-  double bonusf = /* sphere ? M_PI*4/35 : */ (rots-rots2+.0) / rots2;
+  double bonusf = (rots-rots2+.0) / rots2;
 
   auto ipoint = [&] (int i, int mul) {
     hyperpoint h = hpxy(polydata[whereis+2*i] * shzoomx, polydata[whereis+2*i+1] * shzoomy * mul);
@@ -330,10 +329,10 @@ void geometry_information::bshape(hpcshape& sh, PPR prio, double shzoom, int sha
 
   for(int r=0; r<rots2; r++) {
     for(int i=0; i<qty; i++)
-      hpcpush(spin(2*M_PI*r/rots2) * ipoint(i, 1));
+      hpcpush(spin(TAU*r/rots2) * ipoint(i, 1));
     if(sym == 2)
     for(int i=qty-1; i>=0; i--)
-      hpcpush(spin(2*M_PI*r/rots2) * ipoint(i, -1));
+      hpcpush(spin(TAU*r/rots2) * ipoint(i, -1));
     }
   hpcpush(ipoint(0, 1));
   finishshape();
@@ -412,8 +411,8 @@ void geometry_information::make_sidewalls() {
 void geometry_information::procedural_shapes() {
   bshape(shMovestar, PPR::MOVESTAR);
   for(int i=0; i<=8; i++) {
-    hpcpush(xspinpush0(M_PI * i/4, crossf));
-    if(i != 8) hpcpush(xspinpush0(M_PI * i/4 + M_PI/8, crossf/4));
+    hpcpush(xspinpush0(90._deg * i, crossf));
+    if(i != 8) hpcpush(xspinpush0(90._deg * i + 45._deg, crossf/4));
     }
 
   // procedural floors
@@ -525,7 +524,7 @@ void geometry_information::procedural_shapes() {
 
   bshape(shCross, PPR::WALL);
   for(int i=0; i<=84; i+=7)
-    hpcpush(xspinpush0(2*M_PI*i/84, zhexf * (i%3 ? 0.8 : 0.3)));
+    hpcpush(xspinpush0(TAU*i/84, zhexf * (i%3 ? 0.8 : 0.3)));
 
 // items
 
@@ -634,8 +633,8 @@ void geometry_information::procedural_shapes() {
 
   bshape(shEccentricDisk, PPR::ITEM);
   for(int i=0; i<=S84; i+=SD3) {
-    hpcpush(hpxy(sin(i*2*M_PI/S84)*orbsize*.075,
-                 cos(i*2*M_PI/S84)*orbsize*.075 + .07));
+    hpcpush(hpxy(sin(i*S_step)*orbsize*.075,
+                 cos(i*S_step)*orbsize*.075 + .07));
     }
 
   bshape(shDiskSq, PPR::ITEM);
@@ -645,11 +644,11 @@ void geometry_information::procedural_shapes() {
 
   bshape(shEgg, PPR::ITEM);
   RING(i)
-    hpcpush(hpxy(sin(i*2*M_PI/S84)*0.242 * orbsize, cos(i*2*M_PI/S84)*0.177*orbsize));
+    hpcpush(hpxy(sin(i*S_step)*0.242 * orbsize, cos(i*S_step)*0.177*orbsize));
 
   bshape(shSmallEgg, PPR::ITEM);
   RING(i)
-    hpcpush(hpxy(sin(i*2*M_PI/S84)*0.242 * orbsize/2, cos(i*2*M_PI/S84)*0.177*orbsize/2));
+    hpcpush(hpxy(sin(i*S_step)*0.242 * orbsize/2, cos(i*S_step)*0.177*orbsize/2));
   
   auto make_ring = [this] (hpcshape& sh, reaction_t f) {
     bshape(sh, PPR::ITEM);
@@ -812,11 +811,11 @@ void geometry_information::procedural_shapes() {
 
   bshape(shSlime, PPR::MONSTER_BODY);
   PRING(i)
-    hpcpush(ddi(i, scalefactor * hcrossf7 * (0.7 + .2 * sin(i * M_PI * 2 / S84 * 9))) * C0);
+    hpcpush(ddi(i, scalefactor * hcrossf7 * (0.7 + .2 * sin(i * S_step * 9))) * C0);
 
   bshape(shJelly, PPR::MONSTER_BODY);
   PRING(i)
-    hpcpush(ddi(i, scalefactor * hcrossf7 * (0.4 + .03 * sin(i * M_PI * 2 / S84 * 7))) * C0);
+    hpcpush(ddi(i, scalefactor * hcrossf7 * (0.4 + .03 * sin(i * S_step * 7))) * C0);
 
   bshape(shHeptaMarker, PPR::HEPTAMARK);
   for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, zhexf*.2) * C0);
@@ -826,25 +825,25 @@ void geometry_information::procedural_shapes() {
 
   bshape(shRose, PPR::ITEM);
   PRING(t)
-    hpcpush(xspinpush0(M_PI * t / (S42+.0), scalefactor * hcrossf7 * (0.2 + .15 * sin(M_PI * t / (S42+.0) * 3))));
+    hpcpush(xspinpush0(S_step * t, scalefactor * hcrossf7 * (0.2 + .15 * sin(S_step * t * 3))));
   finishshape();
 
   shRoseItem = shRose;
 
   bshape(shSmallRose, PPR::ITEM);
   PRING(t)
-    hpcpush(xspinpush0(M_PI * t / (S42+.0), scalefactor/2 * hcrossf7 * (0.2 + .15 * sin(M_PI * t / (S42+.0) * 3))));
+    hpcpush(xspinpush0(S_step * t, scalefactor/2 * hcrossf7 * (0.2 + .15 * sin(S_step * t * 3))));
   finishshape();
 
   bshape(shThorns, PPR::THORNS);
   for(int t=0; t<=60; t++)
-    hpcpush(xspinpush0(M_PI * t / 30.0, scalefactor * hcrossf7 * ((t&1) ? 0.3 : 0.6)));
+    hpcpush(xspinpush0(TAU * t / 60, scalefactor * hcrossf7 * ((t&1) ? 0.3 : 0.6)));
 
   for(int i=0; i<16; i++) {
     bshape(shParticle[i], PPR::PARTICLE);
     for(int t=0; t<6; t++)
 //    hpcpush(xspinpush0(M_PI * t * 2 / 6 + M_PI * 2/6 * hrand(100) / 150., (0.03 + hrand(100) * 0.0003) * scalefactor));
-      hpcpush(xspinpush0(M_PI * t * 2 / 6 + M_PI * 2/6 * randd() / 1.5, (0.03 + randd() * 0.03) * scalefactor));
+      hpcpush(xspinpush0(TAU * t / 6 + 60._deg * randd() / 1.5, (0.03 + randd() * 0.03) * scalefactor));
     hpc.push_back(hpc[last->s]);
     }
 
@@ -853,7 +852,7 @@ void geometry_information::procedural_shapes() {
     if(GDIM == 3) asteroid_size[i] *= 7;
     bshape(shAsteroid[i], PPR::PARTICLE);
     for(int t=0; t<12; t++)
-      hpcpush(xspinpush0(M_PI * t / 6, asteroid_size[i] * (1 - randd() * .2)));
+      hpcpush(xspinpush0(TAU * t / 12, asteroid_size[i] * (1 - randd() * .2)));
     hpc.push_back(hpc[last->s]);
     }
 
@@ -1100,7 +1099,7 @@ void geometry_information::configure_floorshapes() {
   if(!BITRUNCATED) {
     ld hedge = hdist(xspinpush0(M_PI/S7, rhexf), xspinpush0(-M_PI/S7, rhexf));
 
-    trihepta1 = hdist0(xpush(tessf) * xspinpush0(2*M_PI*2/S7, tessf)) / 2 * .98;
+    trihepta1 = hdist0(xpush(tessf) * xspinpush0(TAU*2/S7, tessf)) / 2 * .98;
     trihepta0 = hdist0(xpush(-tessf) * xspinpush0(M_PI/S7, rhexf+hedge/2)) * .98;
     }
 
@@ -1150,6 +1149,7 @@ void geometry_information::prepare_shapes() {
   S28 = SD7 * 4;
   S36 = SD6 * 6;
   S84 = S42 * 2;
+  S_step = A_PI / S42;
 
   // printf("crossf = %f euclid = %d sphere = %d\n", float(crossf), euclid, sphere);
   hpc.clear(); ext.clear();
@@ -1179,11 +1179,11 @@ void geometry_information::prepare_shapes() {
     dynamicval<int> d(vid.texture_step, max(vid.texture_step, 4));
     ld len6 = hdist0(mid(xpush0(hexvdist), spin(M_PI/S3) * xpush0(hexvdist)));
 
-    ld len7 = hdist0(mid(xpush0(hexf), spin(M_PI*2/S7) * xpush0(hexf)));
-    ld hlen7 = hdist0(mid(xpush0(hcrossf), spin(M_PI*2/S7) * xpush0(hcrossf)));
+    ld len7 = hdist0(mid(xpush0(hexf), spin(TAU/S7) * xpush0(hexf)));
+    ld hlen7 = hdist0(mid(xpush0(hcrossf), spin(TAU/S7) * xpush0(hcrossf)));
 
     ld lenx = hdist(xpush0(hexvdist), spin(M_PI/S3) * xpush0(hexvdist));
-    ld hlenx = hdist(xpush0(hcrossf), spin(2*M_PI/S7) * xpush0(hcrossf));
+    ld hlenx = hdist(xpush0(hcrossf), spin(TAU/S7) * xpush0(hcrossf));
 
     bshape(shHalfMirror[2], PPR::WALL);
     hpcpush(C0); hpcpush(xpush0(-len6*scalefactor));  chasmifyPoly(FLOOR, WALL, 0);

@@ -156,7 +156,7 @@ void run_snub(int v, int w) {
   for(cell *c: currentmap->allcells()) {
     int id = arcm::id_of(c->master);
     if(among(id, 0, 1)) for(int d=0; d<v; d++) {
-      transmatrix T = rel * ggmatrix(c).T * spin(2*M_PI*d/v);
+      transmatrix T = rel * ggmatrix(c).T * spin(TAU*d/v);
       array<hyperpoint,3> hts;
       for(int i=0; i<3; i++) 
         hts[i] = T * ts[i] * C0;
@@ -213,12 +213,12 @@ void create_model() {
   hyperpoint chk = ts[0] * xspinpush0(alpha, h);
 
   mts[0] = chk;
-  mts[1] = spin(-2*M_PI/v) * chk;
+  mts[1] = spin(-TAU/v) * chk;
   mts[2] = matrix2 * chk;
 
   hyperpoint c[5];
   for(int i=0; i<5; i++)
-    c[i] = hpxy(sin(2 * i * M_PI/5), cos(2 * i * M_PI/5));
+    c[i] = hpxy(sin(i * TAU/5), cos(i * TAU/5));
     
   hyperpoint tria[5];
   tria[0] = mts[0];
@@ -256,7 +256,7 @@ void create_model() {
   
   // printf("createmodel with ticks = %d\n", ticks);
 
-  transmatrix t = hyperbolic ? hr::cspin(0, 2, M_PI) * xpush(sin(ticks * M_PI * 2 / anims::period)) : hr::cspin(0, 2, ticks * M_PI * 2 / anims::period);
+  transmatrix t = hyperbolic ? hr::cspin180(0, 2) * xpush(sin(ticks * TAU / anims::period)) : hr::cspin(0, 2, ticks * TAU / anims::period);
   
   hyperpoint hs = hyperbolic ? hpxyz(0,0,-1) : hpxyz(0,0,0);
   

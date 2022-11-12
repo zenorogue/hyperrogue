@@ -191,16 +191,14 @@ EX rugpoint *addRugpoint(shiftpoint h, double dist) {
     ld d = h1[0] * h[1] - h1[1] * h[0]; 
     ld a = h[0] * h1[0] + h[1] * h1[1];
 
-    // m->flat = modelscale * hpxyz(d * 2 * M_PI, sin(a * 2 * M_PI), cos(a * 2 * M_PI));
-
     USING_NATIVE_GEOMETRY;
-    hyperpoint hpoint = ypush(modelscale) * xpush0(modelscale * d * 2 * M_PI);
+    hyperpoint hpoint = ypush(modelscale) * xpush0(modelscale * d * TAU);
     ld hpdist = hdist0(hpoint);
     ld z = hypot_d(2, hpoint);
     if(z==0) z = 1;
     hpoint = hpoint * hpdist / z;
     
-    m->native = point31(hpoint[0], hpoint[1] * sin(a*2*M_PI), hpoint[1]*cos(a*2*M_PI));
+    m->native = point31(hpoint[0], hpoint[1] * sin(a*TAU), hpoint[1]*cos(a*TAU));
     }
   else if(sphere) {
     m->valid = good_shape = true;
@@ -216,7 +214,7 @@ EX rugpoint *addRugpoint(shiftpoint h, double dist) {
     else if(sphere) {
       if(modelscale >= 1) 
         // do as good as we can...
-        scale = M_PI / 2 - 1e-3, good_shape = false, m->valid = false;
+        scale = 90._deg - 1e-3, good_shape = false, m->valid = false;
       else scale = asin(modelscale);
       }
     else
@@ -374,15 +372,15 @@ struct clifford_torus {
     }
   clifford_torus();
   ld get_modelscale() {
-    return hypot_d(2, xh) * xfactor * 2 * M_PI;
+    return hypot_d(2, xh) * xfactor * TAU;
     }
   ld compute_mx();  
   };
 #endif
 
 struct hyperpoint clifford_torus::torus_to_s4(hyperpoint t) {
-  double alpha = -t[0] * 2 * M_PI;
-  double beta = t[1] * 2 * M_PI;
+  double alpha = -t[0] * TAU;
+  double beta = t[1] * TAU;
   
   ld ax = alpha + 1.124651, bx = beta + 1.214893;
   return hyperpoint(
@@ -1085,7 +1083,7 @@ EX void prepareTexture() {
     shiftmatrix V = rgpushxto0(finger_center->h);
     queuestr(V, 0.5, "X", 0xFFFFFFFF, 2);
     for(int i=0; i<72; i++)
-      queueline(V * xspinpush0(i*M_PI/32, finger_range), V * xspinpush0((i+1)*M_PI/32, finger_range), 0xFFFFFFFF, vid.linequality);
+      queueline(V * xspinpush0(i*A_PI/32, finger_range), V * xspinpush0((i+1)*A_PI/32, finger_range), 0xFFFFFFFF, vid.linequality);
     }
   drawqueue();
   calcparam();
@@ -1286,7 +1284,7 @@ EX bool handlekeys(int sym, int uni) {
       crystal::switch_z_coordinate();
     else
     #endif
-      rotate_view(cspin(0, 2, M_PI));
+      rotate_view(cspin180(0, 2));
     return true;
     }
   else if(NUMBERKEY == '4') {
@@ -1295,7 +1293,7 @@ EX bool handlekeys(int sym, int uni) {
       crystal::flip_z();
     else
     #endif
-      rotate_view(cspin(0, 2, M_PI/2));
+      rotate_view(cspin90(0, 2));
     return true;
     }
   #if CAP_CRYSTAL
@@ -1573,7 +1571,7 @@ EX void show() {
   if(rug::rugged)
     dialog::addSelItem(XLAT("model iterations"), its(queueiter), 0);
   dialog::addItem(XLAT("stereo vision config"), 'f');
-  // dialog::addSelItem(XLAT("protractor"), fts(protractor * 180 / M_PI) + "°", 'f');
+  // dialog::addSelItem(XLAT("protractor"), fts(protractor / degree) + "°", 'f');
   if(!good_shape) {
     dialog::addSelItem(XLAT("maximum error"), fts(err_zero), 'e');
     if(rug::rugged)

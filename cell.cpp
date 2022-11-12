@@ -1071,7 +1071,7 @@ int ld_to_int(ld x) {
 #if CAP_ARCM
 EX gp::loc pseudocoords(cell *c) {
   transmatrix T = arcm::archimedean_gmatrix[c->master].second;
-  return {ld_to_int(T[0][LDIM]), ld_to_int((spin(60*degree) * T)[0][LDIM])};
+  return {ld_to_int(T[0][LDIM]), ld_to_int((spin(60._deg) * T)[0][LDIM])};
   }
 
 EX cdata *arcmCdata(cell *c) {

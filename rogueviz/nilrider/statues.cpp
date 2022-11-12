@@ -95,8 +95,8 @@ bool closed_grid(int x, int y) {
 
 template<class T1, class T2> void add_statue(const T1& grid, const T2& f) {
   auto pt = [&] (int x, int y) {
-    ld x1 = x * M_PI / 16.;
-    ld y1 = y * M_PI / 32.;
+    ld x1 = x * TAU / 32;
+    ld y1 = y * TAU / 64;
     cgi.hpcpush(f(x1,y1));
     };
   for(int y=-16; y<16; y++)
@@ -130,7 +130,7 @@ void init_statues() {
   for(int i=0; i<8; i++) {
     hyperpoint z = point31(0, 1e-6, 8);
     hyperpoint ih = inverse_exp(shiftless(z));
-    ih = spin(i * 45 * degree) * ih;
+    ih = spin(i * TAU / 8) * ih;
     add_statue(closed_grid, [&] (ld lon, ld lat) {
       lat = lat * .75;
       hyperpoint h = direct_exp(ih * (.5 + lat / M_PI));
@@ -141,7 +141,7 @@ void init_statues() {
   cgi.extra_vertices();
   cgi.add_texture(shGeostatue);
 
-  for(ld z: vector<ld> {M_PI/2+1e-2, M_PI+1e-2, M_PI*2+1e-2, 7, 10})
+  for(ld z: vector<ld> {90._deg+1e-2, M_PI+1e-2, TAU+1e-2, 7, 10})
   for(hyperpoint h: {point31(0, 0, z), point31(1e-3, 0, z), point31(1e-6, 0, z), point31(0, 1e-6, z)}) {
     hyperpoint i = inverse_exp(shiftless(h));
     println(hlog, i, " @ ", hypot_d(3, i));

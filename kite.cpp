@@ -53,8 +53,8 @@ hyperpoint mhpxy(ld x, ld y) {
 const ld phi = golden_phi;
 const ld rphi = 1 / phi;
 
-const ld down = 1 / tan(36 * degree);
-const ld up = 1 / tan(72 * degree);
+const ld down = 1 / tan(36._deg);
+const ld up = 1 / tan(72._deg);
 
 const ld dart_center = (down + 2 * up) / 3;
 const ld kite_center = up;
@@ -82,8 +82,8 @@ EX pair<vector<vector<hyperpoint>>, vector<vector<ld>>> make_walls() {
     hyperpoint dtop    = meupush( 0, shf+t*up) * meuscale(rphi) * C0;
     hyperpoint dbottom = meupush( 0, shf-down) * meuscale(rphi) * C0;
     
-    hyperpoint dleftmid = (!kite) ? meupush(0, shf-down) * meuscale(rphi) * meupush(-1, down) * C0 : meupush(0, shf-down) * meuscale(rphi) * mspin(-36 * degree) * meupush(0, down - up) * C0;
-    hyperpoint drightmid = (!kite) ? meupush(0, shf-down) * meuscale(rphi) * meupush(1, down) * C0 : meupush(0, shf-down) * meuscale(rphi) * mspin(36 * degree) * meupush(0, down - up) * C0;
+    hyperpoint dleftmid = (!kite) ? meupush(0, shf-down) * meuscale(rphi) * meupush(-1, down) * C0 : meupush(0, shf-down) * meuscale(rphi) * mspin(-36._deg) * meupush(0, down - up) * C0;
+    hyperpoint drightmid = (!kite) ? meupush(0, shf-down) * meuscale(rphi) * meupush(1, down) * C0 : meupush(0, shf-down) * meuscale(rphi) * mspin(36._deg) * meupush(0, down - up) * C0;
     
     hyperpoint dcenter = meupush( 0, shf-up) * meuscale(rphi) * C0;
     
@@ -247,12 +247,12 @@ struct hrmap_kite : hrmap {
     }
 
   void make_graphrules() {
-    pKite1 = meupush(-1, kite_center + 0) * mspin(108 * degree) * meuscale(rphi) * meupush(0, down - kite_center);
-    pKite2 = meupush(1, kite_center + 0) * mspin(-108 * degree) * meuscale(rphi) * meupush(0, down - kite_center);
-    pKite3 = meupush(0, kite_center - down) * mspin(36 * degree) * meuscale(rphi) * meupush(0, down - dart_center);
+    pKite1 = meupush(-1, kite_center + 0) * mspin(108._deg) * meuscale(rphi) * meupush(0, down - kite_center);
+    pKite2 = meupush(1, kite_center + 0) * mspin(-108._deg) * meuscale(rphi) * meupush(0, down - kite_center);
+    pKite3 = meupush(0, kite_center - down) * mspin(36._deg) * meuscale(rphi) * meupush(0, down - dart_center);
     
     pDart1 = meupush(0, dart_center-down) * meuscale(rphi) * meupush(0, down - kite_center);
-    pDart2 = meupush(-1, dart_center+0) * mspin((54 + 90) * degree) * meuscale(rphi) * meupush(0, down - dart_center);
+    pDart2 = meupush(-1, dart_center+0) * mspin(144._deg) * meuscale(rphi) * meupush(0, down - dart_center);
     
     ipKite1 = inverse(pKite1);
     ipKite2 = inverse(pKite2);

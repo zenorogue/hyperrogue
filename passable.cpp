@@ -304,7 +304,7 @@ EX ld calcAirdir(cell *c) {
   for(int i=0; i<c->type; i++) {
     cell *c2 = c->move(i);
     if(c2 && c2->monst == moAirElemental) {
-      return c->c.spin(i) * 2 * M_PI / c2->type;
+      return c->c.spin(i) * TAU / c2->type;
       }
     }
   for(int i=0; i<c->type; i++) {
@@ -315,7 +315,7 @@ EX ld calcAirdir(cell *c) {
     for(int i=0; i<c2->type; i++) {
       cell *c3 = c2->move(i);
       if(c3 && c3->monst == moAirElemental) {
-        return c2->c.spin(i) * 2 * M_PI / c3->type;
+        return c2->c.spin(i) * TAU / c3->type;
         }
       }
     }

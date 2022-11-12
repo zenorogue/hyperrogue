@@ -29,7 +29,7 @@ vector<reaction_t> models_to_use = {
       pmodel = mdDisk;
       pconf.alpha = 1000;
       pconf.scale *= pconf.alpha;
-      View = cspin(1, 2, 20 * degree) * View;
+      View = cspin(1, 2, 20._deg) * View;
       }
     else {
       pmodel = mdHyperboloid;
@@ -112,7 +112,7 @@ vector<reaction_t> models_to_use = {
     pconf.scale = .5;
     if(sphere) pconf.scale *= 2;
     spherename = "loximuthal projection";
-    pconf.loximuthal_parameter = 15 * degree;
+    pconf.loximuthal_parameter = 15._deg;
     },
   [] {
     pmodel = mdSinusoidal;
@@ -276,13 +276,13 @@ EX void compare() {
   if(at4 == 0)
     earthpart = lerp(255, earthpart, t4);
   else if(at4 == 1)
-    View = spin(t4 * 180 * degree) * View;
+    View = spin(t4 * M_PI) * View;
   else if(at4 == 2)
-    View = xpush(t4 * M_PI) * spin(M_PI) * View;
+    View = xpush(t4 * M_PI) * spin180() * View;
   else if(at4 == 3)
-    View = ypush(t4 * M_PI) * xpush(M_PI) * spin(M_PI) * View;
+    View = ypush(t4 * M_PI) * xpush(M_PI) * spin180() * View;
   else if(at4 == 4) {
-    View = ypush(M_PI) * xpush(M_PI) * spin(M_PI) * View;
+    View = ypush(M_PI) * xpush(M_PI) * spin180() * View;
     earthpart = lerp(255, earthpart, 1-t4);
     }
   anims::moved();

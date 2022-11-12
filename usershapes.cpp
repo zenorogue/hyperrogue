@@ -45,13 +45,13 @@ void geometry_information::pushShape(usershapelayer& ds) {
   
   for(int r=0; r<ds.rots; r++) {
     for(int i=0; i<isize(ds.list)/z*z; i++)
-      hpcpush(T * spin(2*M_PI*r/ds.rots) * ds.list[i]);
+      hpcpush(T * spin(TAU*r/ds.rots) * ds.list[i]);
 
     if(ds.sym) {
   
       transmatrix mirrortrans = Id; mirrortrans[1][1] = -1;
       for(int i=isize(ds.list)-1; i>=0; i--)
-        hpcpush(T * spin(2*M_PI*r/ds.rots) * mirrortrans * ds.list[i]);
+        hpcpush(T * spin(TAU*r/ds.rots) * mirrortrans * ds.list[i]);
       }
     }
   

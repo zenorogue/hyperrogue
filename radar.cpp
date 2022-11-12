@@ -110,7 +110,7 @@ EX void draw_radar(bool cornermode) {
     curvepoint(atscreenpos(cx-cos(i * degree)*rad, cy-sin(i*degree)*rad, 1) * C0);
   queuecurve(sId, 0xFFFFFFFF, 0x000000FF, PPR::ZERO);      
 
-  ld alpha = 15 * degree;
+  ld alpha = 15._deg;
   ld co = cos(alpha);
   ld si = sin(alpha);
   

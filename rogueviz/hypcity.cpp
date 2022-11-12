@@ -55,7 +55,7 @@ void prepare_tf() {
       hx[1] = h[1] * t * 2;
       hx[2] = 0;
       hx[3] = 1;
-      if(hyperbolic) hx = spin(45 * degree) * hx;
+      if(hyperbolic) hx = spin(45._deg) * hx;
       hx = normalize(hx);
       hx = zshift(hx, h[2]*(t*(sphere ? 3 : 7)));
 

@@ -45,6 +45,9 @@ EX bool hide_player() {
      ;
   }
 
+EX transmatrix ddspin180(cell *c, int dir) { return ddspin(c, dir, M_PI); }
+EX transmatrix iddspin180(cell *c, int dir) { return iddspin(c, dir, M_PI); }
+
 #if HDR
 template<class T>
 class span {
@@ -74,11 +77,11 @@ EX int animation_lcm = 0;
 
 EX ld ptick(int period, ld phase IS(0)) {
   if(animation_lcm) animation_lcm = animation_lcm * (period / gcd(animation_lcm, period));
-  return (ticks * animation_factor * vid.ispeed) / period + phase * 2 * M_PI;
+  return (ticks * animation_factor * vid.ispeed) / period + phase * TAU;
   }
 
 EX ld fractick(int period, ld phase IS(0)) {
-  ld t = ptick(period, phase) / 2 / M_PI;
+  ld t = ptick(period, phase) / TAU;
   t -= floor(t);
   if(t<0) t++;
   return t;
@@ -137,7 +140,7 @@ EX bool doHighlight() {
 int dlit;
 
 ld spina(cell *c, int dir) {
-  return 2 * M_PI * dir / c->type;
+  return TAU * dir / c->type;
   }
 
 /** @brief used to alternate colors depending on distance to something. In chessboard-patterned geometries, also use a third step */
@@ -186,7 +189,7 @@ EX void drawShield(const shiftmatrix& V, eItem it) {
 #endif  
   else {
     for(ld a=0; a<=cgi.S84*mt+1e-6; a+=pow(.5, vid.linequality))
-      curvepoint(xspinpush0(a * M_PI/cgi.S42, d + sin(ds + M_PI*2*a/4/mt)*.1));
+      curvepoint(xspinpush0(a * cgi.S_step, d + sin(ds + 90._deg*a/mt)*.1));
     queuecurve(V, darkena(col, 0, 0xFF), 0x8080808, PPR::LINE);
     }
 #endif
@@ -202,7 +205,7 @@ void drawSpeed(const shiftmatrix& V, ld scale=1) {
 #endif
   for(int b=0; b<cgi.S84; b+=cgi.S14) {
     PRING(a)
-      curvepoint(xspinpush0((ds+b+a) * M_PI/cgi.S42, cgi.hexf*a/cgi.S84*scale));
+      curvepoint(xspinpush0((ds+b+a) * cgi.S_step, cgi.hexf*a/cgi.S84*scale));
     queuecurve(V, col, 0x8080808, PPR::LINE);
     }
 #endif
@@ -219,7 +222,7 @@ void drawSafety(const shiftmatrix& V, int ct) {
     }
   #endif
   for(int a=0; a<ct; a++)
-    queueline(V*xspinpush0((ds+a*cgi.S84/ct) * M_PI/cgi.S42, 2*cgi.hexf), V*xspinpush0((ds+(a+(ct-1)/2)*cgi.S84/ct) * M_PI / cgi.S42, 2*cgi.hexf), col, vid.linequality);
+    queueline(V*xspinpush0((ds+a*cgi.S84/ct) * cgi.S_step, 2*cgi.hexf), V*xspinpush0((ds+(a+(ct-1)/2)*cgi.S84/ct) * cgi.S_step, 2*cgi.hexf), col, vid.linequality);
 #endif
   }
 
@@ -238,7 +241,7 @@ void drawFlash(const shiftmatrix& V) {
     if(1) ;
     #endif
     else {
-      PRING(a) curvepoint(xspinpush0(a * M_PI / cgi.S42, rad));
+      PRING(a) curvepoint(xspinpush0(a * cgi.S_step, rad));
       queuecurve(V, col, 0x8080808, PPR::LINE);
       }
     }
@@ -275,12 +278,12 @@ void drawLove(const shiftmatrix& V, int hdir) {
   for(int u=0; u<5; u++) {
     shiftmatrix V1 = chei(V, u, 5);
     PRING(a) {
-      double d = (1 + cos(a * M_PI/cgi.S42)) / 2;
+      double d = (1 + cos(a * cgi.S_step)) / 2;
       double z = a; if(z>cgi.S42) z = cgi.S84-z;
       if(z <= 10) d += (10-z) * (10-z) * (10-z) / 3000.;
 
       ld rad = cgi.hexf * (2.5 + .5 * sin(ds+u*.3)) * d;
-      curvepoint(xspinpush0((cgi.S42+hdir+a-1) * M_PI/cgi.S42, rad));
+      curvepoint(xspinpush0((cgi.S42+hdir+a-1) * cgi.S_step, rad));
       }
     queuecurve(V1, col, 0x8080808, PPR::LINE);
     }
@@ -292,7 +295,7 @@ void drawWinter(const shiftmatrix& V, ld hdir, color_t col) {
   float ds = ptick(300);
   col = darkena(col, 0, 0xFF);
   for(int u=0; u<20; u++) {
-    ld rad = sin(ds+u * 2 * M_PI / 20) * M_PI / S7;
+    ld rad = sin(ds+u * TAU / 20) * M_PI / S7;
     shiftmatrix V1 = chei(V, u, 20);
     queueline(V1*xspinpush0(M_PI+hdir+rad, cgi.hexf*.5), V1*xspinpush0(M_PI+hdir+rad, cgi.hexf*3), col, 2 + vid.linequality);
     }
@@ -312,7 +315,7 @@ void drawLightning(const shiftmatrix& V) {
     else {
       if(u % 5) leng = 1.25 + sintick(200, ld(u) * 1.25) * 0.25;
       else leng = 2 + sintick(200, ld(u) * 1.25);
-      rad = (u + ds) * (M_PI / 10);
+      rad = (u + ds) * TAU / 20;
       }
     shiftmatrix V1 = chei(V, u, 20);
     queueline(V1*xspinpush0(rad, cgi.hexf*0.3), V1*xspinpush0(rad, cgi.hexf*leng), col, 2 + vid.linequality);
@@ -332,7 +335,7 @@ void drawCurse(const shiftmatrix& V, eItem it) {
       }
     else {
       leng = 0.85 + sintick(150, ld(u) * 1.25) * 0.15;
-      rad = (u + ds) * (M_PI / 10);
+      rad = (u + ds) * TAU / 20;
       }
     shiftmatrix V1 = chei(V, u, 20);
     queueline(V1*xspinpush0(rad, cgi.hexf*0.3), V1*xspinpush0(rad, cgi.hexf*leng), col, 2 + vid.linequality);
@@ -368,7 +371,7 @@ EX void drawPlayerEffects(const shiftmatrix& V, const shiftmatrix& Vparam, cell 
     else if(SWORDDIM == 3) {
 #if CAP_SHAPES
       shiftmatrix Vsword = 
-        shmup::on ? V * shmup::swordmatrix[multi::cpid] * cspin(2, 0, M_PI/2) 
+        shmup::on ? V * shmup::swordmatrix[multi::cpid] * cspin90(2, 0)
                   : Vparam * rgpushxto0(inverse_shift(gmatrix[c], tC0(V))) * sword::dir[multi::cpid].T;
 
       if(items[itOrbSword])
@@ -384,7 +387,7 @@ EX void drawPlayerEffects(const shiftmatrix& V, const shiftmatrix& Vparam, cell 
       ang %= sword::sword_angles;
 
 #if CAP_QUEUE || CAP_SHAPES
-      shiftmatrix Vnow = Vparam * rgpushxto0(inverse_shift(Vparam, tC0(V))) * ddspin(c,0,M_PI);
+      shiftmatrix Vnow = Vparam * rgpushxto0(inverse_shift(Vparam, tC0(V))) * ddspin180(c,0);
 #endif
 
       int adj = 1 - ((sword_angles/cwt.at->type)&1);
@@ -444,7 +447,7 @@ EX void drawPlayerEffects(const shiftmatrix& V, const shiftmatrix& Vparam, cell 
       ld rad = cgi.hexf * u / 250;
       color_t col = darkena(iinf[itOrbSafety].color, 0, 0xFF);
       PRING(a)
-        curvepoint(xspinpush0(a * M_PI / cgi.S42, rad));
+        curvepoint(xspinpush0(a * cgi.S_step, rad));
       queuecurve(V, col, 0, PPR::LINE);
       }
     }
@@ -453,7 +456,7 @@ EX void drawPlayerEffects(const shiftmatrix& V, const shiftmatrix& Vparam, cell 
 void drawStunStars(const shiftmatrix& V, int t) {
 #if CAP_SHAPES
   for(int i=0; i<3*t; i++) {
-    shiftmatrix V2 = V * spin(M_PI * 2 * i / (3*t) + ptick(200));
+    shiftmatrix V2 = V * spin(TAU * i / (3*t) + ptick(200));
 #if MAXMDIM >= 4
     if(GDIM == 3) V2 = V2 * zpush(cgi.HEAD);
 #endif
@@ -519,7 +522,7 @@ EX namespace tortoise {
     if(d > 0) mcol = 0xFFFFFF;
     else if(d < 0) mcol = 0;
     
-      int dd = 0xFF * (atan(fabs(d)/2) / (M_PI/2));
+      int dd = 0xFF * (atan(fabs(d)/2) / 90._deg);
       
     return gradient(0x487830, mcol, 0, dd, 0xFF);
     }
@@ -754,7 +757,7 @@ EX shiftmatrix face_the_player(const shiftmatrix V) {
   if(vrhr::enabled) {
     shiftpoint h = tC0(V);    
     hyperpoint uh = unshift(h);
-    return shiftless(cspin(1, 2, 90*degree) * rspintox(cspin(2, 1, 90*degree) * uh) * xpush(hdist0(uh)) * cspin(0, 2, 90*degree) * cspin(1, 0, 90*degree));
+    return shiftless(cspin90(1, 2) * rspintox(cspin90(2, 1) * uh) * xpush(hdist0(uh)) * cspin90(0, 2) * spin270());
     }
   #endif
   return rgpushxto0(tC0(V));
@@ -853,7 +856,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     
 #if CAP_SHAPES
   auto sinptick = [c, pticks] (int period) { return c ? sintick(period) : sin(animation_factor * vid.ispeed * pticks / period);};
-  auto spinptick = [c, pticks] (int period, ld phase) { return c ? spintick(period, phase) : spin((animation_factor * vid.ispeed * pticks) / period + phase * 2 * M_PI); };
+  auto spinptick = [c, pticks] (int period, ld phase) { return c ? spintick(period, phase) : spin((animation_factor * vid.ispeed * pticks) / period + phase * TAU); };
   int ct6 = c ? ctof(c) : 1;
   hpcshape *xsh = 
     (it == itPirate || it == itKraken) ? &cgi.shPirateX :
@@ -1005,16 +1008,14 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
   
   else if(it == itRose) {
     for(int u=0; u<4; u++)
-      queuepoly(Vit * spinptick(1500, 0) * spin(2*M_PI / 3 / 4 * u), cgi.shRoseItem, darkena(icol, 0, hidden ? 0x30 : 0xA0));
+      queuepoly(Vit * spinptick(1500, 0) * spin(30._deg * u), cgi.shRoseItem, darkena(icol, 0, hidden ? 0x30 : 0xA0));
     }
 
   else if(it == itBarrow && c) {
     for(int i = 0; i<c->landparam; i++)
-      queuepolyat(Vit * spin(2 * M_PI * i / c->landparam) * xpush(.15) * spinptick(1500, 0), *xsh, darkena(icol, 0, hidden ? 0x40 : 
+      queuepolyat(Vit * spin(TAU * i / c->landparam) * xpush(.15) * spinptick(1500, 0), *xsh, darkena(icol, 0, hidden ? 0x40 : 
         (highwall(c) && wmspatial) ? 0x60 : 0xFF),
         PPR::HIDDEN);
-
-//      queuepoly(Vit*spin(M_PI+(1-2*ang)*2*M_PI/cgi.S84), cgi.shMagicSword, darkena(0xC00000, 0, 0x80 + 0x70 * sin(ticks / 200.0)));
     }
     
   else if(xsh) {
@@ -1072,12 +1073,12 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
       auto dark = darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : (it == itOrbBeauty) ? 0xA0 : 0xC0);
       auto dark1 = darkena(icol1, 0, inice ? 0x40 : hidden ? 0x10 : (it == itOrbBeauty) ? 0x50 : 0x60);
       if(c && GDIM == 2) Vit = rgpushxto0(tC0(Vit));
-      auto Vit1 = Vit * spin(90 * degree);
+      auto Vit1 = Vit * spin90();
 
       if (it == itOrbBeauty) {
         queuepolyat(Vit, cgi.shDisk, dark1, prio);
         for(int u=0; u<3; u++)
-          queuepolyat(Vit1 * spin(2*M_PI / 3 / 3 * u), cgi.shSmallRose, dark, prio);
+          queuepolyat(Vit1 * spin(40._deg * u), cgi.shSmallRose, dark, prio);
         }
       else if (it == itOrbLife) {
         queuepolyat(Vit, cgi.shDisk, dark1, prio);
@@ -1113,7 +1114,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         queuepolyat(Vit, cgi.shDisk, dark1, prio);
         queuepolyat(Vit, cgi.shDiskM, dark, prio);
         for (int i=0; i<5; i++) {
-          shiftmatrix V2 = Vit * spin(2*M_PI * i / 5 + ptick(300));
+          shiftmatrix V2 = Vit * spin(TAU * i / 5 + ptick(300));
           queuepolyat(V2, cgi.shSmallFlailBall, dark, prio);
           }
         }
@@ -1189,7 +1190,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
         bool reversed = (shape == &cgi.shTreeIcon || shape == &cgi.shHumanoid || it == itOrbSword2);
         bool left90 = (shape == &cgi.shLeafIcon || shape == &cgi.shLightningBolt);
         if (shape)
-          queuepolyat(reversed ? Vit1 * MirrorX : left90 ? Vit1 * spin(-90*degree) : Vit1, *shape, (it == itOrbInvis || it == itOrbTeleport) ? 0x20 : 0x80, prio);
+          queuepolyat(reversed ? Vit1 * MirrorX : left90 ? Vit1 * spin270() : Vit1, *shape, (it == itOrbInvis || it == itOrbTeleport) ? 0x20 : 0x80, prio);
         if (it == itOrbSide1 || (shape == &cgi.shEccentricDisk && it != itOrbDiscord))
           queuepolyat(Vit1*Mirror, *shape, 0x80, prio);
         if (jump || it == itOrbEnergy)
@@ -1381,7 +1382,7 @@ EX void drawPlayer(eMonster m, cell *where, const shiftmatrix& V, color_t col, d
         }
   
       if(items[itOrbSide1] && !shmup::on)
-        queuepoly(VBODY * VBS * spin(-M_PI/24), cs.charid >= 2 ? cgi.shSabre : cgi.shPSword, fc(314, cs.swordcolor, 3)); // 3 not colored
+        queuepoly(VBODY * VBS * spin(-15._deg), cs.charid >= 2 ? cgi.shSabre : cgi.shPSword, fc(314, cs.swordcolor, 3)); // 3 not colored
       
       shiftmatrix VWPN = cs.lefthanded ? VBODY * VBS * Mirror : VBODY * VBS;
       
@@ -1451,7 +1452,7 @@ EX int wingphase(int period, int phase IS(0)) {
   }
 
 transmatrix wingmatrix(int period, int phase = 0) {
-  ld t = fractick(period, phase) * 2 * M_PI;
+  ld t = fractick(period, phase) * TAU;
   transmatrix Vwing = Id;
   Vwing[1][1] = .85 + .15 * sin(t);
   return Vwing;
@@ -1508,7 +1509,7 @@ void drawMimic(eMonster m, cell *where, const shiftmatrix& V, color_t col, doubl
       if(items[itOrbThorns] && emp)
         queuepoly(VBODY * VBS, cgi.shHedgehogBladePlayer, darkena(col, 0, 0x40));
       if(items[itOrbSide1] && !shmup::on)
-        queuepoly(VBODY * VBS * spin(-M_PI/24), cs.charid >= 2 ? cgi.shSabre : cgi.shPSword, darkena(col, 0, 0x40));      
+        queuepoly(VBODY * VBS * spin(-15._deg), cs.charid >= 2 ? cgi.shSabre : cgi.shPSword, darkena(col, 0, 0x40));
       if(items[itOrbSide3] && emp)
         queuepoly(VBODY * VBS, (cs.charid&1) ? cgi.shFerocityF : cgi.shFerocityM, darkena(col, 0, 0x40));
 
@@ -1547,7 +1548,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
   char xch = minf[m].glyph;
   
   shiftmatrix V = V1;
-  if(WDIM == 3 && (classflag(m) & CF_FACE_UP) && where && !hybri) V = V1 * cspin(0, 2, M_PI/2);
+  if(WDIM == 3 && (classflag(m) & CF_FACE_UP) && where && !hybri) V = V1 * cspin90(0, 2);
   
   #if CAP_SHAPES
   if(among(m, moTortoise, moWorldTurtle) && where && where->stuntime >= 3)
@@ -1590,7 +1591,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
     
     case moBullet:
       ShadowV(V, cgi.shKnife);
-      queuepoly(VBODY * spin(-M_PI/4), cgi.shKnife, getcs().swordcolor);
+      queuepoly(VBODY * spin270(), cgi.shKnife, getcs().swordcolor);
       return true;
     
     case moKnight: case moKnightMoved: {
@@ -2109,7 +2110,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
     
     case moJiangshi: {
       ShadowV(V, cgi.shJiangShi);
-      auto z2 = WDIM == 3 ? 0 : GDIM == 3 ? -abs(sin(footphase * M_PI * 2)) * cgi.human_height/3 : geom3::lev_to_factor(abs(sin(footphase * M_PI * 2)) * cgi.human_height);
+      auto z2 = WDIM == 3 ? 0 : GDIM == 3 ? -abs(sin(footphase * TAU)) * cgi.human_height/3 : geom3::lev_to_factor(abs(sin(footphase * TAU)) * cgi.human_height);
       auto V0 = V;
       auto V = mmscale(V0, z2);
       otherbodyparts(V, darkena(col, 0, 0xFF), m, m == moJiangshi ? 0 : footphase);
@@ -2328,7 +2329,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
     case moLancer: case moFlailer: case moMiner: {
       shiftmatrix V2 = V;
       if(m == moLancer)
-        V2 = V * spin((where && where->type == 6) ? -M_PI/3 : -M_PI/2 );
+        V2 = V * spin((where && where->type == 6) ? -60._deg : -90._deg );
       shiftmatrix Vh = mmscale(V2, cgi.HEAD);
       shiftmatrix Vb = mmscale(V2, cgi.BODY);
       Vb = Vb * otherbodyparts(V2, darkena(col, 1, 0xFF), m, footphase);
@@ -2512,7 +2513,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
     }
   else if(isMagneticPole(m)) {
     if(m == moNorthPole)
-      queuepolyat(VBODY * spin(M_PI), cgi.shTentacle, 0x000000C0, PPR::TENTACLE1);
+      queuepolyat(VBODY * spin180(), cgi.shTentacle, 0x000000C0, PPR::TENTACLE1);
     queuepolyat(VBODY, cgi.shDisk, darkena(col, 0, 0xFF), PPR::MONSTER_BODY);
     }
   else if(isMetalBeast(m) || m == moBrownBug) {
@@ -2660,7 +2661,6 @@ EX bool applyAnimation(cell *c, shiftmatrix& V, double& footphase, int layer) {
     V = V * a.wherenow;
     if(a.mirrored) V = V * Mirror;
     if(a.attacking == 2) V = V * pispin;
-    // if(GDIM == 3) V = V * cspin(0, 2, M_PI/2);
     a.ltick = ticks;
     return true;
     }
@@ -2874,7 +2874,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
               if(doHighlight())
                 poly_outline = outline;
               shiftmatrix Vbx = Vb;
-              if(WDIM == 2) Vbx = Vbx * spin(sin(M_PI * i / 6.) * wav / (i+.1));
+              if(WDIM == 2) Vbx = Vbx * spin(sin(TAU * i / 12) * wav / (i+.1));
               Vbx = Vbx * xpush(length * (i) / 12.0);
               // shiftmatrix Vbx2 = Vnext * xpush(length2 * i / 6.0);
               // Vbx = Vbx * rspintox(inverse(Vbx) * Vbx2 * C0) * pispin;
@@ -2889,7 +2889,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
         shiftmatrix T = Vparam * ddspin(c, c->mondir);
         color_t col = darkena(0x606020, 0, 0xFF);
         for(int u=-1; u<=1; u++)
-          queueline(T*xspinpush0(M_PI/2, u*cgi.crossf/5), T*xspinpush(0, cgi.crossf)*xspinpush0(M_PI/2, u*cgi.crossf/5), col, 2 + vid.linequality);
+          queueline(T*xspinpush0(90._deg, u*cgi.crossf/5), T*xspinpush(0, cgi.crossf)*xspinpush0(90._deg, u*cgi.crossf/5), col, 2 + vid.linequality);
         }
       }
 
@@ -2898,7 +2898,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
         if(hybri) {
           queuepoly(Vb, cgi.shILeaf[ctof(c)], darkena(col, 0, 0xFF));
           for(int a=0; a<c->type-2; a++)
-            queuepoly(Vb * spin(a * 2 * M_PI / (c->type-2)), cgi.shILeaf[2], darkena(col, 0, 0xFF));
+            queuepoly(Vb * spin(a * TAU / (c->type-2)), cgi.shILeaf[2], darkena(col, 0, 0xFF));
           }
         else if(GDIM == 3) {
           queuepoly(face_the_player(Vb), cgi.shILeaf[1], darkena(col, 0, 0xFF));
@@ -2949,7 +2949,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
             Vb = Vb * pispin;
             }
           else {
-            Vb = Vb0 * ddspin(c, nd, M_PI);
+            Vb = Vb0 * ddspin180(c, nd);
             }
           if(c->monmirror) Vb = Vb * Mirror;
           shiftmatrix Vbb = mmscale(Vb, cgi.ABODY);
@@ -2969,8 +2969,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
             /* todo what if no spin_angle */
             ld hdir0 = currentmap->spin_angle(c, nd) + M_PI;
             ld hdir1 = currentmap->spin_angle(c, c->mondir);
-            while(hdir1 > hdir0 + M_PI) hdir1 -= 2*M_PI;
-            while(hdir1 < hdir0 - M_PI) hdir1 += 2*M_PI;
+            cyclefix(hdir1, hdir0);
             Vb = Vb0 * spin((hdir0 + hdir1)/2 + M_PI);
             }
           if(c->monmirror) Vb = Vb * Mirror;
@@ -2999,7 +2998,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
             Vb = Vb * pispin;
             }
           else {
-            Vb = Vb0 * ddspin(c, nd, M_PI);
+            Vb = Vb0 * ddspin180(c, nd);
             }
           if(c->monmirror) Vb = Vb * Mirror;
           shiftmatrix Vbb = mmscale(Vb, cgi.ABODY) * pispin;
@@ -3087,7 +3086,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       Vb = Vb * T * rspintox(tC0(iso_inverse(T))) * xpush(cgi.tentacle_length);
       }
     else {
-      Vb = Vb * ddspin(c, c->mondir, M_PI);
+      Vb = Vb * ddspin180(c, c->mondir);
       Vb = Vb * xpush(cgi.tentacle_length - cellgfxdist(c, c->mondir));
       }
     if(c->monmirror) Vb = Vb * Mirror;
@@ -3109,7 +3108,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
     
   else if((hasFacing(c) && c->mondir != NODIR) || history::on || quotient || dont_face_pc) {
     if(c->monst == moKrakenH) Vs = Vb, nospins = nospinb;
-    if(!nospins && c->mondir < c->type) Vs = Vs * ddspin(c, c->mondir, M_PI);
+    if(!nospins && c->mondir < c->type) Vs = Vs * ddspin180(c, c->mondir);
     if(c->monst == moPair) Vs = Vs * xpush(-.12);
     if(c->monmirror) Vs = Vs * Mirror;
     if(isFriendly(c)) drawPlayerEffects(Vs, Vparam, c, c->monst);
@@ -3141,7 +3140,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
         // cwtV * rgpushxto0(inverse(cwtV) * tC0(Vs));
         }
       if(c->monst == moHunterChanging)  
-        Vs = Vs * (hybri ? spin(M_PI) : cspin(WDIM-2, WDIM-1, M_PI));
+        Vs = Vs * (hybri ? spin180() : cspin180(WDIM-2, WDIM-1));
       }
     if(c->monmirror) Vs = Vs * Mirror;
     
@@ -3240,7 +3239,7 @@ void apply_joukowsky_aura(shiftpoint& h) {
 EX void addauraspecial(shiftpoint h, color_t col, int dir) {
   if(!haveaura_cached) return;
   apply_joukowsky_aura(h);
-  int r = int(2*AURA + dir + atan2(h[1], h[0]) * AURA / 2 / M_PI) % AURA; 
+  int r = int(2*AURA + dir + atan2(h[1], h[0]) * AURA / TAU) % AURA;
   auraspecials.emplace_back(r, col);
   }
 
@@ -3248,7 +3247,7 @@ EX void addaura(shiftpoint h, color_t col, int fd) {
   if(!haveaura_cached) return;
   apply_joukowsky_aura(h);
 
-  int r = gmod(atan2(h[1], h[0]) * AURA / 2 / M_PI, AURA);
+  int r = gmod(atan2(h[1], h[0]) * AURA / TAU, AURA);
   aurac[r][3] += auramemo << fd;
   col = darkened(col);
   aurac[r][0] += (col>>16)&255;
@@ -3322,7 +3321,7 @@ EX void drawaura() {
       if(cmul>1) cmul=1;
       if(cmul<0) cmul=0;
       
-      ld alpha = AURA * atan2(hx,hy) / (2 * M_PI);
+      ld alpha = AURA * atan2(hx,hy) / TAU;
       if(alpha<0) alpha += AURA;
       if(alpha >= AURA) alpha -= AURA;
       
@@ -3363,7 +3362,7 @@ EX void drawaura() {
   bool joukowsky = among(pmodel, mdJoukowskyInverted, mdJoukowsky) && hyperbolic && pconf.model_transition < 1;
 
   for(int r=0; r<=AURA; r++) for(int z=0; z<11; z++) {
-    float rr = (M_PI * 2 * r) / AURA;
+    float rr = (TAU * r) / AURA;
     float rad0 = inversion ? rad / facs[z] : rad * facs[z];
     int rm = r % AURA;
     ld c = cos(rr);
@@ -3467,14 +3466,14 @@ EX int countMinesAround(cell *c) {
 
 EX transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si) {
   if(NONSTDVAR || bt::in()) return Id;
-  transmatrix V = ddspin(c, si.dir, M_PI);
+  transmatrix V = ddspin180(c, si.dir);
   if(si.reflect) V = V * Mirror;
   if(euclid) return V;
-  return V * iddspin(c, 0, M_PI);
+  return V * iddspin180(c, 0);
   }
 
 EX transmatrix applyDowndir(cell *c, const cellfunction& cf) {
-  return ddspin(c, patterns::downdir(c, cf), M_PI);
+  return ddspin180(c, patterns::downdir(c, cf));
   }
 
 void draw_movement_arrows(cell *c, const transmatrix& V, int df) {
@@ -3488,7 +3487,7 @@ void draw_movement_arrows(cell *c, const transmatrix& V, int df) {
 
   for(int d=0; d<8; d++) {
   
-    movedir md = vectodir(spin(-d * M_PI/4) * smalltangent());
+    movedir md = vectodir(spin(-d * 45._deg) * smalltangent());
     cellwalker xc = cwt + md.d;
     if(xc.spin != df) continue;
     xc += wstep;
@@ -3504,7 +3503,7 @@ void draw_movement_arrows(cell *c, const transmatrix& V, int df) {
       
       if(vid.axes >= 5) keylist += key;
       else
-        queuepoly(shiftless(fixrot * spin(-d * M_PI/4)), cgi.shArrow, col);
+        queuepoly(shiftless(fixrot * spin(-d * 45._deg)), cgi.shArrow, col);
 
       if((c->type & 1) && (isStunnable(c->monst) || isPushable(c->wall))) {
         transmatrix Centered = rgpushxto0(unshift(tC0(cwtV)));
@@ -3552,7 +3551,7 @@ EX color_t reptilecolor(cell *c) {
 
 ld wavefun(ld x) { 
   return sin(x);
-  /* x /= (2*M_PI);
+  /* x /= TAU;
   x -= (int) x;
   if(x > .5) return (x-.5) * 2;
   else return 0; */
@@ -4490,7 +4489,7 @@ EX void drawDirectionalParticle(cell *c, int dir, color_t col, int maxspeed IS(1
     int speed = 1 + rand() % maxspeed;
     auto fd = flashdata(ticks, rand() % 16, c, col, speed);
     fd.angle = -atan2(tC0(currentmap->adj(c, dir)));
-    fd.angle += 2 * M_PI * (rand() % 100 - rand() % 100) / 100 / c->type;
+    fd.angle += TAU * (rand() % 100 - rand() % 100) / 100 / c->type;
     flashes.push_back(fd); 
     }
   }
@@ -4914,7 +4913,7 @@ EX void draw_flash(struct flashdata& f, const shiftmatrix& V, bool& kill) {
       ld rad[25];
       for(int a=0; a<24; a++) rad[a] = (0.5 + randd() * .3 + 0.5 * (a&1)) / (2.8 + celldistance(f.where, cwt.at) * .2);
       rad[24] = rad[0];
-      for(int a=0; a<24; a++) curvepoint(xspinpush0(15 * degree * a, rad[a]));
+      for(int a=0; a<24; a++) curvepoint(xspinpush0(TAU * a / 24, rad[a]));
       queuecurve(V, 0xFF, 0xFF0000FF, PPR::SUPERLINE);
       }
     }
@@ -4948,7 +4947,7 @@ EX void draw_flash(struct flashdata& f, const shiftmatrix& V, bool& kill) {
       else 
 #endif
       {
-        PRING(a) curvepoint(xspinpush0(a * M_PI / cgi.S42, rad));
+        PRING(a) curvepoint(xspinpush0(a * cgi.S_step, rad));
         queuecurve(V, flashcol, 0x8080808, PPR::LINE);
         }
       }
@@ -4969,7 +4968,7 @@ EX void draw_flash(struct flashdata& f, const shiftmatrix& V, bool& kill) {
       else 
 #endif
       {
-        PRING(a) curvepoint(xspinpush0(a * M_PI / cgi.S42, rad));
+        PRING(a) curvepoint(xspinpush0(a * cgi.S_step, rad));
         queuecurve(V, flashcol, 0x8080808, PPR::LINE);
         }
       }
@@ -5387,7 +5386,7 @@ EX void drawmovestar(double dx, double dy) {
     if(rightclick && (d == 2 || d == 6 || d == 3 || d == 5)) col &= 0xFFFFFF3F;
     if(!leftclick && !rightclick && (d&1)) col &= 0xFFFFFF3F;
 #endif
-    queueline(tC0(Centered), Centered * xspinpush0(d * M_PI / 4, cgi.scalefactor/2), col, 3 + vid.linequality);
+    queueline(tC0(Centered), Centered * xspinpush0(d * 45._deg, cgi.scalefactor/2), col, 3 + vid.linequality);
 #endif
     }
   }
@@ -5877,7 +5876,7 @@ EX void restartGraph() {
   if(!autocheat) linepatterns::clearAll();
   if(currentmap) {
     resetview();
-    if(sphere) View = spin(-M_PI/2);
+    if(sphere) View = spin(-90._deg);
     }
   }
 
@@ -6037,7 +6036,7 @@ EX void drawBug(const cellwalker& cw, color_t col) {
 #if CAP_SHAPES
   initquickqueue();
   shiftmatrix V = ggmatrix(cw.at);
-  if(cw.spin) V = V * ddspin(cw.at, cw.spin, M_PI);
+  if(cw.spin) V = V * ddspin180(cw.at, cw.spin);
   queuepoly(V, cgi.shBugBody, col);
   quickqueue();
 #endif

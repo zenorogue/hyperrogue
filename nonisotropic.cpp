@@ -784,14 +784,14 @@ EX namespace nilv {
     
     if(hypot_d(2, h) < 1e-6) return point3(h[0], h[1], h[2]);
     else if(side > 1e-6) {
-      wmin = 0, wmax = 2 * M_PI;
+      wmin = 0, wmax = TAU;
       }
     else if(side < -1e-6) {
-      wmin = - 2 * M_PI, wmax = 0;
+      wmin = - TAU, wmax = 0;
       }
     else return point3(h[0], h[1], 0);
     
-    ld alpha_total = h[0] ? atan(h[1] / h[0]) : M_PI/2;
+    ld alpha_total = h[0] ? atan(h[1] / h[0]) : 90._deg;
   
     ld b;
     if(abs(h[0]) > abs(h[1]))
@@ -1578,14 +1578,14 @@ EX namespace product {
       if(twisted && i == c->type-1 && where[c].second == hybrid::csteps-1) {
         auto b = spins[where[c].first].first;
         transmatrix T = mscale(Id, cgi.plevel);
-        T = T * spin(2 * M_PI * b.spin / b.at->type);
+        T = T * spin(TAU * b.spin / b.at->type);
         if(b.mirrored) T = T * Mirror;
         return T;
         }
       if(twisted && i == c->type-2 && where[c].second == 0) {
         auto b = spins[where[c].first].second;
         transmatrix T = mscale(Id, -cgi.plevel);
-        T = T * spin(2 * M_PI * b.spin / b.at->type);
+        T = T * spin(TAU * b.spin / b.at->type);
         if(b.mirrored) T = T * Mirror;
         return T;
         }
@@ -1799,7 +1799,7 @@ EX namespace slr {
   
       ld z = cr * (K - 1/SV/SV);
   
-      ld k = M_PI/2;
+      ld k = 90._deg;
       ld a = k / K;
       ld zw = xy * cr / sr;
       ld u = z * a;
@@ -2572,7 +2572,7 @@ EX namespace stretch {
       
       res.push_back(point31(h[0] * a / d, h[1] * a / d, h[2] * a / d));
       
-      a = a - 2 * M_PI;
+      a = a - TAU;
 
       res.push_back(point31(h[0] * a / d, h[1] * a / d, h[2] * a / d));
       
@@ -2583,7 +2583,7 @@ EX namespace stretch {
       ld a = atan2(h[2], h[3]);
       
       for(int it=-generations; it<generations; it++) {
-        res.push_back(point31(0, 0, (a + 2 * M_PI * it) * SV));
+        res.push_back(point31(0, 0, (a + TAU * it) * SV));
         }
       
       return res;
@@ -2594,16 +2594,13 @@ EX namespace stretch {
     ld base_min_a = asin(xy);
     ld base_max_a = M_PI - base_min_a;
   
-    ld seek = M_PI/2-atan2(h[3], h[2]);
+    ld seek = 90._deg - atan2(h[3], h[2]);
   
     auto ang = [&] (ld a) {
       ld rp = xy / sin(a);
       ld co = abs(rp) >= 1 ? 0 : sqrt(1-rp*rp);
       
       return atan2(co * sin(a), cos(a)) - co * (1 - 1/SV/SV) * a;
-      
-      // while(a0 > M_PI) a0 -= 2 * M_PI;
-      // while(a0 < -M_PI) a0 += 2 * M_PI;
       };
     
     for(int shift=-generations; shift<generations; shift++) {
@@ -2637,10 +2634,10 @@ EX namespace stretch {
           
           // println(hlog, "*** ", mi, t, " ** ", tie(min_a, ang_min), tie(extreme, ang_extreme), tie(max_a, ang_max), " -> ", vmin, " to ", vmax);
           
-          int cmin = ceil((vmin - seek) / 2 / M_PI);
-          int cmax = floor((vmax - seek) / 2 / M_PI);
+          int cmin = ceil((vmin - seek) / TAU);
+          int cmax = floor((vmax - seek) / TAU);
           for(int c = cmin; c <= cmax; c++) {
-            ld cseek = seek + c * 2 * M_PI;
+            ld cseek = seek + c * TAU;
   
             for(int it=0; it<40; it++) {
             

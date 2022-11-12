@@ -228,7 +228,7 @@ bool handleKey(int sym, int uni) {
   }
 
 void auto_shift() {
-   current.T = spin(30*degree) * lorentz(0, 3, 1) * spin(-30*degree) * current.T;
+   current.T = spin(30._deg) * lorentz(0, 3, 1) * spin(-30._deg) * current.T;
    }
 
 /* in our cellular automaton, each tile is affected by its own history, and the spatial neighbors of its ms-step history */
@@ -509,7 +509,7 @@ void ads_ca_check() {
   }
 
 ld get_shift_cycles(ld shift) {
-  return floor(shift / 2 / M_PI + .5) * 2 * M_PI;
+  return floor(shift / TAU + .5) * TAU;
   }
 
 shiftpoint shift_perfect_mul(shiftmatrix T, shiftpoint h) {
@@ -524,8 +524,7 @@ shiftpoint shift_perfect_mul(shiftmatrix T, shiftpoint h) {
     optimize_shift(cand);
     
     if(i > 0) {
-      while(cand.shift > res.shift + M_PI) cand.shift -= 2 * M_PI;
-      while(cand.shift < res.shift - M_PI) cand.shift += 2 * M_PI;
+      cyclefix(cand.shift, res.shift);
       }
     res = cand;    
     }
@@ -567,7 +566,7 @@ flatresult findflat(shiftpoint h) {
 
 /*
   hyperpoint h = unshift(S0);
-  transmatrix deg90 = cspin(2, 3, 90*degree) * cspin(0, 1, 90*degree);
+  transmatrix deg90 = cspin(2, 3, 90._deg) * cspin(0, 1, 90._deg);
   hyperpoint h0 = unshift(current) * h;
   hyperpoint h90 = unshift(current) * deg90 * h;
 
@@ -586,7 +585,7 @@ flatresult findflat(shiftpoint h) {
   else {
     cost = 0;
     sint = 1;
-    t = 90*degree;
+    t = 90._deg;
     }
   
   hyperpoint h2 = h0 * cost + h90 * sint;

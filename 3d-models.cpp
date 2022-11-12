@@ -606,7 +606,7 @@ void geometry_information::animate_bird(hpcshape& orig, hpcshape_animated& anima
   for(int i=0; i<=WINGS; i++) {
     auto& tgt = animated[i];
     clone_shape(orig, tgt);
-    ld alpha = cos(180. * degree * i / WINGS) * 30 * degree;
+    ld alpha = cos(M_PI * i / WINGS) * 30 * degree;
     for(int i=tgt.s; i<tgt.e; i++) {
       if(abs(hpc[i][1]) > body) {
         ld off = hpc[i][1] > 0 ? body : -body;
@@ -787,17 +787,17 @@ void geometry_information::shift_last_straight(ld z) {
 
 EX void queueball(const shiftmatrix& V, ld rad, color_t col, eItem what) {
   if(what == itOrbSpeed) {
-    shiftmatrix V1 = V * cspin(1, 2, M_PI/2);
+    shiftmatrix V1 = V * cspin90(1, 2);
     ld tt = ptick(100);
     for(int t=0; t<5; t++) {
       for(int a=-50; a<50; a++)
-        curvepoint(cspin(0, 2, a * M_PI/100.) * cspin(0, 1, t * 72 * degree + tt + a*2*M_PI/50.) * xpush0(rad));
+        curvepoint(cspin(0, 2, a * M_PI/100.) * cspin(0, 1, t * 72._deg + tt + a*TAU/50.) * xpush0(rad));
       queuecurve(V1, col, 0, PPR::LINE);
       }
     return;
     }
   ld z = 63.43 * degree;
-  shiftmatrix V1 = V * cspin(0, 2, M_PI/2);
+  shiftmatrix V1 = V * cspin90(0, 2);
   if(what == itOrbShield) V1 = V * cspin(0, 1, ptick(500));
   if(what == itOrbFlash) V1 = V * cspin(0, 1, ptick(1500));
   if(what == itOrbShield) V1 = V * cspin(1, 2, ptick(1000));
@@ -821,7 +821,7 @@ EX void queueball(const shiftmatrix& V, ld rad, color_t col, eItem what) {
     line(a, c);
     line(a, d);
     line(d, c);
-    line(c, spin(M_PI));
+    line(c, spin180());
     }
   }
 
@@ -1256,7 +1256,7 @@ hpcshape& geometry_information::generate_pipe(ld length, ld width, ePipeEnd endt
   const int MAX_R = 20;
   auto at = [&] (ld i, ld a, ld z = 1, ld s = 1) {
     a += 0.5;
-    ld alpha = 360 * degree * a / MAX_R;
+    ld alpha = TAU * a / MAX_R;
     hpcpush(xpush(i * length / MAX_X) * cspin(1, 2, alpha) * ypush0(width*z));
     #if CAP_GL
     if(floor_textures) utt.tvertices.push_back(glhr::makevertex(0, pers ? 0.549 - s * 0.45 * sin(alpha) : 0.999, 0));
@@ -1282,10 +1282,10 @@ hpcshape& geometry_information::generate_pipe(ld length, ld width, ePipeEnd endt
   if(endtype == ePipeEnd::ball) for(int a=0; a<MAX_R; a++) for(int x=-MAX_R; x<MAX_R; x++) {
     ld xb = x < 0 ? 0 : MAX_X;
     ld mul = MAX_X * width/length * .9; // .9 to prevent Z-fighting
-    ld x0 = xb + mul * sin(x * 90 * degree / MAX_R);
-    ld x1 = xb + mul * sin((x+1) * 90 * degree / MAX_R);
-    ld z0 = cos(x * 90 * degree / MAX_R);
-    ld z1 = cos((x+1) * 90 * degree / MAX_R);
+    ld x0 = xb + mul * sin(x * 90._deg / MAX_R);
+    ld x1 = xb + mul * sin((x+1) * 90._deg / MAX_R);
+    ld z0 = cos(x * 90._deg / MAX_R);
+    ld z1 = cos((x+1) * 90._deg / MAX_R);
     at(x0, a, z0, z0);
     at(x0, a+1, z0, z0);
     at(x1, a, z1, z1);

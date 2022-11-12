@@ -756,7 +756,7 @@ struct magic_param {
   void shuffle() {
     do_spin = hrand(2);
     spinangle = hrandf() - hrandf();
-    moveangle = hrandf() * 2 * M_PI;
+    moveangle = hrandf() * TAU;
     shift = hrandf() - hrandf();
     scale = hrandf() - hrandf();
     proj = hrandf() - hrandf();
@@ -1565,7 +1565,7 @@ void splitseg(const shiftmatrix& A, const array<ld, 2>& angles, const array<shif
 void fillcircle(shiftpoint h, color_t col) {
   shiftmatrix A = rgpushxto0(h);
   
-  ld step = M_PI * 2/3;
+  ld step = 120._deg;
   
   array<shiftpoint, 3> mh = make_array(A * xpush0(mapeditor::dtwidth), A * xspinpush0(step, mapeditor::dtwidth), A * xspinpush0(-step, mapeditor::dtwidth));
   auto mp = ptc(mh);
@@ -1588,9 +1588,9 @@ void actDrawPixel(cell *c, shiftpoint h, color_t col) {
     hyperpoint h1 = inverse_shift(M * applyPatterndir(c, si), h);
     auto& tinf = config.texture_map[si.id];
     for(auto& M2: tinf.matrices) for(int i = 0; i<c->type; i += si.symmetries) {
-      fillcircle(M2 * spin(2 * M_PI * i / c->type) * h1, col);
+      fillcircle(M2 * spin(TAU * i / c->type) * h1, col);
       if(texturesym)
-        fillcircle(M2 * spin(2 * M_PI * i / c->type) * Mirror * h1, col);
+        fillcircle(M2 * spin(TAU * i / c->type) * Mirror * h1, col);
       }
     }
   catch(out_of_range&) {}

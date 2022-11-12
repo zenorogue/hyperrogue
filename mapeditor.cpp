@@ -89,7 +89,7 @@ EX namespace mapeditor {
       int ll = ceil(360 * len);
       shiftmatrix W = V * rgpushxto0(s);
       for(int i=0; i<=ll; i++)
-        curvepoint(xspinpush0(360*degree*i/ll, radius));
+        curvepoint(xspinpush0(TAU*i/ll, radius));
       queuecurve(W, col, fill, PPR::LINE);
       }
 
@@ -1979,18 +1979,18 @@ EX namespace mapeditor {
         }
       transmatrix T;
       if(front_config == eFront::equidistants) T = Id;
-      else if(front_config == eFront::const_x) T = cspin(2, 0, M_PI/2);
-      else if(front_config == eFront::const_y) T = cspin(2, 1, M_PI/2);
+      else if(front_config == eFront::const_x) T = cspin90(2, 0);
+      else if(front_config == eFront::const_y) T = cspin90(2, 1);
       else return;
       for(int i=0; i<4; i+=2) {
         for(int u=2; u<=20; u++) {
           PRING(d) {
-            curvepoint(T * xspinpush(M_PI*d/cgi.S42, u/20.) * zpush0(front_edit));
+            curvepoint(T * xspinpush(d*cgi.S_step, u/20.) * zpush0(front_edit));
             }
           queuecurve(d2, cols[i + (u%5 != 0)], 0, i < 2 ? PPR::LINE : PPR::SUPERLINE);
           }
         for(int d=0; d<cgi.S84; d++) {
-          for(int u=0; u<=20; u++) curvepoint(T * xspinpush(M_PI*d/cgi.S42, u/20.) * zpush(front_edit) * C0);
+          for(int u=0; u<=20; u++) curvepoint(T * xspinpush(d*cgi.S_step, u/20.) * zpush(front_edit) * C0);
           queuecurve(d2, cols[i + (d % (cgi.S84/drawcell->type) != 0)], 0, i < 2 ? PPR::LINE : PPR::SUPERLINE);
           }
         }
@@ -1999,11 +1999,11 @@ EX namespace mapeditor {
 
     for(int d=0; d<cgi.S84; d++) {
       unsigned col = (d % (cgi.S84/drawcell->type) == 0) ? gridcolor : lightgrid;
-      queueline(d2 * C0, d2 * xspinpush0(M_PI*d/cgi.S42, 1), col, 4 + vid.linequality);
+      queueline(d2 * C0, d2 * xspinpush0(d*cgi.S_step, 1), col, 4 + vid.linequality);
       }
     for(int u=2; u<=20; u++) {
       PRING(d) {
-        curvepoint(xspinpush0(M_PI*d/cgi.S42, u/20.));
+        curvepoint(xspinpush0(d*cgi.S_step, u/20.));
         }
       queuecurve(d2, (u%5==0) ? gridcolor : lightgrid, 0, PPR::LINE);
       }
@@ -2057,8 +2057,7 @@ EX namespace mapeditor {
         // total: rh2 - rh1
         // ld z = degree;
         ld x = b2 - b1 + M_PI;
-        while(x > M_PI) x -= 2 * M_PI;
-        while(x < -M_PI) x += 2 * M_PI;
+        cyclefix(x, 0);
         area += x;
         }
       }
@@ -2440,7 +2439,7 @@ EX namespace mapeditor {
       }
     
     if(uni == 'a' && haveshape) {
-      mh = spin(2*M_PI*-ew.rotid/dsCur->rots) * mh;
+      mh = spin(TAU*-ew.rotid/dsCur->rots) * mh;
       if(ew.symid) mh = Mirror * mh;
     
       if(ew.pointid < 0 || ew.pointid >= isize(dsCur->list)) 
@@ -2462,7 +2461,7 @@ EX namespace mapeditor {
 
       if(i < 0 || i >= isize(dsCur->list)) return;
 
-      mh = spin(2*M_PI*-ew.rotid/dsCur->rots) * mh;
+      mh = spin(TAU*-ew.rotid/dsCur->rots) * mh;
       if(ew.symid) mh = Mirror * mh;
 
       if(uni == 'm' || uni == 'M') 
@@ -2839,7 +2838,7 @@ EX namespace mapeditor {
           shiftmatrix T = rgpushxto0(lstart);
           texture::where = lstartcell;
           for(int i=0; i<circp; i++)
-            texture::drawPixel(T * xspinpush0(2 * M_PI * i / circp, rad), tcolor);
+            texture::drawPixel(T * xspinpush0(TAU * i / circp, rad), tcolor);
           lstartcell = NULL;
           }
 #endif          
@@ -2936,13 +2935,13 @@ EX namespace mapeditor {
             for(int r=0; r<us->d[l].rots; r++) {
               for(int i=0; i<isize(us->d[l].list); i++) {
                 hyperpoint h = us->d[l].list[i];
-                h = spin(360 * degree * r / us->d[l].rots) * h;
+                h = spin(TAU * r / us->d[l].rots) * h;
                 for(int d=0; d<GDIM; d++) print(hlog, fts(h[d]), ", ");
                 }
               if(us->d[l].sym) for(int i=isize(us->d[l].list)-1; i>=0; i--) {
                 hyperpoint h = us->d[l].list[i];
                 h[1] = -h[1];
-                h = spin(360 * degree * r / us->d[l].rots) * h;
+                h = spin(TAU * r / us->d[l].rots) * h;
                 for(int d=0; d<GDIM; d++) print(hlog, fts(h[d]), ", ");
                 }
               }
@@ -3022,7 +3021,7 @@ EX namespace mapeditor {
     if(radius > .1) circp *= 2; 
     
     for(int j=0; j<circp; j++)
-      pts.push_back(xspinpush0(M_PI*j*2/circp, radius));
+      pts.push_back(xspinpush0(TAU * j / circp, radius));
     for(int j=0; j<circp; j++) curvepoint(pts[j]);
     curvepoint(pts[0]);
     queuecurve(Ctr, dtcolor, 0, PPR::LINE);
@@ -3057,7 +3056,7 @@ EX namespace mapeditor {
 
       for(int j=0; j<=texture::texturesym; j++)
       for(int i=0; i<c->type; i += sih.symmetries) {
-        shiftmatrix M2 = V * applyPatterndir(c, sih) * spin(2*M_PI*i/c->type);
+        shiftmatrix M2 = V * applyPatterndir(c, sih) * spin(TAU * i / c->type);
         if(j) M2 = M2 * Mirror;
         switch(holdmouse ? mousekey : 'd') {
           case 'c':
@@ -3141,14 +3140,14 @@ EX namespace mapeditor {
     
           if(mouseout()) break;
     
-          shiftpoint P2 = V * spin(2*M_PI*a/ds.rots) * (b?Mirror*mh:mh);
+          shiftpoint P2 = V * spin(TAU * a / ds.rots) * (b?Mirror*mh:mh);
         
           queuestr(P2, 10, "x", 0xFF00FF);
           }
         
         if(isize(ds.list) == 0) return us;
         
-        shiftpoint Plast = V * spin(-2*M_PI/ds.rots) * (ds.sym?Mirror*ds.list[0]:ds.list[isize(ds.list)-1]);
+        shiftpoint Plast = V * spin(-TAU / ds.rots) * (ds.sym?Mirror*ds.list[0]:ds.list[isize(ds.list)-1]);
         int state = 0;
         int gstate = 0;
         double dist2 = 0;
@@ -3157,14 +3156,14 @@ EX namespace mapeditor {
         for(int a=0; a<ds.rots; a++) 
         for(int b=0; b<(ds.sym?2:1); b++) {
         
-          hyperpoint mh2 = spin(2*M_PI*-ew.rotid/ds.rots) * mh;
+          hyperpoint mh2 = spin(TAU * -ew.rotid/ds.rots) * mh;
           if(ew.symid) mh2 = Mirror * mh2;
-          shiftpoint pseudomouse = V * spin(2*M_PI*a/ds.rots) * mirrorif(mh2, b);      
+          shiftpoint pseudomouse = V * spin(TAU * a / ds.rots) * mirrorif(mh2, b);
         
           for(int t=0; t<isize(ds.list); t++) {
             int ti = b ? isize(ds.list)-1-t : t;
   
-            shiftpoint P2 = V * spin(2*M_PI*a/ds.rots) * mirrorif(ds.list[ti], b);
+            shiftpoint P2 = V * spin(TAU * a / ds.rots) * mirrorif(ds.list[ti], b);
             
             if(!mouseout()) {
               double d = hdist(moh, P2);

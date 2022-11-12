@@ -204,7 +204,7 @@ bool draw_bird(cell *c, const transmatrix& V) {
       id++; if(id == isize(orig)) id = 0;
       }
     id = tot * WINGS / maxvol / 2;
-    queuepoly(rgpushxto0(tC0(V)) * cspin(0, 2, M_PI/2) * cspin(1, 2, 90 * degree) * cspin(0, 2, 45 * degree),
+    queuepoly(rgpushxto0(tC0(V)) * cspin90(0, 2) * cspin90(1, 2) * cspin(0, 2, 45._deg),
        GDIM == 3 ? cgi.shAnimatedTinyEagle[id] : cgi.shTinyBird, 0xFFFFFFFF
        ); 
     }
@@ -312,9 +312,9 @@ auto hchook = addHook(hooks_drawcell, 100, draw_bird)
   hyperpoint h = all[int(id)] * (1-id+int(id)) + all[int(id+1)] * (id-int(id));
   h = normalize(h);
   centerover = currentmap->gamestart();
-  View = /* cspin(2, 0, M_PI/2) * rspintox(gpushxto0(h) * C0) * */ gpushxto0(h);
+  View = /* cspin90(2, 0) * rspintox(gpushxto0(h) * C0) * */ gpushxto0(h);
   View = spintox(View * C0) * View;
-  View = cspin(2, 0, M_PI/2) * View;
+  View = cspin90(2, 0) * View;
 
   shift_view(point3(0, 0, -1e-2));
 

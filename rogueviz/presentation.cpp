@@ -46,8 +46,8 @@ void grapher::arrow(hyperpoint h1, hyperpoint h2, ld sca, color_t col) {
   ld siz = hypot_d(2, h);
   h *= sca / siz;
   curvepoint(h2);
-  curvepoint(h2 - spin(15*degree) * h);
-  curvepoint(h2 - spin(-15*degree) * h);
+  curvepoint(h2 - spin(15._deg) * h);
+  curvepoint(h2 - spin(-15._deg) * h);
   curvepoint(h2);
   queuecurve(T, col, col, PPR::LINE);
   }
@@ -429,7 +429,7 @@ void use_angledir(presmode mode, bool reset) {
     angle = 0, dir = -1;
   add_temporary_hook(mode, shmup::hooks_turn, 200, [] (int i) {
     angle += dir * i / 500.;
-    if(angle > M_PI/2) angle = M_PI/2;
+    if(angle > 90._deg) angle = 90._deg;
     if(angle < 0) angle = 0;
     return false;
     });

@@ -62,7 +62,7 @@ ld geodesics_0(hyperpoint h) {
   ld r = hypot_d(2, h);
   ld phi = atan2(h[1], h[0]);
   
-  ld z = (phi / 2 / M_PI) * (M_PI * r * r + 2 * M_PI);
+  ld z = (phi / TAU) * (M_PI * r * r + TAU);
   return z + rot_plane(h);
   }
 
@@ -70,7 +70,7 @@ ld geodesics_at_4(hyperpoint h) {
   ld r = 4;
   ld phi = atan2(h[1], h[0]);
   
-  ld z = (phi / 2 / M_PI) * (M_PI * r * r + 2 * M_PI);
+  ld z = (phi / TAU) * (M_PI * r * r + TAU);
   return z + rot_plane(h);
   }
 
@@ -381,7 +381,7 @@ level geodesical(
   "light rays are assumed to be geodesics.\n\n"
   "Geodesics in Nil are horizontal, vertical, and helical. "
   "In this level, all the roads are (fragments of) helical geodesics.",
-  -45*degree, 3*dft_block, 225*degree, 0,
+  -45._deg, 3*dft_block, 225._deg, 0,
   // -8*dft_block, +8*dft_block, +8*dft_block, 0, 
   {
   "ffffffffffffffff",
@@ -404,7 +404,7 @@ level geodesical(
 level geodesical4(
   "Helical Geodesic", 's', nrlPolar,
   "The main road here is a helical geodesic. Orthogonal lines are horizontal.",  
-  -80*degree, 8.5*dft_block, 260*degree, 0.5*dft_block,
+  -80._deg, 8.5*dft_block, 260._deg, 0.5*dft_block,
   // -8*dft_block, +8*dft_block, +8*dft_block, 0, 
   {
   "!!!!!!!!!!!!!!!!",
@@ -560,10 +560,9 @@ struct complex_surface {
     auto d = hypot_d(2, h1);
     ld r = 2;
     h1 = h1 * (r / d);
-    ld phi = atan2(h1[1], h1[0]) + 90*degree;
-    ld phis = atan2((start-ctr)[1], (start-ctr)[0]) + 90 * degree;
-    if(phi < phis-M_PI) phi += 2 * M_PI;
-    if(phi > phis+M_PI) phi -= 2 * M_PI;
+    ld phi = atan2(h1[1], h1[0]) + 90._deg;
+    ld phis = atan2((start-ctr)[1], (start-ctr)[0]) + 90._deg;
+    cyclefix(phi, phis);
     h1 += ctr;
     auto z = [&] (ld a) { return point31(r*sin(a), -r*cos(a), (r * r / 2) * (a-sin(a)*cos(a))); };
 
@@ -577,11 +576,11 @@ struct complex_surface {
     hyperpoint h2 = h; if(start[0] == ctr[0]) h2[1] = start[1]; else h2[0] = start[0];
     hyperpoint pre = rgpushxto0(start) * flatpush(h2-start) * flatpush(h-h2) * C0;
 
-    hyperpoint last = rgpushxto0(start) * gpushxto0(z(phis)) * rgpushxto0(z(phis + dir * 90*degree)) * C0;
+    hyperpoint last = rgpushxto0(start) * gpushxto0(z(phis)) * rgpushxto0(z(phis + dir * 90._deg)) * C0;
     hyperpoint h3 = h; if(start[0] != ctr[0]) h3[1] = last[1]; else h3[0] = last[0];
     hyperpoint post = rgpushxto0(last) * flatpush(h3-last) * flatpush(h-h3) * C0;
 
-    ld p = (1+sin((phi-phis)*2 - 90*degree)) / 2.;
+    ld p = (1+sin((phi-phis)*2 - 90._deg)) / 2.;
 
     pre[2] = pre[2] + (post[2] - pre[2]) * p;
 

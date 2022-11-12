@@ -114,7 +114,7 @@ void origcoords() {
   using namespace rogueviz;
   vertexcoords.resize(N);
   for(int i=0; i<N; i++) 
-    vertexcoords[i] = spin(coords[i].second * 2 * M_PI / 360) * xpush(coords[i].first) * C0;
+    vertexcoords[i] = spin(coords[i].second * degree) * xpush(coords[i].first) * C0;
   }
 
 // compute vertexcoords from the RogueViz representation

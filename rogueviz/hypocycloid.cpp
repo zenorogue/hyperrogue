@@ -72,9 +72,9 @@ void circ_frame() {
   
   shiftmatrix at = ggmatrix(cwt.at) * xpush(xdist);
   
-  ld kdegree = 2 * M_PI / prec;
+  ld kdegree = TAU / prec;
 
-  ld cs = 2*M_PI*cshift;
+  ld cs = TAU * cshift;
 
   if(shape) {
     auto shapefun = [&] (ld x) {

@@ -104,8 +104,8 @@ bool turn(int delta) {
     }
   #endif
 
-  if(min_gfx_slope < -90*degree) min_gfx_slope = -90*degree;
-  if(min_gfx_slope > +90*degree) min_gfx_slope = +90*degree;
+  if(min_gfx_slope < -90._deg) min_gfx_slope = -90._deg;
+  if(min_gfx_slope > +90._deg) min_gfx_slope = +90._deg;
   
   backing = false;
 
@@ -659,7 +659,7 @@ auto celldemo = arg::add3("-unilcycle", initialize) + arg::add3("-unilplan", [] 
     ->editable(0, 5, 0.05, "camera distance", "how far is the unicycle from the camera", 'd')
     ->set_reaction([] { curlev->current.centerview(curlev); });
     param_f(min_gfx_slope, "min_gfx_slope")
-    ->editable(-90*degree, 90*degree, degree, "min camera slope", "affected by up/down", 'm');
+    ->editable(-90._deg, 90._deg, degree, "min camera slope", "affected by up/down", 'm');
     })
   + arg::add3("-fullsim", [] {
     /* for animations */

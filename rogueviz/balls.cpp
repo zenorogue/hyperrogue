@@ -35,7 +35,7 @@ void initialize(int max_ball) {
   shShell.flags |= POLY_TRIANGLES;
 
   auto pt = [] (int i, int j) {
-    cgi.hpcpush(direct_exp(/* cspin(0, 2, -30*degree) **/ cspin(2, 1, 90*degree) * cspin(0, 1, j * degree) * cspin(0, 2, i * M_PI / 2 / 16) * ztangent(r_big_ball)));
+    cgi.hpcpush(direct_exp(/* cspin(0, 2, -30._deg) **/ cspin90(2, 1) * cspin(0, 1, j * degree) * cspin(0, 2, i * 90._deg / 16) * ztangent(r_big_ball)));
     };
 
   for(int i=0; i<16; i++)
@@ -176,7 +176,7 @@ int args() {
     cgi.require_shapes();
     shift();
     initialize(argi());
-    View = cspin(1, 2, M_PI/2);
+    View = cspin90(1, 2);
     }
 
   else return 1;

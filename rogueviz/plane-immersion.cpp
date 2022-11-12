@@ -19,8 +19,8 @@ color_t gridcol = 0xFFFFFFFF;
 hyperpoint fp(ld x, ld y) {
   x *= scale;
   y *= scale;
-  x *= M_PI/10 * sqrt(2)/2;
-  y *= M_PI/10 * sqrt(2)/2;
+  x *= A_PI/10 * sqrt(2)/2;
+  y *= A_PI/10 * sqrt(2)/2;
   if(euclid)
     return hyperpoint(x, y, 0, 1);
   
@@ -28,12 +28,12 @@ hyperpoint fp(ld x, ld y) {
     ld a = sqrt(2)/2;
     x /= a;
     y /= a;
-    hyperpoint h = cspin(2, 3, -M_PI/4) * hyperpoint(sin(x)*a, sin(y)*a, cos(x)*a, cos(y)*a);
+    hyperpoint h = cspin(2, 3, -45._deg) * hyperpoint(sin(x)*a, sin(y)*a, cos(x)*a, cos(y)*a);
     return h;
     }
 
   if(hyperbolic)
-    return cspin(0, 2, -M_PI/2) * tC0(parabolic13(x, y));
+    return cspin90(2, 0) * tC0(parabolic13(x, y));
   
   if(nil)
     return hyperpoint(0, y, x, 1);
@@ -45,7 +45,7 @@ hyperpoint fp(ld x, ld y) {
     ld a = sqrt(2)/2;
     x /= a;
     y /= a;
-    hyperpoint h = cspin(2, 3, -M_PI/4) * hyperpoint(sinh(x)*a, sinh(y)*a, cosh(x)*a, cosh(y)*a);
+    hyperpoint h = cspin(2, 3, -45._deg) * hyperpoint(sinh(x)*a, sinh(y)*a, cosh(x)*a, cosh(y)*a);
     return h;
     }
 
@@ -90,16 +90,16 @@ void relocate() {
   
   vid.fixed_yz = false;
   
-  if(nil) rotate_view(cspin(2, 0, M_PI/2));
-  if(prod) rotate_view(cspin(1, 2, M_PI/2));
+  if(nil) rotate_view(cspin90(2, 0));
+  if(prod) rotate_view(cspin90(1, 2));
 
   if(emba == 1) {  
-    rotate_view(cspin(0, 1, M_PI/4));
-    rotate_view(cspin(1, 2, M_PI/6));
+    rotate_view(cspin(0, 1, 45._deg));
+    rotate_view(cspin(1, 2, 30._deg));
     }
   
   if(emba == 2) {
-    rotate_view(cspin(1, 2, M_PI/2 * .9));
+    rotate_view(cspin(1, 2, 81._deg));
     }
   
   for(int a=0; a<100; a++) 

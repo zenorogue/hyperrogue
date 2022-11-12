@@ -25,7 +25,7 @@ int qmode;
 
 color_t rainbow_color_at(hyperpoint h) {
   ld sat = 1 - 1 / h[2];
-  ld hue = atan2(h[0], h[1]) / (2 * M_PI);
+  ld hue = atan2(h[0], h[1]) / TAU;
   return rainbow_color(sat, hue);
   }
   

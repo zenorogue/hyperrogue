@@ -884,17 +884,6 @@ EX void showStartMenu() {
 
   timerstart = time(NULL);
   
-  /*
-  initquickqueue();
-  int siz = min(vid.xres, vid.yres) / 8;
-  drawMonsterType(moPrincess, NULL, atscreenpos(siz,siz,siz) * spin(-M_PI/4), 0, 0);
-  drawMonsterType(moKnight, NULL, atscreenpos(vid.xres-siz,siz,siz) * spin(-3*M_PI/4), 0, 0);
-  drawItemType(itOrbYendor, NULL, atscreenpos(siz,vid.yres-siz,siz) * spin(M_PI/4), iinf[itOrbYendor].color, 0, false);
-  drawItemType(itKey, NULL, atscreenpos(siz,vid.yres-siz,siz) * spin(M_PI/4), iinf[itKey].color, 0, false);
-  drawItemType(itHyperstone, NULL, atscreenpos(vid.xres-siz,vid.yres-siz,siz) * spin(3*M_PI/4), iinf[itHyperstone].color, 0, false);
-  quickqueue();
-  */
-
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
     if(uni == 'o') uni = 'i';

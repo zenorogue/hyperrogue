@@ -25,7 +25,7 @@ void timestamp::draw_unilcycle(const shiftmatrix& V) {
   hyperpoint base = Ta * Tb * point31(0, 0, whrad);
   
   for(int a=0; a<points; a++) {
-    ld beta = 360 * degree * a / points + circpos;
+    ld beta = TAU * a / points + circpos;
     whpoint[a] = base + Ta * point3(whrad*sin(beta),0,whrad*cos(beta));
     }
   whpoint[points] = whpoint[0];
@@ -116,7 +116,7 @@ bool timestamp::collect(level *lev) {
 /* convert heading to integral units, to make saved replays consistent */
 
 constexpr ld h_units = 360 * 60 * 60;
-constexpr ld h_mul = h_units / 2 / M_PI;
+constexpr ld h_mul = h_units / TAU;
 
 int heading_to_int(ld a) {
   a = a * h_mul;
@@ -252,7 +252,7 @@ void timestamp::draw_instruments(level* l) {
   curvepoint(hpxy(0, rad));
   curvepoint(hpxy(-rad/4, 0));  
   curvepoint(hpxy(rad/4, 0));
-  queuecurve(sId * atscreenpos(cx, cy, pix) * spin(90 * degree + slope), 0xFF, 0x40C040FF, PPR::ZERO);
+  queuecurve(sId * atscreenpos(cx, cy, pix) * spin(90._deg + slope), 0xFF, 0x40C040FF, PPR::ZERO);
 
   // compass
   

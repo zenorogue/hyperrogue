@@ -116,17 +116,17 @@ void face_animation() {
   if(tf == 0) {
     View = cspin(0, 2, 360 * degree * smoothen(t)) * View;
     View = zpush(-0.1) * View;
-    View = cspin(0, 2, M_PI) * View;
+    View = cspin180(0, 2) * View;
     back = 0;
     }
   else if(tf == 1) {
     View = zpush(-0.1 * (1-smoothen(t))) * View;
     if(t > .9)
     back = -0.1 * smoothen(10*t-9);
-    View = cspin(0, 2, M_PI) * View;
+    View = cspin180(0, 2) * View;
     }
   else if(tf == 2) {
-    View = cspin(0, 2, 75*degree*sin(2*M_PI*smoothen(t))) * View;
+    View = cspin(0, 2, 75._deg*sin(TAU*smoothen(t))) * View;
     }
   else if(tf == 3) {
     View = cspin(1, 2, up*degree*smoothen(t)) * View;

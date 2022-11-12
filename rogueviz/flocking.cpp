@@ -237,7 +237,7 @@ namespace flocking {
         if(prod) {
           NLP = inverse(vdata[0].m->ori);
           
-          NLP = hr::cspin(1, 2, 90 * degree) * spin(90 * degree) * NLP;
+          NLP = hr::cspin90(1, 2) * spin90() * NLP;
 
           if(NLP[0][2]) {
             auto downspin = -atan2(NLP[0][2], NLP[1][2]);
@@ -245,9 +245,9 @@ namespace flocking {
             }
           }          
         else {
-          View =spin(90 * degree) * View;
+          View =spin90() * View;
           if(GDIM == 3) {
-            View = hr::cspin(1, 2, 90 * degree) * View;
+            View = hr::cspin90(1, 2) * View;
             }
           shift_view(ztangent(follow_dist));
           }        

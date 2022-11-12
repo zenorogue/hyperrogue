@@ -358,7 +358,7 @@ void distribute_neurons() {
     
     if(!triangulate(data[s].val, w, find, vdata[id].m->at))
       vdata[id].m->at = 
-        spin(2*M_PI*w.csample / w.drawn_samples) * xpush(rad * (w.drawn_samples-1) / w.drawn_samples);
+        spin(TAU*w.csample / w.drawn_samples) * xpush(rad * (w.drawn_samples-1) / w.drawn_samples);
     w.csample++;
     for(auto& e: vdata[id].edges) e.second->orig = nullptr;
     }

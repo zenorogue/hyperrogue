@@ -88,7 +88,9 @@ void celldrawer::addaura() {
 void eclectic_red(color_t& col) {
   part(col, 0) = part(col, 2) * 3 / 4;
   }
-  
+
+constexpr ld spinspeed = .75 / M_PI;
+
 void celldrawer::setcolors() {
 
   wcol = fcol = winf[c->wall].color;
@@ -105,7 +107,7 @@ void celldrawer::setcolors() {
           0x90 + 8 * sintick(1000, windmap::windcodes[windmap::getId(c)] / 256.)
           ) : 
         #endif
-        0x1010C0 + int(32 * sintick(500, (ls::any_chaos() ? c->CHAOSPARAM : c->landparam)*.75/M_PI));
+        0x1010C0 + int(32 * sintick(500, (ls::any_chaos() ? c->CHAOSPARAM : c->landparam)*spinspeed));
     else if(c->land == laOceanWall)
       fcol = 0x2020FF;
     else if(c->land == laVariant)
@@ -118,7 +120,7 @@ void celldrawer::setcolors() {
         if(c->move(i)->wall != waSea && c->move(i)->wall != waBoat)
           nearshore = true;
       if(nearshore) mafcol += 30; */
-      fcol = fcol + mafcol * (4+sintick(500, ((eubinary||c->master->alt) ? celldistAlt(c) : 0)*.75/M_PI))/5;
+      fcol = fcol + mafcol * (4+sintick(500, ((eubinary||c->master->alt) ? celldistAlt(c) : 0)*spinspeed))/5;
       }
     else if(c->land == laDocks) {
       fcol = 0x0000A0;
@@ -126,7 +128,7 @@ void celldrawer::setcolors() {
     else if(c->land == laAlchemist)
       fcol = 0x900090;
     else if(c->land == laWhirlpool)
-      fcol = 0x0000C0 + int(32 * sintick(200, ((eubinary||c->master->alt) ? celldistAlt(c) : 0)*.75/M_PI));
+      fcol = 0x0000C0 + int(32 * sintick(200, ((eubinary||c->master->alt) ? celldistAlt(c) : 0)*spinspeed));
     else if(c->land == laLivefjord)
       fcol = 0x000080;
     else if(isWarpedType(c->land))
@@ -638,7 +640,7 @@ void celldrawer::tune_colors() {
       celldist(c);
 
     int dc = 
-      0x10101 * (127 + int(127 * sintick(200, d*.75/M_PI)));
+      0x10101 * (127 + int(127 * sintick(200, d*spinspeed)));
     wcol = gradient(wcol, dc, 0, .3, 1);
     fcol = gradient(fcol, dc, 0, .3, 1);
     }
@@ -686,7 +688,7 @@ void celldrawer::draw_wall() {
       int hdir = 0;
       for(int i=0; i<c->type; i++) if(c->move(i)->wall == waClosedGate)
         hdir = i;
-      queuepolyat(V * ddspin(c, hdir, M_PI), cgi.shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR::WALL3A:PPR::WALL);
+      queuepolyat(V * ddspin180(c, hdir), cgi.shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR::WALL3A:PPR::WALL);
       return;
       }
     color_t wcol0 = wcol;
@@ -712,7 +714,7 @@ void celldrawer::draw_wall() {
     int hdir = 0;
     for(int i=0; i<c->type; i++) if(c->move(i) && c->move(i)->wall == waClosedGate)
       hdir = i;
-    shiftmatrix V2 = mscale(V, wmspatial?cgi.WALL:1) * ddspin(c, hdir, M_PI);
+    shiftmatrix V2 = mscale(V, wmspatial?cgi.WALL:1) * ddspin180(c, hdir);
     queuepolyat(V2, cgi.shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR::WALL3A:PPR::WALL);
     starcol = 0;
     }
@@ -787,7 +789,7 @@ void celldrawer::draw_boat() {
     Vboat = V;
     nospin = c->wall == waBoat && applyAnimation(c, Vboat, footphase, LAYER_BOAT);
     if(!nospin) Vboat = face_the_player(V);
-    else Vboat = Vboat * cspin(0, 2, M_PI);
+    else Vboat = Vboat * cspin180(0, 2);
     queuepolyat(mscale(Vboat, cgi.scalefactor/2), cgi.shBoatOuter, outcol, PPR::BOATLEV2);
     queuepolyat(mscale(Vboat, cgi.scalefactor/2-0.01), cgi.shBoatInner, incol, PPR::BOATLEV2);
     return;
@@ -795,7 +797,7 @@ void celldrawer::draw_boat() {
 
   if(wmspatial && c->wall == waBoat) {
     nospin = c->wall == waBoat && applyAnimation(c, Vboat, footphase, LAYER_BOAT);
-    if(!nospin && c->mondir != NODIR) Vboat = Vboat * ddspin(c, c->mondir, M_PI);
+    if(!nospin && c->mondir != NODIR) Vboat = Vboat * ddspin180(c, c->mondir);
     queuepolyat(Vboat, cgi.shBoatOuter, outcol, PPR::BOATLEV);
     Vboat = V;
     }
@@ -803,7 +805,7 @@ void celldrawer::draw_boat() {
     nospin = applyAnimation(c, Vboat, footphase, LAYER_BOAT);
     }
   if(!nospin && c->mondir != NODIR) 
-    Vboat = Vboat * ddspin(c, c->mondir, M_PI);
+    Vboat = Vboat * ddspin180(c, c->mondir);
   else {
     shiftmatrix Vx;
     if(applyAnimation(c, Vx, footphase, LAYER_SMALL))
@@ -964,7 +966,7 @@ void celldrawer::draw_halfvine() {
     queuepolyat(GDIM == 2 ? Vdepth : V2, cgi.shSemiFloor[0], darkena(vcol, fd, 0xFF), PPR::WALL3A);
     if(!noshadow) {
       dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
-      queuepolyat(V2 * spin(M_PI*2/3), cgi.shSemiFloorShadow, SHADOW_WALL, GDIM == 2 ? PPR::WALLSHADOW : PPR::TRANSPARENT_SHADOW);
+      queuepolyat(V2 * spin(120._deg), cgi.shSemiFloorShadow, SHADOW_WALL, GDIM == 2 ? PPR::WALLSHADOW : PPR::TRANSPARENT_SHADOW);
       }
     #if MAXMDIM >= 4
     if(GDIM == 3 && qfi.fshape) {
@@ -1032,7 +1034,7 @@ void celldrawer::draw_mirrorwall() {
       queuepolyat(V2, cgi.shHalfMirror[2], 0xC0C0C080, PPR::WALL3);
     }
   else {
-    qfi.spin = ddspin(c, d, M_PI);
+    qfi.spin = ddspin180(c, d);
     shiftmatrix V2 = V * qfi.spin;
     if(!wmblack) {
       inmirrorcount++;
@@ -1526,7 +1528,7 @@ void celldrawer::draw_features() {
       queuepoly(V, cgi.shThorns, 0xC080C0FF);
 
       for(int u=0; u<4; u+=2)
-        queuepoly(V * spin(2*M_PI / 3 / 4 * u), cgi.shRose, darkena(wcol, 0, 0xC0));
+        queuepoly(V * spin(30._deg * u), cgi.shRose, darkena(wcol, 0, 0xC0));
       break;
       }
 
@@ -1712,7 +1714,7 @@ void celldrawer::draw_features() {
             ld rad = cgi.hexf * (.3 * (u + ds));
             int tcol = darkena(gradient(forecolor, backcolor, 0, rad, 1.5 * cgi.hexf), 0, 0xFF);
             PRING(a)
-              curvepoint(xspinpush0(a * M_PI / cgi.S42, rad));
+              curvepoint(xspinpush0(a * cgi.S_step, rad));
             queuecurve(V, tcol, 0, PPR::LINE);
             }
           }  
@@ -1904,7 +1906,7 @@ void celldrawer::check_rotations() {
       ds.point = normalize_flat(ds.total);
       if(prod) ds.point = zshift(ds.point, ds.depth / ds.qty);
       if(side == 2) for(int i=0; i<3; i++) ds.point[i] = -ds.point[i];
-      if(side == 1) ds.point = spin(-M_PI/2) * ds.point;
+      if(side == 1) ds.point = spin(-90._deg) * ds.point;
       }
     };
   
@@ -2535,7 +2537,7 @@ void celldrawer::add_map_effects() {
         cell *c2 = c->move(i); 
         if(airdist(c2) < airdist(c)) {
           ld airdir = calcAirdir(c2); // printf("airdir = %d\n", airdir);
-          transmatrix V0 = ddspin(c, i, M_PI);
+          transmatrix V0 = ddspin180(c, i);
           
           double ph = ptick(PURE?150:75) + airdir;
           
@@ -2570,7 +2572,7 @@ void celldrawer::add_map_effects() {
     for(int t=0; t<c->type; t++) if(c->move(t)) {
       if(c->move(t)->ligon) {
         int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
-        queueline(V*chei(xspinpush((vid.flasheffects ? ticks : ptick(8)) * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
+        queueline(V*chei(xspinpush((vid.flasheffects ? ticks : ptick(8)) * cgi.S_step, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
         }
       for(int u: {-1, 1}) {
         cellwalker cw = cellwalker(c, t) + wstep + u;
@@ -2578,7 +2580,7 @@ void celldrawer::add_map_effects() {
         cell *c2 = cw.peek();
         if(c2 && c2->ligon) {
           int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
-          queueline(V*chei(xspinpush((vid.flasheffects ? ticks : ptick(8)) * M_PI / cgi.S42, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t)*currentmap->adj(cw.at, cw.spin), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
+          queueline(V*chei(xspinpush((vid.flasheffects ? ticks : ptick(8)) * cgi.S_step, cgi.hexf/2), rand() % 1000, 1000) * C0, V*chei(currentmap->adj(c, t)*currentmap->adj(cw.at, cw.spin), rand() % 1000, 1000) * C0, lcol, 2 + vid.linequality);
           }
         }
       }
@@ -2596,8 +2598,7 @@ void celldrawer::add_map_effects() {
       
       int aircol = 0xC0C0FF40;
       
-      if(hdir1 < hdir0-M_PI) hdir1 += 2 * M_PI;
-      if(hdir1 >= hdir0+M_PI) hdir1 -= 2 * M_PI;
+      cyclefix(hdir1, hdir0);
       
       ld hdir = (hdir1*ph1+hdir0*(1-ph1));
   
@@ -2733,7 +2734,7 @@ void celldrawer::draw() {
       inmirrorcount += cmc;
       draw_grid();
       if(cw2.mirrored != cw.mirrored) V = V * Mirror;
-      if(cw2.spin) V = V * spin(2*M_PI*cw2.spin/cw2.at->type);
+      if(cw2.spin) V = V * spin(TAU*cw2.spin/cw2.at->type);
       cw2.spin = 0;
       dynamicval<shiftmatrix> dc(cwtV, cwtV);
       cwtV = V * inverse_shift(ggmatrix(cw2.at), cwtV);

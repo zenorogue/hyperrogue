@@ -2634,9 +2634,9 @@ EX void cast() {
     glUniformMatrix4fv(o->uStraighten, 1, 0, glhr::tmtogl_transpose(asonov::straighten).as_array());
     }
   if(o->uReflectX != -1) {
-    auto h = glhr::pointtogl(tangent_length(spin(90*degree) * asonov::ty, 2));
+    auto h = glhr::pointtogl(tangent_length(spin90() * asonov::ty, 2));
     glUniform4fv(o->uReflectX, 1, &h[0]);
-    h = glhr::pointtogl(tangent_length(spin(90*degree) * asonov::tx, 2));
+    h = glhr::pointtogl(tangent_length(spin90() * asonov::tx, 2));
     glUniform4fv(o->uReflectY, 1, &h[0]);
     }
   #endif

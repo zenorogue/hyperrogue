@@ -106,17 +106,17 @@ mesher msh(eGeometry g, int sym, ld main, ld v0, ld v1, ld bspi, ld scale) {
   dynamicval<eGeometry> dg(geometry, g);
 
   hyperpoint rot = xpush(v0) * xspinpush0(M_PI - M_PI/sym, main);
-  hyperpoint bnlfar = xpush(v0) * spin(M_PI) * rspintox(rot) * rspintox(rot) * rspintox(rot) * xpush0(hdist0(rot));
-  hyperpoint bnrfar = xpush(v0) * spin(M_PI) * spintox(rot) * spintox(rot) * spintox(rot) * xpush0(hdist0(rot));
+  hyperpoint bnlfar = xpush(v0) * spin180() * rspintox(rot) * rspintox(rot) * rspintox(rot) * xpush0(hdist0(rot));
+  hyperpoint bnrfar = xpush(v0) * spin180() * spintox(rot) * spintox(rot) * spintox(rot) * xpush0(hdist0(rot));
 
-  m.lcorner = xspinpush0 (bspi-M_PI/sym, main);
-  m.rcorner = xspinpush0 (bspi+M_PI/sym, main);
+  m.lcorner = xspinpush0 (bspi - M_PI/sym, main);
+  m.rcorner = xspinpush0 (bspi + M_PI/sym, main);
   m.mfar[0] = xspinpush0 (bspi, v0);
   m.mfar[1] = xspinpush0 (bspi, v1);
   m.vfar[0] = spin(bspi) * bnlfar;
   m.vfar[2] = spin(bspi) * bnrfar;
-  m.vfar[1] = spin(-2*M_PI/sym) * m.vfar[2];
-  m.vfar[3] = spin(+2*M_PI/sym) * m.vfar[0];
+  m.vfar[1] = spin(-TAU/sym) * m.vfar[2];
+  m.vfar[3] = spin(+TAU/sym) * m.vfar[0];
   
   return m;
   }
@@ -131,7 +131,7 @@ matrixitem genitem(const transmatrix& m1, const transmatrix& m2, int nsym) {
   mi.first = m1;
   mi.second.resize(nsym);
   for(int i=0; i<nsym; i++)
-    mi.second[i] = spin(2*M_PI*i/nsym) * m2;
+    mi.second[i] = spin(TAU*i/nsym) * m2;
   return mi;
   }
 
@@ -149,7 +149,7 @@ EX hyperpoint may_kleinize(hyperpoint h) {
 
 void addmatrix(matrixlist& matrices, hyperpoint o0, hyperpoint o1, hyperpoint o2, hyperpoint n0, hyperpoint n1, hyperpoint n2, int d, int osym, int nsym) {
   if(do_kleinize()) o0 = kleinize(o0), o1 = kleinize(o1), o2 = kleinize(o2), n0 = kleinize(n0), n1 = kleinize(n1), n2 = kleinize(n2);
-  matrices.v.push_back(genitem(inverse(spin(2*M_PI*d/osym)*build_matrix(o0, o1, o2,C02)), spin(2*M_PI*d/nsym)*build_matrix(n0, n1, n2,C02), nsym));
+  matrices.v.push_back(genitem(inverse(spin(TAU*d/osym)*build_matrix(o0, o1, o2,C02)), spin(TAU*d/nsym)*build_matrix(n0, n1, n2,C02), nsym));
   }
 
 matrixlist hex_matrices, hept_matrices;
@@ -225,10 +225,10 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
   hyperpoint lstmid = hpxyz(0,0,0);
   for(auto pp: lst) lstmid += pp;
   transmatrix T = spin(-m.o.bspi);
-  while((spin(2*M_PI / rots) * T* lstmid)[0] < (T*lstmid)[0])
-    T = spin(2*M_PI / rots) * T;
-  while((spin(-2*M_PI / rots) * T* lstmid)[0] < (T*lstmid)[0])
-    T = spin(-2*M_PI / rots) * T;
+  while((spin(TAU / rots) * T* lstmid)[0] < (T*lstmid)[0])
+    T = spin(TAU / rots) * T;
+  while((spin(-TAU / rots) * T* lstmid)[0] < (T*lstmid)[0])
+    T = spin(-TAU / rots) * T;
   T = spin(m.o.bspi) * T;
   for(auto &pp: lst) pp = T * pp;
   
@@ -238,7 +238,7 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
     int rep = rots / osym;
     int s = lst.size();
     for(int i=0; i<s*(rep-1); i++)
-      lst.push_back(spin(2*M_PI/rots) * lst[i]);
+      lst.push_back(spin(TAU/rots) * lst[i]);
     rots /= rep;
     }
   
@@ -333,11 +333,11 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, ld
   
   bshape(fsh.b[id], fsh.prio);
   for(int t=0; t<=sides; t++)
-    hpcpush(xspinpush0(t*2 * M_PI / sides + shift * M_PI / S42, size));
+    hpcpush(xspinpush0(t * TAU / sides + shift * S_step, size));
 
   bshape(fsh.shadow[id], fsh.prio);
   for(int t=0; t<=sides; t++)
-    hpcpush(xspinpush0(t*2 * M_PI / sides + shift * M_PI / S42, size * SHADMUL));
+    hpcpush(xspinpush0(t * TAU / sides + shift * S_step, size * SHADMUL));
 
   for(int k=0; k<SIDEPARS; k++) {
     fsh.side[k].resize(2);
@@ -1218,7 +1218,7 @@ void draw_shape_for_texture(floorshape* sh) {
     queuepoly(shiftless(eupush(gx+a, gy+b)), sh->b[0], 0xFFFFFFFF);
 
   if(sh == &cgi.shCrossFloor) {
-    queuepoly(shiftless(eupush(gx, gy) * spin(M_PI/4)), cgi.shCross, 0x808080FF);
+    queuepoly(shiftless(eupush(gx, gy) * spin(45._deg)), cgi.shCross, 0x808080FF);
     }
 
   if(1) {
@@ -1237,8 +1237,8 @@ void draw_shape_for_texture(floorshape* sh) {
     ld d = hdist(h1, h2);
     hyperpoint h3 = h1 + (h2-h1) /d * min(d, .1);
     for(int a=0; a<4; a++) {
-      curvepoint(eupush(gx,gy) * eupush(spin(90*degree*a) * h1) * C0);
-      curvepoint(eupush(gx,gy) * eupush(spin(90*degree*a) * h3) * C0);
+      curvepoint(eupush(gx,gy) * eupush(spin(90._deg*a) * h1) * C0);
+      curvepoint(eupush(gx,gy) * eupush(spin(90._deg*a) * h3) * C0);
       queuecurve(shiftless(Id), 0x10101010, 0, PPR::LINE);
       }
     }

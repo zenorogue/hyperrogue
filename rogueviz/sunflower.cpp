@@ -74,8 +74,8 @@ bool sunflower_cell(cell *c, shiftmatrix V) {
   
   if(sphere) {
     if(infer == 'r') 
-      range = qty * density * M_PI/2;
-    else qd = range * 2/M_PI;
+      range = qty * density * 90._deg;
+    else qd = range / 90._deg;
     }
   else if(euclid) {
     if(infer == 'r')
@@ -108,7 +108,7 @@ bool sunflower_cell(cell *c, shiftmatrix V) {
     ld best_error = 1;
     vector<int> sgns;
     for(int i=1; i<iqty; i++) {
-      ld v = i * step_angle / (2*M_PI);
+      ld v = i * step_angle / TAU;
       v = frac(v);
       auto sgn = v > .5;
       if(sgn) v = 1-v;
@@ -263,7 +263,7 @@ void show() {
   dialog::addSelItem("radius", fts(range), 'q');
   dialog::add_action([] {
     if(infer == 'r') infer = 'd';
-    dialog::editNumber(range, 0, 10, .1, 2*M_PI, "range", "range");
+    dialog::editNumber(range, 0, 10, .1, TAU, "range", "range");
     dialog::scaleLog();
     });
   

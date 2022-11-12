@@ -57,7 +57,7 @@ transmatrix hrmap_standard::master_relative(cell *c, bool get_inverse) {
   #if CAP_IRR  
   else if(IRREGULAR) {
     int id = irr::cellindex[c];
-    ld alpha = 2 * M_PI / S7 * irr::periodmap[c->master].base.spin;
+    ld alpha = TAU / S7 * irr::periodmap[c->master].base.spin;
     return get_inverse ? irr::cells[id].rpusher * spin(-alpha-master_to_c7_angle()): spin(alpha + master_to_c7_angle()) * irr::cells[id].pusher;
     }
   #endif
@@ -100,12 +100,12 @@ transmatrix hrmap_standard::adj(heptagon *h, int d) {
     int t0 = h->type;
     int t1 = h->cmove(d)->type;
     int sp = h->c.spin(d);
-    return spin(-d * 2 * M_PI / t0) * xpush(spacedist(h->c7, d)) * spin(M_PI + 2*M_PI*sp/t1);
+    return spin(-d * TAU / t0) * xpush(spacedist(h->c7, d)) * spin(M_PI + TAU * sp / t1);
     }
   transmatrix T = cgi.heptmove[d];
   if(h->c.mirror(d)) T = T * Mirror;
   int sp = h->c.spin(d);
-  if(sp) T = T * spin(2*M_PI*sp/S7);
+  if(sp) T = T * spin(TAU*sp/S7);
   return T;
   }
 
@@ -443,7 +443,7 @@ EX bool no_easy_spin() {
 ld hrmap_standard::spin_angle(cell *c, int d) {
   if(WDIM == 3) return SPIN_NOT_AVAILABLE;
   ld hexshift = 0;
-  if(c == c->master->c7 && (S7 % 2 == 0) && BITRUNCATED) hexshift = cgi.hexshift + 2*M_PI/c->type;
+  if(c == c->master->c7 && (S7 % 2 == 0) && BITRUNCATED) hexshift = cgi.hexshift + TAU/c->type;
   else if(cgi.hexshift && c == c->master->c7) hexshift = cgi.hexshift;
   #if CAP_IRR
   if(IRREGULAR) {
@@ -454,7 +454,7 @@ ld hrmap_standard::spin_angle(cell *c, int d) {
     return -atan2(p[1], p[0]) - hexshift;
     }
   #endif
-  return M_PI - d * 2 * M_PI / c->type - hexshift;
+  return M_PI - d * TAU / c->type - hexshift;
   }
 
 EX transmatrix ddspin(cell *c, int d, ld bonus IS(0)) { return currentmap->spin_to(c, d, bonus); }
@@ -543,14 +543,14 @@ EX hyperpoint randomPointIn(int t) {
   if(NONSTDVAR || arcm::in() || kite::in()) {
     // Let these geometries be less confusing.
     // Also easier to implement ;)
-    return xspinpush0(2 * M_PI * randd(), asinh(randd() / 20));
+    return xspinpush0(TAU * randd(), asinh(randd() / 20));
     }
   while(true) {
-    hyperpoint h = xspinpush0(2*M_PI*(randd()-.5)/t, asinh(randd()));
+    hyperpoint h = xspinpush0(TAU * (randd()-.5)/t, asinh(randd()));
     double d =
       PURE ? cgi.tessf : t == 6 ? cgi.hexhexdist : cgi.crossf;
     if(hdist0(h) < hdist0(xpush(-d) * h))
-      return spin(2*M_PI/t * (rand() % t)) * h;
+      return spin(TAU / t * (rand() % t)) * h;
     }
   }
 
@@ -612,7 +612,7 @@ EX hyperpoint nearcorner(cell *c, int i) {
       auto& t = ac.get_triangle(c->master, i-1);
       int id = arcm::id_of(c->master);
       int id1 = ac.get_adj(ac.get_adj(c->master, i-1), -2).first;
-      return xspinpush0(-t.first - M_PI / c->type, ac.inradius[id/2] + ac.inradius[id1/2] + (ac.real_faces == 0 ? 2 * M_PI / (ac.N == 2 ? 2.1 : ac.N) : 0));
+      return xspinpush0(-t.first - M_PI / c->type, ac.inradius[id/2] + ac.inradius[id1/2] + (ac.real_faces == 0 ? TAU / (ac.N == 2 ? 2.1 : ac.N) : 0));
       }
     if(BITRUNCATED) {
       auto &ac = arcm::current;

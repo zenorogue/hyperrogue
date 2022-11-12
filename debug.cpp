@@ -738,7 +738,7 @@ int read_cheat_args() {
     showstartmenu = false;
     }
   else if(argis("-top")) {
-    PHASE(3); View = View * spin(-M_PI/2);
+    PHASE(3); View = View * spin(-90._deg);
     }
   else if(argis("-idv")) {
     PHASE(3); View = Id;

@@ -366,8 +366,8 @@ EX namespace netgen {
       printf("faza %d cell %d\n", faza, i);
   
       for(int e=0; e<t; e++) {
-        vec v1 = center[i] * nscale + raylen[i] * ang(rot[i] + 2*M_PI*e/t);
-        vec v2 = center[i] * nscale + raylen[i] * ang(rot[i] + 2*M_PI*(e+1)/t);
+        vec v1 = center[i] * nscale + raylen[i] * ang(rot[i] + TAU * e/t);
+        vec v2 = center[i] * nscale + raylen[i] * ang(rot[i] + TAU * (e+1)/t);
         vec v3 = (v1+v2)/2;
   
         if(faza == 1) blackline(v1, v2);
@@ -486,10 +486,10 @@ EX namespace netgen {
     for(int e=0; e<it; e++) if(nei[i][e] == j) ie = e;
     for(int e=0; e<jt; e++) if(nei[j][e] == i) je = e;
     
-    rot[i] = rot[j] + 2*M_PI*(je+.5)/jt - 2*M_PI*(ie+.5)/it + M_PI;
+    rot[i] = rot[j] + TAU*(je+.5)/jt - TAU*(ie+.5)/it + M_PI;
     center[i] = 
       center[j] +
-        (edgist[i]+edgist[j]) * ang(rot[j] + 2*M_PI*(je+.5)/jt);
+        (edgist[i]+edgist[j]) * ang(rot[j] + TAU*(je+.5)/jt);
     }
 
   shiftpoint vec_to_p(vec v) {
@@ -555,8 +555,8 @@ EX namespace netgen {
         applyGlue(i);
   
       for(int e=0; e<t; e++) {
-        vec v1 = center[i] + raylen[i] * ang(rot[i] + 2*M_PI*e/t);
-        vec v2 = center[i] + raylen[i] * ang(rot[i] + 2*M_PI*(e+1)/t);
+        vec v1 = center[i] + raylen[i] * ang(rot[i] + TAU*e/t);
+        vec v2 = center[i] + raylen[i] * ang(rot[i] + TAU*(e+1)/t);
         vec v3 = (v1+v2)/2;
   
         if(nei[i][e] >= 0 && !dragging) {
@@ -756,7 +756,7 @@ EX namespace netgen {
         }
       if(uni == 's') {
         View = Id;
-        if(ctof(centerover)) View = spin(2 * M_PI * (rand() % 7) / 7) * View;
+        if(ctof(centerover)) View = spin(TAU * (rand() % 7) / 7) * View;
         playermoved = false;
         }
       else if(uni == 'c') {

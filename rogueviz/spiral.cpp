@@ -13,7 +13,7 @@ namespace spiral {
   ld mul;
   
   transmatrix at(double d) {
-    return spin(log(d) * 2 * M_PI / log(mul)) * xpush(log(d));
+    return spin(log(d) * TAU / log(mul)) * xpush(log(d));
     }
 
   void place(int N, ld _mul) {

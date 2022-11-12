@@ -54,10 +54,10 @@ EX int race_start_tick, race_finish_tick[MAXPLAYER];
 typedef unsigned char uchar;
 
 uchar frac_to_uchar(ld x) { return uchar(x * 256); }
-uchar angle_to_uchar(ld x) { return frac_to_uchar(x / 2 / M_PI); }
+uchar angle_to_uchar(ld x) { return frac_to_uchar(x / TAU); }
 
 ld uchar_to_frac(uchar x) { return x / 256.; }
-transmatrix spin_uchar(uchar x) { return spin(uchar_to_frac(x) * 2 * M_PI); }
+transmatrix spin_uchar(uchar x) { return spin(uchar_to_frac(x) * TAU); }
 
 static const ld distance_multiplier = 4;
 
@@ -763,7 +763,7 @@ EX bool set_view() {
       }
     at /= multi::players;
     at = normalize(at);
-    atm = rgpushxto0(at) * spin(-90*degree) * rspintox(gpushxto0(at) * first);
+    atm = rgpushxto0(at) * spin270() * rspintox(gpushxto0(at) * first);
     }
   
   if(racing::player_relative || quotient || (kite::in() && GDIM == 3)) {
@@ -788,11 +788,11 @@ EX bool set_view() {
 
     View = xpush(-x) * T * iT1 * ypush(vid.yshift) * View;
 
-    if(GDIM == 3) View = cspin(2, 0, M_PI/2) * View;
+    if(GDIM == 3) View = cspin(2, 0, 90._deg) * View;
     fixmatrix(View);
     }
   if(GDIM == 3 && WDIM == 2)
-    View = cspin(0, 1, M_PI) * cspin(2, 1, M_PI/2 + shmup::playerturny[multi::cpid]) * spin(-M_PI/2) * View;
+    View = spin180() * cspin(2, 1, 90._deg + shmup::playerturny[multi::cpid]) * spin270() * View;
   else if(GDIM == 2) View = spin(race_angle * degree) * View;
   return true;
   }
@@ -1348,7 +1348,7 @@ void draw_ghost(ghost& ghost) {
 
 shiftmatrix racerel(ld rel) {
   int bsize = vid.fsize * 2;
-  return shiftless(atscreenpos(bsize, vid.yres - bsize - rel * (vid.yres - bsize*2) / 100, bsize) * spin(M_PI/2));
+  return shiftless(atscreenpos(bsize, vid.yres - bsize - rel * (vid.yres - bsize*2) / 100, bsize) * spin90());
   }
 
 EX int get_percentage(cell *c) {

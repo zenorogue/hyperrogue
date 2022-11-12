@@ -410,6 +410,7 @@ hpcshape
   hpcshape shFullCross[2];
 
   int SD3, SD6, SD7, S12, S14, S21, S28, S42, S36, S84;
+  ld S_step;
   
   vector<pair<int, cell*>> walloffsets;
   
@@ -582,7 +583,7 @@ void geometry_information::prepare_basics() {
   
   hexshift = 0;
 
-  ld ALPHA = 2 * M_PI / S7;
+  ld ALPHA = TAU / S7;
   
   ld fmin, fmax;  
   
@@ -612,7 +613,7 @@ void geometry_information::prepare_basics() {
       t->hcrossf = cgi.crossf / d;
       t->tessf = cgi.tessf / d;
       t->hexvdist = cgi.hexvdist / d;
-      t->hexhexdist = hdist(xpush0(cgi.hcrossf), xspinpush0(M_PI*2/S7, cgi.hcrossf)) / d;
+      t->hexhexdist = hdist(xpush0(cgi.hcrossf), xspinpush0(TAU/S7, cgi.hcrossf)) / d;
       t->base_distlimit = cgi.base_distlimit-1;
       });
     goto hybrid_finish;
@@ -629,13 +630,13 @@ void geometry_information::prepare_basics() {
   s3 = S3;
   if(fake::in() && !arcm::in()) s3 = fake::around;
   
-  beta = (S3 >= OINF && !fake::in()) ? 0 : 2*M_PI/s3;
+  beta = (S3 >= OINF && !fake::in()) ? 0 : TAU/s3;
 
   tessf = euclid ? 1 : edge_of_triangle_with_angles(beta, M_PI/S7, M_PI/S7);
   
-  if(elliptic && S7 == 4 && !fake::in()) tessf = M_PI/2;
+  if(elliptic && S7 == 4 && !fake::in()) tessf = 90._deg;
   
-  hcrossf = euclid ? tessf / 2 / sin(M_PI/s3) : edge_of_triangle_with_angles(M_PI/2, M_PI/S7, beta/2);
+  hcrossf = euclid ? tessf / 2 / sin(M_PI/s3) : edge_of_triangle_with_angles(90._deg, M_PI/S7, beta/2);
   
   if(S3 >= OINF) hcrossf = 10;
 
@@ -645,15 +646,15 @@ void geometry_information::prepare_basics() {
   for(int p=0; p<100; p++) {
     ld f =  (fmin+fmax) / 2;
     hyperpoint H = xpush0(f);
-    hyperpoint H1 = spin(2*M_PI/S7) * H;
+    hyperpoint H1 = spin(TAU/S7) * H;
     hyperpoint H2 = xpush0(tessf-f);
     ld v1 = intval(H, H1), v2 = intval(H, H2);
 
     if(fake::in() && WDIM == 2) {
       hexvdist = hdist(xpush0(f), xspinpush0(ALPHA/2, hcrossf));
       v2 = hdist(
-        spin(M_PI/2/S3) * xpush0(hexvdist),
-        spin(-M_PI/2/S3) * xpush0(hexvdist)
+        spin(90._deg/S3) * xpush0(hexvdist),
+        spin(-90._deg/S3) * xpush0(hexvdist)
         );
       
       v1 = hdist(
@@ -667,7 +668,7 @@ void geometry_information::prepare_basics() {
   hexf = fmin;
   
   rhexf = BITRUNCATED ? hexf : hcrossf;
-  edgelen = hdist(xpush0(rhexf), xspinpush0(M_PI*2/S7, rhexf));
+  edgelen = hdist(xpush0(rhexf), xspinpush0(TAU/S7, rhexf));
   
   if(BITRUNCATED && !(S7&1))
     hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
@@ -690,7 +691,7 @@ void geometry_information::prepare_basics() {
 
   hexhexdist = fake::in() ?
     2 * hdist0(mid(xspinpush0(M_PI/S6, hexvdist), xspinpush0(-M_PI/S6, hexvdist)))
-    : hdist(xpush0(crossf), xspinpush0(M_PI*2/S7, crossf));
+    : hdist(xpush0(crossf), xspinpush0(TAU/S7, crossf));
   
   DEBB(DF_GEOM | DF_POLY,
     (format("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
@@ -968,7 +969,7 @@ EX namespace geom3 {
       BIRD = 1.20;
       }
     else {
-      INFDEEP = GDIM == 3 ? (sphere ? M_PI/2 : +5) : (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(vid.camera);
+      INFDEEP = GDIM == 3 ? (sphere ? 90._deg : +5) : (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(vid.camera);
       ld wh = actual_wall_height();
       WALL = lev_to_factor(wh);
       FLOOR = lev_to_factor(0);
@@ -1091,8 +1092,8 @@ EX void switch_always3() {
       ld ms = min<ld>(cgi.scalefactor, 1);
       vid.wall_height = 1.5 * ms;
       if(sphere) {
-        vid.depth = M_PI / 6;
-        vid.wall_height = M_PI / 3;
+        vid.depth = 30 * degree;
+        vid.wall_height = 60 * degree;
         }
       vid.human_wall_ratio = 0.8;
       if(euclid && allowIncreasedSight() && vid.use_smart_range == 0) {

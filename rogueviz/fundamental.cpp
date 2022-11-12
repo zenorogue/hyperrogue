@@ -52,7 +52,7 @@ shiftmatrix labelpos(shiftpoint h1, shiftpoint h2) {
   shiftmatrix T = rgpushxto0(h);
   hyperpoint hx = inverse_shift(T, h2);
   ld alpha = atan2(-hx[1], hx[0]);
-  return T * xspinpush(alpha + M_PI/2, label_dist);
+  return T * xspinpush(alpha + 90._deg, label_dist);
   }
  
 ld widthfactor = 5;

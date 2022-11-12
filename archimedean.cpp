@@ -447,22 +447,22 @@ void archimedean_tiling::compute_geometry() {
   
   if(real_faces == 2) {
     /* standard methods fail for dihedra, but the answer is easy */
-    edgelength = 2 * M_PI / faces[0];
+    edgelength = TAU / faces[0];
     for(int i=0; i<N; i++)
       if(faces[i] == 2)
         alphas[i] = 0,
         circumradius[i] = M_PI / real_face_type,
         inradius[i] = 0;
       else
-        alphas[i] = M_PI/2,
-        circumradius[i] = inradius[i] = M_PI/2;
+        alphas[i] = 90._deg,
+        circumradius[i] = inradius[i] = 90._deg;
     }
   else if(real_faces == 0) {
     // these are called hosohedra
     edgelength = M_PI;
     for(int i=0; i<N; i++)
       alphas[i] = M_PI / N,
-      circumradius[i] = M_PI/2,
+      circumradius[i] = 90._deg,
       inradius[i] = 0;
     }
   else for(int p=0; p<100; p++) {
@@ -504,7 +504,7 @@ void archimedean_tiling::compute_geometry() {
   triangles.resize(2*N+2);
   for(int i=0; i<N; i++) for(int j=0; j<2; j++) 
     for(int k=0; k<faces[i]; k++) 
-      triangles[2*i+j].emplace_back(2*M_PI/faces[i], circumradius[i]);
+      triangles[2*i+j].emplace_back(TAU/faces[i], circumradius[i]);
   
   for(int k=0; k<N; k++) {
     triangles[2*N].emplace_back(alphas[k], circumradius[k]);
@@ -529,9 +529,9 @@ void archimedean_tiling::compute_geometry() {
   }
 
 ld archimedean_tiling::scale() {
-  if(real_faces == 0 && N == 2) return M_PI / 2;
-  if(real_faces == 2) return M_PI / 2;
-  if(real_faces == 0) return 2 * M_PI / N;
+  if(real_faces == 0 && N == 2) return 90._deg;
+  if(real_faces == 2) return 90._deg;
+  if(real_faces == 0) return TAU / N;
   return edgelength;
   }
 

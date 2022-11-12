@@ -35,11 +35,8 @@ void do_analyze_grid(int maxv) {
         alpha[qalpha++] = atan2(h1[0], h1[1]);
         }
       if(qalpha != 2) printf("Error: qalpha = %d\n", qalpha);
-      ld df = alpha[0] - alpha[1];
-      if(df<0) df = -df;
-      while(df > 2*M_PI) df -= 2*M_PI;
-      while(df > M_PI) df = 2*M_PI - df;
-      df /= 4*M_PI;
+      ld df = raddif(alpha[0], alpha[1]);
+      df /= 720._deg;
       wstats[d][0] += df;
       if(d==2) printf("df == %" PLDF " dd = %" PLDF "\n", df, dd);
       wstats[d][1] += df*dd;

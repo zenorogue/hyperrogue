@@ -40,12 +40,12 @@ namespace spiral {
     CY = band[0]->h;
     SX = out->w;
     SY = out->h;
+    
+    ld prec = 2*M_PI*M_PI;
 
-    ld k = -2*M_PI*M_PI / log(2.6180339);
+    ld k = -prec / log(2.6180339);
 
-//   cxld mnoznik = cxld(0, M_PI) / cxld(k, M_PI);
-
-    cxld factor = cxld(0, -CY/2/M_PI/M_PI) * cxld(k, M_PI);
+    cxld factor = cxld(0, -CY/prec) * cxld(k, M_PI);
     
     Yshift = CY * k / M_PI;
     

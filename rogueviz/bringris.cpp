@@ -889,16 +889,16 @@ void set_view() {
     dist -= 1e-4;
     move_dist = PIU(hdist(get_corner_position(currentmap->gamestart(), 0), get_corner_position(currentmap->gamestart(), 1)));
     tView = xpush(-dist) * tView;
-    tView = spin(135*degree) * tView;
+    tView = spin(135._deg) * tView;
     }  
   if(in_h2xe() && UNRECTIFIED)
-    tView = spin(135*degree) * tView;
+    tView = spin(135._deg) * tView;
   if(in_h2xe() && S7 == 4)
-    tView = spin(90*degree) * tView;
+    tView = spin90() * tView;
   if(in_s2xe())
-    tView = spin(90*degree) * tView;
+    tView = spin90() * tView;
   if(in_e2xe())
-    tView = spin(90*degree) * tView;
+    tView = spin90() * tView;
   }
 
 void set_tview(transmatrix T) {
@@ -913,12 +913,12 @@ void set_tview(transmatrix T) {
   ncenter = centerover;
   // tView = View;
   if(bgeom == 4)
-    tView = spin(72*degree*at.spin);
+    tView = spin(72._deg*at.spin);
   else
-    tView = spin(90*degree*at.spin);
+    tView = spin(90._deg*at.spin);
   if(at.mirrored)
     tView = MirrorY * tView;
-  // tView = spin(90*degree*at.spin);
+  // tView = spin(90._deg*at.spin);
   set_view();  
 
   pView = rel * tView;
@@ -934,7 +934,7 @@ void rotate_block(int d, bool camera_only) {
   cellwalker at1 = flatspin(at, d);
   if(camera_only || !shape_conflict(at1)) {
     at = at1;
-    set_tview(spin(d*90*degree));
+    set_tview(spin(d*90._deg));
     }
   else playSound(cwt.at, "hit-crush3");
   if(!camera_only) draw_shape();
@@ -1169,7 +1169,7 @@ void draw_screen(int xstart, bool show_next) {
   #if CAP_VR
   if(!explore) {
     E4;
-    vrhr::hmd_at_ui = vrhr::hmd_ref_at * cspin(0, 2, 30*degree);
+    vrhr::hmd_at_ui = vrhr::hmd_ref_at * cspin(0, 2, 30._deg);
     }
   #endif
     
@@ -1190,16 +1190,16 @@ void draw_screen(int xstart, bool show_next) {
     View = pView;
     if(nil) {
       centerover = at.at;
-      rotate_view(cspin(1, 2, -90*degree));
+      rotate_view(cspin90(2, 1));
       shift_view(ztangent(3 * nilv::nilwidth));
-      rotate_view(cspin(0, 1, -90*degree));
+      rotate_view(cspin90(1, 0));
       anims::moved();
       }
     else if(sol) {
       centerover = at.at;
-      rotate_view(cspin(1, 2, 180*degree));
+      rotate_view(cspin180(1, 2));
       shift_view(ztangent(1));
-      rotate_view(cspin(0, 1, -90*degree));
+      rotate_view(cspin90(1, 0));
       anims::moved();
       }
     else {

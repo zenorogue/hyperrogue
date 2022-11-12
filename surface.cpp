@@ -72,7 +72,7 @@ hyperpoint coord(hyperpoint h) {
       }
     
     case dsDini: {
-      ld t = h[0]; // atan(h[0])/2 + M_PI * 3/ 4;
+      ld t = h[0];
       ld v = h[1];
       
       ld a = sqrt(1-dini_b*dini_b);
@@ -166,11 +166,11 @@ ld compute_curvature(hyperpoint at) {
 hyperpoint shape_origin() {
   switch(sh) {
     case dsDini:
-      return point31(M_PI * .82, 0, 0);
+      return point31(A_PI * .82, 0, 0);
     case dsTractricoid:
       return point31(1, 0, 0);
     case dsKuen:
-      return point31(M_PI * .500001, M_PI * 1, 0);
+      return point31(90._deg * 1.000001, M_PI, 0);
     case dsHyperlike:
       return point31(0,0,0);
     default:
@@ -206,13 +206,13 @@ int surface_branch(hyperpoint p) {
 bool inbound(ld& x, ld& y) {
   switch(sh) {
     case dsDini:
-      return flag_clamp(x, M_PI/2, M_PI);
+      return flag_clamp(x, 90._deg, M_PI);
     
     case dsTractricoid:
       return flag_clamp_min(x, 0) & flag_clamp_sym(y, M_PI);
     
     case dsKuen: 
-      return flag_clamp(x, 0, M_PI) & flag_clamp(y, 0, 2*M_PI);
+      return flag_clamp(x, 0, M_PI) & flag_clamp(y, 0, TAU);
     
     case dsHyperlike:
       return flag_clamp_sym(x, M_PI) & flag_clamp_sym(y, hyperlike_bound());
@@ -351,7 +351,7 @@ ld kuen_hypot(ld v, ld u) {
   }
 
 int kuen_branch(ld v, ld u) {
-  if(v > M_PI/2)
+  if(v > 90._deg)
   return kuen_cross(v, u)[2] > 0 ? 1 : 2;
   else
   return kuen_cross(v, u)[2] < 0 ? 1 : 2;
@@ -380,7 +380,7 @@ void draw_kuen_map() {
     for(int r=0; r<512; r++)
     for(int h=0; h<512; h++) {
       ld v = M_PI * (r+.5) / 512;
-      ld u = 2 * M_PI * (h+.5) / 512;
+      ld u = TAU * (h+.5) / 512;
       auto du = coord_derivative(point3(v,u,0), 0);
       auto dv = coord_derivative(point3(v,u,0), 1);
       auto n = hypot_d(3, du^dv);
@@ -401,7 +401,7 @@ void draw_kuen_map() {
   for(auto p: rug::points) {
     auto hp = p->surface_point.params;
     int x = int(512 * hp[0] / M_PI);
-    int y = int(512 * hp[1] / 2 / M_PI);
+    int y = int(512 * hp[1] / TAU);
     qpixel(kuen_map, x, y) = 0xFF000000 | dexp_colors[p->dexp_id];
     }
 
@@ -431,7 +431,7 @@ void run_hyperlike() {
   int lim = (int) sqrt(rug::vertex_limit);
   for(int r=0; r<lim; r++)
   for(int h=0; h<lim; h++) 
-    rug::addRugpoint(shiftless(xpush(2 * M_PI * hyper_b * (2*r-lim) / lim) * ypush(hyperlike_bound() * (2*h-lim) / lim) * C0), -1);
+    rug::addRugpoint(shiftless(xpush(TAU * hyper_b * (2*r-lim) / lim) * ypush(hyperlike_bound() * (2*h-lim) / lim) * C0), -1);
   for(int r=0; r<lim-1; r++)
   for(int h=0; h<lim-1; h++) {
     addTriangle(rug::points[lim*r+h], rug::points[lim*r+h+1], rug::points[lim*r+h+lim]);
@@ -464,13 +464,13 @@ void run_hyperlike() {
 void run_kuen() {
   full_mesh();
 
-  auto H = Id; // spin(-M_PI / 4) * xpush(2);
+  auto H = Id;
   auto Hi = inverse(H);
   
-  auto frontal_map = at_zero(hpxyz(M_PI * .500001, M_PI * 1, 0), Id);
-  auto back0 = at_zero(hpxyz(M_PI * .500001, .67, 0), H);
-  auto back1 = at_other(back0, Hi * spin(-M_PI/2) * hpxy(0.511, -0.5323));
-  auto back2 = at_other(back0, Hi * spin(-M_PI/2) * hpxy(0.511, 0.5323));
+  auto frontal_map = at_zero(hpxyz(90._deg * 1.000001, M_PI * 1, 0), Id);
+  auto back0 = at_zero(hpxyz(90._deg * 1.000001, .67, 0), H);
+  auto back1 = at_other(back0, Hi * spin(-90._deg) * hpxy(0.511, -0.5323));
+  auto back2 = at_other(back0, Hi * spin(-90._deg) * hpxy(0.511, 0.5323));
   
   frontal_map.H = frontal_map.H * ypush(2.6);
   back0.H = back0.H * ypush(.4);
@@ -566,7 +566,7 @@ template<class T> void run_function(T f) {
 
 void run_other() {
   full_mesh();
-  auto dp = at_zero(shape_origin(),  spin(M_PI/2));
+  auto dp = at_zero(shape_origin(),  spin(90._deg));
 
   int it = 0;
   for(auto p: rug::points) {

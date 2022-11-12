@@ -610,8 +610,8 @@ EX bool compute_vertex_valence_flat(arb::arbi_tiling& ac) {
         if(at.sid == at1.sid && (at.eid-at1.eid) % ac.shapes[at.sid].cycle_length == 0) pqty = 0;
         if(qty && pqty == 0 && !total) break;
         ld a = ac.shapes[at.sid].angles[at.eid];
-        while(a < 0) a += 360 * degree;
-        while(a > 360 * degree) a -= 360 * degree;
+        while(a < 0) a += TAU;
+        while(a > TAU) a -= TAU;
         total += a;
         anglelist.push_back(a);
         qty++;
@@ -622,9 +622,9 @@ EX bool compute_vertex_valence_flat(arb::arbi_tiling& ac) {
 
         at = ac.shapes[at.sid].connections[at.eid];
         }
-      while(total < 360*degree - 1e-6);
+      while(total < TAU - 1e-6);
       if(total == 0) qty = OINF;
-      if(total > 360*degree + 1e-6) throw hr_parse_exception("improper total in compute_stats");
+      if(total > TAU + 1e-6) throw hr_parse_exception("improper total in compute_stats");
       if(at.sid != i) throw hr_parse_exception("ended at wrong type determining vertex_valence");
       if((at.eid - k) % ac.shapes[i].cycle_length) {
         reduce_gcd(ac.shapes[i].cycle_length, at.eid - k);
@@ -1997,8 +1997,7 @@ EX void convert() {
       v0 = T * v0;
       v2 = T * v2;
       ld alpha = atan2(v0) - atan2(v2);
-      while(alpha > M_PI) alpha -= 360*degree;
-      while(alpha < -M_PI) alpha += 360*degree;
+      cyclefix(alpha, 0);
       sh.angles.push_back(alpha);
       }
     if(debugflags & DF_GEOM) {
@@ -2117,7 +2116,7 @@ EX void choose() {
   }
 
 EX pair<ld, ld> rep_ideal(ld e, ld u IS(1)) {
-  ld alpha = 2 * M_PI / e;
+  ld alpha = TAU / e;
   hyperpoint h1 = point3(cos(alpha)*u, -sin(alpha)*u, 1);
   hyperpoint h2 = point3(u, 0, 1);
   hyperpoint h3 = point3(cos(alpha)*u, sin(alpha)*u, 1);
@@ -2129,7 +2128,7 @@ EX pair<ld, ld> rep_ideal(ld e, ld u IS(1)) {
   auto Th23 = T * h23;
   ld beta = atan2(T0);
   ld gamma = atan2(Th23);
-  return {len, 90 * degree - (gamma - beta)};
+  return {len, 90._deg - (gamma - beta)};
   }
 
 EX void swap_vertices() {

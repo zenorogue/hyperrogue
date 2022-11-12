@@ -2717,7 +2717,7 @@ EX namespace linepatterns {
     ALLCELLS(
        if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
           if(c->master->move(i) && c->master->move(i) < c->master) {
-            gridlinef(V, C0, xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), cgi.tessf), col, 2 + vid.linequality);
+            gridlinef(V, C0, xspinpush0(-TAU*i/S7 - master_to_c7_angle(), cgi.tessf), col, 2 + vid.linequality);
             }
        )
     );
@@ -2726,7 +2726,7 @@ EX namespace linepatterns {
     ALLCELLS(
       if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
         if(c->master->move(i) && way(c->master, i) && c->master->move(i)->dm4 == c->master->dm4)
-          gridlinef(V, C0, xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), cgi.tessf), col, 2 + vid.linequality);
+          gridlinef(V, C0, xspinpush0(-TAU*i/S7 - master_to_c7_angle(), cgi.tessf), col, 2 + vid.linequality);
       )
     );
 
@@ -2821,15 +2821,15 @@ EX namespace linepatterns {
       if(pseudohept(c) && (p/4 == 10 || p/4 == 8))
       for(int i=0; i<S7; i++) if(c->move(i) && emeraldval(c->move(i)) == p-4) {
         gridlinef(V, C0, tC0(cgi.heptmove[i]), col, 2 + vid.linequality);
-        gridlinef(V, C0, xspinpush0(-i * 2 * M_PI / S7, -hdist/2), col, 2 + vid.linequality);
+        gridlinef(V, C0, xspinpush0(-i * TAU / S7, -hdist/2), col, 2 + vid.linequality);
         }
       )
     );
   linepattern patPalacelike("firewall lines", 0xFF400000, stdhyp_only, 
     ALLCELLS(
       if(pseudohept(c)) for(int i=0; i<7; i++) 
-        gridlinef(V, ddspin(c,i,M_PI*5/7) * xpush0(cgi.tessf/2),
-                     ddspin(c,i,M_PI*9/7) * xpush0(cgi.tessf/2),
+        gridlinef(V, ddspin(c,i,A_PI*5/7) * xpush0(cgi.tessf/2),
+                     ddspin(c,i,A_PI*9/7) * xpush0(cgi.tessf/2),
                             col, 1 + vid.linequality);
       )
     );
@@ -2840,8 +2840,8 @@ EX namespace linepatterns {
           cell *c1 = createMov(c, (i+3) % 7);
           cell *c2 = createMov(c, (i+4) % 7);
           if(polarb50(c1) != a && polarb50(c2) != a)
-              gridlinef(V, ddspin(c,i,M_PI*5/7) * xpush0(cgi.tessf/2),
-                        ddspin(c,i,M_PI*9/7) * xpush0(cgi.tessf/2),
+              gridlinef(V, ddspin(c,i,A_PI*5/7) * xpush0(cgi.tessf/2),
+                        ddspin(c,i,A_PI*9/7) * xpush0(cgi.tessf/2),
                                   col, 1 + vid.linequality);
           }
       )
@@ -2871,8 +2871,8 @@ EX namespace linepatterns {
           heptagon *h2 = c->master->modmove(i-1);
           if(!h1 || !h2) continue;
           if(emeraldval(h1->c7)/4 == 8 && emeraldval(h2->c7)/4 == 8)
-              gridlinef(V, ddspin(c,i,M_PI*5/7) * xpush0(cgi.tessf/2),
-                        ddspin(c,i,M_PI*9/7) * xpush0(cgi.tessf/2),
+              gridlinef(V, ddspin(c,i,A_PI*5/7) * xpush0(cgi.tessf/2),
+                        ddspin(c,i,A_PI*9/7) * xpush0(cgi.tessf/2),
                                   col, 1 + vid.linequality);
           }
       )
@@ -2951,9 +2951,9 @@ EX namespace linepatterns {
       )
     );
   EX ld parallel_count = 6;
-  EX ld parallel_max = 90 * degree;
-  EX ld parallel_length = 180 * degree;
-  linepattern patParallels("parallels", 0xFFFFFF00, always_available, 
+  EX ld parallel_max = 90._deg;
+  EX ld parallel_length = M_PI;
+  linepattern patParallels("parallels", 0xFFFFFF00, always_available,
     ATCENTER(
       for(int i=-int(parallel_count); i<=parallel_count; i ++) {
         ld phi = i * parallel_max / parallel_count;

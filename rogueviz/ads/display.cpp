@@ -23,8 +23,8 @@ void apply_duality(shiftmatrix& S) {
     S.T = Duality * S.T * Duality;
     };
   if(use_duality == 2) {
-    S = ads_matrix(Id, -90*degree) * S * ads_matrix(Id, +90*degree);
-    S.T = spin(90*degree) * S.T;
+    S = ads_matrix(Id, -90._deg) * S * ads_matrix(Id, +90._deg);
+    S.T = spin(90._deg) * S.T;
     }
   }
 
@@ -278,7 +278,7 @@ void view_ads_game() {
     for(int u=0; u<30; u++) {
       auto bcurrent = current;
       
-      transmatrix T = rgpushxto0( spin(12*degree*u) * xpush0(0.5) );
+      transmatrix T = rgpushxto0( spin(TAU*u/30) * xpush0(0.5) );
   
       current.T = current.T * T;
       auto base1 = findflat(ads_point(C0, 0));

@@ -1005,7 +1005,7 @@ EX void initConfig() {
     if(ginf[i].flags & qELLIPTIC)
       sightranges[i] = M_PI;
     else if(ginf[i].cclass == gcSphere)
-      sightranges[i] = 2 * M_PI;
+      sightranges[i] = TAU;
     else if(ginf[i].cclass == gcEuclid)
       sightranges[i] = 10;
     else if(ginf[i].cclass == gcSL2)
@@ -1028,21 +1028,21 @@ EX void initConfig() {
 
   addsaver(sightranges[gBinary3], "sight-binary3", 3.1 + bonus);
   addsaver(sightranges[gCubeTiling], "sight-cubes", 10);
-  addsaver(sightranges[gCell120], "sight-120cell", 2 * M_PI);
+  addsaver(sightranges[gCell120], "sight-120cell", TAU);
   addsaver(sightranges[gECell120], "sight-120cell-elliptic", M_PI);
   addsaver(sightranges[gRhombic3], "sight-rhombic", 10.5 * emul);
   addsaver(sightranges[gBitrunc3], "sight-bitrunc", 12 * emul);
   addsaver(sightranges[gSpace534], "sight-534", 4 + bonus);
   addsaver(sightranges[gSpace435], "sight-435", 3.8 + bonus);
 
-  addsaver(sightranges[gCell5], "sight-5cell", 2 * M_PI);
-  addsaver(sightranges[gCell8], "sight-8cell", 2 * M_PI);
+  addsaver(sightranges[gCell5], "sight-5cell", TAU);
+  addsaver(sightranges[gCell8], "sight-8cell", TAU);
   addsaver(sightranges[gECell8], "sight-8cell-elliptic", M_PI);
-  addsaver(sightranges[gCell16], "sight-16cell", 2 * M_PI);
+  addsaver(sightranges[gCell16], "sight-16cell", TAU);
   addsaver(sightranges[gECell16], "sight-16cell-elliptic", M_PI);
-  addsaver(sightranges[gCell24], "sight-24cell", 2 * M_PI);
+  addsaver(sightranges[gCell24], "sight-24cell", TAU);
   addsaver(sightranges[gECell24], "sight-24cell-elliptic", M_PI);
-  addsaver(sightranges[gCell600], "sight-600cell", 2 * M_PI);
+  addsaver(sightranges[gCell600], "sight-600cell", TAU);
   addsaver(sightranges[gECell600], "sight-600cell-elliptic", M_PI);
   addsaver(sightranges[gHoroTris], "sight-horotris", 2.9 + bonus);
   addsaver(sightranges[gHoroRec], "sight-hororec", 2.2 + bonus);
@@ -1402,14 +1402,14 @@ EX void edit_sightrange() {
       if(GDIM == 3) {
         dialog::addSelItem(XLAT("3D sight range for the fog effect"), fts(sightranges[geometry]), 'r');
         dialog::add_action([] {
-          dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("fog effect"), "");
+          dialog::editNumber(sightranges[geometry], 0, TAU, 0.5, M_PI, XLAT("fog effect"), "");
           });
         }
       }
     if(WDIM == 3) {
       dialog::addSelItem(XLAT("3D sight range"), fts(sightranges[geometry]), 'r');
       dialog::add_action([] {
-      dialog::editNumber(sightranges[geometry], 0, 2 * M_PI, 0.5, M_PI, XLAT("3D sight range"),
+      dialog::editNumber(sightranges[geometry], 0, TAU, 0.5, M_PI, XLAT("3D sight range"),
         XLAT(
           "Sight range for 3D geometries is specified in the absolute units. This value also affects the fog effect.\n\n"
           "In spherical geometries, the sight range of 2π will let you see things behind you as if they were in front of you, "
@@ -2403,7 +2403,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   param_f(linepatterns::parallel_count, "parallel_count")
     ->editable(0, 24, 1, "number of parallels drawn", "", 'n');
   param_f(linepatterns::parallel_max, "parallel_max")
-    ->editable(0, 360*degree, 15*degree, "last parallel drawn", "", 'n');
+    ->editable(0, TAU, 15*degree, "last parallel drawn", "", 'n');
   param_f(vid.depth_bonus, "depth_bonus", 0)
     ->editable(-5, 5, .1, "depth bonus in pseudohedral", "", 'b');
   param_b(vid.pseudohedral, "pseudohedral", false)
@@ -2588,7 +2588,7 @@ EX void showCustomizeChar() {
   initquickqueue();
   transmatrix V = atscreenpos(vid.xres/2, firsty, scale);
   
-  double alpha = atan2(mousex - vid.xres/2, mousey - firsty) - M_PI/2;
+  double alpha = atan2(mousex - vid.xres/2, mousey - firsty) - 90._deg;
   V = V * spin(alpha);
   drawMonsterType(moPlayer, NULL, shiftless(V), 0, cc_footphase / scale, NOCOLOR);
   quickqueue();

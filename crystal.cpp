@@ -801,7 +801,7 @@ EX colortable coordcolors = {0xD04040, 0x40D040, 0x4040D0, 0xFFD500, 0xF000F0, 0
 
 EX ld compass_angle() {
   bool bitr = ginf[gCrystal].vertex == 3;
-  return (bitr ? M_PI/8 : 0) - master_to_c7_angle();
+  return (bitr ? 22.5_deg : 0) - master_to_c7_angle();
   }
       
 EX bool crystal_cell(cell *c, shiftmatrix V) {
@@ -822,7 +822,7 @@ EX bool crystal_cell(cell *c, shiftmatrix V) {
       ld dist = cellgfxdist(c, 0);
 
       for(int i=0; i<S7; i++)  {
-        shiftmatrix T = V * spin(compass_angle() - 2 * M_PI * i / S7) * xpush(dist*.3);
+        shiftmatrix T = V * spin(compass_angle() - TAU * i / S7) * xpush(dist*.3);
         
         auto co = m->hcoords[c->master];
         auto lw = m->makewalker(co, i);
@@ -1118,8 +1118,9 @@ EX void init_rotation() {
 
   if(ho & 1) {
     for(int i=(draw_cut ? 2 : cs.dim-1); i>=1; i--) {
-      ld c = cos(M_PI / 2 / (i+1));
-      ld s = sin(M_PI / 2 / (i+1));
+      ld alpha = 90._deg / (i+1);
+      ld c = cos(alpha);
+      ld s = sin(alpha);
       for(int j=0; j<cs.dim; j++)
         tie(crug_rotation[j][0], crug_rotation[j][i]) =
           make_pair(
@@ -1724,8 +1725,8 @@ void transform_crystal_to_euclid () {
   
   clearAnimations();
   cwt.spin = neighborId(cwt.at, infront);
-  View = iddspin(cwt.at, cwt.spin, M_PI/2);
-  if(!flipplayer) View = cspin(0, 2, M_PI) * View;
+  View = iddspin(cwt.at, cwt.spin, 90._deg);
+  if(!flipplayer) View = cspin180(0, 2) * View;
   
   if(pmodel == mdDisk) pmodel = mdPerspective;
   }

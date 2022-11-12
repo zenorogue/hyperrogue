@@ -237,7 +237,7 @@ void create_intra_120() {
     hyperpoint h = currentmap->get_corner(s, 1);
     for(cell *c: currentmap->allcells()) {
       hyperpoint j = currentmap->relative_matrix(c, s, C0) * C0;
-      if(hdist(h, j) > M_PI/2) c->wall = waPalace;
+      if(hdist(h, j) > 90._deg) c->wall = waPalace;
       }
     for(cell *c: currentmap->allcells()) if(c->wall == waPalace) {
       int nei = 0;
@@ -277,7 +277,7 @@ void create_intra_1440() {
   for(cell *c: currentmap->allcells()) {
     hyperpoint j = currentmap->relative_matrix(c, s, C0) * C0;
     // hyperpoint j = inverse(currentmap->relative_matrix(cwt.at, c, C0)) * C0;
-    if(hdist(h, j) > M_PI/2) 
+    if(hdist(h, j) > 90._deg)
       set_wall(c, (celldistance(c, s)&1) ? 0xFF80FF : 0xFF00FF);
     }
   }

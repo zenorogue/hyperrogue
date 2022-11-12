@@ -66,7 +66,7 @@ void compute_life(cell *c, transmatrix S1, const worldline_visitor& wv) {
   int iter = 0;
   cell *cur_c = c;
   auto cur_w = hybrid::get_where(c);
-  while(t < 2 * M_PI) {
+  while(t < TAU) {
     iter++;
     auto last_w = cur_w;
     auto next_w = cur_w;
@@ -74,7 +74,7 @@ void compute_life(cell *c, transmatrix S1, const worldline_visitor& wv) {
     ld next_t;
     ld last_time = t;
     cell *next_c = nullptr;
-    binsearch(t, t+M_PI/2, [&] (ld t1) { 
+    binsearch(t, t+90._deg, [&] (ld t1) {
       S1 = S1 * chg_shift(t1 - last_time);
       last_time = t1;
       virtualRebase(cur_c, S1);

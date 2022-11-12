@@ -471,9 +471,9 @@ EX namespace dialog {
 
     curvepoint(hyperpoint(x-si, yt, 1, 1));
     for(int i=0; i<=a/2; i++)
-      curvepoint(hyperpoint(x - si * cos(i*2*M_PI/a), yb + si * sin(i*2*M_PI/a), 1, 1));
+      curvepoint(hyperpoint(x - si * cos(i*TAU/a), yb + si * sin(i*TAU/a), 1, 1));
     for(int i=(a+1)/2; i<=a; i++)
-      curvepoint(hyperpoint(x - si * cos(i*2*M_PI/a), yt + si * sin(i*2*M_PI/a), 1, 1));
+      curvepoint(hyperpoint(x - si * cos(i*TAU/a), yt + si * sin(i*TAU/a), 1, 1));
     queuecurve(V, col, 0x80, PPR::LINE);
 
     int yt1 = yt + (list_actual_size * list_skip) / list_full_size;
@@ -481,9 +481,9 @@ EX namespace dialog {
 
     curvepoint(hyperpoint(x-siz, yt1, 1, 1));
     for(int i=0; i<=a/2; i++)
-      curvepoint(hyperpoint(x - siz * cos(i*2*M_PI/a), yb1 + siz * sin(i*2*M_PI/a), 1, 1));
+      curvepoint(hyperpoint(x - siz * cos(i*TAU/a), yb1 + siz * sin(i*TAU/a), 1, 1));
     for(int i=(a+1)/2; i<=a; i++)
-      curvepoint(hyperpoint(x - siz * cos(i*2*M_PI/a), yt1 + siz * sin(i*2*M_PI/a), 1, 1));
+      curvepoint(hyperpoint(x - siz * cos(i*TAU/a), yt1 + siz * sin(i*TAU/a), 1, 1));
     queuecurve(V, col, 0x80, PPR::LINE);
 
     quickqueue();
@@ -516,9 +516,9 @@ EX namespace dialog {
 
       curvepoint(hyperpoint(sl, y-si, 1, 1));
       for(int i=0; i<=a/2; i++)
-        curvepoint(hyperpoint(sr + si * sin(i*2*M_PI/a), y - si * cos(i*2*M_PI/a), 1, 1));
+        curvepoint(hyperpoint(sr + si * sin(i*TAU/a), y - si * cos(i*TAU/a), 1, 1));
       for(int i=(a+1)/2; i<=a; i++)
-        curvepoint(hyperpoint(sl + si * sin(i*2*M_PI/a), y - si * cos(i*2*M_PI/a), 1, 1));
+        curvepoint(hyperpoint(sl + si * sin(i*TAU/a), y - si * cos(i*TAU/a), 1, 1));
       queuecurve(V, col, 0x80, PPR::LINE);
       quickqueue();
 
@@ -535,7 +535,7 @@ EX namespace dialog {
         queuecurve(V, col, 0x80, PPR::LINE);
         quickqueue();
         }
-      for(int i=0; i<=a; i++) curvepoint(hyperpoint(x + siz * sin(i*2*M_PI/a), y - siz * cos(i*2*M_PI/a), 1, 1));
+      for(int i=0; i<=a; i++) curvepoint(hyperpoint(x + siz * sin(i*TAU/a), y - siz * cos(i*TAU/a), 1, 1));
       queuecurve(V, col, col, PPR::LINE);
       quickqueue();
       }
@@ -629,7 +629,7 @@ EX namespace dialog {
             int bx = (c == 1 || c == 3 || c == 5) ? x+1 : x;
             int by = (c == 2 || c == 4 || c == 5) ? vid.yres : 0;
             int cx = bx == 0 ? 0 : bx == 16 ?vid.xres :
-              vid.xres - dwidth + width * tan((bx-8)/8. * 90 * degree);
+              vid.xres - dwidth + width * tan((bx-8)/8. * 90._deg);
             part(col, 0) = lerp(0, full, bx / 16.);
             if(c == 0) println(hlog, "bx = ", bx, " -> cx = ", cx, " darken = ", part(col, 0));
             auravertices.emplace_back(hyperpoint(cx - current_display->xcenter, by - current_display->ycenter, 0, 1), col);
@@ -754,7 +754,7 @@ EX namespace dialog {
             color_t col = addalpha(I.color);
             ld sizf = dfsize * I.scale / 150;
             ld siz = sizf * sqrt(0.15+0.85*I.param/255.);
-            for(int i=0; i<=a; i++) curvepoint(hyperpoint(siz * sin(i*2*M_PI/a), -siz * cos(i*2*M_PI/a), 1, 1));
+            for(int i=0; i<=a; i++) curvepoint(hyperpoint(siz * sin(i*TAU/a), -siz * cos(i*TAU/a), 1, 1));
             shiftmatrix V = shiftless(atscreenpos(valuex + sizf, mid, pix));
             queuecurve(V, col, (I.colorv << 8) | 0xFF, PPR::LINE);
             quickqueue();

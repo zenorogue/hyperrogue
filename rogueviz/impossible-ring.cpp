@@ -61,12 +61,12 @@ struct iring {
   
     ld delta = 0.004;
     
-    transmatrix T = cspin(1, 2, 45*degree);
+    transmatrix T = cspin(1, 2, 45._deg);
     
     int switchat = nil ? 1024 : 2048;
     
     auto step = [&] (int id) {
-      ld alpha = id * 1. / steps * 2 * M_PI;
+      ld alpha = id * 1. / steps * TAU;
       if(id < switchat)
         return T * point3(cos(alpha) * delta, sin(alpha) * delta, 0);
       else
@@ -113,7 +113,7 @@ struct iring {
 
       hyperpoint uds[3];  
 
-      ld alpha = a * 1. / steps * 2 * M_PI;
+      ld alpha = a * 1. / steps * TAU;
       if(a < switchat) {
         uds[0] = T * point31(sin(alpha) * cscale, -cos(alpha) * cscale, 0) - C0;
         uds[1] = T * point31(0, 0, cscale) - C0;

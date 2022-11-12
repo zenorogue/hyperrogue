@@ -99,7 +99,6 @@ EX movedir vectodir(hyperpoint P) {
     ld d1 = geo_dist(U * T * C0, Centered * P);
     ld d2 = geo_dist(U * T * C0, Centered * C0);
     dirdist[i] = d1 - d2;
-    //xspinpush0(-i * 2 * M_PI /cwt.at->type, .5), P);
     }
     
   movedir res;
@@ -122,11 +121,9 @@ EX void remission() {
  }
 
 EX hyperpoint move_destination_vec(int d) {
-  if(WDIM == 2) return spin(-d * M_PI/4) * smalltangent();
-  // else if(WDIM == 2 && pmodel == mdPerspective) return cspin(0, 2, d * M_PI/4) * tC0(pushone());
-  // else if(WDIM == 2) return spin(-d * M_PI/4) * tC0(pushone());
-  else if(d&1) return cspin(0, 1, d > 4 ? M_PI/2 : -M_PI/2) * smalltangent();
-  else return cspin(0, 2, d * M_PI/4) * smalltangent();
+  if(WDIM == 2) return spin(-d * 45._deg) * smalltangent();
+  else if(d&1) return cspin(0, 1, d > 4 ? 45._deg : -45._deg) * smalltangent();
+  else return cspin(0, 2, d * 45._deg) * smalltangent();
   }
 
 EX void movepckeydir(int d) {
@@ -401,7 +398,7 @@ EX void full_rotate_camera(int dir, ld val) {
   else if(GDIM == 3) {
     val *= camera_rot_speed;
     if(third_person_rotation) shift_view(ctangent(2, -third_person_rotation)), didsomething = true, playermoved = false;
-    ld max_angle = quarter_circle - 1e-4;
+    ld max_angle = 90._deg - 1e-4;
     if(walking::on && dir == 1) {
       max_angle /= degree;
       walking::eye_angle += val * walking::eye_angle_scale / degree;
@@ -461,8 +458,8 @@ EX void handlePanning(int sym, int uni) {
     }
 #endif
   if(!smooth_scrolling) {
-    if(sym == SDLK_PAGEUP) full_rotate_view(1, M_PI/cgi.S21/2*shiftmul);
-    if(sym == SDLK_PAGEDOWN) full_rotate_view(-1, -M_PI/cgi.S21/2*shiftmul);
+    if(sym == SDLK_PAGEUP) full_rotate_view(1, cgi.S_step*shiftmul);
+    if(sym == SDLK_PAGEDOWN) full_rotate_view(-1, -cgi.S_step*shiftmul);
     if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
       if(isGravityLand(cwt.at->land) && !rug::rug_control()) playermoved = false;
     }
@@ -925,8 +922,8 @@ EX void mainloopiter() {
     if(keystate[SDL_SCANCODE_LEFT] && DEFAULTNOR(SDL_SCANCODE_LEFT)) full_rotate_camera(0, t);
     if(keystate[SDL_SCANCODE_UP] && DEFAULTNOR(SDL_SCANCODE_UP)) full_rotate_camera(1, t);
     if(keystate[SDL_SCANCODE_DOWN] && DEFAULTNOR(SDL_SCANCODE_DOWN)) full_rotate_camera(1, -t);
-    if(keystate[SDL_SCANCODE_PAGEUP] && DEFAULTNOR(SDL_SCANCODE_PAGEUP)) full_rotate_view(t * 180 / M_PI, t);
-    if(keystate[SDL_SCANCODE_PAGEDOWN] && DEFAULTNOR(SDL_SCANCODE_PAGEDOWN)) full_rotate_view(-t * 180 / M_PI, -t);
+    if(keystate[SDL_SCANCODE_PAGEUP] && DEFAULTNOR(SDL_SCANCODE_PAGEUP)) full_rotate_view(t / degree, t);
+    if(keystate[SDL_SCANCODE_PAGEDOWN] && DEFAULTNOR(SDL_SCANCODE_PAGEDOWN)) full_rotate_view(-t / degree, -t);
 
     #else
 
@@ -936,8 +933,8 @@ EX void mainloopiter() {
     if(keystate[SDLK_LEFT] && DEFAULTNOR(SDLK_LEFT)) full_rotate_camera(0, t);
     if(keystate[SDLK_UP] && DEFAULTNOR(SDLK_UP)) full_rotate_camera(1, t);
     if(keystate[SDLK_DOWN] && DEFAULTNOR(SDLK_DOWN)) full_rotate_camera(1, -t);
-    if(keystate[SDLK_PAGEUP] && DEFAULTNOR(SDLK_PAGEUP)) full_rotate_view(t * 180 / M_PI, t);
-    if(keystate[SDLK_PAGEDOWN] && DEFAULTNOR(SDLK_PAGEDOWN)) full_rotate_view(-t * 180 / M_PI, -t);
+    if(keystate[SDLK_PAGEUP] && DEFAULTNOR(SDLK_PAGEUP)) full_rotate_view(t / degree, t);
+    if(keystate[SDLK_PAGEDOWN] && DEFAULTNOR(SDLK_PAGEDOWN)) full_rotate_view(-t / degree, -t);
     #endif
     }
   else sc_ticks = ticks;
@@ -952,8 +949,8 @@ EX void mainloopiter() {
     if(keystate['a'] && DEFAULTNOR('a')) full_rotate_camera(0, t);
     if(keystate['w'] && DEFAULTNOR('w')) full_rotate_camera(1, t);
     if(keystate['s'] && DEFAULTNOR('s')) full_rotate_camera(1, -t);
-    if(keystate['q'] && DEFAULTNOR('q')) full_rotate_view(t * 180 / M_PI, t);
-    if(keystate['e'] && DEFAULTNOR('e')) full_rotate_view(-t * 180 / M_PI, -t);
+    if(keystate['q'] && DEFAULTNOR('q')) full_rotate_view(t / degree, t);
+    if(keystate['e'] && DEFAULTNOR('e')) full_rotate_view(-t / degree, -t);
 
     if(keystate['i'] && GDIM == 3 && DEFAULTNOR('i')) full_forward_camera(-t);
     if(keystate['k'] && GDIM == 3 && DEFAULTNOR('k')) full_forward_camera(t);

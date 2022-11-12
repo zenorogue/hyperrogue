@@ -901,7 +901,7 @@ EX geometry_data compute_geometry_data() {
   gd.size_str =
     disksize ? its(isize(currentmap->allcells())) :
     #if CAP_BT
-    bt::in() ? fts(8 * M_PI * sqrt(2) * log(2) / pow(vid.binary_width, WDIM-1), 4) + " exp(∞)" :
+    bt::in() ? fts(1440._deg * sqrt(2) * log(2) / pow(vid.binary_width, WDIM-1), 4) + " exp(∞)" :
     #endif
     #if CAP_ARCM
     arcm::in() && (WDIM == 2) ? arcm::current.world_size() :

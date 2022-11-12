@@ -76,7 +76,7 @@ vector<cell*> cl_sphere() {
   vector<cell*> lst;
   auto all = currentmap->allcells();
   for(cell *c: all) {
-    hyperpoint h = spin(45*degree) * currentmap->relative_matrix(c, cs.at, C0) * C0;
+    hyperpoint h = spin(45._deg) * currentmap->relative_matrix(c, cs.at, C0) * C0;
     if(-h[2] < max(abs(h[0]), abs(h[1]))) {
       lst.push_back(c);
       }
@@ -266,9 +266,9 @@ void mine_slide(tour::presmode mode, reaction_t set_geom, function<vector<cell*>
     cwt.at = centerover = starter;
     View = Id;
     if(hyperbolic)
-      View = spin(45*degree) * View;
+      View = spin(45._deg) * View;
     if(sphere) {
-      View = spin(45*degree) * View;
+      View = spin(45._deg) * View;
       slide_backup(pconf.scale, 1000);
       slide_backup(pconf.alpha, 1000);
       slide_backup(modelcolor, 0xFF);
@@ -343,7 +343,7 @@ void enable_earth() {
   texture::config.color_alpha = 255;
   mapeditor::drawplayer = false;
   fullcenter();
-  View = spin(4 * M_PI / 5 + M_PI / 2) * View;
+  View = spin(234._deg) * View;
   }
 
 slide sweeper_slides[] = {
@@ -515,10 +515,10 @@ slide sweeper_slides[] = {
         enable_earth();
       
         View = Id;
-        View = spin(3 * M_PI / 5) * View;
-        View = spin(90*degree) * View;
-        View = cspin(2, 0, 45 * degree) * View;
-        View = cspin(1, 2, 30 * degree) * View;
+        View = spin(108._deg) * View;
+        View = spin(90._deg) * View;
+        View = cspin(2, 0, 45._deg) * View;
+        View = cspin(1, 2, 30._deg) * View;
         playermoved = false;
         tour::slide_backup(vid.axes, 0);
         tour::slide_backup(vid.drawmousecircle, false);
@@ -569,7 +569,7 @@ slide sweeper_slides[] = {
         start_game();
         tour::slide_backup(vid.use_smart_range, 2);
         tour::slide_backup(vid.smart_range_detail, 1);
-        View = spin(90*degree);
+        View = spin90();
         using linepatterns::patTree;
         tour::slide_backup(patTree.color, 0);
         }        
@@ -847,7 +847,7 @@ slide sweeper_slides[] = {
         start_game();
         tour::slide_backup(vid.use_smart_range, 2);
         tour::slide_backup(vid.smart_range_detail, 1);
-        View = spin(90*degree);
+        View = spin90();
         using linepatterns::patTree;
         tour::slide_backup(patTree.color, 0);
         }        

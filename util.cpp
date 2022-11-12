@@ -230,7 +230,7 @@ cld exp_parser::parse(int prio) {
     force_eat(",");
     ld b = rparse(0);
     force_eat(")");
-    res = edge_of_triangle_with_angles(2*M_PI/a, M_PI/b, M_PI/b);
+    res = edge_of_triangle_with_angles(TAU/a, M_PI/b, M_PI/b);
     }
   else if(eat("edge_angles(")) {
     cld a = rparse(0);
@@ -253,7 +253,7 @@ cld exp_parser::parse(int prio) {
     force_eat(",");
     ld b = rparse(0);
     force_eat(")");
-    res = edge_of_triangle_with_angles(M_PI/2, M_PI/a, M_PI/b);
+    res = edge_of_triangle_with_angles(90._deg, M_PI/a, M_PI/b);
     }
   #if CAP_ARCM
   else if(eat("arcmedge(")) {
@@ -307,8 +307,7 @@ cld exp_parser::parse(int prio) {
       hyperpoint h = xpush(c) * spin(M_PI - 2*alpha) * xpush0(c);
       ld result = 2 * atan2(h);
       if(result < 0) result = -result;
-      while(result > 2 * M_PI) result -= 2 * M_PI;
-      if(result > M_PI) result = 2 * M_PI - result;
+      cyclefix(result, 0);
       res = result;
       }
 

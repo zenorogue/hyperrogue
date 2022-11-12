@@ -85,12 +85,12 @@ hyperpoint to_hyper(ld x, ld y) {
   y -= 1;
   hyperpoint h;
   h[0] = -x; h[1] = y; h[2] = 1;
-  h = spin(-90*degree) * h;
+  h = spin270() * h;
   return perspective_to_space(h, 1, gcHyperbolic);
   }
 
 pair<ld, ld> from_hyper(hyperpoint h) {
-  h = spin(+90*degree) * h; h[0] = -h[0];
+  h = spin90() * h; h[0] = -h[0];
   h[2] += 1;
   h /= h[2];
 

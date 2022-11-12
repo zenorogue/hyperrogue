@@ -19,7 +19,7 @@ basic_textureinfo tinf;
 
 hyperpoint spcoord(hyperpoint h) {
   ld phi = h[0], y = h[1], z = h[2], r = global_r;
-  ld aphi = (r+phi + floor(progress))*M_PI/6;
+  ld aphi = (r+phi + floor(progress))*30._deg;
   return zpush(acurvature*(y + r - frac(progress))/szoom) * xspinpush0(aphi, acurvature * z);
   }
 
@@ -106,7 +106,7 @@ void make_texture() {
     pix(2,x,y) = 0xFF400000 + 0x10000 * (y * 63 / fw);
     pix(8,x,y) = 0xFF101010;
     pix(10,x,y) = 0xFF000000 + gradient(0, 0xFFD500, 0, x*(fw-x), fw*fw/4);
-    pix(5,x,y) = 0xFF000000 + gradient(0, 0x804000, -1, sin(2*M_PI*8*y/fw), 1);
+    pix(5,x,y) = 0xFF000000 + gradient(0, 0x804000, -1, sin(TAU*8*y/fw), 1);
     pix(7,x,y) = 0xFF000000 + gradient(0, 0x808080, 0, x*ll(fw-x)*y*(fw-y), ll(fw/2)*(fw/2)*(fw-fw/2)*(fw-fw/2));
     }
 

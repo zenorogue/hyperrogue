@@ -1125,7 +1125,7 @@ EX ld shift_angle, movement_angle, movement_angle_2;
 EX ld normal_angle = 90;
 EX ld period = 10000;
 EX int noframes = 30;
-EX ld cycle_length = 2 * M_PI;
+EX ld cycle_length = TAU;
 EX ld parabolic_length = 1;
 EX ld skiprope_rotation;
 
@@ -1282,7 +1282,7 @@ EX void apply() {
         rotate_view(cspin(1, 2, normal_angle * degree));
         rotate_view(spin(-movement_angle_2 * degree));
         }
-      rotate_view(spin(2 * M_PI * t / period));
+      rotate_view(spin(TAU * t / period));
       if(GDIM == 3) {
         rotate_view(spin(movement_angle_2 * degree));
         rotate_view(cspin(2, 1, normal_angle * degree));
@@ -1297,7 +1297,7 @@ EX void apply() {
         cspin(0, GDIM-1, movement_angle * degree) * spin(shift_angle * degree) * xtangent(cycle_length * t / period)
         );
       moved();
-      rotate_view(cspin(0, GDIM-1, 2 * M_PI * t / period));
+      rotate_view(cspin(0, GDIM-1, TAU * t / period));
       if(clearup) {
         centerover->wall = waNone;
         }
@@ -1317,7 +1317,7 @@ EX void apply() {
     #endif
     case maCircle: {
       centerover = rotation_center;
-      ld alpha = circle_spins * 2 * M_PI * ticks / period;
+      ld alpha = circle_spins * TAU * ticks / period;
       View = spin(-cos_auto(circle_radius)*alpha) * xpush(circle_radius) * spin(alpha) * rotation_center_View;
       moved();
       break;
@@ -1341,17 +1341,17 @@ EX void apply() {
   if(rug::rugged) {
     if(rug_rotation1) {
       rug::using_rugview rv;
-      rotate_view(cspin(1, 2, -rug_angle * degree) * cspin(0, 2, rug_rotation1 * 2 * M_PI * t / period) * cspin(1, 2, rug_angle * degree));
+      rotate_view(cspin(1, 2, -rug_angle * degree) * cspin(0, 2, rug_rotation1 * TAU * t / period) * cspin(1, 2, rug_angle * degree));
       }
     if(rug_rotation2) {
       rug::using_rugview rv;
-      View = View * cspin(0, 1, rug_rotation2 * 2 * M_PI * t / period);
+      View = View * cspin(0, 1, rug_rotation2 * TAU * t / period);
       }
     if(rug_forward) 
       animate_rug_movement(rug_forward * t / period);
     }
   #endif
-  pconf.skiprope += skiprope_rotation * t * 2 * M_PI / period;
+  pconf.skiprope += skiprope_rotation * t * TAU / period;
 
   if(ballangle_rotation) {
     if(models::has_orientation(vpconf.model))
@@ -1485,12 +1485,12 @@ void display_animation() {
   if(ma == maCircle && (circle_display_color & 0xFF)) {
     for(int s=0; s<10; s++) {
       if(s == 0) curvepoint(xpush0(circle_radius - .1));
-      for(int z=0; z<100; z++) curvepoint(xspinpush0((z+s*100) * 2 * M_PI / 1000., circle_radius));
+      for(int z=0; z<100; z++) curvepoint(xspinpush0((z+s*100) * 2 * A_PI / 1000., circle_radius));
       queuecurve(ggmatrix(rotation_center), circle_display_color, 0, PPR::LINE);
       }
     if(sphere) for(int s=0; s<10; s++) {
       if(s == 0) curvepoint(xpush0(circle_radius - .1));
-      for(int z=0; z<100; z++) curvepoint(xspinpush0((z+s*100) * 2 * M_PI / 1000., circle_radius));
+      for(int z=0; z<100; z++) curvepoint(xspinpush0((z+s*100) * 2 * A_PI / 1000., circle_radius));
       queuecurve(ggmatrix(rotation_center) * centralsym, circle_display_color, 0, PPR::LINE);
       }
     }
@@ -1534,7 +1534,7 @@ EX void show() {
   cmode = sm::SIDE; needs_highqual = false;
   animation_lcm = 1;
   gamescreen();
-  animation_period = 2 * M_PI * animation_lcm / animation_factor;
+  animation_period = TAU * animation_lcm / animation_factor;
   dialog::init(XLAT("animations"), iinf[itPalace].color, 150, 100);
   dialog::addSelItem(XLAT("period"), fts(period)+ " ms", 'p');
   dialog::add_action([] () { dialog::editNumber(period, 0, 10000, 1000, 200, XLAT("period"), 
@@ -1547,7 +1547,7 @@ EX void show() {
       dialog::editNumber(animation_period, 0, 10000, 1000, 1000, XLAT("game animation period"), 
         XLAT("Least common multiple of the animation periods of all the game objects on screen, such as rotating items.")
         );
-      dialog::reaction = [] () { animation_factor = 2 * M_PI * animation_lcm / animation_period; };
+      dialog::reaction = [] () { animation_factor = TAU * animation_lcm / animation_period; };
       dialog::extra_options = [] () {
         dialog::addItem("default", 'D');
         dialog::add_action([] () {
@@ -1614,10 +1614,10 @@ EX void show() {
       else if(ma == maTranslation) {
         dialog::addSelItem(XLAT("cycle length"), fts(cycle_length), 'c');
         dialog::add_action([] () { 
-          dialog::editNumber(cycle_length, 0, 10, 0.1, 2*M_PI, "shift", ""); 
+          dialog::editNumber(cycle_length, 0, 10, 0.1, TAU, "shift", ""); 
           dialog::extra_options = [] () {
-            dialog::addSelItem(XLAT("full circle"), fts(2 * M_PI), 'A');
-            dialog::add_action([] () { cycle_length = 2 * M_PI; });
+            dialog::addSelItem(XLAT("full circle"), fts(TAU), 'A');
+            dialog::add_action([] () { cycle_length = TAU; });
             dialog::addSelItem(XLAT("Zebra period"), fts(2.898149445355172), 'B');
             dialog::add_action([] () { cycle_length = 2.898149445355172; });
             dialog::addSelItem(XLAT("Bolza period"), fts(2 * 1.528571), 'C');
@@ -1690,7 +1690,7 @@ EX void show() {
       dialog::extra_options = [] () {
         if(among(rug::gwhere, gSphere, gElliptic))  {
           dialog::addItem(XLAT("synchronize"), 'S');
-          dialog::add_action([] () { rug_forward = 2 * M_PI; popScreen(); });
+          dialog::add_action([] () { rug_forward = TAU; popScreen(); });
           }
         rug_angle_options();
         };
@@ -1967,7 +1967,7 @@ startanim rug { "Hypersian Rug", [] {
 startanim spin_around { "spinning around", no_init,  [] {
   dynamicval<ld> da(pconf.alpha, 999);
   dynamicval<ld> ds(pconf.scale, 500);
-  ld alpha = 2 * M_PI * ticks / 10000.;
+  ld alpha = TAU * ticks / 10000.;
   ld circle_radius = acosh(2.);
   dynamicval<transmatrix> dv(View, spin(-cos_auto(circle_radius)*alpha) * xpush(circle_radius) * spin(alpha) * View);
   gamescreen();
@@ -1996,7 +1996,7 @@ startanim row_of_ghosts { "row of ghosts", no_init, [] {
     for(int x=-25; x<=25; x++)
       for(int y=-25; y<=25; y++) {
         ld ay = (y + mod)/5.;
-        draw_ghost(xpush(x/5.) * spin(M_PI/2) * xpush(ay), int(y-t));
+        draw_ghost(xpush(x/5.) * spin90() * xpush(ay), int(y-t));
         }
     });
   dynamicval<bool> rd(mapeditor::drawplayer, false);
@@ -2011,15 +2011,15 @@ startanim army_of_ghosts { "army of ghosts", no_init, [] {
     ld mod = (tt-t*400)/400.;
     for(int x=-12; x<=12; x++) {
       ld ax = x/4.;
-      transmatrix T = spin(-M_PI/2) * xpush(ax) * spin(M_PI/2);
+      transmatrix T = spin270() * xpush(ax) * spin90();
       for(int y=0;; y++) {
         ld ay = (mod - y)/4.;
-        transmatrix U = spin(M_PI/2) * xpush(ay / cosh(ax)) * T;
+        transmatrix U = spin90() * xpush(ay / cosh(ax)) * T;
         if(!in_smart_range(shiftless(U))) break;
         draw_ghost(U, (-y - t));
         if(y) {
           ay = (mod + y)/4.;
-          transmatrix U = spin(M_PI/2) * xpush(ay / cosh(ax)) * T;
+          transmatrix U = spin90() * xpush(ay / cosh(ax)) * T;
           draw_ghost(U, (y - t));
           }
         }
@@ -2032,7 +2032,7 @@ startanim ghost_spiral { "ghost spiral", no_init, [] {
   dynamicval<reaction_t> r(add_to_frame, [] {
     ld t = (ticks - ticks_start - 2000) / 150000.;
     for(ld i=3; i<=40; i++) {
-      draw_ghost(spin(t * i * 2 * M_PI) * xpush(asinh(15. / i)) * spin(M_PI/2), 1);
+      draw_ghost(spin(t * i * TAU) * xpush(asinh(15. / i)) * spin90(), 1);
       }
     });
   gamescreen();
@@ -2043,12 +2043,12 @@ startanim fib_ghosts { "Fibonacci ghosts", no_init, [] {
   dynamicval<reaction_t> r(add_to_frame, [] {
     ld phase = (ticks - ticks_start - 2000) / 1000.;
     for(int i=0; i<=500; i++) {
-      ld step = M_PI * (3 - sqrt(5));
+      ld step = A_PI * (3 - sqrt(5));
       ld density = 0.01;
       ld area = 1 + (i+.5) * density;
       ld r = acosh(area);
       ld length = sinh(r);
-      transmatrix T = spin(i * step + phase / length) * xpush(r) * spin(M_PI/2);
+      transmatrix T = spin(i * step + phase / length) * xpush(r) * spin90();
       draw_ghost(T, i);
       }
     });

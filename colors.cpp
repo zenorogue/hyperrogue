@@ -247,13 +247,15 @@ EX int cloakcolor(int rtr) {
 EX int firegradient(double p) {
   return gradient(0xFFFF00, 0xFF0000, 0, p, 1);
   }
-  
+
+constexpr ld PI1000 = 0.001 / A_PI;
+
 EX int firecolor(int phase IS(0), int mul IS(1)) {
-  return gradient(0xFFFF00, 0xFF0000, -1, sintick(100*mul, phase/200./M_PI), 1);
+  return gradient(0xFFFF00, 0xFF0000, -1, sintick(100*mul, phase * 5 * PI1000), 1);
   }
 
 EX int watercolor(int phase) {
-  return 0x0080C0FF + 256 * int(63 * sintick(50, phase/100./M_PI));
+  return 0x0080C0FF + 256 * int(63 * sintick(50, phase * 10 * PI1000));
   }
 
 EX int aircolor(int phase) {
@@ -270,7 +272,7 @@ EX int fghostcolor(cell *c) {
   }
 
 EX int weakfirecolor(int phase) {
-  return gradient(0xFF8000, 0xFF0000, -1, sintick(500, phase/1000./M_PI), 1);
+  return gradient(0xFF8000, 0xFF0000, -1, sintick(500, phase * PI1000), 1);
   }
 
 /* HTML color names */

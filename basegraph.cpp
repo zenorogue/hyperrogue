@@ -1024,7 +1024,7 @@ EX void drawCircle(int x, int y, int size, color_t color, color_t fillcolor IS(0
     if(pts > 1500) pts = 1500;
     if(ISMOBILE && pts > 72) pts = 72;
     for(int r=0; r<pts; r++) {
-      float rr = (M_PI * 2 * r) / pts;
+      float rr = (TAU * r) / pts;
       glcoords.push_back(glhr::makevertex(x + size * sin(rr), y + size * pconf.stretch * cos(rr), 0));
       }
     current_display->set_all(0, lband_shift);

@@ -120,7 +120,7 @@ void nil_screen(presmode mode, int id) {
       else t = floor(t) + 2 * (t - floor(t));
       t -= floor(t/4)*4;
       
-      ld t2 = 90 * degree * t;
+      ld t2 = 90._deg * t;
       
       curvepoint(p2(0,0));
       curvepoint(p2(5,5));
@@ -144,7 +144,7 @@ void nil_screen(presmode mode, int id) {
     if(id < 3) {
 
       if(id == 2) {
-        drawMonsterType(moEagle, nullptr, g.pos(5,5,1.5) * spin(-t * 90 * degree) * xyzscale(1.5), 0x40C040, ticks / 1000., 0);
+        drawMonsterType(moEagle, nullptr, g.pos(5,5,1.5) * spin(-t * 90._deg) * xyzscale(1.5), 0x40C040, ticks / 1000., 0);
         }
     
       color_t dark = 0xFF;
@@ -305,7 +305,7 @@ void geodesic_screen(presmode mode, int id) {
     // flat_model_enabler fme;
     initquickqueue();
 
-    dmv_grapher g(MirrorZ * cspin(1, 2, .3 * angle / (M_PI/2)) * spin(angle/2));
+    dmv_grapher g(MirrorZ * cspin(1, 2, .3 * angle / 90._deg) * spin(angle/2));
     
     ld val = 25;
     
@@ -320,7 +320,7 @@ void geodesic_screen(presmode mode, int id) {
     ld rrh = radh * sqrt(1/2.);
     
     ld zmove = val - M_PI * radh * radh;
-    ld len = hypot(2 * M_PI * radh, zmove);
+    ld len = hypot(TAU * radh, zmove);
     
     ld t = inHighQual ? ticks / 1000. : (ticks - geo_zero) / 500;
 
@@ -334,7 +334,7 @@ void geodesic_screen(presmode mode, int id) {
       queuecurve(g.T, col, 0, PPR::LINE);
       
       auto be_shadow = [&] (hyperpoint& h) {
-        // ld part = 1 - angle / (M_PI / 2);
+        // ld part = 1 - angle / 90._deg;
         // h[0] += h[2] * part / 10;
         h[2] = 0;
         };
@@ -396,8 +396,8 @@ void geodesic_screen(presmode mode, int id) {
 
     if(id >= 2) 
       draw_path([&] (ld t) { 
-        ld tx = min(t, 2 * M_PI * rad);
-        ld ta = tx / rad - 135 * degree;
+        ld tx = min(t, TAU * rad);
+        ld ta = tx / rad - 135._deg;
         ld x = rr + rad * cos(ta);
         ld y = rr + rad * sin(ta);
         ld z = rad * tx / 2 - ((rr * x) - (rr * y)) / 2;
@@ -407,10 +407,10 @@ void geodesic_screen(presmode mode, int id) {
     if(id >= 3)
       draw_path([&] (ld t) { 
         ld tx = min(t, len);
-        ld ta = tx / len * 2 * M_PI - 135 * degree;
+        ld ta = tx / len * TAU - 135._deg;
         ld x = rrh + radh * cos(ta);
         ld y = rrh + radh * sin(ta);
-        ld z = radh * radh * (tx/len*2*M_PI) / 2 - ((rrh * x) - (rrh * y)) / 2 + zmove * tx / len;
+        ld z = radh * radh * (tx/len*TAU) / 2 - ((rrh * x) - (rrh * y)) / 2 + zmove * tx / len;
         
         return point31(x, y, z);
         }, helix);
@@ -447,7 +447,7 @@ void geodesic_screen(presmode mode, int id) {
     if(id >= 2) {
       dialog::addBreak(100);
       dialog_may_latex("\\textsf{circle}", "circle", circle >> 8);
-      dialog_may_latex("$"+fts(2 * M_PI * rad)+"$", fts(2 * M_PI * rad), circle >> 8);
+      dialog_may_latex("$"+fts(TAU * rad)+"$", fts(TAU * rad), circle >> 8);
       }
     else dialog::addBreak(300);
 
@@ -553,7 +553,7 @@ void impossible_ring_slide(tour::presmode mode) {
     for(int id=0; id<2; id++) {
       shiftmatrix T = ggmatrix(currentmap->gamestart());
       println(hlog, "angle = ", angle);
-      if(id == 1) T = T * spin(180*degree) * xpush(1.5) * cspin(0, 2, angle) * xpush(-1.5);
+      if(id == 1) T = T * spin180() * xpush(1.5) * cspin(0, 2, angle) * xpush(-1.5);
       
       for(ld z: {+.5, -.5}) {
         for(ld d=0; d<=180; d++)
@@ -599,7 +599,7 @@ void enable_earth() {
   texture::config.color_alpha = 255;
   mapeditor::drawplayer = false;
   fullcenter();
-  View = spin(4 * M_PI / 5 + M_PI / 2) * View;
+  View = spin(234._deg) * View;
   }
 
 slide dmv_slides[] = {
@@ -647,8 +647,8 @@ slide dmv_slides[] = {
         shiftmatrix T = ggmatrix(currentmap->gamestart());
         vid.linewidth *= 4;
         shiftpoint h1 = T * xspinpush0(0, 2);
-        shiftpoint h2 = T * xspinpush0(120*degree, 2);
-        shiftpoint h3 = T * xspinpush0(240*degree, 2);
+        shiftpoint h2 = T * xspinpush0(120._deg, 2);
+        shiftpoint h3 = T * xspinpush0(240._deg, 2);
         queueline(h1, h2, 0xFF0000FF, 4);
         queueline(h2, h3, 0xFF0000FF, 4);
         queueline(h3, h1, 0xFF0000FF, 4);
@@ -669,21 +669,21 @@ slide dmv_slides[] = {
         enable_earth();
       
         View = Id;
-        View = spin(3 * M_PI / 5) * View;
-        View = spin(90*degree) * View;
-        View = cspin(2, 0, 45 * degree) * View;
-        View = cspin(1, 2, 30 * degree) * View;
+        View = spin(108._deg) * View;
+        View = spin(90._deg) * View;
+        View = cspin(2, 0, 45._deg) * View;
+        View = cspin(1, 2, 30._deg) * View;
         playermoved = false;
         tour::slide_backup(vid.axes, 0);
         tour::slide_backup(vid.drawmousecircle, false);
         tour::slide_backup(draw_centerover, false);
         }
       add_temporary_hook(mode, hooks_frame, 200, [] {
-        shiftmatrix T = ggmatrix(currentmap->gamestart()) * spin(-3 * M_PI / 5);
+        shiftmatrix T = ggmatrix(currentmap->gamestart()) * spin(-108._deg);
         vid.linewidth *= 4;
         shiftpoint h1 = T * C0;
-        shiftpoint h2 = T * xpush0(M_PI/2);
-        shiftpoint h3 = T * ypush0(M_PI/2);
+        shiftpoint h2 = T * xpush0(90._deg);
+        shiftpoint h3 = T * ypush0(90._deg);
         queueline(h1, h2, 0xFF0000FF, 3);
         queueline(h2, h3, 0xFF0000FF, 3);
         queueline(h3, h1, 0xFF0000FF, 3);
@@ -734,8 +734,8 @@ slide dmv_slides[] = {
         shiftmatrix T = ggmatrix(currentmap->gamestart());
         vid.linewidth *= 16;
         shiftpoint h1 = T * xspinpush0(0, 2);
-        shiftpoint h2 = T * xspinpush0(120*degree, 2);
-        shiftpoint h3 = T * xspinpush0(240*degree, 2);
+        shiftpoint h2 = T * xspinpush0(120._deg, 2);
+        shiftpoint h3 = T * xspinpush0(240._deg, 2);
         queueline(h1, h2, 0xFF0000FF, 4);
         queueline(h2, h3, 0xFF0000FF, 4);
         queueline(h3, h1, 0xFF0000FF, 4);
@@ -1270,7 +1270,7 @@ slide dmv_slides[] = {
         rogueviz::balls::initialize(1);
         rogueviz::balls::balls.resize(3);
         pmodel = mdEquidistant;
-        View = cspin(1, 2, M_PI/2);
+        View = cspin90(1, 2);
         }
       non_game_slide_scroll(mode);
       }

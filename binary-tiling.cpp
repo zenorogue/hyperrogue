@@ -478,7 +478,7 @@ EX namespace bt {
         }
       if(d == NODIR) return 0;
       if(d == c->type-1) d++;
-      return -(d+2)*M_PI/4;
+      return -(d+2) * 45._deg;
       }
 
     transmatrix adj(heptagon *h, int dir) override {
@@ -726,20 +726,20 @@ EX namespace bt {
       }
     if(geometry == gHoroTris) {
       ld r3 = sqrt(3);
-      direct_tmatrix[0] = xpush(-log(2)) * cspin(1,2, M_PI);
+      direct_tmatrix[0] = xpush(-log(2)) * cspin180(1,2);
       direct_tmatrix[1] = parabolic3(0, +r3/3) * xpush(-log(2));
       direct_tmatrix[2] = parabolic3(-0.5, -r3/6) * xpush(-log(2));
       direct_tmatrix[3] = parabolic3(+0.5, -r3/6) * xpush(-log(2));
-      direct_tmatrix[4] = parabolic3(0, -r3*2/3) * cspin(1,2, M_PI);
-      direct_tmatrix[5] = parabolic3(1, r3/3) * cspin(1,2,M_PI);
-      direct_tmatrix[6] = parabolic3(-1, r3/3) * cspin(1,2,M_PI);
+      direct_tmatrix[4] = parabolic3(0, -r3*2/3) * cspin180(1,2);
+      direct_tmatrix[5] = parabolic3(1, r3/3) * cspin180(1,2);
+      direct_tmatrix[6] = parabolic3(-1, r3/3) * cspin180(1,2);
       }
     if(geometry == gHoroRec) {
       ld r2 = sqrt(2);
       ld l = -log(2)/2;
       ld z = hororec_scale;
-      direct_tmatrix[0] = parabolic3(0, -z) * xpush(l) * cspin(2,1,M_PI/2);
-      direct_tmatrix[1] = parabolic3(0, +z) * xpush(l) * cspin(2,1,M_PI/2);
+      direct_tmatrix[0] = parabolic3(0, -z) * xpush(l) * cspin90(2,1);
+      direct_tmatrix[1] = parabolic3(0, +z) * xpush(l) * cspin90(2,1);
       direct_tmatrix[2] = parabolic3(+2*r2*z, 0);
       direct_tmatrix[3] = parabolic3(0, +4*z);
       direct_tmatrix[4] = parabolic3(-2*r2*z, 0);
@@ -749,9 +749,9 @@ EX namespace bt {
       // also generated with the help of hexb.cpp
       ld l = log(3)/2;
       auto& t = direct_tmatrix;
-      t[0] = parabolic3(horohex_scale, 0) * xpush(-l) * cspin(1, 2, M_PI/2);
-      t[1] = cspin(1, 2, 2*M_PI/3) * t[0];
-      t[2] = cspin(1, 2, 4*M_PI/3) * t[0];
+      t[0] = parabolic3(horohex_scale, 0) * xpush(-l) * cspin(1, 2, 90._deg);
+      t[1] = cspin(1, 2, 120*degree) * t[0];
+      t[2] = cspin(1, 2, 240*degree) * t[0];
       auto it = iso_inverse(t[0]);
 
       t[5] = it * t[1] * t[1];
@@ -978,7 +978,7 @@ EX int celldistance3_hex(heptagon *c1, heptagon *c2) {
   while(isize(d1)) {
     xsteps -= 2;
 
-    T = euscalezoom(hpxy(0,sqrt(3))) * eupush(1,0) * spin(-d2.back() * 2 * M_PI/3) * T * spin(d1.back() * 2 * M_PI/3) * eupush(-1,0) * euscalezoom(hpxy(0,-1/sqrt(3)));
+    T = euscalezoom(hpxy(0,sqrt(3))) * eupush(1,0) * spin(-d2.back() * 120._deg) * T * spin(d1.back() * 2 * M_PI/3) * eupush(-1,0) * euscalezoom(hpxy(0,-1/sqrt(3)));
     
     d1.pop_back(); d2.pop_back();
     
@@ -1166,7 +1166,7 @@ EX void create_faces() {
     hyperpoint down = point3(0,0,2*z);
 
     for(int j=0; j<4; j++) for(int i=0; i<3; i++) {
-      transmatrix T = cspin(0, 1, 2*M_PI*i/3);
+      transmatrix T = cspin(0, 1, 120._deg * i);
 
       hyperpoint hcenter = point3(0,0,-z);
       hyperpoint hu0 = T*point3(+h,  +r3,-z);

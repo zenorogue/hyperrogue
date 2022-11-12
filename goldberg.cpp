@@ -646,12 +646,12 @@ EX namespace gp {
       }
     if(sp>SG3) sp -= SG6;
 
-    return normalize(spin(2*M_PI*sp/S7) * cornmul(T, corner));
+    return normalize(spin(TAU*sp/S7) * cornmul(T, corner));
     }
   
   transmatrix dir_matrix(int i) {
     auto ddspin = [] (int d) -> transmatrix { 
-      return spin(M_PI - d * 2 * M_PI / S7 - cgi.hexshift);
+      return spin(M_PI - d * TAU / S7 - cgi.hexshift);
       };
     return spin(-cgi.gpdata->alpha) * build_matrix(
       C0, 
@@ -678,7 +678,7 @@ EX namespace gp {
         
         hyperpoint h = atz(T, cgi.gpdata->corners, at, 6);
         hyperpoint hl = atz(T, cgi.gpdata->corners, at + eudir(d), 6);
-        cgi.gpdata->Tf[i][x&GOLDBERG_MASK][y&GOLDBERG_MASK][d] = rgpushxto0(h) * rspintox(gpushxto0(h) * hl) * spin(M_PI);
+        cgi.gpdata->Tf[i][x&GOLDBERG_MASK][y&GOLDBERG_MASK][d] = rgpushxto0(h) * rspintox(gpushxto0(h) * hl) * spin180();
         }
       }       
     }

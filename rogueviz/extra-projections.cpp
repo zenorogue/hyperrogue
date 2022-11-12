@@ -100,8 +100,8 @@ void add_extra_projections() {
     ld sy = y > 0 ? 1 : -1;
     y /= sy;
     ld z = 4. - 3. * (hyperbolic ? -sinh(y) : sin(y));
-    x = 2. * x * sqrt(z / 6. / M_PI);
-    y = sy * sqrt(2*M_PI/3) * (2. - sqrt(z));
+    x = 2. * x * sqrt(z / 1080._deg);
+    y = sy * sqrt(120._deg) * (2. - sqrt(z));
     });
   
   // https://en.wikipedia.org/wiki/Eckert_IV_projection
@@ -109,7 +109,7 @@ void add_extra_projections() {
     cld theta = newton_inverse(
       [] (cld th) { return th + sin(th) * cos(th) + 2. * sin(th); }, 
       [] (cld th) { return 1. + cos(th) * cos(th) - sin(th) * sin(th) + 2. * cos(th); }, 
-      (2+M_PI/2) * sin(y), y);
+      (2+90._deg) * sin(y), y);
     static ld cox = 2 / sqrt(4*M_PI+M_PI*M_PI);
     static ld coy = 2 * sqrt(M_PI/(4+M_PI));
     x = cox * x * (1. + cos(theta));
@@ -120,12 +120,12 @@ void add_extra_projections() {
   add_complex("Ortelius", 0, [] (cld& x, cld& y) {
     cld sx = (real(x)+imag(x)) > 0 ? 1 : -1;
     x /= sx;
-    if(abs(real(x)) < 90*degree) {
+    if(abs(real(x)) < 90._deg) {
       cld F = M_PI*M_PI / 8. / x + x / 2.;
       x = (x - F + sqrt(F*F-y*y));
       }
     else {
-      x = sqrt(M_PI*M_PI/4 - y*y) + x - M_PI/2;
+      x = sqrt(M_PI*M_PI/4 - y*y) + x - 90._deg;
       }
     x *= sx;
     });

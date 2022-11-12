@@ -1239,7 +1239,7 @@ EX namespace dice {
         }
       }
     
-    shiftmatrix V1 = V * ddspin(c, dir) * spin(M_PI);
+    shiftmatrix V1 = V * ddspin(c, dir + M_PI);
     if(dd.mirrored) V1 = V1 * MirrorY;
     
     // loop:
@@ -1260,8 +1260,8 @@ EX namespace dice {
     
     if(1) {
       dynamicval<eGeometry> g(geometry, gSphere);
-      ld alpha = 360 * degree / dw->order;
-      ld beta = 180 * degree / dw->facesides;
+      ld alpha = TAU / dw->order;
+      ld beta = M_PI / dw->facesides;
       inradius  = edge_of_triangle_with_angles(alpha, beta, beta);
       outradius = edge_of_triangle_with_angles(beta, alpha, beta);
       }
@@ -1320,7 +1320,7 @@ EX namespace dice {
       
       for(int d=0; d<si; d++) {
         dynamicval<eGeometry> g(geometry, highdim);
-        add_to_queue(T * cspin(0, 1, 2*M_PI*d/si) * cspin(2, 0, inradius) * cspin(0, 1, M_PI-2*M_PI*dw->spins[ws][d]/si), dw->sides[ws][d]);
+        add_to_queue(T * cspin(0, 1, TAU*d/si) * cspin(2, 0, inradius) * cspin(0, 1, M_PI-TAU*dw->spins[ws][d]/si), dw->sides[ws][d]);
         }
       
       if(1) {
@@ -1363,7 +1363,7 @@ EX namespace dice {
         hyperpoint h, hs;
         if(1) {
           dynamicval<eGeometry> g(geometry, highdim);
-          h = zpush(base_to_base) * T * cspin(0, 1, 2*M_PI*(d+.5)/si) * cspin(2, 0, outradius) * zpush0(dieradius);
+          h = zpush(base_to_base) * T * cspin(0, 1, TAU*(d+.5)/si) * cspin(2, 0, outradius) * zpush0(dieradius);
           if(d < si) face[d] = h;
           hs = sphere_to_space(h);
           }

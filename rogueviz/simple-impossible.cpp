@@ -180,7 +180,7 @@ void draw_ro() {
 vector<hyperpoint> path;
 
 void build(bool in_pair) {
-  to_iso = cspin(1, 2, atan(1/sqrt(2))) * cspin(0, 2, M_PI/4);
+  to_iso = cspin(1, 2, atan(1/sqrt(2))) * cspin(0, 2, 45._deg);
   from_iso = inverse(to_iso);
   
   last_co = euc::coord(0, 0, 3);
@@ -242,7 +242,7 @@ void build(bool in_pair) {
   }
 
 void build_net() {
-  to_iso = cspin(1, 2, atan(1/sqrt(2))) * cspin(0, 2, M_PI/4);
+  to_iso = cspin(1, 2, atan(1/sqrt(2))) * cspin(0, 2, 45._deg);
   from_iso = inverse(to_iso);
   
   last_co = euc::coord(0, 0, 0);
@@ -315,22 +315,22 @@ void build_stair() {
           hs[3] = point31(+xx, -xx, -hei);
           }
         else if(dix == 3 || (dix == 2 && step == 0) || (dix == 1 && step > 0)) {
-          transmatrix T = spin(90*degree*diy);
+          transmatrix T = spin(90._deg*diy);
           hs[0] = T * point31(+xx, -xx, -hei);
           hs[1] = T * point31(+xx, +xx, -hei);
           hs[2] = T * point31(+xx, +xx, +hei);
           hs[3] = T * point31(+xx, -xx, +hei);
           }
         else if(dix == 0) {
-          transmatrix T = spin(90*degree*diy);
+          transmatrix T = spin(90._deg*diy);
           hs[0] = T * point31(+xx, -xx, -hei);
           hs[1] = T * point31(+xx, +xx, -hei);
           hs[2] = to_rot(eupush(C0 + shift) * to_heis(T * point31(-xx, +xx, -hei)));
           hs[3] = to_rot(eupush(C0 + shift) * to_heis(T * point31(-xx, -xx, -hei)));
           }
         else {
-          transmatrix T = spin(90*degree*diy);
-          hyperpoint lshift = step ? shift : spin(-90*degree) * shift;
+          transmatrix T = spin(90._deg*diy);
+          hyperpoint lshift = step ? shift : spin270() * shift;
           hs[0] = to_rot(eupush(C0 - lshift) * to_heis(T * point31(-xx, +xx, hei)));
           hs[1] = to_rot(eupush(C0 - lshift) * to_heis(T * point31(-xx, -xx, hei)));
           hs[2] = T * point31(+xx, -xx, hei);
@@ -343,7 +343,7 @@ void build_stair() {
       at = eupush(at) * (C0 + shift);
       }
     
-    shift = spin(90*degree) * shift;
+    shift = spin90() * shift;
     }
   
   println(hlog, "path = ", path);

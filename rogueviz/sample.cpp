@@ -16,8 +16,8 @@ bool draw_simple_scene() {
   shiftmatrix Where = ggmatrix(currentmap->gamestart());
 
   curvepoint(xpush0(0.2));
-  curvepoint(spin(120*degree) * xpush0(0.2));
-  curvepoint(spin(240*degree) * xpush0(0.2));
+  curvepoint(spin(120._deg) * xpush0(0.2));
+  curvepoint(spin(240._deg) * xpush0(0.2));
   curvepoint(xpush0(0.2));
   
   queuecurve(Where, 0xFF0000FF, 0x00FF00FF, PPR::LINE);

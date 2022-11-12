@@ -112,7 +112,7 @@ void animate() {
   
   /* set_view does not orient correctly, so we rotate it */
   
-  View = cspin(2, 0, M_PI/2) * View;
+  View = cspin90(2, 0) * View;
   
   /* we move the camera backward */
 

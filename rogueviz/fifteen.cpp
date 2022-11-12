@@ -64,7 +64,7 @@ void compute_triangle_markers() {
   println(hlog, triangle_markers);
 
   for(int i=0; i<isize(fif); i++) {
-    turns.push_back(triangle_markers[i+1] == 0 ? 90*degree : 0);
+    turns.push_back(triangle_markers[i+1] == 0 ? 90._deg : 0);
     }
   }
 
@@ -480,7 +480,7 @@ auto fifteen_hook =
                 popScreenAll();
                 fullcenter();
                 if(lev == "coiled" || lev == "mobiusband")
-                  View = spin(90*degree) * View;
+                  View = spin90() * View;
                 if(lev == "mobiusband")
                   View = MirrorX * View;
                 }

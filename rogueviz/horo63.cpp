@@ -23,7 +23,7 @@ bool draw_horo63(cell *c, const shiftmatrix& V) {
     array<hyperpoint, 6> c;
     hyperpoint ctr;
     for(int i=0; i<6; i++) {
-      hyperpoint h = spin(60*degree*i) * point31(1,0,0);
+      hyperpoint h = spin(TAU*i/6) * point31(1,0,0);
       h[0] += x;
       h[0] += y/2.;
       h[1] += sqrt(3)/2. * y;

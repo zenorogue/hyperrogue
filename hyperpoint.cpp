@@ -13,11 +13,18 @@
 namespace hr {
 
 #if HDR
-static const ld full_circle = 2 * M_PI;
-static const ld quarter_circle = M_PI / 2;
-static const ld degree = M_PI / 180;
+
+#ifndef M_PI
+#define M_PI 3.14159265358979
+#endif
+
+static constexpr ld A_PI = M_PI;
+static const ld TAU = 2 * A_PI;
+static const ld degree = A_PI / 180;
 static const ld golden_phi = (sqrt(5)+1)/2;
 static const ld log_golden_phi = log(golden_phi);
+
+constexpr ld operator"" _deg(long double deg) { return deg * A_PI / 180; }
 #endif
 
 eGeometry geometry;
@@ -231,10 +238,6 @@ constexpr hyperpoint C03 = hyperpoint(0,0,0,1);
 // basic functions and types
 //===========================
 
-#ifndef M_PI
-#define M_PI 3.14159265358979
-#endif
-
 EX ld squar(ld x) { return x*x; }
 
 EX int sig(int z) { return ginf[geometry].g.sig[z]; }
@@ -284,7 +287,7 @@ EX ld acos_auto(ld x) {
 /** \brief volume of a three-dimensional ball of radius r in the current isotropic geometry */
 EX ld volume_auto(ld r) {
   switch(cgclass) {
-    case gcEuclid: return 4 * r * r * r / 3 * M_PI;
+    case gcEuclid: return r * r * r * 240._deg;
     case gcHyperbolic: return M_PI * (sinh(2*r) - 2 * r);
     case gcSphere: return M_PI * (2 * r - sin(2*r));
     default: return 0;
@@ -295,8 +298,8 @@ EX ld volume_auto(ld r) {
 EX ld area_auto(ld r) {
   switch(cgclass) {
     case gcEuclid: return r * r * M_PI;
-    case gcHyperbolic: return 2 * M_PI * (cosh(r) - 1);
-    case gcSphere: return 2 * M_PI * (1 - cos(r));
+    case gcHyperbolic: return TAU * (cosh(r) - 1);
+    case gcSphere: return TAU * (1 - cos(r));
     default: return 0;
     }
   }
@@ -307,7 +310,7 @@ EX ld wvolarea_auto(ld r) {
   else return area_auto(r);
   }
 
-EX ld asin_clamp(ld x) { return x>1 ? M_PI/2 : x<-1 ? -M_PI/2 : std::isnan(x) ? 0 : asin(x); }
+EX ld asin_clamp(ld x) { return x>1 ? 90._deg : x<-1 ? -90._deg : std::isnan(x) ? 0 : asin(x); }
 
 EX ld acos_clamp(ld x) { return x>1 ? 0 : x<-1 ? M_PI : std::isnan(x) ? 0 : acos(x); }
 
@@ -589,18 +592,42 @@ EX transmatrix cspin(int a, int b, ld alpha) {
   return T;
   }
 
+/** rotate by 90 degrees in the coordinates a, b */
+EX transmatrix cspin90(int a, int b) {
+  transmatrix T = Id;
+  T[a][a] = 0; T[a][b] = 1;
+  T[b][a] = -1; T[b][b] = 0;
+  return T;
+  }
+
+/** rotate by 180 degrees in the coordinates a, b */
+EX transmatrix cspin180(int a, int b) {
+  transmatrix T = Id;
+  T[a][a] = T[b][b] = -1;
+  return T;
+  }
+
 /** rotate by alpha degrees in the XY plane */
 EX transmatrix spin(ld alpha) { return cspin(0, 1, alpha); }
 
+/** rotate by 90 degrees in the XY plane */
+EX transmatrix spin90() { return cspin90(0, 1); }
+
+/** rotate by 180 degrees in the XY plane */
+EX transmatrix spin180() { return cspin180(0, 1); }
+
+/** rotate by 270 degrees in the XY plane */
+EX transmatrix spin270() { return cspin90(1, 0); }
+
 EX transmatrix random_spin3() {
   ld alpha2 = asin(randd() * 2 - 1);
-  ld alpha = randd() * 2 * M_PI;
-  ld alpha3 = randd() * 2 * M_PI;
+  ld alpha = randd() * TAU;
+  ld alpha3 = randd() * TAU;
   return cspin(0, 1, alpha) * cspin(0, 2, alpha2) * cspin(1, 2, alpha3);
   }
 
 EX transmatrix random_spin() {
-  if(WDIM == 2) return spin(randd() * 2 * M_PI);
+  if(WDIM == 2) return spin(randd() * TAU);
   else return random_spin3();
   }
 
@@ -1181,13 +1208,13 @@ EX ld hdist0(const shiftpoint& mh) {
 EX ld circlelength(ld r) {
   switch(cgclass) {
     case gcEuclid:
-      return 2 * M_PI * r;
+      return TAU * r;
     case gcHyperbolic:
-      return 2 * M_PI * sinh(r);
+      return TAU * sinh(r);
     case gcSphere:
-      return 2 * M_PI * sin(r);
+      return TAU * sin(r);
     default:
-      return 2 * M_PI * r;
+      return TAU * r;
     }
   }
 
@@ -1378,12 +1405,12 @@ EX transmatrix spin_towards(const transmatrix Position, transmatrix& ori, const 
       }
     T = rspintox(U);
     }
-  if(back < 0) T = T * spin(M_PI), alpha = -alpha;
+  if(back < 0) T = T * spin180(), alpha = -alpha;
   if(prod) {
     if(dir == 0) ori = cspin(2, 0, alpha);
-    if(dir == 2) ori = cspin(2, 0, alpha - M_PI/2), dir = 0;
+    if(dir == 2) ori = cspin(2, 0, alpha - 90._deg), dir = 0;
     }
-  if(dir) T = T * cspin(dir, 0, -M_PI/2);
+  if(dir) T = T * cspin(dir, 0, -90._deg);
   T = Position * T;
   return T;
   }
@@ -1536,7 +1563,7 @@ EX ld geo_dist(const shiftpoint h1, const shiftpoint h2, flagtype prec IS(pNORMA
 
 EX ld geo_dist_q(const hyperpoint h1, const hyperpoint h2, flagtype prec IS(pNORMAL)) {
   auto d = geo_dist(h1, h2, prec);
-  if(elliptic && d > M_PI/2) return M_PI - d;
+  if(elliptic && d > 90._deg) return M_PI - d;
   return d;
   }
 
@@ -1551,15 +1578,15 @@ EX hyperpoint lp_apply(const hyperpoint h) {
 EX hyperpoint smalltangent() { return xtangent(.1); }
 
 EX void cyclefix(ld& a, ld b) {
-  while(a > b + M_PI) a -= 2 * M_PI;
-  while(a < b - M_PI) a += 2 * M_PI;
+  while(a > b + M_PI) a -= TAU;
+  while(a < b - M_PI) a += TAU;
   }
 
 EX ld raddif(ld a, ld b) {
   ld d = a-b;
   if(d < 0) d = -d;
-  if(d > 2*M_PI) d -= 2*M_PI;
-  if(d > M_PI) d = 2 * M_PI-d;
+  if(d > TAU) d -= TAU;
+  if(d > M_PI) d = TAU-d;
   return d;
   }
 

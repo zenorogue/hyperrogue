@@ -85,7 +85,7 @@ pair<hyperpoint, hyperpoint> trace_path(ld v) {
   hyperpoint lctr = A;
   ld angle = 0;
   
-  ld arclen = radius * M_PI/2;
+  ld arclen = radius * 90._deg;
   
   auto change_angle = [&] (ld x) {
     if(v == 0) return;
@@ -109,7 +109,7 @@ pair<hyperpoint, hyperpoint> trace_path(ld v) {
   change_angle(4);
   shift_to(E, true);
   
-  angle *= M_PI/2;
+  angle *= 90._deg;
   
   if(v > 0) vperiod = vorig - v;
   
@@ -197,7 +197,7 @@ void prepare_nilform() {
   println(hlog, "scale = ", scale);
   println(hlog, nilize(E).second);  
   
-  vperiod = radius * 2 * M_PI + hypot_d(3, B-A) + hypot_d(3, C-B) + hypot_d(3, D-C) + hypot_d(3, E-D);
+  vperiod = radius * TAU + hypot_d(3, B-A) + hypot_d(3, C-B) + hypot_d(3, D-C) + hypot_d(3, E-D);
   println(hlog, "vperiod = ", vperiod);
   
   make_routes();

@@ -219,8 +219,8 @@ void level::init_shapes() {
       if(bmch == 'f' && (x&1) && (y&1)) {
         for(int s=0; s<4; s++) {
           hyperpoint st = point3(x+.1, y+.1, 0);
-          hyperpoint a = spin(90*degree*s) * point3(.1, .1, 0);
-          hyperpoint b = spin(90*degree*(s+1)) * point3(.1, .1, 0);
+          hyperpoint a = spin(90._deg*s) * point3(.1, .1, 0);
+          hyperpoint b = spin(90._deg*(s+1)) * point3(.1, .1, 0);
           hyperpoint hi = point3(0, 0, 1);
           for(int z=0; z<3; z++) {
             ld z1 = (3-z) / 3.;
@@ -252,8 +252,8 @@ void level::init_shapes() {
           ld need = safe_alt(ctr, -1) / scale / scale;
           int max_y = need * 2 + 1;
 
-          hyperpoint a = spin(90*degree*s) * point3(1, 0, 0);
-          hyperpoint b = spin(90*degree*s) * point3(0, 1, 0);
+          hyperpoint a = spin(90._deg*s) * point3(1, 0, 0);
+          hyperpoint b = spin(90._deg*s) * point3(0, 1, 0);
           
           auto pt = [&] (ld af, ld bf, ld yf) {
             hyperpoint ha = a * af * scale; ha[3] = 1;
@@ -402,12 +402,12 @@ void level::init() {
     dynamicval<bool> lop1(loaded_or_planned, true);
     dynamicval<bool> lop2(planning_mode, false);
     if(c.tick(this) == b) break;
-    start.heading_angle -= 1 * degree;
+    start.heading_angle -= degree;
     }
 
   if(flags & nrlOrder) {
     sort(triangles.begin(), triangles.end(), [this] (triangledata a, triangledata b) {
-      return atan2(spin(120*degree)*(a.where - start.where)) < atan2(spin(120*degree)*(b.where - start.where));
+      return atan2(spin(120._deg)*(a.where - start.where)) < atan2(spin(120._deg)*(b.where - start.where));
       });
     for(auto t: triangles) println(hlog, t.where);
     }
@@ -419,8 +419,7 @@ xy_float level::get_xy_f(hyperpoint h) {
   if(flags & nrlPolar) {
     tie(h[0], h[1]) = make_pair(atan2(h[0], h[1]), hypot(h[0], h[1]));
     ld bar = (minx + maxx) / 2;
-    while(h[0] < bar - M_PI) h[0] += 2 * M_PI;
-    while(h[0] > bar + M_PI) h[0] -= 2 * M_PI;
+    cyclefix(h[0], bar);
     }
   int tY = isize(map_tiles);
   int tX = isize(map_tiles[0]);
@@ -455,7 +454,7 @@ hyperpoint level::mappt(ld x, ld y, int s) {
   };
 
 void level::init_plan() {
-  plan.emplace_back(start.where, hpxy(cos(start.heading_angle + 90*degree) * 2, sin(start.heading_angle + 90*degree) * 2));
+  plan.emplace_back(start.where, hpxy(cos(start.heading_angle + 90._deg) * 2, sin(start.heading_angle + 90._deg) * 2));
   current = start;
   }
 

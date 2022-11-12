@@ -187,8 +187,8 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     for(auto p: fac) id.v0 += p;
     id.v0 = normalize_flat(id.v0);
     hyperpoint h = normalize_flat(fac[0]);
-    id.T = cspin(0, 1, -90*degree) * spintox(gpushxto0(id.v0) * h) * gpushxto0(id.v0);
-    if((id.T * C0)[0] > 0) id.T = cspin(0, 1, 180*degree) * id.T;
+    id.T = cspin90(1, 0) * spintox(gpushxto0(id.v0) * h) * gpushxto0(id.v0);
+    if((id.T * C0)[0] > 0) id.T = spin180() * id.T;
     for(int i=0; i<3; i++) id.T[3][i] = id.T[i][3] = i==3;
     if(debug_portal & 128)
     for(int a=0; a<4; a++) {
@@ -233,13 +233,13 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     id.T = gpushxto0(id.v0);
     for(auto p: fac1) {
       if(abs((id.T * p)[2]) > 1e-3 && abs((id.T * p)[0]) < 1e-3)
-        id.T = cspin(2, 0, 90*degree) * id.T;
+        id.T = cspin90(2, 0) * id.T;
       if(abs((id.T * p)[2]) > 1e-3 && abs((id.T * p)[1]) < 1e-3)
-        id.T = cspin(2, 1, 90*degree) * id.T;
+        id.T = cspin90(2, 1) * id.T;
       }
-    if((id.T * C03)[2] > 0) id.T = cspin(2, 0, 180*degree) * id.T;
-    if(abs((id.T * removed)[0]) > 1e-2) id.T = cspin(0, 1, 90*degree) * id.T;
-    if((id.T * removed)[1] < -1e-2) id.T = cspin(0, 1, 180*degree) * id.T;
+    if((id.T * C03)[2] > 0) id.T = cspin180(2, 0) * id.T;
+    if(abs((id.T * removed)[0]) > 1e-2) id.T = cspin90(0, 1) * id.T;
+    if((id.T * removed)[1] < -1e-2) id.T = cspin180(0, 1) * id.T;
     vector<hyperpoint> v;
     geometry = gg;
     for(auto f: fac) v.push_back(id.to_poco(f));
@@ -254,7 +254,7 @@ EX portal_data make_portal(cellwalker cw, int spin) {
   else {
     id.kind = 0;
     id.v0 = project_on_triangle(fac[0], fac[1], fac[2]);
-    id.T = cpush(2, -hdist0(id.v0)) * cspin(2, 0, 90*degree) * spintox(id.v0);
+    id.T = cpush(2, -hdist0(id.v0)) * cspin90(2, 0) * spintox(id.v0);
     hyperpoint ctr = Hypc;
     for(auto p: fac) ctr += id.T*p;
     ctr = normalize(ctr);

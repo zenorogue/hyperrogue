@@ -440,7 +440,7 @@ void shootBullet(monster *m) {
   for(int i=1; i<8; i++) if(markOrb(orbdir[i])) {
     monster* bullet = new monster;
     bullet->base = m->base;
-    bullet->at = m->at * cspin(0, WDIM-1, M_PI/4*i);
+    bullet->at = m->at * cspin(0, WDIM-1, TAU * i/8);
     if(prod) bullet->ori = m->ori;
     if(WDIM == 3) bullet->at = bullet->at * cpush(2, 0.15 * SCALE);
     bullet->type = moBullet;
@@ -448,7 +448,7 @@ void shootBullet(monster *m) {
     bullet->pid = m->pid;
     bullet->hitpoints = 0;
     bullet->fragoff = ticks + bullet_time;
-    bullet->inertia = cspin(0, WDIM-1, -M_PI/4 * i) * m->inertia;
+    bullet->inertia = cspin(0, WDIM-1, -TAU * i/8) * m->inertia;
     bullet->inertia[frontdir()] += bullet_velocity(m->type) * SCALE;
     additional.push_back(bullet);
     }
@@ -635,10 +635,10 @@ shiftpoint hornpos(int id) {
 #define IGO 9
 
 double igospan[IGO+1] = { 0, 
-  M_PI/6, -M_PI/6, 
-  M_PI/4, -M_PI/4,
-  M_PI/3, -M_PI/3,
-  M_PI/2.1, -M_PI/2.1,
+  A_PI/6, -A_PI/6,
+  A_PI/4, -A_PI/4,
+  A_PI/3, -A_PI/3,
+  A_PI/2.1, -A_PI/2.1,
   0
   };
 
@@ -1527,7 +1527,7 @@ void destroyMimics() {
 EX void teleported() {
   monster *m = pc[cpid];
   m->base = cwt.at;
-  m->at = rgpushxto0(inverse_shift(gmatrix[cwt.at], mouseh)) * spin(rand() % 1000 * M_PI / 2000);
+  m->at = rgpushxto0(inverse_shift(gmatrix[cwt.at], mouseh)) * random_spin();
   m->findpat();
   destroyMimics();
   }
@@ -2161,9 +2161,9 @@ void moveMonster(monster *m, int delta) {
     if(m->type == moHedge) {
       hyperpoint h = inverse_shift(m->pat, tC0(goal));
       if(h[1] < 0)
-        nat = nat * spin(M_PI * delta / 3000 / speedfactor());
+        nat = nat * spin(A_PI * delta / 3000 / speedfactor());
       else
-        nat = nat * spin(M_PI * -delta / 3000 / speedfactor());
+        nat = nat * spin(A_PI * -delta / 3000 / speedfactor());
       m->rebasePat(nat, m->base);
       // at most 45 degrees
       if(h[0] < fabsl(h[1])) return;
@@ -2832,7 +2832,7 @@ EX void recall() {
     if(players == 1)
       pc[i]->at = Id;
     else
-      pc[i]->at = spin(2*M_PI*i/players) * xpush(firstland == laMotion ? .5 : .3) * Id;
+      pc[i]->at = spin(TAU*i/players) * xpush(firstland == laMotion ? .5 : .3) * Id;
     /* ggmatrix(cwt.at);
     display(gmatrix[cwt.at]);
     pc[i]->findpat(); */
@@ -2851,7 +2851,7 @@ EX void init() {
     if(players == 1)
       pc[i]->at = Id;
     else
-      pc[i]->at = spin(2*M_PI*i/players) * xpush(firstland == laMotion ? .5 : .3) * Id;
+      pc[i]->at = spin(TAU*i/players) * xpush(firstland == laMotion ? .5 : .3) * Id;
     pc[i]->pat = shiftless(pc[i]->at);
     pc[i]->base = cwt.at;
     pc[i]->vel = 0;
@@ -3013,7 +3013,7 @@ bool celldrawer::draw_shmup_monster() {
     if(m->inBoat) {
       view = m->pat;
       if(WDIM == 2) Vboat = view;
-      if(WDIM == 3) Vboat = view * spin(-M_PI/2);
+      if(WDIM == 3) Vboat = view * spin270();
       
       bool magic = m->type == moPlayer && items[itOrbWater];
       color_t outcolor = magic ? watercolor(0) : 0xC06000FF;
@@ -3056,7 +3056,7 @@ bool celldrawer::draw_shmup_monster() {
               view = view * spin(-atan2(h[1], h[0]));
               }
             else {
-              view = view * spin(-M_PI/2) * cspin(0, 2, -M_PI/2);
+              view = view * spin270() * cspin90(2, 0);
               }
             }
           if(m->inBoat) m->footphase = 0;
@@ -3167,12 +3167,7 @@ bool celldrawer::draw_shmup_monster() {
         if(hasHitpoints(m->type))
           c->hitpoints = m->hitpoints;
         if(m->type == moTortoise) tortoise::emap[c] = getBits(m->torigin) & ((1<<tortoise::numbits)-1);
-        /* if(m->type == moMimic && GDIM == 3)
-          drawMonsterType(m->type, c, view * spin(-M_PI/2), col, m->footphase); */
-        /* else if(GDIM == 3)
-          drawMonsterType(m->type, c, view * cspin(0, 2, M_PI/2), col, m->footphase); */
-        /* else */
-          drawMonsterType(m->type, c, view, col, m->footphase, col);
+        drawMonsterType(m->type, c, view, col, m->footphase, col);
         if(m->type == moTortoise) tortoise::emap.erase(c);
         break;
       }

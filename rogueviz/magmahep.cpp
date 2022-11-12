@@ -58,7 +58,7 @@ void make() {
   /* compute the vertices */
   vertices.resize(magmav+1);
   for(int i=0; i<=magmav; i++)
-    vertices[i] = spin(2*M_PI*(i+(v-7)/4.)/v) * xpush0(1);
+    vertices[i] = spin(TAU*(i+(v-7)/4.)/v) * xpush0(1);
   ld xx = vertices[2][0];
   
   int down = v/2 + 2;
@@ -196,7 +196,7 @@ void draw_at(transmatrix T, color_t col, int id) {
   if(magmadebug) {
     for(int i=0; i<magmav; i++) {
       hyperpoint h = mid(vertices[i], vertices[i+1]);
-      h += spin(M_PI/2) * (vertices[i+1] - vertices[i]) * .05;
+      h += spin90() * (vertices[i+1] - vertices[i]) * .05;
       queuestr(T * rgpushxto0(h), 0.4, its(i), 0x80);
       }
     queuestr(T * rgpushxto0(hcenter), 0.4, "#"+its(id), 0x80);

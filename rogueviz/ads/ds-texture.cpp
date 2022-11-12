@@ -98,10 +98,10 @@ void draw_texture(texture_to_use& tu) {
   int pts_id = 0;
 
   auto add = [&] (int x, int y) {
-    ld x0 = (y-(YSCALE/2.)) / YSCALE * M_PI * 4;
+    ld x0 = (y-(YSCALE/2.)) / YSCALE * 720._deg;
     ld mercator_y0 = (x-(XSCALE/2.)) / (XSCALE/2.) * M_PI * MWIDTH;
     ld y0 = asin(tanh(2 * mercator_y0));
-    ld y1 = y0 - 90 * degree;
+    ld y1 = y0 - 90._deg;
     
     et.tinf.tvertices.push_back(glhr::makevertex(x * 1. / XSCALE, .5 + (y-0.5) / MWIDTH / YSCALE, 0));
 
@@ -111,7 +111,7 @@ void draw_texture(texture_to_use& tu) {
       ld s = current.shift - tu.ctr;
 
       // We actually want to compute this, but this is not precise enough:
-      // cr = ds_cross0(current.T * lorentz(2, 3, -current.shift) * cspin(0, 1, x0) * cspin(0, 2, y0 - 90*degree));
+      // cr = ds_cross0(current.T * lorentz(2, 3, -current.shift) * cspin(0, 1, x0) * cspin(0, 2, y0 - 90._deg));
       
       // Here is what we get for current.T == Id: (computed with sympy)      
       hyperpoint now;

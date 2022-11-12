@@ -439,10 +439,10 @@ void addpoint(const shiftpoint& H) {
     if(sphere && pmodel == mdSpiral) {
       if(isize(glcoords)) {
         hyperpoint Hscr1;
-        shiftpoint H1 = H; H1.shift += 2 * M_PI;
+        shiftpoint H1 = H; H1.shift += TAU;
         applymodel(H1, Hscr1);
         if(hypot_d(2, Hlast-Hscr1) < hypot_d(2, Hlast-Hscr)) { Hscr = Hscr1; }
-        H1.shift -= 4 * M_PI;
+        H1.shift -= 2 * TAU;
         applymodel(H1, Hscr1);
         if(hypot_d(2, Hlast-Hscr1) < hypot_d(2, Hlast-Hscr)) { Hscr = Hscr1; }
         }
@@ -1108,7 +1108,7 @@ EX namespace s2xe {
     }
   
   void add2(pt h, int gen) {
-    glcoords.push_back(glhr::pointtogl(point31(sin(h[0]) * (h[1] + 2 * M_PI * gen), cos(h[0]) * (h[1] + 2 * M_PI * gen), h[2])));
+    glcoords.push_back(glhr::pointtogl(point31(sin(h[0]) * (h[1] + TAU * gen), cos(h[0]) * (h[1] + TAU * gen), h[2])));
     stinf.tvertices.push_back(glhr::makevertex(h[3], h[4], 0));
     }
 
@@ -1125,13 +1125,13 @@ EX namespace s2xe {
   bool to_right(const pt& h2, const pt& h1) {
     ld x2 = h2[0];
     ld x1 = h1[0];
-    if(x2 < x1) x2 += 2 * M_PI;
+    if(x2 < x1) x2 += TAU;
     return x2 >= x2 && x2 <= x1 + M_PI;
     }
   
   EX int qrings = 32;
   
-  ld seg() { return 2 * M_PI / qrings; }
+  ld seg() { return TAU / qrings; }
   
   void add_ortho_triangle(pt bl, pt tl, pt br, pt tr) {
     
@@ -1164,12 +1164,12 @@ EX namespace s2xe {
     }
   
   void add_ordered_triangle(array<pt, 3> v) {
-    if(v[1][0] < v[0][0]) v[1][0] += 2 * M_PI;
-    if(v[2][0] < v[1][0]) v[2][0] += 2 * M_PI;
+    if(v[1][0] < v[0][0]) v[1][0] += TAU;
+    if(v[2][0] < v[1][0]) v[2][0] += TAU;
     if(v[2][0] - v[0][0] < 1e-6) return;
     ld x = (v[1][0] - v[0][0]) / (v[2][0] - v[0][0]);
     
-    if(v[2][0] < v[0][0] + M_PI / 4 && maxy < M_PI - M_PI/4 && sightranges[geometry] <= 5) {
+    if(v[2][0] < v[0][0] + 45._deg && maxy < 135._deg && sightranges[geometry] <= 5) {
       addall(v[0], v[1], v[2]);
       return;
       }
@@ -1195,16 +1195,16 @@ EX namespace s2xe {
     }
 
   void add_triangle_around(array<pt, 3> v) {
-    ld baseheight = (v[0][1] > M_PI/2) ? M_PI : 0;
+    ld baseheight = (v[0][1] > 90._deg) ? M_PI : 0;
     ld tu = (v[0][3] + v[1][3] + v[2][3]) / 3;
     ld tv = (v[0][4] + v[1][4] + v[2][4]) / 3;
     array<pt, 3> vhigh;
     for(int i=0; i<3; i++) { vhigh[i] = v[i]; vhigh[i][1] = baseheight; vhigh[i][3] = tu; vhigh[i][4] = tv; }
-    if(v[1][0] < v[0][0]) v[1][0] = v[1][0] + 2 * M_PI, vhigh[1][0] = vhigh[1][0] + 2 * M_PI;
+    if(v[1][0] < v[0][0]) v[1][0] = v[1][0] + TAU, vhigh[1][0] = vhigh[1][0] + TAU;
     add_ortho_triangle(v[0], vhigh[0], v[1], vhigh[1]);
-    if(v[2][0] < v[1][0]) v[2][0] = v[2][0] + 2 * M_PI, vhigh[2][0] = vhigh[2][0] + 2 * M_PI;
+    if(v[2][0] < v[1][0]) v[2][0] = v[2][0] + TAU, vhigh[2][0] = vhigh[2][0] + TAU;
     add_ortho_triangle(v[1], vhigh[1], v[2], vhigh[2]);
-    if(v[0][0] < v[2][0]) v[0][0] = v[0][0] + 2 * M_PI, vhigh[0][0] = vhigh[0][0] + 2 * M_PI;
+    if(v[0][0] < v[2][0]) v[0][0] = v[0][0] + TAU, vhigh[0][0] = vhigh[0][0] + TAU;
     add_ortho_triangle(v[2], vhigh[2], v[0], vhigh[0]);
     }
 
@@ -1215,12 +1215,12 @@ EX namespace s2xe {
     
     minz = min(abs(v[0][2]), max(abs(v[1][2]), abs(v[2][2])));
     auto& s = sightranges[geometry];
-    maxgen = sqrt(s * s - minz * minz) / (2 * M_PI) + 1;
+    maxgen = sqrt(s * s - minz * minz) / TAU + 1;
     
     maxy = max(v[0][1], max(v[1][1], v[2][1]));
     miny = min(v[0][1], min(v[1][1], v[2][1]));
     with_zero = true;
-    if(maxy < M_PI / 4) {
+    if(maxy < 45._deg) {
       add2(v[0], 0);
       add2(v[1], 0);
       add2(v[2], 0);
@@ -1310,7 +1310,7 @@ void draw_s2xe0(dqi_poly *p) {
   set_width(1);
   glcoords.clear();
 
-  int maxgen = sightranges[geometry] / (2 * M_PI) + 1;
+  int maxgen = sightranges[geometry] / TAU + 1;
   
   auto crossdot = [&] (const hyperpoint h1, const hyperpoint h2) { return make_pair(h1[0] * h2[1] - h1[1] * h2[0], h1[0] * h2[0] + h1[1] * h2[1]); };
   vector<point_data> pd;
@@ -1342,7 +1342,7 @@ void draw_s2xe0(dqi_poly *p) {
   for(int i=0; i<p->cnt; i++) {
     auto &c1 = pd[i];
     auto &c0 = pd[i==0?p->cnt-1 : i-1];
-    if(c1.distance > M_PI/2 && c0.distance > M_PI/2 && crossdot(c0.direction, c1.direction).second < 0) return;
+    if(c1.distance > 90._deg && c0.distance > 90._deg && crossdot(c0.direction, c1.direction).second < 0) return;
     if(c1.bad == 2) return;
     if(c1.bad == 1) no_gens = true;
     }
@@ -1354,12 +1354,12 @@ void draw_s2xe0(dqi_poly *p) {
       angles[i] = atan2(pd[i].direction[1], pd[i].direction[0]);
       }
     sort(angles.begin(), angles.end());
-    angles.push_back(angles[0] + 2 * M_PI);
+    angles.push_back(angles[0] + TAU);
     bool ok = false;
     for(int i=1; i<isize(angles); i++)
       if(angles[i] >= angles[i-1] + M_PI) ok = true;
     if(!ok) {
-      for(auto &c: pd) if(c.distance > M_PI/2) return;
+      for(auto &c: pd) if(c.distance > 90._deg) return;
       no_gens = true;
       }
     }
@@ -1369,7 +1369,7 @@ void draw_s2xe0(dqi_poly *p) {
   for(int gen=-g; gen<=g; gen++) {
     for(int i=0; i<p->cnt; i++) {
       auto& cur = pd[i];
-      ld d = cur.distance + 2 * M_PI * gen;
+      ld d = cur.distance + TAU * gen;
       hyperpoint h;
       h[0] = cur.direction[0] * d;
       h[1] = cur.direction[1] * d;
@@ -1572,9 +1572,9 @@ EX namespace ods {
       
       for(int j=0; j<6; j++) {
         // let Delta be from 0 to 2PI
-        if(h[j][2]<0) h[j][2] += 2 * M_PI;
+        if(h[j][2]<0) h[j][2] += TAU;
         // Theta is from -PI/2 to PI/2. Let it be from 0 to PI
-        h[j][1] += global_projection * M_PI/2;
+        h[j][1] += global_projection * 90._deg;
         h[j][3] = 1;
         }
 
@@ -1591,8 +1591,8 @@ EX namespace ods {
       cyclefix(h[4][0], h[3][0]);
       cyclefix(h[5][0], h[3][0]);
 
-      if(abs(h[1][1] - h[0][1]) > M_PI/2) goto next_i;
-      if(abs(h[2][1] - h[0][1]) > M_PI/2) goto next_i;
+      if(abs(h[1][1] - h[0][1]) > 90._deg) goto next_i;
+      if(abs(h[2][1] - h[0][1]) > 90._deg) goto next_i;
       
       if(h[0][0] < -M_PI || h[0][0] > M_PI) println(hlog, h[0][0]);
 
@@ -1601,7 +1601,7 @@ EX namespace ods {
         if(h[1][0] < -M_PI || h[2][0] < -M_PI) lst++;
         if(h[1][0] > +M_PI || h[2][0] > +M_PI) fst--;
         for(int x=fst; x<=lst; x++) for(int j=0; j<3; j++) {
-          glcoords.push_back(glhr::makevertex(h[j][0] + 2 * M_PI * x, h[j][1], h[j][2]));
+          glcoords.push_back(glhr::makevertex(h[j][0] + TAU * x, h[j][1], h[j][2]));
           if(npoly.tinf) stinf.tvertices.push_back(p->tinf->tvertices[p->offset_texture+i+j]);
           }
         }

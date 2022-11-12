@@ -71,7 +71,7 @@ bool advance_walkers(int delta) {
       auto& w = walkers[i];
       hyperpoint h = tC0(w.T);
       if(WDIM == 2) {
-        w.T = w.T * xspinpush(randd() * 2 * M_PI, step_size);
+        w.T = w.T * xspinpush(randd() * TAU, step_size);
         }
       else {
         hyperpoint dir = random_spin() * xtangent(step_size);

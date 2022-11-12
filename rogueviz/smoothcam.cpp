@@ -281,22 +281,22 @@ void snap_to_center() {
 
   dialog::addItem("mouse up", 'w');
   dialog::add_action([] {
-    View = spin(90*degree) * spintox(unshift(mapeditor::mouse_snap())) * View;
+    View = spin90() * spintox(unshift(mapeditor::mouse_snap())) * View;
     });
 
   dialog::addItem("mouse down", 's');
   dialog::add_action([] {
-    View = spin(-90*degree) * spintox(unshift(mapeditor::mouse_snap())) * View;
+    View = spin270() * spintox(unshift(mapeditor::mouse_snap())) * View;
     });
 
   dialog::addItem("mouse left", 'a');
   dialog::add_action([] {
-    View = spin(180*degree) * spintox(unshift(mapeditor::mouse_snap())) * View;
+    View = spin180() * spintox(unshift(mapeditor::mouse_snap())) * View;
     });
 
   dialog::addItem("mouse left", 'd');
   dialog::add_action([] {
-    View = spin(0*degree) * spintox(unshift(mapeditor::mouse_snap())) * View;
+    View = Id * spintox(unshift(mapeditor::mouse_snap())) * View;
     });
 
   dialog::addBack();

@@ -200,7 +200,7 @@ inline ld gravity = 1 / 16.;
 inline ld whdist = 0.5;
 
 /** minimum slope for rendering */
-inline ld min_gfx_slope = +M_PI/2;
+inline ld min_gfx_slope = +90._deg;
 
 /** current slope for rendering */
 inline ld gfx_slope = 0;

@@ -239,7 +239,7 @@ ld prec = 5;
 void draw_earth() {
   load_planets();
 
-  shiftmatrix S = ggmatrix(currentmap->gamestart()) * spin(90*degree);
+  shiftmatrix S = ggmatrix(currentmap->gamestart()) * spin90();
 
   ld mte = radius[src_planet] / radius[tgt_planet];
   
@@ -425,7 +425,7 @@ EX void compare() {
       dark = dark * dark * (3-2*dark);
       }
     alpha = dark * max_alpha;
-    View = cspin(0, 2, (rot - lrot) * 2 * M_PI) * View;
+    View = cspin(0, 2, (rot - lrot) * TAU) * View;
     lrot = rot;
     anims::moved();
     }

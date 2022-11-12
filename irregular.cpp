@@ -460,7 +460,7 @@ bool step(int delta) {
         ld dist = cgi.hcrossf / 2;
         ld dists[8];
         for(int i=0; i<S7; i++) {
-          dists[i] = hdist(s.p, xspinpush0(cgi.hexshift - i * 2 * M_PI / S7, -cgi.hcrossf));
+          dists[i] = hdist(s.p, xspinpush0(cgi.hexshift - i * TAU / S7, -cgi.hcrossf));
           if(dists[i] < dist)
             d = i, dist = dists[i];
           }

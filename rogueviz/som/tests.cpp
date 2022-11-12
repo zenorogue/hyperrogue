@@ -735,7 +735,7 @@ void shot_settings() {
   brm_limit = GDIM == 2 ? 1000 : 0;
   
   if(GDIM == 3)
-    View = cspin(0, 2, 30 * degree) * cspin(1, 2, 30*degree) * View;
+    View = cspin(0, 2, 30 * degree) * cspin(1, 2, 30._deg) * View;
   
   shift_view(ctangent(2, -0.5));
 
