@@ -42,7 +42,7 @@ namespace sag {
   bool auto_visualize = true;
 
   int vizsa_start;
-  int vizsa_len;
+  int vizsa_len = 5;
   
   /** all the SAG cells */
   vector<cell*> sagcells;
