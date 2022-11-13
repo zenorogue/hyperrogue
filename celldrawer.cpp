@@ -1741,6 +1741,13 @@ void celldrawer::draw_features_and_walls_3d() {
   int ofs = currentmap->wall_offset(c);
   if(isWall3(c, wcol)) {
     if(!no_wall_rendering) {
+    if(c->wall == waChasm && c->land == laMemory && !in_perspective()) {
+      for(int a=0; a<c->type; a++) if(c->move(a) && c->move(a)->land != laMemory) {
+        auto& poly = queuepoly(V, cgi.shWireframe3D[ofs + a], 0);
+        poly.outline = (wcol << 8) | 0x40;
+        }
+      goto after_walls;
+      }
     color_t wcol2 = wcol;
     #if CAP_TEXTURE
     if(texture::config.tstate == texture::tsActive) wcol2 = texture::config.recolor(wcol);
@@ -1853,6 +1860,7 @@ void celldrawer::draw_features_and_walls_3d() {
       queuepoly(face_the_player(V), chasmgraph(c) ? cgi.shSawRing : cgi.shRing, darkena(wcol, 0, 0xFF));
     }
 
+  after_walls:
   int rd = rosedist(c);
   if(rd == 1) 
     queuepoly(face_the_player(V), cgi.shLoveRing, darkena(0x804060, 0, 0xFF));
