@@ -997,32 +997,36 @@ void configure_edge_display() {
     auto t = edgetypes[i];
     switch(mode) {
       case 0:
-        dialog::addSelItem(t->name, itsh(t->color), 'a' + i);
-        dialog::lastItem().colorv = t->color >> 8;
+        if(t->color == DEFAULT_COLOR)
+          dialog::addSelItem(t->name, "default", 'a' + i);
+        else
+          dialog::addColorItem(t->name, t->color, 'a' + i);
         dialog::add_action([t] {
           dialog::openColorDialog(t->color, NULL);
           dialog::dialogflags |= sm::MAYDARK | sm::SIDE;
           });
         break;
-      case 1:
+      case 1: case 2: {
+        auto& val = mode == 2 ? t->visible_from_hi : t->visible_from;
         if(!(vizflags & RV_INVERSE_WEIGHT)) {
-          dialog::addSelItem(t->name, fts(t->visible_from), 'a'+i);
-          dialog::add_action([t] {
-            dialog::editNumber(t->visible_from, 0.001, 1000, .1, .1, "min weight", "");
+          dialog::addSelItem(t->name, fts(val), 'a'+i);
+          dialog::add_action([&val] {
+            dialog::editNumber(val, 0.001, 1000, .1, .1, "min weight", "");
             dialog::scaleLog();
             });
           }
         else {
-          dialog::addSelItem(t->name, its(1 / t->visible_from), 'a'+i);
-          dialog::add_action([t] {
-            static int i;
-            i = 1 / t->visible_from;
+          dialog::addSelItem(t->name, fts(1 / val), 'a'+i);
+          dialog::add_action([t, &val] {
+            static ld i;
+            i = 1 / val;
             dialog::editNumber(i, 1, 1000000, 1, 500, weight_label, "");
-            dialog::reaction = [t] () { t->visible_from = i ? 1. / i : 5; };
+            dialog::reaction = [&val] () { val = i ? 1. / i : 5; };
             dialog::scaleLog(); dialog::ne.step = .2;
             });
           }
         break;
+        }
       default: break;
       }
     }
@@ -1030,6 +1034,11 @@ void configure_edge_display() {
   if(vizflags & RV_HAVE_WEIGHT) {
     dialog::addBoolItem_choice("color/alpha", mode, 0, '1');
     dialog::addBoolItem_choice(weight_label, mode, 1, '2');
+    dialog::addBoolItem_choice(weight_label + " (hi)", mode, 2, '3');
+    dialog::addBoolItem("inverse weights", vizflags & RV_INVERSE_WEIGHT, '4');
+    dialog::add_action([] {
+      vizflags ^= RV_INVERSE_WEIGHT;
+      });
     }
   else mode = 0;
   
