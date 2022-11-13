@@ -1039,6 +1039,10 @@ void configure_edge_display() {
     dialog::add_action([] {
       vizflags ^= RV_INVERSE_WEIGHT;
       });
+    dialog::addSelItem("weight gamma", fts(ggamma), '5');
+    dialog::add_action([] {
+      dialog::editNumber(ggamma, 0, 2, 0.1, 1, "weight gamma", "");
+      });
     }
   else mode = 0;
   
