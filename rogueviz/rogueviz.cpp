@@ -31,6 +31,7 @@ using namespace hr;
 edgetype default_edgetype = { .1, .1, DEFAULT_COLOR, 0xFF0000FF, "default" };
 
 bool showlabels = false;
+bool show_edges = false;
 bool specialmark = false;
 bool edge_legend = false;
 
@@ -527,6 +528,8 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
   bool multidraw = quotient;
   
   bool use_brm = closed_or_bounded && isize(currentmap->allcells()) <= brm_limit;
+
+  ld hi_weight = 0;
         
   if(!lshiftclick) for(int j=0; j<isize(vd.edges); j++) {
     edgeinfo *ei = vd.edges[j].second;
@@ -543,6 +546,9 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
     else if(oi == lid || oj == lid) hilite = true;
 
     if(ei->weight < (hilite ? ei->type->visible_from_hi : ei->type->visible_from)) continue;
+
+    if((vd1.m == shmup::mousetarget || vd2.m == shmup::mousetarget) && m != shmup::mousetarget)
+      hi_weight = ei->weight;
 
     // if(hilite) ghilite = true;
     
@@ -669,7 +675,7 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
     }
   
   
-  if(showlabels && !darken) {
+  if((showlabels || (show_edges && hi_weight)) && !darken) {
     bool doshow = true;
     if((vizflags & RV_COMPRESS_LABELS) && i > 0 && !vd.virt) {
       vertexdata& vdp = vdata[vd.data];
@@ -682,7 +688,13 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
     if(doshow && !behindsphere(V2)) {
       auto info = vd.info;
       if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
-      queuestr(V2, labelscale, vd.name, forecolor, (svg::in || ISWEB) ? 0 : 1);
+      string s;
+      ld w = hi_weight;
+      if(vizflags & RV_INVERSE_WEIGHT) w = 1/w;
+      if(showlabels && hi_weight) s = vd.name + " : " + fts(w);
+      else if(showlabels) s = vd.name;
+      else if(hi_weight) s = fts(w);
+      queuestr(V2, labelscale, s, forecolor, (svg::in || ISWEB) ? 0 : 1);
       if(info) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
       }
     }
@@ -912,6 +924,9 @@ int readArgs() {
     }
   else if(argis("-lab")) {
     showlabels = true;
+    }
+  else if(argis("-rvedges")) {
+    shift(); show_edges = argi();
     }
   else if(argis("-lab-off")) {
     showlabels = false;
