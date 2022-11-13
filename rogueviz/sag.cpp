@@ -1163,12 +1163,13 @@ int readArgs() {
   if(0) ;
 
   else if(argis("-sagmin")) {
-    shift_arg_formula(default_edgetype.visible_from);
-    default_edgetype.visible_from_hi = default_edgetype.visible_from;
-    default_edgetype.visible_from_help = default_edgetype.visible_from;    
+    auto& ed = sag_edge ? *sag_edge : default_edgetype;
+    shift_arg_formula(ed.visible_from);
+    ed.visible_from_hi = ed.visible_from;
     }
   else if(argis("-sagminhi")) {
-    shift_arg_formula(default_edgetype.visible_from_hi);
+    auto& ed = sag_edge ? *sag_edge : default_edgetype;
+    shift_arg_formula(ed.visible_from_hi);
     }
   else if(argis("-sag_gdist")) {
     shift(); sag::gdist_prec = argi();
@@ -1213,9 +1214,6 @@ int readArgs() {
     if(method == smMatch) prepare_graph();
     }
 
-  else if(argis("-sagminhelp")) {
-    shift_arg_formula(default_edgetype.visible_from_help);
-    }
   else if(argis("-sagformat")) {
     shift(); informat = argi();
     }

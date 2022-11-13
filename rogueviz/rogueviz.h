@@ -44,7 +44,6 @@ namespace rogueviz {
   struct edgetype {
     double visible_from;
     double visible_from_hi;
-    double visible_from_help;
     unsigned color, color_hi;
     string name;
     };

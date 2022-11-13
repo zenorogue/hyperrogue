@@ -28,11 +28,13 @@ ld ggamma = 1;
 
 using namespace hr;
 
-edgetype default_edgetype = { .1, .1, .1, DEFAULT_COLOR, 0xFF0000FF, "default" };
+edgetype default_edgetype = { .1, .1, DEFAULT_COLOR, 0xFF0000FF, "default" };
 
 bool showlabels = false;
 bool specialmark = false;
 bool edge_legend = false;
+
+int max_edges_help = 1000;
 
 bool rog3 = false;
 int vertex_shape = 1;
@@ -295,41 +297,42 @@ void rogueviz_help(int id, int pagenumber) {
   
   sort(alledges.begin(), alledges.end(), edgecmp);
 
-  for(int i=0; i<10 && i+pagenumber < noedges; i++) {
-    help_extension hex;
-    hex.key = 'a' + i;
+  int qty = 0;
 
-    edgeinfo *ei = alledges[pagenumber + i];
-    if(ei->weight < ei->type->visible_from_help) continue;
+  for(auto ei: alledges) {
+    help_extension hex;
+    hex.key = dialog::list_fake_key++;
+
     int k = ei->i ^ ei->j ^ id;
     hex.text = vdata[k].name;
     hex.color = vdata[k].cp.color1 >> 8;
     if(vizflags & RV_WHICHWEIGHT) {
-      if(which_weight)
-        hex.subtext = fts(ei->weight2);
-      else
-        hex.subtext = fts(ei->weight);
+      ld w = which_weight ? ei->weight2 : ei->weight;
+      if(vizflags & RV_INVERSE_WEIGHT) w = 1 / w;
+      hex.subtext = fts(w);
       }
 
     hex.action = [k] () { help_extensions.clear(); rogueviz_help(k, 0); };
     help_extensions.push_back(hex);
+
+    qty++; if(qty > max_edges_help) break;
     }
 
-  if(noedges > pagenumber + 10) {
-    help_extension hex;
-    hex.key = 'z';
-    hex.text = "next page";
-    hex.subtext = its(pagenumber+10) + "/" + its(noedges) + " edges";
-    hex.action = [id, pagenumber] () { help_extensions.clear(); rogueviz_help(id, pagenumber + 10); };
-    help_extensions.push_back(hex);
-    }
-  
   if((vizflags & RV_WHICHWEIGHT) && noedges) {
     help_extension hex;
-    hex.key = 'w';
+    hex.key = '1';
     hex.text = "displayed weight";
-    hex.subtext = which_weight ? "attraction force" : "weight from the data";
+    bool inv = vizflags & RV_INVERSE_WEIGHT;
+    hex.subtext = which_weight ? (inv ? "distance requested" : "attraction force") : (inv ? "inverse value from data" : "weight from the data");
     hex.action = [id, pagenumber] () { which_weight = !which_weight; help_extensions.clear(); rogueviz_help(id, pagenumber); };
+    help_extensions.push_back(hex);
+    }
+
+  if(true) {
+    help_extension hex;
+    hex.key = '2';
+    hex.text = "find this";
+    hex.action = [id] () { search_for = id; popScreen(); };
     help_extensions.push_back(hex);
     }
   }
