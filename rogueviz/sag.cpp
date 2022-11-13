@@ -365,7 +365,12 @@ namespace sag {
       cost += costat(i, sagid[i]);
     cost /= 2;
     }
-  
+
+  void set_inverse() {
+    if(method == smMatch) vizflags |= RV_INVERSE_WEIGHT;
+    else vizflags &=~ RV_INVERSE_WEIGHT;
+    }
+
   void reassign() {
     int DN = isize(sagid);
     for(int i=0; i<DN; i++) {
@@ -373,6 +378,7 @@ namespace sag {
       forgetedges(i);
       }
     shmup::fixStorage();
+    set_inverse();
     }
 
   void load_sag_solution(const string& fname) {
