@@ -879,6 +879,7 @@ namespace sag {
   void readsag(const char *fname) {
     maxweight = 0;
     sag_edge = add_edgetype("SAG edge");
+    rogueviz::cleanup.push_back([] { sag_edge = nullptr; });
     fhstream f(fname, "rt");
     if(!f.f) {
       printf("Failed to open SAG file: %s\n", fname);
