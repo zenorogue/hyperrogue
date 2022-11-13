@@ -470,18 +470,21 @@ namespace sag {
     reassign();
     }
 
+  int sag_ittime = 100;
+
   void iterate() {
     if(!sagmode) return;
     int t1 = SDL_GetTicks();
+    int last = -1;
     for(int i=0; i<ipturn; i++) {
       numiter++;
       sag::saiter();
       }
     int t2 = SDL_GetTicks();
     int t = t2 - t1;
-    if(t < 50) ipturn *= 2;
-    else if(t > 200) ipturn /= 2;
-    else ipturn = ipturn * 100 / t;
+    if(t < (sag_ittime+1) / 2) ipturn *= 2;
+    else if(t > sag_ittime * 2) ipturn /= 2;
+    else ipturn = ipturn * sag_ittime / t;
     print(hlog, format("it %12Ld temp %6.4f [2:%8.6f,10:%8.6f,50:%8.6f] cost = %f\n",
       numiter, double(sag::temperature), 
       (double) exp(-2 * exp(-sag::temperature)),
@@ -971,6 +974,13 @@ namespace sag {
         sag::sagmode = sagOff;
         });
 
+      dialog::addSelItem(XLAT("smoothness"), its(sag_ittime), 's');
+      dialog::add_action([] {
+        dialog::editNumber(sag_ittime, 0, 1000, 10, 100, XLAT("smoothness"),
+          XLAT("How much milliseconds to compute before re-rendering the screen when optimizing in the background. Low values look nicer, but may cause less time to be spent on iterations.")
+          );
+        });
+
       dialog::addBoolItem_action(XLAT("auto-visualize"), sag::auto_visualize, 'b');
 
       dialog::addBoolItem_action(XLAT("continuous embedding"), sag::embedding, 'e'); 
@@ -1275,6 +1285,9 @@ int readArgs() {
   else if(argis("-sagviz")) {
     sag::vizsa_start = SDL_GetTicks();
     shift(); sag::vizsa_len = argi();
+    }
+  else if(argis("-sagsmooth")) {
+    shift(); sag::sag_ittime = argi();
     }
   else if(argis("-sagstats")) {
     output_stats();
