@@ -5056,9 +5056,9 @@ EX void make_actual_view() {
     transmatrix T = actual_view_transform * View;
     transmatrix U = view_inverse(T);
     
-    if(T[0][2]) 
+    if(T[0][2])
       T = spin(-atan2(T[0][2], T[1][2])) * T;
-    if(T[1][2] && T[2][2]) 
+    if(T[1][2])
       T = cspin(1, 2, -atan2(T[1][2], T[2][2])) * T;
 
     ld z = -asin_auto(tC0(view_inverse(T)) [2]);
