@@ -14,7 +14,7 @@ EX function<void()> help_delegate;
 
 #if HDR
 struct help_extension {
-  char key;
+  int key;
   string text;
   string subtext;
   color_t color;
@@ -1102,28 +1102,32 @@ EX void showHelp() {
     dialog::addHelp(help);
     }
   
+  bool in_list = false;
+
   for(auto& he: help_extensions) {
+    if(!in_list && he.key == dialog::first_list_fake_key) {
+      dialog::start_list(1000, 1000, 'a');
+      in_list = true;
+      }
+    if(in_list && (he.key < dialog::first_list_fake_key || he.key > dialog::first_list_fake_key + 1000)) {
+      in_list = false;
+      dialog::end_list();
+      }
+
     if(he.subtext != "")
       dialog::addSelItem(he.text, he.subtext, he.key);
     else
       dialog::addItem(he.text, he.key);
+    dialog::add_action(he.action);
     dialog::lastItem().color = he.color;
     }
+  if(in_list) dialog::end_list();
   
   dialog::display();
   
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
     
-    for(auto& he: help_extensions)
-      if(uni == he.key) {
-        // we need to copy he.action
-        // as otherwise it could clear the extensions,
-        // leading to errors
-        auto act = he.action;
-        act();
-        return;
-        }
     if(sym == SDLK_F1)  {
       auto i = help;
       buildHelpText();
