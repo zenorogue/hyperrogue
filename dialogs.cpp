@@ -30,6 +30,7 @@ EX namespace dialog {
     int p1, p2, p3;
     int position;
     reaction_t customfun;
+    item(tDialogItem t = diBreak);
     };
   
   struct scaler {
@@ -63,6 +64,20 @@ EX namespace dialog {
 #endif
 
   EX color_t dialogcolor = 0xC0C0C0;
+  EX color_t dialogcolor_clicked = 0xFF8000;
+  EX color_t dialogcolor_selected = 0xFFD500;
+  EX color_t dialogcolor_key = 0x808080;
+  EX color_t dialogcolor_value = 0x80A040;
+  EX color_t dialogcolor_off = 0x40FF40;
+  EX color_t dialogcolor_on = 0xC04040;
+  EX color_t dialogcolor_big = 0xC06000;
+
+  /** pick the correct dialogcolor, based on whether mouse is over */
+  EX color_t dialogcolor_over(bool b) {
+    if(!b) return dialogcolor;
+    if(actonrelease) return dialogcolor_clicked;
+    return dialogcolor_selected;
+    }
 
   EX void addBack() {
     addItem(XLAT("go back"), 
@@ -186,21 +201,25 @@ EX namespace dialog {
     return "?";
     }
 
+  item::item(tDialogItem t) {
+    type = t;
+    color = dialogcolor;
+    colorc = dialogcolor_clicked;
+    colors = dialogcolor_selected;
+    colork = dialogcolor_key;
+    colorv = dialogcolor_value;
+    scale = 100;
+    }
+
   EX void addSlider(double d1, double d2, double d3, int key) {
-    item it;
-    it.type = diSlider;
-    it.color = dialogcolor;
-    it.scale = 100;
+    item it(diSlider);
     it.key = key;
     it.param = (d2-d1) / (d3-d1);
     items.push_back(it);
     }
   
   EX void addIntSlider(int d1, int d2, int d3, int key) {
-    item it;
-    it.type = diIntSlider;
-    it.color = dialogcolor;
-    it.scale = 100;
+    item it(diIntSlider);
     it.key = key;
     it.p1 = (d2-d1);
     it.p2 = (d3-d1);
@@ -208,19 +227,12 @@ EX namespace dialog {
     }
   
   EX void addSelItem(string body, string value, int key) {
-    item it;
-    it.type = diItem;
+    item it(diItem);
     it.body = body;
     it.value = value;
     it.key = key;
-    it.color = dialogcolor;
-    it.colork = 0x808080;
-    it.colorv = 0x80A040;
-    it.colorc = 0xFFD500;
-    it.colors = 0xFF8000;
-    if(value == ONOFF(true)) it.colorv = 0x40FF40;
-    if(value == ONOFF(false)) it.colorv = 0xC04040;
-    it.scale = 100;
+    if(value == ONOFF(true)) it.colorv = dialogcolor_off;
+    if(value == ONOFF(false)) it.colorv = dialogcolor_on;
     items.push_back(it);
     }
 
@@ -235,20 +247,14 @@ EX namespace dialog {
     }
 
   EX void addKeyboardItem(string keys) {
-    item it;
-    it.type = diKeyboard;
+    item it(diKeyboard);
     it.body = keys;
-    it.color = dialogcolor;
-    it.colors = 0xFF8000;
     it.scale = 150;
     items.push_back(it);
     }
 
   EX void addCustom(int size, reaction_t custom) {
-    item it;
-    it.type = diCustom;
-    it.color = dialogcolor;
-    it.colors = 0xFF8000;
+    item it(diCustom);
     it.scale = size;
     it.customfun = custom;
     items.push_back(it);
@@ -263,10 +269,8 @@ EX namespace dialog {
     }
 
   EX void addHelp(string body) {
-    item it;
-    it.type = diHelp;
+    item it(diHelp);
     it.body = body;
-    it.scale = 100;
 
     if(isize(body) >= 500) it.scale = 70;
 
@@ -274,50 +278,36 @@ EX namespace dialog {
     }
 
   EX void addInfo(string body, color_t color IS(dialogcolor)) {
-    item it;
-    it.type = diInfo;
+    item it(diInfo);
     it.body = body;
-    it.color = color;
-    it.scale = 100;
     items.push_back(it);
     }
 
   EX void addItem(string body, int key) {
-    item it;
-    it.type = diItem;
+    item it(diItem);
     it.body = body;
     it.key = key;
-    it.color = dialogcolor;
-    it.colork = 0x808080;
-    it.colors = 0xFFD500;
-    it.colorc = 0xFF8000;
-    it.scale = 100;
     items.push_back(it);
     }
 
   EX void addBigItem(string body, int key) {
-    item it;
-    it.type = diBigItem;
+    item it(diBigItem);
     it.body = body;
     it.key = key;
-    it.color = 0xC06000;
-    it.colors = 0xFFD500;
-    it.colorc = 0xFF8000;
+    it.color = dialogcolor_big;
     it.scale = 150;
     items.push_back(it);
     }
 
   EX int addBreak(int val) {
-    item it;
-    it.type = diBreak;
+    item it(diBreak);
     it.scale = val;
     items.push_back(it);
     return items.size()-1;
     }
   
   EX void start_list(int size_min, int size_max, int key_start IS(0)) {
-    item it;
-    it.type = diListStart;
+    item it(diListStart);
     it.key = key_start;
     it.scale = 0;
     it.param = size_min;
@@ -327,15 +317,13 @@ EX namespace dialog {
     }
 
   EX void end_list() {
-    item it;
-    it.type = diListEnd;
+    item it(diListEnd);
     it.scale = 0;
     items.push_back(it);
     }
 
   EX void addTitle(string body, color_t color, int scale) {
-    item it;
-    it.type = diTitle;
+    item it(diTitle);
     it.body = body;
     it.color = color;
     it.scale = scale;
@@ -813,7 +801,7 @@ EX namespace dialog {
             else if(c == 2) getcstat = SDLK_RIGHT;
             else getcstat = c;
             }
-          displayfr(xpos, mid, 2, dfsize * I.scale/100, s, in ? I.colors : I.color, 8);
+          displayfr(xpos, mid, 2, dfsize * I.scale/100, s, dialogcolor_over(in), 8);
           }
         }
       }
@@ -1016,9 +1004,7 @@ EX namespace dialog {
         }
       }
 
-    item it;
-    it.type = diSlider;
-    it.scale = 100;
+    item it(diSlider);
 
     for(int i=0; i<4; i++) {
       int y = vid.yres / 2 + (2-i) * vid.fsize * 2;
@@ -1030,7 +1016,7 @@ EX namespace dialog {
       it.param = part(color, i) / 255.;
       draw_slider(dcenter - dwidth / 4, dcenter + dwidth / 4, y, it);
 
-      color_t col = ((i==colorp) && !mousing) ? 0xFFD500 : dialogcolor;
+      color_t col = ((i==colorp) && !mousing) ? dialogcolor_selected : dialogcolor;
       string rgt; rgt += "RGBA" [in];
       displayColorButton(dcenter + dwidth/4 + vid.fsize, y, rgt, 0, 0, 0, col);
       if(mousey >= y - vid.fsize && mousey < y + vid.fsize)
