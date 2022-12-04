@@ -156,10 +156,11 @@ EX namespace dialog {
     }
 
   EX int list_size_min, list_size_max, list_fake_key;
+  EX const int first_list_fake_key = 10000;
 
   EX void init() {
     list_size_min = list_size_max = 0;
-    list_fake_key = 10000;
+    list_fake_key = first_list_fake_key;
     items.clear();
     key_actions.clear(); 
     keyhandler = dialog::handler;
