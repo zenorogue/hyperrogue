@@ -1256,7 +1256,7 @@ LAND( 0x606060, "Zebra", laZebra, ZERO, itZebra, RESERVED, "Everything in this L
   NATIVE((m == moOrangeDog) ? 2 : 0)
   REQ(GOLD(R30) ITEMS(itFeather, U10))
 
-LAND( 0xC08080, "Plane of Fire", laEFire, ZERO | LF_ELEMENTAL, itElemental, RESERVED, elemdesc)
+LAND( 0xFFA080, "Plane of Fire", laEFire, ZERO | LF_ELEMENTAL, itElemental, RESERVED, elemdesc)
   NATIVE(m == moFireElemental ? 2 : isNative(laElementalWall, m))
   REQAS(laElementalWall,)
 
