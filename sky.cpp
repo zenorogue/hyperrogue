@@ -219,7 +219,7 @@ void compute_skyvertices(const vector<sky_item>& sky) {
           for(int x=0; x<=prec; x++) for(int y=0; y<=prec; y++) if(x+y <= prec) {
             hyperpoint h = ctr * (prec-x-y) + vertices[j] * x + vertices[j1] * y;
             h = normalize(h);
-            color_t co = gradient(ccolor, gradient(vcolors[j], vcolors[j1], 0, y, x+y), prec, x+y, 0);
+            color_t co = gradient(ccolor, gradient(vcolors[j], vcolors[j1], 0, y, x+y), 0, x+y, prec);
             // co = (hrand(0x1000000)  << 8) | 0xFF;
             // co = minecolors[(x+2*y) % 7] << 8 | 0xFF;
             h = unshift(si.T) * orthogonal_move(h, cgi.SKY);
