@@ -577,7 +577,7 @@ EX hyperpoint model_location(shiftpoint h, bool& bad) {
     h.h = hmd_pre_for[2] * h.h;
     eModel md = pmodel_3d_version();
     apply_other_model(h, hscr, md);
-    bad = in_vr_sphere && get_side(hscr) == (sphereflipped() ? -1 : 1);
+    bad = in_vr_sphere && get_side(hscr) == (sphere_flipped ? -1 : 1);
   
     hscr[3] = 1;
     return hscr;

@@ -2184,7 +2184,7 @@ EX void quickqueue() {
 
 /* todo */
 ld xintval(const shiftpoint& h) {
-  if(sphereflipped()) return -h.h[2];
+  if(sphere_flipped) return -h.h[2];
   if(hyperbolic) return -h.h[2];
   return -intval(h.h, C0);
   }
@@ -2198,7 +2198,7 @@ int qp[PMAX], qp0[PMAX];
 
 color_t darken_color(color_t& color, bool outline) {
   int alpha = color & 255;
-  if(sphere && pmodel == mdDisk && pconf.alpha <= 1)
+  if(sphere && pmodel == mdDisk && pconf.alpha <= 0.99)
     return 0;
   else {
     if(outline && alpha < 255) 
@@ -2279,7 +2279,7 @@ EX void draw_backside() {
         ptd->draw();
     }
 
-  spherespecial = sphereflipped() ? 1 : -1;
+  spherespecial = sphere_flipped ? 1 : -1;
   reset_projection();
   
   if(pmodel == mdRotatedHyperboles) {

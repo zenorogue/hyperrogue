@@ -11,9 +11,11 @@ namespace hr {
 hyperpoint ghxy, ghgxy;
 shiftpoint ghpm = shiftless(C02);
 
-#if HDR
-inline bool sphereflipped() { return sphere && pconf.alpha > 1.1; }
-#endif
+EX ld flip_limit = 1.1;
+
+EX bool flip_sphere() { return sphere && pconf.alpha > flip_limit; }
+
+EX bool sphere_flipped;
 
 void ghcheck(hyperpoint &ret, const shiftpoint &H) {
   if(hypot_d(2, ret-ghxy) < hypot_d(2, ghgxy-ghxy)) {

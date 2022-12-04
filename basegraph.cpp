@@ -927,7 +927,7 @@ EX int rhypot(int a, int b) { return (int) sqrt(a*a - b*b); }
 EX ld realradius() {
   ld vradius = current_display->radius;
   if(sphere) {
-    if(sphereflipped()) 
+    if(flip_sphere())
       vradius /= sqrt(pconf.alpha*pconf.alpha - 1);
     else
       vradius = 1e12; // use the following

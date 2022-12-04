@@ -5030,7 +5030,8 @@ EX bool nonisotropic_weird_transforms;
 
 EX void make_actual_view() {
   sphereflip = Id;
-  if(sphereflipped()) sphereflip[LDIM][LDIM] = -1;
+  sphere_flipped = flip_sphere();
+  if(sphere_flipped) sphereflip[LDIM][LDIM] = -1;
   actual_view_transform = sphereflip;  
   if(vid.yshift && WDIM == 2) actual_view_transform = ypush(vid.yshift) * actual_view_transform;
   #if MAXMDIM >= 4
