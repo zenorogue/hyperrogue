@@ -197,7 +197,7 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, color_t color, int
   
   if(graphglyph(isMonster)) {
     initquickqueue();
-    poly_outline = bordcolor << 8;
+    poly_outline = OUTLINE_DEFAULT;
     if(isMonster) {
       eMonster m = eMonster(id - ittypes);
       double bsize = buttonsize * 2/3;
