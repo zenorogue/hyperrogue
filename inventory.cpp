@@ -539,6 +539,8 @@ EX namespace inv {
             if(!remaining[i]) icol = gradient(icol, 0, 0, .5, 1);
             bool gg = graphglyph(false);
             
+            bool b = hypot(mousex-px, mousey-py) < rad;
+
             if(!hiliteclick) {
               if(gg) {
                 initquickqueue();
@@ -557,12 +559,11 @@ EX namespace inv {
                 }
               else {
                 if(remaining[i] != 1 || !gg) {
-                  displayfr(px + rad/2, py + rad/2, 2, gg?rad:rad*3/2, remaining[i] <= 0 ? "X" : remaining[i] == 1 ? "o" : its(remaining[i]), dialog::dialogcolor, 8);
+                  displayfr(px + rad/2, py + rad/2, 2, gg?rad:rad*3/2, remaining[i] <= 0 ? "X" : remaining[i] == 1 ? "o" : its(remaining[i]), dialog::dialogcolor_over(b), 8);
                   }
                 }
               }
 
-            bool b = hypot(mousex-px, mousey-py) < rad;
             if(b) {
               getcstat = c, 
               which = o;
