@@ -2981,6 +2981,12 @@ auto hooksw = addHook(hooks_swapdim, 100, [] {
     
 }
 
+shiftmatrix at_missile_level(const shiftmatrix& T) {
+  if(WDIM == 3) return T;
+  if(GDIM == 3) return mscale(T, cgi.BODY);
+  return mmscale(T, 1.15);
+  }
+
 bool celldrawer::draw_shmup_monster() {
   using namespace shmup;
   #if CAP_SHAPES
@@ -3098,38 +3104,38 @@ bool celldrawer::draw_shmup_monster() {
         else
           col = (minf[m->get_parenttype()].color << 8) | 0xFF;
         if(getcs().charid >= 4) {
-          queuepoly(GDIM == 3 ? mscale(view, cgi.BODY) : mmscale(view, 1.15), cgi.shPHead, col);
+          queuepoly(at_missile_level(view), cgi.shPHead, col);
           ShadowV(view, cgi.shPHead);
           }
         else if(peace::on) {
-          queuepolyat(mmscale(view, 1.15), cgi.shDisk, col, PPR::MISSILE);
+          queuepolyat(at_missile_level(view), cgi.shDisk, col, PPR::MISSILE);
           ShadowV(view, cgi.shPHead);
           }
         else {
           shiftmatrix t = view * spin(curtime / 50.0);
-          queuepoly(WDIM == 3 ? t : GDIM == 3 ? mscale(t, cgi.BODY) : mmscale(t, 1.15), cgi.shKnife, col);
+          queuepoly(at_missile_level(t), cgi.shKnife, col);
           ShadowV(t, cgi.shKnife);
           }
         break;
         }
       case moArrowTrap: {
-        queuepoly(mmscale(view, 1.15), cgi.shTrapArrow, 0xFFFFFFFF);
+        queuepoly(at_missile_level(view), cgi.shTrapArrow, 0xFFFFFFFF);
         ShadowV(view, cgi.shTrapArrow);
         break;
         }
       case moTongue: {
-        queuepoly(mmscale(view, 1.15), cgi.shTongue, (minf[m->get_parenttype()].color << 8) | 0xFF);
+        queuepoly(at_missile_level(view), cgi.shTongue, (minf[m->get_parenttype()].color << 8) | 0xFF);
         ShadowV(view, cgi.shTongue);
         break;
         }
       case moFireball:  case moAirball: { // case moLightningBolt:
-        queuepoly(mmscale(view, 1.15), cgi.shPHead, (minf[m->type].color << 8) | 0xFF);
+        queuepoly(at_missile_level(view), cgi.shPHead, (minf[m->type].color << 8) | 0xFF);
         ShadowV(view, cgi.shPHead);
         break;
         }
       case moFlailBullet: case moCrushball: {
         shiftmatrix t = view * spin(curtime / 50.0);
-        queuepoly(mmscale(t, 1.15), cgi.shFlailMissile, (minf[m->type].color << 8) | 0xFF);
+        queuepoly(at_missile_level(t), cgi.shFlailMissile, (minf[m->type].color << 8) | 0xFF);
         ShadowV(view, cgi.shFlailMissile);
         break;        
         }
@@ -3139,7 +3145,7 @@ bool celldrawer::draw_shmup_monster() {
         if(WDIM == 3) t = face_the_player(t);
         t = t * spin(curtime / 500.0);
         ShadowV(t, cgi.shAsteroid[m->hitpoints & 7]);
-        if(WDIM == 2) t = mmscale(t, 1.15);
+        t = at_missile_level(t);
         color_t col = WDIM == 3 ? 0xFFFFFF : minf[m->type].color;
         col <<= 8;
         queuepoly(t, cgi.shAsteroid[m->hitpoints & 7], col | 0xFF);
