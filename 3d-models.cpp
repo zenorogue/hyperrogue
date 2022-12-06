@@ -96,11 +96,11 @@ void geometry_information::add_prism(ld z0, vector<hyperpoint> vh0, ld z1, vecto
   }
   
 void geometry_information::shift_last(ld z) {
-  for(int i=last->s; i<isize(hpc); i++) hpc[i] = zshift(hpc[i], z);
+  for(int i=last->s; i<isize(hpc); i++) hpc[i] = lzpush(z) * hpc[i];
   }
 
 void geometry_information::shift_shape(hpcshape& sh, ld z) {
-  for(int i=sh.s; i<sh.e; i++) hpc[i] = zshift(hpc[i], z);
+  for(int i=sh.s; i<sh.e; i++) hpc[i] = lzpush(z) * hpc[i];
   }
 
 void geometry_information::shift_shape_orthogonally(hpcshape& sh, ld z) {

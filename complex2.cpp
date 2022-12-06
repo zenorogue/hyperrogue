@@ -1356,7 +1356,7 @@ EX namespace dice {
         h = zpush(-z) * h;
         h[2] = h[3]; h[3] = 0;
         dynamicval<eGeometry> g(geometry, orig);
-        return zshift(h, geom3::scale_at_lev(z));
+        return orthogonal_move(h, z);
         };
 
       for(int d=0; d<=si; d++) {

@@ -1407,14 +1407,14 @@ EX namespace hybrid {
     ld lev = cgi.plevel * z / 2;
     if(WDIM == 2) {
       ld zz = lerp(cgi.FLOOR, cgi.WALL, (1+z) / 2);
-      hyperpoint h = zshift(get_corner_position(c, i+next), zz);
+      hyperpoint h = orthogonal_move(get_corner_position(c, i+next), zz);
       return h;
       }
     if(prod) {
       dynamicval<eGeometry> g(geometry, hybrid::underlying);
       dynamicval<geometry_information*> gc(cgip, hybrid::underlying_cgip);
       dynamicval<hrmap*> gm(currentmap, ((hrmap_hybrid*)currentmap)->underlying_map);
-      return mscale(get_corner_position(c, i+next), exp(lev));
+      return scale_point(get_corner_position(c, i+next), exp(lev));
       }
     else {
       #if MAXMDIM >= 4
@@ -1571,26 +1571,26 @@ EX namespace product {
   
   struct hrmap_product : hybrid::hrmap_hybrid {
     transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) override {
-      return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, hint); }) * mscale(Id, cgi.plevel * szgmod(where[c2].second - where[c1].second, hybrid::csteps));
+      return in_underlying([&] { return calc_relative_matrix(where[c2].first, where[c1].first, hint); }) * cpush(2, cgi.plevel * szgmod(where[c2].second - where[c1].second, hybrid::csteps));
       }
 
     transmatrix adj(cell *c, int i) override {
       if(twisted && i == c->type-1 && where[c].second == hybrid::csteps-1) {
         auto b = spins[where[c].first].first;
-        transmatrix T = mscale(Id, cgi.plevel);
+        transmatrix T = cpush(2, cgi.plevel);
         T = T * spin(TAU * b.spin / b.at->type);
         if(b.mirrored) T = T * Mirror;
         return T;
         }
       if(twisted && i == c->type-2 && where[c].second == 0) {
         auto b = spins[where[c].first].second;
-        transmatrix T = mscale(Id, -cgi.plevel);
+        transmatrix T = cpush(2, -cgi.plevel);
         T = T * spin(TAU * b.spin / b.at->type);
         if(b.mirrored) T = T * Mirror;
         return T;
         }
-      if(i == c->type-1) return mscale(Id, cgi.plevel);
-      else if(i == c->type-2) return mscale(Id, -cgi.plevel);
+      if(i == c->type-1) return cpush(2, cgi.plevel);
+      else if(i == c->type-2) return cpush(2, -cgi.plevel);
       c = where[c].first;
       return PIU(currentmap->adj(c, i));
       }
@@ -1620,8 +1620,8 @@ EX namespace product {
       }
 
     virtual transmatrix ray_iadj(cell *c, int i) override {
-      if(i == c->type-2) return (mscale(Id, +cgi.plevel));
-      if(i == c->type-1) return (mscale(Id, -cgi.plevel));
+      if(i == c->type-2) return (cpush(2, +cgi.plevel));
+      if(i == c->type-1) return (cpush(2, -cgi.plevel));
       transmatrix T;
       cell *cw = hybrid::get_where(c).first;
       hybrid::in_underlying_geometry([&] {
@@ -1638,7 +1638,7 @@ EX namespace product {
   EX hyperpoint inverse_exp(hyperpoint h) {
     hyperpoint res;
     res[2] = zlevel(h);
-    h = zshift(h, -res[2]);
+    h = orthogonal_move(h, -res[2]);
     ld r = hypot_d(2, h);
     if(hybrid::under_class() == gcEuclid) {
       res[0] = h[0];
@@ -1664,7 +1664,7 @@ EX namespace product {
     res[0] = h[0] * cd;
     res[1] = h[1] * cd;
     res[2] = cos_auto(d);
-    return zshift(res, h[2]);
+    return orthogonal_move(res, h[2]);
     }
 
   EX bool validate_spin() {

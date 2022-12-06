@@ -3092,7 +3092,8 @@ EX namespace mapeditor {
         hpcshape& sh(cgi.ushr[&ds]);
     
         if(sh.s != sh.e) {
-          auto& last = queuepolyat(mmscale(V, GDIM == 3 ? 0 : geom3::lev_to_factor(ds.zlevel)), sh, ds.color ? ds.color : color, prio);
+          shiftmatrix V1 = GDIM == 3 ? V : orthogonal_move(V, ds.zlevel);
+          auto& last = queuepolyat(V1, sh, ds.color ? ds.color : color, prio);
           if(GDIM == 3) {
             last.tinf = &user_triangles_texture;
             last.offset_texture = ds.texture_offset;

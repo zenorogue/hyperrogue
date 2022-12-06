@@ -509,6 +509,7 @@ EX hyperpoint closest_to_zero(hyperpoint a, hyperpoint b) {
   return (mul_b * a + mul_a * b) / (mul_a + mul_b);
   }
 
+/** should be called get_lof */
 EX ld zlevel(const hyperpoint &h) {
   if(sl2) return sqrt(-intval(h, Hypc));
   else if(translatable) return h[LDIM];
@@ -559,7 +560,7 @@ EX hyperpoint mid(const hyperpoint& H1, const hyperpoint& H2) {
   if(prod) {
     auto d1 = product_decompose(H1);
     auto d2 = product_decompose(H2);
-    return zshift(PIU( mid(d1.second, d2.second) ), (d1.first + d2.first) / 2);
+    return orthogonal_move(PIU( mid(d1.second, d2.second) ), (d1.first + d2.first) / 2);
     }
   return normalize(H1 + H2);
   }
@@ -690,15 +691,19 @@ EX transmatrix euaffine(hyperpoint h) {
   }
 
 EX transmatrix cpush(int cid, ld alpha) {
-  transmatrix T = Id;
   if(prod && cid == 2)
-    return mscale(Id, alpha);
+    return scale_matrix(Id, exp(alpha));
+  transmatrix T = Id;
   if(nonisotropic) 
     return eupush3(cid == 0 ? alpha : 0, cid == 1 ? alpha : 0, cid == 2 ? alpha : 0);
   T[LDIM][LDIM] = T[cid][cid] = cos_auto(alpha);
   T[cid][LDIM] = sin_auto(alpha);
   T[LDIM][cid] = -curvature() * sin_auto(alpha);
   return T;
+  }
+
+EX transmatrix lzpush(ld z) {
+  return cpush(2, z);
   }
 
 EX transmatrix cmirror(int cid) {
@@ -719,9 +724,10 @@ EX bool eqmatrix(transmatrix A, transmatrix B, ld eps IS(.01)) {
   }
 
 #if MAXMDIM >= 4
-// in the 3D space, move the point h orthogonally to the (x,y) plane by z units
+/** in the 3D space, move the point h orthogonally to the (x,y) plane by z units */
 EX hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
-  if(prod) return zshift(h, z);
+  if(GDIM == 2) return scale_point(h, geom3::scale_at_lev(z));
+  if(prod) return scale_point(h, exp(z));
   if(sl2) return slr::translate(h) * cpush0(2, z);
   if(!hyperbolic) return rgpushxto0(h) * cpush(2, z) * C0;
   if(nil) return nisot::translate(h) * cpush0(2, z);
@@ -911,7 +917,7 @@ EX transmatrix ggpushxto0(const hyperpoint& H, ld co) {
     return eupush(H, co);
   if(prod) {
     auto d = product_decompose(H);
-    return mscale(PIU(ggpushxto0(d.second, co)), d.first * co);
+    return scale_matrix(PIU(ggpushxto0(d.second, co)), exp(d.first * co));
     }
   transmatrix res = Id;
   if(sqhypot_d(GDIM, H) < 1e-16) return res;
@@ -954,9 +960,9 @@ EX void fixmatrix(transmatrix& T) {
   else if(cgflags & qAFFINE) ; // affine
   else if(prod) {
     auto z = zlevel(tC0(T));
-    T = mscale(T, -z);
+    T = scale_matrix(T, exp(-z));
     PIU(fixmatrix(T));
-    T = mscale(T, +z);
+    T = scale_matrix(T, exp(+z));
     }
   else if(euclid)
     fixmatrix_euclid(T);
@@ -1164,7 +1170,7 @@ EX transmatrix iview_inverse(transmatrix T) {
 
 EX pair<ld, hyperpoint> product_decompose(hyperpoint h) {
   ld z = zlevel(h);
-  return make_pair(z, mscale(h, -z));
+  return make_pair(z, scale_point(h, exp(-z)));
   }
 
 /** distance from mh and 0 */
@@ -1247,37 +1253,59 @@ EX ld hdist(const shiftpoint& h1, const shiftpoint& h2) {
   return hdist(h1.h, unshift(h2, h1.shift));
   }
 
-EX hyperpoint mscale(const hyperpoint& t, double fac) {
-  if(GDIM == 3 && !prod) return cpush(2, fac) * t;
-  if(prod) fac = exp(fac);
-  hyperpoint res;
-  for(int i=0; i<MXDIM; i++) 
-    res[i] = t[i] * fac;
-  return res;
+/** like orthogonal_move but fol may be factor (in 2D graphics) or level (elsewhere) */
+EX hyperpoint orthogonal_move_fol(const hyperpoint& h, double fol) {
+  if(GDIM == 2) return scale_point(h, fol);
+  else return orthogonal_move(h, fol);
   }
 
-EX shiftpoint mscale(const shiftpoint& t, double fac) {
-  return shiftless(mscale(t.h, fac), t.shift);
+/** like orthogonal_move but fol may be factor (in 2D graphics) or level (elsewhere) */
+EX transmatrix orthogonal_move_fol(const transmatrix& T, double fol) {
+  if(GDIM == 2) return scale_matrix(T, fol);
+  else return orthogonal_move(T, fol);
   }
 
-EX transmatrix mscale(const transmatrix& t, double fac) {
-  if(GDIM == 3 && !prod) {
-    // if(pmodel == mdFlatten) { transmatrix u = t; u[2][LDIM] -= fac; return u; }
-    return t * cpush(2, fac);
-    }
-  if(prod) fac = exp(fac);
+/** like orthogonal_move but fol may be factor (in 2D graphics) or level (elsewhere) */
+EX shiftmatrix orthogonal_move_fol(const shiftmatrix& T, double fol) {
+  if(GDIM == 2) return scale_matrix(T, fol);
+  else return orthogonal_move(T, fol);
+  }
+
+/** the scaling matrix (Euclidean homogeneous scaling; also shift by log(scale) in product space */
+EX transmatrix scale_matrix(const transmatrix& t, ld scale_factor) {
   transmatrix res;
   for(int i=0; i<MXDIM; i++) {
     for(int j=0; j<MDIM; j++)
-      res[i][j] = t[i][j] * fac;
+      res[i][j] = t[i][j] * scale_factor;
     for(int j=MDIM; j<MXDIM; j++)
       res[i][j] = t[i][j];
     }
   return res;
   }
 
-EX shiftmatrix mscale(const shiftmatrix& t, double fac) {
-  return shiftless(mscale(t.T, fac), t.shift);
+/** the scaling matrix (Euclidean homogeneous scaling; also shift by log(scale) in product space */
+EX shiftmatrix scale_matrix(const shiftmatrix& t, ld scale_factor) {
+  return shiftless(scale_matrix(t.T, scale_factor), t.shift);
+  }
+
+/** the scaling matrix (Euclidean homogeneous scaling; also shift by log(scale) in product space */
+EX hyperpoint scale_point(const hyperpoint& h, ld scale_factor) {
+  hyperpoint res;
+  for(int j=0; j<MDIM; j++)
+    res[j] = h[j] * scale_factor;
+  for(int j=MDIM; j<MXDIM; j++)
+    res[j] = h[j];
+  return res;
+  }
+
+EX transmatrix orthogonal_move(const transmatrix& t, double level) {
+  if(prod) return scale_matrix(t, exp(level));
+  if(GDIM == 3) return t * cpush(2, level);
+  return scale_matrix(t, geom3::lev_to_factor(level));
+  }
+
+EX shiftmatrix orthogonal_move(const shiftmatrix& t, double level) {
+  return shiftless(orthogonal_move(t.T, level), t.shift);
   }
 
 EX transmatrix xyscale(const transmatrix& t, double fac) {
@@ -1352,13 +1380,6 @@ EX hyperpoint orthogonal_of_C0(hyperpoint h0, hyperpoint h1, hyperpoint h2) {
   ld a2 = (d1|w) * (d1|d2) - (d2|w) * (d1|d1);
   hyperpoint h = w * denom + d1 * a1 + d2 * a2;
   return normalize(h);
-  }
-
-EX hyperpoint zshift(hyperpoint x, ld z) {
-  if(GDIM == 3 && WDIM == 2) return rgpushxto0(x) * cpush0(2, z);
-  else if(sl2) return mscale(x, z);
-  else if(prod) return mscale(x, z);
-  else return mscale(x, z);
   }
 
 EX hyperpoint hpxd(ld d, ld x, ld y, ld z) {

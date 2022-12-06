@@ -678,8 +678,6 @@ static const int MAXPLAYER = 7;
 // just in case if I change my mind about when Orbs lose their power
 #define ORBBASE 0
 
-#define mmscale(V, x) (mmspatial ? (ivoryz ? mzscale(V,x) : mscale(V, x)) : (V))
-
 #define SHADOW_WALL 0x60
 #define SHADOW_SL   0x18
 #define SHADOW_MON  0x30

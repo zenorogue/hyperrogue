@@ -90,11 +90,11 @@ void geometry_information::hpcpush(hyperpoint h) {
     }
   }
 
-void geometry_information::chasmifyPoly(double fac, double fac2, int k) {
+void geometry_information::chasmifyPoly(double fol, double fol2, int k) {
   if(GDIM == 2) {
      for(int i=isize(hpc)-1; i >= last->s; i--) {
-       hpc.push_back(mscale(hpc[i], fac));
-       hpc[i] = mscale(hpc[i], fac2);
+       hpc.push_back(orthogonal_move_fol(hpc[i], fol));
+       hpc[i] = orthogonal_move_fol(hpc[i], fol2);
        }
      hpc.push_back(hpc[last->s]);
      last->flags |= POLY_ISSIDE;
@@ -111,7 +111,7 @@ void geometry_information::chasmifyPoly(double fac, double fac2, int k) {
       int zf = int(x);
       if(zf == isize(points)-1) zf--;
       x -= zf;
-      hpcpush(zshift(normalize(points[zf] + (points[zf+1] - points[zf]) * x), fac + (fac2-fac) * y));
+      hpcpush(orthogonal_move(normalize(points[zf] + (points[zf+1] - points[zf]) * x), fol + (fol2-fol) * y));
       };
     texture_order([&] (ld x, ld y) { at((1-x+y)/2, (1-x-y)/2); });
     texture_order([&] (ld x, ld y) { at((1-x-y)/2, (1+x-y)/2); });
@@ -958,8 +958,8 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
         h = nilv::on_geodesic(center, nilv::on_geodesic(v1+center, v2+center, y / (x+y)), x + y);
       if(prod) {
         if(bt::in()) h = PIU( parabolic13(h) );
-        h = zshift(normalize_flat(h), center_altitude * (1-x-y) + altitudes[a] * x + altitudes[b] * y);
-        hpcpush(h); return; 
+        h = orthogonal_move(normalize_flat(h), center_altitude * (1-x-y) + altitudes[a] * x + altitudes[b] * y);
+        hpcpush(h); return;
         }
       hpcpush(final_coords(h));
       });
@@ -973,7 +973,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       hyperpoint h = (vertices[a] * (STEP-y) + vertices[(a+1)%n] * y)/STEP;
       if(prod) { 
         if(bt::in()) h = PIU( parabolic13(h) );
-        h = zshift(normalize_flat(h), (altitudes[a] * (STEP-y) + altitudes[(a+1)%n] * y) / STEP);
+        h = orthogonal_move(normalize_flat(h), (altitudes[a] * (STEP-y) + altitudes[(a+1)%n] * y) / STEP);
         hpcpush(h);
         }
       else if(nil)

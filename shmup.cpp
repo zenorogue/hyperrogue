@@ -2983,8 +2983,8 @@ auto hooksw = addHook(hooks_swapdim, 100, [] {
 
 shiftmatrix at_missile_level(const shiftmatrix& T) {
   if(WDIM == 3) return T;
-  if(GDIM == 3) return mscale(T, cgi.BODY);
-  return mmscale(T, 1.15);
+  if(GDIM == 3) return orthogonal_move(T, cgi.BODY);
+  return at_smart_lof(T, 1.15);
   }
 
 bool celldrawer::draw_shmup_monster() {
@@ -3030,8 +3030,8 @@ bool celldrawer::draw_shmup_monster() {
         queuepoly(Vboat, cgi.shBoatInner, incolor);
         }
       if(WDIM == 3) {
-        queuepoly(mscale(Vboat, cgi.scalefactor/2), cgi.shBoatOuter, outcolor);
-        queuepoly(mscale(Vboat, cgi.scalefactor/2-0.01), cgi.shBoatInner, incolor);
+        queuepoly(scale_matrix(Vboat, cgi.scalefactor/2), cgi.shBoatOuter, outcolor);
+        queuepoly(scale_matrix(Vboat, cgi.scalefactor/2-0.01), cgi.shBoatInner, incolor);
         }
       }
 

@@ -379,9 +379,9 @@ void virtualRebase(cell*& base, T& at, const U& check) {
       base = base->cmove(base->type-2); d += cgi.plevel;
       }
     auto w = hybrid::get_where(base);
-    at = mscale(at, -d);
+    at = orthogonal_move(at, -d);
     PIU( virtualRebase(w.first, at, check) );
-    at = mscale(at, +d);
+    at = orthogonal_move(at, +d);
     base = hybrid::get_at(w.first, w.second);
     return;
     }

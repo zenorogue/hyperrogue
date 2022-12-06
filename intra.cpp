@@ -1053,7 +1053,7 @@ EX void handle() {
       hyperpoint h = product_decompose(fac.h0).second;
       h = PIU( deparabolic13(h) );
       dep[0] = h[0];
-      return zshift(PIU(parabolic13(dep)), dec.first);
+      return orthogonal_move(PIU(parabolic13(dep)), dec.first);
       }
     #else
     if(false) {}
