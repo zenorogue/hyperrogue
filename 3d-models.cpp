@@ -692,9 +692,10 @@ void geometry_information::make_star(hpcshape& sh, ld rad) {
     ld r1 = sqrt(1 - z1*z1) * rad;
     z0 *= rad;
     z1 *= rad;
-    for(int b=0; b<360; b+=(BADMODEL?60:15)) {
+    int step = BADMODEL ? 60 : 15;
+    for(int b=0; b<360; b+=step) {
       ld b0 = b * degree;
-      ld b1 = (b+15) * degree;
+      ld b1 = (b+step) * degree;
       hpcsquare(
         hpxy3(r0 * cos(b0), r0 * sin(b0), z0), hpxy3(r0 * cos(b1), r0 * sin(b1), z0), 
         hpxy3(r1 * cos(b0), r1 * sin(b0), z1), hpxy3(r1 * cos(b1), r1 * sin(b1), z1)
