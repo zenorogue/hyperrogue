@@ -596,6 +596,7 @@ void geometry_information::make_revolution_cut(hpcshape &sh, int each, ld push, 
   }
 
 void geometry_information::clone_shape(hpcshape& sh, hpcshape& target) {
+  finishshape();
   target = sh;
   target.s = isize(hpc);
   for(int i=sh.s; i<sh.e; i++) hpc.push_back(hpc[i]);
