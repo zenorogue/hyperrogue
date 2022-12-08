@@ -425,7 +425,12 @@ void archimedean_tiling::compute_geometry() {
   set_flag(ginf[gArchimedean].flags, qCLOSED, get_class() == gcSphere);
   
   if(geom3::ginf_backup.size()) {
-    geom3::ginf_backup[gArchimedean].g = geom3::ginf_backup[gSphere].g;
+    if(get_geometry().kind == gcSphere)
+      geom3::ginf_backup[gArchimedean].g = geom3::ginf_backup[gSphere].g;
+    if(get_geometry().kind == gcEuclid)
+      geom3::ginf_backup[gArchimedean].g = geom3::ginf_backup[gNormal].g;
+    if(get_geometry().kind == gcHyperbolic)
+      geom3::ginf_backup[gArchimedean].g = geom3::ginf_backup[gEuclid].g;
     if(geom3::flipped) swap(geom3::ginf_backup[gArchimedean].g, ginf[gArchimedean].g);
     set_flag(ginf[gArchimedean].flags, qCLOSED, get_class() == gcSphere);
     }
