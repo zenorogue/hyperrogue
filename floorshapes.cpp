@@ -789,17 +789,19 @@ void geometry_information::generate_floorshapes() {
   cell model;
   model.master = &modelh;
   modelh.c7 = &model;
-  model.type = modelh.type = S7;
+  model.type = modelh.type = FULL_EDGE;
   
   auto mmerge1 = [&] (int i, int j) { model.c.setspin(i, j, false); modelh.c.setspin(i, j, false); };  
   auto mmerge = [&] (int i, int j) { mmerge1(i, j); mmerge1(j, i); };  
 
-  for(int i=0; i<S7; i++) {
+  for(int i=0; i<FULL_EDGE; i++) {
     model.move(i) = &model;
     modelh.move(i) = &modelh;
     model.c.setspin(i, i, false);
     modelh.c.setspin(i, i, false);
     }
+
+  model.type = modelh.type = S7;
 
   if(WDIM == 3) ;
   
