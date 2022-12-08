@@ -1257,6 +1257,11 @@ EX void switch_always3() {
         vid.wall_height *= -1;
         vid.eye = 2 * vid.depth;
         }
+      if(msphere && spatial_embedding == seProduct) {
+        vid.depth = 0;
+        vid.wall_height = 2;
+        vid.eye = -2;
+        }
       if(pmodel == mdDisk) pmodel = mdPerspective;
       swapmatrix(View);
       swapmatrix(current_display->which_copy);
