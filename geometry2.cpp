@@ -100,7 +100,7 @@ transmatrix hrmap_standard::adj(heptagon *h, int d) {
     int t0 = h->type;
     int t1 = h->cmove(d)->type;
     int sp = h->c.spin(d);
-    return spin(-d * TAU / t0) * xpush(spacedist(h->c7, d)) * spin(M_PI + TAU * sp / t1);
+    return spin(-d * TAU / t0) * lxpush(spacedist(h->c7, d)) * spin(M_PI + TAU * sp / t1);
     }
   transmatrix T = cgi.heptmove[d];
   if(h->c.mirror(d)) T = T * Mirror;
@@ -235,10 +235,10 @@ void horo_distance::become(hyperpoint h1) {
     a = abs(bt::horo_level(h1));
     }
   #endif
-  else if(hybri)
+  else if(mhybrid)
     a = 0, b = hdist(h1, C0);
   else
-    a = 0, b = intval(h1, C0);
+    a = 0, b = intval(h1, tile_center());
   }
 
 horo_distance::horo_distance(shiftpoint h1, const shiftmatrix& T) {
@@ -246,7 +246,7 @@ horo_distance::horo_distance(shiftpoint h1, const shiftmatrix& T) {
   if(bt::in()) become(inverse_shift(T, h1));
   else
 #endif
-  if(sn::in() || hybri || nil) become(inverse_shift(T, h1));
+  if(sn::in() || mhybrid || nil) become(inverse_shift(T, h1));
   else
     a = 0, b = intval(h1.h, unshift(tC0(T), h1.shift));
   }
@@ -368,7 +368,7 @@ void virtualRebase(cell*& base, T& at, const U& check) {
     }
   /* todo variants of sol */
 
-  if(prod) {
+  if(mproduct) {
     auto d = product_decompose(check(at)).first;
     while(d > cgi.plevel / 2)  { 
       at = currentmap->iadj(base, base->type-1) * at; 
@@ -530,7 +530,7 @@ transmatrix hrmap_standard::adj(cell *c, int i) {
     return calc_relative_matrix(c->cmove(i), c, C0);
     }
   double d = cellgfxdist(c, i);
-  transmatrix T = ddspin(c, i) * xpush(d);
+  transmatrix T = ddspin(c, i) * lxpush(d);
   if(c->c.mirror(i)) T = T * Mirror;
   cell *c1 = c->cmove(i);
   T = T * iddspin(c1, c->c.spin(i), M_PI);
@@ -574,15 +574,15 @@ hyperpoint hrmap_standard::get_corner(cell *c, int cid, ld cf) {
     }
   #endif
   if(PURE) {
-    return ddspin(c,cid,M_PI/S7) * xpush0(cgi.hcrossf * 3 / cf);
+    return ddspin(c,cid,M_PI/S7) * lxpush0(cgi.hcrossf * 3 / cf);
     }
   if(BITRUNCATED) {
     if(!ishept(c))
-      return ddspin(c,cid,M_PI/S6) * xpush0(cgi.hexvdist * 3 / cf);
+      return ddspin(c,cid,M_PI/S6) * lxpush0(cgi.hexvdist * 3 / cf);
     else
-      return ddspin(c,cid,M_PI/S7) * xpush0(cgi.rhexf * 3 / cf);
+      return ddspin(c,cid,M_PI/S7) * lxpush0(cgi.rhexf * 3 / cf);
     }
-  return C0;
+  return tile_center();
   }
 
 EX bool approx_nearcorner = false;
@@ -679,7 +679,7 @@ EX hyperpoint nearcorner(cell *c, int i) {
     }
   #endif
   double d = cellgfxdist(c, i);
-  return ddspin(c, i) * xpush0(d);
+  return ddspin(c, i) * lxpush0(d);
   }
 
 /** /brief get the coordinates of the another vertex of c->move(i)
@@ -728,7 +728,7 @@ EX hyperpoint farcorner(cell *c, int i, int which) {
       int id = arcm::id_of(c->master);
       auto id1 = ac.get_adj(ac.get_adj(c->master, i-1), -2).first;
       int n1 = isize(ac.adjacent[id1]);
-      return spin(-t.first - M_PI / c->type) * xpush(ac.inradius[id/2] + ac.inradius[id1/2]) * xspinpush0(M_PI + M_PI/n1*(which?3:-3), ac.circumradius[id1/2]);
+      return spin(-t.first - M_PI / c->type) * lxpush(ac.inradius[id/2] + ac.inradius[id1/2]) * xspinpush0(M_PI + M_PI/n1*(which?3:-3), ac.circumradius[id1/2]);
       }
     if(BITRUNCATED || DUAL) {
       int mul = DUALMUL;
@@ -742,7 +742,7 @@ EX hyperpoint farcorner(cell *c, int i, int which) {
     
       auto& t2 = arcm::current.get_triangle(adj);
       
-      return spin(-t1.first) * xpush(t1.second) * spin(M_PI + t2.first) * get_corner_position(&cx, which ? -mul : 2*mul);
+      return spin(-t1.first) * lxpush(t1.second) * spin(M_PI + t2.first) * get_corner_position(&cx, which ? -mul : 2*mul);
       }
     }
   #endif
@@ -768,7 +768,7 @@ EX hyperpoint get_warp_corner(cell *c, int cid) {
   #if CAP_IRR || CAP_ARCM
   if(IRREGULAR || arcm::in()) return midcorner(c, cid, .5);
   #endif
-  return ddspin(c,cid,M_PI/S7) * xpush0(cgi.tessf/2);
+  return ddspin(c,cid,M_PI/S7) * lxpush0(cgi.tessf/2);
   }
 
 EX map<cell*, map<cell*, vector<transmatrix>>> brm_structure;
@@ -899,7 +899,7 @@ EX pathgen generate_random_path(cellwalker start, int length, bool for_yendor, b
     p.last = p.path.back();
     }
 
-  else if(hybri) {
+  else if(mhybrid) {
     /* I am lazy */
     for(int i=1; i<=length; i++) p.path[i] = p.path[i-1]->cmove(p.path[i-1]->type-1);
     p.last = p.path.back();

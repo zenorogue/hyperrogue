@@ -1569,7 +1569,7 @@ EX void show() {
   if(among(pmodel, mdJoukowsky, mdJoukowskyInverted)) {
     animator(XLAT("Möbius transformations"), skiprope_rotation, 'S');
     }
-  if(!prod) {
+  if(!mproduct) {
     dialog::addBoolItem(XLAT("circle"), ma == maCircle, '4');
     dialog::add_action([] () { ma = maCircle; 
       rotation_center = centerover;

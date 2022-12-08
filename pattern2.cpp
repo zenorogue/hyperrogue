@@ -28,7 +28,7 @@ EX int ctof(cell *c) {
   if(IRREGULAR) return irr::ctof(c);
   #endif
   if(PURE) return 1;
-  // if(euclid) return 0;
+  // if(meuclid) return 0;
   if(!c) return 1;
   if(bt::in()) return c->type == 7;
   return ishept(c) ? 1 : 0;
@@ -68,7 +68,7 @@ EX bool ishept(cell *c) {
   if(cgflags & qPORTALSPACE) return 0;
   // EUCLIDEAN
   if(euc::in() && PURE) return eupattern(c) == 0;
-  else if(hybri) { cell *c1 = hybrid::get_where(c).first; return c1 == c1->master->c7; }
+  else if(mhybrid) { cell *c1 = hybrid::get_where(c).first; return c1 == c1->master->c7; }
   else return c == c->master->c7;
   }
 
@@ -131,8 +131,8 @@ EX int chessvalue(cell *c) {
 EX int emeraldval(heptagon *h) { return h->emeraldval >> 3; }
 
 EX int emeraldval(cell *c) {
-  if(euclid) return eupattern(c);
-  if(sphere) return 0;
+  if(meuclid) return eupattern(c);
+  if(msphere) return 0;
   if(ctof(c))
     return emeraldval(c->master);
   else {
@@ -166,8 +166,8 @@ int eufifty(cell *c) {
   }
 
 int fiftyval(cell *c) {
-  if(euclid) return eufifty(c) * 32;
-  if(sphere || S7>7 || S6>6) return 0;
+  if(meuclid) return eufifty(c) * 32;
+  if(msphere || S7>7 || S6>6) return 0;
   if(ctof(c))
     return c->master->fiftyval;
   else {
@@ -180,13 +180,13 @@ int fiftyval(cell *c) {
   }
 
 EX int cdist50(cell *c) {
-  if(euclid && S3 == 4) {
+  if(meuclid && S3 == 4) {
     auto co = euc2_coordinates(c);
     int x = co.first, y = co.second;
     return abs(szgmod(x, 5)) + abs(zgmod(y, 5));
     }
-  if(sphere || S7>7 || S6>6) return 0;
-  if(euclid) {
+  if(msphere || S7>7 || S6>6) return 0;
+  if(meuclid) {
     if(c->land == laWildWest) 
       return "0123333332112332223322233211233333322"[eufifty(c)] - '0';
     else return "012333321112322232222321123"[eufifty(c)] - '0';
@@ -201,7 +201,7 @@ EX int cdist50(cell *c) {
   }
 
 int land50(cell *c) {
-  if(sphere || euclid) return 0;
+  if(msphere || meuclid) return 0;
   else if(ctof(c)) return land50(fiftyval(c));
   else {
     auto ar = gp::get_masters(c);
@@ -212,7 +212,7 @@ int land50(cell *c) {
   }
 
 EX bool polara50(cell *c) {
-  if(sphere || euclid || S7>7 || S6>6) return false;
+  if(msphere || meuclid || S7>7 || S6>6) return false;
   else if(NONSTDVAR) return polara50(fiftyval(c->master->c7));
   else if(ctof(c)) return polara50(fiftyval(c));
   else {
@@ -224,8 +224,8 @@ EX bool polara50(cell *c) {
   }
 
 EX bool polarb50(cell *c) {
-  if(euclid) return true;
-  if(sphere || euclid || S7>7 || S6>6) return true;
+  if(meuclid) return true;
+  if(msphere || meuclid || S7>7 || S6>6) return true;
   else if(NONSTDVAR) return polarb50(fiftyval(c->master->c7));
   else if(ctof(c)) return polarb50(fiftyval(c));
   else {
@@ -257,9 +257,9 @@ EX int fiftyval049(heptagon *h) {
   }
 
 EX int fiftyval049(cell *c) {
-  if(euclid) return fiftyval(c) / 32;
+  if(meuclid) return fiftyval(c) / 32;
   else if(ctof(c)) return fiftyval049(c->master);
-  else if(sphere) return 0;
+  else if(msphere) return 0;
   else {
     int a[3], qa=0;
     bool pa = polara50(c);
@@ -332,7 +332,7 @@ int dir_bitrunc457(cell *c) {
 int val46(cell *c);
 
 EX int zebra40(cell *c) {
-  if(euclid) return pattern_threecolor(c);
+  if(meuclid) return pattern_threecolor(c);
   else if(IRREGULAR) return c->master->zebraval/10;
   else if(INVERSE) {
     cell *c1 = gp::get_mapped(c);
@@ -367,7 +367,7 @@ EX int zebra40(cell *c) {
     if(tot == 4+5+6+7) return 17+cod;
     return 24;
     }
-  else if(sphere) return 0;
+  else if(msphere) return 0;
   else if(S3 == 4 && S7 == 6) {
     return 8 + ((c->master->zebraval / 10 + c->c.spin(0))%2) * 2;
     }
@@ -394,9 +394,9 @@ EX int zebra40(cell *c) {
   }
 
 EX int zebra3(cell *c) {
-  if(euclid) return 0;
+  if(meuclid) return 0;
   else if(ctof(c)) return (c->master->zebraval/10)/4;
-  else if(euclid || sphere || S7>7 || S6>6) return 0;
+  else if(meuclid || msphere || S7>7 || S6>6) return 0;
   else { 
     int ii[3];
     auto ar = gp::get_masters(c);
@@ -424,11 +424,11 @@ EX int fieldval_uniq(cell *c) {
   if(experimental) return 0;
   if(reg3::in() && !PURE) return 0;
   else if(arb::in()) return arb::id_of(c->master);
-  else if(hybri) { 
+  else if(mhybrid) {
     auto c1 = hybrid::get_where(c).first; 
     return PIU ( fieldval_uniq(c1) );
     }
-  else if(sphere) {
+  else if(msphere) {
     if(arcm::in()) return c->master->fiftyval;
     #if CAP_IRR
     else if(IRREGULAR) return irr::cellindex[c];
@@ -463,11 +463,11 @@ EX int fieldval_uniq(cell *c) {
   }
 
 EX int fieldval_uniq_rand(cell *c, int randval) {
-  if(hybri) { 
+  if(mhybrid) {
     auto c1 = hybrid::get_where(c).first; 
     return PIU ( fieldval_uniq_rand(c1, randval) );
     }
-  if(sphere || euclid || NONSTDVAR) 
+  if(msphere || meuclid || NONSTDVAR)
     // we do not care in these cases
     return fieldval_uniq(c);
   if(ctof(c)) return currfp.gmul(c->master->fieldval, randval)/7;
@@ -539,9 +539,9 @@ EX int getHemisphere(heptagon *h, int which) {
   }
 
 EX int getHemisphere(cell *c, int which) {
-  if(euclid && quotient) return 0;
-  if(hybri) { auto d = hybrid::get_where(c); return PIU(getHemisphere(d.first, which)); }
-  if(WDIM == 3 && !hybri) {
+  if(meuclid && quotient) return 0;
+  if(mhybrid) { auto d = hybrid::get_where(c); return PIU(getHemisphere(d.first, which)); }
+  if(WDIM == 3 && !mhybrid) {
     hyperpoint p = tC0(calc_relative_matrix(c, currentmap->gamestart(), C0));
     return int(p[which] * 6  + 10.5) - 10;
     }
@@ -991,9 +991,9 @@ EX namespace patterns {
         if(subpattern_flags & SPF_FULLSYM) 
           si.symmetries = 1;
         }      
-      if(sphere && BITRUNCATED && !(S7 == 3))
+      if(msphere && BITRUNCATED && !(S7 == 3))
         si.symmetries = ctof(c) ? 1 : 2;
-      if(sphere && (sub & SPF_EXTRASYM)) {
+      if(msphere && (sub & SPF_EXTRASYM)) {
         si.symmetries = ctof(c) ? 1 : 2;
         }
       if(a38)
@@ -1154,7 +1154,7 @@ EX namespace patterns {
     
     else if(pat == PAT_EMERALD && (stdhyperbolic || a38)) {
       si.id = emeraldval(c); // 44 to 99
-      if(!euclid) {
+      if(!meuclid) {
         int tcdir = 0, tbest = (si.id&3);
         for(int i=0; i<c->type; i++) {
           cell *c2 = c->move(i);
@@ -1208,7 +1208,7 @@ EX namespace patterns {
         si.id -= ((si.id/4-1) % 7) * 4; 
       }
     
-    else if(pat == PAT_PALACE && euclid) {
+    else if(pat == PAT_PALACE && meuclid) {
       si.id = fiftyval049(c);
       si.symmetries = 6;
       }
@@ -1225,7 +1225,7 @@ EX namespace patterns {
     
     #if CAP_FIELD
     else if(pat == PAT_FIELD) {
-      if(euclid)
+      if(meuclid)
         // use the torus ID
         si.id = fieldpattern::fieldval_uniq(c);
       else if(PURE && standard_tiling())
@@ -1238,7 +1238,7 @@ EX namespace patterns {
       }
     #endif
     
-    else if(sphere && pat == PAT_SIBLING) {
+    else if(msphere && pat == PAT_SIBLING) {
       val_all(c, si, sub, pat);
       }
 
@@ -1252,7 +1252,7 @@ EX namespace patterns {
       else val_threecolors(c, si, sub);
       }
 
-    else if(pat == PAT_COLORING && (S7 == 4 || euclid || (a38 && gp_threecolor() == 1) || arcm::in())) {
+    else if(pat == PAT_COLORING && (S7 == 4 || meuclid || (a38 && gp_threecolor() == 1) || arcm::in())) {
       val_threecolors(c, si, sub);
       }
 
@@ -1403,7 +1403,7 @@ EX int pattern_threecolor(cell *c) {
     int i = si.id;
     return i >> 2;
     }
-  if(euclid) {
+  if(meuclid) {
     if(a4 && PURE) return eupattern4(c);
     if(euc::in(2,6) && !BITRUNCATED) return eupattern(c) % 3;
     return c == c->master->c7 ? 0 : (c->c.spin(0)&1) ? 1 : 2;
@@ -1471,7 +1471,7 @@ EX bool pseudohept(cell *c) {
   #if CAP_IRR
   if(IRREGULAR) return irr::pseudohept(c);
   #endif
-  if(hybri) { auto d = hybrid::get_where(c); return ((!prod) || (d.second & 1)) && PIU(pseudohept(d.first)); }
+  if(mhybrid) { auto d = hybrid::get_where(c); return ((!mproduct) || (d.second & 1)) && PIU(pseudohept(d.first)); }
   #if CAP_BT
   if(nil) return c->master->zebraval & c->master->emeraldval & c->master->fieldval & 1;
   if(sol) return (c->master->emeraldval % 3 == 2) && (c->master->zebraval % 3 == 2) && (c->master->distance % 2);
@@ -1506,7 +1506,7 @@ EX bool pseudohept(cell *c) {
 EX bool kraken_pseudohept(cell *c) {
   if(0);
   #if CAP_GP
-  else if(!euclid && S3 == 4 && GOLDBERG && (gp::param.first % 2 || gp::param.second % 2 || S7 % 2))
+  else if(!meuclid && S3 == 4 && GOLDBERG && (gp::param.first % 2 || gp::param.second % 2 || S7 % 2))
     return ishept(c);
   #endif
   #if CAP_IRR
@@ -1521,7 +1521,7 @@ EX bool kraken_pseudohept(cell *c) {
   else if(arcm::in() && DUAL)
     return false;
   #endif
-  else if(!euclid && S3 == 3 && !(S7&1) && gp_threecolor() == 1)
+  else if(!meuclid && S3 == 3 && !(S7&1) && gp_threecolor() == 1)
     return ishept(c);
   else
     return pseudohept(c);
@@ -1600,7 +1600,7 @@ EX namespace patterns {
   EX bool innerwalls;
   
   int sevenval(cell *c) {
-    if(!euclid) return 0;
+    if(!meuclid) return 0;
     auto p = euc2_coordinates(c);
     return gmod(p.first - p.second * 2, 7);
     }
@@ -1706,7 +1706,7 @@ EX namespace patterns {
       ep.extra_params["mz"] = c->master->zebraval;
       }
 
-    if(sphere) {
+    if(msphere) {
       ep.extra_params["h0"] = getHemisphere(c, 0);
       ep.extra_params["h1"] = getHemisphere(c, 1);
       ep.extra_params["h2"] = getHemisphere(c, 2);
@@ -1739,7 +1739,7 @@ EX namespace patterns {
       ep.extra_params["ny"] = szgmod(co[1], nilv::nilperiod[1]);
       ep.extra_params["nz"] = szgmod(co[2], nilv::nilperiod[2]);      
       }
-    if(hybri)
+    if(mhybrid)
       ep.extra_params["level"] = hybrid::get_where(c).second;
 
     if(geometry_supports_cdata()) {
@@ -2031,7 +2031,7 @@ EX namespace patterns {
     dialog::addSelItem(XLAT("random black-and-white"), "current", 'w');
 
     #if CAP_FIELD
-    if(!sphere) {
+    if(!msphere) {
       dialog::addSelItem(XLAT("field pattern C"), "field", 'C');
       dialog::addSelItem(XLAT("field pattern D"), "field", 'D');
       dialog::addSelItem(XLAT("field pattern N"), "field", 'N');
@@ -2218,7 +2218,7 @@ EX namespace patterns {
     else if(a38)
       dialog::addBoolItem(XLAT("broken Emerald Pattern"), (whichPattern == PAT_EMERALD), PAT_EMERALD);
     
-    if(stdhyperbolic || euclid)
+    if(stdhyperbolic || meuclid)
       dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == PAT_PALACE), PAT_PALACE);
     
     if(geosupport_chessboard())
@@ -2230,9 +2230,9 @@ EX namespace patterns {
     if(sphere_narcm)
       dialog::addBoolItem(XLAT("siblings"), (whichPattern == PAT_SIBLING), PAT_SIBLING);
     
-    if(euclid)
+    if(meuclid)
       dialog::addBoolItem(XLAT("torus"), (whichPattern == PAT_FIELD), PAT_FIELD);
-    else if(sphere)
+    else if(msphere)
       dialog::addBoolItem(XLAT("single cells"), (whichPattern == PAT_FIELD), PAT_FIELD);
     else
       dialog::addBoolItem(XLAT("field pattern"), (whichPattern == PAT_FIELD), PAT_FIELD);
@@ -2245,17 +2245,17 @@ EX namespace patterns {
       (whichPattern == PAT_EMERALD && (stdhyperbolic || a38)) ||
       (whichPattern == PAT_PALACE && stdhyperbolic) ||
       (whichPattern == PAT_ZEBRA && stdhyperbolic) ||
-      (whichPattern == PAT_SIBLING && sphere) ||
+      (whichPattern == PAT_SIBLING && msphere) ||
       (whichPattern == PAT_ZEBRA && a457)) {
       dialog::addBoolItem(XLAT("rotational symmetry"), subpattern_flags & SPF_ROT, '0');
       }
     
-    if((euclid && whichPattern == PAT_COLORING) ||
+    if((meuclid && whichPattern == PAT_COLORING) ||
       (a38 && whichPattern == PAT_COLORING) ||
       (a4 && !BITRUNCATED && whichPattern == PAT_COLORING && !a46))
       dialog::addBoolItem(XLAT("edit all three colors"), subpattern_flags & SPF_ROT, '0');
 
-    if(euclid && whichPattern == PAT_COLORING)
+    if(meuclid && whichPattern == PAT_COLORING)
       dialog::addBoolItem(XLAT("rotate the color groups"), subpattern_flags & SPF_CHANGEROT, '4');
 
     if(a46 && whichPattern == PAT_COLORING)
@@ -2275,7 +2275,7 @@ EX namespace patterns {
       dialog::addBoolItem(XLAT("symmetry 0-2"), subpattern_flags & SPF_SYM02, '2');
       dialog::addBoolItem(XLAT("symmetry 0-3"), subpattern_flags & SPF_SYM03, '3');
       }
-    if(euclid && among(whichPattern, PAT_COLORING, PAT_TYPES) && !arcm::in())
+    if(meuclid && among(whichPattern, PAT_COLORING, PAT_TYPES) && !arcm::in())
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
     
     #if CAP_ARCM
@@ -2288,7 +2288,7 @@ EX namespace patterns {
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
       }
 
-    if(euclid && among(whichPattern, PAT_COLORING, 0))
+    if(meuclid && among(whichPattern, PAT_COLORING, 0))
       dialog::addBoolItem(XLAT("full symmetry"), subpattern_flags & SPF_FULLSYM, '!');
 
     if(a38 && PURE && whichPattern == PAT_TYPES) {
@@ -2517,8 +2517,8 @@ EX namespace patterns {
           }
         dialog::addBoolItem(s, geometry == g.geo && variation == g.var && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags, 'a'+j);
         }
-    bool have_goldberg = (S3 == 3 && among(cgroup, cpFootball, cpThree) && !euclid);
-    bool have_variations = (among(cgroup, cpSingle, cpSingleSym) && !euclid);
+    bool have_goldberg = (S3 == 3 && among(cgroup, cpFootball, cpThree) && !meuclid);
+    bool have_variations = (among(cgroup, cpSingle, cpSingleSym) && !meuclid);
     if(!(S7&1) && BITRUNCATED) have_goldberg = false; // always start from pure
     if(have_goldberg) {
       dialog::addBoolItem(XLAT("Goldberg"), GOLDBERG, 'G');
@@ -2715,7 +2715,7 @@ EX namespace linepatterns {
   
   linepattern patBigTriangles("big triangular grid", 0x00606000, always_available, 
     ALLCELLS(
-       if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
+       if(is_master(c) && !meuclid) for(int i=0; i<S7; i++)
           if(c->master->move(i) && c->master->move(i) < c->master) {
             gridlinef(V, C0, xspinpush0(-TAU*i/S7 - master_to_c7_angle(), cgi.tessf), col, 2 + vid.linequality);
             }
@@ -2724,7 +2724,7 @@ EX namespace linepatterns {
 
   linepattern patBigRings("big triangles: rings", 0x00606000, [] { return standard_tiling() && S3 == 3 && mod_allowed(); },
     ALLCELLS(
-      if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
+      if(is_master(c) && !meuclid) for(int i=0; i<S7; i++)
         if(c->master->move(i) && way(c->master, i) && c->master->move(i)->dm4 == c->master->dm4)
           gridlinef(V, C0, xspinpush0(-TAU*i/S7 - master_to_c7_angle(), cgi.tessf), col, 2 + vid.linequality);
       )
@@ -2790,7 +2790,7 @@ EX namespace linepatterns {
         if(fv2/4 == 4 || fv2/4 == 6 || fv2/4 == 5 || fv2/4 == 10) fv2 ^= 2;
         if((fv1&1) == (fv2&1)) continue;
         
-        double x = cgi.hexhexdist / 2; // sphere?.3651:euclid?.2611:.2849;
+        double x = cgi.hexhexdist / 2; // msphere?.3651:meuclid?.2611:.2849;
         
         gridlinef(V, ddspin(c,i,-M_PI/S3) * xpush0(x), 
           ddspin(c,i,M_PI/S3) * xpush0(x), 

@@ -646,7 +646,7 @@ EX namespace gp {
       }
     if(sp>SG3) sp -= SG6;
 
-    return normalize(spin(TAU*sp/S7) * cornmul(T, corner));
+    return normalize_flat(spin(TAU*sp/S7) * cornmul(T, corner));
     }
   
   transmatrix dir_matrix(int i) {
@@ -654,14 +654,15 @@ EX namespace gp {
       return spin(M_PI - d * TAU / S7 - cgi.hexshift);
       };
     return spin(-cgi.gpdata->alpha) * build_matrix(
-      C0, 
-      ddspin(i) * xpush0(cgi.tessf),
-      ddspin(i+1) * xpush0(cgi.tessf),
+      tile_center(),
+      ddspin(i) * lxpush0(cgi.tessf),
+      ddspin(i+1) * lxpush0(cgi.tessf),
       C03
       );
     }
   
-  void prepare_matrices() {
+  EX void prepare_matrices(bool inv) {
+    if(!(GOLDBERG_INV || inv)) return;
     cgi.gpdata->corners = inverse(build_matrix(
       loctoh_ort(loc(0,0)),
       loctoh_ort(param),
@@ -669,6 +670,10 @@ EX namespace gp {
       C03
       ));
     cgi.gpdata->Tf.resize(S7);
+
+    /* should work directly without flipping but it does not... flipping for now */
+
+    if(embedded_plane) geom3::light_flip(true);
     for(int i=0; i<S7; i++) {
       transmatrix T = dir_matrix(i);
       for(int x=-GOLDBERG_LIMIT_HALF; x<GOLDBERG_LIMIT_HALF; x++)
@@ -679,8 +684,19 @@ EX namespace gp {
         hyperpoint h = atz(T, cgi.gpdata->corners, at, 6);
         hyperpoint hl = atz(T, cgi.gpdata->corners, at + eudir(d), 6);
         cgi.gpdata->Tf[i][x&GOLDBERG_MASK][y&GOLDBERG_MASK][d] = rgpushxto0(h) * rspintox(gpushxto0(h) * hl) * spin180();
+        // cgi.gpdata->Tf[i][x&GOLDBERG_MASK][y&GOLDBERG_MASK][d] = Id; // map_relative_push(h) * lrspintox(inverse(map_relative_push(h)) * hl) * spin180();
         }
       }       
+
+    if(geom3::flipped) {
+    geom3::light_flip(false);
+    for(int i=0; i<S7; i++) {
+      for(int x=-GOLDBERG_LIMIT_HALF; x<GOLDBERG_LIMIT_HALF; x++)
+      for(int y=-GOLDBERG_LIMIT_HALF; y<GOLDBERG_LIMIT_HALF; y++)
+      for(int d=0; d<(S3==3?6:4); d++) {
+        swapmatrix( cgi.gpdata->Tf[i][x&GOLDBERG_MASK][y&GOLDBERG_MASK][d] );
+        }
+      } }
     }
 
   EX hyperpoint get_corner_position(const local_info& li, int cid, ld cf IS(3)) {
@@ -729,7 +745,6 @@ EX namespace gp {
         cgi.base_distlimit = 2 * param.first + 2 * param.second + 1;
       if(cgi.base_distlimit > SEE_ALL)
         cgi.base_distlimit = SEE_ALL;
-      prepare_matrices();
       DEBB(DF_GEOM | DF_POLY, ("scale = ", scale));
       }
     }

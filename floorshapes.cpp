@@ -693,14 +693,14 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
               });
             }
           if(!vid.pseudohedral) for(int t=0; t<e-s; t++) {
-            hyperpoint v1 = may_kleinize(hpc[s+t]) - C0;
-            hyperpoint v2 = may_kleinize(hpc[s+t+1]) - C0;
+            hyperpoint fctr = tile_center();
+            hyperpoint v1 = may_kleinize(hpc[s+t]) - fctr;
+            hyperpoint v2 = may_kleinize(hpc[s+t+1]) - fctr;
             texture_order([&] (ld x, ld y) { 
-              hpcpush(
-                orthogonal_move(
-                  normalize(C0 + v1 * x + v2 * y)
-                  , dfloor_table[k])
-                ); 
+              hyperpoint a = fctr + v1 * x + v2 * y;
+              hyperpoint b = normalize_flat(a);
+              hyperpoint c = orthogonal_move(b, dfloor_table[k]);
+              cgi.hpcpush(c);
               });
             }
           }
@@ -1396,7 +1396,9 @@ EX void make_floor_textures() {
   dynamicval<eModel> gm(pmodel, mdDisk);
   dynamicval<eVariation> va(variation, eVariation::pure);
   dynamicval<geometryinfo1> gie(ginf[geometry].g, giEuclid2);
+  dynamicval<flagtype> gief(ginf[geometry].flags, qOPTQ);
   dynamicval<geometryinfo1> gih(ginf[gNormal].g, giHyperb2);
+  dynamicval<flagtype> gihf(ginf[gNormal].flags, 0);
   dynamicval<bool> a3(vid.always3, false);
   dynamicval<bool> hq(inHighQual, true);
   dynamicval<int> hd(darken, 0);

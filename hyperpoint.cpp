@@ -389,6 +389,13 @@ EX ld edge_of_triangle_with_angles(ld alpha, ld beta, ld gamma) {
 EX hyperpoint hpxy(ld x, ld y) { 
   if(sl2) return hyperpoint(x, y, 0, sqrt(1+x*x+y*y));
   if(rotspace) return hyperpoint(x, y, 0, sqrt(1-x*x-y*y));
+  if(embedded_plane) {
+    geom3::light_flip(true);
+    hyperpoint h = hpxy(x, y);
+    geom3::light_flip(false);
+    swapmatrix(h);
+    return h;
+    }
   return PIU(hpxyz(x,y, translatable ? 1 : sphere ? sqrt(1-x*x-y*y) : sqrt(1+x*x+y*y)));
   }
 
@@ -427,7 +434,7 @@ EX ld intval(const hyperpoint &h1, const hyperpoint &h2) {
   }
 
 EX ld quickdist(const hyperpoint &h1, const hyperpoint &h2) {
-  if(prod) return hdist(h1, h2);
+  if(gproduct) return hdist(h1, h2);
   return intval(h1, h2);
   }
 
@@ -515,7 +522,7 @@ EX ld zlevel(const hyperpoint &h) {
   else if(translatable) return h[LDIM];
   else if(sphere) return sqrt(intval(h, Hypc));
   else if(in_e2xe()) return log(h[2]);
-  else if(prod) return log(sqrt(abs(intval(h, Hypc)))); /* abs works with both underlying spherical and hyperbolic */
+  else if(gproduct) return log(sqrt(abs(intval(h, Hypc)))); /* abs works with both underlying spherical and hyperbolic */
   else return (h[LDIM] < 0 ? -1 : 1) * sqrt(-intval(h, Hypc));
   }
 
@@ -534,7 +541,7 @@ EX ld hypot_auto(ld x, ld y) {
 
 /** normalize the homogeneous coordinates */
 EX hyperpoint normalize(hyperpoint H) {
-  if(prod) return H;
+  if(gproduct) return H;
   ld Z = zlevel(H);
   for(int c=0; c<MXDIM; c++) H[c] /= Z;
   return H;
@@ -550,17 +557,38 @@ EX hyperpoint ultra_normalize(hyperpoint H) {
 
 /** normalize, and in product geometry, also flatten */
 EX hyperpoint normalize_flat(hyperpoint h) {
-  if(prod) return product_decompose(h).second;
+  if(gproduct) return product_decompose(h).second;
   if(sl2) h = slr::translate(h) * zpush0(-atan2(h[2], h[3]));
+  if(geom3::euc_in_hyp()) {
+    h = normalize(h);
+    auto h1 = deparabolic13(h);
+    h1[2] = 0;
+    return parabolic13(h1);
+    }
+  if(geom3::sph_in_euc()) {
+    ld z = hypot_d(3, h);
+    if(z > 0) h[0] /= z, h[1] /= z, h[2] /= z;
+    h[3] = 1;
+    return h;
+    }
+  if(geom3::sph_in_hyp()) {
+    ld z = hypot_d(3, h);
+    z = sinh(1) / z;
+    if(z > 0) h[0] *= z, h[1] *= z, h[2] *= z;
+    h[3] = cosh(1);
+    return h;
+    }
   return normalize(h);
   }
 
 /** get the center of the line segment from H1 to H2 */
 EX hyperpoint mid(const hyperpoint& H1, const hyperpoint& H2) {
-  if(prod) {
+  if(gproduct) {
     auto d1 = product_decompose(H1);
     auto d2 = product_decompose(H2);
-    return orthogonal_move(PIU( mid(d1.second, d2.second) ), (d1.first + d2.first) / 2);
+    hyperpoint res1 = PIU( mid(d1.second, d2.second) );
+    hyperpoint res = orthogonal_move(res1, (d1.first + d2.first) / 2);
+    return res;
     }
   return normalize(H1 + H2);
   }
@@ -571,7 +599,7 @@ EX shiftpoint mid(const shiftpoint& H1, const shiftpoint& H2) {
 
 /** like mid, but take 3D into account */
 EX hyperpoint midz(const hyperpoint& H1, const hyperpoint& H2) {
-  if(prod) return mid(H1, H2);
+  if(gproduct) return mid(H1, H2);
   hyperpoint H3 = H1 + H2;
   
   ld Z = 2;
@@ -691,7 +719,7 @@ EX transmatrix euaffine(hyperpoint h) {
   }
 
 EX transmatrix cpush(int cid, ld alpha) {
-  if(prod && cid == 2)
+  if(gproduct && cid == 2)
     return scale_matrix(Id, exp(alpha));
   transmatrix T = Id;
   if(nonisotropic) 
@@ -703,6 +731,7 @@ EX transmatrix cpush(int cid, ld alpha) {
   }
 
 EX transmatrix lzpush(ld z) {
+  if(geom3::euc_in_hyp() && !destandarize_eih) return cpush(0, z);
   return cpush(2, z);
   }
 
@@ -715,6 +744,17 @@ EX transmatrix cmirror(int cid) {
 // push alpha units to the right
 EX transmatrix xpush(ld alpha) { return cpush(0, alpha); }
 
+EX transmatrix lxpush(ld alpha) {
+  if(WDIM == 2 && GDIM == 3) {
+    geom3::light_flip(true);
+    auto t = cpush(0, alpha);
+    geom3::light_flip(false);
+    swapmatrix(t);
+    return t;
+    }
+  return cpush(0, alpha);
+  }
+
 EX bool eqmatrix(transmatrix A, transmatrix B, ld eps IS(.01)) {
   for(int i=0; i<MXDIM; i++)
   for(int j=0; j<MXDIM; j++)
@@ -726,8 +766,29 @@ EX bool eqmatrix(transmatrix A, transmatrix B, ld eps IS(.01)) {
 #if MAXMDIM >= 4
 /** in the 3D space, move the point h orthogonally to the (x,y) plane by z units */
 EX hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
+  if(geom3::euc_in_hyp()) {
+    hyperpoint hf = deparabolic13(h);
+    hf[2] += z;
+    return parabolic13(hf);
+    }
+  if(geom3::sph_in_euc()) {
+    ld z0 = hypot_d(3, h);
+    ld f = ((z0 + z) / z0);
+    hyperpoint hf;
+    for(int i=0; i<3; i++) hf[i] = h[i] * f;
+    hf[3] = 1;
+    return hf;
+    }
+  if(geom3::sph_in_hyp()) {
+    ld z0 = acosh(h[3]);
+    ld f = sinh(z0 + z) / sinh(z0);
+    hyperpoint hf;
+    for(int i=0; i<3; i++) hf[i] = h[i] * f;
+    hf[3] = cosh(z0 + z);
+    return hf;
+    }
   if(GDIM == 2) return scale_point(h, geom3::scale_at_lev(z));
-  if(prod) return scale_point(h, exp(z));
+  if(gproduct) return scale_point(h, exp(z));
   if(sl2) return slr::translate(h) * cpush0(2, z);
   if(!hyperbolic) return rgpushxto0(h) * cpush(2, z) * C0;
   if(nil) return nisot::translate(h) * cpush0(2, z);
@@ -764,19 +825,44 @@ EX transmatrix matrix4(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i, ld 
   }
 
 #if MAXMDIM >= 4
+/** Transform a matrix between the 'embedded_plane' and underlying representation. Switches to the current variant. */
 EX void swapmatrix(transmatrix& T) {
-  for(int i=0; i<4; i++) swap(T[i][2], T[i][3]);
-  for(int i=0; i<4; i++) swap(T[2][i], T[3][i]);
-  if(GDIM == 3) {
-    for(int i=0; i<4; i++) T[i][2] = T[2][i] = 0;
-    T[2][2] = 1;
+  if(geom3::euc_in_hyp() && !geom3::flipped) {
+    geom3::light_flip(true);
+    hyperpoint mov = T * C02;
+    transmatrix U = gpushxto0(mov) * T;
+    geom3::light_flip(false);
+    for(int i=0; i<4; i++) U[i][3] = U[3][i] = i == 3;
+    T = parabolic13(mov[0], mov[1]) * U;
+    }
+  else if(geom3::sph_in_euc() || geom3::sph_in_hyp()) {
+    if(!geom3::flipped) {
+      for(int i=0; i<4; i++) T[i][3] = T[3][i] = i == 3;
+      }
+    }
+  else if(geom3::in_product()) {
+    /* just do nothing */
+    }
+  else {
+    for(int i=0; i<4; i++) swap(T[i][2], T[i][3]);
+    for(int i=0; i<4; i++) swap(T[2][i], T[3][i]);
+    if(GDIM == 3) {
+      for(int i=0; i<4; i++) T[i][2] = T[2][i] = 0;
+      T[2][2] = 1;
+      }
     }
   fixmatrix(T);
-  for(int i=0; i<4; i++) for(int j=0; j<4; j++) if(isnan(T[i][j])) T = Id;
+  for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++) if(isnan(T[i][j])) T = Id;
   }
 
+/** Just like swapmatrix but for hyperpoints. */
 EX void swapmatrix(hyperpoint& h) {
+  if(geom3::in_product()) return;
+  if(geom3::sph_in_euc()) { h[3] = 1; return; }
+  if(geom3::sph_in_hyp()) { h[0] *= sinh(1); h[1] *= sinh(1); h[2] *= sinh(1); h[3] = cosh(1); return; }
   swap(h[2], h[3]);
+  if(GDIM == 3) h[2] = 0;
+  if(geom3::euc_in_hyp()) h = parabolic13(h[0], h[1]) * C0;
   }
 #endif
 
@@ -793,9 +879,20 @@ EX transmatrix parabolic1(ld u) {
     }
   }
 
+EX bool destandarize_eih = true;
+
 EX transmatrix parabolic13(ld u, ld v) {
   if(euclid)
     return eupush3(0, u, v);
+  else if(geom3::euc_in_hyp() && destandarize_eih) {
+    ld diag = (u*u+v*v)/2;
+    return matrix4(
+      1, 0, -u, u,
+      0, 1, -v, v,
+      u, v, -diag+1, diag,
+      u, v, -diag, diag+1
+      );
+    }
   else {
     ld diag = (u*u+v*v)/2;
     return matrix4(
@@ -809,6 +906,13 @@ EX transmatrix parabolic13(ld u, ld v) {
 
 EX hyperpoint deparabolic13(hyperpoint h) {
   if(euclid) return h;
+  if(geom3::euc_in_hyp() && destandarize_eih) {
+    h /= (1 + h[LDIM]);
+    h[2] -= 1;
+    h /= sqhypot_d(LDIM, h);
+    h[2] += .5;
+    return point3(h[0] * 2, h[1] * 2, log(2) + log(-h[2]));
+    }
   h /= (1 + h[LDIM]);
   h[0] -= 1;
   h /= sqhypot_d(LDIM, h);
@@ -818,10 +922,24 @@ EX hyperpoint deparabolic13(hyperpoint h) {
 
 EX hyperpoint parabolic13(hyperpoint h) {
   if(euclid) return h;
+  else if(geom3::euc_in_hyp() && destandarize_eih) {
+    return parabolic13(h[0], h[1]) * cpush0(2, h[2]);
+    }
   else if(LDIM == 3)
     return parabolic13(h[1], h[2]) * xpush0(h[0]);
   else
     return parabolic1(h[1]) * xpush0(h[0]);
+  }
+
+EX transmatrix parabolic13_at(hyperpoint h) {
+  if(euclid) return rgpushxto0(h);
+  else if(geom3::euc_in_hyp() && destandarize_eih) {
+    return parabolic13(h[0], h[1]) * cpush(2, h[2]);
+    }
+  else if(LDIM == 3)
+    return parabolic13(h[1], h[2]) * xpush(h[0]);
+  else
+    return parabolic1(h[1]) * xpush(h[0]);
   }
 
 EX transmatrix spintoc(const hyperpoint& H, int t, int f) {
@@ -852,7 +970,7 @@ EX transmatrix rspintoc(const hyperpoint& H, int t, int f) {
  *  \see rspintox 
  */
 EX transmatrix spintox(const hyperpoint& H) {
-  if(GDIM == 2 || prod) return spintoc(H, 0, 1); 
+  if(GDIM == 2 || gproduct) return spintoc(H, 0, 1);
   transmatrix T1 = spintoc(H, 0, 1);
   return spintoc(T1*H, 0, 2) * T1;
   }
@@ -860,7 +978,19 @@ EX transmatrix spintox(const hyperpoint& H) {
 /** inverse of hr::spintox 
  */
 EX transmatrix rspintox(const hyperpoint& H) {
-  if(GDIM == 2 || prod) return rspintoc(H, 0, 1); 
+  if(GDIM == 2 || gproduct) return rspintoc(H, 0, 1);
+  transmatrix T1 = spintoc(H, 0, 1);
+  return rspintoc(H, 0, 1) * rspintoc(T1*H, 0, 2);
+  }
+
+EX transmatrix lspintox(const hyperpoint& H) {
+  if(WDIM == 2 || gproduct) return spintoc(H, 0, 1);
+  transmatrix T1 = spintoc(H, 0, 1);
+  return spintoc(T1*H, 0, 2) * T1;
+  }
+
+EX transmatrix lrspintox(const hyperpoint& H) {
+  if(WDIM == 2 || gproduct) return rspintoc(H, 0, 1);
   transmatrix T1 = spintoc(H, 0, 1);
   return rspintoc(H, 0, 1) * rspintoc(T1*H, 0, 2);
   }
@@ -915,7 +1045,7 @@ EX transmatrix rpushxto0(const hyperpoint& H) {
 EX transmatrix ggpushxto0(const hyperpoint& H, ld co) {
   if(translatable) 
     return eupush(H, co);
-  if(prod) {
+  if(gproduct) {
     auto d = product_decompose(H);
     return scale_matrix(PIU(ggpushxto0(d.second, co)), exp(d.first * co));
     }
@@ -958,7 +1088,7 @@ EX shiftmatrix rgpushxto0(const shiftpoint& H) {
 EX void fixmatrix(transmatrix& T) {
   if(nonisotropic) ; // T may be inverse... do not do that
   else if(cgflags & qAFFINE) ; // affine
-  else if(prod) {
+  else if(gproduct) {
     auto z = zlevel(tC0(T));
     T = scale_matrix(T, exp(-z));
     PIU(fixmatrix(T));
@@ -1157,14 +1287,14 @@ EX transmatrix z_inverse(const transmatrix& T) {
 /** \brief T inverse a matrix T = O*P, where O is orthogonal and P is an isometry (todo optimize) */
 EX transmatrix view_inverse(transmatrix T) {
   if(nonisotropic) return inverse(T);
-  if(prod) return z_inverse(T);
+  if(gproduct) return z_inverse(T);
   return iso_inverse(T);
   }
 
 /** \brief T inverse a matrix T = P*O, where O is orthogonal and P is an isometry (todo optimize) */
 EX transmatrix iview_inverse(transmatrix T) {
   if(nonisotropic) return inverse(T);
-  if(prod) return z_inverse(T);
+  if(gproduct) return z_inverse(T);
   return iso_inverse(T);
   }
 
@@ -1298,9 +1428,16 @@ EX hyperpoint scale_point(const hyperpoint& h, ld scale_factor) {
   return res;
   }
 
+/** Returns the intended center of the tile, relative to its local matrix. Usually C0 but may be different, e.g. when embedding a sphere in E3 or H3. */
+EX hyperpoint tile_center() {
+  if(geom3::sph_in_euc()) return C02 + C03;
+  if(geom3::sph_in_hyp()) return zpush0(1);
+  return C0;
+  }
+
 EX transmatrix orthogonal_move(const transmatrix& t, double level) {
-  if(prod) return scale_matrix(t, exp(level));
-  if(GDIM == 3) return t * cpush(2, level);
+  if(gproduct) return scale_matrix(t, exp(level));
+  if(GDIM == 3) return t * lzpush(level);
   return scale_matrix(t, geom3::lev_to_factor(level));
   }
 
@@ -1396,7 +1533,7 @@ EX ld xcross(ld x1, ld y1, ld x2, ld y2) { return x1 + (x2 - x1) * y1 / (y1 - y2
 
 EX transmatrix parallel_transport(const transmatrix Position, const transmatrix& ori, const hyperpoint direction) {
   if(nonisotropic) return nisot::parallel_transport(Position, direction);
-  else if(prod) {
+  else if(gproduct) {
     hyperpoint h = product::direct_exp(ori * direction);
     return Position * rgpushxto0(h);
     }
@@ -1408,7 +1545,7 @@ EX void apply_parallel_transport(transmatrix& Position, const transmatrix orient
   }
 
 EX void rotate_object(transmatrix& Position, transmatrix& orientation, transmatrix R) {
-  if(prod) orientation = orientation * R;
+  if(gproduct) orientation = orientation * R;
   else Position = Position * R;
   }
 
@@ -1419,7 +1556,7 @@ EX transmatrix spin_towards(const transmatrix Position, transmatrix& ori, const 
     T = nisot::spin_towards(Position, goal);
   else { 
     hyperpoint U = inverse(Position) * goal;
-    if(prod) {
+    if(gproduct) {
       hyperpoint h = product::inverse_exp(U);
       alpha = asin_clamp(h[2] / hypot_d(3, h));
       U = product_decompose(U).second;
@@ -1427,7 +1564,7 @@ EX transmatrix spin_towards(const transmatrix Position, transmatrix& ori, const 
     T = rspintox(U);
     }
   if(back < 0) T = T * spin180(), alpha = -alpha;
-  if(prod) {
+  if(gproduct) {
     if(dir == 0) ori = cspin(2, 0, alpha);
     if(dir == 2) ori = cspin(2, 0, alpha - 90._deg), dir = 0;
     }
@@ -1463,6 +1600,15 @@ EX transmatrix transpose(transmatrix T) {
   return result;
   }
 
+EX hyperpoint lspinpush0(ld alpha, ld x) {
+  geom3::light_flip(true);
+  hyperpoint h = xspinpush0(alpha, x);
+  geom3::light_flip(false);
+  swapmatrix(h);
+  return h;
+  // return spin(alpha) * lxpush(x) * C0;
+  }
+
 #if HDR
 namespace slr { 
   hyperpoint xyz_point(ld x, ld y, ld z); 
@@ -1472,7 +1618,7 @@ namespace slr {
 inline hyperpoint cpush0(int c, ld x) { 
   hyperpoint h = Hypc;
   if(sl2) return slr::xyz_point(c==0?x:0, c==1?x:0, c==2?x:0);
-  if(c == 2 && prod) {
+  if(c == 2 && gproduct) {
     h[2] = exp(x);
     return h;
     }
@@ -1483,6 +1629,7 @@ inline hyperpoint cpush0(int c, ld x) {
 
 inline hyperpoint xspinpush0(ld alpha, ld x) { 
   if(sl2) return slr::polar(x, -alpha, 0);
+  if(embedded_plane) return lspinpush0(alpha, x);
   hyperpoint h = Hypc;
   h[LDIM] = cos_auto(x);
   h[0] = sin_auto(x) * cos(alpha);
@@ -1491,6 +1638,7 @@ inline hyperpoint xspinpush0(ld alpha, ld x) {
   }
 
 inline hyperpoint xpush0(ld x) { return cpush0(0, x); }
+inline hyperpoint lxpush0(ld x) { return lxpush(x) * tile_center(); }
 inline hyperpoint ypush0(ld x) { return cpush0(1, x); }
 inline hyperpoint zpush0(ld x) { return cpush0(2, x); }
 
@@ -1514,8 +1662,11 @@ EX hyperpoint ctangent(int c, ld x) { return point3(c==0?x:0, c==1?x:0, c==2?x:0
 /** tangent vector in direction X */
 EX hyperpoint xtangent(ld x) { return ctangent(0, x); }
 
-/** tangent vector in direction Y */
+/** tangent vector in direction Z */
 EX hyperpoint ztangent(ld z) { return ctangent(2, z); }
+
+/** tangent vector in logical direction Z */
+EX hyperpoint lztangent(ld z) { return ctangent(2, z); }
 
 /** change the length of the targent vector */
 EX hyperpoint tangent_length(hyperpoint dir, ld length) {
@@ -1533,7 +1684,7 @@ EX hyperpoint direct_exp(hyperpoint v) {
   if(nil) return nilv::formula_exp(v);
   if(sl2 || stretch::in()) return stretch::mstretch ? nisot::numerical_exp(v) : rots::formula_exp(v);
   #endif
-  if(prod) return product::direct_exp(v);
+  if(gproduct) return product::direct_exp(v);
   ld d = hypot_d(GDIM, v);
   if(d > 0) for(int i=0; i<GDIM; i++) v[i] = v[i] * sin_auto(d) / d;
   v[LDIM] = cos_auto(d);
@@ -1564,7 +1715,7 @@ EX hyperpoint inverse_exp(const shiftpoint h, flagtype prec IS(pNORMAL)) {
   #endif
   if(nil) return nilv::get_inverse_exp(h.h, prec);
   if(sl2) return slr::get_inverse_exp(h);
-  if(prod) return product::inverse_exp(h.h);
+  if(gproduct) return product::inverse_exp(h.h);
   ld d = acos_auto_clamp(h[GDIM]);
   hyperpoint v = Hypc;
   if(d && sin_auto(d)) for(int i=0; i<GDIM; i++) v[i] = h[i] * d / sin_auto(d);
@@ -1596,7 +1747,7 @@ EX hyperpoint lp_apply(const hyperpoint h) {
   return nisot::local_perspective_used() ? NLP * h : h;
   }
 
-EX hyperpoint smalltangent() { return xtangent(.1); }
+EX hyperpoint smalltangent() { if(embedded_plane && msphere) return lxpush0(0.1); else return xtangent(.1); }
 
 EX void cyclefix(ld& a, ld b) {
   while(a > b + M_PI) a -= TAU;
@@ -1617,7 +1768,7 @@ EX unsigned bucketer(ld x) {
 
 EX unsigned bucketer(hyperpoint h) {
   unsigned dx = 0;
-  if(prod) {
+  if(gproduct) {
     auto d = product_decompose(h);
     h = d.second;
     dx += bucketer(d.first) * 50;

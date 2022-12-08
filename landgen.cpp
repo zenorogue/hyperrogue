@@ -148,7 +148,7 @@ EX void createArrowTrapAt(cell *c, eLand land) {
 EX eMonster emerald_monster() {
   static eMonster emeraldmonsters[4] = { moHedge, moLancer, moFlailer, moMiner };
   eMonster m = emeraldmonsters[hrand(4)];
-  if(m == moHedge && (S3 != 3 || (hybri && !prod)))
+  if(m == moHedge && (S3 != 3 || (mhybrid && !mproduct)))
     m = moFlailer;
   return m;
   }
@@ -399,7 +399,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           if(gs == 1)
             c->wall = waPalace;
           if(gs == 3) {
-            if(hybri) {
+            if(mhybrid) {
               c->wall = pick(waClosedGate, waOpenGate);
               if(c->wall == waClosedGate) toggleGates(c, waClosePlate, 1);
               else toggleGates(c, waOpenPlate, 1);
@@ -415,7 +415,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = pick(waClosePlate, waOpenPlate);
           if(gs == -6 && !reptilecheat)
             c->wall = waTrapdoor;
-          if(hybri) {
+          if(mhybrid) {
             int l = hybrid::get_where(c).second;
             if(gs >= 3 && (l % 4) == 0) c->wall = waPalace;
             if(gs < 3 && (l % 4) == 2) c->wall = waPalace;
@@ -424,7 +424,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
         else if(d == 8 && !sphere) {
 
-          if(prod && polarb50(c) && (hybrid::get_where(c).second & 3) == 2) {
+          if(mproduct && polarb50(c) && (hybrid::get_where(c).second & 3) == 2) {
             c->wall = waPalace;
             break;
             }          
@@ -462,19 +462,19 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             if(GOLDBERG) ; 
             else {
               int q = 0, s = 0;
-              if(!ishept(c)) for(int i=0; i<c->type - (hybri ? 2 : 0); i++)
+              if(!ishept(c)) for(int i=0; i<c->type - (mhybrid ? 2 : 0); i++)
                 if(cdist50(c->move(i)) == 3 && polarb50(c->move(i)) && !ishept(c->move(i)))
                   q++, s += i;
               if(q == 1 && c->move(s)->land == laPalace) {
                 switch(princess::generating ? 0 : hrand(2)) {
                   case 0: 
                     c->wall = waClosedGate;
-                    if(hybri) toggleGates(c, waClosePlate, 1);
+                    if(mhybrid) toggleGates(c, waClosePlate, 1);
                     c->move(s)->wall = waClosedGate;
                     break;
                   case 1:
                     c->wall = waOpenGate;
-                    if(hybri) toggleGates(c, waOpenPlate, 1);
+                    if(mhybrid) toggleGates(c, waOpenPlate, 1);
                     c->move(s)->wall = waOpenGate;
                     break;
                   }
@@ -798,7 +798,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
             else if(v == 25 || v == 59 || v == 27 || v == 57)
               c->wall = waVineHalfB;
             else c->wall = waNone;
-            if(hybri && cellHalfvine(c)) c->wall = waNone;
+            if(mhybrid && cellHalfvine(c)) c->wall = waNone;
             if(NONSTDVAR && cellHalfvine(c)) {
               c->wall = waNone;
               forCellCM(c2, c) if(emeraldval(c2) == (v^1))
@@ -1392,7 +1392,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           while(i) { if(i&1) b++; i>>=1; }
           if(ctof(c) && (b&1) && hrand(100) < 20)  c->wall = (z&2) ? waCharged : waGrounded;
           }
-        else if(hybri) {
+        else if(mhybrid) {
           cell *c1 = hybrid::get_where(c).first;
           if(among(c1->wall, waCharged, waGrounded))
             c->wall = c1->wall;
@@ -2834,7 +2834,7 @@ EX void set_land_for_geometry(cell *c) {
   #if MAXMDIM == 4
   else if(euc::in(3)) euc::set_land(c);
   #endif
-  else if(hybri) setLandHybrid(c);
+  else if(mhybrid) setLandHybrid(c);
   else if(sphere || (euclid && closed_or_bounded)) setLandSphere(c);
   else if(euclid) setLandEuclid(c);
   else if(quotient) { setland(c, specialland); setLandQuotient(c); }
@@ -2849,6 +2849,7 @@ EX void setdist(cell *c, int d, cell *from) {
 
   if(c == &out_of_bounds) return;
   if(fake::in()) return FPIU(setdist(c, d, from));
+  if(embedded_plane) return IPF(setdist(c, d, from));
   
   if(d < -64) d = -64; /* otherwise it will underflow */
   if(c->mpdist <= d) return;
@@ -2870,7 +2871,7 @@ EX void setdist(cell *c, int d, cell *from) {
 
   if(d <= 10 - getDistLimit()) lastexplore = shmup::on ? shmup::curtime : turncount;
   
-  if(hybri) {
+  if(mhybrid) {
     auto wc = hybrid::get_where(c).first;
     auto wf = from ? hybrid::get_where(from).first : NULL;
     if(c->land && !wc->land) wc->land = c->land;
@@ -2888,7 +2889,7 @@ EX void setdist(cell *c, int d, cell *from) {
   if(d >= BARLEV) {
   
     #if CAP_BT
-    if(bt::in() && WDIM == 3 && !c->land && !sn::in() && !hybri) {
+    if(bt::in() && WDIM == 3 && !c->land && !sn::in() && !mhybrid) {
       ld z = vid.binary_width;
       cell *cseek = c;
       int step = 0;

@@ -2796,7 +2796,7 @@ EX namespace sword {
     };
   
   /** dimensions available to the Sword */
-  #define SWORDDIM (hybri ? 2 : WDIM)
+  #define SWORDDIM (mhybrid ? 2 : WDIM)
     
   #endif
 
@@ -2829,7 +2829,7 @@ EX namespace sword {
   
   EX cell *pos2(cell *c, int s) {
     int t = c->type;
-    if(hybri) t -= 2;
+    if(mhybrid) t -= 2;
     s *= 2;
     s += sword_angles/t;
     s %= (2 * sword_angles);
@@ -2887,7 +2887,7 @@ EX namespace sword {
     neighborId(c2, c1);
     if(s1 < 0 || s2 < 0) return d;
     if(SWORDDIM == 2) {
-      int sub = (hybri) ? 2 : 0;
+      int sub = (mhybrid) ? 2 : 0;
       int t2 = c2->type - sub;
       int t1 = c1->type - sub;
       if(t1 == 0 || t2 == 0) return d;
@@ -3590,7 +3590,7 @@ EX namespace windmap {
       // cw.spin = 0;
       neighbors.emplace_back();
       auto &v = neighbors.back();
-      if(NONSTDVAR && !sphere && !arcm::in() && !hybri && !INVERSE)
+      if(NONSTDVAR && !sphere && !arcm::in() && !mhybrid && !INVERSE)
         for(int l=0; l<S7; l++) {
           v.push_back(getId(cw + cth + l + wstep + cth));
           }
@@ -3607,7 +3607,7 @@ EX namespace windmap {
     if(N == 18920) precomp = windcodes18920;
     if(N == 5676) precomp = windcodes5676;
     
-    if(precomp && (hyperbolic || hybri) && isize(currfp.matrices)) {
+    if(precomp && (hyperbolic || mhybrid) && isize(currfp.matrices)) {
       int randval = hrand(isize(currfp.matrices));
       for(int i=0; i<N; i++)
         windcodes[i] = precomp[getid[fieldpattern::fieldval_uniq_rand(samples[i].at, randval)]-1];

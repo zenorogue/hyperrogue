@@ -372,7 +372,7 @@ EX namespace history {
       v[ph+1]->at * C0;
   
     View = xpush(-(phase-ph) * hdist(now, next)) * View;
-    if(WDIM == 2 || prod) {
+    if(WDIM == 2 || mproduct) {
       View = models::rotmatrix() * View;
       }
     else {

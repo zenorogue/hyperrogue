@@ -604,7 +604,7 @@ EX namespace bt {
   /** \brief by what factor do the lengths expand after moving one level in hr::bt::expansion_coordinate() */
   EX ld expansion() {
     if(WDIM == 2) return area_expansion_rate();
-    else if(prod) return PIU( area_expansion_rate() );
+    else if(mproduct) return PIU( area_expansion_rate() );
     else return sqrt(area_expansion_rate());
     }
   

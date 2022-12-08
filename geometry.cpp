@@ -593,7 +593,7 @@ void geometry_information::prepare_basics() {
 
   xp_order = 0;
 
-  if(arcm::in() && !prod) 
+  if(arcm::in() && !mproduct)
     ginf[gArchimedean].cclass = gcHyperbolic;
   
   dynamicval<eVariation> gv(variation, variation);
@@ -603,9 +603,9 @@ void geometry_information::prepare_basics() {
     println(hlog, "bitruncated = ", BITRUNCATED);
     }
 
-  if(hybri) {
+  if(mhybrid) {
     auto t = this;
-    ld d = prod ? 1 : 2;
+    ld d = mproduct ? 1 : 2;
     hybrid::in_underlying_geometry([&] {
       t->rhexf = cgi.rhexf / d;
       t->hexf = cgi.hexf / d;
@@ -618,6 +618,8 @@ void geometry_information::prepare_basics() {
       });
     goto hybrid_finish;
     }
+
+  if(embedded_plane) geom3::light_flip(true);
 
   if((sphere || hyperbolic) && WDIM == 3 && !bt::in()) {
     rhexf = hexf = 0.378077;
@@ -675,18 +677,6 @@ void geometry_information::prepare_basics() {
   
   finish:
   
-  heptmove.resize(S7);
-  hexmove.resize(S7);
-  invhexmove.resize(S7);
-  
-  for(int d=0; d<S7; d++)
-    heptmove[d] = spin(-d * ALPHA) * xpush(tessf) * spin(M_PI);
-    
-  for(int d=0; d<S7; d++) 
-    hexmove[d] = spin(hexshift-d * ALPHA) * xpush(-crossf)* spin(M_PI);  
-
-  for(int d=0; d<S7; d++) invhexmove[d] = iso_inverse(hexmove[d]);
-
   hexvdist = hdist(xpush0(hexf), xspinpush0(ALPHA/2, hcrossf));
 
   hexhexdist = fake::in() ?
@@ -777,6 +767,13 @@ void geometry_information::prepare_basics() {
     }
   #endif
 
+  if(geom3::euc_in_hyp()) {
+    scalefactor *= exp(-vid.depth);
+    }
+
+  if(geom3::sph_in_euc()) scalefactor *= (1 + vid.depth);
+  if(geom3::sph_in_hyp()) scalefactor *= sinh(1 + vid.depth);
+
   if(scale_used()) {
     scalefactor *= vid.creature_scale;
     orbsize *= vid.creature_scale;
@@ -799,7 +796,7 @@ void geometry_information::prepare_basics() {
   
   plevel = vid.plevel_factor * scalefactor;
   single_step = 1;
-  if(hybri && !prod) {
+  if(mhybrid && !mproduct) {
     #if CAP_ARCM
     if(hybrid::underlying == gArchimedean) 
       arcm::current.get_step_values(psl_steps, single_step);
@@ -819,10 +816,26 @@ void geometry_information::prepare_basics() {
   
   set_sibling_limit();
   
+  geom3::light_flip(false);
+
   prepare_compute3();
   if(hyperbolic && &currfp != &fieldpattern::fp_invalid)
     currfp.analyze(); 
-  
+
+  heptmove.resize(S7);
+  hexmove.resize(S7);
+  invhexmove.resize(S7);
+
+  for(int d=0; d<S7; d++)
+    heptmove[d] = spin(-d * ALPHA) * lxpush(tessf) * spin(M_PI);
+
+  for(int d=0; d<S7; d++)
+    hexmove[d] = spin(hexshift-d * ALPHA) * lxpush(-crossf)* spin(M_PI);
+
+  for(int d=0; d<S7; d++) invhexmove[d] = iso_inverse(hexmove[d]);
+
+  gp::prepare_matrices(inv);
+
   #if CAP_SOLV  
   if(asonov::in()) {
     asonov::prepare();    
@@ -832,7 +845,14 @@ void geometry_information::prepare_basics() {
   }
 
 EX transmatrix xspinpush(ld dir, ld dist) {
-  if(euclid)
+  if(WDIM == 2 && GDIM == 3) {
+    geom3::light_flip(true);
+    transmatrix T = spin(dir) * xpush(dist) * spin(-dir);
+    geom3::light_flip(false);
+    swapmatrix(T);
+    return T;
+    }
+  else if(euclid)
     return eupush(cos(dir) * dist, -sin(dir) * dist);
   else
     return spin(dir) * xpush(dist) * spin(-dir);
@@ -873,13 +893,13 @@ EX namespace geom3 {
     }
   
   EX ld lev_to_factor(ld lev) { 
-    if(prod) return -lev;
+    if(mproduct) return -lev;
     if(WDIM == 3) return lev;
     if(GDIM == 3) return vid.depth - lev;
     return projection_to_factor(lev_to_projection(lev)); 
     }
   EX ld factor_to_lev(ld fac) { 
-    if(prod) return -fac;
+    if(mproduct) return -fac;
     if(GDIM == 3) return fac;
     return vid.depth - projection_to_abslev(factor_to_projection(fac)); 
     }
@@ -904,7 +924,7 @@ EX namespace geom3 {
   EX string invalid;
   
   EX ld actual_wall_height() {
-      if(hybri) return cgi.plevel;
+      if(mhybrid) return cgi.plevel;
       #if CAP_GP
       if(GOLDBERG && vid.gp_autoscale_heights) 
         return vid.wall_height * min<ld>(4 / hypot_d(2, gp::next), 1);
@@ -919,7 +939,7 @@ EX namespace geom3 {
     // tanh(depth) / tanh(camera) == pconf.alpha
     invalid = "";
     
-    if(GDIM == 3) ;
+    if(GDIM == 3 || flipped) ;
     else if(vid.tc_alpha < vid.tc_depth && vid.tc_alpha < vid.tc_camera)
       pconf.alpha = tan_auto(vid.depth) / tan_auto(vid.camera);
     else if(vid.tc_depth < vid.tc_alpha && vid.tc_depth < vid.tc_camera) {
@@ -976,7 +996,7 @@ EX namespace geom3 {
       
       human_height = vid.human_wall_ratio * wh;
       if(WDIM == 3) human_height = scalefactor * vid.height_width / 2;
-      if(hybri) human_height = min(human_height, cgi.plevel * .9);
+      if(mhybrid) human_height = min(human_height, cgi.plevel * .9);
       
       ld reduce = (WDIM == 3 ? human_height / 2 : 0);
       
@@ -1020,26 +1040,134 @@ EX namespace geom3 {
       LOWSKY = lev_to_factor(2 * wh);
       HIGH = LOWSKY;
       HIGH2 = lev_to_factor(3 * wh);
-      SKY = LOWSKY - 5;
+      SKY = LOWSKY - (vid.wall_height > 0 ? 5 : -5);
+
+      if(geom3::mgclass() == gcSphere && geom3::ggclass() != gcSphere) {
+        ld max_high = lerp(-FLOOR, -1, 0.8);
+        ld max_high2 = lerp(-FLOOR, -1, 0.9);
+        if(HIGH < max_high) HIGH = max_high;
+        if(HIGH2 < max_high2) HIGH2 = max_high2;
+        if(LOWSKY < max_high) LOWSKY = max_high;
+        if(SKY < max_high) SKY = max_high;
+        if(vid.wall_height < 0) {
+          SKY = -3 * vid.wall_height;
+          LOWSKY = 1.75 * SKY;
+          }
+        }
       }
     }    
 
 EX namespace geom3 {
+
+  #if HDR
+  enum eSpatialEmbedding {
+    seDefault,
+    seFlat,
+    seInverted,
+    seLowerCurvature,
+    seLowerCurvatureInverted,
+    seMuchLowerCurvature,
+    seMuchLowerCurvatureInverted,
+    seProduct
+    };
+  #endif
+
+  EX vector<pair<string, string>> spatial_embedding_options = {
+    {"default",         "Embed as a equidistant surface in the 3D version of the same geometry. This is the model used by HyperRogue in its 2D graphics."},
+    {"flat",            "Embed as a flat surface in the 3D version of the same geometry."},
+    {"inverted",        "Embed as a equidistant surface, but this time it is inverted."},
+    {"lower curvature", "Embed as a convex surface in a space of lower curvature."},
+    {"lower curvature inverted", "Embed as a concave surface in a space of lower curvature."},
+    {"much lower curvature", "Embed sphere as a convex sphere in hyperbolic space."},
+    {"much lower curvature inverted", "Embed sphere as a concave sphere in hyperbolic space."},
+    {"product",          "Add one extra dimension in the Euclidean way."}
+    };
+
+  EX eSpatialEmbedding spatial_embedding;
+
+  EX vector<geometryinfo> ginf_backup;
+
+  EX eGeometryClass mgclass() {
+    return (embedded_plane ? ginf_backup : ginf)[geometry].g.kind;
+    }
+
+  EX eGeometryClass ggclass() {
+    return (flipped ? ginf_backup : ginf)[geometry].g.kind;
+    }
+
+  EX bool euc_in_hyp() {
+    return ggclass() == gcHyperbolic && mgclass() == gcEuclid;
+    }
+
+  EX bool sph_in_euc() {
+    return ggclass() == gcEuclid && mgclass() == gcSphere;
+    }
+
+  EX bool sph_in_hyp() {
+    return ggclass() == gcHyperbolic && mgclass() == gcSphere;
+    }
+
+  EX bool in_product() {
+    return ggclass() == gcProduct;
+    }
+
+  EX bool same_in_same() {
+    return mgclass() == ggclass();
+    }
+
+  EX bool flipped;
+
+  EX void light_flip(bool f) {
+    if(f != flipped) {
+      swap(ginf[geometry].g, geom3::ginf_backup[geometry].g);
+      swap(ginf[geometry].flags, geom3::ginf_backup[geometry].flags);
+      flipped = f;
+      }
+    }
   
-EX void apply_always3() {
-    for(geometryinfo& gi: ginf) {
-      auto &g = gi.g;
-      if(vid.always3 && g.gameplay_dimension == 2 && g.graphical_dimension == 2) {
-        g.graphical_dimension++;
-        g.homogeneous_dimension++;
-        g.sig[3] = g.sig[2];
-        g.sig[2] = g.sig[1];
-        }
-      if(!vid.always3 && g.gameplay_dimension == 2 && g.graphical_dimension == 3) {
-        g.graphical_dimension--;
-        g.homogeneous_dimension--;
-        g.sig[1] = g.sig[2];
-        g.sig[2] = g.sig[3];
+  #if HDR
+  template<class T> auto in_flipped(const T& f) -> decltype(f()) {
+    light_flip(true);
+    finalizer ff([] { light_flip(false); });
+    return f();
+    }
+
+  #define IPF(x) geom3::in_flipped([&] { return (x); })
+  #endif
+
+  EX void apply_always3() {
+    if(!vid.always3 && !ginf_backup.empty()) {
+      ginf = ginf_backup;
+      ginf_backup.clear();
+      }
+    if(vid.always3 && ginf_backup.empty()) {
+      ginf_backup = ginf;
+      for(geometryinfo& gi: ginf) {
+        auto &g = gi.g;
+        if(vid.always3 && g.gameplay_dimension == 2 && g.graphical_dimension == 2) {
+          g.graphical_dimension++;
+          g.homogeneous_dimension++;
+          g.sig[3] = g.sig[2];
+          g.sig[2] = g.sig[1];
+
+          if(spatial_embedding == seProduct && g.kind != gcEuclid) {
+            g.kind = gcProduct;
+            g.homogeneous_dimension--;
+            g.sig[2] = g.sig[3];
+            gi.flags |= qHYBRID;
+            }
+
+          if(among(spatial_embedding, seLowerCurvature, seLowerCurvatureInverted)) {
+            if(g.kind == gcEuclid) g = ginf[gSpace534].g;
+            if(g.kind == gcSphere) g = ginf[gCubeTiling].g;
+            g.gameplay_dimension = 2;
+            }
+
+          if(among(spatial_embedding, seMuchLowerCurvature, seMuchLowerCurvatureInverted)) {
+            g = ginf[gSpace534].g;
+            g.gameplay_dimension = 2;
+            }
+          }
         }
       }
     }
@@ -1090,17 +1218,44 @@ EX void switch_always3() {
       vid.always3 = true;
       apply_always3();
       ld ms = min<ld>(cgi.scalefactor, 1);
+      vid.depth = ms;
       vid.wall_height = 1.5 * ms;
-      if(sphere) {
+      if(sphere && same_in_same()) {
         vid.depth = 30 * degree;
         vid.wall_height = 60 * degree;
         }
       vid.human_wall_ratio = 0.8;
-      if(euclid && allowIncreasedSight() && vid.use_smart_range == 0) {
+      if(mgclass() == gcEuclid && allowIncreasedSight() && vid.use_smart_range == 0) {
         genrange_bonus = gamerange_bonus = sightrange_bonus = cgi.base_distlimit * 3/2;
         }
       vid.camera = 0;
-      vid.depth = ms;
+      vid.eye = 0;
+      if(sph_in_euc() || sph_in_hyp()) {
+        vid.depth = 0;
+        vid.wall_height = -1;
+        vid.eye = 0.5;
+        if(among(spatial_embedding, seLowerCurvatureInverted, seMuchLowerCurvatureInverted)) {
+          vid.wall_height = 1.4;
+          vid.eye = -0.2;
+          vid.depth = 0.5;
+          }
+        }
+      if(spatial_embedding == seFlat) {
+        vid.eye -= vid.depth / 2;
+        vid.depth = 0;
+        }
+      if(spatial_embedding == seInverted) {
+        vid.eye -= vid.depth * 1.5;
+        vid.depth *= -1;
+        }
+      if(euc_in_hyp() && spatial_embedding == seLowerCurvatureInverted) {
+        vid.wall_height *= -1;
+        vid.eye = 2 * vid.depth;
+        }
+      if(euc_in_hyp() && spatial_embedding == seMuchLowerCurvatureInverted) {
+        vid.wall_height *= -1;
+        vid.eye = 2 * vid.depth;
+        }
       if(pmodel == mdDisk) pmodel = mdPerspective;
       swapmatrix(View);
       swapmatrix(current_display->which_copy);
@@ -1111,6 +1266,8 @@ EX void switch_always3() {
 #if CAP_RACING
       racing::player_relative = true;
 #endif
+      check_cgi();
+      cgi.prepare_basics();
       }
     else {
       vid.always3 = false;
@@ -1188,12 +1345,11 @@ EX string cgi_string() {
   
   if(bt::in() || GDIM == 3) V("WQ", its(vid.texture_step));
   
-  if(hybri) {
+  if(mhybrid) {
     V("U", PIU(cgi_string()));
-    // its(int(hybrid::underlying)));
     }
   
-  if(prod) V("PL", fts(vid.plevel_factor));
+  if(mproduct) V("PL", fts(vid.plevel_factor));
 
   if(geometry == gFieldQuotient) { V("S3=", its(S3)); V("S7=", its(S7)); }
   if(nil) V("NIL", its(S7));
@@ -1242,7 +1398,7 @@ EX void check_cgi() {
   
   cgip = &cgis[s];
   cgi.timestamp = ++ntimestamp;
-  if(hybri) hybrid::underlying_cgip->timestamp = ntimestamp;
+  if(mhybrid) hybrid::underlying_cgip->timestamp = ntimestamp;
   if(fake::in()) fake::underlying_cgip->timestamp = ntimestamp;
   #if CAP_ARCM
   if(arcm::alt_cgip) arcm::alt_cgip->timestamp = ntimestamp;

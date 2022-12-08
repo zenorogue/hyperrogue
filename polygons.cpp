@@ -111,7 +111,7 @@ void geometry_information::chasmifyPoly(double fol, double fol2, int k) {
       int zf = int(x);
       if(zf == isize(points)-1) zf--;
       x -= zf;
-      hpcpush(orthogonal_move(normalize(points[zf] + (points[zf+1] - points[zf]) * x), fol + (fol2-fol) * y));
+      hpcpush(orthogonal_move(normalize_flat(points[zf] + (points[zf+1] - points[zf]) * x), fol + (fol2-fol) * y));
       };
     texture_order([&] (ld x, ld y) { at((1-x+y)/2, (1-x-y)/2); });
     texture_order([&] (ld x, ld y) { at((1-x-y)/2, (1+x-y)/2); });
@@ -881,7 +881,7 @@ hyperpoint ray_kleinize(hyperpoint h, int id, ld pz) {
     return deparabolic13(final_coords(h));
     }
   #endif
-  if(prod) {
+  if(gproduct) {
     if(bt::in()) return point3(h[0], h[1], pz);
     return point3(h[0]/h[2], h[1]/h[2], pz);
     }
@@ -912,7 +912,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
 
   vector<ld> altitudes;
   altitudes.resize(n);
-  if(prod) {
+  if(gproduct) {
     for(int i=0; i<n; i++) {
       auto d = product_decompose(vertices[i]);
       altitudes[i] = d.first;
@@ -926,11 +926,11 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
 
   ld w = 0;
   for(int i=0; i<n; i++) center += vertices[i] * weights[i], w += weights[i];
-  if(prod && !bt::in()) center = normalize_flat(center);
+  if(mproduct && !bt::in()) center = normalize_flat(center);
   else center /= w;
   
   ld center_altitude = 0;
-  if(prod) for(int i=0; i<n; i++) center_altitude += altitudes[i] * weights[i] / w;
+  if(mproduct) for(int i=0; i<n; i++) center_altitude += altitudes[i] * weights[i] / w;
   
   auto ocenter = center;
   
@@ -956,7 +956,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       hyperpoint h = center + v1 * x + v2 * y;
       if(nil && (x || y))
         h = nilv::on_geodesic(center, nilv::on_geodesic(v1+center, v2+center, y / (x+y)), x + y);
-      if(prod) {
+      if(mproduct) {
         if(bt::in()) h = PIU( parabolic13(h) );
         h = orthogonal_move(normalize_flat(h), center_altitude * (1-x-y) + altitudes[a] * x + altitudes[b] * y);
         hpcpush(h); return;
@@ -971,7 +971,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
     for(int a=0; a<n; a++) for(int y=0; y<STEP; y++) {
       if(triangles && (a%3 != 1)) continue;
       hyperpoint h = (vertices[a] * (STEP-y) + vertices[(a+1)%n] * y)/STEP;
-      if(prod) { 
+      if(mproduct) {
         if(bt::in()) h = PIU( parabolic13(h) );
         h = orthogonal_move(normalize_flat(h), (altitudes[a] * (STEP-y) + altitudes[(a+1)%n] * y) / STEP);
         hpcpush(h);
@@ -1011,9 +1011,9 @@ void geometry_information::reserve_wall3d(int i) {
 
 void geometry_information::create_wall3d() {
   if(WDIM == 2) return;
-  reserve_wall3d(kite::in() ? 22 : hybri ? 0 : S7);
+  reserve_wall3d(kite::in() ? 22 : mhybrid ? 0 : S7);
   
-  if(hybri) {
+  if(mhybrid) {
     walloffsets.clear();
     }
 
@@ -1129,7 +1129,7 @@ void geometry_information::prepare_shapes() {
   allshapes.clear();
   DEBBI(DF_POLY, ("buildpolys"));
 
-  if(WDIM == 3 && !hybri) {
+  if(WDIM == 3 && !mhybrid) {
     if(sphere) SD3 = 3, SD7 = 5;
     else SD3 = SD7 = 4;
     }

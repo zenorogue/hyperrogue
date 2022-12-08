@@ -49,7 +49,7 @@ struct portal_data {
 #endif
 
 hyperpoint portal_data::to_poco(hyperpoint h) const {
-  if(prod && kind == 1) {
+  if(mproduct && kind == 1) {
     auto dec = product_decompose(h);
     h = dec.second;
     if(bt::in()) {
@@ -67,7 +67,7 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
     if(d<0) h[2] = -h[2], h[0] = -h[0];
     return h;
     }
-  else if(prod && kind == 0) {
+  else if(mproduct && kind == 0) {
     h = T * h;
     ld z = product_decompose(h).first;
     h /= exp(z);
@@ -105,7 +105,7 @@ hyperpoint portal_data::to_poco(hyperpoint h) const {
   }
 
 hyperpoint portal_data::from_poco(hyperpoint h) const {
-  if(prod && kind == 1) {
+  if(mproduct && kind == 1) {
     ld xd = h[2];
     if(d<0) xd = -xd, h[0] = -h[0];
     #if CAP_BT
@@ -118,7 +118,7 @@ hyperpoint portal_data::from_poco(hyperpoint h) const {
     auto z = product_decompose(h).first;
     return iT * h * exp(d+xd-z);
     }
-  else if(prod && kind == 0) {
+  else if(mproduct && kind == 0) {
     auto h0 = h;
     h[0] = sin_auto(h0[2]);
     h[1] = sin_auto(h0[0]) * cos_auto(h0[2]);
@@ -156,7 +156,7 @@ EX portal_data make_portal(cellwalker cw, int spin) {
   id.scale = 1;
   id.T = Id;
   auto gg = geometry;
-  if(prod && cw.spin >= cw.at->type - 2) {
+  if(mproduct && cw.spin >= cw.at->type - 2) {
     id.kind = 1;
     id.d = product_decompose(fac[0]).first;
     id.v0 = C0 * exp(id.d);
@@ -180,7 +180,7 @@ EX portal_data make_portal(cellwalker cw, int spin) {
       id.T = gpushxto0(ctr);
       }
     }
-  else if(prod) {
+  else if(mproduct) {
     id.kind = 0;
     id.v0 = Hypc;
     id.scale = cgi.plevel;
@@ -518,7 +518,7 @@ EX void analyze_orthonormal(array<hyperpoint, 4> ds, ld sca) {
   vector<ld> orths;
   for(int i: {1,2,3}) {
     ds[i] = T * ds[i];
-    if(prod) ds[i][2]--;
+    if(mproduct) ds[i][2]--;
     }
   for(int i=0; i<3; i++)
   for(int j=0; j<3; j++)
@@ -811,7 +811,7 @@ EX void show_portals() {
     dialog::add_action_push(ray::configure);
     }
 
-  if(prod && point_direction < mouseover2->type - 2) {
+  if(mproduct && point_direction < mouseover2->type - 2) {
     ld r = get_ratio_edge(mouseover2, point_direction);
     dialog::addSelItem(XLAT("height-to-width ratio"), fts(r), 'r');
     dialog::add_action([] {
@@ -1047,7 +1047,7 @@ EX void handle() {
       z[2] = bt::minkowski_to_bt(fac.h0)[2];
       return bt::bt_to_minkowski(z);
       }
-    else if(prod && bt::in()) {
+    else if(mproduct && bt::in()) {
       auto dec = product_decompose(at);
       hyperpoint dep = PIU( deparabolic13(dec.second) );
       hyperpoint h = product_decompose(fac.h0).second;

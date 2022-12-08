@@ -11,7 +11,7 @@ namespace hr {
 EX namespace nisot {
 
   #if HDR
-  inline bool local_perspective_used() { return nonisotropic || prod; }
+  inline bool local_perspective_used() { return nonisotropic || gproduct; }
   #endif
   
   EX bool geodesic_movement = true;
@@ -1049,16 +1049,19 @@ EX void create_faces() {
   
 EX }
 
-EX bool in_s2xe() { return prod && hybrid::under_class() == gcSphere; }
-EX bool in_h2xe() { return prod && hybrid::under_class() == gcHyperbolic; }
-EX bool in_e2xe() { return prod && hybrid::under_class() == gcEuclid; }
+EX bool in_s2xe() { return gproduct && hybrid::under_class() == gcSphere; }
+EX bool in_h2xe() { return gproduct && hybrid::under_class() == gcHyperbolic; }
+EX bool in_e2xe() { return gproduct && hybrid::under_class() == gcEuclid; }
 
 EX namespace hybrid {
 
   EX eGeometry underlying;
   EX geometry_information *underlying_cgip;
 
-  EX eGeometryClass under_class() { return ginf[hybrid::underlying].cclass; }  
+  EX eGeometryClass under_class() {
+    if(embedded_plane) return geom3::ginf_backup[geometry].cclass;
+    return ginf[hybrid::underlying].cclass;
+    }
 
   EX int csteps;
   
@@ -1106,7 +1109,7 @@ EX namespace hybrid {
     }
   
   EX void reconfigure() {
-    if(!hybri) return;
+    if(!mhybrid) return;
     stop_game();
     auto g = geometry;
     geometry = underlying;
@@ -1364,7 +1367,13 @@ EX namespace hybrid {
   
   #if HDR
   template<class T> auto in_underlying_geometry(const T& f) -> decltype(f()) {
-    if(!hybri) return f();
+    if(!mhybrid && !gproduct) return f();
+    if(embedded_plane) {
+      geom3::light_flip(true);
+      finalizer ff([] { geom3::light_flip(false); });
+      return f();
+      }
+    if(geom3::flipped) throw hr_exception("called in_underlying_geometry in flipped");
     pcgip = cgip;
     dynamicval<eGeometry> gag(actual_geometry, geometry);
     dynamicval<eGeometry> g(geometry, underlying);
@@ -1381,7 +1390,8 @@ EX namespace hybrid {
 
   /** like in_underlying_geometry but does not return */
   EX void switch_to_underlying() {
-    if(!hybri) return;
+    if(!mhybrid && !gproduct) return;
+    if(embedded_plane) throw hr_exception("switch_to_underlying in embedded_plane");
     auto m = hmap();
     pmap = m;
     actual_geometry = geometry;
@@ -1410,7 +1420,7 @@ EX namespace hybrid {
       hyperpoint h = orthogonal_move(get_corner_position(c, i+next), zz);
       return h;
       }
-    if(prod) {
+    if(gproduct) {
       dynamicval<eGeometry> g(geometry, hybrid::underlying);
       dynamicval<geometry_information*> gc(cgip, hybrid::underlying_cgip);
       dynamicval<hrmap*> gm(currentmap, ((hrmap_hybrid*)currentmap)->underlying_map);
@@ -1449,7 +1459,7 @@ EX namespace hybrid {
     });
   
   EX vector<pair<int, cell*>> gen_sample_list() {
-    if(!hybri && WDIM != 2 && PURE)
+    if(!mhybrid && WDIM != 2 && PURE)
       return {make_pair(0, centerover), make_pair(centerover->type, nullptr)};
     vector<pair<int, cell*>> result;
     for(auto& v: cgi.walloffsets) if(v.first >= 0) result.push_back(v);
@@ -1668,7 +1678,7 @@ EX namespace product {
     }
 
   EX bool validate_spin() {
-    if(prod) return hybrid::in_underlying_geometry(validate_spin);
+    if(mproduct) return hybrid::in_underlying_geometry(validate_spin);
     if(kite::in()) return false;
     if(!quotient && !arcm::in()) return true;
     map<cell*, cellwalker> cws;
@@ -2232,7 +2242,7 @@ EX namespace rots {
   
     if(det(T) < 0) T = centralsym * T;
     
-    if(prod) d = 0;
+    if(mproduct) d = 0;
   
     hyperpoint h = inverse(View * spin(master_to_c7_angle()) * T) * C0;
     
@@ -2241,7 +2251,7 @@ EX namespace rots {
     
     ld alpha = atan2(ortho_inverse(NLP) * point3(1, 0, 0));
     
-    bool inprod = prod;
+    bool inprod = mproduct;
     transmatrix pView = View;
     if(inprod) {
       pView = spin(alpha) * View;
@@ -2857,10 +2867,10 @@ EX namespace nisot {
     #if CAP_SOLV
     if(sn::in()) return new sn::hrmap_solnih;
     #endif
-    if(prod) return new product::hrmap_product;
+    if(mproduct) return new product::hrmap_product;
     #if MAXMDIM >= 4
     if(nil) return new nilv::hrmap_nil;
-    if(hybri) return new rots::hrmap_rotation_space;
+    if(mhybrid) return new rots::hrmap_rotation_space;
     #endif
     return NULL;
     }
@@ -2963,7 +2973,7 @@ EX namespace nisot {
     #endif
     else if(argis("-prodperiod")) {
       PHASEFROM(2);
-      if(prod) stop_game();
+      if(mproduct) stop_game();
       shift(); hybrid::csteps = argi();
       hybrid::reconfigure();
       return 0;
@@ -2999,7 +3009,7 @@ EX namespace nisot {
       }
     else if(argis("-prodturn")) {
       PHASEFROM(2);
-      if(prod) stop_game();
+      if(mproduct) stop_game();
       shift(); product::cspin = argi();
       shift(); product::cmirror = argi();
       return 0;

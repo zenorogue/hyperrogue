@@ -134,7 +134,7 @@ void fix_cave(cell *c) {
   }
 
 bool keep_to_crossroads() {
-  return specialland == laCrossroads && !(nonisotropic || hybri);
+  return specialland == laCrossroads && !(nonisotropic || mhybrid);
   }
 
 bool bad(cell *c2, cell *c) {
@@ -414,7 +414,7 @@ EX void generate_track() {
     }
     
   try {
-  if(closed_or_bounded && !prod && !(cgflags & qHUGE_BOUNDED)) {
+  if(closed_or_bounded && !mproduct && !(cgflags & qHUGE_BOUNDED)) {
     bounded_track = true;
     make_bounded_track(s);
     }
@@ -701,7 +701,7 @@ bool inrec = false;
 EX ld race_angle = 90;
 
 EX bool force_standard_centering() {
-  return nonisotropic || hybri || quotient || closed_or_bounded;
+  return nonisotropic || mhybrid || quotient || closed_or_bounded;
   }
 
 EX bool use_standard_centering() {

@@ -22,7 +22,7 @@ EX namespace shmupballs {
 EX }
 
 ld sqdist(shiftpoint a, shiftpoint b) {
-  if(prod) return pow(hdist(a, b), 2);
+  if(gproduct) return pow(hdist(a, b), 2);
   else return intval(a.h, unshift(b, a.shift));
   }
 
@@ -422,7 +422,7 @@ void shootBullet(monster *m) {
   bullet->base = m->base;
   bullet->at = m->at;
   if(WDIM == 3) bullet->at = bullet->at * cpush(2, 0.15 * SCALE);
-  if(prod) bullet->ori = m->ori;
+  if(gproduct) bullet->ori = m->ori;
   bullet->type = moBullet;
   bullet->set_parent(m);
   bullet->pid = m->pid;
@@ -441,7 +441,7 @@ void shootBullet(monster *m) {
     monster* bullet = new monster;
     bullet->base = m->base;
     bullet->at = m->at * cspin(0, WDIM-1, TAU * i/8);
-    if(prod) bullet->ori = m->ori;
+    if(gproduct) bullet->ori = m->ori;
     if(WDIM == 3) bullet->at = bullet->at * cpush(2, 0.15 * SCALE);
     bullet->type = moBullet;
     bullet->set_parent(m);
@@ -3057,7 +3057,7 @@ bool celldrawer::draw_shmup_monster() {
         if(!ths || !h) {
           drawPlayerEffects(view, V, c, m->type);
           if(WDIM == 3) {
-            if(prod) {
+            if(gproduct) {
               hyperpoint h = m->ori * C0; // ztangent(1)
               view = view * spin(-atan2(h[1], h[0]));
               }
@@ -3154,7 +3154,7 @@ bool celldrawer::draw_shmup_monster() {
 
       default:
         if(WDIM == 3) {
-          if(prod) {
+          if(gproduct) {
             hyperpoint h = m->ori * xtangent(1);
             view = view * spin(-atan2(h[1], h[0]));
             }

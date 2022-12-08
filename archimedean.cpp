@@ -168,7 +168,7 @@ EX ld compute_edgelength(vector<pair<ld, ld>> facemul, ld halftotal IS(M_PI)) {
       else {
         ld gamma = M_PI / fm.first;
         auto c = asin_auto(sin_auto(edgelength/2) / sin(gamma));
-        hyperpoint h = xpush(c) * spin(M_PI - 2*gamma) * xpush0(c);
+        hyperpoint h = lxpush(c) * spin(M_PI - 2*gamma) * lxpush0(c);
         ld a = atan2(h);
         cyclefix(a, 0);
         if(a < 0) a = -a;
@@ -418,11 +418,20 @@ geometryinfo1& archimedean_tiling::get_geometry(ld mul) {
   }
 
 void archimedean_tiling::compute_geometry() {
+
+  if(embedded_plane) return IPF(compute_geometry());
+
   ginf[gArchimedean].g = get_geometry();
   set_flag(ginf[gArchimedean].flags, qCLOSED, get_class() == gcSphere);
   
+  if(geom3::ginf_backup.size()) {
+    geom3::ginf_backup[gArchimedean].g = geom3::ginf_backup[gSphere].g;
+    if(geom3::flipped) swap(geom3::ginf_backup[gArchimedean].g, ginf[gArchimedean].g);
+    set_flag(ginf[gArchimedean].flags, qCLOSED, get_class() == gcSphere);
+    }
+
   DEBB(DF_GEOM, (format("euclidean_angle_sum = %f\n", float(euclidean_angle_sum))));
-  
+
   bool infake = fake::in();
   
   dynamicval<eGeometry> dv(geometry, gArchimedean);
@@ -478,9 +487,9 @@ void archimedean_tiling::compute_geometry() {
       auto& c = circumradius[i];
 
       c = asin_auto(sin_auto(edgelength/2) / sin(gamma));
-      inradius[i] = hdist0(mid(xpush0(circumradius[i]), xspinpush0(2*gamma, circumradius[i])));
+      inradius[i] = hdist0(mid(lxpush0(circumradius[i]), xspinpush0(2*gamma, circumradius[i])));
       
-      hyperpoint h = xpush(c) * spin(M_PI - 2*gamma) * xpush0(c);
+      hyperpoint h = lxpush(c) * spin(M_PI - 2*gamma) * lxpush0(c);
       ld a = atan2(h);
       cyclefix(a, 0);
       if(a < 0) a = -a;
@@ -592,7 +601,7 @@ struct hrmap_archimedean : hrmap {
       current_altmap = newAltMap(alt);
       }
 
-    transmatrix T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * Id;
+    transmatrix T = lxpush(.01241) * spin(1.4117) * lxpush(0.1241) * Id;
     archimedean_gmatrix[origin] = make_pair(alt, T);
     altmap[alt].emplace_back(origin, T);
   
@@ -653,13 +662,13 @@ struct hrmap_archimedean : hrmap {
     
     auto& t1 = current.get_triangle(hi);
   
-    // * spin(-tri[id][pi+i].first) * xpush(t.second) * pispin * spin(tri[id'][p'+d'].first)
+    // * spin(-tri[id][pi+i].first) * lxpush(t.second) * pispin * spin(tri[id'][p'+d'].first)
     
     auto& p1 = archimedean_gmatrix[h];
     
     heptagon *alt = p1.first;
   
-    transmatrix T = p1.second * spin(-t1.first) * xpush(t1.second);
+    transmatrix T = p1.second * spin(-t1.first) * lxpush(t1.second);
     transmatrix U = Id;
     
     if(hyperbolic) {
@@ -680,22 +689,22 @@ struct hrmap_archimedean : hrmap {
       
     DEBB(DF_GEOM, ("look for: ", alt, " / ", kz(T * C0)));
   
-    for(auto& p2: altmap[alt]) if(same_point_may_warn(p2.second * C0, T * C0)) {
+    for(auto& p2: altmap[alt]) if(same_point_may_warn(p2.second * tile_center(), T * tile_center())) {
       DEBB(DF_GEOM, ("cell found: ", p2.first));
       for(int d2=0; d2<p2.first->degree(); d2++) {
         heptspin hs(p2.first, d2);
         auto& t2 = current.get_triangle(p2.first, d2);
         transmatrix T1 = T * spin(M_PI + t2.first);
-        DEBB(DF_GEOM, ("compare: ", kz(T1 * xpush0(1)), ":: ", kz(p2.second * xpush0(1))));
-        if(same_point_may_warn(T1 * xpush0(1), p2.second * xpush0(1))) {
+        DEBB(DF_GEOM, ("compare: ", kz(T1 * lxpush0(1)), ":: ", kz(p2.second * lxpush0(1))));
+        if(same_point_may_warn(T1 * lxpush0(1), p2.second * lxpush0(1))) {
         
           // T1 = p2.second
           // T * spin(pi+t2.first) == p2.second
-          // p1.second * spinm(-t1.first) * xpush(t1.second) * spin(pi+t2.first) == p2.second
+          // p1.second * spinm(-t1.first) * lxpush(t1.second) * spin(pi+t2.first) == p2.second
           
           // bring p1 and p2 closer, to prevent floating point errors
           if(hyperbolic) {
-            fixup_matrix(p1.second, U * p2.second * spin(-M_PI - t2.first) * xpush(-t1.second) * spin(t1.first), 0.25);
+            fixup_matrix(p1.second, U * p2.second * spin(-M_PI - t2.first) * lxpush(-t1.second) * spin(t1.first), 0.25);
             fixup_matrix(p2.second, T1, 0.25);
             }
   
@@ -837,7 +846,7 @@ struct hrmap_archimedean : hrmap {
       auto& t1 = ac.get_triangle(c->master, cid);
       hyperpoint h0 = xspinpush0(-t0.first, t0.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
       hyperpoint h1 = xspinpush0(-t1.first, t1.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
-      return mid3(C0, h0, h1);
+      return mid3(tile_center(), h0, h1);
       }
     if(DUAL) {
       auto& t0 = ac.get_triangle(c->master, 2*cid-1);
@@ -965,7 +974,7 @@ transmatrix archimedean_tiling::adjcell_matrix(heptagon *h, int d) {
   int d2 = h->c.spin(d);
   auto& t2 = get_triangle(h2, d2);
   
-  return spin(-t1.first) * xpush(t1.second) * spin(M_PI + t2.first);
+  return spin(-t1.first) * lxpush(t1.second) * spin(M_PI + t2.first);
   }
 
 EX int fix(heptagon *h, int spin) {

@@ -135,7 +135,7 @@ EX namespace models {
   #endif
 
   EX transmatrix rotmatrix() {
-    if(GDIM == 2 || prod) return spin(rotation * degree);
+    if(GDIM == 2 || gproduct) return spin(rotation * degree);
     return spin(rotation_xy2 * degree) * cspin(0, 2, -rotation_xz * degree) * spin(rotation * degree);
     }
   
@@ -190,7 +190,7 @@ EX namespace models {
 
   EX bool model_available(eModel pm) {
     if(mdinf[pm].flags & mf::technical) return false;
-    if(prod) {
+    if(gproduct) {
       if(pm == mdPerspective) return true;
       if(among(pm, mdBall, mdHemisphere)) return false;
       return PIU(model_available(pm));
@@ -205,7 +205,7 @@ EX namespace models {
     if(pm == mdLiePerspective && sphere) return false;
     if(pm == mdLieOrthogonal && sphere) return false;
     if(GDIM == 2 && pm == mdEquivolume) return false;
-    if(pm == mdThreePoint && !(GDIM == 3 && !nonisotropic && !prod)) return false;
+    if(pm == mdThreePoint && !(GDIM == 3 && !nonisotropic && !gproduct)) return false;
     if(GDIM == 3 && among(pm, mdBall, mdHyperboloid, mdFormula, mdPolygonal, mdRotatedHyperboles, mdSpiral, mdHemisphere)) return false;
     if(pm == mdCentralInversion && !euclid) return false;
     if(pm == mdPoorMan) return hyperbolic;
@@ -247,7 +247,7 @@ EX namespace models {
     }
   
   EX bool product_model(eModel m) {
-    if(!prod) return false;
+    if(!gproduct) return false;
     if(among(m, mdPerspective, mdHyperboloid, mdEquidistant, mdThreePoint)) return false;
     return true;
     }
@@ -256,8 +256,8 @@ EX namespace models {
   
   EX string get_model_name(eModel m) {
     if(m == mdDisk && GDIM == 3 && (hyperbolic || nonisotropic)) return XLAT("ball model/Gans");
-    if(m == mdPerspective && prod) return XLAT("native perspective");
-    if(prod) return PIU(get_model_name(m));
+    if(m == mdPerspective && gproduct) return XLAT("native perspective");
+    if(gproduct) return PIU(get_model_name(m));
     if(nonisotropic) {
       if(m == mdHorocyclic && !sol) return XLAT("simple model: projection");
       if(m == mdPerspective) return XLAT("simple model: perspective");

@@ -757,7 +757,7 @@ EX land_validity_t& land_validity(eLand l) {
   if(walls_not_implemented() && isCrossroads(l))
     return no_walls;
   
-  if(hybri || hybrid::pmap) {
+  if(mhybrid || hybrid::pmap) {
     if(among(l, laPrincessQuest, laPrairie, laMirrorOld, laMirror, laDual, laWarpCoast, laKraken, laBrownian, laWhirlpool, laWestWall, laHive, laClearing, laWhirlwind, laBlizzard, laBull, laTerracotta, laCrossroads5,
       laEndorian, laDungeon, laMountain))
       return lv::not_implemented;
@@ -765,7 +765,7 @@ EX land_validity_t& land_validity(eLand l) {
       return lv::bad_graphics;
     if((hybrid::actual_geometry == gRotSpace || geometry == gRotSpace) && l == laDryForest)
       return lv::hedgehogs;
-    if(hybri && hybrid::underlying && hybrid::underlying_cgip) {
+    if(mhybrid && hybrid::underlying && hybrid::underlying_cgip) {
       return *PIU(&land_validity(l));
       }
     }

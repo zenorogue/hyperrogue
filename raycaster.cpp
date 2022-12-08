@@ -125,7 +125,7 @@ EX bool available() {
   if(WDIM == 2 && (kite::in() || bt::in())) return false;
   #ifdef GLES_ONLY
   if(need_many_cell_types()) return false;
-  if(!euclid && !prod && !nil) return false;
+  if(!euclid && !gproduct && !nil) return false;
   #endif
   if(hyperbolic && pmodel == mdPerspective && !kite::in())
     return true;
@@ -137,7 +137,7 @@ EX bool available() {
     return true;
   if(euclid && pmodel == mdPerspective && !bt::in())
     return true;
-  if(prod)
+  if(gproduct)
     return true;
   if(pmodel == mdPerspective && stretch::in())
     return true;
@@ -370,7 +370,7 @@ void raygen::compute_which_and_dist(int flat1, int flat2) {
     else if(in_h2xe() && hybrid::underlying == gBinaryTiling)
       fmain += "for(int i=0; i<=4; i++) if(i == 0 || i == 4) {";
     else
-      fmain += "for(int i="+its(flat1)+"; i<"+(prod ? "sides-2" : ((WDIM == 2 || is_subcube_based(variation) || intra::in) && !bt::in()) ? "sides" : its(flat2))+"; i++) {\n";
+      fmain += "for(int i="+its(flat1)+"; i<"+(gproduct ? "sides-2" : ((WDIM == 2 || is_subcube_based(variation) || intra::in) && !bt::in()) ? "sides" : its(flat2))+"; i++) {\n";
 
     fmain += "    mediump mat4 m = " + getM("walloffset+i") + ";\n";
 
@@ -454,14 +454,14 @@ void raygen::compute_which_and_dist(int flat1, int flat2) {
           "mediump float v = -(Mp*u-1.) / Mt;\n"
           "if(a < 1e-5) v = (1.-Mp*Mp) / (2. * Mt);\n"
           "mediump float d = asinh(v);\n";
-      if(prod) fmain += "d /= xspeed;\n";
+      if(gproduct) fmain += "d /= xspeed;\n";
       fmain +=
           "if(d < 0. && abs(log(position."+w+"*position."+w+"-position.x*position.x)) < uBLevel) continue;\n"
           "if(d < dist) { dist = d; which = i; }\n"
           "}\n";
       }
 
-    if(prod) fmain +=
+    if(gproduct) fmain +=
       "if(zspeed > 0.) { mediump float d = (uPLevel - zpos) / zspeed; if(d < dist) { dist = d; which = sides-1; }}\n"
       "if(zspeed < 0.) { mediump float d = (-uPLevel - zpos) / zspeed; if(d < dist) { dist = d; which = sides-2; }}\n";
 
@@ -743,7 +743,7 @@ void raygen::move_forward() {
     if(eyes) {
       fmain +=
       "  mediump float t = go + dist;\n";
-      fmain += prod ?
+      fmain += gproduct ?
       "  mediump vec4 v = at1 * t;\n" :
       "  mediump vec4 v = at0 * t;\n";
       fmain +=
@@ -756,7 +756,7 @@ void raygen::move_forward() {
         "  mediump vec4 xp = vec4(2.*c*sin(w/2.) * cos(w/2.+alpha), 2.*c*sin(w/2.)*sin(w/2.+alpha), w*(1.+(c*c/2.)*((1.-sin(w)/w)+(1.-cos(w))/w * sin(w+2.*alpha))), 1.);\n"
         "  mediump vec4 orig_position = vw * vec4(0., 0., 0., 1.);\n"
         "  mediump vec4 nposition = translate(orig_position, xp);\n";
-      else if(prod) {
+      else if(gproduct) {
         fmain +=
           "  mediump float alen_xy = length(azeq.xy);\n";
         fmain += "  mediump float nzpos = zpos + azeq.z;\n";
@@ -808,10 +808,10 @@ void raygen::move_forward() {
       "  mediump vec4 nposition = v;\n";
       }
 
-    bool reg = hyperbolic || sphere || euclid || sl2 || prod;
+    bool reg = hyperbolic || sphere || euclid || sl2 || gproduct;
 
     if(reg) {
-      string s = (rotspace || prod) ? "-2" : "";
+      string s = (rotspace || gproduct) ? "-2" : "";
       fmain +=
     "    mediump float best = "+f_len()+"(nposition);\n"
     "    for(int i=0; i<sides"+s+"; i++) {\n"
@@ -826,7 +826,7 @@ void raygen::move_forward() {
     "     mediump float cand2 = len_rotspace(" + getM("walloffset+sides-1") + "*nposition);\n"
     "     if(cand2 < best) { best = cand2; which = sides-1; }\n"
     "     }\n";
-      if(prod) {
+      if(gproduct) {
         fmain +=
         "if(nzpos > uPLevel) which = sides-1;\n"
         "if(nzpos <-uPLevel) which = sides-2;\n";
@@ -944,7 +944,7 @@ void raygen::move_forward() {
   }
 
 void raygen::apply_reflect(int flat1, int flat2) {
-  if(prod) fmain += "if(reflect && which >= sides-2) { zspeed = -zspeed; continue; }\n";
+  if(gproduct) fmain += "if(reflect && which >= sides-2) { zspeed = -zspeed; continue; }\n";
   if(horos()) {
     fmain +=
     "if(reflect && (which < "+its(flat1)+" || which >= "+its(flat2)+")) {\n";
@@ -1014,7 +1014,7 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
     intra::switch_to(gid2);
     }
 
-  if(prod) {
+  if(gproduct) {
     fmain += "mediump vec4 nposition;\n";
     fmain += "if(pconnection.x != .5) {\n"; // kind != 0
     if(1) {
@@ -1089,7 +1089,7 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
   intra::resetter ir;
   intra::switch_to(gid2);
 
-  if(prod) {
+  if(gproduct) {
     fmain += "if(pconnection.z != .5) {\n"; // kind != 0
     if(1) {
       string sgn = in_h2xe() ? "-" : "+";
@@ -1182,11 +1182,11 @@ void raygen::emit_intra_portal(int gid1, int gid2) {
 void raygen::emit_iterate(int gid1) {
   using glhr::to_glsl;
 
-  if(intra::in && prod)
+  if(intra::in && gproduct)
     fmain += "  const mediump float uPLevel = " + to_glsl(cgi.plevel/2) + ";\n";
 
   int flat1 = 0, flat2 = deg;
-  if(prod || rotspace) flat2 -= 2;
+  if(gproduct || rotspace) flat2 -= 2;
 
 #if CAP_BT
   if(horos()) {
@@ -1292,8 +1292,8 @@ void raygen::emit_iterate(int gid1) {
 
   fmain += "if(which == -1) continue;\n";
 
-  if(prod && eyes) fmain += "position.w = -nzpos;\n";
-  else if(prod) fmain += "position.w = -zpos;\n";
+  if(gproduct && eyes) fmain += "position.w = -nzpos;\n";
+  else if(gproduct) fmain += "position.w = -zpos;\n";
 
   if(reg3::ultra_mirror_in()) fmain +=
     "if(which >= " + its(S7) + ") {"
@@ -1323,11 +1323,11 @@ void raygen::emit_iterate(int gid1) {
         "pos.xyz = pos.zxy;\n";
     else if(hyperbolic || sphere) fmain +=
         "pos /= pos.w;\n";
-    else if(prod && bt::in()) fmain +=
+    else if(gproduct && bt::in()) fmain +=
         "pos.xy = deparabolic12(pos).xy;\n"
         "pos.z = -pos.w; pos.w = 0.;\n"
 ;
-    else if(prod) fmain +=
+    else if(gproduct) fmain +=
       "pos = vec4(pos.x/pos.z, pos.y/pos.z, -pos.w, 0);\n";
     fmain +=
     "    mediump vec2 inface = map_texture(pos, which+walloffset);\n"
@@ -1438,7 +1438,7 @@ void raygen::emit_iterate(int gid1) {
     "  position = m * position;\n"
     "  tangent = m * tangent;\n";
 
-  if(prod) no_intra_portal =
+  if(gproduct) no_intra_portal =
     "  if(which == sides-2) { zpos += uPLevel+uPLevel; }\n"
     "  else if(which == sides-1) { zpos -= uPLevel+uPLevel; }\n"
     "  else {\n" + no_intra_portal + "}\n";
@@ -1708,7 +1708,7 @@ void raygen::add_functions() {
   }
 
 void raygen::emit_raystarter() {
-  if(prod) {
+  if(gproduct) {
     string sgn=in_h2xe() ? "-" : "+";
     fmain +=
     "  position = vw * vec4(0., 0., 1., 0.);\n"
@@ -1863,10 +1863,10 @@ void raygen::create() {
       fsh += build_getter("mediump mat4", "uM", gms_limit);
     #endif
 
-    if(prod || intra::in) fsh +=
+    if(gproduct || intra::in) fsh +=
       "uniform mediump mat4 uLP;\n";
 
-    if(prod || intra::in) fsh +=
+    if(gproduct || intra::in) fsh +=
       "uniform mediump float uPLevel;\n";
 
     if(many_cell_types) fsh +=
@@ -1971,7 +1971,7 @@ void raygen::create() {
     fmain += "  mediump vec4 position;\n";
     fmain += "  mediump vec4 tangent;\n";
 
-    if(prod || intra::in) {
+    if(gproduct || intra::in) {
       fmain += "  mediump float zspeed = 1.;\n";
       fmain += "  mediump float xspeed = 1.;\n";
       fmain += "  mediump float zpos = 0.;\n";
@@ -2195,7 +2195,7 @@ struct raycast_map {
       if(!c) continue;
       intra::may_switch_to(c);
       int id =p.first;
-      if(prod) {
+      if(gproduct) {
         ms[id+c->type-2] = Id;
         ms[id+c->type-1] = Id;
         }

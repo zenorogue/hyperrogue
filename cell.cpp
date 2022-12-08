@@ -187,7 +187,7 @@ transmatrix hrmap::adj(heptagon *h, int i) { return relative_matrix(h->cmove(i),
 vector<cell*>& hrmap::allcells() { 
   static vector<cell*> default_allcells;
   if(disksize) return all_disk_cells;
-  if(closed_manifold && !(cgflags & qHUGE_BOUNDED) && !(hybri && hybrid::csteps == 0)) {
+  if(closed_manifold && !(cgflags & qHUGE_BOUNDED) && !(mhybrid && hybrid::csteps == 0)) {
     celllister cl(gamestart(), 1000000, 1000000, NULL);
     default_allcells = cl.lst;
     return default_allcells;
@@ -403,13 +403,15 @@ EX bool is_in_disk(cell *c) {
 /** create a map in the current geometry */
 EX void initcells() {
   DEBB(DF_INIT, ("initcells"));
+
+  if(embedded_plane) return IPF( initcells() );
   
   hrmap* res = callhandlers((hrmap*)nullptr, hooks_newmap);
   if(res) currentmap = res;
   #if CAP_SOLV
   else if(asonov::in()) currentmap = asonov::new_map();
   #endif
-  else if(nonisotropic || hybri) currentmap = nisot::new_map();
+  else if(nonisotropic || mhybrid) currentmap = nisot::new_map();
   else if(INVERSE) currentmap = gp::new_inverse();
   else if(fake::in()) currentmap = fake::new_map();
   #if CAP_CRYSTAL
@@ -586,7 +588,7 @@ EX int compdist(int dx[]) {
 
 EX int celldist(cell *c) {
   if(experimental) return 0;
-  if(hybri) 
+  if(mhybrid)
     return hybrid::celldistance(c, currentmap->gamestart());
   if(nil && !quotient) return DISTANCE_UNKNOWN;
   if(euc::in()) return celldistance(currentmap->gamestart(), c);
@@ -617,7 +619,7 @@ static const int ALTDIST_ERROR = 90000;
 
 EX int celldistAlt(cell *c) {
   if(experimental) return 0;
-  if(hybri) { 
+  if(mhybrid) {
     if(in_s2xe()) return hybrid::get_where(c).second;
     auto w = hybrid::get_where(c); 
     int d = c->master->alt && c->master->alt->alt ? hybrid::altmap_heights[c->master->alt->alt] : 0;
@@ -831,7 +833,8 @@ EX bool randpatternMajority(cell *c, int ival, int iterations) {
 cdata orig_cdata;
 
 EX bool geometry_supports_cdata() {
-  if(hybri) return PIU(geometry_supports_cdata());
+  if(mhybrid) return PIU(geometry_supports_cdata());
+  if(embedded_plane) return IPF( geometry_supports_cdata() );
   return among(geometry, gEuclid, gEuclidSquare, gNormal, gOctagon, g45, g46, g47, gBinaryTiling) || (arcm::in() && !sphere) || (currentmap && currentmap->strict_tree_rules());
   }
 
@@ -925,7 +928,8 @@ cdata *getHeptagonCdata_legacy(heptagon *h) {
 
 
 cdata *getHeptagonCdata(heptagon *h) {
-  if(hybri) return PIU ( getHeptagonCdata(h) );
+  if(mhybrid) return PIU ( getHeptagonCdata(h) );
+  if(embedded_plane) return IPF( getHeptagonCdata(h) );
   if(geometry == gNormal && BITRUNCATED) return getHeptagonCdata_legacy(h);
   if(h->cdata) return h->cdata;
 
@@ -1090,8 +1094,9 @@ EX cdata *arcmCdata(cell *c) {
 
 EX int getCdata(cell *c, int j) {
   if(fake::in()) return FPIU(getCdata(c, j));
+  if(embedded_plane) return IPF(getCdata(c, j));
   if(experimental) return 0;
-  if(hybri) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
+  if(mhybrid) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
   else if(INVERSE) {
     cell *c1 = gp::get_mapped(c);
     return UIU(getCdata(c1, j));
@@ -1116,8 +1121,9 @@ EX int getCdata(cell *c, int j) {
 
 EX int getBits(cell *c) {
   if(fake::in()) return FPIU(getBits(c));
+  if(embedded_plane) return IPF(getBits(c));
   if(experimental) return 0;
-  if(hybri) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
+  if(mhybrid) { c = hybrid::get_where(c).first; return PIU(getBits(c)); }
   else if(INVERSE) {
     cell *c1 = gp::get_mapped(c);
     return UIU(getBits(c1));
@@ -1265,7 +1271,7 @@ EX int celldistance(cell *c1, cell *c2) {
 
   if(fake::in()) return FPIU(celldistance(c1, c2));
 
-  if(hybri) return hybrid::celldistance(c1, c2);
+  if(mhybrid) return hybrid::celldistance(c1, c2);
   
   #if CAP_FIELD
   if(geometry == gFieldQuotient && (PURE || BITRUNCATED)) {
@@ -1533,7 +1539,7 @@ EX vector<int> reverse_directions(heptagon *c, int dir) {
   }
 
 EX bool standard_tiling() {
-  return !arcm::in() && !kite::in() && !bt::in() && !arb::in() && !nonisotropic && !hybri;
+  return !arcm::in() && !kite::in() && !bt::in() && !arb::in() && !nonisotropic && !mhybrid;
   }
 
 EX int valence() {

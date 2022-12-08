@@ -184,7 +184,7 @@ map<heptagon*, short> altmap::quotient_relspins;
 auto qclear = addHook(hooks_clearmemory, 200, [] { altmap::quotient_relspins.clear(); });
 
 void hrmap::extend_altmap(heptagon *h, int levs, bool link_cdata) {
-  if(hybri) { PIU ( extend_altmap(h, levs, link_cdata) ); }
+  if(mhybrid) { PIU ( extend_altmap(h, levs, link_cdata) ); }
   if(!h->alt) return;
   preventbarriers(h->c7);
   if(h->c7) forCellEx(c2, h->c7) preventbarriers(c2);
@@ -230,7 +230,7 @@ EX int hrandom_adjacent(cellwalker cw) {
 
 EX heptagon *create_altmap(cell *c, int rad, hstate firststate, int special IS(0)) {
 
-  if(hybri) {
+  if(mhybrid) {
     if(hybrid::under_class() == gcSphere) return NULL;
     c = hybrid::get_where(c).first;
     return PIU ( create_altmap(c, rad, firststate, special) );
@@ -296,7 +296,7 @@ EX heptagon *create_altmap(cell *c, int rad, hstate firststate, int special IS(0
   if(!currentmap->link_alt(h, alt, firststate, p.last.spin)) {
     return nullptr;
     }
-  if(hybri) hybrid::altmap_heights[alt] = hybrid::get_where(centerover).second;
+  if(mhybrid) hybrid::altmap_heights[alt] = hybrid::get_where(centerover).second;
   alt->alt = alt;
   h->alt = alt;
   alt->cdata = (cdata*) h;
@@ -814,10 +814,10 @@ EX void buildEquidistant(cell *c) {
     ls::nice_walls() ? true :
     false;
   
-  if(c->landparam > 30 && b == laOcean && !generatingEquidistant && !hybri && hrand(10) < 5 && chance) 
+  if(c->landparam > 30 && b == laOcean && !generatingEquidistant && !mhybrid && hrand(10) < 5 && chance)
     buildAnotherEquidistant(c);
 
-  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && !hybri && hrand(100) < (PURE?25:5) && items[itBone] >= U10 && chance) 
+  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && !mhybrid && hrand(100) < (PURE?25:5) && items[itBone] >= U10 && chance)
     buildAnotherEquidistant(c);
   }
 
@@ -959,7 +959,7 @@ EX void clear_euland(eLand first) {
   }
 
 bool valid_wall_at(int c) {
-  if(nonisotropic || hybri) return true;
+  if(nonisotropic || mhybrid) return true;
   return short(c) % 3 == 0;
   }
   
@@ -972,7 +972,7 @@ EX eLand switchable(eLand nearland, eLand farland, int c) {
   else if(ls::no_walls()) {
     if((dual::state && nearland == laCrossroads4) || hrand(15) == 0)
       return getNewLand(nearland);
-    if(nearland == laCrossroads4 && (nonisotropic || hybri))
+    if(nearland == laCrossroads4 && (nonisotropic || mhybrid))
       return getNewLand(nearland);
     return nearland;
     }
@@ -1372,7 +1372,7 @@ EX bool horo_ok() {
   if(INVERSE) return false;  
   if(currentmap->strict_tree_rules()) return true;
   if(reg3::in_hrmap_h3() && !PURE) return false;
-  return hyperbolic && !bt::in() && !arcm::in() && !kite::in() && !experimental && !hybri && !arb::in() && !quotient;
+  return hyperbolic && !bt::in() && !arcm::in() && !kite::in() && !experimental && !mhybrid && !arb::in() && !quotient;
   }
 
 /** \brief should we either generate the horocycles in the current geometry, or have them exist via eubinary? */
@@ -1496,7 +1496,7 @@ EX bool old_nice_walls() {
   }
 
 EX bool nice_walls_available() {
-  if(hybri) return PIU(nice_walls_available());
+  if(mhybrid) return PIU(nice_walls_available());
   if(fake::in()) return FPIU(nice_walls_available());
   return WDIM == 2;
   }
@@ -1520,7 +1520,7 @@ EX void build_walls(cell *c, cell *from) {
   
   // buildgreatwalls
   
-  if(hybri) return;  /* Great Walls generated via the underlying geometry */
+  if(mhybrid) return;  /* Great Walls generated via the underlying geometry */
   
   if(walls_not_implemented()) return; // walls not implemented here  
 
@@ -1920,7 +1920,7 @@ EX void gen_temple(cell *c) {
       auto d = hybrid::get_where(c);
       if(!PIU(pseudohept(d.first))) c->wall = waColumn;
       }
-    else if(hybri) {
+    else if(mhybrid) {
       auto d = hybrid::get_where(c);
       if(d.first->wall == waColumn || (d.second&1)) c->wall = waColumn;
       }

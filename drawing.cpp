@@ -1559,7 +1559,7 @@ EX namespace ods {
 
       for(int j=0; j<3; j++) {
         hyperpoint o = p->V * glhr::gltopoint((*p->tab)[p->offset+i+j]);
-        if(nonisotropic || prod) {
+        if(nonisotropic || gproduct) {
           o = lp_apply(inverse_exp(o, iTable, false));
           o[3] = 1;
           dynamicval<eGeometry> g(geometry, gEuclid);
@@ -2456,7 +2456,7 @@ EX void drawqueue() {
   #endif
 
   #if MAXMDIM >= 4 && CAP_GL
-  if(WDIM == 2 && GDIM == 3 && hyperbolic && !vrhr::rendering()) make_air();
+  if(embedded_plane && (hyperbolic || geom3::sph_in_euc()) && !vrhr::rendering()) make_air();
   #endif
   
   #if CAP_VR

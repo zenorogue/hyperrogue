@@ -1496,7 +1496,7 @@ EX void initialize_all() {
 #if CAP_ARCM
   arcm::current.parse();
 #endif
-  if(hybri) geometry = hybrid::underlying;
+  if(mhybrid) geometry = hybrid::underlying;
 
 #if CAP_COMMANDLINE
   arg::read(2);

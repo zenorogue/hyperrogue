@@ -16,7 +16,7 @@ EX hyperpoint final_coords(hyperpoint h) {
   if(sn::in() || !bt::in()) 
     return ultra_normalize(h);
   #if CAP_BT
-  if(bt::in() && !prod)
+  if(bt::in() && !mproduct)
     return bt::bt_to_minkowski(h);
   #endif
   return h;
@@ -121,7 +121,7 @@ EX namespace reg3 {
   EX bool in() {
     if(fake::in()) return FPIU(in());
     if(geometry == gCubeTiling && (cubes_reg3 || !PURE)) return true;
-    return WDIM == 3 && !euclid && !bt::in() && !nonisotropic && !hybri && !kite::in();
+    return WDIM == 3 && !euclid && !bt::in() && !nonisotropic && !mhybrid && !kite::in();
     }
 
   EX void compute_ultra() {

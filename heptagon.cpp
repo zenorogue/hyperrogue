@@ -25,6 +25,7 @@ cell *newCell(int type, heptagon *master);
  */
 
 EX hstate transition(hstate s, int dir) {
+  if(embedded_plane) return IPF(transition(s, dir));
   if(sphere) {
     if(S7 == 4) {
       if(s == hsOrigin) return dir == 0 ? hsB0 : hsB1;

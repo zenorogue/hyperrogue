@@ -796,7 +796,7 @@ EX void generateSnake(cell *c, int i, int snakecolor) {
     c2 = c3;
     c2->monst = moHexSnakeTail; c2->hitpoints = snakecolor;
     int t = c2->type;
-    if(hybri) t -= 2;
+    if(mhybrid) t -= 2;
     i = (j + (t%4 == 0 ? t/2 : (len%2 ? 2 : t - 2))) % t;
     createMov(c2, i);
     if(!inpair(c2->move(i), cpair)) {

@@ -196,7 +196,7 @@ struct hr_polygon_error : hr_exception {
 string hr_polygon_error::generate_error() {
   cld dist = (hdist0(tC0(end)) / params["distunit"]);
   bool angle = abs(dist) < 1e-9;
-  if(angle) dist = (atan2(end * xpush0(1)) / params["angleunit"]);     
+  if(angle) dist = (atan2(end * lxpush0(1)) / params["angleunit"]);
   return
     XLAT("Polygon number %1 did not close correctly (%2 %3). Here is the picture to help you understand the issue.\n\n", its(id), 
       angle ? "angle" : "distance",
@@ -259,7 +259,7 @@ void shape::build_from_angles_edges(bool is_comb) {
     matrices.push_back(at);
     if(debugflags & DF_GEOM) println(hlog, "at = ", at);
     ctr += tC0(at);
-    at = at * xpush(in_edges[i]) * spin(in_angles[i]+M_PI);
+    at = at * lxpush(in_edges[i]) * spin(in_angles[i]+M_PI);
     }
   matrices.push_back(at);
   if(is_comb) return;
@@ -271,8 +271,8 @@ void shape::build_from_angles_edges(bool is_comb) {
     // try to move towards the center
     if(debugflags & DF_GEOM) println(hlog, "special case encountered");
     for(int i=0; i<n; i++) {
-      ctr += at * xpush(in_edges[i]) * spin((in_angles[i]+M_PI)/2) * xpush0(.01);
-      at = at * xpush(in_edges[i]) * spin(in_angles[i]);
+      ctr += at * lxpush(in_edges[i]) * spin((in_angles[i]+M_PI)/2) * lxpush0(.01);
+      at = at * lxpush(in_edges[i]) * spin(in_angles[i]);
       }
     if(debugflags & DF_GEOM) println(hlog, "ctr = ", ctr);
     }
@@ -1473,7 +1473,7 @@ struct hrmap_arbi : hrmap {
 
     heptagon *alt = NULL;
     
-    if(hyperbolic) {
+    if(mhyperbolic) {
       dynamicval<eGeometry> g(geometry, gNormal); 
       alt = init_heptagon(S7);
       alt->s = hsOrigin;
@@ -1481,7 +1481,7 @@ struct hrmap_arbi : hrmap {
       current_altmap = newAltMap(alt); 
       }
     
-    transmatrix T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * Id;
+    transmatrix T = lxpush(.01241) * spin(1.4117) * lxpush(0.1241) * Id;
     arbi_matrix[origin] = make_pair(alt, T);
     altmap[alt].emplace_back(origin, T);
     
@@ -1559,7 +1559,7 @@ struct hrmap_arbi : hrmap {
     
     transmatrix T = p.second * adj(h, d);
     
-    if(hyperbolic) {
+    if(mhyperbolic) {
       dynamicval<eGeometry> g(geometry, gNormal); 
       dynamicval<hrmap*> cm(currentmap, current_altmap);
       // transmatrix U = T;
@@ -1567,8 +1567,8 @@ struct hrmap_arbi : hrmap {
       // U = U * inverse(T);
       }
     fixmatrix(T);
-    
-    if(euclid) {
+
+    if(meuclid) {
       /* hash the rough coordinates as heptagon* alt */
       size_t s = size_t(T[0][LDIM]+.261) * 124101 + size_t(T[1][LDIM]+.261) * 82143;
       alt = (heptagon*) s;

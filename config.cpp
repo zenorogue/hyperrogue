@@ -832,6 +832,9 @@ EX void initConfig() {
   addsaver(vid.highlightmode, "highlightmode");
 
   addsaver(vid.always3, "3D always", false);
+
+  param_enum(geom3::spatial_embedding, "spatial_embedding", "spatial embedding", geom3::seDefault)
+  ->editable(geom3::spatial_embedding_options, "spatial embedding", 'E');
   
   param_b(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA || ISWEB) ? 1 : 0);
   param_i(reserve_limit, "memory_reserve", 128);
@@ -2203,6 +2206,8 @@ EX void show3D() {
     dialog::add_action(geom3::switch_fpp);
     }
 #endif
+
+  add_edit(geom3::spatial_embedding);
   dialog::addBreak(50);
 
 #if MAXMDIM >= 4
@@ -2278,7 +2283,7 @@ EX void show3D() {
       });
     }
 
-  if((WDIM == 2 && GDIM == 3) || prod)
+  if(mproduct || embedded_plane)
     dialog::addBoolItem_action(XLAT("fixed Y/Z rotation"), vid.fixed_yz, 'Z');
 
   if(WDIM == 2 && GDIM == 3) {

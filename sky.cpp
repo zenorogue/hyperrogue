@@ -6,6 +6,12 @@ EX bool context_fog = true;
 
 EX ld camera_level;
 EX bool draw_sky = true;
+EX bool camera_sign;
+
+EX bool camera_over(ld x) {
+  if(camera_sign) return camera_level <= x;
+  return camera_level >= x;
+  }
 
 #if MAXMDIM >= 4 && CAP_GL
 
@@ -37,7 +43,7 @@ EX struct dqi_sky *sky;
 
 EX void prepare_sky() {
   sky = NULL;
-  if(euclid) {
+  if(euclid && !geom3::sph_in_euc()) {
     if(WDIM == 3 || GDIM == 2) return;
     if(no_wall_rendering) return;
     shiftmatrix T = ggmatrix(currentmap->gamestart());
@@ -46,7 +52,7 @@ EX void prepare_sky() {
     queuepolyat(T * zpush(cgi.SKY+0.5) * xpush(cgi.SKY+0.5), cgi.shSun, 0xFFFF00FF, PPR::SKY);
     }
   else {
-    sky = &queuea<dqi_sky> (PPR::MISSILE);
+    sky = &queuea<dqi_sky> (euclid ? PPR::EUCLIDEAN_SKY : PPR::MISSILE);
     }
   }
 
@@ -57,6 +63,7 @@ shiftmatrix sky_cview;
 void compute_skyvertices(const vector<sky_item>& sky) {
   skyvertices.clear();
   if(!draw_sky) return;
+  if(vid.wall_height < 0 && geom3::euc_in_hyp()) return; /* just looks bad */
 
   int sk = get_skybrightness();
   
@@ -184,6 +191,7 @@ void compute_skyvertices(const vector<sky_item>& sky) {
         }
 
       if(true) {
+        hyperpoint tctr = tile_center();
         cellwalker cw0(c, i);
         cellwalker cw = cw0;
         do {
@@ -197,7 +205,7 @@ void compute_skyvertices(const vector<sky_item>& sky) {
   
         transmatrix T1 = Id;
         do {
-          vertices.push_back(tC0(T1));
+          vertices.push_back(T1 * tctr);
           vcolors.push_back(colors[cw.at].first);
           T1 = T1 * currentmap->adj(cw.at, cw.spin);
           cw += wstep; cw++;
@@ -210,15 +218,16 @@ void compute_skyvertices(const vector<sky_item>& sky) {
         for(int i=0; i<k; i++) ccolor = gradient(ccolor, vcolors[i], 0, 1, i+1);
         
         hyperpoint ctr = Hypc;
+        for(auto& p: vertices) p = normalize_flat(p);
         for(auto& p: vertices) ctr = ctr + p;
-        normalize(ctr);
-  
+        ctr = normalize_flat(ctr);
+
         for(int j=0; j<k; j++) {
           int j1 = (j+1) % k;
           glhr::colored_vertex cv[prec+1][prec+1];
           for(int x=0; x<=prec; x++) for(int y=0; y<=prec; y++) if(x+y <= prec) {
             hyperpoint h = ctr * (prec-x-y) + vertices[j] * x + vertices[j1] * y;
-            h = normalize(h);
+            h = normalize_flat(h);
             color_t co = gradient(ccolor, gradient(vcolors[j], vcolors[j1], 0, y, x+y), 0, x+y, prec);
             // co = (hrand(0x1000000)  << 8) | 0xFF;
             // co = minecolors[(x+2*y) % 7] << 8 | 0xFF;
@@ -249,13 +258,14 @@ void compute_skyvertices(const vector<sky_item>& sky) {
 
 void dqi_sky::draw() {
   if(!vid.usingGL || sky.empty() || skyvertices.empty()) return;
-  
+
   #if CAP_VR
   transmatrix s = (vrhr::rendering() ? vrhr::master_cview : cview()).T * inverse(sky_cview.T);
   #else
   transmatrix s = cview().T * inverse(sky_cview.T);
   #endif
     
+  if(euclid) be_euclidean_infinity(s);
   for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
     if(global_projection && global_projection != ed) continue;
     current_display->next_shader_flags = GF_VARCOLOR;
@@ -282,7 +292,27 @@ color_t skycolor(cell *c) {
   return gradient(0x4040FF, 0xFFFFFF, 0, z, 63);
   }
 
-EX const ld star_val = 2;
+/** move an Euclidean matrix to V(C0) == C0 */
+EX void be_euclidean_infinity(transmatrix& V) { for(int i=0; i<3; i++) V[i][3] = 0; }
+
+void draw_star(const shiftmatrix& V, const hpcshape& sh, color_t col, ld rev = false) {
+  ld star_val = 2;
+  bool have_stars = geom3::same_in_same() || geom3::sph_in_euc() || geom3::sph_in_hyp() || geom3::euc_in_hyp();
+  if(geom3::sph_in_euc()) { if(cgi.SKY < 0) have_stars = false; star_val = 1.8; }
+  if(geom3::sph_in_hyp() && cgi.SKY < 0) have_stars = false;
+  if(geom3::euc_in_hyp() && (rev ? cgi.SKY > 0 : cgi.SKY < 0)) have_stars = false;
+  if(!have_stars) return;
+  ld val = cgi.SKY+star_val;
+  if(rev) val = -val;
+
+  if(euclid) {
+    auto V1 = V; be_euclidean_infinity(V1.T);
+    queuepolyat(V1 * zpush(val), sh, col, PPR::EUCLIDEAN_SKY);
+    }
+  else {
+    queuepolyat(V * zpush(val), sh, col, PPR::SKY);
+    }
+  }
 
 void celldrawer::draw_ceiling() {
 
@@ -291,19 +321,17 @@ void celldrawer::draw_ceiling() {
   auto add_to_sky = [this] (color_t col, color_t col2) {
     if(sky) sky->sky.emplace_back(c, V, col, col2);
     };
-  
+
   switch(ceiling_category(c)) {
     /* ceilingless levels */
     case 1: {
-      if(euclid) return;
-      if(fieldpattern::fieldval_uniq(c) % 3 == 0) {
-        queuepolyat(V * zpush(cgi.SKY+star_val), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
-        }
+      if(euclid && !geom3::sph_in_euc()) return;
+      if(fieldpattern::fieldval_uniq(c) % 3 == 0)
+        draw_star(V, cgi.shNightStar, 0xFFFFFFFF);
       add_to_sky(0x00000F, 0x00000F);
       if(c->land == laAsteroids) {
-        if(fieldpattern::fieldval_uniq(c) % 9 < 3) {
-          queuepolyat(V * zpush(-star_val-cgi.SKY), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
-          }
+        if(fieldpattern::fieldval_uniq(c) % 9 < 3)
+          draw_star(V, cgi.shNightStar, 0xFFFFFFFF, true);
         int sk = get_skybrightness(-1);
         auto sky = draw_shapevec(c, V * MirrorZ, cgi.shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
         if(sky) sky->tinf = NULL, sky->flags |= POLY_INTENSE;
@@ -312,7 +340,7 @@ void celldrawer::draw_ceiling() {
       }
     
     case 2: {
-      if(euclid) return;
+      if(euclid && !geom3::sph_in_euc()) return;
       color_t col;
       color_t skycol;
       
@@ -320,25 +348,19 @@ void celldrawer::draw_ceiling() {
         case laWineyard:
           col = 0x4040FF;
           skycol = 0x8080FF;
-          if(emeraldval(c) / 4 == 11) {
-            queuepolyat(V * zpush(cgi.SKY+star_val), cgi.shSun, 0xFFFF00FF, PPR::SKY);
-            }
+          if(emeraldval(c) / 4 == 11) draw_star(V, cgi.shSun, 0xFFFF00FF);
           break;
 
         case laDesert:
           col = 0x2020C0;
           skycol = 0x8080FF;
-          if(emeraldval(c) / 4 == 11) {
-            queuepolyat(V * zpush(cgi.SKY+star_val), cgi.shSun, 0xFFFF00FF, PPR::SKY);
-            }
+          if(emeraldval(c) / 4 == 11) draw_star(V, cgi.shSun, 0xFFFF00FF);
           break;
 
         case laFrog:
           col = 0x4040FF;
           skycol = 0x8080FF;
-          if(zebra40(c) / 4 == 1) {
-            queuepolyat(V * zpush(cgi.SKY+star_val), cgi.shSun, 0xFFFF00FF, PPR::SKY);
-            }
+          if(zebra40(c) / 4 == 1) draw_star(V, cgi.shSun, 0xFFFF00FF);
           break;
 
         case laPower:
@@ -395,7 +417,7 @@ void celldrawer::draw_ceiling() {
     
     case 3: {
       add_to_sky(0, 0);
-      if(camera_level <= cgi.WALL) return;
+      if(camera_over(cgi.WALL)) return;
       if(c->land == laMercuryRiver) fcol = linf[laTerracotta].color, fd = 1;
       if(qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
       forCellIdEx(c2, i, c) 
@@ -410,7 +432,7 @@ void celldrawer::draw_ceiling() {
     
     case 4: {
       add_to_sky(0x00000F, 0x00000F);
-      if(camera_level <= cgi.HIGH2) return;
+      if(camera_over(cgi.HIGH)) return;
       auto ispal = [&] (cell *c0) { return c0->land == laPalace && among(c0->wall, waPalace, waClosedGate, waOpenGate); };
       color_t wcol2 = 0xFFD500;
       if(ispal(c)) {
@@ -428,15 +450,13 @@ void celldrawer::draw_ceiling() {
       if(among(c->wall, waClosedGate, waOpenGate) && qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], 0x202020FF, PPR::WALL);
       if(euclid) return;
 
-      if(true) {
-        queuepolyat(V * zpush(cgi.SKY+star_val), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
-        }
+      draw_star(V, cgi.shNightStar, 0xFFFFFFFF);
       break;
       }
     
     case 6: {
       add_to_sky(skycolor(c), 0x4040C0);
-      if(camera_level <= cgi.HIGH2) return;
+      if(camera_over(cgi.HIGH2)) return;
       color_t wcol2 = winf[waRuinWall].color;
       if(c->landparam == 1)
         forCellIdEx(c2, i, c) if(c2->landparam != 1)
@@ -453,10 +473,9 @@ void celldrawer::draw_ceiling() {
     
     case 7: {
       add_to_sky(0x00000F, 0x00000F);
-      if(fieldpattern::fieldval_uniq(c) % 5 < 2) {
-        queuepolyat(V * zpush(cgi.SKY+star_val), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
-        }
-      if(camera_level <= cgi.HIGH2) return;
+      if(fieldpattern::fieldval_uniq(c) % 5 < 2)
+        draw_star(V, cgi.shNightStar, 0xFFFFFFFF);
+      if(camera_over(cgi.HIGH2)) return;
       color_t wcol2 = winf[waColumn].color;
       if(c->landparam == 1)
         forCellIdEx(c2, i, c) if(c2->landparam != 1)
@@ -473,7 +492,7 @@ void celldrawer::draw_ceiling() {
     
     case 5: {
       add_to_sky(0x00000F, 0x00000F);
-      if(camera_level <= cgi.WALL) return;
+      if(camera_over(cgi.WALL)) return;
     
       if(pseudohept(c)) {
         forCellIdEx(c2, i, c) 
@@ -483,9 +502,7 @@ void celldrawer::draw_ceiling() {
         draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
 
       if(euclid) return;
-      if(true) {
-        queuepolyat(V * zpush(cgi.SKY+star_val), cgi.shNightStar, 0xFFFFFFFF, PPR::SKY);
-        }
+      draw_star(V, cgi.shNightStar, 0xFFFFFFFF);
       }
     }
   }

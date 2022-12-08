@@ -148,8 +148,6 @@ void addMessage(string s, char spamtype = 0);
 #define nih (cgflags & qNIH)
 #define nil (cgclass == gcNil)
 #define sl2 (cgclass == gcSL2)
-#define prod (cgclass == gcProduct)
-#define hybri (cgflags & qHYBRID)
 #define rotspace (geometry == gRotSpace)
 #define hyperbolic (cgclass == gcHyperbolic)
 #define nonisotropic (among(cgclass, gcSolNIH, gcNil, gcSL2))
@@ -160,6 +158,19 @@ void addMessage(string s, char spamtype = 0);
 #define smallbounded ((cgflags & qSMALL) || disksize)
 #define closed_manifold (cgflags & qCLOSED)
 #define closed_or_bounded (closed_manifold || disksize)
+/** the actual map has hybrid geometry, not just the graphics */
+#define mhybrid (cgflags & qHYBRID)
+/** graphics based on a product geometry -- either embedded or actual hybrid product */
+#define gproduct (cgclass == gcProduct)
+
+/** 2D geometry embedded in 3D */
+#define embedded_plane (WDIM == 2 && GDIM == 3)
+/** the actual map is product, not just the graphics */
+#define mproduct (gproduct && !embedded_plane)
+/** the actual map is product, not just the graphics */
+#define meuclid (geom3::mgclass() == gcEuclid)
+#define msphere (geom3::mgclass() == gcSphere)
+#define mhyperbolic (geom3::mgclass() == gcHyperbolic)
 
 // Dry Forest burning, heat transfer, etc. are performed on the whole universe
 #define doall (closed_or_bounded)

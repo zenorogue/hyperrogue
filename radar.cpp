@@ -15,7 +15,7 @@ pair<bool, hyperpoint> makeradar(shiftpoint h) {
     if(r < 1) h1 = h1 * (atanh(r) / r);
     else return {false, h1};
     }
-  else if(prod) h1 = product::inverse_exp(unshift(h));
+  else if(mproduct) h1 = product::inverse_exp(unshift(h));
   else if(sl2) h1 = slr::get_inverse_exp(h);
   else h1 = unshift(h);
   
@@ -84,7 +84,7 @@ EX void draw_radar(bool cornermode) {
   bool d3 = WDIM == 3;
   bool hyp = hyperbolic;
   bool sph = sphere;
-  bool scompass = nonisotropic && !hybri;
+  bool scompass = nonisotropic && !mhybrid;
 
   dynamicval<eGeometry> g(geometry, gEuclid);
   dynamicval<eModel> pm(pmodel, mdDisk);

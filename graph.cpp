@@ -393,7 +393,7 @@ EX void drawPlayerEffects(const shiftmatrix& V, const shiftmatrix& Vparam, cell 
       int adj = 1 - ((sword_angles/cwt.at->type)&1);
       
 #if CAP_QUEUE
-      if(!euclid && !hybri) for(int a=0; a<sword_angles; a++) {
+      if(!euclid && !mhybrid) for(int a=0; a<sword_angles; a++) {
         if(a == ang && items[itOrbSword]) continue;
         if((a+sword_angles/2)%sword_angles == ang && items[itOrbSword2]) continue;
         bool longer = sword::pos2(cwt.at, a-1) != sword::pos2(cwt.at, a+1);
@@ -629,7 +629,7 @@ EX void ShadowV(const shiftmatrix& V, const hpcshape& bp, PPR prio IS(PPR::MONST
 #if CAP_SHAPES
 transmatrix otherbodyparts(const shiftmatrix& V, color_t col, eMonster who, double footphase) {
 
-#define VFOOT ((GDIM == 2 || hybri) ? V : at_smart_lof(V, cgi.LEG0))
+#define VFOOT ((GDIM == 2 || mhybrid) ? V : at_smart_lof(V, cgi.LEG0))
 #define VLEG at_smart_lof(V, cgi.LEG)
 #define VGROIN at_smart_lof(V, cgi.GROIN)
 #define VBODY at_smart_lof(V, cgi.BODY)
@@ -681,7 +681,7 @@ transmatrix otherbodyparts(const shiftmatrix& V, color_t col, eMonster who, doub
 
   shiftmatrix Tright, Tleft;
   
-  if(GDIM == 2 || hybri) {
+  if(GDIM == 2 || mhybrid) {
     Tright = VFOOT * xpush(rightfoot);
     Tleft = VFOOT * Mirror * xpush(-rightfoot);
     }
@@ -758,15 +758,15 @@ EX color_t kind_outline(eItem it) {
 
 EX shiftmatrix face_the_player(const shiftmatrix V) {
   if(GDIM == 2) return V;
-  if(prod) return orthogonal_move(V, cos(ptick(750)) * cgi.plevel / 16);
-  if(hybri) return V * zpush(cos(ptick(750)) * cgi.plevel / 16);
+  if(mproduct) return orthogonal_move(V, cos(ptick(750)) * cgi.plevel / 16);
+  if(mhybrid) return V * zpush(cos(ptick(750)) * cgi.plevel / 16);
   transmatrix dummy; /* used only in prod anyways */
   if(nonisotropic) return shiftless(spin_towards(unshift(V), dummy, C0, 2, 0));
   #if CAP_VR
   if(vrhr::enabled) {
     shiftpoint h = tC0(V);    
     hyperpoint uh = unshift(h);
-    return shiftless(cspin90(1, 2) * rspintox(cspin90(2, 1) * uh) * xpush(hdist0(uh)) * cspin90(0, 2) * spin270());
+    return shiftless(cspin90(1, 2) * lrspintox(cspin90(2, 1) * uh) * xpush(hdist0(uh)) * cspin90(0, 2) * spin270());
     }
   #endif
   return rgpushxto0(tC0(V));
@@ -894,7 +894,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
 
   shiftmatrix Vit = V;
   if(GDIM == 3 && WDIM == 2 && c && it != itBabyTortoise) Vit = orthogonal_move_fol(V, cgi.STUFF);
-  if(c && prod)
+  if(c && mproduct)
     Vit = orthogonal_move(Vit, sin(ptick(750)) * cgi.plevel / 4);
   else if(c && sl2)
     Vit = Vit * zpush(sin(ptick(750)) * cgi.plevel / 4);
@@ -955,7 +955,7 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
           addauraspecial(P1, 0xFF0000, 0);
           }
         
-        V2 = V * rspintox(inverse_shift(V, P1));
+        V2 = V * lrspintox(inverse_shift(V, P1));
         }
       else V2 = V;
       }
@@ -1557,7 +1557,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
   char xch = minf[m].glyph;
   
   shiftmatrix V = V1;
-  if(WDIM == 3 && (classflag(m) & CF_FACE_UP) && where && !hybri) V = V1 * cspin90(0, 2);
+  if(WDIM == 3 && (classflag(m) & CF_FACE_UP) && where && !mhybrid) V = V1 * cspin90(0, 2);
   
   #if CAP_SHAPES
   if(among(m, moTortoise, moWorldTurtle) && where && where->stuntime >= 3)
@@ -2641,7 +2641,7 @@ EX bool applyAnimation(cell *c, shiftmatrix& V, double& footphase, int layer) {
     else
       wnow = tC0(z_inverse(a.wherenow));
     
-    if(prod) {
+    if(gproduct) {
       auto d = product_decompose(wnow);
       ld dist = d.first / R * aspd;
       if(abs(dist) > abs(d.first)) dist = -d.first;
@@ -2856,8 +2856,8 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
         else {
           if(c->monst == moTentacleGhost) {
             hyperpoint V0 = history::on ? unshift(tC0(Vs)) : inverse_shift(cwtV, tC0(Vs));
-            hyperpoint V1 = spintox(V0) * V0;
-            Vs = cwtV * rspintox(V0) * rpushxto0(V1) * pispin;
+            hyperpoint V1 = lspintox(V0) * V0;
+            Vs = cwtV * lrspintox(V0) * rpushxto0(V1) * pispin;
             drawMonsterType(moGhost, c, Vs, col, footphase, asciicol);
             col = minf[moTentacletail].color;
             }
@@ -2904,7 +2904,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
 
     if(mmmon) {
       if(isAnyIvy(c)) {
-        if(hybri) {
+        if(mhybrid) {
           queuepoly(Vb, cgi.shILeaf[ctof(c)], darkena(col, 0, 0xFF));
           for(int a=0; a<c->type-2; a++)
             queuepoly(Vb * spin(a * TAU / (c->type-2)), cgi.shILeaf[2], darkena(col, 0, 0xFF));
@@ -3092,7 +3092,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
       }
     else if(NONSTDVAR) {
       transmatrix T = currentmap->adj(c, c->mondir);
-      Vb = Vb * T * rspintox(tC0(iso_inverse(T))) * xpush(cgi.tentacle_length);
+      Vb = Vb * T * lrspintox(tC0(iso_inverse(T))) * xpush(cgi.tentacle_length);
       }
     else {
       Vb = Vb * ddspin180(c, c->mondir);
@@ -3129,27 +3129,27 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
     
     if(!nospins) {
       shiftmatrix& where = (c->monst == moMirrorSpirit && inmirrorcount) ? ocwtV : cwtV;
-      if(WDIM == 2 || prod) {
-        hyperpoint V0 = inverse_shift(Vs, tC0(where));
+      if(WDIM == 2 || mproduct) {
+        hyperpoint V0 = inverse_shift(Vs, where * tile_center());
         ld z = 0;
-        if(prod) {
+        if(gproduct) {
           auto d = product_decompose(V0);
           z = d.first;
           V0 = d.second;
           }
           
         if(hypot_d(2, tC0(unshift(Vs))) > 1e-3) {
-          Vs = Vs * rspintox(V0);
-          if(prod) Vs = orthogonal_move(Vs, z);
+          Vs = Vs * lrspintox(V0);
+          if(gproduct) Vs = orthogonal_move(Vs, z);
           }
         }
       else if(!sl2) {
         hyperpoint V0 = inverse_shift(Vs, tC0(where));
-        Vs = Vs * rspintox(V0);
+        Vs = Vs * lrspintox(V0);
         // cwtV * rgpushxto0(inverse(cwtV) * tC0(Vs));
         }
       if(c->monst == moHunterChanging)  
-        Vs = Vs * (hybri ? spin180() : cspin180(WDIM-2, WDIM-1));
+        Vs = Vs * (mhybrid ? spin180() : cspin180(WDIM-2, WDIM-1));
       }
     if(c->monmirror) Vs = Vs * Mirror;
     
@@ -3518,7 +3518,7 @@ void draw_movement_arrows(cell *c, const transmatrix& V, int df) {
         transmatrix Centered = rgpushxto0(unshift(tC0(cwtV)));
         int sd = md.subdir;
         
-        transmatrix T = iso_inverse(Centered) * rgpushxto0(Centered * tC0(V)) * rspintox(Centered*tC0(V)) * spin(-sd * M_PI/S7) * xpush(0.2);
+        transmatrix T = iso_inverse(Centered) * rgpushxto0(Centered * tC0(V)) * lrspintox(Centered*tC0(V)) * spin(-sd * M_PI/S7) * xpush(0.2);
         
         if(vid.axes >= 5)
           queuestr(shiftless(T), keysize, s0 + key, col >> 8, 1);
@@ -3994,7 +3994,7 @@ EX color_t transcolor(cell *c, cell *c2, color_t wcol) {
 
 // how much should be the d-th wall darkened in 3D
 EX int get_darkval(cell *c, int d) {
-  if(hybri) {
+  if(mhybrid) {
     return d >= c->type - 2 ? 4 : 0;
     }
   const int darkval_hbt[9] = {0,2,2,0,6,6,8,8,0};
@@ -4054,7 +4054,7 @@ EX bool clip_checked = false;
 void make_clipping_planes() {
 #if MAXMDIM >= 4
   clip_checked = false;
-  if(!frustum_culling || PIU(sphere) || experimental || vid.stereo_mode == sODS || panini_alpha || stereo_alpha || prod) return;
+  if(!frustum_culling || PIU(sphere) || experimental || vid.stereo_mode == sODS || panini_alpha || stereo_alpha || gproduct || embedded_plane) return;
 
   if(WDIM == 3 && pmodel == mdPerspective && !nonisotropic && !in_s2xe())
     threshold = sin_auto(cgi.corner_bonus), xyz_threshold = 0, clip_checked = true;
@@ -4221,26 +4221,26 @@ EX subcellshape& generate_subcellshape_if_needed(cell *c, int id) {
   auto& ss = cgi.subshapes[id];
   if(!ss.faces.empty()) return ss;
   
-  cell *c1 = hybri ? hybrid::get_where(c).first : c;
+  cell *c1 = mhybrid ? hybrid::get_where(c).first : c;
   
-  if(hybri || WDIM == 2) for(int i=0; i<c1->type; i++) {
+  if(mhybrid || WDIM == 2) for(int i=0; i<c1->type; i++) {
     hyperpoint w;
     auto f = [&] { 
       /* mirror image of C0 in the axis h1-h2 */
       hyperpoint h1 = get_corner_position(c1, i);
       hyperpoint h2 = get_corner_position(c1, i+1);
       transmatrix T = gpushxto0(h1);
-      T = spintox(T * h2) * T;
+      T = lspintox(T * h2) * T;
       w = T * C0;
       w[1] = -w[1];
       w = iso_inverse(T) * w;
       };
-    if(prod) PIU(f());
+    if(mproduct) PIU(f());
     else f();
     ss.walltester.push_back(w);
     }
 
-  if(hybri || WDIM == 2) {
+  if(mhybrid || WDIM == 2) {
     ss.walltester.push_back(C0);
     ss.walltester.push_back(C0);
     }
@@ -4253,7 +4253,7 @@ EX subcellshape& generate_subcellshape_if_needed(cell *c, int id) {
     int z = a ? 1 : -1;
     hyperpoint ctr = zpush0(z * cgi.plevel/2);
     for(int i=0; i<c1->type; i++)
-      if(prod || WDIM == 2)
+      if(mproduct || WDIM == 2)
         l.push_back(hybrid::get_corner(c1, i, 0, z));
       else {
         l.push_back(ctr);
@@ -4274,7 +4274,7 @@ EX subcellshape& generate_subcellshape_if_needed(cell *c, int id) {
 int hrmap::wall_offset(cell *c) {
   int id = currentmap->full_shvid(c);
 
-  if(WDIM == 3 && !hybri && !reg3::in()) return 0;
+  if(WDIM == 3 && !mhybrid && !reg3::in()) return 0;
 
   if(isize(cgi.walloffsets) <= id) cgi.walloffsets.resize(id+1, {-1, nullptr});
   auto &wop = cgi.walloffsets[id];
@@ -4791,7 +4791,7 @@ EX void drawMarkers() {
     
     #endif
 
-    if(hybri && !shmup::on) {
+    if(mhybrid && !shmup::on) {
 
       using namespace sword;
       int& ang = sword::dir[multi::cpid].angle;
@@ -4854,7 +4854,7 @@ EX void drawMarkers() {
         auto& c2 = mib.t;
         shiftmatrix T1 = ggmatrix(c1);
         shiftmatrix T2 = ggmatrix(c2);
-        shiftmatrix T = T1 * rspintox(inverse_shift(T1,T2*C0)) * xpush(hdist(T1*C0, T2*C0) * fractick(50, 0));
+        shiftmatrix T = T1 * lrspintox(inverse_shift(T1,T2*C0)) * xpush(hdist(T1*C0, T2*C0) * fractick(50, 0));
         color_t aircol = (orbToTarget == itOrbAir ? 0x8080FF40 : 0x8080FF20);
         queuepoly(T, cgi.shDisk, aircol);
         c1 = c2;
@@ -5017,7 +5017,7 @@ EX transmatrix actual_view_transform;
 EX ld wall_radar(cell *c, transmatrix T, transmatrix LPe, ld max) {
   if(!in_perspective() || !vid.use_wall_radar) return max;
   transmatrix ori;
-  if(prod) ori = ortho_inverse(LPe);
+  if(gproduct) ori = ortho_inverse(LPe);
   ld step = max / 20;
   ld fixed_yshift = 0;
   for(int i=0; i<20; i++) {
@@ -5052,6 +5052,7 @@ EX void make_actual_view() {
       actual_view_transform = get_shift_view_of(ztangent(d), actual_view_transform * View) * view_inverse(View); 
       }
     camera_level = asin_auto(tC0(view_inverse(actual_view_transform * View))[2]);
+    camera_sign = cgi.FLOOR > cgi.WALL;
     }
   if(nonisotropic && !nonisotropic_weird_transforms) {
     transmatrix T = actual_view_transform * View;
@@ -5099,7 +5100,7 @@ EX void precise_mouseover() {
   if(WDIM == 3 && (cmode & (sm::EDIT_INSIDE_WALLS | sm::EDIT_BEFORE_WALLS))) {
     transmatrix T = view_inverse(View);
     transmatrix ori = Id;
-    if(prod) ori = ortho_inverse(NLP);
+    if(gproduct) ori = ortho_inverse(NLP);
     ld step = 0.2;
     cell *c = centerover;
     for(int i=0; i<100; i++) {
@@ -5175,7 +5176,7 @@ EX void center_multiplayer_map(const vector<hyperpoint>& hs) {
   hyperpoint h = Hypc;
   for(auto h1: hs) h += h1;
   h /= isize(hs);
-  h = normalize(h);
+  h = normalize_flat(h);
   cwtV = shiftless(rgpushxto0(h));
   if(isize(hs) == 2) {
     set_multi = true;
@@ -5307,7 +5308,7 @@ EX void drawthemap() {
     else {
       vector<hyperpoint> pts;
       for(int p=0; p<multi::players; p++) if(multi::playerActive(p))
-        pts.push_back(unshift(tC0(multi::whereis[p])));
+        pts.push_back(unshift(multi::whereis[p] * tile_center()));
       center_multiplayer_map(pts);
       }
     }
@@ -5322,7 +5323,7 @@ EX void drawthemap() {
     else {
       vector<hyperpoint> pts;
       for(int p=0; p<multi::players; p++)
-        pts.push_back(unshift(tC0(shmup::pc[p]->pat)));
+        pts.push_back(unshift(shmup::pc[p]->pat * tile_center()));
       center_multiplayer_map(pts);
       }
     }
@@ -5361,7 +5362,7 @@ EX void drawmovestar(double dx, double dy) {
   if(rug::rugged && multi::players == 1 && !multi::alwaysuse) return;
 #endif
 
-  shiftpoint H = tC0(cwtV);
+  shiftpoint H = cwtV * tile_center();
   ld R = sqrt(H[0] * H[0] + H[1] * H[1]);
   shiftmatrix Centered;
 
@@ -5886,7 +5887,7 @@ EX void restartGraph() {
   if(!autocheat) linepatterns::clearAll();
   if(currentmap) {
     resetview();
-    if(sphere) View = spin(-90._deg);
+    View = inverse(View);
     }
   }
 
@@ -6001,7 +6002,7 @@ EX void animateAttackOrHug(const movei& m, int layer, int phase, ld ratio, ld de
   animation& a = animations[layer][m.s];
   a.attacking = phase;
   if(phase == 3) println(hlog, "distance = ", hdist0(T * C0));
-  a.attackat = rspintox(tC0(iso_inverse(T))) * xpush(hdist0(T*C0) * ratio + delta);
+  a.attackat = lrspintox(tC0(iso_inverse(T))) * lxpush(hdist0(T*C0) * ratio + delta);
   if(newanim) a.wherenow = Id, a.ltick = ticks, a.footphase = 0;
   }
 

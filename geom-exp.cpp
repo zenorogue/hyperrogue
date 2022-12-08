@@ -258,13 +258,13 @@ bool forced_quotient() { return quotient && !(cgflags & qOPTQ); }
 EX geometry_filter gf_hyperbolic = {"hyperbolic", 'h', [] { return (arcm::in() || arb::in() || hyperbolic) && !forced_quotient(); }};
 EX geometry_filter gf_spherical = {"spherical", 's', [] { return (arcm::in() || arb::in() || sphere) && !forced_quotient(); }};
 EX geometry_filter gf_euclidean = {"Euclidean", 'e', [] { return (arcm::in() || arb::in() || euclid) && !forced_quotient(); }};
-EX geometry_filter gf_other = {"non-isotropic", 'n', [] { return prod || nonisotropic; }};
+EX geometry_filter gf_other = {"non-isotropic", 'n', [] { return mproduct || nonisotropic; }};
 EX geometry_filter gf_regular_2d = {"regular 2D tesselations", 'r', [] { 
   return standard_tiling() && WDIM == 2 && !forced_quotient();
   }};
 EX geometry_filter gf_regular_3d = {"regular 3D honeycombs", '3', [] { 
   if(euclid) return geometry == gCubeTiling;
-  return !bt::in() && !kite::in() && WDIM == 3 && !forced_quotient() && !nonisotropic && !prod;
+  return !bt::in() && !kite::in() && WDIM == 3 && !forced_quotient() && !nonisotropic && !mproduct;
   }};
 EX geometry_filter gf_quotient = {"interesting quotient spaces", 'q', [] { 
   return forced_quotient() && !elliptic;
@@ -610,7 +610,7 @@ EX void select_quotient() {
     pushScreen(asonov::show_config);
     }
   #endif
-  else if(prod)
+  else if(mproduct)
     pushScreen(product::show_config);
   else if(rotspace)
     hybrid::configure_period();
@@ -634,7 +634,7 @@ EX void select_quotient() {
 EX string full_geometry_name() {
   string qstring = ginf[geometry].quotient_name;
   bool variable =
-    !(prod || hybri || bt::in() || (WDIM == 3 && !reg3::in()) || kite::in() || arb::in());
+    !(mproduct || mhybrid || bt::in() || (WDIM == 3 && !reg3::in()) || kite::in() || arb::in());
   
   string fgname = XLAT(ginf[geometry].tiling_name);
   if(qstring != "none") fgname += " " + XLAT(qstring);
@@ -806,7 +806,7 @@ EX geometry_data compute_geometry_data() {
   gd.nom *= gd.euler;
   gd.denom *= 2;
         
-  if(hybri) gd.nom *= hybrid::csteps, gd.denom *= cgi.single_step;
+  if(mhybrid) gd.nom *= hybrid::csteps, gd.denom *= cgi.single_step;
 
   int g = gcd(gd.nom, gd.denom);
   if(g) {
@@ -1000,14 +1000,14 @@ EX void showEuclideanMenu() {
     }
   #endif
   
-  if(prod) {
+  if(mproduct) {
     dialog::addSelItem(XLAT("Z-level height factor"), fts(vid.plevel_factor), 'Z');
     dialog::add_action([] {
       dialog::editNumber(vid.plevel_factor, 0, 2, 0.1, 0.7, XLAT("Z-level height factor"), "");
       dialog::reaction = ray::reset_raycaster;
       });
     }
-  else if(hybri) {
+  else if(mhybrid) {
     dialog::addSelItem(XLAT("number of levels"), its(hybrid::csteps / cgi.single_step), 'L');
     dialog::add_action(hybrid::configure_period);
     }
@@ -1037,7 +1037,7 @@ EX void showEuclideanMenu() {
     }
   
   #if MAXMDIM >= 4
-  if(hybri) {
+  if(mhybrid) {
     auto r = rots::underlying_scale;
     dialog::addSelItem(XLAT("view the underlying geometry"), r > 0 ? fts(r)+"x" : ONOFF(false), '6');
     dialog::add_action([] {

@@ -1764,7 +1764,7 @@ void celldrawer::draw_features_and_walls_3d() {
         /* always render */
         if(wrl::in && wrl::print) ; else
         #endif
-        if(pmodel == mdPerspective && !sphere && !quotient && !kite::in() && !nonisotropic && !hybri && !experimental && !nih) {
+        if(pmodel == mdPerspective && !sphere && !quotient && !kite::in() && !nonisotropic && !mhybrid && !experimental && !nih) {
           if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(centerover)) continue;
           else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(centerover)) continue;
           // this optimization is not correct, need to fix
@@ -1782,7 +1782,7 @@ void celldrawer::draw_features_and_walls_3d() {
             case 6: case 7: if (pmodel == mdPerspective && V[2][LDIM] <= -l) continue; break;
             }
           }
-        else if(prod) {
+        else if(mproduct) {
           if(a < c->type-2 && !in_s2xe()) {
             ld d = in_e2xe() ? sqhypot_d(2, unshift(tC0(V))) : V[2][2];
             hyperpoint h = (unshift(V) * cgi.walltester[ofs + a]);
@@ -1838,7 +1838,7 @@ void celldrawer::draw_features_and_walls_3d() {
     else if(c->wall == waMineOpen) {
       if(pmodel == mdGeodesic && hdist0(tC0(V)) < 1e-3) {
         }
-      else if(prod && hdist0(tC0(V)) < 1e-3) {
+      else if(mproduct && hdist0(tC0(V)) < 1e-3) {
         }
       else {
         int mines = countMinesAround(c);
@@ -1903,7 +1903,7 @@ void celldrawer::check_rotations() {
     if(a <= b) {
       ds.best = c;
       ds.speed = spd;
-      if(prod) {
+      if(mproduct) {
         auto pd = product_decompose(unshift(tC0(V)));
         ds.total += pd.second;
         ds.depth += pd.first;
@@ -1912,7 +1912,7 @@ void celldrawer::check_rotations() {
         ds.total += unshift(tC0(V));
       ds.qty++;
       ds.point = normalize_flat(ds.total);
-      if(prod) ds.point = orthogonal_move(ds.point, ds.depth / ds.qty);
+      if(mproduct) ds.point = orthogonal_move(ds.point, ds.depth / ds.qty);
       if(side == 2) for(int i=0; i<3; i++) ds.point[i] = -ds.point[i];
       if(side == 1) ds.point = spin(-90._deg) * ds.point;
       }

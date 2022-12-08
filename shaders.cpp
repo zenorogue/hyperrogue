@@ -265,13 +265,13 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
       "t.z = (sin(uCamera) * cos(zl) * cos(d) - sin(zl) * cos(uCamera)) / uz;\n"
       ;
     }
-  else if(pmodel == mdDisk && MDIM == 3 && !spherespecial && !prod) {
+  else if(pmodel == mdDisk && MDIM == 3 && !spherespecial && !gproduct) {
     shader_flags |= SF_DIRECT;
     }
   else if(glhr::noshaders) {
     shader_flags |= SF_PIXELS;
     }
-  else if(pmodel == mdDisk && GDIM == 3 && !spherespecial && !nonisotropic && !prod) {
+  else if(pmodel == mdDisk && GDIM == 3 && !spherespecial && !nonisotropic && !gproduct) {
     coordinator += "t /= (t[3] + uAlpha);\n";
     vsh += "uniform mediump float uAlpha;";
     shader_flags |= SF_DIRECT | SF_BOX | SF_ZFOG;
@@ -454,7 +454,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     if(shader_flags & GF_NO_FOG) {
       vmain += "// no fog used\n";
       }
-    else if(GDIM == 3 && WDIM == 2 && hyperbolic && context_fog && pmodel == mdPerspective) {
+    else if(GDIM == 3 && WDIM == 2 && hyperbolic && context_fog && geom3::same_in_same() && pmodel == mdPerspective) {
       vsh += 
         "uniform mediump mat4 uRadarTransform;\n"
         "uniform mediump sampler2D tAirMap;\n"
@@ -586,7 +586,7 @@ void display_data::set_projection(int ed, ld shift) {
   if(sol && solv_all) id |= 1;
   if(in_h2xe()) id |= 1;
   if(in_s2xe()) id |= 2;
-  if(WDIM == 2 && GDIM == 3 && hyperbolic && context_fog) id |= 1;
+  if(WDIM == 2 && GDIM == 3 && hyperbolic && context_fog && geom3::same_in_same()) id |= 1;
   shared_ptr<glhr::GLprogram> selected;
 
   if(matched_programs.count(id)) selected = matched_programs[id];
@@ -720,7 +720,7 @@ void display_data::set_projection(int ed, ld shift) {
       glhr::projection_multiply(glhr::frustum(cd->tanfov, cd->tanfov * cd->ysize / cd->xsize));
       glhr::projection_multiply(glhr::scale(1, -1, -1));
       if(nisot::local_perspective_used()) {
-        if(prod) {
+        if(gproduct) {
           for(int i=0; i<3; i++) NLP[3][i] = NLP[i][3] = 0;
           NLP[3][3] = 1;
           }

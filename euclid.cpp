@@ -137,10 +137,14 @@ EX namespace euc {
     map<gp::loc, struct cdata> eucdata;
     
     void compute_tmatrix() {
+      bool b = geom3::flipped;
+      cgi.prepare_basics();
+      if(b) geom3::light_flip(false);
       shifttable = get_shifttable();
       tmatrix.resize(S7);
       for(int i=0; i<S7; i++) 
         tmatrix[i] = eumove(shifttable[i]);
+      if(b) geom3::light_flip(true);
       }
     
     void on_dim_change() override {
@@ -1200,13 +1204,14 @@ EX transmatrix eumove(coord co) {
     }
   transmatrix Mat = Id;
   if(a4) {
-    Mat[0][LDIM] += co[0] * cgi.tessf;
-    Mat[1][LDIM] += co[1] * cgi.tessf;
+    Mat[0][2] += co[0] * cgi.tessf;
+    Mat[1][2] += co[1] * cgi.tessf;
     }
   else {
-    Mat[0][LDIM] += (co[0] + co[1] * .5) * cgi.tessf;
-    Mat[1][LDIM] += co[1] * q3 /2 * cgi.tessf;
+    Mat[0][2] += (co[0] + co[1] * .5) * cgi.tessf;
+    Mat[1][2] += co[1] * q3 /2 * cgi.tessf;
     }
+  if(embedded_plane) swapmatrix(Mat);
   return Mat;
   }
 

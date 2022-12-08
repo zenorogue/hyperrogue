@@ -278,7 +278,7 @@ EX void initgame() {
 
   if(cwt.at->land == laCrossroads2) {
     cell *c = cwt.at;
-    if(hybri) { c = hybrid::get_where(c).first; PIU( c->cmove(0) ); }
+    if(mhybrid) { c = hybrid::get_where(c).first; PIU( c->cmove(0) ); }
     c->landparam = 12;
     c->cmove(0)->landparam = 44;
     c->cmove(0)->land = laCrossroads2;
@@ -1405,14 +1405,14 @@ EX void set_geometry(eGeometry target) {
         gp::param.second = 0;
       }
     #endif
-    if(DUAL && geometry != gArchimedean && !hybri) 
+    if(DUAL && geometry != gArchimedean && !mhybrid)
       variation = ginf[geometry].default_variation;
     #if CAP_BT
-    if(bt::in() || WDIM == 3 || kite::in() || arb::in()) if(!hybri) variation = eVariation::pure;
+    if(bt::in() || WDIM == 3 || kite::in() || arb::in()) if(!mhybrid) variation = eVariation::pure;
     #endif
     if(S3 >= OINF) variation = eVariation::pure;
-    if(INVERSE && !hybri) variation = gp::variation_for(gp::param);
-    if(ginf[target].default_variation == eVariation::pure && geometry != gArchimedean && !hybri)
+    if(INVERSE && !mhybrid) variation = gp::variation_for(gp::param);
+    if(ginf[target].default_variation == eVariation::pure && geometry != gArchimedean && !mhybrid)
       variation = eVariation::pure;
     geometry_settings(was_default);
     
@@ -1442,7 +1442,7 @@ EX void set_variation(eVariation target) {
       return;
       }
     if(target != eVariation::pure) {
-      if(bt::in() || sol || kite::in() || WDIM == 3) if(!prod) geometry = gNormal;
+      if(bt::in() || sol || kite::in() || WDIM == 3) if(!mproduct) geometry = gNormal;
       }
     auto& cd = ginf[gCrystal];
     if(target == eVariation::bitruncated && cryst && cd.sides == 8 && cd.vertex == 4) {

@@ -83,7 +83,7 @@ EX bool mouseout2() {
 EX movedir vectodir(hyperpoint P) {
 
   transmatrix U = unshift(ggmatrix(cwt.at));
-  if(GDIM == 3 && WDIM == 2)  U = current_display->radar_transform * U;
+  if(embedded_plane && geom3::same_in_same())  U = current_display->radar_transform * U;
 
   P = direct_exp(lp_iapply(P));
 
@@ -94,10 +94,12 @@ EX movedir vectodir(hyperpoint P) {
   
   vector<ld> dirdist(cwt.at->type);
 
+  auto TC0 = tile_center();
+
   for(int i=0; i<cwt.at->type; i++) {
     transmatrix T = currentmap->adj(cwt.at, (cwt + i).spin);
-    ld d1 = geo_dist(U * T * C0, Centered * P);
-    ld d2 = geo_dist(U * T * C0, Centered * C0);
+    ld d1 = geo_dist(U * T * TC0, Centered * P);
+    ld d2 = geo_dist(U * T * TC0, Centered * TC0);
     dirdist[i] = d1 - d2;
     }
     

@@ -43,7 +43,7 @@ EX bool isprime(int n) {
   }
   
 #if HDR
-#define MWDIM (prod ? 3 : WDIM+1)
+#define MWDIM (mproduct ? 3 : WDIM+1)
 
 struct matrix : array<array<int, MAXMDIM>, MAXMDIM> {
   bool operator == (const matrix& B) const {
@@ -1409,7 +1409,7 @@ EX struct fpattern& getcurrfp() {
     return fp;
     }
   if(!hyperbolic) return fp_invalid;
-  if(WDIM == 3 && !quotient && !hybri && !bt::in()) {
+  if(WDIM == 3 && !quotient && !mhybrid && !bt::in()) {
     static fpattern fp(0);
     if(fp.Prime) return fp;
     for(int p=2; p<20; p++) { fp.Prime = p; if(!fp.solve()) break; }
