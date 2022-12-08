@@ -1902,7 +1902,7 @@ EX bool keep_vertical() {
 
 EX hyperpoint vertical_vector() {
   auto& ds = downseek;
-  if(msphere && !sphere && vid.fixed_yz) {
+  if(msphere && !sphere && !gproduct && vid.fixed_yz) {
     hyperpoint h = get_view_orientation() * C0;
     if(vid.wall_height > 0) h = -h;
     return h;
