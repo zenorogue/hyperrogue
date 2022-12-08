@@ -738,7 +738,7 @@ void dqi_poly::gldraw() {
         glStencilOp( GL_INVERT, GL_INVERT, GL_INVERT);
         glStencilFunc( GL_ALWAYS, 0x1, 0x1 );
         glhr::color2(0xFFFFFFFF);
-        glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, offset, cnt);
+        glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ioffset, cnt);
         
         current_display->set_mask(ed);
         glhr::color2(color);
@@ -766,7 +766,7 @@ void dqi_poly::gldraw() {
         else { 
           glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
           glStencilFunc( GL_EQUAL, 1, 1);
-          glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, offset, cnt);
+          glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ioffset, cnt);
           }
         
         glDisable(GL_STENCIL_TEST);
