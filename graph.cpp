@@ -2568,7 +2568,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
 
   // just for the HUD glyphs...
   else if(isAnyIvy(m)) {
-    queuepoly(V, cgi.shILeaf[0], darkena(col, 0, 0xFF));
+    queuepoly(VBODY, cgi.shILeaf[0], darkena(col, 0, 0xFF));
     }
 
   else
@@ -2815,7 +2815,9 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
   
     shiftmatrix Vb0 = Vb;
     if(c->mondir != NODIR && GDIM == 3 && isAnyIvy(c)) {
-      queueline(tC0(Vparam), Vparam  * tC0(currentmap->adj(c, c->mondir)), (col << 8) + 0xFF, 0);
+      auto V1 = at_smart_lof(Vparam, cgi.ABODY);
+      auto V2 = at_smart_lof(Vparam * currentmap->adj(c, c->mondir), cgi.ABODY);
+      queueline(V1 * tile_center(), V2 * tile_center(), (col << 8) + 0xFF, 0);
       }
     else if(c->mondir != NODIR) {
       
@@ -2910,7 +2912,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
             queuepoly(Vb * spin(a * TAU / (c->type-2)), cgi.shILeaf[2], darkena(col, 0, 0xFF));
           }
         else if(GDIM == 3) {
-          queuepoly(face_the_player(Vb), cgi.shILeaf[1], darkena(col, 0, 0xFF));
+          queuepoly(face_the_player(at_smart_lof(Vb, cgi.ABODY)), cgi.shILeaf[1], darkena(col, 0, 0xFF));
           }
         else {
           if(c->monmirror) Vb = Vb * Mirror;
