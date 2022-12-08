@@ -1035,10 +1035,10 @@ EX namespace geom3 {
       slev = vid.rock_wall_ratio * wh / 3;
       for(int s=0; s<=3; s++)
         SLEV[s] = lev_to_factor(vid.rock_wall_ratio * wh * s/3);
-      LAKE = lev_to_factor(-vid.lake_top);
-      SHALLOW = lev_to_factor(-.4);
-      HELLSPIKE = lev_to_factor(-(vid.lake_top+vid.lake_bottom)/2);
-      BOTTOM = lev_to_factor(-vid.lake_bottom);
+      LAKE = lev_to_factor(sgn * -vid.lake_top);
+      SHALLOW = lev_to_factor(sgn * -.4);
+      HELLSPIKE = lev_to_factor(sgn * -(vid.lake_top+vid.lake_bottom)/2);
+      BOTTOM = lev_to_factor(sgn * -vid.lake_bottom);
       LOWSKY = lev_to_factor(2 * wh);
       HIGH = LOWSKY;
       HIGH2 = lev_to_factor(3 * wh);
@@ -1055,6 +1055,11 @@ EX namespace geom3 {
           SKY = -3 * vid.wall_height;
           LOWSKY = 1.75 * SKY;
           }
+        if(SHALLOW < max_high) SHALLOW = max_high;
+        if(LAKE < max_high) LAKE = max_high;
+        if(BOTTOM < max_high2) BOTTOM = max_high2;
+        if(HELLSPIKE < max_high) HELLSPIKE = max_high;
+        if(sgn < 0) INFDEEP = -1;
         }
       }
     }    
