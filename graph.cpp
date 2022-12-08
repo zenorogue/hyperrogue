@@ -4037,7 +4037,7 @@ EX int get_darkval(cell *c, int d) {
 
 EX ld mousedist(shiftmatrix T) {
   if(GDIM == 2) return hdist(mouseh, tC0(T));
-  shiftpoint T1 = tC0(orthogonal_move_fol(T, cgi.FLOOR));
+  shiftpoint T1 = orthogonal_move_fol(T, cgi.FLOOR) * tile_center();
   if(mouseaim_sensitivity) return sqhypot_d(2, T1.h) + (point_behind(T1) ? 1e10 : 0);
   hyperpoint h1;
   applymodel(T1, h1);
