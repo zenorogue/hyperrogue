@@ -1083,7 +1083,7 @@ void geometry_information::make_3d_models() {
     }
   else
     make_star(shSun, 3);
-  make_star(shNightStar, 0.75);
+  make_star(shNightStar, euclid ? 0.05 : 0.75);
   
   if(WDIM == 2) {
     for(int i=0; i<3; i++) {
