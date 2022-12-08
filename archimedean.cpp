@@ -419,6 +419,7 @@ geometryinfo1& archimedean_tiling::get_geometry(ld mul) {
 
 void archimedean_tiling::compute_geometry() {
 
+  if(embedded_plane && geometry != gArchimedean) return;
   if(embedded_plane) return IPF(compute_geometry());
 
   ginf[gArchimedean].g = get_geometry();
