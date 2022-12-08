@@ -1020,7 +1020,9 @@ EX namespace geom3 {
       
       reduce = (GDIM == 3 ? human_height * .3 : 0);
       
-      STUFF = lev_to_factor(0) - max(orbsize * 0.3, zhexf * .6);
+      int sgn = vid.wall_height > 0 ? 1 : -1;
+
+      STUFF = lev_to_factor(0) - sgn * max(orbsize * 0.3, zhexf * .6);
       
       ABODY = lev_to_factor(human_height * .4 - reduce);
       ALEG0 = lev_to_factor(human_height * .0 - reduce);
@@ -1040,7 +1042,7 @@ EX namespace geom3 {
       LOWSKY = lev_to_factor(2 * wh);
       HIGH = LOWSKY;
       HIGH2 = lev_to_factor(3 * wh);
-      SKY = LOWSKY - (vid.wall_height > 0 ? 5 : -5);
+      SKY = LOWSKY - sgn * 5;
 
       if(geom3::mgclass() == gcSphere && geom3::ggclass() != gcSphere) {
         ld max_high = lerp(-FLOOR, -1, 0.8);
