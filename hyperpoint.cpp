@@ -745,7 +745,7 @@ EX transmatrix cmirror(int cid) {
 EX transmatrix xpush(ld alpha) { return cpush(0, alpha); }
 
 EX transmatrix lxpush(ld alpha) {
-  if(WDIM == 2 && GDIM == 3) {
+  if(embedded_plane) {
     geom3::light_flip(true);
     auto t = cpush(0, alpha);
     geom3::light_flip(false);
@@ -1601,12 +1601,13 @@ EX transmatrix transpose(transmatrix T) {
   }
 
 EX hyperpoint lspinpush0(ld alpha, ld x) {
-  geom3::light_flip(true);
+  bool f = embedded_plane;
+  if(f) geom3::light_flip(true);
+  if(embedded_plane) throw hr_exception("still embedded plane");
   hyperpoint h = xspinpush0(alpha, x);
-  geom3::light_flip(false);
-  swapmatrix(h);
+  if(f) geom3::light_flip(false);
+  if(f) swapmatrix(h);
   return h;
-  // return spin(alpha) * lxpush(x) * C0;
   }
 
 #if HDR
@@ -1624,16 +1625,6 @@ inline hyperpoint cpush0(int c, ld x) {
     }
   h[LDIM] = cos_auto(x);
   h[c] = sin_auto(x);
-  return h;
-  }
-
-inline hyperpoint xspinpush0(ld alpha, ld x) { 
-  if(sl2) return slr::polar(x, -alpha, 0);
-  if(embedded_plane) return lspinpush0(alpha, x);
-  hyperpoint h = Hypc;
-  h[LDIM] = cos_auto(x);
-  h[0] = sin_auto(x) * cos(alpha);
-  h[1] = sin_auto(x) * -sin(alpha);
   return h;
   }
 
@@ -1655,6 +1646,16 @@ inline shiftpoint tC0(const shiftmatrix &T) {
   return shiftpoint{tC0(T.T), T.shift};
   }
 #endif
+
+EX hyperpoint xspinpush0(ld alpha, ld x) {
+  if(sl2) return slr::polar(x, -alpha, 0);
+  if(embedded_plane) return lspinpush0(alpha, x);
+  hyperpoint h = Hypc;
+  h[LDIM] = cos_auto(x);
+  h[0] = sin_auto(x) * cos(alpha);
+  h[1] = sin_auto(x) * -sin(alpha);
+  return h;
+  }
 
 /** tangent vector in the given direction */
 EX hyperpoint ctangent(int c, ld x) { return point3(c==0?x:0, c==1?x:0, c==2?x:0); }
