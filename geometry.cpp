@@ -1156,7 +1156,6 @@ EX namespace geom3 {
             g.kind = gcProduct;
             g.homogeneous_dimension--;
             g.sig[2] = g.sig[3];
-            gi.flags |= qHYBRID;
             }
 
           if(among(spatial_embedding, seLowerCurvature, seLowerCurvatureInverted)) {
