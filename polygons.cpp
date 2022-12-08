@@ -415,13 +415,15 @@ void geometry_information::procedural_shapes() {
     if(i != 8) hpcpush(xspinpush0(90._deg * i + 45._deg, crossf/4));
     }
 
+  hyperpoint TC0 = tile_center();
+
   // procedural floors
 
   bshape(shBarrel, PPR::FLOOR);
-  for(int t=0; t<=S84; t+=2) hpcpush(ddi(t, floorrad1*.5) * C0);
+  for(int t=0; t<=S84; t+=2) hpcpush(ddi(t, floorrad1*.5) * TC0);
 
   bshape(shCircleFloor, PPR::FLOOR);
-  for(int t=0; t<=S84; t+=2) hpcpush(ddi(t, floorrad1*.9) * C0);
+  for(int t=0; t<=S84; t+=2) hpcpush(ddi(t, floorrad1*.9) * TC0);
 
   for(int i=0; i<3; i++) for(int j=0; j<3; j++) shadowmulmatrix[i][j] =
     i==2&&j==2 ? 1:
@@ -430,61 +432,61 @@ void geometry_information::procedural_shapes() {
 
   for(int d=0; d<2; d++) {
     bshape(shSemiFloor[d], PPR::FLOOR);
-    for(int t=0; t<=4; t++) hpcpush(ddi(S7 + (3+3*d+t%4)*S14, floorrad0) * C0);
+    for(int t=0; t<=4; t++) hpcpush(ddi(S7 + (3+3*d+t%4)*S14, floorrad0) * TC0);
     }
 
   // todo not shexf
 
   bshape(shBigCarpet1, PPR::GFLOORa);
-  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, -zhexf*2.1) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, -zhexf*2.1) * TC0);
 
   bshape(shBigCarpet2, PPR::GFLOORb);
-  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, -zhexf*1.9) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, -zhexf*1.9) * TC0);
 
   bshape(shBigCarpet3, PPR::GFLOORc);
-  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12*3, -zhexf*1.7) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12*3, -zhexf*1.7) * TC0);
 
   bshape(shBFloor[0], PPR::BFLOOR);
-  for(int t=0; t<=SD6; t++) hpcpush(ddi(SD7 + t*S14, floorrad0*.1) * C0);
+  for(int t=0; t<=SD6; t++) hpcpush(ddi(SD7 + t*S14, floorrad0*.1) * TC0);
 
   bshape(shBFloor[1], PPR::BFLOOR);
-  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, floorrad1*.1) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, floorrad1*.1) * TC0);
 
   bshape(shMineMark[0], PPR::MINEMARK);
-  for(int t=0; t<=SD6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*.1) * C0);
+  for(int t=0; t<=SD6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*.1) * TC0);
 
   bshape(shMineMark[1], PPR::MINEMARK);
-  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, floorrad1*.1) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, floorrad1*.1) * TC0);
 
   bshape(shBigMineMark[0], PPR::MINEMARK);
-  for(int t=0; t<=SD6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*.15) * C0);
+  for(int t=0; t<=SD6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*.15) * TC0);
 
   bshape(shBigMineMark[1], PPR::MINEMARK);
-  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, floorrad1*.15) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, floorrad1*.15) * TC0);
 
   for(int d=0; d<2; d++) {
     bshape(shSemiBFloor[d], PPR::BFLOOR);
-    for(int t=0; t<=4; t++) hpcpush(ddi(SD7 + (3+3*d+t%4)*S14, floorrad0*.1) * C0);
+    for(int t=0; t<=4; t++) hpcpush(ddi(SD7 + (3+3*d+t%4)*S14, floorrad0*.1) * TC0);
     }
 
   // walls etc
 
   bshape(shGiantStar[1], PPR::GFLOORa);
-  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S36, -zhexf*2.4) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S36, -zhexf*2.4) * TC0);
 
   bshape(shGiantStar[0], PPR::GFLOORa);
   for(int t=0; t<=SD6; t++) {
-    hpcpush(ddi(t*S14, -zhexf*2.4) * C0);
-    hpcpush(ddi(t*S14+S7, zhexf*1.5) * C0);
+    hpcpush(ddi(t*S14, -zhexf*2.4) * TC0);
+    hpcpush(ddi(t*S14+S7, zhexf*1.5) * TC0);
     }
-  hpcpush(ddi(0, -zhexf*2.4) * C0);
+  hpcpush(ddi(0, -zhexf*2.4) * TC0);
 
   bshape(shMirror, PPR::WALL);
   if(PURE) {
-    for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, floorrad1*7/8) * C0);
+    for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, floorrad1*7/8) * TC0);
     }
   else {
-    for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*7/8) * C0);
+    for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*7/8) * TC0);
     }
 
   if(0);
@@ -506,20 +508,20 @@ void geometry_information::procedural_shapes() {
     if(S3 >= OINF) rad0 = rad1 = zhexf;
     bshape(shWall[0], PPR::WALL);
     for(int t=0; t<=S6; t++) {
-      hpcpush(ddi(S7 + t*S14, rad0) * C0);
-      if(t != S6) hpcpush(ddi(S14 + t*S14, rad0 /4) * C0);
+      hpcpush(ddi(S7 + t*S14, rad0) * TC0);
+      if(t != S6) hpcpush(ddi(S14 + t*S14, rad0 /4) * TC0);
       }
 
     bshape(shWall[1], PPR::WALL);
     int td = ((!BITRUNCATED || euclid) && !(S7&1)) ? S42+S6 : 0;
     if(S7 == 6 || S7 == 4) {
       for(int t=0; t<=S6; t++) {
-        hpcpush(ddi(S7 + t*S14, rad1) * C0);
-        if(t != S6) hpcpush(ddi(S14 + t*S14, rad1/4) * C0);
+        hpcpush(ddi(S7 + t*S14, rad1) * TC0);
+        if(t != S6) hpcpush(ddi(S14 + t*S14, rad1/4) * TC0);
         }
       }
     else
-      for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36+td, rad1) * C0);
+      for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36+td, rad1) * TC0);
     }
 
   bshape(shCross, PPR::WALL);
@@ -530,50 +532,50 @@ void geometry_information::procedural_shapes() {
 
   bshape(shGem[0], PPR::ITEM);
   for(int t=0; t<=SD6; t++) {
-    hpcpush(ddi(SD7 + t*S14, zhexf*.4) * C0);
-    if(t != SD6) hpcpush(ddi(S14 + t*S14, zhexf*.1) * C0);
+    hpcpush(ddi(SD7 + t*S14, zhexf*.4) * TC0);
+    if(t != SD6) hpcpush(ddi(S14 + t*S14, zhexf*.1) * TC0);
     }
 
   bshape(shGem[1], PPR::ITEM);
   if(SD7 == 6) {
     for(int t=0; t<=SD6; t++) {
-      hpcpush(ddi(SD7 + t*S14, zhexf*.4) * C0);
-      if(t != SD6) hpcpush(ddi(S14 + t*S14, zhexf*.1) * C0);
+      hpcpush(ddi(SD7 + t*S14, zhexf*.4) * TC0);
+      if(t != SD6) hpcpush(ddi(S14 + t*S14, zhexf*.1) * TC0);
       }
     }
   else
-    for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S36, zhexf*.5) * C0);
+    for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S36, zhexf*.5) * TC0);
 
   bshape(shStar, PPR::ITEM);
   for(int t=0; t<=S84; t+=SD6) {
-    hpcpush(ddi(t, zhexf*.2) * C0);
-    if(t != S84) hpcpush(ddi(t+3, zhexf*.6) * C0);
+    hpcpush(ddi(t, zhexf*.2) * TC0);
+    if(t != S84) hpcpush(ddi(t+3, zhexf*.6) * TC0);
     }
 
   bshape(shFlash, PPR::ITEM);
   for(int t=0; t<S84+SD6; t+=SD6) {
-    hpcpush(ddi(t, zhexf*.25) * C0);
-    hpcpush(ddi(t+3, zhexf*.4) * C0);
+    hpcpush(ddi(t, zhexf*.25) * TC0);
+    hpcpush(ddi(t+3, zhexf*.4) * TC0);
     }
-  hpcpush(ddi(3, zhexf*.4) * C0);
+  hpcpush(ddi(3, zhexf*.4) * TC0);
 
   bshape(shDaisy, PPR::ITEM);
   for(int t=0; t<=SD6; t++) {
-    hpcpush(ddi(t*S14, zhexf*.8*3/4) * C0);
-    if(t != SD6) hpcpush(ddi(t*S14+SD7, zhexf*-.5*3/4) * C0);
+    hpcpush(ddi(t*S14, zhexf*.8*3/4) * TC0);
+    if(t != SD6) hpcpush(ddi(t*S14+SD7, zhexf*-.5*3/4) * TC0);
     }
-  hpcpush(ddi(0, zhexf*.6) * C0);
+  hpcpush(ddi(0, zhexf*.6) * TC0);
 
   bshape(shSnowflake, PPR::ITEM);
   for(int t=0; t<=SD6; t++) {
-    hpcpush(ddi(t*S14, zhexf*.7*.8*3/4) * C0);
-    if(t != SD6) hpcpush(ddi(t*S14+SD7, zhexf*.7*-.5*3/4) * C0);
+    hpcpush(ddi(t*S14, zhexf*.7*.8*3/4) * TC0);
+    if(t != SD6) hpcpush(ddi(t*S14+SD7, zhexf*.7*-.5*3/4) * TC0);
     }
-  hpcpush(ddi(0, zhexf*.7*.6) * C0);
+  hpcpush(ddi(0, zhexf*.7*.6) * TC0);
 
   bshape(shTriangle, PPR::ITEM);
   for(int t=0; t<=SD3; t++) {
-    hpcpush(ddi(t*S28, zhexf*.5) * C0);
+    hpcpush(ddi(t*S28, zhexf*.5) * TC0);
     }
 
   bshape(shTinyArrow, PPR::ITEM);
@@ -582,53 +584,53 @@ void geometry_information::procedural_shapes() {
 
   bshape(shHeptagon, PPR::ITEM);
   for(int i=0; i<=S84; i+=S12)
-    hpcpush(ddi(i, orbsize * .2) * C0);
+    hpcpush(ddi(i, orbsize * .2) * TC0);
   bshape(shHeptagram, PPR::ITEM);
   for(int i=0, skip=3; i<=S84*skip; i+=S12*skip)
-    hpcpush(ddi(i, orbsize * .2) * C0);
+    hpcpush(ddi(i, orbsize * .2) * TC0);
 
   bshape(shDisk, PPR::ITEM);
   for(int i=0; i<=S84; i+=SD3)
-    hpcpush(ddi(i, orbsize * .2) * C0);
+    hpcpush(ddi(i, orbsize * .2) * TC0);
 
   bshape(shHalfDisk, PPR::ITEM);
   for(int i=0; i<=S84/2; i+=SD3)
-    hpcpush(ddi(i, orbsize * .2) * C0);
+    hpcpush(ddi(i, orbsize * .2) * TC0);
 
   bshape(shDiskSegment, PPR::ITEM);
   for(int i=0; i<=S84/2.5; i+=SD3)
-    hpcpush(ddi(i, orbsize * .2) * C0);
+    hpcpush(ddi(i, orbsize * .2) * TC0);
 
   bshape(shMoonDisk, PPR::ITEM);
   for(int i=0; i<=S84; i+=SD3)
     if(i <= S84 * 2 / 3)
-      hpcpush(ddi(i, orbsize * .2) * C0);
+      hpcpush(ddi(i, orbsize * .2) * TC0);
     else {
-      hyperpoint h1 = ddi(i, orbsize * .2) * C0;
-      hyperpoint h2 = ddi(S84-i*2, orbsize * .2) * C0;      
+      hyperpoint h1 = ddi(i, orbsize * .2) * TC0;
+      hyperpoint h2 = ddi(S84-i*2, orbsize * .2) * TC0;      
       hpcpush(mid(mid(h1,h2), h2));
       }
 
   bshape(shHugeDisk, PPR::ITEM);
   for(int i=0; i<=S84; i+=SD3)
-    hpcpush(ddi(i, orbsize * .4) * C0);
+    hpcpush(ddi(i, orbsize * .4) * TC0);
 
   bshape(shDiskT, PPR::ITEM);
   for(int i=0; i<=S84; i+=S28)
-    hpcpush(ddi(i, orbsize * .2) * C0);
+    hpcpush(ddi(i, orbsize * .2) * TC0);
 
   bshape(shDiskS, PPR::ITEM);
   for(int i=0; i<=S84; i+=S21) {
-    hpcpush(ddi(i, orbsize * .2) * C0);
+    hpcpush(ddi(i, orbsize * .2) * TC0);
     if(i != S84) {
-      hpcpush(ddi(i+S21/3, orbsize * .1) * C0);
-      hpcpush(ddi(i+S21-S21/3, orbsize * .1) * C0);
+      hpcpush(ddi(i+S21/3, orbsize * .1) * TC0);
+      hpcpush(ddi(i+S21-S21/3, orbsize * .1) * TC0);
       }
     }
 
   bshape(shDiskM, PPR::ITEM);
   for(int i=0; i<=S84; i+=SD3) {
-    hpcpush(ddi(i, orbsize * .1) * C0);
+    hpcpush(ddi(i, orbsize * .1) * TC0);
     }
 
   bshape(shEccentricDisk, PPR::ITEM);
@@ -639,7 +641,7 @@ void geometry_information::procedural_shapes() {
 
   bshape(shDiskSq, PPR::ITEM);
   for(int i=0; i<=S84; i+=S21) {
-    hpcpush(ddi(i, orbsize * .15) * C0);
+    hpcpush(ddi(i, orbsize * .15) * TC0);
     }
 
   bshape(shEgg, PPR::ITEM);
@@ -650,64 +652,64 @@ void geometry_information::procedural_shapes() {
   RING(i)
     hpcpush(hpxy(sin(i*S_step)*0.242 * orbsize/2, cos(i*S_step)*0.177*orbsize/2));
   
-  auto make_ring = [this] (hpcshape& sh, reaction_t f) {
+  auto make_ring = [this, &TC0] (hpcshape& sh, reaction_t f) {
     bshape(sh, PPR::ITEM);
     RING(i)
-      hpcpush(ddi(i, orbsize * .25) * C0);
+      hpcpush(ddi(i, orbsize * .25) * TC0);
     first = true;
     f();
     first = true;
-    hpcpush(ddi(0, orbsize * .25) * C0);
+    hpcpush(ddi(0, orbsize * .25) * TC0);
     };
   
-  make_ring(shRing, [this] {    
+  make_ring(shRing, [this, &TC0] {    
     orb_inner_ring = isize(hpc) - shRing.s;
     REVPRING(i) {
-      hpcpush(ddi(i, orbsize * .30) * C0);
+      hpcpush(ddi(i, orbsize * .30) * TC0);
       }
     });
 
-  make_ring(shSpikedRing, [this] {
+  make_ring(shSpikedRing, [this, &TC0] {
     REVPRING(i)
-      hpcpush(ddi(i, orbsize * (int(i)&1?.35:.30)) * C0);
+      hpcpush(ddi(i, orbsize * (int(i)&1?.35:.30)) * TC0);
     });
 
-  make_ring(shTargetRing, [this] {
+  make_ring(shTargetRing, [this, &TC0] {
     REVPRING(i)
-      hpcpush(ddi(i, orbsize * (i >= S42-6 && i <= S42+6 ?.36:.30)) * C0);
+      hpcpush(ddi(i, orbsize * (i >= S42-6 && i <= S42+6 ?.36:.30)) * TC0);
     });
 
-  make_ring(shFrogRing, [this] {
+  make_ring(shFrogRing, [this, &TC0] {
     REVPRING(i)
-      hpcpush(ddi(i, orbsize * (((i >= S42-8 && i <= S42-2) || (i >= S42+2 && i <= S42+8)) ?.36:.30)) * C0);
+      hpcpush(ddi(i, orbsize * (((i >= S42-8 && i <= S42-2) || (i >= S42+2 && i <= S42+8)) ?.36:.30)) * TC0);
     });
 
-  make_ring(shSpearRing, [this] {
+  make_ring(shSpearRing, [this, &TC0] {
     REVPRING(i) {
       double d = i - S42;
       if(d<0) d = -d;
       d = 8 - 2 * d;
       if(d<0) d = 0;
-      hpcpush(ddi(i, orbsize * (.3 + .04 * d)) * C0);
+      hpcpush(ddi(i, orbsize * (.3 + .04 * d)) * TC0);
       }
     });
 
   /* three nice spikes
   bshape(shLoveRing, PPR::ITEM);
   for(int i=0; i<=S84; i+=3)
-    hpcpush(ddi(i, orbsize * .25) * C0);
+    hpcpush(ddi(i, orbsize * .25) * TC0);
   for(int i=S84; i>=0; i--) {
     int j = i*3 % S84;
     int d = j - S42;
     if(d<0) d = -d;
     d = 8 - 2 * d;
     if(d<0) d = 0;
-    hpcpush(ddi(i, orbsize * (.3 + .02 * d)) * C0);
+    hpcpush(ddi(i, orbsize * (.3 + .02 * d)) * TC0);
     }
-  hpcpush(ddi(0, orbsize * .25) * C0);
+  hpcpush(ddi(0, orbsize * .25) * TC0);
   */
 
-  make_ring(shLoveRing, [this] {
+  make_ring(shLoveRing, [this, &TC0] {
     REVPRING(i) {
       double j = i*3;
       while(j >= S84) j -= S84;
@@ -717,87 +719,87 @@ void geometry_information::procedural_shapes() {
       d = 8 - 2 * d;
       if(d<0) d = 0;
       if(d >= 6) d -= (d-6)/3;
-      hpcpush(ddi(i, orbsize * (.27 + .02 * d)) * C0);
+      hpcpush(ddi(i, orbsize * (.27 + .02 * d)) * TC0);
       }
     });
 
   auto dmod = [] (ld a, ld b) { return a - int(a/b)*b; };
 
-  make_ring(shSawRing, [this] {
+  make_ring(shSawRing, [this, &TC0] {
     REVPRING(i)
-      hpcpush(ddi(i, orbsize * (.3 + (int(i) & 3) * .02)) * C0);
+      hpcpush(ddi(i, orbsize * (.3 + (int(i) & 3) * .02)) * TC0);
     });
 
-  make_ring(shMoveRing, [this] {
+  make_ring(shMoveRing, [this, &TC0] {
     REVPRING(i) {
       int ii = i + 3;
       if(int(ii) % 7 == 0) {
-        hpcpush(ddi(i-2, orbsize * (.3 - .02)) * C0);
-        hpcpush(ddi(i-1, orbsize * (.3 - .01)) * C0);
+        hpcpush(ddi(i-2, orbsize * (.3 - .02)) * TC0);
+        hpcpush(ddi(i-1, orbsize * (.3 - .01)) * TC0);
         }
-      hpcpush(ddi(i, orbsize * (.3 + (int(ii) % 7) * .01)) * C0);
+      hpcpush(ddi(i, orbsize * (.3 + (int(ii) % 7) * .01)) * TC0);
       }
     });
 
-  make_ring(shGearRing, [dmod, this] {
+  make_ring(shGearRing, [dmod, this, &TC0] {
     REVPRING(i)
-      hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.3:.36)) * C0);
+      hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.3:.36)) * TC0);
     });
 
-  make_ring(shProtectiveRing, [dmod, this] {
+  make_ring(shProtectiveRing, [dmod, this, &TC0] {
     REVPRING(i)
-      hpcpush(ddi(i, orbsize * ((dmod(i, 12)<3)?.3:.36)) * C0);
+      hpcpush(ddi(i, orbsize * ((dmod(i, 12)<3)?.3:.36)) * TC0);
     });
 
-  make_ring(shPowerGearRing, [dmod, this] {
+  make_ring(shPowerGearRing, [dmod, this, &TC0] {
     REVPRING(i)
-      hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.3:(dmod(i,12) < 6) ? .36 : .42)) * C0);
+      hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.3:(dmod(i,12) < 6) ? .36 : .42)) * TC0);
     });
 
-  make_ring(shTerraRing, [dmod, this] {
+  make_ring(shTerraRing, [dmod, this, &TC0] {
     REVPRING(i)
-      hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.36:(dmod(i,12) < 6) ? .3 : .42)) * C0);
+      hpcpush(ddi(i, orbsize * ((dmod(i, 6)<3)?.36:(dmod(i,12) < 6) ? .3 : .42)) * TC0);
     });
 
-  make_ring(shPeaceRing, [dmod, this] { 
+  make_ring(shPeaceRing, [dmod, this, &TC0] { 
     REVPRING(i)
-      hpcpush(ddi(i, orbsize * (dmod(i, S28) < SD7?.36 : .3)) * C0);
+      hpcpush(ddi(i, orbsize * (dmod(i, S28) < SD7?.36 : .3)) * TC0);
     });
 
-  make_ring(shHeptaRing, [dmod, this] {
+  make_ring(shHeptaRing, [dmod, this, &TC0] {
     REVPRING(i)
-      hpcpush(ddi(i, orbsize * (dmod(i, S12) < SD3?.4 : .27)) * C0);
+      hpcpush(ddi(i, orbsize * (dmod(i, S12) < SD3?.4 : .27)) * TC0);
     });
 
   bshape(shCompass1, PPR::ITEM);
   RING(i)
-    hpcpush(ddi(i, orbsize * .35) * C0);
+    hpcpush(ddi(i, orbsize * .35) * TC0);
 
   bshape(shCompass2, PPR::ITEMa);
   RING(i)
-    hpcpush(ddi(i, orbsize * .30) * C0);
+    hpcpush(ddi(i, orbsize * .30) * TC0);
 
   bshape(shCompass3, PPR::ITEMb);
-  hpcpush(ddi(0, orbsize * .29) * C0);
-  hpcpush(ddi(S21, orbsize * .04) * C0);
-  hpcpush(ddi(-S21, orbsize * .04) * C0);
-  hpcpush(ddi(0, orbsize * .29) * C0);
+  hpcpush(ddi(0, orbsize * .29) * TC0);
+  hpcpush(ddi(S21, orbsize * .04) * TC0);
+  hpcpush(ddi(-S21, orbsize * .04) * TC0);
+  hpcpush(ddi(0, orbsize * .29) * TC0);
 
   bshape(shILeaf[0], PPR::ONTENTACLE);
   for(int t=0; t<=SD6; t++) {
-    hpcpush(ddi(SD7 + t*S14, zhexf*.7) * C0);
+    hpcpush(ddi(SD7 + t*S14, zhexf*.7) * TC0);
     if(t != SD6)
-      hpcpush(ddi(S14 + t*S14, zhexf*.15) * C0);
+      hpcpush(ddi(S14 + t*S14, zhexf*.15) * TC0);
     }
 
   bshape(shILeaf[1], PPR::ONTENTACLE);
   if(SD3 == 3 && SD7 % 3)
-    for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S36, zhexf*.8) * C0);
+    for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S36, zhexf*.8) * TC0);
   else {
     for(int t=0; t<=SD7; t++) {
-      hpcpush(ddi(t*S12, zhexf*.8) * C0);
+      hpcpush(ddi(t*S12, zhexf*.8) * TC0);
       if(t != SD6)
-        hpcpush(ddi(t*S12 + SD6, zhexf*.2) * C0);
+        hpcpush(ddi(t*S12 + SD6, zhexf*.2) * TC0);
       }
     }
 
@@ -811,17 +813,17 @@ void geometry_information::procedural_shapes() {
 
   bshape(shSlime, PPR::MONSTER_BODY);
   PRING(i)
-    hpcpush(ddi(i, scalefactor * hcrossf7 * (0.7 + .2 * sin(i * S_step * 9))) * C0);
+    hpcpush(ddi(i, scalefactor * hcrossf7 * (0.7 + .2 * sin(i * S_step * 9))) * TC0);
 
   bshape(shJelly, PPR::MONSTER_BODY);
   PRING(i)
-    hpcpush(ddi(i, scalefactor * hcrossf7 * (0.4 + .03 * sin(i * S_step * 7))) * C0);
+    hpcpush(ddi(i, scalefactor * hcrossf7 * (0.4 + .03 * sin(i * S_step * 7))) * TC0);
 
   bshape(shHeptaMarker, PPR::HEPTAMARK);
-  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, zhexf*.2) * C0);
+  for(int t=0; t<=SD7; t++) hpcpush(ddi(t*S12, zhexf*.2) * TC0);
 
   bshape(shSnowball, PPR::ITEM);
-  for(int t=0; t<=SD7*4; t++) hpcpush(ddi(t*SD3, zhexf*.1) * C0);
+  for(int t=0; t<=SD7*4; t++) hpcpush(ddi(t*SD3, zhexf*.1) * TC0);
 
   bshape(shRose, PPR::ITEM);
   PRING(t)
@@ -856,7 +858,7 @@ void geometry_information::procedural_shapes() {
     hpc.push_back(hpc[last->s]);
     }
 
-  bshape(shSwitchDisk, PPR::FLOOR); for(int i=0; i<=S84; i+=S3) hpcpush(ddi(i, .06) * C0);
+  bshape(shSwitchDisk, PPR::FLOOR); for(int i=0; i<=S84; i+=S3) hpcpush(ddi(i, .06) * TC0);
   }
 
 vector<ld> equal_weights(1000, 1);
