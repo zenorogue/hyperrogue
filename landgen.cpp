@@ -2850,10 +2850,10 @@ EX void setdist(cell *c, int d, cell *from) {
   if(c == &out_of_bounds) return;
   if(fake::in()) return FPIU(setdist(c, d, from));
   
+  if(d < -64) d = -64; /* otherwise it will underflow */
   if(c->mpdist <= d) return;
   if(c->mpdist > d+1 && d < BARLEV) setdist(c, d+1, from);
   c->mpdist = d;
-  // printf("setdist %p %d [%p]\n", c, d, from);
   
   // this fixes the following problem:
   // http://steamcommunity.com/app/342610/discussions/0/1470840994970724215/
