@@ -833,8 +833,8 @@ EX void initConfig() {
 
   addsaver(vid.always3, "3D always", false);
 
-  param_enum(geom3::spatial_embedding, "spatial_embedding", "3D embedding method", geom3::seDefault)
-  ->editable(geom3::spatial_embedding_options, "spatial embedding", 'E')
+  param_enum(geom3::spatial_embedding, "spatial_embedding", "spatial_embedding", geom3::seDefault)
+  ->editable(geom3::spatial_embedding_options, "3D embedding method", 'E')
   ->set_reaction([] {
     if(vid.always3) {
       geom3::switch_fpp();
@@ -2204,19 +2204,21 @@ EX void show3D() {
   gamescreen();
   dialog::init(XLAT("3D configuration"));
 
-  if(GDIM == 2) {
-    dialog::addBoolItem(XLAT("configure TPP automatically"), pmodel == mdDisk && pconf.camera_angle, 'T');
-    dialog::add_action(geom3::switch_tpp);
-    }
-  
 #if MAXMDIM >=4
   if(WDIM == 2) {
+    if(WDIM == 2) add_edit(geom3::spatial_embedding);
     dialog::addBoolItem(XLAT("configure FPP automatically"), GDIM == 3, 'F');
     dialog::add_action(geom3::switch_fpp);
     }
 #endif
 
-  add_edit(geom3::spatial_embedding);
+  dialog::addBreak(50);
+
+  if(GDIM == 2) {
+    dialog::addBoolItem(XLAT("configure TPP automatically"), pmodel == mdDisk && pconf.camera_angle, 'T');
+    dialog::add_action(geom3::switch_tpp);
+    }
+
   dialog::addBreak(50);
 
 #if MAXMDIM >= 4
