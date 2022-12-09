@@ -2887,7 +2887,7 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
                 poly_outline = outline;
               shiftmatrix Vbx = Vb;
               if(WDIM == 2) Vbx = Vbx * spin(sin(TAU * i / 12) * wav / (i+.1));
-              Vbx = Vbx * xpush(length * (i) / 12.0);
+              Vbx = Vbx * lxpush(length * (i) / 12.0);
               // shiftmatrix Vbx2 = Vnext * xpush(length2 * i / 6.0);
               // Vbx = Vbx * rspintox(inverse(Vbx) * Vbx2 * C0) * pispin;
               ShadowV(Vbx, sh, PPR::GIANTSHADOW);

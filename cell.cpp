@@ -51,7 +51,7 @@ public:
   virtual transmatrix spin_to(cell *c, int d, ld bonus=0);
   virtual transmatrix spin_from(cell *c, int d, ld bonus=0);
   
-  virtual double spacedist(cell *c, int i) { return hdist0(tC0(adj(c, i))); }
+  virtual double spacedist(cell *c, int i) { return hdist(tile_center(), adj(c, i) * tile_center()); }
   
   virtual bool strict_tree_rules() { return false; }
 

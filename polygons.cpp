@@ -1291,11 +1291,12 @@ void geometry_information::prepare_shapes() {
   bshape(shSmallWormHead, PPR::ONTENTACLE, scalefactor * wormscale / 2, 80);
 
   bshape(shWormSegment, PPR::TENTACLE1);
+  auto TC0 = tile_center();
   RING(i)
-   hpcpush(ddi(i, .20 * scalefactor * wormscale) * C0);
+   hpcpush(ddi(i, .20 * scalefactor * wormscale) * TC0);
   bshape(shSmallWormSegment, PPR::TENTACLE1);
   RING(i)
-    hpcpush(ddi(i, .16 * scalefactor * wormscale) * C0);
+    hpcpush(ddi(i, .16 * scalefactor * wormscale) * TC0);
   bshape(shWormTail, PPR::TENTACLE1, scalefactor * wormscale, 383);
   bshape(shSmallWormTail, PPR::TENTACLE1, scalefactor * wormscale, 384);
 
