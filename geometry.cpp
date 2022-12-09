@@ -1387,6 +1387,8 @@ EX string cgi_string() {
 
   V("3D", ONOFF(vid.always3));
   
+  if(embedded_plane) V("X:", its(geom3::ggclass()));
+
   if(scale_used()) V("CS", fts(vid.creature_scale));
   
   if(WDIM == 3) V("HTW", fts(vid.height_width));
