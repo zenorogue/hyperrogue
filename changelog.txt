@@ -4833,3 +4833,13 @@ Menu improvements:
 - - Bulls now correctly destroy walls they crash into
 - - fixed wrong time used in some places (running time instead of game time)
 - - fixed the Flail Guards
+
+2022-12-09 02:38 Update 12.1f:
+
+- WIP: In '3d settings' menu for 2D maps, you can now select the way how the 2D map will be embedded into a 3D space (space of the same curvature as flat/concave/convex eequidistant, space of lower curvature, product space). 
+  The basic functionality should work, but there are probably some bugs and lots of missing features (to do: shmup, raycasting, fog, radar, more intuitive menu, better default settings, embedding into nonisotropic geometries).
+  On the way also some bugs with 2.5D should be fixed ("draw sky" disabled now also disables Euclidean sky; correct movement if the surface the camera moves on is not flat; fixed sky colors; fixed the radar transform computation in 2.5D which also affected fog rendering).
+- fixed: inventory glyphs were missing outlines due to a bug
+- improved the display in OSM when using orb icons
+- Give the Plane of Fire a redder floor than CR4 (thanks to jlm)
+- Draw mimics with sword in left hand if PC's sword in left hand (thanks to jlm)
