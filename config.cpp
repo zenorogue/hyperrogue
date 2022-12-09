@@ -833,8 +833,17 @@ EX void initConfig() {
 
   addsaver(vid.always3, "3D always", false);
 
-  param_enum(geom3::spatial_embedding, "spatial_embedding", "spatial embedding", geom3::seDefault)
-  ->editable(geom3::spatial_embedding_options, "spatial embedding", 'E');
+  param_enum(geom3::spatial_embedding, "spatial_embedding", "3D embedding method", geom3::seDefault)
+  ->editable(geom3::spatial_embedding_options, "spatial embedding", 'E')
+  ->set_reaction([] {
+    if(vid.always3) {
+      geom3::switch_fpp();
+      geom3::switch_fpp();
+      delete_sky();
+      // not sure why this is needed...
+      resetGL();
+      }
+    });
   
   param_b(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA || ISWEB) ? 1 : 0);
   param_i(reserve_limit, "memory_reserve", 128);
