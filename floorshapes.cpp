@@ -731,9 +731,10 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
           int s = fsh.b[id].s;
           int e = fsh.b[id].e-1;        
           for(int t=0; t<e-s; t++) {
-            hyperpoint v1 = may_kleinize(hpc[s+t]) - C0;
-            hyperpoint v2 = may_kleinize(hpc[s+t+1]) - C0;
-            texture_order([&] (ld x, ld y) { hpcpush(orthogonal_move(normalize(C0 + v1 * x + v2 * y), top + h * (x+y))); });
+            auto TC0 = tile_center();
+            hyperpoint v1 = may_kleinize(hpc[s+t]) - TC0;
+            hyperpoint v2 = may_kleinize(hpc[s+t+1]) - TC0;
+            texture_order([&] (ld x, ld y) { hpcpush(orthogonal_move(normalize_flat(TC0 + v1 * x + v2 * y), top + h * (x+y))); });
             }
           }
 
