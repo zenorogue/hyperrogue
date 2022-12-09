@@ -57,9 +57,14 @@ EX void prepare_sky() {
     }
   }
 
-vector<glhr::colored_vertex> skyvertices;
-cell *sky_centerover;
-shiftmatrix sky_cview;
+EX vector<glhr::colored_vertex> skyvertices;
+EX cell *sky_centerover;
+EX shiftmatrix sky_cview;
+
+EX void delete_sky() {
+  sky_centerover = nullptr;
+  skyvertices.clear();
+  }
 
 void compute_skyvertices(const vector<sky_item>& sky) {
   skyvertices.clear();
@@ -259,6 +264,7 @@ void compute_skyvertices(const vector<sky_item>& sky) {
 
 void dqi_sky::draw() {
   if(!vid.usingGL || sky.empty() || skyvertices.empty()) return;
+  if(!draw_sky) { delete_sky(); return; }
 
   #if CAP_VR
   transmatrix s = (vrhr::rendering() ? vrhr::master_cview : cview()).T * inverse(sky_cview.T);
