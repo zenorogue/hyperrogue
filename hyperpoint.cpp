@@ -1428,6 +1428,12 @@ EX hyperpoint scale_point(const hyperpoint& h, ld scale_factor) {
   return res;
   }
 
+EX bool moved_center() {
+  if(geom3::sph_in_euc()) return true;
+  if(geom3::sph_in_hyp()) return true;
+  return false;
+  }
+
 /** Returns the intended center of the tile, relative to its local matrix. Usually C0 but may be different, e.g. when embedding a sphere in E3 or H3. */
 EX hyperpoint tile_center() {
   if(geom3::sph_in_euc()) return C02 + C03;

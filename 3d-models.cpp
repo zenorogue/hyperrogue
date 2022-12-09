@@ -754,7 +754,7 @@ void geometry_information::adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye
   
   vector<hyperpoint> pss;
   
-  for(int i=head.s; i<head.e; i++) pss.push_back(psmin(lzpush(shift_head) * hpc[i]));
+  for(int i=head.s; i<head.e; i++) pss.push_back(psmin(lzpush(shift_head - (moved_center() ? 1 : 0)) * hpc[i]));
   
   ld zmid = 0;
   for(hyperpoint& h: pss) zmid += h[2];
