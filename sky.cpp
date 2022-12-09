@@ -46,6 +46,7 @@ EX void prepare_sky() {
   if(euclid && !geom3::sph_in_euc()) {
     if(WDIM == 3 || GDIM == 2) return;
     if(no_wall_rendering) return;
+    if(!draw_sky) return;
     shiftmatrix T = ggmatrix(currentmap->gamestart());
     T.T = gpushxto0(tC0(T.T)) * T.T;
     queuepoly(T, cgi.shEuclideanSky, 0x0044e4FF);
