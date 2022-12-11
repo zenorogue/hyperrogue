@@ -379,7 +379,7 @@ void show() {
     view_trace = !view_trace;
     if(view_trace) generate_trace();
     });
-  dialog::addBoolItem_action("side display", side, 'M');
+  dialog::addBoolItem_action("side display", side, 'm');
 
   dialog::addItem("test the animation", 't');
   dialog::add_action([] {
@@ -407,8 +407,10 @@ void show() {
     last_time = HUGE_VAL;
     });
   
-  if(GDIM == 2) dialog::addItem("centering", 'X');
-  dialog::add_action_push(snap_to_center);
+  if(GDIM == 2) {
+    dialog::addItem("centering", 'z');
+    dialog::add_action_push(snap_to_center);
+    }
     
   dialog::addHelp();
   dialog::add_action([] { gotoHelp(smooth_camera_help); });
