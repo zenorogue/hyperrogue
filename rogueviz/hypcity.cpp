@@ -57,7 +57,7 @@ void prepare_tf() {
       hx[3] = 1;
       if(hyperbolic) hx = spin(45._deg) * hx;
       hx = normalize(hx);
-      hx = zshift(hx, h[2]*(t*(sphere ? 3 : 7)));
+      hx = orthogonal_move(hx, h[2]*(t*(sphere ? 3 : 7)));
 
       return {0, hx}; 
       }

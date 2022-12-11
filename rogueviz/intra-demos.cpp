@@ -20,14 +20,14 @@ void set_wall(cell *c, color_t col) {
 map<cellwalker, int> plane;
 
 cellwalker flatspin(cellwalker cw, int i) {
-  if(hybri && cw.spin < cw.at->type - 2)
+  if(mhybrid && cw.spin < cw.at->type - 2)
     cw.spin = gmod(cw.spin + (cw.mirrored ? -i : i), cw.at->type - 2);
   return cw;
   }
 
 cellwalker gstrafe(cellwalker cw, int i) {
   if(reg3::in()) return currentmap->strafe(cw, i);
-  if(prod) {
+  if(mproduct) {
     if(i == cw.at->type-2 || i == cw.at->type-1)
       return cellwalker(cw.at->move(i), cw.spin);
     else for(int k: {-1, 1})

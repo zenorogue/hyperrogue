@@ -423,7 +423,7 @@ void show() {
   }
 
 void prepare_for_interpolation(hyperpoint& h) {
-  if(prod) {
+  if(gproduct) {
     h[3] = zlevel(h);
     ld t = exp(h[3]);
     h[0] /= t;
@@ -433,7 +433,7 @@ void prepare_for_interpolation(hyperpoint& h) {
   }
 
 void after_interpolation(hyperpoint& h) {
-  if(prod) {
+  if(gproduct) {
     ld v = exp(h[3]) / sqrt(abs(intval(h, Hypc)));
     h[0] *= v;
     h[1] *= v;

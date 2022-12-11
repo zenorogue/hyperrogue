@@ -452,7 +452,7 @@ void queuedisk(const shiftmatrix& V, const colorpair& cp, bool legend, const str
     queuepolyat(V, sh, 0x80, PPR::MONSTER_SHADOW); 
     poly_outline = p; 
     if(info) queueaction(PPR::MONSTER_HEAD, [info] () { SVG_LINK(*info); });
-    queuepolyat(V1 = mscale(V, cgi.BODY), sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
+    queuepolyat(V1 = orthogonal_move_fol(V, cgi.BODY), sh, darken_a(cp.color1), PPR::MONSTER_HEAD);
     if(info) queueaction(PPR::MONSTER_HEAD, [] () { SVG_LINK(""); });
     }
   else {

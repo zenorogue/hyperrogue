@@ -635,7 +635,7 @@ namespace sag {
 
   ld pdist(hyperpoint hi, hyperpoint hj) {
     if(sol) return min(geo_dist(hi, hj), geo_dist(hj, hi));
-    if(prod && angular) {
+    if(mproduct && angular) {
 
       auto di = product_decompose(hi);
       auto dj = product_decompose(hj);
@@ -1146,7 +1146,7 @@ void geo_stats() {
     out("nodes", isize(sagcells));
     out("maxsagdist", max_sag_dist);
     out("dim", (euclid && WDIM == 2 && euc::eu.user_axes[1][1] == 1) ? 1 : WDIM);
-    out("geometry", S3 >= OINF ? "tree" : hyperbolic ? "hyperbolic" : sphere ? "sphere" : euclid ? "euclid" : nil ? "nil" : sol ? "solv" : prod ? "product" : "other");
+    out("geometry", S3 >= OINF ? "tree" : hyperbolic ? "hyperbolic" : sphere ? "sphere" : euclid ? "euclid" : nil ? "nil" : sol ? "solv" : mproduct ? "product" : "other");
     out("closed", max_sag_dist == isize(sagcells) ? 0 : closed_manifold ? 1 : 0);
     out("angular", angular);
     for(int p: {1, 10, 50}) { out(format("sagdist%02d", p), sorted_sagdist[(p * sorted_sagdist.size()) / 100]); }

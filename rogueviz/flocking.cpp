@@ -106,7 +106,7 @@ namespace flocking {
       transmatrix I, Rot;
       bool use_rot = true;
       
-      if(prod) {
+      if(mproduct) {
         I = inverse(m->at);
         Rot = inverse(m->ori);
         }
@@ -204,7 +204,7 @@ namespace flocking {
       fixmatrix(pats[i]);
       
       /* RogueViz does not correctly rotate them */
-      if(prod) {
+      if(mproduct) {
         hyperpoint h = oris[i] * xtangent(1);
         pats[i] = pats[i] * spin(-atan2(h[1], h[0]));
         oris[i] = spin(+atan2(h[1], h[0])) * oris[i];
@@ -234,7 +234,7 @@ namespace flocking {
         gmatrix.clear();
         vdata[0].m->pat = shiftless(View * calc_relative_matrix(vdata[0].m->base, centerover, C0) * vdata[0].m->at);
         View = inverse(vdata[0].m->pat.T) * View;
-        if(prod) {
+        if(mproduct) {
           NLP = inverse(vdata[0].m->ori);
           
           NLP = hr::cspin90(1, 2) * spin90() * NLP;
@@ -265,7 +265,7 @@ namespace flocking {
           vdata[i].m->pat = gmatrix[vdata[i].m->base] * vdata[i].m->at;
           auto h1 = unshift(tC0(vdata[i].m->pat));
           cnt++;          
-          if(prod) {
+          if(mproduct) {
             auto d1 = product_decompose(h1);
             lev += d1.first;
             h += d1.second;
@@ -275,7 +275,7 @@ namespace flocking {
           }
         if(cnt) {
           h = normalize_flat(h);
-          if(prod) h = zshift(h, lev / cnt);
+          if(mproduct) h = orthogonal_move(h, lev / cnt);
           View = inverse(actual_view_transform) * gpushxto0(h) * actual_view_transform * View;
           shift_view(ztangent(follow_dist));
           }

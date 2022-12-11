@@ -124,7 +124,7 @@ void create_sokowalls(cell *c) {
     hyperpoint h0 = get_corner_position(c, b);
     hyperpoint h1 = get_corner_position(c, b+1);
     hyperpoint h2 = normalize(h0 * (qfr-fr) + h1 * fr);
-    return mscale(h2, 1 / (1 - a / 6.1));
+    return orthogonal_move_fol(h2, 1 / (1 - a / 6.1));
     };
   
   for(int a=0; a<9; a++) 

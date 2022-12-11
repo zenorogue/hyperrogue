@@ -30,7 +30,7 @@ color_t rainbow_color_at(hyperpoint h) {
   }
   
 void set_cell(cell *c) {
-  if(hybri) {
+  if(mhybrid) {
     cell *c1 = hybrid::get_where(c).first;
     if(c1->land != laHive) hybrid::in_underlying_geometry([&] { set_cell(c1); });
     c->land = c1->land;

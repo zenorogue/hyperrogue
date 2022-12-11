@@ -83,11 +83,11 @@ transmatrix random_snow_matrix(cell *c) {
     h[2] = -h[2];
     return rgpushxto0(h);
     }
-  else if(prod) {
+  else if(mproduct) {
     transmatrix T = PIU(random_snow_matrix(c));
-    return mscale(T, (randd() - .5) * cgi.plevel);
+    return orthogonal_move(T, (randd() - .5) * cgi.plevel);
     }
-  else if(hybri && !prod) {
+  else if(mhybrid && !mproduct) {
     return rots::lift_matrix(PIU(random_snow_matrix(c))); // * zpush((randd() - .5) * cgi.plevel);
     }
   else if(nonisotropic || bt::in()) {
