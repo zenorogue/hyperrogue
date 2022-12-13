@@ -367,6 +367,8 @@ EX hookset<eLand(eLand)> hooks_nextland;
 
 EX bool all_unlocked = false;
 
+EX vector<eLand> cheatdest_list;
+
 EX eLand getNewLand(eLand old) {
 
   #if CAP_LEGACY
@@ -381,6 +383,12 @@ EX eLand getNewLand(eLand old) {
   
   if(cheatdest != old && cheatdest != laElementalWall) if(!isCyclic(cheatdest) && !isTechnicalLand(cheatdest)) return cheatdest;
   
+  if(cheatdest_list.size()) {
+    eLand l = cheatdest_list[0];
+    std::rotate(cheatdest_list.begin(), cheatdest_list.begin()+1, cheatdest_list.end());
+    return l;
+    }
+
   if(old == laTortoise) return laDragon;
 
   if(yendor::on && ls::any_chaos()) {

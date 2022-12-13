@@ -641,6 +641,11 @@ int read_cheat_args() {
   else if(argis("-W2")) {
     shift(); cheatdest = readland(args()); cheat();
     showstartmenu = false;
+    cheatdest_list.clear();
+    }
+  else if(argis("-W3")) {
+    shift(); cheatdest_list.push_back(readland(args())); cheat();
+    showstartmenu = false;
     }
   else if(argis("-I")) {
     PHASE(3) cheat();
