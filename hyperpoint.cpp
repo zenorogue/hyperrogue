@@ -1797,7 +1797,7 @@ EX hyperpoint lp_apply(const hyperpoint h) {
   return nisot::local_perspective_used() ? NLP * h : h;
   }
 
-EX hyperpoint smalltangent() { if(embedded_plane && msphere) return lxpush0(0.1); else return xtangent(.1); }
+EX hyperpoint smalltangent() { return xtangent(.1); }
 
 EX void cyclefix(ld& a, ld b) {
   while(a > b + M_PI) a -= TAU;
