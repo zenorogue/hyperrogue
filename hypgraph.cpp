@@ -1557,6 +1557,7 @@ EX bool confusingGeometry() {
   }
 
 EX ld master_to_c7_angle() {
+  if(dont_inverse()) return 0;
   if(mhybrid) return hybrid::in_underlying_geometry(master_to_c7_angle);
   if(WDIM == 3) return 0;
   ld alpha = 0;

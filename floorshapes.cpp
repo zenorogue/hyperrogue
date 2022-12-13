@@ -345,6 +345,17 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, ld
     hpcpush(xspinpush0(+M_PI/sides, size));
     hpcpush(xspinpush0(-M_PI/sides, size));
     chasmifyPoly(dlow_table[k], dhi_table[k], k);
+
+    if(geom3::euc_in_nil()) {
+      fsh.gpside[k].resize(c->type);
+      for(int i=0; i<c->type; i++) {
+        sizeto(fsh.gpside[k][i], id);
+        bshape(fsh.gpside[k][i][id], PPR::LAKEWALL);
+        hpcpush(xspinpush0(M_PI - i * TAU / sides + shift * S_step, size));
+        hpcpush(xspinpush0(M_PI - (i + 1) * TAU / sides + shift * S_step, size));
+        chasmifyPoly(dlow_table[k], dhi_table[k], k);
+        }
+      }
     }
   }
 

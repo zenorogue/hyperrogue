@@ -85,6 +85,7 @@ EX movedir vectodir(hyperpoint P) {
   transmatrix U = unshift(ggmatrix(cwt.at));
   if(embedded_plane && geom3::same_in_same())  U = current_display->radar_transform * U;
 
+  if(geom3::euc_in_nil()) P[2] = -P[2]; /* no idea why */
   P = direct_exp(lp_iapply(P));
 
   hyperpoint H = sphereflip * tC0(U);

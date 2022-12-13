@@ -771,6 +771,7 @@ void geometry_information::prepare_basics() {
     scalefactor *= exp(-vid.depth);
     }
 
+  if(geom3::euc_in_nil()) scalefactor *= geom3::euclid_embed_scale;
   if(geom3::sph_in_euc()) scalefactor *= (1 + vid.depth);
   if(geom3::sph_in_hyp()) scalefactor *= sinh(1 + vid.depth);
 
@@ -1021,8 +1022,9 @@ EX namespace geom3 {
       reduce = (GDIM == 3 ? human_height * .3 : 0);
       
       int sgn = vid.wall_height > 0 ? 1 : -1;
+      ld ees = geom3::euc_in_nil() ? geom3::euclid_embed_scale : 1;
 
-      STUFF = lev_to_factor(0) - sgn * max(orbsize * 0.3, zhexf * .6);
+      STUFF = lev_to_factor(0) - sgn * max(orbsize * ees * 0.3, zhexf * ees * .6);
       
       ABODY = lev_to_factor(human_height * .4 - reduce);
       ALEG0 = lev_to_factor(human_height * .0 - reduce);
@@ -1061,6 +1063,8 @@ EX namespace geom3 {
         if(HELLSPIKE < max_high) HELLSPIKE = max_high;
         if(sgn < 0) INFDEEP = -1;
         }
+
+      if(geom3::euc_in_hyp() && sgn < 0) INFDEEP = FLOOR - 5;
       }
     }    
 
@@ -1075,7 +1079,8 @@ EX namespace geom3 {
     seLowerCurvatureInverted,
     seMuchLowerCurvature,
     seMuchLowerCurvatureInverted,
-    seProduct
+    seProduct,
+    seNil
     };
   #endif
 
@@ -1087,10 +1092,12 @@ EX namespace geom3 {
     {"lower curvature inverted", "Embed as a concave surface in a space of lower curvature."},
     {"much lower curvature", "Embed sphere as a convex sphere in hyperbolic space."},
     {"much lower curvature inverted", "Embed sphere as a concave sphere in hyperbolic space."},
-    {"product",          "Add one extra dimension in the Euclidean way."}
+    {"product",          "Add one extra dimension in the Euclidean way."},
+    {"Nil",              "Embed into Nil. Works only with Euclidean."},
     };
 
   EX eSpatialEmbedding spatial_embedding;
+  EX ld euclid_embed_scale = 1;
 
   EX vector<geometryinfo> ginf_backup;
 
@@ -1104,6 +1111,10 @@ EX namespace geom3 {
 
   EX bool euc_in_hyp() {
     return ggclass() == gcHyperbolic && mgclass() == gcEuclid;
+    }
+
+  EX bool euc_in_nil() {
+    return ggclass() == gcNil && mgclass() == gcEuclid;
     }
 
   EX bool sph_in_euc() {
@@ -1171,6 +1182,11 @@ EX namespace geom3 {
 
           if(among(spatial_embedding, seMuchLowerCurvature, seMuchLowerCurvatureInverted)) {
             g = ginf[gSpace534].g;
+            g.gameplay_dimension = 2;
+            }
+
+          if(spatial_embedding == seNil && euclid) {
+            g = ginf[gNil].g;
             g.gameplay_dimension = 2;
             }
           }
@@ -1267,7 +1283,7 @@ EX void switch_always3() {
         vid.wall_height = 2;
         vid.eye = -2;
         }
-      if(pmodel == mdDisk) pmodel = mdPerspective;
+      if(pmodel == mdDisk) pmodel = nonisotropic ? mdGeodesic : mdPerspective;
       swapmatrix(View);
       swapmatrix(current_display->which_copy);
       callhooks(hooks_swapdim);

@@ -169,7 +169,7 @@ const vector<int>& hrmap::get_move_seq(cell *c, int i) {
 transmatrix hrmap::spin_to(cell *c, int d, ld bonus) {
   ld sa = spin_angle(c, d);
   if(sa != SPIN_NOT_AVAILABLE) { return spin(bonus + sa); }
-  transmatrix T = rspintox(tC0(adj(c, d)));
+  transmatrix T = lrspintox(tC0(adj(c, d)));
   if(WDIM == 3) return T * cspin(2, 0, bonus);
   return T * spin(bonus);
   }
@@ -177,7 +177,7 @@ transmatrix hrmap::spin_to(cell *c, int d, ld bonus) {
 transmatrix hrmap::spin_from(cell *c, int d, ld bonus) {
   ld sa = spin_angle(c, d);
   if(sa != SPIN_NOT_AVAILABLE) { return spin(bonus - sa); }
-  transmatrix T = spintox(tC0(adj(c, d)));
+  transmatrix T = lspintox(tC0(adj(c, d)));
   if(WDIM == 3) return T * cspin(2, 0, bonus);
   return T * spin(bonus);
   }
@@ -1539,7 +1539,7 @@ EX vector<int> reverse_directions(heptagon *c, int dir) {
   }
 
 EX bool standard_tiling() {
-  return !arcm::in() && !kite::in() && !bt::in() && !arb::in() && !nonisotropic && !mhybrid;
+  return !arcm::in() && !kite::in() && !bt::in() && !arb::in() && (WDIM == 2 || !nonisotropic) && !mhybrid;
   }
 
 EX int valence() {

@@ -323,7 +323,7 @@ void draw_star(const shiftmatrix& V, const hpcshape& sh, color_t col, ld rev = f
 
 void celldrawer::draw_ceiling() {
 
-  if(pmodel != mdPerspective || sphere) return;
+  if(!models::is_perspective(pmodel) || sphere) return;
   
   auto add_to_sky = [this] (color_t col, color_t col2) {
     if(sky) sky->sky.emplace_back(c, V, col, col2);

@@ -1379,7 +1379,7 @@ void celldrawer::draw_features() {
       if(detaillevel >= 2)
         queuepolyat(at_smart_lof(V, zgrad0(0, cgi.slev, 1, 2)), cgi.shHeptaMarker, darkena(wcol, 0, 0xFF), PPR::REDWALL);
       if(detaillevel >= 1)
-        queuepolyat(at_smart_lof(V, cgi.SLEV[1]) * pispin, cgi.shWeakBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+1);
+        queuepolyat(at_smart_lof(V, cgi.SLEV[1]) * lpispin(), cgi.shWeakBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+1);
       if(detaillevel >= 2)
         queuepolyat(at_smart_lof(V, zgrad0(0, cgi.slev, 3, 2)), cgi.shHeptaMarker, darkena(wcol, 0, 0xFF), PPR::REDWALL+2);
       queuepolyat(at_smart_lof(V, cgi.SLEV[2]), cgi.shSolidBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+3);
@@ -1389,7 +1389,7 @@ void celldrawer::draw_features() {
       if(detaillevel >= 2)
         queuepolyat(at_smart_lof(V, zgrad0(0, cgi.slev, 1, 2)), cgi.shHeptaMarker, darkena(wcol, 0, 0xFF), PPR::REDWALL);
       if(detaillevel >= 1)
-        queuepolyat(at_smart_lof(V, cgi.SLEV[1]) * pispin, cgi.shWeakBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+1);
+        queuepolyat(at_smart_lof(V, cgi.SLEV[1]) * lpispin(), cgi.shWeakBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+1);
       if(detaillevel >= 2)
         queuepolyat(at_smart_lof(V, zgrad0(0, cgi.slev, 3, 2)), cgi.shHeptaMarker, darkena(wcol, 0, 0xFF), PPR::REDWALL+2);
       queuepolyat(at_smart_lof(V, cgi.SLEV[2]), cgi.shWeakBranch, darkena(wcol, 0, 0xFF), PPR::REDWALL+3);

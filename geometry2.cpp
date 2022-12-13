@@ -81,6 +81,8 @@ transmatrix hrmap_standard::master_relative(cell *c, bool get_inverse) {
     }
   else if(WDIM == 3)
     return Id;
+  else if(dont_inverse())
+    return Id;
   else
     return pispin * Id;
   }
@@ -310,7 +312,7 @@ void virtualRebase_cell(cell*& base, T& at, const U& check) {
 template<class T, class U> 
 void virtualRebase(cell*& base, T& at, const U& check) {
 
-  if(nil) {
+  if(nil && WDIM == 3) {
     hyperpoint h = check(at);
     auto step = [&] (int i) {
       at = currentmap->adj(base, (i+S7/2) % S7) * at;
@@ -440,6 +442,8 @@ EX bool no_easy_spin() {
   return NONSTDVAR || arcm::in() || WDIM == 3 || bt::in() || kite::in();
   }
 
+EX bool dont_inverse() { return geometry == 1 && PURE && geom3::euc_in_nil(); }
+
 ld hrmap_standard::spin_angle(cell *c, int d) {
   if(WDIM == 3) return SPIN_NOT_AVAILABLE;
   ld hexshift = 0;
@@ -454,6 +458,7 @@ ld hrmap_standard::spin_angle(cell *c, int d) {
     return -atan2(p[1], p[0]) - hexshift;
     }
   #endif
+  if(dont_inverse()) return - d * TAU / c->type;
   return M_PI - d * TAU / c->type - hexshift;
   }
 
@@ -574,6 +579,9 @@ hyperpoint hrmap_standard::get_corner(cell *c, int cid, ld cf) {
     }
   #endif
   if(PURE) {
+    if(geom3::euc_in_nil()) {
+      return lspinpush0(spin_angle(c, cid) + M_PI/S7, cgi.hcrossf * 3 / cf);
+      }
     return ddspin(c,cid,M_PI/S7) * lxpush0(cgi.hcrossf * 3 / cf);
     }
   if(BITRUNCATED) {

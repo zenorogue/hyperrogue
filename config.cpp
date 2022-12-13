@@ -833,6 +833,8 @@ EX void initConfig() {
 
   addsaver(vid.always3, "3D always", false);
 
+  param_f(geom3::euclid_embed_scale, "euclid_embed_scale", "euclid_embed_scale");
+
   param_enum(geom3::spatial_embedding, "spatial_embedding", "spatial_embedding", geom3::seDefault)
   ->editable(geom3::spatial_embedding_options, "3D embedding method", 'E')
   ->set_reaction([] {
