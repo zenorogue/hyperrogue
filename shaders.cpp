@@ -341,24 +341,17 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
       distfun = "length(t.xyz)";
     switch(cgclass) {
       #if CAP_SOLV
-      case gcSolNIH:
-        switch(sn::geom()) {
-          case gSol:
-            if(solv_all) {
-              vsh += "\n#define SOLV_ALL\n";
-              }
-            vsh += sn::shader_symsol;
-            break;
-          case gNIH:
-            vsh += sn::shader_nsym;
-            break;
-          case gSolN:
-            vsh += sn::shader_nsymsol;
-            break;
-          default:
-            println(hlog, "error: unknown sn geometry");
-          }            
-        treset = true;
+      case gcSol:
+        if(solv_all) {
+          vsh += "\n#define SOLV_ALL\n";
+          }
+        vsh += sn::shader_symsol;
+        break;
+      case gcNIH:
+        vsh += sn::shader_nsym;
+        break;
+      case gcSolN:
+        vsh += sn::shader_nsymsol;
         break;
       #endif
       case gcNil:

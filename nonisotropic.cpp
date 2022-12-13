@@ -50,11 +50,10 @@ EX }
 #if CAP_SOLV
 EX namespace sn {
 
-  EX bool in() { return cgclass == gcSolNIH; }
+  EX bool in() { return among(cgclass, gcSol, gcNIH, gcSolN); }
 
-  EX eGeometry geom() {
-    if(asonov::in()) return gSol;
-    else return geometry;
+  EX eGeometryClass geom() {
+    return cgclass;
     }
 
   #if HDR
@@ -493,21 +492,21 @@ EX namespace sn {
     const ld l2 = log(2);
     const ld l3 = log(3);
     switch(geom()) {
-      case gSolN:
+      case gcSolN:
         return hpxyz3(
           -(velocity[2] * transported[0] + velocity[0] * transported[2]) * l2,
            (velocity[2] * transported[1] + velocity[1] * transported[2]) * l3,
            velocity[0] * transported[0] * exp(2*l2*at[2]) * l2 - velocity[1] * transported[1] * exp(-2*l3*at[2]) * l3,
            0
            );
-      case gSol:
+      case gcSol:
         return hpxyz3(
           -velocity[2] * transported[0] - velocity[0] * transported[2],
            velocity[2] * transported[1] + velocity[1] * transported[2],
            velocity[0] * transported[0] * exp(2*at[2]) - velocity[1] * transported[1] * exp(-2*at[2]),
            0
            );
-      case gNIH:
+      case gcNIH:
         return hpxyz3(
            (velocity[2] * transported[0] + velocity[0] * transported[2]) * l2,
            (velocity[2] * transported[1] + velocity[1] * transported[2]) * l3,
@@ -676,9 +675,9 @@ EX namespace sn {
   
   EX tabled_inverses& get_tabled() {
     switch(geom()) {
-      case gSol: return solt;
-      case gNIH: return niht;
-      case gSolN: return sont;
+      case gcSol: return solt;
+      case gcNIH: return niht;
+      case gcSolN: return sont;
       default: throw hr_exception("not solnih");
       }
     }

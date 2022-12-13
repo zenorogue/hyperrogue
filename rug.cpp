@@ -859,7 +859,7 @@ bincode acd_bin(ld x) {
 
 bincode get_bincode(hyperpoint h) {
   switch(ginf[gwhere].cclass) {
-    case gcEuclid: case gcSolNIH: case gcNil: case gcProduct: case gcSL2:
+    case gcEuclid: case gcSol: case gcNIH: case gcSolN: case gcNil: case gcProduct: case gcSL2:
       return acd_bin(h[0]) + acd_bin(h[1]) * sY + acd_bin(h[2]) * sZ;
     case gcHyperbolic:
       return acd_bin(hypot_d(3, h));

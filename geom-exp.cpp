@@ -520,21 +520,14 @@ EX string geometry_name() {
     case gcSphere:
       return XLAT("spherical") + dim_name();
 
-    case gcSolNIH:
-#if CAP_SOLV
-      switch(sn::geom()) {
-        case gSol:
-          return XLAT("Sol");
-        case gNIH:
-          return XLAT("hyperbolic (3:2)");
-        case gSolN:
-          return XLAT("Sol (3:2)");
-        default:
-          return "unknown";
-        }
-#else
+    case gcSol:
       return XLAT("Sol");
-#endif
+
+    case gcNIH:
+      return XLAT("hyperbolic (3:2)");
+
+    case gcSolN:
+      return XLAT("Sol (3:2)");
 
     case gcNil:
       return XLAT("Nil");
