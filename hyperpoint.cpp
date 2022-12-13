@@ -560,6 +560,7 @@ EX hyperpoint normalize_flat(hyperpoint h) {
   if(gproduct) return product_decompose(h).second;  
   if(sl2) h = slr::translate(h) * zpush0(-atan2(h[2], h[3]));
   if(geom3::euc_in_nil()) h[1] = 0;
+  if(geom3::euc_in_solnih()) h[2] = 0;
   if(geom3::euc_in_hyp()) {
     h = normalize(h);
     auto h1 = deparabolic13(h);
@@ -792,6 +793,9 @@ EX hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
   if(geom3::euc_in_nil()) {
     return nisot::translate(h) * cpush0(1, z);
     }
+  if(geom3::euc_in_solnih()) {
+    return nisot::translate(h) * cpush0(2, z);
+    }
   if(geom3::sph_in_euc()) {
     ld z0 = hypot_d(3, h);
     ld f = ((z0 + z) / z0);
@@ -868,6 +872,13 @@ EX void swapmatrix(transmatrix& T) {
       T = eupush(hyperpoint(h1[0] * geom3::euclid_embed_scale, 0, h1[1] * geom3::euclid_embed_scale, 1));
       }
     }
+  else if(geom3::euc_in_solnih()) {
+    if(!geom3::flipped) {
+      hyperpoint h1 = T * C02;
+      // rotations are illegal anyway...
+      T = eupush(hyperpoint(h1[0] * geom3::euclid_embed_scale, h1[1] * geom3::euclid_embed_scale, 0, 1));
+      }
+    }
   else if(geom3::in_product()) {
     /* just do nothing */
     }
@@ -889,6 +900,7 @@ EX void swapmatrix(hyperpoint& h) {
   if(geom3::sph_in_euc()) { h[3] = 1; return; }
   if(geom3::sph_in_hyp()) { h[0] *= sinh(1); h[1] *= sinh(1); h[2] *= sinh(1); h[3] = cosh(1); return; }
   if(geom3::euc_in_nil()) { h[3] = 1; h[2] = h[1] * geom3::euclid_embed_scale; h[1] = 0; h[0] *= geom3::euclid_embed_scale; return; }
+  if(geom3::euc_in_solnih()) { h[3] = 1; h[1] = h[1] * geom3::euclid_embed_scale; h[2] = 0; h[0] *= geom3::euclid_embed_scale; return; }
   swap(h[2], h[3]);
   if(GDIM == 3) h[2] = 0;
   if(geom3::euc_in_hyp()) h = parabolic13(h[0], h[1]) * C0;

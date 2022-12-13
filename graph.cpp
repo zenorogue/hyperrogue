@@ -3490,7 +3490,7 @@ EX int countMinesAround(cell *c) {
   }
 
 EX transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si) {
-  if(NONSTDVAR || bt::in() || geom3::euc_in_nil()) return Id;
+  if(NONSTDVAR || bt::in() || geom3::euc_in_noniso()) return Id;
   transmatrix V = ddspin180(c, si.dir);
   if(si.reflect) V = V * lmirror();
   if(euclid) return V;
@@ -3749,7 +3749,7 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const shiftmatrix& V, color_t
   else if(sidepar == SIDE_BSHA) prio = PPR::BSHALLOW;
   else prio = PPR::REDWALL-2+4*(sidepar-SIDE_SLEV);
   
-  if(geom3::euc_in_nil()) {
+  if(geom3::euc_in_noniso()) {
     draw_shapevec(c, V, qfi.fshape->gpside[sidepar][i], col, prio);
     return false;
     }

@@ -771,7 +771,7 @@ void geometry_information::prepare_basics() {
     scalefactor *= exp(-vid.depth);
     }
 
-  if(geom3::euc_in_nil()) scalefactor *= geom3::euclid_embed_scale;
+  if(geom3::euc_in_noniso()) scalefactor *= geom3::euclid_embed_scale;
   if(geom3::sph_in_euc()) scalefactor *= (1 + vid.depth);
   if(geom3::sph_in_hyp()) scalefactor *= sinh(1 + vid.depth);
 
@@ -1022,7 +1022,7 @@ EX namespace geom3 {
       reduce = (GDIM == 3 ? human_height * .3 : 0);
       
       int sgn = vid.wall_height > 0 ? 1 : -1;
-      ld ees = geom3::euc_in_nil() ? geom3::euclid_embed_scale : 1;
+      ld ees = geom3::euc_in_noniso() ? geom3::euclid_embed_scale : 1;
 
       STUFF = lev_to_factor(0) - sgn * max(orbsize * ees * 0.3, zhexf * ees * .6);
       
@@ -1080,7 +1080,9 @@ EX namespace geom3 {
     seMuchLowerCurvature,
     seMuchLowerCurvatureInverted,
     seProduct,
-    seNil
+    seNil,
+    seSol, seNIH, seSolN,
+    seNIH_inv
     };
   #endif
 
@@ -1093,7 +1095,11 @@ EX namespace geom3 {
     {"much lower curvature", "Embed sphere as a convex sphere in hyperbolic space."},
     {"much lower curvature inverted", "Embed sphere as a concave sphere in hyperbolic space."},
     {"product",          "Add one extra dimension in the Euclidean way."},
-    {"Nil",              "Embed into Nil. Works only with Euclidean."},
+    {"Nil",              "Embed into Nil. Works only with Euclidean. You need to set the variation to Pure."},
+    {"Sol",              "Embed into Sol. Works only with Euclidean. You need to set the variation to Pure."},
+    {"stretched hyperbolic",              "Embed into stretched hyperbolic geometry. Works only with Euclidean. You need to set the variation to Pure."},
+    {"stretched Sol",              "Embed into stretched Sol geometry. Works only with Euclidean. You need to set the variation to Pure."},
+    {"stretched hyperbolic inverted",              "Embed into stretched hyperbolic geometry as a concave horosphere. Works only with Euclidean. You need to set the variation to Pure."},
     };
 
   EX eSpatialEmbedding spatial_embedding;
@@ -1115,6 +1121,14 @@ EX namespace geom3 {
 
   EX bool euc_in_nil() {
     return ggclass() == gcNil && mgclass() == gcEuclid;
+    }
+
+  EX bool euc_in_solnih() {
+    return among(ggclass(), gcSol, gcNIH, gcSolN) && mgclass() == gcEuclid;
+    }
+
+  EX bool euc_in_noniso() {
+    return among(ggclass(), gcNil, gcSol, gcNIH, gcSolN) && nonisotropic;
     }
 
   EX bool sph_in_euc() {
@@ -1187,6 +1201,26 @@ EX namespace geom3 {
 
           if(spatial_embedding == seNil && euclid) {
             g = ginf[gNil].g;
+            g.gameplay_dimension = 2;
+            }
+
+          if(spatial_embedding == seSol && euclid) {
+            g = ginf[gSol].g;
+            g.gameplay_dimension = 2;
+            }
+
+          if(spatial_embedding == seNIH && euclid) {
+            g = ginf[gNIH].g;
+            g.gameplay_dimension = 2;
+            }
+
+          if(spatial_embedding == seNIH_inv && euclid) {
+            g = ginf[gNIH].g;
+            g.gameplay_dimension = 2;
+            }
+
+          if(spatial_embedding == seSolN && euclid) {
+            g = ginf[gSolN].g;
             g.gameplay_dimension = 2;
             }
           }
@@ -1275,6 +1309,10 @@ EX void switch_always3() {
         vid.eye = 2 * vid.depth;
         }
       if(euc_in_hyp() && spatial_embedding == seMuchLowerCurvatureInverted) {
+        vid.wall_height *= -1;
+        vid.eye = 2 * vid.depth;
+        }
+      if(euc_in_noniso() && spatial_embedding == seNIH_inv) {
         vid.wall_height *= -1;
         vid.eye = 2 * vid.depth;
         }

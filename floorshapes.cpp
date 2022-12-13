@@ -346,7 +346,7 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, ld
     hpcpush(xspinpush0(-M_PI/sides, size));
     chasmifyPoly(dlow_table[k], dhi_table[k], k);
 
-    if(geom3::euc_in_nil()) {
+    if(geom3::euc_in_noniso()) {
       fsh.gpside[k].resize(c->type);
       for(int i=0; i<c->type; i++) {
         sizeto(fsh.gpside[k][i], id);

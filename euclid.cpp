@@ -240,6 +240,7 @@ EX namespace euc {
       }
 
     transmatrix adj(cell *c, int i) override {
+      if(dont_inverse()) return adj(c->master, i);
       if(WDIM == 3) return adj(c->master, i);
       else return hrmap_standard::adj(c, i);
       }
