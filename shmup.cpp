@@ -872,7 +872,7 @@ void movePlayer(monster *m, int delta) {
     double mdd = hypot(mdx, mdy);
     
     if(mdd > 1e-6) {
-      hyperpoint jh = hpxy(mdx/100.0, mdy/100.0);
+      hyperpoint jh = point2(mdx/100.0, mdy/100.0);
       shiftpoint ctr = m->pat * C0;
   
       if(sphere && pconf.alpha > 1.001) for(int i=0; i<3; i++) ctr[i] = -ctr[i];
@@ -1040,7 +1040,7 @@ void movePlayer(monster *m, int delta) {
       if(cwt.at->land == laWestWall) yp = xp * 1, xp *= 0.7;
       for(cell *c2: below) if(c2 != m->base) {
         
-        hyperpoint h = rspintox(inverse_shift(m->pat, tC0(gmatrix[c2]))) * hpxy(xp, yp);
+        hyperpoint h = rspintox(inverse_shift(m->pat, tC0(gmatrix[c2]))) * point2(xp, yp);
       
         m->inertia += h;
         avg_inertia += h/2;

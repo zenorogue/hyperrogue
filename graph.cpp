@@ -4059,7 +4059,7 @@ EX ld mousedist(shiftmatrix T) {
   if(mouseaim_sensitivity) return sqhypot_d(2, T1.h) + (point_behind(T1) ? 1e10 : 0);
   hyperpoint h1;
   applymodel(T1, h1);
-  h1 = h1 - hpxy((mousex - current_display->xcenter) / current_display->radius, (mousey - current_display->ycenter) / current_display->radius);
+  h1 = h1 - point2((mousex - current_display->xcenter) / current_display->radius, (mousey - current_display->ycenter) / current_display->radius);
   return sqhypot_d(2, h1) + (point_behind(T1) ? 1e10 : 0);
   }
 
