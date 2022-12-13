@@ -313,7 +313,9 @@ void bool_setting::add_as_saver() {
   }
 
 void float_setting::load_from(const string& s) {
+  *value = parseld(s);
   anims::animate_parameter(*value, s, reaction);
+  if(reaction) reaction();
   }
 
 void non_editable() {
