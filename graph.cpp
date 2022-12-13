@@ -3757,7 +3757,7 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const shiftmatrix& V, color_t
   dynamicval<bool> ncor(approx_nearcorner, true);
   shiftmatrix V2 = V * ddspin_side(c, i);
   
-  if(NONSTDVAR || !standard_tiling() || geom3::euc_in_nil()) {
+  if(NONSTDVAR || !standard_tiling()) {
     #if CAP_ARCM
     if(arcm::in() && !PURE)
       i = gmod(i + arcm::parent_index_of(c->master)/DUALMUL, c->type);
