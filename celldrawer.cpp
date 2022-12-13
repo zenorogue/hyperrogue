@@ -2385,8 +2385,13 @@ void celldrawer::draw_wall_full() {
       if(sha & 4) {
         bool dbot = true;
         forCellIdEx(c2, i, c) if(chasmgraph(c2) == 2) {
-          if(dbot) dbot = false,
-            draw_qfi(c, orthogonal_move_fol(V, cgi.BOTTOM), 0x080808FF, PPR::LAKEBOTTOM);
+          if(dbot) {
+            dbot = false;
+            if(GDIM == 2)
+              draw_qfi(c, orthogonal_move_fol(V, cgi.BOTTOM), 0x080808FF, PPR::LAKEBOTTOM);
+            else
+              draw_shapevec(c, V, qfi.fshape->levels[SIDE_BTOI], 0x0F0808FF, PPR::LAKEBOTTOM);
+            }
           if(placeSidewall(c, i, SIDE_BTOI, V, D(.6))) break;
           }
 #undef D
