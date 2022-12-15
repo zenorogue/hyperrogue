@@ -467,6 +467,8 @@ EX transmatrix iddspin(cell *c, int d, ld bonus IS(0)) { return currentmap->spin
 EX ld cellgfxdist(cell *c, int d) { return currentmap->spacedist(c, d); }
 
 EX transmatrix ddspin_side(cell *c, int d, ld bonus IS(0)) { 
+  if(geom3::euc_in_noniso() || geom3::hyp_in_solnih())
+    return spin(bonus);
   if(kite::in()) {
     if(embedded_plane) return spin(bonus);
     hyperpoint h1 = get_corner_position(c, gmod(d, c->type), 3);
@@ -478,6 +480,8 @@ EX transmatrix ddspin_side(cell *c, int d, ld bonus IS(0)) {
   }
 
 EX transmatrix iddspin_side(cell *c, int d, ld bonus IS(0)) {
+  if(geom3::euc_in_noniso() || geom3::hyp_in_solnih())
+    return spin(bonus);
   if(kite::in()) {
     if(embedded_plane) return spin(bonus);
     hyperpoint h1 = get_corner_position(c, gmod(d, c->type), 3);

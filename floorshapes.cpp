@@ -321,9 +321,8 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, ld
         hyperpoint h0 = bt::get_corner_horo_coordinates(c, i) * size;
         hyperpoint h1 = bt::get_corner_horo_coordinates(c, i+1) * size;
         hyperpoint hd = (h1 - h0) / STEP;
-        transmatrix T = geom3::hyp_in_solnih() ? Id : iddspin_side(c, i);
         for(int j=0; j<=STEP; j++)
-          hpcpush(T * bt::get_horopoint(h0 + hd * j));
+          hpcpush(iddspin_side(c, i) * bt::get_horopoint(h0 + hd * j));
         chasmifyPoly(dlow_table[k], dhi_table[k], k);
         }
       }
