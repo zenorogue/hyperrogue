@@ -1915,6 +1915,8 @@ EX hyperpoint vertical_vector() {
   if(gproduct && vid.fixed_yz) {
     return get_view_orientation() * lztangent(embedded_plane ? vid.wall_height : 1);
     }
+  if(embedded_plane && geom3::same_in_same())
+    return get_view_orientation() * lztangent(vid.wall_height);
   if(embedded_plane && vid.fixed_yz && nonisotropic) {
     return NLP * lztangent(vid.wall_height);
     }
