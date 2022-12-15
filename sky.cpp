@@ -69,7 +69,9 @@ EX void delete_sky() {
 void compute_skyvertices(const vector<sky_item>& sky) {
   skyvertices.clear();
   if(!draw_sky) return;
-  if(vid.wall_height < 0 && geom3::euc_in_hyp()) return; /* just looks bad */
+  if(vid.wall_height < 0 && geom3::euc_in_hyp()) return; /* just looks bad, hollow horospheres should not have sky */
+  if(vid.wall_height < 0 && meuclid && geom3::ggclass() == gcNIH) return; /* same */
+  if(among(geom3::ggclass(), gcSol, gcSolN)) return;  /* errors */
 
   int sk = get_skybrightness();
   
