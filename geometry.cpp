@@ -1172,6 +1172,12 @@ EX namespace geom3 {
     return f();
     }
 
+  template<class T> auto in_not_flipped(const T& f) -> decltype(f()) {
+    light_flip(false);
+    finalizer ff([] { light_flip(true); });
+    return f();
+    }
+
   #define IPF(x) geom3::in_flipped([&] { return (x); })
   #endif
 
