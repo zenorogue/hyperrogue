@@ -1074,14 +1074,9 @@ EX namespace geom3 {
   #if HDR
   enum eSpatialEmbedding {
     seNone,
-    seTPP,
     seDefault,
-    seFlat,
-    seInverted,
     seLowerCurvature,
-    seLowerCurvatureInverted,
     seMuchLowerCurvature,
-    seMuchLowerCurvatureInverted,
     seProduct,
     seNil,
     seSol, seNIH, seSolN,
@@ -1090,30 +1085,25 @@ EX namespace geom3 {
   #endif
 
   EX vector<pair<string, string>> spatial_embedding_options = {
-    {"2D engine",       "Use HyperRogue's 2D engine to simulate 'default 3D' top-down."},
-    {"2D engine in TPP","HyperRogue's 2D engine, but using third-person perspective."},
-    {"default 3D",      "Embed as a equidistant surface in the 3D version of the same geometry."},
-    {"flat",            "Embed as a flat surface in the 3D version of the same geometry."},
-    {"inverted",        "Embed as a equidistant surface, but this time it is inverted."},
-    {"lower curvature", "Embed as a convex surface in a space of lower curvature."},
-    {"lower curvature inverted", "Embed as a concave surface in a space of lower curvature."},
-    {"much lower curvature", "Embed sphere as a convex sphere in hyperbolic space."},
-    {"much lower curvature inverted", "Embed sphere as a concave sphere in hyperbolic space."},
+    {"2D engine",       "Use HyperRogue's 2D engine to simulate same curvature. Works well in top-down and third-person perspective."},
+    {"same curvature",  "Embed as an equidistant surface in the 3D version of the same geometry."},
+    {"lower curvature", "Embed as a surface in a space of lower curvature."},
+    {"much lower curvature", "Embed sphere as a sphere in hyperbolic space."},
     {"product",          "Add one extra dimension in the Euclidean way."},
     {"Nil",              "Embed into Nil. Works only with Euclidean. You need to set the variation to Pure."},
     {"Sol",              "Embed into Sol. Works only with Euclidean. You need to set the variation to Pure."},
     {"stretched hyperbolic",              "Embed into stretched hyperbolic geometry. Works only with Euclidean. You need to set the variation to Pure."},
     {"stretched Sol",              "Embed into stretched Sol geometry. Works only with Euclidean. You need to set the variation to Pure."},
-    {"stretched hyperbolic inverted",              "Embed into stretched hyperbolic geometry as a concave horosphere. Works only with Euclidean. You need to set the variation to Pure."},
     };
 
   EX eSpatialEmbedding spatial_embedding = seDefault;
   EX ld euclid_embed_scale = 1;
   EX bool auto_configure = true;
+  EX bool flat_embedding = false;
+  EX bool inverted_embedding = false;
 
-  EX bool is_suboption(eSpatialEmbedding se) {
-    return among(se, seTPP, seInverted, seFlat, seLowerCurvatureInverted, seMuchLowerCurvatureInverted, seNIH_inv);
-    }
+  EX bool supports_flat() { return spatial_embedding == seDefault; }
+  EX bool supports_invert() { return among(spatial_embedding, seDefault, seLowerCurvature, seMuchLowerCurvature, seNil, seSol, seNIH, seSolN); }
 
   EX vector<geometryinfo> ginf_backup;
 
@@ -1202,13 +1192,13 @@ EX namespace geom3 {
             g.sig[2] = g.sig[3];
             }
 
-          if(among(spatial_embedding, seLowerCurvature, seLowerCurvatureInverted)) {
+          if(spatial_embedding == seLowerCurvature) {
             if(g.kind == gcEuclid) g = ginf[gSpace534].g;
             if(g.kind == gcSphere) g = ginf[gCubeTiling].g;
             g.gameplay_dimension = 2;
             }
 
-          if(among(spatial_embedding, seMuchLowerCurvature, seMuchLowerCurvatureInverted)) {
+          if(spatial_embedding == seMuchLowerCurvature) {
             g = ginf[gSpace534].g;
             g.gameplay_dimension = 2;
             }
@@ -1228,11 +1218,6 @@ EX namespace geom3 {
             }
 
           if(spatial_embedding == seNIH && ieuc_or_binary) {
-            g = ginf[gNIH].g;
-            g.gameplay_dimension = 2;
-            }
-
-          if(spatial_embedding == seNIH_inv && ieuc_or_binary) {
             g = ginf[gNIH].g;
             g.gameplay_dimension = 2;
             }
@@ -1308,29 +1293,21 @@ EX void switch_always3() {
         vid.depth = 0;
         vid.wall_height = -1;
         vid.eye = 0.5;
-        if(among(spatial_embedding, seLowerCurvatureInverted, seMuchLowerCurvatureInverted)) {
+        if(inverted_embedding) {
           vid.wall_height = 1.4;
           vid.eye = -0.2;
           vid.depth = 0.5;
           }
         }
-      if(spatial_embedding == seFlat) {
+      if(spatial_embedding == seDefault && flat_embedding) {
         vid.eye -= vid.depth / 2;
         vid.depth = 0;
         }
-      if(spatial_embedding == seInverted) {
+      if(spatial_embedding == seDefault && !flat_embedding && inverted_embedding) {
         vid.eye -= vid.depth * 1.5;
         vid.depth *= -1;
         }
-      if(euc_in_hyp() && spatial_embedding == seLowerCurvatureInverted) {
-        vid.wall_height *= -1;
-        vid.eye = 2 * vid.depth;
-        }
-      if(euc_in_hyp() && spatial_embedding == seMuchLowerCurvatureInverted) {
-        vid.wall_height *= -1;
-        vid.eye = 2 * vid.depth;
-        }
-      if(euc_in_noniso() && spatial_embedding == seNIH_inv) {
+      if((euc_in_hyp() || euc_in_noniso()) && inverted_embedding) {
         vid.wall_height *= -1;
         vid.eye = 2 * vid.depth;
         }

@@ -840,6 +840,14 @@ EX void initConfig() {
   param_b(geom3::auto_configure, "auto_configure_3d", "auto_configure_3d")
   -> editable("set 3D settings automatically", 'A');
 
+  param_b(geom3::inverted_embedding, "inverted_3d", "inverted_3d")
+  -> editable("invert convex/concave", 'I')
+  -> set_reaction([] { geom3::switch_fpp(); geom3::switch_fpp(); });
+
+  param_b(geom3::flat_embedding, "flat_3d", "flat_3d")
+  -> editable("flat, not equidistant", 'F')
+  -> set_reaction([] { geom3::switch_fpp(); geom3::switch_fpp(); });
+
   param_enum(geom3::spatial_embedding, "spatial_embedding", "spatial_embedding", geom3::seDefault)
   ->editable(geom3::spatial_embedding_options, "3D embedding method", 'E')
   ->set_reaction([] {
@@ -2207,14 +2215,11 @@ EX void edit_levellines(char c) {
   }
 
 EX geom3::eSpatialEmbedding shown_spatial_embedding() {
-  if(GDIM == 2) {
-    if(pmodel == mdDisk && pconf.camera_angle)
-      return geom3::seTPP;
-    else
-      return geom3::seNone;
-    }
+  if(GDIM == 2) return geom3::seNone;
   return geom3::spatial_embedding;
   }
+
+EX bool in_tpp() { return pmodel == mdDisk && pconf.camera_angle; }
 
 EX void show_spatial_embedding() {
   cmode = sm::SIDE | sm::MAYDARK | sm::CENTER | sm::PANNING | sm::SHOWCURSOR;
@@ -2229,14 +2234,11 @@ EX void show_spatial_embedding() {
 
   for(int i=0; i<isize(seo); i++) {
     auto se = geom3::eSpatialEmbedding(i);
-    if(!geom3::auto_configure && geom3::is_suboption(se)) continue;
     dialog::addBoolItem(XLAT(seo[i].first), emb == i, 'a' + i);
     dialog::add_action([se, emb] {
       if(GDIM == 3) { if(geom3::auto_configure) geom3::switch_fpp(); else geom3::switch_always3(); }
-      if(se == geom3::seNone && emb == geom3::seTPP) geom3::switch_tpp();
-      if(se == geom3::seTPP && emb == geom3::seNone) geom3::switch_tpp();
-      if(se != geom3::seNone && se != geom3::seTPP) {
-        println(hlog, "set spatial_embedding to ", int(se));
+      if(in_tpp()) geom3::switch_tpp();
+      if(se != geom3::seNone) {
         geom3::spatial_embedding = se;
         if(geom3::auto_configure) geom3::switch_fpp(); else geom3::switch_always3();
         delete_sky();
@@ -2247,6 +2249,22 @@ EX void show_spatial_embedding() {
 
   dialog::addBreak(100);
   dialog::addHelp(XLAT(seo[emb].second));
+  dialog::addBreak(100);
+
+  if(geom3::auto_configure) {
+    if(emb == geom3::seNone) {
+      dialog::addBoolItem(XLAT("third-person perspective"), in_tpp(), 'T');
+      dialog::add_action(geom3::switch_tpp);
+      dialog::addBreak(100);
+      }
+    else {
+      if(geom3::supports_flat()) add_edit(geom3::flat_embedding);
+      else dialog::addBreak(100);
+      if(geom3::supports_invert()) add_edit(geom3::inverted_embedding);
+      else dialog::addBreak(100);
+      }
+    }
+
   dialog::addBreak(100);
   dialog::addBack();
 
