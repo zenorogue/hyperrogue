@@ -669,7 +669,7 @@ int celldrawer::getSnakelevColor(int i, int last) {
 void celldrawer::draw_wallshadow() {
   if(!noshadow) {
     dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
-    draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, PPR::WALLSHADOW);
+    draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, GDIM == 3 ? PPR::TRANSPARENT_SHADOW : PPR::WALLSHADOW);
     }
   }
 
