@@ -639,10 +639,10 @@ EX hyperpoint nearcorner(cell *c, int i) {
     ld yx = log(2) / 2;
     ld yy = yx;
     hyperpoint neis[5];
-    neis[0] = bt::get_horopoint(2*yy, -0.5);
-    neis[1] = bt::get_horopoint(2*yy, +0.5);
+    neis[0] = bt::get_horopoint(2*yy, -0.25);
+    neis[1] = bt::get_horopoint(2*yy, +0.25);
     neis[2] = bt::get_horopoint(0, 1);
-    neis[3] = bt::get_horopoint(-2*yy, c->master->zebraval ? -0.25 : +0.25);
+    neis[3] = bt::get_horopoint(-2*yy, c->master->zebraval ? -0.5 : +0.5);
     neis[4] = bt::get_horopoint(0, -1);
     return neis[i];
     }
@@ -650,11 +650,11 @@ EX hyperpoint nearcorner(cell *c, int i) {
     ld yx = log(3) / 2;
     ld yy = yx;
     hyperpoint neis[6];
-    neis[0] = bt::get_horopoint(2*yy, -1);
+    neis[0] = bt::get_horopoint(2*yy, -1/3.);
     neis[1] = bt::get_horopoint(2*yy, +0);
-    neis[2] = bt::get_horopoint(2*yy, +1);
+    neis[2] = bt::get_horopoint(2*yy, +1/3.);
     neis[3] = bt::get_horopoint(0, 1);
-    neis[4] = bt::get_horopoint(-2*yy, c->master->zebraval / 3.);
+    neis[4] = bt::get_horopoint(-2*yy, c->master->zebraval);
     neis[5] = bt::get_horopoint(0, -1);
     return neis[i];
     }
@@ -674,13 +674,13 @@ EX hyperpoint nearcorner(cell *c, int i) {
     // ld xx = 1 / sqrt(2)/2;
     hyperpoint neis[7];
     neis[0] = bt::get_horopoint(0, 1);
-    neis[1] = bt::get_horopoint(yy*2, 1);
+    neis[1] = bt::get_horopoint(yy*2, 0.5);
     neis[2] = bt::get_horopoint(yy*2, 0);
-    neis[3] = bt::get_horopoint(yy*2, -1);
+    neis[3] = bt::get_horopoint(yy*2, -0.5);
     neis[4] = bt::get_horopoint(0, -1);
     if(c->type == 7)
-      neis[5] = bt::get_horopoint(-yy*2, -.5),
-      neis[6] = bt::get_horopoint(-yy*2, +.5);
+      neis[5] = bt::get_horopoint(-yy*2, -1),
+      neis[6] = bt::get_horopoint(-yy*2, +1);
     else
       neis[5] = bt::get_horopoint(-yy*2, 0);
     return neis[i];

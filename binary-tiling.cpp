@@ -1027,7 +1027,7 @@ EX int celldistance3(heptagon *c1, heptagon *c2) {
 EX int celldistance3(cell *c1, cell *c2) { return celldistance3(c1->master, c2->master); }
 
 EX hyperpoint get_horopoint(ld y, ld x) {
-  return xpush(-y) * bt::parabolic(x*2) * C0;
+  return bt::parabolic(x*2) * xpush(-y) * C0;
   }
 
 EX hyperpoint get_horopoint(hyperpoint h) {
@@ -1035,17 +1035,16 @@ EX hyperpoint get_horopoint(hyperpoint h) {
   }
 
 EX hyperpoint get_corner_horo_coordinates(cell *c, int i) {
-  ld yx = log(2) / 2;
-  ld yy = yx;
-  ld xx = 1 / sqrt(2)/2;
+  ld yy = log(2) / 2;
+  ld xx = 1 / 2.;
   switch(geometry) {
     case gBinaryTiling:    
       switch(gmod(i, c->type)) {
         case 0: return point2(-yy, xx);
-        case 1: return point2(yy, 2*xx);
-        case 2: return point2(yy, xx);
-        case 3: return point2(yy, -xx);
-        case 4: return point2(yy, -2*xx);
+        case 1: return point2(yy, xx);
+        case 2: return point2(yy, xx/2);
+        case 3: return point2(yy, -xx/2);
+        case 4: return point2(yy, -xx);
         case 5: return point2(-yy, -xx);
         case 6: return point2(-yy, 0);    
         default: return point2(0, 0);
@@ -1053,9 +1052,9 @@ EX hyperpoint get_corner_horo_coordinates(cell *c, int i) {
     
     case gBinary4:
       switch(gmod(i, c->type)) {
-        case 0: return point2(yy, -2*xx);
+        case 0: return point2(yy, -xx);
         case 1: return point2(yy, +0*xx);
-        case 2: return point2(yy, +2*xx);
+        case 2: return point2(yy, +xx);
         case 3: return point2(-yy, xx);
         case 4: return point2(-yy, -xx);
         default: return point2(0, 0);
@@ -1063,12 +1062,11 @@ EX hyperpoint get_corner_horo_coordinates(cell *c, int i) {
     
     case gTernary:
       yy = log(3) / 2;
-      xx = 1 / sqrt(3) / 2;
       switch(gmod(i, c->type)) {
-        case 0: return point2(yy, -3*xx);
-        case 1: return point2(yy, -1*xx);
-        case 2: return point2(yy, +1*xx);
-        case 3: return point2(yy, +3*xx);
+        case 0: return point2(yy, -xx);
+        case 1: return point2(yy, -xx/3);
+        case 2: return point2(yy, +xx/3);
+        case 3: return point2(yy, +xx);
         case 4: return point2(-yy, xx);
         case 5: return point2(-yy, -xx);
         default: return point2(0, 0);

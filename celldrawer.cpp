@@ -905,20 +905,22 @@ void celldrawer::draw_grid() {
     }
   #endif
   #if CAP_BT
-  else if(bt::in() && WDIM == 2 && geometry != gTernary) {
-    ld yx = log(2) / 2;
-    ld yy = yx;
-    ld xx = 1 / sqrt(2)/2;
-    queueline(V * bt::get_horopoint(-yy, xx), V * bt::get_horopoint(yy, 2*xx), gridcolor(c, c->move(bt::bd_right)), prec);
-    auto horizontal = [&] (ld y, ld x1, ld x2, int steps, int dir) {
-      if(vid.linequality > 0) steps <<= vid.linequality;
-      if(vid.linequality < 0) steps >>= -vid.linequality;
-      for(int i=0; i<=steps; i++) curvepoint(bt::get_horopoint(y, x1 + (x2-x1) * i / steps));
-      queuecurve(V, gridcolor(c, c->move(dir)), 0, PPR::LINE);
-      };
-    horizontal(yy, 2*xx, xx, 4, bt::bd_up_right);
-    horizontal(yy, xx, -xx, 8, bt::bd_up);
-    horizontal(yy, -xx, -2*xx, 4, bt::bd_up_left);
+  else if(bt::in() && WDIM == 2) {
+    for(int t=0; t<c->type; t++) {
+      auto h0 = bt::get_corner_horo_coordinates(c, t);
+      auto h1 = bt::get_corner_horo_coordinates(c, t+1);
+      int steps = 12 * abs(h0[1] - h1[1]);
+      if(!steps) {
+        gridline(V, bt::get_horopoint(h0), bt::get_horopoint(h1), gridcolor(c, c->move(t)), prec);
+        }
+      else {
+        if(vid.linequality > 0) steps <<= vid.linequality;
+        if(vid.linequality < 0) steps >>= -vid.linequality;
+        auto step = (h1 - h0) / steps;
+        for(int i=0; i<=steps; i++) curvepoint(bt::get_horopoint(h0 + i * step));
+        queuecurve(V, gridcolor(c, c->move(t)), 0, PPR::LINE);
+        }
+      }
     }
   #endif
   else if(isWarped(c) && has_nice_dual()) {
