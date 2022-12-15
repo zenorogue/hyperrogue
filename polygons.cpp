@@ -111,7 +111,10 @@ void geometry_information::chasmifyPoly(double fol, double fol2, int k) {
       int zf = int(x);
       if(zf == isize(points)-1) zf--;
       x -= zf;
-      hpcpush(orthogonal_move(normalize_flat(points[zf] + (points[zf+1] - points[zf]) * x), fol + (fol2-fol) * y));
+      auto hp = points[zf] + (points[zf+1] - points[zf]) * x;
+      auto hf = normalize_flat(hp);
+      auto ho = orthogonal_move(hf, fol + (fol2-fol) * y);
+      hpcpush(ho);
       };
     texture_order([&] (ld x, ld y) { at((1-x+y)/2, (1-x-y)/2); });
     texture_order([&] (ld x, ld y) { at((1-x-y)/2, (1+x-y)/2); });

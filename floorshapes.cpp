@@ -665,7 +665,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
     }
   
   #if MAXMDIM >= 4
-  if(WDIM == 2 && GDIM == 3) {
+  if(embedded_plane) {
     finishshape();
     for(auto pfsh: all_plain_floorshapes) {
       auto& fsh = *pfsh;
