@@ -1056,21 +1056,23 @@ EX array<heptagon*, 3> get_masters(cell *c) {
   return make_array(s0.at, (s0 + wstep).at, (s0 + 1 + wstep).at);
   }
 
+EX void swap_vertices() {
+  for(auto& c: cells) {
+    swapmatrix(c.p);
+    swapmatrix(c.pusher);
+    swapmatrix(c.rpusher);
+    for(auto& jp: c.jpoints) swapmatrix(jp);
+    for(auto& rm: c.relmatrices) swapmatrix(rm.second);
+    for(auto& v: c.vertices) swapmatrix(v);
+    }
+  }
+
 auto hook = 
 #if CAP_COMMANDLINE
   addHook(hooks_args, 100, readArgs) + 
 #endif
 #if MAXMDIM >= 4
-  addHook(hooks_swapdim, 100, [] {
-    for(auto& c: cells) {
-      swapmatrix(c.p);
-      swapmatrix(c.pusher);
-      swapmatrix(c.rpusher);
-      for(auto& jp: c.jpoints) swapmatrix(jp);
-      for(auto& rm: c.relmatrices) swapmatrix(rm.second);
-      for(auto& v: c.vertices) swapmatrix(v);
-      }
-  }) +
+  addHook(hooks_swapdim, 100, swap_vertices) +
 #endif
   addHook(hooks_drawcell, 100, draw_cell_schematics) +
   addHook(shmup::hooks_turn, 100, step);

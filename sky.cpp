@@ -518,6 +518,12 @@ void celldrawer::draw_ceiling() {
 
 EX struct renderbuffer *airbuf;
 
+EX void swap_if_missing(bool missing) {
+  if(!missing) return;
+  arb::swap_vertices();
+  irr::swap_vertices();
+  }
+
 EX void make_air() {
   if(!sky) return;
 
@@ -576,7 +582,7 @@ EX void make_air() {
     geom3::apply_always3();
     check_cgi();
     missing = !(cgi.state & 2);
-    if(missing) arb::swap_vertices();
+    swap_if_missing(missing);
     cgi.require_shapes();
     
     eGeometry orig = geometry;
@@ -625,7 +631,7 @@ EX void make_air() {
 
   GLERR("after draw");
   geom3::apply_always3();
-  if(missing) arb::swap_vertices();
+  swap_if_missing(missing);
   check_cgi();
   calcparam();
   GLERR("after make_air");
