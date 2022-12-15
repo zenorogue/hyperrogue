@@ -1912,8 +1912,12 @@ EX hyperpoint vertical_vector() {
     hyperpoint h = iso_inverse(View) * C0;
     return View * (orthogonal_move(h, vid.wall_height) - h);
     }
-  if((WDIM == 2 || gproduct) && GDIM == 3 && vid.fixed_yz)
-    return get_view_orientation() * lztangent(1);
+  if(gproduct && vid.fixed_yz) {
+    return get_view_orientation() * lztangent(embedded_plane ? vid.wall_height : 1);
+    }
+  if(embedded_plane && vid.fixed_yz && nonisotropic) {
+    return NLP * lztangent(vid.wall_height);
+    }
   else if(ds.qty && gproduct)
     return get_view_orientation() * product::inverse_exp(ds.point);
   else if(ds.qty)
@@ -2001,7 +2005,7 @@ EX void spinEdge(ld aspd) {
     }
   if(downspin >  aspd) downspin =  aspd;
   if(downspin < -aspd) downspin = -aspd;
-  rotate_view(spin(downspin));
+  rotate_view(cspin(0, 1, downspin));
   }
 
 /** \brief convert a shiftmatrix to the coordinate system of View 

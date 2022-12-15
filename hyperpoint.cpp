@@ -1752,7 +1752,11 @@ EX hyperpoint xtangent(ld x) { return ctangent(0, x); }
 EX hyperpoint ztangent(ld z) { return ctangent(2, z); }
 
 /** tangent vector in logical direction Z */
-EX hyperpoint lztangent(ld z) { return ctangent(2, z); }
+EX hyperpoint lztangent(ld z) {
+  if(geom3::hyp_in_solnih()) return ctangent(0, z);
+  if(geom3::euc_in_nil()) return ctangent(1, z);
+  return ctangent(2, z);
+  }
 
 /** change the length of the targent vector */
 EX hyperpoint tangent_length(hyperpoint dir, ld length) {
