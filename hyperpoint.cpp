@@ -883,16 +883,18 @@ EX void swapmatrix(transmatrix& T) {
     }
   else if(geom3::euc_in_nil()) {
     if(!geom3::flipped) {
-      hyperpoint h1 = T * C02;
+      hyperpoint h1 = get_column(T, 2);
       // rotations are illegal anyway...
       T = eupush(hyperpoint(h1[0] * geom3::euclid_embed_scale, 0, h1[1] * geom3::euclid_embed_scale, 1));
+      return;
       }
     }
   else if(geom3::euc_in_solnih()) {
     if(!geom3::flipped) {
-      hyperpoint h1 = T * C02;
+      hyperpoint h1 = get_column(T, 2);
       // rotations are illegal anyway...
       T = eupush(hyperpoint(h1[0] * geom3::euclid_embed_scale, h1[1] * geom3::euclid_embed_scale, 0, 1));
+      return;
       }
     }
   else if(geom3::in_product()) {
