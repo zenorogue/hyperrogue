@@ -3100,16 +3100,26 @@ void list_setting::show_edit_option(int key) {
     dialog::init(XLAT(menu_item_name));
     dialog::addBreak(100);
     int q = isize(options);
+
+    int need_list = q > 15 ? 2 : q > 10 ? 1 : 0;
+
+    if(need_list >= 2) dialog::start_list(1500, 1500, 'a');
     for(int i=0; i<q; i++) {
-      dialog::addBoolItem(XLAT(options[i].first), get_value() == i, 'a'+i);
-      dialog::add_action([this, i] { set_value(i); if(reaction) reaction(); popScreen(); });
-      dialog::addBreak(100);
-      if(options[i].second != "") {
+      dialog::addBoolItem(XLAT(options[i].first), get_value() == i, need_list >= 2 ? dialog::list_fake_key++ : 'a' + i);
+      dialog::add_action([this, i, need_list] { set_value(i); if(reaction) reaction(); if(need_list == 0) popScreen(); });
+      if(need_list == 0 && options[i].second != "") {
+        dialog::addBreak(100);
         dialog::addHelp(XLAT(options[i].second));
         dialog::addBreak(100);
         }
       }
+    if(need_list >= 2) dialog::end_list();
     dialog::addBreak(100);
+
+    if(need_list >= 1 && options[get_value()].second != "") {
+      dialog::addHelp(XLAT(options[get_value()].second));
+      dialog::addBreak(100);
+      }
     dialog::addBack();
     dialog::display();
     });
