@@ -507,8 +507,8 @@ EX void showQuotientConfig3() {
   }
 #endif
 
-EX string geometry_name() {
-  switch(ginf[geometry].cclass) {
+EX string geometry_name(eGeometryClass gc) {
+  switch(gc) {
     case gcHyperbolic:
       return XLAT("hyperbolic") + dim_name();
 
@@ -540,6 +540,13 @@ EX string geometry_name() {
     }
   return "?";
   }
+
+EX string geometry_name() {
+  if(embedded_plane)
+    return geometry_name(geom3::mgclass()) + " @ " + geometry_name(geom3::ggclass());
+  else
+    return geometry_name(ginf[geometry].cclass);
+  };
 
 EX void select_quotient_screen() {
   cmode = sm::SIDE | sm::MAYDARK;
