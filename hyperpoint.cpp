@@ -455,6 +455,16 @@ EX ld hypot_d(int d, const hyperpoint& h) {
  */
 EX transmatrix to_other_side(hyperpoint h1, hyperpoint h2) {
 
+  if(geom3::sph_in_low() && !geom3::flipped) {
+    geom3::light_flip(true);
+    h1 = normalize(h1);
+    h2 = normalize(h2);
+    transmatrix T = to_other_side(h1, h2);
+    for(int i=0; i<4; i++) T[i][3] = T[3][i] = i == 3;
+    geom3::light_flip(false);
+    return T;
+    }
+
   ld d = hdist(h1, h2);
   
   hyperpoint v;  

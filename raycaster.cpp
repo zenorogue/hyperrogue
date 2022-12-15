@@ -395,6 +395,12 @@ void raygen::compute_which_and_dist(int flat1, int flat2) {
         "    mediump vec4 next_position = position + d * tangent;\n"
         "    if(dot(next_position, tangent) < dot(m*next_position, m*tangent)) continue;\n"
         "    d /= xspeed;\n";
+    else if(geom3::sph_in_hyp()) fmain +=
+        "    mediump float v = ((zpush_h3(-1.) * (position - m * position))[3] / (zpush_h3(-1.) * (m * tangent - tangent))[3]);\n"
+        "    if(v > 1. || v < -1.) continue;\n"
+        "    mediump float d = atanh(v);\n"
+        "    mediump vec4 next_tangent = position * sinh(d) + tangent * cosh(d);\n"
+        "    if((zpush_h3(-1.) * next_tangent)[3] < (zpush_h3(-1.) * (m * next_tangent))[3]) continue;\n";
     else if(hyperbolic) fmain +=
         "    mediump float v = ((position - m * position)[3] / (m * tangent - tangent)[3]);\n"
         "    if(v > 1. || v < -1.) continue;\n"
@@ -406,6 +412,14 @@ void raygen::compute_which_and_dist(int flat1, int flat2) {
         "    mediump float d = atan(v);\n"
         "    mediump vec4 next_tangent = -position * sin(d) + tangent * cos(d);\n"
         "    if(next_tangent[3] > (m * next_tangent)[3]) continue;\n";
+    else if(geom3::sph_in_euc()) fmain +=
+        "    vec4 tctr = vec4(0, 0, 1, 0);\n"
+        "    mediump float deno = dot(position-tctr, tangent) - dot(m*position-tctr, m*tangent);\n"
+        "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
+        "    mediump float d = (dot(m*position-tctr, m*position-tctr) - dot(position-tctr, position-tctr)) / 2. / deno;\n"
+        "    if(d < 0.) continue;\n"
+        "    mediump vec4 next_position = position + d * tangent;\n"
+        "    if(dot(next_position - tctr, tangent) < dot(m*next_position - tctr, m*tangent)) continue;\n";
     else fmain +=
         "    mediump float deno = dot(position, tangent) - dot(m*position, m*tangent);\n"
         "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
@@ -1517,6 +1531,15 @@ void raygen::add_functions() {
          "sinh(x), 0., 0., cosh(x)"
          ");}\n");
 
+  add_if("zpush_h3",
+
+    "mediump mat4 zpush_h3(float x) { return mat4("
+         "1., 0., 0., 0.,\n"
+         "0., 1., 0., 0.,\n"
+         "0., 0., cosh(x), sinh(x),\n"
+         "0., 0., sinh(x), cosh(x)"
+         ");}\n");
+
   add_if("xpush_h2",
 
     "mediump mat4 xpush_h2(float x) { return mat4("
@@ -2096,9 +2119,10 @@ EX transmatrix get_ms(cell *c, int a, bool mirror) {
       }
     h = normalize(h);
     ld d = hdist0(h);
+    if(moved_center()) d -= 1;
     if(h[2] > 0) d = -d;
-    if(mirror) return MirrorZ * zpush(2*d);
-    return zpush(2*d);
+    if(mirror) return MirrorZ * lzpush(2*d);
+    return lzpush(2*d);
     }
   }
 
@@ -2545,9 +2569,11 @@ EX void cast() {
   
   transmatrix msm = stretch::mstretch_matrix;
 
+  hyperpoint TC0 = tile_center();
+
   back:
   for(int a=0; a<cs->type; a++)
-    if(hdist0(currentmap->ray_iadj(cs, a) * tC0(T)) < hdist0(tC0(T))) {
+    if(hdist(currentmap->ray_iadj(cs, a) * T * C0, TC0) < hdist(T * C0, TC0)) {
       T = currentmap->iadj(cs, a) * T;
       if(o->uToOrig != -1) {
         transmatrix HT = currentmap->adj(cs, a);
