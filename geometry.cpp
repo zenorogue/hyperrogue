@@ -1143,6 +1143,10 @@ EX namespace geom3 {
     return ggclass() == gcHyperbolic && mgclass() == gcSphere;
     }
 
+  EX bool sph_in_low() {
+    return mgclass() == gcSphere && among(ggclass(), gcHyperbolic, gcEuclid);
+    }
+
   EX bool in_product() {
     return ggclass() == gcProduct;
     }

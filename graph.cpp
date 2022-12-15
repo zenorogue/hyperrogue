@@ -782,7 +782,7 @@ EX shiftmatrix face_the_player(const shiftmatrix V) {
     return shiftless(cspin90(1, 2) * lrspintox(cspin90(2, 1) * uh) * xpush(hdist0(uh)) * cspin90(0, 2) * spin270());
     }
   #endif
-  if(embedded_plane && msphere && !sphere && !gproduct) return shiftless(map_relative_push(unshift(V * zpush0(1))) * zpush(-1));
+  if(embedded_plane && geom3::sph_in_low()) return shiftless(map_relative_push(unshift(V * zpush0(1))) * zpush(-1));
   return rgpushxto0(tC0(V));
   }
 
