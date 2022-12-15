@@ -1510,6 +1510,7 @@ struct hrmap_arbi : hrmap {
 
   heptagon *create_step(heptagon *h, int d) override {
   
+    if(geom3::flipped) return geom3::in_not_flipped([&] { return create_step(h, d); });
     dynamicval<bool> sl(using_slided, false);
     int t = id_of(h);
   
