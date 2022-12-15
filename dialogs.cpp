@@ -620,7 +620,6 @@ EX namespace dialog {
             int cx = bx == 0 ? 0 : bx == 16 ?vid.xres :
               vid.xres - dwidth + width * tan((bx-8)/8. * 90._deg);
             part(col, 0) = lerp(0, full, bx / 16.);
-            if(c == 0) println(hlog, "bx = ", bx, " -> cx = ", cx, " darken = ", part(col, 0));
             auravertices.emplace_back(hyperpoint(cx - current_display->xcenter, by - current_display->ycenter, 0, 1), col);
             }
           }
