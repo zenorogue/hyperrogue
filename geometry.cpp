@@ -1073,6 +1073,8 @@ EX namespace geom3 {
 
   #if HDR
   enum eSpatialEmbedding {
+    seNone,
+    seTPP,
     seDefault,
     seFlat,
     seInverted,
@@ -1088,7 +1090,9 @@ EX namespace geom3 {
   #endif
 
   EX vector<pair<string, string>> spatial_embedding_options = {
-    {"default",         "Embed as a equidistant surface in the 3D version of the same geometry. This is the model used by HyperRogue in its 2D graphics."},
+    {"2D engine",       "Use HyperRogue's 2D engine to simulate 'default 3D' top-down."},
+    {"2D engine in TPP","HyperRogue's 2D engine, but using third-person perspective."},
+    {"default 3D",      "Embed as a equidistant surface in the 3D version of the same geometry."},
     {"flat",            "Embed as a flat surface in the 3D version of the same geometry."},
     {"inverted",        "Embed as a equidistant surface, but this time it is inverted."},
     {"lower curvature", "Embed as a convex surface in a space of lower curvature."},
@@ -1103,8 +1107,13 @@ EX namespace geom3 {
     {"stretched hyperbolic inverted",              "Embed into stretched hyperbolic geometry as a concave horosphere. Works only with Euclidean. You need to set the variation to Pure."},
     };
 
-  EX eSpatialEmbedding spatial_embedding;
+  EX eSpatialEmbedding spatial_embedding = seDefault;
   EX ld euclid_embed_scale = 1;
+  EX bool auto_configure = true;
+
+  EX bool is_suboption(eSpatialEmbedding se) {
+    return among(se, seTPP, seInverted, seFlat, seLowerCurvatureInverted, seMuchLowerCurvatureInverted, seNIH_inv);
+    }
 
   EX vector<geometryinfo> ginf_backup;
 
