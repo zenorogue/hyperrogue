@@ -711,9 +711,6 @@ void geometry_information::prepare_basics() {
   if(geometry == gHoroRec || kite::in() || sol || nil || nih) hexvdist = rhexf = .5, tessf = .5, scalefactor = .5, crossf = hcrossf7/2;
   if(bt::in()) scalefactor *= min<ld>(vid.binary_width, 1), crossf *= min<ld>(vid.binary_width, 1);
   #endif
-  #if CAP_BT && MAXMDIM >= 4
-  if(bt::in()) bt::build_tmatrix();
-  #endif
   #if MAXMDIM >= 4
   if(reg3::in()) reg3::generate();
   if(euc::in(3)) euc::generate();
@@ -818,6 +815,10 @@ void geometry_information::prepare_basics() {
   set_sibling_limit();
   
   geom3::light_flip(false);
+
+  #if CAP_BT && MAXMDIM >= 4
+  if(bt::in()) bt::build_tmatrix();
+  #endif
 
   prepare_compute3();
   if(hyperbolic && &currfp != &fieldpattern::fp_invalid)
