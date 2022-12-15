@@ -247,6 +247,8 @@ struct hrmap_kite : hrmap {
     }
 
   void make_graphrules() {
+    if(geom3::flipped) return geom3::in_not_flipped([&] { return make_graphrules(); });
+
     pKite1 = meupush(-1, kite_center + 0) * mspin(108._deg) * meuscale(rphi) * meupush(0, down - kite_center);
     pKite2 = meupush(1, kite_center + 0) * mspin(-108._deg) * meuscale(rphi) * meupush(0, down - kite_center);
     pKite3 = meupush(0, kite_center - down) * mspin(36._deg) * meuscale(rphi) * meupush(0, down - dart_center);
