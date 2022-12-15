@@ -1132,7 +1132,7 @@ EX namespace geom3 {
     }
 
   EX bool euc_in_noniso() {
-    return among(ggclass(), gcNil, gcSol, gcNIH, gcSolN) && nonisotropic;
+    return among(ggclass(), gcNil, gcSol, gcNIH, gcSolN) && mgclass() == gcEuclid;
     }
 
   EX bool sph_in_euc() {
