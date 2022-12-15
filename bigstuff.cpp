@@ -1372,7 +1372,7 @@ EX bool horo_ok() {
   if(INVERSE) return false;  
   if(currentmap->strict_tree_rules()) return true;
   if(reg3::in_hrmap_h3() && !PURE) return false;
-  return hyperbolic && !bt::in() && !arcm::in() && !kite::in() && !experimental && !mhybrid && !arb::in() && !quotient;
+  return mhyperbolic && !bt::in() && !arcm::in() && !kite::in() && !experimental && !mhybrid && !arb::in() && !quotient;
   }
 
 /** \brief should we either generate the horocycles in the current geometry, or have them exist via eubinary? */
