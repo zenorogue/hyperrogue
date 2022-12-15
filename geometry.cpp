@@ -1128,6 +1128,10 @@ EX namespace geom3 {
     return among(ggclass(), gcSol, gcNIH, gcSolN) && mgclass() == gcEuclid;
     }
 
+  EX bool hyp_in_solnih() {
+    return among(ggclass(), gcSol, gcNIH, gcSolN) && mgclass() == gcHyperbolic;
+    }
+
   EX bool euc_in_noniso() {
     return among(ggclass(), gcNil, gcSol, gcNIH, gcSolN) && nonisotropic;
     }
@@ -1200,27 +1204,31 @@ EX namespace geom3 {
             g.gameplay_dimension = 2;
             }
 
-          if(spatial_embedding == seNil && euclid) {
+          bool ieuclid = g.kind == gcEuclid;
+
+          if(spatial_embedding == seNil && ieuclid) {
             g = ginf[gNil].g;
             g.gameplay_dimension = 2;
             }
 
-          if(spatial_embedding == seSol && euclid) {
+          bool ieuc_or_binary = ieuclid || (gi.flags & qBINARY);
+
+          if(spatial_embedding == seSol && ieuc_or_binary) {
             g = ginf[gSol].g;
             g.gameplay_dimension = 2;
             }
 
-          if(spatial_embedding == seNIH && euclid) {
+          if(spatial_embedding == seNIH && ieuc_or_binary) {
             g = ginf[gNIH].g;
             g.gameplay_dimension = 2;
             }
 
-          if(spatial_embedding == seNIH_inv && euclid) {
+          if(spatial_embedding == seNIH_inv && ieuc_or_binary) {
             g = ginf[gNIH].g;
             g.gameplay_dimension = 2;
             }
 
-          if(spatial_embedding == seSolN && euclid) {
+          if(spatial_embedding == seSolN && ieuc_or_binary) {
             g = ginf[gSolN].g;
             g.gameplay_dimension = 2;
             }

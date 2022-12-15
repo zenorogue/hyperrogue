@@ -346,12 +346,12 @@ void drawCurse(const shiftmatrix& V, eItem it) {
 #define UNTRANS (GDIM == 3 ? 0x000000FF : 0)
 
 EX transmatrix lpispin() {
-  if(geom3::euc_in_nil()) return spin180();
-  return pispin;
+  return spin180();
   }
 
 EX const transmatrix& lmirror() {
   if(geom3::euc_in_nil()) return MirrorZ;
+  if(geom3::hyp_in_solnih()) return MirrorZ;
   return Mirror;
   }
 
@@ -3749,7 +3749,7 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const shiftmatrix& V, color_t
   else if(sidepar == SIDE_BSHA) prio = PPR::BSHALLOW;
   else prio = PPR::REDWALL-2+4*(sidepar-SIDE_SLEV);
   
-  if(geom3::euc_in_noniso()) {
+  if(geom3::euc_in_noniso() || geom3::hyp_in_solnih()) {
     draw_shapevec(c, V, qfi.fshape->gpside[sidepar][i], col, prio);
     return false;
     }

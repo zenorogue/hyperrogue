@@ -561,6 +561,7 @@ EX hyperpoint normalize_flat(hyperpoint h) {
   if(sl2) h = slr::translate(h) * zpush0(-atan2(h[2], h[3]));
   if(geom3::euc_in_nil()) h[1] = 0;
   if(geom3::euc_in_solnih()) h[2] = 0;
+  if(geom3::hyp_in_solnih()) h[0] = 0;
   if(geom3::euc_in_hyp()) {
     h = normalize(h);
     auto h1 = deparabolic13(h);
@@ -642,6 +643,7 @@ EX transmatrix cspin180(int a, int b) {
 EX transmatrix spin(ld alpha) {
   if(embedded_plane && geom3::euc_in_hyp() && !destandarize_eih) return cspin(1, 2, alpha);
   if(embedded_plane && geom3::euc_in_nil()) return cspin(0, 2, alpha);
+  if(embedded_plane && geom3::hyp_in_solnih()) return cspin(1, 2, alpha);
   return cspin(0, 1, alpha);
   }
 
@@ -649,6 +651,7 @@ EX transmatrix spin(ld alpha) {
 EX transmatrix spin90() {
   if(embedded_plane && geom3::euc_in_hyp() && !destandarize_eih) return cspin90(1, 2);
   if(embedded_plane && geom3::euc_in_nil()) return cspin90(0, 2);
+  if(embedded_plane && geom3::hyp_in_solnih()) return cspin90(1, 2);
   return cspin90(0, 1);
   }
 
@@ -656,6 +659,7 @@ EX transmatrix spin90() {
 EX transmatrix spin180() {
   if(embedded_plane && geom3::euc_in_hyp() && !destandarize_eih) return cspin180(1, 2);
   if(embedded_plane && geom3::euc_in_nil()) return cspin180(0, 2);
+  if(embedded_plane && geom3::hyp_in_solnih()) return cspin180(1, 2);
   return cspin180(0, 1);
   }
 
@@ -663,6 +667,7 @@ EX transmatrix spin180() {
 EX transmatrix spin270() {
   if(embedded_plane && geom3::euc_in_hyp() && !destandarize_eih) return cspin90(2, 1);
   if(embedded_plane && geom3::euc_in_nil()) return cspin90(2, 0);
+  if(embedded_plane && geom3::hyp_in_solnih()) return cspin90(2, 1);
   return cspin90(1, 0);
   }
 
@@ -750,6 +755,7 @@ EX transmatrix cpush(int cid, ld alpha) {
 
 EX transmatrix lzpush(ld z) {
   if(geom3::euc_in_hyp() && !destandarize_eih) return cpush(0, z);
+  if(geom3::hyp_in_solnih()) return cpush(0, z);
   if(geom3::euc_in_nil()) return cpush(1, z);
   return cpush(2, z);
   }
@@ -803,6 +809,9 @@ EX hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
     for(int i=0; i<3; i++) hf[i] = h[i] * f;
     hf[3] = 1;
     return hf;
+    }
+  if(geom3::hyp_in_solnih()) {
+    return nisot::translate(h) * cpush0(0, z);
     }
   if(geom3::sph_in_hyp()) {
     ld z0 = acosh(h[3]);
@@ -860,6 +869,13 @@ EX void swapmatrix(transmatrix& T) {
     for(int i=0; i<4; i++) U[i][3] = U[3][i] = i == 3;
     T = parabolic13(mov[0], mov[1]) * U;
     }
+  else if(geom3::hyp_in_solnih()) {
+    // rotations are illegal anyway...
+    hyperpoint h = get_column(T, 2);
+    swapmatrix(h);
+    T = rgpushxto0(h);
+    return;
+    }
   else if(geom3::sph_in_euc() || geom3::sph_in_hyp()) {
     if(!geom3::flipped) {
       for(int i=0; i<4; i++) T[i][3] = T[3][i] = i == 3;
@@ -901,6 +917,19 @@ EX void swapmatrix(hyperpoint& h) {
   if(geom3::sph_in_hyp()) { h[0] *= sinh(1); h[1] *= sinh(1); h[2] *= sinh(1); h[3] = cosh(1); return; }
   if(geom3::euc_in_nil()) { h[3] = 1; h[2] = h[1] * geom3::euclid_embed_scale; h[1] = 0; h[0] *= geom3::euclid_embed_scale; return; }
   if(geom3::euc_in_solnih()) { h[3] = 1; h[1] = h[1] * geom3::euclid_embed_scale; h[2] = 0; h[0] *= geom3::euclid_embed_scale; return; }
+  if(geom3::hyp_in_solnih()) {
+    // copied from deparabolic13
+    h /= (1 + h[2]);
+    h[0] -= 1;
+    h /= sqhypot_d(2, h);
+    h[0] += .5;
+    ld hx = log(2) + log(-h[0]);
+    if(cgclass == gcNIH) hx /= log(3);
+    if(cgclass == gcSolN) hx /= log(3);
+    ld hy = h[1] * 2;
+    h = point31(0, hy, hx);
+    return;
+    }
   swap(h[2], h[3]);
   if(GDIM == 3) h[2] = 0;
   if(geom3::euc_in_hyp()) h = parabolic13(h[0], h[1]) * C0;
@@ -910,6 +939,9 @@ EX void swapmatrix(hyperpoint& h) {
 EX transmatrix parabolic1(ld u) {
   if(euclid)
     return ypush(u);
+  else if(geom3::hyp_in_solnih()) {
+    return ypush(u);
+    }
   else {
     ld diag = u*u/2;
     return matrix3(
@@ -1026,6 +1058,7 @@ EX transmatrix rspintox(const hyperpoint& H) {
 
 EX transmatrix lspintox(const hyperpoint& H) {
   if(geom3::euc_in_nil()) return spintoc(H, 0, 2);
+  if(geom3::hyp_in_solnih()) return spintoc(H, 1, 2);
   if(WDIM == 2 || gproduct) return spintoc(H, 0, 1);
   transmatrix T1 = spintoc(H, 0, 1);
   return spintoc(T1*H, 0, 2) * T1;
@@ -1033,6 +1066,7 @@ EX transmatrix lspintox(const hyperpoint& H) {
 
 EX transmatrix lrspintox(const hyperpoint& H) {
   if(geom3::euc_in_nil()) return rspintoc(H, 0, 2);
+  if(geom3::hyp_in_solnih()) return rspintoc(H, 1, 2);
   if(WDIM == 2 || gproduct) return rspintoc(H, 0, 1);
   transmatrix T1 = spintoc(H, 0, 1);
   return rspintoc(H, 0, 1) * rspintoc(T1*H, 0, 2);

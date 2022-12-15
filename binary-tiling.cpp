@@ -483,19 +483,19 @@ EX namespace bt {
 
     transmatrix adj(heptagon *h, int dir) override {
       if(geometry == gBinaryTiling) switch(dir) {
-        case bd_up: return xpush(-log(2));
+        case bd_up: return lxpush(-log(2));
         case bd_left: return parabolic(-2);
         case bd_right: return parabolic(+2);
         case bd_down: 
-          if(h->type == 6) return xpush(log(2));
+          if(h->type == 6) return lxpush(log(2));
           /* case bd_down_left: */
-          return parabolic(-2) * xpush(log(2));
+          return parabolic(-2) * lxpush(log(2));
         case bd_down_right: 
-          return parabolic(+2) * xpush(log(2));
+          return parabolic(+2) * lxpush(log(2));
         case bd_up_left:
-          return xpush(-log(2)) * parabolic(-2);
+          return lxpush(-log(2)) * parabolic(-2);
         case bd_up_right:
-          return xpush(-log(2)) * parabolic(2);
+          return lxpush(-log(2)) * parabolic(2);
         default:
           throw hr_exception("unknown direction");
         }
@@ -634,9 +634,9 @@ EX namespace bt {
     auto &x = h[0], &y = h[1], &z = h[2];
     switch(geometry) {
       case gBinaryTiling: case gBinary4:
-        return bt::parabolic(y) * xpush(x*z2*2);
+        return bt::parabolic(y) * lxpush(x*z2*2);
       case gTernary:
-        return bt::parabolic(y) * xpush(x*z3*2);
+        return bt::parabolic(y) * lxpush(x*z3*2);
       #if CAP_SOLV
       case gSol:
         return xpush(bwh*x) * ypush(bwh*y) * zpush(z2*z);
@@ -700,16 +700,16 @@ EX namespace bt {
     use_direct = (1 << (S7-1)) - 1;    
     if(geometry == gBinary4) {
       use_direct = 3;
-      direct_tmatrix[0] = xpush(-log(2)) * parabolic(-1);
-      direct_tmatrix[1] = xpush(-log(2)) * parabolic(+1);
+      direct_tmatrix[0] = lxpush(-log(2)) * parabolic(-1);
+      direct_tmatrix[1] = lxpush(-log(2)) * parabolic(+1);
       direct_tmatrix[2] = parabolic(2);
       direct_tmatrix[4] = parabolic(-2);
       use_direct = 1+2+4+16;
       }
     if(geometry == gTernary) {
-      direct_tmatrix[0] = xpush(-log(3)) * parabolic(-2);
-      direct_tmatrix[1] = xpush(-log(3));
-      direct_tmatrix[2] = xpush(-log(3)) * parabolic(+2);
+      direct_tmatrix[0] = lxpush(-log(3)) * parabolic(-2);
+      direct_tmatrix[1] = lxpush(-log(3));
+      direct_tmatrix[2] = lxpush(-log(3)) * parabolic(+2);
       direct_tmatrix[3] = parabolic(2);
       direct_tmatrix[5] = parabolic(-2);
       use_direct = 1+2+4+8+32;
@@ -1027,7 +1027,7 @@ EX int celldistance3(heptagon *c1, heptagon *c2) {
 EX int celldistance3(cell *c1, cell *c2) { return celldistance3(c1->master, c2->master); }
 
 EX hyperpoint get_horopoint(ld y, ld x) {
-  return bt::parabolic(x*2) * xpush(-y) * C0;
+  return bt::parabolic(x*2) * lxpush(-y) * C0;
   }
 
 EX hyperpoint get_horopoint(hyperpoint h) {
