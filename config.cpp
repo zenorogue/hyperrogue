@@ -840,11 +840,11 @@ EX void initConfig() {
   param_b(geom3::auto_configure, "auto_configure_3d", "auto_configure_3d")
   -> editable("set 3D settings automatically", 'A');
 
-  param_b(geom3::inverted_embedding, "inverted_3d", "inverted_3d")
+  param_b(geom3::inverted_embedding, "inverted_3d", false)
   -> editable("invert convex/concave", 'I')
   -> set_reaction([] { geom3::switch_fpp(); geom3::switch_fpp(); });
 
-  param_b(geom3::flat_embedding, "flat_3d", "flat_3d")
+  param_b(geom3::flat_embedding, "flat_3d", false)
   -> editable("flat, not equidistant", 'F')
   -> set_reaction([] { geom3::switch_fpp(); geom3::switch_fpp(); });
 
