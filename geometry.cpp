@@ -1448,6 +1448,8 @@ EX string cgi_string() {
   
   if(embedded_plane) V("X:", its(geom3::ggclass()));
 
+  if(embedded_plane && meuclid) V("XS:", fts(geom3::euclid_embed_scale));
+
   if(scale_used()) V("CS", fts(vid.creature_scale));
   
   if(WDIM == 3) V("HTW", fts(vid.height_width));

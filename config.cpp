@@ -835,18 +835,21 @@ EX void initConfig() {
 
   addsaver(vid.always3, "3D always", false);
 
-  param_f(geom3::euclid_embed_scale, "euclid_embed_scale", "euclid_embed_scale");
+  param_f(geom3::euclid_embed_scale, "euclid_embed_scale", "euclid_embed_scale")
+  -> editable(0, 2, 0.05, "Euclidean embedding scale", "How to scale the Euclidean map, relatively to the 3D absolute unit.", 'F')
+  -> set_sets([] { dialog::bound_low(0.05); })
+  -> set_reaction([] { if(vid.always3) { geom3::switch_fpp(); geom3::switch_fpp(); } });
 
   param_b(geom3::auto_configure, "auto_configure_3d", "auto_configure_3d")
   -> editable("set 3D settings automatically", 'A');
 
   param_b(geom3::inverted_embedding, "inverted_3d", false)
   -> editable("invert convex/concave", 'I')
-  -> set_reaction([] { geom3::switch_fpp(); geom3::switch_fpp(); });
+  -> set_reaction([] { if(vid.always3) { geom3::switch_fpp(); geom3::switch_fpp(); } });
 
   param_b(geom3::flat_embedding, "flat_3d", false)
   -> editable("flat, not equidistant", 'F')
-  -> set_reaction([] { geom3::switch_fpp(); geom3::switch_fpp(); });
+  -> set_reaction([] { if(vid.always3) { geom3::switch_fpp(); geom3::switch_fpp(); } });
 
   param_enum(geom3::spatial_embedding, "spatial_embedding", "spatial_embedding", geom3::seDefault)
   ->editable(geom3::spatial_embedding_options, "3D embedding method", 'E')
@@ -2291,6 +2294,7 @@ EX void show3D() {
     }
   
   if(WDIM == 2) {
+    if(geom3::euc_in_noniso()) add_edit(geom3::euclid_embed_scale);
     add_edit(vid.camera);
     if(GDIM == 3)
       add_edit(vid.eye);
