@@ -907,6 +907,7 @@ void celldrawer::draw_grid() {
   #if CAP_BT
   else if(bt::in() && WDIM == 2) {
     for(int t=0; t<c->type; t++) {
+      if(!c->move(t)|| c->move(t) < c) continue;
       auto h0 = bt::get_corner_horo_coordinates(c, t);
       auto h1 = bt::get_corner_horo_coordinates(c, t+1);
       int steps = 12 * abs(h0[1] - h1[1]);
@@ -917,8 +918,13 @@ void celldrawer::draw_grid() {
         if(vid.linequality > 0) steps <<= vid.linequality;
         if(vid.linequality < 0) steps >>= -vid.linequality;
         auto step = (h1 - h0) / steps;
-        for(int i=0; i<=steps; i++) curvepoint(bt::get_horopoint(h0 + i * step));
-        queuecurve(V, gridcolor(c, c->move(t)), 0, PPR::LINE);
+        if(GDIM == 3) {
+          for(int i=0; i<=steps; i++) gridline(V, bt::get_horopoint(h0 + i * step), V, bt::get_horopoint(h0 + (i+1) * step), gridcolor(c, c->move(t)), prec-2);
+          }
+        else {
+          for(int i=0; i<=steps; i++) curvepoint(bt::get_horopoint(h0 + i * step));
+          queuecurve(V, gridcolor(c, c->move(t)), 0, PPR::LINE);
+          }
         }
       }
     }
