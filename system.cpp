@@ -1368,7 +1368,8 @@ EX void stop_game() {
   }
 
 EX eModel default_model() {
-  if(nonisotropic) return mdGeodesic;
+  if(sl2) return mdGeodesic;
+  if(nonisotropic) return nisot::geodesic_movement ? mdGeodesic : mdLiePerspective;
   if(GDIM == 3) return mdPerspective;
   return mdDisk;
   }
