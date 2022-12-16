@@ -840,6 +840,13 @@ EX void initConfig() {
   -> set_sets([] { dialog::bound_low(0.05); })
   -> set_reaction([] { if(vid.always3) { geom3::switch_fpp(); geom3::switch_fpp(); } });
 
+  param_enum(embedded_shift_method_choice, "embedded_shift_method", "embedded_shift_method", smcBoth)
+  -> editable({
+    {"geodesic", "always move on geodesics"},
+    {"keep levels", "keep the vertical angle of the camera"},
+    {"mixed", "on geodesics when moving camera manually, keep level when auto-centering"}
+    }, "view shift for embedded planes", 'H');
+
   param_b(geom3::auto_configure, "auto_configure_3d", "auto_configure_3d")
   -> editable("set 3D settings automatically", 'A');
 
@@ -2295,6 +2302,7 @@ EX void show3D() {
   
   if(WDIM == 2) {
     if(geom3::euc_in_noniso()) add_edit(geom3::euclid_embed_scale);
+    add_edit(embedded_shift_method_choice);
     add_edit(vid.camera);
     if(GDIM == 3)
       add_edit(vid.eye);

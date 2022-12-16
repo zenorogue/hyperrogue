@@ -2115,9 +2115,9 @@ EX void centerpc(ld aspd) {
     if(R < aspd) fix_whichcopy_if_near();
     
     if(R < aspd) 
-      shift_view_to(shiftless(H));
+      shift_view_to(shiftless(H), shift_method(true));
     else 
-      shift_view_towards(shiftless(H), aspd);
+      shift_view_towards(shiftless(H), aspd, shift_method(true));
       
     fixmatrix(View);
     fixmatrix(current_display->which_copy);
@@ -3206,25 +3206,59 @@ EX hyperpoint lie_log(hyperpoint h) {
   return h;
   }
 
+#if HDR
+enum eShiftMethod { smProduct, smIsometric, smEmbedded, smLie, smGeodesic };
+enum eEmbeddedShiftMethodChoice { smcNone, smcBoth, smcAuto };
+#endif
+
+EX eEmbeddedShiftMethodChoice embedded_shift_method_choice = smcBoth;
+
+EX bool use_embedded_shift(bool automatic) {
+  if(automatic) return embedded_shift_method_choice;
+  return embedded_shift_method_choice == smcBoth;
+  }
+
+EX eShiftMethod shift_method(bool automatic IS(false)) {
+  if(gproduct) return smProduct;
+  if(embedded_plane && use_embedded_shift(automatic)) return nonisotropic ? smLie : smEmbedded;
+  if(!nonisotropic && !stretch::in()) return smIsometric;
+  if(!nisot::geodesic_movement && !embedded_plane) return smLie;
+  return smGeodesic;
+  }
+
+EX eShiftMethod shift_method_auto() {
+  if(gproduct) return smProduct;
+  if(embedded_plane) return nonisotropic ? smLie : smEmbedded;
+  if(!nonisotropic && !stretch::in()) return smIsometric;
+  if(!nisot::geodesic_movement) return smLie;
+  return smGeodesic;
+  }
+
 /** shift the view according to the given tangent vector */
-EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V) {
-  if(!nonisotropic && !stretch::in()) {
-    return rgpushxto0(direct_exp(lp_iapply(H))) * V;
-    }
-  else if(!nisot::geodesic_movement) {
-    transmatrix IV = view_inverse(View);
-    transmatrix view_shift = eupush( tC0(IV) );
-    transmatrix rot = V * view_shift;
-    hyperpoint tH = lie_exp(inverse(rot) * H);
-    return rot * eupush(tH) * inverse(view_shift);
-    }
-  else {
-    return iview_inverse(nisot::parallel_transport(view_inverse(V), -H));
+EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V, eShiftMethod sm IS(shift_method())) {
+  switch(sm) {
+    case smProduct:
+      return rgpushxto0(direct_exp(lp_iapply(H))) * V;
+    case smIsometric:
+      return rgpushxto0(direct_exp(H)) * V;
+    case smEmbedded:
+      return get_shift_view_embedded_of(V, rgpushxto0(direct_exp(H))) * V;
+    case smLie: {
+      transmatrix IV = view_inverse(View);
+      transmatrix view_shift = eupush( tC0(IV) );
+      transmatrix rot = V * view_shift;
+      hyperpoint tH = lie_exp(inverse(rot) * H);
+      return rot * eupush(tH) * inverse(view_shift);
+      }
+    case smGeodesic:
+      return iview_inverse(nisot::parallel_transport(view_inverse(V), -H));
+    default:
+      throw hr_exception("unknown shift method (embedded not supported)");
     }
   }
 
 /** shift the view according to the given tangent vector */
-EX void shift_view(hyperpoint H) {
+EX void shift_view(hyperpoint H, eShiftMethod sm IS(shift_method())) {
   if(callhandlers(false, hooks_shift_view, H)) return;
   static bool recursive = false;
   if(!recursive && intra::in) {
@@ -3234,29 +3268,48 @@ EX void shift_view(hyperpoint H) {
     #endif
     return;
     }
-  View = get_shift_view_of(H, View);
+  View = get_shift_view_of(H, View, sm);
   auto& wc = current_display->which_copy;
-  wc = get_shift_view_of(H, wc);
+  wc = get_shift_view_of(H, wc, sm);
   }
 
-/** works in embedded_plane and isotropic spaces */
-void shift_view_isotropic(transmatrix T) {
+/** works in embedded_plane (except embedded product where shift_view works) */
+EX transmatrix get_shift_view_embedded_of(const transmatrix V, const transmatrix T) {
+  transmatrix IV = view_inverse(View);
+  transmatrix rot = View * map_relative_push(IV * C0);
+  View = T * View;
+  transmatrix IV1 = view_inverse(View);
+  transmatrix rot1 = View * map_relative_push(IV1 * C0);
+  return rot * inverse(rot1) * T;
+  }
 
-  if(embedded_plane) {
-    transmatrix IV = view_inverse(View);
-    transmatrix rot = View * map_relative_push(IV * C0);
-    View = T * View;
-    transmatrix IV1 = view_inverse(View);
-    transmatrix rot1 = View * map_relative_push(IV1 * C0);
-    View = rot * inverse(rot1) * View;
-    auto& wc = current_display->which_copy;
-    wc = rot * inverse(rot1) * T * wc;
-    return;
-    }
+/** works in embedded_plane (except embedded product where shift_view works) */
+void shift_view_embedded(const transmatrix T) {
+  transmatrix R = get_shift_view_embedded_of(View, T);
+  View = R * View;
+  auto& wc = current_display->which_copy;
+  wc = R * wc;
+  }
 
+/** works in isotropic and product spaces */
+void shift_view_mmul(const transmatrix T) {
   View = T * View;
   auto& wc = current_display->which_copy;
   wc = T * wc;
+  }
+
+void shift_view_by_matrix(const transmatrix T, eShiftMethod sm) {
+  switch(sm) {
+    case smEmbedded:
+      shift_view_embedded(T);
+      return;
+    case smIsometric:
+    case smProduct:
+      shift_view_mmul(T);
+      return;
+    default:
+      throw hr_exception("unsupported shift method in shift_view_by_matrix");
+    }
   }
 
 /* like rgpushxto0 but keeps the map orientation correct */
@@ -3285,21 +3338,42 @@ EX transmatrix map_relative_push(hyperpoint h) {
   return rgpushxto0(h);
   }
 
-EX void shift_view_to(shiftpoint H) {
-  if(!nonisotropic)
-     shift_view_isotropic(gpushxto0(unshift(H)));
-  else shift_view(-inverse_exp(H));
+EX void shift_view_to(shiftpoint H, eShiftMethod sm IS(shift_method())) {
+  switch(sm) {
+    case smIsometric:
+    case smEmbedded:
+    case smProduct:
+      shift_view_by_matrix(gpushxto0(unshift(H)), sm);
+      return;
+    case smLie:
+      shift_view(-lie_log(unshift(H)), sm);
+      return;
+    case smGeodesic:
+      shift_view(-inverse_exp(H), sm);
+      return;
+    default:
+      throw hr_exception("unsupported shift method in shift_view_to");
+    }
   }
 
-EX void shift_view_towards(shiftpoint H, ld l) {
-  if(!nonisotropic && !gproduct)
-    shift_view_isotropic(rspintox(unshift(H)) * xpush(-l) * spintox(unshift(H)));
-  else if(nonisotropic && !nisot::geodesic_movement)
-    shift_view(tangent_length(unshift(H)-C0, -l));
-  else {
-    hyperpoint ie = inverse_exp(H, pNORMAL | pfNO_DISTANCE);
-    if(gproduct) ie = lp_apply(ie);
-    shift_view(tangent_length(ie, -l));
+EX void shift_view_towards(shiftpoint H, ld l, eShiftMethod sm IS(shift_method())) {
+  switch(sm) {
+    case smIsometric:
+    case smEmbedded:
+      shift_view_by_matrix(rspintox(unshift(H)) * xpush(-l) * spintox(unshift(H)), sm);
+      return;
+    case smLie:
+      shift_view(tangent_length(unshift(H)-C0, -l), sm);
+      return;
+    case smGeodesic:
+    case smProduct: {
+      hyperpoint ie = inverse_exp(H, pNORMAL | pfNO_DISTANCE);
+      if(gproduct) ie = lp_apply(ie);
+      shift_view(tangent_length(ie, -l), sm);
+      return;
+      }
+    default:
+      throw hr_exception("unsupported shift method in shift_view_towards");
     }
   }
 
