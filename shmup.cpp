@@ -183,11 +183,29 @@ cell *monster::findbase(const shiftmatrix& T, int maxsteps) {
   }
 
 void fix_to_2(transmatrix& T) {
-  if(GDIM == 3 && WDIM == 2 && !gproduct) {
-    for(int i=0; i<4; i++) T[i][2] = 0, T[2][i] = 0;
-    T[2][2] = 1;
+  if(embedded_plane) {
+    if(geom3::sph_in_low()) {
+      for(int i=0; i<4; i++) T[i][3] = 0, T[3][i] = 0;
+      T[3][3] = 1;
+      fixmatrix(T);
+      }
+    else if(geom3::same_in_same()) {
+      for(int i=0; i<4; i++) T[i][2] = 0, T[2][i] = 0;
+      T[2][2] = 1;
+      fixmatrix(T);
+      }
+    else if(gproduct) {
+      fixmatrix(T);
+      }
+    else {
+      hyperpoint h = tC0(T);
+      transmatrix rot = iso_inverse(map_relative_push(h)) * T;
+      fix_rotation(rot);
+      T = map_relative_push(h) * rot;
+      fixmatrix(T);
+      }
     }
-  if(nonisotropic) {
+  else if(nonisotropic) {
     hyperpoint h = tC0(T);
     transmatrix rot = gpushxto0(h) * T;
     fix_rotation(rot);
@@ -228,11 +246,9 @@ void monster::rebasePat(const shiftmatrix& new_pat, cell *c2) {
   if(multi::players == 1 && this == shmup::pc[0])
     current_display->which_copy = current_display->which_copy * inverse_shift(gmatrix[base], gmatrix[c2]);
   pat = new_pat;
-  // if(c2 != base) printf("rebase %p -> %p\n", base, c2);
   base = c2;
   at = inverse_shift(gmatrix[c2], pat);
   fix_to_2(at);
-  fixelliptic(at);
   }
 
 bool trackroute(monster *m, shiftmatrix goal, double spd) {
