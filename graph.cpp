@@ -5042,11 +5042,11 @@ EX ld wall_radar(cell *c, transmatrix T, transmatrix LPe, ld max) {
   ld step = max / 20;
   ld fixed_yshift = 0;
   for(int i=0; i<20; i++) {
-    T = shift_object(T, ori, ztangent(-step), shift_method(false));
+    T = shift_object(T, ori, ztangent(-step), shift_method(smaWallRadar));
     virtualRebase(c, T);
     color_t col;
     if(isWall3(c, col) || (WDIM == 2 && GDIM == 3 && tC0(T)[2] > cgi.FLOOR)) { 
-      T = shift_object(T, ori, ztangent(step), shift_method(false));
+      T = shift_object(T, ori, ztangent(step), shift_method(smaWallRadar));
       step /= 2; i = 17; 
       if(step < 1e-3) break; 
       }

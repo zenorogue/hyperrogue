@@ -1629,24 +1629,30 @@ EX ld xcross(ld x1, ld y1, ld x2, ld y2) { return x1 + (x2 - x1) * y1 / (y1 - y2
 #if HDR
 enum eShiftMethod { smProduct, smIsometric, smEmbedded, smLie, smGeodesic };
 enum eEmbeddedShiftMethodChoice { smcNone, smcBoth, smcAuto };
+enum eShiftMethodApplication { smaManualCamera, smaAutocenter, smaObject, smaWallRadar };
 #endif
 
 EX eEmbeddedShiftMethodChoice embedded_shift_method_choice = smcBoth;
 
-EX bool use_embedded_shift(bool automatic) {
-  if(automatic) return embedded_shift_method_choice;
-  return embedded_shift_method_choice == smcBoth;
+EX bool use_embedded_shift(eShiftMethodApplication sma) {
+  switch(sma) {
+    case smaAutocenter: return embedded_shift_method_choice != smcNone;
+    case smaManualCamera: return embedded_shift_method_choice == smcBoth;
+    case smaObject: return true;
+    case smaWallRadar: return among(pmodel, mdLiePerspective, mdLieOrthogonal);
+    default: throw hr_exception("unknown sma");
+    }
   }
 
-EX eShiftMethod shift_method(bool automatic IS(false)) {
+EX eShiftMethod shift_method(eShiftMethodApplication sma) {
   if(gproduct) return smProduct;
-  if(embedded_plane && use_embedded_shift(automatic)) return nonisotropic ? smLie : smEmbedded;
+  if(embedded_plane && use_embedded_shift(sma)) return nonisotropic ? smLie : smEmbedded;
   if(!nonisotropic && !stretch::in()) return smIsometric;
   if(!nisot::geodesic_movement && !embedded_plane) return smLie;
   return smGeodesic;
   }
 
-EX transmatrix shift_object(const transmatrix Position, const transmatrix& ori, const hyperpoint direction, eShiftMethod sm IS(shift_method(true))) {
+EX transmatrix shift_object(const transmatrix Position, const transmatrix& ori, const hyperpoint direction, eShiftMethod sm IS(shift_method(smaObject))) {
   switch(sm) {
     case smGeodesic:
       return nisot::parallel_transport(Position, direction);
@@ -1665,7 +1671,7 @@ EX transmatrix shift_object(const transmatrix Position, const transmatrix& ori, 
     }
   }
 
-EX void apply_shift_object(transmatrix& Position, const transmatrix orientation, const hyperpoint direction, eShiftMethod sm IS(shift_method(true))) {
+EX void apply_shift_object(transmatrix& Position, const transmatrix orientation, const hyperpoint direction, eShiftMethod sm IS(shift_method(smaObject))) {
   Position = shift_object(Position, orientation, direction, sm);
   }
 

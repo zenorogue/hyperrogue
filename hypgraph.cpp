@@ -2115,9 +2115,9 @@ EX void centerpc(ld aspd) {
     if(R < aspd) fix_whichcopy_if_near();
     
     if(R < aspd) 
-      shift_view_to(shiftless(H), shift_method(true));
+      shift_view_to(shiftless(H), shift_method(smaAutocenter));
     else 
-      shift_view_towards(shiftless(H), aspd, shift_method(true));
+      shift_view_towards(shiftless(H), aspd, shift_method(smaAutocenter));
       
     fixmatrix(View);
     fixmatrix(current_display->which_copy);
@@ -3207,7 +3207,7 @@ EX hyperpoint lie_log(hyperpoint h) {
   }
 
 /** shift the view according to the given tangent vector */
-EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V, eShiftMethod sm IS(shift_method())) {
+EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V, eShiftMethod sm IS(shift_method(smaManualCamera))) {
   switch(sm) {
     case smProduct:
       return rgpushxto0(direct_exp(lp_iapply(H))) * V;
@@ -3230,7 +3230,7 @@ EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V, eShift
   }
 
 /** shift the view according to the given tangent vector */
-EX void shift_view(hyperpoint H, eShiftMethod sm IS(shift_method())) {
+EX void shift_view(hyperpoint H, eShiftMethod sm IS(shift_method(smaManualCamera))) {
   if(callhandlers(false, hooks_shift_view, H)) return;
   static bool recursive = false;
   if(!recursive && intra::in) {
@@ -3310,7 +3310,7 @@ EX transmatrix map_relative_push(hyperpoint h) {
   return rgpushxto0(h);
   }
 
-EX void shift_view_to(shiftpoint H, eShiftMethod sm IS(shift_method())) {
+EX void shift_view_to(shiftpoint H, eShiftMethod sm IS(shift_method(smaManualCamera))) {
   switch(sm) {
     case smIsometric:
     case smEmbedded:
@@ -3328,7 +3328,7 @@ EX void shift_view_to(shiftpoint H, eShiftMethod sm IS(shift_method())) {
     }
   }
 
-EX void shift_view_towards(shiftpoint H, ld l, eShiftMethod sm IS(shift_method())) {
+EX void shift_view_towards(shiftpoint H, ld l, eShiftMethod sm IS(shift_method(smaManualCamera))) {
   switch(sm) {
     case smIsometric:
     case smEmbedded:
