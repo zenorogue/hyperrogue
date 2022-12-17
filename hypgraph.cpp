@@ -2247,7 +2247,7 @@ EX void resetview() {
   if(WDIM == 3 && !gproduct) View = cspin90(0, 2) * View;
   if(gproduct) NLP = cspin90(0, 2);
   View = inverse(logical_to_actual()) * View;
-  if(embedded_plane) View = cspin90(1, 2) * View;
+  if(embedded_plane) get_view_orientation() = cspin90(1, 2) * get_view_orientation();
   if(embedded_plane && vid.wall_height < 0) View = cspin180(0, 1) * View;
 
   cwtV = shiftless(View);
