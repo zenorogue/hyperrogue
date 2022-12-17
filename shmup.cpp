@@ -182,7 +182,8 @@ cell *monster::findbase(const shiftmatrix& T, int maxsteps) {
   else return findbaseAround(T, base, maxsteps);
   }
 
-void fix_to_2(transmatrix& T) {
+/** fix the matrix, including the appropriate fixes for nonisotropic, embedded_plane, and elliptic space */
+void full_fix(transmatrix& T) {
   if(embedded_plane) {
     if(geom3::sph_in_low()) {
       for(int i=0; i<4; i++) T[i][3] = 0, T[3][i] = 0;
@@ -201,6 +202,8 @@ void fix_to_2(transmatrix& T) {
       hyperpoint h = tC0(T);
       transmatrix rot = iso_inverse(map_relative_push(h)) * T;
       fix_rotation(rot);
+      if(geom3::hyp_in_solnih()) h[0] = 0;
+      if(geom3::euc_in_nil()) h[1] = 0;
       T = map_relative_push(h) * rot;
       fixmatrix(T);
       }
@@ -220,7 +223,7 @@ void monster::rebasePat(const shiftmatrix& new_pat, cell *c2) {
   if(isVirtual) {
     at = new_pat.T;
     virtualRebase(this);
-    fix_to_2(at);
+    full_fix(at);
     pat = shiftless(at);
     if(multi::players == 1 && this == shmup::pc[0])
       current_display->which_copy = back_to_view(ggmatrix(base));
@@ -230,7 +233,7 @@ void monster::rebasePat(const shiftmatrix& new_pat, cell *c2) {
     at = inverse_shift(gmatrix[base], new_pat);
     transmatrix old_at = at;
     virtualRebase(this);
-    fix_to_2(at);
+    full_fix(at);
     if(base != c2) {
       if(fake::split()) println(hlog, "fake error");
       else {
@@ -248,7 +251,7 @@ void monster::rebasePat(const shiftmatrix& new_pat, cell *c2) {
   pat = new_pat;
   base = c2;
   at = inverse_shift(gmatrix[c2], pat);
-  fix_to_2(at);
+  full_fix(at);
   }
 
 bool trackroute(monster *m, shiftmatrix goal, double spd) {
