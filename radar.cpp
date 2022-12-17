@@ -35,10 +35,10 @@ pair<bool, hyperpoint> makeradar(shiftpoint h) {
       h1[3] = h1[2]; h1[2] = 0;
       // h1 = current_display->radar_transform * h1;
       }
-    for(int a=0; a<3; a++) h1[a] = h1[a] / (1 + h1[3]);
+    for(int a=0; a<LDIM; a++) h1[a] = h1[a] / (1 + h1[LDIM]);
     }
   else if(msphere) {
-    if(geom3::same_in_same()) h1[2] = h1[3];
+    if(geom3::same_in_same()) h1[2] = h1[LDIM];
     if(geom3::sph_in_hyp()) h1 /= sinh(1);
     }
   else {
@@ -107,9 +107,9 @@ EX void draw_radar(bool cornermode) {
   if(subscreens::split([=] () { calcparam(); draw_radar(false); })) return;
   if(dual::split([] { dual::in_subscreen([] { calcparam(); draw_radar(false); }); })) return;
   bool d3 = WDIM == 3;
-  bool hyp = hyperbolic;
-  bool sph = sphere;
-  bool scompass = nonisotropic && !mhybrid;
+  bool hyp = mhyperbolic;
+  bool sph = msphere;
+  bool scompass = nonisotropic && !mhybrid && !embedded_plane;
 
   dynamicval<eGeometry> g(geometry, gEuclid);
   dynamicval<eModel> pm(pmodel, mdDisk);
@@ -178,7 +178,7 @@ EX void draw_radar(bool cornermode) {
     if(sph)
       return point3(cx + (rad-10) * h[0], cy + (rad-10) * h[2] * si + (rad-10) * h[1] * co, +h[1] * si > h[2] * co ? 8 : 16);
     else if(hyp) 
-      return point3(cx + rad * h[0], cy + rad * h[1], 1/(1+h[3]) * cgi.scalefactor * current_display->radius / (inHighQual ? 10 : 6));
+      return point3(cx + rad * h[0], cy + rad * h[1], 1/(1+h[LDIM]) * cgi.scalefactor * current_display->radius / (inHighQual ? 10 : 6));
     else
       return point3(cx + rad * h[0], cy + rad * h[1], rad * cgi.scalefactor / (vid.radarrange + cgi.scalefactor/4) * 0.8);
     };
