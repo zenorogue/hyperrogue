@@ -1098,7 +1098,7 @@ void movePlayer(monster *m, int delta) {
       }
     else if(playergo[cpid]) {
       playergoturn[cpid] = igospan[igo]+godir[cpid];    
-      nat.T = shift_object(nat1.T, m->ori, spin(playergoturn[cpid]) * xtangent(playergo[cpid]));
+      nat.T = shift_object(nat1.T, m->ori, cspin(0, 1, playergoturn[cpid]) * xtangent(playergo[cpid]));
       m->inertia = spin(playergoturn[cpid]) * xtangent(playergo[cpid] / delta);
       }
     
