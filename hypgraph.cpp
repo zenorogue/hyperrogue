@@ -3206,34 +3206,6 @@ EX hyperpoint lie_log(hyperpoint h) {
   return h;
   }
 
-#if HDR
-enum eShiftMethod { smProduct, smIsometric, smEmbedded, smLie, smGeodesic };
-enum eEmbeddedShiftMethodChoice { smcNone, smcBoth, smcAuto };
-#endif
-
-EX eEmbeddedShiftMethodChoice embedded_shift_method_choice = smcBoth;
-
-EX bool use_embedded_shift(bool automatic) {
-  if(automatic) return embedded_shift_method_choice;
-  return embedded_shift_method_choice == smcBoth;
-  }
-
-EX eShiftMethod shift_method(bool automatic IS(false)) {
-  if(gproduct) return smProduct;
-  if(embedded_plane && use_embedded_shift(automatic)) return nonisotropic ? smLie : smEmbedded;
-  if(!nonisotropic && !stretch::in()) return smIsometric;
-  if(!nisot::geodesic_movement && !embedded_plane) return smLie;
-  return smGeodesic;
-  }
-
-EX eShiftMethod shift_method_auto() {
-  if(gproduct) return smProduct;
-  if(embedded_plane) return nonisotropic ? smLie : smEmbedded;
-  if(!nonisotropic && !stretch::in()) return smIsometric;
-  if(!nisot::geodesic_movement) return smLie;
-  return smGeodesic;
-  }
-
 /** shift the view according to the given tangent vector */
 EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V, eShiftMethod sm IS(shift_method())) {
   switch(sm) {

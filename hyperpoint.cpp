@@ -1626,6 +1626,26 @@ EX bool asign(ld y1, ld y2) { return signum(y1) != signum(y2); }
 
 EX ld xcross(ld x1, ld y1, ld x2, ld y2) { return x1 + (x2 - x1) * y1 / (y1 - y2); }
 
+#if HDR
+enum eShiftMethod { smProduct, smIsometric, smEmbedded, smLie, smGeodesic };
+enum eEmbeddedShiftMethodChoice { smcNone, smcBoth, smcAuto };
+#endif
+
+EX eEmbeddedShiftMethodChoice embedded_shift_method_choice = smcBoth;
+
+EX bool use_embedded_shift(bool automatic) {
+  if(automatic) return embedded_shift_method_choice;
+  return embedded_shift_method_choice == smcBoth;
+  }
+
+EX eShiftMethod shift_method(bool automatic IS(false)) {
+  if(gproduct) return smProduct;
+  if(embedded_plane && use_embedded_shift(automatic)) return nonisotropic ? smLie : smEmbedded;
+  if(!nonisotropic && !stretch::in()) return smIsometric;
+  if(!nisot::geodesic_movement && !embedded_plane) return smLie;
+  return smGeodesic;
+  }
+
 EX transmatrix parallel_transport(const transmatrix Position, const transmatrix& ori, const hyperpoint direction) {
   if(nonisotropic) return nisot::parallel_transport(Position, direction);
   else if(gproduct) {
