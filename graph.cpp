@@ -5073,8 +5073,9 @@ EX void make_actual_view() {
       actual_view_transform = get_shift_view_of(ztangent(d), actual_view_transform * View) * view_inverse(View); 
       }
     camera_level = asin_auto(tC0(view_inverse(actual_view_transform * View))[2]);
-    camera_sign = cgi.FLOOR > cgi.WALL;
     if(geom3::euc_in_nil()) camera_level = tC0(view_inverse(actual_view_transform * View))[1];
+    if(moved_center()) camera_level--;
+    camera_sign = cgi.FLOOR > cgi.WALL;
     }
   if(nonisotropic && !nonisotropic_weird_transforms) {
     transmatrix T = actual_view_transform * View;
