@@ -5097,13 +5097,25 @@ EX void make_actual_view() {
       ld z = -tC0(view_inverse(T)) [2];
       transmatrix R = actual_view_transform;
       R = (logical_to_actual()) * R;
-      if(R[0][2] || R[2][2])
-        R = cspin(0, 2, -atan2(R[0][2], R[2][2])) * R;
       if(R[1][2] || R[2][2])
         R = cspin(1, 2, -atan2(R[1][2], R[2][2])) * R;
+      if(R[0][2] || R[2][2])
+        R = cspin(0, 2, -atan2(R[0][2], R[2][2])) * R;
       if(geom3::hyp_in_solnih()) R = Id;
       R = inverse(logical_to_actual()) * R;
       current_display->radar_transform = inverse(R) * zpush(-z);
+      }
+    else if(gproduct) {
+      transmatrix T = View;
+      ld z = zlevel(tC0(inverse(T)));
+
+      transmatrix R = NLP;
+      if(R[1][2] || R[2][2])
+        R = cspin(1, 2, -atan2(R[1][2], R[2][2])) * R;
+      if(R[0][2] || R[2][2])
+        R = cspin(0, 2, -atan2(R[0][2], R[2][2])) * R;
+
+      current_display->radar_transform = R * zpush(z);
       }
     else {
       transmatrix T = actual_view_transform * View;
