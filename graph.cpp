@@ -5074,6 +5074,7 @@ EX void make_actual_view() {
       }
     camera_level = asin_auto(tC0(view_inverse(actual_view_transform * View))[2]);
     if(geom3::euc_in_nil()) camera_level = tC0(view_inverse(actual_view_transform * View))[1];
+    if(geom3::hyp_in_solnih()) camera_level = tC0(view_inverse(actual_view_transform * View))[0];
     if(moved_center()) camera_level--;
     camera_sign = cgi.FLOOR > cgi.WALL;
     }
