@@ -2846,10 +2846,16 @@ EX namespace nisot {
   EX transmatrix parallel_transport(const transmatrix Position, const hyperpoint direction) {
     auto P = Position;
     nisot::fixmatrix(P);  
-    if(!geodesic_movement) return eupush(Position * translate(-direction) * inverse(Position) * C0, -1) * Position;
     return parallel_transport_bare(P, direction);
     }
-  
+
+  EX transmatrix lie_transport(const transmatrix Position, const hyperpoint direction) {
+    transmatrix pshift = eupush( tC0(Position) );
+    transmatrix irot = iso_inverse(pshift) * Position;
+    hyperpoint tH = lie_exp(irot * direction);
+    return pshift * eupush(tH) * irot;
+    }
+
   EX transmatrix spin_towards(const transmatrix Position, const hyperpoint goal, flagtype prec IS(pNORMAL)) {
 
     hyperpoint at = tC0(Position);

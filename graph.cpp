@@ -5042,11 +5042,11 @@ EX ld wall_radar(cell *c, transmatrix T, transmatrix LPe, ld max) {
   ld step = max / 20;
   ld fixed_yshift = 0;
   for(int i=0; i<20; i++) {
-    T = parallel_transport(T, ori, ztangent(-step));
+    T = shift_object(T, ori, ztangent(-step), shift_method(false));
     virtualRebase(c, T);
     color_t col;
     if(isWall3(c, col) || (WDIM == 2 && GDIM == 3 && tC0(T)[2] > cgi.FLOOR)) { 
-      T = parallel_transport(T, ori, ztangent(step));
+      T = shift_object(T, ori, ztangent(step), shift_method(false));
       step /= 2; i = 17; 
       if(step < 1e-3) break; 
       }
@@ -5126,7 +5126,7 @@ EX void precise_mouseover() {
     ld step = 0.2;
     cell *c = centerover;
     for(int i=0; i<100; i++) {
-      apply_parallel_transport(T, ori, ztangent(step));
+      apply_shift_object(T, ori, ztangent(step));
       int pd = through_wall(c, T * C0);
       if(pd != -1) {
         color_t col;

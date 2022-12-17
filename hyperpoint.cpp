@@ -1646,17 +1646,27 @@ EX eShiftMethod shift_method(bool automatic IS(false)) {
   return smGeodesic;
   }
 
-EX transmatrix parallel_transport(const transmatrix Position, const transmatrix& ori, const hyperpoint direction) {
-  if(nonisotropic) return nisot::parallel_transport(Position, direction);
-  else if(gproduct) {
-    hyperpoint h = product::direct_exp(ori * direction);
-    return Position * rgpushxto0(h);
+EX transmatrix shift_object(const transmatrix Position, const transmatrix& ori, const hyperpoint direction, eShiftMethod sm IS(shift_method(true))) {
+  switch(sm) {
+    case smGeodesic:
+      return nisot::parallel_transport(Position, direction);
+    case smLie:
+      return nisot::lie_transport(Position, direction);
+    case smProduct: {
+      hyperpoint h = product::direct_exp(ori * direction);
+      return Position * rgpushxto0(h);
+      }
+    case smIsometric: {
+      return Position * rgpushxto0(direct_exp(direction));
+      }
+    case smEmbedded: {
+      throw hr_exception("not implemented");
+      }
     }
-  else return Position * rgpushxto0(direct_exp(direction));
   }
 
-EX void apply_parallel_transport(transmatrix& Position, const transmatrix orientation, const hyperpoint direction) {
-  Position = parallel_transport(Position, orientation, direction);
+EX void apply_shift_object(transmatrix& Position, const transmatrix orientation, const hyperpoint direction, eShiftMethod sm IS(shift_method(true))) {
+  Position = shift_object(Position, orientation, direction, sm);
   }
 
 EX void rotate_object(transmatrix& Position, transmatrix& orientation, transmatrix R) {

@@ -1059,7 +1059,7 @@ void movePlayer(monster *m, int delta) {
       playergoturn[cpid] = 0;
       if(igo) { go = false; break; }
       ld r = hypot_d(WDIM, avg_inertia);
-      apply_parallel_transport(nat.T, m->ori, lrspintox(avg_inertia) * xtangent(r * delta));
+      apply_shift_object(nat.T, m->ori, lrspintox(avg_inertia) * xtangent(r * delta));
       if(WDIM == 3) rotate_object(nat.T, m->ori, cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]));
       m->vel = r * (600/SCALE);
       }
@@ -1070,7 +1070,7 @@ void movePlayer(monster *m, int delta) {
         playersmallspin[cpid] = cspin(0, 1, fspin) * cspin(2, 0, igospan[igo]);
         if(fspin < 360) igo--; else fspin = 0;
         }
-      nat.T = parallel_transport(nat1.T, m->ori, playersmallspin[cpid] * point3(playerstrafe[cpid], 0, playergo[cpid]));
+      nat.T = shift_object(nat1.T, m->ori, playersmallspin[cpid] * point3(playerstrafe[cpid], 0, playergo[cpid]));
       rotate_object(nat.T, m->ori, cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]));
       m->inertia[0] = playerstrafe[cpid] / delta;
       m->inertia[1] = 0;
@@ -1078,7 +1078,7 @@ void movePlayer(monster *m, int delta) {
       }
     else if(playergo[cpid]) {
       playergoturn[cpid] = igospan[igo]+godir[cpid];    
-      nat.T = parallel_transport(nat1.T, m->ori, spin(playergoturn[cpid]) * xtangent(playergo[cpid]));
+      nat.T = shift_object(nat1.T, m->ori, spin(playergoturn[cpid]) * xtangent(playergo[cpid]));
       m->inertia = spin(playergoturn[cpid]) * xtangent(playergo[cpid] / delta);
       }
     
@@ -1168,7 +1168,7 @@ void movePlayer(monster *m, int delta) {
         int i0 = i;
         for(int a=0; a<3; a++) v[a] = (i0 % 3) - 1, i0 /= 3;
         v = v * .1 / hypot_d(3, v);
-        shiftmatrix T1 = (i == 13) ? nat : shiftless(parallel_transport(nat.T, m->ori, v), nat.shift);
+        shiftmatrix T1 = (i == 13) ? nat : shiftless(shift_object(nat.T, m->ori, v), nat.shift);
         cell *c3 = c2;
         while(true) {
           cell *c4 = findbaseAround(tC0(T1), c3, 1);
@@ -1478,7 +1478,7 @@ void moveMimic(monster *m) {
   // no need to care about Mirror images, as they already have their 'at' matrix reversed :|
 
   if(WDIM == 3) {
-    nat.T = parallel_transport(nat.T, m->ori, playersmallspin[cpid] * point3(playerstrafe[cpid], 0, playergo[cpid]));
+    nat.T = shift_object(nat.T, m->ori, playersmallspin[cpid] * point3(playerstrafe[cpid], 0, playergo[cpid]));
     rotate_object(nat.T, m->ori, cspin(0, 2, playerturn[cpid]) * cspin(1, 2, playerturny[cpid]));
     }
   else
@@ -1711,10 +1711,10 @@ void moveBullet(monster *m, int delta) {
     m->dead = true;
 
   if(inertia_based) {
-    nat.T = parallel_transport(nat.T, m->ori, m->inertia * delta);
+    nat.T = shift_object(nat.T, m->ori, m->inertia * delta);
     }
   else 
-    nat.T = parallel_transport(nat.T, m->ori, fronttangent(delta * SCALE * m->vel / speedfactor()));
+    nat.T = shift_object(nat.T, m->ori, fronttangent(delta * SCALE * m->vel / speedfactor()));
   cell *c2 = m->findbase(nat, fake::split() ? 10 : 1);
 
   if(m->parent && isPlayer(m->parent) && markOrb(itOrbLava) && c2 != m->base && !isPlayerOn(m->base)) 
@@ -2217,14 +2217,14 @@ void moveMonster(monster *m, int delta) {
   
   if(inertia_based) {
     if(igo) return;
-    nat.T = parallel_transport(nat.T, m->ori, m->inertia * delta);
+    nat.T = shift_object(nat.T, m->ori, m->inertia * delta);
     }
   else if(WDIM == 3 && igo) {
     ld fspin = rand() % 1000;  
-    nat.T = parallel_transport(nat0.T, m->ori, cspin(1,2,fspin) * spin(igospan[igo]) * xtangent(step));
+    nat.T = shift_object(nat0.T, m->ori, cspin(1,2,fspin) * spin(igospan[igo]) * xtangent(step));
     }
   else {
-    nat.T = parallel_transport(nat0.T, m->ori, spin(igospan[igo]) * xtangent(step));
+    nat.T = shift_object(nat0.T, m->ori, spin(igospan[igo]) * xtangent(step));
     }
 
   if(m->type != moRagingBull && !peace::on)
