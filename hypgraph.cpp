@@ -3257,11 +3257,11 @@ EX void shift_view(hyperpoint H, eShiftMethod sm IS(shift_method(smaManualCamera
 
 /** works in embedded_plane (except embedded product where shift_view works) */
 EX transmatrix get_shift_view_embedded_of(const transmatrix V, const transmatrix T) {
-  transmatrix IV = view_inverse(View);
-  transmatrix rot = View * map_relative_push(IV * C0);
-  View = T * View;
-  transmatrix IV1 = view_inverse(View);
-  transmatrix rot1 = View * map_relative_push(IV1 * C0);
+  transmatrix IV = view_inverse(V);
+  transmatrix rot = V * map_relative_push(IV * C0);
+  transmatrix V1 = T * V;
+  transmatrix IV1 = view_inverse(V1);
+  transmatrix rot1 = V1 * map_relative_push(IV1 * C0);
   return rot * inverse(rot1) * T;
   }
 
