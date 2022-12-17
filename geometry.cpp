@@ -1299,13 +1299,13 @@ EX void switch_always3() {
         }
       vid.camera = 0;
       vid.eye = 0;
-      if(sph_in_euc() || sph_in_hyp()) {
+      if(sph_in_low()) {
         vid.depth = 0;
         vid.wall_height = -1;
-        vid.eye = 0.5;
+        vid.eye = -0.5;
         if(inverted_embedding) {
           vid.wall_height = 1.4;
-          vid.eye = -0.2;
+          vid.eye = 0.2;
           vid.depth = 0.5;
           }
         }
