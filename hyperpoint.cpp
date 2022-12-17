@@ -651,7 +651,6 @@ EX transmatrix cspin180(int a, int b) {
 
 /** rotate by alpha degrees in the XY plane */
 EX transmatrix spin(ld alpha) {
-  if(embedded_plane && geom3::euc_in_hyp() && !destandarize_eih) return cspin(1, 2, alpha);
   if(embedded_plane && geom3::euc_in_nil()) return cspin(0, 2, alpha);
   if(embedded_plane && geom3::hyp_in_solnih()) return cspin(1, 2, alpha);
   return cspin(0, 1, alpha);
@@ -669,7 +668,6 @@ EX transmatrix unswap_spin(transmatrix T) {
 
 /** rotate by 90 degrees in the XY plane */
 EX transmatrix spin90() {
-  if(embedded_plane && geom3::euc_in_hyp() && !destandarize_eih) return cspin90(1, 2);
   if(embedded_plane && geom3::euc_in_nil()) return cspin90(0, 2);
   if(embedded_plane && geom3::hyp_in_solnih()) return cspin90(1, 2);
   return cspin90(0, 1);
@@ -677,7 +675,6 @@ EX transmatrix spin90() {
 
 /** rotate by 180 degrees in the XY plane */
 EX transmatrix spin180() {
-  if(embedded_plane && geom3::euc_in_hyp() && !destandarize_eih) return cspin180(1, 2);
   if(embedded_plane && geom3::euc_in_nil()) return cspin180(0, 2);
   if(embedded_plane && geom3::hyp_in_solnih()) return cspin180(1, 2);
   return cspin180(0, 1);
@@ -685,7 +682,6 @@ EX transmatrix spin180() {
 
 /** rotate by 270 degrees in the XY plane */
 EX transmatrix spin270() {
-  if(embedded_plane && geom3::euc_in_hyp() && !destandarize_eih) return cspin90(2, 1);
   if(embedded_plane && geom3::euc_in_nil()) return cspin90(2, 0);
   if(embedded_plane && geom3::hyp_in_solnih()) return cspin90(2, 1);
   return cspin90(1, 0);
@@ -774,7 +770,6 @@ EX transmatrix cpush(int cid, ld alpha) {
   }
 
 EX transmatrix lzpush(ld z) {
-  if(geom3::euc_in_hyp() && !destandarize_eih) return cpush(0, z);
   if(geom3::hyp_in_solnih()) return cpush(0, z);
   if(geom3::euc_in_nil()) return cpush(1, z);
   return cpush(2, z);
@@ -974,12 +969,10 @@ EX transmatrix parabolic1(ld u) {
     }
   }
 
-EX bool destandarize_eih = true;
-
 EX transmatrix parabolic13(ld u, ld v) {
   if(euclid)
     return eupush3(0, u, v);
-  else if(geom3::euc_in_hyp() && destandarize_eih) {
+  else if(geom3::euc_in_hyp()) {
     ld diag = (u*u+v*v)/2;
     return matrix4(
       1, 0, -u, u,
@@ -1001,7 +994,7 @@ EX transmatrix parabolic13(ld u, ld v) {
 
 EX hyperpoint deparabolic13(hyperpoint h) {
   if(euclid) return h;
-  if(geom3::euc_in_hyp() && destandarize_eih) {
+  if(geom3::euc_in_hyp()) {
     h /= (1 + h[LDIM]);
     h[2] -= 1;
     h /= sqhypot_d(LDIM, h);
@@ -1017,7 +1010,7 @@ EX hyperpoint deparabolic13(hyperpoint h) {
 
 EX hyperpoint parabolic13(hyperpoint h) {
   if(euclid) return h;
-  else if(geom3::euc_in_hyp() && destandarize_eih) {
+  else if(geom3::euc_in_hyp()) {
     return parabolic13(h[0], h[1]) * cpush0(2, h[2]);
     }
   else if(LDIM == 3)
@@ -1028,7 +1021,7 @@ EX hyperpoint parabolic13(hyperpoint h) {
 
 EX transmatrix parabolic13_at(hyperpoint h) {
   if(euclid) return rgpushxto0(h);
-  else if(geom3::euc_in_hyp() && destandarize_eih) {
+  else if(geom3::euc_in_hyp()) {
     return parabolic13(h[0], h[1]) * cpush(2, h[2]);
     }
   else if(LDIM == 3)
