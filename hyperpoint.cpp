@@ -1649,7 +1649,6 @@ EX bool use_embedded_shift(eShiftMethodApplication sma) {
 
 EX eShiftMethod shift_method(eShiftMethodApplication sma) {
   if(gproduct) return smProduct;
-  if(embedded_plane && geom3::same_in_same()) return smIsotropic;
   if(embedded_plane && sma == smaObject) return geom3::same_in_same() ? smIsotropic : smEmbedded;
   if(embedded_plane && use_embedded_shift(sma)) return nonisotropic ? smLie : smEmbedded;
   if(!nonisotropic && !stretch::in()) return smIsotropic;
