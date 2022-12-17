@@ -5072,10 +5072,15 @@ EX void make_actual_view() {
       ld d = wall_radar(centerover, Start, NLP, max);
       actual_view_transform = get_shift_view_of(ztangent(d), actual_view_transform * View) * view_inverse(View); 
       }
-    camera_level = asin_auto(tC0(view_inverse(actual_view_transform * View))[2]);
-    if(geom3::euc_in_nil()) camera_level = tC0(view_inverse(actual_view_transform * View))[1];
-    if(geom3::hyp_in_solnih()) camera_level = tC0(view_inverse(actual_view_transform * View))[0];
+    hyperpoint h = tC0(view_inverse(actual_view_transform * View));
+
+    if(geom3::euc_in_nil()) camera_level = h[1];
+    else if(geom3::euc_in_solnih()) camera_level = h[2];
+    else if(geom3::hyp_in_solnih()) camera_level = h[0];
+    else if(gproduct) camera_level = log(h[2]);
+    else camera_level = asin_auto(h[2]);
     if(moved_center()) camera_level--;
+
     camera_sign = cgi.FLOOR > cgi.WALL;
     }
   if(nonisotropic && !nonisotropic_weird_transforms) {
