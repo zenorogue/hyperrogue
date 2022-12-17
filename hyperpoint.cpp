@@ -1689,12 +1689,6 @@ EX transmatrix shift_object(const transmatrix Position, const transmatrix& ori, 
       transmatrix rot = inverse(map_relative_push(Position * C0)) * Position;
       transmatrix urot = unswap_spin(rot);
 
-      if(!eqmatrix( cspin(0, 1, 30*degree) , unswap_spin(spin(30*degree)) )) {
-        println(hlog, cspin(0, 1, 30*degree));
-        println(hlog, unswap_spin(spin(30*degree)));
-        throw hr_exception("unswap_spin not working correctly");
-        }
-
       geom3::light_flip(true);
       transmatrix T = rgpushxto0(direct_exp(urot * direction));
       geom3::light_flip(false);
