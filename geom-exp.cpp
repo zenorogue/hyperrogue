@@ -510,15 +510,15 @@ EX void showQuotientConfig3() {
 EX string geometry_name(eGeometryClass gc) {
   switch(gc) {
     case gcHyperbolic:
-      return XLAT("hyperbolic") + dim_name();
+      return XLAT("hyperbolic");
 
     case gcEuclid: 
       if(cgflags & qAFFINE)
-        return XLAT("affine") + dim_name();
-      return XLAT("flat") + dim_name();
+        return XLAT("affine");
+      return XLAT("flat");
     
     case gcSphere:
-      return XLAT("spherical") + dim_name();
+      return XLAT("spherical");
 
     case gcSol:
       return XLAT("Sol");
@@ -542,8 +542,14 @@ EX string geometry_name(eGeometryClass gc) {
   }
 
 EX string geometry_name() {
-  if(embedded_plane)
+  if(embedded_plane && geom3::same_in_same())
+    return geometry_name(geom3::mgclass());
+  else if(embedded_plane && gproduct)
+    return geometry_name(geom3::mgclass()) + " (x E)";
+  else if(embedded_plane)
     return geometry_name(geom3::mgclass()) + " @ " + geometry_name(geom3::ggclass());
+  else if(among(ginf[geometry].cclass, gcHyperbolic, gcEuclid, gcSphere))
+    return geometry_name(ginf[geometry].cclass) + dim_name();
   else
     return geometry_name(ginf[geometry].cclass);
   };
