@@ -1656,6 +1656,7 @@ EX bool use_embedded_shift(eShiftMethodApplication sma) {
 
 EX eShiftMethod shift_method(eShiftMethodApplication sma) {
   if(gproduct) return smProduct;
+  if(embedded_plane && sma == smaObject) return geom3::same_in_same() ? smIsometric : smEmbedded;
   if(embedded_plane && use_embedded_shift(sma)) return nonisotropic ? smLie : smEmbedded;
   if(!nonisotropic && !stretch::in()) return smIsometric;
   if(!nisot::geodesic_movement && !embedded_plane) return smLie;
@@ -1676,8 +1677,31 @@ EX transmatrix shift_object(const transmatrix Position, const transmatrix& ori, 
       return Position * rgpushxto0(direct_exp(direction));
       }
     case smEmbedded: {
-      throw hr_exception("not implemented");
+
+      if(geom3::euc_in_hyp() || geom3::sph_in_low()) {
+        geom3::light_flip(true);
+        transmatrix T = rgpushxto0(direct_exp(direction));
+        geom3::light_flip(false);
+        swapmatrix(T);
+        return Position * T;
+        }
+
+      transmatrix rot = inverse(map_relative_push(Position * C0)) * Position;
+      transmatrix urot = unswap_spin(rot);
+
+      if(!eqmatrix( cspin(0, 1, 30*degree) , unswap_spin(spin(30*degree)) )) {
+        println(hlog, cspin(0, 1, 30*degree));
+        println(hlog, unswap_spin(spin(30*degree)));
+        throw hr_exception("unswap_spin not working correctly");
+        }
+
+      geom3::light_flip(true);
+      transmatrix T = rgpushxto0(direct_exp(urot * direction));
+      geom3::light_flip(false);
+      swapmatrix(T);
+      return Position * inverse(rot) * T * rot;
       }
+    default: throw hr_exception("unknown shift method in shift_object");
     }
   }
 
