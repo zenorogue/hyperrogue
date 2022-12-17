@@ -1319,7 +1319,7 @@ EX void switch_always3() {
         }
       if((euc_in_hyp() || euc_in_noniso()) && inverted_embedding) {
         vid.wall_height *= -1;
-        vid.eye = 2 * vid.depth;
+        vid.eye = -2 * vid.depth;
         }
       if(euc_in_hyp() && spatial_embedding == seMuchLowerCurvature) {
         vid.eye = inverted_embedding ? -vid.depth : vid.depth;
@@ -1328,7 +1328,7 @@ EX void switch_always3() {
       if(msphere && spatial_embedding == seProduct) {
         vid.depth = 0;
         vid.wall_height = 2;
-        vid.eye = -2;
+        vid.eye = 2;
         }
       if(pmodel == mdDisk) pmodel = nonisotropic ? mdGeodesic : mdPerspective;
       swapmatrix(View);
