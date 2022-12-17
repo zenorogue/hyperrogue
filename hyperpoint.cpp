@@ -1697,7 +1697,7 @@ EX void apply_shift_object(transmatrix& Position, const transmatrix orientation,
   }
 
 EX void rotate_object(transmatrix& Position, transmatrix& orientation, transmatrix R) {
-  if(gproduct) orientation = orientation * R;
+  if(gproduct && WDIM == 3) orientation = orientation * R;
   else Position = Position * R;
   }
 
