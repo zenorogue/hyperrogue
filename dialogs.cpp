@@ -280,6 +280,7 @@ EX namespace dialog {
   EX void addInfo(string body, color_t color IS(dialogcolor)) {
     item it(diInfo);
     it.body = body;
+    it.color = color;
     items.push_back(it);
     }
 
