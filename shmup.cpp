@@ -878,6 +878,8 @@ void movePlayer(monster *m, int delta) {
   
   godir[cpid] = 0;
 
+  if(embedded_plane && vid.wall_height < 0) mdx = -mdx;
+
   if(WDIM == 2 && GDIM == 3 && (mdx || mdy)) {
     double mdd = hypot(mdx, mdy);
     godir[cpid] = -atan2(mdx, -mdy);
@@ -919,13 +921,15 @@ void movePlayer(monster *m, int delta) {
   bool blown = m->blowoff > curtime;
 
   #if CAP_MOUSEGRAB
-  if(WDIM == 2 && GDIM == 3 && !lctrlclick && cpid == 0) {
+  if(embedded_plane && !lctrlclick && cpid == 0) {
     if(!stdracing) playerturn[cpid] -= mouseaim_x;
     playerturny[cpid] -= mouseaim_y;
     mouseaim_x = 0;
     mouseaim_y = 0;
     }
   #endif
+
+  if(embedded_plane && vid.wall_height < 0) playerturn[cpid] = -playerturn[cpid];
     
   if(playerturn[cpid] && canmove && !blown && WDIM == 2) {
     m->swordangle -= playerturn[cpid];
