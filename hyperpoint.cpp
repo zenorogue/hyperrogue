@@ -657,6 +657,16 @@ EX transmatrix spin(ld alpha) {
   return cspin(0, 1, alpha);
   }
 
+EX transmatrix logical_to_actual() {
+  if(embedded_plane && geom3::euc_in_nil()) return cspin90(2, 1);
+  if(embedded_plane && geom3::hyp_in_solnih()) return cspin90(0, 1) * cspin90(1, 2);
+  return Id;
+  }
+
+EX transmatrix unswap_spin(transmatrix T) {
+  return ortho_inverse(logical_to_actual()) * T * logical_to_actual();
+  }
+
 /** rotate by 90 degrees in the XY plane */
 EX transmatrix spin90() {
   if(embedded_plane && geom3::euc_in_hyp() && !destandarize_eih) return cspin90(1, 2);

@@ -5907,10 +5907,7 @@ EX void restartGraph() {
   DEBBI(DF_INIT, ("restartGraph"));
   
   if(!autocheat) linepatterns::clearAll();
-  if(currentmap) {
-    resetview();
-    View = inverse(View);
-    }
+  if(currentmap) resetview();
   }
 
 EX void clearAnimations() {

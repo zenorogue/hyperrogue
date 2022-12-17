@@ -2031,14 +2031,19 @@ void fix_whichcopy_if_near() {
   current_display->which_copy = T;
   }
 
-EX void adjust_eye(transmatrix& T, cell *c) {
+EX void adjust_eye(transmatrix& T, cell *c, ld sign) {
   if(!embedded_plane) return;
   geom3::do_auto_eye();
   int sl = snakelevel(c);
   if(isWorm(c->monst) && sl < 3) sl++;
-  int i = (msphere && !sphere) ? 1 : 0;
+  int i = geom3::sph_in_low() ? 1 : 0;
   if(sl || vid.eye || i)
-    T = T * lzpush(cgi.SLEV[sl] - cgi.FLOOR + vid.eye + i);
+    T = T * lzpush(sign * (cgi.SLEV[sl] - cgi.FLOOR - vid.eye + i));
+  }
+
+/** achieve top-down perspective */
+EX transmatrix default_spin() {
+  return cspin90(0, 1) * inverse(logical_to_actual());
   }
 
 EX void centerpc(ld aspd) {
@@ -2061,14 +2066,13 @@ EX void centerpc(ld aspd) {
     auto& pc = shmup::pc[id];
     centerover = pc->base;
     transmatrix T = pc->at;
-    adjust_eye(T, cwt.at);
-    /* in nonisotropic geometries, T is isometry * rotation, so iso_inverse does not work */
-    if(nonisotropic)
-      View = inverse(T);
-    else
-      View = iso_inverse(T);
+    adjust_eye(T, pc->base, +1);
+    View = iview_inverse(T);
     if(gproduct) NLP = ortho_inverse(pc->ori);
-    if(WDIM == 2) rotate_view( cspin180(0, 1) * cspin(2, 1, 90._deg + shmup::playerturny[id]) * spin270() );
+    if(WDIM == 2) {
+      if(vid.wall_height < 0) rotate_view(cspin180(2, 1));
+      rotate_view( cspin(2, 1, -90._deg - shmup::playerturny[id]) * default_spin());
+      }
     return;
     }
   #endif
@@ -2091,12 +2095,13 @@ EX void centerpc(ld aspd) {
     }
   
   if(invalid_matrix(T)) return;
-  
-  adjust_eye(T, cwt.at);
+
+  adjust_eye(T, cwt.at, +1);
 
   hyperpoint H = tC0(T);
 
   ld R = (zero_d(GDIM, H) && !gproduct) ? 0 : hdist0(H);
+
   if(R < 1e-9) {
     // either already centered or direction unknown
     /* if(playerfoundL && playerfoundR) {
@@ -2204,13 +2209,11 @@ EX void resetview() {
   // EUCLIDEAN
   NLP = Id;
   stretch::mstretch_matrix = Id;
-  auto lView = View;
   if(cwt.at) {
     centerover = cwt.at;
     View = iddspin(cwt.at, cwt.spin);
-    adjust_eye(View, cwt.at);
-    if(!flipplayer) View = pispin * View;
-    if(cwt.mirrored) View = Mirror * View;
+    if(!flipplayer) View = spin180() * View;
+    if(cwt.mirrored) View = lmirror() * View;
 
     if(centering) {
       hyperpoint vl = View * get_corner_position(cwt.at, cwt.spin);
@@ -2222,23 +2225,20 @@ EX void resetview() {
 
       View = spintox(rm*vr) * rm * View;
       }
-
-    if(GDIM == 2) View = spin(M_PI + vid.fixed_facing_dir * degree) * View;
-    if(GDIM == 3 && !gproduct) View = cspin90(0, 2) * View;
-    if(gproduct) NLP = cspin90(0, 2);
-    if(cheater && eqmatrix(View, lView) && !centering) {
-      View = Id; adjust_eye(View, cwt.at);
-      static ld cyc = 0;
-      cyc += 90._deg;
-      View = spin(cyc) * View;
-      if(GDIM == 2) View = spin(M_PI + vid.fixed_facing_dir * degree) * View;
-      if(GDIM == 3 && !gproduct) View = cspin90(0, 2) * View;
-      }
     }
   else if(currentmap) {
     centerover = currentmap->gamestart();
-    View = Id; adjust_eye(View, cwt.at);
+    View = Id;
     }
+
+  if(WDIM == 2) View = spin(M_PI + vid.fixed_facing_dir * degree) * View;
+  if(WDIM == 3 && !gproduct) View = cspin90(0, 2) * View;
+  if(gproduct) NLP = cspin90(0, 2);
+
+  adjust_eye(View, cwt.at, -1);
+  View = inverse(logical_to_actual()) * View;
+  if(embedded_plane) View = cspin90(1, 2) * View;
+  if(embedded_plane && vid.wall_height < 0) View = cspin180(0, 1) * View;
 
   cwtV = shiftless(View);
   current_display->which_copy = 
@@ -2265,7 +2265,7 @@ EX void fullcenter() {
   if(playerfound && false) centerpc(INF);
   else {
     bfs();
-    resetview(); View = inverse(View);
+    resetview();
     drawthemap();
     if(!centering) centerpc(INF);
     centerover = cwt.at;
