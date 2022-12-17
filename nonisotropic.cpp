@@ -2905,16 +2905,6 @@ EX namespace nisot {
       return 0;
       }
     #endif
-    else if(argis("-solgeo")) {
-      geodesic_movement = true;
-      pmodel = mdGeodesic;
-      return 0;
-      }
-    else if(argis("-solnogeo")) {
-      geodesic_movement = false;
-      pmodel = mdPerspective;
-      return 0;
-      }
     else if(argis("-product")) {
       PHASEFROM(2);
       set_geometry(gProduct);
