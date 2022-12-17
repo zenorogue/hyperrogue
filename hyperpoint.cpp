@@ -949,7 +949,7 @@ EX void swapmatrix(hyperpoint& h) {
     if(cgclass == gcNIH) hx /= log(3);
     if(cgclass == gcSolN) hx /= log(3);
     ld hy = h[1] * 2;
-    h = point31(0, hy, hx);
+    h = point31(0, -hy, hx);
     return;
     }
   swap(h[2], h[3]);
