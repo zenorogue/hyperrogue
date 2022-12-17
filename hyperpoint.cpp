@@ -659,7 +659,7 @@ EX transmatrix spin(ld alpha) {
 
 EX transmatrix logical_to_actual() {
   if(embedded_plane && geom3::euc_in_nil()) return cspin90(2, 1);
-  if(embedded_plane && geom3::hyp_in_solnih()) return cspin90(0, 1) * cspin90(1, 2);
+  if(embedded_plane && geom3::hyp_in_solnih()) return cspin90(0, 1) * cspin90(1, 2) * cspin90(0, 1);
   return Id;
   }
 
