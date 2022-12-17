@@ -154,7 +154,7 @@ cell *findbaseAround(shiftpoint p, cell *around, int maxsteps) {
   }
 
 cell *findbaseAround(const shiftmatrix& H, cell *around, int maxsteps) {
-  return findbaseAround(tC0(H), around, maxsteps);
+  return findbaseAround(H * tile_center(), around, maxsteps);
   }
 
 /* double distance(hyperpoint h) {

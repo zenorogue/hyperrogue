@@ -250,7 +250,7 @@ horo_distance::horo_distance(shiftpoint h1, const shiftmatrix& T) {
 #endif
   if(sn::in() || mhybrid || nil) become(inverse_shift(T, h1));
   else
-    a = 0, b = intval(h1.h, unshift(tC0(T), h1.shift));
+    a = 0, b = intval(h1.h, unshift(T * tile_center(), h1.shift));
   }
 
 bool horo_distance::operator < (const horo_distance z) const {
