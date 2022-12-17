@@ -687,7 +687,7 @@ EX void initConfig() {
 
   param_i(vid.mobilecompasssize, "mobile compass size", 0); // ISMOBILE || ISPANDORA ? 30 : 0);
   param_i(vid.radarsize, "radarsize size", 120);
-  addsaver(vid.radarrange, "radarrange", 2.5);
+  param_f(vid.radarrange, "radarrange", 2.5);
   param_i(vid.axes, "movement help", 1);
   param_b(vid.axes3, "movement help3", true);
   param_i(vid.shifttarget, "shift-targetting", 2);
@@ -2405,7 +2405,7 @@ EX void show3D() {
   
   edit_levellines('L');
   
-  if(WDIM == 3 || (GDIM == 3 && euclid)) {
+  if(WDIM == 3 || (GDIM == 3 && meuclid)) {
     dialog::addSelItem(XLAT("radar range"), fts(vid.radarrange), 'R');
     dialog::add_action([] () {
       dialog::editNumber(vid.radarrange, 0, 10, 0.5, 2, "", XLAT(""));

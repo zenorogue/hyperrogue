@@ -956,7 +956,7 @@ EX void swapmatrix(hyperpoint& h) {
 EX transmatrix parabolic1(ld u) {
   if(euclid)
     return ypush(u);
-  else if(geom3::hyp_in_solnih()) {
+  else if(geom3::hyp_in_solnih() && !geom3::flipped) {
     return ypush(u);
     }
   else {

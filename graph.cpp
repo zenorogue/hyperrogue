@@ -5092,18 +5092,33 @@ EX void make_actual_view() {
   #endif
   #if MAXMDIM >= 4
   if(embedded_plane) {
-    transmatrix T = actual_view_transform * View;
-    transmatrix U = view_inverse(T);
-    
-    if(T[0][2] || T[1][2])
-      T = spin(-atan2(T[0][2], T[1][2])) * T;
-    if(T[1][2] || T[2][2])
-      T = cspin(1, 2, -atan2(T[1][2], T[2][2])) * T;
+    if(nonisotropic) {
+      transmatrix T = actual_view_transform * View;
+      ld z = -tC0(view_inverse(T)) [2];
+      transmatrix R = actual_view_transform;
+      R = (logical_to_actual()) * R;
+      if(R[0][2] || R[2][2])
+        R = cspin(0, 2, -atan2(R[0][2], R[2][2])) * R;
+      if(R[1][2] || R[2][2])
+        R = cspin(1, 2, -atan2(R[1][2], R[2][2])) * R;
+      if(geom3::hyp_in_solnih()) R = Id;
+      R = inverse(logical_to_actual()) * R;
+      current_display->radar_transform = inverse(R) * zpush(-z);
+      }
+    else {
+      transmatrix T = actual_view_transform * View;
+      transmatrix U = view_inverse(T);
 
-    ld z = -asin_auto(tC0(view_inverse(T)) [2]);
-    T = zpush(-z) * T;
+      if(T[0][2] || T[1][2])
+        T = spin(-atan2(T[0][2], T[1][2])) * T;
+      if(T[1][2] || T[2][2])
+        T = cspin(1, 2, -atan2(T[1][2], T[2][2])) * T;
 
-    current_display->radar_transform = T * U;
+      ld z = -asin_auto(tC0(view_inverse(T)) [2]);
+      T = zpush(-z) * T;
+
+      current_display->radar_transform = T * U;
+      }
     }
   #endif
   Viewbase = View;
