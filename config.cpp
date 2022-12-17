@@ -2231,6 +2231,11 @@ EX geom3::eSpatialEmbedding shown_spatial_embedding() {
 
 EX bool in_tpp() { return pmodel == mdDisk && pconf.camera_angle; }
 
+EX void display_embedded_errors() {
+  if(meuclid && among(geom3::spatial_embedding, geom3::seNil, geom3::seSol, geom3::seSolN, geom3::seNIH) && (!among(geometry, gEuclid, gEuclidSquare) || !PURE))
+    dialog::addInfo(XLAT("error: works only in PURE Euclidean regular square or hex tiling"), 0xC00000);
+  }
+
 EX void show_spatial_embedding() {
   cmode = sm::SIDE | sm::MAYDARK | sm::CENTER | sm::PANNING | sm::SHOWCURSOR;
   gamescreen();
@@ -2259,6 +2264,7 @@ EX void show_spatial_embedding() {
 
   dialog::addBreak(100);
   dialog::addHelp(XLAT(seo[emb].second));
+  display_embedded_errors();
   dialog::addBreak(100);
 
   if(geom3::auto_configure) {
@@ -2290,6 +2296,8 @@ EX void show3D() {
   if(WDIM == 2) {
     dialog::addSelItem("3D style", geom3::spatial_embedding_options[shown_spatial_embedding()].first, 'E');
     dialog::add_action_push(show_spatial_embedding);
+
+    display_embedded_errors();
     dialog::addBreak(50);
     }
 #endif
