@@ -3322,7 +3322,7 @@ EX transmatrix map_relative_push(hyperpoint h) {
 
 EX void shift_view_to(shiftpoint H, eShiftMethod sm IS(shift_method(smaManualCamera))) {
   switch(sm) {
-    case smIsometric:
+    case smIsotropic:
     case smEmbedded:
     case smProduct:
       shift_view_by_matrix(gpushxto0(unshift(H)), sm);
