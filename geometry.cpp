@@ -1310,16 +1310,20 @@ EX void switch_always3() {
           }
         }
       if(spatial_embedding == seDefault && flat_embedding) {
-        vid.eye -= vid.depth / 2;
+        vid.eye += vid.depth / 2;
         vid.depth = 0;
         }
       if(spatial_embedding == seDefault && !flat_embedding && inverted_embedding) {
-        vid.eye -= vid.depth * 1.5;
+        vid.eye += vid.depth * 1.5;
         vid.depth *= -1;
         }
       if((euc_in_hyp() || euc_in_noniso()) && inverted_embedding) {
         vid.wall_height *= -1;
         vid.eye = 2 * vid.depth;
+        }
+      if(euc_in_hyp() && spatial_embedding == seMuchLowerCurvature) {
+        vid.eye = inverted_embedding ? -vid.depth : vid.depth;
+        vid.depth = 0;
         }
       if(msphere && spatial_embedding == seProduct) {
         vid.depth = 0;
@@ -1338,6 +1342,24 @@ EX void switch_always3() {
 #endif
       check_cgi();
       cgi.prepare_basics();
+      if(hyperbolic && same_in_same() && spatial_embedding == seLowerCurvature) {
+        vid.eye += vid.depth;
+        vid.depth *= 2;
+        if(inverted_embedding) {
+          vid.eye = 1;
+          vid.depth *= -1;
+          vid.wall_height *= -1;
+          }
+        }
+      if(hyperbolic && same_in_same() && spatial_embedding == seMuchLowerCurvature) {
+        vid.eye += vid.depth;
+        vid.depth *= 3;
+        if(inverted_embedding) {
+          vid.eye = 2;
+          vid.depth *= -1;
+          vid.wall_height *= -1;
+          }
+        }
       }
     else {
       vid.always3 = false;
