@@ -767,9 +767,9 @@ EX geometry_data compute_geometry_data() {
   gd.area = PURE ? 1 : 3;
 
   gd.euler = 0;
-  if(euclid) gd.euler = 0;
-  else if(sphere && nonorientable) gd.euler = 1;
-  else if(sphere) gd.euler = 2;
+  if(meuclid) gd.euler = 0;
+  else if(msphere && nonorientable) gd.euler = 1;
+  else if(msphere) gd.euler = 2;
   else if(!closed_manifold) gd.euler = -2;
   else if(WDIM == 3) gd.euler = 0;
   else switch(geometry) {
