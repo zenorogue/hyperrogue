@@ -3221,7 +3221,7 @@ EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V, eShift
   switch(sm) {
     case smProduct:
       return rgpushxto0(direct_exp(lp_iapply(H))) * V;
-    case smIsometric:
+    case smIsotropic:
       return rgpushxto0(direct_exp(H)) * V;
     case smEmbedded:
       return get_shift_view_embedded_of(V, rgpushxto0(direct_exp(H))) * V;
@@ -3285,7 +3285,7 @@ void shift_view_by_matrix(const transmatrix T, eShiftMethod sm) {
     case smEmbedded:
       shift_view_embedded(T);
       return;
-    case smIsometric:
+    case smIsotropic:
     case smProduct:
       shift_view_mmul(T);
       return;
@@ -3340,7 +3340,7 @@ EX void shift_view_to(shiftpoint H, eShiftMethod sm IS(shift_method(smaManualCam
 
 EX void shift_view_towards(shiftpoint H, ld l, eShiftMethod sm IS(shift_method(smaManualCamera))) {
   switch(sm) {
-    case smIsometric:
+    case smIsotropic:
     case smEmbedded:
       shift_view_by_matrix(rspintox(unshift(H)) * xpush(-l) * spintox(unshift(H)), sm);
       return;

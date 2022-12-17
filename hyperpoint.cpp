@@ -1630,7 +1630,7 @@ EX bool asign(ld y1, ld y2) { return signum(y1) != signum(y2); }
 EX ld xcross(ld x1, ld y1, ld x2, ld y2) { return x1 + (x2 - x1) * y1 / (y1 - y2); }
 
 #if HDR
-enum eShiftMethod { smProduct, smIsometric, smEmbedded, smLie, smGeodesic };
+enum eShiftMethod { smProduct, smIsotropic, smEmbedded, smLie, smGeodesic };
 enum eEmbeddedShiftMethodChoice { smcNone, smcBoth, smcAuto };
 enum eShiftMethodApplication { smaManualCamera, smaAutocenter, smaObject, smaWallRadar };
 #endif
@@ -1649,9 +1649,10 @@ EX bool use_embedded_shift(eShiftMethodApplication sma) {
 
 EX eShiftMethod shift_method(eShiftMethodApplication sma) {
   if(gproduct) return smProduct;
-  if(embedded_plane && sma == smaObject) return geom3::same_in_same() ? smIsometric : smEmbedded;
+  if(embedded_plane && geom3::same_in_same()) return smIsotropic;
+  if(embedded_plane && sma == smaObject) return geom3::same_in_same() ? smIsotropic : smEmbedded;
   if(embedded_plane && use_embedded_shift(sma)) return nonisotropic ? smLie : smEmbedded;
-  if(!nonisotropic && !stretch::in()) return smIsometric;
+  if(!nonisotropic && !stretch::in()) return smIsotropic;
   if(!nisot::geodesic_movement && !embedded_plane) return smLie;
   return smGeodesic;
   }
@@ -1666,7 +1667,7 @@ EX transmatrix shift_object(const transmatrix Position, const transmatrix& ori, 
       hyperpoint h = product::direct_exp(ori * direction);
       return Position * rgpushxto0(h);
       }
-    case smIsometric: {
+    case smIsotropic: {
       return Position * rgpushxto0(direct_exp(direction));
       }
     case smEmbedded: {
