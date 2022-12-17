@@ -2066,7 +2066,17 @@ EX void centerpc(ld aspd) {
     auto& pc = shmup::pc[id];
     centerover = pc->base;
     transmatrix T = pc->at;
-    adjust_eye(T, pc->base, +1);
+    
+    if(nonisotropic) {
+      transmatrix rot = inverse(rgpushxto0(T * C0)) * T;
+      T = T * inverse(rot);
+      adjust_eye(T, pc->base, +1);
+      T = T * rot;
+      }
+    else {
+      adjust_eye(T, pc->base, +1);
+      }
+
     View = iview_inverse(T);
     if(gproduct) NLP = ortho_inverse(pc->ori);
     if(WDIM == 2) {
@@ -2231,11 +2241,11 @@ EX void resetview() {
     View = Id;
     }
 
+  adjust_eye(View, cwt.at, -1);
+
   if(WDIM == 2) View = spin(M_PI + vid.fixed_facing_dir * degree) * View;
   if(WDIM == 3 && !gproduct) View = cspin90(0, 2) * View;
   if(gproduct) NLP = cspin90(0, 2);
-
-  adjust_eye(View, cwt.at, -1);
   View = inverse(logical_to_actual()) * View;
   if(embedded_plane) View = cspin90(1, 2) * View;
   if(embedded_plane && vid.wall_height < 0) View = cspin180(0, 1) * View;
