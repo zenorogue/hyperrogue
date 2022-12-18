@@ -4843,3 +4843,24 @@ Menu improvements:
 - improved the display in OSM when using orb icons
 - Give the Plane of Fire a redder floor than CR4 (thanks to jlm)
 - Draw mimics with sword in left hand if PC's sword in left hand (thanks to jlm)
+
+2022-12-18 00:59 Update 12.1g:
+
+Further improvements to the "3D style" (embed 2D in a 3D geometry) feature:
+- more intuitive settings
+- kite-and-dart and tes should now work correctly
+- Lower and Much Lower curvature settings are now respected even if it was already hyperbolic
+- pure regular Euclidean hex/square tilings can now be embedded in Nil and Sol/NIH
+- binary tiling and similar can now be embedded in Nil and Sol/NIH
+- shmup should work now
+
+There are still some bugs to fix, but it should mostly work now. And there are more embeddings coming :)
+
+Other bugfixes:
+- fixed coloring of info items
+- fixed centering on reset
+- fixed shmup in embedded plane
+- disabling geodesic movement in Sol/Nil now also assumes that light moves along Lie lines, and shmup monsters move correctly too
+- fixed sky over irregular map
+- fixed slime size
+- fixed grid drawing for binary variants
