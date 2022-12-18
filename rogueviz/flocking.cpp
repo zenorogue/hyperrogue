@@ -92,7 +92,7 @@ namespace flocking {
       vertexdata& vd = vdata[i];
       auto m = vd.m;
       
-      apply_parallel_transport(m->at, m->ori, xtangent(0.01)); // max_speed * d));
+      apply_shift_object(m->at, m->ori, xtangent(0.01)); // max_speed * d));
       
       fixmatrix(m->at);
 
@@ -200,7 +200,7 @@ namespace flocking {
       oris[i] = m->ori;
       rotate_object(pats[i], oris[i], alphaspin);
       
-      apply_parallel_transport(pats[i], oris[i], xtangent(vels[i] * d));
+      apply_shift_object(pats[i], oris[i], xtangent(vels[i] * d));
       fixmatrix(pats[i]);
       
       /* RogueViz does not correctly rotate them */
@@ -522,11 +522,11 @@ bool drawVertex(const shiftmatrix &V, cell *c, shmup::monster *m) {
       
       if(swarm) {
         rotate_object(vd.m->pat.T, vd.m->ori, spin(angle));
-        apply_parallel_transport(vd.m->pat.T, vd.m->ori, xtangent(i * -0.015));
+        apply_shift_object(vd.m->pat.T, vd.m->ori, xtangent(i * -0.015));
         }
       else {
         rotate_object(vd.m->pat.T, vd.m->ori, random_spin());
-        apply_parallel_transport(vd.m->pat.T, vd.m->ori, xtangent(hrandf() / 2));
+        apply_shift_object(vd.m->pat.T, vd.m->ori, xtangent(hrandf() / 2));
         rotate_object(vd.m->pat.T, vd.m->ori, random_spin());
         }
       

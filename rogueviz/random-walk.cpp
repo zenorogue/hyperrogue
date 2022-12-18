@@ -75,7 +75,7 @@ bool advance_walkers(int delta) {
         }
       else {
         hyperpoint dir = random_spin() * xtangent(step_size);
-        apply_parallel_transport(w.T, w.ori, dir);        
+        apply_shift_object(w.T, w.ori, dir);        
         }
       fixmatrix(w.T);
       hyperpoint h1 = tC0(w.T);
