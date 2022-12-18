@@ -4853,14 +4853,13 @@ Further improvements to the "3D style" (embed 2D in a 3D geometry) feature:
 - pure regular Euclidean hex/square tilings can now be embedded in Nil and Sol/NIH
 - binary tiling and similar can now be embedded in Nil and Sol/NIH
 - shmup should work now
+- fixed sky over irregular map
+- fixed slime size
 
 There are still some bugs to fix, but it should mostly work now. And there are more embeddings coming :)
 
 Other bugfixes:
 - fixed coloring of info items
 - fixed centering on reset
-- fixed shmup in embedded plane
 - disabling geodesic movement in Sol/Nil now also assumes that light moves along Lie lines, and shmup monsters move correctly too
-- fixed sky over irregular map
-- fixed slime size
 - fixed grid drawing for binary variants
