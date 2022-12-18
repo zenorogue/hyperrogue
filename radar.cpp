@@ -107,6 +107,7 @@ EX void draw_radar(bool cornermode) {
   if(subscreens::split([=] () { calcparam(); draw_radar(false); })) return;
   if(dual::split([] { dual::in_subscreen([] { calcparam(); draw_radar(false); }); })) return;
   bool d3 = WDIM == 3;
+  int ldim = LDIM;
   bool hyp = mhyperbolic;
   bool sph = msphere;
   bool scompass = nonisotropic && !mhybrid && !embedded_plane;
@@ -178,7 +179,7 @@ EX void draw_radar(bool cornermode) {
     if(sph)
       return point3(cx + (rad-10) * h[0], cy + (rad-10) * h[2] * si + (rad-10) * h[1] * co, +h[1] * si > h[2] * co ? 8 : 16);
     else if(hyp) 
-      return point3(cx + rad * h[0], cy + rad * h[1], 1/(1+h[LDIM]) * cgi.scalefactor * current_display->radius / (inHighQual ? 10 : 6));
+      return point3(cx + rad * h[0], cy + rad * h[1], 1/(1+h[ldim]) * cgi.scalefactor * current_display->radius / (inHighQual ? 10 : 6));
     else
       return point3(cx + rad * h[0], cy + rad * h[1], rad * cgi.scalefactor / (vid.radarrange + cgi.scalefactor/4) * 0.8);
     };
