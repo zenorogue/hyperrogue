@@ -482,9 +482,9 @@ bool behind3(shiftpoint h) {
   if(pmodel == mdGeodesic) 
     return lp_apply(inverse_exp(h))[2] < 0;
   if(pmodel == mdLiePerspective)
-    return lp_apply(lie_log(unshift(h)))[2] < 0;
+    return lp_apply(lie_log(h))[2] < 0;
   if(pmodel == mdRelPerspective)
-    return lp_apply(rel_log(h))[2] < 0;
+    return lp_apply(rel_log(h, false))[2] < 0;
   return h[2] < 0;
   }
 

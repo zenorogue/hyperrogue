@@ -10,9 +10,7 @@ namespace hr {
 
 EX namespace nisot {
 
-  #if HDR
-  inline bool local_perspective_used() { return nonisotropic || gproduct; }
-  #endif
+  EX bool local_perspective_used;
   
   EX bool geodesic_movement = true;
 

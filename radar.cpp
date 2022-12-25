@@ -19,7 +19,7 @@ pair<bool, hyperpoint> makeradar(shiftpoint h) {
   else if(sl2) h1 = slr::get_inverse_exp(h);
   else h1 = unshift(h);
   
-  if(nisot::local_perspective_used() && !embedded_plane) {
+  if(nisot::local_perspective_used && !embedded_plane) {
     h1 = NLP * h1;
     }
   

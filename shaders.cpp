@@ -660,7 +660,7 @@ void display_data::set_projection(int ed, ld shift) {
       }
     else M[2][2] /= 10000;
     glhr::projection_multiply(M);
-    if(nisot::local_perspective_used() && (shader_flags & SF_BOX))
+    if(nisot::local_perspective_used && (shader_flags & SF_BOX))
       glhr::projection_multiply(glhr::tmtogl_transpose(NLP));
     if(ed && vid.stereo_mode != sODS) {
       glhr::glmatrix m = glhr::id;
@@ -712,7 +712,7 @@ void display_data::set_projection(int ed, ld shift) {
     else {
       glhr::projection_multiply(glhr::frustum(cd->tanfov, cd->tanfov * cd->ysize / cd->xsize));
       glhr::projection_multiply(glhr::scale(1, -1, -1));
-      if(nisot::local_perspective_used()) {
+      if(nisot::local_perspective_used) {
         if(gproduct) {
           for(int i=0; i<3; i++) NLP[3][i] = NLP[i][3] = 0;
           NLP[3][3] = 1;
@@ -758,7 +758,7 @@ void display_data::set_projection(int ed, ld shift) {
 
     pp = pp * pp0;    
 
-    if(nisot::local_perspective_used()) 
+    if(nisot::local_perspective_used)
       pp = glhr::tmtogl_transpose(NLP) * pp;
 
     if(get_shader_flags() & SF_ORIENT) {

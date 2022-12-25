@@ -1111,7 +1111,12 @@ EX void initConfig() {
 
   addsaver(bounded_mine_percentage, "bounded_mine_percentage");
 
-  param_b(nisot::geodesic_movement, "solv_geodesic_movement", true);
+  param_enum(nisot::geodesic_movement, "solv_geodesic_movement", "solv_geodesic_movement", true)
+  -> editable({{"Lie group", "light, camera, and objects move in lines of constant direction, in the Lie group sense"}, {"geodesics", "light, camera, and objects always take the shortest path"}}, "straight lines", 'G')
+  -> set_reaction([] {
+    if(pmodel == mdLiePerspective && nisot::geodesic_movement) pmodel = hyperbolic ? mdPerspective : mdGeodesic;
+    if(among(pmodel, mdGeodesic, mdPerspective) && !nisot::geodesic_movement) pmodel = mdLiePerspective;
+    });
 
   addsaver(s2xe::qrings, "s2xe-rings");
   addsaver(rots::underlying_scale, "rots-underlying-scale");

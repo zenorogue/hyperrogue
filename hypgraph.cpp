@@ -539,11 +539,8 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         exit(1);
         /* x wanes as z grows! */
         }
-      if(hyperbolic) {
-        models::apply_orientation_yz(H[1], H[2]);
-        models::apply_orientation(H[0], H[1]);
-        }
-      auto S = lie_log(H); S[3] = 1;
+      hyperpoint S = lie_log_correct(H_orig, H);
+      S[3] = 1;
       S = lp_apply(S);
       if(hyperbolic) {
         models::apply_orientation(ret[1], ret[0]);
@@ -554,7 +551,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       }
 
     case mdRelPerspective: {
-      auto S = rel_log(H_orig); S[3] = 1;
+      auto S = rel_log(H_orig, true); S[3] = 1;
       S = lp_apply(S);
       apply_perspective(S, ret);
       return;
@@ -778,20 +775,14 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         models::apply_orientation_yz(ret[2], ret[1]);
         }
       
-      if(nonisotropic && !vrhr::rendering()) ret = lp_apply(ret);
+      if(!vrhr::rendering()) ret = lp_apply(ret);
 
       break;
       }
 
     case mdLieOrthogonal: {
-      find_zlev(H);
+      ret = lie_log_correct(H_orig, H);
 
-      if(hyperbolic) {
-        models::apply_orientation_yz(H[1], H[2]);
-        models::apply_orientation(H[0], H[1]);
-        }
-
-      ret = lie_log(H);
       ret *= .5;
       ret[LDIM] = 1;
 
@@ -800,18 +791,18 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         models::apply_orientation_yz(ret[2], ret[1]);
         }
 
-      if(nonisotropic && !vrhr::rendering()) ret = lp_apply(ret);
+      if(!vrhr::rendering()) ret = lp_apply(ret);
 
       break;
       }
 
     case mdRelOrthogonal: {
 
-      ret = rel_log(H_orig);
+      ret = rel_log(H_orig, true);
       ret *= .5;
       ret[LDIM] = 1;
 
-      if(nonisotropic && !vrhr::rendering()) ret = lp_apply(ret);
+      if(!vrhr::rendering()) ret = lp_apply(ret);
       break;
       }
 
@@ -2299,6 +2290,7 @@ EX int flat_on;
 eGeometry backup_geometry;
 eVariation backup_variation;
 videopar backup_vid;
+bool backup_lpu;
 
 /** \brief enable the 'flat' model for drawing HUD. See hr::flat_model_enabler */
 EX void enable_flat_model(int val) {
@@ -2308,9 +2300,12 @@ EX void enable_flat_model(int val) {
     #endif
     backup_geometry = geometry;
     backup_variation = variation;
+    backup_lpu = nisot::local_perspective_used;
     backup_vid = vid;
     geometry = gNormal;
     variation = eVariation::bitruncated;
+    nisot::local_perspective_used = false;
+
     pmodel = mdDisk;
     pconf.alpha = 1;
     pconf.scale = 1;
@@ -2330,6 +2325,7 @@ EX void enable_flat_model(int val) {
   if(flat_on >= 1 && flat_on + val < 1) {
     geometry = backup_geometry;
     variation = backup_variation;
+    nisot::local_perspective_used = backup_lpu;
     vid = backup_vid;
     geom3::apply_always3();
     calcparam();
@@ -3121,6 +3117,20 @@ EX hyperpoint lie_exp(hyperpoint h) {
       h[1] *= (exp(+z) - 1) / z;
       }
     }
+  else if(sl2) {
+    h[3] = 0;
+    ld v = h[0] * h[0] + h[1] * h[1] - h[2] * h[2];
+    if(v > 0) {
+      h *= sin(v) / sqrt(v);
+      h[3] += cos(v);
+      }
+    else if(v < 0) {
+      h *= sinh(v) / sqrt(-v);
+      h[3] += cosh(v);
+      }
+    else h[3]++;
+    return h;
+    }
   else {
     /* not implemented -- approximate for now */
     const int steps = 16;
@@ -3134,7 +3144,11 @@ EX hyperpoint lie_exp(hyperpoint h) {
   return h;
   }
 
-EX hyperpoint rel_log(shiftpoint h) {
+/** With relativistic_length off, compute the Lie logarithm in SL(2,R) or de Sitter space.
+ *  With relativistic_length on, this corresponds to a geodesic in AdS/dS, so make it as long as the length of the geodesic in AdS/dS space.
+ **/
+
+EX hyperpoint rel_log(shiftpoint h, bool relativistic_length) {
   if(sl2) {
     optimize_shift(h);
     ld cycles = floor(h.shift / TAU + .5);
@@ -3148,6 +3162,7 @@ EX hyperpoint rel_log(shiftpoint h) {
       z += cycles * TAU;
       }
     else if(cycles || h1[3] < -1 || choice == 0) {
+      if(!relativistic_length) return h1 - C0;
       /* impossible, or light-like */
       r = 1; z = 0;
       }
@@ -3155,6 +3170,7 @@ EX hyperpoint rel_log(shiftpoint h) {
       r = sqrt(-choice);
       z = asinh(r);
       }
+    if(!relativistic_length) r = sqhypot_d(3, h1);
     h1 = h1 * z / r;
     h1[3] = 0;
     return h1;
@@ -3165,13 +3181,22 @@ EX hyperpoint rel_log(shiftpoint h) {
     ld r, z;
     if(choice > 0) { r = sqrt(choice); z = asinh(r); }
     else { r = sqrt(-choice); z = asin_clamp(r); if(h1[2] < 0) z = M_PI - z; }
+    if(!relativistic_length) r = sqrt(h1[3] * h1[3] + h1[0] * h1[0] + h1[1] * h1[1]);
     h1 = h1 * z / r; h1[2] = h1[3]; h1[3] = 0;
     return h1;
     }
   throw hr_exception("rel_log in wrong geometry");
   }
 
-EX hyperpoint lie_log(hyperpoint h) {
+/** Is Lie movement available? Depends on map geometry, not ambient geometry. */
+EX bool lie_movement_available() {
+  if(nonisotropic && !embedded_plane) return true;
+  if(mhyperbolic && bt::in()) return true;
+  return false;
+  };
+
+EX hyperpoint lie_log(const shiftpoint h1) {
+  hyperpoint h = unshift(h1);
   if(nil) {
     h[3] = 0;
     h[2] -= h[0] * h[1] / 2;
@@ -3210,10 +3235,24 @@ EX hyperpoint lie_log(hyperpoint h) {
       for(int i=1; i<LDIM; i++)
         h[i] *= h[0] / (exp(h[0])-1);
     }
+  else if(sl2) {
+    return rel_log(h1, false);
+    }
   else {
     /* not implemented */
     }
   return h;
+  }
+
+/** Like lie_log but includes orientation and level in hyperbolic space. May modify H */
+EX hyperpoint lie_log_correct(const shiftpoint H_orig, hyperpoint& H) {
+  find_zlev(H);
+  if(hyperbolic) {
+    models::apply_orientation_yz(H[1], H[2]);
+    models::apply_orientation(H[0], H[1]);
+    return lie_log(shiftless(H));
+    }
+  return lie_log(H_orig);
   }
 
 /** shift the view according to the given tangent vector */
@@ -3328,7 +3367,7 @@ EX void shift_view_to(shiftpoint H, eShiftMethod sm IS(shift_method(smaManualCam
       shift_view_by_matrix(gpushxto0(unshift(H)), sm);
       return;
     case smLie:
-      shift_view(-lie_log(unshift(H)), sm);
+      shift_view(-lie_log(H), sm);
       return;
     case smGeodesic:
       shift_view(-inverse_exp(H), sm);

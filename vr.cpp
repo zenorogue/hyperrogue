@@ -1007,10 +1007,9 @@ EX void gen_mv() {
   if(!pers) mu[1][1] *= pconf.stretch;
 
   hmd_mv = Id;
-  bool nlpu = nisot::local_perspective_used();
   if(1) {
     E4;
-    if(nlpu) {
+    if(nisot::local_perspective_used) {
       be_33(NLP);
       hmd_mv = NLP * hmd_mv;          
       }

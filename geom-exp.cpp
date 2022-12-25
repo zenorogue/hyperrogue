@@ -1108,13 +1108,8 @@ EX void showEuclideanMenu() {
     dialog::add_action_push(show3D);
     }
   menuitem_projection('1');
-  if(nonisotropic && !sl2 && !embedded_plane) {
-    dialog::addBoolItem(XLAT("geodesic movement in Sol/Nil"), nisot::geodesic_movement, 'G');
-    dialog::add_action([] {
-      nisot::geodesic_movement = !nisot::geodesic_movement;
-      if(pmodel == mdLiePerspective && nisot::geodesic_movement) pmodel = mdGeodesic;
-      if(pmodel == mdGeodesic && !nisot::geodesic_movement) pmodel = mdLiePerspective;
-      });
+  if(lie_movement_available()) {
+    add_edit(nisot::geodesic_movement);
     }
   #if CAP_CRYSTAL && MAXMDIM >= 4
   crystal::add_crystal_transform('x');  

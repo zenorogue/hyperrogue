@@ -4093,7 +4093,7 @@ void make_clipping_planes() {
     sx /= hypot_d(3, sx);
     sx[3] = 0;
     sx = T * sx;
-    if(nisot::local_perspective_used()) sx = ortho_inverse(nlp) * sx;
+    if(nisot::local_perspective_used) sx = ortho_inverse(nlp) * sx;
     clipping_plane_sets.back().push_back(sx);
     };
 
@@ -5059,6 +5059,8 @@ EX ld wall_radar(cell *c, transmatrix T, transmatrix LPe, ld max) {
 EX bool nonisotropic_weird_transforms;
 
 EX void make_actual_view() {
+  nisot::local_perspective_used = gproduct;
+  if(!nisot::local_perspective_used) NLP = Id;
   sphereflip = Id;
   sphere_flipped = flip_sphere();
   if(sphere_flipped) sphereflip[LDIM][LDIM] = -1;
@@ -5083,11 +5085,12 @@ EX void make_actual_view() {
 
     camera_sign = cgi.FLOOR > cgi.WALL;
     }
-  if(nonisotropic && !nonisotropic_weird_transforms) {
+  if((nonisotropic || (hyperbolic && bt::in() && !nisot::geodesic_movement)) && !nonisotropic_weird_transforms) {
     transmatrix T = actual_view_transform * View;
     transmatrix T2 = eupush( tC0(view_inverse(T)) );
     NLP = T * T2;
     actual_view_transform = ortho_inverse(NLP) * actual_view_transform;
+    nisot::local_perspective_used = true;
     }
   #endif
   #if MAXMDIM >= 4

@@ -731,6 +731,7 @@ EX transmatrix euscale3(ld x, ld y, ld z) {
 
 EX transmatrix eupush(hyperpoint h, ld co IS(1)) {
   if(nonisotropic) return nisot::translate(h, co);
+  if(hyperbolic) { return co ? parabolic13_at(deparabolic13(h)) : inverse(parabolic13_at(deparabolic13(h))); }
   transmatrix T = Id;
   for(int i=0; i<GDIM; i++) T[i][LDIM] = h[i] * co;
   return T;
@@ -1651,7 +1652,7 @@ EX eShiftMethod shift_method(eShiftMethodApplication sma) {
   if(gproduct) return smProduct;
   if(embedded_plane && sma == smaObject) return geom3::same_in_same() ? smIsotropic : smEmbedded;
   if(embedded_plane && use_embedded_shift(sma)) return nonisotropic ? smLie : smEmbedded;
-  if(!nonisotropic && !stretch::in()) return smIsotropic;
+  if(!nonisotropic && !stretch::in() && !(!nisot::geodesic_movement && hyperbolic && bt::in())) return smIsotropic;
   if(!nisot::geodesic_movement && !embedded_plane) return smLie;
   return smGeodesic;
   }
@@ -1897,11 +1898,11 @@ EX ld geo_dist_q(const hyperpoint h1, const hyperpoint h2, flagtype prec IS(pNOR
   }
 
 EX hyperpoint lp_iapply(const hyperpoint h) {
-  return nisot::local_perspective_used() ? inverse(NLP) * h : h;
+  return nisot::local_perspective_used ? inverse(NLP) * h : h;
   }
 
 EX hyperpoint lp_apply(const hyperpoint h) {
-  return nisot::local_perspective_used() ? NLP * h : h;
+  return nisot::local_perspective_used ? NLP * h : h;
   }
 
 EX hyperpoint smalltangent() { return xtangent(.1); }
