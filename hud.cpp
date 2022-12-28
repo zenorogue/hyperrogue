@@ -476,13 +476,13 @@ EX void drawStats() {
     quickqueue();
     }
   
-  if(racing::on) 
+  if(racing::on) {
 #if CAP_RACING
     racing::drawStats();
-#else
-    {}
 #endif
+    }
   else if(cornermode) {
+    instat = false;
     int bycorner[4];
     for(int u=0; u<4; u++) bycorner[u] = 0;
     for(int i=0; i<glyphs; i++) if(ikappear(i) && (glyphflags(i) & GLYPH_INSQUARE))
