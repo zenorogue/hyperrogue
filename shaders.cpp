@@ -105,6 +105,9 @@ EX string shader_lie_log() {
   else if(hyperbolic) {
     return "vec4 lie_log(vec4 v) { v = deparabolic13(v); v[3] = 1.; /* if(abs(v[0]) > 1e-6) { float m = v[0] / (exp(v[0]) - 1.); v[1] *= m; v[2] *= m; } */ return v; }\n";
     }
+  else if(sl2) {
+    return shader_rel_log() + "vec4 lie_log(vec4 h) { return rel_log(h); }\n";
+    }
   else {
     return "vec4 lie_log(vec4 v) { return v; }\n";
     }

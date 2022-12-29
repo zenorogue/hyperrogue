@@ -3087,7 +3087,9 @@ EX void rotate_view(transmatrix T) {
   if(!gproduct && !rug::rugged) current_display->which_copy = T * current_display->which_copy;
   }
 
-EX hyperpoint lie_exp(hyperpoint h) {
+EX shiftpoint lie_exp(hyperpoint h1) {
+  shiftpoint sh = shiftless(h1);
+  auto& h = sh.h;
   if(nil) {
     h[3] = 1;
     h[2] += h[0] * h[1] / 2;
@@ -3120,16 +3122,21 @@ EX hyperpoint lie_exp(hyperpoint h) {
   else if(sl2) {
     h[3] = 0;
     ld v = h[0] * h[0] + h[1] * h[1] - h[2] * h[2];
-    if(v > 0) {
-      h *= sin(v) / sqrt(v);
+    println(hlog, "v = ", v);
+    if(v < 0) {
+      v = sqrt(-v);
+      h *= sin(v) / v;
       h[3] += cos(v);
+      ld cycles = floor(v / TAU + .5);
+      sh.shift += TAU * cycles * (h[2] > 0 ? 1 : -1);
       }
-    else if(v < 0) {
-      h *= sinh(v) / sqrt(-v);
+    else if(v > 0) {
+      v = sqrt(v);
+      h *= sinh(v) / v;
       h[3] += cosh(v);
       }
     else h[3]++;
-    return h;
+    return sh;
     }
   else {
     /* not implemented -- approximate for now */
@@ -3141,11 +3148,10 @@ EX hyperpoint lie_exp(hyperpoint h) {
     for(int i=0; i<16; i++) T = T * T;
     h = tC0(T);
     }
-  return h;
+  return sh;
   }
 
-/** With relativistic_length off, compute the Lie logarithm in SL(2,R) or de Sitter space.
- *  With relativistic_length on, this corresponds to a geodesic in AdS/dS, so make it as long as the length of the geodesic in AdS/dS space.
+/** Compute the Lie logarithm in SL(2,R), which corresponds to a geodesic in AdS; or a geodesic in de Sitter space.
  **/
 
 EX hyperpoint rel_log(shiftpoint h, bool relativistic_length) {
@@ -3161,7 +3167,11 @@ EX hyperpoint rel_log(shiftpoint h, bool relativistic_length) {
       if(h1[3] < 0) z = M_PI - z;
       z += cycles * TAU;
       }
-    else if(cycles || h1[3] < -1 || choice == 0) {
+    else if(cycles || h1[3] < -1) {
+      /* impossible, or light-like */
+      r = 1; z = 0;
+      }
+    else if(choice == 0) {
       if(!relativistic_length) return h1 - C0;
       /* impossible, or light-like */
       r = 1; z = 0;
@@ -3170,7 +3180,6 @@ EX hyperpoint rel_log(shiftpoint h, bool relativistic_length) {
       r = sqrt(-choice);
       z = asinh(r);
       }
-    if(!relativistic_length) r = sqhypot_d(3, h1);
     h1 = h1 * z / r;
     h1[3] = 0;
     return h1;
@@ -3255,7 +3264,7 @@ EX hyperpoint lie_log_correct(const shiftpoint H_orig, hyperpoint& H) {
   return lie_log(H_orig);
   }
 
-/** shift the view according to the given tangent vector */
+/** Shift the view according to the given tangent vector. NOTE: known bug when  // note: possible error when lie_exp includes a shift!*/
 EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V, eShiftMethod sm IS(shift_method(smaManualCamera))) {
   switch(sm) {
     case smProduct:
@@ -3268,7 +3277,7 @@ EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V, eShift
       transmatrix IV = view_inverse(View);
       transmatrix view_shift = eupush( tC0(IV) );
       transmatrix rot = V * view_shift;
-      hyperpoint tH = lie_exp(inverse(rot) * H);
+      hyperpoint tH = lie_exp(inverse(rot) * H).h;
       return rot * eupush(tH) * inverse(view_shift);
       }
     case smGeodesic:
