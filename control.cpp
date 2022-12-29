@@ -431,7 +431,7 @@ EX void full_rotate_view(ld h, ld v) {
   if(history::on && !rug::rug_control())
     models::rotation += h * camera_rot_speed;
   else {
-    rotate_view(spin(v * camera_rot_speed));
+    rotate_view(cspin(0, 1, v * camera_rot_speed));
     didsomething = true;
     if(isGravityLand(cwt.at->land) && !rug::rug_control())
       playermoved = false;
