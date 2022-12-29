@@ -1625,13 +1625,14 @@ EX bool in_smart_range(const shiftmatrix& T) {
   ld y = current_display->ycenter + current_display->radius * h1[1] * pconf.stretch;
 
   bool culling = !geom3::euc_in_hyp();
+  bool inp = in_perspective();
 
   if(culling) {
     if(x > current_display->xtop + current_display->xsize * 2) return false;
     if(x < current_display->xtop - current_display->xsize * 1) return false;
     if(y > current_display->ytop + current_display->ysize * 2) return false;
     if(y < current_display->ytop - current_display->ysize * 1) return false;
-    if(GDIM == 3) {
+    if(GDIM == 3 && !inp) {
       if(-h1[2] < pconf.clip_min * 2 - pconf.clip_max) return false;
       if(-h1[2] > pconf.clip_max * 2 - pconf.clip_min) return false;
       }
@@ -1662,8 +1663,8 @@ EX bool in_smart_range(const shiftmatrix& T) {
     }
   
   else if(GDIM == 3) { 
-    if(-h1[2] + 2 * dz < pconf.clip_min || -h1[2] - 2 * dz > pconf.clip_max) return false;
-    sort(dh, dh+GDIM); 
+    if(!inp && (-h1[2] + 2 * dz < pconf.clip_min || -h1[2] - 2 * dz > pconf.clip_max)) return false;
+    sort(dh, dh+3);
     ld scale = sqrt(dh[1] * dh[2]) * cgi.scalefactor * hcrossf7;
     if(scale <= (WDIM == 2 ? vid.smart_range_detail : vid.smart_range_detail_3)) return false;
     }
@@ -2952,7 +2953,7 @@ EX namespace dq {
 
 EX bool do_draw(cell *c) {
   // do not display out of range cells, unless on torus
-  if(c->pathdist == PINFD && !(euclid && quotient) && vid.use_smart_range == 0)
+  if(c->pathdist == PINFD && !(meuclid && quotient) && vid.use_smart_range == 0)
     return false;
   // do not display not fully generated cells, unless changing range allowed
   if(c->mpdist > 7 && !allowChangeRange()) return false;
