@@ -379,11 +379,11 @@ EX ld signed_sqrt(ld x) { return x > 0 ? sqrt(x) : -sqrt(-x); }
 EX int axial_x, axial_y;
 
 EX void apply_perspective(const hyperpoint& H, hyperpoint& ret) {
-  if(H[2] == 0) { ret[0] = 1e6; ret[1] = 1e6; ret[2] = 1; return; }
+  if(H[2] == 0) { ret[0] = 1e6; ret[1] = 1e6; ret[2] = 0; return; }
   ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
   ret[0] = H[0]/H[2] * ratio;
   ret[1] = H[1]/H[2] * ratio;
-  ret[2] = 1;
+  ret[2] = H[2];
   ret[3] = 1;
   }
 
