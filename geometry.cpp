@@ -689,6 +689,8 @@ void geometry_information::prepare_basics() {
   
   base_distlimit = ginf[geometry].distlimit[!BITRUNCATED];
 
+  hybrid_finish:
+  
   #if CAP_GP
   gp::compute_geometry(inv);  
   #endif
@@ -722,8 +724,6 @@ void geometry_information::prepare_basics() {
   #endif
   else if(nil) nilv::create_faces();
   #endif
-  
-  hybrid_finish:
   
   scalefactor = crossf / hcrossf7;
   orbsize = crossf;
