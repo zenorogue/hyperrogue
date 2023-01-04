@@ -1859,8 +1859,8 @@ auto animhook = addHook(hooks_frame, 100, display_animation)
     param_f(anims::circle_spins, "acspins", "animation circle spins");
     addsaver(anims::rug_movement_angle, "rug forward movement angle", 90);
     addsaver(anims::rug_shift_angle, "rug forward shift angle", 0);
-    addsaver(anims::a, "a", 0);
-    addsaver(anims::b, "b", 0);
+    param_f(anims::a, "a", 0);
+    param_f(anims::b, "b", 0);
     param_f(anims::movement_angle_2, "movement angle 2", 0);
     #endif
     });
