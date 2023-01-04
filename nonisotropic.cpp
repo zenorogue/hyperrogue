@@ -2850,7 +2850,7 @@ EX namespace nisot {
   EX transmatrix lie_transport(const transmatrix Position, const hyperpoint direction) {
     transmatrix pshift = eupush( tC0(Position) );
     transmatrix irot = iso_inverse(pshift) * Position;
-    hyperpoint tH = lie_exp(irot * direction);
+    hyperpoint tH = unshift(lie_exp(irot * direction));
     return pshift * eupush(tH) * irot;
     }
 
