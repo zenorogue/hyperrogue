@@ -886,7 +886,8 @@ EX namespace dialog {
            last = &(items[i]);
            }
           }
-      set_highlight(*last);
+      if(last)
+        set_highlight(*last);
       }
     if(DKEY == SDLK_DOWN) {
       uni = sym = 0;
