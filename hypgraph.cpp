@@ -2028,7 +2028,7 @@ EX void adjust_eye(transmatrix& T, cell *c, ld sign) {
   geom3::do_auto_eye();
   int sl = snakelevel(c);
   if(isWorm(c->monst) && sl < 3) sl++;
-  int i = geom3::sph_in_low() ? 1 : 0;
+  int i = moved_center() ? 1 : 0;
   if(sl || vid.eye || i)
     T = T * lzpush(sign * (cgi.SLEV[sl] - cgi.FLOOR - vid.eye + i));
   }
@@ -2917,7 +2917,7 @@ EX namespace dq {
   EX set<unsigned> visited_by_matrix;
   EX void enqueue_by_matrix(heptagon *h, const shiftmatrix& T) {
     if(!h) return;
-    unsigned b = bucketer(tC0(T));
+    unsigned b = bucketer(T * tile_center());
     if(visited_by_matrix.count(b)) { return; }
     visited_by_matrix.insert(b);
     drawqueue.emplace(h, T);
@@ -2934,7 +2934,7 @@ EX namespace dq {
 
   EX void enqueue_by_matrix_c(cell *c, const shiftmatrix& T) {
     if(!c) return;
-    unsigned b = bucketer(tC0(T));
+    unsigned b = bucketer(T * tile_center());
     if(visited_by_matrix.count(b)) { return; }
     visited_by_matrix.insert(b);
     drawqueue_c.emplace(c, T);
@@ -3367,6 +3367,11 @@ EX transmatrix map_relative_push(hyperpoint h) {
     transmatrix T = rgpushxto0(h1);
     geom3::light_flip(false);
     return T * zpush(z);
+    }
+  if(geom3::euc_in_sph()) {
+    ld tx = hypot(h[0], h[2]);
+    ld ty = hypot(h[1], h[3]);
+    return cspin(0, 2, atan2(h[0], h[2])) * cspin(1, 3, atan2(h[1], h[3])) * cspin(2, 3, atan2(tx, ty));
     }
   return rgpushxto0(h);
   }

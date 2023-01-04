@@ -1080,7 +1080,7 @@ EX namespace geom3 {
     seProduct,
     seNil,
     seSol, seNIH, seSolN,
-    seNIH_inv
+    seCliffordTorus
     };
   #endif
 
@@ -1094,6 +1094,7 @@ EX namespace geom3 {
     {"Sol",              "Embed into Sol. Works only with Euclidean. You need to set the variation to Pure."},
     {"stretched hyperbolic",              "Embed into stretched hyperbolic geometry. Works only with Euclidean. You need to set the variation to Pure."},
     {"stretched Sol",              "Embed into stretched Sol geometry. Works only with Euclidean. You need to set the variation to Pure."},
+    {"Clifford Torus",              "Embed Euclidean torus into S3. You need to set the variation to Pure."},
     };
 
   EX eSpatialEmbedding spatial_embedding = seDefault;
@@ -1132,11 +1133,15 @@ EX namespace geom3 {
     }
 
   EX bool euc_in_noniso() {
-    return among(ggclass(), gcNil, gcSol, gcNIH, gcSolN) && mgclass() == gcEuclid;
+    return among(ggclass(), gcNil, gcSol, gcNIH, gcSolN, gcSphere) && mgclass() == gcEuclid;
     }
 
   EX bool sph_in_euc() {
     return ggclass() == gcEuclid && mgclass() == gcSphere;
+    }
+
+  EX bool euc_in_sph() {
+    return ggclass() == gcSphere && mgclass() == gcEuclid;
     }
 
   EX bool sph_in_hyp() {
@@ -1217,6 +1222,11 @@ EX namespace geom3 {
 
           if(spatial_embedding == seNil && ieuclid) {
             g = ginf[gNil].g;
+            g.gameplay_dimension = 2;
+            }
+
+          if(spatial_embedding == seCliffordTorus && ieuclid) {
+            g = ginf[gCell120].g;
             g.gameplay_dimension = 2;
             }
 

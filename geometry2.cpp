@@ -442,7 +442,7 @@ EX bool no_easy_spin() {
   return NONSTDVAR || arcm::in() || WDIM == 3 || bt::in() || kite::in();
   }
 
-EX bool dont_inverse() { return geometry == 1 && PURE && geom3::euc_in_noniso(); }
+EX bool dont_inverse() { return meuclid && PURE && geom3::euc_in_noniso(); }
 
 ld hrmap_standard::spin_angle(cell *c, int d) {
   if(WDIM == 3) return SPIN_NOT_AVAILABLE;

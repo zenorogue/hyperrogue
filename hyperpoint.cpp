@@ -572,6 +572,15 @@ EX hyperpoint normalize_flat(hyperpoint h) {
   if(geom3::euc_in_nil()) h[1] = 0;
   if(geom3::euc_in_solnih()) h[2] = 0;
   if(geom3::hyp_in_solnih()) h[0] = 0;
+  if(geom3::euc_in_sph()) {
+    ld tx = hypot(h[0], h[2]);
+    ld ty = hypot(h[1], h[3]);
+    h[0] = h[0] / tx * sin(1);
+    h[1] = h[1] / ty * cos(1);
+    h[2] = h[2] / tx * sin(1);
+    h[3] = h[3] / ty * cos(1);
+    return h;
+    }
   if(geom3::euc_in_hyp()) {
     h = normalize(h);
     auto h1 = deparabolic13(h);
@@ -837,6 +846,19 @@ EX hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
     hf[3] = cosh(z0 + z);
     return hf;
     }
+  if(geom3::euc_in_sph()) {
+    // cspin(0,2,x) * cspin(1,3,y) * cspin0(2, 3, z)
+    ld tx = hypot(h[0], h[2]);
+    ld ty = hypot(h[1], h[3]);
+    ld z0 = atan2(ty, tx);
+    z0 -= z;
+    hyperpoint hf;
+    hf[0] = h[0] / tx * cos(z0);
+    hf[1] = h[1] / ty * sin(z0);
+    hf[2] = h[2] / tx * cos(z0);
+    hf[3] = h[3] / ty * sin(z0);
+    return hf;
+    }
   if(GDIM == 2) return scale_point(h, geom3::scale_at_lev(z));
   if(gproduct) return scale_point(h, exp(z));
   if(sl2) return slr::translate(h) * cpush0(2, z);
@@ -872,6 +894,11 @@ EX transmatrix matrix4(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i, ld 
   #else
   return transmatrix {{{a,b,c,d},{e,f,g,h},{i,j,k,l},{m,n,o,p}}};
   #endif
+  }
+
+EX void euc_in_sph_rescale(hyperpoint& h) {
+  h[0] *= TAU * geom3::euclid_embed_scale;
+  h[1] *= TAU * geom3::euclid_embed_scale;
   }
 
 #if MAXMDIM >= 4
@@ -916,6 +943,11 @@ EX void swapmatrix(transmatrix& T) {
   else if(geom3::in_product()) {
     /* just do nothing */
     }
+  else if(geom3::euc_in_sph()) {
+    hyperpoint h1 = get_column(T, 2);
+    euc_in_sph_rescale(h1);
+    T = cspin(0, 2, h1[0]) * cspin(1, 3, h1[1]);
+    }
   else {
     for(int i=0; i<4; i++) swap(T[i][2], T[i][3]);
     for(int i=0; i<4; i++) swap(T[2][i], T[3][i]);
@@ -934,6 +966,10 @@ EX void swapmatrix(hyperpoint& h) {
   if(geom3::sph_in_euc()) { h[3] = 1; return; }
   if(geom3::sph_in_hyp()) { h[0] *= sinh(1); h[1] *= sinh(1); h[2] *= sinh(1); h[3] = cosh(1); return; }
   if(geom3::euc_in_nil()) { h[3] = 1; h[2] = h[1] * geom3::euclid_embed_scale; h[1] = 0; h[0] *= geom3::euclid_embed_scale; return; }
+  if(geom3::euc_in_sph()) {
+    euc_in_sph_rescale(h); h = cspin(0, 2, h[0]) * cspin(1, 3, h[1]) * lzpush(1) * C0;
+    return;
+    }
   if(geom3::euc_in_solnih()) { h[3] = 1; h[1] = h[1] * geom3::euclid_embed_scale; h[2] = 0; h[0] *= geom3::euclid_embed_scale; return; }
   if(geom3::hyp_in_solnih()) {
     // copied from deparabolic13
@@ -1524,12 +1560,14 @@ EX hyperpoint scale_point(const hyperpoint& h, ld scale_factor) {
 EX bool moved_center() {
   if(geom3::sph_in_euc()) return true;
   if(geom3::sph_in_hyp()) return true;
+  if(geom3::euc_in_sph()) return true;
   return false;
   }
 
 /** Returns the intended center of the tile, relative to its local matrix. Usually C0 but may be different, e.g. when embedding a sphere in E3 or H3. */
 EX hyperpoint tile_center() {
   if(geom3::sph_in_euc()) return C02 + C03;
+  if(geom3::euc_in_sph()) return zpush0(1);
   if(geom3::sph_in_hyp()) return zpush0(1);
   return C0;
   }
