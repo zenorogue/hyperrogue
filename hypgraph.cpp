@@ -2974,6 +2974,8 @@ bool limited_generation(cell *c) {
   return true;
   }
 
+EX int min_cells_drawn = 50;
+
 EX bool do_draw(cell *c, const shiftmatrix& T) {
 
   if(WDIM == 3) {
@@ -2981,7 +2983,7 @@ EX bool do_draw(cell *c, const shiftmatrix& T) {
     if(GDIM == 3 && racing::on && c->land == laMemory && cells_drawn >= S7+1) return false;
 
     if(cells_drawn > vid.cells_drawn_limit) return false;
-    if(cells_drawn < 50) { limited_generation(c); return true; }
+    if(cells_drawn < min_cells_drawn) { limited_generation(c); return true; }
     #if MAXMDIM >= 4
     if(nil && models::is_perspective(pmodel)) {
       ld dist = hypot_d(3, inverse_exp(tC0(T), pQUICK));
@@ -3006,7 +3008,7 @@ EX bool do_draw(cell *c, const shiftmatrix& T) {
       }
     #endif
     else if(vid.use_smart_range) {
-      if(cells_drawn >= 50 && !in_smart_range(T)) return false;
+      if(cells_drawn >= min_cells_drawn && !in_smart_range(T)) return false;
       if(!limited_generation(c)) return false;
       }
     else {
@@ -3039,7 +3041,7 @@ EX bool do_draw(cell *c, const shiftmatrix& T) {
     }
   if(cells_drawn > vid.cells_drawn_limit) return false;
   bool usr = vid.use_smart_range || quotient;
-  if(usr && cells_drawn >= 50 && !in_smart_range(T) && !(WDIM == 2 && GDIM == 3 && hdist0(tC0(T)) < 2.5)) return false;
+  if(usr && cells_drawn >= min_cells_drawn && !in_smart_range(T) && !(WDIM == 2 && GDIM == 3 && hdist0(tC0(T)) < 2.5)) return false;
   if(vid.use_smart_range == 2 && !limited_generation(c)) return false;
   return true; 
   }
