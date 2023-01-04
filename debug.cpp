@@ -721,6 +721,16 @@ int read_cheat_args() {
       if(itemclass(eItem(i)) == IC_TREASURE)
         items[i] = q;
     }
+  else if(argis("-each-random")) {
+    PHASEFROM(2); start_game(); cheat();
+    for(int i=0; i<ittypes; i++)
+      if(itemclass(eItem(i)) == IC_TREASURE) {
+        items[i] = 10 + hrand(21);
+        if(i == itElemental) items[i] = 12;
+        }
+      else
+        items[i] = 0;
+    }
   else if(argis("-viewall")) {
     PHASE(3); start_game();
     viewall();
