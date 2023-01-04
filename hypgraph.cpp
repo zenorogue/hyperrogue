@@ -1076,6 +1076,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       
     case mdBand: 
       if(pconf.model_transition != 1) {
+        H = unshift(H_orig);
         ld& mt = pconf.model_transition;
         
         H = space_to_perspective(H);
