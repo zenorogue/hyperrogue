@@ -1400,6 +1400,7 @@ EX void switch_always3() {
           vid.wall_height *= -1;
           }
         }
+      if(spatial_embedding == seCliffordTorus) configure_clifford_torus();
       }
     else {
       vid.always3 = false;
@@ -1416,6 +1417,20 @@ EX void switch_always3() {
       }
     View = models::rotmatrix() * View;
 #endif
+    }
+
+  EX void configure_clifford_torus() {
+    rug::clifford_torus ct;
+
+    euclid_embed_scale = TAU / hypot_d(2, ct.xh);
+    euclid_embed_scale_y = TAU / hypot_d(2, ct.yh) / euclid_embed_scale;
+    euclid_embed_rotate = atan2(ct.xh[1], ct.xh[0]) / degree;
+
+    ld alpha = atan2(ct.xfactor, ct.yfactor);
+
+    vid.depth = alpha - 1;
+    vid.wall_height = min(1 / euclid_embed_scale_mean(), (90._deg - alpha) * 0.9);
+    vid.eye = vid.wall_height / 2 - vid.depth;
     }
 
   EX }

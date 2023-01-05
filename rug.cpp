@@ -395,8 +395,14 @@ clifford_torus::clifford_torus() {
   auto p1 = to_loc(euc::eu.user_axes[0]);
   auto p2 = to_loc(euc::eu.user_axes[1]);
 
+  bool f = embedded_plane;
+  if(f) geom3::light_flip(true);
   xh = euc::eumove(p1)*C0-C0;
   yh = euc::eumove(p2)*C0-C0;
+  if(f) geom3::light_flip(false);
+  xh[2] = xh[3] = yh[2] = yh[3] = 0;
+  dynamicval<eGeometry> g(geometry, gCubeTiling);
+
   if(nonorientable) yh *= 2;
   
   flipped = false; // sqhypot_d(2, xh) < sqhypot_d(2, yh);
@@ -409,7 +415,7 @@ clifford_torus::clifford_torus() {
   yfactor = sqrt(1/(1+factor2));
   xfactor = factor * yfactor;
                                     
-  T = build_matrix(xh, yh, C0, C03);  
+  T = build_matrix(xh, yh, C02, C03);
   iT = inverse(T);
   }
 
