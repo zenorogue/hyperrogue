@@ -1269,6 +1269,8 @@ EX int clueless_celldistance(cell *c1, cell *c2) {
 
 EX int celldistance(cell *c1, cell *c2) {
 
+  if(embedded_plane) return IPF(celldistance(c1, c2));
+
   if(fake::in()) return FPIU(celldistance(c1, c2));
 
   if(mhybrid) return hybrid::celldistance(c1, c2);

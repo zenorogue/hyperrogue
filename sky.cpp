@@ -74,6 +74,8 @@ void compute_skyvertices(const vector<sky_item>& sky) {
   if(among(geom3::ggclass(), gcSol, gcSolN)) return;  /* errors */
   if(among(geom3::ggclass(), gcNil)) return;  /* errors sometimes too */
   if(geom3::hyp_in_solnih()) return;
+  if(geom3::euc_in_product()) return;
+  if(geom3::euc_in_sl2()) return;
 
   int sk = get_skybrightness();
   

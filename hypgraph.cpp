@@ -2207,16 +2207,23 @@ void ballgeometry() {
   queuereset(pmodel, PPR::CIRCLE);
   }
 
+EX transmatrix logical_to_actual_units() {
+  transmatrix T = cgi.logical_to_actual;
+  for(int i=0; i<3; i++) set_column(T, i, get_column(T, i) / hypot_d(3, get_column(T, i)));
+  return T;
+  }
+
 EX void resetview() {
   DEBBI(DF_GRAPH, ("reset view"));
   // EUCLIDEAN
   NLP = Id;
   stretch::mstretch_matrix = Id;
+  auto& vo = get_view_orientation();
   if(cwt.at) {
     centerover = cwt.at;
     View = iddspin(cwt.at, cwt.spin);
-    if(!flipplayer) View = spin180() * View;
-    if(cwt.mirrored) View = lmirror() * View;
+    if(!flipplayer) vo = spin180() * vo;
+    if(cwt.mirrored) vo = lmirror() * vo;
 
     if(centering) {
       hyperpoint vl = View * get_corner_position(cwt.at, cwt.spin);
@@ -2236,12 +2243,11 @@ EX void resetview() {
 
   adjust_eye(View, cwt.at, -1);
 
-  if(WDIM == 2) View = spin(M_PI + vid.fixed_facing_dir * degree) * View;
-  if(WDIM == 3 && !gproduct) View = cspin90(0, 2) * View;
-  if(gproduct) NLP = cspin90(0, 2);
-  View = cgi.actual_to_logical * View;
-  if(embedded_plane) get_view_orientation() = cspin90(1, 2) * get_view_orientation();
-  if(embedded_plane && vid.wall_height < 0) View = cspin180(0, 1) * View;
+  if(WDIM == 2) vo = spin(M_PI + vid.fixed_facing_dir * degree) * vo;
+  if(WDIM == 3) vo = cspin90(0, 2) * vo;
+  vo = inverse(logical_to_actual_units()) * vo;
+  if(embedded_plane) vo = cspin90(1, 2) * vo;
+  if(embedded_plane && vid.wall_height < 0) vo = cspin180(0, 1) * vo;
 
   cwtV = shiftless(View);
   current_display->which_copy = 
@@ -3349,6 +3355,13 @@ void shift_view_by_matrix(const transmatrix T, eShiftMethod sm) {
 /* like rgpushxto0 but keeps the map orientation correct */
 EX transmatrix map_relative_push(hyperpoint h) {
   if(!embedded_plane) return rgpushxto0(h);
+  if(geom3::euc_in_product()) {
+    ld bz = zlevel(h);
+    auto h1 = h / exp(bz);
+    ld by = asin_auto(h1[1]);
+    ld bx = atan_auto(h1[0] / h1[2]);
+    return zpush(bz) * xpush(bx) * ypush(by);
+    }
   if(geom3::same_in_same()) {
     ld z = -asin_auto(h[2]);
     ld u = 1 / cos_auto(z);

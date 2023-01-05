@@ -34,6 +34,7 @@ vector<hyperpoint> geometry_information::get_shape(hpcshape sh) {
 hyperpoint get_center(const vector<hyperpoint>& vh) {
   hyperpoint h = Hypc;
   for(auto h1: vh) h = h + h1;
+  if(geom3::euc_in_product()) return h / isize(vh);
   return normalize_flat(h);
   }
 
@@ -743,8 +744,10 @@ hyperpoint psmin(hyperpoint H) {
 
 void geometry_information::adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye, ld shift_head, int q, ld zoom) {
   hyperpoint center = Hypc;
-  for(int i=eye.s; i<eye.e; i++) if(q == 1 || hpc[i][1] > 0) center += hpc[i];
-  center = normalize_flat(center);
+  int c = 0;
+  for(int i=eye.s; i<eye.e; i++) if(q == 1 || hpc[i][1] > 0) center += hpc[i], c++;
+  if(geom3::euc_in_product()) center /= c;
+  else center = normalize_flat(center);
   // center /= (eye.e - eye.s);
   ld rad = 0;
   for(int i=eye.s; i<eye.e; i++) if(q == 1 || hpc[i][1] > 0) rad += hdist(center, hpc[i]);

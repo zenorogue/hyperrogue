@@ -1056,7 +1056,11 @@ EX namespace hybrid {
   EX geometry_information *underlying_cgip;
 
   EX eGeometryClass under_class() {
-    if(embedded_plane) return geom3::ginf_backup[geometry].cclass;
+    if(embedded_plane) {
+      auto c = geom3::ginf_backup[geometry].cclass;
+      if(c == gcEuclid) c = cginf.g.sig[2] > 0 ? gcSphere : gcHyperbolic;
+      return c;
+      }
     return ginf[hybrid::underlying].cclass;
     }
 
@@ -1366,6 +1370,10 @@ EX namespace hybrid {
   template<class T> auto in_underlying_geometry(const T& f) -> decltype(f()) {
     if(!mhybrid && !gproduct) return f();
     if(embedded_plane) {
+      if(geom3::euc_in_product()) {
+        dynamicval<eGeometryClass> dgc(cginf.g.kind, cginf.g.sig[2] < 0 ? gcHyperbolic : gcSphere);
+        return f();
+        }
       geom3::light_flip(true);
       finalizer ff([] { geom3::light_flip(false); });
       return f();
@@ -1645,7 +1653,7 @@ EX namespace product {
   EX hyperpoint inverse_exp(hyperpoint h) {
     hyperpoint res;
     res[2] = zlevel(h);
-    h = orthogonal_move(h, -res[2]);
+    h = h * exp(-res[2]);
     ld r = hypot_d(2, h);
     if(hybrid::under_class() == gcEuclid) {
       res[0] = h[0];
@@ -1671,7 +1679,7 @@ EX namespace product {
     res[0] = h[0] * cd;
     res[1] = h[1] * cd;
     res[2] = cos_auto(d);
-    return orthogonal_move(res, h[2]);
+    return res * exp(h[2]);
     }
 
   EX bool validate_spin() {

@@ -350,7 +350,8 @@ EX transmatrix lpispin() {
   }
 
 EX const transmatrix& lmirror() {
-  if(geom3::euc_in_nil()) return MirrorZ;
+  if(geom3::euc_in_product()) return Id;
+  if(geom3::euc_vertical()) return MirrorZ;
   if(geom3::hyp_in_solnih()) return MirrorZ;
   return Mirror;
   }
@@ -691,7 +692,7 @@ transmatrix otherbodyparts(const shiftmatrix& V, color_t col, eMonster who, doub
 
   shiftmatrix Tright, Tleft;
   
-  if(GDIM == 2 || mhybrid) {
+  if(GDIM == 2 || mhybrid || geom3::euc_in_product()) {
     Tright = VFOOT * xpush(rightfoot);
     Tleft = VFOOT * lmirror() * xpush(-rightfoot);
     }
@@ -3145,7 +3146,8 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
     
     if(!nospins) {
       shiftmatrix& where = (c->monst == moMirrorSpirit && inmirrorcount) ? ocwtV : cwtV;
-      if(WDIM == 2 || mproduct) {
+      if(geom3::euc_in_product()) { }
+      else if(WDIM == 2 || mproduct) {
         hyperpoint V0 = inverse_shift(Vs, where * tile_center());
         ld z = 0;
         if(gproduct) {
@@ -3818,7 +3820,7 @@ EX void pushdown(cell *c, int& q, const shiftmatrix &V, double down, bool rezoom
       auto pp = dynamic_cast<dqi_poly*> (&*ptds[q++]);
       if(!pp) continue;
       auto& ptd = *pp;
-      ptd.V = ptd.V * zpush(+down);
+      ptd.V = ptd.V * lzpush(+down);
       }
     return;
     }

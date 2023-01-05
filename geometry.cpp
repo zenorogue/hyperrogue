@@ -596,7 +596,7 @@ void geometry_information::prepare_lta() {
       lta[1][1] *= geom3::euclid_embed_scale * geom3::euclid_embed_scale_y;
       lta = cspin(0, 1, geom3::euclid_embed_rotate * degree) * lta;
       }
-    if(geom3::euc_in_nil()) lta = cspin90(2, 1) * lta;
+    if(geom3::euc_vertical()) lta = cspin90(2, 1) * lta;
     if(geom3::hyp_in_solnih()) lta = cspin90(0, 1) * cspin90(1, 2) * cspin90(0, 1) * lta;
     }
   actual_to_logical = inverse(lta);
@@ -1108,7 +1108,10 @@ EX namespace geom3 {
     seProduct,
     seNil,
     seSol, seNIH, seSolN,
-    seCliffordTorus
+    seCliffordTorus,
+    seProductH,
+    seProductS,
+    seSL2
     };
   #endif
 
@@ -1123,6 +1126,9 @@ EX namespace geom3 {
     {"stretched hyperbolic",              "Embed into stretched hyperbolic geometry. Works only with Euclidean. You need to set the variation to Pure."},
     {"stretched Sol",              "Embed into stretched Sol geometry. Works only with Euclidean. You need to set the variation to Pure."},
     {"Clifford Torus",              "Embed Euclidean torus into S3. You need to set the variation to Pure."},
+    {"hyperbolic product", "embed Euclidean or hyperbolic plane in the H2xR product space. For E2, set the variation to Pure."},
+    {"spherical product", "embed Euclidean or spherical plane in the H2xR product space. For E2, set the variation to Pure."},
+    {"SL(2,R)",           "Embed Euclidean plane in twisted product geometry. Set the variation to Pure."}
     };
 
   EX eSpatialEmbedding spatial_embedding = seDefault;
@@ -1157,6 +1163,18 @@ EX namespace geom3 {
     return ggclass() == gcNil && mgclass() == gcEuclid;
     }
 
+  EX bool euc_in_product() {
+    return ggclass() == gcProduct && mgclass() == gcEuclid;
+    }
+
+  EX bool euc_in_sl2() {
+    return ggclass() == gcSL2 && mgclass() == gcEuclid;
+    }
+
+  EX bool euc_vertical() {
+    return mgclass() == gcEuclid && among(ggclass(), gcNil, gcProduct, gcSL2);
+    }
+
   EX bool euc_in_solnih() {
     return among(ggclass(), gcSol, gcNIH, gcSolN) && mgclass() == gcEuclid;
     }
@@ -1166,7 +1184,7 @@ EX namespace geom3 {
     }
 
   EX bool euc_in_noniso() {
-    return among(ggclass(), gcNil, gcSol, gcNIH, gcSolN, gcSphere) && mgclass() == gcEuclid;
+    return among(ggclass(), gcNil, gcSol, gcNIH, gcSolN, gcSphere, gcProduct, gcSL2) && mgclass() == gcEuclid;
     }
 
   EX bool sph_in_euc() {
@@ -1234,10 +1252,16 @@ EX namespace geom3 {
           g.sig[3] = g.sig[2];
           g.sig[2] = g.sig[1];
 
-          if(spatial_embedding == seProduct && g.kind != gcEuclid) {
+          if(among(spatial_embedding, seProduct, seProductH, seProductS) && g.kind != gcEuclid) {
             g.kind = gcProduct;
             g.homogeneous_dimension--;
             g.sig[2] = g.sig[3];
+            }
+
+          if(among(spatial_embedding, seProductH, seProductS) && g.kind == gcEuclid) {
+            g.kind = gcProduct;
+            g.homogeneous_dimension--;
+            g.sig[2] = spatial_embedding == seProductH ? -1 : 1;
             }
 
           if(spatial_embedding == seLowerCurvature) {
@@ -1277,6 +1301,11 @@ EX namespace geom3 {
 
           if(spatial_embedding == seSolN && ieuc_or_binary) {
             g = ginf[gSolN].g;
+            g.gameplay_dimension = 2;
+            }
+
+          if(spatial_embedding == seSL2 && ieuclid) {
+            g = giSL2;
             g.gameplay_dimension = 2;
             }
           }
