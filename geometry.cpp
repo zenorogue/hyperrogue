@@ -587,6 +587,8 @@ EX bool is_reg3_variation(eVariation var) {
 
 void geometry_information::prepare_lta() {
   auto& lta = logical_to_actual;
+  bool b = geom3::flipped;
+  if(b) geom3::light_flip(false);
   lta = Id;
   if(embedded_plane) {
     if(geom3::euc_in_noniso()) {
@@ -598,6 +600,7 @@ void geometry_information::prepare_lta() {
     if(geom3::hyp_in_solnih()) lta = cspin90(0, 1) * cspin90(1, 2) * cspin90(0, 1) * lta;
     }
   actual_to_logical = inverse(lta);
+  if(b) geom3::light_flip(true);
   }
 
 void geometry_information::prepare_basics() {
