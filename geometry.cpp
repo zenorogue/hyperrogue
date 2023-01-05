@@ -206,6 +206,12 @@ struct geometry_information {
   /* convert the tangent space in actual coordinates to logical coordinates */
   transmatrix actual_to_logical;
 
+  /* convert the tangent space in logical coordinates to actual coordinates */
+  transmatrix logical_to_actual_units;
+
+  /* convert the tangent space in actual coordinates to logical coordinates */
+  transmatrix actual_to_logical_units;
+
   /** size of the Sword (from Orb of the Sword), used in the shmup mode */
   ld sword_size;
   /** scale factor for the graphics of most things*/
@@ -591,15 +597,18 @@ void geometry_information::prepare_lta() {
   if(b) geom3::light_flip(false);
   lta = Id;
   if(embedded_plane) {
-    if(geom3::euc_in_noniso()) {
-      lta[0][0] *= geom3::euclid_embed_scale;
-      lta[1][1] *= geom3::euclid_embed_scale * geom3::euclid_embed_scale_y;
-      lta = cspin(0, 1, geom3::euclid_embed_rotate * degree) * lta;
-      }
     if(geom3::euc_vertical()) lta = cspin90(2, 1) * lta;
     if(geom3::hyp_in_solnih()) lta = cspin90(0, 1) * cspin90(1, 2) * cspin90(0, 1) * lta;
     }
+  logical_to_actual_units = lta;
+  if(geom3::euc_in_noniso()) {
+    lta = Id;
+    lta[0][0] *= geom3::euclid_embed_scale;
+    lta[1][1] *= geom3::euclid_embed_scale * geom3::euclid_embed_scale_y;
+    lta = cspin(0, 1, geom3::euclid_embed_rotate * degree) * lta * logical_to_actual_units;
+    }
   actual_to_logical = inverse(lta);
+  actual_to_logical_units = inverse(logical_to_actual_units);
   if(b) geom3::light_flip(true);
   }
 
@@ -1142,8 +1151,8 @@ EX namespace geom3 {
   EX ld euclid_embed_scale_mean() { return euclid_embed_scale * sqrt(euclid_embed_scale_y); }
   EX void set_euclid_embed_scale(ld x) { euclid_embed_scale = x; euclid_embed_scale_y = 1; euclid_embed_rotate = 0; }
 
-  EX bool supports_flat() { return spatial_embedding == seDefault; }
-  EX bool supports_invert() { return among(spatial_embedding, seDefault, seLowerCurvature, seMuchLowerCurvature, seNil, seSol, seNIH, seSolN); }
+  EX bool supports_flat() { return among(spatial_embedding, seDefault, seProductH, seProductS); }
+  EX bool supports_invert() { return among(spatial_embedding, seDefault, seLowerCurvature, seMuchLowerCurvature, seNil, seSol, seNIH, seSolN, seProductH, seProductS); }
 
   EX vector<geometryinfo> ginf_backup;
 
@@ -1382,7 +1391,7 @@ EX void switch_always3() {
           vid.depth = 0.5;
           }
         }
-      if(spatial_embedding == seDefault && flat_embedding) {
+      if(supports_flat() && flat_embedding) {
         vid.eye += vid.depth / 2;
         vid.depth = 0;
         }

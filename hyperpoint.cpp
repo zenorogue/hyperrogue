@@ -675,7 +675,7 @@ EX transmatrix spin(ld alpha) {
   }
 
 EX transmatrix unswap_spin(transmatrix T) {
-  return cgi.actual_to_logical * T * cgi.logical_to_actual;
+  return cgi.actual_to_logical_units * T * cgi.logical_to_actual_units;
   }
 
 /** rotate by 90 degrees in the XY plane */

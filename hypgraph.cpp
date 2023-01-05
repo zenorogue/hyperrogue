@@ -2036,11 +2036,11 @@ EX void adjust_eye(transmatrix& T, cell *c, ld sign) {
 
 /** achieve top-down perspective */
 EX transmatrix default_spin() {
-  return cspin90(0, 1) * cgi.actual_to_logical;
+  return cspin90(0, 1) * cgi.actual_to_logical_units;
   }
 
 EX void centerpc(ld aspd) {
-  
+
   if(subscreens::split([=] () {centerpc(aspd);})) return;
   if(dual::split([=] () { centerpc(aspd); })) return;
 
@@ -2207,12 +2207,6 @@ void ballgeometry() {
   queuereset(pmodel, PPR::CIRCLE);
   }
 
-EX transmatrix logical_to_actual_units() {
-  transmatrix T = cgi.logical_to_actual;
-  for(int i=0; i<3; i++) set_column(T, i, get_column(T, i) / hypot_d(3, get_column(T, i)));
-  return T;
-  }
-
 EX void resetview() {
   DEBBI(DF_GRAPH, ("reset view"));
   // EUCLIDEAN
@@ -2245,7 +2239,7 @@ EX void resetview() {
 
   if(WDIM == 2) vo = spin(M_PI + vid.fixed_facing_dir * degree) * vo;
   if(WDIM == 3) vo = cspin90(0, 2) * vo;
-  vo = inverse(logical_to_actual_units()) * vo;
+  vo = cgi.actual_to_logical_units * vo;
   if(embedded_plane) vo = cspin90(1, 2) * vo;
   if(embedded_plane && vid.wall_height < 0) vo = cspin180(0, 1) * vo;
 
