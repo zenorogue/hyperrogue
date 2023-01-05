@@ -2287,6 +2287,14 @@ EX void show_spatial_embedding() {
     if(emb == geom3::seNone) {
       dialog::addBoolItem(XLAT("third-person perspective"), in_tpp(), 'T');
       dialog::add_action(geom3::switch_tpp);
+      dialog::addBoolItem(XLAT("Hypersian Rug"), rug::rugged, 'u');
+      dialog::add_action([] {
+        if(in_tpp()) geom3::switch_tpp();
+        if(!rug::rugged) {
+          pconf.alpha = 1, pconf.scale = 1; if(!rug::rugged) rug::init();
+          }
+        else rug::close();
+        });
       dialog::addBreak(100);
       }
     else {
@@ -2404,6 +2412,11 @@ EX void show3D() {
     dialog::addSelItem(XLAT("projection"), current_proj_name(), 'M');
     dialog::add_action_push(models::model_menu);  
     }
+  if(GDIM == 2) {
+    dialog::addItem(XLAT("configure Hypersian Rug"), 'u');
+    dialog::add_action_push(rug::show);
+    }
+
   #if MAXMDIM >= 4
   if(GDIM == 3) add_edit_fov('f');
   if(GDIM == 3) {

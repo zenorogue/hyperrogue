@@ -1113,7 +1113,7 @@ EX namespace geom3 {
   #endif
 
   EX vector<pair<string, string>> spatial_embedding_options = {
-    {"2D engine",       "Use HyperRogue's 2D engine to simulate same curvature. Works well in top-down and third-person perspective."},
+    {"2D engine",       "Use HyperRogue's 2D engine to simulate same curvature. Works well in top-down and third-person perspective. The Hypersian Rug mode can be used to project this to a surface."},
     {"same curvature",  "Embed as an equidistant surface in the 3D version of the same geometry."},
     {"lower curvature", "Embed as a surface in a space of lower curvature."},
     {"much lower curvature", "Embed sphere as a sphere in hyperbolic space."},
@@ -1299,6 +1299,7 @@ EX void switch_always3() {
 
   EX void switch_tpp() {
     if(dual::split(switch_fpp)) return;
+    if(rug::rugged) rug::close();
     if(pmodel == mdDisk && pconf.camera_angle) {
       vid.yshift = 0;
       pconf.camera_angle = 0;
