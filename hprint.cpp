@@ -432,6 +432,16 @@ EX transmatrix kz(transmatrix h) {
   return h;
   }
 
+EX shiftmatrix kz(shiftmatrix h) {
+  h.T = kz(h.T);
+  return h;
+  }
+
+EX shiftpoint kz(shiftpoint h) {
+  h.h = kz(h.h);
+  return h;
+  }
+
 #if HDR
 template<class T> vector<T> kz(vector<T> v) {
   for(auto& el: v) el = kz(el);
