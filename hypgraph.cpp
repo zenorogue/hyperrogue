@@ -2036,11 +2036,11 @@ EX void adjust_eye(transmatrix& T, cell *c, ld sign) {
 
 /** achieve top-down perspective */
 EX transmatrix default_spin() {
-  return cspin90(0, 1) * inverse(logical_to_actual());
+  return cspin90(0, 1) * cgi.actual_to_logical;
   }
 
 EX void centerpc(ld aspd) {
-
+  
   if(subscreens::split([=] () {centerpc(aspd);})) return;
   if(dual::split([=] () { centerpc(aspd); })) return;
 
@@ -2239,7 +2239,7 @@ EX void resetview() {
   if(WDIM == 2) View = spin(M_PI + vid.fixed_facing_dir * degree) * View;
   if(WDIM == 3 && !gproduct) View = cspin90(0, 2) * View;
   if(gproduct) NLP = cspin90(0, 2);
-  View = inverse(logical_to_actual()) * View;
+  View = cgi.actual_to_logical * View;
   if(embedded_plane) get_view_orientation() = cspin90(1, 2) * get_view_orientation();
   if(embedded_plane && vid.wall_height < 0) View = cspin180(0, 1) * View;
 

@@ -200,6 +200,12 @@ struct geometry_information {
 
   int base_distlimit;
 
+  /* convert the tangent space in logical coordinates to actual coordinates */
+  transmatrix logical_to_actual;
+
+  /* convert the tangent space in actual coordinates to logical coordinates */
+  transmatrix actual_to_logical;
+
   /** size of the Sword (from Orb of the Sword), used in the shmup mode */
   ld sword_size;
   /** scale factor for the graphics of most things*/
@@ -440,6 +446,8 @@ hpcshape
   void prepare_shapes();
   void prepare_usershapes();
 
+  void prepare_lta();
+
   void hpcpush(hyperpoint h);
   void hpc_connect_ideal(hyperpoint a, hyperpoint b);
   void hpcsquare(hyperpoint h1, hyperpoint h2, hyperpoint h3, hyperpoint h4);
@@ -577,6 +585,21 @@ EX bool is_reg3_variation(eVariation var) {
   return var == eVariation::coxeter;
   }
 
+void geometry_information::prepare_lta() {
+  auto& lta = logical_to_actual;
+  lta = Id;
+  if(embedded_plane) {
+    if(geom3::euc_in_noniso()) {
+      lta[0][0] *= geom3::euclid_embed_scale;
+      lta[1][1] *= geom3::euclid_embed_scale * geom3::euclid_embed_scale_y;
+      lta = cspin(0, 1, geom3::euclid_embed_rotate * degree) * lta;
+      }
+    if(geom3::euc_in_nil()) lta = cspin90(2, 1) * lta;
+    if(geom3::hyp_in_solnih()) lta = cspin90(0, 1) * cspin90(1, 2) * cspin90(0, 1) * lta;
+    }
+  actual_to_logical = inverse(lta);
+  }
+
 void geometry_information::prepare_basics() {
 
   DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("prepare_basics"));
@@ -592,6 +615,8 @@ void geometry_information::prepare_basics() {
   heptshape = nullptr;
 
   xp_order = 0;
+
+  prepare_lta();
 
   if(arcm::in() && !mproduct)
     ginf[gArchimedean].cclass = gcHyperbolic;
@@ -1023,7 +1048,7 @@ EX namespace geom3 {
       reduce = (GDIM == 3 ? human_height * .3 : 0);
       
       int sgn = vid.wall_height > 0 ? 1 : -1;
-      ld ees = geom3::euc_in_noniso() ? geom3::euclid_embed_scale : 1;
+      ld ees = geom3::euc_in_noniso() ? geom3::euclid_embed_scale_mean() : 1;
 
       STUFF = lev_to_factor(0) - sgn * max(orbsize * ees * 0.3, zhexf * ees * .6);
       
@@ -1099,9 +1124,14 @@ EX namespace geom3 {
 
   EX eSpatialEmbedding spatial_embedding = seDefault;
   EX ld euclid_embed_scale = 1;
+  EX ld euclid_embed_scale_y = 1;
+  EX ld euclid_embed_rotate = 0;
   EX bool auto_configure = true;
   EX bool flat_embedding = false;
   EX bool inverted_embedding = false;
+
+  EX ld euclid_embed_scale_mean() { return euclid_embed_scale * sqrt(euclid_embed_scale_y); }
+  EX void set_euclid_embed_scale(ld x) { euclid_embed_scale = x; euclid_embed_scale_y = 1; euclid_embed_rotate = 0; }
 
   EX bool supports_flat() { return spatial_embedding == seDefault; }
   EX bool supports_invert() { return among(spatial_embedding, seDefault, seLowerCurvature, seMuchLowerCurvature, seNil, seSol, seNIH, seSolN); }
@@ -1480,7 +1510,11 @@ EX string cgi_string() {
   
   if(embedded_plane) V("X:", its(geom3::ggclass()));
 
-  if(embedded_plane && meuclid) V("XS:", fts(geom3::euclid_embed_scale));
+  if(embedded_plane && meuclid) {
+    V("XS:", fts(geom3::euclid_embed_scale));
+    V("YS:", fts(geom3::euclid_embed_scale_y));
+    V("RS:", fts(geom3::euclid_embed_rotate));
+    }
 
   if(scale_used()) V("CS", fts(vid.creature_scale));
   

@@ -665,14 +665,8 @@ EX transmatrix spin(ld alpha) {
   return cspin(0, 1, alpha);
   }
 
-EX transmatrix logical_to_actual() {
-  if(embedded_plane && geom3::euc_in_nil()) return cspin90(2, 1);
-  if(embedded_plane && geom3::hyp_in_solnih()) return cspin90(0, 1) * cspin90(1, 2) * cspin90(0, 1);
-  return Id;
-  }
-
 EX transmatrix unswap_spin(transmatrix T) {
-  return ortho_inverse(logical_to_actual()) * T * logical_to_actual();
+  return cgi.actual_to_logical * T * cgi.logical_to_actual;
   }
 
 /** rotate by 90 degrees in the XY plane */
@@ -896,11 +890,6 @@ EX transmatrix matrix4(ld a, ld b, ld c, ld d, ld e, ld f, ld g, ld h, ld i, ld 
   #endif
   }
 
-EX void euc_in_sph_rescale(hyperpoint& h) {
-  h[0] *= TAU * geom3::euclid_embed_scale;
-  h[1] *= TAU * geom3::euclid_embed_scale;
-  }
-
 #if MAXMDIM >= 4
 /** Transform a matrix between the 'embedded_plane' and underlying representation. Switches to the current variant. */
 EX void swapmatrix(transmatrix& T) {
@@ -926,17 +915,17 @@ EX void swapmatrix(transmatrix& T) {
     }
   else if(geom3::euc_in_nil()) {
     if(!geom3::flipped) {
-      hyperpoint h1 = get_column(T, 2);
+      hyperpoint h1 = cgi.logical_to_actual * get_column(T, 2);
       // rotations are illegal anyway...
-      T = eupush(hyperpoint(h1[0] * geom3::euclid_embed_scale, 0, h1[1] * geom3::euclid_embed_scale, 1));
+      T = eupush(hyperpoint(h1[0], 0, h1[2], 1));
       return;
       }
     }
   else if(geom3::euc_in_solnih()) {
     if(!geom3::flipped) {
-      hyperpoint h1 = get_column(T, 2);
+      hyperpoint h1 = cgi.logical_to_actual * get_column(T, 2);
       // rotations are illegal anyway...
-      T = eupush(hyperpoint(h1[0] * geom3::euclid_embed_scale, h1[1] * geom3::euclid_embed_scale, 0, 1));
+      T = eupush(hyperpoint(h1[0], h1[1], 0, 1));
       return;
       }
     }
@@ -944,8 +933,7 @@ EX void swapmatrix(transmatrix& T) {
     /* just do nothing */
     }
   else if(geom3::euc_in_sph()) {
-    hyperpoint h1 = get_column(T, 2);
-    euc_in_sph_rescale(h1);
+    hyperpoint h1 = cgi.logical_to_actual * get_column(T, 2);
     T = cspin(0, 2, h1[0]) * cspin(1, 3, h1[1]);
     }
   else {
@@ -965,12 +953,13 @@ EX void swapmatrix(hyperpoint& h) {
   if(geom3::in_product()) return;
   if(geom3::sph_in_euc()) { h[3] = 1; return; }
   if(geom3::sph_in_hyp()) { h[0] *= sinh(1); h[1] *= sinh(1); h[2] *= sinh(1); h[3] = cosh(1); return; }
-  if(geom3::euc_in_nil()) { h[3] = 1; h[2] = h[1] * geom3::euclid_embed_scale; h[1] = 0; h[0] *= geom3::euclid_embed_scale; return; }
+  if(geom3::euc_in_nil()) { h = cgi.logical_to_actual * h; h[3] = 1; h[1] = 0; return; }
   if(geom3::euc_in_sph()) {
-    euc_in_sph_rescale(h); h = cspin(0, 2, h[0]) * cspin(1, 3, h[1]) * lzpush(1) * C0;
+    h = cgi.logical_to_actual * h;
+    h = cspin(0, 2, h[0]) * cspin(1, 3, h[1]) * lzpush(1) * C0;
     return;
     }
-  if(geom3::euc_in_solnih()) { h[3] = 1; h[1] = h[1] * geom3::euclid_embed_scale; h[2] = 0; h[0] *= geom3::euclid_embed_scale; return; }
+  if(geom3::euc_in_solnih()) { h = cgi.logical_to_actual * h; h[3] = 1; h[2] = 0; return; }
   if(geom3::hyp_in_solnih()) {
     // copied from deparabolic13
     h /= (1 + h[2]);
