@@ -1425,6 +1425,16 @@ EX void switch_always3() {
   EX void configure_clifford_torus() {
     rug::clifford_torus ct;
 
+    if(hypot_d(2, ct.xh) < 1e-6 || hypot_d(2, ct.yh) < 1e-6) {
+      euclid_embed_scale = TAU / 20.;
+      euclid_embed_scale_y = 1;
+      euclid_embed_rotate = 0;
+      vid.depth = 45._deg - 1;
+      vid.wall_height = 0.2;
+      vid.eye = vid.wall_height / 2 - vid.depth;
+      return;
+      }
+
     euclid_embed_scale = TAU / hypot_d(2, ct.xh);
     euclid_embed_scale_y = TAU / hypot_d(2, ct.yh) / euclid_embed_scale;
     euclid_embed_rotate = atan2(ct.xh[1], ct.xh[0]) / degree;
