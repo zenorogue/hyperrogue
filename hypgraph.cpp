@@ -3306,7 +3306,7 @@ EX void shift_view(hyperpoint H, eShiftMethod sm IS(shift_method(smaManualCamera
   wc = get_shift_view_of(H, wc, sm);
   }
 
-/** works in embedded_plane (except embedded product where shift_view works) */
+/** works in embedded_plane (except embedded product where shift_view works, and euc_in_sl2) */
 EX transmatrix get_shift_view_embedded_of(const transmatrix V, const transmatrix T) {
   transmatrix IV = view_inverse(V);
   transmatrix rot = V * map_relative_push(IV * C0);
@@ -3319,6 +3319,22 @@ EX transmatrix get_shift_view_embedded_of(const transmatrix V, const transmatrix
 /** works in embedded_plane (except embedded product where shift_view works) */
 void shift_view_embedded(const transmatrix T) {
   transmatrix R = get_shift_view_embedded_of(View, T);
+  View = R * View;
+  auto& wc = current_display->which_copy;
+  wc = R * wc;
+  }
+
+EX transmatrix get_shift_view_embedded_of_esl2(const transmatrix V, const hyperpoint h) {
+  transmatrix IV = view_inverse(V);
+  transmatrix rot = V * map_relative_push(IV * C0);
+  transmatrix V1 = gpushxto0(h) * gpushxto0(IV*C0);
+  transmatrix IV1 = view_inverse(V1);
+  transmatrix rot1 = V1 * map_relative_push(IV1 * C0);
+  return rot * inverse(rot1) * V1 * inverse(V);
+  }
+
+void shift_view_esl2(hyperpoint h) {
+  transmatrix R = get_shift_view_embedded_of_esl2(View, h);
   View = R * View;
   auto& wc = current_display->which_copy;
   wc = R * wc;
@@ -3394,6 +3410,9 @@ EX void shift_view_to(shiftpoint H, eShiftMethod sm IS(shift_method(smaManualCam
     case smProduct:
       shift_view_by_matrix(gpushxto0(unshift(H)), sm);
       return;
+    case smESL2:
+      shift_view_esl2(lp_iapply(unshift(H)));
+      return;
     case smLie:
       shift_view(-lie_log(H), sm);
       return;
@@ -3409,8 +3428,10 @@ EX void shift_view_towards(shiftpoint H, ld l, eShiftMethod sm IS(shift_method(s
   switch(sm) {
     case smIsotropic:
     case smEmbedded:
-      if(sl2) shift_view_to(H, sm); // shift_view_by_matrix(rgpushxto0(unshift(lie_exp(tangent_length(lie_log(H), -l)))), smEmbedded);
       shift_view_by_matrix(rspintox(unshift(H)) * xpush(-l) * spintox(unshift(H)), sm);
+      return;
+    case smESL2:
+      shift_view_esl2(esl2_ita0(tangent_length(esl2_ati(lp_iapply(unshift(H))), l)));
       return;
     case smLie:
       shift_view(tangent_length(lie_log(H), -l), sm);
