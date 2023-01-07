@@ -1403,6 +1403,10 @@ EX void switch_always3() {
         vid.wall_height *= -1;
         vid.eye = -2 * vid.depth;
         }
+      if(euc_in_nil() || euc_in_sl2()) {
+        vid.depth = 0;
+        vid.eye = vid.wall_height / 2;
+        }
       if(euc_in_hyp() && spatial_embedding == seMuchLowerCurvature) {
         vid.eye = inverted_embedding ? -vid.depth : vid.depth;
         vid.depth = 0;
