@@ -1130,14 +1130,14 @@ EX namespace geom3 {
     {"lower curvature", "Embed as a surface in a space of lower curvature."},
     {"much lower curvature", "Embed sphere as a sphere in hyperbolic space."},
     {"product",          "Add one extra dimension in the Euclidean way."},
-    {"Nil",              "Embed into Nil. Works only with Euclidean. You need to set the variation to Pure."},
-    {"Sol",              "Embed into Sol. Works only with Euclidean. You need to set the variation to Pure."},
-    {"stretched hyperbolic",              "Embed into stretched hyperbolic geometry. Works only with Euclidean. You need to set the variation to Pure."},
-    {"stretched Sol",              "Embed into stretched Sol geometry. Works only with Euclidean. You need to set the variation to Pure."},
-    {"Clifford Torus",              "Embed Euclidean torus into S3. You need to set the variation to Pure."},
-    {"hyperbolic product", "embed Euclidean or hyperbolic plane in the H2xR product space. For E2, set the variation to Pure."},
-    {"spherical product", "embed Euclidean or spherical plane in the H2xR product space. For E2, set the variation to Pure."},
-    {"SL(2,R)",           "Embed Euclidean plane in twisted product geometry. Set the variation to Pure."}
+    {"Nil",              "Embed Euclidean plane into Nil."},
+    {"Sol",              "Embed Euclidean or hyperbolic plane into Sol."},
+    {"stretched hyperbolic",              "Embed Euclidean or hyperbolic plane into stretched hyperbolic geometry."},
+    {"stretched Sol",              "Embed Euclidean or hyperbolic plane into stretched Sol geometry."},
+    {"Clifford Torus",              "Embed Euclidean rectangular torus into S3."},
+    {"hyperbolic product", "Embed Euclidean or hyperbolic plane in the H2xR product space."},
+    {"spherical product", "Embed Euclidean cylinder or spherical plane in the H2xR product space."},
+    {"SL(2,R)",           "Embed Euclidean plane in twisted product geometry."}
     };
 
   EX eSpatialEmbedding spatial_embedding = seDefault;

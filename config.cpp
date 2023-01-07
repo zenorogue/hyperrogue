@@ -2248,8 +2248,40 @@ EX geom3::eSpatialEmbedding shown_spatial_embedding() {
 EX bool in_tpp() { return pmodel == mdDisk && pconf.camera_angle; }
 
 EX void display_embedded_errors() {
-  if(meuclid && among(geom3::spatial_embedding, geom3::seNil, geom3::seSol, geom3::seSolN, geom3::seNIH) && (!among(geometry, gEuclid, gEuclidSquare) || !PURE))
-    dialog::addInfo(XLAT("error: works only in PURE Euclidean regular square or hex tiling"), 0xC00000);
+  using namespace geom3;
+  if(meuclid && among(spatial_embedding, seNil, seSol, seSolN, seNIH, seProductH, seProductS, seCliffordTorus, seSL2) && (!among(geometry, gEuclid, gEuclidSquare) || !PURE)) {
+    dialog::addInfo(XLAT("error: currently works only in PURE Euclidean regular square or hex tiling"), 0xC00000);
+    return;
+    }
+  if(mhyperbolic && among(spatial_embedding, seSol, seSolN, seNIH) && !bt::in()) {
+    dialog::addInfo(XLAT("error: currently works only in binary tiling and similar"), 0xC00000);
+    return;
+    }
+  if(meuclid && spatial_embedding == seCliffordTorus) {
+    rug::clifford_torus ct;
+    ld h = ct.xh | ct.yh;
+    bool err = sqhypot_d(2, ct.xh) < 1e-3 || sqhypot_d(2, ct.yh) < 1e-3 || abs(h) > 1e-3;
+    if(err) {
+      dialog::addInfo(XLAT("error: this method works only in rectangular torus"), 0xC00000);
+      return;
+      }
+    }
+  if(meuclid && spatial_embedding == seProductS) {
+    rug::clifford_torus ct;
+    bool err = sqhypot_d(2, ct.xh) < 1e-3 && sqhypot_d(2, ct.yh) < 1e-3;
+    if(err) {
+      dialog::addInfo(XLAT("error: this method works only in cylinder"), 0xC00000);
+      return;
+      }
+    }
+  if(msphere && !among(spatial_embedding, seNone, seDefault, seLowerCurvature, seMuchLowerCurvature, seProduct, seProductS)) {
+    dialog::addInfo(XLAT("error: this method does not work in spherical geometry"), 0xC00000);
+    return;
+    }
+  if(mhyperbolic && !among(spatial_embedding, seNone, seDefault, seLowerCurvature, seMuchLowerCurvature, seProduct, seProductH, seSol, seSolN, seNIH)) {
+    dialog::addInfo(XLAT("error: this method does not work in hyperbolic geometry"), 0xC00000);
+    return;
+    }
   }
 
 EX void show_spatial_embedding() {
