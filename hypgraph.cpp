@@ -2078,7 +2078,10 @@ EX void centerpc(ld aspd) {
     if(gproduct) NLP = ortho_inverse(pc->ori);
     if(WDIM == 2) {
       if(vid.wall_height < 0) rotate_view(cspin180(2, 1));
-      rotate_view( cspin(2, 1, -90._deg - shmup::playerturny[id]) * default_spin());
+      if(gproduct)
+        rotate_view( cspin(2, 1, -90._deg - shmup::playerturny[id]) * cspin90(0, 1));
+      else
+        rotate_view( cspin(2, 1, -90._deg - shmup::playerturny[id]) * default_spin());
       }
     return;
     }

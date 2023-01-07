@@ -69,6 +69,7 @@ struct monster {
     stunoff = 0; blowoff = 0; fragoff = 0; footphase = 0;
     inertia = Hypc; ori = Id; vel = 0;
     swordangle = 0;
+    if(geom3::euc_in_product()) ori = cgi.intermediate_to_logical_scaled;
     }
 
   monster() {
@@ -939,7 +940,10 @@ void movePlayer(monster *m, int delta) {
     
   if(playerturn[cpid] && canmove && !blown && WDIM == 2) {
     m->swordangle -= playerturn[cpid];
-    rotate_object(nat.T, m->ori, spin(playerturn[cpid]));
+    if(geom3::euc_in_product())
+      rotate_object(nat.T, m->ori, cspin(0, 1, playerturn[cpid]));
+    else
+      rotate_object(nat.T, m->ori, spin(playerturn[cpid]));
     if(inertia_based) m->inertia = spin(-playerturn[cpid]) * m->inertia;
     }
   shiftmatrix nat0 = nat;
