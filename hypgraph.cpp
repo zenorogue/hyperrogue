@@ -2043,6 +2043,11 @@ EX transmatrix default_spin() {
   return cspin90(0, 1) * cgi.intermediate_to_logical_scaled;
   }
 
+EX bool shmup_inverted() {
+  if(!embedded_plane) return false;
+  return (vid.wall_height < 0) ^ (geom3::euc_in_nil() || geom3::euc_in_sl2());
+  }
+
 EX void centerpc(ld aspd) {
 
   if(subscreens::split([=] () {centerpc(aspd);})) return;
@@ -2073,11 +2078,11 @@ EX void centerpc(ld aspd) {
     else {
       adjust_eye(T, pc->base, +1);
       }
-
+    
     View = iview_inverse(T);
     if(gproduct) NLP = ortho_inverse(pc->ori);
     if(WDIM == 2) {
-      if(vid.wall_height < 0) rotate_view(cspin180(2, 1));
+      if(shmup_inverted()) rotate_view(cspin180(2, 1));
       if(gproduct)
         rotate_view( cspin(2, 1, -90._deg - shmup::playerturny[id]) * cspin90(0, 1));
       else

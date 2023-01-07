@@ -885,7 +885,7 @@ void movePlayer(monster *m, int delta) {
   
   godir[cpid] = 0;
 
-  if(embedded_plane && vid.wall_height < 0) mdx = -mdx;
+  if(shmup_inverted()) mdx = -mdx;
 
   if(WDIM == 2 && GDIM == 3 && (mdx || mdy)) {
     double mdd = hypot(mdx, mdy);
@@ -936,7 +936,7 @@ void movePlayer(monster *m, int delta) {
     }
   #endif
 
-  if(embedded_plane && vid.wall_height < 0) playerturn[cpid] = -playerturn[cpid];
+  if(shmup_inverted()) playerturn[cpid] = -playerturn[cpid];
     
   if(playerturn[cpid] && canmove && !blown && WDIM == 2) {
     m->swordangle -= playerturn[cpid];
