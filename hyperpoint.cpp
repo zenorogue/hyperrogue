@@ -588,7 +588,7 @@ EX hyperpoint esl2_ati(hyperpoint h) {
   ld S = sqrt(U) * (a1 > 0 ? 1 : -1);
   ld x = -asinh(S);
   h = lorentz(0, 3, -x) * lorentz(1, 2, x) * h;
-  ld y = h[3] ? atanh(h[1] / h[3]) : atanh(h[0] / h[2]);
+  ld y = h[3]*h[3] > h[2]*h[2] ? atanh(h[1] / h[3]) : atanh(h[0] / h[2]);
   h = lorentz(0, 2, -y) * lorentz(1, 3, -y) * h;
   ld z = atan2(h[2], h[3]);
   return hyperpoint(x, y, z, 0);

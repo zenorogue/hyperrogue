@@ -3293,6 +3293,9 @@ EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V, eShift
       }
     case smGeodesic:
       return iview_inverse(nisot::parallel_transport(view_inverse(V), -H));
+    case smESL2: {
+      return get_shift_view_embedded_of_esl2(V, esl2_ita0(lp_iapply(-H)));
+      }
     default:
       throw hr_exception("unknown shift method (embedded not supported)");
     }
@@ -3338,14 +3341,7 @@ EX transmatrix get_shift_view_embedded_of_esl2(const transmatrix V, const hyperp
   transmatrix V1 = gpushxto0(h) * gpushxto0(IV*C0);
   transmatrix IV1 = view_inverse(V1);
   transmatrix rot1 = V1 * map_relative_push(IV1 * C0);
-  return rot * inverse(rot1) * V1 * inverse(V);
-  }
-
-void shift_view_esl2(hyperpoint h) {
-  transmatrix R = get_shift_view_embedded_of_esl2(View, h);
-  View = R * View;
-  auto& wc = current_display->which_copy;
-  wc = R * wc;
+  return rot * inverse(rot1) * V1;
   }
 
 /** works in isotropic and product spaces */
@@ -3419,7 +3415,7 @@ EX void shift_view_to(shiftpoint H, eShiftMethod sm IS(shift_method(smaManualCam
       shift_view_by_matrix(gpushxto0(unshift(H)), sm);
       return;
     case smESL2:
-      shift_view_esl2(lp_iapply(unshift(H)));
+      shift_view(-lp_apply(esl2_ati(lp_iapply(unshift(H)))), sm);
       return;
     case smLie:
       shift_view(-lie_log(H), sm);
@@ -3439,7 +3435,7 @@ EX void shift_view_towards(shiftpoint H, ld l, eShiftMethod sm IS(shift_method(s
       shift_view_by_matrix(rspintox(unshift(H)) * xpush(-l) * spintox(unshift(H)), sm);
       return;
     case smESL2:
-      shift_view_esl2(esl2_ita0(tangent_length(esl2_ati(lp_iapply(unshift(H))), l)));
+      shift_view(-lp_apply(tangent_length(esl2_ati(lp_iapply(unshift(H))), l)));
       return;
     case smLie:
       shift_view(tangent_length(lie_log(H), -l), sm);
