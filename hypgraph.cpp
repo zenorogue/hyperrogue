@@ -3126,7 +3126,6 @@ EX shiftpoint lie_exp(hyperpoint h1) {
   else if(sl2) {
     h[3] = 0;
     ld v = h[0] * h[0] + h[1] * h[1] - h[2] * h[2];
-    println(hlog, "v = ", v);
     if(v < 0) {
       v = sqrt(-v);
       h *= sin(v) / v;
