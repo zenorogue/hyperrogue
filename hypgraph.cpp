@@ -2905,6 +2905,10 @@ EX namespace dq {
   EX queue<pair<heptagon*, shiftmatrix>> drawqueue;
   
   EX unsigned bucketer(const shiftpoint& T) {
+    if(geom3::euc_in_sl2()) {
+      auto T1 = T; optimize_shift(T1);
+      return bucketer(T1.h) + unsigned(floor(T1.shift*81527+.5));
+      }
     return bucketer(T.h) + unsigned(floor(T.shift*81527+.5));
     }
 
