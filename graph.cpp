@@ -5096,13 +5096,13 @@ EX void make_actual_view() {
       transmatrix T = actual_view_transform * View;
       ld z = -tC0(view_inverse(T)) [2];
       transmatrix R = actual_view_transform;
-      R = cgi.logical_to_actual_units * R;
+      R = cgi.logical_scaled_to_intemediate * R;
       if(R[1][2] || R[2][2])
         R = cspin(1, 2, -atan2(R[1][2], R[2][2])) * R;
       if(R[0][2] || R[2][2])
         R = cspin(0, 2, -atan2(R[0][2], R[2][2])) * R;
       if(geom3::hyp_in_solnih()) R = Id;
-      R = cgi.actual_to_logical_units * R;
+      R = cgi.intermediate_to_logical_scaled * R;
       current_display->radar_transform = inverse(R) * zpush(-z);
       }
     else if(gproduct) {

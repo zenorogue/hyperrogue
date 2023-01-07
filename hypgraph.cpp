@@ -2036,7 +2036,7 @@ EX void adjust_eye(transmatrix& T, cell *c, ld sign) {
 
 /** achieve top-down perspective */
 EX transmatrix default_spin() {
-  return cspin90(0, 1) * cgi.actual_to_logical_units;
+  return cspin90(0, 1) * cgi.intermediate_to_logical_scaled;
   }
 
 EX void centerpc(ld aspd) {
@@ -2239,7 +2239,7 @@ EX void resetview() {
 
   if(WDIM == 2) vo = spin(M_PI + vid.fixed_facing_dir * degree) * vo;
   if(WDIM == 3) vo = cspin90(0, 2) * vo;
-  vo = cgi.actual_to_logical_units * vo;
+  vo = cgi.intermediate_to_logical_scaled * vo;
   if(embedded_plane) vo = cspin90(1, 2) * vo;
   if(embedded_plane && vid.wall_height < 0) vo = cspin180(0, 1) * vo;
 

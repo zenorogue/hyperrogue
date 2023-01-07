@@ -201,16 +201,16 @@ struct geometry_information {
   int base_distlimit;
 
   /* convert the tangent space in logical coordinates to actual coordinates */
-  transmatrix logical_to_actual;
+  transmatrix logical_to_intermediate;
 
   /* convert the tangent space in actual coordinates to logical coordinates */
-  transmatrix actual_to_logical;
+  transmatrix intermediate_to_logical;
 
   /* convert the tangent space in logical coordinates to actual coordinates */
-  transmatrix logical_to_actual_units;
+  transmatrix logical_scaled_to_intemediate;
 
   /* convert the tangent space in actual coordinates to logical coordinates */
-  transmatrix actual_to_logical_units;
+  transmatrix intermediate_to_logical_scaled;
 
   /** size of the Sword (from Orb of the Sword), used in the shmup mode */
   ld sword_size;
@@ -592,7 +592,7 @@ EX bool is_reg3_variation(eVariation var) {
   }
 
 void geometry_information::prepare_lta() {
-  auto& lta = logical_to_actual;
+  auto& lta = logical_to_intermediate;
   bool b = geom3::flipped;
   if(b) geom3::light_flip(false);
   lta = Id;
@@ -600,15 +600,15 @@ void geometry_information::prepare_lta() {
     if(geom3::euc_vertical()) lta = cspin90(2, 1) * lta;
     if(geom3::hyp_in_solnih()) lta = cspin90(0, 1) * cspin90(1, 2) * cspin90(0, 1) * lta;
     }
-  logical_to_actual_units = lta;
+  logical_scaled_to_intemediate = lta;
   if(geom3::euc_in_noniso()) {
     lta = Id;
     lta[0][0] *= geom3::euclid_embed_scale;
     lta[1][1] *= geom3::euclid_embed_scale * geom3::euclid_embed_scale_y;
-    lta = logical_to_actual_units * cspin(0, 1, geom3::euclid_embed_rotate * degree) * lta;
+    lta = logical_scaled_to_intemediate * cspin(0, 1, geom3::euclid_embed_rotate * degree) * lta;
     }
-  actual_to_logical = inverse(lta);
-  actual_to_logical_units = inverse(logical_to_actual_units);
+  intermediate_to_logical = inverse(lta);
+  intermediate_to_logical_scaled = inverse(logical_scaled_to_intemediate);
   if(b) geom3::light_flip(true);
   }
 

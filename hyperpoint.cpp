@@ -716,7 +716,7 @@ EX transmatrix spin(ld alpha) {
   }
 
 EX transmatrix unswap_spin(transmatrix T) {
-  return cgi.actual_to_logical_units * T * cgi.logical_to_actual_units;
+  return cgi.intermediate_to_logical_scaled * T * cgi.logical_scaled_to_intemediate;
   }
 
 /** rotate by 90 degrees in the XY plane */
@@ -1000,7 +1000,7 @@ EX void swapmatrix(transmatrix& T) {
     }
   else if(geom3::euc_in_nil()) {
     if(!geom3::flipped) {
-      hyperpoint h1 = cgi.logical_to_actual * get_column(T, 2);
+      hyperpoint h1 = cgi.logical_to_intermediate * get_column(T, 2);
       // rotations are illegal anyway...
       T = eupush(hyperpoint(h1[0], 0, h1[2], 1));
       return;
@@ -1008,19 +1008,19 @@ EX void swapmatrix(transmatrix& T) {
     }
   else if(geom3::euc_in_solnih()) {
     if(!geom3::flipped) {
-      hyperpoint h1 = cgi.logical_to_actual * get_column(T, 2);
+      hyperpoint h1 = cgi.logical_to_intermediate * get_column(T, 2);
       // rotations are illegal anyway...
       T = eupush(hyperpoint(h1[0], h1[1], 0, 1));
       return;
       }
     }
   else if(geom3::euc_in_product()) {
-    hyperpoint h1 = cgi.logical_to_actual * get_column(T, 2);
+    hyperpoint h1 = cgi.logical_to_intermediate * get_column(T, 2);
     T = xpush(h1[0]) * zpush(h1[2]);
     return;
     }
   else if(geom3::euc_in_sl2() && !geom3::flipped) {
-    hyperpoint h1 = cgi.logical_to_actual * get_column(T, 2); h1[1] = 0;
+    hyperpoint h1 = cgi.logical_to_intermediate * get_column(T, 2); h1[1] = 0;
     T = esl2_ita(h1);
     return;
     }
@@ -1028,7 +1028,7 @@ EX void swapmatrix(transmatrix& T) {
     /* just do nothing */
     }
   else if(geom3::euc_in_sph()) {
-    hyperpoint h1 = cgi.logical_to_actual * get_column(T, 2);
+    hyperpoint h1 = cgi.logical_to_intermediate * get_column(T, 2);
     T = cspin(0, 2, h1[0]) * cspin(1, 3, h1[1]);
     }
   else {
@@ -1046,25 +1046,25 @@ EX void swapmatrix(transmatrix& T) {
 /** Just like swapmatrix but for hyperpoints. */
 EX void swapmatrix(hyperpoint& h) {
   if(geom3::euc_in_product()) {
-    h = cgi.logical_to_actual * h;
+    h = cgi.logical_to_intermediate * h;
     h = xpush(h[0]) * zpush(h[2]) * C0;
     return;
     }
   if(geom3::in_product()) return;
   if(geom3::sph_in_euc()) { h[3] = 1; return; }
   if(geom3::sph_in_hyp()) { h[0] *= sinh(1); h[1] *= sinh(1); h[2] *= sinh(1); h[3] = cosh(1); return; }
-  if(geom3::euc_in_nil()) { h = cgi.logical_to_actual * h; h[3] = 1; h[1] = 0; return; }
+  if(geom3::euc_in_nil()) { h = cgi.logical_to_intermediate * h; h[3] = 1; h[1] = 0; return; }
   if(geom3::euc_in_sl2()) {
-    hyperpoint h1 = cgi.logical_to_actual * h; h1[1] = 0;
+    hyperpoint h1 = cgi.logical_to_intermediate * h; h1[1] = 0;
     h = esl2_ita0(h1);
     return;
     }
   if(geom3::euc_in_sph()) {
-    h = cgi.logical_to_actual * h;
+    h = cgi.logical_to_intermediate * h;
     h = cspin(0, 2, h[0]) * cspin(1, 3, h[1]) * lzpush(1) * C0;
     return;
     }
-  if(geom3::euc_in_solnih()) { h = cgi.logical_to_actual * h; h[3] = 1; h[2] = 0; return; }
+  if(geom3::euc_in_solnih()) { h = cgi.logical_to_intermediate * h; h[3] = 1; h[2] = 0; return; }
   if(geom3::hyp_in_solnih()) {
     // copied from deparabolic13
     h /= (1 + h[2]);
