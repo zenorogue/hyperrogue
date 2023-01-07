@@ -930,6 +930,25 @@ EX hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
   u *= cos_auto(z);
   return hpxy3(h[0] * u, h[1] * u, sinh(z));
   }
+
+EX ld get_logical_z(hyperpoint h) {
+  if(geom3::euc_in_nil())
+    return h[1];
+  if(geom3::euc_in_solnih())
+    return h[2];
+  if(geom3::hyp_in_solnih())
+    return h[0];
+  if(geom3::euc_in_sl2())
+    return esl2_ati(h)[1];
+  if(geom3::euc_in_product()) {
+    ld bz = zlevel(h);
+    auto h1 = h / exp(bz);
+    return asin_auto(h1[1]);
+    }
+  if(gproduct)
+    return log(h[2]);
+  return asin_auto(h[2]) - (moved_center() ? 1 : 0);
+  }
 #endif
 
 // push alpha units vertically
