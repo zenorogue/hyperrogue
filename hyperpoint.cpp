@@ -387,8 +387,6 @@ EX ld edge_of_triangle_with_angles(ld alpha, ld beta, ld gamma) {
   }
 
 EX hyperpoint hpxy(ld x, ld y) { 
-  if(sl2) return hyperpoint(x, y, 0, sqrt(1+x*x+y*y));
-  if(rotspace) return hyperpoint(x, y, 0, sqrt(1-x*x-y*y));
   if(embedded_plane) {
     geom3::light_flip(true);
     hyperpoint h = hpxy(x, y);
@@ -396,6 +394,8 @@ EX hyperpoint hpxy(ld x, ld y) {
     swapmatrix(h);
     return h;
     }
+  if(sl2) return hyperpoint(x, y, 0, sqrt(1+x*x+y*y));
+  if(rotspace) return hyperpoint(x, y, 0, sqrt(1-x*x-y*y));
   return PIU(hpxyz(x,y, translatable ? 1 : sphere ? sqrt(1-x*x-y*y) : sqrt(1+x*x+y*y)));
   }
 

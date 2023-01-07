@@ -493,7 +493,7 @@ void geometry_information::make_skeletal(hpcshape& sh, ld push) {
 
 hyperpoint yzspin(ld alpha, hyperpoint h) {
   if(gproduct) return product::direct_exp(cspin(1, 2, alpha) * product::inverse_exp(h));
-  else if(embedded_plane && geom3::sph_in_low()) {
+  else if(embedded_plane && moved_center()) {
     h = gpushxto0(tile_center()) * h;
     h = cspin(1, 2, alpha) * h;
     h = rgpushxto0(tile_center()) * h;
