@@ -605,7 +605,7 @@ void geometry_information::prepare_lta() {
     lta = Id;
     lta[0][0] *= geom3::euclid_embed_scale;
     lta[1][1] *= geom3::euclid_embed_scale * geom3::euclid_embed_scale_y;
-    lta = cspin(0, 1, geom3::euclid_embed_rotate * degree) * lta * logical_to_actual_units;
+    lta = logical_to_actual_units * cspin(0, 1, geom3::euclid_embed_rotate * degree) * lta;
     }
   actual_to_logical = inverse(lta);
   actual_to_logical_units = inverse(logical_to_actual_units);
