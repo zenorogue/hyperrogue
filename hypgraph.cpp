@@ -3376,6 +3376,10 @@ EX transmatrix map_relative_push(hyperpoint h) {
     geom3::light_flip(false);
     return T * zpush(z);
     }
+  if(geom3::euc_in_sl2()) {
+    auto h1 = esl2_ati(h);
+    return esl2_zpush(h1[2]) * xpush(h1[0]) * ypush(h1[1]);
+    }
   if(geom3::euc_in_sph()) {
     ld tx = hypot(h[0], h[2]);
     ld ty = hypot(h[1], h[3]);
@@ -3406,6 +3410,7 @@ EX void shift_view_towards(shiftpoint H, ld l, eShiftMethod sm IS(shift_method(s
   switch(sm) {
     case smIsotropic:
     case smEmbedded:
+      if(sl2) shift_view_to(H, sm); // shift_view_by_matrix(rgpushxto0(unshift(lie_exp(tangent_length(lie_log(H), -l)))), smEmbedded);
       shift_view_by_matrix(rspintox(unshift(H)) * xpush(-l) * spintox(unshift(H)), sm);
       return;
     case smLie:

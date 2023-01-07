@@ -565,6 +565,35 @@ EX hyperpoint ultra_normalize(hyperpoint H) {
   return normalize(H);
   }
 
+/** used in esl2_ita */
+EX transmatrix esl2_zpush(ld z) { return cspin(2, 3, z) * cspin(0, 1, z); }
+
+/** see esl2_ita; equal to esl2_ita * C0 */
+EX hyperpoint esl2_ita0(hyperpoint h1) {
+  return esl2_zpush(h1[2]) * xpush(h1[0]) * ypush0(h1[1]);
+  }
+
+/** in embedded-in-sl2, convert from intermediate to actual coordinates */
+EX transmatrix esl2_ita(hyperpoint h1) {
+  return esl2_zpush(h1[2]) * xpush(h1[0]) * ypush(h1[1]);
+  }
+
+/** in embedded-in-sl2, convert from actual to intermediate coordinates */
+EX hyperpoint esl2_ati(hyperpoint h) {
+  ld a1 = (h[0] * h[3] - h[1] * h[2]) / (-h[2] * h[2] - h[1] * h[1] -h[0] * h[0] - h[3] * h[3]);
+  // a1 is S*sqrt(1+S*S) / (1+2*S*S), where S = sinh(-x) and C = cosh(-x); U is S*S
+  ld a = a1 * a1;
+  ld b = 4 * a - 1;
+  ld U = sqrt(.25 - a/b) - .5;
+  ld S = sqrt(U) * (a1 > 0 ? 1 : -1);
+  ld x = -asinh(S);
+  h = lorentz(0, 3, -x) * lorentz(1, 2, x) * h;
+  ld y = h[3] ? atanh(h[1] / h[3]) : atanh(h[0] / h[2]);
+  h = lorentz(0, 2, -y) * lorentz(1, 3, -y) * h;
+  ld z = atan2(h[2], h[3]);
+  return hyperpoint(x, y, z, 0);
+  }
+
 /** normalize, and in product geometry, also flatten */
 EX hyperpoint normalize_flat(hyperpoint h) {
   if(gproduct) {
@@ -576,8 +605,13 @@ EX hyperpoint normalize_flat(hyperpoint h) {
       }
     return product_decompose(h).second;
     }
-  if(sl2) h = slr::translate(h) * zpush0(-atan2(h[2], h[3]));
   if(geom3::euc_in_nil()) h[1] = 0;
+  if(geom3::euc_in_sl2()) {
+    hyperpoint h1 = esl2_ati(h);
+    h1[1] = 0;
+    return esl2_ita0(h1);
+    }
+  else if(sl2) h = slr::translate(h) * zpush0(-atan2(h[2], h[3]));
   if(geom3::euc_in_solnih()) h[2] = 0;
   if(geom3::hyp_in_solnih()) h[0] = 0;
   if(geom3::euc_in_sph()) {
@@ -648,6 +682,13 @@ EX transmatrix cspin(int a, int b, ld alpha) {
   transmatrix T = Id;
   T[a][a] = +cos(alpha); T[a][b] = +sin(alpha);
   T[b][a] = -sin(alpha); T[b][b] = +cos(alpha);
+  return T;
+  }
+
+EX transmatrix lorentz(int a, int b, ld v) {
+  transmatrix T = Id;
+  T[a][a] = T[b][b] = cosh(v);
+  T[a][b] = T[b][a] = sinh(v);
   return T;
   }
 
@@ -873,6 +914,11 @@ EX hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
     by += z;
     return zpush(bz) * xpush(bx) * ypush(by) * C0;
     }
+  if(geom3::euc_in_sl2()) {
+    hyperpoint h1 = esl2_ati(h);
+    h1[1] += z;
+    return esl2_ita0(h1);
+    }
   if(GDIM == 2) return scale_point(h, geom3::scale_at_lev(z));
   if(gproduct) return scale_point(h, exp(z));
   if(sl2) return slr::translate(h) * cpush0(2, z);
@@ -954,6 +1000,11 @@ EX void swapmatrix(transmatrix& T) {
     T = xpush(h1[0]) * zpush(h1[2]);
     return;
     }
+  else if(geom3::euc_in_sl2() && !geom3::flipped) {
+    hyperpoint h1 = cgi.logical_to_actual * get_column(T, 2); h1[1] = 0;
+    T = esl2_ita(h1);
+    return;
+    }
   else if(geom3::in_product()) {
     /* just do nothing */
     }
@@ -984,6 +1035,11 @@ EX void swapmatrix(hyperpoint& h) {
   if(geom3::sph_in_euc()) { h[3] = 1; return; }
   if(geom3::sph_in_hyp()) { h[0] *= sinh(1); h[1] *= sinh(1); h[2] *= sinh(1); h[3] = cosh(1); return; }
   if(geom3::euc_in_nil()) { h = cgi.logical_to_actual * h; h[3] = 1; h[1] = 0; return; }
+  if(geom3::euc_in_sl2()) {
+    hyperpoint h1 = cgi.logical_to_actual * h; h1[1] = 0;
+    h = esl2_ita0(h1);
+    return;
+    }
   if(geom3::euc_in_sph()) {
     h = cgi.logical_to_actual * h;
     h = cspin(0, 2, h[0]) * cspin(1, 3, h[1]) * lzpush(1) * C0;
@@ -1710,7 +1766,7 @@ EX bool use_embedded_shift(eShiftMethodApplication sma) {
 EX eShiftMethod shift_method(eShiftMethodApplication sma) {
   if(gproduct) return smProduct;
   if(embedded_plane && sma == smaObject) return geom3::same_in_same() ? smIsotropic : smEmbedded;
-  if(embedded_plane && use_embedded_shift(sma)) return nonisotropic ? smLie : smEmbedded;
+  if(embedded_plane && use_embedded_shift(sma)) return (nonisotropic && !sl2) ? smLie : smEmbedded;
   if(!nonisotropic && !stretch::in() && !(!nisot::geodesic_movement && hyperbolic && bt::in())) return smIsotropic;
   if(!nisot::geodesic_movement && !embedded_plane) return smLie;
   return smGeodesic;
@@ -1860,8 +1916,8 @@ inline shiftpoint tC0(const shiftmatrix &T) {
 #endif
 
 EX hyperpoint xspinpush0(ld alpha, ld x) {
-  if(sl2) return slr::polar(x, -alpha, 0);
   if(embedded_plane) return lspinpush0(alpha, x);
+  if(sl2) return slr::polar(x, -alpha, 0);
   hyperpoint h = Hypc;
   h[LDIM] = cos_auto(x);
   h[0] = sin_auto(x) * cos(alpha);

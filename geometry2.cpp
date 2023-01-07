@@ -237,7 +237,7 @@ void horo_distance::become(hyperpoint h1) {
     a = abs(bt::horo_level(h1));
     }
   #endif
-  else if(mhybrid)
+  else if(mhybrid || sl2)
     a = 0, b = hdist(h1, C0);
   else if(geom3::euc_in_product())
     a = 0, b = hdist(h1, C0);
@@ -250,7 +250,7 @@ horo_distance::horo_distance(shiftpoint h1, const shiftmatrix& T) {
   if(bt::in()) become(inverse_shift(T, h1));
   else
 #endif
-  if(sn::in() || mhybrid || nil) become(inverse_shift(T, h1));
+  if(sn::in() || mhybrid || nil || sl2) become(inverse_shift(T, h1));
   else if(geom3::euc_in_product())
     a = 0, b = hdist(h1.h, unshift(T * tile_center(), h1.shift));
   else
