@@ -199,12 +199,15 @@ void full_fix(transmatrix& T) {
       fixmatrix(T);
       }
     else {
-      hyperpoint h = tC0(T);
+      hyperpoint h = T * tile_center();
       transmatrix rot = iso_inverse(map_relative_push(h)) * T;
+      if(geom3::euc_in_sph()) rot = rot * lzpush(1);
       fix_rotation(rot);
       if(geom3::hyp_in_solnih()) h[0] = 0;
-      if(geom3::euc_in_nil()) h[1] = 0;
+      else if(geom3::euc_in_nil()) h[1] = 0;
+
       T = map_relative_push(h) * rot;
+      if(geom3::euc_in_sph()) T = T * lzpush(-1);
       fixmatrix(T);
       }
     }

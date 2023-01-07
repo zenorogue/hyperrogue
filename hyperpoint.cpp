@@ -1791,7 +1791,7 @@ EX eShiftMethod shift_method(eShiftMethodApplication sma) {
   return smGeodesic;
   }
 
-EX transmatrix shift_object(const transmatrix Position, const transmatrix& ori, const hyperpoint direction, eShiftMethod sm IS(shift_method(smaObject))) {
+EX transmatrix shift_object(transmatrix Position, const transmatrix& ori, const hyperpoint direction, eShiftMethod sm IS(shift_method(smaObject))) {
   switch(sm) {
     case smGeodesic:
       return nisot::parallel_transport(Position, direction);
@@ -1814,14 +1814,20 @@ EX transmatrix shift_object(const transmatrix Position, const transmatrix& ori, 
         return Position * T;
         }
 
-      transmatrix rot = inverse(map_relative_push(Position * C0)) * Position;
+      if(geom3::euc_in_sph()) Position = inverse(View) * Position;
+
+      transmatrix rot = inverse(map_relative_push(Position * tile_center())) * Position;
+      if(moved_center()) rot = rot * lzpush(1);
       transmatrix urot = unswap_spin(rot);
 
       geom3::light_flip(true);
       transmatrix T = rgpushxto0(direct_exp(urot * direction));
       geom3::light_flip(false);
       swapmatrix(T);
-      return Position * inverse(rot) * T * rot;
+      auto res = Position * inverse(rot) * T * rot;
+
+      if(geom3::euc_in_sph()) res = View * res;
+      return res;
       }
     default: throw hr_exception("unknown shift method in shift_object");
     }
