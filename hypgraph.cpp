@@ -3413,7 +3413,7 @@ EX void shift_view_towards(shiftpoint H, ld l, eShiftMethod sm IS(shift_method(s
       shift_view_by_matrix(rspintox(unshift(H)) * xpush(-l) * spintox(unshift(H)), sm);
       return;
     case smLie:
-      shift_view(tangent_length(unshift(H)-C0, -l), sm);
+      shift_view(tangent_length(lie_log(H), -l), sm);
       return;
     case smGeodesic:
     case smProduct: {
