@@ -774,7 +774,8 @@ EX shiftmatrix face_the_player(const shiftmatrix V) {
   if(mproduct) return orthogonal_move(V, cos(ptick(750)) * cgi.plevel / 16);
   if(mhybrid) return V * zpush(cos(ptick(750)) * cgi.plevel / 16);
   transmatrix dummy; /* used only in prod anyways */
-  if(geom3::euc_in_nil()) return V;
+  if(geom3::euc_vertical()) return V;
+  if(geom3::euc_in_sph()) return V;
   if(nonisotropic && !embedded_plane) return shiftless(spin_towards(unshift(V), dummy, C0, 2, 0));
   #if CAP_VR
   if(vrhr::enabled) {
