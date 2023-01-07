@@ -3283,7 +3283,7 @@ EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V, eShift
     case smIsotropic:
       return rgpushxto0(direct_exp(H)) * V;
     case smEmbedded:
-      return get_shift_view_embedded_of(V, rgpushxto0(direct_exp(H))) * V;
+      return get_shift_view_embedded_of(V, rgpushxto0(direct_exp(H)));
     case smLie: {
       transmatrix IV = view_inverse(View);
       transmatrix view_shift = eupush( tC0(IV) );
@@ -3324,15 +3324,14 @@ EX transmatrix get_shift_view_embedded_of(const transmatrix V, const transmatrix
   transmatrix V1 = T * V;
   transmatrix IV1 = view_inverse(V1);
   transmatrix rot1 = V1 * map_relative_push(IV1 * C0);
-  return rot * inverse(rot1) * T;
+  return rot * inverse(rot1) * V1;
   }
 
 /** works in embedded_plane (except embedded product where shift_view works) */
 void shift_view_embedded(const transmatrix T) {
-  transmatrix R = get_shift_view_embedded_of(View, T);
-  View = R * View;
+  View = get_shift_view_embedded_of(View, T);
   auto& wc = current_display->which_copy;
-  wc = R * wc;
+  wc = get_shift_view_embedded_of(wc, T);
   }
 
 EX transmatrix get_shift_view_embedded_of_esl2(const transmatrix V, const hyperpoint h) {
