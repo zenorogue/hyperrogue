@@ -1447,6 +1447,7 @@ EX void switch_always3() {
           }
         }
       if(spatial_embedding == seCliffordTorus) configure_clifford_torus();
+      if(spatial_embedding == seProductS) configure_product_cylinder();
       }
     else {
       vid.always3 = false;
@@ -1487,6 +1488,18 @@ EX void switch_always3() {
     vid.depth = alpha - 1;
     vid.wall_height = min(1 / euclid_embed_scale_mean(), (90._deg - alpha) * 0.9);
     vid.eye = vid.wall_height / 2 - vid.depth;
+    }
+
+  EX void configure_product_cylinder() {
+    rug::clifford_torus ct;
+    hyperpoint vec;
+    if(sqhypot_d(2, ct.yh) < 1e-6) vec = ct.yh;
+    else if(sqhypot_d(2, ct.xh) < 1e-6) vec = ct.xh;
+    else vec = hyperpoint(10, 0, 0, 0);
+
+    euclid_embed_scale = TAU / hypot_d(2, vec);
+    euclid_embed_scale_y = 1;
+    euclid_embed_rotate = atan2(vec[1], vec[0]) / degree;
     }
 
   EX }
