@@ -475,10 +475,16 @@ namespace sag {
   void iterate() {
     if(!sagmode) return;
     int t1 = SDL_GetTicks();
+    #if CAP_SDL && !CAP_SDL2
     int last = -1;
+    #endif
     for(int i=0; i<ipturn; i++) {
       numiter++;
       sag::saiter();
+      #if CAP_SDL && !CAP_SDL2
+      int q = i * sag_ittime / ipturn;
+      if(q > last) { last = 1; SDL_PumpEvents(); }
+      #endif
       }
     int t2 = SDL_GetTicks();
     int t = t2 - t1;
