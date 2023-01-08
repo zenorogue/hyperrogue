@@ -495,10 +495,10 @@ void handle_animation(ld t) {
         if(j == 0)
           h = tC0(f.V);
         if(j == 1) {
-          h = tC0(shift_object(f.V, f.ori, ztangent(f.front_distance)));
+          h = tC0(shift_object(f.V, f.ori, ztangent(f.front_distance), smGeodesic));
           }
         if(j == 2) {
-          h = tC0(shift_object(f.V, f.ori, ctangent(1, -f.up_distance)));
+          h = tC0(shift_object(f.V, f.ori, ctangent(1, -f.up_distance), smGeodesic));
           }
         prepare_for_interpolation(h);
         values.push_back(h[i]);
