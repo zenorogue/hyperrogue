@@ -3284,29 +3284,45 @@ EX hyperpoint lie_log_correct(const shiftpoint H_orig, hyperpoint& H) {
   }
 
 /** Shift the view according to the given tangent vector. NOTE: known bug when  // note: possible error when lie_exp includes a shift!*/
-EX transmatrix get_shift_view_of(const hyperpoint H, const transmatrix V, eShiftMethod sm IS(shift_method(smaManualCamera))) {
+EX void shift_v_by_vector(transmatrix& V, const hyperpoint H, eShiftMethod sm IS(shift_method(smaManualCamera))) {
   switch(sm) {
     case smProduct:
-      return rgpushxto0(direct_exp(lp_iapply(H))) * V;
+      V = rgpushxto0(direct_exp(lp_iapply(H))) * V;
+      return;
     case smIsotropic:
-      return rgpushxto0(direct_exp(H)) * V;
+      V = rgpushxto0(direct_exp(H)) * V;
+      return;
     case smEmbedded:
-      return get_shift_view_embedded_of(V, rgpushxto0(direct_exp(H)));
+      return shift_v_embedded(V, rgpushxto0(direct_exp(H)));
     case smLie: {
-      transmatrix IV = view_inverse(View);
+      transmatrix IV = view_inverse(V);
       transmatrix view_shift = eupush( tC0(IV) );
       transmatrix rot = V * view_shift;
       hyperpoint tH = lie_exp(inverse(rot) * H).h;
-      return rot * eupush(tH) * inverse(view_shift);
+      V = rot * eupush(tH) * inverse(view_shift);
+      return;
       }
     case smGeodesic:
-      return iview_inverse(nisot::parallel_transport(view_inverse(V), -H));
+      V = iview_inverse(nisot::parallel_transport(view_inverse(V), -H));
+      return;
     case smESL2: {
-      return get_shift_view_embedded_of_esl2(V, esl2_ita0(lp_iapply(-H)));
+      hyperpoint H1 = esl2_ita0(lp_iapply(-H));
+      transmatrix IV = view_inverse(V);
+      transmatrix rot = V * map_relative_push(IV * C0);
+      transmatrix V1 = gpushxto0(H1) * gpushxto0(IV*C0);
+      transmatrix IV1 = view_inverse(V1);
+      transmatrix rot1 = V1 * map_relative_push(IV1 * C0);
+      V = rot * inverse(rot1) * V1;
+      return;
       }
     default:
       throw hr_exception("unknown shift method (embedded not supported)");
     }
+  }
+
+EX transmatrix get_shift_view_of(const hyperpoint H, transmatrix V, eShiftMethod sm IS(shift_method(smaManualCamera))) {
+  shift_v_by_vector(V, H, sm);
+  return V;
   }
 
 /** shift the view according to the given tangent vector */
@@ -3326,46 +3342,22 @@ EX void shift_view(hyperpoint H, eShiftMethod sm IS(shift_method(smaManualCamera
   }
 
 /** works in embedded_plane (except embedded product where shift_view works, and euc_in_sl2) */
-EX transmatrix get_shift_view_embedded_of(const transmatrix V, const transmatrix T) {
+EX void shift_v_embedded(transmatrix& V, const transmatrix T) {
   transmatrix IV = view_inverse(V);
   transmatrix rot = V * map_relative_push(IV * C0);
   transmatrix V1 = T * V;
   transmatrix IV1 = view_inverse(V1);
   transmatrix rot1 = V1 * map_relative_push(IV1 * C0);
-  return rot * inverse(rot1) * V1;
+  V = rot * inverse(rot1) * V1;
   }
 
-/** works in embedded_plane (except embedded product where shift_view works) */
-void shift_view_embedded(const transmatrix T) {
-  View = get_shift_view_embedded_of(View, T);
-  auto& wc = current_display->which_copy;
-  wc = get_shift_view_embedded_of(wc, T);
-  }
-
-EX transmatrix get_shift_view_embedded_of_esl2(const transmatrix V, const hyperpoint h) {
-  transmatrix IV = view_inverse(V);
-  transmatrix rot = V * map_relative_push(IV * C0);
-  transmatrix V1 = gpushxto0(h) * gpushxto0(IV*C0);
-  transmatrix IV1 = view_inverse(V1);
-  transmatrix rot1 = V1 * map_relative_push(IV1 * C0);
-  return rot * inverse(rot1) * V1;
-  }
-
-/** works in isotropic and product spaces */
-void shift_view_mmul(const transmatrix T) {
-  View = T * View;
-  auto& wc = current_display->which_copy;
-  wc = T * wc;
-  }
-
-void shift_view_by_matrix(const transmatrix T, eShiftMethod sm) {
+EX void shift_v_by_matrix(transmatrix& V, const transmatrix T, eShiftMethod sm) {
   switch(sm) {
     case smEmbedded:
-      shift_view_embedded(T);
-      return;
+      return shift_v_embedded(V, T);
     case smIsotropic:
     case smProduct:
-      shift_view_mmul(T);
+      V = T * V;
       return;
     default:
       throw hr_exception("unsupported shift method in shift_view_by_matrix");
@@ -3415,44 +3407,47 @@ EX transmatrix map_relative_push(hyperpoint h) {
   }
 
 EX void shift_view_to(shiftpoint H, eShiftMethod sm IS(shift_method(smaManualCamera))) {
+  shift_v_to(View, H, sm);
+  shift_v_to(current_display->which_copy, H, sm);
+  }
+
+EX void shift_v_to(transmatrix& V, shiftpoint H, eShiftMethod sm IS(shift_method(smaManualCamera))) {
   switch(sm) {
     case smIsotropic:
     case smEmbedded:
     case smProduct:
-      shift_view_by_matrix(gpushxto0(unshift(H)), sm);
-      return;
+      return shift_v_by_matrix(V, gpushxto0(unshift(H)), sm);
     case smESL2:
-      shift_view(-lp_apply(esl2_ati(lp_iapply(unshift(H)))), sm);
-      return;
+      return shift_v_by_vector(V, -lp_apply(esl2_ati(lp_iapply(unshift(H)))), sm);
     case smLie:
-      shift_view(-lie_log(H), sm);
+      return shift_v_by_vector(V, -lie_log(H), sm);
       return;
     case smGeodesic:
-      shift_view(-inverse_exp(H), sm);
-      return;
+      return shift_v_by_vector(V, -inverse_exp(H), sm);
     default:
       throw hr_exception("unsupported shift method in shift_view_to");
     }
   }
 
 EX void shift_view_towards(shiftpoint H, ld l, eShiftMethod sm IS(shift_method(smaManualCamera))) {
+  shift_v_towards(View, H, l, sm);
+  shift_v_towards(current_display->which_copy, H, l, sm);
+  }
+
+EX void shift_v_towards(transmatrix& V, shiftpoint H, ld l, eShiftMethod sm IS(shift_method(smaManualCamera))) {
   switch(sm) {
     case smIsotropic:
     case smEmbedded:
-      shift_view_by_matrix(rspintox(unshift(H)) * xpush(-l) * spintox(unshift(H)), sm);
-      return;
+      return shift_v_by_matrix(V, rspintox(unshift(H)) * xpush(-l) * spintox(unshift(H)), sm);
     case smESL2:
-      shift_view(-lp_apply(tangent_length(esl2_ati(lp_iapply(unshift(H))), l)));
-      return;
+      return shift_v_by_vector(V, -lp_apply(tangent_length(esl2_ati(lp_iapply(unshift(H))), l)), sm);
     case smLie:
-      shift_view(tangent_length(lie_log(H), -l), sm);
-      return;
+      return shift_v_by_vector(V, tangent_length(lie_log(H), -l), sm);
     case smGeodesic:
     case smProduct: {
       hyperpoint ie = inverse_exp(H, pNORMAL | pfNO_DISTANCE);
       if(gproduct) ie = lp_apply(ie);
-      shift_view(tangent_length(ie, -l), sm);
-      return;
+      return shift_v_by_vector(V, tangent_length(ie, -l), sm);
       }
     default:
       throw hr_exception("unsupported shift method in shift_view_towards");
