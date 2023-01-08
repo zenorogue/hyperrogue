@@ -440,6 +440,7 @@ EX void drawStats() {
   
   first_cell_to_draw = true;
   bool h = hide_player();
+  instat = false;
 
   bool cornermode = (vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100);
   
@@ -527,7 +528,6 @@ EX void drawStats() {
   
   else {
   
-    instat = false;
     bool portrait = vid.xres < vid.yres;
     int colspace = portrait ? (current_display->ycenter - current_display->scrsize - 3 * vid.fsize) : (vid.xres - vid.yres - 16) / 2;
     int rowspace = portrait ? vid.xres - 16 : vid.yres - vid.fsize * (vid.msgleft ? 9 : 4);
