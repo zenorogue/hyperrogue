@@ -2617,56 +2617,36 @@ EX bool applyAnimation(cell *c, shiftmatrix& V, double& footphase, int layer) {
   ld aspd = td / 1000.0 * exp(vid.mspeed);
   ld R;
   again:
-  
-  if(sl2) {
-    a.wherenow = slr::translate(tC0(a.wherenow));
-    hyperpoint h = tC0(iso_inverse(a.wherenow));
-    hyperpoint ie = slr::get_inverse_exp(shiftless(h));
-    auto R = hypot_d(3, ie);
-    aspd *= (1+R+(shmup::on?1:0));
-    if(R < aspd || std::isnan(R) || std::isnan(aspd) || R > 10) {
-      animations[layer].erase(c);
-      return false;
-      }
-    a.wherenow = nisot::parallel_transport(a.wherenow, tangent_length(h, aspd));
-    a.footphase += a.attacking == 2 ? -aspd : aspd;
-    // todo attack animation, rotate correctly
-    footphase = a.footphase;
-    V = V * a.wherenow;
-    a.ltick = ticks;
-    return true;
-    }
+  auto TC0 = tile_center();
 
   if(among(a.attacking, 1, 3))
-    R = hdist(tC0(a.attackat), tC0(a.wherenow));
+    R = hdist(a.attackat * TC0, a.wherenow * TC0);
   else
-    R = hdist0(tC0(a.wherenow));
+    R = hdist(a.wherenow * TC0, TC0);
   aspd *= (1+R+(shmup::on?1:0));
 
   if(a.attacking == 3 && aspd > R) aspd = R;
-  
+
   if((R < aspd || std::isnan(R) || std::isnan(aspd) || R > 10) && a.attacking != 3) {
     if(a.attacking == 1) { a.attacking = 2; goto again; }
     animations[layer].erase(c);
     return false;
     }
   else {
+    transmatrix T = inverse(a.wherenow);
+    if(moved_center()) T = lzpush(-1) * T;
+
     hyperpoint wnow;
     if(a.attacking == 1 || a.attacking == 3)
-      wnow = tC0(z_inverse(a.wherenow) * a.attackat);
+      wnow = T * a.attackat * TC0;
     else
-      wnow = tC0(z_inverse(a.wherenow));
+      wnow = T * TC0;
     
-    if(gproduct) {
-      auto d = product_decompose(wnow);
-      ld dist = d.first / R * aspd;
-      if(abs(dist) > abs(d.first)) dist = -d.first;
-      a.wherenow = orthogonal_move(a.wherenow, dist);
-      /* signed_sqrt to prevent precision errors */
-      aspd *= signed_sqrt(R*R - d.first * d.first) / R;
-      }
-    a.wherenow = a.wherenow * rspintox(wnow);
-    a.wherenow = a.wherenow * xpush(aspd);
+    shift_v_towards(T, shiftless(wnow), aspd, shift_method(smaAnimation));
+    if(moved_center()) T = lzpush(1) * T;
+    a.wherenow = inverse(T);
+    fixmatrix(a.wherenow);
+
     if(cgflags & qAFFINE) {
       transmatrix T = a.wherenow;
       fixmatrix_euclid(T);
@@ -2675,15 +2655,15 @@ EX bool applyAnimation(cell *c, shiftmatrix& V, double& footphase, int layer) {
         a.wherenow[i] = lerp(a.wherenow[i], Id[i], aspd / R);
       a.wherenow = T * a.wherenow;
       }
-    fixmatrix(a.wherenow);
+
     a.footphase += a.attacking == 2 ? -aspd : aspd;
     if(a.attacking == 3 && aspd >= R) {
       a.footphase = 0;
       hyperpoint h1 = a.wherenow * C0;
-      a.wherenow = rgpushxto0(h1) * rspintox(h1);
+      a.wherenow = rgpushxto0(h1) * lrspintox(h1);
       }
     footphase = a.footphase;
-    V = V * a.wherenow;
+    V = V * a.wherenow * lrspintox(wnow);
     if(a.mirrored) V = V * lmirror();
     if(a.attacking == 2) V = V * lpispin();
     a.ltick = ticks;
@@ -6055,8 +6035,8 @@ EX void animateAttackOrHug(const movei& m, int layer, int phase, ld ratio, ld de
   bool newanim = !animations[layer].count(m.s);
   animation& a = animations[layer][m.s];
   a.attacking = phase;
-  if(phase == 3) println(hlog, "distance = ", hdist0(T * C0));
-  a.attackat = lrspintox(tC0(iso_inverse(T))) * lxpush(hdist0(T*C0) * ratio + delta);
+  auto TC0 = tile_center();
+  a.attackat = lrspintox(iso_inverse(T) * TC0) * lxpush(hdist(TC0, T*TC0) * ratio + delta);
   if(newanim) a.wherenow = Id, a.ltick = ticks, a.footphase = 0;
   }
 

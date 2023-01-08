@@ -1767,14 +1767,14 @@ EX ld xcross(ld x1, ld y1, ld x2, ld y2) { return x1 + (x2 - x1) * y1 / (y1 - y2
 #if HDR
 enum eShiftMethod { smProduct, smIsotropic, smEmbedded, smLie, smGeodesic, smESL2 };
 enum eEmbeddedShiftMethodChoice { smcNone, smcBoth, smcAuto };
-enum eShiftMethodApplication { smaManualCamera, smaAutocenter, smaObject, smaWallRadar };
+enum eShiftMethodApplication { smaManualCamera, smaAutocenter, smaObject, smaWallRadar, smaAnimation };
 #endif
 
 EX eEmbeddedShiftMethodChoice embedded_shift_method_choice = smcBoth;
 
 EX bool use_embedded_shift(eShiftMethodApplication sma) {
   switch(sma) {
-    case smaAutocenter: return embedded_shift_method_choice != smcNone;
+    case smaAutocenter: case smaAnimation: return embedded_shift_method_choice != smcNone;
     case smaManualCamera: return embedded_shift_method_choice == smcBoth;
     case smaObject: return true;
     case smaWallRadar: return among(pmodel, mdLiePerspective, mdLieOrthogonal);
