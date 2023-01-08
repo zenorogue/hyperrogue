@@ -386,6 +386,8 @@ ld loglik_cont_approx(logistic& l) {
 
 using logisticfun = std::function<ld(logistic&)>;
 
+int max_steps = 100000;
+
 void fast_loglik_cont(logistic& l, const logisticfun& f, const char *name, ld start, ld eps) {
 
   if(name) println(hlog, "fix_logistic_parameters");
@@ -408,16 +410,16 @@ void fast_loglik_cont(logistic& l, const logisticfun& f, const char *name, ld st
     loop:
     bool changed = false;        
     
-    while(true) { steps++; l.R += step; ld t = ff(); if(t <= cur || steps > 1000) break; cur = t; changed = true; }
+    while(true) { steps++; l.R += step; ld t = ff(); if(t <= cur || steps > max_steps) break; cur = t; changed = true; }
     l.R -= step;
     
-    while(true) { steps++; l.R -= step; ld t = ff(); if(t <= cur || steps > 1000) break; cur = t; changed = true; }
+    while(true) { steps++; l.R -= step; ld t = ff(); if(t <= cur || steps > max_steps) break; cur = t; changed = true; }
     l.R += step;
 
-    while(true) { steps++; l.T += step; ld t = ff(); if(t <= cur || steps > 1000) break; cur = t; changed = true; }
+    while(true) { steps++; l.T += step; ld t = ff(); if(t <= cur || steps > max_steps) break; cur = t; changed = true; }
     l.T -= step;
     
-    while(true) { steps++; l.T -= step; ld t = ff(); if(t <= cur || l.T < 1e-3 || steps > 1000) break; cur = t; changed = true; }
+    while(true) { steps++; l.T -= step; ld t = ff(); if(t <= cur || l.T < 1e-3 || steps > max_steps) break; cur = t; changed = true; }
     l.T += step;
     
     if(changed) goto loop;
