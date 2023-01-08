@@ -5073,7 +5073,10 @@ EX void make_actual_view() {
   #endif
   #if MAXMDIM >= 4
   if(embedded_plane) {
-    if(nonisotropic) {
+    if(geom3::euc_in_sl2()) {
+      current_display->radar_transform = inverse(actual_view_transform * View);
+      }
+    else if(nonisotropic) {
       transmatrix T = actual_view_transform * View;
       ld z = -tC0(view_inverse(T)) [2];
       transmatrix R = actual_view_transform;
