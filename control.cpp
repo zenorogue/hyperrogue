@@ -1120,7 +1120,7 @@ EX void handle_event(SDL_Event& ev) {
       
       bool act = false;
       
-      if(vid.quickmouse) {
+      if(vid.quickmouse || getcstat == PSEUDOKEY_LIST_SLIDER) {
         act = down;
         }
       else {
