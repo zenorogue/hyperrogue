@@ -1910,7 +1910,7 @@ EX hyperpoint vertical_vector() {
     }
   if(embedded_plane && geom3::same_in_same())
     return get_view_orientation() * lztangent(vid.wall_height);
-  if(geom3::euc_in_sl2()) {
+  if(geom3::euc_in_sl2() || geom3::euc_in_sph()) {
     transmatrix Rot = View * map_relative_push(inverse(View) * C0);
     return Rot * lztangent(vid.wall_height);
     }

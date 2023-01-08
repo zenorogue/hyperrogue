@@ -5098,6 +5098,9 @@ EX void make_actual_view() {
 
       current_display->radar_transform = R * zpush(z);
       }
+    else if(geom3::euc_in_sph()) {
+      current_display->radar_transform = inverse(View);
+      }
     else {
       transmatrix T = actual_view_transform * View;
       transmatrix U = view_inverse(T);
