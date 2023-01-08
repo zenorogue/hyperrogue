@@ -4863,3 +4863,18 @@ Other bugfixes:
 - fixed centering on reset
 - disabling geodesic movement in Sol/Nil now also assumes that light moves along Lie lines, and shmup monsters move correctly too
 - fixed grid drawing for binary variants
+
+
+2022-12-18 00:59 Update 12.1h:
+
+Bug fixes:
+- fixed context help getting stuck in corner stats mode
+- fixed Princess AI using boat
+- shallow water is no longer glitched when the 3D settings are illegal
+
+Further improvements to the "3D style" (embed 2D in a 3D geometry) feature:
+- four new embeddings of Euclidean space: Clifford torus (S3), product space (H2xR, S2xR), and SL2
+- Hypersian Rug options are now linked in 3D settings
+- fixed movement animations
+- better diagnostics when an embedding does not work
+- fixed a bug rendering band model without shader
