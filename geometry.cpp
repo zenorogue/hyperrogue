@@ -1026,6 +1026,9 @@ EX namespace geom3 {
       ABODY = 1.08;
       AHEAD = 1.12;
       BIRD = 1.20;
+      SHALLOW = .95;
+      STUFF = 1;
+      LOWSKY = SKY = HIGH = HIGH2 = 1;
       }
     else {
       INFDEEP = GDIM == 3 ? (sphere ? 90._deg : +5) : (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(vid.camera);
