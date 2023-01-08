@@ -710,6 +710,7 @@ EX transmatrix cspin180(int a, int b) {
 /** rotate by alpha degrees in the XY plane */
 EX transmatrix spin(ld alpha) {
   if(embedded_plane && geom3::euc_in_product()) return Id;
+  if(embedded_plane && geom3::euc_in_sl2()) return Id; // just looks weird...
   if(embedded_plane && geom3::euc_vertical()) return cspin(0, 2, alpha);
   if(embedded_plane && geom3::hyp_in_solnih()) return cspin(1, 2, alpha);
   return cspin(0, 1, alpha);
@@ -1204,6 +1205,7 @@ EX transmatrix rspintox(const hyperpoint& H) {
 
 EX transmatrix lspintox(const hyperpoint& H) {
   if(geom3::euc_in_product()) return Id;
+  if(geom3::euc_in_sl2()) return Id;
   if(geom3::euc_vertical()) return spintoc(H, 0, 2);
   if(geom3::hyp_in_solnih()) return spintoc(H, 1, 2);
   if(WDIM == 2 || gproduct) return spintoc(H, 0, 1);
@@ -1213,8 +1215,9 @@ EX transmatrix lspintox(const hyperpoint& H) {
 
 EX transmatrix lrspintox(const hyperpoint& H) {
   if(geom3::euc_in_product()) return Id;
+  if(geom3::euc_in_sl2()) return Id;
   if(geom3::euc_vertical()) return rspintoc(H, 0, 2);
-  if(geom3::hyp_in_solnih()) return rspintoc(H, 1, 2);
+  if(geom3::hyp_in_solnih()) return rspintoc(H, 2, 1);
   if(WDIM == 2 || gproduct) return rspintoc(H, 0, 1);
   transmatrix T1 = spintoc(H, 0, 1);
   return rspintoc(H, 0, 1) * rspintoc(T1*H, 0, 2);
