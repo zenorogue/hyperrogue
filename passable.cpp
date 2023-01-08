@@ -104,7 +104,7 @@ EX bool anti_alchemy(cell *w, cell *from) {
 #if HDR
 #define P_MONSTER    Flag(0)  // can move through monsters
 #define P_MIRROR     Flag(1)  // can move through mirrors
-#define P_REVDIR     Flag(2)  // reverse direction movement
+// unused
 #define P_WIND       Flag(3)  // can move against the wind
 #define P_GRAVITY    Flag(4)  // can move against the gravity
 #define P_ISPLAYER   Flag(5)  // player-only moves (like the Round Table jump)
@@ -141,8 +141,7 @@ EX bool anti_alchemy(cell *w, cell *from) {
 #endif
 
 EX bool passable(cell *w, cell *from, flagtype flags) {
-  bool revdir = (flags&P_REVDIR);
-  bool vrevdir = revdir ^ bool(flags&P_VOID);
+  bool vrevdir = bool(flags&P_VOID);
 
   if(from && from != w && nonAdjacent(from, w) && !F(P_IGNORE37 | P_BULLET)) return false;
   
@@ -151,7 +150,6 @@ EX bool passable(cell *w, cell *from, flagtype flags) {
   
   for(cell *pp: player_positions()) {
     if(w == pp && F(P_ONPLAYER)) return true;
-    if(from == pp && F(P_ONPLAYER) && F(P_REVDIR)) return true;
 
     if(from && !((flags & P_ISPLAYER) && pp->monst)) {
       int i = vrevdir ? incline(w, from) : incline(from, w);
@@ -179,9 +177,6 @@ EX bool passable(cell *w, cell *from, flagtype flags) {
     ) return false;
   
   if(from && (vrevdir ? againstWind(from,w) : againstWind(w, from)) && !F(P_WIND | P_BLOW | P_JUMP1 | P_JUMP2 | P_BULLET | P_AETHER)) return false;
-  
-  if(revdir && from && w->monst && passable(from, w, flags &~ (P_REVDIR|P_MONSTER)))
-    return true;
   
   if(!shmup::on && sword::at(w, flags & P_ISPLAYER) && !F(P_DEADLY | P_BULLET | P_ROSE))
     return false;
@@ -267,6 +262,8 @@ EX bool passable(cell *w, cell *from, flagtype flags) {
     if(in_gravity_zone(w)) ;
     else if(from && from->wall == waBoat && F(P_USEBOAT) && 
       (!againstCurrent(w, from) || F(P_MARKWATER)) && !(from->item == itOrbYendor)) ;
+    else if(from && isWatery(from) && F(P_CHAIN) && F(P_USEBOAT) && !againstCurrent(w, from)) ;
+    else if(!from && F(P_CHAIN) && F(P_USEBOAT)) ;
     else if(!F(P_AETHER | P_FISH | P_FLYING | P_BLOW | P_JUMP1 | P_BULLET | P_DEADLY | P_REPTILE)) return false;
     }
   if(isChasmy(w)) {

@@ -239,11 +239,15 @@ EX void computePathdist(eMonster param, bool include_allies IS(true)) {
       // printf("i=%d cd=%d\n", i, c->move(i)->cpdist);
       cell *c2 = cw1.peek();
       
-      flagtype f = P_MONSTER | P_REVDIR;
-      if(param == moTameBomberbird) f |= P_FLYING;
+      flagtype f = P_MONSTER;
+      if(param == moTameBomberbird) f |= P_FLYING | P_ISFRIEND;
+      if(isPrincess(param)) f |= P_ISFRIEND | P_USEBOAT | P_CHAIN;
+      if(param == moGolem) f |= P_ISFRIEND;
+      bool pass = c2 && c2->pathdist == PINFD;
+      if(pass && qb < qtarg && !nonAdjacent(c, c2) && !thruVine(c,c2)) pass = passable(c2, NULL, f);
+      else pass = pass && passable(c, c2, f);
 
-      if(c2 && c2->pathdist == PINFD &&
-        passable(c2, (qb<qtarg) && !nonAdjacent(c,c2) && !thruVine(c,c2) ?NULL:c, f)) {
+      if(pass) {
         
         if(qb >= qtarg) {
           if(param == moTortoise && nogoSlow(c, c2)) continue;
