@@ -30,9 +30,6 @@ namespace hr {
 
 namespace ads {
 
-shiftpoint kz(shiftpoint x) { x.h = hr::kz(x.h); x.shift = hr::kz(x.shift); return x; }
-shiftmatrix kz(shiftmatrix x) { x.T = hr::kz(x.T); x.shift = hr::kz(x.shift); return x; }
-
 vector<hyperpoint> hs;
 
 int sq = 1;
