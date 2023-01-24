@@ -35,6 +35,7 @@ hyperpoint get_center(const vector<hyperpoint>& vh) {
   hyperpoint h = Hypc;
   for(auto h1: vh) h = h + h1;
   if(geom3::euc_in_product()) return h / isize(vh);
+  if(geom3::euc_cylinder()) h /= isize(vh);
   return normalize_flat(h);
   }
 

@@ -63,6 +63,15 @@ pair<bool, hyperpoint> makeradar(shiftpoint h) {
       if(d > vid.radarrange) return {false, h1};
       if(d) h1 = h1 / (vid.radarrange + cgi.scalefactor/4);
       }
+    else if(geom3::euc_cylinder()) {
+      h1[0] = h.h[0];
+      h1[1] = atan2(h.h[1], h.h[2]);
+      h1[2] = 0;
+      h1 = cgi.intermediate_to_logical * h1;
+      d = hypot_d(2, h1);
+      if(d > vid.radarrange) return {false, h1};
+      if(d) h1 = h1 / (vid.radarrange + cgi.scalefactor/4);
+      }
     else if(geom3::euc_in_sl2()) {
       h1 = cgi.intermediate_to_logical * esl2_ati(unshift(h)); h1[1] = -h1[1];
       d = hypot_d(2, h1);

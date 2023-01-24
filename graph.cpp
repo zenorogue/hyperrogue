@@ -785,6 +785,7 @@ EX shiftmatrix face_the_player(const shiftmatrix V) {
     }
   #endif
   if(embedded_plane && geom3::sph_in_low()) return shiftless(map_relative_push(unshift(V * zpush0(1))) * zpush(-1));
+  if(embedded_plane && geom3::euc_cylinder()) return shiftless(map_relative_push(unshift(V * zpush0(1))) * zpush(-1));
   return rgpushxto0(tC0(V));
   }
 
@@ -5102,6 +5103,9 @@ EX void make_actual_view() {
       current_display->radar_transform = R * zpush(z);
       }
     else if(geom3::euc_in_sph()) {
+      current_display->radar_transform = inverse(View);
+      }
+    else if(geom3::euc_cylinder()) {
       current_display->radar_transform = inverse(View);
       }
     else {

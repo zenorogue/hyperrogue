@@ -3398,6 +3398,12 @@ EX transmatrix map_relative_push(hyperpoint h) {
     auto h1 = esl2_ati(h);
     return esl2_zpush(h1[2]) * xpush(h1[0]) * ypush(h1[1]);
     }
+  if(geom3::euc_cylinder()) {
+    ld z0 = hypot(h[1], h[2]);
+    if(!z0) return Id;
+    transmatrix T = xpush(h[0]) * cspin(1, 2, atan2(h[1], h[2])) * zpush(z0);
+    return T;
+    }
   if(geom3::euc_in_sph()) {
     ld tx = hypot(h[0], h[2]);
     ld ty = hypot(h[1], h[3]);

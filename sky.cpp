@@ -43,7 +43,7 @@ EX struct dqi_sky *sky;
 
 EX void prepare_sky() {
   sky = NULL;
-  if(euclid && !geom3::sph_in_euc()) {
+  if(euclid && !geom3::sph_in_euc() && !geom3::euc_cylinder()) {
     if(WDIM == 3 || GDIM == 2) return;
     if(no_wall_rendering) return;
     if(!draw_sky) return;
@@ -76,6 +76,7 @@ void compute_skyvertices(const vector<sky_item>& sky) {
   if(geom3::hyp_in_solnih()) return;
   if(geom3::euc_in_product()) return;
   if(geom3::euc_in_sl2()) return;
+  if(geom3::euc_cylinder()) return;
 
   int sk = get_skybrightness();
   

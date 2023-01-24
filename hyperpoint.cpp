@@ -629,6 +629,12 @@ EX hyperpoint normalize_flat(hyperpoint h) {
     h1[2] = 0;
     return parabolic13(h1);
     }
+  if(geom3::euc_cylinder()) {
+    h /= h[3];
+    ld z = h[1] * h[1] + h[2] * h[2];
+    if(z > 0) h[1] /= z, h[2] /= z;
+    return h;
+    }
   if(geom3::sph_in_euc()) {
     ld z = hypot_d(3, h);
     if(z > 0) h[0] /= z, h[1] /= z, h[2] /= z;
@@ -883,6 +889,14 @@ EX hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
     hf[3] = 1;
     return hf;
     }
+  if(geom3::euc_cylinder()) {
+    auto hf = h / h[3];
+    ld z0 = hypot(h[1], h[2]);
+    if(!z0) return hf;
+    ld f = ((z0 + z) / z0);
+    hf[1] *= f; hf[2] *= f;
+    return hf;
+    }
   if(geom3::hyp_in_solnih()) {
     return nisot::translate(h) * cpush0(0, z);
     }
@@ -946,6 +960,9 @@ EX ld get_logical_z(hyperpoint h) {
     auto h1 = h / exp(bz);
     return asin_auto(h1[1]);
     }
+  if(geom3::euc_cylinder()) {
+    return hypot(h[1], h[2]) - 1;
+    }
   if(gproduct)
     return log(h[2]);
   return asin_auto(h[2]) - (moved_center() ? 1 : 0);
@@ -997,6 +1014,13 @@ EX void swapmatrix(transmatrix& T) {
   else if(geom3::sph_in_euc() || geom3::sph_in_hyp()) {
     if(!geom3::flipped) {
       for(int i=0; i<4; i++) T[i][3] = T[3][i] = i == 3;
+      }
+    }
+  else if(geom3::euc_cylinder()) {
+    if(!geom3::flipped) {
+      hyperpoint h1 = cgi.logical_to_intermediate * get_column(T, 2);
+      T = xpush(h1[0]) * cspin(1, 2, h1[1]);
+      return;
       }
     }
   else if(geom3::euc_in_nil()) {
@@ -1054,6 +1078,14 @@ EX void swapmatrix(hyperpoint& h) {
   if(geom3::in_product()) return;
   if(geom3::sph_in_euc()) { h[3] = 1; return; }
   if(geom3::sph_in_hyp()) { h[0] *= sinh(1); h[1] *= sinh(1); h[2] *= sinh(1); h[3] = cosh(1); return; }
+  if(geom3::euc_cylinder()) {
+    hyperpoint h1 = cgi.logical_to_intermediate * h;
+    h[0] = h1[0];
+    h[1] = sin(h1[1]);
+    h[2] = cos(h1[1]);
+    h[3] = 1;
+    return;
+    }
   if(geom3::euc_in_nil()) { h = cgi.logical_to_intermediate * h; h[3] = 1; h[1] = 0; return; }
   if(geom3::euc_in_sl2()) {
     hyperpoint h1 = cgi.logical_to_intermediate * h; h1[1] = 0;
@@ -1660,6 +1692,7 @@ EX bool moved_center() {
   if(geom3::sph_in_euc()) return true;
   if(geom3::sph_in_hyp()) return true;
   if(geom3::euc_in_sph()) return true;
+  if(geom3::euc_cylinder()) return true;
   return false;
   }
 
@@ -1668,6 +1701,7 @@ EX hyperpoint tile_center() {
   if(geom3::sph_in_euc()) return C02 + C03;
   if(geom3::euc_in_sph()) return zpush0(1);
   if(geom3::sph_in_hyp()) return zpush0(1);
+  if(geom3::euc_cylinder()) return zpush0(1);
   return C0;
   }
 

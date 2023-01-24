@@ -599,6 +599,7 @@ void geometry_information::prepare_lta() {
   if(embedded_plane) {
     if(geom3::euc_vertical()) lta = cspin90(2, 1) * lta;
     if(geom3::hyp_in_solnih()) lta = cspin90(0, 1) * cspin90(1, 2) * cspin90(0, 1) * lta;
+    if(geom3::euc_cylinder()) lta = cspin90(0, 1) * lta;
     }
   logical_scaled_to_intemediate = lta;
   if(geom3::euc_in_noniso()) {
@@ -1087,7 +1088,11 @@ EX namespace geom3 {
       HIGH2 = lev_to_factor(3 * wh);
       SKY = LOWSKY - sgn * 5;
 
-      if(geom3::mgclass() == gcSphere && geom3::ggclass() != gcSphere) {
+      /* in spherical/cylindrical case, make sure that the high stuff does not go through the center */
+      bool depth_limit = geom3::mgclass() == gcSphere && geom3::ggclass() != gcSphere;
+      depth_limit |= euc_cylinder();
+
+      if(depth_limit) {
         ld max_high = lerp(-FLOOR, -1, 0.8);
         ld max_high2 = lerp(-FLOOR, -1, 0.9);
         if(HIGH < max_high) HIGH = max_high;
@@ -1123,7 +1128,8 @@ EX namespace geom3 {
     seCliffordTorus,
     seProductH,
     seProductS,
-    seSL2
+    seSL2,
+    seCylinder
     };
   #endif
 
@@ -1140,7 +1146,8 @@ EX namespace geom3 {
     {"Clifford Torus",              "Embed Euclidean rectangular torus into S3."},
     {"hyperbolic product", "Embed Euclidean or hyperbolic plane in the H2xR product space."},
     {"spherical product", "Embed Euclidean cylinder or spherical plane in the H2xR product space."},
-    {"SL(2,R)",           "Embed Euclidean plane in twisted product geometry."}
+    {"SL(2,R)",           "Embed Euclidean plane in twisted product geometry."},
+    {"cylinder",          "Embed Euclidean cylinder in Euclidean space."},
     };
 
   EX eSpatialEmbedding spatial_embedding = seDefault;
@@ -1196,7 +1203,12 @@ EX namespace geom3 {
     }
 
   EX bool euc_in_noniso() {
+    if(spatial_embedding == seCylinder) return mgclass() == gcEuclid;
     return among(ggclass(), gcNil, gcSol, gcNIH, gcSolN, gcSphere, gcProduct, gcSL2) && mgclass() == gcEuclid;
+    }
+
+  EX bool euc_cylinder() {
+    return spatial_embedding == seCylinder && mgclass() == gcEuclid;
     }
 
   EX bool sph_in_euc() {
@@ -1220,7 +1232,7 @@ EX namespace geom3 {
     }
 
   EX bool same_in_same() {
-    return mgclass() == ggclass();
+    return mgclass() == ggclass() && !among(spatial_embedding, seCylinder);
     }
 
   EX bool flipped;
@@ -1450,7 +1462,8 @@ EX void switch_always3() {
           }
         }
       if(spatial_embedding == seCliffordTorus) configure_clifford_torus();
-      if(spatial_embedding == seProductS) configure_product_cylinder();
+      if(spatial_embedding == seProductS) configure_cylinder();
+      if(spatial_embedding == seCylinder) configure_cylinder();
       }
     else {
       vid.always3 = false;
@@ -1493,7 +1506,7 @@ EX void switch_always3() {
     vid.eye = vid.wall_height / 2 - vid.depth;
     }
 
-  EX void configure_product_cylinder() {
+  EX void configure_cylinder() {
     rug::clifford_torus ct;
     hyperpoint vec;
     if(sqhypot_d(2, ct.yh) > 1e-6) vec = ct.yh;
