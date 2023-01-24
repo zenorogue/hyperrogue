@@ -1496,8 +1496,8 @@ EX void switch_always3() {
   EX void configure_product_cylinder() {
     rug::clifford_torus ct;
     hyperpoint vec;
-    if(sqhypot_d(2, ct.yh) < 1e-6) vec = ct.yh;
-    else if(sqhypot_d(2, ct.xh) < 1e-6) vec = ct.xh;
+    if(sqhypot_d(2, ct.yh) > 1e-6) vec = ct.yh;
+    else if(sqhypot_d(2, ct.xh) > 1e-6) vec = ct.xh;
     else vec = hyperpoint(10, 0, 0, 0);
 
     euclid_embed_scale = TAU / hypot_d(2, vec);
