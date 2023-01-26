@@ -646,7 +646,7 @@ EX namespace gp {
       }
     if(sp>SG3) sp -= SG6;
 
-    return normalize_flat(spin(TAU*sp/S7) * cornmul(T, corner));
+    return cgi.emb->normalize_flat(spin(TAU*sp/S7) * cornmul(T, corner));
     }
   
   transmatrix dir_matrix(int i) {

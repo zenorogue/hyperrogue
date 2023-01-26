@@ -395,7 +395,7 @@ void raygen::compute_which_and_dist(int flat1, int flat2) {
         "    mediump vec4 next_position = position + d * tangent;\n"
         "    if(dot(next_position, tangent) < dot(m*next_position, m*tangent)) continue;\n"
         "    d /= xspeed;\n";
-    else if(geom3::sph_in_hyp()) fmain +=
+    else if(cgi.emb->is_sph_in_low() && hyperbolic) fmain +=
         "    mediump float v = ((zpush_h3(-1.) * (position - m * position))[3] / (zpush_h3(-1.) * (m * tangent - tangent))[3]);\n"
         "    if(v > 1. || v < -1.) continue;\n"
         "    mediump float d = atanh(v);\n"
@@ -412,7 +412,7 @@ void raygen::compute_which_and_dist(int flat1, int flat2) {
         "    mediump float d = atan(v);\n"
         "    mediump vec4 next_tangent = -position * sin(d) + tangent * cos(d);\n"
         "    if(next_tangent[3] > (m * next_tangent)[3]) continue;\n";
-    else if(geom3::sph_in_euc()) fmain +=
+    else if(cgi.emb->is_sph_in_low() && euclid) fmain +=
         "    vec4 tctr = vec4(0, 0, 1, 0);\n"
         "    mediump float deno = dot(position-tctr, tangent) - dot(m*position-tctr, m*tangent);\n"
         "    if(deno < 1e-6  && deno > -1e-6) continue;\n"
@@ -2119,7 +2119,7 @@ EX transmatrix get_ms(cell *c, int a, bool mirror) {
       }
     h = normalize(h);
     ld d = hdist0(h);
-    if(moved_center()) d -= 1;
+    d -= cgi.emb->center_z();
     if(h[2] > 0) d = -d;
     if(mirror) return MirrorZ * lzpush(2*d);
     return lzpush(2*d);

@@ -305,7 +305,7 @@ struct hrmap_kite : hrmap {
 
     if(emb) {
       geom3::light_flip(false);
-      for(auto& g: graphrules) swapmatrix(g.second);
+      for(auto& g: graphrules) g.second = cgi.emb->base_to_actual(g.second);
 
       geom3::light_flip(f);
       }

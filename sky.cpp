@@ -43,7 +43,7 @@ EX struct dqi_sky *sky;
 
 EX void prepare_sky() {
   sky = NULL;
-  if(euclid && !geom3::sph_in_euc() && !geom3::euc_cylinder()) {
+  if(euclid && !cgi.emb->is_sph_in_low() && !cgi.emb->is_cylinder()) {
     if(WDIM == 3 || GDIM == 2) return;
     if(no_wall_rendering) return;
     if(!draw_sky) return;
@@ -69,14 +69,14 @@ EX void delete_sky() {
 void compute_skyvertices(const vector<sky_item>& sky) {
   skyvertices.clear();
   if(!draw_sky) return;
-  if(vid.wall_height < 0 && geom3::euc_in_hyp()) return; /* just looks bad, hollow horospheres should not have sky */
+  if(vid.wall_height < 0 && cgi.emb->is_euc_in_hyp()) return; /* just looks bad, hollow horospheres should not have sky */
   if(vid.wall_height < 0 && meuclid && geom3::ggclass() == gcNIH) return; /* same */
   if(among(geom3::ggclass(), gcSol, gcSolN)) return;  /* errors */
   if(among(geom3::ggclass(), gcNil)) return;  /* errors sometimes too */
-  if(geom3::hyp_in_solnih()) return;
-  if(geom3::euc_in_product()) return;
-  if(geom3::euc_in_sl2()) return;
-  if(geom3::euc_cylinder()) return;
+  if(cgi.emb->is_hyp_in_solnih()) return;
+  if(cgi.emb->is_euc_in_product()) return;
+  if(cgi.emb->is_euc_in_sl2()) return;
+  if(cgi.emb->is_cylinder()) return;
 
   int sk = get_skybrightness();
   
@@ -231,16 +231,16 @@ void compute_skyvertices(const vector<sky_item>& sky) {
         for(int i=0; i<k; i++) ccolor = gradient(ccolor, vcolors[i], 0, 1, i+1);
         
         hyperpoint ctr = Hypc;
-        for(auto& p: vertices) p = normalize_flat(p);
+        for(auto& p: vertices) p = cgi.emb->normalize_flat(p);
         for(auto& p: vertices) ctr = ctr + p;
-        ctr = normalize_flat(ctr);
+        ctr = cgi.emb->normalize_flat(ctr);
 
         for(int j=0; j<k; j++) {
           int j1 = (j+1) % k;
           glhr::colored_vertex cv[prec+1][prec+1];
           for(int x=0; x<=prec; x++) for(int y=0; y<=prec; y++) if(x+y <= prec) {
             hyperpoint h = ctr * (prec-x-y) + vertices[j] * x + vertices[j1] * y;
-            h = normalize_flat(h);
+            h = cgi.emb->normalize_flat(h);
             color_t co = gradient(ccolor, gradient(vcolors[j], vcolors[j1], 0, y, x+y), 0, x+y, prec);
             // co = (hrand(0x1000000)  << 8) | 0xFF;
             // co = minecolors[(x+2*y) % 7] << 8 | 0xFF;
@@ -311,10 +311,12 @@ EX void be_euclidean_infinity(transmatrix& V) { for(int i=0; i<3; i++) V[i][3] =
 
 void draw_star(const shiftmatrix& V, const hpcshape& sh, color_t col, ld rev = false) {
   ld star_val = 2;
-  bool have_stars = geom3::same_in_same() || geom3::sph_in_euc() || geom3::sph_in_hyp() || geom3::euc_in_hyp();
-  if(geom3::sph_in_euc()) { if(cgi.SKY < 0) have_stars = false; star_val = 1.8; }
-  if(geom3::sph_in_hyp() && cgi.SKY < 0) have_stars = false;
-  if(geom3::euc_in_hyp() && (rev ? cgi.SKY > 0 : cgi.SKY < 0)) have_stars = false;
+  bool have_stars = cgi.emb->is_same_in_same() || cgi.emb->is_sph_in_low() || cgi.emb->is_euc_in_hyp();
+  if(cgi.emb->is_sph_in_low()) {
+    if(cgi.SKY < 0) have_stars = false;
+    if(euclid) star_val = 1.8;
+    }
+  if(cgi.emb->is_euc_in_hyp() && (rev ? cgi.SKY > 0 : cgi.SKY < 0)) have_stars = false;
   if(!have_stars) return;
   ld val = cgi.SKY+star_val;
   if(rev) val = -val;
@@ -339,7 +341,7 @@ void celldrawer::draw_ceiling() {
   switch(ceiling_category(c)) {
     /* ceilingless levels */
     case 1: {
-      if(euclid && !geom3::sph_in_euc()) return;
+      if(euclid && !cgi.emb->is_sph_in_low()) return;
       if(fieldpattern::fieldval_uniq(c) % 3 == 0)
         draw_star(V, cgi.shNightStar, 0xFFFFFFFF);
       add_to_sky(0x00000F, 0x00000F);
@@ -354,7 +356,7 @@ void celldrawer::draw_ceiling() {
       }
     
     case 2: {
-      if(euclid && !geom3::sph_in_euc()) return;
+      if(euclid && !cgi.emb->is_sph_in_low()) return;
       color_t col;
       color_t skycol;
       
@@ -583,6 +585,8 @@ EX void make_air() {
     pconf.stretch = 1;
     pmodel = mdDisk;
 
+    auto cgi1 = &cgi;
+
     vid.always3 = false;
     geom3::apply_always3();
     check_cgi();
@@ -603,7 +607,7 @@ EX void make_air() {
         S = g.T.T;
         S = current_display->radar_transform * S;
         geometry = orig;
-        swapmatrix(S);
+        S = cgi1.emb->actual_to_base(S);
         }
       
       auto& h = cgi.shFullFloor.b[shvid(g.c)];

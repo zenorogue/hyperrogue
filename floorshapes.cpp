@@ -346,7 +346,7 @@ void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, ld
     hpcpush(xspinpush0(-M_PI/sides, size));
     chasmifyPoly(dlow_table[k], dhi_table[k], k);
 
-    if(geom3::euc_in_noniso()) {
+    if(cgi.emb->is_euc_in_noniso()) {
       fsh.gpside[k].resize(c->type);
       for(int i=0; i<c->type; i++) {
         sizeto(fsh.gpside[k][i], id);
@@ -704,12 +704,12 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
               });
             }
           if(!vid.pseudohedral) for(int t=0; t<e-s; t++) {
-            hyperpoint fctr = tile_center();
+            hyperpoint fctr = may_kleinize(tile_center());
             hyperpoint v1 = may_kleinize(hpc[s+t]) - fctr;
             hyperpoint v2 = may_kleinize(hpc[s+t+1]) - fctr;
             texture_order([&] (ld x, ld y) { 
               hyperpoint a = fctr + v1 * x + v2 * y;
-              hyperpoint b = normalize_flat(a);
+              hyperpoint b = cgi.emb->normalize_flat(a);
               hyperpoint c = orthogonal_move(b, dfloor_table[k]);
               cgi.hpcpush(c);
               });
@@ -745,7 +745,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
             auto TC0 = tile_center();
             hyperpoint v1 = may_kleinize(hpc[s+t]) - TC0;
             hyperpoint v2 = may_kleinize(hpc[s+t+1]) - TC0;
-            texture_order([&] (ld x, ld y) { hpcpush(orthogonal_move(normalize_flat(TC0 + v1 * x + v2 * y), top + h * (x+y))); });
+            texture_order([&] (ld x, ld y) { hpcpush(orthogonal_move(cgi.emb->normalize_flat(TC0 + v1 * x + v2 * y), top + h * (x+y))); });
             }
           }
 

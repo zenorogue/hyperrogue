@@ -112,7 +112,7 @@ void geometry_information::chasmifyPoly(double fol, double fol2, int k) {
       if(zf == isize(points)-1) zf--;
       x -= zf;
       auto hp = points[zf] + (points[zf+1] - points[zf]) * x;
-      auto hf = normalize_flat(hp);
+      auto hf = cgi.emb->normalize_flat(hp);
       auto ho = orthogonal_move(hf, fol + (fol2-fol) * y);
       hpcpush(ho);
       };
@@ -931,7 +931,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
 
   ld w = 0;
   for(int i=0; i<n; i++) center += vertices[i] * weights[i], w += weights[i];
-  if(mproduct && !bt::in()) center = normalize_flat(center);
+  if(mproduct && !bt::in()) center = cgi.emb->normalize_flat(center);
   else center /= w;
   
   ld center_altitude = 0;
@@ -963,7 +963,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
         h = nilv::on_geodesic(center, nilv::on_geodesic(v1+center, v2+center, y / (x+y)), x + y);
       if(mproduct) {
         if(bt::in()) h = PIU( parabolic13(h) );
-        h = orthogonal_move(normalize_flat(h), center_altitude * (1-x-y) + altitudes[a] * x + altitudes[b] * y);
+        h = orthogonal_move(cgi.emb->normalize_flat(h), center_altitude * (1-x-y) + altitudes[a] * x + altitudes[b] * y);
         hpcpush(h); return;
         }
       hpcpush(final_coords(h));
@@ -978,7 +978,7 @@ void geometry_information::make_wall(int id, vector<hyperpoint> vertices, vector
       hyperpoint h = (vertices[a] * (STEP-y) + vertices[(a+1)%n] * y)/STEP;
       if(mproduct) {
         if(bt::in()) h = PIU( parabolic13(h) );
-        h = orthogonal_move(normalize_flat(h), (altitudes[a] * (STEP-y) + altitudes[(a+1)%n] * y) / STEP);
+        h = orthogonal_move(cgi.emb->normalize_flat(h), (altitudes[a] * (STEP-y) + altitudes[(a+1)%n] * y) / STEP);
         hpcpush(h);
         }
       else if(nil)

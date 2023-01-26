@@ -83,7 +83,7 @@ EX bool mouseout2() {
 EX movedir vectodir(hyperpoint P) {
 
   transmatrix U = unshift(ggmatrix(cwt.at));
-  if(embedded_plane && geom3::same_in_same())  U = current_display->radar_transform * U;
+  if(embedded_plane && cgi.emb->is_same_in_same())  U = current_display->radar_transform * U;
 
   P = direct_exp(lp_iapply(P));
 
@@ -123,7 +123,7 @@ EX void remission() {
  }
 
 EX hyperpoint move_destination_vec(int d) {
-  if(WDIM == 2 && (!embedded_plane || geom3::same_in_same())) return spin(-d * 45._deg) * smalltangent();
+  if(WDIM == 2 && (!embedded_plane || cgi.emb->is_same_in_same())) return spin(-d * 45._deg) * smalltangent();
   else if(d&1) return cspin(0, 1, d > 4 ? 45._deg : -45._deg) * smalltangent();
   else return cspin(0, 2, d * 45._deg) * smalltangent();
   }

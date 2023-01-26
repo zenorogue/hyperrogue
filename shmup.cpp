@@ -64,14 +64,8 @@ struct monster {
   int split_owner;  ///< in splitscreen mode, which player handles this
   int split_tick;   ///< in which tick was split_owner computed
 
-  void reset() {
-    nextshot = 0;
-    stunoff = 0; blowoff = 0; fragoff = 0; footphase = 0;
-    inertia = Hypc; ori = Id; vel = 0;
-    swordangle = 0;
-    if(geom3::euc_in_product()) ori = cgi.intermediate_to_logical_scaled;
-    }
-
+  void reset();
+  
   monster() {
     reset();
     refs = 1; split_tick = -1; split_owner = -1;
@@ -105,6 +99,14 @@ struct monster {
 
   };  
 #endif
+
+void monster::reset() {
+  nextshot = 0;
+  stunoff = 0; blowoff = 0; fragoff = 0; footphase = 0;
+  inertia = Hypc; ori = Id; vel = 0;
+  swordangle = 0;
+  if(cgip && cgi.emb && cgi.emb->is_euc_in_product()) ori = cgi.emb->intermediate_to_logical_scaled;
+  }
 
 using namespace multi;
 
@@ -186,12 +188,12 @@ cell *monster::findbase(const shiftmatrix& T, int maxsteps) {
 /** fix the matrix, including the appropriate fixes for nonisotropic, embedded_plane, and elliptic space */
 void full_fix(transmatrix& T) {
   if(embedded_plane) {
-    if(geom3::sph_in_low()) {
+    if(cgi.emb->is_sph_in_low()) {
       for(int i=0; i<4; i++) T[i][3] = 0, T[3][i] = 0;
       T[3][3] = 1;
       fixmatrix(T);
       }
-    else if(geom3::same_in_same()) {
+    else if(cgi.emb->is_same_in_same()) {
       for(int i=0; i<4; i++) T[i][2] = 0, T[2][i] = 0;
       T[2][2] = 1;
       fixmatrix(T);
@@ -201,14 +203,14 @@ void full_fix(transmatrix& T) {
       }
     else {
       hyperpoint h = T * tile_center();
-      transmatrix rot = iso_inverse(map_relative_push(h)) * T;
-      if(geom3::euc_in_sph()) rot = rot * lzpush(1);
+      transmatrix rot = iso_inverse(cgi.emb->map_relative_push(h)) * T;
+      if(cgi.emb->is_euc_in_sph()) rot = rot * lzpush(1);
       fix_rotation(rot);
-      if(geom3::hyp_in_solnih()) h[0] = 0;
-      else if(geom3::euc_in_nil()) h[1] = 0;
+      if(cgi.emb->is_hyp_in_solnih()) h[0] = 0;
+      else if(cgi.emb->is_euc_in_nil()) h[1] = 0;
 
-      T = map_relative_push(h) * rot;
-      if(geom3::euc_in_sph()) T = T * lzpush(-1);
+      T = cgi.emb->map_relative_push(h) * rot;
+      if(cgi.emb->is_euc_in_sph()) T = T * lzpush(-1);
       fixmatrix(T);
       }
     }
@@ -940,7 +942,7 @@ void movePlayer(monster *m, int delta) {
     
   if(playerturn[cpid] && canmove && !blown && WDIM == 2) {
     m->swordangle -= playerturn[cpid];
-    if(geom3::euc_in_product())
+    if(cgi.emb->is_euc_in_product())
       rotate_object(nat.T, m->ori, cspin(0, 1, playerturn[cpid]));
     else
       rotate_object(nat.T, m->ori, spin(playerturn[cpid]));

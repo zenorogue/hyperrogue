@@ -239,7 +239,7 @@ void horo_distance::become(hyperpoint h1) {
   #endif
   else if(mhybrid || sl2)
     a = 0, b = hdist(h1, C0);
-  else if(geom3::euc_in_product())
+  else if(cgi.emb->is_euc_in_product())
     a = 0, b = hdist(h1, C0);
   else
     a = 0, b = intval(h1, tile_center());
@@ -251,7 +251,7 @@ horo_distance::horo_distance(shiftpoint h1, const shiftmatrix& T) {
   else
 #endif
   if(sn::in() || mhybrid || nil || sl2) become(inverse_shift(T, h1));
-  else if(geom3::euc_in_product())
+  else if(cgi.emb->is_euc_in_product())
     a = 0, b = hdist(h1.h, unshift(T * tile_center(), h1.shift));
   else
     a = 0, b = intval(h1.h, unshift(T * tile_center(), h1.shift));
@@ -446,7 +446,7 @@ EX bool no_easy_spin() {
   return NONSTDVAR || arcm::in() || WDIM == 3 || bt::in() || kite::in();
   }
 
-EX bool dont_inverse() { return meuclid && PURE && geom3::euc_in_noniso(); }
+EX bool dont_inverse() { return PURE && cgi.emb->is_euc_in_noniso(); }
 
 ld hrmap_standard::spin_angle(cell *c, int d) {
   if(WDIM == 3) return SPIN_NOT_AVAILABLE;
@@ -471,7 +471,7 @@ EX transmatrix iddspin(cell *c, int d, ld bonus IS(0)) { return currentmap->spin
 EX ld cellgfxdist(cell *c, int d) { return currentmap->spacedist(c, d); }
 
 EX transmatrix ddspin_side(cell *c, int d, ld bonus IS(0)) { 
-  if(geom3::euc_in_noniso() || geom3::hyp_in_solnih())
+  if(cgi.emb->is_in_noniso())
     return spin(bonus);
   if(kite::in()) {
     if(embedded_plane) return spin(bonus);
@@ -484,7 +484,7 @@ EX transmatrix ddspin_side(cell *c, int d, ld bonus IS(0)) {
   }
 
 EX transmatrix iddspin_side(cell *c, int d, ld bonus IS(0)) {
-  if(geom3::euc_in_noniso() || geom3::hyp_in_solnih())
+  if(cgi.emb->is_in_noniso())
     return spin(bonus);
   if(kite::in()) {
     if(embedded_plane) return spin(bonus);
@@ -589,7 +589,7 @@ hyperpoint hrmap_standard::get_corner(cell *c, int cid, ld cf) {
     }
   #endif
   if(PURE) {
-    if(geom3::euc_in_noniso()) {
+    if(cgi.emb->is_euc_in_noniso()) {
       return lspinpush0(spin_angle(c, cid) + M_PI/S7, cgi.hcrossf * 3 / cf);
       }
     return ddspin(c,cid,M_PI/S7) * lxpush0(cgi.hcrossf * 3 / cf);

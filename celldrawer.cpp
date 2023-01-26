@@ -1919,7 +1919,7 @@ void celldrawer::check_rotations() {
       else
         ds.total += unshift(tC0(V));
       ds.qty++;
-      ds.point = normalize_flat(ds.total);
+      ds.point = cgi.emb->normalize_flat(ds.total);
       if(mproduct) ds.point = orthogonal_move(ds.point, ds.depth / ds.qty);
       if(side == 2) for(int i=0; i<3; i++) ds.point[i] = -ds.point[i];
       if(side == 1) ds.point = spin(-90._deg) * ds.point;

@@ -144,6 +144,8 @@ struct subcellshape {
 
 enum class ePipeEnd {sharp, ball};
 
+struct embedding_method;
+
 /** basic geometry parameters */
 struct geometry_information {
 
@@ -199,18 +201,8 @@ struct geometry_information {
   vector<transmatrix> heptmove, hexmove, invhexmove;
 
   int base_distlimit;
-
-  /* convert the tangent space in logical coordinates to actual coordinates */
-  transmatrix logical_to_intermediate;
-
-  /* convert the tangent space in actual coordinates to logical coordinates */
-  transmatrix intermediate_to_logical;
-
-  /* convert the tangent space in logical coordinates to actual coordinates */
-  transmatrix logical_scaled_to_intemediate;
-
-  /* convert the tangent space in actual coordinates to logical coordinates */
-  transmatrix intermediate_to_logical_scaled;
+  
+  unique_ptr<embedding_method> emb;
 
   /** size of the Sword (from Orb of the Sword), used in the shmup mode */
   ld sword_size;
@@ -452,8 +444,6 @@ hpcshape
   void prepare_shapes();
   void prepare_usershapes();
 
-  void prepare_lta();
-
   void hpcpush(hyperpoint h);
   void hpc_connect_ideal(hyperpoint a, hyperpoint b);
   void hpcsquare(hyperpoint h1, hyperpoint h2, hyperpoint h3, hyperpoint h4);
@@ -591,28 +581,6 @@ EX bool is_reg3_variation(eVariation var) {
   return var == eVariation::coxeter;
   }
 
-void geometry_information::prepare_lta() {
-  auto& lta = logical_to_intermediate;
-  bool b = geom3::flipped;
-  if(b) geom3::light_flip(false);
-  lta = Id;
-  if(embedded_plane) {
-    if(geom3::euc_vertical()) lta = cspin90(2, 1) * lta;
-    if(geom3::hyp_in_solnih()) lta = cspin90(0, 1) * cspin90(1, 2) * cspin90(0, 1) * lta;
-    if(geom3::euc_cylinder()) lta = cspin90(0, 1) * lta;
-    }
-  logical_scaled_to_intemediate = lta;
-  if(geom3::euc_in_noniso()) {
-    lta = Id;
-    lta[0][0] *= geom3::euclid_embed_scale;
-    lta[1][1] *= geom3::euclid_embed_scale * geom3::euclid_embed_scale_y;
-    lta = logical_scaled_to_intemediate * cspin(0, 1, geom3::euclid_embed_rotate * degree) * lta;
-    }
-  intermediate_to_logical = inverse(lta);
-  intermediate_to_logical_scaled = inverse(logical_scaled_to_intemediate);
-  if(b) geom3::light_flip(true);
-  }
-
 void geometry_information::prepare_basics() {
 
   DEBBI(DF_INIT | DF_POLY | DF_GEOM, ("prepare_basics"));
@@ -628,8 +596,10 @@ void geometry_information::prepare_basics() {
   heptshape = nullptr;
 
   xp_order = 0;
-
-  prepare_lta();
+  
+  emb = make_embed();
+  bool geuclid = euclid;
+  bool ghyperbolic = hyperbolic;
 
   if(arcm::in() && !mproduct)
     ginf[gArchimedean].cclass = gcHyperbolic;
@@ -802,13 +772,13 @@ void geometry_information::prepare_basics() {
     }
   #endif
 
-  if(geom3::euc_in_hyp()) {
+  if(meuclid && ghyperbolic) {
     scalefactor *= exp(-vid.depth);
     }
 
-  if(geom3::euc_in_noniso()) scalefactor *= geom3::euclid_embed_scale;
-  if(geom3::sph_in_euc()) scalefactor *= (1 + vid.depth);
-  if(geom3::sph_in_hyp()) scalefactor *= sinh(1 + vid.depth);
+  if(cgi.emb->is_euc_in_noniso()) scalefactor *= geom3::euclid_embed_scale;
+  if(msphere && geuclid) scalefactor *= (1 + vid.depth);
+  if(msphere && ghyperbolic) scalefactor *= sinh(1 + vid.depth);
 
   if(scale_used()) {
     scalefactor *= vid.creature_scale;
@@ -882,20 +852,6 @@ void geometry_information::prepare_basics() {
     asonov::prepare_walls();
     }
   #endif
-  }
-
-EX transmatrix xspinpush(ld dir, ld dist) {
-  if(WDIM == 2 && GDIM == 3) {
-    geom3::light_flip(true);
-    transmatrix T = spin(dir) * xpush(dist) * spin(-dir);
-    geom3::light_flip(false);
-    swapmatrix(T);
-    return T;
-    }
-  else if(euclid)
-    return eupush(cos(dir) * dist, -sin(dir) * dist);
-  else
-    return spin(dir) * xpush(dist) * spin(-dir);
   }
 
 EX purehookset hooks_swapdim;
@@ -1064,7 +1020,7 @@ EX namespace geom3 {
       reduce = (GDIM == 3 ? human_height * .3 : 0);
       
       int sgn = vid.wall_height > 0 ? 1 : -1;
-      ld ees = geom3::euc_in_noniso() ? geom3::euclid_embed_scale_mean() : 1;
+      ld ees = cgi.emb->is_euc_in_noniso() ? geom3::euclid_embed_scale_mean() : 1;
 
       STUFF = lev_to_factor(0) - sgn * max(orbsize * ees * 0.3, zhexf * ees * .6);
       
@@ -1089,10 +1045,8 @@ EX namespace geom3 {
       SKY = LOWSKY - sgn * 5;
 
       /* in spherical/cylindrical case, make sure that the high stuff does not go through the center */
-      bool depth_limit = geom3::mgclass() == gcSphere && geom3::ggclass() != gcSphere;
-      depth_limit |= euc_cylinder();
 
-      if(depth_limit) {
+      if(cgi.emb->is_depth_limited()) {
         ld max_high = lerp(-FLOOR, -1, 0.8);
         ld max_high2 = lerp(-FLOOR, -1, 0.9);
         if(HIGH < max_high) HIGH = max_high;
@@ -1110,245 +1064,25 @@ EX namespace geom3 {
         if(sgn < 0) INFDEEP = -1;
         }
 
-      if(geom3::euc_in_hyp() && sgn < 0) INFDEEP = FLOOR - 5;
+      if(cgi.emb->is_euc_in_hyp() && sgn < 0) INFDEEP = FLOOR - 5;
       }
     }    
 
 EX namespace geom3 {
 
-  #if HDR
-  enum eSpatialEmbedding {
-    seNone,
-    seDefault,
-    seLowerCurvature,
-    seMuchLowerCurvature,
-    seProduct,
-    seNil,
-    seSol, seNIH, seSolN,
-    seCliffordTorus,
-    seProductH,
-    seProductS,
-    seSL2,
-    seCylinder
-    };
-  #endif
-
-  EX vector<pair<string, string>> spatial_embedding_options = {
-    {"2D engine",       "Use HyperRogue's 2D engine to simulate same curvature. Works well in top-down and third-person perspective. The Hypersian Rug mode can be used to project this to a surface."},
-    {"same curvature",  "Embed as an equidistant surface in the 3D version of the same geometry."},
-    {"lower curvature", "Embed as a surface in a space of lower curvature."},
-    {"much lower curvature", "Embed sphere as a sphere in hyperbolic space."},
-    {"product",          "Add one extra dimension in the Euclidean way."},
-    {"Nil",              "Embed Euclidean plane into Nil."},
-    {"Sol",              "Embed Euclidean or hyperbolic plane into Sol."},
-    {"stretched hyperbolic",              "Embed Euclidean or hyperbolic plane into stretched hyperbolic geometry."},
-    {"stretched Sol",              "Embed Euclidean or hyperbolic plane into stretched Sol geometry."},
-    {"Clifford Torus",              "Embed Euclidean rectangular torus into S3."},
-    {"hyperbolic product", "Embed Euclidean or hyperbolic plane in the H2xR product space."},
-    {"spherical product", "Embed Euclidean cylinder or spherical plane in the H2xR product space."},
-    {"SL(2,R)",           "Embed Euclidean plane in twisted product geometry."},
-    {"cylinder",          "Embed Euclidean cylinder in Euclidean space."},
-    };
-
-  EX eSpatialEmbedding spatial_embedding = seDefault;
-  EX ld euclid_embed_scale = 1;
-  EX ld euclid_embed_scale_y = 1;
-  EX ld euclid_embed_rotate = 0;
-  EX bool auto_configure = true;
-  EX bool flat_embedding = false;
-  EX bool inverted_embedding = false;
-
-  EX ld euclid_embed_scale_mean() { return euclid_embed_scale * sqrt(euclid_embed_scale_y); }
-  EX void set_euclid_embed_scale(ld x) { euclid_embed_scale = x; euclid_embed_scale_y = 1; euclid_embed_rotate = 0; }
-
-  EX bool supports_flat() { return among(spatial_embedding, seDefault, seProductH, seProductS); }
-  EX bool supports_invert() { return among(spatial_embedding, seDefault, seLowerCurvature, seMuchLowerCurvature, seNil, seSol, seNIH, seSolN, seProductH, seProductS); }
-
-  EX vector<geometryinfo> ginf_backup;
-
-  EX eGeometryClass mgclass() {
-    return (embedded_plane ? ginf_backup : ginf)[geometry].g.kind;
-    }
-
-  EX eGeometryClass ggclass() {
-    return (flipped ? ginf_backup : ginf)[geometry].g.kind;
-    }
-
-  EX bool euc_in_hyp() {
-    return ggclass() == gcHyperbolic && mgclass() == gcEuclid;
-    }
-
-  EX bool euc_in_nil() {
-    return ggclass() == gcNil && mgclass() == gcEuclid;
-    }
-
-  EX bool euc_in_product() {
-    return ggclass() == gcProduct && mgclass() == gcEuclid;
-    }
-
-  EX bool euc_in_sl2() {
-    return ggclass() == gcSL2 && mgclass() == gcEuclid;
-    }
-
-  EX bool euc_vertical() {
-    return mgclass() == gcEuclid && among(ggclass(), gcNil, gcProduct, gcSL2);
-    }
-
-  EX bool euc_in_solnih() {
-    return among(ggclass(), gcSol, gcNIH, gcSolN) && mgclass() == gcEuclid;
-    }
-
-  EX bool hyp_in_solnih() {
-    return among(ggclass(), gcSol, gcNIH, gcSolN) && mgclass() == gcHyperbolic;
-    }
-
-  EX bool euc_in_noniso() {
-    if(spatial_embedding == seCylinder) return mgclass() == gcEuclid;
-    return among(ggclass(), gcNil, gcSol, gcNIH, gcSolN, gcSphere, gcProduct, gcSL2) && mgclass() == gcEuclid;
-    }
-
-  EX bool euc_cylinder() {
-    return spatial_embedding == seCylinder && mgclass() == gcEuclid;
-    }
-
-  EX bool sph_in_euc() {
-    return ggclass() == gcEuclid && mgclass() == gcSphere;
-    }
-
-  EX bool euc_in_sph() {
-    return ggclass() == gcSphere && mgclass() == gcEuclid;
-    }
-
-  EX bool sph_in_hyp() {
-    return ggclass() == gcHyperbolic && mgclass() == gcSphere;
-    }
-
-  EX bool sph_in_low() {
-    return mgclass() == gcSphere && among(ggclass(), gcHyperbolic, gcEuclid);
-    }
-
-  EX bool in_product() {
-    return ggclass() == gcProduct;
-    }
-
-  EX bool same_in_same() {
-    return mgclass() == ggclass() && !among(spatial_embedding, seCylinder);
-    }
-
-  EX bool flipped;
-
-  EX void light_flip(bool f) {
-    if(f != flipped) {
-      swap(ginf[geometry].g, geom3::ginf_backup[geometry].g);
-      swap(ginf[geometry].flags, geom3::ginf_backup[geometry].flags);
-      flipped = f;
-      }
-    }
-  
-  #if HDR
-  template<class T> auto in_flipped(const T& f) -> decltype(f()) {
-    light_flip(true);
-    finalizer ff([] { light_flip(false); });
-    return f();
-    }
-
-  template<class T> auto in_not_flipped(const T& f) -> decltype(f()) {
-    light_flip(false);
-    finalizer ff([] { light_flip(true); });
-    return f();
-    }
-
-  #define IPF(x) geom3::in_flipped([&] { return (x); })
-  #endif
-
-  EX void apply_always3() {
-    if(!vid.always3 && !ginf_backup.empty()) {
-      ginf = ginf_backup;
-      ginf_backup.clear();
-      }
-    if(vid.always3 && ginf_backup.empty()) {
-      ginf_backup = ginf;
-      for(geometryinfo& gi: ginf) {
-        auto &g = gi.g;
-        if(vid.always3 && g.gameplay_dimension == 2 && g.graphical_dimension == 2) {
-          g.graphical_dimension++;
-          g.homogeneous_dimension++;
-          g.sig[3] = g.sig[2];
-          g.sig[2] = g.sig[1];
-
-          if(among(spatial_embedding, seProduct, seProductH, seProductS) && g.kind != gcEuclid) {
-            g.kind = gcProduct;
-            g.homogeneous_dimension--;
-            g.sig[2] = g.sig[3];
-            }
-
-          if(among(spatial_embedding, seProductH, seProductS) && g.kind == gcEuclid) {
-            g.kind = gcProduct;
-            g.homogeneous_dimension--;
-            g.sig[2] = spatial_embedding == seProductH ? -1 : 1;
-            }
-
-          if(spatial_embedding == seLowerCurvature) {
-            if(g.kind == gcEuclid) g = ginf[gSpace534].g;
-            if(g.kind == gcSphere) g = ginf[gCubeTiling].g;
-            g.gameplay_dimension = 2;
-            }
-
-          if(spatial_embedding == seMuchLowerCurvature) {
-            g = ginf[gSpace534].g;
-            g.gameplay_dimension = 2;
-            }
-
-          bool ieuclid = g.kind == gcEuclid;
-
-          if(spatial_embedding == seNil && ieuclid) {
-            g = ginf[gNil].g;
-            g.gameplay_dimension = 2;
-            }
-
-          if(spatial_embedding == seCliffordTorus && ieuclid) {
-            g = ginf[gCell120].g;
-            g.gameplay_dimension = 2;
-            }
-
-          bool ieuc_or_binary = ieuclid || (gi.flags & qBINARY);
-
-          if(spatial_embedding == seSol && ieuc_or_binary) {
-            g = ginf[gSol].g;
-            g.gameplay_dimension = 2;
-            }
-
-          if(spatial_embedding == seNIH && ieuc_or_binary) {
-            g = ginf[gNIH].g;
-            g.gameplay_dimension = 2;
-            }
-
-          if(spatial_embedding == seSolN && ieuc_or_binary) {
-            g = ginf[gSolN].g;
-            g.gameplay_dimension = 2;
-            }
-
-          if(spatial_embedding == seSL2 && ieuclid) {
-            g = giSL2;
-            g.gameplay_dimension = 2;
-            }
-          }
-        }
-      }
-    }
-    
   #if MAXMDIM >= 4
-EX void switch_always3() {
+  EX void switch_always3() {
     if(dual::split(switch_always3)) return;
     #if CAP_GL && CAP_RUG
     if(rug::rugged) rug::close();
     #endif
+    swapper = &cgi;
     vid.always3 = !vid.always3;
     apply_always3();
     swapmatrix(View);
     callhooks(hooks_swapdim);
     }
-#endif
+  #endif
 
   EX void switch_tpp() {
     if(dual::split(switch_fpp)) return;
@@ -1383,89 +1117,18 @@ EX void switch_always3() {
     if(!vid.always3) {
       vid.always3 = true;
       apply_always3();
-      ld ms = min<ld>(cgi.scalefactor, 1);
-      vid.depth = ms;
-      vid.wall_height = 1.5 * ms;
-      if(sphere && same_in_same()) {
-        vid.depth = 30 * degree;
-        vid.wall_height = 60 * degree;
-        }
-      vid.human_wall_ratio = 0.8;
-      if(mgclass() == gcEuclid && allowIncreasedSight() && vid.use_smart_range == 0) {
-        genrange_bonus = gamerange_bonus = sightrange_bonus = cgi.base_distlimit * 3/2;
-        }
-      vid.camera = 0;
-      vid.eye = 0;
-      if(sph_in_low()) {
-        vid.depth = 0;
-        vid.wall_height = -1;
-        vid.eye = -0.5;
-        if(inverted_embedding) {
-          vid.wall_height = 1.4;
-          vid.eye = 0.2;
-          vid.depth = 0.5;
-          }
-        }
-      if(supports_flat() && flat_embedding) {
-        vid.eye += vid.depth / 2;
-        vid.depth = 0;
-        }
-      if(spatial_embedding == seDefault && !flat_embedding && inverted_embedding) {
-        vid.eye += vid.depth * 1.5;
-        vid.depth *= -1;
-        }
-      if((euc_in_hyp() || euc_in_noniso()) && inverted_embedding) {
-        vid.wall_height *= -1;
-        vid.eye = -2 * vid.depth;
-        }
-      if(euc_in_nil() || euc_in_sl2()) {
-        vid.depth = 0;
-        vid.eye = vid.wall_height / 2;
-        }
-      if(euc_in_hyp() && spatial_embedding == seMuchLowerCurvature) {
-        vid.eye = inverted_embedding ? -vid.depth : vid.depth;
-        vid.depth = 0;
-        }
-      if(msphere && spatial_embedding == seProduct) {
-        vid.depth = 0;
-        vid.wall_height = 2;
-        vid.eye = 2;
-        }
-      if(pmodel == mdDisk) pmodel = nonisotropic ? mdGeodesic : mdPerspective;
+      auto emb = make_embed();
+      emb->auto_configure();
+      check_cgi();
+      cgi.prepare_basics();
+      swapper = &cgi;
       swapmatrix(View);
       swapmatrix(current_display->which_copy);
       callhooks(hooks_swapdim);
       for(auto m: allmaps) m->on_dim_change();
-      if(cgflags & qIDEAL && vid.texture_step < 32)
-        vid.texture_step = 32;
-#if CAP_RACING
-      racing::player_relative = true;
-#endif
-      check_cgi();
-      cgi.prepare_basics();
-      if(hyperbolic && same_in_same() && spatial_embedding == seLowerCurvature) {
-        vid.eye += vid.depth;
-        vid.depth *= 2;
-        if(inverted_embedding) {
-          vid.eye = 1;
-          vid.depth *= -1;
-          vid.wall_height *= -1;
-          }
-        }
-      if(hyperbolic && same_in_same() && spatial_embedding == seMuchLowerCurvature) {
-        vid.eye += vid.depth;
-        vid.depth *= 3;
-        if(inverted_embedding) {
-          vid.eye = 2;
-          vid.depth *= -1;
-          vid.wall_height *= -1;
-          }
-        }
-      if(spatial_embedding == seCliffordTorus) configure_clifford_torus();
-      if(spatial_embedding == seProductS) configure_cylinder();
-      if(spatial_embedding == seCylinder) configure_cylinder();
       }
     else {
+      swapper = &cgi;
       vid.always3 = false;
       apply_always3();
       vid.wall_height = .3;
@@ -1480,42 +1143,6 @@ EX void switch_always3() {
       }
     View = models::rotmatrix() * View;
 #endif
-    }
-
-  EX void configure_clifford_torus() {
-    rug::clifford_torus ct;
-
-    if(hypot_d(2, ct.xh) < 1e-6 || hypot_d(2, ct.yh) < 1e-6) {
-      euclid_embed_scale = TAU / 20.;
-      euclid_embed_scale_y = 1;
-      euclid_embed_rotate = 0;
-      vid.depth = 45._deg - 1;
-      vid.wall_height = 0.2;
-      vid.eye = vid.wall_height / 2 - vid.depth;
-      return;
-      }
-
-    euclid_embed_scale = TAU / hypot_d(2, ct.xh);
-    euclid_embed_scale_y = TAU / hypot_d(2, ct.yh) / euclid_embed_scale;
-    euclid_embed_rotate = atan2(ct.xh[1], ct.xh[0]) / degree;
-
-    ld alpha = atan2(ct.xfactor, ct.yfactor);
-
-    vid.depth = alpha - 1;
-    vid.wall_height = min(1 / euclid_embed_scale_mean(), (90._deg - alpha) * 0.9);
-    vid.eye = vid.wall_height / 2 - vid.depth;
-    }
-
-  EX void configure_cylinder() {
-    rug::clifford_torus ct;
-    hyperpoint vec;
-    if(sqhypot_d(2, ct.yh) > 1e-6) vec = ct.yh;
-    else if(sqhypot_d(2, ct.xh) > 1e-6) vec = ct.xh;
-    else vec = hyperpoint(10, 0, 0, 0);
-
-    euclid_embed_scale = TAU / hypot_d(2, vec);
-    euclid_embed_scale_y = 1;
-    euclid_embed_rotate = atan2(vec[1], vec[0]) / degree;
     }
 
   EX }

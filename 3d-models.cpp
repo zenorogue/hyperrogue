@@ -34,9 +34,8 @@ vector<hyperpoint> geometry_information::get_shape(hpcshape sh) {
 hyperpoint get_center(const vector<hyperpoint>& vh) {
   hyperpoint h = Hypc;
   for(auto h1: vh) h = h + h1;
-  if(geom3::euc_in_product()) return h / isize(vh);
-  if(geom3::euc_cylinder()) h /= isize(vh);
-  return normalize_flat(h);
+  h /= isize(vh);
+  return cgi.emb->normalize_flat(h);
   }
 
 EX ld zc(ld z) { 
@@ -129,7 +128,7 @@ void geometry_information::add_texture(hpcshape& sh) {
 
 vector<hyperpoint> scaleshape(const vector<hyperpoint>& vh, ld s) {
   vector<hyperpoint> res;
-  for(hyperpoint h: vh) res.push_back(normalize_flat(h * s + shcenter * (1-s)));
+  for(hyperpoint h: vh) res.push_back(cgi.emb->normalize_flat(h * s + shcenter * (1-s)));
   return res;
   }
 
@@ -156,13 +155,15 @@ void geometry_information::make_ha_3d(hpcshape& sh, bool isarmor, ld scale) {
   auto body26 = body[26];
   body.clear();
 
+  auto& T = cgi.emb->intermediate_to_logical;
+
   bool foundplus = false, foundminus = false;
   for(hyperpoint h: fullbody) {
-    if(h[1] > 0.14 * S) {
+    if((T*h)[1] > 0.14 * S) {
       if(foundplus) ;
       else foundplus = true, body.push_back(body7);
       }
-    else if(h[1] < -0.14 * S) {
+    else if((T*h)[1] < -0.14 * S) {
       if(foundminus) ;
       else foundminus = true, body.push_back(body26);
       }
@@ -173,19 +174,20 @@ void geometry_information::make_ha_3d(hpcshape& sh, bool isarmor, ld scale) {
   bool armused = false;
   arm.clear();  
   for(hyperpoint h: fullbody) {
-    if(h[1] < 0.08 * S) ;
-    else if(h[0] > -0.03 * S) {
+    if((T*h)[1] < 0.08 * S) ;
+    else if((T*h)[0] > -0.03 * S) {
       if(armused) ;
       else armused = true, arm.push_back(arm8);
       }
     else arm.push_back(h);
     }
-  
+
   auto hand0 = hand[0];
   hand.clear();
   hand.push_back(hand0);
   for(hyperpoint h: fullbody) {
-    if(h[1] + h[0] > 0.13 * S) hand.push_back(h);
+    auto h1 = T*h;
+    if(h1[1] + h1[0] > 0.13 * S) hand.push_back(h);
     }
 
   bshape(sh, PPR::MONSTER_BODY);
@@ -261,7 +263,7 @@ void geometry_information::addtri(array<hyperpoint, 3> hs, int kind) {
     bool ok = true;
     ld zzes[3];
     for(int s=0; s<3; s++) {
-      hs[s] = normalize_flat(hs[s]);
+      hs[s] = cgi.emb->normalize_flat(hs[s]);
       hyperpoint h = hs[s];
       ld zz = zc(0.78);
       hsh[s] = abs(h[1]);
@@ -269,7 +271,7 @@ void geometry_information::addtri(array<hyperpoint, 3> hs, int kind) {
       zz -= h[0] * h[0] / 0.10 / 0.10 * 0.01 / S / S * SH;
       if(abs(h[1]) > 0.14*S) ok = false, zz -= revZ * (abs(h[1])/S - 0.14) * SH;
       if(abs(h[0]) > 0.08*S) ok = false, zz -= revZ * (abs(h[0])/S - 0.08) * (abs(h[0])/S - 0.08) * 25 * SH;
-      h = normalize_flat(h);
+      h = cgi.emb->normalize_flat(h);
       if(!gproduct || kind != 1) ht[s] = lzpush(zz) * h;
       else ht[s] = h;
       if(hsh[s] < 0.1*S) shi[s] = 0.5;
@@ -494,10 +496,10 @@ void geometry_information::make_skeletal(hpcshape& sh, ld push) {
 
 hyperpoint yzspin(ld alpha, hyperpoint h) {
   if(gproduct) return product::direct_exp(cspin(1, 2, alpha) * product::inverse_exp(h));
-  else if(embedded_plane && moved_center()) {
-    h = gpushxto0(tile_center()) * h;
+  else if(embedded_plane && cgi.emb->center_z()) {
+    h = gpushxto0(cgi.emb->tile_center()) * h;
     h = cspin(1, 2, alpha) * h;
-    h = rgpushxto0(tile_center()) * h;
+    h = rgpushxto0(cgi.emb->tile_center()) * h;
     return h;
     }
   else return cspin(1, 2, alpha) * h;
@@ -564,7 +566,7 @@ void geometry_information::make_revolution_cut(hpcshape &sh, int each, ld push, 
   for(int i=0; i<n; i++) if(!stillin[i] && !stillin[lastid[i]]) lastid[i] = lastid[lastid[i]];
 
   for(int i=0; i<n; i++) {
-    if(!stillin[i]) gbody[i] = normalize_flat(gbody[lastid[i]] * (i - lastid[i]) + gbody[nextid[i]] * (nextid[i] - i));
+    if(!stillin[i]) gbody[i] = cgi.emb->normalize_flat(gbody[lastid[i]] * (i - lastid[i]) + gbody[nextid[i]] * (nextid[i] - i));
     }
   
   bshape(sh, PPR::MONSTER_BODY);
@@ -633,7 +635,7 @@ void geometry_information::slimetriangle(hyperpoint a, hyperpoint b, hyperpoint 
   dynamicval<int> d(vid.texture_step, 8);
   ld sca = 1;
   if(mhybrid) sca = .5;
-  if(geom3::euc_in_noniso()) sca *= .3;
+  if(cgi.emb->is_euc_in_noniso()) sca *= .3;
   texture_order([&] (ld x, ld y) {
     ld z = 1-x-y;
     ld r = scalefactor * hcrossf7 * (0 + pow(max(x,max(y,z)), .3) * 0.8) * sca;
@@ -747,8 +749,8 @@ void geometry_information::adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye
   hyperpoint center = Hypc;
   int c = 0;
   for(int i=eye.s; i<eye.e; i++) if(q == 1 || hpc[i][1] > 0) center += hpc[i], c++;
-  if(geom3::euc_in_product()) center /= c;
-  else center = normalize_flat(center);
+  center /= c;
+  center = cgi.emb->normalize_flat(center);
   // center /= (eye.e - eye.s);
   ld rad = 0;
   for(int i=eye.s; i<eye.e; i++) if(q == 1 || hpc[i][1] > 0) rad += hdist(center, hpc[i]);
@@ -761,7 +763,7 @@ void geometry_information::adjust_eye(hpcshape& eye, hpcshape head, ld shift_eye
   
   vector<hyperpoint> pss;
   
-  for(int i=head.s; i<head.e; i++) pss.push_back(psmin(lzpush(shift_head - (moved_center() ? 1 : 0)) * hpc[i]));
+  for(int i=head.s; i<head.e; i++) pss.push_back(psmin(lzpush(shift_head - cgi.emb->center_z()) * hpc[i]));
   
   ld zmid = 0;
   for(hyperpoint& h: pss) zmid += h[2];

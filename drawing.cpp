@@ -2456,7 +2456,7 @@ EX void drawqueue() {
   #endif
 
   #if MAXMDIM >= 4 && CAP_GL
-  if(embedded_plane && (hyperbolic || geom3::sph_in_euc() || geom3::euc_in_noniso() || geom3::hyp_in_solnih()) && !vrhr::rendering()) make_air();
+  if(embedded_plane && (hyperbolic || cgi.emb->is_sph_in_low() || cgi.emb->is_in_noniso()) && !vrhr::rendering()) make_air();
   #endif
   
   #if CAP_VR

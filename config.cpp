@@ -2365,7 +2365,7 @@ EX void show3D() {
     }
   
   if(WDIM == 2) {
-    if(geom3::euc_in_noniso()) {
+    if(cgi.emb->is_euc_in_noniso()) {
       add_edit(geom3::euclid_embed_scale);
       add_edit(geom3::euclid_embed_scale_y);
       add_edit(geom3::euclid_embed_rotate);

@@ -28,7 +28,7 @@ pair<bool, hyperpoint> makeradar(shiftpoint h) {
     if(d) h1 = h1 * (d / vid.radarrange / hypot_d(3, h1));
     }
   else if(mhyperbolic) {
-    if(geom3::hyp_in_solnih()) {
+    if(cgi.emb->is_hyp_in_solnih()) {
       geom3::light_flip(true);
       h1 = parabolic1(h1[1]) * xpush0(h1[0]);
       geom3::light_flip(false);
@@ -38,11 +38,11 @@ pair<bool, hyperpoint> makeradar(shiftpoint h) {
     for(int a=0; a<LDIM; a++) h1[a] = h1[a] / (1 + h1[LDIM]);
     }
   else if(msphere) {
-    if(geom3::same_in_same()) h1[2] = h1[LDIM];
-    if(geom3::sph_in_hyp()) h1 /= sinh(1);
+    if(cgi.emb->is_same_in_same()) h1[2] = h1[LDIM];
+    if(hyperbolic) h1 /= sinh(1);
     }
   else {
-    if(geom3::euc_in_hyp()) {
+    if(cgi.emb->is_euc_in_hyp()) {
       for(int a=0; a<3; a++) h1[a] = h1[a] / (1 + h1[3]);
       h1[2] -= 1;
       h1 *= 2 / sqhypot_d(3, h1);
@@ -50,35 +50,35 @@ pair<bool, hyperpoint> makeradar(shiftpoint h) {
       if(d > vid.radarrange) return {false, h1};
       if(d) h1 = h1 / (vid.radarrange + cgi.scalefactor/4);
       }
-    else if(geom3::same_in_same()) {
+    else if(cgi.emb->is_same_in_same()) {
       if(d > vid.radarrange) return {false, h1};
       if(d) h1 = h1 * (d / (vid.radarrange + cgi.scalefactor/4) / hypot_d(3, h1));
       }
-    else if(geom3::euc_in_sph()) {
+    else if(cgi.emb->is_euc_in_sph()) {
       h1[0] = atan2(h.h[0], h.h[2]);
       h1[1] = atan2(h.h[1], h.h[3]);
       h1[2] = 0;
-      h1 = cgi.intermediate_to_logical * h1;
+      h1 = cgi.emb->intermediate_to_logical * h1;
       d = hypot_d(2, h1);
       if(d > vid.radarrange) return {false, h1};
       if(d) h1 = h1 / (vid.radarrange + cgi.scalefactor/4);
       }
-    else if(geom3::euc_cylinder()) {
+    else if(cgi.emb->is_cylinder()) {
       h1[0] = h.h[0];
       h1[1] = atan2(h.h[1], h.h[2]);
       h1[2] = 0;
-      h1 = cgi.intermediate_to_logical * h1;
+      h1 = cgi.emb->intermediate_to_logical * h1;
       d = hypot_d(2, h1);
       if(d > vid.radarrange) return {false, h1};
       if(d) h1 = h1 / (vid.radarrange + cgi.scalefactor/4);
       }
-    else if(geom3::euc_in_sl2()) {
-      h1 = cgi.intermediate_to_logical * esl2_ati(unshift(h)); h1[1] = -h1[1];
+    else if(cgi.emb->is_euc_in_sl2()) {
+      h1 = cgi.emb->intermediate_to_logical * esl2_ati(unshift(h)); h1[1] = -h1[1];
       d = hypot_d(2, h1);
       if(d > vid.radarrange) return {false, h1};
       if(d) h1 = h1 / (vid.radarrange + cgi.scalefactor/4);
       }
-    else if(geom3::euc_in_product()) {
+    else if(cgi.emb->is_euc_in_product()) {
       if(in_h2xe())
         h1[0] = atanh(h.h[0] / h.h[2]);
       else
@@ -86,7 +86,7 @@ pair<bool, hyperpoint> makeradar(shiftpoint h) {
       h1[2] = - zlevel(h.h) - h.shift;
       h1[1] = 0;
       h1[3] = 0;
-      h1 = cgi.intermediate_to_logical * h1;
+      h1 = cgi.emb->intermediate_to_logical * h1;
       d = hypot_d(2, h1);
       if(d > vid.radarrange) return {false, h1};
       if(d) h1 = h1 / (vid.radarrange + cgi.scalefactor/4);

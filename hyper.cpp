@@ -78,6 +78,7 @@
 #include "system.cpp"
 #include "debug.cpp"
 #include "geometry.cpp"
+#include "embeddings.cpp"
 #include "geometry2.cpp"
 #include "polygons.cpp"
 #include "3d-models.cpp"

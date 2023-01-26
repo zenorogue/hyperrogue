@@ -137,14 +137,10 @@ EX namespace euc {
     map<gp::loc, struct cdata> eucdata;
     
     void compute_tmatrix() {
-      bool b = geom3::flipped;
       cgi.prepare_basics();
-      if(b) geom3::light_flip(false);
       shifttable = get_shifttable();
       tmatrix.resize(S7);
-      for(int i=0; i<S7; i++) 
-        tmatrix[i] = eumove(shifttable[i]);
-      if(b) geom3::light_flip(true);
+      for(int i=0; i<S7; i++) tmatrix[i] = eumove(shifttable[i]);
       }
     
     void on_dim_change() override {
@@ -1212,7 +1208,7 @@ EX transmatrix eumove(coord co) {
     Mat[0][2] += (co[0] + co[1] * .5) * cgi.tessf;
     Mat[1][2] += co[1] * q3 /2 * cgi.tessf;
     }
-  if(embedded_plane) swapmatrix(Mat);
+  if(embedded_plane) Mat = cgi.emb->base_to_actual(Mat);
   return Mat;
   }
 

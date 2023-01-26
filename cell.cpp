@@ -51,7 +51,7 @@ public:
   virtual transmatrix spin_to(cell *c, int d, ld bonus=0);
   virtual transmatrix spin_from(cell *c, int d, ld bonus=0);
   
-  virtual double spacedist(cell *c, int i) { return hdist(tile_center(), adj(c, i) * tile_center()); }
+  virtual double spacedist(cell *c, int i);
   
   virtual bool strict_tree_rules() { return false; }
 
@@ -117,6 +117,8 @@ struct hrmap_hyperbolic : hrmap_standard {
   void virtualRebase(heptagon*& base, transmatrix& at) override;
   };
 #endif
+
+double hrmap::spacedist(cell *c, int i) { return hdist(tile_center(), adj(c, i) * tile_center()); }
 
 heptagon *hrmap::create_step(heptagon *h, int direction) {
   throw hr_exception("create_step called unexpectedly");
@@ -404,8 +406,12 @@ EX bool is_in_disk(cell *c) {
 EX void initcells() {
   DEBB(DF_INIT, ("initcells"));
 
-  if(embedded_plane) return IPF( initcells() );
-  
+  if(embedded_plane) {
+    IPF(initcells());
+    currentmap->on_dim_change();
+    return;
+    }
+
   hrmap* res = callhandlers((hrmap*)nullptr, hooks_newmap);
   if(res) currentmap = res;
   #if CAP_SOLV

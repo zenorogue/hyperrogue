@@ -1058,12 +1058,12 @@ EX array<heptagon*, 3> get_masters(cell *c) {
 
 EX void swap_vertices() {
   for(auto& c: cells) {
-    swapmatrix(c.p);
+    swappoint(c.p);
     swapmatrix(c.pusher);
     swapmatrix(c.rpusher);
-    for(auto& jp: c.jpoints) swapmatrix(jp);
+    for(auto& jp: c.jpoints) swappoint(jp);
     for(auto& rm: c.relmatrices) swapmatrix(rm.second);
-    for(auto& v: c.vertices) swapmatrix(v);
+    for(auto& v: c.vertices) swappoint(v);
     }
   }
 

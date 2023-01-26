@@ -163,7 +163,7 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     #if CAP_BT
     if(bt::in()) {
       for(auto h: fac)
-        println(hlog, PIU(deparabolic13(normalize_flat(h))));
+        println(hlog, PIU(deparabolic13(cgi.emb->normalize_flat(h))));
       if(cw.spin == cw.at->type - 2)
         fac.pop_back();
       else
@@ -176,7 +176,7 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     else {
       hyperpoint ctr = Hypc;
       for(auto p: fac) ctr += product_decompose(p).second;
-      ctr = normalize_flat(ctr);
+      ctr = cgi.emb->normalize_flat(ctr);
       id.T = gpushxto0(ctr);
       }
     }
@@ -185,8 +185,8 @@ EX portal_data make_portal(cellwalker cw, int spin) {
     id.v0 = Hypc;
     id.scale = cgi.plevel;
     for(auto p: fac) id.v0 += p;
-    id.v0 = normalize_flat(id.v0);
-    hyperpoint h = normalize_flat(fac[0]);
+    id.v0 = cgi.emb->normalize_flat(id.v0);
+    hyperpoint h = cgi.emb->normalize_flat(fac[0]);
     id.T = cspin90(1, 0) * spintox(gpushxto0(id.v0) * h) * gpushxto0(id.v0);
     if((id.T * C0)[0] > 0) id.T = spin180() * id.T;
     for(int i=0; i<3; i++) id.T[3][i] = id.T[i][3] = i==3;

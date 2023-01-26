@@ -2136,7 +2136,7 @@ EX void swap_vertices() {
   for(auto& p: {&current, &slided}) 
     for(auto& s: p->shapes)
       for(auto& v: s.vertices)
-        swapmatrix(v);
+        swappoint(v);
   }
 
 #if MAXMDIM >= 4

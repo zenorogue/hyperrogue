@@ -1370,7 +1370,7 @@ EX namespace hybrid {
   template<class T> auto in_underlying_geometry(const T& f) -> decltype(f()) {
     if(!mhybrid && !gproduct) return f();
     if(embedded_plane) {
-      if(geom3::euc_in_product()) {
+      if(cgi.emb->is_euc_in_product()) {
         dynamicval<eGeometryClass> dgc(cginf.g.kind, cginf.g.sig[2] < 0 ? gcHyperbolic : gcSphere);
         return f();
         }
