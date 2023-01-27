@@ -694,8 +694,9 @@ EX transmatrix spin270() {
   }
 
 EX transmatrix lzpush(ld z) {
-  if(cgi.emb->logical_to_intermediate[2][0]) return cpush(0, z);  
-  if(cgi.emb->logical_to_intermediate[2][1]) return cpush(1, z);
+  auto &lti = cgi.emb->logical_scaled_to_intermediate;
+  if(lti[0][2]) return cpush(0, lti[0][2] * z);
+  if(lti[1][2]) return cpush(1, lti[1][2] * z);
   return cpush(2, z);
   }
 
