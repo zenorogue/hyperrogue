@@ -241,6 +241,8 @@ void horo_distance::become(hyperpoint h1) {
     a = 0, b = hdist(h1, C0);
   else if(cgi.emb->is_euc_in_product())
     a = 0, b = hdist(h1, C0);
+  else if(cgi.emb->is_cylinder())
+    a = 0, b = hdist(h1, tile_center());
   else
     a = 0, b = intval(h1, tile_center());
   }
@@ -252,6 +254,8 @@ horo_distance::horo_distance(shiftpoint h1, const shiftmatrix& T) {
 #endif
   if(sn::in() || mhybrid || nil || sl2) become(inverse_shift(T, h1));
   else if(cgi.emb->is_euc_in_product())
+    a = 0, b = hdist(h1.h, unshift(T * tile_center(), h1.shift));
+  else if(cgi.emb->is_cylinder())
     a = 0, b = hdist(h1.h, unshift(T * tile_center(), h1.shift));
   else
     a = 0, b = intval(h1.h, unshift(T * tile_center(), h1.shift));

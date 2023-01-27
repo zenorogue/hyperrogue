@@ -1374,6 +1374,10 @@ EX namespace hybrid {
         dynamicval<eGeometryClass> dgc(cginf.g.kind, cginf.g.sig[2] < 0 ? gcHyperbolic : gcSphere);
         return f();
         }
+      if(cgi.emb->is_cylinder()) {
+        dynamicval<eGeometryClass> dgc(cginf.g.kind, cginf.g.sig[2] < 0 ? gcHyperbolic : gcSphere);
+        return f();
+        }
       geom3::light_flip(true);
       finalizer ff([] { geom3::light_flip(false); });
       return f();
