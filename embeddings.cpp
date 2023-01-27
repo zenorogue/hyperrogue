@@ -229,7 +229,7 @@ EX }
   #if HDR
   struct embedding_method {
     virtual ld center_z() { return 0; }
-    virtual hyperpoint tile_center() { ld z = center_z(); if(z == 0) return C0; else return zpush0(z); }
+    virtual hyperpoint tile_center();
     virtual transmatrix intermediate_to_actual_translation(hyperpoint i) = 0;
     virtual hyperpoint intermediate_to_actual(hyperpoint i) { return intermediate_to_actual_translation(i) * tile_center(); }
     virtual hyperpoint actual_to_intermediate(hyperpoint a) = 0;
@@ -242,7 +242,7 @@ EX }
     virtual hyperpoint actual_to_base(hyperpoint h) = 0;
     virtual transmatrix actual_to_base(const transmatrix &T) = 0;
     virtual hyperpoint normalize_flat(hyperpoint a) { return flatten(normalize(a)); }
-    virtual hyperpoint flatten(hyperpoint a) { auto i = actual_to_intermediate(a); auto l = intermediate_to_logical * i; l[2] = 0; i = logical_to_intermediate * l; return intermediate_to_actual(i); }
+    virtual hyperpoint flatten(hyperpoint a);
     virtual transmatrix get_radar_transform(const transmatrix& V);
     virtual transmatrix get_lsti() { return Id; }
     virtual transmatrix get_lti() { return logical_scaled_to_intermediate; }
@@ -284,6 +284,12 @@ EX geometry_information *swapper;
 
 struct auaua : embedding_method { int z; };
 
+hyperpoint embedding_method::tile_center() {
+  ld z = center_z();
+  if(z == 0) return C0;
+  return lzpush(z) * C0;
+  }
+
 transmatrix embedding_method::map_relative_push(hyperpoint a) {
   auto i = actual_to_intermediate(a);
   return intermediate_to_actual_translation(i);  
@@ -294,6 +300,13 @@ hyperpoint embedding_method::orthogonal_move(const hyperpoint& a, ld z) {
   auto l = intermediate_to_logical_scaled * i;
   l[2] += z;
   i = logical_scaled_to_intermediate * l;
+  return intermediate_to_actual(i);
+  }
+
+hyperpoint embedding_method::flatten(hyperpoint a) {
+  auto i = actual_to_intermediate(a);
+  auto l = intermediate_to_logical * i;
+  l[2] = 0; i = logical_to_intermediate * l;
   return intermediate_to_actual(i);
   }
 
