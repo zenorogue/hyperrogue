@@ -607,7 +607,7 @@ EX void make_air() {
         S = g.T.T;
         S = current_display->radar_transform * S;
         geometry = orig;
-        S = cgi1.emb->actual_to_base(S);
+        S = cgi1->emb->actual_to_base(S);
         }
       
       auto& h = cgi.shFullFloor.b[shvid(g.c)];
