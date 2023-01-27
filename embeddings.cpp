@@ -594,6 +594,24 @@ struct emb_euc_cylinder_he : emb_euc_cylinder {
     }
   };
 
+struct emb_euc_cylinder_horo : emb_euc_cylinder {
+  ld center_z() override { return 0; }
+  bool no_spin() override { return true; }
+  hyperpoint actual_to_intermediate(hyperpoint a) override {
+    ld z0 = zlevel(a);
+    a /= exp(z0);
+    auto hy = deparabolic13(a);
+    hy[2] = z0;
+    return hy;
+    }
+  transmatrix intermediate_to_actual_translation(hyperpoint i) override {
+    return zpush(i[2]) * parabolic1(i[1]) * xpush(i[0]);
+    }
+  transmatrix get_lsti() override {
+    return cspin90(0, 2);
+    }
+  };
+
 struct emb_euc_in_sph : emb_euclid_noniso {
   bool is_euc_in_sph() override { return true; }
   ld center_z() override { return 1; }
@@ -678,7 +696,9 @@ EX unique_ptr<embedding_method> make_embed() {
   if(!embedded_plane)
     emb1 = new emb_none;
   else if(any_cylinder(spatial_embedding) && mgclass() == gcEuclid)
-    emb1 = spatial_embedding == seCylinderHE ? new emb_euc_cylinder_he : new emb_euc_cylinder;
+    emb1 = spatial_embedding == seCylinderHE ? new emb_euc_cylinder_he :
+           spatial_embedding == seCylinderHoro ? new emb_euc_cylinder_horo :
+           new emb_euc_cylinder;
   else if(mgclass() == ggclass())
     emb1 = new emb_same_in_same;
   else if(mgclass() == gcSphere && among(ggclass(), gcHyperbolic, gcEuclid))
