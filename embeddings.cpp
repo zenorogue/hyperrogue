@@ -242,7 +242,7 @@ EX }
     virtual hyperpoint actual_to_base(hyperpoint h) = 0;
     virtual transmatrix actual_to_base(const transmatrix &T) = 0;
     virtual hyperpoint normalize_flat(hyperpoint a) { return flatten(normalize(a)); }
-    virtual hyperpoint flatten(hyperpoint a) { auto i = actual_to_intermediate(a); auto l = intermediate_to_logical * i; l[2] = center_z(); i = logical_to_intermediate * l; return intermediate_to_actual(i); }
+    virtual hyperpoint flatten(hyperpoint a) { auto i = actual_to_intermediate(a); auto l = intermediate_to_logical * i; l[2] = 0; i = logical_to_intermediate * l; return intermediate_to_actual(i); }
     virtual transmatrix get_radar_transform(const transmatrix& V);
     virtual transmatrix get_lsti() { return Id; }
     virtual transmatrix get_lti() { return logical_scaled_to_intermediate; }
@@ -548,35 +548,22 @@ struct emb_euc_in_sl2 : emb_euclid_noniso {
     }
   };
 
+/* for both seCylinderH and seCylinderE. Possibly actually works for CliffordTorus too */
 struct emb_euc_cylinder : emb_euclid_noniso {
   bool is_cylinder() override { return true; }
   ld center_z() override { return 1; }
   bool is_depth_limited() override { return true; }
   transmatrix get_lsti() override { return cspin90(0, 1); }
   hyperpoint actual_to_intermediate(hyperpoint a) override { 
-    ld z0 = hypot(a[1], a[2]);
+    ld z0 = asin_auto(hypot(a[1], a[2]));
     ld x0 = a[0];
-    if(hyperbolic) x0 = asinh(x0 / acosh(z0));
+    if(z0 == 0) return hyperpoint(x0, 0, 0, 1);
+    x0 = asin_auto(x0 / cos_auto(z0));
     ld y0 = z0 ? atan2(a[1], a[2]) : 0;
-    return hyperpoint(x0, y0, z0, 1);
+    return point31(x0, y0, z0-1);
     }
-  ld get_logical_z(hyperpoint a) override { return hypot(a[1], a[2]) - 1; }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override {
     return xpush(i[0]) * cspin(1, 2, i[1]) * zpush(i[2]);
-    }
-  hyperpoint orthogonal_move(const hyperpoint& a, ld z) override {
-    auto hf = a / a[3];
-    ld z0 = hypot(a[1], a[2]);
-    if(!z0) return hf;
-    ld f = ((z0 + z) / z0);
-    hf[1] *= f; hf[2] *= f;
-    return hf;
-    }
-  hyperpoint flatten(hyperpoint h) {
-    h /= h[3];
-    ld z = hypot(h[1], h[2]);
-    if(z > 0) h[1] /= z, h[2] /= z;
-    return h;
     }
   };
 
