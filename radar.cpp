@@ -73,7 +73,7 @@ pair<bool, hyperpoint> makeradar(shiftpoint h) {
       if(d) h1 = h1 / (vid.radarrange + cgi.scalefactor/4);
       }
     else if(cgi.emb->is_euc_in_sl2()) {
-      h1 = cgi.emb->intermediate_to_logical * esl2_ati(unshift(h)); h1[1] = -h1[1];
+      h1 = cgi.emb->intermediate_to_logical * cgi.emb->actual_to_intermediate(unshift(h)); h1[1] = -h1[1];
       d = hypot_d(2, h1);
       if(d > vid.radarrange) return {false, h1};
       if(d) h1 = h1 / (vid.radarrange + cgi.scalefactor/4);

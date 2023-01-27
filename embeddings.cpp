@@ -500,21 +500,17 @@ struct emb_euc_in_product : emb_euclid_noniso {
 
 struct emb_euc_in_sl2 : emb_euclid_noniso {
 
-  /** used in esl2_ita */
-  EX transmatrix esl2_zpush(ld z) { return cspin(2, 3, z) * cspin(0, 1, z); }
+  transmatrix esl2_zpush(ld z) { return cspin(2, 3, z) * cspin(0, 1, z); }
 
-  /** see esl2_ita; equal to esl2_ita * C0 */
-  EX hyperpoint esl2_ita0(hyperpoint h1) {
-    return esl2_zpush(h1[2]) * xpush(h1[0]) * ypush0(h1[1]);
+  hyperpoint intermediate_to_actual(hyperpoint i) override {
+    return esl2_zpush(i[2]) * xpush(i[0]) * ypush0(i[1]);
     }
 
-  /** in embedded-in-sl2, convert from intermediate to actual coordinates */
-  EX transmatrix esl2_ita(hyperpoint h1) {
-    return esl2_zpush(h1[2]) * xpush(h1[0]) * ypush(h1[1]);
+  transmatrix intermediate_to_actual_translation(hyperpoint i) override {
+    return esl2_zpush(i[2]) * xpush(i[0]) * ypush(i[1]);
     }
 
-  /** in embedded-in-sl2, convert from actual to intermediate coordinates */
-  EX hyperpoint esl2_ati(hyperpoint h) {
+  hyperpoint actual_to_intermediate(hyperpoint h) override {
     ld a1 = (h[0] * h[3] - h[1] * h[2]) / (-h[2] * h[2] - h[1] * h[1] -h[0] * h[0] - h[3] * h[3]);
     // a1 is S*sqrt(1+S*S) / (1+2*S*S), where S = sinh(-x) and C = cosh(-x); U is S*S
     ld a = a1 * a1;
@@ -532,20 +528,6 @@ struct emb_euc_in_sl2 : emb_euclid_noniso {
   bool is_euc_in_sl2() override { return true; }
   bool no_spin() override { return true; }
   transmatrix get_lsti() override { return cspin90(2, 1); }
-  hyperpoint actual_to_intermediate(hyperpoint a) override { return esl2_ati(a); }
-  transmatrix intermediate_to_actual_translation(hyperpoint i) override { return esl2_zpush(i[2]) * xpush(i[0]) * ypush(i[1]); }
-
-  ld get_logical_z(hyperpoint a) override { return esl2_ati(a)[1]; }
-  hyperpoint orthogonal_move(const hyperpoint& a, ld z) override {
-    hyperpoint h1 = esl2_ati(a);
-    h1[1] += z;
-    return esl2_ita0(h1);
-    }
-  hyperpoint flatten(hyperpoint h) {
-    hyperpoint h1 = esl2_ati(h);
-    h1[1] = 0;
-    return esl2_ita0(h1);
-    }
   };
 
 /* for both seCylinderH and seCylinderE. Possibly actually works for CliffordTorus too */

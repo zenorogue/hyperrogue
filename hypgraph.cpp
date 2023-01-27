@@ -3306,7 +3306,7 @@ EX void shift_v_by_vector(transmatrix& V, const hyperpoint H, eShiftMethod sm IS
       V = iview_inverse(nisot::parallel_transport(view_inverse(V), -H));
       return;
     case smESL2: {
-      hyperpoint H1 = esl2_ita0(lp_iapply(-H));
+      hyperpoint H1 = cgi.emb->intermediate_to_actual(lp_iapply(-H));
       transmatrix IV = view_inverse(V);
       transmatrix rot = V * cgi.emb->map_relative_push(IV * C0);
       transmatrix V1 = gpushxto0(H1) * gpushxto0(IV*C0);
@@ -3376,7 +3376,7 @@ EX void shift_v_to(transmatrix& V, shiftpoint H, eShiftMethod sm IS(shift_method
     case smProduct:
       return shift_v_by_matrix(V, gpushxto0(unshift(H)), sm);
     case smESL2:
-      return shift_v_by_vector(V, -lp_apply(esl2_ati(lp_iapply(unshift(H)))), sm);
+      return shift_v_by_vector(V, -lp_apply(cgi.emb->actual_to_intermediate(lp_iapply(unshift(H)))), sm);
     case smLie:
       return shift_v_by_vector(V, -lie_log(H), sm);
       return;
@@ -3398,7 +3398,7 @@ EX void shift_v_towards(transmatrix& V, shiftpoint H, ld l, eShiftMethod sm IS(s
     case smEmbedded:
       return shift_v_by_matrix(V, rspintox(unshift(H)) * xpush(-l) * spintox(unshift(H)), sm);
     case smESL2:
-      return shift_v_by_vector(V, -lp_apply(tangent_length(esl2_ati(lp_iapply(unshift(H))), l)), sm);
+      return shift_v_by_vector(V, -lp_apply(tangent_length(cgi.emb->actual_to_intermediate(lp_iapply(unshift(H))), l)), sm);
     case smLie:
       return shift_v_by_vector(V, tangent_length(lie_log(H), -l), sm);
     case smGeodesic:
