@@ -130,10 +130,7 @@ EX namespace geom3 {
           bool isphere = g.kind == gcSphere;
           bool ieuc_or_binary = ieuclid || (gi.flags & qBINARY);
 
-          // if(spatial_embedding == seProduct && !ieuclid) g = giProduct, g.sig[2] = og.sig[2];
-
           if(spatial_embedding == seProduct && !ieuclid) g = giProduct, g.sig[2] = og.sig[2];
-
           if(spatial_embedding == seProductH && ieuclid) g = giProductH;
           if(spatial_embedding == seProductS && ieuclid) g = giProductS;
           if(spatial_embedding == seLowerCurvature) g = (isphere ? giEuclid3 : giHyperb3);
