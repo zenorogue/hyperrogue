@@ -20,7 +20,8 @@ EX namespace geom3 {
     seCylinderH,
     seCylinderHE,
     seCylinderHoro,
-    seCylinderNil
+    seCylinderNil,
+    seCylinderSL2
     };
   #endif
 
@@ -43,6 +44,7 @@ EX namespace geom3 {
     {"product cylinder", "Embed Euclidean cylinder in H2xR space."},
     {"Nil cylinder", "Embed Euclidean cylinder in Nil."},
     {"horocylinder", "Embed Euclidean as a horocylinder in H2xR space."},
+    {"SL2 cylinder", "Embed Euclidean as a cylinder in twisted product geometry."},
     };
 
   EX eSpatialEmbedding spatial_embedding = seDefault;
@@ -117,89 +119,38 @@ EX namespace geom3 {
       for(geometryinfo& gi: ginf) {
         auto &g = gi.g;
         if(vid.always3 && g.gameplay_dimension == 2 && g.graphical_dimension == 2) {
+          /* same-in-same by default */
+          auto og = g;
           g.graphical_dimension++;
           g.homogeneous_dimension++;
           g.sig[3] = g.sig[2];
           g.sig[2] = g.sig[1];
 
-          if(among(spatial_embedding, seProduct, seProductH, seProductS) && g.kind != gcEuclid) {
-            g.kind = gcProduct;
-            g.homogeneous_dimension--;
-            g.sig[2] = g.sig[3];
-            }
-
-          if(among(spatial_embedding, seProductH, seProductS) && g.kind == gcEuclid) {
-            g.kind = gcProduct;
-            g.homogeneous_dimension--;
-            g.sig[2] = spatial_embedding == seProductH ? -1 : 1;
-            }
-
-          if(spatial_embedding == seLowerCurvature) {
-            if(g.kind == gcEuclid) g = ginf[gSpace534].g;
-            if(g.kind == gcSphere) g = ginf[gCubeTiling].g;
-            g.gameplay_dimension = 2;
-            }
-
-          if(spatial_embedding == seMuchLowerCurvature) {
-            g = ginf[gSpace534].g;
-            g.gameplay_dimension = 2;
-            }
-
           bool ieuclid = g.kind == gcEuclid;
-
-          if(spatial_embedding == seNil && ieuclid) {
-            g = ginf[gNil].g;
-            g.gameplay_dimension = 2;
-            }
-
-          if(spatial_embedding == seCliffordTorus && ieuclid) {
-            g = ginf[gCell120].g;
-            g.gameplay_dimension = 2;
-            }
-
+          bool isphere = g.kind == gcSphere;
           bool ieuc_or_binary = ieuclid || (gi.flags & qBINARY);
 
-          if(spatial_embedding == seSol && ieuc_or_binary) {
-            g = ginf[gSol].g;
-            g.gameplay_dimension = 2;
-            }
+          // if(spatial_embedding == seProduct && !ieuclid) g = giProduct, g.sig[2] = og.sig[2];
 
-          if(spatial_embedding == seNIH && ieuc_or_binary) {
-            g = ginf[gNIH].g;
-            g.gameplay_dimension = 2;
-            }
+          if(spatial_embedding == seProduct && !ieuclid) g = giProduct, g.sig[2] = og.sig[2];
 
-          if(spatial_embedding == seSolN && ieuc_or_binary) {
-            g = ginf[gSolN].g;
-            g.gameplay_dimension = 2;
-            }
-
-          if(spatial_embedding == seSL2 && ieuclid) {
-            g = giSL2;
-            g.gameplay_dimension = 2;
-            }
+          if(spatial_embedding == seProductH && ieuclid) g = giProductH;
+          if(spatial_embedding == seProductS && ieuclid) g = giProductS;
+          if(spatial_embedding == seLowerCurvature) g = (isphere ? giEuclid3 : giHyperb3);
+          if(spatial_embedding == seMuchLowerCurvature) g = giHyperb3;
+          if(spatial_embedding == seNil && ieuclid) g = giNil;
+          if(spatial_embedding == seCliffordTorus && ieuclid) g = giHyperb3;
+          if(spatial_embedding == seSol && ieuc_or_binary) g = giSol;
+          if(spatial_embedding == seNIH && ieuc_or_binary) g = giNIH;
+          if(spatial_embedding == seSolN && ieuc_or_binary) g = giSolN;
+          if(spatial_embedding == seSL2 && ieuclid) g = giSL2;
+          if(spatial_embedding == seCylinderH && ieuclid) g = giHyperb3;
+          if(spatial_embedding == seCylinderHE && ieuclid) g = giProductH;
+          if(spatial_embedding == seCylinderHoro && ieuclid) g = giProductH;
+          if(spatial_embedding == seCylinderNil && ieuclid) g = giNil;
+          if(spatial_embedding == seCylinderSL2 && ieuclid) g = giSL2;
           
-          if(spatial_embedding == seCylinderH && ieuclid) {
-            g = ginf[gSpace534].g;
-            g.gameplay_dimension = 2;
-            }
-
-          if(spatial_embedding == seCylinderHE && ieuclid) {
-            g.kind = gcProduct;
-            g.homogeneous_dimension--;
-            g.sig[2] = -1;
-            }
-
-          if(spatial_embedding == seCylinderHoro && ieuclid) {
-            g.kind = gcProduct;
-            g.homogeneous_dimension--;
-            g.sig[2] = -1;
-            }
-
-          if(spatial_embedding == seCylinderNil && ieuclid) {
-            g = ginf[gNil].g;
-            g.gameplay_dimension = 2;
-            }
+          g.gameplay_dimension = 2;
           }
         }
       }
