@@ -957,4 +957,29 @@ void embedding_method::auto_configure() {
   if(spatial_embedding == seCylinderSL2) configure_cylinder();
   }
 
+EX void invoke_embed(geom3::eSpatialEmbedding se) {
+  if(GDIM == 3) { if(geom3::auto_configure) geom3::switch_fpp(); else geom3::switch_always3(); }
+  if(in_tpp()) geom3::switch_tpp();
+  if(se != geom3::seNone) {
+    geom3::spatial_embedding = se;
+    if(geom3::auto_configure) geom3::switch_fpp(); else geom3::switch_always3();
+    delete_sky();
+    resetGL();
+    }
+  }
+
+geom3::eSpatialEmbedding embed_by_name(string ss) {
+  using namespace geom3;
+  auto& seo = spatial_embedding_options;
+  for(int i=0; i<isize(seo); i++) if(seo[i].first == ss) return eSpatialEmbedding(i);
+  bool numeric = true;
+  for(char c: ss) if(c < '0' || c > '9') numeric = false;
+  if(numeric) return eSpatialEmbedding(atoi(ss.c_str()));
+  for(int i=0; i<isize(ginf); i++) if(appears(seo[i].first, ss)) return eSpatialEmbedding(i);
+  for(int i=0; i<isize(ginf); i++) if(appears(seo[i].second, ss)) return eSpatialEmbedding(i);
+  return seNone;
+  }
+
+auto ah_embed = arg::add2("-seo", [] { arg::shift(); invoke_embed(embed_by_name(arg::args())); });
+
 }

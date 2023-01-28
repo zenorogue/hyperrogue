@@ -2298,16 +2298,7 @@ EX void show_spatial_embedding() {
   for(int i=0; i<isize(seo); i++) {
     auto se = geom3::eSpatialEmbedding(i);
     dialog::addBoolItem(XLAT(seo[i].first), emb == i, 'a' + i);
-    dialog::add_action([se, emb] {
-      if(GDIM == 3) { if(geom3::auto_configure) geom3::switch_fpp(); else geom3::switch_always3(); }
-      if(in_tpp()) geom3::switch_tpp();
-      if(se != geom3::seNone) {
-        geom3::spatial_embedding = se;
-        if(geom3::auto_configure) geom3::switch_fpp(); else geom3::switch_always3();
-        delete_sky();
-        resetGL();
-        }
-      });
+    dialog::add_action([se] { invoke_embed(se); });
     }
 
   dialog::addBreak(100);
