@@ -865,7 +865,9 @@ EX geometryinfo1 giNIH     = { gcNIH,        3, 3, 4, {1,1, 1,0 } };
 EX geometryinfo1 giSolN    = { gcSolN,       3, 3, 4, {1,1, 1,0 } };
 
 EX geometryinfo1 giNil     = { gcNil,        3, 3, 4, {1,1, 1,0 } };
-EX geometryinfo1 giProduct = { gcSL2,        3, 3, 4, {1,1, 1,0 } /* will be filled in product::configure() */ };
+EX geometryinfo1 giProductH= { gcProduct,    3, 3, 3, {1,1,-1,0 } };
+EX geometryinfo1 giProductS= { gcProduct,    3, 3, 3, {1,1, 1,0 } };
+EX geometryinfo1 giProduct = { gcProduct,    3, 3, 3, {1,1, 1,0 } /* will be filled in product::configure() */ };
 EX geometryinfo1 giSL2     = { gcSL2,        3, 3, 4, {1,1,-1,-1} };
 
 EX modecode_t no_code = 0x1;
