@@ -138,7 +138,7 @@ EX namespace geom3 {
           if(spatial_embedding == seLowerCurvature) g = (isphere ? giEuclid3 : giHyperb3);
           if(spatial_embedding == seMuchLowerCurvature) g = giHyperb3;
           if(spatial_embedding == seNil && ieuclid) g = giNil;
-          if(spatial_embedding == seCliffordTorus && ieuclid) g = giHyperb3;
+          if(spatial_embedding == seCliffordTorus && ieuclid) g = giSphere3;
           if(spatial_embedding == seSol && ieuc_or_binary) g = giSol;
           if(spatial_embedding == seNIH && ieuc_or_binary) g = giNIH;
           if(spatial_embedding == seSolN && ieuc_or_binary) g = giSolN;
