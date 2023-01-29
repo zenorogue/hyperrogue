@@ -1034,6 +1034,12 @@ EX hyperpoint get_horopoint(hyperpoint h) {
   return get_horopoint(h[0], h[1]);
   }
 
+EX hyperpoint inverse_horopoint(hyperpoint h) {
+  hyperpoint h1 = deparabolic13(h);
+  h1[1] /= 2 * bt::xy_mul(); h1[0] *= -1;
+  return h1;
+  }
+
 EX hyperpoint get_corner_horo_coordinates(cell *c, int i) {
   ld yy = log(2) / 2;
   ld xx = 1 / 2.;
