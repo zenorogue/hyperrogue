@@ -536,8 +536,13 @@ void raygen::move_forward() {
       fsh +=
       "mediump vec4 christoffel(mediump vec4 pos, mediump vec4 vel, mediump vec4 tra) {\n"
       "  mediump float x = pos.x;\n"
-      "  return vec4(x*vel.y*tra.y - 0.5*dot(vel.yz,tra.zy), -.5*x*dot(vel.yx,tra.xy) + .5 * dot(vel.zx,tra.xz), -.5*(x*x-1.)*dot(vel.yx,tra.xy)+.5*x*dot(vel.zx,tra.xz), 0.);\n"
-//        "  return vec4(0.,0.,0.,0.);\n"
+      "  const float mu = " + to_glsl((1-nilv::model_used)/2) + ";\n"
+      "  pos[2] += pos[0] * pos[1] * mu;\n"
+      "  vel[2] += (pos[0] * vel[1] + pos[1] * vel[0]) * mu;\n"
+      "  tra[2] += (pos[0] * tra[1] + pos[1] * tra[0]) * mu;\n"
+      "  vec4 res = vec4(x*vel.y*tra.y - 0.5*dot(vel.yz,tra.zy), -.5*x*dot(vel.yx,tra.xy) + .5 * dot(vel.zx,tra.xz), -.5*(x*x-1.)*dot(vel.yx,tra.xy)+.5*x*dot(vel.zx,tra.xz), 0.);\n"
+      "  res[2] -= (pos[0] * res[1] + vel[0] * vel[1] + pos[2] * res[0]) * mu;\n"
+      "  return res;\n"
       "  }\n";
       use_christoffel = false;
       }

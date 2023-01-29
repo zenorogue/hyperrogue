@@ -31,8 +31,10 @@ EX namespace nisot {
       T[0][0] = pow(2, h[2]);
       T[1][1] = pow(3, h[2]);
       }
-    if(nil) 
-      T[2][1] = h[0];
+    if(nil) {
+      T[2][1] = h[0] * (nilv::model_used + 1) / 2;
+      T[2][0] = h[1] * (nilv::model_used - 1) / 2;
+      }
     if(co < 0) return iso_inverse(T);
     return T;
     }
@@ -744,13 +746,68 @@ EX }
 
 EX namespace nilv {
 
-  hyperpoint christoffel(const hyperpoint Position, const hyperpoint Velocity, const hyperpoint Transported) {
-    ld x = Position[0];
-    return point3(
-      x * Velocity[1] * Transported[1] - 0.5 * (Velocity[1] * Transported[2] + Velocity[2] * Transported[1]),
-      -.5 * x * (Velocity[1] * Transported[0] + Velocity[0] * Transported[1]) + .5 * (Velocity[2] * Transported[0] + Velocity[0] * Transported[2]),
-      -.5 * (x*x-1) * (Velocity[1] * Transported[0] + Velocity[0] * Transported[1]) + .5 * x * (Velocity[2] * Transported[0] + Velocity[0] * Transported[2])
-      );
+  #if HDR
+  /** nmSym is the rotationally symmetric model of Nil, while nmHeis is the Heisenberg model. */
+  constexpr ld nmSym = 0, nmHeis = 1;
+  #endif
+
+  /** HyperRogue currently uses nmSym by default, but some parts are still written in nmHeis */
+  EX ld model_used = nmSym;
+
+  /** a helper function for model conversions */
+  EX ld sym_to_heis_bonus(const hyperpoint& H) {
+    return H[0] * H[1] / 2;
+    }
+
+  EX hyperpoint convert(hyperpoint H, ld from, ld to) {
+    H[2] += sym_to_heis_bonus(H) * (to - from);
+    return H;
+    }
+
+  EX void convert_ref(hyperpoint& H, ld from, ld to) {
+    H[2] += sym_to_heis_bonus(H) * (to - from);
+    }
+
+  EX void convert_tangent_ref(hyperpoint at, hyperpoint& v, ld from, ld to) {
+    v[2] += (at[0] * v[1] + at[1] * v[0]) * (to - from) / 2;
+    }
+
+  EX void convert_ref(transmatrix& T, ld from, ld to) {
+    auto T1 = transpose(T);
+    convert_ref(T1[3], from, to);
+    for(int i: {0, 1, 2})
+      convert_tangent_ref(T1[3], T1[i], from, to);
+    T = transpose(T1);
+    }
+
+  EX hyperpoint checked_convert(hyperpoint H, ld from, ld to) {
+    if(nil) return convert(H, from, to);
+    return H;
+    }
+
+  hyperpoint christoffel(const hyperpoint Position, const hyperpoint Velocity, const hyperpoint Transported, ld model = model_used) {
+    /* to do: write these formulas in model */
+    if(model == nmHeis) {
+      ld x = Position[0];
+      return point3(
+        x * Velocity[1] * Transported[1] - 0.5 * (Velocity[1] * Transported[2] + Velocity[2] * Transported[1]),
+        -.5 * x * (Velocity[1] * Transported[0] + Velocity[0] * Transported[1]) + .5 * (Velocity[2] * Transported[0] + Velocity[0] * Transported[2]),
+        -.5 * (x*x-1) * (Velocity[1] * Transported[0] + Velocity[0] * Transported[1]) + .5 * x * (Velocity[2] * Transported[0] + Velocity[0] * Transported[2])
+        );
+      }
+    else {
+      hyperpoint P = Position;
+      hyperpoint V = Velocity;
+      hyperpoint T = Transported;
+      convert_ref(P, model_used, nmHeis);
+      convert_tangent_ref(P, V, model_used, nmHeis);
+      convert_tangent_ref(P, T, model_used, nmHeis);
+      auto res = christoffel(P, V, T, nmHeis);
+      convert_tangent_ref(P, res, nmHeis, model_used);
+      // this is acceleration, not tangent, so:
+      res[2] += (model_used-nmHeis) * V[0] * V[1];
+      return res;
+      }
     }
 
   EX hyperpoint formula_exp(hyperpoint v) {
@@ -761,23 +818,25 @@ EX namespace nilv {
     
     if(v[0] == 0 && v[1] == 0) return point31(v[0], v[1], v[2]);
     
-    if(v[2] == 0) return point31(v[0], v[1], v[0] * v[1] / 2);
+    if(v[2] == 0) return convert(point31(v[0], v[1], 0), nmSym, model_used);
     
     ld alpha = atan2(v[1], v[0]);
     ld w = v[2];
     ld c = hypot(v[0], v[1]) / v[2];
     
-    return point31(
+    return convert(point31(
       2 * c * sin(w/2) * cos(w/2 + alpha), 
       2 * c * sin(w/2) * sin(w/2 + alpha), 
       w * (1 + (c*c/2) * ((1 - sin(w)/w) + (1-cos(w))/w * sin(w + 2 * alpha)))
-      );
+      ), nmHeis, model_used);
     }
   
   EX hyperpoint get_inverse_exp(hyperpoint h, flagtype prec IS(pNORMAL)) {
     ld wmin, wmax;
     
-    ld side = h[2] - h[0] * h[1] / 2;
+    ld side = convert(h, model_used, nmSym)[2];
+
+    convert_ref(h, model_used, nmHeis);
     
     if(hypot_d(2, h) < 1e-6) return point3(h[0], h[1], h[2]);
     else if(side > 1e-6) {
@@ -814,9 +873,10 @@ EX namespace nilv {
       }
     }
   
-  EX string nilshader = 
-    "vec4 inverse_exp(vec4 h) {"
+  EX string nilshader() {
+    return "vec4 inverse_exp(vec4 h) {"
       "float wmin, wmax;"
+      "h[2] += h[0] * h[1] / 2. * " + glhr::to_glsl(1-model_used) + ";"
       "float side = h[2] - h[0] * h[1] / 2.;"
       "if(h[0]*h[0] + h[1]*h[1] < 1e-12) return vec4(h[0], h[1], h[2], 1);"
       "if(side > 1e-6) { wmin = 0.; wmax = 2.*PI; }"
@@ -839,9 +899,11 @@ EX namespace nilv {
       "float c = b / sin(w/2.);"
       "return vec4(c*w*cos(alpha), c*w*sin(alpha), w, 1.);"
       "}";
+    }
   
   #if HDR
   struct mvec : array<int, 3> {
+    /** these are in nmHeis */
     
     mvec() { }
   
@@ -864,7 +926,7 @@ EX namespace nilv {
 
   EX ld nilwidth = 1;
       
-  hyperpoint mvec_to_point(mvec m) { return hpxy3(m[0] * nilwidth, m[1] * nilwidth, m[2] * nilwidth * nilwidth); }
+  hyperpoint mvec_to_point(mvec m) { return convert(hpxy3(m[0] * nilwidth, m[1] * nilwidth, m[2] * nilwidth * nilwidth), nmHeis, model_used); }
   
   #if HDR
   struct nilstructure {
@@ -873,16 +935,18 @@ EX namespace nilv {
     };
   #endif
   
+  EX hyperpoint heis(ld x, ld y, ld z) { return convert(point31(x, y, z), nmHeis, model_used); }
+
   nilstructure ns6 = {
     {{ mvec(-1,0,0), mvec(0,-1,0), mvec(0,0,-1), mvec(1,0,0), mvec(0,1,0), mvec(0,0,1) }},
   
     {{
-    { point31(-0.5,-0.5,-0.25), point31(-0.5,-0.5,0.75), point31(-0.5,0.5,0.25), point31(-0.5,0.5,-0.75), },
-    { point31(0.5,-0.5,-0.5), point31(0.5,-0.5,0.5), point31(-0.5,-0.5,0.5), point31(-0.5,-0.5,-0.5), },
-    { point31(0,0,-0.5), point31(-0.5,0.5,-0.75), point31(-0.5,-0.5,-0.25), point31(0,0,-0.5), point31(-0.5,-0.5,-0.25), point31(-0.5,-0.5,-0.5), point31(0,0,-0.5), point31(-0.5,-0.5,-0.5), point31(0.5,-0.5,-0.5), point31(0,0,-0.5), point31(0.5,-0.5,-0.5), point31(0.5,-0.5,-0.75), point31(0,0,-0.5), point31(0.5,-0.5,-0.75), point31(0.5,0.5,-0.25), point31(0,0,-0.5), point31(0.5,0.5,-0.25), point31(0.5,0.5,-0.5), point31(0,0,-0.5), point31(0.5,0.5,-0.5), point31(-0.5,0.5,-0.5), point31(0,0,-0.5), point31(-0.5,0.5,-0.5), point31(-0.5,0.5,-0.75), },
-    { point31(0.5,0.5,-0.25), point31(0.5,0.5,0.75), point31(0.5,-0.5,0.25), point31(0.5,-0.5,-0.75), },
-    { point31(-0.5,0.5,-0.5), point31(-0.5,0.5,0.5), point31(0.5,0.5,0.5), point31(0.5,0.5,-0.5), },
-    { point31(0,0,0.5), point31(-0.5,0.5,0.25), point31(-0.5,-0.5,0.75), point31(0,0,0.5), point31(-0.5,-0.5,0.75), point31(-0.5,-0.5,0.5), point31(0,0,0.5), point31(-0.5,-0.5,0.5), point31(0.5,-0.5,0.5), point31(0,0,0.5), point31(0.5,-0.5,0.5), point31(0.5,-0.5,0.25), point31(0,0,0.5), point31(0.5,-0.5,0.25), point31(0.5,0.5,0.75), point31(0,0,0.5), point31(0.5,0.5,0.75), point31(0.5,0.5,0.5), point31(0,0,0.5), point31(0.5,0.5,0.5), point31(-0.5,0.5,0.5), point31(0,0,0.5), point31(-0.5,0.5,0.5), point31(-0.5,0.5,0.25), },
+    { heis(-0.5,-0.5,-0.25), heis(-0.5,-0.5,0.75), heis(-0.5,0.5,0.25), heis(-0.5,0.5,-0.75), },
+    { heis(0.5,-0.5,-0.5), heis(0.5,-0.5,0.5), heis(-0.5,-0.5,0.5), heis(-0.5,-0.5,-0.5), },
+    { heis(0,0,-0.5), heis(-0.5,0.5,-0.75), heis(-0.5,-0.5,-0.25), heis(0,0,-0.5), heis(-0.5,-0.5,-0.25), heis(-0.5,-0.5,-0.5), heis(0,0,-0.5), heis(-0.5,-0.5,-0.5), heis(0.5,-0.5,-0.5), heis(0,0,-0.5), heis(0.5,-0.5,-0.5), heis(0.5,-0.5,-0.75), heis(0,0,-0.5), heis(0.5,-0.5,-0.75), heis(0.5,0.5,-0.25), heis(0,0,-0.5), heis(0.5,0.5,-0.25), heis(0.5,0.5,-0.5), heis(0,0,-0.5), heis(0.5,0.5,-0.5), heis(-0.5,0.5,-0.5), heis(0,0,-0.5), heis(-0.5,0.5,-0.5), heis(-0.5,0.5,-0.75), },
+    { heis(0.5,0.5,-0.25), heis(0.5,0.5,0.75), heis(0.5,-0.5,0.25), heis(0.5,-0.5,-0.75), },
+    { heis(-0.5,0.5,-0.5), heis(-0.5,0.5,0.5), heis(0.5,0.5,0.5), heis(0.5,0.5,-0.5), },
+    { heis(0,0,0.5), heis(-0.5,0.5,0.25), heis(-0.5,-0.5,0.75), heis(0,0,0.5), heis(-0.5,-0.5,0.75), heis(-0.5,-0.5,0.5), heis(0,0,0.5), heis(-0.5,-0.5,0.5), heis(0.5,-0.5,0.5), heis(0,0,0.5), heis(0.5,-0.5,0.5), heis(0.5,-0.5,0.25), heis(0,0,0.5), heis(0.5,-0.5,0.25), heis(0.5,0.5,0.75), heis(0,0,0.5), heis(0.5,0.5,0.75), heis(0.5,0.5,0.5), heis(0,0,0.5), heis(0.5,0.5,0.5), heis(-0.5,0.5,0.5), heis(0,0,0.5), heis(-0.5,0.5,0.5), heis(-0.5,0.5,0.25), },
     }}
     };
   
@@ -890,14 +954,14 @@ EX namespace nilv {
     {{ mvec(-1,0,0), mvec(-1,0,1), mvec(0,-1,0), mvec(0,0,-1), mvec(1,0,0), mvec(1,0,-1), mvec(0,1,0), mvec(0,0,1) }},
   
     {{
-      { point31(-0.5,-0.5,-0.25), point31(-0.5,-0.5,0.75), point31(-0.5,0.5,-0.25), },
-      { point31(-0.5,-0.5,0.75), point31(-0.5,0.5,0.75), point31(-0.5,0.5,-0.25), },
-      { point31(-0.5,-0.5,-0.25), point31(-0.5,-0.5,0.75), point31(0.5,-0.5,0.25), point31(0.5,-0.5,-0.75), },
-      { point31(-0.5,-0.5,-0.25), point31(-0.5,0.5,-0.25), point31(0.5,0.5,-0.75), point31(0.5,-0.5,-0.75), },
-      { point31(0.5,0.5,0.25), point31(0.5,-0.5,0.25), point31(0.5,-0.5,-0.75), },
-      { point31(0.5,0.5,-0.75), point31(0.5,0.5,0.25), point31(0.5,-0.5,-0.75), },
-      { point31(-0.5,0.5,0.75), point31(-0.5,0.5,-0.25), point31(0.5,0.5,-0.75), point31(0.5,0.5,0.25), },
-      { point31(-0.5,-0.5,0.75), point31(-0.5,0.5,0.75), point31(0.5,0.5,0.25), point31(0.5,-0.5,0.25), },
+      { heis(-0.5,-0.5,-0.25), heis(-0.5,-0.5,0.75), heis(-0.5,0.5,-0.25), },
+      { heis(-0.5,-0.5,0.75), heis(-0.5,0.5,0.75), heis(-0.5,0.5,-0.25), },
+      { heis(-0.5,-0.5,-0.25), heis(-0.5,-0.5,0.75), heis(0.5,-0.5,0.25), heis(0.5,-0.5,-0.75), },
+      { heis(-0.5,-0.5,-0.25), heis(-0.5,0.5,-0.25), heis(0.5,0.5,-0.75), heis(0.5,-0.5,-0.75), },
+      { heis(0.5,0.5,0.25), heis(0.5,-0.5,0.25), heis(0.5,-0.5,-0.75), },
+      { heis(0.5,0.5,-0.75), heis(0.5,0.5,0.25), heis(0.5,-0.5,-0.75), },
+      { heis(-0.5,0.5,0.75), heis(-0.5,0.5,-0.25), heis(0.5,0.5,-0.75), heis(0.5,0.5,0.25), },
+      { heis(-0.5,-0.5,0.75), heis(-0.5,0.5,0.75), heis(0.5,0.5,0.25), heis(0.5,-0.5,0.25), },
       }}
     };
   
@@ -3017,6 +3081,10 @@ EX namespace nisot {
       if(mproduct) stop_game();
       shift(); product::cspin = argi();
       shift(); product::cmirror = argi();
+      return 0;
+      }
+    else if(argis("-nil-model")) {
+      shift(); nilv::model_used = argf();
       return 0;
       }
     return 1;

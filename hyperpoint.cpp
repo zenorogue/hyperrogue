@@ -1137,7 +1137,7 @@ EX transmatrix iso_inverse(const transmatrix& T) {
     return pseudo_ortho_inverse(T);
   if(sphere) 
     return ortho_inverse(T);
-  if(nil) {
+  if(nil && nilv::model_used == 1) {
     transmatrix U = Id;    
     U[2][LDIM] = T[0][LDIM] * T[1][LDIM] - T[2][LDIM];
     U[1][LDIM] = -T[1][LDIM];

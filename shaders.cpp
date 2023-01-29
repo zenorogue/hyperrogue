@@ -358,7 +358,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
         break;
       #endif
       case gcNil:
-        vsh += nilv::nilshader;
+        vsh += nilv::nilshader();
         break;
       case gcSL2:      
         vsh += slr::slshader;
@@ -441,7 +441,7 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
   if(nil && pmodel == mdPerspective)  {
     vsh += "uniform mediump float uRotCos, uRotSin, uRotNil;\n";
     coordinator +=
-      "t.z += (uRotCos * t.x + uRotSin * t.y) * (uRotCos * t.y - uRotSin * t.x) * uRotNil / 2. - t.x * t.y / 2.;\n";
+      "t.z += (uRotCos * t.x + uRotSin * t.y) * (uRotCos * t.y - uRotSin * t.x) * uRotNil / 2. - " + glhr::to_glsl(nilv::model_used) + " * t.x * t.y / 2.;\n";
     }
 
   if(!skip_t) {

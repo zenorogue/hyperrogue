@@ -389,9 +389,9 @@ EX void apply_perspective(const hyperpoint& H, hyperpoint& ret) {
 
 EX void apply_nil_rotation(hyperpoint& H) {
   if(nil) {
-    H[2] -= H[0] * H[1] / 2;
+    nilv::convert_ref(H, nilv::model_used, nilv::nmSym);
     models::apply_orientation(H[0], H[1]);
-    H[2] += H[0] * H[1] / 2 * pconf.rotational_nil;
+    nilv::convert_ref(H, nilv::nmSym, pconf.rotational_nil);
     models::apply_orientation(H[1], H[0]);        
     }
   }
