@@ -274,7 +274,7 @@ namespace flocking {
             h += h1;
           }
         if(cnt) {
-          h = normalize_flat(h);
+          h = cgi.emb->normalize_flat(h);
           if(mproduct) h = orthogonal_move(h, lev / cnt);
           View = inverse(actual_view_transform) * gpushxto0(h) * actual_view_transform * View;
           shift_view(ztangent(follow_dist));
