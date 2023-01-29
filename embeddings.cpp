@@ -11,7 +11,9 @@ EX namespace geom3 {
     seMuchLowerCurvature,
     seProduct,
     seNil,
-    seSol, seNIH, seSolN,
+    seSol,
+    seNIH,
+    seSolN,
     seCliffordTorus,
     seProductH,
     seProductS,
@@ -19,8 +21,8 @@ EX namespace geom3 {
     seCylinderE,
     seCylinderH,
     seCylinderHE,
-    seCylinderHoro,
     seCylinderNil,
+    seCylinderHoro,
     seCylinderSL2
     };
   #endif
