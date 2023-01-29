@@ -1,3 +1,21 @@
+// Hyperbolic Rogue -- embeddings
+// Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
+
+/** \file embeddings.cpp
+ *  \brief Embedding 2D geometries into 3D
+ *
+ *  This file handles primarily embedding 2D geometries into 3D.
+ *
+ *  The following coordinate systems are used for embedding of 2D geometries into 3D:
+ *
+ *  - *base* coordinates are simply the coordinate in the underlying 2D geometry. They support only two dimensions.
+ *  - *logical* coordinates: X and Y are in the Beltrami-Klein or gnomonic model, or in horocyclic coordinates for binary-like tilings. Z coordinate is the altitude above the plane.
+ *  - *logical_scaled* coordinates: X and Y are scaled (and possibly rotated in the XY plane) in order to match the scale and orientation of the ambient 3D geometry. They are a linear transformation of logical.
+ *  - *intermediate* coordinates: they use the same assignment of coordinates as actual, but they are a linear transformation of logical scaled.
+ *  - *actual* coordinates: final coordinates in the ambient 3D geometry.
+ *
+ */
+
 #include "hyper.h"
 
 namespace hr {
@@ -204,6 +222,7 @@ EX }
     virtual transmatrix map_relative_push(hyperpoint h);
     virtual ld get_logical_z(hyperpoint a) { return (intermediate_to_logical_scaled * actual_to_intermediate(a))[2]; }
     virtual hyperpoint logical_to_actual(hyperpoint l) { return intermediate_to_actual(logical_to_intermediate * l); }
+    virtual hyperpoint actual_to_logical(hyperpoint a) { return intermediate_to_logical * actual_to_intermediate(a); }
     virtual hyperpoint base_to_actual(hyperpoint h) = 0;
     virtual transmatrix base_to_actual(const transmatrix &T) = 0;
     virtual hyperpoint actual_to_base(hyperpoint h) = 0;
@@ -213,6 +232,8 @@ EX }
     virtual transmatrix get_radar_transform(const transmatrix& V);
     virtual transmatrix get_lsti() { return Id; }
     virtual transmatrix get_lti() { return logical_scaled_to_intermediate; }
+    virtual hyperpoint base_to_logical(hyperpoint h) = 0;
+    virtual hyperpoint logical_to_base(hyperpoint h) = 0;
     
     virtual bool is_euc_in_product() { return false; }
     virtual bool is_product_embedding() { return false; }
@@ -248,8 +269,6 @@ EX }
   #endif
 
 EX geometry_information *swapper;
-
-struct auaua : embedding_method { int z; };
 
 hyperpoint embedding_method::tile_center() {
   ld z = center_z();
@@ -299,15 +318,58 @@ struct emb_none : embedding_method {
     u *= cos_auto(z);
     return hpxy3(h[0] * u, h[1] * u, sinh(z));
     }
+  hyperpoint base_to_logical(hyperpoint h) override {
+    if(sn::in() || !bt::in())
+      return h;
+    #if CAP_BT
+    if(bt::in() && !mproduct) return bt::minkowski_to_bt(h);
+    #endif
+    return h;
+    }
+  hyperpoint logical_to_base(hyperpoint h) override {
+    if(sn::in() || !bt::in())
+      return ultra_normalize(h);
+    #if CAP_BT
+    if(bt::in() && !mproduct)
+      return bt::bt_to_minkowski(h);
+    #endif
+    return h;
+    }
+  };
+
+/** embeddings methods that are not emb_none */
+
+struct emb_actual : embedding_method {
+
+  hyperpoint base_to_logical(hyperpoint h) override {
+    if(bt::in()) {
+      auto h1 = bt::inverse_horopoint(h);
+      h1[2] = 0; h1[3] = 1;
+      return h1;
+      }
+    h /= h[2];
+    h[2] = 0; h[3] = 1;
+    return h;
+    }
+
+  hyperpoint logical_to_base(hyperpoint h) override {
+    if(bt::in()) {
+      auto h1 = bt::get_horopoint(h);
+      h1[3] = 1;
+      return h1;
+      }
+    h[2] = 1; h = normalize(h);
+    h[3] = 1;
+    return h;
+    }
   };
 
 /** embed in the 3D variant of the same geometry */
 
-struct emb_same_in_same : auaua {
+struct emb_same_in_same : emb_actual {
   virtual bool is_same_in_same() { return true; }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override { return rgpushxto0(i); }
   hyperpoint actual_to_intermediate(hyperpoint a) override { return a; }
-  hyperpoint flatten(hyperpoint h) override { if(abs(h[2]) > 1e-6) println(hlog, "h2 = ", h[2]); return h; }
   hyperpoint orthogonal_move(const hyperpoint& h, ld z) override {
     ld u = 1;
     if(h[2]) z += asin_auto(h[2]), u /= cos_auto(asin_auto(h[2]));
@@ -340,16 +402,42 @@ struct emb_same_in_same : auaua {
     return h;
     }
   transmatrix map_relative_push(hyperpoint h) override {
-    ld z = -asin_auto(h[2]);
+    ld z = asin_auto(h[2]);
     ld u = 1 / cos_auto(z);
     auto h1 = hpxy3(h[0] * u, h[1] * u, 0);
-    return rgpushxto0(h1) * zpush(-z);
+    return rgpushxto0(h1) * zpush(z);
     }
+
+  hyperpoint actual_to_logical(hyperpoint h) override {
+    ld z = asin_auto(h[2]);
+    ld u = 1 / cos_auto(z);
+    auto h1 = hpxy3(h[0] * u, h[1] * u, 0);
+    h1[2] = h1[3];
+    geom3::light_flip(true);
+    h1 = base_to_logical(h1);
+    geom3::light_flip(false);
+    return h1;
+    }
+
+  hyperpoint logical_to_actual(hyperpoint h) override {
+    geom3::light_flip(true);
+    auto b = logical_to_base(h);
+    geom3::light_flip(false);
+    b[3] = b[2]; b[2] = 0;
+    return orthogonal_move(b, h[2]);
+    }
+
+  hyperpoint flatten(hyperpoint h) override {
+    ld z = asin_auto(h[2]);
+    ld u = 1 / cos_auto(z);
+    return hpxy3(h[0] * u, h[1] * u, 0);
+    }
+
   };
 
 /** embed in the product geometry */
 
-struct emb_product_embedding : auaua {
+struct emb_product_embedding : emb_actual {
   virtual bool is_product_embedding() { return true; }
   transmatrix intermediate_to_actual_translation(hyperpoint i) { return rgpushxto0(i); }
   hyperpoint actual_to_intermediate(hyperpoint a) { return a; }
@@ -364,11 +452,23 @@ struct emb_product_embedding : auaua {
   hyperpoint base_to_actual(hyperpoint h) override { return h; }
   hyperpoint actual_to_base(hyperpoint h) override { return flatten(h); }
   transmatrix map_relative_push(hyperpoint h) override { return rgpushxto0(h); }
+
+  hyperpoint actual_to_logical(hyperpoint h) override {
+    ld z = zlevel(h);
+    h /= exp(z);
+    h = base_to_logical(h);
+    h[2] = z;
+    return h;
+    }
+
+  hyperpoint logical_to_actual(hyperpoint h) override {
+    return logical_to_base(h) * exp(h[2]);
+    }
   };
 
 /** embed Euclidean plane as horosphere */
 
-struct emb_euc_in_hyp : embedding_method {
+struct emb_euc_in_hyp : emb_actual {
   bool is_euc_in_hyp() override { return true; }
   hyperpoint actual_to_intermediate(hyperpoint a) override { return deparabolic13(a); }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override { return parabolic13_at(i); }
@@ -389,11 +489,15 @@ struct emb_euc_in_hyp : embedding_method {
 
 /** sphere into a isotropic space of higher curvature */
 
-struct emb_sphere_in_low : embedding_method {
+struct emb_sphere_in_low : emb_actual {
   bool is_sph_in_low() override { return true; }
   bool is_depth_limited() override { return true; }
-  transmatrix intermediate_to_actual_translation(hyperpoint i) override { throw hr_exception("illegal function"); }
-  hyperpoint actual_to_intermediate(hyperpoint a) override { throw hr_exception("illegal function"); }
+  transmatrix intermediate_to_actual_translation(hyperpoint i) override {
+    throw hr_exception("illegal function");
+    }
+  hyperpoint actual_to_intermediate(hyperpoint a) override {
+    throw hr_exception("illegal function");
+    }
   ld center_z() { return 1; }
   transmatrix map_relative_push(hyperpoint a) {
     ld z = hdist0(a);
@@ -430,11 +534,29 @@ struct emb_sphere_in_low : embedding_method {
     hf[3] = cos_auto(z0 + z);
     return hf;
     }
+  hyperpoint logical_to_actual(hyperpoint h) {
+    auto z = h[2];
+    h[2] = 1;
+    geom3::light_flip(true);
+    h = normalize(h);
+    geom3::light_flip(false);
+    h *= (1 + z);
+    h[3] = 1;
+    return h;
+    }
+  hyperpoint actual_to_logical(hyperpoint h) {
+    ld z = get_logical_z(h);
+    geom3::light_flip(true);
+    h = kleinize(h);
+    geom3::light_flip(false);
+    h[2] = z; h[3] = 1;
+    return h;
+    }
   };
 
 /** abstract class for embeddings of Euclidean plane; these embeddings are not isotropic */
 
-struct emb_euclid_noniso : embedding_method {
+struct emb_euclid_noniso : emb_actual {
   bool is_euc_in_noniso() override { return true; }
   bool is_in_noniso() override { return true; }
   transmatrix base_to_actual(const transmatrix &T) override {
@@ -602,7 +724,6 @@ struct emb_euc_in_nil : emb_euclid_noniso {
   hyperpoint actual_to_intermediate(hyperpoint a) override { return a; }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override { return rgpushxto0(i); }
   transmatrix get_lsti() override { return cspin90(2, 1); }
-  hyperpoint orthogonal_move(const hyperpoint& a, ld z) override { return nisot::translate(a) * cpush0(1, z); }
   };
 
 struct emb_euc_in_solnih : emb_euclid_noniso {
@@ -610,11 +731,21 @@ struct emb_euc_in_solnih : emb_euclid_noniso {
   transmatrix intermediate_to_actual_translation(hyperpoint i) override { return rgpushxto0(i); }
   };
 
-struct emb_hyp_in_solnih : embedding_method {
+struct emb_hyp_in_solnih : emb_actual {
   bool is_hyp_in_solnih() override { return true; }
   bool is_in_noniso() override { return true; }
-  transmatrix intermediate_to_actual_translation(hyperpoint i) override { return rgpushxto0(i); }
-  hyperpoint actual_to_intermediate(hyperpoint a) override { return a; }
+  transmatrix intermediate_to_actual_translation(hyperpoint i) override {
+    if(cgclass == gcSol) i[0] *= exp(-i[2]);
+    if(cgclass == gcSolN) i[0] *= pow(2, -i[2]);
+    if(cgclass == gcNIH) i[0] *= pow(2, i[2]);
+    return rgpushxto0(i);
+    }
+  hyperpoint actual_to_intermediate(hyperpoint a) override {
+    if(cgclass == gcSol) a[0] *= exp(a[2]);
+    if(cgclass == gcSolN) a[0] *= pow(2, a[2]);
+    if(cgclass == gcNIH) a[0] *= pow(2, -a[2]);
+    return a;
+    }
   transmatrix base_to_actual(const transmatrix &T) override {
     auto T1 = T;
     auto h = get_column(T1, 2);
