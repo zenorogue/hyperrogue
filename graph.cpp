@@ -5066,9 +5066,7 @@ EX void make_actual_view() {
     nisot::local_perspective_used = true;
     }
   #endif
-  #if MAXMDIM >= 4
-  if(embedded_plane) current_display->radar_transform = cgi.emb->get_radar_transform(View);
-  #endif
+  cgi.emb->set_radar_transform();
   Viewbase = View;
   }
 

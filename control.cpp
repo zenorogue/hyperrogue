@@ -83,7 +83,7 @@ EX bool mouseout2() {
 EX movedir vectodir(hyperpoint P) {
 
   transmatrix U = unshift(ggmatrix(cwt.at));
-  if(embedded_plane && cgi.emb->is_same_in_same())  U = current_display->radar_transform * U;
+  if(embedded_plane && cgi.emb->is_same_in_same())  U = current_display->radar_transform_post * current_display->radar_transform * U;
 
   P = direct_exp(lp_iapply(P));
 

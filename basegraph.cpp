@@ -51,6 +51,7 @@ struct display_data {
   vector<radarpoint> radarpoints;
   vector<radarline> radarlines;
   transmatrix radar_transform;
+  transmatrix radar_transform_post;
 
   ld eyewidth();
   bool stereo_active();

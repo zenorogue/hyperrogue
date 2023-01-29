@@ -229,7 +229,7 @@ EX }
     virtual transmatrix actual_to_base(const transmatrix &T) = 0;
     virtual hyperpoint normalize_flat(hyperpoint a) { return flatten(normalize(a)); }
     virtual hyperpoint flatten(hyperpoint a);
-    virtual transmatrix get_radar_transform(const transmatrix& V);
+    virtual void set_radar_transform();
     virtual transmatrix get_lsti() { return Id; }
     virtual transmatrix get_lti() { return logical_scaled_to_intermediate; }
     virtual hyperpoint base_to_logical(hyperpoint h) = 0;
@@ -947,55 +947,17 @@ EX const transmatrix& lmirror() {
   return Mirror;
   }
 
-transmatrix embedding_method::get_radar_transform(const transmatrix& V) {
-  if(cgi.emb->is_euc_in_sl2()) {
-    return inverse(actual_view_transform * V);
-    }
-  else if(nonisotropic) {
-    transmatrix T = actual_view_transform * V;
-    ld z = -tC0(view_inverse(T)) [2];
-    transmatrix R = actual_view_transform;
-    R = logical_scaled_to_intermediate * R;
-    if(R[1][2] || R[2][2])
-      R = cspin(1, 2, -atan2(R[1][2], R[2][2])) * R;
-    if(R[0][2] || R[2][2])
-      R = cspin(0, 2, -atan2(R[0][2], R[2][2])) * R;
-    if(is_hyp_in_solnih()) R = Id;
-    R = intermediate_to_logical_scaled * R;
-    return inverse(R) * zpush(-z);
-    }
-  else if(gproduct) {
-    transmatrix T = V;
-    ld z = zlevel(tC0(inverse(T)));
-
-    transmatrix R = NLP;
-    if(R[1][2] || R[2][2])
-      R = cspin(1, 2, -atan2(R[1][2], R[2][2])) * R;
-    if(R[0][2] || R[2][2])
-      R = cspin(0, 2, -atan2(R[0][2], R[2][2])) * R;
-
-    return R * zpush(z);
-    }
-  else if(is_euc_in_sph()) {
-    return inverse(V);
-    }
-  else if(is_cylinder()) {
-    return inverse(V);
-    }
-  else {
-    transmatrix T = actual_view_transform * V;
-    transmatrix U = view_inverse(T);
-
-    if(T[0][2] || T[1][2])
-      T = spin(-atan2(T[0][2], T[1][2])) * T;
-    if(T[1][2] || T[2][2])
-      T = cspin(1, 2, -atan2(T[1][2], T[2][2])) * T;
-
-    ld z = -asin_auto(tC0(view_inverse(T)) [2]);
-    T = zpush(-z) * T;
-
-    return T * U;
-    }
+void embedding_method::set_radar_transform() {
+  auto& rt = current_display->radar_transform;
+  auto& rtp = current_display->radar_transform_post;
+  if(!embedded_plane) { rt = rtp = Id; return; }
+  transmatrix U = actual_view_transform * View;
+  auto a = inverse(U) * C0;
+  auto l = actual_to_intermediate(a);
+  l[2] = 0;
+  rt = inverse(intermediate_to_actual_translation(l)) * inverse(U);
+  transmatrix T = intermediate_to_logical * View * intermediate_to_actual_translation(l);
+  rtp = cspin(0, 1, atan2(T[0][1], T[0][0]));
   }
 
 EX void swapmatrix(transmatrix& T) {
