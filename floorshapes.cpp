@@ -137,11 +137,6 @@ matrixitem genitem(const transmatrix& m1, const transmatrix& m2, int nsym) {
 
 bool do_kleinize() { return S3 >= OINF || (cgflags & qIDEAL); }
 
-EX hyperpoint kleinize(hyperpoint h) { 
-  if(GDIM == 2) return point3(h[0]/h[2], h[1]/h[2], 1); 
-  else return point31(h[0]/h[3], h[1]/h[3], h[2]/h[3]);
-  }
-
 EX hyperpoint may_kleinize(hyperpoint h) { 
   if(do_kleinize()) return kleinize(h);
   else return h;

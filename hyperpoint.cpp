@@ -789,6 +789,11 @@ EX transmatrix parabolic13(ld u, ld v) {
     }
   }
 
+EX hyperpoint kleinize(hyperpoint h) {
+  if(GDIM == 2) return point3(h[0]/h[2], h[1]/h[2], 1);
+  else return point31(h[0]/h[3], h[1]/h[3], h[2]/h[3]);
+  }
+
 EX hyperpoint deparabolic13(hyperpoint h) {
   if(euclid) return h;
   if(cgi.emb->is_euc_in_hyp()) {
