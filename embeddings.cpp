@@ -977,8 +977,8 @@ geom3::eSpatialEmbedding embed_by_name(string ss) {
   bool numeric = true;
   for(char c: ss) if(c < '0' || c > '9') numeric = false;
   if(numeric) return eSpatialEmbedding(atoi(ss.c_str()));
-  for(int i=0; i<isize(ginf); i++) if(appears(seo[i].first, ss)) return eSpatialEmbedding(i);
-  for(int i=0; i<isize(ginf); i++) if(appears(seo[i].second, ss)) return eSpatialEmbedding(i);
+  for(int i=0; i<isize(seo); i++) if(appears(seo[i].first, ss)) return eSpatialEmbedding(i);
+  for(int i=0; i<isize(seo); i++) if(appears(seo[i].second, ss)) return eSpatialEmbedding(i);
   return seNone;
   }
 
