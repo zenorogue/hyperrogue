@@ -101,7 +101,7 @@ void geometry_information::chasmifyPoly(double fol, double fol2, int k) {
      }
   else {
     vector<hyperpoint> points;
-    for(int s = last->s; s<isize(hpc); s++) points.push_back(hpc[s]);
+    for(int s = last->s; s<isize(hpc); s++) points.push_back(cgi.emb->actual_to_logical( hpc[s] ));
     hpc.resize(last->s);
     last->flags |= POLY_TRIANGLES;
     last->texture_offset = 0;
@@ -112,9 +112,9 @@ void geometry_information::chasmifyPoly(double fol, double fol2, int k) {
       if(zf == isize(points)-1) zf--;
       x -= zf;
       auto hp = points[zf] + (points[zf+1] - points[zf]) * x;
-      auto hf = cgi.emb->normalize_flat(hp);
-      auto ho = orthogonal_move(hf, fol + (fol2-fol) * y);
-      hpcpush(ho);
+      hp[2] = fol + (fol2-fol) * y;
+      auto hf = cgi.emb->logical_to_actual(hp);
+      hpcpush(hf);
       };
     texture_order([&] (ld x, ld y) { at((1-x+y)/2, (1-x-y)/2); });
     texture_order([&] (ld x, ld y) { at((1-x-y)/2, (1+x-y)/2); });
