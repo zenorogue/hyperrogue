@@ -139,6 +139,8 @@ void place_brick(int x, int y, int z, color_t col = 0xFFD500, int which = -1) {
 bool walls_created = false;
 
 const int darkval_e6[6] = {0,4,6,0,4,6};
+
+bool spinning = true;
   
 void draw_ro() {
 
@@ -147,7 +149,7 @@ void draw_ro() {
   if(true) {
 
     transmatrix S = Id;
-    if(!nilv::model_used) cspin(0, 1, ticks * TAU / anims::period);
+    if(spinning) S = cspin(0, 1, ticks * TAU / anims::period);
 
     int bid = 0;
     for(auto& b: bricks) { bid++;
@@ -453,6 +455,10 @@ int args() {
     pconf.scale = .5;
     
     View = Id;
+    }
+
+  else if(argis("-bspin")) {
+    spinning = true;
     }
 
   else if(argis("-bnet")) {
