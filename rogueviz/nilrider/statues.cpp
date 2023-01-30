@@ -134,7 +134,7 @@ void init_statues() {
     add_statue(closed_grid, [&] (ld lon, ld lat) {
       lat = lat * .75;
       hyperpoint h = direct_exp(ih * (.5 + lat / M_PI));
-      return rgpushxto0(h) * sym_to_heis(point31(sin(lon)*.1, cos(lon)*.1, 0));
+      return rgpushxto0(h) * sym_to_used(point31(sin(lon)*.1, cos(lon)*.1, 0));
       });
     }
   cgi.finishshape();

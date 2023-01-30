@@ -83,6 +83,8 @@ struct goal {
 
 using surface_fun = std::function<ld(hyperpoint h)>;
 
+ld heis_to_used_bonus(const hyperpoint&);
+
 struct level {
   string name;
   char hotkey;
@@ -92,12 +94,13 @@ struct level {
   vector<string> map_tiles;
   ld startx, starty;
   ld scale;
-  surface_fun surface;
+  surface_fun surface_heisenberg;
+  ld surface(hyperpoint h) { return surface_heisenberg(h) + heis_to_used_bonus(h); }
   
   bool initialized;
   
   level(string name, char hotkey, flagtype flags, string longdesc, ld minx, ld miny, ld maxx, ld maxy, const vector<string>& mt, ld sx, ld sy, const std::function<ld(hyperpoint h)>& surf, vector<goal> g) :
-    name(name), hotkey(hotkey), longdesc(longdesc), flags(flags), minx(minx), miny(miny), maxx(maxx), maxy(maxy), map_tiles(mt), startx(sx), starty(sy), surface(surf), goals(g) { initialized = false; }
+    name(name), hotkey(hotkey), longdesc(longdesc), flags(flags), minx(minx), miny(miny), maxx(maxx), maxy(maxy), map_tiles(mt), startx(sx), starty(sy), surface_heisenberg(surf), goals(g) { initialized = false; }
   
   ld real_minx, real_miny, real_maxx, real_maxy;
 
@@ -211,7 +214,7 @@ inline double dft_block = 1;
 extern map<char, color_t> bcols;
 extern map<char, array<string, 16> > submaps;
 
-hyperpoint sym_to_heis(hyperpoint H);
+hyperpoint sym_to_used(hyperpoint H);
 
 extern int reversals;
 extern bool loaded_or_planned;

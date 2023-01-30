@@ -2,15 +2,23 @@ namespace nilrider {
 
 ld timestamp::energy_in_squares() { return vel * vel / (2 * gravity); }
 
-EX ld sym_to_heis_bonus(const hyperpoint& H) {
-  return H[0] * H[1] / 2;
+EX ld sym_to_used_bonus(const hyperpoint& H) {
+  return nilv::sym_to_heis_bonus(H) * (nilv::model_used - nilv::nmSym);
   }
 
-/** convert rotationally symmetric to Heisenberg model */
-EX hyperpoint sym_to_heis(hyperpoint H) {
-  if(nil) {
-    H[2] += sym_to_heis_bonus(H);
-    }
+EX ld heis_to_used_bonus(const hyperpoint& H) {
+  return nilv::sym_to_heis_bonus(H) * (nilv::model_used - nilv::nmHeis);
+  }
+
+/** convert rotationally symmetric to internal model */
+EX hyperpoint sym_to_used(hyperpoint H) {
+  if(nil) H[2] += sym_to_used_bonus(H);
+  return H;
+  }
+
+/** convert Heisenberg to internal model */
+EX hyperpoint heis_to_used(hyperpoint H) {
+  if(nil) H[2] += heis_to_used_bonus(H);
   return H;
   }
 
@@ -180,7 +188,7 @@ void timestamp::centerview(level *lev) {
 
   auto w = where;
   w[2] += 0.2 * lev->scale;
-  hyperpoint front = rgpushxto0(w) * sym_to_heis(hyperpoint(1e-3 * cos(heading_angle), 1e-3*sin(heading_angle), 0, 1));
+  hyperpoint front = rgpushxto0(w) * sym_to_used(hyperpoint(1e-3 * cos(heading_angle), 1e-3*sin(heading_angle), 0, 1));
   hyperpoint up = w; up[2] += 1e-3;
 
   set_view(w, front, up);

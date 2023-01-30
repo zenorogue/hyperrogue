@@ -54,7 +54,7 @@ void level::init_textures() {
         col = bcols[c];
         if(levels && new_levellines_for[3]) {
           hyperpoint h = T * mappt(x, y, texture_density);
-          ld z = h[2] - sym_to_heis_bonus(h);
+          ld z = h[2] - sym_to_used_bonus(h);
           if(z > 0) col = gradient(col, 0xFFFF0000, 0, z - floor(z), 4);
           if(z < 0) col = gradient(col, 0xFF0000FF, 0, -z - floor(-z), 4);
           }
@@ -151,7 +151,7 @@ void level::init_shapes() {
         gh[0] = gh[0] - ah[0];
         gh[1] = gh[1] - ah[1];
         gh[2] = 0;
-        gh = sym_to_heis(gh);
+        gh = sym_to_used(gh);
         h = rgpushxto0(ah) * gh;
         ld delta = 0;
         // make sure steps are below the actual level
@@ -163,7 +163,7 @@ void level::init_shapes() {
           uh[0] = zh[0] - ah[0];
           uh[1] = zh[1] - ah[1];
           uh[2] = 0; uh[3] = 1;
-          uh = sym_to_heis(uh);
+          uh = sym_to_used(uh);
           uh = rgpushxto0(ah) * uh;
           delta = max(delta, uh[2] - zh[2]);
           }
@@ -462,7 +462,7 @@ ld level::safe_alt(hyperpoint h, ld mul, ld mulx) {
   ld maxv = 0;
   for(int x: {-1, 0, 1})
   for(int y: {-1, 0, 1}) {
-    hyperpoint c = sym_to_heis(point31(x*.5*scale*mulx, y*.5*scale*mulx, 0));
+    hyperpoint c = sym_to_used(point31(x*.5*scale*mulx, y*.5*scale*mulx, 0));
     hyperpoint j = rgpushxto0(h) * c;
     maxv = max(maxv, mul * (surface(j) - j[2]));
     }    
