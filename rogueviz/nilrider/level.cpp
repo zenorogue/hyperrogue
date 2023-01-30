@@ -488,8 +488,10 @@ void level::draw_level(const shiftmatrix& V) {
         ld tim = current.timer * 1000;
         tim -= nilrider_shift;
         tim /= nilrider_tempo;
+        transmatrix spin = Id;
+        if(nilv::model_used == 0) spin = cspin(0, 1, tim * M_PI / 6);
         tim = abs(0.2 * sin(tim * M_PI));
-        auto &poly = queuepoly(V * rgpushxto0(t.where) * cpush(2, tim), shMini[i], t.colors[i]);
+        auto &poly = queuepoly(V * rgpushxto0(t.where) * cpush(2, tim) * spin, shMini[i], t.colors[i]);
         poly.tinf = &floor_texture_vertices[cgi.shFloor.id];
         ensure_vertex_number(*poly.tinf, poly.cnt);
         }
