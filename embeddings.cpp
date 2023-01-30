@@ -653,13 +653,25 @@ struct emb_euc_cylinder : emb_euclid_noniso {
 
 struct emb_euc_cylinder_he : emb_euc_cylinder {
   bool no_spin() override { return true; }
-  transmatrix get_lsti() override { return cspin90(0, 2); }
+  transmatrix get_lsti() override { return cspin90(0, 2) * cspin90(0, 1); }
   hyperpoint actual_to_intermediate(hyperpoint a) override {
     ld z0 = zlevel(a);
     a /= exp(z0);
     ld y0 = atan2(a[1], a[0]);
     ld x0 = asin_auto(hypot(a[0], a[1]));
     return hyperpoint(x0-1, y0, z0, 1);
+    }
+  transmatrix intermediate_to_actual_translation(hyperpoint i) override {
+    return zpush(i[2]) * cspin(1, 0, i[1]) * xpush(i[0]);
+    }
+  };
+
+struct emb_euc_cylinder_nil : emb_euc_cylinder {
+  transmatrix get_lsti() override { return cspin90(0, 2) * cspin90(0, 1); }
+  hyperpoint actual_to_intermediate(hyperpoint a) override {
+    ld y0 = atan2(a[1], a[0]);
+    ld x0 = hypot(a[0], a[1]);
+    return hyperpoint(x0-1, y0, a[2], 1);
     }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override {
     return zpush(i[2]) * cspin(1, 0, i[1]) * xpush(i[0]);
@@ -798,6 +810,7 @@ EX unique_ptr<embedding_method> make_embed() {
   else if(any_cylinder(spatial_embedding) && mgclass() == gcEuclid)
     emb1 = spatial_embedding == seCylinderHE ? new emb_euc_cylinder_he :
            spatial_embedding == seCylinderHoro ? new emb_euc_cylinder_horo :
+           spatial_embedding == seCylinderNil ? new emb_euc_cylinder_nil :
            spatial_embedding == seCylinderSL2 ? new emb_euc_cylinder_sl2 :
            new emb_euc_cylinder;
   else if(mgclass() == ggclass())
@@ -1050,6 +1063,7 @@ void embedding_method::auto_configure() {
   if(spatial_embedding == seCylinderH) configure_cylinder();
   if(spatial_embedding == seCylinderHE) configure_cylinder();
   if(spatial_embedding == seCylinderSL2) configure_cylinder();
+  if(spatial_embedding == seCylinderNil) configure_cylinder();
   }
 
 EX void invoke_embed(geom3::eSpatialEmbedding se) {
