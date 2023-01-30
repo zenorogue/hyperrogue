@@ -21,8 +21,8 @@ hyperpoint last_loc;
 
 transmatrix to_iso, from_iso;
 
-hyperpoint from_heis(hyperpoint h) {
-  return nilv::checked_convert(h, nilv::nmHeis, nilv::model_used);
+hyperpoint to_rot(hyperpoint h) {
+  return nilv::checked_convert(h, nilv::model_used, nilv::nmSym);
   }
 
 hyperpoint from_rot(hyperpoint h) {
@@ -90,7 +90,7 @@ void place_brick(euc::coord co, color_t col = 0xFFD500, int which = -1) {
           hyperpoint start = mvertices[a];
           hyperpoint end   = inverse(eupush(root_loc)) * eupush(next_loc) * mvertices[b];
           end = inverse(eupush(start)) * end;
-          end = from_heis(end);
+          end = to_rot(end);
           vertices[b] = inverse(eupush(bri.location)) * eupush(root_loc) * eupush(start) * from_rot(lerp(C0, end, p0));
           vertices[a] = inverse(eupush(bri.location)) * eupush(root_loc) * eupush(start) * from_rot(lerp(C0, end, p1));
 
@@ -140,7 +140,7 @@ bool walls_created = false;
 
 const int darkval_e6[6] = {0,4,6,0,4,6};
 
-bool spinning = true;
+bool spinning = false;
   
 void draw_ro() {
 
@@ -328,14 +328,14 @@ void build_stair() {
           transmatrix T = spin(90._deg*diy);
           hs[0] = T * point31(+xx, -xx, -hei);
           hs[1] = T * point31(+xx, +xx, -hei);
-          hs[2] = from_heis(eupush(C0 + shift) * from_rot(T * point31(-xx, +xx, -hei)));
-          hs[3] = from_heis(eupush(C0 + shift) * from_rot(T * point31(-xx, -xx, -hei)));
+          hs[2] = to_rot(eupush(C0 + shift) * from_rot(T * point31(-xx, +xx, -hei)));
+          hs[3] = to_rot(eupush(C0 + shift) * from_rot(T * point31(-xx, -xx, -hei)));
           }
         else {
           transmatrix T = spin(90._deg*diy);
           hyperpoint lshift = step ? shift : spin270() * shift;
-          hs[0] = from_heis(eupush(C0 - lshift) * from_rot(T * point31(-xx, +xx, hei)));
-          hs[1] = from_heis(eupush(C0 - lshift) * from_rot(T * point31(-xx, -xx, hei)));
+          hs[0] = to_rot(eupush(C0 - lshift) * from_rot(T * point31(-xx, +xx, hei)));
+          hs[1] = to_rot(eupush(C0 - lshift) * from_rot(T * point31(-xx, -xx, hei)));
           hs[2] = T * point31(+xx, -xx, hei);
           hs[3] = T * point31(+xx, +xx, hei);
           }
@@ -366,7 +366,7 @@ hyperpoint interp(ld t) {
   hyperpoint next = path[(ti+1)%no];
   
   hyperpoint n = inverse(eupush(prev)) * next;
-  n = from_heis(n);
+  n = to_rot(n);
   n = lerp(C0, n, t);
   
   return eupush(prev) * from_rot(n);
