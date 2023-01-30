@@ -576,7 +576,7 @@ struct emb_euclid_noniso : emb_actual {
     }
   transmatrix actual_to_base(const transmatrix& T) override { hyperpoint h = actual_to_base(T * tile_center()); return eupush(h[0], h[1]);  }
 
-  transmatrix get_lti() override { 
+  transmatrix get_lti() override {
     transmatrix lti = Id;
     lti[0][0] *= geom3::euclid_embed_scale;
     lti[1][1] *= geom3::euclid_embed_scale * geom3::euclid_embed_scale_y;
@@ -676,6 +676,15 @@ struct emb_euc_cylinder_nil : emb_euc_cylinder {
   transmatrix intermediate_to_actual_translation(hyperpoint i) override {
     return zpush(i[2]) * cspin(1, 0, i[1]) * xpush(i[0]);
     }
+  transmatrix get_lti() override {
+    ld depth = 0; // for now?
+    ld alpha = (1 + depth) / 2.;
+    ld c = pow(1 + alpha * alpha, -0.5);
+    transmatrix U = Id;
+    U[1][1] = (alpha*alpha+1) * c;
+    U[0][1] = alpha * c;
+    return logical_scaled_to_intermediate * U * intermediate_to_logical_scaled * emb_euc_cylinder::get_lti();
+    }
   };
 
 struct emb_euc_cylinder_horo : emb_euc_cylinder {
@@ -711,7 +720,7 @@ struct emb_euc_cylinder_sl2 : emb_euc_cylinder {
     return cspin(2, 3, i[2]) * cspin(0, 1, i[2] + i[1]) * xpush(i[0]);
     }
   transmatrix get_lsti() override {
-    return cspin90(0, 2);
+    return cspin90(0, 2) * cspin90(0, 1);
     }
   };
 
@@ -793,9 +802,9 @@ void embedding_method::prepare_lta() {
   if(b) geom3::light_flip(false);
   
   logical_scaled_to_intermediate = get_lsti();
+  intermediate_to_logical_scaled = inverse(logical_scaled_to_intermediate);
   logical_to_intermediate = get_lti();
   intermediate_to_logical = inverse(logical_to_intermediate);
-  intermediate_to_logical_scaled = inverse(logical_scaled_to_intermediate);
   if(b) geom3::light_flip(true);
   }
 
