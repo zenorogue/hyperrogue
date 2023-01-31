@@ -191,6 +191,11 @@ void game_menu() {
     pushScreen(showSettings);
     });
 
+  dialog::addItem("save animation/shot", 's');
+  dialog::add_action([] {
+    pushScreen(anims::show);
+    });
+
   #if CAP_FILES && !ISWEB
   dialog::addItem("save the current config", 's');
   dialog::add_action([] {
