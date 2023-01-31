@@ -256,7 +256,7 @@ void view_footer() {
 void view_ads_game() {
   displayed.clear();
   
-  bool hv = hybri;
+  bool hv = mhybrid;
 
   hybrid::in_actual([&] {
     gen_budget = max_gen_per_frame;

@@ -2,7 +2,7 @@
 /* Compile with mymake -O3 rogueviz/ads/ads-game */
 /* Best run with -ads-menu; more detailed options are available too */
 
-#define VER_RH "0.1"
+#define VER_RH "0.2"
 
 #ifdef RELHELL
 
@@ -20,7 +20,6 @@
 #define CAP_ARCM 0
 #define CAP_HISTORY 0
 #define CAP_STARTANIM 0
-#define CAP_VR 0
 #include "../hyper.cpp"
 
 namespace rogueviz { std::vector<hr::reaction_t> cleanup; }

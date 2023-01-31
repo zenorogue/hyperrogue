@@ -87,7 +87,7 @@ void switch_spacetime() {
       slr::range_z = 2;
       }
 
-    else if(hybri) {
+    else if(mhybrid) {
       hybrid::switch_to_underlying();
       pmodel = mdDisk;
       pconf.scale = .95;
