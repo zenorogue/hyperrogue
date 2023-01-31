@@ -43,7 +43,7 @@ endif
 
 
 ifeq (${OS},linux)
-  CXXFLAGS_EARLY += -DLINUX
+  CXXFLAGS_EARLY += -DLINUX -I /usr/include/SDL
   EXE_EXTENSION :=
   LDFLAGS_GL := -lGL
   LDFLAGS_GLEW := -lGLEW
