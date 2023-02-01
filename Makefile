@@ -80,7 +80,7 @@ ifeq (${OS},osx)
 endif
 
 ifeq (${TOOLCHAIN},clang)
-  CXXFLAGS_STD = -std=c++11
+  CXXFLAGS_STD = -std=c++14
   CXXFLAGS_EARLY += -fPIC
   CXXFLAGS_EARLY += -W -Wall -Wextra -Wsuggest-override -pedantic
   CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized -Wno-char-subscripts -Wno-unknown-warning-option
@@ -88,7 +88,7 @@ ifeq (${TOOLCHAIN},clang)
 endif
 
 ifeq (${TOOLCHAIN},gcc)
-  CXXFLAGS_STD = -std=c++11
+  CXXFLAGS_STD = -std=c++14
   CXXFLAGS_EARLY += -fPIC
   CXXFLAGS_EARLY += -W -Wall -Wextra -pedantic
   CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized
@@ -96,7 +96,7 @@ ifeq (${TOOLCHAIN},gcc)
 endif
 
 ifeq (${TOOLCHAIN},mingw)
-  CXXFLAGS_STD = -std=c++11
+  CXXFLAGS_STD = -std=c++14
   CXXFLAGS_EARLY += -W -Wall -Wextra
   CXXFLAGS_EARLY += -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-maybe-uninitialized
   CXXFLAGS_EARLY += -Wno-invalid-offsetof
@@ -169,7 +169,7 @@ mymake$(EXE_EXTENSION): mymake.cpp
 emscripten: hyper.html
 
 %.html %.js %.wasm: %.emscripten-sources
-	emcc -std=c++11 -O3 -s USE_ZLIB=1 -s LEGACY_GL_EMULATION=1 -s TOTAL_MEMORY=128MB hyperweb.cpp -o hyper.html
+	emcc -std=c++14 -O3 -s USE_ZLIB=1 -s LEGACY_GL_EMULATION=1 -s TOTAL_MEMORY=128MB hyperweb.cpp -o hyper.html
 
 hyper.emscripten-sources: *.cpp autohdr.h
 
