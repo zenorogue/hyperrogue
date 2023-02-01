@@ -342,7 +342,7 @@ void compute_betweenness(bool verify) {
     auto b = betweenness3(c1);
     // add_to_set(c1, 1, 0);
     auto b4 = betweenness4(c1);
-    print(hlog, format("B;%10Ld;%10Ld;%20.10Lf;%3d;%-40s", b.first, b.second, b4, vertices[i]->lev, rogueviz::vdata[i].name.c_str()));
+    print(hlog, format("B;%10lld;%10lld;%20.10Lf;%3d;%-40s", b.first, b.second, b4, vertices[i]->lev, rogueviz::vdata[i].name.c_str()));
     if(verify) {
       /*
       betweenness_type a = b.first;

@@ -191,7 +191,7 @@ void preparegraph() {
     current_logistic.setRT(factor * graph_R, factor * graph_T);
     saved_logistic = current_logistic; 
 
-    // for(int u=0; u<MAXDIST; u++) iprintf("%d/%Ld\n", edgetally[u], tally[u]);
+    // for(int u=0; u<MAXDIST; u++) iprintf("%d/%lld\n", edgetally[u], tally[u]);
 
     fix_logistic_parameters(current_logistic, loglik_logistic, "logistic", 1e-6);
     writestats();

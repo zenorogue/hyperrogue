@@ -53,7 +53,7 @@ void test_paths(int radius) {
     add_to_tally(mc2, 1, 0);
     // int v = 0;
     if(tally[quickdist(mc1, mc2)] != 1) {
-      printf("[%p] [%p]\n", mc1, mc2);
+      printf("[%p] [%p]\n", (void*)mc1, (void*)mc2);
       printf("quickdist = %d\n", quickdist(mc1, mc2));
       for(int i=0; i<MAXDIST; i++) if(tally[i]) printf("in tally = %d\n", i);
       mc1->ascell()->item = itDiamond;
