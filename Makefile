@@ -128,7 +128,7 @@ endif
 ifeq (${HYPERROGUE_USE_ROGUEVIZ},1)
   # Enable RogueViz. RogueViz requires C++17.
   CXXFLAGS_STD = -std=c++17
-  CXXFLAGS_EARLY += -DCAP_ROGUEVIZ=1
+  CXXFLAGS_EARLY += -DCAP_ROGUEVIZ=1 -DCAP_TEXTURE=1
 endif
 
 
