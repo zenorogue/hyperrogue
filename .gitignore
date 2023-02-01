@@ -1,1 +1,5 @@
 .deps/
+/autohdr.h
+/langen
+/makeh
+/language-data.cpp
