@@ -733,7 +733,7 @@ struct emb_euc_in_sph : emb_euclid_noniso {
     ld x0 = atan2(a[0], a[2]);
     ld y0 = atan2(a[1], a[3]);
     ld z0 = atan2(tx, ty);
-    return hyperpoint(x0, y0, z0, 1);
+    return hyperpoint(x0, y0, z0-1, 1);
     }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override {
     return cspin(0, 2, i[0]) * cspin(1, 3, i[1]) * cspin(2, 3, i[2]);
