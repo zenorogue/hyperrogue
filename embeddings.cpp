@@ -591,7 +591,7 @@ struct emb_euc_in_product : emb_euclid_noniso {
     ld bz = zlevel(a);
     auto h1 = a / exp(bz);
     ld by = asin_auto(h1[1]);
-    ld bx = atan_auto(h1[0] / h1[2]);
+    ld bx = atan2_auto(h1[0], h1[2]);
     return hyperpoint(bx, by, bz, 1);
     }
   transmatrix get_lsti() override { return cspin90(2, 1); }
