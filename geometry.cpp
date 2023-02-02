@@ -1135,7 +1135,7 @@ EX namespace geom3 {
       vid.human_wall_ratio = .7;
       vid.camera = 1;
       vid.depth = 1;
-      if(pmodel == mdPerspective) pmodel = mdDisk;
+      if(among(pmodel, mdPerspective, mdGeodesic)) pmodel = mdDisk;
       swapmatrix(View);
       swapmatrix(current_display->which_copy);
       callhooks(hooks_swapdim);
