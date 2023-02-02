@@ -977,13 +977,18 @@ EX const transmatrix& lmirror() {
 void embedding_method::set_radar_transform() {
   auto& rt = current_display->radar_transform;
   auto& rtp = current_display->radar_transform_post;
+
   if(!embedded_plane) { rt = rtp = Id; return; }
   transmatrix U = actual_view_transform * View;
   auto a = inverse(U) * C0;
   auto l = actual_to_intermediate(a);
+  l = intermediate_to_logical * l;
   l[2] = 0;
+  l = logical_to_intermediate * l;
   rt = inverse(intermediate_to_actual_translation(l)) * inverse(U);
-  transmatrix T = intermediate_to_logical * View * intermediate_to_actual_translation(l);
+  transmatrix T = View * intermediate_to_actual_translation(l);
+  if(gproduct) T = NLP * T;
+  T = intermediate_to_logical * T * logical_to_intermediate;
   rtp = cspin(0, 1, atan2(T[0][1], T[0][0]));
   }
 
