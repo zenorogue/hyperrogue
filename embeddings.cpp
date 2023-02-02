@@ -805,6 +805,11 @@ void embedding_method::prepare_lta() {
   intermediate_to_logical_scaled = inverse(logical_scaled_to_intermediate);
   logical_to_intermediate = get_lti();
   intermediate_to_logical = inverse(logical_to_intermediate);
+  if(MDIM == 3) {
+    // just in case
+    for(int i=0; i<4; i++)
+      intermediate_to_logical_scaled[i][3] = intermediate_to_logical_scaled[3][i] = intermediate_to_logical[3][i] = intermediate_to_logical[i][3] = i == 3;
+    }
   if(b) geom3::light_flip(true);
   }
 
