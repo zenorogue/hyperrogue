@@ -983,12 +983,13 @@ void embedding_method::set_radar_transform() {
   auto a = inverse(U) * C0;
   auto l = actual_to_intermediate(a);
   l = intermediate_to_logical * l;
+  auto l0 = l;
   l[2] = 0;
   l = logical_to_intermediate * l;
   rt = inverse(intermediate_to_actual_translation(l)) * inverse(U);
-  transmatrix T = View * intermediate_to_actual_translation(l);
+  transmatrix T = View * intermediate_to_actual_translation(logical_to_intermediate * l0);
   if(gproduct) T = NLP * T;
-  T = intermediate_to_logical * T * logical_to_intermediate;
+  T = cspin(1, 0, geom3::euclid_embed_rotate * degree) * intermediate_to_logical_scaled * T * logical_scaled_to_intermediate;
   rtp = cspin(0, 1, atan2(T[0][1], T[0][0]));
   }
 
