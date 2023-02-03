@@ -126,6 +126,7 @@ void run_ads_game_std();
 void run_ds_game();
 
 /** in the replay mode */
+bool rev_replay;
 bool in_replay;
 void switch_replay();
 void switch_pause();

@@ -119,7 +119,12 @@ void replay_animation() {
   nomap = main_rock ? (!hyperbolic || among(pmodel, mdRelPerspective, mdRelOrthogonal)) : !sl2;
 
   if(in_replay) {
-    view_pt = (ticks / 1000.) * DS_(simspeed);
+    static int oticks = ticks;
+    if(inHighQual)
+      view_pt = (ticks / 1000.) * DS_(simspeed) * (rev_replay ? -1 : 1);
+    else
+      view_pt += ((ticks - oticks) / 1000.) * DS_(simspeed) * (rev_replay ? -1 : 1);
+    oticks = ticks;
     ld maxt = history.back().start + 0.001;
     view_pt -= maxt * floor(view_pt / maxt);
     for(auto& ss: history)
