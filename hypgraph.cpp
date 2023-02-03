@@ -2791,7 +2791,9 @@ EX void draw_boundary(int w) {
       return;
       }
 
-    default: break;
+    default:
+      if(models::is_perspective(pmodel)) return;
+      break;
     }
 
   if(sphere && pmodel == mdDisk && pconf.alpha > 1) {
