@@ -213,6 +213,9 @@ rock_generator rockgen, rsrcgen;
 
 auto future_shown = 5 * TAU;
 
+/** start with a fixed good-looking sequence */
+bool demo;
+
 void init_ds_game() {
 
   dynamicval<eGeometry> g(geometry, gSpace435);
@@ -238,10 +241,17 @@ void init_ds_game() {
     }
 
   rockgen.cshift += 2;
+  if(demo) {
+    rockgen.static_starry_field();
+    rockgen.hyperboloid();
+    rockgen.chaotic_starry_field();
+    rockgen.rack();
+    }
   rockgen.add_until(future_shown);
   
   rsrcgen.cshift += 1;
   rsrcgen.add_rsrc_until(future_shown);
+
   }
 
 void ds_gen_particles(int qty, transmatrix from, ld shift, color_t col, ld spd, ld t, ld spread = 1) {
