@@ -1896,30 +1896,17 @@ EX bool keep_vertical() {
 
 EX hyperpoint vertical_vector() {
   auto& ds = downseek;
-  if(msphere && !sphere && !gproduct && vid.fixed_yz) {
-    hyperpoint h = get_view_orientation() * C0;
-    if(vid.wall_height > 0) h = -h;
-    return h;
-    }
-  if(meuclid && hyperbolic && vid.fixed_yz) {
-    hyperpoint h = iso_inverse(View) * C0;
-    return View * (orthogonal_move(h, vid.wall_height) - h);
-    }
-  if(gproduct && vid.fixed_yz) {
-    return get_view_orientation() * lztangent(embedded_plane ? vid.wall_height : 1);
-    }
-  if(cgi.emb->is_same_in_same())
-    return get_view_orientation() * lztangent(vid.wall_height);
-  if(cgi.emb->is_euc_in_sl2() || cgi.emb->is_euc_in_sph()) {
+  if(embedded_plane && vid.fixed_yz) {
     transmatrix Rot = View * cgi.emb->map_relative_push(inverse(View) * C0);
+    if(gproduct) Rot = NLP * Rot;
     return Rot * lztangent(vid.wall_height);
     }
-  if(embedded_plane && vid.fixed_yz && nonisotropic) {
-    return NLP * lztangent(vid.wall_height);
+  if(gproduct && vid.fixed_yz) {
+    return get_view_orientation() * lztangent(1);
     }
-  else if(ds.qty && gproduct)
+  if(ds.qty && gproduct)
     return get_view_orientation() * product::inverse_exp(ds.point);
-  else if(ds.qty)
+  if(ds.qty)
     return ds.point;
   return C0;
   }
