@@ -539,8 +539,8 @@ void geometry_information::make_revolution(hpcshape& sh, int mx, ld push) {
 void geometry_information::make_revolution_cut(hpcshape &sh, int each, ld push, ld width) {
   auto body = get_shape(sh);
   body.resize(isize(body) / 2);
-  ld fx = body[0][0];
-  ld lx = body.back()[0];
+  ld fx = cgi.emb->actual_to_logical(body[0])[0];
+  ld lx = cgi.emb->actual_to_logical(body.back())[0];
   body.insert(body.begin(), hpxy(fx + (fx-lx) * 1e-3, 0));
   body.push_back(hpxy(lx + (lx-fx) * 1e-3, 0));
   int n = isize(body);
@@ -561,9 +561,12 @@ void geometry_information::make_revolution_cut(hpcshape &sh, int each, ld push, 
     int cand = -1;
     ld cv = 0;
     for(int i=1; i<n-1; i++) if(stillin[i]) {
-      if((gbody[i][0] < gbody[lastid[i]][0] && gbody[i][0] < gbody[nextid[i]][0]) || (gbody[i][0] > gbody[lastid[i]][0] && gbody[i][0] > gbody[nextid[i]][0]) || abs(gbody[i][1]) > width)
-      if(abs(gbody[i][1]) > cv)
-        cand = i, cv = abs(gbody[i][1]);
+      auto gi = cgi.emb->actual_to_logical(gbody[i]);
+      auto gl = cgi.emb->actual_to_logical(gbody[lastid[i]]);
+      auto gn = cgi.emb->actual_to_logical(gbody[nextid[i]]);
+      if((gi[0] < gl[0] && gi[0] < gn[0]) || (gi[0] > gl[0] && gi[0] > gn[0]) || abs(gi[1]) > width)
+      if(abs(gi[1]) > cv)
+        cand = i, cv = abs(gi[1]);
       }
     if(cand == -1) break;
     int i = cand;
