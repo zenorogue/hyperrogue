@@ -505,14 +505,14 @@ void geometry_information::make_skeletal(hpcshape& sh, ld push) {
   }
 
 hyperpoint yzspin(ld alpha, hyperpoint h) {
-  if(gproduct) return product::direct_exp(cspin(1, 2, alpha) * product::inverse_exp(h));
-  else if(embedded_plane && cgi.emb->center_z()) {
-    h = gpushxto0(cgi.emb->tile_center()) * h;
+  if(embedded_plane) {
+    h = cgi.emb->actual_to_logical(h);
     h = cspin(1, 2, alpha) * h;
-    h = rgpushxto0(cgi.emb->tile_center()) * h;
+    h = cgi.emb->logical_to_actual(h);
     return h;
     }
-  else return cspin(1, 2, alpha) * h;
+  if(gproduct) return product::direct_exp(cspin(1, 2, alpha) * product::inverse_exp(h));
+  return cspin(1, 2, alpha) * h;
   }
 
 void geometry_information::make_revolution(hpcshape& sh, int mx, ld push) {
