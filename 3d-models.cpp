@@ -632,11 +632,15 @@ void geometry_information::animate_bird(hpcshape& orig, hpcshape_animated& anima
     clone_shape(orig, tgt);
     ld alpha = cos(M_PI * i / WINGS) * 30 * degree;
     for(int i=tgt.s; i<tgt.e; i++) {
-      if(abs(hpc[i][1]) > body) {
-        ld off = hpc[i][1] > 0 ? body : -body;
-        hpc[i][2] += abs(hpc[i][1] - off) * sin(alpha);
-        hpc[i][1] = off + (hpc[i][1] - off) * cos(alpha);
-        hpc[i] = normalize(hpc[i]);
+      hyperpoint h = hpc[i];
+      h = cgi.emb->actual_to_logical(hpc[i]);
+      if(abs(h[1]) > body) {
+        ld off = h[1] > 0 ? body : -body;
+        h[2] += abs(h[1] - off) * sin(alpha);
+        h[1] = off + (h[1] - off) * cos(alpha);
+        h = cgi.emb->logical_to_actual(h);
+        h = normalize(h);
+        hpc[i] = h;
         }
       }
     }
