@@ -777,7 +777,6 @@ void geometry_information::prepare_basics() {
     scalefactor *= exp(-vid.depth);
     }
 
-  if(cgi.emb->is_euc_in_noniso()) scalefactor *= geom3::euclid_embed_scale;
   if(msphere && geuclid) scalefactor *= (1 + vid.depth);
   if(msphere && ghyperbolic) scalefactor *= sinh(1 + vid.depth);
 
