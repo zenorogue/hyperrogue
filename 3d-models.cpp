@@ -116,9 +116,19 @@ void geometry_information::add_texture(hpcshape& sh) {
   auto& utt = models_texture;
   sh.tinf = &utt;
   sh.texture_offset = isize(utt.tvertices);
+
+  auto f = [] (hyperpoint h) {
+    if(!embedded_plane && gproduct) return product::inverse_exp(h);
+    return cgi.emb->actual_to_logical(h);
+    };
+
+  hyperpoint ct = Hypc;
+  int n = 0;
+  for(int i=sh.s; i<isize(hpc); i++) ct += f(hpc[i]), n++;
+  ct /= n;
+
   for(int i=sh.s; i<isize(hpc); i++) {
-    hyperpoint h = hpc[i];
-    if(gproduct) h = product::inverse_exp(h);
+    hyperpoint h = f(hpc[i]) - ct;
     ld rad = hypot_d(3, h);
     ld factor = 0.50 + (0.17 * h[2] + 0.13 * h[1] + 0.15 * h[0]) / rad;
     utt.tvertices.push_back(glhr::makevertex(0, factor, 0));
