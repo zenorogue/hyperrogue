@@ -1159,7 +1159,7 @@ void geometry_information::make_3d_models() {
     }
   last->flags |= POLY_TRIANGLES;
   add_texture(*last);
-  if(WDIM == 2) shift_last_straight(FLOOR);
+  if(WDIM == 2) shift_last_straight(FLOOR + cgi.emb->center_z());
   finishshape();
   shJelly = shSlime;
   
