@@ -3,13 +3,11 @@ namespace hr {
 
 #if MAXMDIM >= 4
 pair<bool, hyperpoint> makeradar(shiftpoint h) {
-  if(embedded_plane) h.h = current_display->radar_transform * h.h;
-
-  ld d = hdist0(h);
 
   hyperpoint h1;
-  
-  if(sol && nisot::geodesic_movement && !embedded_plane) {
+
+  if(embedded_plane) h1 = current_display->radar_transform * unshift(h);
+  else if(sol && nisot::geodesic_movement) {
     hyperpoint h1 = inverse_exp(h, pQUICK);
     ld r = hypot_d(3, h1);
     if(r < 1) h1 = h1 * (atanh(r) / r);
@@ -18,17 +16,18 @@ pair<bool, hyperpoint> makeradar(shiftpoint h) {
   else if(mproduct) h1 = product::inverse_exp(unshift(h));
   else if(sl2) h1 = slr::get_inverse_exp(h);
   else h1 = unshift(h);
-  
+
   if(nisot::local_perspective_used && !embedded_plane) {
     h1 = NLP * h1;
     }
   
   if(WDIM == 3) {
+    ld d = hdist0(h);
     if(d >= vid.radarrange) return {false, h1};
     if(d) h1 = h1 * (d / vid.radarrange / hypot_d(3, h1));
     }
   else {
-    h1 = cgi.emb->actual_to_base(h.h);
+    h1 = cgi.emb->actual_to_base(h1);
     h1 = current_display->radar_transform_post * h1;
     if(mhyperbolic) {
       h1[LDIM] = h1[2]; h1[2] = 0;
@@ -36,7 +35,7 @@ pair<bool, hyperpoint> makeradar(shiftpoint h) {
       h1[3] *= 2;
       }
     if(meuclid) {
-      d = hypot_d(2, h1);
+      ld d = hypot_d(2, h1);
       if(d > vid.radarrange) return {false, h1};
       if(d) h1 = h1 / (vid.radarrange + cgi.scalefactor/4);
       }
