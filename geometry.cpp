@@ -35,6 +35,7 @@ struct hpcshape {
   int texture_offset;
   int shs, she;
   void clear() { s = e = shs = she = texture_offset = 0; prio = PPR::ZERO; tinf = NULL; flags = 0; }
+  hpcshape() { clear(); }
   };
 
 #define SIDE_SLEV 0
