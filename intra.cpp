@@ -985,6 +985,7 @@ EX bool isFloor(cell *c) {
 
 EX void handle() {
   if(playermoved || !on) return;
+  make_actual_view();
 
   if(floor_dir == -1 || on_floor_of != centerover) {
     vector<int> choices;
