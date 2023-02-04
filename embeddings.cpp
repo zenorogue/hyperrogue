@@ -829,10 +829,19 @@ struct emb_hyp_in_solnih : emb_actual {
     return point31(0, -hy, hx);
     }
   transmatrix actual_to_base(const transmatrix& T) override {
-    return Id; /* TBD actual computation */
+    hyperpoint h = T * C0;
+    auto f = geom3::flipped;
+    geom3::light_flip(true);
+    transmatrix b = parabolic1(h[1]) * xpush(h[2]);
+    geom3::light_flip(f);
+    return b;
     }
   hyperpoint actual_to_base(hyperpoint h) override {
-    return C02; /* TBD actual computation */
+    auto f = geom3::flipped;
+    geom3::light_flip(true);
+    hyperpoint b = parabolic1(h[1]) * xpush0(h[2]);
+    geom3::light_flip(f);
+    return b;
     }
   transmatrix get_lsti() override { return cspin90(0, 1) * cspin90(1, 2) * cspin90(0, 1); }
   hyperpoint orthogonal_move(const hyperpoint& a, ld z) override { return nisot::translate(a) * cpush0(0, z); }
@@ -1033,8 +1042,11 @@ void embedding_method::set_radar_transform() {
   rt = inverse(intermediate_to_actual_translation(l)) * inverse(U);
   transmatrix T = View * intermediate_to_actual_translation(logical_to_intermediate * l0);
   if(gproduct) T = NLP * T;
-  T = cspin(1, 0, geom3::euclid_embed_rotate * degree) * intermediate_to_logical_scaled * T * logical_scaled_to_intermediate;
+  T = intermediate_to_logical_scaled * T * logical_scaled_to_intermediate;
+  if(cgi.emb->is_euc_in_noniso()) T = cspin(1, 0, geom3::euclid_embed_rotate * degree) * T;
+  if(cgi.emb->is_hyp_in_solnih()) T = T * MirrorY;
   rtp = cspin(0, 1, atan2(T[0][1], T[0][0]));
+  if(cgi.emb->is_hyp_in_solnih()) rtp = MirrorX * cspin90(0, 1) * rtp;
   }
 
 EX void swapmatrix(transmatrix& T) {
