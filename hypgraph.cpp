@@ -1625,10 +1625,9 @@ EX bool in_smart_range(const shiftmatrix& T) {
   ld x = current_display->xcenter + current_display->radius * h1[0];
   ld y = current_display->ycenter + current_display->radius * h1[1] * pconf.stretch;
 
-  bool culling = !cgi.emb->is_euc_in_hyp();
   bool inp = in_perspective();
 
-  if(culling) {
+  if(frustum_culling) {
     if(x > current_display->xtop + current_display->xsize * 2) return false;
     if(x < current_display->xtop - current_display->xsize * 1) return false;
     if(y > current_display->ytop + current_display->ysize * 2) return false;
@@ -1674,7 +1673,7 @@ EX bool in_smart_range(const shiftmatrix& T) {
     if(scale <= vid.smart_range_detail) return false;
     }
 
-  if(!culling) return true;
+  if(!frustum_culling) return true;
   
   return 
     x - 2 * dx < current_display->xtop + current_display->xsize && 
