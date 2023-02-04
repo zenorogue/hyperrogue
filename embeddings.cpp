@@ -1112,14 +1112,14 @@ void embedding_method::auto_configure() {
     }
   vid.camera = 0;
   vid.eye = 0;
-  if(is_sph_in_low()) {
+  if(is_sph_in_low() || is_cylinder()) {
     vid.depth = 0;
     vid.wall_height = -1;
     vid.eye = -0.5;
     if(inverted_embedding) {
-      vid.wall_height = 1.4;
-      vid.eye = 0.2;
-      vid.depth = 0.5;
+      vid.wall_height = is_cylinder() ? 0.6 : 1.4;
+      vid.eye = is_cylinder() ? 0.5 : 0.2;
+      vid.depth = is_cylinder() ? 0 : 0.5;
       }
     }
   if(supports_flat() && flat_embedding) {
@@ -1130,7 +1130,7 @@ void embedding_method::auto_configure() {
     vid.eye += vid.depth * 1.5;
     vid.depth *= -1;
     }
-  if((is_euc_in_hyp() || is_euc_in_noniso()) && inverted_embedding) {
+  if((is_euc_in_hyp() || is_euc_in_noniso()) && inverted_embedding && !is_cylinder()) {
     vid.wall_height *= -1;
     vid.eye = -2 * vid.depth;
     }
