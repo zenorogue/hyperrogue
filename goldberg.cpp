@@ -646,7 +646,7 @@ EX namespace gp {
       }
     if(sp>SG3) sp -= SG6;
 
-    return cgi.emb->normalize_flat(spin(TAU*sp/S7) * cornmul(T, corner));
+    return normalize(spin(TAU*sp/S7) * cornmul(T, corner));
     }
   
   transmatrix dir_matrix(int i) {
@@ -684,7 +684,6 @@ EX namespace gp {
         hyperpoint h = atz(T, cgi.gpdata->corners, at, 6);
         hyperpoint hl = atz(T, cgi.gpdata->corners, at + eudir(d), 6);
         cgi.gpdata->Tf[i][x&GOLDBERG_MASK][y&GOLDBERG_MASK][d] = rgpushxto0(h) * rspintox(gpushxto0(h) * hl) * spin180();
-        // cgi.gpdata->Tf[i][x&GOLDBERG_MASK][y&GOLDBERG_MASK][d] = Id; // map_relative_push(h) * lrspintox(inverse(map_relative_push(h)) * hl) * spin180();
         }
       }       
 
@@ -694,7 +693,8 @@ EX namespace gp {
       for(int x=-GOLDBERG_LIMIT_HALF; x<GOLDBERG_LIMIT_HALF; x++)
       for(int y=-GOLDBERG_LIMIT_HALF; y<GOLDBERG_LIMIT_HALF; y++)
       for(int d=0; d<(S3==3?6:4); d++) {
-        swapmatrix( cgi.gpdata->Tf[i][x&GOLDBERG_MASK][y&GOLDBERG_MASK][d] );
+        auto& T = cgi.gpdata->Tf[i][x&GOLDBERG_MASK][y&GOLDBERG_MASK][d];
+        T = cgi.emb->base_to_actual(T);
         }
       } }
     }
