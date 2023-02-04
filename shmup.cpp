@@ -105,7 +105,6 @@ void monster::reset() {
   stunoff = 0; blowoff = 0; fragoff = 0; footphase = 0;
   inertia = Hypc; ori = Id; vel = 0;
   swordangle = 0;
-  if(cgip && cgi.emb && cgi.emb->is_euc_in_product()) ori = cgi.emb->intermediate_to_logical_scaled;
   }
 
 using namespace multi;
@@ -185,51 +184,11 @@ cell *monster::findbase(const shiftmatrix& T, int maxsteps) {
   else return findbaseAround(T, base, maxsteps);
   }
 
-/** fix the matrix, including the appropriate fixes for nonisotropic, embedded_plane, and elliptic space */
-void full_fix(transmatrix& T) {
-  if(embedded_plane) {
-    if(cgi.emb->is_sph_in_low()) {
-      for(int i=0; i<4; i++) T[i][3] = 0, T[3][i] = 0;
-      T[3][3] = 1;
-      fixmatrix(T);
-      }
-    else if(cgi.emb->is_same_in_same()) {
-      for(int i=0; i<4; i++) T[i][2] = 0, T[2][i] = 0;
-      T[2][2] = 1;
-      fixmatrix(T);
-      }
-    else if(gproduct) {
-      fixmatrix(T);
-      }
-    else {
-      hyperpoint h = T * tile_center();
-      transmatrix rot = iso_inverse(cgi.emb->map_relative_push(h)) * T;
-      if(cgi.emb->is_euc_in_sph()) rot = rot * lzpush(1);
-      fix_rotation(rot);
-      if(cgi.emb->is_hyp_in_solnih()) h[0] = 0;
-      else if(cgi.emb->is_euc_in_nil()) h[1] = 0;
-
-      T = cgi.emb->map_relative_push(h) * rot;
-      if(cgi.emb->is_euc_in_sph()) T = T * lzpush(-1);
-      fixmatrix(T);
-      }
-    }
-  else if(nonisotropic) {
-    hyperpoint h = tC0(T);
-    transmatrix rot = gpushxto0(h) * T;
-    fix_rotation(rot);
-    T = rgpushxto0(h) * rot;
-    }
-  else
-    fixmatrix(T);
-  fixelliptic(T);
-  }
-
 void monster::rebasePat(const shiftmatrix& new_pat, cell *c2) {
   if(isVirtual) {
     at = new_pat.T;
     virtualRebase(this);
-    full_fix(at);
+    cgi.emb->logical_fix(at);
     pat = shiftless(at);
     if(multi::players == 1 && this == shmup::pc[0])
       current_display->which_copy = back_to_view(ggmatrix(base));
@@ -239,7 +198,7 @@ void monster::rebasePat(const shiftmatrix& new_pat, cell *c2) {
     at = inverse_shift(gmatrix[base], new_pat);
     transmatrix old_at = at;
     virtualRebase(this);
-    full_fix(at);
+    cgi.emb->logical_fix(at);
     if(base != c2) {
       if(fake::split()) println(hlog, "fake error");
       else {
@@ -257,7 +216,7 @@ void monster::rebasePat(const shiftmatrix& new_pat, cell *c2) {
   pat = new_pat;
   base = c2;
   at = inverse_shift(gmatrix[c2], pat);
-  full_fix(at);
+  cgi.emb->logical_fix(at);
   }
 
 bool trackroute(monster *m, shiftmatrix goal, double spd) {

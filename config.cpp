@@ -2257,6 +2257,10 @@ EX void display_embedded_errors() {
     dialog::addInfo(XLAT("error: currently works only in binary tiling and similar"), 0xC00000);
     return;
     }
+  if(shmup::on && cgi.emb->no_spin()) {
+    dialog::addInfo(XLAT("error: this embedding does not work in shmup"), 0xC00000);
+    return;
+    }
   if(meuclid && spatial_embedding == seCliffordTorus) {
     rug::clifford_torus ct;
     ld h = ct.xh | ct.yh;

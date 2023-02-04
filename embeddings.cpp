@@ -236,6 +236,7 @@ EX }
     virtual hyperpoint logical_to_base(hyperpoint h) = 0;
     virtual ld anim_center_z() { return center_z(); }
     virtual hyperpoint anim_tile_center();
+    virtual void logical_fix(transmatrix&) = 0;
     
     virtual bool is_euc_in_product() { return false; }
     virtual bool is_product_embedding() { return false; }
@@ -380,6 +381,17 @@ struct emb_none : embedding_method {
       }
     return h;
     }
+
+  void logical_fix(transmatrix& T) {
+    if(nonisotropic) {
+      hyperpoint h = tC0(T);
+      transmatrix rot = gpushxto0(h) * T;
+      fix_rotation(rot);
+      T = rgpushxto0(h) * rot;
+      }
+    else fixmatrix(T);
+    fixelliptic(T);
+    }
   };
 
 /** embeddings methods that are not emb_none */
@@ -407,14 +419,27 @@ struct emb_actual : embedding_method {
     h[3] = 1;
     return h;
     }
+
+  void logical_fix(transmatrix& T) {
+    hyperpoint a = T * tile_center();
+    hyperpoint i0 = actual_to_intermediate(a);
+    auto l0 = intermediate_to_logical * i0;
+    auto l = l0; l[2] = 0;
+    auto i = logical_to_intermediate * l;
+    auto rot0= inverse(intermediate_to_actual_translation(i0)) * T ;
+    auto rot = intermediate_to_logical_scaled * rot0 * logical_scaled_to_intermediate;
+    ld alpha = atan2(rot[0][1], rot[0][0]);
+    T = intermediate_to_actual_translation(i) * spin(alpha);
+    fixelliptic(T);
+    }
   };
 
 /** embed in the 3D variant of the same geometry */
 
 struct emb_same_in_same : emb_actual {
   virtual bool is_same_in_same() { return true; }
-  transmatrix intermediate_to_actual_translation(hyperpoint i) override { return rgpushxto0(i); }
-  hyperpoint actual_to_intermediate(hyperpoint a) override { return a; }
+  transmatrix intermediate_to_actual_translation(hyperpoint i) override { return rgpushxto0(logical_to_actual(i)); }
+  hyperpoint actual_to_intermediate(hyperpoint a) override { return actual_to_logical(a); }
   hyperpoint orthogonal_move(const hyperpoint& h, ld z) override {
     ld u = 1;
     if(h[2]) z += asin_auto(h[2]), u /= cos_auto(asin_auto(h[2]));
@@ -478,6 +503,12 @@ struct emb_same_in_same : emb_actual {
     return hpxy3(h[0] * u, h[1] * u, 0);
     }
 
+  void logical_fix(transmatrix& T) override {
+    // optimization
+    for(int i=0; i<4; i++) T[i][2] = T[2][i] = i == 2;
+    fixmatrix(T);
+    fixelliptic(T);
+    }
   };
 
 /** embed in the product geometry */
@@ -539,7 +570,7 @@ struct emb_sphere_in_low : emb_actual {
   bool is_sph_in_low() override { return true; }
   bool is_depth_limited() override { return true; }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override {
-    return map_relative_push(logical_to_actual(i));
+    return map_relative_push(logical_to_actual(i)) * zpush(-1);
     }
   hyperpoint actual_to_intermediate(hyperpoint a) override { return actual_to_logical(a); }
   ld center_z() { return 1; }
@@ -595,6 +626,12 @@ struct emb_sphere_in_low : emb_actual {
     geom3::light_flip(false);
     h[2] = z; h[3] = 1;
     return h;
+    }
+
+  void logical_fix(transmatrix& T) {
+    fix4(T);
+    fixmatrix(T);
+    fixelliptic(T);
     }
   };
 

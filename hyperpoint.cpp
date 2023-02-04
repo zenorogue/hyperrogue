@@ -1449,28 +1449,27 @@ EX transmatrix shift_object(transmatrix Position, const transmatrix& ori, const 
       }
     case smEmbedded: {
 
-      if(cgi.emb->is_euc_in_hyp() || cgi.emb->is_sph_in_low()) {
-        geom3::light_flip(true);
-        transmatrix T = rgpushxto0(direct_exp(direction));
-        geom3::light_flip(false);
-        return Position * cgi.emb->base_to_actual(T);
+      // optimization -- should work without it
+      if(cgi.emb->is_same_in_same()) return Position * rgpushxto0(direct_exp(direction));
+
+      if(gproduct) {
+        return Position * cgi.emb->intermediate_to_actual_translation(ori * cgi.emb->logical_to_intermediate * direction);
         }
 
-      if(cgi.emb->is_euc_in_sph()) Position = inverse(View) * Position;
+      auto P = inverse_shift(ggmatrix(cwt.at), shiftless(Position));
 
-      transmatrix rot = inverse(cgi.emb->map_relative_push(Position * tile_center())) * Position;
-      ld z = cgi.emb->center_z();
-      if(z) rot = rot * lzpush(z);
-      transmatrix urot = unswap_spin(rot);
+      hyperpoint a = P * tile_center();
+      hyperpoint i0 = cgi.emb->actual_to_intermediate(a);
+      auto l0 = cgi.emb->intermediate_to_logical * i0;
+      auto l = l0; l[2] = 0;
+      auto i = cgi.emb->logical_to_intermediate * l;
+      auto rot1 = inverse(cgi.emb->intermediate_to_actual_translation(i)) * P;
+      auto rot = cgi.emb->intermediate_to_logical_scaled * rot1 * cgi.emb->logical_scaled_to_intermediate;
 
-      geom3::light_flip(true);
-      transmatrix T = rgpushxto0(direct_exp(urot * direction));
-      geom3::light_flip(false);
-      T = cgi.emb->base_to_actual(T);
-      auto res = Position * inverse(rot) * T * rot;
-
-      if(cgi.emb->is_euc_in_sph()) res = View * res;
-      return res;
+      auto par = cgi.emb->logical_to_intermediate * rot * direction;
+      if(cgi.emb->is_sph_in_low()) par = cspin180(0, 1) * par; // reason unknown
+      auto tra = cgi.emb->intermediate_to_actual_translation(par);
+      return Position * inverse(rot1) * tra * rot1;
       }
     default: throw hr_exception("unknown shift method in shift_object");
     }

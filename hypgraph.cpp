@@ -2025,14 +2025,9 @@ EX void adjust_eye(transmatrix& T, cell *c, ld sign) {
     T = T * lzpush(sign * (cgi.SLEV[sl] - cgi.FLOOR - vid.eye + i));
   }
 
-/** achieve top-down perspective */
-EX transmatrix default_spin() {
-  return cspin90(0, 1) * cgi.emb->intermediate_to_logical_scaled;
-  }
-
 EX bool shmup_inverted() {
   if(!embedded_plane) return false;
-  return (vid.wall_height < 0) ^ (cgi.emb->is_euc_in_nil() || cgi.emb->is_euc_in_sl2());
+  return vid.wall_height < 0;
   }
 
 EX void centerpc(ld aspd) {
@@ -2056,8 +2051,8 @@ EX void centerpc(ld aspd) {
     centerover = pc->base;
     transmatrix T = pc->at;
     
-    if(nonisotropic) {
-      transmatrix rot = inverse(rgpushxto0(T * C0)) * T;
+    if(embedded_plane) {
+      transmatrix rot = inverse(cgi.emb->intermediate_to_actual_translation(cgi.emb->actual_to_intermediate(T * tile_center()))) * T;
       T = T * inverse(rot);
       adjust_eye(T, pc->base, +1);
       T = T * rot;
@@ -2069,11 +2064,13 @@ EX void centerpc(ld aspd) {
     View = iview_inverse(T);
     if(gproduct) NLP = ortho_inverse(pc->ori);
     if(WDIM == 2) {
+      // already taken into account in gproduct
+      rotate_view(cgi.emb->intermediate_to_logical_scaled);
+      // right => upwards
+      rotate_view(cspin90(0, 1));
+      // apply playerturny
       if(shmup_inverted()) rotate_view(cspin180(2, 1));
-      if(gproduct)
-        rotate_view( cspin(2, 1, -90._deg - shmup::playerturny[id]) * cspin90(0, 1));
-      else
-        rotate_view( cspin(2, 1, -90._deg - shmup::playerturny[id]) * default_spin());
+      rotate_view( cspin(2, 1, -90._deg - shmup::playerturny[id]));
       }
     return;
     }
