@@ -2656,7 +2656,15 @@ EX bool applyAnimation(cell *c, shiftmatrix& V, double& footphase, int layer) {
       }
     footphase = a.footphase;
     V = V * a.wherenow * lrspintox(wnow);
-    if(cgi.emb->is_cylinder()) V = V * cspin90(1, 0);
+    if(cgi.emb->is_cylinder() && !gproduct) {
+      if(nil) {
+        V = V * lzpush(1);
+        V = V * spin270();
+        V = V * lzpush(-1);
+        }
+      else
+        V = V * cspin90(1, 0);
+      }
     if(a.mirrored) V = V * lmirror();
     if(a.attacking == 2) V = V * lpispin();
     a.ltick = ticks;

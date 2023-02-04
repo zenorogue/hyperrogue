@@ -1022,6 +1022,7 @@ EX transmatrix xspinpush(ld dir, ld dist) {
 
 EX const transmatrix& lmirror() {
   if(cgi.emb->is_euc_in_product()) return Id;
+  if(cgi.emb->is_cylinder() && nil) return Id;
   if(cgi.emb->logical_to_intermediate[2][1]) return MirrorZ;
   if(cgi.emb->is_hyp_in_solnih()) return MirrorY;
   return Mirror;
