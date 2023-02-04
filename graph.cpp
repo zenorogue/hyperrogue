@@ -2608,7 +2608,7 @@ EX bool applyAnimation(cell *c, shiftmatrix& V, double& footphase, int layer) {
   ld aspd = td / 1000.0 * exp(vid.mspeed);
   ld R;
   again:
-  auto TC0 = tile_center();
+  auto TC0 = cgi.emb->anim_tile_center();
 
   if(among(a.attacking, 1, 3))
     R = hdist(a.attackat * TC0, a.wherenow * TC0);
@@ -2625,7 +2625,7 @@ EX bool applyAnimation(cell *c, shiftmatrix& V, double& footphase, int layer) {
     }
   else {
     transmatrix T = inverse(a.wherenow);
-    ld z = cgi.emb->center_z();
+    ld z = cgi.emb->anim_center_z();
     if(z) T = lzpush(-z) * T;
 
     hyperpoint wnow;
@@ -2635,7 +2635,7 @@ EX bool applyAnimation(cell *c, shiftmatrix& V, double& footphase, int layer) {
       wnow = T * TC0;
     
     shift_v_towards(T, shiftless(wnow), aspd, shift_method(smaAnimation));
-    if(z) T = lzpush(1) * T;
+    if(z) T = lzpush(z) * T;
     a.wherenow = inverse(T);
     fixmatrix(a.wherenow);
 
@@ -2666,10 +2666,10 @@ EX bool applyAnimation(cell *c, shiftmatrix& V, double& footphase, int layer) {
 double chainAngle(cell *c, shiftmatrix& V, cell *c2, double dft, const shiftmatrix &Vwhere) {
   if(cgi.emb->no_spin()) return 0;
   if(!gmatrix0.count(c2)) return dft;
-  hyperpoint h = tile_center();
+  hyperpoint h = cgi.emb->anim_tile_center();
   if(animations[LAYER_BIG].count(c2)) h = animations[LAYER_BIG][c2].wherenow * h;
   h = inverse_shift(V, Vwhere) * calc_relative_matrix(c2, c, C0) * h;
-  ld z = cgi.emb->center_z();
+  ld z = cgi.emb->anim_center_z();
   if(z) h = lzpush(-z) * h;
   return atan2(h[1], h[0]);
   }
@@ -2677,7 +2677,7 @@ double chainAngle(cell *c, shiftmatrix& V, cell *c2, double dft, const shiftmatr
 // equivalent to V = V * spin(-chainAngle(c,V,c2,dft));
 bool chainAnimation(cell *c, cell *c2, shiftmatrix& V, const shiftmatrix &Vwhere, ld& length) {
   if(cgi.emb->no_spin()) return false;
-  hyperpoint h = tile_center();
+  hyperpoint h = cgi.emb->anim_tile_center();
   if(animations[LAYER_BIG].count(c2)) h = animations[LAYER_BIG][c2].wherenow * h;
   h = inverse_shift(V, Vwhere) * h;
   length = hdist(h, tile_center());

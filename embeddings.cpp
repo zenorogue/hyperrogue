@@ -234,6 +234,8 @@ EX }
     virtual transmatrix get_lti() { return logical_scaled_to_intermediate; }
     virtual hyperpoint base_to_logical(hyperpoint h) = 0;
     virtual hyperpoint logical_to_base(hyperpoint h) = 0;
+    virtual ld anim_center_z() { return center_z(); }
+    virtual hyperpoint anim_tile_center();
     
     virtual bool is_euc_in_product() { return false; }
     virtual bool is_product_embedding() { return false; }
@@ -272,6 +274,12 @@ EX geometry_information *swapper;
 
 hyperpoint embedding_method::tile_center() {
   ld z = center_z();
+  if(z == 0) return C0;
+  return lzpush(z) * C0;
+  }
+
+hyperpoint embedding_method::anim_tile_center() {
+  ld z = anim_center_z();
   if(z == 0) return C0;
   return lzpush(z) * C0;
   }
@@ -522,6 +530,7 @@ struct emb_euc_in_hyp : emb_actual {
     }
   hyperpoint actual_to_base(hyperpoint h) override { return deparabolic13(h); }
   transmatrix actual_to_base(const transmatrix& T) override { hyperpoint h = deparabolic13(T * C0); return eupush(h[0], h[1]); }
+  ld anim_center_z() override { return vid.depth; }
   };
 
 /** sphere into a isotropic space of higher curvature */
