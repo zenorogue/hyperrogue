@@ -299,9 +299,23 @@ hyperpoint embedding_method::flatten(hyperpoint a) {
 /** dummy 'embedding method' used when no embedding is used (2D engine or 3D map) */
 
 struct emb_none : embedding_method {
-  hyperpoint actual_to_intermediate(hyperpoint a) override { return a; }
-  hyperpoint intermediate_to_actual(hyperpoint i) override { return i; }
-  transmatrix intermediate_to_actual_translation(hyperpoint i) override { return rgpushxto0(i); }
+  hyperpoint actual_to_intermediate(hyperpoint a) override {
+    if(gproduct) return base_to_logical(a);
+    return a;
+    }
+  hyperpoint intermediate_to_actual(hyperpoint i) override {
+    if(gproduct) return logical_to_base(i);
+    return i;
+    }
+  transmatrix intermediate_to_actual_translation(hyperpoint i) override {
+    if(gproduct) i = intermediate_to_actual(i);
+    return rgpushxto0(i);
+    }
+  hyperpoint flatten(hyperpoint a) {
+    if(gproduct) return a / exp(zlevel(a));
+    return embedding_method::flatten(a);
+    }
+
   transmatrix base_to_actual(const transmatrix& T) override { return T; }
   hyperpoint base_to_actual(hyperpoint h) override { return h; }
   transmatrix actual_to_base(const transmatrix& T) override { return T; }
@@ -324,6 +338,11 @@ struct emb_none : embedding_method {
     #if CAP_BT
     if(bt::in() && !mproduct) return bt::minkowski_to_bt(h);
     #endif
+    if(mproduct) {
+      ld z = zlevel(h);
+      h /= h[2];
+      h[2] = z;
+      }
     return h;
     }
   hyperpoint logical_to_base(hyperpoint h) override {
@@ -333,6 +352,12 @@ struct emb_none : embedding_method {
     if(bt::in() && !mproduct)
       return bt::bt_to_minkowski(h);
     #endif
+    if(mproduct) {
+      ld z = h[2];
+      h[2] = 1;
+      flatten(h);
+      h *= exp(z);
+      }
     return h;
     }
   };
