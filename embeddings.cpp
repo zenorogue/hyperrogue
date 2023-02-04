@@ -539,11 +539,9 @@ struct emb_sphere_in_low : emb_actual {
   bool is_sph_in_low() override { return true; }
   bool is_depth_limited() override { return true; }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override {
-    throw hr_exception("illegal function");
+    return map_relative_push(logical_to_actual(i));
     }
-  hyperpoint actual_to_intermediate(hyperpoint a) override {
-    throw hr_exception("illegal function");
-    }
+  hyperpoint actual_to_intermediate(hyperpoint a) override { return actual_to_logical(a); }
   ld center_z() { return 1; }
   transmatrix map_relative_push(hyperpoint a) {
     ld z = hdist0(a);
@@ -586,8 +584,8 @@ struct emb_sphere_in_low : emb_actual {
     geom3::light_flip(true);
     h = normalize(h);
     geom3::light_flip(false);
-    h *= (1 + z);
-    h[3] = 1;
+    h *= sin_auto(1 + z);
+    h[3] = cos_auto(1 + z);
     return h;
     }
   hyperpoint actual_to_logical(hyperpoint h) {
