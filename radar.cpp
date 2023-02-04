@@ -156,13 +156,16 @@ EX void draw_radar(bool cornermode) {
     compassdir('D', point3(0,  0,-1));
     }
 
+  ld f = cgi.scalefactor;
+  if(cgi.emb->is_euc_in_hyp()) f /= exp(vid.depth);
+
   auto locate = [&] (hyperpoint h) {
     if(sph)
       return point3(cx + (rad-10) * h[0], cy + (rad-10) * h[2] * si + (rad-10) * h[1] * co, +h[1] * si > h[2] * co ? 8 : 16);
     else if(hyp) 
       return point3(cx + rad * h[0], cy + rad * h[1], 1/(1+h[ldim]) * cgi.scalefactor * current_display->radius / (inHighQual ? 10 : 6));
     else
-      return point3(cx + rad * h[0], cy + rad * h[1], rad * cgi.scalefactor / (vid.radarrange + cgi.scalefactor/4) * 0.8);
+      return point3(cx + rad * h[0], cy + rad * h[1], rad * f / (vid.radarrange + f/4) * 0.8);
     };
   
   for(auto& r: cd->radarlines) {
