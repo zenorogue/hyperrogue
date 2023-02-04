@@ -900,10 +900,10 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
     poly_outline = kind_outline(it);
 
   shiftmatrix Vit = V;
-  if(GDIM == 3 && WDIM == 2 && c && it != itBabyTortoise) Vit = orthogonal_move_fol(V, cgi.STUFF);
+  if(embedded_plane && c && it != itBabyTortoise) Vit = orthogonal_move_fol(V, cgi.STUFF);
   if(c && mproduct)
     Vit = orthogonal_move(Vit, sin(ptick(750)) * cgi.plevel / 4);
-  else if(c && sl2)
+  else if(c && sl2 && !embedded_plane)
     Vit = Vit * zpush(sin(ptick(750)) * cgi.plevel / 4);
   else
     if(GDIM == 3 && c && it != itBabyTortoise) Vit = face_the_player(Vit);

@@ -1307,13 +1307,18 @@ EX hyperpoint scale_point(const hyperpoint& h, ld scale_factor) {
   }
 
 EX transmatrix orthogonal_move(const transmatrix& t, double level) {
-  if(gproduct && !cgi.emb->is_euc_in_product()) return scale_matrix(t, exp(level));
   if(GDIM == 3) return t * lzpush(level);
   return scale_matrix(t, geom3::lev_to_factor(level));
   }
 
 EX shiftmatrix orthogonal_move(const shiftmatrix& t, double level) {
   return shiftless(orthogonal_move(t.T, level), t.shift);
+  }
+
+/** fix a 3x3 matrix into a 4x4 matrix */
+EX transmatrix fix4(transmatrix t) {
+  for(int i=0; i<4; i++) t[3][i] = t[i][3] = i == 3;
+  return t;
   }
 
 EX transmatrix xyscale(const transmatrix& t, double fac) {

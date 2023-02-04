@@ -300,11 +300,11 @@ hyperpoint embedding_method::flatten(hyperpoint a) {
 
 struct emb_none : embedding_method {
   hyperpoint actual_to_intermediate(hyperpoint a) override {
-    if(gproduct) return base_to_logical(a);
+    if(mhybrid) return base_to_logical(a);
     return a;
     }
   hyperpoint intermediate_to_actual(hyperpoint i) override {
-    if(gproduct) return logical_to_base(i);
+    if(mhybrid) return logical_to_base(i);
     return i;
     }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override {
@@ -343,6 +343,12 @@ struct emb_none : embedding_method {
       h /= h[2];
       h[2] = z;
       }
+    if(sl2) {
+      ld z = atan2(h[2], h[3]);
+      h = slr::translate(h) * zpush0(-atan2(h[2], h[3]));
+      h[0] = h[0] / h[3]; h[1] = h[1] / h[3]; h[2] = z;
+      return h;
+      }
     return h;
     }
   hyperpoint logical_to_base(hyperpoint h) override {
@@ -357,6 +363,12 @@ struct emb_none : embedding_method {
       h[2] = 1;
       flatten(h);
       h *= exp(z);
+      }
+    if(sl2) {
+      ld z = h[2];
+      h[2] = 0; h[3] = 1; normalize(h);
+      h = slr::translate(h) * zpush0(z);
+      return h;
       }
     return h;
     }
