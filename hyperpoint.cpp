@@ -1006,8 +1006,7 @@ EX void orthonormalize(transmatrix& T) {
 EX void fix_rotation(transmatrix& rot) {
   dynamicval<eGeometry> g(geometry, gSphere); 
   fixmatrix(rot); 
-  for(int i=0; i<3; i++) rot[i][3] = rot[3][i] = 0;
-  rot[3][3] = 1;
+  fix4(rot);
   }
 
 /** determinant 2x2 */
