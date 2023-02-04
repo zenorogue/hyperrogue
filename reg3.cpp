@@ -13,7 +13,13 @@
 namespace hr {
 
 EX hyperpoint final_coords(hyperpoint h) {
-  return cgi.emb->logical_to_base(h);
+  if(sn::in() || !bt::in())
+    return ultra_normalize(h);
+  #if CAP_BT
+  if(bt::in() && !mproduct)
+    return bt::bt_to_minkowski(h);
+  #endif
+  return h;
   }
 
 void subcellshape::compute_common() {
