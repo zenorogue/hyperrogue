@@ -1414,7 +1414,7 @@ void celldrawer::draw_features() {
     case waLadder:
       if(GDIM == 3) {
         #if MAXMDIM >= 4
-        draw_shapevec(c, V * zpush(-cgi.human_height/20), cgi.shMFloor.levels[0], 0x804000FF, PPR::FLOOR+1);
+        draw_shapevec(c, V * lzpush(-cgi.human_height/20), cgi.shMFloor.levels[0], 0x804000FF, PPR::FLOOR+1);
         #endif
         }
       else if(euclid) {
@@ -1482,8 +1482,8 @@ void celldrawer::draw_features() {
       if(wmescher && geosupport_football() == 2 && pseudohept(c) && c->land == laPalace) V2 = V * spin(M_PI / c->type);
       if(GDIM == 3) {
         #if MAXMDIM >= 4
-        draw_shapevec(c, V2 * zpush(-cgi.human_height/40), cgi.shMFloor.levels[0], darkena(winf[c->wall].color, 0, 0xFF));
-        draw_shapevec(c, V2 * zpush(-cgi.human_height/35), cgi.shMFloor2.levels[0], (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
+        draw_shapevec(c, V2 * lzpush(-cgi.human_height/40), cgi.shMFloor.levels[0], darkena(winf[c->wall].color, 0, 0xFF));
+        draw_shapevec(c, V2 * lzpush(-cgi.human_height/35), cgi.shMFloor2.levels[0], (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
         #endif
         }
       else {
@@ -1567,7 +1567,7 @@ void celldrawer::draw_features() {
       #if MAXMDIM >= 4
       if(GDIM == 3)
         for(int a=0; a<10; a++)
-        queuepoly(V * zpush(cgi.FLOOR + (cgi.WALL - cgi.FLOOR) * a/10.) * spin(a *degree) * spintick(PURE ? -1000 : -500, 1/12.), cgi.shFan, darkena(wcol, 0, 0xFF));
+        queuepoly(V * lzpush(cgi.FLOOR + (cgi.WALL - cgi.FLOOR) * a/10.) * spin(a *degree) * spintick(PURE ? -1000 : -500, 1/12.), cgi.shFan, darkena(wcol, 0, 0xFF));
       else
       #endif
         queuepoly(V * spintick(PURE ? -1000 : -500, 1/12.), cgi.shFan, darkena(wcol, 0, 0xFF));
@@ -1583,8 +1583,8 @@ void celldrawer::draw_features() {
 
       if(GDIM == 3) {
         #if MAXMDIM >= 4
-        draw_shapevec(c, V * zpush(-cgi.human_height/40), cgi.shMFloor.levels[0], darkena(0xC00000, 0, 0xFF));
-        draw_shapevec(c, V * zpush(-cgi.human_height/20), cgi.shMFloor2.levels[0], darkena(0x600000, 0, 0xFF));
+        draw_shapevec(c, V * lzpush(-cgi.human_height/40), cgi.shMFloor.levels[0], darkena(0xC00000, 0, 0xFF));
+        draw_shapevec(c, V * lzpush(-cgi.human_height/20), cgi.shMFloor2.levels[0], darkena(0x600000, 0, 0xFF));
         #endif
         }
       else {
@@ -2309,7 +2309,7 @@ void celldrawer::draw_wall_full() {
       (c->land == laClearing && !BITRUNCATED))) {
       #if MAXMDIM >= 4
       if(GDIM == 3 && WDIM == 2)
-        queuepoly(Vd*zpush(cgi.FLOOR), cgi.shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
+        queuepoly(Vd*lzpush(cgi.FLOOR), cgi.shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
       else
       #endif
         queuepoly(Vd, cgi.shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);

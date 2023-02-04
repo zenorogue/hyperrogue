@@ -183,7 +183,7 @@ EX void drawShield(const shiftmatrix& V, eItem it) {
   int mt = sphere ? 7 : 5;
 #if MAXMDIM >= 4
   if(GDIM == 3)
-    queueball(V * zpush(cgi.GROIN1), cgi.human_height / 2, darkena(col, 0, 0xFF), itOrbShield);
+    queueball(V * lzpush(cgi.GROIN1), cgi.human_height / 2, darkena(col, 0, 0xFF), itOrbShield);
 #else
   if(1) ;
 #endif  
@@ -200,7 +200,7 @@ void drawSpeed(const shiftmatrix& V, ld scale=1) {
   ld ds = ptick(10);
   color_t col = darkena(iinf[itOrbSpeed].color, 0, 0xFF);
 #if MAXMDIM >= 4
-  if(GDIM == 3) queueball(V * zpush(cgi.GROIN1), cgi.human_height * 0.55, col, itOrbSpeed);
+  if(GDIM == 3) queueball(V * lzpush(cgi.GROIN1), cgi.human_height * 0.55, col, itOrbSpeed);
   else
 #endif
   for(int b=0; b<cgi.S84; b+=cgi.S14) {
@@ -217,7 +217,7 @@ void drawSafety(const shiftmatrix& V, int ct) {
   color_t col = darkena(iinf[itOrbSafety].color, 0, 0xFF);
   #if MAXMDIM >= 4
   if(GDIM == 3) {
-    queueball(V * zpush(cgi.GROIN1), 2*cgi.hexf, col, itOrbSafety);
+    queueball(V * lzpush(cgi.GROIN1), 2*cgi.hexf, col, itOrbSafety);
     return;
     }
   #endif
@@ -235,7 +235,7 @@ void drawFlash(const shiftmatrix& V) {
     ld rad = cgi.hexf * (2.5 + .5 * sin(ds+u*.3));
     #if MAXMDIM >= 4
     if(GDIM == 3) {
-      queueball(V * zpush(cgi.GROIN1), rad, col, itOrbFlash);
+      queueball(V * lzpush(cgi.GROIN1), rad, col, itOrbFlash);
       }
     #else
     if(1) ;
@@ -255,7 +255,7 @@ EX ld cheilevel(ld v) {
 EX transmatrix chei(const transmatrix V, int a, int b) {
 #if MAXMDIM >= 4
   if(GDIM == 2) return V;
-  return V * zpush(cheilevel((a+.5) / b));
+  return V * lzpush(cheilevel((a+.5) / b));
 #else
   return V;
 #endif
@@ -264,7 +264,7 @@ EX transmatrix chei(const transmatrix V, int a, int b) {
 EX shiftmatrix chei(const shiftmatrix V, int a, int b) {
 #if MAXMDIM >= 4
   if(GDIM == 2) return V;
-  return V * zpush(cheilevel((a+.5) / b));
+  return V * lzpush(cheilevel((a+.5) / b));
 #else
   return V;
 #endif
@@ -406,8 +406,8 @@ EX void drawPlayerEffects(const shiftmatrix& V, const shiftmatrix& Vparam, cell 
         ld l0 = PURE ? 0.6 * cgi.scalefactor : longer ? 0.36 : 0.4;
         ld l1 = PURE ? 0.7 * cgi.scalefactor : longer ? 0.44 : 0.42;
 #if MAXMDIM >= 4
-        hyperpoint h0 = GDIM == 3 ? xpush(l0) * zpush(cgi.FLOOR - cgi.human_height/50) * C0 : xpush0(l0);
-        hyperpoint h1 = GDIM == 3 ? xpush(l1) * zpush(cgi.FLOOR - cgi.human_height/50) * C0 : xpush0(l1);
+        hyperpoint h0 = GDIM == 3 ? xpush(l0) * lzpush(cgi.FLOOR - cgi.human_height/50) * C0 : xpush0(l0);
+        hyperpoint h1 = GDIM == 3 ? xpush(l1) * lzpush(cgi.FLOOR - cgi.human_height/50) * C0 : xpush0(l1);
 #else
         hyperpoint h0 = xpush0(l0);
         hyperpoint h1 = xpush0(l1);
@@ -462,7 +462,7 @@ void drawStunStars(const shiftmatrix& V, int t) {
   for(int i=0; i<3*t; i++) {
     shiftmatrix V2 = V * spin(TAU * i / (3*t) + ptick(200));
 #if MAXMDIM >= 4
-    if(GDIM == 3) V2 = V2 * zpush(cgi.HEAD);
+    if(GDIM == 3) V2 = V2 * lzpush(cgi.HEAD);
 #endif
     queuepolyat(V2, cgi.shFlailBall, 0xFFFFFFFF, PPR::STUNSTARS);
     }
@@ -851,7 +851,7 @@ EX void draw_ascii(const shiftmatrix& V, char glyph, color_t col, ld size) {
   string s = s0 + glyph;
   int id = isize(ptds);
   if(WDIM == 2 && GDIM == 3)
-    queuestrn(V * zpush(cgi.FLOOR - cgi.scalefactor * size / 4), size, s, darkenedby(col, darken), 0);
+    queuestrn(V * lzpush(cgi.FLOOR - cgi.scalefactor * size / 4), size, s, darkenedby(col, darken), 0);
   else 
     queuestrn(V, 1, s, darkenedby(col, darken), GDIM == 3 ? 0 : 2);
   while(id < isize(ptds)) ptds[id++]->prio = PPR::MONSTER_BODY;
@@ -995,19 +995,19 @@ EX bool drawItemType(eItem it, cell *c, const shiftmatrix& V, color_t icol, int 
       shiftmatrix V2 = V * spin(pticks * vid.ispeed / 1500.);
       /* divisors should be higher than in plate renderer */
       qfi.fshape = &cgi.shMFloor2;
-      draw_shapevec(c, V2 * zpush(-h/30), qfi.fshape->levels[0], 0xFFD500FF, PPR::WALL);
+      draw_shapevec(c, V2 * lzpush(-h/30), qfi.fshape->levels[0], 0xFFD500FF, PPR::WALL);
 
       qfi.fshape = &cgi.shMFloor3;
-      draw_shapevec(c, V2 * zpush(-h/25), qfi.fshape->levels[0], darkena(icol, 0, 0xFF), PPR::WALL);
+      draw_shapevec(c, V2 * lzpush(-h/25), qfi.fshape->levels[0], darkena(icol, 0, 0xFF), PPR::WALL);
 
       qfi.fshape = &cgi.shMFloor4;
-      draw_shapevec(c, V2 * zpush(-h/20), qfi.fshape->levels[0], 0xFFD500FF, PPR::WALL);
+      draw_shapevec(c, V2 * lzpush(-h/20), qfi.fshape->levels[0], 0xFFD500FF, PPR::WALL);
       }
     else if(WDIM == 3 && c) {
       ld h = cgi.human_height;
       shiftmatrix V2 = Vit * spin(pticks * vid.ispeed / 1500.);
-      draw_floorshape(c, V2 * zpush(h/100), cgi.shMFloor3, 0xFFD500FF);
-      draw_floorshape(c, V2 * zpush(h/50), cgi.shMFloor4, darkena(icol, 0, 0xFF));
+      draw_floorshape(c, V2 * lzpush(h/100), cgi.shMFloor3, 0xFFD500FF);
+      draw_floorshape(c, V2 * lzpush(h/50), cgi.shMFloor4, darkena(icol, 0, 0xFF));
       queuepoly(V2, cgi.shGem[ct6], 0xFFD500FF);
       }
     else if(WDIM == 3 && !c) {
@@ -2256,7 +2256,7 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
         }
 #if MAXMDIM >= 4
       else {
-        shiftmatrix V1 = V * zpush(cgi.AHEAD - zc(0.4) - zc(0.98) + cgi.HEAD); // * cpush(0, cgi.scalefactor * (-0.1));
+        shiftmatrix V1 = V * lzpush(cgi.AHEAD - zc(0.4) - zc(0.98) + cgi.HEAD); // * cpush(0, cgi.scalefactor * (-0.1));
         queuepoly(V1, cgi.shRatHead, darkena(col, 0, 0xFF));
 
         /*
@@ -4951,7 +4951,7 @@ EX void draw_flash(struct flashdata& f, const shiftmatrix& V, bool& kill) {
       flashcol = darkena(flashcol, 0, 0xFF);
 #if MAXMDIM >= 4
       if(GDIM == 3)
-        queueball(V * zpush(cgi.GROIN1), rad, flashcol, itDiamond);
+        queueball(V * lzpush(cgi.GROIN1), rad, flashcol, itDiamond);
       else 
 #endif
       {
@@ -4972,7 +4972,7 @@ EX void draw_flash(struct flashdata& f, const shiftmatrix& V, bool& kill) {
       flashcol = darkena(flashcol, 0, 0xFF);
 #if MAXMDIM >= 4
       if(GDIM == 3)
-        queueball(V * zpush(cgi.GROIN1), rad, flashcol, itRuby);
+        queueball(V * lzpush(cgi.GROIN1), rad, flashcol, itRuby);
       else 
 #endif
       {
