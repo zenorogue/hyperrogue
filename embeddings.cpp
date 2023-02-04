@@ -957,7 +957,7 @@ EX hyperpoint xspinpush0(ld alpha, ld x) {
 EX transmatrix xspinpush(ld dir, ld dist) {
   if(embedded_plane) {
     geom3::light_flip(true);
-    transmatrix T = spin(dir) * xpush(dist) * spin(-dir);
+    transmatrix T = cspin(0, 1, dir) * xpush(dist) * cspin(0, 1, -dir);
     geom3::light_flip(false);
     return cgi.emb->base_to_actual(T);
     }
