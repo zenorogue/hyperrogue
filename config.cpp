@@ -840,16 +840,16 @@ EX void initConfig() {
   param_f(geom3::euclid_embed_scale, "euclid_embed_scale", "euclid_embed_scale")
   -> editable(0, 2, 0.05, "Euclidean embedding scale", "How to scale the Euclidean map, relatively to the 3D absolute unit.", 'X')
   -> set_sets([] { dialog::bound_low(0.05); })
-  -> set_reaction([] { if(vid.always3) { geom3::switch_fpp(); geom3::switch_fpp(); } });
+  -> set_reaction([] { if(vid.always3) { for(auto m: allmaps) m->on_dim_change(); }});
 
   param_f(geom3::euclid_embed_scale_y, "euclid_embed_scale_y", "euclid_embed_scale_y")
   -> editable(0, 2, 0.05, "Euclidean embedding scale Y/X", "This scaling factor affects only the Y coordinate.", 'Y')
   -> set_sets([] { dialog::bound_low(0.05); })
-  -> set_reaction([] { if(vid.always3) { geom3::switch_fpp(); geom3::switch_fpp(); } });
+  -> set_reaction([] { if(vid.always3) { for(auto m: allmaps) m->on_dim_change(); }});
 
   param_f(geom3::euclid_embed_rotate, "euclid_embed_rotate", "euclid_embed_rotate")
   -> editable(0, 360, 15, "Euclidean embedding rotation", "How to rotate the Euclidean embedding, in degrees.", 'F')
-  -> set_reaction([] { if(vid.always3) { geom3::switch_fpp(); geom3::switch_fpp(); } });
+  -> set_reaction([] { if(vid.always3) { for(auto m: allmaps) m->on_dim_change(); }});
 
   param_enum(embedded_shift_method_choice, "embedded_shift_method", "embedded_shift_method", smcBoth)
   -> editable({
