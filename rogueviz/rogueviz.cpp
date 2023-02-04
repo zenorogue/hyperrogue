@@ -402,7 +402,7 @@ void storeline(vector<glvertex>& tab, const hyperpoint& h1, const hyperpoint& h2
 
 color_t darken_a(color_t c) {
   for(int p=0; p<3; p++)
-  for(int i=0; i<darken; i++) part(c, i+1) = (part(c, i+1) + part(backcolor, i)) >> 1;
+  for(int i=0; i<darken; i++) part(c, p+1) = (part(c, p+1) + part(backcolor, p)) >> 1;
   return c;
   }
 
