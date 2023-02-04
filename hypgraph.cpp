@@ -3394,7 +3394,7 @@ EX void set_view(hyperpoint camera, hyperpoint forward, hyperpoint upward) {
   forward = V * forward;
   upward = V * upward;
   
-  if(pmodel == mdGeodesic || hyperbolic || sphere) {
+  if(pmodel == mdGeodesic || hyperbolic || sphere || euclid || mproduct) {
     forward = inverse_exp(shiftless(forward));
     }
   else {
@@ -3406,7 +3406,7 @@ EX void set_view(hyperpoint camera, hyperpoint forward, hyperpoint upward) {
   
   forward /= hypot_d(3, forward);
 
-  if(pmodel == mdGeodesic || hyperbolic || sphere)
+  if(pmodel == mdGeodesic || hyperbolic || sphere || euclid || mproduct)
     upward = inverse_exp(shiftless(upward));
   else {
     // apply_nil_rotation(upward);
