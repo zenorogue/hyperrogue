@@ -767,9 +767,8 @@ EX shiftmatrix face_the_player(const shiftmatrix V) {
   if(mproduct) return orthogonal_move(V, cos(ptick(750)) * cgi.plevel / 16);
   if(mhybrid) return V * zpush(cos(ptick(750)) * cgi.plevel / 16);
   transmatrix dummy; /* used only in prod anyways */
-  if(cgi.emb->logical_to_intermediate[2][1]) return V;
-  if(cgi.emb->is_euc_in_sph()) return V;
-  if(nonisotropic && !embedded_plane) return shiftless(spin_towards(unshift(V), dummy, C0, 2, 0));
+  if(embedded_plane && !cgi.emb->is_same_in_same()) return V;
+  if(nonisotropic) return shiftless(spin_towards(unshift(V), dummy, C0, 2, 0));
   #if CAP_VR
   if(vrhr::enabled) {
     shiftpoint h = tC0(V);    
@@ -777,8 +776,6 @@ EX shiftmatrix face_the_player(const shiftmatrix V) {
     return shiftless(cspin90(1, 2) * lrspintox(cspin90(2, 1) * uh) * xpush(hdist0(uh)) * cspin90(0, 2) * spin270());
     }
   #endif
-  if(embedded_plane && cgi.emb->is_sph_in_low()) return shiftless(cgi.emb->map_relative_push(unshift(V * zpush0(1))) * zpush(-1));
-  if(embedded_plane && cgi.emb->is_cylinder()) return shiftless(cgi.emb->map_relative_push(unshift(V * zpush0(1))) * zpush(-1));
   return rgpushxto0(tC0(V));
   }
 
