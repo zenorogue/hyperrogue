@@ -519,7 +519,11 @@ void celldrawer::draw_ceiling() {
 
       if(euclid) return;
       draw_star(V, cgi.shNightStar, 0xFFFFFFFF);
+      break;
       }
+
+    default:
+      add_to_sky(0, 0);
     }
   }
 
