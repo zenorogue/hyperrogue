@@ -30,9 +30,9 @@ pair<bool, hyperpoint> makeradar(shiftpoint h) {
     h1 = cgi.emb->actual_to_base(h1);
     h1 = current_display->radar_transform_post * h1;
     if(mhyperbolic) {
-      h1[LDIM] = h1[2]; h1[2] = 0;
+      h1[LDIM] = h1[2]; if(!gproduct) h1[2] = 0;
       for(int a=0; a<LDIM; a++) h1[a] = h1[a] / (1 + h1[LDIM]);
-      h1[3] *= 2;
+      h1[LDIM] *= 2;
       }
     if(meuclid) {
       ld d = hypot_d(2, h1);
