@@ -582,7 +582,7 @@ void animallegs(const shiftmatrix& V, eMonster mo, color_t col, double footphase
   hpcshape **x = sh[mo == moRagingBull ? 5 : mo == moBug0 ? 3 : mo == moMetalBeast ? 4 : mo == moRunDog ? 0 : mo == moReptile ? 2 : 1];
 
 #if MAXMDIM >= 4  
-  if(GDIM == 3) {
+  if(GDIM == 3 && !(embedded_plane && gproduct)) {
     if(x[0]) queuepolyat(V * front_leg_move * cspin(0, 2, rightfoot / leg_length) * front_leg_move_inverse, *x[0], col, PPR::MONSTER_FOOT);
     if(x[0]) queuepolyat(V * lmirror() * front_leg_move * cspin(0, 2, leftfoot / leg_length) * front_leg_move_inverse, *x[0], col, PPR::MONSTER_FOOT);
     if(x[1]) queuepolyat(V * rear_leg_move * cspin(0, 2, -rightfoot / leg_length) * rear_leg_move_inverse, *x[1], col, PPR::MONSTER_FOOT);
@@ -594,15 +594,15 @@ void animallegs(const shiftmatrix& V, eMonster mo, color_t col, double footphase
   const shiftmatrix VL = at_smart_lof(V, cgi.ALEG0);
   const shiftmatrix VAML = at_smart_lof(V, cgi.ALEG);
 
-  if(x[0]) queuepolyat(VL * xpush(rightfoot), *x[0], col, PPR::MONSTER_FOOT);
-  if(x[0]) queuepolyat(VL * lmirror() * xpush(leftfoot), *x[0], col, PPR::MONSTER_FOOT);
-  if(x[1]) queuepolyat(VL * xpush(-rightfoot), *x[1], col, PPR::MONSTER_FOOT);
-  if(x[1]) queuepolyat(VL * lmirror() * xpush(-leftfoot), *x[1], col, PPR::MONSTER_FOOT);
+  if(x[0]) queuepolyat(VL * lxpush(rightfoot), *x[0], col, PPR::MONSTER_FOOT);
+  if(x[0]) queuepolyat(VL * lmirror() * lxpush(leftfoot), *x[0], col, PPR::MONSTER_FOOT);
+  if(x[1]) queuepolyat(VL * lxpush(-rightfoot), *x[1], col, PPR::MONSTER_FOOT);
+  if(x[1]) queuepolyat(VL * lmirror() * lxpush(-leftfoot), *x[1], col, PPR::MONSTER_FOOT);
 
-  if(x[2]) queuepolyat(VAML * xpush(rightfoot/2), *x[2], col, PPR::MONSTER_FOOT);
-  if(x[2]) queuepolyat(VAML * lmirror() * xpush(leftfoot/2), *x[2], col, PPR::MONSTER_FOOT);
-  if(x[3]) queuepolyat(VAML * xpush(-rightfoot/2), *x[3], col, PPR::MONSTER_FOOT);
-  if(x[3]) queuepolyat(VAML * lmirror() * xpush(-leftfoot/2), *x[3], col, PPR::MONSTER_FOOT);
+  if(x[2]) queuepolyat(VAML * lxpush(rightfoot/2), *x[2], col, PPR::MONSTER_FOOT);
+  if(x[2]) queuepolyat(VAML * lmirror() * lxpush(leftfoot/2), *x[2], col, PPR::MONSTER_FOOT);
+  if(x[3]) queuepolyat(VAML * lxpush(-rightfoot/2), *x[3], col, PPR::MONSTER_FOOT);
+  if(x[3]) queuepolyat(VAML * lmirror() * lxpush(-leftfoot/2), *x[3], col, PPR::MONSTER_FOOT);
 #endif
   }
 
