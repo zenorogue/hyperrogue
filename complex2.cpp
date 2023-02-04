@@ -1239,7 +1239,7 @@ EX namespace dice {
         }
       }
     
-    shiftmatrix V1 = V * ddspin(c, dir + M_PI);
+    shiftmatrix V1 = V * ddspin(c, dir, M_PI);
     if(dd.mirrored) V1 = V1 * MirrorY;
     
     // loop:
