@@ -2664,19 +2664,25 @@ EX bool applyAnimation(cell *c, shiftmatrix& V, double& footphase, int layer) {
   }
 
 double chainAngle(cell *c, shiftmatrix& V, cell *c2, double dft, const shiftmatrix &Vwhere) {
+  if(cgi.emb->no_spin()) return 0;
   if(!gmatrix0.count(c2)) return dft;
-  hyperpoint h = C0;
+  hyperpoint h = tile_center();
   if(animations[LAYER_BIG].count(c2)) h = animations[LAYER_BIG][c2].wherenow * h;
   h = inverse_shift(V, Vwhere) * calc_relative_matrix(c2, c, C0) * h;
+  ld z = cgi.emb->center_z();
+  if(z) h = lzpush(-z) * h;
   return atan2(h[1], h[0]);
   }
 
 // equivalent to V = V * spin(-chainAngle(c,V,c2,dft));
 bool chainAnimation(cell *c, cell *c2, shiftmatrix& V, const shiftmatrix &Vwhere, ld& length) {
-  hyperpoint h = C0;
+  if(cgi.emb->no_spin()) return false;
+  hyperpoint h = tile_center();
   if(animations[LAYER_BIG].count(c2)) h = animations[LAYER_BIG][c2].wherenow * h;
   h = inverse_shift(V, Vwhere) * h;
-  length = hdist0(h);
+  length = hdist(h, tile_center());
+  ld z = cgi.emb->center_z();
+  if(z) h = lzpush(-z) * h;
   V = V * rspintox(h);
   return true;  
   }
@@ -2821,6 +2827,13 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
           length = cellgfxdist(c, c->mondir);
           }
         
+        shiftmatrix Vbn = Vb;
+        if(cgi.emb->no_spin() && c->mondir != NODIR) {
+          Vbn = Vparam * currentmap->adj(c, c->mondir);
+          ld dummy;
+          applyAnimation(c->move(c->mondir), Vbn, dummy, LAYER_BIG);
+          }
+
         if(c->monmirror) Vb = Vb * lmirror();
   
         if(mapeditor::drawUserShape(Vb, mapeditor::sgMonster, c->monst, (col << 8) + 0xFF, c)) 
@@ -2873,8 +2886,16 @@ EX bool drawMonster(const shiftmatrix& Vparam, int ct, cell *c, color_t col, col
               if(doHighlight())
                 poly_outline = outline;
               shiftmatrix Vbx = Vb;
-              if(WDIM == 2) Vbx = Vbx * spin(sin(TAU * i / 12) * wav / (i+.1));
-              Vbx = Vbx * lxpush(length * (i) / 12.0);
+              if(cgi.emb->no_spin()) {
+                hyperpoint h = inverse_shift(Vb, Vbn * tile_center());
+                h = cgi.emb->actual_to_intermediate(h);
+                h *= i / 12.;
+                Vbx = Vb * cgi.emb->intermediate_to_actual_translation(h);
+                }
+              else {
+                if(WDIM == 2) Vbx = Vbx * spin(sin(TAU * i / 12) * wav / (i+.1));
+                Vbx = Vbx * lxpush(length * (i) / 12.0);
+                }
               // shiftmatrix Vbx2 = Vnext * xpush(length2 * i / 6.0);
               // Vbx = Vbx * rspintox(inverse(Vbx) * Vbx2 * C0) * lpispin();
               ShadowV(Vbx, sh, PPR::GIANTSHADOW);
