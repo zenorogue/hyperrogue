@@ -579,7 +579,11 @@ void geometry_information::make_revolution_cut(hpcshape &sh, int each, ld push, 
   for(int i=0; i<n; i++) if(!stillin[i] && !stillin[lastid[i]]) lastid[i] = lastid[lastid[i]];
 
   for(int i=0; i<n; i++) {
-    if(!stillin[i]) gbody[i] = cgi.emb->normalize_flat(gbody[lastid[i]] * (i - lastid[i]) + gbody[nextid[i]] * (nextid[i] - i));
+    if(!stillin[i]) {
+      auto gl = cgi.emb->actual_to_logical(gbody[lastid[i]]);
+      auto gn = cgi.emb->actual_to_logical(gbody[nextid[i]]);
+      gbody[i] = cgi.emb->logical_to_actual((gl * (i - lastid[i]) + gn * (nextid[i] - i)) / (nextid[i] - lastid[i]));
+      }
     }
   
   bshape(sh, PPR::MONSTER_BODY);
