@@ -21,8 +21,8 @@ namespace hr {
 static constexpr ld A_PI = M_PI;
 static constexpr ld TAU = 2 * A_PI;
 static constexpr ld degree = A_PI / 180;
-static constexpr ld golden_phi = (sqrt(5)+1)/2;
-static constexpr ld log_golden_phi = log(golden_phi);
+static const ld golden_phi = (sqrt(5)+1)/2;
+static const ld log_golden_phi = log(golden_phi);
 
 constexpr ld operator"" _deg(long double deg) { return deg * A_PI / 180; }
 #endif
