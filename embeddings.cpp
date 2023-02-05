@@ -79,7 +79,7 @@ EX namespace geom3 {
   EX void set_euclid_embed_scale(ld x) { euclid_embed_scale = x; euclid_embed_scale_y = 1; euclid_embed_rotate = 0; }
 
   EX bool supports_flat() { return among(spatial_embedding, seDefault, seProductH, seProductS); }
-  EX bool supports_invert() { return among(spatial_embedding, seDefault, seLowerCurvature, seMuchLowerCurvature, seNil, seSol, seNIH, seSolN, seProductH, seProductS); }
+  EX bool supports_invert() { return among(spatial_embedding, seDefault, seLowerCurvature, seMuchLowerCurvature, seNil, seSol, seNIH, seSolN, seProductH, seProductS) || any_cylinder(spatial_embedding); }
 
   EX vector<geometryinfo> ginf_backup;
 
