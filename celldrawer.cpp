@@ -2782,6 +2782,8 @@ void celldrawer::draw() {
     asciichar = winf[c->wall].glyph;
     asciicol = wcol;
 
+    if(c->wall == waNone || isWatery(c)) asciicol = fcol;
+
     asciichar1 = asciichar;
     asciicol1 = asciicol;
 
