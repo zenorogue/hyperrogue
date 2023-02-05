@@ -667,7 +667,7 @@ int celldrawer::getSnakelevColor(int i, int last) {
   }
 
 void celldrawer::draw_wallshadow() {
-  if(!noshadow) {
+  if(!noshadow && qfi.fshape) {
     dynamicval<color_t> p(poly_outline, OUTLINE_TRANS);
     draw_shapevec(c, V, qfi.fshape->shadow, SHADOW_WALL, GDIM == 3 ? PPR::TRANSPARENT_SHADOW : PPR::WALLSHADOW);
     }
@@ -2397,7 +2397,7 @@ void celldrawer::draw_wall_full() {
             dbot = false;
             if(GDIM == 2)
               draw_qfi(c, orthogonal_move_fol(V, cgi.BOTTOM), 0x080808FF, PPR::LAKEBOTTOM);
-            else
+            else if(qfi.fshape)
               draw_shapevec(c, V, qfi.fshape->levels[SIDE_BTOI], 0x0F0808FF, PPR::LAKEBOTTOM);
             }
           if(placeSidewall(c, i, SIDE_BTOI, V, D(.6))) break;
