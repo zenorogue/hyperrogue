@@ -654,15 +654,16 @@ EX namespace gp {
       return spin(M_PI - d * TAU / S7 - cgi.hexshift);
       };
     return spin(-cgi.gpdata->alpha) * build_matrix(
-      tile_center(),
-      ddspin(i) * lxpush0(cgi.tessf),
-      ddspin(i+1) * lxpush0(cgi.tessf),
+      geom3::flipped ? C02 : tile_center(),
+      geom3::flipped ? ddspin(i) * xpush0(cgi.tessf) : ddspin(i) * lxpush0(cgi.tessf),
+      geom3::flipped ? ddspin(i+1) * xpush0(cgi.tessf) : ddspin(i+1) * lxpush0(cgi.tessf),
       C03
       );
     }
   
   EX void prepare_matrices(bool inv) {
     if(!(GOLDBERG_INV || inv)) return;
+    if(embedded_plane) geom3::light_flip(true);
     cgi.gpdata->corners = inverse(build_matrix(
       loctoh_ort(loc(0,0)),
       loctoh_ort(param),
@@ -673,7 +674,6 @@ EX namespace gp {
 
     /* should work directly without flipping but it does not... flipping for now */
 
-    if(embedded_plane) geom3::light_flip(true);
     for(int i=0; i<S7; i++) {
       transmatrix T = dir_matrix(i);
       for(int x=-GOLDBERG_LIMIT_HALF; x<GOLDBERG_LIMIT_HALF; x++)
@@ -683,7 +683,8 @@ EX namespace gp {
         
         hyperpoint h = atz(T, cgi.gpdata->corners, at, 6);
         hyperpoint hl = atz(T, cgi.gpdata->corners, at + eudir(d), 6);
-        cgi.gpdata->Tf[i][x&GOLDBERG_MASK][y&GOLDBERG_MASK][d] = rgpushxto0(h) * rspintox(gpushxto0(h) * hl) * spin180();
+        auto& res = cgi.gpdata->Tf[i][x&GOLDBERG_MASK][y&GOLDBERG_MASK][d];
+        res = rgpushxto0(h) * rspintox(gpushxto0(h) * hl) * spin180();
         }
       }       
 
@@ -1458,6 +1459,10 @@ EX namespace gp {
   #define UIU(x) hr::gp::in_underlying_geometry([&] { return (x); })
   #endif
 
+
+auto hooksw = addHook(hooks_swapdim, 100, [] {
+  for(auto& p: gp_adj) swapmatrix(p.second);
+  });
 
     
   }}
