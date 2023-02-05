@@ -2205,6 +2205,7 @@ void ballgeometry() {
 EX void resetview() {
   DEBBI(DF_GRAPH, ("reset view"));
   // EUCLIDEAN
+  decide_lpu();
   NLP = Id;
   stretch::mstretch_matrix = Id;
   auto& vo = get_view_orientation();

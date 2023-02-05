@@ -5063,8 +5063,12 @@ EX ld wall_radar(cell *c, transmatrix T, transmatrix LPe, ld max) {
 /** if this is set to ON, just transform non-isotropic spaces according to View, and apply NLP to view */
 EX bool nonisotropic_weird_transforms;
 
-EX void make_actual_view() {
+EX void decide_lpu() {
   nisot::local_perspective_used = gproduct;
+  }
+
+EX void make_actual_view() {
+  decide_lpu();
   if(!nisot::local_perspective_used) NLP = Id;
   sphereflip = Id;
   sphere_flipped = flip_sphere();
