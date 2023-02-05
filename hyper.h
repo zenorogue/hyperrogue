@@ -13,8 +13,8 @@
 #define _HYPER_H_
 
 // version numbers
-#define VER "12.1h"
-#define VERNUM_HEX 0xA928
+#define VER "12.1i"
+#define VERNUM_HEX 0xA929
 
 #include "sysconfig.h"
 

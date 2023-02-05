@@ -4865,7 +4865,7 @@ Other bugfixes:
 - fixed grid drawing for binary variants
 
 
-2022-12-18 00:59 Update 12.1h:
+2023-01-08 00:59 Update 12.1h:
 
 Bug fixes:
 - fixed context help getting stuck in corner stats mode
@@ -4878,3 +4878,14 @@ Further improvements to the "3D style" (embed 2D in a 3D geometry) feature:
 - fixed movement animations
 - better diagnostics when an embedding does not work
 - fixed a bug rendering band model without shader
+
+2023-02-05 11:27 Update 12.1i:
+
+Further improvements to the "3D style" (embed 2D in a 3D geometry) feature:
+- Overall better design fixes various small errors, including nicer floor shapes, radar, shmup, and 3D models.
+- Six new embeddings of the Euclidean cylinder.
+- Hints how to change settings if the current embedding does not work.
+- some crashes have been fixed (in Zebra/ Reptiles, thanks to Masala for the report; also crashes related to possible missing shadow models)
+
+Also fixed a bug generating Dice in some tessellations.
+
