@@ -344,7 +344,7 @@ struct emb_none : embedding_method {
     if(gproduct) i = intermediate_to_actual(i);
     return rgpushxto0(i);
     }
-  hyperpoint flatten(hyperpoint a) {
+  hyperpoint flatten(hyperpoint a) override {
     if(gproduct) return a / exp(zlevel(a));
     return embedding_method::flatten(a);
     }
@@ -353,7 +353,7 @@ struct emb_none : embedding_method {
   hyperpoint base_to_actual(hyperpoint h) override { return h; }
   transmatrix actual_to_base(const transmatrix& T) override { return T; }
   hyperpoint actual_to_base(hyperpoint h) override { return h; }
-  hyperpoint orthogonal_move(const hyperpoint& h, ld z) {
+  hyperpoint orthogonal_move(const hyperpoint& h, ld z) override {
     if(GDIM == 2) return scale_point(h, geom3::scale_at_lev(z));
     if(gproduct) return scale_point(h, exp(z));
     if(sl2) return slr::translate(h) * cpush0(2, z);
@@ -406,7 +406,7 @@ struct emb_none : embedding_method {
     return h;
     }
 
-  void logical_fix(transmatrix& T) {
+  void logical_fix(transmatrix& T) override {
     if(nonisotropic) {
       hyperpoint h = tC0(T);
       transmatrix rot = gpushxto0(h) * T;
@@ -444,7 +444,7 @@ struct emb_actual : embedding_method {
     return h;
     }
 
-  void logical_fix(transmatrix& T) {
+  void logical_fix(transmatrix& T) override {
     hyperpoint a = T * tile_center();
     hyperpoint i0 = actual_to_intermediate(a);
     auto l0 = intermediate_to_logical * i0;
@@ -461,7 +461,7 @@ struct emb_actual : embedding_method {
 /** embed in the 3D variant of the same geometry */
 
 struct emb_same_in_same : emb_actual {
-  virtual bool is_same_in_same() { return true; }
+  virtual bool is_same_in_same() override { return true; }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override { return rgpushxto0(logical_to_actual(i)); }
   hyperpoint actual_to_intermediate(hyperpoint a) override { return actual_to_logical(a); }
   hyperpoint orthogonal_move(const hyperpoint& h, ld z) override {
@@ -538,11 +538,11 @@ struct emb_same_in_same : emb_actual {
 /** embed in the product geometry */
 
 struct emb_product_embedding : emb_actual {
-  virtual bool is_product_embedding() { return true; }
-  transmatrix intermediate_to_actual_translation(hyperpoint i) { return rgpushxto0(logical_to_actual(i)); }
-  hyperpoint actual_to_intermediate(hyperpoint a) { return a; }
-  hyperpoint flatten(hyperpoint h) { h /= exp(zlevel(h)); return h; }
-  hyperpoint orthogonal_move(const hyperpoint& h, ld z) { return h * exp(z); }
+  virtual bool is_product_embedding() override { return true; }
+  transmatrix intermediate_to_actual_translation(hyperpoint i) override { return rgpushxto0(logical_to_actual(i)); }
+  hyperpoint actual_to_intermediate(hyperpoint a) override { return a; }
+  hyperpoint flatten(hyperpoint h) override { h /= exp(zlevel(h)); return h; }
+  hyperpoint orthogonal_move(const hyperpoint& h, ld z) override { return h * exp(z); }
   transmatrix base_to_actual(const transmatrix &T) override { return T; }
   transmatrix actual_to_base(const transmatrix &T0) override {
     auto T = T0; fixmatrix(T);
@@ -633,7 +633,7 @@ struct emb_sphere_in_low : emb_actual {
     hf[3] = cos_auto(z0 + z);
     return hf;
     }
-  hyperpoint logical_to_actual(hyperpoint h) {
+  hyperpoint logical_to_actual(hyperpoint h) override {
     auto z = h[2];
     h[2] = 1;
     geom3::light_flip(true);
@@ -643,7 +643,7 @@ struct emb_sphere_in_low : emb_actual {
     h[3] = cos_auto(1 + z);
     return h;
     }
-  hyperpoint actual_to_logical(hyperpoint h) {
+  hyperpoint actual_to_logical(hyperpoint h) override {
     ld z = get_logical_z(h);
     geom3::light_flip(true);
     h = kleinize(h);
@@ -652,7 +652,7 @@ struct emb_sphere_in_low : emb_actual {
     return h;
     }
 
-  void logical_fix(transmatrix& T) {
+  void logical_fix(transmatrix& T) override {
     fix4(T);
     fixmatrix(T);
     fixelliptic(T);
