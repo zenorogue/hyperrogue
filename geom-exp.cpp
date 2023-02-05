@@ -602,7 +602,7 @@ EX void select_quotient_screen() {
   }
 
 EX void select_quotient() {
-  if(euclid && !kite::in() && !arcm::in() && !reg3::cubes_reg3) {
+  if(meuclid && !kite::in() && !arcm::in() && !reg3::cubes_reg3) {
     euc::prepare_torus3();
     pushScreen(euc::show_torus3);
     }
@@ -956,6 +956,7 @@ EX void showEuclideanMenu() {
     });
 
   string qstring = ginf[geometry].quotient_name;
+  if(meuclid && quotient) qstring = ONOFF(true);
 
   if(qstring == "none")
     dialog::addBoolItem(XLAT("quotient space"), false, 'q');
