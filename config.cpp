@@ -2332,6 +2332,14 @@ EX void show_spatial_embedding() {
       }
     }
 
+  dialog::addSelItem(XLAT("reset view"), embedded_plane && isize(current_display->radarpoints) == 0 ? XLAT("(fix errors)") : !cells_drawn ? XLAT("(fix errors)") : "", ' ');
+  dialog::add_action([] {
+    if(rug::rug_control())
+      rug::reset_view();
+    else
+      fullcenter();
+    });
+
   dialog::addBreak(100);
   dialog::addBack();
 
