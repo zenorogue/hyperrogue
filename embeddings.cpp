@@ -67,6 +67,30 @@ EX namespace geom3 {
     {"SL2 cylinder", "Embed Euclidean as a cylinder in twisted product geometry."},
     };
 
+  EX bool clifford_torus_valid() {
+    rug::clifford_torus ct;
+    ld h = ct.xh | ct.yh;
+    return !(sqhypot_d(2, ct.xh) < 1e-3 || sqhypot_d(2, ct.yh) < 1e-3 || abs(h) > 1e-3);
+    }
+
+  EX string why_wrong(eSpatialEmbedding sp) {
+    string ans = "";
+    if(among(sp, seNil, seCliffordTorus, seProductH, seProductS, seSL2) || any_cylinder(sp)) {
+      if(!PURE)
+        ans += " pure";
+      if(!meuclid)
+        ans += " E";
+      if((sp == seProductS || any_cylinder(sp)) && !quotient)
+        ans += " cyl";
+      if(sp == seCliffordTorus && !clifford_torus_valid())
+        ans += " torus";
+      }
+    if(among(sp, seSol, seNIH, seSolN)) {
+      if((meuclid && !PURE) && !bt::in()) ans += " pure or bin";
+      }
+    return ans;
+    }
+
   EX eSpatialEmbedding spatial_embedding = seDefault;
   EX ld euclid_embed_scale = 1;
   EX ld euclid_embed_scale_y = 1;
@@ -92,7 +116,7 @@ EX namespace geom3 {
     }
 
   EX bool any_cylinder(eSpatialEmbedding e) {
-    return among(e, seCylinderE, seCylinderH, seCylinderHE, seCylinderHoro, seCylinderNil);
+    return among(e, seCylinderE, seCylinderH, seCylinderHE, seCylinderHoro, seCylinderNil, seCylinderSL2);
     }
 
   EX bool in_product() {

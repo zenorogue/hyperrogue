@@ -2249,12 +2249,21 @@ EX bool in_tpp() { return pmodel == mdDisk && pconf.camera_angle; }
 
 EX void display_embedded_errors() {
   using namespace geom3;
-  if(meuclid && among(spatial_embedding, seNil, seSol, seSolN, seNIH, seProductH, seProductS, seCliffordTorus, seSL2) && (!among(geometry, gEuclid, gEuclidSquare) || !PURE)) {
+  auto eucs = [] {
+    dialog::addItem(XLAT("set square tiling"), 'A'); dialog::add_action([] { dialog::do_if_confirmed( [] { stop_game(); set_geometry(gEuclidSquare); set_variation(eVariation::pure); start_game(); });});
+    dialog::addItem(XLAT("set hex tiling"), 'B'); dialog::add_action([] { dialog::do_if_confirmed( [] { stop_game(); set_geometry(gEuclid); set_variation(eVariation::pure); start_game(); });});
+    };
+  if(among(spatial_embedding, seNil, seProductH, seProductS, seCliffordTorus, seSL2) && (!among(geometry, gEuclid, gEuclidSquare) || !PURE)) {
     dialog::addInfo(XLAT("error: currently works only in PURE Euclidean regular square or hex tiling"), 0xC00000);
+    eucs();
     return;
     }
-  if(mhyperbolic && among(spatial_embedding, seSol, seSolN, seNIH) && !bt::in()) {
-    dialog::addInfo(XLAT("error: currently works only in binary tiling and similar"), 0xC00000);
+  if(among(spatial_embedding, seSol, seSolN, seNIH) && (!bt::in() && !among(geometry, gEuclid, gEuclidSquare))) {
+    dialog::addInfo(XLAT("error: currently works only in pure Euclidean, or binary tiling and similar"), 0xC00000);
+    eucs();
+    dialog::addItem(XLAT("set binary tiling variant"), 'C'); dialog::add_action([] { dialog::do_if_confirmed( [] { stop_game(); set_geometry(gBinaryTiling); geom3::switch_fpp(); geom3::switch_fpp(); start_game(); }); });
+    dialog::addItem(XLAT("set ternary tiling"), 'D'); dialog::add_action([] { dialog::do_if_confirmed( [] { stop_game(); set_geometry(gTernary); geom3::switch_fpp(); geom3::switch_fpp(); start_game(); }); });
+    dialog::addItem(XLAT("set binary tiling"), 'E'); dialog::add_action([] { dialog::do_if_confirmed( [] { stop_game(); set_geometry(gBinary4); geom3::switch_fpp(); geom3::switch_fpp(); start_game(); }); });
     return;
     }
   if(shmup::on && cgi.emb->no_spin()) {
@@ -2262,11 +2271,16 @@ EX void display_embedded_errors() {
     return;
     }
   if(meuclid && spatial_embedding == seCliffordTorus) {
-    rug::clifford_torus ct;
-    ld h = ct.xh | ct.yh;
-    bool err = sqhypot_d(2, ct.xh) < 1e-3 || sqhypot_d(2, ct.yh) < 1e-3 || abs(h) > 1e-3;
-    if(err) {
+    if(!clifford_torus_valid()) {
       dialog::addInfo(XLAT("error: this method works only in rectangular torus"), 0xC00000);
+      dialog::addItem(XLAT("set 20x20 torus"), 'A'); dialog::add_action([] { dialog::do_if_confirmed( [] { stop_game();
+        auto& T0 = euc::eu_input.user_axes;
+        T0[0][0] = T0[1][1] = 20;
+        T0[0][1] = 0;
+        T0[1][0] = geometry == gEuclid ? 10 : 0;
+        euc::eu_input.twisted = false;
+        euc::build_torus3();
+        geom3::switch_fpp(); geom3::switch_fpp(); start_game(); }); });
       return;
       }
     }
@@ -2275,6 +2289,13 @@ EX void display_embedded_errors() {
     bool err = sqhypot_d(2, ct.xh) < 1e-3 && sqhypot_d(2, ct.yh) < 1e-3;
     if(err) {
       dialog::addInfo(XLAT("error: this method works only in cylinder"), 0xC00000);
+      dialog::addItem(XLAT("set cylinder"), 'A'); dialog::add_action([] { dialog::do_if_confirmed( [] { stop_game();
+        auto& T0 = euc::eu_input.user_axes;
+        T0[0][0] = 10;
+        T0[0][1] = T0[1][0] = T0[1][1] = 0;
+        euc::eu_input.twisted = false;
+        euc::build_torus3();
+        geom3::switch_fpp(); geom3::switch_fpp(); start_game(); }); });
       return;
       }
     }
@@ -2303,6 +2324,9 @@ EX void show_spatial_embedding() {
     auto se = geom3::eSpatialEmbedding(i);
     dialog::addBoolItem(XLAT(seo[i].first), emb == i, 'a' + i);
     dialog::add_action([se] { invoke_embed(se); });
+    string s = why_wrong(se);
+    if(s != "")
+      dialog::items.back().value = (emb == i ? ONOFF(true) : XLAT("needs")) + s;
     }
 
   dialog::addBreak(100);
