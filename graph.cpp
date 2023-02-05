@@ -611,6 +611,7 @@ EX bool noshadow;
 #if CAP_SHAPES
 EX void ShadowV(const shiftmatrix& V, const hpcshape& bp, PPR prio IS(PPR::MONSTER_SHADOW)) {
   if(WDIM == 2 && GDIM == 3 && bp.shs != bp.she) {
+    if(noshadow) return;
     auto& p = queuepolyat(V, bp, 0x18, PPR::TRANSPARENT_SHADOW); 
     p.outline = 0;
     p.subprio = -100;
