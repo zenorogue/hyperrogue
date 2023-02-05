@@ -823,8 +823,8 @@ struct emb_euc_in_sph : emb_euclid_noniso {
 
 struct emb_euc_in_nil : emb_euclid_noniso {
   bool is_euc_in_nil() override { return true; }
-  hyperpoint actual_to_intermediate(hyperpoint a) override { return a; }
-  transmatrix intermediate_to_actual_translation(hyperpoint i) override { return rgpushxto0(i); }
+  hyperpoint actual_to_intermediate(hyperpoint a) override { a[2] -= a[0] * a[1]; return a; }
+  transmatrix intermediate_to_actual_translation(hyperpoint i) override { i[2] += i[0] * i[1]; return rgpushxto0(i); }
   transmatrix get_lsti() override { return cspin90(2, 1); }
   };
 
