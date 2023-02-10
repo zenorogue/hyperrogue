@@ -447,7 +447,7 @@ void after_interpolation(hyperpoint& h) {
 
 ld interpolate(vector<ld> values, const vector<ld>& times, ld t) {
   int n = isize(values);
-  print(hlog, "interpolate: ", values);
+  print(hlog, "interpolate: ", kz(values));
 
   for(int ss=1; ss<=n-1; ss++) {
     for(int a=0; a<n-ss; a++) {
