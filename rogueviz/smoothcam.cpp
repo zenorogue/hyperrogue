@@ -13,7 +13,7 @@ namespace hr {
 using pcell = cell*;
 
 inline void hread(hstream& hs, transmatrix& h) { for(int i=0; i<MDIM; i++) hread(hs, h[i]); }
-inline void hwrite(hstream& hs, transmatrix h) { for(int i=0; i<MDIM; i++) hwrite(hs, h[i]); }
+inline void hwrite(hstream& hs, const transmatrix& h) { for(int i=0; i<MDIM; i++) hwrite(hs, h[i]); }
 
 inline void hwrite(hstream& hs, const pcell& c) {
   hs.write<int>(mapstream::cellids[c]);
@@ -447,7 +447,7 @@ void after_interpolation(hyperpoint& h) {
 
 ld interpolate(vector<ld> values, const vector<ld>& times, ld t) {
   int n = isize(values);
-  print(hlog, "interpolate: ", kz(values));
+  // print(hlog, "interpolate: ", kz(values));
 
   for(int ss=1; ss<=n-1; ss++) {
     for(int a=0; a<n-ss; a++) {
@@ -460,7 +460,7 @@ ld interpolate(vector<ld> values, const vector<ld>& times, ld t) {
     values.pop_back();
     }
 
-  println(hlog, " -> ", values[0], " based on ", times, " -> ", t);
+  // println(hlog, " -> ", values[0], " based on ", times, " -> ", t);
   return values[0];
   }
 
@@ -520,14 +520,13 @@ void handle_animation(ld t) {
       vector<ld> values;
       for(auto& f: anim.frames) {
         transmatrix Rot = inverse(cgi.emb->map_relative_push(f.V*tile_center())) * f.V;
-        if(j == 0 && k == 0) println(hlog, "Rot = ", kz(Rot));
+        // if(j == 0 && k == 0) println(hlog, "Rot = ", kz(Rot));
         if(nisot::local_perspective_used) Rot = Rot * f.ori;
         values.push_back(Rot[j][k]);
         }
       Rot[j][k] = interpolate(values, times, t);
       }
     View = inverse(cgi.emb->intermediate_to_actual_translation(interm)); NLP = Id;
-    println(hlog, "got Rot = ", kz(Rot));
     fix_rotation(Rot);
     rotate_view(inverse(Rot));
     }
@@ -577,7 +576,7 @@ void handle_animation0() {
   if(!animate_on) return;
   handle_animation(ticks / anims::period);
   anims::moved();
-  println(hlog, "at ", cview());
+  // println(hlog, "at ", cview());
   }
 
 void generate_trace() {
@@ -685,8 +684,7 @@ auto hooks = arg::add3("-smoothcam", enable_and_show)
     });
 
 auto hooksw = addHook(hooks_swapdim, 100, [] {
-  println(hlog, "swapping animation");
-  indenter id(2);
+  last_segment = -1;
   for(auto& anim: anims) {
     anim.start = Id;
     for(auto& f: anim.frames) {
