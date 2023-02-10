@@ -505,34 +505,63 @@ void handle_animation(ld t) {
     total += f.interval;
     }
 
-  hyperpoint pts[3];
-  
-  for(int j=0; j<3; j++) {
-    for(int i=0; i<4; i++) {
+  transmatrix V = View;
+
+  if(embedded_plane) {
+    hyperpoint interm = C03;
+    for(int j=0; j<3; j++) {
+      vector<ld> values;
+      for(auto& f: anim.frames)
+        values.push_back(cgi.emb->actual_to_intermediate(f.V*tile_center())[j]);
+      interm[j] = interpolate(values, times, t);
+      }
+    transmatrix Rot = Id;
+    for(int j=0; j<3; j++) for(int k=0; k<3; k++) {
       vector<ld> values;
       for(auto& f: anim.frames) {
-        hyperpoint h;
-        if(j == 0)
-          h = tC0(f.V);
-        if(j == 1) {
-          h = tC0(shift_object(f.V, f.ori, ztangent(f.front_distance), smGeodesic));
-          }
-        if(j == 2) {
-          h = tC0(shift_object(f.V, f.ori, ctangent(1, -f.up_distance), smGeodesic));
-          }
-        prepare_for_interpolation(h);
-        values.push_back(h[i]);
+        transmatrix Rot = inverse(cgi.emb->map_relative_push(f.V*tile_center())) * f.V;
+        if(j == 0 && k == 0) println(hlog, "Rot = ", kz(Rot));
+        if(nisot::local_perspective_used) Rot = Rot * f.ori;
+        values.push_back(Rot[j][k]);
         }
-      
-      pts[j][i] = interpolate(values, times, t);
+      Rot[j][k] = interpolate(values, times, t);
       }
-    after_interpolation(pts[j]);
+    View = inverse(cgi.emb->intermediate_to_actual_translation(interm)); NLP = Id;
+    println(hlog, "got Rot = ", kz(Rot));
+    fix_rotation(Rot);
+    rotate_view(inverse(Rot));
     }
-  
-  transmatrix V = View;
-  set_view(pts[0], pts[1], pts[2]);
-  c_front_dist = geo_dist(pts[0], pts[1]);
-  c_up_dist = geo_dist(pts[0], pts[2]);
+
+  else {
+    hyperpoint pts[3];
+
+    for(int j=0; j<3; j++) {
+      for(int i=0; i<4; i++) {
+        vector<ld> values;
+        for(auto& f: anim.frames) {
+          hyperpoint h;
+          if(j == 0)
+            h = tC0(f.V);
+          if(j == 1) {
+            h = tC0(shift_object(f.V, f.ori, ztangent(f.front_distance), smGeodesic));
+            }
+          if(j == 2) {
+            h = tC0(shift_object(f.V, f.ori, ctangent(1, -f.up_distance), smGeodesic));
+            }
+          prepare_for_interpolation(h);
+          values.push_back(h[i]);
+          }
+
+        pts[j][i] = interpolate(values, times, t);
+        }
+      after_interpolation(pts[j]);
+      }
+
+    set_view(pts[0], pts[1], pts[2]);
+    println(hlog, "V = ", View);
+    c_front_dist = geo_dist(pts[0], pts[1]);
+    c_up_dist = geo_dist(pts[0], pts[2]);
+    }
 
   transmatrix T = View * inverse(last_view_comp);
   last_view_comp = View;
@@ -540,14 +569,7 @@ void handle_animation(ld t) {
   View = T * V;
   fixmatrix(View);
   
-  if(invalid_matrix(View)) {
-    println(hlog, "invalid_matrix ", View);
-    println(hlog, pts[0]);
-    println(hlog, pts[1]);
-    println(hlog, pts[2]);
-    println(hlog, "t = ", t);
-    exit(1);
-    }
+  if(invalid_matrix(View)) println(hlog, "invalid_matrix ", View, " at t = ", t);
   last_time = t;
   }
 
