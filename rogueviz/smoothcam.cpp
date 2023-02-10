@@ -445,6 +445,26 @@ void after_interpolation(hyperpoint& h) {
     h = normalize(h);
   }
 
+ld interpolate(const vector<ld>& times, vector<ld> values, ld t) {
+  int n = isize(values);
+  print(hlog, "interpolate: ", values);
+
+  for(int ss=1; ss<=n-1; ss++) {
+    for(int a=0; a<n-ss; a++) {
+      // combining [a..a+(ss-1)] and [a+1..a+ss]
+      if(times[a+ss] == times[a])
+        values[a] = values[a] + (values[a+ss] - values[a]) * (t-times[a]);
+      else
+        values[a] = (values[a] * (times[a+ss] - t) + values[a+1] * (t - times[a])) / (times[a+ss] - times[a]);
+      }
+    values.pop_back();
+    }
+
+  println(hlog, " -> ", values[0]);
+  return values[0];
+  }
+
+
 void handle_animation(ld t) {
   ld total_total = 0;
   
@@ -504,20 +524,7 @@ void handle_animation(ld t) {
         values.push_back(h[i]);
         }
       
-      int n = isize(values);
-      
-      for(int ss=1; ss<=n-1; ss++) {
-        for(int a=0; a<n-ss; a++) {
-          // combining [a..a+(ss-1)] and [a+1..a+ss]
-          if(times[a+ss] == times[a])
-            values[a] = values[a] + (values[a+ss] - values[a]) * (t-times[a]);
-          else
-            values[a] = (values[a] * (times[a+ss] - t) + values[a+1] * (t - times[a])) / (times[a+ss] - times[a]);
-          }
-        values.pop_back();
-        }
-      
-      pts[j][i] = values[0];
+      pts[j][i] = interpolate(values, times, t);
       }
     after_interpolation(pts[j]);
     }
