@@ -2544,7 +2544,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     ->editable(-5, 5, .1, "eye level", "", 'E')
     ->set_extra([] {
       dialog::dialogflags |= sm::CENTER;
-      vid.tc_depth = ticks;
+      vid.tc_camera = ticks;
     
       dialog::addHelp(XLAT("In the FPP mode, the camera will be set at this altitude (before applying shifts)."));
 
