@@ -918,6 +918,7 @@ EX namespace geom3 {
     }
   
   EX string invalid;
+  EX bool changing_embedded_settings;
   
   EX ld actual_wall_height() {
       if(mhybrid) return cgi.plevel;
@@ -935,7 +936,7 @@ EX namespace geom3 {
     // tanh(depth) / tanh(camera) == pconf.alpha
     invalid = "";
     
-    if(GDIM == 3 || flipped) ;
+    if(GDIM == 3 || flipped || changing_embedded_settings);
     else if(vid.tc_alpha < vid.tc_depth && vid.tc_alpha < vid.tc_camera)
       pconf.alpha = tan_auto(vid.depth) / tan_auto(vid.camera);
     else if(vid.tc_depth < vid.tc_alpha && vid.tc_depth < vid.tc_camera) {
@@ -1091,6 +1092,7 @@ EX namespace geom3 {
     if(vid.always3) swapdim(-1);
     vid.always3 = !vid.always3;
     apply_always3();
+    check_cgi(); cgi.prepare_basics();
     if(vid.always3) swapdim(+1);
     }
   #endif
@@ -1151,19 +1153,22 @@ EX namespace geom3 {
 
   EX void apply_settings_full() {
     if(vid.always3) {
+      changing_embedded_settings = true;
       geom3::switch_fpp();
       delete_sky();
       // not sure why this is needed...
       resetGL();
       geom3::switch_fpp();
+      changing_embedded_settings = false;
       }
     }
 
   EX void apply_settings_light() {
     if(vid.always3) {
+      changing_embedded_settings = true;
       geom3::switch_always3();
-      check_cgi(); cgi.prepare_basics();
       geom3::switch_always3();
+      changing_embedded_settings = false;
       }
     }
 

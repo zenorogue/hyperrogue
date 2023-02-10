@@ -2619,7 +2619,13 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
           }
         dialog::addHelp(help);
         })
-    ->set_reaction(geom3::apply_settings_light);
+    ->set_reaction([] {
+        bool b = vid.tc_alpha < vid.tc_camera;
+        if(vid.tc_alpha >= vid.tc_depth) vid.tc_alpha = vid.depth - 1;
+        if(vid.tc_camera >= vid.tc_depth) vid.tc_camera = vid.depth - 1;
+        if(vid.tc_alpha == vid.tc_camera) (b ? vid.tc_alpha : vid.tc_camera)--;
+        geom3::apply_settings_light();
+        });
   param_f(vid.camera, "camera", "3D camera level", 1)
     ->editable(0, 5, .1, "", "", 'c')
     ->modif([] (float_setting* x) { x->menu_item_name = (GDIM == 2 ? "Camera level above the plane" : "Z shift"); })
