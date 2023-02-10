@@ -1113,13 +1113,60 @@ void embedding_method::set_radar_transform() {
   }
 
 EX void swapmatrix(transmatrix& T) {
-  if(embedded_plane) T = swapper->emb->base_to_actual(T);
-  else T = swapper->emb->actual_to_base(T);
+  if(geom3::swap_direction == +1) T = cgi.emb->base_to_actual(T);
+  if(geom3::swap_direction == -1) T = cgi.emb->actual_to_base(T);
   }
 
 EX void swappoint(hyperpoint& h) {
-  if(embedded_plane) h = swapper->emb->base_to_actual(h);
-  else h = swapper->emb->actual_to_base(h);
+  if(geom3::swap_direction == +1) h = cgi.emb->base_to_actual(h);
+  if(geom3::swap_direction == -1) h = cgi.emb->actual_to_base(h);
+  }
+
+struct embedded_matrix_data {
+  transmatrix saved;
+  hyperpoint logical_coordinates;
+  transmatrix rotation;
+  };
+
+map<transmatrix*, embedded_matrix_data> mdata;
+
+EX void swapmatrix_iview(transmatrix& ori, transmatrix& V) {
+  indenter id(2);
+  if(geom3::swap_direction == -1) {
+    auto& data = mdata[&V];
+    data.logical_coordinates = cgi.emb->intermediate_to_logical * cgi.emb->actual_to_intermediate(V*tile_center());
+    data.rotation = inverse(cgi.emb->map_relative_push(V*tile_center())) * V;
+
+    data.logical_coordinates[2] = ilerp(cgi.FLOOR, cgi.WALL, data.logical_coordinates[2]);
+
+    if(nisot::local_perspective_used) data.rotation = data.rotation * ori;
+    swapmatrix(V);
+    data.rotation = data.rotation * cgi.emb->logical_scaled_to_intermediate;
+    data.saved = V;
+    }
+  if(geom3::swap_direction == 1) {
+    if(!mdata.count(&V)) { swapmatrix(V); ori = Id; return; }
+    auto& data = mdata[&V];
+    if(!eqmatrix(data.saved, V)) { swapmatrix(V); ori = Id; return; }
+    data.logical_coordinates[2] = lerp(cgi.FLOOR, cgi.WALL, data.logical_coordinates[2]);
+    V = cgi.emb->intermediate_to_actual_translation( cgi.emb->logical_to_intermediate * data.logical_coordinates );
+    ori = Id;
+    auto rot = data.rotation;
+    rot = rot * cgi.emb->intermediate_to_logical_scaled;
+    if(nisot::local_perspective_used) ori = ori * rot;
+    else V = V * rot;
+    }
+  }
+
+EX void swapmatrix_view(transmatrix& lp, transmatrix& V) {
+  if(!geom3::swap_direction) return;
+  if(geom3::swap_direction == +1) fix4(V);
+  V = inverse(V);
+  lp = inverse(lp);
+  swapmatrix_iview(lp, V);
+  if(geom3::swap_direction == -1) fix4(V);
+  V = inverse(V);
+  lp = inverse(lp);
   }
 
 void embedding_method::auto_configure() {

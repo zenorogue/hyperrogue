@@ -1070,17 +1070,28 @@ EX namespace geom3 {
 
 EX namespace geom3 {
 
+  /** direction of swapping: +1 => from 2D to 3D; -1 => from 3D to 2D; 0 => make everything right */
+  EX int swap_direction;
+
+  EX void swapdim(int dir) {
+    swap_direction = dir;
+    decide_lpu();
+    swapmatrix_view(NLP, View);
+    swapmatrix_view(NLP, current_display->which_copy);
+    callhooks(hooks_swapdim);
+    for(auto m: allmaps) m->on_dim_change();
+    }
+
   #if MAXMDIM >= 4
   EX void switch_always3() {
     if(dual::split(switch_always3)) return;
     #if CAP_GL && CAP_RUG
     if(rug::rugged) rug::close();
     #endif
-    swapper = &cgi;
+    if(vid.always3) swapdim(-1);
     vid.always3 = !vid.always3;
     apply_always3();
-    swapmatrix(View);
-    callhooks(hooks_swapdim);
+    if(vid.always3) swapdim(+1);
     }
   #endif
 
@@ -1121,14 +1132,10 @@ EX namespace geom3 {
       emb->auto_configure();
       check_cgi();
       cgi.prepare_basics();
-      swapper = &cgi;
-      swapmatrix(View);
-      swapmatrix(current_display->which_copy);
-      callhooks(hooks_swapdim);
-      for(auto m: allmaps) m->on_dim_change();
+      swapdim(+1);
       }
     else {
-      swapper = &cgi;
+      swapdim(-1);
       vid.always3 = false;
       apply_always3();
       vid.wall_height = .3;
@@ -1136,13 +1143,28 @@ EX namespace geom3 {
       vid.camera = 1;
       vid.depth = 1;
       if(among(pmodel, mdPerspective, mdGeodesic)) pmodel = mdDisk;
-      swapmatrix(View);
-      swapmatrix(current_display->which_copy);
-      callhooks(hooks_swapdim);
-      for(auto m: allmaps) m->on_dim_change();
+      swapdim(0);
       }
     View = models::rotmatrix() * View;
 #endif
+    }
+
+  EX void apply_settings_full() {
+    if(vid.always3) {
+      geom3::switch_fpp();
+      delete_sky();
+      // not sure why this is needed...
+      resetGL();
+      geom3::switch_fpp();
+      }
+    }
+
+  EX void apply_settings_light() {
+    if(vid.always3) {
+      geom3::switch_always3();
+      check_cgi(); cgi.prepare_basics();
+      geom3::switch_always3();
+      }
     }
 
   EX }

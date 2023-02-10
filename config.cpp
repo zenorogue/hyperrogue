@@ -840,16 +840,16 @@ EX void initConfig() {
   param_f(geom3::euclid_embed_scale, "euclid_embed_scale", "euclid_embed_scale")
   -> editable(0, 2, 0.05, "Euclidean embedding scale", "How to scale the Euclidean map, relatively to the 3D absolute unit.", 'X')
   -> set_sets([] { dialog::bound_low(0.05); })
-  -> set_reaction([] { if(vid.always3) { for(auto m: allmaps) m->on_dim_change(); }});
+  -> set_reaction(geom3::apply_settings_full);
 
   param_f(geom3::euclid_embed_scale_y, "euclid_embed_scale_y", "euclid_embed_scale_y")
   -> editable(0, 2, 0.05, "Euclidean embedding scale Y/X", "This scaling factor affects only the Y coordinate.", 'Y')
   -> set_sets([] { dialog::bound_low(0.05); })
-  -> set_reaction([] { if(vid.always3) { for(auto m: allmaps) m->on_dim_change(); }});
+  -> set_reaction(geom3::apply_settings_full);
 
   param_f(geom3::euclid_embed_rotate, "euclid_embed_rotate", "euclid_embed_rotate")
   -> editable(0, 360, 15, "Euclidean embedding rotation", "How to rotate the Euclidean embedding, in degrees.", 'F')
-  -> set_reaction([] { if(vid.always3) { for(auto m: allmaps) m->on_dim_change(); }});
+  -> set_reaction(geom3::apply_settings_full);
 
   param_enum(embedded_shift_method_choice, "embedded_shift_method", "embedded_shift_method", smcBoth)
   -> editable({
@@ -863,23 +863,15 @@ EX void initConfig() {
 
   param_b(geom3::inverted_embedding, "inverted_3d", false)
   -> editable("invert convex/concave", 'I')
-  -> set_reaction([] { if(vid.always3) { geom3::switch_fpp(); geom3::switch_fpp(); } });
+  -> set_reaction(geom3::apply_settings_full);
 
   param_b(geom3::flat_embedding, "flat_3d", false)
   -> editable("flat, not equidistant", 'F')
-  -> set_reaction([] { if(vid.always3) { geom3::switch_fpp(); geom3::switch_fpp(); } });
+  -> set_reaction(geom3::apply_settings_full);
 
   param_enum(geom3::spatial_embedding, "spatial_embedding", "spatial_embedding", geom3::seDefault)
   ->editable(geom3::spatial_embedding_options, "3D embedding method", 'E')
-  ->set_reaction([] {
-    if(vid.always3) {
-      geom3::switch_fpp();
-      geom3::switch_fpp();
-      delete_sky();
-      // not sure why this is needed...
-      resetGL();
-      }
-    });
+  ->set_reaction(geom3::apply_settings_full);
   
   param_b(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA || ISWEB) ? 1 : 0);
   param_i(reserve_limit, "memory_reserve", 128);
@@ -2280,7 +2272,7 @@ EX void display_embedded_errors() {
         T0[1][0] = geometry == gEuclid ? 10 : 0;
         euc::eu_input.twisted = false;
         euc::build_torus3();
-        geom3::switch_fpp(); geom3::switch_fpp(); start_game(); }); });
+        geom3::apply_settings_full(); start_game(); }); });
       return;
       }
     }
@@ -2295,7 +2287,7 @@ EX void display_embedded_errors() {
         T0[0][1] = T0[1][0] = T0[1][1] = 0;
         euc::eu_input.twisted = false;
         euc::build_torus3();
-        geom3::switch_fpp(); geom3::switch_fpp(); start_game(); }); });
+        geom3::apply_settings_full(); start_game(); }); });
       return;
       }
     }
@@ -2626,7 +2618,8 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
               "with parameter %2.", fts(current_camera_level), fts(tan_auto(vid.depth) / tan_auto(current_camera_level)));
           }
         dialog::addHelp(help);
-        });
+        })
+    ->set_reaction(geom3::apply_settings_light);
   param_f(vid.camera, "camera", "3D camera level", 1)
     ->editable(0, 5, .1, "", "", 'c')
     ->modif([] (float_setting* x) { x->menu_item_name = (GDIM == 2 ? "Camera level above the plane" : "Z shift"); })
@@ -2660,7 +2653,8 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
         dialog::add_action([] () {
           vid.gp_autoscale_heights = !vid.gp_autoscale_heights;
           });
-        });
+        })
+    ->set_reaction(geom3::apply_settings_light);
   param_f(vid.rock_wall_ratio, "rock_wall_ratio", "3D rock-wall ratio", .9)
     ->editable(0, 1, .1, "Rock-III to wall ratio", "", 'r')
     ->set_extra([] { dialog::addHelp(XLAT(
