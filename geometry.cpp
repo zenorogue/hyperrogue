@@ -789,6 +789,11 @@ void geometry_information::prepare_basics() {
   if(scale_used()) zhexf *= vid.creature_scale;
   if(WDIM == 2 && GDIM == 3) zhexf *= 1.5, orbsize *= 1.2;
 
+  if(cgi.emb->is_euc_in_hyp()) {
+    zhexf *= exp(-vid.depth);
+    orbsize *= exp(-vid.depth);
+    }
+
   floorrad0 = hexvdist* (GDIM == 3 ? 1 : 1 - 0.08 * global_boundary_ratio);
   floorrad1 = rhexf * (GDIM == 3 ? 1 : 1 - 0.06 * global_boundary_ratio);
   
