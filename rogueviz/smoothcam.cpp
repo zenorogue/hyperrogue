@@ -684,4 +684,17 @@ auto hooks = arg::add3("-smoothcam", enable_and_show)
       }
     });
 
+auto hooksw = addHook(hooks_swapdim, 100, [] {
+  println(hlog, "swapping animation");
+  indenter id(2);
+  for(auto& anim: anims) {
+    anim.start = Id;
+    for(auto& f: anim.frames) {
+      transmatrix NLP = inverse(f.ori);
+      swapmatrix_iview(f.ori, f.V);
+      swapmatrix_view(NLP, f.sView);
+      }
+    }
+  });
+
 }}
