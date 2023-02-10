@@ -445,7 +445,7 @@ void after_interpolation(hyperpoint& h) {
     h = normalize(h);
   }
 
-ld interpolate(const vector<ld>& times, vector<ld> values, ld t) {
+ld interpolate(vector<ld> values, const vector<ld>& times, ld t) {
   int n = isize(values);
   print(hlog, "interpolate: ", values);
 
@@ -460,7 +460,7 @@ ld interpolate(const vector<ld>& times, vector<ld> values, ld t) {
     values.pop_back();
     }
 
-  println(hlog, " -> ", values[0]);
+  println(hlog, " -> ", values[0], " based on ", times, " -> ", t);
   return values[0];
   }
 
