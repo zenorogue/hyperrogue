@@ -450,7 +450,9 @@ EX bool no_easy_spin() {
   return NONSTDVAR || arcm::in() || WDIM == 3 || bt::in() || kite::in();
   }
 
-EX bool dont_inverse() { return PURE && cgi.emb->is_euc_in_noniso(); }
+EX bool never_invert;
+
+EX bool dont_inverse() { return never_invert || (PURE && cgi.emb->is_euc_in_noniso()); }
 
 ld hrmap_standard::spin_angle(cell *c, int d) {
   if(WDIM == 3) return SPIN_NOT_AVAILABLE;

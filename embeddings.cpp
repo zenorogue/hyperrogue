@@ -1275,6 +1275,7 @@ geom3::eSpatialEmbedding embed_by_name(string ss) {
   return seNone;
   }
 
-auto ah_embed = arg::add2("-seo", [] { arg::shift(); invoke_embed(embed_by_name(arg::args())); });
+auto ah_embed = arg::add2("-seo", [] { arg::shift(); invoke_embed(embed_by_name(arg::args())); })
+  + arg::add2("-never-invert", [] { never_invert = true; });
 
 }
