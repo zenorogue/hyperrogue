@@ -15,7 +15,7 @@ ld eyepos;
 #if MAXMDIM >= 4
 
 #define S (cgi.scalefactor / 0.805578)
-#define SH (cgi.scalefactor / 0.805578 * vid.height_width / 1.5)
+#define SH (embedded_plane ? cgi.human_height : (cgi.scalefactor / 0.805578 * (vid.height_width / 1.5)))
 
 #define revZ ((WDIM == 2 || gproduct) ? -1 : 1)
 
@@ -390,7 +390,9 @@ void geometry_information::make_foot_3d(hpcshape& sh) {
   add_cone(zc(0.4), leg5, zc(0.45));
   add_texture(sh);
   // shift_last(-LEG0);
-  for(int i=last->s; i<isize(hpc); i++) hpc[i] = cpush(0, -0.0125*S) * hpc[i];
+  ld sc = 1;
+  if(cgi.emb->is_euc_in_hyp()) sc *= exp(-vid.depth);
+  for(int i=last->s; i<isize(hpc); i++) hpc[i] = lxpush(-0.0125*S) * hpc[i];
   }
 
 void geometry_information::make_head_only() {
@@ -508,6 +510,7 @@ hyperpoint yzspin(ld alpha, hyperpoint h) {
   if(embedded_plane) {
     h = cgi.emb->actual_to_logical(h);
     h = cspin(1, 2, alpha) * h;
+    h[2] *= cgi.human_height;
     h = cgi.emb->logical_to_actual(h);
     return h;
     }
@@ -641,6 +644,7 @@ void geometry_information::animate_bird(hpcshape& orig, hpcshape_animated& anima
       if(abs(h[1]) > body) {
         ld off = h[1] > 0 ? body : -body;
         h[2] += abs(h[1] - off) * sin(alpha);
+        if(embedded_plane) h[2] *= cgi.human_height;
         h[1] = off + (h[1] - off) * cos(alpha);
         h = cgi.emb->logical_to_actual(h);
         h = normalize(h);
@@ -656,7 +660,7 @@ void geometry_information::slimetriangle(hyperpoint a, hyperpoint b, hyperpoint 
   dynamicval<int> d(vid.texture_step, 8);
   ld sca = 1;
   if(mhybrid) sca = .5;
-  if(cgi.emb->is_euc_in_noniso()) sca *= .3;
+  if(cgi.emb->is_euc_in_noniso()) sca *= .3 * geom3::euclid_embed_scale;
   texture_order([&] (ld x, ld y) {
     ld z = 1-x-y;
     ld r = scalefactor * hcrossf7 * (0 + pow(max(x,max(y,z)), .3) * 0.8) * sca;
