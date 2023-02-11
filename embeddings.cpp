@@ -1141,7 +1141,8 @@ EX void swapmatrix_iview(transmatrix& ori, transmatrix& V) {
 
     if(nisot::local_perspective_used) data.rotation = data.rotation * ori;
     swapmatrix(V);
-    data.rotation = data.rotation * cgi.emb->logical_scaled_to_intermediate;
+
+    data.rotation = cgi.emb->intermediate_to_logical_scaled * data.rotation;
     data.saved = V;
     }
   if(geom3::swap_direction == 1) {
@@ -1152,7 +1153,7 @@ EX void swapmatrix_iview(transmatrix& ori, transmatrix& V) {
     V = cgi.emb->intermediate_to_actual_translation( cgi.emb->logical_to_intermediate * data.logical_coordinates );
     ori = Id;
     auto rot = data.rotation;
-    rot = rot * cgi.emb->intermediate_to_logical_scaled;
+    rot = cgi.emb->logical_scaled_to_intermediate * rot;
     if(nisot::local_perspective_used) ori = ori * rot;
     else V = V * rot;
     }
