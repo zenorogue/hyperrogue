@@ -198,6 +198,7 @@ EX namespace geom3 {
     }
 
   EX void configure_clifford_torus() {
+    dynamicval<ld> dtessf(cgi.tessf, 1);
     rug::clifford_torus ct;
 
     if(hypot_d(2, ct.xh) < 1e-6 || hypot_d(2, ct.yh) < 1e-6) {
@@ -222,6 +223,7 @@ EX namespace geom3 {
     }
 
   EX void configure_cylinder() {
+    dynamicval<ld> dtessf(cgi.tessf, 1);
     rug::clifford_torus ct;
     hyperpoint vec;
     if(sqhypot_d(2, ct.yh) > 1e-6) vec = ct.yh;
