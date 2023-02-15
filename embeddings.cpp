@@ -505,6 +505,7 @@ struct emb_same_in_same : emb_actual {
     }
 
   hyperpoint actual_to_logical(hyperpoint h) override {
+    if(euclid) { h[3] = 1; return h; }
     ld z = asin_auto(h[2]);
     ld u = 1 / cos_auto(z);
     auto h1 = hpxy3(h[0] * u, h[1] * u, 0);
@@ -516,6 +517,7 @@ struct emb_same_in_same : emb_actual {
     }
 
   hyperpoint logical_to_actual(hyperpoint h) override {
+    if(euclid) { h[3] = 1; return h; }
     geom3::light_flip(true);
     auto b = logical_to_base(h);
     geom3::light_flip(false);
