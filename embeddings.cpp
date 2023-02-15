@@ -775,8 +775,20 @@ struct emb_euc_cylinder_he : emb_euc_cylinder {
     }
   };
 
-struct emb_euc_cylinder_nil : emb_euc_cylinder {
+struct emb_euc_cylinder_twisted : emb_euc_cylinder {
   transmatrix get_lsti() override { return cspin90(0, 2) * cspin90(0, 1); }
+  transmatrix get_lti() override {
+    ld depth = 0; // for now?
+    ld alpha = nil ? (1 + depth) / 2. : sinh(1 + depth) / 2.;
+    ld c = pow(1 + alpha * alpha, -0.5);
+    transmatrix U = Id;
+    U[1][1] = (alpha*alpha+1) * c;
+    U[0][1] = alpha * c;
+    return logical_scaled_to_intermediate * U * intermediate_to_logical_scaled * emb_euc_cylinder::get_lti();
+    }
+  };
+
+struct emb_euc_cylinder_nil : emb_euc_cylinder_twisted {
   hyperpoint actual_to_intermediate(hyperpoint a) override {
     ld y0 = atan2(a[1], a[0]);
     ld x0 = hypot(a[0], a[1]);
@@ -784,15 +796,6 @@ struct emb_euc_cylinder_nil : emb_euc_cylinder {
     }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override {
     return zpush(i[2]) * cspin(1, 0, i[1]) * xpush(i[0]);
-    }
-  transmatrix get_lti() override {
-    ld depth = 0; // for now?
-    ld alpha = (1 + depth) / 2.;
-    ld c = pow(1 + alpha * alpha, -0.5);
-    transmatrix U = Id;
-    U[1][1] = (alpha*alpha+1) * c;
-    U[0][1] = alpha * c;
-    return logical_scaled_to_intermediate * U * intermediate_to_logical_scaled * emb_euc_cylinder::get_lti();
     }
   };
 
@@ -814,22 +817,19 @@ struct emb_euc_cylinder_horo : emb_euc_cylinder {
     }
   };
 
-struct emb_euc_cylinder_sl2 : emb_euc_cylinder {
+struct emb_euc_cylinder_sl2 : emb_euc_cylinder_twisted {
   bool no_spin() override { return true; }
   hyperpoint actual_to_intermediate(hyperpoint a) override {
     hyperpoint i = point31(0, 0, 0);
     i[2] = atan2(a[2], a[3]);
     a = cspin(1, 0, i[2]) * cspin(3, 2, i[2]) * a;
-    i[1] = (a[0] || a[1]) ? atan2(a[0], a[1]) : 0;
+    i[1] = (a[0] || a[1]) ? -atan2(a[1], a[0]) : 0;
     a = cspin(1, 0, i[1]) * a;
-    i[0] = asinh(a[0]);
+    i[0] = asinh(a[0])-1;
     return i;
     }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override {
     return cspin(2, 3, i[2]) * cspin(0, 1, i[2] + i[1]) * xpush(i[0]);
-    }
-  transmatrix get_lsti() override {
-    return cspin90(0, 2) * cspin90(0, 1);
     }
   };
 
