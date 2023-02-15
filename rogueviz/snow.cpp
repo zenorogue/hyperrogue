@@ -23,7 +23,14 @@ namespace snow {
 using rogueviz::objmodels::model;
 using rogueviz::objmodels::tf_result;
 
-vector<model> models;
+struct snowmodel : model {
+  ld scale;
+  transmatrix T;
+  snowmodel(string s, ld scale, transmatrix T) : model("rogueviz/models", s), scale(scale), T(T) {}
+  hyperpoint transform(hyperpoint h) override { return direct_exp(T*h*scale); }
+  };
+
+vector<snowmodel> models;
 
 ld snow_lambda = 0;
 
@@ -278,7 +285,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
     for(int i=0; i<qty; i++) {
       transmatrix T = random_spin();
       println(hlog, "T = ", T);
-      models.emplace_back("rogueviz/models/", s, [scale,T] (hyperpoint h) { tf_result res{0, direct_exp(T*h*scale)}; return res; });
+      models.emplace_back(s, scale, T);
       s = "/" + s;
       }
     }

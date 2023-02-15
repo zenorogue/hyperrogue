@@ -21,8 +21,6 @@ bool model::available() {
   return false;
   }
 
-bool root = false;
-
 string ignore_mtlname = "XXX";
 
 void model::load_obj(model_data& md) {
@@ -34,7 +32,7 @@ void model::load_obj(model_data& md) {
   if(!fs.f) 
     throw hr_exception("failed to open model file: " + path + fname);
   
-  preparer();
+  prepare();
 
   vector<hyperpoint> vertices;
   vector<hyperpoint> normals;
@@ -73,9 +71,7 @@ void model::load_obj(model_data& md) {
         if(s == "Kd") {
           ld a, b, c;
           scan(fsm, a, b, c);
-          part(nextcol, 3) = root ? sqrt(a) * 255.99 : a * 319.99;
-          part(nextcol, 2) = root ? sqrt(b) * 255.99 : b * 319.99;
-          part(nextcol, 1) = root ? sqrt(c) * 255.99 : c * 319.99;
+          nextcol = read_color(a, b, c);
           }
         if(s == "newmtl") {
           emit_material();
@@ -208,44 +204,8 @@ void model::load_obj(model_data& md) {
             for(auto& h: hys)
               h -= ctr1;
             }
-          
-          hyperpoint norm = (hys[1] - hys[0]) ^ (hys[2] - hys[0]);
-          norm /= hypot_d(3, norm);
-          ld y = .5 + (.2 * norm[0] + .16 * norm[1] + .14 * norm[2]);
-          glvertex shade = glhr::makevertex(0, y, 0);
-          glvertex shadecol = glhr::makevertex(y, y, y);
-          
-          auto n0 = tf(hys[0]);
-          auto n1 = tf(hys[1]);
-          auto n2 = tf(hys[2]);
-          auto mi = min(n0.first, min(n1.first, n2.first));
-          auto ma = max(n0.first, max(n1.first, n2.first));
-          if(ma - mi > 1) continue;
-          
-          int parts = sd(hys);
-          auto tri = [&] (int a, int b) {
-            cgi.hpcpush(tf(hys[0] + (hys[1] - hys[0]) * a / parts + (hys[2] - hys[0]) * b / parts).second);
-            // cgi.hpcpush(tf(tot[0] + (tot[1] - tot[0]) * a / parts + (tot[2] - tot[0]) * b / parts).second);
-            if(textured) {
-              co->tv.tvertices.push_back(glhr::pointtogl(tot[0] + (tot[1] - tot[0]) * a / parts + (tot[2] - tot[0]) * b / parts));
-              co->tv.colors.push_back(shadecol);
-              }
-            else {
-              co->tv.tvertices.push_back(shade);
-              }
-            };
-          
-          for(int a=0; a<parts; a++)
-          for(int b=0; b<parts-a; b++) {
-            tri(a, b);
-            tri(a+1, b);
-            tri(a, b+1);
-            if(a+b < parts-1) {
-              tri(a, b+1);
-              tri(a+1, b);
-              tri(a+1, b+1);
-              }
-            }
+
+          process_triangle(hys, tot, textured, co);
           
           while(among(peek(fs), ' ', '\r', '\n')) scan(fs, bar);
           if(isdigit(peek(fs))) { vis[1] = vis[2]; goto next_triangle; }
@@ -269,6 +229,56 @@ void model::load_obj(model_data& md) {
 
   md.objindex.push_back(isize(md.objs));
   cgi.extra_vertices();
+  }
+
+hyperpoint model::transform(hyperpoint h) { return direct_exp(h); }
+
+int model::subdivision(vector<hyperpoint>& hys) {
+  if(euclid) return 1;
+  ld maxlen = prec * max(hypot_d(3, hys[1] - hys[0]), max(hypot_d(3, hys[2] - hys[0]), hypot_d(3, hys[2] - hys[1])));
+  return int(ceil(maxlen));
+  }
+
+color_t model::read_color(ld a, ld b, ld c) {
+  color_t nextcol = 0xFFFFFFFF;
+  part(nextcol, 3) = a * 255.99;
+  part(nextcol, 2) = b * 255.99;
+  part(nextcol, 1) = c * 255.99;
+  return nextcol;
+  }
+
+void model::process_triangle(vector<hyperpoint>& hys, vector<hyperpoint>& tot, bool textured, object *co) {
+
+  hyperpoint norm = (hys[1] - hys[0]) ^ (hys[2] - hys[0]);
+  norm /= hypot_d(3, norm);
+  ld y = .5 + (.2 * norm[0] + .16 * norm[1] + .14 * norm[2]);
+  glvertex shade = glhr::makevertex(0, y, 0);
+  glvertex shadecol = glhr::makevertex(y, y, y);
+
+  int parts = subdivision(hys);
+  auto tri = [&] (int a, int b) {
+    cgi.hpcpush(transform(hys[0] + (hys[1] - hys[0]) * a / parts + (hys[2] - hys[0]) * b / parts));
+    // cgi.hpcpush(tf(tot[0] + (tot[1] - tot[0]) * a / parts + (tot[2] - tot[0]) * b / parts).second);
+    if(textured) {
+      co->tv.tvertices.push_back(glhr::pointtogl(tot[0] + (tot[1] - tot[0]) * a / parts + (tot[2] - tot[0]) * b / parts));
+      co->tv.colors.push_back(shadecol);
+      }
+    else {
+      co->tv.tvertices.push_back(shade);
+      }
+    };
+
+  for(int a=0; a<parts; a++)
+  for(int b=0; b<parts-a; b++) {
+    tri(a, b);
+    tri(a+1, b);
+    tri(a, b+1);
+    if(a+b < parts-1) {
+      tri(a, b+1);
+      tri(a+1, b);
+      tri(a+1, b+1);
+      }
+    }
   }
 
 model_data& model::get() {

@@ -203,7 +203,20 @@ void prepare_nilform() {
   make_routes();
   }
 
-model staircase("rogueviz/nil/", "aco.obj", nilize);
+struct nilmodel : model {
+  hyperpoint transform(hyperpoint h) override { return nilize(h).second; }
+  void process_triangle(vector<hyperpoint>& hys, vector<hyperpoint>& tot, bool textured, object *co) {
+    auto n0 = nilize(hys[0]).first;
+    auto n1 = nilize(hys[1]).first;
+    auto n2 = nilize(hys[2]).first;
+    auto mi = min(n0, min(n1, n2));
+    auto ma = max(n0, max(n1, n2));
+    if(ma - mi > 1) return;
+    model::process_triangle(hys, tot, textured, co);
+    }
+  };
+
+nilmodel staircase;
 
 bool draw_ply() {
 
