@@ -413,7 +413,7 @@ namespace sag {
     reassign();
     }
   
-  void dofullsa(int satime) {
+  void dofullsa(ld satime) {
     sagmode = sagSA;
     int t1 = SDL_GetTicks();
     int tl = -999999;
@@ -1283,7 +1283,7 @@ int readArgs() {
     }
 // (4) perform simulated annealing: -fullsa <time in seconds>
   else if(argis("-sagfull")) {
-    shift(); sag::dofullsa(argi());
+    shift(); sag::dofullsa(argf());
     }
   else if(argis("-sagfulli")) {
     shift(); sag::dofullsa_iterations(argll());
