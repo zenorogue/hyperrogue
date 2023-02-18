@@ -1123,15 +1123,17 @@ EX namespace geom3 {
       vid.fixed_facing_dir = 90;
       }
     }
-    
+  
   EX void switch_fpp() {
 #if MAXMDIM >= 4
     #if CAP_GL && CAP_RUG
     if(rug::rugged) rug::close();
     #endif
     if(dual::split(switch_fpp)) return;
-    check_cgi(); cgi.require_basics();
-    View = iso_inverse(models::rotmatrix()) * View;
+
+    if(!changing_embedded_settings)
+      View = inverse(models::rotmatrix()) * View;
+
     if(!vid.always3) {
       vid.always3 = true;
       apply_always3();
@@ -1145,14 +1147,18 @@ EX namespace geom3 {
       swapdim(-1);
       vid.always3 = false;
       apply_always3();
-      vid.wall_height = .3;
-      vid.human_wall_ratio = .7;
-      vid.camera = 1;
-      vid.depth = 1;
+      if(!changing_embedded_settings) {
+        vid.wall_height = .3;
+        vid.human_wall_ratio = .7;
+        vid.camera = 1;
+        vid.depth = 1;
+        }
       if(among(pmodel, mdPerspective, mdGeodesic)) pmodel = mdDisk;
       swapdim(0);
       }
-    View = models::rotmatrix() * View;
+
+    if(!changing_embedded_settings)
+      View = models::rotmatrix() * View;
 #endif
     }
 
