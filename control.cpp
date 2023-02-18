@@ -718,7 +718,10 @@ EX void mainloopiter() {
 
   #if CAP_VR
   vrhr::vr_shift();
-  #endif  
+  #endif
+
+  check_cgi();
+  cgi.require_basics();
 
   optimizeview();
   
