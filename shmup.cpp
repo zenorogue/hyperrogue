@@ -2773,6 +2773,8 @@ EX void turn(int delta) {
           }
         }
     
+      if(pc[i]->dead && racing::on) pc[i]->vel = 0;
+
       if(pc[i]->dead && items[itOrbLife]) {
         multi::deaths[i]++;
         items[itOrbLife]--;
@@ -2853,7 +2855,7 @@ EX void init() {
     }
   
   if(!safety) {
-    items[itOrbLife] = 3;
+    items[itOrbLife] = racing::on ? 0 : 3;
     if(!racing::on) 
       addMessage(XLAT("Welcome to the Shoot'em Up mode!"));
     // addMessage(XLAT("F/;/Space/Enter/KP5 = fire, WASD/IJKL/Numpad = move"));
