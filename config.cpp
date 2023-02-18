@@ -2397,6 +2397,7 @@ EX void show3D_height_details() {
     add_edit(vid.infdeep_height);
     add_edit(vid.sun_size);
     add_edit(vid.star_size);
+    add_edit(star_prob);
     add_edit(vid.height_limits);
     if(euclid && msphere) add_edit(use_euclidean_infinity);
     }
@@ -2763,6 +2764,8 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     ->editable(0, 10, .1, "sun size (relative to item sizes)", "", '8');
   param_f(vid.star_size, "star_size", "star_size", 0.75)
     ->editable(0, 10, .1, "night star size (relative to item sizes)", "", '9');
+  param_f(star_prob, "star_prob", 0.3)
+    ->editable(0, 1, .01, "star probability", "probability of star per tile", '*');
   param_b(vid.height_limits, "height_limits", true)
     ->editable("automatically limit heights if too high", 'l');
   param_b(auto_remove_roofs, "auto_remove_roofs", true)

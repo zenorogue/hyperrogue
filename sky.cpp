@@ -357,6 +357,17 @@ void draw_star(const shiftmatrix& V, const hpcshape& sh, color_t col, ld rev = f
   queuepolyat(V1 * zpush(val), sh, col, PPR::SKY);
   }
 
+EX ld star_prob = 0.33;
+
+/* the first star is supposed to appear as long as probability > 0 */
+EX vector<ld> stars = {1e-20};
+
+EX bool star_for(int i) {
+  i = i & ((1<<16)-1);
+  while(isize(stars) <= i) stars.push_back(randd());
+  return stars[i] < star_prob;
+  }
+
 void celldrawer::draw_ceiling() {
 
   if(!models::is_perspective(pmodel) || sphere) return;
@@ -368,11 +379,11 @@ void celldrawer::draw_ceiling() {
   switch(ceiling_category(c)) {
     /* ceilingless levels */
     case 1: {
-      if(fieldpattern::fieldval_uniq(c) % 3 == 0)
+      if(star_for(fieldpattern::fieldval_uniq(c)))
         draw_star(V, cgi.shNightStar, 0xFFFFFFFF);
       add_to_sky(0x00000F, 0x00000F);
       if(c->land == laAsteroids) {
-        if(fieldpattern::fieldval_uniq(c) % 9 < 3)
+        if(star_for(fieldpattern::fieldval_uniq(c) ^ 0x5555))
           draw_star(V, cgi.shNightStar, 0xFFFFFFFF, true);
         int sk = get_skybrightness(-1);
         auto sky = draw_shapevec(c, V * MirrorZ, cgi.shFullFloor.levels[SIDE_SKY], 0x000000FF + 0x100 * (sk/17), PPR::SKY);
