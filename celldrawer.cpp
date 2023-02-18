@@ -2184,6 +2184,21 @@ void celldrawer::draw_wall_full() {
     else if(among(patterns::whichShape, '9', '^'))
       set_floor(cgi.shFullFloor);
 
+    else if(patterns::whichShape == '5')
+      set_floor(cgi.shFloor);
+
+    else if(patterns::whichShape == '4')
+      set_floor(cgi.shMFloor);
+
+    else if(patterns::whichShape == '3')
+      set_floor(cgi.shMFloor2);
+
+    else if(patterns::whichShape == '2')
+      set_floor(cgi.shMFloor3);
+
+    else if(embedded_plane && qfi.fshape == &cgi.shFloor)
+      set_floor(cgi.shFullFloor);
+
 #if CAP_TEXTURE
     else if(GDIM == 2 && texture::config.apply(c, Vf, darkena(fcol, fd, 0xFF))) ;
 #endif
