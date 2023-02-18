@@ -1292,7 +1292,7 @@ EX void invoke_embed(geom3::eSpatialEmbedding se) {
     geom3::spatial_embedding = se;
     if(geom3::auto_configure) geom3::switch_fpp(); else geom3::switch_always3();
     delete_sky();
-    resetGL();
+    if(vid.usingGL) resetGL();
     }
   }
 
