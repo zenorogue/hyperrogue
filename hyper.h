@@ -313,6 +313,8 @@ struct projection_configuration {
 
 enum eThreatLevel { tlNoThreat, tlSpam, tlNormal, tlHighThreat };
 
+constexpr ld use_the_default_value = -20.0625;
+
 struct videopar {
   projection_configuration projection_config, rug_config;
   ld yshift;
@@ -416,7 +418,9 @@ struct videopar {
   ld depth;      // world level below the plane
   ld camera;     // camera level above the plane
   ld wall_height, creature_scale, height_width;
-  ld lake_top, lake_bottom;
+  ld lake_top, lake_bottom, lake_shallow, wall_height2, wall_height3;
+  ld lowsky_height, sky_height, star_height, infdeep_height, star_size, sun_size;
+  bool height_limits;
   ld rock_wall_ratio;
   ld human_wall_ratio;
   bool pseudohedral; // in 3D modes

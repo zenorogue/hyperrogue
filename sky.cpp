@@ -5,10 +5,18 @@ namespace hr {
 EX bool context_fog = true;
 
 EX ld camera_level;
-EX bool draw_sky = true;
 EX bool camera_sign;
 
+#if HDR
+enum eSkyMode { skyNone, skyAutomatic, skySkybox, skyAlways };
+#endif
+
+EX eSkyMode draw_sky;
+
+EX bool auto_remove_roofs;
+
 EX bool camera_over(ld x) {
+  if(!auto_remove_roofs) return false;
   if(camera_sign) return camera_level <= x;
   return camera_level >= x;
   }
@@ -41,16 +49,22 @@ struct dqi_sky : drawqueueitem {
   
 EX struct dqi_sky *sky;
 
+EX bool do_draw_skybox() {
+  if(no_wall_rendering) return false;
+  if(!euclid) return false;
+  if(draw_sky == skySkybox) return true;
+  if(!embedded_plane) return false;
+  if(draw_sky == skyAutomatic) return !cgi.emb->is_sph_in_low() && !cgi.emb->is_cylinder();
+  return false;
+  }
+
 EX void prepare_sky() {
   sky = NULL;
-  if(euclid && !cgi.emb->is_sph_in_low() && !cgi.emb->is_cylinder()) {
-    if(WDIM == 3 || GDIM == 2) return;
-    if(no_wall_rendering) return;
-    if(!draw_sky) return;
+  if(do_draw_skybox()) {
     shiftmatrix T = ggmatrix(currentmap->gamestart());
     T.T = gpushxto0(tC0(T.T)) * T.T;
     queuepoly(T, cgi.shEuclideanSky, 0x0044e4FF);
-    queuepolyat(T * zpush(cgi.SKY+0.5) * xpush(cgi.SKY+0.5), cgi.shSun, 0xFFFF00FF, PPR::SKY);
+    queuepolyat(T * zpush(cgi.STAR * 0.7) * xpush(cgi.STAR * 0.7), cgi.shSkyboxSun, 0xFFFF00FF, PPR::SKY);
     }
   else {
     sky = &queuea<dqi_sky> (euclid ? PPR::EUCLIDEAN_SKY : PPR::MISSILE);
@@ -66,17 +80,35 @@ EX void delete_sky() {
   skyvertices.clear();
   }
 
+EX bool do_draw_sky() {
+  if(!embedded_plane) return false;
+  if(draw_sky == skyAlways) return true;
+  if(draw_sky != skyAutomatic) return false;
+
+  if(vid.wall_height < 0 && cgi.emb->is_euc_in_hyp()) return false; /* just looks bad, hollow horospheres should not have sky */
+  if(vid.wall_height < 0 && meuclid && geom3::ggclass() == gcNIH) return false; /* same */
+  if(among(geom3::ggclass(), gcSol, gcSolN)) return false;  /* errors */
+  if(among(geom3::ggclass(), gcNil)) return false;  /* errors sometimes too */
+  if(cgi.emb->is_hyp_in_solnih()) return false;
+  if(cgi.emb->is_euc_in_product()) return false;
+  if(cgi.emb->is_euc_in_sl2()) return false;
+  if(cgi.emb->is_cylinder()) return false;
+
+  return true;
+  }
+
+EX bool do_draw_stars(bool rev) {
+  if(!do_draw_sky()) return false;
+  if(cgi.emb->is_sph_in_low()) {
+    if(cgi.SKY < 0) return false;
+    }
+  if(cgi.emb->is_euc_in_hyp() && (rev ? cgi.SKY > 0 : cgi.SKY < 0)) return false;
+  return true;
+  }
+
 void compute_skyvertices(const vector<sky_item>& sky) {
   skyvertices.clear();
-  if(!draw_sky) return;
-  if(vid.wall_height < 0 && cgi.emb->is_euc_in_hyp()) return; /* just looks bad, hollow horospheres should not have sky */
-  if(vid.wall_height < 0 && meuclid && geom3::ggclass() == gcNIH) return; /* same */
-  if(among(geom3::ggclass(), gcSol, gcSolN)) return;  /* errors */
-  if(among(geom3::ggclass(), gcNil)) return;  /* errors sometimes too */
-  if(cgi.emb->is_hyp_in_solnih()) return;
-  if(cgi.emb->is_euc_in_product()) return;
-  if(cgi.emb->is_euc_in_sl2()) return;
-  if(cgi.emb->is_cylinder()) return;
+  if(!do_draw_sky()) return;
 
   int sk = get_skybrightness();
   
@@ -87,10 +119,10 @@ void compute_skyvertices(const vector<sky_item>& sky) {
         );
   
   hyperpoint skypoint = cpush0(2, cgi.SKY);
-  hyperpoint hellpoint = cpush0(2, -cgi.SKY);
+  hyperpoint hellpoint = cpush0(2, cgi.HELL);
   
   vector<glhr::colored_vertex> this_poly;
-  
+
   for(const sky_item& si: sky) {
     auto c = si.c;
     
@@ -271,7 +303,7 @@ void compute_skyvertices(const vector<sky_item>& sky) {
 
 void dqi_sky::draw() {
   if(!vid.usingGL || sky.empty() || skyvertices.empty()) return;
-  if(!draw_sky) { delete_sky(); return; }
+  if(!do_draw_sky()) { delete_sky(); return; }
 
   #if CAP_VR
   transmatrix s = (vrhr::rendering() ? vrhr::master_cview : cview()).T * inverse(sky_cview.T);
@@ -279,7 +311,8 @@ void dqi_sky::draw() {
   transmatrix s = cview().T * inverse(sky_cview.T);
   #endif
     
-  if(euclid) be_euclidean_infinity(s);
+  be_euclidean_infinity(s);
+
   for(int ed = current_display->stereo_active() ? -1 : 0; ed<2; ed+=2) {
     if(global_projection && global_projection != ed) continue;
     current_display->next_shader_flags = GF_VARCOLOR;
@@ -292,7 +325,7 @@ void dqi_sky::draw() {
       glapplymatrix(s);
       }
     glhr::prepare(skyvertices);
-    glhr::set_fogbase(1.0 + 5 / sightranges[geometry]);
+    glhr::set_fogbase(1.0 + abs(cgi.SKY - cgi.LOWSKY) / sightranges[geometry]);
     glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
     glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW && prio != PPR::EUCLIDEAN_SKY);
     glDrawArrays(GL_TRIANGLES, 0, isize(skyvertices));
@@ -306,28 +339,22 @@ color_t skycolor(cell *c) {
   return gradient(0x4040FF, 0xFFFFFF, 0, z, 63);
   }
 
+EX bool use_euclidean_infinity = true;
+
 /** move an Euclidean matrix to V(C0) == C0 */
-EX void be_euclidean_infinity(transmatrix& V) { for(int i=0; i<3; i++) V[i][3] = 0; }
+EX void be_euclidean_infinity(transmatrix& V) {
+  if(euclid && msphere && use_euclidean_infinity)
+    for(int i=0; i<3; i++) V[i][3] = 0;
+  }
 
 void draw_star(const shiftmatrix& V, const hpcshape& sh, color_t col, ld rev = false) {
-  ld star_val = 2;
-  bool have_stars = cgi.emb->is_same_in_same() || cgi.emb->is_sph_in_low() || cgi.emb->is_euc_in_hyp();
-  if(cgi.emb->is_sph_in_low()) {
-    if(cgi.SKY < 0) have_stars = false;
-    if(euclid) star_val = 1.8;
-    }
-  if(cgi.emb->is_euc_in_hyp() && (rev ? cgi.SKY > 0 : cgi.SKY < 0)) have_stars = false;
-  if(!have_stars) return;
-  ld val = cgi.SKY+star_val;
+  if(!do_draw_stars(rev)) return;
+
+  ld val = cgi.STAR;
   if(rev) val = -val;
 
-  if(euclid) {
-    auto V1 = V; be_euclidean_infinity(V1.T);
-    queuepolyat(V1 * zpush(val), sh, col, PPR::EUCLIDEAN_SKY);
-    }
-  else {
-    queuepolyat(V * zpush(val), sh, col, PPR::SKY);
-    }
+  auto V1 = V; be_euclidean_infinity(V1.T);
+  queuepolyat(V1 * zpush(val), sh, col, PPR::SKY);
   }
 
 void celldrawer::draw_ceiling() {
@@ -341,7 +368,6 @@ void celldrawer::draw_ceiling() {
   switch(ceiling_category(c)) {
     /* ceilingless levels */
     case 1: {
-      if(euclid && !cgi.emb->is_sph_in_low()) return;
       if(fieldpattern::fieldval_uniq(c) % 3 == 0)
         draw_star(V, cgi.shNightStar, 0xFFFFFFFF);
       add_to_sky(0x00000F, 0x00000F);
@@ -356,7 +382,6 @@ void celldrawer::draw_ceiling() {
       }
     
     case 2: {
-      if(euclid && !cgi.emb->is_sph_in_low()) return;
       color_t col;
       color_t skycol;
       
@@ -464,7 +489,6 @@ void celldrawer::draw_ceiling() {
             placeSidewall(c, i, SIDE_HIGH2, V, darkena(wcol2, fd, 0xFF));
         }
       if(among(c->wall, waClosedGate, waOpenGate) && qfi.fshape) draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], 0x202020FF, PPR::WALL);
-      if(euclid) return;
 
       draw_star(V, cgi.shNightStar, 0xFFFFFFFF);
       break;
@@ -517,7 +541,6 @@ void celldrawer::draw_ceiling() {
       else if(qfi.fshape)
         draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(fcol, fd, 0xFF), PPR::WALL);
 
-      if(euclid) return;
       draw_star(V, cgi.shNightStar, 0xFFFFFFFF);
       break;
       }
@@ -539,6 +562,7 @@ EX void swap_if_missing(bool missing) {
 
 EX void make_air() {
   if(!sky) return;
+  if(!embedded_plane) return;
 
   if(centerover != sky_centerover) {
     sky_centerover = centerover;
@@ -547,6 +571,7 @@ EX void make_air() {
     }
   
   if(!context_fog) return;
+  if(vrhr::rendering()) return;
 
   const int AIR_TEXTURE = 512;
   if(!airbuf) {

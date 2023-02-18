@@ -727,7 +727,7 @@ void dqi_poly::gldraw() {
         glhr::color2(color, (flags & POLY_INTENSE) ? 2 : 1);
         glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
         glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW && prio != PPR::EUCLIDEAN_SKY);
-        glhr::set_fogbase(prio == PPR::SKY ? 1.0 + (euclid ? 20 : 5 / sightranges[geometry]) : 1.0);
+        glhr::set_fogbase(prio == PPR::SKY ? 1.0 + ((abs(cgi.SKY - cgi.LOWSKY)) / sightranges[geometry]) : 1.0);
         glDrawArrays(GL_TRIANGLES, ioffset, cnt);
         }
       else {
@@ -2456,7 +2456,7 @@ EX void drawqueue() {
   #endif
 
   #if MAXMDIM >= 4 && CAP_GL
-  if(embedded_plane && (hyperbolic || cgi.emb->is_sph_in_low() || cgi.emb->is_in_noniso()) && !vrhr::rendering()) make_air();
+  make_air();
   #endif
   
   #if CAP_VR

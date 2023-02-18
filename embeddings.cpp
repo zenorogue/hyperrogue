@@ -271,6 +271,7 @@ EX }
     virtual ld anim_center_z() { return center_z(); }
     virtual hyperpoint anim_tile_center();
     virtual void logical_fix(transmatrix&) = 0;
+    virtual ld height_limit(ld sign);
     
     virtual bool is_euc_in_product() { return false; }
     virtual bool is_product_embedding() { return false; }
@@ -283,7 +284,6 @@ EX }
     virtual bool is_euc_in_nil() { return false; }
     virtual bool is_euc_in_noniso() { return false; }
     virtual bool is_in_noniso() { return false; }
-    virtual bool is_depth_limited() { return false; }
     virtual bool is_cylinder() { return false; }
     virtual bool no_spin() { return false; }
 
@@ -306,6 +306,21 @@ EX }
   #endif
 
 EX geometry_information *swapper;
+
+ld embedding_method::height_limit(ld sign) {
+  if(sign > 0) {
+    if(hyperbolic || sol || nih || sl2 || in_h2xe()) return 5;
+    if(sphere || nil || in_s2xe()) return M_PI/2;
+    return 100;
+    }
+  if(sign < 0) {
+    if(center_z()) return -center_z();
+    if(hyperbolic || sol || nih || sl2 || in_h2xe()) return -5;
+    if(sphere || nil || in_s2xe()) return -M_PI/2;
+    return -100;
+    }
+  return 0;
+  }
 
 hyperpoint embedding_method::tile_center() {
   ld z = center_z();
@@ -608,7 +623,6 @@ struct emb_euc_in_hyp : emb_actual {
 
 struct emb_sphere_in_low : emb_actual {
   bool is_sph_in_low() override { return true; }
-  bool is_depth_limited() override { return true; }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override {
     return map_relative_push(logical_to_actual(i)) * zpush(-1);
     }
@@ -757,7 +771,6 @@ struct emb_euc_in_sl2 : emb_euclid_noniso {
 struct emb_euc_cylinder : emb_euclid_noniso {
   bool is_cylinder() override { return true; }
   ld center_z() override { return 1; }
-  bool is_depth_limited() override { return true; }
   transmatrix get_lsti() override { return cspin90(0, 1); }
   hyperpoint actual_to_intermediate(hyperpoint a) override { 
     ld z0 = asin_auto(hypot(a[1], a[2]));
@@ -845,9 +858,11 @@ struct emb_euc_cylinder_sl2 : emb_euc_cylinder_twisted {
     }
   };
 
+/** Clifford torus */
 struct emb_euc_in_sph : emb_euclid_noniso {
   bool is_euc_in_sph() override { return true; }
   ld center_z() override { return 1; }
+  virtual ld height_limit(ld sign) { return sign < 0 ? 0 : 90._deg; }
   hyperpoint actual_to_intermediate(hyperpoint a) override { 
     ld tx = hypot(a[0], a[2]);
     ld ty = hypot(a[1], a[3]);

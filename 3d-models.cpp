@@ -745,13 +745,18 @@ void geometry_information::make_star(hpcshape& sh, ld rad) {
 void geometry_information::make_euclidean_sky() {
   bshape(cgi.shEuclideanSky, PPR::EUCLIDEAN_SKY);
   for(int x=-20; x<20; x++)
-  for(int y=-20; y<20; y++)
+  for(int y=-20; y<20; y++) {
+    auto x0 = x * cgi.LOWSKY;
+    auto x1 = (x+1) * cgi.LOWSKY;
+    auto y0 = y * cgi.LOWSKY;
+    auto y1 = (y+1) * cgi.LOWSKY;
     hpcsquare(
-      lzpush(cgi.WALL) * hpxy(x, y),
-      lzpush(cgi.WALL) * hpxy(x, y+1),
-      lzpush(cgi.WALL) * hpxy(x+1, y),
-      lzpush(cgi.WALL) * hpxy(x+1, y+1)
+      lzpush(cgi.LOWSKY) * hpxy(x0, y0),
+      lzpush(cgi.LOWSKY) * hpxy(x0, y1),
+      lzpush(cgi.LOWSKY) * hpxy(x1, y0),
+      lzpush(cgi.LOWSKY) * hpxy(x1, y1)
       );
+    }
   }
 
 /** res[0] and res[1] place H on the plane, while res[2] is the altitude */
@@ -1118,13 +1123,10 @@ void geometry_information::make_3d_models() {
   make_ball(shDisk, orbsize*.2, 2);
   make_ball(shHeptaMarker, zhexf*.2, 1);
   make_ball(shSnowball, zhexf*.1, 1);
-  if(euclid) {
-    make_ball(shSun, 0.5, 2);
-    make_euclidean_sky();
-    }
-  else
-    make_star(shSun, 3);
-  make_star(shNightStar, euclid ? 0.05 : 0.75);
+  make_ball(shSkyboxSun, 8 * zhexf, 2);
+  if(euclid) make_euclidean_sky();
+  make_star(shSun, vid.sun_size * zhexf);
+  make_star(shNightStar, vid.star_size * zhexf);
   
   if(WDIM == 2) {
     for(int i=0; i<3; i++) {

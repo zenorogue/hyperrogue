@@ -325,6 +325,7 @@ void non_editable() {
 void float_setting::show_edit_option(int key) {
   if(modify_me) modify_me(this);
   dialog::addSelItem(XLAT(menu_item_name), fts(*value) + unit, key);
+  if(*value == use_the_default_value) dialog::lastItem().value = XLAT("default");
   dialog::add_action([this] () {
     add_to_changed(this);
     dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text); 
@@ -2368,6 +2369,45 @@ EX void show_spatial_embedding() {
   dialog::display();
   }
 
+EX void show3D_height_details() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+  dialog::init(XLAT("3D detailed settings"));
+
+  add_edit(vid.wall_height);
+
+  dialog::addBreak(50);
+
+  add_edit(vid.rock_wall_ratio);
+  add_edit(vid.human_wall_ratio);
+  add_edit(vid.lake_top);
+  add_edit(vid.lake_shallow);
+  add_edit(vid.lake_bottom);
+
+  dialog::addBreak(50);
+
+  if(embedded_plane) {
+    add_edit(auto_remove_roofs);
+    add_edit(vid.wall_height2);
+    add_edit(vid.wall_height3);
+    add_edit(draw_sky);
+    add_edit(vid.lowsky_height);
+    add_edit(vid.sky_height);
+    add_edit(vid.star_height);
+    add_edit(vid.infdeep_height);
+    add_edit(vid.sun_size);
+    add_edit(vid.star_size);
+    add_edit(vid.height_limits);
+    if(euclid && msphere) add_edit(use_euclidean_infinity);
+    }
+  else dialog::addInfo(XLAT("more options in 3D engine"));
+
+  dialog::addBreak(100);
+
+  dialog::addBack();
+  dialog::display();
+  }
+
 EX void show3D() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
@@ -2411,11 +2451,9 @@ EX void show3D() {
     
     dialog::addBreak(50);
     add_edit(vid.wall_height);
+    dialog::addSelItem("height details", "", 'D');
+    dialog::add_action_push(show3D_height_details);
     
-    add_edit(vid.rock_wall_ratio);
-    add_edit(vid.human_wall_ratio);
-    add_edit(vid.lake_top);
-    add_edit(vid.lake_bottom);
     if(scale_used())
       add_edit(vid.creature_scale);
     }
@@ -2584,7 +2622,10 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   param_b(numerical_minefield, "numerical_minefield")
   ->editable("display mine counts numerically", 'n');
   param_b(dont_display_minecount, "dont_display_minecount");
-  param_b(draw_sky, "draw sky", true);
+  param_enum(draw_sky, "draw_sky", "draw_sky", skyAutomatic)
+  -> editable({{"NO", "do not draw sky"}, {"automatic", ""}, {"skybox", "works only in Euclidean"}, {"always", "might be glitched in some settings"}}, "sky rendering", 's');
+  param_b(use_euclidean_infinity, "use_euclidean_infinity", true)
+  -> editable("infinite sky", 'i');
   param_f(linepatterns::parallel_count, "parallel_count")
     ->editable(0, 24, 1, "number of parallels drawn", "", 'n');
   param_f(linepatterns::parallel_max, "parallel_max")
@@ -2688,10 +2729,44 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
         fts(cosh(vid.depth - vid.wall_height * vid.human_wall_ratio) / cosh(vid.depth)))
         );
         });
-  param_f(vid.lake_top, "lake_top", "3D lake top", .25)
+  param_f(vid.lake_top, "lake_top", "3D lake top", .25 / 0.3)
     ->editable(0, 1, .1, "Level of water surface", "", 'l');
-  param_f(vid.lake_bottom, "lake_bottom", "3D lake bottom", .9)
+  param_f(vid.lake_shallow, "lake_shallow", "3D lake shallow", .4 / 0.3)
+    ->editable(0, 1, .1, "Level of shallow water", "", 's');
+  param_f(vid.lake_bottom, "lake_bottom", "3D lake bottom", .9 / 0.3)
     ->editable(0, 1, .1, "Level of water bottom", "", 'k');
+  param_f(vid.wall_height2, "wall_height2", "wall_height2", 2)
+    ->editable(0, 5, .1, "ratio of high walls to normal walls", "", '2');
+  param_f(vid.wall_height3, "wall_height3", "wall_height3", 3)
+    ->editable(0, 5, .1, "ratio of very high walls to normal walls", "", '3');
+  param_f(vid.lowsky_height, "lowsky_height", "lowsky_height", 2)
+    ->editable(0, 5, .1, "lowsky height", "", '4');
+  param_f(vid.sky_height, "sky_height", "sky_height", use_the_default_value)
+    ->editable(0, 10, .1, "altitude of the sky", "", '5')
+    ->set_extra([] {
+      dialog::addSelItem(XLAT("use the default value"), 0, 'D');
+      dialog::add_action([] { vid.sky_height = use_the_default_value; });
+      });
+  param_f(vid.star_height, "star_height", "star_height", use_the_default_value)
+    ->editable(0, 10, .1, "altitude of the stars", "", '6')
+    ->set_extra([] {
+      dialog::addSelItem(XLAT("use the default value"), 0, 'D');
+      dialog::add_action([] { vid.star_height = use_the_default_value; });
+      });
+  param_f(vid.infdeep_height, "infdeep_height", "infdeep_height", use_the_default_value)
+    ->editable(0, 10, .1, "infinite depth", "", '7')
+    ->set_extra([] {
+      dialog::addSelItem(XLAT("use the default value"), 0, 'D');
+      dialog::add_action([] { vid.infdeep_height = use_the_default_value; });
+      });
+  param_f(vid.sun_size, "sun_size", "sun_size", 8)
+    ->editable(0, 10, .1, "sun size (relative to item sizes)", "", '8');
+  param_f(vid.star_size, "star_size", "star_size", 0.75)
+    ->editable(0, 10, .1, "night star size (relative to item sizes)", "", '9');
+  param_b(vid.height_limits, "height_limits", true)
+    ->editable("automatically limit heights if too high", 'l');
+  param_b(auto_remove_roofs, "auto_remove_roofs", true)
+    ->editable("do not render higher levels if camera too high", 'r');
   addsaver(vid.tc_depth, "3D TC depth", 1);
   addsaver(vid.tc_camera, "3D TC camera", 2);
   addsaver(vid.tc_alpha, "3D TC alpha", 3);

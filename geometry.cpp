@@ -236,7 +236,7 @@ struct geometry_information {
     BODY, BODY1, BODY2, BODY3,
     NECK1, NECK, NECK3, HEAD, HEAD1, HEAD2, HEAD3,
     ALEG0, ALEG, ABODY, AHEAD, BIRD, LOWSKY, SKY, HIGH, HIGH2,
-    SHALLOW;
+    HELL, STAR, SHALLOW;
   ld human_height, slev;
 
   ld eyelevel_familiar, eyelevel_human, eyelevel_dog;
@@ -308,7 +308,7 @@ hpcshape
   shKnife, shTongue, shFlailMissile, shTrapArrow,
   shPirateHook, shSmallPirateHook, shPirateHood, shEyepatch, shPirateX,
   // shScratch, 
-  shHeptaMarker, shSnowball, shHugeDisk, shSun, shNightStar, shEuclideanSky,
+  shHeptaMarker, shSnowball, shHugeDisk, shSkyboxSun, shSun, shNightStar, shEuclideanSky,
   shSkeletonBody, shSkull, shSkullEyes, shFatBody, shWaterElemental,
   shPalaceGate, shFishTail,
   shMouse, shMouseLegs, shMouseEyes,
@@ -991,10 +991,9 @@ EX namespace geom3 {
       BIRD = 1.20;
       SHALLOW = .95;
       STUFF = 1;
-      LOWSKY = SKY = HIGH = HIGH2 = 1;
+      LOWSKY = SKY = HIGH = HIGH2 = STAR = 1;
       }
     else {
-      INFDEEP = GDIM == 3 ? (sphere ? 90._deg : +5) : (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(vid.camera);
       ld wh = actual_wall_height();
       WALL = lev_to_factor(wh);
       FLOOR = lev_to_factor(0);
@@ -1041,36 +1040,43 @@ EX namespace geom3 {
       slev = vid.rock_wall_ratio * wh / 3;
       for(int s=0; s<=3; s++)
         SLEV[s] = lev_to_factor(vid.rock_wall_ratio * wh * s/3);
-      LAKE = lev_to_factor(sgn * -vid.lake_top);
-      SHALLOW = lev_to_factor(sgn * -.4);
+      LAKE = lev_to_factor(sgn * wh * -vid.lake_top);
+      SHALLOW = lev_to_factor(sgn * wh * -vid.lake_shallow);
       HELLSPIKE = lev_to_factor(sgn * -(vid.lake_top+vid.lake_bottom)/2);
       BOTTOM = lev_to_factor(sgn * -vid.lake_bottom);
-      LOWSKY = lev_to_factor(2 * wh);
-      HIGH = LOWSKY;
-      HIGH2 = lev_to_factor(3 * wh);
-      SKY = LOWSKY - sgn * 5;
+      LOWSKY = lev_to_factor(vid.lowsky_height * wh);
+      HIGH = lev_to_factor(vid.wall_height2 * wh);
+      HIGH2 = lev_to_factor(vid.wall_height3 * wh);
+      SKY = vid.sky_height == use_the_default_value ? cgi.emb->height_limit(-sgn) : lev_to_factor(vid.sky_height * wh);
+      STAR = vid.star_height == use_the_default_value ? lerp(FLOOR, SKY, 0.95) : lev_to_factor(vid.star_height * wh);
+      HELL = -SKY;
+      if(embedded_plane)
+        INFDEEP = vid.infdeep_height == use_the_default_value ? cgi.emb->height_limit(sgn) : lev_to_factor(vid.infdeep_height * wh);
+       else
+        INFDEEP = (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(vid.camera);
 
       /* in spherical/cylindrical case, make sure that the high stuff does not go through the center */
 
-      if(cgi.emb->is_depth_limited()) {
-        ld max_high = lerp(-FLOOR, -1, 0.8);
-        ld max_high2 = lerp(-FLOOR, -1, 0.9);
-        if(HIGH < max_high) HIGH = max_high;
-        if(HIGH2 < max_high2) HIGH2 = max_high2;
-        if(LOWSKY < max_high) LOWSKY = max_high;
-        if(SKY < max_high) SKY = max_high;
-        if(vid.wall_height < 0) {
-          SKY = -3 * vid.wall_height;
-          LOWSKY = 1.75 * SKY;
-          }
-        if(SHALLOW < max_high) SHALLOW = max_high;
-        if(LAKE < max_high) LAKE = max_high;
-        if(BOTTOM < max_high2) BOTTOM = max_high2;
-        if(HELLSPIKE < max_high) HELLSPIKE = max_high;
-        if(sgn < 0) INFDEEP = -1;
+      if(vid.height_limits) {
+        auto hp = cgi.emb->height_limit(1);
+        auto hn = cgi.emb->height_limit(-1);
+        auto adjust = [&] (ld& val, ld& guide, ld lerpval) {
+          if(val > hp)
+            val = lerp(guide, hp, lerpval);
+          else if(val < hn)
+            val = lerp(guide, hn, lerpval);
+          };
+        adjust(HIGH, FLOOR, 0.8);
+        adjust(HIGH2, HIGH, 0.5);
+        adjust(SKY, FLOOR, 1);
+        adjust(STAR, FLOOR, 0.9);
+        adjust(LAKE, FLOOR, 0.8);
+        adjust(SHALLOW, LAKE, 0.9);
+        adjust(BOTTOM, SHALLOW, 0.5);
+        adjust(INFDEEP, FLOOR, 1);
         }
 
-      if(cgi.emb->is_euc_in_hyp() && sgn < 0) INFDEEP = FLOOR - 5;
+      println(hlog, "WALL = ", WALL, " LOWSKY = ", LOWSKY, " SKY = ", SKY, " STAR = ", STAR, " INFDEEP = ", INFDEEP, " wh = ", wh);
       }
     }    
 
@@ -1269,6 +1275,15 @@ EX string cgi_string() {
     V("LB", fts(vid.lake_bottom));
     if(GDIM == 3 && vid.pseudohedral)
       V("PS", fts(vid.depth_bonus));
+    V("LS", fts(vid.lake_shallow));
+    V("SSu", fts(vid.sun_size));
+    V("SSt", fts(vid.star_size));
+    V("WH2", fts(vid.wall_height2));
+    V("WH3", fts(vid.wall_height3));
+    V("WHL", fts(vid.lowsky_height));
+    if(vid.sky_height != use_the_default_value) V("SHe", fts(vid.sky_height));
+    if(vid.star_height != use_the_default_value) V("StH", fts(vid.star_height));
+    if(vid.infdeep_height != use_the_default_value) V("ID", fts(vid.infdeep_height));
     }
 
   V("3D", ONOFF(vid.always3));
