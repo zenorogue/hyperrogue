@@ -494,6 +494,7 @@ struct emb_same_in_same : emb_actual {
   transmatrix intermediate_to_actual_translation(hyperpoint i) override { return rgpushxto0(logical_to_actual(i)); }
   hyperpoint actual_to_intermediate(hyperpoint a) override { return actual_to_logical(a); }
   hyperpoint orthogonal_move(const hyperpoint& h, ld z) override {
+    if(euclid) { hyperpoint h1 = h; h1[2] += z; return h1; }
     ld u = 1;
     if(h[2]) z += asin_auto(h[2]), u /= cos_auto(asin_auto(h[2]));
     u *= cos_auto(z);
