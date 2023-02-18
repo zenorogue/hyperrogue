@@ -532,7 +532,9 @@ EX struct renderbuffer *airbuf;
 EX void swap_if_missing(bool missing) {
   if(!missing) return;
   arb::swap_vertices();
+  #if CAP_IRR
   irr::swap_vertices();
+  #endif
   }
 
 EX void make_air() {

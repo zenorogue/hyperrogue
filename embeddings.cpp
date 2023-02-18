@@ -68,9 +68,13 @@ EX namespace geom3 {
     };
 
   EX bool clifford_torus_valid() {
+    #if CAP_RUG
     rug::clifford_torus ct;
     ld h = ct.xh | ct.yh;
     return !(sqhypot_d(2, ct.xh) < 1e-3 || sqhypot_d(2, ct.yh) < 1e-3 || abs(h) > 1e-3);
+    #else
+    return false;
+    #endif
     }
 
   EX string why_wrong(eSpatialEmbedding sp) {
@@ -198,6 +202,7 @@ EX namespace geom3 {
     }
 
   EX void configure_clifford_torus() {
+    #if CAP_RUG
     dynamicval<ld> dtessf(cgi.tessf, 1);
     rug::clifford_torus ct;
 
@@ -220,9 +225,11 @@ EX namespace geom3 {
     vid.depth = alpha - 1;
     vid.wall_height = min(1 / euclid_embed_scale_mean(), (90._deg - alpha) * 0.9);
     vid.eye = vid.wall_height / 2 - vid.depth;
+    #endif
     }
 
   EX void configure_cylinder() {
+    #if CAP_RUG
     dynamicval<ld> dtessf(cgi.tessf, 1);
     rug::clifford_torus ct;
     hyperpoint vec;
@@ -233,6 +240,7 @@ EX namespace geom3 {
     euclid_embed_scale = TAU / hypot_d(2, vec);
     euclid_embed_scale_y = 1;
     euclid_embed_rotate = atan2(vec[1], vec[0]) / degree;
+    #endif
     }
 
 EX }
@@ -425,22 +433,26 @@ struct emb_none : embedding_method {
 struct emb_actual : embedding_method {
 
   hyperpoint base_to_logical(hyperpoint h) override {
+    #if CAP_BT
     if(bt::in()) {
       auto h1 = bt::inverse_horopoint(h);
       h1[2] = 0; h1[3] = 1;
       return h1;
       }
+    #endif
     h /= h[2];
     h[2] = 0; h[3] = 1;
     return h;
     }
 
   hyperpoint logical_to_base(hyperpoint h) override {
+    #if CAP_BT
     if(bt::in()) {
       auto h1 = bt::get_horopoint(h);
       h1[3] = 1;
       return h1;
       }
+    #endif
     h[2] = 1; h = normalize(h);
     h[3] = 1;
     return h;

@@ -2277,6 +2277,7 @@ EX void display_embedded_errors() {
       }
     }
   if(meuclid && spatial_embedding == seProductS) {
+    #if CAP_RUG
     rug::clifford_torus ct;
     bool err = sqhypot_d(2, ct.xh) < 1e-3 && sqhypot_d(2, ct.yh) < 1e-3;
     if(err) {
@@ -2290,6 +2291,9 @@ EX void display_embedded_errors() {
         geom3::apply_settings_full(); start_game(); }); });
       return;
       }
+    #else
+    dialog::addInfo(XLAT("error: not supported"), 0xC00000);
+    #endif
     }
   if(msphere && !among(spatial_embedding, seNone, seDefault, seLowerCurvature, seMuchLowerCurvature, seProduct, seProductS)) {
     dialog::addInfo(XLAT("error: this method does not work in spherical geometry"), 0xC00000);
@@ -2330,6 +2334,7 @@ EX void show_spatial_embedding() {
     if(emb == geom3::seNone) {
       dialog::addBoolItem(XLAT("third-person perspective"), in_tpp(), 'T');
       dialog::add_action(geom3::switch_tpp);
+      #if CAP_RUG
       dialog::addBoolItem(XLAT("Hypersian Rug"), rug::rugged, 'u');
       dialog::add_action([] {
         if(in_tpp()) geom3::switch_tpp();
@@ -2338,6 +2343,7 @@ EX void show_spatial_embedding() {
           }
         else rug::close();
         });
+      #endif
       dialog::addBreak(100);
       }
     else {
@@ -2463,10 +2469,12 @@ EX void show3D() {
     dialog::addSelItem(XLAT("projection"), current_proj_name(), 'M');
     dialog::add_action_push(models::model_menu);  
     }
+  #if CAP_RUG
   if(GDIM == 2) {
     dialog::addItem(XLAT("configure Hypersian Rug"), 'u');
     dialog::add_action_push(rug::show);
     }
+  #endif
 
   #if MAXMDIM >= 4
   if(GDIM == 3) add_edit_fov('f');

@@ -694,6 +694,7 @@ EX void world_list() {
   switch_to(c);
   dialog::end_list();
   dialog::addBreak(100);
+  #if CAP_EDIT
   dialog::addItem("add a saved world to the scene", 'a');
   dialog::add_action([] {
     dialog::openFileDialog(levelfile, XLAT("level to load:"), ".lev", [] () {
@@ -713,6 +714,7 @@ EX void world_list() {
         }
       });
     });
+  #endif
   dialog::addBack();
   dialog::display();
   }
