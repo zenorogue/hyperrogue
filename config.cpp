@@ -140,6 +140,12 @@ struct float_setting : public setting {
   void load_from(const string& s) override;
   };
 
+struct float_setting_dft : public float_setting {
+  void show_edit_option(int key) override;
+  function<ld()> get_hint;
+  float_setting_dft* set_hint(const function<ld()>& f) { get_hint = f; return this; }
+  };
+
 struct int_setting : public setting {
   int *value;
   int dft;
@@ -335,6 +341,26 @@ void float_setting::show_edit_option(int key) {
     });
   }
 
+void float_setting_dft::show_edit_option(int key) {
+  if(modify_me) modify_me(this);
+  dialog::addSelItem(XLAT(menu_item_name), fts(*value) + unit, key);
+  if(*value == use_the_default_value) dialog::lastItem().value = XLAT("default: ") + fts(get_hint());
+  dialog::add_action([this] () {
+    add_to_changed(this);
+    if(*value == use_the_default_value) *value = get_hint();
+    dialog::editNumber(*value, min_value, max_value, step, dft, XLAT(menu_item_name), help_text);
+    if(sets) sets();
+    if(reaction) dialog::reaction = reaction;
+    if(!is_editable) dialog::extra_options = non_editable;
+    auto eo = dialog::extra_options;
+    dialog::extra_options = [eo, this] {
+      dialog::addSelItem(XLAT("use the default value"), "", 'D');
+      dialog::add_action([this] { *value = use_the_default_value; });
+      if(eo) eo();
+      };
+    });
+  }
+
 void int_setting::show_edit_option(int key) {
   if(modify_me) modify_me(this);
   dialog::addSelItem(XLAT(menu_item_name), its(*value), key);
@@ -372,6 +398,24 @@ EX float_setting *param_f(ld& val, const string p, const string s, ld dft) {
     u->max_value = 2 * dft;
     }
   u->step = dft / 10;
+  u->dft = dft;
+  val = dft;
+  u->add_as_saver();
+  auto f = &*u;
+  params[u->parameter_name] = std::move(u);
+  return f;
+  }
+
+EX float_setting_dft *param_fd(ld& val, const string s, ld dft IS(use_the_default_value) ) {
+  unique_ptr<float_setting_dft> u ( new float_setting_dft );
+  u->parameter_name = s;
+  u->config_name = s;
+  u->menu_item_name = s;
+  u->value = &val;
+  u->last_value = dft;
+  u->min_value = -100;
+  u->max_value = +100;
+  u->step = 1;
   u->dft = dft;
   val = dft;
   u->add_as_saver();
@@ -2400,6 +2444,19 @@ EX void show3D_height_details() {
     add_edit(star_prob);
     add_edit(vid.height_limits);
     if(euclid && msphere) add_edit(use_euclidean_infinity);
+
+    dialog::addBreak(100);
+    dialog::addHelp(lalign(0, "absolute altitudes:\n\n"
+      "depth ", cgi.INFDEEP,
+      " water ", tie(cgi.BOTTOM, cgi.SHALLOW, cgi.LAKE),
+      " floor ", cgi.FLOOR,
+      " eye ", vid.eye,
+      " walls ", tie(cgi.WALL, cgi.HIGH, cgi.HIGH2),
+      " star ", cgi.STAR,
+      " sky ", cgi.SKY,
+      "\n\n",
+      "recommended: ", cgi.emb->height_limit(-1), " to ", cgi.emb->height_limit(1)
+      ));
     }
   else dialog::addInfo(XLAT("more options in 3D engine"));
 
@@ -2730,36 +2787,36 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
         fts(cosh(vid.depth - vid.wall_height * vid.human_wall_ratio) / cosh(vid.depth)))
         );
         });
+  string unitwarn =
+    "The unit this is value is given in is wall height. "
+    "Note that, in exponentially expanding spaces, too high values could cause rendering issues. So "
+    "if you want infinity, values of 5 or similar should be used -- there is no visible difference "
+    "from infinity and glitches are avoided.";
   param_f(vid.lake_top, "lake_top", "3D lake top", .25 / 0.3)
-    ->editable(0, 1, .1, "Level of water surface", "", 'l');
+    ->editable(0, 1, .1, "Level of water surface", unitwarn, 'l');
   param_f(vid.lake_shallow, "lake_shallow", "3D lake shallow", .4 / 0.3)
-    ->editable(0, 1, .1, "Level of shallow water", "", 's');
+    ->editable(0, 1, .1, "Level of shallow water", unitwarn, 's');
   param_f(vid.lake_bottom, "lake_bottom", "3D lake bottom", .9 / 0.3)
-    ->editable(0, 1, .1, "Level of water bottom", "", 'k');
+    ->editable(0, 1, .1, "Level of water bottom", unitwarn, 'k');
   param_f(vid.wall_height2, "wall_height2", "wall_height2", 2)
-    ->editable(0, 5, .1, "ratio of high walls to normal walls", "", '2');
+    ->editable(0, 5, .1, "ratio of high walls to normal walls", unitwarn, '2');
   param_f(vid.wall_height3, "wall_height3", "wall_height3", 3)
-    ->editable(0, 5, .1, "ratio of very high walls to normal walls", "", '3');
+    ->editable(0, 5, .1, "ratio of very high walls to normal walls", unitwarn, '3');
   param_f(vid.lowsky_height, "lowsky_height", "lowsky_height", 2)
-    ->editable(0, 5, .1, "lowsky height", "", '4');
-  param_f(vid.sky_height, "sky_height", "sky_height", use_the_default_value)
-    ->editable(0, 10, .1, "altitude of the sky", "", '5')
-    ->set_extra([] {
-      dialog::addSelItem(XLAT("use the default value"), 0, 'D');
-      dialog::add_action([] { vid.sky_height = use_the_default_value; });
-      });
-  param_f(vid.star_height, "star_height", "star_height", use_the_default_value)
-    ->editable(0, 10, .1, "altitude of the stars", "", '6')
-    ->set_extra([] {
-      dialog::addSelItem(XLAT("use the default value"), 0, 'D');
-      dialog::add_action([] { vid.star_height = use_the_default_value; });
-      });
-  param_f(vid.infdeep_height, "infdeep_height", "infdeep_height", use_the_default_value)
-    ->editable(0, 10, .1, "infinite depth", "", '7')
-    ->set_extra([] {
-      dialog::addSelItem(XLAT("use the default value"), 0, 'D');
-      dialog::add_action([] { vid.infdeep_height = use_the_default_value; });
-      });
+    ->editable(0, 5, .1, "sky fake height", "Sky is rendered at the distance computed based on "
+      "the sky height, which might be beyond the range visible in fog. To prevent this, "
+      "the intensity of the fog effect depends on the value here rather than the actual distance. "
+      "Stars are affected similarly.", '4');
+  param_fd(vid.sky_height, "sky_height")
+    ->set_hint([] { return geom3::to_wh(cgi.SKY); })
+    ->editable(0, 10, .1, "altitude of the sky", unitwarn, '5')
+    ->set_reaction(delete_sky);
+  param_fd(vid.star_height, "star_height")
+    ->set_hint([] { return geom3::to_wh(cgi.STAR); })
+    ->editable(0, 10, .1, "altitude of the stars", unitwarn, '6');
+  param_fd(vid.infdeep_height, "infdeep_height")
+    ->set_hint([] { return geom3::to_wh(cgi.INFDEEP); })
+    ->editable(0, 10, .1, "infinite depth", unitwarn, '7');
   param_f(vid.sun_size, "sun_size", "sun_size", 8)
     ->editable(0, 10, .1, "sun size (relative to item sizes)", "", '8');
   param_f(vid.star_size, "star_size", "star_size", 0.75)
@@ -2767,7 +2824,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   param_f(star_prob, "star_prob", 0.3)
     ->editable(0, 1, .01, "star probability", "probability of star per tile", '*');
   param_b(vid.height_limits, "height_limits", true)
-    ->editable("automatically limit heights if too high", 'l');
+    ->editable("prevent exceeding recommended altitudes", 'l');
   param_b(auto_remove_roofs, "auto_remove_roofs", true)
     ->editable("do not render higher levels if camera too high", 'r');
   addsaver(vid.tc_depth, "3D TC depth", 1);

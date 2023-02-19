@@ -901,8 +901,13 @@ EX namespace geom3 {
     }
   EX ld factor_to_lev(ld fac) { 
     if(mproduct) return -fac;
-    if(GDIM == 3) return fac;
+    if(WDIM == 3) return fac;
+    if(GDIM == 3) return vid.depth - fac;
     return vid.depth - projection_to_abslev(factor_to_projection(fac)); 
+    }
+
+  EX ld to_wh(ld val) {
+    return factor_to_lev(val / actual_wall_height());
     }
   
   EX void do_auto_eye() {
@@ -1075,8 +1080,6 @@ EX namespace geom3 {
         adjust(BOTTOM, SHALLOW, 0.5);
         adjust(INFDEEP, FLOOR, 1);
         }
-
-      println(hlog, "WALL = ", WALL, " LOWSKY = ", LOWSKY, " SKY = ", SKY, " STAR = ", STAR, " INFDEEP = ", INFDEEP, " wh = ", wh);
       }
     }    
 

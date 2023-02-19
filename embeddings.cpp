@@ -309,13 +309,15 @@ EX geometry_information *swapper;
 
 ld embedding_method::height_limit(ld sign) {
   if(sign > 0) {
-    if(hyperbolic || sol || nih || sl2 || in_h2xe()) return 5;
+    if(sol || nih) return 2.5;
+    if(hyperbolic || sl2 || in_h2xe()) return 5;
     if(sphere || nil || in_s2xe()) return M_PI/2;
     return 100;
     }
   if(sign < 0) {
     if(center_z()) return -center_z();
-    if(hyperbolic || sol || nih || sl2 || in_h2xe()) return -5;
+    if(sol || nih) return -2.5;
+    if(hyperbolic || sl2 || in_h2xe()) return -5;
     if(sphere || nil || in_s2xe()) return -M_PI/2;
     return -100;
     }
