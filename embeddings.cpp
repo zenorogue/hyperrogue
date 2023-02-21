@@ -1170,7 +1170,9 @@ EX void swapmatrix_iview(transmatrix& ori, transmatrix& V) {
   if(geom3::swap_direction == -1) {
     auto& data = mdata[&V];
     data.logical_coordinates = cgi.emb->intermediate_to_logical * cgi.emb->actual_to_intermediate(V*tile_center());
-    data.rotation = inverse(cgi.emb->map_relative_push(V*tile_center())) * V;
+    auto tl = cgi.emb->intermediate_to_actual_translation(cgi.emb->logical_to_intermediate * data.logical_coordinates);
+    auto itl = inverse(tl);
+    data.rotation = itl * V;
 
     data.logical_coordinates[2] = ilerp(cgi.FLOOR, cgi.WALL, data.logical_coordinates[2]);
 
@@ -1184,8 +1186,9 @@ EX void swapmatrix_iview(transmatrix& ori, transmatrix& V) {
     if(!mdata.count(&V)) { swapmatrix(V); ori = Id; return; }
     auto& data = mdata[&V];
     if(!eqmatrix(data.saved, V)) { swapmatrix(V); ori = Id; return; }
-    data.logical_coordinates[2] = lerp(cgi.FLOOR, cgi.WALL, data.logical_coordinates[2]);
-    V = cgi.emb->intermediate_to_actual_translation( cgi.emb->logical_to_intermediate * data.logical_coordinates );
+    auto lc = data.logical_coordinates;
+    lc[2] = lerp(cgi.FLOOR, cgi.WALL, lc[2]);
+    V = cgi.emb->intermediate_to_actual_translation( cgi.emb->logical_to_intermediate * lc );
     ori = Id;
     auto rot = data.rotation;
     rot = cgi.emb->logical_scaled_to_intermediate * rot;
