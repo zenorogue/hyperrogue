@@ -137,8 +137,8 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
         int d1 = (d+S7-1)%S7;
         bool missing0 = !h->move(0)->move(d1);
         if(missing0) {
-          if(s == 1) 
-            h->distance = h->move(0)->distance + 1; 
+          if(s == 1 && h->move(0)->s != hsOrigin)
+            h->distance = h->move(0)->distance + 1;
           }
         else {
           heptagon* h1 = createStep(h->move(0), d1);
