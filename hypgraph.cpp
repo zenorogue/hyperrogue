@@ -1910,8 +1910,6 @@ EX hyperpoint vertical_vector() {
   return C0;
   }
 
-EX bool down_is_forward;
-
 EX void spinEdge(ld aspd) { 
 
   #if CAP_VR
@@ -1924,32 +1922,38 @@ EX void spinEdge(ld aspd) {
     
     hyperpoint h = inverse(V) * C0;
     if(!gproduct) {
-      V = V * rgpushxto0(h);
+      if(embedded_plane)
+        V = V * cgi.emb->map_relative_push(h);
+      else
+        V = V * rgpushxto0(h);
       }
     
-    int dir = down_is_forward ? 0 : 1;
-
-    V = cspin90(2, dir) * V;
+    V = cspin90(2, 1) * V;
+    if(vid.wall_height < 0) V = cspin180(1, 2) * V;
+    V = V * cgi.emb->logical_scaled_to_intermediate;
 
     if(1) {
       dynamicval<eGeometry> g(geometry, gSphere);
-      bool b = vid.always3;
-      vid.always3 = false;
-      geom3::apply_always3();
+      bool em = embedded_plane;
+      if(em) geom3::light_flip(true);
       V = gpushxto0(V*C0) * V;
       fixmatrix(V);
-      if(b) {
-        vid.always3 = b;
-        geom3::apply_always3();
-        }
+      if(em) geom3::light_flip(false);
       }
     
     vrhr::be_33(V);
 
-    V = cspin90(dir, 2) * V;
+    if(vid.wall_height < 0) V = cspin180(1, 2) * V;
+    V = cspin90(1, 2) * V;
+    V = V * cgi.emb->intermediate_to_logical_scaled;
+    if(!gproduct) {
+      if(embedded_plane)
+        V = V * inverse(cgi.emb->map_relative_push(h));
+      else
+        V = V * gpushxto0(h);
+      }
     V = inverse(T) * V;
-    if(!gproduct) V = V * gpushxto0(h);
-    get_view_orientation() = V;
+    rotate_view(V * inverse(get_view_orientation()));
     return;
     }
   #endif
