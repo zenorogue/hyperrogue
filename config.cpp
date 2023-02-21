@@ -2850,7 +2850,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     "separate mirror images or different football types.", 'd');
   param_f(global_boundary_ratio, "global_boundary_ratio")
   ->editable(0, 5, 0.1, "Width of cell boundaries",
-    "How wide should the cell boundaries be.", 'b');
+    "How wide should the cell boundaries be.", '0');
   addsaver(vid.gp_autoscale_heights, "3D Goldberg autoscaling", true);  
   addsaver(scorefile, "savefile");
   param_b(savefile_selection, "savefile_selection")
