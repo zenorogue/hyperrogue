@@ -401,6 +401,7 @@ EX void full_rotate_camera(int dir, ld val) {
     val *= camera_rot_speed;
     if(third_person_rotation) shift_view(ctangent(2, -third_person_rotation)), didsomething = true, playermoved = false;
     ld max_angle = 90._deg - 1e-4;
+    ld max_angle1 = 90._deg - 0.5e-4;
     if(walking::on && dir == 1) {
       max_angle /= degree;
       walking::eye_angle += val * walking::eye_angle_scale / degree;
@@ -411,9 +412,9 @@ EX void full_rotate_camera(int dir, ld val) {
       hyperpoint vv = vertical_vector();
       ld alpha = -atan2(vv[2], vv[1]);
       rotate_view(cspin(2, 1, alpha));
-      if(dir == 1 && alpha + val > max_angle)
+      if(dir == 1 && alpha <= max_angle1 && alpha + val > max_angle)
         val = max_angle - alpha;
-      if(dir == 1 && alpha + val < -max_angle)
+      if(dir == 1 && alpha >= -max_angle1 && alpha + val < -max_angle)
         val = -max_angle - alpha;
       rotate_view(cspin(dir, 2, val));
       rotate_view(cspin(1, 2, alpha));
