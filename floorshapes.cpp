@@ -227,7 +227,7 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
   T = spin(m.o.bspi) * T;
   for(auto &pp: lst) pp = T * pp;
   
-  if(osym % rots && rots % osym) printf("warning: rotation oddity (shapeid %d, osym=%d rots=%d)\n", shapeid, osym, rots);
+  if(osym % rots && rots % osym && (debugflags & DF_GEOM)) printf("warning: rotation oddity (shapeid %d, osym=%d rots=%d)\n", shapeid, osym, rots);
 
   if(rots > osym && rots % osym == 0) {
     int rep = rots / osym;
@@ -255,7 +255,7 @@ void geometry_information::bshape2(hpcshape& sh, PPR prio, int shapeid, matrixli
           nh = m.second[r] * z, mapped++;
           }
         }
-      if(mapped == 0) printf("warning: not mapped (shapeid %d)\n", shapeid);
+      if(mapped == 0 && (debugflags & DF_GEOM)) printf("warning: not mapped (shapeid %d)\n", shapeid);
       if(invalid) {
         apeirogonal = true;        
         for(auto h: head) tail.push_back(h);
