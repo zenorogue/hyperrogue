@@ -575,7 +575,7 @@ struct emb_same_in_same : emb_actual {
 struct emb_product_embedding : emb_actual {
   virtual bool is_product_embedding() override { return true; }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override { return rgpushxto0(logical_to_actual(i)); }
-  hyperpoint actual_to_intermediate(hyperpoint a) override { return a; }
+  hyperpoint actual_to_intermediate(hyperpoint a) override { return actual_to_logical(a); }
   hyperpoint flatten(hyperpoint h) override { h /= exp(zlevel(h)); return h; }
   hyperpoint orthogonal_move(const hyperpoint& h, ld z) override { return h * exp(z); }
   transmatrix base_to_actual(const transmatrix &T) override { return T; }
