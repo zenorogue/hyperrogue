@@ -543,6 +543,7 @@ struct emb_same_in_same : emb_actual {
     geom3::light_flip(true);
     h1 = base_to_logical(h1);
     geom3::light_flip(false);
+    h1[2] = z;
     return h1;
     }
 
