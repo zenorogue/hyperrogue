@@ -30,7 +30,7 @@ EX bool rendering() { return state == 2 || state == 4; }
 EX bool rendering_eye() { return state == 2; }
 
 #if HDR
-enum class eHeadset { none, rotation_only, reference, holonomy, model_viewing };
+enum class eHeadset { none, rotation_only, reference, holonomy, model_viewing, holonomy_z };
 enum class eEyes { none, equidistant, truesim };
 enum class eCompScreen { none, reference, single, eyes };
 #endif
@@ -53,7 +53,8 @@ vector<pair<string, string> > headset_desc = {
   {"reference", "The reference point in the real world corresponds to the reference point in VR. When you move your head in a loop, you return to where you started."},
   {"holonomy", "Headsets movements in the real world are translated to the same movements in VR. Since the geometry is different, when you move your head in a loop, you usually don't return "
    "to where you started."},
-  {"view model", "Fix a 3D projection of the non-Euclidean world, and see it from many viewpoints."}
+  {"view model", "Fix a 3D projection of the non-Euclidean world, and see it from many viewpoints."},
+  {"holonomy Z", "in 2D geometries rendered in 3D, like holonomy, but keep the correct altitude and vertical direction."},
   };
 
 vector<pair<string, string> > eyes_desc = {
@@ -497,12 +498,19 @@ EX void be_33(transmatrix& T) {
   T[3][3] = 1;
   }
 
-EX void apply_movement(const transmatrix& rel) {
+eShiftMethod smVR() {
+  if(gproduct) return smProduct;
+  if(!nisot::geodesic_movement) return smLie;
+  if(nonisotropic || stretch::in()) return smGeodesic;
+  return smIsotropic;
+  }
+
+EX void apply_movement(const transmatrix& rel, eShiftMethod sm) {
   hyperpoint h0 = IN_E4(inverse(rel) * C0);
   hyperpoint h = h0;
   for(int i=0; i<3; i++) h[i] /= -absolute_unit_in_meters;
   
-  shift_view(h);
+  shift_view(h, sm);
   transmatrix Rot = rel;
   be_33(Rot);
   rotate_view(Rot);
@@ -512,11 +520,52 @@ EX void vr_shift() {
   if(first) return;
   rug::using_rugview urv;
   if(GDIM == 2) return;
+
+  auto hsm1 = hsm;
+  if(hsm1 == eHeadset::holonomy_z && !embedded_plane) hsm1 = eHeadset::holonomy;
        
-  if(GDIM == 3 && hsm == eHeadset::holonomy) {    
-    apply_movement(IN_E4(hmd_at * inverse(hmd_ref_at)));
+  if(hsm1 == eHeadset::holonomy) {
+    apply_movement(IN_E4(hmd_at * inverse(hmd_ref_at)), smVR());
     hmd_ref_at = hmd_at;
     playermoved = false;
+    if(!rug::rugged) optimizeview();
+    }
+
+  if(hsm1 == eHeadset::holonomy_z) {
+
+    apply_movement(IN_E4(hmd_at * inverse(hmd_ref_at)), smEmbedded);
+    hmd_ref_at = hmd_at;
+    playermoved = false;
+
+    bool below = cgi.WALL < cgi.FLOOR;
+
+    if(vid.fixed_yz) {
+      transmatrix spin_T;
+      ld eye_level;
+
+      if(1) {
+        dynamicval<eGeometry> g(geometry, gCubeTiling);
+        spin_T = vrhr::hmd_at;
+        spin_T = vrhr::sm * inverse(spin_T);
+        eye_level = -spin_T[1][3] / vrhr::absolute_unit_in_meters;
+        vrhr::be_33(spin_T);
+        }
+      // auto shift = vrhr::sm * (inverse(hmd_at) * C0 - inverse(hmd_ref_at) * C0);
+
+      hyperpoint h = tC0(view_inverse(actual_view_transform * View));
+      auto lcur = cgi.emb->get_logical_z(h);
+      auto lnew = cgi.FLOOR + (below?-1:1) * eye_level;
+      println(hlog, "lcur = ", lcur, " lnew = ", lnew, " below = ", below);
+
+      if(1) {
+        hyperpoint p = Hypc;
+        p[1] = lcur - lnew;
+        p = hmd_ref_at * p;
+        if(below) p = -1 * p;
+        shift_view(p, smVR());
+        }
+      }
+
     if(!rug::rugged) optimizeview();
     }
   }
@@ -1068,15 +1117,15 @@ EX void render() {
       if(hsm == eHeadset::rotation_only) {
         transmatrix T = hmd_at;
         be_33(T);
-        apply_movement(T);
+        apply_movement(T, smVR());
         }
       
       else if(GDIM == 3 && hsm == eHeadset::reference) {
-        apply_movement(IN_E4(hmd_at * inverse(hmd_ref_at)));
+        apply_movement(IN_E4(hmd_at * inverse(hmd_ref_at)), smVR());
         }
 
       if(eyes == eEyes::truesim && i != 2) {
-        apply_movement(IN_E4(inverse(vrdata.eyepos[i])));
+        apply_movement(IN_E4(inverse(vrdata.eyepos[i])), smVR());
         }
 
       make_actual_view();
