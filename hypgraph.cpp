@@ -2613,7 +2613,7 @@ void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
 EX void draw_boundary(int w) {
 
   if(w == 1) return;
-  if(nonisotropic || euclid || gproduct) return;
+  if(nonisotropic || (euclid && pmodel != mdFisheye) || gproduct) return;
   #if CAP_VR
   if(vrhr::active() && pmodel == mdHyperboloid) return;
   #endif
