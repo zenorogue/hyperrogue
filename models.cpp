@@ -188,7 +188,10 @@ EX namespace models {
   /** mdRelPerspective and mdRelOrthogonal in hyperbolic space only make sense if it is actually a de Sitter visualization */
   EX bool desitter_projections;
 
+  EX vector<bool_reaction_t> avail_checkers;
+
   EX bool model_available(eModel pm) {
+    if(pm < isize(avail_checkers) && avail_checkers[pm]) return avail_checkers[pm]();
     if(mdinf[pm].flags & mf::technical) return false;
     if(gproduct) {
       if(pm == mdPerspective) return true;
