@@ -1014,7 +1014,9 @@ enum eModel : int {
   mdWerner, mdAitoff, mdHammer, mdLoximuthal, mdMiller, mdGallStereographic, mdWinkelTripel,
   // 39..48
   mdPoorMan, mdPanini, mdRetroCraig, mdRetroLittrow, mdRetroHammer, mdThreePoint, mdLiePerspective, mdLieOrthogonal, mdRelPerspective, mdRelOrthogonal,
-  // 49..
+  // 49
+  mdHorocyclicEqa,
+  // 50..
   mdGUARD, mdPixel, mdHyperboloidFlat, mdPolynomial, mdManual
   };
 #endif
@@ -1076,6 +1078,7 @@ EX vector<modelinfo> mdinf = {
   {X3("Lie orthogonal"), mf::euc_boring, DEFAULTS},
   {X3("relativistic perspective"), mf::euc_boring, DEFAULTS},
   {X3("relativistic orthogonal"), mf::euc_boring, DEFAULTS},
+  {X3("horocyclic equal-area"), mf::euc_boring, DEFAULTS},
   {X3("guard"), mf::technical, DEFAULTS},
   {X3("pixel"), mf::technical, DEFAULTS},
   {X3("hypflat"), mf::technical, DEFAULTS},

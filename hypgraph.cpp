@@ -780,6 +780,26 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       break;
       }
 
+    case mdHorocyclicEqa: {
+
+      if(hyperbolic) {
+        models::apply_orientation_yz(H[1], H[2]);
+        models::apply_orientation(H[0], H[1]);
+        }
+
+      ret = hyperbolic ? deparabolic13(H) : H;
+      ret[0] = exp(-ret[0]) - 1;
+      ret *= .5;
+      ret[LDIM] = 1;
+
+      if(hyperbolic) {
+        models::apply_orientation(ret[1], ret[0]);
+        models::apply_orientation_yz(ret[2], ret[1]);
+        }
+
+      break;
+      }
+
     case mdLieOrthogonal: {
       ret = lie_log_correct(H_orig, H);
 
