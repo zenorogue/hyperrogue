@@ -658,12 +658,14 @@ void display_data::set_projection(int ed, ld shift) {
       eyewidth_translate(ed);
     }
   
+  auto bcolor = models::is_perspective(pmodel) ? backcolor : (modelcolor >> 8);
+
   auto ortho = [&] (ld x, ld y) {
     glhr::glmatrix M = glhr::ortho(x, y, 1);
     if(shader_flags & SF_ZFOG) {
       M[2][2] = 2 / (pconf.clip_max - pconf.clip_min);
       M[3][2] = (pconf.clip_min + pconf.clip_max) / (pconf.clip_max - pconf.clip_min);
-      auto cols = glhr::acolor(darkena(backcolor, 0, 0xFF));
+      auto cols = glhr::acolor(darkena(bcolor, 0, 0xFF));
       glUniform4f(selected->uFogColor, cols[0], cols[1], cols[2], cols[3]);
       }
     else M[2][2] /= 10000;
@@ -713,7 +715,7 @@ void display_data::set_projection(int ed, ld shift) {
     }
   else if(shader_flags & SF_ODSBOX) {
     ortho(M_PI, M_PI);
-    glhr::fog_max(1/sightranges[geometry], darkena(backcolor, 0, 0xFF));
+    glhr::fog_max(1/sightranges[geometry], darkena(bcolor, 0, 0xFF));
     }
   else if(shader_flags & SF_PERS3) {
     if(vrhr::rendering()) use_mv();
@@ -733,7 +735,7 @@ void display_data::set_projection(int ed, ld shift) {
         glhr::eyeshift = glhr::tmtogl(xpush(vid.ipd * ed/2));
         }
       }
-    glhr::fog_max(1/sightranges[geometry], darkena(backcolor, 0, 0xFF));
+    glhr::fog_max(1/sightranges[geometry], darkena(bcolor, 0, 0xFF));
     }
   else {
     if(pconf.alpha > -1) {
