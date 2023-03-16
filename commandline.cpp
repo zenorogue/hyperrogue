@@ -289,6 +289,13 @@ int arg::readCommon() {
     shift(); View = View * cspin(i, j, argf());
     playermoved = false;
     }
+  else if(argis("-grotatei")) {
+    PHASE(3);  start_game();
+    shift(); int i = argi();
+    shift(); int j = argi();
+    shift(); rotate_view(cspin(i, j, argf()));
+    playermoved = false;
+    }
   else if(argis("-cview")) {
     PHASE(3);  start_game();
     View = Id;
