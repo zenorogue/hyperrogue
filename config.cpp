@@ -1202,8 +1202,10 @@ EX void initConfig() {
   param_f(camera_rot_speed, "camrot", "camera-rot-speed", 1);
   param_f(third_person_rotation, "third_person_rotation", 0);
 
-  param_f(panini_alpha, "panini_alpha", 0);
-  param_f(stereo_alpha, "stereo_alpha", 0);
+  param_f(panini_alpha, "panini_alpha", 0)
+  ->set_reaction(reset_all_shaders);
+  param_f(stereo_alpha, "stereo_alpha", 0)
+  ->set_reaction(reset_all_shaders);
 
   callhooks(hooks_configfile);
   
