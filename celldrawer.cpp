@@ -32,6 +32,7 @@ struct celldrawer {
   void draw_wall();
   void draw_boat();
   void draw_grid();
+  void draw_grid_edge(int t, color_t col, int prec);
   void draw_ceiling();
   void draw_halfvine();
   void draw_mirrorwall();
@@ -829,6 +830,14 @@ EX int grid_prec() {
   return prec;
   }
 
+// should we draw t-th edge of c, or the opposite edge?
+EX bool pick_for_grid(cell *c, int t) {
+  cell *c1 = c->move(t);
+  if(!c1) return false;
+  // removed: if(WDIM == 3 && bt::in() && !sn::in()) return !among(t, 5, 6, 8);
+  return c < c1 || isWarped(c->move(t)) || fake::split();
+  }
+
 void celldrawer::draw_grid() {
 
   int prec = grid_prec();
@@ -849,97 +858,92 @@ void celldrawer::draw_grid() {
   vid.linewidth *= vid.multiplier_grid;
   vid.linewidth *= cgi.scalefactor;
 
-  // sphere: 0.3948
-  // sphere heptagonal: 0.5739
-  // sphere trihepta: 0.3467
-  
-  // hyper trihepta: 0.2849
-  // hyper heptagonal: 0.6150
-  // hyper: 0.3798
-  
-  if(0);
-  #if MAXMDIM == 4
-  else if(WDIM == 3) {
-    int ofs = currentmap->wall_offset(c);
-    for(int t=0; t<c->type; t++) {
-      if(!c->move(t)) continue;
-      if(bt::in() && !sn::in() && !among(t, 5, 6, 8)) continue;
-      if(!bt::in() && c->move(t) < c) continue;
-      dynamicval<color_t> g(poly_outline, gridcolor(c, c->move(t)));          
-      if(fat_edges && reg3::in()) {
-        auto& ss = currentmap->get_cellshape(c);
-        for(int i=0; i<c->type; i++) if(c < c->move(i) || fake::split()) {
-          int face = isize(ss.faces[i]);
-          for(int j=0; j<face; j++) {
-            int jj = j == face-1 ? 0 : j+1;
-            int jjj = jj == face-1 ? 0 : jj+1;
-            hyperpoint a = ss.faces[i][j];
-            hyperpoint b = ss.faces[i][jj];
-            if(cgflags & qIDEAL) {
-              ld mm = cgi.ultra_mirror_part;
-              if((cgflags & qULTRA) && !reg3::ultra_mirror_in())
-                mm = lerp(1-cgi.ultra_material_part, cgi.ultra_material_part, .99);
-              tie(a, b) = make_pair(normalize(lerp(a, b, mm)), normalize(lerp(b, a, mm)));
-              }
-            else {
-              a = normalize(a);
-              b = normalize(b);
-              }
-            gridline(V, a, b, gridcolor(c, c->move(t)), prec);            
+  int maxt = c->type;
+  if(arb::apeirogon_hide_grid_edges && arb::is_apeirogonal(c)) maxt -= 2;
 
-            if(reg3::ultra_mirror_in()) {
-              hyperpoint a = ss.faces[i][j];
-              hyperpoint b = ss.faces[i][jj];
-              hyperpoint d = ss.faces[i][jjj];
-              auto& mm = cgi.ultra_mirror_part;
-              tie(a, d) = make_pair(normalize(lerp(a, b, mm)), normalize(lerp(d, b, mm)));
-              gridline(V, a, d, stdgridcolor, prec);
-              }
-            }
-          }
+  if(isWarped(c) && has_nice_dual()) {
+    if(pseudohept(c)) for(int t=0; t<c->type; t++) if(isWarped(c->move(t)))
+      gridline(V, get_warp_corner(c, t%c->type), get_warp_corner(c, (t+1)%c->type), gridcolor(c, c->move(t)), prec);
+    return;
+    }
+  
+  for(int t=0; t<maxt; t++)
+    if(pick_for_grid(c, t))
+      draw_grid_edge(t, gridcolor(c, c->move(t)), prec);
+  }
+
+void celldrawer::draw_grid_edge(int t, color_t col, int prec) {
+
+  #if MAXMDIM == 4
+  if(WDIM == 3) {
+    int ofs = currentmap->wall_offset(c);
+
+    // if(bt::in() && !sn::in() && !among(t, 5, 6, 8)) continue;
+    // if(!bt::in() && c->move(t) < c) continue;
+
+    dynamicval<color_t> g(poly_outline, col);
+    bool use_fat = fat_edges && (reg3::in() || euc::in(3));
+    if(!use_fat) {
+      queuepoly(V, cgi.shWireframe3D[ofs + t], 0);
+      return;
+      }
+
+    auto& ss = currentmap->get_cellshape(c);
+    auto& fa = ss.faces[t];
+    int face = isize(fa);
+    for(int j=0; j<face; j++) {
+      int jj = j == face-1 ? 0 : j+1;
+      int jjj = jj == face-1 ? 0 : jj+1;
+      hyperpoint a = fa[j];
+      hyperpoint b = fa[jj];
+      if(cgflags & qIDEAL) {
+        ld mm = cgi.ultra_mirror_part;
+        if((cgflags & qULTRA) && !reg3::ultra_mirror_in())
+          mm = lerp(1-cgi.ultra_material_part, cgi.ultra_material_part, .99);
+        tie(a, b) = make_pair(normalize(lerp(a, b, mm)), normalize(lerp(b, a, mm)));
         }
       else {
-        queuepoly(V, cgi.shWireframe3D[ofs + t], 0);
+        a = normalize(a);
+        b = normalize(b);
+        }
+      gridline(V, a, b, col, prec);
+
+      if(reg3::ultra_mirror_in()) {
+        hyperpoint a = fa[j];
+        hyperpoint b = fa[jj];
+        hyperpoint d = fa[jjj];
+        auto& mm = cgi.ultra_mirror_part;
+        tie(a, d) = make_pair(normalize(lerp(a, b, mm)), normalize(lerp(d, b, mm)));
+        gridline(V, a, d, stdgridcolor, prec);
         }
       }
+    return;
     }
   #endif
   #if CAP_BT
-  else if(bt::in() && WDIM == 2) {
-    for(int t=0; t<c->type; t++) {
-      if(!c->move(t)|| c->move(t) < c) continue;
-      auto h0 = bt::get_corner_horo_coordinates(c, t);
-      auto h1 = bt::get_corner_horo_coordinates(c, t+1);
-      int steps = 12 * abs(h0[1] - h1[1]);
-      if(!steps) {
-        gridline(V, bt::get_horopoint(h0), bt::get_horopoint(h1), gridcolor(c, c->move(t)), prec);
+  if(bt::in() && WDIM == 2) {
+    auto h0 = bt::get_corner_horo_coordinates(c, t);
+    auto h1 = bt::get_corner_horo_coordinates(c, t+1);
+    int steps = 12 * abs(h0[1] - h1[1]);
+    if(!steps) {
+      gridline(V, bt::get_horopoint(h0), bt::get_horopoint(h1), col, prec);
+      }
+    else {
+      if(vid.linequality > 0) steps <<= vid.linequality;
+      if(vid.linequality < 0) steps >>= -vid.linequality;
+      auto step = (h1 - h0) / steps;
+      if(GDIM == 3) {
+        for(int i=0; i<=steps; i++) gridline(V, bt::get_horopoint(h0 + i * step), V, bt::get_horopoint(h0 + (i+1) * step), gridcolor(c, c->move(t)), prec-2);
         }
       else {
-        if(vid.linequality > 0) steps <<= vid.linequality;
-        if(vid.linequality < 0) steps >>= -vid.linequality;
-        auto step = (h1 - h0) / steps;
-        if(GDIM == 3) {
-          for(int i=0; i<=steps; i++) gridline(V, bt::get_horopoint(h0 + i * step), V, bt::get_horopoint(h0 + (i+1) * step), gridcolor(c, c->move(t)), prec-2);
-          }
-        else {
-          for(int i=0; i<=steps; i++) curvepoint(bt::get_horopoint(h0 + i * step));
-          queuecurve(V, gridcolor(c, c->move(t)), 0, PPR::LINE);
-          }
+        for(int i=0; i<=steps; i++) curvepoint(bt::get_horopoint(h0 + i * step));
+        queuecurve(V, col, 0, PPR::LINE);
         }
       }
+     return;
     }
   #endif
-  else if(isWarped(c) && has_nice_dual()) {
-    if(pseudohept(c)) for(int t=0; t<c->type; t++) if(isWarped(c->move(t)))
-      gridline(V, get_warp_corner(c, t%c->type), get_warp_corner(c, (t+1)%c->type), gridcolor(c, c->move(t)), prec);
-    }
-  else {
-    int maxt = c->type;
-    if(arb::apeirogon_hide_grid_edges && arb::is_apeirogonal(c)) maxt -= 2;
-    for(int t=0; t<maxt; t++)
-      if(c->move(t) && (c->move(t) < c || isWarped(c->move(t)) || fake::split()))
-      gridline(V, get_corner_position(c, t%c->type), get_corner_position(c, (t+1)%c->type), gridcolor(c, c->move(t)), prec);
-    }
+  gridline(V, get_corner_position(c, t%c->type), get_corner_position(c, (t+1)%c->type), col, prec);
   }
 
 void celldrawer::draw_halfvine() {
