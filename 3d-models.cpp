@@ -1297,7 +1297,7 @@ hpcshape& geometry_information::generate_pipe(ld length, ld width, ePipeEnd endt
     }
 #endif
 
-  const int MAX_X = 8;
+  const int MAX_X = 32;
   const int MAX_R = 20;
   auto at = [&] (ld i, ld a, ld z = 1, ld s = 1) {
     a += 0.5;
