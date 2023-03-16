@@ -439,16 +439,27 @@ EX bool mod_allowed() {
   return cheater || autocheat || arcm::in() || arb::in() || tour::on;
   }
 
+EX bool distances_legal(cell *c) {
+  if(mod_allowed()) return true;
+  switch(distance_from) {
+    case dfPlayer:
+      return true;
+    case dfStart:
+      return bt::in();
+    case dfWorld:
+      return c && among(c->land, laOcean, laIvoryTower, laEndorian, laDungeon, laTemple, laWhirlpool, laCanvas);
+    }
+  return false;
+  }
+
 EX int curr_dist(cell *c) {
+  if(!distances_legal(c)) return 0;
   switch(distance_from) {
     case dfPlayer:
       return c->cpdist < INFD ? c->cpdist : celldistance(cwt.at, c);
     case dfStart:
-      if(!mod_allowed()) return 0;
       return celldist(c);
     case dfWorld:
-      if(!mod_allowed() && !among(c->land, laOcean, laIvoryTower, laEndorian, laDungeon, laTemple, laWhirlpool, laCanvas))
-        return 0;
       if((isCyclic(c->land) || among(c->land, laCanvas, laCaribbean, laStorms, laRlyeh))) {
         if(eubinary || c->master->alt) return celldistAlt(c);
         return UNKNOWN;
@@ -1060,7 +1071,7 @@ EX int hyperbolic_celldistance(cell *c1, cell *c2) {
       else {
         if(cl1 == cr2 || cr1 == cl2) found_distance = d;
         }
-      }    
+      }
     
     if(d >= found_distance) {
       if(sl_used == sibling_limit && IRREGULAR) { 

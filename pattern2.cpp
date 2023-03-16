@@ -2890,7 +2890,12 @@ EX namespace linepatterns {
         }
       )
     );
-  EX linepattern patTriRings = linepattern("lines of equal distance", 0xFFFFFF00, trees_known,
+
+  bool trees_legal() {
+    return (bt::in() || trees_known()) && distances_legal(nullptr);
+    }
+
+  EX linepattern patTriRings = linepattern("lines of equal distance", 0xFFFFFF00, trees_legal,
     ALLCELLS(
       if(valence() == 3) {
         forCellIdEx(c2, i, c) {
@@ -2907,13 +2912,30 @@ EX namespace linepatterns {
         }
       )
     );
-  EX linepattern patTriTree = linepattern("tessellation tree", 0xFFFFFF00, trees_known,
+  EX linepattern patTriTree = linepattern("tessellation tree", 0xFFFFFF00, trees_legal,
     ALLCELLS(
       cell *parent = ts::right_parent(c, curr_dist);
       if(gmatrix.count(parent)) {
         hyperpoint end = tC0(currentmap->adj(c, neighborId(c, parent)));
         hyperpoint start = normalize(C0 + tree_starter * (end - C0));
         gridlinef(V, start, V, end, col, 2 + vid.linequality);
+        }
+      )
+    );
+
+  EX linepattern patTriWalls = linepattern("tessellation walls", 0xFF000000, trees_legal,
+    ALLCELLS(
+      if(gmatrix.count(c)) {
+        celldrawer cd;
+        cd.c = c;
+        cd.V = V;
+        for(int t=0; t<c->type; t++) {
+          cell *c1 = c->move(t);
+          if(!c1) continue;
+          if(c1 == ts::right_parent(c, curr_dist)) continue;
+          if(c == ts::right_parent(c1, curr_dist)) continue;
+          cd.draw_grid_edge(t, col, 2 + vid.linequality);
+          }
         }
       )
     );
@@ -2991,7 +3013,7 @@ EX namespace linepatterns {
     );
   
   #if HDR
-  extern linepattern patTriTree, patTriRings, patDual;
+  extern linepattern patTriTree, patTriRings, patTriWalls, patDual;
   #endif
   
   EX vector<linepattern*> patterns = { 
@@ -2999,7 +3021,7 @@ EX namespace linepatterns {
     
     &patTree, &patAltTree, &patZebraTriangles, &patZebraLines,
     &patVine, &patPalacelike, &patPalace, &patPower, &patHorocycles,
-    &patTriRings, &patTriTree,
+    &patTriRings, &patTriTree, &patTriWalls,
     &patGoldbergTree, &patIrregularMaster, &patGoldbergSep, &patHeawood, &patArcm,
     &patCircles, &patRadii, &patMeridians, &patParallels, &patSublines, &patUltra
     };
