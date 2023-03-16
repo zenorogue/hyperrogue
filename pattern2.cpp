@@ -3181,7 +3181,8 @@ int read_pattern_args() {
 
   else if(argis("-palgw")) shift_arg_formula(linepatterns::width);
 
-  else if(argis("-noplayer")) mapeditor::drawplayer = !mapeditor::drawplayer;
+  else if(argis("-noplayer")) mapeditor::drawplayer = false;
+  else if(argis("-drawplayer")) { shift(); mapeditor::drawplayer = argi(); }
   else if(argis("-pcol")) {
     shift();
     colortable *ct = &(colortables[patterns::whichCanvas]);
