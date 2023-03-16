@@ -24,7 +24,7 @@ template<class T> void makeband_complex(shiftpoint H, hyperpoint& ret, const T& 
 
 template<class T> void add_complex(const char *name, flagtype flag, const T& f) {
   int q = isize(mdinf);
-  mdinf.emplace_back(modelinfo{name, name, name, mf::euc_boring | mf::broken | flag, 0, 0, 0, 0, 0, nullptr});
+  mdinf.emplace_back(modelinfo{name, name, name, mf::euc_boring | mf::broken | flag, nullptr});
   while(isize(extra_projections) < q) extra_projections.emplace_back();
   extra_projections.emplace_back([f] (shiftpoint& H_orig, hyperpoint& H, hyperpoint& ret) {
     makeband_complex(H_orig, ret, f);
@@ -33,14 +33,14 @@ template<class T> void add_complex(const char *name, flagtype flag, const T& f) 
 
 template<class T> void add_extra(const char *name, flagtype flag, const T& f) {
   int q = isize(mdinf);
-  mdinf.emplace_back(modelinfo{name, name, name, mf::euc_boring | mf::broken | flag, 0, 0, 0, 0, 0, nullptr});
+  mdinf.emplace_back(modelinfo{name, name, name, mf::euc_boring | mf::broken | flag, nullptr});
   while(isize(extra_projections) < q) extra_projections.emplace_back();
   extra_projections.emplace_back(f);
   }
 
 template<class T> void add_band(const char *name, flagtype flag, const T& f) {
   int q = isize(mdinf);
-  mdinf.emplace_back(modelinfo{name, name, name, mf::euc_boring | mf::broken | flag, 0, 0, 0, 0, 0, nullptr});
+  mdinf.emplace_back(modelinfo{name, name, name, mf::euc_boring | mf::broken | flag, nullptr});
   while(isize(extra_projections) < q) extra_projections.emplace_back();
   extra_projections.emplace_back([f] (shiftpoint& H_orig, hyperpoint& H, hyperpoint& ret) {
     makeband_f(H_orig, ret, f);
@@ -189,37 +189,11 @@ void add_extra_projections() {
     y = ay;
     });
 
-  add_extra("double horocyclic", 0, [] (shiftpoint& H_orig, hyperpoint& H, hyperpoint& ret) {
-    ret = H;
-
-    if(hyperbolic) {
-
-      find_zlev(H);
-
-      models::apply_orientation_yz(H[1], H[2]);
-      models::apply_orientation(H[0], H[1]);
-
-      hyperpoint h1 = deparabolic13(H);
-      ret[1] = h1[1];
-
-      h1 = deparabolic13(cspin90(0, 1) * H);
-      ret[0] = -h1[1];
-
-      if(GDIM == 3) {
-        h1 = deparabolic13(cspin90(2, 1) * H);
-        ret[0] = -h1[2];
-        }
-      }
-
-    ret[LDIM] = 1;
-
-    if(hyperbolic) {
-      models::apply_orientation(ret[1], ret[0]);
-      models::apply_orientation_yz(ret[2], ret[1]);
-      }
+  add_extra("double horocyclic", mf::horocyclic | mf::orientation | mf::axial, [] (shiftpoint& H_orig, hyperpoint& H, hyperpoint& ret) {
+    make_axial(H, ret, [] (hyperpoint h) { return deparabolic13(cspin90(1,0)*h)[1]; });
     });
 
-  add_extra("azimuthal cylindrical", 0, [] (shiftpoint& H_orig, hyperpoint& H, hyperpoint& ret) {
+  add_extra("azimuthal cylindrical", mf::cylindrical | mf::azimuthal | mf::orientation, [] (shiftpoint& H_orig, hyperpoint& H, hyperpoint& ret) {
     find_zlev(H);
     models::apply_orientation_yz(H[1], H[2]);
     models::apply_orientation(H[0], H[1]);
