@@ -388,7 +388,7 @@ cld exp_parser::parse(int prio) {
     else if(number == "psl_steps") res = cgi.psl_steps;
     else if(number == "single_step") res = cgi.single_step;
     else if(number == "step") res = hdist0(tC0(currentmap->adj(cwt.at, 0)));
-    else if(number == "edgelen") res = hdist(get_corner_position(cwt.at, 0), get_corner_position(cwt.at, 1));
+    else if(number == "edgelen") { start_game(); res = hdist(get_corner_position(cwt.at, 0), get_corner_position(cwt.at, 1)); }
     else if(number == "mousey") res = mousey;
     else if(number == "random") res = randd();
     else if(number == "mousez") res = cld(mousex - current_display->xcenter, mousey - current_display->ycenter) / cld(current_display->radius, 0);
