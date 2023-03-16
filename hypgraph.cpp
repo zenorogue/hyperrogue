@@ -211,7 +211,7 @@ bool hypot_zlev(ld zlev, ld& d, ld& df, ld& zf) {
 int twopoint_sphere_flips;
 bool twopoint_do_flips;
 
-ld find_zlev(hyperpoint& H) {
+EX ld find_zlev(hyperpoint& H) {
 
   if(spatial_graphics) {
     ld zlev = zlevel(H);
