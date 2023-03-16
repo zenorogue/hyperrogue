@@ -24,7 +24,7 @@ template<class T> void makeband_complex(shiftpoint H, hyperpoint& ret, const T& 
 
 template<class T> void add_complex(const char *name, flagtype flag, const T& f) {
   int q = isize(mdinf);
-  mdinf.emplace_back(modelinfo{name, name, name, mf::euc_boring | mf::broken | flag, nullptr});
+  mdinf.emplace_back(modelinfo{name, name, name, mf::euc_boring | mf::broken | flag});
   while(isize(extra_projections) < q) extra_projections.emplace_back();
   extra_projections.emplace_back([f] (shiftpoint& H_orig, hyperpoint& H, hyperpoint& ret) {
     makeband_complex(H_orig, ret, f);
@@ -33,14 +33,14 @@ template<class T> void add_complex(const char *name, flagtype flag, const T& f) 
 
 template<class T> void add_extra(const char *name, flagtype flag, const T& f) {
   int q = isize(mdinf);
-  mdinf.emplace_back(modelinfo{name, name, name, mf::euc_boring | mf::broken | flag, nullptr});
+  mdinf.emplace_back(modelinfo{name, name, name, mf::euc_boring | mf::broken | flag});
   while(isize(extra_projections) < q) extra_projections.emplace_back();
   extra_projections.emplace_back(f);
   }
 
 template<class T> void add_band(const char *name, flagtype flag, const T& f) {
   int q = isize(mdinf);
-  mdinf.emplace_back(modelinfo{name, name, name, mf::euc_boring | mf::broken | flag, nullptr});
+  mdinf.emplace_back(modelinfo{name, name, name, mf::euc_boring | mf::broken | flag});
   while(isize(extra_projections) < q) extra_projections.emplace_back();
   extra_projections.emplace_back([f] (shiftpoint& H_orig, hyperpoint& H, hyperpoint& ret) {
     makeband_f(H_orig, ret, f);

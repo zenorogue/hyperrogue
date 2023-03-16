@@ -992,8 +992,6 @@ struct modelinfo {
   const char *name_spherical;  
   
   flagtype flags;
-
-  const char* name;
   };
 
 enum eModel : int {
@@ -1027,69 +1025,67 @@ enum eModel : int {
 // (other bits are used for other information)
 
 #define X3(x) x, x, x
-#define DEFAULTS nullptr
 
 /** list of available models (i.e., projections) */
 EX vector<modelinfo> mdinf = {
-  {"disk/Gans", "general perspective", "general perspective", mf::azimuthal | mf::conformal, DEFAULTS},
-  {"half-plane", "inversion", "stereographic projection [VR]", mf::conformal | mf::orientation | mf::horocyclic, DEFAULTS},
-  {"band", "band", "Mercator", mf::band | mf::conformal | mf::transition, DEFAULTS},
-  {X3("polygonal"), mf::conformal | mf::orientation, DEFAULTS},
-  {X3("formula"), 0, DEFAULTS},
-  {X3("azimuthal equidistant"), mf::azimuthal | mf::equidistant | mf::euc_boring | mf::product_special, DEFAULTS},
-  {X3("azimuthal equi-area"), mf::azimuthal | mf::equiarea | mf::euc_boring, DEFAULTS},
-  {X3("ball model"), mf::conformal | mf::azimuthal | mf::space, DEFAULTS},
-  {"Minkowski hyperboloid", "plane", "sphere", mf::conformal | mf::space | mf::euc_boring, DEFAULTS},
-  {"hemisphere", "sphere", "Minkowski hyperboloid", mf::conformal | mf::space, DEFAULTS},
-  {X3("band equidistant"), mf::band | mf::equidistant | mf::euc_boring, DEFAULTS},
-  {X3("band equi-area"), mf::band | mf::equiarea | mf::euc_boring, DEFAULTS},
-  {X3("sinusoidal"), mf::pseudoband | mf::equiarea | mf::euc_boring, DEFAULTS},
-  {X3("two-point equidistant"), mf::equidistant | mf::euc_boring | mf::twopoint | mf::orientation, DEFAULTS},
-  {X3("fisheye"), 0, DEFAULTS},
-  {X3("Joukowsky transform"), mf::hyper_only | mf::conformal | mf::transition | mf::orientation, DEFAULTS},
-  {X3("Joukowsky+inversion"), mf::hyper_only | mf::conformal | mf::transition | mf::orientation, DEFAULTS},
-  {X3("rotated hyperboles"), mf::hyper_only | mf::orientation, DEFAULTS},
-  {X3("spiral/ring"), mf::hyper_or_torus | mf::uses_bandshift | mf::orientation, DEFAULTS},
-  {X3("native perspective"), mf::perspective | mf::product_special, DEFAULTS},
-  {X3("azimuthal equi-volume"), mf::azimuthal | mf::equivolume | mf::euc_boring, DEFAULTS},
-  {X3("central inversion"), mf::azimuthal | mf::conformal, DEFAULTS},
-  {X3("two-point azimuthal"), mf::euc_boring | mf::azimuthal | mf::twopoint | mf::orientation, DEFAULTS},
-  {X3("two-point hybrid"), mf::euc_boring | mf::azimuthal | mf::equidistant | mf::twopoint | mf::orientation, DEFAULTS},
-  {X3("geodesic"), mf::perspective | mf::product_special, DEFAULTS},
-  {X3("Mollweide"), mf::euc_boring | mf::pseudoband | mf::equiarea, DEFAULTS},
-  {X3("central cylindrical"), mf::euc_boring | mf::band, DEFAULTS},
-  {X3("Collignon"), mf::pseudoband | mf::equiarea, DEFAULTS},
-  {X3("horocyclic coordinates"), mf::euc_boring | mf::orientation | mf::horocyclic, DEFAULTS},
-  {X3("quadrant coordinates"), mf::euc_boring | mf::orientation, DEFAULTS},
-  {X3("axial coordinates"), mf::euc_boring | mf::transition | mf::orientation, DEFAULTS},
-  {X3("anti-axial coordinates"), mf::euc_boring | mf::orientation, DEFAULTS},
-  {X3("Werner projection"), mf::euc_boring | mf::broken | mf::werner | mf::orientation, DEFAULTS}, // keep distances from pole, and distances along parallels
-  {X3("Aitoff projection"), mf::euc_boring | mf::broken | mf::orientation, DEFAULTS}, // halve longitudes, do azequid, double x
-  {X3("Hammer projection"), mf::euc_boring | mf::broken | mf::orientation, DEFAULTS}, // halve longitudes, do azequia, double x
-  {X3("loximuthal projection"), mf::euc_boring | mf::broken | mf::orientation, DEFAULTS}, // map loxodromes azimuthally and equidistantly
-  {X3("Miller projection"), mf::euc_boring | mf::band, DEFAULTS}, // scale latitude 4/5 -> Mercator -> 5/4
-  {X3("Gall stereographic"), mf::euc_boring | mf::band, DEFAULTS}, // like central cylindrical but stereographic
-  {X3("Winkel tripel"), mf::euc_boring | mf::broken | mf::orientation, DEFAULTS}, // mean of equirec and Aitoff
-  {X3("Poor man's square"), mf::euc_boring | mf::orientation, DEFAULTS}, // https://archive.bridgesmathart.org/2018/bridges2018-59.html
-  {X3("Panini projection"), mf::euc_boring | mf::orientation, DEFAULTS},
-  {X3("Craig retroazimuthal"), mf::euc_boring | mf::broken | mf::pseudoband, DEFAULTS}, // retroazimuthal cylindrical
-  {X3("Littrow retroazimuthal"), mf::euc_boring | mf::broken | mf::pseudoband, DEFAULTS}, // retroazimuthal conformal
-  {X3("Hammer retroazimuthal"), mf::euc_boring | mf::pseudoband, DEFAULTS}, // retroazimuthal equidistant
-  {X3("three-point equidistant"), mf::euc_boring | mf::equidistant | mf::orientation | mf::product_special | mf::twopoint, DEFAULTS},
-  {X3("Lie perspective"), mf::euc_boring | mf::perspective, DEFAULTS},
-  {X3("Lie orthogonal"), mf::euc_boring, DEFAULTS},
-  {X3("relativistic perspective"), mf::euc_boring | mf::perspective, DEFAULTS},
-  {X3("relativistic orthogonal"), mf::euc_boring, DEFAULTS},
-  {X3("horocyclic equal-area"), mf::euc_boring | mf::equiarea | mf::orientation | mf::horocyclic, DEFAULTS},
-  {X3("guard"), mf::technical, DEFAULTS},
-  {X3("pixel"), mf::technical, DEFAULTS},
-  {X3("hypflat"), mf::technical, DEFAULTS},
-  {X3("polynomial"), mf::technical | mf::conformal | mf::orientation, DEFAULTS},
-  {X3("manual"), mf::technical, DEFAULTS},
+  {"disk/Gans", "general perspective", "general perspective", mf::azimuthal | mf::conformal},
+  {"half-plane", "inversion", "stereographic projection [VR]", mf::conformal | mf::orientation | mf::horocyclic},
+  {"band", "band", "Mercator", mf::band | mf::conformal | mf::transition},
+  {X3("polygonal"), mf::conformal | mf::orientation},
+  {X3("formula"), 0},
+  {X3("azimuthal equidistant"), mf::azimuthal | mf::equidistant | mf::euc_boring | mf::product_special},
+  {X3("azimuthal equi-area"), mf::azimuthal | mf::equiarea | mf::euc_boring},
+  {X3("ball model"), mf::conformal | mf::azimuthal | mf::space},
+  {"Minkowski hyperboloid", "plane", "sphere", mf::conformal | mf::space | mf::euc_boring},
+  {"hemisphere", "sphere", "Minkowski hyperboloid", mf::conformal | mf::space},
+  {X3("band equidistant"), mf::band | mf::equidistant | mf::euc_boring},
+  {X3("band equi-area"), mf::band | mf::equiarea | mf::euc_boring},
+  {X3("sinusoidal"), mf::pseudoband | mf::equiarea | mf::euc_boring},
+  {X3("two-point equidistant"), mf::equidistant | mf::euc_boring | mf::twopoint | mf::orientation},
+  {X3("fisheye"), 0},
+  {X3("Joukowsky transform"), mf::hyper_only | mf::conformal | mf::transition | mf::orientation},
+  {X3("Joukowsky+inversion"), mf::hyper_only | mf::conformal | mf::transition | mf::orientation},
+  {X3("rotated hyperboles"), mf::hyper_only | mf::orientation},
+  {X3("spiral/ring"), mf::hyper_or_torus | mf::uses_bandshift | mf::orientation},
+  {X3("native perspective"), mf::perspective | mf::product_special},
+  {X3("azimuthal equi-volume"), mf::azimuthal | mf::equivolume | mf::euc_boring},
+  {X3("central inversion"), mf::azimuthal | mf::conformal},
+  {X3("two-point azimuthal"), mf::euc_boring | mf::azimuthal | mf::twopoint | mf::orientation},
+  {X3("two-point hybrid"), mf::euc_boring | mf::azimuthal | mf::equidistant | mf::twopoint | mf::orientation},
+  {X3("geodesic"), mf::perspective | mf::product_special},
+  {X3("Mollweide"), mf::euc_boring | mf::pseudoband | mf::equiarea},
+  {X3("central cylindrical"), mf::euc_boring | mf::band},
+  {X3("Collignon"), mf::pseudoband | mf::equiarea},
+  {X3("horocyclic coordinates"), mf::euc_boring | mf::orientation | mf::horocyclic},
+  {X3("quadrant coordinates"), mf::euc_boring | mf::orientation},
+  {X3("axial coordinates"), mf::euc_boring | mf::transition | mf::orientation},
+  {X3("anti-axial coordinates"), mf::euc_boring | mf::orientation},
+  {X3("Werner projection"), mf::euc_boring | mf::broken | mf::werner | mf::orientation}, // keep distances from pole, and distances along parallels
+  {X3("Aitoff projection"), mf::euc_boring | mf::broken | mf::orientation}, // halve longitudes, do azequid, double x
+  {X3("Hammer projection"), mf::euc_boring | mf::broken | mf::orientation}, // halve longitudes, do azequia, double x
+  {X3("loximuthal projection"), mf::euc_boring | mf::broken | mf::orientation}, // map loxodromes azimuthally and equidistantly
+  {X3("Miller projection"), mf::euc_boring | mf::band}, // scale latitude 4/5 -> Mercator -> 5/4
+  {X3("Gall stereographic"), mf::euc_boring | mf::band}, // like central cylindrical but stereographic
+  {X3("Winkel tripel"), mf::euc_boring | mf::broken | mf::orientation}, // mean of equirec and Aitoff
+  {X3("Poor man's square"), mf::euc_boring | mf::orientation}, // https://archive.bridgesmathart.org/2018/bridges2018-59.html
+  {X3("Panini projection"), mf::euc_boring | mf::orientation},
+  {X3("Craig retroazimuthal"), mf::euc_boring | mf::broken | mf::pseudoband}, // retroazimuthal cylindrical
+  {X3("Littrow retroazimuthal"), mf::euc_boring | mf::broken | mf::pseudoband}, // retroazimuthal conformal
+  {X3("Hammer retroazimuthal"), mf::euc_boring | mf::pseudoband}, // retroazimuthal equidistant
+  {X3("three-point equidistant"), mf::euc_boring | mf::equidistant | mf::orientation | mf::product_special | mf::twopoint},
+  {X3("Lie perspective"), mf::euc_boring | mf::perspective},
+  {X3("Lie orthogonal"), mf::euc_boring},
+  {X3("relativistic perspective"), mf::euc_boring | mf::perspective},
+  {X3("relativistic orthogonal"), mf::euc_boring},
+  {X3("horocyclic equal-area"), mf::euc_boring | mf::equiarea | mf::orientation | mf::horocyclic},
+  {X3("guard"), mf::technical},
+  {X3("pixel"), mf::technical},
+  {X3("hypflat"), mf::technical},
+  {X3("polynomial"), mf::technical | mf::conformal | mf::orientation},
+  {X3("manual"), mf::technical},
   };
 
 #undef X3
-#undef DEFAULTS
 
 #if HDR
 static inline bool orbProtection(eItem it) { return false; } // not implemented
