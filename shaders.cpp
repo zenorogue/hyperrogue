@@ -565,7 +565,12 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
 void display_data::set_projection(int ed, ld shift) {
   flagtype shader_flags = current_display->next_shader_flags;
   unsigned id;
-  id = geometry;
+  id = cgclass;
+  if(stretch::in()) id = 15;
+  id <<= 1; if(GDIM == 3) id |= 1;
+  id <<= 1; if(embedded_plane) id |= 1;
+  if(GDIM == 2 && hyperbolic && pconf.alpha < 0 && pconf.alpha > -1) id |= 1;
+  id <<= 3; id |= vid.stereo_mode;
   id <<= 6; id |= pmodel;
   if(levellines && pmodel != mdPixel) {
     shader_flags |= GF_LEVELS;
