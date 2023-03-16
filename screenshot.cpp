@@ -29,6 +29,8 @@ EX always_false in;
   #endif
   
   EX bool in = false;
+
+  EX bool remove_out = true;
   
   ld cta(color_t col) {
     // col >>= 24;
@@ -154,6 +156,14 @@ EX always_false in;
   
     if(invisible(col) && invisible(outline)) return;
     if(polyi < 2) return;
+
+    if(remove_out) {
+      int minx = polyx[0], miny = polyy[0];
+      int maxx = minx, maxy = miny;
+      for(int i=0; i<polyi; i++) if(polyx[i] < minx) minx = polyx[i]; else if(polyx[i] > maxx) maxx = polyx[i];
+      for(int i=0; i<polyi; i++) if(polyy[i] < miny) miny = polyy[i]; else if(polyy[i] > maxy) maxy = polyy[i];
+      if(maxx < 0 || maxy < 0 || minx > vid.xres || miny > vid.yres) return;
+      }
 
     startstring();
     for(int i=0; i<polyi; i++) {

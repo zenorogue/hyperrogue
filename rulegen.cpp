@@ -2652,6 +2652,10 @@ int readRuleArgs() {
     rulegen::flags ^= Flag(argi());
     }
 
+  else if(argis("-origin-id")) {
+    shift(); origin_id = argi();
+    }
+
   else if(argis("-ruledflags")) {
     shift();
     rulegen::rdebug_flags = argi();
