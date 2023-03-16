@@ -2963,12 +2963,23 @@ EX namespace linepatterns {
         }
       )
     );
+  EX ld mp_ori = 0;
+  EX ld meridian_max = 180._deg;
+  EX ld meridian_count = 12;
+  EX ld meridian_length = 90._deg;
+  EX ld meridian_prec = 12;
+  EX ld meridian_prec2 = 15;
   EX linepattern patMeridians = linepattern("meridians", 0xFFFFFF00, always_available,
     ATCENTER(
-      for(int j=-180; j<=180; j+=15) {
-        for(int i=-90; i<90; i+=15) {
-          for(int k=0; k<=15; k++)
-            curvepoint(xpush(j * degree) * ypush0((i+k) * degree));
+      for(int j=0; j<meridian_count; j++) {
+        ld mj = meridian_max * (j * 2. / meridian_count - 1);
+        for(int i=0; i<meridian_prec; i++) {
+          for(int k=0; k<=meridian_prec2; k++) {
+            ld mi = i + k * 1. / meridian_prec2;
+            mi = mi * 2. / meridian_prec - 1;
+            mi *= meridian_length;
+            curvepoint(spin(mp_ori * degree) * xpush(mj) * ypush0(mi));
+            }
           queuecurve(V, col, 0, PPR::LINE).V=V;
           }
         }
@@ -2986,7 +2997,7 @@ EX namespace linepatterns {
         println(hlog, "xbase = ", xbase);
         for(int j=-180; j<180; j+=15) {
           for(int k=0; k<=15; k++) 
-            curvepoint(xpush(xbase + (j+k) * degree) * ypush0(phi));
+            curvepoint(spin(mp_ori * degree) * xpush(xbase + (j+k) * degree) * ypush0(phi));
           queuecurve(V, col, 0, PPR::LINE).V=V;
           }
         }

@@ -2690,6 +2690,13 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     ->editable(0, 24, 1, "number of parallels drawn", "", 'n');
   param_f(linepatterns::parallel_max, "parallel_max")
     ->editable(0, TAU, 15*degree, "last parallel drawn", "", 'n');
+  param_f(linepatterns::mp_ori, "mp_ori")
+    ->editable(0, TAU, 15*degree, "parallel/meridian orientation", "", 'n');
+  param_f(linepatterns::meridian_max, "meridian_max");
+  param_f(linepatterns::meridian_count, "meridian_count");
+  param_f(linepatterns::meridian_length, "meridian_length");
+  param_f(linepatterns::meridian_prec, "meridian_prec");
+  param_f(linepatterns::meridian_prec2, "meridian_prec2");
 
   param_f(twopoint_xscale, "twopoint_xscale");
   param_i(twopoint_xshape, "twopoint_xshape");
