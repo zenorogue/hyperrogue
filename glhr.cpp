@@ -208,6 +208,14 @@ EX glmatrix tmtogl(const transmatrix& T) {
   return tmp;
   }
 
+EX transmatrix gltotm(const glmatrix& T) {
+  transmatrix tmp;
+  for(int i=0; i<4; i++)
+  for(int j=0; j<4; j++)
+    tmp[i][j] = T[i][j];
+  return tmp;
+  }
+
 EX glmatrix tmtogl_transpose(const transmatrix& T) {
   glmatrix tmp;
   for(int i=0; i<4; i++)
@@ -266,7 +274,7 @@ EX glmatrix translate(ld x, ld y, ld z) {
 
 // /* shaders */
 
-glmatrix projection;
+EX glmatrix projection;
 
 EX void new_projection() {
   WITHSHADER({
@@ -319,7 +327,7 @@ EX int compileShader(int type, const string& s) {
   GLint status;
 
   if(debug_gl) {
-    println(hlog, "===\n");
+    println(hlog, "=== ", full_geometry_name(), " @ ", models::get_model_name(pmodel));
     int lineno = 1;
     string cline = "";
     for(char c: s+"\n") {
