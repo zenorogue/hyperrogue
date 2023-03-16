@@ -501,6 +501,33 @@ EX void threepoint_projection(const hyperpoint& H, hyperpoint& ret) {
 
 EX vector<hr::function<void(shiftpoint& H_orig, hyperpoint& H, hyperpoint& ret)>> extra_projections;
 
+EX void make_axial(hyperpoint H, hyperpoint& ret, const hr::function<ld(hyperpoint)>& f) {
+  models::apply_orientation_yz(H[1], H[2]);
+  models::apply_orientation(H[0], H[1]);
+
+  ret[0] = f(H);
+  ld axi = pconf.axial_angle;
+  bool ax = GDIM == 3 || (axi/180 - floor(axi/180)) == 0.5;
+
+  if(ax) {
+    ret[1] = f(cspin90(0, 1) * H);
+    ret[2] = 0;
+    if(GDIM == 3) ret[2] = f(cspin90(2, 1) * H);
+    }
+  else {
+    ld alpha = axi * degree;
+    ld val = f(cspin(0, 1, alpha) * H);
+    // ret[0] * cos(alpha) + ret[1] * sin(alpha) == val
+    ret[1] = (val - ret[0] * cos(alpha)) / sin(alpha);
+    ret[2] = 0;
+    }
+
+  ret[3] = 1;
+
+  models::apply_orientation(ret[1], ret[0]);
+  models::apply_orientation_yz(ret[2], ret[1]);
+  }
+
 EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
 
   hyperpoint H = H_orig.h;
@@ -680,48 +707,31 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         ret[1] += height * pconf.depth_scaling;
       break;
       }
-    
-    case mdAxial: {
-      models::apply_orientation_yz(H[1], H[2]);
-      models::apply_orientation(H[0], H[1]);
-      
-      ld& mt = pconf.model_transition;
-      
-      ld z = H[LDIM];
-      if(mt != 1) z += (1-mt) * pconf.alpha;
 
-      ret[0] = H[0] / z;
-      ret[1] = H[1] / z;
-      if(GDIM == 3) ret[2] = H[2] / z;
-      else ret[2] = 0;
-      ret[3] = 1;
-      
-      if(mt) for(int i=0; i<LDIM; i++)  {
-        if(mt < 1) 
-          ret[i] *= mt;
-        ret[i] = atan_auto(ret[i]);
-        if(mt < 1) 
-          ret[i] /= mt;
-        }
-      
+    case mdAxial: {
+      make_axial(H, ret, [] (hyperpoint H) {
+        ld& mt = pconf.model_transition;
+
+        ld z = H[LDIM];
+        if(mt != 1) z += (1-mt) * pconf.alpha;
+
+        ld res = H[0] / z;
+
+        if(mt) {
+          if(mt < 1) res *= mt;
+          res = atan_auto(res * mt);
+          if(mt > 1) res /= mt;
+          }
+        return res;
+        });
+
       if(sphere) ret[0] += axial_x * M_PI, ret[1] += axial_y * M_PI;
 
-      models::apply_orientation(ret[1], ret[0]);
-      models::apply_orientation_yz(ret[2], ret[1]);
       break;
       }
     
     case mdAntiAxial: {
-      models::apply_orientation_yz(H[1], H[2]);
-      models::apply_orientation(H[0], H[1]);
-      
-      ret[0] = asin_auto(H[0]);
-      ret[1] = asin_auto(H[1]);
-
-      ret[2] = 0; ret[3] = 1;
-
-      models::apply_orientation(ret[1], ret[0]);
-      models::apply_orientation_yz(ret[2], ret[1]);
+      make_axial(H, ret, [] (hyperpoint H) { return asin_auto(H[0]); });
       break;
       }
     

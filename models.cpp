@@ -627,6 +627,9 @@ EX namespace models {
     if(mdinf[vpmodel].flags & mf::twopoint)
       add_edit(vpconf.twopoint_param);
     
+    if(mdinf[vpmodel].flags & mf::axial)
+      add_edit(vpconf.axial_angle);
+
     if(vpmodel == mdFisheye) 
       add_edit(vpconf.fisheye_param);
 
@@ -1001,8 +1004,12 @@ EX namespace models {
 
       param_f(p.twopoint_param, pp+"twopoint", sp+"twopoint parameter", 1)
       -> editable(1e-3, 10, .1, "two-point parameter", "In two-point-based models, this parameter gives the distance from each of the two points to the center.", 'b')
-      -> set_sets(dialog::scaleLog)
-;
+      -> set_sets(dialog::scaleLog);
+
+      param_f(p.axial_angle, pp+"axial", sp+"axial angle", 90)
+      -> editable(1e-3, 10, .1, "angle between the axes", "In two-axe-based models, this parameter gives the angle between the two axes.", 'x')
+      -> set_sets(dialog::scaleLog);
+
       param_f(p.fisheye_param, pp+"fisheye", sp+"fisheye parameter", 1)
       -> editable(1e-3, 10, .1, "fisheye parameter", "Size of the fish eye.", 'b')
       -> set_sets(dialog::scaleLog);
