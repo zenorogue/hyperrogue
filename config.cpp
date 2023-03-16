@@ -2690,6 +2690,11 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     ->editable(0, 24, 1, "number of parallels drawn", "", 'n');
   param_f(linepatterns::parallel_max, "parallel_max")
     ->editable(0, TAU, 15*degree, "last parallel drawn", "", 'n');
+
+  param_f(twopoint_xscale, "twopoint_xscale");
+  param_i(twopoint_xshape, "twopoint_xshape");
+  param_f(twopoint_xwidth, "twopoint_xwidth");
+
   param_f(vid.depth_bonus, "depth_bonus", 0)
     ->editable(-5, 5, .1, "depth bonus in pseudohedral", "", 'b');
   param_b(vid.pseudohedral, "pseudohedral", false)

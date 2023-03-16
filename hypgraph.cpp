@@ -2416,6 +2416,24 @@ EX color_t periodcolor = 0x00FF0080;
 EX color_t ringcolor = 0xFFFF;
 EX color_t modelcolor = 0;
 
+EX ld twopoint_xscale = 1;
+EX ld twopoint_xwidth = 1;
+EX int twopoint_xshape = 0;
+
+EX void put_x(shiftmatrix S, color_t col) {
+  switch(twopoint_xshape) {
+    case 0:
+      queuestr(S * C0, twopoint_xscale * vid.xres / 100, "X", ringcolor >> 8);
+      break;
+    case 1:
+      vid.linewidth *= twopoint_xwidth;
+      queueline(S * xpush0(twopoint_xscale / 10.), S * xpush0(-twopoint_xscale / 10.), ringcolor, 3);
+      queueline(S * ypush0(twopoint_xscale / 10.), S * ypush0(-twopoint_xscale / 10.), ringcolor, 3);
+      vid.linewidth /= twopoint_xwidth;
+      break;
+    }
+  }
+
 #if CAP_QUEUE
 EX void draw_model_elements() {
 
@@ -2482,8 +2500,8 @@ EX void draw_model_elements() {
     case mdTwoPoint: case mdSimulatedPerspective: fallthrough: {
       if(set_multi) return; /* no need */
       ld a = -pconf.model_orientation * degree;
-      queuestr(shiftless(xspinpush0(a, +pconf.twopoint_param)), vid.xres / 100, "X", ringcolor >> 8);
-      queuestr(shiftless(xspinpush0(a, -pconf.twopoint_param)), vid.xres / 100, "X", ringcolor >> 8);
+      put_x(shiftless(xspinpush(a, +pconf.twopoint_param)), ringcolor >> 8);
+      put_x(shiftless(xspinpush(a, -pconf.twopoint_param)), ringcolor >> 8);
       return;
       }
     
