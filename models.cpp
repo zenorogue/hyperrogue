@@ -108,7 +108,7 @@ EX namespace polygonal {
   EX }
 
 #if HDR
-inline bool mdAzimuthalEqui() { return among(pmodel, mdEquidistant, mdEquiarea, mdEquivolume); }
+inline bool mdAzimuthalEqui() { return (mdinf[pmodel].flags & mf::azimuthal) && (mdinf[pmodel].flags & (mf::equidistant | mf::equiarea | mf::equivolume) && !(mdinf[pmodel].flags & mf::twopoint)); }
 inline bool mdBandAny() { return mdinf[pmodel].flags & mf::pseudoband; }
 inline bool mdPseudocylindrical() { return mdBandAny() && !(mdinf[pmodel].flags & mf::cylindrical); }
 #endif
@@ -198,8 +198,8 @@ EX namespace models {
     if(hyperbolic && desitter_projections && among(pm, mdRelPerspective, mdRelOrthogonal)) return true;
     if(sl2) return among(pm, mdGeodesic, mdEquidistant, mdRelPerspective, mdRelOrthogonal, mdHorocyclic, mdPerspective);
     if(nonisotropic) return among(pm, mdDisk, mdPerspective, mdHorocyclic, mdGeodesic, mdEquidistant, mdFisheye, mdLiePerspective, mdLieOrthogonal);
-    if(sphere && (pm == mdHalfplane || pm == mdBall))
-      return false;
+    if(sphere && pm == pmBall) return false;
+    if(sphere && (mdinf[pm].flags & mf::horocyclic)) return false;
     if(GDIM == 2 && is_perspective(pm)) return false;
     if(pm == mdGeodesic && !nonisotropic) return false;
     if(pm == mdLiePerspective && sphere) return false;
@@ -214,17 +214,14 @@ EX namespace models {
     }    
   
   EX bool has_orientation(eModel m) {
-    if(among(m, mdHorocyclic, mdHorocyclicEqa, mdLieOrthogonal, mdLiePerspective))
-      return hyperbolic || in_h2xe();
     if(is_perspective(m) && panini_alpha) return true;
-    return
-      among(m, mdHalfplane, mdPolynomial, mdPolygonal, mdTwoPoint, mdJoukowsky, mdJoukowskyInverted, mdSpiral, mdSimulatedPerspective, mdTwoHybrid, mdHorocyclic, mdHorocyclicEqa, mdAxial, mdAntiAxial, mdQuadrant,
-        mdWerner, mdAitoff, mdHammer, mdLoximuthal, mdWinkelTripel, mdThreePoint) || mdBandAny();
+    if(nonisotropic) return false;    
+    return (mdinf[m].flags & mf::orientation);
     }
 
   /** @brief returns the broken coordinate, or zero */
   EX int get_broken_coord(eModel m) {
-    if(m == mdWerner) return 1;
+    if(mdinf[m].flags & mf::werner) return 1;
     if(sphere) return (mdinf[m].flags & mf::broken) ? 2 : 0;
     return 0;
     }
@@ -234,7 +231,7 @@ EX namespace models {
     }
   
   EX bool is_perspective(eModel m) {
-    return among(m, mdPerspective, mdGeodesic, mdLiePerspective, mdRelPerspective);
+    return mdinf[m].flags & mf::perspective;
     }
 
   EX bool is_3d(const projection_configuration& p) {
@@ -243,12 +240,12 @@ EX namespace models {
     }
   
   EX bool has_transition(eModel m) {
-    return among(m, mdJoukowsky, mdJoukowskyInverted, mdBand, mdAxial) && GDIM == 2;
+    return (mdinf[m].flags & mf::transition) && GDIM == 2;
     }
   
   EX bool product_model(eModel m) {
     if(!gproduct) return false;
-    if(among(m, mdPerspective, mdHyperboloid, mdEquidistant, mdThreePoint)) return false;
+    if(mdinf[m].flags & mf::product_special) return false;
     return true;
     }
   
@@ -270,7 +267,7 @@ EX namespace models {
       return XLAT(mdinf[m].name_spherical);
     if(euclid) 
       return XLAT(mdinf[m].name_euclidean);
-    if(hyperbolic) 
+    if(hyperbolic)
       return XLAT(mdinf[m].name_hyperbolic);
     return "?";
     }
@@ -624,10 +621,10 @@ EX namespace models {
     if(vpmodel == mdJoukowskyInverted)
       add_edit(vpconf.dualfocus_autoscale);
     
-    if(vpmodel == mdHemisphere && euclid) 
+    if(vpmodel == mdHemisphere && euclid)
       add_edit(vpconf.euclid_to_sphere);
       
-    if(among(vpmodel, mdTwoPoint, mdSimulatedPerspective, mdTwoHybrid, mdThreePoint)) 
+    if(mdinf[vpmodel].flags & mf::twopoint)
       add_edit(vpconf.twopoint_param);
     
     if(vpmodel == mdFisheye) 
