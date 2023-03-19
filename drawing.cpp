@@ -1622,10 +1622,14 @@ EX namespace ods {
 bool broken_projection(dqi_poly& p0) {
   int broken_coord = models::get_broken_coord(pmodel);
   static bool in_broken = false;
+  bool both_broken = pmodel == mdConformalSquare;
   if(broken_coord && !in_broken) {
 
     int zcoord = broken_coord;
     int ycoord = 3 - zcoord;
+    int xcoord = 0;
+
+    zcoord = 2;
     
     vector<hyperpoint> all;
     for(int i=0; i<p0.cnt; i++) 
@@ -1634,9 +1638,17 @@ bool broken_projection(dqi_poly& p0) {
     int last_fail;
 
     for(auto& h: all) models::apply_orientation(h[0], h[1]);
-    
+
+    auto break_in_xz = [&] (hyperpoint a, hyperpoint b, int xcoord, int zcoord) {
+      return a[xcoord] * b[xcoord] <= 0 && (a[xcoord] * b[zcoord] - b[xcoord] * a[zcoord]) * (a[xcoord] - b[xcoord]) < 0;
+      };
+ 
     auto break_in = [&] (hyperpoint a, hyperpoint b) {
-      return a[0] * b[0] <= 0 && (a[0] * b[zcoord] - b[0] * a[zcoord]) * (a[0] - b[0]) < 0;
+      if(both_broken) {
+        for(int xc=0; xc<2; xc++) {if(break_in_xz(a, b, xc, zcoord)) { xcoord = xc; ycoord = 1-xc; return true; } }
+        return false;
+        }
+      return break_in_xz(a, b, xcoord, zcoord);
       };
     
     for(int i=0; i<p0.cnt-1; i++) 
@@ -1655,7 +1667,12 @@ bool broken_projection(dqi_poly& p0) {
     if(fail) {
       if(p0.tinf) return true;
       dynamicval<bool> ib(in_broken, true);
-      ld part = ilerp(all[last_fail][0], all[last_fail+1][0], 0);
+
+      ld part = ilerp(all[last_fail][xcoord], all[last_fail+1][xcoord], 0);
+      if(both_broken && all[last_fail][ycoord] * all[last_fail+1][ycoord] < 0) {
+        ld part2 = ilerp(all[last_fail][ycoord], all[last_fail+1][ycoord], 0);
+        if(part2 > part) part = part2, swap(xcoord, ycoord);
+        }
       hyperpoint initial = normalize(lerp(all[last_fail], all[last_fail+1], 1 - (1-part) * .99));
       bool have_initial = true;
       v.push_back(glhr::pointtogl(initial));
@@ -1663,19 +1680,46 @@ bool broken_projection(dqi_poly& p0) {
       int at = last_fail;
       do {
         v.push_back(glhr::pointtogl(all[at]));
-        if(at == p0.cnt-1 && all[at] != all[0]) {
+        if(at == p0.cnt-1 && sqhypot_d(2, all[at] - all[0]) > 1e-6) {
           p.cnt = isize(v); p.draw(); v.clear(); at = 0;
           have_initial = false;
           }
         int next = at+1;
         if(next == p0.cnt) next = 0;
         if(break_in(all[at], all[next])) {
-          ld part = ilerp(all[at][0], all[next][0], 0);
+          ld part = ilerp(all[at][xcoord], all[next][xcoord], 0);
+          if(both_broken && all[at][ycoord] * all[next][ycoord] < 0) {
+            ld part2 = ilerp(all[at][ycoord], all[next][ycoord], 0);
+            if(part2 < part) part = part2, swap(xcoord, ycoord);
+            }
+
           hyperpoint final = normalize(lerp(all[at], all[next], part * .99));
           v.push_back(glhr::pointtogl(final));
           if(have_initial) {
             int max = 4 << vid.linequality;
-            if(final[0] * initial[0] > 0) {
+            if(both_broken) {
+              auto square_close_corner = [] (hyperpoint h) {
+                hyperpoint end = -C0;
+                if(abs(h[0]) > abs(h[1]))
+                  end[0] = 0.01 * signum(h[0]), end[1] = 0.001 * signum(h[1]);
+                else
+                  end[1] = 0.01 * signum(h[1]), end[0] = 0.001 * signum(h[0]);
+                return normalize(end);
+                };
+              hyperpoint endf = square_close_corner(final);
+              hyperpoint endi = square_close_corner(initial);
+              if(endf != endi) {
+                for(int i=1; i<=max; i++)
+                  v.push_back(glhr::pointtogl(lerp(final, endf, i * 1. / max)));
+                for(int i=0; i<=max; i++)
+                  v.push_back(glhr::pointtogl(lerp(endi, initial, i * 1. / max)));
+                }
+              else {
+                for(int i=1; i<=max; i++)
+                  v.push_back(glhr::pointtogl(lerp(final, initial, i * 1. / max)));
+                }
+              }
+            else if(final[xcoord] * initial[xcoord] > 0) {
               for(int i=1; i<=max; i++)
                 v.push_back(glhr::pointtogl(lerp(final, initial, i * 1. / max)));
               }
