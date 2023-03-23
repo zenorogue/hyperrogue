@@ -480,7 +480,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         }
       }
     
-    else if(arb::in()) {
+    else if(arb::in() || aperiodic) {
       vector<hyperpoint> actual;
       for(int j=0; j<cor; j++) 
         actual.push_back(get_corner_position(c, j));
@@ -494,8 +494,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         }
       
       auto &ac = arb::current_or_slided();
-      ld dist = min_dist * (1 - 3 / sca) * ac.boundary_ratio;
-      
+
+      ld dist = min_dist * (1 - 3 / sca) * (arb::in() ? ac.boundary_ratio : 1);
       ld area = 0;
       for(int j=0; j<cor; j++) {
         hyperpoint current = kleinize(actual[j]);
@@ -506,7 +506,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
 
       int id = arb::id_of(c->master);
       auto& sh = ac.shapes[id];
-      apeirogonal = sh.apeirogonal;
+      apeirogonal = arb::in() && sh.apeirogonal;
       
       for(int j=0; j<cor; j++) {
         hyperpoint last = actual[j?j-1:cor-1];
