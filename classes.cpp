@@ -750,6 +750,7 @@ enum eGeometry {
   gInfOrderMixed, gSpace436, gFake,
   gSpace345, gSpace353, gSpace354, gSpace355,
   gHalfBring,
+  gAperiodicHat,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSol, gcNIH, gcSolN, gcNil, gcProduct, gcSL2 };
@@ -827,6 +828,7 @@ static const flagtype qSTRETCHABLE     = Flag(27);
 static const flagtype qCAT             = Flag(28);
 
 static const flagtype qAPERIODIC       = Flag(29);
+static const flagtype qHAT             = Flag(30);
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
@@ -956,6 +958,7 @@ EX vector<geometryinfo> ginf = {
   {"{3,5,4}","none",    "{3,5,4} hyperbolic honeycomb",               "354",     20, 5, qIDEAL | qULTRA,    giHyperb3, {{7, 2}}, eVariation::pure},
   {"{3,5,5}","none",    "{3,5,5} hyperbolic honeycomb",               "355",     20, 5, qIDEAL | qULTRA,    giHyperb3, {{7, 2}}, eVariation::pure},
   {"{5,4}", "pBring",   "projective Bring's Surface",                 "pBring",   5, 4, qsSMALLN,   giHyperb2, {{6, 4}}, eVariation::bitruncated},
+  {"hat",    "none",    "aperiodic hat",                              "hat",     14, 3, qAPERIODIC | qHAT,     giEuclid2, {{7, 7}}, eVariation::pure},
   };
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 

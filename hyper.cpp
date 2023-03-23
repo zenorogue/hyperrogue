@@ -37,6 +37,7 @@
 #include "nonisotropic.cpp"
 #include "asonov.cpp"
 #include "kite.cpp"
+#include "aperiodic-hat.cpp"
 #include "archimedean.cpp"
 #include "arbitrile.cpp"
 #include "rulegen.cpp"

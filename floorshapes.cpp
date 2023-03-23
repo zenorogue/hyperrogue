@@ -825,6 +825,14 @@ void geometry_information::generate_floorshapes() {
 
   else if(inforder::mixed()) { /* will be generated on the fly */ }
   
+  else if(hat::in()) {
+    dynamicval<bool> ncor(approx_nearcorner, true);
+    for(int i=0; i<2; i++) {
+      modelh.c7 = i == 1 ? &model : nullptr;
+      generate_floorshapes_for(i, &model, 0, 0);
+      }
+    }
+
   #if CAP_BT
   else if(kite::in()) {
     dynamicval<bool> ncor(approx_nearcorner, true);

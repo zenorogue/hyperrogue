@@ -3581,6 +3581,7 @@ EX namespace windmap {
   EX void create() {
     if(disable_bigstuff) return;
     if(cgflags & qPORTALSPACE) return;
+    if(hat::in()) return;
     samples.clear();
     neighbors.clear();
     getid.clear();

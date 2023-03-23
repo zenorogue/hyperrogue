@@ -1477,6 +1477,7 @@ EX bool pseudohept(cell *c) {
   if(sol) return (c->master->emeraldval % 3 == 2) && (c->master->zebraval % 3 == 2) && (c->master->distance % 2);
   if(nih) return c->master->zebraval % 3 == 2 && c->master->emeraldval % 2 == 1 && (c->master->distance % 2);
   if(kite::in()) return kite::getshape(c->master) == kite::pDart;
+  if(hat::in()) return c == c->master->c7;
   if(bt::in()) return bt::pseudohept(c);
   #endif
   if(S3 >= OINF) return c->master->distance % 3 == 1;
@@ -1976,12 +1977,15 @@ EX namespace patterns {
         return c->landparam;
         }
       case 'Z': {
+        if(hat::in()) return hat::hatcolor(c, 6);
         return nearer_map(c);
         }
       case 'Y': {
+        if(hat::in()) return hat::hatcolor(c, 7);
         return furthest_map(c, 0);
         }
       case 'X': {
+        if(hat::in()) return hat::hatcolor(c, 8);
         return furthest_map(c, 1);
         }
       case 'W': {
@@ -2058,6 +2062,12 @@ EX namespace patterns {
     if(closed_manifold) {
       dialog::addSelItem(XLAT("nearer end"), "bounded", 'Z');
       dialog::addSelItem(XLAT("furthest from start"), "bounded", 'Y');
+      }
+
+    if(hat::in()) {
+      dialog::addSelItem(XLAT("hat in cluster"), "hat", 'Z');
+      dialog::addSelItem(XLAT("hat clusters"), "hat", 'Y');
+      dialog::addSelItem(XLAT("hat superclusters"), "hat", 'X');
       }
 
     dialog::addSelItem(XLAT("types"), "types", 'A');

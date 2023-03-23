@@ -429,6 +429,7 @@ EX void initcells() {
   else if(arcm::in()) currentmap = arcm::new_map();
   #endif
   else if(euc::in()) currentmap = euc::new_map();
+  else if(hat::in()) currentmap = hat::new_map();
   #if CAP_BT
   else if(kite::in()) currentmap = kite::new_map();
   #endif
