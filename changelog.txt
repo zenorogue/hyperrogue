@@ -4889,3 +4889,39 @@ Further improvements to the "3D style" (embed 2D in a 3D geometry) feature:
 
 Also fixed a bug generating Dice in some tessellations.
 
+2023-02-22 00:31 Update 12.1j:
+
+Further fixes and improvements to the "3d style" (embed 2D in a 3D geometry) feature:
+- more settings (regarding altitudes) are now configurable
+- fixed VR (correct gravity alignment and eye position computation), also added new headset setting "holonomy Z" for embedded planes (also fixed a bug causing spinning in VR)
+- fixed some minor bugs with "same curvature" and "product" embeddings
+- fixed "SL(2,R) cylinder" (it was not actually implemented)
+- full floors now used by default (also floor shape setting has other options now)
+- when you change the settings, the engine now tries to keep as much as possible (e.g., remap the camera position)
+- no shadow option now disables monster shadows
+- fixed a bug with Goldberg embeddings
+
+Other fixes:
+- fixed key conflict for the cell boundaries option
+- fixed an error computing distances in bitruncated {5,4} causing crashes
+- when you die in the racing mode, you just die without obtaining etherality (possible when you change the land e.g. to Rose Garden or Land of Storms)
+- fixed single tile pattern for texture mode in spherical geometry; also changing the pattern in texture mode no longer affects map editor pattern
+
+2023-03-23 09:34 Update 12.1k:
+Aperiodic tilings:
+- "Aperiodic Hat" tiling [ https://arxiv.org/pdf/2303.10798.pdf ]
+- adjacency rule (for Minefield) now changeable in aperiodic tilings
+- patched chaos now works in aperiodic tilings
+- nicer tile borders in aperiodic tilings
+
+New projections:
+- nicer Conformal Square projection (with transition and shader, and all 2D geometries)
+- horocyclic equal-area projection
+- change axe angle in axial-like projections
+
+Line patterns:
+- more configuration for meridian/parallel patterns
+- new linepattern "tessellation walls"
+
+Other:
+- better fog color in 3D ball model
