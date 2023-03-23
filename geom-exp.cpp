@@ -322,7 +322,7 @@ void set_or_configure_geometry(eGeometry g) {
       if(g == gRotSpace) {
         bool ok = true;
         if(arcm::in()) ok = PURE;
-        else if(bt::in() || kite::in()) ok = false;
+        else if(bt::in() || aperiodic) ok = false;
         else ok = PURE || BITRUNCATED;
         if(!ok) {
           addMessage(XLAT("Only works with (semi-)regular tilings"));
@@ -602,7 +602,7 @@ EX void select_quotient_screen() {
   }
 
 EX void select_quotient() {
-  if(meuclid && !kite::in() && !arcm::in() && !reg3::cubes_reg3) {
+  if(meuclid && !aperiodic && !arcm::in() && !reg3::cubes_reg3) {
     euc::prepare_torus3();
     pushScreen(euc::show_torus3);
     }
@@ -640,7 +640,7 @@ EX void select_quotient() {
 EX string full_geometry_name() {
   string qstring = ginf[geometry].quotient_name;
   bool variable =
-    !(mproduct || mhybrid || bt::in() || (WDIM == 3 && !reg3::in()) || kite::in() || arb::in());
+    !(mproduct || mhybrid || bt::in() || (WDIM == 3 && !reg3::in()) || aperiodic || arb::in());
   
   string fgname = XLAT(ginf[geometry].tiling_name);
   if(qstring != "none") fgname += " " + XLAT(qstring);
@@ -1025,7 +1025,7 @@ EX void showEuclideanMenu() {
   else if(nil) {
     menuitem_nilwidth('v');
     }
-  else if((WDIM == 3 || kite::in() || arb::in()) && !reg3::in() && geometry != gCubeTiling) dialog::addBreak(100);
+  else if((WDIM == 3 || aperiodic || arb::in()) && !reg3::in() && geometry != gCubeTiling) dialog::addBreak(100);
   else 
     menuitem_change_variation('v');
 
@@ -1131,7 +1131,7 @@ EX void showEuclideanMenu() {
   dialog::addTitle(XLAT("info about: %1", full_geometry_name()), 0xFFFFFF, 150);
   
   auto gd = compute_geometry_data();
-  if(WDIM == 2 && !arb::in() && !kite::in()) dialog::addSelItem(XLAT("faces per vertex"), gd.spf, 0);
+  if(WDIM == 2 && !arb::in() && !aperiodic) dialog::addSelItem(XLAT("faces per vertex"), gd.spf, 0);
   
   if(arb::in() && arb::current.comment != "") {
     dialog::addBreak(100);

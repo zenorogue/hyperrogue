@@ -122,7 +122,7 @@ EX bool available() {
   if(noGUI) return false;
   if(!vid.usingGL) return false;
   if(GDIM == 2) return false;
-  if(WDIM == 2 && (kite::in() || bt::in())) return false;
+  if(WDIM == 2 && (aperiodic || bt::in())) return false;
   #ifdef GLES_ONLY
   if(need_many_cell_types()) return false;
   if(!euclid && !gproduct && !nil) return false;

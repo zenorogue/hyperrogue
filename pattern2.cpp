@@ -900,7 +900,7 @@ EX namespace patterns {
     if(IRREGULAR || arcm::in() || bt::in() || arb::in() || WDIM == 3 || currentmap->strict_tree_rules()) si.symmetries = c->type;
     else if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
-    else if(S7 < 6 && S3 == 3 && !INVERSE && !kite::in()) valSibling(c, si, sub, pat);
+    else if(S7 < 6 && S3 == 3 && !INVERSE && !aperiodic) valSibling(c, si, sub, pat);
     else if(euc::in(2,4)) valEuclid4(c, si, sub);
     else if(euc::in(2,6)) valEuclid6(c, si, sub);
     else if(a4) val457(c, si, sub);
@@ -1287,14 +1287,14 @@ EX bool geosupport_chessboard() {
 #endif
     WARPED ? true :
     INVERSE ? false :
-    (bt::in() || kite::in()) ? 0 :
+    (bt::in() || aperiodic) ? 0 :
     (S3 >= OINF) ? true :
     (valence() % 2 == 0);
   }
 
 EX int geosupport_threecolor() {
   if(IRREGULAR) return 0;
-  if(kite::in() || bt::in()) return 0;
+  if(aperiodic || bt::in()) return 0;
   #if CAP_ARCM
   if(arcm::in() && PURE) return arcm::current.support_threecolor();
   if(arcm::in() && BITRUNCATED) return arcm::current.support_threecolor_bitruncated();
@@ -1317,7 +1317,7 @@ EX int geosupport_football() {
   // always works in bitrunc geometries
   if(BITRUNCATED) return 2;
   if(INVERSE) return 0;
-  if(bt::in() || kite::in()) return 0;
+  if(bt::in() || aperiodic) return 0;
 
 #if CAP_ARCM  
   if(arcm::in() && DUAL) return false;

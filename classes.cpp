@@ -826,6 +826,8 @@ static const flagtype qSTRETCHABLE     = Flag(27);
 
 static const flagtype qCAT             = Flag(28);
 
+static const flagtype qAPERIODIC       = Flag(29);
+
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
 // note: check_football_colorability in arbitrile.cpp assumes OINF is divisible by 3
@@ -925,7 +927,7 @@ EX vector<geometryinfo> ginf = {
   {"{5,3,4}","field",   "{5,3,4} field quotient space",               "f435",    12, 4, qsSMALLBF | qDEPRECATED, giHyperb3, {{SEE_ALL, SEE_ALL}}, eVariation::pure},
   {"binary4","none",    "standard binary tiling",                     "binary4",  5, 3, qBINARY,   giHyperb2, {{7, 5}}, eVariation::pure},
   {"sol",    "none",    "Solv geometry",                              "sol",      8, 3, qBINARY|qSOL,   giSol, {{7, 5}}, eVariation::pure},
-  {"kd2",    "none",    "kite-and-dart",                              "kd2",      4, 3, qKITE,     giEuclid2, {{7, 7}}, eVariation::pure},
+  {"kd2",    "none",    "kite-and-dart",                              "kd2",      4, 3, qKITE | qAPERIODIC,     giEuclid2, {{7, 7}}, eVariation::pure},
   {"kd3",    "none",    "kite-and-dart on horospheres",               "kd3",     12, 3, qsBP,      giHyperb3, {{7, 3}}, eVariation::pure},
   {"nil",    "none",    "Nil geometry",                               "nil",      6, 3, qOPTQ,     giNil,     {{7, 5}}, eVariation::pure},
   {"product","none",    "product space",                              "product",  7, 3, qHYBRID,   giProduct, {{7, 3}}, eVariation::pure},

@@ -1776,7 +1776,7 @@ void celldrawer::draw_features_and_walls_3d() {
         /* always render */
         if(wrl::in && wrl::print) ; else
         #endif
-        if(pmodel == mdPerspective && !sphere && !quotient && !kite::in() && !nonisotropic && !mhybrid && !experimental && !nih) {
+        if(pmodel == mdPerspective && !sphere && !quotient && !aperiodic && !nonisotropic && !mhybrid && !experimental && !nih) {
           if(a < 4 && among(geometry, gHoroTris, gBinary3) && celldistAlt(c) >= celldistAlt(centerover)) continue;
           else if(a < 2 && among(geometry, gHoroRec) && celldistAlt(c) >= celldistAlt(centerover)) continue;
           // this optimization is not correct, need to fix

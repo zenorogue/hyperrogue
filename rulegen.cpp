@@ -2553,7 +2553,7 @@ EX void show() {
     "tessellations (contrary to the basic implementation of Archimedean, tes, and unrectified/warped/untruncated tessellations).\n\nYou can convert mostly any "
     "non-spherical periodic 2D tessellation to strict tree based.\n\nSwitching the map format erases your map."));
 
-  if(kite::in()) {
+  if(aperiodic) {
     dialog::addInfo("not available in aperiodic tessellations");
     dialog::addBack();
     dialog::display();

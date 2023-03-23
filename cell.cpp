@@ -598,7 +598,7 @@ EX int celldist(cell *c) {
     return hybrid::celldistance(c, currentmap->gamestart());
   if(nil && !quotient) return DISTANCE_UNKNOWN;
   if(euc::in()) return celldistance(currentmap->gamestart(), c);
-  if(sphere || bt::in() || WDIM == 3 || cryst || sn::in() || kite::in() || closed_manifold) return celldistance(currentmap->gamestart(), c);
+  if(sphere || bt::in() || WDIM == 3 || cryst || sn::in() || aperiodic || closed_manifold) return celldistance(currentmap->gamestart(), c);
   #if CAP_IRR
   if(IRREGULAR) return irr::celldist(c, false);
   #endif
@@ -1298,7 +1298,7 @@ EX int celldistance(cell *c1, cell *c2) {
     return euc::cyldist(euc2_coordinates(c1), euc2_coordinates(c2));
     }
 
-  if(arcm::in() || quotient || sn::in() || (kite::in() && euclid) || experimental || sl2 || nil || arb::in()) 
+  if(arcm::in() || quotient || sn::in() || (aperiodic && euclid) || experimental || sl2 || nil || arb::in()) 
     return clueless_celldistance(c1, c2);
    
    if(S3 >= OINF) return inforder::celldistance(c1, c2);
@@ -1547,7 +1547,7 @@ EX vector<int> reverse_directions(heptagon *c, int dir) {
   }
 
 EX bool standard_tiling() {
-  return !arcm::in() && !kite::in() && !bt::in() && !arb::in() && (WDIM == 2 || !nonisotropic) && !mhybrid;
+  return !arcm::in() && !aperiodic && !bt::in() && !arb::in() && (WDIM == 2 || !nonisotropic) && !mhybrid;
   }
 
 EX int valence() {

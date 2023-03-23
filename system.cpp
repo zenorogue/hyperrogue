@@ -1410,7 +1410,7 @@ EX void set_geometry(eGeometry target) {
     if(DUAL && geometry != gArchimedean && !mhybrid)
       variation = ginf[geometry].default_variation;
     #if CAP_BT
-    if(bt::in() || WDIM == 3 || kite::in() || arb::in()) if(!mhybrid) variation = eVariation::pure;
+    if(bt::in() || WDIM == 3 || aperiodic || arb::in()) if(!mhybrid) variation = eVariation::pure;
     #endif
     if(S3 >= OINF) variation = eVariation::pure;
     if(INVERSE && !mhybrid) variation = gp::variation_for(gp::param);
@@ -1444,7 +1444,7 @@ EX void set_variation(eVariation target) {
       return;
       }
     if(target != eVariation::pure) {
-      if(bt::in() || sol || kite::in() || WDIM == 3) if(!mproduct) geometry = gNormal;
+      if(bt::in() || sol || aperiodic || WDIM == 3) if(!mproduct) geometry = gNormal;
       }
     auto& cd = ginf[gCrystal];
     if(target == eVariation::bitruncated && cryst && cd.sides == 8 && cd.vertex == 4) {

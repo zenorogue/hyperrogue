@@ -200,6 +200,7 @@ void addMessage(string s, char spamtype = 0);
 
 #define INVERSE among(variation, eVariation::unrectified, eVariation::warped, eVariation::untruncated )
 
+#define aperiodic (cgflags & qAPERIODIC)
 #define UNRECTIFIED (variation == eVariation::unrectified)
 #define WARPED (variation == eVariation::warped)
 #define UNTRUNCATED (variation == eVariation::untruncated)

@@ -891,7 +891,7 @@ EX land_validity_t& land_validity(eLand l) {
     return dont_work;
 
   // mirrors do not work in kite and sol
-  if(among(l, laMirror, laMirrorOld) && (kite::in() || sol))
+  if(among(l, laMirror, laMirrorOld) && (aperiodic || sol))
     return dont_work;
   
   if(isCrossroads(l) && geometry == gBinary4)
@@ -1033,7 +1033,7 @@ EX land_validity_t& land_validity(eLand l) {
         return special_chaos;
       return not_in_chaos;
       }
-    if(arcm::in() || kite::in()) return not_implemented;
+    if(arcm::in() || aperiodic) return not_implemented;
     if(closed_or_bounded) return unbounded_only;
     if(INVERSE) return not_implemented;
     }
@@ -1193,7 +1193,7 @@ EX land_validity_t& land_validity(eLand l) {
     return great_walls_missing;
 
   // highlight Crossroads on Euclidean
-  if(euclid && !quotient && (l == laCrossroads || l == laCrossroads4) && !kite::in())
+  if(euclid && !quotient && (l == laCrossroads || l == laCrossroads4) && !aperiodic)
     return full_game; 
 
   if(sol && among(l, laCrossroads, laCrossroads4))

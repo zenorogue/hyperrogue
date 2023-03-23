@@ -1113,7 +1113,7 @@ EX struct dqi_poly *draw_shapevec(cell *c, const shiftmatrix& V, const vector<hp
   #endif
   else if(GOLDBERG && ishex1(c)) 
     return &queuepolyat(V * pispin, shv[0], col, prio);
-  else if(!(S7&1) && PURE && !kite::in() && !a4) {
+  else if(!(S7&1) && PURE && !aperiodic && !a4) {
     auto si = patterns::getpatterninfo(c, patterns::PAT_COLORING, 0);
     if(si.id == 8) si.dir++;
     transmatrix D = applyPatterndir(c, si);

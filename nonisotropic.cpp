@@ -1752,7 +1752,7 @@ EX namespace product {
 
   EX bool validate_spin() {
     if(mproduct) return hybrid::in_underlying_geometry(validate_spin);
-    if(kite::in()) return false;
+    if(aperiodic) return false;
     if(!quotient && !arcm::in()) return true;
     map<cell*, cellwalker> cws;
     manual_celllister cl;

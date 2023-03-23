@@ -398,7 +398,7 @@ EX bool sizes_known() {
   if(bt::in()) return false;
   // not implemented
   if(arcm::in()) return false;
-  if(kite::in()) return false;
+  if(aperiodic) return false;
   if(currentmap->strict_tree_rules()) return true;
   if(arb::in()) return false;
   return true;  

@@ -1487,7 +1487,7 @@ EX bool good_for_wall(cell *c) {
 
 EX bool walls_not_implemented() {
   // if(WDIM == 3 && !PURE) return true;
-  if(sphere || quotient || nonisotropic || (kite::in() && !bt::in()) || experimental) return true;
+  if(sphere || quotient || nonisotropic || aperiodic || experimental) return true;
   return WDIM == 3 && (cgflags & qIDEAL);
   }
 

@@ -447,7 +447,7 @@ void hrmap_hyperbolic::virtualRebase(heptagon*& base, transmatrix& at) {
   }
 
 EX bool no_easy_spin() {
-  return NONSTDVAR || arcm::in() || WDIM == 3 || bt::in() || kite::in();
+  return NONSTDVAR || arcm::in() || WDIM == 3 || bt::in() || aperiodic;
   }
 
 EX bool never_invert;
@@ -479,7 +479,7 @@ EX ld cellgfxdist(cell *c, int d) { return currentmap->spacedist(c, d); }
 EX transmatrix ddspin_side(cell *c, int d, ld bonus IS(0)) { 
   if(cgi.emb->is_in_noniso())
     return spin(bonus);
-  if(kite::in()) {
+  if(aperiodic) {
     if(embedded_plane) return spin(bonus);
     hyperpoint h1 = get_corner_position(c, gmod(d, c->type), 3);
     hyperpoint h2 = get_corner_position(c, gmod(d+1, c->type) , 3);
@@ -492,7 +492,7 @@ EX transmatrix ddspin_side(cell *c, int d, ld bonus IS(0)) {
 EX transmatrix iddspin_side(cell *c, int d, ld bonus IS(0)) {
   if(cgi.emb->is_in_noniso())
     return spin(bonus);
-  if(kite::in()) {
+  if(aperiodic) {
     if(embedded_plane) return spin(bonus);
     hyperpoint h1 = get_corner_position(c, gmod(d, c->type), 3);
     hyperpoint h2 = get_corner_position(c, gmod(d+1, c->type) , 3);
@@ -561,7 +561,7 @@ transmatrix hrmap_standard::adj(cell *c, int i) {
 EX double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
 
 EX hyperpoint randomPointIn(int t) {
-  if(NONSTDVAR || arcm::in() || kite::in()) {
+  if(NONSTDVAR || arcm::in() || aperiodic) {
     // Let these geometries be less confusing.
     // Also easier to implement ;)
     return xspinpush0(TAU * randd(), asinh(randd() / 20));
@@ -674,7 +674,7 @@ EX hyperpoint nearcorner(cell *c, int i) {
     neis[5] = bt::get_horopoint(0, -1);
     return neis[i];
     }
-  if(kite::in()) {
+  if(aperiodic) {
     if(approx_nearcorner)
       return currentmap->get_corner(c, i, 3) + currentmap->get_corner(c, i+1, 3) - C0;
     else
@@ -741,7 +741,7 @@ EX hyperpoint farcorner(cell *c, int i, int which) {
     }
   #endif
   #if CAP_BT
-  if(bt::in() || kite::in())
+  if(bt::in() || aperiodic)
     return nearcorner(c, (i+which) % c->type); // lazy
   #endif
   #if CAP_ARCM
@@ -870,7 +870,7 @@ int brm_hook = addHook(hooks_clearmemory, 0, []() {
   });
 
 EX bool exhaustive_distance_appropriate() {
-  if(euclid && (kite::in() || arcm::in() || arb::in() || quotient)) return true;
+  if(euclid && (aperiodic || arcm::in() || arb::in() || quotient)) return true;
   #if MAXMDIM >= 4
   if(nil && quotient) return true;
   #endif
