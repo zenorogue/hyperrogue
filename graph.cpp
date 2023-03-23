@@ -2399,8 +2399,8 @@ EX bool drawMonsterType(eMonster m, cell *where, const shiftmatrix& V1, color_t 
     case moRedTroll: {
       const shiftmatrix VBS = VBODY * otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
       ShadowV(V, cgi.shYeti);
-      queuepoly(VBS, cgi.shYeti, darkena(col, 0, 0xC0));
-      queuepoly(VHEAD1, cgi.shPHead, darkena(0xFF8000, 0, 0XFF));
+      queuepoly(VBS, cgi.shYeti, darkena(0xFF8000, 0, 0XFF));
+      queuepoly(VHEAD1, cgi.shPHead, darkena(col, 0, 0xC0));
       queuepoly(VHEAD, cgi.shPFace, 0xFFFFFF80 | UNTRANS);
       humanoid_eyes(V, 0x000000FF, darkena(col, 0, 0xFF));
       return true;
