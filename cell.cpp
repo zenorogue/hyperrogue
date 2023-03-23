@@ -1432,6 +1432,7 @@ EX array<map<cell*, vector<adj_data>>, 2> adj_memo;
 
 EX bool geometry_has_alt_mine_rule() {
   if(S3 >= OINF) return false;
+  if(aperiodic) return true;
   if(WDIM == 2) return valence() > 3;
   if(WDIM == 3) return !among(geometry, gHoroHex, gCell5, gBitrunc3, gCell8, gECell8, gCell120, gECell120);
   return true;
