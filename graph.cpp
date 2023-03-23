@@ -5436,6 +5436,8 @@ EX bool permaside;
 
 EX bool old_center;
 
+EX ld min_scale = 1e-6;
+
 EX void calcparam() {
 
   DEBBI(DF_GRAPH, ("calc param"));
@@ -5450,7 +5452,7 @@ EX void calcparam() {
   cd->xcenter = cd->xtop + cd->xsize / 2;
   cd->ycenter = cd->ytop + cd->ysize / 2;
 
-  if(pconf.scale > -1e-2 && pconf.scale < 1e-2) pconf.scale = 1;
+  if(abs(pconf.scale) < min_scale) pconf.scale = 1;
   
   ld realradius = min(cd->xsize / 2, cd->ysize / 2);
   
