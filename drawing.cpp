@@ -1623,6 +1623,19 @@ bool broken_projection(dqi_poly& p0) {
   int broken_coord = models::get_broken_coord(pmodel);
   static bool in_broken = false;
   bool both_broken = pmodel == mdConformalSquare;
+
+  transmatrix T = p0.V.T, IT = Id, FT = Id;
+  if(both_broken) FT = cspin(0, 1, 45._deg), T = FT * T, IT = cspin(0, 1, -45._deg);
+
+  ld zlow = 0;
+  if(both_broken) {
+    ld t = pconf.model_transition;
+    zlow = (1-t*t) / (1+t*t);
+    }
+  // x * mt / (1-z) <= 1
+  // sqrt(1-z*z) * mt / (1-z) <= 1
+  // sqrt(1-z*z) <= (1-z) / mt
+
   if(broken_coord && !in_broken) {
 
     int zcoord = broken_coord;
@@ -1633,14 +1646,14 @@ bool broken_projection(dqi_poly& p0) {
     
     vector<hyperpoint> all;
     for(int i=0; i<p0.cnt; i++) 
-      all.push_back(p0.V.T * glhr::gltopoint((*p0.tab)[p0.offset+i]));
+      all.push_back(T * glhr::gltopoint((*p0.tab)[p0.offset+i]));
     int fail = 0;
     int last_fail;
 
     for(auto& h: all) models::apply_orientation(h[0], h[1]);
 
     auto break_in_xz = [&] (hyperpoint a, hyperpoint b, int xcoord, int zcoord) {
-      return a[xcoord] * b[xcoord] <= 0 && (a[xcoord] * b[zcoord] - b[xcoord] * a[zcoord]) * (a[xcoord] - b[xcoord]) < 0;
+      return a[xcoord] * b[xcoord] <= 0 && (a[xcoord] * (b[zcoord]+zlow) - b[xcoord] * (a[zcoord]+zlow)) * (a[xcoord] - b[xcoord]) < 0;
       };
  
     auto break_in = [&] (hyperpoint a, hyperpoint b) {
@@ -1658,7 +1671,7 @@ bool broken_projection(dqi_poly& p0) {
     dqi_poly p = p0;
     p.tab = &v;
     p.offset = 0;
-    p.V.T = Id;
+    p.V.T = IT;
 
     /* we don't rotate h's back, just change p.V */
     for(int i=0; i<3; i++)
@@ -1698,12 +1711,14 @@ bool broken_projection(dqi_poly& p0) {
           if(have_initial) {
             int max = 4 << vid.linequality;
             if(both_broken) {
-              auto square_close_corner = [] (hyperpoint h) {
+              auto square_close_corner = [&] (hyperpoint h) {
                 hyperpoint end = -C0;
-                if(abs(h[0]) > abs(h[1]))
-                  end[0] = 0.01 * signum(h[0]), end[1] = 0.001 * signum(h[1]);
+                end[0] = 0.01 * signum(h[0]);
+                end[1] = 0.01 * signum(h[1]);
+                /* if(abs(h1[0]) > abs(h1[1]))
+                  end[0] = 0.01 * signum(h1[0]), end[1] = 0.001 * signum(h1[1]);
                 else
-                  end[1] = 0.01 * signum(h[1]), end[0] = 0.001 * signum(h[0]);
+                  end[1] = 0.01 * signum(h1[1]), end[0] = 0.001 * signum(h1[0]); */
                 return normalize(end);
                 };
               hyperpoint endf = square_close_corner(final);
