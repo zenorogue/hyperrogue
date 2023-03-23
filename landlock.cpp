@@ -153,10 +153,12 @@ EX void fix_land_structure_choice() {
     land_structure = lsChaos;
   if(walls_not_implemented() && among(land_structure, lsChaos, lsNoWalls))
     land_structure = lsSingle;
-  if(land_structure == lsPatchedChaos && !(stdeuc || nil || cryst || (euclid && WDIM == 3)))
+  if(land_structure == lsPatchedChaos && !(stdeuc || nil || cryst || (euclid && WDIM == 3) || aperiodic))
     land_structure = lsSingle;
   if(closed_or_bounded && !among(land_structure, lsChaosRW, lsTotalChaos, lsSingle))
     land_structure = lsSingle;
+  if(aperiodic && !among(land_structure, lsChaosRW, lsTotalChaos, lsPatchedChaos, lsSingle))
+    land_structure = lsPatchedChaos;
   }
 
 EX bool landUnlockedRPM(eLand n) {

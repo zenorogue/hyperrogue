@@ -473,6 +473,7 @@ struct hrmap_hat : hrmap {
       h1->distance = h->distance - 1;
       h1->zebraval = dir == 1;
       h->c.connect(dir, h1, 0, false);
+      if(h1->distance == 0) build_cells(h1);
       return h1;
       }
     // create side connection

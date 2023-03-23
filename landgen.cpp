@@ -2811,13 +2811,24 @@ EX void set_land_for_geometry(cell *c) {
       setland(c, currentlands[hrand(isize(currentlands))]);
       return;
       }
-    if(ls::patched_chaos() && stdeuc) { /* note: Nil pached chaos done in setLandNil */
+     /* note: Nil patched chaos done in setLandNil */
+    if(ls::patched_chaos() && stdeuc) {
       cell *c2 = c;
       while(true) {
         forCellCM(c3, c2) if(cdist50(c3) < cdist50(c2)) { c2 = c3; goto again; }
         break;
         again: ;
         }
+      if(!c2->land) setland(c2, currentlands[hrand(isize(currentlands))]);
+      c->land = c2->land;
+      return;
+      }
+    if(ls::patched_chaos() && aperiodic) {
+      cell *c2;
+      if(hat::in())
+        c2 = c->master->cmove(0)->cmove(0)->cmove(1)->cmove(1)->c7;
+      else
+        c2 = c->master->cmove(0)->cmove(0)->cmove(0)->cmove(0)->cmove(0)->cmove(1)->cmove(1)->cmove(1)->cmove(1)->cmove(1)->c7;
       if(!c2->land) setland(c2, currentlands[hrand(isize(currentlands))]);
       c->land = c2->land;
       return;
