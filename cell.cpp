@@ -1493,6 +1493,11 @@ EX vector<cell*> adj_minefield_cells(cell *c) {
   vector<cell*> res;
   auto ori = adj_minefield_cells_full(c);
   for(auto p: ori) res.push_back(p.c);
+  if(hat::in()) {
+    // reduce repetitions
+    sort(res.begin(), res.end());
+    res.erase(std::unique(res.begin(), res.end()), res.end());
+    }
   return res;
   }
 
