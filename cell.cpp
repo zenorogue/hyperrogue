@@ -1502,7 +1502,7 @@ EX vector<cell*> adj_minefield_cells(cell *c) {
   }
 
 EX vector<int> reverse_directions(cell *c, int dir) {
-  if(PURE && !(kite::in() && WDIM == 2)) return reverse_directions(c->master, dir);
+  if(PURE && !(aperiodic && WDIM == 2)) return reverse_directions(c->master, dir);
   int d = c->degree();
   if(d & 1)
     return { gmod(dir + c->type/2, c->type), gmod(dir + (c->type+1)/2, c->type) };
