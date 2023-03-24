@@ -598,6 +598,7 @@ EX int celldist(cell *c) {
   if(mhybrid)
     return hybrid::celldistance(c, currentmap->gamestart());
   if(nil && !quotient) return DISTANCE_UNKNOWN;
+  if(hat::in()) return clueless_celldistance(currentmap->gamestart(), c);
   if(euc::in()) return celldistance(currentmap->gamestart(), c);
   if(sphere || bt::in() || WDIM == 3 || cryst || sn::in() || aperiodic || closed_manifold) return celldistance(currentmap->gamestart(), c);
   #if CAP_IRR
