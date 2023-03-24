@@ -427,8 +427,8 @@ struct hrmap_hat : hrmap {
       eshort *= hat_param;
       elong *= 2 - hat_param;
       // 0-length edges cause problems...
-      if(eshort == 0) eshort = .0001;
-      if(elong == 0) elong = .0001;
+      if(abs(eshort) < 1e-6) eshort = .0001;
+      if(abs(elong) < 1e-6) elong = .0001;
       }
 
     ld i60 = (M_PI - TAU*2/q)/degree;

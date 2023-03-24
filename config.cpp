@@ -824,7 +824,7 @@ EX void initConfig() {
   param_custom(vid.binary_width, "binary tiling width", menuitem_binary_width, 'v');
 
   param_f(hat::hat_param, "hat_param", "hat_param", 1)
-  -> editable(0, 2, 1, "Hat parameter",
+  -> editable(0, 2, 0.1, "hat parameter",
     "Apeirodic hat tiling based on: https://arxiv.org/pdf/2303.10798.pdf\n\n"
     "This controls the parameter discussed in Section 6.", 'v'
     )
