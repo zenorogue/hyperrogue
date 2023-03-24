@@ -458,6 +458,18 @@ struct hrmap_hat : hrmap {
     hatcorners[1] = hc;
     for(auto& h: hatcorners[1]) h = MirrorX * h;
     reverse(hatcorners[1].begin(), hatcorners[1].end());
+
+    if(q == 6) {
+      transmatrix T = spintox(
+        adj(1,9,0,7) * adj(0,11,0,10) * adj(0,1,0,2) * adj(0,8,0,5) * adj(0,11,0,10) *
+        adj(0,1,0,2) * adj(0,8,0,5) * adj(0,11,0,2) * adj(0,8,0,5) * adj(0,11,0,10) *
+        adj(0,1,0,2) * adj(0,8,0,5) * adj(0,11,0,10) * adj(0,1,0,2) * adj(0,8,0,5) *
+        adj(0,11,0,2) * adj(0,8,0,5) * C0
+        );
+      for(auto& h: hc) h = inverse(T) * h;
+      for(auto& h: hatcorners[1]) h = T * h;
+      }
+
     }
 
   constexpr static int relations = 34;
@@ -564,8 +576,12 @@ struct hrmap_hat : hrmap {
     cell *c1 = c0->cmove(d0);
     int t0 = c0 == c0->master->c7;
     int t1 = c1 == c1->master->c7;
-    int n = isize(hatcorners[0]);
     int d1 = c0->c.spin(d0);
+    return adj(t0, d0, t1, d1);
+    }
+
+  transmatrix adj(int t0, int d0, int t1, int d1) {
+    int n = isize(hatcorners[0]);
 
     hyperpoint vl = hatcorners[t0][d0];
     hyperpoint vr = hatcorners[t0][(d0+1)%n];
