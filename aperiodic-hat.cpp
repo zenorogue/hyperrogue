@@ -498,7 +498,6 @@ struct hrmap_hat : hrmap {
     // create side connection
     createStep(h, 0);
     int id = h->c.spin(0)-1;
-    // println(hlog, "solving recursion for ", tie(id, dir));
     indenter ind(2);
     for(auto& ru: rules_recursive) {
       if(ru.id0 == id && ru.child == dir) {
@@ -526,16 +525,13 @@ struct hrmap_hat : hrmap {
 
   void find_cell_connection(cell *c, int d) {
     int id = hat_id(c);
-    // println(hlog, "solving base for ", tie(id, d));
     indenter ind(2);
     for(auto& ru: rules_base) {
       if(ru.id0 == id && ru.edge0 == fix(d)) {
-        // println(hlog, "matching rule found: ", tie(ru.id1, ru.edge1, ru.master_connection));
         heptagon *h = get_step(c->master, ru.master_connection);
         if(!h) continue;
         build_cells(h);
         auto& ha = hats[h];
-        // println(hlog, "h valid, with ", isize(ha), " hats");
         if(ru.id1 >= isize(ha)) continue;
         auto& c1 = ha[ru.id1];
         c->c.connect(d, c1, fix(ru.edge1), false);
@@ -565,11 +561,10 @@ struct hrmap_hat : hrmap {
 
     transmatrix xrm = gpushxto0(xvm);
 
-    if(abs(hdist(vl, vr) - hdist(xvl, xvr)) > 1e-3) throw hr_exception("wrong length connection");
+    if(abs(hdist(vl, vr) - hdist(xvl, xvr)) > 1e-3)
+      throw hr_exception("wrong length connection");
 
     transmatrix T = rgpushxto0(vm) * rspintox(rm*vr) * spintox(xrm*xvl) * xrm;
-
-    // println(hlog, vl, " == ", T * xvr, " AND ", vr, " == ", T * xvl);
 
     return T;
     }
