@@ -742,6 +742,26 @@ EX land_validity_t& land_validity(eLand l) {
   if(euclid && quotient) stdeucx = false;
 
   using namespace lv;
+
+  if(hat::in()) {
+    if(l == laKraken) return dont_work;
+    if(l == laWineyard) return dont_work;
+    if(l == laReptile) return bad_graphics;
+    if(l == laBull) return ok;
+    if(l == laHaunted) return dont_work;
+    if(l == laHive) return not_in_full_game;
+    if(l == laRedRock) return ok;
+    if(l == laStorms) return ok;
+    if(l == laDice) return dont_work;
+    if(l == laVolcano) return dont_work;
+    if(l == laBlizzard) return dont_work;
+    if(l == laBurial) return dont_work;
+    if(l == laEclectic) return dont_work;
+    if(l == laCursed) return dont_work;
+    if(l == laElementalWall) return dont_work;
+    if(l == laFrog) return dont_work;
+    if(l == laDragon) return not_in_full_game;
+    }
   
   if(l == laDice && geometry == gNormal && PURE)
     return dont_work;
