@@ -269,6 +269,12 @@ EX void gen_eclectic_monster(cell *c) {
     }
   }
 
+EX void place_random_gate_continuous(cell *c) {
+  c->wall = pick(waClosedGate, waOpenGate);
+  if(c->wall == waClosedGate) toggleGates(c, waClosePlate, 1);
+  else toggleGates(c, waOpenPlate, 1);
+  }
+
 EX void giantLandSwitch(cell *c, int d, cell *from) {
   bool fargen = d == min(BARLEV, 9);
   switch(c->land) {
@@ -338,7 +344,28 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laPalace: // -------------------------------------------------------------
     
-      if(nil) {
+      if(hat::in()) {
+        if(fargen) {
+          set<heptagon*> hs;
+          forCellCM(c1, c) if(c1->master != c->master) hs.insert(c1->master);
+          if(isize(hs) == 3)
+            c->wall = waPalace;
+          else if(isize(hs) == 2 && hrand(100) < 30)
+            c->wall = waPalace;
+          else if(isize(hs) == 2 && hrand(100) < 50)
+            place_random_gate_continuous(c);
+          else {
+            int i = hrand(100);
+              if(i < 10)
+                c->wall = waTrapdoor;
+              else if(i < 15)
+                c->wall = waClosePlate;
+              else if(i < 20)
+                c->wall = waOpenPlate;
+            }
+          }
+        }
+      else if(nil) {
         if(fargen) {
           int i = hrand(100);
           if(c->master->zebraval % 4 == 2 || c->master->emeraldval % 4 == 2) {
@@ -399,11 +426,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           if(gs == 1)
             c->wall = waPalace;
           if(gs == 3) {
-            if(mhybrid) {
-              c->wall = pick(waClosedGate, waOpenGate);
-              if(c->wall == waClosedGate) toggleGates(c, waClosePlate, 1);
-              else toggleGates(c, waOpenPlate, 1);
-              }
+            if(mhybrid) place_random_gate_continuous(c);
             else
               c->wall = PURE ? waOpenGate : waClosedGate;
             }
