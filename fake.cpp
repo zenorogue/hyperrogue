@@ -89,7 +89,7 @@ EX namespace fake {
 
     hyperpoint get_corner(cell *c, int cid, ld cf=3) override { 
 
-      if(arcm::in()) {
+      if(arcm::in() || hat::in()) {
         return underlying_map->get_corner(c, cid, cf);
         }
 
@@ -99,6 +99,7 @@ EX namespace fake {
       }
 
     transmatrix adj(cell *c, int d) override {
+      if(hat::in()) return underlying_map->adj(c, d);
       if(variation == eVariation::coxeter) {
         array<int, 3> which;
         in_underlying([&which, c, d] {
@@ -535,7 +536,9 @@ EX ld compute_euclidean() {
   #if CAP_ARCM
   if(arcm::in()) return arcm::current.N * 2 / arcm::current.euclidean_angle_sum;
   #endif
+  if(underlying == gAperiodicHat) return 6;
   if(WDIM == 2) return 4 / (S7-2.) + 2;
+
 
   if(underlying == gRhombic3) return 3;
   if(underlying == gBitrunc3) return 2.55208;
@@ -551,6 +554,7 @@ EX ld around_orig() {
   if(arcm::in())
     return arcm::current.N;
   #endif
+  if(hat::in()) return 6;
   if(WDIM == 2)
     return S3;
   if(underlying == gRhombic3)
@@ -655,8 +659,9 @@ void set_gfake(ld _around) {
   compute_scale();
   check_cgi();
   cgi.require_basics();
-  
+
   if(currentmap) new hrmap_fake(currentmap);
+  if(hat::in()) hat::reshape();
   }
 
 EX void change_around() {

@@ -402,6 +402,8 @@ struct hrmap_hat : hrmap {
   void init() {
 
     transmatrix T = Id;
+    hatcorners[0].clear();
+    hatcorners[1].clear();
 
     auto move = [&] (ld angle, ld dist) {
       hatcorners[0].push_back(T * C0);
@@ -409,19 +411,29 @@ struct hrmap_hat : hrmap {
       T = T * xpush(dist);
       };
 
+    ld q = 6;
     ld eshort = 0.5;
     ld elong = sqrt(3) * eshort;
+    if(fake::in()) q = fake::around;
+
+    if(q != 6) {
+      eshort = edge_of_triangle_with_angles(M_PI / q, 60._deg, 90._deg);
+      elong = edge_of_triangle_with_angles(60._deg, M_PI / q, 90._deg);
+      }
+
+    ld i60 = (M_PI - TAU*2/q)/degree;
+    ld n60 = (M_PI - TAU*4/q)/degree;
 
     move(-90, eshort); move( 60, eshort); move(  0, eshort);
-    move( 60, eshort); move( 90, elong);  move(-60, elong);
+    move( 60, eshort); move( 90, elong);  move(n60, elong);
     move( 90, eshort); move(-60, eshort); move( 90, elong);
-    move( 60, elong);  move(-90, eshort); move( 60, eshort);
-    move( 90, elong);  move(60, elong);
+    move(i60, elong);  move(-90, eshort); move( 60, eshort);
+    move( 90, elong);  move(i60, elong);
 
-    hyperpoint ctr = C0;
+    hyperpoint ctr = Hypc;
     for(auto h: hatcorners[0]) ctr += h;
     ctr /= isize(hatcorners[0]);
-    normalize(ctr);
+    ctr = normalize(ctr);
     for(auto& h: hatcorners[0]) h = gpushxto0(ctr) * h;
 
     hatcorners[1] = hatcorners[0];
@@ -585,6 +597,14 @@ struct hrmap_hat : hrmap {
   };
 
 EX hrmap *new_map() { return new hrmap_hat; }
+
+hrmap_hat* hat_map() { return dynamic_cast<hrmap_hat*>(currentmap); }
+
+EX void reshape() {
+  hrmap_hat *hatmap;
+  hatmap = FPIU( hat_map() );
+  hatmap->init();
+  }
 
 EX color_t hatcolor(cell *c, int mode) {
   vector<int> cols;
