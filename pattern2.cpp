@@ -2675,6 +2675,15 @@ EX namespace linepatterns {
     return c2 > c;
     }
 
+  EX ld dual_length = 0;
+  EX ld dual_angle = 0;
+
+  hyperpoint dualpoint() {
+    if(dual_length)
+      return xspinpush0(dual_angle * degree, dual_length);
+    return tile_center();
+    }
+
   linepattern patDual("dual grid", 0xFFFFFF00, always_available,
     ALLCELLS(
       forCellIdEx(c2, i, c) if(way(c,i)) {
@@ -2687,7 +2696,7 @@ EX namespace linepatterns {
         if((patTriRings.color & 0xFF)) {
           if(curr_dist(c2) == curr_dist(c)) continue;
           }
-        gridlinef(V, C0, V * currentmap->adj(c, i), C0, col, 2 + vid.linequality);
+        gridlinef(V, dualpoint(), V * currentmap->adj(c, i), dualpoint(), col, 2 + vid.linequality);
         }
       )
     );
