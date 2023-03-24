@@ -400,27 +400,33 @@ struct hrmap_hat : hrmap {
   vector<hyperpoint> hatcorners[2];
 
   void init() {
-    auto pt = hpxy;
-    hatcorners[0] = {
-     pt(-1.1160254038,1.4330127019),
-     pt(-0.0915063509,2.0245190528),
-     pt(0.2500000000,1.4330127019),
-     pt(-0.0915063509,0.8415063509),
-     pt(0.9330127019,0.2500000000),
-     pt(0.9330127019,-0.9330127019),
-     pt(0.2500000000,-0.9330127019),
-     pt(-0.0915063509,-1.5245190528),
-     pt(-1.1160254038,-0.9330127019),
-     pt(-2.1405444566,-1.5245190528),
-     pt(-2.4820508076,-0.9330127019),
-     pt(0,0),
-     pt(-1.7990381057,0.2500000000),
-     pt(-1.1160254038,0.2500000000),
-     };
-    hatcorners[0][11] = mid(hatcorners[0][10], hatcorners[0][12]);
+
+    transmatrix T = Id;
+
+    auto move = [&] (ld angle, ld dist) {
+      hatcorners[0].push_back(T * C0);
+      T = T * spin(angle * degree);
+      T = T * xpush(dist);
+      };
+
+    ld eshort = 0.5;
+    ld elong = sqrt(3) * eshort;
+
+    move(-90, eshort); move( 60, eshort); move(  0, eshort);
+    move( 60, eshort); move( 90, elong);  move(-60, elong);
+    move( 90, eshort); move(-60, eshort); move( 90, elong);
+    move( 60, elong);  move(-90, eshort); move( 60, eshort);
+    move( 90, elong);  move(60, elong);
+
+    hyperpoint ctr = C0;
+    for(auto h: hatcorners[0]) ctr += h;
+    ctr /= isize(hatcorners[0]);
+    normalize(ctr);
+    for(auto& h: hatcorners[0]) h = gpushxto0(ctr) * h;
+
     hatcorners[1] = hatcorners[0];
     for(auto& h: hatcorners[1]) h = MirrorX * h;
-    reverse(hatcorners[0].begin(), hatcorners[0].end());
+    reverse(hatcorners[1].begin(), hatcorners[1].end());
     }
 
   constexpr static int relations = 34;
