@@ -1283,6 +1283,13 @@ EX land_validity_t& land_validity(eLand l) {
   return ok;
   }
 
+auto ar = arg::add3("-land-info",
+  [] {
+    for(int li=0; li<landtypes; li++) {
+      eLand l = eLand(li);
+      println(hlog, dnameof(l), " : ", land_validity(l).msg);
+      }
+    });
 /*
 int checkLands() {
   for(int i=0; i<landtypes; i++) {
