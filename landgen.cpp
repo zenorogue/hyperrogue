@@ -1350,6 +1350,11 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
       bool randstorm = PIU(hyperbolic_not37 || NONSTDVAR || (quotient && geometry != gZebraQuotient && !euc::in(2)));
       if(fargen) {
       
+        if(hat::in()) {
+          int id = hat::get_hat_id(c);
+          if(id == 0) c->wall = pick(waCharged, waGrounded);
+          if(id == 1 && hrand(100) < 50) c->wall = waSandstone;
+          }
         if(euc::in(2) && smallbounded) {
           auto s = euc::sdxy();
           gp::loc st {s.first/3, s.second/3};
