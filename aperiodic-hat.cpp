@@ -382,6 +382,8 @@ vector<rule_recursive> rules_recursive = {
   {6, 6, 31, 31, 14},
   };
 
+EX ld hat_param = 1;
+
 struct hrmap_hat : hrmap {
 
   // always generate the same way
@@ -402,23 +404,31 @@ struct hrmap_hat : hrmap {
   void init() {
 
     transmatrix T = Id;
-    hatcorners[0].clear();
+    auto& hc = hatcorners[0];
+    hc.clear();
     hatcorners[1].clear();
 
     auto move = [&] (ld angle, ld dist) {
-      hatcorners[0].push_back(T * C0);
+      hc.push_back(T * C0);
       T = T * spin(angle * degree);
       T = T * xpush(dist);
       };
 
     ld q = 6;
-    ld eshort = 0.5;
+    ld eshort = 0.3;
     ld elong = sqrt(3) * eshort;
     if(fake::in()) q = fake::around;
 
     if(q != 6) {
       eshort = edge_of_triangle_with_angles(M_PI / q, 60._deg, 90._deg);
       elong = edge_of_triangle_with_angles(60._deg, M_PI / q, 90._deg);
+      }
+    else {
+      eshort *= hat_param;
+      elong *= 2 - hat_param;
+      // 0-length edges cause problems...
+      if(eshort == 0) eshort = .0001;
+      if(elong == 0) elong = .0001;
       }
 
     ld i60 = (M_PI - TAU*2/q)/degree;
@@ -430,13 +440,22 @@ struct hrmap_hat : hrmap {
     move(i60, elong);  move(-90, eshort); move( 60, eshort);
     move( 90, elong);  move(i60, elong);
 
-    hyperpoint ctr = Hypc;
-    for(auto h: hatcorners[0]) ctr += h;
-    ctr /= isize(hatcorners[0]);
-    ctr = normalize(ctr);
-    for(auto& h: hatcorners[0]) h = gpushxto0(ctr) * h;
+    if(q == 6) {
+      ld area = 0;
+      for(int i=0; i<14; i++) area += (hc[(i+1)%14] ^ hc[i]) [2];
+      println(hlog, "area = ", area);
+      area = abs(area);
+      ld scale = sqrt(2.5 / area);
+      for(auto& h: hc) h = h * scale + (C0) * (1-scale);
+      }
 
-    hatcorners[1] = hatcorners[0];
+    hyperpoint ctr = Hypc;
+    for(auto h: hc) ctr += h;
+    ctr /= isize(hc);
+    ctr = normalize(ctr);
+    for(auto& h: hc) h = gpushxto0(ctr) * h;
+
+    hatcorners[1] = hc;
     for(auto& h: hatcorners[1]) h = MirrorX * h;
     reverse(hatcorners[1].begin(), hatcorners[1].end());
     }
@@ -608,6 +627,7 @@ EX int get_hat_id(cell *c) {
 EX void reshape() {
   hrmap_hat *hatmap;
   hatmap = FPIU( hat_map() );
+  if(!hatmap) return;
   hatmap->init();
   }
 

@@ -822,7 +822,14 @@ EX void initConfig() {
 
   param_f(vid.binary_width, "bwidth", "binary-tiling-width", 1);
   param_custom(vid.binary_width, "binary tiling width", menuitem_binary_width, 'v');
- 
+
+  param_f(hat::hat_param, "hat_param", "hat_param", 1)
+  -> editable(0, 2, 1, "Hat parameter",
+    "Apeirodic hat tiling based on: https://arxiv.org/pdf/2303.10798.pdf\n\n"
+    "This controls the parameter discussed in Section 6.", 'v'
+    )
+  -> set_reaction(hat::reshape);
+
   addsaver(vid.particles, "extra effects", 1);
   param_i(vid.framelimit, "frame limit", 999);
 

@@ -1022,6 +1022,9 @@ EX void showEuclideanMenu() {
     menuitem_binary_width('v');
     add_edit_wall_quality('W');
     }
+  else if(hat::in()) {
+    add_edit(hat::hat_param);
+    }
   else if(nil) {
     menuitem_nilwidth('v');
     }
