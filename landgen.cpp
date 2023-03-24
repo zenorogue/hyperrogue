@@ -2832,11 +2832,15 @@ EX void setland_randomwalk(cell *c) {
     }
   }
 
+EX eLand random_land() {
+  return hrand_elt(isize(cheatdest_list) ? cheatdest_list : currentlands);
+  }
+
 EX void set_land_for_geometry(cell *c) {
 
   if(!c->land && isize(currentlands)) {
     if(land_structure == lsTotalChaos) {
-      setland(c, currentlands[hrand(isize(currentlands))]);
+      setland(c, random_land());
       return;
       }
      /* note: Nil patched chaos done in setLandNil */
@@ -2847,7 +2851,7 @@ EX void set_land_for_geometry(cell *c) {
         break;
         again: ;
         }
-      if(!c2->land) setland(c2, currentlands[hrand(isize(currentlands))]);
+      if(!c2->land) setland(c2, random_land());
       c->land = c2->land;
       return;
       }
@@ -2857,7 +2861,7 @@ EX void set_land_for_geometry(cell *c) {
         c2 = c->master->cmove(0)->cmove(0)->cmove(1)->cmove(1)->c7;
       else
         c2 = c->master->cmove(0)->cmove(0)->cmove(0)->cmove(0)->cmove(0)->cmove(1)->cmove(1)->cmove(1)->cmove(1)->cmove(1)->c7;
-      if(!c2->land) setland(c2, currentlands[hrand(isize(currentlands))]);
+      if(!c2->land) setland(c2, random_land());
       c->land = c2->land;
       return;
       }
