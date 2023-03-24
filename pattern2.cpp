@@ -1477,7 +1477,7 @@ EX bool pseudohept(cell *c) {
   if(sol) return (c->master->emeraldval % 3 == 2) && (c->master->zebraval % 3 == 2) && (c->master->distance % 2);
   if(nih) return c->master->zebraval % 3 == 2 && c->master->emeraldval % 2 == 1 && (c->master->distance % 2);
   if(kite::in()) return kite::getshape(c->master) == kite::pDart;
-  if(hat::in()) return c == c->master->c7;
+  if(hat::in()) return hat::pseudohept(c);
   if(bt::in()) return bt::pseudohept(c);
   #endif
   if(S3 >= OINF) return c->master->distance % 3 == 1;

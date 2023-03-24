@@ -596,6 +596,15 @@ EX hrmap *new_map() { return new hrmap_hat; }
 
 hrmap_hat* hat_map() { return dynamic_cast<hrmap_hat*>(currentmap); }
 
+EX bool pseudohept(cell *c) {
+  int id = hat_map()->hat_id(c);
+  return id == 0 || id == 6;
+  }
+
+EX int get_hat_id(cell *c) {
+  return hat_map()->hat_id(c);
+  }
+
 EX void reshape() {
   hrmap_hat *hatmap;
   hatmap = FPIU( hat_map() );
