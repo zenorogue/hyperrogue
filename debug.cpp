@@ -748,7 +748,7 @@ int read_cheat_args() {
     shift(); int index = argi();
     shift(); whateveri[index] = argi();
     }
-  else if(argis("-W3")) {
+  else if(argis("-W4")) {
     shift(); top_land = readland(args()); cheat();
     showstartmenu = false;
     }
