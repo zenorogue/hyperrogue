@@ -456,6 +456,7 @@ struct hrmap_hat : hrmap {
   heptagon *getOrigin() override { return origin; }
 
   hyperpoint get_corner(cell *c, int cid, ld cf) override {
+    cid = gmod(cid, isize(hatcorners[0]));
     int t = c->master->c7 == c;
     auto& h = hatcorners[t][cid];
 
