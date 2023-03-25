@@ -77,6 +77,7 @@ EX hookset<bool()> hooks_welcome_message;
 /** \brief Print the welcome message during the start of game. Depends on the current mode and other settings. */
 EX void welcomeMessage() {
   if(callhandlers(false, hooks_welcome_message)) return;
+  if(nohelp == 1) return;
   if(embedded_plane) return IPF(welcomeMessage());
 #if CAP_TOUR
   else if(tour::on) return; // displayed by tour
@@ -140,6 +141,7 @@ EX void welcomeMessage() {
       addMessage(XLAT(lv.msg));
     }
 
+  if(nohelp == 2) return;
 #if ISMAC
   addMessage(XLAT("Press F1 or right-shift-click things for help."));
 #elif !ISMOBILE

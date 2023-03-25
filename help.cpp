@@ -218,6 +218,7 @@ EX void buildHelpText() {
   }
 
 EX string standard_help() {
+  if(nohelp == 2) return "";
   return XLAT("Press F1 or right click for help");
   }
 
@@ -239,7 +240,7 @@ EX void buildCredits() {
     "Kojiguchi Kazuki, baconcow, Alan, SurelyYouJest, hotdogPi, DivisionByZero, xXxWeedGokuxXx, jpystynen, Dmitry Marakasov, Alexandre Moine, Arthur O'Dwyer, "
     "Triple_Agent_AAA, bluetailedgnat, Allalinor, Shitford, KittyTac, Christopher King, KosGD, TravelDemon, Bubbles, rdococ, frozenlake, MagmaMcFry, "
     "Snakebird Priestess, roaringdragon2, Stopping Dog, bengineer8, Sir Light IJIJ, ShadeBlade, Saplou, shnourok, Ralith, madasa, 6% remaining, Chimera245, Remik Pi, alien foxcat thing, "
-    "Piotr Grochowski, Ann, still-flow, tyzone, Paradoxica, LottieRatWorld, aismallard, albatross, EncodedSpirit, Jacob Mandelson, CrashTuvai, cvoight, jennlbw"
+    "Piotr Grochowski, Ann, still-flow, tyzone, Paradoxica, LottieRatWorld, aismallard, albatross, EncodedSpirit, Jacob Mandelson, CrashTuvai, cvoight, jennlbw, Kali Ranya"
     );
 #ifdef EXTRALICENSE
   help += EXTRALICENSE;

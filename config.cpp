@@ -1961,6 +1961,8 @@ EX void configureInterface() {
       XLAT("Maximum number of messages on screen."));
     dialog::bound_low(0);
     });
+
+  add_edit(nohelp);
   
   add_edit(vid.msgleft);
   
@@ -2670,6 +2672,13 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
       });
   
   addsaver(vid.auto_eye, "auto-eyelevel", false);
+
+  param_enum(nohelp, "help_messages", "help_messages", 0)
+  -> editable({
+    {"all", "all context help/welcome messages"},
+    {"none", "no context help/welcome messages"},
+    {"automatic", "I know I can press F1 for help"},
+    }, "context help", 'H');
 
   param_f(vid.creature_scale, "creature_scale", "3d-creaturescale", 1)
     ->editable(0, 1, .1, "Creature scale", "", 'C');

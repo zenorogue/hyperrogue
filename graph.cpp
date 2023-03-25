@@ -5690,7 +5690,7 @@ EX void emptyscreen() {
   drawqueue();
   }
 
-EX bool nohelp;
+EX int nohelp;
 EX bool no_find_player;
 
 EX void normalscreen() {
@@ -5836,7 +5836,7 @@ EX void drawscreen() {
   color_t col = linf[cwt.at->land].color;
   if(cwt.at->land == laRedRock) col = 0xC00000;
   if(titlecolor) col = titlecolor;
-  if(!nohelp)
+  if(nohelp != 1)
     displayfr(vid.xres/2, vid.fsize,   2, vid.fsize, mouseovers, col, 8);
 #endif
 
