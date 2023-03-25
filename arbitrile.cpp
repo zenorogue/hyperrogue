@@ -1393,12 +1393,22 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int t1, int xdl, bool xmir
 
   hyperpoint vl = sh.vertices[dl];
   hyperpoint vr = sh.vertices[dr];
+  hyperpoint xvl = xsh.vertices[xdl];
+  hyperpoint xvr = xsh.vertices[xdr];
+
+  bool emb = embedded_plane;
+  if(emb) {
+    vl = cgi.emb->actual_to_base(vl);
+    vr = cgi.emb->actual_to_base(vr);
+    xvl = cgi.emb->actual_to_base(xvl);
+    xvr = cgi.emb->actual_to_base(xvr);
+    geom3::light_flip(true);
+    }
+
   hyperpoint vm = get_midedge(sh.edges[dl], vl, vr);
       
   transmatrix rm = gpushxto0(vm);
   
-  hyperpoint xvl = xsh.vertices[xdl];
-  hyperpoint xvr = xsh.vertices[xdr];
   hyperpoint xvm = get_midedge(xsh.edges[xdl], xvl, xvr);
   
   transmatrix xrm = gpushxto0(xvm);
@@ -1428,7 +1438,12 @@ EX transmatrix get_adj(arbi_tiling& c, int t, int dl, int t1, int xdl, bool xmir
     println(hlog, hdist(vl, Res * xvr), " # ", hdist(vr, Res * xvl));
     throw hr_exception("error in arb::get_adj");
     }
-        
+
+  if(emb) {
+    Res = cgi.emb->base_to_actual(Res);
+    geom3::light_flip(false);
+    }
+
   return Res;
   }
 

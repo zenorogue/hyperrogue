@@ -601,6 +601,8 @@ EX void make_air() {
 
   bool missing = false;
 
+  auto cgi1 = &cgi;
+
   if(1) {
     //shot::take("airtest.png", drawqueue); 
     dynamicval<videopar> v(vid, vid);    
@@ -627,13 +629,18 @@ EX void make_air() {
     pconf.stretch = 1;
     pmodel = mdDisk;
 
-    auto cgi1 = &cgi;
-
     vid.always3 = false;
     geom3::apply_always3();
     check_cgi();
     missing = !(cgi.state & 2);
-    swap_if_missing(missing);
+    cgi.prepare_basics();
+    geom3::swap_direction = -1;
+    if(missing) {
+      swap(cgi.emb, cgi1->emb);
+      swap_if_missing(missing);
+      swap(cgi.emb, cgi1->emb);
+      }
+
     cgi.require_shapes();
     
     eGeometry orig = geometry;
@@ -682,7 +689,12 @@ EX void make_air() {
 
   GLERR("after draw");
   geom3::apply_always3();
-  swap_if_missing(missing);
+  geom3::swap_direction = +1;
+  if(missing) {
+    swap(cgi.emb, cgi1->emb);
+    swap_if_missing(missing);
+    swap(cgi.emb, cgi1->emb);
+    }
   check_cgi();
   calcparam();
   GLERR("after make_air");

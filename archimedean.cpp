@@ -1089,6 +1089,8 @@ auto hook =
 #if MAXMDIM >= 4
 auto hooksw = addHook(hooks_swapdim, 100, [] {
 
+  if(!arcm::in()) return;
+
   dynamicval<eGeometry> g(geometry, gNormal);
   dynamicval<eVariation> gv(variation, eVariation::pure);
   dynamicval<geometry_information*> gi(cgip, find_alt_cgip());

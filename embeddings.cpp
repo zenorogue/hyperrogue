@@ -618,7 +618,10 @@ struct emb_euc_in_hyp : emb_actual {
   hyperpoint base_to_actual(hyperpoint h) override {
     h[3] = h[2]; h[2] = 0; return parabolic13(h[0], h[1]) * C0;
     }
-  hyperpoint actual_to_base(hyperpoint h) override { return deparabolic13(h); }
+  hyperpoint actual_to_base(hyperpoint h) override {
+    hyperpoint h1 = deparabolic13(h); h1[2] = 1;
+    return h1;
+    }
   transmatrix actual_to_base(const transmatrix& T) override { hyperpoint h = deparabolic13(T * C0); return eupush(h[0], h[1]); }
   ld anim_center_z() override { return vid.depth; }
   };

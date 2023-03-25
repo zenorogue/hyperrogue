@@ -602,10 +602,10 @@ struct hrmap_hat : hrmap {
 
     bool emb = embedded_plane;
     if(emb) {
-      vl = cgi.emb->actual_to_base(vl); vl[2] = 1;
-      vr = cgi.emb->actual_to_base(vr); vr[2] = 1;
-      xvl = cgi.emb->actual_to_base(xvl); xvl[2] = 1;
-      xvr = cgi.emb->actual_to_base(xvr); xvr[2] = 1;
+      vl = cgi.emb->actual_to_base(vl);
+      vr = cgi.emb->actual_to_base(vr);
+      xvl = cgi.emb->actual_to_base(xvl);
+      xvr = cgi.emb->actual_to_base(xvr);
       geom3::light_flip(true);
       }
 
