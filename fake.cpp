@@ -32,6 +32,7 @@ EX namespace fake {
     if(in()) return true;
     if(WDIM == 2 && standard_tiling() && (PURE || BITRUNCATED)) return true;
     if(arcm::in() && PURE) return true;
+    if(hat::in()) return true;
     if(WDIM == 2) return false;
     if(among(geometry, gBitrunc3)) return false;
     #if MAXMDIM >= 4
