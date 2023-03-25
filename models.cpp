@@ -200,6 +200,7 @@ EX namespace models {
       }
     if(hyperbolic && desitter_projections && among(pm, mdRelPerspective, mdRelOrthogonal)) return true;
     if(sl2) return among(pm, mdGeodesic, mdEquidistant, mdRelPerspective, mdRelOrthogonal, mdHorocyclic, mdPerspective);
+    if(among(pm, mdRelOrthogonal, mdRelPerspective)) return false;
     if(nonisotropic) return among(pm, mdDisk, mdPerspective, mdHorocyclic, mdGeodesic, mdEquidistant, mdFisheye, mdLiePerspective, mdLieOrthogonal);
     if(sphere && pm == mdBall) return false;
     if(sphere && (mdinf[pm].flags & mf::horocyclic)) return false;
