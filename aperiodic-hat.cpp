@@ -408,9 +408,13 @@ struct hrmap_hat : hrmap {
     hc.clear();
     hatcorners[1].clear();
 
+    bool f = geom3::flipped;
+    bool emb = embedded_plane;
+    if(emb) geom3::light_flip(true);
+
     auto move = [&] (ld angle, ld dist) {
       hc.push_back(T * C0);
-      T = T * spin(angle * degree);
+      T = T * cspin(0, 1, angle * degree);
       T = T * xpush(dist);
       };
 
@@ -470,6 +474,13 @@ struct hrmap_hat : hrmap {
       for(auto& h: hatcorners[1]) h = T * h;
       }
 
+    if(emb) {
+      geom3::light_flip(f);
+      for(auto i:{0, 1}) for(auto& p: hatcorners[i]) {
+        println(hlog, p, " -> ", cgi.emb->base_to_actual(p));
+        p = cgi.emb->base_to_actual(p);
+        }
+      }
     }
 
   constexpr static int relations = 34;
@@ -586,14 +597,21 @@ struct hrmap_hat : hrmap {
     hyperpoint vl = hatcorners[t0][d0];
     hyperpoint vr = hatcorners[t0][(d0+1)%n];
 
-    hyperpoint vm = mid(vl, vr);
-
-    transmatrix rm = gpushxto0(vm);
-
     hyperpoint xvl = hatcorners[t1][d1];
     hyperpoint xvr = hatcorners[t1][(d1+1)%n];
-    hyperpoint xvm = mid(xvl, xvr);
 
+    bool emb = embedded_plane;
+    if(emb) {
+      vl = cgi.emb->actual_to_base(vl); vl[2] = 1;
+      vr = cgi.emb->actual_to_base(vr); vr[2] = 1;
+      xvl = cgi.emb->actual_to_base(xvl); xvl[2] = 1;
+      xvr = cgi.emb->actual_to_base(xvr); xvr[2] = 1;
+      geom3::light_flip(true);
+      }
+
+    hyperpoint vm = mid(vl, vr);
+    transmatrix rm = gpushxto0(vm);
+    hyperpoint xvm = mid(xvl, xvr);
     transmatrix xrm = gpushxto0(xvm);
 
     if(abs(hdist(vl, vr) - hdist(xvl, xvr)) > 1e-3)
@@ -601,6 +619,10 @@ struct hrmap_hat : hrmap {
 
     transmatrix T = rgpushxto0(vm) * rspintox(rm*vr) * spintox(xrm*xvl) * xrm;
 
+    if(emb) {
+      T = cgi.emb->base_to_actual(T);
+      geom3::light_flip(false);
+      }
     return T;
     }
 
@@ -632,12 +654,12 @@ EX hrmap *new_map() { return new hrmap_hat; }
 hrmap_hat* hat_map() { return dynamic_cast<hrmap_hat*>(currentmap); }
 
 EX bool pseudohept(cell *c) {
-  int id = hat_map()->hat_id(c);
+  int id = get_hat_id(c);
   return id == 0 || id == 6;
   }
 
 EX int get_hat_id(cell *c) {
-  return hat_map()->hat_id(c);
+  return FPIU(hat_map())->hat_id(c);
   }
 
 EX void reshape() {
@@ -661,6 +683,8 @@ EX color_t hatcolor(cell *c, int mode) {
     }
   return col;
   }
+
+auto hooksw = addHook(hooks_swapdim, 100, [] { auto h = hat_map(); if(h) h->init(); });
 
 }}
 

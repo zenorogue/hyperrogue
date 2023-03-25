@@ -542,7 +542,7 @@ EX string geometry_name(eGeometryClass gc) {
   }
 
 EX string geometry_name() {
-  if(cgi.emb->is_same_in_same())
+  if(cgi.emb && cgi.emb->is_same_in_same())
     return geometry_name(geom3::mgclass());
   else if(embedded_plane && gproduct)
     return geometry_name(geom3::mgclass()) + " (x E)";
