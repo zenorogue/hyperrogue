@@ -2679,6 +2679,7 @@ EX namespace linepatterns {
   EX ld dual_angle = 0;
 
   hyperpoint dualpoint() {
+    if(!aperiodic) return tile_center();
     if(dual_length)
       return xspinpush0(dual_angle * degree, dual_length);
     return tile_center();
