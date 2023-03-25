@@ -4925,3 +4925,16 @@ Line patterns:
 
 Other:
 - better fog color in 3D ball model
+
+2023-03-25 09:28 Update 12.1l:
+Improvements to the "aperiodic hat":
+- better centering
+- fixed a bug creating bad tiles
+- "hat parameter" transforms continuously (as in Section 6 of https://arxiv.org/pdf/2303.10798.pdf)
+- better pseudo-heptagon assignment (for Graveyard/RRV/etc)
+- improved Jungle, Land of Storms, Palace
+- "fake curvature" works with hat now
+
+Other fixes:
+- do not display relativistic modes in model list
+- an option to not display default help (in "basic interface")
