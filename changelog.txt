@@ -4938,3 +4938,6 @@ Improvements to the "aperiodic hat":
 Other fixes:
 - do not display relativistic modes in model list
 - an option to not display default help (in "basic interface")
+
+2023-03-26 09:41 Update 12.1m:
+- Fixed some crashes when changing the hat parameter, embedding hat, while embedding tessellation from file, using hat with fake geometry. Also fake geometry now appears in the menu for hat.
