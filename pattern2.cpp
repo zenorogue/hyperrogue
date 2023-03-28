@@ -2678,8 +2678,10 @@ EX namespace linepatterns {
   EX ld dual_length = 0;
   EX ld dual_angle = 0;
 
-  hyperpoint dualpoint() {
+  hyperpoint dualpoint(cell *c) {
     if(!aperiodic) return tile_center();
+    if(dual_length && c->master->c7 == c)
+      return MirrorX * xspinpush0(dual_angle * degree, dual_length);
     if(dual_length)
       return xspinpush0(dual_angle * degree, dual_length);
     return tile_center();
@@ -2697,7 +2699,7 @@ EX namespace linepatterns {
         if((patTriRings.color & 0xFF)) {
           if(curr_dist(c2) == curr_dist(c)) continue;
           }
-        gridlinef(V, dualpoint(), V * currentmap->adj(c, i), dualpoint(), col, 2 + vid.linequality);
+        gridlinef(V, dualpoint(c), V * currentmap->adj(c, i), dualpoint(c->cmove(i)), col, 2 + vid.linequality);
         }
       )
     );
