@@ -921,7 +921,7 @@ EX void setLandSphere(cell *c) {
     int y = getHemisphere(c, 2);
     elementalXY(c, x, y, (c->type != 6 || GOLDBERG));
     }
-  if(!(euclid && quotient))
+  if(!(euclid && (quotient || disksize)))
   if(specialland == laCrossroads || specialland == laCrossroads2 || specialland == laCrossroads3 || specialland == laTerracotta) {
     int x = getHemisphere(c, 1);
     if(x == 0 && specialland == laTerracotta)
