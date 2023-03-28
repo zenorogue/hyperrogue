@@ -4941,3 +4941,15 @@ Other fixes:
 
 2023-03-26 09:41 Update 12.1m:
 - Fixed some crashes when changing the hat parameter, embedding hat, while embedding tessellation from file, using hat with fake geometry. Also fake geometry now appears in the menu for hat.
+
+2023-03-28 22:58 Update 12.1n:
+- Aperiodic Hat fixes:
+- - fixed Frog Park (jump rules and graphics)
+- - fixed the Terracotta display (lines displayed, but they are not accurate, so cells are marked too)
+- - interesting values of the hat parameter are displayed in hat parameter config
+- - special welcome message
+
+- fixed crashes and floor graphics in Zebra in some geometries (hat, kite-and-dart)
+- Swap the Red Troll's hair & fur colors (thanks to @jlmjlm)
+- Experimental fractal geometries (experiment with geometry -> Euclidean)
+- fixed Terracotta in Euclidean disk
