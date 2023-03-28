@@ -401,6 +401,16 @@ struct hrmap_hat : hrmap {
   // vertices of each type of hat
   vector<hyperpoint> hatcorners[2];
 
+  struct memo_matrix : transmatrix {
+    bool known;
+    transmatrix& get() { return (transmatrix&) (*this); }
+    void clear() { known = false; }
+    void set(const transmatrix& T) { known = true; get() = T; }
+    };
+
+  memo_matrix adj_memo[2][2][14][14];
+  vector<vector<memo_matrix>> long_transformations;
+
   void init() {
 
     transmatrix T = Id;
@@ -486,7 +496,46 @@ struct hrmap_hat : hrmap {
     for(int b=0; b<2; b++)
     for(int c=0; c<14; c++)
     for(int d=0; d<14; d++)
-      is_known[a][b][c][d] = false;
+      adj_memo[a][b][c][d].clear();
+
+    auto& lt = long_transformations;
+    lt.clear();
+    lt.resize(1);
+    lt[0].resize(relations+1);
+    for(auto& t: lt[0]) t.clear();
+    lt[0][0].set(Id);
+    lt[0][1].set(Id);
+
+    lt.resize(20, lt[0]);
+
+    while(true) {
+      int chg = 0;
+      int unknown = 0;
+      int errors = 0;
+
+      auto products_equal = [&] (memo_matrix& A, memo_matrix& B, memo_matrix& C, memo_matrix& D) {
+        if(A.known && B.known && C.known && D.known) {
+          if(!eqmatrix(A*B, C*D)) errors++;
+          }
+        else if(B.known && C.known && D.known) chg++, A.set( C * D * inverse(B) );
+        else if(A.known && C.known && D.known) chg++, B.set( inverse(A) * C * D );
+        else if(A.known && B.known && D.known) chg++, C.set( A * B * inverse(D) );
+        else if(A.known && B.known && C.known) chg++, D.set( inverse(C) * A * B );
+        else unknown++;
+        };
+
+      for(auto& b: rules_base) {
+        products_equal(lt[0][b.id0+1], adj(b.id0==0, fix(b.edge0), b.id1==0, fix(b.edge1)), lt[1][b.master_connection+1], lt[0][b.id1+1]);
+        }
+
+      for(int k=1; k<19; k++) for(auto& b: rules_recursive) {
+        products_equal(lt[k+1][b.id0+1], lt[k][b.child+1], lt[k+1][b.parent+1], lt[k+1][b.id1+1]);
+        }
+
+      if(debugflags & DF_GEOM) println(hlog, "changed = ", chg, " unknown = ", unknown, " errors = ", errors);
+
+      if(!chg) break;
+      }
     }
 
   constexpr static int relations = 34;
@@ -597,12 +646,9 @@ struct hrmap_hat : hrmap {
     return adj(t0, d0, t1, d1);
     }
 
-  bool is_known[2][2][14][14];
-  transmatrix adj_memo[2][2][14][14];
-
-  transmatrix adj(int t0, int d0, int t1, int d1) {
-    if(is_known[t0][t1][d0][d1])
-      return adj_memo[t0][t1][d0][d1];
+  memo_matrix& adj(int t0, int d0, int t1, int d1) {
+    auto& mm = adj_memo[t0][t1][d0][d1];
+    if(mm.known) return mm;
 
     int n = isize(hatcorners[0]);
 
@@ -636,9 +682,8 @@ struct hrmap_hat : hrmap {
       geom3::light_flip(false);
       }
 
-    is_known[t0][t1][d0][d1] = true;
-    adj_memo[t0][t1][d0][d1] = T;
-    return T;
+    mm.set(T);
+    return mm;
     }
 
   void build_cells(heptagon *h) {
@@ -656,6 +701,18 @@ struct hrmap_hat : hrmap {
     origin->distance = 0;
     origin->zebraval = 1;
     build_cells(origin);
+    }
+
+  transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
+    if(h1 == h2) return Id;
+    int d = h2->distance + 2;
+    return iso_inverse(long_transformations[d][h1->c.spin(0)]) * relative_matrixh(h2->move(0), h1->move(0), hint) * long_transformations[d][h2->c.spin(0)];
+    }
+
+  transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) override {
+    if(c1 == c2) return Id;
+    transmatrix T = iso_inverse(long_transformations[0][hat_id(c1)+1]) * relative_matrixh(c2->master, c1->master, hint) * long_transformations[0][hat_id(c2)+1];
+    return T;
     }
 
   ~hrmap_hat() {
