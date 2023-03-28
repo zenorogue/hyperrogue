@@ -481,6 +481,12 @@ struct hrmap_hat : hrmap {
         p = cgi.emb->base_to_actual(p);
         }
       }
+
+    for(int a=0; a<2; a++)
+    for(int b=0; b<2; b++)
+    for(int c=0; c<14; c++)
+    for(int d=0; d<14; d++)
+      is_known[a][b][c][d] = false;
     }
 
   constexpr static int relations = 34;
@@ -591,7 +597,13 @@ struct hrmap_hat : hrmap {
     return adj(t0, d0, t1, d1);
     }
 
+  bool is_known[2][2][14][14];
+  transmatrix adj_memo[2][2][14][14];
+
   transmatrix adj(int t0, int d0, int t1, int d1) {
+    if(is_known[t0][t1][d0][d1])
+      return adj_memo[t0][t1][d0][d1];
+
     int n = isize(hatcorners[0]);
 
     hyperpoint vl = hatcorners[t0][d0];
@@ -623,6 +635,9 @@ struct hrmap_hat : hrmap {
       T = cgi.emb->base_to_actual(T);
       geom3::light_flip(false);
       }
+
+    is_known[t0][t1][d0][d1] = true;
+    adj_memo[t0][t1][d0][d1] = T;
     return T;
     }
 
