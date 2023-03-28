@@ -165,9 +165,11 @@ color_t get_ori_color(void *v, int lev) {
   return (rainbow_color(t ? 0.6 : 0.8, alpha / TAU) << 8) | 0xFF;
   }
 
+ld hat_shift = 0.7;
+
 void hat_descent() {
   ld sca = (3 + sqrt(5)) / 2; // scaling each axis
-  ld levf = -log(pconf.scale) / log(sca) - 0.7;
+  ld levf = -log(pconf.scale) / log(sca) - hat_shift;
   ld levpart = frac(levf);
   int lev = floor(levf);
   if(lev < 0) lev = 0, levpart = 0;
@@ -237,6 +239,7 @@ void enable_hat_descent() {
 auto hd_hook =
     arg::add3("-hat-descent", enable_hat_descent)
   + arg::add3("-hat-ori", [] { ori_color = true; })
+  + arg::add3("-hat-shift", [] { arg::shift(); hat_shift = arg::argf(); })
   + arg::add3("-hat-normal", [] {
     start_game();
     heptagon *h = cwt.at->master;
