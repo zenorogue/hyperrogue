@@ -759,7 +759,6 @@ EX land_validity_t& land_validity(eLand l) {
     if(l == laEclectic) return dont_work;
     if(l == laCursed) return dont_work;
     if(l == laElementalWall) return dont_work;
-    if(l == laFrog) return dont_work;
     if(l == laDragon) return not_in_full_game;
     }
   
