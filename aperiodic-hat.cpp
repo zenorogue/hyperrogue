@@ -511,7 +511,7 @@ struct hrmap_hat : hrmap {
     lt[0][0].set(Id);
     lt[0][1].set(Id);
 
-    lt.resize(20, lt[0]);
+    lt.resize(30, lt[0]);
 
     while(true) {
       int chg = 0;
@@ -533,7 +533,7 @@ struct hrmap_hat : hrmap {
         products_equal(lt[0][b.id0+1], adj(b.id0==0, fix(b.edge0), b.id1==0, fix(b.edge1)), lt[1][b.master_connection+1], lt[0][b.id1+1]);
         }
 
-      for(int k=1; k<19; k++) for(auto& b: rules_recursive) {
+      for(int k=1; k<29; k++) for(auto& b: rules_recursive) {
         products_equal(lt[k+1][b.id0+1], lt[k][b.child+1], lt[k+1][b.parent+1], lt[k+1][b.id1+1]);
         }
 
