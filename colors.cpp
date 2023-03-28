@@ -111,7 +111,7 @@ EX color_t rainbow_color(ld sat, ld hue) {
   else if(hue<3) res = gradient(0x00FF00, 0x00FFFF, 2, hue, 3);
   else if(hue<4) res = gradient(0x0000FF, 0x00FFFF, 4, hue, 3);
   else if(hue<5) res = gradient(0x0000FF, 0xFF00FF, 4, hue, 5);
-  else if(hue<6) res = gradient(0xFF0000, 0xFF00FF, 6, hue, 5);
+  else if(hue<=6) res = gradient(0xFF0000, 0xFF00FF, 6, hue, 5);
   
   return gradient(0xFFFFFF, res, 0, sat, 1);
   }
