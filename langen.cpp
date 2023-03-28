@@ -354,6 +354,7 @@ int main() {
   allchars.insert("→");
   allchars.insert("⁻");
   allchars.insert("ᶻ");
+  allchars.insert("√");
 
   langPL(); langCZ(); langRU();
   langTR(); langDE(); langPT();
