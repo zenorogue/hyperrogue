@@ -24,7 +24,7 @@ hyper -geo hat -canvas X -othello -smart 1 -genlimit 1000000 -smartlimit 1000000
 
 hyper -canvas i -geo hat -hat-descent -hat-normal -smart 0.001 -smartlimit 1000000000 -genlimit 1000000000 -lw 2 perfect_linewidth=0 -zoom "exp(-5.5..-1../0)" -shot-1000 -animvideo 1800 hat-atoms.mp4
 hyper -canvas i -geo hat -hat-descent -smart 0.001 -smartlimit 1000000000 -genlimit 1000000000 -lw 2 perfect_linewidth=0 -zoom "exp(-5.5..-1../0)" -shot-1000 -animvideo 1800 hat-atoms-aperiodic.mp4
-hyper -canvas i -geo hat -hat-descent -smart 0.001 -smartlimit 1000000000 -genlimit 1000000000 -lw 2 perfect_linewidth=0 -run -hat-normal -hat-ori -zoom "exp(-5.5..-1../0)" -shot-1000 -animvideo 1800 hat-atoms-colored.mp4
+hyper -canvas i -geo hat -hat-descent -smart 0.001 -smartlimit 1000000000 -genlimit 1000000000 -lw 2 perfect_linewidth=0 -run -hat-normal -hat-shift 2 -hat-ori -zoom "exp(-4.5..-1../0)" hat_param="1+cos(0..10*pi)" -shot-1000 -animvideo 1800 hat-atoms-colored.mp4
 
 */
 
