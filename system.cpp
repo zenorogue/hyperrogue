@@ -132,6 +132,8 @@ EX void welcomeMessage() {
     addMessage(XLAT("Welcome to the Heptagonal Mode!"));
   else if(cheater || autocheat)
     addMessage(XLAT("Welcome to HyperRogue! (cheat mode on)"));
+  else if(hat::in())
+    addMessage(XLAT("Welcome to HatRogue!"));
   else
     addMessage(XLAT("Welcome to HyperRogue!"));
 
