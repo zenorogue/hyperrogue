@@ -2977,6 +2977,8 @@ void celldrawer::set_towerfloor(const cellfunction& cf) {
 
 void celldrawer::set_zebrafloor() {
 
+  if(hat::in() || kite::in()) { set_floor(cgi.shFloor); return; }
+
   if(euclid) { set_floor(cgi.shTower[10]); return; }
   if(weirdhyperbolic) {
     set_floor(cgi.shFloor); return;
