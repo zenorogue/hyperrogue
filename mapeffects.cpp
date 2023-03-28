@@ -901,6 +901,11 @@ EX void destroyWeakBranch(cell *cf, cell *ct, eMonster who) {
 EX bool isCentralTrap(cell *c) {
   if(c->wall != waArrowTrap) return false;
   int i = 0;
+  if(hat::in()) {
+    for(int d=0; d<c->type; d++)
+      if(c->cmove(d)->wall == waArrowTrap && c->cmodmove(d+c->type/2)->wall == waArrowTrap)
+        return true;
+    }
   forCellEx(c2, c) if(c2->wall == waArrowTrap) i++;
   return i == 2;
   }
@@ -913,9 +918,11 @@ EX array<cell*, 5> traplimits(cell *c) {
     cellwalker cw(c, d);
     cw += wstep;
     if(cw.at->wall != waArrowTrap) continue;
+    if(q && cw.at == res[1]) continue;
     res[1+q*2] = cw.at;
     cw += (cw.at->type/2);
     if((cw.at->type&1) && (cw+wstep).at->wall != waStone) cw += 1;
+    if((cw+wstep).at->wall != waStone) continue;
     cw += wstep;
     res[(q++)*4] = cw.at;
     }
