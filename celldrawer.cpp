@@ -1578,7 +1578,7 @@ void celldrawer::draw_features() {
       break;
     
     case waArrowTrap:
-      if(c->wparam >= 1)
+      if(c->wparam >= 1 || hat::in())
         queuepoly(orthogonal_move_fol(V, cgi.FLOOR), cgi.shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
       if(isCentralTrap(c)) arrowtraps.push_back(c);
       break;
