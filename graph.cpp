@@ -3970,7 +3970,7 @@ EX int colorhash(color_t i) {
 
 EX bool isWall3(cell *c, color_t& wcol) {
   if(isWall(c)) return true;
-  if(c->wall == waChasm && c->land == laMemory) { wcol = 0x606000; return true; }
+  if(c->wall == waChasm && c->land == laMemory && (anyshiftclick || !(cgflags & qFRACTAL))) { wcol = 0x606000; return true; }
   if(c->wall == waInvisibleFloor) return false;
   // if(chasmgraph(c)) return true;
   if(among(c->wall, waMirror, waCloud, waMineUnknown, waMineMine)) return true;

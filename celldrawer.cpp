@@ -1751,6 +1751,22 @@ void celldrawer::draw_features_and_walls_3d() {
 #if MAXMDIM >= 4
   color_t dummy;
   int ofs = currentmap->wall_offset(c);
+
+  if((cgflags & qFRACTAL) && c->wall == waChasm && c->land == laMemory) {
+    for(int a=0; a<c->type; a++) if(c->move(a) && c->move(a)->land != laMemory) {
+      if(anyshiftclick) {
+        auto& poly = queuepoly(V, cgi.shPlainWall3D[ofs+a], 0xFFFFFFFF - 0xF0F0F00 * get_darkval(c, a));
+        poly.tinf = &floor_texture_vertices[cgi.shFullFloor.id];
+        ensure_vertex_number(*poly.tinf, poly.cnt);
+        }
+      else {
+        auto& poly = queuepoly(V, cgi.shWireframe3D[ofs + a], 0);
+        poly.outline = 0xFFFFFFFF;
+        }
+      }
+    if(anyshiftclick) return;
+    }
+
   if(isWall3(c, wcol)) {
     if(!no_wall_rendering) {
     if(c->wall == waChasm && c->land == laMemory && !in_perspective()) {

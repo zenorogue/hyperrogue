@@ -751,6 +751,7 @@ enum eGeometry {
   gSpace345, gSpace353, gSpace354, gSpace355,
   gHalfBring,
   gAperiodicHat,
+  gSierpinski3, gSierpinski4, gSixFlake, gMengerSponge, gSierpinskiTet,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere, gcSol, gcNIH, gcSolN, gcNil, gcProduct, gcSL2 };
@@ -829,6 +830,8 @@ static const flagtype qCAT             = Flag(28);
 
 static const flagtype qAPERIODIC       = Flag(29);
 static const flagtype qHAT             = Flag(30);
+
+static const flagtype qFRACTAL         = Flag(31);
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 50;
@@ -958,7 +961,12 @@ EX vector<geometryinfo> ginf = {
   {"{3,5,4}","none",    "{3,5,4} hyperbolic honeycomb",               "354",     20, 5, qIDEAL | qULTRA,    giHyperb3, {{7, 2}}, eVariation::pure},
   {"{3,5,5}","none",    "{3,5,5} hyperbolic honeycomb",               "355",     20, 5, qIDEAL | qULTRA,    giHyperb3, {{7, 2}}, eVariation::pure},
   {"{5,4}", "pBring",   "projective Bring's Surface",                 "pBring",   5, 4, qsSMALLN,   giHyperb2, {{6, 4}}, eVariation::bitruncated},
-  {"hat",    "none",    "aperiodic hat",                              "hat",     14, 3, qAPERIODIC | qHAT,     giEuclid2, {{7, 7}}, eVariation::pure},
+  {"hat",    "none",    "aperiodic hat",                              "hat",     14, 3, qAPERIODIC | qHAT,  giEuclid2, {{7, 7}}, eVariation::pure},
+  {"triangle","none",   "Sierpiński triangle",                        "S3",       6, 3, qFRACTAL,  giEuclid2, {{10, 10}}, eVariation::pure},
+  {"carpet", "none",    "Sierpiński carpet",                          "S4",       4, 4, qFRACTAL,  giEuclid2, {{10, 10}}, eVariation::pure},
+  {"6-flake","none",    "6-flake fractal",                            "S6",       6, 3, qFRACTAL,  giEuclid2, {{10, 10}}, eVariation::pure},
+  {"{4,3,4}","none",    "Menger sponge",                              "S8",       6, 4, qFRACTAL,  giEuclid3, {{10, 10}}, eVariation::pure},
+  {"rh{4,3,4}","none",  "Sierpiński tetrahedron",                     "S4b",     12, 3, qFRACTAL,  giEuclid3, {{10, 10}}, eVariation::pure},
   };
   // bits: 9, 10, 15, 16, (reserved for later) 17, 18
 

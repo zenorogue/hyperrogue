@@ -159,6 +159,8 @@ EX void fix_land_structure_choice() {
     land_structure = lsSingle;
   if(aperiodic && !among(land_structure, lsChaosRW, lsTotalChaos, lsPatchedChaos, lsSingle))
     land_structure = lsPatchedChaos;
+  if((cgflags & qFRACTAL) && !among(land_structure, lsChaosRW, lsTotalChaos, lsPatchedChaos, lsSingle))
+    land_structure = lsPatchedChaos;
   }
 
 EX bool landUnlockedRPM(eLand n) {

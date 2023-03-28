@@ -346,6 +346,8 @@ void set_or_configure_geometry(eGeometry g) {
 
 /** is g2 the same tiling as the current geometry (geometry)? */
 bool same_tiling(eGeometry g2) {
+  /* no quotients for fractals */
+  if(cgflags & qFRACTAL) return g2 == geometry;
   if(g2 == gCrystal)
     return S3 == 4;
   if(g2 == gFieldQuotient && (hyperbolic || (geometry == gCubeTiling && reg3::cubes_reg3)) && standard_tiling())
@@ -602,7 +604,7 @@ EX void select_quotient_screen() {
   }
 
 EX void select_quotient() {
-  if(meuclid && !aperiodic && !arcm::in() && !reg3::cubes_reg3) {
+  if(meuclid && !aperiodic && !arcm::in() && !reg3::cubes_reg3 && !(cgflags & qFRACTAL)) {
     euc::prepare_torus3();
     pushScreen(euc::show_torus3);
     }
@@ -1029,6 +1031,8 @@ EX void showEuclideanMenu() {
     menuitem_nilwidth('v');
     }
   else if((WDIM == 3 || aperiodic || arb::in()) && !reg3::in() && geometry != gCubeTiling) dialog::addBreak(100);
+  else if(cgclass && qFRACTAL)
+    dialog::addBreak(100);
   else 
     menuitem_change_variation('v');
 

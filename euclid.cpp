@@ -46,10 +46,12 @@ EX namespace euc {
 
     switch(g) {
       case gCubeTiling:
+      case gMengerSponge:
         shifttable = { +D0, +D1, +D2 };
         break;
       
       case gRhombic3:
+      case gSierpinskiTet:
         shifttable = { D0+D1, D0+D2, D1+D2, D1-D2, D0-D2, D0-D1 };
         break;
       
@@ -58,10 +60,13 @@ EX namespace euc {
         break;
       
       case gEuclid:
+      case gSierpinski3:
+      case gSixFlake:
         shifttable = { D0, D1, D1-D0, -D0, -D1, D0-D1 };
         break;
 
       case gEuclidSquare:
+      case gSierpinski4:
         shifttable = { D0, D1, -D0, -D1 };
         break;
       

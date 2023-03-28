@@ -2226,7 +2226,7 @@ EX void giantLandSwitch(cell *c, int d, cell *from) {
           int hardchance = items[itRuby] + yendor::hardness();
           if(hardchance > 25) hardchance = 25;
           bool hardivy = hrand(100) < hardchance;
-          if(hat::in() ?  buildIvy(c, 0, 4) : (hardivy ? buildIvy(c, 1, 9) : buildIvy(c, 0, c->type)) && !peace::on)
+          if((cgflags & qFRACTAL) ? buildIvy(c, 0, 2) : hat::in() ?  buildIvy(c, 0, 4) : (hardivy ? buildIvy(c, 1, 9) : buildIvy(c, 0, c->type)) && !peace::on)
             c->item = itRuby;
           }
         }
@@ -2826,7 +2826,9 @@ EX void setland_randomwalk(cell *c) {
   if(c->land) return;
   if(hrand(10) == 0) setland(c, currentlands[hrand(isize(currentlands))]);
   else {
-    cell *c2 = c->cmove(hrand(c->type));
+    cell *c2 = nullptr;
+    for(int i=0; i<10 && !(c2 && (!disksize || is_in_disk(c2)) && is_in_fractal(c2)); i++)
+      c2 = c->cmove(hrand(c->type));
     setland_randomwalk(c2);
     c->land = c2->land;
     }
@@ -2834,6 +2836,11 @@ EX void setland_randomwalk(cell *c) {
 
 EX eLand random_land() {
   return hrand_elt(isize(cheatdest_list) ? cheatdest_list : currentlands);
+  }
+
+EX void share_land(cell *c, cell *c2) {
+  if(!c2->land) setland(c2, random_land());
+  c->land = c2->land;
   }
 
 EX void set_land_for_geometry(cell *c) {
@@ -2844,15 +2851,17 @@ EX void set_land_for_geometry(cell *c) {
       return;
       }
      /* note: Nil patched chaos done in setLandNil */
-    if(ls::patched_chaos() && stdeuc) {
+    if(ls::patched_chaos() && (cgflags & qFRACTAL)) {
+      share_land(c, fractal_rep(c));
+      }
+    else if(ls::patched_chaos() && stdeuc) {
       cell *c2 = c;
       while(true) {
         forCellCM(c3, c2) if(cdist50(c3) < cdist50(c2)) { c2 = c3; goto again; }
         break;
         again: ;
         }
-      if(!c2->land) setland(c2, random_land());
-      c->land = c2->land;
+      share_land(c, c2);
       return;
       }
     if(ls::patched_chaos() && aperiodic) {
@@ -2861,8 +2870,7 @@ EX void set_land_for_geometry(cell *c) {
         c2 = c->master->cmove(0)->cmove(0)->cmove(1)->cmove(1)->c7;
       else
         c2 = c->master->cmove(0)->cmove(0)->cmove(0)->cmove(0)->cmove(0)->cmove(1)->cmove(1)->cmove(1)->cmove(1)->cmove(1)->c7;
-      if(!c2->land) setland(c2, random_land());
-      c->land = c2->land;
+      share_land(c, c2);
       return;
       }
     if(land_structure == lsChaosRW) {
@@ -3058,7 +3066,7 @@ EX void setdist(cell *c, int d, cell *from) {
       }
     }
 
-  if(disksize && !is_in_disk(c)) {
+  if((disksize && !is_in_disk(c)) || ((cgflags & qFRACTAL) && !is_in_fractal(c))) {
     setland(c, laMemory);
     if(!isMultitile(c)) c->monst = moNone;
     c->item = itNone;

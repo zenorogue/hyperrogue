@@ -402,6 +402,141 @@ EX bool is_in_disk(cell *c) {
   return *it == c;
   }
 
+bool sierpinski3(gp::loc g) {
+  int x = g.first;
+  int y = g.second;
+  set<pair<int, int>> visited;
+  while(true) {
+    if(visited.count({x,y})) return false;
+    visited.insert({x,y});
+    // if(x == -1 && y == -2) return false;
+    // if(x == -2 && y == -3) return false;
+    if(x == 0 && y == 0) return true;
+    if((x&1) == 1 && (y&1) == 1) return false;
+    x >>= 1;
+    y >>= 1;
+    // x--; y++;
+    tie(x, y) = make_pair(-x-y, x);
+    }
+  }
+
+bool sierpinski46(gp::loc g) {
+  int x = g.first;
+  int y = g.second;
+  set<pair<int, int>> visited;
+  if(S7 == 6)
+    x += 2785684, y += 289080;
+  else
+    x += 75239892, y += 7913772;
+  while(true) {
+    if(visited.count({x,y})) return false;
+    visited.insert({x,y});
+    if(x == 0 && y == 0) return true;
+    int dx = gmod(x, 3);
+    int dy = gmod(y, 3);
+    if(dx == 1 && dy == 1) return false;
+    if(S7 == 6 && dx == dy) return false;
+    x = (x-dx) / 3;
+    y = (y-dy) / 3;
+    }
+  }
+
+bool menger_sponge(euc::coord c) {
+  c[0] += 528120*9; c[1] += 438924*9; c[2] += 306712*9;
+  set<euc::coord> visited;
+  while(true) {
+    if(visited.count(c)) return false;
+    visited.insert(c);
+    if(c[0] == 0 && c[1] == 0 && c[2] == 0) return true;
+    int ones = 0;
+    for(int i=0; i<3; i++) {
+      int d = gmod(c[i], 3);
+      c[i] = (c[i] - d) / 3;
+      if(d == 1) ones++;
+      }
+    if(ones >= 2) return false;
+    }
+  }
+
+bool sierpinski_tet(euc::coord c) {
+  set<euc::coord> visited;
+  c[0] += 16 * (1+8+64+512);
+  c[1] += 16 * (1+8+64+512);
+  c[1] += 32 * (1+8+64+512);
+  c[2] += 32 * (1+8+64+512);
+  c[0] += 64 * (1+8+64+512);
+  c[1] += 64 * (1+8+64+512);
+  while(true) {
+    if(visited.count(c)) return false;
+    visited.insert(c);
+    if(c[0] == 0 && c[1] == 0 && c[2] == 0) return true;
+    int ones = 0;
+    for(int i=0; i<3; i++) {
+      int d = gmod(c[i], 2);
+      c[i] = (c[i] - d) / 2;
+      if(d == 1) ones++;
+      }
+    if(ones & 1) return false;
+    }
+  }
+
+EX bool is_in_fractal(cell *c) {
+  if(fake::in()) return FPIU(is_in_fractal(c));
+  if(mhybrid) { c = hybrid::get_where(c).first; return PIU(is_in_fractal(c)); }
+  switch(geometry) {
+    case gSierpinski3:
+      return sierpinski3(euc::full_coords2(c));
+    case gSierpinski4:
+    case gSixFlake:
+      return sierpinski46(euc::full_coords2(c));
+    case gMengerSponge:
+      return menger_sponge(euc::get_ispacemap()[c->master]);
+    case gSierpinskiTet: {
+      return sierpinski_tet(euc::get_ispacemap()[c->master]);
+      }
+    default:
+      return true;
+    }
+  }
+
+EX cell *fractal_rep(cell *c) {
+  switch(geometry) {
+    case gSierpinski3: {
+      auto co = euc::full_coords2(c);
+      co.first += 4;
+      co.first &= ~15;
+      co.first -= 4;
+      co.second += 2;
+      co.second &= ~15;
+      co.second -= 2;
+      if(co.first == -4 && co.second == -2) co.first = 0, co.second = 0;
+      return euc::get_at(euc::to_coord(co))->c7;
+      }
+    case gSierpinski4:
+    case gSixFlake: {
+      auto co = euc::full_coords2(c);
+      if(S7 == 6) co.first += 4;
+      co.first -= gmod(co.first, 9);
+      co.second -= gmod(co.second, 9);
+      return euc::get_at(euc::to_coord(co))->c7;
+      }
+    case gSierpinskiTet: {
+      auto co = euc::get_ispacemap()[c->master];
+      co[0] &=~7;
+      co[1] &=~7;
+      co[2] &=~7;
+      return euc::get_at(co)->c7;
+      }
+    case gMengerSponge: {
+      auto co = euc::get_ispacemap()[c->master];
+      for(int i=0; i<3; i++) co[i] = co[i] - gmod(co[i], 9);
+      return euc::get_at(co)->c7;
+      }
+    default:
+      throw hr_exception("unknown fractal");
+    }
+  }
+
 /** create a map in the current geometry */
 EX void initcells() {
   DEBB(DF_INIT, ("initcells"));
