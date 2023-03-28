@@ -826,8 +826,20 @@ EX void initConfig() {
   param_f(hat::hat_param, "hat_param", "hat_param", 1)
   -> editable(0, 2, 0.1, "hat parameter",
     "Apeirodic hat tiling based on: https://arxiv.org/pdf/2303.10798.pdf\n\n"
-    "This controls the parameter discussed in Section 6.", 'v'
+    "This controls the parameter discussed in Section 6. Parameter p is Tile(p, (2-p)√3), scaled so that the area is the same for every p.", 'v'
     )
+  -> set_extra([] {
+      dialog::addSelItem(XLAT("chevron (periodic)"), "0", 'C');
+      dialog::add_action([] { dialog::ne.s = "0"; dialog::apply_edit(); });
+      dialog::addSelItem(XLAT("hat"), "1", 'H');
+      dialog::add_action([] { dialog::ne.s = "1"; dialog::apply_edit(); });
+      dialog::addSelItem(XLAT("all equal (periodic)"), "3-√3", 'T');
+      dialog::add_action([] { dialog::ne.s = "3 - sqrt(3)"; dialog::apply_edit(); });
+      dialog::addSelItem(XLAT("turtle"), "1.5", 'T');
+      dialog::add_action([] { dialog::ne.s = "1.5"; dialog::apply_edit(); });
+      dialog::addSelItem(XLAT("comma (periodic)"), "2", ',');
+      dialog::add_action([] { dialog::ne.s = "2"; dialog::apply_edit(); });
+      })
   -> set_reaction(hat::reshape);
 
   addsaver(vid.particles, "extra effects", 1);
