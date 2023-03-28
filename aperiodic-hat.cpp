@@ -411,6 +411,14 @@ struct hrmap_hat : hrmap {
   memo_matrix adj_memo[2][2][14][14];
   vector<vector<memo_matrix>> long_transformations;
 
+  void clear_adj_memo() {
+    for(int a=0; a<2; a++)
+    for(int b=0; b<2; b++)
+    for(int c=0; c<14; c++)
+    for(int d=0; d<14; d++)
+      adj_memo[a][b][c][d].clear();
+    }
+
   void init() {
 
     transmatrix T = Id;
@@ -473,13 +481,14 @@ struct hrmap_hat : hrmap {
     for(auto& h: hatcorners[1]) h = MirrorX * h;
     reverse(hatcorners[1].begin(), hatcorners[1].end());
 
+    clear_adj_memo();
     if(q == 6) {
-      transmatrix T = spintox(
+      hyperpoint hfar = 
         adj(1,9,0,7) * adj(0,11,0,10) * adj(0,1,0,2) * adj(0,8,0,5) * adj(0,11,0,10) *
         adj(0,1,0,2) * adj(0,8,0,5) * adj(0,11,0,2) * adj(0,8,0,5) * adj(0,11,0,10) *
         adj(0,1,0,2) * adj(0,8,0,5) * adj(0,11,0,10) * adj(0,1,0,2) * adj(0,8,0,5) *
-        adj(0,11,0,2) * adj(0,8,0,5) * C0
-        );
+        adj(0,11,0,2) * adj(0,8,0,5) * C0;
+      transmatrix T = spintox(hfar);
       for(auto& h: hc) h = inverse(T) * h;
       for(auto& h: hatcorners[1]) h = T * h;
       }
@@ -492,11 +501,7 @@ struct hrmap_hat : hrmap {
         }
       }
 
-    for(int a=0; a<2; a++)
-    for(int b=0; b<2; b++)
-    for(int c=0; c<14; c++)
-    for(int d=0; d<14; d++)
-      adj_memo[a][b][c][d].clear();
+    clear_adj_memo();
 
     auto& lt = long_transformations;
     lt.clear();
