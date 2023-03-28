@@ -1265,7 +1265,7 @@ EX void apply_impact(cell *c) {
 EX int check_vault(cell *cf, cell *ct, flagtype flags, cell*& jumpthru) {
   cell *c2 = NULL, *c3 = NULL;    
   forCellCM(cc, cf) {
-    if(isNeighbor(cc, ct)) c3 = c2, c2 = cc;
+    if(isNeighbor(cc, ct) && c2 != cc) c3 = c2, c2 = cc;
     }
   jumpthru = c2;
   if(!c2) return 0;
