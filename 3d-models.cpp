@@ -390,8 +390,6 @@ void geometry_information::make_foot_3d(hpcshape& sh) {
   add_cone(zc(0.4), leg5, zc(0.45));
   add_texture(sh);
   // shift_last(-LEG0);
-  ld sc = 1;
-  if(cgi.emb->is_euc_in_hyp()) sc *= exp(-vid.depth);
   for(int i=last->s; i<isize(hpc); i++) hpc[i] = lxpush(-0.0125*S) * hpc[i];
   }
 
