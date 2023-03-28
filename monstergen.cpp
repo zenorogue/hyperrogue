@@ -218,7 +218,7 @@ void wanderingZebra(cell *start) {
       return;
       }
     int q = 0;
-    cell *ctab[8];
+    cell *ctab[FULL_EDGE];
     for(int i=0; i<c->type; i++) {
       cell *c3 = c->move(i);
       if(c3 && c3 != c2 && c3->land == laZebra && c3->wall == waNone)
