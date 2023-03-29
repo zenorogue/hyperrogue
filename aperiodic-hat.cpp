@@ -712,6 +712,10 @@ struct hrmap_hat : hrmap {
     build_cells(origin);
     }
 
+  void on_dim_change() override {
+    init();
+    }
+
   transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
     if(h1 == h2) return Id;
     int d = h2->distance + 2;
