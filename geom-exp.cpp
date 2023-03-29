@@ -1031,7 +1031,7 @@ EX void showEuclideanMenu() {
     menuitem_nilwidth('v');
     }
   else if((WDIM == 3 || aperiodic || arb::in()) && !reg3::in() && geometry != gCubeTiling) dialog::addBreak(100);
-  else if(cgclass && qFRACTAL)
+  else if(cgclass & qFRACTAL)
     dialog::addBreak(100);
   else 
     menuitem_change_variation('v');
