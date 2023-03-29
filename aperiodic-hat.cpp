@@ -411,6 +411,49 @@ struct hrmap_hat : hrmap {
   memo_matrix adj_memo[2][2][14][14];
   vector<vector<memo_matrix>> long_transformations;
 
+  void fill_transform_levels(int lev) {
+    int clev = isize(long_transformations);
+    while(clev <= lev) {
+      auto& lt = long_transformations;
+      lt.emplace_back();
+      auto& last = lt.back();
+      last.resize(relations+1);
+      for(auto& t: last) t.clear();
+      last[0].set(Id);
+      last[1].set(Id);
+
+      while(true) {
+        int chg = 0;
+        int unknown = 0;
+        int errors = 0;
+
+        auto products_equal = [&] (memo_matrix& A, memo_matrix& B, memo_matrix& C, memo_matrix& D) {
+          if(A.known && B.known && C.known && D.known) {
+            if(!eqmatrix(A*B, C*D)) errors++;
+            }
+          else if(B.known && C.known && D.known) chg++, A.set( C * D * inverse(B) );
+          else if(A.known && C.known && D.known) chg++, B.set( inverse(A) * C * D );
+          else if(A.known && B.known && D.known) chg++, C.set( A * B * inverse(D) );
+          else if(A.known && B.known && C.known) chg++, D.set( inverse(C) * A * B );
+          else unknown++;
+          };
+
+        if(clev == 1) for(auto& b: rules_base) {
+          products_equal(lt[0][b.id0+1], adj(b.id0==0, fix(b.edge0), b.id1==0, fix(b.edge1)), lt[1][b.master_connection+1], lt[0][b.id1+1]);
+          }
+
+        if(clev >= 2) for(auto& b: rules_recursive) {
+          products_equal(lt[clev][b.id0+1], lt[clev-1][b.child+1], lt[clev][b.parent+1], lt[clev][b.id1+1]);
+          }
+
+        if(debugflags & DF_GEOM) println(hlog, "changed = ", chg, " unknown = ", unknown, " errors = ", errors);
+        if(!chg) break;
+        }
+
+      clev++;
+      }
+    }
+
   void clear_adj_memo() {
     for(int a=0; a<2; a++)
     for(int b=0; b<2; b++)
@@ -496,51 +539,12 @@ struct hrmap_hat : hrmap {
     if(emb) {
       geom3::light_flip(f);
       for(auto i:{0, 1}) for(auto& p: hatcorners[i]) {
-        println(hlog, p, " -> ", cgi.emb->base_to_actual(p));
         p = cgi.emb->base_to_actual(p);
         }
       }
 
     clear_adj_memo();
-
-    auto& lt = long_transformations;
-    lt.clear();
-    lt.resize(1);
-    lt[0].resize(relations+1);
-    for(auto& t: lt[0]) t.clear();
-    lt[0][0].set(Id);
-    lt[0][1].set(Id);
-
-    lt.resize(30, lt[0]);
-
-    while(true) {
-      int chg = 0;
-      int unknown = 0;
-      int errors = 0;
-
-      auto products_equal = [&] (memo_matrix& A, memo_matrix& B, memo_matrix& C, memo_matrix& D) {
-        if(A.known && B.known && C.known && D.known) {
-          if(!eqmatrix(A*B, C*D)) errors++;
-          }
-        else if(B.known && C.known && D.known) chg++, A.set( C * D * inverse(B) );
-        else if(A.known && C.known && D.known) chg++, B.set( inverse(A) * C * D );
-        else if(A.known && B.known && D.known) chg++, C.set( A * B * inverse(D) );
-        else if(A.known && B.known && C.known) chg++, D.set( inverse(C) * A * B );
-        else unknown++;
-        };
-
-      for(auto& b: rules_base) {
-        products_equal(lt[0][b.id0+1], adj(b.id0==0, fix(b.edge0), b.id1==0, fix(b.edge1)), lt[1][b.master_connection+1], lt[0][b.id1+1]);
-        }
-
-      for(int k=1; k<29; k++) for(auto& b: rules_recursive) {
-        products_equal(lt[k+1][b.id0+1], lt[k][b.child+1], lt[k+1][b.parent+1], lt[k+1][b.id1+1]);
-        }
-
-      if(debugflags & DF_GEOM) println(hlog, "changed = ", chg, " unknown = ", unknown, " errors = ", errors);
-
-      if(!chg) break;
-      }
+    long_transformations.clear();
     }
 
   constexpr static int relations = 34;
@@ -711,11 +715,13 @@ struct hrmap_hat : hrmap {
   transmatrix relative_matrixh(heptagon *h2, heptagon *h1, const hyperpoint& hint) override {
     if(h1 == h2) return Id;
     int d = h2->distance + 2;
+    fill_transform_levels(d);
     return iso_inverse(long_transformations[d][h1->c.spin(0)]) * relative_matrixh(h2->move(0), h1->move(0), hint) * long_transformations[d][h2->c.spin(0)];
     }
 
   transmatrix relative_matrixc(cell *c2, cell *c1, const hyperpoint& hint) override {
     if(c1 == c2) return Id;
+    fill_transform_levels(1);
     transmatrix T = iso_inverse(long_transformations[0][hat_id(c1)+1]) * relative_matrixh(c2->master, c1->master, hint) * long_transformations[0][hat_id(c2)+1];
     return T;
     }
