@@ -4953,3 +4953,8 @@ Other fixes:
 - Swap the Red Troll's hair & fur colors (thanks to @jlmjlm)
 - Experimental fractal geometries (experiment with geometry -> Euclidean)
 - fixed Terracotta in Euclidean disk
+
+2023-03-29 09:10 Update 12.1o:
+- fixed the orientation in the hat tiling
+- fixed bugs when regenerating a map in the hat tiling + embedding
+- fixed variation not showing in some geometries
