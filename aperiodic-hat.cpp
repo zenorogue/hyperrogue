@@ -478,7 +478,7 @@ struct hrmap_hat : hrmap {
     for(auto& h: hc) h = gpushxto0(ctr) * h;
 
     hatcorners[1] = hc;
-    for(auto& h: hatcorners[1]) h = MirrorX * h;
+    for(auto& h: hc) h = MirrorX * h;
     reverse(hatcorners[1].begin(), hatcorners[1].end());
 
     clear_adj_memo();
