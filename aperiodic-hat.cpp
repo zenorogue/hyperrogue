@@ -756,6 +756,14 @@ EX void reshape() {
   hatmap->init();
   }
 
+EX transmatrix get_long_transform(int level, int dir) {
+  hrmap_hat *hatmap;
+  hatmap = FPIU( hat_map() );
+  if(!hatmap) return Id;
+  hatmap->fill_transform_levels(max(level, 5));
+  return hatmap->long_transformations[level][dir];
+  }
+
 EX color_t hatcolor(cell *c, int mode) {
   vector<int> cols;
   auto *m = (hrmap_hat*) (currentmap);
