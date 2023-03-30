@@ -236,8 +236,63 @@ void enable_hat_descent() {
   rogueviz::rv_hook(hooks_frame, 100, hat_descent);
   }
 
+void fat_line(const shiftmatrix& V1, const hyperpoint h1, const shiftmatrix& V2, const hyperpoint h2, color_t col, int prec, ld lw) {
+  transmatrix U2 = unshift(V2, V1.shift);
+
+  ld d = hdist(V1.T*h1, U2*h2);
+
+  shiftmatrix T = V1 * rgpushxto0(h1);
+  transmatrix S = rspintox(inverse_shift(T, V2) * h2);
+  transmatrix U = rspintoc(inverse_shift(T*S, shiftless(C0)), 2, 1);
+  auto& p = queuepoly(T * S * U, cgi.generate_pipe(d, lw, ePipeEnd::ball), col);
+  p.intester = xpush0(d/2);
+  }
+
+map<int, int> skelid;
+
+void hat_skeleton() {
+  ld sca = (3 + sqrt(5)) / 2; // scaling each axis
+  for(auto& p: gmatrix) {
+    cell *c = p.first;
+    shiftmatrix T = p.second;
+    int id = hat::get_hat_id(c);
+    ld levz = log(sca);
+
+    fat_line(T, C0, T, inverse(hat::get_long_transform(0, id+1)) * zpush0(levz), (rainbow_color(0.2, id / 8.) << 8) | 0xFF, 2, 0.05);
+
+    if(id == 0) {
+      heptagon *h = c->master;
+      int lev = 1;
+      for(int l=1; l<5; l++) {
+        int nid = h->c.spin(0);
+        queuepoly(T * zpush(lev*levz), cgi.shSnowball, h->zebraval ? 0xFFFF80FF : 0xFFFFFFFF);
+        fat_line(T, zpush0(lev*levz), T, inverse(hat::get_long_transform(lev+1, nid)) * zpush0((lev*1)+levz), (rainbow_color(0.3, nid / 7.) << 8) | 0xFF, 2, 0.05);
+        for(int i=8; i<h->type; i++) if(h->move(i) && h->move(i) > h) {
+          int i1 = min(i, h->c.spin(i));
+          color_t r = rainbow_color(0.7, skelid[i1]/13.);
+          r <<= 8; r |= 0xFF;
+          // queueline(T* zpush0(lev*levz), T* hat::get_long_transform(lev, i) * zpush0(lev*levz), 0x80FF80FF);
+          fat_line(T, zpush0(lev*levz), T, hat::get_long_transform(lev, i+1) * zpush0(lev*levz), r, 2, 0.01);
+          }
+
+        if(nid>1) break;
+        h = h->move(0);
+        lev++;
+        }
+      }
+    }
+  }
+
+void enable_hat_skeleton() {
+  rogueviz::rv_hook(hooks_frame, 100, hat_skeleton);
+  skelid[8] = 0;
+  skelid[10] = 1;
+  for(int i=13; i<24; i++) skelid[i] = i-11;
+  }
+
 auto hd_hook =
     arg::add3("-hat-descent", enable_hat_descent)
+  + arg::add3("-hat-skeleton", enable_hat_skeleton)
   + arg::add3("-hat-ori", [] { ori_color = true; })
   + arg::add3("-hat-shift", [] { arg::shift(); hat_shift = arg::argf(); })
   + arg::add3("-hat-normal", [] {
