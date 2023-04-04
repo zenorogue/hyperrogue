@@ -1,8 +1,8 @@
 // Hyperbolic Rogue -- Kite-and-dart tiling
 // Copyright (C) 2011-2019 Zeno Rogue, see 'hyper.cpp' for details
 
-/** \file apeirodic-hat.cpp
- *  \brief Apeirodic Hat tiling, based on https://arxiv.org/pdf/2303.10798.pdf
+/** \file aperiodic-hat.cpp
+ *  \brief Aperiodic Hat tiling, based on https://arxiv.org/pdf/2303.10798.pdf
  */
 
 #include "hyper.h"
