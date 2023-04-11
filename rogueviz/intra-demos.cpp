@@ -453,6 +453,84 @@ void create_intra_sol() {
   println(hlog, "finished create_intra_sol");
   }
 
+map<int, cell*> starter;
+
+bool vr_keys(int sym, int uni) {
+  if(intra::in && !starter.count(intra::current)) starter[intra::current] = cwt.at;
+  const Uint8 *keystate = SDL12_GetKeyState(NULL);
+  #if CAP_SDL2
+  if(keystate[SDL_SCANCODE_LALT] || keystate[SDL_SCANCODE_RALT]) 
+  #else
+  if(keystate[SDLK_LALT] || keystate[SDLK_RALT])
+  #endif
+    {
+    if(sym == 'e' && intra::in) {
+      println(hlog, "intra::current = ", intra::current);
+      intra::switch_to(2);
+      if(starter.count(intra::current)) cwt.at = centerover = starter[intra::current];
+      fullcenter();
+      View = cspin90(0, 1);
+      playermoved = false;
+      walking::handle();
+      return true;
+      }
+    if(sym == 'h' && intra::in) {
+      intra::switch_to(0);
+      if(starter.count(intra::current)) cwt.at = centerover = starter[intra::current];
+      fullcenter();
+      View = cspin90(0, 1);
+      playermoved = false;
+      walking::handle();
+      return true;
+      }
+    if(sym == 's' && intra::in) {
+      intra::switch_to(6);
+      if(starter.count(intra::current)) cwt.at = centerover = starter[intra::current];
+      fullcenter();
+      View = cspin90(0, 1);
+      playermoved = false;
+      walking::handle();
+      return true;
+      }
+    if(sym == ',') {
+      camera_speed *= 1.2;
+      println(hlog, "camera_speed set to ", camera_speed);
+      return true;
+      }
+    if(sym == '.') {
+      camera_speed /= 1.2;
+      println(hlog, "camera_speed set to ", camera_speed);
+      return true;
+      }
+    #if CAP_VR
+    if(sym == 'a') {
+      vrhr::absolute_unit_in_meters *= 1.2;
+      walking::eye_level *= 1.2;
+      println(hlog, "vr absolute unit set to ", vrhr::absolute_unit_in_meters);
+      return true;
+      }
+    if(sym == 'z') {
+      vrhr::absolute_unit_in_meters /= 1.2;
+      walking::eye_level /= 1.2;
+      println(hlog, "vr absolute unit set to ", vrhr::absolute_unit_in_meters);
+      return true;
+      }
+    #endif
+    if(sym == 'w') {
+      walking::switch_walking();
+      println(hlog, "walking set to ", ONOFF(walking::on));
+      return true;
+      }
+    #if CAP_VR
+    if(sym == 'x') {
+      vrhr::always_show_hud = false;
+      return true;
+      }
+    #endif
+    }
+  return false;
+  }
+
 // all generators will add to the current scene
 
 auto hooks = 
@@ -500,12 +578,20 @@ auto hooks =
         slide_backup(vrhr::eyes, vrhr::eEyes::truesim);
         slide_backup(vrhr::cscr, vrhr::eCompScreen::eyes);
         #endif
+        starter.clear();
+        rogueviz::rv_hook(hooks_handleKey, 101, vr_keys);
         popScreenAll();
         resetGL();
         };
       };
 
-    auto add = [&] (string s, string desc, string youtube, string twitter, reaction_t loader) {
+    struct loader {
+      string desc;
+      char key;
+      reaction_t loader;
+      };
+
+    auto add = [&] (string s, string desc, string youtube, string twitter, vector<loader> loaders) {
       v.push_back(tour::slide{
         s, 10, tour::LEGAL::NONE | tour::QUICKSKIP | tour::QUICKGEO | tour::ALWAYS_TEXT, desc,
         [=] (tour::presmode mode) {
@@ -514,9 +600,11 @@ auto hooks =
             slide_url(mode, 'y', "YouTube link", youtube);
           if(twitter != "")
             slide_url(mode, 't', "Twitter link", twitter);
-            
+
           slide_url(mode, 'b', "Bridges paper link", "https://archive.bridgesmathart.org/2022/bridges2022-297.html");
-          slide_action(mode, 'r', "run this visualization", loader);
+
+          for(auto& loader: loaders)
+            slide_action(mode, loader.key, loader.desc, loader.loader);
           slidecommand = "portal options";
           if(mode == tour::pmKey) pushScreen(intra::show_portals);
           rogueviz::pres::non_game_slide_scroll(mode);
@@ -525,16 +613,21 @@ auto hooks =
       };
 
     add("inter-geometric portals",
-      "In this world we can find portals between six different geometries. The camera is in 'walking mode' i.e. restricted to keep close to the floor (this can be disabled with '5').",
+      "In this world we can find portals between six different geometries. The camera is in 'walking mode' i.e. restricted to keep close to the floor (this can be disabled with '5').\n\n"
+      "In VR, you might want to prefer the VR version, which adds extra blocks to Solv to improve the performance.\n\n"
+      "Note: this is a very complex shader, so compiling it may take long time!\n\n"
+      "Hotkeys, mostly useful when showing VR to someone:\n\n"
+      "Alt+EHS -- go to Euclidean/hyperbolic/spherical space, Alt+,. -- change the camera speed, Alt+AZ -- change altitude, Alt+W -- switch walking, Alt+X -- change HUD"
+      ,
       "https://youtu.be/yqUv2JO2BCs", "https://twitter.com/ZenoRogue/status/1496867204419452935",
-      load("portalscene3.lev", 0.2174492, 600)
+      {loader{"run this visualization", 'r', load("portalscene3.lev", 0.2174492, 600)}, 
+       loader{"run this visualization (VR)", 'v', load("portalscene3-solv.lev", 0.2174492, 600)}}
       );
     add("curved landscape",
       "Here we create portals between Solv and H3 geometries, resulting in a scene looking a bit like a curved landscape.",
       "", "https://twitter.com/ZenoRogue/status/1446127100516130826",
-      load("solv-h3-scene.lev", 0.05, 3000));
+      {loader{"run this visualization", 'r', load("solv-h3-scene.lev", 0.05, 3000)}});
     }));
-
 }
 
 }
