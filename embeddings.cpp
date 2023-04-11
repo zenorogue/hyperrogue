@@ -301,6 +301,7 @@ EX }
     
     void prepare_lta();
     void auto_configure();
+    virtual ~embedding_method() {}
     };
 
   #endif
