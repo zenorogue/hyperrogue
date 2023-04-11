@@ -497,6 +497,7 @@ bool draw_ptriangle(cell *c, const shiftmatrix& V) {
   return false;
   }
 
+#if CAP_RVSLIDES
 void slide_itri(tour::presmode mode, int id) {
   using namespace tour;
   setCanvas(mode, '0');
@@ -524,6 +525,7 @@ void slide_itri(tour::presmode mode, int id) {
     }     
   rogueviz::pres::non_game_slide_scroll(mode);
   }
+#endif
 
 string cap = "Impossible architecture in Nil/";
 
@@ -546,9 +548,11 @@ auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
     }
   else return 1;
   return 0;
-  })
+  });
 
-+ addHook_rvslides(166, [] (string s, vector<tour::slide>& v) {
+#if CAP_RVSLIDES
+auto hcslides =
+  addHook_rvslides(166, [] (string s, vector<tour::slide>& v) {
   using namespace tour;
   if(s != "noniso") return;
 
@@ -585,6 +589,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_ptriangle)
     slide_itri(mode, 2);
     }});
   });
+#endif
 
 }
 }

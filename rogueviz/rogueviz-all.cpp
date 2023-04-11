@@ -28,7 +28,6 @@
 #include "impossible-ring.cpp"
 #include "triangle.cpp"
 #include "sumotron.cpp"
-#include "noniso-honeycombs.cpp"
 #include "random-walk.cpp"
 #include "fifteen.cpp"
 #include "crystal-sokoban.cpp"
@@ -58,11 +57,14 @@
 #include "playing-with-impossibility.cpp"
 #include "hyperbolic-minesweeper-pres.cpp"
 #include "dhrg-pres.cpp"
+#include "noniso-honeycombs.cpp"
 #endif
 #include "highdim-demo.cpp"
 #include "horo63.cpp"
 #include "platformer.cpp"
+#if CAP_RAY && MAXMDIM >= 4
 #include "intra-demos.cpp"
+#endif
 #include "gobot.cpp"
 #include "extra-projections.cpp"
 #include "balloonsim.cpp"

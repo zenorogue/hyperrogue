@@ -191,6 +191,7 @@ bool draw_snow(cell *c, const shiftmatrix& V) {
 
 string cap = "non-Euclidean snowballs/";
 
+#if CAP_RVSLIDES
 void snow_slide(vector<tour::slide>& v, string title, string desc, reaction_t t) {
   using namespace tour;
   v.push_back(
@@ -219,6 +220,7 @@ void snow_slide(vector<tour::slide>& v, string title, string desc, reaction_t t)
     }}
     );
   }
+#endif
 
 void show() {
   cmode = sm::SIDE | sm::MAYDARK;
@@ -299,6 +301,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
     param_b(just_centered, "snow_just_centered");
     })
 
+#if CAP_RVSLIDES
 + addHook_rvslides(161, [] (string s, vector<tour::slide>& v) {
   if(s != "noniso") return;
   v.push_back(tour::slide{
@@ -372,7 +375,9 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
     snow_lambda = 3;
     });
 #endif
-  });
+  })
+#endif
+  + 0;
 
 }
 }
