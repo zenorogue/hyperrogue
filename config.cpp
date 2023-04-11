@@ -2867,7 +2867,7 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
       "the sky height, which might be beyond the range visible in fog. To prevent this, "
       "the intensity of the fog effect depends on the value here rather than the actual distance. "
       "Stars are affected similarly.", '4');
-  #if MAXMDIM >= 3
+  #if MAXMDIM >= 4
   param_fd(vid.sky_height, "sky_height")
     ->set_hint([] { return geom3::to_wh(cgi.SKY); })
     ->editable(0, 10, .1, "altitude of the sky", unitwarn, '5')
