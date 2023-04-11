@@ -1183,7 +1183,11 @@ EX void initConfig() {
   
   param_b(tortoise::shading_enabled, "tortoise_shading", true);
 
-  addsaver(bounded_mine_percentage, "bounded_mine_percentage");
+  param_f(bounded_mine_percentage, "bounded_mine_freq")
+  -> editable(0, 1, 0.01, "fraction of mine in bounded minefield", "", '%')
+  -> set_reaction([] {
+    if(game_active) { stop_game(); start_game(); }
+    });
 
   param_enum(nisot::geodesic_movement, "solv_geodesic_movement", "solv_geodesic_movement", true)
   -> editable({{"Lie group", "light, camera, and objects move in lines of constant direction, in the Lie group sense"}, {"geodesics", "light, camera, and objects always take the shortest path"}}, "straight lines", 'G')
