@@ -56,6 +56,9 @@ bool random_colors = false;
 /* just one snowball per cell, in the center */
 bool just_centered = false;
 
+/* do not draw snow on player cell */
+bool snow_not_player = false;
+
 int snow_shape = 0;
 
 struct snowball {
@@ -131,6 +134,8 @@ transmatrix random_snow_matrix(cell *c) {
   }
 
 bool draw_snow(cell *c, const shiftmatrix& V) {
+
+  if(c == cwt.at && snow_not_player) return false;
   
   if(!snowballs_at.count(c)) {
     auto& v = snowballs_at[c];
@@ -299,6 +304,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
 + addHook(hooks_configfile, 100, [] {
     param_b(random_colors, "snow_random_colors");
     param_b(just_centered, "snow_just_centered");
+    param_b(snow_not_player, "snow_not_player");
     })
 
 #if CAP_RVSLIDES
