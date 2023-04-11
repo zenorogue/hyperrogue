@@ -383,6 +383,7 @@ vector<rule_recursive> rules_recursive = {
   };
 
 EX ld hat_param = 1;
+EX ld hat_param_imag = 0;
 
 struct hrmap_hat : hrmap {
 
@@ -473,22 +474,20 @@ struct hrmap_hat : hrmap {
     bool emb = embedded_plane;
     if(emb) geom3::light_flip(true);
 
-    auto move = [&] (ld angle, ld dist) {
-      hc.push_back(T * C0);
-      T = T * cspin(0, 1, angle * degree);
-      T = T * xpush(dist);
-      };
-
     ld q = 6;
     ld eshort = 0.3;
     ld elong = sqrt(3) * eshort;
     if(fake::in()) q = fake::around;
+
+    ld eshorti = 0, elongi = 0;
 
     if(q != 6) {
       eshort = edge_of_triangle_with_angles(M_PI / q, 60._deg, 90._deg);
       elong = edge_of_triangle_with_angles(60._deg, M_PI / q, 90._deg);
       }
     else {
+      eshorti = eshort * hat_param_imag;
+      elongi = elong * -hat_param_imag;
       eshort *= hat_param;
       elong *= 2 - hat_param;
       // 0-length edges cause problems...
@@ -496,33 +495,65 @@ struct hrmap_hat : hrmap {
       if(abs(elong) < 1e-6) elong = .0001;
       }
 
-    ld i60 = (M_PI - TAU*2/q)/degree;
-    ld n60 = (M_PI - TAU*4/q)/degree;
+    auto hat = [&] (vector<hyperpoint>& hc) {
 
-    move(-90, eshort); move( 60, eshort); move(  0, eshort);
-    move( 60, eshort); move( 90, elong);  move(n60, elong);
-    move( 90, eshort); move(-60, eshort); move( 90, elong);
-    move(i60, elong);  move(-90, eshort); move( 60, eshort);
-    move( 90, elong);  move(i60, elong);
+      auto move = [&] (ld angle, ld dist, ld disti) {
+        hc.push_back(T * C0);
+        T = T * cspin(0, 1, angle * degree);
+        T = T * xpush(dist);
+        T = T * ypush(disti);
+        };
 
-    if(q == 6) {
+      auto moves = [&] (ld angle) { move(angle, eshort, eshorti); };
+      auto movel = [&] (ld angle) { move(angle, elong, elongi); };
+
+      ld i60 = (M_PI - TAU*2/q)/degree;
+      ld n60 = (M_PI - TAU*4/q)/degree;
+
+      moves(-90); moves( 60); moves(  0);
+      moves( 60); movel( 90); movel(n60);
+      moves( 90); moves(-60); movel( 90);
+      movel(i60); moves(-90); moves( 60);
+      movel( 90); movel(i60);
+      };
+
+    hat(hc);
+
+#undef eshort
+#undef elong
+
+    auto compute_area = [&] (vector<hyperpoint>& hc) {
       ld area = 0;
-      for(int i=0; i<14; i++) area += (hc[(i+1)%14] ^ hc[i]) [2];
-      println(hlog, "area = ", area);
-      area = abs(area);
-      ld scale = sqrt(2.5 / area);
-      for(auto& h: hc) h = h * scale + (C0) * (1-scale);
+      for(int i=0; i<14; i++) area += (hc[(i+1)%isize(hc)] ^ hc[i]) [2];
+      return abs(area);
+      };
+
+    auto recenter = [&] (vector<hyperpoint>& hc) {
+      hyperpoint ctr = Hypc;
+      for(auto h: hc) ctr += h;
+      ctr /= isize(hc);
+      ctr = normalize(ctr);
+      for(auto& h: hc) h = gpushxto0(ctr) * h;
+      };
+
+    if(hat_param_imag)  {
+      eshorti *= -1;
+      elongi *= -1;
+      hat(hatcorners[1]);
       }
-
-    hyperpoint ctr = Hypc;
-    for(auto h: hc) ctr += h;
-    ctr /= isize(hc);
-    ctr = normalize(ctr);
-    for(auto& h: hc) h = gpushxto0(ctr) * h;
-
-    hatcorners[1] = hc;
+    else hatcorners[1] = hc;
     for(auto& h: hc) h = MirrorX * h;
     reverse(hatcorners[1].begin(), hatcorners[1].end());
+
+    if(q == 6) {
+      ld phi = (1 + sqrt(5)) / 2;
+      ld phi4 = pow(phi, 4);
+      ld area = (compute_area(hatcorners[0]) * phi4 + compute_area(hatcorners[1]) * 1) / (phi4 + 1);
+      area = abs(area);
+      ld scale = sqrt(2.5 / area);
+      for(auto &hc: hatcorners) for(auto& h: hc) h = h * scale + (C0) * (1-scale);
+      }
+    for(auto &hc: hatcorners) recenter(hc);
 
     clear_adj_memo();
     if(q == 6) {

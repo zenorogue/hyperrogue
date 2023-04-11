@@ -842,6 +842,13 @@ EX void initConfig() {
       })
   -> set_reaction(hat::reshape);
 
+  param_f(hat::hat_param_imag, "hat_param_imag", "hat_param_imag", 0)
+  -> editable(0, 2, 0.1, "hat parameter (imaginary)",
+    "Apeirodic hat tiling based on: https://arxiv.org/pdf/2303.10798.pdf\n\n"
+    "This controls the parameter discussed in Section 6. Parameter p is Tile(p, (2-p)√3), scaled so that the area is the same for every p.", 'v'
+    )
+  -> set_reaction(hat::reshape);
+
   addsaver(vid.particles, "extra effects", 1);
   param_i(vid.framelimit, "frame limit", 999);
 

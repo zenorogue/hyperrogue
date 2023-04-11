@@ -1026,6 +1026,7 @@ EX void showEuclideanMenu() {
     }
   else if(hat::in()) {
     add_edit(hat::hat_param);
+    add_edit(hat::hat_param_imag);
     }
   else if(nil) {
     menuitem_nilwidth('v');
