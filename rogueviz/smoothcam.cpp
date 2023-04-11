@@ -507,8 +507,9 @@ void handle_animation(ld t) {
 
   transmatrix V = View;
 
-  if(embedded_plane) {
+  if(embedded_plane && embedded_shift_method_choice != smcNone) {
     hyperpoint interm = C03;
+
     for(int j=0; j<3; j++) {
       vector<ld> values;
       for(auto& f: anim.frames)
@@ -542,10 +543,10 @@ void handle_animation(ld t) {
           if(j == 0)
             h = tC0(f.V);
           if(j == 1) {
-            h = tC0(shift_object(f.V, f.ori, ztangent(f.front_distance), smGeodesic));
+            h = tC0(shift_object(f.V, f.ori, ztangent(f.front_distance), hyperbolic ? smIsotropic : smGeodesic));
             }
           if(j == 2) {
-            h = tC0(shift_object(f.V, f.ori, ctangent(1, -f.up_distance), smGeodesic));
+            h = tC0(shift_object(f.V, f.ori, ctangent(1, -f.up_distance), hyperbolic ? smIsotropic :smGeodesic));
             }
           prepare_for_interpolation(h);
           values.push_back(h[i]);
@@ -557,7 +558,6 @@ void handle_animation(ld t) {
       }
 
     set_view(pts[0], pts[1], pts[2]);
-    println(hlog, "V = ", View);
     c_front_dist = geo_dist(pts[0], pts[1]);
     c_up_dist = geo_dist(pts[0], pts[2]);
     }
