@@ -889,6 +889,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       find_zlev(H);
       models::apply_orientation_yz(H[1], H[2]);
       models::apply_orientation(H[0], H[1]);
+      if(euclid) H[0] /= pconf.fisheye_param, H[1] /= pconf.fisheye_param;
       ret = to_square(H);
       models::apply_orientation(ret[1], ret[0]);
       models::apply_orientation_yz(ret[2], ret[1]);
@@ -2497,7 +2498,9 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
     }  
   #endif
   #if CAP_QUEUE
-  for(int i=0; i<=360; i++) curvepoint(xspinpush0(i * degree, 10));
+  ld rad = 10;
+  if(euclid) rad = 1000;
+  for(int i=0; i<=360; i++) curvepoint(xspinpush0(i * degree, rad));
   auto& c = queuecurve(shiftless(Id), linecol, fillcol, prio);
   if(pmodel == mdDisk && hyperbolic && pconf.alpha <= -1)
     c.flags |= POLY_FORCE_INVERTED;
@@ -2708,7 +2711,7 @@ void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
 EX void draw_boundary(int w) {
 
   if(w == 1) return;
-  if(nonisotropic || (euclid && pmodel != mdFisheye) || gproduct) return;
+  if(nonisotropic || (euclid && !among(pmodel, mdFisheye, mdConformalSquare)) || gproduct) return;
   #if CAP_VR
   if(vrhr::active() && pmodel == mdHyperboloid) return;
   #endif
