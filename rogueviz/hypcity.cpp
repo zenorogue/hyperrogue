@@ -76,7 +76,7 @@ struct citymodel : model {
     return h;
     }
 
-  void postprocess() {
+  void postprocess() override {
     println(hlog, "low = ", low);
     println(hlog, "high = ", high);
     }

@@ -634,8 +634,8 @@ struct emb_sphere_in_low : emb_actual {
     return map_relative_push(logical_to_actual(i)) * zpush(-1);
     }
   hyperpoint actual_to_intermediate(hyperpoint a) override { return actual_to_logical(a); }
-  ld center_z() { return 1; }
-  transmatrix map_relative_push(hyperpoint a) {
+  ld center_z() override { return 1; }
+  transmatrix map_relative_push(hyperpoint a) override {
     ld z = hdist0(a);
     geom3::light_flip(true);
     auto h1 = normalize(a);
@@ -737,7 +737,7 @@ struct emb_euc_in_product : emb_euclid_noniso {
     return hyperpoint(bx, by, bz, 1);
     }
   transmatrix get_lsti() override { return cspin90(2, 1); }
-  transmatrix intermediate_to_actual_translation(hyperpoint i) {
+  transmatrix intermediate_to_actual_translation(hyperpoint i) override {
     return zpush(i[2]) * xpush(i[0]) * ypush(i[1]);
     }
   };
@@ -869,7 +869,7 @@ struct emb_euc_cylinder_sl2 : emb_euc_cylinder_twisted {
 struct emb_euc_in_sph : emb_euclid_noniso {
   bool is_euc_in_sph() override { return true; }
   ld center_z() override { return 1; }
-  virtual ld height_limit(ld sign) { return sign < 0 ? 0 : 90._deg; }
+  virtual ld height_limit(ld sign) override { return sign < 0 ? 0 : 90._deg; }
   hyperpoint actual_to_intermediate(hyperpoint a) override { 
     ld tx = hypot(a[0], a[2]);
     ld ty = hypot(a[1], a[3]);

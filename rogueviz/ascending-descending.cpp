@@ -205,7 +205,7 @@ void prepare_nilform() {
 
 struct nilmodel : model {
   hyperpoint transform(hyperpoint h) override { return nilize(h).second; }
-  void process_triangle(vector<hyperpoint>& hys, vector<hyperpoint>& tot, bool textured, object *co) {
+  void process_triangle(vector<hyperpoint>& hys, vector<hyperpoint>& tot, bool textured, object *co) override {
     auto n0 = nilize(hys[0]).first;
     auto n1 = nilize(hys[1]).first;
     auto n2 = nilize(hys[2]).first;

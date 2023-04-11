@@ -660,7 +660,7 @@ struct hrmap_hat : hrmap {
     throw hr_exception("not in hats");
     }
 
-  void find_cell_connection(cell *c, int d) {
+  void find_cell_connection(cell *c, int d) override {
     int id = hat_id(c);
     indenter ind(2);
     for(auto& ru: rules_base) {
