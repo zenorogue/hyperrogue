@@ -199,25 +199,33 @@ EX int less_states;
 
 EX int number_of_types() {
   if(arb::in() || WDIM == 2) return isize(arb::current.shapes);
+  #if CAP_MAXMDIM >= 4
   if(WDIM == 3) return gcd(reg3::quotient_count_sub(), less_states);
+  #endif
   throw hr_exception("unknown number_of_types");
   }
 
 EX int get_id(cell *c) {
   if(arb::in() || WDIM == 2) return shvid(c);
+  #if CAP_MAXMDIM >= 4
   if(WDIM == 3) return zgmod(reg3::get_aid(c), less_states);
+  #endif
   throw hr_exception("unknown get_id");
   }
 
 int shape_size(int id) {
   if(arb::in() || WDIM == 2) return isize(arb::current.shapes[id].connections);
+  #if CAP_MAXMDIM >= 4
   if(WDIM == 3) return reg3::get_size_of_aid(id);
+  #endif
   throw hr_exception("unknown shape_size");
   }
 
 int cycle_size(int id) {
   if(arb::in() || WDIM == 2) return arb::current.shapes[id].cycle_length;
+  #if CAP_MAXMDIM >= 4
   if(WDIM == 3) return reg3::get_size_of_aid(id);
+  #endif
   throw hr_exception("unknown shape size");
   }
 
@@ -1321,10 +1329,12 @@ EX int move_code(twalker cs) {
      be_solid(cs.at); ufind(cs); ufind(cs2); be_solid(cs2.at);
      fix_distances(cs.at);
 
+     #if MAXMDIM >= 4
      if(WDIM == 3) {
        if(cs2.at->parent_dir == cs2.spin) return C_PARENT;
        else return get_roadsign(cs+wstep);
        }
+     #endif
 
      int y = cs.at->dist - cs.peek()->dist;
      int x;
@@ -1461,8 +1471,10 @@ vector<int> gen_rule(twalker cwmain, int id) {
   if(WDIM != 3) for(int i=0; i<isize(cids); i++) if(cids[i] == DIR_UNKNOWN)
     cids[i] = get_side(cwmain+i) < 0 ? DIR_RIGHT : DIR_LEFT;
 
+  #if MAXMDIM >= 4
   if(WDIM == 3) for(int i=0; i<isize(cids); i++) if(cids[i] == DIR_UNKNOWN)
     cids[i] = get_roadsign(cwmain+i);
+  #endif
 
   return cids;
   }
@@ -2035,12 +2047,14 @@ EX void rules_iteration() {
   if(isize(important) != N)
     throw rulegen_retry("need more rules after examine");
 
+  #if MAXMDIM >= 4
   if(WDIM == 3) {
     check_road_shortcuts();
     optimize();
     N = isize(important);
     check_validity_3d();
     }
+  #endif
 
   if(skipped_branches.size()) {
     checks_to_skip.clear();
@@ -2076,7 +2090,9 @@ EX void cleanup() {
   important.clear();
   shortcuts.clear();
   single_live_branch_close_to_root.clear();
+  #if MAXMDIM >= 4
   cleanup3();
+  #endif
   }
 
 EX void clear_all() {  
@@ -2098,6 +2114,7 @@ EX void generate_rules() {
   start_time = SDL_GetTicks();
   delete_tmap();
 
+  #if MAXMDIM >= 4
   if(WDIM == 3 && reg3::in_hrmap_rule_or_subrule()) {
     stop_game();
     reg3::consider_rules = 0;
@@ -2107,7 +2124,9 @@ EX void generate_rules() {
   else if(WDIM == 3) {
     flags |= w_numerical;
     }
-  else if(!arb::in()) try {
+  else 
+  #endif
+  if(!arb::in()) try {
     arb::convert::convert();
     if(flags & w_numerical) arb::convert::activate();
     }
@@ -2166,7 +2185,9 @@ EX void generate_rules() {
     t_origin.push_back(twalker(c, 0));
     }
 
+  #if MAXMDIM >= 4
   if(GDIM == 3) build_cycle_data();
+  #endif
 
   bfs_queue = queue<tcell*>();
   if(flags & w_bfs) for(auto c: t_origin) bfs_queue.push(c.at);
@@ -2486,10 +2507,12 @@ auto hooks = addHook(hooks_configfile, 100, [] {
       param_i(max_shortcut_length, "max_shortcut_length");
       param_i(rulegen_timeout, "rulegen_timeout");
       param_i(first_restart_on, "first_restart_on");
+      #if MAXMDIM >= 4
       param_i(max_ignore_level_pre, "max_ignore_level_pre");
       param_i(max_ignore_level_post, "max_ignore_level_post");
       param_i(max_ignore_time_pre, "max_ignore_time_pre");
       param_i(max_ignore_time_post, "max_ignore_time_post");
+      #endif
     });
 
 EX void parse_treestate(arb::arbi_tiling& c, exp_parser& ep) {

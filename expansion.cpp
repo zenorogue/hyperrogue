@@ -113,8 +113,8 @@ void expansion_analyzer::preliminary_grouping() {
       for(int v: rulegen::treestates[i].rules)
         if(v >= 0) children[i].push_back(v);
     }
-  else if(reg3::exact_rules()) {
 #if MAXMDIM >= 4
+  else if(reg3::exact_rules()) {
     rootid = reg3::rule_get_root(0);
     auto& chi = reg3::rule_get_children();
     auto& chpos = reg3::rule_get_childpos();
@@ -128,8 +128,8 @@ void expansion_analyzer::preliminary_grouping() {
         children[i].push_back(ck);
       k++;
       }
-#endif
     }
+#endif
   else {
     sample_id(currentmap->gamestart());
     // queue for, do not change to range-based for
@@ -145,7 +145,9 @@ void expansion_analyzer::preliminary_grouping() {
   }
 
 void expansion_analyzer::reduce_grouping() {
+  #if MAXMDIM >= 4
   if(reg3::exact_rules()) return;
+  #endif
   if(currentmap->strict_tree_rules()) return;
   int old_N = N;
   vector<int> grouping;
@@ -239,7 +241,11 @@ bool expansion_analyzer::verify(int id) {
 
 int expansion_analyzer::valid(int v, int step) {
   if(step < 0) return 0;
+  #if MAXMDIM >= 4
+  int more = 5;
+  #else
   int more = reg3::exact_rules() ? 1 : 5;
+  #endif
   #if CAP_GMP == 0
   if(get_descendants(step+v+v+more).approx_int() >= bignum::BASE) return 0;
   typedef ld val;
@@ -392,7 +398,9 @@ int type_in_quick(expansion_analyzer& ea, cell *c, const cellfunction& f) {
   }
 
 EX bool sizes_known() {
+  #if MAXMDIM >= 4
   if(reg3::exact_rules()) return true;
+  #endif
   if(closed_manifold) return false;
   // Castle Anthrax is infinite
   if(bt::in()) return false;

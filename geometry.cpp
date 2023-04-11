@@ -1175,7 +1175,9 @@ EX namespace geom3 {
     if(vid.always3) {
       changing_embedded_settings = true;
       geom3::switch_fpp();
+      #if MAXMDIM >= 4
       delete_sky();
+      #endif
       // not sure why this is needed...
       resetGL();
       geom3::switch_fpp();
@@ -1183,6 +1185,7 @@ EX namespace geom3 {
       }
     }
 
+  #if MAXMDIM >= 4
   EX void apply_settings_light() {
     if(vid.always3) {
       changing_embedded_settings = true;
@@ -1191,6 +1194,7 @@ EX namespace geom3 {
       changing_embedded_settings = false;
       }
     }
+  #endif
 
   EX }
 

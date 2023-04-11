@@ -1295,6 +1295,7 @@ void embedding_method::auto_configure() {
   }
 
 EX void invoke_embed(geom3::eSpatialEmbedding se) {
+  #if MAXMDIM >= 4
   if(GDIM == 3) { if(geom3::auto_configure) geom3::switch_fpp(); else geom3::switch_always3(); }
   if(in_tpp()) geom3::switch_tpp();
   if(se != geom3::seNone) {
@@ -1303,6 +1304,7 @@ EX void invoke_embed(geom3::eSpatialEmbedding se) {
     delete_sky();
     if(vid.usingGL) resetGL();
     }
+  #endif
   }
 
 geom3::eSpatialEmbedding embed_by_name(string ss) {

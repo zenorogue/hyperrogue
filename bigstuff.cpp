@@ -1372,7 +1372,9 @@ EX bool horo_ok() {
   if(INVERSE) return false;  
   if(hat::in()) return false;
   if(currentmap->strict_tree_rules()) return true;
+  #if MAXMDIM >= 4
   if(reg3::in_hrmap_h3() && !PURE) return false;
+  #endif
   return mhyperbolic && !bt::in() && !arcm::in() && !kite::in() && !experimental && !mhybrid && !arb::in() && !quotient;
   }
 

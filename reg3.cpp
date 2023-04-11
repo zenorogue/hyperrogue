@@ -2907,6 +2907,8 @@ EX }
 EX namespace reg3 {
 EX bool in() { return false; }
 EX bool in_rule() { return false; }
+EX bool cubes_reg3;
+EX bool exact_rules() { return false; }
 EX }
 #endif
 

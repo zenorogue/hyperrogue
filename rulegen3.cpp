@@ -9,6 +9,7 @@
 
 namespace hr {
 
+#if MAXMDIM >= 4
 EX namespace rulegen {
 
 struct road_shortcut_trie_vertex {
@@ -1757,6 +1758,7 @@ int readRuleArgs3() {
 auto hook3 = addHook(hooks_args, 100, readRuleArgs3);
 #endif
 
-}
+EX }
+#endif
 
 }

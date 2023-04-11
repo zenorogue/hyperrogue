@@ -2475,9 +2475,11 @@ EX void show3D_height_details() {
     add_edit(vid.infdeep_height);
     add_edit(vid.sun_size);
     add_edit(vid.star_size);
+    #if MAXMDIM >= 4
     add_edit(star_prob);
     add_edit(vid.height_limits);
     if(euclid && msphere) add_edit(use_euclidean_infinity);
+    #endif
 
     dialog::addBreak(100);
     dialog::addHelp(lalign(0, "absolute altitudes:\n\n"
@@ -2721,10 +2723,12 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   param_b(numerical_minefield, "numerical_minefield")
   ->editable("display mine counts numerically", 'n');
   param_b(dont_display_minecount, "dont_display_minecount");
+  #if MAXMDIM >= 4
   param_enum(draw_sky, "draw_sky", "draw_sky", skyAutomatic)
   -> editable({{"NO", "do not draw sky"}, {"automatic", ""}, {"skybox", "works only in Euclidean"}, {"always", "might be glitched in some settings"}}, "sky rendering", 's');
   param_b(use_euclidean_infinity, "use_euclidean_infinity", true)
   -> editable("infinite sky", 'i');
+  #endif
   param_f(linepatterns::parallel_count, "parallel_count")
     ->editable(0, 24, 1, "number of parallels drawn", "", 'n');
   param_f(linepatterns::parallel_max, "parallel_max")
@@ -2863,10 +2867,12 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
       "the sky height, which might be beyond the range visible in fog. To prevent this, "
       "the intensity of the fog effect depends on the value here rather than the actual distance. "
       "Stars are affected similarly.", '4');
+  #if MAXMDIM >= 3
   param_fd(vid.sky_height, "sky_height")
     ->set_hint([] { return geom3::to_wh(cgi.SKY); })
     ->editable(0, 10, .1, "altitude of the sky", unitwarn, '5')
     ->set_reaction(delete_sky);
+  #endif
   param_fd(vid.star_height, "star_height")
     ->set_hint([] { return geom3::to_wh(cgi.STAR); })
     ->editable(0, 10, .1, "altitude of the stars", unitwarn, '6');
@@ -2877,8 +2883,10 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
     ->editable(0, 10, .1, "sun size (relative to item sizes)", "", '8');
   param_f(vid.star_size, "star_size", "star_size", 0.75)
     ->editable(0, 10, .1, "night star size (relative to item sizes)", "", '9');
+  #if MAXMDIM >= 4
   param_f(star_prob, "star_prob", 0.3)
     ->editable(0, 1, .01, "star probability", "probability of star per tile", '*');
+  #endif
   param_b(vid.height_limits, "height_limits", true)
     ->editable("prevent exceeding recommended altitudes", 'l');
   param_b(auto_remove_roofs, "auto_remove_roofs", true)
