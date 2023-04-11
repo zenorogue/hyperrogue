@@ -1185,16 +1185,16 @@ EX namespace geom3 {
       }
     }
 
-  #if MAXMDIM >= 4
   EX void apply_settings_light() {
+  #if MAXMDIM >= 4
     if(vid.always3) {
       changing_embedded_settings = true;
       geom3::switch_always3();
       geom3::switch_always3();
       changing_embedded_settings = false;
       }
-    }
   #endif
+    }
 
   EX }
 
