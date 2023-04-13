@@ -440,14 +440,13 @@ struct hrmap_hat : hrmap {
           };
 
         if(clev == 1) for(auto& b: rules_base) {
-          products_equal(lt[0][b.id0+1], adj(b.id0==0, fix(b.edge0), b.id1==0, fix(b.edge1)), lt[1][b.master_connection+1], lt[0][b.id1+1]);
+          products_equal(lt[0][b.id0+1], adj2(b.id0==0, fix(b.edge0), b.id1==0, fix(b.edge1)), lt[1][b.master_connection+1], lt[0][b.id1+1]);
           }
 
         if(clev >= 2) for(auto& b: rules_recursive) {
           products_equal(lt[clev][b.id0+1], lt[clev-1][b.child+1], lt[clev][b.parent+1], lt[clev][b.id1+1]);
           }
 
-        if(debugflags & DF_GEOM) println(hlog, "changed = ", chg, " unknown = ", unknown, " errors = ", errors);
         if(!chg) break;
         }
 
@@ -558,10 +557,10 @@ struct hrmap_hat : hrmap {
     clear_adj_memo();
     if(q == 6) {
       hyperpoint hfar = 
-        adj(1,9,0,7) * adj(0,11,0,10) * adj(0,1,0,2) * adj(0,8,0,5) * adj(0,11,0,10) *
-        adj(0,1,0,2) * adj(0,8,0,5) * adj(0,11,0,2) * adj(0,8,0,5) * adj(0,11,0,10) *
-        adj(0,1,0,2) * adj(0,8,0,5) * adj(0,11,0,10) * adj(0,1,0,2) * adj(0,8,0,5) *
-        adj(0,11,0,2) * adj(0,8,0,5) * C0;
+        adj2(1,9,0,7) * adj2(0,11,0,10) * adj2(0,1,0,2) * adj2(0,8,0,5) * adj2(0,11,0,10) *
+        adj2(0,1,0,2) * adj2(0,8,0,5) * adj2(0,11,0,2) * adj2(0,8,0,5) * adj2(0,11,0,10) *
+        adj2(0,1,0,2) * adj2(0,8,0,5) * adj2(0,11,0,10) * adj2(0,1,0,2) * adj2(0,8,0,5) *
+        adj2(0,11,0,2) * adj2(0,8,0,5) * C0;
       transmatrix T = spintox(hfar);
       for(auto& h: hc) h = inverse(T) * h;
       for(auto& h: hatcorners[1]) h = T * h;
@@ -683,10 +682,10 @@ struct hrmap_hat : hrmap {
     int t0 = c0 == c0->master->c7;
     int t1 = c1 == c1->master->c7;
     int d1 = c0->c.spin(d0);
-    return adj(t0, d0, t1, d1);
+    return adj2(t0, d0, t1, d1);
     }
 
-  memo_matrix& adj(int t0, int d0, int t1, int d1) {
+  memo_matrix& adj2(int t0, int d0, int t1, int d1) {
     auto& mm = adj_memo[t0][t1][d0][d1];
     if(mm.known) return mm;
 
