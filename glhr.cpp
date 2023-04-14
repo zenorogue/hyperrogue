@@ -666,7 +666,10 @@ EX void full_enable(shared_ptr<GLprogram> p) {
     current_projection[0][0] = -1e8;
     }, {})
   id_modelview();
+  #if MINIMIZE_GL_CALLS
+  #else
   current_linewidth = -1;
+  #endif
   /* if(current_depthwrite) glDepthMask(GL_TRUE);
   else glDepthMask(GL_FALSE);
   if(current_depthtest) glEnable(GL_DEPTH_TEST);
