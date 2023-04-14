@@ -951,19 +951,22 @@ EX void mainloopiter() {
     ld t = (ticks - lastticks) * shiftmul / 1000.;
     lastticks = ticks;
 
-    if(keystate['d'] && DEFAULTNOR('d')) full_rotate_camera(0, -t);
-    if(keystate['a'] && DEFAULTNOR('a')) full_rotate_camera(0, t);
-    if(keystate['w'] && DEFAULTNOR('w')) full_rotate_camera(1, t);
-    if(keystate['s'] && DEFAULTNOR('s')) full_rotate_camera(1, -t);
-    if(keystate['q'] && DEFAULTNOR('q')) full_rotate_view(t / degree, t);
-    if(keystate['e'] && DEFAULTNOR('e')) full_rotate_view(-t / degree, -t);
+    #define dkey(x) keystate[int(x)] && DEFAULTNOR(x)
 
-    if(keystate['i'] && GDIM == 3 && DEFAULTNOR('i')) full_forward_camera(-t);
-    if(keystate['k'] && GDIM == 3 && DEFAULTNOR('k')) full_forward_camera(t);
-    if(keystate['l'] && GDIM == 3 && DEFAULTNOR('l')) full_strafe_camera(-t);
-    if(keystate['j'] && GDIM == 3 && DEFAULTNOR('j')) full_strafe_camera(t);
-    if(keystate['h'] && GDIM == 3 && DEFAULTNOR('h')) full_ystrafe_camera(-t);
-    if(keystate['y'] && GDIM == 3 && DEFAULTNOR('y')) full_ystrafe_camera(t);
+    if(dkey('d')) full_rotate_camera(0, -t);
+    if(dkey('a')) full_rotate_camera(0, t);
+    if(dkey('w')) full_rotate_camera(1, t);
+    if(dkey('s')) full_rotate_camera(1, -t);
+    if(dkey('q')) full_rotate_view(t / degree, t);
+    if(dkey('e')) full_rotate_view(-t / degree, -t);
+
+    if(GDIM == 3 && dkey('i')) full_forward_camera(-t);
+    if(GDIM == 3 && dkey('k')) full_forward_camera(t);
+    if(GDIM == 3 && dkey('l')) full_strafe_camera(-t);
+    if(GDIM == 3 && dkey('j')) full_strafe_camera(t);
+    if(GDIM == 3 && dkey('h')) full_ystrafe_camera(-t);
+    if(GDIM == 3 && dkey('y')) full_ystrafe_camera(t);
+    #undef dkey
     }
 
   #if CAP_VR
