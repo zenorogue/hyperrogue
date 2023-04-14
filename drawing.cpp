@@ -1446,8 +1446,6 @@ void draw_stretch(dqi_poly *p) {
       auto &lb = results[i+1];
       auto &lc = results[i+2];
       
-      int ia = 0, ib = 0, ic = 0;
-      
       for(auto& ha: la) for(auto& hb: lb) if(test(ha, hb))
         for(auto& hc: lc) if(test(ha, hc) && test(hb, hc)) {
         
@@ -1457,7 +1455,6 @@ void draw_stretch(dqi_poly *p) {
         if(p->tinf) 
           for(int j=0; j<3; j++)
             stinf.tvertices.push_back(p->tinf->tvertices[p->offset_texture+i+j]);
-        ia++; ib++; ic++;
         }
       }
     npoly.cnt = isize(glcoords);  
