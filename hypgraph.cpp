@@ -3316,8 +3316,8 @@ EX hyperpoint rel_log(shiftpoint h, bool relativistic_length) {
     ld choice = h1[2] * h1[2] - h1[0] * h1[0] - h1[1] * h1[1];
     ld r, z;
     if(choice > 0) {
-      ld r = sqrt(choice);
-      ld z = asin_clamp(r);
+      r = sqrt(choice);
+      z = asin_clamp(r);
       if(h1[3] < 0) z = M_PI - z;
       z += cycles * TAU;
       }
