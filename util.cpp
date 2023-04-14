@@ -188,6 +188,8 @@ vector<pair<ld, ld>> exp_parser::parse_with_reps() {
   return vals;
   }
 
+ld bmousexs, bmouseys;
+
 cld exp_parser::parse(int prio) {
   cld res;
   skip_white();
@@ -390,6 +392,14 @@ cld exp_parser::parse(int prio) {
     else if(number == "step") res = hdist0(tC0(currentmap->adj(cwt.at, 0)));
     else if(number == "edgelen") { start_game(); res = hdist(get_corner_position(cwt.at, 0), get_corner_position(cwt.at, 1)); }
     else if(number == "mousey") res = mousey;
+    else if(number == "mousexs") {
+      if(!inHighQual) bmousexs = (1. * mousex - current_display->xcenter) / current_display->radius;
+      res = bmousexs;
+      }
+    else if(number == "mouseys") {
+      if(!inHighQual) bmouseys = (1. * mousey - current_display->ycenter) / current_display->radius;
+      res = bmouseys;
+      }
     else if(number == "random") res = randd();
     else if(number == "mousez") res = cld(mousex - current_display->xcenter, mousey - current_display->ycenter) / cld(current_display->radius, 0);
     else if(number == "shot") res = inHighQual ? 1 : 0;
