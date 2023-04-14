@@ -124,10 +124,13 @@ struct glmatrix {
       color[2] = b;
       color[3] = 1;
       }
-    colored_vertex(hyperpoint h, color_t col) {
-      coords = pointtogl(h);
+    void set_color(color_t col) {
       for(int i=0; i<4; i++)
         color[i] = part(col, 3-i) / 255.0;
+      }
+    colored_vertex(hyperpoint h, color_t col) {
+      coords = pointtogl(h);
+      set_color(col);
       }
     };
   
