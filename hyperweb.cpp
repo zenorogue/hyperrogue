@@ -57,7 +57,7 @@ namespace hr {
 
 namespace hr {
 
-string get_value(string name) {
+EX string get_value(string name) {
   char *str = (char*)EM_ASM_INT({
     var name = UTF8ToString($0, $1);
     var value = document.getElementById(name).value;
