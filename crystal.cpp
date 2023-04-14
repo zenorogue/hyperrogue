@@ -884,7 +884,7 @@ EX vector<cell*> build_shortest_path(cell *c1, cell *c2) {
       }
     }
   
-  println(hlog, "Error: path not found");
+  println(hlog, "Error: path not found, steps = ", steps);
   return p;
   }
 
