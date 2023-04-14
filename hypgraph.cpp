@@ -3460,7 +3460,7 @@ EX void shift_view(hyperpoint H, eShiftMethod sm IS(shift_method(smaManualCamera
   static bool recursive = false;
   if(!recursive && intra::in) {
     dynamicval<bool> r(recursive, true);
-    #if MAXMDIM >= 4 && CAP_RAY
+    #if CAP_PORTALS
     intra::shift_view_portal(H);
     #endif
     return;

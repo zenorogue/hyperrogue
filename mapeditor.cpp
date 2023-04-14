@@ -724,7 +724,7 @@ EX namespace mapstream {
     }
     
     addToQueue(save_start());
-    #if MAXMDIM >= 4 && CAP_RAY
+    #if CAP_PORTALS
     if(intra::in) intra::prepare_need_to_save();
     #endif
     for(int i=0; i<isize(cellbyid); i++) {
@@ -771,7 +771,7 @@ EX namespace mapstream {
       f.write(c->wparam); f.write(c->landparam);
       f.write_char(c->stuntime); f.write_char(c->hitpoints);
       bool blocked = false;
-      #if MAXMDIM >= 4 && CAP_RAY
+      #if CAP_PORTALS
       if(intra::in && isWall3(c) && !intra::need_to_save.count(c)) blocked = true;
       #endif
       if(!blocked)
@@ -805,7 +805,7 @@ EX namespace mapstream {
       for(int i=0; i<multi::players; i++)
         f.write(cellids[multi::player[i].at]);
 
-    #if MAXMDIM >= 4 && CAP_RAY
+    #if CAP_PORTALS
     if(intra::in) {
       for(int i=0; i<isize(intra::portals_to_save); i++) {
         auto& p = intra::portals_to_save[i];
@@ -1069,7 +1069,7 @@ EX namespace mapstream {
           }
       }
 
-    #if MAXMDIM >= 4 && CAP_RAY
+    #if CAP_PORTALS
     if(intra::in) {
       while(true) {
         char k = f.get<char>();
@@ -1153,14 +1153,14 @@ EX namespace mapstream {
   EX void saveMap(hstream& f) {
     f.write(f.get_vernum());
     f.write(dual::state);
-    #if MAXMDIM >= 4 && CAP_RAY
+    #if CAP_PORTALS
     int q = intra::in ? isize(intra::data) : 0;
     f.write(q);
     #else
     int q = 0;
     #endif
     if(q) {
-      #if MAXMDIM >= 4 && CAP_RAY
+      #if CAP_PORTALS
       intra::prepare_to_save();
       int qp = isize(intra::portals_to_save);
       f.write(qp);
@@ -1204,7 +1204,7 @@ EX namespace mapstream {
     if(q) {
       int qp;
       f.read(qp);
-      #if MAXMDIM >= 4 && CAP_RAY
+      #if CAP_PORTALS
       intra::portals_to_save.resize(qp);
       for(auto& ps: intra::portals_to_save) {
         f.read(ps.spin);
@@ -3262,7 +3262,7 @@ EX namespace mapeditor {
     add_edit(game_keys_scroll);
     dialog::addInfo(XLAT("hint: shift+A to enter the map editor"));
     
-    #if CAP_RAY && MAXMDIM >= 4
+    #if CAP_PORTALS
     if(WDIM == 3 && !intra::in) {
       dialog::addBoolItem(XLAT("become a portal map"), intra::in, 'm');
       dialog::add_action_push(intra::become_menu);

@@ -6,7 +6,7 @@ EX namespace intra {
 
 EX bool in;
 
-#if CAP_RAY && MAXMDIM >= 4
+#if CAP_PORTALS
 #if HDR
 /** information per every space connected with intra-portals */
 struct intra_data {
