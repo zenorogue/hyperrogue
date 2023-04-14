@@ -4,7 +4,7 @@
 
 #include "rogueviz.h"
 
-#if CAP_RAY
+#if CAP_PORTALS
 
 /** 
 

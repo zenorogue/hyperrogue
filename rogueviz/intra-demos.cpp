@@ -8,7 +8,7 @@
 
 namespace hr {
 
-#if CAP_RAY && MAXMDIM >= 4
+#if CAP_PORTALS
 namespace intraf {
 
 using namespace intra;

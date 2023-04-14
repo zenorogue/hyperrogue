@@ -66,7 +66,7 @@
 #include "highdim-demo.cpp"
 #include "horo63.cpp"
 #include "platformer.cpp"
-#if CAP_RAY && MAXMDIM >= 4
+#if CAP_PORTALS
 #include "intra-demos.cpp"
 #endif
 #include "gobot.cpp"
