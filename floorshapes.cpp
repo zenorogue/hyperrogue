@@ -1084,7 +1084,6 @@ int hrmap_standard::shvid(cell *c) {
       cgi.crossf = cgi.tessf;
       
       cgi.require_shapes();
-      println(hlog, "generating floorshapes for ", t);
       cgi.generate_floorshapes_for(t, &model, 0, 0);
       cgi.finishshape();
       cgi.extra_vertices();
