@@ -1341,8 +1341,10 @@ EX void actDraw() {
   physics();
   drawRugScene();
   
+  #if CAP_HOLDKEYS
   double alpha = (ticks - lastticks) / 1000.0;
   lastticks = ticks;
+  #endif
 
   #if CAP_HOLDKEYS
   const Uint8 *keystate = SDL12_GetKeyState(NULL);
