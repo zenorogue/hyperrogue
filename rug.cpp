@@ -870,7 +870,11 @@ bincode get_bincode(hyperpoint h) {
     case gcHyperbolic:
       return acd_bin(hypot_d(3, h));
     case gcSphere: {
+      #if MAXMDIM >= 4
       return acd_bin(h[0]) + acd_bin(h[1]) * sY + acd_bin(h[2]) * sZ + acd_bin(h[3]) * sT;
+      #else
+      return 0;
+      #endif
       }
     }
   return 0;

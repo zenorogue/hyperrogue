@@ -642,7 +642,9 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
         /* x wanes as z grows! */
         }
       hyperpoint S = lie_log_correct(H_orig, H);
+      #if MAXMDIM >= 4
       S[3] = 1;
+      #endif
       S = lp_apply(S);
       if(hyperbolic) {
         models::apply_orientation(ret[1], ret[0]);
@@ -652,12 +654,14 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       return;
       }
 
+    #if MAXMDIM >= 4
     case mdRelPerspective: {
       auto S = rel_log(H_orig, true); S[3] = 1;
       S = lp_apply(S);
       apply_perspective(S, ret);
       return;
       }
+    #endif
 
     case mdPixel:
       ret = H / current_display->radius;
@@ -912,6 +916,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       break;
       }
 
+    #if MAXMDIM >= 4
     case mdRelOrthogonal: {
 
       ret = rel_log(H_orig, true);
@@ -921,6 +926,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       if(!vrhr::rendering()) ret = lp_apply(ret);
       break;
       }
+    #endif
 
     case mdHemisphere: {
   
@@ -2542,6 +2548,7 @@ EX void draw_model_elements() {
   dynamicval<ld> lw(vid.linewidth, vid.linewidth * vid.multiplier_ring);
   switch(pmodel) {
   
+    #if MAXMDIM >= 4
     case mdRelOrthogonal:
     case mdRelPerspective: {
       constexpr ld cc = 3;
@@ -2565,6 +2572,7 @@ EX void draw_model_elements() {
         }
       return;
       }
+    #endif
 
     case mdRotatedHyperboles: {
       queuestr(current_display->xcenter, current_display->ycenter + current_display->radius * pconf.alpha, 0, vid.fsize, "X", ringcolor, 1, 8);
@@ -3299,6 +3307,7 @@ EX shiftpoint lie_exp(hyperpoint h1) {
 /** Compute the Lie logarithm in SL(2,R), which corresponds to a geodesic in AdS; or a geodesic in de Sitter space.
  **/
 
+#if MAXMDIM >= 4
 EX hyperpoint rel_log(shiftpoint h, bool relativistic_length) {
   if(sl2) {
     optimize_shift(h);
@@ -3341,6 +3350,7 @@ EX hyperpoint rel_log(shiftpoint h, bool relativistic_length) {
     }
   throw hr_exception("rel_log in wrong geometry");
   }
+#endif
 
 /** Is Lie movement available? Depends on map geometry, not ambient geometry. */
 EX bool lie_movement_available() {
@@ -3351,7 +3361,9 @@ EX bool lie_movement_available() {
 
 EX hyperpoint lie_log(const shiftpoint h1) {
   hyperpoint h = unshift(h1);
-  if(nil) {
+  if(0) ;
+  #if MAXMDIM >= 4
+  else if(nil) {
     h[3] = 0;
     h[2] -= h[0] * h[1] / 2;
     }
@@ -3380,6 +3392,10 @@ EX hyperpoint lie_log(const shiftpoint h1) {
       h[1] *= z / (exp(+z) - 1);
       }
     }
+  else if(sl2) {
+    return rel_log(h1, false);
+    }
+  #endif
   else if(euclid) {
     h[LDIM] = 0;
     }
@@ -3388,9 +3404,6 @@ EX hyperpoint lie_log(const shiftpoint h1) {
     if(abs(h[0]) > 1e-6)
       for(int i=1; i<LDIM; i++)
         h[i] *= h[0] / (exp(h[0])-1);
-    }
-  else if(sl2) {
-    return rel_log(h1, false);
     }
   else {
     /* not implemented */
