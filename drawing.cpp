@@ -168,35 +168,40 @@ EX int texts_merged;
 EX int shapes_merged;
 
 #if MINIMIZE_GL_CALLS
-color_t triangle_color, line_color;
+PPR lprio;
 ld m_shift;
-vector<glvertex> triangle_vertices;
-vector<glvertex> line_vertices;
+vector<glhr::colored_vertex> triangle_vertices;
+vector<glhr::colored_vertex> line_vertices;
 #endif
 
 EX void glflush() {
   DEBBI(DF_GRAPH, ("glflush"));
   #if MINIMIZE_GL_CALLS
-  current_display->set_all(0, m_shift);
   if(isize(triangle_vertices)) {
-    // printf("%08X %08X | %d shapes, %d/%d vertices\n", triangle_color, line_color, shapes_merged, isize(triangle_vertices), isize(line_vertices));
-    if(triangle_color) {
+    // printf("%3d | %d shapes, %d/%d vertices\n", lprio, shapes_merged, isize(triangle_vertices), isize(line_vertices));
+    current_display->next_shader_flags = GF_VARCOLOR;
+    current_display->set_all(0, m_shift);
+    if(true) {
       glhr::be_nontextured();
       glapplymatrix(Id);
       glhr::current_vertices = NULL;
-      glhr::vertices(triangle_vertices);
-      glhr::color2(triangle_color);
+      glhr::prepare(triangle_vertices);
+      glhr::color2(0xFFFFFFFF);
       glDrawArrays(GL_TRIANGLES, 0, isize(triangle_vertices));
       }
     triangle_vertices.clear();
+    if(isize(line_vertices)) goto jump;
     }
   if(isize(line_vertices)) {
-    if(line_color) {
+    current_display->next_shader_flags = GF_VARCOLOR;
+    current_display->set_all(0, m_shift);
+    jump:
+    if(true) {
       glhr::be_nontextured();
       glapplymatrix(Id);
       glhr::current_vertices = NULL;
-      glhr::vertices(line_vertices);
-      glhr::color2(line_color);
+      glhr::prepare(line_vertices);
+      glhr::color2(0xFFFFFFFF);
       glDrawArrays(GL_LINES, 0, isize(line_vertices));
       }
     line_vertices.clear();
@@ -650,25 +655,30 @@ void dqi_poly::gldraw() {
   
 #if MINIMIZE_GL_CALLS  
   if(current_display->stereo_active() == 0 && !tinf && (color == 0 || ((flags & (POLY_VCONVEX | POLY_CCONVEX)) && !(flags & (POLY_INVERSE | POLY_FORCE_INVERTED))))) {
-    if(color != triangle_color || outline != line_color || texts_merged || m_shift != V.shift) {
+    if(lprio != prio || texts_merged || m_shift != V.shift) {
       glflush();
-      triangle_color = color;
-      line_color = outline;
+      lprio = prio;
       m_shift = V.shift;
       }
     shapes_merged++;
 
     if((flags & POLY_CCONVEX) && !(flags & POLY_VCONVEX)) {
-      vector<glvertex> v2(cnt+1);
-      for(int i=0; i<cnt+1; i++) v2[i] = glhr::pointtogl( V.T * glhr::gltopoint( v[offset+i-1] ) );
+      vector<glhr::colored_vertex> v2(cnt+1);
+      for(int i=0; i<cnt+1; i++) v2[i] = glhr::colored_vertex( V.T * glhr::gltopoint( v[offset+i-1] ), color);
       if(color) for(int i=0; i<cnt; i++) triangle_vertices.push_back(v2[0]), triangle_vertices.push_back(v2[i]), triangle_vertices.push_back(v2[i+1]);
-      for(int i=1; i<cnt; i++) line_vertices.push_back(v2[i]), line_vertices.push_back(v2[i+1]);
+      if(outline) {
+        for(auto& v: v2) v.set_color(outline);
+        for(int i=1; i<cnt; i++) line_vertices.push_back(v2[i]), line_vertices.push_back(v2[i+1]);
+        }
       }
     else {
-      vector<glvertex> v2(cnt);
-      for(int i=0; i<cnt; i++) v2[i] = glhr::pointtogl( V.T * glhr::gltopoint( v[offset+i] ) );
+      vector<glhr::colored_vertex> v2(cnt);
+      for(int i=0; i<cnt; i++) v2[i] = glhr::colored_vertex( V.T * glhr::gltopoint( v[offset+i] ), color);
       if(color) for(int i=2; i<cnt-1; i++) triangle_vertices.push_back(v2[0]), triangle_vertices.push_back(v2[i-1]), triangle_vertices.push_back(v2[i]);
-      for(int i=1; i<cnt; i++) line_vertices.push_back(v2[i-1]), line_vertices.push_back(v2[i]);
+      if(outline) {
+        for(auto& v: v2) v.set_color(outline);
+        for(int i=1; i<cnt; i++) line_vertices.push_back(v2[i-1]), line_vertices.push_back(v2[i]);
+        }
       }
     return;
     }
