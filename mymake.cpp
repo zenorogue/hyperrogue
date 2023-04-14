@@ -122,11 +122,12 @@ void set_mingw64_cross() {
 
 void set_web() {
   preprocessor = "/usr/lib/emscripten/em++ -E";
-  compiler = "/usr/lib/emscripten/em++ -c";
+  compiler = "/usr/lib/emscripten/em++ -c -Wno-invalid-offsetof";
   default_standard = standard = " -std=c++17";
   opts = "-DISWEB=1";
   linker = 
-    "/usr/lib/emscripten/em++ -s USE_ZLIB=1 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 -s TOTAL_MEMORY=512MB "
+    "/usr/lib/emscripten/em++ -O2 -s USE_ZLIB=1 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 -s TOTAL_MEMORY=512MB "
+    "-s STACK_SIZE=1048576 "
     "-s EXTRA_EXPORTED_RUNTIME_METHODS='[\"FS\",\"ccall\"]' "
     "-s EXPORTED_FUNCTIONS=\"['_main', '_use_file']\" "
     "-s DISABLE_EXCEPTION_CATCHING=0";
@@ -371,7 +372,7 @@ int main(int argc, char **argv) {
       }
     }
   
-  if(sdlver) modules.push_back("savepng");
+  if(sdlver && os != "web") modules.push_back("savepng");
 
   if(get_file_time(obj_dir + "/hyper.o") < get_file_time("hyper.cpp")) {
     if(!quiet) printf("compiling hyper...\n");
