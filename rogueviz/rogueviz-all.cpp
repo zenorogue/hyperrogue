@@ -3,7 +3,9 @@
 /* basics */
 #include "rogueviz.cpp"
 #include "presentation.cpp"
+#if CAP_MODELS
 #include "objmodels.cpp"
+#endif
 #include "smoothcam.cpp"
 
 #include "staircase.cpp"
@@ -44,7 +46,9 @@
 #include "weirdmaze.cpp"
 
 #include "inner-maps.cpp"
+#if CAP_TEXTURE
 #include "planets.cpp"
+#endif
 #include "hyperbolic-analogs.cpp"
 
 #define RV_ALL

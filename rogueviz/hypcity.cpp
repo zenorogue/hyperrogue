@@ -15,6 +15,7 @@
 //  add -PM 0 -alpha 1
 
 namespace hr {
+#if CAP_MODELS
 namespace hypcity {
 
 using namespace rogueviz::objmodels;
@@ -165,4 +166,6 @@ auto hypcity_ah = arg::add3("-hypcity", enable)
     cb(XLAT("non-Euclidean city"), &hypcity_slides[0], 'c');
     });
 
-}}
+}
+#endif
+}

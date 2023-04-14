@@ -8,6 +8,7 @@
 
 namespace hr {
 
+#if CAP_RAY && MAXMDIM >= 4
 namespace intraf {
 
 using namespace intra;
@@ -629,5 +630,5 @@ auto hooks =
       {loader{"run this visualization", 'r', load("solv-h3-scene.lev", 0.05, 3000)}});
     }));
 }
-
+#endif
 }

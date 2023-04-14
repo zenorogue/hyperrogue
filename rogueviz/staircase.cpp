@@ -219,7 +219,9 @@ void draw_staircase() {
   p.offset = 0;
   p.offset_texture = 0;
   p.tinf = &tinf;
+  #if CAP_TEXTURE
   tinf.texture_id = tdata.textureid;
+  #endif
   }
 
 void enable_hooks() {

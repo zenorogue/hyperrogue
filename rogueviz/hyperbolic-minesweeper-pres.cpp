@@ -5,7 +5,7 @@
 #include "dynamic-wfc.cpp"
 
 namespace hr {
-
+#if CAP_RVSLIDES
 cell* starter;
 
 void geom_euc_rec() {
@@ -966,7 +966,7 @@ int phooks =
   addHook_slideshows(100, [] (tour::ss::slideshow_callback cb) {
     cb(XLAT("Hyperbolic Minesweeper is in P"), &sweeper_slides[0], 'h');
     });
- 
+#endif 
 }
 
 // kolor zmienic dziada

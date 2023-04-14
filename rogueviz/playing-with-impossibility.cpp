@@ -6,6 +6,7 @@
 
 namespace rogueviz {
 
+#if CAP_MODELS
 #ifndef RV_ALL
 namespace cylon {
   extern void enable();
@@ -1306,7 +1307,7 @@ int phooks =
     });
  
 }
-
+#endif
 }
 
 // kolor zmienic dziada

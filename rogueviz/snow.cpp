@@ -20,6 +20,7 @@ namespace rogueviz {
 
 namespace snow {
 
+#if CAP_MODELS
 using rogueviz::objmodels::model;
 using rogueviz::objmodels::tf_result;
 
@@ -31,6 +32,7 @@ struct snowmodel : model {
   };
 
 vector<snowmodel> models;
+#endif
 
 ld snow_lambda = 0;
 
@@ -162,17 +164,20 @@ bool draw_snow(cell *c, const shiftmatrix& V) {
       snowball b{just_centered ? Id : random_snow_matrix(c), 0, -1, snow_color};
       if(random_colors)
         b.color = (hrand(0x1000000) << 8) | 0x808080FF;
+      #if CAP_MODELS
       if(isize(models)) {
         b.model_id = hrand(isize(models));
         if(single_objects)
           b.object_id = hrand(isize(models[b.model_id].get().objindex)-1);
         }
+      #endif
       v.emplace_back(b);
       }
     }
   
   poly_outline = 0xFF;
   for(auto& T: snowballs_at[c]) {
+    #if CAP_MODELS
     if(models.size()) {
      if(T.object_id == -1)
         models[T.model_id].render(V*T.T);
@@ -184,7 +189,9 @@ bool draw_snow(cell *c, const shiftmatrix& V) {
           }
         }
       }
-    else {
+    else 
+    #endif
+    {
       auto& p = queuepoly(V * T.T, shapeid(snow_shape), T.color);
       if(!snow_texture) p.tinf = nullptr;
       if(snow_intense) p.flags |= POLY_INTENSE;
@@ -285,6 +292,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
   else if(argis("-snow-glitch")) {
     snow_test = true;
     }
+  #if CAP_MODELS
   else if(argis("-use-model")) {
     shift(); string s = args();
     shift(); ld scale = argf();
@@ -296,6 +304,7 @@ auto hchook = addHook(hooks_drawcell, 100, draw_snow)
       s = "/" + s;
       }
     }
+  #endif
   else return 1;
   return 0;
   })

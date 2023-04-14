@@ -86,8 +86,8 @@ void make_texture() {
     }
   
   tdata.loadTextureGL();
-  #endif
   rug::alternate_texture = tdata.textureid;
+  #endif
   }
 
 void create_model();

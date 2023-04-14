@@ -3,7 +3,7 @@
 #include "rogueviz.h"
 
 namespace rogueviz {
-
+#if CAP_MODELS
 namespace objmodels {
 
 bool scan(fhstream& hs, char& c) { return fscanf(hs.f, "%c", &c) == 1; }
@@ -330,4 +330,5 @@ auto cf = addHook(hooks_configfile, 100, [] {
   });
 
 }
+#endif
 }

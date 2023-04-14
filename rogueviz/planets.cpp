@@ -2,6 +2,7 @@
 
 namespace hr {
 
+#if CAP_TEXTURE
 namespace planets {
 
 texture::texture_data earth, neptune, mars, moon, sun;
@@ -544,5 +545,6 @@ auto msc =
       });
 
 }
+#endif
 }
 

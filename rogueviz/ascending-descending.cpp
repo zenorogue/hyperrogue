@@ -2,6 +2,7 @@
 
 namespace hr {
 
+#if CAP_MODELS
 namespace ply {
 
 using namespace rogueviz::objmodels;
@@ -296,4 +297,5 @@ auto plyhook =
     });
 
 }
+#endif
 }

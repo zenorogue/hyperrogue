@@ -8,6 +8,7 @@ bool alone = true;
 
 bool in_special = false;
 
+#if CAP_RVSLIDES
 auto geoslide(eGeometry g, char canvas, int jhole, int jblock) {
   using namespace tour;
   return [=] (presmode mode) {
@@ -85,9 +86,11 @@ auto geoslide(eGeometry g, char canvas, int jhole, int jblock) {
       }
     };
   }
+#endif
 
 string cap = "honeycombs/";
 
+#if CAP_RVSLIDES
 void honey(string s, vector<tour::slide>& v) {
   if(s != "noniso") return;
   using namespace tour;
@@ -148,6 +151,7 @@ void honey(string s, vector<tour::slide>& v) {
       });
 
   }
+#endif
 
 #if CAP_RVSLIDES
 vector<tour::slide> noniso_slides;

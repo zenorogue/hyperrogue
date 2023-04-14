@@ -4,7 +4,7 @@
 // run: -analogs
 
 namespace hr {
-
+#if CAP_TEXTURE
 namespace analogs {
 
 patterns::ePattern wp;
@@ -464,5 +464,6 @@ auto msc = arg::add3("-analogs", enable)
       });
 
 }
+#endif
 }
 

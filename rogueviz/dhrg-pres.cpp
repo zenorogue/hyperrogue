@@ -3,7 +3,7 @@
 #include "rogueviz.h"
 
 #define RVPATH HYPERPATH "rogueviz/"
-
+#if CAP_RVPRES
 namespace dhrg {
   void graphv(std::string s);
   extern double graph_R;
@@ -749,3 +749,4 @@ int dhrg_phooks =
     });
  
 }
+#endif

@@ -14,6 +14,10 @@
 #define CAP_RVSLIDES (CAP_TOUR && !ISWEB)
 #endif
 
+#ifndef CAP_MODELS
+#define CAP_MODELS (!ISWEB)
+#endif
+
 namespace rogueviz {
   using namespace hr;
   
@@ -366,6 +370,10 @@ namespace objmodels {
     Res res = 0;
     for(Res r: results) res += r;
     return res;
+    }
+  #else
+  template<class T> auto parallelize(long long N, T action) -> decltype(action(0,0)) {
+    return action(0, N);
     }
   #endif
 
