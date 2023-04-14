@@ -1273,11 +1273,13 @@ EX namespace dice {
       dynamicval<eGeometry> g(geometry, gSphere);
       hyperpoint de = direct_exp(log_shift);
       S = rgpushxto0(de);
+      #if MAXMDIM >= 4
       if(GDIM == 3) {
-        for(int i=0; i<4; i++) swap(S[i][2], S[i][3]);
-        for(int i=0; i<4; i++) swap(S[2][i], S[3][i]);
+        for(int i=0; i<MAXMDIM; i++) swap(S[i][2], S[i][3]);
+        for(int i=0; i<MAXMDIM; i++) swap(S[2][i], S[3][i]);
         }
-      for(int i=0; i<4; i++) S[i][1] *= -1;
+      #endif
+      for(int i=0; i<MAXMDIM; i++) S[i][1] *= -1;
       }
     
     add_to_queue(S, val);
@@ -1348,13 +1350,19 @@ EX namespace dice {
       auto sphere_to_space = [&] (hyperpoint h) {
         if(fpp) return h;
         if(osphere) {
-          h[2] = 1 - h[2]; h[3] = 0;
+          h[2] = 1 - h[2];
+          #if MAXMDIM > 3
+          h[3] = 0;
+          #endif
           return h;
           }
         if(oeuclid) { h[2] = 1-h[2]; return h; }
         ld z = asin_auto(h[2]);
         h = zpush(-z) * h;
-        h[2] = h[3]; h[3] = 0;
+        #if MAXMDIM > 3
+        h[2] = h[3];
+        h[3] = 0;
+        #endif
         dynamicval<eGeometry> g(geometry, orig);
         return orthogonal_move(h, z);
         };
