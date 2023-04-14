@@ -959,7 +959,7 @@ void embedding_method::prepare_lta() {
   intermediate_to_logical_scaled = inverse(logical_scaled_to_intermediate);
   logical_to_intermediate = get_lti();
   intermediate_to_logical = inverse(logical_to_intermediate);
-  if(MDIM == 3) {
+  if(MDIM == 3 && MAXMDIM == 4) {
     // just in case
     for(int i=0; i<4; i++)
       intermediate_to_logical_scaled[i][3] = intermediate_to_logical_scaled[3][i] = intermediate_to_logical[3][i] = intermediate_to_logical[i][3] = i == 3;
@@ -1018,42 +1018,62 @@ EX transmatrix unswap_spin(transmatrix T) {
 
 /** rotate by alpha degrees in the XY plane */
 EX transmatrix spin(ld alpha) {
+  #if MAXMDIM == 3
+  return cspin(0, 1, alpha);
+  #else
   if(cgi.emb->no_spin()) return Id;
   return cgi.emb->logical_scaled_to_intermediate * cspin(0, 1, alpha) * cgi.emb->intermediate_to_logical_scaled;
+  #endif
   }
 
 /** rotate by 90 degrees in the XY plane */
 EX transmatrix spin90() {
+  #if MAXMDIM == 3
+  return cspin90(0, 1);
+  #else
   if(cgi.emb->no_spin()) return Id;
   return cgi.emb->logical_scaled_to_intermediate * cspin90(0, 1) * cgi.emb->intermediate_to_logical_scaled;
+  #endif
   }
 
 /** rotate by 180 degrees in the XY plane */
 EX transmatrix spin180() {
+  #if MAXMDIM == 3
+  return cspin180(0, 1);
+  #else
   if(cgi.emb->no_spin()) return Id;
   return cgi.emb->logical_scaled_to_intermediate * cspin180(0, 1) * cgi.emb->intermediate_to_logical_scaled;
+  #endif
   }
 
 /** rotate by 270 degrees in the XY plane */
 EX transmatrix spin270() {
+  #if MAXMDIM == 3
+  return cspin90(1, 0);
+  #else
   if(cgi.emb->no_spin()) return Id;
   return cgi.emb->logical_scaled_to_intermediate * cspin90(1, 0) * cgi.emb->intermediate_to_logical_scaled;
+  #endif
   }
 
 EX transmatrix lzpush(ld z) {
+  #if MAXMDIM >= 4
   auto &lti = cgi.emb->logical_scaled_to_intermediate;
   if(lti[0][2]) return cpush(0, lti[0][2] * z);
   if(lti[1][2]) return cpush(1, lti[1][2] * z);
+  #endif
   return cpush(2, z);
   }
 
 EX transmatrix lxpush(ld alpha) {
+  #if MAXMDIM >= 4
   if(embedded_plane) {
     geom3::light_flip(true);
     auto t = cpush(0, alpha);
     geom3::light_flip(false);
     return cgi.emb->base_to_actual(t);
     }
+  #endif
   return cpush(0, alpha);
   }
 
