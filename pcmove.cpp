@@ -634,6 +634,7 @@ bool pcmove::actual_move() {
 
   mi = movei(cwt.at, d);
   cell *& c2 = mi.t;
+  if(c2 == &out_of_bounds) return false;
   good_tortoise = c2->monst == moTortoise && tortoise::seek() && !tortoise::diff(tortoise::getb(c2)) && !c2->item;
   
   if(items[itOrbGravity]) {

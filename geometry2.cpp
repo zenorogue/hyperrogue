@@ -278,6 +278,7 @@ void virtualRebase_cell(cell*& base, T& at, const U& check) {
   while(true) {
     cell *newbase = NULL;
     forCellIdCM(c2, i, base) {
+      if(c2 == &out_of_bounds) continue;
       transmatrix V2 = currentmap->iadj(base, i);
       T cand_at = V2 * at;
       horo_distance newz(check(cand_at));
