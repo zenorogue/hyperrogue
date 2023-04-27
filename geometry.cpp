@@ -1106,7 +1106,7 @@ EX namespace geom3 {
     if(vid.always3) swapdim(-1);
     vid.always3 = !vid.always3;
     apply_always3();
-    check_cgi(); cgi.prepare_basics();
+    check_cgi(); cgi.require_basics();
     if(vid.always3) swapdim(+1);
     }
   #endif

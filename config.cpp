@@ -1462,7 +1462,7 @@ EX void loadConfig() {
   geom3::apply_always3();
   polygonal::solve();
   check_cgi();
-  cgi.prepare_basics();
+  cgi.require_basics();
   }
 #endif
 

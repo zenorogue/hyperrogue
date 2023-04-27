@@ -633,7 +633,7 @@ EX void make_air() {
     geom3::apply_always3();
     check_cgi();
     missing = !(cgi.state & 2);
-    cgi.prepare_basics();
+    cgi.require_basics();
     geom3::swap_direction = -1;
     if(missing) {
       swap(cgi.emb, cgi1->emb);

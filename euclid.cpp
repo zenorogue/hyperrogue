@@ -142,7 +142,7 @@ EX namespace euc {
     map<gp::loc, struct cdata> eucdata;
     
     void compute_tmatrix() {
-      cgi.prepare_basics();
+      cgi.require_basics();
       shifttable = get_shifttable();
       tmatrix.resize(S7);
       for(int i=0; i<S7; i++) tmatrix[i] = eumove(shifttable[i]);

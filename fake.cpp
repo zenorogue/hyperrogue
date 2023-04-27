@@ -686,7 +686,7 @@ EX void change_around() {
 
     /* to compute scale */
     if(WDIM == 2)
-      cgi.prepare_basics();
+      cgi.require_basics();
     }
 
   t = scale / t;
