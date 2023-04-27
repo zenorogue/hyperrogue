@@ -782,6 +782,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
   #endif
   }
 
+EX hookset<bool(cell*)> hooks_floorshapes;
+
 void geometry_information::generate_floorshapes() {
 
   DEBBI(DF_POLY, ("generate_floorshapes"));
@@ -804,7 +806,9 @@ void geometry_information::generate_floorshapes() {
 
   model.type = modelh.type = S7;
 
-  if(WDIM == 3) ;
+  if(callhandlers(false, hooks_floorshapes, &model)) ;
+
+  else if(WDIM == 3) ;
   
   #if CAP_IRR
   else if(IRREGULAR) {
