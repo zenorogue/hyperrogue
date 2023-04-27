@@ -347,7 +347,7 @@ EX void be_euclidean_infinity(transmatrix& V) {
     for(int i=0; i<3; i++) V[i][3] = 0;
   }
 
-void draw_star(const shiftmatrix& V, const hpcshape& sh, color_t col, ld rev = false) {
+EX void draw_star(const shiftmatrix& V, const hpcshape& sh, color_t col, ld rev IS(false)) {
   if(!do_draw_stars(rev)) return;
 
   ld val = cgi.STAR;
@@ -368,10 +368,18 @@ EX bool star_for(int i) {
   return stars[i] < star_prob;
   }
 
+EX hookset<bool(celldrawer *cd)> hooks_ceiling;
+
+EX void g_add_to_sky(cell *c, shiftmatrix& V, color_t col, color_t col2) {
+  if(sky) sky->sky.emplace_back(c, V, col, col2);
+  };
+
 void celldrawer::draw_ceiling() {
 
   if(!models::is_perspective(pmodel) || sphere) return;
   
+  if(callhandlers(false, hooks_ceiling, this)) return;
+
   auto add_to_sky = [this] (color_t col, color_t col2) {
     if(sky) sky->sky.emplace_back(c, V, col, col2);
     };
