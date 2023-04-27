@@ -261,8 +261,11 @@ EX namespace euc {
         bool draw = drawcell_subs(c, V * spin(master_to_c7_angle()));
         if(in_wallopt() && isWall3(c) && isize(dq::drawqueue) > 1000 && !hybrid::pmap) continue;
   
-        if(draw) for(int i=0; i<S7; i++)
-          dq::enqueue_by_matrix(h->move(i), optimized_shift(V * adj(h, i)));
+        if(draw) for(int i=0; i<S7; i++) {
+          auto V1 = V * adj(h, i);
+          if(geom3::apply_break_cylinder && cgi.emb->break_cylinder(V, V1)) continue;
+          dq::enqueue_by_matrix(h->move(i), optimized_shift(V1));
+          }
         }
       }
     

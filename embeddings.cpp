@@ -102,6 +102,7 @@ EX namespace geom3 {
   EX bool auto_configure = true;
   EX bool flat_embedding = false;
   EX bool inverted_embedding = false;
+  EX bool apply_break_cylinder = true;
 
   EX ld euclid_embed_scale_mean() { return euclid_embed_scale * sqrt(euclid_embed_scale_y); }
   EX void set_euclid_embed_scale(ld x) { euclid_embed_scale = x; euclid_embed_scale_y = 1; euclid_embed_rotate = 0; }
@@ -302,6 +303,9 @@ EX }
     void prepare_lta();
     void auto_configure();
     virtual ~embedding_method() {}
+
+    /* should we break cylinder between M1 and M2 */
+    virtual bool break_cylinder(const shiftmatrix& M1, const shiftmatrix& M2) { return false; }
     };
 
   #endif
@@ -775,6 +779,12 @@ struct emb_euc_in_sl2 : emb_euclid_noniso {
   transmatrix get_lsti() override { return cspin90(2, 1); }
   };
 
+bool break_dims(const shiftmatrix& M1, const shiftmatrix& M2, int i, int j) {
+  transmatrix uM1 = current_display->radar_transform * unshift(M1);
+  transmatrix uM2 = current_display->radar_transform * unshift(M2);
+  return uM1[j][j] < 0 && uM2[j][j] < 0 && uM1[i][j] * uM2[i][j] < 0;
+  }
+
 /* for both seCylinderH and seCylinderE. Possibly actually works for CliffordTorus too */
 struct emb_euc_cylinder : emb_euclid_noniso {
   bool is_cylinder() override { return true; }
@@ -791,6 +801,7 @@ struct emb_euc_cylinder : emb_euclid_noniso {
   transmatrix intermediate_to_actual_translation(hyperpoint i) override {
     return xpush(i[0]) * cspin(1, 2, i[1]) * zpush(i[2]);
     }
+  bool break_cylinder(const shiftmatrix& M1, const shiftmatrix& M2) override { return break_dims(M1, M2, 1, 2); }
   };
 
 struct emb_euc_cylinder_he : emb_euc_cylinder {
@@ -806,6 +817,7 @@ struct emb_euc_cylinder_he : emb_euc_cylinder {
   transmatrix intermediate_to_actual_translation(hyperpoint i) override {
     return zpush(i[2]) * cspin(1, 0, i[1]) * xpush(i[0]);
     }
+  bool break_cylinder(const shiftmatrix& M1, const shiftmatrix& M2) override { return break_dims(M1, M2, 1, 0); }
   };
 
 struct emb_euc_cylinder_twisted : emb_euc_cylinder {
@@ -830,6 +842,7 @@ struct emb_euc_cylinder_nil : emb_euc_cylinder_twisted {
   transmatrix intermediate_to_actual_translation(hyperpoint i) override {
     return zpush(i[2]) * cspin(1, 0, i[1]) * xpush(i[0]);
     }
+  bool break_cylinder(const shiftmatrix& M1, const shiftmatrix& M2) override { return break_dims(M1, M2, 1, 0); }
   };
 
 struct emb_euc_cylinder_horo : emb_euc_cylinder {
@@ -848,6 +861,7 @@ struct emb_euc_cylinder_horo : emb_euc_cylinder {
   transmatrix get_lsti() override {
     return cspin90(0, 2);
     }
+  bool break_cylinder(const shiftmatrix& M1, const shiftmatrix& M2) override { return false; }
   };
 
 struct emb_euc_cylinder_sl2 : emb_euc_cylinder_twisted {
@@ -864,6 +878,7 @@ struct emb_euc_cylinder_sl2 : emb_euc_cylinder_twisted {
   transmatrix intermediate_to_actual_translation(hyperpoint i) override {
     return cspin(2, 3, i[2]) * cspin(0, 1, i[2] + i[1]) * xpush(i[0]);
     }
+  bool break_cylinder(const shiftmatrix& M1, const shiftmatrix& M2) override { return break_dims(M1, M2, 0, 1); }
   };
 
 /** Clifford torus */
@@ -882,6 +897,7 @@ struct emb_euc_in_sph : emb_euclid_noniso {
   transmatrix intermediate_to_actual_translation(hyperpoint i) override {
     return cspin(0, 2, i[0]) * cspin(1, 3, i[1]) * cspin(2, 3, i[2]);
     }
+  bool break_cylinder(const shiftmatrix& M1, const shiftmatrix& M2) override { return break_dims(M1, M2, 0, 2) || break_dims(M1, M2, 1, 3); }
   };
 
 /* todo model change */
