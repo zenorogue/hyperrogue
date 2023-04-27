@@ -1045,10 +1045,10 @@ EX namespace geom3 {
       slev = vid.rock_wall_ratio * wh / 3;
       for(int s=0; s<=3; s++)
         SLEV[s] = lev_to_factor(vid.rock_wall_ratio * wh * s/3);
-      LAKE = lev_to_factor(sgn * wh * -vid.lake_top);
-      SHALLOW = lev_to_factor(sgn * wh * -vid.lake_shallow);
-      HELLSPIKE = lev_to_factor(sgn * -(vid.lake_top+vid.lake_bottom)/2);
-      BOTTOM = lev_to_factor(sgn * -vid.lake_bottom);
+      LAKE = lev_to_factor(wh * -vid.lake_top);
+      SHALLOW = lev_to_factor(wh * -vid.lake_shallow);
+      HELLSPIKE = lev_to_factor(wh * -(vid.lake_top+vid.lake_bottom)/2);
+      BOTTOM = lev_to_factor(wh * -vid.lake_bottom);
       LOWSKY = lev_to_factor(vid.lowsky_height * wh);
       HIGH = lev_to_factor(vid.wall_height2 * wh);
       HIGH2 = lev_to_factor(vid.wall_height3 * wh);
