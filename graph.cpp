@@ -3771,6 +3771,14 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const shiftmatrix& V, color_t
     if(currentmap->strict_tree_rules()) {
       i = rulegen::get_arb_dir(c, i);
       }
+    if(sidepar >= SIDEPARS) {
+      println(hlog, "ERROR: sidepar >= SIDEPARS", make_pair(sidepar, SIDEPARS));
+      return false;
+      }
+    if(i >= isize(qfi.fshape->gpside[sidepar])) {
+      println(hlog, "ERROR: i >= gpside[sidepar]", make_tuple(sidepar, i, isize(qfi.fshape->gpside[sidepar])));
+      return false;
+      }
     draw_shapevec(c, V2, qfi.fshape->gpside[sidepar][i], col, prio);
     return false;
     }
