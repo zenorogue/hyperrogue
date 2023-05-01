@@ -388,7 +388,7 @@ EX void g_add_to_sky(cell *c, shiftmatrix& V, color_t col, color_t col2) {
 
 void celldrawer::draw_ceiling() {
 
-  if(!models::is_perspective(pmodel) || sphere) return;
+  if(!models::is_perspective(pmodel)) return;
   
   if(callhandlers(false, hooks_ceiling, this)) return;
 
