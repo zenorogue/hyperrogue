@@ -519,7 +519,7 @@ struct emb_same_in_same : emb_actual {
   transmatrix actual_to_base(const transmatrix &T0) override {
     auto T = T0;
     for(int i=0; i<4; i++) T[i][2] = T[i][3], T[i][3] = 0;
-    for(int i=0; i<4; i++) T[2][i] = T[3][i], T[i][3] = 0;
+    for(int i=0; i<4; i++) T[2][i] = T[3][i], T[3][i] = 0;
     T[3][3] = 1;
     fixmatrix(T);
     for(int i=0; i<MDIM; i++) for(int j=0; j<MDIM; j++) if(isnan(T[i][j])) return Id;
