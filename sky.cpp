@@ -118,8 +118,8 @@ void compute_skyvertices(const vector<sky_item>& sky) {
         darkena(si.skycolor, 0, 0xFF)
         );
   
-  hyperpoint skypoint = cpush0(2, cgi.SKY);
-  hyperpoint hellpoint = cpush0(2, cgi.HELL);
+  hyperpoint skypoint = cpush0(2, cgi.SKY + cgi.emb->center_z());
+  hyperpoint hellpoint = cpush0(2, cgi.HELL + cgi.emb->center_z());
   
   vector<glhr::colored_vertex> this_poly;
 
@@ -351,7 +351,8 @@ EX void draw_star(const shiftmatrix& V, const hpcshape& sh, color_t col, ld rev 
   if(!do_draw_stars(rev)) return;
 
   ld val = cgi.STAR;
-  if(rev) val = -val;
+  if(rev) val = cgi.FLOOR * 2 - val;
+  val += cgi.emb->center_z();
 
   auto V1 = V; be_euclidean_infinity(V1.T);
   queuepolyat(V1 * zpush(val), sh, col, PPR::SKY);
