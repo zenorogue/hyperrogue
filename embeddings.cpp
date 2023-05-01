@@ -1215,7 +1215,7 @@ EX void swapmatrix_iview(transmatrix& ori, transmatrix& V) {
   indenter id(2);
   if(geom3::swap_direction == -1) {
     auto& data = mdata[&V];
-    data.logical_coordinates = cgi.emb->intermediate_to_logical * cgi.emb->actual_to_intermediate(V*tile_center());
+    data.logical_coordinates = cgi.emb->intermediate_to_logical * cgi.emb->actual_to_intermediate(V*C0);
     auto tl = cgi.emb->intermediate_to_actual_translation(cgi.emb->logical_to_intermediate * data.logical_coordinates);
     auto itl = inverse(tl);
     data.rotation = itl * V;
@@ -1233,7 +1233,7 @@ EX void swapmatrix_iview(transmatrix& ori, transmatrix& V) {
     auto& data = mdata[&V];
     if(!eqmatrix(data.saved, V)) { swapmatrix(V); ori = Id; return; }
     auto lc = data.logical_coordinates;
-    lc[2] = lerp(cgi.FLOOR, cgi.WALL, lc[2]);
+    lc[2] = lerp(cgi.FLOOR, cgi.WALL, lc[2]) + cgi.emb->center_z();
     V = cgi.emb->intermediate_to_actual_translation( cgi.emb->logical_to_intermediate * lc );
     ori = Id;
     auto rot = data.rotation;
