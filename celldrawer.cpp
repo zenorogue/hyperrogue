@@ -694,10 +694,12 @@ void celldrawer::draw_wall() {
       }
     color_t wcol0 = wcol;
     color_t wcol2 = gradient(0, wcol0, 0, .8, 1);
+    color_t wcol1 = wcol2;
+    if(geometry == gEuclidSquare) wcol1 = gradient(0, wcol0, 0, .9, 1);
     draw_shapevec(c, V, qfi.fshape->levels[SIDE_WALL], darkena(wcol, 0, 0xFF), PPR::WALL);
     forCellIdEx(c2, i, c) 
       if(!highwall(c2) || conegraph(c2) || c2->wall == waClosedGate || fake::split())
-        placeSidewall(c, i, SIDE_WALL, V, darkena(wcol2, fd, 255));
+        placeSidewall(c, i, SIDE_WALL, V, darkena((i&1)?wcol1:wcol2, fd, 255));
 
     draw_wallshadow();
     return;
