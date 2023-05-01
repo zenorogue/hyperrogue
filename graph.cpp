@@ -3754,6 +3754,8 @@ EX bool placeSidewall(cell *c, int i, int sidepar, const shiftmatrix& V, color_t
   else if(sidepar == SIDE_ASHA) prio = PPR::ASHALLOW;
   else if(sidepar == SIDE_BSHA) prio = PPR::BSHALLOW;
   else prio = PPR::REDWALL-2+4*(sidepar-SIDE_SLEV);
+
+  if((col & 255) < 255) prio = PPR::TRANSPARENT_WALL;
   
   if(cgi.emb->is_in_noniso()) {
     draw_shapevec(c, V, qfi.fshape->gpside[sidepar][i], col, prio);
