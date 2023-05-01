@@ -280,6 +280,7 @@ EX }
     virtual bool is_same_in_same() { return false; }
     virtual bool is_sph_in_low() { return false; }
     virtual bool is_hyp_in_solnih() { return false; }
+    virtual bool is_euc_scalable() { return false; }
     virtual bool is_euc_in_hyp() { return false; }
     virtual bool is_euc_in_sph() { return false; }
     virtual bool is_euc_in_nil() { return false; }
@@ -606,9 +607,19 @@ struct emb_product_embedding : emb_actual {
     }
   };
 
+struct emb_euc_scalable : emb_actual {
+  bool is_euc_scalable() override { return true; }
+  transmatrix get_lti() override {
+    transmatrix lti = Id;
+    lti[0][0] *= geom3::euclid_embed_scale;
+    lti[1][1] *= geom3::euclid_embed_scale * geom3::euclid_embed_scale_y;
+    return logical_scaled_to_intermediate * cspin(0, 1, geom3::euclid_embed_rotate * degree) * lti;
+    }
+  };
+
 /** embed Euclidean plane as horosphere */
 
-struct emb_euc_in_hyp : emb_actual {
+struct emb_euc_in_hyp : emb_euc_scalable {
   bool is_euc_in_hyp() override { return true; }
   hyperpoint actual_to_intermediate(hyperpoint a) override { return deparabolic13(a); }
   transmatrix intermediate_to_actual_translation(hyperpoint i) override { return parabolic13_at(i); }
@@ -616,16 +627,18 @@ struct emb_euc_in_hyp : emb_actual {
     geom3::light_flip(true);
     hyperpoint mov = T * C02;
     transmatrix U = gpushxto0(mov) * T;
+    mov = logical_to_intermediate * mov;
     geom3::light_flip(false);
     for(int i=0; i<4; i++) U[i][3] = U[3][i] = i == 3;
     return parabolic13(mov[0], mov[1]) * U;
     }
   hyperpoint base_to_actual(hyperpoint h) override {
+    h = logical_to_intermediate * h;
     h[3] = h[2]; h[2] = 0; return parabolic13(h[0], h[1]) * C0;
     }
   hyperpoint actual_to_base(hyperpoint h) override {
     hyperpoint h1 = deparabolic13(h); h1[2] = 1;
-    return h1;
+    return intermediate_to_logical * h1;
     }
   transmatrix actual_to_base(const transmatrix& T) override { hyperpoint h = deparabolic13(T * C0); return eupush(h[0], h[1]); }
   ld anim_center_z() override { return vid.depth; }
@@ -703,7 +716,7 @@ struct emb_sphere_in_low : emb_actual {
 
 /** abstract class for embeddings of Euclidean plane; these embeddings are not isotropic */
 
-struct emb_euclid_noniso : emb_actual {
+struct emb_euclid_noniso : emb_euc_scalable {
   bool is_euc_in_noniso() override { return true; }
   bool is_in_noniso() override { return true; }
   transmatrix base_to_actual(const transmatrix &T) override {
@@ -722,13 +735,6 @@ struct emb_euclid_noniso : emb_actual {
     return h1;
     }
   transmatrix actual_to_base(const transmatrix& T) override { hyperpoint h = actual_to_base(T * tile_center()); return eupush(h[0], h[1]);  }
-
-  transmatrix get_lti() override {
-    transmatrix lti = Id;
-    lti[0][0] *= geom3::euclid_embed_scale;
-    lti[1][1] *= geom3::euclid_embed_scale * geom3::euclid_embed_scale_y;
-    return logical_scaled_to_intermediate * cspin(0, 1, geom3::euclid_embed_rotate * degree) * lti;
-    }
   };
 
 struct emb_euc_in_product : emb_euclid_noniso {
