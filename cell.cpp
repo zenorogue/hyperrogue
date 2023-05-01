@@ -98,6 +98,7 @@ struct hrmap_standard : hrmap {
   virtual hyperpoint get_corner(cell *c, int cid, ld cf) override;
   virtual transmatrix master_relative(cell *c, bool get_inverse) override;
   virtual bool link_alt(heptagon *h, heptagon *alt, hstate firststate, int dir) override;
+  virtual void on_dim_change();
   };
 
 void clearfrom(heptagon*);
@@ -117,6 +118,11 @@ struct hrmap_hyperbolic : hrmap_standard {
   void virtualRebase(heptagon*& base, transmatrix& at) override;
   };
 #endif
+
+void hrmap_standard::on_dim_change() {
+  for(auto& p: gp::gp_swapped) swapmatrix(gp::gp_adj[p]);
+  gp::gp_swapped.clear();
+  }
 
 double hrmap::spacedist(cell *c, int i) { return hdist(tile_center(), adj(c, i) * tile_center()); }
 
@@ -542,7 +548,11 @@ EX void initcells() {
   DEBB(DF_INIT, ("initcells"));
 
   if(embedded_plane) {
+    geom3::swap_direction = -1;
+    for(auto& m: cgi.heptmove) swapmatrix(m);
     IPF(initcells());
+    geom3::swap_direction = +1;
+    for(auto& m: cgi.heptmove) swapmatrix(m);
     currentmap->on_dim_change();
     return;
     }

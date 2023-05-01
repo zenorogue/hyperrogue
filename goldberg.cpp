@@ -274,6 +274,8 @@ EX namespace gp {
     if(do_adjm) {
       get_adj(wcw.at, wcw.spin) = inverse(wc.adjm) * wc1.adjm;
       get_adj(wcw1.at, wcw1.spin) = inverse(wc1.adjm) * wc.adjm;
+      if(geom3::flipped) gp_swapped.emplace(wcw.at, wcw.spin);
+      if(geom3::flipped) gp_swapped.emplace(wcw1.at, wcw1.spin);
       }
     }
 
@@ -283,6 +285,7 @@ EX namespace gp {
     }
   
   EX map<pair<cell*, int>, transmatrix> gp_adj;
+  EX set<pair<cell*, int>> gp_swapped;
   
   EX transmatrix& get_adj(cell *c, int i) { return gp_adj[make_pair(c,i)]; }
 
