@@ -14,6 +14,7 @@ enum eSkyMode { skyNone, skyAutomatic, skySkybox, skyAlways };
 EX eSkyMode draw_sky;
 
 EX bool auto_remove_roofs;
+EX bool simple_sky;
 
 EX bool camera_over(ld x) {
   if(!auto_remove_roofs) return false;
@@ -24,6 +25,7 @@ EX bool camera_over(ld x) {
 #if MAXMDIM >= 4 && CAP_GL
 
 EX int get_skybrightness(int mul IS(1)) {
+  if(simple_sky) return 255;
   ld s = 1 - mul * (camera_level - cgi.WALL) / -2;
   if(s > 1) return 255;
   if(s < 0) return 0;
@@ -298,7 +300,7 @@ void compute_skyvertices(const vector<sky_item>& sky) {
       }
     }
 
-  for(auto& v: skyvertices) for(int i=0; i<3; i++) v.color[i] *= 2;
+  if(!simple_sky) for(auto& v: skyvertices) for(int i=0; i<3; i++) v.color[i] *= 2;
   }
 
 void dqi_sky::draw() {
@@ -325,9 +327,18 @@ void dqi_sky::draw() {
       glapplymatrix(s);
       }
     glhr::prepare(skyvertices);
-    glhr::set_fogbase(1.0 + abs(cgi.SKY - cgi.LOWSKY) / sightranges[geometry]);
-    glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
-    glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW && prio != PPR::EUCLIDEAN_SKY);
+    glhr::color2(0xFFFFFFFF);
+    if(simple_sky) {
+      glhr::set_fogbase(1);
+      glhr::set_depthtest(true);
+      glhr::set_depthwrite(true);
+      }
+    else {
+      glhr::set_fogbase(1.0 + abs(cgi.SKY - cgi.LOWSKY) / sightranges[geometry]);
+      glhr::set_depthtest(model_needs_depth() && prio < PPR::SUPERLINE);
+      glhr::set_depthwrite(model_needs_depth() && prio != PPR::TRANSPARENT_SHADOW && prio != PPR::EUCLIDEAN_SKY);
+      }
+
     glDrawArrays(GL_TRIANGLES, 0, isize(skyvertices));
     }
   }
