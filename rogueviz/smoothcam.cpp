@@ -124,8 +124,9 @@ void start_segment() {
   auto& anim = anims.back();
   anim.start_cell = centerover;
   anim.start = Id;
-  last_view = Id;
-  current_position = Id;
+  if(det(View) < 0) anim.start = MirrorX * anim.start;
+  last_view = anim.start;
+  current_position = anim.start;
   current_segment = &anim;
   }
 
@@ -470,10 +471,16 @@ void show() {
     animate_on = !animate_on;
     last_time = HUGE_VAL;
     });
-  
+
   if(GDIM == 2) {
     dialog::addItem("centering", 'z');
     dialog::add_action_push(snap_to_center);
+    }
+  else {
+    dialog::addItem("mirror Y view", 'Y');
+    dialog::add_action([] {
+      rotate_view(MirrorY);
+      });
     }
     
   dialog::addHelp();
@@ -631,6 +638,7 @@ void handle_animation(ld t) {
     set_view(pts[0], pts[1], pts[2]);
     c_front_dist = geo_dist(pts[0], pts[1]);
     c_up_dist = geo_dist(pts[0], pts[2]);
+    if(det(last_view_comp) < 0) View = MirrorX * View;
     }
 
   if(vid.fixed_yz) spinEdge_full();
