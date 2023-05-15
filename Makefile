@@ -102,6 +102,10 @@ ifeq (${TOOLCHAIN},mingw)
   CXXFLAGS_EARLY += -Wno-invalid-offsetof
 endif
 
+ifeq (${FONTCONFIG},1)
+  CXXFLAGS_EARLY += -DFONTCONFIG `pkg-config --cflags fontconfig`
+  LDFLAGS_EARLY += `pkg-config --libs fontconfig`
+endif
 
 ## We have now finished OS-specific and TOOLCHAIN-specific computations.
 ## Begin customization points for user-specifiable HYPERROGUE_USE_XXX macros.

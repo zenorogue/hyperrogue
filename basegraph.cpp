@@ -6,6 +6,10 @@
  */
 
 #include "hyper.h"
+#ifdef FONTCONFIG
+#include <fontconfig/fontconfig.h>
+#endif
+
 namespace hr {
 
 #if HDR
@@ -216,12 +220,43 @@ EX void present_screen() {
 
 #if CAP_SDLTTF
 
-EX string fontpath = ISWEB ? "sans-serif" : HYPERFONTPATH "DejaVuSans-Bold.ttf";
+string fontdefault = "DejaVuSans-Bold.ttf";
+EX string fontpath = ISWEB ? "sans-serif" : string(HYPERFONTPATH) + fontdefault;
+
+string findfont() {
+  string answer = fontpath;
+  #ifdef FONTCONFIG
+  if ((answer.length() < fontdefault.length()) || (0 != answer.compare(answer.length() - fontdefault.length(), fontdefault.length(), fontdefault))) {
+    return answer;
+  }
+  FcPattern   *pat;
+  FcResult	result;
+  if (!FcInit()) {
+    return answer;
+  }
+  pat = FcNameParse((FcChar8 *)fontdefault.c_str());
+  FcConfigSubstitute(0, pat, FcMatchPattern);
+  FcDefaultSubstitute(pat);
+
+  FcPattern   *match;
+  match = FcFontMatch(0, pat, &result);
+  if (match) {
+    FcChar8 *file;
+    if (FcPatternGetString(match, FC_FILE, 0, &file) == FcResultMatch) {
+      answer = (const char *)file;
+    }
+    FcPatternDestroy(match);
+  }
+  FcPatternDestroy(pat);
+  FcFini();
+  #endif
+  return answer;
+}
 
 void loadfont(int siz) {
   fix_font_size(siz);
   if(!font[siz]) {
-    font[siz] = TTF_OpenFont(fontpath.c_str(), siz);
+    font[siz] = TTF_OpenFont(findfont().c_str(), siz);
     // Destination set by ./configure (in the GitHub repository)
     #ifdef FONTDESTDIR
     if (font[siz] == NULL) {
