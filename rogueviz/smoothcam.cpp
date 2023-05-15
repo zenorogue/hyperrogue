@@ -591,21 +591,20 @@ void handle_animation(ld t) {
     for(int j=0; j<3; j++) {
       vector<ld> values;
       for(auto& f: anim.frames)
-        values.push_back(cgi.emb->actual_to_intermediate(f.V*tile_center())[j]);
+        values.push_back(cgi.emb->actual_to_intermediate(f.V*C0)[j]);
       interm[j] = interpolate(values, times, t);
       }
     transmatrix Rot = Id;
     for(int j=0; j<3; j++) for(int k=0; k<3; k++) {
       vector<ld> values;
       for(auto& f: anim.frames) {
-        transmatrix Rot = inverse(cgi.emb->map_relative_push(f.V*tile_center())) * f.V;
-        // if(j == 0 && k == 0) println(hlog, "Rot = ", kz(Rot));
+        transmatrix Rot = inverse(cgi.emb->map_relative_push(f.V*C0) * lzpush(cgi.emb->center_z())) * f.V;
         if(nisot::local_perspective_used) Rot = Rot * f.ori;
         values.push_back(Rot[j][k]);
         }
       Rot[j][k] = interpolate(values, times, t);
       }
-    View = inverse(cgi.emb->intermediate_to_actual_translation(interm)); NLP = Id;
+    View = inverse(cgi.emb->intermediate_to_actual_translation(interm) * lzpush(cgi.emb->center_z())); NLP = Id;
     fix_rotation(Rot);
     rotate_view(inverse(Rot));
     }
@@ -621,10 +620,10 @@ void handle_animation(ld t) {
           if(j == 0)
             h = tC0(f.V);
           if(j == 1) {
-            h = tC0(shift_object(f.V, f.ori, ztangent(f.front_distance), hyperbolic ? smIsotropic : smGeodesic));
+            h = tC0(shift_object(f.V, f.ori, ztangent(f.front_distance), (hyperbolic || euclid || sphere) ? smIsotropic : smGeodesic));
             }
           if(j == 2) {
-            h = tC0(shift_object(f.V, f.ori, ctangent(1, -f.up_distance), hyperbolic ? smIsotropic :smGeodesic));
+            h = tC0(shift_object(f.V, f.ori, ctangent(1, -f.up_distance), (hyperbolic || euclid || sphere) ? smIsotropic : smGeodesic));
             }
           prepare_for_interpolation(h);
           values.push_back(h[i]);
