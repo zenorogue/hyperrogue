@@ -294,6 +294,7 @@ namespace objmodels {
 
   struct object {
     hpcshape sh;
+    string mtlname;
     basic_textureinfo tv;
     color_t color;
     };

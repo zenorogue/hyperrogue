@@ -23,11 +23,28 @@ bool model::available() {
 
 string ignore_mtlname = "XXX";
 
+int debug_objects = 0;
+
+map<string, texture::texture_data> materials_global;
+
+texture::texture_data& by_name(string g) {
+  if(materials_global.count(g)) return materials_global[g];
+  if(debug_objects > 2) println(hlog, "loading texture from: ", g);
+  auto& mat = materials_global[g];
+  mat.twidth = mat.theight = 0; mat.stretched = true;
+  mat.readtexture(g);
+  mat.loadTextureGL();
+  if(debug_objects > 3) println(hlog, "texture ID: ", mat.textureid);
+  return mat;
+  }
+
 void model::load_obj(model_data& md) {
   md.prec_used = prec;
 
   auto& objects = md.objs;
   fhstream fs(path+fname, "rt");
+  if(debug_objects > 0) println(hlog, "loading 3D model from: ", path+fname);
+  indenter ind(2);
 
   if(!fs.f) 
     throw hr_exception("failed to open model file: " + path + fname);
@@ -46,23 +63,18 @@ void model::load_obj(model_data& md) {
       string mtllib;
       scan(fs, mtllib);
       fhstream fsm(path+mtllib, "rt");
+      if(debug_objects > 1)
+        println(hlog, "loading material library from: ", path+mtllib);
+      indenter ind(2);
       if(!fsm.f) 
         throw hr_exception("failed to open mtllib: " + mtllib);
       color_t nextcol = 0xFFFFFFFF;
       string mtlname, texname = "";
       auto emit_material = [&] {
-        if(texname != "") {
-          texture::texture_data tdata;
-          materials[mtlname] = tdata;
-          auto& mat = materials[mtlname];
-          mat.twidth = mat.theight = 0; mat.stretched = true;
-          println(hlog, "texname: ", texname);
-          mat.readtexture(path+texname);
-          mat.loadTextureGL();
-          println(hlog, "texture ID: ", mat.textureid);
-          }
+        if(texname != "" && !materials.count(mtlname))
+          materials[mtlname] = by_name(path + texname);
         colors[mtlname] = nextcol;
-        println(hlog, "color of ", mtlname, " is ", nextcol);
+        if(debug_objects > 2) println(hlog, "color of ", mtlname, " is ", nextcol);
         };
       while(!feof(fsm.f)) {
         string s;
@@ -90,14 +102,14 @@ void model::load_obj(model_data& md) {
       object *co = nullptr;
       bool textured = false;
       string oname = scanline_noblank(fs);
-      println(hlog, "reading object: ", oname);
+      if(debug_objects > 2) println(hlog, "reading object: ", oname);
       md.objindex.push_back(isize(md.objs));
       hyperpoint ctr = Hypc;
       int cqty = 0;
       while(true) {
         if(feof(fs.f)) {
           if(co) cgi.finishshape();
-          if(co) println(hlog, "vertices = ", co->sh.e-co->sh.s, " tvertices = ", isize(co->tv.tvertices));
+          if(co && debug_objects > 4) println(hlog, "vertices = ", co->sh.e-co->sh.s, " tvertices = ", isize(co->tv.tvertices));
           break;
           }
         scan(fs, s);
@@ -106,7 +118,7 @@ void model::load_obj(model_data& md) {
           }
         else if(s == "o" || s == "g") {
           if(co) cgi.finishshape();
-          if(co) println(hlog, "vertices = ", co->sh.e-co->sh.s, " tvertices = ", isize(co->tv.tvertices));
+          if(co && debug_objects > 4) println(hlog, "vertices = ", co->sh.e-co->sh.s, " tvertices = ", isize(co->tv.tvertices));
           goto next_object;
           }
         else if(s == "v") {        
@@ -133,12 +145,13 @@ void model::load_obj(model_data& md) {
           }
         else if(s == "usemtl") {
           if(co) cgi.finishshape();
-          if(co) println(hlog, "vertices = ", co->sh.e-co->sh.s, " tvertices = ", isize(co->tv.tvertices));
+          if(co && debug_objects > 4) println(hlog, "vertices = ", co->sh.e-co->sh.s, " tvertices = ", isize(co->tv.tvertices));
           string mtlname = scanline_noblank(fs);
           co = nullptr;
           if(mtlname.find("Layer_Layer0") != string::npos) continue;
           objects.push_back(make_shared<object>());
           co = &*objects.back();
+          co->mtlname = mtlname;
           cgi.bshape(co->sh, PPR::WALL);
           cgi.last->flags |= POLY_TRIANGLES;
           cgi.last->texture_offset = 0;
@@ -146,7 +159,7 @@ void model::load_obj(model_data& md) {
             textured = true;
             cgi.last->tinf = &co->tv;
             co->tv.texture_id = materials[mtlname].textureid;
-            println(hlog, "using texture_id : ", co->tv.texture_id);
+            if(debug_objects > 0) println(hlog, "using texture_id : ", co->tv.texture_id);
             co->color = 0xFFFFFFFF;
             }
           else {
@@ -159,7 +172,7 @@ void model::load_obj(model_data& md) {
               co->color = 0xFFFFFFFF;
             }
           if(mtlname.find(ignore_mtlname) != string::npos) co->color = 0;
-          println(hlog, "set textured to ", textured, " color ", co->color, " mtlname = '", mtlname, "'");
+          if(debug_objects > 4) println(hlog, "set textured to ", textured, " color ", co->color, " mtlname = '", mtlname, "'");
           }
         else if(s == "f") {
           struct vertexinfo { int f, t, n; };
@@ -200,7 +213,7 @@ void model::load_obj(model_data& md) {
           if(shift_to_ctr) {
             hyperpoint ctr1 = ctr / cqty;
             ctr1[3] = 0;
-            println(hlog, "ctr1 = ", ctr1, "hys = ", hys[0]);
+            if(debug_objects > 5) println(hlog, "ctr1 = ", ctr1, "hys = ", hys[0]);
             for(auto& h: hys)
               h -= ctr1;
             }
@@ -225,7 +238,7 @@ void model::load_obj(model_data& md) {
       throw("unknown command: " + s);
     }
   
-  println(hlog, "reading finished");
+  if(debug_objects > 0) println(hlog, "reading finished");
 
   md.objindex.push_back(isize(md.objs));
   cgi.extra_vertices();
@@ -291,7 +304,7 @@ model_data& model::get() {
     }
   
   if(md && md->prec_used < prec) {
-    println(hlog, "need prec=", prec, " used = ", md->prec_used);
+    if(debug_objects > 0) println(hlog, "need prec=", prec, " used = ", md->prec_used);
     md->objs.clear();
     load_obj(*md);
     }
@@ -327,7 +340,7 @@ auto cf = addHook(hooks_configfile, 100, [] {
   ->set_sets([] { cmode = sm::NOSCR; })
   ; 
   param_b(shift_to_ctr, "shift_to_ctr");
-  });
+  }) + arg::add2("-debobj", [] { arg::shift(); debug_objects = arg::argi(); });
 
 }
 #endif
