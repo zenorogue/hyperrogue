@@ -891,7 +891,7 @@ struct emb_euc_cylinder_sl2 : emb_euc_cylinder_twisted {
 struct emb_euc_in_sph : emb_euclid_noniso {
   bool is_euc_in_sph() override { return true; }
   ld center_z() override { return 1; }
-  virtual ld height_limit(ld sign) override { return sign < 0 ? 0 : 90._deg; }
+  // virtual ld height_limit(ld sign) override { return sign < 0 ? 0 : 90._deg; }
   hyperpoint actual_to_intermediate(hyperpoint a) override { 
     ld tx = hypot(a[0], a[2]);
     ld ty = hypot(a[1], a[3]);
