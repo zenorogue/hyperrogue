@@ -1188,6 +1188,8 @@ EX void initConfig() {
   addsaver(mouseaim_sensitivity, "mouseaim_sensitivity", 0.01);
 
   param_b(vid.consider_shader_projection, "shader-projection", true);
+  param_b(semidirect_rendering, "semidirect_rendering", false)
+  ->editable("semidirect_rendering (perspective on GPU)", 'k');
 
   param_i(forced_center_down, "forced_center_down")
   -> editable(0, 100, 10, "forced center down", "make the center not the actual screen center", 'd');
