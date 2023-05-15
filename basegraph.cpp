@@ -254,7 +254,7 @@ const string& findfont() {
   FcPatternDestroy(pat);
   FcFini();
   font_to_find = "";
-  println(hlog, "fontpath is: ", fontpath);
+  if(debugflags & DF_INIT) println(hlog, "fontpath is: ", fontpath);
   #endif
   return fontpath;
   }
