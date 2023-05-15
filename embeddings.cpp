@@ -1216,11 +1216,13 @@ EX void swapmatrix_iview(transmatrix& ori, transmatrix& V) {
   if(geom3::swap_direction == -1) {
     auto& data = mdata[&V];
     data.logical_coordinates = cgi.emb->intermediate_to_logical * cgi.emb->actual_to_intermediate(V*C0);
+
     auto tl = cgi.emb->intermediate_to_actual_translation(cgi.emb->logical_to_intermediate * data.logical_coordinates);
-    auto itl = inverse(tl);
+    auto itl = inverse(tl * lzpush(cgi.emb->center_z()));
     data.rotation = itl * V;
 
-    data.logical_coordinates[2] = ilerp(cgi.FLOOR, cgi.WALL, data.logical_coordinates[2]);
+    auto& lc = data.logical_coordinates;
+    data.logical_coordinates[2] = ilerp(cgi.FLOOR, cgi.WALL, lc[2]);
 
     if(nisot::local_perspective_used) data.rotation = data.rotation * ori;
     swapmatrix(V);
