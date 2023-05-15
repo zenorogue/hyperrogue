@@ -56,6 +56,7 @@ struct setting {
     return parameter_name + "|" + config_name + "|" + menu_item_name + "|" + help_text;
     }
   virtual cld get_cld() = 0;
+  virtual void set_cld(cld x) = 0;
   explicit setting() { restrict = auto_restrict; is_editable = false; }
   virtual void check_change() {
     cld val = get_cld();
@@ -111,6 +112,7 @@ template<class T> struct enum_setting : list_setting {
   bool affects(void* v) override { return v == value; }
   void add_as_saver() override;
   cld get_cld() override { return get_value(); }
+  virtual void set_cld(cld x) { set_value(floor(real(x)+.5)); }
   void load_from(const string& s) override {
     *value = (T) parseint(s);
     }
@@ -137,6 +139,7 @@ struct float_setting : public setting {
   bool affects(void *v) override { return v == value; }
   void show_edit_option(int key) override;
   cld get_cld() override { return *value; }
+  void set_cld(cld x) override { *value = real(x); }
   void load_from(const string& s) override;
   };
 
@@ -157,6 +160,7 @@ struct int_setting : public setting {
   bool affects(void *v) override { return v == value; }
   void show_edit_option(int key) override;
   cld get_cld() override { return *value; }
+  void set_cld(cld x) override { *value = floor(real(x)+.5); }
   int_setting *editable(int min_value, int max_value, ld step, string menu_item_name, string help_text, char key) {
     this->is_editable = true;
     this->min_value = min_value;
@@ -185,6 +189,7 @@ struct bool_setting : public setting {
   bool affects(void *v) override { return v == value; }
   void show_edit_option(int key) override;
   cld get_cld() override { return *value ? 1 : 0; }
+  void set_cld(cld x) override { *value = real(x) >= 0.5; }
   void load_from(const string& s) override {
     *value = parseint(s);
     }
@@ -196,6 +201,7 @@ struct custom_setting : public setting {
   function<bool(void*)> custom_affect;
   void show_edit_option(int key) override { custom_viewer(key); }
   cld get_cld() override { return custom_value(); }
+  void set_cld(cld x) override { }
   bool affects(void *v) override { return custom_affect(v); }
   };
   
