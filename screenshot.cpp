@@ -1408,7 +1408,7 @@ EX bool record_animation_of(reaction_t content) {
   int oldturn = -1;
   for(int i=0; i<noframes; i++) {
     if(i < min_frame || i > max_frame) continue;
-    printf("%d/%d\n", i, noframes);
+    println(hlog, "record frame ",i, "/", noframes, " of ", videofile);
     callhooks(hooks_record_anim, i, noframes);
     int newticks = i * period / noframes;
     if(time_formula != "-") {
@@ -1471,7 +1471,7 @@ EX bool record_video(string fname IS(videofile), bool_reaction_t rec IS(record_a
     if(dup(tab[0]) != 0) exit(1);
     if(close(tab[1]) != 0) exit(1);
     if(close(tab[0]) != 0) exit(1);
-    string fformat = "ffmpeg -y -f rawvideo -pix_fmt bgra -s " + its(shot::shotx) + "x" + its(shot::shoty) + " -r 60 -i - -pix_fmt yuv420p -codec:v libx264 \"" + fname + "\"";    
+    string fformat = "ffmpeg -hide_banner -loglevel error -y -f rawvideo -pix_fmt bgra -s " + its(shot::shotx) + "x" + its(shot::shoty) + " -r 60 -i - -pix_fmt yuv420p -codec:v libx264 \"" + fname + "\"";
     ignore(system(fformat.c_str()));
     exit(0);
     }
