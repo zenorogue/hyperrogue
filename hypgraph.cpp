@@ -378,7 +378,14 @@ EX ld signed_sqrt(ld x) { return x > 0 ? sqrt(x) : -sqrt(-x); }
 
 EX int axial_x, axial_y;
 
+/** in perspective projections, compute inverse_exp (or similar) on CPU, but perspective on GPU (needs consider_shader_projection off) */
+EX bool semidirect_rendering = false;
+
+/** flag for semidirect_rendering */
+EX bool computing_semidirect = false;
+
 EX void apply_perspective(const hyperpoint& H, hyperpoint& ret) {
+  if(computing_semidirect) { ret = H; ret[3] = 1; return; }
   if(H[2] == 0) { ret[0] = 1e6; ret[1] = 1e6; ret[2] = 0; return; }
   ld ratio = vid.xres / current_display->tanfov / current_display->radius / 2;
   ret[0] = H[0]/H[2] * ratio;
@@ -620,13 +627,14 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
     case mdPerspective: {
       if(gproduct) H = product::inverse_exp(H);
       apply_nil_rotation(H);
-      H = lp_apply(H);
+      if(!computing_semidirect) H = lp_apply(H);
       apply_perspective(H, ret);
       return;      
       }
 
     case mdGeodesic: {
-      auto S = lp_apply(inverse_exp(H_orig, pNORMAL | pfNO_DISTANCE));
+      auto S = inverse_exp(H_orig, pNORMAL | pfNO_DISTANCE);
+      if(!computing_semidirect) S = lp_apply(S);
       apply_perspective(S, ret);
       return;
       }
@@ -645,7 +653,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
       #if MAXMDIM >= 4
       S[3] = 1;
       #endif
-      S = lp_apply(S);
+      if(!computing_semidirect) S = lp_apply(S);
       if(hyperbolic) {
         models::apply_orientation(ret[1], ret[0]);
         models::apply_orientation_yz(ret[2], ret[1]);
@@ -657,7 +665,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
     #if MAXMDIM >= 4
     case mdRelPerspective: {
       auto S = rel_log(H_orig, true); S[3] = 1;
-      S = lp_apply(S);
+      if(!computing_semidirect) S = lp_apply(S);
       apply_perspective(S, ret);
       return;
       }

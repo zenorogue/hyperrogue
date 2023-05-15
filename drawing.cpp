@@ -509,7 +509,15 @@ void addpoly(const shiftmatrix& V, const vector<glvertex> &tab, int ofs, int cnt
     }
   tofix.clear(); knowgood = false;
   if(in_perspective()) {
-    if(poly_flags & POLY_TRIANGLES) {
+    if(get_shader_flags() & SF_SEMIDIRECT) {
+      dynamicval<bool> d(computing_semidirect, true);
+      for(int i=ofs; i<ofs+cnt; i++) {
+        hyperpoint Hscr;
+        applymodel(V * glhr::gltopoint(tab[i]), Hscr);
+        add1(Hscr);
+        }
+      }
+    else if(poly_flags & POLY_TRIANGLES) {
       for(int i=ofs; i<ofs+cnt; i+=3) {
         shiftpoint h0 = V * glhr::gltopoint(tab[i]);
         shiftpoint h1 = V * glhr::gltopoint(tab[i+1]);

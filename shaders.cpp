@@ -32,6 +32,8 @@ constexpr flagtype SF_ORIENT       = 16384;
 constexpr flagtype SF_BOX          = 32768;
 constexpr flagtype SF_ZFOG         = 65536;
 constexpr flagtype SF_ODSBOX       = (1<<17);
+
+constexpr flagtype SF_SEMIDIRECT   = (1<<18);
 #endif
 
 EX bool solv_all;
@@ -235,6 +237,11 @@ shared_ptr<glhr::GLprogram> write_shader(flagtype shader_flags) {
     vmain += "gl_Position = uP * pos;\n";
     skip_t = true;
     shader_flags |= SF_DIRECT;
+    }
+  else if(!vid.consider_shader_projection && semidirect_rendering && models::is_perspective(pmodel)) {
+    vmain += "// this\n";
+    distfun = "length(t.xyz)";
+    shader_flags |= SF_PERS3 | SF_SEMIDIRECT;
     }
   else if(!vid.consider_shader_projection) {
     shader_flags |= SF_PIXELS;
