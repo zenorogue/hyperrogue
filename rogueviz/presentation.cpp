@@ -636,6 +636,7 @@ int runslide =
     }) + arg::add3("-slide", [] {
   arg::shift(); launch_slideshow_by_name(arg::args());
   presentation(pmStop);
+  popScreenAll();
   arg::shift(); string s = arg::args();
   int i;
   currentslide = -1;
