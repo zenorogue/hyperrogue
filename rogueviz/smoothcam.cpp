@@ -8,22 +8,65 @@
 
 // to add: insert positions? split/merge segments? improved join?
 
+namespace rogueviz {
+namespace smoothcam {
+struct frame {
+  string title;
+  cell *where;
+  transmatrix sView;
+  transmatrix V;
+  transmatrix ori;
+  ld front_distance, up_distance;
+  ld interval;
+  map<string, ld> params;
+  };
+
+struct animation {
+  cell *start_cell;
+  transmatrix start;
+  ld start_interval;
+  vector<frame> frames;
+  };
+
+}
+}
+
 namespace hr {
 
-using pcell = cell*;
+  using pcell = cell*;
 
-inline void hread(hstream& hs, transmatrix& h) { for(int i=0; i<MDIM; i++) hread(hs, h[i]); }
-inline void hwrite(hstream& hs, const transmatrix& h) { for(int i=0; i<MDIM; i++) hwrite(hs, h[i]); }
+  static void hwrite(hstream& hs, const pcell& c) {
+    hs.write<int>(mapstream::cellids[c]);
+    }
 
-inline void hwrite(hstream& hs, const pcell& c) {
-  hs.write<int>(mapstream::cellids[c]);
+  static void hread(hstream& hs, pcell& c) {
+    int32_t at = hs.get<int>();
+    c = mapstream::cellbyid[at];
+    }
+
+  static void hread(hstream& hs, transmatrix& h) { for(int i=0; i<MDIM; i++) hread(hs, h[i]); }
+  static void hwrite(hstream& hs, const transmatrix& h) { for(int i=0; i<MDIM; i++) hwrite(hs, h[i]); }
+
+  void hwrite(hstream& hs, const rogueviz::smoothcam::animation& anim) {
+    hwrite(hs, anim.start_cell, anim.start, anim.start_interval, anim.frames);
+    }
+
+  void hread(hstream& hs, rogueviz::smoothcam::animation& anim) {
+    hread(hs, anim.start_cell, anim.start, anim.start_interval, anim.frames);
+    }
+
+  void hwrite(hstream& hs, const rogueviz::smoothcam::frame& frame) {
+    hwrite(hs, frame.title, frame.where, frame.sView, frame.V, frame.ori, frame.front_distance, frame.up_distance, frame.interval);
+    }
+
+  void hread(hstream& hs, rogueviz::smoothcam::frame& frame) {
+    hread(hs, frame.title, frame.where, frame.sView, frame.V, frame.ori, frame.front_distance, frame.up_distance, frame.interval);
+    }
+
   }
 
-inline void hread(hstream& hs, pcell& c) {
-  int32_t at = hs.get<int>();
-  c = mapstream::cellbyid[at];
-  }
-  
+namespace rogueviz {
+
 namespace smoothcam {
 
 string smooth_camera_help = 
@@ -38,23 +81,6 @@ string smooth_camera_help =
   "If you place two positions X and Y with interval 0 between them, X will be used"
   "as the actual position, while Y-X will be the first derivative. Thus, for example, "
   "placing two equal positions with interval 0 will force the camera to smoothly stop.";
-
-struct frame {
-  string title;
-  cell *where;
-  transmatrix sView;
-  transmatrix V;
-  transmatrix ori;
-  ld front_distance, up_distance;
-  ld interval;
-  };
-
-struct animation {
-  cell *start_cell;
-  transmatrix start;
-  ld start_interval;
-  vector<frame> frames;
-  };
 
 map<cell*, map<hyperpoint, string> > labels;
 map<cell*, vector<vector<hyperpoint> > > traces;
@@ -604,22 +630,6 @@ void generate_trace() {
       }
     }
   send();
-  }
-
-void hwrite(hstream& hs, const animation& anim) {
-  hwrite(hs, anim.start_cell, anim.start, anim.start_interval, anim.frames);
-  }
-
-void hread(hstream& hs, animation& anim) {
-  hread(hs, anim.start_cell, anim.start, anim.start_interval, anim.frames);
-  }
-
-void hwrite(hstream& hs, const frame& frame) {
-  hwrite(hs, frame.title, frame.where, frame.sView, frame.V, frame.ori, frame.front_distance, frame.up_distance, frame.interval);
-  }
-
-void hread(hstream& hs, frame& frame) {
-  hread(hs, frame.title, frame.where, frame.sView, frame.V, frame.ori, frame.front_distance, frame.up_distance, frame.interval);
   }
 
 bool draw_labels(cell *c, const shiftmatrix& V) {
