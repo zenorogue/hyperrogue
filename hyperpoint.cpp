@@ -1689,8 +1689,10 @@ EX ld raddif(ld a, ld b) {
   return d;
   }
 
+EX int bucket_scale = 10000;
+
 EX unsigned bucketer(ld x) {
-  return unsigned((long long)(x * 10000 + 100000.5) - 100000);
+  return (unsigned) (long long) (floor(x * bucket_scale));
   }
 
 EX unsigned bucketer(hyperpoint h) {
