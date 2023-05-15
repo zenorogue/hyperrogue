@@ -366,7 +366,7 @@ EX void draw_star(const shiftmatrix& V, const hpcshape& sh, color_t col, ld rev 
   val += cgi.emb->center_z();
 
   auto V1 = V; be_euclidean_infinity(V1.T);
-  queuepolyat(V1 * zpush(val), sh, col, PPR::SKY);
+  queuepolyat(V1 * lzpush(val), sh, col, PPR::SKY);
   }
 
 EX ld star_prob = 0.33;
