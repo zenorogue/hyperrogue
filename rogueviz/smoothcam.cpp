@@ -87,6 +87,18 @@ map<cell*, vector<vector<hyperpoint> > > traces;
 
 vector<animation> anims;
 
+vector<animation> anims_backup;
+
+void backup() {
+  anims_backup = anims;
+  }
+
+void append_backup() {
+  swap(anims_backup, anims);
+  for(auto a: anims_backup) anims.push_back(a);
+  anims_backup.clear();
+  }
+
 transmatrix last_view, current_position, last_view_comp;
 cell *last_centerover;
 
@@ -696,6 +708,17 @@ auto hooks = arg::add3("-smoothcam", enable_and_show)
       current_segment = &anims.back();
       }
     });
+
+void save_animation(hstream& f) {
+  if(f.vernum >= 0xA930) hwrite(f, smoothcam_params);
+  hwrite(f, anims);
+  }
+
+void load_animation(hstream& f) {
+  if(f.vernum >= 0xA930) hread(f, smoothcam_params);
+  hread(f, anims);
+  current_segment = &anims.back();
+  }
 
 auto hooksw = addHook(hooks_swapdim, 100, [] {
   last_segment = -1;
