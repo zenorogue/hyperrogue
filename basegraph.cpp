@@ -220,21 +220,25 @@ EX void present_screen() {
 
 #if CAP_SDLTTF
 
-string fontdefault = "DejaVuSans-Bold.ttf";
-EX string fontpath = ISWEB ? "sans-serif" : string(HYPERFONTPATH) + fontdefault;
+#define DEFAULT_FONT "DejaVuSans-Bold.ttf"
 
-string findfont() {
-  string answer = fontpath;
+#ifdef FONTCONFIG
+/** if this is non-empty, find the font using fontconfig */
+EX string font_to_find = DEFAULT_FONT;
+#endif
+
+/** actual font path */
+EX string fontpath = ISWEB ? "sans-serif" : string(HYPERFONTPATH) + DEFAULT_FONT;
+
+const string& findfont() {
   #ifdef FONTCONFIG
-  if ((answer.length() < fontdefault.length()) || (0 != answer.compare(answer.length() - fontdefault.length(), fontdefault.length(), fontdefault))) {
-    return answer;
-  }
+  if(font_to_find == "") return fontpath;
   FcPattern   *pat;
   FcResult	result;
   if (!FcInit()) {
-    return answer;
+    return fontpath;
   }
-  pat = FcNameParse((FcChar8 *)fontdefault.c_str());
+  pat = FcNameParse((FcChar8 *)font_to_find.c_str());
   FcConfigSubstitute(0, pat, FcMatchPattern);
   FcDefaultSubstitute(pat);
 
@@ -243,15 +247,17 @@ string findfont() {
   if (match) {
     FcChar8 *file;
     if (FcPatternGetString(match, FC_FILE, 0, &file) == FcResultMatch) {
-      answer = (const char *)file;
+      fontpath = (const char *)file;
     }
     FcPatternDestroy(match);
   }
   FcPatternDestroy(pat);
   FcFini();
+  font_to_find = "";
+  println(hlog, "fontpath is: ", fontpath);
   #endif
-  return answer;
-}
+  return fontpath;
+  }
 
 void loadfont(int siz) {
   fix_font_size(siz);

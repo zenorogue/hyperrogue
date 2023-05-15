@@ -175,7 +175,14 @@ int arg::readCommon() {
   else if(argis("-nogui")) { PHASE(1); noGUI = true; }
 #ifndef EMSCRIPTEN
 #if CAP_SDL
-  else if(argis("-font")) { PHASE(1); shift(); fontpath = args(); }
+  else if(argis("-font")) { PHASE(1); shift(); fontpath = args();
+    #ifdef FONTCONFIG
+    font_to_find = "";
+    #endif
+    }
+#ifdef FONTCONFIG
+  else if(argis("-find-font")) { PHASE(1); shift(); font_to_find = args(); }
+#endif
 #endif
 #endif
 
