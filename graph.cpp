@@ -5448,6 +5448,8 @@ EX bool old_center;
 
 EX ld min_scale = 1e-6;
 
+EX int forced_center_down = ISANDROID ? 2 : ISIOS ? 40 : 40;
+
 EX void calcparam() {
 
   DEBBI(DF_GRAPH, ("calc param"));
@@ -5466,7 +5468,8 @@ EX void calcparam() {
   
   ld realradius = min(cd->xsize / 2, cd->ysize / 2);
   
-  cd->scrsize = realradius - (inHighQual ? 0 : ISANDROID ? 2 : ISIOS ? 40 : 40);
+  cd->scrsize = realradius;
+  if(!inHighQual) cd->scrsize -= forced_center_down;
 
   current_display->sidescreen = permaside;
   
