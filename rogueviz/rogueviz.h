@@ -377,6 +377,17 @@ namespace objmodels {
     }
   #endif
 
+namespace smoothcam {
+  void save_animation(hstream& f);
+  void load_animation(hstream& f);
+  void handle_animation(ld);
+  void enable();
+  extern bool animate_on;
+  extern ld last_time;
+  void enable_and_show();
+  void backup();
+  void append_backup();
   }
+}
 
 #endif
