@@ -464,8 +464,13 @@ EX transmatrix to_other_side(hyperpoint h1, hyperpoint h2) {
     return T;
     }
 
-  ld d = hdist(h1, h2);
+  if(sol && meuclid) {
+    /* works in 4x4... */
+    return gpushxto0(h1) * gpushxto0(h2);
+    }
   
+  ld d = hdist(h1, h2);
+
   hyperpoint v;  
   if(euclid)
     v = (h2 - h1) / d;    

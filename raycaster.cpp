@@ -491,6 +491,7 @@ void raygen::compute_which_and_dist(int flat1, int flat2) {
 
 void raygen::move_forward() {
   using glhr::to_glsl;
+  string find_which;
   if(in_h2xe() && !is_stepbased()) fmain +=
     "  mediump float ch = cosh(dist*xspeed); mediump float sh = sinh(dist*xspeed);\n"
     "  mediump vec4 v = position * ch + tangent * sh;\n"
@@ -587,7 +588,7 @@ void raygen::move_forward() {
       "  return christoffel(pos, vel, vel);\n"
       "  }\n";
 
-    if(sn::in() && !asonov) fsh += "uniform mediump float uBinaryWidth;\n";
+    if(sn::in() && !asonov && !embedded_plane) fsh += "uniform mediump float uBinaryWidth;\n";
 
     fmain +=
       "  dist = next < minstep ? 2.*next : next;\n";
@@ -862,6 +863,28 @@ void raygen::move_forward() {
     string hnilw2 = to_glsl(nilv::nilwidth * nilv::nilwidth / 2);
 
     if(reg) fmain += "if(which != -1) {\n";
+    else if(embedded_plane) {
+      string s = sol ? "-2" : "";
+      find_which += 
+      "    mediump float best = length(nposition);\n"
+      "    for(int i=0; i<sides"+s+"; i++) {\n"
+      "      mediump float cand = length(" + getM("walloffset+i") + " * nposition);\n"
+      "      if(cand < best) { best = cand; which = i; }\n"
+      "      }\n";
+
+      if(cgi.FLOOR > cgi.WALL) {
+        if(sol) find_which +=
+        "    if(nposition[2] < " + to_glsl(cgi.WALL)+") which = sides-1;\n"
+        "    if(nposition[2] > " + to_glsl(cgi.FLOOR)+") which = sides-2;\n";
+        }
+      else {
+        if(sol) find_which +=
+        "    if(nposition[2] < " + to_glsl(cgi.FLOOR)+") which = sides-2;\n"
+        "    if(nposition[2] > " + to_glsl(cgi.WALL)+") which = sides-1;\n";
+        }
+
+      fmain += find_which + "    if(which != -1) {\n";
+      }
     else if(asonov) fmain +=
         "if(abs(sp.x) > 1. || abs(sp.y) > 1. || abs(sp.z) > 1.) {\n";
     else if(nih) fmain +=
@@ -878,7 +901,8 @@ void raygen::move_forward() {
         "}\n"
       "else {\n";
 
-    if(sn::in()) {
+    if(embedded_plane) fmain += find_which;
+    else if(sn::in()) {
       if(asonov) fmain +=
         "if(sp.x > 1.) which = 4;\n"
         "if(sp.y > 1.) which = 5;\n"
@@ -2122,12 +2146,11 @@ EX transmatrix get_ms(cell *c, int a, bool mirror) {
       hyperpoint corner = hybrid::get_corner(c, a, 0, z);
       h += corner;
       }
+    h /= c->type;
     h = normalize(h);
-    ld d = hdist0(h);
-    d -= cgi.emb->center_z();
-    if(h[2] > 0) d = -d;
-    if(mirror) return MirrorZ * lzpush(2*d);
-    return lzpush(2*d);
+    ld d = cgi.emb->get_logical_z(h);
+    if(mirror) return MirrorZ * lzpush(-2*d);
+    else return lzpush(-2*d);
     }
   }
 
