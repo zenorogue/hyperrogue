@@ -2119,6 +2119,8 @@ EX void spinEdge(ld aspd) {
   rotate_view(cspin(0, 1, downspin));
   }
 
+EX void spinEdge_full() { spinEdge(999999); }
+
 /** \brief convert a shiftmatrix to the coordinate system of View 
  *  usually used to set which_copy
  */
