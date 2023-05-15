@@ -28,6 +28,7 @@ struct animation {
   vector<frame> frames;
   };
 
+vector<string> smoothcam_params;
 }
 }
 
@@ -57,10 +58,12 @@ namespace hr {
 
   void hwrite(hstream& hs, const rogueviz::smoothcam::frame& frame) {
     hwrite(hs, frame.title, frame.where, frame.sView, frame.V, frame.ori, frame.front_distance, frame.up_distance, frame.interval);
+    for(auto pa: rogueviz::smoothcam::smoothcam_params) { hwrite(hs, frame.params.at(pa)); }
     }
 
   void hread(hstream& hs, rogueviz::smoothcam::frame& frame) {
     hread(hs, frame.title, frame.where, frame.sView, frame.V, frame.ori, frame.front_distance, frame.up_distance, frame.interval);
+    for(auto pa: rogueviz::smoothcam::smoothcam_params) { hread(hs, frame.params[pa]); }
     }
 
   }
@@ -177,6 +180,20 @@ transmatrix try_harder_relative_matrix(cell *at, cell *from) {
   return U;
   }
 
+frame new_frame() {
+  frame f;
+  f.title = gentitle();
+  f.where = centerover;
+  f.sView = View;
+  f.V = current_position;
+  f.ori = ortho_inverse(NLP);
+  f.front_distance = 1;
+  f.up_distance = 1;
+  f.interval = 0;
+  for(auto p: smoothcam_params) f.params[p] = real(params[p]->get_cld());
+  return f;
+  };
+
 void edit_segment(int aid) {
   cmode = sm::PANNING;
   gamescreen();
@@ -233,6 +250,12 @@ void edit_step(animation& anim, int id) {
   dialog::add_action([&f] {
     dialog::editNumber(f.up_distance, -5, 5, .1, 1, "up distance", "");
     });
+
+  char key = '1';
+  for(auto pa: smoothcam_params) {
+    dialog::addSelItem(pa, fts(f.params[pa]), key++);
+    }
+
   dialog::addItem("delete", 'd');
   dialog::add_action([&anim, id] {
     anim.frames.erase(anim.frames.begin()+id);
@@ -289,7 +312,7 @@ void edit_step(animation& anim, int id) {
   if(&anim == current_segment) {
     dialog::addItem("insert the current position before this", 'j');
     dialog::add_action([&anim, id] {
-      anim.frames.insert(anim.frames.begin() + id, frame{gentitle(), centerover, View, current_position, ortho_inverse(NLP), 1, 1, 0});
+      anim.frames.insert(anim.frames.begin() + id, new_frame());
       popScreen();
       });
     }
@@ -391,7 +414,7 @@ void show() {
   if(current_segment) {
     dialog::addItem("create a new position", 'a');
     dialog::add_action([] {
-      current_segment->frames.push_back(frame{gentitle(), centerover, View, current_position, ortho_inverse(NLP), 1, 1, 0});
+      current_segment->frames.push_back(new_frame());
       });
     }
 
@@ -545,6 +568,13 @@ void handle_animation(ld t) {
 
   transmatrix V = View;
 
+  for(auto pa: smoothcam_params) {
+    vector<ld> values;
+    for(auto& f: anim.frames) values.push_back(f.params[pa]);
+    ld val = interpolate(values, times, t);
+    params[pa]->set_cld(val);
+    }
+
   if(embedded_plane && embedded_shift_method_choice != smcNone) {
     hyperpoint interm = C03;
 
@@ -690,6 +720,9 @@ auto hooks = arg::add3("-smoothcam", enable_and_show)
     enable_and_show(); 
     animate_on = true;
     last_time = HUGE_VAL;
+    })
+  + arg::add3("-smoothcam-param", [] {
+    arg::shift(); smoothcam_params.push_back( arg::args() );
     })
   + arg::add3("-smoothcam-anim-on", [] {
     animate_on = true;
