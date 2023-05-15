@@ -2529,6 +2529,7 @@ void circle_around_center(ld radius, color_t linecol, color_t fillcol, PPR prio)
 EX color_t periodcolor = 0x00FF0080;
 EX color_t ringcolor = 0xFFFF;
 EX color_t modelcolor = 0;
+EX ld periodwidth = 1;
 
 EX ld twopoint_xscale = 1;
 EX ld twopoint_xwidth = 1;
@@ -2750,11 +2751,14 @@ EX void draw_boundary(int w) {
   dynamicval<ld> dw(vid.linewidth, vid.linewidth * (svg::in ? svg::divby : 1));
   #endif
 
-  if(elliptic && !among(pmodel, mdBand, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdMollweide, mdCollignon))
+  if(elliptic && !among(pmodel, mdBand, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdMollweide, mdCollignon)) {
+    dynamicval<ld> d(vid.linewidth, vid.linewidth * periodwidth);
     circle_around_center(90._deg, periodcolor, 0, PPR::CIRCLE);
+    }
   
   int broken_coord = models::get_broken_coord(pmodel);
   if(broken_coord) {
+    dynamicval<ld> d(vid.linewidth, vid.linewidth * periodwidth);
     int unbroken_coord = 3 - broken_coord;
     const ld eps = 1e-3;
     const ld rem = sqrt(1-eps*eps);
@@ -2811,9 +2815,11 @@ EX void draw_boundary(int w) {
         queuestraight(T * ypush0(hyperbolic ? 10 : right), 2, lc, fc, p);
       ld xperiod = elliptic ? fakeinf/2 : fakeinf;
       if(sphere && !bndband) {
+        dynamicval<ld> d(vid.linewidth, vid.linewidth * periodwidth);
         queuestraight(T * xpush0(xperiod), 2, periodcolor, 0, PPR::CIRCLE);
         }
       if(sphere && bndband) {
+        dynamicval<ld> d(vid.linewidth, vid.linewidth * periodwidth);
         ld adegree = degree-1e-6;
         for(ld a=-90; a<90+1e-6; a+=pow(.5, vid.linequality)) {
           curvepoint(T * xpush(xperiod) * ypush0(a * adegree));
