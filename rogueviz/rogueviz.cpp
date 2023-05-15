@@ -809,6 +809,15 @@ void readcolor(const string& cfname) {
         vdata[getid(lab)].info = new string(buf); // replace with std::shared_ptr in C++111
       continue;
       }
+    else if(c2 == '>') {
+      char buf[600];
+      int err = fscanf(f, "%500s", buf);
+      if(err > 0) {
+        vdata[getid(lab)].name = buf;
+        for(char& ch: vdata[getid(lab)].name) if(ch == '_') ch = ' ';
+        }
+      continue;
+      }
     else {
       ungetc(c2, f);
       char buf[600];
