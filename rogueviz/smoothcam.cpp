@@ -371,6 +371,9 @@ void snap_to_center() {
   }
 
 void show() {
+  /* might not be changed automatically */
+  if(vid.fixed_yz) spinEdge_full();
+
   cmode = side ? sm::SIDE : 0;
   gamescreen();
   draw_crosshair();
@@ -629,6 +632,8 @@ void handle_animation(ld t) {
     c_front_dist = geo_dist(pts[0], pts[1]);
     c_up_dist = geo_dist(pts[0], pts[2]);
     }
+
+  if(vid.fixed_yz) spinEdge_full();
 
   transmatrix T = View * inverse(last_view_comp);
   last_view_comp = View;
