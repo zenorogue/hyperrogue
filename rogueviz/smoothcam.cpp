@@ -403,7 +403,7 @@ void show() {
           dist = fts(d) + "au";
         else {
           transmatrix T = f.sView * iso_inverse(View);
-          dist = fts(kz(acos_clamp(T[2][2]))) + "°/" + fts(kz(acos_clamp(T[1][1]))) + "°";
+          dist = fts(kz(acos_clamp(T[2][2])/degree)) + "°/" + fts(kz(acos_clamp(T[1][1])/degree)) + "°";
           }
         }
         
