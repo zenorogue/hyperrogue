@@ -1015,6 +1015,7 @@ void save_anim(string fname) {
   smoothcam::save_animation(f);
   }
 
+#if CAP_VIDEO
 void transition(ld a, ld b, int frames) {
   anims::noframes = frames;
 
@@ -1072,6 +1073,7 @@ void transition_test(ld t) {
   glhr::vfar_default = vf * t;
   activate(emb_lerp(_edok, cu, t));
   }
+#endif
 
 bool adjust_to_period;
 
@@ -1510,6 +1512,7 @@ void show_technical() {
       });
     }
 
+  #if CAP_VIDEO
   if(false) {
     dialog::addItem("transition to", 'u');
     dialog::add_action([] { anims::videofile = "transition_to.mp4"; transition(0.01, 1, 60); });
@@ -1518,6 +1521,7 @@ void show_technical() {
     dialog::addItem("transition from", 'i');
     dialog::add_action([] { anims::videofile = "transition_from.mp4"; transition(1, 0.01, 60); });
     }
+  #endif
 
   dialog::addBack();
   dialog::display();
@@ -1883,8 +1887,11 @@ auto embchess_ah =
 + arg::add3("-embmin", [] { arg::shift(); cells_drawn = arg::argi(); })
 + arg::add3("-emb-chess-moves", [] { arg::shift(); chess_moves = arg::argi(); })
 + arg::add3("-emb-sqd", enable_square_diagram)
+#if CAP_VIDEO
 + arg::add3("-embtrans-test", [] { arg::shift(); transition_test(arg::argf()); })
+#endif
 + arg::add3("-emb-no-floor", [] { no_floor = true; })
+#if CAP_VIDEO
 + arg::add3("-embtrans", [] { 
     arg::shift(); anims::videofile = arg::args();
     arg::shift(); ld a = arg::argf();
@@ -1892,13 +1899,16 @@ auto embchess_ah =
     arg::shift(); int t = arg::argi();
     transition(a, b, t);
     })
+#endif
 + arg::add3("-avp", [] { semidirect_rendering = true; vid.consider_shader_projection = false; })
+#if CAP_VIDEO
 + arg::add3("-embforward", [] { 
     arg::shift(); int t = arg::argi();
     arg::shift(); anims::videofile = arg::args();
     arg::shift(); ld d = arg::argf();
     animate_forward(d, t);
     })
+#endif
 + arg::add3("-emb-goforward", [] { 
     arg::shift(); ld d = arg::argf();
     for(int i=0; i<1000; i++) {
