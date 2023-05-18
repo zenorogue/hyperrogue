@@ -57,7 +57,6 @@ embset current() {
 void activate(const embset& e) {
   if(GDIM == 2) invoke_embed(geom3::seDefault);
   embset c = current();
-  auto wh = vid.wall_height;
   geom3::changing_embedded_settings = true;
   geom3::switch_always3();
   geom3::euclid_embed_scale = e.se == geom3::seDefault ? 1 : e.scale;
@@ -74,7 +73,6 @@ void activate(const embset& e) {
     if(vid.usingGL) resetGL();
     }
   delete_sky();
-  if(vid.wall_height * wh < 0) View = MirrorY * View;
   pmodel = default_model();
   };
 
