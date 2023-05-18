@@ -159,7 +159,7 @@ vector<string> xmap = {
 
 void build_map();
 
-ld hmul;
+ld hmul = 1;
 
 set<cell*> house1, house2;
 
