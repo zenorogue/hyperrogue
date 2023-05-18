@@ -1207,6 +1207,7 @@ struct embedded_matrix_data {
   transmatrix saved;
   hyperpoint logical_coordinates;
   transmatrix rotation;
+  ld old_height;
   };
 
 map<transmatrix*, embedded_matrix_data> mdata;
@@ -1229,6 +1230,7 @@ EX void swapmatrix_iview(transmatrix& ori, transmatrix& V) {
 
     data.rotation = cgi.emb->intermediate_to_logical_scaled * data.rotation;
     data.saved = V;
+    data.old_height = vid.wall_height;
     }
   if(geom3::swap_direction == 1) {
     if(!mdata.count(&V)) { swapmatrix(V); ori = Id; return; }
@@ -1242,6 +1244,7 @@ EX void swapmatrix_iview(transmatrix& ori, transmatrix& V) {
     rot = cgi.emb->logical_scaled_to_intermediate * rot;
     if(nisot::local_perspective_used) ori = ori * rot;
     else V = V * rot;
+    if(vid.wall_height * data.old_height < 0) V = MirrorY * V;
     }
   }
 
