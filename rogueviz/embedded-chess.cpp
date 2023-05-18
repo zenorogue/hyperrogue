@@ -1075,6 +1075,16 @@ void transition_test(ld t) {
   activate(emb_lerp(_edok, cu, t));
   }
 
+bool adjust_to_period;
+
+embset rescaled(const embset& e, ld p) {
+  auto e1 = e;
+  e1.scale /= p;
+  e1.sky *= p;
+  e1.star *= p;
+  return e1;
+  }
+
 void embset_list() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
@@ -1082,7 +1092,9 @@ void embset_list() {
   dialog::start_list(900, 900, '1');
   for(auto& e: embsets) {
     dialog::addItem(e.name, dialog::list_fake_key++);
-    dialog::add_action([&e] { activate(e); });
+    dialog::add_action([&e] {
+      activate(rescaled(e, periods));
+      });
     }
   dialog::end_list();
   dialog::addBack();
@@ -1250,6 +1262,23 @@ bool activated = false;
 
 void o_key(o_funcs& v);
 
+void build() {
+   auto& T0 = euc::eu_input.user_axes;
+   T0[0][0] = 20 * periods;
+   T0[1][1] = 20 * periods;
+   euc::eu_input.twisted = 0;
+   T0[0][1] = 0;
+   T0[1][0] = 0;
+   euc::build_torus3();
+   geometry = gEuclidSquare;
+   variation = eVariation::pure;
+   start_game();
+
+  bac = currentmap->allcells();
+  ac.resize(bac.size());
+  build_map();
+  }
+
 void enable() {
 
   if(activated) return;
@@ -1314,23 +1343,9 @@ void enable() {
     }
   stop_game();
   // vid.cells_drawn_limit = 400;
+  build();
 
   if(!floor_textures) make_floor_textures();
-
-   auto& T0 = euc::eu_input.user_axes;
-   T0[0][0] = 20 * periods;
-   T0[1][1] = 20 * periods;
-   euc::eu_input.twisted = 0;
-   T0[0][1] = 0;
-   T0[1][0] = 0;
-   euc::build_torus3();
-   geometry = gEuclidSquare;
-   variation = eVariation::pure;
-   start_game();
-
-  bac = currentmap->allcells();
-  ac.resize(bac.size());
-  build_map();
 
   rogueviz::rv_hook(hooks_drawcell, 100, draw_chess_at);
   // rogueviz::rv_hook(hooks_frame, 100, [] { restart = true; });
@@ -1356,81 +1371,131 @@ void enable() {
   tour::slide_backup(auto_remove_roofs, false);
   tour::slide_backup(vid.lake_top, 0.2);
   tour::slide_backup(simple_sky, true);
+  tour::slide_backup(sightranges[geometry], 50);
+  tour::slide_backup(backcolor, 0xA0C0FF);
+  tour::slide_backup(vid.cs, vid.cs);
+
+  tour::slide_backup(vid.use_smart_range, 2);
+
+  // vid.cells_generated_limit = 9999;
+  // vid.cells_drawn_limit = 9999;
+  // vid.use_smart_range = 2;
+
+  set_char_by_name(vid.cs, "dodek");
   }
 
-void show() {
+void show_smoothcam() {
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen();
-  dialog::init(XLAT("embchess"), 0xFFFFFFFF, 150, 0);
-  
-  if(true) {
-    dialog::addItem("2D to 3D", 'a');
-    dialog::add_action(switch_fpp_fixed);
-    dialog::addItem("look downwards", 'l');
-    dialog::add_action(look_downwards);
-    }
-  if(true) {
-    dialog::addItem("save smoothcam animation", 's');
-    dialog::add_action([] { save_anim("emb/animation.sav"); });
-    }
-  if(true) {
-    dialog::addItem("load smoothcam animation", 'l');
-    dialog::add_action([] { load_anim("emb/animation.sav"); });
-    }
-  if(true) {
-    dialog::addItem("create smoothcam animation", 'c');
-    dialog::add_action([] { smoothcam::enable_and_show(); });
-    }
-  if(true) {
-    dialog::addBoolItem("run the animation", smoothcam::animate_on, 'r');
-    dialog::add_action([] {
-      smoothcam::animate_on = !smoothcam::animate_on;
-      smoothcam::last_time = HUGE_VAL;
-      });
-   }
-  if(true) {
-    dialog::addBoolItem("animation T0", false, 'a');
-    dialog::add_action([] { smoothcam::animate_on = false; smoothcam::handle_animation(0); });
-    dialog::addBoolItem("animation T1", false, 'b');
-    dialog::add_action([] { smoothcam::animate_on = false; smoothcam::handle_animation(1-1e-7); });
-    }
-  if(true) {
-    dialog::addSelItem("invert walls", fts(vid.wall_height), 'i');
-    dialog::add_action([] { 
-      auto cur = current();
-      cur.walls = -cur.walls;
-      activate(cur);
-      });
-    }
-  if(true) {
-    dialog::addSelItem("closer to default", fts(geom3::euclid_embed_scale), '[');
-    dialog::add_action([] { 
-      activate(emb_lerp(edok(), current(), .99));
-      });
-    dialog::addSelItem("further from default", fts(geom3::euclid_embed_scale), ']');
-    dialog::add_action([] { 
-      activate(emb_lerp(edok(), current(), 1.01));
-      });
-    }
-  if(true) {
-    dialog::addItem("embset list", 'e');
-    dialog::add_action_push(embset_list);
-    }
-  if(true) {
-    dialog::addItem("print embset", 'p');
-    dialog::add_action([] { 
-      embset e = current();
-      println(hlog, e);
-      });    
-    }
-  if(false) {
-    dialog::addItem("transition to", 'u');
-    dialog::add_action([] { anims::videofile = "transition_to.mp4"; transition(0.01, 1, 60); });
-    }
-  if(false) {
-    dialog::addItem("transition from", 'i');
-    dialog::add_action([] { anims::videofile = "transition_from.mp4"; transition(1, 0.01, 60); });
-    }
+  dialog::init(XLAT("smoothcam options"), 0xFFFFFFFF, 150, 0);
+
+  dialog::addItem("create/edit", 'c');
+  dialog::add_action([] { smoothcam::enable_and_show(); });
+  dialog::addBoolItem("run", smoothcam::animate_on, 'r');
+  dialog::add_action([] {
+    smoothcam::animate_on = !smoothcam::animate_on;
+    smoothcam::last_time = HUGE_VAL;
+    });
+  dialog::addItem("move to the start", 'a');
+  dialog::add_action([] { smoothcam::animate_on = true; smoothcam::handle_animation(0); smoothcam::animate_on = false; });
+  dialog::addItem("move to the end", 'b');
+  dialog::add_action([] { smoothcam::animate_on = true; smoothcam::handle_animation(1-1e-7); smoothcam::animate_on = false; });
+  dialog::addItem("save", 's');
+  dialog::add_action([] { save_anim("emb/animation.sav"); });
+  dialog::addItem("load", 'l');
+  dialog::add_action([] { load_anim("emb/animation.sav"); });
+  dialog::addInfo("warning: saved animations need to be loaded in the same embedding");
+  dialog::addBack();
+  dialog::display();
+  }
+
+void show_embeddings() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+  dialog::init(XLAT("embeddings"), 0xFFFFFFFF, 150, 0);
+
+  dialog::addItem("2D to 3D", 'a');
+  dialog::add_action(switch_fpp_fixed);
+
+  dialog::addItem("choose form the list", 'e');
+  dialog::add_action_push(embset_list);
+
+  dialog::addSelItem("invert walls", fts(vid.wall_height), 'i');
+  dialog::add_action([] { 
+    auto cur = current();
+    cur.walls = -cur.walls;
+    activate(cur);
+    });
+
+  dialog::addSelItem("closer to default", fts(geom3::euclid_embed_scale), '[');
+  dialog::add_action([] { 
+    activate(emb_lerp(edok(), current(), .9));
+    });
+  dialog::addSelItem("further from default", fts(geom3::euclid_embed_scale), ']');
+  dialog::add_action([] { 
+    activate(emb_lerp(edok(), current(), 10/9.));
+    });
+
+  dialog::addBack();
+  dialog::display();
+  }
+
+void show_quality() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+  dialog::init(XLAT("quality / elements"), 0xFFFFFFFF, 150, 0);
+  dialog::addInfo("hint: reduce range to improve performance");
+
+  dialog::addBoolItem_action("with models", with_models, 'm');
+  dialog::addBoolItem_action("with chess", with_chess, 'h');
+  dialog::addSelItem("draw the hole", its(draw_digger), 'g');
+  dialog::add_action([] { draw_digger = (1 + draw_digger) % 3; });
+  dialog::addBreak(100);
+
+  dialog::addItem("low range", '1');
+  dialog::add_action([] { vid.cells_drawn_limit = 400; delete_sky(); });
+  dialog::addItem("mid range", '2');
+  dialog::add_action([] { vid.cells_drawn_limit = 2000; delete_sky(); });
+  dialog::addItem("high range", '3');
+  dialog::add_action([] { vid.cells_drawn_limit = 20000; delete_sky(); });
+  dialog::addItem("extreme range", '4');
+  dialog::add_action([] { vid.cells_drawn_limit = 200000; delete_sky(); });
+
+  dialog::addSelItem("scaffolding X", its(scaffoldx), 'X');
+  dialog::add_action([] { scaffoldx = (1 + scaffoldx) % 3; });
+  dialog::addSelItem("scaffolding Y", its(scaffoldy), 'Y');
+  dialog::add_action([] { scaffoldy = (1 + scaffoldy) % 3; });
+  dialog::addSelItem("scaffolding B", its(scaffoldb), 'B');
+  dialog::add_action([] { scaffoldb = (1 + scaffoldb) % 3; });
+  dialog::addSelItem("no floor", ONOFF(no_floor), '<');
+  dialog::add_action([] { no_floor = !no_floor; mapeditor::drawplayer = false; build_map(); });
+
+  dialog::addSelItem("periods", its(periods), 'p');
+  dialog::add_action([] { periods++; stop_game(); build(); 
+    if(adjust_to_period) activate(rescaled(current(), periods / (periods-1.)));
+    });
+  dialog::addBoolItem_action("rescale by period", adjust_to_period, 'r');
+
+  dialog::addInfo("hint: scaffolding needs periods to work");
+
+  dialog::addBack();
+  dialog::display();
+  }
+
+void show_technical() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+  dialog::init(XLAT("technical"), 0xFFFFFFFF, 150, 0);
+
+  dialog::addItem("look downwards", 'l');
+  dialog::add_action(look_downwards);
+
+  dialog::addItem("print embedding", 'p');
+  dialog::add_action([] { 
+    embset e = current();
+    println(hlog, e);
+    });
+
   if(true) {
     static ld dist = 0;
     dialog::addSelItem("measure forward distance", fts(dist), 'f');
@@ -1446,30 +1511,37 @@ void show() {
       dist += -0.05;
       });
     }
-  if(true) {
-    dialog::addItem("low range", 'r');
-    dialog::add_action([] { vid.cells_drawn_limit = 400; delete_sky(); });
-    dialog::addItem("mid range", 't');
-    dialog::add_action([] { vid.cells_drawn_limit = 2000; delete_sky(); });
-    dialog::addItem("high range", 'y');
-    dialog::add_action([] { vid.cells_drawn_limit = 20000; delete_sky(); });
-    dialog::addItem("extreme range", 'u');
-    dialog::add_action([] { vid.cells_drawn_limit = 200000; delete_sky(); });
-    dialog::addBoolItem_action("with models", with_models, 'm');
-    dialog::addBoolItem_action("with chess", with_chess, 'h');
-    dialog::addSelItem("draw the digger", its(draw_digger), 'g');
-    dialog::add_action([] { draw_digger = (1 + draw_digger) % 3; });
+
+  if(false) {
+    dialog::addItem("transition to", 'u');
+    dialog::add_action([] { anims::videofile = "transition_to.mp4"; transition(0.01, 1, 60); });
     }
-  if(true) {
-    dialog::addSelItem("scaffolding X", its(scaffoldx), 'X');
-    dialog::add_action([] { scaffoldx = (1 + scaffoldx) % 3; });
-    dialog::addSelItem("scaffolding Y", its(scaffoldy), 'Y');
-    dialog::add_action([] { scaffoldy = (1 + scaffoldy) % 3; });
-    dialog::addSelItem("scaffolding B", its(scaffoldb), 'B');
-    dialog::add_action([] { scaffoldb = (1 + scaffoldb) % 3; });
-    dialog::addSelItem("no floor", ONOFF(no_floor), '<');
-    dialog::add_action([] { no_floor = !no_floor; mapeditor::drawplayer = false; build_map(); });
+  if(false) {
+    dialog::addItem("transition from", 'i');
+    dialog::add_action([] { anims::videofile = "transition_from.mp4"; transition(1, 0.01, 60); });
     }
+
+  dialog::addBack();
+  dialog::display();
+  }
+
+void show() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+  dialog::init(XLAT("Non-Euclidean 3D"), 0xFFFFFFFF, 150, 0);
+
+  dialog::addItem("embedding options", 'e');
+  dialog::add_action_push(show_embeddings);
+
+  dialog::addItem("quality and elements", 'q');
+  dialog::add_action_push(show_quality);
+
+  dialog::addItem("smoothcam animation", 'a');
+  dialog::add_action_push(show_smoothcam);
+  
+  dialog::addItem("technical stuff", 't');
+  dialog::add_action_push(show_technical);
+  
   dialog::addBoolItem("move the cat", mapeditor::drawplayer, 'd');
   dialog::add_action([] {
     move_cat = true;
@@ -1481,7 +1553,7 @@ void show() {
   }
 
 void o_key(o_funcs& v) {
-  v.push_back(named_dialog("embchess options", show));
+  v.push_back(named_dialog("embedded-chess options", show));
   }
 
 struct solv_grapher : rogueviz::pres::grapher {
@@ -1708,7 +1780,7 @@ string defs =
 
 void act_or_config() {
   if(activated) pushScreen(show);
-  else enable();
+  else { enable(); popScreenAll(); mapeditor::drawplayer = false; }
   }
 
 slide embchess_slides[] = {
