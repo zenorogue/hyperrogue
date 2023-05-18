@@ -1367,6 +1367,7 @@ EX void generate() {
 EX bool in() { 
   if(fake::in()) return FPIU(in()); 
   if(geometry == gCubeTiling && (reg3::cubes_reg3 || !PURE)) return false;
+  if(cgflags & qEXPERIMENTAL) return false;
   return meuclid && standard_tiling();
   }
 
