@@ -3773,58 +3773,62 @@ EX int read_config_args() {
     auto& cs = vid.cs;
     shift();
     string s = args();
-    if(s == "dodek") {
-      cs.charid = 4;
-      cs.lefthanded = false;
-      cs.skincolor = 0x202020FF;
-      cs.eyecolor = 0x20C000FF;
-      cs.haircolor = 0x202020FF;
-      cs.dresscolor =0x424242FF;
-      cs.swordcolor = 0xF73333FF;      
-      }
-    else if(s == "rudy") {
-      cs.charid = 4;
-      cs.lefthanded = false;
-      cs.skincolor = 0xA44139FF;
-      cs.eyecolor = 0xD59533FF;
-      cs.haircolor = 0xC6634AFF;
-      cs.dresscolor =0xC6634AFF;
-      cs.swordcolor = 0x3CBB33FF;      
-      }
-    else if(s == "running") {
-      cs.charid = 6;
-      cs.lefthanded = false;
-      cs.skincolor = 0xFFFFFFFF;
-      cs.eyecolor = 0xFF;
-      cs.haircolor = 0xFFFFFFFF;
-      cs.dresscolor =0xFFFFFFFF;
-      cs.swordcolor = 0xFF0000FF;
-      }
-    else if(s == "princess") {
-      cs.charid = 3;
-      cs.lefthanded = true;
-      cs.skincolor  = 0xEFD0C9FF;
-      cs.haircolor  = 0x301800FF;
-      cs.eyecolor   = 0xC000FF;
-      cs.dresscolor = 0x408040FF;
-      cs.swordcolor = 0xFFFFFFFF;
-      }
-    else if(s == "worker") {
-      cs.charid = 2;
-      cs.skincolor = 0xC77A58FF;
-      cs.haircolor = 0x502810FF;
-      cs.dresscolor = 0xC0C000FF;
-      cs.eyecolor = 0x500040FF;
-      cs.swordcolor = 0x808080FF;
-      }
-    else {
-      cs.charid = argi();
-      cs.lefthanded = cs.charid >= 10;
-      cs.charid %= 10;
-      }
+    set_char_by_name(cs, s);
     }
   else return 1;
   return 0;
+  }
+
+EX void set_char_by_name(charstyle& cs, const string& s) {
+  if(s == "dodek") {
+    cs.charid = 4;
+    cs.lefthanded = false;
+    cs.skincolor = 0x202020FF;
+    cs.eyecolor = 0x20C000FF;
+    cs.haircolor = 0x202020FF;
+    cs.dresscolor =0x424242FF;
+    cs.swordcolor = 0xF73333FF;      
+    }
+  else if(s == "rudy") {
+    cs.charid = 4;
+    cs.lefthanded = false;
+    cs.skincolor = 0xA44139FF;
+    cs.eyecolor = 0xD59533FF;
+    cs.haircolor = 0xC6634AFF;
+    cs.dresscolor =0xC6634AFF;
+    cs.swordcolor = 0x3CBB33FF;      
+    }
+  else if(s == "running") {
+    cs.charid = 6;
+    cs.lefthanded = false;
+    cs.skincolor = 0xFFFFFFFF;
+    cs.eyecolor = 0xFF;
+    cs.haircolor = 0xFFFFFFFF;
+    cs.dresscolor =0xFFFFFFFF;
+    cs.swordcolor = 0xFF0000FF;
+    }
+  else if(s == "princess") {
+    cs.charid = 3;
+    cs.lefthanded = true;
+    cs.skincolor  = 0xEFD0C9FF;
+    cs.haircolor  = 0x301800FF;
+    cs.eyecolor   = 0xC000FF;
+    cs.dresscolor = 0x408040FF;
+    cs.swordcolor = 0xFFFFFFFF;
+    }
+  else if(s == "worker") {
+    cs.charid = 2;
+    cs.skincolor = 0xC77A58FF;
+    cs.haircolor = 0x502810FF;
+    cs.dresscolor = 0xC0C000FF;
+    cs.eyecolor = 0x500040FF;
+    cs.swordcolor = 0x808080FF;
+    }
+  else {
+    cs.charid = atoi(s.c_str());
+    cs.lefthanded = cs.charid >= 10;
+    cs.charid %= 10;
+    }
   }
 
 EX int read_param_args() {

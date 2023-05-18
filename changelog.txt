@@ -4958,3 +4958,11 @@ Other fixes:
 - fixed the orientation in the hat tiling
 - fixed bugs when regenerating a map in the hat tiling + embedding
 - fixed variation not showing in some geometries
+
+2023-05-19 01:15 Update 12.1p:
+Mostly embedding-related improvements:
+- embedding scale parameter now works in "lower curvature" (horospher) embedding (redundant, but useful)
+- better wall shading in EuclidSquare embeddings
+- many embedding-related fixes
+- "Non-Euclidean Third Dimension" demo (of embeddings) in RogueViz
+(also, the "imaginary" hat parameter)
