@@ -74,6 +74,7 @@
 #include "balloonsim.cpp"
 #include "dpgen.cpp"
 #include "antidesitter.cpp"
+#include "embedded-chess.cpp"
 
 #include "dhrg/dhrg.cpp"
 

@@ -4,6 +4,10 @@
 
 namespace hr {
 
+namespace embchess {
+
+namespace smoothcam { using namespace rogueviz::smoothcam; }
+
 /** load Chess? */
 EX bool with_chess = false;
 /** load other models? */
@@ -20,10 +24,6 @@ int periods = 1;
 
 /** how many chess moves performed */
 int chess_moves = 0;
-
-namespace smoothcam {
-using namespace rogueviz::smoothcam;
-}
 
 vector<pair<hyperpoint, hyperpoint>> map54_edges;
 vector<hyperpoint> map54_nodes;
@@ -78,7 +78,7 @@ void activate(const embset& e) {
   pmodel = default_model();
   };
 
-embset lerp(const embset& a, const embset& b, ld f) {
+embset emb_lerp(const embset& a, const embset& b, ld f) {
   embset e;
   e.name = lalign(0, "lerp(", a, ", ", b, ", ", f, ")");
   e.se = b.se;
@@ -159,13 +159,11 @@ vector<string> xmap = {
   {"....^.pppppppppppp#"},
   };
 
-namespace embchess {
-
 void build_map();
 
 ld hmul;
 
-set<cell*> domek1, domek2;
+set<cell*> house1, house2;
 
 vector<cell*> ac, bac;
 
@@ -322,10 +320,6 @@ void split_model_data::render(const shiftmatrix& V, int x, int y) {
 
 chessmodel chess("rogueviz/models/", "Polyfjord_Chess_Set.obj");
 
-ld minz = 100, maxz = -100;
-ld minx = 100, maxx = -100;
-ld miny = 100, maxy = -100;
-
 struct bunnymodel : public model {
   hyperpoint transform(hyperpoint h) override { 
     h = cspin90(1, 2) * h;
@@ -470,9 +464,6 @@ struct lilymodel : public model {
     h[0] += 0.67; h[1] -= 0.36; 
     h[0] *= 5;
     h[1] *= 5;
-    /* h[0] *= 400;
-    h[1] *= 400;
-    h[0] -= 0.1*2; h[1] += 0.36*2; */
     h[2] = lerp(cgi.LAKE, cgi.FLOOR, ilerp(0.018, -0.0496, h[2]) * hmul);
     if(GDIM == 3) h = cgi.emb->logical_to_actual(h);
     else h[2] = 1;
@@ -487,9 +478,6 @@ struct duckmodel : public model {
   hyperpoint transform(hyperpoint h) override { 
     h = cspin90(1, 2) * h;
     h[0] += 3.8; h[1] -= 2;
-    /* h[0] *= 400;
-    h[1] *= 400;
-    h[0] -= 0.1*2; h[1] += 0.36*2; */
     h[2] = lerp(cgi.LAKE, cgi.FLOOR, ilerp(0.056, -0.408, h[2]) * hmul * 1.5);
     if(GDIM == 3) h = cgi.emb->logical_to_actual(h);
     else h[2] = 1;
@@ -510,13 +498,6 @@ struct ratmodel : public model {
     h[1] /= 3 * 3;
     h[2] /= 3 * 3;
     h = cspin(0, 1, 135._deg) * h;
-
-    if(h[2] < minz) minz = h[2];
-    if(h[2] > maxz) maxz = h[2];
-    if(h[0] < minx) minx = h[0];
-    if(h[0] > maxx) maxx = h[0];
-    if(h[1] < miny) miny = h[1];
-    if(h[1] > maxy) maxy = h[1];
 
     h[2] = lerp(cgi.FLOOR, cgi.WALL, ilerp(1/9., 1/9. - 1.2, h[2]) * hmul);
     if(GDIM == 3) h = cgi.emb->logical_to_actual(h);
@@ -832,13 +813,7 @@ void draw_scaffold(const shiftmatrix& V) {
     }
   }
 
-/*
-          static bool first = true;
-          if(first) println(hlog, tie(minx, maxx), tie(miny, maxy), tie(minz, maxz));
-          first = false;
-*/
-
-string losowo = "1100002102001211";
+string fixed_random_digits = "1100002102001211";
 
 void draw_shape(const shiftmatrix& V, vector<ld> tab, color_t col, ld mul = 1) {
   int n = isize(tab);
@@ -863,9 +838,6 @@ bool draw_chess_at(cell *c, const shiftmatrix& V) {
       case 'r':
         if(GDIM == 3 && with_models) {
           rat.render(V);
-          static bool first = true;
-          if(first) println(hlog, tie(minx, maxx), tie(miny, maxy), tie(minz, maxz));
-          first = false;
           }
         else {
           drawMonsterType(moMouse, c, V * spin(-135._deg), 0x804000, 0, 0x804000);
@@ -873,11 +845,12 @@ bool draw_chess_at(cell *c, const shiftmatrix& V) {
         break;
       case '<':
         c->wall = waChasm;
-        domek1.erase(c); domek2.erase(c);
+        house1.erase(c); house2.erase(c);
         fat_line(V, cgi.emb->logical_to_actual(point31(0.5, 0.5, 0)), V, cgi.emb->logical_to_actual(point31(0.5, -0.5, 0)), 0xFFFFFFFF, 2, 0.001);
         fat_line(V, cgi.emb->logical_to_actual(point31(0.5, 0.5, 0)), V, cgi.emb->logical_to_actual(point31(-0.5, 0.5, 0)), 0xFFFFFFFF, 2, 0.001);
         break;
       case 'u': {
+        if(!cgtrader_models) break;
         if(GDIM == 3 && with_models) {
           lily.render(V);
           c->item = itNone;
@@ -886,6 +859,7 @@ bool draw_chess_at(cell *c, const shiftmatrix& V) {
         break;
         }
       case 'v': {
+        if(!cgtrader_models) break;
         if(GDIM == 3 && with_models) duck.render(V);
         else {
           draw_shape(V, {-0.164988, 0.0033671, -0.114197, 0.0638159, 0.0401905, 0.063635, 0.10735, 0.0268375, 0.10735, -0.0268375, 0.0401905, -0.063635, -0.114197, -0.0638159, -0.164988, -0.0033671, }, 0xC0C0C0FF, 2);
@@ -909,6 +883,7 @@ bool draw_chess_at(cell *c, const shiftmatrix& V) {
           }
         break;
       case 't':
+        if(!cgtrader_models) break;
         if(GDIM == 2) c->wall = waRoundTable; else if(with_models && !light_models) {
           c->wall = waNone;
           table.render(V);
@@ -934,12 +909,14 @@ bool draw_chess_at(cell *c, const shiftmatrix& V) {
           }
         break;
       case 'e':
+        if(!cgtrader_models) break;
         if(GDIM == 3 && draw_digger == 2) digger.render(V);
         break;
       case 'K': {
+        if(!cgtrader_models) break;
         int a = gmod(co.first + co.second, 3);
         if(GDIM == 3 && with_models) {
-          auto gtulip = [&] (int a, int b) -> tulipmodel& { char ch = losowo[5*a+b]; if(ch == '0') return tulip; if(ch == '1') return tulip1; if(ch == '2') return tulip2; return tulip2; };
+          auto gtulip = [&] (int a, int b) -> tulipmodel& { char ch = fixed_random_digits[5*a+b]; if(ch == '0') return tulip; if(ch == '1') return tulip1; if(ch == '2') return tulip2; return tulip2; };
           gtulip(a, 0).render(V);
           gtulip(a, 1).render(V * cgi.emb->intermediate_to_actual_translation(cgi.emb->logical_to_intermediate * point3(1/3., 1/3., 0)));
           gtulip(a, 2).render(V * cgi.emb->intermediate_to_actual_translation(cgi.emb->logical_to_intermediate * point3(1/3., -1/3., 0)));
@@ -990,20 +967,10 @@ void switch_fpp_fixed() {
     activate(edefault);
     }
   if(GDIM == 3) {
-    // pconf.camera_angle = 90;
-
     ld tfov = vid.fov * degree / 2;
     cd->tanfov = tan(tfov);
-    // tanfov * z + depth = fov
-    // z = (fov - depth) / tanfov
     ld yshift = (otanfov - vid.depth) / cd->tanfov;
-    // drawthemap();
-    // centerpc(INF);
-    // shift_view(zpush0(yshift));
     println(hlog, "yshift = ", yshift, " from ", vid.yshift);
-    // playermoved = false;
-    // vid.fov = fov;
-    // vid.yshift = yshift;
     View = Id;
     for(int a=0; a<2; a++)
     for(int b=0; b<2; b++)
@@ -1011,7 +978,6 @@ void switch_fpp_fixed() {
     for(int a=0; a<2; a++)
       View[a][3] = tView[a][2];
     println(hlog, tie(tView[2][0], tView[2][1]));
-    // rotate_view(cspin90(2, 1));
     shift_view(zpush0(yshift)); 
     playermoved = false;
     }
@@ -1068,7 +1034,7 @@ void transition(ld a, ld b, int frames) {
     sightranges[geometry] = 50 * t;
     glhr::vnear_default = vn * t;
     glhr::vfar_default = vf * t;
-    activate(lerp(_edok, cu, t));
+    activate(emb_lerp(_edok, cu, t));
     });
   anims::record_video();
   delHook(anims::hooks_anim, lev);
@@ -1106,7 +1072,7 @@ void transition_test(ld t) {
   sightranges[geometry] = 50 * t;
   glhr::vnear_default = vn * t;
   glhr::vfar_default = vf * t;
-  activate(lerp(_edok, cu, t));
+  activate(emb_lerp(_edok, cu, t));
   }
 
 void embset_list() {
@@ -1137,137 +1103,6 @@ void look_downwards() {
     }
   }
 
-void show() {
-  cmode = sm::SIDE | sm::MAYDARK;
-  gamescreen();
-  dialog::init(XLAT("embchess"), 0xFFFFFFFF, 150, 0);
-  
-  if(true) {
-    dialog::addItem("2D to 3D", 'a');
-    dialog::add_action(switch_fpp_fixed);
-    dialog::addItem("look downwards", 'l');
-    dialog::add_action(look_downwards);
-    }
-  if(true) {
-    dialog::addItem("save smoothcam animation", 's');
-    dialog::add_action([] { save_anim("emb/animation.sav"); });
-    }
-  if(true) {
-    dialog::addItem("load smoothcam animation", 'l');
-    dialog::add_action([] { load_anim("emb/animation.sav"); });
-    }
-  if(true) {
-    dialog::addItem("create smoothcam animation", 'c');
-    dialog::add_action([] { smoothcam::enable_and_show(); });
-    }
-  if(true) {
-    dialog::addBoolItem("run the animation", smoothcam::animate_on, 'r');
-    dialog::add_action([] {
-      smoothcam::animate_on = !smoothcam::animate_on;
-      smoothcam::last_time = HUGE_VAL;
-      });
-   }
-  if(true) {
-    dialog::addBoolItem("animation T0", false, 'a');
-    dialog::add_action([] { smoothcam::animate_on = false; smoothcam::handle_animation(0); });
-    dialog::addBoolItem("animation T1", false, 'b');
-    dialog::add_action([] { smoothcam::animate_on = false; smoothcam::handle_animation(1-1e-7); });
-    }
-  if(true) {
-    dialog::addSelItem("invert walls", fts(vid.wall_height), 'i');
-    dialog::add_action([] { 
-      auto cur = current();
-      cur.walls = -cur.walls;
-      activate(cur);
-      });
-    }
-  if(true) {
-    dialog::addSelItem("closer to default", fts(geom3::euclid_embed_scale), '[');
-    dialog::add_action([] { 
-      activate(lerp(edok(), current(), .99));
-      });
-    dialog::addSelItem("further from default", fts(geom3::euclid_embed_scale), ']');
-    dialog::add_action([] { 
-      activate(lerp(edok(), current(), 1.01));
-      });
-    }
-  if(true) {
-    dialog::addItem("embset list", 'e');
-    dialog::add_action_push(embset_list);
-    }
-  if(true) {
-    dialog::addItem("print embset", 'p');
-    dialog::add_action([] { 
-      embset e = current();
-      println(hlog, e);
-      });    
-    }
-  if(false) {
-    dialog::addItem("transition to", 'u');
-    dialog::add_action([] { anims::videofile = "transition_to.mp4"; transition(0.01, 1, 60); });
-    }
-  if(false) {
-    dialog::addItem("transition from", 'i');
-    dialog::add_action([] { anims::videofile = "transition_from.mp4"; transition(1, 0.01, 60); });
-    }
-  if(true) {
-    static ld dist = 0;
-    dialog::addSelItem("measure forward distance", fts(dist), 'f');
-    dialog::add_action([] { 
-      shift_view(ztangent(-0.2));
-      spinEdge(100);
-      dist += 0.2;
-      });
-    dialog::addSelItem("go backward", fts(dist), 'b');
-    dialog::add_action([] { 
-      shift_view(ztangent(+0.05));
-      spinEdge(100);
-      dist += -0.05;
-      });
-    }
-  if(true) {
-    dialog::addItem("low range", 'r');
-    dialog::add_action([] { vid.cells_drawn_limit = 400; delete_sky(); });
-    dialog::addItem("mid range", 't');
-    dialog::add_action([] { vid.cells_drawn_limit = 2000; delete_sky(); });
-    dialog::addItem("high range", 'y');
-    dialog::add_action([] { vid.cells_drawn_limit = 20000; delete_sky(); });
-    dialog::addItem("extreme range", 'u');
-    dialog::add_action([] { vid.cells_drawn_limit = 200000; delete_sky(); });
-    dialog::addBoolItem_action("with models", with_models, 'm');
-    dialog::addBoolItem_action("with chess", with_chess, 'h');
-    dialog::addSelItem("draw the digger", its(draw_digger), 'g');
-    dialog::add_action([] { draw_digger = (1 + draw_digger) % 3; });
-    }
-  if(true) {
-    dialog::addSelItem("scaffolding X", its(scaffoldx), 'X');
-    dialog::add_action([] { scaffoldx = (1 + scaffoldx) % 3; });
-    dialog::addSelItem("scaffolding Y", its(scaffoldy), 'Y');
-    dialog::add_action([] { scaffoldy = (1 + scaffoldy) % 3; });
-    dialog::addSelItem("scaffolding B", its(scaffoldb), 'B');
-    dialog::add_action([] { scaffoldb = (1 + scaffoldb) % 3; });
-    dialog::addSelItem("no floor", ONOFF(no_floor), '<');
-    dialog::add_action([] { no_floor = !no_floor; mapeditor::drawplayer = false; build_map(); });
-    }
-  dialog::addBoolItem("move the cat", mapeditor::drawplayer, 'd');
-  dialog::add_action([] {
-    move_cat = true;
-    game_keys_scroll = false;
-    });
-  /* println(hlog, "sol = ", sol);
-  if(true) {
-    dialog::addItem("reset GL", 'r');
-    dialog::add_action([] { resetGL(); reset_all_shaders(); });
-    } */
-
-  dialog::addBack();
-  dialog::display();    
-  }
-
-void o_key(o_funcs& v) {
-  v.push_back(named_dialog("embchess options", show));
-  }
-
 color_t domcol = 0xf8dba0;
 color_t domcolf = 0x785b20;
 color_t domroof = 0x802020;
@@ -1284,20 +1119,20 @@ bool chess_ceiling(celldrawer *cw) {
   auto co = euc::full_coords2(cw->c);
   if(co == gp::loc{0, 0}) 
     draw_star(cw->V, cgi.shSun, 0xFFFF00FF);
-  if(domek2.count(cw->c)) {
+  if(house2.count(cw->c)) {
     color_t col = (domcol << 8) | 0xFF;
     color_t wcol1 = (gradient(0, domcol, 0, .9, 1) << 8) | 0xFF;
     color_t wcol2 = (gradient(0, domcol, 0, .8, 1) << 8) | 0xFF;
-    if(domek1.count(cw->c)) forCellIdEx(c2, i, cw->c) if(!domek1.count(c2)) {
+    if(house1.count(cw->c)) forCellIdEx(c2, i, cw->c) if(!house1.count(c2)) {
       placeSidewall(cw->c, i, SIDE_HIGH, cw->V, (i&1)?wcol1:wcol2); 
       placeSidewall(cw->c, i, SIDE_HIGH2, cw->V, (i&1)?wcol1:wcol2); 
       }
-    forCellIdEx(c2, i, cw->c) if(!domek2.count(c2)) {
+    forCellIdEx(c2, i, cw->c) if(!house2.count(c2)) {
       placeSidewall(cw->c, i, SIDE_HIGH2, cw->V, (i&1)?wcol1:wcol2); 
       }
-    if(domek1.count(cw->c) != domek2.count(cw->c))
+    if(house1.count(cw->c) != house2.count(cw->c))
       draw_shapevec(cw->c, cw->V, qfi.fshape->levels[SIDE_HIGH], col, PPR::REDWALL);
-    if(domek2.count(cw->c))
+    if(house2.count(cw->c))
       draw_shapevec(cw->c, cw->V, qfi.fshape->levels[SIDE_HIGH2], (domroof << 8) | 0xFF, PPR::REDWALL);
 
     auto co = euc::full_coords2(cw->c);
@@ -1337,7 +1172,7 @@ void build_map() {
         break;
       case '1':
         c->wall = waRed3;
-        domek2.insert(c);
+        house2.insert(c);
         c->landparam = domcol;
         break;
       case '2':
@@ -1354,25 +1189,25 @@ void build_map() {
         break;
       case 'D':
         c->wall = waWaxWall;
-        domek1.insert(c);
-        domek2.insert(c);
+        house1.insert(c);
+        house2.insert(c);
         c->landparam = domcol;
         break;
       case 't':
       case 'r':
       case 'd':
         c->wall = waNone;
-        domek2.insert(c);
+        house2.insert(c);
         c->landparam = domcolf;
         break;
       case '+':
         c->wall = waNone;
-        domek2.insert(c);
+        house2.insert(c);
         c->landparam = domcol;
         break;
       case 'O':
         c->wall = waWaxWall;
-        domek2.insert(c);
+        house2.insert(c);
         c->landparam = domcol;
         break;
       case 'u':
@@ -1392,13 +1227,39 @@ void build_map() {
     }
   }
 
-void enable() { 
-  arg::shift(); hmul = arg::argf();
+ld square_diagram_size = 1000;
 
+void enable_square_diagram() {
+  rogueviz::rv_hook(hooks_frame, 100, [] {
+    if(square_diagram_size >= 1000) return;
+    auto p = [] (ld x, ld y) { return hpxy(x, y); };
+    for(int i=0; i<4; i++) {
+      ld si = square_diagram_size;
+      ld big = 100;
+      curvepoint(p(si, big));
+      curvepoint(p(si, -big));
+      curvepoint(p(big, -big));
+      curvepoint(p(big, big));
+      curvepoint(p(si, big));
+      queuecurve(shiftless(Id) * cspin(0, 1, i*90._deg), 0, 0xFF, PPR::CIRCLE).flags |= POLY_ALWAYS_IN;
+      }
+    });
+  }
+
+bool activated = false;
+
+void o_key(o_funcs& v);
+
+void enable() {
+
+  if(activated) return;
+  tour::slide_backup(activated, true);
+
+  if(!params.count("square_diagram_size")) param_f(square_diagram_size, "square_diagram_size");
   stop_game();
-  never_invert = true;
-  vid.wallmode = 3;
-  vid.monmode = 2;
+  tour::slide_backup(never_invert, true);
+  tour::slide_backup(vid.wallmode, 3);
+  tour::slide_backup(vid.monmode, 2);
 
   geometry = gArchimedean;
   variation = eVariation::pure;
@@ -1486,16 +1347,141 @@ void enable() {
     return false;
     });
 
+  tour::slide_backup(frustum_culling, false);
+  tour::slide_backup(game_keys_scroll, true);
+  tour::slide_backup(bright, true);
+  tour::slide_backup(draw_sky, skyAlways);
+  tour::slide_backup(vid.cells_generated_limit, 999999);
+  tour::slide_backup(noshadow, true);
+  tour::slide_backup(auto_remove_roofs, false);
+  tour::slide_backup(vid.lake_top, 0.2);
+  tour::slide_backup(simple_sky, true);
+  }
 
-  frustum_culling = false;
-  game_keys_scroll = true;
-  bright = true;
-  draw_sky = skyAlways;
-  vid.cells_generated_limit = 9999;
-  noshadow = true;
-  auto_remove_roofs = false;
-  vid.lake_top = 0.2;
-  simple_sky = true;
+void show() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen();
+  dialog::init(XLAT("embchess"), 0xFFFFFFFF, 150, 0);
+  
+  if(true) {
+    dialog::addItem("2D to 3D", 'a');
+    dialog::add_action(switch_fpp_fixed);
+    dialog::addItem("look downwards", 'l');
+    dialog::add_action(look_downwards);
+    }
+  if(true) {
+    dialog::addItem("save smoothcam animation", 's');
+    dialog::add_action([] { save_anim("emb/animation.sav"); });
+    }
+  if(true) {
+    dialog::addItem("load smoothcam animation", 'l');
+    dialog::add_action([] { load_anim("emb/animation.sav"); });
+    }
+  if(true) {
+    dialog::addItem("create smoothcam animation", 'c');
+    dialog::add_action([] { smoothcam::enable_and_show(); });
+    }
+  if(true) {
+    dialog::addBoolItem("run the animation", smoothcam::animate_on, 'r');
+    dialog::add_action([] {
+      smoothcam::animate_on = !smoothcam::animate_on;
+      smoothcam::last_time = HUGE_VAL;
+      });
+   }
+  if(true) {
+    dialog::addBoolItem("animation T0", false, 'a');
+    dialog::add_action([] { smoothcam::animate_on = false; smoothcam::handle_animation(0); });
+    dialog::addBoolItem("animation T1", false, 'b');
+    dialog::add_action([] { smoothcam::animate_on = false; smoothcam::handle_animation(1-1e-7); });
+    }
+  if(true) {
+    dialog::addSelItem("invert walls", fts(vid.wall_height), 'i');
+    dialog::add_action([] { 
+      auto cur = current();
+      cur.walls = -cur.walls;
+      activate(cur);
+      });
+    }
+  if(true) {
+    dialog::addSelItem("closer to default", fts(geom3::euclid_embed_scale), '[');
+    dialog::add_action([] { 
+      activate(emb_lerp(edok(), current(), .99));
+      });
+    dialog::addSelItem("further from default", fts(geom3::euclid_embed_scale), ']');
+    dialog::add_action([] { 
+      activate(emb_lerp(edok(), current(), 1.01));
+      });
+    }
+  if(true) {
+    dialog::addItem("embset list", 'e');
+    dialog::add_action_push(embset_list);
+    }
+  if(true) {
+    dialog::addItem("print embset", 'p');
+    dialog::add_action([] { 
+      embset e = current();
+      println(hlog, e);
+      });    
+    }
+  if(false) {
+    dialog::addItem("transition to", 'u');
+    dialog::add_action([] { anims::videofile = "transition_to.mp4"; transition(0.01, 1, 60); });
+    }
+  if(false) {
+    dialog::addItem("transition from", 'i');
+    dialog::add_action([] { anims::videofile = "transition_from.mp4"; transition(1, 0.01, 60); });
+    }
+  if(true) {
+    static ld dist = 0;
+    dialog::addSelItem("measure forward distance", fts(dist), 'f');
+    dialog::add_action([] { 
+      shift_view(ztangent(-0.2));
+      spinEdge(100);
+      dist += 0.2;
+      });
+    dialog::addSelItem("go backward", fts(dist), 'b');
+    dialog::add_action([] { 
+      shift_view(ztangent(+0.05));
+      spinEdge(100);
+      dist += -0.05;
+      });
+    }
+  if(true) {
+    dialog::addItem("low range", 'r');
+    dialog::add_action([] { vid.cells_drawn_limit = 400; delete_sky(); });
+    dialog::addItem("mid range", 't');
+    dialog::add_action([] { vid.cells_drawn_limit = 2000; delete_sky(); });
+    dialog::addItem("high range", 'y');
+    dialog::add_action([] { vid.cells_drawn_limit = 20000; delete_sky(); });
+    dialog::addItem("extreme range", 'u');
+    dialog::add_action([] { vid.cells_drawn_limit = 200000; delete_sky(); });
+    dialog::addBoolItem_action("with models", with_models, 'm');
+    dialog::addBoolItem_action("with chess", with_chess, 'h');
+    dialog::addSelItem("draw the digger", its(draw_digger), 'g');
+    dialog::add_action([] { draw_digger = (1 + draw_digger) % 3; });
+    }
+  if(true) {
+    dialog::addSelItem("scaffolding X", its(scaffoldx), 'X');
+    dialog::add_action([] { scaffoldx = (1 + scaffoldx) % 3; });
+    dialog::addSelItem("scaffolding Y", its(scaffoldy), 'Y');
+    dialog::add_action([] { scaffoldy = (1 + scaffoldy) % 3; });
+    dialog::addSelItem("scaffolding B", its(scaffoldb), 'B');
+    dialog::add_action([] { scaffoldb = (1 + scaffoldb) % 3; });
+    dialog::addSelItem("no floor", ONOFF(no_floor), '<');
+    dialog::add_action([] { no_floor = !no_floor; mapeditor::drawplayer = false; build_map(); });
+    }
+  dialog::addBoolItem("move the cat", mapeditor::drawplayer, 'd');
+  dialog::add_action([] {
+    move_cat = true;
+    game_keys_scroll = false;
+    });
+
+  dialog::addBack();
+  dialog::display();    
+  }
+
+void o_key(o_funcs& v) {
+  v.push_back(named_dialog("embchess options", show));
   }
 
 struct solv_grapher : rogueviz::pres::grapher {
@@ -1708,25 +1694,6 @@ void geodesic_screen(tour::presmode mode, int id) {
     });
   }
 
-ld square_diagram_size = 10;
-
-void enable_square_diagram() {
-  param_f(square_diagram_size, "square_diagram_size");
-  rogueviz::rv_hook(hooks_frame, 100, [] {
-    auto p = [] (ld x, ld y) { return hpxy(x, y); };
-    for(int i=0; i<4; i++) {
-      ld si = square_diagram_size;
-      ld big = 100;
-      curvepoint(p(si, big));
-      curvepoint(p(si, -big));
-      curvepoint(p(big, -big));
-      curvepoint(p(big, big));
-      curvepoint(p(si, big));
-      queuecurve(shiftless(Id) * cspin(0, 1, i*90._deg), 0, 0xFF, PPR::CIRCLE).flags |= POLY_ALWAYS_IN;
-      }
-    });
-  }
-
 using namespace rogueviz::pres;
 
 string defs = 
@@ -1739,40 +1706,26 @@ string defs =
   "\\renewcommand{\\rmdefault}{\\sfdefault}\\sf"
   ;
 
-slide solv_slides[] = {
-  {"from A to B in Solv 1", 999, LEGAL::NONE | QUICKGEO | NOTITLE, 
-    "not written"
-    ,
-    [] (presmode mode) {
-      println(hlog, "A mode ", int(mode));
-      empty_screen(mode);
-      geodesic_screen(mode, 0);
-      no_other_hud(mode);
-      }
-    },
-  {"from A to B in Solv 2", 999, LEGAL::NONE | QUICKGEO | NOTITLE, 
-    "not written"
-    ,
-    [] (presmode mode) {
-      println(hlog, "B mode ", int(mode));
-      empty_screen(mode);
-      geodesic_screen(mode, 1);
-      no_other_hud(mode);
-      }
-    },
-  {"from A to B in Solv 3", 999, LEGAL::NONE | QUICKGEO | NOTITLE, 
-    "not written"
-    ,
-    [] (presmode mode) {
-      println(hlog, "C mode ", int(mode));
-      empty_screen(mode);
-      geodesic_screen(mode, 2);
-      no_other_hud(mode);
-      }
-    },
+void act_or_config() {
+  if(activated) pushScreen(show);
+  else enable();
+  }
+
+slide embchess_slides[] = {
+  {"3D world", 999, LEGAL::NONE | QUICKGEO | QUICKSKIP | USE_SLIDE_NAME,
+   "This is the world from our YouTube video 'Non-Euclidean Third Dimension'. "
+   "You can activate it by pressing '5', and then press '5' again "
+   "to access various options. The next slides are slides from that video.\n\n",
+
+  [] (presmode mode) {
+    setCanvas(mode, '0');
+    slide_url(mode, 'y', "YouTube link", "https://youtu.be/Rhjv_PazzZE");
+    slide_action(mode, 'a', "activate / configure", act_or_config);
+    if(mode == pmKey) act_or_config();
+    }},
 
   {"Euler's polyhedron formula", 999, LEGAL::NONE | QUICKGEO | USE_SLIDE_NAME | NOTITLE, 
-    "-show the formula",
+    "This is a proof that a sphere cannot be tiled with squares.",
     [] (presmode mode) {
       latex_slide(mode, defs+R"=(
    {\color{remph}Euler's polyhedron formula: }   
@@ -1786,30 +1739,48 @@ slide solv_slides[] = {
    )=", sm::NOSCR, 150);
       }},
 
-  {"final slide", 123, LEGAL::ANY | NOTITLE | QUICKSKIP | FINALSLIDE, 
-    "FINAL SLIDE",
-  
+
+  {"from A to B in Solv 1", 999, LEGAL::NONE | QUICKGEO | NOTITLE, 
+    "How to get from A to B in Solv as quickly as possible? The first attempt is to do so without leaving the plane. Since the XY plane in Solv has Euclidean geometry, we can compute the length of such a path using the Pythagoras theorem."
+    "Press '5' to switch to the 3D view."
+    ,
     [] (presmode mode) {
+      println(hlog, "A mode ", int(mode));
       empty_screen(mode);
-      add_stat(mode, [] {
-        dialog::init();
-        color_t d = dialog::dialogcolor;
-
-        dialog::addTitle("Thanks for your attention!", 0xC00000, 200);
-
-        dialog::addBreak(100);
-
-        dialog::addTitle("twitter.com/zenorogue/", d, 150);
-        
-        dialog::display();
-        return true;
-        });
+      geodesic_screen(mode, 0);
       no_other_hud(mode);
       }
+    },
+  {"from A to B in Solv 2", 999, LEGAL::NONE | QUICKGEO | NOTITLE, 
+    "But we can do it faster like this, using two hyperbolic geodesics. "
+    ,
+    [] (presmode mode) {
+      println(hlog, "B mode ", int(mode));
+      empty_screen(mode);
+      geodesic_screen(mode, 1);
+      no_other_hud(mode);
+      }
+    },
+  {"from A to B in Solv 3", 999, LEGAL::NONE | QUICKGEO | NOTITLE, 
+    "And even faster, do it like this, avoiding sharp bends."
+    ,
+    [] (presmode mode) {
+      println(hlog, "C mode ", int(mode));
+      empty_screen(mode);
+      geodesic_screen(mode, 2);
+      no_other_hud(mode);
+      }
+    },
+
+  {"final slide", 123, LEGAL::ANY | NOTITLE | QUICKSKIP | FINALSLIDE, 
+    "End of the presentation.",
+  
+    [] (presmode mode) { }
     },
   };
 
 auto embchess_ah = 
+  /* enable this unit */
   arg::add3("-embchess", enable)
 + arg::add3("-embperiods", [] { arg::shift(); periods = arg::argi(); })
 + arg::add3("-emb-noceil", [] {
@@ -1870,6 +1841,8 @@ auto embchess_ah =
 
 auto embchess_show =
   addHook_slideshows(100, [] (tour::ss::slideshow_callback cb) {
-    cb(XLAT("Solv geodesics"), &solv_slides[0], 'S');
+    cb(XLAT("non-Euclidean third dimension"), &embchess_slides[0], '3');
     });
-}}
+
+}
+}
