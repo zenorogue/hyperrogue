@@ -679,7 +679,9 @@ EX void make_air() {
         S = cgi1->emb->actual_to_base(S);
         }
       
-      auto& h = cgi.shFullFloor.b[shvid(g.c)];
+      int id = shvid(g.c);
+      ensure_floorshape_generated(id, g.c);
+      auto& h = cgi.shFullFloor.b[id];
 
       dqi_poly p;
       p.V = shiftless(S);

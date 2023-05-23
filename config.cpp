@@ -2764,8 +2764,12 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
 
   param_f(vid.depth_bonus, "depth_bonus", 0)
     ->editable(-5, 5, .1, "depth bonus in pseudohedral", "", 'b');
-  param_b(vid.pseudohedral, "pseudohedral", false)
-    ->editable("make the tiles flat", 'p');
+  param_enum(vid.pseudohedral, "pseudohedral", "pseudohedral", phOFF)
+    ->editable(
+    {{"OFF", "the tiles are curved"},
+    {"inscribed", "the tiles are inscribed"},
+    {"circumscribed", "the tiles are circumscribed"}},
+    "make the tiles flat", 'p');
   param_f(vid.depth, "depth", "3D depth", 1)
     ->editable(0, 5, .1, "Ground level below the plane", "", 'd')
     ->set_extra([] {

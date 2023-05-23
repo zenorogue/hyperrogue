@@ -1282,8 +1282,10 @@ EX string cgi_string() {
     V("ASH", ONOFF(vid.gp_autoscale_heights));
     V("LT", fts(vid.lake_top));
     V("LB", fts(vid.lake_bottom));
-    if(GDIM == 3 && vid.pseudohedral)
-      V("PS", fts(vid.depth_bonus));
+    if(GDIM == 3 && vid.pseudohedral) {
+      V("PSH", fts(vid.pseudohedral));
+      V("PSD", fts(vid.depth_bonus));
+      }
     V("LS", fts(vid.lake_shallow));
     V("SSu", fts(vid.sun_size));
     V("SSt", fts(vid.star_size));

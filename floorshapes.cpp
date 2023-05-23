@@ -274,6 +274,10 @@ template<class T> void sizeto(T& t, int n) {
   if(isize(t) <= n) t.resize(n+1);
   }
 
+template<class T, class U> void sizeto(T& t, int n, const U& val) {
+  if(isize(t) <= n) t.resize(n+1, val);
+  }
+
 void geometry_information::bshape_regular(floorshape &fsh, int id, int sides, ld shift, ld size, cell *c) {
   
   sizeto(fsh.b, id);
@@ -375,6 +379,24 @@ void geometry_information::finish_apeirogon(hyperpoint center) {
     hpcpush(center);
     hpcpush(starting_point);
     }
+  }
+
+hyperpoint get_circumscribed_corner(cell *c, int t, hyperpoint h) {
+
+  hyperpoint h0 = currentmap->adjmod(c, t) * h;
+  hyperpoint h1 = currentmap->adjmod(c, t-1) * h;
+  transmatrix T;
+  array<hyperpoint, 3> hs = {h, h0, h1};
+  set_column(T, 3, C03);
+  hyperpoint res = C03;
+  for(int i=0; i<3; i++) {
+    hyperpoint ahs = hs[i];
+    if(hyperbolic) ahs[3] *= -1;
+    set_column(T, i, ahs);
+    res[i] = dot_d(4, hs[i], ahs);
+    }
+  T = transpose(T);
+  return inverse(T) * res;
   }
 
 // !siid equals pseudohept(c)
@@ -685,7 +707,8 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         if(1) {
           int s = fsh.b[id].s;
           int e = fsh.b[id].e-1;
-          if(vid.pseudohedral) {
+
+          if(vid.pseudohedral == phInscribed) {
             hyperpoint ctr = Hypc;
             for(int t=0; t<e-s; t++)
               ctr += kleinize(cgi.emb->orthogonal_move(hpc[s+t], dfloor_table[k]));
@@ -699,7 +722,24 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
                 });
               }
             }
-          if(!vid.pseudohedral) for(int t=0; t<e-s; t++) {
+          if(vid.pseudohedral == phCircumscribed) {
+
+            vector<hyperpoint> hs(c->type);
+            hyperpoint z = Hypc; z[2] = dfloor_table[k];
+            hyperpoint ctr = cgi.emb->logical_to_actual(z);
+            for(int t=0; t<c->type; t++) hs[t] = get_circumscribed_corner(c, t, ctr);
+            // for(int t=0; t<c->type; t++) hs[t] = xspinpush0(t * TAU / c->type, 0.2); //  kleinize(get_circumscribed_corner(c, t, ctr));
+            println(hlog, "hs is: ", hs, " dft=", dfloor_table[k], " type=", c->type, " id=", id);
+
+            for(int t=0; t<c->type; t++) {
+              hyperpoint v1 = hs[t] - ctr;
+              hyperpoint v2 = atmod(hs, t+1) - ctr;
+              texture_order([&] (ld x, ld y) {
+                hpcpush(normalize(ctr + v1 * x + v2 * y));
+                });
+              }
+            }
+          if(vid.pseudohedral == phOFF) for(int t=0; t<e-s; t++) {
 
             hyperpoint v1 = cgi.emb->actual_to_logical(hpc[s+t]);
             hyperpoint v2 = cgi.emb->actual_to_logical(hpc[s+t+1]);
@@ -856,21 +896,7 @@ void geometry_information::generate_floorshapes() {
   
   #if CAP_ARCM
   else if(arcm::in()) {
-    arcm::parent_index_of(&modelh) = 0;
-    auto &ac = arcm::current;
-    for(int i=0; i<2*ac.N + 2; i++) {
-      if(ac.regular && i>=2 && i < 2*ac.N) continue;
-      arcm::id_of(&modelh) = i;
-      model.type = isize(ac.triangles[i]);
-      if(DUAL) model.type /= 2, arcm::parent_index_of(&modelh) = !(i&1);
-      
-      if(BITRUNCATED)
-        generate_floorshapes_for(i, &model, !arcm::pseudohept(&model), arcm::pseudohept(&model) ? 0 : 1^(i&1));
-      else if(geosupport_football() == 2)
-        generate_floorshapes_for(i, &model, !arcm::pseudohept(&model), i >= 4 ? 1 : 0);
-      else
-        generate_floorshapes_for(i, &model, 0, 0);
-      }
+    /* will be generated on the fly */
     }
   #endif
   
@@ -1053,6 +1079,22 @@ EX void set_floor(const transmatrix& spin, hpcshape& sh) {
   qfi.usershape = -1;
   }
 
+/** currently only for arcm */
+EX void ensure_floorshape_generated(int id, cell *c) {
+  hpcshape nul; nul.s = -1;
+  sizeto(cgi.shFloor.b, id, nul);
+  if(cgi.shFloor.b[id].s == -1) {
+    if(BITRUNCATED)
+      cgi.generate_floorshapes_for(id, c, !arcm::pseudohept(c), arcm::pseudohept(c) ? 0 : 1^(id&1));
+    else if(geosupport_football() == 2)
+      cgi.generate_floorshapes_for(id, c, !arcm::pseudohept(c), id >= 4 ? 1 : 0);
+    else
+      cgi.generate_floorshapes_for(id, c, 0, 0);
+    cgi.finishshape();
+    cgi.extra_vertices();
+    }
+  }
+
 EX int shvid(cell *c) {
   return currentmap->shvid(c);
   }
@@ -1124,7 +1166,9 @@ EX struct dqi_poly *draw_shapevec(cell *c, const shiftmatrix& V, const vector<hp
   #endif
   #if CAP_ARCM
   else if(arcm::in()) {
-    return &queuepolyat(V, shv[shvid(c)], col, prio);
+    int id = shvid(c);
+    ensure_floorshape_generated(id, c);
+    return &queuepolyat(V, shv[id], col, prio);
     }
   #endif
   else if(GOLDBERG && ishex1(c)) 
