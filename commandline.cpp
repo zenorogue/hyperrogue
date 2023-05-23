@@ -305,7 +305,7 @@ int arg::readCommon() {
     }
   else if(argis("-cview")) {
     PHASE(3);  start_game();
-    View = Id;
+    View = Id; playermoved = false;
     }
   else if(argis("-exit")) {
     PHASE(3);
