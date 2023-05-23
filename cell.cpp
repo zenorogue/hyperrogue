@@ -77,6 +77,11 @@ public:
 
   /** generate a new map that is disconnected from what we already have, disconnected from the map we have so far */
   virtual cell* gen_extra_origin(int fv) { throw hr_exception("gen_extra_origin not supported on this map"); }
+
+  transmatrix adjmod(cell *c, int i) { return adj(c, gmod(i, c->type)); }
+  transmatrix adjmod(heptagon *h, int i) { return adj(h, gmod(i, h->type)); }
+  transmatrix iadjmod(cell *c, int i) { return iadj(c, gmod(i, c->type)); }
+  transmatrix iadjmod(heptagon *h, int i) { return iadj(h, gmod(i, h->type)); }
   };
 
 /** hrmaps which are based on regular non-Euclidean 2D tilings, possibly quotient  
