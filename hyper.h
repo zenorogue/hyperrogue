@@ -884,6 +884,18 @@ const typename Map::mapped_type *at_or_null(const Map& map, const Key& key) {
   return (it == map.end()) ? nullptr : &it->second;
   }
 
+int gmod(int i, int j);
+
+// vector::at(i) modulo its size (const version)
+template<class T> const T& atmod(const vector<T>& container, int index) {
+  return container[gmod(index, isize(container))];
+  }
+
+// vector::at(i) modulo its size (non-const version)
+template<class T> T& atmod(vector<T>& container, int index) {
+  return container[gmod(index, isize(container))];
+  }
+
 namespace daily {
   extern bool on;
   extern int daily_id;
