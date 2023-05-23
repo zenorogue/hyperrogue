@@ -412,9 +412,9 @@ void archimedean_tiling::regroup() {
   }
 
 geometryinfo1& archimedean_tiling::get_geometry(ld mul) {
-  if(euclidean_angle_sum * mul < 1.999999) return ginf[gSphere].g;
-  else if(euclidean_angle_sum * mul > 2.000001) return ginf[gNormal].g;
-  else return ginf[gEuclid].g;
+  if(euclidean_angle_sum * mul < 1.999999) return giSphere2;
+  else if(euclidean_angle_sum * mul > 2.000001) return giHyperb2;
+  else return giEuclid2;
   }
 
 void archimedean_tiling::compute_geometry() {
@@ -422,19 +422,17 @@ void archimedean_tiling::compute_geometry() {
   if(embedded_plane && geometry != gArchimedean) return;
   if(embedded_plane) return IPF(compute_geometry());
 
-  ginf[gArchimedean].g = get_geometry();
-  set_flag(ginf[gArchimedean].flags, qCLOSED, get_class() == gcSphere);
-  
-  if(geom3::ginf_backup.size()) {
-    if(get_geometry().kind == gcSphere)
-      geom3::ginf_backup[gArchimedean].g = geom3::ginf_backup[gSphere].g;
-    if(get_geometry().kind == gcEuclid)
-      geom3::ginf_backup[gArchimedean].g = geom3::ginf_backup[gNormal].g;
-    if(get_geometry().kind == gcHyperbolic)
-      geom3::ginf_backup[gArchimedean].g = geom3::ginf_backup[gEuclid].g;
-    if(geom3::flipped) swap(geom3::ginf_backup[gArchimedean].g, ginf[gArchimedean].g);
-    set_flag(ginf[gArchimedean].flags, qCLOSED, get_class() == gcSphere);
+  auto gg = get_geometry();
+
+  for(int a=0; a<2; a++) {
+    auto& arr = a ? geom3::ginf_backup : ginf;
+    if(arr.empty()) continue;
+    if(gg.kind == gcSphere) arr[gArchimedean].g = arr[gSphere].g;
+    if(gg.kind == gcEuclid) arr[gArchimedean].g = arr[gNormal].g;
+    if(gg.kind == gcHyperbolic) arr[gArchimedean].g = arr[gEuclid].g;
+    set_flag(arr[gArchimedean].flags, qCLOSED, gg.kind == gcSphere);
     }
+  if(geom3::flipped) swap(geom3::ginf_backup[gArchimedean].g, ginf[gArchimedean].g);
 
   DEBB(DF_GEOM, (format("euclidean_angle_sum = %f\n", float(euclidean_angle_sum))));
 
@@ -459,6 +457,9 @@ void archimedean_tiling::compute_geometry() {
   ld elmin = 0, elmax = hyperbolic ? 10 : sphere ? M_PI : 2 * euclidean_edge_length;
 
   /* inradius[N] is used in farcorner and nearcorner. Probably a bug */
+
+  bool need_flip = embedded_plane;
+  if(need_flip) geom3::light_flip(true);
   
   if(real_faces == 2) {
     /* standard methods fail for dihedra, but the answer is easy */
@@ -493,9 +494,9 @@ void archimedean_tiling::compute_geometry() {
       auto& c = circumradius[i];
 
       c = asin_auto(sin_auto(edgelength/2) / sin(gamma));
-      inradius[i] = hdist0(mid(lxpush0(circumradius[i]), xspinpush0(2*gamma, circumradius[i])));
+      inradius[i] = hdist0(mid(xpush0(circumradius[i]), cspin(0, 1, 2*gamma) * xpush0(circumradius[i])));
       
-      hyperpoint h = lxpush(c) * spin(M_PI - 2*gamma) * lxpush0(c);
+      hyperpoint h = xpush(c) * cspin(0, 1, M_PI - 2*gamma) * xpush0(c);
       ld a = atan2(h);
       cyclefix(a, 0);
       if(a < 0) a = -a;
@@ -512,6 +513,8 @@ void archimedean_tiling::compute_geometry() {
     else elmax = edgelength;
     if(euclid) break;
     }
+
+  if(need_flip) geom3::light_flip(false);
   
   DEBB(DF_GEOM, (format("computed edgelength = %f\n", float(edgelength))));
   
