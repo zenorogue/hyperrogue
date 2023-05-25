@@ -428,8 +428,8 @@ void archimedean_tiling::compute_geometry() {
     auto& arr = a ? geom3::ginf_backup : ginf;
     if(arr.empty()) continue;
     if(gg.kind == gcSphere) arr[gArchimedean].g = arr[gSphere].g;
-    if(gg.kind == gcEuclid) arr[gArchimedean].g = arr[gNormal].g;
-    if(gg.kind == gcHyperbolic) arr[gArchimedean].g = arr[gEuclid].g;
+    if(gg.kind == gcEuclid) arr[gArchimedean].g = arr[gEuclid].g;
+    if(gg.kind == gcHyperbolic) arr[gArchimedean].g = arr[gNormal].g;
     set_flag(arr[gArchimedean].flags, qCLOSED, gg.kind == gcSphere);
     }
   if(geom3::flipped) swap(geom3::ginf_backup[gArchimedean].g, ginf[gArchimedean].g);
