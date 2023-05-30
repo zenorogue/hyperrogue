@@ -2582,6 +2582,25 @@ EX void drawqueue() {
         });
     }
 
+  if(draw_plain_floors && (default_flooralpha < 255 || svg::in)) for(PPR p: {PPR::FLOOR}) {
+    int pp = int(p);
+    if(qp0[pp] == qp[pp]) continue;
+    auto get_z = [&] (const unique_ptr<drawqueueitem>& p) -> ld {
+      auto d = dynamic_cast<dqi_poly*> (&*p);
+      if(!d) return 0;
+      hyperpoint h = Hypc;
+
+      for(int i=0; i<d->cnt; i++) h += glhr::gltopoint( (*d->tab)[d->offset + i] );
+      h /= d->cnt; normalize(h);
+      h = unshift(d->V) * h;
+      return h[2];
+      };
+    sort(&ptds[qp0[int(p)]], &ptds[qp[int(p)]],
+      [&] (const unique_ptr<drawqueueitem>& p1, const unique_ptr<drawqueueitem>& p2) {
+        return get_z(p1) > get_z(p2);
+        });
+    }
+
 #if CAP_SDL
   if(current_display->stereo_active() && !vid.usingGL) {
 
