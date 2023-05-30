@@ -1567,6 +1567,7 @@ EX map<char, colortable> colortables = {
   {'t', {0x804040, 0x1408040, 0x404080, 0x1808040 }},
   {'c', {0x202020, 0x1C0C0C0}},
   {'F', {0x1C0C0C0, 0x202020}},
+  {'L', {0xA0FFA0, 0x60C060}},
   {'w', {0x303030, 0x1C0C0C0}},
   {'v', {0xC00000, 0xC08000, 0xC0C000, 0x00C000, 0xC0C0, 0x00C0, 0xC000C0}},
   {'j', {0x100FFFF, 0x100FF00, 0x1FFFF00, 0x1FF8000, 0x1FF0000, 0x1FF00FF}},  
@@ -1987,6 +1988,9 @@ EX namespace patterns {
       case 'X': {
         if(hat::in()) return hat::hatcolor(c, 8);
         return furthest_map(c, 1);
+        }
+      case 'L': {
+        return colortables['L'][c->master->c7 == c];
         }
       case 'W': {
         return furthest_map(c, 2);
