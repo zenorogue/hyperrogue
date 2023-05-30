@@ -1140,6 +1140,9 @@ EX namespace geom3 {
     #endif
     if(dual::split(switch_fpp)) return;
 
+    check_cgi();
+    cgi.require_basics();
+
     if(!changing_embedded_settings)
       View = inverse(models::rotmatrix()) * View;
 
@@ -1149,7 +1152,7 @@ EX namespace geom3 {
       auto emb = make_embed();
       emb->auto_configure();
       check_cgi();
-      cgi.prepare_basics();
+      cgi.require_basics();
       swapdim(+1);
       }
     else {

@@ -26,6 +26,11 @@ EX vector<basic_textureinfo> floor_texture_vertices;
 EX vector<glvertex> floor_texture_map;
 EX struct renderbuffer *floor_textures;
 
+EX basic_textureinfo* get_floor_texture_vertices(int index) {
+  if(noGUI || !vid.usingGL) return nullptr;
+  return &floor_texture_vertices[index];
+  }
+
 /* 0: generate no floorshapes; 1: generate only plain floorshapes; 2: generate all */
 EX int floorshapes_level = 2;
 
@@ -701,7 +706,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         sizeto(fsh.levels[k], id);
         bshape(fsh.levels[k][id], fsh.prio);    
         last->flags |= POLY_TRIANGLES;
-        last->tinf = &floor_texture_vertices[fsh.id];
+        last->tinf = get_floor_texture_vertices(fsh.id);
         last->texture_offset = 0;
 
         if(1) {
@@ -761,7 +766,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
         sizeto(fsh.cone[co], id);
         bshape(fsh.cone[co][id], fsh.prio);    
         last->flags |= POLY_TRIANGLES;
-        last->tinf = &floor_texture_vertices[fsh.id];
+        last->tinf = get_floor_texture_vertices(fsh.id);
         last->texture_offset = 0;
         ld h = (FLOOR - WALL) / (co+1);
         ld top = co ? (FLOOR + WALL) / 2 : WALL;
@@ -1301,9 +1306,11 @@ void draw_shape_for_texture(floorshape* sh) {
       }
     }
   
-  auto& ftv = floor_texture_vertices[sh->id];
-  ftv.tvertices.clear();
-  ftv.texture_id = floor_textures->renderedTexture;
+  auto ftv = get_floor_texture_vertices(sh->id);
+  if(ftv) {
+    ftv->tvertices.clear();
+    ftv->texture_id = floor_textures->renderedTexture;
+    }
   
   hyperpoint center = eupush(gx, gy) * C0;
   hyperpoint v1 = hpxyz3(sd, sd, 0, 0);
@@ -1331,9 +1338,9 @@ void draw_shape_for_texture(floorshape* sh) {
     };
   
   // SL2 needs 6 times more
-  texture_order([&] (ld x, ld y) {
+  if(ftv) texture_order([&] (ld x, ld y) {
     auto v = tvec_at(x, y);
-    ftv.tvertices.push_back(glhr::makevertex(v[0], v[1], 0));
+    ftv->tvertices.push_back(glhr::makevertex(v[0], v[1], 0));
     });
   
   floor_texture_square_size = 2 * (tvec_at(1, 0)[0] - tvec_at(0, 0)[0]);
@@ -1350,11 +1357,12 @@ EX void ensure_vertex_number(basic_textureinfo& bti, int qty) {
 
 /** ensure_vertex_number for a hpcshape */
 EX void ensure_vertex_number(hpcshape& sh) {
+  if(!sh.tinf) return;
   ensure_vertex_number(*sh.tinf, sh.e - sh.s);
   }
 
 EX void bind_floor_texture(hpcshape& li, int id) {
-  li.tinf = &floor_texture_vertices[id];
+  li.tinf = get_floor_texture_vertices(id);
   ensure_vertex_number(li);
   }
 
