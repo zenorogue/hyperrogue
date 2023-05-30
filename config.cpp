@@ -834,14 +834,18 @@ EX void initConfig() {
   param_f(hat::hat_param, "hat_param", "hat_param", 1)
   -> editable(0, 2, 0.1, "hat parameter",
     "Apeirodic hat tiling based on: https://arxiv.org/pdf/2303.10798.pdf\n\n"
-    "This controls the parameter discussed in Section 6. Parameter p is Tile(p, (2-p)√3), scaled so that the area is the same for every p.", 'v'
+    "This controls the parameter discussed in Section 6. Parameter p is Tile(p, (2-p)√3), scaled so that the area is the same for every p."
+    "Aperiodic spectre tiling based on: https://arxiv.org/abs/2305.17743\n\n"
+    "Set the parameter to 'spectre' value to make all tiles have the same shape."
+    ,
+    'v'
     )
   -> set_extra([] {
       dialog::addSelItem(XLAT("chevron (periodic)"), "0", 'C');
       dialog::add_action([] { dialog::ne.s = "0"; dialog::apply_edit(); });
       dialog::addSelItem(XLAT("hat"), "1", 'H');
       dialog::add_action([] { dialog::ne.s = "1"; dialog::apply_edit(); });
-      dialog::addSelItem(XLAT("all equal (periodic)"), "3-√3", 'T');
+      dialog::addSelItem(XLAT("spectre"), "3-√3", 'T');
       dialog::add_action([] { dialog::ne.s = "3 - sqrt(3)"; dialog::apply_edit(); });
       dialog::addSelItem(XLAT("turtle"), "1.5", 'T');
       dialog::add_action([] { dialog::ne.s = "1.5"; dialog::apply_edit(); });
@@ -852,8 +856,7 @@ EX void initConfig() {
 
   param_f(hat::hat_param_imag, "hat_param_imag", "hat_param_imag", 0)
   -> editable(0, 2, 0.1, "hat parameter (imaginary)",
-    "Apeirodic hat tiling based on: https://arxiv.org/pdf/2303.10798.pdf\n\n"
-    "This controls the parameter discussed in Section 6. Parameter p is Tile(p, (2-p)√3), scaled so that the area is the same for every p.", 'v'
+    "Imaginary part of the hat parameter. This corresponds to the usual interpretation of complex numbers in Euclidean planar geometry: rather than shortened or lengthened, the edges are moved in the other dimension.", 'v'
     )
   -> set_reaction(hat::reshape);
 
