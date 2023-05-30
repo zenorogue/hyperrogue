@@ -2743,9 +2743,9 @@ EX namespace linepatterns {
   
   linepattern patBigTriangles("big triangular grid", 0x00606000, always_available, 
     ALLCELLS(
-       if(is_master(c) && !meuclid) for(int i=0; i<S7; i++)
+       if(c->master->c7 == c) for(int i=0; i<S7; i++)
           if(c->master->move(i) && c->master->move(i) < c->master) {
-            gridlinef(V, C0, xspinpush0(-TAU*i/S7 - master_to_c7_angle(), cgi.tessf), col, 2 + vid.linequality);
+            gridlinef(V, C0, V, currentmap->master_relative(c, true) * currentmap->adj(c->master, i) * C0, col, 2 + vid.linequality);
             }
        )
     );
