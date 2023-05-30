@@ -734,7 +734,6 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
             hyperpoint ctr = cgi.emb->logical_to_actual(z);
             for(int t=0; t<c->type; t++) hs[t] = get_circumscribed_corner(c, t, ctr);
             // for(int t=0; t<c->type; t++) hs[t] = xspinpush0(t * TAU / c->type, 0.2); //  kleinize(get_circumscribed_corner(c, t, ctr));
-            println(hlog, "hs is: ", hs, " dft=", dfloor_table[k], " type=", c->type, " id=", id);
 
             for(int t=0; t<c->type; t++) {
               hyperpoint v1 = hs[t] - ctr;
@@ -743,6 +742,10 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
                 hpcpush(normalize(ctr + v1 * x + v2 * y));
                 });
               }
+            /* also affect the plain floor */
+            bshape(fsh.b[id], PPR::FLOOR);
+            for(hyperpoint& h: hs) hpcpush(h);
+            hpcpush(hs[0]);
             }
           if(vid.pseudohedral == phOFF) for(int t=0; t<e-s; t++) {
 
