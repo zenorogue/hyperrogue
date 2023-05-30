@@ -2042,6 +2042,8 @@ void celldrawer::bookkeeping() {
     }
   }
 
+EX bool draw_plain_floors;
+
 /** 
   Display text statistics about the cell (distances in viewdists mode, pattern codes, etc.).
   may also change the colors provided in 
@@ -2133,13 +2135,15 @@ void celldrawer::draw_cellstat() {
     }
   }
 
+EX int default_flooralpha = 255;
+
 void celldrawer::draw_wall_full() {
 
   shiftmatrix Vf0;
   const shiftmatrix& Vf = (chasmg && wmspatial) ? (Vf0=orthogonal_move_fol(V, cgi.BOTTOM)) : V;
 
   #if CAP_SHAPES
-  int flooralpha = 255;
+  int flooralpha = default_flooralpha;
   #endif
 
   #if CAP_EDIT && CAP_TEXTURE
@@ -2295,10 +2299,11 @@ void celldrawer::draw_wall_full() {
       }
     else {
       if(patterns::whichShape == '^') poly_outline = darkena(fcol, fd, flooralpha);
-      if(WDIM == 2 && GDIM == 3 && qfi.fshape)
+      if(WDIM == 2 && GDIM == 3 && qfi.fshape && !draw_plain_floors)
         draw_shapevec(c, V, qfi.fshape->levels[0], darkena(fcol, fd, 255), PPR::FLOOR);
-      else
-        draw_qfi(c, V, darkena(fcol, fd, flooralpha));
+      else {
+        draw_qfi(c, V, darkena3(fcol, fd, flooralpha));
+        }
       }
     
     #if MAXMDIM >= 4

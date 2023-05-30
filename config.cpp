@@ -2765,6 +2765,11 @@ EX int config3 = addHook(hooks_configfile, 100, [] {
   param_f(twopoint_xwidth, "twopoint_xwidth");
   param_f(periodwidth, "periodwidth", 1);
 
+  param_b(draw_plain_floors, "draw_plain_floors", false)
+  ->editable("draw plain floors in 3D", 'p');
+  param_i(default_flooralpha, "floor_alpha")
+  ->editable(0, 255, 15, "floor alpha", "255 = opaque", 'a');
+
   param_f(vid.depth_bonus, "depth_bonus", 0)
     ->editable(-5, 5, .1, "depth bonus in pseudohedral", "", 'b');
   param_enum(vid.pseudohedral, "pseudohedral", "pseudohedral", phOFF)
