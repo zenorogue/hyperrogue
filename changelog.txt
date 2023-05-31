@@ -4966,3 +4966,9 @@ Mostly embedding-related improvements:
 - many embedding-related fixes
 - "Non-Euclidean Third Dimension" demo (of embeddings) in RogueViz
 (also, the "imaginary" hat parameter)
+
+2023-05-31 02:18 Update 12.1q:
+- Aperiodic Spectre tiling [https://arxiv.org/abs/2305.17743]
+- fixed embeddings of Archimedean tilings
+- Berger sphere should now work correctly with subdivided cells
+- new options mostly for 3D visualizations: circumscribed pseudohedra (a new option in 'make the tiles flat' in 3D config), use plain non-textured floors with alpha transparency (not in menus, find setting 'draw_plain_floors' and 'floor_alpha'); 'big triangular grid' line pattern should now work in Euclidean "Goldberg"
