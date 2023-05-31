@@ -834,9 +834,9 @@ EX void initConfig() {
   param_f(hat::hat_param, "hat_param", "hat_param", 1)
   -> editable(0, 2, 0.1, "hat/spectre/turtle parameter",
     "Apeirodic hat tiling based on: https://arxiv.org/pdf/2303.10798.pdf\n\n"
-    "This controls the parameter discussed in Section 6. Parameter p is Tile(p, (2-p)√3), scaled so that the area is the same for every p."
+    "This controls the parameter discussed in Section 6. Parameter p is Tile(p, (2-p)√3), scaled so that the area is the same for every p.\n\n"
     "Aperiodic spectre tiling based on: https://arxiv.org/abs/2305.17743\n\n"
-    "Set the parameter to 'spectre' value to make all tiles have the same shape."
+    "In the spectre tiling, set the parameter to 'spectre' value to make all tiles have the same shape."
     ,
     'v'
     )
