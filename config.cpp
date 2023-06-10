@@ -831,6 +831,8 @@ EX void initConfig() {
   param_f(vid.binary_width, "bwidth", "binary-tiling-width", 1);
   param_custom(vid.binary_width, "binary tiling width", menuitem_binary_width, 'v');
 
+  param_b(fake::multiple_special_draw, "fake_multiple", true);
+
   param_f(hat::hat_param, "hat_param", "hat_param", 1)
   -> editable(0, 2, 0.1, "hat/spectre/turtle parameter",
     "Apeirodic hat tiling based on: https://arxiv.org/pdf/2303.10798.pdf\n\n"
