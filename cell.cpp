@@ -554,8 +554,10 @@ EX void initcells() {
 
   if(embedded_plane) {
     geom3::swap_direction = -1;
+    check_cgi();
     for(auto& m: cgi.heptmove) swapmatrix(m);
     IPF(initcells());
+    check_cgi();
     geom3::swap_direction = +1;
     for(auto& m: cgi.heptmove) swapmatrix(m);
     currentmap->on_dim_change();

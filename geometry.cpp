@@ -1335,7 +1335,8 @@ EX void check_cgi() {
   if(mhybrid) hybrid::underlying_cgip->timestamp = ntimestamp;
   if(fake::in()) fake::underlying_cgip->timestamp = ntimestamp;
   #if CAP_ARCM
-  if(arcm::alt_cgip) arcm::alt_cgip->timestamp = ntimestamp;
+  if(arcm::alt_cgip[0]) arcm::alt_cgip[0]->timestamp = ntimestamp;
+  if(arcm::alt_cgip[1]) arcm::alt_cgip[1]->timestamp = ntimestamp;
   #endif
   
   int limit = 4;

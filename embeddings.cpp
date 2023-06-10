@@ -132,13 +132,30 @@ EX namespace geom3 {
   
   EX geometry_information* unflipped;
 
+  EX void light_flip_geom() {
+    indenter ind(2);
+    swap(ginf[geometry].g, geom3::ginf_backup[geometry].g);
+    swap(ginf[geometry].flags, geom3::ginf_backup[geometry].flags);
+    if(fake::in()) {
+      // println(hlog, "warning: flipping while still in fake");
+      FPIU(light_flip_geom());
+      }
+    // hyperbolic arcm needs gNormal for cdata. Also swap gSphere and gEuclid for compute_geometry
+    else if(arcm::in()) {
+      dynamicval<eGeometry> g(geometry, gNormal); light_flip_geom();
+      geometry = gSphere; light_flip_geom();
+      geometry = gEuclid; light_flip_geom();
+      }
+    }
+
   EX void light_flip(bool f) {
     if(f != flipped) {
+      if(!flipped) cgip->use_count++;
       if(!flipped) unflipped = cgip;
-      swap(ginf[geometry].g, geom3::ginf_backup[geometry].g);
-      swap(ginf[geometry].flags, geom3::ginf_backup[geometry].flags);
-      if(!flipped) cgip = unflipped;
+      light_flip_geom();
       flipped = f;
+      if(!flipped) cgip = unflipped;
+      if(!flipped) cgip->use_count--;
       }
     }
   
@@ -165,40 +182,43 @@ EX namespace geom3 {
       }
     if(vid.always3 && ginf_backup.empty()) {
       ginf_backup = ginf;
-      for(geometryinfo& gi: ginf) {
-        auto &g = gi.g;
-        if(vid.always3 && g.gameplay_dimension == 2 && g.graphical_dimension == 2) {
-          /* same-in-same by default */
-          auto og = g;
-          g.graphical_dimension++;
-          g.homogeneous_dimension++;
-          g.sig[3] = g.sig[2];
-          g.sig[2] = g.sig[1];
+      for(geometryinfo& gi: ginf)
+        apply_always3_to(gi);
+      }
+    }
 
-          bool ieuclid = g.kind == gcEuclid;
-          bool isphere = g.kind == gcSphere;
-          bool ieuc_or_binary = ieuclid || (gi.flags & qBINARY);
+  EX void apply_always3_to(geometryinfo& gi) {
+    auto &g = gi.g;
+    if(vid.always3 && g.gameplay_dimension == 2 && g.graphical_dimension == 2) {
+      /* same-in-same by default */
+      auto og = g;
+      g.graphical_dimension++;
+      g.homogeneous_dimension++;
+      g.sig[3] = g.sig[2];
+      g.sig[2] = g.sig[1];
 
-          if(spatial_embedding == seProduct && !ieuclid) g = giProduct, g.sig[2] = og.sig[2];
-          if(spatial_embedding == seProductH && ieuclid) g = giProductH;
-          if(spatial_embedding == seProductS && ieuclid) g = giProductS;
-          if(spatial_embedding == seLowerCurvature) g = (isphere ? giEuclid3 : giHyperb3);
-          if(spatial_embedding == seMuchLowerCurvature) g = giHyperb3;
-          if(spatial_embedding == seNil && ieuclid) g = giNil;
-          if(spatial_embedding == seCliffordTorus && ieuclid) g = giSphere3;
-          if(spatial_embedding == seSol && ieuc_or_binary) g = giSol;
-          if(spatial_embedding == seNIH && ieuc_or_binary) g = giNIH;
-          if(spatial_embedding == seSolN && ieuc_or_binary) g = giSolN;
-          if(spatial_embedding == seSL2 && ieuclid) g = giSL2;
-          if(spatial_embedding == seCylinderH && ieuclid) g = giHyperb3;
-          if(spatial_embedding == seCylinderHE && ieuclid) g = giProductH;
-          if(spatial_embedding == seCylinderHoro && ieuclid) g = giProductH;
-          if(spatial_embedding == seCylinderNil && ieuclid) g = giNil;
-          if(spatial_embedding == seCylinderSL2 && ieuclid) g = giSL2;
-          
-          g.gameplay_dimension = 2;
-          }
-        }
+      bool ieuclid = g.kind == gcEuclid;
+      bool isphere = g.kind == gcSphere;
+      bool ieuc_or_binary = ieuclid || (gi.flags & qBINARY);
+
+      if(spatial_embedding == seProduct && !ieuclid) g = giProduct, g.sig[2] = og.sig[2];
+      if(spatial_embedding == seProductH && ieuclid) g = giProductH;
+      if(spatial_embedding == seProductS && ieuclid) g = giProductS;
+      if(spatial_embedding == seLowerCurvature) g = (isphere ? giEuclid3 : giHyperb3);
+      if(spatial_embedding == seMuchLowerCurvature) g = giHyperb3;
+      if(spatial_embedding == seNil && ieuclid) g = giNil;
+      if(spatial_embedding == seCliffordTorus && ieuclid) g = giSphere3;
+      if(spatial_embedding == seSol && ieuc_or_binary) g = giSol;
+      if(spatial_embedding == seNIH && ieuc_or_binary) g = giNIH;
+      if(spatial_embedding == seSolN && ieuc_or_binary) g = giSolN;
+      if(spatial_embedding == seSL2 && ieuclid) g = giSL2;
+      if(spatial_embedding == seCylinderH && ieuclid) g = giHyperb3;
+      if(spatial_embedding == seCylinderHE && ieuclid) g = giProductH;
+      if(spatial_embedding == seCylinderHoro && ieuclid) g = giProductH;
+      if(spatial_embedding == seCylinderNil && ieuclid) g = giNil;
+      if(spatial_embedding == seCylinderSL2 && ieuclid) g = giSL2;
+
+      g.gameplay_dimension = 2;
       }
     }
 

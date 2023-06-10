@@ -719,6 +719,7 @@ EX void make_air() {
     }
   check_cgi();
   calcparam();
+  cgi.require_basics();
   GLERR("after make_air");
   current_display->set_viewport(0);
   current_display->set_all(0,0);

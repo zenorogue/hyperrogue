@@ -432,7 +432,6 @@ void archimedean_tiling::compute_geometry() {
     if(gg.kind == gcHyperbolic) arr[gArchimedean].g = arr[gNormal].g;
     set_flag(arr[gArchimedean].flags, qCLOSED, gg.kind == gcSphere);
     }
-  if(geom3::flipped) swap(geom3::ginf_backup[gArchimedean].g, ginf[gArchimedean].g);
 
   DEBB(DF_GEOM, (format("euclidean_angle_sum = %f\n", float(euclidean_angle_sum))));
 
@@ -573,13 +572,14 @@ EX bool use_gmatrix = true;
  *  not used by arcm itself, but used in fake arcm
  */
 
-EX geometry_information *alt_cgip;
+EX geometry_information *alt_cgip[2];
 
 EX geometry_information *find_alt_cgip() {
-  if(alt_cgip) return alt_cgip;
+  auto& galt_cgip = alt_cgip[embedded_plane];
+  if(galt_cgip) return galt_cgip;
   check_cgi();
   cgi.require_basics();
-  return alt_cgip = cgip;
+  return galt_cgip = cgip;
   }
 
 struct hrmap_archimedean : hrmap {
@@ -601,16 +601,24 @@ struct hrmap_archimedean : hrmap {
     heptagon *alt = NULL;
     
     if(hyperbolic) {
-      dynamicval<eGeometry> g(geometry, gNormal);
-      dynamicval<eVariation> gv(variation, eVariation::pure);
-      dynamicval<geometry_information*> gi(cgip, find_alt_cgip());
-      alt = init_heptagon(S7);
-      alt->s = hsOrigin;
-      alt->alt = alt;
-      current_altmap = newAltMap(alt);
+      bool f = geom3::flipped;
+      if(f) geom3::light_flip(false);
+      if(1) {
+        dynamicval<eGeometry> g(geometry, gNormal);
+        dynamicval<eVariation> gv(variation, eVariation::pure);
+        dynamicval<geometry_information*> gi(cgip, find_alt_cgip());
+        alt = init_heptagon(S7);
+        alt->s = hsOrigin;
+        alt->alt = alt;
+        current_altmap = newAltMap(alt);
+        }
+      if(f) geom3::light_flip(true);
       }
 
+    bool f = geom3::flipped;
+    if(f) geom3::light_flip(false);
     transmatrix T = lxpush(.01241) * spin(1.4117) * lxpush(0.1241) * Id;
+    if(f) geom3::light_flip(true);
     archimedean_gmatrix[origin] = make_pair(alt, T);
     altmap[alt].emplace_back(origin, T);
   
@@ -661,6 +669,19 @@ struct hrmap_archimedean : hrmap {
 
   heptagon *create_step(heptagon *h, int d) override {
   
+    bool f = geom3::flipped;
+    if(f) {
+      dynamicval<int> uc(cgip->use_count, cgip->use_count+1);
+      auto bcgip = cgip;
+      geom3::light_flip(false);
+      check_cgi();
+      cgi.require_basics();
+      auto h1 = create_step(h, d);
+      geom3::light_flip(true);
+      cgip = bcgip;
+      return h1;
+      }
+
     DEBB(DF_GEOM, (heptspin(h,d), " ~ ?"));
 
     dynamicval<geometryinfo1> gi(ginf[geometry].g, ginf[gArchimedean].g);
@@ -672,15 +693,16 @@ struct hrmap_archimedean : hrmap {
     auto& t1 = current.get_triangle(hi);
   
     // * spin(-tri[id][pi+i].first) * lxpush(t.second) * pispin * spin(tri[id'][p'+d'].first)
-    
+
     auto& p1 = archimedean_gmatrix[h];
     
     heptagon *alt = p1.first;
   
     transmatrix T = p1.second * spin(-t1.first) * lxpush(t1.second);
     transmatrix U = Id;
-    
+
     if(hyperbolic) {
+      dynamicval<int> uc(cgip->use_count, cgip->use_count+1);
       dynamicval<eGeometry> g(geometry, gNormal);
       dynamicval<eVariation> gv(variation, eVariation::pure);
       dynamicval<geometry_information*> gi(cgip, find_alt_cgip());
@@ -1096,12 +1118,17 @@ auto hooksw = addHook(hooks_swapdim, 100, [] {
 
   dynamicval<eGeometry> g(geometry, gNormal);
   dynamicval<eVariation> gv(variation, eVariation::pure);
+
+  alt_cgip[0] = nullptr;
+  alt_cgip[1] = nullptr;
+
   dynamicval<geometry_information*> gi(cgip, find_alt_cgip());
 
   for(auto& p: altmap) for(auto& pp: p.second) swapmatrix(pp.second);
   for(auto& p: archimedean_gmatrix) swapmatrix(p.second.second);
 
-  alt_cgip = nullptr;
+  alt_cgip[0] = nullptr;
+  alt_cgip[1] = nullptr;
   });
 #endif
 

@@ -1092,6 +1092,7 @@ EX void ensure_floorshape_generated(int id, cell *c) {
   hpcshape nul; nul.s = -1;
   sizeto(cgi.shFloor.b, id, nul);
   if(cgi.shFloor.b[id].s == -1) {
+    cgi.require_shapes();
     if(BITRUNCATED)
       cgi.generate_floorshapes_for(id, c, !arcm::pseudohept(c), arcm::pseudohept(c) ? 0 : 1^(id&1));
     else if(geosupport_football() == 2)

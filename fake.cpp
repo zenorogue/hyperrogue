@@ -54,6 +54,7 @@ EX namespace fake {
       dynamicval<hrmap*> gpm(pmap, this);
       dynamicval<eGeometry> gag(actual_geometry, geometry);
       dynamicval<eGeometry> g(geometry, underlying);
+      dynamicval<int> uc(cgip->use_count, cgip->use_count+1);
       dynamicval<geometry_information*> gc(cgip, underlying_cgip);
       dynamicval<hrmap*> gu(currentmap, underlying_map);
       return t();
@@ -90,6 +91,13 @@ EX namespace fake {
 
     hyperpoint get_corner(cell *c, int cid, ld cf=3) override { 
 
+      if(embedded_plane) {
+        geom3::light_flip(true);
+        hyperpoint h = get_corner(c, cid, cf);
+        geom3::light_flip(false);
+        return cgi.emb->base_to_actual(h);
+        }
+
       if(arcm::in() || hat::in()) {
         return underlying_map->get_corner(c, cid, cf);
         }
@@ -100,6 +108,12 @@ EX namespace fake {
       }
 
     transmatrix adj(cell *c, int d) override {
+      if(embedded_plane) {
+        geom3::light_flip(true);
+        transmatrix T = adj(c, d);
+        geom3::light_flip(false);
+        return cgi.emb->base_to_actual(T);
+        }
       if(hat::in()) return underlying_map->adj(c, d);
       if(variation == eVariation::coxeter) {
         array<int, 3> which;
@@ -592,12 +606,16 @@ EX void compute_scale() {
   
   ginf[gFake].g = geometry_of_curvature(good - around, WDIM);
 
-  geom3::apply_always3();
   ld around_ideal = 1/(1/2. - 1./get_middle());
   
   bool have_ideal = abs(around_ideal - around) < 1e-6;
   if(underlying == gRhombic3 || underlying == gBitrunc3) have_ideal = false;
   
+  finalizer f([&] {if(vid.always3 && WDIM == 2) {
+    geom3::ginf_backup[gFake] = ginf[gFake];
+    geom3::apply_always3_to(ginf[gFake]);
+    }});
+
   if(arcm::in()) {
     ginf[gFake].tiling_name = "(" + ginf[gArchimedean].tiling_name + ")^" + fts(around / around_orig());
     return;
