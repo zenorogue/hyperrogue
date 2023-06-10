@@ -4200,11 +4200,19 @@ EX void gridline(const shiftmatrix& V1, const hyperpoint h1, const shiftmatrix& 
   ld d = (c1 <= 0 || c2 <= 0) ? 99 : hdist(V1.T*h1, U2*h2);
   
   #if MAXMDIM >= 4
-  if(WDIM == 3 && fat_edges) {
+  if(GDIM == 3 && fat_edges) {
+    if(nonisotropic) {
+      auto nV1 = V1 * rgpushxto0(h1);
+      hyperpoint U2 = inverse_shift(nV1, V2*rgpushxto0(h2)) * C0;
+      auto& p = cgi.get_pipe_noniso(U2, vid.linewidth, ePipeEnd::ball);
+      queuepoly(nV1, p, col);
+      return;
+      }
+
     shiftmatrix T = V1 * rgpushxto0(h1);
     transmatrix S = rspintox(inverse_shift(T, V2) * h2);
     transmatrix U = rspintoc(inverse_shift(T*S, shiftless(C0)), 2, 1);
-    auto& p = queuepoly(T * S * U, cgi.generate_pipe(d, vid.linewidth, ePipeEnd::ball), col);
+    auto& p = queuepoly(T * S * U, cgi.get_pipe_iso(d, vid.linewidth, ePipeEnd::ball), col);
     p.intester = xpush0(d/2);
     return;
     }

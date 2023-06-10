@@ -543,7 +543,9 @@ hpcshape
   void require_usershapes() { if(usershape_state == usershape_changes) return; usershape_state = usershape_changes; prepare_usershapes(); }
   int timestamp;
   
-  hpcshape& generate_pipe(ld length, ld width, ePipeEnd endtype = ePipeEnd::sharp);
+  hpcshape& gen_pipe(hpcshape& pipe, ePipeEnd endtype, ld ratio, const hr::function<hyperpoint(ld,ld,ld)>& f);
+  hpcshape& get_pipe_iso(ld length, ld width, ePipeEnd endtype = ePipeEnd::sharp);
+  hpcshape& get_pipe_noniso(hyperpoint target, ld width, ePipeEnd endtype = ePipeEnd::sharp);
   
   map<string, unique_ptr<gi_extension>> ext;
 

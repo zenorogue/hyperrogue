@@ -1278,31 +1278,25 @@ void geometry_information::make_3d_models() {
   finishshape();
   }
 
-hpcshape& geometry_information::generate_pipe(ld length, ld width, ePipeEnd endtype) {
-  int id = int(length * 172 + .5) + int(157003 * log(width+.001));
-  bool pers = in_perspective();
-  if(!pers) id ^= 0x4126891;
-  if(shPipe.count(id)) return shPipe[id];
-  hpcshape& pipe = shPipe[id];
-  println(hlog, "generating pipe of length ", length, " and width ", width);
-  bshape(pipe, PPR::WALL);
+hpcshape& geometry_information::gen_pipe(hpcshape& pipe, ePipeEnd endtype, ld ratio, const hr::function<hyperpoint(ld,ld,ld)>& f) {
+  cgi.bshape(pipe, PPR::WALL);
 
-#if CAP_GL
-  auto& utt = models_texture;
+  #if CAP_GL
+  auto& utt = cgi.models_texture;
   if(floor_textures) {
     pipe.tinf = &utt;
     pipe.texture_offset = isize(utt.tvertices);
     }
-#endif
+  #endif
 
   const int MAX_X = 32;
   const int MAX_R = 20;
   auto at = [&] (ld i, ld a, ld z = 1, ld s = 1) {
     a += 0.5;
     ld alpha = TAU * a / MAX_R;
-    hpcpush(xpush(i * length / MAX_X) * cspin(1, 2, alpha) * ypush0(width*z));
+    cgi.hpcpush(f(i / MAX_X, alpha, z));
     #if CAP_GL
-    if(floor_textures) utt.tvertices.push_back(glhr::makevertex(0, pers ? 0.549 - s * 0.45 * sin(alpha) : 0.999, 0));
+    if(floor_textures) utt.tvertices.push_back(glhr::makevertex(0, true ? 0.549 - s * 0.45 * sin(alpha) : 0.999, 0));
     #endif
     };
   for(int i=0; i<MAX_X; i++) {
@@ -1324,7 +1318,7 @@ hpcshape& geometry_information::generate_pipe(ld length, ld width, ePipeEnd endt
 
   if(endtype == ePipeEnd::ball) for(int a=0; a<MAX_R; a++) for(int x=-MAX_R; x<MAX_R; x++) {
     ld xb = x < 0 ? 0 : MAX_X;
-    ld mul = MAX_X * width/length * .9; // .9 to prevent Z-fighting
+    ld mul = MAX_X * ratio * .9; // .9 to prevent Z-fighting
     ld x0 = xb + mul * sin(x * 90._deg / MAX_R);
     ld x1 = xb + mul * sin((x+1) * 90._deg / MAX_R);
     ld z0 = cos(x * 90._deg / MAX_R);
@@ -1341,6 +1335,42 @@ hpcshape& geometry_information::generate_pipe(ld length, ld width, ePipeEnd endt
   finishshape();
   extra_vertices();
   return pipe;
+  }
+
+hpcshape& geometry_information::get_pipe_noniso(hyperpoint target, ld width, ePipeEnd endtype) {
+  int id = bucketer(target)  + int(157003 * log(width+.001));
+  if(cgi.shPipe.count(id)) return cgi.shPipe[id];
+  hpcshape& pipe = cgi.shPipe[id];
+
+  hyperpoint lmax = sol ? inverse_exp_newton(target, 10) : inverse_exp(shiftless(target));
+  transmatrix lT;
+  ld length;
+  if(1) {
+    dynamicval<eGeometry> g(geometry, gCubeTiling);
+    length = hdist0(lmax);
+    lT = rspintox(lmax);
+    }
+
+  return gen_pipe(pipe, endtype, width/length, [&] (ld i, ld alpha, ld z) {
+    hyperpoint p;
+    if(1) {
+      dynamicval<eGeometry> g(geometry, gCubeTiling);
+      p = xpush(i * length) * cspin(1, 2, alpha) * ypush0(width*z);
+      p = lT * p;
+      }
+    return direct_exp(p);
+    });
+  }
+
+hpcshape& geometry_information::get_pipe_iso(ld length, ld width, ePipeEnd endtype) {
+  int id = int(length * 172 + .5) + int(157003 * log(width+.001));
+  bool pers = in_perspective();
+  if(!pers) id ^= 0x4126891;
+  if(shPipe.count(id)) return shPipe[id];
+  hpcshape& pipe = shPipe[id];
+  println(hlog, "generating pipe of length ", length, " and width ", width);
+
+  return gen_pipe(pipe, endtype, width/length, [&] (ld i, ld alpha, ld z) { return xpush(i * length) * cspin(1, 2, alpha) * ypush0(width*z); });
   }
 
 #undef S
