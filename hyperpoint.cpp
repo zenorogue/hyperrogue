@@ -1650,6 +1650,22 @@ EX hyperpoint inverse_exp(const shiftpoint h, flagtype prec IS(pNORMAL)) {
   return v;
   }
 
+/** more precise */
+EX hyperpoint inverse_exp_newton(hyperpoint h, int iter) {
+  auto approx = inverse_exp(shiftless(h));
+  for(int i=0; i<iter; i++) {
+    transmatrix T;
+    ld eps = 1e-3;
+    hyperpoint cur = direct_exp(approx);
+    println(hlog, approx, " error = ", hdist(cur, h), " iteration ", i, "/", iter);
+    for(int i=0; i<3; i++)
+      set_column(T, i, direct_exp(approx + ctangent(i, eps)) - h);
+    set_column(T, 3, C03);
+    approx = approx - inverse(T) * (cur - h) * eps;
+    }
+  return approx;
+  }
+
 EX ld geo_dist(const hyperpoint h1, const hyperpoint h2, flagtype prec IS(pNORMAL)) {
   if(!nonisotropic) return hdist(h1, h2);
   return hypot_d(3, inverse_exp(shiftless(nisot::translate(h1, -1) * h2, prec)));
