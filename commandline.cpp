@@ -303,6 +303,22 @@ int arg::readCommon() {
     shift(); rotate_view(cspin(i, j, argf()));
     playermoved = false;
     }
+  else if(argis("-center-vertex")) {
+    PHASE(3); shift(); int i = argi();
+    shift(); int j = argi();
+    shift(); int k = argi();
+    start_game();
+    auto fh = currentmap->get_cellshape(cwt.at).faces[j][k];
+    hyperpoint h = View * fh;
+    if(i == 0) {
+      shift_view_to(shiftless(h));
+      playermoved = false;
+      }
+    if(i == 1) {
+      rotate_view(spintox(h));
+      rotate_view(cspin90(0, 2));
+      }
+    }
   else if(argis("-cview")) {
     PHASE(3);  start_game();
     View = Id; playermoved = false;
