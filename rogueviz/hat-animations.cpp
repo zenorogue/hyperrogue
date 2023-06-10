@@ -59,7 +59,7 @@ void draw_loop(cellwalker cw, color_t col) {
     hyperpoint H2 = mid(currentmap->get_corner(cw.at, cw.spin, 3), currentmap->get_corner(cw.at, (cw+1).spin, 3));
     if(s < .5) { curvepoint(T * (s * 2 * C0 + (1-s*2) * H2)); break; } s -= 0.5;
     curvepoint(T * C0);
-    if(next == -1) cw.spin = ppair[cw.at->master->c7 == cw.at ? 1 : 0][cw.spin];
+    if(next == -1) cw.spin = ppair[geometry == gAperiodicSpectre ? 0 : cw.at->master->c7 == cw.at ? 1 : 0][cw.spin];
     else cw += next;
     }
 
