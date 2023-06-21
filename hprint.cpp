@@ -447,6 +447,11 @@ template<class T> vector<T> kz(vector<T> v) {
   for(auto& el: v) el = kz(el);
   return v;
   }
+
+template<class T, size_t N> array<T,N> kz(array<T,N> v) {
+  for(auto& el: v) el = kz(el);
+  return v;
+  }
 #endif
 
 EX string pick123() { return cts('1' + rand() % 3); }
