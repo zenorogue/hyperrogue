@@ -1632,7 +1632,7 @@ EX vector<adj_data> adj_minefield_cells_full(cell *c) {
           if(hdist(h, T * h2) < 1e-6) shares = true;
         if(shares) res.emplace_back(adj_data{c1, det(T) < 0, T});
         }
-      if(shares || c == c1) forCellIdEx(c2, i, c1) {
+      if(shares || c == c1) forCellIdCM(c2, i, c1) {
         if(cl.listed(c2)) continue;
         cl.add(c2);
         M.push_back(T * currentmap->adj(c1, i));
