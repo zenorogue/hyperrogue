@@ -699,7 +699,7 @@ EX void apply_other_model(shiftpoint H_orig, hyperpoint& ret, eModel md) {
           }
         else {
           w = hypot_d(3, ret);
-          w = sinh(w) / ((pconf.alpha + cosh(w)) * w);
+          if(w) w = sinh(w) / ((pconf.alpha + cosh(w)) * w);
           }
         for(int i=0; i<3; i++) ret[i] *= w;
         ret[3] = 1; 
@@ -2728,6 +2728,11 @@ void queuestraight(hyperpoint X, int style, color_t lc, color_t fc, PPR p) {
   }
 
 EX void draw_boundary(int w) {
+
+  if((nonisotropic || gproduct) && pmodel == mdDisk) {
+    queuecircle(current_display->xcenter, current_display->ycenter, current_display->radius, ringcolor, PPR::OUTCIRCLE, modelcolor);
+    return;
+    }
 
   if(w == 1) return;
   if(nonisotropic || (euclid && !among(pmodel, mdFisheye, mdConformalSquare)) || gproduct) return;
