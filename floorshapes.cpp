@@ -526,7 +526,7 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
       ld area = 0;
       for(int j=0; j<cor; j++) {
         hyperpoint current = kleinize(actual[j]);
-        hyperpoint last = kleinize(actual[j?j-1:cor-1]);
+        hyperpoint last = kleinize(atmod(actual, j-1));
         area += current[0] * last[1] - last[0] * current[1];
         }
       if(area < 0) dist = -dist;
@@ -535,19 +535,19 @@ void geometry_information::generate_floorshapes_for(int id, cell *c, int siid, i
       int id = 0;
       arb::shape *sh = nullptr;
       if(arb::in()) {
-        int id = arb::id_of(c->master);
+        id = arb::id_of(c->master);
         sh = &ac.shapes[id];
         apeirogonal = sh->apeirogonal;
         }
-      
+
       for(int j=0; j<cor; j++) {
-        hyperpoint last = actual[j?j-1:cor-1];
-        hyperpoint current = ypush(1e-6 * randd()) * xpush(1e-6) * actual[j];
-        hyperpoint next = actual[j<cor-1?j+1:0];
+        hyperpoint last = atmod(actual, j-1);
+        hyperpoint current = ypush(1e-7) * xpush(1e-6) * actual[j];
+        hyperpoint next = atmod(actual, j+1);
 
         if(apeirogonal) {
-          if(j == 0) last = arb::get_adj(arb::current_or_slided(), id, cor-1, id, cor-2, false) * actual[cor-3];
-          if(j == cor-2) next = arb::get_adj(arb::current_or_slided(), id, cor-2, id, cor-1, false) * actual[1];
+          if(j == 0) last = arb::get_adj(ac, id, cor-1, id, cor-2, false) * actual[cor-3];
+          if(j == cor-2) next = arb::get_adj(ac, id, cor-2, id, cor-1, false) * actual[1];
           if(j == cor-1) { cornerlist.push_back(sh->vertices.back()); continue; }
           }
 

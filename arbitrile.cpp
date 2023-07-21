@@ -365,6 +365,7 @@ EX void load_tile(exp_parser& ep, arbi_tiling& c, bool unit) {
   cc.symmetric_value = 0;
   cc.flags = 0;
   cc.repeat_value = 1;
+  cc.apeirogonal = false;
   bool is_symmetric = false;
   while(ep.next() != ')') {
     cld dist = 1;
