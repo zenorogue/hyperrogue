@@ -4972,3 +4972,10 @@ Mostly embedding-related improvements:
 - fixed embeddings of Archimedean tilings
 - Berger sphere should now work correctly with subdivided cells
 - new options mostly for 3D visualizations: circumscribed pseudohedra (a new option in 'make the tiles flat' in 3D config), use plain non-textured floors with alpha transparency (not in menus, find setting 'draw_plain_floors' and 'floor_alpha'); 'big triangular grid' line pattern should now work in Euclidean "Goldberg"
+
+2023-07-21 09:32 Update 12.1r -- mostly minor bugfixes:
+- fixed a bug with apeirogonal tiles
+- fixed some bugs with the "ball projection" of anisotropic geometries
+- fixed stereo_alpha in some geometries
+- fixed the combinations of Archimedean, fake, and embedding
+- "pipes" (fat grid lines) for anisotropic geometries
