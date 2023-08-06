@@ -1090,6 +1090,9 @@ EX void initConfig() {
   param_f(crosshair_size, "size:crosshair");
   addsaver(crosshair_color, "color:crosshair");
   
+  param_b(mapeditor::drawplayer, "drawplayer");
+  param_color((color_t&) patterns::canvasback, "color:canvasback", false);
+
   param_color(backcolor, "color:background", false);
   param_color(forecolor, "color:foreground", false);
   param_color(bordcolor, "color:borders", false);
