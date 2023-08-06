@@ -489,6 +489,8 @@ void accept_command(string s) {
       "bring-unrectified x y -- restart on unrectified GP(x,y) Bring surface\n"
       "disk-unrectified x y size -- restart on unrectified GP(x,y) {4,5} disk of given size\n"
       "undo - undo last move\n"
+      "export - export board to string (no history, owners, captures)\n"
+      "import [string] - import board from string\n"
       );      
 
   if(tokens[0] == "save") {
@@ -581,6 +583,26 @@ void accept_command(string s) {
     take_shot();
     }
 
+  if(tokens[0] == "export" && t == 1) {
+    string ex;
+    for(int i=0; i<isize(ac); i++) ex.push_back("bw." [current.taken[i]] );
+    go_message("current board: ```" + ex + "```");
+    }
+
+  if(tokens[0] == "import" && t == 2) {
+    string ex = tokens[1];
+    if(isize(ex) != isize(ac)) { go_message("bad length"); return; }
+    save_backup();
+    for(int i=0; i<isize(ac); i++) {
+      auto& t = current.taken[i];
+      auto ch = ex[i];
+      t = Free;
+      if(ch == 'b') t = 0;
+      if(ch == 'w') t = 1;
+      current.owner[i] = Free;
+      }
+    take_shot();
+    }
   }
 
 std::thread bot_thread;
