@@ -70,6 +70,10 @@ void hwrite(hstream& hs, const boarddata& b) {
   hwrite(hs, b.captures, b.taken, b.owner, b.geom);
   }
 
+void hread(hstream& hs, boarddata& b) {
+  hread(hs, b.captures, b.taken, b.owner, b.geom);
+  }
+
 vector<int> neigh_indices(int i) {
   vector<int> res;
   forCellEx(c1, ac[i])
@@ -411,6 +415,14 @@ void clear_owner_marks() {
   take_shot();
   }
 
+void save_go() {
+  save_backup();
+  fhstream f("go.saved-game", "wb");
+  f.write(f.vernum);
+  f.write(history);
+  undo();
+  }
+
 void accept_command(string s) {
   println(hlog, "accepting command: '", s, "'");
   vector<string> tokens;
@@ -493,13 +505,7 @@ void accept_command(string s) {
       "import [string] - import board from string\n"
       );      
 
-  if(tokens[0] == "save") {
-    save_backup();
-    fhstream f("go.saved-game", "wb");
-    f.write(f.vernum);
-    f.write(history);
-    undo();
-    }
+  if(tokens[0] == "save") save_go();
 
   if(tokens[0] == "die") die_at(tokens);
   
@@ -717,6 +723,17 @@ int rugArgs() {
   
   else if(argis("-go-discord"))
     go_discord();
+
+  else if(argis("-go-load")) {
+    shift(); string s = args();
+    fhstream f(s, "rb");
+    f.read(f.vernum);
+    f.read(history);
+    println(hlog, "history of ", isize(history), " read successfully");
+    undo();
+    }
+
+  else if(argis("-go-save")) save_go();
 
   else return 1;
   return 0;
