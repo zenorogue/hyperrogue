@@ -1099,7 +1099,7 @@ EX void initConfig() {
   param_color(periodcolor, "color:period", true);
   param_color(stdgridcolor, "color:stdgrid", true);
   param_f(vid.multiplier_grid, "mgrid", "mult:grid", 1);
-  addsaver(dialog::dialogcolor, "color:dialog", false);
+  param_color(dialog::dialogcolor, "color:dialog", false);
   for(auto& p: colortables)
     savecolortable(p.second, s0+"canvas"+p.first);
   savecolortable(distcolors, "distance");
