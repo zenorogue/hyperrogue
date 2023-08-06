@@ -21,7 +21,7 @@
 #include "rogueviz.h"
 
 namespace hr {
-#if CAP_THREADS
+#if CAP_THREAD
 EX namespace gobot {
 
 eWall empty = waChasm;
