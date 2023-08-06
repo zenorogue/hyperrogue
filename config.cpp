@@ -193,6 +193,49 @@ struct int_setting : public setting {
   void load_from(const string& s) override {
     *value = parseint(s);
     }
+
+  virtual void swap_with(setting *s) {
+    auto d = dynamic_cast<int_setting*> (s);
+    if(!d) throw hr_exception("illegal swap_with on int_setting");
+    swap(*value, *(d->value));
+    swap(last_value, d->last_value);
+    }
+
+  virtual void clone_from(int_setting *e) {
+    min_value = e->min_value;
+    max_value = e->max_value;
+    }
+  };
+
+struct color_setting : public setting {
+  color_t *value;
+  color_t dft;
+  bool has_alpha;
+  void add_as_saver() override;
+  bool affects(void *v) override { return v == value; }
+  void show_edit_option(int key) override;
+  cld get_cld() override { return *value; }
+  void set_cld(cld x) override { *value = floor(real(x)+.5); }
+  color_setting *editable(string menu_item_name, string help_text, char key) {
+    this->is_editable = true;
+    this->menu_item_name = menu_item_name;
+    this->help_text = help_text;
+    default_key = key;
+    return this;
+    }
+
+  void load_from(const string& s) override {
+    sscanf(s.c_str(), "%x", value);
+    }
+
+  virtual void swap_with(setting *s) {
+    auto d = dynamic_cast<color_setting*> (s);
+    if(!d) throw hr_exception("illegal swap_with on color_setting");
+    swap(*value, *(d->value));
+    swap(last_value, d->last_value);
+    }
+
+  virtual void clone_from(color_setting *e) { has_alpha = e->has_alpha; }
   };
 
 struct bool_setting : public setting {
@@ -344,6 +387,12 @@ void int_setting::add_as_saver() {
 #endif
   }
 
+void color_setting::add_as_saver() {
+#if CAP_CONFIG
+  addsaver(*value, config_name, dft);
+#endif
+  }
+
 void bool_setting::add_as_saver() { 
 #if CAP_CONFIG
   addsaver(*value, config_name, dft);
@@ -411,6 +460,15 @@ void bool_setting::show_edit_option(int key) {
     add_to_changed(this);
     switcher(); if(sets) sets();
     if(reaction) reaction();
+    });
+  }
+
+void color_setting::show_edit_option(int key) {
+  dialog::addColorItem(XLAT(menu_item_name), has_alpha ? *value : addalpha(*value), key);
+  dialog::add_action([this] () {
+    dialog::openColorDialog(*value);
+    dialog::colorAlpha = has_alpha;
+    dialog::dialogflags |= sm::SIDE;
     });
   }
 
@@ -506,6 +564,24 @@ EX bool_setting *param_b(bool& val, const string s, bool dft) {
   params[u->parameter_name] = std::move(u);
   return f;
   }
+
+EX color_setting *param_color(color_t& val, const string s, bool has_alpha, color_t dft) {
+  unique_ptr<color_setting> u ( new color_setting );
+  u->parameter_name = param_esc(s);
+  u->config_name = s;
+  u->menu_item_name = s;
+  u->value = &val;
+  u->last_value = dft;
+  u->dft = dft;
+  u->has_alpha = has_alpha;
+  val = dft;
+  u->add_as_saver();
+  auto f = &*u;
+  params[u->parameter_name] = std::move(u);
+  return f;
+  }
+
+EX color_setting *param_color(color_t& val, const string s, bool has_alpha) { return param_color(val, s, has_alpha, val); }
 
 EX bool_setting *param_b(bool& val, const string s) { return param_b(val, s, val); }
 
@@ -1014,16 +1090,16 @@ EX void initConfig() {
   param_f(crosshair_size, "size:crosshair");
   addsaver(crosshair_color, "color:crosshair");
   
-  addsaver(backcolor, "color:background");
-  addsaver(forecolor, "color:foreground");
-  addsaver(bordcolor, "color:borders");
-  addsaver(ringcolor, "color:ring");
+  param_color(backcolor, "color:background", false);
+  param_color(forecolor, "color:foreground", false);
+  param_color(bordcolor, "color:borders", false);
+  param_color(ringcolor, "color:ring", true);
   param_f(vid.multiplier_ring, "mring", "mult:ring", 1);
-  addsaver(modelcolor, "color:model");
-  addsaver(periodcolor, "color:period");
-  addsaver(stdgridcolor, "color:stdgrid"); 
+  param_color(modelcolor, "color:model", true);
+  param_color(periodcolor, "color:period", true);
+  param_color(stdgridcolor, "color:stdgrid", true);
   param_f(vid.multiplier_grid, "mgrid", "mult:grid", 1);
-  addsaver(dialog::dialogcolor, "color:dialog");
+  addsaver(dialog::dialogcolor, "color:dialog", false);
   for(auto& p: colortables)
     savecolortable(p.second, s0+"canvas"+p.first);
   savecolortable(distcolors, "distance");
@@ -3972,6 +4048,10 @@ EX void lps_add(local_parameter_set& lps, bool& val, bool nvalue) {
 
 EX void lps_add(local_parameter_set& lps, ld& val, ld nvalue) {
   lps_add_typed<ld, float_setting> (lps, val, nvalue);
+  }
+
+EX void lps_add(local_parameter_set& lps, color_t& val, color_t nvalue) {
+  lps_add_typed<color_t, color_setting> (lps, val, nvalue);
   }
 
 }
