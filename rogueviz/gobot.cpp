@@ -361,6 +361,16 @@ void try_to_play(string s, int who) {
     if(current.taken[i] == 1-who && count_breath(i) == 0)
       dead_group(i);
     }
+
+  int steps = 0;
+  for(int it=isize(history)-1; it>=0; it--) {
+    steps++;
+    if(history[it].taken == current.taken) {
+      go_message("This position repeated " + its(steps) + " moves back. Say 'undo' to cancel this move");
+      }
+    if(history[it].captures[0] == 0 && history[it].captures[1] == 0)
+      break;
+    }
   
   if(count_breath(pos) == 0) {
     current.taken[pos] = Free;
