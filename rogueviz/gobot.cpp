@@ -38,6 +38,7 @@ const int Free = 2;
 struct boarddata {
   vector<int> taken, owner;
   array<int, 2> captures;
+  string geom;
   };
 
 boarddata current;
@@ -48,19 +49,24 @@ vector<boarddata> history;
 
 bool draw_go(cell *c, const shiftmatrix& V);
 
-void init_go() {
+void init_go_board() {
   ac = currentmap->allcells();
   current.taken.resize(isize(ac), 2);
   current.owner.resize(isize(ac), 2);
   current.captures[0] = 0;
   current.captures[1] = 0;
+  shstream f; mapstream::save_geometry(f); current.geom = f.s;
   for(int i=0; i<isize(ac); i++)
     indices[ac[i]] = i;
+  }
+
+void init_go() {
+  init_go_board();
   rogueviz::addHook(hooks_drawcell, 100, draw_go);
   }
 
 void hwrite(hstream& hs, const boarddata& b) {
-  hwrite(hs, b.captures, b.taken, b.owner);
+  hwrite(hs, b.captures, b.taken, b.owner, b.geom);
   }
 
 vector<int> neigh_indices(int i) {
@@ -137,6 +143,13 @@ void save_backup() {
   }
 
 void undo() {
+  if(current.geom != history.back().geom) {
+    shstream f; f.s = history.back().geom;
+    stop_game();
+    mapstream::load_geometry(f);
+    start_game();
+    init_go();
+    }
   current = history.back();
   history.pop_back();
   }
@@ -430,13 +443,16 @@ void accept_command(string s) {
       "score - view the score\n"
       "hires - take a 1000x1000 screenshot\n"
       "restart - restart\n"
+      "bring-unrectified x y -- restart on unrectified GP(x,y) Bring surface\n"
+      "disk-unrectified x y size -- restart on unrectified GP(x,y) {4,5} disk of given size\n"
       "undo - undo last move\n"
       );      
 
   if(tokens[0] == "save") {
     save_backup();
     fhstream f("go.saved-game", "wb");
-    f.write(history);    
+    f.write(f.vernum);
+    f.write(history);
     undo();
     }
 
@@ -480,6 +496,38 @@ void accept_command(string s) {
     for(int i=0; i<isize(ac); i++) current.owner[i] = current.taken[i] = Free;
     current.captures[0] = 0;
     current.captures[1] = 0;
+    take_shot();
+    }
+
+  if(tokens[0] == "bring-unrectified" && t == 3) {
+    int x = atoi(tokens[1].c_str());
+    int y = atoi(tokens[2].c_str());
+    if(x > 8 || y > 8 || x < 0 || y < 0 || x+y == 0) { go_message("illegal parameters"); return; }
+    save_backup();
+    stop_game();
+    geometry = gBring;
+    variation =eVariation::unrectified;
+    gp::param = {x, y};
+    start_game();
+    init_go();
+    go_message("Bring surface, size = " + its(isize(ac)));
+    take_shot();
+    }
+
+  if(tokens[0] == "disk-unrectified" && t == 4) {
+    int x = atoi(tokens[1].c_str());
+    int y = atoi(tokens[2].c_str());
+    int size = atoi(tokens[3].c_str());
+    if(x > 8 || y > 8 || x < 0 || y < 0 || x+y == 0 || size > 1000 || size < 10) { go_message("illegal parameters"); return; }
+    save_backup();
+    stop_game();
+    geometry = g45;
+    req_disksize = size;
+    variation =eVariation::unrectified;
+    gp::param = {x, y};
+    start_game();
+    init_go();
+    go_message("disk, size = " + its(isize(ac)));
     take_shot();
     }
 
